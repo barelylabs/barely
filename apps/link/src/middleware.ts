@@ -18,7 +18,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // export async function middleware(req: any) {
 export async function middleware(req: NextRequest) {
-	console.log('middlewaaaare');
+	console.log('middlewaaaaree');
 
 	// //* 🧬 parse the incoming request *//
 	// const { origin, handle, slug, app, appRoute, appId, pathname } =
