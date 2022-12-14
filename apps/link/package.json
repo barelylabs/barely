@@ -16,6 +16,7 @@
     "@barely/ui": "workspace:*",
     "@barely/zod": "workspace:*",
     "@next/font": "^13.0.5",
+    "@vercel/edge": "^0.1.2",
     "next": "^13.0.5",
     "react": "18.2.0",
     "react-dom": "18.2.0",
