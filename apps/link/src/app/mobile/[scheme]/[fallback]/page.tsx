@@ -1,5 +1,5 @@
 export const dynamicParams = true;
-// export const runtime = 'experimental-edge';
+export const runtime = 'experimental-edge';
 
 import { z } from 'zod';
 import ClientRedirect from './ClientRedirect';
