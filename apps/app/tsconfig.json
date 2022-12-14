@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.json",
+  "exclude": [],
+  "include": [
+    "next-env.d.ts",
+    "node_modules/@barely/auth/next-auth.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.cjs",
+    "**/*.mjs"
+  ]
+}

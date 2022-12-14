@@ -1,10 +1,21 @@
-import { router } from "../trpc";
-import { postRouter } from "./post";
-import { authRouter } from "./auth";
+import { router } from '../trpc';
 
+// import routes
+import { authRouter } from './auth';
+import { bioRouter } from './bio';
+import { eventRouter } from './event';
+import { formResponseRouter } from './formResponse';
+import { linkRouter } from './link';
+import { visitorSessionRouter } from './visitorSession';
+
+// export routes
 export const appRouter = router({
-  post: postRouter,
-  auth: authRouter,
+	auth: authRouter,
+	bio: bioRouter,
+	formResponse: formResponseRouter,
+	link: linkRouter,
+	event: eventRouter,
+	visitorSession: visitorSessionRouter,
 });
 
 // export type definition of API

@@ -1,5 +1,5 @@
 {
-  "name": "@acme/db",
+  "name": "@barely/db",
   "version": "0.1.0",
   "main": "./index.ts",
   "types": "./index.ts",
@@ -8,15 +8,21 @@
     "clean": "rm -rf .turbo node_modules",
     "with-env": "dotenv -e ../../.env --",
     "dev": "pnpm with-env prisma studio --port 5556",
-    "db-push": "pnpm with-env prisma db push",
-    "db-generate": "pnpm with-env prisma generate"
+    "db:push": "pnpm with-env prisma db push",
+    "db:generate": "pnpm with-env prisma generate"
   },
   "dependencies": {
-    "@prisma/client": "^4.6.1"
+    "@barely/edge": "workspace:*",
+    "@planetscale/database": "^1.5.0",
+    "@prisma/client": "^4.6.1",
+    "kysely": "^0.22.0",
+    "kysely-planetscale": "^1.2.0"
   },
   "devDependencies": {
+    "@types/node": "^18.11.15",
     "dotenv-cli": "^6.0.0",
     "prisma": "^4.6.1",
-    "typescript": "^4.9.3"
+    "typescript": "^4.9.3",
+    "zod-prisma": "workspace:*"
   }
 }

@@ -2,12 +2,19 @@
   "name": "create-t3-turbo",
   "private": true,
   "packageManager": "pnpm@7.13.0",
+  "workspaces": [
+    "apps/*",
+    "config/*",
+    "lib/*",
+    "packages/*"
+  ],
   "scripts": {
     "build": "turbo build",
     "clean": "rm -rf node_modules",
     "clean:workspaces": "turbo clean",
-    "db-generate": "turbo db-generate",
-    "db-push": "turbo db-push",
+    "clean:all": " turbo clean && rm -rf node_modules",
+    "db:generate": "turbo db:generate",
+    "db:push": "turbo db:push",
     "dev": "turbo dev --parallel",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "lint": "turbo lint && manypkg check",

@@ -1,5 +1,5 @@
 {
-  "name": "@acme/api",
+  "name": "@barely/api",
   "version": "0.1.0",
   "main": "./index.ts",
   "types": "./index.ts",
@@ -10,11 +10,17 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@acme/auth": "*",
-    "@acme/db": "*",
+    "@barely/auth": "workspace:*",
+    "@barely/meta": "workspace:*",
+    "@barely/db": "workspace:*",
+    "@barely/edge": "workspace:*",
+    "@barely/zod": "workspace:*",
     "@trpc/client": "^10.1.0",
     "@trpc/server": "^10.1.0",
+    "cuid": "^2.1.8",
+    "dotenv": "^16.0.3",
     "superjson": "^1.9.1",
+    "trpc-openapi": "^1.0.0",
     "zod": "^3.18.0"
   },
   "devDependencies": {

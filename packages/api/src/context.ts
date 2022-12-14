@@ -1,7 +1,8 @@
-import { getServerSession, type Session } from "@acme/auth";
-import { prisma } from "@acme/db";
+import { getServerSession, type Session } from "@barely/auth";
+import { prisma } from "@barely/db";
 import { type inferAsyncReturnType } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
+import cuid from "cuid";
 
 /**
  * Replace this with an object if you want to pass things to createContextInner
@@ -27,11 +28,20 @@ export const createContextInner = async (opts: CreateContextOptions) => {
  * @link https://trpc.io/docs/context
  **/
 export const createContext = async (opts: CreateNextContextOptions) => {
-  const session = await getServerSession(opts);
+  const reqId = cuid();  
+	opts.res.setHeader('x-request-id', reqId);
+	const session = await getServerSession(opts);
 
-  return await createContextInner({
-    session,
-  });
+  // return await createContextInner({
+  //   session,
+  // });
+  const context: {
+		req?: typeof opts.req;
+		res?: typeof opts.res;
+		reqId?: string;
+	} & inferAsyncReturnType<typeof createContextInner> = { session, prisma, reqId };
+
+	return context;
 };
 
 export type Context = inferAsyncReturnType<typeof createContext>;
