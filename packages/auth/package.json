@@ -19,6 +19,7 @@
     "react-dom": "18.2.0"
   },
   "devDependencies": {
+    "@barely/ts-config": "*",
     "eslint": "^8.28.0",
     "typescript": "^4.9.3"
   }

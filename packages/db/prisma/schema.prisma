@@ -7,7 +7,7 @@ generator client {
 
 generator zod {
     provider = "zod-prisma"
-    output   = "../zod"
+    output   = "../../zod/db"
 }
 
 datasource db {
@@ -24,11 +24,11 @@ model Post {
 
 // artist
 model Artist {
-    id                   String                @id @default(cuid())
-    handle               String                @unique
+    id                   String                    @id @default(cuid())
+    handle               String                    @unique
     name                 String
     // owner
-    user                 User                  @relation(fields: [userId], references: [id])
+    user                 User                      @relation(fields: [userId], references: [id])
     userId               String
     // assets 
     accounts             ArtistAccount[]
@@ -39,14 +39,14 @@ model Artist {
     vidRenders           VidRender[]
     playlistCoverRenders PlaylistCoverRender[]
     // bio
-    bios                 Bio[]                 @relation("ArtistBios")
-    rootBio              Bio?                  @relation("ArtistRootBio")
+    bios                 Bio[]                     @relation("ArtistBios")
+    rootBio              Bio?                      @relation("ArtistRootBio")
     buttons              Button[]
     forms                Form[]
     // links
-    links                Link[]                @relation("ArtistLinks")
+    links                Link[]                    @relation("ArtistLinks")
     socialLinks          ArtistSocialLink[]
-    remarketing          ArtistRemarketing[]
+    analytics            ArtistAnalyticsEndpoint[]
     externalWebsites     ExternalWebsite[]
     // campaigns
     campaigns            Campaign[]
@@ -87,16 +87,16 @@ model ArtistSocialLink {
     @@unique([artistId, linkApp])
 }
 
-model ArtistRemarketing {
-    artist              Artist      @relation(fields: [artistId], references: [id])
-    artistId            String
-    remarketing         Remarketing @relation(fields: [remarketingId, remarketingPlatform], references: [id, platform])
-    remarketingId       String
-    remarketingPlatform AdPlatform
+model ArtistAnalyticsEndpoint {
+    artist            Artist            @relation(fields: [artistId], references: [id])
+    artistId          String
+    analyticsEndpoint AnalyticsEndpoint @relation(fields: [analyticsId, analyticsPlatform], references: [id, platform])
+    analyticsId       String
+    analyticsPlatform AnalyticsPlatform
 
-    @@id([artistId, remarketingPlatform, remarketingId])
-    @@unique([artistId, remarketingPlatform])
-    @@unique([remarketingId, remarketingPlatform])
+    @@id([artistId, analyticsPlatform, analyticsId])
+    @@unique([artistId, analyticsPlatform])
+    @@unique([analyticsId, analyticsPlatform])
 }
 
 // links
@@ -104,7 +104,7 @@ model Link {
     id            String            @id @default(cuid())
     createdAt     DateTime          @default(now())
     // artist
-    artist        Artist            @relation("ArtistLinks", fields: [artistId, handle], references: [id, handle]) // remarketing
+    artist        Artist            @relation("ArtistLinks", fields: [artistId, handle], references: [id, handle]) // for analytics 
     artistId      String
     artistSocial  ArtistSocialLink? @relation("ArtistSocialLink")
     // trigger
@@ -173,22 +173,22 @@ enum LinkDomain {
     brl
 }
 
-model Remarketing {
-    id                String
-    user              User               @relation(fields: [userId], references: [id])
-    userId            String
-    platform          AdPlatform
-    accessToken       String? // ideally this won't be needed
+model AnalyticsEndpoint {
+    id              String
+    user            User?                    @relation(fields: [userId], references: [id])
+    userId          String?
+    platform        AnalyticsPlatform
+    accessToken     String? // ideally this won't be needed
     // artist    
-    artistRemarketing ArtistRemarketing?
+    artistAnalytics ArtistAnalyticsEndpoint?
     // reported events
-    eventReports      EventReport[]
+    eventReports    EventReport[]
 
     @@id([platform, id])
     @@index([userId])
 }
 
-enum AdPlatform {
+enum AnalyticsPlatform {
     meta
     google
     tiktok
@@ -780,7 +780,7 @@ enum EngagementRetention {
     day_365
 }
 
-// analytics && remarketing
+// analytics 
 model VisitorSession {
     id                String           @id @default(cuid())
     createdAt         DateTime         @default(now())
@@ -798,6 +798,7 @@ model VisitorSession {
     isBot             Boolean?
     osName            String?
     osVersion         String?
+    referrer          String?
     ua                String?
     // user - geo
     city              String?
@@ -810,24 +811,24 @@ model VisitorSession {
 }
 
 model Event {
-    id                 Int            @id @default(autoincrement())
-    type               EventType
-    createdAt          DateTime       @default(now())
+    id           Int            @id @default(autoincrement())
+    type         EventType
+    createdAt    DateTime       @default(now())
     // link
-    link               Link?          @relation(fields: [linkId], references: [id])
-    linkId             String?
+    link         Link?          @relation(fields: [linkId], references: [id])
+    linkId       String?
     // bio
-    bio                Bio?           @relation(fields: [bioId], references: [id])
-    bioId              String?
-    bioButton          BioButton?     @relation(fields: [bioId, buttonId], references: [bioId, buttonId])
-    buttonId           String?
+    bio          Bio?           @relation(fields: [bioId], references: [id])
+    bioId        String?
+    bioButton    BioButton?     @relation(fields: [bioId, buttonId], references: [bioId, buttonId])
+    buttonId     String?
     // form
-    form               Form?          @relation(fields: [formId], references: [id])
-    formId             String?
+    form         Form?          @relation(fields: [formId], references: [id])
+    formId       String?
     // analytics    
-    session            VisitorSession @relation(fields: [sessionId], references: [id])
-    sessionId          String
-    remarketingReports EventReport[]
+    session      VisitorSession @relation(fields: [sessionId], references: [id])
+    sessionId    String
+    eventReports EventReport[]
 
     @@index([linkId])
     @@index([bioId])
@@ -846,20 +847,20 @@ enum EventType {
 }
 
 model EventReport {
-    createdAt           DateTime    @default(now())
+    createdAt         DateTime          @default(now())
     // event
-    event               Event       @relation(fields: [eventId], references: [id])
-    eventId             Int
+    event             Event             @relation(fields: [eventId], references: [id])
+    eventId           Int
     // report
-    remarketing         Remarketing @relation(fields: [remarketingPlatform, remarketingId], references: [platform, id])
-    remarketingPlatform AdPlatform
-    remarketingId       String
+    analyticsEndpoint AnalyticsEndpoint @relation(fields: [analyticsPlatform, analyticsId], references: [platform, id])
+    analyticsPlatform AnalyticsPlatform
+    analyticsId       String
     // 
-    error               String?     @db.VarChar(1000)
+    error             String?           @db.VarChar(1000)
 
-    @@id([eventId, remarketingPlatform, remarketingId])
+    @@id([eventId, analyticsPlatform, analyticsId])
     @@index([eventId])
-    @@index([remarketingPlatform, remarketingId])
+    @@index([analyticsPlatform, analyticsId])
 }
 
 model ExternalWebsite {
@@ -1249,12 +1250,12 @@ model Stat {
     watch60s Int?
 
     // stats for :
-    ad                Ad?            @relation(fields: [adId], references: [id])
-    adPlatform        AdPlatform?
+    platform          AnalyticsPlatform?
+    ad                Ad?                @relation(fields: [adId], references: [id])
     adId              String?
-    playlist          Playlist?      @relation(fields: [playlistId], references: [id])
+    playlist          Playlist?          @relation(fields: [playlistId], references: [id])
     playlistId        String?
-    artistAccount     ArtistAccount? @relation(fields: [artistId, artistAccountType, artistAccountId], references: [artistId, accountType, accountId])
+    artistAccount     ArtistAccount?     @relation(fields: [artistId, artistAccountType, artistAccountId], references: [artistId, accountType, accountId])
     artistId          String?
     artistAccountType AccountType?
     artistAccountId   String?
@@ -1406,7 +1407,7 @@ model User {
     pitchReviews         PitchReview[]
     // artist 
     artists              Artist[]
-    remarketing          Remarketing[]
+    analyticsEndpoints   AnalyticsEndpoint[]
     audiences            Audience[]
     // dev
     epics                Epic[]

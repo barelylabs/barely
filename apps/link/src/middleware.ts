@@ -1,136 +1,106 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
+import { closestDbConnection, usEast1_dev } from "@barely/db/kysely";
 
-// import type { LinkWithRemarketing } from '@barely/api/src/router/link';
-// import type { MobileRedirectParams } from './app/mobile/[redirectParams]/page';
+import { visitorSession, _fetch } from "@barely/edge";
+import { linkAnalyticsSchema } from "@barely/zod/analytics/link";
+import { z } from "zod";
 
-// import {
-// 	visitorSessionBaseSchema,
-// 	visitorSessionCreateSchema,
-// } from '@barely/db/prisma/zod/visitorsession';
-// import { eventCreateSchema } from '@barely/db/prisma/zod/event';
+export const config = {
+  matcher: [
+    "/((?!api|mobile|_next/static|favicon|logos|sitemap|atom|404|500).*)",
+  ],
+};
 
-// import * as visitorSession from '../../../packages/edge/src/visitorSession';
-// import type { ReportEventInput } from '@barely/api/src/router/event';
+type AnalyticsInput = z.infer<typeof linkAnalyticsSchema>;
 
-// export const config = {
-// 	matcher: ['/((?!api|mobile|_next/static|favicon|sitemap|atom|404|500).*)'],
-// };
-
-// export async function middleware(req: any) {
 export async function middleware(req: NextRequest) {
-	console.log('middlewaaaaree');
+  //* 🧬 parse the incoming request *//
+  const { isLocal, origin, handle, slug, app, appRoute, appId, pathname } =
+    visitorSession.getPathParams(req);
 
-	// //* 🧬 parse the incoming request *//
-	// const { origin, handle, slug, app, appRoute, appId, pathname } =
-	// 	visitorSession.getPathParams(req);
-	// if (!handle && pathname.length === 0) return; // redirect to barely.io/link?
-	// if (pathname.length === 0) return NextResponse.rewrite(`${origin}/404`);
+  if (!handle && pathname.length === 1) return; // redirect to barely.io/link?
+  if (!handle || pathname.length === 1)
+    return NextResponse.rewrite(`${origin}/404`);
 
-	// //* 🔎 get link data from db (we'll cache this with stale-while-revalidate) *//
-	// const pathParams = new URLSearchParams({
-	// 	handle,
-	// 	slug: slug ?? '',
-	// 	app: app ?? '',
-	// 	appRoute: appRoute ?? '',
-	// 	appId: appId ?? '',
-	// }).toString();
-	// const getLinkEndpoint = new URL(`/api/open/link/by-path?${pathParams}`, req.url);
-	// const linkRes = await fetch(getLinkEndpoint.href);
-	// const linkData: LinkWithRemarketing = await linkRes.json();
-	// const { id: linkId, url: targetUrl, androidScheme, appleScheme } = linkData;
+  //* 🔎 get link data from db (planetscale serverless + kysely) *//
+  const edgeDb = isLocal
+    ? usEast1_dev
+    : closestDbConnection(req.geo?.longitude ?? "0", req.geo?.latitude ?? "0");
 
-	// //* 🚧 handle route errors *//
-	// if (!targetUrl) return NextResponse.rewrite(`${origin}/404`);
-	// if (linkRes.status !== 200)
-	// 	return NextResponse.rewrite(`${origin}/${linkRes.status ?? '500'}`);
-	// // //* 🧭 route based on device platform and available schemes *//
-	// // ➡️ 🍏 || 🤖 || 💻
-	// const { platform, ...deviceProps } = visitorSession.getDeviceData(req);
-	// const scheme =
-	// 	platform === 'android' && androidScheme
-	// 		? androidScheme
-	// 		: platform === 'ios' && appleScheme
-	// 		? appleScheme
-	// 		: null;
-	// // ➡️ 🤖 (android scheme w/ built-in fallback url)
-	// if (platform === 'android' && androidScheme?.includes('S.browser_fallback_url'))
-	// 	return NextResponse.redirect(androidScheme);
-	// // ➡️ 💻 (web url)
-	// if (platform === 'web' || !scheme) return NextResponse.redirect(targetUrl);
-	// // ➡️ 📱 (🍏 || 🤖) (page with schema redirect & delayed fallback url)
-	// const { ogTitle, ogDescription, ogImage, favicon } = linkData;
-	// const mobileRedirectParams: MobileRedirectParams = {
-	// 	scheme: encodeURIComponent(scheme),
-	// 	fallback: encodeURIComponent(targetUrl),
-	// 	ogTitle: encodeURIComponent(ogTitle ?? ''),
-	// 	ogDescription: encodeURIComponent(ogDescription ?? ''),
-	// 	ogImage: encodeURIComponent(ogImage ?? ''),
-	// 	favicon: encodeURIComponent(favicon ?? ''),
-	// };
-	// const mobileRedirectParamsString = new URLSearchParams(mobileRedirectParams).toString();
-	// NextResponse.redirect(`${origin}/mobile/${mobileRedirectParamsString}`);
-	// //* 😎 🏖 🌞 🩴 *//
-	// /* we can relax a little. the visitor has been routed to their
-	// destination. now to do the analytics logging/reporting. */
-	// //* ⏲ create session *//
-	// const { ip, geo } = req;
-	// const { browser, device, os, cpu, isBot, ua } = deviceProps;
-	// const visitorSessionInput = visitorSessionCreateSchema.parse({
-	// 	ip,
-	// 	...geo,
-	// 	browserName: browser.name,
-	// 	browserVersion: browser.version,
-	// 	cpu: cpu.architecture,
-	// 	deviceModel: device.model,
-	// 	deviceType: device.type,
-	// 	deviceVendor: device.vendor,
-	// 	isBot,
-	// 	osName: os.name,
-	// 	osVersion: os.version,
-	// 	ua,
-	// });
-	// const createSessionEndpoint = new URL(`/api/open/visitor-session/create`, req.url);
-	// const sessionRes = await fetch(createSessionEndpoint.href, {
-	// 	method: 'POST',
-	// 	headers: { 'Content-Type': 'application/json' },
-	// 	body: JSON.stringify(visitorSessionInput),
-	// });
-	// const sessionData = visitorSessionBaseSchema.parse(await sessionRes.json());
-	// //* 📈 create event *//
-	// const createEventEndpoint = new URL(`/api/open/event/create`, req.url);
-	// const eventInput = eventCreateSchema.parse({
-	// 	linkId: linkId,
-	// 	sessionId: sessionData.id,
-	// 	type: 'pageView',
-	// });
-	// const eventRes = await fetch(createEventEndpoint.href, {
-	// 	method: 'POST',
-	// 	headers: { 'Content-Type': 'application/json' },
-	// 	body: JSON.stringify(eventInput),
-	// });
-	// const eventData = eventCreateSchema.parse(await eventRes.json());
-	// //* 📊 report event to remarketing && analytics *//
-	// if (
-	// 	!ip ||
-	// 	!ua ||
-	// 	!eventData.id ||
-	// 	!linkData.remarketingEndpoints ||
-	// 	linkData.remarketingEndpoints.length === 0
-	// )
-	// 	return;
-	// const reportEventInput: ReportEventInput = {
-	// 	url: targetUrl,
-	// 	eventId: eventData.id,
-	// 	geo,
-	// 	ip,
-	// 	ua,
-	// 	remarketingEndpoints: linkData.remarketingEndpoints,
-	// };
-	// const reportEventEndpoint = new URL(`/api/open/event/report`, req.url);
-	// return await fetch(reportEventEndpoint.href, {
-	// 	method: 'POST',
-	// 	headers: { 'Content-Type': 'application/json' },
-	// 	body: JSON.stringify(reportEventInput),
-	// });
-	// //* 🎉 🎉 🎉 *//
+  const eqOrIs = (value: any) => (value ? "=" : "is");
+
+  const link = await edgeDb
+    .selectFrom("Link")
+    .select(["id", "url", "androidScheme", "appleScheme", "artistId"])
+    .where("handle", "=", handle)
+    .where("slug", eqOrIs(slug), slug)
+    .where("app", eqOrIs(app), app)
+    .where("appRoute", eqOrIs(appRoute), appRoute)
+    .where("appId", eqOrIs(appId), appId)
+    .executeTakeFirst();
+
+  //* 🚧 handle route errors *//
+  if (!link || !link.url) return NextResponse.rewrite(`${origin}/404`);
+
+  //* 📈 report event to analytics + remarketing *//
+  const { ip, geo } = req;
+  const { platform, ...deviceProps } = visitorSession.getDeviceData(req);
+  const { browser, device, os, cpu, isBot, ua } = deviceProps;
+
+  const analyticsInput: AnalyticsInput = {
+    linkId: link.id,
+    artistId: link.artistId,
+    url: req.nextUrl.href,
+    // visitor info
+    ip: isLocal ? process.env.VISITOR_IP : ip,
+    ua: isLocal ? process.env.VISITOR_UA : ua,
+    referrer: req.referrer,
+    ...geo,
+    browserName: browser.name,
+    browserVersion: browser.version,
+    cpu: cpu.architecture,
+    deviceModel: device.model,
+    deviceType: device.type,
+    deviceVendor: device.vendor,
+    isBot,
+    osName: os.name,
+    osVersion: os.version,
+  };
+
+  const analyticsEndpoint = new URL(`/api/analytics`, req.url);
+  await _fetch.post({
+    endpoint: analyticsEndpoint.href,
+    body: analyticsInput,
+    schemaReq: linkAnalyticsSchema,
+  });
+
+  //* 🧭 route based on device platform and available schemes *//
+  // ➡️ 🍏 || 🤖 || 💻
+  return NextResponse.redirect(link.url); // 👈 just doing url redirects for now
+
+  // const scheme =
+  // 	platform === 'android' && androidScheme
+  // 		? androidScheme
+  // 		: platform === 'ios' && appleScheme
+  // 		? appleScheme
+  // 		: null;
+  // // ➡️ 🤖 (android scheme w/ built-in fallback url)
+  // if (platform === 'android' && androidScheme?.includes('S.browser_fallback_url'))
+  // 	return NextResponse.redirect(androidScheme);
+  // // ➡️ 💻 (web url)
+  // if (platform === 'web' || !scheme) return NextResponse.redirect(targetUrl);
+  // // ➡️ 📱 (🍏 || 🤖) (page with schema redirect & delayed fallback url)
+  // const { ogTitle, ogDescription, ogImage, favicon } = linkData;
+  // const mobileRedirectParams: MobileRedirectParams = {
+  // 	scheme: encodeURIComponent(scheme),
+  // 	fallback: encodeURIComponent(targetUrl),
+  // 	ogTitle: encodeURIComponent(ogTitle ?? ''),
+  // 	ogDescription: encodeURIComponent(ogDescription ?? ''),
+  // 	ogImage: encodeURIComponent(ogImage ?? ''),
+  // 	favicon: encodeURIComponent(favicon ?? ''),
+  // };
+  // const mobileRedirectParamsString = new URLSearchParams(mobileRedirectParams).toString();
+  // NextResponse.redirect(`${origin}/mobile/${mobileRedirectParamsString}`);
+
+  // //* 🎉 🎉 🎉 *//
 }

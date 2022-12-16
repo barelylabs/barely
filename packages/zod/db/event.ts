@@ -24,7 +24,7 @@ export interface EventRelations {
   bioButton: (z.infer<typeof bioButtonBaseSchema> & BioButtonRelations) | null
   form: (z.infer<typeof formBaseSchema> & FormRelations) | null
   session: z.infer<typeof visitorSessionBaseSchema> & VisitorSessionRelations
-  remarketingReports: (z.infer<typeof eventReportBaseSchema> & EventReportRelations)[]
+  eventReports: (z.infer<typeof eventReportBaseSchema> & EventReportRelations)[]
 }
 
 export const eventRelationsSchema: z.ZodObject<{
@@ -35,7 +35,7 @@ export const eventRelationsSchema: z.ZodObject<{
   bioButton: z.lazy(() => bioButtonBaseSchema.merge(bioButtonRelationsSchema)).nullable(),
   form: z.lazy(() => formBaseSchema.merge(formRelationsSchema)).nullable(),
   session: z.lazy(() => visitorSessionBaseSchema.merge(visitorSessionRelationsSchema)),
-  remarketingReports: z.lazy(() => eventReportBaseSchema.merge(eventReportRelationsSchema)).array(),
+  eventReports: z.lazy(() => eventReportBaseSchema.merge(eventReportRelationsSchema)).array(),
 })
 
 export const eventSchema = eventBaseSchema
@@ -59,7 +59,7 @@ export const eventCreateSchema = eventBaseSchema
     form: true,
     formId: true,
     sessionId: true,
-    remarketingReports: true,
+    eventReports: true,
   })
 
 export const eventUpdateSchema = eventBaseSchema

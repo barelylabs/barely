@@ -1,7 +1,4 @@
-import {  ZodOptional, ZodString, ZodTransformer } from 'zod';
-
 export function toNull(value: any) {
-	return value ?? null;
+  if (value === undefined) return null;
+  return value;
 }
-
-

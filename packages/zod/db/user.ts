@@ -4,7 +4,7 @@ import { AccountRelations, accountRelationsSchema, accountBaseSchema } from "./a
 import { SessionRelations, sessionRelationsSchema, sessionBaseSchema } from "./session"
 import { PitchReviewRelations, pitchReviewRelationsSchema, pitchReviewBaseSchema } from "./pitchreview"
 import { ArtistRelations, artistRelationsSchema, artistBaseSchema } from "./artist"
-import { RemarketingRelations, remarketingRelationsSchema, remarketingBaseSchema } from "./remarketing"
+import { AnalyticsEndpointRelations, analyticsEndpointRelationsSchema, analyticsEndpointBaseSchema } from "./analyticsendpoint"
 import { AudienceRelations, audienceRelationsSchema, audienceBaseSchema } from "./audience"
 import { EpicRelations, epicRelationsSchema, epicBaseSchema } from "./epic"
 import { StoryRelations, storyRelationsSchema, storyBaseSchema } from "./story"
@@ -33,7 +33,7 @@ export interface UserRelations {
   sessions: (z.infer<typeof sessionBaseSchema> & SessionRelations)[]
   pitchReviews: (z.infer<typeof pitchReviewBaseSchema> & PitchReviewRelations)[]
   artists: (z.infer<typeof artistBaseSchema> & ArtistRelations)[]
-  remarketing: (z.infer<typeof remarketingBaseSchema> & RemarketingRelations)[]
+  analyticsEndpoints: (z.infer<typeof analyticsEndpointBaseSchema> & AnalyticsEndpointRelations)[]
   audiences: (z.infer<typeof audienceBaseSchema> & AudienceRelations)[]
   epics: (z.infer<typeof epicBaseSchema> & EpicRelations)[]
   stories: (z.infer<typeof storyBaseSchema> & StoryRelations)[]
@@ -52,7 +52,7 @@ export const userRelationsSchema: z.ZodObject<{
   sessions: z.lazy(() => sessionBaseSchema.merge(sessionRelationsSchema)).array(),
   pitchReviews: z.lazy(() => pitchReviewBaseSchema.merge(pitchReviewRelationsSchema)).array(),
   artists: z.lazy(() => artistBaseSchema.merge(artistRelationsSchema)).array(),
-  remarketing: z.lazy(() => remarketingBaseSchema.merge(remarketingRelationsSchema)).array(),
+  analyticsEndpoints: z.lazy(() => analyticsEndpointBaseSchema.merge(analyticsEndpointRelationsSchema)).array(),
   audiences: z.lazy(() => audienceBaseSchema.merge(audienceRelationsSchema)).array(),
   epics: z.lazy(() => epicBaseSchema.merge(epicRelationsSchema)).array(),
   stories: z.lazy(() => storyBaseSchema.merge(storyRelationsSchema)).array(),
@@ -92,7 +92,7 @@ export const userCreateSchema = userBaseSchema
     sessions: true,
     pitchReviews: true,
     artists: true,
-    remarketing: true,
+    analyticsEndpoints: true,
     audiences: true,
     epics: true,
     stories: true,

@@ -9,6 +9,7 @@
     "lint": "eslint . --ext .ts,.js,.tsx,.jsx"
   },
   "dependencies": {
+    "@barely/zod": "workspace:*",
     "devalue": "^4.2.0",
     "next": "^13.0.5",
     "sha.js": "^2.4.11",
@@ -16,7 +17,7 @@
     "zod": "^3.19.1"
   },
   "devDependencies": {
-    "@barely/ts-config": "*",
+    "@barely/ts-config": "workspace:*",
     "@types/node": "^18.0.0",
     "@types/react": "^18.0.25",
     "@types/react-dom": "^18.0.8",

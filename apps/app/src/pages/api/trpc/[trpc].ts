@@ -1,10 +1,11 @@
-import { appRouter, createContext } from "@barely/api";
+import { appRouter } from "@barely/api";
+import { createApiContext } from "@barely/api/src/context/apiContext";
 import { createNextApiHandler } from "@trpc/server/adapters/next";
 
 // export API handler
 export default createNextApiHandler({
   router: appRouter,
-  createContext,
+  createContext: createApiContext,
 });
 
 // If you need to enable cors, you can do so like this:

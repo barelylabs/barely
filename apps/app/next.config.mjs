@@ -10,8 +10,14 @@ const config = {
   reactStrictMode: true,
   swcMinify: true,
   experimental: {
-    // Enables hot-reload and easy integration for local packages
-    transpilePackages: ["@barely/api", "@barely/auth", "@barely/db"],
+    appDir: true,
+    transpilePackages: [
+      "@barely/api",
+      "@barely/auth",
+      "@barely/db",
+      "@barely/tailwind-config",
+      "@barely/ts-config",
+    ],
   },
   // We already do linting on GH actions
   // eslint: {

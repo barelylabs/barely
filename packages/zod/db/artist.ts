@@ -11,7 +11,7 @@ import { ButtonRelations, buttonRelationsSchema, buttonBaseSchema } from "./butt
 import { FormRelations, formRelationsSchema, formBaseSchema } from "./form"
 import { LinkRelations, linkRelationsSchema, linkBaseSchema } from "./link"
 import { ArtistSocialLinkRelations, artistSocialLinkRelationsSchema, artistSocialLinkBaseSchema } from "./artistsociallink"
-import { ArtistRemarketingRelations, artistRemarketingRelationsSchema, artistRemarketingBaseSchema } from "./artistremarketing"
+import { ArtistAnalyticsEndpointRelations, artistAnalyticsEndpointRelationsSchema, artistAnalyticsEndpointBaseSchema } from "./artistanalyticsendpoint"
 import { ExternalWebsiteRelations, externalWebsiteRelationsSchema, externalWebsiteBaseSchema } from "./externalwebsite"
 import { CampaignRelations, campaignRelationsSchema, campaignBaseSchema } from "./campaign"
 import { AudienceRelations, audienceRelationsSchema, audienceBaseSchema } from "./audience"
@@ -41,7 +41,7 @@ export interface ArtistRelations {
   forms: (z.infer<typeof formBaseSchema> & FormRelations)[]
   links: (z.infer<typeof linkBaseSchema> & LinkRelations)[]
   socialLinks: (z.infer<typeof artistSocialLinkBaseSchema> & ArtistSocialLinkRelations)[]
-  remarketing: (z.infer<typeof artistRemarketingBaseSchema> & ArtistRemarketingRelations)[]
+  analytics: (z.infer<typeof artistAnalyticsEndpointBaseSchema> & ArtistAnalyticsEndpointRelations)[]
   externalWebsites: (z.infer<typeof externalWebsiteBaseSchema> & ExternalWebsiteRelations)[]
   campaigns: (z.infer<typeof campaignBaseSchema> & CampaignRelations)[]
   audiences: (z.infer<typeof audienceBaseSchema> & AudienceRelations)[]
@@ -67,7 +67,7 @@ export const artistRelationsSchema: z.ZodObject<{
   forms: z.lazy(() => formBaseSchema.merge(formRelationsSchema)).array(),
   links: z.lazy(() => linkBaseSchema.merge(linkRelationsSchema)).array(),
   socialLinks: z.lazy(() => artistSocialLinkBaseSchema.merge(artistSocialLinkRelationsSchema)).array(),
-  remarketing: z.lazy(() => artistRemarketingBaseSchema.merge(artistRemarketingRelationsSchema)).array(),
+  analytics: z.lazy(() => artistAnalyticsEndpointBaseSchema.merge(artistAnalyticsEndpointRelationsSchema)).array(),
   externalWebsites: z.lazy(() => externalWebsiteBaseSchema.merge(externalWebsiteRelationsSchema)).array(),
   campaigns: z.lazy(() => campaignBaseSchema.merge(campaignRelationsSchema)).array(),
   audiences: z.lazy(() => audienceBaseSchema.merge(audienceRelationsSchema)).array(),
@@ -95,7 +95,7 @@ export const artistCreateSchema = artistBaseSchema.partial({
   forms: true,
   links: true,
   socialLinks: true,
-  remarketing: true,
+  analytics: true,
   externalWebsites: true,
   campaigns: true,
   audiences: true,

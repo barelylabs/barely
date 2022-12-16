@@ -7,7 +7,7 @@ import type { AppRouter } from "@barely/api";
 
 const PostCard: React.FC<{
   link: inferProcedureOutput<AppRouter["link"]["getAll"]>[number];
-}> = ({link}) => {
+}> = ({ link }) => {
   return (
     <div className="max-w-2xl rounded-lg border-2 border-gray-500 p-4 transition-all hover:scale-[101%]">
       <h2 className="text-2xl font-bold text-[hsl(280,100%,70%)]">
@@ -64,14 +64,14 @@ const AuthShowcase: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center gap-4">
-      {session?.user && (
-        <p className="text-center text-2xl text-white">
+      {session?.user?.id && (
+        <p className="text-2xl text-center text-white">
           {session && <span>Logged in as {session?.user?.name}</span>}
           {secretMessage && <span> - {secretMessage}</span>}
         </p>
       )}
       <button
-        className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
+        className="px-10 py-3 font-semibold text-white no-underline transition rounded-full bg-white/10 hover:bg-white/20"
         onClick={session ? () => signOut() : () => signIn("discord")}
       >
         {session ? "Sign out" : "Sign in"}

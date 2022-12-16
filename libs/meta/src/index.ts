@@ -1,3 +1,2 @@
-export * from './models';
-export * from './event';
-export * from './schema';
+export * from "./models";
+export * as event from "./event";

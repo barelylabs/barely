@@ -1,5 +1,5 @@
 import * as z from "zod"
-import { adPlatformSchema } from "./adplatform"
+import { analyticsPlatformSchema } from "./analyticsplatform"
 import { accountTypeSchema } from "./accounttype"
 import { AdRelations, adRelationsSchema, adBaseSchema } from "./ad"
 import { PlaylistRelations, playlistRelationsSchema, playlistBaseSchema } from "./playlist"
@@ -24,7 +24,7 @@ export const statBaseSchema = z.object({
   watch95: z.number().int().nullable(),
   watch100: z.number().int().nullable(),
   watch60s: z.number().int().nullable(),
-  adPlatform: adPlatformSchema.nullable(),
+  platform: analyticsPlatformSchema.nullable(),
   adId: z.string().nullable(),
   playlistId: z.string().nullable(),
   artistId: z.string().nullable(),
@@ -67,7 +67,7 @@ export const statCreateSchema = statBaseSchema
     watch95: statBaseSchema.shape.watch95.unwrap(),
     watch100: statBaseSchema.shape.watch100.unwrap(),
     watch60s: statBaseSchema.shape.watch60s.unwrap(),
-    adPlatform: statBaseSchema.shape.adPlatform.unwrap(),
+    platform: statBaseSchema.shape.platform.unwrap(),
     adId: statBaseSchema.shape.adId.unwrap(),
     playlistId: statBaseSchema.shape.playlistId.unwrap(),
     artistId: statBaseSchema.shape.artistId.unwrap(),
@@ -91,8 +91,8 @@ export const statCreateSchema = statBaseSchema
     watch95: true,
     watch100: true,
     watch60s: true,
+    platform: true,
     ad: true,
-    adPlatform: true,
     adId: true,
     playlist: true,
     playlistId: true,
@@ -120,7 +120,7 @@ export const statUpdateSchema = statBaseSchema
     watch95: statBaseSchema.shape.watch95.unwrap(),
     watch100: statBaseSchema.shape.watch100.unwrap(),
     watch60s: statBaseSchema.shape.watch60s.unwrap(),
-    adPlatform: statBaseSchema.shape.adPlatform.unwrap(),
+    platform: statBaseSchema.shape.platform.unwrap(),
     adId: statBaseSchema.shape.adId.unwrap(),
     playlistId: statBaseSchema.shape.playlistId.unwrap(),
     artistId: statBaseSchema.shape.artistId.unwrap(),

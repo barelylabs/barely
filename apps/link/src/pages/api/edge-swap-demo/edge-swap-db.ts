@@ -9,7 +9,8 @@ export default async function handler(req: Request) {
     const { longitude, latitude } = geolocation(req);
 
     const links = await closestDbConnection(longitude ?? '0', latitude ?? '0')
-        .selectFrom('Link')
+        .selectFrom('Link')        
+        // .select('id', 'url', 'title', 'description')
         .selectAll()
         .execute();
 

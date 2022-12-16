@@ -1,26 +1,26 @@
 import * as z from "zod"
-import { adPlatformSchema } from "./adplatform"
+import { analyticsPlatformSchema } from "./analyticsplatform"
 import { EventRelations, eventRelationsSchema, eventBaseSchema } from "./event"
-import { RemarketingRelations, remarketingRelationsSchema, remarketingBaseSchema } from "./remarketing"
+import { AnalyticsEndpointRelations, analyticsEndpointRelationsSchema, analyticsEndpointBaseSchema } from "./analyticsendpoint"
 
 export const eventReportBaseSchema = z.object({
   createdAt: z.date(),
   eventId: z.number().int(),
-  remarketingPlatform: adPlatformSchema,
-  remarketingId: z.string(),
+  analyticsPlatform: analyticsPlatformSchema,
+  analyticsId: z.string(),
   error: z.string().nullable(),
 })
 
 export interface EventReportRelations {
   event: z.infer<typeof eventBaseSchema> & EventRelations
-  remarketing: z.infer<typeof remarketingBaseSchema> & RemarketingRelations
+  analyticsEndpoint: z.infer<typeof analyticsEndpointBaseSchema> & AnalyticsEndpointRelations
 }
 
 export const eventReportRelationsSchema: z.ZodObject<{
   [K in keyof EventReportRelations]: z.ZodType<EventReportRelations[K]>
 }> = z.object({
   event: z.lazy(() => eventBaseSchema.merge(eventRelationsSchema)),
-  remarketing: z.lazy(() => remarketingBaseSchema.merge(remarketingRelationsSchema)),
+  analyticsEndpoint: z.lazy(() => analyticsEndpointBaseSchema.merge(analyticsEndpointRelationsSchema)),
 })
 
 export const eventReportSchema = eventReportBaseSchema
@@ -32,8 +32,8 @@ export const eventReportCreateSchema = eventReportBaseSchema
   }).partial({
     createdAt: true,
     eventId: true,
-    remarketingPlatform: true,
-    remarketingId: true,
+    analyticsPlatform: true,
+    analyticsId: true,
     error: true,
   })
 

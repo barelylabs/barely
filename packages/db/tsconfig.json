@@ -1,4 +1,4 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "@barely/tsconfig/base.json",
   "include": ["index.ts", "kysely/index.ts"]
 }

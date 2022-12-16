@@ -27,21 +27,22 @@ export const createContextInner = async (opts: CreateContextOptions) => {
  * This is the actual context you'll use in your router
  * @link https://trpc.io/docs/context
  **/
-export const createContext = async (opts: CreateNextContextOptions) => {
-  const reqId = cuid();  
-	opts.res.setHeader('x-request-id', reqId);
-	const session = await getServerSession(opts);
+export const createApiContext = async (opts: CreateNextContextOptions) => {
+  const reqId = cuid();
+  opts.res.setHeader("x-request-id", reqId);
+  const session = await getServerSession(opts);
 
-  // return await createContextInner({
-  //   session,
-  // });
   const context: {
-		req?: typeof opts.req;
-		res?: typeof opts.res;
-		reqId?: string;
-	} & inferAsyncReturnType<typeof createContextInner> = { session, prisma, reqId };
+    req?: typeof opts.req;
+    res?: typeof opts.res;
+    reqId?: string;
+  } & inferAsyncReturnType<typeof createContextInner> = {
+    session,
+    prisma,
+    reqId,
+  };
 
-	return context;
+  return context;
 };
 
-export type Context = inferAsyncReturnType<typeof createContext>;
+export type ApiContext = inferAsyncReturnType<typeof createApiContext>;

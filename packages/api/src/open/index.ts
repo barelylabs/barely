@@ -3,7 +3,7 @@ import { appRouter } from '../router';
 import { generateOpenApiDocument } from 'trpc-openapi';
 import type {} from 'openapi-types';
 
-import { baseUrl } from '@barely/utils';
+import { baseUrl } from '@barely/edge';
 
 // Generate OpenAPI schema document
 export const openApiDocument = generateOpenApiDocument(appRouter, {
