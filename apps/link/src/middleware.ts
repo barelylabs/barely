@@ -68,7 +68,7 @@ export async function middleware(req: NextRequest) {
   };
 
   const analyticsEndpoint = new URL(`/api/analytics`, req.url);
-  await _fetch.post({
+  _fetch.post({
     endpoint: analyticsEndpoint.href,
     body: analyticsInput,
     schemaReq: linkAnalyticsSchema,
