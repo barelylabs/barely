@@ -39,8 +39,7 @@ export function getPathParams(req: NextRequest) {
   const slug = tld === "to" ? pathname : null;
   const [appString, appRouteString, appIdString] =
     tld === "link" ? pathname.split("/").slice(1) : [null];
-
-  const app = linkBaseSchema.pick({ app: true }).parse({ app: appString }).app;
+  const app = linkBaseSchema.shape.app.nullable().parse(appString);
   const appRoute = handleUndefined.toNull(appRouteString);
   const appId = handleUndefined.toNull(appIdString);
 
