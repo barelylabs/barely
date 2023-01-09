@@ -20,7 +20,6 @@
 		"dev": "turbo dev --parallel",
 		"format": "prettier --write \"**/*.{ts,tsx,md}\"",
 		"lint": "turbo lint && manypkg check",
-		"postinstall": "turbo db:generate",
 		"type-check": "turbo type-check"
 	},
 	"dependencies": {
