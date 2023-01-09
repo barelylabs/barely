@@ -8,21 +8,17 @@
 /** @type {import("next").NextConfig} */
 const config = {
   reactStrictMode: true,
-  swcMinify: true,
+  transpilePackages: [
+    "@barely/api",
+    "@barely/auth",
+    "@barely/db",
+    "@barely/spotify",
+    "@barely/tailwind-config",
+    "@barely/ts-config",
+  ],
   experimental: {
     appDir: true,
-    transpilePackages: [
-      "@barely/api",
-      "@barely/auth",
-      "@barely/db",
-      "@barely/tailwind-config",
-      "@barely/ts-config",
-    ],
   },
-  // We already do linting on GH actions
-  // eslint: {
-  //   ignoreDuringBuilds: !!process.env.CI,
-  // },
 };
 
 export default config;

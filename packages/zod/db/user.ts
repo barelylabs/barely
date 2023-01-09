@@ -4,6 +4,7 @@ import { AccountRelations, accountRelationsSchema, accountBaseSchema } from "./a
 import { SessionRelations, sessionRelationsSchema, sessionBaseSchema } from "./session"
 import { PitchReviewRelations, pitchReviewRelationsSchema, pitchReviewBaseSchema } from "./pitchreview"
 import { ArtistRelations, artistRelationsSchema, artistBaseSchema } from "./artist"
+import { ArtistUserRoleRelations, artistUserRoleRelationsSchema, artistUserRoleBaseSchema } from "./artistuserrole"
 import { AnalyticsEndpointRelations, analyticsEndpointRelationsSchema, analyticsEndpointBaseSchema } from "./analyticsendpoint"
 import { AudienceRelations, audienceRelationsSchema, audienceBaseSchema } from "./audience"
 import { EpicRelations, epicRelationsSchema, epicBaseSchema } from "./epic"
@@ -33,6 +34,7 @@ export interface UserRelations {
   sessions: (z.infer<typeof sessionBaseSchema> & SessionRelations)[]
   pitchReviews: (z.infer<typeof pitchReviewBaseSchema> & PitchReviewRelations)[]
   artists: (z.infer<typeof artistBaseSchema> & ArtistRelations)[]
+  artistUserRoles: (z.infer<typeof artistUserRoleBaseSchema> & ArtistUserRoleRelations)[]
   analyticsEndpoints: (z.infer<typeof analyticsEndpointBaseSchema> & AnalyticsEndpointRelations)[]
   audiences: (z.infer<typeof audienceBaseSchema> & AudienceRelations)[]
   epics: (z.infer<typeof epicBaseSchema> & EpicRelations)[]
@@ -52,6 +54,7 @@ export const userRelationsSchema: z.ZodObject<{
   sessions: z.lazy(() => sessionBaseSchema.merge(sessionRelationsSchema)).array(),
   pitchReviews: z.lazy(() => pitchReviewBaseSchema.merge(pitchReviewRelationsSchema)).array(),
   artists: z.lazy(() => artistBaseSchema.merge(artistRelationsSchema)).array(),
+  artistUserRoles: z.lazy(() => artistUserRoleBaseSchema.merge(artistUserRoleRelationsSchema)).array(),
   analyticsEndpoints: z.lazy(() => analyticsEndpointBaseSchema.merge(analyticsEndpointRelationsSchema)).array(),
   audiences: z.lazy(() => audienceBaseSchema.merge(audienceRelationsSchema)).array(),
   epics: z.lazy(() => epicBaseSchema.merge(epicRelationsSchema)).array(),
@@ -92,6 +95,7 @@ export const userCreateSchema = userBaseSchema
     sessions: true,
     pitchReviews: true,
     artists: true,
+    artistUserRoles: true,
     analyticsEndpoints: true,
     audiences: true,
     epics: true,

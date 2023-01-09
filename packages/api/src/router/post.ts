@@ -1,16 +1,17 @@
-import { router, procedure } from "../trpc";
+import { router, publicProcedure, privateProcedure } from "../trpc";
 import { z } from "zod";
+import { prisma } from "@barely/db";
 
 export const postRouter = router({
-  all: procedure.query(({ ctx }) => {
-    return ctx.prisma.post.findMany();
+  getAll: publicProcedure.query(({ ctx }) => {
+    return prisma.post.findMany();
   }),
-  byId: procedure.input(z.string()).query(({ ctx, input }) => {
-    return ctx.prisma.post.findFirst({ where: { id: input } });
+  byId: publicProcedure.input(z.string()).query(({ ctx, input }) => {
+    return prisma.post.findFirst({ where: { id: input } });
   }),
-  create: procedure
+  create: publicProcedure
     .input(z.object({ title: z.string(), content: z.string() }))
     .mutation(({ ctx, input }) => {
-      return ctx.prisma.post.create({ data: input });
+      return prisma.post.create({ data: input });
     }),
 });

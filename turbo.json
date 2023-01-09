@@ -5,6 +5,10 @@
       "inputs": ["prisma/schema.prisma"],
       "cache": false
     },
+    "db:push:force": {
+      "inputs": ["prisma/schema.prisma"],
+      "cache": false
+    },
     "db:generate": {
       "inputs": ["prisma/schema.prisma"],
       "cache": false
@@ -13,7 +17,6 @@
       "inputs": ["prisma/seed.ts"],
       "cache": false
     },
-
     "dev": {
       "dependsOn": ["^db:generate"],
       "cache": false

@@ -1,6 +1,4 @@
-import { router, procedure } from "../trpc";
-import { TRPCError } from "@trpc/server";
-
+import { router, publicProcedure, privateProcedure } from "../trpc";
 import { z } from "zod";
 import { linkBaseSchema } from "@barely/zod/db/link";
 import { appTypeSchema } from "@barely/zod/db/apptype";
@@ -23,10 +21,13 @@ export const linkWithRemarketingSchema = linkBaseSchema
 export type LinkWithRemarketing = z.infer<typeof linkWithRemarketingSchema>;
 
 export const linkRouter = router({
-  getAll: procedure.query(({ ctx }) => {
-    return ctx.prisma.link.findMany();
+  getAll: publicProcedure.query(({ ctx }) => {
+    return ctx.prisma.link.findMany({ take: 10 });
   }),
-  getById: procedure.input(z.string()).query(({ ctx, input }) => {
+  // getArtists: procedure.query(({ ctx }) => {
+  //   return ctx.prisma.artist.findMany();
+  // }),
+  getById: publicProcedure.input(z.string()).query(({ ctx, input }) => {
     {
       const link = ctx.prisma.link.findFirst({ where: { id: input } });
       return link;

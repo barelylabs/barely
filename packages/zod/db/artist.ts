@@ -1,5 +1,6 @@
 import * as z from "zod"
 import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
+import { ArtistUserRoleRelations, artistUserRoleRelationsSchema, artistUserRoleBaseSchema } from "./artistuserrole"
 import { ArtistAccountRelations, artistAccountRelationsSchema, artistAccountBaseSchema } from "./artistaccount"
 import { PlaylistRelations, playlistRelationsSchema, playlistBaseSchema } from "./playlist"
 import { TrackRelations, trackRelationsSchema, trackBaseSchema } from "./track"
@@ -24,11 +25,12 @@ export const artistBaseSchema = z.object({
   id: z.string(),
   handle: z.string(),
   name: z.string(),
-  userId: z.string(),
+  ownerId: z.string(),
 })
 
 export interface ArtistRelations {
-  user: z.infer<typeof userBaseSchema> & UserRelations
+  owner: z.infer<typeof userBaseSchema> & UserRelations
+  userRoles: (z.infer<typeof artistUserRoleBaseSchema> & ArtistUserRoleRelations)[]
   accounts: (z.infer<typeof artistAccountBaseSchema> & ArtistAccountRelations)[]
   playlists: (z.infer<typeof playlistBaseSchema> & PlaylistRelations)[]
   tracks: (z.infer<typeof trackBaseSchema> & TrackRelations)[]
@@ -54,7 +56,8 @@ export interface ArtistRelations {
 export const artistRelationsSchema: z.ZodObject<{
   [K in keyof ArtistRelations]: z.ZodType<ArtistRelations[K]>
 }> = z.object({
-  user: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
+  owner: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
+  userRoles: z.lazy(() => artistUserRoleBaseSchema.merge(artistUserRoleRelationsSchema)).array(),
   accounts: z.lazy(() => artistAccountBaseSchema.merge(artistAccountRelationsSchema)).array(),
   playlists: z.lazy(() => playlistBaseSchema.merge(playlistRelationsSchema)).array(),
   tracks: z.lazy(() => trackBaseSchema.merge(trackRelationsSchema)).array(),
@@ -82,7 +85,8 @@ export const artistSchema = artistBaseSchema
 
 export const artistCreateSchema = artistBaseSchema.partial({
   id: true,
-  userId: true,
+  ownerId: true,
+  userRoles: true,
   accounts: true,
   playlists: true,
   tracks: true,

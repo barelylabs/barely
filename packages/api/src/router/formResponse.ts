@@ -1,8 +1,8 @@
-import { router, procedure } from "../trpc";
+import { router, publicProcedure, privateProcedure } from "../trpc";
 import { formResponseCreateSchema } from "@barely/zod/db/formresponse";
 
 export const formResponseRouter = router({
-  create: procedure
+  create: publicProcedure
     .input(formResponseCreateSchema)
     .mutation(async ({ ctx, input }) => {
       return await ctx.prisma.formResponse.create({

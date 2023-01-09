@@ -1,5 +1,5 @@
 {
-  "name": "zod-prisma",
+  "name": "zod-prisma-fork",
   "description": "fork of zod-prisma",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -7,7 +7,7 @@
     "dist"
   ],
   "bin": {
-    "zod-prisma": "dist/cli.js"
+    "zod-prisma-fork": "dist/cli.js"
   },
   "scripts": {
     "build-fast": "tsup-node src/cli.ts --format cjs,esm",

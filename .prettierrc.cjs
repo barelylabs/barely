@@ -1,12 +1,13 @@
 /** @type {import("prettier").Config} */
 module.exports = {
-  arrowParens: "always",
-  printWidth: 80,
-  singleQuote: false,
-  jsxSingleQuote: false,
-  semi: true,
-  trailingComma: "all",
-  tabWidth: 2,
-  plugins: [require.resolve("prettier-plugin-tailwindcss")],
-  tailwindConfig: "./config/tailwind",
+	arrowParens: 'avoid',
+	printWidth: 90,
+	singleQuote: true,
+	jsxSingleQuote: true,
+	semi: true,
+	trailingComma: 'all',
+	useTabs: true,
+	tabWidth: 2,
+	plugins: [require('prettier-plugin-tailwindcss'), require('prettier-plugin-prisma')],
+	tailwindConfig: './config/tailwind',
 };

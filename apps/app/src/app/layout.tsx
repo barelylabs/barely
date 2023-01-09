@@ -1,20 +1,26 @@
-import "../styles/globals.css";
-import { Inter } from "@next/font/google";
-const inter = Inter({ subsets: ["latin"] }); // fixme: this is not working
-// const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+import './globals.css';
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <html>
-      {/* <html className={inter.variable}> */}
-      <head>
-        <link rel="stylesheet" href="https://rsms.me/inter/inter.css"></link>
-      </head>
-      <body className="h-full">{children}</body>
-    </html>
-  );
-}
+import React from 'react';
+
+// import { TrpcProvider } from '../client/trpcClient';
+
+const RootLayout = ({ children, ...props }: { children: React.ReactNode }) => {
+	return (
+		// <TrpcProvider>
+		<html lang='en' className='h-full bg-gray-50'>
+			<head />
+			<body className='h-full'>
+				<main>
+					<div className='w-full py-6'>
+						<div className='mx-auto px-4 sm:px-6 md:px-8'>
+							<input className='w-full rounded-lg px-5 py-2' />
+							{/* {children} */}
+						</div>
+					</div>
+				</main>
+			</body>
+		</html>
+		// </TrpcProvider>
+	);
+};
+export default RootLayout;

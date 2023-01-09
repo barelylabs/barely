@@ -1,8 +1,9 @@
-import { router, procedure } from "../trpc";
+import { router, publicProcedure, privateProcedure } from "../trpc";
+
 import { z } from "zod";
 
 export const bioRouter = router({
-  getById: procedure
+  getById: publicProcedure
     .input(z.object({ bioId: z.string() }))
     .query(async ({ ctx, input }) => {
       return await ctx.prisma.bio.findUnique({

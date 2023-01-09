@@ -1,14 +1,12 @@
-import { router, procedure } from "../trpc";
+import { router, publicProcedure, privateProcedure } from "../trpc";
 import { visitorSessionCreateSchema } from "@barely/zod/db";
-import { visitorSessionBaseSchema } from "@barely/zod/db/visitorsession";
+import { prisma } from "@barely/db";
 
 export const visitorSessionRouter = router({
-  create: procedure
-    .meta({ openapi: { method: "POST", path: "/visitor-session/create" } })
+  create: publicProcedure
     .input(visitorSessionCreateSchema)
-    .output(visitorSessionBaseSchema)
     .mutation(async ({ ctx, input }) => {
-      const visitorSession = await ctx.prisma.visitorSession.create({
+      const visitorSession = await prisma.visitorSession.create({
         data: input,
       });
       return visitorSession;

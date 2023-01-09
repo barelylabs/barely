@@ -1,4 +1,4 @@
-import { router, procedure } from "../trpc";
+import { router, publicProcedure, privateProcedure } from "../trpc";
 import { meta } from "@barely/meta";
 import { geoSchema } from "@barely/zod/next";
 
@@ -38,6 +38,9 @@ import { z } from "zod";
 // export type ReportEventInput = z.infer<typeof reportEventSchema>;
 
 export const eventRouter = router({
+  // getAll: procedure.query(({ ctx }) => {
+  //   return ctx.prisma.artist.findMany({ take: 10 });
+  // }),
   // create: publicProcedure
   // 	.meta({ openapi: { method: 'POST', path: '/event/create' } })
   // 	.input(eventCreateSchema)
