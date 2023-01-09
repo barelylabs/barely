@@ -1,55 +1,55 @@
 {
-  "$schema": "https://turborepo.org/schema.json",
-  "pipeline": {
-    "db:push": {
-      "inputs": ["prisma/schema.prisma"],
-      "cache": false
-    },
-    "db:push:force": {
-      "inputs": ["prisma/schema.prisma"],
-      "cache": false
-    },
-    "db:generate": {
-      "inputs": ["prisma/schema.prisma"],
-      "cache": false
-    },
-    "db:seed": {
-      "inputs": ["prisma/seed.ts"],
-      "cache": false
-    },
-    "dev": {
-      "dependsOn": ["^db:generate"],
-      "cache": false
-    },
-    "build:libs": {
-      "outputs": ["dist/**"]
-    },
-    "build": {
-      "dependsOn": ["^build:libs", "^build", "^db:generate"],
-      "outputs": [".next/**", "dist/**"]
-    },
-    "lint": {
-      "outputs": []
-    },
-    "clean": {
-      "cache": false
-    },
-    "//#clean": {
-      "cache": false
-    },
-    "type-check": {
-      "dependsOn": ["^db:generate"],
-      "cache": false
-    }
-  },
-  "globalEnv": [
-    "DATABASE_URL",
-    "US_EAST_1_HOSTNAME",
-    "US_EAST_1_USERNAME",
-    "US_EAST_1_PASSWORD",
-    "NEXTAUTH_SECRET",
-    "NEXTAUTH_URL",
-    "DISCORD_CLIENT_ID",
-    "DISCORD_CLIENT_SECRET"
-  ]
+	"$schema": "https://turborepo.org/schema.json",
+	"pipeline": {
+		"db:push": {
+			"inputs": ["prisma/schema.prisma"],
+			"cache": false
+		},
+		"db:push:force": {
+			"inputs": ["prisma/schema.prisma"],
+			"cache": false
+		},
+		"db:generate": {
+			"inputs": ["prisma/schema.prisma"],
+			"cache": false
+		},
+		"db:seed": {
+			"inputs": ["prisma/seed.ts"],
+			"cache": false
+		},
+		"dev": {
+			"dependsOn": ["^db:generate"],
+			"cache": false
+		},
+		"build:libs": {
+			"outputs": ["dist/**"]
+		},
+		"build": {
+			"dependsOn": ["^build:libs", "^build", "^db:generate"],
+			"outputs": [".next/**", "dist/**"]
+		},
+		"lint": {
+			"outputs": []
+		},
+		"clean": {
+			"cache": false
+		},
+		"//#clean": {
+			"cache": false
+		},
+		"type-check": {
+			"dependsOn": ["^db:generate"],
+			"cache": false
+		}
+	},
+	"globalEnv": [
+		"DATABASE_URL",
+		"US_EAST_1_HOSTNAME",
+		"US_EAST_1_USERNAME",
+		"US_EAST_1_PASSWORD",
+		"NEXTAUTH_SECRET",
+		"NEXTAUTH_URL",
+		"DISCORD_CLIENT_ID",
+		"DISCORD_CLIENT_SECRET"
+	]
 }

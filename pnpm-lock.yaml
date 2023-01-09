@@ -12,6 +12,7 @@ importers:
       prettier-plugin-prisma: ^4.8.0
       prettier-plugin-tailwindcss: ^0.1.13
       turbo: ^1.6.3
+      turbo-ignore: ^0.5.0
       typescript: ^4.9.3
     dependencies:
       '@manypkg/cli': 0.19.2
@@ -22,6 +23,7 @@ importers:
       prettier-plugin-prisma: 4.8.0_prettier@2.8.2
       prettier-plugin-tailwindcss: 0.1.13_prettier@2.8.2
       turbo: 1.6.3
+      turbo-ignore: 0.5.0
       typescript: 4.9.4
 
   apps/app:
@@ -11141,6 +11143,11 @@ packages:
     requiresBuild: true
     dev: false
     optional: true
+
+  /turbo-ignore/0.5.0:
+    resolution: {integrity: sha512-93VCzUdCBCCDVje06jia/lKep4vYbpL2pBNnvxK1+LdrYu5Sug+WN1ybBZ2pwlJ04RQ6wjoejetZDreui3nDYw==}
+    hasBin: true
+    dev: false
 
   /turbo-linux-64/1.6.3:
     resolution: {integrity: sha512-O9uc6J0yoRPWdPg9THRQi69K6E2iZ98cRHNvus05lZbcPzZTxJYkYGb5iagCmCW/pq6fL4T4oLWAd6evg2LGQA==}
