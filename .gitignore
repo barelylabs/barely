@@ -8,16 +8,11 @@ node_modules
 # testing
 coverage
 
-# database
-prisma/db.sqlite
-prisma/db.sqlite-journal
-
 # next.js
 .next/
 out/
 
-# expo
-.expo/
+# libs
 dist/
 
 # production

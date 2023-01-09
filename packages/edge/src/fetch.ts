@@ -40,11 +40,6 @@ async function _fetch<Schema extends ZodType>(
 	const { endpoint, method, contentType, authorization } = f;
 	const { headers, body, schemaReq, schemaRes } = f;
 
-	// body &&
-	// 	Object.keys(body).forEach(key => {
-	// 		if (!body[key]) delete body[key];
-	// 	});
-
 	try {
 		const res = await fetch(endpoint, {
 			method: method ?? 'GET',

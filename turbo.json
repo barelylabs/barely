@@ -21,8 +21,11 @@
       "dependsOn": ["^db:generate"],
       "cache": false
     },
+    "build:libs": {
+      "outputs": ["dist/**"]
+    },
     "build": {
-      "dependsOn": ["^build", "^db:generate"],
+      "dependsOn": ["^build:libs", "^build", "^db:generate"],
       "outputs": [".next/**", "dist/**"]
     },
     "lint": {
