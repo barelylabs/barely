@@ -10,9 +10,9 @@
 		"zod-prisma-fork": "dist/cli.js"
 	},
 	"scripts": {
-		"build-fast": "tsup-node src/cli.ts --format cjs,esm",
-		"build:libs": "pnpm run build-fast",
-		"dev": "tsup-node src/cli.ts --watch format cjs,esm"
+		"build-fast": "tsup src/cli.ts --format cjs,esm",
+		"build": "pnpm run build-fast",
+		"dev": "tsup src/cli.ts --watch format cjs,esm"
 	},
 	"devDependencies": {
 		"@barely/eslint-config": "workspace:*",
