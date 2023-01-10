@@ -1,46 +1,49 @@
 {
-  "name": "prisma-generator-zod",
-  "description": "Provide a description about your generator",
-  "version": "1.0.0",
-  "main": "dist/generator.js",
-  "license": "MIT",
-  "bin": {
-    "prisma-generator-zod": "dist/bin.js"
-  },
-  "engines": {
-    "node": ">=14.0"
-  },
-  "scripts": {
-    "start": "node dist/bin.js",
-    "dev": "npx tsc -w",
-    "build": "npx tsc",
-    "prepack": "yarn build",
-    "test": "jest"
-  },
-  "dependencies": {
-    "@prisma/client": "3.12.0",
-    "@prisma/generator-helper": "3.12.0",
-    "@prisma/sdk": "3.12.0",
-    "prettier": "2.5.1"
-  },
-  "devDependencies": {
-    "@types/jest": "27.0.3",
-    "@types/node": "17.0.21",
-    "@types/prettier": "2.4.2",
-    "jest": "27.4.7",
-    "prisma": "3.12.0",
-    "ts-jest": "27.1.4",
-    "typescript": "4.6.2"
-  },
-  "homepage": "Link to homepage or github readme here",
-  "repository": {
-    "type": "git",
-    "url": "Repo link here"
-  },
-  "author": "Your Name <Your Email>",
-  "keywords": [
-    "prisma",
-    "prisma2",
-    "generator"
-  ]
+	"name": "prisma-generator-zod",
+	"description": "fork of zod-prisma",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"bin": {
+		"prisma-generator-zod": "./bin.js"
+	},
+	"scripts": {
+		"build-fast": "tsup src/cli.ts --format cjs,esm",
+		"build": "pnpm run build-fast",
+		"dev": "tsup src/cli.ts --watch format cjs,esm"
+	},
+	"devDependencies": {
+		"@barely/eslint-config": "workspace:*",
+		"@barely/ts-config": "workspace:*",
+		"@prisma/client": "^4.0.0",
+		"@prisma/internals": "^4.0.0",
+		"decimal.js": "^10.3.1",
+		"eslint": "^7.32.0",
+		"execa": "6.1.0",
+		"expect-type": "^0.13.0",
+		"fast-glob": "3.2.11",
+		"fs-jetpack": "4.3.1",
+		"prettier": "2.7.1",
+		"prisma": "^4.0.0",
+		"typescript": "^4.9.3",
+		"zod": "^3.19.1"
+	},
+	"dependencies": {
+		"@prisma/generator-helper": "^4.0.0",
+		"parenthesis": "3.1.8",
+		"ts-morph": "15.1.0",
+		"tsup": "^6.5.0"
+	},
+	"peerDependencies": {
+		"decimal.js": "^10.0.0",
+		"prisma": "^3.0.0 || ^4.0.0",
+		"zod": "^3.20"
+	},
+	"peerDependenciesMeta": {
+		"decimal.js": {
+			"optional": true
+		}
+	}
 }

@@ -1,7 +1,7 @@
 {
 	"name": "create-t3-turbo",
 	"private": true,
-	"packageManager": "pnpm@7.23.0",
+	"packageManager": "pnpm@7.24.2",
 	"workspaces": [
 		"apps/*",
 		"config/*",
@@ -11,7 +11,7 @@
 	"scripts": {
 		"build:libs": "turbo build:libs",
 		"build": "turbo build",
-		"clean": "rm -rf node_modules",
+		"clean": "rm -rf node_modules && rm -rf dist",
 		"clean:workspaces": "turbo clean",
 		"clean:all": " turbo clean && rm -rf node_modules",
 		"db:generate": "turbo db:generate",
@@ -20,6 +20,7 @@
 		"db:seed": "turbo db:seed",
 		"dev": "turbo dev --parallel",
 		"format": "prettier --write \"**/*.{ts,tsx,md}\"",
+		"preinstallz": "mkdir ./libs/prisma-generator-zod/dist && touch ./libs/prisma-generator-zod/dist/cli.js",
 		"lint": "turbo lint && manypkg check",
 		"type-check": "turbo type-check"
 	},
