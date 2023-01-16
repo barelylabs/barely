@@ -20,6 +20,16 @@ const Hero = () => {
 				<p className='w-full pt-10 pb-12  text-xl text-gray-200  '>
 					Simple, powerful links to build your audience.
 				</p>
+
+				{!showEmailForm && !submitted && (
+					<button
+						onClick={() => setShowEmailForm(true)}
+						className='rounded-xl bg-purple-400 px-5 py-3 font-normal text-gray-50'
+					>
+						Join the waitlist
+					</button>
+				)}
+
 				{showEmailForm && (
 					<form
 						className='flex flex-row justify-center space-x-3 sm:mx-auto'
@@ -39,21 +49,14 @@ const Hero = () => {
 					</form>
 				)}
 
-				{submitted ? (
-					<div className='mx-auto max-w-sm text-purple-700 '>
+				{submitted && (
+					<div className='mx-auto max-w-sm text-purple-200 '>
 						<p className='font-semibold'>Thanks for your interest!</p>
 						<p>
 							You've been added to our waitlist and we'll reach out when we expand our
 							testing program.
 						</p>
 					</div>
-				) : (
-					<button
-						onClick={() => setShowEmailForm(true)}
-						className='rounded-xl bg-purple-400 px-5 py-3 font-normal text-gray-50'
-					>
-						Join the waitlist
-					</button>
 				)}
 			</div>
 		</div>
