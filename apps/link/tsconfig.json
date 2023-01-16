@@ -1,11 +1,11 @@
 {
-  "extends": "@barely/ts-config/nextjs.json",
-  "include": [
-    "next-env.d.ts",
-    "node_modules/@barely/auth/next-auth.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts"
-  ],
-  "exclude": ["node_modules"]
+	"extends": "@barely/config/tsconfig.nextjs.json",
+	"include": [
+		"node_modules/@barely/auth/next-auth.d.ts",
+		"next-env.d.ts",
+		"**/*.ts",
+		"**/*.tsx",
+		".next/types/**/*.ts"
+	],
+	"exclude": ["node_modules"]
 }

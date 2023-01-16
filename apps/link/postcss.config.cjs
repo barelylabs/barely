@@ -1,1 +1,1 @@
-module.exports = require("@barely/tailwind-config/postcss");
+module.exports = require('@barely/config/postcss.config.cjs');

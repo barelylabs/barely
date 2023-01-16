@@ -1,5 +1,5 @@
 {
-	"extends": "@barely/ts-config/react-library.json",
+	"extends": "@barely/config/tsconfig.react.json",
 	"include": ["."],
 	"exclude": ["dist", "build", "node_modules"]
 }

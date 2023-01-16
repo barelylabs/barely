@@ -15,8 +15,7 @@
 		"dev": "tsup src/cli.ts --watch format cjs,esm"
 	},
 	"devDependencies": {
-		"@barely/eslint-config": "workspace:*",
-		"@barely/ts-config": "workspace:*",
+		"@barely/config": "workspace:*",
 		"@prisma/client": "^4.0.0",
 		"@prisma/internals": "^4.0.0",
 		"decimal.js": "^10.3.1",

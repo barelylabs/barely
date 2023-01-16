@@ -9,5 +9,5 @@ module.exports = {
 	useTabs: true,
 	tabWidth: 2,
 	plugins: [require('prettier-plugin-tailwindcss'), require('prettier-plugin-prisma')],
-	tailwindConfig: './config/tailwind',
+	tailwindConfig: './packages/config/tailwind.config.cjs',
 };

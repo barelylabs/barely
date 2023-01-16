@@ -1,44 +1,46 @@
 {
-  "name": "@barely/link",
-  "version": "0.0.0",
-  "private": true,
-  "scripts": {
-    "clean": "rm -rf .next .turbo node_modules",
-    "dev": "next dev -- -p 3004",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "@barely/api": "*",
-    "@barely/db": "*",
-    "@barely/edge": "*",
-    "@barely/meta": "*",
-    "@barely/ui": "*",
-    "@barely/zod": "*",
-    "@next/font": "^13.0.5",
-    "@vercel/edge": "^0.1.2",
-    "cuid": "^2.1.8",
-    "dotenv": "^16.0.3",
-    "next": "^13.0.6",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "zod": "^3.19.1"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.0.0",
-    "@barely/eslint-config": "*",
-    "@barely/tailwind-config": "*",
-    "@barely/ts-config": "*",
-    "@svgr/webpack": "^6.5.1",
-    "@tailwindcss/typography": "^0.5.8",
-    "@types/node": "^18.0.0",
-    "@types/react": "^18.0.25",
-    "@types/react-dom": "^18.0.8",
-    "autoprefixer": "^10.4.13",
-    "eslint": "^8.28.0",
-    "postcss": "^8.4.19",
-    "tailwindcss": "^3.2.4",
-    "typescript": "^4.9.3"
-  }
+	"name": "@barely/link",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"clean": "rm -rf .next .turbo node_modules",
+		"dev": "next dev -- -p 3004",
+		"build": "next build",
+		"start": "next start",
+		"lint": "next lint"
+	},
+	"dependencies": {
+		"@barely/api": "*",
+		"@barely/db": "*",
+		"@barely/edge": "*",
+		"@barely/meta": "*",
+		"@barely/ui": "*",
+		"@barely/zod": "*",
+		"@next/font": "^13.0.5",
+		"@radix-ui/react-tooltip": "^1.0.2",
+		"@vercel/edge": "^0.1.2",
+		"cuid": "^2.1.8",
+		"dotenv": "^16.0.3",
+		"next": "^13.1.2",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
+		"react-icons": "^4.7.1",
+		"sharp": "^0.31.3",
+		"tailwind-merge": "^1.8.1",
+		"zod": "^3.19.1"
+	},
+	"devDependencies": {
+		"@babel/core": "^7.0.0",
+		"@barely/config": "*",
+		"@svgr/webpack": "^6.5.1",
+		"@tailwindcss/typography": "^0.5.8",
+		"@types/node": "^18.0.0",
+		"@types/react": "^18.0.25",
+		"@types/react-dom": "^18.0.8",
+		"autoprefixer": "^10.4.13",
+		"eslint": "^8.28.0",
+		"postcss": "^8.4.19",
+		"tailwindcss": "^3.2.4",
+		"typescript": "^4.9.3"
+	}
 }

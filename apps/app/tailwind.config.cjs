@@ -1,4 +1,4 @@
 /** @type {import("tailwindcss").Config} */
 module.exports = {
-  presets: [require("@barely/tailwind-config")],
+  presets: [require("@barely/config/tailwind.config.cjs")],
 };

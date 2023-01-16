@@ -1,5 +1,5 @@
 {
-  "extends": "@barely/ts-config/base.json",
-  "include": ["*.ts"],
-  "exclude": ["node_modules"]
+	"extends": "@barely/config/tsconfig.base.json",
+	"include": ["*.ts"],
+	"exclude": ["node_modules"]
 }

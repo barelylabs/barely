@@ -1,1 +1,1 @@
-module.exports = require('@barely/tailwind-config');
+module.exports = require('@barely/config/tailwind.config.cjs');

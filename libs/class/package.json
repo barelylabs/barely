@@ -17,7 +17,7 @@
 	},
 	"dependencies": {},
 	"devDependencies": {
-		"@barely/ts-config": "workspace:*",
+		"@barely/config": "workspace:*",
 		"@types/node": "^18.11.9",
 		"@typescript-eslint/eslint-plugin": "^5.33.0",
 		"@typescript-eslint/parser": "^5.33.0",

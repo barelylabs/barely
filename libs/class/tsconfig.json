@@ -1,6 +1,6 @@
 {
-  "extends": "@barely/ts-config/base.json",
-  "compilerOptions": { "target": "ES2020" },
-  "include": ["src/*.ts"],
-  "exclude": ["node_modules"]
+	"extends": "@barely/config/tsconfig.base.json",
+	"compilerOptions": { "target": "ES2020" },
+	"include": ["src/*.ts"],
+	"exclude": ["node_modules"]
 }

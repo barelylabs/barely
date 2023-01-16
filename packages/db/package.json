@@ -22,7 +22,7 @@
 		"kysely-planetscale": "^1.2.0"
 	},
 	"devDependencies": {
-		"@barely/ts-config": "*",
+		"@barely/config": "*",
 		"@types/node": "^18.0.0",
 		"dotenv-cli": "^6.0.0",
 		"prisma": "^4.6.1",

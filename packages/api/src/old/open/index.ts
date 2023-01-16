@@ -1,4 +1,4 @@
-import { appRouter } from '../router';
+import { appRouter } from '../../router';
 
 import { generateOpenApiDocument } from 'trpc-openapi';
 import type {} from 'openapi-types';

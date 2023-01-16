@@ -13,8 +13,7 @@ const config = {
     "@barely/auth",
     "@barely/db",
     "@barely/spotify",
-    "@barely/tailwind-config",
-    "@barely/ts-config",
+    "@barely/config",    
   ],
   experimental: {
     appDir: true,

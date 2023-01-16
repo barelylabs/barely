@@ -6,17 +6,22 @@ import { linkAnalyticsSchema } from '@barely/zod/analytics/link';
 import { z } from 'zod';
 
 export const config = {
-	matcher: ['/((?!api|mobile|_next/static|favicon|logos|sitemap|atom|404|500).*)'],
+	matcher: ['/((?!api|mobile|_next|favicon|logos|sitemap|atom|404|500).*)'],
 };
 
 type AnalyticsInput = z.infer<typeof linkAnalyticsSchema>;
 
 export async function middleware(req: NextRequest) {
+	console.log('middleware path => ', req.nextUrl.pathname);
+
 	//* 🧬 parse the incoming request *//
 	const { isLocal, origin, handle, slug, app, appRoute, appId, pathname } =
 		visitorSession.getPathParams(req);
 
 	if (!handle && pathname.length === 1) return; // redirect to barely.io/link?
+	if (!handle && ['/privacy'].includes(pathname)) return;
+	if (handle && pathname.length === 1)
+		return NextResponse.redirect('https://barely.link');
 	if (!handle || pathname.length === 1) return NextResponse.rewrite(`${origin}/404`);
 
 	//* 🔎 get link data from db (planetscale serverless + kysely) *//
