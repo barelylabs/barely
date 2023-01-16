@@ -2,13 +2,13 @@ import { ReactNode } from 'react';
 import { IconType } from 'react-icons/lib';
 
 interface TimelinePointProps {
-	content: ReactNode;
-	color?: string;
-	icon?: IconType;
 	id?: string;
+	icon?: IconType;
+	color?: string;
+	content: ReactNode;
 }
 
-const TimelineVertical = ({ points }: { points: TimelinePointProps[] }) => {
+export function TimelineVertical({ points }: { points: TimelinePointProps[] }) {
 	return points.length ? (
 		<div className='flex flex-col'>
 			{points.map((point, index) => (
@@ -42,6 +42,4 @@ const TimelineVertical = ({ points }: { points: TimelinePointProps[] }) => {
 	) : (
 		<></>
 	);
-};
-
-export default TimelineVertical;
+}

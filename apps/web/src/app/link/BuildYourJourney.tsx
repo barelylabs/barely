@@ -4,12 +4,12 @@ import {
 	MdQrCode,
 	MdTouchApp,
 } from 'react-icons/md';
-import FeatureCard from './FeatureCard';
+// import { FeatureCard, TimelineVertical } from '@barely/ui';
 import { GiConvergenceTarget } from 'react-icons/gi';
 import { GoGlobe } from 'react-icons/go';
 import { FiActivity, FiTarget } from 'react-icons/fi';
 import { RiPagesLine } from 'react-icons/ri';
-import TimelineVertical from './TimelineVertical';
+import { FeatureCard, TimelineVertical } from '@barely/ui';
 
 const Heading = () => {
 	return (

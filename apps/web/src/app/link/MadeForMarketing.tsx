@@ -1,10 +1,8 @@
-import Link from 'next/link';
-
-import Tooltip from './Tooltip';
 import { FaLink } from 'react-icons/fa';
 
 import { MdPrivacyTip } from 'react-icons/md';
 import { BsClipboardCheck, BsFillPinMapFill } from 'react-icons/bs';
+import { Tooltip } from '@barely/ui';
 
 const features = [
 	{
@@ -45,6 +43,9 @@ const MadeForMarketing = () => {
 					<Tooltip content="The artist's handle" className='bg-red fill-red text-gray-50'>
 						<button className='text-red'>{`{artist}`}</button>
 					</Tooltip>
+					<Tooltip content="The artist's handle" className='bg-red fill-red text-gray-50'>
+						<button className='text-red'>{`{artist}`}</button>
+					</Tooltip>
 					<span className='text-gray-200'>.barely.link</span>/
 					<Tooltip
 						className='bg-green fill-green text-gray-50'
@@ -66,9 +67,6 @@ const MadeForMarketing = () => {
 					>
 						<button className='text-purple-400'>{`{appId}`}</button>
 					</Tooltip>
-					{/* <span className='text-lg font-light italic text-gray-50'>
-						{' 👈 hover for more info'}
-					</span> */}
 				</h3>
 				<span className='py-5 text-sm text-gray-300'>👆 hover for more info</span>
 				<div className='mt-16 max-w-lg sm:mx-auto md:max-w-none'>

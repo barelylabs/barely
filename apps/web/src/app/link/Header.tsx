@@ -1,19 +1,8 @@
 import { Fragment } from 'react';
 import { Popover, Transition } from '@headlessui/react';
-
-import {
-	ArrowPathIcon,
-	Bars3Icon,
-	ChartBarIcon,
-	CursorArrowRaysIcon,
-	DocumentChartBarIcon,
-	ShieldCheckIcon,
-	Squares2X2Icon,
-	XMarkIcon,
-} from '@heroicons/react/24/outline';
-import { ChevronDownIcon } from '@heroicons/react/20/solid';
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
-import logo from '../../public/logos/logo+barely-link__transparent+light_txt.png';
+import logo from '../../../public/logos/logo+barely-io__transparent+light_txt.png';
 import Link from 'next/link';
 
 // function classNames(...classes) {

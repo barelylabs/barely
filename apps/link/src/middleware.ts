@@ -19,9 +19,8 @@ export async function middleware(req: NextRequest) {
 		visitorSession.getPathParams(req);
 
 	if (!handle && pathname.length === 1) return; // redirect to barely.io/link?
-	if (!handle && ['/privacy'].includes(pathname)) return;
 	if (handle && pathname.length === 1)
-		return NextResponse.redirect('https://barely.link');
+		return NextResponse.redirect('https://barely.io/link');
 	if (!handle || pathname.length === 1) return NextResponse.rewrite(`${origin}/404`);
 
 	//* 🔎 get link data from db (planetscale serverless + kysely) *//
