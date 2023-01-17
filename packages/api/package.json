@@ -12,10 +12,9 @@
 	"dependencies": {
 		"@barely/auth": "*",
 		"@barely/db": "*",
-		"@barely/edge": "*",
 		"@barely/meta": "*",
+		"@barely/schema": "*",
 		"@barely/spotify": "*",
-		"@barely/zod": "*",
 		"@trpc/client": "^10.1.0",
 		"@trpc/server": "^10.1.0",
 		"cuid": "^2.1.8",

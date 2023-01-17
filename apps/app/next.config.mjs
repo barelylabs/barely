@@ -1,23 +1,18 @@
-// @ts-check
-/**
- * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.
- * This is especially useful for Docker builds.
- */
-!process.env.SKIP_ENV_VALIDATION && (await import("./src/env/server.mjs"));
-
 /** @type {import("next").NextConfig} */
 const config = {
-  reactStrictMode: true,
-  transpilePackages: [
-    "@barely/api",
-    "@barely/auth",
-    "@barely/db",
-    "@barely/spotify",
-    "@barely/config",    
-  ],
-  experimental: {
-    appDir: true,
-  },
+	reactStrictMode: true,
+	transpilePackages: [
+		'@barely/api',
+		'@barely/auth',
+		'@barely/config',
+		'@barely/db',
+		'@barely/schema',
+		'@barely/spotify',
+		'@barely/utils',
+	],
+	experimental: {
+		appDir: true,
+	},
 };
 
 export default config;

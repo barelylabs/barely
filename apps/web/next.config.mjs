@@ -11,8 +11,9 @@ const config = {
 		'@barely/edge',
 		'@barely/meta',
 		'@barely/config',
+		'@barely/schema',
 		'@barely/ui',
-		'@barely/zod',
+		'@barely/utils',
 	],
 	experimental: {
 		appDir: true,

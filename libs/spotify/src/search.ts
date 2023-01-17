@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { _fetch, _zod } from '@barely/edge';
-import { accountBaseSchema } from '@barely/zod/db/account';
+import { zFetch } from '@barely/utils';
+import { accountBaseSchema } from '../../../packages/schema/db/account';
 
 const spotifySearchSchema = z.object({
 	account: accountBaseSchema,
@@ -16,7 +16,7 @@ export const search = async (props: z.infer<typeof spotifySearchSchema>) => {
 
 	const endpoint = `https://api.spotify.com/v1/search?q=${query}&type=${types}&limit=${limit}`;
 	const authorization = `Bearer ${props.account.access_token}`;
-	const searchResponse = await _fetch.get({
+	const searchResponse = await zFetch.get({
 		endpoint,
 		authorization,
 		schemaRes: spotifySearchResponseSchema,

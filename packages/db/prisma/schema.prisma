@@ -8,7 +8,7 @@ generator client {
 
 generator zod {
   provider = "prisma-generator-zod"
-  output   = "../../zod/db"
+  output   = "../../schema/db"
 }
 
 datasource db {
@@ -33,6 +33,8 @@ model Artist {
   ownerId              String                    @default("NOT_NULL")
   // users
   userRoles            ArtistUserRole[]
+  // external
+  spotifyId            String?                   @unique
   // assets 
   accounts             ArtistAccount[]
   playlists            Playlist[]
@@ -66,9 +68,11 @@ model Artist {
 }
 
 enum ArtistUserRoleOption {
-  admin
-  manager
   artist
+  agent
+  label
+  manager
+  publisher
 }
 
 model ArtistUserRole {
@@ -352,6 +356,9 @@ model Campaign {
   endDate      DateTime?
   type         CampaignType
   stage        CampaignStage
+  // user
+  createdBy    User                   @relation(fields: [createdById], references: [id])
+  createdById  String
   // artist
   artist       Artist                 @relation(fields: [artistId], references: [id])
   artistId     String
@@ -367,6 +374,7 @@ model Campaign {
   pitchReviews PitchReview[]
   lineItems    LineItem[]
 
+  @@index([createdById])
   @@index([artistId])
   @@index([trackId])
   @@index([playlistId])
@@ -1426,6 +1434,8 @@ model User {
   sessions             Session[]
   // pitch
   pitchReviews         PitchReview[]
+  // campaigns
+  campaigns            Campaign[]
   // artist 
   artists              Artist[]
   artistUserRoles      ArtistUserRole[]

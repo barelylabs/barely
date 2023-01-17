@@ -12,10 +12,10 @@
 	"dependencies": {
 		"@barely/api": "*",
 		"@barely/db": "*",
-		"@barely/edge": "*",
+		"@barely/utils": "*",
 		"@barely/meta": "*",
+		"@barely/schema": "*",
 		"@barely/ui": "*",
-		"@barely/zod": "*",
 		"@next/font": "^13.0.5",
 		"@radix-ui/react-tooltip": "^1.0.2",
 		"@vercel/edge": "^0.1.2",

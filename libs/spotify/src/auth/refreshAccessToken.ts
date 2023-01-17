@@ -1,5 +1,5 @@
 //https://developer.spotify.com/documentation/ios/guides/token-swap-and-refresh/
-import { _fetch } from '@barely/edge';
+import { zFetch } from '@barely/utils';
 import { z } from 'zod';
 
 export const refreshAccessToken = async (refreshToken: string) => {
@@ -9,7 +9,7 @@ export const refreshAccessToken = async (refreshToken: string) => {
 			[process.env.SPOTIFY_CLIENT_ID, process.env.SPOTIFY_CLIENT_SECRET].join(':'),
 		).toString('base64');
 
-	const { json, error } = await _fetch.post({
+	const { json, error } = await zFetch.post({
 		endpoint: `https://accounts.spotify.com/api/token`,
 		contentType: 'application/x-www-form-urlencoded',
 		authorization: spotifyAuthBase64,

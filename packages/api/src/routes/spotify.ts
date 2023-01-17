@@ -8,7 +8,7 @@ import { TRPCError } from '@trpc/server';
 export const spotifyRouter = router({
 	findTrack: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
 		let account = await ctx.prisma.account.findFirst({
-			where: { user: { id: process.env.ADMIN_USER_ID }, provider: 'spotify' },
+			where: { user: { id: process.env.API_USER_ID }, provider: 'spotify' },
 		});
 
 		if (!account?.refresh_token)

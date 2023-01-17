@@ -7,12 +7,12 @@ const config = {
 	transpilePackages: [
 		'@barely/api',
 		'@barely/auth',
+		'@barely/config',
 		'@barely/db',
 		'@barely/edge',
 		'@barely/meta',
-		'@barely/config',		
+		'@barely/schema',
 		'@barely/ui',
-		'@barely/zod',
 	],
 	env: {
 		VISITOR_IP: process.env.VISITOR_IP,

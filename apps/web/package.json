@@ -10,8 +10,9 @@
 		"lint": "next lint"
 	},
 	"dependencies": {
+		"@barely/schema": "*",
 		"@barely/ui": "*",
-		"@barely/zod": "*",
+		"@barely/utils": "*",
 		"@next/font": "^13.0.5",
 		"@vercel/edge": "^0.1.2",
 		"dotenv": "^16.0.3",
