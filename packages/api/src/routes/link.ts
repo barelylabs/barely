@@ -1,8 +1,8 @@
 import { router, publicProcedure, privateProcedure } from '../trpc';
 import { z } from 'zod';
-import { linkBaseSchema } from '../../../schema/db/link';
-import { appTypeSchema } from '../../../schema/db/apptype';
-import { remarketingBaseSchema } from '../../../schema/db/remarketing';
+import { linkBaseSchema } from '@barely/schema/db/link';
+import { appTypeSchema } from '@barely/schema/db/apptype';
+import { remarketingBaseSchema } from '@barely/schema/db/remarketing';
 
 const linkByPathSchema = z.object({
 	handle: z.string(),

@@ -8,6 +8,7 @@ import { type CreateNextContextOptions } from '@trpc/server/adapters/next';
  * Replace this with an object if you want to pass things to createContextInner
  */
 interface CreateContextOptions {
+	session: Session;
 	user: User | null;
 	rsc: boolean;
 }
@@ -34,6 +35,7 @@ export async function createContext(
 	if (opts.type === 'rsc') {
 		return {
 			type: 'rsc',
+			session: null,
 			user: null, // todo await opts.getUser(),
 			prisma,
 		};
@@ -43,6 +45,7 @@ export async function createContext(
 	const session = await getServerSession(opts);
 	return {
 		type: 'api',
+		session,
 		user: session?.user ?? null,
 		prisma,
 	};

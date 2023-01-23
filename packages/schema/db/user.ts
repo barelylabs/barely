@@ -15,6 +15,7 @@ import { FileRelations, fileRelationsSchema, fileBaseSchema } from "./file"
 import { PlaylistRelations, playlistRelationsSchema, playlistBaseSchema } from "./playlist"
 import { PlaylistCoverRenderRelations, playlistCoverRenderRelationsSchema, playlistCoverRenderBaseSchema } from "./playlistcoverrender"
 import { VidRenderRelations, vidRenderRelationsSchema, vidRenderBaseSchema } from "./vidrender"
+import { LoginTokenRelations, loginTokenRelationsSchema, loginTokenBaseSchema } from "./logintoken"
 
 export const userBaseSchema = z.object({
   id: z.string(),
@@ -46,6 +47,7 @@ export interface UserRelations {
   playlists: (z.infer<typeof playlistBaseSchema> & PlaylistRelations)[]
   playlistCoverRenders: (z.infer<typeof playlistCoverRenderBaseSchema> & PlaylistCoverRenderRelations)[]
   vidRenders: (z.infer<typeof vidRenderBaseSchema> & VidRenderRelations)[]
+  loginTokens: (z.infer<typeof loginTokenBaseSchema> & LoginTokenRelations)[]
 }
 
 export const userRelationsSchema: z.ZodObject<{
@@ -67,6 +69,7 @@ export const userRelationsSchema: z.ZodObject<{
   playlists: z.lazy(() => playlistBaseSchema.merge(playlistRelationsSchema)).array(),
   playlistCoverRenders: z.lazy(() => playlistCoverRenderBaseSchema.merge(playlistCoverRenderRelationsSchema)).array(),
   vidRenders: z.lazy(() => vidRenderBaseSchema.merge(vidRenderRelationsSchema)).array(),
+  loginTokens: z.lazy(() => loginTokenBaseSchema.merge(loginTokenRelationsSchema)).array(),
 })
 
 export const userSchema = userBaseSchema
@@ -109,6 +112,7 @@ export const userCreateSchema = userBaseSchema
     playlists: true,
     playlistCoverRenders: true,
     vidRenders: true,
+    loginTokens: true,
   })
 
 export const userUpdateSchema = userBaseSchema

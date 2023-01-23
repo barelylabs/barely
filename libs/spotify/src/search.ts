@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { zFetch } from '@barely/utils';
-import { accountBaseSchema } from '../../../packages/schema/db/account';
+import { zFetch } from '@barely/utils/edge';
+import { accountBaseSchema } from '@barely/schema/db/account';
 
 const spotifySearchSchema = z.object({
 	account: accountBaseSchema,

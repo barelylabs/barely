@@ -15,7 +15,7 @@ export const artistRouter = router({
 	findByHandle: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
 		return await ctx.prisma.artist.findFirst({ where: { handle: input } });
 	}),
-	findBySpotifyId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
+	bySpotifyId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
 		return await ctx.prisma.artist.findFirst({ where: { spotifyId: input } });
 	}),
 });

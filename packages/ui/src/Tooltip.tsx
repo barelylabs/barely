@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
-import { cn } from '.';
+import { cn } from '@barely/utils/edge';
 
-import * as Tt from '@radix-ui/react-tooltip';
+import * as HeadlessTooltip from '@radix-ui/react-tooltip';
 
 export interface TooltipProps {
 	children: ReactNode;
@@ -12,10 +12,10 @@ export interface TooltipProps {
 export function Tooltip(props: TooltipProps) {
 	return (
 		<>
-			<Tt.Root>
-				<Tt.Trigger asChild>{props.children}</Tt.Trigger>
-				<Tt.Portal className='m-3'>
-					<Tt.Content
+			<HeadlessTooltip.Root>
+				<HeadlessTooltip.Trigger asChild>{props.children}</HeadlessTooltip.Trigger>
+				<HeadlessTooltip.Portal className='m-3'>
+					<HeadlessTooltip.Content
 						className={cn(
 							'text-md rounded-md bg-white p-3 text-gray-800 shadow-md',
 							props.className,
@@ -23,16 +23,16 @@ export function Tooltip(props: TooltipProps) {
 						sideOffset={5}
 						side='top'
 					>
-						{/* {props.content} */}
-						fuckall
-						<Tt.Arrow />
-					</Tt.Content>
-				</Tt.Portal>
-			</Tt.Root>
+						{props.content}
+
+						<HeadlessTooltip.Arrow />
+					</HeadlessTooltip.Content>
+				</HeadlessTooltip.Portal>
+			</HeadlessTooltip.Root>
 		</>
 	);
 }
 
-export const TooltipProvider = ({ children }: { children: ReactNode }) => (
-	<Tt.Provider delayDuration={10}>{children}</Tt.Provider>
+export const HeadlessTooltipProvider = ({ children }: { children: ReactNode }) => (
+	<HeadlessTooltip.Provider delayDuration={10}>{children}</HeadlessTooltip.Provider>
 );

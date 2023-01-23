@@ -12,13 +12,18 @@
 	"dependencies": {
 		"@barely/auth": "*",
 		"@barely/db": "*",
+		"@barely/env": "*",
+		"@barely/email": "*",
 		"@barely/meta": "*",
 		"@barely/schema": "*",
 		"@barely/spotify": "*",
+		"@barely/utils": "*",
 		"@trpc/client": "^10.1.0",
 		"@trpc/server": "^10.1.0",
+		"body-parser": "^1.20.1",
 		"cuid": "^2.1.8",
 		"dotenv": "^16.0.3",
+		"openai": "^3.1.0",
 		"superjson": "^1.11.0",
 		"trpc-openapi": "^1.0.0",
 		"zod": "^3.19.1"

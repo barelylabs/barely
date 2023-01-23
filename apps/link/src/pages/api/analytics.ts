@@ -3,8 +3,8 @@ import { prisma } from '@barely/db';
 import { meta } from '@barely/meta';
 import { EventReport } from '@prisma/client/edge';
 
-import { handleUndefined } from '@barely/edge';
-import { linkAnalyticsSchema } from '@barely/zod/analytics/link';
+import { handleUndefined } from '@barely/utils/edge';
+import { linkAnalyticsSchema } from '@barely/schema/analytics/link';
 
 const analytics = async (req: NextApiRequest, res: NextApiResponse) => {
 	const {

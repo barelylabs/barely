@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { closestDbConnection, usEast1_dev } from '@barely/db/kysely';
 
-import { visitorSession, _fetch } from '@barely/edge';
-import { linkAnalyticsSchema } from '@barely/zod/analytics/link';
+import { visitorSession, zFetch } from '@barely/utils/edge';
+import { linkAnalyticsSchema } from '@barely/schema/analytics/link';
 import { z } from 'zod';
 
 export const config = {
@@ -69,7 +69,7 @@ export async function middleware(req: NextRequest) {
 	} satisfies AnalyticsInput;
 
 	const analyticsEndpoint = new URL(`/api/analytics`, req.url);
-	_fetch.post({
+	zFetch.post({
 		endpoint: analyticsEndpoint.href,
 		body: analyticsInput,
 		schemaReq: linkAnalyticsSchema,

@@ -11,9 +11,8 @@
 	"scripts": {
 		"build:libs": "turbo build:libs",
 		"build": "turbo build",
-		"clean": "rm -rf node_modules && rm -rf dist",
 		"clean:workspaces": "turbo clean",
-		"clean:all": " turbo clean && rm -rf node_modules",
+		"clean:all": " turbo clean && rm -rf node_modules pnpm-lock.yaml",
 		"db:generate": "turbo db:generate",
 		"db:push": "turbo db:push",
 		"db:push:force": "turbo db:push:force ",

@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { IconType } from 'react-icons';
-import { cn } from '..';
+import { cn } from '@barely/utils/edge';
 
 interface FeatureCardProps {
 	Icon?: IconType;

@@ -1,1 +1,1 @@
-export * from './campaign';
+export * from './campaignFormSchema';

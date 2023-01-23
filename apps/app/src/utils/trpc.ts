@@ -1,34 +1,34 @@
 // src/utils/trpc.ts
-import { createTRPCNext } from "@trpc/next";
-import { httpBatchLink, loggerLink } from "@trpc/client";
-import { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
-import type { AppRouter } from "@barely/api";
-import { transformer } from "@barely/api/transformer";
+import { createTRPCNext } from '@trpc/next';
+import { httpBatchLink, loggerLink } from '@trpc/client';
+import { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
+import type { AppRouter } from '@barely/api';
+import { transformer } from '@barely/api/transformer';
 
-const getBaseUrl = () => {
-  if (typeof window !== "undefined") return ""; // browser should use relative url
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
+import { baseUrl } from '@barely/utils/edge';
 
-  return `http://localhost:${process.env.PORT ?? 3001}`; // dev SSR should use localhost
-};
+import env from '~/env';
 
 export const trpc = createTRPCNext<AppRouter>({
-  config() {
-    return {
-      transformer,
-      links: [
-        loggerLink({
-          enabled: (opts) =>
-            process.env.NODE_ENV === "development" ||
-            (opts.direction === "down" && opts.result instanceof Error),
-        }),
-        httpBatchLink({
-          url: `${getBaseUrl()}/api/trpc`,
-        }),
-      ],
-    };
-  },
-  ssr: false,
+	config() {
+		return {
+			transformer,
+			links: [
+				loggerLink({
+					enabled: opts =>
+						process.env.NODE_ENV === 'development' ||
+						(opts.direction === 'down' && opts.result instanceof Error),
+				}),
+				httpBatchLink({
+					url: `${baseUrl.get({
+						prodBaseUrl: env.NEXT_PUBLIC_APP_BASE_URL,
+						devPort: env.NEXT_PUBLIC_APP_DEV_PORT,
+					})}/api/trpc`,
+				}),
+			],
+		};
+	},
+	ssr: false,
 });
 
 /**

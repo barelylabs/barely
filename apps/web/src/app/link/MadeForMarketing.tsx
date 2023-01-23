@@ -2,7 +2,7 @@ import { FaLink } from 'react-icons/fa';
 
 import { MdPrivacyTip } from 'react-icons/md';
 import { BsClipboardCheck, BsFillPinMapFill } from 'react-icons/bs';
-import { Tooltip } from '@barely/ui';
+import { Tooltip } from '@barely/ui/src/Tooltip';
 
 const features = [
 	{

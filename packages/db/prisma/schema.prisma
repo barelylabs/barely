@@ -1014,6 +1014,105 @@ model Task {
   @@index([storyId])
 }
 
+// chat
+// model ChatChannel {
+//   id          String    @id @default(cuid())
+//   createdAt   DateTime  @default(now())
+//   name        String
+//   description String?
+//   // creator
+//   owner       User      @relation(fields: [ownerId], references: [id])
+//   ownerId     String
+//   // members
+//   members     ChatMember[]
+//   // messages
+//   messages    ChatMessage[]
+//   // campaigns
+//   campaigns   Campaign[]
+
+//   @@index([ownerId])
+// }
+
+// model ChatThread {
+//   id          String    @id @default(cuid())
+//   createdAt   DateTime  @default(now())
+//   name        String
+//   description String?
+//   // creator
+//   owner       User      @relation(fields: [ownerId], references: [id])
+//   ownerId     String
+//   // members
+//   members     ChatMember[]
+//   // messages
+//   messages    ChatMessage[]
+//   // campaigns
+//   campaigns   Campaign[]
+
+//   @@index([ownerId])
+// }
+
+// model ChatMember {
+//   id          String    @id @default(cuid())
+//   createdAt   DateTime  @default(now())
+//   // member
+//   user        User      @relation(fields: [userId], references: [id])
+//   userId      String
+//   // channel
+//   channel     ChatChannel? @relation(fields: [channelId], references: [id])
+//   channelId   String?
+//   // thread
+//   thread      ChatThread? @relation(fields: [threadId], references: [id])
+//   threadId    String?
+//   // campaigns
+//   campaigns   Campaign[]
+
+//   @@index([userId])
+//   @@index([channelId])
+//   @@index([threadId])
+// }
+
+// model ChatMessage {
+//   id          String    @id @default(cuid())
+//   createdAt   DateTime  @default(now())
+//   text        String
+//   // sender
+//   user        User      @relation(fields: [userId], references: [id])
+//   userId      String
+//   // channel
+//   channel     ChatChannel? @relation(fields: [channelId], references: [id])
+//   channelId   String?
+//   // thread
+//   thread      ChatThread? @relation(fields: [threadId], references: [id])
+//   threadId    String?
+//   // campaigns
+//   campaigns   Campaign[]
+
+//   @@index([userId])
+//   @@index([channelId])
+//   @@index([threadId])
+// }
+
+// model ChatMessage {
+//   id          String    @id @default(cuid())
+//   createdAt   DateTime  @default(now())
+//   text        String
+//   // sender
+//   user        User      @relation(fields: [userId], references: [id])
+//   userId      String
+//   // channel
+//   channel     ChatChannel? @relation(fields: [channelId], references: [id])
+//   channelId   String?
+//   // thread
+//   thread      ChatThread? @relation(fields: [threadId], references: [id])
+//   threadId    String?
+//   // campaigns
+//   campaigns   Campaign[]
+
+//   @@index([userId])
+//   @@index([channelId])
+//   @@index([threadId])
+// }
+
 // assets
 model Track {
   id           String         @id @default(cuid())
@@ -1450,6 +1549,17 @@ model User {
   playlists            Playlist[]
   playlistCoverRenders PlaylistCoverRender[]
   vidRenders           VidRender[]
+
+  loginTokens LoginToken[]
+}
+
+model LoginToken {
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  token     String   @id
+  expiresAt DateTime
+
+  @@index([userId])
 }
 
 model VerificationToken {

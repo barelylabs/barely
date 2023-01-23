@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { hash, zFetch, _zod } from '@barely/utils';
+import { hash, zFetch, _zod } from '@barely/utils/edge';
 import { geoSchema } from '../../../packages/schema/next';
 
 interface MetaEventProps {

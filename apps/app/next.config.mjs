@@ -1,3 +1,6 @@
+import * as dotenv from 'dotenv';
+dotenv.config({ path: '../../.env' });
+
 /** @type {import("next").NextConfig} */
 const config = {
 	reactStrictMode: true,
@@ -6,8 +9,10 @@ const config = {
 		'@barely/auth',
 		'@barely/config',
 		'@barely/db',
+		'@barely/env',
 		'@barely/schema',
 		'@barely/spotify',
+		'@barely/ui',
 		'@barely/utils',
 	],
 	experimental: {

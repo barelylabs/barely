@@ -1,5 +1,5 @@
 //https://developer.spotify.com/documentation/ios/guides/token-swap-and-refresh/
-import { zFetch } from '@barely/utils';
+import { zFetch } from '@barely/utils/edge';
 import { z } from 'zod';
 
 export const refreshAccessToken = async (refreshToken: string) => {

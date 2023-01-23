@@ -1,7 +1,9 @@
 'use client';
+// import * as HeadlessTooltip from '@radix-ui/react-tooltip';
 
-import { TooltipProvider as TtProvider } from '@barely/ui';
+import { HeadlessTooltipProvider } from '@barely/ui/src/Tooltip';
 import { ReactNode } from 'react';
 export const TooltipProvider = ({ children }: { children: ReactNode }) => (
-	<TtProvider>{children}</TtProvider>
+	<HeadlessTooltipProvider>{children}</HeadlessTooltipProvider>
+	// <HeadlessTooltip.Provider delayDuration={10}>{children}</HeadlessTooltip.Provider>
 );

@@ -51,6 +51,7 @@ export { transactionSchema, transactionCreateSchema, transactionUpdateSchema } f
 export { accountSchema, accountCreateSchema, accountUpdateSchema } from "./account"
 export { sessionSchema, sessionCreateSchema, sessionUpdateSchema } from "./session"
 export { userSchema, userCreateSchema, userUpdateSchema } from "./user"
+export { loginTokenSchema, loginTokenCreateSchema, loginTokenUpdateSchema } from "./logintoken"
 export { verificationTokenSchema, verificationTokenCreateSchema, verificationTokenUpdateSchema } from "./verificationtoken"
 export { artistUserRoleOptionSchema } from "./artistuserroleoption"
 export { appTypeSchema } from "./apptype"

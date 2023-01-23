@@ -1,5 +1,5 @@
 import { router, publicProcedure, privateProcedure } from '../trpc';
-import { formResponseCreateSchema } from '../../../schema/db/formresponse';
+import { formResponseCreateSchema } from '@barely/schema/db/formresponse';
 
 export const formResponseRouter = router({
 	create: publicProcedure

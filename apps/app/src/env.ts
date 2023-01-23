@@ -1,6 +1,13 @@
-import { zEnv } from '@barely/utils';
-import { envSchema } from '@barely/schema';
+import { clientEnvAllSchema, serverEnvAllSchema, zEnv } from '@barely/env';
 
-const env = zEnv({ env: process.env, schema: envSchema });
+const serverEnvSchema = serverEnvAllSchema;
+
+const clientEnvSchema = clientEnvAllSchema.pick({
+	NEXT_PUBLIC_APP_BASE_URL: true,
+	NEXT_PUBLIC_APP_DEV_PORT: true,
+	NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY: true,
+});
+
+const env = zEnv({ clientEnvSchema, serverEnvSchema });
 
 export default env;

@@ -1,8 +1,3 @@
-export * from './Button';
-export * from './Heading';
-export * from './Icon';
-export * from './Modal';
-
-export * from './Cards';
-export * from './Tooltip';
-export * from './Timelines';
+export * as Button from './Button';
+export * as ButtonOrLink from './ButtonOrLink';
+export * as Tooltip from './Tooltip';

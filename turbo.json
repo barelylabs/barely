@@ -39,14 +39,5 @@
 			"cache": false
 		}
 	},
-	"globalEnv": [
-		"DATABASE_URL",
-		"US_EAST_1_HOSTNAME",
-		"US_EAST_1_USERNAME",
-		"US_EAST_1_PASSWORD",
-		"NEXTAUTH_SECRET",
-		"NEXTAUTH_URL",
-		"DISCORD_CLIENT_ID",
-		"DISCORD_CLIENT_SECRET"
-	]
+	"globalDependencies": [".env"]
 }

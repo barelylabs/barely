@@ -7,6 +7,5 @@ export * as geoLocation from './geoLocation';
 export * as hash from './hash';
 export * as visitorSession from './visitorSession';
 
-export * from './zEnv';
 export * as zFetch from './zFetch';
 export * as _zod from './_zod';
