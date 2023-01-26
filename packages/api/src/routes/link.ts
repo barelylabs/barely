@@ -24,17 +24,15 @@ export const linkRouter = router({
 	getAll: publicProcedure.query(({ ctx }) => {
 		return ctx.prisma.link.findMany({ take: 10 });
 	}),
-	getByArtistId: privateProcedure
+	getByUserId: privateProcedure
 		.input(z.array(z.string()).optional())
 		.query(({ ctx, input }) => {
 			return ctx.prisma.link.findMany({
-				where: input?.length
-					? { artistId: { in: input } }
-					: {
-							artist: { ownerId: ctx.user.id } || {
-								userRoles: { some: { user: { id: ctx.user.id } } },
-							},
-					  },
+				where: input?.length ? { userId: { in: input } } : { userId: ctx.user.id }, //todo fix this. get links for anyone this user is a collaborator with
+				// artist: { ownerId: ctx.user.id } || {
+				// 	userRoles: { some: { user: { id: ctx.user.id } } },
+				// },
+				// },
 				include: {
 					_count: { select: { events: { where: { type: 'linkClick' } } } },
 				},

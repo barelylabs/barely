@@ -1,12 +1,12 @@
 import * as z from "zod"
-import { ArtistRelations, artistRelationsSchema, artistBaseSchema } from "./artist"
+import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
 import { BioButtonRelations, bioButtonRelationsSchema, bioButtonBaseSchema } from "./biobutton"
 import { LinkRelations, linkRelationsSchema, linkBaseSchema } from "./link"
 import { FormRelations, formRelationsSchema, formBaseSchema } from "./form"
 
 export const buttonBaseSchema = z.object({
   id: z.string(),
-  artistId: z.string(),
+  userId: z.string(),
   text: z.string().nullable(),
   buttonColor: z.string().nullable(),
   textColor: z.string().nullable(),
@@ -17,7 +17,7 @@ export const buttonBaseSchema = z.object({
 })
 
 export interface ButtonRelations {
-  artist: z.infer<typeof artistBaseSchema> & ArtistRelations
+  user: z.infer<typeof userBaseSchema> & UserRelations
   bios: (z.infer<typeof bioButtonBaseSchema> & BioButtonRelations)[]
   link: (z.infer<typeof linkBaseSchema> & LinkRelations) | null
   form: (z.infer<typeof formBaseSchema> & FormRelations) | null
@@ -26,7 +26,7 @@ export interface ButtonRelations {
 export const buttonRelationsSchema: z.ZodObject<{
   [K in keyof ButtonRelations]: z.ZodType<ButtonRelations[K]>
 }> = z.object({
-  artist: z.lazy(() => artistBaseSchema.merge(artistRelationsSchema)),
+  user: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
   bios: z.lazy(() => bioButtonBaseSchema.merge(bioButtonRelationsSchema)).array(),
   link: z.lazy(() => linkBaseSchema.merge(linkRelationsSchema)).nullable(),
   form: z.lazy(() => formBaseSchema.merge(formRelationsSchema)).nullable(),
@@ -46,7 +46,7 @@ export const buttonCreateSchema = buttonBaseSchema
     phone: buttonBaseSchema.shape.phone.unwrap(),
   }).partial({
     id: true,
-    artistId: true,
+    userId: true,
     text: true,
     buttonColor: true,
     textColor: true,

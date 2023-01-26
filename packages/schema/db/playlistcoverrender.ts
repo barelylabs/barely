@@ -1,8 +1,7 @@
 import * as z from "zod"
 import { FileRelations, fileRelationsSchema, fileBaseSchema } from "./file"
+import { PlaylistRelations, playlistRelationsSchema, playlistBaseSchema } from "./playlist"
 import { AdCampaignRelations, adCampaignRelationsSchema, adCampaignBaseSchema } from "./adcampaign"
-import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
-import { ArtistRelations, artistRelationsSchema, artistBaseSchema } from "./artist"
 
 export const playlistCoverRenderBaseSchema = z.object({
   id: z.string(),
@@ -21,24 +20,24 @@ export const playlistCoverRenderBaseSchema = z.object({
   textShiftY: z.number().int(),
   logo: z.boolean(),
   logoColor: z.string(),
+  renderedCoverId: z.string().nullable(),
+  playlistId: z.string(),
   renderedPlaylistCoverId: z.string().nullable(),
-  userId: z.string(),
+  userId: z.string().nullable(),
 })
 
 export interface PlaylistCoverRenderRelations {
-  renderedPlaylistCover: (z.infer<typeof fileBaseSchema> & FileRelations) | null
-  testForAdCampaigns: (z.infer<typeof adCampaignBaseSchema> & AdCampaignRelations)[]
-  user: z.infer<typeof userBaseSchema> & UserRelations
-  artists: (z.infer<typeof artistBaseSchema> & ArtistRelations)[]
+  renderedCover: (z.infer<typeof fileBaseSchema> & FileRelations) | null
+  playlist: z.infer<typeof playlistBaseSchema> & PlaylistRelations
+  adCampaigns: (z.infer<typeof adCampaignBaseSchema> & AdCampaignRelations)[]
 }
 
 export const playlistCoverRenderRelationsSchema: z.ZodObject<{
   [K in keyof PlaylistCoverRenderRelations]: z.ZodType<PlaylistCoverRenderRelations[K]>
 }> = z.object({
-  renderedPlaylistCover: z.lazy(() => fileBaseSchema.merge(fileRelationsSchema)).nullable(),
-  testForAdCampaigns: z.lazy(() => adCampaignBaseSchema.merge(adCampaignRelationsSchema)).array(),
-  user: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
-  artists: z.lazy(() => artistBaseSchema.merge(artistRelationsSchema)).array(),
+  renderedCover: z.lazy(() => fileBaseSchema.merge(fileRelationsSchema)).nullable(),
+  playlist: z.lazy(() => playlistBaseSchema.merge(playlistRelationsSchema)),
+  adCampaigns: z.lazy(() => adCampaignBaseSchema.merge(adCampaignRelationsSchema)).array(),
 })
 
 export const playlistCoverRenderSchema = playlistCoverRenderBaseSchema
@@ -47,7 +46,9 @@ export const playlistCoverRenderSchema = playlistCoverRenderBaseSchema
 export const playlistCoverRenderCreateSchema = playlistCoverRenderBaseSchema
   .extend({
     name: playlistCoverRenderBaseSchema.shape.name.unwrap(),
+    renderedCoverId: playlistCoverRenderBaseSchema.shape.renderedCoverId.unwrap(),
     renderedPlaylistCoverId: playlistCoverRenderBaseSchema.shape.renderedPlaylistCoverId.unwrap(),
+    userId: playlistCoverRenderBaseSchema.shape.userId.unwrap(),
   }).partial({
     id: true,
     name: true,
@@ -57,17 +58,20 @@ export const playlistCoverRenderCreateSchema = playlistCoverRenderBaseSchema
     textShiftX: true,
     textShiftY: true,
     logoColor: true,
-    renderedPlaylistCover: true,
+    renderedCover: true,
+    renderedCoverId: true,
+    playlistId: true,
+    adCampaigns: true,
     renderedPlaylistCoverId: true,
-    testForAdCampaigns: true,
     userId: true,
-    artists: true,
   })
 
 export const playlistCoverRenderUpdateSchema = playlistCoverRenderBaseSchema
   .extend({
     name: playlistCoverRenderBaseSchema.shape.name.unwrap(),
+    renderedCoverId: playlistCoverRenderBaseSchema.shape.renderedCoverId.unwrap(),
     renderedPlaylistCoverId: playlistCoverRenderBaseSchema.shape.renderedPlaylistCoverId.unwrap(),
+    userId: playlistCoverRenderBaseSchema.shape.userId.unwrap(),
   })
   .partial()
   

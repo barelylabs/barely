@@ -9,7 +9,7 @@ import { linkAnalyticsSchema } from '@barely/schema/analytics/link';
 const analytics = async (req: NextApiRequest, res: NextApiResponse) => {
 	const {
 		linkId,
-		artistId,
+		userId,
 		url,
 		// visitor info
 		ip,
@@ -28,6 +28,7 @@ const analytics = async (req: NextApiRequest, res: NextApiResponse) => {
 	} = linkAnalyticsSchema.parse(req.body);
 
 	//* ⏲ create session *//
+
 	const visitorSession = await prisma.visitorSession.create({
 		data: {
 			ip,
@@ -58,12 +59,13 @@ const analytics = async (req: NextApiRequest, res: NextApiResponse) => {
 	});
 
 	//* 📊 report event to analytics *//
-	const artist = await prisma.artist.findFirst({
-		where: { id: artistId },
-		select: { analytics: { select: { analyticsEndpoint: true } } },
+	const user = await prisma.user.findFirst({
+		where: { id: userId },
+		select: { analyticsEndpoints: true },
 	});
-	const analyticsEndpoints = artist ? artist.analytics.map(a => a.analyticsEndpoint) : [];
-	if (!analyticsEndpoints.length) return;
+	const analyticsEndpoints = user?.analyticsEndpoints;
+	// const analyticsEndpoints = user ? user.analyticsEndpoints.map(a => a.analyticsEndpoint) : [];
+	if (!analyticsEndpoints) return;
 
 	const eventReports: Omit<EventReport, 'createdAt'>[] = [];
 

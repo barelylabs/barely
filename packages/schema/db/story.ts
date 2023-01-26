@@ -1,9 +1,7 @@
 import * as z from "zod"
-import { storyStageIdSchema } from "./storystageid"
 import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
-import { ArtistRelations, artistRelationsSchema, artistBaseSchema } from "./artist"
 import { EpicRelations, epicRelationsSchema, epicBaseSchema } from "./epic"
-import { StoryStageRelations, storyStageRelationsSchema, storyStageBaseSchema } from "./storystage"
+import { StoryColumnRelations, storyColumnRelationsSchema, storyColumnBaseSchema } from "./storycolumn"
 import { StoryUpdateRecordRelations, storyUpdateRecordRelationsSchema, storyUpdateRecordBaseSchema } from "./storyupdaterecord"
 import { TaskRelations, taskRelationsSchema, taskBaseSchema } from "./task"
 
@@ -15,30 +13,33 @@ export const storyBaseSchema = z.object({
   dueDate: z.date().nullable(),
   lexoRank: z.string(),
   priority: z.string().nullable(),
-  userId: z.string(),
-  artistId: z.string().nullable(),
+  createdById: z.string(),
+  assignedToId: z.string().nullable(),
+  forUserId: z.string().nullable(),
   epicId: z.string().nullable(),
-  stageId: storyStageIdSchema,
+  columnId: z.string(),
 })
 
 export interface StoryRelations {
-  user: z.infer<typeof userBaseSchema> & UserRelations
-  artist: (z.infer<typeof artistBaseSchema> & ArtistRelations) | null
+  createdBy: z.infer<typeof userBaseSchema> & UserRelations
+  assignedTo: (z.infer<typeof userBaseSchema> & UserRelations) | null
+  forUser: (z.infer<typeof userBaseSchema> & UserRelations) | null
   epic: (z.infer<typeof epicBaseSchema> & EpicRelations) | null
-  stage: z.infer<typeof storyStageBaseSchema> & StoryStageRelations
+  column: z.infer<typeof storyColumnBaseSchema> & StoryColumnRelations
   update: (z.infer<typeof storyUpdateRecordBaseSchema> & StoryUpdateRecordRelations)[]
-  Task: (z.infer<typeof taskBaseSchema> & TaskRelations)[]
+  tasks: (z.infer<typeof taskBaseSchema> & TaskRelations)[]
 }
 
 export const storyRelationsSchema: z.ZodObject<{
   [K in keyof StoryRelations]: z.ZodType<StoryRelations[K]>
 }> = z.object({
-  user: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
-  artist: z.lazy(() => artistBaseSchema.merge(artistRelationsSchema)).nullable(),
+  createdBy: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
+  assignedTo: z.lazy(() => userBaseSchema.merge(userRelationsSchema)).nullable(),
+  forUser: z.lazy(() => userBaseSchema.merge(userRelationsSchema)).nullable(),
   epic: z.lazy(() => epicBaseSchema.merge(epicRelationsSchema)).nullable(),
-  stage: z.lazy(() => storyStageBaseSchema.merge(storyStageRelationsSchema)),
+  column: z.lazy(() => storyColumnBaseSchema.merge(storyColumnRelationsSchema)),
   update: z.lazy(() => storyUpdateRecordBaseSchema.merge(storyUpdateRecordRelationsSchema)).array(),
-  Task: z.lazy(() => taskBaseSchema.merge(taskRelationsSchema)).array(),
+  tasks: z.lazy(() => taskBaseSchema.merge(taskRelationsSchema)).array(),
 })
 
 export const storySchema = storyBaseSchema
@@ -50,7 +51,8 @@ export const storyCreateSchema = storyBaseSchema
     description: storyBaseSchema.shape.description.unwrap(),
     dueDate: storyBaseSchema.shape.dueDate.unwrap(),
     priority: storyBaseSchema.shape.priority.unwrap(),
-    artistId: storyBaseSchema.shape.artistId.unwrap(),
+    assignedToId: storyBaseSchema.shape.assignedToId.unwrap(),
+    forUserId: storyBaseSchema.shape.forUserId.unwrap(),
     epicId: storyBaseSchema.shape.epicId.unwrap(),
   }).partial({
     id: true,
@@ -59,14 +61,16 @@ export const storyCreateSchema = storyBaseSchema
     description: true,
     dueDate: true,
     priority: true,
-    userId: true,
-    artist: true,
-    artistId: true,
+    createdById: true,
+    assignedTo: true,
+    assignedToId: true,
+    forUser: true,
+    forUserId: true,
     epic: true,
     epicId: true,
-    stageId: true,
+    columnId: true,
     update: true,
-    Task: true,
+    tasks: true,
   })
 
 export const storyUpdateSchema = storyBaseSchema
@@ -75,7 +79,8 @@ export const storyUpdateSchema = storyBaseSchema
     description: storyBaseSchema.shape.description.unwrap(),
     dueDate: storyBaseSchema.shape.dueDate.unwrap(),
     priority: storyBaseSchema.shape.priority.unwrap(),
-    artistId: storyBaseSchema.shape.artistId.unwrap(),
+    assignedToId: storyBaseSchema.shape.assignedToId.unwrap(),
+    forUserId: storyBaseSchema.shape.forUserId.unwrap(),
     epicId: storyBaseSchema.shape.epicId.unwrap(),
   })
   .partial()

@@ -32,7 +32,7 @@ export async function middleware(req: NextRequest) {
 
 	const link = await edgeDb
 		.selectFrom('Link')
-		.select(['id', 'url', 'androidScheme', 'appleScheme', 'artistId'])
+		.select(['id', 'url', 'androidScheme', 'appleScheme', 'userId'])
 		.where('handle', '=', handle)
 		.where('slug', eqOrIs(slug), slug)
 		.where('app', eqOrIs(app), app)
@@ -50,7 +50,7 @@ export async function middleware(req: NextRequest) {
 
 	const analyticsInput = {
 		linkId: link.id,
-		artistId: link.artistId,
+		userId: link.userId,
 		url: req.nextUrl.href,
 		// visitor info
 		ip: isLocal ? process.env.VISITOR_IP : ip ?? '',

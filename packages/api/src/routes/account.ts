@@ -1,15 +1,15 @@
 import { router, privateProcedure } from '../trpc';
 import { z } from 'zod';
 
-import { accountTypeSchema, accountProviderSchema } from '@barely/schema/db';
+import { accountPlatformSchema, oAuthProviderSchema } from '@barely/schema/db';
 
 export const accountRouter = router({
 	getByUser: privateProcedure
 		.input(
 			z
 				.object({
-					type: accountTypeSchema.array().optional(),
-					provider: accountProviderSchema.array().optional(),
+					type: accountPlatformSchema.array().optional(),
+					provider: oAuthProviderSchema.array().optional(),
 				})
 				.optional(),
 		)

@@ -3,7 +3,8 @@ import { zFetch } from '@barely/utils/edge';
 import { accountBaseSchema } from '@barely/schema/db/account';
 
 const spotifySearchSchema = z.object({
-	account: accountBaseSchema,
+	// account: accountBaseSchema,
+	accessToken: z.string(),
 	query: z.string().min(2),
 	types: z.array(z.enum(['artist', 'album', 'track', 'playlist'])).optional(),
 	limit: z.number().min(1).max(50).optional(),
@@ -15,7 +16,8 @@ export const search = async (props: z.infer<typeof spotifySearchSchema>) => {
 	const limit = props.limit ?? 20;
 
 	const endpoint = `https://api.spotify.com/v1/search?q=${query}&type=${types}&limit=${limit}`;
-	const authorization = `Bearer ${props.account.access_token}`;
+	const authorization = `Bearer ${props.accessToken}`;
+	// const authorization = '';
 	const searchResponse = await zFetch.get({
 		endpoint,
 		authorization,

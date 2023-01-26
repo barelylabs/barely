@@ -3,7 +3,7 @@ import { formPlatformSchema } from "./formplatform"
 import { EventRelations, eventRelationsSchema, eventBaseSchema } from "./event"
 import { ButtonRelations, buttonRelationsSchema, buttonBaseSchema } from "./button"
 import { FormResponseRelations, formResponseRelationsSchema, formResponseBaseSchema } from "./formresponse"
-import { ArtistRelations, artistRelationsSchema, artistBaseSchema } from "./artist"
+import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
 
 export const formBaseSchema = z.object({
   id: z.string(),
@@ -17,6 +17,7 @@ export const formBaseSchema = z.object({
   inputEmail: z.boolean(),
   inputPhone: z.boolean(),
   inputMessage: z.boolean(),
+  userId: z.string(),
   artistId: z.string().nullable(),
 })
 
@@ -24,7 +25,7 @@ export interface FormRelations {
   events: (z.infer<typeof eventBaseSchema> & EventRelations)[]
   buttons: (z.infer<typeof buttonBaseSchema> & ButtonRelations)[]
   responses: (z.infer<typeof formResponseBaseSchema> & FormResponseRelations)[]
-  artist: (z.infer<typeof artistBaseSchema> & ArtistRelations) | null
+  user: z.infer<typeof userBaseSchema> & UserRelations
 }
 
 export const formRelationsSchema: z.ZodObject<{
@@ -33,7 +34,7 @@ export const formRelationsSchema: z.ZodObject<{
   events: z.lazy(() => eventBaseSchema.merge(eventRelationsSchema)).array(),
   buttons: z.lazy(() => buttonBaseSchema.merge(buttonRelationsSchema)).array(),
   responses: z.lazy(() => formResponseBaseSchema.merge(formResponseRelationsSchema)).array(),
-  artist: z.lazy(() => artistBaseSchema.merge(artistRelationsSchema)).nullable(),
+  user: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
 })
 
 export const formSchema = formBaseSchema
@@ -53,7 +54,7 @@ export const formCreateSchema = formBaseSchema
     events: true,
     buttons: true,
     responses: true,
-    artist: true,
+    userId: true,
     artistId: true,
   })
 

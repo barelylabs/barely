@@ -3,8 +3,8 @@ import { adStatusSchema } from "./adstatus"
 import { AdCampaignRelations, adCampaignRelationsSchema, adCampaignBaseSchema } from "./adcampaign"
 import { AudienceRelations, audienceRelationsSchema, audienceBaseSchema } from "./audience"
 import { AdRelations, adRelationsSchema, adBaseSchema } from "./ad"
-import { UpdateAdSetRelations, updateAdSetRelationsSchema, updateAdSetBaseSchema } from "./updateadset"
-import { CloneAdSetRelations, cloneAdSetRelationsSchema, cloneAdSetBaseSchema } from "./cloneadset"
+import { AdSetUpdateRecordRelations, adSetUpdateRecordRelationsSchema, adSetUpdateRecordBaseSchema } from "./adsetupdaterecord"
+import { AdSetCloneRelations, adSetCloneRelationsSchema, adSetCloneBaseSchema } from "./adsetclone"
 
 export const adSetBaseSchema = z.object({
   id: z.string(),
@@ -29,9 +29,9 @@ export interface AdSetRelations {
   adCampaign: z.infer<typeof adCampaignBaseSchema> & AdCampaignRelations
   audience: z.infer<typeof audienceBaseSchema> & AudienceRelations
   ads: (z.infer<typeof adBaseSchema> & AdRelations)[]
-  updates: (z.infer<typeof updateAdSetBaseSchema> & UpdateAdSetRelations)[]
-  parentAdSetForClone: (z.infer<typeof cloneAdSetBaseSchema> & CloneAdSetRelations)[]
-  childAdSetFromClone: (z.infer<typeof cloneAdSetBaseSchema> & CloneAdSetRelations)[]
+  updates: (z.infer<typeof adSetUpdateRecordBaseSchema> & AdSetUpdateRecordRelations)[]
+  parentAdSetForClone: (z.infer<typeof adSetCloneBaseSchema> & AdSetCloneRelations)[]
+  childAdSetFromClone: (z.infer<typeof adSetCloneBaseSchema> & AdSetCloneRelations)[]
 }
 
 export const adSetRelationsSchema: z.ZodObject<{
@@ -40,9 +40,9 @@ export const adSetRelationsSchema: z.ZodObject<{
   adCampaign: z.lazy(() => adCampaignBaseSchema.merge(adCampaignRelationsSchema)),
   audience: z.lazy(() => audienceBaseSchema.merge(audienceRelationsSchema)),
   ads: z.lazy(() => adBaseSchema.merge(adRelationsSchema)).array(),
-  updates: z.lazy(() => updateAdSetBaseSchema.merge(updateAdSetRelationsSchema)).array(),
-  parentAdSetForClone: z.lazy(() => cloneAdSetBaseSchema.merge(cloneAdSetRelationsSchema)).array(),
-  childAdSetFromClone: z.lazy(() => cloneAdSetBaseSchema.merge(cloneAdSetRelationsSchema)).array(),
+  updates: z.lazy(() => adSetUpdateRecordBaseSchema.merge(adSetUpdateRecordRelationsSchema)).array(),
+  parentAdSetForClone: z.lazy(() => adSetCloneBaseSchema.merge(adSetCloneRelationsSchema)).array(),
+  childAdSetFromClone: z.lazy(() => adSetCloneBaseSchema.merge(adSetCloneRelationsSchema)).array(),
 })
 
 export const adSetSchema = adSetBaseSchema

@@ -1,9 +1,8 @@
-import env from '@barely/env';
-
 import { render as reactEmailRender } from '@react-email/render';
+import env from '../env';
 
-const sendgrid = require('@sendgrid/mail');
-sendgrid.setApiKey(env.SENDGRID_API_KEY);
+import * as Postmark from 'postmark';
+const postmark = new Postmark.ServerClient(env.POSTMARK_SERVER_API_TOKEN);
 
 interface SendEmailProps {
 	to: string;
@@ -15,16 +14,19 @@ interface SendEmailProps {
 }
 
 export async function send(props: SendEmailProps) {
-	const options = {
-		to: props.to,
-		from: props.from,
-		subject: props.subject,
-		text: props.text,
-		html: props.html,
-	};
+	const { to, from, subject, text, html, type } = props;
 
 	try {
-		await sendgrid.send(options);
+		const postmarkResponse = await postmark.sendEmail({
+			To: to,
+			From: from,
+			Subject: subject,
+			TextBody: text,
+			HtmlBody: html,
+		});
+
+		console.log('postmarkResponse => ', postmarkResponse);
+		return postmarkResponse;
 	} catch (error) {
 		console.error(error);
 	}

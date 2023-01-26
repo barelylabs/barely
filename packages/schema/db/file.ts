@@ -1,23 +1,22 @@
 import * as z from "zod"
 import { fileTypeSchema } from "./filetype"
 import { fileExtensionSchema } from "./fileextension"
-import { ArtistRelations, artistRelationsSchema, artistBaseSchema } from "./artist"
+import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
 import { TrackRelations, trackRelationsSchema, trackBaseSchema } from "./track"
 import { PlaylistRelations, playlistRelationsSchema, playlistBaseSchema } from "./playlist"
 import { PlaylistCoverRenderRelations, playlistCoverRenderRelationsSchema, playlistCoverRenderBaseSchema } from "./playlistcoverrender"
 import { VidRenderRelations, vidRenderRelationsSchema, vidRenderBaseSchema } from "./vidrender"
 import { AdCreativeRelations, adCreativeRelationsSchema, adCreativeBaseSchema } from "./adcreative"
 import { VidViewsGroupRelations, vidViewsGroupRelationsSchema, vidViewsGroupBaseSchema } from "./vidviewsgroup"
-import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
 
 export const fileBaseSchema = z.object({
   id: z.string(),
+  ownerId: z.string(),
   createdAt: z.date(),
   type: fileTypeSchema,
   name: z.string(),
   extension: fileExtensionSchema,
   description: z.string().nullable(),
-  artistId: z.string().nullable(),
   url: z.string(),
   size: z.number().int(),
   width: z.number().int().nullable(),
@@ -28,11 +27,10 @@ export const fileBaseSchema = z.object({
   metaId: z.string().nullable(),
   vidForTrackId: z.string().nullable(),
   thumbnailForId: z.string().nullable(),
-  userId: z.string(),
 })
 
 export interface FileRelations {
-  artist: (z.infer<typeof artistBaseSchema> & ArtistRelations) | null
+  owner: (z.infer<typeof userBaseSchema> & UserRelations) | null
   vidForTrack: (z.infer<typeof trackBaseSchema> & TrackRelations) | null
   masterMp3ForTrack: (z.infer<typeof trackBaseSchema> & TrackRelations) | null
   masterWavForTrack: (z.infer<typeof trackBaseSchema> & TrackRelations) | null
@@ -44,13 +42,12 @@ export interface FileRelations {
   parentVidForVidRenders: (z.infer<typeof vidRenderBaseSchema> & VidRenderRelations)[]
   adCreatives: (z.infer<typeof adCreativeBaseSchema> & AdCreativeRelations)[]
   vidViewsGroups: (z.infer<typeof vidViewsGroupBaseSchema> & VidViewsGroupRelations)[]
-  user: z.infer<typeof userBaseSchema> & UserRelations
 }
 
 export const fileRelationsSchema: z.ZodObject<{
   [K in keyof FileRelations]: z.ZodType<FileRelations[K]>
 }> = z.object({
-  artist: z.lazy(() => artistBaseSchema.merge(artistRelationsSchema)).nullable(),
+  owner: z.lazy(() => userBaseSchema.merge(userRelationsSchema)).nullable(),
   vidForTrack: z.lazy(() => trackBaseSchema.merge(trackRelationsSchema)).nullable(),
   masterMp3ForTrack: z.lazy(() => trackBaseSchema.merge(trackRelationsSchema)).nullable(),
   masterWavForTrack: z.lazy(() => trackBaseSchema.merge(trackRelationsSchema)).nullable(),
@@ -62,7 +59,6 @@ export const fileRelationsSchema: z.ZodObject<{
   parentVidForVidRenders: z.lazy(() => vidRenderBaseSchema.merge(vidRenderRelationsSchema)).array(),
   adCreatives: z.lazy(() => adCreativeBaseSchema.merge(adCreativeRelationsSchema)).array(),
   vidViewsGroups: z.lazy(() => vidViewsGroupBaseSchema.merge(vidViewsGroupRelationsSchema)).array(),
-  user: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
 })
 
 export const fileSchema = fileBaseSchema
@@ -71,7 +67,6 @@ export const fileSchema = fileBaseSchema
 export const fileCreateSchema = fileBaseSchema
   .extend({
     description: fileBaseSchema.shape.description.unwrap(),
-    artistId: fileBaseSchema.shape.artistId.unwrap(),
     width: fileBaseSchema.shape.width.unwrap(),
     height: fileBaseSchema.shape.height.unwrap(),
     fps: fileBaseSchema.shape.fps.unwrap(),
@@ -81,10 +76,10 @@ export const fileCreateSchema = fileBaseSchema
     thumbnailForId: fileBaseSchema.shape.thumbnailForId.unwrap(),
   }).partial({
     id: true,
+    owner: true,
+    ownerId: true,
     createdAt: true,
     description: true,
-    artist: true,
-    artistId: true,
     width: true,
     height: true,
     fps: true,
@@ -103,13 +98,11 @@ export const fileCreateSchema = fileBaseSchema
     parentVidForVidRenders: true,
     adCreatives: true,
     vidViewsGroups: true,
-    userId: true,
   })
 
 export const fileUpdateSchema = fileBaseSchema
   .extend({
     description: fileBaseSchema.shape.description.unwrap(),
-    artistId: fileBaseSchema.shape.artistId.unwrap(),
     width: fileBaseSchema.shape.width.unwrap(),
     height: fileBaseSchema.shape.height.unwrap(),
     fps: fileBaseSchema.shape.fps.unwrap(),

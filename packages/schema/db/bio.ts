@@ -1,7 +1,7 @@
 import * as z from "zod"
 import { bioImgShapeSchema } from "./bioimgshape"
 import { bioThemeSchema } from "./biotheme"
-import { ArtistRelations, artistRelationsSchema, artistBaseSchema } from "./artist"
+import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
 import { LinkRelations, linkRelationsSchema, linkBaseSchema } from "./link"
 import { EventRelations, eventRelationsSchema, eventBaseSchema } from "./event"
 import { BioButtonRelations, bioButtonRelationsSchema, bioButtonBaseSchema } from "./biobutton"
@@ -9,8 +9,9 @@ import { BioButtonRelations, bioButtonRelationsSchema, bioButtonBaseSchema } fro
 export const bioBaseSchema = z.object({
   id: z.string(),
   createdAt: z.date(),
-  rootForArtistId: z.string().nullable(),
-  artistId: z.string(),
+  userId: z.string(),
+  rootForUserId: z.string().nullable(),
+  handle: z.string(),
   route: z.string().nullable(),
   slug: z.string().nullable(),
   img: z.string().nullable(),
@@ -29,8 +30,8 @@ export const bioBaseSchema = z.object({
 })
 
 export interface BioRelations {
-  rootForArtist: (z.infer<typeof artistBaseSchema> & ArtistRelations) | null
-  artist: z.infer<typeof artistBaseSchema> & ArtistRelations
+  user: z.infer<typeof userBaseSchema> & UserRelations
+  rootForUser: (z.infer<typeof userBaseSchema> & UserRelations) | null
   link: (z.infer<typeof linkBaseSchema> & LinkRelations) | null
   events: (z.infer<typeof eventBaseSchema> & EventRelations)[]
   buttons: (z.infer<typeof bioButtonBaseSchema> & BioButtonRelations)[]
@@ -39,8 +40,8 @@ export interface BioRelations {
 export const bioRelationsSchema: z.ZodObject<{
   [K in keyof BioRelations]: z.ZodType<BioRelations[K]>
 }> = z.object({
-  rootForArtist: z.lazy(() => artistBaseSchema.merge(artistRelationsSchema)).nullable(),
-  artist: z.lazy(() => artistBaseSchema.merge(artistRelationsSchema)),
+  user: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
+  rootForUser: z.lazy(() => userBaseSchema.merge(userRelationsSchema)).nullable(),
   link: z.lazy(() => linkBaseSchema.merge(linkRelationsSchema)).nullable(),
   events: z.lazy(() => eventBaseSchema.merge(eventRelationsSchema)).array(),
   buttons: z.lazy(() => bioButtonBaseSchema.merge(bioButtonRelationsSchema)).array(),
@@ -51,7 +52,7 @@ export const bioSchema = bioBaseSchema
 
 export const bioCreateSchema = bioBaseSchema
   .extend({
-    rootForArtistId: bioBaseSchema.shape.rootForArtistId.unwrap(),
+    rootForUserId: bioBaseSchema.shape.rootForUserId.unwrap(),
     route: bioBaseSchema.shape.route.unwrap(),
     slug: bioBaseSchema.shape.slug.unwrap(),
     img: bioBaseSchema.shape.img.unwrap(),
@@ -67,9 +68,10 @@ export const bioCreateSchema = bioBaseSchema
   }).partial({
     id: true,
     createdAt: true,
-    rootForArtist: true,
-    rootForArtistId: true,
-    artistId: true,
+    userId: true,
+    rootForUser: true,
+    rootForUserId: true,
+    handle: true,
     route: true,
     slug: true,
     link: true,
@@ -90,7 +92,7 @@ export const bioCreateSchema = bioBaseSchema
 
 export const bioUpdateSchema = bioBaseSchema
   .extend({
-    rootForArtistId: bioBaseSchema.shape.rootForArtistId.unwrap(),
+    rootForUserId: bioBaseSchema.shape.rootForUserId.unwrap(),
     route: bioBaseSchema.shape.route.unwrap(),
     slug: bioBaseSchema.shape.slug.unwrap(),
     img: bioBaseSchema.shape.img.unwrap(),

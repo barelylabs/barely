@@ -1,8 +1,8 @@
 import * as z from "zod"
 import { linkDomainSchema } from "./linkdomain"
 import { appTypeSchema } from "./apptype"
-import { ArtistRelations, artistRelationsSchema, artistBaseSchema } from "./artist"
-import { ArtistSocialLinkRelations, artistSocialLinkRelationsSchema, artistSocialLinkBaseSchema } from "./artistsociallink"
+import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
+import { SocialLinkRelations, socialLinkRelationsSchema, socialLinkBaseSchema } from "./sociallink"
 import { TrackAppLinkRelations, trackAppLinkRelationsSchema, trackAppLinkBaseSchema } from "./trackapplink"
 import { PlaylistRelations, playlistRelationsSchema, playlistBaseSchema } from "./playlist"
 import { BioRelations, bioRelationsSchema, bioBaseSchema } from "./bio"
@@ -13,7 +13,7 @@ import { EventRelations, eventRelationsSchema, eventBaseSchema } from "./event"
 export const linkBaseSchema = z.object({
   id: z.string(),
   createdAt: z.date(),
-  artistId: z.string(),
+  userId: z.string(),
   handle: z.string(),
   domain: linkDomainSchema,
   slug: z.string().nullable(),
@@ -37,8 +37,8 @@ export const linkBaseSchema = z.object({
 })
 
 export interface LinkRelations {
-  artist: z.infer<typeof artistBaseSchema> & ArtistRelations
-  artistSocial: (z.infer<typeof artistSocialLinkBaseSchema> & ArtistSocialLinkRelations) | null
+  user: z.infer<typeof userBaseSchema> & UserRelations
+  userSocial: (z.infer<typeof socialLinkBaseSchema> & SocialLinkRelations) | null
   trackApp: (z.infer<typeof trackAppLinkBaseSchema> & TrackAppLinkRelations) | null
   playlist: (z.infer<typeof playlistBaseSchema> & PlaylistRelations) | null
   bio: (z.infer<typeof bioBaseSchema> & BioRelations) | null
@@ -52,8 +52,8 @@ export interface LinkRelations {
 export const linkRelationsSchema: z.ZodObject<{
   [K in keyof LinkRelations]: z.ZodType<LinkRelations[K]>
 }> = z.object({
-  artist: z.lazy(() => artistBaseSchema.merge(artistRelationsSchema)),
-  artistSocial: z.lazy(() => artistSocialLinkBaseSchema.merge(artistSocialLinkRelationsSchema)).nullable(),
+  user: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
+  userSocial: z.lazy(() => socialLinkBaseSchema.merge(socialLinkRelationsSchema)).nullable(),
   trackApp: z.lazy(() => trackAppLinkBaseSchema.merge(trackAppLinkRelationsSchema)).nullable(),
   playlist: z.lazy(() => playlistBaseSchema.merge(playlistRelationsSchema)).nullable(),
   bio: z.lazy(() => bioBaseSchema.merge(bioRelationsSchema)).nullable(),
@@ -89,9 +89,8 @@ export const linkCreateSchema = linkBaseSchema
   }).partial({
     id: true,
     createdAt: true,
-    artistId: true,
-    artistSocial: true,
-    handle: true,
+    userId: true,
+    userSocial: true,
     domain: true,
     slug: true,
     app: true,

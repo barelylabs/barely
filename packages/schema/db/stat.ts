@@ -1,9 +1,9 @@
 import * as z from "zod"
-import { analyticsPlatformSchema } from "./analyticsplatform"
-import { accountTypeSchema } from "./accounttype"
+import { streamingPlatformSchema } from "./streamingplatform"
 import { AdRelations, adRelationsSchema, adBaseSchema } from "./ad"
+import { AccountRelations, accountRelationsSchema, accountBaseSchema } from "./account"
 import { PlaylistRelations, playlistRelationsSchema, playlistBaseSchema } from "./playlist"
-import { ArtistAccountRelations, artistAccountRelationsSchema, artistAccountBaseSchema } from "./artistaccount"
+import { TrackRelations, trackRelationsSchema, trackBaseSchema } from "./track"
 
 export const statBaseSchema = z.object({
   id: z.string(),
@@ -17,33 +17,34 @@ export const statBaseSchema = z.object({
   spend: z.number().nullable(),
   clicks: z.number().int().nullable(),
   impressions: z.number().int().nullable(),
-  view: z.number().int().nullable(),
+  views: z.number().int().nullable(),
   watch25: z.number().int().nullable(),
   watch50: z.number().int().nullable(),
   watch75: z.number().int().nullable(),
   watch95: z.number().int().nullable(),
   watch100: z.number().int().nullable(),
   watch60s: z.number().int().nullable(),
-  platform: analyticsPlatformSchema.nullable(),
   adId: z.string().nullable(),
+  accountId: z.string().nullable(),
   playlistId: z.string().nullable(),
-  artistId: z.string().nullable(),
-  artistAccountType: accountTypeSchema.nullable(),
-  artistAccountId: z.string().nullable(),
+  trackId: z.string().nullable(),
+  streamingPlatform: streamingPlatformSchema.nullable(),
 })
 
 export interface StatRelations {
   ad: (z.infer<typeof adBaseSchema> & AdRelations) | null
+  account: (z.infer<typeof accountBaseSchema> & AccountRelations) | null
   playlist: (z.infer<typeof playlistBaseSchema> & PlaylistRelations) | null
-  artistAccount: (z.infer<typeof artistAccountBaseSchema> & ArtistAccountRelations) | null
+  track: (z.infer<typeof trackBaseSchema> & TrackRelations) | null
 }
 
 export const statRelationsSchema: z.ZodObject<{
   [K in keyof StatRelations]: z.ZodType<StatRelations[K]>
 }> = z.object({
   ad: z.lazy(() => adBaseSchema.merge(adRelationsSchema)).nullable(),
+  account: z.lazy(() => accountBaseSchema.merge(accountRelationsSchema)).nullable(),
   playlist: z.lazy(() => playlistBaseSchema.merge(playlistRelationsSchema)).nullable(),
-  artistAccount: z.lazy(() => artistAccountBaseSchema.merge(artistAccountRelationsSchema)).nullable(),
+  track: z.lazy(() => trackBaseSchema.merge(trackRelationsSchema)).nullable(),
 })
 
 export const statSchema = statBaseSchema
@@ -60,19 +61,18 @@ export const statCreateSchema = statBaseSchema
     spend: statBaseSchema.shape.spend.unwrap(),
     clicks: statBaseSchema.shape.clicks.unwrap(),
     impressions: statBaseSchema.shape.impressions.unwrap(),
-    view: statBaseSchema.shape.view.unwrap(),
+    views: statBaseSchema.shape.views.unwrap(),
     watch25: statBaseSchema.shape.watch25.unwrap(),
     watch50: statBaseSchema.shape.watch50.unwrap(),
     watch75: statBaseSchema.shape.watch75.unwrap(),
     watch95: statBaseSchema.shape.watch95.unwrap(),
     watch100: statBaseSchema.shape.watch100.unwrap(),
     watch60s: statBaseSchema.shape.watch60s.unwrap(),
-    platform: statBaseSchema.shape.platform.unwrap(),
     adId: statBaseSchema.shape.adId.unwrap(),
+    accountId: statBaseSchema.shape.accountId.unwrap(),
     playlistId: statBaseSchema.shape.playlistId.unwrap(),
-    artistId: statBaseSchema.shape.artistId.unwrap(),
-    artistAccountType: statBaseSchema.shape.artistAccountType.unwrap(),
-    artistAccountId: statBaseSchema.shape.artistAccountId.unwrap(),
+    trackId: statBaseSchema.shape.trackId.unwrap(),
+    streamingPlatform: statBaseSchema.shape.streamingPlatform.unwrap(),
   }).partial({
     id: true,
     listeners: true,
@@ -84,22 +84,22 @@ export const statCreateSchema = statBaseSchema
     spend: true,
     clicks: true,
     impressions: true,
-    view: true,
+    views: true,
     watch25: true,
     watch50: true,
     watch75: true,
     watch95: true,
     watch100: true,
     watch60s: true,
-    platform: true,
     ad: true,
     adId: true,
+    account: true,
+    accountId: true,
     playlist: true,
     playlistId: true,
-    artistAccount: true,
-    artistId: true,
-    artistAccountType: true,
-    artistAccountId: true,
+    track: true,
+    trackId: true,
+    streamingPlatform: true,
   })
 
 export const statUpdateSchema = statBaseSchema
@@ -113,19 +113,18 @@ export const statUpdateSchema = statBaseSchema
     spend: statBaseSchema.shape.spend.unwrap(),
     clicks: statBaseSchema.shape.clicks.unwrap(),
     impressions: statBaseSchema.shape.impressions.unwrap(),
-    view: statBaseSchema.shape.view.unwrap(),
+    views: statBaseSchema.shape.views.unwrap(),
     watch25: statBaseSchema.shape.watch25.unwrap(),
     watch50: statBaseSchema.shape.watch50.unwrap(),
     watch75: statBaseSchema.shape.watch75.unwrap(),
     watch95: statBaseSchema.shape.watch95.unwrap(),
     watch100: statBaseSchema.shape.watch100.unwrap(),
     watch60s: statBaseSchema.shape.watch60s.unwrap(),
-    platform: statBaseSchema.shape.platform.unwrap(),
     adId: statBaseSchema.shape.adId.unwrap(),
+    accountId: statBaseSchema.shape.accountId.unwrap(),
     playlistId: statBaseSchema.shape.playlistId.unwrap(),
-    artistId: statBaseSchema.shape.artistId.unwrap(),
-    artistAccountType: statBaseSchema.shape.artistAccountType.unwrap(),
-    artistAccountId: statBaseSchema.shape.artistAccountId.unwrap(),
+    trackId: statBaseSchema.shape.trackId.unwrap(),
+    streamingPlatform: statBaseSchema.shape.streamingPlatform.unwrap(),
   })
   .partial()
   

@@ -1,6 +1,5 @@
 import * as z from "zod"
 import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
-import { ArtistRelations, artistRelationsSchema, artistBaseSchema } from "./artist"
 import { StoryRelations, storyRelationsSchema, storyBaseSchema } from "./story"
 
 export const epicBaseSchema = z.object({
@@ -14,21 +13,24 @@ export const epicBaseSchema = z.object({
   color: z.string().nullable(),
   complete: z.boolean().nullable(),
   lexoRank: z.string(),
-  ownerId: z.string(),
-  artistId: z.string().nullable(),
+  createdById: z.string(),
+  assignedToId: z.string(),
+  forUserId: z.string().nullable(),
 })
 
 export interface EpicRelations {
-  owner: z.infer<typeof userBaseSchema> & UserRelations
-  artist: (z.infer<typeof artistBaseSchema> & ArtistRelations) | null
+  createdBy: z.infer<typeof userBaseSchema> & UserRelations
+  assignedTo: z.infer<typeof userBaseSchema> & UserRelations
+  forUser: (z.infer<typeof userBaseSchema> & UserRelations) | null
   stories: (z.infer<typeof storyBaseSchema> & StoryRelations)[]
 }
 
 export const epicRelationsSchema: z.ZodObject<{
   [K in keyof EpicRelations]: z.ZodType<EpicRelations[K]>
 }> = z.object({
-  owner: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
-  artist: z.lazy(() => artistBaseSchema.merge(artistRelationsSchema)).nullable(),
+  createdBy: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
+  assignedTo: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
+  forUser: z.lazy(() => userBaseSchema.merge(userRelationsSchema)).nullable(),
   stories: z.lazy(() => storyBaseSchema.merge(storyRelationsSchema)).array(),
 })
 
@@ -43,7 +45,7 @@ export const epicCreateSchema = epicBaseSchema
     startDate: epicBaseSchema.shape.startDate.unwrap(),
     color: epicBaseSchema.shape.color.unwrap(),
     complete: epicBaseSchema.shape.complete.unwrap(),
-    artistId: epicBaseSchema.shape.artistId.unwrap(),
+    forUserId: epicBaseSchema.shape.forUserId.unwrap(),
   }).partial({
     id: true,
     createdAt: true,
@@ -53,9 +55,10 @@ export const epicCreateSchema = epicBaseSchema
     startDate: true,
     color: true,
     complete: true,
-    ownerId: true,
-    artist: true,
-    artistId: true,
+    createdById: true,
+    assignedToId: true,
+    forUser: true,
+    forUserId: true,
     stories: true,
   })
 
@@ -67,7 +70,7 @@ export const epicUpdateSchema = epicBaseSchema
     startDate: epicBaseSchema.shape.startDate.unwrap(),
     color: epicBaseSchema.shape.color.unwrap(),
     complete: epicBaseSchema.shape.complete.unwrap(),
-    artistId: epicBaseSchema.shape.artistId.unwrap(),
+    forUserId: epicBaseSchema.shape.forUserId.unwrap(),
   })
   .partial()
   

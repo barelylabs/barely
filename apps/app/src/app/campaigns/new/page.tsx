@@ -45,11 +45,14 @@ const NewCampaignPage = () => {
 
 	// db artist
 	const artistSpotifyId = selectedTrack?.artists[0]?.id ?? '';
-	const { data: artist } = trpc.artist.bySpotifyId.useQuery(artistSpotifyId, {
-		enabled: !!selectedTrack,
-		// staleTime: 1000 * 60 * 5, // 5 minutes
-		cacheTime: 1000 * 60 * 5, // 5 minutes
-	});
+	const { data: artist } = trpc.user.bySpotifyId.useQuery(
+		{ spotifyId: artistSpotifyId },
+		{
+			enabled: !!selectedTrack,
+			// staleTime: 1000 * 60 * 5, // 5 minutes
+			cacheTime: 1000 * 60 * 5, // 5 minutes
+		},
+	);
 
 	// form
 	const [formStage, setFormStage] = useState<'track' | 'details' | 'complete'>('track');

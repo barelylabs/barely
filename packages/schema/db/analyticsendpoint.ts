@@ -1,7 +1,6 @@
 import * as z from "zod"
 import { analyticsPlatformSchema } from "./analyticsplatform"
 import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
-import { ArtistAnalyticsEndpointRelations, artistAnalyticsEndpointRelationsSchema, artistAnalyticsEndpointBaseSchema } from "./artistanalyticsendpoint"
 import { EventReportRelations, eventReportRelationsSchema, eventReportBaseSchema } from "./eventreport"
 
 export const analyticsEndpointBaseSchema = z.object({
@@ -13,7 +12,6 @@ export const analyticsEndpointBaseSchema = z.object({
 
 export interface AnalyticsEndpointRelations {
   user: (z.infer<typeof userBaseSchema> & UserRelations) | null
-  artistAnalytics: (z.infer<typeof artistAnalyticsEndpointBaseSchema> & ArtistAnalyticsEndpointRelations) | null
   eventReports: (z.infer<typeof eventReportBaseSchema> & EventReportRelations)[]
 }
 
@@ -21,7 +19,6 @@ export const analyticsEndpointRelationsSchema: z.ZodObject<{
   [K in keyof AnalyticsEndpointRelations]: z.ZodType<AnalyticsEndpointRelations[K]>
 }> = z.object({
   user: z.lazy(() => userBaseSchema.merge(userRelationsSchema)).nullable(),
-  artistAnalytics: z.lazy(() => artistAnalyticsEndpointBaseSchema.merge(artistAnalyticsEndpointRelationsSchema)).nullable(),
   eventReports: z.lazy(() => eventReportBaseSchema.merge(eventReportRelationsSchema)).array(),
 })
 
@@ -36,7 +33,6 @@ export const analyticsEndpointCreateSchema = analyticsEndpointBaseSchema
     user: true,
     userId: true,
     accessToken: true,
-    artistAnalytics: true,
     eventReports: true,
   })
 

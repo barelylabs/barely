@@ -1,52 +1,61 @@
 import * as z from "zod"
-import { accountTypeSchema } from "./accounttype"
-import { accountProviderSchema } from "./accountprovider"
+import { accountPlatformSchema } from "./accountplatform"
+import { oAuthProviderSchema } from "./oauthprovider"
 import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
-import { ArtistAccountRelations, artistAccountRelationsSchema, artistAccountBaseSchema } from "./artistaccount"
-import { PlaylistRelations, playlistRelationsSchema, playlistBaseSchema } from "./playlist"
+import { PlaylistAccountRelations, playlistAccountRelationsSchema, playlistAccountBaseSchema } from "./playlistaccount"
 import { AdCreativeRelations, adCreativeRelationsSchema, adCreativeBaseSchema } from "./adcreative"
 import { AdCampaignRelations, adCampaignRelationsSchema, adCampaignBaseSchema } from "./adcampaign"
+import { StatRelations, statRelationsSchema, statBaseSchema } from "./stat"
+
+// Helper schema for JSON fields
+type Literal = boolean | number | string
+type Json = Literal | { [key: string]: Json } | Json[]
+const literalSchema = z.union([z.string(), z.number(), z.boolean()])
+const jsonSchema: z.ZodSchema<Json> = z.lazy(() =>
+  z.union([literalSchema, z.array(jsonSchema), z.record(jsonSchema)]),
+)
 
 export const accountBaseSchema = z.object({
   id: z.string(),
+  platform: accountPlatformSchema,
+  provider: oAuthProviderSchema.nullable(),
+  providerUserId: z.string().nullable(),
+  email: z.string().nullable(),
+  approvedScopes: jsonSchema.nullable(),
+  avatarUrl: z.string().nullable(),
+  username: z.string().nullable(),
+  accessToken: z.string().nullable(),
+  parentAccountId: z.string().nullable(),
   userId: z.string(),
-  type: accountTypeSchema,
-  provider: accountProviderSchema,
-  providerAccountId: z.string(),
-  refresh_token: z.string().nullable(),
-  access_token: z.string().nullable(),
-  expires_at: z.number().int().nullable(),
-  token_type: z.string().nullable(),
-  scope: z.string().nullable(),
-  id_token: z.string().nullable(),
-  session_state: z.string().nullable(),
-  artistId: z.string().nullable(),
+  defaultForUserId: z.string().nullable(),
 })
 
 export interface AccountRelations {
-  user: z.infer<typeof userBaseSchema> & UserRelations
-  parentAccounts: (z.infer<typeof accountBaseSchema> & AccountRelations)[]
+  parentAccount: (z.infer<typeof accountBaseSchema> & AccountRelations) | null
   childAccounts: (z.infer<typeof accountBaseSchema> & AccountRelations)[]
-  artist: (z.infer<typeof artistAccountBaseSchema> & ArtistAccountRelations) | null
-  playlists: (z.infer<typeof playlistBaseSchema> & PlaylistRelations)[]
+  user: z.infer<typeof userBaseSchema> & UserRelations
+  defaultFor: (z.infer<typeof userBaseSchema> & UserRelations) | null
+  playlists: (z.infer<typeof playlistAccountBaseSchema> & PlaylistAccountRelations)[]
   metaAdCreative: (z.infer<typeof adCreativeBaseSchema> & AdCreativeRelations)[]
   metaAdCampaigns: (z.infer<typeof adCampaignBaseSchema> & AdCampaignRelations)[]
   tikTokAdCreative: (z.infer<typeof adCreativeBaseSchema> & AdCreativeRelations)[]
   tikTokAdCampaigns: (z.infer<typeof adCampaignBaseSchema> & AdCampaignRelations)[]
+  stats: (z.infer<typeof statBaseSchema> & StatRelations)[]
 }
 
 export const accountRelationsSchema: z.ZodObject<{
   [K in keyof AccountRelations]: z.ZodType<AccountRelations[K]>
 }> = z.object({
-  user: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
-  parentAccounts: z.lazy(() => accountBaseSchema.merge(accountRelationsSchema)).array(),
+  parentAccount: z.lazy(() => accountBaseSchema.merge(accountRelationsSchema)).nullable(),
   childAccounts: z.lazy(() => accountBaseSchema.merge(accountRelationsSchema)).array(),
-  artist: z.lazy(() => artistAccountBaseSchema.merge(artistAccountRelationsSchema)).nullable(),
-  playlists: z.lazy(() => playlistBaseSchema.merge(playlistRelationsSchema)).array(),
+  user: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
+  defaultFor: z.lazy(() => userBaseSchema.merge(userRelationsSchema)).nullable(),
+  playlists: z.lazy(() => playlistAccountBaseSchema.merge(playlistAccountRelationsSchema)).array(),
   metaAdCreative: z.lazy(() => adCreativeBaseSchema.merge(adCreativeRelationsSchema)).array(),
   metaAdCampaigns: z.lazy(() => adCampaignBaseSchema.merge(adCampaignRelationsSchema)).array(),
   tikTokAdCreative: z.lazy(() => adCreativeBaseSchema.merge(adCreativeRelationsSchema)).array(),
   tikTokAdCampaigns: z.lazy(() => adCampaignBaseSchema.merge(adCampaignRelationsSchema)).array(),
+  stats: z.lazy(() => statBaseSchema.merge(statRelationsSchema)).array(),
 })
 
 export const accountSchema = accountBaseSchema
@@ -54,45 +63,49 @@ export const accountSchema = accountBaseSchema
 
 export const accountCreateSchema = accountBaseSchema
   .extend({
-    refresh_token: accountBaseSchema.shape.refresh_token.unwrap(),
-    access_token: accountBaseSchema.shape.access_token.unwrap(),
-    expires_at: accountBaseSchema.shape.expires_at.unwrap(),
-    token_type: accountBaseSchema.shape.token_type.unwrap(),
-    scope: accountBaseSchema.shape.scope.unwrap(),
-    id_token: accountBaseSchema.shape.id_token.unwrap(),
-    session_state: accountBaseSchema.shape.session_state.unwrap(),
-    artistId: accountBaseSchema.shape.artistId.unwrap(),
+    provider: accountBaseSchema.shape.provider.unwrap(),
+    providerUserId: accountBaseSchema.shape.providerUserId.unwrap(),
+    email: accountBaseSchema.shape.email.unwrap(),
+    approvedScopes: accountBaseSchema.shape.approvedScopes.unwrap(),
+    avatarUrl: accountBaseSchema.shape.avatarUrl.unwrap(),
+    username: accountBaseSchema.shape.username.unwrap(),
+    accessToken: accountBaseSchema.shape.accessToken.unwrap(),
+    parentAccountId: accountBaseSchema.shape.parentAccountId.unwrap(),
+    defaultForUserId: accountBaseSchema.shape.defaultForUserId.unwrap(),
   }).partial({
-    id: true,
-    userId: true,
-    refresh_token: true,
-    access_token: true,
-    expires_at: true,
-    token_type: true,
-    scope: true,
-    id_token: true,
-    session_state: true,
-    parentAccounts: true,
+    platform: true,
+    provider: true,
+    providerUserId: true,
+    email: true,
+    approvedScopes: true,
+    avatarUrl: true,
+    username: true,
+    accessToken: true,
+    parentAccount: true,
+    parentAccountId: true,
     childAccounts: true,
-    artist: true,
-    artistId: true,
+    userId: true,
+    defaultFor: true,
+    defaultForUserId: true,
     playlists: true,
     metaAdCreative: true,
     metaAdCampaigns: true,
     tikTokAdCreative: true,
     tikTokAdCampaigns: true,
+    stats: true,
   })
 
 export const accountUpdateSchema = accountBaseSchema
   .extend({
-    refresh_token: accountBaseSchema.shape.refresh_token.unwrap(),
-    access_token: accountBaseSchema.shape.access_token.unwrap(),
-    expires_at: accountBaseSchema.shape.expires_at.unwrap(),
-    token_type: accountBaseSchema.shape.token_type.unwrap(),
-    scope: accountBaseSchema.shape.scope.unwrap(),
-    id_token: accountBaseSchema.shape.id_token.unwrap(),
-    session_state: accountBaseSchema.shape.session_state.unwrap(),
-    artistId: accountBaseSchema.shape.artistId.unwrap(),
+    provider: accountBaseSchema.shape.provider.unwrap(),
+    providerUserId: accountBaseSchema.shape.providerUserId.unwrap(),
+    email: accountBaseSchema.shape.email.unwrap(),
+    approvedScopes: accountBaseSchema.shape.approvedScopes.unwrap(),
+    avatarUrl: accountBaseSchema.shape.avatarUrl.unwrap(),
+    username: accountBaseSchema.shape.username.unwrap(),
+    accessToken: accountBaseSchema.shape.accessToken.unwrap(),
+    parentAccountId: accountBaseSchema.shape.parentAccountId.unwrap(),
+    defaultForUserId: accountBaseSchema.shape.defaultForUserId.unwrap(),
   })
   .partial()
   

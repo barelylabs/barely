@@ -1,15 +1,14 @@
-import { createNextApiHandler } from "@trpc/server/adapters/next";
-import { createContext } from "@barely/api";
-import { appRouter } from "@barely/api";
+import { createNextApiHandler } from '@trpc/server/adapters/next';
+import { createContext } from '@barely/api';
+import { appRouter } from '@barely/api';
+
+export const config = {
+	runtime: 'nodejs',
+};
 
 export default createNextApiHandler({
-  router: appRouter,
-  createContext(opts) {
-    return createContext({
-      type: "api",
-      ...opts,
-    });
-  },
+	router: appRouter,
+	createContext,
 });
 
 // If you need to enable cors, you can do so like this:

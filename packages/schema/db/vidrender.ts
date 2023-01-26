@@ -3,8 +3,6 @@ import { renderStatusSchema } from "./renderstatus"
 import { FileRelations, fileRelationsSchema, fileBaseSchema } from "./file"
 import { TrackRenderRelations, trackRenderRelationsSchema, trackRenderBaseSchema } from "./trackrender"
 import { AdCampaignRelations, adCampaignRelationsSchema, adCampaignBaseSchema } from "./adcampaign"
-import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
-import { ArtistRelations, artistRelationsSchema, artistBaseSchema } from "./artist"
 
 export const vidRenderBaseSchema = z.object({
   id: z.string(),
@@ -31,16 +29,14 @@ export const vidRenderBaseSchema = z.object({
   lambdaBucket: z.string(),
   lambdaFunction: z.string(),
   lambdaRegion: z.string(),
-  userId: z.string(),
+  adCampaignId: z.string().nullable(),
 })
 
 export interface VidRenderRelations {
   renderedVid: z.infer<typeof fileBaseSchema> & FileRelations
   parentVid: z.infer<typeof fileBaseSchema> & FileRelations
   trackRender: z.infer<typeof trackRenderBaseSchema> & TrackRenderRelations
-  adCampaigns: (z.infer<typeof adCampaignBaseSchema> & AdCampaignRelations)[]
-  user: z.infer<typeof userBaseSchema> & UserRelations
-  artists: (z.infer<typeof artistBaseSchema> & ArtistRelations)[]
+  adCampaign: (z.infer<typeof adCampaignBaseSchema> & AdCampaignRelations) | null
 }
 
 export const vidRenderRelationsSchema: z.ZodObject<{
@@ -49,9 +45,7 @@ export const vidRenderRelationsSchema: z.ZodObject<{
   renderedVid: z.lazy(() => fileBaseSchema.merge(fileRelationsSchema)),
   parentVid: z.lazy(() => fileBaseSchema.merge(fileRelationsSchema)),
   trackRender: z.lazy(() => trackRenderBaseSchema.merge(trackRenderRelationsSchema)),
-  adCampaigns: z.lazy(() => adCampaignBaseSchema.merge(adCampaignRelationsSchema)).array(),
-  user: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
-  artists: z.lazy(() => artistBaseSchema.merge(artistRelationsSchema)).array(),
+  adCampaign: z.lazy(() => adCampaignBaseSchema.merge(adCampaignRelationsSchema)).nullable(),
 })
 
 export const vidRenderSchema = vidRenderBaseSchema
@@ -61,6 +55,7 @@ export const vidRenderCreateSchema = vidRenderBaseSchema
   .extend({
     renderFailedError: vidRenderBaseSchema.shape.renderFailedError.unwrap(),
     playlistTitle: vidRenderBaseSchema.shape.playlistTitle.unwrap(),
+    adCampaignId: vidRenderBaseSchema.shape.adCampaignId.unwrap(),
   }).partial({
     id: true,
     renderFailedError: true,
@@ -68,15 +63,15 @@ export const vidRenderCreateSchema = vidRenderBaseSchema
     parentVidId: true,
     trackRenderId: true,
     playlistTitle: true,
-    adCampaigns: true,
-    userId: true,
-    artists: true,
+    adCampaign: true,
+    adCampaignId: true,
   })
 
 export const vidRenderUpdateSchema = vidRenderBaseSchema
   .extend({
     renderFailedError: vidRenderBaseSchema.shape.renderFailedError.unwrap(),
     playlistTitle: vidRenderBaseSchema.shape.playlistTitle.unwrap(),
+    adCampaignId: vidRenderBaseSchema.shape.adCampaignId.unwrap(),
   })
   .partial()
   

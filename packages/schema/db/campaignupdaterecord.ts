@@ -1,10 +1,12 @@
 import * as z from "zod"
 import { campaignStageSchema } from "./campaignstage"
+import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
 import { CampaignRelations, campaignRelationsSchema, campaignBaseSchema } from "./campaign"
 
 export const campaignUpdateRecordBaseSchema = z.object({
   id: z.string(),
   createdAt: z.date(),
+  createdById: z.string(),
   campaignId: z.string(),
   stage: campaignStageSchema.nullable(),
   dailyBudget: z.number().nullable(),
@@ -19,12 +21,14 @@ export const campaignUpdateRecordBaseSchema = z.object({
 })
 
 export interface CampaignUpdateRecordRelations {
+  createdBy: z.infer<typeof userBaseSchema> & UserRelations
   campaign: z.infer<typeof campaignBaseSchema> & CampaignRelations
 }
 
 export const campaignUpdateRecordRelationsSchema: z.ZodObject<{
   [K in keyof CampaignUpdateRecordRelations]: z.ZodType<CampaignUpdateRecordRelations[K]>
 }> = z.object({
+  createdBy: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
   campaign: z.lazy(() => campaignBaseSchema.merge(campaignRelationsSchema)),
 })
 
@@ -46,6 +50,7 @@ export const campaignUpdateRecordCreateSchema = campaignUpdateRecordBaseSchema
   }).partial({
     id: true,
     createdAt: true,
+    createdById: true,
     campaignId: true,
     stage: true,
     dailyBudget: true,

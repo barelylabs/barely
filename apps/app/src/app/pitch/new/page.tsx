@@ -16,6 +16,9 @@ import { Text } from '@barely/ui/src/Text';
 import { TextInput } from '@barely/ui/src/TextInput';
 
 import Link from 'next/link';
+import { useSignIn, useSignUp } from '@clerk/nextjs';
+import { z, ZodFormattedError } from 'zod';
+import { SubmitHandler } from 'react-hook-form';
 
 const NewCampaignPage = () => {
 	// form
@@ -40,6 +43,28 @@ const NewCampaignPage = () => {
 
 	// submit
 	// const createCampaign = trpc.campaign.create();
+	const { isLoaded: signUpIsLoaded, signUp } = useSignUp();
+
+	const onSubmit: SubmitHandler<
+		z.infer<typeof formSchema.createCampaignFormSchema>
+	> = async data => {
+		if (!signUpIsLoaded) throw new Error('signUp not loaded');
+		const signUpRes = await signUp.create({
+			emailAddress: data.user.email,
+			firstName: data.user.firstName,
+			lastName: data.user.lastName,
+		});
+
+		// create campaign with new user id;
+	};
+
+	// async function onSubmit(data: ) {
+	// 	if (!signUp) return;
+	// 	const signUpResponse = await signUp.create({
+	// 		emailAddress: watch('user.email'),
+	// 		firstName: watch('user.firstName'),
+	// 	})
+	// }
 
 	// track
 	const [trackQ, setTrackQ] = useState('');
@@ -98,14 +123,17 @@ const NewCampaignPage = () => {
 
 	// db artist
 	const artistSpotifyId = selectedSpotifyTrack?.artists[0]?.id ?? '';
-	const { data: dbArtist } = trpc.artist.bySpotifyId.useQuery(artistSpotifyId, {
-		enabled: artistSpotifyId !== null,
-		// staleTime: 1000 * 60 * 5, // 5 minutes
-		cacheTime: 1000 * 60 * 5, // 5 minutes
-		onSuccess: dbArtist => {
-			if (dbArtist) setValue('artist.id', dbArtist.id);
+	const { data: dbArtist } = trpc.user.bySpotifyId.useQuery(
+		{ spotifyId: artistSpotifyId },
+		{
+			enabled: artistSpotifyId !== null,
+			// staleTime: 1000 * 60 * 5, // 5 minutes
+			cacheTime: 1000 * 60 * 5, // 5 minutes
+			onSuccess: dbArtist => {
+				if (dbArtist) setValue('artist.id', dbArtist.id);
+			},
 		},
-	});
+	);
 
 	return (
 		<>

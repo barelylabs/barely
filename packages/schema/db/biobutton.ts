@@ -6,6 +6,7 @@ import { EventRelations, eventRelationsSchema, eventBaseSchema } from "./event"
 export const bioButtonBaseSchema = z.object({
   bioId: z.string(),
   buttonId: z.string(),
+  lexoRank: z.string(),
   buttonLexoRank: z.string(),
 })
 

@@ -1,57 +1,59 @@
 import * as z from "zod"
-import { playlistPlatformSchema } from "./playlistplatform"
+import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
+import { PlaylistAccountRelations, playlistAccountRelationsSchema, playlistAccountBaseSchema } from "./playlistaccount"
 import { CampaignRelations, campaignRelationsSchema, campaignBaseSchema } from "./campaign"
-import { AccountRelations, accountRelationsSchema, accountBaseSchema } from "./account"
+import { PlacementRelations, placementRelationsSchema, placementBaseSchema } from "./placement"
 import { FileRelations, fileRelationsSchema, fileBaseSchema } from "./file"
+import { PlaylistCoverRenderRelations, playlistCoverRenderRelationsSchema, playlistCoverRenderBaseSchema } from "./playlistcoverrender"
 import { LinkRelations, linkRelationsSchema, linkBaseSchema } from "./link"
 import { StatRelations, statRelationsSchema, statBaseSchema } from "./stat"
-import { PlacementRelations, placementRelationsSchema, placementBaseSchema } from "./placement"
-import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
-import { ArtistRelations, artistRelationsSchema, artistBaseSchema } from "./artist"
 
 export const playlistBaseSchema = z.object({
   id: z.string(),
-  platform: playlistPlatformSchema,
-  platformId: z.string(),
+  artistId: z.string(),
+  appleMusicId: z.string().nullable(),
+  deezerId: z.string().nullable(),
+  soundcloudId: z.string().nullable(),
+  spotifyId: z.string().nullable(),
+  tidalId: z.string().nullable(),
+  youtubeId: z.string().nullable(),
   name: z.string(),
   description: z.string().nullable(),
   public: z.boolean(),
   userOwned: z.boolean(),
   totalTracks: z.number().int().nullable(),
   forTesting: z.boolean(),
-  accountId: z.string(),
   coverId: z.string(),
   linkId: z.string().nullable(),
   cloneParentId: z.string().nullable(),
-  userId: z.string(),
 })
 
 export interface PlaylistRelations {
+  artist: z.infer<typeof userBaseSchema> & UserRelations
+  accounts: (z.infer<typeof playlistAccountBaseSchema> & PlaylistAccountRelations)[]
   campaigns: (z.infer<typeof campaignBaseSchema> & CampaignRelations)[]
-  account: z.infer<typeof accountBaseSchema> & AccountRelations
+  placements: (z.infer<typeof placementBaseSchema> & PlacementRelations)[]
   cover: z.infer<typeof fileBaseSchema> & FileRelations
+  coverRenders: (z.infer<typeof playlistCoverRenderBaseSchema> & PlaylistCoverRenderRelations)[]
   link: (z.infer<typeof linkBaseSchema> & LinkRelations) | null
-  stats: (z.infer<typeof statBaseSchema> & StatRelations)[]
   cloneChildren: (z.infer<typeof playlistBaseSchema> & PlaylistRelations)[]
   cloneParent: (z.infer<typeof playlistBaseSchema> & PlaylistRelations) | null
-  placements: (z.infer<typeof placementBaseSchema> & PlacementRelations)[]
-  user: z.infer<typeof userBaseSchema> & UserRelations
-  artists: (z.infer<typeof artistBaseSchema> & ArtistRelations)[]
+  stats: (z.infer<typeof statBaseSchema> & StatRelations)[]
 }
 
 export const playlistRelationsSchema: z.ZodObject<{
   [K in keyof PlaylistRelations]: z.ZodType<PlaylistRelations[K]>
 }> = z.object({
+  artist: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
+  accounts: z.lazy(() => playlistAccountBaseSchema.merge(playlistAccountRelationsSchema)).array(),
   campaigns: z.lazy(() => campaignBaseSchema.merge(campaignRelationsSchema)).array(),
-  account: z.lazy(() => accountBaseSchema.merge(accountRelationsSchema)),
+  placements: z.lazy(() => placementBaseSchema.merge(placementRelationsSchema)).array(),
   cover: z.lazy(() => fileBaseSchema.merge(fileRelationsSchema)),
+  coverRenders: z.lazy(() => playlistCoverRenderBaseSchema.merge(playlistCoverRenderRelationsSchema)).array(),
   link: z.lazy(() => linkBaseSchema.merge(linkRelationsSchema)).nullable(),
-  stats: z.lazy(() => statBaseSchema.merge(statRelationsSchema)).array(),
   cloneChildren: z.lazy(() => playlistBaseSchema.merge(playlistRelationsSchema)).array(),
   cloneParent: z.lazy(() => playlistBaseSchema.merge(playlistRelationsSchema)).nullable(),
-  placements: z.lazy(() => placementBaseSchema.merge(placementRelationsSchema)).array(),
-  user: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
-  artists: z.lazy(() => artistBaseSchema.merge(artistRelationsSchema)).array(),
+  stats: z.lazy(() => statBaseSchema.merge(statRelationsSchema)).array(),
 })
 
 export const playlistSchema = playlistBaseSchema
@@ -59,30 +61,48 @@ export const playlistSchema = playlistBaseSchema
 
 export const playlistCreateSchema = playlistBaseSchema
   .extend({
+    appleMusicId: playlistBaseSchema.shape.appleMusicId.unwrap(),
+    deezerId: playlistBaseSchema.shape.deezerId.unwrap(),
+    soundcloudId: playlistBaseSchema.shape.soundcloudId.unwrap(),
+    spotifyId: playlistBaseSchema.shape.spotifyId.unwrap(),
+    tidalId: playlistBaseSchema.shape.tidalId.unwrap(),
+    youtubeId: playlistBaseSchema.shape.youtubeId.unwrap(),
     description: playlistBaseSchema.shape.description.unwrap(),
     totalTracks: playlistBaseSchema.shape.totalTracks.unwrap(),
     linkId: playlistBaseSchema.shape.linkId.unwrap(),
     cloneParentId: playlistBaseSchema.shape.cloneParentId.unwrap(),
   }).partial({
     id: true,
+    artistId: true,
+    accounts: true,
+    appleMusicId: true,
+    deezerId: true,
+    soundcloudId: true,
+    spotifyId: true,
+    tidalId: true,
+    youtubeId: true,
     description: true,
     totalTracks: true,
     campaigns: true,
-    accountId: true,
+    placements: true,
     coverId: true,
+    coverRenders: true,
     link: true,
     linkId: true,
-    stats: true,
     cloneChildren: true,
     cloneParent: true,
     cloneParentId: true,
-    placements: true,
-    userId: true,
-    artists: true,
+    stats: true,
   })
 
 export const playlistUpdateSchema = playlistBaseSchema
   .extend({
+    appleMusicId: playlistBaseSchema.shape.appleMusicId.unwrap(),
+    deezerId: playlistBaseSchema.shape.deezerId.unwrap(),
+    soundcloudId: playlistBaseSchema.shape.soundcloudId.unwrap(),
+    spotifyId: playlistBaseSchema.shape.spotifyId.unwrap(),
+    tidalId: playlistBaseSchema.shape.tidalId.unwrap(),
+    youtubeId: playlistBaseSchema.shape.youtubeId.unwrap(),
     description: playlistBaseSchema.shape.description.unwrap(),
     totalTracks: playlistBaseSchema.shape.totalTracks.unwrap(),
     linkId: playlistBaseSchema.shape.linkId.unwrap(),

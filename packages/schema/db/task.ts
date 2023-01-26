@@ -1,6 +1,5 @@
 import * as z from "zod"
 import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
-import { ArtistRelations, artistRelationsSchema, artistBaseSchema } from "./artist"
 import { StoryRelations, storyRelationsSchema, storyBaseSchema } from "./story"
 
 export const taskBaseSchema = z.object({
@@ -13,24 +12,24 @@ export const taskBaseSchema = z.object({
   priority: z.string().nullable(),
   today: z.boolean(),
   complete: z.boolean(),
-  userId: z.string(),
-  artistId: z.string().nullable(),
+  createdById: z.string(),
+  assignedToId: z.string().nullable(),
   storyId: z.string().nullable(),
   delete: z.boolean(),
   deleteDate: z.date().nullable(),
 })
 
 export interface TaskRelations {
-  user: z.infer<typeof userBaseSchema> & UserRelations
-  artist: (z.infer<typeof artistBaseSchema> & ArtistRelations) | null
+  createdBy: z.infer<typeof userBaseSchema> & UserRelations
+  assignedTo: (z.infer<typeof userBaseSchema> & UserRelations) | null
   story: (z.infer<typeof storyBaseSchema> & StoryRelations) | null
 }
 
 export const taskRelationsSchema: z.ZodObject<{
   [K in keyof TaskRelations]: z.ZodType<TaskRelations[K]>
 }> = z.object({
-  user: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
-  artist: z.lazy(() => artistBaseSchema.merge(artistRelationsSchema)).nullable(),
+  createdBy: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
+  assignedTo: z.lazy(() => userBaseSchema.merge(userRelationsSchema)).nullable(),
   story: z.lazy(() => storyBaseSchema.merge(storyRelationsSchema)).nullable(),
 })
 
@@ -42,7 +41,7 @@ export const taskCreateSchema = taskBaseSchema
     description: taskBaseSchema.shape.description.unwrap(),
     dueDate: taskBaseSchema.shape.dueDate.unwrap(),
     priority: taskBaseSchema.shape.priority.unwrap(),
-    artistId: taskBaseSchema.shape.artistId.unwrap(),
+    assignedToId: taskBaseSchema.shape.assignedToId.unwrap(),
     storyId: taskBaseSchema.shape.storyId.unwrap(),
     deleteDate: taskBaseSchema.shape.deleteDate.unwrap(),
   }).partial({
@@ -51,9 +50,9 @@ export const taskCreateSchema = taskBaseSchema
     description: true,
     dueDate: true,
     priority: true,
-    userId: true,
-    artist: true,
-    artistId: true,
+    createdById: true,
+    assignedTo: true,
+    assignedToId: true,
     story: true,
     storyId: true,
     deleteDate: true,
@@ -64,7 +63,7 @@ export const taskUpdateSchema = taskBaseSchema
     description: taskBaseSchema.shape.description.unwrap(),
     dueDate: taskBaseSchema.shape.dueDate.unwrap(),
     priority: taskBaseSchema.shape.priority.unwrap(),
-    artistId: taskBaseSchema.shape.artistId.unwrap(),
+    assignedToId: taskBaseSchema.shape.assignedToId.unwrap(),
     storyId: taskBaseSchema.shape.storyId.unwrap(),
     deleteDate: taskBaseSchema.shape.deleteDate.unwrap(),
   })

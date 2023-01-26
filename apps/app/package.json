@@ -20,6 +20,8 @@
 		"@barely/spotify": "*",
 		"@barely/ui": "*",
 		"@barely/utils": "*",
+		"@clerk/nextjs": "^4.7.7",
+		"@clerk/themes": "^1.2.39",
 		"@headlessui/react": "^1.7.4",
 		"@heroicons/react": "^2.0.13",
 		"@hookform/resolvers": "^2.9.10",

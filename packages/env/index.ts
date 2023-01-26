@@ -10,6 +10,9 @@ const processEnv = {
 	NODE_ENV: process.env.NODE_ENV,
 
 	API_USER_ID: process.env.API_USER_ID,
+	NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+	CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
+
 	NEXTAUTH_URL: process.env.NEXTAUTH_URL,
 	NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
 
@@ -42,7 +45,7 @@ export const clientEnvAllSchema = z.object({
 		process.env.NODE_ENV === 'development'
 			? z.string().min(1)
 			: z.string().min(1).optional(),
-	NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY: z.string(),
+	NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1),
 });
 
 export const serverEnvAllSchema = z.object({
@@ -61,6 +64,7 @@ export const serverEnvAllSchema = z.object({
 			? z.string().min(1)
 			: z.string().min(1).optional(),
 
+	CLERK_SECRET_KEY: z.string().min(1),
 	// EXTERNAL
 	DATABASE_URL: z.string().url(),
 	DISCORD_CLIENT_ID: z.string(),
