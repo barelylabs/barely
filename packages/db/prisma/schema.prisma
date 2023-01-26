@@ -174,8 +174,8 @@ model Link {
   id            String        @id @default(cuid())
   createdAt     DateTime      @default(now())
   // user
-  user          User          @relation(fields: [userId], references: [id])
-  userId        String
+  user          User?         @relation(fields: [userId, handle], references: [id, handle])
+  userId        String?
   userSocial    SocialLink?
   // trigger
   handle        String // from user 👆
@@ -215,7 +215,6 @@ model Link {
   events        Event[]
 
   delete Boolean? @default(false)
-  // @@index([artistId, handle])
 
   @@unique([id, app])
   @@unique([handle, domain, app, slug])

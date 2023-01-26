@@ -13,7 +13,7 @@ import { EventRelations, eventRelationsSchema, eventBaseSchema } from "./event"
 export const linkBaseSchema = z.object({
   id: z.string(),
   createdAt: z.date(),
-  userId: z.string(),
+  userId: z.string().nullable(),
   handle: z.string(),
   domain: linkDomainSchema,
   slug: z.string().nullable(),
@@ -37,7 +37,7 @@ export const linkBaseSchema = z.object({
 })
 
 export interface LinkRelations {
-  user: z.infer<typeof userBaseSchema> & UserRelations
+  user: (z.infer<typeof userBaseSchema> & UserRelations) | null
   userSocial: (z.infer<typeof socialLinkBaseSchema> & SocialLinkRelations) | null
   trackApp: (z.infer<typeof trackAppLinkBaseSchema> & TrackAppLinkRelations) | null
   playlist: (z.infer<typeof playlistBaseSchema> & PlaylistRelations) | null
@@ -52,7 +52,7 @@ export interface LinkRelations {
 export const linkRelationsSchema: z.ZodObject<{
   [K in keyof LinkRelations]: z.ZodType<LinkRelations[K]>
 }> = z.object({
-  user: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
+  user: z.lazy(() => userBaseSchema.merge(userRelationsSchema)).nullable(),
   userSocial: z.lazy(() => socialLinkBaseSchema.merge(socialLinkRelationsSchema)).nullable(),
   trackApp: z.lazy(() => trackAppLinkBaseSchema.merge(trackAppLinkRelationsSchema)).nullable(),
   playlist: z.lazy(() => playlistBaseSchema.merge(playlistRelationsSchema)).nullable(),
@@ -69,6 +69,7 @@ export const linkSchema = linkBaseSchema
 
 export const linkCreateSchema = linkBaseSchema
   .extend({
+    userId: linkBaseSchema.shape.userId.unwrap(),
     slug: linkBaseSchema.shape.slug.unwrap(),
     app: linkBaseSchema.shape.app.unwrap(),
     appRoute: linkBaseSchema.shape.appRoute.unwrap(),
@@ -89,8 +90,10 @@ export const linkCreateSchema = linkBaseSchema
   }).partial({
     id: true,
     createdAt: true,
+    user: true,
     userId: true,
     userSocial: true,
+    handle: true,
     domain: true,
     slug: true,
     app: true,
@@ -121,6 +124,7 @@ export const linkCreateSchema = linkBaseSchema
 
 export const linkUpdateSchema = linkBaseSchema
   .extend({
+    userId: linkBaseSchema.shape.userId.unwrap(),
     slug: linkBaseSchema.shape.slug.unwrap(),
     app: linkBaseSchema.shape.app.unwrap(),
     appRoute: linkBaseSchema.shape.appRoute.unwrap(),
