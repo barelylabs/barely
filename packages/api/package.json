@@ -10,7 +10,6 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@barely/auth": "*",
 		"@barely/db": "*",
 		"@barely/email": "*",
 		"@barely/env": "*",
