@@ -1,4 +1,6 @@
 import * as z from "zod"
+import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
+import { TeamRelations, teamRelationsSchema, teamBaseSchema } from "./team"
 import { FileRelations, fileRelationsSchema, fileBaseSchema } from "./file"
 import { PlaylistRelations, playlistRelationsSchema, playlistBaseSchema } from "./playlist"
 import { AdCampaignRelations, adCampaignRelationsSchema, adCampaignBaseSchema } from "./adcampaign"
@@ -6,6 +8,8 @@ import { AdCampaignRelations, adCampaignRelationsSchema, adCampaignBaseSchema } 
 export const playlistCoverRenderBaseSchema = z.object({
   id: z.string(),
   name: z.string().nullable(),
+  createdById: z.string(),
+  teamId: z.string(),
   img: z.boolean(),
   imgSrc: z.string(),
   imgShift: z.boolean(),
@@ -27,6 +31,8 @@ export const playlistCoverRenderBaseSchema = z.object({
 })
 
 export interface PlaylistCoverRenderRelations {
+  createdBy: z.infer<typeof userBaseSchema> & UserRelations
+  team: z.infer<typeof teamBaseSchema> & TeamRelations
   renderedCover: (z.infer<typeof fileBaseSchema> & FileRelations) | null
   playlist: z.infer<typeof playlistBaseSchema> & PlaylistRelations
   adCampaigns: (z.infer<typeof adCampaignBaseSchema> & AdCampaignRelations)[]
@@ -35,6 +41,8 @@ export interface PlaylistCoverRenderRelations {
 export const playlistCoverRenderRelationsSchema: z.ZodObject<{
   [K in keyof PlaylistCoverRenderRelations]: z.ZodType<PlaylistCoverRenderRelations[K]>
 }> = z.object({
+  createdBy: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
+  team: z.lazy(() => teamBaseSchema.merge(teamRelationsSchema)),
   renderedCover: z.lazy(() => fileBaseSchema.merge(fileRelationsSchema)).nullable(),
   playlist: z.lazy(() => playlistBaseSchema.merge(playlistRelationsSchema)),
   adCampaigns: z.lazy(() => adCampaignBaseSchema.merge(adCampaignRelationsSchema)).array(),
@@ -52,6 +60,8 @@ export const playlistCoverRenderCreateSchema = playlistCoverRenderBaseSchema
   }).partial({
     id: true,
     name: true,
+    createdById: true,
+    teamId: true,
     textColor: true,
     textScale: true,
     textAlign: true,

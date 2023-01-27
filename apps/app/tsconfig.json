@@ -1,27 +1,25 @@
 {
-  "extends": "@barely/config/tsconfig.nextjs.json",
-  "include": [
-    "next-env.d.ts",
-    "node_modules/@barely/auth/next-auth.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.cjs",
-    "**/*.mjs",
-    ".next/types/**/*.ts",
-    "src/app/(auth)/signup"
-  ],
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "~/*": [
-        "./src/*"
-      ]
-    },
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
-  },
-  "exclude": []
+	"extends": "@barely/config/tsconfig.nextjs.json",
+	"include": [
+		"next-env.d.ts",
+		"node_modules/@barely/auth/next-auth.d.ts",
+		"**/*.ts",
+		"**/*.tsx",
+		"**/*.cjs",
+		"**/*.mjs",
+		".next/types/**/*.ts",
+		"src/app/(auth)/sign-up"
+	],
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"~/*": ["./src/*"]
+		},
+		"plugins": [
+			{
+				"name": "next"
+			}
+		]
+	},
+	"exclude": []
 }

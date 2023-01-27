@@ -1,5 +1,5 @@
 import * as z from "zod"
-import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
+import { TeamRelations, teamRelationsSchema, teamBaseSchema } from "./team"
 import { AccountRelations, accountRelationsSchema, accountBaseSchema } from "./account"
 import { HeadlineRelations, headlineRelationsSchema, headlineBaseSchema } from "./headline"
 import { FileRelations, fileRelationsSchema, fileBaseSchema } from "./file"
@@ -10,7 +10,7 @@ export const adCreativeBaseSchema = z.object({
   id: z.string(),
   name: z.string(),
   createdAt: z.date(),
-  userId: z.string(),
+  teamId: z.string(),
   metaAccountId: z.string(),
   tikTokAccountId: z.string().nullable(),
   metaId: z.string().nullable(),
@@ -24,7 +24,7 @@ export const adCreativeBaseSchema = z.object({
 })
 
 export interface AdCreativeRelations {
-  user: z.infer<typeof userBaseSchema> & UserRelations
+  team: z.infer<typeof teamBaseSchema> & TeamRelations
   metaAccount: z.infer<typeof accountBaseSchema> & AccountRelations
   tikTokAccount: (z.infer<typeof accountBaseSchema> & AccountRelations) | null
   headline: (z.infer<typeof headlineBaseSchema> & HeadlineRelations) | null
@@ -36,7 +36,7 @@ export interface AdCreativeRelations {
 export const adCreativeRelationsSchema: z.ZodObject<{
   [K in keyof AdCreativeRelations]: z.ZodType<AdCreativeRelations[K]>
 }> = z.object({
-  user: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
+  team: z.lazy(() => teamBaseSchema.merge(teamRelationsSchema)),
   metaAccount: z.lazy(() => accountBaseSchema.merge(accountRelationsSchema)),
   tikTokAccount: z.lazy(() => accountBaseSchema.merge(accountRelationsSchema)).nullable(),
   headline: z.lazy(() => headlineBaseSchema.merge(headlineRelationsSchema)).nullable(),
@@ -61,7 +61,7 @@ export const adCreativeCreateSchema = adCreativeBaseSchema
   }).partial({
     id: true,
     createdAt: true,
-    userId: true,
+    teamId: true,
     metaAccountId: true,
     tikTokAccount: true,
     tikTokAccountId: true,

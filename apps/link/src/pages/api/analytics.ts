@@ -9,7 +9,7 @@ import { linkAnalyticsSchema } from '@barely/schema/analytics/link';
 const analytics = async (req: NextApiRequest, res: NextApiResponse) => {
 	const {
 		linkId,
-		userId,
+		teamId,
 		url,
 		// visitor info
 		ip,
@@ -59,12 +59,11 @@ const analytics = async (req: NextApiRequest, res: NextApiResponse) => {
 	});
 
 	//* 📊 report event to analytics *//
-	const user = await prisma.user.findFirst({
-		where: { id: userId },
+	const team = await prisma.team.findFirst({
+		where: { id: teamId },
 		select: { analyticsEndpoints: true },
 	});
-	const analyticsEndpoints = user?.analyticsEndpoints;
-	// const analyticsEndpoints = user ? user.analyticsEndpoints.map(a => a.analyticsEndpoint) : [];
+	const analyticsEndpoints = team?.analyticsEndpoints;
 	if (!analyticsEndpoints) return;
 
 	const eventReports: Omit<EventReport, 'createdAt'>[] = [];

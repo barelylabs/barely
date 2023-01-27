@@ -6,7 +6,6 @@ const config = {
 	reactStrictMode: true,
 	transpilePackages: [
 		'@barely/api',
-		'@barely/auth',
 		'@barely/config',
 		'@barely/db',
 		'@barely/env',

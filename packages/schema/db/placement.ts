@@ -4,7 +4,6 @@ import { PlaylistRelations, playlistRelationsSchema, playlistBaseSchema } from "
 
 export const placementBaseSchema = z.object({
   id: z.string(),
-  createdAt: z.date(),
   pitchReviewId: z.string(),
   addToPlaylist: z.boolean().nullable(),
   addedToPlaylist: z.boolean().nullable(),
@@ -41,7 +40,6 @@ export const placementCreateSchema = placementBaseSchema
     removeDate: placementBaseSchema.shape.removeDate.unwrap(),
   }).partial({
     id: true,
-    createdAt: true,
     pitchReviewId: true,
     addToPlaylist: true,
     addedToPlaylist: true,

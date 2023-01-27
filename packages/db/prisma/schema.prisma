@@ -1,3 +1,13 @@
+//* 💾 db 💾 *//
+
+datasource db {
+  provider     = "mysql"
+  relationMode = "prisma"
+  url          = env("DATABASE_URL")
+}
+
+//* 🎰 generators 🎰 *//
+
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["filteredRelationCount"]
@@ -8,70 +18,68 @@ generator zod {
   output   = "../../schema/db"
 }
 
-datasource db {
-  provider     = "mysql"
-  relationMode = "prisma"
-  url          = env("DATABASE_URL")
-}
-
 //* 💁‍♂️ users 💁‍♂️ *//
 
 model User {
-  id                  String                 @id @default(cuid())
-  type                UserType
-  firstName           String?
-  lastName            String?
-  emailVerified       DateTime?
-  handle              String?
-  displayName         String?
-  email               String?                @unique /// @zod.email()
-  phone               String?
-  image               String?
-  marketing           Boolean                @default(false)
-  // collabs
-  teams               Team[]
-  collaborators       CollaboratorRole[]     @relation("CollaboratorRoleUser")
-  collaboratorFor     CollaboratorRole[]     @relation("CollaboratoreRoleCollaborator")
+  id                   String                 @id
+  type                 UserType
+  firstName            String
+  lastName             String
+  email                String                 @unique /// @zod.email()
+  emailVerified        DateTime?
+  // handle           String?
+  displayName          String?
+  phone                String?
+  image                String?
+  marketing            Boolean                @default(false)
+  // collabs 
+  teams                TeamMember[]
+  organizations        OrganizationMember[]
   // transactions
-  stripeId            String?
-  transactions        Transaction[]
+  stripeId             String?
+  transactions         Transaction[]
   // external accounts
-  accounts            Account[]              @relation("UserAccount")
-  defaultAccounts     Account[]              @relation("UserDefaultAccount")
-  spotifyId           String?                @unique
+  accounts             Account[]              @relation("UserAccount")
+  // defaultAccounts     Account[]              @relation("UserDefaultAccount")
+  spotifyId            String?                @unique
   // assets
-  files               File[]
-  tracks              Track[]
-  playlists           Playlist[]
+  createdFiles         File[]
+  vidRenders           VidRender[]
+  trackRenders         TrackRender[]
+  playlistCoverRenders PlaylistCoverRender[]
+  // tracks           Track[]
+  // playlists        Playlist[]
   // campaigns
-  pitchReviews        PitchReview[]
-  campaignsCreated    Campaign[]
-  campaignUpdates     CampaignUpdateRecord[]
-  adCreatives         AdCreative[]
-  audiences           Audience[]
+  pitchReviews         PitchReview[]
+  campaignsCreated     Campaign[]
+  campaignUpdates      CampaignUpdateRecord[]
+  // adCreatives      AdCreative[]
+  // audiences        Audience[]
   // links
-  links               Link[]
-  socialLinks         SocialLink[]
-  externalWebsites    ExternalWebsite[]
-  analyticsEndpoints  AnalyticsEndpoint[]
-  // bio
-  bios                Bio[]                  @relation("UserBio")
-  rootBio             Bio?                   @relation("UserRootBio")
-  buttons             Button[]
-  forms               Form[]
-  // dev
-  epicsCreated        Epic[]                 @relation("EpicCreatedByUser")
-  epicsAssigned       Epic[]                 @relation("EpicAssignedToUser")
-  epicsForUser        Epic[]                 @relation("EpicForUser")
-  storyBoardsCreated  StoryBoard[]           @relation("BoardCreatedByUser")
-  storyBoardsAssigned StoryBoard[]           @relation("BoardAssignedToUsers")
-  storiesCreated      Story[]                @relation("StoryCreatedByUser")
-  storiesAssigned     Story[]                @relation("StoryAssignedToUser")
-  storiesForUser      Story[]                @relation("StoryForUser")
-  tasksCreated        Task[]                 @relation("TaskCreatedByUser")
-  tasksAssigned       Task[]                 @relation("TaskAssignedToUser")
+  // links               Link[]
+  // socialLinks         SocialLink[]
+  // externalWebsites    ExternalWebsite[]
+  // analyticsEndpoints  AnalyticsEndpoint[]
 
-  @@unique([id, handle])
+  // bio
+  // bios                Bio[]        @relation("UserBio")
+  // rootBio             Bio?         @relation("UserRootBio")
+  // buttons             Button[]
+  // forms               Form[]
+
+  // dev  // todo - add back in
+  epicsCreated        Epic[]       @relation("EpicCreatedByUser")
+  epicsAssigned       Epic[]       @relation("EpicAssignedToUser")
+  // epicsForUser        Epic[]       @relation("EpicForUser")
+  storyBoardsCreated  StoryBoard[] @relation("BoardCreatedByUser")
+  storyBoardsAssigned StoryBoard[] @relation("BoardAssignedToUsers")
+  storiesCreated      Story[]      @relation("StoryCreatedByUser")
+  storiesAssigned     Story[]      @relation("StoryAssignedToUser")
+  // storiesForUser      Story[]      @relation("StoryForUser")
+  tasksCreated        Task[]       @relation("TaskCreatedByUser")
+  tasksAssigned       Task[]       @relation("TaskAssignedToUser")
+
+  // @@unique([id, handle])
 }
 
 enum UserType {
@@ -82,28 +90,105 @@ enum UserType {
   marketer
 }
 
+//* 👫 teams 👫 *//
+
 model Team {
-  id        String   @id @default(cuid())
-  name      String
-  createdAt DateTime @default(now())
-  users     User[]
+  id                   String                @id @default(cuid())
+  name                 String
+  handle               String                @unique
+  createdAt            DateTime              @default(now())
+  users                TeamMember[]
+  // accounts
+  externalAccounts     Account[]             @relation("TeamAccount")
+  defaultAccounts      Account[]             @relation("TeamDefaultAccount")
+  // links
+  links                Link[]                @relation("TeamLink")
+  socialLinks          Link[]                @relation("TeamSocialLink")
+  analyticsEndpoints   AnalyticsEndpoint[]
+  externalWebsites     ExternalWebsite[] // todo - add back in
+  // bio
+  bios                 Bio[]                 @relation("TeamBio")
+  rootBio              Bio?                  @relation("TeamRootBio")
+  buttons              Button[]
+  forms                Form[]
+  // campaigns
+  campaigns            Campaign[]
+  adCreatives          AdCreative[]
+  // targeting
+  audiences            Audience[]
+  demos                Demo[] // todo - add back in
+  geoGroups            GeoGroup[] // todo - add back in
+  interestGroups       InterestGroup[] // todo - add back in
+  vidViewsGroups       VidViewsGroup[] // todo - add back in
+  // dev
+  epics                Epic[] // todo - add back in
+  storyBoards          StoryBoard[] // todo - add back in
+  tasks                Task[] // todo - add back in
+  // assets
+  tracks               Track[]
+  playlists            Playlist[]
+  files                File[]
+  trackRenders         TrackRender[]
+  vidRenders           VidRender[]
+  playlistCoverRenders PlaylistCoverRender[]
+
+  @@unique([id, handle])
 }
 
-model CollaboratorRole {
-  user             User                   @relation("CollaboratorRoleUser", fields: [userId], references: [id])
-  userId           String
-  collaborator     User                   @relation("CollaboratoreRoleCollaborator", fields: [collaboratorId], references: [id])
-  collaboratorId   String
-  collaboratorRole CollaboratorRoleOption
+enum TeamType {
+  artist
+  creator
+  influencer
+  product
+}
 
-  @@id([userId, collaboratorId])
+model TeamMember {
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+  team   Team   @relation(fields: [teamId], references: [id])
+  teamId String
+
+  role TeamRoleOption @default(member)
+
+  @@id([userId, teamId])
   @@index([userId])
-  @@index([collaboratorId])
+  @@index([teamId])
 }
 
-enum CollaboratorRoleOption {
+enum TeamRoleOption {
   admin
-  marketing
+  member
+}
+
+//* 🏰 organizations 🏰 *//
+
+model Organization {
+  id        String               @id @default(cuid())
+  name      String
+  createdAt DateTime             @default(now())
+  users     OrganizationMember[]
+}
+
+enum OrganizationType {
+  label
+  agency
+}
+
+model OrganizationMember {
+  user   User                   @relation(fields: [userId], references: [id])
+  userId String
+  org    Organization           @relation(fields: [orgId], references: [id])
+  orgId  String
+  role   OrganizationRoleOption @default(member)
+
+  @@id([userId, orgId])
+  @@index([userId])
+  @@index([orgId])
+}
+
+enum OrganizationRoleOption {
+  admin
+  member
 }
 
 //* 📲 external accounts 📲 *//
@@ -133,7 +218,7 @@ enum OAuthProvider {
 
 model Account {
   id             String          @id
-  platform       AccountPlatform @default(spotify)
+  platform       AccountPlatform
   provider       OAuthProvider?
   providerUserId String?
   email          String?
@@ -149,76 +234,94 @@ model Account {
 
   user             User    @relation("UserAccount", fields: [userId], references: [id])
   userId           String
-  defaultFor       User?   @relation("UserDefaultAccount", fields: [defaultForUserId], references: [id])
-  defaultForUserId String?
+  team             Team?   @relation("TeamAccount", fields: [teamId], references: [id])
+  teamId           String?
+  defaultForTeam   Team?   @relation("TeamDefaultAccount", fields: [defaultForTeamId], references: [id])
+  defaultForTeamId String?
 
   // assets
-  playlists         PlaylistAccount[]
-  metaAdCreative    AdCreative[]      @relation("AdCreativeMetaAccount")
-  metaAdCampaigns   AdCampaign[]      @relation("AdCampaignMetaAccount")
-  tikTokAdCreative  AdCreative[]      @relation("AdCreativeTikTokAccount")
-  tikTokAdCampaigns AdCampaign[]      @relation("AdCampaignTikTokAccount")
+  appleMusicPlaylists Playlist[] @relation("PlaylistAppleMusicAccount")
+  deezerPlaylists     Playlist[] @relation("PlaylistDeezerAccount")
+  soundCloudPlaylists Playlist[] @relation("PlaylistSoundCloudAccount")
+  spotifyPlaylists    Playlist[] @relation("PlaylistSpotifyAccount")
+  tidalPlaylists      Playlist[] @relation("PlaylistTidalAccount")
+  youtubePlaylists    Playlist[] @relation("PlaylistYoutubeAccount")
+
+  metaAdCreative    AdCreative[] @relation("AdCreativeMetaAccount")
+  metaAdCampaigns   AdCampaign[] @relation("AdCampaignMetaAccount")
+  tikTokAdCreative  AdCreative[] @relation("AdCreativeTikTokAccount")
+  tikTokAdCampaigns AdCampaign[] @relation("AdCampaignTikTokAccount")
 
   stats Stat[]
 
+  @@unique([defaultForTeamId, platform])
   @@unique([provider, providerUserId])
   @@unique([id, platform])
   @@index([userId])
+  @@index([teamId])
   @@index([parentAccountId])
-  @@index([defaultForUserId])
 }
 
 //* 🔗 links 🔗 *// 
 
 model Link {
-  id            String        @id @default(cuid())
-  createdAt     DateTime      @default(now())
-  // user
-  user          User?         @relation(fields: [userId, handle], references: [id, handle])
-  userId        String?
-  userSocial    SocialLink?
+  id                String     @id @default(cuid())
+  createdAt         DateTime   @default(now())
+  // team
+  team              Team       @relation("TeamLink", fields: [teamId], references: [id]) // todo - add back in
+  teamId            String     @default("default")
+  socialForTeam     Team?      @relation("TeamSocialLink", fields: [socialForTeamId], references: [id]) // todo - add back in
+  socialForTeamId   String?
+  showSocialForTeam Boolean?   @default(true)
   // trigger
-  handle        String // from user 👆
-  domain        LinkDomain    @default(barely)
-  slug          String?
-  app           AppType? // 
-  appRoute      String?
-  appId         String?
+  handle            String // from user 👆
+  domain            LinkDomain @default(barely)
+  slug              String?
+  app               AppType? // 
+  appRoute          String?
+  appId             String?
   // target
-  url           String        @db.VarChar(1000)
-  appleScheme   String?       @db.VarChar(1000)
-  androidScheme String?       @db.VarChar(1000)
+  url               String     @db.VarChar(1000)
+  appleScheme       String?    @db.VarChar(1000)
+  androidScheme     String?    @db.VarChar(1000)
   // metadata
-  ogTitle       String?
-  ogDescription String?
-  ogImage       String?
-  favicon       String?
+  ogTitle           String?
+  ogDescription     String?
+  ogImage           String?
+  favicon           String?
   // qr
-  qrLight       String?       @default("white")
-  qrDark        String?       @default("black")
-  qrText        String?       @default("black")
-  qrLogo        String?
+  qrLight           String?    @default("white")
+  qrDark            String?    @default("black")
+  qrText            String?    @default("black")
+  qrLogo            String?
   // assets
-  trackApp      TrackAppLink? @relation("TrackAppLink")
-  playlist      Playlist?     @relation("PlaylistLink")
+  appleMusicTrack   Track?     @relation("TrackAppleMusicLink")
+  deezerTrack       Track?     @relation("TrackDeezerLink")
+  soundcloudTrack   Track?     @relation("TrackSoundcloudLink")
+  spotifyTrack      Track?     @relation("TrackSpotifyLink")
+  tidalTrack        Track?     @relation("TrackTidalLink")
+  youtubeTrack      Track?     @relation("TrackYoutubeLink")
+
+  playlist    Playlist?    @relation("PlaylistLink")
   // bio
-  bio           Bio?          @relation("LinkToBio", fields: [bioId], references: [id])
-  bioId         String?       @unique
-  buttons       Button[]
+  bio         Bio?         @relation("LinkToBio", fields: [bioId], references: [id])
+  bioId       String?      @unique
+  buttons     Button[]
   // short -> app link
-  shortLink     Link?         @relation("ShortToAppLink")
-  appLink       Link?         @relation("ShortToAppLink", fields: [appLinkId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  appLinkId     String?       @unique
+  shortLink   Link?        @relation("ShortToAppLink")
+  appLink     Link?        @relation("ShortToAppLink", fields: [appLinkId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  appLinkId   String?      @unique
   // ads
-  adCreatives   AdCreative[]
+  adCreatives AdCreative[]
   // events    
-  events        Event[]
+  events      Event[]
 
   delete Boolean? @default(false)
 
+  @@unique([socialForTeamId, app])
   @@unique([id, app])
   @@unique([handle, domain, app, slug])
-  @@index([userId, handle])
+  @@index([teamId, handle])
 }
 
 enum AppType {
@@ -242,30 +345,17 @@ enum LinkDomain {
   brl
 }
 
-model SocialLink {
-  user    User    @relation(fields: [userId], references: [id])
-  userId  String
-  link    Link    @relation(fields: [linkId, linkApp], references: [id, app])
-  linkApp AppType
-  linkId  String
-  display Boolean @default(true)
-
-  @@id([userId, linkApp, linkId])
-  @@unique([userId, linkApp])
-  @@unique([linkId, linkApp])
-}
-
 model AnalyticsEndpoint {
   id           String
-  user         User?             @relation(fields: [userId], references: [id])
-  userId       String?
+  team         Team              @relation(fields: [teamId], references: [id])
+  teamId       String            @default("") // todo - remove default and manually fix existing records
   platform     AnalyticsPlatform
   accessToken  String? // ideally this won't be needed
   eventReports EventReport[]
 
   @@id([platform, id])
-  @@unique([userId, platform, id])
-  @@index([userId])
+  @@unique([teamId, platform, id])
+  @@index([teamId])
 }
 
 enum AnalyticsPlatform {
@@ -278,15 +368,20 @@ enum AnalyticsPlatform {
 //* 👩‍🎤 bio 👩‍🎤 *//
 
 model Bio {
-  id                String       @id @default(cuid())
-  createdAt         DateTime     @default(now())
-  // user  
-  user              User         @relation("UserBio", fields: [userId, handle], references: [id, handle])
-  userId            String
-  rootForUser       User?        @relation("UserRootBio", fields: [rootForUserId], references: [id])
-  rootForUserId     String?      @unique
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  // team
+  team          Team     @relation("TeamBio", fields: [teamId, handle], references: [id, handle])
+  teamId        String
+  rootForTeam   Team?    @relation("TeamRootBio", fields: [rootForTeamId], references: [id])
+  rootForTeamId String?  @unique
+  // user              User         @relation("UserBio", fields: [userId, handle], references: [id, handle])
+  // userId            String
+  // rootForUser       User?        @relation("UserRootBio", fields: [rootForUserId], references: [id])
+  // rootForUserId     String?      @unique
+
   // 🔗 trigger [handle].barely.bio/[route || slug]/[slug?]
-  handle            String // handle pulled from user 👆  
+  handle            String // handle pulled from team 👆  
   route             String?
   slug              String?
   // 🔗 alias ([handle].brl.to/[slug] -> [handle].barely.bio/[...path])
@@ -312,10 +407,10 @@ model Bio {
   theme             BioTheme
   barelyBranding    Boolean      @default(true)
 
-  @@unique([userId, route, slug])
-  @@index([userId])
+  @@unique([teamId, route, slug])
+  @@index([teamId])
   @@index([handle])
-  @@index([userId, handle])
+  @@index([teamId, handle])
 }
 
 enum BioTheme {
@@ -332,8 +427,10 @@ enum BioImgShape {
 
 model Button {
   id          String      @id @default(cuid())
-  user        User        @relation(fields: [userId], references: [id])
-  userId      String
+  team        Team        @relation(fields: [teamId], references: [id])
+  teamId      String
+  // user        User        @relation(fields: [userId], references: [id])
+  // userId      String
   text        String?
   buttonColor String?
   textColor   String?
@@ -348,7 +445,7 @@ model Button {
   phone       String?
 
   @@index([formId])
-  @@index([userId])
+  @@index([teamId])
   @@index([linkId])
 }
 
@@ -385,11 +482,13 @@ model Form {
   buttons   Button[]
   responses FormResponse[]
 
-  user     User    @relation(fields: [userId], references: [id])
-  userId   String
-  artistId String?
+  team   Team   @relation(fields: [teamId], references: [id])
+  teamId String
+  // user     User    @relation(fields: [userId], references: [id])
+  // userId   String
+  // artistId String?
 
-  @@index([userId])
+  @@index([teamId])
 }
 
 enum FormPlatform {
@@ -420,11 +519,13 @@ model Campaign {
   stage        CampaignStage
   endDate      DateTime?
   // user
+  team         Team                   @relation(fields: [teamId], references: [id])
+  teamId       String
   createdBy    User                   @relation(fields: [createdById], references: [id])
   createdById  String
   // promoting
-  track        Track                  @relation(fields: [trackId], references: [id])
-  trackId      String
+  track        Track?                 @relation(fields: [trackId], references: [id])
+  trackId      String?
   playlist     Playlist?              @relation(fields: [playlistId], references: [id])
   playlistId   String?
   // ads
@@ -435,6 +536,7 @@ model Campaign {
   // transaction
   lineItems    LineItem[]
 
+  @@index([teamId])
   @@index([createdById])
   @@index([trackId])
   @@index([playlistId])
@@ -526,7 +628,7 @@ enum PitchReviewStage {
 
 model Placement {
   id               String      @id @default(cuid())
-  createdAt        DateTime    @default(now())
+  // createdAt        DateTime    @default(now())
   pitchReview      PitchReview @relation(fields: [pitchReviewId], references: [id])
   pitchReviewId    String
   // placement
@@ -574,9 +676,9 @@ model AdCampaign {
   metaTriggerFraction      Decimal?              @db.Decimal(10, 1)
   tikTokTriggerFraction    Decimal?              @db.Decimal(10, 1)
   // testing
-  testDemos                Demo[]
-  testGeoGroups            GeoGroup[]
-  testInterestGroups       InterestGroup[]
+  testDemos                Demo[] // todo - add back in
+  testGeoGroups            GeoGroup[] // todo - add back in
+  testInterestGroups       InterestGroup[] // todo - add back in
   testHeadlines            Headline[]
   testVidRenders           VidRender[]
   testTrackRenders         TrackRender[]
@@ -615,8 +717,8 @@ model AdSet {
   // update
   updates             AdSetUpdateRecord[]
   // clone
-  parentAdSetForClone AdSetClone[]        @relation("ParentAdSetForClone")
-  childAdSetFromClone AdSetClone[]        @relation("ChildAdSetFromClone")
+  parentAdSetForClone AdSetCloneRecord[]  @relation("ParentAdSetForClone")
+  childAdSetFromClone AdSetCloneRecord[]  @relation("ChildAdSetFromClone")
   // id
   metaId              String?
   tikTokId            String?
@@ -657,7 +759,7 @@ model AdSetUpdateRecord {
   @@index([audienceId])
 }
 
-model AdSetClone {
+model AdSetCloneRecord {
   id             String    @id @default(cuid())
   createdAt      DateTime  @default(now())
   parentAdSet    AdSet     @relation("ParentAdSetForClone", fields: [parentAdSetId], references: [id])
@@ -672,21 +774,23 @@ model AdSetClone {
   dailyBudget    Decimal?  @db.Decimal(10, 2)
   audience       Audience? @relation(fields: [audienceId], references: [id])
   audienceId     String?
-  // clone
-  clonedAdSet    AdSet?    @relation("ChildAdSetFromClone", fields: [clonedAdSetId], references: [id])
-  clonedAdSetId  String?
+  // child
+  childAdSet     AdSet?    @relation("ChildAdSetFromClone", fields: [childAdSetId], references: [id])
+  childAdSetId   String?
 
   @@index([parentAdSetId])
   @@index([audienceId])
-  @@index([clonedAdSetId])
+  @@index([childAdSetId])
 }
 
 model AdCreative {
   id               String    @id @default(cuid())
   name             String
   createdAt        DateTime  @default(now())
-  user             User      @relation(fields: [userId], references: [id])
-  userId           String
+  team             Team      @relation(fields: [teamId], references: [id])
+  teamId           String
+  // user             User      @relation(fields: [userId], references: [id])
+  // userId           String? // todo - delete
   // account
   metaAccount      Account   @relation("AdCreativeMetaAccount", fields: [metaAccountId], references: [id])
   metaAccountId    String
@@ -708,7 +812,7 @@ model AdCreative {
   // children
   ads              Ad[]
 
-  @@index([userId])
+  @@index([teamId])
   @@index([metaAccountId])
   @@index([tikTokAccountId])
   @@index([headlineId])
@@ -748,22 +852,25 @@ model Ad {
 //* 🎯 targeting 🎯 *//
 
 model Audience {
-  id                     String          @id @default(cuid())
-  createdAt              DateTime        @default(now())
-  name                   String?
-  user                   User?           @relation(fields: [userId], references: [id])
-  userId                 String?
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  name      String?
+  team      Team     @relation(fields: [teamId], references: [id])
+  teamId    String
+  // user                   User?           @relation(fields: [userId], references: [id])
+  // userId                 String?
+
   // demo
-  demo                   Demo            @relation(fields: [demoId], references: [id])
+  demo                   Demo            @relation(fields: [demoId], references: [id]) // todo - add back in
   demoId                 String
   // geo
-  geoGroups              GeoGroup[]
+  geoGroups              GeoGroup[] // todo - add back in
   // interests    
-  includeInterestGroups  InterestGroup[] @relation("TargetIncludeInterestGroups")
-  excludeInterestGroups  InterestGroup[] @relation("TargetExcludeInterestGroups")
+  includeInterestGroups  InterestGroup[] @relation("TargetIncludeInterestGroups") // todo - add back in
+  excludeInterestGroups  InterestGroup[] @relation("TargetExcludeInterestGroups") // todo - add back in
   // custom
-  includeVidViewsGroups  VidViewsGroup[] @relation("TargetIncludeVidViewsGroup")
-  excludeVidViewsGroups  VidViewsGroup[] @relation("TargetExcludeVidViewsGroup")
+  includeVidViewsGroups  VidViewsGroup[] @relation("TargetIncludeVidViewsGroup") // todo - add back in
+  excludeVidViewsGroups  VidViewsGroup[] @relation("TargetExcludeVidViewsGroup") // todo - add back in
   // meta
   metaId                 String?
   metaAudienceLowerBound Int?
@@ -772,22 +879,29 @@ model Audience {
   tikTokId               String?
 
   adSets          AdSet[]
-  forAdSetClones  AdSetClone[]
+  forAdSetClones  AdSetCloneRecord[]
   forAdSetUpdates AdSetUpdateRecord[]
 
-  @@index([userId])
+  @@index([teamId])
   @@index([demoId])
 }
 
 model Demo {
-  id          String       @id @default(cuid())
+  id          String  @id @default(cuid())
   name        String
-  ageMin      Int          @default(18)
+  ageMin      Int     @default(18)
   ageMax      Int
   gender      Gender
   onlyEnglish Boolean
+
+  team   Team?   @relation(fields: [teamId], references: [id])
+  teamId String?
+  public Boolean @default(false)
+
   audiences   Audience[]
   adCampaigns AdCampaign[]
+
+  @@index([teamId])
 }
 
 enum Gender {
@@ -797,11 +911,18 @@ enum Gender {
 }
 
 model GeoGroup {
-  id              String       @id @default(cuid())
-  name            String
-  countries       Country[]
+  id        String    @id @default(cuid())
+  name      String
+  countries Country[]
+
+  team   Team?   @relation(fields: [teamId], references: [id])
+  teamId String?
+  public Boolean @default(false)
+
   audiences       Audience[]
   adCampaignTests AdCampaign[]
+
+  @@index([teamId])
 }
 
 model Country {
@@ -814,6 +935,7 @@ model Country {
   metaAudienceUpperBound Int?
   geoGroups              GeoGroup[]
 }
+// todo - add back in
 
 enum CountryColorCode {
   red
@@ -829,7 +951,13 @@ model InterestGroup {
   includeIn   Audience[]   @relation("TargetIncludeInterestGroups")
   excludeIn   Audience[]   @relation("TargetExcludeInterestGroups")
   adCampaigns AdCampaign[]
+  team        Team?        @relation(fields: [teamId], references: [id])
+  teamId      String?
+  public      Boolean      @default(false)
+
+  @@index([teamId])
 }
+// todo - add back in
 
 model Interest {
   id                     String          @id @default(cuid())
@@ -841,6 +969,7 @@ model Interest {
   metaAudienceLowerBound Int
   metaAudienceUpperBound Int
 }
+// todo - add back in
 
 model VidViewsGroup {
   id                     String              @id @default(cuid())
@@ -857,7 +986,13 @@ model VidViewsGroup {
   metaAudienceUpperBound Int
   tiktokId               String
   tiktokName             String
+
+  team   Team?   @relation(fields: [teamId], references: [id])
+  teamId String?
+
+  @@index([teamId])
 }
+// todo - add back in
 
 enum VidViewsMetric {
   view_1s
@@ -879,7 +1014,7 @@ model VisitorSession {
   id                String           @id @default(cuid())
   createdAt         DateTime         @default(now())
   events            Event[]
-  externalWebsite   ExternalWebsite? @relation(fields: [externalWebsiteId], references: [id])
+  externalWebsite   ExternalWebsite? @relation(fields: [externalWebsiteId], references: [id]) // todo - add back in
   externalWebsiteId String?
   // user - device
   browserName       String?
@@ -962,14 +1097,13 @@ model ExternalWebsite {
   id              String           @id @default(cuid())
   createdAt       DateTime         @default(now())
   name            String
-  // 
-  user            User             @relation(fields: [userId], references: [id])
-  userId          String
-  artistId        String?
+  team            Team?            @relation(fields: [teamId], references: [id])
+  teamId          String?
   visitorSessions VisitorSession[]
 
-  @@index([userId])
+  @@index([teamId])
 }
+// todo - add back in
 
 model Stat {
   id           String   @id @default(cuid())
@@ -1016,7 +1150,8 @@ enum StreamingPlatform {
   youtube
 }
 
-//* 🧰 dev 🧰 *//
+//* 🧰 dev 🧰 *//  
+
 model Epic {
   id                 String    @id @default(cuid())
   createdAt          DateTime  @default(now())
@@ -1033,14 +1168,49 @@ model Epic {
   createdById        String
   assignedTo         User      @relation("EpicAssignedToUser", fields: [assignedToId], references: [id])
   assignedToId       String
-  forUser            User?     @relation("EpicForUser", fields: [forUserId], references: [id])
-  forUserId          String?
+  team               Team      @relation(fields: [teamId], references: [id])
+  teamId             String
+  // forUser            User?     @relation("EpicForUser", fields: [forUserId], references: [id])
+  // forUserId          String?
   // children
   stories            Story[]
 
+  @@index([teamId])
   @@index([createdById])
   @@index([assignedToId])
-  @@index([forUserId])
+}
+
+model StoryBoard {
+  id          String   @id @default(cuid())
+  name        String
+  createdAt   DateTime @default(now())
+  createdBy   User     @relation("BoardCreatedByUser", fields: [createdById], references: [id])
+  createdById String
+  members     User[]   @relation("BoardAssignedToUsers")
+
+  color   String?
+  columns StoryColumn[]
+
+  team   Team   @relation(fields: [teamId], references: [id])
+  teamId String
+
+  @@unique([name, createdById])
+  @@index([createdById])
+  @@index([teamId])
+}
+
+model StoryColumn {
+  id           String              @id @default(cuid())
+  name         String
+  board        StoryBoard          @relation(fields: [boardId], references: [id])
+  boardId      String
+  lexoRank     String
+  stories      Story[]
+  prevStoryFor StoryUpdateRecord[] @relation("StoryUpdatePrevColumn")
+  newStoryFor  StoryUpdateRecord[] @relation("StoryUpdateNewColumn")
+
+  @@unique([name, boardId])
+  @@index([boardId])
 }
 
 model Story {
@@ -1056,8 +1226,8 @@ model Story {
   createdById  String
   assignedTo   User?       @relation("StoryAssignedToUser", fields: [assignedToId], references: [id])
   assignedToId String?
-  forUser      User?       @relation("StoryForUser", fields: [forUserId], references: [id])
-  forUserId    String?
+  // forUser      User?       @relation("StoryForUser", fields: [forUserId], references: [id])
+  // forUserId    String?
   epic         Epic?       @relation(fields: [epicId], references: [id])
   epicId       String?
   column       StoryColumn @relation(fields: [columnId], references: [id])
@@ -1066,40 +1236,12 @@ model Story {
   update StoryUpdateRecord[]
   tasks  Task[]
 
+  // @@index([teamId])
   @@index([createdById])
   @@index([assignedToId])
-  @@index([forUserId])
+  // @@index([forUserId])
   @@index([epicId])
   @@index([columnId])
-}
-
-model StoryBoard {
-  id          String   @id @default(cuid())
-  name        String
-  createdAt   DateTime @default(now())
-  createdBy   User     @relation("BoardCreatedByUser", fields: [createdById], references: [id])
-  createdById String
-  members     User[]   @relation("BoardAssignedToUsers")
-
-  color   String?
-  columns StoryColumn[]
-
-  @@unique([name, createdById])
-  @@index([createdById])
-}
-
-model StoryColumn {
-  id           String              @id @default(cuid())
-  name         String
-  board        StoryBoard          @relation(fields: [boardId], references: [id])
-  boardId      String
-  lexoRank     String
-  stories      Story[]
-  prevStoryFor StoryUpdateRecord[] @relation("StoryUpdatePrevColumn")
-  newStoryFor  StoryUpdateRecord[] @relation("StoryUpdateNewColumn")
-
-  @@unique([name, boardId])
-  @@index([boardId])
 }
 
 model StoryUpdateRecord {
@@ -1137,7 +1279,10 @@ model Task {
   storyId    String?
   delete     Boolean
   deleteDate DateTime?
+  team       Team?     @relation(fields: [teamId], references: [id])
+  teamId     String?
 
+  @@index([teamId])
   @@index([createdById])
   @@index([assignedToId])
   @@index([storyId])
@@ -1245,62 +1390,96 @@ model Task {
 //* 🏦 assets 🏦 *//
 
 model Track {
-  id           String         @id @default(cuid())
-  name         String
-  artist       User           @relation(fields: [artistId], references: [id])
-  artistId     String
+  id               String        @id @default(cuid())
+  name             String
+  team             Team          @relation(fields: [teamId], references: [id])
+  teamId           String
+  // artist       User           @relation(fields: [artistId], references: [id])
+  // artistId     String
   // external ids
-  isrc         String?
-  appleMusicId String?        @unique
-  deezerId     String?        @unique
-  soundcloudId String?        @unique
-  spotifyId    String?        @unique
-  tidalId      String?        @unique
-  youtubeId    String?        @unique
+  isrc             String?
+  appleMusicId     String?       @unique
+  deezerId         String?       @unique
+  soundcloudId     String?       @unique
+  spotifyId        String?       @unique
+  tidalId          String?       @unique
+  youtubeId        String?       @unique
   // metadata
-  released     Boolean
-  releaseDate  DateTime?
+  released         Boolean
+  releaseDate      DateTime?
   // files 
-  masterMp3    File?          @relation("TrackMasterMp3", fields: [masterMp3Id], references: [id])
-  masterMp3Id  String?        @unique
-  masterWav    File?          @relation("TrackMasterWav", fields: [masterWavId], references: [id])
-  masterWavId  String?        @unique
-  vids         File[]         @relation("TrackVids")
-  trackRenders TrackRender[]
-  // links
-  appLinks     TrackAppLink[]
+  masterMp3        File?         @relation("TrackMasterMp3", fields: [masterMp3Id], references: [id])
+  masterMp3Id      String?       @unique
+  masterWav        File?         @relation("TrackMasterWav", fields: [masterWavId], references: [id])
+  masterWavId      String?       @unique
+  vids             File[]        @relation("TrackVids")
+  trackRenders     TrackRender[]
+  // links  
+  appleMusicLink   Link?         @relation("TrackAppleMusicLink", fields: [appleMusicLinkId], references: [id])
+  appleMusicLinkId String?
+  deezerLink       Link?         @relation("TrackDeezerLink", fields: [deezerLinkId], references: [id])
+  deezerLinkId     String?
+  soundcloudLink   Link?         @relation("TrackSoundcloudLink", fields: [soundcloudLinkId], references: [id])
+  soundcloudLinkId String?
+  spotifyLink      Link?         @relation("TrackSpotifyLink", fields: [spotifyLinkId], references: [id])
+  spotifyLinkId    String?
+  tidalLink        Link?         @relation("TrackTidalLink", fields: [tidalLinkId], references: [id])
+  tidalLinkId      String?
+  youtubeLink      Link?         @relation("TrackYoutubeLink", fields: [youtubeLinkId], references: [id])
+  youtubeLinkId    String?
   // campaigns
-  campaigns    Campaign[]
-  stats        Stat[]
+  campaigns        Campaign[]
+  stats            Stat[]
 
-  @@unique([artistId, name])
-  @@unique([id, spotifyId, appleMusicId, youtubeId])
+  @@unique([teamId, name])
+  @@unique([appleMusicLinkId])
+  @@unique([deezerLinkId])
+  @@unique([soundcloudLinkId])
+  @@unique([spotifyLinkId])
+  @@unique([tidalLinkId])
+  @@unique([youtubeLinkId])
 }
 
-model TrackAppLink {
-  track   Track   @relation(fields: [trackId], references: [id])
-  trackId String
-  link    Link    @relation("TrackAppLink", fields: [linkId, linkApp], references: [id, app])
-  linkApp AppType
-  linkId  String
+// model TrackAppLink {
+//   track   Track   @relation(fields: [trackId], references: [id])
+//   trackId String
+//   link    Link    @relation("TrackAppLink", fields: [linkId, linkApp], references: [id, app])
+//   linkApp AppType
+//   linkId  String
 
-  @@id([trackId, linkApp, linkId])
-  @@unique([linkId, linkApp])
-  @@unique([trackId, linkApp])
-}
+//   @@id([trackId, linkApp, linkId])
+//   @@unique([linkId, linkApp])
+//   @@unique([trackId, linkApp])
+// }
 
 model Playlist {
-  id           String            @id @default(cuid())
-  artist       User              @relation(fields: [artistId], references: [id]) // which artist is the playlist for?
-  artistId     String
+  id                  String   @id @default(cuid())
+  team                Team     @relation(fields: [teamId], references: [id])
+  teamId              String
+  // artist       User              @relation(fields: [artistId], references: [id]) // which artist is the playlist for?
+  // artistId     String
   // streaming
-  accounts     PlaylistAccount[]
-  appleMusicId String?           @unique
-  deezerId     String?           @unique
-  soundcloudId String?           @unique
-  spotifyId    String?           @unique
-  tidalId      String?           @unique
-  youtubeId    String?           @unique
+  // accounts     PlaylistAccount[]
+  appleMusicId        String?  @unique
+  appleMusicAccount   Account? @relation("PlaylistAppleMusicAccount", fields: [appleMusicAccountId], references: [id])
+  appleMusicAccountId String?
+
+  deezerId        String?  @unique
+  deezerAccount   Account? @relation("PlaylistDeezerAccount", fields: [deezerAccountId], references: [id])
+  deezerAccountId String?
+
+  soundCloudId        String?  @unique
+  soundCloudAccount   Account? @relation("PlaylistSoundCloudAccount", fields: [soundCloudAccountId], references: [id])
+  soundCloudAccountId String?
+  spotifyId           String?  @unique
+  spotifyAccount      Account? @relation("PlaylistSpotifyAccount", fields: [spotifyAccountId], references: [id])
+  spotifyAccountId    String?
+  tidalId             String?  @unique
+  tidalAccount        Account? @relation("PlaylistTidalAccount", fields: [tidalAccountId], references: [id])
+  tidalAccountId      String?
+  youtubeId           String?  @unique
+  youtubeAccount      Account? @relation("PlaylistYoutubeAccount", fields: [youtubeAccountId], references: [id])
+  youtubeAccountId    String?
 
   // metadata
   name          String
@@ -1326,29 +1505,27 @@ model Playlist {
   // analytics
   stats         Stat[]
 
-  @@index([artistId])
+  @@index([appleMusicAccountId])
+  @@index([deezerAccountId])
+  @@index([soundCloudAccountId])
+  @@index([spotifyAccountId])
+  @@index([tidalAccountId])
+  @@index([youtubeAccountId])
+  @@index([teamId])
   @@index([coverId])
   @@index([cloneParentId])
-}
-
-model PlaylistAccount {
-  playlist   Playlist @relation(fields: [playlistId], references: [id])
-  playlistId String
-  account    Account  @relation(fields: [accountId], references: [id])
-  accountId  String
-
-  @@id([playlistId, accountId])
-  @@unique([playlistId, accountId])
-  @@index([accountId])
 }
 
 //* 🗄 files 🗄 *//
 
 model File {
-  id                     String               @id @default(cuid())
-  owner                  User?                @relation(fields: [ownerId], references: [id])
-  ownerId                String
+  id     String @id @default(cuid())
+  team   Team   @relation(fields: [teamId], references: [id])
+  teamId String
+
   createdAt              DateTime             @default(now())
+  creator                User?                @relation(fields: [creatorId], references: [id])
+  creatorId              String
   type                   FileType
   name                   String
   extension              FileExtension
@@ -1380,9 +1557,10 @@ model File {
   // adCreative
   adCreatives            AdCreative[]
   // targeting
-  vidViewsGroups         VidViewsGroup[]
+  vidViewsGroups         VidViewsGroup[] // todo - add back in
 
-  @@index([ownerId])
+  @@index([teamId])
+  @@index([creatorId])
   @@index([vidForTrackId])
   @@index([thumbnailForId])
 }
@@ -1406,6 +1584,10 @@ enum FileExtension {
 
 model VidRender {
   id                String       @id @default(cuid())
+  createdBy         User         @relation(fields: [createdById], references: [id])
+  createdById       String
+  team              Team         @relation(fields: [teamId], references: [id])
+  teamId            String
   renderStatus      RenderStatus
   renderFailedError String?      @db.VarChar(1000)
   renderedVid       File         @relation("VidRender", fields: [renderedVidId], references: [id])
@@ -1441,6 +1623,8 @@ model VidRender {
   adCampaign        AdCampaign?  @relation(fields: [adCampaignId], references: [id])
   adCampaignId      String?
 
+  @@index([teamId])
+  @@index([createdById])
   // @@index([userId])
   @@index([trackRenderId])
   @@index([parentVidId])
@@ -1456,6 +1640,10 @@ enum RenderStatus {
 
 model TrackRender {
   id                 String       @id @default(cuid())
+  createdBy          User         @relation(fields: [createdById], references: [id])
+  createdById        String
+  team               Team         @relation(fields: [teamId], references: [id])
+  teamId             String
   track              Track        @relation(fields: [trackId], references: [id])
   trackId            String
   trackTrimIn        Decimal      @db.Decimal(10, 1)
@@ -1463,11 +1651,17 @@ model TrackRender {
   vidRenders         VidRender[]
 
   @@index([trackId])
+  @@index([teamId])
+  @@index([createdById])
 }
 
 model PlaylistCoverRender {
   id              String       @id @default(cuid())
   name            String?
+  createdBy       User         @relation(fields: [createdById], references: [id])
+  createdById     String
+  team            Team         @relation(fields: [teamId], references: [id])
+  teamId          String
   // image
   img             Boolean
   imgSrc          String
@@ -1497,17 +1691,31 @@ model PlaylistCoverRender {
   renderedPlaylistCoverId String?
   userId                  String?
 
+  @@index([teamId])
+  @@index([createdById])
   @@index([playlistId])
 }
 
 //* 🤝 transactions 🤝 *//
 
+model Subscription {
+  id        String           @id @default(cuid())
+  type      SubscriptionType
+  lineItems LineItem[]
+}
+
+enum SubscriptionType {
+  campaignMaintenance
+  links
+}
+
 model LineItem {
-  id         String   @id @default(cuid())
-  createdAt  DateTime @default(now())
-  name       String
-  campaign   Campaign @relation(fields: [campaignId], references: [id])
-  campaignId String
+  id             String        @id @default(cuid())
+  name           String
+  campaign       Campaign?     @relation(fields: [campaignId], references: [id])
+  campaignId     String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+  subscriptionId String?
 
   paymentType                  PaymentType
   setupPrice                   Decimal?    @db.Decimal(10, 2)
@@ -1518,11 +1726,12 @@ model LineItem {
 
   totalDue Decimal? @db.Decimal(10, 2)
 
-  transactions  Transaction? @relation(fields: [transactionId], references: [id])
+  transaction   Transaction? @relation(fields: [transactionId], references: [id])
   transactionId String?
 
   @@index([campaignId])
   @@index([transactionId])
+  @@index([subscriptionId])
 }
 
 enum PaymentType {

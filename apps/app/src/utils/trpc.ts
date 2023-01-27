@@ -5,8 +5,6 @@ import { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 import type { AppRouter } from '@barely/api';
 import { transformer } from '@barely/api/transformer';
 
-import { baseUrl } from '@barely/utils/edge';
-
 import env from '~/env';
 
 export const trpc = createTRPCNext<AppRouter>({
@@ -20,10 +18,7 @@ export const trpc = createTRPCNext<AppRouter>({
 						(opts.direction === 'down' && opts.result instanceof Error),
 				}),
 				httpBatchLink({
-					url: `${baseUrl.get({
-						prodBaseUrl: env.NEXT_PUBLIC_APP_BASE_URL,
-						devPort: env.NEXT_PUBLIC_APP_DEV_PORT,
-					})}/api/trpc`,
+					url: `${env.NEXT_PUBLIC_APP_BASE_URL}/api/trpc`,
 				}),
 			],
 		};

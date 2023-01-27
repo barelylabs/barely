@@ -26,6 +26,7 @@ async function SignInPage({ searchParams }: SignInPageProps) {
 						// logoPlacement: 'outside',
 						// logoImageUrl: '/logo+barely-io__transparent+dark_txt.png',
 					},
+					elements: { formButtonPrimary: 'bg-purple-500' },
 				}}
 			/>
 		</div>

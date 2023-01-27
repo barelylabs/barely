@@ -4,7 +4,7 @@ import { AdCampaignRelations, adCampaignRelationsSchema, adCampaignBaseSchema } 
 import { AudienceRelations, audienceRelationsSchema, audienceBaseSchema } from "./audience"
 import { AdRelations, adRelationsSchema, adBaseSchema } from "./ad"
 import { AdSetUpdateRecordRelations, adSetUpdateRecordRelationsSchema, adSetUpdateRecordBaseSchema } from "./adsetupdaterecord"
-import { AdSetCloneRelations, adSetCloneRelationsSchema, adSetCloneBaseSchema } from "./adsetclone"
+import { AdSetCloneRecordRelations, adSetCloneRecordRelationsSchema, adSetCloneRecordBaseSchema } from "./adsetclonerecord"
 
 export const adSetBaseSchema = z.object({
   id: z.string(),
@@ -30,8 +30,8 @@ export interface AdSetRelations {
   audience: z.infer<typeof audienceBaseSchema> & AudienceRelations
   ads: (z.infer<typeof adBaseSchema> & AdRelations)[]
   updates: (z.infer<typeof adSetUpdateRecordBaseSchema> & AdSetUpdateRecordRelations)[]
-  parentAdSetForClone: (z.infer<typeof adSetCloneBaseSchema> & AdSetCloneRelations)[]
-  childAdSetFromClone: (z.infer<typeof adSetCloneBaseSchema> & AdSetCloneRelations)[]
+  parentAdSetForClone: (z.infer<typeof adSetCloneRecordBaseSchema> & AdSetCloneRecordRelations)[]
+  childAdSetFromClone: (z.infer<typeof adSetCloneRecordBaseSchema> & AdSetCloneRecordRelations)[]
 }
 
 export const adSetRelationsSchema: z.ZodObject<{
@@ -41,8 +41,8 @@ export const adSetRelationsSchema: z.ZodObject<{
   audience: z.lazy(() => audienceBaseSchema.merge(audienceRelationsSchema)),
   ads: z.lazy(() => adBaseSchema.merge(adRelationsSchema)).array(),
   updates: z.lazy(() => adSetUpdateRecordBaseSchema.merge(adSetUpdateRecordRelationsSchema)).array(),
-  parentAdSetForClone: z.lazy(() => adSetCloneBaseSchema.merge(adSetCloneRelationsSchema)).array(),
-  childAdSetFromClone: z.lazy(() => adSetCloneBaseSchema.merge(adSetCloneRelationsSchema)).array(),
+  parentAdSetForClone: z.lazy(() => adSetCloneRecordBaseSchema.merge(adSetCloneRecordRelationsSchema)).array(),
+  childAdSetFromClone: z.lazy(() => adSetCloneRecordBaseSchema.merge(adSetCloneRecordRelationsSchema)).array(),
 })
 
 export const adSetSchema = adSetBaseSchema

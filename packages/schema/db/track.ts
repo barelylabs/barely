@@ -1,15 +1,15 @@
 import * as z from "zod"
-import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
+import { TeamRelations, teamRelationsSchema, teamBaseSchema } from "./team"
 import { FileRelations, fileRelationsSchema, fileBaseSchema } from "./file"
 import { TrackRenderRelations, trackRenderRelationsSchema, trackRenderBaseSchema } from "./trackrender"
-import { TrackAppLinkRelations, trackAppLinkRelationsSchema, trackAppLinkBaseSchema } from "./trackapplink"
+import { LinkRelations, linkRelationsSchema, linkBaseSchema } from "./link"
 import { CampaignRelations, campaignRelationsSchema, campaignBaseSchema } from "./campaign"
 import { StatRelations, statRelationsSchema, statBaseSchema } from "./stat"
 
 export const trackBaseSchema = z.object({
   id: z.string(),
   name: z.string(),
-  artistId: z.string(),
+  teamId: z.string(),
   isrc: z.string().nullable(),
   appleMusicId: z.string().nullable(),
   deezerId: z.string().nullable(),
@@ -21,15 +21,26 @@ export const trackBaseSchema = z.object({
   releaseDate: z.date().nullable(),
   masterMp3Id: z.string().nullable(),
   masterWavId: z.string().nullable(),
+  appleMusicLinkId: z.string().nullable(),
+  deezerLinkId: z.string().nullable(),
+  soundcloudLinkId: z.string().nullable(),
+  spotifyLinkId: z.string().nullable(),
+  tidalLinkId: z.string().nullable(),
+  youtubeLinkId: z.string().nullable(),
 })
 
 export interface TrackRelations {
-  artist: z.infer<typeof userBaseSchema> & UserRelations
+  team: z.infer<typeof teamBaseSchema> & TeamRelations
   masterMp3: (z.infer<typeof fileBaseSchema> & FileRelations) | null
   masterWav: (z.infer<typeof fileBaseSchema> & FileRelations) | null
   vids: (z.infer<typeof fileBaseSchema> & FileRelations)[]
   trackRenders: (z.infer<typeof trackRenderBaseSchema> & TrackRenderRelations)[]
-  appLinks: (z.infer<typeof trackAppLinkBaseSchema> & TrackAppLinkRelations)[]
+  appleMusicLink: (z.infer<typeof linkBaseSchema> & LinkRelations) | null
+  deezerLink: (z.infer<typeof linkBaseSchema> & LinkRelations) | null
+  soundcloudLink: (z.infer<typeof linkBaseSchema> & LinkRelations) | null
+  spotifyLink: (z.infer<typeof linkBaseSchema> & LinkRelations) | null
+  tidalLink: (z.infer<typeof linkBaseSchema> & LinkRelations) | null
+  youtubeLink: (z.infer<typeof linkBaseSchema> & LinkRelations) | null
   campaigns: (z.infer<typeof campaignBaseSchema> & CampaignRelations)[]
   stats: (z.infer<typeof statBaseSchema> & StatRelations)[]
 }
@@ -37,12 +48,17 @@ export interface TrackRelations {
 export const trackRelationsSchema: z.ZodObject<{
   [K in keyof TrackRelations]: z.ZodType<TrackRelations[K]>
 }> = z.object({
-  artist: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
+  team: z.lazy(() => teamBaseSchema.merge(teamRelationsSchema)),
   masterMp3: z.lazy(() => fileBaseSchema.merge(fileRelationsSchema)).nullable(),
   masterWav: z.lazy(() => fileBaseSchema.merge(fileRelationsSchema)).nullable(),
   vids: z.lazy(() => fileBaseSchema.merge(fileRelationsSchema)).array(),
   trackRenders: z.lazy(() => trackRenderBaseSchema.merge(trackRenderRelationsSchema)).array(),
-  appLinks: z.lazy(() => trackAppLinkBaseSchema.merge(trackAppLinkRelationsSchema)).array(),
+  appleMusicLink: z.lazy(() => linkBaseSchema.merge(linkRelationsSchema)).nullable(),
+  deezerLink: z.lazy(() => linkBaseSchema.merge(linkRelationsSchema)).nullable(),
+  soundcloudLink: z.lazy(() => linkBaseSchema.merge(linkRelationsSchema)).nullable(),
+  spotifyLink: z.lazy(() => linkBaseSchema.merge(linkRelationsSchema)).nullable(),
+  tidalLink: z.lazy(() => linkBaseSchema.merge(linkRelationsSchema)).nullable(),
+  youtubeLink: z.lazy(() => linkBaseSchema.merge(linkRelationsSchema)).nullable(),
   campaigns: z.lazy(() => campaignBaseSchema.merge(campaignRelationsSchema)).array(),
   stats: z.lazy(() => statBaseSchema.merge(statRelationsSchema)).array(),
 })
@@ -62,9 +78,15 @@ export const trackCreateSchema = trackBaseSchema
     releaseDate: trackBaseSchema.shape.releaseDate.unwrap(),
     masterMp3Id: trackBaseSchema.shape.masterMp3Id.unwrap(),
     masterWavId: trackBaseSchema.shape.masterWavId.unwrap(),
+    appleMusicLinkId: trackBaseSchema.shape.appleMusicLinkId.unwrap(),
+    deezerLinkId: trackBaseSchema.shape.deezerLinkId.unwrap(),
+    soundcloudLinkId: trackBaseSchema.shape.soundcloudLinkId.unwrap(),
+    spotifyLinkId: trackBaseSchema.shape.spotifyLinkId.unwrap(),
+    tidalLinkId: trackBaseSchema.shape.tidalLinkId.unwrap(),
+    youtubeLinkId: trackBaseSchema.shape.youtubeLinkId.unwrap(),
   }).partial({
     id: true,
-    artistId: true,
+    teamId: true,
     isrc: true,
     appleMusicId: true,
     deezerId: true,
@@ -79,7 +101,18 @@ export const trackCreateSchema = trackBaseSchema
     masterWavId: true,
     vids: true,
     trackRenders: true,
-    appLinks: true,
+    appleMusicLink: true,
+    appleMusicLinkId: true,
+    deezerLink: true,
+    deezerLinkId: true,
+    soundcloudLink: true,
+    soundcloudLinkId: true,
+    spotifyLink: true,
+    spotifyLinkId: true,
+    tidalLink: true,
+    tidalLinkId: true,
+    youtubeLink: true,
+    youtubeLinkId: true,
     campaigns: true,
     stats: true,
   })
@@ -96,6 +129,12 @@ export const trackUpdateSchema = trackBaseSchema
     releaseDate: trackBaseSchema.shape.releaseDate.unwrap(),
     masterMp3Id: trackBaseSchema.shape.masterMp3Id.unwrap(),
     masterWavId: trackBaseSchema.shape.masterWavId.unwrap(),
+    appleMusicLinkId: trackBaseSchema.shape.appleMusicLinkId.unwrap(),
+    deezerLinkId: trackBaseSchema.shape.deezerLinkId.unwrap(),
+    soundcloudLinkId: trackBaseSchema.shape.soundcloudLinkId.unwrap(),
+    spotifyLinkId: trackBaseSchema.shape.spotifyLinkId.unwrap(),
+    tidalLinkId: trackBaseSchema.shape.tidalLinkId.unwrap(),
+    youtubeLinkId: trackBaseSchema.shape.youtubeLinkId.unwrap(),
   })
   .partial()
   

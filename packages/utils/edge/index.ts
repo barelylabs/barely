@@ -1,5 +1,4 @@
 export * as handleUndefined from './handleUndefined';
-export * as baseUrl from './baseUrl';
 export * from './cn';
 
 export * as _json from './_json';

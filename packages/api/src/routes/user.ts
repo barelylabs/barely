@@ -2,7 +2,7 @@ import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { router, publicProcedure, privateProcedure } from '../trpc';
 // import { auth, email } from '@barely/utils/node';
-// import { userCreateSchema } from '@barely/schema/db';
+import { userCreateSchema } from '@barely/schema/db';
 
 export const userRouter = router({
 	current: publicProcedure.query(({ ctx }) => {
@@ -18,6 +18,13 @@ export const userRouter = router({
 			});
 			return user;
 		}),
+	create: publicProcedure.input(userCreateSchema).mutation(async ({ ctx, input }) => {
+		const { id, firstName, lastName, email, phone, marketing } = input;
+		const newUser = await ctx.prisma.user.create({
+			data: { ...input },
+		});
+		return newUser;
+	}),
 
 	// newUser: publicProcedure.input()
 

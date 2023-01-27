@@ -1,18 +1,18 @@
 import * as z from "zod"
-import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
+import { TeamRelations, teamRelationsSchema, teamBaseSchema } from "./team"
 import { DemoRelations, demoRelationsSchema, demoBaseSchema } from "./demo"
 import { GeoGroupRelations, geoGroupRelationsSchema, geoGroupBaseSchema } from "./geogroup"
 import { InterestGroupRelations, interestGroupRelationsSchema, interestGroupBaseSchema } from "./interestgroup"
 import { VidViewsGroupRelations, vidViewsGroupRelationsSchema, vidViewsGroupBaseSchema } from "./vidviewsgroup"
 import { AdSetRelations, adSetRelationsSchema, adSetBaseSchema } from "./adset"
-import { AdSetCloneRelations, adSetCloneRelationsSchema, adSetCloneBaseSchema } from "./adsetclone"
+import { AdSetCloneRecordRelations, adSetCloneRecordRelationsSchema, adSetCloneRecordBaseSchema } from "./adsetclonerecord"
 import { AdSetUpdateRecordRelations, adSetUpdateRecordRelationsSchema, adSetUpdateRecordBaseSchema } from "./adsetupdaterecord"
 
 export const audienceBaseSchema = z.object({
   id: z.string(),
   createdAt: z.date(),
   name: z.string().nullable(),
-  userId: z.string().nullable(),
+  teamId: z.string(),
   demoId: z.string(),
   metaId: z.string().nullable(),
   metaAudienceLowerBound: z.number().int().nullable(),
@@ -21,7 +21,7 @@ export const audienceBaseSchema = z.object({
 })
 
 export interface AudienceRelations {
-  user: (z.infer<typeof userBaseSchema> & UserRelations) | null
+  team: z.infer<typeof teamBaseSchema> & TeamRelations
   demo: z.infer<typeof demoBaseSchema> & DemoRelations
   geoGroups: (z.infer<typeof geoGroupBaseSchema> & GeoGroupRelations)[]
   includeInterestGroups: (z.infer<typeof interestGroupBaseSchema> & InterestGroupRelations)[]
@@ -29,14 +29,14 @@ export interface AudienceRelations {
   includeVidViewsGroups: (z.infer<typeof vidViewsGroupBaseSchema> & VidViewsGroupRelations)[]
   excludeVidViewsGroups: (z.infer<typeof vidViewsGroupBaseSchema> & VidViewsGroupRelations)[]
   adSets: (z.infer<typeof adSetBaseSchema> & AdSetRelations)[]
-  forAdSetClones: (z.infer<typeof adSetCloneBaseSchema> & AdSetCloneRelations)[]
+  forAdSetClones: (z.infer<typeof adSetCloneRecordBaseSchema> & AdSetCloneRecordRelations)[]
   forAdSetUpdates: (z.infer<typeof adSetUpdateRecordBaseSchema> & AdSetUpdateRecordRelations)[]
 }
 
 export const audienceRelationsSchema: z.ZodObject<{
   [K in keyof AudienceRelations]: z.ZodType<AudienceRelations[K]>
 }> = z.object({
-  user: z.lazy(() => userBaseSchema.merge(userRelationsSchema)).nullable(),
+  team: z.lazy(() => teamBaseSchema.merge(teamRelationsSchema)),
   demo: z.lazy(() => demoBaseSchema.merge(demoRelationsSchema)),
   geoGroups: z.lazy(() => geoGroupBaseSchema.merge(geoGroupRelationsSchema)).array(),
   includeInterestGroups: z.lazy(() => interestGroupBaseSchema.merge(interestGroupRelationsSchema)).array(),
@@ -44,7 +44,7 @@ export const audienceRelationsSchema: z.ZodObject<{
   includeVidViewsGroups: z.lazy(() => vidViewsGroupBaseSchema.merge(vidViewsGroupRelationsSchema)).array(),
   excludeVidViewsGroups: z.lazy(() => vidViewsGroupBaseSchema.merge(vidViewsGroupRelationsSchema)).array(),
   adSets: z.lazy(() => adSetBaseSchema.merge(adSetRelationsSchema)).array(),
-  forAdSetClones: z.lazy(() => adSetCloneBaseSchema.merge(adSetCloneRelationsSchema)).array(),
+  forAdSetClones: z.lazy(() => adSetCloneRecordBaseSchema.merge(adSetCloneRecordRelationsSchema)).array(),
   forAdSetUpdates: z.lazy(() => adSetUpdateRecordBaseSchema.merge(adSetUpdateRecordRelationsSchema)).array(),
 })
 
@@ -54,7 +54,6 @@ export const audienceSchema = audienceBaseSchema
 export const audienceCreateSchema = audienceBaseSchema
   .extend({
     name: audienceBaseSchema.shape.name.unwrap(),
-    userId: audienceBaseSchema.shape.userId.unwrap(),
     metaId: audienceBaseSchema.shape.metaId.unwrap(),
     metaAudienceLowerBound: audienceBaseSchema.shape.metaAudienceLowerBound.unwrap(),
     metaAudienceUpperBound: audienceBaseSchema.shape.metaAudienceUpperBound.unwrap(),
@@ -63,8 +62,7 @@ export const audienceCreateSchema = audienceBaseSchema
     id: true,
     createdAt: true,
     name: true,
-    user: true,
-    userId: true,
+    teamId: true,
     demoId: true,
     geoGroups: true,
     includeInterestGroups: true,
@@ -83,7 +81,6 @@ export const audienceCreateSchema = audienceBaseSchema
 export const audienceUpdateSchema = audienceBaseSchema
   .extend({
     name: audienceBaseSchema.shape.name.unwrap(),
-    userId: audienceBaseSchema.shape.userId.unwrap(),
     metaId: audienceBaseSchema.shape.metaId.unwrap(),
     metaAudienceLowerBound: audienceBaseSchema.shape.metaAudienceLowerBound.unwrap(),
     metaAudienceUpperBound: audienceBaseSchema.shape.metaAudienceUpperBound.unwrap(),

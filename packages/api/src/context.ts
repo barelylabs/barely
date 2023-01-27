@@ -1,4 +1,4 @@
-import { getServerSession, type Session } from '@barely/auth';
+// import { getServerSession, type Session } from '@barely/auth';
 import { prisma } from '@barely/db';
 // import { prisma, User } from '@barely/db';
 

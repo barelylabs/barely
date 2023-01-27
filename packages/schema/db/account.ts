@@ -2,7 +2,8 @@ import * as z from "zod"
 import { accountPlatformSchema } from "./accountplatform"
 import { oAuthProviderSchema } from "./oauthprovider"
 import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
-import { PlaylistAccountRelations, playlistAccountRelationsSchema, playlistAccountBaseSchema } from "./playlistaccount"
+import { TeamRelations, teamRelationsSchema, teamBaseSchema } from "./team"
+import { PlaylistRelations, playlistRelationsSchema, playlistBaseSchema } from "./playlist"
 import { AdCreativeRelations, adCreativeRelationsSchema, adCreativeBaseSchema } from "./adcreative"
 import { AdCampaignRelations, adCampaignRelationsSchema, adCampaignBaseSchema } from "./adcampaign"
 import { StatRelations, statRelationsSchema, statBaseSchema } from "./stat"
@@ -27,15 +28,22 @@ export const accountBaseSchema = z.object({
   accessToken: z.string().nullable(),
   parentAccountId: z.string().nullable(),
   userId: z.string(),
-  defaultForUserId: z.string().nullable(),
+  teamId: z.string().nullable(),
+  defaultForTeamId: z.string().nullable(),
 })
 
 export interface AccountRelations {
   parentAccount: (z.infer<typeof accountBaseSchema> & AccountRelations) | null
   childAccounts: (z.infer<typeof accountBaseSchema> & AccountRelations)[]
   user: z.infer<typeof userBaseSchema> & UserRelations
-  defaultFor: (z.infer<typeof userBaseSchema> & UserRelations) | null
-  playlists: (z.infer<typeof playlistAccountBaseSchema> & PlaylistAccountRelations)[]
+  team: (z.infer<typeof teamBaseSchema> & TeamRelations) | null
+  defaultForTeam: (z.infer<typeof teamBaseSchema> & TeamRelations) | null
+  appleMusicPlaylists: (z.infer<typeof playlistBaseSchema> & PlaylistRelations)[]
+  deezerPlaylists: (z.infer<typeof playlistBaseSchema> & PlaylistRelations)[]
+  soundCloudPlaylists: (z.infer<typeof playlistBaseSchema> & PlaylistRelations)[]
+  spotifyPlaylists: (z.infer<typeof playlistBaseSchema> & PlaylistRelations)[]
+  tidalPlaylists: (z.infer<typeof playlistBaseSchema> & PlaylistRelations)[]
+  youtubePlaylists: (z.infer<typeof playlistBaseSchema> & PlaylistRelations)[]
   metaAdCreative: (z.infer<typeof adCreativeBaseSchema> & AdCreativeRelations)[]
   metaAdCampaigns: (z.infer<typeof adCampaignBaseSchema> & AdCampaignRelations)[]
   tikTokAdCreative: (z.infer<typeof adCreativeBaseSchema> & AdCreativeRelations)[]
@@ -49,8 +57,14 @@ export const accountRelationsSchema: z.ZodObject<{
   parentAccount: z.lazy(() => accountBaseSchema.merge(accountRelationsSchema)).nullable(),
   childAccounts: z.lazy(() => accountBaseSchema.merge(accountRelationsSchema)).array(),
   user: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
-  defaultFor: z.lazy(() => userBaseSchema.merge(userRelationsSchema)).nullable(),
-  playlists: z.lazy(() => playlistAccountBaseSchema.merge(playlistAccountRelationsSchema)).array(),
+  team: z.lazy(() => teamBaseSchema.merge(teamRelationsSchema)).nullable(),
+  defaultForTeam: z.lazy(() => teamBaseSchema.merge(teamRelationsSchema)).nullable(),
+  appleMusicPlaylists: z.lazy(() => playlistBaseSchema.merge(playlistRelationsSchema)).array(),
+  deezerPlaylists: z.lazy(() => playlistBaseSchema.merge(playlistRelationsSchema)).array(),
+  soundCloudPlaylists: z.lazy(() => playlistBaseSchema.merge(playlistRelationsSchema)).array(),
+  spotifyPlaylists: z.lazy(() => playlistBaseSchema.merge(playlistRelationsSchema)).array(),
+  tidalPlaylists: z.lazy(() => playlistBaseSchema.merge(playlistRelationsSchema)).array(),
+  youtubePlaylists: z.lazy(() => playlistBaseSchema.merge(playlistRelationsSchema)).array(),
   metaAdCreative: z.lazy(() => adCreativeBaseSchema.merge(adCreativeRelationsSchema)).array(),
   metaAdCampaigns: z.lazy(() => adCampaignBaseSchema.merge(adCampaignRelationsSchema)).array(),
   tikTokAdCreative: z.lazy(() => adCreativeBaseSchema.merge(adCreativeRelationsSchema)).array(),
@@ -71,9 +85,9 @@ export const accountCreateSchema = accountBaseSchema
     username: accountBaseSchema.shape.username.unwrap(),
     accessToken: accountBaseSchema.shape.accessToken.unwrap(),
     parentAccountId: accountBaseSchema.shape.parentAccountId.unwrap(),
-    defaultForUserId: accountBaseSchema.shape.defaultForUserId.unwrap(),
+    teamId: accountBaseSchema.shape.teamId.unwrap(),
+    defaultForTeamId: accountBaseSchema.shape.defaultForTeamId.unwrap(),
   }).partial({
-    platform: true,
     provider: true,
     providerUserId: true,
     email: true,
@@ -85,9 +99,16 @@ export const accountCreateSchema = accountBaseSchema
     parentAccountId: true,
     childAccounts: true,
     userId: true,
-    defaultFor: true,
-    defaultForUserId: true,
-    playlists: true,
+    team: true,
+    teamId: true,
+    defaultForTeam: true,
+    defaultForTeamId: true,
+    appleMusicPlaylists: true,
+    deezerPlaylists: true,
+    soundCloudPlaylists: true,
+    spotifyPlaylists: true,
+    tidalPlaylists: true,
+    youtubePlaylists: true,
     metaAdCreative: true,
     metaAdCampaigns: true,
     tikTokAdCreative: true,
@@ -105,7 +126,8 @@ export const accountUpdateSchema = accountBaseSchema
     username: accountBaseSchema.shape.username.unwrap(),
     accessToken: accountBaseSchema.shape.accessToken.unwrap(),
     parentAccountId: accountBaseSchema.shape.parentAccountId.unwrap(),
-    defaultForUserId: accountBaseSchema.shape.defaultForUserId.unwrap(),
+    teamId: accountBaseSchema.shape.teamId.unwrap(),
+    defaultForTeamId: accountBaseSchema.shape.defaultForTeamId.unwrap(),
   })
   .partial()
   

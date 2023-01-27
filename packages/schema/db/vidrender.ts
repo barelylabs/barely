@@ -1,11 +1,15 @@
 import * as z from "zod"
 import { renderStatusSchema } from "./renderstatus"
+import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
+import { TeamRelations, teamRelationsSchema, teamBaseSchema } from "./team"
 import { FileRelations, fileRelationsSchema, fileBaseSchema } from "./file"
 import { TrackRenderRelations, trackRenderRelationsSchema, trackRenderBaseSchema } from "./trackrender"
 import { AdCampaignRelations, adCampaignRelationsSchema, adCampaignBaseSchema } from "./adcampaign"
 
 export const vidRenderBaseSchema = z.object({
   id: z.string(),
+  createdById: z.string(),
+  teamId: z.string(),
   renderStatus: renderStatusSchema,
   renderFailedError: z.string().nullable(),
   renderedVidId: z.string(),
@@ -33,6 +37,8 @@ export const vidRenderBaseSchema = z.object({
 })
 
 export interface VidRenderRelations {
+  createdBy: z.infer<typeof userBaseSchema> & UserRelations
+  team: z.infer<typeof teamBaseSchema> & TeamRelations
   renderedVid: z.infer<typeof fileBaseSchema> & FileRelations
   parentVid: z.infer<typeof fileBaseSchema> & FileRelations
   trackRender: z.infer<typeof trackRenderBaseSchema> & TrackRenderRelations
@@ -42,6 +48,8 @@ export interface VidRenderRelations {
 export const vidRenderRelationsSchema: z.ZodObject<{
   [K in keyof VidRenderRelations]: z.ZodType<VidRenderRelations[K]>
 }> = z.object({
+  createdBy: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
+  team: z.lazy(() => teamBaseSchema.merge(teamRelationsSchema)),
   renderedVid: z.lazy(() => fileBaseSchema.merge(fileRelationsSchema)),
   parentVid: z.lazy(() => fileBaseSchema.merge(fileRelationsSchema)),
   trackRender: z.lazy(() => trackRenderBaseSchema.merge(trackRenderRelationsSchema)),
@@ -58,6 +66,8 @@ export const vidRenderCreateSchema = vidRenderBaseSchema
     adCampaignId: vidRenderBaseSchema.shape.adCampaignId.unwrap(),
   }).partial({
     id: true,
+    createdById: true,
+    teamId: true,
     renderFailedError: true,
     renderedVidId: true,
     parentVidId: true,

@@ -15,7 +15,6 @@ export const storyBaseSchema = z.object({
   priority: z.string().nullable(),
   createdById: z.string(),
   assignedToId: z.string().nullable(),
-  forUserId: z.string().nullable(),
   epicId: z.string().nullable(),
   columnId: z.string(),
 })
@@ -23,7 +22,6 @@ export const storyBaseSchema = z.object({
 export interface StoryRelations {
   createdBy: z.infer<typeof userBaseSchema> & UserRelations
   assignedTo: (z.infer<typeof userBaseSchema> & UserRelations) | null
-  forUser: (z.infer<typeof userBaseSchema> & UserRelations) | null
   epic: (z.infer<typeof epicBaseSchema> & EpicRelations) | null
   column: z.infer<typeof storyColumnBaseSchema> & StoryColumnRelations
   update: (z.infer<typeof storyUpdateRecordBaseSchema> & StoryUpdateRecordRelations)[]
@@ -35,7 +33,6 @@ export const storyRelationsSchema: z.ZodObject<{
 }> = z.object({
   createdBy: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
   assignedTo: z.lazy(() => userBaseSchema.merge(userRelationsSchema)).nullable(),
-  forUser: z.lazy(() => userBaseSchema.merge(userRelationsSchema)).nullable(),
   epic: z.lazy(() => epicBaseSchema.merge(epicRelationsSchema)).nullable(),
   column: z.lazy(() => storyColumnBaseSchema.merge(storyColumnRelationsSchema)),
   update: z.lazy(() => storyUpdateRecordBaseSchema.merge(storyUpdateRecordRelationsSchema)).array(),
@@ -52,7 +49,6 @@ export const storyCreateSchema = storyBaseSchema
     dueDate: storyBaseSchema.shape.dueDate.unwrap(),
     priority: storyBaseSchema.shape.priority.unwrap(),
     assignedToId: storyBaseSchema.shape.assignedToId.unwrap(),
-    forUserId: storyBaseSchema.shape.forUserId.unwrap(),
     epicId: storyBaseSchema.shape.epicId.unwrap(),
   }).partial({
     id: true,
@@ -64,8 +60,6 @@ export const storyCreateSchema = storyBaseSchema
     createdById: true,
     assignedTo: true,
     assignedToId: true,
-    forUser: true,
-    forUserId: true,
     epic: true,
     epicId: true,
     columnId: true,
@@ -80,7 +74,6 @@ export const storyUpdateSchema = storyBaseSchema
     dueDate: storyBaseSchema.shape.dueDate.unwrap(),
     priority: storyBaseSchema.shape.priority.unwrap(),
     assignedToId: storyBaseSchema.shape.assignedToId.unwrap(),
-    forUserId: storyBaseSchema.shape.forUserId.unwrap(),
     epicId: storyBaseSchema.shape.epicId.unwrap(),
   })
   .partial()

@@ -3,7 +3,7 @@ import { formPlatformSchema } from "./formplatform"
 import { EventRelations, eventRelationsSchema, eventBaseSchema } from "./event"
 import { ButtonRelations, buttonRelationsSchema, buttonBaseSchema } from "./button"
 import { FormResponseRelations, formResponseRelationsSchema, formResponseBaseSchema } from "./formresponse"
-import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
+import { TeamRelations, teamRelationsSchema, teamBaseSchema } from "./team"
 
 export const formBaseSchema = z.object({
   id: z.string(),
@@ -17,15 +17,14 @@ export const formBaseSchema = z.object({
   inputEmail: z.boolean(),
   inputPhone: z.boolean(),
   inputMessage: z.boolean(),
-  userId: z.string(),
-  artistId: z.string().nullable(),
+  teamId: z.string(),
 })
 
 export interface FormRelations {
   events: (z.infer<typeof eventBaseSchema> & EventRelations)[]
   buttons: (z.infer<typeof buttonBaseSchema> & ButtonRelations)[]
   responses: (z.infer<typeof formResponseBaseSchema> & FormResponseRelations)[]
-  user: z.infer<typeof userBaseSchema> & UserRelations
+  team: z.infer<typeof teamBaseSchema> & TeamRelations
 }
 
 export const formRelationsSchema: z.ZodObject<{
@@ -34,7 +33,7 @@ export const formRelationsSchema: z.ZodObject<{
   events: z.lazy(() => eventBaseSchema.merge(eventRelationsSchema)).array(),
   buttons: z.lazy(() => buttonBaseSchema.merge(buttonRelationsSchema)).array(),
   responses: z.lazy(() => formResponseBaseSchema.merge(formResponseRelationsSchema)).array(),
-  user: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
+  team: z.lazy(() => teamBaseSchema.merge(teamRelationsSchema)),
 })
 
 export const formSchema = formBaseSchema
@@ -45,7 +44,6 @@ export const formCreateSchema = formBaseSchema
     title: formBaseSchema.shape.title.unwrap(),
     subtitle: formBaseSchema.shape.subtitle.unwrap(),
     messagePrompt: formBaseSchema.shape.messagePrompt.unwrap(),
-    artistId: formBaseSchema.shape.artistId.unwrap(),
   }).partial({
     id: true,
     title: true,
@@ -54,8 +52,7 @@ export const formCreateSchema = formBaseSchema
     events: true,
     buttons: true,
     responses: true,
-    userId: true,
-    artistId: true,
+    teamId: true,
   })
 
 export const formUpdateSchema = formBaseSchema
@@ -63,7 +60,6 @@ export const formUpdateSchema = formBaseSchema
     title: formBaseSchema.shape.title.unwrap(),
     subtitle: formBaseSchema.shape.subtitle.unwrap(),
     messagePrompt: formBaseSchema.shape.messagePrompt.unwrap(),
-    artistId: formBaseSchema.shape.artistId.unwrap(),
   })
   .partial()
   

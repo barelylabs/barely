@@ -2,16 +2,35 @@ import { z, ZodRawShape } from 'zod';
 
 const processEnv = {
 	// CLIENT
-	NEXT_PUBLIC_APP_BASE_URL: process.env.NEXT_PUBLIC_APP_BASE_URL,
-	NEXT_PUBLIC_APP_DEV_PORT: process.env.NEXT_PUBLIC_APP_DEV_PORT,
-	NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY,
+	NEXT_PUBLIC_APP_BASE_URL:
+		typeof window !== 'undefined'
+			? '' // browser should use relative url
+			: process.env.NODE_ENV === 'production'
+			? `https://${process.env.VERCEL_URL}` // SSR should use vercel url
+			: `http://localhost:${process.env.NEXT_PUBLIC_APP_DEV_PORT}`, // dev SSR should use localhost
+
+	NEXT_PUBLIC_WEB_BASE_URL:
+		typeof window !== 'undefined'
+			? ''
+			: process.env.NODE_ENV === 'production'
+			? `https://${process.env.VERCEL_URL}`
+			: `http://localhost:${process.env.NEXT_PUBLIC_WEB_DEV_PORT}`,
+
+	NEXT_PUBLIC_LINK_BASE_URL:
+		typeof window !== 'undefined'
+			? ''
+			: process.env.NODE_ENV === 'production'
+			? `https://${process.env.VERCEL_URL}`
+			: `http://localhost:${process.env.NEXT_PUBLIC_LINK_DEV_PORT}`,
+
+	NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
 
 	// SERVER
 	NODE_ENV: process.env.NODE_ENV,
 
 	API_USER_ID: process.env.API_USER_ID,
-	NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
 	CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
+	CLERK_WEBHOOK_USER_SECRET_KEY: process.env.CLERK_WEBHOOK_USER_SECRET_KEY,
 
 	NEXTAUTH_URL: process.env.NEXTAUTH_URL,
 	NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
@@ -33,38 +52,19 @@ const processEnv = {
 
 export const clientEnvAllSchema = z.object({
 	NEXT_PUBLIC_APP_BASE_URL: z.string(),
-	NEXT_PUBLIC_APP_DEV_PORT:
-		process.env.NODE_ENV === 'development'
-			? z.string().min(1)
-			: z.string().min(1).optional(),
-	NEXT_PUBLIC_WEB_DEV_PORT:
-		process.env.NODE_ENV === 'development'
-			? z.string().min(1)
-			: z.string().min(1).optional(),
-	NEXT_PUBLIC_LINK_DEV_PORT:
-		process.env.NODE_ENV === 'development'
-			? z.string().min(1)
-			: z.string().min(1).optional(),
+	NEXT_PUBLIC_WEB_BASE_URL: z.string(),
+	NEXT_PUBLIC_LINK_BASE_URL: z.string(),
 	NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1),
 });
 
 export const serverEnvAllSchema = z.object({
 	NODE_ENV: z.enum(['development', 'test', 'production']),
-	// INTERNAL
+
 	API_USER_ID: z.string(),
-	NEXTAUTH_URL: z.preprocess(
-		// This makes Vercel deployments not fail if you don't set NEXTAUTH_URL
-		// Since NextAuth.js automatically uses the VERCEL_URL if present.
-		str => process.env.VERCEL_URL ?? str,
-		// VERCEL_URL doesn't include `https` so it cant be validated as a URL
-		process.env.VERCEL ? z.string() : z.string().url(),
-	),
-	NEXTAUTH_SECRET:
-		process.env.NODE_ENV === 'production'
-			? z.string().min(1)
-			: z.string().min(1).optional(),
 
 	CLERK_SECRET_KEY: z.string().min(1),
+	CLERK_WEBHOOK_USER_SECRET_KEY: z.string().min(1),
+
 	// EXTERNAL
 	DATABASE_URL: z.string().url(),
 	DISCORD_CLIENT_ID: z.string(),

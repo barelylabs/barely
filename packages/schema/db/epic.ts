@@ -1,5 +1,6 @@
 import * as z from "zod"
 import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
+import { TeamRelations, teamRelationsSchema, teamBaseSchema } from "./team"
 import { StoryRelations, storyRelationsSchema, storyBaseSchema } from "./story"
 
 export const epicBaseSchema = z.object({
@@ -15,13 +16,13 @@ export const epicBaseSchema = z.object({
   lexoRank: z.string(),
   createdById: z.string(),
   assignedToId: z.string(),
-  forUserId: z.string().nullable(),
+  teamId: z.string(),
 })
 
 export interface EpicRelations {
   createdBy: z.infer<typeof userBaseSchema> & UserRelations
   assignedTo: z.infer<typeof userBaseSchema> & UserRelations
-  forUser: (z.infer<typeof userBaseSchema> & UserRelations) | null
+  team: z.infer<typeof teamBaseSchema> & TeamRelations
   stories: (z.infer<typeof storyBaseSchema> & StoryRelations)[]
 }
 
@@ -30,7 +31,7 @@ export const epicRelationsSchema: z.ZodObject<{
 }> = z.object({
   createdBy: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
   assignedTo: z.lazy(() => userBaseSchema.merge(userRelationsSchema)),
-  forUser: z.lazy(() => userBaseSchema.merge(userRelationsSchema)).nullable(),
+  team: z.lazy(() => teamBaseSchema.merge(teamRelationsSchema)),
   stories: z.lazy(() => storyBaseSchema.merge(storyRelationsSchema)).array(),
 })
 
@@ -45,7 +46,6 @@ export const epicCreateSchema = epicBaseSchema
     startDate: epicBaseSchema.shape.startDate.unwrap(),
     color: epicBaseSchema.shape.color.unwrap(),
     complete: epicBaseSchema.shape.complete.unwrap(),
-    forUserId: epicBaseSchema.shape.forUserId.unwrap(),
   }).partial({
     id: true,
     createdAt: true,
@@ -57,8 +57,7 @@ export const epicCreateSchema = epicBaseSchema
     complete: true,
     createdById: true,
     assignedToId: true,
-    forUser: true,
-    forUserId: true,
+    teamId: true,
     stories: true,
   })
 
@@ -70,7 +69,6 @@ export const epicUpdateSchema = epicBaseSchema
     startDate: epicBaseSchema.shape.startDate.unwrap(),
     color: epicBaseSchema.shape.color.unwrap(),
     complete: epicBaseSchema.shape.complete.unwrap(),
-    forUserId: epicBaseSchema.shape.forUserId.unwrap(),
   })
   .partial()
   

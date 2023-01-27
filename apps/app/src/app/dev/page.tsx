@@ -7,11 +7,11 @@ function DevPage() {
 	const userQuery = trpc.user.current.useQuery();
 	const boardsQuery = trpc.storyBoard.byUser.useQuery();
 
-	const newBoard = trpc.storyBoard.add.useMutation({
-		async onSuccess(board) {
-			await utils.storyBoard.byUser.invalidate();
-		},
-	});
+	// const newBoard = trpc.storyBoard.add.useMutation({
+	// 	async onSuccess(board) {
+	// 		await utils.storyBoard.byUser.invalidate();
+	// 	},
+	// });
 
 	return (
 		<div>
@@ -20,7 +20,7 @@ function DevPage() {
 			{boardsQuery.data?.map(board => (
 				<div key={board.id}>{board.name}</div>
 			))}
-			<Button onClick={() => newBoard.mutate({ name: 'new board 3' })}>Add Board</Button>
+			{/* <Button onClick={() => newBoard.mutate({ name: 'new board 3' })}>Add Board</Button> */}
 		</div>
 	);
 }

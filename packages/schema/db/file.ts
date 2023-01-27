@@ -1,6 +1,7 @@
 import * as z from "zod"
 import { fileTypeSchema } from "./filetype"
 import { fileExtensionSchema } from "./fileextension"
+import { TeamRelations, teamRelationsSchema, teamBaseSchema } from "./team"
 import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
 import { TrackRelations, trackRelationsSchema, trackBaseSchema } from "./track"
 import { PlaylistRelations, playlistRelationsSchema, playlistBaseSchema } from "./playlist"
@@ -11,8 +12,9 @@ import { VidViewsGroupRelations, vidViewsGroupRelationsSchema, vidViewsGroupBase
 
 export const fileBaseSchema = z.object({
   id: z.string(),
-  ownerId: z.string(),
+  teamId: z.string(),
   createdAt: z.date(),
+  creatorId: z.string(),
   type: fileTypeSchema,
   name: z.string(),
   extension: fileExtensionSchema,
@@ -30,7 +32,8 @@ export const fileBaseSchema = z.object({
 })
 
 export interface FileRelations {
-  owner: (z.infer<typeof userBaseSchema> & UserRelations) | null
+  team: z.infer<typeof teamBaseSchema> & TeamRelations
+  creator: (z.infer<typeof userBaseSchema> & UserRelations) | null
   vidForTrack: (z.infer<typeof trackBaseSchema> & TrackRelations) | null
   masterMp3ForTrack: (z.infer<typeof trackBaseSchema> & TrackRelations) | null
   masterWavForTrack: (z.infer<typeof trackBaseSchema> & TrackRelations) | null
@@ -47,7 +50,8 @@ export interface FileRelations {
 export const fileRelationsSchema: z.ZodObject<{
   [K in keyof FileRelations]: z.ZodType<FileRelations[K]>
 }> = z.object({
-  owner: z.lazy(() => userBaseSchema.merge(userRelationsSchema)).nullable(),
+  team: z.lazy(() => teamBaseSchema.merge(teamRelationsSchema)),
+  creator: z.lazy(() => userBaseSchema.merge(userRelationsSchema)).nullable(),
   vidForTrack: z.lazy(() => trackBaseSchema.merge(trackRelationsSchema)).nullable(),
   masterMp3ForTrack: z.lazy(() => trackBaseSchema.merge(trackRelationsSchema)).nullable(),
   masterWavForTrack: z.lazy(() => trackBaseSchema.merge(trackRelationsSchema)).nullable(),
@@ -76,9 +80,10 @@ export const fileCreateSchema = fileBaseSchema
     thumbnailForId: fileBaseSchema.shape.thumbnailForId.unwrap(),
   }).partial({
     id: true,
-    owner: true,
-    ownerId: true,
+    teamId: true,
     createdAt: true,
+    creator: true,
+    creatorId: true,
     description: true,
     width: true,
     height: true,

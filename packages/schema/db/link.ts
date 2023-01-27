@@ -1,9 +1,8 @@
 import * as z from "zod"
 import { linkDomainSchema } from "./linkdomain"
 import { appTypeSchema } from "./apptype"
-import { UserRelations, userRelationsSchema, userBaseSchema } from "./user"
-import { SocialLinkRelations, socialLinkRelationsSchema, socialLinkBaseSchema } from "./sociallink"
-import { TrackAppLinkRelations, trackAppLinkRelationsSchema, trackAppLinkBaseSchema } from "./trackapplink"
+import { TeamRelations, teamRelationsSchema, teamBaseSchema } from "./team"
+import { TrackRelations, trackRelationsSchema, trackBaseSchema } from "./track"
 import { PlaylistRelations, playlistRelationsSchema, playlistBaseSchema } from "./playlist"
 import { BioRelations, bioRelationsSchema, bioBaseSchema } from "./bio"
 import { ButtonRelations, buttonRelationsSchema, buttonBaseSchema } from "./button"
@@ -13,7 +12,9 @@ import { EventRelations, eventRelationsSchema, eventBaseSchema } from "./event"
 export const linkBaseSchema = z.object({
   id: z.string(),
   createdAt: z.date(),
-  userId: z.string().nullable(),
+  teamId: z.string(),
+  socialForTeamId: z.string().nullable(),
+  showSocialForTeam: z.boolean().nullable(),
   handle: z.string(),
   domain: linkDomainSchema,
   slug: z.string().nullable(),
@@ -37,9 +38,14 @@ export const linkBaseSchema = z.object({
 })
 
 export interface LinkRelations {
-  user: (z.infer<typeof userBaseSchema> & UserRelations) | null
-  userSocial: (z.infer<typeof socialLinkBaseSchema> & SocialLinkRelations) | null
-  trackApp: (z.infer<typeof trackAppLinkBaseSchema> & TrackAppLinkRelations) | null
+  team: z.infer<typeof teamBaseSchema> & TeamRelations
+  socialForTeam: (z.infer<typeof teamBaseSchema> & TeamRelations) | null
+  appleMusicTrack: (z.infer<typeof trackBaseSchema> & TrackRelations) | null
+  deezerTrack: (z.infer<typeof trackBaseSchema> & TrackRelations) | null
+  soundcloudTrack: (z.infer<typeof trackBaseSchema> & TrackRelations) | null
+  spotifyTrack: (z.infer<typeof trackBaseSchema> & TrackRelations) | null
+  tidalTrack: (z.infer<typeof trackBaseSchema> & TrackRelations) | null
+  youtubeTrack: (z.infer<typeof trackBaseSchema> & TrackRelations) | null
   playlist: (z.infer<typeof playlistBaseSchema> & PlaylistRelations) | null
   bio: (z.infer<typeof bioBaseSchema> & BioRelations) | null
   buttons: (z.infer<typeof buttonBaseSchema> & ButtonRelations)[]
@@ -52,9 +58,14 @@ export interface LinkRelations {
 export const linkRelationsSchema: z.ZodObject<{
   [K in keyof LinkRelations]: z.ZodType<LinkRelations[K]>
 }> = z.object({
-  user: z.lazy(() => userBaseSchema.merge(userRelationsSchema)).nullable(),
-  userSocial: z.lazy(() => socialLinkBaseSchema.merge(socialLinkRelationsSchema)).nullable(),
-  trackApp: z.lazy(() => trackAppLinkBaseSchema.merge(trackAppLinkRelationsSchema)).nullable(),
+  team: z.lazy(() => teamBaseSchema.merge(teamRelationsSchema)),
+  socialForTeam: z.lazy(() => teamBaseSchema.merge(teamRelationsSchema)).nullable(),
+  appleMusicTrack: z.lazy(() => trackBaseSchema.merge(trackRelationsSchema)).nullable(),
+  deezerTrack: z.lazy(() => trackBaseSchema.merge(trackRelationsSchema)).nullable(),
+  soundcloudTrack: z.lazy(() => trackBaseSchema.merge(trackRelationsSchema)).nullable(),
+  spotifyTrack: z.lazy(() => trackBaseSchema.merge(trackRelationsSchema)).nullable(),
+  tidalTrack: z.lazy(() => trackBaseSchema.merge(trackRelationsSchema)).nullable(),
+  youtubeTrack: z.lazy(() => trackBaseSchema.merge(trackRelationsSchema)).nullable(),
   playlist: z.lazy(() => playlistBaseSchema.merge(playlistRelationsSchema)).nullable(),
   bio: z.lazy(() => bioBaseSchema.merge(bioRelationsSchema)).nullable(),
   buttons: z.lazy(() => buttonBaseSchema.merge(buttonRelationsSchema)).array(),
@@ -69,7 +80,8 @@ export const linkSchema = linkBaseSchema
 
 export const linkCreateSchema = linkBaseSchema
   .extend({
-    userId: linkBaseSchema.shape.userId.unwrap(),
+    socialForTeamId: linkBaseSchema.shape.socialForTeamId.unwrap(),
+    showSocialForTeam: linkBaseSchema.shape.showSocialForTeam.unwrap(),
     slug: linkBaseSchema.shape.slug.unwrap(),
     app: linkBaseSchema.shape.app.unwrap(),
     appRoute: linkBaseSchema.shape.appRoute.unwrap(),
@@ -90,10 +102,10 @@ export const linkCreateSchema = linkBaseSchema
   }).partial({
     id: true,
     createdAt: true,
-    user: true,
-    userId: true,
-    userSocial: true,
-    handle: true,
+    teamId: true,
+    socialForTeam: true,
+    socialForTeamId: true,
+    showSocialForTeam: true,
     domain: true,
     slug: true,
     app: true,
@@ -109,7 +121,12 @@ export const linkCreateSchema = linkBaseSchema
     qrDark: true,
     qrText: true,
     qrLogo: true,
-    trackApp: true,
+    appleMusicTrack: true,
+    deezerTrack: true,
+    soundcloudTrack: true,
+    spotifyTrack: true,
+    tidalTrack: true,
+    youtubeTrack: true,
     playlist: true,
     bio: true,
     bioId: true,
@@ -124,7 +141,8 @@ export const linkCreateSchema = linkBaseSchema
 
 export const linkUpdateSchema = linkBaseSchema
   .extend({
-    userId: linkBaseSchema.shape.userId.unwrap(),
+    socialForTeamId: linkBaseSchema.shape.socialForTeamId.unwrap(),
+    showSocialForTeam: linkBaseSchema.shape.showSocialForTeam.unwrap(),
     slug: linkBaseSchema.shape.slug.unwrap(),
     app: linkBaseSchema.shape.app.unwrap(),
     appRoute: linkBaseSchema.shape.appRoute.unwrap(),

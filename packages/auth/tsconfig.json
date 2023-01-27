@@ -1,4 +1,0 @@
-{
-	"extends": "@barely/config/tsconfig.base.json",
-	"include": ["src", "index.ts", "next-auth.d.ts", "env.ts"]
-}

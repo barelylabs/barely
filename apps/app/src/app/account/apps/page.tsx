@@ -1,15 +1,28 @@
-'use client';
+import { currentUser } from '@clerk/nextjs/app-beta';
+import { AddSocialButton, ExternalAccountCard } from './SocialButton';
+import env from '~/env';
 
-import { trpc } from '../../../client/trpcClient';
-import { signIn } from 'next-auth/react';
+async function ExternalAccountsPage() {
+	const user = await currentUser();
 
-const ExternalAccountsPage = () => {
-	const { data: user } = trpc.user.current.useQuery();
-	const { data: accounts } = trpc.account.getByUser.useQuery();
+	const spotify = user?.externalAccounts.find(
+		account => account.provider === 'oauth_spotify',
+	);
 
 	return (
 		<>
-			<h1>accounts for user {user?.id}</h1>
+			{user?.firstName}
+			<pre>{JSON.stringify(user?.externalAccounts, null, 2)}</pre>
+
+			<p>server baseUrl = {env.NEXT_PUBLIC_APP_BASE_URL}</p>
+
+			<h1>spotify</h1>
+			{/* {spotify && <div>{spotify.username}</div>} */}
+			<ExternalAccountCard platform='spotify' baseUrl={env.NEXT_PUBLIC_APP_BASE_URL} />
+			{/* <AddSocialButton strategy='oauth_spotify' baseUrl={baseUrl} /> */}
+			{/* <button onClick={() => user?.deleteExternalAccount(spotify?.id)}> */}
+
+			{/* <h1>accounts for user {user?.id}</h1>
 			{accounts?.length &&
 				accounts.map(account => {
 					return (
@@ -22,10 +35,11 @@ const ExternalAccountsPage = () => {
 				})}
 			<button className='bg-spotify' onClick={() => signIn('spotify')}>
 				add spotify account
-			</button>
+			</button> */}
+			{/* <button onClick >add spotify account</button> */}
 		</>
 	);
-};
+}
 
 export default ExternalAccountsPage;
 

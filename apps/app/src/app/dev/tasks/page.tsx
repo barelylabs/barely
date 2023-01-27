@@ -10,31 +10,31 @@ function StoriesPage() {
 
 	const [limitPerColumn, setLimitPerColumn] = useState(30);
 
-	const columnsQuery = trpc.storyColumn.byBoard.useQuery({ id: boardId ?? '' } ?? '', {
-		enabled: !!boardId,
-	});
-	const columns = columnsQuery.data ?? [];
+	// const columnsQuery = trpc.storyColumn.byBoard.useQuery({ id: boardId ?? '' } ?? '', {
+	// 	enabled: !!boardId,
+	// });
+	// const columns = columnsQuery.data ?? [];
 
-	const storiesQueries = trpc.useQueries(t =>
-		columns.map(column => t.story.byColumn({ columnId: column.id })),
-	);
+	// const storiesQueries = trpc.useQueries(t =>
+	// 	columns.map(column => t.story.byColumn({ columnId: column.id })),
+	// );
 
-	const utils = trpc.useContext();
+	// const utils = trpc.useContext();
 
-	const newStoryMutation = trpc.story.add.useMutation({
-		async onMutate(story) {
-			await utils.story.invalidate();
-		},
-	});
+	// const newStoryMutation = trpc.story.add.useMutation({
+	// 	async onMutate(story) {
+	// 		await utils.story.invalidate();
+	// 	},
+	// });
 
 	return (
 		// add a title that say stories, a select to choose a board, a number input to choose the limit per column, a button to add a new story
 		<>
-			{boardsQuery.data?.map(board => (
+			{/* {boardsQuery.data?.map(board => (
 				<option key={board.id} value={board.id}>
 					{board.name}
 				</option>
-			))}
+			))} */}
 
 			{/* */}
 
