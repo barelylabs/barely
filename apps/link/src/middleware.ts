@@ -40,7 +40,7 @@ export async function middleware(req: NextRequest) {
 		.where('appId', eqOrIs(appId), appId)
 		.executeTakeFirst();
 
-	//* 🚧 handle route errors *//
+	//* 🚧 handle route errors 🚧  *//
 	if (!link || !link.url) return NextResponse.rewrite(`${origin}/404`);
 
 	//* 📈 report event to analytics + remarketing *//
