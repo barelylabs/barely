@@ -1,0 +1,62 @@
+name: Create planetscale dev branch
+
+env:
+  pscale_base_directory: .pscale
+
+on:
+  push:
+    branches:
+      - 'dev-**'
+
+jobs:
+  create_database_branch:
+    name: Create database branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]${GITHUB_REF#refs/heads/}"
+        id: extract_branch
+
+      - name: Validate parameters
+        id: validate_params
+        uses: actions/github-script@v3
+        env:
+          BRANCH_NAME: ${{ github.event.inputs.branch }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const branch_name = process.env.BRANCH_NAME || "${{steps.extract_branch.outputs.branch}}";
+
+            const regex = /[^\/]+$/;
+            let clean_branch_name;
+
+            if (branch_name.match(regex)) {
+              clean_branch_name = branch_name.match(regex)[0];
+            } else {
+              clean_branch_name = branch_name;
+            }
+
+            if (! /^[a-zA-Z0-9_-]+$/.test(clean_branch_name)) {
+              const error = `The branch name contains illegal characters: ${clean_branch_name}`;
+              core.error(error);
+              core.setFailed(error);
+            }
+            core.setOutput('branch_name', clean_branch_name);
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Create database branch - if asked, please click on displayed link to authenticate
+        id: create-db-branch
+        timeout-minutes: 3
+        env:
+          PLANETSCALE_SERVICE_TOKEN_ID: ${{secrets.PLANETSCALE_SERVICE_TOKEN_ID}}
+          PLANETSCALE_SERVICE_TOKEN: ${{secrets.PLANETSCALE_SERVICE_TOKEN}}
+          ORG_NAME: ${{secrets.ORG_NAME}}
+          DB_NAME: ${{secrets.DB_NAME}}
+          GITHUB_USER: ${{github.actor}}
+          BRANCH_NAME: ${{ steps.validate_params.outputs.branch_name }}
+        working-directory: ${{env.pscale_base_directory}}/cli-helper-scripts/
+        run: |
+          ./create-branch.sh "$BRANCH_NAME"
