@@ -8,6 +8,10 @@ module.exports = {
 	trailingComma: 'all',
 	useTabs: true,
 	tabWidth: 2,
-	plugins: [require('prettier-plugin-tailwindcss'), require('prettier-plugin-prisma')],
+	plugins: [
+		require('prettier-plugin-tailwindcss'),
+		require('prettier-plugin-prisma'),
+		require('prettier-plugin-sh'),
+	],
 	tailwindConfig: './packages/config/tailwind.config.cjs',
 };
