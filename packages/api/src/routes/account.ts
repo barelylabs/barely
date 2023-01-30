@@ -14,6 +14,7 @@ export const accountRouter = router({
 				.optional(),
 		)
 		.query(async ({ ctx }) => {
+			ctx.user.privateMetadata;
 			return await ctx.prisma.account.findMany({
 				where: {
 					user: { id: ctx.user.id },

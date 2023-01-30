@@ -8,18 +8,25 @@ node_modules
 # testing
 coverage
 
+# actions
+.venv/*
+_actions/*
+.pscale/cli-helper-scripts/typescript
+
 # next.js
 .next/
 out/
 
-# libs
-dist/
-
 # production
+dist/
 build
 
 # misc
 .DS_Store
+.DS_Store?
+.Trashes
+.Spotlight-V100
+._*
 *.pem
 
 # debug
