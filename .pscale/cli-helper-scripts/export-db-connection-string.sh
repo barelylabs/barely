@@ -11,7 +11,8 @@ if [ -z "$DATABASE_URL" ] && [ -z "$MY_DB_URL" ]; then
     if [ -n "$2" ] && [ -n "$3" ]; then
         for i in `seq 1 $2`; do
             for j in `seq 1 $3`; do
-                echo "::set-output name=dbconnection_${i}_${j}::`curl -s -X POST -d "plain&secret=$MY_DB_URL" https://shared-secrets-planetscale.herokuapp.com/`"          
+                # echo "::set-output name=dbconnection_${i}_${j}::`curl -s -X POST -d "plain&secret=$MY_DB_URL" https://shared-secrets-planetscale.herokuapp.com/`"                          
+                echo "dbconnection_${i}_${j}=`curl -s -X POST -d "plain&secret=$MY_DB_URL" https://shared-secrets-planetscale.herokuapp.com/`" >> $GITHUB_OUTPUT
             done
         done
     fi

@@ -22,9 +22,13 @@ echo "Using org name ${ORG_NAME}"
 export BRANCH_NAME=${BRANCH_NAME:-"main"}
 echo "Using branch name ${BRANCH_NAME}"
 
-# if CI variable ist set
+# if CI variable is set
 if [ -n "$CI" ]; then
-    echo "::set-output name=DB_NAME::$DB_NAME"
-    echo "::set-output name=ORG_NAME::$ORG_NAME"
-    echo "::set-output name=BRANCH_NAME::$BRANCH_NAME"
+    echo "DB_NAME=$DB_NAME" >> $GITHUB_OUTPUT
+    echo "ORG_NAME=$ORG_NAME" >> $GITHUB_OUTPUT
+    echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+    # echo "::set-output name=DB_NAME::$DB_NAME"
+    # echo "::set-output name=ORG_NAME::$ORG_NAME"
+    # echo "::set-output name=BRANCH_NAME::$BRANCH_NAME"
 fi

@@ -27,7 +27,8 @@ function create-db-branch {
     echo "Branch $BRANCH_NAME is ready at $branch_url"
     # if CI variable ist set, then set output variables
     if [ -n "$CI" ]; then
-        echo "::set-output name=BRANCH_URL::$branch_url"
+        # echo "::set-output name=BRANCH_URL::$branch_url"
+        echo "BRANCH_URL=$branch_url" >> $GITHUB_OUTPUT
     fi
 }
 
@@ -68,8 +69,11 @@ function create-deploy-request {
     echo "Check out the deploy request created at $deploy_request"
     # if CI variable is set, export the deploy request URL
     if [ -n "$CI" ]; then
-        echo "::set-output name=DEPLOY_REQUEST_URL::$deploy_request"
-        echo "::set-output name=DEPLOY_REQUEST_NUMBER::$deploy_request_number"
+        # echo "::set-output name=DEPLOY_REQUEST_URL::$deploy_request"
+        echo "DEPLOY_REQUEST_URL=$deploy_request" >> $GITHUB_OUTPUT
+        
+        # echo "::set-output name=DEPLOY_REQUEST_NUMBER::$deploy_request_number"
+        echo "DEPLOY_REQUEST_NUMBER=$deploy_request_number" >> $GITHUB_OUTPUT
         create-diff-for-ci "$DB_NAME" "$ORG_NAME" "$deploy_request_number" "$BRANCH_NAME"
     fi   
 }
@@ -101,12 +105,18 @@ function create-deploy-request-info {
 
     # if CI variable is set, export deployment request info
     if [ -n "$CI" ]; then
-        echo "::set-output name=BRANCH_NAME::$branch_name"
-        echo "::set-output name=DB_NAME::$DB_NAME"
-        echo "::set-output name=ORG_NAME::$ORG_NAME"
-        echo "::set-output name=DEPLOY_REQUEST_URL::$deploy_request"
-        echo "::set-output name=DEPLOY_REQUEST_NUMBER::$DEPLOY_REQUEST_NUMBER"
-        echo "::set-output name=BRANCH_URL::$branch_url"
+        # echo "::set-output name=BRANCH_NAME::$branch_name"
+        # echo "::set-output name=DB_NAME::$DB_NAME"
+        # echo "::set-output name=ORG_NAME::$ORG_NAME"
+        # echo "::set-output name=DEPLOY_REQUEST_URL::$deploy_request"
+        # echo "::set-output name=DEPLOY_REQUEST_NUMBER::$DEPLOY_REQUEST_NUMBER"
+        # echo "::set-output name=BRANCH_URL::$branch_url"
+        echo "BRANCH_NAME=$branch_name" >> $GITHUB_OUTPUT
+        echo "DB_NAME=$DB_NAME" >> $GITHUB_OUTPUT
+        echo "ORG_NAME=$ORG_NAME" >> $GITHUB_OUTPUT
+        echo "DEPLOY_REQUEST_URL=$deploy_request" >> $GITHUB_OUTPUT
+        echo "DEPLOY_REQUEST_NUMBER=$DEPLOY_REQUEST_NUMBER" >> $GITHUB_OUTPUT
+        echo "BRANCH_URL=$branch_url" >> $GITHUB_OUTPUT 
     fi
 }
 
@@ -136,10 +146,14 @@ function create-branch-info {
 
     # if CI variable is set, export branch info
     if [ -n "$CI" ]; then
-        echo "::set-output name=BRANCH_NAME::$branch_name"
-        echo "::set-output name=DB_NAME::$DB_NAME"
-        echo "::set-output name=ORG_NAME::$ORG_NAME"
-        echo "::set-output name=BRANCH_URL::$branch_url"
+        # echo "::set-output name=BRANCH_NAME::$branch_name"
+        # echo "::set-output name=DB_NAME::$DB_NAME"
+        # echo "::set-output name=ORG_NAME::$ORG_NAME"
+        # echo "::set-output name=BRANCH_URL::$branch_url"
+        echo "BRANCH_NAME=$branch_name" >> $GITHUB_OUTPUT
+        echo "DB_NAME=$DB_NAME" >> $GITHUB_OUTPUT
+        echo "ORG_NAME=$ORG_NAME" >> $GITHUB_OUTPUT
+        echo "BRANCH_URL=$branch_url" >> $GITHUB_OUTPUT
     fi
 }
 
@@ -179,7 +193,8 @@ function create-diff-for-ci {
         # replace tabs with whitespace
         BRANCH_DIFF="${BRANCH_DIFF//'\t'/' '}"
 
-        echo "::set-output name=BRANCH_DIFF::$BRANCH_DIFF"
+        # echo "::set-output name=BRANCH_DIFF::$BRANCH_DIFF"
+        echo "BRANCH_DIFF=$BRANCH_DIFF" >> $GITHUB_OUTPUT
     fi
 }
 
@@ -191,8 +206,10 @@ function create-deployment {
     local deploy_request="https://app.planetscale.com/${ORG_NAME}/${DB_NAME}/deploy-requests/${deploy_request_number}"
     # if CI variable is set, export the deploy request parameters
     if [ -n "$CI" ]; then
-        echo "::set-output name=DEPLOY_REQUEST_URL::$deploy_request"
-        echo "::set-output name=DEPLOY_REQUEST_NUMBER::$deploy_request_number"
+        # echo "::set-output name=DEPLOY_REQUEST_URL::$deploy_request"
+        # echo "::set-output name=DEPLOY_REQUEST_NUMBER::$deploy_request_number"
+        echo "DEPLOY_REQUEST_URL=$deploy_request" >> $GITHUB_OUTPUT
+        echo "DEPLOY_REQUEST_NUMBER=$deploy_request_number" >> $GITHUB_OUTPUT
     fi
 
     echo "Going to deploy deployment request $deploy_request with the following changes: "
