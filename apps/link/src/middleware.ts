@@ -12,7 +12,7 @@ export const config = {
 type AnalyticsInput = z.infer<typeof linkAnalyticsSchema>;
 
 export async function middleware(req: NextRequest) {
-	console.log('middleware path => ', req.nextUrl.pathname);
+	// console.log('middleware path => ', req.nextUrl.pathname);
 
 	//* 🧬 parse the incoming request *//
 	const { isLocal, origin, handle, slug, app, appRoute, appId, pathname } =
