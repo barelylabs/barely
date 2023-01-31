@@ -59,7 +59,7 @@ jobs:
             core.setOutput('branch_name', clean_branch_name);
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v3
 
       - name: Create database branch
         id: create-db-branch-and-connection
@@ -82,13 +82,13 @@ jobs:
   #     TURBO_TEAM_ID: ${{secrets.VERCEL_TEAM_ID}}
   #   steps:
   #     - name: Checkout code
-  #       uses: actions/checkout@v6
+  #       uses: actions/checkout@v3
   #     - uses: pnpm /action-setup@v2.0.1
   #       with:
   #         version: 6.32.2
 
   #     - name: Setup Node.js environment
-  #       uses: actions/setup-node@v6
+  #       uses: actions/setup-node@v3
   #       with:
   #         node-version: '18'
   #         cache: 'pnpm'
@@ -104,7 +104,7 @@ jobs:
   #   needs: create_db_branch
   #   runs-on: ubuntu-latest
   # steps:
-  #   - uses: actions/checkout@v2
+  #   - uses: actions/checkout@v3
   #   - name: Install Vercel CLI
   #     run: npm install --global vercel@latest
   #   # TODO: add db string to preview env
