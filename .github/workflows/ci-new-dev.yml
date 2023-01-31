@@ -57,8 +57,8 @@ jobs:
         id: create-db-branch-and-connection
         timeout-minutes: 3
         env:
-          ORG_NAME: ${{secrets.ORG_NAME}}
-          DB_NAME: ${{secrets.PLANETSCALE_DB_NAME}}
+          # ORG_NAME: ${{secrets.ORG_NAME}}
+          # DB_NAME: ${{secrets.PLANETSCALE_DB_NAME}}
           BRANCH_NAME: ${{ steps.validate_params.outputs.branch_name }}
 
         working-directory: ${{env.pscale_base_directory}}/cli-helper-scripts/
