@@ -7,14 +7,11 @@ on:
 
 env:
   pscale_base_directory: .pscale
-
   GITHUB_USER: ${{github.actor}}
   BRANCH_NAME: ${{ steps.validate_params.outputs.branch_name }}
-
   VERCEL_TEAM_ID: ${{secrets.TEAM_ID}}
   VERCEL_PROJECT_ID: ${{secrets.VERCEL_PROJECT_ID}}
   VERCEL_TOKEN: ${{secrets.VERCEL_TOKEN}}
-
   TURBO_TOKEN: ${{secrets.VERCEL_TOKEN}}
   TURBO_TEAM_ID: ${{secrets.TEAM_ID}}
 
@@ -22,13 +19,11 @@ jobs:
   create_db_branch:
     name: Planetscale Dev Branch
     runs-on: ubuntu-latest
-
     env:
       ORG_NAME: ${{secrets.TEAM_ID}}
       DB_NAME: ${{secrets.PLANETSCALE_DB_NAME}}
       PLANETSCALE_SERVICE_TOKEN: ${{secrets.PLANETSCALE_SERVICE_TOKEN}}
       PLANETSCALE_SERVICE_TOKEN_ID: ${{secrets.PLANETSCALE_SERVICE_TOKEN_ID}}
-
     steps:
       - name: Extract branch name
         id: extract_branch
