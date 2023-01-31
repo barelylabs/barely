@@ -19,7 +19,7 @@ jobs:
     outputs:
       database_url: ${{ steps.create-db-branch-and-connection.outputs.database_url }}
     env:
-      ORG_NAME: ${{secrets.TEAM_ID}}
+      ORG_NAME: ${{secrets.PLANETSCALE_ORG_NAME}}
       DB_NAME: ${{secrets.PLANETSCALE_DB_NAME}}
       PLANETSCALE_SERVICE_TOKEN: ${{secrets.PLANETSCALE_SERVICE_TOKEN}}
       PLANETSCALE_SERVICE_TOKEN_ID: ${{secrets.PLANETSCALE_SERVICE_TOKEN_ID}}
