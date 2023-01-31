@@ -1,0 +1,123 @@
+name: ci-new-dev
+
+env:
+  pscale_base_directory: .pscale
+
+  GITHUB_USER: ${{github.actor}}
+  BRANCH_NAME: ${{ steps.validate_params.outputs.branch_name }}
+
+  VERCEL_TEAM_ID: ${{secrets.TEAM_ID}}
+  VERCEL_PROJECT_ID: ${{secrets.VERCEL_PROJECT_ID}}
+  VERCEL_TOKEN: ${{secrets.VERCEL_TOKEN}}
+
+  TURBO_TOKEN: ${{secrets.VERCEL_TOKEN}}
+  TURBO_TEAM_ID: ${{secrets.TEAM_ID}}
+
+on:
+  push:
+    types: [created]
+    branches-ignore:
+      - main
+
+jobs:
+  create_db_branch:
+    name: Planetscale Dev Branch
+    runs-on: ubuntu-latest
+
+    env:
+      ORG_NAME: ${{secrets.TEAM_ID}}
+      DB_NAME: ${{secrets.PLANETSCALE_DB_NAME}}
+      PLANETSCALE_SERVICE_TOKEN: ${{secrets.PLANETSCALE_SERVICE_TOKEN}}
+      PLANETSCALE_SERVICE_TOKEN_ID: ${{secrets.PLANETSCALE_SERVICE_TOKEN_ID}}
+
+    steps:
+      - name: Extract branch name
+        id: extract_branch
+        shell: bash
+        run: echo "##[set-output name=branch;]${GITHUB_REF#refs/heads/}"
+
+      - name: Validate parameters
+        id: validate_params
+        uses: actions/github-script@v3
+        env:
+          BRANCH_NAME: ${{ github.event.inputs.branch }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const branch_name = process.env.BRANCH_NAME || "${{steps.extract_branch.outputs.branch}}";
+
+            const regex = /[^\/]+$/;
+            let clean_branch_name;
+
+            if (branch_name.match(regex)) {
+              clean_branch_name = branch_name.match(regex)[0];
+            } else {
+              clean_branch_name = branch_name;
+            }
+
+            if (! /^[a-zA-Z0-9_-]+$/.test(clean_branch_name)) {
+              const error = `The branch name contains illegal characters: ${clean_branch_name}`;
+              core.error(error);
+              core.setFailed(error);
+            }
+            core.setOutput('branch_name', clean_branch_name);
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Create database branch
+        id: create-db-branch-and-connection
+        timeout-minutes: 3
+        env:
+          ORG_NAME: ${{secrets.ORG_NAME}}
+          DB_NAME: ${{secrets.PLANETSCALE_DB_NAME}}
+          BRANCH_NAME: ${{ steps.validate_params.outputs.branch_name }}
+
+        working-directory: ${{env.pscale_base_directory}}/cli-helper-scripts/
+        run: |
+          ./create-branch-and-connection.sh "$BRANCH_NAME"
+
+  # build:
+  #   name: Turbo Build
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 15
+  #   env:
+  #     TURBO_TOKEN: ${{secrets.VERCE_TOKEN}}
+  #     TURBO_TEAM_ID: ${{secrets.VERCEL_TEAM_ID}}
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
+  #     - uses: pnpm /action-setup@v2.0.1
+  #       with:
+  #         version: 6.32.2
+
+  #     - name: Setup Node.js environment
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: '18'
+  #         cache: 'pnpm'
+
+  #     - name: Install dependencies
+  #       run: pnpm i && pnpm i -r
+
+  #     - name: Build
+  #       run: pnpm build
+
+  # create_app_preview:
+  #   name: Vercel Preview Deployment
+  #   needs: create_db_branch
+  #   runs-on: ubuntu-latest
+  # steps:
+  #   - uses: actions/checkout@v2
+  #   - name: Install Vercel CLI
+  #     run: npm install --global vercel@latest
+  #   # TODO: add db string to preview env
+  #   - name: Add preview db string
+  #     run: vercel env add DATABASE_URL preview
+
+  #   - name: Pull Vercel Environment Information
+  #     run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+  #   - name: Build Project Artifacts
+  #     run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+  #   - name: Deploy Project Artifacts to Vercel
+  #     run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}

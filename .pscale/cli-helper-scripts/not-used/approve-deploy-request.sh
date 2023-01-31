@@ -10,6 +10,4 @@ COMMENT="$2"
 COMMENT="$(echo "$COMMENT" | sed -e 's/ /\&nbsp;/g')"
 
 . set-db-and-org-and-branch-name.sh
-pscale deploy-request review "$DB_NAME" "$DEPLOY_REQUEST_NUMBER" --approve --comment "$COMMENT" --org "$ORG_NAME"
-
-
+pscale deploy-request review "$PLANETSCALE_DB_NAME" "$DEPLOY_REQUEST_NUMBER" --approve --comment "$COMMENT" --org "$ORG_NAME"
