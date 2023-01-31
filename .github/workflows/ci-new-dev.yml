@@ -16,8 +16,12 @@ env:
   VERCEL_ACCESS_TOKEN: ${{secrets.VERCEL_TOKEN}}
 
 jobs:
+  # create (or replace) db dev branch when any:
+  # - new dev branch created
+  # - pull req to main
   create_db_branch:
     name: Planetscale Dev Branch
+    if: ${{ github.event.ref_type == 'created' || github.event.action == 'opened' || github.event.action == 'synchronize' }}
     runs-on: ubuntu-latest
     outputs:
       database_url: ${{ steps.create-db-branch-and-connection.outputs.database_url }}
@@ -122,8 +126,11 @@ jobs:
   #           DATABASE_URL=${{ needs.create_db_branch.outputs.database_url }}
 
   deploy_link:
+    # deploy preview for:
+    # - any dev branch push
+    # - any pull request to main
     name: Vercel Preview Deployment - link.barely.io
-    if: ${{ github.event.action == 'opened' || github.event.action == 'synchronize' || github.event.ref_type == 'branch' }}
+    if: ${{ github.event == 'push' || github.event.action == 'opened' || github.event.action == 'synchronize' }}
     needs: [create_db_branch]
     runs-on: ubuntu-latest
     outputs:
@@ -160,7 +167,10 @@ jobs:
   #         delete: true
 
   delete_link:
-    if: ${{ github.event.action == 'closed' }}
+    # delete preview for:
+    # - any dev branch deleted
+    # - any pull request closed
+    if: ${{ github.event.action == 'closed' || github.event.deleted == true }}
     runs-on: ubuntu-latest
     env:
       VERCEL_PROJECT_ID: ${{secrets.VERCEL_LINK_PROJECT_ID}}
