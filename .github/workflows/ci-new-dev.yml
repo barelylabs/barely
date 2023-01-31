@@ -1,7 +1,7 @@
 name: Preview Environments
 
 on:
-  create:
+  # create:
   pull_request:
     types: [opened, synchronize, closed]
     branches-ignore:
