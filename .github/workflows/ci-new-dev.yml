@@ -58,7 +58,7 @@ jobs:
             core.setOutput('branch_name', clean_branch_name);
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
       - name: Create database branch
         id: create-db-branch-and-connection
@@ -81,13 +81,13 @@ jobs:
   #     TURBO_TEAM_ID: ${{secrets.VERCEL_TEAM_ID}}
   #   steps:
   #     - name: Checkout code
-  #       uses: actions/checkout@v3
+  #       uses: actions/checkout@v6
   #     - uses: pnpm /action-setup@v2.0.1
   #       with:
   #         version: 6.32.2
 
   #     - name: Setup Node.js environment
-  #       uses: actions/setup-node@v3
+  #       uses: actions/setup-node@v6
   #       with:
   #         node-version: '18'
   #         cache: 'pnpm'
