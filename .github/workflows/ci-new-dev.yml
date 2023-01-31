@@ -127,7 +127,7 @@ jobs:
     env:
       VERCEL_PROJECT_ID: ${{secrets.VERCEL_LINK_PROJECT_ID}}
     steps:
-      - uses: snaplet/action@v1
+      - uses: snaplet/vercel-action@v2
         id: deploy
         with:
           env: |
