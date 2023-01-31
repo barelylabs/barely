@@ -25,19 +25,21 @@ jobs:
       PLANETSCALE_SERVICE_TOKEN_ID: ${{secrets.PLANETSCALE_SERVICE_TOKEN_ID}}
     steps:
       - name: Extract branch name
-        id: extract_branch
         shell: bash
-        run: echo "##[set-output name=branch;]${GITHUB_REF#refs/heads/}"
+        # run: echo "{branch}={};]${GITHUB_REF#refs/heads/}"
+        # run: echo "##[set-output name=branch;]${GITHUB_REF#refs/heads/}"
+        run: echo "branch: ${GITHUB_REF_NAME}"
+        id: extract_branch
 
       - name: Validate parameters
         id: validate_params
-        uses: actions/github-script@v3
+        uses: actions/github-script@v6
         env:
           BRANCH_NAME: ${{ github.event.inputs.branch }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const branch_name = process.env.BRANCH_NAME || "${{steps.extract_branch.outputs.branch}}";
+          script: |            
+            const branch_name = "${{ github.branch_name }}";
 
             const regex = /[^\/]+$/;
             let clean_branch_name;
