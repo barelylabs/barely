@@ -24,21 +24,22 @@ jobs:
       PLANETSCALE_SERVICE_TOKEN: ${{secrets.PLANETSCALE_SERVICE_TOKEN}}
       PLANETSCALE_SERVICE_TOKEN_ID: ${{secrets.PLANETSCALE_SERVICE_TOKEN_ID}}
     steps:
-      - name: Extract branch name
-        shell: bash
-        # run: echo "{branch}={};]${GITHUB_REF#refs/heads/}"
-        # run: echo "##[set-output name=branch;]${GITHUB_REF#refs/heads/}"
-        run: echo "branch: ${{ github.branch_name }}"
-        id: extract_branch
+      # - name: Extract branch name
+      # shell: bash
+      # run: echo "{branch}={};]${GITHUB_REF#refs/heads/}"
+      # run: echo "##[set-output name=branch;]${GITHUB_REF#refs/heads/}"
+      # run: echo "branch: ${{ github.branch_name }}"
+      # id: extract_branch
 
       - name: Validate parameters
         id: validate_params
         uses: actions/github-script@v6
-        env:
-          BRANCH_NAME: ${{ github.event.inputs.branch }}
+        # env:
+        #   BRANCH_NAME: ${{ github.branch_name }}
+        #   # BRANCH_NAME: ${{ github.event.inputs.branch }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |            
+          script: |
             const branch_name = "${{ github.branch_name }}";
 
             const regex = /[^\/]+$/;
