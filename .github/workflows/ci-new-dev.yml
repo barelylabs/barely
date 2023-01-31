@@ -128,6 +128,7 @@ jobs:
       VERCEL_PROJECT_ID: ${{secrets.VERCEL_LINK_PROJECT_ID}}
     steps:
       - uses: snaplet/action@v1
+        id: deploy
         with:
           env: |
             DATABASE_URL=${{ needs.create_db_branch.outputs.database_url }}
