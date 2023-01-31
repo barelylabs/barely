@@ -63,32 +63,32 @@ jobs:
           ./create-branch-and-connection.sh "$BRANCH_NAME"
 
   # build:
-    name: Turbo Build
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    env:
-      TURBO_TOKEN: ${{secrets.VERCEL_TOKEN}}
-      TURBO_TEAM_ID: ${{secrets.VERCEL_TEAM_ID}}
+  # name: Turbo Build
+  # runs-on: ubuntu-latest
+  # timeout-minutes: 15
+  # env:
+  #   TURBO_TOKEN: ${{secrets.VERCEL_TOKEN}}
+  #   TURBO_TEAM_ID: ${{secrets.VERCEL_TEAM_ID}}
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+  # steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v3
 
-      - uses: pnpm /action-setup@v2.0.1
-        with:
-          version: 6.32.2
+  #   - uses: pnpm /action-setup@v2.0.1
+  #     with:
+  #       version: 6.32.2
 
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'pnpm'
+  #   - name: Setup Node.js environment
+  #     uses: actions/setup-node@v3
+  #     with:
+  #       node-version: '18'
+  #       cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm i && pnpm i -r
+  #   - name: Install dependencies
+  #     run: pnpm i && pnpm i -r
 
-      - name: Build
-        run: pnpm build
+  #   - name: Build
+  #     run: pnpm build
 
   ### DEPLOY
   # deploy_web:
@@ -122,7 +122,7 @@ jobs:
     if: ${{ github.event.action == 'opened' || github.event.action == 'synchronize' || github.event.ref_type == 'branch' }}
     needs: [create_db_branch]
     runs-on: ubuntu-latest
-    outputs: 
+    outputs:
       deployment_url: ${{ steps.deploy.outputs.deployment-url }}
     env:
       VERCEL_PROJECT_ID: ${{secrets.VERCEL_LINK_PROJECT_ID}}
