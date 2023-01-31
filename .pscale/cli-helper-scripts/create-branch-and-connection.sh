@@ -13,4 +13,5 @@ BRANCH_NAME="$1"
 create-branch "$DB_NAME" "$BRANCH_NAME" "$ORG_NAME" "recreate"
 
 . create-branch-connection-string.sh
-create-branch-connection-string "$DB_NAME" "$BRANCH_NAME" "$ORG_NAME" "creds-${BRANCH_NAME}" "sharesecret"
+create-branch-connection-string "$DB_NAME" "$BRANCH_NAME" "$ORG_NAME" "creds-${BRANCH_NAME}"
+# create-branch-connection-string "$DB_NAME" "$BRANCH_NAME" "$ORG_NAME" "creds-${BRANCH_NAME}" "sharesecret"
