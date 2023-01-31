@@ -9,8 +9,8 @@ on:
 
 env:
   pscale_base_directory: .pscale
-  VERCEL_ACCESS_TOKEN: ${{secrets.VERCEL_TOKEN}}
   VERCEL_TEAM_ID: ${{secrets.VERCEL_TEAM_ID}}
+  VERCEL_ACCESS_TOKEN: ${{secrets.VERCEL_TOKEN}}
 
 jobs:
   create_db_branch:
