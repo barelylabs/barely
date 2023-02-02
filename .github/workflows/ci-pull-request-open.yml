@@ -1,5 +1,11 @@
 name: Pull request opened
 
+env:
+  PLANETSCALE_ORG_NAME: ${{ secrets.PLANETSCALE_ORG_NAME }}
+  PLANETSCALE_DB_NAME: ${{ secrets.PLANETSCALE_DB_NAME }}
+  PLANETSCALE_SERVICE_TOKEN: ${{ secrets.PLANETSCALE_SERVICE_TOKEN }}
+  PLANETSCALE_SERVICE_TOKEN_ID: ${{ secrets.PLANETSCALE_SERVICE_TOKEN_ID }}
+
 on:
   pull_request:
     types: [opened, synchronize]
@@ -7,20 +13,20 @@ on:
       - main
 
 jobs:
-  create-db-branch:
+  db:
     name: Create Planetscale Dev Branch
-    uses: barelylabs/planetscale-branch-action@v0.1.1-alpha
-    id: create-db-branch
+    runs-on: ubuntu-latest
+    outputs:
+      branch-name: ${{ steps.create-db-branch.outputs.branch-name }}
+      connection-string: ${{ steps.create-db-branch.outputs.connection-string }}
     
-    env:
-      PLANETSCALE_ORG_NAME: ${{ secrets.PLANETSCALE_ORG_NAME }}
-      PLANETSCALE_DB_NAME: ${{ secrets.PLANETSCALE_DB_NAME }}
-      PLANETSCALE_SERVICE_TOKEN: ${{ secrets.PLANETSCALE_SERVICE_TOKEN }}
-      PLANETSCALE_SERVICE_TOKEN_ID: ${{ secrets.PLANETSCALE_SERVICE_TOKEN_ID }}
-    
-    with:
-      action: 'create'
-      overwrite-branch: true
+    steps:      
+      - name: Create db branch
+        id: create-db-branch  
+        uses: barelylabs/planetscale-branch-action@v0.1.1-alpha  
+        with:
+          action: 'create'
+          overwrite-branch: true
 
     # name: Create Planetscale Dev Branch
     # runs-on: ubuntu-latest
