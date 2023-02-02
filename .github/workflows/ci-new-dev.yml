@@ -2,13 +2,13 @@ name: Preview Environments
 
 on:
   # create:
-  push:
-    branches-ignore:
-      - main
+  # push:
+  #   branches-ignore:
+  #     - main
   pull_request:
-    types: [opened, synchronize, closed]
+    types: [opened, synchronize]
     branches:
-      - main
+      - never
 
 env:
   pscale_base_directory: .pscale
