@@ -2,36 +2,31 @@
 	"name": "create-t3-turbo",
 	"private": true,
 	"packageManager": "pnpm@7.24.2",
-	"workspaces": [
-		"apps/*",
-		"config/*",
-		"lib/*",
-		"packages/*"
-	],
 	"scripts": {
-		"build:libs": "turbo build:libs",
 		"build": "turbo build",
+		"clean": "rm -rf node_modules",
 		"clean:workspaces": "turbo clean",
 		"clean:all": " turbo clean && rm -rf node_modules pnpm-lock.yaml",
 		"db:generate": "turbo db:generate",
-		"db:push": "turbo db:push",
-		"db:push:force": "turbo db:push:force ",
+		"db:push": "turbo db:push db:generate",
 		"db:seed": "turbo db:seed",
 		"dev": "turbo dev --parallel",
 		"format": "prettier --write \"**/*.{ts,tsx,md}\"",
 		"lint": "turbo lint && manypkg check",
 		"type-check": "turbo type-check"
 	},
-	"devDependencies": {
-		"@manypkg/cli": "^0.19.2",
-		"@typescript-eslint/eslint-plugin": "^5.43.0",
-		"@typescript-eslint/parser": "^5.43.0",
-		"eslint": "^8.28.0",
-		"prettier": "^2.7.1",
+	"dependencies": {
+		"@ianvs/prettier-plugin-sort-imports": "^3.7.1",
+		"@manypkg/cli": "^0.20.0",
+		"@typescript-eslint/eslint-plugin": "^5.49.0",
+		"@typescript-eslint/parser": "^5.49.0",
+		"eslint": "^8.32.0",
+		"eslint-config-prettier": "^8.6.0",
+		"prettier": "^2.8.3",
 		"prettier-plugin-prisma": "^4.8.0",
 		"prettier-plugin-sh": "^0.12.8",
-		"prettier-plugin-tailwindcss": "^0.1.13",
-		"turbo": "^1.6.3",
-		"typescript": "^4.9.3"
+		"prettier-plugin-tailwindcss": "^0.2.2",
+		"turbo": "^1.7.0",
+		"typescript": "^4.9.4"
 	}
 }

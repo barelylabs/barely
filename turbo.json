@@ -18,16 +18,14 @@
 			"cache": false
 		},
 		"dev": {
-			"dependsOn": ["^db:generate"],
+			"persistent": true,			
 			"cache": false
 		},
 		"build": {
 			"dependsOn": ["^build", "^db:generate"],
 			"outputs": [".next/**", "dist/**"]
 		},
-		"lint": {
-			"outputs": []
-		},
+		"lint": {				},
 		"clean": {
 			"cache": false
 		},
@@ -39,5 +37,25 @@
 			"cache": false
 		}
 	},
-	"globalDependencies": [".env"]
+	"globalEnv": [
+		"NEXT_PUBLIC_APP_BASE_URL",
+		"NEXT_PUBLIC_WEB_BASE_URL",
+		"NEXT_PUBLIC_LINK_BASE_URL",
+		"NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+
+		"NODE_ENV",
+		"BOT_USER_ID",
+		"CLERK_SECRET_KEY",
+		"CLERK_WEBHOOK_USER_SECRET",
+		"DATABASE_URL",
+		"OPENAI_API_KEY",
+		"OPENAI_ORG_ID",
+		"POSTMARK_SERVER_API_TOKEN",
+		"SENDGRID_API_KEY",
+		"SPOTIFY_CLIENT_ID",
+		"SPOTIFY_CLIENT_SECRET",
+		"TWILIO_ACCOUNT_SID",
+		"TWILIO_AUTH_TOKEN",
+		"TWILIO_PHONE_NUMBER"
+	]
 }

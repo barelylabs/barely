@@ -1,4 +1,6 @@
 /** @type {import("eslint").Linter.Config} */
-module.exports = {
-  extends: ["../../.eslintrc.cjs", "next"],
+const config = {
+	extends: 'next/core-web-vitals',
 };
+
+module.exports = config;

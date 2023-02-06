@@ -1,44 +1,40 @@
 import { z, ZodRawShape } from 'zod';
 
+function getBaseUrl(devPort?: string) {
+	if (typeof window !== 'undefined') {
+		return ''; // browser should use relative url
+	}
+
+	if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'preview') {
+		if (!process.env.VERCEL_URL) throw new Error('VERCEL_URL not found');
+		return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
+	}
+
+	if (!devPort) throw new Error('devPort not found');
+	return `http://localhost:${devPort}`; // dev SSR should use localhost
+}
+
 const processEnv = {
 	// CLIENT
-	NEXT_PUBLIC_APP_BASE_URL:
-		typeof window !== 'undefined'
-			? '' // browser should use relative url
-			: process.env.NODE_ENV === 'production'
-			? `https://${process.env.VERCEL_URL}` // SSR should use vercel url
-			: `http://localhost:${process.env.NEXT_PUBLIC_APP_DEV_PORT}`, // dev SSR should use localhost
+	NEXT_PUBLIC_APP_BASE_URL: getBaseUrl(process.env.NEXT_PUBLIC_APP_DEV_PORT),
+	NEXT_PUBLIC_WEB_BASE_URL: getBaseUrl(process.env.NEXT_PUBLIC_WEB_DEV_PORT),
+	NEXT_PUBLIC_LINK_BASE_URL: getBaseUrl(process.env.NEXT_PUBLIC_LINK_DEV_PORT),
 
-	NEXT_PUBLIC_WEB_BASE_URL:
-		typeof window !== 'undefined'
-			? ''
-			: process.env.NODE_ENV === 'production'
-			? `https://${process.env.VERCEL_URL}`
-			: `http://localhost:${process.env.NEXT_PUBLIC_WEB_DEV_PORT}`,
-
-	NEXT_PUBLIC_LINK_BASE_URL:
-		typeof window !== 'undefined'
-			? ''
-			: process.env.NODE_ENV === 'production'
-			? `https://${process.env.VERCEL_URL}`
-			: `http://localhost:${process.env.NEXT_PUBLIC_LINK_DEV_PORT}`,
-
+	// NEXT_PUBLIC_APP_DEV_PORT: process.env.NEXT_PUBLIC_APP_DEV_PORT,
+	// NEXT_PUBLIC_WEB_DEV_PORT: process.env.NEXT_PUBLIC_WEB_DEV_PORT,
+	// NEXT_PUBLIC_LINK_DEV_PORT: process.env.NEXT_PUBLIC_LINK_DEV_PORT,
 	NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
 
 	// SERVER
+	VERCEL_URL: process.env.VERCEL_URL,
+
 	NODE_ENV: process.env.NODE_ENV,
 
-	API_USER_ID: process.env.API_USER_ID,
+	BOT_USER_ID: process.env.BOT_USER_ID,
 	CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
 	CLERK_WEBHOOK_USER_SECRET_KEY: process.env.CLERK_WEBHOOK_USER_SECRET_KEY,
 
-	NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-	NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-
 	DATABASE_URL: process.env.DATABASE_URL,
-	DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
-	DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
-	MAGIC_SECRET_KEY: process.env.MAGIC_SECRET_KEY,
 	OPENAI_API_KEY: process.env.OPENAI_API_KEY,
 	OPENAI_ORG_ID: process.env.OPENAI_ORG_ID,
 	POSTMARK_SERVER_API_TOKEN: process.env.POSTMARK_SERVER_API_TOKEN,
@@ -51,16 +47,19 @@ const processEnv = {
 };
 
 export const clientEnvAllSchema = z.object({
-	NEXT_PUBLIC_APP_BASE_URL: z.string(),
-	NEXT_PUBLIC_WEB_BASE_URL: z.string(),
-	NEXT_PUBLIC_LINK_BASE_URL: z.string(),
+	// NEXT_PUBLIC_APP_BASE_URL: z.string(),
+	// NEXT_PUBLIC_WEB_BASE_URL: z.string(),
+	// NEXT_PUBLIC_LINK_BASE_URL: z.string(),
+	NEXT_PUBLIC_APP_DEV_PORT: z.string(),
+	NEXT_PUBLIC_WEB_DEV_PORT: z.string(),
+	NEXT_PUBLIC_LINK_DEV_PORT: z.string(),
 	NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1),
 });
 
 export const serverEnvAllSchema = z.object({
 	NODE_ENV: z.enum(['development', 'test', 'production']),
 
-	API_USER_ID: z.string(),
+	BOT_USER_ID: z.string(),
 
 	CLERK_SECRET_KEY: z.string().min(1),
 	CLERK_WEBHOOK_USER_SECRET_KEY: z.string().min(1),
@@ -95,9 +94,6 @@ export function zEnv<TClient extends ZodRawShape, TServer extends ZodRawShape>({
 		? merged.safeParse(processEnv)
 		: clientEnvSchema.safeParse(processEnv);
 
-	// console.log('processEnv => ', processEnv);
-	// console.log('isServer => ', isServer);
-
 	if (!parsed?.success) {
 		console.error(
 			'❌ Invalid environment variables:\n',
@@ -114,6 +110,7 @@ export function zEnv<TClient extends ZodRawShape, TServer extends ZodRawShape>({
 					`❌ Attempted to access server-side environment variable '${prop}' on the client`,
 				);
 
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 			if (prop in target) return target[prop as keyof typeof target];
 
 			return undefined;

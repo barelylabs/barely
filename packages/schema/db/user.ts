@@ -18,17 +18,19 @@ import { TaskRelations, taskRelationsSchema, taskBaseSchema } from "./task"
 
 export const userBaseSchema = z.object({
   id: z.string(),
-  type: userTypeSchema,
   firstName: z.string(),
   lastName: z.string(),
+  fullName: z.string(),
+  username: z.string().nullable(),
   email: z.string().email(),
-  emailVerified: z.date().nullable(),
-  displayName: z.string().nullable(),
+  emailVerified: z.boolean(),
   phone: z.string().nullable(),
+  phoneVerified: z.boolean(),
   image: z.string().nullable(),
+  type: userTypeSchema,
+  spotifyId: z.string().nullable(),
   marketing: z.boolean(),
   stripeId: z.string().nullable(),
-  spotifyId: z.string().nullable(),
 })
 
 export interface UserRelations {
@@ -82,24 +84,24 @@ export const userSchema = userBaseSchema
 
 export const userCreateSchema = userBaseSchema
   .extend({
-    emailVerified: userBaseSchema.shape.emailVerified.unwrap(),
-    displayName: userBaseSchema.shape.displayName.unwrap(),
+    username: userBaseSchema.shape.username.unwrap(),
     phone: userBaseSchema.shape.phone.unwrap(),
     image: userBaseSchema.shape.image.unwrap(),
-    stripeId: userBaseSchema.shape.stripeId.unwrap(),
     spotifyId: userBaseSchema.shape.spotifyId.unwrap(),
+    stripeId: userBaseSchema.shape.stripeId.unwrap(),
   }).partial({
+    username: true,
     emailVerified: true,
-    displayName: true,
     phone: true,
+    phoneVerified: true,
     image: true,
-    marketing: true,
     teams: true,
     organizations: true,
+    spotifyId: true,
+    marketing: true,
     stripeId: true,
     transactions: true,
     accounts: true,
-    spotifyId: true,
     createdFiles: true,
     vidRenders: true,
     trackRenders: true,
@@ -119,12 +121,11 @@ export const userCreateSchema = userBaseSchema
 
 export const userUpdateSchema = userBaseSchema
   .extend({
-    emailVerified: userBaseSchema.shape.emailVerified.unwrap(),
-    displayName: userBaseSchema.shape.displayName.unwrap(),
+    username: userBaseSchema.shape.username.unwrap(),
     phone: userBaseSchema.shape.phone.unwrap(),
     image: userBaseSchema.shape.image.unwrap(),
-    stripeId: userBaseSchema.shape.stripeId.unwrap(),
     spotifyId: userBaseSchema.shape.spotifyId.unwrap(),
+    stripeId: userBaseSchema.shape.stripeId.unwrap(),
   })
   .partial()
   
