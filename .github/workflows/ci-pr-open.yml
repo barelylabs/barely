@@ -13,9 +13,9 @@ env:
   PLANETSCALE_SERVICE_TOKEN_ID: ${{ secrets.PLANETSCALE_SERVICE_TOKEN_ID }}
 
 jobs:
-  # turbo build and cache
+  # turbo build (& cache), lint, typecheck
 
-  turbo-build:
+  build-lint:
     name: Turbo Build
     runs-on: ubuntu-latest
     env:
@@ -26,21 +26,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - uses: pnpm /action-setup@v2.0.1
-        with:
-          version: 6.32.2
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2.2.4
 
-      - name: Setup Node.js environment
+      - name: Setup Node 18
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
-          cache: 'pnpm'
+          node-version: 18
 
-      - name: Install dependencies
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        run: |
+          echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install deps (with cache)
         run: pnpm i && pnpm i -r
 
-      - name: Build
-        run: pnpm build
+      - name: Build, lint, and type-check
+        run: pnpm turbo build lint type-check
 
   # create (or overwrite) a new db branch for the pull request preview
 
