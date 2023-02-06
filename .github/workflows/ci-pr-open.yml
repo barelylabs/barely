@@ -91,7 +91,7 @@ jobs:
 
   deploy-link:
     name: Vercel Preview Deployment - link.barely.io
-    needs: [db]
+    needs: [create-db-branch]
     runs-on: ubuntu-latest
     env:
       VERCEL_ACCESS_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -100,4 +100,4 @@ jobs:
       - uses: snaplet/action@v1
         with:
           env: |
-            DATABASE_URL=${{ needs.db.outputs.connection-string }}
+            DATABASE_URL=${{ needs.create-db-branch.outputs.connection-string }}
