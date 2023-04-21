@@ -1,5 +1,12 @@
 {
 	"extends": "@barely/config/tsconfig.react.json",
-	"include": ["."],
-	"exclude": ["dist", "build", "node_modules"]
+	"include": ["env", "index.ts", "templates/**/*"],
+
+	"exclude": ["node_modules"],
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"~/*": ["./*"]
+		}
+	}
 }

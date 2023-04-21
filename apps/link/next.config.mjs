@@ -1,19 +1,11 @@
 import * as dotenv from 'dotenv';
+
 dotenv.config({ path: '../../.env' });
 
 /** @type {import("next").NextConfig} */
 const config = {
 	reactStrictMode: true,
-	transpilePackages: [
-		'@barely/api',
-		'@barely/auth',
-		'@barely/config',
-		'@barely/db',
-		'@barely/edge',
-		'@barely/meta',
-		'@barely/schema',
-		'@barely/ui',
-	],
+	transpilePackages: ['@barely/config', '@barely/db', '@barely/lib', '@barely/ui'],
 	env: {
 		VISITOR_IP: process.env.VISITOR_IP,
 		VISITOR_UA: process.env.VISITOR_UA,

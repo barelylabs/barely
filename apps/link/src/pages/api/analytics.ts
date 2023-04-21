@@ -1,10 +1,17 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '@barely/db';
-import { meta } from '@barely/meta';
-import { EventReport } from '@prisma/client/edge';
 
-import { handleUndefined } from '@barely/utils/edge';
-import { linkAnalyticsSchema } from '@barely/schema/analytics/link';
+import { EventReport } from '@prisma/client/edge';
+import { z } from 'zod';
+
+import { prisma } from '@barely/db';
+// import { linkAnalyticsSchema } from '@barely/lib/schema/analytics/link';
+import { visitorSessionSchema } from '@barely/lib/schema/db/visitor-session';
+import { undefinedToNull } from '@barely/lib/utils/edge/handle-undefined';
+import { meta } from '@barely/meta';
+
+export const linkAnalyticsSchema = visitorSessionSchema
+	.partial()
+	.merge(z.object({ linkId: z.string(), teamId: z.string(), url: z.string() }));
 
 const analytics = async (req: NextApiRequest, res: NextApiResponse) => {
 	const {
@@ -72,7 +79,7 @@ const analytics = async (req: NextApiRequest, res: NextApiResponse) => {
 	await Promise.all(
 		analyticsEndpoints.map(async ({ id, platform, accessToken }) => {
 			switch (platform) {
-				case /*👾*/ 'meta':
+				case /*👾*/ 'meta': {
 					if (!accessToken) break;
 					const metaReport = await meta.event.report({
 						pixelId: id,
@@ -88,8 +95,10 @@ const analytics = async (req: NextApiRequest, res: NextApiResponse) => {
 						eventId: event.id,
 						analyticsId: id,
 						analyticsPlatform: platform,
-						error: handleUndefined.toNull(metaReport.error),
+						error: undefinedToNull(metaReport.error),
 					});
+					break;
+				}
 
 				case /*🇨🇳*/ 'tiktok':
 					/*feature*/

@@ -9,6 +9,7 @@
 		"clean:all": " turbo clean && rm -rf node_modules pnpm-lock.yaml",
 		"db:generate": "turbo db:generate",
 		"db:push": "turbo db:push db:generate",
+		"db:push:force": "turbo db:push:force db:generate",
 		"db:seed": "turbo db:seed",
 		"dev": "turbo dev --parallel",
 		"format": "prettier --write \"**/*.{ts,tsx,md}\"",
@@ -18,15 +19,15 @@
 	"dependencies": {
 		"@ianvs/prettier-plugin-sort-imports": "^3.7.1",
 		"@manypkg/cli": "^0.20.0",
-		"@typescript-eslint/eslint-plugin": "^5.49.0",
-		"@typescript-eslint/parser": "^5.49.0",
-		"eslint": "^8.32.0",
+		"@typescript-eslint/eslint-plugin": "^5.33.0",
+		"@typescript-eslint/parser": "^5.33.0",
+		"eslint": "^8.28.0",
 		"eslint-config-prettier": "^8.6.0",
-		"prettier": "^2.8.3",
-		"prettier-plugin-prisma": "^4.8.0",
+		"prettier": "^2.8.4",
+		"prettier-plugin-prisma": "^4.10.0",
 		"prettier-plugin-sh": "^0.12.8",
-		"prettier-plugin-tailwindcss": "^0.2.2",
-		"turbo": "^1.7.0",
-		"typescript": "^4.9.4"
+		"prettier-plugin-tailwindcss": "^0.2.3",
+		"turbo": "^1.8.2",
+		"typescript": "^5.0.0"
 	}
 }

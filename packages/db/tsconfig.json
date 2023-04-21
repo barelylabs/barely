@@ -1,4 +1,4 @@
 {
 	"extends": "@barely/config/tsconfig.base.json",
-	"include": ["index.ts", "kysely/index.ts"]
+	"include": ["index.ts", "env.ts", "kysely/**/*.ts", "prisma/seed.ts"]
 }

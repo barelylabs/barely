@@ -4,14 +4,14 @@ import {
 	MdQrCode,
 	MdTouchApp,
 } from 'react-icons/md';
-// import { FeatureCard, TimelineVertical } from '@barely/ui';
 import { GiConvergenceTarget } from 'react-icons/gi';
 import { GoGlobe } from 'react-icons/go';
 import { FiActivity, FiTarget } from 'react-icons/fi';
 import { RiPagesLine } from 'react-icons/ri';
-// import { FeatureCard, TimelineVertical } from '@barely/ui';
-import { FeatureCard } from '@barely/ui/src/FeatureCard';
-import { TimelineVertical } from '@barely/ui/src/TimelineVertical';
+
+import { FeatureCard } from '@barely/ui';
+
+// import { TimelineVertical } from '@barely/ui/src/TimelineVertical';
 
 const Heading = () => {
 	return (

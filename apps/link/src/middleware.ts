@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { closestDbConnection, usEast1_dev } from '@barely/db/kysely';
 
-import { visitorSession, zFetch } from '@barely/utils/edge';
-import { linkAnalyticsSchema } from '@barely/schema/analytics/link';
 import { z } from 'zod';
+
+import { closestKyselyRead } from '@barely/db/kysely/kysely.db';
+import { getDeviceData, getPathParams } from '@barely/lib/utils/edge/visitor-session';
+import { zPost } from '@barely/lib/utils/edge/zod-fetch';
+
+import { linkAnalyticsSchema } from './pages/api/analytics';
 
 export const config = {
 	matcher: ['/((?!api|mobile|_next|favicon|logos|sitemap|atom|404|500).*)'],
@@ -12,11 +15,9 @@ export const config = {
 type AnalyticsInput = z.infer<typeof linkAnalyticsSchema>;
 
 export async function middleware(req: NextRequest) {
-	// console.log('middleware path => ', req.nextUrl.pathname);
-
 	//* 🧬 parse the incoming request *//
 	const { isLocal, origin, handle, slug, app, appRoute, appId, pathname } =
-		visitorSession.getPathParams(req);
+		getPathParams(req);
 
 	if (!handle && pathname.length === 1) return; // redirect to barely.io/link?
 	if (handle && pathname.length === 1)
@@ -24,13 +25,17 @@ export async function middleware(req: NextRequest) {
 	if (!handle || pathname.length === 1) return NextResponse.rewrite(`${origin}/404`);
 
 	//* 🔎 get link data from db (planetscale serverless + kysely) *//
-	const edgeDb = isLocal
-		? usEast1_dev
-		: closestDbConnection(req.geo?.longitude ?? '0', req.geo?.latitude ?? '0');
+	// const edgeDb = isLocal
+	// 	? usEast1_dev
+	// 	: closestDbConnection(req.geo?.longitude ?? '0', req.geo?.latitude ?? '0');
 
-	const eqOrIs = (value: any) => (value ? '=' : 'is');
+	const db = closestKyselyRead(req.geo?.longitude, req.geo?.latitude);
 
-	const link = await edgeDb
+	function eqOrIs<T>(value: T) {
+		return value ? '=' : 'is';
+	}
+
+	const link = await db
 		.selectFrom('Link')
 		.select(['id', 'url', 'androidScheme', 'appleScheme', 'teamId'])
 		.where('handle', '=', handle)
@@ -45,7 +50,8 @@ export async function middleware(req: NextRequest) {
 
 	//* 📈 report event to analytics + remarketing *//
 	const { ip, geo } = req;
-	const { platform, ...deviceProps } = visitorSession.getDeviceData(req);
+	const { platform, ...deviceProps } = getDeviceData(req);
+	console.log('platform => ', platform);
 	const { browser, device, os, cpu, isBot, ua } = deviceProps;
 
 	const analyticsInput = {
@@ -69,10 +75,13 @@ export async function middleware(req: NextRequest) {
 	} satisfies AnalyticsInput;
 
 	const analyticsEndpoint = new URL(`/api/analytics`, req.url);
-	zFetch.post({
+
+	// don't wait for analytics to finish. get the link redirect out ASAP
+	// eslint-disable-next-line @typescript-eslint/no-floating-promises
+	zPost({
 		endpoint: analyticsEndpoint.href,
 		body: analyticsInput,
-		schemaReq: linkAnalyticsSchema,
+		schema: linkAnalyticsSchema,
 	});
 
 	//* 🧭 route based on device platform and available schemes *//

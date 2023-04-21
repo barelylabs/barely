@@ -3,32 +3,46 @@ const { join } = require('path');
 
 const defaultTheme = require('tailwindcss/defaultTheme');
 const colors = require('tailwindcss/colors');
+const { fontFamily } = require('tailwindcss/defaultTheme');
 
 const lightText = '#F2F2F2';
 const darkText = '#1A1A1A';
 
 module.exports = {
+	darkMode: ['class', '[data-theme="dark"]'],
 	content: [
-		// 'apps/link/src/app/**/*.{js,ts,jsx,tsx,astro,html}',
-		// join(__dirname, 'src/app/**/*.{js,ts,jsx,tsx,astro,html}'),
-		// join(__dirname, 'src/pages/**/*.{js,ts,jsx,tsx,astro,html}'),
-		// join(__dirname, '../../packages/ui/src/**/*.{js,ts,jsx,tsx,astro,html}'),
-		// join(__dirname, './public/**/*.html'),
-
-		// './public/**/*.html',
 		'./src/app/**/*.{astro,html,ts,tsx,js,jsx}',
 		'./src/pages/**/*.{astro,html,ts,tsx,js,jsx}',
 		'./src/components/**/*.{astro,html,ts,tsx,js,jsx}',
-		'../../packages/ui/src/**/*.{ts,tsx,js,jsx}',
-		// './src/app/**/*.ts',
-		// './src/app/**/*.tsx',
+		'../../packages/ui/elements/**/*.{ts,tsx,js,jsx}',
+		'../../libs/toast/src/**/*.{ts,tsx,js,jsx}',
 	],
 	theme: {
+		container: {
+			center: true,
+			padding: '1.5rem',
+			screens: {
+				'2xl': '1440px',
+			},
+		},
 		extend: {
+			fontFamily: {
+				sans: ['var(--font-sans)', ...fontFamily.sans],
+			},
 			animation: {
 				text: 'text 5s ease infinite',
+				'accordion-down': 'accordion-down 0.2s ease-out',
+				'accordion-up': 'accordion-up 0.2s ease-out',
 			},
 			keyframes: {
+				'accordion-down': {
+					from: { height: 0 },
+					to: { height: 'var(--radix-accordion-content-height)' },
+				},
+				'accordion-up': {
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: 0 },
+				},
 				text: {
 					'0%, 100%': {
 						'background-size': '200% 200%',
@@ -375,56 +389,9 @@ module.exports = {
 			},
 		},
 	},
-
-	darkMode: 'class',
 	plugins: [
-		require('@tailwindcss/typography'),
+		require('tailwindcss-animate'),
 		require('@tailwindcss/forms'),
-		require('tailwindcss-themer')({
-			defaultTheme: {
-				extend: {},
-			},
-			themes: [
-				{
-					name: 'light',
-					extend: {
-						backgroundColor: {
-							'body-primary': '#F2F2F2',
-							'body-secondary': '#DBDBDB',
-						},
-						textColor: {
-							primary: '#1A1A1A',
-							secondary: '#4D4D4D',
-						},
-					},
-				},
-				{
-					name: 'dark',
-					extend: {
-						backgroundColor: {
-							'body-primary': '#091D2A',
-							'body-secondary': '#123B54',
-						},
-						textColor: {
-							primary: '#F2F2F2',
-							secondary: '#DBDBDB',
-						},
-					},
-				},
-				{
-					name: 'dark-purple',
-					extend: {
-						backgroundColor: {
-							'body-primary': '#120F24',
-							'body-secondary': '#362C6D',
-						},
-						textColor: {
-							primary: '#F2F2F2',
-							secondary: '#DBDBDB',
-						},
-					},
-				},
-			],
-		}),
+		require('@tailwindcss/typography'),
 	],
 };

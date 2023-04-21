@@ -1,0 +1,30 @@
+{
+	"name": "@barely/toast",
+	"version": "0.1.0",
+	"main": "index.ts",
+	"types": "index.ts",
+	"private": true,
+	"scripts": {
+		"clean": "rm -rf .next .turbo node_modules",
+		"lint": "eslint . --ext .ts,.js,.tsx,.jsx"
+	},
+	"dependencies": {
+		"@barely/lib": "*",
+		"@radix-ui/react-toast": "^1.1.2",
+		"zod": "^3.19.1"
+	},
+	"devDependencies": {
+		"@barely/config": "*",
+		"@types/node": "^18.0.0",
+		"@typescript-eslint/eslint-plugin": "^5.33.0",
+		"@typescript-eslint/parser": "^5.33.0",
+		"eslint": "^8.28.0",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
+		"typescript": "^5.0.0"
+	},
+	"peerDependencies": {
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0"
+	}
+}

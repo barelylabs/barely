@@ -14,9 +14,16 @@ const config = {
 					// './packages/config/./tsconfig.json',
 					'./apps/*/tsconfig.json',
 					'./packages/*/tsconfig.json',
+					'./libs/*/tsconfig.json',
 				],
 			},
 			rules: {
+				'@typescript-eslint/no-empty-interface': [
+					'error',
+					{
+						allowSingleExtends: true,
+					},
+				],
 				'@typescript-eslint/no-unused-vars': [
 					'error',
 					{
@@ -25,6 +32,7 @@ const config = {
 						caughtErrorsIgnorePattern: '^_',
 					},
 				],
+				'no-mixed-spaces-and-tabs': ['error', 'smart-tabs'],
 			},
 		},
 	],

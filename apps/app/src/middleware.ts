@@ -1,54 +1,63 @@
-import { withClerkMiddleware, getAuth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 
-// Set the paths that don't require the user to be signed in
-const publicPaths = ['/', '/sign-in*', '/sign-up*', '/api*'];
+import { withAuth } from 'next-auth/middleware';
 
-const pathIsPublic = (path: string) => {
-	const matchingPublicPath = publicPaths.find(x =>
-		path.match(new RegExp(`^${x}$`.replace('*$', '($|/)'))),
-	);
-	return !!matchingPublicPath;
-};
+// const publicPaths = ['/', '/login*', '/register*', '/api*', '/playlist-pitch*'];
 
-export default withClerkMiddleware((request: NextRequest) => {
-	const { userId } = getAuth(request);
-	const isPublic = pathIsPublic(request.nextUrl.pathname);
+// const pathIsPublic = (path: string) => {
+// 	const matchingPublicPath = publicPaths.find(x =>
+// 		path.match(new RegExp(`^${x}$`.replace('*$', '($|/)'))),
+// 	);
+// 	return !!matchingPublicPath;
+// };
 
-	const searchParams = request.nextUrl.searchParams;
-	const redirectPath = searchParams.get('redirect_path');
-	const redirectUrl = request.nextUrl.clone();
-	redirectUrl.pathname = redirectPath || '/campaigns';
+// const pathIsApi = (path: string) => {
+// 	return path.match(/^\/api\//);
+// };
 
-	console.log('userId => ', userId);
-	console.log('isPublic => ', isPublic);
+// const pathIsLogout = (path: string) => {
+// 	return path.startsWith('/logout');
+// };
 
-	if (isPublic && userId) return NextResponse.redirect(redirectUrl);
-	if (isPublic) return NextResponse.next();
+export default withAuth(
+	function middleware() {
+		// const isPublic = pathIsPublic(req.nextUrl.pathname);
+		// const isLogout = pathIsLogout(req.nextUrl.pathname);
 
-	// if the user is not signed in redirect them to the sign in page.
+		// const searchParams = req.nextUrl.searchParams;
+		// const redirectPath = searchParams.get('redirect_path');
+		// const redirectUrl = req.nextUrl.clone();
+		// redirectUrl.pathname = redirectPath ?? '/campaigns';
 
-	if (!userId) {
-		const signInUrl = new URL('/signin', request.url);
-		signInUrl.searchParams.set('redirect_url', request.url);
-		return NextResponse.redirect(signInUrl);
-	}
-	return NextResponse.next();
-});
+		// if (isPublic) return NextResponse.next();
 
-// export const config = { matcher: '/((?!.*\\.).*)' };
+		// console.log('req.nextauth.token => ', req.nextauth.token);
+
+		// if (!req.nextauth.user) {
+		// 	const loginUrl = new URL('/login', req.url);
+		// 	loginUrl.searchParams.set('redirect', !isLogout ? req.url : '/campaigns');
+		// 	return NextResponse.redirect(loginUrl);
+		// }
+		return NextResponse.next();
+	},
+	// {
+	// 	callbacks: {
+	// 		authorized: ({ token }) => {
+	// 			console.log('token => ', token);
+	// 			return token?.role === 'admin';
+	// 		},
+	// 	},
+	// },
+);
 
 export const config = {
 	matcher: [
-		'/account/:path*',
-		'/api/:path*',
+		'/accounts/:path*',
 		'/campaigns/:path*',
 		'/chat/:path*',
 		'/dev/:path*',
 		'/links/:path*',
-		'/sign-in',
-		'/sign-up',
-		//
+		'/playlists/:path*',
+		'/screen/:path*',
 	],
 };

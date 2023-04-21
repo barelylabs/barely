@@ -4,8 +4,10 @@
 	"extends": "./tsconfig.base.json",
 	"compilerOptions": {
 		"jsx": "react-jsx",
-		"lib": ["ES2015"],
+		"lib": ["dom", "dom.iterable", "esnext"],
 		"module": "esnext",
-		"target": "es6"
-	}
+		"target": "es5"
+	},
+	"include": ["src", "../types/next-auth.d.ts"],
+	"exclude": ["dist", "build", "node_modules"]
 }

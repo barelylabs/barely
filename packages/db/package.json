@@ -15,19 +15,20 @@
 		"db:seed": "ts-node ./prisma/seed.ts"
 	},
 	"dependencies": {
+		"@barely/env": "*",
 		"@planetscale/database": "^1.5.0",
 		"@prisma/client": "^4.6.1",
 		"kysely": "^0.22.0",
-		"kysely-planetscale": "^1.2.0"
+		"kysely-planetscale": "^1.2.0",
+		"prisma-kysely": "^1.0.4"
 	},
 	"devDependencies": {
 		"@barely/config": "*",
 		"@types/node": "^18.0.0",
 		"dotenv-cli": "^6.0.0",
 		"prisma": "^4.6.1",
-		"prisma-generator-zod": "workspace:*",
 		"ts-node": "^10.9.1",
 		"tsconfig-paths": "^4.1.1",
-		"typescript": "^4.9.3"
+		"typescript": "^5.0.0"
 	}
 }

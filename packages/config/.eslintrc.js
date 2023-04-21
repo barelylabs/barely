@@ -15,20 +15,18 @@ const config = {
 			parserOptions: {
 				tsconfigRootDir: __dirname,
 				project: [
-					// './packages/config/./tsconfig.json',
 					'./apps/*/tsconfig.json',
+					'./libs/*/tsconfig.json',
 					'./packages/*/tsconfig.json',
 				],
 			},
 			rules: {
-				'@typescript-eslint/no-unused-vars': [
-					'error',
-					{
-						argsIgnorePattern: '^_',
-						varsIgnorePattern: '^_',
-						caughtErrorsIgnorePattern: '^_',
-					},
+				'@typescript-eslint/no-misused-promises': [
+					2,
+					{ checksVoidReturn: { attributes: false } },
 				],
+				'no-unused-vars': 'off',
+				'@typescript-eslint/no-unused-vars': ['off'],
 			},
 		},
 	],

@@ -1,21 +1,20 @@
 'use client';
 
-import { Session } from 'next-auth';
-import { signOut } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-export default function Logout({ session }: { session: Session | null }) {
+import { useRouter } from 'next/navigation';
+
+import { signOut } from '@barely/lib/auth/react';
+
+export default function Logout({ redirect }: { redirect?: string }) {
 	const router = useRouter();
-	const callbackUrl = '/signin';
 
 	useEffect(() => {
-		if (!session) {
-			console.log('there is no user signed in.');
-			router.push(callbackUrl);
-		}
+		if (!router) return;
+		signOut()
+			.then(() => router.push(redirect ?? '/login'))
+			.catch(err => console.error(err));
+	}, [router, redirect]);
 
-		signOut({ redirect: false, callbackUrl }).then(data => router.push(data.url));
-	}, [session, router]);
-	return <></>;
+	return <>...logging you out</>;
 }

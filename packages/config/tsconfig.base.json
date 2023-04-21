@@ -1,59 +1,39 @@
-// {
-// 	"$schema": "https://json.schemastore.org/tsconfig",
-// 	"display": "Default",
-// 	"compilerOptions": {
-// 		"target": "es2017",
-// 		"lib": ["dom", "dom.iterable", "esnext"],
-// 		"allowJs": true,
-// 		"skipLibCheck": true,
-// 		"strict": true,
-// 		"forceConsistentCasingInFileNames": true,
-// 		"noEmit": true,
-// 		"esModuleInterop": true,
-// 		"module": "esnext",
-// 		"moduleResolution": "node",
-// 		"resolveJsonModule": true,
-// 		"isolatedModules": true,
-// 		"jsx": "preserve",
-// 		"incremental": false,
-// 		"noUncheckedIndexedAccess": true,
-
-// 		"composite": false,
-// 		"declaration": true,
-// 		"declarationMap": true,
-// 		"inlineSources": false,
-// 		"noUnusedLocals": false,
-// 		"noUnusedParameters": false,
-// 		"preserveWatchOutput": true
-// 	},
-// 	"ts-node": {
-// 		"esm": true
-// 	},
-// 	"lib": ["esnext"],
-// 	"exclude": ["node_modules"]
-// }
-
 {
 	"compilerOptions": {
-		"target": "es2017",
-		"lib": ["dom", "dom.iterable", "esnext"],
-		"allowJs": true,
+		// "target": "es2017",
+		// "lib": ["dom", "dom.iterable", "esnext"],
+		// "allowJs": true,
 		"skipLibCheck": true,
 		"strict": true,
 		"forceConsistentCasingInFileNames": true,
-		"noEmit": true,
+		// "noEmit": true,
 		"esModuleInterop": true,
-		"module": "esnext",
+		// "module": "esnext",
 		"moduleResolution": "node",
-		"resolveJsonModule": true,
+		// "resolveJsonModule": true,
 		"isolatedModules": true,
-		"jsx": "preserve",
-		"incremental": true,
-		"noUncheckedIndexedAccess": true
+		// "jsx": "preserve",
+		// "incremental": true,
+		// "noUncheckedIndexedAccess": true,
+
+		"composite": false,
+		"declaration": true,
+		"declarationMap": true,
+		"inlineSources": false,
+		"noUnusedLocals": false,
+		"noUnusedParameters": false,
+		"preserveWatchOutput": true
 	},
 	"ts-node": {
-		"esm": true
+		"files": true,
+		"require": ["tsconfig-paths/register"],
+		"experimentalResolverFeatures": true,
+		"compilerOptions": {
+			"module": "CommonJS",
+			"types": ["node"]
+		}
 	},
+
 	"lib": ["esnext"],
 	"include": [".eslintrc.js"]
 }

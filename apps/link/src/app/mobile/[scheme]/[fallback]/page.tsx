@@ -12,17 +12,18 @@ const mobileRedirectParamsSchema = z.object({
 	ogImage: z.string().optional(),
 	favicon: z.string().optional(),
 });
-type MobileRedirectParams = z.infer<typeof mobileRedirectParamsSchema>;
+// type MobileRedirectParams = z.infer<typeof mobileRedirectParamsSchema>;
 
-export default function MobileRedirectPage ({
+export default function MobileRedirectPage({
 	params,
 	searchParams,
 }: {
-		params: { scheme: string; fallback: string; };
-		searchParams?: { [key: string]: string | string[] | undefined };
-	}) {
+	params: { scheme: string; fallback: string };
+	searchParams?: { [key: string]: string | string[] | undefined };
+}) {
 	const { scheme, fallback } = params;
-	const { ogTitle, ogDescription, ogImage, favicon } = mobileRedirectParamsSchema.parse(searchParams);
+	const { ogTitle, ogDescription, ogImage, favicon } =
+		mobileRedirectParamsSchema.parse(searchParams);
 
 	return (
 		<>

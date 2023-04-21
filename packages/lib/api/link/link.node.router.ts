@@ -1,0 +1,77 @@
+import { z } from 'zod';
+
+import { prisma } from '@barely/db';
+
+import { publicProcedure, router } from '../trpc';
+
+// import { appTypeSchema } from '@barely/lib/schema/db/apptype';
+// import { analyticsEndpointBaseSchema } from '@barely/lib/schema/db/analyticsendpoint';
+// import { linkBaseSchema } from '@barely/lib/schema/db/link';
+
+export const linkRouter = router({
+	getAll: publicProcedure.query(() => {
+		return prisma.link.findMany({ take: 10 });
+	}),
+	// getByUserId: privateProcedure
+	// 	.input(z.array(z.string()).optional())
+	// 	.query(({ ctx, input }) => {
+	// 		return prisma.link.findMany({
+	// 			where: input?.length ? { userId: { in: input } } : { userId: ctx.user.id }, //todo fix this. get links for anyone this user is a collaborator with
+	// 			// artist: { ownerId: ctx.user.id } || {
+	// 			// 	userRoles: { some: { user: { id: ctx.user.id } } },
+	// 			// },
+	// 			// },
+	// 			include: {
+	// 				_count: { select: { events: { where: { type: 'linkClick' } } } },
+	// 			},
+	// 			take: 20,
+	// 		});
+	// 	}),
+
+	getById: publicProcedure.input(z.string()).query(({ input }) => {
+		{
+			const link = prisma.link.findFirst({ where: { id: input } });
+			return link;
+		}
+	}),
+	// getByPath: procedure
+	//   .meta({ openapi: { method: "GET", path: "/link/by-path" } })
+	//   .input(linkByPathSchema)
+	//   .output(z.lazy(() => linkWithRemarketingSchema.partial()))
+	//   .query(async ({ ctx, input }) => {
+	//     const { handle, slug, app, appRoute, appId } = input;
+	//     const link = await prisma.link.findFirst({
+	//       where: { handle, slug, app, appRoute, appId },
+	//       select: {
+	//         id: true,
+	//         url: true,
+	//         artist: {
+	//           select: { remarketing: { select: { remarketing: true } } },
+	//         },
+	//         trackApp: { select: { track: { select: { spotifyId: true } } } },
+	//         androidScheme: true,
+	//         appleScheme: true,
+	//         ogTitle: true,
+	//         ogDescription: true,
+	//         ogImage: true,
+	//         favicon: true,
+	//       },
+	//     });
+
+	//     if (!link) {
+	//       throw new TRPCError({
+	//         code: "NOT_FOUND",
+	//         message: `sorry, we couldn't find that link`,
+	//       });
+	//     }
+
+	//     const remarketingEndpoints =
+	//       link.artist?.remarketing.map((r) => r.remarketing) ?? [];
+	//     const { artist, ...linkWithoutArtist } = link;
+	//     const linkWithRemarketing = {
+	//       ...linkWithoutArtist,
+	//       remarketingEndpoints,
+	//     };
+	//     return linkWithRemarketing;
+	//   }),
+});

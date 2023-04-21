@@ -5,7 +5,7 @@ function getBaseUrl(devPort?: string) {
 		return ''; // browser should use relative url
 	}
 
-	if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'preview') {
+	if (process.env.VERCEL_ENV === 'production') {
 		if (!process.env.VERCEL_URL) throw new Error('VERCEL_URL not found');
 		return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
 	}
@@ -20,61 +20,65 @@ const processEnv = {
 	NEXT_PUBLIC_WEB_BASE_URL: getBaseUrl(process.env.NEXT_PUBLIC_WEB_DEV_PORT),
 	NEXT_PUBLIC_LINK_BASE_URL: getBaseUrl(process.env.NEXT_PUBLIC_LINK_DEV_PORT),
 
-	// NEXT_PUBLIC_APP_DEV_PORT: process.env.NEXT_PUBLIC_APP_DEV_PORT,
-	// NEXT_PUBLIC_WEB_DEV_PORT: process.env.NEXT_PUBLIC_WEB_DEV_PORT,
-	// NEXT_PUBLIC_LINK_DEV_PORT: process.env.NEXT_PUBLIC_LINK_DEV_PORT,
-	NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+	NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+	NEXT_PUBLIC_PUSHER_APP_KEY: process.env.NEXT_PUBLIC_PUSHER_APP_KEY,
+	NEXT_PUBLIC_PUSHER_APP_CLUSTER: process.env.NEXT_PUBLIC_PUSHER_APP_CLUSTER,
+	NEXT_PUBLIC_PUSHER_APP_ID: process.env.NEXT_PUBLIC_PUSHER_APP_ID,
 
 	// SERVER
+	VERCEL_ENV: process.env.VERCEL_ENV,
 	VERCEL_URL: process.env.VERCEL_URL,
-
-	NODE_ENV: process.env.NODE_ENV,
-
-	BOT_USER_ID: process.env.BOT_USER_ID,
-	CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
-	CLERK_WEBHOOK_USER_SECRET_KEY: process.env.CLERK_WEBHOOK_USER_SECRET_KEY,
-
+	BOT_SPOTIFY_ACCOUNT_ID: process.env.BOT_SPOTIFY_ACCOUNT_ID,
+	DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
+	DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
 	DATABASE_URL: process.env.DATABASE_URL,
+	NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+	NEXTAUTH_URL_INTERNAL: process.env.NEXTAUTH_URL_INTERNAL,
 	OPENAI_API_KEY: process.env.OPENAI_API_KEY,
 	OPENAI_ORG_ID: process.env.OPENAI_ORG_ID,
 	POSTMARK_SERVER_API_TOKEN: process.env.POSTMARK_SERVER_API_TOKEN,
+	PUSHER_APP_SECRET: process.env.PUSHER_APP_SECRET,
+	SCREENING_PHONE_NUMBER: process.env.SCREENING_PHONE_NUMBER,
 	SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
 	SPOTIFY_CLIENT_ID: process.env.SPOTIFY_CLIENT_ID,
 	SPOTIFY_CLIENT_SECRET: process.env.SPOTIFY_CLIENT_SECRET,
+	STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+	STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
 	TWILIO_ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID,
 	TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN,
 	TWILIO_PHONE_NUMBER: process.env.TWILIO_PHONE_NUMBER,
 };
 
 export const clientEnvAllSchema = z.object({
-	// NEXT_PUBLIC_APP_BASE_URL: z.string(),
-	// NEXT_PUBLIC_WEB_BASE_URL: z.string(),
-	// NEXT_PUBLIC_LINK_BASE_URL: z.string(),
-	NEXT_PUBLIC_APP_DEV_PORT: z.string(),
-	NEXT_PUBLIC_WEB_DEV_PORT: z.string(),
-	NEXT_PUBLIC_LINK_DEV_PORT: z.string(),
-	NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1),
+	NEXT_PUBLIC_APP_BASE_URL: z.string(),
+	NEXT_PUBLIC_WEB_BASE_URL: z.string(),
+	NEXT_PUBLIC_LINK_BASE_URL: z.string(),
+	NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string(),
+	NEXT_PUBLIC_PUSHER_APP_KEY: z.string(),
+	NEXT_PUBLIC_PUSHER_APP_CLUSTER: z.string(),
+	NEXT_PUBLIC_PUSHER_APP_ID: z.string(),
 });
 
 export const serverEnvAllSchema = z.object({
-	NODE_ENV: z.enum(['development', 'test', 'production']),
-
-	BOT_USER_ID: z.string(),
-
-	CLERK_SECRET_KEY: z.string().min(1),
-	CLERK_WEBHOOK_USER_SECRET_KEY: z.string().min(1),
+	VERCEL_ENV: z.enum(['development', 'test', 'production']),
 
 	// EXTERNAL
+	BOT_SPOTIFY_ACCOUNT_ID: z.string(),
 	DATABASE_URL: z.string().url(),
 	DISCORD_CLIENT_ID: z.string(),
 	DISCORD_CLIENT_SECRET: z.string(),
-	MAGIC_SECRET_KEY: z.string(),
+	NEXTAUTH_SECRET: z.string(),
+	NEXTAUTH_URL_INTERNAL: z.string().url().optional(),
 	OPENAI_API_KEY: z.string(),
 	OPENAI_ORG_ID: z.string(),
 	POSTMARK_SERVER_API_TOKEN: z.string(),
+	PUSHER_APP_SECRET: z.string(),
+	SCREENING_PHONE_NUMBER: z.string(),
 	SENDGRID_API_KEY: z.string(),
 	SPOTIFY_CLIENT_ID: z.string(),
 	SPOTIFY_CLIENT_SECRET: z.string(),
+	STRIPE_SECRET_KEY: z.string(),
+	STRIPE_WEBHOOK_SECRET: z.string(),
 	TWILIO_ACCOUNT_SID: z.string(),
 	TWILIO_AUTH_TOKEN: z.string(),
 	TWILIO_PHONE_NUMBER: z.string(),
@@ -94,6 +98,7 @@ export function zEnv<TClient extends ZodRawShape, TServer extends ZodRawShape>({
 		? merged.safeParse(processEnv)
 		: clientEnvSchema.safeParse(processEnv);
 
+	// console.log('parsed env => ', parsed);
 	if (!parsed?.success) {
 		console.error(
 			'❌ Invalid environment variables:\n',

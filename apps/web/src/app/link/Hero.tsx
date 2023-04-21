@@ -53,8 +53,8 @@ const Hero = () => {
 					<div className='mx-auto max-w-sm text-purple-200 '>
 						<p className='font-semibold'>Thanks for your interest!</p>
 						<p>
-							You've been added to our waitlist and we'll reach out when we expand our
-							testing program.
+							{`You've been added to our waitlist and we'll reach out when we expand our
+							testing program.`}
 						</p>
 					</div>
 				)}

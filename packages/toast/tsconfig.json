@@ -1,0 +1,5 @@
+{
+	"extends": "@barely/config/tsconfig.react.json",
+	"include": ["index.tsx", "src/**/*.ts", "src/**/*.tsx"],
+	"exclude": ["node_modules"]
+}

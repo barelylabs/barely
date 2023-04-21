@@ -1,4 +1,4 @@
-import { default as BarelyLogo } from 'public/logos/barely-io-logo.svg';
+import Image from 'next/image';
 import Link from 'next/link';
 
 export default function NotFound() {
@@ -8,9 +8,10 @@ export default function NotFound() {
 				<div className='flex flex-shrink-0 justify-center'>
 					<Link href='/' className='mb-3 inline-flex'>
 						<span className='sr-only'>barely.io</span>
-						<img
+						<Image
 							src='/logos/barely-io-logo.svg'
-							className='h-20 w-20'
+							width='80'
+							height='80'
 							alt='barely.io logo'
 						/>
 					</Link>

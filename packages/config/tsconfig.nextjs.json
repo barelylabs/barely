@@ -3,11 +3,24 @@
 	"display": "Next.js",
 	"extends": "./tsconfig.base.json",
 	"compilerOptions": {
-		"baseUrl": ".",
-		"paths": {
-			"~/*": ["./src/*"]
-		}
+		"declaration": false,
+		"declarationMap": false,
+		"target": "es5",
+		"lib": ["dom", "dom.iterable", "esnext"],
+		"allowJs": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"noEmit": true,
+		"incremental": true,
+		"esModuleInterop": true,
+		"module": "esnext",
+		"resolveJsonModule": true,
+		"strict": true,
+		"isolatedModules": true,
+		"jsx": "preserve",
+		"strictNullChecks": true,
+		"useUnknownInCatchVariables": true
 	},
-	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.cjs", "**/*.mjs"],
-	"exclude": []
+	"include": ["src", "next-env.d.ts", "../types/next-auth.d.ts", "../types/*.d.ts"],
+	"exclude": ["node_modules"]
 }

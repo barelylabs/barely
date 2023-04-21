@@ -1,28 +1,28 @@
 import Link from 'next/link';
-import { FaFacebook, FaInstagram, FaTwitter, FaYoutube } from 'react-icons/fa';
+// import { FaFacebook, FaInstagram, FaTwitter, FaYoutube } from 'react-icons/fa';
 
-const navigation = [
-	{
-		name: 'Facebook',
-		href: '#',
-		icon: FaFacebook,
-	},
-	{
-		name: 'Instagram',
-		href: '#',
-		icon: FaInstagram,
-	},
-	{
-		name: 'Twitter',
-		href: '#',
-		icon: FaTwitter,
-	},
-	{
-		name: 'YouTube',
-		href: '#',
-		icon: FaYoutube,
-	},
-];
+// const navigation = [
+// 	{
+// 		name: 'Facebook',
+// 		href: '#',
+// 		icon: FaFacebook,
+// 	},
+// 	{
+// 		name: 'Instagram',
+// 		href: '#',
+// 		icon: FaInstagram,
+// 	},
+// 	{
+// 		name: 'Twitter',
+// 		href: '#',
+// 		icon: FaTwitter,
+// 	},
+// 	{
+// 		name: 'YouTube',
+// 		href: '#',
+// 		icon: FaYoutube,
+// 	},
+// ];
 
 export default function Footer() {
 	return (
