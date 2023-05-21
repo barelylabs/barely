@@ -4,7 +4,6 @@ import { useState } from 'react';
 
 import Link from 'next/link';
 
-import { Icon } from '@barely/ui';
 import { signOut } from 'next-auth/react';
 
 import { SessionUser } from '@barely/auth/auth-options';
@@ -16,6 +15,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@barely/ui/elements/dropdown-menu';
+import { Icon } from '@barely/ui/elements/icon';
 
 import { UserAvatar } from '~/app/(dash)/components/user-avatar';
 import env from '~/env';

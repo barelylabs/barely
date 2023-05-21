@@ -1,20 +1,16 @@
 /** @type {import('tailwindcss').Config} */
-const { join } = require('path');
 
 const defaultTheme = require('tailwindcss/defaultTheme');
 const colors = require('tailwindcss/colors');
-const { fontFamily } = require('tailwindcss/defaultTheme');
-
-const lightText = '#F2F2F2';
-const darkText = '#1A1A1A';
 
 module.exports = {
-	darkMode: ['class', '[data-theme="dark"]'],
+	darkMode: ['class'],
 	content: [
 		'./src/app/**/*.{astro,html,ts,tsx,js,jsx}',
 		'./src/pages/**/*.{astro,html,ts,tsx,js,jsx}',
 		'./src/components/**/*.{astro,html,ts,tsx,js,jsx}',
 		'../../packages/ui/elements/**/*.{ts,tsx,js,jsx}',
+		'../../packages/ui/components/**/*.{ts,tsx,js,jsx}',
 		'../../libs/toast/src/**/*.{ts,tsx,js,jsx}',
 	],
 	theme: {
@@ -25,9 +21,22 @@ module.exports = {
 				'2xl': '1440px',
 			},
 		},
+		borderWidth: {
+			DEFAULT: '1.5px',
+			0: '0',
+			2: '2px',
+			3: '3px',
+			4: '4px',
+			6: '6px',
+			8: '8px',
+		},
 		extend: {
 			fontFamily: {
-				sans: ['var(--font-sans)', ...fontFamily.sans],
+				sans: ['var(--font-sans)', ...defaultTheme.fontFamily.sans],
+			},
+			fontSize: {
+				md: '1rem',
+				'2xs': '0.625rem',
 			},
 			animation: {
 				text: 'text 5s ease infinite',
@@ -55,6 +64,47 @@ module.exports = {
 				},
 			},
 			colors: {
+				border: 'hsl(var(--border))',
+				input: 'hsl(var(--input))',
+				ring: 'hsl(var(--ring))',
+				background: 'hsl(var(--background))',
+				foreground: 'hsl(var(--foreground))',
+				primary: {
+					DEFAULT: 'hsl(var(--primary))',
+					foreground: 'hsl(var(--primary-foreground))',
+				},
+				secondary: {
+					DEFAULT: 'hsl(var(--secondary))',
+					foreground: 'hsl(var(--secondary-foreground))',
+				},
+				success: {
+					DEFAULT: 'hsl(var(--success))',
+					foreground: 'hsl(var(--success-foreground))',
+				},
+				destructive: {
+					DEFAULT: 'hsl(var(--destructive))',
+					foreground: 'hsl(var(--destructive-foreground))',
+				},
+				muted: {
+					DEFAULT: 'hsl(var(--muted))',
+					foreground: 'hsl(var(--muted-foreground))',
+				},
+				accent: {
+					DEFAULT: 'hsl(var(--accent))',
+					foreground: 'hsl(var(--accent-foreground))',
+				},
+				popover: {
+					DEFAULT: 'hsl(var(--popover))',
+					foreground: 'hsl(var(--popover-foreground))',
+				},
+				subtle: {
+					DEFAULT: 'hsl(var(--subtle))',
+					foreground: 'hsl(var(--subtle-foreground))',
+				},
+				card: {
+					DEFAULT: 'hsl(var(--card))',
+					foreground: 'hsl(var(--card-foreground))',
+				},
 				transparent: 'transparent',
 				current: 'currentColor',
 				black: colors.black,
@@ -74,7 +124,6 @@ module.exports = {
 					800: '#003F66',
 					900: '#001F33',
 				},
-
 				'amazon-music-alt': {
 					DEFAULT: '#0DBFF5',
 					50: '#E7F9FE',
@@ -88,7 +137,6 @@ module.exports = {
 					800: '#044C62',
 					900: '#022631',
 				},
-
 				apple: {
 					DEFAULT: '#555555',
 					50: '#F2F2F2',
@@ -364,22 +412,10 @@ module.exports = {
 					900: '#06242D',
 				},
 			},
-			backgroundColor: {
-				primary: '#5A49B6',
-				'primary-hover': '#483A92',
-				secondary: '#2C92D3',
-				'secondary-hover': '#2375A9',
-				confirm: '#6CBD42',
-				'confirm-hover': '#579735',
-				danger: '#EB1B3C',
-				'danger-hover': '#BC102C',
-			},
-			textColor: {
-				light: lightText,
-				dark: darkText,
-			},
-			fontFamily: {
-				sans: ['inter', ...defaultTheme.fontFamily.sans],
+			borderRadius: {
+				lg: `var(--radius)`,
+				md: `calc(var(--radius) - 2px)`,
+				sm: `calc(var(--radius) - 4px)`,
 			},
 			letterSpacing: {
 				normal: '-.025em',

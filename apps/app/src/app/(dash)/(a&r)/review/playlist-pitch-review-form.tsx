@@ -18,10 +18,13 @@ import {
 } from '@barely/api/playlist-pitch-review/playlist-pitch-review-atoms';
 import { type GetPlaylistsByUserId } from '@barely/api/playlist/playlist.node.fns';
 
-import { CheckboxField, InfoCard, SwitchField, TextField } from '@barely/ui/elements';
+import { InfoCard } from '@barely/ui/elements/card';
+import { CheckboxField } from '@barely/ui/elements/checkbox';
 import { Form, SubmitButton } from '@barely/ui/elements/form';
 import { NumberField } from '@barely/ui/elements/number-field';
 import { RatingField } from '@barely/ui/elements/rating';
+import { SwitchField } from '@barely/ui/elements/switch';
+import { TextField } from '@barely/ui/elements/text-field';
 
 import { wait } from '@barely/utils/edge/wait';
 

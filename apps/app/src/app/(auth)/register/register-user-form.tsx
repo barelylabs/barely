@@ -28,8 +28,9 @@ const RegisterUserForm = ({ callbackUrl }: RegisterFormProps) => {
 	const [loginEmailSent, setLoginEmailSent] = useState(false);
 	const [identifier, setIdentifier] = useState('');
 
-	const onSubmit = (user: z.infer<typeof userContactInfoSchema>) => {
-		return createUser.mutate({ ...user });
+	const onSubmit = async (user: z.infer<typeof userContactInfoSchema>) => {
+		await createUser.mutateAsync({ ...user });
+		return;
 	};
 
 	return (

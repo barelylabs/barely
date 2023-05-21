@@ -61,44 +61,45 @@ const playlistPlacementRouter = router({
 				);
 
 				// check if the track is already in the playlist
-				const spotifyTracklist = await getSpotifyPlaylistTrackIds({
-					spotifyId: playlist.spotifyId,
-					accessToken: spotifyAccessToken,
-				});
+				// const spotifyTracklist = await getSpotifyPlaylistTrackIds({
+				// 	spotifyId: playlist.spotifyId,
+				// 	accessToken: spotifyAccessToken,
+				// });
 
-				const trackInstancesInPlaylist = spotifyTracklist.filter(
-					spotifyId => spotifyId === track.spotifyId,
-				);
+				// const trackInstancesInPlaylist = spotifyTracklist.filter(
+				// 	spotifyId => spotifyId === track.spotifyId,
+				// );
 
-				console.log(
-					'playlist link => ',
-					`https://open.spotify.com/playlist/${playlist.spotifyId}`,
-				);
-				console.log(
-					'trackInstancesInPlaylist.length => ',
-					trackInstancesInPlaylist.length,
-				);
-				const trackIndex = spotifyTracklist.indexOf(track.spotifyId);
-				const distanceFromPlacement = Math.abs(
-					trackIndex - queuedPlacement.playlistPosition,
-				);
+				// console.log(
+				// 	'playlist link => ',
+				// 	`https://open.spotify.com/playlist/${playlist.spotifyId}`,
+				// );
+				// console.log(
+				// 	'trackInstancesInPlaylist.length => ',
+				// 	trackInstancesInPlaylist.length,
+				// );
+				// const trackIndex = spotifyTracklist.indexOf(track.spotifyId);
+				// const distanceFromPlacement = Math.abs(
+				// 	trackIndex - queuedPlacement.playlistPosition,
+				// );
 
-				if (trackInstancesInPlaylist.length === 1 && distanceFromPlacement < 10) {
-					await prisma.playlistPlacement.update({
-						where: { id: queuedPlacement.id },
-						data: { addedToPlaylist: true },
-					});
-					continue;
-				}
+				// if (trackInstancesInPlaylist.length === 1 && distanceFromPlacement < 10) {
+				// 	await prisma.playlistPlacement.update({
+				// 		where: { id: queuedPlacement.id },
+				// 		data: { addedToPlaylist: true },
+				// 	});
+				// 	continue;
+				// }
 
-				if (trackInstancesInPlaylist.length > 0) {
+				// if (trackInstancesInPlaylist.length > 0) {
 					// -> the track is either already in the playlist multiple times or in there too far from the placement position
-					await removeTrackFromSpotifyPlaylist({
+				console.log('removing track from playlist...')	
+				await removeTrackFromSpotifyPlaylist({
 						accessToken: spotifyAccessToken,
 						trackSpotifyId: track.spotifyId,
 						playlistSpotifyId: playlist.spotifyId,
 					});
-				}
+				// }
 
 				// if it is not in the playlist, add it to the playlist
 				console.log('adding track to playlist...');
@@ -108,6 +109,7 @@ const playlistPlacementRouter = router({
 					'playlist link => ',
 					`https://open.spotify.com/playlist/${playlist.spotifyId}`,
 				);
+
 				await addTrackToSpotifyPlaylist({
 					accessToken: spotifyAccessToken,
 					trackSpotifyId: track.spotifyId,
@@ -116,10 +118,11 @@ const playlistPlacementRouter = router({
 				});
 
 				// -> update the placement to addedToPlaylist: true
-				await prisma.playlistPlacement.update({
-					where: { id: queuedPlacement.id },
-					data: { addedToPlaylist: true },
-				});
+				// todo - uncomment this
+				// await prisma.playlistPlacement.update({
+				// 	where: { id: queuedPlacement.id },
+				// 	data: { addedToPlaylist: true },
+				// });
 			}
 
 			return true;

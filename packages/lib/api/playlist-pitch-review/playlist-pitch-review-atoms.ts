@@ -29,7 +29,7 @@ const playlistPitchReviewFieldAtom = fieldAtom({
 		pitchReviewSchema.shape.review.min(15, 'Please write a longer review'),
 		{
 			on: ['change'],
-			when: 'dirty',
+			when: 'touched',
 		},
 	),
 });

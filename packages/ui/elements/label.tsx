@@ -8,7 +8,7 @@ import { cn } from '@barely/lib/utils/edge/cn';
 // 	'absolute z-10 origin-[0]  scale-75 transform text-gray-500 duration-300 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:text-blue-600 dark:text-gray-400 peer-focus:dark:text-blue-500 ';
 
 const labelStyles = cva(
-	'block py-1 font-normal text-left text-slate-700 dark:text-slate-300 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
+	'block py-1 font-normal text-muted-foreground dark:text-slate-300 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
 	{
 		variants: {
 			size: {

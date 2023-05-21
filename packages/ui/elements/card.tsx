@@ -6,13 +6,14 @@ import { cn } from '@barely/lib/utils/edge/cn';
 
 import { AspectRatio } from './aspect-ratio';
 import { type BadgeProps } from './badge';
+import { IconType } from './icon';
 import { Text } from './typography';
 
 const Card = ({ className, children }: { className?: string; children: ReactNode }) => {
 	return (
 		<div
 			className={cn(
-				'w-full mt-2 bg-white dark:bg-slate-900 rounded-md border-2 border-slate-200 dark:border-slate-700 px-4 py-4 sm:px-5 grid gap-3',
+				'w-full mt-2 bg-card rounded-md border-2 p-4 sm:p-5 grid gap-3',
 				className,
 			)}
 		>
@@ -92,4 +93,33 @@ const InfoCard = ({ children, ...props }: InfoCardProps) => {
 	);
 };
 
-export { Card, CardFooter, InfoCard };
+interface FeatureCardProps {
+	Icon?: IconType;
+	iconColor?: string;
+	headline?: string;
+	children?: ReactNode;
+	className?: string;
+}
+
+const FeatureCard = (props: FeatureCardProps) => {
+	return (
+		<Card
+			className={cn(
+				'flex flex-row items-center space-x-5 rounded-lg p-6 shadow-md',
+				props.className,
+			)}
+		>
+			{props.Icon && (
+				<div className={`p-1 text-5xl font-light text-${props.iconColor ?? ''}`}>
+					<props.Icon />
+				</div>
+			)}
+			<div className='flex flex-col space-y-1'>
+				<h1 className='text-2xl'>{props.headline}</h1>
+				{props.children}
+			</div>
+		</Card>
+	);
+};
+
+export { Card, CardFooter, InfoCard, FeatureCard };

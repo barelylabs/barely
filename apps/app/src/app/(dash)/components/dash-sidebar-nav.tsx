@@ -7,7 +7,7 @@ import { useAtomValue } from 'jotai';
 
 import { SessionUser } from '@barely/auth/auth-options';
 
-import { Icon } from '@barely/ui/elements';
+import { Icon } from '@barely/ui/elements/icon';
 
 import { cn } from '@barely/utils/edge/cn';
 

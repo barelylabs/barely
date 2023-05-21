@@ -11,6 +11,7 @@ const Review = (props: {
 		displayName: string;
 	};
 	key?: string;
+	children?: React.ReactNode;
 }) => {
 	return (
 		<div className='flex flex-row gap-5 items-start pb-3'>
@@ -21,6 +22,7 @@ const Review = (props: {
 			<div className='flex flex-col space-y-2'>
 				<RatingDisplay rating={props.rating} by={props.reviewer?.displayName} />
 				<div>{props.review}</div>
+				{props.children}
 			</div>
 		</div>
 	);

@@ -1,4 +1,4 @@
-import { Text } from '@barely/ui';
+import { Text } from '@barely/ui/elements/typography';
 
 interface LoginLinkSentProps {
 	identifier: string;

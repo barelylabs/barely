@@ -38,7 +38,7 @@
 		"lexorank": "^1.0.5",
 		"libphonenumber-js": "^1.10.19",
 		"lodash.debounce": "^4.0.8",
-		"next": "^13.2.1",
+		"next": "^13.4.2",
 		"next-auth": "^4.19.2",
 		"nodemailer": "^6.9.1",
 		"openai": "^3.1.0",
@@ -47,10 +47,11 @@
 		"react-phone-number-input": "^3.2.18",
 		"sha.js": "^2.4.11",
 		"stripe": "^11.13.0",
-		"superjson": "^1.11.0",
+		"superjson": "^1.12.3",
+		"tailwind-merge": "^1.12.0",
 		"trpc-openapi": "^1.1.2",
 		"twilio": "^3.84.1",
-		"zod": "^3.2.1"
+		"zod": "^3.21.4"
 	},
 	"devDependencies": {
 		"@barely/config": "*",

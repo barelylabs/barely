@@ -18,11 +18,11 @@ const getUserFromToken = (token: JWT) => {
 	const parsedUser = sessionUserSchema.safeParse(token);
 
 	if (!parsedUser.success) {
-		console.log('ack bad user!', parsedUser.error);
+		// console.log('ack bad user!', parsedUser.error);
 		return null;
 	}
 
-	console.log('parsedUser', parsedUser.data);
+	// console.log('parsedUser', parsedUser.data);
 	return parsedUser.data;
 };
 

@@ -15,10 +15,12 @@ import {
 	AtSign,
 	Banknote,
 	Bell,
+	Binary,
 	Bold,
 	Bot,
 	CalendarRange,
 	Check,
+	CheckCircle,
 	CheckSquare,
 	ChevronDown,
 	ChevronLeft,
@@ -39,7 +41,6 @@ import {
 	Download,
 	Edit,
 	ExternalLink,
-	Facebook,
 	File,
 	FileAudio,
 	FileText,
@@ -53,7 +54,6 @@ import {
 	FormInput,
 	Gamepad,
 	Gauge,
-	Github,
 	Globe,
 	GripVertical,
 	Hammer,
@@ -64,7 +64,6 @@ import {
 	Image,
 	Import,
 	Infinity as InfinityIcon,
-	Instagram,
 	Joystick,
 	Laptop,
 	LineChart,
@@ -73,6 +72,7 @@ import {
 	Loader2,
 	Magnet,
 	Megaphone,
+	Menu,
 	MessageSquare,
 	Moon,
 	MoreHorizontal,
@@ -97,6 +97,7 @@ import {
 	Save,
 	Search,
 	Settings,
+	ShieldCheck,
 	Sliders,
 	Square,
 	Star,
@@ -113,7 +114,6 @@ import {
 	Trello,
 	Triangle,
 	Tv,
-	Twitter,
 	User,
 	UserPlus,
 	Users,
@@ -124,14 +124,21 @@ import {
 	Watch,
 	Wrench,
 	X,
-	Youtube,
 	Zap,
 	ZoomIn,
 	ZoomOut,
 	type Icon as LucideIcon,
 } from 'lucide-react';
-import { FaSpotify, FaTiktok, FaTwitch } from 'react-icons/fa';
-// import { IoSparkles } from 'react-icons/io5';
+import {
+	FaFacebook,
+	FaGithub,
+	FaInstagram,
+	FaSpotify,
+	FaTiktok,
+	FaTwitch,
+	FaTwitter,
+	FaYoutube,
+} from 'react-icons/fa';
 import type { IconType as ReactIcon } from 'react-icons/lib';
 
 const Icon = {
@@ -151,12 +158,14 @@ const Icon = {
 
 	bell: Bell,
 	billing: CreditCard,
+	binary: Binary,
 	bold: Bold,
 	bot: Bot,
 	broadcast: Radio,
 
 	calendar: CalendarRange,
 	check: Check,
+	checkCircle: CheckCircle,
 	checked: CheckSquare,
 	chevronUp: ChevronUp,
 	chevronDown: ChevronDown,
@@ -222,6 +231,7 @@ const Icon = {
 	magnet: Magnet,
 	media: Image,
 	megaphone: Megaphone,
+	menu: Menu,
 	message: MessageSquare,
 	money: Banknote,
 	moon: Moon,
@@ -250,12 +260,12 @@ const Icon = {
 	refresh: RefreshCcw,
 
 	rocket: Rocket,
-	// rocket2: RocketLaunchIcon,
 
 	save: Save,
 	search: Search,
 	settings: Settings,
 	share: ShareIcon,
+	shield: ShieldCheck,
 	sliders: Sliders,
 	spark: Zap,
 	spinner: Loader2,
@@ -294,16 +304,22 @@ const Icon = {
 	zoomIn: ZoomIn,
 	zoomOut: ZoomOut,
 
-	facebook: Facebook,
-	gitHub: Github,
-	instagram: Instagram,
+	facebook: FaFacebook,
+	gitHub: FaGithub,
+	instagram: FaInstagram,
 	spotify: FaSpotify,
 	tiktok: FaTiktok,
-	twitter: Twitter,
+	twitter: FaTwitter,
 	twitch: FaTwitch,
-	youtube: Youtube,
+	youtube: FaYoutube,
 };
 
 type IconType = LucideIcon | ReactIcon;
 
-export { Icon, type IconType };
+// how do I make a type based on the entries in Icon?
+type IconSelection = keyof typeof Icon;
+
+// q: how do I make a generic Icon that can take IconSelection as an input key? something like <Icon.IconSelection />
+// a:
+
+export { Icon, type IconType, type IconSelection };

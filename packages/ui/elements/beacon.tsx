@@ -6,7 +6,7 @@ const Beacon = ({ className }: BeaconProps) => {
 	return (
 		<span
 			className={cn(
-				'absolute top-1 right-0 flex h-5 w-5 animate-bounce items-center justify-center',
+				'absolute top-1 right-0 flex h-5 w-5 animate-bounce items-center justify-center z-40',
 				className,
 			)}
 		>

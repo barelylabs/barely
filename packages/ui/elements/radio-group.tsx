@@ -3,12 +3,12 @@
 import * as React from 'react';
 
 import * as RadioGroupPrimitive from '@radix-ui/react-radio-group';
-import { FieldAtom, useFieldActions, useFieldValue } from 'form-atoms';
+// import { FieldAtom, useFieldActions, useFieldValue } from 'form-atoms';
 import { Circle } from 'lucide-react';
 
 import { cn } from '@barely/lib/utils/edge/cn';
 
-import { FieldWrapperProps } from './field-wrapper';
+// import { FieldWrapperProps } from './field-wrapper';
 
 const RadioGroup = React.forwardRef<
 	React.ElementRef<typeof RadioGroupPrimitive.Root>,
@@ -33,7 +33,7 @@ const RadioGroupItem = React.forwardRef<
 		<RadioGroupPrimitive.Item
 			ref={ref}
 			className={cn(
-				'text:fill-slate-50 h-4 w-4 rounded-full border border-slate-300 text-slate-900 hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-100 dark:hover:text-slate-900 dark:focus:ring-slate-400 dark:focus:ring-offset-slate-900',
+				'h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
 				className,
 			)}
 			{...props}
@@ -46,31 +46,31 @@ const RadioGroupItem = React.forwardRef<
 });
 RadioGroupItem.displayName = RadioGroupPrimitive.Item.displayName;
 
-function RadioGroupField(
-	props: React.ComponentProps<typeof RadioGroupPrimitive.Root> &
-		Omit<FieldWrapperProps<string>, 'children'> & { fieldAtom: FieldAtom<string> },
-) {
-	const { fieldAtom, label, ...rest } = props;
-	const value = useFieldValue(fieldAtom);
+// function RadioGroupField(
+// 	props: React.ComponentProps<typeof RadioGroupPrimitive.Root> &
+// 		Omit<FieldWrapperProps<string>, 'children'> & { fieldAtom: FieldAtom<string> },
+// ) {
+// 	const { fieldAtom, label, ...rest } = props;
+// 	const value = useFieldValue(fieldAtom);
 
-	const switchActions = useFieldActions(fieldAtom);
+// 	const switchActions = useFieldActions(fieldAtom);
 
-	return (
-		<div className={cn('flex items-center justify-center ', props.className)}>
-			<RadioGroup
-				id={rest.id}
-				{...rest}
-				value={value}
-				onValueChange={c => switchActions.setValue(c)}
-			/>
-			{label && (
-				<label htmlFor={rest.id} className={cn('ml-2 text-sm')}>
-					{label}
-				</label>
-			)}
-		</div>
-	);
-}
+// 	return (
+// 		<div className={cn('flex items-center justify-center ', props.className)}>
+// 			<RadioGroup
+// 				id={rest.id}
+// 				{...rest}
+// 				value={value}
+// 				onValueChange={c => switchActions.setValue(c)}
+// 			/>
+// 			{label && (
+// 				<label htmlFor={rest.id} className={cn('ml-2 text-sm')}>
+// 					{label}
+// 				</label>
+// 			)}
+// 		</div>
+// 	);
+// }
 
 export { RadioGroup, RadioGroupItem };
 

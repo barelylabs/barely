@@ -4,18 +4,18 @@ import '~/styles/globals.css';
 
 import type { Metadata } from 'next';
 
-import { Container } from '@barely/ui';
 import { Inter as FontSans } from '@next/font/google';
 
 import { cn } from '@barely/lib/utils/edge/cn';
 
+import { Container } from '@barely/ui/elements/container';
 import { Toaster } from '@barely/ui/elements/toaster';
 
 import Providers from './providers';
 
 const fontSans = FontSans({
 	subsets: ['latin'],
-	variable: '--font-inter',
+	variable: '--font-sans',
 });
 
 export const metadata: Metadata = {
@@ -45,7 +45,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
 		<html lang='en' suppressHydrationWarning>
 			<body
 				className={cn(
-					'min-h-screen bg-white font-sans text-slate-900 antialiased dark:bg-slate-900 dark:text-slate-50',
+					'min-h-screen bg-background font-sans text-foreground antialiased ',
 					fontSans.variable,
 				)}
 			>

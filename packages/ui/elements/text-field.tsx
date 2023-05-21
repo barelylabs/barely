@@ -9,7 +9,7 @@ import { FieldWrapper, FieldWrapperProps } from './field-wrapper';
 
 const textFieldStyles = cva(
 	[
-		'flex h-10 border peer appearance-none rounded-md border-slate-300 bg-transparent text-gray-900 placeholder:text-slate-400 focus:outline-none focus:border-neutral-300 focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-50 dark:focus:ring-slate-400 dark:focus:ring-offset-slate-900',
+		'flex h-10 border peer appearance-none rounded-md border-input bg-transparent  placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ',
 	],
 	{
 		variants: {

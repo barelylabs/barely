@@ -67,6 +67,7 @@ export const siteConfig: SiteConfig = {
 		},
 		{
 			title: 'Settings',
+			userFilters: ['pitchReviewing', 'pitchScreening'],
 			// href: '/accounts',
 			icon: 'settings',
 			items: [

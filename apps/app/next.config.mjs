@@ -37,9 +37,9 @@ const config = {
 	],
 	experimental: {
 		appDir: true,
-		// swcPlugins: [['@swc-jotai/react-refresh', {}]],
 		swcPlugins: [
 			['next-superjson-plugin', {}],
+			// ['@swc-jotai/debug-label', {}],
 			// ['@swc-jotai/react-refresh', {}],
 		],
 	},
@@ -50,7 +50,6 @@ const config = {
 		NEXT_PUBLIC_PUSHER_APP_ID: process.env.NEXT_PUBLIC_PUSHER_APP_ID,
 		NEXT_PUBLIC_PUSHER_APP_KEY: process.env.NEXT_PUBLIC_PUSHER_APP_KEY,
 		NEXT_PUBLIC_PUSHER_APP_CLUSTER: process.env.NEXT_PUBLIC_PUSHER_APP_CLUSTER,
-
 		NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
 
 		BOT_SPOTIFY_ACCOUNT_ID: process.env.BOT_SPOTIFY_ACCOUNT_ID,

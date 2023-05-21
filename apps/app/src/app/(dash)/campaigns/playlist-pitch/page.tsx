@@ -1,5 +1,5 @@
+import { PlaylistPitchSubmissionForm } from '~/app/(dash)/campaigns/playlist-pitch/playlist-pitch-form';
 import { DashContentHeader } from '~/app/(dash)/components/dash-content-header';
-import { PlaylistPitchSubmissionForm } from '~/app/(public)/playlist-pitch/playlist-pitch-form';
 
 export default function Page() {
 	return (

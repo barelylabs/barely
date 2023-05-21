@@ -71,7 +71,7 @@ export function Combobox<T>(
 	const options = useAtomValue(props.optionsAtom);
 
 	const ComboboxOptions = (
-		<HeadlessCombobox.Options className='absolute z-10 mt-3 max-h-80 w-full overflow-auto rounded-md space-y-1 bg-white dark:bg-slate-800 p-3 border border-slate-100 dark:border-slate-700 shadow-md ring-1 ring-black ring-opacity-5 focus:outline-none '>
+		<HeadlessCombobox.Options className='absolute z-10 mt-3 max-h-80 w-full overflow-auto rounded-md space-y-1 bg-popover p-3 border shadow-md ring-1 ring-ring ring-opacity-5 focus:outline-none '>
 			{!options.length && fetchingOptions && <p className='text-sm'>Loading...</p>}
 			{!options.length && !fetchingOptions && <p className='text-sm'>No options found</p>}
 			{!!options.length &&

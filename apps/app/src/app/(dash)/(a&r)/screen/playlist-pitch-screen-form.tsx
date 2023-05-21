@@ -4,7 +4,8 @@ import { Suspense } from 'react';
 
 import Link from 'next/link';
 
-import { Separator, TextField } from '@barely/ui';
+import {  TextField } from '@barely/ui/elements/text-field';
+import { Separator } from '@barely/ui/elements/separator';
 import { formAtom, useFormActions, useFormValues } from 'form-atoms';
 import { useHydrateAtoms } from 'jotai/utils';
 
@@ -90,9 +91,6 @@ const PitchScreenForm = (props: { initialCampaigns: CampaignWithTrackAndMetadata
 		},
 
 		onSuccess: () => {
-			// todo
-			// setSelectedGenres([]);
-			// setScreeningMessage('');
 			return utils.node.campaign.toScreen.invalidate();
 		},
 
@@ -107,7 +105,7 @@ const PitchScreenForm = (props: { initialCampaigns: CampaignWithTrackAndMetadata
 	const track = campaigns?.[0]?.track;
 
 	const handleScreenCampaign = (stageDecision: 'approved' | 'rejected') => {
-		if (!campaign.id || !track) return;
+		if (!campaign?.id || !track) return;
 
 		updateCampaign.mutate({
 			id: campaign.id,

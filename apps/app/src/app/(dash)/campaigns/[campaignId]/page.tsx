@@ -1,14 +1,16 @@
 import { Suspense } from 'react';
 
-import { Icon, InfoCard } from '@barely/ui';
+import {  InfoCard } from '@barely/ui/elements/card';
+import { Icon} from '@barely/ui/elements/icon';
 
 import { campaignTypeDisplay } from '@barely/api/campaign/campaign.edge.fns';
 import { getCampaignById } from '@barely/api/campaign/campaign.node.fns';
 
-import { Container } from '@barely/ui/elements/container';
-import { H1, H2, Text } from '@barely/ui/elements/typography';
+import {ConfettiRain} from '@barely/ui/elements/confetti';
+import { Text } from '@barely/ui/elements/typography';
 
 import { CampaignReviews } from '~/app/(dash)/campaigns/[campaignId]/campaign-reviews';
+import { DashContentHeader } from '~/app/(dash)/components/dash-content-header';
 
 const getCampaign = async (campaignId: string) => {
 	const campaign = await getCampaignById(campaignId, {
@@ -19,13 +21,16 @@ const getCampaign = async (campaignId: string) => {
 	return campaign;
 };
 
-const CampaignPage = async ({ params }: { params: { campaignId: string } }) => {
+const CampaignPage = async ({ params, searchParams }: {
+	params: { campaignId: string }, searchParams: { success?: boolean}
+ }) => {
 	const initialCampaign = await getCampaign(params.campaignId);
 
 	return (
 		<>
-			{/* <Container className='space-y-4'> */}
-			<H2>Your campaign</H2>
+			
+			<DashContentHeader title='Your campaign'/> 			
+			{searchParams.success && <ConfettiRain />}
 			<Suspense fallback={<div>Loading...</div>}>
 				<InfoCard
 					title={initialCampaign.track.name}

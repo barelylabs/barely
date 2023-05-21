@@ -2,17 +2,17 @@ import { cva, VariantProps } from 'class-variance-authority';
 
 import { cn } from '@barely/lib/utils/edge/cn';
 
-import { Icon } from './icon';
+import { Icon, IconSelection } from './icon';
 
 const badgeVariants = cva(
-	'flex flex-row items-center justify-center rounded-full font-medium w-fit h-fit',
+	'inline-flex items-center justify-center rounded-full font-medium w-fit h-fit',
 	{
 		variants: {
 			variant: {
-				solid: 'bg-slate-900 text-white dark:bg-slate-50 dark:text-slate-900',
+				solid: 'bg-primary text-primary-foreground',
+				secondary: 'bg-secondary text-secondary-foreground',
 				subtle: 'bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-slate-100',
-				outline:
-					'border border-slate-900 text-slate-900 dark:border-slate-600 dark:text-slate-50',
+				outline: 'border text-foreground',
 				success: 'bg-green-100 text-green-800',
 				info: 'bg-blue-100 text-blue-800',
 				warning: 'bg-yellow-100 text-yellow-800',
@@ -20,7 +20,7 @@ const badgeVariants = cva(
 			},
 			size: {
 				sm: 'px-2.5 py-0.5 text-xs space-x-1',
-				md: 'px-3 py-0.5 text-sm space-x-1',
+				md: 'px-3 py-0.5 text-xs sm:text-sm space-x-1',
 				lg: 'px-4 py-2 text-sm space-x-2',
 			},
 		},
@@ -36,6 +36,7 @@ export interface BadgeProps
 		VariantProps<typeof badgeVariants> {
 	rectangle?: boolean;
 	grow?: boolean;
+	icon?: IconSelection;
 	removeButton?: boolean;
 	onRemove?: () => void;
 }
@@ -46,10 +47,13 @@ const Badge = ({
 	size,
 	rectangle,
 	grow,
+	icon,
 	removeButton,
 	onRemove,
 	...props
 }: BadgeProps) => {
+	const BadgeIcon = icon && Icon[icon] ? Icon[icon] : () => null;
+
 	return (
 		<div
 			className={cn(
@@ -60,6 +64,11 @@ const Badge = ({
 			)}
 			{...props}
 		>
+			{icon && (
+				<BadgeIcon
+					className={cn('mr-1', size === 'md' && 'h-[10px] w-[10px] sm:h-3 sm:w-3')}
+				/>
+			)}
 			{props.children}
 			{removeButton && (
 				<button

@@ -7,8 +7,7 @@ import {
 	Head,
 	Heading,
 	Hr,
-	Html,
-	Link,
+	Html,	
 	Preview,
 	Tailwind,
 	Text,
@@ -21,8 +20,9 @@ const PlaylistPitchApprovedEmailTemplate = (props: {
 	firstName?: string;
 	loginLink: string;
 	trackName: string;
+	screeningMessage: string;
 }) => {
-	const previewText = `Sign in to your barely.io account`;
+	const previewText = `Launch your playlist.pitch campaign!`;
 
 	return (
 		<Html>
@@ -41,6 +41,11 @@ const PlaylistPitchApprovedEmailTemplate = (props: {
 							<span className='font-bold'>"{props.trackName}"</span> and it sounds good to
 							proceed!
 						</Text>
+						<Container className='px-4 bg-slate-200 rounded-md'>
+							<Text className='text-md'>
+								{props.screeningMessage}
+							</Text>
+						</Container>
 						<Text className='text-md'>
 							Click the button below to go to your account, set up budget, and launch your
 							playlist.pitch campaign.

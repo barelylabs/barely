@@ -52,13 +52,13 @@ const createTRPCContext = async (opts: CreateContextProps) => {
 
 	const user = token ? getUserFromToken(token) : null;
 
-	if (token) {
-		console.log('json web token', JSON.stringify(token, null, 2));
-		const user = getUserFromToken(token);
-		console.log('jwt user', user);
-	} else {
-		console.log('no json web token');
-	}
+	// if (token) {
+	// 	// console.log('json web token', JSON.stringify(token, null, 2));
+	// 	const user = getUserFromToken(token);
+	// 	// console.log('jwt user', user);
+	// } else {
+	// 	// console.log('no json web token');
+	// }
 	// console.log('session in createTRPCContext', session);
 
 	return createInnerTRPCContext({
@@ -78,7 +78,7 @@ export { createTRPCContext, type TRPCContext };
 
 const t = initTRPC
 	.meta<OpenApiMeta & { edge?: boolean }>()
-	.context<typeof createTRPCContext>()
+	.context<TRPCContext>()
 	.create({
 		transformer: superjson,
 		errorFormatter({ shape, error }) {

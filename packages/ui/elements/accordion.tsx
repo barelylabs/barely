@@ -9,17 +9,13 @@ import { ChevronDown } from 'lucide-react';
 
 import { cn } from '@barely/lib/utils/edge/cn';
 
-const Accordion = AccordionPrimitive.Root;
+// const AccordionPrimitive = AccordionPrimitive.Root;
 
 const AccordionItem = React.forwardRef<
 	React.ElementRef<typeof AccordionPrimitive.Item>,
 	React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>
 >(({ className, ...props }, ref) => (
-	<AccordionPrimitive.Item
-		ref={ref}
-		className={cn('border-b border-b-slate-200 dark:border-b-slate-700', className)}
-		{...props}
-	/>
+	<AccordionPrimitive.Item ref={ref} className={cn('border-b', className)} {...props} />
 ));
 AccordionItem.displayName = 'AccordionItem';
 
@@ -27,11 +23,11 @@ const AccordionTrigger = React.forwardRef<
 	React.ElementRef<typeof AccordionPrimitive.Trigger>,
 	React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
 >(({ className, children, ...props }, ref) => (
-	<AccordionPrimitive.Header className='flex'>
+	<AccordionPrimitive.Header className='flex '>
 		<AccordionPrimitive.Trigger
 			ref={ref}
 			className={cn(
-				'flex flex-1 items-center justify-between py-4 font-medium transition-all hover:underline [&[data-state=open]>svg]:rotate-180',
+				'flex flex-1 items-center justify-between text-xl text-left py-4 font-medium transition-all hover:underline [&[data-state=open]>svg]:rotate-180',
 				className,
 			)}
 			{...props}
@@ -60,34 +56,40 @@ const AccordionContent = React.forwardRef<
 ));
 AccordionContent.displayName = AccordionPrimitive.Content.displayName;
 
-export { Accordion, AccordionItem, AccordionTrigger, AccordionContent };
+interface AccordionItemProps {
+	trigger: React.ReactNode;
+	content: React.ReactNode;
+	value: string;
+}
 
-/* 
+interface AccordionProps {
+	type?: 'single' | 'multiple';
+	items: AccordionItemProps[];
+}
 
-import {
-		Accordion,
-		AccordionContent,
-		AccordionItem,
-		AccordionTrigger,
-	} from '@barely/ui/accordion';
-	
-	<Accordion type='single' collapsible>
-		<AccordionItem value='item-1'>
-			<AccordionTrigger>Is it accessible?</AccordionTrigger>
-			<AccordionContent>Yes. It adheres to the WAI-ARIA design pattern.</AccordionContent>
-		</AccordionItem>
-		<AccordionItem value='item-2'>
-			<AccordionTrigger>Is it styled?</AccordionTrigger>
-			<AccordionContent>
-				Yes. It comes with default styles that matches the other components' aesthetic.
-			</AccordionContent>
-		</AccordionItem>
-		<AccordionItem value='item-3'>
-			<AccordionTrigger>Is it animated?</AccordionTrigger>
-			<AccordionContent>
-				Yes. It's animated by default, but you can disable it if you prefer.
-			</AccordionContent>
-		</AccordionItem>
-	</Accordion>;
-	
-*/
+const Accordion = (props: AccordionProps) => {
+	const { items } = props;
+	return (
+		<AccordionPrimitive.Accordion
+			type={props.type ?? 'single'}
+			collapsible
+			className='w-full'
+		>
+			{items.map(item => (
+				<AccordionItem key={item.value} value={item.value}>
+					<AccordionTrigger>{item.trigger}</AccordionTrigger>
+					<AccordionContent>{item.content}</AccordionContent>
+				</AccordionItem>
+			))}
+		</AccordionPrimitive.Accordion>
+	);
+};
+
+export {
+	Accordion,
+	type AccordionItemProps,
+	AccordionPrimitive,
+	AccordionItem,
+	AccordionTrigger,
+	AccordionContent,
+};

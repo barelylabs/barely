@@ -148,7 +148,7 @@ const AllCampaigns = () => {
 
 										const badge =
 											campaign.stage === 'approved' ? (
-												'Approved'
+												<Badge variant='success'>Approved</Badge>
 											) : campaign.stage === 'screening' ? (
 												<Badge variant='warning'>Pending</Badge>
 											) : undefined;
@@ -162,7 +162,7 @@ const AllCampaigns = () => {
 												</Link>
 											) : campaign.stage === 'running' ? (
 												<Link href={`/campaigns/${campaign.id}`} passHref>
-													<Button>View Campaign</Button>
+													<Button variant='subtle'>View Campaign</Button>
 												</Link>
 											) : null;
 

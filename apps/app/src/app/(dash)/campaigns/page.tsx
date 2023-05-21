@@ -1,4 +1,4 @@
-import { H1 } from '@barely/ui';
+import { H1 } from '@barely/ui/elements/typography';
 
 import AllCampaigns from './all-campaigns';
 

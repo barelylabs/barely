@@ -48,7 +48,7 @@ const AlertDialogOverlay = React.forwardRef<
 	// >(({ className, children, ...props }, ref) => (
 	<AlertDialogPrimitive.Overlay
 		className={cn(
-			'fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity animate-in fade-in',
+			'fixed inset-0 z-50 bg-background/80 backdrop-blur-sm transition-opacity animate-in fade-in',
 			className,
 		)}
 		{...props}
@@ -66,8 +66,7 @@ const AlertDialogContent = React.forwardRef<
 		<AlertDialogPrimitive.Content
 			ref={ref}
 			className={cn(
-				'fixed z-50 grid w-full max-w-lg scale-100 gap-4 bg-white p-6 opacity-100 animate-in fade-in-90 slide-in-from-bottom-10 sm:rounded-lg sm:zoom-in-90 sm:slide-in-from-bottom-0 md:w-full',
-				'dark:bg-slate-900',
+				'fixed z-50 grid w-full max-w-lg scale-100 gap-4 border bg-background p-6 opacity-100 animate-in fade-in-90 slide-in-from-bottom-10 sm:rounded-lg sm:zoom-in-90 sm:slide-in-from-bottom-0 md:w-full',
 				className,
 			)}
 			{...props}
@@ -123,7 +122,7 @@ const AlertDialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<AlertDialogPrimitive.Description
 		ref={ref}
-		className={cn('text-sm text-slate-500', 'dark:text-slate-400', className)}
+		className={cn('text-sm text-muted-foreground', className)}
 		{...props}
 	/>
 ));
@@ -193,7 +192,6 @@ const AlertDialog = (props: AlertDialogProps) => {
 					</AlertDialogCancel>
 					<AlertDialogAction
 						variant={props.actionVariant ?? 'destructive'}
-						// onClick
 						onClick={props.action}
 					>
 						{props.actionName ?? 'Continue'}

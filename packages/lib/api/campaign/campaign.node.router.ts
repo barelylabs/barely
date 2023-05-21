@@ -424,7 +424,7 @@ export const campaignRouter = router({
 				campaign.type === 'playlistPitch' &&
 				input.stage === 'approved' &&
 				campaign.createdBy &&
-				campaign.track
+				campaign.track && campaign.screeningMessage
 			) {
 				// set the curator reach to the minimum if it's not set yet
 				if (!campaign.curatorReach) {
@@ -443,6 +443,7 @@ export const campaignRouter = router({
 					identifier: campaign.createdBy.email,
 					callbackUrl: `${env.NEXT_PUBLIC_APP_BASE_URL}/campaigns/${campaign.id}/launch`,
 				});
+
 				await sendEmail({
 					from: 'adam@barely.io',
 					to: campaign.createdBy.email,
@@ -452,6 +453,7 @@ export const campaignRouter = router({
 							campaign.createdBy.firstName ?? campaign.createdBy.username ?? undefined,
 						trackName: campaign.track.name,
 						loginLink: emailLoginLink,
+						screeningMessage: campaign.screeningMessage,
 					}),
 					type: 'transactional',
 				});
@@ -459,15 +461,22 @@ export const campaignRouter = router({
 				// send text to the user that created the campaign
 
 				if (campaign.createdBy.phone) {
+					console.log('campaign.createdBy.phone', campaign.createdBy.phone)
+
 					const phoneLoginLink = await createLoginLink({
 						provider: 'phone',
 						identifier: campaign.createdBy.phone,
 						callbackUrl: `${env.NEXT_PUBLIC_APP_BASE_URL}/campaigns/${campaign.id}/launch`,
 					});
-					await sendText({
+
+					console.log('phoneLoginLink', phoneLoginLink)
+				
+					const text = await sendText({
 						to: campaign.createdBy.phone,
 						body: `Your playlist.pitch for ${campaign.track.name} has been approved! Click the link below to launch your campaign. ${phoneLoginLink}`,
 					});
+
+					console.log('text', text)
 				}
 			}
 

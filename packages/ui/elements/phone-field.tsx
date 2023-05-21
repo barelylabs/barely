@@ -73,7 +73,6 @@ const PhoneField = ({
 					)}
 					placeholder={props.placeholder}
 					onKeyDown={e => handleInput(e)}
-					// onInput={e => handleInput(e)}
 				/>
 			</div>
 		</FieldWrapper>

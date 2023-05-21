@@ -4,7 +4,6 @@ import { FieldAtom, useField, useFieldValue } from 'form-atoms';
 
 import { cn } from '@barely/lib/utils/edge/cn';
 
-import { AvatarRoot } from './avatar';
 import { FieldWrapper, FieldWrapperProps } from './field-wrapper';
 import { Icon } from './icon';
 
@@ -15,12 +14,7 @@ const RatingField = (
 	const { fieldAtom, ...rest } = props;
 
 	const rating = useFieldValue(fieldAtom);
-	// const ratingActions = useFieldActions(fieldAtom);
 	const ratingActions = useField(fieldAtom).actions;
-
-	// const fuckoff = useField(fieldAtom)
-	// fuckoff.
-	// ratingActions.
 
 	return (
 		<FieldWrapper fieldAtom={fieldAtom} {...rest}>
@@ -69,11 +63,12 @@ const RatingDisplay = (props: { rating: number; by?: string }) => {
 	return (
 		<div className='flex flex-row gap-2 items-center'>
 			<div className='flex flex-row gap-1 items-center'>
-				{[1, 2, 3, 4, 5].map(star => {
+				{[1, 2, 3, 4, 5].map((star, starIndex) => {
 					const isFilled = props.rating >= star;
 
 					return (
 						<Icon.star
+							key={starIndex}
 							className={cn(
 								'w-6 h-6 p-1 -m-1',
 								isFilled
@@ -85,7 +80,7 @@ const RatingDisplay = (props: { rating: number; by?: string }) => {
 				})}
 			</div>
 			{props.by && (
-				<span className='text-sm font-light text-gray-500 dark:text-gray-400'>
+				<span className='text-sm font-light text-muted-foreground/90'>
 					Reviewed by
 					<span className='font-bold'> {props.by}</span>
 				</span>

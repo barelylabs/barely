@@ -8,11 +8,13 @@ export default function PreviewEmail(props: { params: { slug: string } }) {
 		case 'sign-in':
 			templateToRender = SignInEmailTemplate({ loginLink: 'https://barely.io/login' });
 			break;
+		
 		case 'playlist-pitch-approved':
 			templateToRender = PlaylistPitchApprovedEmailTemplate({
 				firstName: 'Xander',
 				trackName: 'Local Gravity',
 				loginLink: 'https://barely.io/login',
+				screeningMessage: "Love this. You're gonna be a star 🌟"
 			});
 	}
 

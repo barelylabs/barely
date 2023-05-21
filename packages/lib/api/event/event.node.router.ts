@@ -12,7 +12,7 @@ import { router } from '../trpc';
 // import { eventBaseSchema } from "@barely/db/zod/event";
 // import { remarketingBaseSchema } from "@barely/db/zod/remarketing";
 
-// // 👇 fixme... these are temporary patches for partially required variables in zod 3.19.1.
+// // 👇 fixme... these are temporary patches for partially required variables in zod 3.21.4.
 // // 👇 Once patched, can just make required in the input. https://github.com/colinhacks/zod/issues/1550
 // const eventCreateSchema = eventCreateSchemaNeedsPatch.merge(
 //   z.object({ sessionId: z.string() }).required(),

@@ -1,14 +1,14 @@
 import { Suspense } from 'react';
 
-import { Icon, InfoCard } from '@barely/ui';
-
 import { campaignTypeDisplay } from '@barely/api/campaign/campaign.edge.fns';
 import { getCampaignById } from '@barely/api/campaign/campaign.node.fns';
 
+import { InfoCard } from '@barely/ui/elements/card';
 import { Container } from '@barely/ui/elements/container';
+import { Icon } from '@barely/ui/elements/icon';
 import { H3, Text } from '@barely/ui/elements/typography';
 
-import { LaunchCampaignForm } from '~/app/(dash)/campaigns/components/launch-campaign-form';
+import { LaunchCampaignForm } from '~/app/(dash)/campaigns/[campaignId]/launch/launch-campaign-form';
 
 // import { TrackGenresInput } from '~/app/(dash)/components/track-genres-input';
 

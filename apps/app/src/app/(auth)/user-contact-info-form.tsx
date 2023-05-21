@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 
 import Link from 'next/link';
 
@@ -92,12 +92,14 @@ interface UserContactInfoFormProps {
 	onSubmit: (data: z.infer<typeof userContactInfoSchema>) => void | Promise<void>;
 	submitLabel?: ReactNode;
 	newUser?: boolean;
+	phoneHint?: ReactNode;
 }
 
 const UserContactInfoForm = ({
 	newUser,
 	submitLabel,
 	onSubmit,
+	phoneHint,
 }: UserContactInfoFormProps) => {
 	const user = useFormValues(userContactInfoFormAtom);
 	const { fieldAtoms } = useForm(userContactInfoFormAtom);
@@ -158,18 +160,12 @@ const UserContactInfoForm = ({
 		phoneFieldActions.validate();
 	}, [user.phone, phoneQueryExists, setPhoneExists, phoneFieldActions]);
 
-	// useEffect(() => console.log('user.phone => ', user.phone), [user]);
-
 	// controlled userType select
 	const userType = useFieldValue(userTypeFieldAtom);
 	const userTypeFieldActions = useFieldActions(userTypeFieldAtom);
 
 	return (
 		<Form formAtom={userContactInfoFormAtom} onSubmit={onSubmit}>
-			{/* <pre>{JSON.stringify(user, null, 2)}</pre>
-			emailExists: {emailExists ? 'true' : 'false'}
-			<br />
-			phoneExists: {phoneExists ? 'true' : 'false'} */}
 			<div className='flex flex-col space-y-2'>
 				<TextField fieldAtom={fieldAtoms.firstName} size='sm' label='First name' />
 				<TextField fieldAtom={fieldAtoms.lastName} size='sm' label='Last name' />
@@ -203,7 +199,13 @@ const UserContactInfoForm = ({
 					</Select>
 				</div>
 
-				<PhoneField fieldAtom={phoneFieldAtom} size='sm' label='Phone' type='tel' />
+				<PhoneField
+					fieldAtom={phoneFieldAtom}
+					size='sm'
+					type='tel'
+					label='Phone (optional)'
+					hint={phoneHint}
+				/>
 			</div>
 			<div className='flex flex-col space-y-4 py-4'>
 				<SubmitButton formAtom={userContactInfoFormAtom}>

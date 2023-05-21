@@ -5,7 +5,7 @@ import { publicProcedure, router } from '../trpc';
 
 const userRouter = router({
 	current: publicProcedure.query(async ({ ctx }) => {
-		console.log('current user ctx.user: ', ctx.user);
+		// console.log('current user ctx.user: ', ctx.user);
 		if (!ctx.user) return null;
 
 		const user = await ctx.kyselyRead

@@ -1,9 +1,11 @@
 'use client';
 
-import { H4, H5, Progress, Text } from '@barely/ui/elements';
+import { Progress } from '@barely/ui/elements/progress';
 import { Review } from '@barely/ui/elements/review-card';
+import { Text } from '@barely/ui/elements/typography';
 
 import { fullName } from '@barely/utils/edge/name';
+import Link from 'next/link';
 
 import { api } from '~/client/trpc';
 
@@ -33,13 +35,13 @@ const CampaignReviews = (props: { campaignId: string; reach: number }) => {
 
 	return (
 		<>
-			<Text variant='lg/normal'>Reviews</Text>
+			<Text variant='lg/normal'>Completed Reviews ({totalPlaylistPitchReviews} / {props.reach})</Text>
 			<Progress
 				value={(totalPlaylistPitchReviews / props.reach) * 100}
 				className='mb-6'
 			/>
 
-			{flatPlaylistPitchReviews.map(review => {
+			{flatPlaylistPitchReviews.map((review) => {
 				const reviewerDisplayName =
 					review.reviewer?.username ??
 					fullName(review.reviewer?.firstName, review.reviewer?.lastName);
@@ -51,8 +53,22 @@ const CampaignReviews = (props: { campaignId: string; reach: number }) => {
 						reviewer={{
 							displayName: reviewerDisplayName,
 						}}
-						review={review.review}
-					/>
+						review={review.review}					
+					>
+						{review.placements.length > 0 && (
+							<>
+							<Text variant='xs/normal' className='my-4 mb-1 dark:text-slate-400'>Placements:</Text>
+							{review.placements.map(placement => (
+								<div key={placement.id}>
+									<Link href={`https://open.spotify.com/playlist/${placement.playlist.spotifyId ?? ''}`} target='_blank'>
+									<Text variant='xs/normal' className='dark:text-blue-600'>{placement.playlist.name}</Text>
+									</Link>
+									{/* <Text variant='xs/normal'>{placement.playlist.owner.displayName}</Text> */}
+								</div>
+							))}
+							</>
+						)}
+					</Review>
 				);
 			})}
 		</>

@@ -4,32 +4,31 @@ import { cva, VariantProps } from 'class-variance-authority';
 
 import { cn } from '@barely/lib/utils/edge/cn';
 
-const textStyles = cva(
-	['text-slate-900 dark:text-slate-50 leading-none align-text-bottom'],
-	{
-		variants: {
-			size: {
-				xs: 'text-xs',
-				sm: 'text-sm leading-1',
-				md: 'text-base',
-				lg: 'text-lg',
-			},
-			weight: {
-				light: 'font-light',
-				normal: 'font-normal',
-				medium: 'font-medium',
-				semibold: 'font-semibold',
-				bold: 'font-bold',
-			},
-
-			// paragraph: { true: 'text-slate-500 dark:text-slate-400' },
-			subtle: { true: 'text-slate-600 dark:text-slate-400' },
-
-			underline: { true: 'underline' },
+const textStyles = cva([' leading-none align-text-bottom'], {
+	variants: {
+		size: {
+			xs: 'text-xs',
+			sm: 'text-sm leading-1',
+			md: 'text-base',
+			lg: 'text-lg',
+			xl: 'text-xl',
+			'2xl': 'text-2xl',
+			'3xl': 'text-3xl',
 		},
-		defaultVariants: { size: 'md', weight: 'normal' },
+		weight: {
+			light: 'font-light',
+			normal: 'font-normal',
+			medium: 'font-medium',
+			semibold: 'font-semibold',
+			bold: 'font-bold',
+		},
+
+		subtle: { true: 'text-subtle-foreground' },
+		muted: { true: 'text-muted-foreground' },
+		underline: { true: 'underline' },
 	},
-);
+	defaultVariants: { size: 'md', weight: 'normal' },
+});
 
 type TextStylesProps = VariantProps<typeof textStyles>;
 
@@ -55,6 +54,36 @@ const Text = ({ variant, children, className, ...props }: TextProps) => {
 
 // special cases
 
+const HHero = forwardRef<HTMLHeadingElement, { children: ReactNode; className?: string }>(
+	({ className, children, ...props }, ref) => (
+		<h1
+			ref={ref}
+			className={cn(
+				'scroll-m-20 text-5xl md:text-7xl lg:text-8xl lg:leading-[1.1] font-extrabold tracking-tight mb-4',
+				className,
+			)}
+			{...props}
+		>
+			{children}
+		</h1>
+	),
+);
+
+const Title = forwardRef<HTMLHeadingElement, { children: ReactNode; className?: string }>(
+	({ className, children, ...props }, ref) => (
+		<h1
+			ref={ref}
+			className={cn(
+				'scroll-m-20 text-5xl lg:text-6xl font-bold tracking-tight',
+				className,
+			)}
+			{...props}
+		>
+			{children}
+		</h1>
+	),
+);
+
 const H1 = forwardRef<HTMLHeadingElement, { children: ReactNode; className?: string }>(
 	({ className, children, ...props }, ref) => (
 		<h1
@@ -69,6 +98,7 @@ const H1 = forwardRef<HTMLHeadingElement, { children: ReactNode; className?: str
 		</h1>
 	),
 );
+
 const H2 = forwardRef<HTMLHeadingElement, { children: ReactNode; className?: string }>(
 	({ className, children, ...props }, ref) => (
 		<h2
@@ -132,14 +162,7 @@ const BlockQuote = forwardRef<
 	HTMLQuoteElement,
 	{ children: ReactNode; className?: string }
 >(({ className, children, ...props }, ref) => (
-	<blockquote
-		ref={ref}
-		className={cn(
-			'mt-6 border-l-2 border-slate-300 pl-6 italic text-slate-800 dark:border-slate-600 dark:text-slate-200',
-			className,
-		)}
-		{...props}
-	>
+	<blockquote ref={ref} className={cn('border-l-2 pl-6 italic ', className)} {...props}>
 		{children}
 	</blockquote>
 ));
@@ -149,7 +172,7 @@ const InlineCode = forwardRef<HTMLElement, { children: ReactNode; className?: st
 		<code
 			ref={ref}
 			className={cn(
-				'relative rounded bg-slate-100 py-[0.2rem] px-[0.3rem] font-mono text-sm font-semibold text-slate-900 dark:bg-slate-800 dark:text-slate-400',
+				'relative rounded py-[0.2rem] px-[0.3rem] bg-muted font-mono text-sm font-semibold text-slate-900 ',
 				className,
 			)}
 			{...props}
@@ -165,11 +188,11 @@ const Lead = forwardRef<
 >(({ className, children, ...props }, ref) => (
 	<p
 		ref={ref}
-		className={cn('mt-6 text-xl text-slate-700 dark:text-slate-400', className)}
+		className={cn('text-md  md:text-lg lg:text-xl text-muted-foreground', className)}
 		{...props}
 	>
 		{children}
 	</p>
 ));
 
-export { H1, H2, H3, H4, H5, P, BlockQuote, InlineCode, Lead, Text };
+export { HHero, Title, H1, H2, H3, H4, H5, P, BlockQuote, InlineCode, Lead, Text };
