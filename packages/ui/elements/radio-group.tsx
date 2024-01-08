@@ -6,7 +6,7 @@ import * as RadioGroupPrimitive from '@radix-ui/react-radio-group';
 // import { FieldAtom, useFieldActions, useFieldValue } from 'form-atoms';
 import { Circle } from 'lucide-react';
 
-import { cn } from '@barely/lib/utils/edge/cn';
+import { cn } from '@barely/lib/utils/cn';
 
 // import { FieldWrapperProps } from './field-wrapper';
 

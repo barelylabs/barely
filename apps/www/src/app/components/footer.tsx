@@ -35,16 +35,16 @@ export default function Footer() {
 				<Separator />
 				<div className='mx-auto w-fit py-10'>
 					<Link href='/privacy'>
-						<Text variant='md/normal' subtle>
+						<Text variant='md/normal' subtle className='text-center'>
 							privacy
 						</Text>
 					</Link>
 				</div>
 				<div className='flex flex-col gap-2 mx-auto mt-8 md:order-1 md:mt-0 text-center'>
-					<Text variant='sm/light' muted>
+					<Text variant='sm/light' muted className='text-center'>
 						&copy; Barely Labs, LLC. All rights reserved.
 					</Text>
-					<Text variant='xs/light' muted>
+					<Text variant='xs/light' muted className='text-center'>
 						barely.io is not affiliated with or funded by Spotify.
 					</Text>
 				</div>

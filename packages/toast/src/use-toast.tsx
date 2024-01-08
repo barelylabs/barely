@@ -8,6 +8,7 @@ const TOAST_REMOVE_DELAY = 1000;
 
 type ToasterToast = ToastProps & {
 	id: string;
+	icon?: 'info' | 'success' | 'warning' | 'error';
 	title?: React.ReactNode;
 	description?: React.ReactNode;
 	action?: ToastActionElement;
@@ -137,7 +138,7 @@ function dispatch(action: Action) {
 
 interface Toast extends Omit<ToasterToast, 'id'> {}
 
-function toast({ ...props }: Toast) {
+function plainToast({ ...props }: Toast) {
 	const id = genId();
 
 	const update = (props: ToasterToast) =>
@@ -179,11 +180,23 @@ function useToast() {
 		};
 	}, [state]);
 
+	const toast = (title: string, props?: Omit<Toast, 'title'>) =>
+		plainToast({ title, ...props });
+	toast.success = (title: string, props?: Omit<Toast, 'title'>) =>
+		plainToast({ icon: 'success', title, ...props });
+	toast.error = (title: string, props?: Omit<Toast, 'title'>) =>
+		plainToast({ icon: 'error', title, ...props });
+	toast.warning = (title: string, props?: Omit<Toast, 'title'>) =>
+		plainToast({ icon: 'warning', title, ...props });
+	toast.info = (title: string, props?: Omit<Toast, 'title'>) =>
+		plainToast({ icon: 'info', title, ...props });
+
 	return {
 		...state,
+		plainToast,
 		toast,
 		dismiss: (toastId?: string) => dispatch({ type: 'DISMISS_TOAST', toastId }),
 	};
 }
 
-export { useToast, toast };
+export { useToast, plainToast as toast };

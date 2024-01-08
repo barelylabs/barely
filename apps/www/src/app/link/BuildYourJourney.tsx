@@ -11,12 +11,14 @@ import { RiPagesLine } from 'react-icons/ri';
 
 import { FeatureCard } from '@barely/ui/elements/card';
 import { TimelineVertical } from '@barely/ui/elements/timeline';
-import { H1, H2, H3, Text } from '@barely/ui/elements/typography';
+import { H, Text } from '@barely/ui/elements/typography';
 
 const Heading = () => {
 	return (
 		<div className='m-auto flex w-fit flex-col pt-20 pb-7'>
-			<H1 className=' pb-9'>Build your fan's journey.</H1>
+			<H size='1' className=' pb-9'>
+				{`Build your fan's journey.`}
+			</H>
 
 			<div className='flex flex-row space-x-4 text-xl font-semibold text-gray-50 sm:m-auto'>
 				<a href='#brand' className='rounded-xl bg-red-500 px-5 py-3 '>
@@ -36,8 +38,8 @@ const Heading = () => {
 const Brand = () => {
 	return (
 		<div className='flex flex-col space-y-4 '>
-			<H2>Brand</H2>
-			<H3>Tell your story</H3>
+			<H size='2'>Brand</H>
+			<H size='3'>Tell your story</H>
 			<Text muted>
 				Build trust and increase brand recognition across all channels to create a
 				memorable (and profitable) customer journey - without need to cobble together and
@@ -63,8 +65,8 @@ const Brand = () => {
 const Track = () => {
 	return (
 		<div className='flex flex-col space-y-4'>
-			<H2>Track</H2>
-			<H3>Make data-driven decisions</H3>
+			<H size='2'>Track</H>
+			<H size='3'>Make data-driven decisions</H>
 			<Text muted>
 				Track clicks, monitor engagement, and gain insights into the performance of your
 				campaigns in real-time. Our friendly dashboard helps you make data-driven
@@ -90,8 +92,8 @@ const Track = () => {
 const Grow = () => {
 	return (
 		<div className='flex flex-col space-y-4'>
-			<H2 className='text-4xl font-semibold '>Grow</H2>
-			<H3 className='text-2xl font-semibold '>Generate more conversions</H3>
+			<H size='2'>Grow</H>
+			<H size='3'>Generate more conversions</H>
 			<Text muted>
 				Scale your business and fanbase with a suite of tools designed to lower your cost
 				per sale, increase average order value, and generate happy fans who can’t stop

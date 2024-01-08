@@ -1,6 +1,6 @@
-import * as dotenv from 'dotenv';
+// import * as dotenv from 'dotenv';
 
-dotenv.config({ path: '../../.env' });
+// dotenv.config({ path: '../../.env' });
 
 /** @type {import("next").NextConfig} */
 const config = {

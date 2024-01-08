@@ -12,14 +12,16 @@
 		"lint": "eslint . --ext .ts,.js,.tsx,.jsx"
 	},
 	"dependencies": {
-		"zod": "^3.21.4"
+		"zod": "^3.22.4"
 	},
 	"devDependencies": {
-		"@barely/config": "*",
-		"@types/node": "^18.0.0",
-		"@types/react": "^18.0.25",
-		"@types/react-dom": "^18.0.8",
-		"@types/sha.js": "^2.4.0",
-		"typescript": "^5.0.0"
+		"@barely/eslint-config": "workspace:^0.1.0",
+		"@barely/tailwind-config": "workspace:^0.1.0",
+		"@barely/tsconfig": "workspace:^0.1.0",
+		"@types/node": "^20.10.6",
+		"@types/react": "^18.2.25",
+		"@types/react-dom": "^18.2.18",
+		"@types/sha.js": "^2.4.1",
+		"typescript": "^5.3.3"
 	}
 }

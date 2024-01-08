@@ -1,52 +1,107 @@
-import { render as reactEmailRender, render } from '@react-email/render';
-import * as Postmark from 'postmark';
+import { type ReadableStream } from 'node:stream/web';
+import { type ReactNode } from 'react';
+import { convert } from 'html-to-text';
+import pretty from 'pretty';
 
-import env from '~/env';
-
-const postmark = new Postmark.ServerClient(env.POSTMARK_SERVER_API_TOKEN);
+import env from './env';
 
 interface SendEmailProps {
 	to: string;
 	from: string;
 	subject: string;
-
-	template: JSX.Element;
+	type: 'transactional' | 'marketing';
+	react: JSX.Element;
 
 	text?: string;
 	html?: string;
-	type: 'transactional' | 'marketing';
 }
 
-const sendEmail = async (props: SendEmailProps) => {
-	const { to, from, subject, template, type } = props;
+export async function sendEmail(props: SendEmailProps) {
+	if (props.type === 'transactional') {
+		try {
+			const html = await renderEmailAsync(props.react);
+			const text = await renderEmailAsync(props.react, { plainText: true });
 
-	const text = render(template, {
-		plainText: true,
-	});
+			const res = await fetch('https://api.resend.com/emails', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${env.RESEND_API_KEY}`,
+				},
+				body: JSON.stringify({
+					from: props.from,
+					to: props.to,
+					subject: props.subject,
+					html,
+					text,
+				}),
+			});
 
-	const html = render(template, {
-		pretty: true,
-	});
-
-	try {
-		const postmarkResponse = await postmark.sendEmail({
-			To: to,
-			From: from,
-			Subject: subject,
-			TextBody: text,
-			HtmlBody: html,
-			MessageStream: type === 'transactional' ? 'outbound' : 'broadcast',
-		});
-
-		console.log('postmarkResponse => ', postmarkResponse);
-		return postmarkResponse;
-	} catch (error) {
-		console.error(error);
+			if (res.ok) return true;
+		} catch (err) {
+			console.error(err);
+		}
 	}
-};
+}
 
-const renderEmail = (Email: JSX.Element) => {
-	return reactEmailRender(Email);
-};
+async function renderToString(children: ReactNode) {
+	const ReactDOMServer = (await import('react-dom/server')).default;
 
-export { sendEmail, renderEmail };
+	const stream = await ReactDOMServer.renderToReadableStream(children);
+
+	const html = await readableStreamToString(
+		// ReactDOMServerReadableStream behaves like ReadableStream
+		// in modern edge runtimes but the types are not compatible
+		stream as unknown as ReadableStream<Uint8Array>,
+	);
+
+	return (
+		html
+			// Remove leading doctype becuase we add it manually
+			.replace(/^<!DOCTYPE html>/, '')
+			// Remove empty comments to match the output of renderToStaticMarkup
+			.replace(/<!-- -->/g, '')
+	);
+}
+
+async function readableStreamToString(readableStream: ReadableStream<Uint8Array>) {
+	let result = '';
+
+	const decoder = new TextDecoder();
+
+	for await (const chunk of readableStream) {
+		result += decoder.decode(chunk);
+	}
+
+	return result;
+}
+
+export async function renderEmailAsync(
+	component: ReactNode,
+	options?: {
+		pretty?: boolean;
+		plainText?: boolean;
+	},
+) {
+	const markup = await renderToString(component);
+
+	if (options?.plainText) {
+		return convert(markup, {
+			selectors: [
+				{ selector: 'img', format: 'skip' },
+				{ selector: '#__react-email-preview', format: 'skip' },
+			],
+		});
+	}
+
+	const doctype =
+		'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">';
+
+	const document = `${doctype}${markup}`;
+
+	if (options?.pretty) {
+		return pretty(document);
+	}
+
+	return document;
+}

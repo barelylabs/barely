@@ -3,10 +3,8 @@
 'use client';
 
 import * as React from 'react';
-
+import { cn } from '@barely/lib/utils/cn';
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
-
-import { cn } from '@barely/lib/utils/edge/cn';
 
 const AvatarRoot = React.forwardRef<
 	React.ElementRef<typeof AvatarPrimitive.Root>,
@@ -51,12 +49,14 @@ const AvatarFallback = React.forwardRef<
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName;
 
 const Avatar = (props: {
+	size?: string;
 	imageUrl?: string;
 	displayName?: string;
 	initials?: string;
+	className?: string;
 }) => {
 	return (
-		<AvatarRoot>
+		<AvatarRoot className={props.className}>
 			<AvatarImage src={props.imageUrl} />
 			<AvatarFallback>{props.initials}</AvatarFallback>
 		</AvatarRoot>

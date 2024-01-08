@@ -1,71 +1,68 @@
 'use client';
 
 import { useState } from 'react';
-
 import Link from 'next/link';
+import { useZodForm } from '@barely/lib/hooks/use-zod-form';
+import { insertUserSchema } from '@barely/server/user.schema';
+import type { z } from 'zod';
 
-import { formAtom } from 'form-atoms';
-import { z } from 'zod';
+import { api } from '@barely/api/react';
 
-import { emailFieldAtom } from '@barely/api/user/user.atoms';
-import { userSchema } from '@barely/api/user/user.schema';
-
-import { Form, SubmitButton } from '@barely/ui/elements/form';
-import { TextField } from '@barely/ui/elements/text-field';
 import { Text } from '@barely/ui/elements/typography';
-
-import { api } from '~/client/trpc';
+import { Form, SubmitButton } from '@barely/ui/forms';
+import { TextField } from '@barely/ui/forms/text-field';
 
 import { LoginLinkSent } from '../login-success';
 
-const signInSchema = userSchema.pick({ email: true });
-
-const loginFormAtom = formAtom({
-	email: emailFieldAtom,
-});
+const signInSchema = insertUserSchema.pick({ email: true });
 
 interface RegisterFormProps extends React.HTMLAttributes<HTMLDivElement> {
 	callbackUrl?: string;
 }
 
 const LoginForm = ({ callbackUrl }: RegisterFormProps) => {
-	const sendLoginEmail = api.node.auth.sendLoginEmail.useMutation({
+	const form = useZodForm({
+		schema: signInSchema,
+		defaultValues: {
+			email: '',
+		},
+	});
+
+	const [loginEmailSent, setLoginEmailSent] = useState(false);
+
+	const { mutateAsync: sendLoginEmail } = api.auth.sendLoginEmail.useMutation({
 		onSuccess: () => {
 			setLoginEmailSent(true);
 		},
 	});
 
-	const [loginEmailSent, setLoginEmailSent] = useState(false);
-	const [identifier, setIdentifier] = useState('');
-
 	const onSubmit = async (user: z.infer<typeof signInSchema>) => {
-		setIdentifier(user.email);
-		await sendLoginEmail.mutateAsync({ email: user.email, callbackUrl });
+		console.log('user => ', user);
+		await sendLoginEmail({ email: user.email, callbackUrl });
 		return;
 	};
 
 	return (
 		<>
 			{loginEmailSent ? (
-				<LoginLinkSent identifier={identifier} provider='email' />
+				<LoginLinkSent identifier={form.watch('email')} provider='email' />
 			) : (
-				<Form formAtom={loginFormAtom} onSubmit={onSubmit}>
-					<p className='text-sm text-slate-600 dark:text-slate-400'>
+				<Form form={form} onSubmit={onSubmit}>
+					<Text variant='sm/normal' subtle>
 						Enter your email address
-					</p>
+					</Text>
+
 					<TextField
-						fieldAtom={emailFieldAtom}
-						// label='Email'
-						size='sm'
 						type='email'
 						autoCorrect='off'
 						autoComplete='email'
 						autoCapitalize='off'
+						name='email'
+						control={form.control}
 						placeholder='name@example.com'
 					/>
-					<SubmitButton size='sm' formAtom={loginFormAtom}>
-						Login with email 🚀
-					</SubmitButton>
+
+					<SubmitButton fullWidth>Login with email 🚀</SubmitButton>
 					<Text variant={'sm/normal'} subtle underline>
 						<Link href='/register' className='hover:text-brand'>
 							{`Don't have an account? Sign Up`}

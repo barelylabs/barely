@@ -33,12 +33,12 @@ const Header = () => {
 				<Link href='/' className='flex items-center text-md md:text-2xl font-extrabold'>
 					<Logo className='mr-2 h-[1.2rem] w-[1.2rem] md:h-[1.5rem] md:w-[1.5rem]' />
 					<div className='relative'>
-						<span>barely</span>
-						<span className='text-xs font-light -top-5'>.io</span>
+						<span className='font-heading'>barely</span>
+						<span className='text-xs font-normal -top-5'>.io</span>
 					</div>
 				</Link>
-				<div className='ml-auto flex h-full items-center'>
-					<Button href='https://app.barely.io/login' className='mr-6' variant='subtle'>
+				<div className='ml-auto flex h-full items-center space-x-1 sm:space-x-6'>
+					<Button href='https://app.barely.io/login' variant='subtle'>
 						Log in
 					</Button>
 					<Button href='https://app.barely.io/register' pill variant='secondary'>

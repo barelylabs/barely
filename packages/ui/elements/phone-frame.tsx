@@ -1,4 +1,4 @@
-import { cn } from '@barely/lib/utils/edge/cn';
+import { cn } from '@barely/lib/utils/cn';
 
 interface PhoneFrameProps {
 	size?: 'xs' | 'sm' | 'md' | 'lg';

@@ -1,6 +1,6 @@
 {
 	"name": "@barely/email",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"private": true,
 	"workspaces": [
 		".react-email"
@@ -10,15 +10,37 @@
 		"export": "email export"
 	},
 	"devDependencies": {
-		"@barely/config": "*",
-		"@barely/env": "*",
-		"eslint": "^8.28.0",
-		"tailwindcss": "^3.2.4",
-		"typescript": "^5.0.0"
+		"@barely/env": "workspace:^0.1.0",
+		"@barely/eslint-config": "workspace:^0.1.0",
+		"@barely/tailwind-config": "workspace:^0.1.0",
+		"@types/html-to-text": "^9.0.1",
+		"@types/node": "^20.10.6",
+		"@types/pretty": "^2.0.1",
+		"@types/react": "^18.2.25",
+		"@types/react-dom": "^18.2.18",
+		"eslint": "^8.56.0",
+		"tailwindcss": "^3.3.3",
+		"typescript": "^5.3.3"
 	},
 	"dependencies": {
-		"@react-email/components": "0.0.5",
-		"@react-email/render": "^0.0.6",
-		"react-email": "1.9.1"
+		"@react-email/body": "^0.0.7",
+		"@react-email/button": "^0.0.13",
+		"@react-email/container": "^0.0.11",
+		"@react-email/head": "^0.0.7",
+		"@react-email/heading": "^0.0.11",
+		"@react-email/hr": "^0.0.7",
+		"@react-email/html": "^0.0.7",
+		"@react-email/img": "^0.0.7",
+		"@react-email/link": "^0.0.7",
+		"@react-email/preview": "^0.0.8",
+		"@react-email/render": "^0.0.10",
+		"@react-email/tailwind": "^0.0.13",
+		"@react-email/text": "^0.0.7",
+		"html-to-text": "^9.0.5",
+		"pretty": "^2.0.0",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
+		"react-email": "^1.10.0",
+		"resend": "^2.1.0"
 	}
 }

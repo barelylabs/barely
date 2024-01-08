@@ -1,94 +1,175 @@
-'use client';
+import * as React from 'react';
 
-import { ComponentProps, ReactNode, useId } from 'react';
-
+import * as LabelPrimitive from '@radix-ui/react-label';
+import { Slot } from '@radix-ui/react-slot';
 import {
-	FieldAtom,
-	FormAtom,
-	FormFields,
-	FormFieldValues,
-	useFieldErrors,
-	useFieldState,
-	useFormStatus,
-	useFormSubmit,
-} from 'form-atoms';
+	Controller,
+	ControllerProps,
+	FieldPath,
+	FieldValues,
+	FormProvider,
+	useFormContext,
+} from 'react-hook-form';
 
-import { Button, ButtonProps } from './button';
-import { Icon } from './icon';
+import { cn } from '@barely/lib/utils/cn';
 
-function FieldErrorIcon<TValue>(props: { atom: FieldAtom<TValue> }) {
-	const { validateStatus } = useFieldState(props.atom);
-	const errors = useFieldErrors(props.atom);
+import { Label } from './label';
 
-	if (!errors.length && validateStatus === 'valid') return null;
+const Form = FormProvider;
 
+type FormFieldContextValue<
+	TFieldValues extends FieldValues = FieldValues,
+	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+> = {
+	name: TName;
+};
+
+const FormFieldContext = React.createContext<FormFieldContextValue>(
+	{} as FormFieldContextValue,
+);
+
+const FormField = <
+	TFieldValues extends FieldValues = FieldValues,
+	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+>({
+	...props
+}: ControllerProps<TFieldValues, TName>) => {
 	return (
-		<div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3'>
-			{validateStatus === 'validating' && (
-				<Icon.spinner className='h-5 w-5 text-red-500 animate-spin' />
-			)}
-			{validateStatus === 'invalid' && !!errors.length && (
-				<Icon.alert aria-hidden='true' className='h-5 w-5 text-red-500' />
-			)}
-		</div>
+		<FormFieldContext.Provider value={{ name: props.name }}>
+			<Controller {...props} />
+		</FormFieldContext.Provider>
 	);
-}
+};
 
-function FieldError<TValue>(props: { atom: FieldAtom<TValue> }) {
-	const id = useId();
-	const errors = useFieldErrors(props.atom);
+const useFormField = () => {
+	const fieldContext = React.useContext(FormFieldContext);
+	const itemContext = React.useContext(FormItemContext);
+	const { getFieldState, formState } = useFormContext();
 
-	if (!errors.length) return null;
+	const fieldState = getFieldState(fieldContext.name, formState);
+
+	if (!fieldContext) {
+		throw new Error('useFormField should be used within <FormField>');
+	}
+
+	const { id } = itemContext;
+
+	return {
+		id,
+		name: fieldContext.name,
+		formItemId: `${id}-form-item`,
+		formDescriptionId: `${id}-form-item-description`,
+		formMessageId: `${id}-form-item-message`,
+		...fieldState,
+	};
+};
+
+type FormItemContextValue = {
+	id: string;
+};
+
+const FormItemContext = React.createContext<FormItemContextValue>(
+	{} as FormItemContextValue,
+);
+
+const FormItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+	({ className, ...props }, ref) => {
+		const id = React.useId();
+
+		return (
+			<FormItemContext.Provider value={{ id }}>
+				<div ref={ref} className={cn('space-y-2', className)} {...props} />
+			</FormItemContext.Provider>
+		);
+	},
+);
+FormItem.displayName = 'FormItem';
+
+const FormLabel = React.forwardRef<
+	React.ElementRef<typeof LabelPrimitive.Root>,
+	React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
+>(({ className, ...props }, ref) => {
+	const { error, formItemId } = useFormField();
 
 	return (
-		<p className='mt-1.5 text-left text-sm text-red-500' id={`${id}-error`}>
-			{errors[0]}
+		<Label
+			ref={ref}
+			className={cn(error && 'text-destructive', className)}
+			htmlFor={formItemId}
+			{...props}
+		/>
+	);
+});
+FormLabel.displayName = 'FormLabel';
+
+const FormControl = React.forwardRef<
+	React.ElementRef<typeof Slot>,
+	React.ComponentPropsWithoutRef<typeof Slot>
+>(({ ...props }, ref) => {
+	const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
+
+	return (
+		<Slot
+			ref={ref}
+			id={formItemId}
+			aria-describedby={
+				!error ? `${formDescriptionId}` : `${formDescriptionId} ${formMessageId}`
+			}
+			aria-invalid={!!error}
+			{...props}
+		/>
+	);
+});
+FormControl.displayName = 'FormControl';
+
+const FormDescription = React.forwardRef<
+	HTMLParagraphElement,
+	React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => {
+	const { formDescriptionId } = useFormField();
+
+	return (
+		<p
+			ref={ref}
+			id={formDescriptionId}
+			className={cn('text-[0.8rem] text-muted-foreground', className)}
+			{...props}
+		/>
+	);
+});
+FormDescription.displayName = 'FormDescription';
+
+const FormMessage = React.forwardRef<
+	HTMLParagraphElement,
+	React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, children, ...props }, ref) => {
+	const { error, formMessageId } = useFormField();
+	const body = error ? String(error?.message) : children;
+
+	if (!body) {
+		return null;
+	}
+
+	return (
+		<p
+			ref={ref}
+			id={formMessageId}
+			className={cn('text-[0.8rem] font-medium text-destructive', className)}
+			{...props}
+		>
+			{body}
 		</p>
 	);
-}
+});
+FormMessage.displayName = 'FormMessage';
 
-interface FormProps<TFormFields extends FormFields>
-	extends Omit<ComponentProps<'form'>, 'onSubmit'> {
-	formAtom: FormAtom<TFormFields>;
-	onSubmit: (values: FormFieldValues<TFormFields>) => void | Promise<void>;
-	children: ReactNode;
-}
-
-function Form<T extends FormFields>(props: FormProps<T>) {
-	const formSubmit = useFormSubmit(props.formAtom);
-
-	const { submitStatus } = useFormStatus(props.formAtom);
-
-	return (
-		<form className='w-full flex flex-col' onSubmit={formSubmit(props.onSubmit)}>
-			<fieldset
-				className='flex flex-col space-y-4 w-full'
-				disabled={submitStatus === 'submitting'}
-			>
-				{props.children}
-			</fieldset>
-		</form>
-	);
-}
-
-interface SubmitButtonProps<TFormFields extends FormFields> extends ButtonProps {
-	formAtom: FormAtom<TFormFields>;
-}
-
-function SubmitButton<T extends FormFields>({
-	children,
-	formAtom,
-	...props
-}: SubmitButtonProps<T>) {
-	const { submitStatus } = useFormStatus(formAtom);
-
-	return (
-		<>
-			<Button type='submit' loading={submitStatus === 'submitting'} {...props}>
-				{children}
-			</Button>
-		</>
-	);
-}
-
-export { Form, FieldErrorIcon, FieldError, SubmitButton };
+export {
+	useFormField,
+	Form,
+	FormItem,
+	FormLabel,
+	FormControl,
+	FormDescription,
+	FormMessage,
+	FormField,
+};

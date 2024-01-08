@@ -1,18 +1,23 @@
 import './styles/globals.css';
 
 import type { Metadata } from 'next';
-
+import localFont from 'next/font/local';
+import { cn } from '@barely/lib/utils/cn';
 import { Inter as FontSans } from '@next/font/google';
-
-import { cn } from '@barely/lib/utils/edge/cn';
 
 import { TailwindIndicator } from '@barely/ui/components/tailwind-indicator';
 import { Container } from '@barely/ui/elements/container';
-import { Toaster } from '@barely/ui/elements/toaster';
+
+// import { Toaster } from '@barely/ui/elements/toaster';
 
 import Footer from '~/app/components/footer';
 import { Header } from '~/app/components/header';
 import Providers from '~/app/providers';
+
+const fontHeading = localFont({
+	src: '../assets/fonts/CalSans-SemiBold.woff2',
+	variable: '--font-heading',
+});
 
 const fontSans = FontSans({
 	subsets: ['latin'],
@@ -34,7 +39,6 @@ export const metadata: Metadata = {
 			},
 		],
 	},
-	themeColor: '#ffffff',
 };
 
 interface RootLayoutProps {
@@ -46,19 +50,20 @@ export default function RootLayout({ children }: RootLayoutProps) {
 		<html lang='en' suppressHydrationWarning>
 			<body
 				className={cn(
-					'min-h-screen bg-background font-sans text-primary antialiased w-full',
+					'min-h-screen w-full bg-background font-sans text-primary antialiased',
+					fontHeading.variable,
 					fontSans.variable,
 				)}
 			>
 				<Providers>
-					{/* <Header /> */}
+					<Header />
 
-					<Container className='max-w-full md:max-w-6xl mx-auto py-6 px-6'>
+					<Container className='mx-auto max-w-full px-6 py-6 md:max-w-6xl'>
 						{children}
 					</Container>
 
 					<Footer />
-					<Toaster />
+					{/* <Toaster /> */}
 					<TailwindIndicator />
 				</Providers>
 			</body>

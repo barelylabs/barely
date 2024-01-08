@@ -1,23 +1,13 @@
-import { SessionUser } from '@barely/auth/auth-options';
+import type { User } from '@barely/lib/server/user.schema';
 
-import { Icon } from '@barely/ui/elements/icon';
+import type { Icon } from '@barely/ui/elements/icon';
 
-export interface NavItem {
+export interface SidebarNavItem {
 	title: string;
 	href?: string;
 	disabled?: boolean;
 	external?: boolean;
 	icon?: keyof typeof Icon;
 	label?: string;
-	userFilters?: (keyof SessionUser)[];
+	userFilters?: (keyof User)[];
 }
-
-export interface NavItemWithChildren extends NavItem {
-	items: NavItemWithChildren[];
-}
-
-export interface MainNavItem extends NavItem {}
-
-export interface SidebarNavItem extends NavItemWithChildren {}
-
-// q: how to call an Icon based on icon prop?

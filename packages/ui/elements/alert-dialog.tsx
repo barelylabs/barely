@@ -7,7 +7,7 @@ import * as React from 'react';
 import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog';
 import { VariantProps } from 'class-variance-authority';
 
-import { cn } from '@barely/lib/utils/edge/cn';
+import { cn } from '@barely/lib/utils/cn';
 
 import { buttonVariants } from './button';
 
@@ -138,7 +138,7 @@ const AlertDialogAction = React.forwardRef<
 >(({ className, variant, size, ...props }, ref) => (
 	<AlertDialogPrimitive.Action
 		ref={ref}
-		className={cn(buttonVariants({ variant: variant ?? 'solid', size }), className)}
+		className={cn(buttonVariants({ variant: variant ?? 'primary', size }), className)}
 		{...props}
 	/>
 ));
@@ -165,6 +165,7 @@ AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName;
 interface AlertDialogProps {
 	triggerName: React.ReactNode;
 	triggerVariant?: VariantProps<typeof buttonVariants>['variant'];
+	triggerSize?: VariantProps<typeof buttonVariants>['size'];
 	title?: React.ReactNode;
 	description?: React.ReactNode;
 	actionName?: React.ReactNode;
@@ -177,7 +178,10 @@ interface AlertDialogProps {
 const AlertDialog = (props: AlertDialogProps) => {
 	return (
 		<AlertDialogRoot>
-			<AlertDialogTrigger variant={props.triggerVariant ?? 'solid'}>
+			<AlertDialogTrigger
+				variant={props.triggerVariant ?? 'secondary'}
+				size={props.triggerSize ?? 'md'}
+			>
 				{props.triggerName}
 			</AlertDialogTrigger>
 			<AlertDialogContent>

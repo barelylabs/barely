@@ -1,0 +1,89 @@
+# neon ref: https://neon.tech/blog/branching-with-preview-environments
+
+name: Deploy Preview
+
+on: [pull_request]
+
+jobs:
+  neon-preview:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v7
+
+      - name: Install the Neon CLI
+        run: npm install -g neonctl
+
+        # If the branch already exists, this command will fail but the workflow will continue
+
+      - name: Create a Neon branch
+        id: create-branch
+        run: neonctl branches create --project-id ${{ secrets.NEON_PROJECT_ID }} --name ${{ steps.branch-name.outputs.current_branch }} --api-key ${{ secrets.NEON_API_KEY }} --compute --type read_write
+
+      # The branch ID is needed to display the URL of the branch in the comment.
+      - name: get Neon branch ID
+        id: get-neon-branch-id
+        run: |
+          echo branch_id=$(neonctl branches get ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --output json | jq -r '.id') >> $GITHUB_OUTPUT
+
+      # - name: Run Prisma Migrate
+      #   run: |
+      #     touch .env
+
+      #     echo DATABASE_URL=$(neonctl cs ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }}) >> .env
+
+      #     echo DIRECT_DATABASE_URL=$(neonctl cs ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }}) >> .env
+
+      #     npx prisma generate
+      #     npx prisma migrate deploy
+
+      - name: Run Drizzle Generate and Push
+        run: |
+          touch .env
+
+          echo DATABASE_URL=$(neonctl cs ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require >> .env
+
+          pnpm run db:generate
+          pnpm run db:push
+
+      
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            Vercel Preview URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
+            Neon branch :elephant: : https://console.neon.tech/app/projects/${{ secrets.NEON_PROJECT_ID }}/branches/${{ steps.get-neon-branch-id.outputs.branch_id }}
+
+  app-deploy:
+    name: Vercel Preview Deployment - app.barely.io
+    needs: [neon-preview]
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_ACCESS_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
+
+    - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}      
+
+      - name: Build App Project Artifacts
+        run: |
+          pnpm i
+          pnpm build --filter=@barely/app
+
+      - name: Deploy App Preview to Vercel
+        id: deploy-app
+        run: echo preview_url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --) >> $GITHUB_OUTPUT
+
+      - name: Comment on Pull Request
+
+  # link-deploy:
+
+  # www-deploy:
+  

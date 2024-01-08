@@ -1,5 +1,5 @@
 import { Accordion, type AccordionItemProps } from '@barely/ui/elements/accordion';
-import { H1, Text } from '@barely/ui/elements/typography';
+import { H, Text } from '@barely/ui/elements/typography';
 
 const faqItems: AccordionItemProps[] = [
 	{
@@ -41,9 +41,11 @@ const faqItems: AccordionItemProps[] = [
 
 const FAQ = () => {
 	return (
-		<div className='grid grid-cols-1 sm:grid-cols-2 space-y-3 mt-20 w-full'>
+		<div className='grid grid-cols-1 md:grid-cols-1 gap-5 mt-20 w-full'>
 			<div className='max-w-2xl'>
-				<H1 className='pb-4'>Frequently asked questions</H1>
+				<H size='1' className='pb-4'>
+					Frequently asked questions
+				</H>
 				<Text variant='lg/light' muted>
 					Find your answers to common playlist.pitch questions.
 				</Text>

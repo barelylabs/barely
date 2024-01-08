@@ -3,7 +3,7 @@ import { FaLink } from 'react-icons/fa';
 import { MdPrivacyTip } from 'react-icons/md';
 
 import { Tooltip } from '@barely/ui/elements/tooltip';
-import { H1, H3, Text } from '@barely/ui/elements/typography';
+import { H, Text } from '@barely/ui/elements/typography';
 
 const features = [
 	{
@@ -39,8 +39,10 @@ const MadeForMarketing = () => {
 			className='m-auto flex w-full flex-col place-items-center py-16 sm:py-20 lg:py-28'
 		>
 			<div className='space-y-4mx-auto flex max-w-5xl flex-col items-center px-6 lg:px-8'>
-				<H1 className='pb-12 '>Made For Marketing</H1>
-				<H3 className='text-3xl font-semibold text-gray-200'>
+				<H size='1' className='pb-12 '>
+					Made For Marketing
+				</H>
+				<H size='3' className='text-3xl font-semibold text-gray-200'>
 					<Tooltip content="The artist's handle" className='bg-red fill-red text-gray-50'>
 						<button className='text-red'>{`{artist}`}</button>
 					</Tooltip>
@@ -65,7 +67,7 @@ const MadeForMarketing = () => {
 					>
 						<button className='text-purple-400'>{`{appId}`}</button>
 					</Tooltip>
-				</H3>
+				</H>
 				<Text variant='sm/normal' className='py-5' muted>
 					👆 hover for more info
 				</Text>

@@ -1,5 +1,44 @@
 {
-  "extends": "@barely/config/tsconfig.nextjs.json",
+  "extends": "@barely/tsconfig/nextjs.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "~/*": [
+        "./src/*"
+      ],
+      "@static/*": [
+        "./public/_static/*"
+      ],
+      "@barely/server/*": [
+        "../../packages/lib/server/*"
+      ],
+      "@barely/api/*": [
+        "../../packages/lib/server/api/*"
+      ],
+      "@barely/atoms/*": [
+        "../../packages/lib/atoms/*"
+      ],
+      "@barely/hooks/*": [
+        "../../packages/lib/hooks/*"
+      ],
+      "@barely/ui/*": [
+        "../../packages/ui/*"
+      ],
+      "@barely/utils/*": [
+        "../../packages/lib/utils/*"
+      ],
+      "@public/*": [
+        "./public/*"
+      ]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "strictNullChecks": true,
+    "jsx": "preserve"
+  },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
@@ -8,18 +47,7 @@
     "**/*.mjs",
     ".next/types/**/*.ts"
   ],
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "~/*": [
-        "./src/*"
-      ]
-    },
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
-  },
-  "exclude": []
+  "exclude": [
+    "node_modules"
+  ]
 }

@@ -2,11 +2,24 @@
 
 'use client';
 
+import { forwardRef } from 'react';
+import { cn } from '@barely/lib/utils/cn';
 import * as AspectRatioPrimitive from '@radix-ui/react-aspect-ratio';
 
-const AspectRatio = AspectRatioPrimitive.Root;
+// const AspectRatio = AspectRatioPrimitive.Root;
 
-export { AspectRatio };
+// export { AspectRatio };
+
+export const AspectRatio = forwardRef<
+	React.ElementRef<typeof AspectRatioPrimitive.Root>,
+	React.ComponentPropsWithoutRef<typeof AspectRatioPrimitive.Root>
+>(({ className, ...props }, ref) => (
+	<AspectRatioPrimitive.Root
+		ref={ref}
+		className={cn('relative flex overflow-hidden rounded-md', className)}
+		{...props}
+	/>
+));
 
 /* usage
 

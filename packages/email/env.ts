@@ -1,12 +1,10 @@
-import { clientEnvAllSchema, serverEnvAllSchema, zEnv } from '@barely/env';
+import { allClientEnvSchema, allServerEnvSchema, zEnv } from '@barely/env';
 
-const serverEnvSchema = serverEnvAllSchema.pick({
-	POSTMARK_SERVER_API_TOKEN: true,
+const serverEnvSchema = allServerEnvSchema.pick({
+	RESEND_API_KEY: true,
 });
 
-const clientEnvSchema = clientEnvAllSchema.pick({
-	NEXT_PUBLIC_APP_BASE_URL: true,
-});
+const clientEnvSchema = allClientEnvSchema;
 
 const env = zEnv({ serverEnvSchema, clientEnvSchema });
 

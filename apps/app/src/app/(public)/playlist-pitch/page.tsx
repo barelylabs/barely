@@ -1,27 +1,22 @@
 import { redirect } from 'next/navigation';
+import { auth } from '@barely/server/auth';
 
-import { getServerSession } from 'next-auth/next';
+import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
+import { PlaylistPitchForm } from '~/app/[handle]/campaigns/playlist-pitch/playlist-pitch-form';
 
-import { authOptions } from '@barely/lib/auth';
-
-import { H1 } from '@barely/ui/elements';
-
-import { DashContentHeader } from '~/app/(dash)/components/dash-content-header';
-
-import { PlaylistPitchSubmissionForm } from '../../(dash)/campaigns/playlist-pitch/playlist-pitch-form';
+// import { PlaylistPitchForm } from '../../(dash.old)/campaigns/playlist-pitch/playlist-pitch-form';
 
 const NewCampaignPage = async () => {
-	const session = await getServerSession(authOptions);
+	const session = await auth();
 	if (session?.user) return redirect('/campaigns/playlist-pitch');
 
 	return (
 		<>
-			{/* <H1>playlist.pitch</H1> */}
 			<DashContentHeader
 				title='playlist.pitch'
 				subtitle='Submit your track for screening'
 			/>
-			<PlaylistPitchSubmissionForm />
+			<PlaylistPitchForm />
 		</>
 	);
 };

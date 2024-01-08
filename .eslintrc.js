@@ -10,12 +10,7 @@ const config = {
 			files: ['**/*.ts', '**/*.tsx'],
 			parserOptions: {
 				tsconfigRootDir: __dirname,
-				project: [
-					// './packages/config/./tsconfig.json',
-					'./apps/*/tsconfig.json',
-					'./packages/*/tsconfig.json',
-					'./libs/*/tsconfig.json',
-				],
+				project: ['./apps/*/tsconfig.json', './packages/*/tsconfig.json'],
 			},
 			rules: {
 				'@typescript-eslint/no-empty-interface': [

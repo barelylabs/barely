@@ -9,19 +9,25 @@
 		"lint": "eslint . --ext .ts,.js,.tsx,.jsx"
 	},
 	"dependencies": {
-		"@barely/lib": "*",
-		"@radix-ui/react-toast": "^1.1.2",
-		"zod": "^3.21.4"
+		"@heroicons/react": "^2.0.18",
+		"@radix-ui/react-toast": "^1.1.4",
+		"class-variance-authority": "^0.7.0",
+		"clsx": "^2.0.0",
+		"lucide-react": "^0.294.0",
+		"tailwind-merge": "^1.14.0",
+		"zod": "^3.22.4"
 	},
 	"devDependencies": {
-		"@barely/config": "*",
-		"@types/node": "^18.0.0",
-		"@typescript-eslint/eslint-plugin": "^5.33.0",
-		"@typescript-eslint/parser": "^5.33.0",
-		"eslint": "^8.28.0",
+		"@barely/eslint-config": "workspace:^0.1.0",
+		"@barely/tailwind-config": "workspace:^0.1.0",
+		"@barely/tsconfig": "workspace:^0.1.0",
+		"@types/node": "^20.10.6",
+		"@typescript-eslint/eslint-plugin": "^6.10.0",
+		"@typescript-eslint/parser": "^6.10.0",
+		"eslint": "^8.56.0",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
-		"typescript": "^5.0.0"
+		"typescript": "^5.3.3"
 	},
 	"peerDependencies": {
 		"react": "^18.2.0",

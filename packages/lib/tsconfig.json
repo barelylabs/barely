@@ -1,17 +1,18 @@
 {
-	"extends": "@barely/config/tsconfig.base.json",
+	"extends": "@barely/tsconfig/base.json",
 	"compilerOptions": {
-		"target": "es5",
+		"target": "es2022",
 		"resolveJsonModule": true,
 		"jsx": "react-jsx"
-		// "baseUrl": ".",
-		// "paths": {
-		// 	"~~/*": ["./*"]
 	},
 	"include": [
-		".",
-		"../types/next-auth.d.ts"
-		// "node_modules/@trpc/react-query/src/createTRPCReact.tsx"
+		"env",
+		"../types/next-auth.d.ts",
+		"./atoms/**/*",
+		"./context/**/*",
+		"./hooks/**/*",
+		"./server/**/*",
+		"./utils/**/*"
 	],
 	"exclude": ["dist", "build", "node_modules"]
 }

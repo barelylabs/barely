@@ -6,7 +6,7 @@ import * as React from 'react';
 
 import * as HoverCardPrimitive from '@radix-ui/react-hover-card';
 
-import { cn } from '@barely/lib/utils/edge/cn';
+import { cn } from '@barely/lib/utils/cn';
 
 const HoverCard = HoverCardPrimitive.Root;
 

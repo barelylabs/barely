@@ -1,25 +1,49 @@
-import { clientEnvAllSchema, serverEnvAllSchema, zEnv } from '@barely/env';
+import { pickClientEnvSchema, pickServerEnvSchema, zEnv } from '@barely/env';
+import { z } from 'zod';
 
-const serverEnvSchema = serverEnvAllSchema.pick({
-	BOT_SPOTIFY_ACCOUNT_ID: true,
-	NEXTAUTH_SECRET: true,
-	OPENAI_API_KEY: true,
-	PUSHER_APP_SECRET: true,
-	SCREENING_PHONE_NUMBER: true,
-	SPOTIFY_CLIENT_ID: true,
-	SPOTIFY_CLIENT_SECRET: true,
-	STRIPE_SECRET_KEY: true,
-	TWILIO_ACCOUNT_SID: true,
-	TWILIO_AUTH_TOKEN: true,
-});
+const serverEnvSchema = pickServerEnvSchema([
+	'AUTH_URL',
+	'BOT_SPOTIFY_ACCOUNT_ID',
+	'BOT_THREADS_API_KEY',
+	'CLOUDINARY_API_SECRET',
+	'GANDI_API_KEY',
+	'LOCALHOST_IP',
+	'NAMESILO_API_KEY',
+	'NEXTAUTH_SECRET',
+	'OPENAI_API_KEY',
+	'OPENAI_ORG_ID',
+	'PUSHER_APP_SECRET',
+	'RESEND_API_KEY',
+	'SCREENING_PHONE_NUMBER',
+	'SPOTIFY_CLIENT_ID',
+	'SPOTIFY_CLIENT_SECRET',
+	'STRIPE_SECRET_KEY',
+	'TINYBIRD_API_KEY',
+	'TWILIO_ACCOUNT_SID',
+	'TWILIO_AUTH_TOKEN',
+	'TWILIO_PHONE_NUMBER',
+	'UPSTASH_REDIS_REST_URL',
+	'UPSTASH_REDIS_REST_TOKEN',
+	'VERCEL_ENV',
+	'VERCEL_LINK_PROJECT_ID',
+	'VERCEL_TEAM_ID',
+	'VERCEL_TOKEN',
+	'DATABASE_READ_URL',
+	'DATABASE_READ_POOL_URL',
+	'DATABASE_WRITE_URL',
+	'DATABASE_WRITE_POOL_URL',
+]);
 
-const clientEnvSchema = clientEnvAllSchema.pick({
-	NEXT_PUBLIC_APP_BASE_URL: true,
-	NEXT_PUBLIC_PUSHER_APP_ID: true,
-	NEXT_PUBLIC_PUSHER_APP_KEY: true,
-	NEXT_PUBLIC_PUSHER_APP_CLUSTER: true,
-});
+const clientEnvSchema = pickClientEnvSchema([
+	'NEXT_PUBLIC_CLOUDINARY_API_KEY',
+	'NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME',
+	'NEXT_PUBLIC_PUSHER_APP_ID',
+	'NEXT_PUBLIC_PUSHER_APP_KEY',
+	'NEXT_PUBLIC_PUSHER_APP_CLUSTER',
+]);
 
 const env = zEnv({ serverEnvSchema, clientEnvSchema });
+
+export const clientEnv = zEnv({ serverEnvSchema: z.object({}), clientEnvSchema });
 
 export default env;

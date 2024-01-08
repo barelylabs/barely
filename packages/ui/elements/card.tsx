@@ -1,8 +1,6 @@
 import { ReactNode } from 'react';
-
 import Image from 'next/image';
-
-import { cn } from '@barely/lib/utils/edge/cn';
+import { cn } from '@barely/lib/utils/cn';
 
 import { AspectRatio } from './aspect-ratio';
 import { type BadgeProps } from './badge';
@@ -13,7 +11,7 @@ const Card = ({ className, children }: { className?: string; children: ReactNode
 	return (
 		<div
 			className={cn(
-				'w-full mt-2 bg-card rounded-md border-2 p-4 sm:p-5 grid gap-3',
+				'flex w-full flex-col gap-3 rounded-md border-2 bg-card p-4 sm:p-5',
 				className,
 			)}
 		>
@@ -23,10 +21,10 @@ const Card = ({ className, children }: { className?: string; children: ReactNode
 };
 
 const CardFooter = ({ children }: { children: ReactNode }) => {
-	return <div className='px-4 py-3 bg-gray-50 sm:px-6 dark:bg-slate-800'>{children}</div>;
+	return <div className='bg-gray-50 px-4 py-3 dark:bg-slate-800 sm:px-6'>{children}</div>;
 };
 
-//* OPINIONATED CARD *//
+//* OPINIONATED CARDS *//
 
 interface InfoCardProps {
 	// left
@@ -51,7 +49,7 @@ const InfoCard = ({ children, ...props }: InfoCardProps) => {
 		<Card>
 			<div className='flex flex-row justify-between space-x-4'>
 				<div className='flex flex-row space-x-4'>
-					<div className='block w-[100px] h-[100px] overflow-hidden rounded-md flex-shrink-0'>
+					<div className='block h-[100px] w-[100px] flex-shrink-0 overflow-hidden rounded-md'>
 						<AspectRatio
 							ratio={props.imageAspectRatio}
 							className='bg-slate-50 dark:bg-slate-800'
@@ -61,7 +59,7 @@ const InfoCard = ({ children, ...props }: InfoCardProps) => {
 								alt={props.imageAlt ?? ''}
 								width={100}
 								height={100}
-								className='object-cover w-full'
+								className='w-full object-cover'
 							/>
 						</AspectRatio>
 					</div>
@@ -73,18 +71,20 @@ const InfoCard = ({ children, ...props }: InfoCardProps) => {
 							</Text>
 							{props.description && <div className='pt-2'>{props.description}</div>}
 						</div>
-						<div className='flex text-xs font-light flex-row space-x-1 items-center'>
+						<div className='flex flex-row items-center space-x-1 text-xs font-light'>
 							{props.stats}
 						</div>
 					</div>
 				</div>
+
 				<div
 					className={cn(
-						'flex flex-col space-y-2 items-end h-full',
+						'flex h-full flex-col items-end space-y-2',
 						props.badges ? 'justify-between' : 'justify-end',
 					)}
 				>
 					{props.badges && props.badges}
+
 					{props.buttons && props.buttons}
 				</div>
 			</div>

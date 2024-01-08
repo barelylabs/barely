@@ -37,7 +37,7 @@ import { ReactNode } from 'react';
 
 import { useInView } from 'react-intersection-observer';
 
-import { cn } from '@barely/lib/utils/edge/cn';
+import { cn } from '@barely/lib/utils/cn';
 
 type AnimateOnScrollProps = {
 	children: ReactNode;

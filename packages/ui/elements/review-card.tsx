@@ -1,4 +1,4 @@
-import { initials } from '@barely/lib/utils/edge/name';
+import { initials } from '@barely/lib/utils/name';
 
 import { Avatar } from './avatar';
 import { RatingDisplay } from './rating';

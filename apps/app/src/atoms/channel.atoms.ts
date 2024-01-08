@@ -1,15 +1,15 @@
 import { atom } from 'jotai';
 
-import { pusherClientAtom } from '@barely/atoms/pusher.atom';
+import { pusherAtom } from '@barely/atoms/pusher.atom';
 
 const campaignChannelAtom = atom(get => {
-	const client = get(pusherClientAtom);
+	const client = get(pusherAtom);
 	const channel = client.subscribe('campaigns');
 	return channel;
 });
 
 const trackChannelAtom = atom(get => {
-	const client = get(pusherClientAtom);
+	const client = get(pusherAtom);
 	const channel = client.subscribe('tracks');
 	return channel;
 });

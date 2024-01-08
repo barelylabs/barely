@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import { signOut } from '@barely/lib/auth/react';
+import { signOut } from '@barely/server/auth/auth.react';
 
 export default function Logout({ redirect }: { redirect?: string }) {
 	const router = useRouter();

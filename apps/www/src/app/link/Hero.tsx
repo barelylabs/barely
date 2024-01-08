@@ -3,24 +3,24 @@
 import { useState } from 'react';
 
 import { Button } from '@barely/ui/elements/button';
-import { H4, HHero, Lead, Text, Title } from '@barely/ui/elements/typography';
+import { HHero, Lead, Title } from '@barely/ui/elements/typography';
 
 const Hero = () => {
-	const [showEmailForm, setShowEmailForm] = useState(false);
-	const [submitted, setSubmitted] = useState(false);
+	const [showEmailForm] = useState(false);
+	const [submitted] = useState(false);
 
 	return (
 		<div
 			id='hero'
-			className='flex w-full flex-col space-y-4 bg-slate-900 px-6 pt-10 pb-20 text-left sm:px-4 sm:text-center md:items-center md:px-8'
+			className='flex w-full flex-col space-y-4 bg-slate-900 px-6 pb-20 pt-10 text-left sm:px-4 sm:text-center md:items-center md:px-8'
 		>
 			<div className='max-w-5xl py-6 '>
 				<HHero className='text-blue-500'>
 					barely
-					<span className='text-3xl text-gray-200 tracking-normal'>.link</span>
+					<span className='text-3xl tracking-normal text-gray-200'>.link</span>
 				</HHero>
 				<Title className='text-5xl font-bold text-gray-100'>Links for Artists</Title>
-				<Lead className='pt-10 pb-12'>
+				<Lead className='pb-12 pt-10'>
 					Simple, powerful links to build your audience.
 				</Lead>
 

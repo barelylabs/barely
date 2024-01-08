@@ -1,116 +1,114 @@
-import { NextRequest, NextResponse } from 'next/server';
-
-import { z } from 'zod';
-
-import { closestKyselyRead } from '@barely/db/kysely/kysely.db';
-import { getDeviceData, getPathParams } from '@barely/lib/utils/edge/visitor-session';
-import { zPost } from '@barely/lib/utils/edge/zod-fetch';
-
-import { linkAnalyticsSchema } from './pages/api/analytics';
+import { NextFetchEvent, NextRequest, NextResponse } from 'next/server';
+import { db } from '@barely/lib/server/db/index';
+import { RecordClickProps, recordLinkClick } from '@barely/lib/server/event.fns';
+import { LinkAnalyticsProps } from '@barely/lib/server/link.schema';
+import { Links } from '@barely/lib/server/link.sql';
+import { parseLink } from '@barely/lib/server/middleware/utils';
+import { LINK_BASE_URL, WWW_BASE_URL } from '@barely/lib/utils/constants';
+import {
+	detectBot,
+	parseGeo,
+	parseIp,
+	parseReferer,
+	parseUserAgent,
+} from '@barely/lib/utils/middleware';
+import { sqlAnd } from '@barely/lib/utils/sql';
+import { eq, isNull, SQL } from 'drizzle-orm';
 
 export const config = {
 	matcher: ['/((?!api|mobile|_next|favicon|logos|sitemap|atom|404|500).*)'],
 };
 
-type AnalyticsInput = z.infer<typeof linkAnalyticsSchema>;
+export async function middleware(req: NextRequest, ev: NextFetchEvent) {
+	const url = req.nextUrl;
+	const linkProps = parseLink(req);
 
-export async function middleware(req: NextRequest) {
 	//* 🧬 parse the incoming request *//
-	const { isLocal, origin, handle, slug, app, appRoute, appId, pathname } =
-		getPathParams(req);
 
-	if (!handle && pathname.length === 1) return; // redirect to barely.io/link?
-	if (handle && pathname.length === 1)
-		return NextResponse.redirect('https://barely.io/link');
-	if (!handle || pathname.length === 1) return NextResponse.rewrite(`${origin}/404`);
+	if (
+		linkProps.linkClickType === 'transparentLinkClick' &&
+		!linkProps.handle &&
+		!linkProps.app
+	)
+		return NextResponse.rewrite(`${WWW_BASE_URL}/link`);
 
-	//* 🔎 get link data from db (planetscale serverless + kysely) *//
-	// const edgeDb = isLocal
-	// 	? usEast1_dev
-	// 	: closestDbConnection(req.geo?.longitude ?? '0', req.geo?.latitude ?? '0');
+	if (linkProps.linkClickType === 'transparentLinkClick' && !linkProps.handle)
+		return NextResponse.rewrite(`${LINK_BASE_URL}/404`);
 
-	const db = closestKyselyRead(req.geo?.longitude, req.geo?.latitude);
+	let where: SQL | undefined = undefined;
 
-	function eqOrIs<T>(value: T) {
-		return value ? '=' : 'is';
+	if (linkProps.linkClickType === 'transparentLinkClick') {
+		if (!linkProps.handle && !linkProps.app)
+			return NextResponse.rewrite(`${WWW_BASE_URL}/link`);
+
+		if (!linkProps.handle) return NextResponse.rewrite(`${LINK_BASE_URL}/404`);
+
+		where = sqlAnd([
+			eq(Links.handle, linkProps.handle),
+			linkProps.app ? eq(Links.app, linkProps.app) : isNull(Links.app),
+			linkProps.appRoute
+				? eq(Links.appRoute, linkProps.appRoute)
+				: isNull(Links.appRoute),
+		]);
+	} else if (linkProps.linkClickType === 'shortLinkClick') {
+		where = sqlAnd([
+			eq(Links.domain, linkProps.domain),
+			eq(Links.key, url.pathname.replace('/', '')),
+		]);
 	}
 
-	const link = await db
-		.selectFrom('Link')
-		.select(['id', 'url', 'androidScheme', 'appleScheme', 'teamId'])
-		.where('handle', '=', handle)
-		.where('slug', eqOrIs(slug), slug)
-		.where('app', eqOrIs(app), app)
-		.where('appRoute', eqOrIs(appRoute), appRoute)
-		.where('appId', eqOrIs(appId), appId)
-		.executeTakeFirst();
+	if (!where) return NextResponse.rewrite(`${LINK_BASE_URL}/404`);
+
+	const link: LinkAnalyticsProps | undefined = await db.read.query.Links.findFirst({
+		where,
+		columns: {
+			// for analytics
+			id: true,
+			workspaceId: true,
+			domain: true,
+			key: true,
+			// for routing
+			url: true,
+			androidScheme: true,
+			appleScheme: true,
+			// remarketing
+			remarketing: true,
+			// custom meta tags
+			customMetaTags: true,
+		},
+	});
 
 	//* 🚧 handle route errors 🚧  *//
 	if (!link || !link.url) return NextResponse.rewrite(`${origin}/404`);
 
 	//* 📈 report event to analytics + remarketing *//
-	const { ip, geo } = req;
-	const { platform, ...deviceProps } = getDeviceData(req);
-	console.log('platform => ', platform);
-	const { browser, device, os, cpu, isBot, ua } = deviceProps;
+	const ip = parseIp(req);
+	const geo = parseGeo(req);
+	const ua = parseUserAgent(req);
+	const isBot = detectBot(req);
 
-	const analyticsInput = {
-		linkId: link.id,
-		teamId: link.teamId,
-		url: req.nextUrl.href,
-		// visitor info
-		ip: isLocal ? process.env.VISITOR_IP : ip ?? '',
-		ua: isLocal ? process.env.VISITOR_UA : ua,
-		referrer: req.referrer,
-		...geo,
-		browserName: browser.name,
-		browserVersion: browser.version,
-		cpu: cpu.architecture,
-		deviceModel: device.model,
-		deviceType: device.type,
-		deviceVendor: device.vendor,
+	const { referer, referer_url } = parseReferer(req);
+
+	const recordClickProps: RecordClickProps = {
+		// link data
+		link,
+		href: linkProps.href,
+		// visit data
+		type: linkProps.linkClickType,
+		ip,
+		geo,
+		ua,
 		isBot,
-		osName: os.name,
-		osVersion: os.version,
-	} satisfies AnalyticsInput;
+		referer,
+		referer_url,
+	};
 
-	const analyticsEndpoint = new URL(`/api/analytics`, req.url);
-
-	// don't wait for analytics to finish. get the link redirect out ASAP
-	// eslint-disable-next-line @typescript-eslint/no-floating-promises
-	zPost({
-		endpoint: analyticsEndpoint.href,
-		body: analyticsInput,
-		schema: linkAnalyticsSchema,
-	});
+	ev.waitUntil(recordLinkClick(recordClickProps)); // 👈 record click in background. Will continue after response is sent.
 
 	//* 🧭 route based on device platform and available schemes *//
 	// ➡️ 🍏 || 🤖 || 💻
+
+	if (isBot && link.customMetaTags) return NextResponse.redirect(`/_proxy/${link.id}`); // 👈 send bots to proxy for meta tags
+
 	return NextResponse.redirect(link.url); // 👈 just doing url redirects for now
-
-	// const scheme =
-	// 	platform === 'android' && androidScheme
-	// 		? androidScheme
-	// 		: platform === 'ios' && appleScheme
-	// 		? appleScheme
-	// 		: null;
-	// // ➡️ 🤖 (android scheme w/ built-in fallback url)
-	// if (platform === 'android' && androidScheme?.includes('S.browser_fallback_url'))
-	// 	return NextResponse.redirect(androidScheme);
-	// // ➡️ 💻 (web url)
-	// if (platform === 'web' || !scheme) return NextResponse.redirect(targetUrl);
-	// // ➡️ 📱 (🍏 || 🤖) (page with schema redirect & delayed fallback url)
-	// const { ogTitle, ogDescription, ogImage, favicon } = linkData;
-	// const mobileRedirectParams: MobileRedirectParams = {
-	// 	scheme: encodeURIComponent(scheme),
-	// 	fallback: encodeURIComponent(targetUrl),
-	// 	ogTitle: encodeURIComponent(ogTitle ?? ''),
-	// 	ogDescription: encodeURIComponent(ogDescription ?? ''),
-	// 	ogImage: encodeURIComponent(ogImage ?? ''),
-	// 	favicon: encodeURIComponent(favicon ?? ''),
-	// };
-	// const mobileRedirectParamsString = new URLSearchParams(mobileRedirectParams).toString();
-	// NextResponse.redirect(`${origin}/mobile/${mobileRedirectParamsString}`);
-
-	// //* 🎉 🎉 🎉 *//
 }

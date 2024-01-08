@@ -1,7 +1,7 @@
 import { FeatureCard } from '@barely/ui/components/feature-card';
 import { AnimateOnScroll } from '@barely/ui/elements/animate-on-scroll';
 import { Icon } from '@barely/ui/elements/icon';
-import { H1, H2, Lead, Text, Title } from '@barely/ui/elements/typography';
+import { HHero, Lead } from '@barely/ui/elements/typography';
 
 const iconClasses = 'h-14 w-14';
 
@@ -41,9 +41,9 @@ const items = [
 
 const WhatYouGet = () => {
 	return (
-		<div className='flex flex-col space-y-8 mt-20 text-center w-full items-center'>
+		<div className='flex flex-col space-y-4 mt-10 sm:mt-20 text-center w-full items-center'>
 			<AnimateOnScroll fade slideFrom='bottom'>
-				<Title className='mt-14'>What you get</Title>
+				<HHero className='mt-14'>What you get</HHero>
 			</AnimateOnScroll>
 			<AnimateOnScroll fade slideFrom='bottom'>
 				<Lead className=' max-w-2xl'>
@@ -53,12 +53,12 @@ const WhatYouGet = () => {
 				</Lead>
 			</AnimateOnScroll>
 
-			<div className='w-full overflow-hidden md:h-auto md:overflow-auto'>
-				<div className='flex snap-x snap-mandatory gap-6 overflow-x-scroll scroll-smooth  pb-12 md:flex-wrap md:overflow-hidden'>
+			<div className='w-full overflow-hidden pt-8 md:h-auto md:overflow-auto'>
+				<div className='flex snap-x snap-mandatory gap-6 overflow-x-scroll scroll-smooth pb-4 sm:pb-12 sm:grid sm:grid-cols-2 md:grid-cols-3'>
 					{items.map((item, index) => (
 						<div
 							key={index}
-							className='relative flex w-full shrink-0 snap-center flex-col '
+							className='relative flex w-full shrink-0 md:shrink-1 snap-center flex-col '
 						>
 							<FeatureCard
 								className='h-full'

@@ -3,8 +3,7 @@ export function TailwindIndicator() {
 
 	return (
 		// <div className=''>
-		<div className='fixed flex bottom-1 right-1 z-20 items-center justify-center rounded-full bg-neutral-500 bg-opacity-25 px-1 border-[1px] border-neutral-600 h-6 w-6 text-xs text-neutral-300'>
-			{/* <div className='block'>xs</div> */}
+		<div className='fixed bottom-1 right-1 z-20 flex h-6 w-6 items-center justify-center rounded-full border-[1px] border-b bg-background bg-opacity-25 px-1 text-xs text-neutral-500'>
 			<div className='block sm:hidden'>xs</div>
 			<div className='hidden sm:block md:hidden lg:hidden xl:hidden 2xl:hidden'>sm</div>
 			<div className='hidden md:block lg:hidden xl:hidden 2xl:hidden'>md</div>

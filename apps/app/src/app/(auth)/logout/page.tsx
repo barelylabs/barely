@@ -1,12 +1,13 @@
 import { redirect } from 'next/navigation';
 
-import { getServerSession } from '@barely/lib/auth';
+import { auth } from '@barely/server/auth';
 
 import Logout from './logout';
 
 async function LogoutPage() {
-	const user = await getServerSession();
-	if (!user) return redirect('/login');
+	const session = await auth();
+
+	if (!session) return redirect('/login');
 
 	return <Logout />;
 }

@@ -1,19 +1,16 @@
 import { Fragment } from 'react';
-
 import Image from 'next/image';
 import Link from 'next/link';
-
 import { Popover, Transition } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
-
-import logo from '../../../public/logos/logo+barely-io__transparent+light_txt.png';
+import logo from '@public/static/logo.png';
 
 export default function Header() {
 	return (
 		<Popover className=' w-full bg-slate-900'>
 			<div
 				id='topbar'
-				className='mx-auto flex max-w-5xl items-center justify-between py-8 px-6 md:justify-start md:space-x-10 lg:px-8'
+				className='mx-auto flex max-w-5xl items-center justify-between px-6 py-8 md:justify-start md:space-x-10 lg:px-8'
 			>
 				<Link href='/'>
 					<div className='relative flex h-[40px] w-48 justify-start lg:flex-1'>
@@ -81,7 +78,7 @@ export default function Header() {
 				>
 					{({ close }) => (
 						<div className='divide-y-2 divide-gray-50 rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5'>
-							<div className='px-5 pt-5 pb-6'>
+							<div className='px-5 pb-6 pt-5'>
 								<div className='flex items-center justify-between'>
 									<div>
 										{/* <img
@@ -99,7 +96,7 @@ export default function Header() {
 								</div>
 							</div>
 
-							<div className='py-6 px-5'>
+							<div className='px-5 py-6'>
 								<div className='grid grid-cols-1 gap-4 text-2xl'>
 									<a
 										href='#brand'

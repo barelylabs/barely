@@ -8,7 +8,7 @@ import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import { FieldAtom, useFieldActions, useFieldValue } from 'form-atoms';
 import { Check } from 'lucide-react';
 
-import { cn } from '@barely/lib/utils/edge/cn';
+import { cn } from '@barely/lib/utils/cn';
 
 import { FieldWrapperProps } from './field-wrapper';
 

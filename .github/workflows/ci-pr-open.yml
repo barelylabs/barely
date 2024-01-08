@@ -32,7 +32,7 @@ jobs:
           action: 'create-branch'
           overwrite-existing-branch: true
 
-  # turbo build (& cache), lint, typecheck
+  # turbo build (& cache), linteger, typecheck
 
   build-lint:
     name: Turbo Build
@@ -69,7 +69,7 @@ jobs:
       - name: Install deps (with cache)
         run: pnpm i && pnpm i -r
 
-      - name: Build, lint, and type-check
+      - name: Build, linteger, and type-check
         run: pnpm turbo build lint type-check
 
       - name: Push schema to db

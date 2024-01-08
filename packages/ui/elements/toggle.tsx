@@ -6,7 +6,7 @@ import * as TogglePrimitive from '@radix-ui/react-toggle';
 import { cva, VariantProps } from 'class-variance-authority';
 import { FieldAtom, useFieldActions, useFieldValue } from 'form-atoms';
 
-import { cn } from '@barely/lib/utils/edge/cn';
+import { cn } from '@barely/lib/utils/cn';
 
 import { FieldWrapper, FieldWrapperProps } from './field-wrapper';
 
