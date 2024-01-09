@@ -50,13 +50,8 @@ jobs:
 
           pnpm run db:generate
           pnpm run db:push
-
-      
-        uses: thollander/actions-comment-pull-request@v2
-        with:
-          message: |
-            Vercel Preview URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
-            Neon branch :elephant: : https://console.neon.tech/app/projects/${{ secrets.NEON_PROJECT_ID }}/branches/${{ steps.get-neon-branch-id.outputs.branch_id }}
+    outputs:
+      branch_id: ${{ steps.get-neon-branch-id.outputs.branch_id }}
 
   app-deploy:
     name: Vercel Preview Deployment - app.barely.io
@@ -65,12 +60,12 @@ jobs:
     env:
       VERCEL_ACCESS_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
-
-    - name: Install Vercel CLI
+    steps:
+      - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}      
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build App Project Artifacts
         run: |
@@ -82,8 +77,12 @@ jobs:
         run: echo preview_url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --) >> $GITHUB_OUTPUT
 
       - name: Comment on Pull Request
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            Vercel Preview URL :rocket: : ${{ steps.deploy-app.outputs.preview_url }}
+            Neon branch :elephant: : https://console.neon.tech/app/projects/${{ secrets.NEON_PROJECT_ID }}/branches/${{ needs.neon-preview.outputs.branch_id }}
 
   # link-deploy:
 
   # www-deploy:
-  
