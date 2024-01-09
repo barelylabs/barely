@@ -10,6 +10,7 @@
 	"scripts": {
 		"clean": "rm -rf .turbo node_modules",
 		"format": "prettier --check . --ignore-path ../../.gitignore",
+		"format:fix": "turbo format --continue -- --write --cache --cache-location node_modules/.cache/.prettiercache",
 		"lint": "eslint .",
 		"typecheck": "tsc --noEmit"
 	},

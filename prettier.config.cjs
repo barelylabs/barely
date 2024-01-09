@@ -13,7 +13,7 @@ module.exports = {
 	useTabs: true,
 	tabWidth: 2,
 	plugins: ['@ianvs/prettier-plugin-sort-imports', 'prettier-plugin-tailwindcss'],
-	tailwindConfig: './packages/config/tailwind',
+	tailwindConfig: './tooling/tailwind',
 	importOrder: [
 		'^(react/(.*)$)|^(react$)|^(react-native(.*)$)',
 		'^(next/(.*)$)|^(next$)',
