@@ -1,1 +1,2 @@
-module.exports = require('@barely/config/postcss.config.cjs');
+// @ts-expect-error - No types for postcss
+module.exports = require('@barely/tailwind-config/postcss');
