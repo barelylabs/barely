@@ -54,7 +54,7 @@ jobs:
       branch_id: ${{ steps.get-neon-branch-id.outputs.branch_id }}
 
   app-deploy:
-    name: Vercel Preview Deployment - app.barely.io
+    name: vercel preview - app.barely.io
     needs: [neon-preview]
     runs-on: ubuntu-latest
     env:
