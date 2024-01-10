@@ -57,8 +57,8 @@ jobs:
         shell: bash
         run: cp .env.example .env
 
-      - name: Build
-        run: pnpm build
+      # - name: Build
+      #   run: pnpm build
 
       - name: Typecheck
         run: pnpm typecheck

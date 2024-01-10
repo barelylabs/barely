@@ -50,6 +50,7 @@ jobs:
 
           pnpm run db:generate
           pnpm run db:push
+
     outputs:
       branch_id: ${{ steps.get-neon-branch-id.outputs.branch_id }}
 
