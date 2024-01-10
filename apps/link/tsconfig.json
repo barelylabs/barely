@@ -5,13 +5,19 @@
     "paths": {
       "~/*": ["./src/*"],
       "@static/*": ["./public/_static/*"],
-      "@barely/server/*": ["../../packages/lib/server/*"],
-      "@barely/api/*": ["../../packages/lib/server/api/*"],
-      "@barely/atoms/*": ["../../packages/lib/atoms/*"],
-      "@barely/hooks/*": ["../../packages/lib/hooks/*"],
-      "@barely/ui/*": ["../../packages/ui/*"],
-      "@barely/utils/*": ["../../packages/lib/utils/*"],
-      "@public/*": ["./public/*"]
+      "@public/*": ["./public/*"],
+      // "@barely/server/*": ["../../packages/lib/server/*"],
+      // "@barely/api/*": ["../../packages/lib/server/api/*"],
+      // "@barely/atoms/*": ["../../packages/lib/atoms/*"],
+      // "@barely/hooks/*": ["../../packages/lib/hooks/*"],
+      // "@barely/ui/*": ["../../packages/ui/*"],
+      // "@barely/utils/*": ["../../packages/lib/utils/*"],
+      "@barely/server/*": ["./node_modules/@barely/lib/server/*"],
+      "@barely/api/*": ["./node_modules/@barely/lib/server/api/*"],
+      "@barely/atoms/*": ["./node_modules/@barely/lib/atoms/*"],
+      "@barely/hooks/*": ["./node_modules/@barely/lib/hooks/*"],
+      "@barely/ui/*": ["./node_modules/@barely/ui/*"],
+      "@barely/utils/*": ["./node_modules/@barely/lib/utils/*"]
     },
     "plugins": [
       {

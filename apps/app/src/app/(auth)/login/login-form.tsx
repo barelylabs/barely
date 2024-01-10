@@ -3,9 +3,9 @@
 import type { z } from "zod";
 import { useState } from "react";
 import Link from "next/link";
-import { api } from "@barely/api/react";
 import { useZodForm } from "@barely/lib/hooks/use-zod-form";
-import { insertUserSchema } from "@barely/server/user.schema";
+import { api } from "@barely/lib/server/api/react";
+import { insertUserSchema } from "@barely/lib/server/user.schema";
 import { Text } from "@barely/ui/elements/typography";
 import { Form, SubmitButton } from "@barely/ui/forms";
 import { TextField } from "@barely/ui/forms/text-field";

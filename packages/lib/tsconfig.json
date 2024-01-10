@@ -1,9 +1,7 @@
 {
   "extends": "@barely/tsconfig/base.json",
   "compilerOptions": {
-    "target": "es2022",
-    "resolveJsonModule": true,
-    "jsx": "react-jsx"
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
   },
   "include": [
     "env",
