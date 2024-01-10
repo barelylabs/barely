@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./index.ts"
+    ".": "./index.ts",
+    "./postcss": "./postcss.cjs"
   },
   "license": "MIT",
   "files": [
