@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // import {
 // 	Toast,
@@ -32,4 +32,4 @@
 // 	);
 // }
 
-export { Toaster } from '@barely/toast/src/toaster';
+export { Toaster } from "@barely/toast/src/toaster";

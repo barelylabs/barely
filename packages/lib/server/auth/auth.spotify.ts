@@ -10,7 +10,7 @@
  */
 
 // import type { OAuth2Config, OAuthConfig, OAuthUserConfig } from '@auth/core/providers';
-import { OAuth2Config } from 'next-auth/providers';
+import type { OAuth2Config } from "next-auth/providers";
 // export interface SpotifyImage {
 // 	url: string;
 // }
@@ -23,7 +23,7 @@ import { OAuth2Config } from 'next-auth/providers';
 // 	images: SpotifyImage[];
 // }
 
-import { SpotifyProfile } from 'next-auth/providers/spotify';
+import type { SpotifyProfile } from "next-auth/providers/spotify";
 
 /**
  * Add Spotify login to your page.
@@ -75,39 +75,39 @@ import { SpotifyProfile } from 'next-auth/providers/spotify';
  */
 
 interface Options {
-	clientId: string;
-	clientSecret: string;
+  clientId: string;
+  clientSecret: string;
 }
 
 export default function Spotify<P extends SpotifyProfile>(
-	options: Options, // options: OAuthUserConfig<P>,
+  options: Options, // options: OAuthUserConfig<P>,
 ): OAuth2Config<P> {
-	return {
-		id: 'spotify',
-		name: 'Spotify',
-		type: 'oauth',
-		authorization:
-			'https://accounts.spotify.com/authorize?show_dialog=true&scope=ugc-image-upload,user-modify-playback-state,user-read-playback-state,user-modify-playback-state,user-read-currently-playing,user-follow-modify,user-follow-read,user-read-recently-played,user-read-playback-position,user-top-read,playlist-read-collaborative,playlist-modify-public,playlist-read-private,playlist-modify-private,app-remote-control,streaming,user-read-email,user-read-private,user-library-modify,user-library-read',
-		token: 'https://accounts.spotify.com/api/token',
-		userinfo: 'https://api.spotify.com/v1/me',
-		profile(profile) {
-			return {
-				id: profile.id,
-				name: profile.display_name,
-				email: profile.email,
-				image: profile.images?.[0]?.url,
-			};
-		},
-		style: {
-			logo: '/spotify.svg',
-			logoDark: '/spotify.svg',
-			bg: '#fff',
-			text: '#2ebd59',
-			bgDark: '#fff',
-			textDark: '#2ebd59',
-		},
-		checks: ['state'],
+  return {
+    id: "spotify",
+    name: "Spotify",
+    type: "oauth",
+    authorization:
+      "https://accounts.spotify.com/authorize?show_dialog=true&scope=ugc-image-upload,user-modify-playback-state,user-read-playback-state,user-modify-playback-state,user-read-currently-playing,user-follow-modify,user-follow-read,user-read-recently-played,user-read-playback-position,user-top-read,playlist-read-collaborative,playlist-modify-public,playlist-read-private,playlist-modify-private,app-remote-control,streaming,user-read-email,user-read-private,user-library-modify,user-library-read",
+    token: "https://accounts.spotify.com/api/token",
+    userinfo: "https://api.spotify.com/v1/me",
+    profile(profile) {
+      return {
+        id: profile.id,
+        name: profile.display_name,
+        email: profile.email,
+        image: profile.images?.[0]?.url,
+      };
+    },
+    style: {
+      logo: "/spotify.svg",
+      logoDark: "/spotify.svg",
+      bg: "#fff",
+      text: "#2ebd59",
+      bgDark: "#fff",
+      textDark: "#2ebd59",
+    },
+    checks: ["state"],
 
-		...options,
-	};
+    ...options,
+  };
 }

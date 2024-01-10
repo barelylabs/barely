@@ -125,23 +125,17 @@
       "indexes": {
         "AdCampaigns_workspace_idx": {
           "name": "AdCampaigns_workspace_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         },
         "AdCampaigns_campaign_idx": {
           "name": "AdCampaigns_campaign_idx",
-          "columns": [
-            "campaignId"
-          ],
+          "columns": ["campaignId"],
           "isUnique": false
         },
         "AdCampaigns_metaAdAccount_idx": {
           "name": "AdCampaigns_metaAdAccount_idx",
-          "columns": [
-            "metaAdAccountId"
-          ],
+          "columns": ["metaAdAccountId"],
           "isUnique": false
         }
       },
@@ -150,12 +144,8 @@
           "name": "AdCampaigns_workspaceId_Workspaces_id_fk",
           "tableFrom": "AdCampaigns",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -269,37 +259,27 @@
       "indexes": {
         "AdCreatives_workspace_idx": {
           "name": "AdCreatives_workspace_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         },
         "AdCreatives_metaAccount_idx": {
           "name": "AdCreatives_metaAccount_idx",
-          "columns": [
-            "metaAccountId"
-          ],
+          "columns": ["metaAccountId"],
           "isUnique": false
         },
         "AdCreatives_headline_idx": {
           "name": "AdCreatives_headline_idx",
-          "columns": [
-            "headlineId"
-          ],
+          "columns": ["headlineId"],
           "isUnique": false
         },
         "AdCreatives_link_idx": {
           "name": "AdCreatives_link_idx",
-          "columns": [
-            "linkId"
-          ],
+          "columns": ["linkId"],
           "isUnique": false
         },
         "AdCreatives_tiktokAccount_idx": {
           "name": "AdCreatives_tiktokAccount_idx",
-          "columns": [
-            "tiktokAccountId"
-          ],
+          "columns": ["tiktokAccountId"],
           "isUnique": false
         }
       },
@@ -308,12 +288,8 @@
           "name": "AdCreatives_workspaceId_Workspaces_id_fk",
           "tableFrom": "AdCreatives",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -457,23 +433,17 @@
       "indexes": {
         "AdSetCloneRecords_audience_idx": {
           "name": "AdSetCloneRecords_audience_idx",
-          "columns": [
-            "audienceId"
-          ],
+          "columns": ["audienceId"],
           "isUnique": false
         },
         "AdSetCloneRecord_adSetParent_idx": {
           "name": "AdSetCloneRecord_adSetParent_idx",
-          "columns": [
-            "adSetParentId"
-          ],
+          "columns": ["adSetParentId"],
           "isUnique": false
         },
         "AdSetCloneRecord_adSetChild_idx": {
           "name": "AdSetCloneRecord_adSetChild_idx",
-          "columns": [
-            "adSetChildId"
-          ],
+          "columns": ["adSetChildId"],
           "isUnique": false
         }
       },
@@ -482,12 +452,8 @@
           "name": "AdSetCloneRecords_workspaceId_Workspaces_id_fk",
           "tableFrom": "AdSetCloneRecords",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -495,20 +461,14 @@
       "compositePrimaryKeys": {
         "AdSetCloneRecords_workspaceId_adSetParentId_id": {
           "name": "AdSetCloneRecords_workspaceId_adSetParentId_id",
-          "columns": [
-            "workspaceId",
-            "adSetParentId",
-            "id"
-          ]
+          "columns": ["workspaceId", "adSetParentId", "id"]
         }
       },
       "uniqueConstraints": {
         "AdSetCloneRecords_id_unique": {
           "name": "AdSetCloneRecords_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       }
     },
@@ -575,16 +535,12 @@
       "indexes": {
         "AdSetUpdateRecords_adSet_idx": {
           "name": "AdSetUpdateRecords_adSet_idx",
-          "columns": [
-            "adSetId"
-          ],
+          "columns": ["adSetId"],
           "isUnique": false
         },
         "AdSetUpdateRecord_audience_idx": {
           "name": "AdSetUpdateRecord_audience_idx",
-          "columns": [
-            "audienceId"
-          ],
+          "columns": ["audienceId"],
           "isUnique": false
         }
       },
@@ -593,12 +549,8 @@
           "name": "AdSetUpdateRecords_workspaceId_Workspaces_id_fk",
           "tableFrom": "AdSetUpdateRecords",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -606,20 +558,14 @@
       "compositePrimaryKeys": {
         "AdSetUpdateRecords_workspaceId_adSetId_id": {
           "name": "AdSetUpdateRecords_workspaceId_adSetId_id",
-          "columns": [
-            "workspaceId",
-            "adSetId",
-            "id"
-          ]
+          "columns": ["workspaceId", "adSetId", "id"]
         }
       },
       "uniqueConstraints": {
         "AdSetUpdateRecords_id_unique": {
           "name": "AdSetUpdateRecords_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       }
     },
@@ -753,23 +699,17 @@
       "indexes": {
         "AdSets_workspace_idx": {
           "name": "AdSets_workspace_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         },
         "AdSets_adCampaign_idx": {
           "name": "AdSets_adCampaign_idx",
-          "columns": [
-            "adCampaignId"
-          ],
+          "columns": ["adCampaignId"],
           "isUnique": false
         },
         "AdSets_audience_idx": {
           "name": "AdSets_audience_idx",
-          "columns": [
-            "audienceId"
-          ],
+          "columns": ["audienceId"],
           "isUnique": false
         }
       },
@@ -778,12 +718,8 @@
           "name": "AdSets_workspaceId_Workspaces_id_fk",
           "tableFrom": "AdSets",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -867,23 +803,17 @@
       "indexes": {
         "Ads_workspace_idx": {
           "name": "Ads_workspace_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         },
         "Ads_adSet_idx": {
           "name": "Ads_adSet_idx",
-          "columns": [
-            "adSetId"
-          ],
+          "columns": ["adSetId"],
           "isUnique": false
         },
         "Ads_creative_idx": {
           "name": "Ads_creative_idx",
-          "columns": [
-            "adCreativeId"
-          ],
+          "columns": ["adCreativeId"],
           "isUnique": false
         }
       },
@@ -892,12 +822,8 @@
           "name": "Ads_workspaceId_Workspaces_id_fk",
           "tableFrom": "Ads",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -905,12 +831,8 @@
           "name": "Ads_adSetId_AdSets_id_fk",
           "tableFrom": "Ads",
           "tableTo": "AdSets",
-          "columnsFrom": [
-            "adSetId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["adSetId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -918,12 +840,8 @@
           "name": "Ads_adCreativeId_AdCreatives_id_fk",
           "tableFrom": "Ads",
           "tableTo": "AdCreatives",
-          "columnsFrom": [
-            "adCreativeId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["adCreativeId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -963,10 +881,7 @@
       "indexes": {
         "AnalyticsEndpoints_platform_id_idx": {
           "name": "AnalyticsEndpoints_platform_id_idx",
-          "columns": [
-            "platform",
-            "id"
-          ],
+          "columns": ["platform", "id"],
           "isUnique": true
         }
       },
@@ -975,12 +890,8 @@
           "name": "AnalyticsEndpoints_workspaceId_Workspaces_id_fk",
           "tableFrom": "AnalyticsEndpoints",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -988,10 +899,7 @@
       "compositePrimaryKeys": {
         "AnalyticsEndpoints_platform_id": {
           "name": "AnalyticsEndpoints_platform_id",
-          "columns": [
-            "platform",
-            "id"
-          ]
+          "columns": ["platform", "id"]
         }
       },
       "uniqueConstraints": {}
@@ -1054,9 +962,7 @@
       "indexes": {
         "AudienceDemos_workspace_idx": {
           "name": "AudienceDemos_workspace_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         }
       },
@@ -1065,12 +971,8 @@
           "name": "AudienceDemos_workspaceId_Workspaces_id_fk",
           "tableFrom": "AudienceDemos",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1183,9 +1085,7 @@
       "indexes": {
         "AudienceGeoGroups_workspace_idx": {
           "name": "AudienceGeoGroups_workspace_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         }
       },
@@ -1194,12 +1094,8 @@
           "name": "AudienceGeoGroups_workspaceId_Workspaces_id_fk",
           "tableFrom": "AudienceGeoGroups",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1229,10 +1125,7 @@
       "compositePrimaryKeys": {
         "_AudienceCountries_To_AudienceGeoGroups_audienceCountryId_audienceGeoGroupId": {
           "name": "_AudienceCountries_To_AudienceGeoGroups_audienceCountryId_audienceGeoGroupId",
-          "columns": [
-            "audienceCountryId",
-            "audienceGeoGroupId"
-          ]
+          "columns": ["audienceCountryId", "audienceGeoGroupId"]
         }
       },
       "uniqueConstraints": {}
@@ -1259,10 +1152,7 @@
       "compositePrimaryKeys": {
         "_AudienceCountries_To_Audiences_audienceCountryId_audienceId": {
           "name": "_AudienceCountries_To_Audiences_audienceCountryId_audienceId",
-          "columns": [
-            "audienceCountryId",
-            "audienceId"
-          ]
+          "columns": ["audienceCountryId", "audienceId"]
         }
       },
       "uniqueConstraints": {}
@@ -1289,10 +1179,7 @@
       "compositePrimaryKeys": {
         "_AudienceGeoGroups_To_Audiences_audienceGeoGroupId_audienceId": {
           "name": "_AudienceGeoGroups_To_Audiences_audienceGeoGroupId_audienceId",
-          "columns": [
-            "audienceGeoGroupId",
-            "audienceId"
-          ]
+          "columns": ["audienceGeoGroupId", "audienceId"]
         }
       },
       "uniqueConstraints": {}
@@ -1350,9 +1237,7 @@
       "indexes": {
         "AudienceInterestGroups_workspace_idx": {
           "name": "AudienceInterestGroups_workspace_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         }
       },
@@ -1361,12 +1246,8 @@
           "name": "AudienceInterestGroups_workspaceId_Workspaces_id_fk",
           "tableFrom": "AudienceInterestGroups",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1606,9 +1487,7 @@
       "indexes": {
         "AudienceVidViewsGroups_workspace_idx": {
           "name": "AudienceVidViewsGroups_workspace_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         }
       },
@@ -1617,12 +1496,8 @@
           "name": "AudienceVidViewsGroups_workspaceId_Workspaces_id_fk",
           "tableFrom": "AudienceVidViewsGroups",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1728,9 +1603,7 @@
       "indexes": {
         "Audiences_workspace_idx": {
           "name": "Audiences_workspace_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         }
       },
@@ -1739,12 +1612,8 @@
           "name": "Audiences_workspaceId_Workspaces_id_fk",
           "tableFrom": "Audiences",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1834,9 +1703,7 @@
       "indexes": {
         "BioButtons_workspace_idx": {
           "name": "BioButtons_workspace_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         }
       },
@@ -1845,12 +1712,8 @@
           "name": "BioButtons_workspaceId_Workspaces_id_fk",
           "tableFrom": "BioButtons",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -1858,12 +1721,8 @@
           "name": "BioButtons_linkId_Links_id_fk",
           "tableFrom": "BioButtons",
           "tableTo": "Links",
-          "columnsFrom": [
-            "linkId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["linkId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -1871,12 +1730,8 @@
           "name": "BioButtons_formId_Forms_id_fk",
           "tableFrom": "BioButtons",
           "tableTo": "Forms",
-          "columnsFrom": [
-            "formId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["formId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -2022,16 +1877,12 @@
       "indexes": {
         "Bios_workspace_idx": {
           "name": "Bios_workspace_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         },
         "Bios_handle_idx": {
           "name": "Bios_handle_idx",
-          "columns": [
-            "handle"
-          ],
+          "columns": ["handle"],
           "isUnique": false
         }
       },
@@ -2040,12 +1891,8 @@
           "name": "Bios_workspaceId_Workspaces_id_fk",
           "tableFrom": "Bios",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -2053,12 +1900,8 @@
           "name": "Bios_handle_Workspaces_handle_fk",
           "tableFrom": "Bios",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "handle"
-          ],
-          "columnsTo": [
-            "handle"
-          ],
+          "columnsFrom": ["handle"],
+          "columnsTo": ["handle"],
           "onDelete": "no action",
           "onUpdate": "cascade"
         }
@@ -2094,10 +1937,7 @@
       "compositePrimaryKeys": {
         "_BioButtons_To_Bios_bioId_bioButtonId": {
           "name": "_BioButtons_To_Bios_bioId_bioButtonId",
-          "columns": [
-            "bioId",
-            "bioButtonId"
-          ]
+          "columns": ["bioId", "bioButtonId"]
         }
       },
       "uniqueConstraints": {}
@@ -2157,12 +1997,8 @@
           "name": "CampaignUpdateRecords_campaignId_Campaigns_id_fk",
           "tableFrom": "CampaignUpdateRecords",
           "tableTo": "Campaigns",
-          "columnsFrom": [
-            "campaignId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["campaignId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2170,12 +2006,8 @@
           "name": "CampaignUpdateRecords_creatorId_Users_id_fk",
           "tableFrom": "CampaignUpdateRecords",
           "tableTo": "Users",
-          "columnsFrom": [
-            "creatorId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["creatorId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2183,19 +2015,14 @@
       "compositePrimaryKeys": {
         "CampaignUpdateRecords_campaignId_id": {
           "name": "CampaignUpdateRecords_campaignId_id",
-          "columns": [
-            "campaignId",
-            "id"
-          ]
+          "columns": ["campaignId", "id"]
         }
       },
       "uniqueConstraints": {
         "CampaignUpdateRecords_id_unique": {
           "name": "CampaignUpdateRecords_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       }
     },
@@ -2287,23 +2114,17 @@
       "indexes": {
         "Campaigns_workspace_idx": {
           "name": "Campaigns_workspace_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         },
         "Campaigns_track_idx": {
           "name": "Campaigns_track_idx",
-          "columns": [
-            "trackId"
-          ],
+          "columns": ["trackId"],
           "isUnique": false
         },
         "Campaigns_playlist_idx": {
           "name": "Campaigns_playlist_idx",
-          "columns": [
-            "playlistId"
-          ],
+          "columns": ["playlistId"],
           "isUnique": false
         }
       },
@@ -2312,12 +2133,8 @@
           "name": "Campaigns_workspaceId_Workspaces_id_fk",
           "tableFrom": "Campaigns",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -2383,9 +2200,7 @@
       "indexes": {
         "EventReports_event_idx": {
           "name": "EventReports_event_idx",
-          "columns": [
-            "eventId"
-          ],
+          "columns": ["eventId"],
           "isUnique": false
         }
       },
@@ -2463,38 +2278,27 @@
       "indexes": {
         "Events_bio_idx": {
           "name": "Events_bio_idx",
-          "columns": [
-            "bioId"
-          ],
+          "columns": ["bioId"],
           "isUnique": false
         },
         "Events_bio_bioButton_idx": {
           "name": "Events_bio_bioButton_idx",
-          "columns": [
-            "bioId",
-            "bioButtonId"
-          ],
+          "columns": ["bioId", "bioButtonId"],
           "isUnique": false
         },
         "Events_form_idx": {
           "name": "Events_form_idx",
-          "columns": [
-            "formId"
-          ],
+          "columns": ["formId"],
           "isUnique": false
         },
         "Events_link_idx": {
           "name": "Events_link_idx",
-          "columns": [
-            "linkId"
-          ],
+          "columns": ["linkId"],
           "isUnique": false
         },
         "Events_visitorSession_idx": {
           "name": "Events_visitorSession_idx",
-          "columns": [
-            "visitorSessionId"
-          ],
+          "columns": ["visitorSessionId"],
           "isUnique": false
         }
       },
@@ -2548,9 +2352,7 @@
       "indexes": {
         "ExternalWebsite_workspace_idx": {
           "name": "ExternalWebsite_workspace_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         }
       },
@@ -2559,12 +2361,8 @@
           "name": "ExternalWebsite_workspaceId_Workspaces_id_fk",
           "tableFrom": "ExternalWebsite",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -2714,9 +2512,7 @@
       "indexes": {
         "Files_workspace_idx": {
           "name": "Files_workspace_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         }
       },
@@ -2725,12 +2521,8 @@
           "name": "Files_workspaceId_Workspaces_id_fk",
           "tableFrom": "Files",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -2805,12 +2597,8 @@
           "name": "FormResponses_formId_Forms_id_fk",
           "tableFrom": "FormResponses",
           "tableTo": "Forms",
-          "columnsFrom": [
-            "formId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["formId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2818,19 +2606,14 @@
       "compositePrimaryKeys": {
         "FormResponses_formId_id": {
           "name": "FormResponses_formId_id",
-          "columns": [
-            "formId",
-            "id"
-          ]
+          "columns": ["formId", "id"]
         }
       },
       "uniqueConstraints": {
         "FormResponses_id_unique": {
           "name": "FormResponses_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       }
     },
@@ -2914,9 +2697,7 @@
       "indexes": {
         "Forms_workspace_idx": {
           "name": "Forms_workspace_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         }
       },
@@ -2925,12 +2706,8 @@
           "name": "Forms_workspaceId_Workspaces_id_fk",
           "tableFrom": "Forms",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -2974,9 +2751,7 @@
         "Genres_name_unique": {
           "name": "Genres_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       }
     },
@@ -3000,9 +2775,7 @@
       "indexes": {
         "_PlaylistsToGenres_genre_idx": {
           "name": "_PlaylistsToGenres_genre_idx",
-          "columns": [
-            "genreName"
-          ],
+          "columns": ["genreName"],
           "isUnique": false
         }
       },
@@ -3011,12 +2784,8 @@
           "name": "_Playlists_To_Genres_playlistId_Playlists_id_fk",
           "tableFrom": "_Playlists_To_Genres",
           "tableTo": "Playlists",
-          "columnsFrom": [
-            "playlistId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["playlistId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3024,12 +2793,8 @@
           "name": "_Playlists_To_Genres_genreName_Genres_id_fk",
           "tableFrom": "_Playlists_To_Genres",
           "tableTo": "Genres",
-          "columnsFrom": [
-            "genreName"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["genreName"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3037,10 +2802,7 @@
       "compositePrimaryKeys": {
         "_Playlists_To_Genres_playlistId_genreName": {
           "name": "_Playlists_To_Genres_playlistId_genreName",
-          "columns": [
-            "playlistId",
-            "genreName"
-          ]
+          "columns": ["playlistId", "genreName"]
         }
       },
       "uniqueConstraints": {}
@@ -3065,9 +2827,7 @@
       "indexes": {
         "_TracksToGenres_genre_idx": {
           "name": "_TracksToGenres_genre_idx",
-          "columns": [
-            "genreId"
-          ],
+          "columns": ["genreId"],
           "isUnique": false
         }
       },
@@ -3076,12 +2836,8 @@
           "name": "_Tracks_To_Genres_trackId_Tracks_id_fk",
           "tableFrom": "_Tracks_To_Genres",
           "tableTo": "Tracks",
-          "columnsFrom": [
-            "trackId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["trackId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3089,12 +2845,8 @@
           "name": "_Tracks_To_Genres_genreId_Genres_id_fk",
           "tableFrom": "_Tracks_To_Genres",
           "tableTo": "Genres",
-          "columnsFrom": [
-            "genreId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["genreId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3102,10 +2854,7 @@
       "compositePrimaryKeys": {
         "_Tracks_To_Genres_trackId_genreId": {
           "name": "_Tracks_To_Genres_trackId_genreId",
-          "columns": [
-            "trackId",
-            "genreId"
-          ]
+          "columns": ["trackId", "genreId"]
         }
       },
       "uniqueConstraints": {}
@@ -3288,49 +3037,32 @@
       "indexes": {
         "Link_workspace_idx": {
           "name": "Link_workspace_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         },
         "Link_bioId_key": {
           "name": "Link_bioId_key",
-          "columns": [
-            "bioId"
-          ],
+          "columns": ["bioId"],
           "isUnique": true
         },
         "Link_appLinkId_key": {
           "name": "Link_appLinkId_key",
-          "columns": [
-            "appLinkId"
-          ],
+          "columns": ["appLinkId"],
           "isUnique": true
         },
         "Link_id_app_key": {
           "name": "Link_id_app_key",
-          "columns": [
-            "id",
-            "appId"
-          ],
+          "columns": ["id", "appId"],
           "isUnique": true
         },
         "Link_handle_domain_app_slug_key": {
           "name": "Link_handle_domain_app_slug_key",
-          "columns": [
-            "handle",
-            "domain",
-            "appId",
-            "slug"
-          ],
+          "columns": ["handle", "domain", "appId", "slug"],
           "isUnique": true
         },
         "Link_socialForTeamId_appId_key": {
           "name": "Link_socialForTeamId_appId_key",
-          "columns": [
-            "socialForTeamId",
-            "appId"
-          ],
+          "columns": ["socialForTeamId", "appId"],
           "isUnique": true
         }
       },
@@ -3339,12 +3071,8 @@
           "name": "Links_workspaceId_Workspaces_id_fk",
           "tableFrom": "Links",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -3506,16 +3234,12 @@
       "indexes": {
         "PlaylistCoverRenders_workspace_idx": {
           "name": "PlaylistCoverRenders_workspace_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         },
         "PlaylistCoverRenders_playlist_idx": {
           "name": "PlaylistCoverRenders_playlist_idx",
-          "columns": [
-            "playlistId"
-          ],
+          "columns": ["playlistId"],
           "isUnique": false
         }
       },
@@ -3524,12 +3248,8 @@
           "name": "PlaylistCoverRenders_workspaceId_Workspaces_id_fk",
           "tableFrom": "PlaylistCoverRenders",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -3613,16 +3333,12 @@
       "indexes": {
         "PlaylistPitchReviews_campaign_idx": {
           "name": "PlaylistPitchReviews_campaign_idx",
-          "columns": [
-            "campaignId"
-          ],
+          "columns": ["campaignId"],
           "isUnique": false
         },
         "PlaylistPitchReviews_reviewer_idx": {
           "name": "PlaylistPitchReviews_reviewer_idx",
-          "columns": [
-            "reviewerId"
-          ],
+          "columns": ["reviewerId"],
           "isUnique": false
         }
       },
@@ -3721,9 +3437,7 @@
       "indexes": {
         "PlaylistPlacements_pitchReview_idx": {
           "name": "PlaylistPlacements_pitchReview_idx",
-          "columns": [
-            "pitchReviewId"
-          ],
+          "columns": ["pitchReviewId"],
           "isUnique": false
         }
       },
@@ -3732,12 +3446,8 @@
           "name": "PlaylistPlacements_trackId_Tracks_id_fk",
           "tableFrom": "PlaylistPlacements",
           "tableTo": "Tracks",
-          "columnsFrom": [
-            "trackId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["trackId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3745,12 +3455,8 @@
           "name": "PlaylistPlacements_playlistId_Playlists_id_fk",
           "tableFrom": "PlaylistPlacements",
           "tableTo": "Playlists",
-          "columnsFrom": [
-            "playlistId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["playlistId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3936,9 +3642,7 @@
       "indexes": {
         "Playlists_workspace_idx": {
           "name": "Playlists_workspace_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         }
       },
@@ -3947,12 +3651,8 @@
           "name": "Playlists_workspaceId_Workspaces_id_fk",
           "tableFrom": "Playlists",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -3960,12 +3660,8 @@
           "name": "Playlists_curatorId_Users_id_fk",
           "tableFrom": "Playlists",
           "tableTo": "Users",
-          "columnsFrom": [
-            "curatorId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["curatorId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3973,12 +3669,8 @@
           "name": "Playlists_coverId_Files_id_fk",
           "tableFrom": "Playlists",
           "tableTo": "Files",
-          "columnsFrom": [
-            "coverId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["coverId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3986,12 +3678,8 @@
           "name": "Playlists_spotifyLinkId_Links_id_fk",
           "tableFrom": "Playlists",
           "tableTo": "Links",
-          "columnsFrom": [
-            "spotifyLinkId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["spotifyLinkId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3999,12 +3687,8 @@
           "name": "Playlists_appleMusicLinkId_Links_id_fk",
           "tableFrom": "Playlists",
           "tableTo": "Links",
-          "columnsFrom": [
-            "appleMusicLinkId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["appleMusicLinkId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4012,12 +3696,8 @@
           "name": "Playlists_deezerLinkId_Links_id_fk",
           "tableFrom": "Playlists",
           "tableTo": "Links",
-          "columnsFrom": [
-            "deezerLinkId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["deezerLinkId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4025,12 +3705,8 @@
           "name": "Playlists_soundCloudLinkId_Links_id_fk",
           "tableFrom": "Playlists",
           "tableTo": "Links",
-          "columnsFrom": [
-            "soundCloudLinkId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["soundCloudLinkId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4038,12 +3714,8 @@
           "name": "Playlists_tidalLinkId_Links_id_fk",
           "tableFrom": "Playlists",
           "tableTo": "Links",
-          "columnsFrom": [
-            "tidalLinkId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tidalLinkId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4051,12 +3723,8 @@
           "name": "Playlists_youtubeLinkId_Links_id_fk",
           "tableFrom": "Playlists",
           "tableTo": "Links",
-          "columnsFrom": [
-            "youtubeLinkId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["youtubeLinkId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4066,9 +3734,7 @@
         "Playlists_spotifyId_unique": {
           "name": "Playlists_spotifyId_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "spotifyId"
-          ]
+          "columns": ["spotifyId"]
         }
       }
     },
@@ -4094,10 +3760,7 @@
       "compositePrimaryKeys": {
         "_Playlists_To_ProviderAccounts_playlistId_providerAccountId": {
           "name": "_Playlists_To_ProviderAccounts_playlistId_providerAccountId",
-          "columns": [
-            "playlistId",
-            "providerAccountId"
-          ]
+          "columns": ["playlistId", "providerAccountId"]
         }
       },
       "uniqueConstraints": {}
@@ -4212,17 +3875,12 @@
       "indexes": {
         "ProviderAccounts_provider_providerAccountId_idx": {
           "name": "ProviderAccounts_provider_providerAccountId_idx",
-          "columns": [
-            "provider",
-            "providerAccountId"
-          ],
+          "columns": ["provider", "providerAccountId"],
           "isUnique": true
         },
         "ProviderAccounts_workspace_idx": {
           "name": "ProviderAccounts_workspace_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         }
       },
@@ -4231,12 +3889,8 @@
           "name": "ProviderAccounts_userId_Users_id_fk",
           "tableFrom": "ProviderAccounts",
           "tableTo": "Users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -4244,12 +3898,8 @@
           "name": "ProviderAccounts_workspaceId_Workspaces_id_fk",
           "tableFrom": "ProviderAccounts",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4295,24 +3945,17 @@
       "indexes": {
         "ProviderSubAccounts_parentAccount_idx": {
           "name": "ProviderSubAccounts_parentAccount_idx",
-          "columns": [
-            "userId"
-          ],
+          "columns": ["userId"],
           "isUnique": false
         },
         "ProviderSubAccounts_type_accountId_idx": {
           "name": "ProviderSubAccounts_type_accountId_idx",
-          "columns": [
-            "type",
-            "providerId"
-          ],
+          "columns": ["type", "providerId"],
           "isUnique": true
         },
         "ProviderSubAccounts_workspace_idx": {
           "name": "ProviderSubAccounts_workspace_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         }
       },
@@ -4321,12 +3964,8 @@
           "name": "ProviderSubAccounts_workspaceId_Workspaces_id_fk",
           "tableFrom": "ProviderSubAccounts",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -4334,12 +3973,8 @@
           "name": "ProviderSubAccounts_userId_Workspaces_id_fk",
           "tableFrom": "ProviderSubAccounts",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -4519,30 +4154,22 @@
       "indexes": {
         "Stat_adId_idx": {
           "name": "Stat_adId_idx",
-          "columns": [
-            "adId"
-          ],
+          "columns": ["adId"],
           "isUnique": false
         },
         "Stat_accountId_idx": {
           "name": "Stat_accountId_idx",
-          "columns": [
-            "providerAccountId"
-          ],
+          "columns": ["providerAccountId"],
           "isUnique": false
         },
         "Stat_playlistId_idx": {
           "name": "Stat_playlistId_idx",
-          "columns": [
-            "playlistId"
-          ],
+          "columns": ["playlistId"],
           "isUnique": false
         },
         "Stat_trackId_idx": {
           "name": "Stat_trackId_idx",
-          "columns": [
-            "trackId"
-          ],
+          "columns": ["trackId"],
           "isUnique": false
         }
       },
@@ -4551,12 +4178,8 @@
           "name": "Stats_playlistId_Playlists_id_fk",
           "tableFrom": "Stats",
           "tableTo": "Playlists",
-          "columnsFrom": [
-            "playlistId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["playlistId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4564,12 +4187,8 @@
           "name": "Stats_trackId_Tracks_id_fk",
           "tableFrom": "Stats",
           "tableTo": "Tracks",
-          "columnsFrom": [
-            "trackId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["trackId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4615,16 +4234,12 @@
       "indexes": {
         "TrackRenders_workspace_idx": {
           "name": "TrackRenders_workspace_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         },
         "TrackRenders_track_idx": {
           "name": "TrackRenders_track_idx",
-          "columns": [
-            "trackId"
-          ],
+          "columns": ["trackId"],
           "isUnique": false
         }
       },
@@ -4633,12 +4248,8 @@
           "name": "TrackRenders_workspaceId_Workspaces_id_fk",
           "tableFrom": "TrackRenders",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -4800,17 +4411,12 @@
       "indexes": {
         "Tracks_workspaceId_key": {
           "name": "Tracks_workspaceId_key",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         },
         "Tracks_workspace_trackName_key": {
           "name": "Tracks_workspace_trackName_key",
-          "columns": [
-            "workspaceId",
-            "name"
-          ],
+          "columns": ["workspaceId", "name"],
           "isUnique": true
         }
       },
@@ -4819,12 +4425,8 @@
           "name": "Tracks_workspaceId_Workspaces_id_fk",
           "tableFrom": "Tracks",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -4834,107 +4436,77 @@
         "Tracks_isrc_unique": {
           "name": "Tracks_isrc_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "isrc"
-          ]
+          "columns": ["isrc"]
         },
         "Tracks_appleMusicId_unique": {
           "name": "Tracks_appleMusicId_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "appleMusicId"
-          ]
+          "columns": ["appleMusicId"]
         },
         "Tracks_deezerId_unique": {
           "name": "Tracks_deezerId_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "deezerId"
-          ]
+          "columns": ["deezerId"]
         },
         "Tracks_soundcloudId_unique": {
           "name": "Tracks_soundcloudId_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "soundcloudId"
-          ]
+          "columns": ["soundcloudId"]
         },
         "Tracks_spotifyId_unique": {
           "name": "Tracks_spotifyId_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "spotifyId"
-          ]
+          "columns": ["spotifyId"]
         },
         "Tracks_tidalId_unique": {
           "name": "Tracks_tidalId_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "tidalId"
-          ]
+          "columns": ["tidalId"]
         },
         "Tracks_youtubeId_unique": {
           "name": "Tracks_youtubeId_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "youtubeId"
-          ]
+          "columns": ["youtubeId"]
         },
         "Tracks_masterMp3Id_unique": {
           "name": "Tracks_masterMp3Id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "masterMp3Id"
-          ]
+          "columns": ["masterMp3Id"]
         },
         "Tracks_masterWavId_unique": {
           "name": "Tracks_masterWavId_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "masterWavId"
-          ]
+          "columns": ["masterWavId"]
         },
         "Tracks_appleMusicLinkId_unique": {
           "name": "Tracks_appleMusicLinkId_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "appleMusicLinkId"
-          ]
+          "columns": ["appleMusicLinkId"]
         },
         "Tracks_deezerLinkId_unique": {
           "name": "Tracks_deezerLinkId_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "deezerLinkId"
-          ]
+          "columns": ["deezerLinkId"]
         },
         "Tracks_soundcloudLinkId_unique": {
           "name": "Tracks_soundcloudLinkId_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "soundcloudLinkId"
-          ]
+          "columns": ["soundcloudLinkId"]
         },
         "Tracks_spotifyLinkId_unique": {
           "name": "Tracks_spotifyLinkId_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "spotifyLinkId"
-          ]
+          "columns": ["spotifyLinkId"]
         },
         "Tracks_tidalLinkId_unique": {
           "name": "Tracks_tidalLinkId_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "tidalLinkId"
-          ]
+          "columns": ["tidalLinkId"]
         },
         "Tracks_youtubeLinkId_unique": {
           "name": "Tracks_youtubeLinkId_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "youtubeLinkId"
-          ]
+          "columns": ["youtubeLinkId"]
         }
       }
     },
@@ -5030,9 +4602,7 @@
       "indexes": {
         "LineItems_campaign_idx": {
           "name": "LineItems_campaign_idx",
-          "columns": [
-            "campaignId"
-          ],
+          "columns": ["campaignId"],
           "isUnique": false
         }
       },
@@ -5041,12 +4611,8 @@
           "name": "TransactionLineItems_transactionId_Transactions_id_fk",
           "tableFrom": "TransactionLineItems",
           "tableTo": "Transactions",
-          "columnsFrom": [
-            "transactionId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["transactionId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -5054,19 +4620,14 @@
       "compositePrimaryKeys": {
         "TransactionLineItems_transactionId_id": {
           "name": "TransactionLineItems_transactionId_id",
-          "columns": [
-            "transactionId",
-            "id"
-          ]
+          "columns": ["transactionId", "id"]
         }
       },
       "uniqueConstraints": {
         "TransactionLineItems_id_unique": {
           "name": "TransactionLineItems_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       }
     },
@@ -5177,16 +4738,12 @@
       "indexes": {
         "Transactions_workspace_idx": {
           "name": "Transactions_workspace_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         },
         "Transactions_createdBy_idx": {
           "name": "Transactions_createdBy_idx",
-          "columns": [
-            "createdById"
-          ],
+          "columns": ["createdById"],
           "isUnique": false
         }
       },
@@ -5195,12 +4752,8 @@
           "name": "Transactions_workspaceId_Workspaces_id_fk",
           "tableFrom": "Transactions",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -5237,12 +4790,8 @@
           "name": "UserSessions_userId_Users_id_fk",
           "tableFrom": "UserSessions",
           "tableTo": "Users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -5371,23 +4920,17 @@
       "indexes": {
         "Users_email_key": {
           "name": "Users_email_key",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         },
         "Users_phone_key": {
           "name": "Users_phone_key",
-          "columns": [
-            "phone"
-          ],
+          "columns": ["phone"],
           "isUnique": true
         },
         "Users_personalWorkspaceId_key": {
           "name": "Users_personalWorkspaceId_key",
-          "columns": [
-            "personalWorkspaceId"
-          ],
+          "columns": ["personalWorkspaceId"],
           "isUnique": true
         }
       },
@@ -5396,12 +4939,8 @@
           "name": "Users_personalWorkspaceId_Workspaces_id_fk",
           "tableFrom": "Users",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "personalWorkspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["personalWorkspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -5409,12 +4948,8 @@
           "name": "Users_handle_Workspaces_handle_fk",
           "tableFrom": "Users",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "handle"
-          ],
-          "columnsTo": [
-            "handle"
-          ],
+          "columnsFrom": ["handle"],
+          "columnsTo": ["handle"],
           "onDelete": "no action",
           "onUpdate": "cascade"
         },
@@ -5422,12 +4957,8 @@
           "name": "Users_image_Workspaces_imageUrl_fk",
           "tableFrom": "Users",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "image"
-          ],
-          "columnsTo": [
-            "imageUrl"
-          ],
+          "columnsFrom": ["image"],
+          "columnsTo": ["imageUrl"],
           "onDelete": "no action",
           "onUpdate": "cascade"
         }
@@ -5465,12 +4996,8 @@
           "name": "_Users_To_Workspaces_workspaceId_Workspaces_id_fk",
           "tableFrom": "_Users_To_Workspaces",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -5478,12 +5005,8 @@
           "name": "_Users_To_Workspaces_userId_Users_id_fk",
           "tableFrom": "_Users_To_Workspaces",
           "tableTo": "Users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -5491,10 +5014,7 @@
       "compositePrimaryKeys": {
         "_Users_To_Workspaces_workspaceId_userId": {
           "name": "_Users_To_Workspaces_workspaceId_userId",
-          "columns": [
-            "workspaceId",
-            "userId"
-          ]
+          "columns": ["workspaceId", "userId"]
         }
       },
       "uniqueConstraints": {}
@@ -5527,10 +5047,7 @@
       "compositePrimaryKeys": {
         "VerificationTokens_identifier_token": {
           "name": "VerificationTokens_identifier_token",
-          "columns": [
-            "identifier",
-            "token"
-          ]
+          "columns": ["identifier", "token"]
         }
       },
       "uniqueConstraints": {}
@@ -5719,37 +5236,27 @@
       "indexes": {
         "VidRenders_workspace_idx": {
           "name": "VidRenders_workspace_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         },
         "VidRenders_createdBy_idx": {
           "name": "VidRenders_createdBy_idx",
-          "columns": [
-            "createdById"
-          ],
+          "columns": ["createdById"],
           "isUnique": false
         },
         "VidRenders_trackRender_idx": {
           "name": "VidRenders_trackRender_idx",
-          "columns": [
-            "trackRenderId"
-          ],
+          "columns": ["trackRenderId"],
           "isUnique": false
         },
         "VidRenders_parentVid_idx": {
           "name": "VidRenders_parentVid_idx",
-          "columns": [
-            "parentVidId"
-          ],
+          "columns": ["parentVidId"],
           "isUnique": false
         },
         "VidRenders_adCampaign_idx": {
           "name": "VidRenders_adCampaign_idx",
-          "columns": [
-            "adCampaignId"
-          ],
+          "columns": ["adCampaignId"],
           "isUnique": false
         }
       },
@@ -5758,12 +5265,8 @@
           "name": "VidRenders_workspaceId_Workspaces_id_fk",
           "tableFrom": "VidRenders",
           "tableTo": "Workspaces",
-          "columnsFrom": [
-            "workspaceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspaceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -5913,9 +5416,7 @@
       "indexes": {
         "VisitorSessions_externalWebsite_idx": {
           "name": "VisitorSessions_externalWebsite_idx",
-          "columns": [
-            "externalWebsiteId"
-          ],
+          "columns": ["externalWebsiteId"],
           "isUnique": false
         }
       },
@@ -6006,16 +5507,12 @@
       "indexes": {
         "Workspaces_handle_key": {
           "name": "Workspaces_handle_key",
-          "columns": [
-            "handle"
-          ],
+          "columns": ["handle"],
           "isUnique": true
         },
         "Workspaces_spotifyArtistId_key": {
           "name": "Workspaces_spotifyArtistId_key",
-          "columns": [
-            "spotifyArtistId"
-          ],
+          "columns": ["spotifyArtistId"],
           "isUnique": true
         }
       },
@@ -6025,9 +5522,7 @@
         "Workspaces_imageUrl_unique": {
           "name": "Workspaces_imageUrl_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "imageUrl"
-          ]
+          "columns": ["imageUrl"]
         }
       }
     }

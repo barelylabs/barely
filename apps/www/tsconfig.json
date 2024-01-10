@@ -1,48 +1,23 @@
 {
   "extends": "@barely/tsconfig/nextjs.json",
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.cjs",
-    "**/*.mjs",
-    ".next/types/**/*.ts"
-  ],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "~/*": [
-        "./src/*"
-      ],
-      "@public/*": [
-        "./public/*"
-      ],
-      "@barely/api/*": [
-        "../../packages/lib/api/*"
-      ],
-      "@barely/auth/*": [
-        "../../packages/lib/auth/*"
-      ],
-      "@barely/atoms/*": [
-        "../../packages/lib/atoms/*"
-      ],
-      "@barely/hooks/*": [
-        "../../packages/lib/hooks/*"
-      ],
-      "@barely/ui/*": [
-        "../../packages/ui/*"
-      ],
-      "@barely/utils/*": [
-        "../../packages/lib/utils/*"
-      ]
+      "~/*": ["./src/*"],
+      "@public/*": ["./public/*"],
+      "@barely/api/*": ["../../packages/lib/api/*"],
+      "@barely/auth/*": ["../../packages/lib/auth/*"],
+      "@barely/atoms/*": ["../../packages/lib/atoms/*"],
+      "@barely/hooks/*": ["../../packages/lib/hooks/*"],
+      "@barely/ui/*": ["../../packages/ui/*"],
+      "@barely/utils/*": ["../../packages/lib/utils/*"]
     },
     "plugins": [
       {
         "name": "next"
       }
-    ],
-    "strictNullChecks": true,
-    "jsx": "preserve"
+    ]
   },
-  "exclude": []
+  "include": [".", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
 }

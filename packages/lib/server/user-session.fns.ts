@@ -1,19 +1,19 @@
-import { UserSession } from './user-session.schema';
+import type { UserSession } from "./user-session.schema";
 
 export function deserializeUserSession(userSession: UserSession) {
-	return {
-		...userSession,
-		expires: new Date(userSession.expires),
-	};
+  return {
+    ...userSession,
+    expires: new Date(userSession.expires),
+  };
 }
 
 export function serializeUserSession(userSession: {
-	userId: string;
-	sessionToken: string;
-	expires: Date;
+  userId: string;
+  sessionToken: string;
+  expires: Date;
 }) {
-	return {
-		...userSession,
-		expires: userSession.expires.toISOString(),
-	};
+  return {
+    ...userSession,
+    expires: userSession.expires.toISOString(),
+  };
 }

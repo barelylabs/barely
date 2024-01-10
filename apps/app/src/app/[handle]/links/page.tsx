@@ -1,31 +1,36 @@
-import { Suspense } from 'react';
-import type { LinkFilterParams } from '@barely/server/link.schema';
+import { Suspense } from "react";
 
-import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
-import { AllLinks } from '~/app/[handle]/links/_components/all-links';
-import { ArchiveLinkModal } from '~/app/[handle]/links/_components/archive-link-modal';
-import { LinkFilters } from '~/app/[handle]/links/_components/link-filters';
-import { LinkModal } from '~/app/[handle]/links/_components/link-modal';
-import { NewLinkButton } from '~/app/[handle]/links/_components/new-link-button';
-import { UpgradeModal } from '~/app/[handle]/settings/billing/upgrade-modal';
+import type { LinkFilterParams } from "@barely/server/link.schema";
 
-export default function Page({ searchParams }: { searchParams: LinkFilterParams }) {
-	return (
-		<>
-			<DashContentHeader title='Links' button={<NewLinkButton />} />
+import { DashContentHeader } from "~/app/[handle]/_components/dash-content-header";
+import { AllLinks } from "~/app/[handle]/links/_components/all-links";
+import { ArchiveLinkModal } from "~/app/[handle]/links/_components/archive-link-modal";
+import { LinkFilters } from "~/app/[handle]/links/_components/link-filters";
+import { LinkModal } from "~/app/[handle]/links/_components/link-modal";
+import { NewLinkButton } from "~/app/[handle]/links/_components/new-link-button";
+import { UpgradeModal } from "~/app/[handle]/settings/billing/upgrade-modal";
 
-			<div className='grid grid-cols-1 gap-5 md:grid-cols-[auto,1fr]'>
-				<LinkFilters />
+export default function Page({
+  searchParams,
+}: {
+  searchParams: LinkFilterParams;
+}) {
+  return (
+    <>
+      <DashContentHeader title="Links" button={<NewLinkButton />} />
 
-				<Suspense fallback={<div>Loading...</div>}>
-					<AllLinks {...searchParams} />
-				</Suspense>
-			</div>
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-[auto,1fr]">
+        <LinkFilters />
 
-			<LinkModal />
-			<ArchiveLinkModal />
+        <Suspense fallback={<div>Loading...</div>}>
+          <AllLinks {...searchParams} />
+        </Suspense>
+      </div>
 
-			<UpgradeModal checkoutCancelPath='links' checkoutSuccessPath='links' />
-		</>
-	);
+      <LinkModal />
+      <ArchiveLinkModal />
+
+      <UpgradeModal checkoutCancelPath="links" checkoutSuccessPath="links" />
+    </>
+  );
 }

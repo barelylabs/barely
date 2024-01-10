@@ -1,8 +1,8 @@
 {
-  "extends": "@barely/tsconfig/react.json",
+  "extends": "@barely/tsconfig/base.json",
   "compilerOptions": {
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
   },
-  "include": ["index.tsx", "src/**/*.ts", "src/**/*.tsx"],
+  "include": ["."],
   "exclude": ["node_modules"]
 }

@@ -1,1 +1,1 @@
-export { signOut, signIn } from 'next-auth/react';
+export { signOut, signIn } from "next-auth/react";

@@ -1,68 +1,68 @@
-import { relations } from 'drizzle-orm';
-import { boolean, index, pgTable, varchar } from 'drizzle-orm/pg-core';
+import { relations } from "drizzle-orm";
+import { boolean, index, pgTable, varchar } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId, timestamps } from '../utils/sql';
-import { AdCreatives } from './ad-creative.sql';
-import { AdSets } from './ad-set.sql';
-import { Stats } from './stat.sql';
-import { Workspaces } from './workspace.sql';
+import { cuid, primaryId, timestamps } from "../utils/sql";
+import { AdCreatives } from "./ad-creative.sql";
+import { AdSets } from "./ad-set.sql";
+import { Stats } from "./stat.sql";
+import { Workspaces } from "./workspace.sql";
 
 export const Ads = pgTable(
-	'Ads',
-	{
-		...primaryId,
-		workspaceId: cuid('workspaceId')
-			.notNull()
-			.references(() => Workspaces.id, {
-				onUpdate: 'cascade',
-				onDelete: 'cascade',
-			}),
+  "Ads",
+  {
+    ...primaryId,
+    workspaceId: cuid("workspaceId")
+      .notNull()
+      .references(() => Workspaces.id, {
+        onUpdate: "cascade",
+        onDelete: "cascade",
+      }),
 
-		...timestamps,
+    ...timestamps,
 
-		// external
-		metaId: varchar('metaId', { length: 255 }),
-		tiktokId: varchar('tiktokId', { length: 255 }),
-		metaStatus: varchar('status', {
-			length: 255,
-			enum: ['ACTIVE', 'PAUSED', 'ERROR'],
-		}).notNull(),
+    // external
+    metaId: varchar("metaId", { length: 255 }),
+    tiktokId: varchar("tiktokId", { length: 255 }),
+    metaStatus: varchar("status", {
+      length: 255,
+      enum: ["ACTIVE", "PAUSED", "ERROR"],
+    }).notNull(),
 
-		// internal
-		passedTest: boolean('passedTest'),
+    // internal
+    passedTest: boolean("passedTest"),
 
-		// relations
-		adSetId: cuid('adSetId')
-			.notNull()
-			.references(() => AdSets.id, {
-				onUpdate: 'cascade',
-				onDelete: 'cascade',
-			}),
+    // relations
+    adSetId: cuid("adSetId")
+      .notNull()
+      .references(() => AdSets.id, {
+        onUpdate: "cascade",
+        onDelete: "cascade",
+      }),
 
-		adCreativeId: cuid('adCreativeId')
-			.notNull()
-			.references(() => AdCreatives.id),
-	},
-	ad => {
-		return {
-			workspace: index('Ads_workspace_idx').on(ad.workspaceId),
-			adSet: index('Ads_adSet_idx').on(ad.adSetId),
-			creative: index('Ads_creative_idx').on(ad.adCreativeId),
-		};
-	},
+    adCreativeId: cuid("adCreativeId")
+      .notNull()
+      .references(() => AdCreatives.id),
+  },
+  (ad) => {
+    return {
+      workspace: index("Ads_workspace_idx").on(ad.workspaceId),
+      adSet: index("Ads_adSet_idx").on(ad.adSetId),
+      creative: index("Ads_creative_idx").on(ad.adCreativeId),
+    };
+  },
 );
 
 export const Ad_Relations = relations(Ads, ({ one, many }) => ({
-	// one-to-one
-	adSet: one(AdSets, {
-		fields: [Ads.adSetId],
-		references: [AdSets.id],
-	}),
-	// one-to-many
-	adCreative: one(AdCreatives, {
-		fields: [Ads.adCreativeId],
-		references: [AdCreatives.id],
-	}),
-	// many-to-one
-	stats: many(Stats),
+  // one-to-one
+  adSet: one(AdSets, {
+    fields: [Ads.adSetId],
+    references: [AdSets.id],
+  }),
+  // one-to-many
+  adCreative: one(AdCreatives, {
+    fields: [Ads.adCreativeId],
+    references: [AdCreatives.id],
+  }),
+  // many-to-one
+  stats: many(Stats),
 }));

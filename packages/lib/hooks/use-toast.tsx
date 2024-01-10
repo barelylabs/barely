@@ -187,6 +187,6 @@
 
 // export { useToast, toast };
 
-import { useToast } from '@barely/toast/src/use-toast';
+import { useToast } from "@barely/toast/src/use-toast";
 
 export { useToast };

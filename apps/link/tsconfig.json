@@ -3,41 +3,22 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "~/*": [
-        "./src/*"
-      ],
-      "@static/*": [
-        "./public/_static/*"
-      ],
-      "@barely/server/*": [
-        "../../packages/lib/server/*"
-      ],
-      "@barely/api/*": [
-        "../../packages/lib/server/api/*"
-      ],
-      "@barely/atoms/*": [
-        "../../packages/lib/atoms/*"
-      ],
-      "@barely/hooks/*": [
-        "../../packages/lib/hooks/*"
-      ],
-      "@barely/ui/*": [
-        "../../packages/ui/*"
-      ],
-      "@barely/utils/*": [
-        "../../packages/lib/utils/*"
-      ],
-      "@public/*": [
-        "./public/*"
-      ]
+      "~/*": ["./src/*"],
+      "@static/*": ["./public/_static/*"],
+      "@barely/server/*": ["../../packages/lib/server/*"],
+      "@barely/api/*": ["../../packages/lib/server/api/*"],
+      "@barely/atoms/*": ["../../packages/lib/atoms/*"],
+      "@barely/hooks/*": ["../../packages/lib/hooks/*"],
+      "@barely/ui/*": ["../../packages/ui/*"],
+      "@barely/utils/*": ["../../packages/lib/utils/*"],
+      "@public/*": ["./public/*"]
     },
     "plugins": [
       {
         "name": "next"
       }
     ],
-    "strictNullChecks": true,
-    "jsx": "preserve"
+    "strictNullChecks": true
   },
   "include": [
     "next-env.d.ts",
@@ -47,7 +28,5 @@
     "**/*.mjs",
     ".next/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

@@ -10,4 +10,4 @@
 //     />;
 // }
 
-export { AreaChart } from '@tremor/react';
+export { AreaChart } from "@tremor/react";

@@ -1,125 +1,132 @@
-import { TRPCError } from '@trpc/server';
-import { eq } from 'drizzle-orm';
-import { z } from 'zod';
+import { TRPCError } from "@trpc/server";
+import { eq } from "drizzle-orm";
+import { z } from "zod";
 
-import { privateProcedure, publicProcedure, router } from './api';
-import { insertGenreSchema } from './genre.schema';
-import { _Playlists_To_Genres } from './genre.sql';
+import { privateProcedure, publicProcedure, router } from "./api";
+import { insertGenreSchema } from "./genre.schema";
+import { _Playlists_To_Genres } from "./genre.sql";
 import {
-	estimateGenresByPlaylistId,
-	getPlaylistsByUserId,
-	totalPlaylistReachByGenres,
-	upsertPlaylistGenres,
-	userGetPlaylistById,
-} from './playlist.fns';
+  estimateGenresByPlaylistId,
+  getPlaylistsByUserId,
+  totalPlaylistReachByGenres,
+  upsertPlaylistGenres,
+  userGetPlaylistById,
+} from "./playlist.fns";
 
 const playlistRouter = router({
-	byId: privateProcedure.input(z.string()).query(async ({ ctx, input: playlistId }) => {
-		const playlist = await userGetPlaylistById(ctx.user.id, playlistId, ctx.db);
+  byId: privateProcedure
+    .input(z.string())
+    .query(async ({ ctx, input: playlistId }) => {
+      const playlist = await userGetPlaylistById(
+        ctx.user.id,
+        playlistId,
+        ctx.db,
+      );
 
-		console.log('playlist => ', playlist);
+      console.log("playlist => ", playlist);
 
-		return playlist;
-	}),
+      return playlist;
+    }),
 
-	byCurrentUser: privateProcedure
-		.input(
-			z.object({
-				forPitchPlacement: z.boolean().optional(),
-			}),
-		)
-		.query(async ({ ctx }) => {
-			console.log('user.id => ', ctx.user.id);
+  byCurrentUser: privateProcedure
+    .input(
+      z.object({
+        forPitchPlacement: z.boolean().optional(),
+      }),
+    )
+    .query(async ({ ctx }) => {
+      console.log("user.id => ", ctx.user.id);
 
-			return await getPlaylistsByUserId(ctx.user.id, ctx.db);
-		}),
+      return await getPlaylistsByUserId(ctx.user.id, ctx.db);
+    }),
 
-	byWorkspaceId: privateProcedure
-		.input(
-			z.object({
-				workspaceId: z.string().optional(),
-				forPitchPlacement: z.boolean().optional(),
-			}),
-		)
-		.query(async ({ ctx, input }) => {
-			const workspaceId = input.workspaceId || ctx.workspace.id;
-			if (!workspaceId) {
-				throw new TRPCError({
-					code: 'NOT_FOUND',
-					message: 'no workspaceId',
-				});
-			}
+  byWorkspaceId: privateProcedure
+    .input(
+      z.object({
+        workspaceId: z.string().optional(),
+        forPitchPlacement: z.boolean().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const workspaceId = input.workspaceId ?? ctx.workspace.id;
+      if (!workspaceId) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "no workspaceId",
+        });
+      }
 
-			const rawPlaylists = await ctx.db.read.query.Playlists.findMany({
-				where: Playlists => eq(Playlists.workspaceId, workspaceId),
-				with: {
-					_providerAccounts: {
-						with: {
-							providerAccount: true,
-						},
-					},
-				},
-			});
+      const rawPlaylists = await ctx.db.read.query.Playlists.findMany({
+        where: (Playlists) => eq(Playlists.workspaceId, workspaceId),
+        with: {
+          _providerAccounts: {
+            with: {
+              providerAccount: true,
+            },
+          },
+        },
+      });
 
-			const playlists = rawPlaylists.map(rawPlaylist => ({
-				...rawPlaylist,
-				providerAccounts: rawPlaylist._providerAccounts.map(_pa => _pa.providerAccount),
-			}));
+      const playlists = rawPlaylists.map((rawPlaylist) => ({
+        ...rawPlaylist,
+        providerAccounts: rawPlaylist._providerAccounts.map(
+          (_pa) => _pa.providerAccount,
+        ),
+      }));
 
-			if (input.forPitchPlacement) return playlists.filter(p => !p.forTesting);
+      if (input.forPitchPlacement)
+        return playlists.filter((p) => !p.forTesting);
 
-			return playlists;
-		}),
+      return playlists;
+    }),
 
-	countByGenres: publicProcedure
-		.meta({
-			openapi: {
-				method: 'GET',
-				path: '/playlist/reach-by-genres',
-			},
-		})
-		.input(
-			z.object({
-				genreIds: z.preprocess(
-					val =>
-						Array.isArray(val)
-							? (val as string[])
-							: typeof val === 'string' // assume comma-separated string
-							? val.split(',').map((genre: string) => genre.trim())
-							: [],
-					z.array(insertGenreSchema.shape.id),
-				),
-			}),
-		)
-		.output(
-			z.object({
-				totalPlaylists: z.number(),
-				totalCurators: z.number(),
-				averagePlaylistsPerCurator: z.number(),
-			}),
-		)
-		.query(async ({ ctx, input }) => {
-			const { totalPlaylists, totalCurators } = await totalPlaylistReachByGenres(
-				input.genreIds,
-				ctx.db,
-			);
+  countByGenres: publicProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/playlist/reach-by-genres",
+      },
+    })
+    .input(
+      z.object({
+        genreIds: z.preprocess(
+          (val) =>
+            Array.isArray(val)
+              ? (val as string[])
+              : typeof val === "string" // assume comma-separated string
+                ? val.split(",").map((genre: string) => genre.trim())
+                : [],
+          z.array(insertGenreSchema.shape.id),
+        ),
+      }),
+    )
+    .output(
+      z.object({
+        totalPlaylists: z.number(),
+        totalCurators: z.number(),
+        averagePlaylistsPerCurator: z.number(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { totalPlaylists, totalCurators } =
+        await totalPlaylistReachByGenres(input.genreIds, ctx.db);
 
-			return {
-				totalPlaylists,
-				totalCurators,
-				averagePlaylistsPerCurator: Math.ceil(totalPlaylists / totalCurators),
-			};
-		}),
+      return {
+        totalPlaylists,
+        totalCurators,
+        averagePlaylistsPerCurator: Math.ceil(totalPlaylists / totalCurators),
+      };
+    }),
 
-	estimateGenresById: privateProcedure
-		.input(z.string())
-		.mutation(async ({ ctx, input: playlistId }) => {
-			const gptGenreIds = await estimateGenresByPlaylistId(playlistId, ctx.db);
+  estimateGenresById: privateProcedure
+    .input(z.string())
+    .mutation(async ({ ctx, input: playlistId }) => {
+      const gptGenreIds = await estimateGenresByPlaylistId(playlistId, ctx.db);
 
-			console.log('gptGenreIds => ', gptGenreIds);
+      console.log("gptGenreIds => ", gptGenreIds);
 
-			await upsertPlaylistGenres(playlistId, gptGenreIds, ctx.db);
-		}),
+      await upsertPlaylistGenres(playlistId, gptGenreIds, ctx.db);
+    }),
 });
 
 export { playlistRouter };

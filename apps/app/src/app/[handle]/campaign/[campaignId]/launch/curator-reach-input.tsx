@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
 // import { Label, Slider } from '@barely/ui';
 // import { fieldAtom, useFieldActions } from 'form-atoms';
-import { Label } from '@barely/ui/elements/label';
+import { Label } from "@barely/ui/elements/label";
 
 // import { Slider } from '@barely/ui/elements/slider';
 
@@ -17,12 +17,12 @@ import { Label } from '@barely/ui/elements/label';
 // });
 
 const CuratorReachInput = () => {
-	// const curatorReachActions = useFieldActions(curatorReachFieldAtom);
+  // const curatorReachActions = useFieldActions(curatorReachFieldAtom);
 
-	return (
-		<>
-			<Label>How many curator reviews would you like?</Label>
-			{/* <Slider
+  return (
+    <>
+      <Label>How many curator reviews would you like?</Label>
+      {/* <Slider
 				min={props.minCurators}
 				max={props.maxCurators}
 				step={1}
@@ -30,8 +30,8 @@ const CuratorReachInput = () => {
 				onValueChange={v => curatorReachActions.setValue(v)}
 				growThumb
 			/> */}
-		</>
-	);
+    </>
+  );
 };
 
 export { CuratorReachInput };

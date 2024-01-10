@@ -1,13 +1,16 @@
 {
-	"extends": "@barely/tsconfig/react.json",
-	"include": [
-		"./elements/**/*",
-		"./charts/**/*",
-		"./components/**/*",
-		"./hooks/**/*",
-		"./images/**/*",
-		"./forms/**/*",
-		"tailwind.config.ts"
-	],
-	"exclude": ["node_modules"]
+  "extends": "@barely/tsconfig/react.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
+  },
+  "include": [
+    "./elements/**/*",
+    "./charts/**/*",
+    "./components/**/*",
+    "./hooks/**/*",
+    "./images/**/*",
+    "./forms/**/*",
+    "tailwind.config.ts"
+  ],
+  "exclude": ["node_modules"]
 }

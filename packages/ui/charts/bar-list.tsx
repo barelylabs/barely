@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { BarListProps } from '@tremor/react';
+import type { BarListProps } from "@tremor/react";
 
-export { BarList } from '@tremor/react';
+export { BarList } from "@tremor/react";
 
-export type BarListBarProps = BarListProps['data'][0];
+export type BarListBarProps = BarListProps["data"][0];

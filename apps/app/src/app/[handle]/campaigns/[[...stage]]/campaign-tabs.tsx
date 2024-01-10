@@ -1,61 +1,60 @@
-'use client';
+"use client";
 
-import { useParams } from 'next/navigation';
-import { api } from '@barely/server/api/react';
+import { useParams } from "next/navigation";
+import { useWorkspace } from "@barely/hooks/use-workspace";
+import { api } from "@barely/server/api/react";
+import { HorizontalTabs } from "@barely/ui/components/navigation/horizontal-tabs";
+import { Button } from "@barely/ui/elements/button";
+import { Icon } from "@barely/ui/elements/icon";
 
-import { useWorkspace } from '@barely/hooks/use-workspace';
-
-import type { HorizontalTabItemProps } from '@barely/ui/components/navigation/horizontal-tabs';
-import { HorizontalTabs } from '@barely/ui/components/navigation/horizontal-tabs';
-import { Button } from '@barely/ui/elements/button';
-import { Icon } from '@barely/ui/elements/icon';
+import type { HorizontalTabItemProps } from "@barely/ui/components/navigation/horizontal-tabs";
 
 export function CampaignTabs() {
-	const workspace = useWorkspace();
+  const workspace = useWorkspace();
 
-	const params = useParams();
+  const params = useParams();
 
-	console.log({ params });
+  console.log({ params });
 
-	const { data: totals } = api.campaign.countByWorkspaceId.useQuery({
-		workspaceId: workspace.id,
-	});
+  const { data: totals } = api.campaign.countByWorkspaceId.useQuery({
+    workspaceId: workspace.id,
+  });
 
-	const tabs: HorizontalTabItemProps[] = [
-		{
-			name: 'Active',
-			href: `/${workspace.handle}/campaigns/active`,
-		},
-		{
-			name: 'Approved',
-			href: `/${workspace.handle}/campaigns/approved`,
-			beacon: params?.stage?.[0] !== 'all' && !!totals?.approved,
-		},
-		{
-			name: 'Screening',
-			href: `/${workspace.handle}/campaigns/screening`,
-		},
-		{
-			name: 'All',
-			href: `/${workspace.handle}/campaigns/all`,
-		},
-	];
+  const tabs: HorizontalTabItemProps[] = [
+    {
+      name: "Active",
+      href: `/${workspace.handle}/campaigns/active`,
+    },
+    {
+      name: "Approved",
+      href: `/${workspace.handle}/campaigns/approved`,
+      beacon: params?.stage?.[0] !== "all" && !!totals?.approved,
+    },
+    {
+      name: "Screening",
+      href: `/${workspace.handle}/campaigns/screening`,
+    },
+    {
+      name: "All",
+      href: `/${workspace.handle}/campaigns/all`,
+    },
+  ];
 
-	return (
-		<HorizontalTabs
-			tabs={tabs}
-			actions={
-				<Button
-					size='md'
-					className='h-full'
-					href={`/${workspace.handle}/campaigns/playlist-pitch`}
-				>
-					<Icon.plus className='mr-2 h-3 w-3' />
-					New Campaign
-				</Button>
-			}
-		/>
-	);
+  return (
+    <HorizontalTabs
+      tabs={tabs}
+      actions={
+        <Button
+          size="md"
+          className="h-full"
+          href={`/${workspace.handle}/campaigns/playlist-pitch`}
+        >
+          <Icon.plus className="mr-2 h-3 w-3" />
+          New Campaign
+        </Button>
+      }
+    />
+  );
 }
 
 // function StageCount(

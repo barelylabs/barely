@@ -1,4 +1,4 @@
-import { router } from './api';
+import { router } from "./api";
 
 // import { meta } from '@barely/meta';
 // import { geoSchema } from '../../../schema/next';
@@ -39,32 +39,32 @@ import { router } from './api';
 // export type ReportEventInput = z.infer<typeof reportEventSchema>;
 
 export const eventRouter = router({
-	// getAll: procedure.query(({ ctx }) => {
-	//   return prisma.artist.findMany({ take: 10 });
-	// }),
-	// create: publicProcedure
-	// 	.meta({ openapi: { method: 'POST', path: '/event/create' } })
-	// 	.input(eventCreateSchema)
-	// 	.output(eventBaseSchema)
-	// 	.mutation(async ({ ctx, input }) => {
-	// 		const { type, linkId, bioId, buttonId, formId, sessionId } = input;
-	// 		const event = await prisma.event.create({
-	// 			data: {
-	// 				type,
-	// 				session: { connect: { id: sessionId } },
-	// 				bio: bioId ? { connect: { id: bioId } } : undefined,
-	// 				bioButton:
-	// 					bioId && buttonId
-	// 						? {
-	// 								connect: {
-	// 									bioId_buttonId: { bioId: bioId, buttonId: buttonId },
-	// 								},
-	// 						  }
-	// 						: undefined,
-	// 				form: formId ? { connect: { id: formId } } : undefined,
-	// 				link: linkId ? { connect: { id: linkId } } : undefined,
-	// 			},
-	// 		});
-	// 		return event;
-	// 	}),
+  // getAll: procedure.query(({ ctx }) => {
+  //   return prisma.artist.findMany({ take: 10 });
+  // }),
+  // create: publicProcedure
+  // 	.meta({ openapi: { method: 'POST', path: '/event/create' } })
+  // 	.input(eventCreateSchema)
+  // 	.output(eventBaseSchema)
+  // 	.mutation(async ({ ctx, input }) => {
+  // 		const { type, linkId, bioId, buttonId, formId, sessionId } = input;
+  // 		const event = await prisma.event.create({
+  // 			data: {
+  // 				type,
+  // 				session: { connect: { id: sessionId } },
+  // 				bio: bioId ? { connect: { id: bioId } } : undefined,
+  // 				bioButton:
+  // 					bioId && buttonId
+  // 						? {
+  // 								connect: {
+  // 									bioId_buttonId: { bioId: bioId, buttonId: buttonId },
+  // 								},
+  // 						  }
+  // 						: undefined,
+  // 				form: formId ? { connect: { id: formId } } : undefined,
+  // 				link: linkId ? { connect: { id: linkId } } : undefined,
+  // 			},
+  // 		});
+  // 		return event;
+  // 	}),
 });

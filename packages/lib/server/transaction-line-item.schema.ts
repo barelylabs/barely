@@ -1,10 +1,14 @@
-import { InferModel } from 'drizzle-orm';
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import type { InferInsertModel } from "drizzle-orm";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
-import { TransactionLineItems } from './transaction-line-item.sql';
+import { TransactionLineItems } from "./transaction-line-item.sql";
 
-export const insertTransactionLineItemSchema = createInsertSchema(TransactionLineItems);
-export const selectTransactionLineItemSchema = createSelectSchema(TransactionLineItems);
+export const insertTransactionLineItemSchema =
+  createInsertSchema(TransactionLineItems);
+export const selectTransactionLineItemSchema =
+  createSelectSchema(TransactionLineItems);
 
-export type TransactionLineItem = InferModel<typeof TransactionLineItems, 'select'>;
-export type InsertTransactionLineItem = InferModel<typeof TransactionLineItems, 'insert'>;
+export type TransactionLineItem = InferInsertModel<typeof TransactionLineItems>;
+export type InsertTransactionLineItem = InferInsertModel<
+  typeof TransactionLineItems
+>;

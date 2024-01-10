@@ -1,7 +1,7 @@
-import { allClientEnvSchema, allServerEnvSchema, zEnv } from '@barely/env';
+import { allClientEnvSchema, allServerEnvSchema, zEnv } from "@barely/env";
 
 const serverEnvSchema = allServerEnvSchema.pick({
-	RESEND_API_KEY: true,
+  RESEND_API_KEY: true,
 });
 
 const clientEnvSchema = allClientEnvSchema;

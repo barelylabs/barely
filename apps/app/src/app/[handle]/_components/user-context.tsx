@@ -1,15 +1,19 @@
-'use client';
+"use client";
 
-import type { ReactNode } from 'react';
-import type { SessionUser } from '@barely/server/auth';
+import type { ReactNode } from "react";
+import { UserContext } from "@barely/hooks/use-user";
 
-import { UserContext } from '@barely/hooks/use-user';
+import type { SessionUser } from "@barely/server/auth";
 
 interface UserContextProviderProps {
-	user: SessionUser;
-	children: ReactNode;
+  user: SessionUser;
+  children: ReactNode;
 }
 
 export const UserContextProvider = (props: UserContextProviderProps) => {
-	return <UserContext.Provider value={props.user}>{props.children}</UserContext.Provider>;
+  return (
+    <UserContext.Provider value={props.user}>
+      {props.children}
+    </UserContext.Provider>
+  );
 };

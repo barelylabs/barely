@@ -1,4 +1,4 @@
-import { allClientEnvSchema, allServerEnvSchema, zEnv } from '@barely/env';
+import { allClientEnvSchema, allServerEnvSchema, zEnv } from "@barely/env";
 
 const serverEnvSchema = allServerEnvSchema.pick({});
 const clientEnvSchema = allClientEnvSchema.pick({});

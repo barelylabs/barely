@@ -1,19 +1,19 @@
-import { atomWithStorage, createJSONStorage } from 'jotai/utils';
+import { atomWithStorage, createJSONStorage } from "jotai/utils";
 
 const pageStorage = createJSONStorage(() => sessionStorage);
 
 export interface NavHistory {
-	currentPath: string | null;
-	settingsBackPath: string | null;
-	history: string[];
-	storage: typeof pageStorage;
+  currentPath: string | null;
+  settingsBackPath: string | null;
+  history: string[];
+  storage: typeof pageStorage;
 }
 
 const navHistory: NavHistory = {
-	currentPath: null,
-	settingsBackPath: null,
-	history: [],
-	storage: pageStorage,
+  currentPath: null,
+  settingsBackPath: null,
+  history: [],
+  storage: pageStorage,
 };
 
-export const navHistoryAtom = atomWithStorage('navigationHistory', navHistory);
+export const navHistoryAtom = atomWithStorage("navigationHistory", navHistory);
