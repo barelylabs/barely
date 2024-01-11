@@ -15,12 +15,12 @@ import { BlurImage } from "@barely/ui/elements/blur-image";
 import { Icon } from "@barely/ui/elements/icon";
 import { Label } from "@barely/ui/elements/label";
 import { LoadingSpinner } from "@barely/ui/elements/loading";
-// import {
-//   Modal,
-//   ModalBody,
-//   ModalFooter,
-//   ModalHeader,
-// } from "@barely/ui/elements/modal";
+import {
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+} from "@barely/ui/elements/modal";
 import {
   InfoTooltip,
   SimpleTooltipContent,
@@ -43,292 +43,292 @@ import { showUpgradeModalAtom } from "~/app/[handle]/settings/billing/upgrade-mo
 export const showLinkModalAtom = atomWithToggle(false);
 export const editLinkAtom = atom<Link | null>(null);
 
-// export function LinkModal() {
-//   const apiContext = api.useContext();
-//   const workspace = useWorkspace();
-//   const user = useUser();
+export function LinkModal() {
+  const apiContext = api.useContext();
+  const workspace = useWorkspace();
+  const user = useUser();
 
-//   const {
-//     linkDomains,
-//     primaryLinkDomain,
-//     isLoading: loadingDomains,
-//   } = useDomains();
+  const {
+    linkDomains,
+    primaryLinkDomain,
+    isLoading: loadingDomains,
+  } = useDomains();
 
-//   const domainOptions = linkDomains.map((domain) => ({
-//     value: domain.domain,
-//     label: domain.domain,
-//   }));
+  const domainOptions = linkDomains.map((domain) => ({
+    value: domain.domain,
+    label: domain.domain,
+  }));
 
-//   const [editLink, setEditLink] = useAtom(editLinkAtom);
-//   const setShowLinkModal = useSetAtom(showLinkModalAtom);
+  const [editLink, setEditLink] = useAtom(editLinkAtom);
+  const setShowLinkModal = useSetAtom(showLinkModalAtom);
 
-//   /**
-//    * if editLink exists, we're editing an existing link
-//    */
-//   const linkForm = useZodForm({
-//     schema: upsertLinkSchema,
-//     values: editLink ?? {
-//       userId: user.id,
-//       workspaceId: workspace.id,
+  /**
+   * if editLink exists, we're editing an existing link
+   */
+  const linkForm = useZodForm({
+    schema: upsertLinkSchema,
+    values: editLink ?? {
+      userId: user.id,
+      workspaceId: workspace.id,
 
-//       // transparent link
-//       handle: workspace.handle,
+      // transparent link
+      handle: workspace.handle,
 
-//       // short link
-//       domain: primaryLinkDomain.domain,
-//       key: "",
+      // short link
+      domain: primaryLinkDomain.domain,
+      key: "",
 
-//       //destination
-//       url: "",
-//       appleScheme: "",
-//       androidScheme: "",
+      //destination
+      url: "",
+      appleScheme: "",
+      androidScheme: "",
 
-//       // meta tags
-//       customMetaTags: false,
-//       title: "",
-//       description: "",
-//       image: "",
-//     },
+      // meta tags
+      customMetaTags: false,
+      title: "",
+      description: "",
+      image: "",
+    },
 
-//     resetOptions: {
-//       keepDirtyValues: true, // retain user-interacted input
-//     },
-//   });
+    resetOptions: {
+      keepDirtyValues: true, // retain user-interacted input
+    },
+  });
 
-//   /**
-//    *  Link state derived from url (app/appRoute, metaTags)
-//    *  This data is stored outside the form, but used in onSubmit
-//    * */
+  /**
+   *  Link state derived from url (app/appRoute, metaTags)
+   *  This data is stored outside the form, but used in onSubmit
+   * */
 
-//   const url = linkForm.watch("url");
+  const url = linkForm.watch("url");
 
-//   const [debouncedUrl, setDebouncedUrl, urlIsDebounced] = useDebounce(url);
+  const [debouncedUrl, setDebouncedUrl, urlIsDebounced] = useDebounce(url);
 
-//   // if editLink.url changes (i.e. we've selected it outside of the modal or it's been updated on the backend and propagated to the client),
-//   // we want to immediately update the debouncedUrl
-//   useEffect(() => {
-//     if (editLink?.url) {
-//       setDebouncedUrl(editLink.url);
-//     }
-//   }, [editLink?.url, setDebouncedUrl]);
+  // if editLink.url changes (i.e. we've selected it outside of the modal or it's been updated on the backend and propagated to the client),
+  // we want to immediately update the debouncedUrl
+  useEffect(() => {
+    if (editLink?.url) {
+      setDebouncedUrl(editLink.url);
+    }
+  }, [editLink?.url, setDebouncedUrl]);
 
-//   // transparent link
-//   const appLinkData = getAppAndAppRouteFromUrl(debouncedUrl);
-//   const transparentLink = appLinkData
-//     ? `${workspace.handle}.barely.link/${appLinkData.app}/${appLinkData.appRoute}`
-//     : null;
+  // transparent link
+  const appLinkData = getAppAndAppRouteFromUrl(debouncedUrl);
+  const transparentLink = appLinkData
+    ? `${workspace.handle}.barely.link/${appLinkData.app}/${appLinkData.appRoute}`
+    : null;
 
-//   // meta tags
-//   const { data: metaTagsFromUrl, isFetching: isFetchingMetaTags } =
-//     api.link.getMetaTags.useQuery(debouncedUrl, {
-//       enabled: isValidUrl(debouncedUrl),
-//       refetchOnWindowFocus: false,
-//     });
+  // meta tags
+  const { data: metaTagsFromUrl, isFetching: isFetchingMetaTags } =
+    api.link.getMetaTags.useQuery(debouncedUrl, {
+      enabled: isValidUrl(debouncedUrl),
+      refetchOnWindowFocus: false,
+    });
 
-//   // we are generating meta tags if:
-//   // - there is no editLink && isFetchingMetaTags
-//   // - there is an editLink && url is dirty && isFetchingMetaTags
-//   const generatingMetaTags =
-//     (!editLink && isFetchingMetaTags) ??
-//     (!editLink && !urlIsDebounced) ??
-//     (!!editLink && linkForm.formState.dirtyFields.url && isFetchingMetaTags) ??
-//     false;
+  // we are generating meta tags if:
+  // - there is no editLink && isFetchingMetaTags
+  // - there is an editLink && url is dirty && isFetchingMetaTags
+  const generatingMetaTags =
+    (!editLink && isFetchingMetaTags) ??
+    (!editLink && !urlIsDebounced) ??
+    (!!editLink && linkForm.formState.dirtyFields.url && isFetchingMetaTags) ??
+    false;
 
-//   const metaTags =
-//     linkForm.watch("customMetaTags") ??
-//     (!!editLink && !linkForm.formState.dirtyFields.url)
-//       ? {
-//           // image: linkForm.watch('image'),
-//           image: "",
-//           title: linkForm.watch("title"),
-//           description: linkForm.watch("description"),
-//         }
-//       : metaTagsFromUrl;
+  const metaTags =
+    linkForm.watch("customMetaTags") ??
+    (!!editLink && !linkForm.formState.dirtyFields.url)
+      ? {
+          // image: linkForm.watch('image'),
+          image: "",
+          title: linkForm.watch("title"),
+          description: linkForm.watch("description"),
+        }
+      : metaTagsFromUrl;
 
-//   /**
-//    * Generate random key
-//    * */
+  /**
+   * Generate random key
+   * */
 
-//   const [generatingKey, setGeneratingKey] = useState(false);
-//   const { mutateAsync: generateRandomKey } =
-//     api.link.generateRandomKey.useMutation();
+  const [generatingKey, setGeneratingKey] = useState(false);
+  const { mutateAsync: generateRandomKey } =
+    api.link.generateRandomKey.useMutation();
 
-//   const randomizeKey = useCallback(async () => {
-//     setGeneratingKey(true);
-//     const key = await generateRandomKey({
-//       domain: linkForm.watch("domain"),
-//     });
+  const randomizeKey = useCallback(async () => {
+    setGeneratingKey(true);
+    const key = await generateRandomKey({
+      domain: linkForm.watch("domain"),
+    });
 
-//     linkForm.setValue("key", key, {
-//       shouldDirty: true,
-//       shouldValidate: true,
-//     });
-//     setGeneratingKey(false);
-//   }, [generateRandomKey, linkForm]);
+    linkForm.setValue("key", key, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    setGeneratingKey(false);
+  }, [generateRandomKey, linkForm]);
 
-//   /**
-//    * Handle submit
-//    * */
-//   const { mutateAsync: createLink } = api.link.create.useMutation({
-//     onSuccess: async () => {
-//       await apiContext.link.byWorkspace.invalidate();
-//       setShowLinkModal(false);
-//       setEditLink(null);
-//       linkForm.reset();
-//     },
-//   });
+  /**
+   * Handle submit
+   * */
+  const { mutateAsync: createLink } = api.link.create.useMutation({
+    onSuccess: async () => {
+      await apiContext.link.byWorkspace.invalidate();
+      setShowLinkModal(false);
+      setEditLink(null);
+      linkForm.reset();
+    },
+  });
 
-//   const { mutateAsync: updateLink } = api.link.update.useMutation({
-//     onSuccess: async () => {
-//       await apiContext.link.byWorkspace.invalidate();
-//       setShowLinkModal(false);
-//       setEditLink(null);
-//       linkForm.reset();
-//     },
-//   });
+  const { mutateAsync: updateLink } = api.link.update.useMutation({
+    onSuccess: async () => {
+      await apiContext.link.byWorkspace.invalidate();
+      setShowLinkModal(false);
+      setEditLink(null);
+      linkForm.reset();
+    },
+  });
 
-//   const LinkIconOrFavicon = useMemo(() => {
-//     if (!metaTagsFromUrl?.favicon) return null;
+  const LinkIconOrFavicon = useMemo(() => {
+    if (!metaTagsFromUrl?.favicon) return null;
 
-//     return (
-//       <BlurImage
-//         src={metaTagsFromUrl.favicon}
-//         alt="Logo"
-//         className="mx-auto h-10 w-10"
-//         width={20}
-//         height={20}
-//       />
-//     );
-//   }, [metaTagsFromUrl?.favicon]);
+    return (
+      <BlurImage
+        src={metaTagsFromUrl.favicon}
+        alt="Logo"
+        className="mx-auto h-10 w-10"
+        width={20}
+        height={20}
+      />
+    );
+  }, [metaTagsFromUrl?.favicon]);
 
-//   const onSubmit = async (data: z.infer<typeof upsertLinkSchema>) => {
-//     console.log("data => ", data);
-//     // await wait(1000);
-//     if (editLink)
-//       return await updateLink({
-//         ...data,
-//         id: editLink.id,
-//         ...(data.customMetaTags ? metaTags : {}),
-//       });
-//     return await createLink(data);
-//   };
+  const onSubmit = async (data: z.infer<typeof upsertLinkSchema>) => {
+    console.log("data => ", data);
+    // await wait(1000);
+    if (editLink)
+      return await updateLink({
+        ...data,
+        id: editLink.id,
+        ...(data.customMetaTags ? metaTags : {}),
+      });
+    return await createLink(data);
+  };
 
-//   return (
-//     <>
-//       <LinksHotkeys form={linkForm} />
+  return (
+    <>
+      <LinksHotkeys form={linkForm} />
 
-//       <Modal
-//         showModalAtom={showLinkModalAtom}
-//         className="w-full"
-//         preventDefaultClose={linkForm.formState.isDirty}
-//       >
-//         <div className="grid w-full grid-cols-2 ">
-//           <div className="flex flex-col border-r-2 border-border ">
-//             <ModalHeader
-//               icon="link"
-//               iconOverride={LinkIconOrFavicon}
-//               title={
-//                 editLink
-//                   ? `Edit ${editLink.domain}/${editLink.key}`
-//                   : "Create a new link"
-//               }
-//             />
+      <Modal
+        showModalAtom={showLinkModalAtom}
+        className="w-full"
+        preventDefaultClose={linkForm.formState.isDirty}
+      >
+        <div className="grid w-full grid-cols-2 ">
+          <div className="flex flex-col border-r-2 border-border ">
+            <ModalHeader
+              icon="link"
+              iconOverride={LinkIconOrFavicon}
+              title={
+                editLink
+                  ? `Edit ${editLink.domain}/${editLink.key}`
+                  : "Create a new link"
+              }
+            />
 
-//             <Form form={linkForm} className="space-y-0" onSubmit={onSubmit}>
-//               <ModalBody>
-//                 <div className="flex w-full max-w-full flex-col gap-8">
-//                   <div className="flex flex-col space-y-2">
-//                     <TextField name="url" label="Destination URL" />
+            <Form form={linkForm} className="space-y-0" onSubmit={onSubmit}>
+              <ModalBody>
+                <div className="flex w-full max-w-full flex-col gap-8">
+                  <div className="flex flex-col space-y-2">
+                    <TextField name="url" label="Destination URL" />
 
-//                     <div className="flex flex-col space-y-1">
-//                       <div className="flex flex-row justify-between">
-//                         <Label className="items-center">
-//                           <div className="flex flex-row items-center gap-2">
-//                             <p>Short Link</p>
-//                             {!linkDomains.length && (
-//                               <InfoTooltip
-//                                 content={
-//                                   <TooltipContent
-//                                     title="Instead of brl.to, you can use your own branded domain for your short links."
-//                                     cta="Add a domain"
-//                                     href={`/${workspace.handle}/settings/domains`}
-//                                   />
-//                                 }
-//                               />
-//                             )}
-//                           </div>
-//                         </Label>
-//                         <Label asChild>
-//                           <button
-//                             className="flex flex-row items-center gap-1 text-right"
-//                             onClick={() => randomizeKey()}
-//                             disabled={generatingKey}
-//                           >
-//                             {generatingKey ? (
-//                               <LoadingSpinner />
-//                             ) : (
-//                               <Icon.shuffle className="h-3 w-3" />
-//                             )}
-//                             <p>{generatingKey ? "Generating" : "Randomize"}</p>
-//                           </button>
-//                         </Label>
-//                       </div>
+                    <div className="flex flex-col space-y-1">
+                      <div className="flex flex-row justify-between">
+                        <Label className="items-center">
+                          <div className="flex flex-row items-center gap-2">
+                            <p>Short Link</p>
+                            {!linkDomains.length && (
+                              <InfoTooltip
+                                content={
+                                  <TooltipContent
+                                    title="Instead of brl.to, you can use your own branded domain for your short links."
+                                    cta="Add a domain"
+                                    href={`/${workspace.handle}/settings/domains`}
+                                  />
+                                }
+                              />
+                            )}
+                          </div>
+                        </Label>
+                        <Label asChild>
+                          <button
+                            className="flex flex-row items-center gap-1 text-right"
+                            onClick={() => randomizeKey()}
+                            disabled={generatingKey}
+                          >
+                            {generatingKey ? (
+                              <LoadingSpinner />
+                            ) : (
+                              <Icon.shuffle className="h-3 w-3" />
+                            )}
+                            <p>{generatingKey ? "Generating" : "Randomize"}</p>
+                          </button>
+                        </Label>
+                      </div>
 
-//                       <div className="flex w-full flex-grow flex-row">
-//                         {loadingDomains ? (
-//                           "loading domains"
-//                         ) : (
-//                           <>
-//                             <SelectField
-//                               name="domain"
-//                               options={domainOptions}
-//                               className="w-fit flex-grow-0 rounded-r-none border-r-0"
-//                             />
-//                             <TextField
-//                               name="key"
-//                               className="flex-1 rounded-l-none"
-//                             />
-//                           </>
-//                         )}
-//                       </div>
-//                     </div>
+                      <div className="flex w-full flex-grow flex-row">
+                        {loadingDomains ? (
+                          "loading domains"
+                        ) : (
+                          <>
+                            <SelectField
+                              name="domain"
+                              options={domainOptions}
+                              className="w-fit flex-grow-0 rounded-r-none border-r-0"
+                            />
+                            <TextField
+                              name="key"
+                              className="flex-1 rounded-l-none"
+                            />
+                          </>
+                        )}
+                      </div>
+                    </div>
 
-//                     <div className="flex w-full max-w-full flex-col gap-1">
-//                       <Label>Transparent Link</Label>
+                    <div className="flex w-full max-w-full flex-col gap-1">
+                      <Label>Transparent Link</Label>
 
-//                       <div className="h-fit min-h-[40px] w-full rounded-md border bg-slate-100 p-2">
-//                         <Text className="w-full break-all" variant="sm/normal">
-//                           {url.length < 4
-//                             ? ""
-//                             : transparentLink ??
-//                               "*We don't currently support that app"}
-//                         </Text>
-//                       </div>
-//                     </div>
-//                   </div>
+                      <div className="h-fit min-h-[40px] w-full rounded-md border bg-slate-100 p-2">
+                        <Text className="w-full break-all" variant="sm/normal">
+                          {url.length < 4
+                            ? ""
+                            : transparentLink ??
+                              "*We don't currently support that app"}
+                        </Text>
+                      </div>
+                    </div>
+                  </div>
 
-//                   <LinkOptionalSettings form={linkForm} />
-//                 </div>
-//               </ModalBody>
-//               <ModalFooter>
-//                 <SubmitButton fullWidth>
-//                   {editLink ? "Save changes" : "Create link"}
-//                 </SubmitButton>
-//               </ModalFooter>
-//             </Form>
-//           </div>
+                  <LinkOptionalSettings form={linkForm} />
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <SubmitButton fullWidth>
+                  {editLink ? "Save changes" : "Create link"}
+                </SubmitButton>
+              </ModalFooter>
+            </Form>
+          </div>
 
-//           <SocialLinkPreviews
-//             form={linkForm}
-//             url={debouncedUrl}
-//             metaTags={metaTags}
-//             generatingMetaTags={generatingMetaTags}
-//           />
-//         </div>
-//       </Modal>
-//     </>
-//   );
-// }
+          <SocialLinkPreviews
+            form={linkForm}
+            url={debouncedUrl}
+            metaTags={metaTags}
+            generatingMetaTags={generatingMetaTags}
+          />
+        </div>
+      </Modal>
+    </>
+  );
+}
 
 interface LinkOptionalSettingsProps {
   form: UseFormReturn<UpsertLink>;
@@ -414,8 +414,4 @@ export function LinkOptionalSettings(props: LinkOptionalSettingsProps) {
       {/* <pre>{JSON.stringify(endpoints, null, 2)}</pre> */}
     </div>
   );
-}
-
-export function LinkModal() {
-  return null;
 }
