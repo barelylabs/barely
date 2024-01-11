@@ -9,7 +9,7 @@ import { FeatureChecklist } from "@barely/ui/components/feature-checklist";
 import { Badge } from "@barely/ui/elements/badge";
 import { Button } from "@barely/ui/elements/button";
 import { ConfettiBurst } from "@barely/ui/elements/confetti";
-// import { Modal, ModalBody, ModalHeader } from "@barely/ui/elements/modal";
+import { Modal, ModalBody, ModalHeader } from "@barely/ui/elements/modal";
 import { Text } from "@barely/ui/elements/typography";
 
 export const showUpgradeModalAtom = atomWithToggle(false);
