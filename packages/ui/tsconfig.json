@@ -4,12 +4,11 @@
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
   },
   "include": [
-    "./elements/**/*",
     "./charts/**/*",
     "./components/**/*",
-    "./hooks/**/*",
-    "./images/**/*",
+    "./elements/**/*",
     "./forms/**/*",
+    "./images/**/*",
     "tailwind.config.ts"
   ],
   "exclude": ["node_modules"]
