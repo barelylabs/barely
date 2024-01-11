@@ -1,16 +1,10 @@
-// import forms from '@tailwindcss/forms';
-// import typography from '@tailwindcss/typography';
-// import scrollbarHide from 'tailwind-scrollbar-hide';
 import type { Config } from "tailwindcss";
-// import radix from 'tailwindcss-radix';
 import colors from "tailwindcss/colors";
 import defaultTheme from "tailwindcss/defaultTheme";
 
-// import b from '../../../node_modules/@tremor/**/*.'
-
 export default {
   darkMode: ["class"],
-  content: ["./"],
+  content: ["src/**/*.{ts,tsx}"],
   theme: {
     container: {
       center: true,

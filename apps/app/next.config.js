@@ -22,9 +22,6 @@ const config = {
     ],
   },
 
-  typescript: { ignoreBuildErrors: true },
-  eslint: { ignoreDuringBuilds: true },
-
   /** Enables hot reloading for local packages without a build step */
   transpilePackages: [
     "@barely/email",
@@ -32,6 +29,9 @@ const config = {
     "@barely/lib",
     "@barely/ui",
   ],
+
+  eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: true },
 };
 
 export default config;

@@ -3,7 +3,7 @@ import baseConfig from "@barely/tailwind-config";
 
 export default {
   content: [
-    "./src/**/*.{ts,tsx}",
+    ...baseConfig.content,
     "../../packages/ui/**/*.{ts,tsx}",
     "../../node_modules/@tremor/**/*.{js,ts,jsx,tsx}", // Tremor module
   ],
