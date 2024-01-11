@@ -25,7 +25,7 @@ interface ModalProps {
   preventDefaultClose?: boolean;
 }
 
-export function Modal(props: ModalProps) {
+function Modal(props: ModalProps) {
   const router = useRouter();
 
   const showModalAtom = props.showModalAtom ?? atomWithToggle(false);
@@ -116,7 +116,7 @@ interface ModalHeaderProps {
   children?: ReactNode;
 }
 
-export function ModalHeader(props: ModalHeaderProps) {
+function ModalHeader(props: ModalHeaderProps) {
   const IconComponent = props.icon ? Icon[props.icon] : null;
 
   return (
@@ -141,7 +141,7 @@ interface ModalBodyProps {
   className?: string;
 }
 
-export function ModalBody(props: ModalBodyProps) {
+function ModalBody(props: ModalBodyProps) {
   return (
     <div
       className={cn("flex flex-col gap-3 bg-slate-50 p-6 ", props.className)}
@@ -151,7 +151,7 @@ export function ModalBody(props: ModalBodyProps) {
   );
 }
 
-export function ModalFooter(props: { children?: ReactNode }) {
+function ModalFooter(props: { children?: ReactNode }) {
   //<div className='flex flex-col gap-2 border-t p-6 text-center'>
   return (
     <div className="flex flex-col gap-3 border-t p-6 text-center">
@@ -159,3 +159,5 @@ export function ModalFooter(props: { children?: ReactNode }) {
     </div>
   );
 }
+
+export { Modal, ModalHeader, ModalBody, ModalFooter };

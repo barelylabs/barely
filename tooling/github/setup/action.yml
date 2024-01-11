@@ -14,4 +14,4 @@ runs:
       run: pnpm add -g turbo
 
     - shell: bash
-      run: pnpm i && pnpm i -r
+      run: pnpm i
