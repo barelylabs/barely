@@ -291,9 +291,6 @@ importers:
       '@barely/ui':
         specifier: workspace:^0.1.0
         version: link:../../packages/ui
-      '@next/font':
-        specifier: ^13.4.10
-        version: 13.4.10
       '@vercel/edge':
         specifier: ^0.1.2
         version: 0.1.2
@@ -4794,10 +4791,6 @@ packages:
     dependencies:
       glob: 7.1.7
     dev: true
-
-  /@next/font@13.4.10:
-    resolution: {integrity: sha512-BqV71ikHIFh+PZLpCR0nMZnlg/3Hcuw9qIUN42I4iCpneDHHiViUtanUeE113gy0Wm9oePTGX5OeKnPbSNnnHA==}
-    dev: false
 
   /@next/swc-darwin-arm64@14.0.4:
     resolution: {integrity: sha512-mF05E/5uPthWzyYDyptcwHptucf/jj09i2SXBPwNzbgBNc+XnwzrL0U6BmPjQeOL+FiB+iG1gwBeq7mlDjSRPg==}

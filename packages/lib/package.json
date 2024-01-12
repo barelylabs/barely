@@ -19,7 +19,6 @@
     "db:drop": "pnpm with-env drizzle-kit drop --config=server/db/drizzle.config.ts",
     "db:pull": "pnpm with-env drizzle-kit introspect:pg --config=server/db/drizzle.config.ts",
     "db:push": "pnpm with-env drizzle-kit push:pg --config=server/db/drizzle.config.ts",
-    "db:push:manual": "pnpm with-env ts-node server/drizzle-push.ts",
     "db:generate": "pnpm with-env drizzle-kit generate:pg --config=server/db/drizzle.config.ts",
     "dev": "pnpm with-env drizzle-kit studio --port 5555 --config=server/db/drizzle.config.ts --verbose",
     "format": "prettier --check . --ignore-path ../../.gitignore",

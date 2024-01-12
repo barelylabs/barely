@@ -16,7 +16,6 @@
     "@barely/env": "workspace:^0.1.0",
     "@barely/lib": "workspace:^0.1.0",
     "@barely/ui": "workspace:^0.1.0",
-    "@next/font": "^13.4.10",
     "@vercel/edge": "^0.1.2",
     "dotenv-cli": "^7.2.1",
     "next": "^14.0.4",
