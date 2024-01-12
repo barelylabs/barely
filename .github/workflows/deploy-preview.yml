@@ -19,13 +19,8 @@ jobs:
       - name: Install the Neon CLI
         run: npm install -g neonctl
 
-      # - name: Install Vercel CLI
-      #   run: npm install -g vercel@latest
-
-      # - name: Pull Vercel Environment Information
-      #   run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-
-      # This is just needed so the env check doesn't fail. The DATABASE_URL will be overwritten below.
+      # This is just so the env check doesn't fail on missing variables.
+      # DATABASE_URL && DATABASE_WRITE_URL will be overwritten below.
       - name: Copy env
         shell: bash
         run: cp .env.example .env
@@ -36,7 +31,7 @@ jobs:
         run: |
           output=$(neonctl branches create --project-id ${{ secrets.NEON_PROJECT_ID }} --name ${{ steps.branch-name.outputs.current_branch }} --api-key ${{ secrets.NEON_API_KEY }} --compute --type read_write 2>&1) || true
           if [[ $output == *"branch with the provided name \"${{ steps.branch-name.outputs.current_branch }}\" already exists"* ]]; then
-            echo "$output"
+            echo "A branch named \"${{ steps.branch-name.outputs.current_branch }}\" already exists. Using that branch for this preview deployment."
           elif [[ -n $output ]]; then
             echo "Unhandled error: $output" && exit 1
           fi
@@ -70,6 +65,7 @@ jobs:
     env:
       VERCEL_ACCESS_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
     steps:
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
