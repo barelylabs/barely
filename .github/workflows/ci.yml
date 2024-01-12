@@ -2,9 +2,9 @@ name: CI
 
 on:
   pull_request:
-    branches: ['*']
+    branches: ["*"]
   push:
-    branches: ['main']
+    branches: ["main"]
   merge_group:
 
 concurrency:
@@ -56,9 +56,6 @@ jobs:
       - name: Copy env
         shell: bash
         run: cp .env.example .env
-
-      # - name: Build
-      #   run: pnpm build
 
       - name: Typecheck
         run: pnpm typecheck
