@@ -19,11 +19,21 @@ jobs:
       - name: Install the Neon CLI
         run: npm install -g neonctl
 
-        # If the branch already exists, this command will fail but the workflow will continue
+      # If the branch already exists, this command will fail but the workflow will continue
+
+      # - name: Create a Neon branch
+      #   id: create-branch
+      #   run: neonctl branches create --project-id ${{ secrets.NEON_PROJECT_ID }} --name ${{ steps.branch-name.outputs.current_branch }} --api-key ${{ secrets.NEON_API_KEY }} --compute --type read_write
 
       - name: Create a Neon branch
         id: create-branch
-        run: neonctl branches create --project-id ${{ secrets.NEON_PROJECT_ID }} --name ${{ steps.branch-name.outputs.current_branch }} --api-key ${{ secrets.NEON_API_KEY }} --compute --type read_write
+        run: |
+          output=$(neonctl branches create --project-id ${{ secrets.NEON_PROJECT_ID }} --name ${{ steps.branch-name.outputs.current_branch }} --api-key ${{ secrets.NEON_API_KEY }} --compute --type read_write 2>&1) || true
+          if [[ $output == *"branch with the provided name \"${{ steps.branch-name.outputs.current_branch }}\" already exists"* ]]; then
+            echo "$output"
+          elif [[ -n $output ]]; then
+            echo "Unhandled error: $output" && exit 1
+          fi
 
       # The branch ID is needed to display the URL of the branch in the comment.
       - name: get Neon branch ID
