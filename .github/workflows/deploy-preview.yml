@@ -42,7 +42,7 @@ jobs:
           fi
 
       # The branch ID is needed to display the URL of the branch in the comment.
-      - name: get Neon branch ID
+      - name: Get Neon branch ID
         id: get-neon-branch-id
         run: |
           echo branch_id=$(neonctl branches get ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --output json | jq -r '.id') >> $GITHUB_OUTPUT
@@ -56,6 +56,7 @@ jobs:
           touch .env
 
           echo DATABASE_URL=$(neonctl cs ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require >> .env
+          echo DATABASE_WRITE_URL=$(neonctl cs ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require >> .env
 
           pnpm db:push
 
