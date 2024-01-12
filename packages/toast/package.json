@@ -1,9 +1,6 @@
 {
   "name": "@barely/toast",
   "version": "0.1.0",
-  "exports": {
-    ".": "./index.ts"
-  },
   "types": "index.ts",
   "private": true,
   "scripts": {

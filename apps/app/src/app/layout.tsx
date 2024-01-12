@@ -1,13 +1,13 @@
 import "~/styles/globals.css";
 
 import type { Metadata } from "next";
+import { Inter as FontSans } from "next/font/google";
 import localFont from "next/font/local";
 import { headers } from "next/headers";
 import { cn } from "@barely/lib/utils/cn";
 import { TailwindIndicator } from "@barely/ui/components/tailwind-indicator";
 import { Container } from "@barely/ui/elements/container";
 import { Toaster } from "@barely/ui/elements/toaster";
-import { Inter as FontSans } from "@next/font/google";
 
 import Providers from "./providers";
 

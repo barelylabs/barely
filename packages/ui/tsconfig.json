@@ -8,7 +8,9 @@
     "./components/**/*",
     "./elements/**/*",
     "./forms/**/*",
+    "./hooks/**/*",
     "./images/**/*",
+    "./utils/**/*",
     "tailwind.config.ts"
   ],
   "exclude": ["node_modules"]

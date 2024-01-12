@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-
-import { useToast } from "./use-toast";
+import { useToast } from "@barely/toast";
 
 export function useCopy() {
   const [isCopied, setIsCopied] = useState(false);
