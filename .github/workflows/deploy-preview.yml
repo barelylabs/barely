@@ -52,14 +52,18 @@ jobs:
       #     npx prisma generate
       #     npx prisma migrate deploy
 
+      # Setup node/pnpm/turbo
+      - name: Setup
+        uses: ./tooling/github/setup
+
       - name: Run Drizzle Generate and Push
         run: |
           touch .env
 
           echo DATABASE_URL=$(neonctl cs ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require >> .env
 
-          pnpm run db:generate
-          pnpm run db:push
+          pnpm db:generate
+          pnpm db:push
 
     outputs:
       branch_id: ${{ steps.get-neon-branch-id.outputs.branch_id }}
