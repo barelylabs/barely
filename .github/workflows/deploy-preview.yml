@@ -109,7 +109,9 @@ jobs:
         id: vercel-env
         run: |
           vercel pull --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}          
+          cp .vercel/.env.preview.local .env
           VERCEL_URL=app-git-${{ needs.neon-preview.outputs.git_branch_name }}-barelylabs.vercel.app
+          echo "VERCEL_URL: $VERCEL_URL"
           echo "VERCEL_URL=$VERCEL_URL" >> .env
           echo "preview_url=$VERCEL_URL" >> $GITHUB_OUTPUT
 
