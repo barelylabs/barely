@@ -105,30 +105,30 @@ jobs:
         run: |
           npm install --global vercel@latest
 
-      - name: Pull Vercel Environment Information
+      - name: Vercel Env
+        id: vercel-env
         run: |
           vercel env pull --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} .env
-          echo "VERCEL_URL=app-git-${{ needs.neon-preview.outputs.git_branch_name }}-barelylabs.vercel.app" >> .env
-          echo "VERCEL_URL: $(grep VERCEL_URL .env | cut -d '=' -f2)"
-          echo "VERCEL_BRANCH_URL: $(grep VERCEL_BRANCH_URL .env | cut -d '=' -f2)"
-          echo "DATABASE_NAME: $(grep DATABASE_NAME .env | cut -d '=' -f2)"
-
-        # run: |
-        #   vercel pull --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
+          VERCEL_URL=app-git-${{ needs.neon-preview.outputs.git_branch_name }}-barelylabs.vercel.app
+          echo "VERCEL_URL=$VERCEL_URL" >> .env
+          echo "preview_url=$VERCEL_URL" >> $GITHUB_OUTPUT
 
       - name: Build App Project Artifacts
         run: pnpm build --filter=@barely/app
-        # run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy App Preview to Vercel
         id: deploy-app
-        run: echo preview_url=$(vercel deploy --prebuilt --) >> $GITHUB_OUTPUT
+        run: |
+          PREVIEW_URL = $(vercel deploy --prebuilt --)
+          echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT          
+          echo "Deployed to (calc from git branch) ${{ steps.vercel-env.outputs.preview_url }}"
+          echo "Deployed to (deploy-result) $PREVIEW_URL"
 
       - name: Comment on Pull Request
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            Vercel Preview URL :rocket: : ${{ steps.deploy-app.outputs.preview_url }}
+            Vercel Preview URL :rocket: : ${{ steps.vercel-env.outputs.preview_url }}
             Neon branch :elephant: : https://console.neon.tech/app/projects/${{ secrets.NEON_PROJECT_ID }}/branches/${{ needs.neon-preview.outputs.neon_branch_id }}
 
   # link-deploy:
