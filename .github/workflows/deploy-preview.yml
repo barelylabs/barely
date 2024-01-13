@@ -47,6 +47,7 @@ jobs:
         uses: ./tooling/github/setup
 
       - name: Run Drizzle Generate and Push
+        id: drizzle
         run: |
           touch .env
 
@@ -55,23 +56,14 @@ jobs:
 
           echo DATABASE_WRITE_URL=$DATABASE_WRITE_URL >> .env
 
-          echo "DATABASE_URL=$DATABASE_URL" >> $GITHUB_OUTPUT
-          echo "DATABASE_WRITE_URL=$DATABASE_WRITE_URL" >> $GITHUB_OUTPUT
-
           pnpm db:push
 
-      # - name: Update Vercel Env Variables for this Git Branch
-      #   run: |
-      #     echo ${{ steps.create-branch.outputs.database_url }} | vercel env add DATABASE_READ_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
-      #     echo ${{ steps.create-branch.outputs.database_url }} | vercel env add DATABASE_READ_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
-      #     echo ${{ steps.create-branch.outputs.database_url }} | vercel env add DATABASE_WRITE_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
-      #     echo ${{ steps.create-branch.outputs.database_url }} | vercel env add DATABASE_WRITE_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
-      #     echo ${{ steps.create-branch.outputs.database_url }} | vercel env add DIRECT_DATABASE_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
+          echo "DATABASE_URL=$DATABASE_URL" >> $GITHUB_OUTPUT
 
     outputs:
       git_branch_name: ${{ steps.branch-name.outputs.current_branch }}
       neon_branch_id: ${{ steps.get-neon-branch-id.outputs.branch_id }}
-      database_url: ${{ steps.create-branch.outputs.database_url }}
+      database_url: ${{ steps.drizzle.outputs.database_url }}
 
   app-deploy:
     name: vercel preview - app.barely.io
