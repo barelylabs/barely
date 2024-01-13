@@ -50,13 +50,27 @@ jobs:
         run: |
           touch .env
 
-          echo DATABASE_URL=$(neonctl cs ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require >> .env
-          echo DATABASE_WRITE_URL=$(neonctl cs ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require >> .env
+          DATABASE_URL=$(neonctl cs ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require
+          DATABASE_WRITE_URL=$(neonctl cs ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require
+
+          echo DATABASE_WRITE_URL=$DATABASE_WRITE_URL >> .env
+
+          echo "::set-output name=database_url::$DATABASE_URL"
+          echo "::set-output name=database_write_url::$DATABASE_WRITE_URL"
 
           pnpm db:push
 
+      - name: Update Vercel Env Variables for this Git Branch
+        run: |
+          vercel env add DATABASE_READ_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} ${{ steps.create-branch.outputs.database_url }} --token=${{ secrets.VERCEL_TOKEN }}
+          vercel env add DATABASE_READ_URL preview ${{ steps.branch-name.outputs.current_branch }} ${{ steps.create-branch.outputs.database_url }} --token=${{ secrets.VERCEL_TOKEN }}
+          vercel env add DATABASE_WRITE_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} ${{ steps.create-branch.outputs.database_url }} --token=${{ secrets.VERCEL_TOKEN }}
+          vercel env add DATABASE_WRITE_URL preview ${{ steps.branch-name.outputs.current_branch }} ${{ steps.create-branch.outputs.database_url }} --token=${{ secrets.VERCEL_TOKEN }}
+          vercel env add DIRECT_DATABASE_URL preview ${{ steps.branch-name.outputs.current_branch }} ${{ steps.create-branch.outputs.database_url }} --token=${{ secrets.VERCEL_TOKEN }}
+
     outputs:
-      branch_id: ${{ steps.get-neon-branch-id.outputs.branch_id }}
+      git_branch_name: ${{ steps.branch-name.outputs.current_branch }}
+      neon_branch_id: ${{ steps.get-neon-branch-id.outputs.branch_id }}
 
   app-deploy:
     name: vercel preview - app.barely.io
@@ -76,12 +90,10 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel env pull --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} .env
 
       - name: Build App Project Artifacts
-        run: |
-          pnpm i
-          pnpm build --filter=@barely/app
+        run: pnpm build --filter=@barely/app
 
       - name: Deploy App Preview to Vercel
         id: deploy-app
@@ -92,7 +104,7 @@ jobs:
         with:
           message: |
             Vercel Preview URL :rocket: : ${{ steps.deploy-app.outputs.preview_url }}
-            Neon branch :elephant: : https://console.neon.tech/app/projects/${{ secrets.NEON_PROJECT_ID }}/branches/${{ needs.neon-preview.outputs.branch_id }}
+            Neon branch :elephant: : https://console.neon.tech/app/projects/${{ secrets.NEON_PROJECT_ID }}/branches/${{ needs.neon-preview.outputs.neon_branch_id }}
 
   # link-deploy:
 
