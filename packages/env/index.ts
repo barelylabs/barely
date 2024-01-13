@@ -22,11 +22,27 @@ import { z } from "zod";
 
 export const allClientEnvSchema = z.object({
   // NEXT_PUBLIC_APP_BASE_URL: z.string(),
-  NEXT_PUBLIC_APP_DEV_PORT: z.string(),
+  NEXT_PUBLIC_APP_DEV_PORT: z
+    .string()
+    .optional()
+    .refine((v) => process.env.VERCEL_ENV !== "development" ?? !!v, {
+      message: "You need a dev port in order to run the app locally",
+    }),
   // NEXT_PUBLIC_WWW_BASE_URL: z.string(),
-  NEXT_PUBLIC_WWW_DEV_PORT: z.string(),
+  NEXT_PUBLIC_WWW_DEV_PORT: z
+    .string()
+    .optional()
+    .refine((v) => process.env.VERCEL_ENV !== "development" ?? !!v, {
+      message: "You need a dev port in order to run the app locally",
+    }),
+
   // NEXT_PUBLIC_LINK_BASE_URL: z.string(),
-  NEXT_PUBLIC_LINK_DEV_PORT: z.string(),
+  NEXT_PUBLIC_LINK_DEV_PORT: z
+    .string()
+    .optional()
+    .refine((v) => process.env.VERCEL_ENV !== "development" ?? !!v, {
+      message: "You need a dev port in order to run the app locally",
+    }),
   NEXT_PUBLIC_TRANSPARENT_LINK_ROOT_DOMAIN: z.string(),
   NEXT_PUBLIC_SHORT_LINK_ROOT_DOMAIN: z.string(),
 
