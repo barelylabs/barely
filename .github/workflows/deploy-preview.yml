@@ -107,14 +107,18 @@ jobs:
 
       - name: Pull Vercel Environment Information
         run: |
-          vercel pull --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}          
-          echo "VERCEL_URL: $(grep VERCEL_URL .vercel/.env.preview.local | cut -d '=' -f2)"
-          echo "DATABASE_NAME: $(grep DATABASE_NAME .vercel/.env.preview.local | cut -d '=' -f2)"
-        # run: vercel env pull --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} .env
+          vercel env pull --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} .env
+          echo "VERCEL_URL=app-git-${{ needs.neon-preview.outputs.git_branch_name }}-barelylabs.vercel.app" >> .env
+          echo "VERCEL_URL: $(grep VERCEL_URL .env | cut -d '=' -f2)"
+          echo "VERCEL_BRANCH_URL: $(grep VERCEL_BRANCH_URL .env | cut -d '=' -f2)"
+          echo "DATABASE_NAME: $(grep DATABASE_NAME .env | cut -d '=' -f2)"
+
+        # run: |
+        #   vercel pull --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build App Project Artifacts
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
-        # run: pnpm build --filter=@barely/app
+        run: pnpm build --filter=@barely/app
+        # run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy App Preview to Vercel
         id: deploy-app
