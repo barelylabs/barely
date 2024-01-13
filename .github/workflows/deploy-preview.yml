@@ -109,7 +109,7 @@ jobs:
         run: |
           vercel pull --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
           cp .vercel/.env.preview.local .env
-          echo "VERCEL_URL: $(grep VERCEL_URL .env | cut -d '=' -f2)"
+          echo "VERCEL_URL : $(grep VERCEL_URL .env | cut -d '=' -f2)"
         # run: vercel env pull --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} .env
 
       - name: Build App Project Artifacts
