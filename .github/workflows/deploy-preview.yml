@@ -59,6 +59,7 @@ jobs:
           pnpm db:push
 
           echo "database_url=$DATABASE_URL" >> $GITHUB_OUTPUT
+          echo "Length of DATABASE_URL: ${#DATABASE_URL}"
 
     outputs:
       git_branch_name: ${{ steps.branch-name.outputs.current_branch }}
@@ -87,6 +88,9 @@ jobs:
       # For now, we're manually removing and re-adding the environment variables. Might be a simpler way to directly replace them, but got errors when trying to do that.
       - name: Update Vercel Environment Variables for this Branch
         run: |
+          echo "Length of env.DATABASE_URL: ${#env.DATABASE_URL}"
+          echo "Length of outputs.database_url: ${#{{ needs.neon-preview.outputs.database_url }}}"
+
           vercel env rm DATABASE_READ_POOL_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --yes --token=${{ secrets.VERCEL_TOKEN }}
           vercel env rm DATABASE_READ_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --yes --token=${{ secrets.VERCEL_TOKEN }}
           vercel env rm DATABASE_WRITE_POOL_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --yes --token=${{ secrets.VERCEL_TOKEN }}
