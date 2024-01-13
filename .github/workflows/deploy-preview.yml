@@ -84,6 +84,11 @@ jobs:
 
       - name: Update Vercel Environment Variables for this Branch
         run: |
+          vercel env rm DATABASE_READ_POOL_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} --yes
+          vercel env rm DATABASE_READ_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} --yes
+          vercel env rm DATABASE_WRITE_POOL_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} --yes
+          vercel env rm DATABASE_WRITE_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} --yes
+          vercel env rm DIRECT_DATABASE_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} --yes
           echo ${{ needs.neon-preview.outputs.database_url }}  | vercel env add DATABASE_READ_POOL_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
           echo ${{ needs.neon-preview.outputs.database_url }}  | vercel env add DATABASE_READ_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
           echo ${{ needs.neon-preview.outputs.database_url }}  | vercel env add DATABASE_WRITE_POOL_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
