@@ -109,29 +109,26 @@ jobs:
         id: vercel-env
         run: |
           vercel pull --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}          
-          cp .vercel/.env.preview.local .env
+
           VERCEL_URL=app-git-${{ needs.neon-preview.outputs.git_branch_name }}-barelylabs.vercel.app
+          echo "VERCEL_URL=$VERCEL_URL" >> .vercel/.env.preview.local
+          cp .vercel/.env.preview.local .env
+
           echo "VERCEL_URL: $VERCEL_URL"
-          echo "VERCEL_URL=$VERCEL_URL" >> .env
           echo "preview_url=$VERCEL_URL" >> $GITHUB_OUTPUT
 
       - name: Build App Project Artifacts
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
-        # run: pnpm build --filter=@barely/app
 
       - name: Deploy App Preview to Vercel
         id: deploy-app
-        run: |
-          PREVIEW_URL = $(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
-          echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT          
-          echo "Deployed to (calc from git branch) ${{ steps.vercel-env.outputs.preview_url }}"
-          echo "Deployed to (deploy-result) $PREVIEW_URL"
+        run: echo preview_url=$(vercel deploy --prebuilt --) >> $GITHUB_OUTPUT
 
       - name: Comment on Pull Request
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            Vercel Preview URL :rocket: : ${{ steps.vercel-env.outputs.preview_url }}
+            Vercel Preview URL :rocket: : calc_${{ steps.vercel-env.outputs.preview_url }} deploy_${{ steps.deploy-app.outputs.preview_url }}
             Neon branch :elephant: : https://console.neon.tech/app/projects/${{ secrets.NEON_PROJECT_ID }}/branches/${{ needs.neon-preview.outputs.neon_branch_id }}
 
   # link-deploy:
