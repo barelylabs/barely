@@ -113,7 +113,8 @@ jobs:
         # run: vercel env pull --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} .env
 
       - name: Build App Project Artifacts
-        run: pnpm build --filter=@barely/app
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        # run: pnpm build --filter=@barely/app
 
       - name: Deploy App Preview to Vercel
         id: deploy-app
