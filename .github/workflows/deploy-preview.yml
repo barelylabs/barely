@@ -62,11 +62,11 @@ jobs:
 
       - name: Update Vercel Env Variables for this Git Branch
         run: |
-          vercel env add DATABASE_READ_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} ${{ steps.create-branch.outputs.database_url }} --token=${{ secrets.VERCEL_TOKEN }}
-          vercel env add DATABASE_READ_URL preview ${{ steps.branch-name.outputs.current_branch }} ${{ steps.create-branch.outputs.database_url }} --token=${{ secrets.VERCEL_TOKEN }}
-          vercel env add DATABASE_WRITE_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} ${{ steps.create-branch.outputs.database_url }} --token=${{ secrets.VERCEL_TOKEN }}
-          vercel env add DATABASE_WRITE_URL preview ${{ steps.branch-name.outputs.current_branch }} ${{ steps.create-branch.outputs.database_url }} --token=${{ secrets.VERCEL_TOKEN }}
-          vercel env add DIRECT_DATABASE_URL preview ${{ steps.branch-name.outputs.current_branch }} ${{ steps.create-branch.outputs.database_url }} --token=${{ secrets.VERCEL_TOKEN }}
+          echo ${{ steps.create-branch.outputs.database_url }} | vercel env add DATABASE_READ_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
+          echo ${{ steps.create-branch.outputs.database_url }} | vercel env add DATABASE_READ_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
+          echo ${{ steps.create-branch.outputs.database_url }} | vercel env add DATABASE_WRITE_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
+          echo ${{ steps.create-branch.outputs.database_url }} | vercel env add DATABASE_WRITE_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
+          echo ${{ steps.create-branch.outputs.database_url }} | vercel env add DIRECT_DATABASE_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
 
     outputs:
       git_branch_name: ${{ steps.branch-name.outputs.current_branch }}
