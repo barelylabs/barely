@@ -58,7 +58,7 @@ jobs:
 
           pnpm db:push
 
-          echo "DATABASE_URL=$DATABASE_URL" >> $GITHUB_OUTPUT
+          echo "database_url=$DATABASE_URL" >> $GITHUB_OUTPUT
 
     outputs:
       git_branch_name: ${{ steps.branch-name.outputs.current_branch }}
@@ -73,6 +73,7 @@ jobs:
       VERCEL_ACCESS_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -82,28 +83,29 @@ jobs:
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
+      # For now, we're manually removing and re-adding the environment variables. Might be a simpler way to directly replace them, but got errors when trying to do that.
       - name: Update Vercel Environment Variables for this Branch
         run: |
-          vercel env rm DATABASE_READ_POOL_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} --yes
-          vercel env rm DATABASE_READ_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} --yes
-          vercel env rm DATABASE_WRITE_POOL_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} --yes
-          vercel env rm DATABASE_WRITE_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} --yes
-          vercel env rm DIRECT_DATABASE_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} --yes
-          echo ${{ needs.neon-preview.outputs.database_url }}  | vercel env add DATABASE_READ_POOL_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
-          echo ${{ needs.neon-preview.outputs.database_url }}  | vercel env add DATABASE_READ_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
-          echo ${{ needs.neon-preview.outputs.database_url }}  | vercel env add DATABASE_WRITE_POOL_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
-          echo ${{ needs.neon-preview.outputs.database_url }}  | vercel env add DATABASE_WRITE_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
-          echo ${{ needs.neon-preview.outputs.database_url }}  | vercel env add DIRECT_DATABASE_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
+          vercel env rm DATABASE_READ_POOL_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --yes
+          vercel env rm DATABASE_READ_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --yes
+          vercel env rm DATABASE_WRITE_POOL_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --yes
+          vercel env rm DATABASE_WRITE_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --yes
+          vercel env rm DIRECT_DATABASE_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --yes
+          echo ${{ needs.neon-preview.outputs.database_url }}  | vercel env add DATABASE_READ_POOL_URL preview ${{ needs.neon-preview.outputs.git_branch_name }}
+          echo ${{ needs.neon-preview.outputs.database_url }}  | vercel env add DATABASE_READ_URL preview ${{ needs.neon-preview.outputs.git_branch_name }}
+          echo ${{ needs.neon-preview.outputs.database_url }}  | vercel env add DATABASE_WRITE_POOL_URL preview ${{ needs.neon-preview.outputs.git_branch_name }}
+          echo ${{ needs.neon-preview.outputs.database_url }}  | vercel env add DATABASE_WRITE_URL preview ${{ needs.neon-preview.outputs.git_branch_name }}
+          echo ${{ needs.neon-preview.outputs.database_url }}  | vercel env add DIRECT_DATABASE_URL preview ${{ needs.neon-preview.outputs.git_branch_name }}
 
       - name: Pull Vercel Environment Information
-        run: vercel env pull --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} .env
+        run: vercel env pull --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} .env
 
       - name: Build App Project Artifacts
         run: pnpm build --filter=@barely/app
 
       - name: Deploy App Preview to Vercel
         id: deploy-app
-        run: echo preview_url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --) >> $GITHUB_OUTPUT
+        run: echo preview_url=$(vercel deploy --prebuilt --) >> $GITHUB_OUTPUT
 
       - name: Comment on Pull Request
         uses: thollander/actions-comment-pull-request@v2
