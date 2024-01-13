@@ -9,7 +9,10 @@ export function getBaseUrl(devPort?: string) {
     return ""; // browser should use relative url
   }
 
-  if (process.env.VERCEL_ENV === "production") {
+  if (
+    process.env.VERCEL_ENV === "production" ||
+    process.env.VERCEL_ENV === "preview"
+  ) {
     if (!process.env.VERCEL_URL) throw new Error("VERCEL_URL not found");
     return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
   }
@@ -20,7 +23,10 @@ export function getBaseUrl(devPort?: string) {
 }
 
 export function getAbsoluteBaseUrl(devPort?: string) {
-  if (process.env.VERCEL_ENV === "production") {
+  if (
+    process.env.VERCEL_ENV === "production" ||
+    process.env.VERCEL_ENV === "preview"
+  ) {
     if (!process.env.VERCEL_URL) throw new Error("VERCEL_URL not found");
     return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
   }
