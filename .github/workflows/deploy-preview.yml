@@ -119,7 +119,7 @@ jobs:
       - name: Deploy App Preview to Vercel
         id: deploy-app
         run: |
-          PREVIEW_URL = $(vercel deploy --prebuilt --)
+          PREVIEW_URL = $(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
           echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT          
           echo "Deployed to (calc from git branch) ${{ steps.vercel-env.outputs.preview_url }}"
           echo "Deployed to (deploy-result) $PREVIEW_URL"
