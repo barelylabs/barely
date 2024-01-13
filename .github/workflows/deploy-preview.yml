@@ -65,8 +65,7 @@ jobs:
       # For now, we're manually removing and re-adding the environment variables. Might be a simpler way to directly replace them, but got errors when trying to do that.
       - name: Update Vercel Environment Variables for this Branch
         run: |
-          echo "DATABASE_URL: $DATABASE_URL"          
-          echo "Length of DATABASE_URL: ${#$DATABASE_URL}"          
+          echo "DATABASE_URL: $DATABASE_URL"                    
 
           vercel env rm DATABASE_READ_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} --yes --token=${{ secrets.VERCEL_TOKEN }}
           vercel env rm DATABASE_READ_URL preview ${{ steps.branch-name.outputs.current_branch }} --yes --token=${{ secrets.VERCEL_TOKEN }}
