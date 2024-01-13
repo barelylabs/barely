@@ -58,12 +58,14 @@ jobs:
 
           pnpm db:push
 
-          echo "DATABASE_URL=$DATABASE_URL" >> $GITHUB_ENV
-          echo "Length of DATABASE_URL: ${#DATABASE_URL}"
+          echo "database_url=$DATABASE_URL" >> $GITHUB_OUTPUT
+          echo "database_url_2=$DATABASE_URL" >> $env:GITHUB_OUTPUT
 
     outputs:
       git_branch_name: ${{ steps.branch-name.outputs.current_branch }}
       neon_branch_id: ${{ steps.get-neon-branch-id.outputs.branch_id }}
+      database_url: ${{ steps.drizzle.outputs.DATABASE_URL }}
+      database_url_2: ${{ steps.drizzle.outputs.DATABASE_URL_2 }}
 
   app-deploy:
     name: vercel preview - app.barely.io
@@ -74,6 +76,8 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      DATABASE_URL: ${{ needs.neon-preview.outputs.database_url }}
+      DATABASE_URL_2: ${{ needs.neon-preview.outputs.database_url_2 }}
     steps:
       - uses: actions/checkout@v4
 
@@ -88,7 +92,8 @@ jobs:
       - name: Update Vercel Environment Variables for this Branch
         run: |
 
-          echo "Length of DATABASE_URL: ${#DATABASE_URL}"
+          echo "Length of DATABASE_URL: ${#$DATABASE_URL}"
+          echo "Length of DATABASE_URL_2: ${#$DATABASE_URL_2}"
 
           vercel env rm DATABASE_READ_POOL_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --yes --token=${{ secrets.VERCEL_TOKEN }}
           vercel env rm DATABASE_READ_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --yes --token=${{ secrets.VERCEL_TOKEN }}
