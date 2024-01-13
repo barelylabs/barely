@@ -55,22 +55,23 @@ jobs:
 
           echo DATABASE_WRITE_URL=$DATABASE_WRITE_URL >> .env
 
-          echo "::set-output name=database_url::$DATABASE_URL"
-          echo "::set-output name=database_write_url::$DATABASE_WRITE_URL"
+          echo "DATABASE_URL=$DATABASE_URL" >> $GITHUB_OUTPUT
+          echo "DATABASE_WRITE_URL=$DATABASE_WRITE_URL" >> $GITHUB_OUTPUT
 
           pnpm db:push
 
-      - name: Update Vercel Env Variables for this Git Branch
-        run: |
-          echo ${{ steps.create-branch.outputs.database_url }} | vercel env add DATABASE_READ_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
-          echo ${{ steps.create-branch.outputs.database_url }} | vercel env add DATABASE_READ_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
-          echo ${{ steps.create-branch.outputs.database_url }} | vercel env add DATABASE_WRITE_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
-          echo ${{ steps.create-branch.outputs.database_url }} | vercel env add DATABASE_WRITE_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
-          echo ${{ steps.create-branch.outputs.database_url }} | vercel env add DIRECT_DATABASE_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
+      # - name: Update Vercel Env Variables for this Git Branch
+      #   run: |
+      #     echo ${{ steps.create-branch.outputs.database_url }} | vercel env add DATABASE_READ_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
+      #     echo ${{ steps.create-branch.outputs.database_url }} | vercel env add DATABASE_READ_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
+      #     echo ${{ steps.create-branch.outputs.database_url }} | vercel env add DATABASE_WRITE_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
+      #     echo ${{ steps.create-branch.outputs.database_url }} | vercel env add DATABASE_WRITE_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
+      #     echo ${{ steps.create-branch.outputs.database_url }} | vercel env add DIRECT_DATABASE_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
 
     outputs:
       git_branch_name: ${{ steps.branch-name.outputs.current_branch }}
       neon_branch_id: ${{ steps.get-neon-branch-id.outputs.branch_id }}
+      database_url: ${{ steps.create-branch.outputs.database_url }}
 
   app-deploy:
     name: vercel preview - app.barely.io
@@ -88,6 +89,14 @@ jobs:
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
+
+      - name: Update Vercel Environment Variables for this Branch
+        run: |
+          echo ${{ needs.neon-preview.outputs.database_url }}  | vercel env add DATABASE_READ_POOL_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
+          echo ${{ needs.neon-preview.outputs.database_url }}  | vercel env add DATABASE_READ_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
+          echo ${{ needs.neon-preview.outputs.database_url }}  | vercel env add DATABASE_WRITE_POOL_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
+          echo ${{ needs.neon-preview.outputs.database_url }}  | vercel env add DATABASE_WRITE_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
+          echo ${{ needs.neon-preview.outputs.database_url }}  | vercel env add DIRECT_DATABASE_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Pull Vercel Environment Information
         run: vercel env pull --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} .env
