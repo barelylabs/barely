@@ -81,15 +81,17 @@ jobs:
         uses: ./tooling/github/setup
 
       - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+        run: |
+          npm install --global vercel@latest
+          vercel --token=${{ secrets.VERCEL_TOKEN }}
 
       # For now, we're manually removing and re-adding the environment variables. Might be a simpler way to directly replace them, but got errors when trying to do that.
       - name: Update Vercel Environment Variables for this Branch
         run: |
-          vercel env rm DATABASE_READ_POOL_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --yes
-          vercel env rm DATABASE_READ_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --yes
+          vercel env rm DATABASE_READ_POOL_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --yes 
+          vercel env rm DATABASE_READ_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --yes 
           vercel env rm DATABASE_WRITE_POOL_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --yes
-          vercel env rm DATABASE_WRITE_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --yes
+          vercel env rm DATABASE_WRITE_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --yes 
           vercel env rm DIRECT_DATABASE_URL preview ${{ needs.neon-preview.outputs.git_branch_name }} --yes
           echo ${{ needs.neon-preview.outputs.database_url }}  | vercel env add DATABASE_READ_POOL_URL preview ${{ needs.neon-preview.outputs.git_branch_name }}
           echo ${{ needs.neon-preview.outputs.database_url }}  | vercel env add DATABASE_READ_URL preview ${{ needs.neon-preview.outputs.git_branch_name }}
