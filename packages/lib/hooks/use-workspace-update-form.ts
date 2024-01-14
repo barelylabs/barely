@@ -36,7 +36,12 @@ export function useWorkspaceUpdateForm() {
       };
     },
     onSuccess: async (data, variables, context) => {
-      if (context?.handleChanged && context.oldHandle && context.newHandle) {
+      if (
+        context?.handleChanged &&
+        context.oldHandle &&
+        context.newHandle &&
+        currentPath
+      ) {
         return router.push(
           currentPath.replace(context.oldHandle, context.newHandle),
         );

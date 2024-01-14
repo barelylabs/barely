@@ -1,3 +1,4 @@
+import type { ReadonlyURLSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
@@ -41,11 +42,13 @@ export function useTypedQuery<T extends z.AnyZodObject>(
   type ArrayOutput = FilteredKeys<FullOutput, unknown[]>;
   type ArrayOutputKeys = keyof ArrayOutput;
 
-  const pathname = usePathname();
   const router = useRouter();
-  const unparsedQuery = useSearchParams();
+  const pathname = usePathname() as null | string;
+  const unparsedQuery = useSearchParams() as null | ReadonlyURLSearchParams;
 
-  const parsedQuerySchema = schema.safeParse(Object.fromEntries(unparsedQuery));
+  const parsedQuerySchema = unparsedQuery
+    ? schema.safeParse(Object.fromEntries(unparsedQuery))
+    : schema.safeParse({});
 
   let parsedQuery: Output = useMemo(() => {
     return {} as Output;
@@ -115,14 +118,6 @@ export function useTypedQuery<T extends z.AnyZodObject>(
   );
 
   function removeByKey(key: OutputOptionalKeys) {
-    // const { [key]: _, ...newQuery } = parsedQuery;
-    // const queryString = new URLSearchParams(newQuery).toString();
-    // const newPath = `${pathname}${queryString.length > 0 ? `?${queryString}` : ''}`;
-    // if (options?.replace) {
-    // 	router.replace(newPath);
-    // } else {
-    // 	router.push(newPath);
-    // }
     const newPath = getRemoveByKeyPath(key);
     setPath(newPath);
   }
@@ -164,6 +159,7 @@ export function useTypedQuery<T extends z.AnyZodObject>(
 
   // Remove all query params from the URL
   function removeAllQueryParams() {
+    if (!pathname) return;
     router.replace(pathname);
   }
 

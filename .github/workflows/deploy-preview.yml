@@ -128,7 +128,7 @@ jobs:
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            Vercel Preview URL :rocket: : calc_${{ steps.vercel-env.outputs.preview_url }} deploy_${{ steps.deploy-app.outputs.preview_url }}
+            Vercel Preview URL :rocket: : https://${{ steps.vercel-env.outputs.preview_url }}
             Neon branch :elephant: : https://console.neon.tech/app/projects/${{ secrets.NEON_PROJECT_ID }}/branches/${{ needs.neon-preview.outputs.neon_branch_id }}
 
   # link-deploy:
