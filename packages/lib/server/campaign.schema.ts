@@ -5,11 +5,12 @@ import { z } from "zod";
 import type { Genre } from "./genre.schema";
 import type { Track } from "./track.schema";
 import type { Workspace } from "./workspace.schema";
-import { APP_BASE_URL } from "../utils/constants";
-import { zGet } from "../utils/zod-fetch";
+// import { APP_BASE_URL } from "../utils/constants";
+
 import { playlistPitchSettings } from "./campaign.settings";
 import { Campaigns } from "./campaign.sql";
 import { insertGenreSchema } from "./genre.schema";
+import { getTotalPlaylistReachByGenres_SA } from "./playlist.actions";
 import { createTrackSchema, upsertTrackSchema } from "./track.schema";
 import { newUserContactInfoSchemaWithRole } from "./user.schema";
 import {
@@ -86,20 +87,27 @@ const playlistPitchGenresSchema = z
     // sort genres alphabetically so any order of a specific combination will be cached the same
     g.sort((a, b) => a.name.localeCompare(b.name));
 
-    const res = await zGet(
-      `${APP_BASE_URL}/api/rest/playlist/reach-by-genres?genres=${encodeURIComponent(
-        g.map((_g) => _g.name).join(","),
-      )}`,
-      z.object({ totalPlaylists: z.number(), totalCurators: z.number() }),
+    const { totalCurators } = await getTotalPlaylistReachByGenres_SA(
+      g.map((g) => g.id),
     );
 
-    console.log("totalPlaylistReach => ", res);
+    return totalCurators > playlistPitchSettings.minCuratorReach;
+    // const res = await zGet(
+    //   `${
+    //     env.NEXT_PUBLIC_APP_BASE_URL
+    //   }/api/rest/playlist/reach-by-genres?genres=${encodeURIComponent(
+    //     g.map((_g) => _g.name).join(","),
+    //   )}`,
+    //   z.object({ totalPlaylists: z.number(), totalCurators: z.number() }),
+    // );
 
-    if (res.success && res.parsed) {
-      return res.data.totalPlaylists > playlistPitchSettings.minCuratorReach;
-    }
+    // console.log("totalPlaylistReach => ", res);
 
-    console.error("Failed to get totalPlaylistReach", res.data);
+    // if (res.success && res.parsed) {
+    //   return res.data.totalPlaylists > playlistPitchSettings.minCuratorReach;
+    // }
+
+    // console.error("Failed to get totalPlaylistReach", res.data);
 
     return false;
   }, "More curators plz");

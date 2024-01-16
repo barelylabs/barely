@@ -307,6 +307,7 @@ export const Icon = {
   plus: Plus,
   plusCircle: PlusCircle,
   post: FileText,
+  press: Newspaper,
   profile: CircleUserRound,
 
   qr: QrCode,

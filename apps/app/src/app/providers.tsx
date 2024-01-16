@@ -8,12 +8,14 @@ import { pageSessionAtom } from "@barely/atoms/session.atom";
 import { useWorkspaceHandle } from "@barely/hooks/use-workspace";
 import { ThemeProvider } from "@barely/ui/elements/next-theme-provider";
 import { TooltipProvider } from "@barely/ui/elements/tooltip";
-import { APP_BASE_URL } from "@barely/utils/constants";
+// import { APP_BASE_URL } from "@barely/utils/constants";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ReactQueryStreamedHydration } from "@tanstack/react-query-next-experimental";
 import { loggerLink, unstable_httpBatchStreamLink } from "@trpc/client";
 import { Provider as JotaiProvider, useAtomValue } from "jotai";
+
+import env from "~/env";
 
 export function TRPCReactProvider(props: {
   children: ReactNode;
@@ -50,14 +52,14 @@ export function TRPCReactProvider(props: {
         (runtime) => {
           const servers = {
             node: unstable_httpBatchStreamLink({
-              url: `${APP_BASE_URL}/api/node`,
+              url: `${env.NEXT_PUBLIC_APP_BASE_URL}/api/node`,
               headers() {
                 return preparedHeaders;
               },
             })(runtime),
 
             edge: unstable_httpBatchStreamLink({
-              url: `${APP_BASE_URL}/api/edge`,
+              url: `${env.NEXT_PUBLIC_APP_BASE_URL}/api/edge`,
               headers() {
                 return preparedHeaders;
               },

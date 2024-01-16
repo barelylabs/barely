@@ -3,7 +3,7 @@ import { and, eq } from "drizzle-orm";
 
 import type { SessionUser } from ".";
 import type { Db } from "../db";
-import { APP_BASE_URL } from "../../utils/constants";
+// import { APP_BASE_URL } from "../../utils/constants";
 import { dbRead } from "../../utils/db";
 import { newId } from "../../utils/id";
 import { insertProviderAccountSchema } from "../provider-account.schema";
@@ -172,12 +172,12 @@ export function NeonAdapter(db: Db): Adapter {
             );
 
           // trigger syncing playlists, but don't wait for it to finish. otherwise, the user hangs on the spotify auth screen which is confusing
-          const syncPlaylistsEndpoint = `${APP_BASE_URL}/api/rest/spotify/sync-playlists/${account.providerAccountId}`;
+          // const syncPlaylistsEndpoint = `${env.NEXT_PUBLIC_APP_BASE_URL}/api/rest/spotify/sync-playlists/${account.providerAccountId}`;
 
-          // eslint-disable-next-line @typescript-eslint/no-floating-promises
-          fetch(syncPlaylistsEndpoint, {
-            method: "POST",
-          });
+          // // eslint-disable-next-line @typescript-eslint/no-floating-promises
+          // fetch(syncPlaylistsEndpoint, {
+          //   method: "POST",
+          // }); //fixme: was having trouble with open-api. figure out how to call separate instance to sync playlists in the background.
         }
       });
     },

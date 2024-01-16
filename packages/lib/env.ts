@@ -35,6 +35,8 @@ const serverEnvSchema = pickServerEnvSchema([
 ]);
 
 const clientEnvSchema = pickClientEnvSchema([
+  "NEXT_PUBLIC_APP_BASE_URL",
+  "NEXT_PUBLIC_APP_BASE_URL",
   "NEXT_PUBLIC_CLOUDINARY_API_KEY",
   "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME",
   "NEXT_PUBLIC_PUSHER_APP_ID",

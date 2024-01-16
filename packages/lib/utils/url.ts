@@ -1,37 +1,37 @@
-import { APP_BASE_URL } from "./constants";
+import env from "../env";
 
 export function absoluteUrl_App(path: string) {
-  return `${APP_BASE_URL}${path}`;
+  return `${env.NEXT_PUBLIC_APP_ABSOLUTE_BASE_URL}${path}`;
 }
 
-export function getBaseUrl(devPort?: string) {
-  if (typeof window !== "undefined") {
-    return ""; // browser should use relative url
-  }
+// export function getBaseUrl(devPort?: string) {
+//   if (typeof window !== "undefined") {
+//     return ""; // browser should use relative url
+//   }
 
-  if (
-    process.env.VERCEL_ENV === "production" ||
-    process.env.VERCEL_ENV === "preview"
-  ) {
-    if (!process.env.VERCEL_URL) throw new Error("VERCEL_URL not found");
-    return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
-  }
+//   if (
+//     process.env.VERCEL_ENV === "production" ||
+//     process.env.VERCEL_ENV === "preview"
+//   ) {
+//     if (!process.env.VERCEL_URL) throw new Error("VERCEL_URL not found");
+//     return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
+//   }
 
-  if (!devPort) console.error("devPort not found for base url");
+//   if (!devPort) console.error("devPort not found for base url");
 
-  return `http://localhost:${devPort ?? ""}`; // dev SSR should use localhost
-}
+//   return `http://localhost:${devPort ?? ""}`; // dev SSR should use localhost
+// }
 
-export function getAbsoluteBaseUrl(devPort?: string) {
-  if (
-    process.env.VERCEL_ENV === "production" ||
-    process.env.VERCEL_ENV === "preview"
-  ) {
-    if (!process.env.VERCEL_URL) throw new Error("VERCEL_URL not found");
-    return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
-  }
+// export function getAbsoluteBaseUrl(devPort?: string) {
+//   if (
+//     process.env.VERCEL_ENV === "production" ||
+//     process.env.VERCEL_ENV === "preview"
+//   ) {
+//     if (!process.env.VERCEL_URL) throw new Error("VERCEL_URL not found");
+//     return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
+//   }
 
-  if (!devPort) console.error("devPort not found for base url");
+//   if (!devPort) console.error("devPort not found for base url");
 
-  return `http://localhost:${devPort ?? ""}`; // dev SSR should use localhost
-}
+//   return `http://localhost:${devPort ?? ""}`; // dev SSR should use localhost
+// }

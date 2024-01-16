@@ -19,8 +19,6 @@ export const statRouter = router({
         throw new Error("an assetId is required");
       }
 
-      console.log("input => ", input);
-
       const timeseries = await pipe_webHitsTimeseries({
         ...input,
         workspaceId: ctx.workspace?.id,

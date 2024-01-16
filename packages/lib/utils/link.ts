@@ -2,11 +2,10 @@ import type { Metadata } from "next";
 import { parse } from "node-html-parser";
 
 import type { Link, LinkMetaTags } from "../server/link.schema";
+import env from "../env";
 import {
   ccTLDs,
   GOOGLE_FAVICON_URL,
-  HOME_DOMAIN,
-  LINK_ABSOLUTE_BASE_URL,
   SECOND_LEVEL_DOMAINS,
   SPECIAL_APEX_DOMAINS,
 } from "./constants";
@@ -17,7 +16,7 @@ export function getShortLinkUrlFromLink(link: Link) {
     process.env.NODE_ENV === "development" ||
     process.env.NODE_ENV === "test"
   ) {
-    return `${LINK_ABSOLUTE_BASE_URL}/${link.key}?domain=${link.domain}`;
+    return `${env.NEXT_PUBLIC_LINK_ABSOLUTE_BASE_URL}/${link.key}?domain=${link.domain}`;
   }
   return `https://${link.domain}/${link.key}`;
 }
@@ -183,7 +182,7 @@ export function constructMetadata({
       creator: "@dubdotco",
     },
     icons,
-    metadataBase: new URL(HOME_DOMAIN),
+    metadataBase: new URL(env.NEXT_PUBLIC_APP_ABSOLUTE_BASE_URL),
     ...(noIndex && {
       robots: {
         index: false,

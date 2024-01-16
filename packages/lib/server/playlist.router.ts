@@ -81,12 +81,12 @@ const playlistRouter = router({
     }),
 
   countByGenres: publicProcedure
-    .meta({
-      openapi: {
-        method: "GET",
-        path: "/playlist/reach-by-genres",
-      },
-    })
+    // .meta({
+    //   openapi: {
+    //     method: "GET",
+    //     path: "/playlist/reach-by-genres",
+    //   },
+    // })
     .input(
       z.object({
         genreIds: z.preprocess(
@@ -100,21 +100,21 @@ const playlistRouter = router({
         ),
       }),
     )
-    .output(
-      z.object({
-        totalPlaylists: z.number(),
-        totalCurators: z.number(),
-        averagePlaylistsPerCurator: z.number(),
-      }),
-    )
+    // .output(
+    //   z.object({
+    //     totalPlaylists: z.number(),
+    //     totalCurators: z.number(),
+    //     averagePlaylistsPerCurator: z.number(),
+    //   }),
+    // )
     .query(async ({ ctx, input }) => {
-      const { totalPlaylists, totalCurators } =
+      const { totalPlaylists, totalCurators, averagePlaylistsPerCurator } =
         await totalPlaylistReachByGenres(input.genreIds, ctx.db);
 
       return {
         totalPlaylists,
         totalCurators,
-        averagePlaylistsPerCurator: Math.ceil(totalPlaylists / totalCurators),
+        averagePlaylistsPerCurator,
       };
     }),
 

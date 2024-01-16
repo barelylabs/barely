@@ -17,9 +17,10 @@ import {
   DropdownMenuTrigger,
 } from "@barely/ui/elements/dropdown-menu";
 import { Icon } from "@barely/ui/elements/icon";
-import { APP_BASE_URL } from "@barely/utils/constants";
+// import { APP_BASE_URL } from "@barely/utils/constants";
 import { signOut } from "next-auth/react";
 
+import env from "~/env";
 import { UserAvatar } from "./user-avatar";
 
 // export function UserAccountNav({ user }: UserAccountNavProps) {
@@ -75,7 +76,7 @@ export function UserAccountNav() {
             event.preventDefault();
             setSigningOut(true);
             signOut({
-              callbackUrl: `${APP_BASE_URL}/login`,
+              callbackUrl: `${env.NEXT_PUBLIC_APP_BASE_URL}/login`,
             }).catch((err) => console.error(err));
           }}
         >

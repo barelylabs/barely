@@ -6,6 +6,8 @@ import {
   parsePhoneNumber,
 } from "libphonenumber-js/min";
 
+import type { Db } from "../server/db";
+
 type CountryCode = "US" | "CA";
 
 const parseIncompletePhoneNumber = ({
@@ -39,6 +41,20 @@ const formatInternational = (input: string) => {
 const parseForDb = (input: string) => {
   return "+" + parseDigits(input);
 };
+
+export async function checkPhoneNumberExists(phone: string, db?: Db) {
+  if (window === undefined && !!db) {
+    const { checkPhoneNumberExistsServerAction } = await import(
+      "../server/user.actions"
+    );
+    return checkPhoneNumberExistsServerAction(phone);
+  }
+
+  const { checkPhoneNumberExistsServerAction } = await import(
+    "../server/user.actions"
+  );
+  return checkPhoneNumberExistsServerAction(phone);
+}
 
 export {
   parseIncompletePhoneNumber,

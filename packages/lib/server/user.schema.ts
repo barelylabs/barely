@@ -1,14 +1,16 @@
-import type { InferModel } from "drizzle-orm";
+import type { InferSelectModel } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
-import { APP_BASE_URL } from "../utils/constants";
-import { checkEmailExists, isRealEmail } from "../utils/email";
+import { isRealEmail } from "../utils/email";
 import {
   formatInternational,
   isPossiblePhoneNumber,
 } from "../utils/phone-number";
-import { zGet } from "../utils/zod-fetch";
+import {
+  checkEmailExistsServerAction,
+  checkPhoneNumberExistsServerAction,
+} from "./user.actions";
 import { _Users_To_Workspaces, Users } from "./user.sql";
 
 export const insertUserSchema = createInsertSchema(Users, {
@@ -28,7 +30,7 @@ export const updateUserSchema = insertUserSchema
   .required({ id: true });
 export const selectUserSchema = createSelectSchema(Users);
 
-export type User = InferModel<typeof Users, "select">;
+export type User = InferSelectModel<typeof Users>;
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type CreateUser = z.infer<typeof createUserSchema>;
@@ -38,10 +40,7 @@ export type SelectUser = z.infer<typeof selectUserSchema>;
 // joins
 export const insert_User_To_Workspace_Schema =
   createInsertSchema(_Users_To_Workspaces);
-export type User_To_Workspace = InferModel<
-  typeof _Users_To_Workspaces,
-  "select"
->;
+export type User_To_Workspace = InferSelectModel<typeof _Users_To_Workspaces>;
 
 // forms
 export const phoneNumberInUseMessage =
@@ -62,7 +61,7 @@ export const newUserContactInfoSchema = z.object({
 
       if (!isRealEmail(email)) return false;
 
-      const emailExists = await checkEmailExists(email);
+      const emailExists = await checkEmailExistsServerAction(email);
 
       return !emailExists;
     }, emailInUseMessage),
@@ -78,12 +77,7 @@ export const newUserContactInfoSchema = z.object({
       if (!phone.length) return true;
       if (!isPossiblePhoneNumber(phone)) return false;
 
-      const phoneNumberExists = await zGet(
-        `${APP_BASE_URL}/api/rest/user/phone-number-exists?phone=${encodeURIComponent(
-          phone,
-        )}`,
-        z.boolean(),
-      );
+      const phoneNumberExists = await checkPhoneNumberExistsServerAction(phone);
       return !phoneNumberExists;
     }, phoneNumberInUseMessage)
     .transform((phone) => (!phone.length ? null : formatInternational(phone)))

@@ -2,10 +2,10 @@ import type { FieldPath, FieldValues } from "react-hook-form";
 import { useState } from "react";
 import { Controller } from "react-hook-form";
 
-import type { TextareaProps } from "../elements/text-area";
+import type { TextareaProps } from "../elements/textarea";
 // import { Input, InputProps } from '../elements/input';
 import type { FieldProps } from "./field-wrapper";
-import { Textarea } from "../elements/text-area";
+import { Textarea } from "../elements/textarea";
 import {
   FieldControl,
   FieldDescription,
@@ -42,7 +42,6 @@ export const TextAreaField = <
                   {...field}
                   {...props}
                   onChange={(e) => {
-                    console.log("onchange");
                     field.onChange(e);
                     props.onChange?.(e);
                   }}

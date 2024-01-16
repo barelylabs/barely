@@ -217,9 +217,14 @@ const totalPlaylistReachByGenres = async (genreIds: Genre["id"][], db: Db) => {
     });
   });
 
+  const totalPlaylists = uniquePlaylists.size;
+  const totalCurators = uniqueCurators.size;
+  const averagePlaylistsPerCurator = Math.ceil(totalPlaylists / totalCurators);
+
   return {
-    totalPlaylists: uniquePlaylists.size,
-    totalCurators: uniqueCurators.size,
+    totalPlaylists,
+    totalCurators,
+    averagePlaylistsPerCurator,
   };
 };
 

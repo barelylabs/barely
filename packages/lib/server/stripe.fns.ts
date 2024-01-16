@@ -15,12 +15,13 @@ import type { Workspace } from "./workspace.schema";
 import type { PlanType } from "./workspace.settings";
 import env from "../env";
 import { playlistPitchCostInDollars } from "../utils/campaign";
-import { APP_BASE_URL } from "../utils/constants";
+// import { APP_BASE_URL } from "../utils/constants";
 import { dbRead } from "../utils/db";
 import { newId } from "../utils/id";
 import { log } from "../utils/log";
 import { fullNameToFirstAndLast } from "../utils/name";
 import { pushEvent } from "../utils/pusher-server";
+import { absoluteUrl_App } from "../utils/url";
 import { Campaigns } from "./campaign.sql";
 import { assignPlaylistPitchToReviewers } from "./playlist-pitch-review.fns";
 import { totalPlaylistReachByGenres } from "./playlist.fns";
@@ -104,13 +105,19 @@ export async function createPlanCheckoutLink(props: {
     throw new Error("User must have a stripeId.");
   }
 
-  const successUrl =
-    `${APP_BASE_URL}/` + props.successPath ??
-    `${props.workspace.handle}/settings/billing?success=true`;
+  const successUrl = absoluteUrl_App(
+    props.successPath ??
+      `${props.workspace.handle}/settings/billing?success=true`,
+  );
+  // )`${env.absolu}/` + props.successPath ??
+  // `${props.workspace.handle}/settings/billing?success=true`;
 
-  const cancelUrl =
-    `${APP_BASE_URL}/` + props.cancelPath ??
-    `${props.workspace.handle}/settings/billing`;
+  // const cancelUrl =
+  //   `${APP_BASE_URL}/` + props.cancelPath ??
+  //   `${props.workspace.handle}/settings/billing`;
+  const cancelUrl = absoluteUrl_App(
+    props.cancelPath ?? `${props.workspace.handle}/settings/billing`,
+  );
 
   const metadata: StripeTransactionMetadata = {
     createdById: user.id,
@@ -170,8 +177,16 @@ export async function createPitchCheckoutLink(props: {
     throw new Error("User must have a stripeId.");
   }
 
-  const successUrl = `${APP_BASE_URL}/${props.campaign.workspace.handle}/campaign/${props.campaign.id}?success=true`;
-  const cancelUrl = `${APP_BASE_URL}/${props.campaign.workspace.handle}/campaign/${props.campaign.id}/launch`;
+  // const successUrl = `${APP_BASE_URL}/${props.campaign.workspace.handle}/campaign/${props.campaign.id}?success=true`;
+  // const cancelUrl = `${APP_BASE_URL}/${props.campaign.workspace.handle}/campaign/${props.campaign.id}/launch`;
+
+  const successUrl = absoluteUrl_App(
+    `${props.campaign.workspace.handle}/campaign/${props.campaign.id}?success=true`,
+  );
+
+  const cancelUrl = absoluteUrl_App(
+    `${props.campaign.workspace.handle}/campaign/${props.campaign.id}/launch`,
+  );
 
   const costInDollars = playlistPitchCostInDollars({
     curatorReach: props.campaign.curatorReach,

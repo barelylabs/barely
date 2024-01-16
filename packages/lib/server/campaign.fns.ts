@@ -14,7 +14,7 @@ import type {
 import type { Db } from "./db";
 import type { User } from "./user.schema";
 import env from "../env";
-import { APP_BASE_URL } from "../utils/constants";
+// import { APP_BASE_URL } from "../utils/constants";
 import { dbRead } from "../utils/db";
 import { newId } from "../utils/id";
 import { sendText } from "../utils/sms";
@@ -233,7 +233,7 @@ export async function createPlaylistPitchCampaign(props: {
     type: "transactional",
     react: PlaylistPitchToScreenEmailTemplate({
       firstName: "Adam",
-      loginLink: `${APP_BASE_URL}/screen`,
+      loginLink: `${env.NEXT_PUBLIC_APP_BASE_URL}/screen`,
     }),
   });
 
@@ -248,7 +248,7 @@ export async function createPlaylistPitchCampaign(props: {
     const userConfirmEmailLink = await createLoginLink({
       provider: "email",
       identifier: props.user.email,
-      callbackUrl: `${APP_BASE_URL}/${campaign.workspace.handle}/campaigns`,
+      callbackUrl: `${env.NEXT_PUBLIC_APP_BASE_URL}/${campaign.workspace.handle}/campaigns`,
     });
 
     await sendEmail({

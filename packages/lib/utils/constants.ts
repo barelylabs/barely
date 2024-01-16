@@ -1,4 +1,4 @@
-import { getAbsoluteBaseUrl, getBaseUrl } from "./url";
+// import { getAbsoluteBaseUrl, getBaseUrl } from "./url";
 
 export const GOOGLE_FAVICON_URL =
   "https://www.google.com/s2/favicons?sz=64&domain_url=";
@@ -11,21 +11,21 @@ export const SECOND_LEVEL_DOMAINS = new Set([
   "gov",
   "in",
 ]);
-export const APP_BASE_URL = getBaseUrl(process.env.NEXT_PUBLIC_APP_DEV_PORT);
-export const LINK_BASE_URL = getBaseUrl(process.env.NEXT_PUBLIC_LINK_DEV_PORT);
-export const WWW_BASE_URL = getBaseUrl(process.env.NEXT_PUBLIC_WWW_DEV_PORT);
+// export const APP_BASE_URL = getBaseUrl(process.env.NEXT_PUBLIC_APP_DEV_PORT);
+// export const LINK_BASE_URL = getBaseUrl(process.env.NEXT_PUBLIC_LINK_DEV_PORT);
+// export const WWW_BASE_URL = getBaseUrl(process.env.NEXT_PUBLIC_WWW_DEV_PORT);
 
-export const LINK_ABSOLUTE_BASE_URL = getAbsoluteBaseUrl(
-  process.env.NEXT_PUBLIC_LINK_DEV_PORT,
-);
-export const APP_ABSOLUTE_BASE_URL = getAbsoluteBaseUrl(
-  process.env.NEXT_PUBLIC_APP_DEV_PORT,
-);
-export const WWW_ABSOLUTE_BASE_URL = getAbsoluteBaseUrl(
-  process.env.NEXT_PUBLIC_WWW_DEV_PORT,
-);
+// export const LINK_ABSOLUTE_BASE_URL = getAbsoluteBaseUrl(
+//   process.env.NEXT_PUBLIC_LINK_DEV_PORT,
+// );
+// export const APP_ABSOLUTE_BASE_URL = getAbsoluteBaseUrl(
+//   process.env.NEXT_PUBLIC_APP_DEV_PORT,
+// );
+// export const WWW_ABSOLUTE_BASE_URL = getAbsoluteBaseUrl(
+//   process.env.NEXT_PUBLIC_WWW_DEV_PORT,
+// );
 
-export const HOME_DOMAIN = `https://${APP_BASE_URL}`;
+// export const HOME_DOMAIN = `https://${APP_BASE_URL}`;
 
 export const SPECIAL_APEX_DOMAINS = new Set([
   "my.id",

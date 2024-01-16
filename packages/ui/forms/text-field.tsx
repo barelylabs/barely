@@ -48,7 +48,6 @@ export const TextField = <
                       {...field}
                       {...props}
                       onChange={(e) => {
-                        console.log("onchange");
                         field.onChange(e);
                         props.onChange?.(e);
                       }}

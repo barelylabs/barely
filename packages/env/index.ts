@@ -5,44 +5,56 @@ import { z } from "zod";
 
 // throw new Error('This file should not be imported directly');™
 
-// function getBaseUrl(devPort?: string) {
-// 	if (typeof window !== 'undefined') {
-// 		return ''; // browser should use relative url
-// 	}
+function getBaseUrl({
+  devPort,
+  absolute = false,
+}: {
+  devPort?: string;
+  absolute?: boolean;
+}) {
+  if (!absolute && typeof window !== "undefined") {
+    return ""; // browser should use relative url
+  }
 
-// 	if (process.env.VERCEL_ENV === 'production') {
-// 		if (!process.env.VERCEL_URL) throw new Error('VERCEL_URL not found');
-// 		return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
-// 	}
+  if (
+    process.env.VERCEL_ENV === "production" ||
+    process.env.VERCEL_ENV === "preview"
+  ) {
+    if (!process.env.VERCEL_URL) throw new Error("VERCEL_URL not found");
+    return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
+  }
 
-// 	if (!devPort) console.error('devPort not found for base url');
+  if (!devPort) console.error("devPort not found for base url");
 
-// 	return `http://localhost:${devPort ?? ''}`; // dev SSR should use localhost
-// }
+  return `http://localhost:${devPort ?? ""}`; // dev SSR should use localhost
+}
 
 export const allClientEnvSchema = z.object({
-  // NEXT_PUBLIC_APP_BASE_URL: z.string(),
+  NEXT_PUBLIC_APP_ABSOLUTE_BASE_URL: z.string(),
+  NEXT_PUBLIC_APP_BASE_URL: z.string(),
   NEXT_PUBLIC_APP_DEV_PORT: z
     .string()
     .optional()
-    .refine((v) => process.env.VERCEL_ENV !== "development" ?? !!v, {
+    .refine((v) => process.env.VERCEL_ENV !== "development" || !!v, {
       message: "You need a dev port in order to run the app locally",
     }),
-  // NEXT_PUBLIC_WWW_BASE_URL: z.string(),
-  NEXT_PUBLIC_WWW_DEV_PORT: z
-    .string()
-    .optional()
-    .refine((v) => process.env.VERCEL_ENV !== "development" ?? !!v, {
-      message: "You need a dev port in order to run the app locally",
-    }),
-
-  // NEXT_PUBLIC_LINK_BASE_URL: z.string(),
+  NEXT_PUBLIC_LINK_ABSOLUTE_BASE_URL: z.string(),
+  NEXT_PUBLIC_LINK_BASE_URL: z.string(),
   NEXT_PUBLIC_LINK_DEV_PORT: z
     .string()
     .optional()
-    .refine((v) => process.env.VERCEL_ENV !== "development" ?? !!v, {
+    .refine((v) => process.env.VERCEL_ENV !== "development" || !!v, {
       message: "You need a dev port in order to run the app locally",
     }),
+  NEXT_PUBLIC_WWW_ABSOLUTE_BASE_URL: z.string(),
+  NEXT_PUBLIC_WWW_BASE_URL: z.string(),
+  NEXT_PUBLIC_WWW_DEV_PORT: z
+    .string()
+    .optional()
+    .refine((v) => process.env.VERCEL_ENV !== "development" || !!v, {
+      message: "You need a dev port in order to run the app locally",
+    }),
+
   NEXT_PUBLIC_TRANSPARENT_LINK_ROOT_DOMAIN: z.string(),
   NEXT_PUBLIC_SHORT_LINK_ROOT_DOMAIN: z.string(),
 
@@ -89,8 +101,6 @@ export const allServerEnvSchema = z.object({
     .refine(
       (v) => {
         const isValid = /^\d+\s[msdh](s)?$/i.test(v);
-        console.log("refine link click rate limit => ", v);
-        console.log("isValid => ", isValid);
         return isValid;
       },
       {
@@ -98,7 +108,6 @@ export const allServerEnvSchema = z.object({
       },
     )
     .transform((v) => {
-      console.log("transform rateLimitRecordLinkClick => ", v);
       return v as RateLimitTime;
     })
     .optional()
@@ -135,9 +144,27 @@ const processEnv = {
   RATE_LIMIT_RECORD_LINK_CLICK: process.env.RATE_LIMIT_RECORD_LINK_CLICK,
 
   // CALCULATED (we're calculating these here to make it easier to use them in the app)
-  // NEXT_PUBLIC_APP_BASE_URL: getBaseUrl(process.env.NEXT_PUBLIC_APP_DEV_PORT),
-  // NEXT_PUBLIC_WWW_BASE_URL: getBaseUrl(process.env.NEXT_PUBLIC_WWW_DEV_PORT),
-  // NEXT_PUBLIC_LINK_BASE_URL: getBaseUrl(process.env.NEXT_PUBLIC_LINK_DEV_PORT),
+  NEXT_PUBLIC_APP_BASE_URL: getBaseUrl({
+    devPort: process.env.NEXT_PUBLIC_APP_DEV_PORT,
+  }),
+  NEXT_PUBLIC_APP_ABSOLUTE_BASE_URL: getBaseUrl({
+    devPort: process.env.NEXT_PUBLIC_APP_DEV_PORT,
+    absolute: true,
+  }),
+  NEXT_PUBLIC_LINK_BASE_URL: getBaseUrl({
+    devPort: process.env.NEXT_PUBLIC_LINK_DEV_PORT,
+  }),
+  NEXT_PUBLIC_LINK_ABSOLUTE_BASE_URL: getBaseUrl({
+    devPort: process.env.NEXT_PUBLIC_LINK_DEV_PORT,
+    absolute: true,
+  }),
+  NEXT_PUBLIC_WWW_BASE_URL: getBaseUrl({
+    devPort: process.env.NEXT_PUBLIC_WWW_DEV_PORT,
+  }),
+  NEXT_PUBLIC_WWW_ABSOLUTE_BASE_URL: getBaseUrl({
+    devPort: process.env.NEXT_PUBLIC_WWW_DEV_PORT,
+    absolute: true,
+  }),
 
   /**
    * We have to destructure all variables from process.env to keep from tree-shaking them away 🤦‍♂️

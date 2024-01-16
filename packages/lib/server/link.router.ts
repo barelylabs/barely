@@ -34,8 +34,6 @@ export const linkRouter = router({
   byWorkspace: privateProcedure
     .input(linkFilterParamsSchema.optional())
     .query(async ({ input, ctx }) => {
-      console.log("input => ", input);
-
       const searchCondition =
         input?.search && input.search.length > 0
           ? or(

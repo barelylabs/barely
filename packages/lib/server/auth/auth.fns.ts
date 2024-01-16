@@ -3,7 +3,7 @@ import SignInEmailTemplate from "@barely/email/src/templates/sign-in";
 import { eq } from "drizzle-orm";
 
 import env from "../../env";
-import { APP_BASE_URL } from "../../utils/constants";
+// import { APP_BASE_URL } from "../../utils/constants";
 import { raise } from "../../utils/raise";
 import { db } from "../db";
 import { UserSessions } from "../user-session.sql";
@@ -21,7 +21,8 @@ export async function createLoginLink(props: {
   const token = generateVerificationToken();
   const hashedToken = await hashToken(token);
 
-  const callbackUrl = props.callbackUrl ?? `${APP_BASE_URL}/dashboard`;
+  const callbackUrl =
+    props.callbackUrl ?? `${env.NEXT_PUBLIC_APP_BASE_URL}/dashboard`;
   const THIRTY_DAYS_IN_SECONDS = 60 * 60 * 24 * 30;
   const expiresIn = props.expiresInSeconds ?? THIRTY_DAYS_IN_SECONDS;
 
