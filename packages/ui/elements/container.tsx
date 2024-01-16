@@ -12,7 +12,7 @@ const Container = ({ children, className }: Props) => {
   return (
     <div
       className={cn(
-        "container flex min-h-full w-full flex-col items-start justify-center p-6",
+        "container flex min-h-full w-full flex-col  justify-center p-6",
         className,
       )}
     >

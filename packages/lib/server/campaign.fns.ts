@@ -248,7 +248,7 @@ export async function createPlaylistPitchCampaign(props: {
     const userConfirmEmailLink = await createLoginLink({
       provider: "email",
       identifier: props.user.email,
-      callbackUrl: `${env.NEXT_PUBLIC_APP_BASE_URL}/${campaign.workspace.handle}/campaigns`,
+      callbackPath: `${env.NEXT_PUBLIC_APP_BASE_URL}/${campaign.workspace.handle}/campaigns`,
     });
 
     await sendEmail({

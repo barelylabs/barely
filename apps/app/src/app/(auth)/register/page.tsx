@@ -3,14 +3,17 @@ import Link from "next/link";
 import { H, Text } from "@barely/ui/elements/typography";
 import logo from "@static/logo.png";
 
+import { handleLoggedIn } from "~/app/(auth)/handle-logged-in";
 import RegisterUserForm from "./register-user-form";
 
-const RegisterUserPage = ({
+const RegisterUserPage = async ({
   searchParams,
 }: {
   searchParams?: { callbackUrl?: string };
 }) => {
   const { callbackUrl } = searchParams ?? {};
+
+  await handleLoggedIn();
 
   return (
     <div className="container flex h-screen min-h-fit w-screen flex-col items-center justify-center overflow-scroll lg:max-w-none lg:grid-cols-2 lg:px-0">

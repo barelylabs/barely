@@ -8,8 +8,12 @@ import { Users } from "../user.sql";
 import { createLoginLink } from "./auth.fns";
 
 export const authRouter = router({
-  vercelUrl: publicProcedure.query(() => {
-    return { vercelUrl: process.env.VERCEL_URL };
+  envVars: publicProcedure.query(() => {
+    return {
+      vercelUrl: process.env.VERCEL_URL,
+      databaseUrl: process.env.DATABASE_WRITE_URL,
+      vercelEnv: process.env.VERCEL_ENV,
+    };
   }),
   sendLoginEmail: publicProcedure
     .input(
@@ -44,7 +48,7 @@ export const authRouter = router({
       const loginLink = await createLoginLink({
         provider: "email",
         identifier: input.email,
-        callbackUrl: input.callbackUrl,
+        callbackPath: input.callbackUrl,
       });
 
       const SignInEmail = SignInEmailTemplate({

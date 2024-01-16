@@ -2,9 +2,10 @@ import { sendEmail } from "@barely/email";
 import SignInEmailTemplate from "@barely/email/src/templates/sign-in";
 import { eq } from "drizzle-orm";
 
+import { auth } from ".";
 import env from "../../env";
-// import { APP_BASE_URL } from "../../utils/constants";
 import { raise } from "../../utils/raise";
+import { absoluteUrl } from "../../utils/url";
 import { db } from "../db";
 import { UserSessions } from "../user-session.sql";
 import { Users } from "../user.sql";
@@ -15,14 +16,19 @@ export { signOut } from "next-auth/react";
 export async function createLoginLink(props: {
   provider: "email" | "phone";
   identifier: string;
-  callbackUrl?: string;
+  callbackPath?: string;
   expiresInSeconds?: number;
 }) {
   const token = generateVerificationToken();
   const hashedToken = await hashToken(token);
 
-  const callbackUrl =
-    props.callbackUrl ?? `${env.NEXT_PUBLIC_APP_BASE_URL}/dashboard`;
+  const defaultWorkspace = await getDefaultWorkspace();
+
+  const callbackUrl = absoluteUrl(
+    "app",
+    props.callbackPath ?? `${defaultWorkspace.handle}/links`,
+  );
+
   const THIRTY_DAYS_IN_SECONDS = 60 * 60 * 24 * 30;
   const expiresIn = props.expiresInSeconds ?? THIRTY_DAYS_IN_SECONDS;
 
@@ -45,6 +51,13 @@ export async function createLoginLink(props: {
   return `${env.AUTH_URL}/api/auth/callback/${
     props.provider
   }?${params.toString()}`;
+}
+
+export async function getDefaultWorkspace() {
+  const session = await auth();
+  const workspaces = session?.user?.workspaces ?? [];
+  const defaultWorkspace = workspaces[0];
+  return defaultWorkspace ?? raise("No default workspace");
 }
 
 export function generateVerificationToken() {
@@ -77,7 +90,7 @@ export async function sendLoginEmail(props: {
   const loginLink = await createLoginLink({
     provider: "email",
     identifier: props.email,
-    callbackUrl: props.callbackUrl,
+    callbackPath: props.callbackUrl,
   });
 
   const SignInEmail = SignInEmailTemplate({

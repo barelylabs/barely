@@ -11,7 +11,7 @@ export function absoluteUrl(site: "app" | "link" | "www", path: string) {
           ? env.NEXT_PUBLIC_WWW_BASE_URL
           : raise(`Invalid proj`);
 
-  return `${siteBaseUrl}${path}`;
+  return `${siteBaseUrl}/${path}`;
 }
 
 // export function absoluteUrl_App(path: string) {

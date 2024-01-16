@@ -4,14 +4,21 @@ import { Icon } from "@barely/ui/elements/icon";
 import { H } from "@barely/ui/elements/typography";
 import logo from "@static/logo.png";
 
+import { handleLoggedIn } from "~/app/(auth)/handle-logged-in";
 import LoginForm from "./login-form";
 
-const SignInPage = ({ searchParams }: { searchParams?: { error: string } }) => {
+const SignInPage = async ({
+  searchParams,
+}: {
+  searchParams?: { error: string };
+}) => {
   const { error } = searchParams ?? {};
 
   if (error) {
     console.error(error);
   }
+
+  await handleLoggedIn();
 
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">

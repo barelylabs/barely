@@ -554,7 +554,7 @@ export const campaignRouter = router({
         const emailLoginLink = await createLoginLink({
           provider: "email",
           identifier: campaign.createdBy.email,
-          callbackUrl: `${env.NEXT_PUBLIC_APP_BASE_URL}/${campaign.workspace.handle}/campaign/${campaign.id}/launch`,
+          callbackPath: `${env.NEXT_PUBLIC_APP_BASE_URL}/${campaign.workspace.handle}/campaign/${campaign.id}/launch`,
         });
 
         console.log("sending pitch approved email");
@@ -582,7 +582,7 @@ export const campaignRouter = router({
           const phoneLoginLink = await createLoginLink({
             provider: "phone",
             identifier: campaign.createdBy.phone,
-            callbackUrl: `${env.NEXT_PUBLIC_APP_BASE_URL}/${campaign.workspace.handle}/campaigns/${campaign.id}/launch`,
+            callbackPath: `${env.NEXT_PUBLIC_APP_BASE_URL}/${campaign.workspace.handle}/campaigns/${campaign.id}/launch`,
           });
 
           console.log("phoneLoginLink", phoneLoginLink);

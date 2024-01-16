@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getDefaultWorkspace } from "@barely/lib/server/auth/auth.fns";
 import { auth } from "@barely/server/auth";
 
 import { SidebarNav } from "~/app/[handle]/_components/dash-sidebar-nav";
@@ -29,7 +30,10 @@ export default async function DashboardLayout({
     (w) => w.handle === params.handle,
   );
 
-  if (!currentWorkspace) return redirect("/dashboard");
+  if (!currentWorkspace) {
+    const defaultWorkspace = await getDefaultWorkspace();
+    return redirect(`${defaultWorkspace.handle}/links`);
+  }
 
   return (
     <WorkspaceProviders user={user} workspace={currentWorkspace}>
