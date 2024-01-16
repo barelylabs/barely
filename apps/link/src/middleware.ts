@@ -5,7 +5,7 @@ import { db } from "@barely/lib/server/db/index";
 import { recordLinkClick } from "@barely/lib/server/event.fns";
 import { Links } from "@barely/lib/server/link.sql";
 import { parseLink } from "@barely/lib/server/middleware/utils";
-import { LINK_BASE_URL, WWW_BASE_URL } from "@barely/lib/utils/constants";
+// import { LINK_BASE_URL, WWW_BASE_URL } from "@barely/lib/utils/constants";
 import {
   detectBot,
   parseGeo,
@@ -14,10 +14,13 @@ import {
   parseUserAgent,
 } from "@barely/lib/utils/middleware";
 import { sqlAnd } from "@barely/lib/utils/sql";
+import { absoluteUrl } from "@barely/lib/utils/url";
 import { eq, isNull } from "drizzle-orm";
 
 import type { RecordClickProps } from "@barely/lib/server/event.fns";
 import type { LinkAnalyticsProps } from "@barely/lib/server/link.schema";
+
+import env from "~/env";
 
 export const config = {
   matcher: ["/((?!api|mobile|_next|favicon|logos|sitemap|atom|404|500).*)"],
@@ -34,18 +37,21 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
     !linkProps.handle &&
     !linkProps.app
   )
-    return NextResponse.rewrite(`${WWW_BASE_URL}/link`);
+    return NextResponse.rewrite(`${env.NEXT_PUBLIC_WWW_BASE_URL}/link`);
 
   if (linkProps.linkClickType === "transparentLinkClick" && !linkProps.handle)
-    return NextResponse.rewrite(`${LINK_BASE_URL}/404`);
+    return NextResponse.rewrite(`${env.NEXT_PUBLIC_LINK_BASE_URL}/404`);
 
   let where: SQL | undefined = undefined;
 
   if (linkProps.linkClickType === "transparentLinkClick") {
     if (!linkProps.handle && !linkProps.app)
-      return NextResponse.rewrite(`${WWW_BASE_URL}/link`);
+      // return NextResponse.rewrite(`${WWW_BASE_URL}/link`);
+      return NextResponse.rewrite(absoluteUrl("www", "/link"));
 
-    if (!linkProps.handle) return NextResponse.rewrite(`${LINK_BASE_URL}/404`);
+    // if (!linkProps.handle) return NextResponse.rewrite(`${LINK_BASE_URL}/404`);
+    if (!linkProps.handle)
+      return NextResponse.rewrite(absoluteUrl("link", "/404"));
 
     where = sqlAnd([
       eq(Links.handle, linkProps.handle),
@@ -61,7 +67,8 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
     ]);
   }
 
-  if (!where) return NextResponse.rewrite(`${LINK_BASE_URL}/404`);
+  // if (!where) return NextResponse.rewrite(`${LINK_BASE_URL}/404`);
+  if (!where) return NextResponse.rewrite(absoluteUrl("link", "/404"));
 
   const link: LinkAnalyticsProps | undefined =
     await db.read.query.Links.findFirst({

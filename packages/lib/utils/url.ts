@@ -1,8 +1,22 @@
 import env from "../env";
+import { raise } from "./raise";
 
-export function absoluteUrl_App(path: string) {
-  return `${env.NEXT_PUBLIC_APP_ABSOLUTE_BASE_URL}${path}`;
+export function absoluteUrl(site: "app" | "link" | "www", path: string) {
+  const siteBaseUrl =
+    site === "app"
+      ? env.NEXT_PUBLIC_APP_BASE_URL
+      : site === "link"
+        ? env.NEXT_PUBLIC_LINK_BASE_URL
+        : site === "www"
+          ? env.NEXT_PUBLIC_WWW_BASE_URL
+          : raise(`Invalid proj`);
+
+  return `${siteBaseUrl}${path}`;
 }
+
+// export function absoluteUrl_App(path: string) {
+//   return `${env.NEXT_PUBLIC_APP_ABSOLUTE_BASE_URL}${path}`;
+// }
 
 // export function getBaseUrl(devPort?: string) {
 //   if (typeof window !== "undefined") {

@@ -21,7 +21,7 @@ import { newId } from "../utils/id";
 import { log } from "../utils/log";
 import { fullNameToFirstAndLast } from "../utils/name";
 import { pushEvent } from "../utils/pusher-server";
-import { absoluteUrl_App } from "../utils/url";
+import { absoluteUrl } from "../utils/url";
 import { Campaigns } from "./campaign.sql";
 import { assignPlaylistPitchToReviewers } from "./playlist-pitch-review.fns";
 import { totalPlaylistReachByGenres } from "./playlist.fns";
@@ -105,7 +105,8 @@ export async function createPlanCheckoutLink(props: {
     throw new Error("User must have a stripeId.");
   }
 
-  const successUrl = absoluteUrl_App(
+  const successUrl = absoluteUrl(
+    "app",
     props.successPath ??
       `${props.workspace.handle}/settings/billing?success=true`,
   );
@@ -115,7 +116,8 @@ export async function createPlanCheckoutLink(props: {
   // const cancelUrl =
   //   `${APP_BASE_URL}/` + props.cancelPath ??
   //   `${props.workspace.handle}/settings/billing`;
-  const cancelUrl = absoluteUrl_App(
+  const cancelUrl = absoluteUrl(
+    "app",
     props.cancelPath ?? `${props.workspace.handle}/settings/billing`,
   );
 
@@ -180,11 +182,13 @@ export async function createPitchCheckoutLink(props: {
   // const successUrl = `${APP_BASE_URL}/${props.campaign.workspace.handle}/campaign/${props.campaign.id}?success=true`;
   // const cancelUrl = `${APP_BASE_URL}/${props.campaign.workspace.handle}/campaign/${props.campaign.id}/launch`;
 
-  const successUrl = absoluteUrl_App(
+  const successUrl = absoluteUrl(
+    "app",
     `${props.campaign.workspace.handle}/campaign/${props.campaign.id}?success=true`,
   );
 
-  const cancelUrl = absoluteUrl_App(
+  const cancelUrl = absoluteUrl(
+    "app",
     `${props.campaign.workspace.handle}/campaign/${props.campaign.id}/launch`,
   );
 
