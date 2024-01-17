@@ -6,6 +6,7 @@ on: [pull_request]
 
 jobs:
   neon-preview:
+    name: neon preview
     permissions: write-all
     runs-on: ubuntu-latest
     env:
@@ -109,6 +110,9 @@ jobs:
         id: vercel-env
         run: |
           vercel pull --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
+          VERCEL_URL=app-git-${{ needs.neon-preview.outputs.git_branch_name }}-barelylabs.vercel.app
+          echo "VERCEL_URL=$VERCEL_URL" >> .vercel/.env.preview.local
+          cp .vercel/.env.preview.local .env
       # echo "Checking .vercel/.env.preview.local"
       # DATABASE_READ_URL=$(grep -oP 'DATABASE_READ_URL="\K[^"]+' .vercel/.env.preview.local)
       # echo "DATABASE_READ_URL: $DATABASE_READ_URL"
