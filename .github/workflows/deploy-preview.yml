@@ -110,10 +110,11 @@ jobs:
         run: |
           vercel pull --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}          
           echo "Checking .vercel/.env.preview.local"
+          DATABASE_READ_URL=$(grep -oP 'DATABASE_READ_URL="\K[^"]+' .vercel/.env.preview.local)
+          echo "DATABASE_READ_URL: $DATABASE_READ_URL"
           VERCEL_URL=$(grep -oP 'VERCEL_URL="\K[^"]+' .vercel/.env.preview.local)
           echo "VERCEL_URL: $VERCEL_URL"
-          DATABASE_URL=$(grep -oP 'DATABASE_URL="\K[^"]+' .env)
-          echo "DATABASE_URL: $DATABASE_URL"
+          echo "preview_url=$VERCEL_URL" >> $GITHUB_OUTPUT
 
       # VERCEL_URL=app-git-${{ needs.neon-preview.outputs.git_branch_name }}-barelylabs.vercel.app
       # echo "VERCEL_URL=$VERCEL_URL" >> .vercel/.env.preview.local
