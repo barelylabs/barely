@@ -1,19 +1,18 @@
 import { eq } from "drizzle-orm";
 
 import type { Db } from "./db";
-import { dbRead } from "../utils/db";
 import { nanoid } from "../utils/id";
 import { Links } from "./link.sql";
 
 export async function getLinkById(id: string, db: Db) {
-  return dbRead(db).query.Links.findFirst({
+  return db.http.query.Links.findFirst({
     where: eq(Links.id, id),
   });
 }
 
 export async function getRandomKey(domain: string, db: Db) {
   const key = nanoid(7);
-  const keyExists = await dbRead(db).query.Links.findFirst({
+  const keyExists = await db.http.query.Links.findFirst({
     where: eq(Links.key, key),
   });
 

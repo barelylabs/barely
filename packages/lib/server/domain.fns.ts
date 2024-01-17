@@ -42,7 +42,7 @@ export async function validateDomain(domain: string) {
 }
 
 export async function domainExists(domain: string) {
-  const existingDomain = await db.read.query.Domains.findFirst({
+  const existingDomain = await db.http.query.Domains.findFirst({
     where: eq(Domains.domain, domain),
     columns: {
       domain: true,
@@ -199,7 +199,7 @@ export async function removeDomainFromVercel(props: {
   }
 
   const apexDomain = getApexDomain(`https://${props.domain}`);
-  const domainCount = await db.read
+  const domainCount = await db.http
     .select({
       count: sql<number>`cast(count(${Domains.domain}) as int)`,
     })

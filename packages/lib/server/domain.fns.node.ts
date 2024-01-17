@@ -9,7 +9,7 @@ export async function changeDomainForLinkImages(props: {
   oldDomain: string;
   newDomain: string;
 }) {
-  const links = await db.read.query.Links.findMany({
+  const links = await db.http.query.Links.findMany({
     where: eq(Domains.domain, props.oldDomain),
     columns: {
       key: true,

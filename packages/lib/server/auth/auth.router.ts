@@ -25,7 +25,7 @@ export const authRouter = router({
     .mutation(async ({ input, ctx }) => {
       console.log("sendLoginEmail", input.email, input.callbackUrl);
 
-      const dbUser = await ctx.db.read.query.Users.findFirst({
+      const dbUser = await ctx.db.http.query.Users.findFirst({
         where: eq(Users.email, input.email),
         with: {
           personalWorkspace: {

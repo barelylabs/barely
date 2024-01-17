@@ -33,7 +33,7 @@ export const domainNodeRouter = router({
 
       // 2. If the domain is being set as the primary link domain, set all other domains to not be the primary link domain
       if (input.isPrimaryLinkDomain) {
-        await ctx.db.writePool
+        await ctx.db.pool
           .update(Domains)
           .set({ isPrimaryLinkDomain: false })
           .where(
@@ -46,7 +46,7 @@ export const domainNodeRouter = router({
       }
 
       // 3. Add domain to database
-      await ctx.db.writePool.insert(Domains).values({
+      await ctx.db.pool.insert(Domains).values({
         ...input,
         workspaceId: ctx.workspace.id,
       });
@@ -56,7 +56,7 @@ export const domainNodeRouter = router({
     .input(updateDomainSchema)
     .mutation(async ({ input, ctx }) => {
       // get domain from db
-      const existingDomain = await ctx.db.read.query.Domains.findFirst({
+      const existingDomain = await ctx.db.http.query.Domains.findFirst({
         where: and(
           eq(Domains.workspaceId, ctx.workspace.id),
           eq(Domains.domain, input.domain),
@@ -76,7 +76,7 @@ export const domainNodeRouter = router({
            * delete any existing links
            * */
           existingDomain.type === "link" &&
-            ctx.db.writePool
+            ctx.db.pool
               .delete(Domains)
               .where(
                 and(
@@ -94,7 +94,7 @@ export const domainNodeRouter = router({
          */
         input.isPrimaryLinkDomain &&
           !existingDomain.isPrimaryLinkDomain &&
-          ctx.db.writePool
+          ctx.db.pool
             .update(Domains)
             .set({ isPrimaryLinkDomain: false })
             .where(
@@ -110,7 +110,7 @@ export const domainNodeRouter = router({
          */
         input.isPrimaryBioDomain &&
           !existingDomain.isPrimaryBioDomain &&
-          ctx.db.writePool
+          ctx.db.pool
             .update(Domains)
             .set({ isPrimaryBioDomain: false })
             .where(
@@ -126,7 +126,7 @@ export const domainNodeRouter = router({
          */
         input.isPrimaryPressDomain &&
           !existingDomain.isPrimaryPressDomain &&
-          ctx.db.writePool
+          ctx.db.pool
             .update(Domains)
             .set({ isPrimaryPressDomain: false })
             .where(
@@ -166,7 +166,7 @@ export const domainNodeRouter = router({
       }
 
       // update domain in database
-      await ctx.db.writePool
+      await ctx.db.pool
         .update(Domains)
         .set(input)
         .where(
@@ -180,7 +180,7 @@ export const domainNodeRouter = router({
   delete: privateProcedure
     .input(z.string())
     .mutation(async ({ input, ctx }) => {
-      const domain = await ctx.db.read.query.Domains.findFirst({
+      const domain = await ctx.db.http.query.Domains.findFirst({
         where: and(
           eq(Domains.workspaceId, ctx.workspace.id),
           eq(Domains.domain, input),
@@ -209,7 +209,7 @@ export const domainNodeRouter = router({
       console.log("domain removed from vercel => ", vercelResponse.status);
 
       /** 2. Delete domain from database */
-      await ctx.db.writePool
+      await ctx.db.pool
         .delete(Domains)
         .where(
           and(

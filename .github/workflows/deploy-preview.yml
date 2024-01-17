@@ -60,28 +60,25 @@ jobs:
         run: |
           touch .env
 
-          echo "DATABASE_URL=$(neonctl cs ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require" >> $GITHUB_ENV
-          DATABASE_WRITE_URL=$(neonctl cs ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require
+          echo "DATABASE_URL=$(neonctl connection-string ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require" >> $GITHUB_ENV      
+          echo "DATABASE_POOL_URL=$(neonctl connection-string ${{ steps.branch-name.outputs.current_branch }} --pooled --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require" >> $GITHUB_ENV
 
-          echo DATABASE_WRITE_URL=$DATABASE_WRITE_URL >> .env
+          echo DATABASE_URL=$DATABASE_WRITE_URL >> .env
+          echo DATABASE_POOL_URL=$DATABASE_WRITE_POOL_URL >> .env
 
           pnpm db:push
 
       # For now, we're manually removing and re-adding the environment variables. Might be a simpler way to directly replace them, but got errors when trying to do that.
       - name: Update Vercel Environment Variables for this Branch
         run: |
-          echo "DATABASE_URL: $DATABASE_URL"                    
+          echo "DATABASE_URL: $DATABASE_URL"  
+          echo "DATABASE_POOL_URL: $DATABASE_POOL_URL"                  
 
-          vercel env rm DATABASE_READ_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} --yes --token=${{ secrets.VERCEL_TOKEN }}
-          vercel env rm DATABASE_READ_URL preview ${{ steps.branch-name.outputs.current_branch }} --yes --token=${{ secrets.VERCEL_TOKEN }}
-          vercel env rm DATABASE_WRITE_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} --yes --token=${{ secrets.VERCEL_TOKEN }}
-          vercel env rm DATABASE_WRITE_URL preview ${{ steps.branch-name.outputs.current_branch }} --yes --token=${{ secrets.VERCEL_TOKEN }}
-          vercel env rm DIRECT_DATABASE_URL preview ${{ steps.branch-name.outputs.current_branch }} --yes --token=${{ secrets.VERCEL_TOKEN }}
-          echo $DATABASE_URL | vercel env add DATABASE_READ_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
-          echo $DATABASE_URL | vercel env add DATABASE_READ_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
-          echo $DATABASE_URL | vercel env add DATABASE_WRITE_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
-          echo $DATABASE_URL | vercel env add DATABASE_WRITE_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
-          echo $DATABASE_URL | vercel env add DIRECT_DATABASE_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
+          vercel env rm DATABASE_URL preview ${{ steps.branch-name.outputs.current_branch }} --yes --token=${{ secrets.VERCEL_TOKEN }}
+          vercel env rm DATABASE_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} --yes --token=${{ secrets.VERCEL_TOKEN }}
+
+          echo $DATABASE_URL | vercel env add DATABASE_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
+          echo $DATABASE_POOL_URL | vercel env add DATABASE_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
 
     outputs:
       git_branch_name: ${{ steps.branch-name.outputs.current_branch }}
@@ -109,23 +106,12 @@ jobs:
       - name: Vercel Env
         id: vercel-env
         run: |
-          vercel pull --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
-          VERCEL_URL=app-git-${{ needs.neon-preview.outputs.git_branch_name }}-barelylabs.vercel.app
-          echo "VERCEL_URL=$VERCEL_URL" >> .vercel/.env.preview.local
+          vercel pull --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
           cp .vercel/.env.preview.local .env
-      # echo "Checking .vercel/.env.preview.local"
-      # DATABASE_READ_URL=$(grep -oP 'DATABASE_READ_URL="\K[^"]+' .vercel/.env.preview.local)
-      # echo "DATABASE_READ_URL: $DATABASE_READ_URL"
-      # VERCEL_URL=$(grep -oP 'VERCEL_URL="\K[^"]+' .vercel/.env.preview.local)
-      # echo "VERCEL_URL: $VERCEL_URL"
-      # echo "preview_url=$VERCEL_URL" >> $GITHUB_OUTPUT
-
-      # VERCEL_URL=app-git-${{ needs.neon-preview.outputs.git_branch_name }}-barelylabs.vercel.app
-      # echo "VERCEL_URL=$VERCEL_URL" >> .vercel/.env.preview.local
-      # cp .vercel/.env.preview.local .env
-
-      # echo "VERCEL_URL: $VERCEL_URL"
-      # echo "preview_url=$VERCEL_URL" >> $GITHUB_OUTPUT
+          DATABASE_URL=$(grep -oP 'DATABASE_URL="\K[^"]+' .env)
+          DATABASE_POOL_URL=$(grep -oP 'DATABASE_POOL_URL="\K[^"]+' .env)
+          echo "DATABASE_URL: $DATABASE_URL"
+          echo "DATABASE_POOL_URL: $DATABASE_POOL_URL"
 
       - name: Build App Project Artifacts
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
@@ -133,8 +119,11 @@ jobs:
       - name: Deploy App Preview to Vercel
         id: deploy-app
         run: |
-          echo preview_url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN}}) >> $GITHUB_OUTPUT
-          echo inspect_url=$(vercel inspect $preview_url --token=${{ secrets.VERCEL_TOKEN }}) >> $GITHUB_OUTPUT
+          preview_url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN}})
+          echo "preview_url=$preview_url" >> $GITHUB_ENV
+          deployment_id=$(vercel inspect https://app-dyz0u5a4v-barelylabs.vercel.app | grep -oP 'id\s+dpl_\K.*')
+          inspect_url="https://vercel.com/${{ secrets.VERCEL_TEAM_ID }}/${{ secrets.VERCEL_APP_PROJECT_ID }}/$deployment_id"
+          echo "inspect_url=$inspect_url" >> $GITHUB_ENV
 
       - name: Comment on Pull Request
         uses: thollander/actions-comment-pull-request@v2

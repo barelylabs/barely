@@ -18,7 +18,7 @@ export const playlistPitchReviewRouter = router({
       }),
     )
     .query(async ({ input, ctx }) => {
-      const count = await ctx.db.read
+      const count = await ctx.db.http
         .select({
           count: sqlCount,
         })
@@ -58,7 +58,7 @@ export const playlistPitchReviewRouter = router({
         where.push(gt(PlaylistPitchReviews.updatedAt, input.cursor));
       }
 
-      const reviews = await ctx.db.read.query.PlaylistPitchReviews.findMany({
+      const reviews = await ctx.db.http.query.PlaylistPitchReviews.findMany({
         where: and(...where),
         orderBy: desc(PlaylistPitchReviews.updatedAt),
         limit: limit + 1,
@@ -85,7 +85,7 @@ export const playlistPitchReviewRouter = router({
     }),
 
   toReview: privateProcedure.query(async ({ ctx }) => {
-    const reviews = await ctx.db.read.query.PlaylistPitchReviews.findMany({
+    const reviews = await ctx.db.http.query.PlaylistPitchReviews.findMany({
       where: and(
         eq(PlaylistPitchReviews.reviewerId, ctx.user.id),
         eq(PlaylistPitchReviews.stage, "reviewing"),
@@ -117,13 +117,13 @@ export const playlistPitchReviewRouter = router({
     .mutation(async ({ input, ctx }) => {
       const { id, placements, ...data } = input;
 
-      await ctx.db.write
+      await ctx.db.http
         .update(PlaylistPitchReviews)
         .set(data)
         .where(eq(PlaylistPitchReviews.id, id));
 
       if (placements?.length) {
-        await ctx.db.write
+        await ctx.db.http
           .insert(PlaylistPlacements)
           .values(
             placements.map((p) => ({ ...p, id: newId("playlistPitchReview") })),

@@ -71,7 +71,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
   if (!where) return NextResponse.rewrite(absoluteUrl("link", "/404"));
 
   const link: LinkAnalyticsProps | undefined =
-    await db.read.query.Links.findFirst({
+    await db.http.query.Links.findFirst({
       where,
       columns: {
         // for analytics

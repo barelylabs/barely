@@ -2,7 +2,6 @@ import { desc, eq, inArray } from "drizzle-orm";
 
 import type { Db } from "./db";
 import type { InsertPlaylistPitchReview } from "./playlist-pitch-review-schema";
-import { dbRead } from "../utils/db";
 import { newId } from "../utils/id";
 import { getCampaignById } from "./campaign.fns";
 import { _Playlists_To_Genres, _Tracks_To_Genres } from "./genre.sql";
@@ -29,7 +28,7 @@ const assignPlaylistPitchToReviewers = async (campaignId: string, db: Db) => {
   // && accounts.some(spotifyPlaylists.some(playlistGenres.some(genre.trackGenres.some(track.id==campaign.track.id))))
   // && playlistPitchReviews.every(campaign.id!=campaignId)
 
-  // const allPlaylists = await dbRead(db).query.Playlists.findMany({
+  // const allPlaylists = await db.http.query.Playlists.findMany({
   // 	where: Playlists => and(
   // 		isNotNull(Playlists.curatorId),
   // 	),
@@ -39,7 +38,7 @@ const assignPlaylistPitchToReviewers = async (campaignId: string, db: Db) => {
   // 	}
   // })
 
-  const allGenres = await dbRead(db).query._Playlists_To_Genres.findMany({
+  const allGenres = await db.http.query._Playlists_To_Genres.findMany({
     where: inArray(
       _Playlists_To_Genres.genreId,
       campaign.track.genres.map((g) => g.id),
@@ -100,14 +99,14 @@ const assignPlaylistPitchToReviewers = async (campaignId: string, db: Db) => {
     return review;
   });
 
-  return await db.write.insert(PlaylistPitchReviews).values(reviews);
+  return await db.http.insert(PlaylistPitchReviews).values(reviews);
 };
 
 const getPlaylistPitchReviewsByCampaignId = async (
   campaignId: string,
   db: Db,
 ) => {
-  const reviews = await dbRead(db).query.PlaylistPitchReviews.findMany({
+  const reviews = await db.http.query.PlaylistPitchReviews.findMany({
     where: eq(PlaylistPitchReviews.campaignId, campaignId),
     orderBy: desc(PlaylistPitchReviews.createdAt),
     limit: 20,

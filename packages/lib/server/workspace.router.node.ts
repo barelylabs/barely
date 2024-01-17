@@ -16,7 +16,7 @@ export const workspaceNodeRouter = router({
         invalidate: true,
       });
 
-      await ctx.db.write
+      await ctx.db.http
         .update(Workspaces)
         .set({ imageUrl: secure_url })
         .where(eq(Workspaces.id, ctx.workspace.id));

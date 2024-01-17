@@ -82,13 +82,13 @@ export async function recordLinkClick({
   const timestamp = new Date(time).toISOString();
 
   // increment the link click count in db
-  await db.write
+  await db.http
     .update(Links)
     .set({ clicks: sqlIncrement(Links.clicks) })
     .where(eq(Links.id, link.id));
 
   // increment the workspace link usage count in db
-  await db.write
+  await db.http
     .update(Workspaces)
     .set({ linkUsage: sqlIncrement(Workspaces.linkUsage) })
     .where(eq(Workspaces.id, link.workspaceId));
@@ -98,7 +98,7 @@ export async function recordLinkClick({
    *  */
 
   const analyticsEndpoints = link.remarketing
-    ? await db.readPool.query.AnalyticsEndpoints.findMany({
+    ? await db.pool.query.AnalyticsEndpoints.findMany({
         where: eq(AnalyticsEndpoints.workspaceId, link.workspaceId),
       })
     : [];

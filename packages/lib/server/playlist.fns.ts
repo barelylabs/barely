@@ -6,7 +6,6 @@ import type { Db } from "./db";
 import type { Genre } from "./genre.schema";
 import type { Playlist } from "./playlist.schema";
 import type { ProviderAccount } from "./provider-account.schema";
-import { dbRead } from "../utils/db";
 import { estimateGenresByTracks } from "./genre.gpt";
 import { _Playlists_To_Genres, Genres } from "./genre.sql";
 import { getSpotifyPlaylistTracks } from "./spotify.endpts.playlist";
@@ -18,7 +17,7 @@ export interface PlaylistWithProviderAccounts extends Playlist {
 }
 
 const getPlaylistById = async (playlistId: string, db: Db) => {
-  const playlist = await dbRead(db).query.Playlists.findFirst({
+  const playlist = await db.http.query.Playlists.findFirst({
     where: (Playlists) => eq(Playlists.id, playlistId),
     with: {
       _genres: {
@@ -59,7 +58,7 @@ const getPlaylistsByUserId = async (userId: string, db: Db) => {
 
   // console.log('getting userWithPlaylists for ', userId);
 
-  const userWithPlaylists = await dbRead(db).query.Users.findFirst({
+  const userWithPlaylists = await db.http.query.Users.findFirst({
     where: (users) => eq(users.id, userId),
     columns: {},
     with: {
@@ -165,7 +164,7 @@ const userGetPlaylistById = async (
 };
 
 const totalPlaylistReachByGenres = async (genreIds: Genre["id"][], db: Db) => {
-  const matchingGenres = await dbRead(db).query.Genres.findMany({
+  const matchingGenres = await db.http.query.Genres.findMany({
     where: inArray(Genres.id, genreIds),
     with: {
       _playlists: {
@@ -278,7 +277,7 @@ export async function upsertPlaylistGenres(
   genreIds: Genre["id"][],
   db: Db,
 ) {
-  await db.writePool.transaction(async (tx) => {
+  await db.pool.transaction(async (tx) => {
     await Promise.allSettled(
       genreIds.map(async (genreId) => {
         await tx

@@ -6,7 +6,7 @@ import type { Db } from "./db";
 import type { ProviderAccount } from "./provider-account.schema";
 import type { CreateUser, InsertUser } from "./user.schema";
 import type { InsertWorkspace } from "./workspace.schema";
-import { dbRead } from "../utils/db";
+//
 import { convertToHandle } from "../utils/handle";
 import { newId } from "../utils/id";
 import { fullNameToFirstAndLast, parseFullName } from "../utils/name";
@@ -20,11 +20,9 @@ import { Workspaces } from "./workspace.sql";
 ("@auth/core/adapters");
 
 export async function checkEmailExistsOnServer(email: string, db: Db) {
-  const emailExists = await dbRead(db)
-    .query.Users.findFirst({
-      where: (Users) => eq(Users.email, email),
-    })
-    .then((u) => !!u);
+  const emailExists = await db.http.query.Users.findFirst({
+    where: (Users) => eq(Users.email, email),
+  }).then((u) => !!u);
 
   return emailExists;
 }
@@ -42,11 +40,9 @@ export async function createUser(user: CreateUser, db: Db) {
   const newWorkspaceId = newId("workspace");
 
   // check if handle is available
-  let existingHandle = await dbRead(db)
-    .query.Users.findFirst({
-      where: (Users) => eq(Users.handle, handle),
-    })
-    .then((u) => u?.handle);
+  let existingHandle = await db.http.query.Users.findFirst({
+    where: (Users) => eq(Users.handle, handle),
+  }).then((u) => u?.handle);
 
   console.log("existing handle ", existingHandle);
 
@@ -56,11 +52,9 @@ export async function createUser(user: CreateUser, db: Db) {
 
     while (existingHandle) {
       handle = `${existingHandle}${i}`;
-      existingHandle = await dbRead(db)
-        .query.Users.findFirst({
-          where: (Users) => eq(Users.handle, handle),
-        })
-        .then((u) => u?.handle);
+      existingHandle = await db.http.query.Users.findFirst({
+        where: (Users) => eq(Users.handle, handle),
+      }).then((u) => u?.handle);
 
       if (existingHandle) console.log("handle taken ", handle);
       if (!existingHandle) console.log("handle available ", handle);
@@ -88,7 +82,7 @@ export async function createUser(user: CreateUser, db: Db) {
     type: "personal",
   };
 
-  await db.writePool
+  await db.pool
     .transaction(async (tx) => {
       await tx.insert(Workspaces).values(newWorkspace);
       await tx.insert(Users).values(newUser);
@@ -116,7 +110,7 @@ export async function createUser(user: CreateUser, db: Db) {
 }
 
 export async function getUserWithWorkspacesByUserId(userId: string, db: Db) {
-  const userWithWorkspaces = await dbRead(db).query.Users.findFirst({
+  const userWithWorkspaces = await db.http.query.Users.findFirst({
     where: (Users) => eq(Users.id, userId),
     with: {
       _workspaces: {
@@ -141,7 +135,7 @@ export async function getUserWithWorkspacesByUserId(userId: string, db: Db) {
 }
 
 export async function getUserWithWorkspacesByEmail(email: string, db: Db) {
-  const userWithWorkspaces = await dbRead(db).query.Users.findFirst({
+  const userWithWorkspaces = await db.http.query.Users.findFirst({
     where: (Users) => eq(Users.email, email),
     with: {
       _workspaces: {
@@ -170,7 +164,7 @@ export async function getUserWithWorkspacesByAccount(
   providerAccountId: string,
   db: Db,
 ) {
-  const providerAccount = await dbRead(db).query.ProviderAccounts.findFirst({
+  const providerAccount = await db.http.query.ProviderAccounts.findFirst({
     where: and(
       eq(ProviderAccounts.provider, provider),
       eq(ProviderAccounts.providerAccountId, providerAccountId),

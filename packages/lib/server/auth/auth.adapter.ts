@@ -3,8 +3,6 @@ import { and, eq } from "drizzle-orm";
 
 import type { SessionUser } from ".";
 import type { Db } from "../db";
-// import { APP_BASE_URL } from "../../utils/constants";
-import { dbRead } from "../../utils/db";
 import { newId } from "../../utils/id";
 import { insertProviderAccountSchema } from "../provider-account.schema";
 import { ProviderAccounts } from "../provider-account.sql";
@@ -100,7 +98,7 @@ export function NeonAdapter(db: Db): Adapter {
         throw new Error("No user id");
       }
 
-      await db.write
+      await db.http
         .update(Users)
         .set(serializeUser(userData))
         .where(eq(Users.id, userData.id));
@@ -115,7 +113,7 @@ export function NeonAdapter(db: Db): Adapter {
     },
 
     deleteUser: async (id) => {
-      await db.writePool.delete(Users).where(eq(Users.id, id));
+      await db.pool.delete(Users).where(eq(Users.id, id));
     },
 
     linkAccount: async (account) => {
@@ -143,7 +141,7 @@ export function NeonAdapter(db: Db): Adapter {
         throw new Error("No user found");
       }
 
-      await db.writePool.transaction(async (tx) => {
+      await db.pool.transaction(async (tx) => {
         await tx.insert(ProviderAccounts).values({
           ...account,
           type: type.data,
@@ -191,7 +189,7 @@ export function NeonAdapter(db: Db): Adapter {
         throw new Error("Invalid provider");
       }
 
-      await db.write
+      await db.http
         .delete(ProviderAccounts)
         .where(
           and(
@@ -202,11 +200,11 @@ export function NeonAdapter(db: Db): Adapter {
     },
 
     createVerificationToken: async (token) => {
-      await db.writePool
+      await db.pool
         .insert(VerificationTokens)
         .values({ ...serializeVerificationToken(token) });
 
-      const verificationToken = await db.writePool
+      const verificationToken = await db.pool
         .select()
         .from(VerificationTokens)
         .where(eq(VerificationTokens.token, token.token))
@@ -221,7 +219,7 @@ export function NeonAdapter(db: Db): Adapter {
         console.log("using verification token => ", token);
 
         const deletedToken =
-          (await dbRead(db)
+          (await db.http
             .select()
             .from(VerificationTokens)
             .where(
@@ -256,11 +254,11 @@ export function NeonAdapter(db: Db): Adapter {
 
     createSession: async (sessionData) => {
       console.log("creating session => ", sessionData);
-      await db.writePool
+      await db.pool
         .insert(UserSessions)
         .values(serializeUserSession(sessionData));
 
-      const session = await db.writePool
+      const session = await db.pool
         .select()
         .from(UserSessions)
         .where(eq(UserSessions.sessionToken, sessionData.sessionToken))
@@ -274,7 +272,7 @@ export function NeonAdapter(db: Db): Adapter {
     getSessionAndUser: async (sessionToken) => {
       // console.log('getting session and user w/ sessionToken: ', sessionToken);
 
-      const sessionWithUser = await dbRead(db).query.UserSessions.findFirst({
+      const sessionWithUser = await db.http.query.UserSessions.findFirst({
         where: eq(UserSessions.sessionToken, sessionToken),
         with: {
           user: {
@@ -316,7 +314,7 @@ export function NeonAdapter(db: Db): Adapter {
 
     updateSession: async (sessionData) => {
       console.log("updating session => ", sessionData);
-      await db.writePool
+      await db.pool
         .update(UserSessions)
         .set({
           ...sessionData,
@@ -324,7 +322,7 @@ export function NeonAdapter(db: Db): Adapter {
         })
         .where(eq(UserSessions.sessionToken, sessionData.sessionToken));
 
-      const session = await db.writePool
+      const session = await db.pool
         .select()
         .from(UserSessions)
         .where(eq(UserSessions.sessionToken, sessionData.sessionToken))
@@ -336,7 +334,7 @@ export function NeonAdapter(db: Db): Adapter {
     },
 
     deleteSession: async (sessionToken) => {
-      // await db.write
+      // await db.http
       // 	.delete(UserSessions)
       // 	.where(eq(UserSessions.sessionToken, sessionToken));
       await deleteSession(sessionToken);

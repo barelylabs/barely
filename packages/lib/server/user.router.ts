@@ -19,7 +19,7 @@ const userRouter = router({
   current: publicProcedure.query(async ({ ctx }) => {
     if (!ctx.user) return null;
 
-    const user = await ctx.db.read
+    const user = await ctx.db.http
       .select()
       .from(Users)
       .where(eq(Users.id, ctx.user.id))
@@ -44,7 +44,7 @@ const userRouter = router({
     .output(z.boolean())
     .query(async ({ ctx, input }) => {
       console.log("checking for phone number", parseForDb(input.phone));
-      const user = await ctx.db.read
+      const user = await ctx.db.http
         .select()
         .from(Users)
         .where(eq(Users.phone, parseForDb(input.phone)))

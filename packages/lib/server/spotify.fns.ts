@@ -3,7 +3,6 @@ import { and, eq } from "drizzle-orm";
 
 import type { Db } from "./db";
 import type { ProviderAccount } from "./provider-account.schema";
-import { dbRead } from "../utils/db";
 import { newId } from "../utils/id";
 import { db } from "./db";
 import { _Playlists_To_Genres } from "./genre.sql";
@@ -41,7 +40,7 @@ const getSpotifyAccessToken = async (spotifyAccount: ProviderAccount) => {
     // console.log('new expires_at => ', expires_at);
 
     try {
-      await db.write
+      await db.http
         .update(ProviderAccounts)
         .set({
           access_token: refreshedToken.access_token,
@@ -75,7 +74,7 @@ const getSpotifyAccessToken = async (spotifyAccount: ProviderAccount) => {
 const syncSpotifyAccountUser = async (spotifyAccountId: string, db: Db) => {
   console.log("syncing spotify user...");
 
-  const spotifyAccount = await dbRead(db).query.ProviderAccounts.findFirst({
+  const spotifyAccount = await db.http.query.ProviderAccounts.findFirst({
     where: and(
       eq(ProviderAccounts.provider, "spotify"),
       eq(ProviderAccounts.providerAccountId, spotifyAccountId),
@@ -104,7 +103,7 @@ const syncSpotifyAccountUser = async (spotifyAccountId: string, db: Db) => {
 
   console.log("updating spotify user info...");
 
-  await db.writePool
+  await db.pool
     .update(ProviderAccounts)
     .set({
       username: spotifyUser.display_name,
@@ -122,7 +121,7 @@ const syncSpotifyAccountPlaylists = async (
 ) => {
   console.log("syncing spotify playlists in the fn...");
 
-  const spotifyAccount = await dbRead(db).query.ProviderAccounts.findFirst({
+  const spotifyAccount = await db.http.query.ProviderAccounts.findFirst({
     with: {
       user: {
         columns: {
@@ -167,7 +166,7 @@ const syncSpotifyAccountPlaylists = async (
   console.log("userSpotifyPlaylists => ", userSpotifyPlaylists);
 
   for (const userSpotifyPlaylist of userSpotifyPlaylists) {
-    await db.writePool.transaction(async (tx) => {
+    await db.pool.transaction(async (tx) => {
       const existingPlaylist = await tx.query.Playlists.findFirst({
         where: eq(Playlists.spotifyId, userSpotifyPlaylist.id),
         columns: {
@@ -225,7 +224,7 @@ const syncSpotifyAccountPlaylists = async (
         });
     });
 
-    const syncedPlaylist = await db.read.query.Playlists.findFirst({
+    const syncedPlaylist = await db.http.query.Playlists.findFirst({
       where: eq(Playlists.spotifyId, userSpotifyPlaylist.id),
       columns: {
         id: true,

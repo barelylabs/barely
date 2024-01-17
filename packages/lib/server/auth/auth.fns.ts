@@ -34,7 +34,7 @@ export async function createLoginLink(props: {
 
   const expires = new Date(Date.now() + expiresIn * 1000).toISOString();
 
-  await db.write.insert(VerificationTokens).values({
+  await db.http.insert(VerificationTokens).values({
     token: hashedToken,
     expires,
     identifier: props.identifier,
@@ -83,7 +83,7 @@ export async function sendLoginEmail(props: {
   callbackUrl: string;
 }) {
   const dbUser =
-    (await db.read.query.Users.findFirst({
+    (await db.http.query.Users.findFirst({
       where: eq(Users.email, props.email),
     })) ?? raise("Email not found");
 
@@ -112,7 +112,7 @@ export async function sendLoginEmail(props: {
 
 export async function deleteSession(sessionToken: string) {
   console.log("deleting session : ", sessionToken);
-  await db.write
+  await db.http
     .delete(UserSessions)
     .where(eq(UserSessions.sessionToken, sessionToken));
 }

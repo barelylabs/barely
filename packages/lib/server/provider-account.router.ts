@@ -14,7 +14,7 @@ const providerAccountRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.write
+      await ctx.db.http
         .delete(ProviderAccounts)
         .where(
           and(
@@ -37,7 +37,7 @@ const providerAccountRouter = router({
         .optional(),
     )
     .query(async ({ ctx, input }) => {
-      const accounts = await ctx.db.read.query.ProviderAccounts.findMany({
+      const accounts = await ctx.db.http.query.ProviderAccounts.findMany({
         where: and(
           eq(ProviderAccounts.userId, ctx.user.id),
           // todo - check if this is working for filtering providerAccounts by provider(s)

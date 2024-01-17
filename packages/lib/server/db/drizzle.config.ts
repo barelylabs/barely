@@ -2,7 +2,7 @@ import type { Config } from "drizzle-kit";
 
 import env from "../../env";
 
-const connectionString = env.DATABASE_WRITE_URL + "?ssl=true&sslmode=require";
+const connectionString = env.DATABASE_URL + "&ssl=true";
 
 export default {
   schema: "./server/**/*.sql.ts",

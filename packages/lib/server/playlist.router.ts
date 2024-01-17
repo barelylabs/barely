@@ -56,7 +56,7 @@ const playlistRouter = router({
         });
       }
 
-      const rawPlaylists = await ctx.db.read.query.Playlists.findMany({
+      const rawPlaylists = await ctx.db.http.query.Playlists.findMany({
         where: (Playlists) => eq(Playlists.workspaceId, workspaceId),
         with: {
           _providerAccounts: {

@@ -1,18 +1,17 @@
 import { Suspense } from "react";
 import { headers } from "next/headers";
+import { db } from "@barely/lib/server/db";
 import { getCampaignById } from "@barely/server/campaign.fns";
 import { InfoCard } from "@barely/ui/elements/card";
 import { ConfettiRain } from "@barely/ui/elements/confetti";
 import { Icon } from "@barely/ui/elements/icon";
 import { Text } from "@barely/ui/elements/typography";
 import { campaignTypeDisplay } from "@barely/utils/campaign";
-import { dbWithClosestDbRead } from "@barely/utils/db";
 
 import { DashContentHeader } from "~/app/[handle]/_components/dash-content-header";
 import { CampaignReviews } from "./campaign-reviews";
 
 const getCampaign = async (campaignId: string) => {
-  const db = dbWithClosestDbRead(headers());
   const campaign = await getCampaignById(campaignId, db);
 
   if (!campaign) throw new Error("Campaign not found");

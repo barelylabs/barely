@@ -20,7 +20,7 @@ const playlistPlacementRouter = router({
     .output(z.boolean())
     .mutation(async ({ ctx }) => {
       const queuedPlacements =
-        await ctx.db.read.query.PlaylistPlacements.findMany({
+        await ctx.db.http.query.PlaylistPlacements.findMany({
           where: and(
             lt(PlaylistPlacements.addDate, new Date().toISOString()),
             eq(PlaylistPlacements.addedToPlaylist, false),

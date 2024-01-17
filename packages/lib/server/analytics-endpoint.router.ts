@@ -13,7 +13,7 @@ export const analyticsEndpointRouter = router({
         message: `No workspaceId`,
       });
 
-    const endpointsArray = await ctx.db.read.query.AnalyticsEndpoints.findMany({
+    const endpointsArray = await ctx.db.http.query.AnalyticsEndpoints.findMany({
       where: eq(AnalyticsEndpoints.workspaceId, ctx.workspace.id),
     });
 
@@ -50,7 +50,7 @@ export const analyticsEndpointRouter = router({
         });
 
       // upsert the endpoint
-      const updatedEndpoint = await ctx.db.write
+      const updatedEndpoint = await ctx.db.http
         .insert(AnalyticsEndpoints)
         .values(input)
         .onConflictDoUpdate({

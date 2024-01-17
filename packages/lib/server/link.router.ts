@@ -23,7 +23,7 @@ import { Links } from "./link.sql";
 export const linkRouter = router({
   byId: publicProcedure.input(z.string()).query(async ({ input, ctx }) => {
     {
-      const link = await ctx.db.read.query.Links.findFirst({
+      const link = await ctx.db.http.query.Links.findFirst({
         where: eq(Links.id, input),
       });
 
@@ -42,7 +42,7 @@ export const linkRouter = router({
             )
           : undefined;
 
-      const links = await ctx.db.read.query.Links.findMany({
+      const links = await ctx.db.http.query.Links.findMany({
         where: sqlAnd([
           eq(Links.workspaceId, ctx.workspace.id),
           !!input?.userId && eq(Links.userId, input.userId),
@@ -96,7 +96,7 @@ export const linkRouter = router({
       };
 
       console.log("createLinkValues => ", createLinkValues);
-      const link = await ctx.db.write
+      const link = await ctx.db.http
         .insert(Links)
         .values(createLinkValues)
         .returning();
@@ -116,7 +116,7 @@ export const linkRouter = router({
       const url =
         input.url ??
         (
-          await ctx.db.read.query.Links.findFirst({
+          await ctx.db.http.query.Links.findFirst({
             where: eq(Links.id, input.id),
           })
         )?.url ??
@@ -130,7 +130,7 @@ export const linkRouter = router({
           }
         : await getMetaTags(url);
 
-      const link = await ctx.db.write
+      const link = await ctx.db.http
         .update(Links)
         .set({ ...input, ...metaTags })
         .where(eq(Links.id, input.id))

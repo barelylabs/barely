@@ -1,7 +1,6 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
-import { dbRead } from "../utils/db";
 import { newId } from "../utils/id";
 import { privateProcedure, publicProcedure, router } from "./api";
 import { createPlanCheckoutLink } from "./stripe.fns";
@@ -28,7 +27,7 @@ export const workspaceRouter = router({
         ...input,
       };
 
-      await ctx.db.writePool.transaction(async (tx) => {
+      await ctx.db.pool.transaction(async (tx) => {
         await tx.insert(Workspaces).values({
           id: workspaceId,
           ...input,
@@ -46,7 +45,7 @@ export const workspaceRouter = router({
   bySpotifyId: publicProcedure
     .input(z.string())
     .query(async ({ input, ctx }) => {
-      const artistTeam = await dbRead(ctx.db).query.Workspaces.findFirst({
+      const artistTeam = await ctx.db.http.query.Workspaces.findFirst({
         where: eq(Workspaces.spotifyArtistId, input),
       });
 
@@ -78,7 +77,7 @@ export const workspaceRouter = router({
         throw new Error("Workspace ID does not match the current context");
       }
 
-      const updatedWorkspace = await ctx.db.write
+      const updatedWorkspace = await ctx.db.http
         .update(Workspaces)
         .set(input)
         .where(eq(Workspaces.id, ctx.workspace.id));
@@ -114,7 +113,7 @@ export const workspaceRouter = router({
   // 		invalidate: true,
   // 	});
 
-  // 	await ctx.db.write
+  // 	await ctx.db.http
   // 		.update(Workspaces)
   // 		.set({ imageUrl: secure_url })
   // 		.where(eq(Workspaces.id, ctx.workspace.id));

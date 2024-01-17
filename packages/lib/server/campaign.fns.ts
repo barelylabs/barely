@@ -15,7 +15,7 @@ import type { Db } from "./db";
 import type { User } from "./user.schema";
 import env from "../env";
 // import { APP_BASE_URL } from "../utils/constants";
-import { dbRead } from "../utils/db";
+
 import { newId } from "../utils/id";
 import { sendText } from "../utils/sms";
 import { sqlAnd } from "../utils/sql";
@@ -25,7 +25,7 @@ import { Tracks } from "./track.sql";
 import { Users } from "./user.sql";
 
 export async function getCampaignById(campaignId: string, db: Db) {
-  const campaign = await dbRead(db).query.Campaigns.findFirst({
+  const campaign = await db.http.query.Campaigns.findFirst({
     where: eq(Campaigns.id, campaignId),
     with: {
       workspace: true,
@@ -66,7 +66,7 @@ export async function getCampaignsByUserId(
 ) {
   // find all campaigns that were a) created by the user or b) have a track that belongs to an artist that the user is a member of
 
-  const userWithCampaigns = await dbRead(db).query.Users.findFirst({
+  const userWithCampaigns = await db.http.query.Users.findFirst({
     where: eq(Users.id, userId),
     with: {
       _workspaces: {
@@ -139,7 +139,7 @@ export async function getCampaignsByWorkspaceId(
   // 	where.push(eq(Campaigns.stage, opts.stage));
   // }
 
-  const campaigns = await dbRead(db).query.Campaigns.findMany({
+  const campaigns = await db.http.query.Campaigns.findMany({
     where: sqlAnd([
       eq(Campaigns.workspaceId, workspaceId),
       opts.type && eq(Campaigns.type, opts.type),
@@ -172,7 +172,7 @@ export async function getCampaignsByWorkspaceId(
 }
 
 export async function getCampaignsToScreen(db: Db) {
-  const campaigns = await dbRead(db).query.Campaigns.findMany({
+  const campaigns = await db.http.query.Campaigns.findMany({
     where: eq(Campaigns.stage, "screening"),
     with: {
       track: {
@@ -203,7 +203,7 @@ export async function createPlaylistPitchCampaign(props: {
   sendConfirmationEmail?: boolean;
   db: Db;
 }) {
-  const track = await dbRead(props.db).query.Tracks.findFirst({
+  const track = await props.db.http.query.Tracks.findFirst({
     where: eq(Tracks.id, props.trackId),
   });
 
@@ -220,7 +220,7 @@ export async function createPlaylistPitchCampaign(props: {
     workspaceId: track.workspaceId,
   };
 
-  await props.db.write.insert(Campaigns).values(newCampaign);
+  await props.db.http.insert(Campaigns).values(newCampaign);
 
   const campaign = await getCampaignById(newCampaign.id, props.db);
 

@@ -2,7 +2,6 @@ import { and, eq, notInArray } from "drizzle-orm";
 import { z } from "zod";
 
 import type { TrackWithWorkspaceAndGenres } from "./track.schema";
-import { dbRead } from "../utils/db";
 import { pushEvent } from "../utils/pusher-server";
 import { sqlAnd } from "../utils/sql";
 import { privateProcedure, publicProcedure, router } from "./api";
@@ -13,7 +12,7 @@ import { Tracks } from "./track.sql";
 
 const trackRouter = router({
   byId: privateProcedure.input(z.string()).query(async ({ ctx, input }) => {
-    const track = await ctx.db.read.query.Tracks.findFirst({
+    const track = await ctx.db.http.query.Tracks.findFirst({
       where: eq(Tracks.id, input),
       with: {
         workspace: true,
@@ -38,7 +37,7 @@ const trackRouter = router({
   bySpotifyId: publicProcedure
     .input(z.string())
     .query(async ({ ctx, input }) => {
-      const track = await dbRead(ctx.db).query.Tracks.findFirst({
+      const track = await ctx.db.http.query.Tracks.findFirst({
         where: eq(Tracks.spotifyId, input),
         with: {
           workspace: true,
@@ -63,7 +62,7 @@ const trackRouter = router({
   existsBySpotifyId: publicProcedure
     .input(z.string())
     .query(async ({ ctx, input }) => {
-      const track = await ctx.db.read.query.Tracks.findFirst({
+      const track = await ctx.db.http.query.Tracks.findFirst({
         where: eq(Tracks.spotifyId, input),
         columns: {
           id: true,
@@ -79,7 +78,7 @@ const trackRouter = router({
       z.object({ trackId: z.string(), genres: z.array(insertGenreSchema) }),
     )
     .mutation(async ({ input, ctx }) => {
-      await ctx.db.writePool.transaction(async (tx) => {
+      await ctx.db.pool.transaction(async (tx) => {
         await tx.delete(_Tracks_To_Genres).where(
           sqlAnd([
             eq(_Tracks_To_Genres.trackId, input.trackId),
@@ -119,10 +118,10 @@ const trackRouter = router({
 
       const { genreIds, ...data } = updateData;
 
-      await ctx.db.write.update(Tracks).set(data).where(eq(Tracks.id, id));
+      await ctx.db.http.update(Tracks).set(data).where(eq(Tracks.id, id));
 
       if (genreIds) {
-        await ctx.db.write
+        await ctx.db.http
           .delete(_Tracks_To_Genres)
           .where(
             and(
@@ -131,7 +130,7 @@ const trackRouter = router({
             ),
           );
 
-        await ctx.db.write.insert(_Tracks_To_Genres).values(
+        await ctx.db.http.insert(_Tracks_To_Genres).values(
           genreIds.map((genreId) => ({
             trackId: id,
             genreId,

@@ -11,7 +11,7 @@ export async function createTrack(
   const newTrackId = newId("track");
 
   const dbTrack = (
-    await (tx ?? db.writePool)
+    await (tx ?? db.pool)
       .insert(Tracks)
       .values({
         ...track,

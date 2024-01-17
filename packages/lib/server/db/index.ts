@@ -1,5 +1,4 @@
 import { neon, neonConfig, Pool } from "@neondatabase/serverless";
-import { Client } from "@polyscale/serverless-js";
 import { drizzle as drizzleHttp } from "drizzle-orm/neon-http";
 import { drizzle as drizzlePool } from "drizzle-orm/neon-serverless";
 
@@ -78,58 +77,43 @@ export const dbSchema = {
   ...visitorSessionSql,
 };
 
-const polyscale = new Client("https://serverless.aws.psedge.global", {
-  cacheId: "polyscale-cache-id",
-  username: "target-db-username",
-  password: "target-db-password",
-  database: "target-db-database",
-  provider: "mysql",
-});
-
 neonConfig.fetchConnectionCache = true;
 
-const write = neon(env.DATABASE_WRITE_URL);
-const dbWrite = drizzleHttp(write, {
+const http = neon(env.DATABASE_URL);
+const dbHttp = drizzleHttp(http, {
   schema: dbSchema,
 });
 
-const writePool = new Pool({ connectionString: env.DATABASE_WRITE_POOL_URL });
-export const dbWritePool = drizzlePool(writePool, {
+const pool = new Pool({ connectionString: env.DATABASE_POOL_URL });
+export const dbPool = drizzlePool(pool, {
   schema: dbSchema,
 });
 
-const read = neon(env.DATABASE_READ_URL);
-const dbRead = drizzleHttp(read, {
-  schema: dbSchema,
-});
+// const read = neon(env.DATABASE_READ_URL);
+// const dbRead = drizzleHttp(read, {
+//   schema: dbSchema,
+// });
 
-const readPool = new Pool({ connectionString: env.DATABASE_READ_POOL_URL });
-export const dbReadPool = drizzlePool(readPool, {
-  schema: dbSchema,
-});
+// const readPool = new Pool({ connectionString: env.DATABASE_READ_POOL_URL });
+// export const dbReadPool = drizzlePool(readPool, {
+//   schema: dbSchema,
+// });
 
-export type DbHtml = typeof dbWrite;
-export type DbHtmlTransaction = Parameters<
-  Parameters<DbHtml["transaction"]>[0]
+export type DbHttp = typeof dbHttp;
+export type DbHttpTransaction = Parameters<
+  Parameters<DbHttp["transaction"]>[0]
 >[0];
-export type DbPool = typeof dbWritePool;
+export type DbPool = typeof dbPool;
 export type DbPoolTransaction = Parameters<
   Parameters<DbPool["transaction"]>[0]
 >[0];
 
 export interface Db {
-  write: DbHtml;
-  writePool: DbPool;
-  read: DbHtml;
-  readPool: DbPool;
-  closestRead?: DbHtml;
-  closestReadPool?: DbPool;
-  polyScale?: typeof polyscale;
+  http: DbHttp;
+  pool: DbPool;
 }
 
 export const db: Db = {
-  write: dbWrite,
-  writePool: dbWritePool,
-  read: dbRead,
-  readPool: dbReadPool,
+  http: dbHttp,
+  pool: dbPool,
 };

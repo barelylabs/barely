@@ -2,11 +2,10 @@ import { eq } from "drizzle-orm";
 import * as r from "remeda";
 
 import type { Db } from "./db";
-import { dbRead } from "../utils/db";
 import { Users } from "./user.sql";
 
 const getGenresByUserId = async (userId: string, db: Db) => {
-  const userWithGenres = await dbRead(db).query.Users.findFirst({
+  const userWithGenres = await db.http.query.Users.findFirst({
     where: eq(Users.id, userId),
     with: {
       _workspaces: {

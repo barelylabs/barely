@@ -15,7 +15,7 @@ import { Domains } from "./domain.sql";
 
 export const domainRouter = router({
   byDomain: privateProcedure.input(z.string()).query(async ({ input, ctx }) => {
-    const domain = await ctx.db.read.query.Domains.findFirst({
+    const domain = await ctx.db.http.query.Domains.findFirst({
       where: and(
         eq(Domains.workspaceId, ctx.workspace.id),
         eq(Domains.domain, input),
@@ -26,7 +26,7 @@ export const domainRouter = router({
   }),
 
   byWorkspace: privateProcedure.query(async ({ ctx }) => {
-    const domains = await ctx.db.readPool.query.Domains.findMany({
+    const domains = await ctx.db.pool.query.Domains.findMany({
       where: eq(Domains.workspaceId, ctx.workspace.id),
       orderBy: (domains, { desc }) => [desc(domains.isPrimaryLinkDomain)],
     });
@@ -46,7 +46,7 @@ export const domainRouter = router({
     .query(async ({ input, ctx }) => {
       let status: DomainStatus = "Valid Configuration";
 
-      const domain = await ctx.db.read.query.Domains.findFirst({
+      const domain = await ctx.db.http.query.Domains.findFirst({
         where: and(
           eq(Domains.workspaceId, ctx.workspace.id),
           eq(Domains.domain, input),
@@ -142,7 +142,7 @@ export const domainRouter = router({
         ) {
           /* Domain was just verified */
           status = "Valid Configuration";
-          await ctx.db.writePool
+          await ctx.db.pool
             .update(Domains)
             .set({ verified: true })
             .where(
@@ -169,7 +169,7 @@ export const domainRouter = router({
         const { data } = vercelConfigResponse;
 
         if (!data.misconfigured) {
-          await ctx.db.writePool
+          await ctx.db.pool
             .update(Domains)
             .set({ verified: true, lastCheckedAt: new Date() })
             .where(
@@ -180,7 +180,7 @@ export const domainRouter = router({
             );
         } else {
           status = "Invalid Configuration";
-          await ctx.db.writePool
+          await ctx.db.pool
             .update(Domains)
             .set({ verified: false, lastCheckedAt: new Date() })
             .where(

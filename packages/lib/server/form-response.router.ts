@@ -12,7 +12,7 @@ export const formResponseRouter = router({
         id: newId("formResponse"),
       };
 
-      await ctx.db.write.insert(FormResponses).values(formResponse);
+      await ctx.db.http.insert(FormResponses).values(formResponse);
 
       return formResponse;
     }),

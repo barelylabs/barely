@@ -7,7 +7,7 @@ export const visitorSessionRouter = router({
   create: publicProcedure
     .input(createVisitorSessionSchema)
     .mutation(async ({ input, ctx }) => {
-      return await ctx.db.write
+      return await ctx.db.http
         .insert(VisitorSessions)
         .values({ ...input, id: newId("webSession") })
         .execute();

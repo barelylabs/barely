@@ -28,10 +28,8 @@ const serverEnvSchema = pickServerEnvSchema([
   "VERCEL_LINK_PROJECT_ID",
   "VERCEL_TEAM_ID",
   "VERCEL_TOKEN",
-  "DATABASE_READ_URL",
-  "DATABASE_READ_POOL_URL",
-  "DATABASE_WRITE_URL",
-  "DATABASE_WRITE_POOL_URL",
+  "DATABASE_URL",
+  "DATABASE_POOL_URL",
 ]);
 
 const clientEnvSchema = pickClientEnvSchema([

@@ -16,7 +16,7 @@ import type { PlanType } from "./workspace.settings";
 import env from "../env";
 import { playlistPitchCostInDollars } from "../utils/campaign";
 // import { APP_BASE_URL } from "../utils/constants";
-import { dbRead } from "../utils/db";
+
 import { newId } from "../utils/id";
 import { log } from "../utils/log";
 import { fullNameToFirstAndLast } from "../utils/name";
@@ -57,11 +57,11 @@ export async function createStripeUser(props: {
   });
 
   // return customer
-  await props.db.write.update(Users).set({
+  await props.db.http.update(Users).set({
     stripeId: customer.id,
   });
 
-  const userWithStripe = await dbRead(props.db)
+  const userWithStripe = await props.db.http
     .select()
     .from(Users)
     .where(eq(Users.id, props.userId))
@@ -311,7 +311,7 @@ export async function handleStripeCheckoutSessionComplete(
            * billingCycleStart,
            */
 
-          const workspace = await db.read.query.Workspaces.findFirst({
+          const workspace = await db.http.query.Workspaces.findFirst({
             where: eq(Workspaces.id, transactionMetadata.workspaceId),
           });
 
@@ -323,7 +323,7 @@ export async function handleStripeCheckoutSessionComplete(
             return NextResponse.json({ received: true }, { status: 200 });
           }
 
-          await db.writePool
+          await db.pool
             .update(Workspaces)
             .set({
               plan: plan.id,
@@ -350,7 +350,7 @@ export async function handleStripeCheckoutSessionComplete(
 
         /** CAMPAIGNS */
         const campaign = lineItemMetadata.campaignId
-          ? await db.read.query.Campaigns.findFirst({
+          ? await db.http.query.Campaigns.findFirst({
               where: eq(Campaigns.id, lineItemMetadata.campaignId),
               with: {
                 track: {
@@ -408,7 +408,7 @@ export async function handleStripeCheckoutSessionComplete(
     );
   }
 
-  await db.writePool.transaction(async (tx) => {
+  await db.pool.transaction(async (tx) => {
     console.log("adding transaction to db => ", transaction);
 
     await tx.insert(Transactions).values(transaction);

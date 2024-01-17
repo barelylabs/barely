@@ -10,7 +10,7 @@ import type { Track } from "./track.schema";
 import type { Workspace } from "./workspace.schema";
 import env from "../env";
 // import { APP_BASE_URL } from "../utils/constants";
-import { dbRead } from "../utils/db";
+
 import { convertToHandle } from "../utils/handle";
 import { newCuid, newId } from "../utils/id";
 import { pushEvent } from "../utils/pusher-server";
@@ -56,12 +56,12 @@ export const campaignRouter = router({
         });
 
       let dbArtist = input.artist.id
-        ? await ctx.db.read.query.Workspaces.findFirst({
+        ? await ctx.db.http.query.Workspaces.findFirst({
             where: eq(Workspaces.id, input.artist.id),
             with: { _users: true },
           })
         : input.artist.spotifyArtistId
-          ? await ctx.db.read.query.Workspaces.findFirst({
+          ? await ctx.db.http.query.Workspaces.findFirst({
               where: eq(
                 Workspaces.spotifyArtistId,
                 input.artist.spotifyArtistId,
@@ -91,7 +91,7 @@ export const campaignRouter = router({
 
         const newArtistId = newId("workspace");
 
-        await ctx.db.writePool.transaction(async (tx) => {
+        await ctx.db.pool.transaction(async (tx) => {
           await tx.insert(Workspaces).values({
             id: newArtistId,
             handle,
@@ -105,7 +105,7 @@ export const campaignRouter = router({
           });
         });
 
-        dbArtist = await ctx.db.read.query.Workspaces.findFirst({
+        dbArtist = await ctx.db.http.query.Workspaces.findFirst({
           where: eq(Workspaces.id, newArtistId),
           with: { _users: true },
         });
@@ -121,11 +121,11 @@ export const campaignRouter = router({
       // 💿 check if track exists
 
       let dbTrack = input.track.id
-        ? await ctx.db.read.query.Tracks.findFirst({
+        ? await ctx.db.http.query.Tracks.findFirst({
             where: eq(Tracks.id, input.track.id),
           })
         : input.track.spotifyId
-          ? await ctx.db.read.query.Tracks.findFirst({
+          ? await ctx.db.http.query.Tracks.findFirst({
               where: eq(Tracks.spotifyId, input.track.spotifyId),
             })
           : null;
@@ -166,7 +166,7 @@ export const campaignRouter = router({
       // 🔎 check if artist already exists in db
       if (input.artist.spotifyArtistId) {
         const spotifyArtistId = input.artist.spotifyArtistId;
-        const dbArtistCheck = await ctx.db.read.query.Workspaces.findFirst({
+        const dbArtistCheck = await ctx.db.http.query.Workspaces.findFirst({
           where: eq(Workspaces.spotifyArtistId, spotifyArtistId),
         });
 
@@ -181,11 +181,9 @@ export const campaignRouter = router({
         input.artist.handle ?? convertToHandle(input.artist.name);
 
       // check if handle is available
-      let existingArtistHandle = await dbRead(ctx.db)
-        .query.Workspaces.findFirst({
-          where: eq(Workspaces.handle, artistHandle),
-        })
-        .then((w) => w?.handle);
+      let existingArtistHandle = await ctx.db.http.query.Workspaces.findFirst({
+        where: eq(Workspaces.handle, artistHandle),
+      }).then((w) => w?.handle);
 
       // if handle is taken, append a number to the end
       if (existingArtistHandle) {
@@ -193,11 +191,9 @@ export const campaignRouter = router({
 
         while (existingArtistHandle) {
           artistHandle = `${existingArtistHandle}${i}`;
-          existingArtistHandle = await dbRead(ctx.db)
-            .query.Workspaces.findFirst({
-              where: eq(Workspaces.handle, artistHandle),
-            })
-            .then((w) => w?.handle);
+          existingArtistHandle = await ctx.db.http.query.Workspaces.findFirst({
+            where: eq(Workspaces.handle, artistHandle),
+          }).then((w) => w?.handle);
 
           if (existingArtistHandle) console.log("handle taken ", artistHandle);
           if (!existingArtistHandle)
@@ -212,7 +208,7 @@ export const campaignRouter = router({
       let newWorkspace: Workspace | undefined;
       let newTrack: Track | undefined;
 
-      await ctx.db.writePool.transaction(async (tx) => {
+      await ctx.db.pool.transaction(async (tx) => {
         // 👩‍🎤 create new workspace
         newWorkspace = await createWorkspace(
           {
@@ -380,7 +376,7 @@ export const campaignRouter = router({
       if (input.type) where.push(eq(Campaigns.type, input.type));
       if (input.stage) where.push(eq(Campaigns.stage, input.stage));
 
-      const campaignsWithCount = await ctx.db.read
+      const campaignsWithCount = await ctx.db.http
         .select({
           count: sqlCount,
         })
@@ -408,7 +404,7 @@ export const campaignRouter = router({
       if (input.type) where.push(eq(Campaigns.type, input.type));
 
       const [all, active, screening, approved] = await Promise.allSettled([
-        ctx.db.readPool
+        ctx.db.pool
           .select({
             count: sqlCount,
           })
@@ -416,7 +412,7 @@ export const campaignRouter = router({
           .where(and(...where))
           .limit(1)
           .then((c) => (c[0] ? c[0].count : 0)),
-        ctx.db.readPool
+        ctx.db.pool
           .select({
             count: sqlCount,
           })
@@ -424,7 +420,7 @@ export const campaignRouter = router({
           .where(and(...where, eq(Campaigns.stage, "active")))
           .limit(1)
           .then((c) => (c[0] ? c[0].count : 0)),
-        ctx.db.readPool
+        ctx.db.pool
           .select({
             count: sqlCount,
           })
@@ -432,7 +428,7 @@ export const campaignRouter = router({
           .where(and(...where, eq(Campaigns.stage, "screening")))
           .limit(1)
           .then((c) => (c[0] ? c[0].count : 0)),
-        ctx.db.readPool
+        ctx.db.pool
           .select({
             count: sqlCount,
           })
@@ -457,7 +453,7 @@ export const campaignRouter = router({
         message: "User is not authorized to screen campaigns.",
       });
 
-    const campaigns = await ctx.db.read.query.Campaigns.findMany({
+    const campaigns = await ctx.db.http.query.Campaigns.findMany({
       where: eq(Campaigns.stage, "screening"),
       orderBy: [asc(Campaigns.createdAt)],
       with: {
@@ -496,12 +492,12 @@ export const campaignRouter = router({
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { genres, ...input } = rawInput;
 
-      await ctx.db.write
+      await ctx.db.http
         .update(Campaigns)
         .set(input)
         .where(eq(Campaigns.id, input.id));
 
-      const campaign = await ctx.db.read.query.Campaigns.findFirst({
+      const campaign = await ctx.db.http.query.Campaigns.findFirst({
         where: eq(Campaigns.id, input.id),
         with: {
           createdBy: true,
@@ -517,7 +513,7 @@ export const campaignRouter = router({
           message: "Campaign not found",
         });
 
-      await ctx.db.write.insert(CampaignUpdateRecords).values({
+      await ctx.db.http.insert(CampaignUpdateRecords).values({
         id: newCuid(),
         campaignId: input.id,
         createdById: ctx.user.id,
@@ -544,7 +540,7 @@ export const campaignRouter = router({
       if (input.stage === "approved") {
         // set the curator reach to the minimum if it's not set yet
         if (!campaign.curatorReach) {
-          await ctx.db.write
+          await ctx.db.http
             .update(Campaigns)
             .set({ curatorReach: 3 })
             .where(eq(Campaigns.id, input.id));
@@ -600,12 +596,12 @@ export const campaignRouter = router({
   update: privateProcedure
     .input(updateCampaignSchema)
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.write
+      await ctx.db.http
         .update(Campaigns)
         .set(input)
         .where(eq(Campaigns.id, input.id));
 
-      const campaign = await ctx.db.read.query.Campaigns.findFirst({
+      const campaign = await ctx.db.http.query.Campaigns.findFirst({
         where: eq(Campaigns.id, input.id),
         with: {
           createdBy: true,
@@ -623,7 +619,7 @@ export const campaignRouter = router({
           message: "Campaign not found",
         });
 
-      await ctx.db.write.insert(CampaignUpdateRecords).values({
+      await ctx.db.http.insert(CampaignUpdateRecords).values({
         id: newCuid(),
         campaignId: input.id,
         createdById: ctx.user.id,

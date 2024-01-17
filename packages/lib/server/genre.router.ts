@@ -1,12 +1,11 @@
 import type { GenreWithPlaylistStats } from "./genre.schema";
-import { dbRead } from "../utils/db";
 import { privateProcedure, publicProcedure, router } from "./api";
 import { getGenresByUserId } from "./genre.fns";
 import { _Playlists_To_Genres } from "./genre.sql";
 
 export const genreRouter = router({
   allInPitchPlaylists: publicProcedure.query(async ({ ctx }) => {
-    const allGenres = await dbRead(ctx.db).query.Genres.findMany({
+    const allGenres = await ctx.db.http.query.Genres.findMany({
       with: {
         _playlists: {
           columns: {},

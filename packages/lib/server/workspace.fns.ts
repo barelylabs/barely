@@ -66,7 +66,7 @@ export async function createWorkspace(
     return await createWorkspaceTransaction(insertWorkspaceProps, tx);
   } else {
     console.log("creating transaction and workspace");
-    const dbWorkspace = await db.writePool.transaction(async (tx) => {
+    const dbWorkspace = await db.pool.transaction(async (tx) => {
       return await createWorkspaceTransaction(insertWorkspaceProps, tx);
     });
     return dbWorkspace;

@@ -1,10 +1,6 @@
 import type { ZodObject, ZodRawShape } from "zod";
 import { z } from "zod";
 
-// if (typeof window !== 'undefined') console.log('process.env => ', process.env);
-
-// throw new Error('This file should not be imported directly');™
-
 function getBaseUrl({
   devPort,
   absolute = false,
@@ -82,10 +78,8 @@ export const allServerEnvSchema = z.object({
   BOT_SPOTIFY_ACCOUNT_ID: z.string(),
   BOT_THREADS_API_KEY: z.string(),
   CLOUDINARY_API_SECRET: z.string(),
-  DATABASE_READ_URL: z.string().url(),
-  DATABASE_READ_POOL_URL: z.string().url(),
-  DATABASE_WRITE_URL: z.string().url(),
-  DATABASE_WRITE_POOL_URL: z.string().url(),
+  DATABASE_URL: z.string().url(),
+  DATABASE_POOL_URL: z.string().url(),
   DISCORD_CLIENT_ID: z.string(),
   DISCORD_CLIENT_SECRET: z.string(),
   LOCALHOST_IP: z.string(),
@@ -195,10 +189,8 @@ const processEnv = {
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
   DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
   DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
-  DATABASE_READ_URL: process.env.DATABASE_READ_URL,
-  DATABASE_READ_POOL_URL: process.env.DATABASE_READ_POOL_URL,
-  DATABASE_WRITE_URL: process.env.DATABASE_WRITE_URL,
-  DATABASE_WRITE_POOL_URL: process.env.DATABASE_WRITE_POOL_URL,
+  DATABASE_URL: process.env.DATABASE_READ_URL,
+  DATABASE_POOL_URL: process.env.DATABASE_READ_POOL_URL,
   GANDI_API_KEY: process.env.GANDI_API_KEY,
   LOCALHOST_IP: process.env.LOCALHOST_IP,
   NAMESILO_API_KEY: process.env.NAMESILO_API_KEY,

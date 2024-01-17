@@ -19,7 +19,7 @@ const spotifyRouter = router({
     if (input.length === 0) return [];
 
     const botSpotifyAccount =
-      await ctx.db.read.query.ProviderAccounts.findFirst({
+      await ctx.db.http.query.ProviderAccounts.findFirst({
         where: and(
           eq(ProviderAccounts.provider, "spotify"),
           eq(ProviderAccounts.providerAccountId, env.BOT_SPOTIFY_ACCOUNT_ID),
@@ -91,7 +91,7 @@ const spotifyRouter = router({
     }),
 
   syncCurrentUser: privateProcedure.mutation(async ({ ctx }) => {
-    const spotifyAccounts = await ctx.db.read.query.ProviderAccounts.findMany({
+    const spotifyAccounts = await ctx.db.http.query.ProviderAccounts.findMany({
       where: and(
         eq(ProviderAccounts.provider, "spotify"),
         eq(ProviderAccounts.userId, ctx.user.id),
