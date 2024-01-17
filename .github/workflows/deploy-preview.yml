@@ -108,13 +108,13 @@ jobs:
       - name: Vercel Env
         id: vercel-env
         run: |
-          vercel pull --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}          
-          echo "Checking .vercel/.env.preview.local"
-          DATABASE_READ_URL=$(grep -oP 'DATABASE_READ_URL="\K[^"]+' .vercel/.env.preview.local)
-          echo "DATABASE_READ_URL: $DATABASE_READ_URL"
-          VERCEL_URL=$(grep -oP 'VERCEL_URL="\K[^"]+' .vercel/.env.preview.local)
-          echo "VERCEL_URL: $VERCEL_URL"
-          echo "preview_url=$VERCEL_URL" >> $GITHUB_OUTPUT
+          vercel pull --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
+      # echo "Checking .vercel/.env.preview.local"
+      # DATABASE_READ_URL=$(grep -oP 'DATABASE_READ_URL="\K[^"]+' .vercel/.env.preview.local)
+      # echo "DATABASE_READ_URL: $DATABASE_READ_URL"
+      # VERCEL_URL=$(grep -oP 'VERCEL_URL="\K[^"]+' .vercel/.env.preview.local)
+      # echo "VERCEL_URL: $VERCEL_URL"
+      # echo "preview_url=$VERCEL_URL" >> $GITHUB_OUTPUT
 
       # VERCEL_URL=app-git-${{ needs.neon-preview.outputs.git_branch_name }}-barelylabs.vercel.app
       # echo "VERCEL_URL=$VERCEL_URL" >> .vercel/.env.preview.local
@@ -128,14 +128,17 @@ jobs:
 
       - name: Deploy App Preview to Vercel
         id: deploy-app
-        run: echo preview_url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN}}) >> $GITHUB_OUTPUT
+        run: |
+          echo preview_url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN}}) >> $GITHUB_OUTPUT
+          echo inspect_url=$(vercel inspect preview_url --token=${{ secrets.VERCEL_TOKEN }}) >> $GITHUB_OUTPUT
 
       - name: Comment on Pull Request
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            Vercel Preview URL :rocket: : https://${{ steps.vercel-env.outputs.preview_url }}
-            Neon branch :elephant: : https://console.neon.tech/app/projects/${{ secrets.NEON_PROJECT_ID }}/branches/${{ needs.neon-preview.outputs.neon_branch_id }}
+            app preview :rocket: : https://${{ steps.deploy-app.outputs.preview_url }}
+            app inspect :mag: : https://${{ steps.deploy-app.outputs.inspect_url }}
+            neon branch :elephant: : https://console.neon.tech/app/projects/${{ secrets.NEON_PROJECT_ID }}/branches/${{ needs.neon-preview.outputs.neon_branch_id }}
 
   # link-deploy:
 
