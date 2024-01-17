@@ -39,7 +39,7 @@
       "@noble/hashes@1.3.0": "patches/@noble__hashes@1.3.0.patch"
     },
     "overrides": {
-      "@langchain/core": "0.1.9"
+      "@langchain/core": "0.1.15"
     }
   },
   "prettier": "@barely/prettier-config"

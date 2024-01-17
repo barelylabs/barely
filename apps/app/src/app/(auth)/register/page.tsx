@@ -3,7 +3,7 @@ import Link from "next/link";
 import { H, Text } from "@barely/ui/elements/typography";
 import logo from "@static/logo.png";
 
-import { handleLoggedIn } from "~/app/(auth)/handle-logged-in";
+import { handleLoggedInOnAuthPage } from "~/app/(auth)/handle-logged-in-on-auth-page";
 import RegisterUserForm from "./register-user-form";
 
 const RegisterUserPage = async ({
@@ -13,7 +13,7 @@ const RegisterUserPage = async ({
 }) => {
   const { callbackUrl } = searchParams ?? {};
 
-  await handleLoggedIn();
+  await handleLoggedInOnAuthPage();
 
   return (
     <div className="container flex h-screen min-h-fit w-screen flex-col items-center justify-center overflow-scroll lg:max-w-none lg:grid-cols-2 lg:px-0">

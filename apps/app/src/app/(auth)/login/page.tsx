@@ -4,7 +4,7 @@ import { Icon } from "@barely/ui/elements/icon";
 import { H } from "@barely/ui/elements/typography";
 import logo from "@static/logo.png";
 
-import { handleLoggedIn } from "~/app/(auth)/handle-logged-in";
+import { handleLoggedInOnAuthPage } from "~/app/(auth)/handle-logged-in-on-auth-page";
 import LoginForm from "./login-form";
 
 const SignInPage = async ({
@@ -18,7 +18,7 @@ const SignInPage = async ({
     console.error(error);
   }
 
-  await handleLoggedIn();
+  await handleLoggedInOnAuthPage();
 
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
