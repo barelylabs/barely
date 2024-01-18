@@ -60,11 +60,26 @@ jobs:
         run: |
           touch .env
 
-          echo "DATABASE_URL=$(neonctl connection-string ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require" >> $GITHUB_ENV      
-          echo "DATABASE_POOL_URL=$(neonctl connection-string ${{ steps.branch-name.outputs.current_branch }} --pooled --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require" >> $GITHUB_ENV
+          DATABASE_URL=$(neonctl connection-string ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require
+          DATABASE_POOL_URL=$(neonctl connection-string ${{ steps.branch-name.outputs.current_branch }} --pooled --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require
 
-          echo DATABASE_URL=$DATABASE_URL >> .env
-          echo DATABASE_POOL_URL=$DATABASE_POOL_URL >> .env
+          echo "DATABASE_URL: $DATABASE_URL"
+          echo "DATABASE_POOL_URL: $DATABASE_POOL_URL"
+
+          echo "DATABASE_URL=$DATABASE_URL" >> $GITHUB_ENV
+          echo "DATABASE_POOL_URL=$DATABASE_POOL_URL" >> $GITHUB_ENV
+
+          if grep -q "DATABASE_URL" .env; then
+            sed -i "" "s#^DATABASE_URL=.*#DATABASE_URL=$connectionString#" .env
+          else
+            echo "DATABASE_URL=$(neonctl connection-string ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require" >> .env
+          fi
+
+          if grep -q "DATABASE_POOL_URL" .env; then
+            sed -i "" "s#^DATABASE_POOL_URL=.*#DATABASE_POOL_URL=$connectionString#" .env
+          else
+            echo "DATABASE_POOL_URL=$(neonctl connection-string ${{ steps.branch-name.outputs.current_branch }} --pooled --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require" >> .env
+          fi          
 
           pnpm db:push
 
