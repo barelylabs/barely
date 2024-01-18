@@ -134,10 +134,19 @@ jobs:
         id: vercel-env
         run: |
           vercel pull --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
+
+          echo "VERCEL PULLED"
+
           cp .vercel/.env.preview.local .env
+
+          echo ".env COPIED"
+
+          echo "VERCEL_URL before: $(grep -oP 'VERCEL_URL="\K[^"]+' .env)"
 
           perl -i -ne 'print unless /VERCEL_URL/' .env
           echo "VERCEL_URL=test.app" >> .env
+
+          echo "VERCEL_URL after: $(grep -oP 'VERCEL_URL="\K[^"]+' .env)"
 
           DATABASE_URL=$(grep -oP 'DATABASE_URL="\K[^"]+' .env)
           DATABASE_POOL_URL=$(grep -oP 'DATABASE_POOL_URL="\K[^"]+' .env)
