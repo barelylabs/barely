@@ -42,10 +42,12 @@ jobs:
           fi
 
       # The branch ID is needed to display the URL of the branch in the comment.
-      - name: Get Neon branch ID
-        id: get-neon-branch-id
+      - name: Get Neon branch
+        id: get-neon-branch
         run: |
           echo branch_id=$(neonctl branches get ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --output json | jq -r '.id') >> $GITHUB_OUTPUT
+          echo DATABASE_URL=$(neonctl connection-string ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require >> $GITHUB_ENV
+          echo DATABASE_POOL_URL=$(neonctl connection-string ${{ steps.branch-name.outputs.current_branch }} --pooled --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require >> $GITHUB_ENV
 
       # Setup node/pnpm/turbo
       - name: Setup
@@ -55,48 +57,58 @@ jobs:
         run: |
           npm install --global vercel@latest
 
-      - name: Run Drizzle Generate and Push
+      - name: db:push
         id: drizzle
         run: |
           rm -f .env
-          touch .env
-
-          DATABASE_URL=$(neonctl connection-string ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require
-          DATABASE_POOL_URL=$(neonctl connection-string ${{ steps.branch-name.outputs.current_branch }} --pooled --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require
+          touch .env          
 
           echo "DATABASE_URL: $DATABASE_URL"
           echo "DATABASE_POOL_URL: $DATABASE_POOL_URL"
 
-          echo "DATABASE_URL=$DATABASE_URL" >> $GITHUB_ENV
-          echo "DATABASE_URL=$DATABASE_URL" >> .env
-
-          echo "DATABASE_POOL_URL=$DATABASE_POOL_URL" >> $GITHUB_ENV
+          echo "DATABASE_URL=$DATABASE_URL" >> .env          
           echo "DATABASE_POOL_URL=$DATABASE_POOL_URL" >> .env
 
           pnpm db:push
 
       # For now, we're manually removing and re-adding the environment variables. Might be a simpler way to directly replace them, but got errors when trying to do that.
-      - name: Update Vercel Environment Variables for this Branch
+      - name: Update Vercel Environment Variables for App Preview Branch
         run: |
           echo "DATABASE_URL: $DATABASE_URL"  
           echo "DATABASE_POOL_URL: $DATABASE_POOL_URL"                  
 
           branch_name=${{ steps.branch-name.outputs.current_branch }}
 
-          if vercel env ls preview $branch_name  | grep -q DATABASE_URL; then
+          if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
             vercel env rm DATABASE_URL preview pg --yes --token=${{ secrets.VERCEL_TOKEN }}
           fi
 
-          if vercel env ls preview $branch_name  | grep -q DATABASE_POOL_URL; then
+          if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
             vercel env rm DATABASE_POOL_URL preview pg --yes --token=${{ secrets.VERCEL_TOKEN }}
           fi          
 
           echo $DATABASE_URL | vercel env add DATABASE_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
           echo $DATABASE_POOL_URL | vercel env add DATABASE_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
 
+      - name: Update Vercel Env Variables for Link Preview Branch
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
+        run: branch_name=${{ steps.branch-name.outputs.current_branch }}
+
+          if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
+          vercel env rm DATABASE_URL preview pg --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+          if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
+          vercel env rm DATABASE_POOL_URL preview pg --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+          echo $DATABASE_URL | vercel env add DATABASE_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
+          echo $DATABASE_POOL_URL | vercel env add DATABASE_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
+
     outputs:
       git_branch_name: ${{ steps.branch-name.outputs.current_branch }}
-      neon_branch_id: ${{ steps.get-neon-branch-id.outputs.branch_id }}
+      neon_branch_id: ${{ steps.get-neon-branch.outputs.branch_id }}
 
   app-deploy:
     name: vercel preview - app.barely.io
