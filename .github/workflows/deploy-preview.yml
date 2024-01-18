@@ -141,6 +141,8 @@ jobs:
 
           echo ".env COPIED"
 
+          ls -l .env
+
           echo "VERCEL_URL before: $(grep -oP 'VERCEL_URL="\K[^"]+' .env)"
 
           if ! grep -q "VERCEL_URL" .env; then
