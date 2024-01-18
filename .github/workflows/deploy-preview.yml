@@ -46,10 +46,10 @@ jobs:
         id: get-neon-branch
         run: |
           branch_id=$(neonctl branches get ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --output json | jq -r '.id')
-          echo "branch_id=$branch_id" >> $GITHUB_OUTPUT
-          DATABASE_URL=$(neonctl connection-string ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require | tr -d '\n')
+          echo "branch_id=$branch_id" >> $GITHUB_ENV          
+          DATABASE_URL=$(neonctl connection-string ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }} | tr -d '\n')?sslmode=require
           echo "DATABASE_URL=$DATABASE_URL" >> $GITHUB_ENV
-          DATABASE_POOL_URL=$(neonctl connection-string ${{ steps.branch-name.outputs.current_branch }} --pooled --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require | tr -d '\n')
+          DATABASE_POOL_URL=$(neonctl connection-string ${{ steps.branch-name.outputs.current_branch }} --pooled --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }} | tr -d '\n')?sslmode=require
           echo "DATABASE_POOL_URL=$DATABASE_POOL_URL" >> $GITHUB_ENV
 
       # Setup node/pnpm/turbo
