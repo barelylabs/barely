@@ -134,38 +134,40 @@ jobs:
         id: vercel-env
         run: |
           vercel pull --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
-
-          echo "VERCEL PULLED"
-
+          VERCEL_URL=app-git-${{ needs.neon-preview.outputs.git_branch_name }}-barelylabs.vercel.app
+          echo "VERCEL_URL=$VERCEL_URL" >> .vercel/.env.preview.local
           cp .vercel/.env.preview.local .env
 
-          echo ".env COPIED"
+        # echo "VERCEL PULLED"
 
-          ls -l .env
+        # cp .vercel/.env.preview.local .env
 
-          echo "VERCEL_URL before: $(grep -oP 'VERCEL_URL="\K[^"]+' .env)"
-          cat .env
+        # echo ".env COPIED"
 
-          if grep -q "VERCEL_URL" .env; then
-            sed -i '/VERCEL_URL/d' .env
-          fi
+        # ls -l .env
 
-          echo 'VERCEL_URL="test.app"' >> .env
+        # echo "VERCEL_URL before: $(grep -oP 'VERCEL_URL="\K[^"]+' .env)"
+        # cat .env
 
-          echo "After modification:"
-          cat .env 
-          VERCEL_URL=$(grep -oP 'VERCEL_URL="\K[^"]+' .env)
+        # if grep -q "VERCEL_URL" .env; then
+        #   sed -i '/VERCEL_URL/d' .env
+        # fi
 
-          echo "VERCEL_URL after: $VERCEL_URL"
+        # echo 'VERCEL_URL="test.app"' >> .env
 
+        # echo "After modification:"
+        # cat .env
+        # VERCEL_URL=$(grep -oP 'VERCEL_URL="\K[^"]+' .env)
 
-          DATABASE_URL=$(grep -oP 'DATABASE_URL="\K[^"]+' .env)
-          DATABASE_POOL_URL=$(grep -oP 'DATABASE_POOL_URL="\K[^"]+' .env)
-          VERCEL_URL=$(grep -oP 'VERCEL_URL="\K[^"]+' .env)
+        # echo "VERCEL_URL after: $VERCEL_URL"
 
-          echo "DATABASE_URL: $DATABASE_URL"
-          echo "DATABASE_POOL_URL: $DATABASE_POOL_URL"
-          echo "VERCEL_URL: $VERCEL_URL"
+        # DATABASE_URL=$(grep -oP 'DATABASE_URL="\K[^"]+' .env)
+        # DATABASE_POOL_URL=$(grep -oP 'DATABASE_POOL_URL="\K[^"]+' .env)
+        # VERCEL_URL=$(grep -oP 'VERCEL_URL="\K[^"]+' .env)
+
+        # echo "DATABASE_URL: $DATABASE_URL"
+        # echo "DATABASE_POOL_URL: $DATABASE_POOL_URL"
+        # echo "VERCEL_URL: $VERCEL_URL"
 
       - name: Build App Project Artifacts
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
