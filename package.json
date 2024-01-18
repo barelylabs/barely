@@ -22,9 +22,8 @@
     "lint": "turbo lint --continue -- --cache --cache-location node_modules/.cache/.eslintcache",
     "lint:fix": "turbo lint --continue -- --fix --cache --cache-location node_modules/.cache/.eslintcache",
     "lint:ws": "pnpm dlx sherif@latest",
-    "neon:me": "neonctl me | awk -F '│' 'NR==4{print $2}' | tr -d ' '",
-    "neon:current-branch": "git rev-parse --abbrev-ref HEAD",
-    "neon:create-dev-branch": "chmod +x ./scripts/dev-branch.sh && ./scripts/dev-branch.sh",
+    "neon:create-dev-branch": "chmod +x ./scripts/create-dev-branch.sh && ./scripts/create-dev-branch.sh",
+    "neon:reset-dev-branch": "chmod +x ./scripts/reset-dev-branch.sh && ./scripts/reset-dev-branch.sh",
     "postinstall": "pnpm lint:ws",
     "typecheck": "turbo typecheck"
   },

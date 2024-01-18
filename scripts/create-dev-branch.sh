@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Get the output of step1 and step2
 me=$(neonctl me | awk -F '│' 'NR==4{print $2}' | tr -d ' ')
 currentBranch=$(git rev-parse --abbrev-ref HEAD)
 branchName=dev_${currentBranch}_${me}
