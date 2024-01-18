@@ -4,9 +4,8 @@ import { auth } from "@barely/server/auth";
 
 export default auth((req) => {
   console.log("url => ", req.url);
-  const { pathname } = req.nextUrl;
 
-  if (!req.auth?.user && !pathname.startsWith("/login"))
+  if (!req.auth?.user)
     return NextResponse.redirect(absoluteUrl("app", "login"));
 
   return NextResponse.next();
