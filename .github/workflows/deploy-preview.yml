@@ -144,6 +144,7 @@ jobs:
           ls -l .env
 
           echo "VERCEL_URL before: $(grep -oP 'VERCEL_URL="\K[^"]+' .env)"
+          cat .env
 
           if ! grep -q "VERCEL_URL" .env; then
             echo "VERCEL_URL=test.app" > .env
@@ -153,6 +154,7 @@ jobs:
           fi           
 
           echo "VERCEL_URL after: $(grep -oP 'VERCEL_URL="\K[^"]+' .env)"
+          cat.env 
 
           DATABASE_URL=$(grep -oP 'DATABASE_URL="\K[^"]+' .env)
           DATABASE_POOL_URL=$(grep -oP 'DATABASE_POOL_URL="\K[^"]+' .env)
