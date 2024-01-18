@@ -93,14 +93,15 @@ jobs:
       - name: Update Vercel Env Variables for Link Preview Branch
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
-        run: branch_name=${{ steps.branch-name.outputs.current_branch }}
+        run: |
+          branch_name=${{ steps.branch-name.outputs.current_branch }}
 
           if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
-          vercel env rm DATABASE_URL preview pg --yes --token=${{ secrets.VERCEL_TOKEN }}
+            vercel env rm DATABASE_URL preview pg --yes --token=${{ secrets.VERCEL_TOKEN }}
           fi
 
           if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
-          vercel env rm DATABASE_POOL_URL preview pg --yes --token=${{ secrets.VERCEL_TOKEN }}
+            vercel env rm DATABASE_POOL_URL preview pg --yes --token=${{ secrets.VERCEL_TOKEN }}
           fi
 
           echo $DATABASE_URL | vercel env add DATABASE_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
