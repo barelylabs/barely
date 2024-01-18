@@ -45,31 +45,31 @@ jobs:
       - name: Get Neon branch
         id: get-neon-branch
         run: |
-          echo branch_id=$(neonctl branches get ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --output json | jq -r '.id') >> $GITHUB_OUTPUT
-          echo DATABASE_URL=$(neonctl connection-string ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require >> $GITHUB_ENV
-          echo DATABASE_POOL_URL=$(neonctl connection-string ${{ steps.branch-name.outputs.current_branch }} --pooled --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require >> $GITHUB_ENV
+          echo "branch_id=$(neonctl branches get ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --output json | jq -r '.id')" >> $GITHUB_OUTPUT
+          echo "DATABASE_URL=$(neonctl connection-string ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require" >> $GITHUB_ENV
+          echo "DATABASE_POOL_URL=$(neonctl connection-string ${{ steps.branch-name.outputs.current_branch }} --pooled --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require" >> $GITHUB_ENV
 
       # Setup node/pnpm/turbo
-      - name: Setup
-        uses: ./tooling/github/setup
+      # - name: Setup
+      #   uses: ./tooling/github/setup
 
       - name: Install Vercel CLI
         run: |
           npm install --global vercel@latest
 
-      - name: db:push
-        id: drizzle
-        run: |
-          rm -f .env
-          touch .env          
+      # - name: db:push
+      #   id: drizzle
+      #   run: |
+      #     rm -f .env
+      #     touch .env
 
-          echo "DATABASE_URL: $DATABASE_URL"
-          echo "DATABASE_POOL_URL: $DATABASE_POOL_URL"
+      #     echo "DATABASE_URL: $DATABASE_URL"
+      #     echo "DATABASE_POOL_URL: $DATABASE_POOL_URL"
 
-          echo "DATABASE_URL=$DATABASE_URL" >> .env          
-          echo "DATABASE_POOL_URL=$DATABASE_POOL_URL" >> .env
+      #     echo "DATABASE_URL=$DATABASE_URL" >> .env
+      #     echo "DATABASE_POOL_URL=$DATABASE_POOL_URL" >> .env
 
-          pnpm db:push
+      #     pnpm db:push
 
       # For now, we're manually removing and re-adding the environment variables. Might be a simpler way to directly replace them, but got errors when trying to do that.
       - name: Update Vercel Environment Variables for App Preview Branch
