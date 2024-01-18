@@ -130,32 +130,40 @@ jobs:
         run: |
           npm install --global vercel@latest
 
+      # - name: Vercel Env
+      #   id: vercel-env
+      #   run: |
+      #     vercel pull --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
+      #     cp .vercel/.env.preview.local .env
+
+      #     # it seems like VERCEL_URL is set to an empty string by default, so we need to set it manually.
+      #     # I think it is set during the deploy step
+      #     sed -i '/VERCEL_URL/d' .env
+      #     echo "VERCEL_URL=https://vercel.app" >> .env
+
+      #     DATABASE_URL=$(grep -oP 'DATABASE_URL="\K[^"]+' .env)
+      #     DATABASE_POOL_URL=$(grep -oP 'DATABASE_POOL_URL="\K[^"]+' .env)
+      #     VERCEL_URL=$(grep -oP 'VERCEL_URL="\K[^"]+' .env)
+
+      #     echo "DATABASE_URL: $DATABASE_URL"
+      #     echo "DATABASE_POOL_URL: $DATABASE_POOL_URL"
+      #     echo "VERCEL_URL: $VERCEL_URL"
+
+      # - name: Build App Project Artifacts
+      #   run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
       - name: Vercel Env
         id: vercel-env
         run: |
-          vercel pull --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
-          cp .vercel/.env.preview.local .env
-
-          # it seems like VERCEL_URL is set to an empty string by default, so we need to set it manually. 
-          # I think it is set during the deploy step
-          sed -i '/VERCEL_URL/d' .env
-          echo "VERCEL_URL=https://vercel.app" >> .env
-
-          DATABASE_URL=$(grep -oP 'DATABASE_URL="\K[^"]+' .env)
-          DATABASE_POOL_URL=$(grep -oP 'DATABASE_POOL_URL="\K[^"]+' .env)
-          VERCEL_URL=$(grep -oP 'VERCEL_URL="\K[^"]+' .env)
-
+          echo DATABASE_URL=$(vercel env ls preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} | grep DATABASE_URL | awk '{print $2}') >> $GITHUB_OUTPUT
+          echo DATABASE_POOL_URL=$(vercel env ls preview ${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} | grep DATABASE_POOL_URL | awk '{print $2}') >> $GITHUB_OUTPUT
           echo "DATABASE_URL: $DATABASE_URL"
           echo "DATABASE_POOL_URL: $DATABASE_POOL_URL"
-          echo "VERCEL_URL: $VERCEL_URL"
-
-      - name: Build App Project Artifacts
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy App Preview to Vercel
         id: deploy-app
         run: |
-          preview_url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN}})
+          preview_url=$(vercel deploy --build-env DATABASE_URL=${{ steps.vercel-env.outputs.DATABASE_URL}} --build-env DATABASE_POOL_URL=${{ steps.vercel-env.outputs.DATABASE_POOL_URL }} --token=${{ secrets.VERCEL_TOKEN}})          
           echo "preview_url=$preview_url" >> $GITHUB_ENV
           deployment_id=$(vercel inspect https://app-dyz0u5a4v-barelylabs.vercel.app | grep -oP 'id\s+dpl_\K.*')
           inspect_url="https://vercel.com/${{ secrets.VERCEL_TEAM_ID }}/${{ secrets.VERCEL_APP_PROJECT_ID }}/$deployment_id"
