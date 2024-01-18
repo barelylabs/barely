@@ -70,7 +70,7 @@ jobs:
           echo "DATABASE_POOL_URL=$DATABASE_POOL_URL" >> $GITHUB_ENV
 
           if grep -q "DATABASE_URL" .env; then
-            sed -i "s#^DATABASE_URL=.*#DATABASE_URL=$DATABASE_URL#" .env
+            sed -i "" "s#^DATABASE_URL=.*#DATABASE_URL=$DATABASE_URL#" .env
           else
             echo "DATABASE_URL=$DATABASE_URL" >> .env
           fi
@@ -89,8 +89,15 @@ jobs:
           echo "DATABASE_URL: $DATABASE_URL"  
           echo "DATABASE_POOL_URL: $DATABASE_POOL_URL"                  
 
-          vercel env rm DATABASE_URL preview ${{ steps.branch-name.outputs.current_branch }} --yes --token=${{ secrets.VERCEL_TOKEN }}
-          vercel env rm DATABASE_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} --yes --token=${{ secrets.VERCEL_TOKEN }}
+          branch_name=${{ steps.branch-name.outputs.current_branch }}
+
+          if vercel env ls preview $branch_name  | grep -q DATABASE_URL; then
+            vercel env rm DATABASE_URL preview pg --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+          if vercel env ls preview $branch_name  | grep -q DATABASE_POOL_URL; then
+            vercel env rm DATABASE_POOL_URL preview pg --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi          
 
           echo $DATABASE_URL | vercel env add DATABASE_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
           echo $DATABASE_POOL_URL | vercel env add DATABASE_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
