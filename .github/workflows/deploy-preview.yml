@@ -135,6 +135,8 @@ jobs:
         run: |
           vercel pull --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
           cp .vercel/.env.preview.local .env
+          # it seems like VERCEL_URL is not set by default, so we need to set it manually. I think it is set during the deploy step
+          echo "VERCEL_URL=https://vercel.app" >> .env
           DATABASE_URL=$(grep -oP 'DATABASE_URL="\K[^"]+' .env)
           DATABASE_POOL_URL=$(grep -oP 'DATABASE_POOL_URL="\K[^"]+' .env)
           echo "DATABASE_URL: $DATABASE_URL"
