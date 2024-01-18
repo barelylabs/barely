@@ -142,12 +142,13 @@ jobs:
 
       - name: Install Vercel CLI
         run: |
-          npm install --global vercel@latest && vercel link --repo --scope=barelylabs --yes --token $VERCEL_TOKEN
+          npm install --global vercel@latest && vercel link --repo --scope=barelylabs --yes --token=$VERCEL_TOKEN
 
       - name: Pull Vercel Environment Information
         id: vercel-env
         run: |
-          vercel pull app --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
+          cd apps/app          
+          vercel pull --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
           VERCEL_URL=app-git-${{ needs.neon-preview.outputs.git_branch_name }}-barelylabs.vercel.app
           sed -i '/VERCEL_URL/d' .vercel/.env.preview.local
           echo "VERCEL_URL=\"$VERCEL_URL\"" >> .vercel/.env.preview.local                    
@@ -193,7 +194,7 @@ jobs:
 
       - name: Deploy App Preview to Vercel
         id: deploy-app
-        run: echo preview_url=$(vercel deploy --prebuilt --) >> $GITHUB_OUTPUT
+        run: echo preview_url=$(pnpm with-env vercel deploy --prebuilt --) >> $GITHUB_OUTPUT
         # run: |
         #   preview_url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN}})
         #   echo "preview_url=$preview_url" >> $GITHUB_ENV
