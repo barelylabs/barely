@@ -15,9 +15,7 @@ import { Form, SubmitButton } from "@barely/ui/forms";
 import { PhoneField } from "@barely/ui/forms/phone-field";
 import { TextField } from "@barely/ui/forms/text-field";
 import { isRealEmail } from "@barely/utils/email";
-import { onPromise } from "@barely/utils/on-promise";
 import { isPossiblePhoneNumber } from "@barely/utils/phone-number";
-import { debounce } from "perfect-debounce";
 
 import { LoginLinkSent } from "../login-success";
 
@@ -115,26 +113,25 @@ const RegisterUserForm = ({ callbackUrl }: RegisterFormProps) => {
                 name="phone"
                 label="Phone (optional)"
                 hint="We will only use this to contact you about your account."
-                onChange={(e) => {
-                  const handleChange = onPromise(
-                    debounce(async (e: React.ChangeEvent<HTMLInputElement>) => {
-                      if (!e.target.value.length) return form.trigger("phone");
+                onChangeDebounced={async (
+                  e: React.ChangeEvent<HTMLInputElement>,
+                ) => {
+                  if (!e.target.value.length) {
+                    await form.trigger("phone");
+                    return;
+                  }
 
-                      const phoneIsReal = isPossiblePhoneNumber(e.target.value);
+                  const phoneIsReal = isPossiblePhoneNumber(e.target.value);
 
-                      if (phoneIsReal) await form.trigger("phone");
+                  if (phoneIsReal) await form.trigger("phone");
 
-                      if (
-                        !phoneIsReal &&
-                        (form.formState.errors.phone?.message ===
-                          phoneNumberInUseMessage ||
-                          form.formState.isSubmitted)
-                      )
-                        await form.trigger("phone");
-                    }),
-                  );
-
-                  return handleChange(e);
+                  if (
+                    !phoneIsReal &&
+                    (form.formState.errors.phone?.message ===
+                      phoneNumberInUseMessage ||
+                      form.formState.isSubmitted)
+                  )
+                    await form.trigger("phone");
                 }}
               />
             </div>

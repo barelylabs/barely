@@ -14,6 +14,30 @@ export function absoluteUrl(site: "app" | "link" | "www", path: string) {
   return `${siteBaseUrl}/${path}`;
 }
 
+// export function getBaseUrl({
+//   devPort,
+//   absolute = false,
+// }: {
+//   devPort?: string;
+//   absolute?: boolean;
+// }) {
+//   if (!absolute && typeof window !== "undefined") {
+//     return ""; // browser should use relative url
+//   }
+
+//   if (
+//     process.env.VERCEL_ENV === "production" ||
+//     process.env.VERCEL_ENV === "preview"
+//   ) {
+//     if (!process.env.VERCEL_URL) throw new Error("VERCEL_URL not found");
+//     return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
+//   }
+
+//   if (!devPort) console.error("devPort not found for base url");
+
+//   return `http://localhost:${devPort ?? ""}`; // dev SSR should use localhost
+// }
+
 // export function absoluteUrl_App(path: string) {
 //   return `${env.NEXT_PUBLIC_APP_ABSOLUTE_BASE_URL}${path}`;
 // }

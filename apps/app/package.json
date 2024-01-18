@@ -5,7 +5,6 @@
   "type": "module",
   "scripts": {
     "build": "pnpm with-env next build",
-    "build:vercel": "pnpm with-env vercel build",
     "clean": "git clean -xdf .next .turbo node_modules",
     "dev": "pnpm with-env next dev -- -p 3000",
     "format": "prettier --check . --ignore-path ../../.gitignore",
@@ -20,6 +19,7 @@
     "@barely/lib": "workspace:^0.1.0",
     "@barely/ui": "workspace:^0.1.0",
     "@formkit/auto-animate": "1.0.0-beta.6",
+    "@t3-oss/env-nextjs": "^0.7.3",
     "@tailwindcss/forms": "^0.5.6",
     "@tanstack/query-sync-storage-persister": "^5.17.1",
     "@tanstack/react-query": "^5.17.1",

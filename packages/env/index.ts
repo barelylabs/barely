@@ -12,15 +12,19 @@ function getBaseUrl({
     return ""; // browser should use relative url
   }
 
-  if (
-    process.env.VERCEL_ENV === "production" ||
-    process.env.VERCEL_ENV === "preview"
-  ) {
-    if (!process.env.VERCEL_URL) throw new Error("VERCEL_URL not found");
-    return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
+  const vercelEnv =
+    process.env.VERCEL_ENV ?? process.env.NEXT_PUBLIC_VERCEL_ENV ?? "fucked";
+  const vercelUrl =
+    process.env.VERCEL_URL ?? process.env.NEXT_PUBLIC_VERCEL_URL ?? "urlfucked";
+
+  console.log("process.env.VERCEL_ENV => ", vercelEnv);
+  console.log("process.env.VERCEL_URL => ", vercelUrl);
+  if (vercelEnv === "production" || vercelEnv === "preview") {
+    if (!vercelUrl) throw new Error("VERCEL_URL not found");
+    return `https://${vercelUrl}`; // SSR should use vercel url
   }
 
-  if (!devPort) console.error("devPort not found for base url");
+  if (!devPort) console.error("devPort not found for base url, yo.");
 
   return `http://localhost:${devPort ?? ""}`; // dev SSR should use localhost
 }
@@ -106,7 +110,7 @@ export const allServerEnvSchema = z.object({
     })
     .optional()
     .default("1 h"),
-  RESEND_API_KEY: z.string(),
+  RESEND_API_KEY: z.string().optional(),
   SCREENING_PHONE_NUMBER: z.string(),
   SENDGRID_API_KEY: z.string(),
   SPOTIFY_CLIENT_ID: z.string(),
@@ -261,34 +265,11 @@ export function zEnv<TClient extends ZodRawShape, TServer extends ZodRawShape>({
 }) {
   const isServer = typeof window === "undefined";
 
-  // console.log('isServer => ', isServer);
-
   const merged = serverEnvSchema.merge(clientEnvSchema);
-  // console.log(
-  // 	`preparsed rate limit (${isServer ? 'server' : 'client'}) => `,
-  // 	processEnv.RATE_LIMIT_RECORD_LINK_CLICK,
-  // );
-  // console.log(
-  // 	`typeof preparsed rate limit (${isServer ? 'server' : 'client'}) => `,
-  // 	typeof processEnv.RATE_LIMIT_RECORD_LINK_CLICK,
-  // );
 
   const parsed = isServer
     ? merged.safeParse(processEnv)
     : clientEnvSchema.safeParse(processEnv);
-
-  // console.log('parse success => ', parsed.success);
-
-  // console.log('parsed data => ', parsed.data);
-
-  // console.log(
-  // 	`parsed rate limit (${isServer ? 'server' : 'client'}) => `,
-  // 	parsed.data.RATE_LIMIT_RECORD_LINK_CLICK,
-  // );
-  // console.log(
-  // 	`typeof rate limit (${isServer ? 'server' : 'client'}) => `,
-  // 	typeof parsed.data.RATE_LIMIT_RECORD_LINK_CLICK,
-  // );
 
   if (!parsed?.success) {
     console.log("error => ", parsed.error);
