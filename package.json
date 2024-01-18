@@ -6,7 +6,7 @@
   },
   "packageManager": "pnpm@8.14.0",
   "scripts": {
-    "build": "turbo build",
+    "build": "turbo build --cache-dir=.turbo",
     "clean": "git clean -xdf node_modules",
     "clean:workspaces": "turbo clean",
     "clean:all": "turbo clean && clean",
