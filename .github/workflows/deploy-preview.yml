@@ -74,7 +74,8 @@ jobs:
 
       #     pnpm db:push
 
-      # For now, we're manually removing and re-adding the environment variables. Might be a simpler way to directly replace them, but got errors when trying to do that.
+      # Using Vercel as our secret store for the DATABASE_URL and DATABASE_POOL_URL
+      # -- to my knowledge, using an external store is the only way to pass secrets between Github Actions jobs?
       # - name: Update Vercel Environment Variables for App Preview Branch
       #   run: |
       #     echo "DATABASE_URL: $DATABASE_URL"
@@ -119,6 +120,8 @@ jobs:
     needs: [neon-preview]
     runs-on: ubuntu-latest
     env:
+      TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      TURBO_TEAM: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_ACCESS_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -126,20 +129,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Cache turbo build step
+        uses: actions/cache@v3
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
       - name: Setup
         uses: ./tooling/github/setup
 
       - name: Install Vercel CLI
         run: |
-          npm install --global vercel@latest
+          npm install --global vercel@latest && vercel link --repo --scope=barelylabs --yes --token $VERCEL_TOKEN
 
-      - name: Vercel Env
+      - name: Pull Vercel Environment Information
         id: vercel-env
         run: |
-          vercel pull --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
+          cd apps/app
+          vercel pull app --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
           VERCEL_URL=app-git-${{ needs.neon-preview.outputs.git_branch_name }}-barelylabs.vercel.app
           sed -i '/VERCEL_URL/d' .vercel/.env.preview.local
-          echo "VERCEL_URL=$VERCEL_URL" >> .vercel/.env.preview.local
+          echo "VERCEL_URL=\"$VERCEL_URL\"" >> .vercel/.env.preview.local                    
           cp .vercel/.env.preview.local .env
 
           echo ".env:"
@@ -178,15 +190,17 @@ jobs:
 
       - name: Build App Project Artifacts
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        # run: pnpm build --filter=@barely/app --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy App Preview to Vercel
         id: deploy-app
-        run: |
-          preview_url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN}})
-          echo "preview_url=$preview_url" >> $GITHUB_ENV
-          deployment_id=$(vercel inspect https://app-dyz0u5a4v-barelylabs.vercel.app --token=${{ secrets.VERCEL_TOKEN }} | grep -oP 'id\s+dpl_\K.*')
-          inspect_url="https://vercel.com/${{ secrets.VERCEL_TEAM_ID }}/${{ secrets.VERCEL_APP_PROJECT_ID }}/$deployment_id"
-          echo "inspect_url=$inspect_url" >> $GITHUB_ENV
+        run: echo preview_url=$(vercel deploy --prebuilt --) >> $GITHUB_OUTPUT
+        # run: |
+        #   preview_url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN}})
+        #   echo "preview_url=$preview_url" >> $GITHUB_ENV
+        #   deployment_id=$(vercel inspect $preview_url --token=${{ secrets.VERCEL_TOKEN }} | grep -oP 'id\s+dpl_\K.*')
+        #   inspect_url="https://vercel.com/${{ secrets.VERCEL_TEAM_ID }}/${{ secrets.VERCEL_APP_PROJECT_ID }}/$deployment_id"
+        #   echo "inspect_url=$inspect_url" >> $GITHUB_ENV
 
       - name: Comment on Pull Request
         uses: thollander/actions-comment-pull-request@v2

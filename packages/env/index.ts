@@ -17,8 +17,6 @@ function getBaseUrl({
   const vercelUrl =
     process.env.VERCEL_URL ?? process.env.NEXT_PUBLIC_VERCEL_URL ?? "urlfucked";
 
-  console.log("process.env.VERCEL_ENV => ", vercelEnv);
-  console.log("process.env.VERCEL_URL => ", vercelUrl);
   if (vercelEnv === "production" || vercelEnv === "preview") {
     if (!vercelUrl) throw new Error("VERCEL_URL not found");
     return `https://${vercelUrl}`; // SSR should use vercel url
@@ -184,6 +182,8 @@ const processEnv = {
   NEXT_PUBLIC_PUSHER_APP_KEY: process.env.NEXT_PUBLIC_PUSHER_APP_KEY,
   NEXT_PUBLIC_PUSHER_APP_CLUSTER: process.env.NEXT_PUBLIC_PUSHER_APP_CLUSTER,
   NEXT_PUBLIC_PUSHER_APP_ID: process.env.NEXT_PUBLIC_PUSHER_APP_ID,
+  NEXT_PUBLIC_VERCEL_ENV: process.env.NEXT_PUBLIC_VERCEL_ENV,
+  NEXT_PUBLIC_VERCEL_URL: process.env.NEXT_PUBLIC_VERCEL_URL,
 
   // SERVER
   AUTH_SECRET: process.env.AUTH_SECRET,
@@ -199,7 +199,6 @@ const processEnv = {
   LOCALHOST_IP: process.env.LOCALHOST_IP,
   NAMESILO_API_KEY: process.env.NAMESILO_API_KEY,
   NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-  NEXTAUTH_URL_INTERNAL: process.env.NEXTAUTH_URL_INTERNAL,
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   OPENAI_ORG_ID: process.env.OPENAI_ORG_ID,
   POSTMARK_SERVER_API_TOKEN: process.env.POSTMARK_SERVER_API_TOKEN,
@@ -273,6 +272,8 @@ export function zEnv<TClient extends ZodRawShape, TServer extends ZodRawShape>({
 
   if (!parsed?.success) {
     console.log("error => ", parsed.error);
+    console.log("processEnv => ", processEnv);
+
     console.error(
       "❌ Invalid environment variables ->\n",
       ...formatErrors(parsed.error.format()),
