@@ -1,8 +1,11 @@
 import type { Config } from "drizzle-kit";
+import { z } from "zod";
 
-import env from "../../env";
+// import env from "../../env";
 
-const connectionString = env.DATABASE_URL + "?ssl=true&sslmode=require";
+const DATABASE_URL = z.string().url().parse(process.env.DATABASE_URL);
+
+const connectionString = DATABASE_URL + "?ssl=true&sslmode=require";
 
 export default {
   schema: "./server/**/*.sql.ts",
