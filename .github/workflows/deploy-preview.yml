@@ -143,8 +143,12 @@ jobs:
 
           echo "VERCEL_URL before: $(grep -oP 'VERCEL_URL="\K[^"]+' .env)"
 
-          perl -i -ne 'print unless /VERCEL_URL/' .env
-          echo "VERCEL_URL=test.app" >> .env
+          if ! grep -q "VERCEL_URL" .env; then
+            echo "VERCEL_URL=test.app" >> .env
+          else
+            perl -i -ne 'print unless /VERCEL_URL/' .env
+            echo "VERCEL_URL=test.app" >> .env
+          fi           
 
           echo "VERCEL_URL after: $(grep -oP 'VERCEL_URL="\K[^"]+' .env)"
 
