@@ -56,9 +56,9 @@ jobs:
       # - name: Setup
       #   uses: ./tooling/github/setup
 
-      - name: Install Vercel CLI
-        run: |
-          npm install --global vercel@latest
+      # - name: Install Vercel CLI
+      #   run: |
+      #     npm install --global vercel@latest
 
       # - name: db:push
       #   id: drizzle
@@ -75,23 +75,23 @@ jobs:
       #     pnpm db:push
 
       # For now, we're manually removing and re-adding the environment variables. Might be a simpler way to directly replace them, but got errors when trying to do that.
-      - name: Update Vercel Environment Variables for App Preview Branch
-        run: |
-          echo "DATABASE_URL: $DATABASE_URL"  
-          echo "DATABASE_POOL_URL: $DATABASE_POOL_URL"                  
+      # - name: Update Vercel Environment Variables for App Preview Branch
+      #   run: |
+      #     echo "DATABASE_URL: $DATABASE_URL"
+      #     echo "DATABASE_POOL_URL: $DATABASE_POOL_URL"
 
-          branch_name=${{ steps.branch-name.outputs.current_branch }}
+      #     branch_name=${{ steps.branch-name.outputs.current_branch }}
 
-          if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
-            vercel env rm DATABASE_URL preview pg --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
+      #     if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
+      #       vercel env rm DATABASE_URL preview pg --yes --token=${{ secrets.VERCEL_TOKEN }}
+      #     fi
 
-          if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
-            vercel env rm DATABASE_POOL_URL preview pg --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi          
+      #     if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
+      #       vercel env rm DATABASE_POOL_URL preview pg --yes --token=${{ secrets.VERCEL_TOKEN }}
+      #     fi
 
-          echo $DATABASE_URL | vercel env add DATABASE_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
-          echo $DATABASE_POOL_URL | vercel env add DATABASE_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
+      #     echo $DATABASE_URL | vercel env add DATABASE_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
+      #     echo $DATABASE_POOL_URL | vercel env add DATABASE_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
 
       # - name: Update Vercel Env Variables for Link Preview Branch
       #   env:
