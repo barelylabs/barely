@@ -58,6 +58,7 @@ jobs:
       - name: Run Drizzle Generate and Push
         id: drizzle
         run: |
+          rm -f .env
           touch .env
 
           DATABASE_URL=$(neonctl connection-string ${{ steps.branch-name.outputs.current_branch }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})?sslmode=require
@@ -67,19 +68,10 @@ jobs:
           echo "DATABASE_POOL_URL: $DATABASE_POOL_URL"
 
           echo "DATABASE_URL=$DATABASE_URL" >> $GITHUB_ENV
+          echo "DATABASE_URL=$DATABASE_URL" >> .env
+
           echo "DATABASE_POOL_URL=$DATABASE_POOL_URL" >> $GITHUB_ENV
-
-          if grep -q "DATABASE_URL" .env; then
-            sed -i "s#^DATABASE_URL=.*#DATABASE_URL=$DATABASE_URL#" .env
-          else
-            echo "DATABASE_URL=$DATABASE_URL" >> .env
-          fi
-
-          if grep -q "DATABASE_POOL_URL" .env; then
-            sed -i "s#^DATABASE_POOL_URL=.*#DATABASE_POOL_URL=$DATABASE_POOL_URL#" .env
-          else
-            echo "DATABASE_POOL_URL=$DATABASE_POOL_URL" >> .env
-          fi          
+          echo "DATABASE_POOL_URL=$DATABASE_POOL_URL" >> .env
 
           pnpm db:push
 
