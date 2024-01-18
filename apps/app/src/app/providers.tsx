@@ -8,7 +8,6 @@ import { pageSessionAtom } from "@barely/atoms/session.atom";
 import { useWorkspaceHandle } from "@barely/hooks/use-workspace";
 import { ThemeProvider } from "@barely/ui/elements/next-theme-provider";
 import { TooltipProvider } from "@barely/ui/elements/tooltip";
-// import { APP_BASE_URL } from "@barely/utils/constants";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ReactQueryStreamedHydration } from "@tanstack/react-query-next-experimental";

@@ -25,6 +25,7 @@
     "neon:create-dev-branch": "chmod +x ./scripts/create-dev-branch.sh && ./scripts/create-dev-branch.sh",
     "neon:reset-dev-branch": "chmod +x ./scripts/reset-dev-branch.sh && ./scripts/reset-dev-branch.sh",
     "postinstall": "pnpm lint:ws",
+    "start": "turbo start",
     "typecheck": "turbo typecheck"
   },
   "devDependencies": {

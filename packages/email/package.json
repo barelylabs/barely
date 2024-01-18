@@ -41,6 +41,7 @@
     "@react-email/render": "^0.0.10",
     "@react-email/tailwind": "^0.0.13",
     "@react-email/text": "^0.0.7",
+    "@t3-oss/env-nextjs": "^0.7.3",
     "html-to-text": "^9.0.5",
     "pretty": "^2.0.0",
     "react": "^18.2.0",

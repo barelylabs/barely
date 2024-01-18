@@ -23,6 +23,9 @@
     "lint": {
       "outputs": ["node_modules/.cache/.eslintcache"]
     },
+    "start": {
+      "cache": false
+    },
     "typecheck": {
       "outputs": ["node_modules/.cache/tsbuildinfo.json"]
     },
@@ -46,6 +49,8 @@
     "NEXT_PUBLIC_LINK_ROOT_DOMAIN",
     "NEXT_PUBLIC_SHORT_LINK_ROOT_DOMAIN",
     "NEXT_PUBLIC_TRANSPARENT_LINK_ROOT_DOMAIN",
+    "NEXT_PUBLIC_VERCEL_ENV",
+    "NEXT_PUBLIC_VERCEL_URL",
     "NEXT_PUBLIC_VERCEL_DEPLOYMENT_SUFFIX",
 
     "AUTH_URL",
