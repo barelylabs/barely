@@ -90,22 +90,22 @@ jobs:
           echo $DATABASE_URL | vercel env add DATABASE_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
           echo $DATABASE_POOL_URL | vercel env add DATABASE_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Update Vercel Env Variables for Link Preview Branch
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
-        run: |
-          branch_name=${{ steps.branch-name.outputs.current_branch }}
+      # - name: Update Vercel Env Variables for Link Preview Branch
+      #   env:
+      #     VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
+      #   run: |
+      #     branch_name=${{ steps.branch-name.outputs.current_branch }}
 
-          if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
-            vercel env rm DATABASE_URL preview pg --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
+      #     if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
+      #       vercel env rm DATABASE_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+      #     fi
 
-          if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
-            vercel env rm DATABASE_POOL_URL preview pg --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
+      #     if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
+      #       vercel env rm DATABASE_POOL_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+      #     fi
 
-          echo $DATABASE_URL | vercel env add DATABASE_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
-          echo $DATABASE_POOL_URL | vercel env add DATABASE_POOL_URL preview ${{ steps.branch-name.outputs.current_branch }} --token=${{ secrets.VERCEL_TOKEN }}
+      #     echo $DATABASE_URL | vercel env add DATABASE_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
+      #     echo $DATABASE_POOL_URL | vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
 
     outputs:
       git_branch_name: ${{ steps.branch-name.outputs.current_branch }}
@@ -135,6 +135,8 @@ jobs:
         run: |
           vercel pull --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
           cp .vercel/.env.preview.local .env
+
+          cat .env
 
           sed -i '/VERCEL_URL/d' .env
           echo "VERCEL_URL=test.app" >> .env
