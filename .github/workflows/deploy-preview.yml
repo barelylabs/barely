@@ -146,15 +146,18 @@ jobs:
           echo "VERCEL_URL before: $(grep -oP 'VERCEL_URL="\K[^"]+' .env)"
           cat .env
 
-          if ! grep -q "VERCEL_URL" .env; then
-            echo "VERCEL_URL=test.app" > .env
-          else
-            perl -i -ne 'print unless /VERCEL_URL/' .env
-            echo "VERCEL_URL=test.app" > .env
-          fi           
+          if grep -q "VERCEL_URL" .env; then
+            sed -i '/VERCEL_URL/d' .env
+          fi
 
-          echo "VERCEL_URL after: $(grep -oP 'VERCEL_URL="\K[^"]+' .env)"
+          echo 'VERCEL_URL="test.app"' >> .env
+
+          echo "After modification:"
           cat.env 
+          VERCEL_URL=$(grep -oP 'VERCEL_URL="\K[^"]+' .env)
+
+          echo "VERCEL_URL after: $VERCEL_URL"
+
 
           DATABASE_URL=$(grep -oP 'DATABASE_URL="\K[^"]+' .env)
           DATABASE_POOL_URL=$(grep -oP 'DATABASE_POOL_URL="\K[^"]+' .env)
