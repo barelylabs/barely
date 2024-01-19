@@ -147,7 +147,8 @@ jobs:
       - name: Pull Vercel Environment Information
         id: vercel-env
         run: |
-          cd apps/app          
+          cd apps/app
+          vercel link --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }} }}          
           vercel pull --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
           VERCEL_URL=app-git-${{ needs.neon-preview.outputs.git_branch_name }}-barelylabs.vercel.app
           sed -i '/VERCEL_URL/d' .vercel/.env.preview.local
@@ -189,7 +190,8 @@ jobs:
         # echo "VERCEL_URL: $VERCEL_URL"
 
       - name: Build App Project Artifacts
-        run: pnpm build --yes --token=${{ secrets.VERCEL_TOKEN }}
+        run: pnpm build --filter=@barely/app
+        # run: pnpm build --yes --token=${{ secrets.VERCEL_TOKEN }}
         # run: pnpm build --filter=@barely/app --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy App Preview to Vercel
