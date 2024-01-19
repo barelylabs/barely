@@ -126,15 +126,8 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Cache turbo build step
-        uses: actions/cache@v3
-        with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Setup
         uses: ./tooling/github/setup
@@ -142,16 +135,18 @@ jobs:
       - name: Install Vercel CLI
         run: |
           npm install --global vercel@latest
-          vercel link --repo --scope=barelylabs --yes --token=$VERCEL_TOKEN
+        # vercel link --repo --scope=barelylabs --yes --token=$VERCEL_TOKEN
+        # cd apps/app
+        # vercel link --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
+        # cd ../..
 
       - name: Pull Vercel Environment Information
         id: vercel-env
         run: |
-          vercel link --cwd apps/app --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}     
           vercel pull --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
 
           VERCEL_URL=app-git-${{ needs.neon-preview.outputs.git_branch_name }}-barelylabs.vercel.app
-          sed -i '/VERCEL_URL/d' .vercel/.env.preview.local
+          sed -i '/VERCEL_URL/d' apps/app/.vercel/.env.preview.local
           echo "VERCEL_URL=\"$VERCEL_URL\"" >> .vercel/.env.preview.local                    
           cp .vercel/.env.preview.local .env
 
