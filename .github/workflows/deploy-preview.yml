@@ -137,9 +137,6 @@ jobs:
           npm install --global vercel@latest
           vercel link --repo --scope=barelylabs --yes --token=$VERCEL_TOKEN
           vercel link --cwd apps/app --scope=barelylabs --yes --token=$VERCEL_TOKEN
-        # cd apps/app
-        # vercel link --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
-        # cd ../..
 
       - name: Pull Vercel Environment Information
         id: vercel-env
@@ -164,8 +161,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_TEAM_ID }}
           vercel-project-id: ${{ secrets.VERCEL_APP_PROJECT_ID }}
+          working-directory: ./apps/app
           # github-comment: false
-          working-directory: apps/app
 
       # - name: Deploy App Preview to Vercel
       #   id: deploy-app
