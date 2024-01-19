@@ -189,12 +189,12 @@ jobs:
         # echo "VERCEL_URL: $VERCEL_URL"
 
       - name: Build App Project Artifacts
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        run: pnpm build --yes --token=${{ secrets.VERCEL_TOKEN }}
         # run: pnpm build --filter=@barely/app --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy App Preview to Vercel
         id: deploy-app
-        run: echo preview_url=$(pnpm with-env vercel deploy --prebuilt --) >> $GITHUB_OUTPUT
+        run: echo preview_url=$(vercel deploy --prebuilt --) >> $GITHUB_OUTPUT
         # run: |
         #   preview_url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN}})
         #   echo "preview_url=$preview_url" >> $GITHUB_ENV
