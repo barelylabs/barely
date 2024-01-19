@@ -123,8 +123,8 @@ jobs:
       TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       TURBO_TEAM: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -157,20 +157,28 @@ jobs:
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy App Preview to Vercel
-        id: deploy-app
-        run: |
-          echo preview_url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}) >> $GITHUB_OUTPUT
-        #   deployment_id=$(vercel inspect $preview_url --token=${{ secrets.VERCEL_TOKEN }} | grep -oP 'id\s+dpl_\K.*')
-        #   inspect_url="https://vercel.com/${{ secrets.VERCEL_TEAM_ID }}/${{ secrets.VERCEL_APP_PROJECT_ID }}/$deployment_id"
-        #   echo "inspect_url=$inspect_url" >> $GITHUB_ENV
-
-      - name: Comment on Pull Request
-        uses: thollander/actions-comment-pull-request@v2
+        uses: amondnet/vercel-action@v25.1.1 # deploy
         with:
-          message: |
-            app preview :rocket: : https://${{ steps.deploy-app.outputs.preview_url }}
-            app inspect :mag: : https://${{ steps.deploy-app.outputs.inspect_url }}
-            neon branch :elephant: : https://console.neon.tech/app/projects/${{ secrets.NEON_PROJECT_ID }}/branches/${{ needs.neon-preview.outputs.neon_branch_id }}
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_TEAM_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_APP_PROJECT_ID }}
+
+      # - name: Deploy App Preview to Vercel
+      #   id: deploy-app
+      #   run: |
+      #     echo preview_url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}) >> $GITHUB_OUTPUT
+      #   #   deployment_id=$(vercel inspect $preview_url --token=${{ secrets.VERCEL_TOKEN }} | grep -oP 'id\s+dpl_\K.*')
+      #   #   inspect_url="https://vercel.com/${{ secrets.VERCEL_TEAM_ID }}/${{ secrets.VERCEL_APP_PROJECT_ID }}/$deployment_id"
+      #   #   echo "inspect_url=$inspect_url" >> $GITHUB_ENV
+
+      # - name: Comment on Pull Request
+      #   uses: thollander/actions-comment-pull-request@v2
+      #   with:
+      #     message: |
+      #       app preview :rocket: : https://${{ steps.deploy-app.outputs.preview_url }}
+      #       app inspect :mag: : https://${{ steps.deploy-app.outputs.inspect_url }}
+      #       neon branch :elephant: : https://console.neon.tech/app/projects/${{ secrets.NEON_PROJECT_ID }}/branches/${{ needs.neon-preview.outputs.neon_branch_id }}
 
   # link-deploy:
 
