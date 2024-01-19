@@ -17,7 +17,6 @@ import { TextField } from "@barely/ui/forms/text-field";
 import { isRealEmail } from "@barely/utils/email";
 import { isPossiblePhoneNumber } from "@barely/utils/phone-number";
 
-import env from "~/env";
 import { LoginLinkSent } from "../login-success";
 
 interface RegisterFormProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -68,7 +67,7 @@ const RegisterUserForm = ({ callbackUrl }: RegisterFormProps) => {
       <p>VERCEL_ENV: {envUrls?.vercelEnv}</p>
       <p>VERCEL_URL: {envUrls?.vercelUrl}</p>
       <p>DATABASE_URL: {envUrls?.databaseUrl}</p>
-      <p>DATABASE_URL (on the client): {env.DATABASE_URL}</p>
+
       {/* <p>DATABASE_POOL_URL (on the client): {process.env.DATABASE_POOL_URL}</p> */}
 
       {loginEmailSent ? (
