@@ -122,10 +122,9 @@ jobs:
     env:
       TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       TURBO_TEAM: ${{ secrets.VERCEL_TEAM_ID }}
-      VERCEL_ACCESS_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -142,14 +141,15 @@ jobs:
 
       - name: Install Vercel CLI
         run: |
-          npm install --global vercel@latest && vercel link --repo --scope=barelylabs --yes --token=$VERCEL_TOKEN
+          npm install --global vercel@latest
+          vercel link --repo --scope=barelylabs --yes --token=$VERCEL_TOKEN
 
       - name: Pull Vercel Environment Information
         id: vercel-env
         run: |
-          cd apps/app
-          vercel link --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}     
-          vercel pull --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
+          vercel link --cwd apps/app --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}     
+          vercel pull --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
+
           VERCEL_URL=app-git-${{ needs.neon-preview.outputs.git_branch_name }}-barelylabs.vercel.app
           sed -i '/VERCEL_URL/d' .vercel/.env.preview.local
           echo "VERCEL_URL=\"$VERCEL_URL\"" >> .vercel/.env.preview.local                    
@@ -158,46 +158,12 @@ jobs:
           echo ".env:"
           cat .env
 
-        # echo "VERCEL PULLED"
-
-        # cp .vercel/.env.preview.local .env
-
-        # echo ".env COPIED"
-
-        # ls -l .env
-
-        # echo "VERCEL_URL before: $(grep -oP 'VERCEL_URL="\K[^"]+' .env)"
-        # cat .env
-
-        # if grep -q "VERCEL_URL" .env; then
-        #   sed -i '/VERCEL_URL/d' .env
-        # fi
-
-        # echo 'VERCEL_URL="test.app"' >> .env
-
-        # echo "After modification:"
-        # cat .env
-        # VERCEL_URL=$(grep -oP 'VERCEL_URL="\K[^"]+' .env)
-
-        # echo "VERCEL_URL after: $VERCEL_URL"
-
-        # DATABASE_URL=$(grep -oP 'DATABASE_URL="\K[^"]+' .env)
-        # DATABASE_POOL_URL=$(grep -oP 'DATABASE_POOL_URL="\K[^"]+' .env)
-        # VERCEL_URL=$(grep -oP 'VERCEL_URL="\K[^"]+' .env)
-
-        # echo "DATABASE_URL: $DATABASE_URL"
-        # echo "DATABASE_POOL_URL: $DATABASE_POOL_URL"
-        # echo "VERCEL_URL: $VERCEL_URL"
-
       - name: Build App Project Artifacts
-        run: pnpm build --filter=@barely/app
-        # run: pnpm build --yes --token=${{ secrets.VERCEL_TOKEN }}
-        # run: pnpm build --filter=@barely/app --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy App Preview to Vercel
         id: deploy-app
         run: |
-          cd apps/app
           echo preview_url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}) >> $GITHUB_OUTPUT
         #   deployment_id=$(vercel inspect $preview_url --token=${{ secrets.VERCEL_TOKEN }} | grep -oP 'id\s+dpl_\K.*')
         #   inspect_url="https://vercel.com/${{ secrets.VERCEL_TEAM_ID }}/${{ secrets.VERCEL_APP_PROJECT_ID }}/$deployment_id"
