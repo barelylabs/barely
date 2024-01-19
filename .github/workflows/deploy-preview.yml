@@ -165,6 +165,7 @@ jobs:
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy App Preview to Vercel
+        id: deploy-app
         uses: amondnet/vercel-action@v25.1.1 # deploy
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
@@ -172,6 +173,26 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_TEAM_ID }}
           vercel-project-id: ${{ secrets.VERCEL_APP_PROJECT_ID }}
           github-comment: false
+
+      - name: Inspect App Preview
+        id: inspect-app
+        run: |
+          echo "preview_url : ${{ steps.deploy-app.outputs.preview-url }}"
+          echo "preview_name : ${{ steps.deploy-app.outputs.preview-name }}"
+
+          deployment_id=$(vercel inspect ${{ steps.deploy-app.outputs.preview-url }} --token=${{ secrets.VERCEL_TOKEN }} | grep -oP 'id\s+dpl_\K.*')
+          echo "deployment_id : $deployment_id"
+
+          inspect_url="https://vercel.com/${{ secrets.VERCEL_TEAM_ID }}/${{ secrets.VERCEL_APP_PROJECT_ID }}/$deployment_id"
+          echo "inspect_url=$inspect_url" >> $GITHUB_OUTPUT
+
+      - name: Comment on Pull Request
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            app preview :rocket: : { ${{ steps.deploy-app.outputs.preview-name }} } https://${{ steps.deploy-app.outputs.preview-url }}
+            # app inspect :mag: : https://${{ steps.inspect-app.outputs.inspect_url }}
+            neon branch :elephant: : https://console.neon.tech/app/projects/${{ secrets.NEON_PROJECT_ID }}/branches/${{ needs.neon-preview.outputs.neon_branch_id }}
 
       # - name: Deploy App Preview to Vercel
       #   id: deploy-app
