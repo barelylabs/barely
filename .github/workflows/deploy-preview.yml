@@ -135,7 +135,8 @@ jobs:
       - name: Install Vercel CLI
         run: |
           npm install --global vercel@latest
-        # vercel link --repo --scope=barelylabs --yes --token=$VERCEL_TOKEN
+          vercel link --repo --scope=barelylabs --yes --token=$VERCEL_TOKEN
+          vercel link --cwd apps/app --scope=barelylabs --yes --token=$VERCEL_TOKEN
         # cd apps/app
         # vercel link --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
         # cd ../..
@@ -143,18 +144,18 @@ jobs:
       - name: Pull Vercel Environment Information
         id: vercel-env
         run: |
-          vercel pull --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
+          vercel pull --cwd apps/app --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
 
           VERCEL_URL=app-git-${{ needs.neon-preview.outputs.git_branch_name }}-barelylabs.vercel.app
-          sed -i '/VERCEL_URL/d' .vercel/.env.preview.local
-          echo "VERCEL_URL=\"$VERCEL_URL\"" >> .vercel/.env.preview.local                    
-          cp .vercel/.env.preview.local .env
+          sed -i '/VERCEL_URL/d' apps/app/.vercel/.env.preview.local
+          echo "VERCEL_URL=\"$VERCEL_URL\"" >> apps/app/.vercel/.env.preview.local                    
+          cp apps/app/.vercel/.env.preview.local .env
 
           echo ".env:"
           cat .env
 
       - name: Build App Project Artifacts
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --cwd apps/app --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy App Preview to Vercel
         uses: amondnet/vercel-action@v25.1.1 # deploy
@@ -163,6 +164,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_TEAM_ID }}
           vercel-project-id: ${{ secrets.VERCEL_APP_PROJECT_ID }}
+          # github-comment: false
+          working-directory: apps/app
 
       # - name: Deploy App Preview to Vercel
       #   id: deploy-app
