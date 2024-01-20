@@ -164,6 +164,8 @@ jobs:
       - name: Build App Project Artifacts
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
+      # Using this to get the git branch/commit info for the preview deployment.
+      # Realizing we might be able to add inline to vercel deploy --build-env
       - name: Deploy App Preview to Vercel
         id: deploy-app
         uses: amondnet/vercel-action@v25.1.1 # deploy
@@ -180,8 +182,9 @@ jobs:
           echo "preview_url : ${{ steps.deploy-app.outputs.preview-url }}"
           echo "preview_name : ${{ steps.deploy-app.outputs.preview-name }}"
 
-          deployment_id=$(vercel inspect ${{ steps.deploy-app.outputs.preview-url }} --token=${{ secrets.VERCEL_TOKEN }} | grep -oP 'id\s+dpl_\K.*')
-          echo "deployment_id : $deployment_id"
+          inspect=$(vercel inspect ${{ steps.deploy-app.outputs.preview-url}} --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+          deployment_id=$(echo "$inspect" | grep -m 1 '^    id' | awk '{print $NF}' | cut -d'_' -f 2-)
+          echo "deployment_id: ${deployment_id}"        
 
           inspect_url="https://vercel.com/${{ secrets.VERCEL_TEAM_ID }}/${{ secrets.VERCEL_APP_PROJECT_ID }}/$deployment_id"
           echo "inspect_url=$inspect_url" >> $GITHUB_OUTPUT
