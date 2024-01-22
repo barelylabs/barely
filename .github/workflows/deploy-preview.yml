@@ -146,8 +146,7 @@ jobs:
           github_commit_message=$(git show -s --format=%s $github_commit_sha)
           github_commit_ref=${{ github.event.pull_request.head.ref }}
 
-          github_branch_name=${{ github.event.pull_request.head.ref }}
-          github_deployment_id=${{ github.event.pull_request.id }}
+          vercel_git_metadata = -m githubCommitSha=$github_commit_sha -m githubCommitAuthorName=$github_commit_author_login -m githubCommitAuthorLogin=$github_commit_author_login -m githubDeployment=$github_deployment -m githubOrg=$github_org -m githubRepo=$github_repo -m githubCommitOrg=$github_commit_org -m githubCommitRepo=$github_commit_repo -m githubCommitMessage="$github_commit_message" -m githubCommitRef=$github_commit_ref
 
           echo "Git Branch Info:"
           echo "github_commit_sha=$github_commit_sha"
@@ -159,10 +158,7 @@ jobs:
           echo "github_commit_org=$github_commit_org"
           echo "github_commit_repo=$github_commit_repo"
           echo "github_commit_message=$github_commit_message"
-          echo "github_commit_ref=$github_commit_ref"
-
-          echo "github_branch_name=$github_branch_name"
-          echo "github_deployment_id=$github_deployment_id"
+          echo "github_commit_ref=$github_commit_ref"          
 
           echo "github_commit_sha=$github_commit_sha" >> $GITHUB_OUTPUT
           echo "github_commit_author_name=$github_commit_author_name" >> $GITHUB_OUTPUT
@@ -174,6 +170,7 @@ jobs:
           echo "github_commit_repo=$github_commit_repo" >> $GITHUB_OUTPUT
           echo "github_commit_message=$github_commit_message" >> $GITHUB_OUTPUT
           echo "github_commit_ref=$github_commit_ref" >> $GITHUB_OUTPUT
+          echo "vercel_git_metadata=$vercel_git_metadata" >> $GITHUB_OUTPUT
 
       - name: Cache turbo build setup
         uses: actions/cache@v3
@@ -210,41 +207,37 @@ jobs:
       - name: Build App Project Artifacts
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
-      # Using this to get the git branch/commit info for the preview deployment.
-      # Realizing we might be able to add inline to vercel deploy --build-env
+      # Using vercel_git_metadata here to associate with the PR.
       - name: Deploy App Preview to Vercel
         id: deploy-app
         run: |
-          echo preview-url=$(vercel deploy --prebuilt -m githubCommitSha=${{ steps.git-info.outputs.github_commit_sha }} -m githubCommitAuthorName=${{ steps.git-info.outputs.github_commit_author_login }} -m githubCommitAuthorLogin=${{ steps.git-info.outputs.github_commit_author_login }} -m githubDeployment=${{ steps.git-info.outputs.github_deployment }} -m githubOrg=${{ steps.git-info.outputs.github_org }} -m githubRepo=${{ steps.git-info.outputs.github_repo }} -m githubCommitOrg=${{ steps.git-info.outputs.github_commit_org }} -m githubCommitRepo=${{ steps.git-info.outputs.github_commit_repo }} -m githubCommitMessage="${{ steps.git-info.outputs.github_commit_message }}" -m githubCommitRef=${{ steps.git-info.outputs.github_commit_ref }} --token=${{ secrets.VERCEL_TOKEN }}) >> $GITHUB_OUTPUT
+          echo preview_url=$(vercel deploy --prebuilt ${{ steps.git-info.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }}) >> $GITHUB_OUTPUT
 
-      - name: Inspect App Preview
-        id: inspect-app
-        run: |
-          echo "preview_url : ${{ steps.deploy-app.outputs.preview-url }}"          
-
-          inspect=$(vercel inspect ${{ steps.deploy-app.outputs.preview-url}} --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+          inspect=$(vercel inspect $preview_url --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
           deployment_id=$(echo "$inspect" | grep -m 1 '^    id' | awk '{print $NF}' | cut -d'_' -f 2-)
-          echo "deployment_id: ${deployment_id}"        
-
-          inspect_url="https://vercel.com/barelylabs/${{ secrets.VERCEL_APP_PROJECT_ID }}/$deployment_id"
+          inspect_url="https://vercel.com/barelylabs/app/$deployment_id"
           echo "inspect_url=$inspect_url" >> $GITHUB_OUTPUT
+
+      # - name: Inspect App Preview
+      #   id: inspect-app
+      #   run: |
+      #     echo "preview_url : ${{ steps.deploy-app.outputs.preview-url }}"
+
+      #     inspect=$(vercel inspect ${{ steps.deploy-app.outputs.preview-url}} --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+      #     deployment_id=$(echo "$inspect" | grep -m 1 '^    id' | awk '{print $NF}' | cut -d'_' -f 2-)
+      #     echo "deployment_id: ${deployment_id}"
+
+      #     inspect_url="https://vercel.com/barelylabs/${{ secrets.VERCEL_APP_PROJECT_ID }}/$deployment_id"
+      #     echo "inspect_url=$inspect_url" >> $GITHUB_OUTPUT
 
       - name: Comment on Pull Request
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            app inspect :mag: : ${{ steps.inspect-app.outputs.inspect_url }}
-            app preview :rocket: : ${{ steps.deploy-app.outputs.preview-url }}
+            app preview :rocket: : ${{ steps.deploy-app.outputs.preview_url }}
+            app inspect :mag: : ${{ steps.deploy-app.outputs.inspect_url }}
 
             neon branch :elephant: : https://console.neon.tech/app/projects/${{ secrets.NEON_PROJECT_ID }}/branches/${{ needs.neon-preview.outputs.neon_branch_id }}
-
-      # - name: Deploy App Preview to Vercel
-      #   id: deploy-app
-      #   run: |
-      #     echo preview_url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}) >> $GITHUB_OUTPUT
-      #   #   deployment_id=$(vercel inspect $preview_url --token=${{ secrets.VERCEL_TOKEN }} | grep -oP 'id\s+dpl_\K.*')
-      #   #   inspect_url="https://vercel.com/${{ secrets.VERCEL_TEAM_ID }}/${{ secrets.VERCEL_APP_PROJECT_ID }}/$deployment_id"
-      #   #   echo "inspect_url=$inspect_url" >> $GITHUB_ENV
 
   # link-deploy:
 
