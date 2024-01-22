@@ -131,10 +131,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
-        # ref: ${{ github.event.pull_request.head.sha}}
 
-      - name: Git Branch Info
-        id: git-info
+      - name: Git Metadata
+        id: git-meta
         run: |
           github_commit_sha=${{ github.event.pull_request.head.sha }}          
           github_commit_author_login=${{ github.event.pull_request.user.login }}
@@ -146,19 +145,7 @@ jobs:
           github_commit_message=$(git show -s --format=%s $github_commit_sha)
           github_commit_ref=${{ github.event.pull_request.head.ref }}
 
-          vercel_git_metadata="-m githubCommitSha=$github_commit_sha -m githubCommitAuthorName=$github_commit_author_login -m githubCommitAuthorLogin=$github_commit_author_login -m githubDeployment=$github_deployment -m githubOrg=$github_org -m githubRepo=$github_repo -m githubCommitOrg=$github_commit_org -m githubCommitRepo=$github_commit_repo -m githubCommitMessage=\"$github_commit_message\" -m githubCommitRef=$github_commit_ref"
-
-          echo "Git Branch Info:"
-          echo "github_commit_sha=$github_commit_sha"
-          echo "github_commit_author_name=$github_commit_author_name"
-          echo "github_commit_author_login=$github_commit_author_login"
-          echo "github_deployment=$github_deployment"
-          echo "github_org=$github_org"
-          echo "github_repo=$github_repo"
-          echo "github_commit_org=$github_commit_org"
-          echo "github_commit_repo=$github_commit_repo"
-          echo "github_commit_message=$github_commit_message"
-          echo "github_commit_ref=$github_commit_ref"          
+          vercel_git_metadata="-m githubCommitSha=$github_commit_sha -m githubCommitAuthorName=$github_commit_author_login -m githubCommitAuthorLogin=$github_commit_author_login -m githubDeployment=$github_deployment -m githubOrg=$github_org -m githubRepo=$github_repo -m githubCommitOrg=$github_commit_org -m githubCommitRepo=$github_commit_repo -m githubCommitMessage=\"$github_commit_message\" -m githubCommitRef=$github_commit_ref"       
 
           echo "github_commit_sha=$github_commit_sha" >> $GITHUB_OUTPUT
           echo "github_commit_author_name=$github_commit_author_name" >> $GITHUB_OUTPUT
@@ -172,13 +159,13 @@ jobs:
           echo "github_commit_ref=$github_commit_ref" >> $GITHUB_OUTPUT
           echo "vercel_git_metadata=$vercel_git_metadata" >> $GITHUB_OUTPUT
 
-      - name: Cache turbo build setup
-        uses: actions/cache@v3
-        with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-
+      # - name: Cache turbo build setup
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: .turbo
+      #     key: ${{ runner.os }}-turbo-${{ github.sha }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-turbo-
 
       - name: Setup
         uses: ./tooling/github/setup
@@ -201,17 +188,16 @@ jobs:
           echo "VERCEL_URL=\"$VERCEL_URL\"" >> .vercel/.env.preview.local                    
           cp .vercel/.env.preview.local .env
 
-          echo ".env:"
-          cat .env
-
       - name: Build App Project Artifacts
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
-      # Using vercel_git_metadata here to associate with the PR.
+      # Using vercel_git_metadata here to associate the deployment with the PR.
       - name: Deploy App Preview to Vercel
         id: deploy-app
         run: |
-          echo preview_url=$(vercel deploy --prebuilt ${{ steps.git-info.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }}) >> $GITHUB_OUTPUT
+          echo preview_url=$(vercel deploy --prebuilt ${{ steps.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }}) >> $GITHUB_OUTPUT
+
+          echo "preview_url: $preview_url"
 
           inspect=$(vercel inspect $preview_url --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
           deployment_id=$(echo "$inspect" | grep -m 1 '^    id' | awk '{print $NF}' | cut -d'_' -f 2-)
