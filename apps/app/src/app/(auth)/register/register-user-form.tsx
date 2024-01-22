@@ -60,16 +60,8 @@ const RegisterUserForm = ({ callbackUrl }: RegisterFormProps) => {
 
   const [validatingEmail, setValidatingEmail] = useState(false);
 
-  const { data: envUrls } = api.auth.envVars.useQuery();
-
   return (
     <>
-      <p>VERCEL_ENV: {envUrls?.vercelEnv}</p>
-      <p>VERCEL_URL: {envUrls?.vercelUrl}</p>
-      <p>DATABASE_URL: {envUrls?.databaseUrl}</p>
-
-      {/* <p>DATABASE_POOL_URL (on the client): {process.env.DATABASE_POOL_URL}</p> */}
-
       {loginEmailSent ? (
         <LoginLinkSent identifier={identifier} provider="email" />
       ) : creatingAccount ? (
