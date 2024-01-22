@@ -140,7 +140,7 @@ jobs:
           github_commit_ref=${{ github.event.pull_request.head.ref }}
           github_deployment_id=${{ github.event.pull_request.id }}
 
-          echo "github_commit_message=$(git show -s --format:%s)" >> $GITHUB_OUTPUT
+          echo "github_commit_message=$(git show -s --format=%s)" >> "$GITHUB_OUTPUT"
 
           echo "Git Branch Info:"
           echo "Branch Name: $github_branch_name"
