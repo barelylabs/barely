@@ -129,13 +129,15 @@ jobs:
     steps:
       - name: Git Branch Info
         run: |
-          github_branch_name=${{ github.ref_name }}
+          github_branch_name=${{ github.event.pull_request.head.ref }}
           github_commit_author_login=${{ github.event.pull_request.user.login }}
           github_commit_author_name=${{ github.event.pull_request.user.name }}          
-          github_commit_message=${{ github.event.pull_request.title }}
           github_commit_sha=${{ github.event.pull_request.head.sha }}
           github_commit_ref=${{ github.event.pull_request.head.ref }}
           github_deployment_id=${{ github.event.pull_request.id }}
+
+          git fetch origin ${{ github.event.pull_request.head.ref }}
+          echo "github_commit_message=$(git log -1 --pretty=format:%s)" >> $GITHUB_ENV
 
           echo "Git Branch Info:"
           echo "Branch Name: $github_branch_name"
