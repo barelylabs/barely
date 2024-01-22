@@ -131,6 +131,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Git Branch Info
+        id: git-info
         run: |
           github_branch_name=${{ github.event.pull_request.head.ref }}
           github_commit_author_login=${{ github.event.pull_request.user.login }}
@@ -139,8 +140,7 @@ jobs:
           github_commit_ref=${{ github.event.pull_request.head.ref }}
           github_deployment_id=${{ github.event.pull_request.id }}
 
-          git fetch origin ${{ github.event.pull_request.head.ref }}
-          echo "github_commit_message=$(git log -1 --pretty=format:%s)" >> $GITHUB_ENV
+          echo "github_commit_message=$(git show -s --format:%s)" >> $GITHUB_OUTPUT
 
           echo "Git Branch Info:"
           echo "Branch Name: $github_branch_name"
