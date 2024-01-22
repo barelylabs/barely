@@ -130,13 +130,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha}}
+          fetch-depth: 2
+        # ref: ${{ github.event.pull_request.head.sha}}
 
       - name: Git Branch Info
         id: git-info
         run: |
-          github_commit_sha=${{ github.event.pull_request.head.sha }}
-          github_commit_author_name=${{ github.event.pull_request.user.name }}          
+          github_commit_sha=${{ github.event.pull_request.head.sha }}          
           github_commit_author_login=${{ github.event.pull_request.user.login }}
           github_deployment=1
           github_org=${{ github.repository_owner }}
