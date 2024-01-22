@@ -8,13 +8,6 @@ import { Users } from "../user.sql";
 import { createLoginLink } from "./auth.fns";
 
 export const authRouter = router({
-  envVars: publicProcedure.query(() => {
-    return {
-      vercelUrl: process.env.VERCEL_URL,
-      databaseUrl: process.env.DATABASE_URL,
-      vercelEnv: process.env.VERCEL_ENV,
-    };
-  }),
   sendLoginEmail: publicProcedure
     .input(
       z.object({
