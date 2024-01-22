@@ -200,7 +200,7 @@ jobs:
       - name: Deploy App Preview to Vercel
         id: deploy-app
         run: |
-          echo preview-url=$(vercel deploy --prebuilt -e githubCommitSha=${{ steps.git-info.outputs.github_commit_sha }} -e githubCommitAuthorName=${{ steps.git-info.outputs.github_commit_author_name }} -e githubCommitAuthorLogin=${{ steps.git-info.outputs.github_commit_author_login }} -e githubCommitMessage="${{ steps.git-info.outputs.github_commit_message }}" -e githubCommitRef=${{ steps.git-info.outputs.github_commit_ref }} -e githubDeployment=${{ steps.git-info.outputs.github_deployment_id }} --token=${{ secrets.VERCEL_TOKEN }}) >> $GITHUB_OUTPUT
+          echo preview-url=$(vercel deploy --prebuilt -e githubCommitSha=${{ steps.git-info.outputs.github_commit_sha }} -e githubCommitAuthorName=${{ steps.git-info.outputs.github_commit_author_name }} -e githubCommitAuthorLogin=${{ steps.git-info.outputs.github_commit_author_login }} -e githubCommitMessage="testing...${{ steps.git-info.outputs.github_commit_message }}" -e githubCommitRef=${{ steps.git-info.outputs.github_commit_ref }} -e githubDeployment=${{ steps.git-info.outputs.github_deployment_id }} --token=${{ secrets.VERCEL_TOKEN }}) >> $GITHUB_OUTPUT
 
       - name: Inspect App Preview
         id: inspect-app
