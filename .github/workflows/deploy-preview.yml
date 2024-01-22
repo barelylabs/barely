@@ -127,6 +127,9 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Git Branch Info
         run: |
           github_branch_name=${{ github.event.pull_request.head.ref }}
@@ -147,9 +150,6 @@ jobs:
           echo "Commit SHA: $github_commit_sha"
           echo "Commit Ref: $github_commit_ref"
           echo "Deployment ID: $github_deployment_id"
-
-      - name: Checkout code
-        uses: actions/checkout@v4
 
       - name: Cache turbo build setup
         uses: actions/cache@v3
