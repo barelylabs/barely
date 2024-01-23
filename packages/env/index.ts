@@ -76,7 +76,6 @@ type RateLimitTime =
   | `${number} d`;
 
 export const allServerEnvSchema = z.object({
-  AUTH_URL: z.string().url().optional(),
   BOT_SPOTIFY_ACCOUNT_ID: z.string(),
   BOT_THREADS_API_KEY: z.string(),
   CLOUDINARY_API_SECRET: z.string(),
@@ -186,8 +185,6 @@ const processEnv = {
   NEXT_PUBLIC_VERCEL_URL: process.env.NEXT_PUBLIC_VERCEL_URL,
 
   // SERVER
-  AUTH_SECRET: process.env.AUTH_SECRET,
-  AUTH_URL: process.env.AUTH_URL,
   BOT_SPOTIFY_ACCOUNT_ID: process.env.BOT_SPOTIFY_ACCOUNT_ID,
   BOT_THREADS_API_KEY: process.env.BOT_THREADS_API_KEY,
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
