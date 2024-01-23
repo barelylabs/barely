@@ -263,6 +263,10 @@ jobs:
         id: vercel-env
         run: |
           vercel pull --cwd apps/link --yes --environment=preview --git-branch=${{ needs.git-meta.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
+
+          VERCEL_URL=link-git-${{ needs.git-meta.outputs.git_branch_name }}-barelylabs.vercel.app
+          sed -i '/VERCEL_URL/d' ./apps/link/.vercel/.env.preview.local
+          echo "VERCEL_URL=\"$VERCEL_URL\"" >> ./apps/link/.vercel/.env.preview.local                    
           cp ./apps/link/.vercel/.env.preview.local .env
 
       - name: Build Link Project Artifacts
