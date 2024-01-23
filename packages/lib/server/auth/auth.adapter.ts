@@ -15,9 +15,9 @@ import { UserSessions } from "../user-session.sql";
 import {
   createUser,
   deserializeUser,
-  getUserWithWorkspacesByAccount,
-  getUserWithWorkspacesByEmail,
-  getUserWithWorkspacesByUserId,
+  getSessionUserByAccount,
+  getSessionUserByEmail,
+  getSessionUserByUserId,
   serializeUser,
 } from "../user.fns";
 import { Users } from "../user.sql";
@@ -43,7 +43,7 @@ export function NeonAdapter(db: Db): Adapter {
         db,
       );
 
-      const user = await getUserWithWorkspacesByUserId(userId, db);
+      const user = await getSessionUserByUserId(userId, db);
 
       if (!user) {
         throw new Error("No user found");
@@ -54,7 +54,7 @@ export function NeonAdapter(db: Db): Adapter {
 
     getUser: async (userId) => {
       console.log("getting user by id: ", userId);
-      const user = await getUserWithWorkspacesByUserId(userId, db);
+      const user = await getSessionUserByUserId(userId, db);
 
       if (!user) return null;
 
@@ -64,7 +64,7 @@ export function NeonAdapter(db: Db): Adapter {
     getUserByEmail: async (email) => {
       console.log("getting user by email: ", email);
 
-      const user = await getUserWithWorkspacesByEmail(email, db);
+      const user = await getSessionUserByEmail(email, db);
 
       console.log("user by email: ", user);
 
@@ -82,7 +82,7 @@ export function NeonAdapter(db: Db): Adapter {
         throw new Error("Invalid provider");
       }
 
-      const user = await getUserWithWorkspacesByAccount(
+      const user = await getSessionUserByAccount(
         provider.data,
         account.providerAccountId,
         db,
@@ -103,7 +103,7 @@ export function NeonAdapter(db: Db): Adapter {
         .set(serializeUser(userData))
         .where(eq(Users.id, userData.id));
 
-      const user = await getUserWithWorkspacesByUserId(userData.id, db);
+      const user = await getSessionUserByUserId(userData.id, db);
 
       if (!user) {
         throw new Error("No user found");
@@ -135,7 +135,7 @@ export function NeonAdapter(db: Db): Adapter {
       }
 
       // get user by id
-      const user = await getUserWithWorkspacesByUserId(account.userId, db);
+      const user = await getSessionUserByUserId(account.userId, db);
 
       if (!user) {
         throw new Error("No user found");

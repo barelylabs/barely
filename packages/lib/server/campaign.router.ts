@@ -6,6 +6,7 @@ import { TRPCError } from "@trpc/server";
 import { and, asc, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 
+import type { SessionUser } from "./auth";
 import type { Track } from "./track.schema";
 import type { Workspace } from "./workspace.schema";
 import env from "../env";
@@ -14,6 +15,7 @@ import env from "../env";
 import { convertToHandle } from "../utils/handle";
 import { newCuid, newId } from "../utils/id";
 import { pushEvent } from "../utils/pusher-server";
+import { raise } from "../utils/raise";
 import { sendText } from "../utils/sms";
 import { sqlCount } from "../utils/sql";
 import { privateProcedure, publicProcedure, router } from "./api";
@@ -35,7 +37,7 @@ import { Campaigns, CampaignUpdateRecords } from "./campaign.sql";
 import { createPitchCheckoutLink } from "./stripe.fns";
 import { createTrack } from "./track.fns";
 import { Tracks } from "./track.sql";
-import { createUser } from "./user.fns";
+import { createUser, getSessionUserByUserId } from "./user.fns";
 import { _Users_To_Workspaces } from "./user.sql";
 import { createWorkspace } from "./workspace.fns";
 import { Workspaces } from "./workspace.sql";
@@ -242,8 +244,24 @@ export const campaignRouter = router({
           message: "Something went wrong creating the track.",
         });
 
+      if (!newWorkspace)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong creating the artist.",
+        });
+
+      const newSessionUser: SessionUser = {
+        ...newUser,
+        workspaces: [
+          {
+            ...newWorkspace,
+            role: "admin",
+          },
+        ],
+      };
+
       const newCampaign = createPlaylistPitchCampaign({
-        user: newUser,
+        user: newSessionUser,
         trackId: newTrack.id,
         sendConfirmationEmail: true,
         db: ctx.db,
@@ -547,7 +565,11 @@ export const campaignRouter = router({
         }
 
         // send email to the user that created the campaign
+        const user =
+          (await getSessionUserByUserId(campaign.createdBy.id, ctx.db)) ??
+          raise("no user found for that campaign");
         const emailLoginLink = await createLoginLink({
+          user,
           provider: "email",
           identifier: campaign.createdBy.email,
           callbackPath: `${env.NEXT_PUBLIC_APP_BASE_URL}/${campaign.workspace.handle}/campaign/${campaign.id}/launch`,
@@ -576,6 +598,7 @@ export const campaignRouter = router({
           console.log("campaign.createdBy.phone", campaign.createdBy.phone);
 
           const phoneLoginLink = await createLoginLink({
+            user,
             provider: "phone",
             identifier: campaign.createdBy.phone,
             callbackPath: `${env.NEXT_PUBLIC_APP_BASE_URL}/${campaign.workspace.handle}/campaigns/${campaign.id}/launch`,

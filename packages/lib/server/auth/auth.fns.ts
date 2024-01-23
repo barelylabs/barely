@@ -2,6 +2,7 @@ import { sendEmail } from "@barely/email";
 import SignInEmailTemplate from "@barely/email/src/templates/sign-in";
 import { eq } from "drizzle-orm";
 
+import type { SessionUser } from ".";
 import { auth } from ".";
 import env from "../../env";
 import { raise } from "../../utils/raise";
@@ -13,21 +14,29 @@ import { VerificationTokens } from "../verification-token.sql";
 
 export { signOut } from "next-auth/react";
 
-export async function createLoginLink(props: {
+export interface CreateLoginLinkProps {
   provider: "email" | "phone";
   identifier: string;
-  callbackPath?: string;
   expiresInSeconds?: number;
-}) {
+  user: SessionUser;
+  callbackPath?: string;
+}
+
+export async function createLoginLink(props: CreateLoginLinkProps) {
   const token = generateVerificationToken();
   const hashedToken = await hashToken(token);
 
-  const defaultWorkspace = await getDefaultWorkspace();
-
-  const callbackUrl = absoluteUrl(
-    "app",
-    props.callbackPath ?? `${defaultWorkspace.handle}/links`,
-  );
+  let callbackUrl: string;
+  if (props.callbackPath) {
+    callbackUrl = absoluteUrl("app", props.callbackPath);
+  } else if (props.user) {
+    callbackUrl = absoluteUrl(
+      "app",
+      `${getDefaultWorkspaceOfUser(props.user).handle}/links`,
+    );
+  } else {
+    throw new Error("Either callbackPath or user must be defined");
+  }
 
   const THIRTY_DAYS_IN_SECONDS = 60 * 60 * 24 * 30;
   const expiresIn = props.expiresInSeconds ?? THIRTY_DAYS_IN_SECONDS;
@@ -53,9 +62,17 @@ export async function createLoginLink(props: {
   }?${params.toString()}`;
 }
 
-export async function getDefaultWorkspace() {
+export async function getDefaultWorkspaceOfCurrentUser() {
   const session = await auth();
-  const workspaces = session?.user?.workspaces ?? [];
+  // const workspaces = session?.user?.workspaces ?? [];
+  // const defaultWorkspace = workspaces[0];
+  // return defaultWorkspace ?? raise("No default workspace");
+  if (!session?.user) throw new Error("User not found");
+  return getDefaultWorkspaceOfUser(session.user);
+}
+
+export function getDefaultWorkspaceOfUser(user: SessionUser) {
+  const workspaces = user.workspaces ?? [];
   const defaultWorkspace = workspaces[0];
   return defaultWorkspace ?? raise("No default workspace");
 }
@@ -80,33 +97,60 @@ async function hashToken(token: string) {
 
 export async function sendLoginEmail(props: {
   email: string;
-  callbackUrl: string;
+  callbackUrl?: string;
 }) {
-  const dbUser =
-    (await db.http.query.Users.findFirst({
-      where: eq(Users.email, props.email),
-    })) ?? raise("Email not found");
+  console.log("sendLoginEmail", props.email, props.callbackUrl);
+
+  const dbUser = await db.http.query.Users.findFirst({
+    where: eq(Users.email, props.email),
+    with: {
+      personalWorkspace: {
+        columns: {
+          handle: true,
+        },
+      },
+      _workspaces: {
+        with: {
+          workspace: true,
+        },
+      },
+    },
+  });
+
+  console.log("dbUser", dbUser);
+
+  if (!dbUser)
+    return {
+      success: false,
+      message: "Email not found",
+      code: "EMAIL_NOT_FOUND",
+    };
 
   const loginLink = await createLoginLink({
     provider: "email",
     identifier: props.email,
+    user: {
+      ...dbUser,
+      workspaces: dbUser._workspaces.map((_w) => ({
+        ..._w.workspace,
+        role: _w.role,
+      })),
+    },
     callbackPath: props.callbackUrl,
   });
 
   const SignInEmail = SignInEmailTemplate({
-    firstName: dbUser.firstName ?? undefined,
+    firstName: dbUser.firstName ?? dbUser.handle ?? undefined,
     loginLink,
   });
 
-  const emailRes =
-    (await sendEmail({
-      from: "barely.io <support@barely.io>",
-      to: props.email,
-      subject: "Barely Login Link",
-      type: "transactional",
-      react: SignInEmail,
-    })) ?? raise("Something went wrong");
-
+  const emailRes = await sendEmail({
+    from: "barely.io <support@barely.io>",
+    to: props.email,
+    subject: "Barely Login Link",
+    type: "transactional",
+    react: SignInEmail,
+  });
   return emailRes;
 }
 

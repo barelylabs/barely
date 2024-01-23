@@ -4,6 +4,7 @@ import { PlaylistPitchToScreenEmailTemplate } from "@barely/email/src/templates/
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 
+import type { SessionUser } from "./auth";
 import type {
   Campaign,
   CampaignWithTeamAndTrack,
@@ -12,7 +13,6 @@ import type {
   InsertCampaign,
 } from "./campaign.schema";
 import type { Db } from "./db";
-import type { User } from "./user.schema";
 import env from "../env";
 // import { APP_BASE_URL } from "../utils/constants";
 
@@ -198,7 +198,7 @@ export async function getCampaignsToScreen(db: Db) {
 }
 
 export async function createPlaylistPitchCampaign(props: {
-  user: User;
+  user: SessionUser;
   trackId: string;
   sendConfirmationEmail?: boolean;
   db: Db;
@@ -246,6 +246,7 @@ export async function createPlaylistPitchCampaign(props: {
 
   if (props.sendConfirmationEmail) {
     const userConfirmEmailLink = await createLoginLink({
+      user: props.user,
       provider: "email",
       identifier: props.user.email,
       callbackPath: `${env.NEXT_PUBLIC_APP_BASE_URL}/${campaign.workspace.handle}/campaigns`,
