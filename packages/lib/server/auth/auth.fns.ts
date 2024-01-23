@@ -63,7 +63,7 @@ export async function createLoginLink(props: CreateLoginLinkProps) {
   if (props.provider === "email") params.append("email", props.identifier);
   if (props.provider === "phone") params.append("phone", props.identifier);
 
-  return `${env.AUTH_URL}/api/auth/callback/${
+  return `${env.NEXT_PUBLIC_APP_BASE_URL}/api/auth/callback/${
     props.provider
   }?${params.toString()}`;
 }

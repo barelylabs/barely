@@ -2,7 +2,6 @@ import { pickClientEnvSchema, pickServerEnvSchema, zEnv } from "@barely/env";
 import { z } from "zod";
 
 const serverEnvSchema = pickServerEnvSchema([
-  "AUTH_URL",
   "BOT_SPOTIFY_ACCOUNT_ID",
   "BOT_THREADS_API_KEY",
   "CLOUDINARY_API_SECRET",
