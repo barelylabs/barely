@@ -163,7 +163,7 @@ jobs:
 
       - name: Install Vercel CLI
         run: |
-          npm install --global vercel@latest
+          pnpm install --global vercel@latest
           vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
           vercel link --cwd apps/app --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
           vercel link --cwd apps/link --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
