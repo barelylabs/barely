@@ -2,6 +2,9 @@ import env from "../env";
 import { raise } from "./raise";
 
 export function absoluteUrl(site: "app" | "link" | "www", path: string) {
+  console.log("process.env => ", process.env);
+  console.log("env => ", env);
+
   const siteBaseUrl =
     site === "app"
       ? env.NEXT_PUBLIC_APP_BASE_URL
