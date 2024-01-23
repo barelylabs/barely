@@ -166,15 +166,13 @@ jobs:
       - name: Install Vercel CLI
         run: |
           npm install --global vercel@latest
-        # vercel link --repo --scope=barelylabs --yes --token=$VERCEL_TOKEN
-        # cd apps/app
-        # vercel link --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
-        # cd ../..
+          vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
+          vercel link --cwd apps/app --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Pull Vercel Environment Information
         id: vercel-env
         run: |
-          vercel pull --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
+          vercel pull --cwd apps/app --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
 
           VERCEL_URL=app-git-${{ needs.neon-preview.outputs.git_branch_name }}-barelylabs.vercel.app
           sed -i '/VERCEL_URL/d' .vercel/.env.preview.local
@@ -182,13 +180,14 @@ jobs:
           cp .vercel/.env.preview.local .env
 
       - name: Build App Project Artifacts
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        run: turbo build:vercel --token=${{ secrets.VERCEL_TOKEN }}
+        # run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
       # Using vercel_git_metadata here to associate the deployment with the PR.
       - name: Deploy App Preview to Vercel
         id: deploy-app
         run: |
-          preview_url=$(vercel deploy --prebuilt ${{ steps.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})
+          preview_url=$(vercel deploy --cwd apps/app --prebuilt ${{ steps.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})
           echo "preview_url: $preview_url"
           echo preview_url=$preview_url >> $GITHUB_OUTPUT          
 
