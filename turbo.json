@@ -16,6 +16,16 @@
         ".vercel/output/**"
       ]
     },
+    "build:vercel": {
+      "dependsOn": ["^build"],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "next-env.d.ts",
+        ".output/**",
+        ".vercel/output/**"
+      ]
+    },
     "format": {
       "outputs": ["node_modules/.cache/.prettiercache"],
       "outputMode": "new-only"
