@@ -109,7 +109,7 @@ export async function createUser(user: CreateUser, db: Db) {
   return newUserWithStripe;
 }
 
-export async function getUserWithWorkspacesByUserId(userId: string, db: Db) {
+export async function getSessionUserByUserId(userId: string, db: Db) {
   const userWithWorkspaces = await db.http.query.Users.findFirst({
     where: (Users) => eq(Users.id, userId),
     with: {
@@ -134,7 +134,7 @@ export async function getUserWithWorkspacesByUserId(userId: string, db: Db) {
   return sessionUser;
 }
 
-export async function getUserWithWorkspacesByEmail(email: string, db: Db) {
+export async function getSessionUserByEmail(email: string, db: Db) {
   const userWithWorkspaces = await db.http.query.Users.findFirst({
     where: (Users) => eq(Users.email, email),
     with: {
@@ -159,7 +159,7 @@ export async function getUserWithWorkspacesByEmail(email: string, db: Db) {
   return sessionUser;
 }
 
-export async function getUserWithWorkspacesByAccount(
+export async function getSessionUserByAccount(
   provider: ProviderAccount["provider"],
   providerAccountId: string,
   db: Db,
