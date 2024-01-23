@@ -1,9 +1,10 @@
 {
   "name": "@barely/link",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "build": "pnpm with-env next build",
+    "build:vercel": "pnpm with-env vercel build",
     "clean": "git clean -xdf .next .turbo node_modules",
     "dev": "pnpm with-env next dev -- -p 3002",
     "format": "prettier --check . --ignore-path ../../.gitignore",

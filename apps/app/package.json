@@ -12,7 +12,6 @@
     "lint": "dotenv -v SKIP_ENV_VALIDATION=1 next lint",
     "start": "pnpm with-env next start",
     "typecheck": "tsc --noEmit",
-    "vercel:link": "vercel link --scope=barelylabs --yes",
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {

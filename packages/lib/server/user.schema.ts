@@ -56,9 +56,6 @@ export const newUserContactInfoSchema = z.object({
     .string()
     .email("Please use a valid email address")
     .refine(async (email) => {
-      console.log("checking for email => ", email);
-      console.log("client side? => ", typeof window !== "undefined");
-
       if (!isRealEmail(email)) return false;
 
       const emailExists = await checkEmailExistsServerAction(email);
