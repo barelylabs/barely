@@ -9,8 +9,10 @@ jobs:
     name: git metadata
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - name: Git Metadata
         id: git-meta
@@ -159,12 +161,11 @@ jobs:
       #     echo $DATABASE_POOL_URL | vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
 
     outputs:
-      git_branch_name: ${{ needs.git-meta.outputs.git_branch_name }}
       neon_branch_id: ${{ steps.get-neon-branch.outputs.branch_id }}
 
   app-deploy:
     name: vercel preview - app.barely.io
-    needs: [neon-preview]
+    needs: [neon-preview, git-meta]
     runs-on: ubuntu-latest
     env:
       TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -177,32 +178,32 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Git Metadata
-        id: git-meta
-        run: |
-          github_commit_sha=${{ github.event.pull_request.head.sha }}          
-          github_commit_author_login=${{ github.event.pull_request.user.login }}
-          github_deployment=1
-          github_org=${{ github.repository_owner }}
-          github_repo=${{ github.repository }}
-          github_commit_org=${{ github.repository_owner }}
-          github_commit_repo=${{ github.repository }}
-          github_commit_message=$(git show -s --format=%s $github_commit_sha)
-          github_commit_ref=${{ github.event.pull_request.head.ref }}
+      # - name: Git Metadata
+      #   id: git-meta
+      #   run: |
+      #     github_commit_sha=${{ github.event.pull_request.head.sha }}
+      #     github_commit_author_login=${{ github.event.pull_request.user.login }}
+      #     github_deployment=1
+      #     github_org=${{ github.repository_owner }}
+      #     github_repo=${{ github.repository }}
+      #     github_commit_org=${{ github.repository_owner }}
+      #     github_commit_repo=${{ github.repository }}
+      #     github_commit_message=$(git show -s --format=%s $github_commit_sha)
+      #     github_commit_ref=${{ github.event.pull_request.head.ref }}
 
-          vercel_git_metadata="-m githubCommitSha=$github_commit_sha -m githubCommitAuthorName=$github_commit_author_login -m githubCommitAuthorLogin=$github_commit_author_login -m githubDeployment=$github_deployment -m githubOrg=$github_org -m githubRepo=$github_repo -m githubCommitOrg=$github_commit_org -m githubCommitRepo=$github_commit_repo -m githubCommitMessage=\"$github_commit_message\" -m githubCommitRef=$github_commit_ref"                 
+      #     vercel_git_metadata="-m githubCommitSha=$github_commit_sha -m githubCommitAuthorName=$github_commit_author_login -m githubCommitAuthorLogin=$github_commit_author_login -m githubDeployment=$github_deployment -m githubOrg=$github_org -m githubRepo=$github_repo -m githubCommitOrg=$github_commit_org -m githubCommitRepo=$github_commit_repo -m githubCommitMessage=\"$github_commit_message\" -m githubCommitRef=$github_commit_ref"
 
-          echo "github_commit_sha=$github_commit_sha" >> $GITHUB_OUTPUT
-          echo "github_commit_author_name=$github_commit_author_name" >> $GITHUB_OUTPUT
-          echo "github_commit_author_login=$github_commit_author_login" >> $GITHUB_OUTPUT
-          echo "github_deployment=$github_deployment" >> $GITHUB_OUTPUT
-          echo "github_org=$github_org" >> $GITHUB_OUTPUT
-          echo "github_repo=$github_repo" >> $GITHUB_OUTPUT
-          echo "github_commit_org=$github_commit_org" >> $GITHUB_OUTPUT
-          echo "github_commit_repo=$github_commit_repo" >> $GITHUB_OUTPUT
-          echo "github_commit_message=$github_commit_message" >> $GITHUB_OUTPUT
-          echo "github_commit_ref=$github_commit_ref" >> $GITHUB_OUTPUT
-          echo "vercel_git_metadata=$vercel_git_metadata" >> $GITHUB_OUTPUT
+      #     echo "github_commit_sha=$github_commit_sha" >> $GITHUB_OUTPUT
+      #     echo "github_commit_author_name=$github_commit_author_name" >> $GITHUB_OUTPUT
+      #     echo "github_commit_author_login=$github_commit_author_login" >> $GITHUB_OUTPUT
+      #     echo "github_deployment=$github_deployment" >> $GITHUB_OUTPUT
+      #     echo "github_org=$github_org" >> $GITHUB_OUTPUT
+      #     echo "github_repo=$github_repo" >> $GITHUB_OUTPUT
+      #     echo "github_commit_org=$github_commit_org" >> $GITHUB_OUTPUT
+      #     echo "github_commit_repo=$github_commit_repo" >> $GITHUB_OUTPUT
+      #     echo "github_commit_message=$github_commit_message" >> $GITHUB_OUTPUT
+      #     echo "github_commit_ref=$github_commit_ref" >> $GITHUB_OUTPUT
+      #     echo "vercel_git_metadata=$vercel_git_metadata" >> $GITHUB_OUTPUT
 
       - name: Setup
         uses: ./tooling/github/setup
@@ -223,9 +224,9 @@ jobs:
           vercel link --cwd apps/app --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
 
           # Using app environment variables as the source of truth for all builds
-          vercel pull --cwd apps/app --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
+          vercel pull --cwd apps/app --yes --environment=preview --git-branch=${{ needs.git-meta.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
 
-          VERCEL_URL=app-git-${{ needs.neon-preview.outputs.git_branch_name }}-barelylabs.vercel.app
+          VERCEL_URL=app-git-${{ needs.git-meta.outputs.git_branch_name }}-barelylabs.vercel.app
           sed -i '/VERCEL_URL/d' ./apps/app/.vercel/.env.preview.local
           echo "VERCEL_URL=\"$VERCEL_URL\"" >> ./apps/app/.vercel/.env.preview.local                    
           cp ./apps/app/.vercel/.env.preview.local .env
@@ -236,7 +237,7 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
         run: |
           vercel link --cwd apps/link --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
-          vercel pull --cwd apps/link --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
+          vercel pull --cwd apps/link --yes --environment=preview --git-branch=${{ needs.git-meta.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build App Project Artifacts
         run: turbo build:vercel --token=${{ secrets.VERCEL_TOKEN }}
@@ -247,7 +248,7 @@ jobs:
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
         run: |
-          preview_url=$(vercel deploy --cwd apps/app --prebuilt ${{ steps.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})          
+          preview_url=$(vercel deploy --cwd apps/app --prebuilt ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})          
           echo preview_url=$preview_url >> $GITHUB_OUTPUT          
 
           inspect=$(vercel inspect $preview_url --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
@@ -260,7 +261,7 @@ jobs:
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
         run: |
-          preview_url=$(vercel deploy --cwd apps/link --prebuilt ${{ steps.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})          
+          preview_url=$(vercel deploy --cwd apps/link --prebuilt ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})          
           echo preview_url=$preview_url >> $GITHUB_OUTPUT          
 
           inspect=$(vercel inspect $preview_url --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
