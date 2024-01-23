@@ -29,11 +29,17 @@ export async function createLoginLink(props: CreateLoginLinkProps) {
   let callbackUrl: string;
   if (props.callbackPath) {
     callbackUrl = absoluteUrl("app", props.callbackPath);
+    console.log("callbackPath provided, using it: ", callbackUrl);
   } else if (props.user) {
-    callbackUrl = absoluteUrl(
-      "app",
-      `${getDefaultWorkspaceOfUser(props.user).handle}/links`,
+    console.log(
+      "no callback path provided, using default workspace links page",
     );
+    const defaultWorkspace = getDefaultWorkspaceOfUser(props.user);
+    console.log("defaultWorkspace", defaultWorkspace);
+    console.log("defaultWorkspace.handle", defaultWorkspace.handle);
+
+    callbackUrl = absoluteUrl("app", `${defaultWorkspace.handle}/links`);
+    console.log("callbackUrl", callbackUrl);
   } else {
     throw new Error("Either callbackPath or user must be defined");
   }
