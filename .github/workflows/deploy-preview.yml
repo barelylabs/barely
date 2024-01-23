@@ -164,8 +164,8 @@ jobs:
         run: |
           pnpm install --global vercel@latest
           vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
-          vercel link --cwd apps/app --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
-          vercel link --cwd apps/link --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
+        # vercel link --cwd apps/app --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
+        # vercel link --cwd apps/link --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
         # vercel link --cwd apps/www --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Pull Vercel Environment Information
