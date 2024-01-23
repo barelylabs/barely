@@ -175,9 +175,9 @@ jobs:
           vercel pull --cwd apps/app --yes --environment=preview --git-branch=${{ needs.neon-preview.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
 
           VERCEL_URL=app-git-${{ needs.neon-preview.outputs.git_branch_name }}-barelylabs.vercel.app
-          sed -i '/VERCEL_URL/d' .vercel/.env.preview.local
-          echo "VERCEL_URL=\"$VERCEL_URL\"" >> .vercel/.env.preview.local                    
-          cp .vercel/.env.preview.local .env
+          sed -i '/VERCEL_URL/d' ./apps/app/.vercel/.env.preview.local
+          echo "VERCEL_URL=\"$VERCEL_URL\"" >> ./apps/app/.vercel/.env.preview.local                    
+          cp ./apps/app/.vercel/.env.preview.local .env
 
       - name: Build App Project Artifacts
         run: turbo build:vercel --token=${{ secrets.VERCEL_TOKEN }}
