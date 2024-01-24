@@ -1,0 +1,30 @@
+NODE endpoint
+SQL >
+
+    %
+    SELECT
+        type,
+        timestamp,
+        workspaceId,
+        assetId,
+        sessionId,
+        href,
+
+        domain,
+        key,
+
+        city,
+        country,
+        device,
+        browser,
+        os,
+        referer
+    FROM web_events
+    where
+        type IN ('transparentLinkClick', 'shortLinkClick')
+        {% if defined(workspaceId) %}
+            AND workspaceId = {{ String(workspaceId) }}
+        {% end %}
+        {% if defined(assetId) %} AND assetId = {{ String(assetId) }} {% end %}
+
+

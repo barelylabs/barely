@@ -8,25 +8,24 @@ node_modules
 # testing
 coverage
 
-# actions
-.venv/*
-_actions/*
-.pscale/cli-helper-scripts/typescript
-
 # next.js
 .next/
 out/
+next-env.d.ts
+
+# expo
+.expo/
+dist/
+expo-env.d.ts
+
+# tinybird
+.tinyb
 
 # production
-dist/
 build
 
 # misc
 .DS_Store
-.DS_Store?
-.Trashes
-.Spotlight-V100
-._*
 *.pem
 
 # debug
