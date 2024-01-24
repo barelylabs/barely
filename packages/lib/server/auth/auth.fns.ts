@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 
 import type { SessionUser } from ".";
 import { auth } from ".";
-import env from "../../env";
+import { env } from "../../env";
 import { raise } from "../../utils/raise";
 import { absoluteUrl } from "../../utils/url";
 import { db } from "../db";

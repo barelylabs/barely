@@ -2,7 +2,7 @@ import { eq, or, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import type { Domain } from "./domain.schema";
-import env from "../env";
+import { env } from "../env";
 import { validDomainRegex } from "../utils/domain";
 import { getApexDomain, getDomainWithoutWWW } from "../utils/link";
 import { sqlStringEndsWith } from "../utils/sql";

@@ -14,7 +14,7 @@ import { ReactQueryStreamedHydration } from "@tanstack/react-query-next-experime
 import { loggerLink, unstable_httpBatchStreamLink } from "@trpc/client";
 import { Provider as JotaiProvider, useAtomValue } from "jotai";
 
-import env from "~/env";
+import { env } from "~/env";
 
 export function TRPCReactProvider(props: {
   children: ReactNode;

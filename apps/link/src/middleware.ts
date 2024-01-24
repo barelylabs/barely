@@ -20,7 +20,7 @@ import { eq, isNull } from "drizzle-orm";
 import type { RecordClickProps } from "@barely/lib/server/event.fns";
 import type { LinkAnalyticsProps } from "@barely/lib/server/link.schema";
 
-import env from "~/env";
+import { env } from "~/env";
 
 export const config = {
   matcher: ["/((?!api|mobile|_next|favicon|logos|sitemap|atom|404|500).*)"],

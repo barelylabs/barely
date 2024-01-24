@@ -1,6 +1,6 @@
 import { v2 } from "cloudinary";
 
-import env from "../env";
+import { env } from "../env";
 
 v2.config({
   cloud_name: env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,

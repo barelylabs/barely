@@ -5,7 +5,7 @@ import type { visitorSessionTinybirdSchema } from "./event.tb";
 // import { recordEventToTinybird } from './event.tb';
 import type { LinkAnalyticsProps } from "./link.schema";
 import type { NextFormattedUserAgent, NextGeo } from "./next.schema";
-import env from "../env";
+import { env } from "../env";
 import { newId } from "../utils/id";
 import { sqlIncrement } from "../utils/sql";
 import { ratelimit } from "../utils/upstash";

@@ -4,7 +4,7 @@ import { signOut } from "@barely/server/auth";
 // import { APP_BASE_URL } from "@barely/utils/constants";
 import { wait } from "@barely/utils/wait";
 
-import env from "~/env";
+import { env } from "~/env";
 
 // import { SignOutButton } from '~/app/(dash)/[handle]/components/user-menu';
 

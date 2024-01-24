@@ -13,7 +13,7 @@ import type { Transaction } from "./transaction.schema";
 import type { User } from "./user.schema";
 import type { Workspace } from "./workspace.schema";
 import type { PlanType } from "./workspace.settings";
-import env from "../env";
+import { env } from "../env";
 import { playlistPitchCostInDollars } from "../utils/campaign";
 // import { APP_BASE_URL } from "../utils/constants";
 

@@ -2,7 +2,7 @@ import { neon, neonConfig, Pool } from "@neondatabase/serverless";
 import { drizzle as drizzleHttp } from "drizzle-orm/neon-http";
 import { drizzle as drizzlePool } from "drizzle-orm/neon-serverless";
 
-import env from "../../env";
+import { env } from "../../env";
 import * as adCreativeSql from "../ad-creative.sql";
 import * as adSetSql from "../ad-set.sql";
 import * as adSql from "../ad.sql";

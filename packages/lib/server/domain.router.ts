@@ -3,7 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import type { DomainStatus } from "./domain.schema";
-import env from "../env";
+import { env } from "../env";
 import { privateProcedure, publicProcedure, router } from "./api";
 import {
   getDomainConfigFromVercel,
