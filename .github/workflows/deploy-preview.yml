@@ -76,8 +76,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup node/pnpm/turbo
+        uses: ./tooling/github/setup
+
       - name: Install the Neon CLI
-        run: npm install -g neonctl
+        run: pnpm install -g neonctl
 
       # This is just so the env check doesn't fail on missing variables.
       # DATABASE_URL && DATABASE_POOL_URL will be overwritten below.
@@ -109,64 +112,60 @@ jobs:
           DATABASE_POOL_URL=$(neonctl connection-string ${{ needs.git-meta.outputs.git_branch_name }} --pooled --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }} | tr -d '\n')?sslmode=require
           echo "DATABASE_POOL_URL=$DATABASE_POOL_URL" >> $GITHUB_ENV
 
-      # Setup node/pnpm/turbo
-      # - name: Setup
-      #   uses: ./tooling/github/setup
+      - name: db:push
+        id: drizzle
+        run: |
+          rm -f .env
+          touch .env
 
-      # - name: Install Vercel CLI
-      #   run: |
-      #     npm install --global vercel@latest
+          echo "DATABASE_URL: $DATABASE_URL"
+          echo "DATABASE_POOL_URL: $DATABASE_POOL_URL"
 
-      # - name: db:push
-      #   id: drizzle
-      #   run: |
-      #     rm -f .env
-      #     touch .env
+          echo "DATABASE_URL=$DATABASE_URL" >> .env
+          echo "DATABASE_POOL_URL=$DATABASE_POOL_URL" >> .env
 
-      #     echo "DATABASE_URL: $DATABASE_URL"
-      #     echo "DATABASE_POOL_URL: $DATABASE_POOL_URL"
-
-      #     echo "DATABASE_URL=$DATABASE_URL" >> .env
-      #     echo "DATABASE_POOL_URL=$DATABASE_POOL_URL" >> .env
-
-      #     pnpm db:push
+          pnpm db:push
 
       # Using Vercel as our secret store for the DATABASE_URL and DATABASE_POOL_URL
       # -- to my knowledge, using an external store is the only way to pass secrets between Github Actions jobs?
-      # - name: Update Vercel Environment Variables for App Preview Branch
-      #   run: |
-      #     echo "DATABASE_URL: $DATABASE_URL"
-      #     echo "DATABASE_POOL_URL: $DATABASE_POOL_URL"
+      - name: Install Vercel CLI
+        run: |
+          npm install --global vercel@latest
 
-      #     branch_name=${{ needs.git-meta.outputs.git_branch_name }}
+      - name: Update Vercel Environment Variables for App Preview Branch
+        run: |
+          echo "DATABASE_URL: $DATABASE_URL"
+          echo "DATABASE_POOL_URL: $DATABASE_POOL_URL"
 
-      #     if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
-      #       vercel env rm DATABASE_URL preview pg --yes --token=${{ secrets.VERCEL_TOKEN }}
-      #     fi
+          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
 
-      #     if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
-      #       vercel env rm DATABASE_POOL_URL preview pg --yes --token=${{ secrets.VERCEL_TOKEN }}
-      #     fi
+          if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
+            vercel env rm DATABASE_URL preview pg --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
 
-      #     echo $DATABASE_URL | vercel env add DATABASE_URL preview ${{ needs.git-meta.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
-      #     echo $DATABASE_POOL_URL | vercel env add DATABASE_POOL_URL preview ${{ needs.git-meta.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
+          if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
+            vercel env rm DATABASE_POOL_URL preview pg --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
 
-      # - name: Update Vercel Env Variables for Link Preview Branch
-      #   env:
-      #     VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
-      #   run: |
-      #     branch_name=${{ needs.git-meta.outputs.git_branch_name }}
+          echo $DATABASE_URL | vercel env add DATABASE_URL preview ${{ needs.git-meta.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
+          echo $DATABASE_POOL_URL | vercel env add DATABASE_POOL_URL preview ${{ needs.git-meta.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
 
-      #     if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
-      #       vercel env rm DATABASE_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
-      #     fi
+      - name: Update Vercel Env Variables for Link Preview Branch
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
+        run: |
+          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
 
-      #     if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
-      #       vercel env rm DATABASE_POOL_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
-      #     fi
+          if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
+            vercel env rm DATABASE_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
 
-      #     echo $DATABASE_URL | vercel env add DATABASE_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
-      #     echo $DATABASE_POOL_URL | vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
+          if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
+            vercel env rm DATABASE_POOL_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+          echo $DATABASE_URL | vercel env add DATABASE_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
+          echo $DATABASE_POOL_URL | vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
 
     outputs:
       neon_branch_id: ${{ steps.get-neon-branch.outputs.branch_id }}
@@ -186,7 +185,7 @@ jobs:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
@@ -215,8 +214,6 @@ jobs:
 
       - name: Deploy App Preview to Vercel
         id: deploy-app
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
         run: |
           preview_url=$(vercel deploy --cwd apps/app --prebuilt ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})          
           echo preview_url=$preview_url >> $GITHUB_OUTPUT          
