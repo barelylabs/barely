@@ -1,0 +1,14 @@
+{
+	"$schema": "https://json.schemastore.org/tsconfig",
+	"display": "Next.js",
+	"extends": "./base.json",
+	"compilerOptions": {
+		"declaration": false,
+		"declarationMap": false,
+		"strictNullChecks": true,
+		"jsx": "preserve",
+		"plugins": [{ "name": "next" }]
+	},
+	"include": ["next-env.d.ts", "src", "*.ts", "*.mjs", ".next/types/**/*.ts"],
+	"exclude": []
+}

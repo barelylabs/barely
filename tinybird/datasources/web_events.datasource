@@ -1,0 +1,34 @@
+SCHEMA >
+    `workspaceId` String `json:$.workspaceId`,
+    `sessionId` String `json:$.sessionId`,
+    `href` String `json:$.href`,
+    `assetId` String `json:$.assetId`,    
+    `domain` String `json:$.domain`,
+    `key` String `json:$.key`,
+    `timestamp` DateTime `json:$.timestamp`,
+    `type` String `json:$.type`,
+    `referer` String `json:$.referer`,
+    `referer_url` String `json:$.referer_url`,
+    `city` String `json:$.city`,
+    `country` String `json:$.country`,
+    `latitude` String `json:$.latitude`,
+    `longitude` String `json:$.longitude`,
+    `region` String `json:$.region`,
+    `ua` String `json:$.ua`,
+    `browser` String `json:$.browser`,
+    `browser_version` String `json:$.browser_version`,
+    `engine` String `json:$.engine`,
+    `engine_version` String `json:$.engine_version`,
+    `os` String `json:$.os`,
+    `os_version` String `json:$.os_version`,
+    `device` String `json:$.device`,
+    `device_vendor` String `json:$.device_vendor`,
+    `device_model` String `json:$.device_model`,
+    `cpu_architecture` String `json:$.cpu_architecture`,
+    `bot` UInt8 `json:$.bot`,
+    `reportedToMeta` String `json:$.reportedToMeta`,
+    `reportedToTiktok` String `json:$.reportedToTiktok`
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYear(timestamp)"
+ENGINE_SORTING_KEY "timestamp, workspaceId, assetId"

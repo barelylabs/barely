@@ -1,5 +1,0 @@
-{
-	"extends": "@barely/config/tsconfig.base.json",
-	"include": ["index.ts"],
-	"exclude": ["node_modules"]
-}

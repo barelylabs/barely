@@ -1,0 +1,14 @@
+{
+	"name": "@barely/tsconfig",
+	"version": "0.1.0",
+	"license": "MIT",
+	"files": [
+		"./base.js",
+		"./nextjs.js",
+		"./react.js"
+	],
+	"devDependencies": {
+		"eslint": "^8.56.0",
+		"typescript": "^5.3.3"
+	}
+}
