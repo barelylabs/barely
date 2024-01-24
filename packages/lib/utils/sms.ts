@@ -1,4 +1,4 @@
-import env from "../env";
+import { env } from "../env";
 
 const accountSid = env.TWILIO_ACCOUNT_SID;
 const authToken = env.TWILIO_AUTH_TOKEN;

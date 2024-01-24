@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import env from "../env";
+import { env } from "../env";
 import { zPost } from "./zod-fetch";
 
 export const log = async ({

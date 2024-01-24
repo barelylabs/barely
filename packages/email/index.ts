@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { convert } from "html-to-text";
 import pretty from "pretty";
 
-import env from "./env";
+import { env } from "./env";
 
 interface SendEmailProps {
   to: string;

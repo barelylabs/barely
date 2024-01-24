@@ -1,14 +1,6 @@
-import { allClientEnvSchema, allServerEnvSchema, zEnv } from "@barely/env";
-import { z } from "zod";
+import { allClientEnvKeys, allServerEnvKeys, zEnv } from "@barely/env";
 
-const serverEnvSchema = allServerEnvSchema;
-const clientEnvSchema = allClientEnvSchema;
-
-const env = zEnv({ clientEnvSchema, serverEnvSchema });
-
-export const clientEnv = zEnv({
-  clientEnvSchema: clientEnvSchema,
-  serverEnvSchema: z.object({}),
+export const { env, clientEnv } = zEnv({
+  clientEnvKeys: allClientEnvKeys,
+  serverEnvKeys: allServerEnvKeys,
 });
-
-export default env;

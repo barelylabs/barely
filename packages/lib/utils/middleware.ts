@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { userAgent } from "next/server";
 import { ipAddress } from "@vercel/edge";
 
-import env from "../env";
+import { env } from "../env";
 import { getRandomGeoData } from "../server/link.constants";
 import {
   nextGeoSchema,

@@ -1,11 +1,6 @@
-import { allClientEnvSchema, allServerEnvSchema, zEnv } from "@barely/env";
+import { allClientEnvKeys, zEnv } from "@barely/env";
 
-const serverEnvSchema = allServerEnvSchema.pick({
-  RESEND_API_KEY: true,
+export const { env } = zEnv({
+  clientEnvKeys: allClientEnvKeys,
+  serverEnvKeys: ["RESEND_API_KEY"],
 });
-
-const clientEnvSchema = allClientEnvSchema;
-
-const env = zEnv({ serverEnvSchema, clientEnvSchema });
-
-export default env;

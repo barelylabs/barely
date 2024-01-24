@@ -20,7 +20,7 @@ import { Icon } from "@barely/ui/elements/icon";
 // import { APP_BASE_URL } from "@barely/utils/constants";
 import { signOut } from "next-auth/react";
 
-import env from "~/env";
+import { env } from "~/env";
 import { UserAvatar } from "./user-avatar";
 
 // export function UserAccountNav({ user }: UserAccountNavProps) {

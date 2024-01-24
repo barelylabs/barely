@@ -9,7 +9,7 @@ import { z } from "zod";
 import type { SessionUser } from "./auth";
 import type { Track } from "./track.schema";
 import type { Workspace } from "./workspace.schema";
-import env from "../env";
+import { env } from "../env";
 // import { APP_BASE_URL } from "../utils/constants";
 
 import { convertToHandle } from "../utils/handle";

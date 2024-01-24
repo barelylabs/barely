@@ -3,7 +3,7 @@ import { db } from "@barely/server/db";
 import { handleStripeCheckoutSessionComplete } from "@barely/server/stripe.fns";
 import Stripe from "stripe";
 
-import env from "~/env";
+import { env } from "~/env";
 
 const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
   apiVersion: "2022-11-15",

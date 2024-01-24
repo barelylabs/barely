@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { parse } from "node-html-parser";
 
 import type { Link, LinkMetaTags } from "../server/link.schema";
-import env from "../env";
+import { env } from "../env";
 import {
   ccTLDs,
   GOOGLE_FAVICON_URL,

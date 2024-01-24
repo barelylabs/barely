@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { eq, or } from "drizzle-orm";
 import { z } from "zod";
 
-import env from "../env";
+import { env } from "../env";
 import { newId } from "../utils/id";
 import {
   getAppAndAppRouteFromUrl,

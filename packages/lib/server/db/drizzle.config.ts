@@ -1,7 +1,7 @@
 import type { Config } from "drizzle-kit";
 import { z } from "zod";
 
-// import env from "../../env";
+// import { env } from "../../env";
 
 const DATABASE_URL = z.string().url().parse(process.env.DATABASE_URL);
 

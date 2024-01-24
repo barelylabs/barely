@@ -1,7 +1,7 @@
 import Pusher from "pusher-http-edge";
 
 import type { ChannelName, EventData, EventName } from "./pusher-client";
-import env from "../env";
+import { env } from "../env";
 
 export const pusherServer = new Pusher({
   appId: env.NEXT_PUBLIC_PUSHER_APP_ID,

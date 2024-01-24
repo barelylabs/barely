@@ -1,7 +1,6 @@
 import { generateOpenApiDocument } from "trpc-openapi";
 
-import env from "../../env";
-// import { APP_BASE_URL } from "../../utils/constants";
+import { env } from "../../env";
 import { edgeRouter } from "./router.edge";
 
 /* 👇 */

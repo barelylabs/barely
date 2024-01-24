@@ -1,4 +1,4 @@
-import env from "../env";
+import { env } from "../env";
 import { raise } from "./raise";
 
 export function absoluteUrl(site: "app" | "link" | "www", path: string) {

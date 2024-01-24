@@ -1,7 +1,7 @@
 import { atomWithStorage } from "jotai/utils";
 import Pusher from "pusher-js";
 
-import env from "../env";
+import { env } from "../env";
 
 let pusher: Pusher | undefined;
 

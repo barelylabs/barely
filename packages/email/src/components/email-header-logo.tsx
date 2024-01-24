@@ -1,9 +1,7 @@
 import * as React from "react";
 import { Img } from "@react-email/img";
 
-import env from "../../env";
-
-// import env from '~/env';
+import { env } from "../../env";
 
 export function getBaseUrl(devPort?: string) {
   if (typeof window !== "undefined") {

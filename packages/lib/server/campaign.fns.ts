@@ -13,7 +13,7 @@ import type {
   InsertCampaign,
 } from "./campaign.schema";
 import type { Db } from "./db";
-import env from "../env";
+import { env } from "../env";
 // import { APP_BASE_URL } from "../utils/constants";
 
 import { newId } from "../utils/id";

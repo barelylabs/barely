@@ -3,7 +3,7 @@ import NextAuth from "next-auth";
 
 import type { User as DbUser, User_To_Workspace } from "../user.schema";
 import type { Workspace } from "../workspace.schema";
-import env from "../../env";
+import { env } from "../../env";
 import { db } from "../db";
 import { NeonAdapter } from "./auth.adapter";
 import { generateVerificationToken, sendLoginEmail } from "./auth.fns";

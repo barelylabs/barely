@@ -1,7 +1,7 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
-import env from "../env";
+import { env } from "../env";
 
 // Initiate Redis instance by connecting to REST URL
 export const redis = new Redis({

@@ -4,7 +4,7 @@ import * as r from "remeda";
 import { z } from "zod";
 
 import type { SpotifyTrackOption } from "./spotify.schema";
-import env from "../env";
+import { env } from "../env";
 import { privateProcedure, publicProcedure, router } from "./api";
 import { ProviderAccounts } from "./provider-account.sql";
 import { searchSpotify } from "./spotify.endpts.search";
