@@ -7,6 +7,7 @@ on:
     workflows: ["CI"]
     types:
       - completed
+  merge_group:
 
 jobs:
   #/////////////////#
@@ -134,11 +135,15 @@ jobs:
           vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
           vercel link --cwd apps/app --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
 
+      - name: Get Current Deployment ID
+        id: current-deployment-id
+        run:
+
       - name: Pull Vercel -- app
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --cwd apps/app --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build Project Artifacts -- app
-        run: turbo build:vercel --filter=@barely/app --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: turbo build:vercel --filter=@barely/app --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy to Vercel -- app
         id: deploy-app
@@ -183,10 +188,10 @@ jobs:
           vercel link --cwd apps/link --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Pull Vercel -- link
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --cwd apps/link --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build Project Artifacts -- link
-        run: turbo build:vercel --filter=@barely/link --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: turbo build:vercel --filter=@barely/link --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy to Vercel -- link
         id: deploy-link
@@ -205,6 +210,8 @@ jobs:
   # 🚨 ROLLBACK APPS (IF ANY FAIL) #
   #/////////////////////////////////
 
+  # ref: https://dev.to/philw_/using-vercels-instant-rollback-feature-in-your-own-cicd-pipeline-57oi
+
   rollback-app:
     name: Rollback app if any deployments fail
     needs: [app-deploy, link-deploy]
@@ -219,7 +226,10 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Rollback app
-        run: vercel rollback https://app.barely.io --token=${{ secrets.VERCEL_TOKEN }} --scope=barelylabs
+        run: |
+          ROLLBACK_DEPLOYMENT_ID=$(curl -s "https://api.vercel.com/v6/deployments?teamId=${{ secrets.VERCEL_TEAM_ID }}&projectId=${{ secrets.VERCEL_APP_PROJECT_ID}}&limit=2&rollbackCandidate=true&state=READY&target=production" -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | jq -r '.deployments[1].uid')
+          echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
+          vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
 
   rollback-link:
     name: Rollback link if any deployments fail
@@ -235,7 +245,10 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Rollback link
-        run: vercel rollback https://link.barely.io --token=${{ secrets.VERCEL_TOKEN }} --scope=barelylabs
+        run: |
+          ROLLBACK_DEPLOYMENT_ID=$(curl -s "https://api.vercel.com/v6/deployments?teamId=${{ secrets.VERCEL_TEAM_ID }}&projectId=${{ secrets.VERCEL_LINK_PROJECT_ID}}&limit=2&rollbackCandidate=true&state=READY&target=production" -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | jq -r '.deployments[1].uid')
+          echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
+          vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
 
   #/////////////#
   # 🧹 CLEAN UP #
