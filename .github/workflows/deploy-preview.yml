@@ -305,6 +305,7 @@ jobs:
             ## apps
             :iphone: :rocket: :: ${{ needs.app-deploy.outputs.preview_url }}
             :iphone: :mag: :: ${{ needs.app-deploy.outputs.inspect_url }}
+
             :link: :rocket: :: ${{ needs.link-deploy.outputs.preview_url }}
             :link: :mag: :: ${{ needs.link-deploy.outputs.inspect_url }}
             ## dbs
