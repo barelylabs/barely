@@ -1,37 +1,14 @@
 {
-  "css.lint.unknownAtRules": "ignore",
-
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
-  },
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnSave": true,
-
-  "eslint.rules.customizations": [{ "rule": "*", "severity": "warn" }],
-  "eslint.workingDirectories": [
-    { "pattern": "apps/*/" },
-    { "pattern": "packages/*/" }
-  ],
-
-  "files.autoSave": "off",
-  "files.autoSaveDelay": 5000,
-
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "typescript.preferences.importModuleSpecifier": "non-relative",
-  "typescript.preferences.autoImportFileExcludePatterns": [
-    "@paralleldrive/cuid2",
-    "nanoid",
-    "next/router.d.ts",
-    "next/dist/client/router.d.ts",
-    "@barely/email/src/primitives"
-  ],
-
-  "tailwindCSS.experimental.classRegex": [
-    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
-    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
-  ],
-  "[python]": {
-    "editor.defaultFormatter": "ms-python.black-formatter"
-  },
-  "tinybird.dataProjectSubdir": "tinybird"
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": true
+	},
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.formatOnSave": true,
+	"eslint.rules.customizations": [{ "rule": "*", "severity": "warn" }],
+	"files.autoSave": "off",
+	"files.autoSaveDelay": 5000,
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"tailwindCSS.experimental.classRegex": [
+		["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+	]
 }

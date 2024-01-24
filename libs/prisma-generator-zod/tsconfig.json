@@ -1,0 +1,22 @@
+{
+	"compilerOptions": {
+		"target": "es2020",
+		"module": "esnext",
+		"strict": true,
+		// interop between ESM and CJS modules. Recommended by TS
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"moduleResolution": "node",
+		"skipLibCheck": true,
+		"noImplicitAny": true,
+		"resolveJsonModule": true,
+		"noErrorTruncation": true,
+		// linter checks for common issues
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+		// noUnused* overlap with @typescript-eslint/no-unused-vars, can disable if duplicative
+		"noUnusedLocals": true,
+		"noUnusedParameters": true
+	},
+	"exclude": ["examples", "test/functional/*/{prisma,actual}", "test/usage/usage.ts"]
+}
