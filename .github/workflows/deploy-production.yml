@@ -7,7 +7,6 @@ on:
     workflows: ["CI"]
     types:
       - completed
-  merge_group:
 
 jobs:
   #/////////////////#
