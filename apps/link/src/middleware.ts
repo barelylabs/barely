@@ -1,107 +1,127 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { closestDbConnection, usEast1_dev } from '@barely/db/kysely';
+import type { SQL } from "drizzle-orm";
+import type { NextFetchEvent, NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { db } from "@barely/lib/server/db/index";
+import { recordLinkClick } from "@barely/lib/server/event.fns";
+import { Links } from "@barely/lib/server/link.sql";
+import { parseLink } from "@barely/lib/server/middleware/utils";
+// import { LINK_BASE_URL, WWW_BASE_URL } from "@barely/lib/utils/constants";
+import {
+  detectBot,
+  parseGeo,
+  parseIp,
+  parseReferer,
+  parseUserAgent,
+} from "@barely/lib/utils/middleware";
+import { sqlAnd } from "@barely/lib/utils/sql";
+import { absoluteUrl } from "@barely/lib/utils/url";
+import { eq, isNull } from "drizzle-orm";
 
-import { visitorSession, zFetch } from '@barely/utils/edge';
-import { linkAnalyticsSchema } from '@barely/schema/analytics/link';
-import { z } from 'zod';
+import type { RecordClickProps } from "@barely/lib/server/event.fns";
+import type { LinkAnalyticsProps } from "@barely/lib/server/link.schema";
+
+import { env } from "~/env";
 
 export const config = {
-	matcher: ['/((?!api|mobile|_next|favicon|logos|sitemap|atom|404|500).*)'],
+  matcher: ["/((?!api|mobile|_next|favicon|logos|sitemap|atom|404|500).*)"],
 };
 
-type AnalyticsInput = z.infer<typeof linkAnalyticsSchema>;
+export async function middleware(req: NextRequest, ev: NextFetchEvent) {
+  const url = req.nextUrl;
+  const linkProps = parseLink(req);
 
-export async function middleware(req: NextRequest) {
-	console.log('middleware path => ', req.nextUrl.pathname);
+  //* 🧬 parse the incoming request *//
 
-	//* 🧬 parse the incoming request *//
-	const { isLocal, origin, handle, slug, app, appRoute, appId, pathname } =
-		visitorSession.getPathParams(req);
+  if (
+    linkProps.linkClickType === "transparentLinkClick" &&
+    !linkProps.handle &&
+    !linkProps.app
+  )
+    return NextResponse.rewrite(`${env.NEXT_PUBLIC_WWW_BASE_URL}/link`);
 
-	if (!handle && pathname.length === 1) return; // redirect to barely.io/link?
-	if (handle && pathname.length === 1)
-		return NextResponse.redirect('https://barely.io/link');
-	if (!handle || pathname.length === 1) return NextResponse.rewrite(`${origin}/404`);
+  if (linkProps.linkClickType === "transparentLinkClick" && !linkProps.handle)
+    return NextResponse.rewrite(`${env.NEXT_PUBLIC_LINK_BASE_URL}/404`);
 
-	//* 🔎 get link data from db (planetscale serverless + kysely) *//
-	const edgeDb = isLocal
-		? usEast1_dev
-		: closestDbConnection(req.geo?.longitude ?? '0', req.geo?.latitude ?? '0');
+  let where: SQL | undefined = undefined;
 
-	const eqOrIs = (value: any) => (value ? '=' : 'is');
+  if (linkProps.linkClickType === "transparentLinkClick") {
+    if (!linkProps.handle && !linkProps.app)
+      // return NextResponse.rewrite(`${WWW_BASE_URL}/link`);
+      return NextResponse.rewrite(absoluteUrl("www", "/link"));
 
-	const link = await edgeDb
-		.selectFrom('Link')
-		.select(['id', 'url', 'androidScheme', 'appleScheme', 'teamId'])
-		.where('handle', '=', handle)
-		.where('slug', eqOrIs(slug), slug)
-		.where('app', eqOrIs(app), app)
-		.where('appRoute', eqOrIs(appRoute), appRoute)
-		.where('appId', eqOrIs(appId), appId)
-		.executeTakeFirst();
+    // if (!linkProps.handle) return NextResponse.rewrite(`${LINK_BASE_URL}/404`);
+    if (!linkProps.handle)
+      return NextResponse.rewrite(absoluteUrl("link", "/404"));
 
-	//* 🚧 handle route errors 🚧  *//
-	if (!link || !link.url) return NextResponse.rewrite(`${origin}/404`);
+    where = sqlAnd([
+      eq(Links.handle, linkProps.handle),
+      linkProps.app ? eq(Links.app, linkProps.app) : isNull(Links.app),
+      linkProps.appRoute
+        ? eq(Links.appRoute, linkProps.appRoute)
+        : isNull(Links.appRoute),
+    ]);
+  } else if (linkProps.linkClickType === "shortLinkClick") {
+    where = sqlAnd([
+      eq(Links.domain, linkProps.domain),
+      eq(Links.key, url.pathname.replace("/", "")),
+    ]);
+  }
 
-	//* 📈 report event to analytics + remarketing *//
-	const { ip, geo } = req;
-	const { platform, ...deviceProps } = visitorSession.getDeviceData(req);
-	const { browser, device, os, cpu, isBot, ua } = deviceProps;
+  // if (!where) return NextResponse.rewrite(`${LINK_BASE_URL}/404`);
+  if (!where) return NextResponse.rewrite(absoluteUrl("link", "/404"));
 
-	const analyticsInput = {
-		linkId: link.id,
-		teamId: link.teamId,
-		url: req.nextUrl.href,
-		// visitor info
-		ip: isLocal ? process.env.VISITOR_IP : ip ?? '',
-		ua: isLocal ? process.env.VISITOR_UA : ua,
-		referrer: req.referrer,
-		...geo,
-		browserName: browser.name,
-		browserVersion: browser.version,
-		cpu: cpu.architecture,
-		deviceModel: device.model,
-		deviceType: device.type,
-		deviceVendor: device.vendor,
-		isBot,
-		osName: os.name,
-		osVersion: os.version,
-	} satisfies AnalyticsInput;
+  const link: LinkAnalyticsProps | undefined =
+    await db.http.query.Links.findFirst({
+      where,
+      columns: {
+        // for analytics
+        id: true,
+        workspaceId: true,
+        domain: true,
+        key: true,
+        // for routing
+        url: true,
+        androidScheme: true,
+        appleScheme: true,
+        // remarketing
+        remarketing: true,
+        // custom meta tags
+        customMetaTags: true,
+      },
+    });
 
-	const analyticsEndpoint = new URL(`/api/analytics`, req.url);
-	zFetch.post({
-		endpoint: analyticsEndpoint.href,
-		body: analyticsInput,
-		schemaReq: linkAnalyticsSchema,
-	});
+  //* 🚧 handle route errors 🚧  *//
+  if (!link ?? !link?.url) return NextResponse.rewrite(`${origin}/404`);
 
-	//* 🧭 route based on device platform and available schemes *//
-	// ➡️ 🍏 || 🤖 || 💻
-	return NextResponse.redirect(link.url); // 👈 just doing url redirects for now
+  //* 📈 report event to analytics + remarketing *//
+  const ip = parseIp(req);
+  const geo = parseGeo(req);
+  const ua = parseUserAgent(req);
+  const isBot = detectBot(req);
 
-	// const scheme =
-	// 	platform === 'android' && androidScheme
-	// 		? androidScheme
-	// 		: platform === 'ios' && appleScheme
-	// 		? appleScheme
-	// 		: null;
-	// // ➡️ 🤖 (android scheme w/ built-in fallback url)
-	// if (platform === 'android' && androidScheme?.includes('S.browser_fallback_url'))
-	// 	return NextResponse.redirect(androidScheme);
-	// // ➡️ 💻 (web url)
-	// if (platform === 'web' || !scheme) return NextResponse.redirect(targetUrl);
-	// // ➡️ 📱 (🍏 || 🤖) (page with schema redirect & delayed fallback url)
-	// const { ogTitle, ogDescription, ogImage, favicon } = linkData;
-	// const mobileRedirectParams: MobileRedirectParams = {
-	// 	scheme: encodeURIComponent(scheme),
-	// 	fallback: encodeURIComponent(targetUrl),
-	// 	ogTitle: encodeURIComponent(ogTitle ?? ''),
-	// 	ogDescription: encodeURIComponent(ogDescription ?? ''),
-	// 	ogImage: encodeURIComponent(ogImage ?? ''),
-	// 	favicon: encodeURIComponent(favicon ?? ''),
-	// };
-	// const mobileRedirectParamsString = new URLSearchParams(mobileRedirectParams).toString();
-	// NextResponse.redirect(`${origin}/mobile/${mobileRedirectParamsString}`);
+  const { referer, referer_url } = parseReferer(req);
 
-	// //* 🎉 🎉 🎉 *//
+  const recordClickProps: RecordClickProps = {
+    // link data
+    link,
+    href: linkProps.href,
+    // visit data
+    type: linkProps.linkClickType,
+    ip,
+    geo,
+    ua,
+    isBot,
+    referer,
+    referer_url,
+  };
+
+  ev.waitUntil(recordLinkClick(recordClickProps)); // 👈 record click in background. Will continue after response is sent.
+
+  //* 🧭 route based on device platform and available schemes *//
+  // ➡️ 🍏 || 🤖 || 💻
+
+  if (isBot && link.customMetaTags)
+    return NextResponse.redirect(`/_proxy/${link.id}`); // 👈 send bots to proxy for meta tags
+
+  return NextResponse.redirect(link.url); // 👈 just doing url redirects for now
 }

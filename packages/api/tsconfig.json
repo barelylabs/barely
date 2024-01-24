@@ -1,9 +1,0 @@
-{
-	"extends": "@barely/config/tsconfig.base.json",
-	"include": [
-		"src",
-		"index.ts",
-		"transformer.ts",
-		"node_modules/@barely/auth/next-auth.d.ts"
-	]
-}

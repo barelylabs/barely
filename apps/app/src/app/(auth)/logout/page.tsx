@@ -1,16 +1,15 @@
-// import { authOptions } from '@barely/auth';
-// import { unstable_getServerSession } from 'next-auth';
-import Logout from './Logout';
+import { redirect } from "next/navigation";
+import { auth } from "@barely/server/auth";
+
+import { Logout } from "./logout";
 
 async function LogoutPage() {
-	// const session = await unstable_getServerSession(authOptions);
+  const session = await auth();
 
-	return (
-		<div>
-			{/* Logout user: {session?.user?.id}
-			<Logout session={session} /> */}
-		</div>
-	);
+  if (!session) return redirect("/login");
+
+  return <Logout />;
+  return null;
 }
 
 export default LogoutPage;
