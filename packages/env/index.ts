@@ -1,96 +1,131 @@
-import type { z } from "zod";
+import { z, ZodRawShape } from 'zod';
 
-import { clientEnvSchema, processEnv, serverEnvSchema } from "./parent-env";
+const processEnv = {
+	// CLIENT
+	NEXT_PUBLIC_APP_BASE_URL:
+		typeof window !== 'undefined'
+			? '' // browser should use relative url
+			: process.env.NODE_ENV === 'production'
+			? `https://${process.env.VERCEL_URL}` // SSR should use vercel url
+			: `http://localhost:${process.env.NEXT_PUBLIC_APP_DEV_PORT}`, // dev SSR should use localhost
 
-function safePick<
-  T extends z.ZodObject<z.ZodRawShape>,
-  K extends keyof z.infer<T>,
->(schema: T, keys: K[]) {
-  const pickObj: Record<string, true> = {};
-  keys.forEach((key) => {
-    pickObj[key as string] = true;
-  });
+	NEXT_PUBLIC_WEB_BASE_URL:
+		typeof window !== 'undefined'
+			? ''
+			: process.env.NODE_ENV === 'production'
+			? `https://${process.env.VERCEL_URL}`
+			: `http://localhost:${process.env.NEXT_PUBLIC_WEB_DEV_PORT}`,
 
-  return schema.pick(pickObj) as z.ZodObject<
-    Pick<ReturnType<T["_def"]["shape"]>, (typeof keys)[number]>,
-    "strip",
-    z.ZodTypeAny
-  >;
-}
+	NEXT_PUBLIC_LINK_BASE_URL:
+		typeof window !== 'undefined'
+			? ''
+			: process.env.NODE_ENV === 'production'
+			? `https://${process.env.VERCEL_URL}`
+			: `http://localhost:${process.env.NEXT_PUBLIC_LINK_DEV_PORT}`,
 
-export function zEnv<
-  KClient extends keyof z.infer<typeof clientEnvSchema>,
-  KServer extends keyof z.infer<typeof serverEnvSchema>,
->({
-  clientEnvKeys,
-  serverEnvKeys,
+	NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+
+	// SERVER
+	NODE_ENV: process.env.NODE_ENV,
+
+	API_USER_ID: process.env.API_USER_ID,
+	CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
+	CLERK_WEBHOOK_USER_SECRET_KEY: process.env.CLERK_WEBHOOK_USER_SECRET_KEY,
+
+	NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+	NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+
+	DATABASE_URL: process.env.DATABASE_URL,
+	DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
+	DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
+	MAGIC_SECRET_KEY: process.env.MAGIC_SECRET_KEY,
+	OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+	OPENAI_ORG_ID: process.env.OPENAI_ORG_ID,
+	POSTMARK_SERVER_API_TOKEN: process.env.POSTMARK_SERVER_API_TOKEN,
+	SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
+	SPOTIFY_CLIENT_ID: process.env.SPOTIFY_CLIENT_ID,
+	SPOTIFY_CLIENT_SECRET: process.env.SPOTIFY_CLIENT_SECRET,
+	TWILIO_ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID,
+	TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN,
+	TWILIO_PHONE_NUMBER: process.env.TWILIO_PHONE_NUMBER,
+};
+
+export const clientEnvAllSchema = z.object({
+	NEXT_PUBLIC_APP_BASE_URL: z.string(),
+	NEXT_PUBLIC_WEB_BASE_URL: z.string(),
+	NEXT_PUBLIC_LINK_BASE_URL: z.string(),
+	NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1),
+});
+
+export const serverEnvAllSchema = z.object({
+	NODE_ENV: z.enum(['development', 'test', 'production']),
+
+	API_USER_ID: z.string(),
+
+	CLERK_SECRET_KEY: z.string().min(1),
+	CLERK_WEBHOOK_USER_SECRET_KEY: z.string().min(1),
+
+	// EXTERNAL
+	DATABASE_URL: z.string().url(),
+	DISCORD_CLIENT_ID: z.string(),
+	DISCORD_CLIENT_SECRET: z.string(),
+	MAGIC_SECRET_KEY: z.string(),
+	OPENAI_API_KEY: z.string(),
+	OPENAI_ORG_ID: z.string(),
+	POSTMARK_SERVER_API_TOKEN: z.string(),
+	SENDGRID_API_KEY: z.string(),
+	SPOTIFY_CLIENT_ID: z.string(),
+	SPOTIFY_CLIENT_SECRET: z.string(),
+	TWILIO_ACCOUNT_SID: z.string(),
+	TWILIO_AUTH_TOKEN: z.string(),
+	TWILIO_PHONE_NUMBER: z.string(),
+});
+
+export function zEnv<TClient extends ZodRawShape, TServer extends ZodRawShape>({
+	clientEnvSchema,
+	serverEnvSchema,
 }: {
-  clientEnvKeys: KClient[];
-  serverEnvKeys: KServer[];
+	clientEnvSchema: z.ZodObject<TClient>;
+	serverEnvSchema: z.ZodObject<TServer>;
 }) {
-  const isServer = typeof window === "undefined";
+	const isServer = typeof window === 'undefined';
 
-  const pickedClientEnvSchema = safePick(clientEnvSchema, clientEnvKeys);
-  const pickedServerEnvSchema = safePick(serverEnvSchema, serverEnvKeys);
+	const merged = serverEnvSchema.merge(clientEnvSchema);
+	const parsed = isServer
+		? merged.safeParse(processEnv)
+		: clientEnvSchema.safeParse(processEnv);
 
-  const merged = pickedServerEnvSchema.merge(pickedClientEnvSchema);
+	// console.log('processEnv => ', processEnv);
+	// console.log('isServer => ', isServer);
 
-  const parsed = isServer
-    ? merged.safeParse(processEnv)
-    : pickedClientEnvSchema.safeParse(processEnv);
+	if (!parsed?.success) {
+		console.error(
+			'❌ Invalid environment variables:\n',
+			...formatErrors(parsed.error.format()),
+		);
+		throw new Error('Invalid environment variables');
+	}
 
-  if (!parsed?.success) {
-    console.log("error => ", parsed.error);
-    console.log("processEnv => ", processEnv);
+	const env = new Proxy(parsed.data, {
+		get(target, prop) {
+			if (typeof prop !== 'string') return undefined;
+			if (!isServer && !prop.startsWith('NEXT_PUBLIC_'))
+				throw new Error(
+					`❌ Attempted to access server-side environment variable '${prop}' on the client`,
+				);
 
-    console.error(
-      "❌ Invalid environment variables ->\n",
-      ...formatErrors(parsed.error.format()),
-    );
-    throw new Error("Invalid environment variables");
-  }
+			if (prop in target) return target[prop as keyof typeof target];
 
-  type ServerEnv = Pick<
-    z.infer<typeof merged>,
-    | Extract<KServer, keyof z.infer<typeof merged>>
-    | Extract<KClient, keyof z.infer<typeof merged>>
-  >;
+			return undefined;
+		},
+	}) as z.infer<typeof merged>; // not ideal to cast it this way, but should be typesafe due to isServer guard above
 
-  type ClientEnv = Pick<
-    z.infer<typeof merged>,
-    Extract<KClient, keyof z.infer<typeof merged>>
-  >;
-
-  const env = new Proxy(parsed.data, {
-    get(target, prop: KClient | KServer) {
-      if (typeof prop !== "string") return undefined;
-      if (!isServer && !prop.startsWith("NEXT_PUBLIC_"))
-        throw new Error(
-          `❌ Attempted to access server-side environment variable '${prop}' on the client`,
-        );
-
-      if (prop in target) return target[prop as keyof typeof target];
-
-      return undefined;
-    },
-  }) as ServerEnv; // not ideal to cast it this way, but should be typesafe due to isServer guard above
-
-  return { clientEnv: env as ClientEnv, env: env };
+	return env;
 }
 
-const formatErrors = (
-  errors: z.ZodFormattedError<Map<string, string>, string>,
-) =>
-  Object.entries(errors)
-    .map(([name, value]) => {
-      if (value && "_errors" in value)
-        return `${name}: ${value._errors.join(", ")}\n`;
-    })
-    .filter(Boolean);
-
-export const allClientEnvKeys = Object.keys(
-  clientEnvSchema.shape,
-) as (keyof z.infer<typeof clientEnvSchema>)[];
-export const allServerEnvKeys = Object.keys(
-  serverEnvSchema.shape,
-) as (keyof z.infer<typeof serverEnvSchema>)[];
+const formatErrors = (errors: z.ZodFormattedError<Map<string, string>, string>) =>
+	Object.entries(errors)
+		.map(([name, value]) => {
+			if (value && '_errors' in value) return `${name}: ${value._errors.join(', ')}\n`;
+		})
+		.filter(Boolean);
