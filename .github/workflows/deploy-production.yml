@@ -5,9 +5,9 @@ on:
     branches: ["main"]
 
 jobs:
-  #/////////////////#
-  # 👾 GIT METADATA #
-  #/////////////////#
+  #/////////////////////
+  # 👾 GIT METADATA 👾 #
+  #////////////////////
 
   git-meta:
     name: git metadata
@@ -59,9 +59,9 @@ jobs:
       github_commit_ref: ${{ steps.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ steps.git-meta.outputs.vercel_git_metadata }}
 
-  #/////////////////#
-  # 🐘 NEON DB:PUSH #
-  #/////////////////#
+  #/////////////////////
+  # 🐘 NEON DB:PUSH 🐘 #
+  #////////////////////
 
   neon-prod:
     name: neon prod
@@ -101,11 +101,11 @@ jobs:
     outputs:
       neon_branch_id: ${{ steps.get-neon-branch.outputs.branch_id }}
 
-  #//////////////////////#
-  # 📱 DEPLOY APP - PROD #
-  #//////////////////////#
+  #////////////////////////////////////////////////////////////
+  # 📱 DEPLOY APP -- PROD (Not Aliasing to Production Yet) 📱 #
+  #///////////////////////////////////////////////////////////
 
-  app-deploy:
+  deploy-app:
     name: vercel prod - app.barely.io
     needs: [neon-prod, git-meta]
     runs-on: ubuntu-latest
@@ -139,23 +139,23 @@ jobs:
         run: turbo build:vercel --filter=@barely/app --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy to Vercel -- app
-        id: deploy-app
+        id: deploy
         run: |
-          vercel deploy --cwd apps/app --prebuilt --prod ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --cwd apps/app --prebuilt --prod --skip-domain ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }}
           inspect=$(vercel inspect $https://app.barely.io --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
           deployment_id=$(echo "$inspect" | grep -m 1 '^    id' | awk '{print $NF}' | cut -d'_' -f 2-)
           inspect_url="https://vercel.com/barelylabs/app/$deployment_id"
           echo "inspect_url=$inspect_url" >> $GITHUB_OUTPUT
 
     outputs:
-      deployment_id: ${{ steps.deploy-app.outputs.deployment_id }}
-      inspect_url: ${{ steps.deploy-app.outputs.inspect_url }}
+      deployment_id: ${{ steps.deploy.outputs.deployment_id }}
+      inspect_url: ${{ steps.deploy.outputs.inspect_url }}
 
-  #////////////////#
-  # 🔗 DEPLOY LINK #
-  #////////////////#
+  #/////////////////////////////////////////////////////////////
+  # 🔗 DEPLOY LINK --PROD  (Not Aliasing to Production Yet) 🔗 #
+  #////////////////////////////////////////////////////////////
 
-  link-deploy:
+  deploy-link:
     name: vercel prod - link.barely.io
     needs: [neon-prod, git-meta]
     runs-on: ubuntu-latest
@@ -189,27 +189,61 @@ jobs:
         run: turbo build:vercel --filter=@barely/link --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy to Vercel -- link
-        id: deploy-link
+        id: deploy
         run: |
-          vercel deploy --cwd apps/link --prebuilt --prod ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --cwd apps/link --prebuilt --prod --skip-domain ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }}
           inspect=$(vercel inspect $https://link.barely.io --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
           deployment_id=$(echo "$inspect" | grep -m 1 '^    id' | awk '{print $NF}' | cut -d'_' -f 2-)
           inspect_url="https://vercel.com/barelylabs/link/$deployment_id"
           echo "inspect_url=$inspect_url" >> $GITHUB_OUTPUT
 
     outputs:
-      deployment_id: ${{ steps.deploy-link.outputs.deployment_id }}
-      inspect_url: ${{ steps.deploy-link.outputs.inspect_url }}
+      deployment_id: ${{ steps.deploy.outputs.deployment_id }}
+      inspect_url: ${{ steps.deploy.outputs.inspect_url }}
 
-  #/////////////////////////////////
-  # 🚨 ROLLBACK APPS (IF ANY FAIL) #
-  #/////////////////////////////////
+  #///////////////////////////////////////////
+  # 🚀 PROMOTE APPS TO PRODUCTION DOMAINS 🚀 #
+  #//////////////////////////////////////////
+
+  promote-app:
+    name: Promote app to production
+    needs: [deploy-app, deploy-link]
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
+    steps:
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Promote app to production
+        run: vercel promote ${{ needs.deploy-app.outputs.deployment_id }} --token=${{ secrets.VERCEL_TOKEN }}
+
+  promote-link:
+    name: Promote link to production
+    needs: [deploy-app, deploy-link]
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
+    steps:
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Promote link to production
+        run: vercel promote ${{ needs.deploy-link.outputs.deployment_id }} --token=${{ secrets.VERCEL_TOKEN }}
+
+  #///////////////////////////////////////////////
+  # 🚨 ROLLBACK APPS (IF ANY PROMOTION FAILS) 🚨 #
+  #//////////////////////////////////////////////
 
   # ref: https://dev.to/philw_/using-vercels-instant-rollback-feature-in-your-own-cicd-pipeline-57oi
 
   rollback-app:
     name: Rollback app if any deployments fail
-    needs: [app-deploy, link-deploy]
+    needs: [promote-app, promote-link]
     if: ${{ failure() }}
     runs-on: ubuntu-latest
     env:
@@ -228,7 +262,7 @@ jobs:
 
   rollback-link:
     name: Rollback link if any deployments fail
-    needs: [app-deploy, link-deploy]
+    needs: [promote-app, promote-link]
     if: ${{ failure() }}
     runs-on: ubuntu-latest
     env:
@@ -250,7 +284,7 @@ jobs:
   #/////////////#
 
   delete-neon-branch:
-    needs: [neon-prod, app-deploy, link-deploy]
+    needs: [neon-prod, promote-app, promote-link]
     runs-on: ubuntu-latest
     steps:
       - name: Delete Neon Branch
