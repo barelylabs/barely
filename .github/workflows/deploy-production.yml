@@ -1,7 +1,9 @@
 name: Deploy Production
 
 on:
-  pull_request:
+  pull_request_target:
+    branches:
+      - main    
   merge_group:
   workflow_run:
     workflows: ["CI"]
@@ -133,10 +135,6 @@ jobs:
           pnpm i -g vercel@latest
           vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
           vercel link --cwd apps/app --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Get Current Deployment ID
-        id: current-deployment-id
-        run:
 
       - name: Pull Vercel -- app
         run: vercel pull --cwd apps/app --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
