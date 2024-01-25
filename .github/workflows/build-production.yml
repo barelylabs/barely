@@ -35,7 +35,9 @@ jobs:
           vercel link --cwd apps/app --scope=barelylabs --yes --token=$VERCEL_TOKEN
 
       - name: Pull Vercel -- app
-        run: vercel pull --cwd apps/app --yes --environment=production --token=$VERCEL_TOKEN
+        run:
+          vercel pull --cwd apps/app --yes --environment=production --token=$VERCEL_TOKEN
+          cp ./apps/app/.vercel/.env.production.local .env
 
       - name: Build app
         run: turbo build:vercel --filter=@barely/app --token=$VERCEL_TOKEN
@@ -64,7 +66,9 @@ jobs:
           vercel link --cwd apps/link --scope=barelylabs --yes --token=$VERCEL_TOKEN
 
       - name: Pull Vercel -- link
-        run: vercel pull --cwd apps/link --yes --environment=production --token=$VERCEL_TOKEN
+        run: |
+          vercel pull --cwd apps/link --yes --environment=production --token=$VERCEL_TOKEN
+          cp ./apps/link/.vercel/.env.production.local .env
 
       - name: Build link
         run: turbo build:vercel --filter=@barely/link --token=$VERCEL_TOKEN
