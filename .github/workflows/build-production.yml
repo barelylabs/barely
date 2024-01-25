@@ -1,4 +1,4 @@
-name: Deploy Production
+name: Build Production
 
 on:
   merge_group:
