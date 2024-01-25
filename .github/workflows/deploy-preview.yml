@@ -132,7 +132,7 @@ jobs:
         run: |
           npm install --global vercel@latest
 
-      - name: Update Vercel Environment Variables for App Preview Branch
+      - name: Update Vercel Env Variables for App Preview Branch
         run: |
           echo "DATABASE_URL: $DATABASE_URL"
           echo "DATABASE_POOL_URL: $DATABASE_POOL_URL"
@@ -140,15 +140,15 @@ jobs:
           branch_name=${{ needs.git-meta.outputs.git_branch_name }}
 
           if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
-            vercel env rm DATABASE_URL preview pg --yes --token=${{ secrets.VERCEL_TOKEN }}
+            vercel env rm DATABASE_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
           fi
 
           if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
-            vercel env rm DATABASE_POOL_URL preview pg --yes --token=${{ secrets.VERCEL_TOKEN }}
+            vercel env rm DATABASE_POOL_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
           fi
 
-          echo $DATABASE_URL | vercel env add DATABASE_URL preview ${{ needs.git-meta.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
-          echo $DATABASE_POOL_URL | vercel env add DATABASE_POOL_URL preview ${{ needs.git-meta.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
+          echo $DATABASE_URL | vercel env add DATABASE_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
+          echo $DATABASE_POOL_URL | vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Update Vercel Env Variables for Link Preview Branch
         env:
