@@ -66,6 +66,7 @@ jobs:
           vercel link --cwd apps/link --scope=barelylabs --yes --token=$VERCEL_TOKEN
 
       - name: Pull Vercel -- link
+
         run: |
           vercel pull --cwd apps/link --yes --environment=production --token=$VERCEL_TOKEN
           cp ./apps/link/.vercel/.env.production.local .env
