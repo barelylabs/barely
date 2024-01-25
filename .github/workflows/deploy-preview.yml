@@ -92,10 +92,10 @@ jobs:
       - name: Create a Neon branch
         id: create-branch
         run: |
-          output=$(neonctl branches create --project-id ${{ secrets.NEON_PROJECT_ID }} --name ${{ needs.git-meta.outputs.git_branch_name }} --api-key ${{ secrets.NEON_API_KEY }} --compute --type read_write 2>&1) || true
+          output=$(neonctl branches create --project-id ${{ secrets.NEON_PROJECT_ID }} --name ${{ needs.git-meta.outputs.git_branch_name }} --api-key ${{ secrets.NEON_API_KEY }} --compute --type read_write 2>&1) || true          
           if [[ $output == *"branch with the provided name \"${{ needs.git-meta.outputs.git_branch_name }}\" already exists"* ]]; then
             echo "A branch named \"${{ needs.git-meta.outputs.git_branch_name }}\" already exists. Using that branch for this preview deployment."
-          elif [[ -n $output ]]; then
+          elif [[ $output == *"ERROR:"* ]]; then
             echo "Unhandled error: $output" && exit 1
           fi
 

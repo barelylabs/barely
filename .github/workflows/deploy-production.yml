@@ -68,7 +68,7 @@ jobs:
   #/////////////////#
 
   neon-prod:
-    name: neon production
+    name: neon prod
     needs: [git-meta]
     permissions: write-all
     runs-on: ubuntu-latest
