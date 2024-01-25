@@ -175,7 +175,7 @@ jobs:
   #//////////////////////#
 
   app-deploy:
-    name: vercel preview - app.barely.io
+    name: vercel preview - app
     needs: [neon-preview, git-meta]
     runs-on: ubuntu-latest
     env:
@@ -232,7 +232,7 @@ jobs:
   #////////////////////////#
 
   link-deploy:
-    name: vercel preview - barely.link
+    name: vercel preview - link
     needs: [neon-preview, git-meta]
     runs-on: ubuntu-latest
     env:
