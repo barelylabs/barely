@@ -4,21 +4,28 @@ on:
   pull_request:
     branches: ["*"]
   push:
-    branches: ["main"]
+    branches: [main]
   merge_group:
+    types: [checks_requested]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
-# You can leverage Vercel Remote Caching with Turbo to speed up your builds
-# @link https://turborepo.org/docs/core-concepts/remote-caching#remote-caching-on-vercel-builds
 env:
   FORCE_COLOR: 3
   TURBO_TEAM: ${{ secrets.VERCEL_TEAM_ID }}
   TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
 jobs:
+  ci--see_status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Immediate success"
+        run: true
+
+  # Check on every pull request
+
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -59,3 +66,36 @@ jobs:
 
       - name: Typecheck
         run: pnpm typecheck
+
+  ci--can-enqueue:
+    needs: [lint, format, typecheck]
+    if: always() && github.event_name != 'merge_group'
+    permissions:
+      actions: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Transform outcomes
+        env:
+          NEEDS_JSON: "${{ toJson(needs) }}"
+        run: |
+          echo "ALL_SUCCESS=$(echo "$NEEDS_JSON" | jq '. | to_entries | map([.value.result == "success", .value.result == "skipped"] | any) | all')" >> $GITHUB_ENV
+
+      - name: Check outcomes
+        run: "[ $ALL_SUCCESS = true ]"
+
+  # Check on every merge queue (this could include more expensive checks)
+  ci--can-merge:
+    needs: [lint, format, typecheck]
+    if: always() && github.event_name == 'merge_group'
+    permissions:
+      actions: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Transform outcomes
+        env:
+          NEEDS_JSON: "${{ toJson(needs) }}"
+        run: |
+          echo "ALL_SUCCESS=$(echo "$NEEDS_JSON" | jq '. | to_entries | map([.value.result == "success", .value.result == "skipped"] | any) | all')" >> $GITHUB_ENV
+
+      - name: Check outcomes
+        run: "[ $ALL_SUCCESS = true ]"
