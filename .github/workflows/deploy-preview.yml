@@ -310,3 +310,18 @@ jobs:
             :link: :mag: :: ${{ needs.link-deploy.outputs.inspect_url }}
             ## dbs
             :elephant: :mag: :: https://console.neon.tech/app/projects/${{ secrets.NEON_PROJECT_ID }}/branches/${{ needs.neon-preview.outputs.neon_branch_id }}
+
+  deploy-preview--can-merge:
+    needs: [neon-preview, app-deploy, link-deploy]
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+    steps:
+      - name: Transform outcomes
+        env:
+          NEEDS_JSON: "${{ toJson(needs) }}"
+        run: |
+          echo "ALL_SUCCESS=$(echo "$NEEDS_JSON" | jq '. | to_entries | map([.value.result == "success", .value.result == "skipped"] | any) | all')" >> $GITHUB_ENV
+
+      - name: Check outcomes
+        run: "[ $ALL_SUCCESS = true ]"
