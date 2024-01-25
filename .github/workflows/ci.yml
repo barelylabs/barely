@@ -18,11 +18,11 @@ env:
   TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
 jobs:
-  # can_see_status:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: "Immediate success"
-  #       run: true
+  ci--see_status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Immediate success"
+        run: true
 
   # Check on every pull request
 

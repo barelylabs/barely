@@ -5,6 +5,12 @@ on:
     types: [checks_requested]
 
 jobs:
+  build-prod--see-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Immediate success"
+        run: true
+
   build-app:
     runs-on: ubuntu-latest
     env:
@@ -63,7 +69,7 @@ jobs:
       - name: Build link
         run: turbo build:vercel --filter=@barely/link --token=$VERCEL_TOKEN
 
-  build--can-merge:
+  build-prod--can-merge:
     needs: [build-app, build-link]
     if: always() && github.event_name == 'merge_group'
     permissions:
