@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "pnpm with-env next build",
-    "build:vercel": "pnpm with-env vercel build",
+    "build:preview": "pnpm with-env vercel build",
     "build:prod": "pnpm with-env vercel build --prod",
     "clean": "git clean -xdf .next .turbo node_modules",
     "dev": "pnpm with-env next dev -- -p 3002",

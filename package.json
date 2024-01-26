@@ -7,8 +7,8 @@
   "packageManager": "pnpm@8.14.0",
   "scripts": {
     "build": "turbo build",
-    "build:vercel": "turbo build:vercel",
-    "build:vercel:prod": "turbo build:prod",
+    "build:preview": "turbo build:preview",
+    "build:prod": "turbo build:prod",
     "clean": "git clean -xdf node_modules",
     "clean:workspaces": "turbo clean",
     "clean:all": "turbo clean && clean",

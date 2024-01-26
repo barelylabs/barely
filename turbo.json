@@ -16,8 +16,8 @@
         ".vercel/output/**"
       ]
     },
-    "build:vercel": {
-      "dependsOn": ["^build:vercel"],
+    "build:preview": {
+      "dependsOn": ["^build:preview"],
       "outputs": [
         ".next/**",
         "!.next/cache/**",
