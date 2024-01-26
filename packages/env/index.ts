@@ -40,9 +40,6 @@ export function zEnv<
     : pickedClientEnvSchema.safeParse(processEnv);
 
   if (!parsed?.success) {
-    console.log("error => ", parsed.error);
-    console.log("processEnv => ", processEnv);
-
     console.error(
       "❌ Invalid environment variables ->\n",
       ...formatErrors(parsed.error.format()),
