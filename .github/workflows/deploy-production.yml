@@ -1,8 +1,8 @@
 name: Deploy Production
 
 on:
-  push:
-    branches: ["main"]
+  merge_group:
+    types: [checks_requested]
 
 jobs:
   #/////////////////////
@@ -12,6 +12,19 @@ jobs:
   git-meta:
     name: git metadata
     runs-on: ubuntu-latest
+    outputs:
+      git_branch_name: ${{ steps.git-meta.outputs.github_commit_ref }}
+      github_commit_sha: ${{ steps.git-meta.outputs.github_commit_sha }}
+      github_commit_author_name: ${{ steps.git-meta.outputs.github_commit_author_name }}
+      github_commit_author_login: ${{ steps.git-meta.outputs.github_commit_author_login }}
+      github_deployment: ${{ steps.git-meta.outputs.github_deployment }}
+      github_org: ${{ steps.git-meta.outputs.github_org }}
+      github_repo: ${{ steps.git-meta.outputs.github_repo }}
+      github_commit_org: ${{ steps.git-meta.outputs.github_commit_org }}
+      github_commit_repo: ${{ steps.git-meta.outputs.github_commit_repo }}
+      github_commit_message: ${{ steps.git-meta.outputs.github_commit_message }}
+      github_commit_ref: ${{ steps.git-meta.outputs.github_commit_ref }}
+      vercel_git_metadata: ${{ steps.git-meta.outputs.vercel_git_metadata }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -21,7 +34,7 @@ jobs:
       - name: Git Metadata
         id: git-meta
         run: |
-          github_commit_sha="${{ github.event.before }}" | cut -c1-8 >> $GITHUB_OUTPUT       
+          github_commit_sha="${{ github.sha }}" | cut -c1-8 >> $GITHUB_OUTPUT       
           github_commit_author_login=${{ github.actor }}
           github_deployment=1
           github_org=${{ github.repository_owner }}
@@ -45,20 +58,6 @@ jobs:
           echo "github_commit_ref=$github_commit_ref" >> $GITHUB_OUTPUT
           echo "vercel_git_metadata=$vercel_git_metadata" >> $GITHUB_OUTPUT
 
-    outputs:
-      git_branch_name: ${{ steps.git-meta.outputs.github_commit_ref }}
-      github_commit_sha: ${{ steps.git-meta.outputs.github_commit_sha }}
-      github_commit_author_name: ${{ steps.git-meta.outputs.github_commit_author_name }}
-      github_commit_author_login: ${{ steps.git-meta.outputs.github_commit_author_login }}
-      github_deployment: ${{ steps.git-meta.outputs.github_deployment }}
-      github_org: ${{ steps.git-meta.outputs.github_org }}
-      github_repo: ${{ steps.git-meta.outputs.github_repo }}
-      github_commit_org: ${{ steps.git-meta.outputs.github_commit_org }}
-      github_commit_repo: ${{ steps.git-meta.outputs.github_commit_repo }}
-      github_commit_message: ${{ steps.git-meta.outputs.github_commit_message }}
-      github_commit_ref: ${{ steps.git-meta.outputs.github_commit_ref }}
-      vercel_git_metadata: ${{ steps.git-meta.outputs.vercel_git_metadata }}
-
   #/////////////////////
   # 🐘 NEON DB:PUSH 🐘 #
   #////////////////////
@@ -68,6 +67,8 @@ jobs:
     needs: [git-meta]
     permissions: write-all
     runs-on: ubuntu-latest
+    outputs:
+      neon_branch_id: ${{ steps.get-neon-branch.outputs.branch_id }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -98,15 +99,12 @@ jobs:
 
           pnpm db:push
 
-    outputs:
-      neon_branch_id: ${{ steps.get-neon-branch.outputs.branch_id }}
-
   #////////////////////////////////////////////////////////////
   # 📱 DEPLOY APP -- PROD (Not Aliasing to Production Yet) 📱 #
   #///////////////////////////////////////////////////////////
 
   deploy-app:
-    name: vercel prod - app.barely.io
+    name: deploy prod build of app to vercel
     needs: [db-push, git-meta]
     runs-on: ubuntu-latest
     env:
@@ -130,7 +128,7 @@ jobs:
           vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
           vercel link --cwd apps/app --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Pull Vercel -- app
+      - name: Pull Vercel
         run: |
           vercel pull --cwd apps/app --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
@@ -139,10 +137,10 @@ jobs:
           echo "VERCEL_URL=$VERCEL_URL" >> ./apps/app/.vercel/.env.production.local
           cp ./apps/app/.vercel/.env.production.local .env
 
-      - name: Build Project Artifacts -- app
+      - name: Build Project Artifacts
         run: turbo build:prod --filter=@barely/app --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Deploy to Vercel -- app
+      - name: Deploy to Vercel
         id: deploy
         run: |
           vercel deploy --cwd apps/app --prebuilt --prod --skip-domain ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }}
@@ -160,7 +158,7 @@ jobs:
   #////////////////////////////////////////////////////////////
 
   deploy-link:
-    name: vercel prod - link.barely.io
+    name: deploy prod build of link to vercel
     needs: [db-push, git-meta]
     runs-on: ubuntu-latest
     env:
@@ -184,7 +182,7 @@ jobs:
           vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
           vercel link --cwd apps/link --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Pull Vercel -- link
+      - name: Pull Vercel
         run: |
           vercel pull --cwd apps/link --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
@@ -193,10 +191,10 @@ jobs:
           echo "VERCEL_URL=$VERCEL_URL" >> ./apps/link/.vercel/.env.production.local
           cp ./apps/link/.vercel/.env.production.local .env
 
-      - name: Build Project Artifacts -- link
+      - name: Build Project Artifacts
         run: turbo build:prod --filter=@barely/link --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Deploy to Vercel -- link
+      - name: Deploy to Vercel
         id: deploy
         run: |
           vercel deploy --cwd apps/link --prebuilt --prod --skip-domain ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }}
@@ -209,13 +207,33 @@ jobs:
       deployment_id: ${{ steps.deploy.outputs.deployment_id }}
       inspect_url: ${{ steps.deploy.outputs.inspect_url }}
 
+  #/////////////////////////////
+  # 🔀 MERGE PR BRANCH TO MAIN 🔀
+  #/////////////////////////////
+
+  all-apps-deployed-to-prod:
+    name: All Apps Deployed to Production
+    needs: [deploy-app, deploy-link]
+    permissions:
+      actions: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Transform outcomes to JSON
+        env:
+          NEEDS_JSON: "${{ toJson(needs) }}"
+        run: |
+          echo "ALL_SUCCESS=$(echo "$NEEDS_JSON" | jq '. | to_entries | map([.value.result == "success", .value.result == "skipped"] | any) | all')" >> $GITHUB_ENV
+      - name: Check outcomes
+        run: "[ $ALL_SUCCESS = true ]"
+
   #//////////////////////////////////////////
   # 🚀 PROMOTE APPS TO PRODUCTION DOMAINS 🚀 #
   #//////////////////////////////////////////
+  # -- at a later date, we could decouple this promotion step from deploying & merging to main
 
   promote-app:
     name: Promote app to production
-    needs: [deploy-app, deploy-link]
+    needs: [all-apps-deployed-to-prod, deploy-app]
     runs-on: ubuntu-latest
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -230,7 +248,7 @@ jobs:
 
   promote-link:
     name: Promote link to production
-    needs: [deploy-app, deploy-link]
+    needs: [all-apps-deployed-to-prod, deploy-link]
     runs-on: ubuntu-latest
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
