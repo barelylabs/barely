@@ -42,8 +42,12 @@ jobs:
           vercel link --cwd apps/app --scope=barelylabs --yes --token=$VERCEL_TOKEN
 
       - name: Pull Vercel -- app
-        run:
+        run: |
           vercel pull --cwd apps/app --yes --environment=production --token=$VERCEL_TOKEN
+
+          VERCEL_URL=app.barely.io
+          sed -i '/VERCEL_URL/d' ./apps/app/.vercel/.env.production.local
+          echo "VERCEL_URL=$VERCEL_URL" >> ./apps/app/.vercel/.env.production.local
           cp ./apps/app/.vercel/.env.production.local .env
 
       - name: Build app
@@ -74,9 +78,12 @@ jobs:
           vercel link --cwd apps/link --scope=barelylabs --yes --token=$VERCEL_TOKEN
 
       - name: Pull Vercel -- link
-
         run: |
           vercel pull --cwd apps/link --yes --environment=production --token=$VERCEL_TOKEN
+
+          VERCEL_URL=barely.link
+          sed -i '/VERCEL_URL/d' ./apps/link/.vercel/.env.production.local
+          echo "VERCEL_URL=$VERCEL_URL" >> ./apps/link/.vercel/.env.production.local
           cp ./apps/link/.vercel/.env.production.local .env
 
       - name: Build link
