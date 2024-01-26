@@ -210,7 +210,7 @@ jobs:
           cp ./apps/app/.vercel/.env.preview.local .env
 
       - name: Build App Project Artifacts
-        run: turbo build:vercel --filter=@barely/app --token=${{ secrets.VERCEL_TOKEN }}
+        run: turbo build:preview --filter=@barely/app --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy App Preview to Vercel
         id: deploy-app
@@ -267,7 +267,7 @@ jobs:
           cp ./apps/link/.vercel/.env.preview.local .env
 
       - name: Build Link Project Artifacts
-        run: turbo build:vercel --filter=@barely/link --token=${{ secrets.VERCEL_TOKEN }}
+        run: turbo build:preview --filter=@barely/link --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy Link Preview to Vercel
         id: deploy-link
