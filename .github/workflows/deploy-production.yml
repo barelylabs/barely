@@ -137,10 +137,10 @@ jobs:
           VERCEL_URL=app.barely.io
           sed -i '/VERCEL_URL/d' ./apps/app/.vercel/.env.production.local
           echo "VERCEL_URL=$VERCEL_URL" >> ./apps/app/.vercel/.env.production.local
-          cp ./apps/link/.vercel/.env.production.local .env
+          cp ./apps/app/.vercel/.env.production.local .env
 
       - name: Build Project Artifacts -- app
-        run: turbo build:vercel --filter=@barely/app --token=${{ secrets.VERCEL_TOKEN }}
+        run: turbo build:prod --filter=@barely/app --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy to Vercel -- app
         id: deploy
@@ -194,7 +194,7 @@ jobs:
           cp ./apps/link/.vercel/.env.production.local .env
 
       - name: Build Project Artifacts -- link
-        run: turbo build:vercel --filter=@barely/link --token=${{ secrets.VERCEL_TOKEN }}
+        run: turbo build:prod --filter=@barely/link --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy to Vercel -- link
         id: deploy
