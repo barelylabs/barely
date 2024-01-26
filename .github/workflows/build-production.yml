@@ -1,6 +1,12 @@
 name: Build Production
 
+# This workflow triggers on all pull_request and merge_group events.
+# The build and 'can-merge' jobs will *only* run on merge_group events.
+# All jobs will skip on pull requests, which should allow for moving into the merge queue.
+
 on:
+  pull_request:
+    branches: ["*"]
   merge_group:
     types: [checks_requested]
 
@@ -12,6 +18,7 @@ jobs:
         run: true
 
   build-app:
+    if: always() && github.event_name == 'merge_group'
     runs-on: ubuntu-latest
     env:
       TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -43,6 +50,7 @@ jobs:
         run: turbo build:vercel --filter=@barely/app --token=$VERCEL_TOKEN
 
   build-link:
+    if: always() && github.event_name == 'merge_group'
     runs-on: ubuntu-latest
     env:
       TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}

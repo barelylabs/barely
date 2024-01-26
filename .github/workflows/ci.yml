@@ -84,18 +84,18 @@ jobs:
         run: "[ $ALL_SUCCESS = true ]"
 
   # Check on every merge queue (this could include more expensive checks)
-  ci--can-merge:
-    needs: [lint, format, typecheck]
-    if: always() && github.event_name == 'merge_group'
-    permissions:
-      actions: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Transform outcomes
-        env:
-          NEEDS_JSON: "${{ toJson(needs) }}"
-        run: |
-          echo "ALL_SUCCESS=$(echo "$NEEDS_JSON" | jq '. | to_entries | map([.value.result == "success", .value.result == "skipped"] | any) | all')" >> $GITHUB_ENV
+  # ci--can-merge:
+  #   needs: [lint, format, typecheck]
+  #   if: always() && github.event_name == 'merge_group'
+  #   permissions:
+  #     actions: read
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Transform outcomes
+  #       env:
+  #         NEEDS_JSON: "${{ toJson(needs) }}"
+  #       run: |
+  #         echo "ALL_SUCCESS=$(echo "$NEEDS_JSON" | jq '. | to_entries | map([.value.result == "success", .value.result == "skipped"] | any) | all')" >> $GITHUB_ENV
 
-      - name: Check outcomes
-        run: "[ $ALL_SUCCESS = true ]"
+  #     - name: Check outcomes
+  #       run: "[ $ALL_SUCCESS = true ]"
