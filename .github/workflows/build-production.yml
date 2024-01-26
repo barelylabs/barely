@@ -1,6 +1,12 @@
-name: Deploy Production
+name: Build Production
+
+# This workflow triggers on all pull_request and merge_group events.
+# The build and 'can-merge' jobs will *only* run on merge_group events.
+# All jobs will skip on pull requests, which should allow for moving into the merge queue.
 
 on:
+  pull_request:
+    branches: ["*"]
   merge_group:
     types: [checks_requested]
 
@@ -12,6 +18,7 @@ jobs:
         run: true
 
   build-app:
+    if: always() && github.event_name == 'merge_group'
     runs-on: ubuntu-latest
     env:
       TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -35,12 +42,19 @@ jobs:
           vercel link --cwd apps/app --scope=barelylabs --yes --token=$VERCEL_TOKEN
 
       - name: Pull Vercel -- app
-        run: vercel pull --cwd apps/app --yes --environment=production --token=$VERCEL_TOKEN
+        run: |
+          vercel pull --cwd apps/app --yes --environment=production --token=$VERCEL_TOKEN
+
+          VERCEL_URL=app.barely.io
+          sed -i '/VERCEL_URL/d' ./apps/app/.vercel/.env.production.local
+          echo "VERCEL_URL=$VERCEL_URL" >> ./apps/app/.vercel/.env.production.local
+          cp ./apps/app/.vercel/.env.production.local .env
 
       - name: Build app
         run: turbo build:vercel --filter=@barely/app --token=$VERCEL_TOKEN
 
   build-link:
+    if: always() && github.event_name == 'merge_group'
     runs-on: ubuntu-latest
     env:
       TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -64,7 +78,13 @@ jobs:
           vercel link --cwd apps/link --scope=barelylabs --yes --token=$VERCEL_TOKEN
 
       - name: Pull Vercel -- link
-        run: vercel pull --cwd apps/link --yes --environment=production --token=$VERCEL_TOKEN
+        run: |
+          vercel pull --cwd apps/link --yes --environment=production --token=$VERCEL_TOKEN
+
+          VERCEL_URL=barely.link
+          sed -i '/VERCEL_URL/d' ./apps/link/.vercel/.env.production.local
+          echo "VERCEL_URL=$VERCEL_URL" >> ./apps/link/.vercel/.env.production.local
+          cp ./apps/link/.vercel/.env.production.local .env
 
       - name: Build link
         run: turbo build:vercel --filter=@barely/link --token=$VERCEL_TOKEN
