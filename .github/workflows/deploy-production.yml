@@ -13,6 +13,7 @@ jobs:
   git-meta:
     name: git metadata
     runs-on: ubuntu-latest
+    if: always() && github.event_name == 'merge_group'
     outputs:
       git_branch_name: ${{ steps.git-meta.outputs.github_commit_ref }}
       github_commit_sha: ${{ steps.git-meta.outputs.github_commit_sha }}
@@ -66,6 +67,7 @@ jobs:
   db-push:
     name: db:push
     needs: [git-meta]
+    if: always() && github.event_name == 'merge_group'
     permissions: write-all
     runs-on: ubuntu-latest
     outputs:
@@ -108,6 +110,7 @@ jobs:
     name: deploy prod build of app to vercel
     needs: [db-push, git-meta]
     runs-on: ubuntu-latest
+    if: always() && github.event_name == 'merge_group'
     env:
       TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       TURBO_TEAM: ${{ secrets.VERCEL_TEAM_ID }}
@@ -161,6 +164,7 @@ jobs:
     name: deploy prod build of link to vercel
     needs: [db-push, git-meta]
     runs-on: ubuntu-latest
+    if: always() && github.event_name == 'merge_group'
     env:
       TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       TURBO_TEAM: ${{ secrets.VERCEL_TEAM_ID }}
@@ -234,6 +238,7 @@ jobs:
   promote-app:
     name: Promote app to production
     needs: [deploy-prod--all-apps-deployed, deploy-app]
+    if: always() && github.event_name == 'merge_group'
     runs-on: ubuntu-latest
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -249,6 +254,7 @@ jobs:
   promote-link:
     name: Promote link to production
     needs: [deploy-prod--all-apps-deployed, deploy-link]
+    if: always() && github.event_name == 'merge_group'
     runs-on: ubuntu-latest
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -311,6 +317,7 @@ jobs:
 
   delete-neon-branch:
     needs: [db-push, promote-app, promote-link]
+    if: always() && github.event_name == 'merge_group'
     runs-on: ubuntu-latest
     steps:
       - name: Delete Neon Branch
