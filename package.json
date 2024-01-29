@@ -37,7 +37,8 @@
     "prettier-plugin-tailwindcss": "^0.5.10",
     "tailwindcss-animate": "^1.0.7",
     "turbo": "^1.11.3",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vercel": "33.2.0"
   },
   "pnpm": {
     "patchedDependencies": {

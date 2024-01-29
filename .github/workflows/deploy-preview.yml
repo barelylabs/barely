@@ -76,7 +76,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup node/pnpm/turbo
+      - name: Setup node/pnpm/turbo/vercel
         uses: ./tooling/github/setup
 
       - name: Install the Neon CLI
@@ -128,10 +128,6 @@ jobs:
 
       # Using Vercel as our secret store for the DATABASE_URL and DATABASE_POOL_URL
       # -- to my knowledge, using an external store is the only way to pass secrets between Github Actions jobs?
-      - name: Install Vercel CLI
-        run: |
-          npm install --global vercel@latest
-
       - name: Update Vercel Env Variables for App Preview Branch
         run: |
           echo "DATABASE_URL: $DATABASE_URL"
@@ -139,16 +135,16 @@ jobs:
 
           branch_name=${{ needs.git-meta.outputs.git_branch_name }}
 
-          if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
-            vercel env rm DATABASE_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
+            pnpm vercel env rm DATABASE_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
           fi
 
-          if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
-            vercel env rm DATABASE_POOL_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
+            pnpm vercel env rm DATABASE_POOL_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
           fi
 
-          echo $DATABASE_URL | vercel env add DATABASE_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
-          echo $DATABASE_POOL_URL | vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
+          echo $DATABASE_URL | pnpm vercel env add DATABASE_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
+          echo $DATABASE_POOL_URL | pnpm vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Update Vercel Env Variables for Link Preview Branch
         env:
@@ -156,16 +152,16 @@ jobs:
         run: |
           branch_name=${{ needs.git-meta.outputs.git_branch_name }}
 
-          if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
-            vercel env rm DATABASE_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
+            pnpm vercel env rm DATABASE_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
           fi
 
-          if vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
-            vercel env rm DATABASE_POOL_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
+            pnpm vercel env rm DATABASE_POOL_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
           fi
 
-          echo $DATABASE_URL | vercel env add DATABASE_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
-          echo $DATABASE_POOL_URL | vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
+          echo $DATABASE_URL | pnpm vercel env add DATABASE_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
+          echo $DATABASE_POOL_URL | pnpm vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
 
     outputs:
       neon_branch_id: ${{ steps.get-neon-branch.outputs.branch_id }}
@@ -193,16 +189,15 @@ jobs:
       - name: Setup
         uses: ./tooling/github/setup
 
-      - name: Install Vercel CLI
+      - name: Link Vercel CLI
         run: |
-          pnpm i -g vercel@latest
-          vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
-          vercel link --cwd apps/app --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
+          pnpm vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
+          pnpm vercel link --cwd apps/app --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Pull Vercel -- App
         id: vercel-env-app
         run: |
-          vercel pull --cwd apps/app --yes --environment=preview --git-branch=${{ needs.git-meta.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
+          pnpm vercel pull --cwd apps/app --yes --environment=preview --git-branch=${{ needs.git-meta.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
 
           VERCEL_URL=app-git-${{ needs.git-meta.outputs.git_branch_name }}-barelylabs.vercel.app
           sed -i '/VERCEL_URL/d' ./apps/app/.vercel/.env.preview.local
@@ -215,10 +210,10 @@ jobs:
       - name: Deploy App Preview to Vercel
         id: deploy-app
         run: |
-          preview_url=$(vercel deploy --force --cwd apps/app --prebuilt ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})          
+          preview_url=$(pnpm vercel deploy --force --cwd apps/app --prebuilt ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})          
           echo preview_url=$preview_url >> $GITHUB_OUTPUT          
 
-          inspect=$(vercel inspect $preview_url --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+          inspect=$(pnpm vercel inspect $preview_url --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
           deployment_id=$(echo "$inspect" | grep -m 1 '^    id' | awk '{print $NF}' | cut -d'_' -f 2-)
           inspect_url="https://vercel.com/barelylabs/app/$deployment_id"
           echo "inspect_url=$inspect_url" >> $GITHUB_OUTPUT
@@ -250,16 +245,15 @@ jobs:
       - name: Setup
         uses: ./tooling/github/setup
 
-      - name: Install Vercel CLI
+      - name: Vercel Link CLI
         run: |
-          pnpm i -g vercel@latest
-          vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
-          vercel link --cwd apps/link --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
+          pnpm vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
+          pnpm vercel link --cwd apps/link --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Pull Vercel
         id: vercel-env
         run: |
-          vercel pull --cwd apps/link --yes --environment=preview --git-branch=${{ needs.git-meta.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
+          pnpm vercel pull --cwd apps/link --yes --environment=preview --git-branch=${{ needs.git-meta.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
 
           VERCEL_URL=link-git-${{ needs.git-meta.outputs.git_branch_name }}-barelylabs.vercel.app
           sed -i '/VERCEL_URL/d' ./apps/link/.vercel/.env.preview.local
@@ -274,10 +268,10 @@ jobs:
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
         run: |
-          preview_url=$(vercel deploy --force --cwd apps/link --prebuilt ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})          
+          preview_url=$(pnpm vercel deploy --force --cwd apps/link --prebuilt ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})          
           echo preview_url=$preview_url >> $GITHUB_OUTPUT          
 
-          inspect=$(vercel inspect $preview_url --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+          inspect=$(pnpm vercel inspect $preview_url --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
           deployment_id=$(echo "$inspect" | grep -m 1 '^    id' | awk '{print $NF}' | cut -d'_' -f 2-)
           inspect_url="https://vercel.com/barelylabs/link/$deployment_id"
           echo "inspect_url=$inspect_url" >> $GITHUB_OUTPUT
