@@ -215,7 +215,7 @@ jobs:
       - name: Deploy App Preview to Vercel
         id: deploy-app
         run: |
-          preview_url=$(vercel deploy --cwd apps/app --prebuilt ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})          
+          preview_url=$(vercel deploy --force --cwd apps/app --prebuilt ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})          
           echo preview_url=$preview_url >> $GITHUB_OUTPUT          
 
           inspect=$(vercel inspect $preview_url --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
@@ -274,7 +274,7 @@ jobs:
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
         run: |
-          preview_url=$(vercel deploy --cwd apps/link --prebuilt ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})          
+          preview_url=$(vercel deploy --force --cwd apps/link --prebuilt ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})          
           echo preview_url=$preview_url >> $GITHUB_OUTPUT          
 
           inspect=$(vercel inspect $preview_url --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
