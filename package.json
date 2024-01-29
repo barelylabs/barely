@@ -11,7 +11,7 @@
     "build:prod": "turbo build:prod",
     "clean": "git clean -xdf node_modules",
     "clean:workspaces": "turbo clean",
-    "clean:all": "turbo clean && clean",
+    "clean:all": "turbo clean && pnpm clean",
     "db:check": "pnpm --filter=@barely/lib db:check",
     "db:generate": "pnpm --filter=@barely/lib db:generate",
     "db:push": "pnpm --filter=@barely/lib db:push",
