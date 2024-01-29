@@ -124,7 +124,7 @@ jobs:
 
       - name: Install Vercel CLI
         run: |
-          pnpm i -g vercel@33.1.0
+          pnpm i -g vercel@latest
           vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
           vercel link --cwd apps/app --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
 
@@ -178,7 +178,7 @@ jobs:
 
       - name: Install Vercel CLI
         run: |
-          pnpm i -g vercel@33.1.0
+          pnpm i -g vercel@latest
           vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
           vercel link --cwd apps/link --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
 
@@ -241,7 +241,7 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
     steps:
       - name: Install Vercel CLI
-        run: npm i -g vercel@33.1.0
+        run: npm i -g vercel@latest
 
       - name: Promote app to production
         run: vercel promote ${{ needs.deploy-app.outputs.deployment_id }} --token=${{ secrets.VERCEL_TOKEN }}
@@ -256,7 +256,7 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
     steps:
       - name: Install Vercel CLI
-        run: npm i -g vercel@33.1.0
+        run: npm i -g vercel@latest
 
       - name: Promote link to production
         run: vercel promote ${{ needs.deploy-link.outputs.deployment_id }} --token=${{ secrets.VERCEL_TOKEN }}
@@ -278,7 +278,7 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
     steps:
       - name: Install Vercel CLI
-        run: npm i -g vercel@33.1.0
+        run: npm i -g vercel@latest
 
       - name: Rollback app
         run: |
@@ -297,7 +297,7 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
     steps:
       - name: Install Vercel CLI
-        run: npm i -g vercel@33.1.0
+        run: npm i -g vercel@latest
 
       - name: Rollback link
         run: |

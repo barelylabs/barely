@@ -130,7 +130,7 @@ jobs:
       # -- to my knowledge, using an external store is the only way to pass secrets between Github Actions jobs?
       - name: Install Vercel CLI
         run: |
-          npm install --global vercel@33.1.0
+          npm install --global vercel@latest
 
       - name: Update Vercel Env Variables for App Preview Branch
         run: |
@@ -195,7 +195,7 @@ jobs:
 
       - name: Install Vercel CLI
         run: |
-          pnpm i -g vercel@33.1.0
+          pnpm i -g vercel@latest
           vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
           vercel link --cwd apps/app --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
 
@@ -252,7 +252,7 @@ jobs:
 
       - name: Install Vercel CLI
         run: |
-          pnpm i -g vercel@33.1.0
+          pnpm i -g vercel@latest
           vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
           vercel link --cwd apps/link --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
 
