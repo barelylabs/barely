@@ -1,6 +1,7 @@
 name: Deploy Production
 
 on:
+  pull_request:
   merge_group:
     types: [checks_requested]
 
@@ -122,15 +123,14 @@ jobs:
       - name: Setup node/pnpm/turbo
         uses: ./tooling/github/setup
 
-      - name: Install Vercel CLI
+      - name: Link Vercel CLI
         run: |
-          pnpm i -g vercel@latest
-          vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
-          vercel link --cwd apps/app --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
+          pnpm vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
+          pnpm vercel link --cwd apps/app --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Pull Vercel
         run: |
-          vercel pull --cwd apps/app --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          pnpm vercel pull --cwd apps/app --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
           VERCEL_URL=app.barely.io
           sed -i '/VERCEL_URL/d' ./apps/app/.vercel/.env.production.local
@@ -143,8 +143,8 @@ jobs:
       - name: Deploy to Vercel
         id: deploy
         run: |
-          vercel deploy --cwd apps/app --prebuilt --prod --skip-domain ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }}
-          inspect=$(vercel inspect $https://app.barely.io --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+          pnpm vercel deploy --cwd apps/app --prebuilt --prod --skip-domain ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }}
+          inspect=$(pnpm vercel inspect $https://app.barely.io --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
           deployment_id=$(echo "$inspect" | grep -m 1 '^    id' | awk '{print $NF}' | cut -d'_' -f 2-)
           inspect_url="https://vercel.com/barelylabs/app/$deployment_id"
           echo "inspect_url=$inspect_url" >> $GITHUB_OUTPUT
@@ -173,18 +173,17 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Setup node/pnpm/turbo
+      - name: Setup node/pnpm/turbo/vercel
         uses: ./tooling/github/setup
 
-      - name: Install Vercel CLI
+      - name: Link Vercel CLI
         run: |
-          pnpm i -g vercel@latest
-          vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
-          vercel link --cwd apps/link --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
+          pnpm vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
+          pnpm vercel link --cwd apps/link --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Pull Vercel
         run: |
-          vercel pull --cwd apps/link --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          pnpm vercel pull --cwd apps/link --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
           VERCEL_URL=barely.link
           sed -i '/VERCEL_URL/d' ./apps/link/.vercel/.env.production.local
@@ -197,8 +196,8 @@ jobs:
       - name: Deploy to Vercel
         id: deploy
         run: |
-          vercel deploy --cwd apps/link --prebuilt --prod --skip-domain ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }}
-          inspect=$(vercel inspect $https://link.barely.io --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+          pnpm vercel deploy --cwd apps/link --prebuilt --prod --skip-domain ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }}
+          inspect=$(pnpm vercel inspect $https://link.barely.io --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
           deployment_id=$(echo "$inspect" | grep -m 1 '^    id' | awk '{print $NF}' | cut -d'_' -f 2-)
           inspect_url="https://vercel.com/barelylabs/link/$deployment_id"
           echo "inspect_url=$inspect_url" >> $GITHUB_OUTPUT
@@ -211,9 +210,10 @@ jobs:
   # 🔀 MERGE PR BRANCH TO MAIN 🔀
   #/////////////////////////////
 
-  all-apps-deployed-to-prod:
+  deploy-prod--all-apps-deployed:
     name: All Apps Deployed to Production
     needs: [deploy-app, deploy-link]
+    if: always() && github.event_name == 'merge_group' # skip if pull request, which allows entry into merge queue
     permissions:
       actions: read
     runs-on: ubuntu-latest
@@ -233,7 +233,7 @@ jobs:
 
   promote-app:
     name: Promote app to production
-    needs: [all-apps-deployed-to-prod, deploy-app]
+    needs: [deploy-prod--all-apps-deployed, deploy-app]
     runs-on: ubuntu-latest
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -248,7 +248,7 @@ jobs:
 
   promote-link:
     name: Promote link to production
-    needs: [all-apps-deployed-to-prod, deploy-link]
+    needs: [deploy-prod--all-apps-deployed, deploy-link]
     runs-on: ubuntu-latest
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
