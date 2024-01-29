@@ -214,7 +214,7 @@ jobs:
   # 🔀 MERGE PR BRANCH TO MAIN 🔀
   #/////////////////////////////
 
-  deploy-prod--all-apps-deployed:
+  deploy-production--can-merge:
     name: All Apps Deployed to Production
     needs: [deploy-app, deploy-link]
     if: always() && github.event_name == 'merge_group' # skip if pull request, which allows entry into merge queue
@@ -237,7 +237,7 @@ jobs:
 
   promote-app:
     name: Promote app to production
-    needs: [deploy-prod--all-apps-deployed, deploy-app]
+    needs: [deploy-production--can-merge, deploy-app]
     if: always() && github.event_name == 'merge_group'
     runs-on: ubuntu-latest
     env:
@@ -253,7 +253,7 @@ jobs:
 
   promote-link:
     name: Promote link to production
-    needs: [deploy-prod--all-apps-deployed, deploy-link]
+    needs: [deploy-production--can-merge, deploy-link]
     if: always() && github.event_name == 'merge_group'
     runs-on: ubuntu-latest
     env:
