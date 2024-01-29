@@ -546,6 +546,9 @@ importers:
       '@t3-oss/env-nextjs':
         specifier: ^0.7.3
         version: 0.7.3(typescript@5.3.3)(zod@3.22.4)
+      '@trpc/react-query':
+        specifier: next
+        version: 11.0.0-next-beta.242(@tanstack/react-query@5.17.19)(@trpc/client@11.0.0-next-beta.242)(@trpc/server@11.0.0-next-beta.242)(react-dom@18.2.0)(react@18.2.0)
       '@trpc/server':
         specifier: next
         version: 11.0.0-next-beta.242
@@ -6507,6 +6510,22 @@ packages:
       '@trpc/client': 11.0.0-next-beta.242(@trpc/server@11.0.0-next-beta.242)
       '@trpc/server': 11.0.0-next-beta.242
       next: 14.1.0(@babel/core@7.23.9)(react-dom@18.2.0)(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
+  /@trpc/react-query@11.0.0-next-beta.242(@tanstack/react-query@5.17.19)(@trpc/client@11.0.0-next-beta.242)(@trpc/server@11.0.0-next-beta.242)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-X5Kd1WJOXwfnAATAvfioBNhuS6S6ZgS1pC2OcgeAaVgaNX+efU9nXqGwoQtshL8E4gZslGNoSMompGpUf6CxFA==}
+    peerDependencies:
+      '@tanstack/react-query': ^5.0.0
+      '@trpc/client': 11.0.0-next-beta.242+4377b3cf6
+      '@trpc/server': 11.0.0-next-beta.242+4377b3cf6
+      react: '>=18.2.0'
+      react-dom: '>=18.2.0'
+    dependencies:
+      '@tanstack/react-query': 5.17.19(react@18.2.0)
+      '@trpc/client': 11.0.0-next-beta.242(@trpc/server@11.0.0-next-beta.242)
+      '@trpc/server': 11.0.0-next-beta.242
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false

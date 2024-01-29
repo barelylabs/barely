@@ -67,9 +67,8 @@ const assignPlaylistPitchToReviewers = async (campaignId: string, db: Db) => {
   const allCurators = allGenres
     .map((_g) => _g.playlist.curator)
     .filter((curator) => curator?.pitchReviewing)
-    .filter(
-      (curator) =>
-        curator?.playlistPitchReviews.every((r) => r.campaignId !== campaignId),
+    .filter((curator) =>
+      curator?.playlistPitchReviews.every((r) => r.campaignId !== campaignId),
     )
     .filter((c) => !!c) as NonNullable<
     (typeof allGenres)[0]["playlist"]["curator"]

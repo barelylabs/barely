@@ -28,7 +28,7 @@ const Card = ({
 
 const CardFooter = ({ children }: { children: ReactNode }) => {
   return (
-    <div className="bg-gray-50 px-4 py-3 sm:px-6 dark:bg-slate-800">
+    <div className="bg-gray-50 px-4 py-3 dark:bg-slate-800 sm:px-6">
       {children}
     </div>
   );

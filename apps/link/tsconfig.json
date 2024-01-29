@@ -17,14 +17,14 @@
       "@barely/atoms/*": ["./node_modules/@barely/lib/atoms/*"],
       "@barely/hooks/*": ["./node_modules/@barely/lib/hooks/*"],
       "@barely/ui/*": ["./node_modules/@barely/ui/*"],
-      "@barely/utils/*": ["./node_modules/@barely/lib/utils/*"]
+      "@barely/utils/*": ["./node_modules/@barely/lib/utils/*"],
     },
     "plugins": [
       {
-        "name": "next"
-      }
+        "name": "next",
+      },
     ],
-    "strictNullChecks": true
+    "strictNullChecks": true,
   },
   "include": [
     "next-env.d.ts",
@@ -32,7 +32,7 @@
     "**/*.tsx",
     "**/*.cjs",
     "**/*.mjs",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
 }

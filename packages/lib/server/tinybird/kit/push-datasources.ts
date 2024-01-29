@@ -68,9 +68,9 @@ readDirectory(directoryPath)
           schemaLines
             ?.map((line) => {
               const [name, type, path] = line.trim().split(" ");
-              return `${name?.replaceAll("`", "")} ${type} ${path?.split(
-                ",",
-              )[0]}`;
+              return `${name?.replaceAll("`", "")} ${type} ${
+                path?.split(",")[0]
+              }`;
               // return `${name?.replaceAll('`', '')} ${type}`;
             })
             .join(",") ?? raise("schema not found");

@@ -1,7 +1,7 @@
 {
   "extends": "@barely/tsconfig/react.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
   },
   "include": [
     "./charts/**/*",
@@ -11,7 +11,7 @@
     "./hooks/**/*",
     "./images/**/*",
     "./utils/**/*",
-    "tailwind.config.ts"
+    "tailwind.config.ts",
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
 }
