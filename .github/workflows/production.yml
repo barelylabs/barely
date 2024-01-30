@@ -33,10 +33,7 @@ jobs:
           fetch-depth: 2
 
       - id: git-meta
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
-          echo "$GITHUB_CONTEXT"
           github_commit_author_login=${{ github.actor }}
           github_deployment=1
           github_org=${{ github.repository_owner }}
@@ -48,15 +45,16 @@ jobs:
           commit_ref=${{ github.ref }}
           echo "commit_ref: $commit_ref"
 
-          pr_number=$(echo $commit_ref | awk -F'pr-' '{print $2}')
+          pr_number=$(echo $commit_ref | awk -F'/' '{print $5}' | awk -F'-' '{print $2}')
+
           echo "pr_number: $pr_number"
 
           pr_info=$(curl -s H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository_owner }}/${{ github.repository }}/pulls/$pr_number)
 
-          github_commit_ref=$(echo $pull_request_info | jq -r '.head.ref')
+          github_commit_ref=$(echo $pr_info | jq -r '.head.ref')
           echo "github_commit_ref: $github_commit_ref"
 
-          github_commit_sha=$(echo $pull_request_info | jq -r '.head.sha')
+          github_commit_sha=$(echo $pr_info | jq -r '.head.sha')
           echo "github_commit_sha: $github_commit_sha"
 
           if [ "$github_commit_ref" = "main" ]; then
