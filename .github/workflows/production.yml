@@ -11,7 +11,6 @@ jobs:
   #////////////////////
 
   git-meta:
-    name: git metadata
     runs-on: ubuntu-latest
     if: always() && github.event_name == 'merge_group'
     outputs:
@@ -107,7 +106,7 @@ jobs:
   #///////////////////////////////////////////////////////////
 
   deploy-app:
-    name: deploy prod build of app to vercel
+    name: deploy app prod build to vercel
     needs: [db-push, git-meta]
     runs-on: ubuntu-latest
     if: always() && github.event_name == 'merge_group'
@@ -161,7 +160,7 @@ jobs:
   #////////////////////////////////////////////////////////////
 
   deploy-link:
-    name: deploy prod build of link to vercel
+    name: deploy link prod build to vercel
     needs: [db-push, git-meta]
     runs-on: ubuntu-latest
     if: always() && github.event_name == 'merge_group'
@@ -235,7 +234,7 @@ jobs:
   # -- at a later date, we could decouple this promotion step from deploying & merging to main
 
   promote-app:
-    name: Promote app to production
+    name: promote app to production
     needs: [production--can-merge, deploy-app]
     if: always() && github.event_name == 'merge_group'
     runs-on: ubuntu-latest
@@ -251,7 +250,7 @@ jobs:
         run: vercel promote ${{ needs.deploy-app.outputs.deployment_id }} --token=${{ secrets.VERCEL_TOKEN }}
 
   promote-link:
-    name: Promote link to production
+    name: promote link to production
     needs: [production--can-merge, deploy-link]
     if: always() && github.event_name == 'merge_group'
     runs-on: ubuntu-latest
@@ -273,7 +272,7 @@ jobs:
   # ref: https://dev.to/philw_/using-vercels-instant-rollback-feature-in-your-own-cicd-pipeline-57oi
 
   rollback-app:
-    name: Rollback app if any deployments fail
+    name: rollback app if any deployments fail
     needs: [promote-app, promote-link]
     if: ${{ failure() }}
     runs-on: ubuntu-latest
@@ -292,7 +291,7 @@ jobs:
           vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
 
   rollback-link:
-    name: Rollback link if any deployments fail
+    name: rollback link if any deployments fail
     needs: [promote-app, promote-link]
     if: ${{ failure() }}
     runs-on: ubuntu-latest

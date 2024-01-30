@@ -13,7 +13,6 @@ jobs:
   #/////////////////#
 
   git-meta:
-    name: git metadata
     runs-on: ubuntu-latest
     if: always() && github.event_name == 'pull_request'
     steps:
