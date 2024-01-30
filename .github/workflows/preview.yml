@@ -15,8 +15,21 @@ jobs:
   git-meta:
     runs-on: ubuntu-latest
     if: always() && github.event_name == 'pull_request'
+    outputs:
+      git_branch_name: ${{ steps.git-meta.outputs.github_commit_ref }}
+      github_commit_sha: ${{ steps.git-meta.outputs.github_commit_sha }}
+      github_commit_author_name: ${{ steps.git-meta.outputs.github_commit_author_name }}
+      github_commit_author_login: ${{ steps.git-meta.outputs.github_commit_author_login }}
+      github_deployment: ${{ steps.git-meta.outputs.github_deployment }}
+      github_org: ${{ steps.git-meta.outputs.github_org }}
+      github_repo: ${{ steps.git-meta.outputs.github_repo }}
+      github_commit_org: ${{ steps.git-meta.outputs.github_commit_org }}
+      github_commit_repo: ${{ steps.git-meta.outputs.github_commit_repo }}
+      github_commit_message: ${{ steps.git-meta.outputs.github_commit_message }}
+      github_commit_ref: ${{ steps.git-meta.outputs.github_commit_ref }}
+      vercel_git_metadata: ${{ steps.git-meta.outputs.vercel_git_metadata }}
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
@@ -25,7 +38,7 @@ jobs:
         id: git-meta
         run: |
           github_commit_sha=${{ github.event.pull_request.head.sha }}          
-          github_commit_author_login=${{ github.event.pull_request.user.login }}
+          github_commit_author_login=${{ github.actor }}
           github_deployment=1
           github_org=${{ github.repository_owner }}
           github_repo=${{ github.repository }}
@@ -47,20 +60,6 @@ jobs:
           echo "github_commit_message=$github_commit_message" >> $GITHUB_OUTPUT
           echo "github_commit_ref=$github_commit_ref" >> $GITHUB_OUTPUT
           echo "vercel_git_metadata=$vercel_git_metadata" >> $GITHUB_OUTPUT
-
-    outputs:
-      git_branch_name: ${{ steps.git-meta.outputs.github_commit_ref }}
-      github_commit_sha: ${{ steps.git-meta.outputs.github_commit_sha }}
-      github_commit_author_name: ${{ steps.git-meta.outputs.github_commit_author_name }}
-      github_commit_author_login: ${{ steps.git-meta.outputs.github_commit_author_login }}
-      github_deployment: ${{ steps.git-meta.outputs.github_deployment }}
-      github_org: ${{ steps.git-meta.outputs.github_org }}
-      github_repo: ${{ steps.git-meta.outputs.github_repo }}
-      github_commit_org: ${{ steps.git-meta.outputs.github_commit_org }}
-      github_commit_repo: ${{ steps.git-meta.outputs.github_commit_repo }}
-      github_commit_message: ${{ steps.git-meta.outputs.github_commit_message }}
-      github_commit_ref: ${{ steps.git-meta.outputs.github_commit_ref }}
-      vercel_git_metadata: ${{ steps.git-meta.outputs.vercel_git_metadata }}
 
   #////////////////////#
   # 🐘 NEON DB PREVIEW #
