@@ -46,7 +46,7 @@ jobs:
           echo "commit_ref: $commit_ref"
           github_commit_sha=$(echo $commit_ref | rev | cut -d'-' -f1 | rev)
           echo "github_commit_sha: $github_commit_sha"
-          branches=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/commits/$commit_sha/branches-where-head)          
+          branches=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/commits/$github_commit_sha/branches-where-head)          
           echo "branches: $branches"
           github_commit_ref=$(echo $branches | jq -r '.[0].name') 
           echo "github_commit_ref: $github_commit_ref"
@@ -72,7 +72,7 @@ jobs:
   db-push:
     name: db:push
     needs: [git-meta]
-    if: always() && github.event_name == 'merge_group'
+    if: always() && github.event_name == 'merge_group' && needs.git-meta.result == 'success'
     permissions: write-all
     runs-on: ubuntu-latest
     outputs:
@@ -257,7 +257,7 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Promote app to production
-        run: vercel promote ${{ needs.deploy-app.outputs.deployment_id }} --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel promote dpl_${{ needs.deploy-app.outputs.deployment_id }} --token=${{ secrets.VERCEL_TOKEN }}
 
   promote-link:
     name: promote link to production
@@ -273,7 +273,7 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Promote link to production
-        run: vercel promote ${{ needs.deploy-link.outputs.deployment_id }} --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel promote dpl_${{ needs.deploy-link.outputs.deployment_id }} --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
 
   #///////////////////////////////////////////////
   # 🚨 ROLLBACK APPS (IF ANY PROMOTION FAILS) 🚨 #
