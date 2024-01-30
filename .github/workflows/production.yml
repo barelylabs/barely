@@ -113,6 +113,10 @@ jobs:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
+    outputs:
+      deployment_id: ${{ steps.deploy.outputs.deployment_id }}
+      deployment_url: ${{ steps.deploy.outputs.deployment_url }}
+      inspect_url: ${{ steps.deploy.outputs.inspect_url }}
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -147,13 +151,9 @@ jobs:
 
           inspect=$(pnpm vercel inspect $deploy_url --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
           deployment_id=$(echo "$inspect" | grep -m 1 '^    id' | awk '{print $NF}' | cut -d'_' -f 2-)
+          echo "deployment_id=$deployment_id" >> $GITHUB_OUTPUT
           inspect_url="https://vercel.com/barelylabs/app/$deployment_id"
           echo "inspect_url=$inspect_url" >> $GITHUB_OUTPUT
-
-    outputs:
-      deployment_id: ${{ steps.deploy.outputs.deployment_id }}
-      deployment_url: ${{ steps.deploy.outputs.deployment_url }}
-      inspect_url: ${{ steps.deploy.outputs.inspect_url }}
 
   #/////////////////////////////////////////////////////////////
   # 🔗 DEPLOY LINK --PROD  (Not Aliasing to Production Yet) 🔗 #
@@ -170,6 +170,10 @@ jobs:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
+    outputs:
+      deployment_id: ${{ steps.deploy.outputs.deployment_id }}
+      deployment_url: ${{ steps.deploy.outputs.deployment_url }}
+      inspect_url: ${{ steps.deploy.outputs.inspect_url }}
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -204,13 +208,9 @@ jobs:
 
           inspect=$(pnpm vercel inspect $deploy_url --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
           deployment_id=$(echo "$inspect" | grep -m 1 '^    id' | awk '{print $NF}' | cut -d'_' -f 2-)
+          echo "deployment_id=$deployment_id" >> $GITHUB_OUTPUT
           inspect_url="https://vercel.com/barelylabs/link/$deployment_id"
           echo "inspect_url=$inspect_url" >> $GITHUB_OUTPUT
-
-    outputs:
-      deployment_id: ${{ steps.deploy.outputs.deployment_id }}
-      deployment_url: ${{ steps.deploy.outputs.deployment_url }}
-      inspect_url: ${{ steps.deploy.outputs.inspect_url }}
 
   #/////////////////////////////
   # 🔀 MERGE PR BRANCH TO MAIN 🔀
