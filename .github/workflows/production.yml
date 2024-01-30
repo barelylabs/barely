@@ -34,25 +34,32 @@ jobs:
 
       - id: git-meta
         run: |
-
           github_commit_author_login=${{ github.actor }}
           github_deployment=1
           github_org=${{ github.repository_owner }}
           github_repo=${{ github.repository }}
           github_commit_org=${{ github.repository_owner }}
           github_commit_repo=${{ github.repository }}
-          github_commit_message=$(git show -s --format=%s $github_commit_sha)
+          github_commit_message=$(git show -s --format=%)
 
           commit_ref=${{ github.ref }}
           echo "commit_ref: $commit_ref"
 
-          github_commit_sha=$(echo $github_commit_ref | rev | cut -d'-' -f1 | rev)
+          pr_number=$(echo $commit_ref | awk -F'/' '{print $5}' | awk -F'-' '{print $2}')
+          echo "pr_number: $pr_number"
 
-          branches=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/commits/$commit_sha/branches-where-head)          
-          echo "branches: $branches"
+          pr_info=$(curl -s H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/pulls/$pr_number)
 
-          github_commit_ref=$(echo $branches | jq -r '.[0].name') 
+          github_commit_ref=$(echo $pr_info | jq -r '.head.ref')
           echo "github_commit_ref: $github_commit_ref"
+
+          github_commit_sha=$(echo $pr_info | jq -r '.head.sha')
+          echo "github_commit_sha: $github_commit_sha"
+
+          if [ "$github_commit_ref" = "main" ]; then
+            echo "Error: Cannot proceed with 'main' branch."
+            exit 1
+          fi
 
           vercel_git_metadata="-m githubCommitSha=$github_commit_sha -m githubCommitAuthorName=$github_commit_author_login -m githubCommitAuthorLogin=$github_commit_author_login -m githubDeployment=$github_deployment -m githubOrg=$github_org -m githubRepo=$github_repo -m githubCommitOrg=$github_commit_org -m githubCommitRepo=$github_commit_repo -m githubCommitMessage=\"$github_commit_message\" -m githubCommitRef=$github_commit_ref"                 
 
@@ -75,7 +82,7 @@ jobs:
   db-push:
     name: db:push
     needs: [git-meta]
-    if: always() && github.event_name == 'merge_group'
+    if: always() && github.event_name == 'merge_group' && needs.git-meta.result == 'success'
     permissions: write-all
     runs-on: ubuntu-latest
     outputs:
@@ -96,13 +103,7 @@ jobs:
 
       - id: get-neon-branch
         run: |
-          branch_id=$(neonctl branches get ${{ needs.git-meta.outputs.git_branch_name }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --output json | jq -r '.id')
-          echo "branch_id: $branch_id"
-          if [[ -z "$branch_id" ]]; then
-            echo "Error: branch_id is undefined or empty"
-            exit 1
-          fi
-          echo "branch_id=$branch_id" >> $GITHUB_OUTPUT
+          echo branch_id=$(neonctl branches get ${{ needs.git-meta.outputs.git_branch_name }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --output json | jq -r '.id') >> $GITHUB_OUTPUT
 
       - name: db:push
         run: |
@@ -120,9 +121,9 @@ jobs:
 
   deploy-app:
     name: deploy prod build to vercel -- app
-    needs: [db-push, git-meta]
+    needs: [git-meta, db-push]
     runs-on: ubuntu-latest
-    if: always() && github.event_name == 'merge_group'
+    if: always() && github.event_name == 'merge_group' && needs.db-push.result == 'success'
     env:
       TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       TURBO_TEAM: ${{ secrets.VERCEL_TEAM_ID }}
@@ -177,9 +178,9 @@ jobs:
 
   deploy-link:
     name: deploy prod build to vercel -- link
-    needs: [db-push, git-meta]
+    needs: [git-meta, db-push, git-meta]
     runs-on: ubuntu-latest
-    if: always() && github.event_name == 'merge_group'
+    if: always() && github.event_name == 'merge_group' && needs.db-push.result == 'success'
     env:
       TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       TURBO_TEAM: ${{ secrets.VERCEL_TEAM_ID }}
@@ -233,7 +234,7 @@ jobs:
   #/////////////////////////////
 
   production--can-merge:
-    needs: [deploy-app, deploy-link]
+    needs: [git-meta, db-push, deploy-app, deploy-link]
     if: always() && github.event_name == 'merge_group' # skip if pull request, which allows entry into merge queue
     permissions:
       actions: read
@@ -266,7 +267,7 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Promote app to production
-        run: vercel promote ${{ needs.deploy-app.outputs.deployment_id }} --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel promote dpl_${{ needs.deploy-app.outputs.deployment_id }} --token=${{ secrets.VERCEL_TOKEN }}
 
   promote-link:
     name: promote link to production
@@ -282,7 +283,7 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Promote link to production
-        run: vercel promote ${{ needs.deploy-link.outputs.deployment_id }} --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel promote dpl_${{ needs.deploy-link.outputs.deployment_id }} --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
 
   #///////////////////////////////////////////////
   # 🚨 ROLLBACK APPS (IF ANY PROMOTION FAILS) 🚨 #
@@ -333,8 +334,8 @@ jobs:
   #/////////////#
 
   delete-neon-branch:
-    needs: [db-push, promote-app, promote-link]
-    if: always() && github.event_name == 'merge_group'
+    needs: [git-meta, db-push, promote-app, promote-link]
+    if: always() && github.event_name == 'merge_group' && needs.git-meta.outputs.git_branch_name != 'main'
     runs-on: ubuntu-latest
     steps:
       - name: Delete Neon Branch
