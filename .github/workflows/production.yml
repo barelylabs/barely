@@ -93,7 +93,13 @@ jobs:
 
       - id: get-neon-branch
         run: |
-          echo branch_id=$(neonctl branches get ${{ needs.git-meta.outputs.git_branch_name }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --output json | jq -r '.id') >> $GITHUB_OUTPUT
+          branch_id=$(neonctl branches get ${{ needs.git-meta.outputs.git_branch_name }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --output json | jq -r '.id')
+          echo "branch_id: $branch_id"
+          if [[ -z "$branch_id" ]]; then
+            echo "Error: branch_id is undefined or empty"
+            exit 1
+          fi
+          echo "branch_id=$branch_id" >> $GITHUB_OUTPUT
 
       - name: db:push
         run: |
