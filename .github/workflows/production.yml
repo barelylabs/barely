@@ -34,7 +34,7 @@ jobs:
 
       - id: git-meta
         run: |
-          github_commit_sha=${{ github.sha }}
+
           github_commit_author_login=${{ github.actor }}
           github_deployment=1
           github_org=${{ github.repository_owner }}
@@ -42,7 +42,17 @@ jobs:
           github_commit_org=${{ github.repository_owner }}
           github_commit_repo=${{ github.repository }}
           github_commit_message=$(git show -s --format=%s $github_commit_sha)
-          github_commit_ref=${{ github.ref }}
+
+          commit_ref=${{ github.ref }}
+          echo "commit_ref: $commit_ref"
+
+          github_commit_sha=$(echo $github_commit_ref | rev | cut -d'-' -f1 | rev)
+
+          branches=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/commits/$commit_sha/branches-where-head)          
+          echo "branches: $branches"
+
+          github_commit_ref=$(echo $branches | jq -r '.[0].name') 
+          echo "github_commit_ref: $github_commit_ref"
 
           vercel_git_metadata="-m githubCommitSha=$github_commit_sha -m githubCommitAuthorName=$github_commit_author_login -m githubCommitAuthorLogin=$github_commit_author_login -m githubDeployment=$github_deployment -m githubOrg=$github_org -m githubRepo=$github_repo -m githubCommitOrg=$github_commit_org -m githubCommitRepo=$github_commit_repo -m githubCommitMessage=\"$github_commit_message\" -m githubCommitRef=$github_commit_ref"                 
 
@@ -86,7 +96,13 @@ jobs:
 
       - id: get-neon-branch
         run: |
-          echo branch_id=$(neonctl branches get ${{ needs.git-meta.outputs.git_branch_name }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --output json | jq -r '.id') >> $GITHUB_OUTPUT
+          branch_id=$(neonctl branches get ${{ needs.git-meta.outputs.git_branch_name }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --output json | jq -r '.id')
+          echo "branch_id: $branch_id"
+          if [[ -z "$branch_id" ]]; then
+            echo "Error: branch_id is undefined or empty"
+            exit 1
+          fi
+          echo "branch_id=$branch_id" >> $GITHUB_OUTPUT
 
       - name: db:push
         run: |
