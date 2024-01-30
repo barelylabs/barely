@@ -1,7 +1,7 @@
 {
   "extends": "@barely/tsconfig/base.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
   },
   "include": [
     "env",
@@ -10,7 +10,7 @@
     "./context/**/*",
     "./hooks/**/*",
     "./server/**/*",
-    "./utils/**/*"
+    "./utils/**/*",
   ],
-  "exclude": ["dist", "build", "node_modules"]
+  "exclude": ["dist", "build", "node_modules"],
 }

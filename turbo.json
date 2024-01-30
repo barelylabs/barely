@@ -16,8 +16,18 @@
         ".vercel/output/**"
       ]
     },
-    "build:vercel": {
-      "dependsOn": ["^build"],
+    "build:preview": {
+      "dependsOn": ["^build:preview"],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "next-env.d.ts",
+        ".output/**",
+        ".vercel/output/**"
+      ]
+    },
+    "build:prod": {
+      "dependsOn": ["^build:prod"],
       "outputs": [
         ".next/**",
         "!.next/cache/**",

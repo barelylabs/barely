@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "pnpm with-env next build",
-    "build:vercel": "pnpm with-env vercel build",
+    "build:preview": "pnpm with-env vercel build",
+    "build:prod": "pnpm with-env vercel build --prod",
     "clean": "git clean -xdf .next .turbo node_modules",
     "dev": "pnpm with-env next dev -- -p 3000",
     "format": "prettier --check . --ignore-path ../../.gitignore",
@@ -33,7 +34,7 @@
     "dotenv-cli": "^7.2.1",
     "fast-deep-equal": "^3.1.3",
     "jotai": "^2.6.1",
-    "next": "^14.0.4",
+    "next": "^14.1.0",
     "object-path-immutable": "^4.1.2",
     "perfect-debounce": "^1.0.0",
     "pusher-js": "^8.3.0",

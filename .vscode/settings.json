@@ -33,5 +33,10 @@
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter"
   },
-  "tinybird.dataProjectSubdir": "tinybird"
+  "tinybird.dataProjectSubdir": "tinybird",
+  "github-actions.workflows.pinned.workflows": [
+    ".github/workflows/preview.yml",
+    ".github/workflows/production.yml",
+    ".github/workflows/ci.yml"
+  ]
 }
