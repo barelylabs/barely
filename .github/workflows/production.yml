@@ -44,7 +44,7 @@ jobs:
 
           commit_ref=${{ github.ref }}
           echo "commit_ref: $commit_ref"
-          github_commit_sha=$(echo $github_commit_ref | awk -F'-' '{print $NF}')
+          github_commit_sha=$(echo $commit_ref | rev | cut -d'-' -f1 | rev)
           echo "github_commit_sha: $github_commit_sha"
           branches=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/commits/$commit_sha/branches-where-head)          
           echo "branches: $branches"
@@ -93,13 +93,7 @@ jobs:
 
       - id: get-neon-branch
         run: |
-          branch_id=$(neonctl branches get ${{ needs.git-meta.outputs.git_branch_name }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --output json | jq -r '.id')
-          echo "branch_id: $branch_id"
-          if [[ -z "$branch_id" ]]; then
-            echo "Error: branch_id is undefined or empty"
-            exit 1
-          fi
-          echo "branch_id=$branch_id" >> $GITHUB_OUTPUT
+          echo branch_id=$(neonctl branches get ${{ needs.git-meta.outputs.git_branch_name }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --output json | jq -r '.id') >> $GITHUB_OUTPUT
 
       - name: db:push
         run: |
