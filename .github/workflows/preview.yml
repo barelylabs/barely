@@ -85,7 +85,7 @@ jobs:
         uses: ./tooling/github/setup
 
       - name: Install the Neon CLI
-        run: pnpm install -g neonctl
+        run: pnpm i -g neonctl
 
       # This is just so the env check doesn't fail on missing variables.
       # DATABASE_URL && DATABASE_POOL_URL will be overwritten below.
@@ -141,10 +141,12 @@ jobs:
           branch_name=${{ needs.git-meta.outputs.git_branch_name }}
 
           if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
+            echo "Removing existing DATABASE_URL env variable from preview branch (git branch: $branch_name)"
             pnpm vercel env rm DATABASE_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
           fi
 
           if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
+            echo "Removing existing DATABASE_POOL_URL env variable from preview branch (git branch: $branch_name)"
             pnpm vercel env rm DATABASE_POOL_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
           fi
 
