@@ -29,13 +29,12 @@ jobs:
       github_commit_ref: ${{ steps.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ steps.git-meta.outputs.vercel_git_metadata }}
     steps:
-      - name: Checkout
+      - name: checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
-      - name: Git Metadata
-        id: git-meta
+      - id: git-meta
         run: |
           github_commit_sha=${{ github.event.pull_request.head.sha }}          
           github_commit_author_login=${{ github.actor }}
@@ -76,24 +75,23 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
     steps:
-      - name: Checkout
+      - name: checkout
         uses: actions/checkout@v4
 
-      - name: Setup node/pnpm/turbo/vercel
+      - name: setup node/pnpm/turbo/vercel
         uses: ./tooling/github/setup
 
-      - name: Install the Neon CLI
+      - name: install neon cli
         run: pnpm i -g neonctl
 
       # This is just so the env check doesn't fail on missing variables.
       # DATABASE_URL && DATABASE_POOL_URL will be overwritten below.
-      - name: Copy env
+      - name: copy env
         shell: bash
         run: cp .env.example .env
 
       # If the branch already exists, this command will fail but the workflow will continue
-      - name: Create a Neon branch
-        id: create-branch
+      - id: create-branch
         run: |
           output=$(neonctl branches create --project-id ${{ secrets.NEON_PROJECT_ID }} --name ${{ needs.git-meta.outputs.git_branch_name }} --api-key ${{ secrets.NEON_API_KEY }} --compute --type read_write 2>&1) || true          
           if [[ $output == *"branch with the provided name \"${{ needs.git-meta.outputs.git_branch_name }}\" already exists"* ]]; then
@@ -103,8 +101,7 @@ jobs:
           fi
 
       # The branch ID is needed to display the URL of the branch in the comment.
-      - name: Get Neon branch
-        id: get-neon-branch
+      - id: get-neon-branch
         run: |
           branch_id=$(neonctl branches get ${{ needs.git-meta.outputs.git_branch_name }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --output json | jq -r '.id')
           echo "branch_id=$branch_id" >> $GITHUB_ENV          
@@ -116,7 +113,6 @@ jobs:
           echo "DATABASE_POOL_URL=$DATABASE_POOL_URL" >> $GITHUB_ENV
 
       - name: db:push
-        id: drizzle
         run: |
           rm -f .env
           touch .env
@@ -131,7 +127,7 @@ jobs:
 
       # Using Vercel as our secret store for the DATABASE_URL and DATABASE_POOL_URL
       # -- to my knowledge, using an external store is the only way to pass secrets between Github Actions jobs?
-      - name: Update Vercel Env Variables for App Preview Branch
+      - name: update vercel env - app/preview/branch
         run: |
           echo "DATABASE_URL: $DATABASE_URL"
           echo "DATABASE_POOL_URL: $DATABASE_POOL_URL"
@@ -151,7 +147,7 @@ jobs:
           echo $DATABASE_URL | pnpm vercel env add DATABASE_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
           echo $DATABASE_POOL_URL | pnpm vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Update Vercel Env Variables for Link Preview Branch
+      - name: update vercel env - link/preview/branch
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
         run: |
@@ -187,21 +183,20 @@ jobs:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
     steps:
-      - name: Checkout
+      - name: checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
-      - name: Setup
+      - name: setup node/pnpm/turbo/vercel
         uses: ./tooling/github/setup
 
-      - name: Link Vercel CLI
+      - name: link vercel
         run: |
           pnpm vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
           pnpm vercel link --cwd apps/app --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Pull Vercel -- App
-        id: vercel-env-app
+      - name: pull vercel - app
         run: |
           pnpm vercel pull --cwd apps/app --yes --environment=preview --git-branch=${{ needs.git-meta.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
 
@@ -210,10 +205,10 @@ jobs:
           echo "VERCEL_URL=\"$VERCEL_URL\"" >> ./apps/app/.vercel/.env.preview.local                    
           cp ./apps/app/.vercel/.env.preview.local .env
 
-      - name: Build App Project Artifacts
+      - name: build project artifacts
         run: turbo build:preview --filter=@barely/app --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Deploy App Preview to Vercel
+      - name: deploy preview to vercel
         id: deploy-app
         run: |
           preview_url=$(pnpm vercel deploy --cwd apps/app --prebuilt ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})          
@@ -244,21 +239,20 @@ jobs:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
     steps:
-      - name: Checkout
+      - name: checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
-      - name: Setup
+      - name: setup node/pnpm/turbo/vercel
         uses: ./tooling/github/setup
 
-      - name: Vercel Link CLI
+      - name: link vercel
         run: |
           pnpm vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
           pnpm vercel link --cwd apps/link --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Pull Vercel
-        id: vercel-env
+      - name: pull vercel
         run: |
           pnpm vercel pull --cwd apps/link --yes --environment=preview --git-branch=${{ needs.git-meta.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
 
@@ -267,10 +261,10 @@ jobs:
           echo "VERCEL_URL=\"$VERCEL_URL\"" >> ./apps/link/.vercel/.env.preview.local                    
           cp ./apps/link/.vercel/.env.preview.local .env
 
-      - name: Build Project Artifacts
+      - name: build project artifacts
         run: turbo build:preview --filter=@barely/link --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Deploy Preview to Vercel
+      - name: deploy preview to vercel
         id: deploy-link
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
@@ -292,15 +286,14 @@ jobs:
   #//////////////////#
 
   comment:
-    name: Comment on Pull Request
     if: always() && github.event_name == 'pull_request'
     needs: [neon-preview, deploy-app, deploy-link]
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: checkout
         uses: actions/checkout@v4
 
-      - name: Comment on Pull Request
+      - name: comment on pull request
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
@@ -310,7 +303,7 @@ jobs:
 
             :link: :rocket: :: ${{ needs.deploy-link.outputs.preview_url }}
             :link: :mag: :: ${{ needs.deploy-link.outputs.inspect_url }}
-            ## dbs
+            ## db
             :elephant: :mag: :: https://console.neon.tech/app/projects/${{ secrets.NEON_PROJECT_ID }}/branches/${{ needs.neon-preview.outputs.neon_branch_id }}
 
   preview--can-merge:
