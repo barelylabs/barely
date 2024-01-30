@@ -267,7 +267,7 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Promote app to production
-        run: vercel promote dpl_${{ needs.deploy-app.outputs.deployment_id }} --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel promote dpl_${{ needs.deploy-app.outputs.deployment_id }} --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
 
   promote-link:
     name: promote link to production
