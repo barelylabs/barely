@@ -182,6 +182,9 @@ jobs:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
+    outputs:
+      preview_url: ${{ steps.deploy-app.outputs.preview_url }}
+      inspect_url: ${{ steps.deploy-app.outputs.inspect_url }}
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -219,10 +222,6 @@ jobs:
           inspect_url="https://vercel.com/barelylabs/app/$deployment_id"
           echo "inspect_url=$inspect_url" >> $GITHUB_OUTPUT
 
-    outputs:
-      preview_url: ${{ steps.deploy-app.outputs.preview_url }}
-      inspect_url: ${{ steps.deploy-app.outputs.inspect_url }}
-
   #////////////////////////#
   # 🔗 DEPLOY LINK PREVIEW #
   #////////////////////////#
@@ -238,6 +237,9 @@ jobs:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
+    outputs:
+      preview_url: ${{ steps.deploy-link.outputs.preview_url }}
+      inspect_url: ${{ steps.deploy-link.outputs.inspect_url }}
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -276,10 +278,6 @@ jobs:
           deployment_id=$(echo "$inspect" | grep -m 1 '^    id' | awk '{print $NF}' | cut -d'_' -f 2-)
           inspect_url="https://vercel.com/barelylabs/link/$deployment_id"
           echo "inspect_url=$inspect_url" >> $GITHUB_OUTPUT
-
-    outputs:
-      preview_url: ${{ steps.deploy-link.outputs.preview_url }}
-      inspect_url: ${{ steps.deploy-link.outputs.inspect_url }}
 
   #//////////////////#
   # 💬 COMMENT ON PR #
