@@ -42,7 +42,7 @@ jobs:
           github_commit_repo=${{ github.repository }}
           github_commit_message=$(git show -s --format=%s $github_commit_sha)
 
-          commit_ref=${{ github.ref }}
+          commit_ref=${{ github.head_ref }}
           echo "commit_ref: $commit_ref"
           github_commit_sha=$(echo $commit_ref | rev | cut -d'-' -f1 | rev)
           echo "github_commit_sha: $github_commit_sha"
@@ -324,8 +324,8 @@ jobs:
   #/////////////#
 
   delete-neon-branch:
-    needs: [db-push, promote-app, promote-link]
-    if: always() && github.event_name == 'merge_group'
+    needs: [git-meta, db-push, promote-app, promote-link]
+    if: always() && github.event_name == 'merge_group' && needs.git-meta.outputs.git_branch_name != 'main'
     runs-on: ubuntu-latest
     steps:
       - name: Delete Neon Branch
