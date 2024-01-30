@@ -44,7 +44,7 @@ jobs:
 
           commit_ref=${{ github.ref }}
           echo "commit_ref: $commit_ref"
-          github_commit_sha=$(echo $github_commit_ref | rev | cut -d'-' -f1 | rev)
+          github_commit_sha=$(echo $github_commit_ref | awk -F'-' '{print $NF}')
           echo "github_commit_sha: $github_commit_sha"
           branches=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/commits/$commit_sha/branches-where-head)          
           echo "branches: $branches"
