@@ -33,7 +33,10 @@ jobs:
           fetch-depth: 2
 
       - id: git-meta
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
+          echo "$GITHUB_CONTEXT"
           github_commit_author_login=${{ github.actor }}
           github_deployment=1
           github_org=${{ github.repository_owner }}
@@ -42,7 +45,7 @@ jobs:
           github_commit_repo=${{ github.repository }}
           github_commit_message=$(git show -s --format=%s $github_commit_sha)
 
-          commit_ref=${{ github.head_ref }}
+          commit_ref=${{ github.ref }}
           echo "commit_ref: $commit_ref"
           github_commit_sha=$(echo $commit_ref | rev | cut -d'-' -f1 | rev)
           echo "github_commit_sha: $github_commit_sha"
@@ -50,6 +53,11 @@ jobs:
           echo "branches: $branches"
           github_commit_ref=$(echo $branches | jq -r '.[0].name') 
           echo "github_commit_ref: $github_commit_ref"
+
+          if [ "$github_commit_ref" = "main" ]; then
+            echo "Error: Cannot proceed with 'main' branch."
+            exit 1
+          fi
 
           vercel_git_metadata="-m githubCommitSha=$github_commit_sha -m githubCommitAuthorName=$github_commit_author_login -m githubCommitAuthorLogin=$github_commit_author_login -m githubDeployment=$github_deployment -m githubOrg=$github_org -m githubRepo=$github_repo -m githubCommitOrg=$github_commit_org -m githubCommitRepo=$github_commit_repo -m githubCommitMessage=\"$github_commit_message\" -m githubCommitRef=$github_commit_ref"                 
 
