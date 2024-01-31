@@ -5,6 +5,7 @@ import { auth } from "@barely/server/auth";
 export default auth((req) => {
   console.log("middleware :: url => ", req.url);
   console.log("middleware :: VERCEL_URL => ", process.env.VERCEL_URL);
+  console.log("middleware :: process.env => ", process.env);
 
   if (!req.auth?.user)
     return NextResponse.redirect(absoluteUrl("app", "login"));
