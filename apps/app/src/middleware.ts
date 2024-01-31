@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { absoluteUrl } from "@barely/lib/utils/url";
+import { getAbsoluteUrl } from "@barely/lib/utils/url";
 import { auth } from "@barely/server/auth";
 
 export default auth((req) => {
@@ -8,7 +8,7 @@ export default auth((req) => {
   console.log("middleware :: process.env => ", process.env);
 
   if (!req.auth?.user)
-    return NextResponse.redirect(absoluteUrl("app", "login"));
+    return NextResponse.redirect(getAbsoluteUrl("app", "login"));
 
   return NextResponse.next();
 });

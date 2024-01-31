@@ -16,7 +16,7 @@ export function getShortLinkUrlFromLink(link: Link) {
     process.env.NODE_ENV === "development" ||
     process.env.NODE_ENV === "test"
   ) {
-    return `${env.NEXT_PUBLIC_LINK_ABSOLUTE_BASE_URL}/${link.key}?domain=${link.domain}`;
+    return `${env.NEXT_PUBLIC_LINK_BASE_URL}/${link.key}?domain=${link.domain}`;
   }
   return `https://${link.domain}/${link.key}`;
 }
@@ -182,7 +182,7 @@ export function constructMetadata({
       creator: "@dubdotco",
     },
     icons,
-    metadataBase: new URL(env.NEXT_PUBLIC_APP_ABSOLUTE_BASE_URL),
+    metadataBase: new URL(env.NEXT_PUBLIC_APP_BASE_URL),
     ...(noIndex && {
       robots: {
         index: false,

@@ -1,82 +1,57 @@
 import { z } from "zod";
 
-function getBaseUrl({
-  devPort,
-  absolute = false,
-}: {
-  devPort?: string;
-  absolute?: boolean;
-}) {
-  if (!absolute && typeof window !== "undefined") {
-    return ""; // browser should use relative url
-  }
-
-  const vercelEnv =
-    process.env.VERCEL_ENV ?? process.env.NEXT_PUBLIC_VERCEL_ENV ?? null;
-  const vercelUrl =
-    process.env.VERCEL_URL ?? process.env.NEXT_PUBLIC_VERCEL_URL ?? null;
-
-  if (vercelEnv === "production" || vercelEnv === "preview") {
-    if (!vercelUrl) throw new Error("VERCEL_URL not found");
-    return `https://${vercelUrl}`; // SSR should use vercel url
-  }
-
-  if (!devPort) console.error("devPort not found for base url, yo.");
-
-  return `http://localhost:${devPort ?? ""}`; // dev SSR should use localhost
-}
-
 export const processEnv = {
   // VARIABLES
   RATE_LIMIT_RECORD_LINK_CLICK: process.env.RATE_LIMIT_RECORD_LINK_CLICK,
-
-  // CALCULATED (we're calculating these here to make it easier to use them in the app)
-  NEXT_PUBLIC_APP_BASE_URL: getBaseUrl({
-    devPort: process.env.NEXT_PUBLIC_APP_DEV_PORT,
-  }),
-  NEXT_PUBLIC_APP_ABSOLUTE_BASE_URL: getBaseUrl({
-    devPort: process.env.NEXT_PUBLIC_APP_DEV_PORT,
-    absolute: true,
-  }),
-  NEXT_PUBLIC_LINK_BASE_URL: getBaseUrl({
-    devPort: process.env.NEXT_PUBLIC_LINK_DEV_PORT,
-  }),
-  NEXT_PUBLIC_LINK_ABSOLUTE_BASE_URL: getBaseUrl({
-    devPort: process.env.NEXT_PUBLIC_LINK_DEV_PORT,
-    absolute: true,
-  }),
-  NEXT_PUBLIC_WWW_BASE_URL: getBaseUrl({
-    devPort: process.env.NEXT_PUBLIC_WWW_DEV_PORT,
-  }),
-  NEXT_PUBLIC_WWW_ABSOLUTE_BASE_URL: getBaseUrl({
-    devPort: process.env.NEXT_PUBLIC_WWW_DEV_PORT,
-    absolute: true,
-  }),
 
   /**
    * We have to destructure all variables from process.env to keep from tree-shaking them away 🤦‍♂️
    * */
 
-  // CLIENT
+  /**
+   * CLIENT
+   * */
+
+  NEXT_PUBLIC_CURRENT_APP: process.env.NEXT_PUBLIC_CURRENT_APP,
+
+  // APP
+  NEXT_PUBLIC_APP_BASE_URL: process.env.NEXT_PUBLIC_APP_BASE_URL,
   NEXT_PUBLIC_APP_DEV_PORT: process.env.NEXT_PUBLIC_APP_DEV_PORT,
-  NEXT_PUBLIC_WWW_DEV_PORT: process.env.NEXT_PUBLIC_WWW_DEV_PORT,
+
+  // LINK
   NEXT_PUBLIC_LINK_DEV_PORT: process.env.NEXT_PUBLIC_LINK_DEV_PORT,
+  NEXT_PUBLIC_LINK_BASE_URL: process.env.NEXT_PUBLIC_LINK_BASE_URL,
   NEXT_PUBLIC_TRANSPARENT_LINK_ROOT_DOMAIN:
     process.env.NEXT_PUBLIC_TRANSPARENT_LINK_ROOT_DOMAIN,
   NEXT_PUBLIC_SHORT_LINK_ROOT_DOMAIN:
     process.env.NEXT_PUBLIC_SHORT_LINK_ROOT_DOMAIN,
+
+  // WWW
+  NEXT_PUBLIC_WWW_DEV_PORT: process.env.NEXT_PUBLIC_WWW_DEV_PORT,
+  NEXT_PUBLIC_WWW_BASE_URL: process.env.NEXT_PUBLIC_WWW_BASE_URL,
+
+  // CLOUDINARY
   NEXT_PUBLIC_CLOUDINARY_API_KEY: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
   NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME:
     process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+
+  // STRIPE
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+
+  // PUSHER
   NEXT_PUBLIC_PUSHER_APP_KEY: process.env.NEXT_PUBLIC_PUSHER_APP_KEY,
   NEXT_PUBLIC_PUSHER_APP_CLUSTER: process.env.NEXT_PUBLIC_PUSHER_APP_CLUSTER,
   NEXT_PUBLIC_PUSHER_APP_ID: process.env.NEXT_PUBLIC_PUSHER_APP_ID,
+
+  // VERCEL
   NEXT_PUBLIC_VERCEL_ENV: process.env.NEXT_PUBLIC_VERCEL_ENV,
   NEXT_PUBLIC_VERCEL_URL: process.env.NEXT_PUBLIC_VERCEL_URL,
 
-  // SERVER
+  /**
+   * SERVER
+   * */
+
   BOT_SPOTIFY_ACCOUNT_ID: process.env.BOT_SPOTIFY_ACCOUNT_ID,
   BOT_THREADS_API_KEY: process.env.BOT_THREADS_API_KEY,
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
@@ -112,7 +87,7 @@ export const processEnv = {
 };
 
 export const clientEnvSchema = z.object({
-  NEXT_PUBLIC_APP_ABSOLUTE_BASE_URL: z.string(),
+  NEXT_PUBLIC_CURRENT_APP: z.enum(["app", "link", "www"]),
   NEXT_PUBLIC_APP_BASE_URL: z.string(),
   NEXT_PUBLIC_APP_DEV_PORT: z
     .string()
@@ -120,7 +95,6 @@ export const clientEnvSchema = z.object({
     .refine((v) => process.env.VERCEL_ENV !== "development" || !!v, {
       message: "You need a dev port in order to run the app locally",
     }),
-  NEXT_PUBLIC_LINK_ABSOLUTE_BASE_URL: z.string(),
   NEXT_PUBLIC_LINK_BASE_URL: z.string(),
   NEXT_PUBLIC_LINK_DEV_PORT: z
     .string()
@@ -128,7 +102,6 @@ export const clientEnvSchema = z.object({
     .refine((v) => process.env.VERCEL_ENV !== "development" || !!v, {
       message: "You need a dev port in order to run the app locally",
     }),
-  NEXT_PUBLIC_WWW_ABSOLUTE_BASE_URL: z.string(),
   NEXT_PUBLIC_WWW_BASE_URL: z.string(),
   NEXT_PUBLIC_WWW_DEV_PORT: z
     .string()
@@ -146,6 +119,7 @@ export const clientEnvSchema = z.object({
   NEXT_PUBLIC_PUSHER_APP_KEY: z.string(),
   NEXT_PUBLIC_PUSHER_APP_CLUSTER: z.string(),
   NEXT_PUBLIC_PUSHER_APP_ID: z.string(),
+  NEXT_PUBLIC_VERCEL_ENV: z.enum(["development", "preview", "production"]),
 });
 
 type RateLimitTime =

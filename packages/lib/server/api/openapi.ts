@@ -7,5 +7,5 @@ import { edgeRouter } from "./router.edge";
 export const openApiDocument = generateOpenApiDocument(edgeRouter, {
   title: "tRPC OpenAPI",
   version: "1.0.0",
-  baseUrl: env.NEXT_PUBLIC_APP_ABSOLUTE_BASE_URL,
+  baseUrl: env.NEXT_PUBLIC_APP_BASE_URL,
 });
