@@ -57,3 +57,8 @@ export function getAbsoluteUrl(app: "app" | "link" | "www", path?: string) {
   const appBaseUrl = getBaseUrl(app, true);
   return `${appBaseUrl}${path ? `/${path}` : ""}`;
 }
+
+export function getUrl(app: "app" | "link" | "www", path?: string) {
+  const appBaseUrl = getBaseUrl(app);
+  return `${appBaseUrl}${path ? `/${path}` : ""}`;
+}
