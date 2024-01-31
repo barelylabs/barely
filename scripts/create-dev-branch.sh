@@ -2,13 +2,13 @@
 
 me=$(neonctl me | awk -F '│' 'NR==4{print $2}' | tr -d ' ')
 currentBranch=$(git rev-parse --abbrev-ref HEAD)
-branchName=${currentBranch}_dev_${me}
+branchName=dev_${me}_${currentBranch}
 
 # Use the output in the neonctl command
 if neonctl branches get $branchName; then
     echo "Branch $branchName already exists."
 else
-    neonctl branches create $branchName
+    neonctl branches create --name $branchName
 fi
 
 # Get the connection string for the branch

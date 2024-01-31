@@ -50,7 +50,6 @@ export function TRPCReactProvider(props: {
         (runtime) => {
           const servers = {
             node: unstable_httpBatchStreamLink({
-              // url: `${env.NEXT_PUBLIC_APP_BASE_URL}/api/node`,
               url: getUrl("app", "api/node"),
               headers() {
                 return preparedHeaders;
@@ -58,7 +57,6 @@ export function TRPCReactProvider(props: {
             })(runtime),
 
             edge: unstable_httpBatchStreamLink({
-              // url: `${env.NEXT_PUBLIC_APP_BASE_URL}/api/edge`,
               url: getUrl("app", "api/edge"),
               headers() {
                 return preparedHeaders;

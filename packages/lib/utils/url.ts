@@ -11,11 +11,6 @@ export function getBaseUrl(app: "app" | "link" | "www", absolute = false) {
     process.env.NEXT_PUBLIC_VERCEL_ENV ??
     raise("getBaseUrl :: VERCEL_ENV not found");
 
-  const vercelUrl =
-    process.env.VERCEL_URL ??
-    process.env.NEXT_PUBLIC_VERCEL_URL ??
-    raise("getBaseUrl :: VERCEL_URL not found");
-
   if (vercelEnv === "development") {
     const devPort =
       app === "app"
@@ -31,6 +26,11 @@ export function getBaseUrl(app: "app" | "link" | "www", absolute = false) {
 
     return `http://localhost:${devPort}`; // dev SSR should use localhost
   }
+
+  const vercelUrl =
+    process.env.VERCEL_URL ??
+    process.env.NEXT_PUBLIC_VERCEL_URL ??
+    raise("getBaseUrl :: VERCEL_URL not found");
 
   const baseUrl =
     app === "app"

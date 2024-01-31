@@ -19,6 +19,7 @@ import { env } from "../env";
 import { newId } from "../utils/id";
 import { sendText } from "../utils/sms";
 import { sqlAnd } from "../utils/sql";
+import { getAbsoluteUrl } from "../utils/url";
 import { createLoginLink } from "./auth/auth.fns";
 import { Campaigns } from "./campaign.sql";
 import { Tracks } from "./track.sql";
@@ -233,7 +234,7 @@ export async function createPlaylistPitchCampaign(props: {
     type: "transactional",
     react: PlaylistPitchToScreenEmailTemplate({
       firstName: "Adam",
-      loginLink: `${env.NEXT_PUBLIC_APP_BASE_URL}/screen`,
+      loginLink: getAbsoluteUrl("app", "screen"), //fixme: this needs a handle
     }),
   });
 
@@ -249,7 +250,7 @@ export async function createPlaylistPitchCampaign(props: {
       user: props.user,
       provider: "email",
       identifier: props.user.email,
-      callbackPath: `${env.NEXT_PUBLIC_APP_BASE_URL}/${campaign.workspace.handle}/campaigns`,
+      callbackPath: `${campaign.workspace.handle}/campaigns`,
     });
 
     await sendEmail({
