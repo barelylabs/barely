@@ -1,78 +1,64 @@
 import { env } from "../env";
 import { raise } from "./raise";
 
-export function absoluteUrl(site: "app" | "link" | "www", path: string) {
-  // console.log("process.env => ", process.env);
-  // console.log("env => ", env);
+export function getBaseUrl(app: "app" | "link" | "www", absolute = false) {
+  if (!absolute && typeof window !== "undefined") return ""; // browser should use relative url
 
-  const siteBaseUrl =
-    site === "app"
+  const currentApp = env.NEXT_PUBLIC_CURRENT_APP;
+
+  const vercelEnv =
+    process.env.VERCEL_ENV ??
+    process.env.NEXT_PUBLIC_VERCEL_ENV ??
+    raise("getBaseUrl :: VERCEL_ENV not found");
+
+  if (vercelEnv === "development") {
+    const devPort =
+      app === "app"
+        ? env.NEXT_PUBLIC_APP_DEV_PORT ??
+          raise("NEXT_PUBLIC_APP_DEV_PORT not found")
+        : app === "link"
+          ? env.NEXT_PUBLIC_LINK_DEV_PORT ??
+            raise("NEXT_PUBLIC_LINK_DEV_PORT not found")
+          : app === "www"
+            ? env.NEXT_PUBLIC_WWW_DEV_PORT ??
+              raise("NEXT_PUBLIC_WWW_DEV_PORT not found")
+            : raise("Invalid app");
+
+    return `http://localhost:${devPort}`; // dev SSR should use localhost
+  }
+
+  const vercelUrl =
+    process.env.VERCEL_URL ??
+    process.env.NEXT_PUBLIC_VERCEL_URL ??
+    raise("getBaseUrl :: VERCEL_URL not found");
+
+  const baseUrl =
+    app === "app"
       ? env.NEXT_PUBLIC_APP_BASE_URL
-      : site === "link"
+      : app === "link"
         ? env.NEXT_PUBLIC_LINK_BASE_URL
-        : site === "www"
+        : app === "www"
           ? env.NEXT_PUBLIC_WWW_BASE_URL
-          : raise(`Invalid proj`);
+          : raise("Invalid app");
 
-  return `${siteBaseUrl}/${path}`;
+  if (vercelEnv === "preview") {
+    const previewBaseUrl = app === currentApp ? vercelUrl : baseUrl;
+    return `https://${previewBaseUrl}`; // SSR should use vercel url
+  }
+
+  if (vercelEnv === "production") {
+    return `https://${baseUrl}`;
+  }
+
+  return raise("getBaseUrl :: Invalid vercel env");
 }
 
-// export function getBaseUrl({
-//   devPort,
-//   absolute = false,
-// }: {
-//   devPort?: string;
-//   absolute?: boolean;
-// }) {
-//   if (!absolute && typeof window !== "undefined") {
-//     return ""; // browser should use relative url
-//   }
+export function getAbsoluteUrl(app: "app" | "link" | "www", path?: string) {
+  const appBaseUrl = getBaseUrl(app, true);
+  return `${appBaseUrl}${path ? `/${path}` : ""}`;
+}
 
-//   if (
-//     process.env.VERCEL_ENV === "production" ||
-//     process.env.VERCEL_ENV === "preview"
-//   ) {
-//     if (!process.env.VERCEL_URL) throw new Error("VERCEL_URL not found");
-//     return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
-//   }
-
-//   if (!devPort) console.error("devPort not found for base url");
-
-//   return `http://localhost:${devPort ?? ""}`; // dev SSR should use localhost
-// }
-
-// export function absoluteUrl_App(path: string) {
-//   return `${env.NEXT_PUBLIC_APP_ABSOLUTE_BASE_URL}${path}`;
-// }
-
-// export function getBaseUrl(devPort?: string) {
-//   if (typeof window !== "undefined") {
-//     return ""; // browser should use relative url
-//   }
-
-//   if (
-//     process.env.VERCEL_ENV === "production" ||
-//     process.env.VERCEL_ENV === "preview"
-//   ) {
-//     if (!process.env.VERCEL_URL) throw new Error("VERCEL_URL not found");
-//     return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
-//   }
-
-//   if (!devPort) console.error("devPort not found for base url");
-
-//   return `http://localhost:${devPort ?? ""}`; // dev SSR should use localhost
-// }
-
-// export function getAbsoluteBaseUrl(devPort?: string) {
-//   if (
-//     process.env.VERCEL_ENV === "production" ||
-//     process.env.VERCEL_ENV === "preview"
-//   ) {
-//     if (!process.env.VERCEL_URL) throw new Error("VERCEL_URL not found");
-//     return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
-//   }
-
-//   if (!devPort) console.error("devPort not found for base url");
-
-//   return `http://localhost:${devPort ?? ""}`; // dev SSR should use localhost
-// }
+export function getUrl(app: "app" | "link" | "www", path?: string) {
+  const appBaseUrl = getBaseUrl(app);
+  return `${appBaseUrl}${path ? `/${path}` : ""}`;
+}

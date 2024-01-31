@@ -14,7 +14,7 @@ import {
   parseUserAgent,
 } from "@barely/lib/utils/middleware";
 import { sqlAnd } from "@barely/lib/utils/sql";
-import { absoluteUrl } from "@barely/lib/utils/url";
+import { getAbsoluteUrl } from "@barely/lib/utils/url";
 import { eq, isNull } from "drizzle-orm";
 
 import type { RecordClickProps } from "@barely/lib/server/event.fns";
@@ -47,11 +47,11 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
   if (linkProps.linkClickType === "transparentLinkClick") {
     if (!linkProps.handle && !linkProps.app)
       // return NextResponse.rewrite(`${WWW_BASE_URL}/link`);
-      return NextResponse.rewrite(absoluteUrl("www", "/link"));
+      return NextResponse.rewrite(getAbsoluteUrl("www", "/link"));
 
     // if (!linkProps.handle) return NextResponse.rewrite(`${LINK_BASE_URL}/404`);
     if (!linkProps.handle)
-      return NextResponse.rewrite(absoluteUrl("link", "/404"));
+      return NextResponse.rewrite(getAbsoluteUrl("link", "/404"));
 
     where = sqlAnd([
       eq(Links.handle, linkProps.handle),
@@ -68,7 +68,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
   }
 
   // if (!where) return NextResponse.rewrite(`${LINK_BASE_URL}/404`);
-  if (!where) return NextResponse.rewrite(absoluteUrl("link", "/404"));
+  if (!where) return NextResponse.rewrite(getAbsoluteUrl("link", "/404"));
 
   const link: LinkAnalyticsProps | undefined =
     await db.http.query.Links.findFirst({

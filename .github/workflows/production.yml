@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     if: always() && github.event_name == 'merge_group'
     outputs:
-      git_branch_name: ${{ steps.git-meta.outputs.github_commit_ref }}
+      git_pr_branch_name: ${{ steps.git-meta.outputs.github_commit_ref }}
       github_commit_sha: ${{ steps.git-meta.outputs.github_commit_sha }}
       github_commit_author_name: ${{ steps.git-meta.outputs.github_commit_author_name }}
       github_commit_author_login: ${{ steps.git-meta.outputs.github_commit_author_login }}
@@ -40,14 +40,12 @@ jobs:
           github_repo=${{ github.repository }}
           github_commit_org=${{ github.repository_owner }}
           github_commit_repo=${{ github.repository }}
-          github_commit_message=$(git show -s --format=%)
+          github_commit_message=$(git show -s --format=%)          
 
           commit_ref=${{ github.ref }}
-          echo "commit_ref: $commit_ref"
+          echo "commit_ref: $commit_ref"          
 
-          pr_number=$(echo $commit_ref | awk -F'/' '{print $5}' | awk -F'-' '{print $2}')
-          echo "pr_number: $pr_number"
-
+          pr_number=$(echo $commit_ref | awk -F'/' '{print $5}' | awk -F'-' '{print $2}')          
           pr_info=$(curl -s H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/pulls/$pr_number)
 
           github_commit_ref=$(echo $pr_info | jq -r '.head.ref')
@@ -103,7 +101,7 @@ jobs:
 
       - id: get-neon-branch
         run: |
-          echo branch_id=$(neonctl branches get ${{ needs.git-meta.outputs.git_branch_name }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --output json | jq -r '.id') >> $GITHUB_OUTPUT
+          echo branch_id=$(neonctl branches get main --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --output json | jq -r '.id') >> $GITHUB_OUTPUT
 
       - name: db:push
         run: |
@@ -335,12 +333,11 @@ jobs:
 
   delete-neon-branch:
     needs: [git-meta, db-push, promote-app, promote-link]
-    if: always() && github.event_name == 'merge_group' && needs.git-meta.outputs.git_branch_name != 'main'
+    if: always() && github.event_name == 'merge_group' && needs.git-meta.outputs.git_pr_branch_name != 'main'
     runs-on: ubuntu-latest
     steps:
-      - name: Delete Neon Branch
-        uses: neondatabase/delete-branch-action@v3
-        with:
-          project_id: ${{ secrets.NEON_PROJECT_ID }}
-          branch: ${{ needs.db-push.outputs.neon_branch_id }}
-          api_key: ${{ secrets.NEON_API_KEY }}
+      - name: install neon cli
+        run: npm i -g neonctl
+
+      - name: delete neon branch
+        run: neonctl branches delete ${{ needs.git-meta.outputs.git_pr_branch_name }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }}

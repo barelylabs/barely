@@ -6,7 +6,7 @@ import type { SessionUser } from ".";
 import { auth } from ".";
 import { env } from "../../env";
 import { raise } from "../../utils/raise";
-import { absoluteUrl } from "../../utils/url";
+import { getAbsoluteUrl } from "../../utils/url";
 import { db } from "../db";
 import { UserSessions } from "../user-session.sql";
 import { Users } from "../user.sql";
@@ -28,7 +28,7 @@ export async function createLoginLink(props: CreateLoginLinkProps) {
 
   let callbackUrl: string;
   if (props.callbackPath) {
-    callbackUrl = absoluteUrl("app", props.callbackPath);
+    callbackUrl = getAbsoluteUrl("app", props.callbackPath);
     console.log("callbackPath provided, using it: ", callbackUrl);
   } else if (props.user) {
     console.log(
@@ -38,7 +38,7 @@ export async function createLoginLink(props: CreateLoginLinkProps) {
     console.log("defaultWorkspace", defaultWorkspace);
     console.log("defaultWorkspace.handle", defaultWorkspace.handle);
 
-    callbackUrl = absoluteUrl("app", `${defaultWorkspace.handle}/links`);
+    callbackUrl = getAbsoluteUrl("app", `${defaultWorkspace.handle}/links`);
     console.log("callbackUrl", callbackUrl);
   } else {
     throw new Error("Either callbackPath or user must be defined");
@@ -63,9 +63,10 @@ export async function createLoginLink(props: CreateLoginLinkProps) {
   if (props.provider === "email") params.append("email", props.identifier);
   if (props.provider === "phone") params.append("phone", props.identifier);
 
-  return `${env.NEXT_PUBLIC_APP_BASE_URL}/api/auth/callback/${
-    props.provider
-  }?${params.toString()}`;
+  return getAbsoluteUrl(
+    "app",
+    `api/auth/callback/${props.provider}?${params.toString()}`,
+  );
 }
 
 export async function getDefaultWorkspaceOfCurrentUser() {

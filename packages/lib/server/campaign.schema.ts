@@ -92,24 +92,6 @@ const playlistPitchGenresSchema = z
     );
 
     return totalCurators > playlistPitchSettings.minCuratorReach;
-    // const res = await zGet(
-    //   `${
-    //     env.NEXT_PUBLIC_APP_BASE_URL
-    //   }/api/rest/playlist/reach-by-genres?genres=${encodeURIComponent(
-    //     g.map((_g) => _g.name).join(","),
-    //   )}`,
-    //   z.object({ totalPlaylists: z.number(), totalCurators: z.number() }),
-    // );
-
-    // console.log("totalPlaylistReach => ", res);
-
-    // if (res.success && res.parsed) {
-    //   return res.data.totalPlaylists > playlistPitchSettings.minCuratorReach;
-    // }
-
-    // console.error("Failed to get totalPlaylistReach", res.data);
-
-    return false;
   }, "More curators plz");
 
 export const updatePlaylistPitchCampaign_ScreeningSchema = z.object({

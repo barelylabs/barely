@@ -9,9 +9,6 @@ import { z } from "zod";
 import type { SessionUser } from "./auth";
 import type { Track } from "./track.schema";
 import type { Workspace } from "./workspace.schema";
-import { env } from "../env";
-// import { APP_BASE_URL } from "../utils/constants";
-
 import { convertToHandle } from "../utils/handle";
 import { newCuid, newId } from "../utils/id";
 import { pushEvent } from "../utils/pusher-server";
@@ -572,7 +569,7 @@ export const campaignRouter = router({
           user,
           provider: "email",
           identifier: campaign.createdBy.email,
-          callbackPath: `${env.NEXT_PUBLIC_APP_BASE_URL}/${campaign.workspace.handle}/campaign/${campaign.id}/launch`,
+          callbackPath: `${campaign.workspace.handle}/campaign/${campaign.id}/launch`,
         });
 
         console.log("sending pitch approved email");
@@ -601,7 +598,7 @@ export const campaignRouter = router({
             user,
             provider: "phone",
             identifier: campaign.createdBy.phone,
-            callbackPath: `${env.NEXT_PUBLIC_APP_BASE_URL}/${campaign.workspace.handle}/campaigns/${campaign.id}/launch`,
+            callbackPath: `${campaign.workspace.handle}/campaigns/${campaign.id}/launch`,
           });
 
           console.log("phoneLoginLink", phoneLoginLink);
