@@ -161,7 +161,7 @@ jobs:
       - name: deploy to vercel
         id: deploy
         run: |
-          deploy_url=$(pnpm vercel deploy --cwd apps/app --prebuilt --prod --skip-domain ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})
+          deploy_url=$(pnpm vercel deploy --cwd apps/app --prebuilt --prod ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})
           echo deploy_url=$deploy_url >> $GITHUB_OUTPUT
 
           inspect=$(pnpm vercel inspect $deploy_url --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
@@ -218,7 +218,7 @@ jobs:
       - name: deploy to vercel
         id: deploy
         run: |
-          deploy_url=$(pnpm vercel deploy --cwd apps/link --prebuilt --prod --skip-domain ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})
+          deploy_url=$(pnpm vercel deploy --cwd apps/link --prebuilt --prod ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})
           echo deploy_url=$deploy_url >> $GITHUB_OUTPUT
 
           inspect=$(pnpm vercel inspect $deploy_url --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
@@ -251,37 +251,37 @@ jobs:
   #//////////////////////////////////////////
   # -- at a later date, we could decouple this promotion step from deploying & merging to main
 
-  promote-app:
-    name: promote app to production
-    needs: [production--can-merge, deploy-app]
-    if: always() && github.event_name == 'merge_group'
-    runs-on: ubuntu-latest
-    env:
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
-    steps:
-      - name: Install Vercel CLI
-        run: npm i -g vercel@latest
+  # promote-app:
+  #   name: promote app to production
+  #   needs: [production--can-merge, deploy-app]
+  #   if: always() && github.event_name == 'merge_group'
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  #     VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+  #     VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
+  #   steps:
+  #     - name: Install Vercel CLI
+  #       run: npm i -g vercel@latest
 
-      - name: Promote app to production
-        run: vercel promote dpl_${{ needs.deploy-app.outputs.deployment_id }} --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
+  #     - name: Promote app to production
+  #       run: vercel promote dpl_${{ needs.deploy-app.outputs.deployment_id }} --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
 
-  promote-link:
-    name: promote link to production
-    needs: [production--can-merge, deploy-link]
-    if: always() && github.event_name == 'merge_group'
-    runs-on: ubuntu-latest
-    env:
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
-    steps:
-      - name: Install Vercel CLI
-        run: npm i -g vercel@latest
+  # promote-link:
+  #   name: promote link to production
+  #   needs: [production--can-merge, deploy-link]
+  #   if: always() && github.event_name == 'merge_group'
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  #     VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+  #     VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
+  #   steps:
+  #     - name: Install Vercel CLI
+  #       run: npm i -g vercel@latest
 
-      - name: Promote link to production
-        run: vercel promote dpl_${{ needs.deploy-link.outputs.deployment_id }} --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
+  #     - name: Promote link to production
+  #       run: vercel promote dpl_${{ needs.deploy-link.outputs.deployment_id }} --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
 
   #///////////////////////////////////////////////
   # 🚨 ROLLBACK APPS (IF ANY PROMOTION FAILS) 🚨 #
@@ -291,8 +291,8 @@ jobs:
 
   rollback-app:
     name: rollback app if any deployments fail
-    needs: [promote-app, promote-link]
-    if: ${{ failure() && needs.promote-app.result == 'success' }}
+    needs: [deploy-app, deploy-link]
+    if: ${{ failure() && needs.deploy-app.result == 'success' }}
     runs-on: ubuntu-latest
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -310,8 +310,8 @@ jobs:
 
   rollback-link:
     name: rollback link if any deployments fail
-    needs: [promote-app, promote-link]
-    if: ${{ failure() && needs.promote-link.result == 'success' }}
+    needs: [deploy-app, deploy-link]
+    if: ${{ failure() && needs.deploy-link.result == 'success' }}
     runs-on: ubuntu-latest
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -332,7 +332,7 @@ jobs:
   #/////////////#
 
   delete-neon-branch:
-    needs: [git-meta, db-push, promote-app, promote-link]
+    needs: [git-meta, db-push, deploy-app, deploy-link]
     if: always() && github.event_name == 'merge_group' && needs.git-meta.outputs.git_branch_name != 'main'
     runs-on: ubuntu-latest
     steps:
