@@ -3,7 +3,8 @@ import { absoluteUrl } from "@barely/lib/utils/url";
 import { auth } from "@barely/server/auth";
 
 export default auth((req) => {
-  console.log("url => ", req.url);
+  console.log("middleware :: url => ", req.url);
+  console.log("middleware :: VERCEL_URL => ", process.env.VERCEL_URL);
 
   if (!req.auth?.user)
     return NextResponse.redirect(absoluteUrl("app", "login"));

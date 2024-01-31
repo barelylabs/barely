@@ -12,9 +12,9 @@ function getBaseUrl({
   }
 
   const vercelEnv =
-    process.env.VERCEL_ENV ?? process.env.NEXT_PUBLIC_VERCEL_ENV ?? "fucked";
+    process.env.VERCEL_ENV ?? process.env.NEXT_PUBLIC_VERCEL_ENV ?? null;
   const vercelUrl =
-    process.env.VERCEL_URL ?? process.env.NEXT_PUBLIC_VERCEL_URL ?? "urlfucked";
+    process.env.VERCEL_URL ?? process.env.NEXT_PUBLIC_VERCEL_URL ?? null;
 
   if (vercelEnv === "production" || vercelEnv === "preview") {
     if (!vercelUrl) throw new Error("VERCEL_URL not found");
