@@ -8,6 +8,7 @@ import {
   SparklesIcon,
   XCircleIcon,
 } from "@heroicons/react/24/solid";
+import { PlayCircle } from "@phosphor-icons/react";
 import {
   BracketsAngle,
   CalendarBlank,
@@ -125,6 +126,8 @@ import {
   Share2,
   ShieldCheck,
   Shuffle,
+  SkipBack,
+  SkipForward,
   Sliders,
   Square,
   Star,
@@ -302,6 +305,7 @@ export const Icon = {
   photo: ImageIcon,
   pieChart: PieChart,
   play: Play,
+  playCircle: PlayCircle,
   pizza: Pizza,
   playlist: ListMusic,
   plus: Plus,
@@ -328,6 +332,8 @@ export const Icon = {
   shield: ShieldCheck,
   shuffle: Shuffle,
   // slash:
+  skipBackward: SkipBack,
+  skipForward: SkipForward,
   sliders: Sliders,
   social: Share2,
   spark: Zap,

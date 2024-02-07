@@ -3,6 +3,9 @@ import type { ReactNode } from "react";
 import { forwardRef } from "react";
 import { cn } from "@barely/lib/utils/cn";
 import { cva } from "class-variance-authority";
+import WrapBalancer, {
+  Provider as WrapBalancerProvider,
+} from "react-wrap-balancer";
 
 const textStyles = cva(["align-text-bottom leading-none "], {
   variants: {
@@ -193,4 +196,13 @@ const Lead = forwardRef<
 
 Lead.displayName = "Lead";
 
-export { H, P, BlockQuote, InlineCode, Lead, Text };
+export {
+  H,
+  P,
+  BlockQuote,
+  InlineCode,
+  Lead,
+  Text,
+  WrapBalancer,
+  WrapBalancerProvider,
+};

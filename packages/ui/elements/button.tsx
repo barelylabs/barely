@@ -16,6 +16,7 @@ interface ButtonBaseProps extends VariantProps<ButtonVariants> {
   loading?: boolean;
   loadingText?: React.ReactNode;
   fullWidth?: boolean;
+  disabled?: boolean;
   disabledTooltip?: string | React.ReactNode;
   selected?: boolean;
 }
@@ -71,7 +72,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     }
 
     const btn = (
-      <span className={props.disabled ? "cursor-not-allowed" : ""}>
+      <span
+        className={cn(
+          "flex items-center justify-center",
+          props.disabled ? "cursor-not-allowed" : "",
+        )}
+      >
         <button
           type={props.type ?? "button"}
           className={classes}

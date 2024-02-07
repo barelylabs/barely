@@ -4,24 +4,38 @@ import * as React from "react";
 import { cn } from "@barely/lib/utils/cn";
 import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 
+export const ScrollAreaViewportContext =
+  React.createContext<React.ForwardedRef<HTMLDivElement> | null>(null);
+
 const ScrollArea = React.forwardRef<
   React.ElementRef<typeof ScrollAreaPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> & {
     hideScrollbar?: boolean;
+    viewportRef?: React.Ref<HTMLDivElement>;
   }
->(({ className, hideScrollbar = false, children, ...props }, ref) => (
-  <ScrollAreaPrimitive.Root
-    ref={ref}
-    className={cn("relative overflow-hidden", className)}
-    {...props}
-  >
-    <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit]">
-      {children}
-    </ScrollAreaPrimitive.Viewport>
-    <ScrollBar className={cn(hideScrollbar && "hidden")} />
-    <ScrollAreaPrimitive.Corner />
-  </ScrollAreaPrimitive.Root>
-));
+>(
+  (
+    { className, viewportRef, hideScrollbar = false, children, ...props },
+    ref,
+  ) => {
+    return (
+      <ScrollAreaPrimitive.Root
+        ref={ref}
+        className={cn("relative overflow-hidden", className)}
+        {...props}
+      >
+        <ScrollAreaPrimitive.Viewport
+          ref={viewportRef}
+          className="h-full w-full rounded-[inherit]"
+        >
+          {children}
+        </ScrollAreaPrimitive.Viewport>
+        <ScrollBar className={cn(hideScrollbar && "hidden")} />
+        <ScrollAreaPrimitive.Corner />
+      </ScrollAreaPrimitive.Root>
+    );
+  },
+);
 ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName;
 
 const ScrollBar = React.forwardRef<

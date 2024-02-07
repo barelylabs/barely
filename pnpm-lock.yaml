@@ -38,6 +38,91 @@ importers:
         specifier: 33.2.0
         version: 33.2.0
 
+  apps/agency:
+    dependencies:
+      '@barely/env':
+        specifier: workspace:^0.1.0
+        version: link:../../packages/env
+      '@barely/lib':
+        specifier: workspace:^0.1.0
+        version: link:../../packages/lib
+      '@barely/ui':
+        specifier: workspace:^0.1.0
+        version: link:../../packages/ui
+      '@vercel/edge':
+        specifier: ^0.1.2
+        version: 0.1.2
+      dotenv-cli:
+        specifier: ^7.2.1
+        version: 7.3.0
+      next:
+        specifier: ^14.1.0
+        version: 14.1.0(@babel/core@7.23.9)(react-dom@18.2.0)(react@18.2.0)
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
+      react-icons:
+        specifier: ^4.11.0
+        version: 4.12.0(react@18.2.0)
+      sharp:
+        specifier: ^0.31.3
+        version: 0.31.3
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
+    devDependencies:
+      '@babel/core':
+        specifier: ^7.22.9
+        version: 7.23.9
+      '@barely/eslint-config':
+        specifier: workspace:^0.1.0
+        version: link:../../tooling/eslint
+      '@barely/prettier-config':
+        specifier: workspace:^0.1.0
+        version: link:../../tooling/prettier
+      '@barely/tailwind-config':
+        specifier: workspace:^0.1.0
+        version: link:../../tooling/tailwind
+      '@barely/tsconfig':
+        specifier: workspace:^0.1.0
+        version: link:../../tooling/typescript
+      '@svgr/webpack':
+        specifier: ^6.5.1
+        version: 6.5.1
+      '@tailwindcss/typography':
+        specifier: ^0.5.9
+        version: 0.5.10(tailwindcss@3.4.1)
+      '@types/node':
+        specifier: ^20.10.6
+        version: 20.11.10
+      '@types/react':
+        specifier: ^18.2.25
+        version: 18.2.48
+      '@types/react-dom':
+        specifier: ^18.2.18
+        version: 18.2.18
+      autoprefixer:
+        specifier: ^10.4.14
+        version: 10.4.17(postcss@8.4.33)
+      eslint:
+        specifier: ^8.56.0
+        version: 8.56.0
+      postcss:
+        specifier: ^8.4.32
+        version: 8.4.33
+      prettier:
+        specifier: ^3.1.1
+        version: 3.2.4
+      tailwindcss:
+        specifier: ^3.4.0
+        version: 3.4.1
+      tailwindcss-animate:
+        specifier: ^1.0.7
+        version: 1.0.7(tailwindcss@3.4.1)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.3.3
+
   apps/app:
     dependencies:
       '@barely/email':
@@ -276,6 +361,91 @@ importers:
       tailwindcss:
         specifier: ^3.4.0
         version: 3.4.1
+      typescript:
+        specifier: ^5.3.3
+        version: 5.3.3
+
+  apps/press:
+    dependencies:
+      '@barely/env':
+        specifier: workspace:^0.1.0
+        version: link:../../packages/env
+      '@barely/lib':
+        specifier: workspace:^0.1.0
+        version: link:../../packages/lib
+      '@barely/ui':
+        specifier: workspace:^0.1.0
+        version: link:../../packages/ui
+      '@vercel/edge':
+        specifier: ^0.1.2
+        version: 0.1.2
+      dotenv-cli:
+        specifier: ^7.2.1
+        version: 7.3.0
+      next:
+        specifier: ^14.1.0
+        version: 14.1.0(@babel/core@7.23.9)(react-dom@18.2.0)(react@18.2.0)
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
+      react-icons:
+        specifier: ^4.11.0
+        version: 4.12.0(react@18.2.0)
+      sharp:
+        specifier: ^0.31.3
+        version: 0.31.3
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
+    devDependencies:
+      '@babel/core':
+        specifier: ^7.22.9
+        version: 7.23.9
+      '@barely/eslint-config':
+        specifier: workspace:^0.1.0
+        version: link:../../tooling/eslint
+      '@barely/prettier-config':
+        specifier: workspace:^0.1.0
+        version: link:../../tooling/prettier
+      '@barely/tailwind-config':
+        specifier: workspace:^0.1.0
+        version: link:../../tooling/tailwind
+      '@barely/tsconfig':
+        specifier: workspace:^0.1.0
+        version: link:../../tooling/typescript
+      '@svgr/webpack':
+        specifier: ^6.5.1
+        version: 6.5.1
+      '@tailwindcss/typography':
+        specifier: ^0.5.9
+        version: 0.5.10(tailwindcss@3.4.1)
+      '@types/node':
+        specifier: ^20.10.6
+        version: 20.11.10
+      '@types/react':
+        specifier: ^18.2.25
+        version: 18.2.48
+      '@types/react-dom':
+        specifier: ^18.2.18
+        version: 18.2.18
+      autoprefixer:
+        specifier: ^10.4.14
+        version: 10.4.17(postcss@8.4.33)
+      eslint:
+        specifier: ^8.56.0
+        version: 8.56.0
+      postcss:
+        specifier: ^8.4.32
+        version: 8.4.33
+      prettier:
+        specifier: ^3.1.1
+        version: 3.2.4
+      tailwindcss:
+        specifier: ^3.4.0
+        version: 3.4.1
+      tailwindcss-animate:
+        specifier: ^1.0.7
+        version: 1.0.7(tailwindcss@3.4.1)
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
@@ -887,6 +1057,9 @@ importers:
       cmdk:
         specifier: ^0.1.22
         version: 0.1.22(@types/react@18.2.48)(react-dom@18.2.0)(react@18.2.0)
+      embla-carousel-react:
+        specifier: 8.0.0-rc22
+        version: 8.0.0-rc22(react@18.2.0)
       jotai:
         specifier: ^2.6.1
         version: 2.6.3(@types/react@18.2.48)(react@18.2.0)
@@ -929,6 +1102,15 @@ importers:
       react-phone-number-input:
         specifier: ^3.3.0
         version: 3.3.9(react-dom@18.2.0)(react@18.2.0)
+      react-photo-album:
+        specifier: ^2.3.1
+        version: 2.3.1(react@18.2.0)
+      react-player:
+        specifier: ^2.14.1
+        version: 2.14.1(react@18.2.0)
+      react-wrap-balancer:
+        specifier: ^1.1.0
+        version: 1.1.0(react@18.2.0)
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.1)
@@ -1574,7 +1756,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.12.9
-      '@babel/helper-plugin-utils': 7.10.4
+      '@babel/helper-plugin-utils': 7.22.5
       '@babel/plugin-syntax-object-rest-spread': 7.8.3(@babel/core@7.12.9)
       '@babel/plugin-transform-parameters': 7.23.3(@babel/core@7.12.9)
     dev: true
@@ -9649,6 +9831,28 @@ packages:
       minimalistic-crypto-utils: 1.0.1
     dev: true
 
+  /embla-carousel-react@8.0.0-rc22(react@18.2.0):
+    resolution: {integrity: sha512-NwmISV0Cw9XVo76Vquz3hJaeZe7qoCRtrzStxlEY7qfZD8WR/f4JlQAso35URTs1BeYVhcuClflelioo+Zmidg==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.1 || ^18.0.0
+    dependencies:
+      embla-carousel: 8.0.0-rc22
+      embla-carousel-reactive-utils: 8.0.0-rc22(embla-carousel@8.0.0-rc22)
+      react: 18.2.0
+    dev: false
+
+  /embla-carousel-reactive-utils@8.0.0-rc22(embla-carousel@8.0.0-rc22):
+    resolution: {integrity: sha512-K4b8QhQGXYW5wr4l+U6XryhafsFV5c/IyohDnZN3MGoYIB9xY7qpjUWAcs5bTDjAD+qCZPOuXre0D3IVa28mqw==}
+    peerDependencies:
+      embla-carousel: 8.0.0-rc22
+    dependencies:
+      embla-carousel: 8.0.0-rc22
+    dev: false
+
+  /embla-carousel@8.0.0-rc22:
+    resolution: {integrity: sha512-MeXnPT1LShfgAu8qXj3CskayV0R6OkHx7w3cPTx+Q5ZWKyShKpIuu7qVQJ5BoFegalE4n6yxqoQaRuGFbK9pYw==}
+    dev: false
+
   /emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
 
@@ -12894,6 +13098,10 @@ packages:
   /lines-and-columns@1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
 
+  /load-script@1.0.0:
+    resolution: {integrity: sha512-kPEjMFtZvwL9TaZo0uZ2ml+Ye9HUMmPwbYRJ324qF9tqMejwykJ5ggTyvzmrbBeapCAbk98BSbTeovHEEP1uCA==}
+    dev: false
+
   /load-tsconfig@0.2.5:
     resolution: {integrity: sha512-IXO6OCs9yg8tMKzfPZ1YmheJbZCiEsnBdcB03l0OcfK9prKnJb96siuHCr5Fl37/yo9DnKU+TLpxzTUspw9shg==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
@@ -13163,6 +13371,10 @@ packages:
     dependencies:
       fs-monkey: 1.0.5
     dev: true
+
+  /memoize-one@5.2.1:
+    resolution: {integrity: sha512-zYiwtZUcYyXKo/np96AGZAckk+FWWsUdJ3cHGGmld7+AhvcWmQyGCYUh1hc4Q/pkOhb65dQR/pqCyK0cOaHz4Q==}
+    dev: false
 
   /memoizee@0.4.15:
     resolution: {integrity: sha512-UBWmJpLZd5STPm7PMUlOw/TSy972M+z8gcyQ5veOnSDRREz/0bmpyTfKt3/51DhEBqCZQn1udM/5flcSPYhkdQ==}
@@ -14993,6 +15205,10 @@ packages:
       react: 18.2.0
     dev: false
 
+  /react-fast-compare@3.2.2:
+    resolution: {integrity: sha512-nsO+KSNgo1SbJqJEYRE9ERzo7YtYbou/OqjSQKxV7jcKox7+usiUVZOAC+XnDOABXggQTno0Y1CpVnuWEc1boQ==}
+    dev: false
+
   /react-hook-form@7.49.3(react@18.2.0):
     resolution: {integrity: sha512-foD6r3juidAT1cOZzpmD/gOKt7fRsDhXXZ0y28+Al1CHgX+AY1qIN9VSIIItXRq1dN68QrRwl1ORFlwjBaAqeQ==}
     engines: {node: '>=18', pnpm: '8'}
@@ -15056,6 +15272,28 @@ packages:
       prop-types: 15.8.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
+  /react-photo-album@2.3.1(react@18.2.0):
+    resolution: {integrity: sha512-c7ofDx2DAbQa9AW9wUWOBX9zUKf/QjvdQK+fPNKEiKprks/n8t4c2viyBZ6EWpQLFLU0ad3yVBTgFvxEZ46/Iw==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      react: '>=16.8.0'
+    dependencies:
+      react: 18.2.0
+    dev: false
+
+  /react-player@2.14.1(react@18.2.0):
+    resolution: {integrity: sha512-jILj7F9o+6NHzrJ1GqZIxfJgskvGmKeJ05FNhPvgiCpvMZFmFneKEkukywHcULDO2lqITm+zcEkLSq42mX0FbA==}
+    peerDependencies:
+      react: '>=16.6.0'
+    dependencies:
+      deepmerge: 4.3.1
+      load-script: 1.0.0
+      memoize-one: 5.2.1
+      prop-types: 15.8.1
+      react: 18.2.0
+      react-fast-compare: 3.2.2
     dev: false
 
   /react-remove-scroll-bar@2.3.4(@types/react@18.2.48)(react@18.2.0):
@@ -15165,6 +15403,14 @@ packages:
     dependencies:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
+  /react-wrap-balancer@1.1.0(react@18.2.0):
+    resolution: {integrity: sha512-EhF3jOZm5Fjx+Cx41e423qOv2c2aOvXAtym2OHqrGeMUnwERIyNsRBgnfT3plB170JmuYvts8K2KSPEIerKr5A==}
+    peerDependencies:
+      react: '>=16.8.0 || ^17.0.0 || ^18'
+    dependencies:
+      react: 18.2.0
     dev: false
 
   /react@18.2.0:
