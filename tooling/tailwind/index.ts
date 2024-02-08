@@ -481,6 +481,7 @@ export default {
         lg: `var(--radius)`,
         md: `calc(var(--radius) - 2px)`,
         sm: `calc(var(--radius) - 4px)`,
+        xs: `calc(var(--radius) - 6px)`,
         "tremor-small": "0.375rem",
         "tremor-default": "0.5rem",
         "tremor-full": "9999px",

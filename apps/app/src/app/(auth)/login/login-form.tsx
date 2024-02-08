@@ -18,7 +18,7 @@ interface RegisterFormProps extends React.HTMLAttributes<HTMLDivElement> {
   callbackUrl?: string;
 }
 
-const LoginForm = ({ callbackUrl }: RegisterFormProps) => {
+export const LoginForm = ({ callbackUrl }: RegisterFormProps) => {
   const form = useZodForm({
     schema: signInSchema,
     defaultValues: {
@@ -71,5 +71,3 @@ const LoginForm = ({ callbackUrl }: RegisterFormProps) => {
     </>
   );
 };
-
-export default LoginForm;

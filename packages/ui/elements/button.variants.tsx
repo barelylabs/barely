@@ -25,6 +25,7 @@ const buttonVariants = cva(
         sm: "h-8 rounded-md px-2 py-1 text-sm",
         md: "h-10 px-4 py-2 text-sm md:text-md",
         lg: "h-11 rounded-md px-6 py-4 text-md md:px-8 md:py-6 md:text-lg",
+        icon: "h-10 w-10",
       },
 
       selected: {

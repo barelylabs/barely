@@ -9,11 +9,13 @@ export type SliderProps = Omit<
   React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>,
   "onValueChange"
 > & {
+  hideThumb?: boolean;
   growThumb?: boolean;
   isError?: boolean;
   debounce?: number;
   onValueChange?: (value: number) => void;
   onValueChangeDebounced?: (value: number) => void;
+  trackClassName?: string;
 };
 
 const Slider = React.forwardRef<
@@ -50,11 +52,17 @@ const Slider = React.forwardRef<
         handleDebouncedChange(v).catch((err) => console.error(err));
       }}
     >
-      <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary">
-        <SliderPrimitive.Range className="absolute h-full bg-primary" />
+      <SliderPrimitive.Track
+        className={cn(
+          "relative h-2 w-full grow overflow-hidden rounded-full bg-secondary",
+          props.trackClassName,
+        )}
+      >
+        <SliderPrimitive.Range className="absolute h-full bg-primary transition-transform duration-75 ease-linear" />
       </SliderPrimitive.Track>
 
       {!!props.value &&
+        !props.hideThumb &&
         props.value.map((v, i) => {
           const percentage = (v / (props.max ?? 100)) * 100;
           return (

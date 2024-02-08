@@ -1,8 +1,9 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
+import type { PublicFile } from "./file.schema";
 import type { Genre } from "./genre.schema";
-import type { Workspace } from "./workspace.schema";
+import type { PublicWorkspace, Workspace } from "./workspace.schema";
 import { genreIdSchema } from "./genre.schema";
 import { Tracks } from "./track.sql";
 
@@ -28,4 +29,11 @@ export type SelectTrack = z.infer<typeof selectTrackSchema>;
 export interface TrackWithWorkspaceAndGenres extends Track {
   workspace: Workspace;
   genres: Genre[];
+}
+
+// public
+export interface TrackWithArtistAndMasters extends Track {
+  workspace: PublicWorkspace;
+  masterMp3: PublicFile;
+  masterWav: PublicFile;
 }

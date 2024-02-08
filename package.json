@@ -18,7 +18,7 @@
     "db:push:force": "--filter=@barely/lib db:push:force",
     "db:pull": "pnpm --filter=@barely/lib db:pull",
     "db:studio": "pnpm --filter=@barely/lib db:studio",
-    "dev": "turbo dev --parallel",
+    "dev": "chmod +x ./scripts/dev-qr-codes.sh && ./scripts/dev-qr-codes.sh && turbo dev --parallel",
     "dev:pull": "pnpm vercel env pull .env && pnpm neon:create-dev-branch",
     "format": "turbo format --continue -- --cache --cache-location node_modules/.cache/.prettiercache",
     "format:fix": "turbo format --continue -- --write --cache --cache-location node_modules/.cache/.prettiercache",

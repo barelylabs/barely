@@ -5,7 +5,7 @@ import { H } from "@barely/ui/elements/typography";
 import logo from "@static/logo.png";
 
 import { handleLoggedInOnAuthPage } from "~/app/(auth)/handle-logged-in-on-auth-page";
-import LoginForm from "./login-form";
+import { LoginForm } from "./login-form";
 
 const SignInPage = async ({
   searchParams,

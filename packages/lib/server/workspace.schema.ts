@@ -36,3 +36,14 @@ export type SelectWorkspace = z.infer<typeof selectWorkspaceSchema>;
 
 // forms
 export const workspaceTypeSchema = insertWorkspaceSchema.shape.type.unwrap();
+
+// public
+export const publicWorkspaceSchema = selectWorkspaceSchema.pick({
+  id: true,
+  name: true,
+  handle: true,
+  type: true,
+  imageUrl: true,
+});
+
+export type PublicWorkspace = z.infer<typeof publicWorkspaceSchema>;

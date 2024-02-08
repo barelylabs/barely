@@ -44,7 +44,6 @@ export const Tracks = pgTable(
     imageUrl: varchar("imageUrl", { length: 255 }),
 
     // relations
-
     masterMp3Id: varchar("masterMp3Id", { length: 255 }).unique(),
     masterWavId: varchar("masterWavId", { length: 255 }).unique(),
 
