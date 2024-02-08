@@ -4,8 +4,8 @@ import * as React from "react";
 import { cn } from "@barely/lib/utils/cn";
 import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 
-export const ScrollAreaViewportContext =
-  React.createContext<React.ForwardedRef<HTMLDivElement> | null>(null);
+// export const ScrollAreaViewportContext =
+//   React.createContext<React.ForwardedRef<HTMLDivElement> | null>(null);
 
 const ScrollArea = React.forwardRef<
   React.ElementRef<typeof ScrollAreaPrimitive.Root>,

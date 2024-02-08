@@ -8,12 +8,12 @@ import {
   SparklesIcon,
   XCircleIcon,
 } from "@heroicons/react/24/solid";
-import { PlayCircle } from "@phosphor-icons/react";
 import {
   BracketsAngle,
   CalendarBlank,
   GridNine,
   MetaLogo,
+  PlayCircle,
 } from "@phosphor-icons/react/dist/ssr";
 import {
   AlertCircle,

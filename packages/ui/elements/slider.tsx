@@ -58,7 +58,7 @@ const Slider = React.forwardRef<
           props.trackClassName,
         )}
       >
-        <SliderPrimitive.Range className="duration-[50ms] absolute h-full bg-primary transition-transform ease-linear" />
+        <SliderPrimitive.Range className="absolute h-full bg-primary transition-transform duration-75 ease-linear" />
       </SliderPrimitive.Track>
 
       {!!props.value &&
