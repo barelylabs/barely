@@ -2,33 +2,34 @@
 
 import { useRef } from "react";
 import { cn } from "@barely/lib/utils/cn";
-import { PhotoGallery } from "@barely/ui/elements/photo-gallery";
 import { ScrollArea } from "@barely/ui/elements/scroll-area";
 
-import type { KPI } from "~/app/properyouth/kpis";
+// import type { KPI } from "~/app/properyouth/kpis";
 import type { SocialStatProps } from "~/app/properyouth/social-stats";
-import { KPIs } from "~/app/properyouth/kpis";
+// import { KPIs } from "~/app/properyouth/kpis";
 import { MusicPlayerBottomBar } from "~/app/properyouth/player";
+import { PressContact } from "~/app/properyouth/press-contact";
 import { PressHero } from "~/app/properyouth/press-hero";
+import { PressPhotos } from "~/app/properyouth/press-photos";
 import { PressVideos } from "~/app/properyouth/press-videos";
 import { Section, SectionDiv } from "~/app/properyouth/section";
 import { SocialStats } from "~/app/properyouth/social-stats";
 import { TopPlayerBar } from "~/app/properyouth/top-player-bar";
 
-const kpis: KPI[] = [
-  {
-    label: "Social followers",
-    value: 15000,
-  },
-  {
-    label: "Monthly listeners",
-    value: 5980,
-  },
-  {
-    label: "Video views",
-    value: 120000,
-  },
-];
+// const kpis: KPI[] = [
+//   {
+//     label: "Social followers",
+//     value: 15000,
+//   },
+//   {
+//     label: "Monthly listeners",
+//     value: 5980,
+//   },
+//   {
+//     label: "Video views",
+//     value: 120000,
+//   },
+// ];
 
 const socialStats: SocialStatProps[] = [
   {
@@ -60,47 +61,33 @@ const heroPics = {
     "https://res.cloudinary.com/dregnw0zb/image/upload/v1706835629/press/proper_youth_-_h_-_bar_2_bhzdev.jpg",
 };
 
-const pressPics = [
-  {
-    src: "https://res.cloudinary.com/dregnw0zb/image/upload/v1706843124/press/proper_youth_-_h_-_sky_silhouette_3_vz9z9g.jpg",
-    width: 911,
-    height: 608,
-  },
-  {
-    src: "https://res.cloudinary.com/dregnw0zb/image/upload/v1706835623/press/proper_youth_-_v_-_walking_1_kco6kk.jpg",
-    width: 691,
-    height: 1035,
-  },
-  {
-    src: "https://res.cloudinary.com/dregnw0zb/image/upload/v1706835630/press/proper_youth_-_v_-_bar_1_jnixxj.jpg",
-    width: 691,
-    height: 1035,
-  },
-  {
-    src: "https://res.cloudinary.com/dregnw0zb/image/upload/v1706835634/press/proper_youth_-_v_-_wall_1_q2vare.jpg",
-    width: 691,
-    height: 1035,
-  },
-  {
-    src: "https://res.cloudinary.com/dregnw0zb/image/upload/v1706835634/press/proper_youth_-_v_-_roof_3_oljzzm.jpg",
-    width: 691,
-    height: 1035,
-  },
-  {
-    src: "https://res.cloudinary.com/dregnw0zb/image/upload/v1706835623/press/proper_youth_-_v_-_photo_booth_1_rpfnlq.jpg",
-    width: 691,
-    height: 1035,
-  },
-];
-
 export default function PressPage() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
+  const mainRef = useRef<HTMLDivElement>(null);
+
+  // const [mainHeight, setMainHeight] = useState(0);
+  // const test = useMediaQuery();
+
+  // useEffect(() => {
+  //   const updateHeight = () => {
+  //     if (mainRef.current) {
+  //       setMainHeight(mainRef.current.offsetHeight);
+  //     }
+  //   };
+
+  //   updateHeight(); // Update height on mount
+
+  //   window.addEventListener("resize", updateHeight); // Update height on window resize
+
+  //   return () => window.removeEventListener("resize", updateHeight); // Cleanup
+  // }, []);
   return (
     <>
       <main
+        ref={mainRef}
         className={`mx-auto box-border w-full max-w-5xl flex-1 overflow-hidden`}
-        style={{ height: "calc(100vh - 72px)" }}
+        style={{ height: "calc(100dvh - 72px)" }}
       >
         <ScrollArea
           className={cn(
@@ -116,9 +103,13 @@ export default function PressPage() {
             {...heroPics}
           />
 
+          {/* <p>viewport height: {test.height}</p>
+          <p>main height: {mainHeight}</p> */}
+
           <TopPlayerBar scrollAreaRef={scrollAreaRef} />
 
-          <KPIs kpis={kpis} />
+          {/* <KPIs kpis={kpis} /> */}
+          {/* <SocialStats stats={socialStats} /> */}
 
           <Section id="bio">
             <SectionDiv title="Bio">
@@ -185,25 +176,9 @@ export default function PressPage() {
 
           <PressVideos />
 
-          <Section id="photos">
-            <SectionDiv title="Photos">
-              <PhotoGallery photos={pressPics} />
-            </SectionDiv>
-          </Section>
+          <PressPhotos />
 
-          <Section id="contact">
-            <SectionDiv title="Contact">
-              <p className="text-left text-md leading-8">
-                <span className="font-semibold">Booking & Management</span>
-                <br />
-                Adam Barito
-                <br />
-                <a href="mailto:adam@barelysparrow.com">
-                  adam@barelysparrow.com
-                </a>
-              </p>
-            </SectionDiv>
-          </Section>
+          <PressContact />
         </ScrollArea>
       </main>
       <MusicPlayerBottomBar />

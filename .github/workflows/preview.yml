@@ -168,59 +168,78 @@ jobs:
       neon_branch_id: ${{ steps.get-neon-branch.outputs.branch_id }}
 
   #///////////////////////#
+  # 🌐 DEPLOY WWW PREVIEW #
+  #///////////////////////#
+
+  #///////////////////////#
   # 📱 DEPLOY APP PREVIEW #
   #//////////////////////#
 
   deploy-app:
-    name: vercel preview - app
-    if: always() && github.event_name == 'pull_request'
+    uses: ./.github/workflows/deploy-preview-to-vercel.yml
     needs: [neon-preview, git-meta]
-    runs-on: ubuntu-latest
-    env:
-      TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      TURBO_TEAM: ${{ secrets.VERCEL_TEAM_ID }}
+    with:
+      app_name: app
+      working_directory: apps/app
+      scope: barelylabs
+      environment: preview
+      git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
+      vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+    secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
-    outputs:
-      preview_url: ${{ steps.deploy-app.outputs.preview_url }}
-      inspect_url: ${{ steps.deploy-app.outputs.inspect_url }}
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
 
-      - name: setup node/pnpm/turbo/vercel
-        uses: ./tooling/github/setup
+  # deploy-app:
+  #   name: vercel preview - app
+  #   if: always() && github.event_name == 'pull_request'
+  #   needs: [neon-preview, git-meta]
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  #     TURBO_TEAM: ${{ secrets.VERCEL_TEAM_ID }}
+  #     VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  #     VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+  #     VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
+  #   outputs:
+  #     preview_url: ${{ steps.deploy-app.outputs.preview_url }}
+  #     inspect_url: ${{ steps.deploy-app.outputs.inspect_url }}
+  #   steps:
+  #     - name: checkout
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 2
 
-      - name: link vercel
-        run: |
-          pnpm vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
-          pnpm vercel link --cwd apps/app --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
+  #     - name: setup node/pnpm/turbo/vercel
+  #       uses: ./tooling/github/setup
 
-      - name: pull vercel - app
-        run: |
-          pnpm vercel pull --cwd apps/app --yes --environment=preview --git-branch=${{ needs.git-meta.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }} 
+  #     - name: link vercel
+  #       run: |
+  #         pnpm vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
+  #         pnpm vercel link --cwd apps/app --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
 
-          VERCEL_URL=app-git-${{ needs.git-meta.outputs.git_branch_name }}-barelylabs.vercel.app
-          sed -i '/VERCEL_URL/d' ./apps/app/.vercel/.env.preview.local
-          echo "VERCEL_URL=\"$VERCEL_URL\"" >> ./apps/app/.vercel/.env.preview.local                    
-          cp ./apps/app/.vercel/.env.preview.local .env
+  #     - name: pull vercel - app
+  #       run: |
+  #         pnpm vercel pull --cwd apps/app --yes --environment=preview --git-branch=${{ needs.git-meta.outputs.git_branch_name }} --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: build project artifacts
-        run: turbo build:preview --filter=@barely/app --token=${{ secrets.VERCEL_TOKEN }}
+  #         VERCEL_URL=app-git-${{ needs.git-meta.outputs.git_branch_name }}-barelylabs.vercel.app
+  #         sed -i '/VERCEL_URL/d' ./apps/app/.vercel/.env.preview.local
+  #         echo "VERCEL_URL=\"$VERCEL_URL\"" >> ./apps/app/.vercel/.env.preview.local
+  #         cp ./apps/app/.vercel/.env.preview.local .env
 
-      - name: deploy preview to vercel
-        id: deploy-app
-        run: |
-          preview_url=$(pnpm vercel deploy --cwd apps/app --prebuilt ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})          
-          echo preview_url=$preview_url >> $GITHUB_OUTPUT          
+  #     - name: build project artifacts
+  #       run: turbo build:preview --filter=@barely/app --token=${{ secrets.VERCEL_TOKEN }}
 
-          inspect=$(pnpm vercel inspect $preview_url --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
-          deployment_id=$(echo "$inspect" | grep -m 1 '^    id' | awk '{print $NF}' | cut -d'_' -f 2-)
-          inspect_url="https://vercel.com/barelylabs/app/$deployment_id"
-          echo "inspect_url=$inspect_url" >> $GITHUB_OUTPUT
+  #     - name: deploy preview to vercel
+  #       id: deploy-app
+  #       run: |
+  #         preview_url=$(pnpm vercel deploy --cwd apps/app --prebuilt ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})
+  #         echo preview_url=$preview_url >> $GITHUB_OUTPUT
+
+  #         inspect=$(pnpm vercel inspect $preview_url --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+  #         deployment_id=$(echo "$inspect" | grep -m 1 '^    id' | awk '{print $NF}' | cut -d'_' -f 2-)
+  #         inspect_url="https://vercel.com/barelylabs/app/$deployment_id"
+  #         echo "inspect_url=$inspect_url" >> $GITHUB_OUTPUT
 
   #////////////////////////#
   # 🔗 DEPLOY LINK PREVIEW #

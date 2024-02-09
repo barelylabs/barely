@@ -265,7 +265,7 @@ export function MusicPlayerBar() {
     <>
       <div className="fixed bottom-0 h-[72px] w-full">
         <div className="mx-auto h-full w-full max-w-5xl flex-row items-center justify-center sm:px-4 lg:px-6">
-          <div className="grid h-full w-full grid-cols-2 gap-4 sm:grid-cols-[minmax(200px,_1fr)_minmax(300px,_2fr)_minmax(0px,_1fr)]">
+          <div className="grid h-full w-full grid-cols-[3fr_1fr] gap-4 sm:grid-cols-[minmax(200px,_1fr)_minmax(300px,_2fr)_minmax(0px,_1fr)]">
             {/* Album Art */}
             <div className="flex h-full flex-row gap-3 px-4 py-4 sm:px-0">
               {currentOrFirstTrack && (

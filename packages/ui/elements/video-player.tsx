@@ -10,10 +10,8 @@ import type { CarouselApi } from "./carousel";
 import {
   Carousel,
   CarouselContent,
-  CarouselIndicator,
   CarouselItem,
-  CarouselNextOverlay,
-  CarouselPreviousOverlay,
+  CarouselPreviousNext,
 } from "./carousel";
 import { playingMusicAtom } from "./music-player";
 
@@ -153,9 +151,7 @@ export function VideoCarousel({
           </CarouselItem>
         ))}
       </CarouselContent>
-      <CarouselPreviousOverlay />
-      <CarouselNextOverlay />
-      <CarouselIndicator />
+      <CarouselPreviousNext />
     </Carousel>
   );
 }

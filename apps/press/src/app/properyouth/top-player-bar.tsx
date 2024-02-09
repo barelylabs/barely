@@ -10,7 +10,7 @@ export function TopPlayerBar(props: {
 }) {
   const playerBarRef = useRef<HTMLDivElement>(null);
 
-  const [sticky, setSticky] = useState("");
+  const [stuckClassName, setStuckClassName] = useState("");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,9 +23,9 @@ export function TopPlayerBar(props: {
         const isAtTop = playerBarTop - scrollAreaTop <= 0;
 
         if (isAtTop) {
-          setSticky("shadow-lg shadow-slate-800/50");
+          setStuckClassName("shadow-lg shadow-slate-800/50");
         } else {
-          setSticky("");
+          setStuckClassName("");
         }
       }
     };
@@ -47,7 +47,7 @@ export function TopPlayerBar(props: {
     <Section
       ref={playerBarRef}
       id="player-bar"
-      className={cn("sticky top-0 z-50 py-6", sticky)}
+      className={cn("top-0 z-50 py-6 sm:sticky", stuckClassName)}
     >
       <SectionDiv>
         <div className="flex flex-row items-center">

@@ -1,0 +1,79 @@
+name: Deploy Preview to Vercel
+
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        required: true
+        type: string
+      working_directory:
+        required: true
+        type: string
+      scope:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+      git_branch:
+        required: true
+        type: string
+      vercel_git_metadata:
+        required: true
+        type: string
+    secrets:
+      VERCEL_TOKEN:
+        required: true
+      VERCEL_PROJECT_ID:
+        required: true
+      VERCEL_TEAM_ID:
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      TURBO_TEAM: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    outputs:
+      preview_url: ${{ steps.deploy.outputs.preview_url }}
+      inspect_url: ${{ steps.deploy.outputs.inspect_url }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: setup node/pnpm/turbo/vercel
+        uses: ./tooling/github/setup
+
+      - name: link vercel
+        run: |
+          pnpm vercel link --repo --scope=${{ inputs.scope }} --yes --token=${{ secrets.VERCEL_TOKEN }}
+          pnpm vercel link --cwd ${{ inputs.working_directory }} --scope=${{ inputs.scope }} --yes --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: pull vercel
+        run: |
+          pnpm vercel pull --cwd ${{ inputs.working_directory }} --yes --environment=${{ inputs.environment }} --git-branch=${{ inputs.git_branch }} --token=${{ secrets.VERCEL_TOKEN }}
+
+          VERCEL_URL=${{ inputs.app_name }}-git-${{ inputs.git_branch }}-${{ inputs.scope }}.vercel.app
+          sed -i '/VERCEL_URL/d' ${{ inputs.working_directory }}/.vercel/.env.preview.local
+          echo "VERCEL_URL=\"$VERCEL_URL\"" >> ${{ inputs.working_directory }}/.vercel/.env.preview.local                    
+          cp ${{ inputs.working_directory }}/.vercel/.env.preview.local .env
+
+      - name: build project artifacts
+        run: turbo build:preview --filter=@barely/${{ inputs.app_name }} --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: deploy preview to vercel
+        id: deploy
+        run: |
+          preview_url=$(pnpm vercel deploy --cwd ${{ inputs.working_directory }} --prebuilt ${{ inputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})          
+          echo "preview_url=$preview_url" >> $GITHUB_OUTPUT          
+
+          inspect=$(pnpm vercel inspect $preview_url --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+          deployment_id=$(echo "$inspect" | grep -m 1 '^    id' | awk '{print $NF}' | cut -d'_' -f 2-)
+          inspect_url="https://vercel.com/${{ inputs.scope }}/${{ inputs.app_name }}/$deployment_id"
+          echo "inspect_url=$inspect_url" >> $GITHUB_OUTPUT
