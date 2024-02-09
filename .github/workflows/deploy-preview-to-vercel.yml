@@ -21,6 +21,11 @@ on:
       vercel_git_metadata:
         required: true
         type: string
+    outputs:
+      preview_url:
+        value: ${{ jobs.deploy.outputs.preview_url }}
+      inspect_url:
+        value: ${{ jobs.deploy.outputs.inspect_url }}
     secrets:
       VERCEL_TOKEN:
         required: true
