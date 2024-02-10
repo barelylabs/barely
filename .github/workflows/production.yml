@@ -6,9 +6,7 @@ on:
     types: [checks_requested]
 
 jobs:
-  #/////////////////////
   # 👾 GIT METADATA 👾 #
-  #////////////////////
 
   git-meta:
     runs-on: ubuntu-latest
@@ -73,9 +71,7 @@ jobs:
           echo "github_commit_ref=$github_commit_ref" >> $GITHUB_OUTPUT
           echo "vercel_git_metadata=$vercel_git_metadata" >> $GITHUB_OUTPUT
 
-  #/////////////////////
   # 🐘 NEON DB:PUSH 🐘 #
-  #////////////////////
 
   db-push:
     name: db:push
@@ -113,126 +109,96 @@ jobs:
 
           pnpm db:push
 
-  #////////////////////////////////////////////////////////////
-  # 📱 DEPLOY APP -- PROD (Not Aliasing to Production Yet) 📱 #
-  #///////////////////////////////////////////////////////////
+  # 📱 DEPLOY APPS -- PROD (Not Aliasing to Production Yet) #
+
+  deploy-www:
+    uses: ./.github/workflows/deploy-to-vercel.yml
+    needs: [git-meta, db-push]
+    with:
+      app_name: www
+      working_directory: apps/www
+      scope: barelylabs
+      environment: production
+      git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
+      vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_WWW_PROJECT_ID }}
 
   deploy-app:
-    name: deploy prod build to vercel -- app
+    uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push]
-    runs-on: ubuntu-latest
-    if: always() && github.event_name == 'merge_group' && needs.db-push.result == 'success'
-    env:
-      TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      TURBO_TEAM: ${{ secrets.VERCEL_TEAM_ID }}
+    with:
+      app_name: app
+      working_directory: apps/app
+      scope: barelylabs
+      environment: production
+      git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
+      vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+    secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
-    outputs:
-      deployment_id: ${{ steps.deploy.outputs.deployment_id }}
-      deployment_url: ${{ steps.deploy.outputs.deployment_url }}
-      inspect_url: ${{ steps.deploy.outputs.inspect_url }}
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-
-      - name: setup node/pnpm/turbo/vercel
-        uses: ./tooling/github/setup
-
-      - name: link vercel
-        run: |
-          pnpm vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
-          pnpm vercel link --cwd apps/app --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: pull vercel
-        run: |
-          pnpm vercel pull --cwd apps/app --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-
-          VERCEL_URL=app.barely.io
-          sed -i '/VERCEL_URL/d' ./apps/app/.vercel/.env.production.local
-          echo "VERCEL_URL=$VERCEL_URL" >> ./apps/app/.vercel/.env.production.local
-          cp ./apps/app/.vercel/.env.production.local .env
-
-      - name: build project artifacts
-        run: turbo build:prod --filter=@barely/app --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: deploy to vercel
-        id: deploy
-        run: |
-          deploy_url=$(pnpm vercel deploy --cwd apps/app --prebuilt --prod --skip-domain ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})
-          echo deploy_url=$deploy_url >> $GITHUB_OUTPUT
-
-          inspect=$(pnpm vercel inspect $deploy_url --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
-          deployment_id=$(echo "$inspect" | grep -m 1 '^    id' | awk '{print $NF}' | cut -d'_' -f 2-)
-          echo "deployment_id=$deployment_id" >> $GITHUB_OUTPUT
-          inspect_url="https://vercel.com/barelylabs/app/$deployment_id"
-          echo "inspect_url=$inspect_url" >> $GITHUB_OUTPUT
-
-  #/////////////////////////////////////////////////////////////
-  # 🔗 DEPLOY LINK --PROD  (Not Aliasing to Production Yet) 🔗 #
-  #////////////////////////////////////////////////////////////
 
   deploy-link:
-    name: deploy prod build to vercel -- link
-    needs: [git-meta, db-push, git-meta]
-    runs-on: ubuntu-latest
-    if: always() && github.event_name == 'merge_group' && needs.db-push.result == 'success'
-    env:
-      TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      TURBO_TEAM: ${{ secrets.VERCEL_TEAM_ID }}
+    uses: ./.github/workflows/deploy-to-vercel.yml
+    needs: [git-meta, db-push]
+    with:
+      app_name: link
+      working_directory: apps/link
+      scope: barelylabs
+      environment: production
+      git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
+      vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+    secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
-    outputs:
-      deployment_id: ${{ steps.deploy.outputs.deployment_id }}
-      deployment_url: ${{ steps.deploy.outputs.deployment_url }}
-      inspect_url: ${{ steps.deploy.outputs.inspect_url }}
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
 
-      - name: setup node/pnpm/turbo/vercel
-        uses: ./tooling/github/setup
+  deploy-press:
+    uses: ./.github/workflows/deploy-to-vercel.yml
+    needs: [git-meta, db-push]
+    with:
+      app_name: press
+      working_directory: apps/press
+      scope: barelylabs
+      environment: production
+      git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
+      vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PRESS_PROJECT_ID }}
 
-      - name: link vercel
-        run: |
-          pnpm vercel link --repo --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
-          pnpm vercel link --cwd apps/link --scope=barelylabs --yes --token=${{ secrets.VERCEL_TOKEN }}
+  deploy-sparrow:
+    uses: ./.github/workflows/deploy-to-vercel.yml
+    needs: [git-meta, db-push]
+    with:
+      app_name: sparrow
+      working_directory: apps/sparrow
+      scope: barelylabs
+      environment: production
+      git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
+      vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SPARROW_PROJECT_ID }}
 
-      - name: pull vercel
-        run: |
-          pnpm vercel pull --cwd apps/link --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-
-          VERCEL_URL=barely.link
-          sed -i '/VERCEL_URL/d' ./apps/link/.vercel/.env.production.local
-          echo "VERCEL_URL=$VERCEL_URL" >> ./apps/link/.vercel/.env.production.local
-          cp ./apps/link/.vercel/.env.production.local .env
-
-      - name: build project artifacts
-        run: turbo build:prod --filter=@barely/link --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: deploy to vercel
-        id: deploy
-        run: |
-          deploy_url=$(pnpm vercel deploy --cwd apps/link --prebuilt --prod --skip-domain ${{ needs.git-meta.outputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})
-          echo deploy_url=$deploy_url >> $GITHUB_OUTPUT
-
-          inspect=$(pnpm vercel inspect $deploy_url --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
-          deployment_id=$(echo "$inspect" | grep -m 1 '^    id' | awk '{print $NF}' | cut -d'_' -f 2-)
-          echo "deployment_id=$deployment_id" >> $GITHUB_OUTPUT
-          inspect_url="https://vercel.com/barelylabs/link/$deployment_id"
-          echo "inspect_url=$inspect_url" >> $GITHUB_OUTPUT
-
-  #/////////////////////////////
   # 🔀 MERGE PR BRANCH TO MAIN 🔀
-  #/////////////////////////////
 
   production--can-merge:
-    needs: [git-meta, db-push, deploy-app, deploy-link]
+    needs:
+      [
+        git-meta,
+        db-push,
+        deploy-www,
+        deploy-app,
+        deploy-link,
+        deploy-press,
+        deploy-sparrow,
+      ]
     if: always() && github.event_name == 'merge_group' # skip if pull request, which allows entry into merge queue
     permissions:
       actions: read
@@ -246,10 +212,24 @@ jobs:
       - name: Check outcomes
         run: "[ $ALL_SUCCESS = true ]"
 
-  #//////////////////////////////////////////
   # 🚀 PROMOTE APPS TO PRODUCTION DOMAINS 🚀 #
-  #//////////////////////////////////////////
   # -- at a later date, we could decouple this promotion step from deploying & merging to main
+
+  promote-www:
+    name: promote www to production
+    needs: [production--can-merge, deploy-www]
+    if: always() && github.event_name == 'merge_group'
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_WWW_PROJECT_ID }}
+    steps:
+      - name: Install Vercel CLI
+        run: npm i -g xxxxxx@xxxxxx
+
+      - name: Promote www to production
+        run: vercel promote dpl_${{ needs.deploy-www.outputs.deployment_id }} --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
 
   promote-app:
     name: promote app to production
@@ -283,15 +263,65 @@ jobs:
       - name: Promote link to production
         run: vercel promote dpl_${{ needs.deploy-link.outputs.deployment_id }} --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
 
-  #///////////////////////////////////////////////
-  # 🚨 ROLLBACK APPS (IF ANY PROMOTION FAILS) 🚨 #
-  #//////////////////////////////////////////////
+  promote-press:
+    name: promote press to production
+    needs: [production--can-merge, deploy-press]
+    if: always() && github.event_name == 'merge_group'
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PRESS_PROJECT_ID }}
+    steps:
+      - name: Install Vercel CLI
+        run: npm i -g xxxxxx@xxxxxx
 
+      - name: Promote press to production
+        run: vercel promote dpl_${{ needs.deploy-press.outputs.deployment_id }} --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
+
+  promote-sparrow:
+    name: promote sparrow to production
+    needs: [production--can-merge, deploy-sparrow]
+    if: always() && github.event_name == 'merge_group'
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SPARROW_PROJECT_ID }}
+    steps:
+      - name: Install Vercel CLI
+        run: npm i -g xxxxxx@xxxxxx
+
+      - name: Promote sparrow to production
+        run: vercel promote dpl_${{ needs.deploy-sparrow.outputs.deployment_id }} --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
+
+  # 🚨 ROLLBACK APPS (IF ANY PROMOTION FAILS) 🚨 #
   # ref: https://dev.to/philw_/using-vercels-instant-rollback-feature-in-your-own-cicd-pipeline-57oi
+
+  rollback-www:
+    name: rollback www if any deployments fail
+    needs:
+      [promote-www, promote-app, promote-link, promote-press, promote-sparrow]
+    if: ${{ failure() && needs.promote-www.result == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_WWW_PROJECT_ID }}
+    steps:
+      - name: Install Vercel CLI
+        run: npm i -g xxxxxx@xxxxxx
+
+      - name: Rollback www
+        run: |
+          ROLLBACK_DEPLOYMENT_ID=$(curl -s "https://api.vercel.com/v6/deployments?teamId=${{ secrets.VERCEL_TEAM_ID }}&projectId=${{ secrets.VERCEL_WWW_PROJECT_ID}}&limit=2&rollbackCandidate=true&state=READY&target=production" -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | jq -r '.deployments[1].uid')
+          echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
+          vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
 
   rollback-app:
     name: rollback app if any deployments fail
-    needs: [promote-app, promote-link]
+    needs:
+      [promote-www, promote-app, promote-link, promote-press, promote-sparrow]
     if: ${{ failure() && needs.promote-app.result == 'success' }}
     runs-on: ubuntu-latest
     env:
@@ -310,7 +340,8 @@ jobs:
 
   rollback-link:
     name: rollback link if any deployments fail
-    needs: [promote-app, promote-link]
+    needs:
+      [promote-www, promote-app, promote-link, promote-press, promote-sparrow]
     if: ${{ failure() && needs.promote-link.result == 'success' }}
     runs-on: ubuntu-latest
     env:
@@ -327,12 +358,59 @@ jobs:
           echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
           vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
 
-  #/////////////#
-  # 🧹 CLEAN UP #
-  #/////////////#
+  rollback-press:
+    name: rollback press if any deployments fail
+    needs:
+      [promote-www, promote-app, promote-link, promote-press, promote-sparrow]
+    if: ${{ failure() && needs.promote-press.result == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PRESS_PROJECT_ID }}
+    steps:
+      - name: Install Vercel CLI
+        run: npm i -g xxxxxx@xxxxxx
+
+      - name: Rollback press
+        run: |
+          ROLLBACK_DEPLOYMENT_ID=$(curl -s "https://api.vercel.com/v6/deployments?teamId=${{ secrets.VERCEL_TEAM_ID }}&projectId=${{ secrets.VERCEL_PRESS_PROJECT_ID}}&limit=2&rollbackCandidate=true&state=READY&target=production" -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | jq -r '.deployments[1].uid')
+          echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
+          vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
+
+  rollback-sparrow:
+    name: rollback sparrow if any deployments fail
+    needs:
+      [promote-www, promote-app, promote-link, promote-press, promote-sparrow]
+    if: ${{ failure() && needs.promote-sparrow.result == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SPARROW_PROJECT_ID }}
+    steps:
+      - name: Install Vercel CLI
+        run: npm i -g xxxxxx@xxxxxx
+
+      - name: Rollback sparrow
+        run: |
+          ROLLBACK_DEPLOYMENT_ID=$(curl -s "https://api.vercel.com/v6/deployments?teamId=${{ secrets.VERCEL_TEAM_ID }}&projectId=${{ secrets.VERCEL_SPARROW_PROJECT_ID}}&limit=2&rollbackCandidate=true&state=READY&target=production" -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | jq -r '.deployments[1].uid')
+          echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
+          vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
+
+  # 🧹 CLEAN UP 🧹 #
 
   delete-neon-branch:
-    needs: [git-meta, db-push, promote-app, promote-link]
+    needs:
+      [
+        git-meta,
+        db-push,
+        promote-www,
+        promote-app,
+        promote-link,
+        promote-press,
+        promote-sparrow,
+      ]
     if: always() && github.event_name == 'merge_group' && needs.git-meta.outputs.git_pr_branch_name != 'main'
     runs-on: ubuntu-latest
     steps:
