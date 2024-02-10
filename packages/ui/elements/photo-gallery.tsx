@@ -3,12 +3,14 @@ import Image from "next/image";
 import { useMediaQuery } from "@barely/lib/hooks/use-media-query";
 import ReactPhotoAlbum from "react-photo-album";
 
+import BackgroundImage from "./background-image";
 import {
   Carousel,
   CarouselContent,
   CarouselIndicator,
   CarouselItem,
   CarouselNextOverlay,
+  CarouselPreviousNext,
   CarouselPreviousOverlay,
 } from "./carousel";
 
@@ -16,23 +18,30 @@ function NextJsImage({
   photo,
   imageProps: { alt, title, sizes, className, onClick },
   wrapperStyle,
-}: RenderPhotoProps) {
+  priority = false,
+}: RenderPhotoProps & { priority?: boolean }) {
   return (
     <div style={{ ...wrapperStyle, position: "relative" }}>
       <Image
         fill
         src={photo}
         placeholder={"blurDataURL" in photo ? "blur" : undefined}
-        {...{ alt, title, sizes, className, onClick }}
+        {...{ alt, title, sizes, className, onClick, priority }}
       />
     </div>
   );
+}
+
+function NextJsImageWithPriority(props: RenderPhotoProps) {
+  return <NextJsImage {...props} priority />;
 }
 
 type GalleryProps = Omit<PhotoAlbumProps, "layout"> & {
   layout?: "masonry" | "columns" | "rows";
   carousel?: boolean | "mobileOnly";
   carouselIndicator?: boolean;
+  carouselPrevNext?: "overlay" | "leftRight" | "below";
+  prioritize?: boolean;
 };
 
 export function PhotoGallery({
@@ -41,51 +50,51 @@ export function PhotoGallery({
     containerWidth < 450 ? 1 : containerWidth < 640 ? 2 : 3,
   layout = "masonry",
   carousel = "mobileOnly",
-  carouselIndicator = true,
+  carouselIndicator,
+  carouselPrevNext,
+  prioritize = false,
   ...props
 }: GalleryProps) {
   const { isMobile } = useMediaQuery();
 
-  // useEffect(() => console.log("isMobile", isMobile), [isMobile]);
-
   if (carousel === true || (carousel === "mobileOnly" && isMobile)) {
     return (
-      <Carousel>
-        <CarouselContent className="">
+      <Carousel opts={{ containScroll: false }}>
+        <CarouselContent className="-ml-11">
           {photos.map((photo, index) => (
-            <CarouselItem key={index} className="">
+            <CarouselItem key={index} className="basis-3/4">
               <div className="relative h-full w-full">
-                {/* Background div wrapper */}
-                <div className="absolute left-0 top-0 flex h-full w-full items-center justify-center overflow-hidden bg-neutral-800">
-                  {/* Wrapper element with padding and negative margin */}
-
-                  {/* Blurred background div */}
-                  <div
-                    className="min-h-[120%] min-w-[120%] "
-                    style={{
-                      backgroundImage: `url(${photo.src})`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                      filter: "blur(15px)",
-                      opacity: 0.5,
-                    }}
-                  ></div>
+                {/* Blurred background */}
+                <div className="absolute left-0 top-0 flex h-full w-full items-center justify-center overflow-hidden">
+                  <BackgroundImage
+                    src={photo.src}
+                    alt={photo.alt ?? ""}
+                    className="scale-125 opacity-50 blur-lg"
+                  />
                 </div>
-                {/* Content div */}
+                {/* Content */}
                 <div className="relative z-10 flex h-full items-center justify-center">
                   <Image
                     src={photo.src}
                     alt={photo.alt ?? ""}
                     width={photo.width}
                     height={photo.height}
+                    priority={index < 2}
                   />
                 </div>
               </div>
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPreviousOverlay />
-        <CarouselNextOverlay />
+        {carouselPrevNext === "overlay" ? (
+          <>
+            <CarouselPreviousOverlay />
+            <CarouselNextOverlay />
+          </>
+        ) : carouselPrevNext === "below" ? (
+          <CarouselPreviousNext />
+        ) : null}
+
         {carouselIndicator && <CarouselIndicator />}
       </Carousel>
     );
@@ -97,7 +106,7 @@ export function PhotoGallery({
       layout={layout}
       columns={columns}
       photos={photos}
-      renderPhoto={NextJsImage}
+      renderPhoto={prioritize ? NextJsImageWithPriority : NextJsImage}
     />
   );
 }

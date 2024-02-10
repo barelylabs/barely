@@ -22,7 +22,7 @@ export function BlurImage(props: ImageProps) {
       onError={() => {
         setSrc(`https://avatar.vercel.sh/${props.alt}`); // if the image fails to load, use the default avatar
       }}
-      unoptimized
+      unoptimized={props.unoptimized ?? true}
     />
   );
 }

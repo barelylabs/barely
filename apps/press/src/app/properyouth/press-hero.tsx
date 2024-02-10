@@ -1,6 +1,8 @@
 import type { RefObject } from "react";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { BackgroundImage } from "@barely/ui/elements/background-image";
+import { BottomThirdFadeGradient } from "@barely/ui/elements/gradient";
 import { Icon } from "@barely/ui/elements/icon";
 
 import { SectionDiv } from "~/app/properyouth/section";
@@ -26,8 +28,6 @@ export function PressHero(props: PressHeroProps) {
 
         const zoom =
           1.1 + pressHeroRef.current.getBoundingClientRect().top / 7500;
-
-        // console.log("zoom", zoom);
 
         setHeaderOpacity(opacity);
         setHeaderZoom(zoom);
@@ -86,23 +86,16 @@ export function PressHero(props: PressHeroProps) {
       className="relative h-[350px] w-full py-6 sm:hidden sm:h-[400px] md:h-[450px] md:py-10"
       id="intro-mobile"
     >
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 33%), url(${props.avatarPic})`,
-
-          backgroundPosition: "center top",
-          backgroundRepeat: "no-repeat",
-          backgroundSize: "cover",
+      <BackgroundImage
+        src={props.avatarPic}
+        alt=""
+        divStyle={{
           opacity: headerOpacity,
           transform: `scale(${headerZoom})`,
-          zIndex: -1,
         }}
-      ></div>
+      >
+        <BottomThirdFadeGradient />
+      </BackgroundImage>
       {heroText}
     </section>
   );
@@ -112,23 +105,16 @@ export function PressHero(props: PressHeroProps) {
       id="intro-desktop"
       className="relative hidden h-[350px] w-full py-6 sm:block sm:h-[400px] md:h-[450px] md:py-10"
     >
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 33%), url(${props.headerPic})`,
-
-          backgroundPosition: "center top",
-          backgroundRepeat: "no-repeat",
-          backgroundSize: "cover",
+      <BackgroundImage
+        src={props.headerPic}
+        alt=""
+        divStyle={{
           opacity: headerOpacity,
           transform: `scale(${headerZoom})`,
-          zIndex: -1,
         }}
-      ></div>
+      >
+        <BottomThirdFadeGradient />
+      </BackgroundImage>
       {heroText}
     </section>
   );

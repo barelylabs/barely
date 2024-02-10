@@ -1,6 +1,7 @@
 import "~/styles/globals.css";
 
 import type { Metadata } from "next";
+import React from "react";
 import { Inter as FontSans } from "next/font/google";
 import localFont from "next/font/local";
 import { headers } from "next/headers";
@@ -43,17 +44,23 @@ interface RootLayoutProps {
 }
 
 export default function RootLayout({ children }: RootLayoutProps) {
+  // const bodyRef = React.useRef<HTMLBodyElement>(null);
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
+        // ref={bodyRef}
         className={cn(
-          "min-h-screen bg-background font-sans text-foreground antialiased ",
+          "max-h-dvh bg-background font-sans text-foreground antialiased",
           fontHeading.variable,
           fontSans.variable,
         )}
       >
         <Providers headers={headers()}>
-          <Container className="max-w-full px-0 py-0">{children}</Container>
+          <Container className="max-w-full px-0 py-0">
+            {/* <p>body height</p> */}
+            {children}
+          </Container>
         </Providers>
         <Toaster />
         <TailwindIndicator />
