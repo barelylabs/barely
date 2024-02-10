@@ -23,11 +23,11 @@ on:
         type: string
     outputs:
       deployment_id:
-        value: ${{ jobs.deploy.outputs.deployment_id }}
+        value: ${{ jobs.deploy-to-vercel.outputs.deployment_id }}
       deployment_url:
-        value: ${{ jobs.deploy.outputs.deployment_url }}
+        value: ${{ jobs.deploy-to-vercel.outputs.deployment_url }}
       inspect_url:
-        value: ${{ jobs.deploy.outputs.inspect_url }}
+        value: ${{ jobs.deploy-to-vercel.outputs.inspect_url }}
     secrets:
       VERCEL_TOKEN:
         required: true
@@ -37,7 +37,7 @@ on:
         required: true
 
 jobs:
-  deploy:
+  deploy-to-vercel:
     runs-on: ubuntu-latest
     env:
       TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
