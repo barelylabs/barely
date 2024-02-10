@@ -226,7 +226,7 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_WWW_PROJECT_ID }}
     steps:
       - name: Install Vercel CLI
-        run: npm i -g xxxxxx@xxxxxx
+        run: npm i -g vercel@latest
 
       - name: Promote www to production
         run: vercel promote dpl_${{ needs.deploy-www.outputs.deployment_id }} --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
@@ -274,7 +274,7 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PRESS_PROJECT_ID }}
     steps:
       - name: Install Vercel CLI
-        run: npm i -g xxxxxx@xxxxxx
+        run: npm i -g vercel@latest
 
       - name: Promote press to production
         run: vercel promote dpl_${{ needs.deploy-press.outputs.deployment_id }} --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
@@ -290,7 +290,7 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SPARROW_PROJECT_ID }}
     steps:
       - name: Install Vercel CLI
-        run: npm i -g xxxxxx@xxxxxx
+        run: npm i -g vercel@latest
 
       - name: Promote sparrow to production
         run: vercel promote dpl_${{ needs.deploy-sparrow.outputs.deployment_id }} --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
@@ -310,7 +310,7 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_WWW_PROJECT_ID }}
     steps:
       - name: Install Vercel CLI
-        run: npm i -g xxxxxx@xxxxxx
+        run: npm i -g vercel@latest
 
       - name: Rollback www
         run: |
@@ -370,7 +370,7 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PRESS_PROJECT_ID }}
     steps:
       - name: Install Vercel CLI
-        run: npm i -g xxxxxx@xxxxxx
+        run: npm i -g vercel@latest
 
       - name: Rollback press
         run: |
@@ -390,7 +390,7 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SPARROW_PROJECT_ID }}
     steps:
       - name: Install Vercel CLI
-        run: npm i -g xxxxxx@xxxxxx
+        run: npm i -g vercel@latest
 
       - name: Rollback sparrow
         run: |
