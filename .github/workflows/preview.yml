@@ -263,19 +263,18 @@ jobs:
         with:
           message: |
             ## apps
-            | app | preview | inspect |
-            | --- | ------- | ------- |
-            | :globe_with_meridians: www | [:rocket: preview](${{ needs.deploy-www.outputs.deployment_url }}) | [:mag: inspect](${{ needs.deploy-www.outputs.inspect_url }}) |
-            | :iphone: app | [:rocket: preview](${{ needs.deploy-app.outputs.deployment_url }}) | [:mag: inspect](${{ needs.deploy-app.outputs.inspect_url }}) |
-            | :link: link | [:rocket: preview](${{ needs.deploy-link.outputs.deployment_url }}) | [:mag: inspect](${{ needs.deploy-link.outputs.inspect_url }}) |
-            | :newspaper: press | [:rocket: preview](${{ needs.deploy-press.outputs.deployment_url }}) | [:mag: inspect](${{ needs.deploy-press.outputs.inspect_url }}) |
-            | :bird: sparrow | [:rocket: preview](${{ needs.deploy-sparrow.outputs.deployment_url }}) | [:mag: inspect](${{ needs.deploy-sparrow.outputs.inspect_url }}) |
-
+            | :iphone: app | :rocket: preview | :mag: inspect |
+            | ------------ | ---------------- | ------------- |
+            | :globe_with_meridians: www | [preview](${{ needs.deploy-www.outputs.deployment_url }}) | [inspect](${{ needs.deploy-www.outputs.inspect_url }}) |
+            | :iphone: app | [preview](${{ needs.deploy-app.outputs.deployment_url }}) | [inspect](${{ needs.deploy-app.outputs.inspect_url }}) |
+            | :link: link | [preview](${{ needs.deploy-link.outputs.deployment_url }}) | [inspect](${{ needs.deploy-link.outputs.inspect_url }}) |
+            | :newspaper: press | [preview](${{ needs.deploy-press.outputs.deployment_url }}) | [inspect](${{ needs.deploy-press.outputs.inspect_url }}) |
+            | :wing: sparrow | [preview](${{ needs.deploy-sparrow.outputs.deployment_url }}) | [inspect](${{ needs.deploy-sparrow.outputs.inspect_url }}) |
 
             ## db
-            | db | inspect |
-            | -- | ------- |
-            | :elephant: neon | [:mag: :arrow_upper_right:](${{ needs.neon-preview.outputs.neon_branch_id }}) |
+            | :floppy_disk: db | :mag: inspect |
+            | ---------------- | ------------- |
+            | :elephant: neon  | [inspect](${{ needs.neon-preview.outputs.neon_branch_id }}) |
 
   preview--can-merge:
     needs: [neon-preview, deploy-app, deploy-link]
