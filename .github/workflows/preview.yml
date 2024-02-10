@@ -277,7 +277,15 @@ jobs:
             | :elephant: neon  | [inspect](${{ needs.neon-preview.outputs.neon_branch_id }}) |
 
   preview--can-merge:
-    needs: [neon-preview, deploy-app, deploy-link]
+    needs:
+      [
+        neon-preview,
+        deploy-www,
+        deploy-app,
+        deploy-link,
+        deploy-press,
+        deploy-sparrow,
+      ]
     if: always() && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:

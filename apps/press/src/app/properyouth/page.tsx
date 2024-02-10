@@ -64,28 +64,9 @@ const heroPics = {
 export default function PressPage() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const mainRef = useRef<HTMLDivElement>(null);
-
-  // const [mainHeight, setMainHeight] = useState(0);
-  // const test = useMediaQuery();
-
-  // useEffect(() => {
-  //   const updateHeight = () => {
-  //     if (mainRef.current) {
-  //       setMainHeight(mainRef.current.offsetHeight);
-  //     }
-  //   };
-
-  //   updateHeight(); // Update height on mount
-
-  //   window.addEventListener("resize", updateHeight); // Update height on window resize
-
-  //   return () => window.removeEventListener("resize", updateHeight); // Cleanup
-  // }, []);
   return (
     <>
       <main
-        ref={mainRef}
         className={`mx-auto box-border w-full max-w-5xl flex-1 overflow-hidden`}
         style={{ height: "calc(100dvh - 72px)" }}
       >
