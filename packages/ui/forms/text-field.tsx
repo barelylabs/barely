@@ -56,19 +56,6 @@ export const TextField = <
                     <FieldErrorIcon isValidating={isValidating} />
                   </div>
                 </FieldControl>
-                {/* {props.description && (
-								<FieldDescription>{props.description}</FieldDescription>
-								)}
-							{hint && (
-								<FieldHint
-								onFocus={() => setFocus(true)}
-								onBlur={() => setFocus(false)}
-								className={focus ? 'block' : 'hidden'}
-								>
-									{hint}
-								</FieldHint>
-							)}
-							<FieldErrorMessage /> */}
               </FieldWrapper>
             </FormItem>
           );

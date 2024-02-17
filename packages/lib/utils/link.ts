@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { parse } from "node-html-parser";
 
+import type { SessionWorkspace } from "../server/auth";
 import type { Link, LinkMetaTags } from "../server/link.schema";
 import { env } from "../env";
 import {
@@ -21,7 +22,12 @@ export function getShortLinkUrlFromLink(link: Link) {
   return `https://${link.domain}/${link.key}`;
 }
 
-export function getAppAndAppRouteFromUrl(url: string) {
+export function getAppAndAppRouteFromUrl(
+  url: string,
+  opts?: {
+    workspace?: SessionWorkspace;
+  },
+) {
   // {handle}.barely.link/app -OR- {handle}.barely.link/{app}/{appRoute}/{appId}
 
   // an example url: https://open.spotify.com/artist/7ukNuZ9893467DP0KV6NHA?si=4NxdFI70Q0S8b6bu_wWl5A&ref=twitter
@@ -43,26 +49,44 @@ export function getAppAndAppRouteFromUrl(url: string) {
   }
 
   // get the path of the url (e.g. '/watch?v=9bZkp7q19f0' or '/artist/7ukNuZ9893467DP0KV6NHA') and remove any search params
-  const urlObject = new URL(url);
-  const pathname = urlObject.pathname + urlObject.search;
-  const appRoute =
-    pathname.length > 1 ? getUrlWithoutUTMParams(pathname.slice(1)) : "";
 
-  // get the app from the domain (e.g. 'youtube' or 'spotify')
+  const urlObject = new URL(url);
+
   let app: string;
+  let pathname = urlObject.pathname;
+  const searchParams = urlObject.searchParams;
 
   switch (true) {
-    case domain.includes("open.spotify"):
+    case domain.includes("open.spotify"): {
       app = "spotify";
-      break;
+      searchParams.delete("si");
+      console.log("wsSpotArtistId", opts?.workspace?.spotifyArtistId);
+      const isCurrentArtistPage =
+        pathname.startsWith("/artist/") &&
+        pathname.split("/")[2] === opts?.workspace?.spotifyArtistId;
 
+      console.log("isCurrentArtistPage ", isCurrentArtistPage);
+      if (isCurrentArtistPage) {
+        pathname = "/artist";
+        console.log("isCurrentArtistPathname ", pathname);
+      }
+
+      break;
+    }
     case domain.includes("youtube") || domain.includes("youtu.be"):
       app = "youtube";
       break;
 
-    default:
+    default: {
       app = convertToHandle(domain);
+      // const path = pathname + search;
+      // appRoute = path.length > 1 ? getUrlWithoutUTMParams(path.slice(1)) : "";
+    }
   }
+
+  const path = pathname + searchParams.toString();
+
+  const appRoute = path.length > 1 ? getUrlWithoutUTMParams(path.slice(1)) : "";
 
   return {
     app,
@@ -363,6 +387,18 @@ export function getUrlWithoutUTMParams(url: string) {
   try {
     const newUrl = new URL(url);
     paramsMetadata.forEach((params) => newUrl.searchParams.delete(params.key));
+    return newUrl.toString();
+  } catch (error) {
+    return url;
+  }
+}
+
+export const trackingParams = ["si"];
+
+export function getUrlWithoutTrackingParams(url: string) {
+  try {
+    const newUrl = new URL(url);
+    trackingParams.forEach((params) => newUrl.searchParams.delete(params));
     return newUrl.toString();
   } catch (error) {
     return url;
