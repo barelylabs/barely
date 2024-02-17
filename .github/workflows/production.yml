@@ -117,7 +117,7 @@ jobs:
     with:
       app_name: www
       working_directory: apps/www
-      scope: barelylabs
+      scope: barely
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
@@ -132,7 +132,7 @@ jobs:
     with:
       app_name: app
       working_directory: apps/app
-      scope: barelylabs
+      scope: barely
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
@@ -147,7 +147,7 @@ jobs:
     with:
       app_name: link
       working_directory: apps/link
-      scope: barelylabs
+      scope: barely
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
@@ -162,7 +162,7 @@ jobs:
     with:
       app_name: press
       working_directory: apps/press
-      scope: barelylabs
+      scope: barely
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
@@ -177,7 +177,7 @@ jobs:
     with:
       app_name: sparrow
       working_directory: apps/sparrow
-      scope: barelylabs
+      scope: barely
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
@@ -229,7 +229,7 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Promote www to production
-        run: vercel promote dpl_${{ needs.deploy-www.outputs.deployment_id }} --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel promote dpl_${{ needs.deploy-www.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
   promote-app:
     name: promote app to production
@@ -245,7 +245,7 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Promote app to production
-        run: vercel promote dpl_${{ needs.deploy-app.outputs.deployment_id }} --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel promote dpl_${{ needs.deploy-app.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
   promote-link:
     name: promote link to production
@@ -261,7 +261,7 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Promote link to production
-        run: vercel promote dpl_${{ needs.deploy-link.outputs.deployment_id }} --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel promote dpl_${{ needs.deploy-link.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
   promote-press:
     name: promote press to production
@@ -277,7 +277,7 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Promote press to production
-        run: vercel promote dpl_${{ needs.deploy-press.outputs.deployment_id }} --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel promote dpl_${{ needs.deploy-press.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
   promote-sparrow:
     name: promote sparrow to production
@@ -293,7 +293,7 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Promote sparrow to production
-        run: vercel promote dpl_${{ needs.deploy-sparrow.outputs.deployment_id }} --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel promote dpl_${{ needs.deploy-sparrow.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
   # 🚨 ROLLBACK APPS (IF ANY PROMOTION FAILS) 🚨 #
   # ref: https://dev.to/philw_/using-vercels-instant-rollback-feature-in-your-own-cicd-pipeline-57oi
@@ -316,7 +316,7 @@ jobs:
         run: |
           ROLLBACK_DEPLOYMENT_ID=$(curl -s "https://api.vercel.com/v6/deployments?teamId=${{ secrets.VERCEL_TEAM_ID }}&projectId=${{ secrets.VERCEL_WWW_PROJECT_ID}}&limit=2&rollbackCandidate=true&state=READY&target=production" -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | jq -r '.deployments[1].uid')
           echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
-          vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
+          vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
   rollback-app:
     name: rollback app if any deployments fail
@@ -336,7 +336,7 @@ jobs:
         run: |
           ROLLBACK_DEPLOYMENT_ID=$(curl -s "https://api.vercel.com/v6/deployments?teamId=${{ secrets.VERCEL_TEAM_ID }}&projectId=${{ secrets.VERCEL_APP_PROJECT_ID}}&limit=2&rollbackCandidate=true&state=READY&target=production" -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | jq -r '.deployments[1].uid')
           echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
-          vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
+          vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
   rollback-link:
     name: rollback link if any deployments fail
@@ -356,7 +356,7 @@ jobs:
         run: |
           ROLLBACK_DEPLOYMENT_ID=$(curl -s "https://api.vercel.com/v6/deployments?teamId=${{ secrets.VERCEL_TEAM_ID }}&projectId=${{ secrets.VERCEL_LINK_PROJECT_ID}}&limit=2&rollbackCandidate=true&state=READY&target=production" -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | jq -r '.deployments[1].uid')
           echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
-          vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
+          vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
   rollback-press:
     name: rollback press if any deployments fail
@@ -376,7 +376,7 @@ jobs:
         run: |
           ROLLBACK_DEPLOYMENT_ID=$(curl -s "https://api.vercel.com/v6/deployments?teamId=${{ secrets.VERCEL_TEAM_ID }}&projectId=${{ secrets.VERCEL_PRESS_PROJECT_ID}}&limit=2&rollbackCandidate=true&state=READY&target=production" -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | jq -r '.deployments[1].uid')
           echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
-          vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
+          vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
   rollback-sparrow:
     name: rollback sparrow if any deployments fail
@@ -396,7 +396,7 @@ jobs:
         run: |
           ROLLBACK_DEPLOYMENT_ID=$(curl -s "https://api.vercel.com/v6/deployments?teamId=${{ secrets.VERCEL_TEAM_ID }}&projectId=${{ secrets.VERCEL_SPARROW_PROJECT_ID}}&limit=2&rollbackCandidate=true&state=READY&target=production" -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | jq -r '.deployments[1].uid')
           echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
-          vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barelylabs --token=${{ secrets.VERCEL_TOKEN }}
+          vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
   # 🧹 CLEAN UP 🧹 #
 
