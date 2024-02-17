@@ -76,7 +76,7 @@ export interface TransparentLinkParams {
   path: string;
   fullPath: string;
   app: string;
-  appRoute: string;
+  appRoute: string | null;
 }
 
 export function parseTransparentLink(req: NextRequest) {
@@ -107,7 +107,7 @@ export function parseTransparentLink(req: NextRequest) {
     path,
     fullPath,
     app,
-    appRoute,
+    appRoute: appRoute.length > 0 ? appRoute : null,
   };
   return transparentLinkParams;
 }

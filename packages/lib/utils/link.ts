@@ -22,11 +22,9 @@ export function getShortLinkUrlFromLink(link: Link) {
   return `https://${link.domain}/${link.key}`;
 }
 
-export function getAppAndAppRouteFromUrl(
+export function getTransparentLinkDataFromUrl(
   url: string,
-  opts?: {
-    workspace?: SessionWorkspace;
-  },
+  workspace: SessionWorkspace,
 ) {
   // {handle}.barely.link/app -OR- {handle}.barely.link/{app}/{appRoute}/{appId}
 
@@ -60,14 +58,14 @@ export function getAppAndAppRouteFromUrl(
     case domain.includes("open.spotify"): {
       app = "spotify";
       searchParams.delete("si");
-      console.log("wsSpotArtistId", opts?.workspace?.spotifyArtistId);
+      console.log("wsSpotArtistId", workspace?.spotifyArtistId);
       const isCurrentArtistPage =
         pathname.startsWith("/artist/") &&
-        pathname.split("/")[2] === opts?.workspace?.spotifyArtistId;
+        pathname.split("/")[2] === workspace?.spotifyArtistId;
 
       console.log("isCurrentArtistPage ", isCurrentArtistPage);
       if (isCurrentArtistPage) {
-        pathname = "/artist";
+        pathname = "";
         console.log("isCurrentArtistPathname ", pathname);
       }
 
@@ -79,18 +77,20 @@ export function getAppAndAppRouteFromUrl(
 
     default: {
       app = convertToHandle(domain);
-      // const path = pathname + search;
-      // appRoute = path.length > 1 ? getUrlWithoutUTMParams(path.slice(1)) : "";
     }
   }
 
   const path = pathname + searchParams.toString();
 
-  const appRoute = path.length > 1 ? getUrlWithoutUTMParams(path.slice(1)) : "";
+  const appRoute =
+    path.length > 1 ? getUrlWithoutUTMParams(path.slice(1)) : null;
+
+  const transparentLink = `${workspace.handle}.barely.link/${app}${appRoute ? `/${appRoute}` : ""}`;
 
   return {
     app,
     appRoute,
+    transparentLink,
   };
 }
 

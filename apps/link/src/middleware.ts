@@ -5,7 +5,6 @@ import { db } from "@barely/lib/server/db/index";
 import { recordLinkClick } from "@barely/lib/server/event.fns";
 import { Links } from "@barely/lib/server/link.sql";
 import { parseLink } from "@barely/lib/server/middleware/utils";
-// import { LINK_BASE_URL, WWW_BASE_URL } from "@barely/lib/utils/constants";
 import {
   detectBot,
   parseGeo,
@@ -40,6 +39,14 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
     if (!linkProps.handle)
       return NextResponse.rewrite(getAbsoluteUrl("link", "/404"));
 
+    console.log("appRoute", linkProps.appRoute);
+    console.log("appRoute is null", linkProps.appRoute === null);
+
+    console.log("handle", linkProps.handle);
+    console.log("app", linkProps.app);
+    console.log("appRoute", linkProps.appRoute);
+    console.log("typeof linkProps.appRoute", typeof linkProps.appRoute);
+
     where = sqlAnd([
       eq(Links.handle, linkProps.handle),
       linkProps.app ? eq(Links.app, linkProps.app) : isNull(Links.app),
@@ -54,7 +61,8 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
     ]);
   }
 
-  // if (!where) return NextResponse.rewrite(`${LINK_BASE_URL}/404`);
+  // console.log("middleware: where", where);
+
   if (!where) return NextResponse.rewrite(getAbsoluteUrl("link", "/404"));
 
   const link: LinkAnalyticsProps | undefined =
@@ -77,8 +85,11 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
       },
     });
 
+  console.log("middleware: link", link);
+
   //* 🚧 handle route errors 🚧  *//
-  if (!link ?? !link?.url) return NextResponse.rewrite(`${origin}/404`);
+  if (!link ?? !link?.url)
+    return NextResponse.rewrite(getAbsoluteUrl("link", "404"));
 
   //* 📈 report event to analytics + remarketing *//
   const ip = parseIp(req);

@@ -55,6 +55,9 @@ export function getBaseUrl(app: "app" | "link" | "www", absolute = false) {
 
 export function getAbsoluteUrl(app: "app" | "link" | "www", path?: string) {
   const appBaseUrl = getBaseUrl(app, true);
+
+  console.log("appBaseUrl :", appBaseUrl);
+
   return `${appBaseUrl}${path ? `/${path}` : ""}`;
 }
 
