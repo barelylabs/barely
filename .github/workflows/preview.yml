@@ -171,7 +171,7 @@ jobs:
     with:
       app_name: www
       working_directory: apps/www
-      scope: barelylabs
+      scope: barely
       environment: preview
       git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
@@ -186,7 +186,7 @@ jobs:
     with:
       app_name: app
       working_directory: apps/app
-      scope: barelylabs
+      scope: barely
       environment: preview
       git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
@@ -201,7 +201,7 @@ jobs:
     with:
       app_name: link
       working_directory: apps/link
-      scope: barelylabs
+      scope: barely
       environment: preview
       git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
@@ -216,7 +216,7 @@ jobs:
     with:
       app_name: press
       working_directory: apps/press
-      scope: barelylabs
+      scope: barely
       environment: preview
       git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
@@ -231,7 +231,7 @@ jobs:
     with:
       app_name: sparrow
       working_directory: apps/sparrow
-      scope: barelylabs
+      scope: barely
       environment: preview
       git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}

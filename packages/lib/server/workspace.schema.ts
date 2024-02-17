@@ -19,6 +19,7 @@ export const insertWorkspaceSchema = createInsertSchema(Workspaces, {
 });
 export const createWorkspaceSchema = insertWorkspaceSchema.omit({ id: true });
 
+export const updateCurrentWorkspaceSchema = insertWorkspaceSchema.partial();
 export const updateWorkspaceSchema = insertWorkspaceSchema
   .partial()
   .required({ id: true });

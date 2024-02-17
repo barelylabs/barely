@@ -23,10 +23,19 @@ export const domainNodeRouter = router({
       if (!vercelResponse.success) {
         console.log("vercelResponse => ", vercelResponse.data);
 
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "there was an error adding the domain to vercel",
-        }); //fixme break out error codes in addLinkDomainToVercel
+        if (
+          vercelResponse.parsed &&
+          vercelResponse.data.error.code === "domain_already_in_use"
+        ) {
+          console.log(
+            "domain already in use. skipping adding domain to vercel",
+          );
+        } else {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "there was an error adding the domain to vercel",
+          });
+        }
       }
 
       console.log("domain added to vercel => ", vercelResponse.status);
