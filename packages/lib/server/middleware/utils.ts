@@ -19,6 +19,8 @@ export function parseLinkDomain(req: NextRequest) {
     )
     ?.replace("www.", "");
 
+  console.log("parseLinkDomain: domain", domain);
+
   if (!domain) throw new Error("No domain found");
 
   // special case for Vercel preview deployment URLs
@@ -37,6 +39,8 @@ export function parseLinkDomain(req: NextRequest) {
   )
     ? "transparentLinkClick"
     : "shortLinkClick";
+
+  console.log("parseLinkDomain: linkClickType", linkClickType);
 
   if (
     linkClickType === "shortLinkClick" &&
@@ -80,6 +84,8 @@ export function parseTransparentLink(req: NextRequest) {
 
   const handle =
     domain.split(".").length === 3 ? domain.split(".")[0] ?? null : null;
+
+  console.log("parseTransparentLink: handle", handle);
 
   // path is the path of the URL (e.g. properyouth.barely.link/spotify/track/12345 => /spotify/track/12345)
   const path = req.nextUrl.pathname;
