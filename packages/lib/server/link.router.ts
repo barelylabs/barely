@@ -5,8 +5,8 @@ import { z } from "zod";
 import { env } from "../env";
 import { newId } from "../utils/id";
 import {
-  getAppAndAppRouteFromUrl,
   getMetaTags,
+  getTransparentLinkDataFromUrl,
   isValidUrl,
 } from "../utils/link";
 import { raise } from "../utils/raise";
@@ -65,7 +65,7 @@ export const linkRouter = router({
         });
       }
 
-      const appData = getAppAndAppRouteFromUrl(input.url);
+      const appData = getTransparentLinkDataFromUrl(input.url, ctx.workspace);
 
       if (!appData) {
         throw new TRPCError({

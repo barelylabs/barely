@@ -33,7 +33,7 @@ import { SelectField } from "@barely/ui/forms/select-field";
 import { SwitchField } from "@barely/ui/forms/switch-field";
 import { TextField } from "@barely/ui/forms/text-field";
 import {
-  getAppAndAppRouteFromUrl,
+  getTransparentLinkDataFromUrl,
   getUrlWithoutTrackingParams,
   isValidUrl,
 } from "@barely/utils/link";
@@ -122,13 +122,11 @@ export function LinkModal() {
   const appLinkData = useMemo(() => {
     if (!workspace || !debouncedUrl) return null;
 
-    return getAppAndAppRouteFromUrl(debouncedUrl, {
-      workspace,
-    });
+    return getTransparentLinkDataFromUrl(debouncedUrl, workspace);
   }, [workspace, debouncedUrl]);
 
   const transparentLink = appLinkData
-    ? `${workspace.handle}.barely.link/${appLinkData.app}/${appLinkData.appRoute}`
+    ? `${workspace.handle}.barely.link/${appLinkData.app}${appLinkData.appRoute && "/" + appLinkData.appRoute}`
     : null;
 
   // meta tags
@@ -266,7 +264,7 @@ export function LinkModal() {
                     <AddWorkspaceSpotifyArtistId
                       spotifyArtistId={
                         appLinkData?.app === "spotify" &&
-                        appLinkData.appRoute.startsWith("artist/")
+                        appLinkData.appRoute?.startsWith("artist/")
                           ? appLinkData.appRoute.split("/")[1]
                           : ""
                       }
