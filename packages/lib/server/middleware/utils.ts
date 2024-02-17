@@ -89,6 +89,7 @@ export function parseTransparentLink(req: NextRequest) {
 
   // path is the path of the URL (e.g. properyouth.barely.link/spotify/track/12345 => /spotify/track/12345)
   const path = req.nextUrl.pathname;
+  console.log("parseTransparentLink: path", path);
 
   // fullPath is the full URL path (including query params)
   const searchParams = req.nextUrl.searchParams.toString();
@@ -96,8 +97,13 @@ export function parseTransparentLink(req: NextRequest) {
     searchParams.length > 0 ? `?${searchParams}` : ""
   }`;
 
+  console.log("parseTransparentLink: fullPath", fullPath);
+
   // Here, we are using decodeURIComponent to handle foreign languages
   const app = decodeURIComponent(path.split("/")[1] ?? ""); // app is the first part of the path (e.g. properyouth.barely.link/spotify/track/12345 => spotify)
+  console.log("parseTransparentLink: app", app);
+  console.log("parseTransparentLink type: ", typeof app);
+  console.log("parseTransparentLink length: ", app.length);
   // appRoute is the rest of the path (e.g. properyouth.barely.link/spotify/track/12345?si=aparam => track/12345?si=aparam)
   const appRoute = decodeURIComponent(fullPath.split("/").slice(2).join("/"));
 

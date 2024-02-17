@@ -39,13 +39,9 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
     if (!linkProps.handle)
       return NextResponse.rewrite(getAbsoluteUrl("link", "/404"));
 
-    console.log("appRoute", linkProps.appRoute);
-    console.log("appRoute is null", linkProps.appRoute === null);
-
     console.log("handle", linkProps.handle);
     console.log("app", linkProps.app);
     console.log("appRoute", linkProps.appRoute);
-    console.log("typeof linkProps.appRoute", typeof linkProps.appRoute);
 
     where = sqlAnd([
       eq(Links.handle, linkProps.handle),
