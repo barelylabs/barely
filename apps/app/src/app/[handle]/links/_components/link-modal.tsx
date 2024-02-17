@@ -125,9 +125,9 @@ export function LinkModal() {
     return getTransparentLinkDataFromUrl(debouncedUrl, workspace);
   }, [workspace, debouncedUrl]);
 
-  const transparentLink = appLinkData
-    ? `${workspace.handle}.barely.link/${appLinkData.app}${appLinkData.appRoute && "/" + appLinkData.appRoute}`
-    : null;
+  // const transparentLink = appLinkData
+  //   ? `${workspace.handle}.barely.link/${appLinkData.app}${appLinkData.appRoute && "/" + appLinkData.appRoute}`
+  //   : null;
 
   // meta tags
   const { data: metaTagsFromUrl, isFetching: isFetchingMetaTags } =
@@ -330,7 +330,7 @@ export function LinkModal() {
                         <Text className="w-full break-all" variant="sm/normal">
                           {url.length < 4
                             ? ""
-                            : transparentLink ??
+                            : appLinkData?.transparentLink ??
                               "*We don't currently support that app"}
                         </Text>
                       </div>
