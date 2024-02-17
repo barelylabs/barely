@@ -108,7 +108,6 @@ export const Links = pgTable(
   },
 
   (link) => ({
-    // primary: primaryKey(link.workspaceId, link.id),
     workspace: index("Link_workspace_idx").on(link.workspaceId),
 
     bioIdKey: uniqueIndex("Link_bioId_key").on(link.bioId),
@@ -119,6 +118,11 @@ export const Links = pgTable(
       link.domain,
       link.app,
       link.key,
+    ),
+    handleAppAppRoute: uniqueIndex("Link_handle_app_appRoute_key").on(
+      link.handle,
+      link.app,
+      link.appRoute,
     ),
     socialForTeamIdAppKey: uniqueIndex("Link_socialForTeamId_appId_key").on(
       link.socialForTeamId,
