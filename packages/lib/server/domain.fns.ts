@@ -182,6 +182,13 @@ export async function addDomainToVercel(props: {
           ? getDomainWithoutWWW(props.domain)
           : undefined,
       },
+      errorSchema: z.object({
+        error: z.object({
+          code: z.string(),
+          projectId: z.string(),
+          message: z.string(),
+        }),
+      }),
     },
   );
 

@@ -7,7 +7,7 @@ import { createPlanCheckoutLink } from "./stripe.fns";
 import { _Users_To_Workspaces } from "./user.sql";
 import {
   createWorkspaceSchema,
-  updateWorkspaceSchema,
+  updateCurrentWorkspaceSchema,
 } from "./workspace.schema";
 import { Workspaces } from "./workspace.sql";
 
@@ -71,12 +71,8 @@ export const workspaceRouter = router({
     }),
 
   update: privateProcedure
-    .input(updateWorkspaceSchema)
+    .input(updateCurrentWorkspaceSchema)
     .mutation(async ({ ctx, input }) => {
-      if (input.id !== ctx.workspace?.id) {
-        throw new Error("Workspace ID does not match the current context");
-      }
-
       const updatedWorkspace = await ctx.db.http
         .update(Workspaces)
         .set(input)
@@ -104,20 +100,4 @@ export const workspaceRouter = router({
 
       return checkoutLink;
     }),
-
-  // uploadAvatar: privateProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
-  // 	const { secure_url } = await upload(input, {
-  // 		public_id: ctx.workspace.id,
-  // 		folder: 'avatars',
-  // 		overwrite: true,
-  // 		invalidate: true,
-  // 	});
-
-  // 	await ctx.db.http
-  // 		.update(Workspaces)
-  // 		.set({ imageUrl: secure_url })
-  // 		.where(eq(Workspaces.id, ctx.workspace.id));
-
-  // 	return secure_url;
-  // }),
 });

@@ -47,12 +47,13 @@ export function LinkFilters() {
           id="searchInput"
           defaultValue={data.search ?? ""}
           ref={searchInputRef}
-          onChangeDebounced={(e) =>
+          onChangeDebounced={(e) => {
+            console.log("filter change", e.target.value);
             e.target.value.length
               ? setQuery("search", e.target.value)
-              : removeByKey("search")
-          }
-          debounce={200}
+              : removeByKey("search");
+          }}
+          debounce={500}
           placeholder="Search..."
         />
       </div>

@@ -2,7 +2,7 @@
 
 import type { UseFormReturn } from "react-hook-form";
 import { useCallback, useEffect } from "react";
-import { isValidUrl } from "@barely/utils/link";
+import { getUrlWithoutTrackingParams, isValidUrl } from "@barely/utils/link";
 import { useAtom } from "jotai";
 
 import type { UpsertLink } from "@barely/server/link.schema";
@@ -123,7 +123,7 @@ export function LinksHotkeys(props: LinksHotKeysProps) {
         target.tagName !== "TEXTAREA" &&
         !existingModalBackdrop
       ) {
-        props.form.setValue("url", pastedContent);
+        props.form.setValue("url", getUrlWithoutTrackingParams(pastedContent));
         setShowLinkModal(true);
       }
     },

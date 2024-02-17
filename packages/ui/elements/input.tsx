@@ -1,4 +1,4 @@
-import * as React from "react";
+import { forwardRef, useMemo } from "react";
 import { cn } from "@barely/lib/utils/cn";
 import { debounce } from "perfect-debounce";
 
@@ -13,19 +13,12 @@ export interface InputAddonProps {
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement> &
   InputAddonProps;
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
+const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, onChangeDebounced, isError, ...props }, ref) => {
-    const onChangeDebouncedMemo = React.useMemo(() => {
+    const onChangeDebouncedMemo = useMemo(() => {
       if (!onChangeDebounced) return undefined;
       return debounce(onChangeDebounced, props.debounce ?? 400);
     }, [onChangeDebounced, props.debounce]);
-
-    const handleDebouncedChange = React.useCallback(
-      async (e: React.ChangeEvent<HTMLInputElement>) => {
-        await onChangeDebouncedMemo?.(e);
-      },
-      [onChangeDebouncedMemo],
-    );
 
     return (
       <input
@@ -42,7 +35,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         onChange={(e) => {
           props.onChange?.(e);
           if (!onChangeDebounced) return;
-          handleDebouncedChange(e).catch((err) => console.error(err));
+          onChangeDebouncedMemo?.(e).catch((err) => console.error(err));
         }}
       />
     );

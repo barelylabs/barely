@@ -12,6 +12,7 @@ import { atomWithToggle } from "@barely/lib/atoms/atom-with-toggle";
 import { api } from "@barely/server/api/react";
 import { upsertLinkSchema } from "@barely/server/link.schema";
 import { BlurImage } from "@barely/ui/elements/blur-image";
+import { Button } from "@barely/ui/elements/button";
 import { Icon } from "@barely/ui/elements/icon";
 import { Label } from "@barely/ui/elements/label";
 import { LoadingSpinner } from "@barely/ui/elements/loading";
@@ -31,7 +32,11 @@ import { Form, SubmitButton } from "@barely/ui/forms";
 import { SelectField } from "@barely/ui/forms/select-field";
 import { SwitchField } from "@barely/ui/forms/switch-field";
 import { TextField } from "@barely/ui/forms/text-field";
-import { getAppAndAppRouteFromUrl, isValidUrl } from "@barely/utils/link";
+import {
+  getAppAndAppRouteFromUrl,
+  getUrlWithoutTrackingParams,
+  isValidUrl,
+} from "@barely/utils/link";
 import { atom, useAtom, useSetAtom } from "jotai";
 
 import type { Link, UpsertLink } from "@barely/server/link.schema";
@@ -113,7 +118,15 @@ export function LinkModal() {
   }, [editLink?.url, setDebouncedUrl]);
 
   // transparent link
-  const appLinkData = getAppAndAppRouteFromUrl(debouncedUrl);
+  // const appLinkData = getAppAndAppRouteFromUrl(debouncedUrl);
+  const appLinkData = useMemo(() => {
+    if (!workspace || !debouncedUrl) return null;
+
+    return getAppAndAppRouteFromUrl(debouncedUrl, {
+      workspace,
+    });
+  }, [workspace, debouncedUrl]);
+
   const transparentLink = appLinkData
     ? `${workspace.handle}.barely.link/${appLinkData.app}/${appLinkData.appRoute}`
     : null;
@@ -238,7 +251,26 @@ export function LinkModal() {
               <ModalBody>
                 <div className="flex w-full max-w-full flex-col gap-8">
                   <div className="flex flex-col space-y-2">
-                    <TextField name="url" label="Destination URL" />
+                    <TextField
+                      name="url"
+                      label="Destination URL"
+                      onPaste={(e) => {
+                        const input = e.clipboardData.getData("text");
+                        if (!input || !isValidUrl(input)) return;
+                        e.preventDefault();
+                        const cleanUrl = getUrlWithoutTrackingParams(input);
+                        e.currentTarget.value = cleanUrl; // this wasn't triggering the formData to change
+                        linkForm.setValue("url", cleanUrl);
+                      }}
+                    />
+                    <AddWorkspaceSpotifyArtistId
+                      spotifyArtistId={
+                        appLinkData?.app === "spotify" &&
+                        appLinkData.appRoute.startsWith("artist/")
+                          ? appLinkData.appRoute.split("/")[1]
+                          : ""
+                      }
+                    />
 
                     <div className="flex flex-col space-y-1">
                       <div className="flex flex-row justify-between">
@@ -412,6 +444,47 @@ export function LinkOptionalSettings(props: LinkOptionalSettingsProps) {
 			</Tooltip> */}
 
       {/* <pre>{JSON.stringify(endpoints, null, 2)}</pre> */}
+    </div>
+  );
+}
+
+export function AddWorkspaceSpotifyArtistId(props: {
+  spotifyArtistId?: string;
+}) {
+  const [show, setShow] = useState(true);
+  const apiUtils = api.useContext();
+  const workspace = useWorkspace();
+  const { mutateAsync: updateWorkspace } = api.workspace.update.useMutation();
+
+  const onSubmit = async () => {
+    await updateWorkspace({
+      spotifyArtistId: props.spotifyArtistId,
+    });
+    await apiUtils.workspace.invalidate();
+  };
+
+  if (
+    !show ||
+    !props.spotifyArtistId ||
+    (workspace.spotifyArtistId?.length ?? 0) > 0
+  )
+    return null;
+
+  return (
+    <div className="flex flex-row items-center justify-between gap-2 py-2">
+      <Text variant="sm/normal">
+        👆 Is that the link to{" "}
+        <span className="font-bold">{workspace.name}`&apos;`s</span> Spotify
+        Artist Profile?
+      </Text>
+      <div className="flex flex-row gap-2">
+        <Button variant="primary" size="sm" onClick={onSubmit}>
+          yes
+        </Button>
+        <Button variant="secondary" size="sm" onClick={() => setShow(false)}>
+          no
+        </Button>
+      </div>
     </div>
   );
 }
