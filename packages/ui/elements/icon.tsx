@@ -5,6 +5,7 @@ import {
   CheckCircleIcon,
   ExclamationCircleIcon,
   EyeDropperIcon,
+  InformationCircleIcon,
   SparklesIcon,
   XCircleIcon,
 } from "@heroicons/react/24/solid";
@@ -74,6 +75,7 @@ import {
   FormInput,
   Gamepad,
   Gauge,
+  Ghost,
   Globe,
   GripVertical,
   Hammer,
@@ -87,6 +89,7 @@ import {
   Import,
   Infinity as InfinityIcon,
   Joystick,
+  KanbanSquare,
   Laptop,
   LineChart,
   Linkedin,
@@ -142,7 +145,6 @@ import {
   ThumbsDown,
   ThumbsUp,
   Trash,
-  Trello,
   Triangle,
   Tv,
   UploadCloud,
@@ -253,6 +255,7 @@ export const Icon = {
 
   gamepad: Gamepad,
   gauge: Gauge,
+  ghost: Ghost,
   globe: Globe,
   grip: GripVertical,
 
@@ -265,12 +268,13 @@ export const Icon = {
 
   image: ImageIcon,
   import: Import,
+  info: InformationCircleIcon,
   infinity: InfinityIcon,
   integrations: GridNine,
 
   joystick: Joystick,
 
-  kanban: Trello,
+  kanban: KanbanSquare,
 
   laptop: Laptop,
   link: LinkIcon,
@@ -392,8 +396,6 @@ export const Icon = {
 export type IconType = LucideIcon | ReactIcon;
 
 export type IconSelection = keyof typeof Icon;
-
-// export { Icon, type IconType, type IconSelection };
 
 export function DeviceIcon({
   display,

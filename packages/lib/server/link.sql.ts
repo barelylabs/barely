@@ -86,6 +86,7 @@ export const Links = pgTable(
 
     // settings
     remarketing: boolean("remarketing").default(false).notNull(),
+    transparent: boolean("transparent").default(false).notNull(),
 
     // internal
     comments: text("comments"),

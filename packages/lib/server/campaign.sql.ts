@@ -3,13 +3,12 @@ import {
   index,
   integer,
   pgTable,
-  primaryKey,
   text,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
 
-import { cuid, id, primaryId, timestamps } from "../utils/sql";
+import { cuid, primaryId, timestamps } from "../utils/sql";
 import { AdCampaigns } from "./ad-campaign.sql";
 import { PlaylistPitchReviews } from "./playlist-pitch-review.sql";
 import { Playlists } from "./playlist.sql";
@@ -110,7 +109,7 @@ export const CampaignRelations = relations(Campaigns, ({ one, many }) => ({
 export const CampaignUpdateRecords = pgTable(
   "CampaignUpdateRecords",
   {
-    ...id,
+    ...primaryId,
     ...timestamps,
     stage: text("stage", { enum: campaignStageEnum }).notNull(),
 
@@ -125,7 +124,13 @@ export const CampaignUpdateRecords = pgTable(
       .references(() => Users.id),
   },
   (campaignUpdate) => ({
-    primary: primaryKey(campaignUpdate.campaignId, campaignUpdate.id),
+    // primary: primaryKey({
+    //   name: "campaignupdaterecords_campaignid_id_pk",
+    //   columns: [campaignUpdate.campaignId, campaignUpdate.id],
+    // }),
+    campaign: index("CampaignUpdateRecords_campaign_idx").on(
+      campaignUpdate.campaignId,
+    ),
   }),
 );
 

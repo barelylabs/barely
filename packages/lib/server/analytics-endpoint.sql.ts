@@ -25,7 +25,10 @@ export const AnalyticsEndpoints = pgTable(
   },
   (endpoint) => {
     return {
-      primary: primaryKey(endpoint.platform, endpoint.id),
+      primary: primaryKey({
+        name: "analyticsendpoints_platform_id_pk",
+        columns: [endpoint.platform, endpoint.id],
+      }),
       workspacePlatform: uniqueIndex("workspace_platform_idx").on(
         endpoint.workspaceId,
         endpoint.platform,

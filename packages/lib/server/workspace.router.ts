@@ -53,21 +53,17 @@ export const workspaceRouter = router({
 
       if (!artistTeam) return null;
 
-      // if (!ctx.user?.id)
-      // 	throw new TRPCError({
-      // 		code: 'UNAUTHORIZED',
-      // 		message: `You must be logged in as a member of ${artistTeam.name}'s team to create a new campaign for them.`,
-      // 	});
-
-      // const userIsAdmin = ctx.user?.teams.map(t => t.id).includes(artistTeam.id);
-
-      // if (!userIsAdmin)
-      // 	throw new TRPCError({
-      // 		code: 'UNAUTHORIZED',
-      // 		message: `You must have admin access to ${artistTeam.name}'s team to create a new campaign for them. Contact someone on the team to get access.`,
-      // 	});
-
       return artistTeam;
+    }),
+
+  spotifyArtistIdTaken: publicProcedure
+    .input(z.string())
+    .query(async ({ input, ctx }) => {
+      const artistTeam = await ctx.db.http.query.Workspaces.findFirst({
+        where: eq(Workspaces.spotifyArtistId, input),
+      });
+
+      return !!artistTeam;
     }),
 
   update: privateProcedure

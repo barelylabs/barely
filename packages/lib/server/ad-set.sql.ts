@@ -1,14 +1,7 @@
 import { relations } from "drizzle-orm";
-import {
-  boolean,
-  index,
-  integer,
-  pgTable,
-  primaryKey,
-  varchar,
-} from "drizzle-orm/pg-core";
+import { boolean, index, integer, pgTable, varchar } from "drizzle-orm/pg-core";
 
-import { cuid, id, primaryId, timestamps } from "../utils/sql";
+import { cuid, primaryId, timestamps } from "../utils/sql";
 import { AdCampaigns } from "./ad-campaign.sql";
 import { Ads } from "./ad.sql";
 import { Audiences } from "./audience.sql";
@@ -97,7 +90,7 @@ export const AdSet_Relations = relations(AdSets, ({ one, many }) => ({
 export const AdSetCloneRecords = pgTable(
   "AdSetCloneRecords",
   {
-    ...id,
+    ...primaryId,
     workspaceId: cuid("workspaceId")
       .notNull()
       .references(() => Workspaces.id, {
@@ -123,7 +116,10 @@ export const AdSetCloneRecords = pgTable(
     adSetChildId: cuid("adSetChildId"),
   },
   (table) => ({
-    primary: primaryKey(table.workspaceId, table.adSetParentId, table.id),
+    // primary: primaryKey({
+    //   name: "adsetclonerecords_workspaceid_adsetparentid_id_pk",
+    //   columns: [table.workspaceId, table.adSetParentId, table.id],
+    // }),
 
     audience: index("AdSetCloneRecords_audience_idx").on(table.audienceId),
     adSetParent: index("AdSetCloneRecord_adSetParent_idx").on(
@@ -161,7 +157,7 @@ export const AdSetCloneRecord_Relations = relations(
 export const AdSetUpdateRecords = pgTable(
   "AdSetUpdateRecords",
   {
-    ...id,
+    ...primaryId,
     workspaceId: cuid("workspaceId")
       .notNull()
       .references(() => Workspaces.id, {
@@ -183,7 +179,6 @@ export const AdSetUpdateRecords = pgTable(
     audienceId: cuid("audienceId"),
   },
   (table) => ({
-    primary: primaryKey(table.workspaceId, table.adSetId, table.id),
     adSet: index("AdSetUpdateRecords_adSet_idx").on(table.adSetId),
     audience: index("AdSetUpdateRecord_audience_idx").on(table.audienceId),
   }),
