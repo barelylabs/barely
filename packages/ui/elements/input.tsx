@@ -8,6 +8,7 @@ export interface InputAddonProps {
   ) => void | Promise<void>;
   debounce?: number;
   isError?: boolean;
+  disableController?: boolean;
 }
 
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement> &

@@ -98,9 +98,9 @@ export function LinkModal() {
                         if (!input || !isValidUrl(input)) return;
                         e.preventDefault();
                         const cleanUrl = getUrlWithoutTrackingParams(input);
-                        // e.currentTarget.value = cleanUrl; // this wasn't triggering the formData to change
                         linkForm.setValue("url", cleanUrl);
                       }}
+                      disabled={!!editLink?.transparent}
                     />
 
                     <AddWorkspaceSpotifyArtistId
