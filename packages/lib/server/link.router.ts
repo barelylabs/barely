@@ -65,9 +65,12 @@ export const linkRouter = router({
         });
       }
 
-      const appData = getTransparentLinkDataFromUrl(input.url, ctx.workspace);
+      const transparentLinkData = getTransparentLinkDataFromUrl(
+        input.url,
+        ctx.workspace,
+      );
 
-      if (!appData) {
+      if (!transparentLinkData) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: `Invalid URL`,
@@ -91,8 +94,8 @@ export const linkRouter = router({
       const createLinkValues = {
         id: linkId,
         ...input,
-        ...appData,
         ...metaTags,
+        ...(input.transparent ? transparentLinkData : {}),
       };
 
       const link = await ctx.db.http
