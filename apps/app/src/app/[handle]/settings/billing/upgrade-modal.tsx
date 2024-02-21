@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { atomWithToggle } from "@barely/atoms/atom-with-toggle";
 import { useWorkspace } from "@barely/hooks/use-workspace";
+import { toTitleCase } from "@barely/lib/utils/text";
 import { api } from "@barely/server/api/react";
 import { WORKSPACE_PLANS } from "@barely/server/workspace.settings";
 import { FeatureChecklist } from "@barely/ui/components/feature-checklist";
@@ -65,7 +66,7 @@ export function UpgradeModal(props: {
       <ModalBody className="">
         <div className="flex flex-row items-center justify-between">
           <Text variant="lg/semibold">
-            Pro Yearly{" "}
+            Pro {toTitleCase(billingCycle)}{" "}
             <Badge variant="outline">{`$${cost}/${billingCycle.replace(
               "ly",
               "",

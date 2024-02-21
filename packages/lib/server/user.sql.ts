@@ -36,6 +36,7 @@ export const Users = pgTable(
     // custom fields
     ...timestamps,
     stripeId: varchar("stripeId", { length: 255 }),
+    stripeId_devMode: varchar("stripeId_devMode", { length: 255 }),
     marketing: boolean("marketing").default(false),
     pitchScreening: boolean("pitchScreening").default(false),
     pitchReviewing: boolean("pitchReviewing").default(false),
