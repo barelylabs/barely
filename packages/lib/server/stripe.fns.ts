@@ -57,9 +57,15 @@ export async function createStripeUser(props: {
   });
 
   // return customer
-  await props.db.http.update(Users).set({
-    stripeId: customer.id,
-  });
+  await props.db.http.update(Users).set(
+    env.VERCEL_ENV === "development" || env.VERCEL_ENV === "preview"
+      ? {
+          stripeId_devMode: customer.id,
+        }
+      : {
+          stripeId: customer.id,
+        },
+  );
 
   const userWithStripe = await props.db.http
     .select()
@@ -89,7 +95,11 @@ export async function createPlanCheckoutLink(props: {
     throw new Error("Invalid priceId.");
   }
 
-  const user = props.user.stripeId
+  const userHasStripeId = testEnvironment
+    ? !!props.user.stripeId_devMode
+    : !!props.user.stripeId;
+
+  const user = userHasStripeId
     ? props.user
     : await createStripeUser({
         userId: props.user.id,
@@ -110,12 +120,6 @@ export async function createPlanCheckoutLink(props: {
     props.successPath ??
       `${props.workspace.handle}/settings/billing?success=true`,
   );
-  // )`${env.absolu}/` + props.successPath ??
-  // `${props.workspace.handle}/settings/billing?success=true`;
-
-  // const cancelUrl =
-  //   `${APP_BASE_URL}/` + props.cancelPath ??
-  //   `${props.workspace.handle}/settings/billing`;
   const cancelUrl = getAbsoluteUrl(
     "app",
     props.cancelPath ?? `${props.workspace.handle}/settings/billing`,
@@ -126,21 +130,12 @@ export async function createPlanCheckoutLink(props: {
     workspaceId: props.workspace.id,
   };
 
-  console.log("successUrl => ", successUrl);
-  console.log("cancelUrl => ", cancelUrl);
-
   const session = await stripe.checkout.sessions.create({
     customer: user.stripeId ?? undefined,
     mode: "subscription",
     success_url: successUrl,
     cancel_url: cancelUrl,
     payment_method_types: ["card"],
-    // automatic_tax: {
-    // 	enabled: true,
-    // },
-    // tax_id_collection: {
-    // 	enabled: true,
-    // },
     line_items: [
       {
         price: priceId,
@@ -178,9 +173,6 @@ export async function createPitchCheckoutLink(props: {
   if (!user?.stripeId) {
     throw new Error("User must have a stripeId.");
   }
-
-  // const successUrl = `${APP_BASE_URL}/${props.campaign.workspace.handle}/campaign/${props.campaign.id}?success=true`;
-  // const cancelUrl = `${APP_BASE_URL}/${props.campaign.workspace.handle}/campaign/${props.campaign.id}/launch`;
 
   const successUrl = getAbsoluteUrl(
     "app",

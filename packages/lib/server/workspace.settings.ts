@@ -36,7 +36,7 @@ export const WORKSPACE_PLANS = new Map<PlanType, Plan>([
       description: "Pro Plan",
       productId: {
         test: "prod_P3OhzmfamZ6E1D",
-        production: "", // fixme
+        production: "prod_PbK7nyXH7BxZnO",
       },
       linkUsageLimit: 50000,
       price: {
@@ -44,14 +44,14 @@ export const WORKSPACE_PLANS = new Map<PlanType, Plan>([
           amount: 9,
           priceIds: {
             test: "price_1OFHtmHDMmzntRhpEIGl71FN",
-            production: "", // fixme
+            production: "price_1Om7TTHDMmzntRhppfS957xC",
           },
         },
         yearly: {
           amount: 90,
           priceIds: {
             test: "price_1OFIExHDMmzntRhpxKLdRjwL",
-            production: "", // fixme
+            production: "price_1Om7TTHDMmzntRhpWEX1GFUM",
           },
         },
       },
