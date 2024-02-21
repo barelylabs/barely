@@ -33,6 +33,7 @@ export const TextAreaField = <
     <FormFieldContext.Provider value={{ name: props.name }}>
       <Controller
         {...props}
+        disabled={props.disableController}
         render={({ field, fieldState }) => {
           return (
             <FormItem>

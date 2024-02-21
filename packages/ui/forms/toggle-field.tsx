@@ -23,11 +23,6 @@ export const ToggleField = <
               <Toggle pressed={field.value} onPressedChange={field.onChange} />
             </FieldControl>
             <FieldMessages {...{ description: props.description, hint }} />
-            {/* <div className='space-y-1 leading-none'>
-							<FieldLabel>{props.label}</FieldLabel>
-							<FieldDescription>{props.description}</FieldDescription>
-							<FieldErrorMessage />
-						</div> */}
           </FormItem>
         )}
       />

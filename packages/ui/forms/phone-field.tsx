@@ -55,6 +55,7 @@ export const PhoneField = <
     <FormFieldContext.Provider value={{ name: props.name }}>
       <Controller
         {...props}
+        disabled={props.disableController}
         render={({ field }) => {
           return (
             <FormItem>
@@ -71,6 +72,7 @@ export const PhoneField = <
                       onValueChange={(value) =>
                         setCountryCode(value as CountryCode)
                       }
+                      disabled={props.disabled}
                     >
                       <SelectTrigger className="bg:transparent border-transparent pr-1 dark:border-transparent">
                         <SelectValue />
