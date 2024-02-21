@@ -3,18 +3,18 @@ import {
   index,
   integer,
   pgTable,
-  primaryKey,
+  // primaryKey,
   varchar,
 } from "drizzle-orm/pg-core";
 
-import { cuid, id } from "../utils/sql";
+import { cuid, primaryId } from "../utils/sql";
 import { Campaigns } from "./campaign.sql";
 import { Transactions } from "./transaction.sql";
 
 export const TransactionLineItems = pgTable(
   "TransactionLineItems",
   {
-    ...id,
+    ...primaryId,
     name: varchar("name", { length: 255 }).notNull(),
     paymentType: varchar("paymentType", {
       length: 255,
@@ -53,7 +53,8 @@ export const TransactionLineItems = pgTable(
     campaignId: cuid("campaignId"),
   },
   (lineItem) => ({
-    primary: primaryKey(lineItem.transactionId, lineItem.id),
+    // primary: primaryKey(lineItem.transactionId, lineItem.id),
+    transaction: index("LineItems_transaction_idx").on(lineItem.transactionId),
     campaign: index("LineItems_campaign_idx").on(lineItem.campaignId),
   }),
 );

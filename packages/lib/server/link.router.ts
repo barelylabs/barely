@@ -65,9 +65,12 @@ export const linkRouter = router({
         });
       }
 
-      const appData = getTransparentLinkDataFromUrl(input.url, ctx.workspace);
+      const transparentLinkData = getTransparentLinkDataFromUrl(
+        input.url,
+        ctx.workspace,
+      );
 
-      if (!appData) {
+      if (!transparentLinkData) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: `Invalid URL`,
@@ -91,11 +94,10 @@ export const linkRouter = router({
       const createLinkValues = {
         id: linkId,
         ...input,
-        ...appData,
         ...metaTags,
+        ...(input.transparent ? transparentLinkData : {}),
       };
 
-      console.log("createLinkValues => ", createLinkValues);
       const link = await ctx.db.http
         .insert(Links)
         .values(createLinkValues)
@@ -113,14 +115,33 @@ export const linkRouter = router({
         });
       }
 
-      const url =
-        input.url ??
-        (
-          await ctx.db.http.query.Links.findFirst({
-            where: eq(Links.id, input.id),
-          })
-        )?.url ??
-        raise("Link not found");
+      const existingLink =
+        (await ctx.db.pool.query.Links.findFirst({
+          where: eq(Links.id, input.id),
+        })) ?? raise("Link not found");
+
+      if (existingLink.transparent === true && input.transparent === false) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `You can't make a transparent link non-transparent`,
+        });
+      }
+
+      if (input.transparent === true) {
+        const appData = getTransparentLinkDataFromUrl(
+          existingLink.url,
+          ctx.workspace,
+        );
+
+        if (!appData) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `Invalid URL`,
+          });
+        }
+
+        input = { ...input, app: appData.app, appRoute: appData.appRoute };
+      }
 
       const metaTags = input.customMetaTags
         ? {
@@ -128,9 +149,11 @@ export const linkRouter = router({
             description: input.description,
             image: input.image,
           }
-        : await getMetaTags(url);
+        : await getMetaTags(existingLink.url);
 
-      const link = await ctx.db.http
+      console.log("metaTags", metaTags);
+
+      const link = await ctx.db.pool
         .update(Links)
         .set({ ...input, ...metaTags })
         .where(eq(Links.id, input.id))

@@ -13,14 +13,7 @@ import {
   SelectValue,
 } from "../elements/select";
 import { FieldWrapper } from "./field-wrapper";
-import {
-  // FieldDescription,
-  // FieldErrorMessage,
-  // FieldHint,
-  // FieldLabel,
-  FormFieldContext,
-  FormItem,
-} from "./index";
+import { FormFieldContext, FormItem } from "./index";
 
 export interface SelectFieldOption<TOption extends string | number> {
   value: TOption;
@@ -37,7 +30,6 @@ export const SelectField = <
   InputProps & {
     options: SelectFieldOption<Extract<TFieldValues[TName], string | number>>[];
   }) => {
-  // const [focus, setFocus] = useState(false);
   return (
     <FormFieldContext.Provider value={{ name: props.name }}>
       <Controller
@@ -45,7 +37,11 @@ export const SelectField = <
         render={({ field }) => (
           <FormItem>
             <FieldWrapper {...props} hint={hint}>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                disabled={props.disabled}
+              >
                 <FormControl>
                   <SelectTrigger className={props.className}>
                     <SelectValue placeholder={props.placeholder} />

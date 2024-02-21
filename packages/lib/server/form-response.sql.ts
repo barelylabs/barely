@@ -1,13 +1,13 @@
 import { relations } from "drizzle-orm";
-import { pgTable, primaryKey, text, varchar } from "drizzle-orm/pg-core";
+import { index, pgTable, text, varchar } from "drizzle-orm/pg-core";
 
-import { cuid, id, timestamps } from "../utils/sql";
+import { cuid, primaryId, timestamps } from "../utils/sql";
 import { Forms } from "./form.sql";
 
 export const FormResponses = pgTable(
   "FormResponses",
   {
-    ...id,
+    ...primaryId,
     ...timestamps,
     name: text("name"),
     email: text("email"),
@@ -23,7 +23,7 @@ export const FormResponses = pgTable(
   },
   (formResponse) => {
     return {
-      primary: primaryKey(formResponse.formId, formResponse.id),
+      form: index("FormResponses_form_idx").on(formResponse.formId),
     };
   },
 );

@@ -24,12 +24,10 @@ export function AllLinks(filters: LinkFilterParams) {
   return (
     <>
       <ul className="flex flex-col gap-2">
-        {/* <pre>{JSON.stringify({ userId, showArchived }, null, 2)}</pre> */}
         {links.map((l) => (
           <LinkCard link={l} key={l.id} />
         ))}
       </ul>
-      {/* <pre>{JSON.stringify(links, null, 2)}</pre> */}
     </>
   );
 }

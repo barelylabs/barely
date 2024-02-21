@@ -10,7 +10,6 @@ import {
   SECOND_LEVEL_DOMAINS,
   SPECIAL_APEX_DOMAINS,
 } from "./constants";
-import { convertToHandle } from "./handle";
 
 export function getShortLinkUrlFromLink(link: Link) {
   if (
@@ -21,6 +20,10 @@ export function getShortLinkUrlFromLink(link: Link) {
   }
   return `https://${link.domain}/${link.key}`;
 }
+
+export type TransparentLinkData = ReturnType<
+  typeof getTransparentLinkDataFromUrl
+>;
 
 export function getTransparentLinkDataFromUrl(
   url: string,
@@ -76,7 +79,8 @@ export function getTransparentLinkDataFromUrl(
       break;
 
     default: {
-      app = convertToHandle(domain);
+      // app = convertToHandle(domain);
+      return null;
     }
   }
 

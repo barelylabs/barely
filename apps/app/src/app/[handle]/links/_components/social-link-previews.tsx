@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import type { UseFormReturn } from "react-hook-form";
 import { useMemo } from "react";
 import Image from "next/image";
 import { AspectRatio } from "@barely/ui/elements/aspect-ratio";
@@ -10,11 +9,8 @@ import { LoadingSpinner } from "@barely/ui/elements/loading";
 import { ScrollArea } from "@barely/ui/elements/scroll-area";
 import { H } from "@barely/ui/elements/typography";
 import { getDomainWithoutWWW } from "@barely/utils/link";
-import { useAtom } from "jotai";
 
-import type { LinkMetaTags, UpsertLink } from "@barely/server/link.schema";
-
-import { showLinkModalAtom } from "~/app/[handle]/links/_components/link-modal";
+import type { LinkMetaTags } from "@barely/lib/server/link.schema";
 
 interface SocialPreviewProps {
   hostname?: string | null;
@@ -148,22 +144,25 @@ export function LinkedinPreview(props: SocialPreviewProps) {
   );
 }
 
-export function SocialLinkPreviews(props: {
-  form?: UseFormReturn<UpsertLink>;
+interface SocialLinkPreviewsProps {
   url: string;
   metaTags?: LinkMetaTags;
   generatingMetaTags: boolean;
-}) {
-  const [, setShowLinkModal] = useAtom(showLinkModalAtom);
+  closeModal: () => Promise<void>;
+}
 
-  // const debouncedUrl = useDebounceValue(props.url, 500);
-
+export function SocialLinkPreviews({
+  url,
+  metaTags,
+  generatingMetaTags,
+  closeModal,
+}: SocialLinkPreviewsProps) {
   const hostname = useMemo(() => {
-    return getDomainWithoutWWW(props.url);
-  }, [props.url]);
+    return getDomainWithoutWWW(url);
+  }, [url]);
 
   const previewImage = useMemo(() => {
-    if (props.generatingMetaTags) {
+    if (generatingMetaTags) {
       return (
         <div className="flex h-[250px] w-full flex-col items-center justify-center space-y-4 border-b border-border bg-gray-100">
           <LoadingSpinner color="muted" />
@@ -171,11 +170,11 @@ export function SocialLinkPreviews(props: {
       );
     }
 
-    if (props.metaTags?.image) {
-      if (props.metaTags.image.startsWith("https://res.cloudinary.com")) {
+    if (metaTags?.image) {
+      if (metaTags.image.startsWith("https://res.cloudinary.com")) {
         return (
           <BlurImage
-            src={props.metaTags.image}
+            src={metaTags.image}
             alt="Preview"
             width={1200}
             height={627}
@@ -190,7 +189,7 @@ export function SocialLinkPreviews(props: {
             className="items-center justify-center rounded-none border-b border-border"
           >
             <Image
-              src={props.metaTags.image}
+              src={metaTags.image}
               alt="Preview"
               className="w-full object-cover"
               fill
@@ -208,12 +207,12 @@ export function SocialLinkPreviews(props: {
         </p>
       </div>
     );
-  }, [props.metaTags?.image, props.generatingMetaTags]);
+  }, [metaTags?.image, generatingMetaTags]);
 
   const socialPreviewProps = {
     hostname,
-    title: props.metaTags?.title,
-    description: props.metaTags?.description,
+    title: metaTags?.title,
+    description: metaTags?.description,
     previewImage,
   };
 
@@ -226,9 +225,8 @@ export function SocialLinkPreviews(props: {
             className="absolute right-2 top-2"
             icon
             pill
-            onClick={() => {
-              props.form?.reset();
-              setShowLinkModal(false);
+            onClick={async () => {
+              await closeModal();
             }}
           >
             <Icon.close strokeWidth={1} className="h-7 w-7 p-1" />
@@ -238,6 +236,8 @@ export function SocialLinkPreviews(props: {
             Social Previews
           </H>
         </div>
+
+        {/* <pre>{JSON.stringify(linkForm.watch(), null, 2)}</pre> */}
 
         <div className="flex w-full flex-col gap-10 px-6 py-6">
           <TwitterPreview {...socialPreviewProps} />
