@@ -66,10 +66,8 @@ export function getTransparentLinkDataFromUrl(
         pathname.startsWith("/artist/") &&
         pathname.split("/")[2] === workspace?.spotifyArtistId;
 
-      console.log("isCurrentArtistPage ", isCurrentArtistPage);
       if (isCurrentArtistPage) {
         pathname = "";
-        console.log("isCurrentArtistPathname ", pathname);
       }
 
       break;

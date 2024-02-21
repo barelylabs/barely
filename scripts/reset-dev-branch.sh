@@ -2,7 +2,7 @@
 
 me=$(neonctl me | awk -F '│' 'NR==4{print $2}' | tr -d ' ')
 currentBranch=$(git rev-parse --abbrev-ref HEAD)
-branchName=${currentBranch}_dev_${me}
+branchName=${currentBranch}__dev_${me}
 
 # Use the output in the neonctl command
 if neonctl branches get $branchName; then
