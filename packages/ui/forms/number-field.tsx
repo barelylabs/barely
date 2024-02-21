@@ -22,6 +22,7 @@ export const NumberField = <
     <FormFieldContext.Provider value={{ name: props.name }}>
       <Controller
         {...props}
+        disabled={props.disableController}
         render={({ field, fieldState }) => (
           <FormItem>
             <FieldLabel>{props.label}</FieldLabel>

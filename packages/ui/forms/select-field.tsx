@@ -34,6 +34,7 @@ export const SelectField = <
     <FormFieldContext.Provider value={{ name: props.name }}>
       <Controller
         {...props}
+        disabled={props.disableController}
         render={({ field }) => (
           <FormItem>
             <FieldWrapper {...props} hint={hint}>

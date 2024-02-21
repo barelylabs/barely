@@ -29,6 +29,7 @@ export const CalendarField = <
     <FormFieldContext.Provider value={{ name: props.name }}>
       <Controller
         {...props}
+        disabled={props.disableController}
         render={({ field }) => (
           <FormItem className="flex flex-col">
             <FieldLabel>{props.label}</FieldLabel>
