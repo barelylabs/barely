@@ -27,5 +27,5 @@ const createContext = cache(async ({ handle }: ServerContextProps) => {
 
 const createCaller = createCallerFactory(edgeRouter);
 
-export const api = (props: ServerContextProps) =>
-  createCaller(() => createContext(props));
+export const api = (props?: ServerContextProps) =>
+  createCaller(() => createContext(props ?? {}));
