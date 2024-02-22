@@ -24,8 +24,6 @@ const createContext = async (req: NextAuthRequest) => {
 };
 
 const handler = auth(async (req) => {
-  console.log("edge api handler :: node version: ", process.version);
-
   const response = await fetchRequestHandler({
     endpoint: "/api/edge",
     router: edgeRouter,

@@ -21,7 +21,7 @@ export const createTRPCContext = async (opts: {
   session: Session | null;
   rest?: boolean;
 }) => {
-  let session = null;
+  let session: Session | null = null;
 
   if (opts.session) {
     session = opts.session;
@@ -74,7 +74,7 @@ export const createTRPCContext = async (opts: {
     ratelimit,
   };
 
-  console.log(">>> tRPC Context", context);
+  console.log(">>> tRPC Context", context.session);
 
   return context;
 };
