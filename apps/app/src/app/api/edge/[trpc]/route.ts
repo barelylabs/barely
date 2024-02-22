@@ -15,6 +15,8 @@ export function OPTIONS() {
 }
 
 const handler = auth(async (req): Promise<Response> => {
+  console.log("edge api handler :: node version: ", process.version);
+
   const response = await fetchRequestHandler({
     endpoint: "/api/edge",
     router: edgeRouter,
