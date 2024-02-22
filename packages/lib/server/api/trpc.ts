@@ -30,9 +30,8 @@ export const createTRPCContext = async (opts: {
     session = await auth();
   }
 
-  const source = opts.headers.get("x-trpc-source") ?? "unknown";
-
-  console.log(">>> tRPC Request from", source, "by", session?.user);
+  // const source = opts.headers.get("x-trpc-source") ?? "unknown";
+  // console.log(">>> tRPC Request from", source, "by", session?.user);
 
   const longitude = opts.rest
     ? undefined
@@ -74,7 +73,7 @@ export const createTRPCContext = async (opts: {
     ratelimit,
   };
 
-  console.log(">>> tRPC Context", context.session);
+  // console.log(">>> tRPC Context", context.session);
 
   return context;
 };
@@ -120,7 +119,7 @@ export const privateProcedure = t.procedure.use((opts) => {
   if (!opts.ctx.user) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: "Can't find that user in our database.",
+      message: "privateProcedure: Can't find that user in our database.",
     });
   }
 
