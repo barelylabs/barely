@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import React, { useMemo } from "react";
 import { api } from "@barely/api/react";
-import { transformer } from "@barely/api/transformer";
+// import { transformer } from "@barely/api/transformer";
 import { pageSessionAtom } from "@barely/atoms/session.atom";
 import { useWorkspaceHandle } from "@barely/hooks/use-workspace";
 import { getUrl } from "@barely/lib/utils/url";
@@ -11,35 +11,49 @@ import { ThemeProvider } from "@barely/ui/elements/next-theme-provider";
 import { TooltipProvider } from "@barely/ui/elements/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { ReactQueryStreamedHydration } from "@tanstack/react-query-next-experimental";
+// import { ReactQueryStreamedHydration } from "@tanstack/react-query-next-experimental";
 import { loggerLink, unstable_httpBatchStreamLink } from "@trpc/client";
 import { Provider as JotaiProvider, useAtomValue } from "jotai";
+import SuperJSON from "superjson";
+
+const createQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 5 * 1000, // 5 seconds
+      },
+    },
+  });
+
+let clientQueryClientSingleton: QueryClient | undefined = undefined;
+
+const getQueryClient = () => {
+  if (typeof window === "undefined") {
+    // Server: always create a new client
+    return createQueryClient();
+  } else {
+    // Browser: use singleton pattern to keep the same query client
+    return (clientQueryClientSingleton ??= createQueryClient());
+  }
+};
 
 export function TRPCReactProvider(props: {
   children: ReactNode;
   headers?: Headers;
 }) {
   const pageSession = useAtomValue(pageSessionAtom);
-
   const workspaceHandle = useWorkspaceHandle();
 
-  const [queryClient, trpcClient] = useMemo(() => {
+  const queryClient = getQueryClient();
+
+  const trpcClient = useMemo(() => {
     const headers = new Map(props.headers);
     headers.set("x-trpc-source", "nextjs-react");
     headers.set("x-page-session-id", pageSession.id);
     headers.set("x-workspace-handle", workspaceHandle ?? "");
     const preparedHeaders = Object.fromEntries(headers);
 
-    const client = new QueryClient({
-      defaultOptions: {
-        queries: {
-          staleTime: 5 * 1000, // 5 seconds
-        },
-      },
-    });
-
     const trpc = api.createClient({
-      transformer,
       links: [
         loggerLink({
           enabled: (opts) =>
@@ -50,6 +64,7 @@ export function TRPCReactProvider(props: {
         (runtime) => {
           const servers = {
             node: unstable_httpBatchStreamLink({
+              transformer: SuperJSON,
               url: getUrl("app", "api/node"),
               headers() {
                 return preparedHeaders;
@@ -57,6 +72,7 @@ export function TRPCReactProvider(props: {
             })(runtime),
 
             edge: unstable_httpBatchStreamLink({
+              transformer: SuperJSON,
               url: getUrl("app", "api/edge"),
               headers() {
                 return preparedHeaders;
@@ -90,15 +106,15 @@ export function TRPCReactProvider(props: {
       ],
     });
 
-    return [client, trpc];
+    return trpc;
   }, [workspaceHandle, pageSession.id, props.headers]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <api.Provider client={trpcClient} queryClient={queryClient}>
-        <ReactQueryStreamedHydration transformer={transformer}>
-          {props.children}
-        </ReactQueryStreamedHydration>
+        {/* <ReactQueryStreamedHydration transformer={transformer}> */}
+        {props.children}
+        {/* </ReactQueryStreamedHydration> */}
       </api.Provider>
     </QueryClientProvider>
   );
