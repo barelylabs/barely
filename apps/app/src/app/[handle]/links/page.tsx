@@ -25,7 +25,7 @@ export default function Page({
     <>
       <DashContentHeader title="Links" button={<NewLinkButton />} />
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-[auto,1fr]">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-[auto,1fr]">
         <LinkFilters />
 
         <Suspense fallback={<div>Loading...</div>}>
