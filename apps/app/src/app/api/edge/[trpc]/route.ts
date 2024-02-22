@@ -4,7 +4,7 @@ import { createTRPCContext } from "@barely/server/api/trpc";
 import { auth } from "@barely/server/auth";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 
 export function OPTIONS() {
   const response = new Response(null, {
@@ -21,7 +21,7 @@ const handler = auth(async (req) => {
     endpoint: "/api/edge",
     router: edgeRouter,
     req,
-    createContext: () =>
+    createContext: async () =>
       createTRPCContext({
         session: req.auth,
         headers: req.headers,
