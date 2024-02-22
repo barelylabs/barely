@@ -74,6 +74,8 @@ export const createTRPCContext = async (opts: {
     ratelimit,
   };
 
+  console.log(">>> tRPC Context", context);
+
   return context;
 };
 

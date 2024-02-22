@@ -36,7 +36,8 @@ const handler = auth(async (req) => {
     },
   });
 
-  console.log("edge api handler :: response", response);
+  console.log("edge api handler :: response.body", response.body);
+  console.log("edge api handler :: response.headers", response.headers);
 
   setCorsHeaders(response);
 
