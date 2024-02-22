@@ -12,7 +12,7 @@ import { TooltipProvider } from "@barely/ui/elements/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ReactQueryStreamedHydration } from "@tanstack/react-query-next-experimental";
-import { loggerLink, unstable_httpBatchStreamLink } from "@trpc/client";
+import { httpBatchLink, loggerLink } from "@trpc/client";
 import { Provider as JotaiProvider, useAtomValue } from "jotai";
 
 export function TRPCReactProvider(props: {
@@ -49,14 +49,14 @@ export function TRPCReactProvider(props: {
 
         (runtime) => {
           const servers = {
-            node: unstable_httpBatchStreamLink({
+            node: httpBatchLink({
               url: getUrl("app", "api/node"),
               headers() {
                 return preparedHeaders;
               },
             })(runtime),
 
-            edge: unstable_httpBatchStreamLink({
+            edge: httpBatchLink({
               url: getUrl("app", "api/edge"),
               headers() {
                 return preparedHeaders;
