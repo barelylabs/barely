@@ -37,17 +37,9 @@ const handler = auth(async (req) => {
     })
     .catch((err) => console.log("err: ", err));
 
-  console.log(
-    "edge api handler :: response.headers.get('x-trpc-source')",
-    response.headers.get("x-trpc-source"),
-  );
-
   setCorsHeaders(response);
 
-  console.log(
-    "edge api handler :: response.headers.get('Access-Control-Allow-Origin')",
-    response.headers.get("Access-Control-Allow-Methods"),
-  );
+  console.log("edge api handler :: response.headers", response.headers);
   return response;
 });
 
