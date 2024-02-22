@@ -51,7 +51,6 @@ export const processEnv = {
   /**
    * SERVER
    * */
-
   BOT_SPOTIFY_ACCOUNT_ID: process.env.BOT_SPOTIFY_ACCOUNT_ID,
   BOT_THREADS_API_KEY: process.env.BOT_THREADS_API_KEY,
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
@@ -61,6 +60,7 @@ export const processEnv = {
   DATABASE_POOL_URL: process.env.DATABASE_POOL_URL,
   GANDI_API_KEY: process.env.GANDI_API_KEY,
   LOCALHOST_IP: process.env.LOCALHOST_IP,
+  META_TEST_EVENT_CODE: process.env.META_TEST_EVENT_CODE,
   NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   OPENAI_ORG_ID: process.env.OPENAI_ORG_ID,
@@ -139,6 +139,7 @@ export const serverEnvSchema = z.object({
   DISCORD_CLIENT_SECRET: z.string(),
   LOCALHOST_IP: z.string(),
   GANDI_API_KEY: z.string(),
+  META_TEST_EVENT_CODE: z.string().optional(),
   NEXTAUTH_SECRET: z.string(),
   OPENAI_API_KEY: z.string(),
   OPENAI_ORG_ID: z.string(),

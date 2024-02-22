@@ -7,6 +7,7 @@ import type { LinkAnalyticsProps } from "./link.schema";
 import type { NextFormattedUserAgent, NextGeo } from "./next.schema";
 import { env } from "../env";
 import { newId } from "../utils/id";
+import { log } from "../utils/log";
 import { sqlIncrement } from "../utils/sql";
 import { ratelimit } from "../utils/upstash";
 import { AnalyticsEndpoints } from "./analytics-endpoint.sql";
@@ -54,17 +55,10 @@ export async function recordLinkClick({
   console.log("not a bot, so check if ip is rate limited.");
 
   // deduplicate clicks from the same ip & linkId - only record 1 link click per ip per linkId per hour
-  console.log(
-    "process.env.RATE_LIMIT_RECORD_LINK_CLICK => ",
-    process.env.RATE_LIMIT_RECORD_LINK_CLICK,
-  );
-  console.log(
-    "env.RATE_LIMIT_RECORD_LINK_CLICK => ",
-    env.RATE_LIMIT_RECORD_LINK_CLICK,
-  );
-
-  // const rateLimitPeriod = env.RATE_LIMIT_RECORD_LINK_CLICK ?? '1 h'; //fixme: why is this undefined?
-  const rateLimitPeriod = "1 s";
+  const rateLimitPeriod =
+    env.RATE_LIMIT_RECORD_LINK_CLICK ?? env.VERCEL_ENV === "development"
+      ? "1 s"
+      : "1 h";
 
   console.log("rateLimitPeriod => ", rateLimitPeriod);
 
@@ -107,18 +101,32 @@ export async function recordLinkClick({
   const metaPixel = analyticsEndpoints.find(
     (endpoint) => endpoint.platform === "meta",
   );
+
+  await log({
+    type: "link",
+    fn: "recordLinkClick",
+    message: `metaPixel => ${metaPixel?.id}`,
+  });
+
+  console.log("href => ", href);
+
   const metaRes = metaPixel?.accessToken
     ? await reportEventToMeta({
         pixelId: metaPixel.id,
         accessToken: metaPixel.accessToken,
-        testEventCode: "TEST37240",
         url: href,
         ip,
         ua: ua.ua,
-        eventName: "ViewContent",
+        eventName: "Barely_LinkClick",
         geo,
       })
     : { reported: false };
+
+  await log({
+    type: "link",
+    fn: "recordLinkClick",
+    message: `metaRes => ${JSON.stringify(metaRes)}`,
+  });
 
   // ♪ TikTok ♪
 

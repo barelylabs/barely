@@ -3,35 +3,37 @@ import { z } from "zod";
 import { env } from "../env";
 import { zPost } from "./zod-fetch";
 
-export const log = async ({
-  message,
-  type,
-  mention = false,
-}: {
+export const log = async (opts: {
+  type: "link" | "stripe" | "meta";
+  fn: string;
   message: string;
-  type: "cron" | "link" | "stripe";
   mention?: boolean;
 }) => {
-  if (process.env.NODE_ENV === "development" || !env.BOT_THREADS_API_KEY)
-    /* 
-	Log a message to the console 
-	*/
-    console.log(message);
+  /* 
+  Log a message to the console 
+  */
+  if (process.env.NODE_ENV === "development" || !env.BOT_THREADS_API_KEY) {
+    return console.log(
+      `>> ${opts.fn ? `fn :: ${opts.fn} // ` : ""}`,
+      opts.message,
+    );
+  }
 
   try {
     /* 
 		Log a message to Threads error channel 
 		*/
+
     await zPost("https://threads.com/api/public/postThread", z.object({}), {
       auth: `Bearer ${env.BOT_THREADS_API_KEY}`,
       body: {
-        channel: `${type}-errors`,
+        channel: `${opts.type}-errors`,
         blocks: [
           {
             type: "section",
             text: {
               type: "mrkdwn",
-              text: `${mention ? "<@34548329863> " : ""}${message}`,
+              text: `${opts.mention ? "<@34548329863> " : ""}${opts.message}`,
             },
           },
         ],

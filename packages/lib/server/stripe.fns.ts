@@ -309,9 +309,11 @@ export async function handleStripeCheckoutSessionComplete(
 
           if (!workspace) {
             await log({
-              message: `Workspace with Stripe ID ${transactionMetadata.workspaceId} not found.`,
               type: "stripe",
+              fn: "handleStripeCheckoutSessionComplete",
+              message: `Workspace with Stripe ID ${transactionMetadata.workspaceId} not found.`,
             });
+
             return NextResponse.json({ received: true }, { status: 200 });
           }
 

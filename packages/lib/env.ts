@@ -7,6 +7,7 @@ export const { env, clientEnv } = zEnv({
     "CLOUDINARY_API_SECRET",
     "GANDI_API_KEY",
     "LOCALHOST_IP",
+    "META_TEST_EVENT_CODE",
     "NEXTAUTH_SECRET",
     "OPENAI_API_KEY",
     "OPENAI_ORG_ID",

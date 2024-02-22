@@ -28,9 +28,4 @@ export const authRouter = createTRPCRouter({
       message: `Hello ${ctx.user?.email ?? ctx.user?.firstName ?? "user"}`,
     };
   }),
-
-  // logOut: publicProcedure.mutation(async ({ ctx }) => {
-  // 	await signOut();
-  // 	return { success: true };
-  // }),
 });
