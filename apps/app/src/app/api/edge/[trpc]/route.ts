@@ -29,17 +29,17 @@ const handler = auth(async (req) => {
     },
   });
 
-  const clonedResponse = response.clone();
-  clonedResponse
-    .json()
-    .then((body) => {
-      console.log("edge api handler :: response.json()", body);
-    })
-    .catch((err) => console.log("err: ", err));
+  // const clonedResponse = response.clone();
+  // clonedResponse
+  //   .json()
+  //   .then((body) => {
+  //     console.log("edge api handler :: response.json()", body);
+  //   })
+  //   .catch((err) => console.log("err: ", err));
 
   setCorsHeaders(response);
 
-  console.log("edge api handler :: response.headers", response.headers);
+  // console.log("edge api handler :: response.headers", response.headers);
   return response;
 });
 
