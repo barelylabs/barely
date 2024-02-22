@@ -130,7 +130,7 @@ export class Tinybird {
         .map((p) => JSON.stringify(p))
         .join("\n");
 
-      console.log("body => ", body);
+      // console.log("body => ", body);
 
       let res = await fetch(url, {
         method: "POST",

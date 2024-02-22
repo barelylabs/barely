@@ -62,10 +62,12 @@ export function parseLinkDomain(req: NextRequest) {
     console.log("domain", domain);
   }
 
-  const href = req.nextUrl.href.replace(
+  const href = ("https://" + domain + req.nextUrl.pathname).replace(
     `localhost:${process.env.NEXT_PUBLIC_LINK_DEV_PORT}`,
     `${process.env.NEXT_PUBLIC_TRANSPARENT_LINK_ROOT_DOMAIN}`,
   );
+
+  console.log("parseLinkDomain: href", href);
 
   return { domain, href, linkClickType };
 }

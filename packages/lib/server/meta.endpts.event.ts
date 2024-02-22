@@ -1,7 +1,9 @@
 import { z } from "zod";
 
 import type { NextGeo } from "./next.schema";
+import { env } from "../env";
 import { sha256 } from "../utils/hash";
+import { log } from "../utils/log";
 import { zPost } from "../utils/zod-fetch";
 import { z_optStr_hash, z_optStr_lowerCase_hash } from "../utils/zod-helpers";
 
@@ -12,15 +14,16 @@ interface MetaEventProps {
   url: string;
   ip?: string;
   ua?: string;
-  eventName: string;
+  eventName: "ViewContent" | "Barely_LinkClick";
   time?: number;
   geo?: NextGeo;
+  eventId?: string;
   testEventCode?: string;
 }
 
 export async function reportEventToMeta(props: MetaEventProps) {
   const { ip, geo, ua, time } = props;
-  const { pixelId, accessToken, url, eventName, testEventCode } = props;
+  const { pixelId, accessToken, url, eventName } = props;
 
   const userData = metaUserDataSchema.parse({
     ip,
@@ -37,6 +40,15 @@ export async function reportEventToMeta(props: MetaEventProps) {
     sourceUrl: url,
   });
 
+  const testEventCode =
+    env.VERCEL_ENV === "development" ? env.META_TEST_EVENT_CODE : undefined;
+
+  if (testEventCode)
+    await log({
+      type: "link",
+      fn: "reportEventToMeta",
+      message: `testEventCode => ${testEventCode}`,
+    });
   try {
     const metaEventResJson = await zPost(
       `https://graph.facebook.com/v15.0/${pixelId}/events`,
@@ -45,7 +57,9 @@ export async function reportEventToMeta(props: MetaEventProps) {
         body: {
           access_token: accessToken,
           data: [{ user_data: userData, ...serverEventData }],
-          test_event_code: testEventCode,
+          ...(testEventCode !== undefined && {
+            test_event_code: testEventCode,
+          }),
         },
       },
     );
