@@ -4,8 +4,6 @@ import { createTRPCContext } from "@barely/server/api/trpc";
 import { auth } from "@barely/server/auth";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
-// import type { NextAuthRequest } from "@barely/server/auth";
-
 export const runtime = "edge";
 
 export function OPTIONS() {
@@ -15,13 +13,6 @@ export function OPTIONS() {
   setCorsHeaders(response);
   return response;
 }
-
-// const createContext = async (req: NextAuthRequest) => {
-//   return await createTRPCContext({
-//     session: req.auth,
-//     headers: req.headers,
-//   });
-// };
 
 const handler = auth(async (req) => {
   const response = await fetchRequestHandler({
@@ -38,14 +29,24 @@ const handler = auth(async (req) => {
     },
   });
 
-  console.log("edge api handler :: response.body", response.body);
-  console.log("edge api handler :: response.headers", response.headers);
+  const clonedResponse = response.clone();
+  clonedResponse
+    .json()
+    .then((body) => {
+      console.log("edge api handler :: response.json()", body);
+    })
+    .catch((err) => console.log("err: ", err));
+
+  console.log(
+    "edge api handler :: response.headers.get('x-trpc-source')",
+    response.headers.get("x-trpc-source"),
+  );
 
   setCorsHeaders(response);
 
   console.log(
-    "edge api handler :: response.headers with cors headers",
-    response.headers,
+    "edge api handler :: response.headers.get('Access-Control-Allow-Origin')",
+    response.headers.get("Access-Control-Allow-Methods"),
   );
   return response;
 });
