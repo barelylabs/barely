@@ -1,4 +1,4 @@
-import { router } from "./api";
+import { createTRPCRouter } from "./api/trpc";
 
 // import { meta } from '@barely/meta';
 // import { geoSchema } from '../../../schema/next';
@@ -38,7 +38,7 @@ import { router } from "./api";
 
 // export type ReportEventInput = z.infer<typeof reportEventSchema>;
 
-export const eventRouter = router({
+export const eventRouter = createTRPCRouter({
   // getAll: procedure.query(({ ctx }) => {
   //   return prisma.artist.findMany({ take: 10 });
   // }),

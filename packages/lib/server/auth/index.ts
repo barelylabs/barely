@@ -9,9 +9,9 @@ import { NeonAdapter } from "./auth.adapter";
 import { generateVerificationToken, sendLoginEmail } from "./auth.fns";
 import Spotify from "./auth.spotify";
 
-// import Spotify from '@auth/core/providers/spotify';
-
 //* 🧫 CUSTOM TYPES 🧫 *//
+
+export type { NextAuthRequest } from "next-auth/lib";
 
 export interface SessionWorkspace extends Workspace {
   role: User_To_Workspace["role"];
@@ -85,9 +85,6 @@ export const {
 
   callbacks: {
     session: ({ session, user }) => {
-      // console.log('callback session => ', session);
-      // console.log('callback user => ', user);
-
       return { ...session, user };
     },
   },

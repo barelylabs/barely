@@ -4,7 +4,11 @@ import { z } from "zod";
 
 import type { DomainStatus } from "./domain.schema";
 import { env } from "../env";
-import { privateProcedure, publicProcedure, router } from "./api";
+import {
+  createTRPCRouter,
+  privateProcedure,
+  publicProcedure,
+} from "./api/trpc";
 import {
   getDomainConfigFromVercel,
   getDomainResponseFromVercel,
@@ -13,7 +17,7 @@ import {
 } from "./domain.fns";
 import { Domains } from "./domain.sql";
 
-export const domainRouter = router({
+export const domainRouter = createTRPCRouter({
   byDomain: privateProcedure.input(z.string()).query(async ({ input, ctx }) => {
     const domain = await ctx.db.http.query.Domains.findFirst({
       where: and(
@@ -30,13 +34,6 @@ export const domainRouter = router({
       where: eq(Domains.workspaceId, ctx.workspace.id),
       orderBy: (domains, { desc }) => [desc(domains.isPrimaryLinkDomain)],
     });
-
-    // const linkDomains = [
-    // 	...domains.filter(d => d.type === 'link'),
-    // 	...BARELY_LINK_DOMAINS,
-    // ];
-    // const primaryLinkDomain =
-    // 	domains.find(d => d.isPrimaryLinkDomain) ?? BARELY_LINK_DOMAINS[0];
 
     return domains;
   }),

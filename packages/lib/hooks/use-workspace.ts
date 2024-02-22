@@ -1,9 +1,6 @@
 import { useContext } from "react";
 import { useParams } from "next/navigation";
 
-// import { useAtomValue } from 'jotai';
-
-// import { workspaceAtom } from '../atoms/workspace.atom';
 import { WorkspaceContext } from "../context/workspace.context";
 import { api } from "../server/api/react";
 import { useSubscribe } from "./use-subscribe";

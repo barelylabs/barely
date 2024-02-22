@@ -3,7 +3,7 @@ import "~/styles/globals.css";
 import type { Metadata } from "next";
 import { Inter as FontSans } from "next/font/google";
 import localFont from "next/font/local";
-import { headers } from "next/headers";
+// import { headers } from "next/headers";
 import { cn } from "@barely/lib/utils/cn";
 import { TailwindIndicator } from "@barely/ui/components/tailwind-indicator";
 import { Container } from "@barely/ui/elements/container";
@@ -26,7 +26,7 @@ const fontSans = FontSans({
  * make the entire app dynamic. You can move the `TRPCReactProvider` further
  * down the tree (e.g. /[handle] and onwards) to make part of the app statically rendered.
  */
-export const dynamic = "force-dynamic";
+// export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "barely.io",
@@ -59,7 +59,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           fontSans.variable,
         )}
       >
-        <Providers headers={headers()}>
+        <Providers>
           <Container className="max-w-full px-0 py-0">{children}</Container>
         </Providers>
         <Toaster />

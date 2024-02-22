@@ -1,9 +1,9 @@
 import { newId } from "../utils/id";
-import { publicProcedure, router } from "./api";
+import { createTRPCRouter, publicProcedure } from "./api/trpc";
 import { createVisitorSessionSchema } from "./visitor-session.schema";
 import { VisitorSessions } from "./visitor-session.sql";
 
-export const visitorSessionRouter = router({
+export const visitorSessionRouter = createTRPCRouter({
   create: publicProcedure
     .input(createVisitorSessionSchema)
     .mutation(async ({ input, ctx }) => {

@@ -11,7 +11,11 @@ import {
 } from "../utils/link";
 import { raise } from "../utils/raise";
 import { sqlAnd, sqlStringContains } from "../utils/sql";
-import { privateProcedure, publicProcedure, router } from "./api";
+import {
+  createTRPCRouter,
+  privateProcedure,
+  publicProcedure,
+} from "./api/trpc";
 import { getRandomKey } from "./link.fns";
 import {
   createLinkSchema,
@@ -20,7 +24,7 @@ import {
 } from "./link.schema";
 import { Links } from "./link.sql";
 
-export const linkRouter = router({
+export const linkRouter = createTRPCRouter({
   byId: publicProcedure.input(z.string()).query(async ({ input, ctx }) => {
     {
       const link = await ctx.db.http.query.Links.findFirst({

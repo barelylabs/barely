@@ -1,9 +1,13 @@
 import type { GenreWithPlaylistStats } from "./genre.schema";
-import { privateProcedure, publicProcedure, router } from "./api";
+import {
+  createTRPCRouter,
+  privateProcedure,
+  publicProcedure,
+} from "./api/trpc";
 import { getGenresByUserId } from "./genre.fns";
 import { _Playlists_To_Genres } from "./genre.sql";
 
-export const genreRouter = router({
+export const genreRouter = createTRPCRouter({
   allInPitchPlaylists: publicProcedure.query(async ({ ctx }) => {
     const allGenres = await ctx.db.http.query.Genres.findMany({
       with: {

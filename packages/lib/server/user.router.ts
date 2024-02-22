@@ -2,12 +2,12 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { parseForDb } from "../utils/phone-number";
-import { publicProcedure, router } from "./api";
+import { createTRPCRouter, publicProcedure } from "./api/trpc";
 import { checkEmailExistsOnServer, createUser } from "./user.fns";
 import { createUserSchema } from "./user.schema";
 import { Users } from "./user.sql";
 
-const userRouter = router({
+const userRouter = createTRPCRouter({
   create: publicProcedure
     .input(createUserSchema)
     .mutation(async ({ input, ctx }) => {

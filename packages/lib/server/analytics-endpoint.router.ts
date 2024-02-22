@@ -3,9 +3,9 @@ import { eq } from "drizzle-orm";
 
 import { insertAnalyticsEndpointSchema } from "./analytics-endpoint-schema";
 import { AnalyticsEndpoints } from "./analytics-endpoint.sql";
-import { privateProcedure, router } from "./api";
+import { createTRPCRouter, privateProcedure } from "./api/trpc";
 
-export const analyticsEndpointRouter = router({
+export const analyticsEndpointRouter = createTRPCRouter({
   byCurrentWorkspace: privateProcedure.query(async ({ ctx }) => {
     if (!ctx.workspace)
       throw new TRPCError({

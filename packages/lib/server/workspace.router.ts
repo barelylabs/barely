@@ -2,7 +2,11 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { newId } from "../utils/id";
-import { privateProcedure, publicProcedure, router } from "./api";
+import {
+  createTRPCRouter,
+  privateProcedure,
+  publicProcedure,
+} from "./api/trpc";
 import { createPlanCheckoutLink } from "./stripe.fns";
 import { _Users_To_Workspaces } from "./user.sql";
 import {
@@ -11,7 +15,7 @@ import {
 } from "./workspace.schema";
 import { Workspaces } from "./workspace.sql";
 
-export const workspaceRouter = router({
+export const workspaceRouter = createTRPCRouter({
   current: privateProcedure.query(({ ctx }) => {
     if (!ctx.workspace) return null;
     return ctx.workspace;

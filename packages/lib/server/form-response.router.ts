@@ -1,9 +1,9 @@
 import { newId } from "../utils/id";
-import { publicProcedure, router } from "./api";
+import { createTRPCRouter, publicProcedure } from "./api/trpc";
 import { createFormResponseSchema } from "./form-response.schema";
 import { FormResponses } from "./form-response.sql";
 
-export const formResponseRouter = router({
+export const formResponseRouter = createTRPCRouter({
   create: publicProcedure
     .input(createFormResponseSchema)
     .mutation(async ({ input, ctx }) => {

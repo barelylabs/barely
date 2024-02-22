@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { api } from "@barely/lib/server/api/server.edge";
 
 import type { LinkFilterParams } from "@barely/server/link.schema";
 
@@ -11,10 +12,15 @@ import { NewLinkButton } from "~/app/[handle]/links/_components/new-link-button"
 import { UpgradeModal } from "~/app/[handle]/settings/billing/upgrade-modal";
 
 export default function Page({
+  params,
   searchParams,
 }: {
+  params: { handle: string };
   searchParams: LinkFilterParams;
 }) {
+  const { handle } = params;
+  const links = api({ handle }).link.byWorkspace();
+
   return (
     <>
       <DashContentHeader title="Links" button={<NewLinkButton />} />
@@ -23,13 +29,12 @@ export default function Page({
         <LinkFilters />
 
         <Suspense fallback={<div>Loading...</div>}>
-          <AllLinks {...searchParams} />
+          <AllLinks links={links} filters={searchParams} />
         </Suspense>
       </div>
 
       <LinkModal />
       <ArchiveLinkModal />
-
       <UpgradeModal checkoutCancelPath="links" checkoutSuccessPath="links" />
     </>
   );

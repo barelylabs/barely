@@ -3,7 +3,7 @@
 import { and, eq, lt } from "drizzle-orm";
 import { z } from "zod";
 
-import { publicProcedure, router } from "./api";
+import { createTRPCRouter, publicProcedure } from "./api/trpc";
 import { PlaylistPlacements } from "./playlist-placement.sql";
 import {
   addTrackToSpotifyPlaylist,
@@ -11,7 +11,7 @@ import {
 } from "./spotify.endpts.playlist";
 import { getSpotifyAccessToken } from "./spotify.fns";
 
-const playlistPlacementRouter = router({
+const playlistPlacementRouter = createTRPCRouter({
   checkPlacementQueue: publicProcedure
     .meta({
       openapi: { method: "GET", path: `/playlist-placement/check-queue` },
