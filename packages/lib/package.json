@@ -67,7 +67,7 @@
     "remeda": "^1.24.0",
     "sha.js": "^2.4.11",
     "stripe": "^11.18.0",
-    "superjson": "^1.13.1",
+    "superjson": "^2.2.1",
     "tailwind-merge": "^1.14.0",
     "trpc-openapi": "^1.2.0",
     "twilio": "^3.84.1",

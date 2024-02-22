@@ -20,12 +20,11 @@
     "@barely/lib": "workspace:^0.1.0",
     "@barely/ui": "workspace:^0.1.0",
     "@vercel/edge": "^0.1.2",
-    "dotenv-cli": "^7.2.1",
     "html-escaper": "^3.0.3",
     "next": "^14.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "sharp": "^0.31.3",
+    "sharp": "^0.33.2",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -39,6 +38,7 @@
     "@types/react": "^18.2.25",
     "@types/react-dom": "^18.2.18",
     "autoprefixer": "^10.4.14",
+    "dotenv-cli": "^7.2.1",
     "eslint": "^8.56.0",
     "eslint-config-next": "^14.0.4",
     "postcss": "^8.4.32",
