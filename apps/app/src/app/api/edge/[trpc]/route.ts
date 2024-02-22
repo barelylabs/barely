@@ -4,7 +4,7 @@ import { createTRPCContext } from "@barely/server/api/trpc";
 import { auth } from "@barely/server/auth";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 export function OPTIONS() {
   const response = new Response(null, {
