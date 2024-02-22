@@ -1,11 +1,11 @@
 import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 
-import { privateProcedure, router } from "./api";
+import { createTRPCRouter, privateProcedure } from "./api/trpc";
 import { insertProviderAccountSchema } from "./provider-account.schema";
 import { ProviderAccounts } from "./provider-account.sql";
 
-const providerAccountRouter = router({
+const providerAccountRouter = createTRPCRouter({
   delete: privateProcedure
     .input(
       z.object({

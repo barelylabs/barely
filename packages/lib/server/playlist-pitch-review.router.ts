@@ -4,12 +4,12 @@ import { z } from "zod";
 
 import { newId } from "../utils/id";
 import { sqlCount } from "../utils/sql";
-import { privateProcedure, router } from "./api";
+import { createTRPCRouter, privateProcedure } from "./api/trpc";
 import { submitPlaylistPitchReviewSchema } from "./playlist-pitch-review-schema";
 import { PlaylistPitchReviews } from "./playlist-pitch-review.sql";
 import { PlaylistPlacements } from "./playlist-placement.sql";
 
-export const playlistPitchReviewRouter = router({
+export const playlistPitchReviewRouter = createTRPCRouter({
   countByCampaignId: privateProcedure
     .input(
       z.object({

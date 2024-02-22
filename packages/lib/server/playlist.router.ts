@@ -2,7 +2,11 @@ import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
-import { privateProcedure, publicProcedure, router } from "./api";
+import {
+  createTRPCRouter,
+  privateProcedure,
+  publicProcedure,
+} from "./api/trpc";
 import { insertGenreSchema } from "./genre.schema";
 import { _Playlists_To_Genres } from "./genre.sql";
 import {
@@ -13,7 +17,7 @@ import {
   userGetPlaylistById,
 } from "./playlist.fns";
 
-const playlistRouter = router({
+const playlistRouter = createTRPCRouter({
   byId: privateProcedure
     .input(z.string())
     .query(async ({ ctx, input: playlistId }) => {

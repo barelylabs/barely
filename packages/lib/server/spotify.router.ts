@@ -5,7 +5,11 @@ import { z } from "zod";
 
 import type { SpotifyTrackOption } from "./spotify.schema";
 import { env } from "../env";
-import { privateProcedure, publicProcedure, router } from "./api";
+import {
+  createTRPCRouter,
+  privateProcedure,
+  publicProcedure,
+} from "./api/trpc";
 import { ProviderAccounts } from "./provider-account.sql";
 import { searchSpotify } from "./spotify.endpts.search";
 import {
@@ -14,7 +18,7 @@ import {
   syncSpotifyAccountUser,
 } from "./spotify.fns";
 
-const spotifyRouter = router({
+const spotifyRouter = createTRPCRouter({
   findTrack: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
     if (input.length === 0) return [];
 

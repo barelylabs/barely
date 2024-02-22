@@ -1,6 +1,5 @@
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 
-import { router } from ".";
 import { analyticsEndpointRouter } from "../analytics-endpoint.router";
 import { authRouter } from "../auth/auth.router";
 import { bioRouter } from "../bio.router";
@@ -20,8 +19,9 @@ import { trackRouter } from "../track.router";
 import { userRouter } from "../user.router";
 import { visitorSessionRouter } from "../visitor-session.router";
 import { workspaceRouter } from "../workspace.router";
+import { createTRPCRouter } from "./trpc";
 
-const edgeRouter = router({
+const edgeRouter = createTRPCRouter({
   analyticsEndpoint: analyticsEndpointRouter,
   auth: authRouter,
   bio: bioRouter,

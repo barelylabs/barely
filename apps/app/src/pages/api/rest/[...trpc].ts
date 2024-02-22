@@ -1,5 +1,5 @@
 import { edgeRouter } from "@barely/api/router.edge";
-import { createTRPCContext } from "@barely/server/api";
+import { createTRPCContext } from "@barely/server/api/trpc";
 import { createOpenApiNextHandler } from "trpc-openapi";
 
 export const config = {
@@ -11,9 +11,9 @@ export default createOpenApiNextHandler({
   createContext: ({ req }) => {
     console.log("creating context for rest api");
     return createTRPCContext({
-      req: req as unknown as Request,
+      session: null,
       rest: true,
-      auth: null,
+      headers: req.headers as unknown as Headers,
     });
   },
 });

@@ -4,13 +4,17 @@ import { z } from "zod";
 import type { TrackWithWorkspaceAndGenres } from "./track.schema";
 import { pushEvent } from "../utils/pusher-server";
 import { sqlAnd } from "../utils/sql";
-import { privateProcedure, publicProcedure, router } from "./api";
+import {
+  createTRPCRouter,
+  privateProcedure,
+  publicProcedure,
+} from "./api/trpc";
 import { insertGenreSchema } from "./genre.schema";
 import { _Tracks_To_Genres } from "./genre.sql";
 import { updateTrackSchema } from "./track.schema";
 import { Tracks } from "./track.sql";
 
-const trackRouter = router({
+const trackRouter = createTRPCRouter({
   byId: privateProcedure.input(z.string()).query(async ({ ctx, input }) => {
     const track = await ctx.db.http.query.Tracks.findFirst({
       where: eq(Tracks.id, input),

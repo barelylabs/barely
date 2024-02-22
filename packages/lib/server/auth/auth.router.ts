@@ -1,9 +1,13 @@
 import { z } from "zod";
 
-import { privateProcedure, publicProcedure, router } from "../api";
+import {
+  createTRPCRouter,
+  privateProcedure,
+  publicProcedure,
+} from "../api/trpc";
 import { sendLoginEmail } from "./auth.fns";
 
-export const authRouter = router({
+export const authRouter = createTRPCRouter({
   sendLoginEmail: publicProcedure
     .input(
       z.object({

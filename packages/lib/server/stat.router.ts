@@ -1,4 +1,4 @@
-import { publicProcedure, router } from "./api";
+import { createTRPCRouter, publicProcedure } from "./api/trpc";
 import {
   pipe_webHitsTimeseries,
   pipe_webSourcesTopBrowsers,
@@ -11,7 +11,7 @@ import {
   stdWebEventQueryToPipeParamsSchema,
 } from "./stat.schema";
 
-export const statRouter = router({
+export const statRouter = createTRPCRouter({
   linkTimeseries: publicProcedure
     .input(stdWebEventQueryToPipeParamsSchema)
     .query(async ({ input, ctx }) => {

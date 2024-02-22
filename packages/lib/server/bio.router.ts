@@ -1,9 +1,9 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
-import { publicProcedure, router } from "./api";
+import { createTRPCRouter, publicProcedure } from "./api/trpc";
 
-export const bioRouter = router({
+export const bioRouter = createTRPCRouter({
   getById: publicProcedure
     .input(z.string())
     .query(async ({ input: bioId, ctx }) => {

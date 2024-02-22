@@ -1,10 +1,10 @@
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 
-import { mergeRouters, router } from ".";
 import { edgeRouter } from "./router.edge";
 import { nodeRouter } from "./router.node";
+import { createTRPCRouter, mergeRouters } from "./trpc";
 
-const nodeRouterForMerge = router({
+const nodeRouterForMerge = createTRPCRouter({
   node: nodeRouter,
 });
 

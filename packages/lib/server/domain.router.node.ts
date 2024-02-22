@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { and, eq, not } from "drizzle-orm";
 import { z } from "zod";
 
-import { privateProcedure, router } from "./api";
+import { createTRPCRouter, privateProcedure } from "./api/trpc";
 import { addDomainToVercel, removeDomainFromVercel } from "./domain.fns";
 import { changeDomainForLinkImages } from "./domain.fns.node";
 import { createDomainSchema, updateDomainSchema } from "./domain.schema";
@@ -10,7 +10,7 @@ import { Domains } from "./domain.sql";
 
 // using node runtime to access cloudinary
 
-export const domainNodeRouter = router({
+export const domainNodeRouter = createTRPCRouter({
   add: privateProcedure
     .input(createDomainSchema)
     .mutation(async ({ input, ctx }) => {

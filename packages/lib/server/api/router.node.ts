@@ -1,10 +1,10 @@
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 
-import { router } from ".";
 import { domainNodeRouter } from "../domain.router.node";
 import { workspaceNodeRouter } from "../workspace.router.node";
+import { createTRPCRouter } from "./trpc";
 
-const nodeRouter = router({
+const nodeRouter = createTRPCRouter({
   domain: domainNodeRouter,
   workspace: workspaceNodeRouter,
 });

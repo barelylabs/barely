@@ -1,6 +1,6 @@
 import { setCorsHeaders } from "@barely/lib/utils/cors";
-import { createTRPCContext } from "@barely/server/api";
 import { edgeRouter } from "@barely/server/api/router.edge";
+import { createTRPCContext } from "@barely/server/api/trpc";
 import { auth } from "@barely/server/auth";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
@@ -14,14 +14,18 @@ export function OPTIONS() {
   return response;
 }
 
-const handler = auth(async (req): Promise<Response> => {
+const handler = auth(async (req) => {
   console.log("edge api handler :: node version: ", process.version);
 
   const response = await fetchRequestHandler({
     endpoint: "/api/edge",
     router: edgeRouter,
     req,
-    createContext: () => createTRPCContext({ auth: req.auth, req }),
+    createContext: () =>
+      createTRPCContext({
+        session: req.auth,
+        headers: req.headers,
+      }),
     onError({ error, path }) {
       console.error(`>>> tRPC Error on '${path}'`, error);
     },
@@ -29,6 +33,6 @@ const handler = auth(async (req): Promise<Response> => {
 
   setCorsHeaders(response);
   return response;
-}) as unknown as () => Promise<Response>; // fixme: related to the issue here: https://github.com/t3-oss/create-t3-turbo/issues/800
+});
 
 export { handler as GET, handler as POST };

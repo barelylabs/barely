@@ -15,7 +15,11 @@ import { pushEvent } from "../utils/pusher-server";
 import { raise } from "../utils/raise";
 import { sendText } from "../utils/sms";
 import { sqlCount } from "../utils/sql";
-import { privateProcedure, publicProcedure, router } from "./api";
+import {
+  createTRPCRouter,
+  privateProcedure,
+  publicProcedure,
+} from "./api/trpc";
 import { createLoginLink } from "./auth/auth.fns";
 import {
   createPlaylistPitchCampaign,
@@ -39,7 +43,7 @@ import { _Users_To_Workspaces } from "./user.sql";
 import { createWorkspace } from "./workspace.fns";
 import { Workspaces } from "./workspace.sql";
 
-export const campaignRouter = router({
+export const campaignRouter = createTRPCRouter({
   // CREATE
   createPlaylistPitch: privateProcedure
     .input(createPlaylistPitchCampaignSchema)
