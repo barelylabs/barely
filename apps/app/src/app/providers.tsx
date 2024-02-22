@@ -37,17 +37,14 @@ const getQueryClient = () => {
   }
 };
 
-export function TRPCReactProvider(props: {
-  children: ReactNode;
-  headers?: Headers;
-}) {
+export function TRPCReactProvider(props: { children: ReactNode }) {
   const pageSession = useAtomValue(pageSessionAtom);
   const workspaceHandle = useWorkspaceHandle();
 
   const queryClient = getQueryClient();
 
   const trpcClient = useMemo(() => {
-    const headers = new Map(props.headers);
+    const headers = new Headers();
     headers.set("x-trpc-source", "nextjs-react");
     headers.set("x-page-session-id", pageSession.id);
     headers.set("x-workspace-handle", workspaceHandle ?? "");
@@ -107,14 +104,12 @@ export function TRPCReactProvider(props: {
     });
 
     return trpc;
-  }, [workspaceHandle, pageSession.id, props.headers]);
+  }, [workspaceHandle, pageSession.id]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <api.Provider client={trpcClient} queryClient={queryClient}>
-        {/* <ReactQueryStreamedHydration transformer={transformer}> */}
         {props.children}
-        {/* </ReactQueryStreamedHydration> */}
       </api.Provider>
     </QueryClientProvider>
   );
@@ -128,7 +123,7 @@ export default function Providers(props: {
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <JotaiProvider>
         <TooltipProvider delayDuration={100}>
-          <TRPCReactProvider headers={props.headers}>
+          <TRPCReactProvider>
             <>
               {props.children}
               <ReactQueryDevtools initialIsOpen={false} />
