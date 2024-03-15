@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { index, integer, pgTable, varchar } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId, timestamps } from "../utils/sql";
+import { dbId, primaryId, timestamps } from "../utils/sql";
 import { AudienceDemos } from "./audience-demo.sql";
 import {
   _AudienceCountries_To_Audiences,
@@ -19,7 +19,7 @@ export const Audiences = pgTable(
   "Audiences",
   {
     ...primaryId,
-    workspaceId: cuid("workspaceId")
+    workspaceId: dbId("workspaceId")
       .notNull()
       .references(() => Workspaces.id, {
         onUpdate: "cascade",
@@ -35,7 +35,7 @@ export const Audiences = pgTable(
     tiktokId: varchar("tiktokId", { length: 255 }),
 
     // relations
-    demoId: cuid("demoId").notNull(),
+    demoId: dbId("demoId").notNull(),
   },
   (table) => {
     return {

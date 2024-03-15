@@ -6,16 +6,14 @@ link_qr=http://$ip_address:3001
 www_qr=http://$ip_address:3002
 press_qr=http://$ip_address:3005
 
-echo "app:"
+echo "app::3000"
 qrencode -t ansiutf8 -o - $app_qr
 
-echo "link:"
-qrencode -t ansiutf8 -o - $link_qr
-
-echo "www:"
+echo "www::3001"
 qrencode -t ansiutf8 -o - $www_qr
 
-echo "press:"
+echo "link::3002"
+qrencode -t ansiutf8 -o - $link_qr
+
+echo "press::3005"
 qrencode -t ansiutf8 -o - $press_qr
-
-

@@ -2,7 +2,7 @@ import { relations } from "drizzle-orm";
 import { index, pgTable, primaryKey, varchar } from "drizzle-orm/pg-core";
 
 import type { GenreId } from "./genre.schema";
-import { cuid } from "../utils/sql";
+import { dbId } from "../utils/sql";
 import { Playlists } from "./playlist.sql";
 import { Tracks } from "./track.sql";
 
@@ -27,7 +27,7 @@ export const Genre_Relations = relations(Genres, ({ many }) => ({
 export const _Playlists_To_Genres = pgTable(
   "_Playlists_To_Genres",
   {
-    playlistId: cuid("playlistId")
+    playlistId: dbId("playlistId")
       .notNull()
       .references(() => Playlists.id, { onDelete: "cascade" }),
     genreId: varchar("genreId", { length: 255 })
@@ -63,7 +63,7 @@ export const _Playlists_To_Genres_Relations = relations(
 export const _Tracks_To_Genres = pgTable(
   "_Tracks_To_Genres",
   {
-    trackId: cuid("trackId")
+    trackId: dbId("trackId")
       .notNull()
       .references(() => Tracks.id, { onDelete: "cascade" }),
     genreId: varchar("genreId", { length: 255 })

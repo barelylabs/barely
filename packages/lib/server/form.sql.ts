@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { boolean, index, pgTable, varchar } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId } from "../utils/sql";
+import { dbId, primaryId } from "../utils/sql";
 import { BioButtons } from "./bio.sql";
 import { Events } from "./event.sql";
 import { FormResponses } from "./form-response.sql";
@@ -12,7 +12,7 @@ export const Forms = pgTable(
   {
     // id: cuid('id').notNull(),
     ...primaryId,
-    workspaceId: cuid("workspaceId")
+    workspaceId: dbId("workspaceId")
       .notNull()
       .references(() => Workspaces.id, {
         onUpdate: "cascade",

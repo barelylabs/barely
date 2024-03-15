@@ -14,6 +14,11 @@
     },
     "strictNullChecks": true,
   },
-  "include": [".", ".next/types/**/*.ts"],
+  "include": [
+    ".",
+    ".next/types/**/*.ts",
+    "../../packages/lib/hooks/use-create-or-update-form.ts",
+    "../../packages/lib/hooks/use-workspace-hotkeys.tsx",
+  ],
   "exclude": ["node_modules"],
 }

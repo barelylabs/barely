@@ -1,13 +1,7 @@
 import { relations } from "drizzle-orm";
-import {
-  index,
-  integer,
-  pgTable,
-  // primaryKey,
-  varchar,
-} from "drizzle-orm/pg-core";
+import { index, integer, pgTable, varchar } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId } from "../utils/sql";
+import { dbId, primaryId } from "../utils/sql";
 import { Campaigns } from "./campaign.sql";
 import { Transactions } from "./transaction.sql";
 
@@ -45,12 +39,12 @@ export const TransactionLineItems = pgTable(
     description: varchar("description", { length: 255 }).notNull(),
 
     // relations
-    transactionId: cuid("transactionId")
+    transactionId: dbId("transactionId")
       .notNull()
       .references(() => Transactions.id, {
         onDelete: "cascade",
       }),
-    campaignId: cuid("campaignId"),
+    campaignId: dbId("campaignId"),
   },
   (lineItem) => ({
     // primary: primaryKey(lineItem.transactionId, lineItem.id),

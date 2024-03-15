@@ -17,7 +17,9 @@ export function NoResultsPlaceholder(props: {
 
       <H size="4">{props.title ?? `There's nothing here.`}</H>
       {props.subtitle && (
-        <Text variant="xs/light">Create a new link to get started.</Text>
+        <Text variant="xs/light">
+          {props.subtitle ?? "Create one to get started"}
+        </Text>
       )}
       {props.button && props.button}
     </div>

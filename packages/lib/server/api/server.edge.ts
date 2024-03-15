@@ -15,7 +15,7 @@ interface ServerContextProps {
 
 const createContext = cache(async ({ handle }: ServerContextProps) => {
   const heads = new Headers(headers());
-  console.log("heads", heads);
+  // console.log("heads", heads);
   heads.set("x-trpc-source", "rsc");
   if (handle) heads.set("x-workspace-handle", handle);
 

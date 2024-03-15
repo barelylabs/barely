@@ -18,7 +18,7 @@ export function useWorkspaceHandle() {
 export function useWorkspace() {
   const currentWorkspace = useContext(WorkspaceContext);
 
-  const apiContext = api.useContext();
+  const apiUtils = api.useUtils();
 
   if (!currentWorkspace) {
     throw new Error("useWorkspace must be used within a WorkspaceProvider");
@@ -41,7 +41,8 @@ export function useWorkspace() {
       ids: [workspace.id],
     },
     callback: async () => {
-      await apiContext.workspace.invalidate();
+      console.log("workspace updated, invalidating");
+      await apiUtils.workspace.invalidate();
     },
   });
 

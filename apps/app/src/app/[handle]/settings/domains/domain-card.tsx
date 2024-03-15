@@ -60,11 +60,11 @@ export function DomainCard(props: { domain: Domain }) {
         </div>
 
         <div className="flex w-fit flex-row items-center justify-end gap-2">
-          <Button variant="outline" size="sm">
+          <Button look="outline" size="sm">
             Refresh
           </Button>
           <Button
-            variant="outline"
+            look="outline"
             size="sm"
             onClick={() => {
               setEditDomain(domain);

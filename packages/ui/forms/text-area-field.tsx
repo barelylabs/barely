@@ -3,31 +3,35 @@ import { useState } from "react";
 import { Controller } from "react-hook-form";
 
 import type { TextareaProps } from "../elements/textarea";
-// import { Input, InputProps } from '../elements/input';
 import type { FieldProps } from "./field-wrapper";
 import { Textarea } from "../elements/textarea";
-import {
-  FieldControl,
-  FieldDescription,
-  // FieldErrorIcon,
-  FieldErrorMessage,
-  FieldHint,
-  FieldLabel,
-  FormFieldContext,
-  FormItem,
-} from "./index";
+import { FieldWrapper } from "./field-wrapper";
+import { FieldControl, FormFieldContext, FormItem } from "./index";
 
 export const TextAreaField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
   hint,
+  infoTooltip,
+  labelButton,
+  allowEnableConfirmMessage,
   ...props
 }: FieldProps<TFieldValues, TName> &
   TextareaProps & {
     isValidating?: boolean;
   }) => {
-  const [focus, setFocus] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(props.disabled);
+
+  const toggleDisabled = () => {
+    const userConfirmed = window.confirm(
+      allowEnableConfirmMessage ??
+        "Are you sure you want to unlock this field?",
+    );
+    if (userConfirmed) {
+      setIsDisabled((prev) => !prev);
+    }
+  };
 
   return (
     <FormFieldContext.Provider value={{ name: props.name }}>
@@ -37,27 +41,26 @@ export const TextAreaField = <
         render={({ field, fieldState }) => {
           return (
             <FormItem>
-              <FieldLabel>{props.label}</FieldLabel>
-              <FieldControl>
-                <Textarea
-                  {...field}
-                  {...props}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    props.onChange?.(e);
-                  }}
-                  isError={!!fieldState?.error?.message}
-                />
-              </FieldControl>
-              <FieldDescription>{props.description}</FieldDescription>
-              <FieldHint
-                onFocus={() => setFocus(true)}
-                onBlur={() => setFocus(false)}
-                className={focus ? "block" : "hidden"}
+              <FieldWrapper
+                {...props}
+                infoTooltip={infoTooltip}
+                labelButton={labelButton}
+                hint={hint}
+                isDisabled={isDisabled}
+                toggleDisabled={toggleDisabled}
               >
-                {hint}
-              </FieldHint>
-              <FieldErrorMessage />
+                <FieldControl>
+                  <Textarea
+                    {...field}
+                    {...props}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      props.onChange?.(e);
+                    }}
+                    isError={!!fieldState.error?.message}
+                  />
+                </FieldControl>
+              </FieldWrapper>
             </FormItem>
           );
         }}

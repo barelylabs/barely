@@ -8,6 +8,7 @@ branchName=${currentBranch}__dev_${me}
 if neonctl branches get $branchName; then
     echo "Branch $branchName already exists."
 else
+    echo "Creating branch $branchName"
     neonctl branches create --name $branchName
 fi
 

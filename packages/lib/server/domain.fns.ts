@@ -157,7 +157,7 @@ export async function addDomainToVercel(props: {
       projectId: z.string(),
       redirect: z.string().nullish(),
       redirectStatusCode: z
-        .union([z.literal(307), z.literal(301), z.literal(302), z.literal(308)])
+        .union([z.literal(301), z.literal(302), z.literal(307), z.literal(308)])
         .nullish(),
       gitBranch: z.string().nullish(),
       updatedAt: z.number().optional(),
@@ -263,7 +263,7 @@ export async function getDomainResponseFromVercel(props: {
       projectId: z.string(),
       redirect: z.string().nullish(),
       redirectStatusCode: z
-        .union([z.literal(307), z.literal(301), z.literal(302), z.literal(308)])
+        .union([z.literal(301), z.literal(302), z.literal(307), z.literal(308)])
         .nullish(),
       gitBranch: z.string().nullish(),
       updatedAt: z.number().optional(),
@@ -351,7 +351,7 @@ export async function verifyDomainOnVercel(props: {
       projectId: z.string(),
       redirect: z.string().nullish(),
       redirectStatusCode: z
-        .union([z.literal(307), z.literal(301), z.literal(302), z.literal(308)])
+        .union([z.literal(301), z.literal(302), z.literal(307), z.literal(308)])
         .nullish(),
       gitBranch: z.string().nullish(),
       updatedAt: z.number().optional(),

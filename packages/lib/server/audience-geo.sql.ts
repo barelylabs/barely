@@ -8,7 +8,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId, timestamps } from "../utils/sql";
+import { dbId, primaryId, timestamps } from "../utils/sql";
 import { Audiences } from "./audience.sql";
 import { Workspaces } from "./workspace.sql";
 
@@ -39,7 +39,7 @@ export const AudienceGeoGroups = pgTable(
   {
     // id: cuid('id').notNull(),
     ...primaryId,
-    workspaceId: cuid("workspaceId")
+    workspaceId: dbId("workspaceId")
       .notNull()
       .references(() => Workspaces.id, {
         onUpdate: "cascade",
@@ -78,11 +78,13 @@ export const AudienceGeoGroup_Relations = relations(
 export const _AudienceCountries_To_AudienceGeoGroups = pgTable(
   "_AudienceCountries_To_AudienceGeoGroups",
   {
-    audienceCountryId: cuid("audienceCountryId").notNull(),
-    audienceGeoGroupId: cuid("audienceGeoGroupId").notNull(),
+    audienceCountryId: dbId("audienceCountryId").notNull(),
+    audienceGeoGroupId: dbId("audienceGeoGroupId").notNull(),
   },
   (table) => ({
-    primary: primaryKey(table.audienceCountryId, table.audienceGeoGroupId),
+    primary: primaryKey({
+      columns: [table.audienceCountryId, table.audienceGeoGroupId],
+    }),
   }),
 );
 
@@ -105,8 +107,8 @@ export const _AudienceCountries_To_AudienceGeoGroups_Relations = relations(
 export const _AudienceCountries_To_Audiences = pgTable(
   "_AudienceCountries_To_Audiences",
   {
-    audienceCountryId: cuid("audienceCountryId").notNull(),
-    audienceId: cuid("audienceId").notNull(),
+    audienceCountryId: dbId("audienceCountryId").notNull(),
+    audienceId: dbId("audienceId").notNull(),
   },
   (table) => ({
     primary: primaryKey(table.audienceCountryId, table.audienceId),
@@ -132,8 +134,8 @@ export const _AudienceCountries_To_Audiences_Relations = relations(
 export const _AudienceGeoGroups_To_Audiences = pgTable(
   "_AudienceGeoGroups_To_Audiences",
   {
-    audienceGeoGroupId: cuid("audienceGeoGroupId").notNull(),
-    audienceId: cuid("audienceId").notNull(),
+    audienceGeoGroupId: dbId("audienceGeoGroupId").notNull(),
+    audienceId: dbId("audienceId").notNull(),
   },
   (table) => ({
     primary: primaryKey(table.audienceGeoGroupId, table.audienceId),

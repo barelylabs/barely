@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { index, integer, pgTable } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId } from "../utils/sql";
+import { dbId, primaryId } from "../utils/sql";
 import { Tracks } from "./track.sql";
 import { Users } from "./user.sql";
 import { Workspaces } from "./workspace.sql";
@@ -10,7 +10,7 @@ export const TrackRenders = pgTable(
   "TrackRenders",
   {
     ...primaryId,
-    workspaceId: cuid("workspaceId")
+    workspaceId: dbId("workspaceId")
       .notNull()
       .references(() => Workspaces.id, {
         onDelete: "cascade",
@@ -19,8 +19,8 @@ export const TrackRenders = pgTable(
     trackTrimIn: integer("trackTrimIn").notNull(), // ms
 
     // relations
-    createdById: cuid("createdById"),
-    trackId: cuid("trackId").notNull(),
+    createdById: dbId("createdById"),
+    trackId: dbId("trackId").notNull(),
   },
   (trackRender) => {
     return {

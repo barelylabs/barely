@@ -46,7 +46,7 @@ export function BillingSummary() {
           plan.
         </Text>
         <Button
-          variant="primary"
+          look="primary"
           size="md"
           onClick={() => setShowUpgradeModal(true)}
         >

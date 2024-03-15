@@ -3,7 +3,6 @@ import { useMemo } from "react";
 import Image from "next/image";
 import { AspectRatio } from "@barely/ui/elements/aspect-ratio";
 import { BlurImage } from "@barely/ui/elements/blur-image";
-import { Button } from "@barely/ui/elements/button";
 import { Icon } from "@barely/ui/elements/icon";
 import { LoadingSpinner } from "@barely/ui/elements/loading";
 import { ScrollArea } from "@barely/ui/elements/scroll-area";
@@ -155,7 +154,6 @@ export function SocialLinkPreviews({
   url,
   metaTags,
   generatingMetaTags,
-  closeModal,
 }: SocialLinkPreviewsProps) {
   const hostname = useMemo(() => {
     return getDomainWithoutWWW(url);
@@ -220,17 +218,6 @@ export function SocialLinkPreviews({
     <ScrollArea hideScrollbar className="md:max-h-[90vh]">
       <div className="flex flex-col">
         <div className="relative z-10 flex flex-col gap-2 border-b border-border bg-background p-4 text-center md:sticky md:top-0">
-          <Button
-            variant="ghost"
-            className="absolute right-2 top-2"
-            icon
-            pill
-            onClick={async () => {
-              await closeModal();
-            }}
-          >
-            <Icon.close strokeWidth={1} className="h-7 w-7 p-1" />
-          </Button>
           <Icon.share className="mx-auto h-6 w-6" />
           <H size="5" muted>
             Social Previews

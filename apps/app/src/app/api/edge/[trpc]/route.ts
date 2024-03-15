@@ -15,7 +15,7 @@ export function OPTIONS() {
 }
 
 const handler = auth(async (req) => {
-  console.log("edge api handler :: req.auth", req.auth);
+  // console.log("edge api handler :: req.auth", req.auth);
 
   const response = await fetchRequestHandler({
     endpoint: "/api/edge",

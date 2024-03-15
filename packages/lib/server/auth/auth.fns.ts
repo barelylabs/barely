@@ -35,11 +35,7 @@ export async function createLoginLink(props: CreateLoginLinkProps) {
       "no callback path provided, using default workspace links page",
     );
     const defaultWorkspace = getDefaultWorkspaceOfUser(props.user);
-    console.log("defaultWorkspace", defaultWorkspace);
-    console.log("defaultWorkspace.handle", defaultWorkspace.handle);
-
     callbackUrl = getAbsoluteUrl("app", `${defaultWorkspace.handle}/links`);
-    console.log("callbackUrl", callbackUrl);
   } else {
     throw new Error("Either callbackPath or user must be defined");
   }
@@ -124,7 +120,7 @@ export async function sendLoginEmail(props: {
     },
   });
 
-  console.log("dbUser", dbUser);
+  // console.log("dbUser", dbUser);
 
   if (!dbUser)
     return {
@@ -162,7 +158,7 @@ export async function sendLoginEmail(props: {
 }
 
 export async function deleteSession(sessionToken: string) {
-  console.log("deleting session : ", sessionToken);
+  // console.log("deleting session : ", sessionToken);
   await db.http
     .delete(UserSessions)
     .where(eq(UserSessions.sessionToken, sessionToken));

@@ -82,7 +82,7 @@ export const AllCampaigns = () => {
                 href={`/${workspace.handle}/campaign/${campaign.id}`}
                 passHref
               >
-                <Button variant="subtle">View Campaign</Button>
+                <Button look="muted">View Campaign</Button>
               </Link>
             ) : null;
 

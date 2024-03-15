@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { boolean, index, pgTable, varchar } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId, timestamps } from "../utils/sql";
+import { dbId, primaryId, timestamps } from "../utils/sql";
 import { Events } from "./event.sql";
 
 export const VisitorSessions = pgTable(
@@ -29,7 +29,7 @@ export const VisitorSessions = pgTable(
     region: varchar("region", { length: 255 }),
 
     // relations
-    externalWebsiteId: cuid("externalWebsiteId"),
+    externalWebsiteId: dbId("externalWebsiteId"),
   },
   (visitorSession) => ({
     externalWebsite: index("VisitorSessions_externalWebsite_idx").on(

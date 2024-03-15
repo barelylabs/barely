@@ -21,6 +21,13 @@ export const z_optStr_lowerCase_hash = z
   .optional()
   .transform((s) => sha256(s?.toLowerCase()));
 
+export const z_optUrl = z
+  .string()
+  .url()
+  .optional()
+  .or(z.literal(""))
+  .transform((v) => (v === "" ? undefined : v));
+
 // json
 
 const literalSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);

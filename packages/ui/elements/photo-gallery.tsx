@@ -1,7 +1,10 @@
+"use client";
+
 import type { PhotoAlbumProps, RenderPhotoProps } from "react-photo-album";
-import Image from "next/image";
 import { useMediaQuery } from "@barely/lib/hooks/use-media-query";
 import ReactPhotoAlbum from "react-photo-album";
+
+import type { Image } from "@barely/lib/server/file.schema";
 
 import BackgroundImage from "./background-image";
 import {
@@ -13,6 +16,9 @@ import {
   CarouselPreviousNext,
   CarouselPreviousOverlay,
 } from "./carousel";
+import { Img } from "./img";
+
+export { ReactPhotoAlbum as PhotoAlbum };
 
 function NextJsImage({
   photo,
@@ -22,7 +28,7 @@ function NextJsImage({
 }: RenderPhotoProps & { priority?: boolean }) {
   return (
     <div style={{ ...wrapperStyle, position: "relative" }}>
-      <Image
+      <Img
         fill
         src={photo}
         placeholder={"blurDataURL" in photo ? "blur" : undefined}
@@ -36,12 +42,13 @@ function NextJsImageWithPriority(props: RenderPhotoProps) {
   return <NextJsImage {...props} priority />;
 }
 
-type GalleryProps = Omit<PhotoAlbumProps, "layout"> & {
+export type GalleryProps = Omit<PhotoAlbumProps, "layout"> & {
   layout?: "masonry" | "columns" | "rows";
   carousel?: boolean | "mobileOnly";
   carouselIndicator?: boolean;
   carouselPrevNext?: "overlay" | "leftRight" | "below";
   prioritize?: boolean;
+  photos: Image[];
 };
 
 export function PhotoGallery({
@@ -74,7 +81,7 @@ export function PhotoGallery({
                 </div>
                 {/* Content */}
                 <div className="relative z-10 flex h-full items-center justify-center">
-                  <Image
+                  <Img
                     src={photo.src}
                     alt={photo.alt ?? ""}
                     width={photo.width}

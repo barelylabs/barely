@@ -25,7 +25,7 @@ export const TabButtons = <T,>({
     {tabs.map((tab) => (
       <Button
         key={tab.label}
-        variant="tab"
+        look="tab"
         size="sm"
         selected={selectedTab === tab.value}
         onClick={() => setSelectedTab(tab.value)}

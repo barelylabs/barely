@@ -3,7 +3,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
 import type { Genre } from "./genre.schema";
-import type { Track } from "./track.schema";
+import type { InsertTrack } from "./track.schema";
 import type { Workspace } from "./workspace.schema";
 // import { APP_BASE_URL } from "../utils/constants";
 
@@ -37,23 +37,23 @@ export type SelectCampaign = z.infer<typeof selectCampaignSchema>;
 
 export interface CampaignWithTeamAndTrack extends Campaign {
   workspace: Workspace;
-  track: Track;
+  track: InsertTrack;
 }
 
 export interface CampaignWithWorkspaceAndTrackAndGenres extends Campaign {
   workspace: Workspace;
-  track: Track & { genres: Genre[] };
+  track: InsertTrack & { genres: Genre[] };
 }
 
 export interface CampaignWithTrackAndGenres extends Campaign {
-  track: Track & { genres: Genre[] };
+  track: InsertTrack & { genres: Genre[] };
 }
 
 //  forms
 
 export const createUserAndPlaylistPitchCampaignSchema = z.object({
   user: newUserContactInfoSchemaWithRole,
-  track: createTrackSchema.partial({ workspaceId: true }),
+  track: createTrackSchema,
   artist: createWorkspaceSchema
     .required({
       spotifyArtistId: true,

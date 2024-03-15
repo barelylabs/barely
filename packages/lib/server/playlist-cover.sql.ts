@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { boolean, index, integer, pgTable, varchar } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId, timestamps } from "../utils/sql";
+import { dbId, primaryId, timestamps } from "../utils/sql";
 import { Files } from "./file.sql";
 import { Users } from "./user.sql";
 import { Workspaces } from "./workspace.sql";
@@ -11,7 +11,7 @@ export const PlaylistCoverRenders = pgTable(
   {
     // id: cuid('id').notNull(),
     ...primaryId,
-    workspaceId: cuid("workspaceId")
+    workspaceId: dbId("workspaceId")
       .notNull()
       .references(() => Workspaces.id, {
         onUpdate: "cascade",
@@ -39,9 +39,9 @@ export const PlaylistCoverRenders = pgTable(
     logoColor: varchar("logoColor", { length: 255 }).default("white").notNull(),
 
     // relations
-    createdById: cuid("createdById"),
-    renderedCoverId: cuid("renderedCoverId"),
-    playlistId: cuid("playlistId").notNull(),
+    createdById: dbId("createdById"),
+    renderedCoverId: dbId("renderedCoverId"),
+    playlistId: dbId("playlistId").notNull(),
   },
   (table) => {
     return {

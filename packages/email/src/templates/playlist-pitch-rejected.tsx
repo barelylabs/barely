@@ -4,13 +4,13 @@ import { EmailFooter } from "../components/email-footer";
 import { EmailHeaderLogo } from "../components/email-header-logo";
 import {
   Body,
-  Container,
+  EmailContainer,
+  EmailHeading,
+  EmailQuote,
+  EmailSeparator,
   Head,
-  Heading,
   Html,
   Preview,
-  Quote,
-  Separator,
   Text,
 } from "../primitives";
 
@@ -28,9 +28,9 @@ export const PlaylistPitchRejectedEmailTemplate = (props: {
       <Preview>{previewText}</Preview>
 
       <Body>
-        <Container>
+        <EmailContainer>
           <EmailHeaderLogo />
-          <Heading>Your track wasn't approved 😔</Heading>
+          <EmailHeading>Your track wasn't approved 😔</EmailHeading>
           {props.firstName && <Text>Hi {props.firstName},</Text>}
           <Text className="text-md">
             Our A&R team has reviewed{" "}
@@ -39,11 +39,11 @@ export const PlaylistPitchRejectedEmailTemplate = (props: {
             roster of playlists. We hope you'll try again with a different
             track!
           </Text>
-          <Quote>{props.screeningMessage}</Quote>
+          <EmailQuote>{props.screeningMessage}</EmailQuote>
 
-          <Separator />
+          <EmailSeparator />
           <EmailFooter />
-        </Container>
+        </EmailContainer>
       </Body>
     </Html>
   );

@@ -1,22 +1,22 @@
 import { relations } from "drizzle-orm";
 import { pgTable, primaryKey, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 
-import { cuid } from "../utils/sql";
+import { dbId } from "../utils/sql";
 import { EventReports } from "./event-report.sql";
 import { Workspaces } from "./workspace.sql";
 
 export const AnalyticsEndpoints = pgTable(
   "AnalyticsEndpoints",
   {
-    id: varchar("id", { length: 255 }).notNull(), // we'll use the id the platform gives us
     platform: varchar("platform", {
       length: 255,
       enum: ["meta", "google", "tiktok", "snapchat"],
     }).notNull(),
+    id: varchar("id", { length: 255 }).notNull(), // we'll use the id the platform gives us
     accessToken: varchar("accessToken", { length: 255 }),
 
     // relations
-    workspaceId: cuid("workspaceId")
+    workspaceId: dbId("workspaceId")
       .notNull()
       .references(() => Workspaces.id, {
         onUpdate: "cascade",

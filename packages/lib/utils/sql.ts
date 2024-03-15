@@ -5,17 +5,17 @@ import { timestamp, varchar } from "drizzle-orm/pg-core";
 
 import { raise } from "./raise";
 
-export const cuid = (name: string) => varchar(name, { length: 255 });
+export const dbId = (name: string) => varchar(name, { length: 255 });
 
 export const primaryId = {
   get id() {
-    return cuid("id").primaryKey().notNull();
+    return dbId("id").primaryKey().notNull();
   },
 };
 
 export const id = {
   get id() {
-    return cuid("id").notNull().unique();
+    return dbId("id").notNull().unique();
   },
 };
 
@@ -37,14 +37,20 @@ export const timestamps = {
   }),
 };
 
-// queries
+export const lexorank = {
+  lexorank: varchar("lexorank", { length: 255 }).notNull(),
+};
 
+// queries
 export const sqlCount = sql<number>`count(*)`.mapWith(Number);
 export const sqlCurrentDateTime = sql<string>`CURRENT_TIMESTAMP`;
 export const sqlCurrentTimestamp = sql<string>`CURRENT_TIMESTAMP`;
 
 export const sqlStringContains = (column: PgColumn, value: string) =>
   sql`LOWER(${column}) LIKE LOWER('%' || ${value} || '%')`;
+
+export const sqlStringStartsWith = (column: PgColumn, value: string) =>
+  sql`LOWER(${column}) LIKE LOWER(${value} || '%')`;
 
 export const sqlStringEndsWith = (column: PgColumn, value: string) =>
   sql`LOWER(${column}) LIKE LOWER('%' || ${value})`;

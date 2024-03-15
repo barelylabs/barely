@@ -12,7 +12,7 @@ type FilteredKeys<T, U> = {
 };
 
 // Take array as a string and return zod array
-export const queryNumberArray = z
+export const queryNumberArraySchema = z
   .string()
   .or(z.number())
   .or(z.array(z.number()))
@@ -22,12 +22,20 @@ export const queryNumberArray = z
     return [a];
   });
 
-// Take array as a string and return zod number array
+// Take array as a string and return zod string array
+export const queryStringArraySchema = z
+  .string()
+  .or(z.array(z.string()))
+  .transform((a) => {
+    if (typeof a === "string") return a.split(",");
+    if (Array.isArray(a)) return a;
+    return [a];
+  });
 
-// Take string and return return zod string array - comma separated
-export const queryStringArray = z
-  .preprocess((a) => z.string().parse(a).split(","), z.string().array())
-  .or(z.string().array());
+// Take string and return zod string array - comma separated
+// export const queryStringArray = z
+//   .preprocess((a) => z.string().parse(a).split(","), z.string().array())
+//   .or(z.string().array());
 
 export function useTypedQuery<T extends z.AnyZodObject>(
   schema: T,
@@ -62,7 +70,8 @@ export function useTypedQuery<T extends z.AnyZodObject>(
       if (options?.replace) {
         router.replace(path);
       } else {
-        router.push(path);
+        console.log("pushing path", path);
+        return router.push(path);
       }
     },
     [router],
@@ -84,21 +93,9 @@ export function useTypedQuery<T extends z.AnyZodObject>(
   );
 
   const setQuery = useCallback(
-    // function setQuery<J extends OutputKeys>(key: J, value: Output[J]) {
-    // 	// Remove old value by key so we can merge new value
-    // 	const { [key]: _, ...newQuery } = parsedQuery;
-    // 	const newValue = { ...newQuery, [key]: value };
-    // 	const queryString = new URLSearchParams(newValue).toString();
-    // 	const newPath = `${pathname}${queryString.length > 0 ? `?${queryString}` : ''}`;
-    // 	if (options?.replace) {
-    // 		router.replace(newPath);
-    // 	} else {
-    // 		router.push(newPath);
-    // 	}
-    // },
-    // [parsedQuery, router],
     function setQuery<J extends OutputKeys>(key: J, value: Output[J]) {
       const newPath = getSetQueryPath(key, value);
+
       setPath(newPath);
     },
     [getSetQueryPath, setPath],

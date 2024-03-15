@@ -16,6 +16,9 @@ import { ratelimit } from "../../utils/upstash";
 
 import { db } from "../db";
 
+const trpcSources = ["nextjs-react", "rsc", "rest"] as const;
+type TRPCSource = (typeof trpcSources)[number];
+
 export const createTRPCContext = async (opts: {
   headers: Headers;
   session: Session | null;
@@ -28,10 +31,14 @@ export const createTRPCContext = async (opts: {
   } else if (!opts.rest) {
     const { auth } = await import("../auth");
     session = await auth();
+    console.log("ssr session => ", session);
   }
 
-  // const source = opts.headers.get("x-trpc-source") ?? "unknown";
-  // console.log(">>> tRPC Request from", source, "by", session?.user);
+  const source = opts.rest
+    ? "rest"
+    : trpcSources.includes(opts.headers.get("x-trpc-source") as TRPCSource)
+      ? (opts.headers.get("x-trpc-source") as TRPCSource)
+      : "unknown";
 
   const longitude = opts.rest
     ? undefined
@@ -56,6 +63,12 @@ export const createTRPCContext = async (opts: {
     ? undefined
     : opts.headers.get("x-page-session-id") ?? null;
 
+  const pusherSocketId = opts.rest
+    ? undefined
+    : opts.headers.get("x-pusher-socket-id") ?? null;
+
+  // console.log("pusherSocketId => ", pusherSocketId);
+
   const ip = opts.rest ? "" : opts.headers.get("x-real-ip") ?? "";
 
   const context = {
@@ -64,16 +77,16 @@ export const createTRPCContext = async (opts: {
     user: opts.session?.user,
     workspace,
     pageSessionId,
+    pusherSocketId,
     // pii
     ip,
     longitude,
     latitude,
     // for convenience
     db,
+    source,
     ratelimit,
   };
-
-  // console.log(">>> tRPC Context", context.session);
 
   return context;
 };

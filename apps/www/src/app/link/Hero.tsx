@@ -27,7 +27,7 @@ const Hero = () => {
 
         {!showEmailForm && !submitted && (
           <Button
-            variant="primary"
+            look="primary"
             size="lg"
             pill
             // onClick={() => setShowEmailForm(true)}

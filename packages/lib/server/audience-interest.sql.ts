@@ -8,7 +8,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId, timestamps } from "../utils/sql";
+import { dbId, primaryId, timestamps } from "../utils/sql";
 import { Audiences } from "./audience.sql";
 import { Workspaces } from "./workspace.sql";
 
@@ -40,7 +40,7 @@ export const AudienceInterestGroups = pgTable(
   {
     // id: cuid('id').notNull(),
     ...primaryId,
-    workspaceId: cuid("workspaceId")
+    workspaceId: dbId("workspaceId")
       .notNull()
       .references(() => Workspaces.id, {
         onUpdate: "cascade",
@@ -79,8 +79,8 @@ export const AudienceInterestGroup_Relations = relations(
 export const _AudienceInterests_To_Audiences = pgTable(
   "_AudienceInterest_To_Audience",
   {
-    audienceInterestId: cuid("audienceInterestId").notNull(),
-    audienceId: cuid("audienceId").notNull(),
+    audienceInterestId: dbId("audienceInterestId").notNull(),
+    audienceId: dbId("audienceId").notNull(),
     type: char("type", { length: 7, enum: ["include", "exclude"] }).notNull(),
   },
 );
@@ -102,8 +102,8 @@ export const _AudienceInterests_To_Audiences_Relations = relations(
 export const _AudienceInterestGroups_To_Audiences = pgTable(
   "_AudienceInterestGroup_To_Audience",
   {
-    audienceInterestGroupId: cuid("audienceInterestGroupId").notNull(),
-    audienceId: cuid("audienceId").notNull(),
+    audienceInterestGroupId: dbId("audienceInterestGroupId").notNull(),
+    audienceId: dbId("audienceId").notNull(),
   },
 );
 
@@ -124,8 +124,8 @@ export const _AudienceInterestGroup_To_Audience_Relations = relations(
 export const _AudienceInterests_To_AudienceInterestGroups = pgTable(
   "_AudienceInterest_To_AudienceInterestGroup",
   {
-    audienceInterestId: cuid("audienceInterestId").notNull(),
-    audienceInterestGroupId: cuid("audienceInterestGroupId").notNull(),
+    audienceInterestId: dbId("audienceInterestId").notNull(),
+    audienceInterestGroupId: dbId("audienceInterestGroupId").notNull(),
   },
 );
 

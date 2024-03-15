@@ -8,7 +8,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId, timestamps } from "../utils/sql";
+import { dbId, primaryId, timestamps } from "../utils/sql";
 import { AdSets } from "./ad-set.sql";
 import { Campaigns } from "./campaign.sql";
 import { ProviderSubAccounts } from "./provider-sub-account.sql";
@@ -19,7 +19,7 @@ export const AdCampaigns = pgTable(
   "AdCampaigns",
   {
     ...primaryId,
-    workspaceId: cuid("workspaceId")
+    workspaceId: dbId("workspaceId")
       .notNull()
       .references(() => Workspaces.id, {
         onUpdate: "cascade",
@@ -48,8 +48,8 @@ export const AdCampaigns = pgTable(
     }).notNull(),
 
     // relations
-    campaignId: cuid("campaignId").notNull(),
-    metaAdAccountId: cuid("metaAdAccountId").notNull(),
+    campaignId: dbId("campaignId").notNull(),
+    metaAdAccountId: dbId("metaAdAccountId").notNull(),
   },
   (adCampaign) => ({
     // primary: primaryKey(adCampaign.workspaceId, adCampaign.id),

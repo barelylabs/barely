@@ -4,7 +4,8 @@
 	"extends": "./base.json",
 	"compilerOptions": {
 		"jsx": "react-jsx",
-		"target": "es5"
+		"target": "ES5",
+		"downlevelIteration": true
 	},
 	"include": ["src", "../types/next-auth.d.ts"],
 	"exclude": ["dist", "build", "node_modules"]

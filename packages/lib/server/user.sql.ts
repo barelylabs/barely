@@ -8,7 +8,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId, timestamps } from "../utils/sql";
+import { dbId, primaryId, timestamps } from "../utils/sql";
 import { Campaigns, CampaignUpdateRecords } from "./campaign.sql";
 import { Files } from "./file.sql";
 import { PlaylistCoverRenders } from "./playlist-cover.sql";
@@ -40,7 +40,7 @@ export const Users = pgTable(
     marketing: boolean("marketing").default(false),
     pitchScreening: boolean("pitchScreening").default(false),
     pitchReviewing: boolean("pitchReviewing").default(false),
-    personalWorkspaceId: cuid("personalWorkspaceId")
+    personalWorkspaceId: dbId("personalWorkspaceId")
       .notNull()
       .references(() => Workspaces.id, {
         onDelete: "cascade",
@@ -71,8 +71,8 @@ export const Users = pgTable(
 export const UserRelations = relations(Users, ({ one, many }) => ({
   // one-to-one
   personalWorkspace: one(Workspaces, {
-    fields: [Users.personalWorkspaceId, Users.handle, Users.image],
-    references: [Workspaces.id, Workspaces.handle, Workspaces.imageUrl],
+    fields: [Users.personalWorkspaceId, Users.handle],
+    references: [Workspaces.id, Workspaces.handle],
   }),
 
   // many-to-one
@@ -101,10 +101,10 @@ export const UserRelations = relations(Users, ({ one, many }) => ({
 export const _Users_To_Workspaces = pgTable(
   "_Users_To_Workspaces",
   {
-    workspaceId: cuid("workspaceId")
+    workspaceId: dbId("workspaceId")
       .notNull()
       .references(() => Workspaces.id, { onDelete: "cascade" }),
-    userId: cuid("userId")
+    userId: dbId("userId")
       .notNull()
       .references(() => Users.id, { onDelete: "cascade" }),
 
@@ -116,8 +116,9 @@ export const _Users_To_Workspaces = pgTable(
       .notNull(),
   },
   (userToWorkspace) => ({
-    primaryKey: primaryKey(userToWorkspace.workspaceId, userToWorkspace.userId),
-    // a user can only have one personal workspace. enforce this with a unique index
+    primaryKey: primaryKey({
+      columns: [userToWorkspace.workspaceId, userToWorkspace.userId],
+    }),
   }),
 );
 

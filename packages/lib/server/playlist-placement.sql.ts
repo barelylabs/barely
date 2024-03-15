@@ -7,7 +7,7 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId, sqlCurrentTimestamp, timestamps } from "../utils/sql";
+import { dbId, primaryId, sqlCurrentTimestamp, timestamps } from "../utils/sql";
 import { PlaylistPitchReviews } from "./playlist-pitch-review.sql";
 import { Playlists } from "./playlist.sql";
 import { Tracks } from "./track.sql";
@@ -31,15 +31,15 @@ export const PlaylistPlacements = pgTable(
 
     // relations
 
-    trackId: cuid("trackId")
+    trackId: dbId("trackId")
       .notNull()
       .references(() => Tracks.id),
 
-    playlistId: cuid("playlistId")
+    playlistId: dbId("playlistId")
       .notNull()
       .references(() => Playlists.id),
 
-    pitchReviewId: cuid("pitchReviewId"),
+    pitchReviewId: dbId("pitchReviewId"),
   },
   (placement) => {
     return {

@@ -7,18 +7,26 @@ import { cn } from "@barely/lib/utils/cn";
 import { Loader2 } from "lucide-react";
 
 import type { ButtonVariants } from "./button.variants";
-import { buttonVariants } from "./button.variants";
+import { buttonIconVariants, buttonVariants } from "./button.variants";
+import { Icon } from "./icon";
 import { Tooltip } from "./tooltip";
 
 interface ButtonBaseProps extends VariantProps<ButtonVariants> {
-  pill?: boolean;
-  icon?: boolean;
+  iconClassName?: string;
+  /** left-aligned icon */
+  startIcon?: keyof typeof Icon;
+  /** right-aligned icon */
+  endIcon?: keyof typeof Icon;
+  /** loading state */
   loading?: boolean;
   loadingText?: React.ReactNode;
-  fullWidth?: boolean;
   disabled?: boolean;
   disabledTooltip?: string | React.ReactNode;
   selected?: boolean;
+  /** styling */
+  fullWidth?: boolean;
+  pill?: boolean;
+  icon?: boolean;
 }
 
 interface ButtonAsAnchorProps
@@ -38,28 +46,36 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
       className,
-      variant,
-      size,
-      pill,
-      icon,
-      loading,
+      variant = "button",
+      look: color = "primary",
+      type = "button" /* bc the default type of a button should be "button" */,
+      size = "md",
+      loading = false,
       loadingText,
-      children,
-      fullWidth,
       disabledTooltip,
-      selected,
+      selected = false,
+      /* styles */
+      pill,
+      fullWidth,
+      /* icon */
+      startIcon,
+      endIcon,
+      /* attributes from 'HTMLAnchorProps' or 'HTMLButtonProps' */
+      children,
       ...props
     },
     ref,
   ) => {
     const classes = cn(
-      buttonVariants({ variant, size, selected, className }),
-      variant === "link" && "m-0 h-fit p-0 focus:ring-transparent",
-      variant === "tab" && "focus:ring-transparent",
-      pill && "rounded-full",
-      fullWidth && "w-full",
-      icon && "h-fit p-0 focus:ring-transparent",
-      // selected === true && variant=== 'tab' && 'bg-opacity-10',
+      buttonVariants({
+        variant,
+        look: color,
+        size,
+        selected,
+        loading,
+        pill,
+        fullWidth,
+      }),
       className,
     );
 
@@ -71,6 +87,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       );
     }
 
+    const StartIcon = startIcon ? Icon[startIcon] : null;
+    const EndIcon = endIcon ? Icon[endIcon] : null;
+
     const btn = (
       <span
         className={cn(
@@ -79,14 +98,48 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )}
       >
         <button
-          type={props.type ?? "button"}
+          ref={ref}
+          type={type as "button" | "submit" | "reset"}
           className={classes}
           disabled={loading ?? props.disabled}
-          ref={ref}
           {...props}
+          /* if button is disabled, prevent onClick handler */
+          onClick={
+            props.disabled
+              ? (e: React.MouseEvent) => e.preventDefault()
+              : props.onClick
+          }
         >
+          {StartIcon && (
+            <StartIcon
+              className={cn(
+                buttonIconVariants({
+                  variant,
+                  look: color,
+                  size,
+                  position: "start",
+                }),
+                props.iconClassName,
+              )}
+            />
+          )}
+
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {loading && loadingText ? loadingText : children}
+
+          {EndIcon && (
+            <EndIcon
+              className={cn(
+                buttonIconVariants({
+                  variant,
+                  look: color,
+                  size,
+                  position: "end",
+                }),
+                props.iconClassName,
+              )}
+            />
+          )}
         </button>
       </span>
     );
@@ -98,7 +151,5 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   },
 );
 Button.displayName = "Button";
-
-// const Highlight =
 
 export { Button, buttonVariants, type ButtonProps };

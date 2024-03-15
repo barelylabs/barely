@@ -170,7 +170,7 @@ export function PlaylistPitchScreenForm() {
                   campaign.track.spotifyId ?? ""
                 }`}
                 target="_blank"
-                variant="subtle"
+                look="muted"
                 size="md"
                 pill
                 icon
@@ -201,7 +201,7 @@ export function PlaylistPitchScreenForm() {
 
             <div className="flow-row flex w-full space-x-4 pt-4">
               <Button
-                variant="primary"
+                look="primary"
                 fullWidth
                 onClick={() => {
                   console.log("approved");
@@ -216,7 +216,7 @@ export function PlaylistPitchScreenForm() {
               </Button>
 
               <Button
-                variant="outline"
+                look="outline"
                 fullWidth
                 onClick={() => {
                   form.setValue("stage", "rejected");

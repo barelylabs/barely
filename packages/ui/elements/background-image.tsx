@@ -24,7 +24,7 @@ export const BackgroundImage = React.forwardRef<
       <Image
         src={src}
         alt=""
-        className="absolute inset-0 h-full w-full object-cover object-top"
+        className="absolute inset-0 h-full w-full object-cover object-center"
         fill
         priority
       />

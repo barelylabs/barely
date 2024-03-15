@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { boolean, index, integer, pgTable, varchar } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId, timestamps } from "../utils/sql";
+import { dbId, primaryId, timestamps } from "../utils/sql";
 import { AdCampaigns } from "./ad-campaign.sql";
 import { Files } from "./file.sql";
 import { TrackRenders } from "./track-render.sql";
@@ -12,7 +12,7 @@ export const VidRenders = pgTable(
   "VidRenders",
   {
     ...primaryId,
-    workspaceId: cuid("workspaceId")
+    workspaceId: dbId("workspaceId")
       .notNull()
       .references(() => Workspaces.id, {
         onDelete: "cascade",
@@ -44,10 +44,10 @@ export const VidRenders = pgTable(
     lambdaRegion: varchar("lambdaRegion", { length: 255 }).notNull(),
 
     // relations
-    createdById: cuid("createdById").notNull(),
-    adCampaignId: cuid("adCampaignId"),
-    trackRenderId: cuid("trackRenderId"),
-    parentVidId: cuid("parentVidId"),
+    createdById: dbId("createdById").notNull(),
+    adCampaignId: dbId("adCampaignId"),
+    trackRenderId: dbId("trackRenderId"),
+    parentVidId: dbId("parentVidId"),
   },
   (table) => ({
     // primary: primaryKey(table.workspaceId, table.id),

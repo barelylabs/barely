@@ -43,6 +43,18 @@ const badgeVariants = cva(
   },
 );
 
+const badgeIconVariants = cva("mr-1", {
+  variants: {
+    size: {
+      "2xs": "h-3 w-3",
+      xs: "h-3 w-3",
+      sm: "h-4 w-4",
+      md: "h-5 w-5",
+      lg: "h-6 w-6",
+    },
+  },
+});
+
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLSpanElement>,
     VariantProps<typeof badgeVariants> {
@@ -74,18 +86,19 @@ const Badge = ({
         badgeVariants({ variant, size }),
         rectangle && "rounded-sm",
         grow && "w-full",
-        asButton && "hover:cursor-pointer active:scale-95",
+        asButton && "active:scale-95 hover:cursor-pointer",
         className,
       )}
       {...props}
     >
       {icon && (
         <BadgeIcon
-          className={cn(
-            "mr-1",
-            size === "sm" && "h-[8px] w-[8px] sm:h-2 sm:w-2",
-            (!size || size === "md") && "h-[10px] w-[10px] sm:h-3 sm:w-3",
-          )}
+          // className={cn(
+          //   "mr-1",
+          //   size === "sm" && "h-[8px] w-[8px] sm:h-2 sm:w-2",
+          //   (!size || size === "md") && "h-[10px] w-[10px] sm:h-3 sm:w-3",
+          // )}
+          className={badgeIconVariants({ size })}
         />
       )}
       {props.children}

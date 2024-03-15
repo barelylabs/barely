@@ -8,7 +8,7 @@ import { useZodForm } from "./use-zod-form";
 
 export function useWorkspaceUpdateForm() {
   const workspace = useWorkspace();
-  const apiContext = api.useContext();
+  const apiUtils = api.useUtils();
 
   const form = useZodForm({
     schema: updateWorkspaceSchema,
@@ -23,7 +23,7 @@ export function useWorkspaceUpdateForm() {
 
   const { mutate: updateWorkspace } = api.workspace.update.useMutation({
     onMutate: async (data) => {
-      await apiContext.workspace.current.cancel();
+      await apiUtils.workspace.current.cancel();
 
       // check if the handle is changing. If it is we need to redirect to the new handle once the mutation has settled
       const handleChanged = data.handle !== workspace.handle;
@@ -47,7 +47,7 @@ export function useWorkspaceUpdateForm() {
         );
       }
 
-      await apiContext.workspace.current.invalidate();
+      await apiUtils.workspace.current.invalidate();
       form.reset();
     },
   });

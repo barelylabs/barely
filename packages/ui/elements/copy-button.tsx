@@ -12,7 +12,7 @@ export function CopyButton({ text }: { text?: string }) {
     <Button
       pill
       icon
-      variant="secondary"
+      look="secondary"
       className="p-1.5"
       onClick={() => text && copyToClipboard(text)}
     >

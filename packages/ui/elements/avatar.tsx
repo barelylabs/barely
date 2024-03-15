@@ -6,6 +6,8 @@ import * as React from "react";
 import { cn } from "@barely/lib/utils/cn";
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 
+import { Img } from "./img";
+
 const AvatarRoot = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
@@ -57,8 +59,17 @@ const Avatar = (props: {
 }) => {
   return (
     <AvatarRoot className={props.className}>
-      <AvatarImage src={props.imageUrl} />
-      <AvatarFallback>{props.initials}</AvatarFallback>
+      {/* <AvatarImage src={props.imageUrl} /> */}
+      {props.imageUrl?.length ? (
+        <Img
+          src={props.imageUrl}
+          alt={props.displayName ?? ""}
+          className={cn("aspect-square h-full w-full", props.className)}
+          fill
+        />
+      ) : (
+        <AvatarFallback>{props.initials}</AvatarFallback>
+      )}
     </AvatarRoot>
   );
 };

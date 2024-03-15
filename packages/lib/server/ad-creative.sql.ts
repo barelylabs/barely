@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { index, pgTable, varchar } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId, timestamps } from "../utils/sql";
+import { dbId, primaryId, timestamps } from "../utils/sql";
 import { Ads } from "./ad.sql";
 import { Links } from "./link.sql";
 import { ProviderAccounts } from "./provider-account.sql";
@@ -11,7 +11,7 @@ export const AdCreatives = pgTable(
   "AdCreatives",
   {
     ...primaryId,
-    workspaceId: cuid("workspaceId")
+    workspaceId: dbId("workspaceId")
       .notNull()
       .references(() => Workspaces.id, {
         onUpdate: "cascade",
@@ -31,10 +31,10 @@ export const AdCreatives = pgTable(
 
     // relations
 
-    metaAccountId: cuid("metaAccountId").notNull(),
-    tiktokAccountId: cuid("tiktokAccountId"),
-    headlineId: cuid("headlineId"),
-    linkId: cuid("linkId").notNull(),
+    metaAccountId: dbId("metaAccountId").notNull(),
+    tiktokAccountId: dbId("tiktokAccountId"),
+    headlineId: dbId("headlineId"),
+    linkId: dbId("linkId").notNull(),
   },
   (adCreative) => {
     return {

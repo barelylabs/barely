@@ -7,29 +7,24 @@ import { NewWorkspaceModal } from "~/app/[handle]/_components/new-workspace-moda
 import { WorkspaceProviders } from "~/app/[handle]/_components/providers";
 import { DashboardHeader } from "./_components/dash-header";
 
-interface DashboardLayoutProps {
-  params: { handle: string };
-  children: React.ReactElement;
-}
-
 export default async function DashboardLayout({
   params,
   children,
-}: DashboardLayoutProps) {
+}: {
+  params: { handle: string };
+  children: React.ReactElement;
+}) {
   const session = await auth();
 
   if (!session) return redirect("/login");
 
   const user = session.user;
-
   const userWorkspace = user.workspaces.find((w) => w.type === "personal");
-
   if (userWorkspace) user.image = userWorkspace.imageUrl;
 
   const currentWorkspace = user.workspaces.find(
     (w) => w.handle === params.handle,
   );
-
   if (!currentWorkspace) {
     const defaultWorkspace = await getDefaultWorkspaceOfCurrentUser();
     return redirect(`${defaultWorkspace.handle}/links`);

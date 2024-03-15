@@ -1,28 +1,33 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import type { z } from "zod";
+import { useCallback } from "react";
 import { useWorkspace } from "@barely/hooks/use-workspace";
 import { useWorkspaceUpdateForm } from "@barely/hooks/use-workspace-update-form";
-import { useZodForm } from "@barely/hooks/use-zod-form";
+import { useUpload } from "@barely/lib/hooks/use-upload";
 import { api } from "@barely/server/api/react";
-import { SettingsCard } from "@barely/ui/components/settings-card";
-import { BlurImage } from "@barely/ui/elements/blur-image";
+import {
+  SettingsCard,
+  SettingsCardForm,
+} from "@barely/ui/components/settings-card";
+import { Editor } from "@barely/ui/elements/editor";
 import { Icon } from "@barely/ui/elements/icon";
 import { Text } from "@barely/ui/elements/typography";
+import { UploadDropzone } from "@barely/ui/elements/upload";
 import { SelectField } from "@barely/ui/forms/select-field";
 import { TextField } from "@barely/ui/forms/text-field";
-import { z } from "zod";
+import { atom } from "jotai";
 
+import type { OnUploadComplete } from "@barely/lib/files/client";
+import type { UploadQueueItem } from "@barely/lib/hooks/use-upload";
 import type { workspaceTypeSchema } from "@barely/server/workspace.schema";
 import type { SelectFieldOption } from "@barely/ui/forms/select-field";
-
-// import { toast } from '@barely/ui/hooks/use-toast';
 
 export function DisplayOrWorkspaceNameForm() {
   const { form, onSubmit, isPersonal } = useWorkspaceUpdateForm();
 
   return (
-    <SettingsCard
+    <SettingsCardForm
       form={form}
       onSubmit={onSubmit}
       title={isPersonal ? "Your Name" : "Workspace Name"}
@@ -35,7 +40,7 @@ export function DisplayOrWorkspaceNameForm() {
       formHint="Please use a maximum of 32 characters"
     >
       <TextField label="" control={form.control} name="name" />
-    </SettingsCard>
+    </SettingsCardForm>
   );
 }
 
@@ -43,7 +48,7 @@ export function HandleForm() {
   const { form, onSubmit, isPersonal } = useWorkspaceUpdateForm();
 
   return (
-    <SettingsCard
+    <SettingsCardForm
       form={form}
       onSubmit={onSubmit}
       title={isPersonal ? "Your Handle" : "Workspace Handle"}
@@ -79,184 +84,7 @@ export function HandleForm() {
           </div>
         </div>
       )}
-    </SettingsCard>
-  );
-}
-
-export function AvatarForm() {
-  const workspace = useWorkspace();
-  const isPersonal = workspace.type === "personal";
-  const apiContext = api.useContext();
-
-  const avatarUploadSchema = z.object({ image: z.string() });
-
-  const form = useZodForm({
-    schema: avatarUploadSchema,
-    values: {
-      image: workspace.imageUrl ?? "",
-    },
-    resetOptions: {
-      keepDirtyValues: true, // retain user-interacted input
-    },
-  });
-
-  const [dragActive, setDragActive] = useState(false);
-
-  const onChangeImage = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-
-      if (file) {
-        if (file.size / 1024 / 1024 > 2) {
-          // toast({ //fixme
-          // 	title: 'File size too big (max 2MB)',
-          // 	variant: 'destructive',
-          // 	duration: 5000,
-          // });
-        } else if (file.type !== "image/png" && file.type !== "image/jpeg") {
-          // toast({ //fixme
-          // 	title: 'File type not supported (.png or .jpg only)',
-          // 	variant: 'destructive',
-          // 	duration: 5000,
-          // });
-        } else {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            form.setValue("image", e.target?.result as string, {
-              shouldDirty: true,
-            });
-          };
-          reader.readAsDataURL(file);
-        }
-      }
-    },
-    [form],
-  );
-
-  // const [uploading, setUploading] = useState(false);
-
-  // form
-
-  const { mutateAsync: uploadAvatar } =
-    api.node.workspace.uploadAvatar.useMutation({
-      onSettled: async () => {
-        await apiContext.workspace.current.invalidate();
-        form.reset();
-      },
-    });
-
-  const onSubmit = async (data: z.infer<typeof avatarUploadSchema>) => {
-    await uploadAvatar(data.image);
-  };
-
-  const image = form.watch("image");
-
-  return (
-    <SettingsCard
-      form={form}
-      onSubmit={onSubmit}
-      title={isPersonal ? "Your Avatar" : "Workspace Avatar"}
-      subtitle={
-        isPersonal
-          ? "This is your personal avatar on Barely."
-          : `This is your workspace's avatar on Barely.`
-      }
-      disableSubmit={!form.formState.isDirty}
-    >
-      <label
-        htmlFor="image"
-        className="group relative mt-1 flex h-28 w-28 cursor-pointer flex-col items-center justify-center rounded-full border border-gray-300 bg-white shadow-sm transition-all hover:bg-gray-50"
-      >
-        <div
-          className="absolute z-[5] h-full w-full rounded-full"
-          onDragOver={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setDragActive(true);
-          }}
-          onDragEnter={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setDragActive(true);
-          }}
-          onDragLeave={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setDragActive(false);
-          }}
-          onDrop={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setDragActive(false);
-            const file = e.dataTransfer.files?.[0];
-            if (file) {
-              if (file.size / 1024 / 1024 > 2) {
-                // toast({//fixme
-                // 	title: 'File size too big (max 2MB)',
-                // 	variant: 'destructive',
-                // 	duration: 5000,
-                // });
-              } else if (
-                file.type !== "image/png" &&
-                file.type !== "image/jpeg"
-              ) {
-                // toast({//fixme
-                // 	title: 'File type not supported (.png or .jpg only)',
-                // 	variant: 'destructive',
-                // 	duration: 5000,
-                // });
-              } else {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                  // setImage(e.target?.result as string);
-                  form.setValue("image", e.target?.result as string, {
-                    shouldDirty: true,
-                  });
-                };
-                reader.readAsDataURL(file);
-              }
-            }
-          }}
-        />
-
-        <div
-          className={`${
-            dragActive
-              ? "cursor-copy border-2 border-black bg-gray-50 opacity-100"
-              : ""
-          } absolute z-[3] flex h-full w-full flex-col items-center justify-center rounded-full bg-white transition-all ${
-            image
-              ? "opacity-0 group-hover:opacity-100"
-              : "group-hover:bg-gray-50"
-          }`}
-        >
-          <Icon.upload
-            className={`${
-              dragActive ? "scale-110" : "scale-100"
-            } h-5 w-5 text-gray-500 transition-all duration-75 group-hover:scale-110 group-active:scale-95`}
-          />
-        </div>
-        {image && (
-          <BlurImage
-            src={image}
-            alt="Preview"
-            className="h-full w-full rounded-full object-cover"
-            fill
-          />
-        )}
-      </label>
-
-      <div className="mt-1 flex rounded-full shadow-sm">
-        <input
-          id="image"
-          name="image"
-          type="file"
-          accept="image/*"
-          className="sr-only"
-          onChange={onChangeImage}
-        />
-      </div>
-    </SettingsCard>
+    </SettingsCardForm>
   );
 }
 
@@ -277,7 +105,7 @@ export function WorkspaceTypeForm() {
   ];
 
   return (
-    <SettingsCard
+    <SettingsCardForm
       form={form}
       onSubmit={onSubmit}
       title="Workspace Type"
@@ -290,6 +118,155 @@ export function WorkspaceTypeForm() {
         name="type"
         options={workspaceTypeOptions}
       />
+    </SettingsCardForm>
+  );
+}
+
+const avatarUploadQueueAtom = atom<UploadQueueItem[]>([]);
+const headerUploadQueueAtom = atom<UploadQueueItem[]>([]);
+
+export function WorkspaceAvatarForm() {
+  const workspace = useWorkspace();
+  const isPersonal = workspace.type === "personal";
+  const apiUtils = api.useUtils();
+
+  const { mutateAsync: updateWorkspaceAvatar } =
+    api.workspace.updateAvatar.useMutation();
+
+  const onUploadComplete: OnUploadComplete = useCallback(
+    async (fileRecord) => {
+      await updateWorkspaceAvatar({ avatarFileId: fileRecord.id });
+      await apiUtils.workspace.invalidate();
+    },
+    [updateWorkspaceAvatar, apiUtils.workspace],
+  );
+
+  const avatarUploadState = useUpload({
+    uploadQueueAtom: avatarUploadQueueAtom,
+    folder: "avatars",
+    allowedFileTypes: ["image"],
+    maxFiles: 1,
+    onUploadComplete,
+  });
+
+  const { isPendingPresigns, uploadQueue, uploading, handleSubmit } =
+    avatarUploadState;
+
+  const imagePreview =
+    avatarUploadState.uploadQueue[0]?.previewImage ?? workspace.avatarImageUrl;
+
+  return (
+    <SettingsCard
+      title={isPersonal ? "Your Avatar" : "Workspace Avatar"}
+      subtitle={
+        isPersonal
+          ? "This is your personal avatar on Barely."
+          : `This is your workspace's avatar on Barely.`
+      }
+      onSubmit={handleSubmit}
+      disableSubmit={
+        uploadQueue[0]?.status === "complete" ||
+        uploadQueue.length === 0 ||
+        isPendingPresigns ||
+        uploading
+      }
+      isSubmitting={uploading}
+    >
+      <UploadDropzone
+        {...avatarUploadState}
+        title=""
+        subtitle=""
+        imagePreview={imagePreview}
+        className="h-28 w-28 rounded-full"
+      />
     </SettingsCard>
+  );
+}
+
+export function WorkspaceHeaderForm() {
+  const workspace = useWorkspace();
+  const isPersonal = workspace.type === "personal";
+  const apiUtils = api.useUtils();
+
+  const { mutateAsync: updateWorkspaceHeader } =
+    api.workspace.updateHeader.useMutation();
+
+  const onUploadComplete: OnUploadComplete = useCallback(
+    async (fileRecord) => {
+      await updateWorkspaceHeader({ headerFileId: fileRecord.id });
+      await apiUtils.workspace.invalidate();
+    },
+    [updateWorkspaceHeader, apiUtils.workspace],
+  );
+
+  const headerUploadState = useUpload({
+    uploadQueueAtom: headerUploadQueueAtom,
+    folder: "headers",
+    allowedFileTypes: ["image"],
+    maxFiles: 1,
+    onUploadComplete,
+  });
+
+  const { isPendingPresigns, uploadQueue, uploading, handleSubmit } =
+    headerUploadState;
+
+  const imagePreview =
+    headerUploadState.uploadQueue[0]?.previewImage ?? workspace.headerImageUrl;
+
+  return (
+    <SettingsCard
+      title={isPersonal ? "Your Header" : "Workspace Header"}
+      subtitle={
+        isPersonal
+          ? "This is your personal header on Barely."
+          : `This is your workspace's header on Barely.`
+      }
+      onSubmit={handleSubmit}
+      disableSubmit={
+        uploadQueue[0]?.status === "complete" ||
+        uploadQueue.length === 0 ||
+        isPendingPresigns ||
+        uploading
+      }
+      isSubmitting={uploading}
+    >
+      <UploadDropzone
+        {...headerUploadState}
+        title=""
+        subtitle=""
+        imagePreview={imagePreview}
+        className="h-40 w-full rounded-md"
+      />
+    </SettingsCard>
+  );
+}
+
+export function WorkspaceBioForm() {
+  const workspace = useWorkspace();
+  const { form, onSubmit, isPersonal } = useWorkspaceUpdateForm();
+
+  return (
+    <SettingsCardForm
+      form={form}
+      onSubmit={onSubmit}
+      title={isPersonal ? "Your Bio" : "Workspace Bio"}
+      subtitle={
+        isPersonal
+          ? "This is your personal bio on Barely."
+          : `This is your workspace's bio on Barely.`
+      }
+      disableSubmit={!form.formState.isDirty}
+    >
+      <Editor
+        mode="markdown"
+        initialMarkdown={workspace.bio ?? ""}
+        getMarkdown={() => form.getValues("bio") ?? ""}
+        setMarkdown={(value: string) =>
+          form.setValue("bio", value, { shouldDirty: true })
+        }
+        excludedToolbarItems={["blockType"]}
+        disableLists
+      />
+    </SettingsCardForm>
   );
 }

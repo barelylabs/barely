@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { index, pgTable, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId } from "../utils/sql";
+import { dbId, primaryId } from "../utils/sql";
 import { ProviderAccounts } from "./provider-account.sql";
 import { Workspaces } from "./workspace.sql";
 
@@ -19,13 +19,13 @@ export const ProviderSubAccounts = pgTable(
     providerId: varchar("providerId", { length: 255 }).notNull(),
 
     // relations
-    workspaceId: cuid("workspaceId")
+    workspaceId: dbId("workspaceId")
       .notNull()
       .references(() => Workspaces.id, {
         onDelete: "cascade",
       }),
 
-    parentAccountId: cuid("userId")
+    parentAccountId: dbId("userId")
       .notNull()
       .references(() => Workspaces.id, {
         onUpdate: "cascade",

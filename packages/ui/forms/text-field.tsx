@@ -1,5 +1,7 @@
-// import { useState } from 'react';
+"use client";
+
 import type { FieldPath, FieldValues } from "react-hook-form";
+import { useState } from "react";
 import { Controller } from "react-hook-form";
 
 import type { InputProps } from "../elements/input";
@@ -21,12 +23,24 @@ export const TextField = <
   isValidating,
   infoTooltip,
   labelButton,
+  allowEnable,
+  allowEnableConfirmMessage,
   ...props
 }: FieldProps<TFieldValues, TName> &
   InputProps & {
     isValidating?: boolean;
   }) => {
-  // const [focus, setFocus] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(props.disabled);
+
+  const toggleDisabled = () => {
+    const userConfirmed = window.confirm(
+      allowEnableConfirmMessage ??
+        "Are you sure you want to unlock this field?",
+    );
+    if (userConfirmed) {
+      setIsDisabled((prev) => !prev);
+    }
+  };
 
   return (
     <FormFieldContext.Provider value={{ name: props.name }}>
@@ -41,6 +55,8 @@ export const TextField = <
                 infoTooltip={infoTooltip}
                 labelButton={labelButton}
                 hint={hint}
+                isDisabled={isDisabled}
+                toggleDisabled={allowEnable ? toggleDisabled : undefined}
               >
                 <FieldControl>
                   <div className="relative">
@@ -48,6 +64,7 @@ export const TextField = <
                       type={props.type}
                       {...field}
                       {...props}
+                      disabled={isDisabled}
                       onChange={(e) => {
                         field.onChange(e);
                         props.onChange?.(e);

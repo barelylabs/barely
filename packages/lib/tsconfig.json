@@ -8,9 +8,11 @@
     "../types/next-auth.d.ts",
     "./atoms/**/*",
     "./context/**/*",
+    "./files/**/*",
     "./hooks/**/*",
     "./server/**/*",
     "./utils/**/*",
+    "../../apps/app/src/app/[handle]/tracks/_components/use-create-or-edit-form.ts",
   ],
   "exclude": ["dist", "build", "node_modules"],
 }

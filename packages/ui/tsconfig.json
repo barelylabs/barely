@@ -1,6 +1,8 @@
 {
   "extends": "@barely/tsconfig/react.json",
   "compilerOptions": {
+    "target": "es5",
+    "downlevelIteration": true,
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
   },
   "include": [

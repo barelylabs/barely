@@ -7,7 +7,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId } from "../utils/sql";
+import { dbId, primaryId } from "../utils/sql";
 import { AdCreatives } from "./ad-creative.sql";
 import { _Playlists_To_ProviderAccounts } from "./playlist.sql";
 import { ProviderSubAccounts } from "./provider-sub-account.sql";
@@ -31,12 +31,12 @@ export const ProviderAccounts = pgTable(
     ...primaryId,
 
     // relations
-    userId: cuid("userId")
+    userId: dbId("userId")
       .notNull()
       .references(() => Users.id, {
         onDelete: "cascade",
       }),
-    workspaceId: cuid("workspaceId")
+    workspaceId: dbId("workspaceId")
       .notNull()
       .references(() => Workspaces.id, {}),
 

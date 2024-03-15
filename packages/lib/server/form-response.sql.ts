@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { index, pgTable, text, varchar } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId, timestamps } from "../utils/sql";
+import { dbId, primaryId, timestamps } from "../utils/sql";
 import { Forms } from "./form.sql";
 
 export const FormResponses = pgTable(
@@ -15,7 +15,7 @@ export const FormResponses = pgTable(
     message: varchar("message", { length: 1000 }),
 
     // relations
-    formId: cuid("formId")
+    formId: dbId("formId")
       .notNull()
       .references(() => Forms.id, {
         onDelete: "cascade",

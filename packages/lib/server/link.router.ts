@@ -1,8 +1,10 @@
 import { TRPCError } from "@trpc/server";
-import { eq, or } from "drizzle-orm";
+import { and, eq, inArray, or } from "drizzle-orm";
 import { z } from "zod";
 
+import type { InsertLink } from "./link.schema";
 import { env } from "../env";
+import { getUserWorkspaceByHandle } from "../utils/auth";
 import { newId } from "../utils/id";
 import {
   getMetaTags,
@@ -36,21 +38,29 @@ export const linkRouter = createTRPCRouter({
   }),
 
   byWorkspace: privateProcedure
-    .input(linkFilterParamsSchema.optional())
+    .input(
+      z.object({
+        handle: z.string(),
+        filters: linkFilterParamsSchema,
+      }),
+    )
     .query(async ({ input, ctx }) => {
+      const { handle, filters } = input;
+      const workspace = getUserWorkspaceByHandle(ctx.user, handle);
+
       const searchCondition =
-        input?.search && input.search.length > 0
+        filters?.search && filters.search.length > 0
           ? or(
-              sqlStringContains(Links.key, input.search),
-              sqlStringContains(Links.url, input.search),
+              sqlStringContains(Links.key, filters.search),
+              sqlStringContains(Links.url, filters.search),
             )
           : undefined;
 
       const links = await ctx.db.http.query.Links.findMany({
         where: sqlAnd([
-          eq(Links.workspaceId, ctx.workspace.id),
-          !!input?.userId && eq(Links.userId, input.userId),
-          !input?.showArchived && eq(Links.archived, false),
+          eq(Links.workspaceId, workspace.id),
+          !!filters?.userId && eq(Links.userId, filters.userId),
+          !filters?.showArchived && eq(Links.archived, false),
           searchCondition,
         ]),
       });
@@ -95,16 +105,19 @@ export const linkRouter = createTRPCRouter({
         metaTags.description = metaTags.description.substring(0, 500);
       }
 
-      const createLinkValues = {
-        id: linkId,
+      const insertLinkValues = {
         ...input,
+        id: linkId,
+        userId: ctx.user.id,
+        workspaceId: ctx.workspace.id,
+        handle: ctx.workspace.handle,
         ...metaTags,
         ...(input.transparent ? transparentLinkData : {}),
-      };
+      } satisfies InsertLink;
 
       const link = await ctx.db.http
         .insert(Links)
-        .values(createLinkValues)
+        .values(insertLinkValues)
         .returning();
       return link;
     }),
@@ -163,6 +176,36 @@ export const linkRouter = createTRPCRouter({
         .where(eq(Links.id, input.id))
         .returning();
       return link;
+    }),
+
+  archive: privateProcedure
+    .input(z.array(z.string()))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.http
+        .update(Links)
+        .set({ archived: true })
+        .where(
+          and(
+            eq(Links.workspaceId, ctx.workspace.id),
+            inArray(Links.id, input),
+          ),
+        );
+    }),
+
+  delete: privateProcedure
+    .input(z.array(z.string()))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.http
+        .update(Links)
+        .set({
+          deletedAt: new Date().toISOString(),
+        })
+        .where(
+          and(
+            eq(Links.workspaceId, ctx.workspace.id),
+            inArray(Links.id, input),
+          ),
+        );
     }),
 
   // utils

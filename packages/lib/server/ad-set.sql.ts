@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { boolean, index, integer, pgTable, varchar } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId, timestamps } from "../utils/sql";
+import { dbId, primaryId, timestamps } from "../utils/sql";
 import { AdCampaigns } from "./ad-campaign.sql";
 import { Ads } from "./ad.sql";
 import { Audiences } from "./audience.sql";
@@ -11,7 +11,7 @@ export const AdSets = pgTable(
   "AdSets",
   {
     ...primaryId,
-    workspaceId: cuid("workspaceId")
+    workspaceId: dbId("workspaceId")
       .notNull()
       .references(() => Workspaces.id, {
         onUpdate: "cascade",
@@ -40,9 +40,9 @@ export const AdSets = pgTable(
     }).notNull(),
 
     // relations
-    adCampaignId: cuid("adCampaignId").notNull(),
-    audienceId: cuid("audienceId").notNull(),
-    adSetParentId: cuid("adSetParentId"),
+    adCampaignId: dbId("adCampaignId").notNull(),
+    audienceId: dbId("audienceId").notNull(),
+    adSetParentId: dbId("adSetParentId"),
   },
   (table) => ({
     // primary: primaryKey(table.workspaceId, table.id),
@@ -91,7 +91,7 @@ export const AdSetCloneRecords = pgTable(
   "AdSetCloneRecords",
   {
     ...primaryId,
-    workspaceId: cuid("workspaceId")
+    workspaceId: dbId("workspaceId")
       .notNull()
       .references(() => Workspaces.id, {
         onDelete: "cascade",
@@ -111,9 +111,9 @@ export const AdSetCloneRecords = pgTable(
     dailyBudget: integer("dailyBudget"),
 
     // relations
-    audienceId: cuid("audienceId"),
-    adSetParentId: cuid("adSetParentId").notNull(),
-    adSetChildId: cuid("adSetChildId"),
+    audienceId: dbId("audienceId"),
+    adSetParentId: dbId("adSetParentId").notNull(),
+    adSetChildId: dbId("adSetChildId"),
   },
   (table) => ({
     // primary: primaryKey({
@@ -158,7 +158,7 @@ export const AdSetUpdateRecords = pgTable(
   "AdSetUpdateRecords",
   {
     ...primaryId,
-    workspaceId: cuid("workspaceId")
+    workspaceId: dbId("workspaceId")
       .notNull()
       .references(() => Workspaces.id, {
         onDelete: "cascade",
@@ -175,8 +175,8 @@ export const AdSetUpdateRecords = pgTable(
     dailyBudget: integer("dailyBudget"),
 
     // relations
-    adSetId: cuid("adSetId").notNull(),
-    audienceId: cuid("audienceId"),
+    adSetId: dbId("adSetId").notNull(),
+    audienceId: dbId("audienceId"),
   },
   (table) => ({
     adSet: index("AdSetUpdateRecords_adSet_idx").on(table.adSetId),

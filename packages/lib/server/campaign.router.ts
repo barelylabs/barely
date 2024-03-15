@@ -7,7 +7,7 @@ import { and, asc, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 
 import type { SessionUser } from "./auth";
-import type { Track } from "./track.schema";
+import type { InsertTrack } from "./track.schema";
 import type { Workspace } from "./workspace.schema";
 import { convertToHandle } from "../utils/handle";
 import { newCuid, newId } from "../utils/id";
@@ -136,10 +136,7 @@ export const campaignRouter = createTRPCRouter({
       // 💿 if track doesn't exist, create new track
 
       if (!dbTrack)
-        dbTrack = await createTrack(
-          { ...input.track, workspaceId: dbArtist.id },
-          ctx.db,
-        );
+        dbTrack = await createTrack(input.track, dbArtist.id, ctx.db);
 
       if (!dbTrack)
         throw new TRPCError({
@@ -209,7 +206,7 @@ export const campaignRouter = createTRPCRouter({
       console.log("new artist handle", artistHandle);
 
       let newWorkspace: Workspace | undefined;
-      let newTrack: Track | undefined;
+      let newTrack: InsertTrack | undefined;
 
       await ctx.db.pool.transaction(async (tx) => {
         // 👩‍🎤 create new workspace
@@ -232,11 +229,9 @@ export const campaignRouter = createTRPCRouter({
             message: "Something went wrong creating the artist.",
           });
         // 💿 create new track
-        newTrack = await createTrack(
-          { ...input.track, workspaceId: newWorkspace.id },
-          ctx.db,
-          tx,
-        );
+        newTrack =
+          (await createTrack(input.track, newWorkspace.id, ctx.db, tx)) ??
+          undefined;
       });
 
       if (!newTrack)
@@ -657,6 +652,7 @@ export const campaignRouter = createTRPCRouter({
       await pushEvent("campaign", "update", {
         id: campaign.id,
         pageSessionId: ctx.pageSessionId,
+        socketId: ctx.pusherSocketId,
       });
 
       return campaign;

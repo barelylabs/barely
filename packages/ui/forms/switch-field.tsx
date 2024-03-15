@@ -13,6 +13,7 @@ export const SwitchField = <
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
   hint,
+  size = "sm",
   infoTooltip,
   ...props
 }: FieldProps<TFieldValues, TName> & SwitchAddonProps) => {
@@ -27,10 +28,10 @@ export const SwitchField = <
             </FieldLabel>
             <FieldControl>
               <Switch
+                {...props}
                 checked={field.value}
                 onCheckedChange={field.onChange}
-                size="sm"
-                {...props}
+                size={size}
               />
             </FieldControl>
             <FieldMessages {...{ description: props.description, hint }} />

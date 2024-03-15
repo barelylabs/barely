@@ -1,8 +1,6 @@
 "use client";
 
 import { useRef } from "react";
-import { useTypedQuery } from "@barely/hooks/use-typed-query";
-import { linkFilterParamsSchema } from "@barely/server/link.schema";
 import { Button } from "@barely/ui/elements/button";
 import { Icon } from "@barely/ui/elements/icon";
 import { Input } from "@barely/ui/elements/input";
@@ -10,14 +8,15 @@ import { Label } from "@barely/ui/elements/label";
 import { Switch } from "@barely/ui/elements/switch";
 import { Text } from "@barely/ui/elements/typography";
 
+import { useLinkContext } from "~/app/[handle]/links/_components/link-context";
+
 export function LinkFilters() {
-  const { data, setQuery, removeByKey, removeAllQueryParams } = useTypedQuery(
-    linkFilterParamsSchema,
-  );
+  const { filters, setSearch, toggleArchived, clearAllFilters } =
+    useLinkContext();
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const showClearButton = data.search ?? data.showArchived;
+  const showClearButton = filters.search ?? filters.showArchived;
 
   return (
     <div className="flex h-fit w-fit flex-col gap-4 rounded-md border p-6 py-6">
@@ -28,13 +27,13 @@ export function LinkFilters() {
           </Text>
           {showClearButton ? (
             <Button
-              variant="outline"
+              look="outline"
               size="sm"
               onClick={() => {
                 if (searchInputRef.current) {
                   searchInputRef.current.value = "";
                 }
-                removeAllQueryParams();
+                clearAllFilters();
               }}
             >
               <Icon.x className="mr-1 h-3 w-3" />
@@ -45,14 +44,10 @@ export function LinkFilters() {
 
         <Input
           id="searchInput"
-          defaultValue={data.search ?? ""}
+          defaultValue={filters.search ?? ""}
           ref={searchInputRef}
-          onChangeDebounced={(e) => {
-            console.log("filter change", e.target.value);
-            e.target.value.length
-              ? setQuery("search", e.target.value)
-              : removeByKey("search");
-          }}
+          // onChange={(e) => setSearch(e.target.value)}
+          onChangeDebounced={(e) => setSearch(e.target.value)}
           debounce={500}
           placeholder="Search..."
         />
@@ -62,12 +57,12 @@ export function LinkFilters() {
         <Label htmlFor="showArchivedSwitch">Include archived links</Label>
         <Switch
           id="showArchivedSwitch"
-          checked={!!data.showArchived}
-          onClick={() =>
-            data.showArchived
-              ? removeByKey("showArchived")
-              : setQuery("showArchived", true)
-          }
+          checked={!!filters.showArchived}
+          onClick={() => toggleArchived()}
+          // data.showArchived
+          //   ? removeByKey("showArchived")
+          //   : setQuery("showArchived", true)
+
           size="sm"
         />
       </div>

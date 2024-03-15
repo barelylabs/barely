@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { index, pgTable, varchar } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId, timestamps } from "../utils/sql";
+import { dbId, primaryId, timestamps } from "../utils/sql";
 import { AnalyticsEndpoints } from "./analytics-endpoint.sql";
 import { Events } from "./event.sql";
 
@@ -14,12 +14,12 @@ export const EventReports = pgTable(
     error: varchar("error", { length: 1000 }),
 
     // relations
-    eventId: cuid("eventId").notNull(),
+    eventId: dbId("eventId").notNull(),
     analyticsPlatform: varchar("analyticsPlatform", {
       length: 100,
       enum: ["meta", "google", "tiktok", "snapchat"],
     }).notNull(),
-    analyticsId: cuid("analyticsId").notNull(),
+    analyticsId: dbId("analyticsId").notNull(),
   },
   (table) => {
     return {
