@@ -52,7 +52,7 @@ export const processEnv = {
    * SERVER
    * */
   AWS_S3_BUCKET_NAME: process.env.AWS_S3_BUCKET_NAME,
-  AWS_S3_CALLBACK_URL: process.env.AWS_S3_CALLBACK_URL,
+  // AWS_S3_CALLBACK_URL: process.env.AWS_S3_CALLBACK_URL,
   AWS_S3_REGION: process.env.AWS_S3_REGION,
   AWS_S3_ACCESS_KEY_ID: process.env.AWS_S3_ACCESS_KEY_ID,
   AWS_S3_SECRET_ACCESS_KEY: process.env.AWS_S3_SECRET_ACCESS_KEY,
@@ -136,7 +136,7 @@ type RateLimitTime =
 
 export const serverEnvSchema = z.object({
   AWS_S3_BUCKET_NAME: z.string(),
-  AWS_S3_CALLBACK_URL: z.string(),
+  // AWS_S3_CALLBACK_URL: z.string(),
   AWS_S3_REGION: z.string(),
   AWS_S3_ACCESS_KEY_ID: z.string(),
   AWS_S3_SECRET_ACCESS_KEY: z.string(),

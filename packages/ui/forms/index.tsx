@@ -46,7 +46,7 @@ const Form = <T extends FieldValues>({
       >
         <fieldset
           className={cn(
-            "flex w-full max-w-full flex-col overflow-hidden",
+            "flex w-full max-w-full flex-col gap-4",
             props.className,
           )}
           disabled={form.formState.isSubmitting}

@@ -37,7 +37,7 @@ export async function getPresigned({
   metadata = {},
 }: GetPresignedProps) {
   const Metadata = {
-    callbackUrl: env.AWS_S3_CALLBACK_URL,
+    // callbackUrl: env.AWS_S3_CALLBACK_URL,
     ...metadata,
   };
 
