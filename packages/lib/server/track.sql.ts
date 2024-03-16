@@ -8,11 +8,13 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId, timestamps } from "../utils/sql";
+import { dbId, primaryId, timestamps } from "../utils/sql";
 import { Campaigns } from "./campaign.sql";
-import { Files } from "./file.sql";
+import { _Files_To_Tracks__Artwork, _Files_To_Tracks__Audio } from "./file.sql";
 import { _Tracks_To_Genres } from "./genre.sql";
+import { _Mixtapes_To_Tracks } from "./mixtape.sql";
 import { PlaylistPlacements } from "./playlist-placement.sql";
+import { _Playlists_To_Tracks } from "./playlist.sql";
 import { Stats } from "./stat.sql";
 import { TrackRenders } from "./track-render.sql";
 import { Workspaces } from "./workspace.sql";
@@ -21,7 +23,7 @@ export const Tracks = pgTable(
   "Tracks",
   {
     ...primaryId,
-    workspaceId: cuid("workspaceId")
+    workspaceId: dbId("workspaceId")
       .notNull()
       .references(() => Workspaces.id, {
         onDelete: "cascade",
@@ -43,9 +45,11 @@ export const Tracks = pgTable(
     releaseDate: date("releaseDate", { mode: "string" }),
     imageUrl: varchar("imageUrl", { length: 255 }),
 
+    archived: boolean("archived").default(false),
     // relations
     masterMp3Id: varchar("masterMp3Id", { length: 255 }).unique(),
     masterWavId: varchar("masterWavId", { length: 255 }).unique(),
+    artworkId: dbId("artworkId"),
 
     appleMusicLinkId: varchar("appleMusicLinkId", { length: 255 }).unique(),
     deezerLinkId: varchar("deezerLinkId", { length: 255 }).unique(),
@@ -55,9 +59,7 @@ export const Tracks = pgTable(
     youtubeLinkId: varchar("youtubeLinkId", { length: 255 }).unique(),
   },
   (track) => ({
-    // primary: primaryKey(track.workspaceId, track.id),
     workspace: index("Tracks_workspaceId_key").on(track.workspaceId),
-    // workspace: track.workspaceId,
     workspace_trackName: uniqueIndex("Tracks_workspace_trackName_key").on(
       track.workspaceId,
       track.name,
@@ -67,14 +69,17 @@ export const Tracks = pgTable(
 
 export const Track_Relations = relations(Tracks, ({ one, many }) => ({
   // one-to-one
-  masterMp3: one(Files, {
-    fields: [Tracks.masterMp3Id],
-    references: [Files.id],
-  }),
-  masterWav: one(Files, {
-    fields: [Tracks.masterWavId],
-    references: [Files.id],
-  }),
+  // masterMp3: one(Files, {
+  //   relationName: "trackToMasterMp3",
+  //   fields: [Tracks.masterMp3Id],
+  //   references: [Files.id],
+  // }),
+  // masterWav: one(Files, {
+  //   relationName: "trackToMasterWav",
+  //   fields: [Tracks.masterWavId],
+  //   references: [Files.id],
+  // }),
+
   // one-to-many
   workspace: one(Workspaces, {
     fields: [Tracks.workspaceId],
@@ -85,8 +90,11 @@ export const Track_Relations = relations(Tracks, ({ one, many }) => ({
   playlistPlacements: many(PlaylistPlacements),
   stats: many(Stats),
   trackRenders: many(TrackRenders),
-  vids: many(Files),
+  _audioFiles: many(_Files_To_Tracks__Audio),
+  _artworkFiles: many(_Files_To_Tracks__Artwork),
 
   // many-to-many
+  playlists: many(_Playlists_To_Tracks),
+  _mixtapes: many(_Mixtapes_To_Tracks),
   _genres: many(_Tracks_To_Genres),
 }));

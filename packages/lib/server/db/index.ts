@@ -18,15 +18,18 @@ import * as domainSql from "../domain.sql";
 import * as eventReportSql from "../event-report.sql";
 import * as eventSql from "../event.sql";
 import * as externalWebsiteSql from "../external-website.sql";
+import * as fileFolderSql from "../file-folder.sql";
 import * as fileSql from "../file.sql";
 import * as formResponseSql from "../form-response.sql";
 import * as formSql from "../form.sql";
 import * as genreSql from "../genre.sql";
 import * as linkSql from "../link.sql";
+import * as mixtapeSql from "../mixtape.sql";
 import * as playlistCoverSql from "../playlist-cover.sql";
 import * as playlistPitchReviewSql from "../playlist-pitch-review.sql";
 import * as playlistPlacementSql from "../playlist-placement.sql";
 import * as playlistSql from "../playlist.sql";
+import * as pressSql from "../press-kit.sql";
 import * as providerAccountSql from "../provider-account.sql";
 import * as providerSubAccountSql from "../provider-sub-account.sql";
 import * as statSql from "../stat.sql";
@@ -56,14 +59,17 @@ export const dbSchema = {
   ...eventReportSql,
   ...externalWebsiteSql,
   ...fileSql,
+  ...fileFolderSql,
   ...formSql,
   ...formResponseSql,
   ...genreSql,
   ...linkSql,
+  ...mixtapeSql,
   ...playlistSql,
   ...playlistCoverSql,
   ...playlistPitchReviewSql,
   ...playlistPlacementSql,
+  ...pressSql,
   ...providerAccountSql,
   ...providerSubAccountSql,
   ...statSql,
@@ -88,16 +94,6 @@ const pool = new Pool({ connectionString: env.DATABASE_POOL_URL });
 export const dbPool = drizzlePool(pool, {
   schema: dbSchema,
 });
-
-// const read = neon(env.DATABASE_READ_URL);
-// const dbRead = drizzleHttp(read, {
-//   schema: dbSchema,
-// });
-
-// const readPool = new Pool({ connectionString: env.DATABASE_READ_POOL_URL });
-// export const dbReadPool = drizzlePool(readPool, {
-//   schema: dbSchema,
-// });
 
 export type DbHttp = typeof dbHttp;
 export type DbHttpTransaction = Parameters<

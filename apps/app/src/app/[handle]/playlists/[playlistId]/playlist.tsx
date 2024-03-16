@@ -30,7 +30,7 @@ const Playlist = (props: { id: string }) => {
         <Button
           loading={isPending}
           onClick={onPromise(() => estimateGenres(props.id))}
-          variant="ghost"
+          look="ghost"
           icon
           pill
         >

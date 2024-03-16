@@ -8,7 +8,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId, timestamps } from "../utils/sql";
+import { dbId, primaryId, timestamps } from "../utils/sql";
 import { Campaigns } from "./campaign.sql";
 import { PlaylistPlacements } from "./playlist-placement.sql";
 import { Users } from "./user.sql";
@@ -28,8 +28,8 @@ export const PlaylistPitchReviews = pgTable(
     rejectReason: varchar("rejectReason", { length: 255 }),
 
     // relations
-    campaignId: cuid("campaignId").notNull(),
-    reviewerId: cuid("reviewerId").notNull(),
+    campaignId: dbId("campaignId").notNull(),
+    reviewerId: dbId("reviewerId").notNull(),
   },
   (review) => ({
     // primary: primaryKey(review.campaignId, review.reviewerId, review.id),

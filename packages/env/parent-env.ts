@@ -51,6 +51,11 @@ export const processEnv = {
   /**
    * SERVER
    * */
+  AWS_S3_BUCKET_NAME: process.env.AWS_S3_BUCKET_NAME,
+  // AWS_S3_CALLBACK_URL: process.env.AWS_S3_CALLBACK_URL,
+  AWS_S3_REGION: process.env.AWS_S3_REGION,
+  AWS_S3_ACCESS_KEY_ID: process.env.AWS_S3_ACCESS_KEY_ID,
+  AWS_S3_SECRET_ACCESS_KEY: process.env.AWS_S3_SECRET_ACCESS_KEY,
   BOT_SPOTIFY_ACCOUNT_ID: process.env.BOT_SPOTIFY_ACCOUNT_ID,
   BOT_THREADS_API_KEY: process.env.BOT_THREADS_API_KEY,
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
@@ -87,7 +92,7 @@ export const processEnv = {
 };
 
 export const clientEnvSchema = z.object({
-  NEXT_PUBLIC_CURRENT_APP: z.enum(["app", "link", "www"]),
+  NEXT_PUBLIC_CURRENT_APP: z.enum(["app", "link", "www", "bio", "press"]),
   NEXT_PUBLIC_APP_BASE_URL: z.string(),
   NEXT_PUBLIC_APP_DEV_PORT: z
     .string()
@@ -130,6 +135,11 @@ type RateLimitTime =
   | `${number} d`;
 
 export const serverEnvSchema = z.object({
+  AWS_S3_BUCKET_NAME: z.string(),
+  // AWS_S3_CALLBACK_URL: z.string(),
+  AWS_S3_REGION: z.string(),
+  AWS_S3_ACCESS_KEY_ID: z.string(),
+  AWS_S3_SECRET_ACCESS_KEY: z.string(),
   BOT_SPOTIFY_ACCOUNT_ID: z.string(),
   BOT_THREADS_API_KEY: z.string(),
   CLOUDINARY_API_SECRET: z.string(),

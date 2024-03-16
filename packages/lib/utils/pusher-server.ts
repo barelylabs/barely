@@ -15,5 +15,7 @@ export function pushEvent(
   event: EventName,
   data: EventData,
 ) {
-  return pusherServer.trigger(channel, event, data);
+  return pusherServer.trigger(channel, event, data, {
+    socket_id: data.socketId ?? undefined,
+  });
 }

@@ -4,8 +4,9 @@ import { Fragment, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navHistoryAtom } from "@barely/atoms/navigation-history.atom";
-import { useUrlMatchesCurrentUrl } from "@barely/hooks/use-url-matches-current-url";
+import { usePathnameMatchesCurrentPath } from "@barely/hooks/use-pathname-matches-current-path";
 import { useWorkspaces } from "@barely/hooks/use-workspaces";
+import { useWorkspace } from "@barely/lib/hooks/use-workspace";
 import { Icon } from "@barely/ui/elements/icon";
 import { ScrollArea } from "@barely/ui/elements/scroll-area";
 import { Text } from "@barely/ui/elements/typography";
@@ -24,6 +25,7 @@ export interface SidebarNavProps {
 export function SidebarNav(props: SidebarNavProps) {
   const handle = props.workspace.handle;
   const pathname = usePathname();
+  const workspace = useWorkspace();
   const workspaces = useWorkspaces();
 
   const allHandles = workspaces.map((workspace) => workspace.handle);
@@ -34,12 +36,35 @@ export function SidebarNav(props: SidebarNavProps) {
 
   const topMainLinks: SidebarNavItem[] = [
     {
-      title: ".links",
+      title: "links",
       href: `/${handle}/links`,
       icon: "link",
     },
     {
-      title: ".settings",
+      title: "media",
+      href: `/${handle}/media`,
+      icon: "media",
+    },
+    {
+      title: "tracks",
+      href: `/${handle}/tracks`,
+      icon: "music",
+      workspaceFilters: ["feature__tracks"],
+    },
+    {
+      title: "mixtapes",
+      href: `/${handle}/mixtapes`,
+      icon: "mixtape",
+      workspaceFilters: ["feature__mixtapes"],
+    },
+    {
+      title: "press",
+      href: `/${handle}/press`,
+      icon: "press",
+      workspaceFilters: ["feature__pressKits"],
+    },
+    {
+      title: "settings",
       href: `/${handle}/settings`,
       icon: "settings",
     },
@@ -47,7 +72,7 @@ export function SidebarNav(props: SidebarNavProps) {
 
   const topSettingsLinks: SidebarNavItem[] = [
     {
-      title: "general",
+      title: "profile",
       href: `/${handle}/settings`,
       icon: "profile",
     },
@@ -79,7 +104,7 @@ export function SidebarNav(props: SidebarNavProps) {
   }, [allHandles, handle, navHistory?.settingsBackPath]);
 
   return (
-    <aside className="fixed left-0 top-14 z-30 hidden h-[100vh] w-14 shrink-0 flex-col overflow-y-auto bg-muted px-3 py-3 md:sticky md:flex md:w-56">
+    <aside className="fixed left-0 top-14 z-30 hidden h-[100vh] max-h-[100vh] w-14 shrink-0 flex-col overflow-y-auto bg-muted px-3 py-3 md:sticky md:flex md:w-56">
       <WorkspaceSwitcher />
 
       {isSettings && (
@@ -95,6 +120,15 @@ export function SidebarNav(props: SidebarNavProps) {
         <div className="flex h-full flex-col justify-between">
           <div className="flex flex-col gap-1">
             {topLinks.map((item, index) => {
+              if (
+                item.workspaceFilters &&
+                !item.workspaceFilters
+                  .map((filter) => workspace[filter])
+                  .includes(true)
+              ) {
+                return null;
+              }
+
               return (
                 <Fragment key={index}>
                   <NavItem item={item} />
@@ -111,14 +145,14 @@ export function SidebarNav(props: SidebarNavProps) {
 function NavItem(props: { item: SidebarNavItem }) {
   const NavIcon = props.item.icon ? Icon[props.item.icon] : null;
 
-  const isCurrent = useUrlMatchesCurrentUrl(props.item.href ?? "");
+  const isCurrent = usePathnameMatchesCurrentPath(props.item.href ?? "");
 
   return (
     <Link
       href={props.item.href ?? "#"}
       className={cn(
         "group flex w-full items-center gap-2 rounded-md px-2 py-1.5 hover:bg-secondary",
-        isCurrent && "bg-secondary ",
+        isCurrent && "bg-secondary",
       )}
       passHref
     >

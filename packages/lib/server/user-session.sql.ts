@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
 
-import { cuid } from "../utils/sql";
+import { dbId } from "../utils/sql";
 import { Users } from "./user.sql";
 
 export const UserSessions = pgTable("UserSessions", {
@@ -9,7 +9,7 @@ export const UserSessions = pgTable("UserSessions", {
   expires: timestamp("expires", { mode: "string" }).notNull(),
 
   // relations
-  userId: cuid("userId")
+  userId: dbId("userId")
     .notNull()
     .references(() => Users.id, {
       onDelete: "cascade",

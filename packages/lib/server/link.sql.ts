@@ -9,7 +9,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId, timestamps } from "../utils/sql";
+import { dbId, primaryId, timestamps } from "../utils/sql";
 import { AdCreatives } from "./ad-creative.sql";
 import { BioButtons, Bios } from "./bio.sql";
 import { Domains } from "./domain.sql";
@@ -37,7 +37,7 @@ export const Links = pgTable(
   "Links",
   {
     ...primaryId,
-    workspaceId: cuid("workspaceId")
+    workspaceId: dbId("workspaceId")
       .notNull()
       .references(() => Workspaces.id, {
         onUpdate: "cascade",
@@ -99,13 +99,13 @@ export const Links = pgTable(
     publicStats: boolean("publicStats").default(false),
 
     // relations (+ domain)
-    userId: cuid("userId").references(() => Users.id, {
+    userId: dbId("userId").references(() => Users.id, {
       onUpdate: "cascade",
       // I don't think we want to delete links when a user is deleted.
     }),
-    appLinkId: cuid("appLinkId"),
-    bioId: cuid("bioId"),
-    socialForTeamId: cuid("socialForTeamId"),
+    appLinkId: dbId("appLinkId"),
+    bioId: dbId("bioId"),
+    socialForTeamId: dbId("socialForTeamId"),
   },
 
   (link) => ({

@@ -12,6 +12,7 @@ import { Button } from "@barely/ui/elements/button";
 import { ConfettiBurst } from "@barely/ui/elements/confetti";
 import { Modal, ModalBody, ModalHeader } from "@barely/ui/elements/modal";
 import { Text } from "@barely/ui/elements/typography";
+import { useAtom } from "jotai";
 
 export const showUpgradeModalAtom = atomWithToggle(false);
 
@@ -20,6 +21,8 @@ export function UpgradeModal(props: {
   checkoutCancelPath?: string;
 }) {
   const workspace = useWorkspace();
+
+  const [showUpgradeModal, setShowUpgradeModal] = useAtom(showUpgradeModalAtom);
 
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">(
     "yearly",
@@ -57,7 +60,11 @@ export function UpgradeModal(props: {
       : pro?.price.yearly.amount;
 
   return (
-    <Modal showModalAtom={showUpgradeModalAtom} className="max-h-fit max-w-lg">
+    <Modal
+      showModal={showUpgradeModal}
+      setShowModal={setShowUpgradeModal}
+      className="max-h-fit max-w-lg"
+    >
       <ModalHeader
         icon="logo"
         title="Upgrade to Pro"
@@ -74,7 +81,7 @@ export function UpgradeModal(props: {
           </Text>
           <ConfettiBurst active={billingCycle === "yearly"} />
           <Button
-            variant="link"
+            look="link"
             size="xs"
             onClick={() =>
               setBillingCycle(billingCycle === "yearly" ? "monthly" : "yearly")

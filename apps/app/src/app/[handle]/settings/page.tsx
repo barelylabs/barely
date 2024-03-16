@@ -1,8 +1,10 @@
 import { DashContentHeader } from "~/app/[handle]/_components/dash-content-header";
 import {
-  AvatarForm,
   DisplayOrWorkspaceNameForm,
   HandleForm,
+  WorkspaceAvatarForm,
+  WorkspaceBioForm,
+  WorkspaceHeaderForm,
   WorkspaceTypeForm,
 } from "~/app/[handle]/settings/workspace-profile-settings";
 
@@ -15,8 +17,10 @@ export default function WorkspaceProfileSettingsPage() {
       />
       <DisplayOrWorkspaceNameForm />
       <HandleForm />
-      <AvatarForm />
+      <WorkspaceAvatarForm />
+      <WorkspaceHeaderForm />
       <WorkspaceTypeForm />
+      <WorkspaceBioForm />
     </>
   );
 }

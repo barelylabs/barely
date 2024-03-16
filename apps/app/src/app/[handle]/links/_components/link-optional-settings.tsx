@@ -12,15 +12,15 @@ import { useSetAtom } from "jotai";
 import type { Link, UpsertLink } from "@barely/lib/server/link.schema";
 import type { TransparentLinkData } from "@barely/lib/utils/link";
 
-import { TransparentLinkDisplay } from "~/app/[handle]/links/_components/link-modal";
+import { TransparentLinkDisplay } from "~/app/[handle]/links/_components/create-or-update-link-modal";
 import { showUpgradeModalAtom } from "~/app/[handle]/settings/billing/upgrade-modal";
 
 export function LinkOptionalSettings({
   linkForm,
   transparentLinkData,
-  editLink,
+  selectedLink,
 }: {
-  editLink: Link | null;
+  selectedLink?: Link | null;
   linkForm: UseFormReturn<UpsertLink>;
   transparentLinkData: TransparentLinkData;
 }) {
@@ -46,7 +46,7 @@ export function LinkOptionalSettings({
         </div>
       </div>
 
-      {!editLink?.transparent && (
+      {!selectedLink?.transparent && (
         <>
           <div className="flex flex-col gap-2">
             <SwitchField
@@ -59,10 +59,10 @@ export function LinkOptionalSettings({
               disabled={
                 // if we're editing a link that is transparent, we can't change it back.
                 // if we don't support the app, we can't make it transparent.
-                editLink?.transparent ?? transparentLinkData === null
+                selectedLink?.transparent ?? transparentLinkData === null
               }
               disabledTooltip={
-                editLink?.transparent ? (
+                selectedLink?.transparent ? (
                   <TooltipContent title="Transparent links can't be changed back." />
                 ) : (
                   <TooltipContent title="We don't currently support that app." />
@@ -70,7 +70,7 @@ export function LinkOptionalSettings({
               }
             />
 
-            {!editLink?.transparent && linkForm.watch("transparent") && (
+            {!selectedLink?.transparent && linkForm.watch("transparent") && (
               <Alert
                 variant="warning"
                 size="sm"
@@ -79,7 +79,7 @@ export function LinkOptionalSettings({
               />
             )}
 
-            {(linkForm.watch("transparent") ?? editLink?.transparent) && (
+            {(linkForm.watch("transparent") ?? selectedLink?.transparent) && (
               <TransparentLinkDisplay
                 transparentLink={transparentLinkData?.transparentLink}
               />

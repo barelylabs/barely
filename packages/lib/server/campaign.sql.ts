@@ -8,7 +8,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId, timestamps } from "../utils/sql";
+import { dbId, primaryId, timestamps } from "../utils/sql";
 import { AdCampaigns } from "./ad-campaign.sql";
 import { PlaylistPitchReviews } from "./playlist-pitch-review.sql";
 import { Playlists } from "./playlist.sql";
@@ -33,9 +33,8 @@ const campaignStageEnum = [
 export const Campaigns = pgTable(
   "Campaigns",
   {
-    // id: cuid('id').notNull(),
     ...primaryId,
-    workspaceId: cuid("workspaceId")
+    workspaceId: dbId("workspaceId")
       .notNull()
       .references(() => Workspaces.id, {
         onUpdate: "cascade",
@@ -66,12 +65,11 @@ export const Campaigns = pgTable(
     curatorReach: integer("curatorReach"),
 
     // relations
-    createdById: cuid("createdById").notNull(),
-    trackId: cuid("trackId").notNull(),
-    playlistId: cuid("playlistId"),
+    createdById: dbId("createdById").notNull(),
+    trackId: dbId("trackId").notNull(),
+    playlistId: dbId("playlistId"),
   },
   (campaign) => ({
-    // primary: primaryKey(campaign.workspaceId, campaign.id),
     workspace: index("Campaigns_workspace_idx").on(campaign.workspaceId),
     track: index("Campaigns_track_idx").on(campaign.trackId),
     playlist: index("Campaigns_playlist_idx").on(campaign.playlistId),
@@ -114,12 +112,12 @@ export const CampaignUpdateRecords = pgTable(
     stage: text("stage", { enum: campaignStageEnum }).notNull(),
 
     // relations
-    campaignId: cuid("campaignId")
+    campaignId: dbId("campaignId")
       .notNull()
       .references(() => Campaigns.id, {
         onDelete: "cascade",
       }),
-    createdById: cuid("creatorId")
+    createdById: dbId("creatorId")
       .notNull()
       .references(() => Users.id),
   },

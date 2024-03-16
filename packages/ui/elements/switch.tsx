@@ -11,7 +11,7 @@ import { cva } from "class-variance-authority";
 import { Tooltip } from "./tooltip";
 
 const switchVariants = cva(
-  "peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input data-[state=unchecked]:bg-slate-200",
+  "peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors data-[state=checked]:bg-primary data-[state=unchecked]:bg-input data-[state=unchecked]:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
   {
     variants: {
       size: {
@@ -21,7 +21,7 @@ const switchVariants = cva(
       },
     },
     defaultVariants: {
-      size: "md",
+      size: "sm",
     },
   },
 );
@@ -37,12 +37,12 @@ const switchThumbVariants = cva(
       },
     },
     defaultVariants: {
-      size: "md",
+      size: "sm",
     },
   },
 );
 
-export interface SwitchAddonProps {
+export interface SwitchAddonProps extends VariantProps<typeof switchVariants> {
   disabled?: boolean;
   disabledTooltip?: string | React.ReactNode;
 }
@@ -50,10 +50,7 @@ export interface SwitchAddonProps {
 export const Switch = React.forwardRef<
   React.ElementRef<typeof SwitchPrimitives.Root>,
   React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root> &
-    VariantProps<typeof switchVariants> & {
-      disabled?: boolean;
-      disabledTooltip?: string | React.ReactNode;
-    }
+    SwitchAddonProps
 >(({ className, size, disabled = false, disabledTooltip, ...props }, ref) => {
   if (disabled && disabledTooltip) {
     return (

@@ -11,6 +11,22 @@ import {
   SPECIAL_APEX_DOMAINS,
 } from "./constants";
 
+export function parseSpotifyLink(link: string) {
+  const match = link.match(
+    /https?:\/\/open\.spotify\.com\/(track|album|playlist)\/([a-zA-Z0-9]+)/,
+  );
+
+  if (!match) {
+    // throw new Error("Invalid Spotify link");
+    return null;
+  }
+
+  return {
+    type: match[1],
+    id: match[2],
+  };
+}
+
 export function getShortLinkUrlFromLink(link: Link) {
   if (
     process.env.NODE_ENV === "development" ||

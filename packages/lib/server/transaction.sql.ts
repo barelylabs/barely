@@ -9,7 +9,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId, timestamps } from "../utils/sql";
+import { dbId, primaryId, timestamps } from "../utils/sql";
 import { TransactionLineItems } from "./transaction-line-item.sql";
 import { Users } from "./user.sql";
 import { Workspaces } from "./workspace.sql";
@@ -18,7 +18,7 @@ export const Transactions = pgTable(
   "Transactions",
   {
     ...primaryId,
-    workspaceId: cuid("workspaceId")
+    workspaceId: dbId("workspaceId")
       .notNull()
       .references(() => Workspaces.id, {
         onDelete: "cascade",
@@ -40,7 +40,7 @@ export const Transactions = pgTable(
     checkoutLink: varchar("checkoutLink", { length: 255 }),
 
     // relations
-    createdById: cuid("createdById"),
+    createdById: dbId("createdById"),
   },
   (transaction) => ({
     // primary: primaryKey(transaction.workspaceId, transaction.id),

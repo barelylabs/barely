@@ -7,7 +7,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId, timestamps } from "../utils/sql";
+import { dbId, primaryId, timestamps } from "../utils/sql";
 import { Ads } from "./ad.sql";
 import { Playlists } from "./playlist.sql";
 import { ProviderAccounts } from "./provider-account.sql";
@@ -52,14 +52,14 @@ export const Stats = pgTable(
     }),
 
     // relations
-    adId: cuid("adId"),
+    adId: dbId("adId"),
     providerAccountProvider: varchar("providerAccountPlatform", {
       length: 255,
       enum: providersEnum,
     }),
     providerAccountId: varchar("providerAccountId", { length: 255 }),
-    playlistId: cuid("playlistId").references(() => Playlists.id),
-    trackId: cuid("trackId").references(() => Tracks.id),
+    playlistId: dbId("playlistId").references(() => Playlists.id),
+    trackId: dbId("trackId").references(() => Tracks.id),
   },
   (stat) => ({
     adIdIdx: index("Stat_adId_idx").on(stat.adId),

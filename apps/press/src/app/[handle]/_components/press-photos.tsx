@@ -1,0 +1,15 @@
+import { PhotoGallery } from "@barely/ui/elements/photo-gallery";
+
+import type { PublicImage } from "@barely/lib/server/file.schema";
+
+import { Section, SectionDiv } from "~/app/[handle]/_components/press-section";
+
+export function PressPhotos({ photos }: { photos: PublicImage[] }) {
+  return (
+    <Section id="photos">
+      <SectionDiv title="Photos">
+        <PhotoGallery photos={photos} carouselPrevNext="below" prioritize />
+      </SectionDiv>
+    </Section>
+  );
+}

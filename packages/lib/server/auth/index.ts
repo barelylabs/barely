@@ -15,6 +15,8 @@ export type { NextAuthRequest } from "next-auth/lib";
 
 export interface SessionWorkspace extends Workspace {
   role: User_To_Workspace["role"];
+  avatarImageUrl?: string;
+  headerImageUrl?: string;
 }
 
 export interface SessionUser extends DbUser {

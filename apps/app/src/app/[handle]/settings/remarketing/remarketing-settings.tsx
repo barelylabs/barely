@@ -2,27 +2,22 @@
 
 // import { useToast } from '@barely/toast';
 import type { z } from "zod";
-import { useEffectOnce } from "@barely/hooks/use-effect-once";
+// import { useEffectOnce } from "@barely/hooks/use-effect-once";
 import { useWorkspace } from "@barely/hooks/use-workspace";
 import { useZodForm } from "@barely/hooks/use-zod-form";
 import { insertMetaPixelSchema } from "@barely/server/analytics-endpoint-schema";
 import { api } from "@barely/server/api/react";
-import { SettingsCard } from "@barely/ui/components/settings-card";
+import { SettingsCardForm } from "@barely/ui/components/settings-card";
 import { TextAreaField } from "@barely/ui/forms/text-area-field";
 import { TextField } from "@barely/ui/forms/text-field";
-import { useSetAtom } from "jotai";
 
 // import { useToast } from '@barely/ui/hooks/use-toast';
 
-import { showLinkModalAtom } from "~/app/[handle]/links/_components/link-modal";
+// import { showLinkModalAtom } from "~/app/[handle]/links/_components/link-modal";
 
 export function RemarketingSettings() {
   const [endpoints] =
     api.analyticsEndpoint.byCurrentWorkspace.useSuspenseQuery();
-
-  const setShowLinkModal = useSetAtom(showLinkModalAtom);
-
-  // const { toast } = useToast();
 
   const context = api.useContext();
   const workspace = useWorkspace();
@@ -54,13 +49,8 @@ export function RemarketingSettings() {
     await updateEndpoint(data).catch((e) => console.error(e));
   }
 
-  useEffectOnce(() => {
-    console.log("closing link modal");
-    setShowLinkModal(false);
-  });
-
   return (
-    <SettingsCard
+    <SettingsCardForm
       icon="meta"
       title="Meta Pixel"
       subtitle="Your Meta pixel information"
@@ -75,6 +65,6 @@ export function RemarketingSettings() {
         label="Pixel Access Token"
         className="break-words"
       />
-    </SettingsCard>
+    </SettingsCardForm>
   );
 }

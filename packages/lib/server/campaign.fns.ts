@@ -51,6 +51,7 @@ export async function getCampaignById(campaignId: string, db: Db) {
     track: {
       ...campaign.track,
       genres: campaign.track._genres.map((_g) => _g.genre),
+      _genres: [],
     },
   };
   return campaignWithTrackAndGenres;
@@ -166,6 +167,7 @@ export async function getCampaignsByWorkspaceId(
       track: {
         ...c.track,
         genres: c.track._genres.map((g) => g.genre),
+        _genres: [],
       },
     }));
 

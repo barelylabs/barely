@@ -4,7 +4,6 @@ import type { UseEmblaCarouselType } from "embla-carousel-react";
 import * as React from "react";
 import { cn } from "@barely/lib/utils/cn";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import type { ButtonProps } from "./button";
 import { Button } from "./button";
@@ -202,19 +201,19 @@ CarouselItem.displayName = "CarouselItem";
 const CarouselPrevious = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<typeof Button>
->(({ className, variant = "link", size = "icon", ...props }, ref) => {
+>(({ look = "link", size = "sm", ...props }, ref) => {
   const { scrollPrev, canScrollPrev } = useCarousel();
   return (
     <Button
       ref={ref}
-      variant={variant}
       size={size}
-      className={cn("h-8 w-8 rounded-full", className)}
+      look={look}
+      pill
+      startIcon="chevronLeft"
       disabled={!canScrollPrev}
       onClick={scrollPrev}
       {...props}
     >
-      <ChevronLeft className="h-6 w-6" />
       <span className="sr-only">Previous slide</span>
     </Button>
   );
@@ -224,20 +223,21 @@ CarouselPrevious.displayName = "CarouselPreviousLeft";
 const CarouselNext = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<typeof Button>
->(({ className, variant = "link", size = "icon", ...props }, ref) => {
+>(({ look = "link", size = "sm", ...props }, ref) => {
   const { scrollNext, canScrollNext } = useCarousel();
 
   return (
     <Button
       ref={ref}
-      variant={variant}
       size={size}
-      className={cn("h-8 w-8 rounded-full", className)}
+      look={look}
+      pill
+      startIcon="chevronRight"
       disabled={!canScrollNext}
       onClick={scrollNext}
       {...props}
     >
-      <ChevronRight className="h-6 w-6" />
+      {/* <ChevronRight className="h-6 w-6" /> */}
       <span className="sr-only">Next slide</span>
     </Button>
   );
@@ -246,16 +246,15 @@ CarouselNext.displayName = "CarouselNext";
 
 const CarouselPrevious_LeftTop = ({
   className,
-  variant = "outline",
-  size = "icon",
+  look: variant = "outline",
   ...props
 }: ButtonProps) => {
   const { orientation, scrollPrev, canScrollPrev } = useCarousel();
 
   return (
     <CarouselPrevious
-      variant={variant}
-      size={size}
+      {...props}
+      look={variant}
       className={cn(
         "absolute",
         orientation === "horizontal"
@@ -265,23 +264,21 @@ const CarouselPrevious_LeftTop = ({
       )}
       disabled={!canScrollPrev}
       onClick={scrollPrev}
-      {...props}
     />
   );
 };
 
 const CarouselNext_RightBottom = ({
   className,
-  variant = "outline",
-  size = "icon",
+  look: color = "outline",
   ...props
 }: ButtonProps) => {
   const { orientation, scrollNext, canScrollNext } = useCarousel();
 
   return (
     <CarouselNext
-      variant={variant}
-      size={size}
+      {...props}
+      look={color}
       className={cn(
         "absolute",
         orientation === "horizontal"
@@ -291,7 +288,6 @@ const CarouselNext_RightBottom = ({
       )}
       disabled={!canScrollNext}
       onClick={scrollNext}
-      {...props}
     />
   );
 };

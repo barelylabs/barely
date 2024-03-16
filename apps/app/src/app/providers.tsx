@@ -3,9 +3,9 @@
 import type { ReactNode } from "react";
 import React, { useMemo } from "react";
 import { api } from "@barely/api/react";
-// import { transformer } from "@barely/api/transformer";
 import { pageSessionAtom } from "@barely/atoms/session.atom";
 import { useWorkspaceHandle } from "@barely/hooks/use-workspace";
+import { usePusherSocketId } from "@barely/lib/hooks/use-pusher";
 import { getUrl } from "@barely/lib/utils/url";
 import { ThemeProvider } from "@barely/ui/elements/next-theme-provider";
 import { TooltipProvider } from "@barely/ui/elements/tooltip";
@@ -16,45 +16,36 @@ import { loggerLink, unstable_httpBatchStreamLink } from "@trpc/client";
 import { Provider as JotaiProvider, useAtomValue } from "jotai";
 import SuperJSON from "superjson";
 
-// const createQueryClient = () =>
-//   new QueryClient({
-//     defaultOptions: {
-//       queries: {
-//         staleTime: 5 * 1000, // 5 seconds
-//       },
-//     },
-//   });
+const createQueryClient = () => new QueryClient();
 
-// let clientQueryClientSingleton: QueryClient | undefined = undefined;
+let clientQueryClientSingleton: QueryClient | undefined = undefined;
 
-// const getQueryClient = () => {
-//   if (typeof window === "undefined") {
-//     // Server: always create a new client
-//     return createQueryClient();
-//   } else {
-//     // Browser: use singleton pattern to keep the same query client
-//     return (clientQueryClientSingleton ??= createQueryClient());
-//   }
-// };
+const getQueryClient = () => {
+  if (typeof window === "undefined") {
+    // Server: always create a new QueryClient
+    return createQueryClient();
+  } else {
+    // Browser: use singleton pattern to keep the same query client
+    return (clientQueryClientSingleton ??= createQueryClient());
+  }
+};
 
 export function TRPCReactProvider(props: { children: ReactNode }) {
   const pageSession = useAtomValue(pageSessionAtom);
   const workspaceHandle = useWorkspaceHandle();
+  const pusherSocketId = usePusherSocketId();
 
-  const [queryClient, trpcClient] = useMemo(() => {
+  const queryClient = getQueryClient();
+
+  const trpcClient = useMemo(() => {
+    console.log("updating trpc client");
+
     const headers = new Headers();
     headers.set("x-trpc-source", "nextjs-react");
     headers.set("x-page-session-id", pageSession.id);
+    headers.set("x-pusher-socket-id", pusherSocketId ?? "");
     headers.set("x-workspace-handle", workspaceHandle ?? "");
     const preparedHeaders = Object.fromEntries(headers);
-
-    const client = new QueryClient({
-      defaultOptions: {
-        queries: {
-          staleTime: 5 * 1000, // 5 seconds
-        },
-      },
-    });
 
     const trpc = api.createClient({
       links: [
@@ -109,8 +100,8 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
       ],
     });
 
-    return [client, trpc];
-  }, [workspaceHandle, pageSession.id]);
+    return trpc;
+  }, [workspaceHandle, pageSession.id, pusherSocketId]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -134,7 +125,10 @@ export default function Providers(props: {
           <TRPCReactProvider>
             <>
               {props.children}
-              <ReactQueryDevtools initialIsOpen={false} />
+              <ReactQueryDevtools
+                buttonPosition="bottom-left"
+                initialIsOpen={false}
+              />
             </>
           </TRPCReactProvider>
         </TooltipProvider>

@@ -4,14 +4,14 @@ import { EmailFooter } from "../components/email-footer";
 import { EmailHeaderLogo } from "../components/email-header-logo";
 import {
   Body,
-  Button,
-  Container,
+  EmailButton,
+  EmailContainer,
+  EmailHeading,
+  EmailQuote,
+  EmailSeparator,
   Head,
-  Heading,
   Html,
   Preview,
-  Quote,
-  Separator,
   Text,
 } from "../primitives";
 
@@ -29,9 +29,9 @@ const PlaylistPitchApprovedEmailTemplate = (props: {
       <Preview>{previewText}</Preview>
 
       <Body>
-        <Container>
+        <EmailContainer>
           <EmailHeaderLogo />
-          <Heading>Your track is accepted!</Heading>
+          <EmailHeading>Your track is accepted!</EmailHeading>
           {props.firstName && <Text>Hi {props.firstName},</Text>}
           <Text>
             Our A&R team has reviewed{" "}
@@ -39,18 +39,18 @@ const PlaylistPitchApprovedEmailTemplate = (props: {
             good to proceed!
           </Text>
 
-          <Quote>{props.screeningMessage}</Quote>
+          <EmailQuote>{props.screeningMessage}</EmailQuote>
 
           <Text className="text-md">
             Click the button below to go to your account, set up budget, and
             launch your playlist.pitch campaign.
           </Text>
-          <Button href={props.loginLink}>Start my campaign 🚀</Button>
+          <EmailButton href={props.loginLink}>Start my campaign 🚀</EmailButton>
 
-          <Separator />
+          <EmailSeparator />
 
           <EmailFooter />
-        </Container>
+        </EmailContainer>
       </Body>
     </Html>
   );

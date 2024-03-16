@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useUpdateNavHistory } from "@barely/hooks/use-nav-history";
 import { UserContext } from "@barely/hooks/use-user";
 import { WorkspaceContext } from "@barely/lib/context/workspace.context";
+import { useWorkspaceHotkeys } from "@barely/lib/hooks/use-workspace-hotkeys";
 
 import type { SessionUser, SessionWorkspace } from "@barely/server/auth";
 
@@ -29,6 +30,8 @@ export function WorkspaceContextProvider({
   workspace,
   children,
 }: WorkspaceContextProviderProps) {
+  useWorkspaceHotkeys({ workspace });
+
   return (
     <WorkspaceContext.Provider value={workspace}>
       {children}

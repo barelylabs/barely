@@ -10,14 +10,16 @@ import { Modal, ModalBody, ModalHeader } from "@barely/ui/elements/modal";
 import { Form, SubmitButton } from "@barely/ui/forms";
 import { SelectField } from "@barely/ui/forms/select-field";
 import { TextField } from "@barely/ui/forms/text-field";
-import { useSetAtom } from "jotai";
+import { useAtom } from "jotai";
 
 import type { SelectFieldOption } from "@barely/ui/forms/select-field";
 
 export const showNewWorkspaceModalAtom = atomWithToggle(false);
 
 export function NewWorkspaceModal() {
-  const setNewWorkspaceModalOpen = useSetAtom(showNewWorkspaceModalAtom);
+  const [newWorkspaceModalOpen, setNewWorkspaceModalOpen] = useAtom(
+    showNewWorkspaceModalAtom,
+  );
   const router = useRouter();
 
   const form = useZodForm({
@@ -53,7 +55,11 @@ export function NewWorkspaceModal() {
   };
 
   return (
-    <Modal showModalAtom={showNewWorkspaceModalAtom} className="max-w-md">
+    <Modal
+      showModal={newWorkspaceModalOpen}
+      setShowModal={setNewWorkspaceModalOpen}
+      className="max-w-md"
+    >
       <ModalHeader icon="logo" title="Create a new workspace" />
 
       <ModalBody>

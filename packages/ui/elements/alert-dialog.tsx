@@ -18,9 +18,9 @@ interface AlertDialogTriggerProps
 const AlertDialogTrigger = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Trigger>,
   AlertDialogTriggerProps
->(({ className, variant, size, ...props }, ref) => (
+>(({ className, look, size, ...props }, ref) => (
   <AlertDialogPrimitive.Trigger
-    className={cn(buttonVariants({ variant, size }), className)}
+    className={cn(buttonVariants({ look, size }), className)}
     ref={ref}
     {...props}
   />
@@ -128,13 +128,10 @@ interface AlertDialogActionProps
 const AlertDialogAction = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Action>,
   AlertDialogActionProps
->(({ className, variant, size, ...props }, ref) => (
+>(({ className, look = "primary", size, ...props }, ref) => (
   <AlertDialogPrimitive.Action
     ref={ref}
-    className={cn(
-      buttonVariants({ variant: variant ?? "primary", size }),
-      className,
-    )}
+    className={cn(buttonVariants({ look, size }), className)}
     {...props}
   />
 ));
@@ -147,13 +144,10 @@ interface AlertDialogCancelProps
 const AlertDialogCancel = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Cancel>,
   AlertDialogCancelProps
->(({ className, variant, size, ...props }, ref) => (
+>(({ className, look = "outline", size, ...props }, ref) => (
   <AlertDialogPrimitive.Cancel
     ref={ref}
-    className={cn(
-      buttonVariants({ variant: variant ?? "outline", size }),
-      className,
-    )}
+    className={cn(buttonVariants({ look, size }), className)}
     {...props}
   />
 ));
@@ -163,22 +157,22 @@ AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName;
 
 interface AlertDialogProps {
   triggerName: React.ReactNode;
-  triggerVariant?: VariantProps<typeof buttonVariants>["variant"];
+  triggerVariant?: VariantProps<typeof buttonVariants>["look"];
   triggerSize?: VariantProps<typeof buttonVariants>["size"];
   title?: React.ReactNode;
   description?: React.ReactNode;
   actionName?: React.ReactNode;
-  actionVariant?: VariantProps<typeof buttonVariants>["variant"];
+  actionVariant?: VariantProps<typeof buttonVariants>["look"];
   action: React.MouseEventHandler<HTMLButtonElement>;
   cancelName?: React.ReactNode;
-  cancelVariant?: VariantProps<typeof buttonVariants>["variant"];
+  cancelVariant?: VariantProps<typeof buttonVariants>["look"];
 }
 
 const AlertDialog = (props: AlertDialogProps) => {
   return (
     <AlertDialogRoot>
       <AlertDialogTrigger
-        variant={props.triggerVariant ?? "secondary"}
+        color={props.triggerVariant ?? "secondary"}
         size={props.triggerSize ?? "md"}
       >
         {props.triggerName}
@@ -190,11 +184,11 @@ const AlertDialog = (props: AlertDialogProps) => {
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogCancel variant={props.cancelVariant ?? "outline"}>
+          <AlertDialogCancel color={props.cancelVariant ?? "outline"}>
             {props.cancelName ?? "Cancel"}
           </AlertDialogCancel>
           <AlertDialogAction
-            variant={props.actionVariant ?? "destructive"}
+            color={props.actionVariant ?? "destructive"}
             onClick={props.action}
           >
             {props.actionName ?? "Continue"}

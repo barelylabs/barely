@@ -7,7 +7,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId, timestamps } from "../utils/sql";
+import { dbId, primaryId, timestamps } from "../utils/sql";
 import { Events } from "./event.sql";
 import { Forms } from "./form.sql";
 import { Links } from "./link.sql";
@@ -21,7 +21,7 @@ export const Bios = pgTable(
     // id: cuid('id').notNull(),
     ...primaryId,
 
-    workspaceId: cuid("workspaceId")
+    workspaceId: dbId("workspaceId")
       .notNull()
       .references(() => Workspaces.id, {
         onUpdate: "cascade",
@@ -85,7 +85,7 @@ export const BioButtons = pgTable(
   {
     // id: cuid('id').notNull(),
     ...primaryId,
-    workspaceId: cuid("workspaceId")
+    workspaceId: dbId("workspaceId")
       .notNull()
       .references(() => Workspaces.id, {
         onUpdate: "cascade",
@@ -94,11 +94,11 @@ export const BioButtons = pgTable(
 
     ...timestamps,
 
-    linkId: cuid("linkId").references(() => Links.id, {
+    linkId: dbId("linkId").references(() => Links.id, {
       onUpdate: "cascade",
       onDelete: "cascade",
     }),
-    formId: cuid("formId").references(() => Forms.id, {
+    formId: dbId("formId").references(() => Forms.id, {
       onUpdate: "cascade",
       onDelete: "cascade",
     }),
@@ -135,8 +135,8 @@ export const BioButtonRelations = relations(BioButtons, ({ one, many }) => ({
 export const _BioButtons_To_Bios = pgTable(
   "_BioButtons_To_Bios",
   {
-    bioId: cuid("bioId").notNull(),
-    bioButtonId: cuid("bioButtonId").notNull(),
+    bioId: dbId("bioId").notNull(),
+    bioButtonId: dbId("bioButtonId").notNull(),
     lexoRank: varchar("lexoRank", { length: 255 }).notNull(),
   },
   (bioButtonToBio) => ({

@@ -23,6 +23,7 @@ export const createUserSchema = insertUserSchema
   })
   .extend({
     image: z.string().url().nullish(),
+    // handle: createWorkspaceSchema.shape.handle,
   });
 export const upsertUserSchema = insertUserSchema.partial({ id: true });
 export const updateUserSchema = insertUserSchema

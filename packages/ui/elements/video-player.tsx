@@ -123,10 +123,10 @@ export function VideoPlayer({
 }
 
 export function VideoCarousel({
-  urls,
+  videos,
   playerProps,
 }: {
-  urls: string[];
+  videos: { url: string }[];
   playerProps?: ReactPlayerProps;
 }) {
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
@@ -145,9 +145,13 @@ export function VideoCarousel({
   return (
     <Carousel setApi={setCarouselApi}>
       <CarouselContent>
-        {urls.map((url, i) => (
+        {videos.map((video, i) => (
           <CarouselItem key={i}>
-            <VideoPlayer url={url} current={current === i} {...playerProps} />
+            <VideoPlayer
+              url={video.url}
+              current={current === i}
+              {...playerProps}
+            />
           </CarouselItem>
         ))}
       </CarouselContent>

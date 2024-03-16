@@ -15,7 +15,7 @@ import { SimpleTooltipContent } from "@barely/ui/elements/tooltip";
 import { Form, SubmitButton } from "@barely/ui/forms";
 import { SwitchField } from "@barely/ui/forms/switch-field";
 import { TextField } from "@barely/ui/forms/text-field";
-import { atom, useAtom, useSetAtom } from "jotai";
+import { atom, useAtom } from "jotai";
 
 import type { InsertDomain } from "@barely/server/domain.schema";
 
@@ -29,7 +29,7 @@ export function DomainModal() {
   const { domains } = useDomains();
 
   const [editDomain, setEditDomain] = useAtom(editDomainAtom);
-  const setShowDomainModal = useSetAtom(showDomainModalAtom);
+  const [showDomainModal, setShowDomainModal] = useAtom(showDomainModalAtom);
 
   /**
 	 if editDomain exists, we're editing an existing domain
@@ -126,7 +126,8 @@ export function DomainModal() {
 
   return (
     <Modal
-      showModalAtom={showDomainModalAtom}
+      showModal={showDomainModal}
+      setShowModal={setShowDomainModal}
       onClose={() => {
         setEditDomain(undefined);
         domainForm.reset();
@@ -191,7 +192,7 @@ export function DomainModal() {
             <>
               <Button
                 fullWidth
-                variant={deleteDisabled ? "secondary" : "destructive"}
+                look={deleteDisabled ? "secondary" : "destructive"}
                 disabled={deleteDisabled}
                 disabledTooltip={`You can't delete your primary ${linkType} domain`}
                 onClick={async () => {

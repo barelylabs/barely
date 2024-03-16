@@ -18,6 +18,7 @@ interface TooltipProps {
   desktopOnly?: boolean;
   className?: string;
   fullWidth?: boolean;
+  delayDuration?: number;
 }
 
 const Tooltip = ({
@@ -27,6 +28,7 @@ const Tooltip = ({
   desktopOnly,
   className,
   fullWidth,
+  delayDuration,
 }: TooltipProps) => {
   const { isMobile } = useMediaQuery();
 
@@ -63,7 +65,7 @@ const Tooltip = ({
   }
 
   return (
-    <TooltipPrimitive.Root>
+    <TooltipPrimitive.Root delayDuration={delayDuration}>
       <TooltipPrimitive.Trigger className="md:inline-flex" asChild>
         {children}
       </TooltipPrimitive.Trigger>

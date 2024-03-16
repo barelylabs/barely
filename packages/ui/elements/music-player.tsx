@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 import { atomWithToggle } from "@barely/lib/atoms/atom-with-toggle";
 import { cn } from "@barely/lib/utils/cn";
 import { tFormatter } from "@barely/lib/utils/time";
@@ -8,18 +8,18 @@ import { atom, useAtom } from "jotai";
 import { useAtomCallback } from "jotai/utils";
 import ReactPlayer from "react-player/lazy";
 
-import type { TrackWithArtistAndMasters } from "@barely/lib/server/track.schema";
+import type { PublicTrackWith_Artist_Files } from "@barely/lib/server/track.schema";
 
+import type { ButtonProps } from "./button";
 import { Button } from "./button";
-import { Icon } from "./icon";
 import { Slider } from "./slider";
 import { videoPlayerGlobalCurrentAtom } from "./video-player";
 
 export type MusicPlayerTrack = Pick<
-  TrackWithArtistAndMasters,
-  "id" | "name" | "workspace" | "imageUrl" | "masterMp3"
+  PublicTrackWith_Artist_Files,
+  "id" | "name" | "workspace" | "audioFiles" | "artwork"
 >;
-export type MusicPlayerPlaylist = MusicPlayerTrack[];
+export type MusicPlayerTracklist = MusicPlayerTrack[];
 
 interface Progress {
   played: number;
@@ -39,7 +39,7 @@ const progressMusicAtom = atom<Progress>({
 });
 const durationMusicAtom = atom<number | undefined>(undefined);
 
-export const playlistAtom = atom<MusicPlayerPlaylist>([]);
+export const tracklistAtom = atom<MusicPlayerTracklist>([]);
 export const currentTrackAtom = atom<MusicPlayerTrack | undefined>(undefined);
 
 export function useMusicPlayer() {
@@ -48,7 +48,7 @@ export function useMusicPlayer() {
   const [seeking, setSeeking] = useAtom(seekingMusicAtom);
   const [duration, setDuration] = useAtom(durationMusicAtom);
   const [progress, setProgress] = useAtom(progressMusicAtom);
-  const [playlist, setPlaylist] = useAtom(playlistAtom);
+  const [tracklist, setTracklist] = useAtom(tracklistAtom);
   const [currentTrack, setCurrentTrack] = useAtom(currentTrackAtom);
 
   // video
@@ -75,24 +75,20 @@ export function useMusicPlayer() {
     useCallback(
       (get) => {
         const currentTrack = get(currentTrackAtom);
-        const playlist = get(playlistAtom) ?? [];
+        const tracklist = get(tracklistAtom) ?? [];
 
         if (!currentTrack) {
           console.log("no current track");
           setVideoGlobalCurrent(false);
-          setCurrentTrack(playlist[0]);
+          setCurrentTrack(tracklist[0]);
           setProgress({
             played: 0,
             playedSeconds: 0,
             loaded: 0,
             loadedSeconds: 0,
           });
-
-          // return togglePlaying(true);
         }
 
-        const definitelyCurrentTrack = get(currentTrackAtom);
-        console.log("definitely current track", definitelyCurrentTrack);
         return togglePlaying();
       },
       [togglePlaying, setCurrentTrack, setProgress, setVideoGlobalCurrent],
@@ -104,13 +100,13 @@ export function useMusicPlayer() {
   const goToPrevious = useAtomCallback(
     useCallback(
       (get) => {
-        const playlist = get(playlistAtom);
+        const tracklist = get(tracklistAtom);
         const progress = get(progressMusicAtom);
         const currentTrack = get(currentTrackAtom);
-        const currentIndex = playlist.findIndex(
+        const currentIndex = tracklist.findIndex(
           (track) => track.id === currentTrack?.id,
         );
-        const previousTrack = playlist[currentIndex - 1];
+        const previousTrack = tracklist[currentIndex - 1];
         if (
           (progress.playedSeconds > 1 && progress.playedSeconds < 5) ||
           !previousTrack
@@ -133,12 +129,12 @@ export function useMusicPlayer() {
   const skipToNext = useAtomCallback(
     useCallback(
       (get) => {
-        const playlist = get(playlistAtom);
+        const tracklist = get(tracklistAtom);
         const currentTrack = get(currentTrackAtom);
-        const currentIndex = playlist.findIndex(
+        const currentIndex = tracklist.findIndex(
           (track) => track.id === currentTrack?.id,
         );
-        const nextTrack = playlist[currentIndex + 1];
+        const nextTrack = tracklist[currentIndex + 1];
         if (nextTrack) {
           setCurrentTrack(nextTrack);
           setProgress({
@@ -154,12 +150,10 @@ export function useMusicPlayer() {
   );
 
   const handlePlay = useCallback(() => {
-    console.log("handle play");
     setVideoGlobalCurrent(false);
     togglePlaying(true);
   }, [togglePlaying, setVideoGlobalCurrent]);
   const handlePause = useCallback(() => {
-    console.log("handle pause");
     togglePlaying(false);
   }, [togglePlaying]);
   const handleDuration = useCallback(
@@ -202,8 +196,8 @@ export function useMusicPlayer() {
     ref,
     player,
     currentTrack,
-    playlist,
-    setPlaylist,
+    tracklist,
+    setPlaylist: setTracklist,
     playing,
 
     seeking,
@@ -240,26 +234,27 @@ export function HeadlessMusicPlayer() {
   } = useMusicPlayer();
 
   return (
-    <ReactPlayer
-      ref={ref}
-      url={currentTrack?.masterMp3.url}
-      width="100%"
-      height="100%"
-      playing={playing}
-      onPlay={handlePlay}
-      onPause={handlePause}
-      onDuration={handleDuration}
-      onProgress={handleProgress}
-      progressInterval={10}
-      onReady={() => console.log("ready")}
-    />
+    <div className="hidden">
+      <ReactPlayer
+        ref={ref}
+        url={currentTrack?.audioFiles[0]?.src}
+        playing={playing}
+        onPlay={handlePlay}
+        onPause={handlePause}
+        onDuration={handleDuration}
+        onProgress={handleProgress}
+        progressInterval={10}
+      />
+    </div>
   );
 }
 
 export function MusicPlayerBar() {
-  const { currentTrack, playlist } = useMusicPlayer();
+  const { currentTrack, tracklist } = useMusicPlayer();
 
-  const currentOrFirstTrack = currentTrack ?? playlist[0];
+  const currentOrFirstTrack = currentTrack ?? tracklist[0];
+
+  const artworkUrl = currentOrFirstTrack?.artwork?.src;
 
   return (
     <>
@@ -273,7 +268,7 @@ export function MusicPlayerBar() {
                   <picture>
                     <img
                       alt={currentOrFirstTrack.name}
-                      src={currentOrFirstTrack.imageUrl ?? ""}
+                      src={artworkUrl ?? ""}
                       className="h-11  w-11 rounded-xs"
                     />
                   </picture>
@@ -292,14 +287,14 @@ export function MusicPlayerBar() {
             <div className="hidden max-w-full flex-grow flex-col items-center justify-center gap-1 sm:flex ">
               <div className="flex w-full flex-row items-center justify-center gap-3">
                 <MusicPreviousButton />
-                <MusicPlayButton size="small" />
+                <MusicPlayButton />
                 <MusicNextButton />
               </div>
               <MusicSeek />
             </div>
 
             <div className="flex flex-row items-center justify-end p-4 sm:hidden">
-              <MusicPlayButton size="small" />
+              <MusicPlayButton />
             </div>
           </div>
         </div>
@@ -332,44 +327,21 @@ export function MusicSeek() {
 }
 
 export function MusicPlayButton({
-  size = "small",
+  size = "sm",
 }: {
-  size?: "icon" | "small" | "large";
+  size?: ButtonProps["size"];
 }) {
   const { playing, togglePlay } = useMusicPlayer();
 
   return (
     <Button
-      size="icon"
-      icon
+      variant="icon"
+      size={size}
       pill
-      className={cn(
-        size === "large"
-          ? "h-12 w-12"
-          : size === "small"
-            ? "h-8 w-8"
-            : "h-6 w-6",
-      )}
+      startIcon={playing ? "pause" : "play"}
+      iconClassName={cn("fill-current", !playing && "ml-[2px]")}
       onClick={() => togglePlay()}
-    >
-      {playing ? (
-        <Icon.pause
-          fill="black"
-          className={cn(
-            "w-full rounded-full text-black",
-            size === "small" ? "p-1" : size === "icon" ? "p-2" : "",
-          )}
-        />
-      ) : (
-        <Icon.play
-          fill="black"
-          className={cn(
-            "ml-1 w-full rounded-full  text-black",
-            size === "small" ? "p-1" : size === "icon" ? "p-2" : "",
-          )}
-        />
-      )}
-    </Button>
+    />
   );
 }
 
@@ -377,15 +349,14 @@ export function MusicPreviousButton() {
   const { goToPrevious } = useMusicPlayer();
   return (
     <Button
-      icon
-      variant="link"
-      size="icon"
+      variant="icon"
+      size="sm"
+      look="link"
       pill
-      className="h-6 w-6"
+      iconClassName="text-white fill-current"
+      startIcon="skipBackward"
       onClick={() => goToPrevious()}
-    >
-      <Icon.skipBackward fill="gray-500" className="w-full text-white" />
-    </Button>
+    />
   );
 }
 
@@ -393,14 +364,13 @@ export function MusicNextButton() {
   const { skipToNext } = useMusicPlayer();
   return (
     <Button
-      icon
-      variant="link"
-      size="icon"
+      variant="icon"
+      look="link"
+      size="sm"
       pill
-      className="h-6 w-6"
+      iconClassName="text-white fill-current"
+      startIcon="skipForward"
       onClick={() => skipToNext()}
-    >
-      <Icon.skipForward fill="gray-500" className="w-full text-white" />
-    </Button>
+    />
   );
 }

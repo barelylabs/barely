@@ -37,8 +37,6 @@ const Form = <T extends FieldValues>({
   children,
   ...props
 }: FormProps<T>) => {
-  // const isSubmitting = form.formState.isSubmitting;
-
   return (
     <FormProvider {...form}>
       <form
@@ -48,7 +46,7 @@ const Form = <T extends FieldValues>({
       >
         <fieldset
           className={cn(
-            "flex w-full max-w-full flex-col space-y-4",
+            "flex w-full max-w-full flex-col gap-4",
             props.className,
           )}
           disabled={form.formState.isSubmitting}
@@ -77,8 +75,6 @@ const FormField = <
 >({
   ...props
 }: ControllerProps<TFieldValues, TName>) => {
-  // const ctrl = props.control
-
   return (
     <FormFieldContext.Provider value={{ name: props.name }}>
       <Controller {...props} />

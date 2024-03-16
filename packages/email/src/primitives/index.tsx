@@ -21,7 +21,10 @@ export function Body(props: { children: React.ReactNode }) {
   return <BodyPrimitive style={style}>{props.children}</BodyPrimitive>;
 }
 
-export function Button(props: { children: React.ReactNode; href: string }) {
+export function EmailButton(props: {
+  children: React.ReactNode;
+  href: string;
+}) {
   const style = {
     borderRadius: "0.375rem", // 0.37
     fontWeight: 600,
@@ -42,7 +45,7 @@ export function Button(props: { children: React.ReactNode; href: string }) {
   );
 }
 
-export function Container(props: { children: React.ReactNode }) {
+export function EmailContainer(props: { children: React.ReactNode }) {
   const style = {
     display: "flex",
     paddingLeft: "1.25rem",
@@ -58,7 +61,7 @@ export function Container(props: { children: React.ReactNode }) {
   );
 }
 
-export function Heading(props: { children: React.ReactNode }) {
+export function EmailHeading(props: { children: React.ReactNode }) {
   const style = {
     marginTop: "1.5rem",
     marginBottom: "1.5rem",
@@ -69,7 +72,7 @@ export function Heading(props: { children: React.ReactNode }) {
   return <HeadingPrimitive style={style}>{props.children}</HeadingPrimitive>;
 }
 
-export function Link(props: { children: React.ReactNode; href: string }) {
+export function EmailLink(props: { children: React.ReactNode; href: string }) {
   const style = {
     color: "#3182ce",
   };
@@ -81,7 +84,7 @@ export function Link(props: { children: React.ReactNode; href: string }) {
   );
 }
 
-export function Separator() {
+export function EmailSeparator() {
   return (
     <HrPrimitive
       style={{
@@ -94,7 +97,7 @@ export function Separator() {
   );
 }
 
-export function Quote(props: { children: React.ReactNode }) {
+export function EmailQuote(props: { children: React.ReactNode }) {
   const style = {
     display: "inline-block",
     padding: "10px 4.5%",

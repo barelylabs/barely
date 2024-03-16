@@ -12,12 +12,70 @@ import { newId } from "../utils/id";
 import { fullNameToFirstAndLast, parseFullName } from "../utils/name";
 import { parseForDb } from "../utils/phone-number";
 import { raise } from "../utils/raise";
+import {
+  _Files_To_Workspaces__AvatarImage,
+  _Files_To_Workspaces__HeaderImage,
+} from "./file.sql";
 import { ProviderAccounts } from "./provider-account.sql";
 import { createStripeUser } from "./stripe.fns";
 import { _Users_To_Workspaces, Users } from "./user.sql";
 import { Workspaces } from "./workspace.sql";
 
 ("@auth/core/adapters");
+
+/** START HELPER FUNCTIONS */
+export const rawSessionUserWith = {
+  _workspaces: {
+    with: {
+      workspace: {
+        with: {
+          _avatarImages: {
+            where: () => eq(_Files_To_Workspaces__AvatarImage.current, true),
+            with: {
+              file: true,
+            },
+            limit: 1,
+          },
+          _headerImages: {
+            where: () => eq(_Files_To_Workspaces__HeaderImage.current, true),
+            with: {
+              file: true,
+            },
+            limit: 1,
+          },
+        },
+      },
+    },
+  },
+} as const;
+
+export async function getRawSessionUserByUserId(userId: string, db: Db) {
+  const userWithWorkspaces = await db.http.query.Users.findFirst({
+    where: (Users) => eq(Users.id, userId),
+    with: rawSessionUserWith,
+  });
+
+  return userWithWorkspaces;
+}
+
+type RawSessionUser = NonNullable<
+  Awaited<ReturnType<typeof getRawSessionUserByUserId>>
+>;
+
+export function getSessionUserFromRawUser(user: RawSessionUser): SessionUser {
+  const sessionUser: SessionUser = {
+    ...user,
+    workspaces: user._workspaces.map((_w) => ({
+      ..._w.workspace,
+      avatarImageUrl: _w.workspace._avatarImages[0]?.file?.src ?? "",
+      headerImageUrl: _w.workspace._headerImages[0]?.file?.src ?? "",
+      role: _w.role,
+    })),
+  };
+
+  return sessionUser;
+}
+/** END HELPER FUNCTIONS */
 
 export async function checkEmailExistsOnServer(email: string, db: Db) {
   const emailExists = await db.http.query.Users.findFirst({
@@ -78,7 +136,7 @@ export async function createUser(user: CreateUser, db: Db) {
     id: newWorkspaceId,
     name: fullName,
     handle,
-    imageUrl: user.image,
+    // imageUrl: user.image,
     type: "personal",
   };
 
@@ -110,53 +168,20 @@ export async function createUser(user: CreateUser, db: Db) {
 }
 
 export async function getSessionUserByUserId(userId: string, db: Db) {
-  const userWithWorkspaces = await db.http.query.Users.findFirst({
-    where: (Users) => eq(Users.id, userId),
-    with: {
-      _workspaces: {
-        with: {
-          workspace: true,
-        },
-      },
-    },
-  });
-
-  if (!userWithWorkspaces) return null;
-
-  const sessionUser: SessionUser = {
-    ...userWithWorkspaces,
-    workspaces: userWithWorkspaces._workspaces.map((_w) => ({
-      ..._w.workspace,
-      role: _w.role,
-    })),
-  };
-
-  return sessionUser;
+  const rawUser = await getRawSessionUserByUserId(userId, db);
+  if (!rawUser) return null;
+  return getSessionUserFromRawUser(rawUser);
 }
 
 export async function getSessionUserByEmail(email: string, db: Db) {
   const userWithWorkspaces = await db.http.query.Users.findFirst({
     where: (Users) => eq(Users.email, email),
-    with: {
-      _workspaces: {
-        with: {
-          workspace: true,
-        },
-      },
-    },
+    with: rawSessionUserWith,
   });
 
   if (!userWithWorkspaces) return null;
 
-  const sessionUser: SessionUser = {
-    ...userWithWorkspaces,
-    workspaces: userWithWorkspaces._workspaces.map((_w) => ({
-      ..._w.workspace,
-      role: _w.role,
-    })),
-  };
-
-  return sessionUser;
+  return getSessionUserFromRawUser(userWithWorkspaces);
 }
 
 export async function getSessionUserByAccount(
@@ -171,28 +196,24 @@ export async function getSessionUserByAccount(
     ),
     with: {
       user: {
-        with: {
-          _workspaces: {
-            with: {
-              workspace: true,
-            },
-          },
-        },
+        with: rawSessionUserWith,
       },
     },
   });
 
   if (!providerAccount) return null;
 
-  const sessionUser: SessionUser = {
-    ...providerAccount.user,
-    workspaces: providerAccount.user._workspaces.map((_w) => ({
-      ..._w.workspace,
-      role: _w.role,
-    })),
-  };
+  // const sessionUser: SessionUser = {
+  //   ...providerAccount.user,
+  //   workspaces: providerAccount.user._workspaces.map((_w) => ({
+  //     ..._w.workspace,
+  //     avatarImageUrl: _w.workspace._avatarImages[0]?.image?.src ?? "",
+  //     headerImageUrl: _w.workspace._headerImages[0]?.image?.src ?? "",
+  //     role: _w.role,
+  //   })),
+  // };
 
-  return sessionUser;
+  return getSessionUserFromRawUser(providerAccount.user);
 }
 
 export function deserializeUser(user: SessionUser) {

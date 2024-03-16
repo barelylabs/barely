@@ -544,5 +544,6 @@ export default {
     require("@tailwindcss/typography"),
     require("tailwind-scrollbar-hide"),
     require("tailwindcss-radix"),
+    require("tailwindcss-react-aria-components"),
   ],
 } satisfies Config;

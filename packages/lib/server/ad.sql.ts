@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { boolean, index, pgTable, varchar } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId, timestamps } from "../utils/sql";
+import { dbId, primaryId, timestamps } from "../utils/sql";
 import { AdCreatives } from "./ad-creative.sql";
 import { AdSets } from "./ad-set.sql";
 import { Stats } from "./stat.sql";
@@ -11,7 +11,7 @@ export const Ads = pgTable(
   "Ads",
   {
     ...primaryId,
-    workspaceId: cuid("workspaceId")
+    workspaceId: dbId("workspaceId")
       .notNull()
       .references(() => Workspaces.id, {
         onUpdate: "cascade",
@@ -32,14 +32,14 @@ export const Ads = pgTable(
     passedTest: boolean("passedTest"),
 
     // relations
-    adSetId: cuid("adSetId")
+    adSetId: dbId("adSetId")
       .notNull()
       .references(() => AdSets.id, {
         onUpdate: "cascade",
         onDelete: "cascade",
       }),
 
-    adCreativeId: cuid("adCreativeId")
+    adCreativeId: dbId("adCreativeId")
       .notNull()
       .references(() => AdCreatives.id),
   },

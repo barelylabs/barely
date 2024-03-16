@@ -14,9 +14,10 @@ const prefixes = {
   // web
   link: "link",
   bio: "bio",
-  press: "pr",
+  pressKit: "pk",
   webSession: "web_session",
   // assets
+  file: "file",
   playlist: "pl",
   track: "tr",
   // campaigns
@@ -28,6 +29,8 @@ const prefixes = {
   // payments
   transaction: "tx",
   lineItem: "txli",
+  mixtape: "mx",
+  mixtapeTrack: "mxtr",
 } as const;
 
 export function newId(prefix: keyof typeof prefixes) {

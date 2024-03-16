@@ -6,12 +6,15 @@ import { bioRouter } from "../bio.router";
 import { campaignRouter } from "../campaign.router";
 import { domainRouter } from "../domain.router";
 import { eventRouter } from "../event.router";
+import { fileRouter } from "../file.router";
 import { formResponseRouter } from "../form-response.router";
 import { genreRouter } from "../genre.router";
 import { linkRouter } from "../link.router";
+import { mixtapeRouter } from "../mixtape.router";
 import { playlistPitchReviewRouter } from "../playlist-pitch-review.router";
 import { playlistPlacementRouter } from "../playlist-placement.router";
 import { playlistRouter } from "../playlist.router";
+import { pressKitRouter } from "../press-kit.router";
 import { providerAccountRouter } from "../provider-account.router";
 import { spotifyRouter } from "../spotify.router";
 import { statRouter } from "../stat.router";
@@ -28,12 +31,15 @@ const edgeRouter = createTRPCRouter({
   campaign: campaignRouter,
   domain: domainRouter,
   event: eventRouter,
+  file: fileRouter,
   formResponse: formResponseRouter,
   genre: genreRouter,
   link: linkRouter,
+  mixtape: mixtapeRouter,
   playlist: playlistRouter,
   playlistPitchReview: playlistPitchReviewRouter,
   playlistPlacement: playlistPlacementRouter,
+  pressKit: pressKitRouter,
   providerAccount: providerAccountRouter,
   spotify: spotifyRouter,
   stat: statRouter,

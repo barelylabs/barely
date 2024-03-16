@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { index, pgTable, text } from "drizzle-orm/pg-core";
 
-import { cuid, primaryId, timestamps } from "../utils/sql";
+import { dbId, primaryId, timestamps } from "../utils/sql";
 import { BioButtons, Bios } from "./bio.sql";
 import { EventReports } from "./event-report.sql";
 import { Forms } from "./form.sql";
@@ -28,11 +28,11 @@ export const Events = pgTable(
     }).notNull(),
 
     // relations
-    linkId: cuid("linkId"),
-    bioId: cuid("bioId"),
-    bioButtonId: cuid("bioButtonId"),
-    formId: cuid("formId"),
-    visitorSessionId: cuid("visitorSessionId"),
+    linkId: dbId("linkId"),
+    bioId: dbId("bioId"),
+    bioButtonId: dbId("bioButtonId"),
+    formId: dbId("formId"),
+    visitorSessionId: dbId("visitorSessionId"),
   },
   (event) => ({
     bio: index("Events_bio_idx").on(event.bioId),

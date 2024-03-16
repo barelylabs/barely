@@ -1,14 +1,15 @@
 import type { Adapter } from "@auth/core/adapters";
 import { and, eq } from "drizzle-orm";
 
-import type { SessionUser } from ".";
 import type { Db } from "../db";
 import { newId } from "../../utils/id";
+import { raise } from "../../utils/raise";
 import { insertProviderAccountSchema } from "../provider-account.schema";
 import { ProviderAccounts } from "../provider-account.sql";
 import { getSpotifyUser } from "../spotify.endpts.user";
 import {
   deserializeUserSession,
+  getSessionAndUser,
   serializeUserSession,
 } from "../user-session.fns";
 import { UserSessions } from "../user-session.sql";
@@ -53,7 +54,7 @@ export function NeonAdapter(db: Db): Adapter {
     },
 
     getUser: async (userId) => {
-      console.log("getting user by id: ", userId);
+      // console.log("getting user by id: ", userId);
       const user = await getSessionUserByUserId(userId, db);
 
       if (!user) return null;
@@ -62,11 +63,11 @@ export function NeonAdapter(db: Db): Adapter {
     },
 
     getUserByEmail: async (email) => {
-      console.log("getting user by email: ", email);
+      // console.log("getting user by email: ", email);
 
       const user = await getSessionUserByEmail(email, db);
 
-      console.log("user by email: ", user);
+      // console.log("user by email: ", user);
 
       if (!user) return null;
 
@@ -117,7 +118,7 @@ export function NeonAdapter(db: Db): Adapter {
     },
 
     linkAccount: async (account) => {
-      console.log("linking account => ", account);
+      // console.log("linking account => ", account);
       const type = insertProviderAccountSchema.shape.type.safeParse(
         account.type,
       );
@@ -141,13 +142,17 @@ export function NeonAdapter(db: Db): Adapter {
         throw new Error("No user found");
       }
 
+      const personalWorkspace =
+        user.workspaces.find((w) => w.type === "personal") ??
+        raise("No personal workspace found");
+
       await db.pool.transaction(async (tx) => {
         await tx.insert(ProviderAccounts).values({
           ...account,
           type: type.data,
           provider: provider.data,
           id: newId("providerAccount"),
-          workspaceId: user?.personalWorkspaceId,
+          workspaceId: personalWorkspace.id,
         });
 
         if (account.provider === "spotify" && account.access_token) {
@@ -155,7 +160,7 @@ export function NeonAdapter(db: Db): Adapter {
             accessToken: account.access_token,
           });
 
-          console.log("spotifyUser => ", spotifyUser);
+          // console.log("spotifyUser => ", spotifyUser);
 
           await tx
             .update(ProviderAccounts)
@@ -216,7 +221,7 @@ export function NeonAdapter(db: Db): Adapter {
 
     useVerificationToken: async (token) => {
       try {
-        console.log("using verification token => ", token);
+        // console.log("using verification token => ", token);
 
         const deletedToken =
           (await db.http
@@ -230,7 +235,7 @@ export function NeonAdapter(db: Db): Adapter {
             )
             .then((res) => res[0])) ?? null;
 
-        console.log("token to use: ", deletedToken);
+        // console.log("token to use: ", deletedToken);
 
         if (!deletedToken) {
           return null;
@@ -253,7 +258,7 @@ export function NeonAdapter(db: Db): Adapter {
     },
 
     createSession: async (sessionData) => {
-      console.log("creating session => ", sessionData);
+      // console.log("creating session => ", sessionData);
       await db.pool
         .insert(UserSessions)
         .values(serializeUserSession(sessionData));
@@ -272,48 +277,31 @@ export function NeonAdapter(db: Db): Adapter {
     getSessionAndUser: async (sessionToken) => {
       // console.log('getting session and user w/ sessionToken: ', sessionToken);
 
-      const sessionWithUser = await db.http.query.UserSessions.findFirst({
-        where: eq(UserSessions.sessionToken, sessionToken),
-        with: {
-          user: {
-            with: {
-              _workspaces: {
-                with: {
-                  workspace: true,
-                },
-              },
-            },
-          },
-        },
-      });
+      // const sessionWithUser = await db.http.query.UserSessions.findFirst({
+      //   where: eq(UserSessions.sessionToken, sessionToken),
+      //   with: {
+      //     user: {
+      //       with: userWith,
+      //     },
+      //   },
+      // });
 
-      if (!sessionWithUser) {
-        return null;
-      }
+      // if (!sessionWithUser) return null;
 
-      // console.log('sessionWithUser: ', sessionWithUser);
+      // // console.log('sessionWithUserAndWorkspaces: ', sessionUser);
 
-      const sessionUser: SessionUser = {
-        ...sessionWithUser.user,
-        workspaces: sessionWithUser.user._workspaces.map((_w) => ({
-          ..._w.workspace,
-          role: _w.role,
-        })),
-      };
+      // const sessionAndUser = {
+      //   session: deserializeUserSession(sessionWithUser),
+      //   user: deserializeUser(sessionUser),
+      // };
+      // // console.log('returning session and user => ', sessionAndUser);
 
-      // console.log('sessionWithUserAndWorkspaces: ', sessionUser);
-
-      const sessionAndUser = {
-        session: deserializeUserSession(sessionWithUser),
-        user: deserializeUser(sessionUser),
-      };
-      // console.log('returning session and user => ', sessionAndUser);
-
-      return sessionAndUser;
+      // return sessionAndUser;
+      return await getSessionAndUser(sessionToken, db);
     },
 
     updateSession: async (sessionData) => {
-      console.log("updating session => ", sessionData);
+      // console.log("updating session => ", sessionData);
       await db.pool
         .update(UserSessions)
         .set({
@@ -334,9 +322,6 @@ export function NeonAdapter(db: Db): Adapter {
     },
 
     deleteSession: async (sessionToken) => {
-      // await db.http
-      // 	.delete(UserSessions)
-      // 	.where(eq(UserSessions.sessionToken, sessionToken));
       await deleteSession(sessionToken);
     },
   };

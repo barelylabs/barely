@@ -23,7 +23,7 @@ export function MobileNav() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="ghost"
+          look="ghost"
           className="-ml-4 text-base hover:bg-transparent focus:ring-0  focus:ring-offset-0 md:hidden"
         >
           <Icon.rocket className="mr-2 h-4 w-4" />{" "}

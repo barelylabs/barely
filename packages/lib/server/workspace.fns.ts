@@ -2,6 +2,7 @@ import type { Db, DbPoolTransaction } from "./db";
 import type { User } from "./user.schema";
 import type { CreateWorkspace, InsertWorkspace } from "./workspace.schema";
 import { newId } from "../utils/id";
+import { sqlIncrement } from "../utils/sql";
 import { _Users_To_Workspaces } from "./user.sql";
 import { Workspaces } from "./workspace.sql";
 
@@ -70,5 +71,36 @@ export async function createWorkspace(
       return await createWorkspaceTransaction(insertWorkspaceProps, tx);
     });
     return dbWorkspace;
+  }
+}
+
+export async function incrementWorkspaceFileUsage(
+  workspaceId: string,
+  fileSizeInBytes: number,
+  db: Db,
+  tx?: DbPoolTransaction,
+) {
+  if (tx) {
+    await tx.update(Workspaces).set({
+      fileUsage_total: sqlIncrement(
+        Workspaces.fileUsage_total,
+        fileSizeInBytes,
+      ),
+      fileUsage_billingCycle: sqlIncrement(
+        Workspaces.fileUsage_billingCycle,
+        fileSizeInBytes,
+      ),
+    });
+  } else {
+    await db.pool.update(Workspaces).set({
+      fileUsage_total: sqlIncrement(
+        Workspaces.fileUsage_total,
+        fileSizeInBytes,
+      ),
+      fileUsage_billingCycle: sqlIncrement(
+        Workspaces.fileUsage_billingCycle,
+        fileSizeInBytes,
+      ),
+    });
   }
 }

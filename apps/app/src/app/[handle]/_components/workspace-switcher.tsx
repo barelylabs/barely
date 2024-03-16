@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useUser } from "@barely/hooks/use-user";
 import { useWorkspace } from "@barely/hooks/use-workspace";
 import { useWorkspaces } from "@barely/hooks/use-workspaces";
+import { usePusherSocketId } from "@barely/lib/hooks/use-pusher";
 import { Avatar } from "@barely/ui/elements/avatar";
 import { Badge } from "@barely/ui/elements/badge";
 import { Button } from "@barely/ui/elements/button";
@@ -34,6 +35,7 @@ import { showNewWorkspaceModalAtom } from "~/app/[handle]/_components/new-worksp
 
 export function WorkspaceSwitcher() {
   const router = useRouter();
+  usePusherSocketId();
 
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const setNewWorkspaceModalOpen = useSetAtom(showNewWorkspaceModalAtom);
@@ -52,7 +54,7 @@ export function WorkspaceSwitcher() {
   const normalizedObject = {
     id: currentWorkspace.id,
     name: currentWorkspace.name ?? currentWorkspace.handle,
-    imageUrl: currentWorkspace.imageUrl ?? "",
+    avatarImageUrl: currentWorkspace.avatarImageUrl ?? "",
     type: toTitleCase(underscoresToSpaces(currentWorkspace.type)),
   };
 
@@ -62,7 +64,7 @@ export function WorkspaceSwitcher() {
     <Popover open={switcherOpen} onOpenChange={setSwitcherOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="ghost"
+          look="ghost"
           size="sm"
           role="combobox"
           aria-expanded={switcherOpen}
@@ -70,7 +72,10 @@ export function WorkspaceSwitcher() {
           className="flex h-fit w-full flex-row gap-2 px-2 py-2"
           fullWidth
         >
-          <Avatar className="h-7 w-7" imageUrl={normalizedObject.imageUrl} />
+          <Avatar
+            className="h-7 w-7"
+            imageUrl={normalizedObject.avatarImageUrl}
+          />
           <Text variant="xs/medium">{normalizedObject.name}</Text>
 
           <Badge variant="info" size="2xs" className="h-full">
@@ -109,7 +114,7 @@ export function WorkspaceSwitcher() {
                 >
                   <Avatar
                     className="mr-2 h-5 w-5"
-                    imageUrl={personalAccount.imageUrl ?? ""}
+                    imageUrl={personalAccount.avatarImageUrl ?? ""}
                   />
                   {personalAccount.name ?? personalAccount.handle}
                   <Icon.check
@@ -146,7 +151,7 @@ export function WorkspaceSwitcher() {
                 >
                   <Avatar
                     className="mr-2 h-5 w-5"
-                    imageUrl={workspace.imageUrl ?? ""}
+                    imageUrl={workspace.avatarImageUrl ?? ""}
                   />
                   {workspace.name ?? workspace.handle}
                   <Icon.check

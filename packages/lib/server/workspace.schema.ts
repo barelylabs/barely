@@ -19,10 +19,13 @@ export const insertWorkspaceSchema = createInsertSchema(Workspaces, {
 });
 export const createWorkspaceSchema = insertWorkspaceSchema.omit({ id: true });
 
-export const updateCurrentWorkspaceSchema = insertWorkspaceSchema.partial();
 export const updateWorkspaceSchema = insertWorkspaceSchema
   .partial()
   .required({ id: true });
+export const updateCurrentWorkspaceSchema = updateWorkspaceSchema.omit({
+  id: true,
+});
+
 export const upsertWorkspaceSchema = insertWorkspaceSchema.partial({
   id: true,
 });
@@ -39,12 +42,33 @@ export type SelectWorkspace = z.infer<typeof selectWorkspaceSchema>;
 export const workspaceTypeSchema = insertWorkspaceSchema.shape.type.unwrap();
 
 // public
-export const publicWorkspaceSchema = selectWorkspaceSchema.pick({
-  id: true,
-  name: true,
-  handle: true,
-  type: true,
-  imageUrl: true,
-});
+export const publicWorkspaceSchema = selectWorkspaceSchema
+  .pick({
+    // id: true,
+    name: true,
+    handle: true,
+    type: true,
+    bio: true,
+    bookingTitle: true,
+    bookingName: true,
+    bookingEmail: true,
+    // social ids
+    spotifyArtistId: true,
+    youtubeChannelId: true,
+    tiktokUsername: true,
+    instagramUsername: true,
+    // stats
+    spotifyFollowers: true,
+    spotifyMonthlyListeners: true,
+    youtubeSubscribers: true,
+    tiktokFollowers: true,
+    instagramFollowers: true,
+    twitterFollowers: true,
+    facebookFollowers: true,
+  })
+  .extend({
+    avatarImageUrl: z.string().nullish(),
+    headerImageUrl: z.string().nullish(),
+  });
 
 export type PublicWorkspace = z.infer<typeof publicWorkspaceSchema>;
