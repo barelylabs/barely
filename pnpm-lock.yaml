@@ -828,8 +828,8 @@ importers:
         specifier: ^2.4.11
         version: 2.4.11
       stripe:
-        specifier: ^11.18.0
-        version: 11.18.0
+        specifier: ^14.21.0
+        version: 14.21.0
       superjson:
         specifier: ^2.2.1
         version: 2.2.1
@@ -20687,8 +20687,8 @@ packages:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
 
-  /stripe@11.18.0:
-    resolution: {integrity: sha512-OUA32uhNoSoM6wOodyFbV+3IBCoO140uzdXmBArQ0S88D4EbH91xl2v+Ml1sKalcFKUBadHLeHfU/p9AbsOfGw==}
+  /stripe@14.21.0:
+    resolution: {integrity: sha512-PFmpl35Myn6UDdVLTHcuppdbkPVvlQfkMHOmgGZh5QOdSUxVmvz090Z4obLg8ta1MNs1PNpzr9i7E39iAIv07A==}
     engines: {node: '>=12.*'}
     dependencies:
       '@types/node': 20.11.10
