@@ -6,7 +6,7 @@ import Stripe from "stripe";
 import { env } from "~/env";
 
 const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-  apiVersion: "2022-11-15",
+  apiVersion: "2023-10-16",
 });
 
 const webhookSecret = env.STRIPE_WEBHOOK_SECRET;
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 
   switch (event.type) {
     case "checkout.session.completed": {
-      const session = event.data.object as Stripe.Checkout.Session;
+      const session = event.data.object;
       console.log("session => ", session);
       console.log("session.metadata", session.metadata);
 

@@ -33,8 +33,8 @@ import { Users } from "./user.sql";
 import { WORKSPACE_PLANS } from "./workspace.settings";
 import { Workspaces } from "./workspace.sql";
 
-const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-  apiVersion: "2022-11-15",
+export const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
+  apiVersion: "2023-10-16",
   httpClient: Stripe.createFetchHttpClient(),
 });
 

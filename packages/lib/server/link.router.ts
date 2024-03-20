@@ -72,13 +72,6 @@ export const linkRouter = createTRPCRouter({
   create: privateProcedure
     .input(createLinkSchema)
     .mutation(async ({ input, ctx }) => {
-      if (input.workspaceId !== ctx.workspace.id) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: `Invalid workspace`,
-        });
-      }
-
       const transparentLinkData = getTransparentLinkDataFromUrl(
         input.url,
         ctx.workspace,
@@ -125,16 +118,19 @@ export const linkRouter = createTRPCRouter({
   update: privateProcedure
     .input(updateLinkSchema)
     .mutation(async ({ input, ctx }) => {
-      if (!!input.workspaceId && input.workspaceId !== ctx.workspace.id) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: `Invalid workspace`,
-        });
-      }
+      // if (!!input.workspaceId && input.workspaceId !== ctx.workspace.id) {
+      // 	throw new TRPCError({
+      // 		code: 'BAD_REQUEST',
+      // 		message: `Invalid workspace`,
+      // 	});
+      // }
 
       const existingLink =
         (await ctx.db.pool.query.Links.findFirst({
-          where: eq(Links.id, input.id),
+          where: and(
+            eq(Links.workspaceId, ctx.workspace.id),
+            eq(Links.id, input.id),
+          ),
         })) ?? raise("Link not found");
 
       if (existingLink.transparent === true && input.transparent === false) {
