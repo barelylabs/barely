@@ -51,6 +51,8 @@ export const Users = pgTable(
 		image: varchar('image', { length: 1000 }).references(() => Workspaces.imageUrl, {
 			onUpdate: 'cascade',
 		}),
+		stripeId: varchar('stripeId', { length: 255 }), // deprecated
+		stripeId_devMode: varchar('stripeId_devMode', { length: 255 }),
 	},
 
 	user => ({
