@@ -206,11 +206,11 @@ jobs:
     steps:
       - name: Transform outcomes to JSON
         env:
-          NEEDS_JSON: "${{ toJson(needs) }}"
+          NEEDS_JSON: '${{ toJson(needs) }}'
         run: |
           echo "ALL_SUCCESS=$(echo "$NEEDS_JSON" | jq '. | to_entries | map([.value.result == "success", .value.result == "skipped"] | any) | all')" >> $GITHUB_ENV
       - name: Check outcomes
-        run: "[ $ALL_SUCCESS = true ]"
+        run: '[ $ALL_SUCCESS = true ]'
 
   # 🚀 PROMOTE APPS TO PRODUCTION DOMAINS 🚀 #
   # -- at a later date, we could decouple this promotion step from deploying & merging to main
@@ -300,8 +300,7 @@ jobs:
 
   rollback-www:
     name: rollback www if any deployments fail
-    needs:
-      [promote-www, promote-app, promote-link, promote-press, promote-sparrow]
+    needs: [promote-www, promote-app, promote-link, promote-press, promote-sparrow]
     if: ${{ failure() && needs.promote-www.result == 'success' }}
     runs-on: ubuntu-latest
     env:
@@ -320,8 +319,7 @@ jobs:
 
   rollback-app:
     name: rollback app if any deployments fail
-    needs:
-      [promote-www, promote-app, promote-link, promote-press, promote-sparrow]
+    needs: [promote-www, promote-app, promote-link, promote-press, promote-sparrow]
     if: ${{ failure() && needs.promote-app.result == 'success' }}
     runs-on: ubuntu-latest
     env:
@@ -340,8 +338,7 @@ jobs:
 
   rollback-link:
     name: rollback link if any deployments fail
-    needs:
-      [promote-www, promote-app, promote-link, promote-press, promote-sparrow]
+    needs: [promote-www, promote-app, promote-link, promote-press, promote-sparrow]
     if: ${{ failure() && needs.promote-link.result == 'success' }}
     runs-on: ubuntu-latest
     env:
@@ -360,8 +357,7 @@ jobs:
 
   rollback-press:
     name: rollback press if any deployments fail
-    needs:
-      [promote-www, promote-app, promote-link, promote-press, promote-sparrow]
+    needs: [promote-www, promote-app, promote-link, promote-press, promote-sparrow]
     if: ${{ failure() && needs.promote-press.result == 'success' }}
     runs-on: ubuntu-latest
     env:
@@ -380,8 +376,7 @@ jobs:
 
   rollback-sparrow:
     name: rollback sparrow if any deployments fail
-    needs:
-      [promote-www, promote-app, promote-link, promote-press, promote-sparrow]
+    needs: [promote-www, promote-app, promote-link, promote-press, promote-sparrow]
     if: ${{ failure() && needs.promote-sparrow.result == 'success' }}
     runs-on: ubuntu-latest
     env:
@@ -405,6 +400,7 @@ jobs:
       [
         git-meta,
         db-push,
+        production--can-merge,
         promote-www,
         promote-app,
         promote-link,

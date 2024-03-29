@@ -1,13 +1,12 @@
-import type { Selection } from "react-aria-components";
-import { useState } from "react";
+import type { Selection } from 'react-aria-components';
+import { useState } from 'react';
 
 export function useSelection({
-  initialSelectedKeys = new Set(),
+	initialSelectedKeys = new Set(),
 }: {
-  initialSelectedKeys?: Selection;
+	initialSelectedKeys?: Selection;
 } = {}) {
-  const [selectedKeys, setSelectedKeys] =
-    useState<Selection>(initialSelectedKeys);
+	const [selectedKeys, setSelectedKeys] = useState<Selection>(initialSelectedKeys);
 
-  return [selectedKeys, setSelectedKeys] as const;
+	return [selectedKeys, setSelectedKeys] as const;
 }

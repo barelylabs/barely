@@ -1,6 +1,6 @@
-import { useUser } from "./use-user";
+import { useUser } from './use-user';
 
 export const useWorkspaces = () => {
-  const currentUser = useUser();
-  return currentUser.workspaces;
+	const currentUser = useUser();
+	return currentUser.workspaces;
 };

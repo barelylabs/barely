@@ -1,14 +1,12 @@
-import type { InferInsertModel } from "drizzle-orm";
-import type { z } from "zod";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import type { InferInsertModel } from 'drizzle-orm';
+import type { z } from 'zod';
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 
-import { Playlists } from "./playlist.sql";
+import { Playlists } from './playlist.sql';
 
 export const insertPlaylistSchema = createInsertSchema(Playlists);
 export const createPlaylistSchema = insertPlaylistSchema.omit({ id: true });
-export const updatePlaylistSchema = insertPlaylistSchema
-  .partial()
-  .required({ id: true });
+export const updatePlaylistSchema = insertPlaylistSchema.partial().required({ id: true });
 export const upsertPlaylistSchema = insertPlaylistSchema.partial({ id: true });
 export const selectPlaylistSchema = createSelectSchema(Playlists);
 

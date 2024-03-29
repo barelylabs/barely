@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import { Button } from "@barely/ui/elements/button";
+import { Button } from '@barely/ui/elements/button';
 
-import { useLinkContext } from "~/app/[handle]/links/_components/link-context";
+import { useLinkContext } from '~/app/[handle]/links/_components/link-context';
 
 export function CreateLinkButton() {
-  const { setShowCreateLinkModal } = useLinkContext();
+	const { setShowCreateLinkModal } = useLinkContext();
 
-  return (
-    <Button
-      onClick={() => {
-        setShowCreateLinkModal(true);
-      }}
-      className="space-x-3"
-    >
-      <p>New Link</p>
-      <kbd className="hidden rounded bg-zinc-700 px-2 py-0.5 text-xs font-light text-gray-400 transition-all duration-75 group-hover:bg-gray-100 group-hover:text-gray-500 md:inline-block">
-        C
-      </kbd>
-    </Button>
-  );
+	return (
+		<Button
+			onClick={() => {
+				setShowCreateLinkModal(true);
+			}}
+			className='space-x-3'
+		>
+			<p>New Link</p>
+			<kbd className='hidden rounded bg-zinc-700 px-2 py-0.5 text-xs font-light text-gray-400 transition-all duration-75 group-hover:bg-gray-100 group-hover:text-gray-500 md:inline-block'>
+				C
+			</kbd>
+		</Button>
+	);
 }

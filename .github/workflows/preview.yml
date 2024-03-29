@@ -261,14 +261,7 @@ jobs:
   comment:
     if: always() && github.event_name == 'pull_request'
     needs:
-      [
-        neon-preview,
-        deploy-www,
-        deploy-app,
-        deploy-link,
-        deploy-press,
-        deploy-sparrow,
-      ]
+      [neon-preview, deploy-www, deploy-app, deploy-link, deploy-press, deploy-sparrow]
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -285,7 +278,7 @@ jobs:
             | :iphone: app | [preview](${{ needs.deploy-app.outputs.deployment_url }}) | [inspect](${{ needs.deploy-app.outputs.inspect_url }}) |
             | :link: link | [preview](${{ needs.deploy-link.outputs.deployment_url }}) | [inspect](${{ needs.deploy-link.outputs.inspect_url }}) |
             | :newspaper: press | [preview](${{ needs.deploy-press.outputs.deployment_url }}) | [inspect](${{ needs.deploy-press.outputs.inspect_url }}) |
-            | :wing: sparrow | [preview](${{ needs.deploy-sparrow.outputs.deployment_url }}) | [inspect](${{ needs.deploy-sparrow.outputs.inspect_url }}) |
+            | :bird: sparrow | [preview](${{ needs.deploy-sparrow.outputs.deployment_url }}) | [inspect](${{ needs.deploy-sparrow.outputs.inspect_url }}) |
 
             ## db
             | :floppy_disk: db | :mag: inspect |
@@ -294,14 +287,7 @@ jobs:
 
   preview--can-merge:
     needs:
-      [
-        neon-preview,
-        deploy-www,
-        deploy-app,
-        deploy-link,
-        deploy-press,
-        deploy-sparrow,
-      ]
+      [neon-preview, deploy-www, deploy-app, deploy-link, deploy-press, deploy-sparrow]
     if: always() && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
@@ -309,9 +295,9 @@ jobs:
     steps:
       - name: Transform outcomes
         env:
-          NEEDS_JSON: "${{ toJson(needs) }}"
+          NEEDS_JSON: '${{ toJson(needs) }}'
         run: |
           echo "ALL_SUCCESS=$(echo "$NEEDS_JSON" | jq '. | to_entries | map([.value.result == "success", .value.result == "skipped"] | any) | all')" >> $GITHUB_ENV
 
       - name: Check outcomes
-        run: "[ $ALL_SUCCESS = true ]"
+        run: '[ $ALL_SUCCESS = true ]'

@@ -1,67 +1,99 @@
-import { env } from "../env";
-import { raise } from "./raise";
+import { env } from '../env';
+import { raise } from './raise';
 
-export function getBaseUrl(app: "app" | "link" | "www", absolute = false) {
-  if (!absolute && typeof window !== "undefined") return ""; // browser should use relative url
+const apps = ['app', 'bio', 'cart', 'link', 'press', 'www'] as const;
 
-  const currentApp = env.NEXT_PUBLIC_CURRENT_APP;
+export function getBaseUrl(app: (typeof apps)[number], absolute = false) {
+	if (!absolute && typeof window !== 'undefined') return ''; // browser should use relative url
 
-  const vercelEnv =
-    process.env.VERCEL_ENV ??
-    process.env.NEXT_PUBLIC_VERCEL_ENV ??
-    raise("getBaseUrl :: VERCEL_ENV not found");
+	const currentApp = env.NEXT_PUBLIC_CURRENT_APP;
 
-  if (vercelEnv === "development") {
-    const devPort =
-      app === "app"
-        ? env.NEXT_PUBLIC_APP_DEV_PORT ??
-          raise("NEXT_PUBLIC_APP_DEV_PORT not found")
-        : app === "link"
-          ? env.NEXT_PUBLIC_LINK_DEV_PORT ??
-            raise("NEXT_PUBLIC_LINK_DEV_PORT not found")
-          : app === "www"
-            ? env.NEXT_PUBLIC_WWW_DEV_PORT ??
-              raise("NEXT_PUBLIC_WWW_DEV_PORT not found")
-            : raise("Invalid app");
+	const vercelEnv =
+		process.env.VERCEL_ENV ??
+		process.env.NEXT_PUBLIC_VERCEL_ENV ??
+		raise('getBaseUrl :: VERCEL_ENV not found');
 
-    return `http://localhost:${devPort}`; // dev SSR should use localhost
-  }
+	if (vercelEnv === 'development') {
+		let devPort;
+		switch (app) {
+			case 'app':
+				devPort =
+					env.NEXT_PUBLIC_APP_DEV_PORT ?? raise('NEXT_PUBLIC_APP_DEV_PORT not found');
+				break;
+			case 'link':
+				devPort =
+					env.NEXT_PUBLIC_LINK_DEV_PORT ?? raise('NEXT_PUBLIC_LINK_DEV_PORT not found');
+				break;
+			case 'www':
+				devPort =
+					env.NEXT_PUBLIC_WWW_DEV_PORT ?? raise('NEXT_PUBLIC_WWW_DEV_PORT not found');
+				break;
+			case 'bio':
+				devPort =
+					env.NEXT_PUBLIC_BIO_DEV_PORT ?? raise('NEXT_PUBLIC_BIO_DEV_PORT not found');
+				break;
+			case 'cart':
+				devPort =
+					env.NEXT_PUBLIC_CART_DEV_PORT ?? raise('NEXT_PUBLIC_CART_DEV_PORT not found');
+				break;
+			case 'press':
+				devPort =
+					env.NEXT_PUBLIC_PRESS_DEV_PORT ?? raise('NEXT_PUBLIC_PRESS_DEV_PORT not found');
+				break;
+			default:
+				raise('Invalid app');
+		}
 
-  const vercelUrl =
-    process.env.VERCEL_URL ??
-    process.env.NEXT_PUBLIC_VERCEL_URL ??
-    raise("getBaseUrl :: VERCEL_URL not found");
+		return `http://localhost:${devPort}`; // dev SSR should use localhost
+	}
 
-  const baseUrl =
-    app === "app"
-      ? env.NEXT_PUBLIC_APP_BASE_URL
-      : app === "link"
-        ? env.NEXT_PUBLIC_LINK_BASE_URL
-        : app === "www"
-          ? env.NEXT_PUBLIC_WWW_BASE_URL
-          : raise("Invalid app");
+	const vercelUrl =
+		process.env.VERCEL_URL ??
+		process.env.NEXT_PUBLIC_VERCEL_URL ??
+		raise('getBaseUrl :: VERCEL_URL not found');
 
-  if (vercelEnv === "preview") {
-    const previewBaseUrl = app === currentApp ? vercelUrl : baseUrl;
-    return `https://${previewBaseUrl}`; // SSR should use vercel url
-  }
+	let baseUrl;
+	switch (app) {
+		case 'app':
+			baseUrl = env.NEXT_PUBLIC_APP_BASE_URL;
+			break;
+		case 'link':
+			baseUrl = env.NEXT_PUBLIC_LINK_BASE_URL;
+			break;
+		case 'www':
+			baseUrl = env.NEXT_PUBLIC_WWW_BASE_URL;
+			break;
+		case 'bio':
+			baseUrl = env.NEXT_PUBLIC_BIO_BASE_URL;
+			break;
+		case 'cart':
+			baseUrl = env.NEXT_PUBLIC_CART_BASE_URL;
+			break;
+		case 'press':
+			baseUrl = env.NEXT_PUBLIC_PRESS_BASE_URL;
+			break;
+		default:
+			raise('Invalid app');
+	}
+	if (vercelEnv === 'preview') {
+		const previewBaseUrl = app === currentApp ? vercelUrl : baseUrl;
+		return `https://${previewBaseUrl}`; // SSR should use vercel url
+	}
 
-  if (vercelEnv === "production") {
-    return `https://${baseUrl}`;
-  }
+	if (vercelEnv === 'production') {
+		return `https://${baseUrl}`;
+	}
 
-  return raise("getBaseUrl :: Invalid vercel env");
+	return raise('getBaseUrl :: Invalid vercel env');
 }
 
-export function getAbsoluteUrl(app: "app" | "link" | "www", path?: string) {
-  const appBaseUrl = getBaseUrl(app, true);
+export function getAbsoluteUrl(app: (typeof apps)[number], path?: string) {
+	const appBaseUrl = getBaseUrl(app, true);
 
-  console.log("appBaseUrl :", appBaseUrl);
-
-  return `${appBaseUrl}${path ? `/${path}` : ""}`;
+	return `${appBaseUrl}${path ? `/${path}` : ''}`;
 }
 
-export function getUrl(app: "app" | "link" | "www", path?: string) {
-  const appBaseUrl = getBaseUrl(app);
-  return `${appBaseUrl}${path ? `/${path}` : ""}`;
+export function getUrl(app: (typeof apps)[number], path?: string) {
+	const appBaseUrl = getBaseUrl(app);
+	return `${appBaseUrl}${path ? `/${path}` : ''}`;
 }

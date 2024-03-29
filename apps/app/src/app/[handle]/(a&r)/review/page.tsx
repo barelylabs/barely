@@ -6,7 +6,7 @@
 // import { PlaylistPitchReviewForm } from './playlist-pitch-review-form';
 
 const ReviewPitchPage = () => {
-  return <></>;
+	return <></>;
 };
 
 export default ReviewPitchPage;

@@ -1,11 +1,11 @@
-import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
+import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 
-import { edgeRouter } from "./router.edge";
-import { nodeRouter } from "./router.node";
-import { createTRPCRouter, mergeRouters } from "./trpc";
+import { edgeRouter } from './router.edge';
+import { nodeRouter } from './router.node';
+import { createTRPCRouter, mergeRouters } from './trpc';
 
 const nodeRouterForMerge = createTRPCRouter({
-  node: nodeRouter,
+	node: nodeRouter,
 });
 
 const combinedRouter = mergeRouters(edgeRouter, nodeRouterForMerge);
@@ -15,8 +15,8 @@ type CombinedRouterInputs = inferRouterInputs<CombinedRouter>;
 type CombinedRouterOutputs = inferRouterOutputs<CombinedRouter>;
 
 export {
-  combinedRouter,
-  type CombinedRouter,
-  type CombinedRouterInputs,
-  type CombinedRouterOutputs,
+	combinedRouter,
+	type CombinedRouter,
+	type CombinedRouterInputs,
+	type CombinedRouterOutputs,
 };

@@ -1,3 +1,3 @@
-import { useDropzone } from "react-dropzone";
+import { useDropzone } from 'react-dropzone';
 
 export { useDropzone };

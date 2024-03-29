@@ -1,17 +1,17 @@
-"use client";
-
-import React from "react";
-import {
-  currentTrackAtom,
-  HeadlessMusicPlayer,
-  MusicPlayerBar,
-  tracklistAtom,
-} from "@barely/ui/elements/music-player";
-import { useHydrateAtoms } from "jotai/utils";
+'use client';
 
 // import type { PublicFile } from "@barely/lib/server/file.schema";
 // import type { PublicWorkspace } from "@barely/lib/server/workspace.schema";
-import type { MusicPlayerTracklist } from "@barely/ui/elements/music-player";
+import type { MusicPlayerTracklist } from '@barely/ui/elements/music-player';
+import React from 'react';
+import { useHydrateAtoms } from 'jotai/utils';
+
+import {
+	currentTrackAtom,
+	HeadlessMusicPlayer,
+	MusicPlayerBar,
+	tracklistAtom,
+} from '@barely/ui/elements/music-player';
 
 /** FROM DB */
 // const properYouthWorkspace: PublicWorkspace = {
@@ -111,19 +111,19 @@ import type { MusicPlayerTracklist } from "@barely/ui/elements/music-player";
 // ];
 
 export function MusicPlayerBottomBar({
-  tracklist: tracklist,
+	tracklist: tracklist,
 }: {
-  tracklist: MusicPlayerTracklist;
+	tracklist: MusicPlayerTracklist;
 }) {
-  useHydrateAtoms([
-    [tracklistAtom, tracklist],
-    [currentTrackAtom, tracklist[0]],
-  ]);
+	useHydrateAtoms([
+		[tracklistAtom, tracklist],
+		[currentTrackAtom, tracklist[0]],
+	]);
 
-  return (
-    <>
-      <HeadlessMusicPlayer />
-      <MusicPlayerBar />
-    </>
-  );
+	return (
+		<>
+			<HeadlessMusicPlayer />
+			<MusicPlayerBar />
+		</>
+	);
 }

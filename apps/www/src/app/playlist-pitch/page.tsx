@@ -1,31 +1,28 @@
-import { Hero } from "~/app/components/hero";
-import {
-  GetStartedToday,
-  LetsGetStarted,
-} from "~/app/playlist-pitch/get-started";
-import { FAQ } from "./faq";
-import { Features } from "./high-quality-campaigns";
-import { HowItWorks } from "./how-it-works";
-import { WhatYouGet } from "./what-you-get";
+import { Hero } from '~/app/components/hero';
+import { GetStartedToday, LetsGetStarted } from '~/app/playlist-pitch/get-started';
+import { FAQ } from './faq';
+import { Features } from './high-quality-campaigns';
+import { HowItWorks } from './how-it-works';
+import { WhatYouGet } from './what-you-get';
 
 const PlaylistPitchPage = () => {
-  return (
-    <div className="flex w-full flex-col items-center">
-      <Hero
-        badgeIcon="spark"
-        badgeLabel="Discover"
-        title="playlist.pitch"
-        subtitle="Get your music onto organic playlists and jump start your audience."
-        buttonLabel="Start Campaign"
-      />
-      <Features />
-      <WhatYouGet />
-      <HowItWorks />
-      <LetsGetStarted />
-      <FAQ />
-      <GetStartedToday />
-    </div>
-  );
+	return (
+		<div className='flex w-full flex-col items-center'>
+			<Hero
+				badgeIcon='spark'
+				badgeLabel='Discover'
+				title='playlist.pitch'
+				subtitle='Get your music onto organic playlists and jump start your audience.'
+				buttonLabel='Start Campaign'
+			/>
+			<Features />
+			<WhatYouGet />
+			<HowItWorks />
+			<LetsGetStarted />
+			<FAQ />
+			<GetStartedToday />
+		</div>
+	);
 };
 
 // const faqItems: AccordionItemProps[] = [

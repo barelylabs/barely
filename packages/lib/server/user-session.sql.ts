@@ -1,25 +1,25 @@
-import { relations } from "drizzle-orm";
-import { pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
+import { relations } from 'drizzle-orm';
+import { pgTable, timestamp, varchar } from 'drizzle-orm/pg-core';
 
-import { dbId } from "../utils/sql";
-import { Users } from "./user.sql";
+import { dbId } from '../utils/sql';
+import { Users } from './user.sql';
 
-export const UserSessions = pgTable("UserSessions", {
-  sessionToken: varchar("sessionToken", { length: 255 }).notNull().primaryKey(),
-  expires: timestamp("expires", { mode: "string" }).notNull(),
+export const UserSessions = pgTable('UserSessions', {
+	sessionToken: varchar('sessionToken', { length: 255 }).notNull().primaryKey(),
+	expires: timestamp('expires', { mode: 'string' }).notNull(),
 
-  // relations
-  userId: dbId("userId")
-    .notNull()
-    .references(() => Users.id, {
-      onDelete: "cascade",
-    }),
+	// relations
+	userId: dbId('userId')
+		.notNull()
+		.references(() => Users.id, {
+			onDelete: 'cascade',
+		}),
 });
 
 export const UserSession_Relations = relations(UserSessions, ({ one }) => ({
-  // one-to-many
-  user: one(Users, {
-    fields: [UserSessions.userId],
-    references: [Users.id],
-  }),
+	// one-to-many
+	user: one(Users, {
+		fields: [UserSessions.userId],
+		references: [Users.id],
+	}),
 }));
