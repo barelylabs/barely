@@ -1,0 +1,23 @@
+{
+	"extends": "@barely/tsconfig/nextjs.json",
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"~/*": ["./src/*"],
+			"@public/*": ["./public/*"],
+			"@barely/server/*": ["./node_modules/@barely/lib/server/*"],
+			"@barely/api/*": ["./node_modules/@barely/lib/server/api/*"],
+			"@barely/atoms/*": ["./node_modules/@barely/lib/atoms/*"],
+			"@barely/hooks/*": ["./node_modules/@barely/lib/hooks/*"],
+			"@barely/ui/*": ["./node_modules/@barely/ui/*"],
+			"@barely/utils/*": ["./node_modules/@barely/lib/utils/*"],
+		},
+		"plugins": [
+			{
+				"name": "next",
+			},
+		],
+	},
+	"include": [".", ".next/types/**/*.ts"],
+	"exclude": ["node_modules"],
+}

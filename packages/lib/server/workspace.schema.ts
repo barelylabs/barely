@@ -1,33 +1,31 @@
-import type { InferSelectModel } from "drizzle-orm";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { z } from "zod";
+import type { InferSelectModel } from 'drizzle-orm';
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import { z } from 'zod';
 
-import { Workspaces } from "./workspace.sql";
+import { Workspaces } from './workspace.sql';
 
 export const insertWorkspaceSchema = createInsertSchema(Workspaces, {
-  name: z
-    .string()
-    .min(3, "Your workspace name must be at least 3 characters long"),
-  handle: z
-    .string()
-    .min(3, "Your workspace handle must be at least 3 characters long")
-    .max(32, "Your workspace handle must be no more than 32 characters long")
-    .regex(
-      /^[a-zA-Z][a-zA-Z0-9-_]*$/,
-      "Your workspace handle must start with a letter and can only contain letters, numbers, dashes, and underscores",
-    ),
+	name: z.string().min(3, 'Your workspace name must be at least 3 characters long'),
+	handle: z
+		.string()
+		.min(3, 'Your workspace handle must be at least 3 characters long')
+		.max(32, 'Your workspace handle must be no more than 32 characters long')
+		.regex(
+			/^[a-zA-Z][a-zA-Z0-9-_]*$/,
+			'Your workspace handle must start with a letter and can only contain letters, numbers, dashes, and underscores',
+		),
 });
 export const createWorkspaceSchema = insertWorkspaceSchema.omit({ id: true });
 
 export const updateWorkspaceSchema = insertWorkspaceSchema
-  .partial()
-  .required({ id: true });
+	.partial()
+	.required({ id: true });
 export const updateCurrentWorkspaceSchema = updateWorkspaceSchema.omit({
-  id: true,
+	id: true,
 });
 
 export const upsertWorkspaceSchema = insertWorkspaceSchema.partial({
-  id: true,
+	id: true,
 });
 export const selectWorkspaceSchema = createSelectSchema(Workspaces);
 
@@ -40,35 +38,39 @@ export type SelectWorkspace = z.infer<typeof selectWorkspaceSchema>;
 
 // forms
 export const workspaceTypeSchema = insertWorkspaceSchema.shape.type.unwrap();
+export const inviteMemberSchema = z.object({
+	email: z.string().email(),
+	role: z.enum(['admin', 'member']),
+});
 
 // public
 export const publicWorkspaceSchema = selectWorkspaceSchema
-  .pick({
-    // id: true,
-    name: true,
-    handle: true,
-    type: true,
-    bio: true,
-    bookingTitle: true,
-    bookingName: true,
-    bookingEmail: true,
-    // social ids
-    spotifyArtistId: true,
-    youtubeChannelId: true,
-    tiktokUsername: true,
-    instagramUsername: true,
-    // stats
-    spotifyFollowers: true,
-    spotifyMonthlyListeners: true,
-    youtubeSubscribers: true,
-    tiktokFollowers: true,
-    instagramFollowers: true,
-    twitterFollowers: true,
-    facebookFollowers: true,
-  })
-  .extend({
-    avatarImageUrl: z.string().nullish(),
-    headerImageUrl: z.string().nullish(),
-  });
+	.pick({
+		// id: true,
+		name: true,
+		handle: true,
+		type: true,
+		bio: true,
+		bookingTitle: true,
+		bookingName: true,
+		bookingEmail: true,
+		// social ids
+		spotifyArtistId: true,
+		youtubeChannelId: true,
+		tiktokUsername: true,
+		instagramUsername: true,
+		// stats
+		spotifyFollowers: true,
+		spotifyMonthlyListeners: true,
+		youtubeSubscribers: true,
+		tiktokFollowers: true,
+		instagramFollowers: true,
+		twitterFollowers: true,
+		facebookFollowers: true,
+	})
+	.extend({
+		avatarImageUrl: z.string().nullish(),
+		headerImageUrl: z.string().nullish(),
+	});
 
 export type PublicWorkspace = z.infer<typeof publicWorkspaceSchema>;

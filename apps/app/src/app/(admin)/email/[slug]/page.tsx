@@ -35,5 +35,5 @@
 // }
 
 export default function PreviewEmail() {
-  return <></>;
+	return <></>;
 }

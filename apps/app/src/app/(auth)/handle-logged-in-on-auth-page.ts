@@ -1,18 +1,27 @@
-import { redirect } from "next/navigation";
-import { getDefaultWorkspaceOfCurrentUser } from "@barely/lib/server/auth/auth.fns";
+import type { SessionWorkspace } from '@barely/lib/server/auth';
+import { redirect } from 'next/navigation';
+import { auth } from '@barely/lib/server/auth';
+import { getDefaultWorkspaceOfCurrentUser } from '@barely/lib/server/auth/auth.fns';
 
-import type { SessionWorkspace } from "@barely/lib/server/auth";
+export async function handleLoggedInOnAuthPage(props?: { callbackUrl?: string }) {
+	let defaultWorkspace: SessionWorkspace | undefined;
 
-export async function handleLoggedInOnAuthPage() {
-  let defaultWorkspace: SessionWorkspace | undefined;
+	const session = await auth();
 
-  try {
-    defaultWorkspace = await getDefaultWorkspaceOfCurrentUser();
-  } catch (err) {
-    return;
-  }
+	console.log('session on auth page', session);
 
-  if (defaultWorkspace) return redirect(`/${defaultWorkspace.handle}/links`);
+	if (session?.user && props?.callbackUrl) {
+		console.log('Redirecting to callbackUrl', props.callbackUrl);
+		return redirect(props.callbackUrl);
+	}
 
-  return;
+	try {
+		defaultWorkspace = await getDefaultWorkspaceOfCurrentUser(session);
+	} catch (err) {
+		return;
+	}
+
+	if (defaultWorkspace) return redirect(`/${defaultWorkspace.handle}/links`);
+
+	return;
 }

@@ -1,8 +1,8 @@
-import { zEnv } from "@barely/env";
+import { zEnv } from '@barely/env';
 
 export const env = zEnv({
-  clientEnvKeys: [],
-  serverEnvKeys: [],
+	clientEnvKeys: [],
+	serverEnvKeys: [],
 });
 
 export default env;

@@ -1,62 +1,62 @@
-export type PlanType = "free" | "pro" | "enterprise";
+export type PlanType = 'free' | 'pro' | 'enterprise';
 
 export interface Plan {
-  id: PlanType;
-  name: string;
-  productId: {
-    test: string;
-    production: string;
-  };
-  description: string;
-  linkUsageLimit: number;
-  price: {
-    monthly: {
-      amount: number;
-      priceIds: {
-        test: string;
-        production: string;
-      };
-    };
-    yearly: {
-      amount: number;
-      priceIds: {
-        test: string;
-        production: string;
-      };
-    };
-  };
+	id: PlanType;
+	name: string;
+	productId: {
+		test: string;
+		production: string;
+	};
+	description: string;
+	linkUsageLimit: number;
+	price: {
+		monthly: {
+			amount: number;
+			priceIds: {
+				test: string;
+				production: string;
+			};
+		};
+		yearly: {
+			amount: number;
+			priceIds: {
+				test: string;
+				production: string;
+			};
+		};
+	};
 }
 
 export const WORKSPACE_PLANS = new Map<PlanType, Plan>([
-  [
-    "pro",
-    {
-      id: "pro",
-      name: "Pro",
-      description: "Pro Plan",
-      productId: {
-        test: "prod_P3OhzmfamZ6E1D",
-        production: "prod_PbK7nyXH7BxZnO",
-      },
-      linkUsageLimit: 50000,
-      price: {
-        monthly: {
-          amount: 9,
-          priceIds: {
-            test: "price_1OFHtmHDMmzntRhpEIGl71FN",
-            production: "price_1Om7TTHDMmzntRhppfS957xC",
-          },
-        },
-        yearly: {
-          amount: 90,
-          priceIds: {
-            test: "price_1OFIExHDMmzntRhpxKLdRjwL",
-            production: "price_1Om7TTHDMmzntRhpWEX1GFUM",
-          },
-        },
-      },
-    },
-  ],
+	[
+		'pro',
+		{
+			id: 'pro',
+			name: 'Pro',
+			description: 'Pro Plan',
+			productId: {
+				test: 'prod_P3OhzmfamZ6E1D',
+				production: 'prod_PbK7nyXH7BxZnO',
+			},
+			linkUsageLimit: 50000,
+			price: {
+				monthly: {
+					amount: 9,
+					priceIds: {
+						test: 'price_1OFHtmHDMmzntRhpEIGl71FN',
+						production: 'price_1Om7TTHDMmzntRhppfS957xC',
+					},
+				},
+				yearly: {
+					amount: 90,
+					priceIds: {
+						test: 'price_1OFIExHDMmzntRhpxKLdRjwL',
+						production: 'price_1Om7TTHDMmzntRhpWEX1GFUM',
+					},
+				},
+			},
+		},
+	],
 ]);
 
 // export const LINK_CLICKS_METERED_PLANS = new Map([

@@ -1,19 +1,19 @@
 {
-  "extends": "@barely/tsconfig/react.json",
-  "compilerOptions": {
-    "target": "es5",
-    "downlevelIteration": true,
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
-  },
-  "include": [
-    "./charts/**/*",
-    "./components/**/*",
-    "./elements/**/*",
-    "./forms/**/*",
-    "./hooks/**/*",
-    "./images/**/*",
-    "./utils/**/*",
-    "tailwind.config.ts",
-  ],
-  "exclude": ["node_modules"],
+	"extends": "@barely/tsconfig/react.json",
+	"compilerOptions": {
+		"target": "es5",
+		"downlevelIteration": true,
+		"tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+	},
+	"include": [
+		"./charts/**/*",
+		"./components/**/*",
+		"./elements/**/*",
+		"./forms/**/*",
+		"./hooks/**/*",
+		"./images/**/*",
+		"./utils/**/*",
+		"tailwind.config.ts",
+	],
+	"exclude": ["node_modules"],
 }

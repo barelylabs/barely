@@ -1,15 +1,15 @@
-import type { TrackWith_Workspace_Genres_Files } from "./track.schema";
+import type { TrackWith_Workspace_Genres_Files } from './track.schema';
 
 interface SpotifyTrackOptionArtist
-  extends Pick<TrackWith_Workspace_Genres_Files["workspace"], "name"> {
-  id?: string;
-  handle?: string;
-  spotifyArtistId: string;
+	extends Pick<TrackWith_Workspace_Genres_Files['workspace'], 'name'> {
+	id?: string;
+	handle?: string;
+	spotifyArtistId: string;
 }
 
 export type SpotifyTrackOption = Pick<
-  TrackWith_Workspace_Genres_Files,
-  "id" | "name" | "isrc" | "spotifyId" | "released" | "imageUrl"
+	TrackWith_Workspace_Genres_Files,
+	'id' | 'name' | 'isrc' | 'spotifyId' | 'released' | 'imageUrl'
 > & {
-  workspace: SpotifyTrackOptionArtist;
+	workspace: SpotifyTrackOptionArtist;
 };

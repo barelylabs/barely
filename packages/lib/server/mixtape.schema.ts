@@ -1,35 +1,33 @@
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { z } from "zod";
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import { z } from 'zod';
 
 import type {
-  PublicTrackWith_Artist_Files,
-  TrackWith_Workspace_Genres_Files,
-} from "./track.schema";
-import { queryStringArraySchema } from "../hooks/use-typed-query";
-import { Mixtapes } from "./mixtape.sql";
-import { selectTrackSchema } from "./track.schema";
+	PublicTrackWith_Artist_Files,
+	TrackWith_Workspace_Genres_Files,
+} from './track.schema';
+import { queryStringArraySchema } from '../hooks/use-typed-query';
+import { Mixtapes } from './mixtape.sql';
+import { selectTrackSchema } from './track.schema';
 
 export const insertMixtapeTracksSchema = z.array(
-  selectTrackSchema.partial().required({ id: true }).extend({
-    lexorank: z.string(),
-  }),
+	selectTrackSchema.partial().required({ id: true }).extend({
+		lexorank: z.string(),
+	}),
 );
 
 export const insertMixtapeSchema = createInsertSchema(Mixtapes).extend({
-  _tracks: insertMixtapeTracksSchema.optional(),
+	_tracks: insertMixtapeTracksSchema.optional(),
 });
 
 export const createMixtapeSchema = insertMixtapeSchema.omit({
-  id: true,
-  workspaceId: true,
+	id: true,
+	workspaceId: true,
 });
 export const upsertMixtapeSchema = insertMixtapeSchema.partial({
-  id: true,
-  workspaceId: true,
+	id: true,
+	workspaceId: true,
 });
-export const updateMixtapeSchema = insertMixtapeSchema
-  .partial()
-  .required({ id: true });
+export const updateMixtapeSchema = insertMixtapeSchema.partial().required({ id: true });
 
 export const selectMixtapeSchema = createSelectSchema(Mixtapes);
 
@@ -40,35 +38,35 @@ export type UpsertMixtape = z.infer<typeof upsertMixtapeSchema>;
 export type UpdateMixtape = z.infer<typeof updateMixtapeSchema>;
 
 export interface MixtapeWith_Tracks extends Mixtape {
-  tracks: (TrackWith_Workspace_Genres_Files & { lexorank: string })[];
+	tracks: (TrackWith_Workspace_Genres_Files & { lexorank: string })[];
 }
 
 // forms
 export const defaultMixtape: UpsertMixtape = {
-  name: "",
-  description: "",
-  _tracks: [],
+	name: '',
+	description: '',
+	_tracks: [],
 } as const;
 
 export const formatEditMixtapeToUpsertMixtapeForm = (
-  mixtape: MixtapeWith_Tracks,
+	mixtape: MixtapeWith_Tracks,
 ): UpsertMixtape => {
-  return {
-    ...mixtape,
-    _tracks: mixtape.tracks.map((t) => ({
-      id: t.id,
-      lexorank: t.lexorank,
-    })),
-  };
+	return {
+		...mixtape,
+		_tracks: mixtape.tracks.map(t => ({
+			id: t.id,
+			lexorank: t.lexorank,
+		})),
+	};
 };
 
 // query params
 export const mixtapeFilterParamsSchema = z.object({
-  search: z.string().optional(),
-  selectedMixtapeIds: queryStringArraySchema.optional(),
+	search: z.string().optional(),
+	selectedMixtapeIds: queryStringArraySchema.optional(),
 });
 
-export type PublicMixtape = Pick<Mixtape, "id" | "name" | "description">;
+export type PublicMixtape = Pick<Mixtape, 'id' | 'name' | 'description'>;
 export interface PublicMixtapeWith_Tracks extends PublicMixtape {
-  tracks: (PublicTrackWith_Artist_Files & { lexorank: string })[];
+	tracks: (PublicTrackWith_Artist_Files & { lexorank: string })[];
 }

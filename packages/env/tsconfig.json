@@ -1,5 +1,5 @@
 {
-  "extends": "@barely/tsconfig/base.json",
-  "include": ["index.ts", "parent-env.ts"],
-  "exclude": ["node_modules"],
+	"extends": "@barely/tsconfig/base.json",
+	"include": ["index.ts", "parent-env.ts"],
+	"exclude": ["node_modules"],
 }

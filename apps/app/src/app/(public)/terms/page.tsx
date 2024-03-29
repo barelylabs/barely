@@ -1,3 +1,3 @@
 export default function TermsPage() {
-  return <h1>Terms</h1>;
+	return <h1>Terms</h1>;
 }

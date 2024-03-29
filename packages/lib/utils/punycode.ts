@@ -1,3 +1,3 @@
-import punycode from "punycode/";
+import punycode from 'punycode/';
 
 export { punycode };

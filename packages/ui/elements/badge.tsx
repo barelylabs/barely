@@ -1,126 +1,126 @@
-"use client";
+'use client';
 
-import type { VariantProps } from "class-variance-authority";
-import { cn } from "@barely/lib/utils/cn";
-import { cva } from "class-variance-authority";
-import { X } from "lucide-react";
+import type { VariantProps } from 'class-variance-authority';
+import { cn } from '@barely/lib/utils/cn';
+import { cva } from 'class-variance-authority';
+import { X } from 'lucide-react';
 
-import type { IconSelection } from "./icon";
-import { Icon } from "./icon";
+import type { IconSelection } from './icon';
+import { Icon } from './icon';
 
 const badgeVariants = cva(
-  "inline-flex h-fit w-fit items-center justify-center rounded-full font-medium",
-  {
-    variants: {
-      variant: {
-        solid: "bg-primary text-primary-foreground",
-        secondary: "bg-secondary text-secondary-foreground",
-        muted: "bg-muted text-muted-foreground",
-        subtle:
-          "border-[0.5px] border-subtle-foreground/5 bg-subtle text-subtle-foreground",
-        outline: "border text-foreground",
-        success: "bg-green-100 text-green-800",
-        info: "bg-blue-100 text-blue-800",
-        warning: "bg-yellow-100 text-yellow-800",
-        danger: "bg-red-100 text-red-800",
-      },
-      size: {
-        "2xs": "space-x-1 px-2 py-0 text-2xs",
-        xs: "space-x-1 px-2 py-0.5 text-xs",
-        sm: "space-x-1 px-2.5 py-1 text-xs",
-        md: "space-x-1 px-3 py-1 text-xs sm:text-sm",
-        lg: "space-x-2 px-4 py-2 text-sm",
-      },
-      button: {
-        true: "active:scale-95 ",
-        false: "",
-      },
-    },
-    defaultVariants: {
-      variant: "solid",
-      size: "md",
-    },
-  },
+	'inline-flex h-fit w-fit items-center justify-center rounded-full font-medium',
+	{
+		variants: {
+			variant: {
+				solid: 'bg-primary text-primary-foreground',
+				secondary: 'bg-secondary text-secondary-foreground',
+				muted: 'bg-muted text-muted-foreground',
+				subtle:
+					'border-[0.5px] border-subtle-foreground/5 bg-subtle text-subtle-foreground',
+				outline: 'border text-foreground',
+				success: 'bg-green-100 text-green-800',
+				info: 'bg-blue-100 text-blue-800',
+				warning: 'bg-yellow-100 text-yellow-800',
+				danger: 'bg-red-100 text-red-800',
+			},
+			size: {
+				'2xs': 'space-x-1 px-2 py-0 text-2xs',
+				xs: 'space-x-1 px-2 py-0.5 text-xs',
+				sm: 'space-x-1 px-2.5 py-1 text-xs',
+				md: 'space-x-1 px-3 py-1 text-xs sm:text-sm',
+				lg: 'space-x-2 px-4 py-2 text-sm',
+			},
+			button: {
+				true: 'active:scale-95 ',
+				false: '',
+			},
+		},
+		defaultVariants: {
+			variant: 'solid',
+			size: 'md',
+		},
+	},
 );
 
-const badgeIconVariants = cva("mr-1", {
-  variants: {
-    size: {
-      "2xs": "h-3 w-3",
-      xs: "h-3 w-3",
-      sm: "h-4 w-4",
-      md: "h-5 w-5",
-      lg: "h-6 w-6",
-    },
-  },
+const badgeIconVariants = cva('mr-1', {
+	variants: {
+		size: {
+			'2xs': 'h-3 w-3',
+			xs: 'h-3 w-3',
+			sm: 'h-4 w-4',
+			md: 'h-5 w-5',
+			lg: 'h-6 w-6',
+		},
+	},
 });
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLSpanElement>,
-    VariantProps<typeof badgeVariants> {
-  asButton?: boolean;
-  rectangle?: boolean;
-  grow?: boolean;
-  icon?: IconSelection;
-  removeButton?: boolean;
-  onRemove?: () => void;
+	extends React.HTMLAttributes<HTMLSpanElement>,
+		VariantProps<typeof badgeVariants> {
+	asButton?: boolean;
+	rectangle?: boolean;
+	grow?: boolean;
+	icon?: IconSelection;
+	removeButton?: boolean;
+	onRemove?: () => void;
 }
 
 const Badge = ({
-  className,
-  variant,
-  size,
-  asButton,
-  rectangle,
-  grow,
-  icon,
-  removeButton,
-  onRemove,
-  ...props
+	className,
+	variant,
+	size,
+	asButton,
+	rectangle,
+	grow,
+	icon,
+	removeButton,
+	onRemove,
+	...props
 }: BadgeProps) => {
-  const BadgeIcon = icon && Icon[icon] ? Icon[icon] : () => null;
+	const BadgeIcon = icon && Icon[icon] ? Icon[icon] : () => null;
 
-  return (
-    <span
-      className={cn(
-        badgeVariants({ variant, size }),
-        rectangle && "rounded-sm",
-        grow && "w-full",
-        asButton && "active:scale-95 hover:cursor-pointer",
-        className,
-      )}
-      {...props}
-    >
-      {icon && (
-        <BadgeIcon
-          // className={cn(
-          //   "mr-1",
-          //   size === "sm" && "h-[8px] w-[8px] sm:h-2 sm:w-2",
-          //   (!size || size === "md") && "h-[10px] w-[10px] sm:h-3 sm:w-3",
-          // )}
-          className={badgeIconVariants({ size })}
-        />
-      )}
-      {props.children}
-      {removeButton && (
-        <button
-          className="ml-2 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              onRemove;
-            }
-          }}
-          onMouseDown={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-          onClick={onRemove}
-        >
-          <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-        </button>
-      )}
-    </span>
-  );
+	return (
+		<span
+			className={cn(
+				badgeVariants({ variant, size }),
+				rectangle && 'rounded-sm',
+				grow && 'w-full',
+				asButton && 'active:scale-95 hover:cursor-pointer',
+				className,
+			)}
+			{...props}
+		>
+			{icon && (
+				<BadgeIcon
+					// className={cn(
+					//   "mr-1",
+					//   size === "sm" && "h-[8px] w-[8px] sm:h-2 sm:w-2",
+					//   (!size || size === "md") && "h-[10px] w-[10px] sm:h-3 sm:w-3",
+					// )}
+					className={badgeIconVariants({ size })}
+				/>
+			)}
+			{props.children}
+			{removeButton && (
+				<button
+					className='ml-2 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2'
+					onKeyDown={e => {
+						if (e.key === 'Enter') {
+							onRemove;
+						}
+					}}
+					onMouseDown={e => {
+						e.preventDefault();
+						e.stopPropagation();
+					}}
+					onClick={onRemove}
+				>
+					<X className='h-3 w-3 text-muted-foreground hover:text-foreground' />
+				</button>
+			)}
+		</span>
+	);
 };
 
 export { Badge };

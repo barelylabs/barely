@@ -1,43 +1,34 @@
-import { env } from "../env";
+import { env } from '../env';
 
 const accountSid = env.TWILIO_ACCOUNT_SID;
 const authToken = env.TWILIO_AUTH_TOKEN;
 
-async function sendText({
-  to,
-  from,
-  body,
-}: {
-  to: string;
-  body: string;
-  from?: string;
-}) {
-  if (!accountSid || !authToken)
-    return console.error("Twilio credentials not found");
+async function sendText({ to, from, body }: { to: string; body: string; from?: string }) {
+	if (!accountSid || !authToken) return console.error('Twilio credentials not found');
 
-  // send sms using twilio rest api
+	// send sms using twilio rest api
 
-  const message = (await fetch(
-    `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Basic ${Buffer.from(
-          `${accountSid}:${authToken}`,
-        ).toString("base64")}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        From: from ?? env.TWILIO_PHONE_NUMBER,
-        To: to,
-        Body: body,
-      }).toString(),
-    },
-  ).then((res) => res.json())) as unknown;
+	const message = (await fetch(
+		`https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
+		{
+			method: 'POST',
+			headers: {
+				Authorization: `Basic ${Buffer.from(`${accountSid}:${authToken}`).toString(
+					'base64',
+				)}`,
+				'Content-Type': 'application/x-www-form-urlencoded',
+			},
+			body: new URLSearchParams({
+				From: from ?? env.TWILIO_PHONE_NUMBER,
+				To: to,
+				Body: body,
+			}).toString(),
+		},
+	).then(res => res.json())) as unknown;
 
-  console.log("sms message response => ", message);
+	console.log('sms message response => ', message);
 
-  return true;
+	return true;
 }
 
 export { sendText };
