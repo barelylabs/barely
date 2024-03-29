@@ -1,13 +1,17 @@
-import type { ColumnProps } from '@react-email/components';
+// import type { ColumnProps } from '@react-email/components';
+import type { ColumnProps } from '@react-email/column';
 import { Body as BodyPrimitive } from '@react-email/body';
 import { Button as ButtonPrimitive } from '@react-email/button';
-import { Column, Row, Text } from '@react-email/components';
+import { Column } from '@react-email/column';
+// import { Column, Row, Text } from '@react-email/components';
 import { Container as ContainerPrimitive } from '@react-email/container';
 import { Heading as HeadingPrimitive } from '@react-email/heading';
 import { Hr as HrPrimitive } from '@react-email/hr';
 import { Link as LinkPrimitive } from '@react-email/link';
+import { Row } from '@react-email/row';
+import { Text } from '@react-email/text';
 
-import { cn } from '../cn';
+// import { cn } from '../cn';
 
 export const resetText = {
 	margin: '0',
@@ -15,15 +19,15 @@ export const resetText = {
 	lineHeight: 1.4,
 };
 
-export {
-	CodeBlock as EmailCodeBlock,
-	CodeInline as EmailCodeInline,
-	Column,
-	Img as EmailImg,
-	Markdown as EmailMarkdown,
-	Row as EmailRow,
-	Section as EmailSection,
-} from '@react-email/components';
+// export {
+// 	CodeBlock as EmailCodeBlock,
+// 	CodeInline as EmailCodeInline,
+// 	Column,
+// 	Img as EmailImg,
+// 	Markdown as EmailMarkdown,
+// 	Row as EmailRow,
+// 	Section as EmailSection,
+// } from '@react-email/components';
 export { Html } from '@react-email/html';
 
 export { Preview } from '@react-email/preview';
@@ -138,8 +142,14 @@ export function InformationTableLabel(props: {
 }) {
 	return (
 		<Text
-			style={resetText}
-			className={cn('text-xs font-normal text-slate-500', props.className)}
+			style={{
+				...resetText,
+				fontWeight: 'normal',
+				color: '#64748b',
+				fontSize: '12px',
+				lineHeight: '16px',
+			}}
+			// className={cn('text-xs font-normal text-slate-500', props.className)}
 		>
 			{props.children}
 		</Text>
@@ -151,7 +161,16 @@ export function InformationTableValue(props: {
 	className?: string;
 }) {
 	return (
-		<Text style={resetText} className={cn('text-sm text-slate-800', props.className)}>
+		<Text
+			style={{
+				...resetText,
+				fontWeight: 'normal',
+				color: '#64748b',
+				fontSize: '12px',
+				lineHeight: '16px',
+			}}
+			// className={cn('text-sm text-slate-800', props.className)}
+		>
 			{props.children}
 		</Text>
 	);
@@ -163,11 +182,15 @@ export const informationTableColumn = {
 	borderColor: 'white',
 	borderWidth: '0px 1px 1px 0px',
 	height: '44px',
+	verticalAlign: 'top',
 };
 
 export function InformationTableColumn(props: { children: React.ReactNode }) {
 	return (
-		<Column style={informationTableColumn} className={cn('align-top')}>
+		<Column
+			style={informationTableColumn}
+			// className={cn('align-top')}
+		>
 			{props.children}
 		</Column>
 	);

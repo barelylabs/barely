@@ -1,18 +1,29 @@
-import {
-	Body,
-	Button,
-	Column,
-	Container,
-	Head,
-	Hr,
-	Html,
-	Img,
-	Row,
-	Section,
-	Tailwind,
-	Text,
-} from '@react-email/components';
+// import {
+// 	Body,
+// 	Button,
+// 	Column,
+// 	Container,
+// 	Head,
+// 	Hr,
+// 	Html,
+// 	Img,
+// 	Row,
+// 	Section,
+// 	Tailwind,
+// 	Text,
+// } from '@react-email/components';
+import { Body } from '@react-email/body';
+import { Button } from '@react-email/button';
+import { Column } from '@react-email/column';
+import { Container } from '@react-email/container';
+import { Head } from '@react-email/head';
+import { Hr } from '@react-email/hr';
+import { Html } from '@react-email/html';
+import { Img } from '@react-email/img';
 import { Preview } from '@react-email/preview';
+import { Row } from '@react-email/row';
+import { Section } from '@react-email/section';
+import { Text } from '@react-email/text';
 
 import {
 	InformationTableColumn,
@@ -74,93 +85,71 @@ export default function ReceiptEmail({
 	const previewText = `Your receipt from ${sellerName}`;
 
 	return (
-		<Tailwind>
-			<Html>
-				<Head />
-				<Preview>{previewText}</Preview>
+		// <Tailwind>
+		<Html>
+			<Head />
+			<Preview>{previewText}</Preview>
 
-				<Body style={main}>
-					<Container style={container} className='border-slate sm:border'>
-						<Section>
-							<Row>
-								<Column>
-									<Img
-										src={'https://app.barely.io/_static/logo.png'}
-										width='42'
-										height='42'
-										alt='Logo'
-									/>
-								</Column>
+			<Body style={main}>
+				<Container
+					style={container}
+					// className='border-slate sm:border'
+				>
+					<Section>
+						<Row>
+							<Column>
+								<Img
+									src={'https://app.barely.io/_static/logo.png'}
+									width='42'
+									height='42'
+									alt='Logo'
+								/>
+							</Column>
 
-								<Column align='right' style={{ display: 'table-cell' }}>
-									<Text style={heading} className='font-bold'>
-										Receipt
-									</Text>
-								</Column>
-							</Row>
-						</Section>
+							<Column align='right' style={{ display: 'table-cell' }}>
+								<Text style={{ ...heading, fontWeight: 'bold' }}>Receipt</Text>
+							</Column>
+						</Row>
+					</Section>
 
-						<Section>
-							<Row>
-								<Column align='right'>
-									<Text>
-										{date.toLocaleDateString(undefined, {
-											month: 'long',
-											day: 'numeric',
-											year: 'numeric',
-										})}
-									</Text>
-								</Column>
-							</Row>
-						</Section>
+					<Section>
+						<Row>
+							<Column align='right'>
+								<Text>
+									{date.toLocaleDateString(undefined, {
+										month: 'long',
+										day: 'numeric',
+										year: 'numeric',
+									})}
+								</Text>
+							</Column>
+						</Row>
+					</Section>
 
-						<Section className='border-collapse border-spacing-[2px] rounded-xl bg-slate-100 text-md'>
-							<Row>
-								<InformationTableColumn>
+					<Section
+						style={{
+							borderCollapse: 'collapse',
+							borderSpacing: '2px',
+							borderRadius: '0.75rem',
+							backgroundColor: '#f9fafb',
+							fontSize: '1rem',
+						}}
+						// className='border-collapse border-spacing-[2px] rounded-xl bg-slate-100 text-md'
+					>
+						<Row>
+							<InformationTableColumn>
+								<InformationTableRow>
+									<InformationTableLabel>Invoice</InformationTableLabel>
+									<InformationTableValue>{cartId}</InformationTableValue>
+								</InformationTableRow>
+
+								<InformationTableRow>
+									<InformationTableLabel>Creator</InformationTableLabel>
+									<InformationTableValue>{sellerName}</InformationTableValue>
+								</InformationTableRow>
+
+								{shippingAddress && (
 									<InformationTableRow>
-										<InformationTableLabel>Invoice</InformationTableLabel>
-										<InformationTableValue>{cartId}</InformationTableValue>
-									</InformationTableRow>
-
-									<InformationTableRow>
-										<InformationTableLabel>Creator</InformationTableLabel>
-										<InformationTableValue>{sellerName}</InformationTableValue>
-									</InformationTableRow>
-
-									{shippingAddress && (
-										<InformationTableRow>
-											<InformationTableLabel>Billed to</InformationTableLabel>
-											<InformationTableValue>{billingAddress.name}</InformationTableValue>
-											<InformationTableValue>
-												{billingAddress.state} {billingAddress.postalCode}
-											</InformationTableValue>
-											<InformationTableValue>
-												{billingAddress.country}
-											</InformationTableValue>
-										</InformationTableRow>
-									)}
-								</InformationTableColumn>
-
-								{shippingAddress ? (
-									<InformationTableColumn>
-										<InformationTableLabel>Shipping to</InformationTableLabel>
-										<InformationTableValue>{shippingAddress.name}</InformationTableValue>
-										<InformationTableValue>{shippingAddress.line1}</InformationTableValue>
-										{shippingAddress.line2 && (
-											<InformationTableValue>
-												{shippingAddress.line2}
-											</InformationTableValue>
-										)}
-										<InformationTableValue>{shippingAddress.city}</InformationTableValue>
-										<InformationTableValue>
-											{shippingAddress.state} {shippingAddress.postalCode}
-										</InformationTableValue>
-										<InformationTableValue>
-											{shippingAddress.country}
-										</InformationTableValue>
-									</InformationTableColumn>
-								) : (
-									<InformationTableColumn>
 										<InformationTableLabel>Billed to</InformationTableLabel>
 										<InformationTableValue>{billingAddress.name}</InformationTableValue>
 										<InformationTableValue>
@@ -169,139 +158,213 @@ export default function ReceiptEmail({
 										<InformationTableValue>
 											{billingAddress.country}
 										</InformationTableValue>
-									</InformationTableColumn>
+									</InformationTableRow>
 								)}
-							</Row>
-						</Section>
+							</InformationTableColumn>
 
-						<Section className='border-collapse border-spacing-0 rounded-lg text-md'>
-							<Row>
-								<Column align='right'>
-									<Text style={{ ...resetText, marginTop: '20px' }}>Total (USD)</Text>
-									<Text style={{ ...heading, marginTop: 0 }}>{total}</Text>
-								</Column>
-							</Row>
+							{shippingAddress ? (
+								<InformationTableColumn>
+									<InformationTableLabel>Shipping to</InformationTableLabel>
+									<InformationTableValue>{shippingAddress.name}</InformationTableValue>
+									<InformationTableValue>{shippingAddress.line1}</InformationTableValue>
+									{shippingAddress.line2 && (
+										<InformationTableValue>{shippingAddress.line2}</InformationTableValue>
+									)}
+									<InformationTableValue>{shippingAddress.city}</InformationTableValue>
+									<InformationTableValue>
+										{shippingAddress.state} {shippingAddress.postalCode}
+									</InformationTableValue>
+									<InformationTableValue>{shippingAddress.country}</InformationTableValue>
+								</InformationTableColumn>
+							) : (
+								<InformationTableColumn>
+									<InformationTableLabel>Billed to</InformationTableLabel>
+									<InformationTableValue>{billingAddress.name}</InformationTableValue>
+									<InformationTableValue>
+										{billingAddress.state} {billingAddress.postalCode}
+									</InformationTableValue>
+									<InformationTableValue>{billingAddress.country}</InformationTableValue>
+								</InformationTableColumn>
+							)}
+						</Row>
+					</Section>
 
-							<Hr style={{ margin: 0 }} />
+					<Section
+						style={{
+							borderCollapse: 'collapse',
+							borderSpacing: '0',
+							borderRadius: '0.75rem',
+							fontSize: '1rem',
+						}}
+					>
+						<Row>
+							<Column align='right'>
+								<Text style={{ ...resetText, marginTop: '20px' }}>Total (USD)</Text>
+								<Text style={{ ...heading, marginTop: 0 }}>{total}</Text>
+							</Column>
+						</Row>
 
-							<Row className='mt-2'>
-								<Column>
-									<Text style={resetText} className='text-lg font-medium'>
-										Product
-									</Text>
-								</Column>
-								<Column align='right'>
-									<Text style={resetText} className='text-lg font-medium'>
-										Total
-									</Text>
-								</Column>
-							</Row>
-							{/* <Hr style={{ opacity: 0 }} /> */}
+						<Hr style={{ margin: 0 }} />
 
-							{products.map((product, index) => {
-								return (
-									<Section key={index}>
-										<Row style={{ padding: '10px 0' }}>
-											<Column style={{ verticalAlign: 'top' }}>
-												<Text className='m-0 p-0 pr-2 text-sm leading-tight'>
-													{product.name}
-												</Text>
+						<Row
+							style={{
+								marginTop: '8px',
+							}}
+							// className='mt-2'
+						>
+							<Column>
+								<Text
+									style={{
+										...resetText,
+										fontSize: '1.125rem',
+										lineHeight: '1.5rem',
+										fontWeight: 'bold',
+									}}
+								>
+									Product
+								</Text>
+							</Column>
+							<Column align='right'>
+								<Text
+									style={{
+										...resetText,
+										fontSize: '1.125rem',
+										lineHeight: '1.5rem',
+										fontWeight: 'bold',
+									}}
+								>
+									Total
+								</Text>
+							</Column>
+						</Row>
+						{/* <Hr style={{ opacity: 0 }} /> */}
 
-												{product.payWhatYouWantPrice && (
-													<Text
-														style={{
-															...resetText,
-															...mutedText,
-															marginTop: '4px',
-															fontSize: '12px',
-														}}
-													>
-														Pay what you want: {product.payWhatYouWantPrice}
-													</Text>
-												)}
+						{products.map((product, index) => {
+							return (
+								<Section key={index}>
+									<Row style={{ padding: '10px 0' }}>
+										<Column style={{ verticalAlign: 'top' }}>
+											<Text
+												style={{
+													...resetText,
+													fontSize: '14px',
+													lineHeight: 1.25,
+													margin: '0',
+													padding: '0',
+													paddingRight: '8px',
+												}}
+												// className='m-0 p-0 pr-2 text-sm leading-tight'
+											>
+												{product.name}
+											</Text>
 
-												{product.shipping && (
-													<Text
-														style={{
-															...resetText,
-															...mutedText,
-															marginTop: '4px',
-															fontSize: '12px',
-														}}
-													>
-														Shipping: {product.shipping}
-													</Text>
-												)}
-											</Column>
-
-											<Column align='right' style={{ verticalAlign: 'top' }}>
+											{product.payWhatYouWantPrice && (
 												<Text
 													style={{
-														fontSize: '14px',
-														margin: '0',
-														padding: '0',
-														lineHeight: 1.4,
+														...resetText,
+														...mutedText,
+														marginTop: '4px',
+														fontSize: '12px',
 													}}
 												>
-													{product.price}
+													Pay what you want: {product.payWhatYouWantPrice}
 												</Text>
-											</Column>
-										</Row>
-										<Hr />
-									</Section>
-								);
-							})}
+											)}
 
-							<Section style={{ width: 'fit-content' }} align='right'>
-								{shippingTotal && (
-									<>
-										<Row>
-											<Column style={{ display: 'table-cell' }} align='right'>
-												<Text style={resetText} className='my-2'>
-													Shipping:
+											{product.shipping && (
+												<Text
+													style={{
+														...resetText,
+														...mutedText,
+														marginTop: '4px',
+														fontSize: '12px',
+													}}
+												>
+													Shipping: {product.shipping}
 												</Text>
-											</Column>
-											<Column
-												align='right'
-												style={{ display: 'table-cell', width: '90px' }}
+											)}
+										</Column>
+
+										<Column align='right' style={{ verticalAlign: 'top' }}>
+											<Text
+												style={{
+													fontSize: '14px',
+													margin: '0',
+													padding: '0',
+													lineHeight: 1.4,
+												}}
 											>
-												<Text style={resetText} className='my-2 '>
-													{shippingTotal}
-												</Text>
-											</Column>
-										</Row>
-										<Hr />
-									</>
-								)}
+												{product.price}
+											</Text>
+										</Column>
+									</Row>
+									<Hr />
+								</Section>
+							);
+						})}
 
-								<Row>
-									<Column style={{ display: 'table-cell' }} align='right'>
-										<Text className='font-medium'>Total:</Text>
-									</Column>
-									<Column align='right' style={{ display: 'table-cell', width: '90px' }}>
-										<Text className='font-medium'>{total}</Text>
-									</Column>
-								</Row>
-							</Section>
-						</Section>
+						<Section style={{ width: 'fit-content' }} align='right'>
+							{shippingTotal && (
+								<>
+									<Row>
+										<Column style={{ display: 'table-cell' }} align='right'>
+											<Text style={{ ...resetText, marginTop: '8px' }}>Shipping:</Text>
+										</Column>
+										<Column
+											align='right'
+											style={{ display: 'table-cell', width: '90px' }}
+										>
+											<Text style={{ ...resetText, marginTop: '8px' }}>
+												{shippingTotal}
+											</Text>
+										</Column>
+									</Row>
+									<Hr />
+								</>
+							)}
 
-						<Section className='mt-6 sm:mt-20'>
 							<Row>
-								<Column>
-									<Button style={{ ...outlineButton }} href={`mailto:${supportEmail}`}>
-										Contact Support
-									</Button>
+								<Column style={{ display: 'table-cell' }} align='right'>
+									<Text style={{ ...resetText, fontWeight: 'bold' }}>Total:</Text>
+								</Column>
+								<Column align='right' style={{ display: 'table-cell', width: '90px' }}>
+									<Text style={{ ...resetText, fontWeight: 'bold' }}>{total}</Text>
 								</Column>
 							</Row>
-							<Text className='text-slate text-center text-xs'>
-								If you need any help, please use the link above to contact the creator
-								directly.
-							</Text>
 						</Section>
-					</Container>
-				</Body>
-			</Html>
-		</Tailwind>
+					</Section>
+
+					<Section
+						style={{
+							marginTop: '24px',
+						}}
+						// className='mt-6 sm:mt-20'
+					>
+						<Row>
+							<Column>
+								<Button style={{ ...outlineButton }} href={`mailto:${supportEmail}`}>
+									Contact Support
+								</Button>
+							</Column>
+						</Row>
+						<Text
+							style={{
+								...resetText,
+								textAlign: 'center',
+								color: '#64748b',
+								fontSize: '12px',
+								lineHeight: '1rem',
+							}}
+							// className='text-slate text-center text-xs'
+						>
+							If you need any help, please use the link above to contact the creator
+							directly.
+						</Text>
+					</Section>
+				</Container>
+			</Body>
+		</Html>
+		// </Tailwind>
 	);
 }
 
