@@ -140,16 +140,16 @@ export const mergeRouters = t.mergeRouters;
 export const publicProcedure = t.procedure;
 
 export const privateProcedure = t.procedure.use(async opts => {
-	const { ctx } = opts;
+	// const { ctx } = opts;
 
-	if (!ctx.user) {
+	if (!opts.ctx.user) {
 		throw new TRPCError({
 			code: 'UNAUTHORIZED',
 			message: "privateProcedure: Can't find that user in our database.",
 		});
 	}
 
-	if (!ctx.workspace) {
+	if (!opts.ctx.workspace) {
 		throw new TRPCError({
 			code: 'UNAUTHORIZED',
 			message: "privateProcedure: Can't find that workspace in our database.",
@@ -158,8 +158,8 @@ export const privateProcedure = t.procedure.use(async opts => {
 
 	return opts.next({
 		ctx: {
-			user: ctx.user,
-			workspace: ctx.workspace,
+			user: opts.ctx.user,
+			workspace: opts.ctx.workspace,
 		},
 	});
 });
