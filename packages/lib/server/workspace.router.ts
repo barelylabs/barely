@@ -139,6 +139,8 @@ export const workspaceRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
+			console.log('updateAvatar input => ', input);
+			console.log('updateAvatar ctx => ', ctx);
 			// check if there is already a default workspace avatar
 			const defaultAvatar = await ctx.db.pool.query._Files_To_Workspaces__AvatarImage
 				.findFirst({
@@ -182,12 +184,12 @@ export const workspaceRouter = createTRPCRouter({
 				.catch(console.error);
 
 			try {
-				const pushRes = await pushEvent('workspace', 'update', {
+				await pushEvent('workspace', 'update', {
 					id: ctx.workspace.id,
 					pageSessionId: ctx.pageSessionId,
 				});
 
-				console.log('pushed event', pushRes);
+				// console.log('pushed event', pushRes);
 			} catch (e) {
 				console.error('error pushing workspace update event => ', e);
 			}

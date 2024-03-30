@@ -122,9 +122,7 @@ export const createTRPCRouter = t.router;
 export const mergeRouters = t.mergeRouters;
 
 export const publicProcedure = t.procedure;
-export const publicEdgeProcedure = publicProcedure.meta({
-	edge: true,
-});
+
 export const privateProcedure = t.procedure.use(async opts => {
 	const { ctx } = opts;
 
@@ -179,6 +177,4 @@ export const workspaceQueryProcedure = privateProcedure.use(async opts => {
 			workspace,
 		},
 	});
-
-	// we're making sure that the user has access to the workspace
 });
