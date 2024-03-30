@@ -27,6 +27,12 @@ const handler = auth(async req => {
 		onError({ error, path }) {
 			console.error(`>>> tRPC Error on '${path}'`, error);
 		},
+	}).catch(err => {
+		console.error('err => ', err);
+		return new Response(null, {
+			statusText: 'Internal Server Error',
+			status: 500,
+		});
 	});
 
 	setCorsHeaders(response);
