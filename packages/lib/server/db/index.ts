@@ -1,8 +1,8 @@
+import { zEnv } from '@barely/env';
 import { neon, neonConfig, Pool } from '@neondatabase/serverless';
 import { drizzle as drizzleHttp } from 'drizzle-orm/neon-http';
 import { drizzle as drizzlePool } from 'drizzle-orm/neon-serverless';
 
-import { env } from '../../env';
 import * as adCreativeSql from '../routes/ad-creative/ad-creative.sql';
 import * as adSetSql from '../routes/ad-set/ad-set.sql';
 import * as adSql from '../routes/ad/ad.sql';
@@ -46,6 +46,11 @@ import * as visitorSessionSql from '../routes/visitor-session/visitor-session.sq
 import * as workspaceInviteSql from '../routes/workspace-invite/workspace-invite.sql';
 import * as workspaceSql from '../routes/workspace/workspace.sql';
 import * as vidRenderSql from '../vid-render.sql';
+
+const { env } = zEnv({
+	serverEnvKeys: ['DATABASE_URL', 'DATABASE_POOL_URL'],
+	clientEnvKeys: [],
+});
 
 export const dbSchema = {
 	...adSql,

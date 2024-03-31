@@ -157,6 +157,7 @@ export async function getPublicPressKit({
 	if (!publicPressKitData) {
 		return null;
 	}
+
 	/* normalize press kit */
 
 	// normalize workspace
