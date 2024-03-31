@@ -3,6 +3,6 @@ import { stripeConnectRouter } from '@barely/lib/server/routes/stripe-connect/st
 
 export { OPTIONS } from '@barely/lib/utils/trpc-route';
 
-const handler = routeHandler(stripeConnectRouter);
+const handler = routeHandler('stripeConnect', stripeConnectRouter);
 
 export { handler as GET, handler as POST };

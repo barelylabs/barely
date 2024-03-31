@@ -8,10 +8,12 @@ import { setCorsHeaders } from '../../utils/trpc-route';
 import { auth } from '../auth';
 import { createTRPCContext } from './trpc';
 
-export const routeHandler = (router: AnyRouter) =>
+export const routeHandler = (path: string, router: AnyRouter) =>
 	auth(async req => {
+		console.log('req => ', req);
+
 		const response = await fetchRequestHandler({
-			endpoint: '/api/trpc/workspace-stripe',
+			endpoint: '/api/trpc/' + path,
 			router,
 			req,
 			createContext: () =>

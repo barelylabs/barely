@@ -3,6 +3,6 @@ import { workspaceInviteRouter } from '@barely/lib/server/routes/workspace-invit
 import { OPTIONS } from '@barely/lib/utils/trpc-route';
 
 export const runtime = 'edge';
-const handler = routeHandler(workspaceInviteRouter);
+const handler = routeHandler('workspaceInvite', workspaceInviteRouter);
 
 export { OPTIONS, handler as GET, handler as POST };

@@ -3,6 +3,6 @@ import { mixtapeRouter } from '@barely/lib/server/routes/mixtape/mixtape.router'
 
 export { OPTIONS } from '@barely/lib/utils/trpc-route';
 
-const handler = routeHandler(mixtapeRouter);
+const handler = routeHandler('mixtape', mixtapeRouter);
 
 export { handler as GET, handler as POST };

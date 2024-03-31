@@ -308,6 +308,9 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 							serverName = firstPart;
 						}
 
+						console.log('serverName => ', serverName);
+						console.log('path => ', path);
+
 						const link = servers[serverName];
 
 						return link({

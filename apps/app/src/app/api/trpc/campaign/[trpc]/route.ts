@@ -3,6 +3,6 @@ import { campaignRouter } from '@barely/lib/server/routes/campaign/campaign.rout
 
 export { OPTIONS } from '@barely/lib/utils/trpc-route';
 
-const handler = routeHandler(campaignRouter);
+const handler = routeHandler('campaign', campaignRouter);
 
 export { handler as GET, handler as POST };

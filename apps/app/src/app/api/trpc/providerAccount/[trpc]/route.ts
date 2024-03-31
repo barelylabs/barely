@@ -3,6 +3,6 @@ import { providerAccountRouter } from '@barely/lib/server/routes/provider-accoun
 
 export { OPTIONS } from '@barely/lib/utils/trpc-route';
 
-const handler = routeHandler(providerAccountRouter);
+const handler = routeHandler('providerAccount', providerAccountRouter);
 
 export { handler as GET, handler as POST };

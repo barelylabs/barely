@@ -3,6 +3,6 @@ import { statRouter } from '@barely/lib/server/routes/stat/stat.router';
 
 export { OPTIONS } from '@barely/lib/utils/trpc-route';
 
-const handler = routeHandler(statRouter);
+const handler = routeHandler('stat', statRouter);
 
 export { handler as GET, handler as POST };

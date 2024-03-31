@@ -4,6 +4,6 @@ import { OPTIONS } from '@barely/lib/utils/trpc-route';
 
 export const runtime = 'edge';
 
-const handler = routeHandler(workspaceRouter);
+const handler = routeHandler('workspace', workspaceRouter);
 
 export { OPTIONS, handler as GET, handler as POST };

@@ -3,6 +3,6 @@ import { visitorSessionRouter } from '@barely/lib/server/routes/visitor-session/
 
 export { OPTIONS } from '@barely/lib/utils/trpc-route';
 
-const handler = routeHandler(visitorSessionRouter);
+const handler = routeHandler('visitorSession', visitorSessionRouter);
 
 export { handler as GET, handler as POST };

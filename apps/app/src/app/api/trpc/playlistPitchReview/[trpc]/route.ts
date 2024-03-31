@@ -3,6 +3,6 @@ import { playlistPitchReviewRouter } from '@barely/lib/server/routes/playlist-pi
 
 export { OPTIONS } from '@barely/lib/utils/trpc-route';
 
-const handler = routeHandler(playlistPitchReviewRouter);
+const handler = routeHandler('playlistPitchReview', playlistPitchReviewRouter);
 
 export { handler as GET, handler as POST };

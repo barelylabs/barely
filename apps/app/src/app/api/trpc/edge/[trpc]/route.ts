@@ -5,6 +5,6 @@ export const runtime = 'edge';
 
 export { OPTIONS } from '@barely/lib/utils/trpc-route';
 
-const handler = routeHandler(appRouter);
+const handler = routeHandler('edge', appRouter);
 
 export { handler as GET, handler as POST };

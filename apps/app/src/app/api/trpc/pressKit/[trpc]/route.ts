@@ -3,6 +3,6 @@ import { pressKitRouter } from '@barely/lib/server/routes/press-kit/press-kit.ro
 
 export { OPTIONS } from '@barely/lib/utils/trpc-route';
 
-const handler = routeHandler(pressKitRouter);
+const handler = routeHandler('pressKit', pressKitRouter);
 
 export { handler as GET, handler as POST };

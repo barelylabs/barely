@@ -3,6 +3,6 @@ import { cartFunnelRouter } from '@barely/lib/server/routes/cart-funnel/cart-fun
 
 export { OPTIONS } from '@barely/lib/utils/trpc-route';
 
-const handler = routeHandler(cartFunnelRouter);
+const handler = routeHandler('cartFunnel', cartFunnelRouter);
 
 export { handler as GET, handler as POST };
