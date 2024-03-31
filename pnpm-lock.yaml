@@ -712,9 +712,6 @@ importers:
       resend:
         specifier: ^3.2.0
         version: 3.2.0
-      responsive-react-email:
-        specifier: ^0.0.5
-        version: 0.0.5(react-email@2.1.0)(react@18.2.0)
     devDependencies:
       '@barely/env':
         specifier: workspace:^0.1.0
@@ -21981,16 +21978,6 @@ packages:
     dependencies:
       lowercase-keys: 1.0.1
     dev: true
-
-  /responsive-react-email@0.0.5(react-email@2.1.0)(react@18.2.0):
-    resolution: {integrity: sha512-r+Z6Yp6G3Sm9eKmttsb8GVij25rXJGN2eoQ9OfMcuVMfBfq1NdytIFLBo/6wdMW1zw+ko1FEUG/zgRyK9UuYLw==}
-    peerDependencies:
-      react: 18.x
-      react-email: 1.x
-    dependencies:
-      react: 18.2.0
-      react-email: 2.1.0(eslint@8.56.0)
-    dev: false
 
   /restore-cursor@3.1.0:
     resolution: {integrity: sha512-l+sSefzHpj5qimhFSE5a8nufZYAM3sBSVMAPtYkmC+4EH2anSGaEMXSD0izRQbu9nfyQ9y5JrVmp7E8oZrUjvA==}

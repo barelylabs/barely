@@ -82,8 +82,6 @@ export function HandleForm() {
 					</div>
 				</div>
 			)}
-
-			{JSON.stringify(form.formState.errors, null, 2)}
 		</SettingsCardForm>
 	);
 }
