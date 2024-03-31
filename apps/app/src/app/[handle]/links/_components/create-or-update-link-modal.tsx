@@ -6,7 +6,10 @@ import { useDebounce } from '@barely/lib/hooks/use-debounce';
 import { useDomains } from '@barely/lib/hooks/use-domains';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
-import { defaultLink, upsertLinkSchema } from '@barely/lib/server/link.schema';
+import {
+	defaultLink,
+	upsertLinkSchema,
+} from '@barely/lib/server/routes/link/link.schema';
 import {
 	getTransparentLinkDataFromUrl,
 	getUrlWithoutTrackingParams,

@@ -1,10 +1,11 @@
 'use client';
 
-import type { EdgeRouterOutputs } from '@barely/lib/server/api/router.edge';
+// import type { EdgeRouterOutputs } from '@barely/lib/server/api/router.edge';
+import type { AppRouterOutputs } from '@barely/lib/server/api/react';
 import type {
 	CartFunnel,
 	cartFunnelFilterParamsSchema,
-} from '@barely/lib/server/cart-funnel.schema';
+} from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
 import {
@@ -19,10 +20,10 @@ import {
 import { useTypedQuery } from '@barely/lib/hooks/use-typed-query';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
-import { cartFunnelSearchParamsSchema } from '@barely/lib/server/cart-funnel.schema';
+import { cartFunnelSearchParamsSchema } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
 
 interface CartFunnelContext {
-	funnels: EdgeRouterOutputs['cartFunnel']['byWorkspace']['funnels'];
+	funnels: AppRouterOutputs['cartFunnel']['byWorkspace']['funnels'];
 	funnelSelection: Selection;
 	lastSelectedFunnelId: string | undefined;
 	lastSelectedFunnel: CartFunnel | undefined;
@@ -54,7 +55,7 @@ export function CartFunnelContextProvider({
 	selectedFunnelIds,
 }: {
 	children: React.ReactNode;
-	initialFunnels: Promise<EdgeRouterOutputs['cartFunnel']['byWorkspace']>;
+	initialFunnels: Promise<AppRouterOutputs['cartFunnel']['byWorkspace']>;
 	filters: z.infer<typeof cartFunnelFilterParamsSchema>;
 	selectedFunnelIds: string[];
 }) {

@@ -1,6 +1,6 @@
 import type { z } from 'zod';
-import { api } from '@barely/lib/server/api/server.edge';
-import { mixtapeFilterParamsSchema } from '@barely/lib/server/mixtape.schema';
+import { api } from '@barely/lib/server/api/server';
+import { mixtapeFilterParamsSchema } from '@barely/lib/server/routes/mixtape/mixtape.schema';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllMixtapes } from '~/app/[handle]/mixtapes/_components/all-mixtapes';

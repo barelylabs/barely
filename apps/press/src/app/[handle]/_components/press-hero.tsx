@@ -1,6 +1,6 @@
 'use client';
 
-import type { PublicPressKit } from '@barely/lib/server/press-kit.schema';
+import type { PublicPressKit } from '@barely/lib/server/routes/press-kit/press-kit.schema';
 import { useContext, useEffect, useRef, useState } from 'react';
 
 import { WorkspaceSocialLinks } from '@barely/ui/components/workspace-social-links';

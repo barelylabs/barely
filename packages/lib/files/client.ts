@@ -2,7 +2,7 @@
 import type { ContentDisposition } from '@uploadthing/shared';
 import { UploadThingError } from '@uploadthing/shared';
 
-import type { FileRecord } from '../server/file.schema';
+import type { FileRecord } from '../server/routes/file/file.schema';
 import type { MultiPartPresigned, SinglePartPresigned } from './types';
 import { contentDisposition } from './utils';
 

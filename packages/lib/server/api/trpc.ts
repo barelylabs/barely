@@ -15,7 +15,7 @@ import { ratelimit } from '../../utils/upstash';
  */
 
 import { db } from '../db';
-import { _Users_To_Workspaces } from '../user.sql';
+import { _Users_To_Workspaces } from '../routes/user/user.sql';
 
 const trpcSources = ['nextjs-react', 'rsc', 'rest'] as const;
 type TRPCSource = (typeof trpcSources)[number];
@@ -29,6 +29,7 @@ export const createTRPCContext = async (opts: {
 
 	if (opts.session) {
 		session = opts.session;
+		console.log('auth session => ', session);
 	} else if (!opts.rest) {
 		const { auth } = await import('../auth');
 		session = await auth();
@@ -41,6 +42,8 @@ export const createTRPCContext = async (opts: {
 			? (opts.headers.get('x-trpc-source') as TRPCSource)
 			: 'unknown';
 
+	console.log('source => ', source);
+
 	const longitude = opts.rest
 		? undefined
 		: opts.headers.get('x-longitude') ??
@@ -52,23 +55,36 @@ export const createTRPCContext = async (opts: {
 			opts.headers.get('x-vercel-ip-latitude') ??
 			undefined;
 
+	console.log('longitude => ', longitude);
+	console.log('latitude => ', latitude);
+
 	const pageSessionId = opts.rest
 		? undefined
 		: opts.headers.get('x-page-session-id') ?? null;
+
+	console.log('pageSessionId => ', pageSessionId);
 
 	const pusherSocketId = opts.rest
 		? undefined
 		: opts.headers.get('x-pusher-socket-id') ?? null;
 
+	console.log('pusherSocketId => ', pusherSocketId);
+
 	const workspaceHandle = opts.rest
 		? undefined
 		: opts.headers.get('x-workspace-handle') ?? null;
+
+	console.log('workspaceHandle => ', workspaceHandle);
 
 	const workspace = workspaceHandle
 		? session?.user.workspaces.find(w => w.handle === workspaceHandle)
 		: null;
 
+	console.log('workspace => ', workspace);
+
 	const ip = opts.rest ? '' : opts.headers.get('x-real-ip') ?? '';
+
+	console.log('ip => ', ip);
 
 	const context = {
 		// auth
@@ -122,20 +138,18 @@ export const createTRPCRouter = t.router;
 export const mergeRouters = t.mergeRouters;
 
 export const publicProcedure = t.procedure;
-export const publicEdgeProcedure = publicProcedure.meta({
-	edge: true,
-});
-export const privateProcedure = t.procedure.use(async opts => {
-	const { ctx } = opts;
 
-	if (!ctx.user) {
+export const privateProcedure = t.procedure.use(async opts => {
+	// const { ctx } = opts;
+
+	if (!opts.ctx.user) {
 		throw new TRPCError({
 			code: 'UNAUTHORIZED',
 			message: "privateProcedure: Can't find that user in our database.",
 		});
 	}
 
-	if (!ctx.workspace) {
+	if (!opts.ctx.workspace) {
 		throw new TRPCError({
 			code: 'UNAUTHORIZED',
 			message: "privateProcedure: Can't find that workspace in our database.",
@@ -144,8 +158,8 @@ export const privateProcedure = t.procedure.use(async opts => {
 
 	return opts.next({
 		ctx: {
-			user: ctx.user,
-			workspace: ctx.workspace,
+			user: opts.ctx.user,
+			workspace: opts.ctx.workspace,
 		},
 	});
 });
@@ -179,6 +193,4 @@ export const workspaceQueryProcedure = privateProcedure.use(async opts => {
 			workspace,
 		},
 	});
-
-	// we're making sure that the user has access to the workspace
 });

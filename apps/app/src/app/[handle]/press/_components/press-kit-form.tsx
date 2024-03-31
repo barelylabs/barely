@@ -1,13 +1,13 @@
 'use client';
 
-import type { SortableFile } from '@barely/lib/server/file.schema';
-import type { NormalizedPressKit } from '@barely/lib/server/press-kit.schema';
+import type { SortableFile } from '@barely/lib/server/routes/file/file.schema';
+import type { NormalizedPressKit } from '@barely/lib/server/routes/press-kit/press-kit.schema';
 import type { z } from 'zod';
 import { use, useState } from 'react';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { useZodForm } from '@barely/lib/hooks/use-zod-form';
 import { api } from '@barely/lib/server/api/react';
-import { updatePressKitSchema } from '@barely/lib/server/press-kit.schema';
+import { updatePressKitSchema } from '@barely/lib/server/routes/press-kit/press-kit.schema';
 import { useFieldArray } from 'react-hook-form';
 
 import { Button } from '@barely/ui/elements/button';

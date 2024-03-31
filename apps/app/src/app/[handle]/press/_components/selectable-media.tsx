@@ -1,6 +1,6 @@
 'use client';
 
-import type { FileRecord } from '@barely/lib/server/file.schema';
+import type { FileRecord } from '@barely/lib/server/routes/file/file.schema';
 import { useState } from 'react';
 import { useFiles } from '@barely/lib/hooks/use-files';
 import { useDragAndDrop } from 'react-aria-components';

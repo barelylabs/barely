@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getDefaultWorkspaceOfCurrentUser } from '@barely/lib/server/auth/auth.fns';
-import { checkIfWorkspaceHasPendingInviteForUser } from '@barely/lib/server/workspace.fns';
+import { checkIfWorkspaceHasPendingInviteForUser } from '@barely/lib/server/routes/workspace/workspace.fns';
 import { auth } from '@barely/server/auth';
 
 import { SidebarNav } from '~/app/[handle]/_components/dash-sidebar-nav';

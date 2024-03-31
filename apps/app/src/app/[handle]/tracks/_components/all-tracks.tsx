@@ -1,6 +1,6 @@
 'use client';
 
-import type { EdgeRouterOutputs } from '@barely/lib/server/api/router.edge';
+import type { AppRouterOutputs } from '@barely/lib/server/api/router';
 
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
@@ -51,7 +51,7 @@ export function AllTracks() {
 	);
 }
 
-function TrackCard({ track }: { track: EdgeRouterOutputs['track']['byWorkspace'][0] }) {
+function TrackCard({ track }: { track: AppRouterOutputs['track']['byWorkspace'][0] }) {
 	const { setShowEditTrackModal, setShowArchiveTrackModal, setShowDeleteTrackModal } =
 		useTrackContext();
 

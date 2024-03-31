@@ -1,5 +1,5 @@
 import type { NextRequest } from 'next/server';
-import { checkForAbandonedUpsellCarts } from '@barely/lib/server/cart.fns';
+import { checkForAbandonedUpsellCarts } from '@barely/lib/server/routes/cart/cart.fns';
 
 export async function POST(req: NextRequest) {
 	const headers = req.headers;

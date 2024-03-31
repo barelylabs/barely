@@ -2,8 +2,8 @@
 
 import type { z } from 'zod';
 import { useEffect } from 'react';
-import { api } from '@barely/server/api/react';
-import { updatePlaylistPitchCampaign_ScreeningSchema } from '@barely/server/campaign.schema';
+import { api } from '@barely/lib/server/api/react';
+import { updatePlaylistPitchCampaign_ScreeningSchema } from '@barely/lib/server/routes/campaign/campaign.schema';
 
 import { useSubscribe } from '@barely/hooks/use-subscribe';
 import { useZodForm } from '@barely/hooks/use-zod-form';

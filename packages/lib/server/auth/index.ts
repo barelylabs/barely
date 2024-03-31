@@ -1,8 +1,8 @@
 import type { DefaultSession } from '@auth/core/types';
 import NextAuth from 'next-auth';
 
-import type { User as DbUser, User_To_Workspace } from '../user.schema';
-import type { Workspace } from '../workspace.schema';
+import type { User as DbUser, User_To_Workspace } from '../routes/user/user.schema';
+import type { Workspace } from '../routes/workspace/workspace.schema';
 import { env } from '../../env';
 import { db } from '../db';
 import { NeonAdapter } from './auth.adapter';

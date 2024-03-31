@@ -1,4 +1,4 @@
-import type { PublicImage } from '@barely/lib/server/file.schema';
+import type { PublicImage } from '@barely/lib/server/routes/file/file.schema';
 
 import { PhotoGallery } from '@barely/ui/elements/photo-gallery';
 

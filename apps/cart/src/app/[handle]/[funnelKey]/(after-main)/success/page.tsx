@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { api } from '@barely/lib/server/api/server.edge';
+import { cartApi } from '@barely/lib/server/routes/cart/cart.api.server';
 
 import { WorkspaceSocialLinks } from '@barely/ui/components/workspace-social-links';
 import { Button } from '@barely/ui/elements/button';
@@ -21,7 +21,7 @@ export default async function CartSuccessPage({
 	console.log('cartId', cartId);
 	if (!cartId) return null;
 
-	const { funnel } = await api().cart.getByIdAndFunnelKey({
+	const { funnel } = await cartApi.getByIdAndFunnelKey({
 		id: cartId,
 		handle,
 		funnelKey,

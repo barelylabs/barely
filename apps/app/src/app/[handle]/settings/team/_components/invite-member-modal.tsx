@@ -4,7 +4,7 @@ import type { z } from 'zod';
 import { atomWithToggle } from '@barely/lib/atoms/atom-with-toggle';
 import { useZodForm } from '@barely/lib/hooks/use-zod-form';
 import { api } from '@barely/lib/server/api/react';
-import { inviteMemberSchema } from '@barely/lib/server/workspace.schema';
+import { inviteMemberSchema } from '@barely/lib/server/routes/workspace-invite/workspace-invite.schema';
 import { useAtom } from 'jotai';
 
 import { Modal, ModalBody, ModalHeader } from '@barely/ui/elements/modal';
@@ -24,7 +24,7 @@ export function InviteMemberModal() {
 		},
 	});
 
-	const { mutateAsync: inviteMember } = api.workspace.inviteMember.useMutation({
+	const { mutateAsync: inviteMember } = api.workspaceInvite.inviteMember.useMutation({
 		onSuccess: () => {
 			form.reset();
 			setShowModal(false);

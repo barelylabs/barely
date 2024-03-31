@@ -1,6 +1,6 @@
 'use client';
 
-import type { FileRecord } from '@barely/lib/server/file.schema';
+import type { FileRecord } from '@barely/lib/server/routes/file/file.schema';
 import { nFormatter } from '@barely/lib/utils/number';
 
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';

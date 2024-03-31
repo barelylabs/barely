@@ -1,9 +1,9 @@
 'use client';
 
-import type { StatDateRange } from '@barely/server/stat.schema';
+import type { StatDateRange } from '@barely/lib/server/routes/stat/stat.schema';
 import { Suspense } from 'react';
+import { statDateRange } from '@barely/lib/server/routes/stat/stat.schema';
 import { api } from '@barely/server/api/react';
-import { statDateRange } from '@barely/server/stat.schema';
 
 import { ChevronRightToArrow } from '@barely/ui/elements/icon';
 import {

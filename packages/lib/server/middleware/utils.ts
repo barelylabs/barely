@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 
-import type { RecordClickProps } from '../event.fns';
+import type { RecordClickProps } from '../routes/event/event.fns';
 import { getDomainWithoutWWW } from '../../utils/link';
 import { raise } from '../../utils/raise';
 

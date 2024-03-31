@@ -1,7 +1,10 @@
 'use client';
 
-import type { EdgeRouterOutputs } from '@barely/lib/server/api/router.edge';
-import type { Link, linkFilterParamsSchema } from '@barely/lib/server/link.schema';
+import type { AppRouterOutputs } from '@barely/lib/server/api/react';
+import type {
+	Link,
+	linkFilterParamsSchema,
+} from '@barely/lib/server/routes/link/link.schema';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
 import {
@@ -16,11 +19,11 @@ import {
 import { useTypedQuery } from '@barely/lib/hooks/use-typed-query';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
-import { linkSearchParamsSchema } from '@barely/lib/server/link.schema';
+import { linkSearchParamsSchema } from '@barely/lib/server/routes/link/link.schema';
 import { wait } from '@barely/lib/utils/wait';
 
 interface LinkContext {
-	links: EdgeRouterOutputs['link']['byWorkspace'];
+	links: AppRouterOutputs['link']['byWorkspace'];
 	linkSelection: Selection;
 	lastSelectedLinkId: string | undefined;
 	lastSelectedLink: Link | undefined;
@@ -52,7 +55,7 @@ export function LinkContextProvider({
 	selectedLinkIds,
 }: {
 	children: React.ReactNode;
-	initialLinks: Promise<EdgeRouterOutputs['link']['byWorkspace']>;
+	initialLinks: Promise<AppRouterOutputs['link']['byWorkspace']>;
 	filters: z.infer<typeof linkFilterParamsSchema>;
 	selectedLinkIds:
 		| z.infer<typeof linkSearchParamsSchema.shape.selectedLinkIds>

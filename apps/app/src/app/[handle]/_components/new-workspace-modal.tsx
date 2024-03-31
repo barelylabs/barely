@@ -3,8 +3,8 @@
 import type { SelectFieldOption } from '@barely/ui/forms/select-field';
 import type { z } from 'zod';
 import { useRouter } from 'next/navigation';
+import { createWorkspaceSchema } from '@barely/lib/server/routes/workspace/workspace.schema';
 import { api } from '@barely/server/api/react';
-import { createWorkspaceSchema } from '@barely/server/workspace.schema';
 import { useAtom } from 'jotai';
 
 import { atomWithToggle } from '@barely/atoms/atom-with-toggle';

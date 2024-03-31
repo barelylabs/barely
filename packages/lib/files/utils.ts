@@ -1,7 +1,7 @@
 import type { AllowedFileType, ContentDisposition } from '@uploadthing/shared';
 import { ALLOWED_FILE_TYPES, getTypeFromFileName } from '@uploadthing/shared';
 
-import type { FileRecord } from '../server/file.schema';
+import type { FileRecord } from '../server/routes/file/file.schema';
 import type { AllowedFileExtension } from './types';
 
 export function contentDisposition(

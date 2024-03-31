@@ -1,6 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import { db } from '@barely/lib/server/db';
-import { getLinkById } from '@barely/lib/server/link.fns';
+import { getLinkById } from '@barely/lib/server/routes/link/link.fns';
 import { GOOGLE_FAVICON_URL } from '@barely/lib/utils/constants';
 import { constructMetadata, getApexDomain } from '@barely/lib/utils/link';
 import { unescape } from 'html-escaper';

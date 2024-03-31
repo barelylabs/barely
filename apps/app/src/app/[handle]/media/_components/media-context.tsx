@@ -1,7 +1,7 @@
 'use client';
 
-import type { EdgeRouterOutputs } from '@barely/lib/server/api/router.edge';
-import type { FileRecord } from '@barely/lib/server/file.schema';
+import type { AppRouterOutputs } from '@barely/lib/server/api/router';
+import type { FileRecord } from '@barely/lib/server/routes/file/file.schema';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
 import {
@@ -14,11 +14,11 @@ import {
 } from 'react';
 import { useFiles } from '@barely/lib/hooks/use-files';
 import { useTypedQuery } from '@barely/lib/hooks/use-typed-query';
-import { fileSearchParamsSchema } from '@barely/lib/server/file.schema';
+import { fileSearchParamsSchema } from '@barely/lib/server/routes/file/file.schema';
 import { wait } from '@barely/lib/utils/wait';
 
 interface MediaContext {
-	files: EdgeRouterOutputs['file']['byWorkspace']['files'];
+	files: AppRouterOutputs['file']['byWorkspace']['files'];
 	// infinite
 	hasMoreFiles: boolean;
 	fetchMoreFiles: () => void;

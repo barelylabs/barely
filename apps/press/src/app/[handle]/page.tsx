@@ -1,5 +1,4 @@
-import { _Playlists_To_Tracks } from '@barely/lib/server/playlist.sql';
-import { getPublicPressKit } from '@barely/lib/server/press-kit.fns';
+import { getPublicPressKit } from '@barely/lib/server/routes/press-kit/press-kit.fns';
 
 import type { SocialStat } from './_components/press-social-stats';
 // const bio = `The second album by dream pop trio Proper Youth draws the bulk of its inspiration from all three members' biggest shared passion: 80's music. It was a singular decade full of chorused guitars, analog synths, saxophone, and plenty of reverb that welcomed listeners to escape into an aural arena replete with romanticism and earnesty. The new record modernizes this approach, incorporating themes about aging, loneliness, and narcissism into a dreamy soundscape that sounds best when played loud.
@@ -19,29 +18,6 @@ import { PressScrollArea } from './_components/press-scroll-area';
 import { SocialStats } from './_components/press-social-stats';
 import { TopPlayerBar } from './_components/press-top-player-bar';
 import { PressVideos } from './_components/press-videos';
-
-// const socialStats: SocialStat[] = [
-//   {
-//     icon: "spotify",
-//     label: "Spotify Followers",
-//     value: 12242,
-//   },
-//   {
-//     icon: "spotify",
-//     label: "Monthly Listeners",
-//     value: 5750,
-//   },
-//   {
-//     icon: "instagram",
-//     label: "Instagram Followers",
-//     value: 9882,
-//   },
-//   {
-//     icon: "youtube",
-//     label: "YouTube Subscribers",
-//     value: 2440,
-//   },
-// ];
 
 export default async function PressPage({ params }: { params: { handle: string } }) {
 	const publicPressKit = await getPublicPressKit({ handle: params.handle });

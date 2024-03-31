@@ -2,7 +2,7 @@
 
 import type { OnUploadComplete } from '@barely/lib/files/client';
 import type { UploadQueueItem } from '@barely/lib/hooks/use-upload';
-import type { workspaceTypeSchema } from '@barely/server/workspace.schema';
+import type { workspaceTypeSchema } from '@barely/lib/server/routes/workspace/workspace.schema';
 import type { SelectFieldOption } from '@barely/ui/forms/select-field';
 import type { z } from 'zod';
 import { useCallback } from 'react';
@@ -82,8 +82,6 @@ export function HandleForm() {
 					</div>
 				</div>
 			)}
-
-			{JSON.stringify(form.formState.errors, null, 2)}
 		</SettingsCardForm>
 	);
 }
@@ -124,14 +122,22 @@ const avatarUploadQueueAtom = atom<UploadQueueItem[]>([]);
 const headerUploadQueueAtom = atom<UploadQueueItem[]>([]);
 
 export function WorkspaceAvatarForm() {
+	const apiUtils = api.useUtils();
+
 	const workspace = useWorkspace();
 	const isPersonal = workspace.type === 'personal';
-	const apiUtils = api.useUtils();
 
 	const { mutateAsync: updateWorkspaceAvatar } = api.workspace.updateAvatar.useMutation();
 
 	const onUploadComplete: OnUploadComplete = useCallback(
 		async fileRecord => {
+			console.log('fileRecord => ', fileRecord);
+			console.log('fileRecord.id => ', fileRecord.id);
+
+			if (!fileRecord.id) {
+				return;
+			}
+
 			await updateWorkspaceAvatar({ avatarFileId: fileRecord.id });
 			await apiUtils.workspace.invalidate();
 		},

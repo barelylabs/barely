@@ -1,5 +1,5 @@
 import type { NextRequest } from 'next/server';
-import { handleStripeConnectChargeSuccess } from '@barely/server/stripe-connect.fns';
+import { handleStripeConnectChargeSuccess } from '@barely/lib/server/routes/stripe-connect/stripe-connect.fns';
 import Stripe from 'stripe';
 
 import { env } from '~/env';

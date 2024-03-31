@@ -9,9 +9,9 @@ import { env } from '../../env';
 import { raise } from '../../utils/raise';
 import { getAbsoluteUrl } from '../../utils/url';
 import { db } from '../db';
-import { UserSessions } from '../user-session.sql';
-import { Users } from '../user.sql';
-import { VerificationTokens } from '../verification-token.sql';
+import { VerificationTokens } from '../routes/auth/verification-token.sql';
+import { UserSessions } from '../routes/user/user-session.sql';
+import { Users } from '../routes/user/user.sql';
 
 export { signOut } from 'next-auth/react';
 

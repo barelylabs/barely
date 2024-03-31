@@ -3,7 +3,7 @@ import { UploadPartCommand } from '@aws-sdk/client-s3';
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
-import type { FileRecord } from '../server/file.schema';
+import type { FileRecord } from '../server/routes/file/file.schema';
 import type { FileContentType, MultiPartPresigned, SinglePartPresigned } from './types';
 import { env } from '../env';
 import { s3 } from './s3';

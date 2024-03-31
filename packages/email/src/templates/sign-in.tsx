@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Head } from '@react-email/head';
 import { Html } from '@react-email/html';
 import { Preview } from '@react-email/preview';
+import { Text } from '@react-email/text';
 
 import { EmailFooter } from '../components/email-footer';
 import { EmailHeaderLogo } from '../components/email-header-logo';
@@ -12,7 +13,6 @@ import {
 	EmailHeading,
 	EmailLink,
 	EmailSeparator,
-	EmailText,
 } from '../primitives';
 
 interface SignInEmailTemplateProps {
@@ -33,13 +33,13 @@ const SignInEmailTemplate = (props: SignInEmailTemplateProps) => {
 					<EmailHeaderLogo />
 					<EmailHeading>Your login link</EmailHeading>
 					{props.firstName && <p>Hi {props.firstName},</p>}
-					<EmailText>
+					<Text>
 						Please click the button below to sign in to your{' '}
 						<span>
 							<EmailLink href='https://barely.io'>barely.io</EmailLink>
 						</span>{' '}
 						account.
-					</EmailText>
+					</Text>
 					<EmailButton href={props.loginLink}>Login to barely.io</EmailButton>
 
 					<EmailSeparator />

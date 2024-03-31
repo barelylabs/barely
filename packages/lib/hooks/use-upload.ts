@@ -7,7 +7,7 @@ import { useDropzone } from 'react-dropzone';
 
 import type { OnUploadComplete, OnUploadProgress } from '../files/client';
 import type { AllowedFileType, Presigned } from '../files/types';
-import type { uploadFileSchema } from '../server/file.schema';
+import type { uploadFileSchema } from '../server/routes/file/file.schema';
 import {
 	generateClientDropzoneAccept,
 	uploadMultipart,

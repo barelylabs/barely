@@ -5,7 +5,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useZodForm } from '@barely/lib/hooks/use-zod-form';
 import { api } from '@barely/lib/server/api/react';
-import { insertUserSchema } from '@barely/lib/server/user.schema';
+import { insertUserSchema } from '@barely/lib/server/routes/user/user.schema';
 
 import { Text } from '@barely/ui/elements/typography';
 import { Form, SubmitButton } from '@barely/ui/forms';

@@ -1,12 +1,12 @@
-import type { RecordClickProps } from '@barely/lib/server/event.fns';
-import type { LinkAnalyticsProps } from '@barely/lib/server/link.schema';
+import type { RecordClickProps } from '@barely/lib/server/routes/event/event.fns';
+import type { LinkAnalyticsProps } from '@barely/lib/server/routes/link/link.schema';
 import type { SQL } from 'drizzle-orm';
 import type { NextFetchEvent, NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { db } from '@barely/lib/server/db/index';
-import { recordLinkClick } from '@barely/lib/server/event.fns';
-import { Links } from '@barely/lib/server/link.sql';
 import { parseLink } from '@barely/lib/server/middleware/utils';
+import { recordLinkClick } from '@barely/lib/server/routes/event/event.fns';
+import { Links } from '@barely/lib/server/routes/link/link.sql';
 import {
 	detectBot,
 	parseGeo,

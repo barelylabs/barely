@@ -1,7 +1,7 @@
 import type { z } from 'zod';
 import { redirect } from 'next/navigation';
-import { api } from '@barely/lib/server/api/server.edge';
-import { trackFilterParamsSchema } from '@barely/lib/server/track.schema';
+import { api } from '@barely/lib/server/api/server';
+import { trackFilterParamsSchema } from '@barely/lib/server/routes/track/track.schema';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllTracks } from '~/app/[handle]/tracks/_components/all-tracks';

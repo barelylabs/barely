@@ -43,11 +43,15 @@ const parseForDb = (input: string) => {
 
 export async function checkPhoneNumberExists(phone: string, db?: Db) {
 	if (window === undefined && !!db) {
-		const { checkPhoneNumberExistsServerAction } = await import('../server/user.actions');
+		const { checkPhoneNumberExistsServerAction } = await import(
+			'../server/routes/user/user.actions'
+		);
 		return checkPhoneNumberExistsServerAction(phone);
 	}
 
-	const { checkPhoneNumberExistsServerAction } = await import('../server/user.actions');
+	const { checkPhoneNumberExistsServerAction } = await import(
+		'../server/routes/user/user.actions'
+	);
 	return checkPhoneNumberExistsServerAction(phone);
 }
 

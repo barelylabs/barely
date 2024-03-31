@@ -1,4 +1,4 @@
-import type { LinkMetaTags } from '@barely/lib/server/link.schema';
+import type { LinkMetaTags } from '@barely/lib/server/routes/link/link.schema';
 import type { ReactNode } from 'react';
 import { useMemo } from 'react';
 import Image from 'next/image';

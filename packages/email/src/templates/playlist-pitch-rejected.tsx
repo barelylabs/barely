@@ -1,18 +1,12 @@
 import * as React from 'react';
+import { Head } from '@react-email/head';
+import { Html } from '@react-email/html';
+import { Preview } from '@react-email/preview';
+import { Text } from '@react-email/text';
 
 import { EmailFooter } from '../components/email-footer';
 import { EmailHeaderLogo } from '../components/email-header-logo';
-import {
-	Body,
-	EmailContainer,
-	EmailHeading,
-	EmailQuote,
-	EmailSeparator,
-	EmailText,
-	Head,
-	Html,
-	Preview,
-} from '../primitives';
+import { Body, EmailContainer, EmailHeading } from '../primitives';
 
 export const PlaylistPitchRejectedEmailTemplate = (props: {
 	firstName?: string;
@@ -31,16 +25,16 @@ export const PlaylistPitchRejectedEmailTemplate = (props: {
 				<EmailContainer>
 					<EmailHeaderLogo />
 					<EmailHeading>Your track wasn't approved 😔</EmailHeading>
-					{props.firstName && <EmailText>Hi {props.firstName},</EmailText>}
-					<EmailText className='text-md'>
+					{props.firstName && <Text>Hi {props.firstName},</Text>}
+					<Text className='text-md'>
 						Our A&R team has reviewed{' '}
 						<span className='font-bold'>"{props.trackName}"</span> and unfortunately it
 						doesn't sound like a good fit for our current roster of playlists. We hope
 						you'll try again with a different track!
-					</EmailText>
-					<EmailQuote>{props.screeningMessage}</EmailQuote>
+					</Text>
+					<Text>{props.screeningMessage}</Text>
 
-					<EmailSeparator />
+					<Text />
 					<EmailFooter />
 				</EmailContainer>
 			</Body>

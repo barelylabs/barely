@@ -1,4 +1,4 @@
-import type { PublicWorkspace } from '@barely/lib/server/workspace.schema';
+import type { PublicWorkspace } from '@barely/lib/server/routes/workspace/workspace.schema';
 import Link from 'next/link';
 
 import { Icon } from '../elements/icon';

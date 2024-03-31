@@ -1,10 +1,7 @@
 import { createTRPCReact } from '@trpc/react-query';
 
-import type { CombinedRouter } from './router.combined';
+import type { AppRouter } from './router';
 
-export const api = createTRPCReact<CombinedRouter>();
+export const api = createTRPCReact<AppRouter>();
 
-export {
-	type CombinedRouterInputs as RouterInputs,
-	type CombinedRouterOutputs as RouterOutputs,
-} from './router.combined';
+export { type AppRouterInputs, type AppRouterOutputs } from './router';

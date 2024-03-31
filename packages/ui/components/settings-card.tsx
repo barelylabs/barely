@@ -33,7 +33,7 @@ export function SettingsCard(props: SettingsCardProps) {
 				{props.children}
 			</div>
 
-			<div className='flex flex-row items-center justify-between gap-2 border-t border-border bg-slate-50 p-4'>
+			<div className='flex flex-row items-center justify-between gap-2 border-t border-border bg-muted p-4'>
 				<Text variant='sm/normal'>{props.formHint}</Text>
 				{props.isForm ? (
 					<SubmitButton disabled={props.disableSubmit}>

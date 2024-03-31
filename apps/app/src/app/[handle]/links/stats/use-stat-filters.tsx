@@ -1,4 +1,4 @@
-import { stdWebEventPipeQueryParamsSchema } from '@barely/server/stat.schema';
+import { stdWebEventPipeQueryParamsSchema } from '@barely/lib/server/routes/stat/stat.schema';
 
 import { useTypedQuery } from '@barely/hooks/use-typed-query';
 

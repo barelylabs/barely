@@ -2,8 +2,8 @@ import type { z } from 'zod';
 import { Suspense } from 'react';
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { api } from '@barely/lib/server/api/server.edge';
-import { cartPageSearchParams } from '@barely/lib/server/cart.schema';
+import { cartApi } from '@barely/lib/server/routes/cart/cart.api.server';
+import { cartPageSearchParams } from '@barely/lib/server/routes/cart/cart.schema';
 import { isDevelopment } from '@barely/lib/utils/environment';
 
 import { ElementsProvider } from '~/app/[handle]/[funnelKey]/_components/elements-provider';
@@ -33,8 +33,8 @@ export default function CartPage({
 	const cartId = cookies().get(`${handle}.${funnelKey}.cartId`)?.value;
 
 	const initialData = cartId
-		? api().cart.getByIdAndFunnelKey({ id: cartId, handle, funnelKey })
-		: api().cart.createByFunnelKey({
+		? cartApi.getByIdAndFunnelKey({ id: cartId, handle, funnelKey })
+		: cartApi.createByFunnelKey({
 				handle,
 				funnelKey,
 				shipTo: {

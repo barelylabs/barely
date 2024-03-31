@@ -1,4 +1,4 @@
-import type { Campaign } from '../server/campaign.schema';
+import type { Campaign } from '../server/routes/campaign/campaign.schema';
 
 export function campaignTypeDisplay(type: Campaign['type']) {
 	switch (type) {

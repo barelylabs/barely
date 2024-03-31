@@ -1,6 +1,6 @@
 import type { IngestEndpoint } from './client';
-import { webEventIngestSchema } from '../event.tb';
-import { webHitTimeseriesPipeDataSchema } from '../stat.schema';
+import { webEventIngestSchema } from '../routes/event/event.tb';
+import { webHitTimeseriesPipeDataSchema } from '../routes/stat/stat.schema';
 import { tinybird } from './client';
 
 export const writes = {

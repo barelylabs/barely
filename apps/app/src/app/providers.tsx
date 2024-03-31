@@ -61,17 +61,235 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 				runtime => {
 					const servers = {
-						node: unstable_httpBatchStreamLink({
+						// combined app router. if it hasn't been split off, it'll default to calling here
+						edge: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/node'),
+							url: getUrl('app', 'api/trpc/edge'),
 							headers() {
 								return preparedHeaders;
 							},
 						})(runtime),
 
-						edge: unstable_httpBatchStreamLink({
+						// split off routers
+						analyticsEndpoint: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/edge'),
+							url: getUrl('app', 'api/trpc/analyticsEndpoint'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						auth: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/auth'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						bio: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/bio'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						campaign: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/campaign'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						cart: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/cart'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						cartFunnel: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/cartFunnel'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						domain: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/domain'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						event: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/event'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						file: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/file'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						formResponse: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/formResponse'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						genre: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/genre'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						link: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/link'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						mixtape: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/mixtape'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						playlist: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/playlist'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						playlistPitchReview: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/playlistPitchReview'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						playlistPlacement: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/playlistPlacement'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						pressKit: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/pressKit'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						product: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/product'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						providerAccount: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/providerAccount'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						spotify: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/spotify'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						stat: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/stat'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						stripeConnect: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/stripeConnect'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						track: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/track'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						user: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/user'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						visitorSession: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/visitorSession'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						workspace: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/workspace'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						workspaceInvite: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/workspaceInvite'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						workspaceStripe: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/workspaceStripe'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -84,11 +302,14 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 						let path: string = ctx.op.path;
 						let serverName: keyof typeof servers = 'edge';
 
-						if (pathParts[0] === 'node') {
-							pathParts.shift();
+						if (pathParts[0] && pathParts[0] in servers) {
+							const firstPart = pathParts.shift() as keyof typeof servers;
 							path = pathParts.join('.');
-							serverName = 'node';
+							serverName = firstPart;
 						}
+
+						console.log('serverName => ', serverName);
+						console.log('path => ', path);
 
 						const link = servers[serverName];
 

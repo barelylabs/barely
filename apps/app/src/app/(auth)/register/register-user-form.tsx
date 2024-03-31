@@ -7,7 +7,7 @@ import {
 	emailInUseMessage,
 	newUserContactInfoSchema,
 	phoneNumberInUseMessage,
-} from '@barely/server/user.schema';
+} from '@barely/lib/server/routes/user/user.schema';
 
 import { api } from '@barely/api/react';
 

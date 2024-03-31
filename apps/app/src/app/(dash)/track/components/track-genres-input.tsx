@@ -3,10 +3,10 @@
 import type {
 	UpdatePlaylistPitchCampaign_LaunchSchema,
 	UpdatePlaylistPitchCampaign_ScreeningSchema,
-} from '@barely/server/campaign.schema';
-import type { GenreWithPlaylistStats } from '@barely/server/genre.schema';
+} from '@barely/lib/server/routes/campaign/campaign.schema';
+import type { GenreWithPlaylistStats } from '@barely/lib/server/routes/genre/genre.schema';
 import type { Control } from 'react-hook-form';
-import { api } from '@barely/server/api/react';
+import { api } from '@barely/lib/server/api/react';
 import deepEqual from 'fast-deep-equal';
 
 import { MultiSelect } from '@barely/ui/elements/multiselect';

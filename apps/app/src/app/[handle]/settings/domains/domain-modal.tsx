@@ -1,10 +1,10 @@
 'use client';
 
-import type { InsertDomain } from '@barely/server/domain.schema';
+import type { InsertDomain } from '@barely/server/routes/domain/domain.schema';
 import type { z } from 'zod';
 import { useEffect, useState } from 'react';
 import { api } from '@barely/server/api/react';
-import { insertDomainSchema } from '@barely/server/domain.schema';
+import { insertDomainSchema } from '@barely/server/routes/domain/domain.schema';
 import { atom, useAtom } from 'jotai';
 
 import { atomWithToggle } from '@barely/atoms/atom-with-toggle';
@@ -51,7 +51,7 @@ export function DomainModal() {
 		},
 	});
 
-	const { mutateAsync: addDomain } = api.node.domain.add.useMutation({
+	const { mutateAsync: addDomain } = api.domain.add.useMutation({
 		onSuccess: async () => {
 			await apiContext.domain.byWorkspace.invalidate();
 			setShowDomainModal(false);
@@ -59,7 +59,7 @@ export function DomainModal() {
 			domainForm.reset();
 		},
 	});
-	const { mutateAsync: updateDomain } = api.node.domain.update.useMutation({
+	const { mutateAsync: updateDomain } = api.domain.update.useMutation({
 		onSuccess: async () => {
 			await apiContext.domain.byWorkspace.invalidate();
 			setShowDomainModal(false);
@@ -67,7 +67,7 @@ export function DomainModal() {
 			domainForm.reset();
 		},
 	});
-	const { mutateAsync: deleteDomain } = api.node.domain.delete.useMutation({
+	const { mutateAsync: deleteDomain } = api.domain.delete.useMutation({
 		onSuccess: async () => {
 			await apiContext.domain.byWorkspace.invalidate();
 			setShowDomainModal(false);

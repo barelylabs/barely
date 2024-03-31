@@ -2,11 +2,11 @@ import { relations } from 'drizzle-orm';
 import { boolean, index, integer, pgTable, varchar } from 'drizzle-orm/pg-core';
 
 import { dbId, primaryId, timestamps } from '../utils/sql';
-import { AdCampaigns } from './ad-campaign.sql';
-import { Files } from './file.sql';
-import { TrackRenders } from './track-render.sql';
-import { Users } from './user.sql';
-import { Workspaces } from './workspace.sql';
+import { AdCampaigns } from './routes/ad-campaign/ad-campaign.sql';
+import { Files } from './routes/file/file.sql';
+import { TrackRenders } from './routes/track/track-render.sql';
+import { Users } from './routes/user/user.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 
 export const VidRenders = pgTable(
 	'VidRenders',

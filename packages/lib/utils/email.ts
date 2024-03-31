@@ -14,10 +14,12 @@ export function isRealEmail(email: string) {
 
 export async function checkEmailExists(email: string, db?: Db) {
 	if (window === undefined && !!db) {
-		const { checkEmailExistsOnServer } = await import('../server/user.fns');
+		const { checkEmailExistsOnServer } = await import('../server/routes/user/user.fns');
 		return checkEmailExistsOnServer(email, db);
 	}
 
-	const { checkEmailExistsServerAction } = await import('../server/user.actions');
+	const { checkEmailExistsServerAction } = await import(
+		'../server/routes/user/user.actions'
+	);
 	return checkEmailExistsServerAction(email);
 }

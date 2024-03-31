@@ -1,6 +1,6 @@
 'use client';
 
-import type { PublicTrackWith_Artist_Files } from '@barely/lib/server/track.schema';
+import type { PublicTrackWith_Artist_Files } from '@barely/lib/server/routes/track/track.schema';
 import { useCallback } from 'react';
 import { atomWithToggle } from '@barely/lib/atoms/atom-with-toggle';
 import { cn } from '@barely/lib/utils/cn';

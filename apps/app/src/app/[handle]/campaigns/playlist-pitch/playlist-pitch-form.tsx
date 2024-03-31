@@ -1,8 +1,8 @@
 'use client';
 
-import type { SessionUser } from '@barely/server/auth';
-import type { SpotifyTrackOption } from '@barely/server/spotify.schema';
-import type { newUserContactInfoSchemaWithRole } from '@barely/server/user.schema';
+import type { SessionUser } from '@barely/lib/server/auth';
+import type { SpotifyTrackOption } from '@barely/lib/server/routes/spotify/spotify.schema';
+import type { newUserContactInfoSchemaWithRole } from '@barely/lib/server/routes/user/user.schema';
 import type { z } from 'zod';
 import { useState } from 'react';
 import Image from 'next/image';
