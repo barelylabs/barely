@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { CART_STAGES } from './cart.sql';
+import { CART_STAGES } from './routes/cart/cart.sql';
 
 export const stripeConnectChargeMetadataSchema = z.object({
 	cartId: z.string(),

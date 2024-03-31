@@ -1,6 +1,6 @@
 'use client';
 
-import type { EdgeRouterOutputs } from '@barely/lib/server/api/router.edge';
+import type { AppRouterOutputs } from '@barely/lib/server/api/react';
 import type { productFilterParamsSchema } from '@barely/lib/server/product.schema';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
@@ -19,11 +19,11 @@ import { api } from '@barely/lib/server/api/react';
 import { productSearchParamsSchema } from '@barely/lib/server/product.schema';
 
 export interface ProductCtx {
-	products: EdgeRouterOutputs['product']['byWorkspace']['products'];
+	products: AppRouterOutputs['product']['byWorkspace']['products'];
 	productSelection: Selection;
 	lastSelectedProductId: string | undefined;
 	lastSelectedProduct:
-		| EdgeRouterOutputs['product']['byWorkspace']['products'][0]
+		| AppRouterOutputs['product']['byWorkspace']['products'][0]
 		| undefined;
 	setProductSelection: (selection: Selection) => void;
 	gridListRef: React.RefObject<HTMLDivElement>;
@@ -53,7 +53,7 @@ export function ProductContextProvider({
 	selectedProductIds,
 }: {
 	children: React.ReactNode;
-	initialProducts: Promise<EdgeRouterOutputs['product']['byWorkspace']>;
+	initialProducts: Promise<AppRouterOutputs['product']['byWorkspace']>;
 	filters: z.infer<typeof productFilterParamsSchema>;
 	selectedProductIds: string[];
 }) {

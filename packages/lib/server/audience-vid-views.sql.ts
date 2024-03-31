@@ -3,7 +3,7 @@ import { index, integer, pgTable, varchar } from 'drizzle-orm/pg-core';
 
 import { dbId, primaryId, timestamps } from '../utils/sql';
 import { Audiences } from './audience.sql';
-import { Workspaces } from './workspace.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 
 export const AudienceVidViewsGroups = pgTable(
 	'AudienceVidViewsGroups',

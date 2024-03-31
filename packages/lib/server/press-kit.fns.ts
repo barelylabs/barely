@@ -2,8 +2,8 @@ import { eq, or, sql } from 'drizzle-orm';
 
 import type { PublicMixtapeWith_Tracks } from './mixtape.schema';
 import type { PublicPressKit, PublicPressPhoto } from './press-kit.schema';
+import type { PublicWorkspace } from './routes/workspace/workspace.schema';
 import type { PublicTrackWith_Artist_Files } from './track.schema';
-import type { PublicWorkspace } from './workspace.schema';
 import { db } from './db';
 import { PressKits } from './press-kit.sql';
 

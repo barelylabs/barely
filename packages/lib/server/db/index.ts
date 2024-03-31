@@ -15,7 +15,6 @@ import * as audienceSql from '../audience.sql';
 import * as bioSql from '../bio.sql';
 import * as campaignSql from '../campaign.sql';
 import * as funnelSql from '../cart-funnel.sql';
-import * as cartSql from '../cart.sql';
 import * as domainSql from '../domain.sql';
 import * as eventReportSql from '../event-report.sql';
 import * as eventSql from '../event.sql';
@@ -36,6 +35,9 @@ import * as pressSql from '../press-kit.sql';
 import * as productSql from '../product.sql';
 import * as providerAccountSql from '../provider-account.sql';
 import * as providerSubAccountSql from '../provider-sub-account.sql';
+import * as cartSql from '../routes/cart/cart.sql';
+import * as workspaceInviteSql from '../routes/workspace-invite/workspace-invite.sql';
+import * as workspaceSql from '../routes/workspace/workspace.sql';
 import * as statSql from '../stat.sql';
 import * as trackSql from '../track.sql';
 import * as transactionSql from '../transaction.sql';
@@ -44,8 +46,6 @@ import * as userSql from '../user.sql';
 import * as verificationTokenSql from '../verification-token.sql';
 import * as vidRenderSql from '../vid-render.sql';
 import * as visitorSessionSql from '../visitor-session.sql';
-import * as workspaceInviteSql from '../workspace-invite.sql';
-import * as workspaceSql from '../workspace.sql';
 
 export const dbSchema = {
 	...adSql,

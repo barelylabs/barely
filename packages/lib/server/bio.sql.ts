@@ -5,7 +5,7 @@ import { dbId, primaryId, timestamps } from '../utils/sql';
 import { Events } from './event.sql';
 import { Forms } from './form.sql';
 import { Links } from './link.sql';
-import { Workspaces } from './workspace.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 
 // bio
 

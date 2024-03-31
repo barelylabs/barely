@@ -1,7 +1,7 @@
 'use client';
 
-import type { EdgeRouterOutputs } from '@barely/lib/server/api/router.edge';
-import type { InsertCart } from '@barely/lib/server/cart.schema';
+import type { CartRouterOutputs } from '@barely/lib/server/routes/cart/cart.api.react';
+import type { InsertCart } from '@barely/lib/server/routes/cart/cart.schema';
 import type { StripeElementsOptions } from '@stripe/stripe-js';
 import { use, useState } from 'react';
 import { isProduction } from '@barely/lib/utils/environment';
@@ -13,7 +13,7 @@ export function ElementsProvider({
 	children,
 }: {
 	stage: InsertCart['stage'];
-	initialData: Promise<EdgeRouterOutputs['cart']['createByFunnelKey']>;
+	initialData: Promise<CartRouterOutputs['createByFunnelKey']>;
 	children: React.ReactNode;
 }) {
 	const { cart, funnel } = use(initialData);

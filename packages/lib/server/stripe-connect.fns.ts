@@ -1,22 +1,17 @@
 import { eq, or } from 'drizzle-orm';
 import { Stripe } from 'stripe';
 
-import type { UpdateCart } from './cart.schema';
-import type { Workspace } from './workspace.schema';
-import { env } from '../env';
+import type { UpdateCart } from './routes/cart/cart.schema';
+import type { Workspace } from './routes/workspace/workspace.schema';
 import { isProduction } from '../utils/environment';
 import { newId } from '../utils/id';
 import { raise } from '../utils/raise';
-import { getCartById, sendCartReceiptEmail } from './cart.fns';
-import { Carts } from './cart.sql';
 import { db } from './db';
 import { Fans } from './fan.sql';
+import { getCartById, sendCartReceiptEmail } from './routes/cart/cart.fns';
+import { Carts } from './routes/cart/cart.sql';
+import { stripe } from './stripe';
 import { stripeConnectChargeMetadataSchema } from './stripe-connect.schema';
-
-export const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-	apiVersion: '2023-10-16',
-	httpClient: Stripe.createFetchHttpClient(),
-});
 
 export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 	const { cartId, preChargeCartStage } = stripeConnectChargeMetadataSchema.parse(

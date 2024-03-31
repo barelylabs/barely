@@ -5,7 +5,7 @@ import { dbId, primaryId } from '../utils/sql';
 import { BioButtons } from './bio.sql';
 import { Events } from './event.sql';
 import { FormResponses } from './form-response.sql';
-import { Workspaces } from './workspace.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 
 export const Forms = pgTable(
 	'Forms',

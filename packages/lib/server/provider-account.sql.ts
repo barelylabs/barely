@@ -5,9 +5,9 @@ import { dbId, primaryId } from '../utils/sql';
 import { AdCreatives } from './ad-creative.sql';
 import { _Playlists_To_ProviderAccounts } from './playlist.sql';
 import { ProviderSubAccounts } from './provider-sub-account.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 import { Stats } from './stat.sql';
 import { Users } from './user.sql';
-import { Workspaces } from './workspace.sql';
 
 export const providersEnum = [
 	'discord',

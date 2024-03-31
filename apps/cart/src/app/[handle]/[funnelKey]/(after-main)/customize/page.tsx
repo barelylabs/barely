@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { api } from '@barely/lib/server/api/server.edge';
+import { cartApi } from '@barely/lib/server/routes/cart/cart.api.server';
 
 import { Img } from '@barely/ui/elements/img';
 import { H } from '@barely/ui/elements/typography';
@@ -22,7 +22,7 @@ export default async function UpsellPage({
 
 	if (!cartId) return null;
 
-	const { cart, funnel } = await api().cart.getByIdAndFunnelKey({
+	const { cart, funnel } = await cartApi.getByIdAndFunnelKey({
 		id: cartId,
 		handle,
 		funnelKey,

@@ -3,17 +3,20 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
 import type { Genre } from './genre.schema';
+import type { Workspace } from './routes/workspace/workspace.schema';
 import type { InsertTrack } from './track.schema';
-import type { Workspace } from './workspace.schema';
 // import { APP_BASE_URL } from "../utils/constants";
 
 import { playlistPitchSettings } from './campaign.settings';
 import { Campaigns } from './campaign.sql';
 import { insertGenreSchema } from './genre.schema';
 import { getTotalPlaylistReachByGenres_SA } from './playlist.actions';
+import {
+	createWorkspaceSchema,
+	upsertWorkspaceSchema,
+} from './routes/workspace/workspace.schema';
 import { createTrackSchema, upsertTrackSchema } from './track.schema';
 import { newUserContactInfoSchemaWithRole } from './user.schema';
-import { createWorkspaceSchema, upsertWorkspaceSchema } from './workspace.schema';
 
 export const insertCampaignSchema = createInsertSchema(Campaigns);
 export const createCampaignSchema = insertCampaignSchema.omit({ id: true });

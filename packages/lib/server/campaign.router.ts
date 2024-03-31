@@ -6,8 +6,8 @@ import { TRPCError } from '@trpc/server';
 import { and, asc, eq, inArray } from 'drizzle-orm';
 import { z } from 'zod';
 
+import type { Workspace } from './routes/workspace/workspace.schema';
 import type { InsertTrack } from './track.schema';
-import type { Workspace } from './workspace.schema';
 import { convertToHandle } from '../utils/handle';
 import { newCuid, newId } from '../utils/id';
 import { pushEvent } from '../utils/pusher-server';
@@ -30,13 +30,13 @@ import {
 	updatePlaylistPitchCampaign_ScreeningSchema,
 } from './campaign.schema';
 import { Campaigns, CampaignUpdateRecords } from './campaign.sql';
+import { createWorkspace } from './routes/workspace/workspace.fns';
+import { Workspaces } from './routes/workspace/workspace.sql';
 import { createPitchCheckoutLink } from './stripe.fns';
 import { createTrack } from './track.fns';
 import { Tracks } from './track.sql';
 import { createUser, getSessionUserByUserId } from './user.fns';
 import { _Users_To_Workspaces } from './user.sql';
-import { createWorkspace } from './workspace.fns';
-import { Workspaces } from './workspace.sql';
 
 export const campaignRouter = createTRPCRouter({
 	// CREATE

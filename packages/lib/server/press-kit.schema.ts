@@ -4,10 +4,10 @@ import { z } from 'zod';
 
 import type { FileRecord, PublicImage } from './file.schema';
 import type { PublicMixtapeWith_Tracks } from './mixtape.schema';
-import type { PublicWorkspace } from './workspace.schema';
+import type { PublicWorkspace } from './routes/workspace/workspace.schema';
 import { z_optUrl } from '../utils/zod-helpers';
 import { PressKits } from './press-kit.sql';
-import { updateCurrentWorkspaceSchema } from './workspace.schema';
+import { updateCurrentWorkspaceSchema } from './routes/workspace/workspace.schema';
 
 export const insertPressKitVideos = z.array(
 	z.object({

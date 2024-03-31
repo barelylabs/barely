@@ -5,7 +5,7 @@ import { dbId, primaryId, timestamps } from '../utils/sql';
 import { AdCampaigns } from './ad-campaign.sql';
 import { Ads } from './ad.sql';
 import { Audiences } from './audience.sql';
-import { Workspaces } from './workspace.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 
 export const AdSets = pgTable(
 	'AdSets',

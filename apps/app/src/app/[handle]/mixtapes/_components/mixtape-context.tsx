@@ -1,6 +1,6 @@
 'use client';
 
-import type { EdgeRouterOutputs } from '@barely/lib/server/api/router.edge';
+import type { AppRouterOutputs } from '@barely/lib/server/api/react';
 import type { MixtapeWith_Tracks } from '@barely/lib/server/mixtape.schema';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
@@ -45,7 +45,7 @@ export function MixtapeContextProvider({
 	filters = {},
 }: {
 	children: React.ReactNode;
-	initialMixtapes: Promise<EdgeRouterOutputs['mixtape']['byWorkspace']>;
+	initialMixtapes: Promise<AppRouterOutputs['mixtape']['byWorkspace']>;
 	filters: z.infer<typeof mixtapeFilterParamsSchema> | undefined;
 }) {
 	const [showCreateMixtapeModal, setShowCreateMixtapeModal] = useState(false);

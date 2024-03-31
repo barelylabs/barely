@@ -15,7 +15,7 @@ import { db } from './db';
 import { ingestWebEvent, webEventIngestSchema } from './event.tb';
 import { Links } from './link.sql';
 import { reportEventToMeta } from './meta.endpts.event';
-import { Workspaces } from './workspace.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 
 /**
  * Record clicks with geo, ua, referer, and timestamp data

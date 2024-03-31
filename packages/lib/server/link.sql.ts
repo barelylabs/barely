@@ -14,8 +14,8 @@ import { AdCreatives } from './ad-creative.sql';
 import { BioButtons, Bios } from './bio.sql';
 import { Domains } from './domain.sql';
 import { Events } from './event.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 import { Users } from './user.sql';
-import { Workspaces } from './workspace.sql';
 
 export const appEnum = [
 	'appleMusic',

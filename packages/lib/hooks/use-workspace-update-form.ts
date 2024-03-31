@@ -2,7 +2,7 @@ import type { z } from 'zod';
 import { usePathname, useRouter } from 'next/navigation';
 
 import { api } from '../server/api/react';
-import { updateWorkspaceSchema } from '../server/workspace.schema';
+import { updateWorkspaceSchema } from '../server/routes/workspace/workspace.schema';
 import { useWorkspace } from './use-workspace';
 import { useZodForm } from './use-zod-form';
 

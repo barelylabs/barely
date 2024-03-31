@@ -10,7 +10,7 @@ import {
 
 import { dbId, primaryId, timestamps } from '../utils/sql';
 import { Audiences } from './audience.sql';
-import { Workspaces } from './workspace.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 
 export const AudienceCountries = pgTable('AudienceCountries', {
 	id: varchar('id', { length: 255 }).primaryKey().notNull(),

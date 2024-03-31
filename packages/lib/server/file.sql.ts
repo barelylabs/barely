@@ -14,10 +14,10 @@ import { dbId, lexorank, primaryId, timestamps } from '../utils/sql';
 import { FileFolders } from './file-folder.sql';
 import { PressKits } from './press-kit.sql';
 import { Products } from './product.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 import { Tracks } from './track.sql';
 import { Users } from './user.sql';
 import { VidRenders } from './vid-render.sql';
-import { Workspaces } from './workspace.sql';
 
 export const allowedFileExtensions = ['mp3', 'wav', 'jpg', 'png', 'mp4', 'mov'] as const;
 

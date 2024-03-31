@@ -4,8 +4,8 @@ import { boolean, index, pgTable, varchar } from 'drizzle-orm/pg-core';
 import { dbId, primaryId, timestamps } from '../utils/sql';
 import { AdCreatives } from './ad-creative.sql';
 import { AdSets } from './ad-set.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 import { Stats } from './stat.sql';
-import { Workspaces } from './workspace.sql';
 
 export const Ads = pgTable(
 	'Ads',

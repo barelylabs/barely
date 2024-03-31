@@ -1,6 +1,6 @@
 'use client';
 
-import type { Workspace } from '@barely/server/workspace.schema';
+import type { Workspace } from '@barely/lib/server/routes/workspace/workspace.schema';
 import { Fragment, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';

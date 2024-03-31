@@ -5,7 +5,7 @@ import { z } from 'zod';
 import type { FileRecord, PublicAudio, PublicImage } from './file.schema';
 import type { _Files_To_Tracks__Artwork, _Files_To_Tracks__Audio } from './file.sql';
 import type { Genre } from './genre.schema';
-import type { PublicWorkspace, Workspace } from './workspace.schema';
+import type { PublicWorkspace, Workspace } from './routes/workspace/workspace.schema';
 import { queryStringArraySchema } from '../hooks/use-typed-query';
 import { genreIdSchema } from './genre.schema';
 import { Tracks } from './track.sql';

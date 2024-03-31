@@ -4,12 +4,12 @@ import { z } from 'zod';
 
 import { isRealEmail } from '../utils/email';
 import { formatInternational, isPossiblePhoneNumber } from '../utils/phone-number';
+import { createWorkspaceSchema } from './routes/workspace/workspace.schema';
 import {
 	checkEmailExistsServerAction,
 	checkPhoneNumberExistsServerAction,
 } from './user.actions';
 import { _Users_To_Workspaces, Users } from './user.sql';
-import { createWorkspaceSchema } from './workspace.schema';
 
 export const insertUserSchema = createInsertSchema(Users, {
 	email: schema => schema.email.email(),

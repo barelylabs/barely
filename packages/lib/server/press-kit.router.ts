@@ -9,7 +9,7 @@ import { createTRPCRouter, privateProcedure } from './api/trpc';
 import { _Files_To_PressKits_PressPhotos } from './file.sql';
 import { defaultPressKit, updatePressKitSchema } from './press-kit.schema';
 import { PressKits } from './press-kit.sql';
-import { Workspaces } from './workspace.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 
 export const pressKitRouter = createTRPCRouter({
 	byWorkspace: privateProcedure

@@ -1,4 +1,4 @@
-import type { RouterOutputs } from '@barely/server/api/react';
+import type { AppRouterOutputs } from '@barely/server/api/react';
 import type { DomainStatus } from '@barely/server/domain.schema';
 import { useState } from 'react';
 
@@ -6,8 +6,8 @@ import { getSubdomain } from '@barely/utils/domain';
 
 export function DomainConfiguration(props: {
 	status: DomainStatus;
-	domainResponse: RouterOutputs['domain']['verifyOnVercel']['vercelDomainResponse'];
-	configResponse: RouterOutputs['domain']['verifyOnVercel']['vercelConfigResponse'];
+	domainResponse: AppRouterOutputs['domain']['verifyOnVercel']['vercelDomainResponse'];
+	configResponse: AppRouterOutputs['domain']['verifyOnVercel']['vercelConfigResponse'];
 }) {
 	const { status, domainResponse, configResponse } = props;
 

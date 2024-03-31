@@ -1,6 +1,6 @@
 'use client';
 
-import type { EdgeRouterOutputs } from '@barely/lib/server/api/router.edge';
+import type { AppRouterOutputs } from '@barely/lib/server/api/router';
 
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
@@ -53,7 +53,7 @@ export function AllMixtapes() {
 function MixtapeCard({
 	mixtape,
 }: {
-	mixtape: EdgeRouterOutputs['mixtape']['byWorkspace'][0];
+	mixtape: AppRouterOutputs['mixtape']['byWorkspace'][0];
 }) {
 	const {
 		setShowUpdateMixtapeModal,

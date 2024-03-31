@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
-import type { EdgeRouterInputs } from '../server/api/router.edge';
+import type { AppRouterInputs } from '../server/api/router';
 
-export type ChannelName = keyof EdgeRouterInputs;
+export type ChannelName = keyof AppRouterInputs;
 export type EventName = 'update' | 'create' | 'delete';
 
 export const eventSchema = z.object({

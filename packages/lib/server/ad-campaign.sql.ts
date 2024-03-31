@@ -12,8 +12,8 @@ import { dbId, primaryId, timestamps } from '../utils/sql';
 import { AdSets } from './ad-set.sql';
 import { Campaigns } from './campaign.sql';
 import { ProviderSubAccounts } from './provider-sub-account.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 import { VidRenders } from './vid-render.sql';
-import { Workspaces } from './workspace.sql';
 
 export const AdCampaigns = pgTable(
 	'AdCampaigns',

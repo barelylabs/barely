@@ -16,7 +16,7 @@ import { sqlAnd, sqlStringContains } from '../utils/sql';
 import { createTRPCRouter, privateProcedure } from './api/trpc';
 import { selectWorkspaceFilesSchema, uploadFileSchema } from './file.schema';
 import { Files } from './file.sql';
-import { incrementWorkspaceFileUsage } from './workspace.fns';
+import { incrementWorkspaceFileUsage } from './routes/workspace/workspace.fns';
 
 export const fileRouter = createTRPCRouter({
 	byWorkspace: privateProcedure

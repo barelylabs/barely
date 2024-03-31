@@ -2,7 +2,7 @@
 
 import type { OnUploadComplete } from '@barely/lib/files/client';
 import type { UploadQueueItem } from '@barely/lib/hooks/use-upload';
-import type { workspaceTypeSchema } from '@barely/server/workspace.schema';
+import type { workspaceTypeSchema } from '@barely/lib/server/routes/workspace/workspace.schema';
 import type { SelectFieldOption } from '@barely/ui/forms/select-field';
 import type { z } from 'zod';
 import { useCallback } from 'react';

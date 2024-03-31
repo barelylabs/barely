@@ -1,6 +1,6 @@
 import type { z } from 'zod';
 import { redirect } from 'next/navigation';
-import { api } from '@barely/lib/server/api/server.edge';
+import { api } from '@barely/lib/server/api/server';
 import { cartFunnelSearchParamsSchema } from '@barely/lib/server/cart-funnel.schema';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';

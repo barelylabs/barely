@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Head } from '@react-email/head';
 import { Html } from '@react-email/html';
 import { Preview } from '@react-email/preview';
+import { Text } from '@react-email/text';
 
 import { EmailFooter } from '../components/email-footer';
 import { EmailHeaderLogo } from '../components/email-header-logo';
@@ -12,7 +13,6 @@ import {
 	EmailHeading,
 	EmailLink,
 	EmailSeparator,
-	EmailText,
 } from '../primitives';
 
 interface WorkspaceInviteEmailProps {
@@ -38,7 +38,7 @@ export const WorkspaceInviteEmailTemplate = ({
 					<EmailHeaderLogo />
 					<EmailHeading>You've been invited to a workspace on barely.io</EmailHeading>
 
-					<EmailText>
+					<Text>
 						{inviterName} has invited you to join the workspace{' '}
 						<strong>{workspaceName}</strong> on barely.io. Please click the button below
 						to sign in to your{' '}
@@ -46,7 +46,7 @@ export const WorkspaceInviteEmailTemplate = ({
 							<EmailLink href='https://barely.io'>barely.io</EmailLink>
 						</span>{' '}
 						account.
-					</EmailText>
+					</Text>
 					<EmailButton href={loginLink}>Join {workspaceName}</EmailButton>
 
 					<EmailSeparator />

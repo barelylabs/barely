@@ -10,9 +10,9 @@ import {
 } from 'drizzle-orm/pg-core';
 
 import { dbId, primaryId, timestamps } from '../utils/sql';
-import { Carts } from './cart.sql';
 import { Products } from './product.sql';
-import { Workspaces } from './workspace.sql';
+import { Carts } from './routes/cart/cart.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 
 export const CartFunnels = pgTable(
 	'CartFunnels',

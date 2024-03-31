@@ -61,17 +61,34 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 				runtime => {
 					const servers = {
-						node: unstable_httpBatchStreamLink({
+						// combined app router. if it hasn't been split off, it'll default to calling here
+						edge: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/node'),
+							url: getUrl('app', 'api/trpc/edge'),
 							headers() {
 								return preparedHeaders;
 							},
 						})(runtime),
 
-						edge: unstable_httpBatchStreamLink({
+						workspace: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/edge'),
+							url: getUrl('app', 'api/trpc/workspace'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						workspaceCheckout: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/workspaceCheckout'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
+						workspaceInvite: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getUrl('app', 'api/trpc/workspaceInvite'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -84,10 +101,10 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 						let path: string = ctx.op.path;
 						let serverName: keyof typeof servers = 'edge';
 
-						if (pathParts[0] === 'node') {
-							pathParts.shift();
+						if (pathParts[0] && pathParts[0] in servers) {
+							const firstPart = pathParts.shift() as keyof typeof servers;
 							path = pathParts.join('.');
-							serverName = 'node';
+							serverName = firstPart;
 						}
 
 						const link = servers[serverName];

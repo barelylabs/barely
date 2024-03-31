@@ -4,7 +4,7 @@ import { index, pgTable, unique, varchar } from 'drizzle-orm/pg-core';
 
 import { dbId, primaryId, timestamps } from '../utils/sql';
 import { Files } from './file.sql';
-import { Workspaces } from './workspace.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 
 export const FileFolders = pgTable(
 	'FileFolders',

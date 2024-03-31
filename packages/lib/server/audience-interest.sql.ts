@@ -3,7 +3,7 @@ import { boolean, char, index, integer, pgTable, varchar } from 'drizzle-orm/pg-
 
 import { dbId, primaryId, timestamps } from '../utils/sql';
 import { Audiences } from './audience.sql';
-import { Workspaces } from './workspace.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 
 // interests
 

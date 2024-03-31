@@ -2,8 +2,8 @@ import { relations } from 'drizzle-orm';
 import { boolean, pgTable, primaryKey, varchar } from 'drizzle-orm/pg-core';
 
 import { dbId, primaryId, timestamps } from '../utils/sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 import { Tracks } from './track.sql';
-import { Workspaces } from './workspace.sql';
 
 export const Mixtapes = pgTable('Mixtapes', {
 	...primaryId,

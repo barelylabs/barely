@@ -4,8 +4,8 @@ import { and, eq } from 'drizzle-orm';
 import type { SessionUser } from './auth';
 import type { Db } from './db';
 import type { ProviderAccount } from './provider-account.schema';
+import type { InsertWorkspace } from './routes/workspace/workspace.schema';
 import type { CreateUser, InsertUser } from './user.schema';
-import type { InsertWorkspace } from './workspace.schema';
 //
 import { convertToHandle } from '../utils/handle';
 import { newId } from '../utils/id';
@@ -17,9 +17,9 @@ import {
 	_Files_To_Workspaces__HeaderImage,
 } from './file.sql';
 import { ProviderAccounts } from './provider-account.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 import { createStripeWorkspaceCustomer } from './stripe.fns';
 import { _Users_To_Workspaces, Users } from './user.sql';
-import { Workspaces } from './workspace.sql';
 
 ('@auth/core/adapters');
 

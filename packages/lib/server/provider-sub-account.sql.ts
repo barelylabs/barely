@@ -3,7 +3,7 @@ import { index, pgTable, uniqueIndex, varchar } from 'drizzle-orm/pg-core';
 
 import { dbId, primaryId } from '../utils/sql';
 import { ProviderAccounts } from './provider-account.sql';
-import { Workspaces } from './workspace.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 
 type ProviderSubAccountType = 'metaAd' | 'metaBusiness' | 'facebookPage';
 

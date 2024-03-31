@@ -4,7 +4,7 @@ import { boolean, jsonb, pgTable, text, varchar } from 'drizzle-orm/pg-core';
 import { dbId, primaryId, timestamps } from '../utils/sql';
 import { _Files_To_PressKits_PressPhotos } from './file.sql';
 import { Mixtapes } from './mixtape.sql';
-import { Workspaces } from './workspace.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 
 export const PressKits = pgTable('PressKits', {
 	...primaryId,

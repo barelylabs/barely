@@ -2,9 +2,9 @@ import { relations } from 'drizzle-orm';
 import { index, integer, pgTable } from 'drizzle-orm/pg-core';
 
 import { dbId, primaryId } from '../utils/sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 import { Tracks } from './track.sql';
 import { Users } from './user.sql';
-import { Workspaces } from './workspace.sql';
 
 export const TrackRenders = pgTable(
 	'TrackRenders',

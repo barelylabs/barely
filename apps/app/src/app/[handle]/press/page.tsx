@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { api } from '@barely/lib/server/api/server.edge';
+import { api } from '@barely/lib/server/api/server';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { PressKitForm } from '~/app/[handle]/press/_components/press-kit-form';

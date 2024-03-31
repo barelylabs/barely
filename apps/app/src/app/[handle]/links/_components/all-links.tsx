@@ -1,6 +1,6 @@
 'use client';
 
-import type { EdgeRouterOutputs } from '@barely/lib/server/api/router.edge';
+import type { AppRouterOutputs } from '@barely/lib/server/api/router';
 import Link from 'next/link';
 import { cn } from '@barely/lib/utils/cn';
 import { truncate } from '@barely/lib/utils/text';
@@ -60,7 +60,7 @@ export function AllLinks() {
 	);
 }
 
-function LinkCard({ link }: { link: EdgeRouterOutputs['link']['byWorkspace'][0] }) {
+function LinkCard({ link }: { link: AppRouterOutputs['link']['byWorkspace'][0] }) {
 	const { setShowUpdateLinkModal, setShowArchiveLinkModal, setShowDeleteLinkModal } =
 		useLinkContext();
 

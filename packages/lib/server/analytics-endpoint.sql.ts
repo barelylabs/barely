@@ -3,7 +3,7 @@ import { pgTable, primaryKey, uniqueIndex, varchar } from 'drizzle-orm/pg-core';
 
 import { dbId } from '../utils/sql';
 import { EventReports } from './event-report.sql';
-import { Workspaces } from './workspace.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 
 export const AnalyticsEndpoints = pgTable(
 	'AnalyticsEndpoints',

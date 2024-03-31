@@ -3,8 +3,9 @@ import { z } from 'zod';
 
 import { getAbsoluteUrl } from '../utils/url';
 import { createTRPCRouter, privateProcedure } from './api/trpc';
-import { isStripeTestEnvironment, stripe } from './stripe.fns';
-import { Workspaces } from './workspace.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
+import { stripe } from './stripe';
+import { isStripeTestEnvironment } from './stripe.fns';
 
 export const stripeConnectRouter = createTRPCRouter({
 	getOnboardingLink: privateProcedure

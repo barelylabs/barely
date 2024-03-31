@@ -5,10 +5,10 @@ import { dbId, primaryId, timestamps } from '../utils/sql';
 import { AdCampaigns } from './ad-campaign.sql';
 import { PlaylistPitchReviews } from './playlist-pitch-review.sql';
 import { Playlists } from './playlist.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 import { Tracks } from './track.sql';
 import { TransactionLineItems } from './transaction-line-item.sql';
 import { Users } from './user.sql';
-import { Workspaces } from './workspace.sql';
 
 const campaignStageEnum = [
 	'screening',

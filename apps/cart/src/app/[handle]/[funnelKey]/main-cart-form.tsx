@@ -1,11 +1,11 @@
 'use client';
 
-import type { EdgeRouterOutputs } from '@barely/lib/server/api/router.edge';
+import type { CartRouterOutputs } from '@barely/lib/server/routes/cart/cart.api.react';
 import { use, useEffect } from 'react';
 import { api } from '@barely/lib/server/api/react';
-import { updateMainCartFromCartSchema } from '@barely/lib/server/cart.schema';
-import { getAmountsForMainCart } from '@barely/lib/server/cart.utils';
 import { APPAREL_SIZES, isApparelSize } from '@barely/lib/server/product.constants';
+import { updateMainCartFromCartSchema } from '@barely/lib/server/routes/cart/cart.schema';
+import { getAmountsForMainCart } from '@barely/lib/server/routes/cart/cart.utils';
 import { cn } from '@barely/lib/utils/cn';
 import { formatCentsToDollars } from '@barely/lib/utils/currency';
 import { getAbsoluteUrl } from '@barely/lib/utils/url';
@@ -40,7 +40,7 @@ export function MainCartForm({
 	shouldWriteToCookie,
 }: {
 	shouldWriteToCookie?: boolean;
-	initialData: Promise<NonNullable<EdgeRouterOutputs['cart']['createByFunnelKey']>>;
+	initialData: Promise<NonNullable<CartRouterOutputs['createByFunnelKey']>>;
 }) {
 	const { cart: initialCart, funnel: initialFunnel } = use(initialData);
 

@@ -4,9 +4,9 @@ import { boolean, index, integer, pgTable, varchar } from 'drizzle-orm/pg-core';
 import { dbId, primaryId, timestamps } from '../utils/sql';
 import { AdCampaigns } from './ad-campaign.sql';
 import { Files } from './file.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 import { TrackRenders } from './track-render.sql';
 import { Users } from './user.sql';
-import { Workspaces } from './workspace.sql';
 
 export const VidRenders = pgTable(
 	'VidRenders',

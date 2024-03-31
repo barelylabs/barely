@@ -51,7 +51,7 @@ export function DomainModal() {
 		},
 	});
 
-	const { mutateAsync: addDomain } = api.node.domain.add.useMutation({
+	const { mutateAsync: addDomain } = api.domain.add.useMutation({
 		onSuccess: async () => {
 			await apiContext.domain.byWorkspace.invalidate();
 			setShowDomainModal(false);
@@ -59,7 +59,7 @@ export function DomainModal() {
 			domainForm.reset();
 		},
 	});
-	const { mutateAsync: updateDomain } = api.node.domain.update.useMutation({
+	const { mutateAsync: updateDomain } = api.domain.update.useMutation({
 		onSuccess: async () => {
 			await apiContext.domain.byWorkspace.invalidate();
 			setShowDomainModal(false);
@@ -67,7 +67,7 @@ export function DomainModal() {
 			domainForm.reset();
 		},
 	});
-	const { mutateAsync: deleteDomain } = api.node.domain.delete.useMutation({
+	const { mutateAsync: deleteDomain } = api.domain.delete.useMutation({
 		onSuccess: async () => {
 			await apiContext.domain.byWorkspace.invalidate();
 			setShowDomainModal(false);

@@ -10,7 +10,7 @@ import {
 
 import { timestamps } from '../utils/sql';
 import { Links } from './link.sql';
-import { Workspaces } from './workspace.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 
 export const Domains = pgTable(
 	'Domains',

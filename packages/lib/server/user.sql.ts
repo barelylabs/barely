@@ -14,11 +14,11 @@ import { Files } from './file.sql';
 import { PlaylistCoverRenders } from './playlist-cover.sql';
 import { PlaylistPitchReviews } from './playlist-pitch-review.sql';
 import { ProviderAccounts } from './provider-account.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 import { TrackRenders } from './track-render.sql';
 import { Transactions } from './transaction.sql';
 import { UserSessions } from './user-session.sql';
 import { VidRenders } from './vid-render.sql';
-import { Workspaces } from './workspace.sql';
 
 export const Users = pgTable(
 	'Users',

@@ -8,9 +8,9 @@ import { _Tracks_To_Genres } from './genre.sql';
 import { _Mixtapes_To_Tracks } from './mixtape.sql';
 import { PlaylistPlacements } from './playlist-placement.sql';
 import { _Playlists_To_Tracks } from './playlist.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 import { Stats } from './stat.sql';
 import { TrackRenders } from './track-render.sql';
-import { Workspaces } from './workspace.sql';
 
 export const Tracks = pgTable(
 	'Tracks',

@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { WORKSPACE_PLANS } from '@barely/lib/server/routes/workspace/workspace.settings';
 import { toTitleCase } from '@barely/lib/utils/text';
 import { api } from '@barely/server/api/react';
-import { WORKSPACE_PLANS } from '@barely/server/workspace.settings';
 import { useAtom } from 'jotai';
 
 import { atomWithToggle } from '@barely/atoms/atom-with-toggle';
@@ -31,7 +31,7 @@ export function UpgradeModal(props: {
 	const [creatingCheckout, setCreatingCheckout] = useState(false);
 
 	const { mutate: createUpgradeCheckoutLink } =
-		api.workspace.createCheckoutLink.useMutation({
+		api.workspaceCheckout.createCheckoutLink.useMutation({
 			onSuccess: checkoutLink => {
 				if (checkoutLink) window.location.replace(checkoutLink);
 			},

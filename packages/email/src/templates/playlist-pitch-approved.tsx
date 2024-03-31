@@ -1,4 +1,8 @@
 import * as React from 'react';
+import { Head } from '@react-email/head';
+import { Html } from '@react-email/html';
+import { Preview } from '@react-email/preview';
+import { Text } from '@react-email/text';
 
 import { EmailFooter } from '../components/email-footer';
 import { EmailHeaderLogo } from '../components/email-header-logo';
@@ -7,12 +11,7 @@ import {
 	EmailButton,
 	EmailContainer,
 	EmailHeading,
-	EmailQuote,
 	EmailSeparator,
-	EmailText,
-	Head,
-	Html,
-	Preview,
 } from '../primitives';
 
 const PlaylistPitchApprovedEmailTemplate = (props: {
@@ -32,19 +31,19 @@ const PlaylistPitchApprovedEmailTemplate = (props: {
 				<EmailContainer>
 					<EmailHeaderLogo />
 					<EmailHeading>Your track is accepted!</EmailHeading>
-					{props.firstName && <EmailText>Hi {props.firstName},</EmailText>}
-					<EmailText>
+					{props.firstName && <Text>Hi {props.firstName},</Text>}
+					<Text>
 						Our A&R team has reviewed{' '}
 						<span className='font-bold'>"{props.trackName}"</span> and it sounds good to
 						proceed!
-					</EmailText>
+					</Text>
 
-					<EmailQuote>{props.screeningMessage}</EmailQuote>
+					<Text>{props.screeningMessage}</Text>
 
-					<EmailText className='text-md'>
+					<Text className='text-md'>
 						Click the button below to go to your account, set up budget, and launch your
 						playlist.pitch campaign.
-					</EmailText>
+					</Text>
 					<EmailButton href={props.loginLink}>Start my campaign 🚀</EmailButton>
 
 					<EmailSeparator />

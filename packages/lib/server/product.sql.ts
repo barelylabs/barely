@@ -13,7 +13,7 @@ import { dbId, primaryId, timestamps } from '../utils/sql';
 import { CartFunnels } from './cart-funnel.sql';
 import { _Files_To_Products__Images } from './file.sql';
 import { MERCH_TYPES } from './product.constants';
-import { Workspaces } from './workspace.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 
 export const Products = pgTable('Products', {
 	...primaryId,

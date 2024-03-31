@@ -1,6 +1,6 @@
 'use client';
 
-import type { EdgeRouterOutputs } from '@barely/lib/server/api/router.edge';
+import type { AppRouterOutputs } from '@barely/lib/server/api/react';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
 import {
@@ -18,10 +18,10 @@ import { trackFilterParamsSchema } from '@barely/lib/server/track.schema';
 import { wait } from '@barely/lib/utils/wait';
 
 interface TrackContext {
-	tracks: EdgeRouterOutputs['track']['byWorkspace'];
+	tracks: AppRouterOutputs['track']['byWorkspace'];
 	trackSelection: Selection;
 	lastSelectedTrackId: string | undefined;
-	lastSelectedTrack: EdgeRouterOutputs['track']['byWorkspace'][0] | undefined;
+	lastSelectedTrack: AppRouterOutputs['track']['byWorkspace'][0] | undefined;
 	setTrackSelection: (selection: Selection) => void;
 	gridListRef: React.RefObject<HTMLDivElement>;
 	focusGridList: () => void;
@@ -44,7 +44,7 @@ export function TrackContextProvider({
 	filters,
 }: {
 	children: React.ReactNode;
-	initialTracks: Promise<EdgeRouterOutputs['track']['byWorkspace']>;
+	initialTracks: Promise<AppRouterOutputs['track']['byWorkspace']>;
 	filters: z.infer<typeof trackFilterParamsSchema>;
 }) {
 	const [showCreateTrackModal, setShowCreateTrackModal] = useState(false);

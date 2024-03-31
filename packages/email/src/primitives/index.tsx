@@ -1,9 +1,7 @@
-// import type { ColumnProps } from '@react-email/components';
 import type { ColumnProps } from '@react-email/column';
 import { Body as BodyPrimitive } from '@react-email/body';
 import { Button as ButtonPrimitive } from '@react-email/button';
 import { Column } from '@react-email/column';
-// import { Column, Row, Text } from '@react-email/components';
 import { Container as ContainerPrimitive } from '@react-email/container';
 import { Heading as HeadingPrimitive } from '@react-email/heading';
 import { Hr as HrPrimitive } from '@react-email/hr';
@@ -11,28 +9,11 @@ import { Link as LinkPrimitive } from '@react-email/link';
 import { Row } from '@react-email/row';
 import { Text } from '@react-email/text';
 
-// import { cn } from '../cn';
-
 export const resetText = {
 	margin: '0',
 	padding: '0',
 	lineHeight: 1.4,
 };
-
-// export {
-// 	CodeBlock as EmailCodeBlock,
-// 	CodeInline as EmailCodeInline,
-// 	Column,
-// 	Img as EmailImg,
-// 	Markdown as EmailMarkdown,
-// 	Row as EmailRow,
-// 	Section as EmailSection,
-// } from '@react-email/components';
-export { Html } from '@react-email/html';
-
-export { Preview } from '@react-email/preview';
-export { Text as EmailText } from '@react-email/text';
-export { Head } from '@react-email/head';
 
 export function Body(props: { children: React.ReactNode }) {
 	const style = {

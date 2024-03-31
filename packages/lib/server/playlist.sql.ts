@@ -17,10 +17,10 @@ import { _Playlists_To_Genres } from './genre.sql';
 import { Links } from './link.sql';
 import { PlaylistPlacements } from './playlist-placement.sql';
 import { ProviderAccounts } from './provider-account.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 import { Stats } from './stat.sql';
 import { Tracks } from './track.sql';
 import { Users } from './user.sql';
-import { Workspaces } from './workspace.sql';
 
 export const Playlists = pgTable(
 	'Playlists',

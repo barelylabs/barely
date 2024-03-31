@@ -13,7 +13,7 @@ import {
 	_AudienceInterests_To_Audiences,
 } from './audience-interest.sql';
 import { _AudienceVidViewsGroups_To_Audiences } from './audience-vid-views.sql';
-import { Workspaces } from './workspace.sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 
 export const Audiences = pgTable(
 	'Audiences',

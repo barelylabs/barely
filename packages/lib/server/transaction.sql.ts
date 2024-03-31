@@ -10,9 +10,9 @@ import {
 } from 'drizzle-orm/pg-core';
 
 import { dbId, primaryId, timestamps } from '../utils/sql';
+import { Workspaces } from './routes/workspace/workspace.sql';
 import { TransactionLineItems } from './transaction-line-item.sql';
 import { Users } from './user.sql';
-import { Workspaces } from './workspace.sql';
 
 export const Transactions = pgTable(
 	'Transactions',

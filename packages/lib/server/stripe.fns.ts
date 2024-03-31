@@ -1,15 +1,14 @@
+import type Stripe from 'stripe';
 import { NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
-import Stripe from 'stripe';
 
 import type { CampaignWithWorkspaceAndTrackAndGenres } from './campaign.schema';
 import type { Db } from './db';
+import type { Workspace } from './routes/workspace/workspace.schema';
 import type { StripeLineItemMetadata, StripeTransactionMetadata } from './stripe.schema';
 import type { InsertTransactionLineItem } from './transaction-line-item.schema';
 import type { Transaction } from './transaction.schema';
 import type { User } from './user.schema';
-import type { Workspace } from './workspace.schema';
-import type { PlanType } from './workspace.settings';
 import { env } from '../env';
 import { playlistPitchCostInDollars } from '../utils/campaign';
 import { newId } from '../utils/id';
@@ -21,19 +20,15 @@ import { getAbsoluteUrl } from '../utils/url';
 import { Campaigns } from './campaign.sql';
 import { assignPlaylistPitchToReviewers } from './playlist-pitch-review.fns';
 import { totalPlaylistReachByGenres } from './playlist.fns';
+import { WORKSPACE_PLANS } from './routes/workspace/workspace.settings';
+import { Workspaces } from './routes/workspace/workspace.sql';
+import { stripe } from './stripe';
 import {
 	stripeLineItemMetadataSchema,
 	stripeTransactionMetadataSchema,
 } from './stripe.schema';
 import { TransactionLineItems } from './transaction-line-item.sql';
 import { Transactions } from './transaction.sql';
-import { WORKSPACE_PLANS } from './workspace.settings';
-import { Workspaces } from './workspace.sql';
-
-export const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-	apiVersion: '2023-10-16',
-	httpClient: Stripe.createFetchHttpClient(),
-});
 
 // export async function createStripeUser(props: {
 //   userId: string;
@@ -114,96 +109,80 @@ export async function createStripeWorkspaceCustomer(props: {
 	return stripeWorkspace[0] ?? raise('Failed to create Stripe customer.');
 }
 
-export async function createPlanCheckoutLink(props: {
-	user: User;
-	workspace: Workspace;
-	planId: PlanType;
-	billingCycle: 'monthly' | 'yearly';
-	successPath?: string;
-	cancelPath?: string;
-	db: Db;
-}) {
-	const testEnvironment =
-		env.VERCEL_ENV === 'development' || env.VERCEL_ENV === 'preview';
-	const priceId = WORKSPACE_PLANS.get(props.planId)?.price[props.billingCycle].priceIds[
-		testEnvironment ? 'test' : 'production'
-	];
+// export async function createPlanCheckoutLink(props: {
+// 	user: User;
+// 	workspace: Workspace;
+// 	planId: PlanType;
+// 	billingCycle: 'monthly' | 'yearly';
+// 	successPath?: string;
+// 	cancelPath?: string;
+// 	db: Db;
+// }) {
+// 	const testEnvironment =
+// 		env.VERCEL_ENV === 'development' || env.VERCEL_ENV === 'preview';
+// 	const priceId = WORKSPACE_PLANS.get(props.planId)?.price[props.billingCycle].priceIds[
+// 		testEnvironment ? 'test' : 'production'
+// 	];
 
-	if (!priceId) {
-		throw new Error('Invalid priceId.');
-	}
+// 	if (!priceId) {
+// 		throw new Error('Invalid priceId.');
+// 	}
 
-	const workspaceHasStripeCustomerId = testEnvironment
-		? !!props.workspace.stripeCustomerId_devMode
-		: !!props.workspace.stripeCustomerId;
+// 	const workspaceHasStripeCustomerId = testEnvironment
+// 		? !!props.workspace.stripeCustomerId_devMode
+// 		: !!props.workspace.stripeCustomerId;
 
-	// // const userHasStripeId = testEnvironment
-	// //   ? !!props.user.stripeId_devMode
-	// //   : !!props.user.stripeId;
+// 	const workspace = workspaceHasStripeCustomerId
+// 		? props.workspace
+// 		: await createStripeWorkspaceCustomer({
+// 				workspaceId: props.workspace.id,
+// 				email: props.user.email,
+// 				name:
+// 					props.user.fullName ??
+// 					fullNameToFirstAndLast(props.user.firstName, props.user.lastName),
+// 				phone: props.user.phone ?? undefined,
+// 				db: props.db,
+// 			});
 
-	// const user = userHasStripeId
-	//   ? props.user
-	//   : await createStripeUser({
-	//       userId: props.user.id,
-	//       email: props.user.email,
-	//       name:
-	//         props.user.fullName ??
-	//         fullNameToFirstAndLast(props.user.firstName, props.user.lastName),
-	//       phone: props.user.phone ?? undefined,
-	//       db: props.db,
-	//     });
+// 	if (
+// 		(testEnvironment && !workspace?.stripeCustomerId_devMode) ||
+// 		(!testEnvironment && !workspace?.stripeCustomerId)
+// 	) {
+// 		throw new Error('workspace must have a stripeCustomerId.');
+// 	}
 
-	const workspace = workspaceHasStripeCustomerId
-		? props.workspace
-		: await createStripeWorkspaceCustomer({
-				workspaceId: props.workspace.id,
-				email: props.user.email,
-				name:
-					props.user.fullName ??
-					fullNameToFirstAndLast(props.user.firstName, props.user.lastName),
-				phone: props.user.phone ?? undefined,
-				db: props.db,
-			});
+// 	const successUrl = getAbsoluteUrl(
+// 		'app',
+// 		props.successPath ?? `${props.workspace.handle}/settings/billing?success=true`,
+// 	);
+// 	const cancelUrl = getAbsoluteUrl(
+// 		'app',
+// 		props.cancelPath ?? `${props.workspace.handle}/settings/billing`,
+// 	);
 
-	if (
-		(testEnvironment && !workspace?.stripeCustomerId_devMode) ||
-		(!testEnvironment && !workspace?.stripeCustomerId)
-	) {
-		throw new Error('workspace must have a stripeCustomerId.');
-	}
+// 	const metadata: StripeTransactionMetadata = {
+// 		createdById: props.user.id,
+// 		workspaceId: props.workspace.id,
+// 	};
 
-	const successUrl = getAbsoluteUrl(
-		'app',
-		props.successPath ?? `${props.workspace.handle}/settings/billing?success=true`,
-	);
-	const cancelUrl = getAbsoluteUrl(
-		'app',
-		props.cancelPath ?? `${props.workspace.handle}/settings/billing`,
-	);
+// 	const session = await stripe.checkout.sessions.create({
+// 		customer: workspace.stripeCustomerId ?? undefined,
+// 		mode: 'subscription',
+// 		success_url: successUrl,
+// 		cancel_url: cancelUrl,
+// 		payment_method_types: ['card'],
+// 		line_items: [
+// 			{
+// 				price: priceId,
+// 				quantity: 1,
+// 			},
+// 		],
+// 		client_reference_id: props.workspace.id,
+// 		metadata,
+// 	});
 
-	const metadata: StripeTransactionMetadata = {
-		createdById: props.user.id,
-		workspaceId: props.workspace.id,
-	};
-
-	const session = await stripe.checkout.sessions.create({
-		customer: workspace.stripeCustomerId ?? undefined,
-		mode: 'subscription',
-		success_url: successUrl,
-		cancel_url: cancelUrl,
-		payment_method_types: ['card'],
-		line_items: [
-			{
-				price: priceId,
-				quantity: 1,
-			},
-		],
-		client_reference_id: props.workspace.id,
-		metadata,
-	});
-
-	return session.url;
-}
+// 	return session.url;
+// }
 
 export async function createPitchCheckoutLink(props: {
 	user: User;
