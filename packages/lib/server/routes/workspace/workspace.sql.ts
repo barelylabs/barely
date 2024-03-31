@@ -9,29 +9,29 @@ import {
 } from 'drizzle-orm/pg-core';
 
 import { dbId, primaryId, timestamps } from '../../../utils/sql';
-import { AdCreatives } from '../../ad-creative.sql';
-import { AnalyticsEndpoints } from '../../analytics-endpoint.sql';
-import { Bios } from '../../bio.sql';
-import { Campaigns } from '../../campaign.sql';
-import { ExternalWebsites } from '../../external-website.sql';
+import { VidRenders } from '../../vid-render.sql';
+import { AdCreatives } from '../ad-creative/ad-creative.sql';
+import { AnalyticsEndpoints } from '../analytics-endpoint/analytics-endpoint.sql';
+import { Bios } from '../bio/bio.sql';
+import { Campaigns } from '../campaign/campaign.sql';
+import { ExternalWebsites } from '../external-website/external-website.sql';
 import {
 	_Files_To_Workspaces__AvatarImage,
 	_Files_To_Workspaces__HeaderImage,
 	Files,
-} from '../../file.sql';
-import { Forms } from '../../form.sql';
-import { Links } from '../../link.sql';
-import { Mixtapes } from '../../mixtape.sql';
-import { PlaylistCoverRenders } from '../../playlist-cover.sql';
-import { Playlists } from '../../playlist.sql';
-import { PressKits } from '../../press-kit.sql';
-import { ProviderAccounts } from '../../provider-account.sql';
-import { ProviderSubAccounts } from '../../provider-sub-account.sql';
-import { TrackRenders } from '../../track-render.sql';
-import { Tracks } from '../../track.sql';
-import { Transactions } from '../../transaction.sql';
-import { _Users_To_Workspaces } from '../../user.sql';
-import { VidRenders } from '../../vid-render.sql';
+} from '../file/file.sql';
+import { Forms } from '../form/form.sql';
+import { Links } from '../link/link.sql';
+import { Mixtapes } from '../mixtape/mixtape.sql';
+import { PlaylistCoverRenders } from '../playlist/playlist-cover.sql';
+import { Playlists } from '../playlist/playlist.sql';
+import { PressKits } from '../press-kit/press-kit.sql';
+import { ProviderAccounts } from '../provider-account/provider-account.sql';
+import { ProviderSubAccounts } from '../provider-account/provider-sub-account.sql';
+import { TrackRenders } from '../track/track-render.sql';
+import { Tracks } from '../track/track.sql';
+import { Transactions } from '../transaction/transaction.sql';
+import { _Users_To_Workspaces } from '../user/user.sql';
 import { WorkspaceInvites } from '../workspace-invite/workspace-invite.sql';
 
 export const Workspaces = pgTable(

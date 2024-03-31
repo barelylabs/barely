@@ -31,7 +31,7 @@ export function UpgradeModal(props: {
 	const [creatingCheckout, setCreatingCheckout] = useState(false);
 
 	const { mutate: createUpgradeCheckoutLink } =
-		api.workspaceCheckout.createCheckoutLink.useMutation({
+		api.workspaceStripe.createCheckoutLink.useMutation({
 			onSuccess: checkoutLink => {
 				if (checkoutLink) window.location.replace(checkoutLink);
 			},

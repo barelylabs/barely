@@ -1,6 +1,6 @@
 import slugify from '@sindresorhus/slugify';
 
-import { ccTLDs } from '../server/link.constants';
+import { ccTLDs } from '../server/routes/link/link.constants';
 
 export function generateDomainFromName(name: string) {
 	const normalizedName = slugify(name, { separator: '' });

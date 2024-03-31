@@ -12,9 +12,9 @@ import {
 import {
 	_Files_To_Workspaces__AvatarImage,
 	_Files_To_Workspaces__HeaderImage,
-} from '../../file.sql';
+} from '../file/file.sql';
 // import { createPlanCheckoutLink } from './stripe.fns';
-import { _Users_To_Workspaces } from '../../user.sql';
+import { _Users_To_Workspaces } from '../user/user.sql';
 import { WorkspaceInvites } from '../workspace-invite/workspace-invite.sql';
 // import { inviteUserToWorkspace } from './workspace.edge.fns';
 import { createWorkspaceSchema, updateCurrentWorkspaceSchema } from './workspace.schema';

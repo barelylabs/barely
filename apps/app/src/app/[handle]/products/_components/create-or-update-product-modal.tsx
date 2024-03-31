@@ -4,8 +4,8 @@ import type { UploadQueueItem } from '@barely/lib/hooks/use-upload';
 import type {
 	SortableFile,
 	SortableFilePendingUpload,
-} from '@barely/lib/server/file.schema';
-import type { UpsertProduct } from '@barely/lib/server/product.schema';
+} from '@barely/lib/server/routes/file/file.schema';
+import type { UpsertProduct } from '@barely/lib/server/routes/product/product.schema';
 import type { z } from 'zod';
 import { useCallback, useEffect, useState } from 'react';
 import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
@@ -16,7 +16,7 @@ import {
 	defaultProduct,
 	merchTypeSchema,
 	upsertProductSchema,
-} from '@barely/lib/server/product.schema';
+} from '@barely/lib/server/routes/product/product.schema';
 import { insert } from '@barely/lib/utils/collection';
 import { atom } from 'jotai';
 

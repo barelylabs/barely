@@ -8,7 +8,7 @@ import { api } from '@barely/lib/server/api/react';
 import {
 	defaultCartFunnel,
 	upsertCartFunnelSchema,
-} from '@barely/lib/server/cart-funnel.schema';
+} from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
 
 import { Editor } from '@barely/ui/elements/editor';
 import { Label } from '@barely/ui/elements/label';

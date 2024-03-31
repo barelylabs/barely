@@ -33,15 +33,20 @@ export function WorkspaceContextProvider({
 	);
 }
 
+function WorkspaceUpdateNavHistory({ children }: { children: ReactNode }) {
+	useUpdateNavHistory();
+	return <>{children}</>;
+}
+
 export function WorkspaceProviders(
 	props: UserContextProviderProps & WorkspaceContextProviderProps,
 ) {
-	useUpdateNavHistory();
+	// useUpdateNavHistory();
 
 	return (
 		<UserContextProvider user={props.user}>
 			<WorkspaceContextProvider workspace={props.workspace}>
-				{props.children}
+				<WorkspaceUpdateNavHistory>{props.children}</WorkspaceUpdateNavHistory>
 			</WorkspaceContextProvider>
 		</UserContextProvider>
 	);

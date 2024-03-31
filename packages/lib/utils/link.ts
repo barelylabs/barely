@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { parse } from 'node-html-parser';
 
 import type { SessionWorkspace } from '../server/auth';
-import type { Link, LinkMetaTags } from '../server/link.schema';
+import type { Link, LinkMetaTags } from '../server/routes/link/link.schema';
 import { env } from '../env';
 import {
 	ccTLDs,

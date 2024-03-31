@@ -3,9 +3,12 @@
 import type { CartRouterOutputs } from '@barely/lib/server/routes/cart/cart.api.react';
 import { use, useEffect } from 'react';
 import { api } from '@barely/lib/server/api/react';
-import { APPAREL_SIZES, isApparelSize } from '@barely/lib/server/product.constants';
 import { updateMainCartFromCartSchema } from '@barely/lib/server/routes/cart/cart.schema';
 import { getAmountsForMainCart } from '@barely/lib/server/routes/cart/cart.utils';
+import {
+	APPAREL_SIZES,
+	isApparelSize,
+} from '@barely/lib/server/routes/product/product.constants';
 import { cn } from '@barely/lib/utils/cn';
 import { formatCentsToDollars } from '@barely/lib/utils/currency';
 import { getAbsoluteUrl } from '@barely/lib/utils/url';

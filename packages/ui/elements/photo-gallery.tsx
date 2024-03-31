@@ -1,6 +1,6 @@
 'use client';
 
-import type { Image } from '@barely/lib/server/file.schema';
+import type { Image } from '@barely/lib/server/routes/file/file.schema';
 import type { PhotoAlbumProps, RenderPhotoProps } from 'react-photo-album';
 import { useMediaQuery } from '@barely/lib/hooks/use-media-query';
 import ReactPhotoAlbum from 'react-photo-album';

@@ -1,7 +1,10 @@
 'use client';
 
 import type { UploadQueueItem } from '@barely/lib/hooks/use-upload';
-import type { InsertTrackAudioFile, UpsertTrack } from '@barely/lib/server/track.schema';
+import type {
+	InsertTrackAudioFile,
+	UpsertTrack,
+} from '@barely/lib/server/routes/track/track.schema';
 import type { z } from 'zod';
 import { useCallback } from 'react';
 import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
@@ -11,7 +14,7 @@ import {
 	defaultTrack,
 	formatWorkspaceTrackToUpsertTrackForm,
 	upsertTrackSchema,
-} from '@barely/lib/server/track.schema';
+} from '@barely/lib/server/routes/track/track.schema';
 import { parseSpotifyLink } from '@barely/lib/utils/link';
 import { atom } from 'jotai';
 

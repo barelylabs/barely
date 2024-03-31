@@ -4,15 +4,19 @@ import { and, eq } from 'drizzle-orm';
 import type { Db } from '../db';
 import { newId } from '../../utils/id';
 import { raise } from '../../utils/raise';
-import { insertProviderAccountSchema } from '../provider-account.schema';
-import { ProviderAccounts } from '../provider-account.sql';
-import { getSpotifyUser } from '../spotify.endpts.user';
+import {
+	deserializeVerificationToken,
+	serializeVerificationToken,
+} from '../routes/auth/verification-token.fns';
+import { VerificationTokens } from '../routes/auth/verification-token.sql';
+import { insertProviderAccountSchema } from '../routes/provider-account/provider-account.schema';
+import { ProviderAccounts } from '../routes/provider-account/provider-account.sql';
 import {
 	deserializeUserSession,
 	getSessionAndUser,
 	serializeUserSession,
-} from '../user-session.fns';
-import { UserSessions } from '../user-session.sql';
+} from '../routes/user/user-session.fns';
+import { UserSessions } from '../routes/user/user-session.sql';
 import {
 	createUser,
 	deserializeUser,
@@ -20,13 +24,9 @@ import {
 	getSessionUserByEmail,
 	getSessionUserByUserId,
 	serializeUser,
-} from '../user.fns';
-import { Users } from '../user.sql';
-import {
-	deserializeVerificationToken,
-	serializeVerificationToken,
-} from '../verification-token.fns';
-import { VerificationTokens } from '../verification-token.sql';
+} from '../routes/user/user.fns';
+import { Users } from '../routes/user/user.sql';
+import { getSpotifyUser } from '../spotify/spotify.endpts.user';
 import { deleteSession } from './auth.fns';
 
 export function NeonAdapter(db: Db): Adapter {

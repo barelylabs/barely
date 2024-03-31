@@ -1,6 +1,6 @@
 import type { z } from 'zod';
 
-import type { selectWorkspaceFilesSchema } from '../server/file.schema';
+import type { selectWorkspaceFilesSchema } from '../server/routes/file/file.schema';
 import { api } from '../server/api/react';
 import { useWorkspace } from './use-workspace';
 

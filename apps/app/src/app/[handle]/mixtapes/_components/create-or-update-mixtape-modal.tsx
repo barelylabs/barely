@@ -1,13 +1,13 @@
 'use client';
 
-import type { MixtapeWith_Tracks } from '@barely/lib/server/mixtape.schema';
-import type { TrackWith_Workspace_Genres_Files } from '@barely/lib/server/track.schema';
+import type { MixtapeWith_Tracks } from '@barely/lib/server/routes/mixtape/mixtape.schema';
+import type { TrackWith_Workspace_Genres_Files } from '@barely/lib/server/routes/track/track.schema';
 import type { z } from 'zod';
 import { useCallback, useState } from 'react';
 import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
-import { upsertMixtapeSchema } from '@barely/lib/server/mixtape.schema';
+import { upsertMixtapeSchema } from '@barely/lib/server/routes/mixtape/mixtape.schema';
 import { insert } from '@barely/lib/utils/collection';
 import { DropIndicator, isTextDropItem, useDragAndDrop } from 'react-aria-components';
 

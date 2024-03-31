@@ -14,7 +14,7 @@ import {
 } from 'react';
 import { useTypedQuery } from '@barely/lib/hooks/use-typed-query';
 import { api } from '@barely/lib/server/api/react';
-import { trackFilterParamsSchema } from '@barely/lib/server/track.schema';
+import { trackFilterParamsSchema } from '@barely/lib/server/routes/track/track.schema';
 import { wait } from '@barely/lib/utils/wait';
 
 interface TrackContext {

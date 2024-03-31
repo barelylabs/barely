@@ -1,10 +1,10 @@
 'use client';
 
-import type { InsertDomain } from '@barely/server/domain.schema';
+import type { InsertDomain } from '@barely/server/routes/domain/domain.schema';
 import type { z } from 'zod';
 import { useEffect, useState } from 'react';
 import { api } from '@barely/server/api/react';
-import { insertDomainSchema } from '@barely/server/domain.schema';
+import { insertDomainSchema } from '@barely/server/routes/domain/domain.schema';
 import { atom, useAtom } from 'jotai';
 
 import { atomWithToggle } from '@barely/atoms/atom-with-toggle';

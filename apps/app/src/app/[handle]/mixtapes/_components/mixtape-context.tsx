@@ -1,7 +1,7 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/react';
-import type { MixtapeWith_Tracks } from '@barely/lib/server/mixtape.schema';
+import type { MixtapeWith_Tracks } from '@barely/lib/server/routes/mixtape/mixtape.schema';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
 import {
@@ -16,7 +16,7 @@ import {
 import { useTypedQuery } from '@barely/lib/hooks/use-typed-query';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
-import { mixtapeFilterParamsSchema } from '@barely/lib/server/mixtape.schema';
+import { mixtapeFilterParamsSchema } from '@barely/lib/server/routes/mixtape/mixtape.schema';
 import { wait } from '@barely/lib/utils/wait';
 
 interface MixtapeContext {

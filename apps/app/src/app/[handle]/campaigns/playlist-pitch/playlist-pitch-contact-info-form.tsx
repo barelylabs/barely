@@ -6,7 +6,7 @@ import {
 	emailInUseMessage,
 	newUserContactInfoSchemaWithRole,
 	phoneNumberInUseMessage,
-} from '@barely/server/user.schema';
+} from '@barely/lib/server/routes/user/user.schema';
 import { debounce } from 'perfect-debounce';
 
 import { useZodForm } from '@barely/hooks/use-zod-form';

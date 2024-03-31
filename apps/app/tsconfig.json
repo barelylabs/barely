@@ -19,6 +19,7 @@
 		".next/types/**/*.ts",
 		"../../packages/lib/hooks/use-create-or-update-form.ts",
 		"../../packages/lib/hooks/use-workspace-hotkeys.tsx",
+		"../../packages/lib/server/api/route-handler.ts",
 	],
 	"exclude": ["node_modules"],
 }

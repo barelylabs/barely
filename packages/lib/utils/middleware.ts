@@ -3,8 +3,11 @@ import { userAgent } from 'next/server';
 import { ipAddress } from '@vercel/edge';
 
 import { env } from '../env';
-import { getRandomGeoData } from '../server/link.constants';
-import { nextGeoSchema, nextUserAgentToFormattedSchema } from '../server/next.schema';
+import {
+	nextGeoSchema,
+	nextUserAgentToFormattedSchema,
+} from '../server/next/next.schema';
+import { getRandomGeoData } from '../server/routes/link/link.constants';
 import { getDomainWithoutWWW } from './link';
 
 export const detectBot = (req: NextRequest) => {

@@ -1,4 +1,4 @@
-import type { User } from '@barely/server/user.schema';
+import type { User } from '@barely/lib/server/routes/user/user.schema';
 import type { AvatarProps } from '@radix-ui/react-avatar';
 
 import { AvatarFallback, AvatarImage, AvatarRoot } from '@barely/ui/elements/avatar';

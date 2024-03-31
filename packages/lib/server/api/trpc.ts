@@ -15,7 +15,7 @@ import { ratelimit } from '../../utils/upstash';
  */
 
 import { db } from '../db';
-import { _Users_To_Workspaces } from '../user.sql';
+import { _Users_To_Workspaces } from '../routes/user/user.sql';
 
 const trpcSources = ['nextjs-react', 'rsc', 'rest'] as const;
 type TRPCSource = (typeof trpcSources)[number];

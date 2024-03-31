@@ -1,33 +1,33 @@
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 
-import { analyticsEndpointRouter } from '../analytics-endpoint.router';
-import { authRouter } from '../auth/auth.router';
-import { bioRouter } from '../bio.router';
-import { campaignRouter } from '../campaign.router';
-import { cartFunnelRouter } from '../cart-funnel.router';
-import { domainRouter } from '../domain.router';
-import { eventRouter } from '../event.router';
-import { fileRouter } from '../file.router';
-import { formResponseRouter } from '../form-response.router';
-import { genreRouter } from '../genre.router';
-import { linkRouter } from '../link.router';
-import { mixtapeRouter } from '../mixtape.router';
-import { playlistPitchReviewRouter } from '../playlist-pitch-review.router';
-import { playlistPlacementRouter } from '../playlist-placement.router';
-import { playlistRouter } from '../playlist.router';
-import { pressKitRouter } from '../press-kit.router';
-import { productRouter } from '../product.router';
-import { providerAccountRouter } from '../provider-account.router';
+import { analyticsEndpointRouter } from '../routes/analytics-endpoint/analytics-endpoint.router';
+import { authRouter } from '../routes/auth/auth.router';
+import { bioRouter } from '../routes/bio/bio.router';
+import { campaignRouter } from '../routes/campaign/campaign.router';
+import { cartFunnelRouter } from '../routes/cart-funnel/cart-funnel.router';
 import { cartRouter } from '../routes/cart/cart.router';
-import { workspaceCheckoutRouter } from '../routes/workspace-checkout/workspace-checkout.router';
+import { domainRouter } from '../routes/domain/domain.router';
+import { eventRouter } from '../routes/event/event.router';
+import { fileRouter } from '../routes/file/file.router';
+import { formResponseRouter } from '../routes/form/form-response.router';
+import { genreRouter } from '../routes/genre/genre.router';
+import { linkRouter } from '../routes/link/link.router';
+import { mixtapeRouter } from '../routes/mixtape/mixtape.router';
+import { playlistPitchReviewRouter } from '../routes/playlist-pitch-review/playlist-pitch-review.router';
+import { playlistPlacementRouter } from '../routes/playlist-placement/playlist-placement.router';
+import { playlistRouter } from '../routes/playlist/playlist.router';
+import { pressKitRouter } from '../routes/press-kit/press-kit.router';
+import { productRouter } from '../routes/product/product.router';
+import { providerAccountRouter } from '../routes/provider-account/provider-account.router';
+import { spotifyRouter } from '../routes/spotify/spotify.router';
+import { statRouter } from '../routes/stat/stat.router';
+import { stripeConnectRouter } from '../routes/stripe-connect/stripe-connect.router';
+import { trackRouter } from '../routes/track/track.router';
+import { userRouter } from '../routes/user/user.router';
+import { visitorSessionRouter } from '../routes/visitor-session/visitor-session.router';
 import { workspaceInviteRouter } from '../routes/workspace-invite/workspace-invite.router';
+import { workspaceStripeRouter } from '../routes/workspace-stripe/workspace-stripe.router';
 import { workspaceRouter } from '../routes/workspace/workspace.router';
-import { spotifyRouter } from '../spotify.router';
-import { statRouter } from '../stat.router';
-import { stripeConnectRouter } from '../stripe-connect.router';
-import { trackRouter } from '../track.router';
-import { userRouter } from '../user.router';
-import { visitorSessionRouter } from '../visitor-session.router';
 import { createTRPCRouter } from './trpc';
 
 const appRouter = createTRPCRouter({
@@ -55,7 +55,7 @@ const appRouter = createTRPCRouter({
 	stripeConnect: stripeConnectRouter,
 	workspace: workspaceRouter,
 	workspaceInvite: workspaceInviteRouter,
-	workspaceCheckout: workspaceCheckoutRouter,
+	workspaceStripe: workspaceStripeRouter,
 	track: trackRouter,
 	user: userRouter,
 	visitorSession: visitorSessionRouter,

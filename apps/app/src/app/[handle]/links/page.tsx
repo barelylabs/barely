@@ -1,7 +1,7 @@
 import type { z } from 'zod';
 import { redirect } from 'next/navigation';
 import { api } from '@barely/lib/server/api/server';
-import { linkSearchParamsSchema } from '@barely/server/link.schema';
+import { linkSearchParamsSchema } from '@barely/server/routes/link/link.schema';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllLinks } from '~/app/[handle]/links/_components/all-links';

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import { api } from '../server/api/react';
-import { BARELY_SHORTLINK_DOMAIN } from '../server/link.constants';
+import { BARELY_SHORTLINK_DOMAIN } from '../server/routes/link/link.constants';
 
 export function useDomains() {
 	const { data: domains, error, isLoading } = api.domain.byWorkspace.useQuery();

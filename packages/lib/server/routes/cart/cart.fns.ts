@@ -4,20 +4,20 @@ import { sendEmail } from '@barely/email';
 import ReceiptEmailTemplate from '@barely/email/src/templates/cart/receipt';
 import { and, eq, lt } from 'drizzle-orm';
 
-import type { Fan } from '../../fan.schema';
-import type { Product } from '../../product.schema';
-import type { ShippingEstimateProps } from '../../shipping.endpts';
-import type { stripeConnectChargeMetadataSchema } from '../../stripe-connect.schema';
+import type { ShippingEstimateProps } from '../../shipengine/shipengine.endpts';
+import type { Fan } from '../fan/fan.schema';
+import type { Product } from '../product/product.schema';
+import type { stripeConnectChargeMetadataSchema } from '../stripe-connect/stripe-connect.schema';
 import type { Cart, InsertCart, UpdateCart } from './cart.schema';
 import { formatCentsToDollars } from '../../../utils/currency';
 import { isProduction } from '../../../utils/environment';
 import { newId } from '../../../utils/id';
 import { raise } from '../../../utils/raise';
-import { CartFunnels } from '../../cart-funnel.sql';
 import { db } from '../../db';
-import { MEDIAMAIL_TYPES, MERCH_DIMENSIONS } from '../../product.constants';
-import { getShippingEstimates } from '../../shipping.endpts';
+import { getShippingEstimates } from '../../shipengine/shipengine.endpts';
 import { stripe } from '../../stripe';
+import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
+import { MEDIAMAIL_TYPES, MERCH_DIMENSIONS } from '../product/product.constants';
 import { Carts } from './cart.sql';
 import { getAmountsForMainCart } from './cart.utils';
 

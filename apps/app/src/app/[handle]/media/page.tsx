@@ -1,6 +1,6 @@
 import type { z } from 'zod';
 import { redirect } from 'next/navigation';
-import { fileSearchParamsSchema } from '@barely/lib/server/file.schema';
+import { fileSearchParamsSchema } from '@barely/lib/server/routes/file/file.schema';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllMedia } from '~/app/[handle]/media/_components/all-media';

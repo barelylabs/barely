@@ -1,6 +1,6 @@
 'use client';
 
-import type { CartFunnel } from '@barely/lib/server/cart-funnel.schema';
+import type { CartFunnel } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
 
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { GridList, GridListCard } from '@barely/ui/elements/grid-list';

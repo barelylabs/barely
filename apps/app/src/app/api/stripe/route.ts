@@ -1,6 +1,5 @@
 import type { NextRequest } from 'next/server';
-import { db } from '@barely/server/db';
-import { handleStripeCheckoutSessionComplete } from '@barely/server/stripe.fns';
+import { handleStripeCheckoutSessionComplete } from '@barely/lib/server/routes/workspace-stripe/workspace-stripe.fns';
 import Stripe from 'stripe';
 
 import { env } from '~/env';
@@ -42,7 +41,7 @@ export async function POST(req: NextRequest) {
 				expand: ['line_items.data.price.product'],
 			});
 
-			await handleStripeCheckoutSessionComplete(sessionWithLineItems, db);
+			await handleStripeCheckoutSessionComplete(sessionWithLineItems);
 
 			break;
 		}

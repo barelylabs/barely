@@ -1,4 +1,4 @@
-import type { StatDateRange } from '../server/stat.schema';
+import type { StatDateRange } from '../server/routes/stat/stat.schema';
 
 export function formatDate(input: string | number): string {
 	const date = new Date(input);

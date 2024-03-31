@@ -1,4 +1,4 @@
-import type { PublicPressKit } from '@barely/lib/server/press-kit.schema';
+import type { PublicPressKit } from '@barely/lib/server/routes/press-kit/press-kit.schema';
 
 import { Section, SectionDiv } from '~/app/[handle]/_components/press-section';
 

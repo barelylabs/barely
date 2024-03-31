@@ -4,13 +4,13 @@ import { and, eq } from 'drizzle-orm';
 
 import type { SessionUser, SessionWorkspace } from '../../auth';
 import type { Db, DbPoolTransaction } from '../../db';
-import type { User } from '../../user.schema';
+import type { User } from '../user/user.schema';
 import type { CreateWorkspace, InsertWorkspace } from './workspace.schema';
 import { newId } from '../../../utils/id';
 import { sqlIncrement } from '../../../utils/sql';
 import { createLoginLink } from '../../auth/auth.fns';
 import { db } from '../../db';
-import { _Users_To_Workspaces } from '../../user.sql';
+import { _Users_To_Workspaces } from '../user/user.sql';
 import { WorkspaceInvites } from '../workspace-invite/workspace-invite.sql';
 import { Workspaces } from './workspace.sql';
 

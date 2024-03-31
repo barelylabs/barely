@@ -1,6 +1,6 @@
 'use client';
 
-import type { FileRecord } from '@barely/lib/server/file.schema';
+import type { FileRecord } from '@barely/lib/server/routes/file/file.schema';
 
 import BackgroundImage from '@barely/ui/elements/background-image';
 import { Button } from '@barely/ui/elements/button';

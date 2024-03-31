@@ -1,5 +1,5 @@
-import type { AppRouterOutputs } from '@barely/server/api/react';
-import type { DomainStatus } from '@barely/server/domain.schema';
+import type { AppRouterOutputs } from '@barely/lib/server/api/react';
+import type { DomainStatus } from '@barely/lib/server/routes/domain/domain.schema';
 import { useState } from 'react';
 
 import { getSubdomain } from '@barely/utils/domain';

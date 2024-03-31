@@ -2,8 +2,8 @@
 
 // import { useToast } from '@barely/toast';
 import type { z } from 'zod';
-import { insertMetaPixelSchema } from '@barely/server/analytics-endpoint-schema';
-import { api } from '@barely/server/api/react';
+import { api } from '@barely/lib/server/api/react';
+import { insertMetaPixelSchema } from '@barely/lib/server/routes/analytics-endpoint/analytics-endpoint-schema';
 
 // import { useEffectOnce } from "@barely/hooks/use-effect-once";
 import { useWorkspace } from '@barely/hooks/use-workspace';

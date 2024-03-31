@@ -1,7 +1,7 @@
 import type { z } from 'zod';
 import { redirect } from 'next/navigation';
 import { api } from '@barely/lib/server/api/server';
-import { productSearchParamsSchema } from '@barely/lib/server/product.schema';
+import { productSearchParamsSchema } from '@barely/lib/server/routes/product/product.schema';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllProducts } from '~/app/[handle]/products/_components/all-products';

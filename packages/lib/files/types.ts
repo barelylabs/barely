@@ -7,7 +7,7 @@ import type {
 	// SizeUnit,
 } from '@uploadthing/shared';
 
-import type { FileRecord } from '../server/file.schema';
+import type { FileRecord } from '../server/routes/file/file.schema';
 
 export { AllowedFileType };
 export type AllowedFileExtension = keyof typeof types;

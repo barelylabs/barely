@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
-import { getCampaignById } from '@barely/server/campaign.fns';
-import { db } from '@barely/server/db';
+import { db } from '@barely/lib/server/db';
+import { getCampaignById } from '@barely/lib/server/routes/campaign/campaign.fns';
 
 import { InfoCard } from '@barely/ui/elements/card';
 import { Icon } from '@barely/ui/elements/icon';

@@ -2,10 +2,10 @@ import { relations } from 'drizzle-orm';
 import { boolean, integer, pgTable, timestamp, varchar } from 'drizzle-orm/pg-core';
 
 import { dbId, primaryId, timestamps } from '../../../utils/sql';
-import { CartFunnels } from '../../cart-funnel.sql';
-import { Fans } from '../../fan.sql';
-import { APPAREL_SIZES } from '../../product.constants';
-import { Products } from '../../product.sql';
+import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
+import { Fans } from '../fan/fan.sql';
+import { APPAREL_SIZES } from '../product/product.constants';
+import { Products } from '../product/product.sql';
 import { Workspaces } from '../workspace/workspace.sql';
 
 export const CART_STAGES = [

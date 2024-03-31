@@ -1,8 +1,8 @@
 'use client';
 
-import type { Domain } from '@barely/server/domain.schema';
+import type { Domain } from '@barely/lib/server/routes/domain/domain.schema';
 import Link from 'next/link';
-import { api } from '@barely/server/api/react';
+import { api } from '@barely/lib/server/api/react';
 import { useSetAtom } from 'jotai';
 
 import { Badge } from '@barely/ui/elements/badge';

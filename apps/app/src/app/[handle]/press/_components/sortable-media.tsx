@@ -5,10 +5,10 @@ import type {
 	FileRecord,
 	SortableFile,
 	SortableFilePendingUpload,
-} from '@barely/lib/server/file.schema';
+} from '@barely/lib/server/routes/file/file.schema';
 import type { Dispatch, SetStateAction } from 'react';
 import type { DropItem } from 'react-aria-components';
-import { isSortableFilePendingUpload } from '@barely/lib/server/file.schema';
+import { isSortableFilePendingUpload } from '@barely/lib/server/routes/file/file.schema';
 import { cn } from '@barely/lib/utils/cn';
 import { insert } from '@barely/lib/utils/collection';
 import {

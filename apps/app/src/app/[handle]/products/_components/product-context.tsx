@@ -1,7 +1,7 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/react';
-import type { productFilterParamsSchema } from '@barely/lib/server/product.schema';
+import type { productFilterParamsSchema } from '@barely/lib/server/routes/product/product.schema';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
 import {
@@ -16,7 +16,7 @@ import {
 import { useTypedQuery } from '@barely/lib/hooks/use-typed-query';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
-import { productSearchParamsSchema } from '@barely/lib/server/product.schema';
+import { productSearchParamsSchema } from '@barely/lib/server/routes/product/product.schema';
 
 export interface ProductCtx {
 	products: AppRouterOutputs['product']['byWorkspace']['products'];

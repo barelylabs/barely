@@ -7,9 +7,9 @@ import { isProduction } from '../../../utils/environment';
 import { raise } from '../../../utils/raise';
 import { getAbsoluteUrl } from '../../../utils/url';
 import { createTRPCRouter, publicProcedure } from '../../api/trpc';
-import { CartFunnels } from '../../cart-funnel.sql';
 import { stripe } from '../../stripe';
-import { getStripeConnectAccountId } from '../../stripe-connect.fns';
+import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
+import { getStripeConnectAccountId } from '../stripe-connect/stripe-connect.fns';
 import {
 	createMainCartFromFunnel,
 	funnelWith,
