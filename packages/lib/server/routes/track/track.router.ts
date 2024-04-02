@@ -55,7 +55,11 @@ export const trackRouter = createTRPCRouter({
 	update: privateProcedure.input(updateTrackSchema).mutation(async ({ ctx, input }) => {
 		const { id, ...updateData } = input;
 
+		console.log('updateData', updateData);
+
 		const { _genres, _artworkFiles, _audioFiles, ...data } = updateData;
+
+		console.log('_audioFiles', _audioFiles);
 
 		await ctx.db.http
 			.update(Tracks)

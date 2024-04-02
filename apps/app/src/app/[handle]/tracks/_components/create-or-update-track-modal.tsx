@@ -122,10 +122,14 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 				}),
 				_audioFiles: audioUploadQueue
 					.map(item => {
+						console.log('item.file.type', item.file.type);
+
 						const af: InsertTrackAudioFile = {
 							fileId: item.presigned?.fileRecord.id ?? '',
 							masterCompressed:
-								item.file.type === 'audio/mpeg' || item.file.type === 'audio/m4a'
+								item.file.type === 'audio/mpeg' ||
+								item.file.type === 'audio/m4a' ||
+								item.file.type === 'audio/x-m4a'
 									? true
 									: undefined,
 							masterWav: item.file.type === 'audio/wav' ? true : undefined,

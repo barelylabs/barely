@@ -29,11 +29,9 @@ export const createTRPCContext = async (opts: {
 
 	if (opts.session) {
 		session = opts.session;
-		console.log('auth session => ', session);
 	} else if (!opts.rest) {
 		const { auth } = await import('../auth');
 		session = await auth();
-		console.log('ssr session => ', session);
 	}
 
 	const source = opts.rest
@@ -41,8 +39,6 @@ export const createTRPCContext = async (opts: {
 		: trpcSources.includes(opts.headers.get('x-trpc-source') as TRPCSource)
 			? (opts.headers.get('x-trpc-source') as TRPCSource)
 			: 'unknown';
-
-	console.log('source => ', source);
 
 	const longitude = opts.rest
 		? undefined
@@ -55,14 +51,9 @@ export const createTRPCContext = async (opts: {
 			opts.headers.get('x-vercel-ip-latitude') ??
 			undefined;
 
-	console.log('longitude => ', longitude);
-	console.log('latitude => ', latitude);
-
 	const pageSessionId = opts.rest
 		? undefined
 		: opts.headers.get('x-page-session-id') ?? null;
-
-	console.log('pageSessionId => ', pageSessionId);
 
 	const pusherSocketId = opts.rest
 		? undefined
@@ -80,11 +71,7 @@ export const createTRPCContext = async (opts: {
 		? session?.user.workspaces.find(w => w.handle === workspaceHandle)
 		: null;
 
-	console.log('workspace => ', workspace);
-
 	const ip = opts.rest ? '' : opts.headers.get('x-real-ip') ?? '';
-
-	console.log('ip => ', ip);
 
 	const context = {
 		// auth
