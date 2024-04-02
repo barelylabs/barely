@@ -490,7 +490,8 @@ export function CreateOrUpdateMixtapeModal(props: { mode: 'create' | 'edit' }) {
 		form.reset();
 		focusGridList();
 		await apiUtils.mixtape.invalidate();
-	}, [form, focusGridList, apiUtils.mixtape]);
+		setShowMixtapeModal(false);
+	}, [form, focusGridList, apiUtils.mixtape, setShowMixtapeModal]);
 
 	return (
 		<Modal

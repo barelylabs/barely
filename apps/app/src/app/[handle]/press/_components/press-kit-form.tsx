@@ -3,7 +3,7 @@
 import type { SortableFile } from '@barely/lib/server/routes/file/file.schema';
 import type { NormalizedPressKit } from '@barely/lib/server/routes/press-kit/press-kit.schema';
 import type { z } from 'zod';
-import { use, useState } from 'react';
+import { use, useMemo, useState } from 'react';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { useZodForm } from '@barely/lib/hooks/use-zod-form';
 import { api } from '@barely/lib/server/api/react';
@@ -77,8 +77,6 @@ export function PressKitForm({
 			lexorank: photo.lexorank,
 		}));
 
-		console.log('_pressPhotos', _pressPhotos);
-
 		const updateValues = {
 			...values,
 			_pressPhotos,
@@ -86,6 +84,17 @@ export function PressKitForm({
 
 		await updatePressKit(updateValues);
 	};
+
+	const pressPhotosAreUpdated = useMemo(
+		() =>
+			pressPhotos.some(
+				photo => !pressKit.pressPhotos.find(pkPhoto => pkPhoto.file.id === photo.id),
+			) ||
+			pressKit.pressPhotos.some(
+				pkPhoto => !pressPhotos.find(photo => photo.id === pkPhoto.file.id),
+			),
+		[pressPhotos, pressKit.pressPhotos],
+	);
 
 	const {
 		fields: pressQuoteFields,
@@ -354,18 +363,14 @@ export function PressKitForm({
 					<SortableMedia media={pressPhotos} setMedia={setPressPhotos} />
 				</PressKitCard>
 
-				<SubmitButton fullWidth>Save</SubmitButton>
+				<p> pressPhotosAreUpdated: {pressPhotosAreUpdated ? 'true' : 'false'}</p>
 
-				<pre>
-					{JSON.stringify(
-						pressPhotos.map(p => ({
-							id: p.id,
-							lexorank: p.lexorank,
-						})),
-						null,
-						2,
-					)}
-				</pre>
+				<SubmitButton
+					disabled={!form.formState.isDirty && !pressPhotosAreUpdated}
+					fullWidth
+				>
+					Save
+				</SubmitButton>
 			</Form>
 		</>
 	);

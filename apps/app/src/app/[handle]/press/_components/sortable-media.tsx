@@ -200,7 +200,7 @@ export function SortableMedia({
 					<MediaListBoxCard
 						file={photo}
 						removeFile={() => {
-							setMedia(prev => prev.filter(f => f.id !== photo.id));
+							setMedia(prev => [...prev.filter(f => f.id !== photo.id)]);
 							if (isSortableFilePendingUpload(photo) && !!setUploadQueue) {
 								setUploadQueue(prev =>
 									prev.filter(q => q.presigned?.fileRecord.id !== photo.id),

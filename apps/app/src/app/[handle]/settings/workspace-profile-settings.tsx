@@ -14,8 +14,8 @@ import { useWorkspace } from '@barely/hooks/use-workspace';
 import { useWorkspaceUpdateForm } from '@barely/hooks/use-workspace-update-form';
 
 import { SettingsCard, SettingsCardForm } from '@barely/ui/components/settings-card';
-import { Editor } from '@barely/ui/elements/editor';
 import { Icon } from '@barely/ui/elements/icon';
+import { MDXEditor } from '@barely/ui/elements/mdx-editor';
 import { Text } from '@barely/ui/elements/typography';
 import { UploadDropzone } from '@barely/ui/elements/upload';
 import { SelectField } from '@barely/ui/forms/select-field';
@@ -119,8 +119,6 @@ export function WorkspaceTypeForm() {
 }
 
 const avatarUploadQueueAtom = atom<UploadQueueItem[]>([]);
-const headerUploadQueueAtom = atom<UploadQueueItem[]>([]);
-
 export function WorkspaceAvatarForm() {
 	const apiUtils = api.useUtils();
 
@@ -185,6 +183,7 @@ export function WorkspaceAvatarForm() {
 	);
 }
 
+const headerUploadQueueAtom = atom<UploadQueueItem[]>([]);
 export function WorkspaceHeaderForm() {
 	const workspace = useWorkspace();
 	const isPersonal = workspace.type === 'personal';
@@ -235,7 +234,7 @@ export function WorkspaceHeaderForm() {
 				title=''
 				subtitle=''
 				imagePreview={imagePreview}
-				className='h-40 w-full rounded-md'
+				className='h-80 w-full rounded-md'
 			/>
 		</SettingsCard>
 	);
@@ -257,13 +256,9 @@ export function WorkspaceBioForm() {
 			}
 			disableSubmit={!form.formState.isDirty}
 		>
-			<Editor
-				mode='markdown'
-				initialMarkdown={workspace.bio ?? ''}
-				getMarkdown={() => form.getValues('bio') ?? ''}
-				setMarkdown={v => form.setValue('bio', v, { shouldDirty: true })}
-				excludedToolbarItems={['blockType']}
-				disableLists
+			<MDXEditor
+				markdown={workspace.bio ?? ''}
+				onChange={v => form.setValue('bio', v, { shouldDirty: true })}
 			/>
 		</SettingsCardForm>
 	);

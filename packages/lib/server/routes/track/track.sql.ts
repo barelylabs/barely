@@ -61,18 +61,6 @@ export const Tracks = pgTable(
 );
 
 export const Track_Relations = relations(Tracks, ({ one, many }) => ({
-	// one-to-one
-	// masterMp3: one(Files, {
-	//   relationName: "trackToMasterMp3",
-	//   fields: [Tracks.masterMp3Id],
-	//   references: [Files.id],
-	// }),
-	// masterWav: one(Files, {
-	//   relationName: "trackToMasterWav",
-	//   fields: [Tracks.masterWavId],
-	//   references: [Files.id],
-	// }),
-
 	// one-to-many
 	workspace: one(Workspaces, {
 		fields: [Tracks.workspaceId],

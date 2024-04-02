@@ -45,12 +45,9 @@ interface RootLayoutProps {
 }
 
 export default function RootLayout({ children }: RootLayoutProps) {
-	// const bodyRef = React.useRef<HTMLBodyElement>(null);
-
 	return (
 		<html lang='en' suppressHydrationWarning>
 			<body
-				// ref={bodyRef}
 				className={cn(
 					'max-h-dvh bg-background font-sans text-foreground antialiased',
 					fontHeading.variable,
@@ -58,10 +55,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
 				)}
 			>
 				<Providers headers={headers()}>
-					<Container className='max-w-full px-0 py-0'>
-						{/* <p>body height</p> */}
-						{children}
-					</Container>
+					<Container className='max-w-full px-0 py-0'>{children}</Container>
 				</Providers>
 				<Toaster />
 				<TailwindIndicator />

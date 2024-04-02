@@ -14,6 +14,13 @@ export const insertWorkspaceSchema = createInsertSchema(Workspaces, {
 			/^[a-zA-Z][a-zA-Z0-9-_]*$/,
 			'Your workspace handle must start with a letter and can only contain letters, numbers, dashes, and underscores',
 		),
+	spotifyFollowers: z.coerce.number().min(0).optional(),
+	spotifyMonthlyListeners: z.coerce.number().min(0).optional(),
+	youtubeSubscribers: z.coerce.number().min(0).optional(),
+	tiktokFollowers: z.coerce.number().min(0).optional(),
+	instagramFollowers: z.coerce.number().min(0).optional(),
+	twitterFollowers: z.coerce.number().min(0).optional(),
+	facebookFollowers: z.coerce.number().min(0).optional(),
 });
 export const createWorkspaceSchema = insertWorkspaceSchema.omit({ id: true });
 

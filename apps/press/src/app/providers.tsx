@@ -6,7 +6,7 @@ import { ThemeProvider } from '@barely/ui/elements/next-theme-provider';
 
 export default function Providers(props: { children: ReactNode; headers?: Headers }) {
 	return (
-		<ThemeProvider attribute='class' defaultTheme='dark' enableSystem>
+		<ThemeProvider attribute='class' defaultTheme='dark'>
 			<>{props.children}</>
 		</ThemeProvider>
 	);

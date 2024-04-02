@@ -59,6 +59,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 			/* icon */
 			startIcon,
 			endIcon,
+			iconClassName,
 			/* attributes from 'HTMLAnchorProps' or 'HTMLButtonProps' */
 			children,
 			...props
@@ -117,7 +118,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 									size,
 									position: 'start',
 								}),
-								props.iconClassName,
+								iconClassName,
 							)}
 						/>
 					)}
@@ -134,7 +135,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 									size,
 									position: 'end',
 								}),
-								props.iconClassName,
+								iconClassName,
 							)}
 						/>
 					)}

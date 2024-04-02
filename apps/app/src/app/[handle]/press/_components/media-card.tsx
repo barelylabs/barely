@@ -23,7 +23,7 @@ export function MediaCard({ file, removeFile, isSelectable }: MediaCardProps) {
 				)}
 				{file.type === 'image' && (
 					<div className='relative inset-0 flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-md'>
-						<BackgroundImage src={file.src} alt={file.name} />
+						<BackgroundImage sizes='128px' src={file.src} alt={file.name} />
 					</div>
 				)}
 				{!!removeFile && (

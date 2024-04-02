@@ -25,7 +25,7 @@ const buttonVariants = cva(
 				muted: 'bg-muted text-muted-foreground hover:bg-muted/90',
 				minimal: 'bg-transparent text-muted-foreground hover:bg-muted',
 				ghost: 'bg-transparent hover:bg-accent hover:text-accent-foreground',
-				link: '!focus:ring-transparent !m-0 !h-fit bg-transparent !p-0 text-primary underline-offset-4 ring-transparent ring-offset-transparent hover:underline',
+				link: '!focus:ring-transparent !m-0 !h-fit bg-transparent !p-0 text-foreground underline-offset-4 ring-transparent ring-offset-transparent hover:underline',
 				tab: '!focus:ring-transparent',
 			},
 
@@ -80,7 +80,7 @@ const buttonVariants = cva(
 			{
 				variant: 'icon',
 				size: 'md',
-				className: 'hover:border-default h-7 w-7 !p-2',
+				className: 'hover:border-default h-7 w-7 !p-1',
 			},
 			{
 				variant: 'icon',
@@ -115,7 +115,7 @@ const buttonIconVariants = cva('', {
 			minimal: 'text-muted-foreground',
 			muted: 'text-muted-foreground',
 			ghost: 'text-muted-foreground',
-			link: 'text-primary-foreground underline-offset-4',
+			link: 'text-foreground underline-offset-4',
 			tab: '',
 		},
 		position: {

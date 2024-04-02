@@ -13,17 +13,55 @@ import {
 
 export function parseSpotifyLink(link: string) {
 	const match = link.match(
-		/https?:\/\/open\.spotify\.com\/(track|album|playlist)\/([a-zA-Z0-9]+)/,
+		/https?:\/\/open\.spotify\.com\/(artist|track|album|playlist)\/([a-zA-Z0-9]+)/,
 	);
 
 	if (!match) {
-		// throw new Error("Invalid Spotify link");
 		return null;
 	}
 
 	return {
 		type: match[1],
 		id: match[2],
+	};
+}
+
+export function parseInstagramLink(link: string) {
+	const match = link.match(/https?:\/\/(?:www\.)?instagram\.com\/([^/?]+)/);
+
+	if (!match) {
+		return null;
+	}
+
+	return {
+		username: match[1],
+	};
+}
+
+export function parseTikTokLink(link: string) {
+	const match = link.match(/https?:\/\/(?:www\.)?tiktok\.com\/@([^/?]+)/);
+
+	if (!match) {
+		return null;
+	}
+
+	return {
+		username: match[1],
+	};
+}
+
+export function parseYoutubeLink(link: string) {
+	const match = link.match(
+		/https?:\/\/(?:www\.)?(youtube\.com|youtu\.be)\/(channel|user|watch)\/?([^?]*).*/,
+	);
+
+	if (!match) {
+		return null;
+	}
+
+	return {
+		type: match[2],
+		id: match[3],
 	};
 }
 
