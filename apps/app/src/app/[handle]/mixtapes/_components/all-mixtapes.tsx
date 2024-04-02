@@ -16,7 +16,6 @@ export function AllMixtapes() {
 		setMixtapeSelection,
 		gridListRef,
 		setShowUpdateMixtapeModal,
-		focusGridList,
 	} = useMixtapesContext();
 
 	return (
@@ -45,7 +44,6 @@ export function AllMixtapes() {
 			>
 				{mixtape => <MixtapeCard mixtape={mixtape} />}
 			</GridList>
-			<button onClick={() => focusGridList()}>Focus GridList</button>
 		</>
 	);
 }

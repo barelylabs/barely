@@ -88,7 +88,7 @@ export function PressHero({
 		>
 			<BackgroundImage
 				src={workspace.avatarImageUrl ?? workspace.headerImageUrl ?? ''}
-				alt=''
+				alt={workspace.name}
 				divStyle={{
 					opacity: headerOpacity,
 					transform: `scale(${headerZoom})`,
@@ -107,7 +107,7 @@ export function PressHero({
 		>
 			<BackgroundImage
 				src={workspace.headerImageUrl ?? workspace.avatarImageUrl ?? ''}
-				alt=''
+				alt={workspace.name}
 				divStyle={{
 					opacity: headerOpacity,
 					transform: `scale(${headerZoom})`,

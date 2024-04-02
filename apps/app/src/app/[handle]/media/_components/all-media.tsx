@@ -59,7 +59,7 @@ function FileCard({ file }: { file: FileRecord }) {
 					<div className='absolute inset-0 flex h-full w-full p-2'>
 						<div className='relative inset-0 flex h-full w-full flex-col items-center justify-center rounded-md'>
 							<Img
-								sizes='500px'
+								sizes='200px'
 								fill
 								src={file.src}
 								alt={file.name}
@@ -68,12 +68,16 @@ function FileCard({ file }: { file: FileRecord }) {
 						</div>
 					</div>
 				)}
-				{file.type === 'audio' && <Icon.music className='h-6 w-6' />}
+				{file.type === 'audio' && (
+					<Icon.music className='m-auto h-10 w-10 text-muted-foreground' />
+				)}
 			</div>
 
 			<div slot='content' className='flex flex-row justify-between'>
 				<div className='flex flex-col gap-1'>
-					<Text variant='xs/semibold'>{file.name}</Text>
+					<Text variant='xs/semibold' className='break-all'>
+						{file.name}
+					</Text>
 					<div className='flex flex-row gap-1'>
 						<Text variant='xs/normal' muted>
 							{file.type.toUpperCase()}

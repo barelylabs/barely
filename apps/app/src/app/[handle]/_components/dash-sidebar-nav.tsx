@@ -52,13 +52,11 @@ export function SidebarNav(props: SidebarNavProps) {
 			title: 'tracks',
 			href: `/${handle}/tracks`,
 			icon: 'music',
-			workspaceFilters: ['feature__tracks'],
 		},
 		{
 			title: 'mixtapes',
 			href: `/${handle}/mixtapes`,
 			icon: 'mixtape',
-			workspaceFilters: ['feature__mixtapes'],
 		},
 		{
 			title: 'products',
@@ -74,7 +72,6 @@ export function SidebarNav(props: SidebarNavProps) {
 			title: 'press',
 			href: `/${handle}/press`,
 			icon: 'press',
-			workspaceFilters: ['feature__pressKits'],
 		},
 		{
 			title: 'settings',
@@ -84,31 +81,16 @@ export function SidebarNav(props: SidebarNavProps) {
 	];
 
 	const topSettingsLinks: SidebarNavItem[] = [
-		{
-			title: 'profile',
-			href: `/${handle}/settings`,
-			icon: 'profile',
-		},
-		{
-			title: 'team',
-			href: `/${handle}/settings/team`,
-			icon: 'users',
-		},
-		{
-			title: 'domains',
-			href: `/${handle}/settings/domains`,
-			icon: 'domain',
-		},
+		{ title: 'profile', icon: 'profile', href: `/${handle}/settings` },
+		{ title: 'socials', icon: 'socials', href: `/${handle}/settings/socials` },
+		{ title: 'team', icon: 'users', href: `/${handle}/settings/team` },
+		{ title: 'domains', icon: 'domain', href: `/${handle}/settings/domains` },
 		{
 			title: 'remarketing',
-			href: `/${handle}/settings/remarketing`,
 			icon: 'remarketing',
+			href: `/${handle}/settings/remarketing`,
 		},
-		{
-			title: 'billing',
-			href: `/${handle}/settings/billing`,
-			icon: 'billing',
-		},
+		{ title: 'billing', icon: 'billing', href: `/${handle}/settings/billing` },
 	];
 
 	const topLinks = isSettings ? topSettingsLinks : topMainLinks;

@@ -60,9 +60,10 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 
 	/* form */
 	const { form, onSubmit: onSubmitTrack } = useCreateOrUpdateForm({
-		updateItem: selectedTrack
-			? formatWorkspaceTrackToUpsertTrackForm(selectedTrack)
-			: null,
+		updateItem:
+			mode === 'update' && selectedTrack
+				? formatWorkspaceTrackToUpsertTrackForm(selectedTrack)
+				: null,
 		upsertSchema: upsertTrackSchema,
 		defaultValues: defaultTrack,
 		handleCreateItem: async d => {
@@ -124,8 +125,10 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 						const af: InsertTrackAudioFile = {
 							fileId: item.presigned?.fileRecord.id ?? '',
 							masterCompressed:
-								item.file.type === 'audio/mpeg' || item.file.type === 'audio/m4a',
-							masterWav: item.file.type === 'audio/wav',
+								item.file.type === 'audio/mpeg' || item.file.type === 'audio/m4a'
+									? true
+									: undefined,
+							masterWav: item.file.type === 'audio/wav' ? true : undefined,
 						};
 						return af;
 					})
@@ -168,7 +171,8 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 		form.reset();
 		focusGridList();
 		await apiUtils.track.invalidate();
-	}, [form, apiUtils.track, focusGridList]);
+		setShowModal(false);
+	}, [form, apiUtils.track, focusGridList, setShowModal]);
 
 	return (
 		<Modal

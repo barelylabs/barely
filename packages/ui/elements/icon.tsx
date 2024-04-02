@@ -366,6 +366,7 @@ export const Icon = {
 	skipForward: SkipForward,
 	sliders: Sliders,
 	social: Share2,
+	socials: ExternalLink,
 	spark: Zap,
 	spinner: Loader2,
 	square: Square,

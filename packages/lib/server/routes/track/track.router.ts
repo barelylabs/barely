@@ -49,88 +49,9 @@ export const trackRouter = createTRPCRouter({
 	// create
 	create: privateProcedure.input(createTrackSchema).mutation(async ({ ctx, input }) => {
 		return await createTrack(input, ctx.workspace.id, ctx.db);
-		// const { _genres, _artworkFiles, _audioFiles, ...data } = input;
-
-		// const newTrack: InsertTrack = {
-		//   ...data,
-		//   id: newId("track"),
-		//   workspaceId: ctx.workspace.id,
-		// };
-
-		// await ctx.db.pool.insert(Tracks).values(newTrack);
-
-		// if (_genres?.length) {
-		//   await ctx.db.pool.insert(_Tracks_To_Genres).values(
-		//     _genres.map((genreId) => ({
-		//       genreId,
-		//       trackId: newTrack.id,
-		//     })),
-		//   );
-		// }
-
-		// if (_artworkFiles?.length) {
-		//   console.log("creating artwork join", _artworkFiles);
-		//   await ctx.db.pool.insert(_Files_To_Tracks__Artwork).values(
-		//     _artworkFiles.map((_artworkFile) => ({
-		//       ..._artworkFile,
-		//       trackId: newTrack.id,
-		//     })),
-		//   );
-		// }
-
-		// console.log("_audioFiles", _audioFiles);
-
-		// if (_audioFiles?.length) {
-		//   console.log("creating audio joins", _audioFiles);
-		//   await ctx.db.pool.insert(_Files_To_Tracks__Audio).values(
-		//     _audioFiles.map((_audioFile) => ({
-		//       ..._audioFile,
-		//       trackId: newTrack.id,
-		//     })),
-		//   );
-		// }
-
-		// return await getTrackById(newTrack.id, ctx.db);
 	}),
 
 	// update
-	updateGenres: privateProcedure
-		.input(z.object({ trackId: z.string(), genres: z.array(insertGenreSchema) }))
-		.mutation(async ({ input, ctx }) => {
-			await ctx.db.pool.transaction(async tx => {
-				await tx.delete(_Tracks_To_Genres).where(
-					sqlAnd([
-						eq(_Tracks_To_Genres.trackId, input.trackId),
-						input.genres.length > 0 &&
-							notInArray(
-								_Tracks_To_Genres.genreId,
-								input.genres.map(g => g.id),
-							),
-					]),
-				);
-
-				await Promise.allSettled(
-					input.genres.map(g => {
-						return tx
-							.insert(_Tracks_To_Genres)
-							.values({
-								trackId: input.trackId,
-								genreId: g.id,
-							})
-							.onConflictDoNothing({
-								target: [_Tracks_To_Genres.trackId, _Tracks_To_Genres.genreId],
-							});
-					}),
-				);
-			});
-
-			await pushEvent('track', 'update', {
-				id: input.trackId,
-				pageSessionId: ctx.pageSessionId,
-				socketId: ctx.pusherSocketId,
-			});
-		}),
-
 	update: privateProcedure.input(updateTrackSchema).mutation(async ({ ctx, input }) => {
 		const { id, ...updateData } = input;
 
@@ -204,6 +125,43 @@ export const trackRouter = createTRPCRouter({
 			);
 		}
 	}),
+
+	updateGenres: privateProcedure
+		.input(z.object({ trackId: z.string(), genres: z.array(insertGenreSchema) }))
+		.mutation(async ({ input, ctx }) => {
+			await ctx.db.pool.transaction(async tx => {
+				await tx.delete(_Tracks_To_Genres).where(
+					sqlAnd([
+						eq(_Tracks_To_Genres.trackId, input.trackId),
+						input.genres.length > 0 &&
+							notInArray(
+								_Tracks_To_Genres.genreId,
+								input.genres.map(g => g.id),
+							),
+					]),
+				);
+
+				await Promise.allSettled(
+					input.genres.map(g => {
+						return tx
+							.insert(_Tracks_To_Genres)
+							.values({
+								trackId: input.trackId,
+								genreId: g.id,
+							})
+							.onConflictDoNothing({
+								target: [_Tracks_To_Genres.trackId, _Tracks_To_Genres.genreId],
+							});
+					}),
+				);
+			});
+
+			await pushEvent('track', 'update', {
+				id: input.trackId,
+				pageSessionId: ctx.pageSessionId,
+				socketId: ctx.pusherSocketId,
+			});
+		}),
 
 	// delete
 	archive: privateProcedure
