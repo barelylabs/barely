@@ -4,6 +4,7 @@ import '@mdxeditor/editor/style.css';
 
 // InitializedMDXEditor.tsx
 import type {
+	CodeBlockEditorDescriptor,
 	JsxComponentDescriptor,
 	MDXEditorMethods,
 	MDXEditorProps,
@@ -13,6 +14,8 @@ import {
 	BlockTypeSelect,
 	BoldItalicUnderlineToggles,
 	Button,
+	codeBlockPlugin,
+	codeMirrorPlugin,
 	CreateLink,
 	GenericJsxEditor,
 	headingsPlugin,
@@ -28,6 +31,7 @@ import {
 	thematicBreakPlugin,
 	toolbarPlugin,
 	UndoRedo,
+	useCodeBlockEditorContext,
 	usePublisher,
 } from '@mdxeditor/editor';
 
@@ -80,6 +84,25 @@ const InsertVideo = () => {
 	);
 };
 
+const PlainTextCodeEditorDescriptor: CodeBlockEditorDescriptor = {
+	match: () => true,
+	priority: 0,
+	Editor: props => {
+		const cb = useCodeBlockEditorContext();
+		return (
+			// eslint-disable-next-line jsx-a11y/no-static-element-interactions
+			<div onKeyDown={e => e.nativeEvent.stopImmediatePropagation()}>
+				<textarea
+					rows={3}
+					cols={20}
+					defaultValue={props.code}
+					onChange={e => cb.setCode(e.target.value)}
+				/>
+			</div>
+		);
+	},
+};
+
 // Only import this to the next file
 export function InitializedMDXEditor({
 	editorRef,
@@ -96,6 +119,8 @@ export function InitializedMDXEditor({
 				linkDialogPlugin(),
 				thematicBreakPlugin(),
 				markdownShortcutPlugin(),
+				codeBlockPlugin({ codeBlockEditorDescriptors: [PlainTextCodeEditorDescriptor] }),
+				codeMirrorPlugin({ codeBlockLanguages: { js: 'Javascript', ts: 'Typescript' } }),
 				jsxPlugin({ jsxComponentDescriptors }),
 
 				toolbarPlugin({

@@ -3,9 +3,10 @@
 import type { OnUploadComplete } from '@barely/lib/files/client';
 import type { UploadQueueItem } from '@barely/lib/hooks/use-upload';
 import type { workspaceTypeSchema } from '@barely/lib/server/routes/workspace/workspace.schema';
+import type { MDXEditorMethods } from '@barely/ui/elements/mdx-editor';
 import type { SelectFieldOption } from '@barely/ui/forms/select-field';
 import type { z } from 'zod';
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { useUpload } from '@barely/lib/hooks/use-upload';
 import { api } from '@barely/server/api/react';
 import { atom } from 'jotai';
@@ -14,6 +15,7 @@ import { useWorkspace } from '@barely/hooks/use-workspace';
 import { useWorkspaceUpdateForm } from '@barely/hooks/use-workspace-update-form';
 
 import { SettingsCard, SettingsCardForm } from '@barely/ui/components/settings-card';
+import { Button } from '@barely/ui/elements/button';
 import { Icon } from '@barely/ui/elements/icon';
 import { MDXEditor } from '@barely/ui/elements/mdx-editor';
 import { Text } from '@barely/ui/elements/typography';
@@ -244,6 +246,8 @@ export function WorkspaceBioForm() {
 	const workspace = useWorkspace();
 	const { form, onSubmit, isPersonal } = useWorkspaceUpdateForm();
 
+	const ref = useRef<MDXEditorMethods>(null);
+
 	return (
 		<SettingsCardForm
 			form={form}
@@ -257,9 +261,22 @@ export function WorkspaceBioForm() {
 			disableSubmit={!form.formState.isDirty}
 		>
 			<MDXEditor
+				ref={ref}
 				markdown={workspace.bio ?? ''}
-				onChange={v => form.setValue('bio', v, { shouldDirty: true })}
+				onChange={v => {
+					console.log('v => ', v);
+					form.setValue('bio', v, { shouldDirty: true });
+				}}
 			/>
+			<Button
+				fullWidth
+				onClick={() => {
+					form.setValue('bio', '', { shouldDirty: true });
+					ref.current?.setMarkdown('');
+				}}
+			>
+				Clear
+			</Button>
 		</SettingsCardForm>
 	);
 }

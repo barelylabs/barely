@@ -14,8 +14,6 @@ export function useUpdateNavHistory() {
 	const setNavHistory = useSetAtom(navHistoryAtom);
 
 	useEffect(() => {
-		console.log('pathname => ', pathname);
-
 		setNavHistory(prev => {
 			if (!pathname) return prev;
 
@@ -34,7 +32,6 @@ export function useUpdateNavHistory() {
 				settingsBackPath = prev.currentPath ?? defaultSettingsBackPath;
 			}
 
-			console.log('settingsBackPath => ', settingsBackPath);
 			const newHistory: NavHistory = {
 				...prev,
 				currentPath: pathname,

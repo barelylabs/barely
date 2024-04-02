@@ -25,6 +25,18 @@ export function SocialStatsForm() {
 			disableSubmit={!form.formState.isDirty}
 			formHint='Please enter your social stats.'
 		>
+			<TextField
+				label='Facebook Followers'
+				control={form.control}
+				type='number'
+				name='facebookFollowers'
+			/>
+			<TextField
+				label='Instagram Followers'
+				control={form.control}
+				type='number'
+				name='instagramFollowers'
+			/>
 			<NumberField
 				label='Spotify Followers'
 				control={form.control}
@@ -37,34 +49,16 @@ export function SocialStatsForm() {
 				name='spotifyMonthlyListeners'
 			/>
 			<TextField
-				label='YouTube Subscribers'
-				control={form.control}
-				type='number'
-				name='youtubeSubscribers'
-			/>
-			<TextField
-				label='Instagram Followers'
-				control={form.control}
-				type='number'
-				name='instagramFollowers'
-			/>
-			<TextField
 				label='Twitter Followers'
 				control={form.control}
 				type='number'
 				name='twitterFollowers'
 			/>
 			<TextField
-				label='Facebook Followers'
+				label='YouTube Subscribers'
 				control={form.control}
 				type='number'
-				name='facebookFollowers'
-			/>
-			<TextField
-				label='Instagram Followers'
-				control={form.control}
-				name='instagramFollowers'
-				type='number'
+				name='youtubeSubscribers'
 			/>
 		</SettingsCardForm>
 	);
