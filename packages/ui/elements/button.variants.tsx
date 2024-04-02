@@ -1,7 +1,7 @@
 import { cva } from 'class-variance-authority';
 
 const buttonVariants = cva(
-	'inline-flex w-fit items-center justify-center whitespace-nowrap rounded-md font-medium transition-colors active:scale-95 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+	'inline-flex w-fit items-center justify-center whitespace-nowrap rounded-md font-medium transition-colors active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
 	{
 		variants: {
 			variant: {
@@ -19,14 +19,14 @@ const buttonVariants = cva(
 				success: 'bg-success text-success-foreground hover:bg-success/80',
 
 				destructive:
-					'bg-destructive text-destructive-foreground hover:bg-destructive/90 focus:ring-destructive',
+					'bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:ring-destructive',
 				outline:
 					'border-[1.5px] border-input bg-transparent hover:bg-accent hover:text-accent-foreground ',
 				muted: 'bg-muted text-muted-foreground hover:bg-muted/90',
 				minimal: 'bg-transparent text-muted-foreground hover:bg-muted',
 				ghost: 'bg-transparent hover:bg-accent hover:text-accent-foreground',
-				link: '!focus:ring-transparent !m-0 !h-fit bg-transparent !p-0 text-foreground underline-offset-4 ring-transparent ring-offset-transparent hover:underline',
-				tab: '!focus:ring-transparent',
+				link: '!focus-visible:ring-transparent !m-0 !h-fit bg-transparent !p-0 text-foreground underline-offset-4 ring-transparent ring-offset-transparent hover:underline',
+				tab: '!focus-visible:ring-transparent',
 			},
 
 			size: {
