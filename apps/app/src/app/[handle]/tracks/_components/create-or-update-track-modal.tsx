@@ -90,9 +90,9 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 	} = artworkUploadState;
 
 	const artworkImagePreview =
-		artworkUploadQueue[0]?.previewImage ??
-		selectedTrack?.artworkFiles?.find(f => f.current)?.src ??
-		'';
+		artworkUploadQueue[0]?.previewImage ?? mode === 'update'
+			? selectedTrack?.artworkFiles?.find(f => f.current)?.src ?? ''
+			: '';
 
 	/* Audio upload */
 	const audioUploadState = useUpload({
@@ -122,8 +122,6 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 				}),
 				_audioFiles: audioUploadQueue
 					.map(item => {
-						console.log('item.file.type', item.file.type);
-
 						const af: InsertTrackAudioFile = {
 							fileId: item.presigned?.fileRecord.id ?? '',
 							masterCompressed:
@@ -141,15 +139,10 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 
 			await Promise.all([handleArtworkUpload(), handleAudioUpload()]);
 			await onSubmitTrack(upsertTrackData);
-
-			setArtworkUploadQueue([]);
-			setAudioUploadQueue([]);
 		},
 		[
 			artworkUploadQueue,
-			setArtworkUploadQueue,
 			audioUploadQueue,
-			setAudioUploadQueue,
 			onSubmitTrack,
 			handleArtworkUpload,
 			handleAudioUpload,
@@ -163,8 +156,12 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 		uploadingAudio;
 
 	// MASTERS
-	const masterCompressed = selectedTrack?.audioFiles?.find(f => f.masterCompressed);
-	const masterWav = selectedTrack?.audioFiles?.find(f => f.masterWav);
+	const masterCompressed =
+		mode === 'update'
+			? selectedTrack?.audioFiles?.find(f => f.masterCompressed)
+			: undefined;
+	const masterWav =
+		mode === 'update' ? selectedTrack?.audioFiles?.find(f => f.masterWav) : undefined;
 
 	/* modal */
 	const showModal = mode === 'create' ? showCreateTrackModal : showEditTrackModal;
@@ -174,9 +171,18 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 	const handleCloseModal = useCallback(async () => {
 		form.reset();
 		focusGridList();
+		setArtworkUploadQueue([]);
+		setAudioUploadQueue([]);
 		await apiUtils.track.invalidate();
 		setShowModal(false);
-	}, [form, apiUtils.track, focusGridList, setShowModal]);
+	}, [
+		form,
+		apiUtils.track,
+		focusGridList,
+		setShowModal,
+		setArtworkUploadQueue,
+		setAudioUploadQueue,
+	]);
 
 	return (
 		<Modal
@@ -189,6 +195,9 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 				audioUploadQueue.length > 0
 			}
 			onClose={handleCloseModal}
+			onAutoFocus={() => {
+				mode === 'update' ? form.setFocus('isrc') : form.setFocus('name');
+			}}
 		>
 			<ModalHeader
 				icon='music'
@@ -196,6 +205,7 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 			/>
 			<Form form={form} onSubmit={handleSubmit}>
 				<ModalBody>
+					{mode}
 					<TextField
 						name='name'
 						control={form.control}
