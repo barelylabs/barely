@@ -40,7 +40,7 @@ const Form = <T extends FieldValues>({
 				onSubmit={onPromise(form.handleSubmit(onSubmit))}
 			>
 				<fieldset
-					className={cn('flex w-full max-w-full flex-col gap-4', props.className)}
+					className={cn('flex w-full max-w-full flex-col', props.className)}
 					disabled={form.formState.isSubmitting}
 				>
 					{children}

@@ -46,7 +46,7 @@ export const LoginForm = ({ callbackUrl }: RegisterFormProps) => {
 			{loginEmailSent ? (
 				<LoginLinkSent identifier={form.watch('email')} provider='email' />
 			) : (
-				<Form form={form} onSubmit={onSubmit}>
+				<Form form={form} onSubmit={onSubmit} className='gap-4'>
 					<Text variant='sm/normal' subtle>
 						Enter your email address
 					</Text>

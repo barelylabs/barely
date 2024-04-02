@@ -99,9 +99,6 @@ export function TrackContextProvider({
 		lastSelectedTrack,
 		setTrackSelection: setSelectedKeys,
 		gridListRef,
-		// focusGridList: () => {
-		//   gridListRef.current?.focus();
-		// },
 		focusGridList: () => {
 			wait(1)
 				.then(() => gridListRef.current?.focus())

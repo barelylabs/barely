@@ -23,20 +23,24 @@ interface ModalProps {
 	setShowModal?: (show: boolean) => void;
 	onClose?: () => void;
 	preventDefaultClose?: boolean;
+	onAutoFocus?: () => void;
 }
 
-function Modal({ showModal, setShowModal, dismissable = true, ...props }: ModalProps) {
+function Modal({
+	showModal,
+	setShowModal,
+	onAutoFocus,
+	dismissable = true,
+	...props
+}: ModalProps) {
 	const router = useRouter();
-
-	// const showModalAtom = props.showModalAtom ?? atomWithToggle(false);
-
-	// const [showModal, setShowModal] = useAtom(showModalAtom);
 
 	const closeModal = ({
 		dragged,
 		byCloseButton,
 	}: { dragged?: boolean; byCloseButton?: boolean } = {}) => {
 		if (props.preventDefaultClose && !dragged && !byCloseButton) return;
+
 		// fire onClose event if provided
 		props.onClose?.();
 
@@ -84,7 +88,6 @@ function Modal({ showModal, setShowModal, dismissable = true, ...props }: ModalP
 		<Dialog.Root
 			open={showModal ?? true}
 			onOpenChange={open => {
-				// console.log('dialog onOpenChange', open);
 				if (!open) {
 					closeModal();
 				}
@@ -97,19 +100,25 @@ function Modal({ showModal, setShowModal, dismissable = true, ...props }: ModalP
 				/>
 
 				<Dialog.Content
-					// onCloseAutoFocus={e => console.log(e)}
 					className={cn(
 						'animate-scale-in fixed inset-0 z-40 m-auto flex h-fit max-h-[90vh] w-full max-w-screen-lg flex-col overflow-auto border border-gray-200 bg-white p-0 shadow-xl sm:rounded-2xl md:overflow-hidden',
 						'focus:outline-none',
 						props.className,
 					)}
+					onOpenAutoFocus={e => {
+						if (onAutoFocus) {
+							e.preventDefault();
+							onAutoFocus();
+						}
+					}}
 				>
 					<Button
 						startIcon='x'
 						variant='icon'
 						look='ghost'
 						size='sm'
-						// className="group absolute right-0 top-0 z-20 m-2 hidden transition-all duration-75 sm:block"
+						// eslint-disable-next-line jsx-a11y/no-autofocus
+						autoFocus={false}
 						className='absolute right-1 top-1 z-20'
 						pill
 						onClick={() => {
