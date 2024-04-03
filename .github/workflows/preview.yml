@@ -211,6 +211,21 @@ jobs:
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
 
+  deploy-cart:
+    uses: ./.github/workflows/deploy-to-vercel.yml
+    needs: [neon-preview, git-meta]
+    with:
+      app_name: cart
+      working_directory: apps/cart
+      scope: barely
+      environment: preview
+      git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
+      vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_CART_PROJECT_ID }}
+
   deploy-link:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [neon-preview, git-meta]

@@ -141,6 +141,21 @@ jobs:
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
 
+  deploy-cart:
+    uses: ./.github/workflows/deploy-to-vercel.yml
+    needs: [git-meta, db-push]
+    with:
+      app_name: cart
+      working_directory: apps/cart
+      scope: barely
+      environment: production
+      git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
+      vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_CART_PROJECT_ID }}
+
   deploy-link:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push]
@@ -247,6 +262,22 @@ jobs:
       - name: Promote app to production
         run: vercel promote dpl_${{ needs.deploy-app.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
+  promote-cart:
+    name: promote cart to production
+    needs: [production--can-merge, deploy-cart]
+    if: always() && github.event_name == 'merge_group'
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_CART_PROJECT_ID }}
+    steps:
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Promote cart to production
+        run: vercel promote dpl_${{ needs.deploy-cart.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+
   promote-link:
     name: promote link to production
     needs: [production--can-merge, deploy-link]
@@ -319,7 +350,15 @@ jobs:
 
   rollback-app:
     name: rollback app if any deployments fail
-    needs: [promote-www, promote-app, promote-link, promote-press, promote-sparrow]
+    needs:
+      [
+        promote-www,
+        promote-app,
+        promote-cart,
+        promote-link,
+        promote-press,
+        promote-sparrow,
+      ]
     if: ${{ failure() && needs.promote-app.result == 'success' }}
     runs-on: ubuntu-latest
     env:
@@ -336,9 +375,44 @@ jobs:
           echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
           vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
+  rollback-cart:
+    name: rollback cart if any deployments fail
+    needs:
+      [
+        promote-www,
+        promote-app,
+        promote-cart,
+        promote-link,
+        promote-press,
+        promote-sparrow,
+      ]
+    if: ${{ failure() && needs.promote-cart.result == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_CART_PROJECT_ID }}
+    steps:
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Rollback cart
+        run: |
+          ROLLBACK_DEPLOYMENT_ID=$(curl -s "https://api.vercel.com/v6/deployments?teamId=${{ secrets.VERCEL_TEAM_ID }}&projectId=${{ secrets.VERCEL_CART_PROJECT_ID}}&limit=2&rollbackCandidate=true&state=READY&target=production" -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | jq -r '.deployments[1].uid')
+          echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
+          vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+
   rollback-link:
     name: rollback link if any deployments fail
-    needs: [promote-www, promote-app, promote-link, promote-press, promote-sparrow]
+    needs:
+      [
+        promote-www,
+        promote-app,
+        promote-cart,
+        promote-link,
+        promote-press,
+        promote-sparrow,
+      ]
     if: ${{ failure() && needs.promote-link.result == 'success' }}
     runs-on: ubuntu-latest
     env:
@@ -357,7 +431,15 @@ jobs:
 
   rollback-press:
     name: rollback press if any deployments fail
-    needs: [promote-www, promote-app, promote-link, promote-press, promote-sparrow]
+    needs:
+      [
+        promote-www,
+        promote-app,
+        promote-link,
+        promote-cart,
+        promote-press,
+        promote-sparrow,
+      ]
     if: ${{ failure() && needs.promote-press.result == 'success' }}
     runs-on: ubuntu-latest
     env:
@@ -376,7 +458,15 @@ jobs:
 
   rollback-sparrow:
     name: rollback sparrow if any deployments fail
-    needs: [promote-www, promote-app, promote-link, promote-press, promote-sparrow]
+    needs:
+      [
+        promote-www,
+        promote-app,
+        promote-cart,
+        promote-link,
+        promote-press,
+        promote-sparrow,
+      ]
     if: ${{ failure() && needs.promote-sparrow.result == 'success' }}
     runs-on: ubuntu-latest
     env:
