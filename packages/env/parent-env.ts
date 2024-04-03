@@ -103,7 +103,7 @@ export const processEnv = {
 };
 
 export const clientEnvSchema = z.object({
-	NEXT_PUBLIC_CURRENT_APP: z.enum(['app', 'link', 'www', 'bio', 'press']),
+	NEXT_PUBLIC_CURRENT_APP: z.enum(['app', 'bio', 'cart', 'link', 'press', 'www']),
 	NEXT_PUBLIC_APP_BASE_URL: z.string(),
 	NEXT_PUBLIC_APP_DEV_PORT: z
 		.string()

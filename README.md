@@ -68,20 +68,20 @@ These are features that are planned Q3-Q4 for 2024.
 
 # Tech Stack
 
-Next.js - framework
-Typescript - language
-Tailwind - CSS
-tRPC - typesafe API
-Drizzle - typesafe ORM
-Neon - postgres db
-Tinybird - analytics
-Auth.js - auth
-s3 - file storage
-shadcn/ui + react-aria - ui
-Turborepo - monorepo
-Stripe - payments
-React Email - creating emails
-Resend - sending emails
+Next.js - framework  
+Typescript - language  
+Tailwind - CSS  
+tRPC - typesafe API  
+Drizzle - typesafe ORM  
+Neon - postgres db  
+Tinybird - analytics  
+Auth.js - auth  
+s3 - file storage  
+shadcn/ui + react-aria - ui  
+Turborepo - monorepo  
+Stripe - payments  
+React Email - creating emails  
+Resend - sending emails  
 Vercel - deployments
 
 # Marketing
