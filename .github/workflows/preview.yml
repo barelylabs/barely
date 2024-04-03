@@ -319,7 +319,15 @@ jobs:
 
   preview--can-merge:
     needs:
-      [neon-preview, deploy-www, deploy-app, deploy-link, deploy-press, deploy-sparrow]
+      [
+        neon-preview,
+        deploy-app,
+        deploy-cart,
+        deploy-link,
+        deploy-press,
+        deploy-sparrow,
+        deploy-www,
+      ]
     if: always() && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
