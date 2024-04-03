@@ -34,33 +34,30 @@ jobs:
 
       - id: git-meta
         run: |
-          github_commit_sha=${{ github.event.pull_request.head.sha }}
+          github_commit_sha=${{ github.event.pull_request.head.sha }}          
           github_commit_author_login=${{ github.actor }}
           github_deployment=1
           github_org=${{ github.repository_owner }}
           github_repo=${{ github.repository }}
           github_commit_org=${{ github.repository_owner }}
           github_commit_repo=${{ github.repository }}
-          # Capture the commit message in a variable first
-          commit_message=$(git show -s --format=%s "$github_commit_sha")
-          # Ensure special characters in commit_message are properly escaped
-          escaped_commit_message=$(echo "$commit_message" | sed 's/"/\\"/g')
+          github_commit_message=$(git show -s --format=%s $github_commit_sha)
           github_commit_ref=${{ github.event.pull_request.head.ref }}
-          escaped_commit_ref=$(echo "$github_commit_ref" | sed 's/"/\\"/g')
 
-          # Now use the escaped variables
-          vercel_git_metadata="-m githubCommitSha=$github_commit_sha -m githubCommitAuthorName=\"$github_commit_author_login\" -m githubCommitAuthorLogin=\"$github_commit_author_login\" -m githubDeployment=$github_deployment -m githubOrg=\"$github_org\" -m githubRepo=\"$github_repo\" -m githubCommitOrg=\"$github_commit_org\" -m githubCommitRepo=\"$github_commit_repo\" -m githubCommitMessage=\"$escaped_commit_message\" -m githubCommitRef=\"$escaped_commit_ref\""
+          vercel_git_metadata="-m githubCommitSha=$github_commit_sha -m githubCommitAuthorName=$github_commit_author_login -m githubCommitAuthorLogin=$github_commit_author_login -m githubDeployment=$github_deployment -m githubOrg=$github_org -m githubRepo=$github_repo -m githubCommitOrg=$github_commit_org -m githubCommitRepo=$github_commit_repo -m githubCommitMessage=\"$github_commit_message\" -m githubCommitRef=$github_commit_ref"                 
 
           echo "github_commit_sha=$github_commit_sha" >> $GITHUB_OUTPUT
+          echo "github_commit_author_name=$github_commit_author_name" >> $GITHUB_OUTPUT
           echo "github_commit_author_login=$github_commit_author_login" >> $GITHUB_OUTPUT
           echo "github_deployment=$github_deployment" >> $GITHUB_OUTPUT
           echo "github_org=$github_org" >> $GITHUB_OUTPUT
           echo "github_repo=$github_repo" >> $GITHUB_OUTPUT
           echo "github_commit_org=$github_commit_org" >> $GITHUB_OUTPUT
           echo "github_commit_repo=$github_commit_repo" >> $GITHUB_OUTPUT
-          echo "github_commit_message=$commit_message" >> $GITHUB_OUTPUT
+          echo "github_commit_message=$github_commit_message" >> $GITHUB_OUTPUT
           echo "github_commit_ref=$github_commit_ref" >> $GITHUB_OUTPUT
           echo "vercel_git_metadata=$vercel_git_metadata" >> $GITHUB_OUTPUT
+
   # 🐘 NEON DB PREVIEW #
   neon-preview:
     name: neon preview
