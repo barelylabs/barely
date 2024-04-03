@@ -48,6 +48,7 @@ These are features that are planned Q3-Q4 for 2024.
 
 - An opinionated alternative to HootSuite.
 - Schedule social media posts to Instagram, TikTok, YouTube, & X
+- Automated tracking of engagement & follower growth
 
 ### 📣 Ads
 
@@ -89,7 +90,7 @@ The marketing philosophy is heavily informed by the teachings of Indepreneur. Yo
 
 # Thanks
 
-We have referenced and heavily borrowed ideas + code from [cal.com](https://cal.com) (hooks + button ui + codebase structure), [dub](https://dub.co) (ui + short-link logic), and [t3-turbo](https://github.com/t3-oss/create-t3-turbo) (trpc + monorepo + auth + general best practices).
+We have referenced and heavily borrowed ideas + code from [cal.com](https://cal.com) (hooks + button ui + codebase structure), [dub](https://dub.co) (ui + short-link logic), [uploadthing](https://uploadthing.com) (file uploads), and [t3-turbo](https://github.com/t3-oss/create-t3-turbo) (trpc + monorepo + auth + general best practices).
 
 # OSS
 
