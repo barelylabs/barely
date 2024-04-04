@@ -293,7 +293,15 @@ jobs:
   comment:
     if: always() && github.event_name == 'pull_request'
     needs:
-      [neon-preview, deploy-www, deploy-app, deploy-link, deploy-press, deploy-sparrow]
+      [
+        neon-preview,
+        deploy-app,
+        deploy-cart,
+        deploy-link,
+        deploy-press,
+        deploy-sparrow,
+        deploy-www,
+      ]
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -306,11 +314,12 @@ jobs:
             ## apps
             | :iphone: app | :rocket: preview | :mag: inspect |
             | ------------ | ---------------- | ------------- |
-            | :globe_with_meridians: www | [preview](${{ needs.deploy-www.outputs.deployment_url }}) | [inspect](${{ needs.deploy-www.outputs.inspect_url }}) |
             | :iphone: app | [preview](${{ needs.deploy-app.outputs.deployment_url }}) | [inspect](${{ needs.deploy-app.outputs.inspect_url }}) |
+            | :shopping_cart: cart | [preview](${{ needs.deploy-cart.outputs.deployment_url }}) | [inspect](${{ needs.deploy-cart.outputs.inspect_url }}) |
             | :link: link | [preview](${{ needs.deploy-link.outputs.deployment_url }}) | [inspect](${{ needs.deploy-link.outputs.inspect_url }}) |
             | :newspaper: press | [preview](${{ needs.deploy-press.outputs.deployment_url }}) | [inspect](${{ needs.deploy-press.outputs.inspect_url }}) |
             | :bird: sparrow | [preview](${{ needs.deploy-sparrow.outputs.deployment_url }}) | [inspect](${{ needs.deploy-sparrow.outputs.inspect_url }}) |
+            | :globe_with_meridians: www | [preview](${{ needs.deploy-www.outputs.deployment_url }}) | [inspect](${{ needs.deploy-www.outputs.inspect_url }}) |
 
             ## db
             | :floppy_disk: db | :mag: inspect |
