@@ -133,8 +133,6 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 		false;
 
 	const metaTags = useMemo(() => {
-		console.log('showLinkModal', showLinkModal);
-
 		return form.watch('customMetaTags') ??
 			(mode === 'update' && !form.formState.dirtyFields.url)
 			? {
@@ -144,7 +142,7 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 					favicon: form.watch('favicon') ?? '',
 				}
 			: metaTagsFromUrl;
-	}, [mode, form, showLinkModal, metaTagsFromUrl]);
+	}, [mode, form, metaTagsFromUrl]);
 
 	/**
 	 * Generate random key

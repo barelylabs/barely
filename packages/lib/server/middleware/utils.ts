@@ -19,8 +19,6 @@ export function parseLinkDomain(req: NextRequest) {
 		)
 		?.replace('www.', '');
 
-	console.log('parseLinkDomain: domain', domain);
-
 	if (!domain) throw new Error('No domain found');
 
 	// special case for Vercel preview deployment URLs
@@ -40,8 +38,6 @@ export function parseLinkDomain(req: NextRequest) {
 		? 'transparentLinkClick'
 		: 'shortLinkClick';
 
-	console.log('parseLinkDomain: linkClickType', linkClickType);
-
 	if (
 		linkClickType === 'shortLinkClick' &&
 		(process.env.VERCEL_ENV === 'development' || process.env.VERCEL_ENV === 'preview')
@@ -52,20 +48,14 @@ export function parseLinkDomain(req: NextRequest) {
 				'Domain query parameter not provided. We need that to test in local & preview environments',
 			);
 
-		console.log('domainParam', domainParam);
-		``;
 		domain =
 			getDomainWithoutWWW(domainParam) ?? raise('Domain query parameter is invalid');
-
-		console.log('domain', domain);
 	}
 
 	const href = ('https://' + domain + req.nextUrl.pathname).replace(
 		`localhost:${process.env.NEXT_PUBLIC_LINK_DEV_PORT}`,
 		`${process.env.NEXT_PUBLIC_TRANSPARENT_LINK_ROOT_DOMAIN}`,
 	);
-
-	console.log('parseLinkDomain: href', href);
 
 	return { domain, href, linkClickType };
 }
@@ -84,23 +74,16 @@ export function parseTransparentLink(req: NextRequest) {
 
 	const handle = domain.split('.').length === 3 ? domain.split('.')[0] ?? null : null;
 
-	console.log('parseTransparentLink: handle', handle);
-
 	// path is the path of the URL (e.g. properyouth.barely.link/spotify/track/12345 => /spotify/track/12345)
 	const path = req.nextUrl.pathname;
-	console.log('parseTransparentLink: path', path);
 
 	// fullPath is the full URL path (including query params)
 	const searchParams = req.nextUrl.searchParams.toString();
 	const fullPath = `${path}${searchParams.length > 0 ? `?${searchParams}` : ''}`;
 
-	console.log('parseTransparentLink: fullPath', fullPath);
-
 	// Here, we are using decodeURIComponent to handle foreign languages
 	const app = decodeURIComponent(path.split('/')[1] ?? ''); // app is the first part of the path (e.g. properyouth.barely.link/spotify/track/12345 => spotify)
-	console.log('parseTransparentLink: app', app);
-	console.log('parseTransparentLink type: ', typeof app);
-	console.log('parseTransparentLink length: ', app.length);
+
 	// appRoute is the rest of the path (e.g. properyouth.barely.link/spotify/track/12345?si=aparam => track/12345?si=aparam)
 	const appRoute = decodeURIComponent(fullPath.split('/').slice(2).join('/'));
 

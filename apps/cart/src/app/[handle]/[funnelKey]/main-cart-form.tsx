@@ -49,7 +49,6 @@ export function MainCartForm({
 
 	useEffect(() => {
 		if (shouldWriteToCookie && initialCart.id) {
-			console.log('setting cart cookie');
 			setCartCookie({
 				handle: initialFunnel.handle,
 				funnelKey: initialFunnel.key,
@@ -85,7 +84,6 @@ export function MainCartForm({
 
 	const { mutate: mutateCart } = api.cart.updateMainCartFromCart.useMutation({
 		onMutate: async data => {
-			console.log('onMutate', data);
 			await apiUtils.cart.getByIdAndFunnelKey.cancel();
 
 			const prevCart = apiUtils.cart.getByIdAndFunnelKey.getData({
@@ -182,9 +180,8 @@ export function MainCartForm({
 		},
 	});
 
-	const handleSubmit = async (data: z.infer<typeof updateMainCartFromCartSchema>) => {
-		console.log('submitting', data);
-
+	// const handleSubmit = async (data: z.infer<typeof updateMainCartFromCartSchema>) => {
+	const handleSubmit = async () => {
 		if (!stripe || !elements) {
 			return;
 		}
@@ -263,7 +260,6 @@ export function MainCartForm({
 							<H size='3'>Contact Information</H>
 							<LinkAuthenticationElement
 								onChange={e => {
-									console.log('complete', e);
 									if (e.complete) {
 										if (z.string().email().safeParse(e.value.email).success) {
 											debouncedUpdateCart({

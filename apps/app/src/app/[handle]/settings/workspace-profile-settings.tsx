@@ -15,7 +15,6 @@ import { useWorkspace } from '@barely/hooks/use-workspace';
 import { useWorkspaceUpdateForm } from '@barely/hooks/use-workspace-update-form';
 
 import { SettingsCard, SettingsCardForm } from '@barely/ui/components/settings-card';
-import { Button } from '@barely/ui/elements/button';
 import { Icon } from '@barely/ui/elements/icon';
 import { MDXEditor } from '@barely/ui/elements/mdx-editor';
 import { Text } from '@barely/ui/elements/typography';
@@ -131,9 +130,6 @@ export function WorkspaceAvatarForm() {
 
 	const onUploadComplete: OnUploadComplete = useCallback(
 		async fileRecord => {
-			console.log('fileRecord => ', fileRecord);
-			console.log('fileRecord.id => ', fileRecord.id);
-
 			if (!fileRecord.id) {
 				return;
 			}
@@ -264,19 +260,9 @@ export function WorkspaceBioForm() {
 				ref={ref}
 				markdown={workspace.bio ?? ''}
 				onChange={v => {
-					console.log('v => ', v);
 					form.setValue('bio', v, { shouldDirty: true });
 				}}
 			/>
-			<Button
-				fullWidth
-				onClick={() => {
-					form.setValue('bio', '', { shouldDirty: true });
-					ref.current?.setMarkdown('');
-				}}
-			>
-				Clear
-			</Button>
 		</SettingsCardForm>
 	);
 }

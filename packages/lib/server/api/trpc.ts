@@ -59,13 +59,9 @@ export const createTRPCContext = async (opts: {
 		? undefined
 		: opts.headers.get('x-pusher-socket-id') ?? null;
 
-	console.log('pusherSocketId => ', pusherSocketId);
-
 	const workspaceHandle = opts.rest
 		? undefined
 		: opts.headers.get('x-workspace-handle') ?? null;
-
-	console.log('workspaceHandle => ', workspaceHandle);
 
 	const workspace = workspaceHandle
 		? session?.user.workspaces.find(w => w.handle === workspaceHandle)

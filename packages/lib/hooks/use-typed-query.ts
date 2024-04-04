@@ -70,7 +70,6 @@ export function useTypedQuery<T extends z.AnyZodObject>(
 			if (options?.replace) {
 				router.replace(path);
 			} else {
-				console.log('pushing path', path);
 				return router.push(path);
 			}
 		},

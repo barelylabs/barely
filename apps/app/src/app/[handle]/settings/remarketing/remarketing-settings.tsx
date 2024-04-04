@@ -45,7 +45,6 @@ export function RemarketingSettings() {
 	});
 
 	async function onSubmit(data: z.infer<typeof insertMetaPixelSchema>) {
-		console.log('data => ', data);
 		await updateEndpoint(data).catch(e => console.error(e));
 	}
 

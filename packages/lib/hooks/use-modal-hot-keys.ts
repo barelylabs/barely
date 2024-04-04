@@ -77,28 +77,6 @@ export function useModalHotKeys({
 				setShowUpdateModal?.(true);
 			}
 
-			// only close add-edit-modal w/ keyboard shortcut if:
-			// - esc is pressed
-			// - the form is not dirty
-			// - user is not typing in an input or textarea
-			// - there is an existing modal backdrop (i.e. another modal is open)
-
-			// if (
-			//   e.key === "Escape" &&
-			//   target.tagName !== "INPUT" &&
-			//   target.tagName !== "TEXTAREA" &&
-			//   existingModalBackdrop &&
-			//   closeModalsDisabled !== true
-			// ) {
-			//   console.log("esc pressed");
-			//   e.preventDefault(); // otherwise it'll show up in the input field since that's getting auto-selected
-			//   setShowCreateModal?.(false);
-			//   setShowUpdateModal?.(false);
-			//   setShowArchiveModal?.(false);
-			//   setShowDeleteModal?.(false);
-			//   onClose?.();
-			// }
-
 			// only open archive-modal w/ keyboard shortcut if:
 			// - a is pressed
 			// - user is not pressing cmd/ctrl + a

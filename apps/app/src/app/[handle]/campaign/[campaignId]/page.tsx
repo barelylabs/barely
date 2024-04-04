@@ -1,5 +1,4 @@
 import { Suspense } from 'react';
-import { headers } from 'next/headers';
 import { db } from '@barely/lib/server/db';
 import { getCampaignById } from '@barely/lib/server/routes/campaign/campaign.fns';
 
@@ -27,9 +26,6 @@ const CampaignPage = async ({
 	params: { campaignId: string };
 	searchParams: { success?: boolean };
 }) => {
-	const headersList = headers();
-	console.log(headersList);
-
 	const initialCampaign = await getCampaign(params.campaignId);
 
 	return (

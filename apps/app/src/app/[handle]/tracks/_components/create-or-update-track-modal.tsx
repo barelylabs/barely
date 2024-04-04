@@ -205,7 +205,6 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 			/>
 			<Form form={form} onSubmit={handleSubmit}>
 				<ModalBody>
-					{mode}
 					<TextField
 						name='name'
 						control={form.control}

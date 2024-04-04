@@ -65,16 +65,16 @@ function Modal({
 				dismissible={dismissable}
 				shouldScaleBackground
 			>
-				<Drawer.Overlay className='fixed inset-0 z-40 bg-gray-100 bg-opacity-10 backdrop-blur' />
+				<Drawer.Overlay className='fixed inset-0 z-40 bg-muted bg-opacity-10 backdrop-blur' />
 				<Drawer.Portal>
 					<Drawer.Content
 						className={cn(
-							'fixed bottom-0 left-0 right-0 z-50 mt-24 h-fit rounded-t-[10-px] border-t border-gray-200 bg-white',
+							'fixed bottom-0 left-0 right-0 z-50 mt-24 h-fit rounded-t-[10-px] border-t border-border bg-background',
 							props.className,
 						)}
 					>
 						<div className='sticky top-0 z-20 flex w-full items-center justify-center rounded-t-[10px] bg-inherit'>
-							<div className='my-3 h-1 w-12 rounded-full bg-gray-300' />
+							<div className='my-3 h-1 w-12 rounded-full bg-border' />
 						</div>
 						{props.children}
 					</Drawer.Content>
@@ -96,12 +96,12 @@ function Modal({
 			<Dialog.Portal>
 				<Dialog.Overlay
 					id='modal-backdrop' // for detecting when there's an active opened modal
-					className='animate-fade-in fixed inset-0 z-40 bg-gray-100 bg-opacity-50 backdrop-blur-md'
+					className='animate-fade-in fixed inset-0 z-40 bg-slate-100 bg-opacity-20 backdrop-blur-md dark:bg-slate-800 dark:bg-opacity-80'
 				/>
 
 				<Dialog.Content
 					className={cn(
-						'animate-scale-in fixed inset-0 z-40 m-auto flex h-fit max-h-[90vh] w-full max-w-screen-lg flex-col overflow-auto border border-gray-200 bg-white p-0 shadow-xl sm:rounded-2xl md:overflow-hidden',
+						'animate-scale-in fixed inset-0 z-40 m-auto flex h-fit max-h-[90vh] w-full max-w-screen-lg flex-col overflow-auto border border-border bg-inherit p-0 shadow-xl sm:rounded-2xl md:overflow-hidden',
 						'focus:outline-none',
 						props.className,
 					)}
@@ -111,6 +111,7 @@ function Modal({
 							onAutoFocus();
 						}
 					}}
+					tabIndex={undefined}
 				>
 					<Button
 						startIcon='x'
@@ -151,7 +152,7 @@ function ModalHeader(props: ModalHeaderProps) {
 	const IconComponent = props.icon ? Icon[props.icon] : null;
 
 	return (
-		<div className='z-10 flex flex-col items-center justify-center gap-3 border-b bg-background px-6 py-6 text-center sm:px-10 md:sticky md:top-0'>
+		<div className='z-10 flex flex-col items-center justify-center gap-3 border-b border-border bg-background px-6 py-6 text-center sm:px-10 md:sticky md:top-0'>
 			{props.iconOverride ? (
 				props.iconOverride
 			) : IconComponent ? (
@@ -172,9 +173,7 @@ interface ModalBodyProps {
 
 function ModalBody(props: ModalBodyProps) {
 	return (
-		<div
-			className={cn('flex max-w-full flex-col gap-3 bg-slate-50 p-6', props.className)}
-		>
+		<div className={cn('flex max-w-full flex-col gap-3 bg-subtle p-6', props.className)}>
 			{props.children}
 		</div>
 	);

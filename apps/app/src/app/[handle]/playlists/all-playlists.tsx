@@ -24,11 +24,9 @@ const AllPlaylists = () => {
 
 	api.spotify.syncCurrentUser.useMutation({
 		onMutate: () => {
-			console.log('syncing spotify');
 			setSyncingSpotify(true);
 		},
 		onSuccess: async () => {
-			console.log('synced spotify');
 			await utils.playlist.byCurrentUser.invalidate();
 			setSyncingSpotify(false);
 		},

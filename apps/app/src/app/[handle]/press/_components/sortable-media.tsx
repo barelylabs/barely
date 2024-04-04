@@ -84,8 +84,6 @@ export function SortableMedia({
 						position: 'before',
 					});
 
-					console.log('updatedCollection on root drop', updatedCollection);
-
 					return updatedCollection.map(f => ({
 						...f,
 						lexorank: f.lexorank,
@@ -97,7 +95,6 @@ export function SortableMedia({
 		},
 
 		onInsert(e) {
-			console.log('onInsert', e);
 			const handleInsert = async () => {
 				const fileRecords = await getDroppedFileRecords(e.items);
 
@@ -122,7 +119,6 @@ export function SortableMedia({
 		},
 
 		onReorder(e) {
-			console.log('onReorder', e);
 			const handleReorder = async () => {
 				const fileRecords = (
 					await Promise.all([...e.keys].map(key => media.find(f => f.id === key)))
@@ -162,10 +158,6 @@ export function SortableMedia({
 					}}
 				/>
 			);
-		},
-
-		onDragStart: e => {
-			console.log('onDragStart', e);
 		},
 	});
 

@@ -15,8 +15,6 @@ export function CampaignTabs() {
 
 	const params = useParams();
 
-	console.log({ params });
-
 	const { data: totals } = api.campaign.countByWorkspaceId.useQuery({
 		workspaceId: workspace.id,
 	});

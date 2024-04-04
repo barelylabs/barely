@@ -51,9 +51,9 @@ export const UploadDropzone = React.forwardRef<
 
 					<div
 						className={cn(
-							'absolute flex h-full w-full flex-col items-center justify-center bg-white p-4 transition-all',
+							'absolute flex h-full w-full flex-col items-center justify-center border-dashed bg-background p-4 transition-all',
 							props.isDragActive &&
-								'cursor-copy border-2 border-black bg-slate-100 opacity-100',
+								'cursor-copy border-2 border-black bg-muted opacity-100',
 							imagePreview
 								? 'opacity-0 group-hover:opacity-75'
 								: 'group-hover:bg-slate-100',

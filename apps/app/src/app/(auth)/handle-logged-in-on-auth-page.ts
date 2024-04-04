@@ -8,10 +8,7 @@ export async function handleLoggedInOnAuthPage(props?: { callbackUrl?: string })
 
 	const session = await auth();
 
-	console.log('session on auth page', session);
-
 	if (session?.user && props?.callbackUrl) {
-		console.log('Redirecting to callbackUrl', props.callbackUrl);
 		return redirect(props.callbackUrl);
 	}
 

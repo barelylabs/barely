@@ -42,8 +42,6 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 	const queryClient = getQueryClient();
 
 	const trpcClient = useMemo(() => {
-		console.log('updating trpc client');
-
 		const headers = new Headers();
 		headers.set('x-trpc-source', 'nextjs-react');
 		headers.set('x-page-session-id', pageSession.id);
@@ -307,9 +305,6 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 							path = pathParts.join('.');
 							serverName = firstPart;
 						}
-
-						console.log('serverName => ', serverName);
-						console.log('path => ', path);
 
 						const link = servers[serverName];
 

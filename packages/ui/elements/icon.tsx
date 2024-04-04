@@ -16,11 +16,15 @@ import {
 	ArrowFatUp,
 	BracketsAngle,
 	CalendarBlank,
+	CassetteTape,
+	Disc,
 	GridNine,
+	Hoodie,
 	MetaLogo,
 	PlayCircle,
 	TShirt,
 	Video,
+	VinylRecord,
 } from '@phosphor-icons/react/dist/ssr';
 import {
 	AlertCircle,
@@ -46,7 +50,6 @@ import {
 	Binary,
 	Bold,
 	Bot,
-	CassetteTape,
 	Check,
 	CheckCircle,
 	CheckSquare,
@@ -67,7 +70,6 @@ import {
 	CreditCard,
 	Crop,
 	Database,
-	Disc,
 	DollarSign,
 	Download,
 	Edit,
@@ -288,6 +290,7 @@ export const Icon = {
 	heart: Heart,
 	help: HelpCircle,
 	home: Home,
+	hoodie: Hoodie,
 
 	image: ImageIcon,
 	import: Import,
@@ -375,6 +378,7 @@ export const Icon = {
 	stat: BarChart,
 	stickyNote: StickyNote,
 	sun: Sun,
+	sweatshirt: Hoodie,
 
 	tablet: Tablet,
 	tag: Tag,
@@ -398,6 +402,7 @@ export const Icon = {
 	verified: Verified,
 
 	video: Video,
+	vinyl: VinylRecord,
 
 	wand: Wand2,
 	warning: AlertTriangle,

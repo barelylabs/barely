@@ -16,7 +16,6 @@ interface SendEmailProps {
 }
 
 export async function sendEmail(props: SendEmailProps) {
-	console.log('🔔 sendEmail');
 	try {
 		const html = await renderAsync(props.react);
 		const text = await renderAsync(props.react, { plainText: true });

@@ -39,8 +39,6 @@ export async function POST(req: NextRequest) {
 	switch (event.type) {
 		case 'charge.succeeded': {
 			const charge = event.data.object;
-			// console.log('charge => ', charge);
-			// console.log('session.metadata', charge.metadata);
 
 			await handleStripeConnectChargeSuccess(charge);
 

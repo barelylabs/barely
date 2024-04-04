@@ -18,7 +18,7 @@ export default async function CartSuccessPage({
 	const { handle, funnelKey } = params;
 
 	const cartId = cookies().get(`${params.handle}.${params.funnelKey}.cartId`)?.value;
-	console.log('cartId', cartId);
+
 	if (!cartId) return null;
 
 	const { funnel } = await cartApi.getByIdAndFunnelKey({

@@ -36,7 +36,6 @@ export const LoginForm = ({ callbackUrl }: RegisterFormProps) => {
 	});
 
 	const onSubmit = async (user: z.infer<typeof signInSchema>) => {
-		console.log('user => ', user);
 		await sendLoginEmail({ email: user.email, callbackUrl });
 		return;
 	};

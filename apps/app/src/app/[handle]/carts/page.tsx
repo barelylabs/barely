@@ -4,11 +4,12 @@ import { api } from '@barely/lib/server/api/server';
 import { cartFunnelSearchParamsSchema } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
-import { AllFunnels } from '~/app/[handle]/carts/_components/all-cart-funnels';
+import { AllCartFunnels } from '~/app/[handle]/carts/_components/all-cart-funnels';
 import { ArchiveOrDeleteFunnelModal } from '~/app/[handle]/carts/_components/archive-or-delete-funnel-modal';
 import { CartFunnelContextProvider } from '~/app/[handle]/carts/_components/cart-funnel-context';
+import { CartFunnelHotkeys } from '~/app/[handle]/carts/_components/cart-hotkeys';
 import { CreateCartFunnelButton } from '~/app/[handle]/carts/_components/create-cart-funnel-button';
-import { CreateOrUpdateFunnelModal } from '~/app/[handle]/carts/_components/create-or-update-funnel-modal';
+import { CreateOrUpdateFunnelModal } from '~/app/[handle]/carts/_components/create-or-update-cart-funnel-modal';
 
 export default function CartFunnelsPage({
 	params,
@@ -19,7 +20,6 @@ export default function CartFunnelsPage({
 }) {
 	const parsedFilters = cartFunnelSearchParamsSchema.safeParse(searchParams);
 	if (!parsedFilters.success) {
-		console.log(parsedFilters.error.errors);
 		redirect(`/${params.handle}/funnels`);
 	}
 
@@ -37,7 +37,7 @@ export default function CartFunnelsPage({
 		>
 			<DashContentHeader title='Carts' button={<CreateCartFunnelButton />} />
 
-			<AllFunnels />
+			<AllCartFunnels />
 
 			<CreateOrUpdateFunnelModal mode='create' />
 			<CreateOrUpdateFunnelModal mode='update' />
@@ -45,7 +45,7 @@ export default function CartFunnelsPage({
 			<ArchiveOrDeleteFunnelModal mode='archive' />
 			<ArchiveOrDeleteFunnelModal mode='delete' />
 
-			{/* <FunnelHotkeys /> */}
+			<CartFunnelHotkeys />
 			{/* <UpgradeModal checkoutCancelPath="carts" checkoutSuccessPath="carts" /> */}
 		</CartFunnelContextProvider>
 	);

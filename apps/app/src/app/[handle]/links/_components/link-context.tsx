@@ -135,7 +135,6 @@ export function LinkContextProvider({
 				setOptimisticFilters({ ...optimisticFilters });
 				removeByKey('search');
 			}
-			console.log('should be done pending');
 		});
 	}
 

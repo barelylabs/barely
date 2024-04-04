@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* @import '../../../../node_modules/@mdxeditor/editor/dist/style.css'; */
-
 @layer base {
 	:root {
 		--background: 0 0% 100%;
@@ -14,22 +12,21 @@
 		--popover-foreground: 222.2 84% 4.9%;
 		--primary: 222.2 47.4% 11.2%;
 		--primary-foreground: 210 40% 98%;
-		--secondary: 214.3 31.8% 91.4%;
+		--secondary: 210 40% 96.1%;
 		--secondary-foreground: 222.2 47.4% 11.2%;
-		--muted: 210 40% 96.1%;
-		--muted-foreground: 215.4 16.3% 46.9%;
-		--subtle: 210, 40%, 98%;
-		--subtle-foreground: 215, 20.2%, 65.1%;
-		--accent: 212.7 26.8% 91.4%;
-		--accent-foreground: 222.2 47.4% 11.2%;
-		/* --accent: 221.2 83.2% 53.3%;
-		--accent-foreground: 210 40% 98%; */
+		--subtle: 210, 40%, 96.1%; /* slate-100 */
+		--subtle-foreground: 215, 20.2%, 65.1%; /* slate-400 */
+		--muted: 214.3 31.8% 91.4%; /* slate-200 */
+		--muted-foreground: 215.3 19.3% 34.5%; /* slate-600 */
+		--accent: 212.7 26.8% 83.9%; /* slate-300 */
+		--accent-foreground: 217.2 32.6% 17.5%; /* slate-800 */
 		--destructive: 0 84.2% 60.2%;
 		--destructive-foreground: 210 40% 98%;
 		--border: 214.3 31.8% 91.4%;
 		--input: 214.3 31.8% 91.4%;
 		--ring: 222.2 84% 4.9%;
 		--radius: 0.5rem;
+
 		--success: 130, 77.5%, 96.5%;
 		--success-foreground: 120, 49%, 32%;
 		--warning: 38 92% 50%;
@@ -45,21 +42,24 @@
 		--popover-foreground: 210 40% 98%;
 		--primary: 210 40% 98%;
 		--primary-foreground: 222.2 47.4% 11.2%;
-		--secondary: 215.3 25% 26.7%;
+		--secondary: 217.2 32.6% 17.5%;
 		--secondary-foreground: 210 40% 98%;
-		--muted: 217.2 32.6% 17.5%;
-		--muted-foreground: 215 20.2% 65.1%;
-		--accent: 217.2 32.6% 17.5%;
-		--accent-foreground: 210 40% 98%;
+		--subtle: 222.2 47.4% 11.2%; /* slate-900 */
+		--subtle-foreground: 215.3 19.3% 34.5%; /* slate-600 */
+		--muted: 217.2 32.6% 17.5%; /* slate-800 */
+		--muted-foreground: 215 20.2% 65.1%; /* slate-400 */
+		--accent: 215.3 25% 26.7%; /* slate-700 */
+		--accent-foreground: 214.3 31.8% 91.4%; /* slate-200 */
 		--destructive: 0 62.8% 30.6%;
 		--destructive-foreground: 210 40% 98%;
-		--warning: 38 92% 50%;
-		--warning-foreground: 48 96% 89%;
-		--success: 130, 77.5%, 96.5%;
-		--success-foreground: 120, 49%, 32%;
 		--border: 217.2 32.6% 17.5%;
 		--input: 217.2 32.6% 17.5%;
 		--ring: 212.7 26.8% 83.9;
+
+		--success: 130, 77.5%, 96.5%;
+		--success-foreground: 120, 49%, 32%;
+		--warning: 38 92% 50%;
+		--warning-foreground: 48 96% 89%;
 	}
 }
 
@@ -297,5 +297,9 @@
 } */
 
 .full-demo-mdxeditor[class*='popupContainer'] {
-	z-index: 20;
+	z-index: z-50;
+}
+
+.mdxeditor-popup-container {
+	z-index: z-50;
 }

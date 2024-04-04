@@ -21,7 +21,7 @@ import { TextField } from '@barely/ui/forms/text-field';
 
 import { useMixtapesContext } from '~/app/[handle]/mixtapes/_components/mixtape-context';
 
-export function CreateOrUpdateMixtapeModal(props: { mode: 'create' | 'edit' }) {
+export function CreateOrUpdateMixtapeModal(props: { mode: 'create' | 'update' }) {
 	const { mode } = props;
 	const { handle } = useWorkspace();
 	const apiUtils = api.useUtils();
@@ -48,7 +48,7 @@ export function CreateOrUpdateMixtapeModal(props: { mode: 'create' | 'edit' }) {
 		select: data =>
 			data
 				.filter(track =>
-					mode === 'edit'
+					mode === 'update'
 						? !selectedMixtape?.tracks?.some(t => t.id === track.id)
 						: !newMixtapeTracks.some(t => t.id === track.id),
 				)
@@ -73,10 +73,7 @@ export function CreateOrUpdateMixtapeModal(props: { mode: 'create' | 'edit' }) {
 			await apiUtils.mixtape.byWorkspace.cancel();
 
 			const previousTracks =
-				apiUtils.mixtape.byWorkspace
-					.getData()
-					?.find(m => m.id === mixtapeId)
-					?.tracks.filter(t => !_tracks.some(_t => t.id === _t.id)) ?? [];
+				selectedMixtape?.tracks.filter(t => !_tracks.some(_t => t.id === _t.id)) ?? [];
 
 			const workspaceTracks = apiUtils.track.byWorkspace.getData();
 
@@ -161,9 +158,7 @@ export function CreateOrUpdateMixtapeModal(props: { mode: 'create' | 'edit' }) {
 	const { mutateAsync: removeTracks } = api.mixtape.removeTracks.useMutation({
 		async onMutate(mixtape) {
 			await apiUtils.mixtape.byId.cancel(mixtape.mixtapeId);
-			const previousTracks =
-				apiUtils.mixtape.byWorkspace.getData()?.find(m => m.id === mixtape.mixtapeId)
-					?.tracks ?? [];
+			const previousTracks = selectedMixtape?.tracks ?? [];
 
 			const updatedTracks = previousTracks.filter(t => !mixtape.trackIds.includes(t.id));
 
@@ -375,7 +370,7 @@ export function CreateOrUpdateMixtapeModal(props: { mode: 'create' | 'edit' }) {
 		getItems: keys =>
 			[...keys].map(key => {
 				const track = (
-					mode === 'edit' ? selectedMixtape?.tracks : newMixtapeTracks
+					mode === 'update' ? selectedMixtape?.tracks : newMixtapeTracks
 				)?.find(track => track.id === key);
 				return {
 					track: JSON.stringify(track),
@@ -445,7 +440,7 @@ export function CreateOrUpdateMixtapeModal(props: { mode: 'create' | 'edit' }) {
 				const items = (await Promise.all(
 					[...e.keys]
 						.map(key =>
-							(mode === 'edit' ? selectedMixtape?.tracks : newMixtapeTracks)?.find(
+							(mode === 'update' ? selectedMixtape?.tracks : newMixtapeTracks)?.find(
 								t => t.id === key,
 							),
 						)
@@ -502,7 +497,9 @@ export function CreateOrUpdateMixtapeModal(props: { mode: 'create' | 'edit' }) {
 		>
 			<ModalHeader
 				icon='mixtape'
-				title={mode === 'edit' ? `Edit ${selectedMixtape?.name ?? ''}` : 'Create Mixtape'}
+				title={
+					mode === 'update' ? `Update ${selectedMixtape?.name ?? ''}` : 'Create Mixtape'
+				}
 			/>
 
 			<Form form={form} onSubmit={onSubmitMixtape}>
@@ -531,7 +528,9 @@ export function CreateOrUpdateMixtapeModal(props: { mode: 'create' | 'edit' }) {
 								data-vaul-no-drag
 								aria-label='Mixtape Tracks'
 								className='bg-gray flex min-h-[200px] flex-col rounded-lg border border-border p-2 sm:p-2'
-								items={mode === 'edit' ? selectedMixtape?.tracks ?? [] : newMixtapeTracks}
+								items={
+									mode === 'update' ? selectedMixtape?.tracks ?? [] : newMixtapeTracks
+								}
 								dragAndDropHooks={mixtapeTracksDragAndDropHooks}
 							>
 								{track => (
@@ -542,8 +541,8 @@ export function CreateOrUpdateMixtapeModal(props: { mode: 'create' | 'edit' }) {
 					</div>
 				</ModalBody>
 				<ModalFooter>
-					<SubmitButton fullWidth>
-						{mode === 'edit' ? 'Save Mixtape' : 'Create Mixtape'}
+					<SubmitButton disabled={mode === 'update' && !form.formState.isDirty} fullWidth>
+						{mode === 'update' ? 'Save Mixtape' : 'Create Mixtape'}
 					</SubmitButton>
 				</ModalFooter>
 			</Form>

@@ -52,8 +52,8 @@ export const TextField = <
 								isDisabled={isDisabled}
 								toggleDisabled={allowEnable ? toggleDisabled : undefined}
 							>
-								<FieldControl>
-									<div className='relative'>
+								<div className='relative'>
+									<FieldControl>
 										<Input
 											{...field}
 											{...props}
@@ -64,9 +64,9 @@ export const TextField = <
 											}}
 											isError={!!fieldState?.error?.message}
 										/>
-										<FieldErrorIcon isValidating={isValidating} />
-									</div>
-								</FieldControl>
+									</FieldControl>
+									<FieldErrorIcon isValidating={isValidating} />
+								</div>
 							</FieldWrapper>
 						</FormItem>
 					);

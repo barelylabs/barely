@@ -10,6 +10,7 @@ import type {
 	MDXEditorProps,
 } from '@mdxeditor/editor';
 import type { ForwardedRef } from 'react';
+import { cn } from '@barely/lib/utils/cn';
 import {
 	BlockTypeSelect,
 	BoldItalicUnderlineToggles,
@@ -34,6 +35,7 @@ import {
 	useCodeBlockEditorContext,
 	usePublisher,
 } from '@mdxeditor/editor';
+import { useTheme } from 'next-themes';
 
 import { Icon } from '../icon';
 import { VideoPlayer } from '../video-player';
@@ -106,8 +108,11 @@ const PlainTextCodeEditorDescriptor: CodeBlockEditorDescriptor = {
 // Only import this to the next file
 export function InitializedMDXEditor({
 	editorRef,
+	className,
 	...props
 }: { editorRef: ForwardedRef<MDXEditorMethods> | null } & MDXEditorProps) {
+	const { theme } = useTheme();
+
 	return (
 		<MDXEditor
 			ref={editorRef}
@@ -136,8 +141,13 @@ export function InitializedMDXEditor({
 					),
 				}),
 			]}
-			contentEditableClassName='prose'
 			{...props}
+			contentEditableClassName='prose'
+			className={cn(
+				'rounded-lg border border-border bg-background p-4 text-red',
+				theme === 'dark' && 'dark-theme',
+				className,
+			)}
 		/>
 	);
 }

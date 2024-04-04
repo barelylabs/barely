@@ -75,11 +75,12 @@ function ProductCard({
 						<Img
 							src={product?.images[0]?.src ?? ''}
 							alt='Product Image'
-							className='h-8 w-8 rounded-md bg-gray-100 sm:h-16 sm:w-16'
+							className='h-8 w-8 rounded-md bg-muted sm:h-16 sm:w-16'
 							width={40}
 							height={40}
+							sizes='40px'
 						/>
-						<Text variant='md/semibold' className='text-blue-800'>
+						<Text variant='md/semibold' className='text-accent-foreground'>
 							{product.name}
 						</Text>
 					</div>

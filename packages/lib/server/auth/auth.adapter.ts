@@ -32,7 +32,7 @@ import { deleteSession } from './auth.fns';
 export function NeonAdapter(db: Db): Adapter {
 	return {
 		createUser: async userData => {
-			console.log('creating user => ', userData);
+			// console.log('creating user => ', userData);
 
 			const newUser = await createUser(
 				{
@@ -54,7 +54,6 @@ export function NeonAdapter(db: Db): Adapter {
 		},
 
 		getUser: async userId => {
-			// console.log("getting user by id: ", userId);
 			const user = await getSessionUserByUserId(userId, db);
 
 			if (!user) return null;
@@ -63,11 +62,9 @@ export function NeonAdapter(db: Db): Adapter {
 		},
 
 		getUserByEmail: async email => {
-			console.log('getting user by email: ', email);
+			// console.log('getting user by email: ', email);
 
 			const user = await getSessionUserByEmail(email, db);
-
-			// console.log("user by email: ", user);
 
 			if (!user) return null;
 

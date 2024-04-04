@@ -104,7 +104,7 @@ export function SidebarNav(props: SidebarNavProps) {
 	}, [allHandles, handle, navHistory?.settingsBackPath]);
 
 	return (
-		<aside className='fixed left-0 top-14  hidden h-[100vh] max-h-[100vh] w-14 shrink-0 flex-col overflow-y-auto bg-muted px-3 py-3 md:sticky md:flex md:w-56'>
+		<aside className='fixed left-0 top-14  hidden h-[100vh] max-h-[100vh] w-14 shrink-0 flex-col overflow-y-auto bg-accent px-3 py-3 md:sticky md:flex md:w-56'>
 			<WorkspaceSwitcher />
 
 			{isSettings && (
@@ -149,8 +149,8 @@ function NavItem(props: { item: SidebarNavItem }) {
 		<Link
 			href={props.item.href ?? '#'}
 			className={cn(
-				'group flex w-full items-center gap-2 rounded-md px-2 py-1.5 hover:bg-secondary',
-				isCurrent && 'bg-secondary',
+				'group flex w-full items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted',
+				isCurrent && 'bg-muted',
 			)}
 			passHref
 		>

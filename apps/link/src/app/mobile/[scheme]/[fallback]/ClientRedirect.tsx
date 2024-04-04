@@ -14,12 +14,10 @@ export default function ClientRedirect({ scheme, fallback }: RedirectProps) {
 		appSchemes.map((scheme, index) => {
 			if (scheme === null) return;
 			setTimeout(() => (document.location = decodeURIComponent(scheme)), index * 300);
-			console.log('scheme', scheme);
 		});
 
 		if (fallback === null) return;
 
-		console.log('fallback', fallback);
 		setTimeout(
 			() => (document.location = decodeURIComponent(fallback)),
 			appSchemes.length === 1 ? 400 : 700,

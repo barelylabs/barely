@@ -70,7 +70,6 @@ export function LaunchPlaylistPitchForm(props: LaunchPlaylistPitchFormProps) {
 	const createCheckout = api.campaign.createPlaylistPitchCheckoutLink.useMutation({
 		onMutate: () => setCreatingCheckoutSession(true),
 		onSuccess: checkoutLink => {
-			console.log('checkoutLink => ', checkoutLink);
 			if (checkoutLink) window.location.replace(checkoutLink);
 		},
 	});

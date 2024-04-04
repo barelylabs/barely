@@ -65,7 +65,12 @@ export function WorkspaceSwitcher() {
 					className='flex h-fit w-full flex-row gap-2 px-2 py-2'
 					fullWidth
 				>
-					<Avatar className='h-7 w-7' imageUrl={normalizedObject.avatarImageUrl} />
+					<Avatar
+						className='h-7 w-7'
+						imageUrl={normalizedObject.avatarImageUrl}
+						sizes='50'
+						priority
+					/>
 					<Text variant='xs/medium'>{normalizedObject.name}</Text>
 
 					<Badge variant='info' size='2xs' className='h-full'>
@@ -100,6 +105,8 @@ export function WorkspaceSwitcher() {
 									isSelected={currentWorkspace.handle === personalAccount.handle}
 								>
 									<Avatar
+										sizes='50'
+										priority
 										className='mr-2 h-5 w-5'
 										imageUrl={personalAccount.avatarImageUrl ?? ''}
 									/>
@@ -136,6 +143,8 @@ export function WorkspaceSwitcher() {
 									<Avatar
 										className='mr-2 h-5 w-5'
 										imageUrl={workspace.avatarImageUrl ?? ''}
+										sizes='50'
+										priority
 									/>
 									{workspace.name ?? workspace.handle}
 									<Icon.check

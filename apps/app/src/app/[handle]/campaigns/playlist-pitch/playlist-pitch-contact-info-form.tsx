@@ -43,12 +43,7 @@ export function PlaylistPitchContactInfoForm(props: UserContactInfoFormProps) {
 	return (
 		<Form form={form} onSubmit={props.onSubmit}>
 			<div className='flex flex-col space-y-1'>
-				<TextField
-					control={form.control}
-					name='fullName'
-					label='Your Name'
-					onChangeDebounced={e => console.log('changed ', e.target.value)}
-				/>
+				<TextField control={form.control} name='fullName' label='Your Name' />
 
 				<TextField
 					control={form.control}

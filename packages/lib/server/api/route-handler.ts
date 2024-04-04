@@ -1,7 +1,4 @@
 import type { AnyRouter } from '@trpc/server';
-// import { createTRPCContext } from '@barely/lib/server/api/trpc';
-// import { auth } from '@barely/lib/server/auth';
-// import { setCorsHeaders } from '@barely/lib/utils/trpc-route';
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 
 import { setCorsHeaders } from '../../utils/trpc-route';
@@ -10,8 +7,6 @@ import { createTRPCContext } from './trpc';
 
 export const routeHandler = (path: string, router: AnyRouter) =>
 	auth(async req => {
-		console.log('req => ', req);
-
 		const response = await fetchRequestHandler({
 			endpoint: '/api/trpc/' + path,
 			router,
