@@ -45,7 +45,6 @@ function Modal({
 		props.onClose?.();
 
 		if (setShowModal) {
-			console.log('setShowModal(false)');
 			setShowModal(false);
 		} else {
 			router.back();
@@ -111,7 +110,7 @@ function Modal({
 							onAutoFocus();
 						}
 					}}
-					tabIndex={undefined}
+					tabIndex={-1}
 				>
 					<Button
 						startIcon='x'

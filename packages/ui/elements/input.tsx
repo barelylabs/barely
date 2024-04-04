@@ -12,7 +12,10 @@ export interface InputAddonProps {
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement> & InputAddonProps;
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-	({ className, type, onChangeDebounced, isError, ...props }, ref) => {
+	(
+		{ className, type, onChangeDebounced, isError, autoComplete = 'off', ...props },
+		ref,
+	) => {
 		const onChangeDebouncedMemo = useMemo(() => {
 			if (!onChangeDebounced) return undefined;
 			return debounce(onChangeDebounced, props.debounce ?? 400);
@@ -20,6 +23,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
 		return (
 			<input
+				autoComplete={autoComplete}
 				ref={ref}
 				type={type}
 				className={cn(

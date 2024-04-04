@@ -144,11 +144,8 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 
 			await handleProductImageUpload();
 			await onSubmitProduct(upsertProductData);
-
-			await apiUtils.product.invalidate();
-			// setProductImageUploadQueue([]);
 		},
-		[onSubmitProduct, handleProductImageUpload, productImages, apiUtils.product],
+		[onSubmitProduct, handleProductImageUpload, productImages],
 	);
 
 	const submitDisabled = isPendingPresignsProductImage || uploadingProductImage;
@@ -163,10 +160,18 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 	const handleCloseModal = useCallback(async () => {
 		reset();
 		setShowModal(false);
-		setProductImageUploadQueue([]);
 		focusGridList();
+		setProductImageUploadQueue([]);
+		if (mode === 'create') setProductImages([]);
 		await apiUtils.product.invalidate();
-	}, [setShowModal, focusGridList, apiUtils.product, reset, setProductImageUploadQueue]);
+	}, [
+		setShowModal,
+		focusGridList,
+		apiUtils.product,
+		reset,
+		setProductImageUploadQueue,
+		mode,
+	]);
 
 	return (
 		<Modal
