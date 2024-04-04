@@ -1,5 +1,4 @@
 import { Suspense } from 'react';
-import { headers } from 'next/headers';
 import { db } from '@barely/lib/server/db';
 import { getCampaignById } from '@barely/lib/server/routes/campaign/campaign.fns';
 

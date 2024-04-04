@@ -290,7 +290,7 @@ export const Icon = {
 	heart: Heart,
 	help: HelpCircle,
 	home: Home,
-    hoodie: Hoodie,
+	hoodie: Hoodie,
 
 	image: ImageIcon,
 	import: Import,
@@ -378,7 +378,7 @@ export const Icon = {
 	stat: BarChart,
 	stickyNote: StickyNote,
 	sun: Sun,
-    sweatshirt: Hoodie,
+	sweatshirt: Hoodie,
 
 	tablet: Tablet,
 	tag: Tag,
