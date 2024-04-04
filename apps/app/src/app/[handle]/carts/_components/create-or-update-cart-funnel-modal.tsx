@@ -93,8 +93,9 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 		mode === 'create' ? setShowCreateFunnelModal : setShowUpdateFunnelModal;
 
 	const handleCloseModal = useCallback(async () => {
-		setShowModal(false);
 		focusGridList();
+		setShowModal(false);
+
 		await apiUtils.cartFunnel.invalidate();
 	}, [setShowModal, focusGridList, apiUtils.cartFunnel]);
 
@@ -104,6 +105,7 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 			setShowModal={setShowModal}
 			className='w-full'
 			preventDefaultClose={form.formState.isDirty}
+			onAutoFocus={() => form.setFocus('name')}
 			onClose={handleCloseModal}
 		>
 			<ModalHeader
@@ -117,6 +119,9 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 						label='Name'
 						placeholder='Enter cart name'
 						control={form.control}
+						data-1p-ignore
+						data-bwignore
+						data-lpignore='true'
 					/>
 					<TextField
 						name='key'
