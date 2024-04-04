@@ -208,11 +208,12 @@ jobs:
       [
         git-meta,
         db-push,
-        deploy-www,
         deploy-app,
+        deploy-cart,
         deploy-link,
         deploy-press,
         deploy-sparrow,
+        deploy-www,
       ]
     if: always() && github.event_name == 'merge_group' # skip if pull request, which allows entry into merge queue
     permissions:
@@ -229,22 +230,6 @@ jobs:
 
   # 🚀 PROMOTE APPS TO PRODUCTION DOMAINS 🚀 #
   # -- at a later date, we could decouple this promotion step from deploying & merging to main
-
-  promote-www:
-    name: promote www to production
-    needs: [production--can-merge, deploy-www]
-    if: always() && github.event_name == 'merge_group'
-    runs-on: ubuntu-latest
-    env:
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_WWW_PROJECT_ID }}
-    steps:
-      - name: Install Vercel CLI
-        run: npm i -g vercel@latest
-
-      - name: Promote www to production
-        run: vercel promote dpl_${{ needs.deploy-www.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
   promote-app:
     name: promote app to production
@@ -326,13 +311,10 @@ jobs:
       - name: Promote sparrow to production
         run: vercel promote dpl_${{ needs.deploy-sparrow.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
-  # 🚨 ROLLBACK APPS (IF ANY PROMOTION FAILS) 🚨 #
-  # ref: https://dev.to/philw_/using-vercels-instant-rollback-feature-in-your-own-cicd-pipeline-57oi
-
-  rollback-www:
-    name: rollback www if any deployments fail
-    needs: [promote-www, promote-app, promote-link, promote-press, promote-sparrow]
-    if: ${{ failure() && needs.promote-www.result == 'success' }}
+  promote-www:
+    name: promote www to production
+    needs: [production--can-merge, deploy-www]
+    if: always() && github.event_name == 'merge_group'
     runs-on: ubuntu-latest
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -342,22 +324,22 @@ jobs:
       - name: Install Vercel CLI
         run: npm i -g vercel@latest
 
-      - name: Rollback www
-        run: |
-          ROLLBACK_DEPLOYMENT_ID=$(curl -s "https://api.vercel.com/v6/deployments?teamId=${{ secrets.VERCEL_TEAM_ID }}&projectId=${{ secrets.VERCEL_WWW_PROJECT_ID}}&limit=2&rollbackCandidate=true&state=READY&target=production" -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | jq -r '.deployments[1].uid')
-          echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
-          vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Promote www to production
+        run: vercel promote dpl_${{ needs.deploy-www.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+
+  # 🚨 ROLLBACK APPS (IF ANY PROMOTION FAILS) 🚨 #
+  # ref: https://dev.to/philw_/using-vercels-instant-rollback-feature-in-your-own-cicd-pipeline-57oi
 
   rollback-app:
     name: rollback app if any deployments fail
     needs:
       [
-        promote-www,
         promote-app,
         promote-cart,
         promote-link,
         promote-press,
         promote-sparrow,
+        promote-www,
       ]
     if: ${{ failure() && needs.promote-app.result == 'success' }}
     runs-on: ubuntu-latest
@@ -379,12 +361,12 @@ jobs:
     name: rollback cart if any deployments fail
     needs:
       [
-        promote-www,
         promote-app,
         promote-cart,
         promote-link,
         promote-press,
         promote-sparrow,
+        promote-www,
       ]
     if: ${{ failure() && needs.promote-cart.result == 'success' }}
     runs-on: ubuntu-latest
@@ -406,12 +388,12 @@ jobs:
     name: rollback link if any deployments fail
     needs:
       [
-        promote-www,
         promote-app,
         promote-cart,
         promote-link,
         promote-press,
         promote-sparrow,
+        promote-www,
       ]
     if: ${{ failure() && needs.promote-link.result == 'success' }}
     runs-on: ubuntu-latest
@@ -433,12 +415,12 @@ jobs:
     name: rollback press if any deployments fail
     needs:
       [
-        promote-www,
         promote-app,
-        promote-link,
         promote-cart,
+        promote-link,
         promote-press,
         promote-sparrow,
+        promote-www,
       ]
     if: ${{ failure() && needs.promote-press.result == 'success' }}
     runs-on: ubuntu-latest
@@ -460,12 +442,12 @@ jobs:
     name: rollback sparrow if any deployments fail
     needs:
       [
-        promote-www,
         promote-app,
         promote-cart,
         promote-link,
         promote-press,
         promote-sparrow,
+        promote-www,
       ]
     if: ${{ failure() && needs.promote-sparrow.result == 'success' }}
     runs-on: ubuntu-latest
@@ -480,6 +462,33 @@ jobs:
       - name: Rollback sparrow
         run: |
           ROLLBACK_DEPLOYMENT_ID=$(curl -s "https://api.vercel.com/v6/deployments?teamId=${{ secrets.VERCEL_TEAM_ID }}&projectId=${{ secrets.VERCEL_SPARROW_PROJECT_ID}}&limit=2&rollbackCandidate=true&state=READY&target=production" -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | jq -r '.deployments[1].uid')
+          echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
+          vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+
+  rollback-www:
+    name: rollback www if any deployments fail
+    needs:
+      [
+        promote-app,
+        promote-cart,
+        promote-link,
+        promote-press,
+        promote-sparrow,
+        promote-www,
+      ]
+    if: ${{ failure() && needs.promote-www.result == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_WWW_PROJECT_ID }}
+    steps:
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Rollback www
+        run: |
+          ROLLBACK_DEPLOYMENT_ID=$(curl -s "https://api.vercel.com/v6/deployments?teamId=${{ secrets.VERCEL_TEAM_ID }}&projectId=${{ secrets.VERCEL_WWW_PROJECT_ID}}&limit=2&rollbackCandidate=true&state=READY&target=production" -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | jq -r '.deployments[1].uid')
           echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
           vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
