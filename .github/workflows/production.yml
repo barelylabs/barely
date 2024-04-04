@@ -507,7 +507,15 @@ jobs:
         promote-sparrow,
         promote-www,
       ]
-    if: always() && github.event_name == 'merge_group' && needs.git-meta.outputs.git_pr_branch_name != 'main'
+    if:
+      always() && github.event_name == 'merge_group' && needs.git-meta.outputs.git_pr_branch_name != 'main' &&
+      needs.production--can-merge.result == 'success' &&
+      needs.promote-app.result == 'success' &&
+      needs.promote-cart.result == 'success' &&
+      needs.promote-link.result == 'success' &&
+      needs.promote-press.result == 'success' &&
+      needs.promote-sparrow.result == 'success' &&
+      needs.promote-www.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: install neon cli
