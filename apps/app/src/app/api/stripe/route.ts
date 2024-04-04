@@ -46,20 +46,6 @@ export async function POST(req: NextRequest) {
 			break;
 		}
 
-		// case 'checkout.session.async_payment_succeeded': {
-		//   const session = event.data.object as Stripe.Checkout.Session;
-		//   console.log('🔔 Checkout session async payment succeeded!');
-		//   console.log(session);
-		//   break;
-		// }
-
-		// case 'checkout.session.async_payment_failed': {
-		//   const session = event.data.object;
-		//   console.log('🔔 Checkout session async payment failed!');
-		//   console.log(session);
-		//   break;
-		// }
-
 		default:
 			console.log(`🔔 Unhandled event type ${event.type}`);
 	}

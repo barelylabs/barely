@@ -56,15 +56,18 @@ const Avatar = (props: {
 	displayName?: string;
 	initials?: string;
 	className?: string;
+	sizes?: string;
+	priority?: boolean;
 }) => {
 	return (
 		<AvatarRoot className={props.className}>
-			{/* <AvatarImage src={props.imageUrl} /> */}
 			{props.imageUrl?.length ? (
 				<Img
 					src={props.imageUrl}
 					alt={props.displayName ?? ''}
 					className={cn('aspect-square h-full w-full', props.className)}
+					sizes={props.sizes}
+					priority={props.priority}
 					fill
 				/>
 			) : (

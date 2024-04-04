@@ -491,11 +491,12 @@ jobs:
         git-meta,
         db-push,
         production--can-merge,
-        promote-www,
         promote-app,
+        promote-cart,
         promote-link,
         promote-press,
         promote-sparrow,
+        promote-www,
       ]
     if: always() && github.event_name == 'merge_group' && needs.git-meta.outputs.git_pr_branch_name != 'main'
     runs-on: ubuntu-latest
@@ -503,5 +504,17 @@ jobs:
       - name: install neon cli
         run: npm i -g neonctl
 
-      - name: delete neon branch
+      - name: delete neon preview branch
         run: neonctl branches delete ${{ needs.git-meta.outputs.git_pr_branch_name }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }}
+
+      - name: delete neon dev branches
+        run: |
+          # Fetch the current PR branch name
+          PR_BRANCH_NAME=${{ needs.git-meta.outputs.git_pr_branch_name }}
+          # List all branches using neonctl and filter those matching the pattern
+          MATCHING_BRANCHES=$(neonctl branches list --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} | grep "$PR_BRANCH_NAME"__dev_ | awk '{print $2}')
+          # Loop through the filtered list and delete each matching branch
+          for BRANCH in $MATCHING_BRANCHES; do
+            echo "Deleting branch: $BRANCH"
+            neonctl branches delete $BRANCH --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }}
+          done

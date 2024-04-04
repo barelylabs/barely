@@ -1,6 +1,5 @@
 'use client';
 
-// import type { EdgeRouterOutputs } from '@barely/lib/server/api/router.edge';
 import type { AppRouterOutputs } from '@barely/lib/server/api/react';
 import type {
 	CartFunnel,
@@ -23,21 +22,21 @@ import { api } from '@barely/lib/server/api/react';
 import { cartFunnelSearchParamsSchema } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
 
 interface CartFunnelContext {
-	funnels: AppRouterOutputs['cartFunnel']['byWorkspace']['funnels'];
-	funnelSelection: Selection;
-	lastSelectedFunnelId: string | undefined;
-	lastSelectedFunnel: CartFunnel | undefined;
-	setFunnelSelection: (selection: Selection) => void;
+	cartFunnels: AppRouterOutputs['cartFunnel']['byWorkspace']['funnels'];
+	cartFunnelSelection: Selection;
+	lastSelectedCartFunnelId: string | undefined;
+	lastSelectedCartFunnel: CartFunnel | undefined;
+	setCartFunnelSelection: (selection: Selection) => void;
 	gridListRef: React.RefObject<HTMLDivElement>;
 	focusGridList: () => void;
-	showCreateFunnelModal: boolean;
-	setShowCreateFunnelModal: (show: boolean) => void;
-	showUpdateFunnelModal: boolean;
-	setShowUpdateFunnelModal: (show: boolean) => void;
-	showArchiveFunnelModal: boolean;
-	setShowArchiveFunnelModal: (show: boolean) => void;
-	showDeleteFunnelModal: boolean;
-	setShowDeleteFunnelModal: (show: boolean) => void;
+	showCreateCartFunnelModal: boolean;
+	setShowCreateCartFunnelModal: (show: boolean) => void;
+	showUpdateCartFunnelModal: boolean;
+	setShowUpdateCartFunnelModal: (show: boolean) => void;
+	showArchiveCartFunnelModal: boolean;
+	setShowArchiveCartFunnelModal: (show: boolean) => void;
+	showDeleteCartFunnelModal: boolean;
+	setShowDeleteCartFunnelModal: (show: boolean) => void;
 	// filters
 	filters: z.infer<typeof cartFunnelFilterParamsSchema>;
 	pendingFiltersTransition: boolean;
@@ -153,21 +152,21 @@ export function CartFunnelContextProvider({
 	);
 
 	const contextValue = {
-		funnels: infiniteFunnels.funnels,
-		funnelSelection: optimisticSelection,
-		lastSelectedFunnelId,
-		lastSelectedFunnel,
-		setFunnelSelection,
+		cartFunnels: infiniteFunnels.funnels,
+		cartFunnelSelection: optimisticSelection,
+		lastSelectedCartFunnelId: lastSelectedFunnelId,
+		lastSelectedCartFunnel: lastSelectedFunnel,
+		setCartFunnelSelection: setFunnelSelection,
 		gridListRef,
 		focusGridList: () => gridListRef.current?.focus(),
-		showCreateFunnelModal,
-		setShowCreateFunnelModal,
-		showUpdateFunnelModal,
-		setShowUpdateFunnelModal,
-		showArchiveFunnelModal,
-		setShowArchiveFunnelModal,
-		showDeleteFunnelModal,
-		setShowDeleteFunnelModal,
+		showCreateCartFunnelModal: showCreateFunnelModal,
+		setShowCreateCartFunnelModal: setShowCreateFunnelModal,
+		showUpdateCartFunnelModal: showUpdateFunnelModal,
+		setShowUpdateCartFunnelModal: setShowUpdateFunnelModal,
+		showArchiveCartFunnelModal: showArchiveFunnelModal,
+		setShowArchiveCartFunnelModal: setShowArchiveFunnelModal,
+		showDeleteCartFunnelModal: showDeleteFunnelModal,
+		setShowDeleteCartFunnelModal: setShowDeleteFunnelModal,
 		// filters
 		filters: optimisticFilters,
 		pendingFiltersTransition,

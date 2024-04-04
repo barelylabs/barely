@@ -12,7 +12,7 @@ export function NoResultsPlaceholder(props: {
 }) {
 	const IconComponent = props.icon ? Icon[props.icon] : null;
 	return (
-		<div className='flex h-full max-h-[500px] flex-col items-center justify-center gap-y-3 rounded-lg border border-dashed px-6 py-16'>
+		<div className='flex h-full max-h-[500px] w-full flex-col items-center justify-center gap-y-3 rounded-lg border border-dashed px-6 py-16 focus-visible:outline-none'>
 			{IconComponent && <IconComponent className='h-10 w-10' />}
 
 			<H size='4'>{props.title ?? `There's nothing here.`}</H>

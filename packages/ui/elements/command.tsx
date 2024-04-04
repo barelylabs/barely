@@ -1,8 +1,10 @@
 'use client';
 
 import type { DialogProps } from '@radix-ui/react-dialog';
+import type { VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 import { cn } from '@barely/lib/utils/cn';
+import { cva } from 'class-variance-authority';
 import { Command as CommandPrimitive } from 'cmdk';
 import { Search } from 'lucide-react';
 
@@ -126,14 +128,72 @@ const CommandItem = React.forwardRef<
 
 CommandItem.displayName = CommandPrimitive.Item.displayName;
 
+const commandShortcutVariants = cva(
+	'hidden rounded px-2 py-0.5 text-xs font-light transition-all duration-75 group-hover:bg-gray-200 sm:inline-block',
+	{
+		variants: {
+			variant: {
+				default: '',
+				button: '',
+			},
+			look: {
+				primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
+				accent: 'bg-accent text-accent-foreground hover:bg-accent/90',
+				muted: 'bg-muted text-muted-foreground hover:bg-muted/90',
+			},
+			// size: {
+			// 	xs: 'text-xs',
+			// 	sm: 'text-sm',
+			// 	md: 'text-md',
+			// 	lg: 'text-lg',
+			// 	xl: 'text-xl',
+			// },
+		},
+		compoundVariants: [
+			{
+				variant: 'default',
+				look: 'primary',
+				className: 'bg-primary text-primary-foreground hover:bg-primary/90',
+			},
+			{
+				variant: 'default',
+				look: 'accent',
+				className: 'bg-accent text-accent-foreground hover:bg-accent/90',
+			},
+			{
+				variant: 'default',
+				look: 'muted',
+				className: 'bg-muted text-muted-foreground hover:bg-muted/90',
+			},
+			{
+				variant: 'button',
+				look: 'primary',
+				className: 'bg-muted-foreground text-accent hover:bg-muted-foreground/90',
+			},
+		],
+		defaultVariants: {
+			variant: 'default',
+			look: 'muted',
+			// size: 'md',
+		},
+	},
+);
+
 const CommandShortcut = ({
 	className,
+	variant = 'default',
+	look = 'primary',
 	...props
-}: React.HTMLAttributes<HTMLSpanElement>) => {
+}: React.HTMLAttributes<HTMLSpanElement> &
+	VariantProps<typeof commandShortcutVariants>) => {
 	return (
 		<kbd
 			className={cn(
-				'hidden rounded bg-slate-200 px-2 py-0.5 text-xs font-light text-gray-500 transition-all duration-75 group-hover:bg-gray-200 sm:inline-block',
+				// 'hidden rounded bg-slate-200 px-2 py-0.5 text-xs font-light text-gray-500 transition-all duration-75 group-hover:bg-gray-200 sm:inline-block',
+				commandShortcutVariants({
+					variant,
+					look,
+				}),
 				className,
 			)}
 			{...props}

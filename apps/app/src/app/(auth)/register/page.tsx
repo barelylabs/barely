@@ -14,8 +14,6 @@ const RegisterUserPage = async ({
 }) => {
 	const { callbackUrl } = searchParams ?? {};
 
-	console.log('callback on register page', callbackUrl);
-
 	await handleLoggedInOnAuthPage({ callbackUrl });
 
 	return (

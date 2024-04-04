@@ -162,7 +162,6 @@ export function useUpload({
 					});
 
 					const updatedQueue = [...newQueue, ...prevQueue];
-					console.log('maxFiles', maxFiles, 'updatedQueue', updatedQueue);
 					if (maxFiles === 0) return updatedQueue;
 
 					return updatedQueue.slice(0, maxFiles);
@@ -236,8 +235,6 @@ export function useUpload({
 	);
 
 	const handleSubmit = useCallback(async () => {
-		console.log('uploading. uploadQueue:', uploadQueue);
-
 		if (uploadQueue.length > 0 && !uploadQueue.some(q => q.presigned === null)) {
 			await Promise.all(
 				uploadQueue.map(async item => {

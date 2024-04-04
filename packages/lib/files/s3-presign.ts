@@ -59,7 +59,6 @@ export async function getPresigned({
 			},
 		});
 
-		console.log('presignedUrl', url, 'fields', fields);
 		return {
 			fileRecord,
 			key,
@@ -141,7 +140,6 @@ export async function completeMultipartUpload({
 			})),
 		},
 	});
-	console.log('completeUploadResponse', completeUploadResponse);
 
 	return completeUploadResponse;
 }

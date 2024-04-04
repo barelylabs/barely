@@ -10,13 +10,12 @@ import {
 	upsertCartFunnelSchema,
 } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
 
-import { Editor } from '@barely/ui/elements/editor';
 import { Label } from '@barely/ui/elements/label';
 import { MDXEditor } from '@barely/ui/elements/mdx-editor';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
 import { H } from '@barely/ui/elements/typography';
 import { Form, SubmitButton } from '@barely/ui/forms';
-import { NumberField } from '@barely/ui/forms/number-field';
+import { CurrencyField } from '@barely/ui/forms/currency-field';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { SwitchField } from '@barely/ui/forms/switch-field';
 import { TextField } from '@barely/ui/forms/text-field';
@@ -29,11 +28,11 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 
 	/* funnel context */
 	const {
-		lastSelectedFunnel: selectedFunnel,
-		showCreateFunnelModal,
-		setShowCreateFunnelModal,
-		showUpdateFunnelModal,
-		setShowUpdateFunnelModal,
+		lastSelectedCartFunnel: selectedFunnel,
+		showCreateCartFunnelModal: showCreateFunnelModal,
+		setShowCreateCartFunnelModal: setShowCreateFunnelModal,
+		showUpdateCartFunnelModal: showUpdateFunnelModal,
+		setShowUpdateCartFunnelModal: setShowUpdateFunnelModal,
 		focusGridList,
 	} = useCartFunnelContext();
 
@@ -108,21 +107,21 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 			onClose={handleCloseModal}
 		>
 			<ModalHeader
-				icon='funnel'
-				title={selectedFunnel ? `Update ${selectedFunnel.name}` : 'New funnel'}
+				icon='cart'
+				title={selectedFunnel ? `Update ${selectedFunnel.name}` : 'New Cart'}
 			/>
 			<Form form={form} onSubmit={handleSubmit}>
 				<ModalBody>
 					<TextField
 						name='name'
 						label='Name'
-						placeholder='Enter funnel name'
+						placeholder='Enter cart name'
 						control={form.control}
 					/>
 					<TextField
 						name='key'
 						label='Key'
-						placeholder='Enter funnel key'
+						placeholder='Enter cart key'
 						control={form.control}
 					/>
 
@@ -140,30 +139,28 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 						label='Pay What You Want?'
 					/>
 					{form.watch('mainProductPayWhatYouWant') && (
-						<NumberField
+						<CurrencyField
 							control={form.control}
 							name='mainProductPayWhatYouWantMin'
 							label='Minimum Price'
+							outputUnits='cents'
 						/>
 					)}
 
 					{!form.watch('mainProductPayWhatYouWant') && (
-						<NumberField
+						<CurrencyField
 							control={form.control}
 							name='mainProductDiscount'
 							label='Discount'
+							outputUnits='cents'
 						/>
 					)}
-					{/* {form.watch('mainProductPayWhatYouWant') ? (
-					) : (
-					)} */}
-					{/* <p>{form.watch('mainProductDiscount')}</p> */}
 
-					<NumberField
+					<CurrencyField
 						control={form.control}
 						name='mainProductHandling'
 						label='Handling'
-						placeholder='Handling'
+						outputUnits='cents'
 					/>
 
 					{/* BUMP */}
@@ -175,22 +172,21 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 						options={productOptions}
 					/>
 					<TextField control={form.control} name='bumpProductHeadline' label='Headline' />
-					<NumberField
+					<CurrencyField
 						control={form.control}
 						name='bumpProductDiscount'
 						label='Discount'
+						outputUnits='cents'
 					/>
 
 					<Label>Description</Label>
-					<Editor
-						mode='markdown'
-						initialMarkdown={
-							mode === 'update' ? selectedFunnel?.bumpProductDescription : ''
+					<MDXEditor
+						markdown={
+							mode === 'update' ? selectedFunnel?.bumpProductDescription ?? '' : ''
 						}
-						getMarkdown={() => form.getValues('bumpProductDescription') ?? ''}
-						setMarkdown={markdown =>
-							form.setValue('bumpProductDescription', markdown, { shouldDirty: true })
-						}
+						onChange={markdown => {
+							form.setValue('bumpProductDescription', markdown, { shouldDirty: true });
+						}}
 					/>
 
 					{/* UPSELL */}
@@ -206,10 +202,11 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 						name='upsellProductHeadline'
 						label='Headline'
 					/>
-					<NumberField
+					<CurrencyField
 						control={form.control}
 						name='upsellProductDiscount'
 						label='Discount'
+						outputUnits='cents'
 					/>
 
 					<Label>Above the Fold</Label>

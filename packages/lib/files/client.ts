@@ -59,8 +59,6 @@ export async function uploadPresignedPost(
 	Object.entries(presigned.fields).forEach(([k, v]) => formData.append(k, v));
 	formData.append('file', file); // File data **MUST GO LAST**
 
-	console.log('presignedPost formData: ', formData);
-
 	const response = await new Promise<XMLHttpRequest>((resolve, reject) => {
 		const xhr = new XMLHttpRequest();
 		xhr.open('POST', presigned.url);

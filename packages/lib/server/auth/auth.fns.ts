@@ -31,9 +31,7 @@ export async function createLoginLink(props: CreateLoginLinkProps) {
 
 	if (props.callbackPath) {
 		callbackUrl = getAbsoluteUrl('app', props.callbackPath);
-		console.log('callbackPath provided, using it: ', callbackUrl);
 	} else if (props.user) {
-		console.log('no callback path provided, using default workspace links page');
 		const defaultWorkspace = getDefaultWorkspaceOfUser(props.user);
 		callbackUrl = getAbsoluteUrl('app', `${defaultWorkspace.handle}/links`);
 	} else {

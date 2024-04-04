@@ -41,7 +41,6 @@ export function useWorkspace() {
 			ids: [workspace.id],
 		},
 		callback: async () => {
-			console.log('workspace updated, invalidating');
 			await apiUtils.workspace.invalidate();
 		},
 	});

@@ -29,13 +29,7 @@ const Editor = dynamic(
 // This is what is imported by other components. Pre-initialized with plugins, and ready
 // to accept other props, including a ref.
 export const MDXEditor = forwardRef<MDXEditorMethods, MDXEditorProps>(
-	({ ...props }, ref) => (
-		<Editor
-			{...props}
-			className='rounded-lg border border-border bg-background p-4'
-			editorRef={ref}
-		/>
-	),
+	({ ...props }, ref) => <Editor {...props} className='' editorRef={ref} />,
 );
 
 // TS complains without the following line

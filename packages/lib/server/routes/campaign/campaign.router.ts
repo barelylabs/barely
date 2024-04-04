@@ -43,8 +43,6 @@ export const campaignRouter = createTRPCRouter({
 	createPlaylistPitch: privateProcedure
 		.input(createPlaylistPitchCampaignSchema)
 		.mutation(async ({ ctx, input }) => {
-			console.log('createPlaylistPitch', input);
-
 			// 🔎 check if artist exists
 
 			if (!input.artist.spotifyArtistId && !input.artist.id)

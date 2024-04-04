@@ -27,9 +27,6 @@ const CampaignPage = async ({
 	params: { campaignId: string };
 	searchParams: { success?: boolean };
 }) => {
-	const headersList = headers();
-	console.log(headersList);
-
 	const initialCampaign = await getCampaign(params.campaignId);
 
 	return (

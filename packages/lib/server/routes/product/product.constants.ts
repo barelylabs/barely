@@ -13,7 +13,19 @@ export const MERCH_TYPES = [
 	'digital',
 ] as const;
 export type MerchType = (typeof MERCH_TYPES)[number];
+
 export const MEDIAMAIL_TYPES: MerchType[] = ['cd', 'vinyl', 'cassette'] as const;
+export type MediaMailType = (typeof MEDIAMAIL_TYPES)[number];
+
+export const APPAREL_TYPES: MerchType[] = ['tshirt', 'sweatshirt'] as const;
+export type ApparelType = (typeof APPAREL_TYPES)[number];
+
+export function isMerchType(type: string): type is MerchType {
+	return MERCH_TYPES.includes(type as MerchType);
+}
+export function isApparelType(type: string): type is ApparelType {
+	return APPAREL_TYPES.includes(type as ApparelType);
+}
 
 export const MERCH_DIMENSIONS: Record<
 	MerchType,

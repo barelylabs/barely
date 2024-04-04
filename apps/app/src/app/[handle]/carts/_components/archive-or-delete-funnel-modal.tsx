@@ -8,12 +8,12 @@ import { useCartFunnelContext } from '~/app/[handle]/carts/_components/cart-funn
 
 export function ArchiveOrDeleteFunnelModal({ mode }: { mode: 'archive' | 'delete' }) {
 	const {
-		funnelSelection,
-		lastSelectedFunnel,
-		showArchiveFunnelModal,
-		showDeleteFunnelModal,
-		setShowArchiveFunnelModal,
-		setShowDeleteFunnelModal,
+		cartFunnelSelection: funnelSelection,
+		lastSelectedCartFunnel: lastSelectedFunnel,
+		showArchiveCartFunnelModal: showArchiveFunnelModal,
+		showDeleteCartFunnelModal: showDeleteFunnelModal,
+		setShowArchiveCartFunnelModal: setShowArchiveFunnelModal,
+		setShowDeleteCartFunnelModal: setShowDeleteFunnelModal,
 	} = useCartFunnelContext();
 
 	const apiUtils = api.useUtils();

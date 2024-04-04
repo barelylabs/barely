@@ -80,7 +80,7 @@ const buttonVariants = cva(
 			{
 				variant: 'icon',
 				size: 'md',
-				className: 'hover:border-default h-7 w-7 !p-1',
+				className: 'hover:border-default h-8 w-8 !p-2',
 			},
 			{
 				variant: 'icon',

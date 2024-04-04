@@ -139,8 +139,6 @@ export function PlaylistPitchScreenForm() {
 	const handleScreenCampaign = (
 		data: z.infer<typeof updatePlaylistPitchCampaign_ScreeningSchema>,
 	) => {
-		console.log('data => ', data);
-
 		submitScreening({
 			id: data.id,
 			stage: data.stage,
@@ -202,13 +200,11 @@ export function PlaylistPitchScreenForm() {
 								look='primary'
 								fullWidth
 								onClick={() => {
-									console.log('approved');
 									form.setValue('stage', 'approved');
 									form
 										.handleSubmit(handleScreenCampaign)()
 										.catch(err => console.error(err));
 								}}
-								// onClick={() => console.log('approved')}
 							>
 								<Icon.thumbsUp />
 							</Button>

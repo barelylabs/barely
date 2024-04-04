@@ -55,7 +55,6 @@ const RegisterUserForm = ({ callbackUrl }: RegisterFormProps) => {
 	});
 
 	const onSubmit = async (user: z.infer<typeof newUserContactInfoSchema>) => {
-		console.log('creating user =>', user);
 		setCreatingAccount(true);
 		await createUser.mutateAsync({ ...user });
 		return;

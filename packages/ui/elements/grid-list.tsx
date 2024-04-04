@@ -66,7 +66,10 @@ export function GridList<T extends { id: string }>({
 	return (
 		<GridListPrimitive
 			data-vaul-no-drag
-			className={cn('gap-2 data-[drop-target]:bg-blue-50', className)}
+			className={cn(
+				'gap-2 data-[drop-target]:bg-blue-50 focus-visible:outline-none dark:data-[drop-target]:bg-slate-800',
+				className,
+			)}
 			{...props}
 			ref={glRef}
 			items={items}

@@ -9,6 +9,7 @@ import { ArchiveOrDeleteProductModal } from '~/app/[handle]/products/_components
 import { CreateOrUpdateProductModal } from '~/app/[handle]/products/_components/create-or-update-product-modal';
 import { CreateProductButton } from '~/app/[handle]/products/_components/create-product-button';
 import { ProductContextProvider } from '~/app/[handle]/products/_components/product-context';
+import { ProductHotkeys } from '~/app/[handle]/products/_components/product-hotkeys';
 
 export default function ProductsPage({
 	params,
@@ -46,7 +47,7 @@ export default function ProductsPage({
 			<ArchiveOrDeleteProductModal mode='archive' />
 			<ArchiveOrDeleteProductModal mode='delete' />
 
-			{/* <ProductHotkeys /> */}
+			<ProductHotkeys />
 			{/* <UpgradeModal checkoutCancelPath="products" checkoutSuccessPath="products" /> */}
 		</ProductContextProvider>
 	);

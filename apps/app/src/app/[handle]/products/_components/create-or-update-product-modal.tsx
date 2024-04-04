@@ -5,12 +5,17 @@ import type {
 	SortableFile,
 	SortableFilePendingUpload,
 } from '@barely/lib/server/routes/file/file.schema';
+import type {
+	ApparelSize,
+	MerchType,
+} from '@barely/lib/server/routes/product/product.constants';
 import type { UpsertProduct } from '@barely/lib/server/routes/product/product.schema';
 import type { z } from 'zod';
 import { useCallback, useEffect, useState } from 'react';
 import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
 import { useUpload } from '@barely/lib/hooks/use-upload';
 import { api } from '@barely/lib/server/api/react';
+import { isApparelType } from '@barely/lib/server/routes/product/product.constants';
 import {
 	apparelSizeSchema,
 	defaultProduct,
@@ -20,15 +25,15 @@ import {
 import { insert } from '@barely/lib/utils/collection';
 import { atom } from 'jotai';
 
-import { Editor } from '@barely/ui/elements/editor';
 import { Icon } from '@barely/ui/elements/icon';
 import { Label } from '@barely/ui/elements/label';
+import { MDXEditor } from '@barely/ui/elements/mdx-editor';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
 import { ToggleGroup, ToggleGroupItem } from '@barely/ui/elements/toggle-group';
 import { UploadDropzone } from '@barely/ui/elements/upload';
 import { Form, SubmitButton } from '@barely/ui/forms';
+import { CurrencyField } from '@barely/ui/forms/currency-field';
 import { DatetimeField } from '@barely/ui/forms/datetime-field';
-import { NumberField } from '@barely/ui/forms/number-field';
 import { SwitchField } from '@barely/ui/forms/switch-field';
 import { TextField } from '@barely/ui/forms/text-field';
 
@@ -78,12 +83,9 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 		},
 	});
 
-	/* product image state */
+	const { reset } = form;
 
-	// const initialProductImages = useMemo(() => {
-	// 	if (mode === 'create' || !selectedProduct) return [];
-	// 	return selectedProduct.images;
-	// }, [mode, selectedProduct]);
+	/* product image state */
 
 	const [productImages, setProductImages] = useState<
 		(SortableFile | SortableFilePendingUpload)[]
@@ -91,7 +93,6 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 
 	useEffect(() => {
 		if (mode === 'update' && selectedProduct) {
-			console.log('selectedProduct.images', selectedProduct.images);
 			setProductImages(selectedProduct.images);
 		}
 	}, [mode, selectedProduct]);
@@ -101,7 +102,7 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 		uploadQueueAtom: productImageUploadQueueAtom,
 		allowedFileTypes: ['image'],
 		folder: 'product-images',
-		onPresigned: (allPresigned, uploadQueue) => {
+		onPresigned: allPresigned => {
 			// we want to insert the presigned fileRecords into the productImages array with a lexorank
 			setProductImages(prev => {
 				const { updatedCollection } = insert({
@@ -116,8 +117,6 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 					position: 'after',
 				});
 
-				console.log('uploadQueue', uploadQueue);
-
 				return updatedCollection.map(f => ({
 					...f,
 					pendingUpload: true,
@@ -125,9 +124,6 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 				}));
 			});
 		},
-		// onDrop: (acceptedFiles) => {
-		//     //
-		// }
 	});
 
 	const {
@@ -145,9 +141,6 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 				...data,
 				_images: productImages.map(f => ({ fileId: f.id, lexorank: f.lexorank })),
 			};
-
-			console.log('upsertProductData', upsertProductData);
-			console.log('_images', upsertProductData._images);
 
 			await handleProductImageUpload();
 			await onSubmitProduct(upsertProductData);
@@ -168,10 +161,12 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 		mode === 'create' ? setShowCreateProductModal : setShowUpdateProductModal;
 
 	const handleCloseModal = useCallback(async () => {
+		reset();
 		setShowModal(false);
+		setProductImageUploadQueue([]);
 		focusGridList();
 		await apiUtils.product.invalidate();
-	}, [setShowModal, focusGridList, apiUtils.product]);
+	}, [setShowModal, focusGridList, apiUtils.product, reset, setProductImageUploadQueue]);
 
 	return (
 		<Modal
@@ -189,11 +184,17 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 				<ModalBody>
 					<TextField control={form.control} name='name' label='Name' />
 
-					<NumberField control={form.control} name='price' label='Price' />
-					{/* <SwitchField control={form.control} name='isDigital' label='Digital?' />
-					<SwitchField control={form.control} name='isApparel' label='Apparel?' /> */}
+					<CurrencyField
+						control={form.control}
+						name='price'
+						label='Price'
+						outputUnits='cents'
+					/>
+
+					<Label htmlFor='product-type-toggle-group'>Product Type</Label>
 
 					<ToggleGroup
+						id='product-type-toggle-group'
 						type='single'
 						value={form.watch('merchType')}
 						onValueChange={value => {
@@ -205,48 +206,66 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 
 							form.setValue('merchType', merchType.data);
 						}}
+						className='w-fit'
 					>
-						<ToggleGroupItem value='cd'>
-							<Icon.cd />
-						</ToggleGroupItem>
-						<ToggleGroupItem value='tshirt'>
-							<Icon.tshirt />
-						</ToggleGroupItem>
-						<ToggleGroupItem value='digital'>
-							<Icon.media />
-						</ToggleGroupItem>
+						<ProductTypeToggleItem value='cd'>
+							<Icon.cd className='h-5 w-5' />
+						</ProductTypeToggleItem>
+						<ProductTypeToggleItem value='vinyl'>
+							<Icon.vinyl className='h-6 w-6' />
+						</ProductTypeToggleItem>
+						<ProductTypeToggleItem value='cassette'>
+							<Icon.cassette className='h-5 w-5' />
+						</ProductTypeToggleItem>
+
+						<ProductTypeToggleItem value='tshirt'>
+							<Icon.tshirt className='h-5 w-5' />
+						</ProductTypeToggleItem>
+						<ProductTypeToggleItem value='sweatshirt'>
+							<Icon.sweatshirt className='h-5 w-5' />
+						</ProductTypeToggleItem>
+
+						<ProductTypeToggleItem value='digital'>
+							<Icon.download className='h-5 w-5' />
+						</ProductTypeToggleItem>
 					</ToggleGroup>
 
-					<ToggleGroup
-						type='multiple'
-						value={form.watch('_apparelSizes')?.map(s => s.size) ?? []}
-						onValueChange={value => {
-							const _apparelSizes = value.map(v => ({
-								size: apparelSizeSchema.parse(v),
-								stock: 100,
-							}));
-							form.setValue('_apparelSizes', _apparelSizes);
-						}}
-					>
-						<ToggleGroupItem value='XS' aria-label='Toggle XS'>
-							XS
-						</ToggleGroupItem>
-						<ToggleGroupItem value='S' aria-label='Toggle S'>
-							S
-						</ToggleGroupItem>
-						<ToggleGroupItem value='M' aria-label='Toggle M'>
-							M
-						</ToggleGroupItem>
-						<ToggleGroupItem value='L' aria-label='Toggle L'>
-							L
-						</ToggleGroupItem>
-						<ToggleGroupItem value='XL' aria-label='Toggle XL'>
-							XL
-						</ToggleGroupItem>
-						<ToggleGroupItem value='XXL' aria-label='Toggle XXL'>
-							XXL
-						</ToggleGroupItem>
-					</ToggleGroup>
+					{isApparelType(form.watch('merchType') ?? '') && (
+						<>
+							<Label>Apparel Sizes</Label>
+							<ToggleGroup
+								type='multiple'
+								value={form.watch('_apparelSizes')?.map(s => s.size) ?? []}
+								onValueChange={value => {
+									const _apparelSizes = value.map(v => ({
+										size: apparelSizeSchema.parse(v),
+										stock: 100,
+									}));
+									form.setValue('_apparelSizes', _apparelSizes);
+								}}
+								className='w-fit'
+							>
+								<ApparelSizeToggleItem value='XS' aria-label='Toggle XS'>
+									XS
+								</ApparelSizeToggleItem>
+								<ApparelSizeToggleItem value='S' aria-label='Toggle S'>
+									S
+								</ApparelSizeToggleItem>
+								<ApparelSizeToggleItem value='M' aria-label='Toggle M'>
+									M
+								</ApparelSizeToggleItem>
+								<ApparelSizeToggleItem value='L' aria-label='Toggle L'>
+									L
+								</ApparelSizeToggleItem>
+								<ApparelSizeToggleItem value='XL' aria-label='Toggle XL'>
+									XL
+								</ApparelSizeToggleItem>
+								<ApparelSizeToggleItem value='XXL' aria-label='Toggle XXL'>
+									XXL
+								</ApparelSizeToggleItem>
+							</ToggleGroup>
+						</>
+					)}
 
 					<SwitchField control={form.control} name='preorder' label='Preorder?' />
 
@@ -254,15 +273,12 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 						<DatetimeField control={form.control} name='preorderDeliveryEstimate' />
 					)}
 
-					<Editor
-						mode='markdown'
-						initialMarkdown={mode === 'update' ? selectedProduct?.description ?? '' : ''}
-						getMarkdown={() => form.getValues('description') ?? ''}
-						setMarkdown={markdown =>
+					<Label>Description</Label>
+					<MDXEditor
+						markdown={mode === 'update' ? selectedProduct?.description ?? '' : ''}
+						onChange={markdown =>
 							form.setValue('description', markdown, { shouldDirty: true })
 						}
-						excludedToolbarItems={['blockType']}
-						disableLists
 					/>
 
 					<div className='flex flex-col items-start gap-1'>
@@ -291,5 +307,29 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 				</ModalFooter>
 			</Form>
 		</Modal>
+	);
+}
+
+function ProductTypeToggleItem({
+	value,
+	children,
+}: {
+	value: MerchType;
+	children: React.ReactNode;
+}) {
+	return <ToggleGroupItem value={value}>{children}</ToggleGroupItem>;
+}
+
+function ApparelSizeToggleItem({
+	value,
+	children,
+}: {
+	value: ApparelSize;
+	children: React.ReactNode;
+}) {
+	return (
+		<ToggleGroupItem value={value} className='w-10'>
+			{children}
+		</ToggleGroupItem>
 	);
 }

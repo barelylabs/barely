@@ -17,9 +17,6 @@ export default function MixtapesPage({
 	searchParams: z.infer<typeof mixtapeFilterParamsSchema>;
 	params: { handle: string };
 }) {
-	console.log('params', params);
-	console.log('searchParams', searchParams);
-
 	const mixtapes = api({ handle: params.handle }).mixtape.byWorkspace({
 		handle: params.handle,
 	});
@@ -33,7 +30,7 @@ export default function MixtapesPage({
 			<AllMixtapes />
 
 			<CreateOrUpdateMixtapeModal mode='create' />
-			<CreateOrUpdateMixtapeModal mode='edit' />
+			<CreateOrUpdateMixtapeModal mode='update' />
 
 			<ArchiveOrDeleteMixtapeModal mode='archive' />
 			<ArchiveOrDeleteMixtapeModal mode='delete' />

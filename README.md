@@ -1,4 +1,4 @@
-![logo.png](https://app.barely.io/_static/logo.png)
+![logo.png](https://app.barely.io/_static/logo_70px.png)
 
 # barely.io
 

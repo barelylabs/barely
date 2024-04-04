@@ -26,7 +26,6 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	const url = req.nextUrl;
 	const linkProps = parseLink(req);
 
-	console.log('middleware: linkProps', linkProps);
 	//* 🧬 parse the incoming request *//
 
 	let where: SQL | undefined = undefined;
@@ -36,10 +35,6 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 			return NextResponse.rewrite(getAbsoluteUrl('www', '/link'));
 
 		if (!linkProps.handle) return NextResponse.rewrite(getAbsoluteUrl('link', '/404'));
-
-		console.log('handle', linkProps.handle);
-		console.log('app', linkProps.app);
-		console.log('appRoute', linkProps.appRoute);
 
 		where = sqlAnd([
 			eq(Links.handle, linkProps.handle),
@@ -54,8 +49,6 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 			eq(Links.key, url.pathname.replace('/', '')),
 		]);
 	}
-
-	// console.log("middleware: where", where);
 
 	if (!where) return NextResponse.rewrite(getAbsoluteUrl('link', '/404'));
 
@@ -77,8 +70,6 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 			customMetaTags: true,
 		},
 	});
-
-	console.log('middleware: link', link);
 
 	//* 🚧 handle route errors 🚧  *//
 	if (!link ?? !link?.url) return NextResponse.rewrite(getAbsoluteUrl('link', '404'));
