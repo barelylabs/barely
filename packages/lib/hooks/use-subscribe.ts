@@ -19,9 +19,9 @@ export function useSubscribe(props: {
 
 	const pageSession = useAtomValue(pageSessionAtom);
 	const channels = useRef(
-		!Array.isArray(props.subscribeTo)
-			? [pusher.subscribe(props.subscribeTo.channel)]
-			: props.subscribeTo.map(sub => pusher.subscribe(sub.channel)),
+		!Array.isArray(props.subscribeTo) ?
+			[pusher.subscribe(props.subscribeTo.channel)]
+		:	props.subscribeTo.map(sub => pusher.subscribe(sub.channel)),
 	);
 	const stableCallback = useRef(props.callback);
 
@@ -30,9 +30,10 @@ export function useSubscribe(props: {
 	}, [props.callback]);
 
 	useEffect(() => {
-		channels.current = !Array.isArray(props.subscribeTo)
-			? [pusher.subscribe(props.subscribeTo.channel)]
-			: props.subscribeTo.map(sub => pusher.subscribe(sub.channel));
+		channels.current =
+			!Array.isArray(props.subscribeTo) ?
+				[pusher.subscribe(props.subscribeTo.channel)]
+			:	props.subscribeTo.map(sub => pusher.subscribe(sub.channel));
 	}, [props.subscribeTo]);
 
 	useEffect(() => {
@@ -43,9 +44,10 @@ export function useSubscribe(props: {
 		};
 
 		channels.current.forEach(channel => {
-			const ids = !Array.isArray(props.subscribeTo)
-				? props.subscribeTo.ids
-				: props.subscribeTo.find(sub => sub.channel === channel.name)?.ids;
+			const ids =
+				!Array.isArray(props.subscribeTo) ?
+					props.subscribeTo.ids
+				:	props.subscribeTo.find(sub => sub.channel === channel.name)?.ids;
 
 			channel.bind('update', (data: unknown) => {
 				const parsedUpdateData = eventSchema.safeParse(data);

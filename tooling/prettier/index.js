@@ -18,6 +18,7 @@ const config = {
 	tailwindConfig: fileURLToPath(
 		new URL('../../tooling/tailwind/index.ts', import.meta.url),
 	),
+	experimentalTernaries: true,
 	tailwindFunctions: ['cn', 'cva'],
 	importOrder: [
 		'<TYPES>',

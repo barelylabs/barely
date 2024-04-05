@@ -105,23 +105,23 @@ export function DomainModal() {
 	}, [editDomain?.domain]);
 
 	const isPrimaryLinkDisabledState =
-		linkType !== 'link'
-			? { disabled: true, disabledTooltip: `This is a ${linkType} link.` } // the switch shouldn't actually be visible if we're not adding/editing a link domain
-			: !hasLinkDomains
-				? {
-						disabled: true,
-						disabledTooltip: `This is your first link domain, so it's gotta be set to primary.`,
-					}
-				: editDomain && editDomain.isPrimaryLinkDomain
-					? {
-							disabled: true,
-							disabledTooltip: 'Please set another domain to be the primary link domain.',
-						}
-					: { disabled: false, disabledTooltip: '' };
+		linkType !== 'link' ?
+			{ disabled: true, disabledTooltip: `This is a ${linkType} link.` } // the switch shouldn't actually be visible if we're not adding/editing a link domain
+		: !hasLinkDomains ?
+			{
+				disabled: true,
+				disabledTooltip: `This is your first link domain, so it's gotta be set to primary.`,
+			}
+		: editDomain?.isPrimaryLinkDomain ?
+			{
+				disabled: true,
+				disabledTooltip: 'Please set another domain to be the primary link domain.',
+			}
+		:	{ disabled: false, disabledTooltip: '' };
 
 	// disable the submit button if we're editing an existing domain, but nothing has changed
 	const submitDisabled = editDomain && !domainForm.formState.isDirty;
-	const deleteDisabled = editDomain && editDomain.isPrimaryLinkDomain;
+	const deleteDisabled = editDomain?.isPrimaryLinkDomain;
 
 	const [domainInputLocked, setDomainInputLocked] = useState(false);
 

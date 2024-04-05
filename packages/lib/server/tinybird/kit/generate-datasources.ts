@@ -50,13 +50,11 @@ Object.values(writes).forEach(({ name, description, schema }) => {
 
 		// @ts-expect-error - _def can have property checks -- ideally do proper type checking here
 		// eslint-disable-next-line
-		const type = s._def.checks?.some(c => c.kind === 'datetime')
-			? 'DateTime'
-			: zodType === 'ZodString' || zodType === 'ZodEnum'
-				? 'String'
-				: zodType === 'ZodBoolean'
-					? 'UInt8'
-					: '';
+		const type =
+			s._def.checks?.some(c => c.kind === 'datetime') ? 'DateTime'
+			: zodType === 'ZodString' || zodType === 'ZodEnum' ? 'String'
+			: zodType === 'ZodBoolean' ? 'UInt8'
+			: '';
 
 		console.log(`${key} inner type => `, type);
 

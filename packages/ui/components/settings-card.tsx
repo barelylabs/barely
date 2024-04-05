@@ -35,19 +35,18 @@ export function SettingsCard(props: SettingsCardProps) {
 
 			<div className='flex flex-row items-center justify-between gap-2 border-t border-border bg-muted p-4'>
 				<Text variant='sm/normal'>{props.formHint}</Text>
-				{props.isForm ? (
+				{props.isForm ?
 					<SubmitButton disabled={props.disableSubmit}>
 						{props.buttonLabel ?? 'Save'}
 					</SubmitButton>
-				) : (
-					<Button
+				:	<Button
 						onClick={props.onSubmit}
 						disabled={props.disableSubmit}
 						loading={props.isSubmitting}
 					>
 						{props.buttonLabel ?? 'Save'}
 					</Button>
-				)}
+				}
 			</div>
 		</div>
 	);

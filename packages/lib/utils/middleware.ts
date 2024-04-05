@@ -30,9 +30,9 @@ export const detectBot = (req: NextRequest) => {
 };
 
 export function parseGeo(req: NextRequest) {
-	return env.VERCEL_ENV === 'development'
-		? getRandomGeoData()
-		: nextGeoSchema.parse(req.geo);
+	return env.VERCEL_ENV === 'development' ?
+			getRandomGeoData()
+		:	nextGeoSchema.parse(req.geo);
 }
 
 export function parseUserAgent(req: NextRequest) {

@@ -29,14 +29,14 @@ export function getAmountsForMainCart(
 		const mainProductPayWhatYouWantMin = funnel.mainProductPayWhatYouWantMin ?? 0;
 
 		mainProductPayWhatYouWantPrice =
-			mainProductPayWhatYouWantPrice >= mainProductPayWhatYouWantMin
-				? mainProductPayWhatYouWantPrice
-				: funnel.mainProductPayWhatYouWantMin ?? 0;
+			mainProductPayWhatYouWantPrice >= mainProductPayWhatYouWantMin ?
+				mainProductPayWhatYouWantPrice
+			:	funnel.mainProductPayWhatYouWantMin ?? 0;
 
 		mainProductPrice =
-			mainProductPayWhatYouWantPrice >= mainProductPayWhatYouWantMin
-				? mainProductPayWhatYouWantPrice
-				: funnel.mainProductPayWhatYouWantMin ?? 0;
+			mainProductPayWhatYouWantPrice >= mainProductPayWhatYouWantMin ?
+				mainProductPayWhatYouWantPrice
+			:	funnel.mainProductPayWhatYouWantMin ?? 0;
 	} else {
 		mainProductPrice = funnel.mainProduct.price - (funnel.mainProductDiscount ?? 0);
 	}
@@ -49,17 +49,16 @@ export function getAmountsForMainCart(
 
 	// bump product
 	const addedBumpProduct = cart.addedBumpProduct ?? false;
-	const bumpProductPrice = !funnel.bumpProduct
-		? 0
-		: funnel.bumpProduct.price - (funnel.bumpProductDiscount ?? 0);
+	const bumpProductPrice =
+		!funnel.bumpProduct ? 0 : (
+			funnel.bumpProduct.price - (funnel.bumpProductDiscount ?? 0)
+		);
 	const bumpProductQuantity = cart.bumpProductQuantity ?? 1;
-	const bumpProductAmount = cart.addedBumpProduct
-		? bumpProductPrice * bumpProductQuantity
-		: 0;
+	const bumpProductAmount =
+		cart.addedBumpProduct ? bumpProductPrice * bumpProductQuantity : 0;
 	const bumpProductShippingPrice = cart.bumpProductShippingPrice ?? 0;
-	const bumpProductShippingAndHandlingAmount = addedBumpProduct
-		? cart.bumpProductShippingPrice ?? 0
-		: 0;
+	const bumpProductShippingAndHandlingAmount =
+		addedBumpProduct ? cart.bumpProductShippingPrice ?? 0 : 0;
 
 	// main + bump
 	const mainPlusBumpShippingAndHandlingAmount =

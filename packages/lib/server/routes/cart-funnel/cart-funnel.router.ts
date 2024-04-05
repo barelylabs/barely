@@ -41,12 +41,13 @@ export const cartFunnelRouter = createTRPCRouter({
 
 			if (funnels.length > limit) {
 				const nextFunnel = funnels.pop();
-				nextCursor = nextFunnel
-					? {
+				nextCursor =
+					nextFunnel ?
+						{
 							id: nextFunnel?.id,
 							createdAt: nextFunnel?.createdAt,
 						}
-					: undefined;
+					:	undefined;
 			}
 
 			return {

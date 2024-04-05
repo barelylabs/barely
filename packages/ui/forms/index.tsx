@@ -251,14 +251,13 @@ const FieldErrorIcon = React.forwardRef<
 			className='pointer-events-none absolute inset-y-0 right-0 flex items-center '
 			{...props}
 		>
-			{isValidating ? (
+			{isValidating ?
 				<LoadingSpinner className={cn('mr-3')} />
-			) : (
-				<Icon.alert
+			:	<Icon.alert
 					aria-hidden='true'
 					className={cn('h-7 w-7 pr-3 text-destructive', className)}
 				/>
-			)}
+			}
 		</div>
 	);
 });

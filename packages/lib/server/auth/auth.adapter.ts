@@ -32,14 +32,11 @@ import { deleteSession } from './auth.fns';
 export function NeonAdapter(db: Db): Adapter {
 	return {
 		createUser: async userData => {
-			// console.log('creating user => ', userData);
-
 			const newUser = await createUser(
 				{
 					...userData,
-					emailVerified: userData.emailVerified
-						? userData.emailVerified.toISOString()
-						: null,
+					emailVerified:
+						userData.emailVerified ? userData.emailVerified.toISOString() : null,
 				},
 				db,
 			);

@@ -1,29 +1,23 @@
 {
-	"extends": "@barely/tsconfig/nextjs.json",
+	"extends": "@barely/tsconfig/base.json",
 	"compilerOptions": {
+		"lib": ["dom", "dom.iterable", "ES2022"],
+		"jsx": "preserve",
 		"baseUrl": ".",
 		"paths": {
 			"~/*": ["./src/*"],
 			"@public/*": ["./public/*"],
-			// "@barely/api/*": ["../../packages/lib/api/*"],
-			// "@barely/auth/*": ["../../packages/lib/auth/*"],
-			// "@barely/atoms/*": ["../../packages/lib/atoms/*"],
-			// "@barely/hooks/*": ["../../packages/lib/hooks/*"],
-			// "@barely/ui/*": ["../../packages/ui/*"],
-			// "@barely/utils/*": ["../../packages/lib/utils/*"]
 			"@barely/server/*": ["./node_modules/@barely/lib/server/*"],
 			"@barely/api/*": ["./node_modules/@barely/lib/server/api/*"],
 			"@barely/atoms/*": ["./node_modules/@barely/lib/atoms/*"],
 			"@barely/hooks/*": ["./node_modules/@barely/lib/hooks/*"],
 			"@barely/ui/*": ["./node_modules/@barely/ui/*"],
-			"@barely/utils/*": ["./node_modules/@barely/lib/utils/*"],
+			"@barely/utils/*": ["./node_modules/@barely/lib/utils/*"]
 		},
-		"plugins": [
-			{
-				"name": "next",
-			},
-		],
+		"plugins": [{ "name": "next" }],
+		"tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+		"module": "esnext"
 	},
 	"include": [".", ".next/types/**/*.ts"],
-	"exclude": ["node_modules"],
+	"exclude": ["node_modules"]
 }

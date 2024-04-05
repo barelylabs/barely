@@ -31,9 +31,10 @@ export function PlaylistPitchScreenForm() {
 		{ enabled: !!campaign?.track.genres?.length },
 	);
 
-	const genresCount = campaign?.track.genres?.length
-		? _genresCount
-		: {
+	const genresCount =
+		campaign?.track.genres?.length ?
+			_genresCount
+		:	{
 				totalPlaylists: 0,
 				totalCurators: 0,
 			};

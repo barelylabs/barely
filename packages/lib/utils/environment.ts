@@ -1,10 +1,4 @@
-import { zEnv } from '@barely/env';
-
-// import { env } from '../env';
-const { env } = zEnv({
-	serverEnvKeys: [],
-	clientEnvKeys: ['NEXT_PUBLIC_VERCEL_ENV'],
-});
+import { env } from '../env';
 
 export function isDevelopment() {
 	return env.NEXT_PUBLIC_VERCEL_ENV === 'development';

@@ -393,9 +393,10 @@ export async function getDomainsAvailable(domains: string[]) {
 				const product = res.data.products?.find(
 					product => product.status === 'available',
 				);
-				const price = product?.prices[0]?.price_after_taxes
-					? barelyDomainPrice(product?.prices[0]?.price_after_taxes)
-					: undefined;
+				const price =
+					product?.prices[0]?.price_after_taxes ?
+						barelyDomainPrice(product?.prices[0]?.price_after_taxes)
+					:	undefined;
 				const duration = product?.prices[0]?.min_duration;
 
 				if (!price || !duration) {

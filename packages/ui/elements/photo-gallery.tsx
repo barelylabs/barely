@@ -52,7 +52,10 @@ export type GalleryProps = Omit<PhotoAlbumProps, 'layout'> & {
 
 export function PhotoGallery({
 	photos,
-	columns = containerWidth => (containerWidth < 450 ? 1 : containerWidth < 640 ? 2 : 3),
+	columns = containerWidth =>
+		containerWidth < 450 ? 1
+		: containerWidth < 640 ? 2
+		: 3,
 	layout = 'masonry',
 	carousel = 'mobileOnly',
 	carouselIndicator,
@@ -91,14 +94,14 @@ export function PhotoGallery({
 						</CarouselItem>
 					))}
 				</CarouselContent>
-				{carouselPrevNext === 'overlay' ? (
+				{carouselPrevNext === 'overlay' ?
 					<>
 						<CarouselPreviousOverlay />
 						<CarouselNextOverlay />
 					</>
-				) : carouselPrevNext === 'below' ? (
+				: carouselPrevNext === 'below' ?
 					<CarouselPreviousNext />
-				) : null}
+				:	null}
 
 				{carouselIndicator && <CarouselIndicator />}
 			</Carousel>

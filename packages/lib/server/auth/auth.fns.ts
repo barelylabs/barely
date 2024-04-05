@@ -1,4 +1,4 @@
-import type { Session } from 'next-auth/types';
+import type { Session } from 'next-auth';
 import { sendEmail } from '@barely/email';
 import SignInEmailTemplate from '@barely/email/src/templates/sign-in';
 import { eq } from 'drizzle-orm';

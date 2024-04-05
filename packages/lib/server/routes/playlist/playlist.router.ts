@@ -82,11 +82,12 @@ const playlistRouter = createTRPCRouter({
 			z.object({
 				genreIds: z.preprocess(
 					val =>
-						Array.isArray(val)
-							? (val as string[])
-							: typeof val === 'string' // assume comma-separated string
-								? val.split(',').map((genre: string) => genre.trim())
-								: [],
+						Array.isArray(val) ? (val as string[])
+						: (
+							typeof val === 'string' // assume comma-separated string
+						) ?
+							val.split(',').map((genre: string) => genre.trim())
+						:	[],
 					z.array(insertGenreSchema.shape.id),
 				),
 			}),

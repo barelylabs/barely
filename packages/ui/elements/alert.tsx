@@ -34,15 +34,13 @@ export function Alert(props: AlertProps) {
 		<div className={alertVariants({ variant: props.variant, size: props.size })}>
 			<div className='flex flex-row'>
 				<div className='ml-1 flex-shrink-0'>
-					{props.variant === 'success' ? (
+					{props.variant === 'success' ?
 						<Icon.checkCircleFilled className='h-5 w-5' />
-					) : props.variant === 'info' ? (
+					: props.variant === 'info' ?
 						<Icon.info className='h-5 w-5' />
-					) : props.variant === 'warning' ? (
+					: props.variant === 'warning' ?
 						<Icon.warning className=' h-[16px] w-[16px]' />
-					) : (
-						<Icon.xCircleFilled className='h-5 w-5' />
-					)}
+					:	<Icon.xCircleFilled className='h-5 w-5' />}
 				</div>
 
 				<div className='ml-[10px] mt-[2px] flex flex-col'>

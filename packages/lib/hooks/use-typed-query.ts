@@ -54,9 +54,10 @@ export function useTypedQuery<T extends z.AnyZodObject>(
 	const pathname = usePathname() as null | string;
 	const unparsedQuery = useSearchParams() as null | ReadonlyURLSearchParams;
 
-	const parsedQuerySchema = unparsedQuery
-		? schema.safeParse(Object.fromEntries(unparsedQuery))
-		: schema.safeParse({});
+	const parsedQuerySchema =
+		unparsedQuery ?
+			schema.safeParse(Object.fromEntries(unparsedQuery))
+		:	schema.safeParse({});
 
 	let parsedQuery: Output = useMemo(() => {
 		return {} as Output;

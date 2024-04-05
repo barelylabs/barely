@@ -31,7 +31,9 @@ export function UserAccountNav() {
 
 	const { firstName, lastName } = user;
 	const fullName =
-		firstName && lastName ? `${firstName} ${lastName}` : firstName ? firstName : null;
+		firstName && lastName ? `${firstName} ${lastName}`
+		: firstName ? firstName
+		: null;
 
 	const [signingOut, setSigningOut] = useState(false);
 

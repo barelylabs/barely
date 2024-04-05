@@ -193,9 +193,9 @@ export function PlaylistPitchForm(props: { user?: SessionUser }) {
 								<Link
 									href={`/login?redirect=${encodeURIComponent(
 										`/campaigns/new?type=playlistPitch&artistId=${dbArtist.id}&${
-											dbTrack
-												? 'trackId=' + dbTrack.id
-												: 'trackSpotifyId=' + (track.spotifyId ?? '')
+											dbTrack ?
+												'trackId=' + dbTrack.id
+											:	'trackSpotifyId=' + (track.spotifyId ?? '')
 										}`,
 									)}`}
 								>

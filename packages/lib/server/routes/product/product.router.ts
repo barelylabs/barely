@@ -50,12 +50,13 @@ export const productRouter = createTRPCRouter({
 
 			if (products.length > limit) {
 				const nextProduct = products.pop();
-				nextCursor = nextProduct
-					? {
+				nextCursor =
+					nextProduct ?
+						{
 							id: nextProduct?.id,
 							createdAt: nextProduct?.createdAt,
 						}
-					: undefined;
+					:	undefined;
 			}
 
 			const normalizedProducts = products.map(p => {

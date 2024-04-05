@@ -42,10 +42,9 @@ export const LoginForm = ({ callbackUrl }: RegisterFormProps) => {
 
 	return (
 		<>
-			{loginEmailSent ? (
+			{loginEmailSent ?
 				<LoginLinkSent identifier={form.watch('email')} provider='email' />
-			) : (
-				<Form form={form} onSubmit={onSubmit} className='gap-4'>
+			:	<Form form={form} onSubmit={onSubmit} className='gap-4'>
 					<Text variant='sm/normal' subtle>
 						Enter your email address
 					</Text>
@@ -67,7 +66,7 @@ export const LoginForm = ({ callbackUrl }: RegisterFormProps) => {
 						</Link>
 					</Text>
 				</Form>
-			)}
+			}
 		</>
 	);
 };

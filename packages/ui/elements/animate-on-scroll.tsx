@@ -65,23 +65,19 @@ const AnimateOnScroll = ({
 	const fadeClassAfter = 'opacity-100';
 
 	const slideClassBefore =
-		slideFrom === 'left'
-			? '-translate-x-10'
-			: slideFrom === 'right'
-				? 'translate-x-10'
-				: slideFrom === 'top'
-					? '-translate-y-10'
-					: slideFrom === 'bottom'
-						? 'translate-y-10'
-						: 'translate-x-0 translate-y-0';
+		slideFrom === 'left' ? '-translate-x-10'
+		: slideFrom === 'right' ? 'translate-x-10'
+		: slideFrom === 'top' ? '-translate-y-10'
+		: slideFrom === 'bottom' ? 'translate-y-10'
+		: 'translate-x-0 translate-y-0';
 	const slideClassAfter = 'translate-x-0 translate-y-0';
 
 	const className = cn(
 		'transition duration-500 ease-in-out',
 		'motion-reduce:transition-none motion-reduce:hover:transform-none',
-		isVisible
-			? cn(fadeClassAfter, slideClassAfter)
-			: cn(fadeClassBefore, slideClassBefore),
+		isVisible ?
+			cn(fadeClassAfter, slideClassAfter)
+		:	cn(fadeClassBefore, slideClassBefore),
 	);
 
 	return (

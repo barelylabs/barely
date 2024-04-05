@@ -143,9 +143,9 @@ export function CartFunnelContextProvider({
 	}
 
 	const lastSelectedFunnelId =
-		optimisticSelection === 'all'
-			? undefined
-			: Array.from(optimisticSelection).pop()?.toString();
+		optimisticSelection === 'all' ? undefined : (
+			Array.from(optimisticSelection).pop()?.toString()
+		);
 
 	const lastSelectedFunnel = infiniteFunnels.funnels.find(
 		f => f.id === lastSelectedFunnelId,

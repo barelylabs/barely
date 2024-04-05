@@ -35,18 +35,17 @@ export function ArchiveOrDeleteModal<T extends { id: string; name: string }>({
 	if (!lastSelected) return null;
 
 	const title =
-		mode === 'archive'
-			? selection === 'all'
-				? `Archive all ${itemName}s?`
-				: `Archive "${lastSelected?.name}" ${selection.size > 1 ? `and ${selection.size - 1} other ${itemName}?` : ''}`
-			: selection === 'all'
-				? `Delete all ${itemName}s?`
-				: `Delete "${lastSelected?.name}" ${selection.size > 1 ? `and ${selection.size - 1} other ${itemName}?` : ''}`;
+		mode === 'archive' ?
+			selection === 'all' ?
+				`Archive all ${itemName}s?`
+			:	`Archive "${lastSelected?.name}" ${selection.size > 1 ? `and ${selection.size - 1} other ${itemName}?` : ''}`
+		: selection === 'all' ? `Delete all ${itemName}s?`
+		: `Delete "${lastSelected?.name}" ${selection.size > 1 ? `and ${selection.size - 1} other ${itemName}?` : ''}`;
 
 	const subtitle =
-		mode === 'archive'
-			? `Archived ${itemName}s will still work - they just won't show up on your main dashboard.`
-			: `Deleted ${itemName}s will be permanently removed from your account.`;
+		mode === 'archive' ?
+			`Archived ${itemName}s will still work - they just won't show up on your main dashboard.`
+		:	`Deleted ${itemName}s will be permanently removed from your account.`;
 
 	return (
 		<Modal showModal={showModal} setShowModal={setShowModal} className='h-fit max-w-md'>

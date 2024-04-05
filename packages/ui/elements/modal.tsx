@@ -152,14 +152,18 @@ function ModalHeader(props: ModalHeaderProps) {
 
 	return (
 		<div className='z-10 flex flex-col items-center justify-center gap-3 border-b border-border bg-background px-6 py-6 text-center sm:px-10 md:sticky md:top-0'>
-			{props.iconOverride ? (
+			{props.iconOverride ?
 				props.iconOverride
-			) : IconComponent ? (
+			: IconComponent ?
 				<IconComponent className='h-10 w-10' />
-			) : null}
+			:	null}
 
-			{props.title ? <H size='4'>{props.title}</H> : null}
-			{props.subtitle ? <Text variant='sm/normal'>{props.subtitle}</Text> : null}
+			{props.title ?
+				<H size='4'>{props.title}</H>
+			:	null}
+			{props.subtitle ?
+				<Text variant='sm/normal'>{props.subtitle}</Text>
+			:	null}
 			{props.children}
 		</div>
 	);

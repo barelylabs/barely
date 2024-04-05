@@ -29,13 +29,15 @@ export const workspaceStripeRouter = createTRPCRouter({
 				throw new Error('Invalid priceId.');
 			}
 
-			const workspaceHasStripeCustomerId = testEnvironment
-				? !!ctx.workspace.stripeCustomerId_devMode
-				: !!ctx.workspace.stripeCustomerId;
+			const workspaceHasStripeCustomerId =
+				testEnvironment ?
+					!!ctx.workspace.stripeCustomerId_devMode
+				:	!!ctx.workspace.stripeCustomerId;
 
-			const workspace = workspaceHasStripeCustomerId
-				? ctx.workspace
-				: await createStripeWorkspaceCustomer({
+			const workspace =
+				workspaceHasStripeCustomerId ?
+					ctx.workspace
+				:	await createStripeWorkspaceCustomer({
 						workspaceId: ctx.workspace.id,
 						email: ctx.user.email,
 						name:

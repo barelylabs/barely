@@ -48,9 +48,9 @@ export function CreateOrUpdateMixtapeModal(props: { mode: 'create' | 'update' })
 		select: data =>
 			data
 				.filter(track =>
-					mode === 'update'
-						? !selectedMixtape?.tracks?.some(t => t.id === track.id)
-						: !newMixtapeTracks.some(t => t.id === track.id),
+					mode === 'update' ?
+						!selectedMixtape?.tracks?.some(t => t.id === track.id)
+					:	!newMixtapeTracks.some(t => t.id === track.id),
 				)
 				.map(t => ({ ...t, lexorank: '' })),
 	});
@@ -370,8 +370,9 @@ export function CreateOrUpdateMixtapeModal(props: { mode: 'create' | 'update' })
 		getItems: keys =>
 			[...keys].map(key => {
 				const track = (
-					mode === 'update' ? selectedMixtape?.tracks : newMixtapeTracks
-				)?.find(track => track.id === key);
+					mode === 'update' ?
+						selectedMixtape?.tracks
+					:	newMixtapeTracks)?.find(track => track.id === key);
 				return {
 					track: JSON.stringify(track),
 					'text/plain': track?.id ?? '',

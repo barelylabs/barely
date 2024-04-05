@@ -56,11 +56,9 @@ export function LinkOptionalSettings({
 								selectedLink?.transparent ?? transparentLinkData === null
 							}
 							disabledTooltip={
-								selectedLink?.transparent ? (
+								selectedLink?.transparent ?
 									<TooltipContent title="Transparent links can't be changed back." />
-								) : (
-									<TooltipContent title="We don't currently support that app." />
-								)
+								:	<TooltipContent title="We don't currently support that app." />
 							}
 						/>
 
@@ -96,20 +94,18 @@ export function LinkOptionalSettings({
 				}
 				disabled={!hasEndpoint}
 				disabledTooltip={
-					workspace.plan === 'free' ? (
+					workspace.plan === 'free' ?
 						<TooltipContent
 							title='Upgrade to Pro to enable remarketing.'
 							cta='Upgrade to Pro'
 							onClick={() => setShowUpgradeModal(true)}
 							closeOnClick
 						/>
-					) : (
-						<TooltipContent
+					:	<TooltipContent
 							title={`Add at least one pixel for ${workspace.handle} to enable remarketing.`}
 							cta='Add a pixel'
 							href={`/${workspace.handle}/settings/remarketing`}
 						/>
-					)
 				}
 			/>
 		</div>

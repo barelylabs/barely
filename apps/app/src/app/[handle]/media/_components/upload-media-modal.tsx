@@ -38,15 +38,13 @@ export function UploadMediaModal() {
 		>
 			<ModalHeader title='Upload Media' icon='media' />
 			<ModalBody>
-				{!mediaUploadState.uploadQueue.length ? (
+				{!mediaUploadState.uploadQueue.length ?
 					<UploadDropzone
 						{...mediaUploadState}
 						title='Drop files here, or click to select files'
 						className='h-[430px] w-full'
 					/>
-				) : (
-					<UploadQueue className='h-[430px]' uploadState={mediaUploadState} />
-				)}
+				:	<UploadQueue className='h-[430px]' uploadState={mediaUploadState} />}
 			</ModalBody>
 
 			<ModalFooter>

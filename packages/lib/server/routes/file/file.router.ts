@@ -55,12 +55,13 @@ export const fileRouter = createTRPCRouter({
 
 			if (files.length > limit) {
 				const nextFile = files.pop();
-				nextCursor = nextFile
-					? {
+				nextCursor =
+					nextFile ?
+						{
 							id: nextFile?.id,
 							createdAt: nextFile?.createdAt,
 						}
-					: undefined;
+					:	undefined;
 			}
 
 			return {

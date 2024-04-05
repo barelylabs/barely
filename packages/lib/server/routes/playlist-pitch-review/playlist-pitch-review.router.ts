@@ -26,9 +26,9 @@ export const playlistPitchReviewRouter = createTRPCRouter({
 				.where(
 					and(
 						eq(PlaylistPitchReviews.campaignId, input.campaignId),
-						input.complete
-							? gt(PlaylistPitchReviews.rating, 0)
-							: gte(PlaylistPitchReviews.rating, 0),
+						input.complete ?
+							gt(PlaylistPitchReviews.rating, 0)
+						:	gte(PlaylistPitchReviews.rating, 0),
 					),
 				);
 
@@ -49,9 +49,9 @@ export const playlistPitchReviewRouter = createTRPCRouter({
 
 			const where: SQL[] = [
 				eq(PlaylistPitchReviews.campaignId, input.campaignId),
-				input.complete
-					? gt(PlaylistPitchReviews.rating, 0)
-					: gte(PlaylistPitchReviews.rating, 0),
+				input.complete ?
+					gt(PlaylistPitchReviews.rating, 0)
+				:	gte(PlaylistPitchReviews.rating, 0),
 			];
 
 			if (input.cursor) {

@@ -74,7 +74,7 @@ function LinkCard({ link }: { link: AppRouterOutputs['link']['byWorkspace'][0] }
 			setShowDeleteModal={setShowDeleteLinkModal}
 		>
 			<div className='flex flex-grow flex-row items-center gap-4'>
-				{link.favicon ? (
+				{link.favicon ?
 					<BlurImage
 						src={link.favicon}
 						alt='Link'
@@ -82,9 +82,7 @@ function LinkCard({ link }: { link: AppRouterOutputs['link']['byWorkspace'][0] }
 						width={20}
 						height={20}
 					/>
-				) : (
-					<Icon.link className='h-8 w-8 sm:h-10 sm:w-10' />
-				)}
+				:	<Icon.link className='h-8 w-8 sm:h-10 sm:w-10' />}
 
 				<div className='flex flex-col items-start gap-1'>
 					<div className='flex flex-row items-center gap-2'>

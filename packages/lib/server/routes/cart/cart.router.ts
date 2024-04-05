@@ -121,9 +121,10 @@ export const cartRouter = createTRPCRouter({
 						mainProductShippingRate?.shipping_amount.amount ?? 1000;
 					updatedCart.mainProductShippingAmount = mainProductShippingAmount;
 
-					const mainPlusBumpShippingRate = !funnel.bumpProduct
-						? mainProductShippingRate
-						: await getProductsShippingRateEstimate({
+					const mainPlusBumpShippingRate =
+						!funnel.bumpProduct ?
+							mainProductShippingRate
+						:	await getProductsShippingRateEstimate({
 								products: [
 									{
 										product: funnel.mainProduct,
@@ -168,9 +169,10 @@ export const cartRouter = createTRPCRouter({
 			const stripePaymentIntentId = carts[0]?.mainStripePaymentIntentId;
 			if (!stripePaymentIntentId) throw new Error('stripePaymentIntentId not found');
 
-			const stripeAccount = isProduction()
-				? funnel.workspace.stripeConnectAccountId
-				: funnel.workspace.stripeConnectAccountId_devMode;
+			const stripeAccount =
+				isProduction() ?
+					funnel.workspace.stripeConnectAccountId
+				:	funnel.workspace.stripeConnectAccountId_devMode;
 
 			// we need to update the paymentIntent amount
 			await stripe.paymentIntents.update(

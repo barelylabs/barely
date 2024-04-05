@@ -2,16 +2,14 @@ import { cache } from 'react';
 import { headers } from 'next/headers';
 
 import { createCallerFactory, createTRPCContext } from '../../api/trpc';
-import { auth } from '../../auth';
 import { cartRouter } from './cart.router';
 
-const createContext = cache(async () => {
+const createContext = cache(() => {
 	const heads = new Headers(headers());
-	// console.log("heads", heads);
 	heads.set('x-trpc-source', 'rsc');
 
 	return createTRPCContext({
-		session: await auth(),
+		session: null,
 		headers: heads,
 	});
 });

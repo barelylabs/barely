@@ -148,7 +148,7 @@ export default function ReceiptEmail({
 								)}
 							</InformationTableColumn>
 
-							{shippingAddress ? (
+							{shippingAddress ?
 								<InformationTableColumn>
 									<InformationTableLabel>Shipping to</InformationTableLabel>
 									<InformationTableValue>{shippingAddress.name}</InformationTableValue>
@@ -162,8 +162,7 @@ export default function ReceiptEmail({
 									</InformationTableValue>
 									<InformationTableValue>{shippingAddress.country}</InformationTableValue>
 								</InformationTableColumn>
-							) : (
-								<InformationTableColumn>
+							:	<InformationTableColumn>
 									<InformationTableLabel>Billed to</InformationTableLabel>
 									<InformationTableValue>{billingAddress.name}</InformationTableValue>
 									<InformationTableValue>
@@ -171,7 +170,7 @@ export default function ReceiptEmail({
 									</InformationTableValue>
 									<InformationTableValue>{billingAddress.country}</InformationTableValue>
 								</InformationTableColumn>
-							)}
+							}
 						</Row>
 					</Section>
 

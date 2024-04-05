@@ -89,11 +89,12 @@ export async function recordLinkClick({
 	 * 👾 remarketing/analytics 👾
 	 *  */
 
-	const analyticsEndpoints = link.remarketing
-		? await db.pool.query.AnalyticsEndpoints.findMany({
+	const analyticsEndpoints =
+		link.remarketing ?
+			await db.pool.query.AnalyticsEndpoints.findMany({
 				where: eq(AnalyticsEndpoints.workspaceId, link.workspaceId),
 			})
-		: [];
+		:	[];
 
 	// ∞ Meta ∞
 	const metaPixel = analyticsEndpoints.find(endpoint => endpoint.platform === 'meta');
@@ -106,8 +107,9 @@ export async function recordLinkClick({
 
 	console.log('href => ', href);
 
-	const metaRes = metaPixel?.accessToken
-		? await reportEventToMeta({
+	const metaRes =
+		metaPixel?.accessToken ?
+			await reportEventToMeta({
 				pixelId: metaPixel.id,
 				accessToken: metaPixel.accessToken,
 				url: href,
@@ -116,7 +118,7 @@ export async function recordLinkClick({
 				eventName: 'Barely_LinkClick',
 				geo,
 			})
-		: { reported: false };
+		:	{ reported: false };
 
 	await log({
 		type: 'link',

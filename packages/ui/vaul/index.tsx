@@ -175,9 +175,8 @@ function Root({
 	function shouldDrag(el: EventTarget, isDraggingInDirection: boolean) {
 		let element = el as HTMLElement;
 		const highlightedText = window.getSelection()?.toString();
-		const swipeAmount = drawerRef.current
-			? getTranslate(drawerRef.current, direction)
-			: null;
+		const swipeAmount =
+			drawerRef.current ? getTranslate(drawerRef.current, direction) : null;
 		const date = new Date();
 
 		if (
@@ -312,9 +311,10 @@ function Root({
 				const translateValue =
 					Math.min(dampenedDraggedDistance * -1, 0) * directionMultiplier;
 				set(drawerRef.current, {
-					transform: isVertical(direction)
-						? `translate3d(0, ${translateValue}px, 0)`
-						: `translate3d(${translateValue}px, 0, 0)`,
+					transform:
+						isVertical(direction) ?
+							`translate3d(0, ${translateValue}px, 0)`
+						:	`translate3d(${translateValue}px, 0, 0)`,
 				});
 				return;
 			}
@@ -345,9 +345,10 @@ function Root({
 					wrapper,
 					{
 						borderRadius: `${borderRadiusValue}px`,
-						transform: isVertical(direction)
-							? `scale(${scaleValue}) translate3d(0, ${translateValue}px, 0)`
-							: `scale(${scaleValue}) translate3d(${translateValue}px, 0, 0)`,
+						transform:
+							isVertical(direction) ?
+								`scale(${scaleValue}) translate3d(0, ${translateValue}px, 0)`
+							:	`scale(${scaleValue}) translate3d(${translateValue}px, 0, 0)`,
 						transition: 'none',
 					},
 					true,
@@ -358,9 +359,10 @@ function Root({
 				const translateValue = absDraggedDistance * directionMultiplier;
 
 				set(drawerRef.current, {
-					transform: isVertical(direction)
-						? `translate3d(0, ${translateValue}px, 0)`
-						: `translate3d(${translateValue}px, 0, 0)`,
+					transform:
+						isVertical(direction) ?
+							`translate3d(0, ${translateValue}px, 0)`
+						:	`translate3d(${translateValue}px, 0, 0)`,
 				});
 			}
 		}
@@ -443,9 +445,10 @@ function Root({
 
 		onClose?.();
 		set(drawerRef.current, {
-			transform: isVertical(direction)
-				? `translate3d(0, ${direction === 'bottom' ? '100%' : '-100%'}, 0)`
-				: `translate3d(${direction === 'right' ? '100%' : '-100%'}, 0, 0)`,
+			transform:
+				isVertical(direction) ?
+					`translate3d(0, ${direction === 'bottom' ? '100%' : '-100%'}, 0)`
+				:	`translate3d(${direction === 'right' ? '100%' : '-100%'}, 0, 0)`,
 			transition: `transform ${TRANSITIONS.DURATION}s cubic-bezier(${TRANSITIONS.EASE.join(',')})`,
 		});
 
@@ -523,15 +526,15 @@ function Root({
 				{
 					borderRadius: `${BORDER_RADIUS}px`,
 					overflow: 'hidden',
-					...(isVertical(direction)
-						? {
-								transform: `scale(${getScale()}) translate3d(0, calc(env(safe-area-inset-top) + 14px), 0)`,
-								transformOrigin: 'top',
-							}
-						: {
-								transform: `scale(${getScale()}) translate3d(calc(env(safe-area-inset-top) + 14px), 0, 0)`,
-								transformOrigin: 'left',
-							}),
+					...(isVertical(direction) ?
+						{
+							transform: `scale(${getScale()}) translate3d(0, calc(env(safe-area-inset-top) + 14px), 0)`,
+							transformOrigin: 'top',
+						}
+					:	{
+							transform: `scale(${getScale()}) translate3d(calc(env(safe-area-inset-top) + 14px), 0, 0)`,
+							transformOrigin: 'left',
+						}),
 					transitionProperty: 'transform, border-radius',
 					transitionDuration: `${TRANSITIONS.DURATION}s`,
 					transitionTimingFunction: `cubic-bezier(${TRANSITIONS.EASE.join(',')})`,
@@ -670,15 +673,15 @@ function Root({
 			set(wrapper, {
 				borderRadius: `${BORDER_RADIUS}px`,
 				overflow: 'hidden',
-				...(isVertical(direction)
-					? {
-							transform: `scale(${getScale()}) translate3d(0, calc(env(safe-area-inset-top) + 14px), 0)`,
-							transformOrigin: 'top',
-						}
-					: {
-							transform: `scale(${getScale()}) translate3d(calc(env(safe-area-inset-top) + 14px), 0, 0)`,
-							transformOrigin: 'left',
-						}),
+				...(isVertical(direction) ?
+					{
+						transform: `scale(${getScale()}) translate3d(0, calc(env(safe-area-inset-top) + 14px), 0)`,
+						transformOrigin: 'top',
+					}
+				:	{
+						transform: `scale(${getScale()}) translate3d(calc(env(safe-area-inset-top) + 14px), 0, 0)`,
+						transformOrigin: 'left',
+					}),
 				transitionProperty: 'transform, border-radius',
 				transitionDuration: `${TRANSITIONS.DURATION}s`,
 				transitionTimingFunction: `cubic-bezier(${TRANSITIONS.EASE.join(',')})`,
@@ -714,9 +717,10 @@ function Root({
 				const translateValue = getTranslate(drawerRef.current as HTMLElement, direction);
 				set(drawerRef.current, {
 					transition: 'none',
-					transform: isVertical(direction)
-						? `translate3d(0, ${translateValue}px, 0)`
-						: `translate3d(${translateValue}px, 0, 0)`,
+					transform:
+						isVertical(direction) ?
+							`translate3d(0, ${translateValue}px, 0)`
+						:	`translate3d(${translateValue}px, 0, 0)`,
 				});
 			}, 500);
 		}
@@ -734,9 +738,10 @@ function Root({
 		const newTranslate = -NESTED_DISPLACEMENT + percentageDragged * NESTED_DISPLACEMENT;
 
 		set(drawerRef.current, {
-			transform: isVertical(direction)
-				? `scale(${newScale}) translate3d(0, ${newTranslate}px, 0)`
-				: `scale(${newScale}) translate3d(${newTranslate}px, 0, 0)`,
+			transform:
+				isVertical(direction) ?
+					`scale(${newScale}) translate3d(0, ${newTranslate}px, 0)`
+				:	`scale(${newScale}) translate3d(${newTranslate}px, 0, 0)`,
 			transition: 'none',
 		});
 	}
@@ -749,9 +754,10 @@ function Root({
 		if (o) {
 			set(drawerRef.current, {
 				transition: `transform ${TRANSITIONS.DURATION}s cubic-bezier(${TRANSITIONS.EASE.join(',')})`,
-				transform: isVertical(direction)
-					? `scale(${scale}) translate3d(0, ${translate}px, 0)`
-					: `scale(${scale}) translate3d(${translate}px, 0, 0)`,
+				transform:
+					isVertical(direction) ?
+						`scale(${scale}) translate3d(0, ${translate}px, 0)`
+					:	`scale(${scale}) translate3d(${translate}px, 0, 0)`,
 			});
 		}
 	}
@@ -895,12 +901,12 @@ const Content = React.forwardRef<HTMLDivElement, ContentProps>(function (
 			onPointerUp={onRelease}
 			ref={composedRef}
 			style={
-				snapPointsOffset && snapPointsOffset.length > 0
-					? ({
-							'--snap-point-height': `${snapPointsOffset[0]!}px`,
-							...style,
-						} as React.CSSProperties)
-					: style
+				snapPointsOffset && snapPointsOffset.length > 0 ?
+					({
+						'--snap-point-height': `${snapPointsOffset[0]!}px`,
+						...style,
+					} as React.CSSProperties)
+				:	style
 			}
 			{...rest}
 			vaul-drawer=''

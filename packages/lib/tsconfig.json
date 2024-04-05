@@ -1,7 +1,8 @@
 {
 	"extends": "@barely/tsconfig/base.json",
 	"compilerOptions": {
-		"tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+		"jsx": "preserve",
+		"tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
 	},
 	"include": [
 		"env",
@@ -12,7 +13,7 @@
 		"./hooks/**/*",
 		"./server/**/*",
 		"./utils/**/*",
-		"../../apps/app/src/app/[handle]/tracks/_components/use-create-or-edit-form.ts",
+		"../../apps/app/src/app/[handle]/tracks/_components/use-create-or-edit-form.ts"
 	],
-	"exclude": ["dist", "build", "node_modules"],
+	"exclude": ["dist", "build", "node_modules"]
 }

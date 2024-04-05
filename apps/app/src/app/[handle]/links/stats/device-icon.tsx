@@ -16,9 +16,9 @@ export default function DeviceIcon({
 		return (
 			<BlurImage
 				src={
-					display === 'Desktop'
-						? `https://faisalman.github.io/ua-parser-js/images/types/default.png`
-						: `https://faisalman.github.io/ua-parser-js/images/types/${display.toLowerCase()}.png`
+					display === 'Desktop' ?
+						`https://faisalman.github.io/ua-parser-js/images/types/default.png`
+					:	`https://faisalman.github.io/ua-parser-js/images/types/${display.toLowerCase()}.png`
 				}
 				alt={display}
 				width={20}

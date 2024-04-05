@@ -197,9 +197,9 @@ async function zPost<Schema extends ZodType, ErrorSchema extends ZodType>(
 			...options?.headers,
 		},
 		body:
-			options.contentType === 'application/x-www-form-urlencoded'
-				? new URLSearchParams(options.body)
-				: JSON.stringify(options.body),
+			options.contentType === 'application/x-www-form-urlencoded' ?
+				new URLSearchParams(options.body)
+			:	JSON.stringify(options.body),
 	})
 		.then(res => formatResponse(res, options))
 		.then(formattedRes =>
@@ -229,9 +229,9 @@ async function zDelete<Schema extends ZodType, ErrorSchema extends ZodType>(
 			...options?.headers,
 		},
 		body:
-			options.contentType === 'application/x-www-form-urlencoded'
-				? new URLSearchParams(options.body)
-				: JSON.stringify(options.body),
+			options.contentType === 'application/x-www-form-urlencoded' ?
+				new URLSearchParams(options.body)
+			:	JSON.stringify(options.body),
 	})
 		.then(res => formatResponse(res, options))
 		.then(formattedRes =>

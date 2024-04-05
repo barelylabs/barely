@@ -45,14 +45,12 @@ export function DomainCard(props: { domain: Domain }) {
 						<Icon.externalLink className='h-5 w-5' />
 					</Link>
 					<Badge variant='solid' size='sm' className='flex flex-row gap-2'>
-						{props.domain.type === 'link' ? (
+						{props.domain.type === 'link' ?
 							<>
 								<Icon.link className='h-3 w-3' />
 								{props.domain.isPrimaryLinkDomain ? 'Primary Link Domain' : 'Link'}
 							</>
-						) : (
-							<Icon.bio className='h-3 w-3' />
-						)}
+						:	<Icon.bio className='h-3 w-3' />}
 					</Badge>
 				</div>
 
@@ -75,15 +73,13 @@ export function DomainCard(props: { domain: Domain }) {
 
 			<div className='flex h-10 flex-col space-y-2 sm:flex-row sm:items-center sm:space-x-5 sm:space-y-0'>
 				<div className='flex items-center space-x-2'>
-					{!domain.verified && fetchingDomainVerification ? (
+					{!domain.verified && fetchingDomainVerification ?
 						<LoadingSpinner className='h-6 w-6' />
-					) : domain.verified ? (
+					: domain.verified ?
 						<Icon.checkCircleFilled className='h-6 w-6 text-blue-500' />
-					) : domainVerification?.status === 'Pending Verification' ? (
+					: domainVerification?.status === 'Pending Verification' ?
 						<Icon.alertFilled className='h-6 w-6 text-warning' />
-					) : (
-						<Icon.xCircleFilled className='h-6 w-6 text-destructive' />
-					)}
+					:	<Icon.xCircleFilled className='h-6 w-6 text-destructive' />}
 
 					<p className='text-sm text-muted-foreground'>
 						{domainVerification ? domainVerification.status : 'Checking Domain Status'}

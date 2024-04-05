@@ -106,9 +106,9 @@ export function HorizontalTabItem({
 			scroll={linkScroll}
 			className={cn(
 				'relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-transparent data-[state=active]:bg-red data-[state=active]:text-foreground data-[state=active]:shadow-sm focus:outline-none focus:ring-transparent focus:ring-offset-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-transparent disabled:pointer-events-none disabled:opacity-50',
-				isCurrent
-					? 'bg-background text-accent-foreground'
-					: 'text-default hover:bg-subtle hover:text-accent-foreground',
+				isCurrent ?
+					'bg-background text-accent-foreground'
+				:	'text-default hover:bg-subtle hover:text-accent-foreground',
 				props.disabled && 'pointer-events-none !opacity-30',
 				props.className,
 			)}

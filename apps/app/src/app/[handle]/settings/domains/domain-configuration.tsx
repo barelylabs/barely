@@ -12,9 +12,9 @@ export function DomainConfiguration(props: {
 	const { status, domainResponse, configResponse } = props;
 
 	const subdomain =
-		domainResponse.success && domainResponse.parsed
-			? getSubdomain(domainResponse.data.name, domainResponse.data.apexName)
-			: null;
+		domainResponse.success && domainResponse.parsed ?
+			getSubdomain(domainResponse.data.name, domainResponse.data.apexName)
+		:	null;
 
 	const [recordType, setRecordType] = useState<'A' | 'CNAME'>(subdomain ? 'CNAME' : 'A'); // default to CNAME if this is a subdomain, but the user can change it to A if they want
 
@@ -69,9 +69,9 @@ export function DomainConfiguration(props: {
 			<div className='border-t border-gray-200 pt-5'>
 				<div className='flex justify-start space-x-4'>
 					<div className='ease border-b-2 border-black pb-1 text-sm text-black transition-all duration-150'>
-						{configJson?.conflicts.some(x => x.type === 'A')
-							? 'A Record (recommended)'
-							: 'CNAME Record (recommended)'}
+						{configJson?.conflicts.some(x => x.type === 'A') ?
+							'A Record (recommended)'
+						:	'CNAME Record (recommended)'}
 					</div>
 				</div>
 				<DnsRecord
@@ -113,9 +113,9 @@ export function DomainConfiguration(props: {
 				<button
 					onClick={() => setRecordType('CNAME')}
 					className={`${
-						recordType == 'CNAME'
-							? 'border-black text-black'
-							: 'border-white text-gray-400'
+						recordType == 'CNAME' ?
+							'border-black text-black'
+						:	'border-white text-gray-400'
 					} ease border-b-2 pb-1 text-sm transition-all duration-150`}
 				>
 					CNAME Record{subdomain && ' (recommended)'}

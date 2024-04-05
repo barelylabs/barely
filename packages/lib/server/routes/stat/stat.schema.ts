@@ -85,12 +85,12 @@ export type StdWebEventPipeQueryParams = z.infer<typeof stdWebEventPipeQueryPara
 export const stdWebEventQueryToPipeParamsSchema =
 	stdWebEventPipeQueryParamsSchema.transform(data => {
 		const date_range =
-			data?.date_from && data.date_to
-				? {
-						date_from: getIsoDateFromDate(data.date_from),
-						date_to: getIsoDateFromDate(data.date_to),
-					}
-				: getIsoDateRangeFromDescription(data?.dateRange ?? '1w');
+			data?.date_from && data.date_to ?
+				{
+					date_from: getIsoDateFromDate(data.date_from),
+					date_to: getIsoDateFromDate(data.date_to),
+				}
+			:	getIsoDateRangeFromDescription(data?.dateRange ?? '1w');
 
 		return {
 			...data,

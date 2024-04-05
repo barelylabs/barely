@@ -68,30 +68,28 @@ export function useSnapPoints({
 				}
 
 				if (isVertical(direction)) {
-					const height = isPx
-						? snapPointAsNumber
-						: hasWindow
-							? snapPoint * window.innerHeight
-							: 0;
+					const height =
+						isPx ? snapPointAsNumber
+						: hasWindow ? snapPoint * window.innerHeight
+						: 0;
 
 					if (hasWindow) {
-						return direction === 'bottom'
-							? window.innerHeight - height
-							: -window.innerHeight + height;
+						return direction === 'bottom' ?
+								window.innerHeight - height
+							:	-window.innerHeight + height;
 					}
 
 					return height;
 				}
-				const width = isPx
-					? snapPointAsNumber
-					: hasWindow
-						? snapPoint * window.innerWidth
-						: 0;
+				const width =
+					isPx ? snapPointAsNumber
+					: hasWindow ? snapPoint * window.innerWidth
+					: 0;
 
 				if (hasWindow) {
-					return direction === 'right'
-						? window.innerWidth - width
-						: -window.innerWidth + width;
+					return direction === 'right' ?
+							window.innerWidth - width
+						:	-window.innerWidth + width;
 				}
 
 				return width;
@@ -111,9 +109,10 @@ export function useSnapPoints({
 			onSnapPointChange(newSnapPointIndex);
 			set(drawerRef.current, {
 				transition: `transform ${TRANSITIONS.DURATION}s cubic-bezier(${TRANSITIONS.EASE.join(',')})`,
-				transform: isVertical(direction)
-					? `translate3d(0, ${dimension}px, 0)`
-					: `translate3d(${dimension}px, 0, 0)`,
+				transform:
+					isVertical(direction) ?
+						`translate3d(0, ${dimension}px, 0)`
+					:	`translate3d(${dimension}px, 0, 0)`,
 			});
 
 			if (
@@ -174,9 +173,9 @@ export function useSnapPoints({
 		if (fadeFromIndex === undefined) return;
 
 		const currentPosition =
-			direction === 'bottom' || direction === 'right'
-				? (activeSnapPointOffset ?? 0) - draggedDistance
-				: (activeSnapPointOffset ?? 0) + draggedDistance;
+			direction === 'bottom' || direction === 'right' ?
+				(activeSnapPointOffset ?? 0) - draggedDistance
+			:	(activeSnapPointOffset ?? 0) + draggedDistance;
 		const isOverlaySnapPoint = activeSnapPointIndex === fadeFromIndex - 1;
 		const isFirst = activeSnapPointIndex === 0;
 		const hasDraggedUp = draggedDistance > 0;
@@ -202,9 +201,9 @@ export function useSnapPoints({
 		const closestSnapPoint = snapPointsOffset?.reduce((prev, curr) => {
 			if (typeof prev !== 'number' || typeof curr !== 'number') return prev;
 
-			return Math.abs(curr - currentPosition) < Math.abs(prev - currentPosition)
-				? curr
-				: prev;
+			return Math.abs(curr - currentPosition) < Math.abs(prev - currentPosition) ?
+					curr
+				:	prev;
 		});
 
 		const dim = isVertical(direction) ? window.innerHeight : window.innerWidth;
@@ -233,9 +232,9 @@ export function useSnapPoints({
 	function onDrag({ draggedDistance }: { draggedDistance: number }) {
 		if (activeSnapPointOffset === null) return;
 		const newValue =
-			direction === 'bottom' || direction === 'right'
-				? activeSnapPointOffset! - draggedDistance
-				: activeSnapPointOffset! + draggedDistance;
+			direction === 'bottom' || direction === 'right' ?
+				activeSnapPointOffset! - draggedDistance
+			:	activeSnapPointOffset! + draggedDistance;
 
 		// Don't do anything if we exceed the last(biggest) snap point
 		if (
@@ -252,9 +251,10 @@ export function useSnapPoints({
 		}
 
 		set(drawerRef.current, {
-			transform: isVertical(direction)
-				? `translate3d(0, ${newValue}px, 0)`
-				: `translate3d(${newValue}px, 0, 0)`,
+			transform:
+				isVertical(direction) ?
+					`translate3d(0, ${newValue}px, 0)`
+				:	`translate3d(${newValue}px, 0, 0)`,
 		});
 	}
 
@@ -280,15 +280,15 @@ export function useSnapPoints({
 		if (!shouldFade && !isOverlaySnapPoint) return null;
 
 		// Either fadeFrom index or the one before
-		const targetSnapPointIndex = isOverlaySnapPoint
-			? activeSnapPointIndex + 1
-			: activeSnapPointIndex - 1;
+		const targetSnapPointIndex =
+			isOverlaySnapPoint ? activeSnapPointIndex + 1 : activeSnapPointIndex - 1;
 
 		// Get the distance from overlaySnapPoint to the one before or vice-versa to calculate the opacity percentage accordingly
-		const snapPointDistance = isOverlaySnapPoint
-			? snapPointsOffset[targetSnapPointIndex]! -
+		const snapPointDistance =
+			isOverlaySnapPoint ?
+				snapPointsOffset[targetSnapPointIndex]! -
 				snapPointsOffset[targetSnapPointIndex - 1]!
-			: snapPointsOffset[targetSnapPointIndex + 1]! -
+			:	snapPointsOffset[targetSnapPointIndex + 1]! -
 				snapPointsOffset[targetSnapPointIndex]!;
 
 		const percentageDragged = absDraggedDistance / Math.abs(snapPointDistance);

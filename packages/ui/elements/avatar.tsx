@@ -61,7 +61,7 @@ const Avatar = (props: {
 }) => {
 	return (
 		<AvatarRoot className={props.className}>
-			{props.imageUrl?.length ? (
+			{props.imageUrl?.length ?
 				<Img
 					src={props.imageUrl}
 					alt={props.displayName ?? ''}
@@ -70,9 +70,7 @@ const Avatar = (props: {
 					priority={props.priority}
 					fill
 				/>
-			) : (
-				<AvatarFallback>{props.initials}</AvatarFallback>
-			)}
+			:	<AvatarFallback>{props.initials}</AvatarFallback>}
 		</AvatarRoot>
 	);
 };
