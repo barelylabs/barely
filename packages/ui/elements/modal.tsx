@@ -110,7 +110,7 @@ function Modal({
 							onAutoFocus();
 						}
 					}}
-					tabIndex={-1}
+					tabIndex={undefined} // fixme: when tabIndex was set to -1 (default by radix), the modal would focus between every input on tab. This is a temporary fix
 				>
 					<Button
 						startIcon='x'

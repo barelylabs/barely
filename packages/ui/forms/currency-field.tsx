@@ -57,9 +57,9 @@ export const CurrencyField = <
 										<CurrencyInput
 											{...field}
 											{...props}
+											initialValue={field.value}
 											value={field.value}
 											onValueChange={v => field.onChange(v)}
-											// decimalsLimit={2}
 										/>
 									</FieldControl>
 									<FieldErrorIcon isValidating={isValidating} />
