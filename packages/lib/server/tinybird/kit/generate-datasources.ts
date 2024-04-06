@@ -48,9 +48,9 @@ Object.values(writes).forEach(({ name, description, schema }) => {
 
 		const zodType = shape._def.typeName.toString();
 
-		// @ts-expect-error - _def can have property checks -- ideally do proper type checking here
-		// eslint-disable-next-line
 		const type =
+			// @ts-expect-error - _def can have property checks -- ideally do proper type checking here
+			// eslint-disable-next-line
 			s._def.checks?.some(c => c.kind === 'datetime') ? 'DateTime'
 			: zodType === 'ZodString' || zodType === 'ZodEnum' ? 'String'
 			: zodType === 'ZodBoolean' ? 'UInt8'
