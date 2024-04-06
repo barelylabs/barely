@@ -66,7 +66,7 @@ export const env = createEnv({
 		VERCEL_TOKEN: z.string(),
 	},
 	client: {
-		NEXT_PUBLIC_APP_BASE_URL: z.string().url(),
+		NEXT_PUBLIC_APP_BASE_URL: z.string(),
 		NEXT_PUBLIC_APP_DEV_PORT: devPortSchema,
 		NEXT_PUBLIC_BIO_BASE_URL: z.string(),
 		NEXT_PUBLIC_BIO_DEV_PORT: devPortSchema,

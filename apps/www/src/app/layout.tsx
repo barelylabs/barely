@@ -8,8 +8,6 @@ import { cn } from '@barely/lib/utils/cn';
 import { TailwindIndicator } from '@barely/ui/components/tailwind-indicator';
 import { Container } from '@barely/ui/elements/container';
 
-// import { Toaster } from '@barely/ui/elements/toaster';
-
 import Footer from '~/app/components/footer';
 import { Header } from '~/app/components/header';
 import Providers from '~/app/providers';
