@@ -39,9 +39,9 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 		where = sqlAnd([
 			eq(Links.handle, linkProps.handle),
 			linkProps.app ? eq(Links.app, linkProps.app) : isNull(Links.app),
-			linkProps.appRoute
-				? eq(Links.appRoute, linkProps.appRoute)
-				: isNull(Links.appRoute),
+			linkProps.appRoute ?
+				eq(Links.appRoute, linkProps.appRoute)
+			:	isNull(Links.appRoute),
 		]);
 	} else if (linkProps.linkClickType === 'shortLinkClick') {
 		where = sqlAnd([

@@ -178,14 +178,15 @@ export async function getPublicPressKit({
 			audioUrl: _t.track._audioFiles[0]?.file.src,
 			// normalized joins
 			workspace: publicWorkspace,
-			artwork: _t.track._artworkFiles[0]
-				? {
+			artwork:
+				_t.track._artworkFiles[0] ?
+					{
 						..._t.track._artworkFiles[0]?.file,
 
 						width: _t.track._artworkFiles[0]?.file.width ?? 300,
 						height: _t.track._artworkFiles[0]?.file.height ?? 300,
 					}
-				: undefined,
+				:	undefined,
 			audioFiles: _t.track._audioFiles.map(_f => ({
 				id: _f.file.id,
 				name: _f.file.name,
@@ -198,14 +199,14 @@ export async function getPublicPressKit({
 		})) ?? [];
 
 	const publicMixtape: PublicMixtapeWith_Tracks | undefined =
-		publicPressKitData.mixtape && publicTracks.length
-			? {
-					id: publicPressKitData.mixtape.id,
-					name: publicPressKitData.mixtape.name,
-					description: publicPressKitData.mixtape.description,
-					tracks: publicTracks,
-				}
-			: undefined;
+		publicPressKitData.mixtape && publicTracks.length ?
+			{
+				id: publicPressKitData.mixtape.id,
+				name: publicPressKitData.mixtape.name,
+				description: publicPressKitData.mixtape.description,
+				tracks: publicTracks,
+			}
+		:	undefined;
 
 	// normalize press photos
 	const publicPressPhotos: PublicPressPhoto[] = publicPressKitData._pressPhotos

@@ -45,12 +45,12 @@ export const linkRouter = createTRPCRouter({
 			const workspace = getUserWorkspaceByHandle(ctx.user, handle);
 
 			const searchCondition =
-				filters?.search && filters.search.length > 0
-					? or(
-							sqlStringContains(Links.key, filters.search),
-							sqlStringContains(Links.url, filters.search),
-						)
-					: undefined;
+				filters?.search && filters.search.length > 0 ?
+					or(
+						sqlStringContains(Links.key, filters.search),
+						sqlStringContains(Links.url, filters.search),
+					)
+				:	undefined;
 
 			const links = await ctx.db.http.query.Links.findMany({
 				where: sqlAnd([
@@ -75,13 +75,14 @@ export const linkRouter = createTRPCRouter({
 			});
 		}
 
-		const metaTags = input.customMetaTags
-			? {
+		const metaTags =
+			input.customMetaTags ?
+				{
 					title: input.title,
 					description: input.description,
 					image: input.image,
 				}
-			: await getMetaTags(input.url);
+			:	await getMetaTags(input.url);
 
 		const linkId = newId('link');
 
@@ -136,13 +137,14 @@ export const linkRouter = createTRPCRouter({
 			input = { ...input, app: appData.app, appRoute: appData.appRoute };
 		}
 
-		const metaTags = input.customMetaTags
-			? {
+		const metaTags =
+			input.customMetaTags ?
+				{
 					title: input.title,
 					description: input.description,
 					image: input.image,
 				}
-			: await getMetaTags(existingLink.url);
+			:	await getMetaTags(existingLink.url);
 
 		console.log('metaTags', metaTags);
 

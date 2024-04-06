@@ -44,9 +44,9 @@ export const MultiSelect = <T extends NonNullable<unknown>>(
 ) => {
 	const { getItemId, values, onValuesChange } = props;
 	const onValuesChangeDebouncedMemo = React.useMemo(() => {
-		return props.onValuesChangeDebounced
-			? debounce(props.onValuesChangeDebounced, props.debounce ?? 500)
-			: undefined;
+		return props.onValuesChangeDebounced ?
+				debounce(props.onValuesChangeDebounced, props.debounce ?? 500)
+			:	undefined;
 	}, [props.onValuesChangeDebounced, props.debounce]);
 
 	const handleDebouncedChange = React.useCallback(
@@ -130,9 +130,10 @@ export const MultiSelect = <T extends NonNullable<unknown>>(
 		[values, handleUnselect],
 	);
 
-	const selectableOptions = props.showSelectedOptions
-		? props.options
-		: props.options.filter(
+	const selectableOptions =
+		props.showSelectedOptions ?
+			props.options
+		:	props.options.filter(
 				item =>
 					!props.values.map(s => getItemIdCallback(s)).includes(getItemIdCallback(item)),
 			);

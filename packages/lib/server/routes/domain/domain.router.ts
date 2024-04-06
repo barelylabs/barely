@@ -393,17 +393,17 @@ export const domainRouter = createTRPCRouter({
 			}
 
 			const domainsToCheck =
-				env.VERCEL_ENV === 'production'
-					? [
-							`${handle}.link`,
-							`${handle}.to`,
-							`${handle}.co`,
-							`${handle}.rocks`,
-							`${handle}.tv`,
-							`${handle}.info`,
-							`${handle}.io`,
-						]
-					: [`${handle}.com`, `${handle}.net`, `${handle}.org`, `${handle}.fr`];
+				env.VERCEL_ENV === 'production' ?
+					[
+						`${handle}.link`,
+						`${handle}.to`,
+						`${handle}.co`,
+						`${handle}.rocks`,
+						`${handle}.tv`,
+						`${handle}.info`,
+						`${handle}.io`,
+					]
+				:	[`${handle}.com`, `${handle}.net`, `${handle}.org`, `${handle}.fr`];
 
 			const domains = await getDomainsAvailable(domainsToCheck);
 

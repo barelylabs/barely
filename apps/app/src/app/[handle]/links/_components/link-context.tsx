@@ -139,9 +139,9 @@ export function LinkContextProvider({
 	}
 
 	const lastSelectedLinkId =
-		optimisticSelection === 'all'
-			? undefined
-			: Array.from(optimisticSelection).pop()?.toString();
+		optimisticSelection === 'all' ? undefined : (
+			Array.from(optimisticSelection).pop()?.toString()
+		);
 
 	const lastSelectedLink = links.find(l => l.id === lastSelectedLinkId);
 

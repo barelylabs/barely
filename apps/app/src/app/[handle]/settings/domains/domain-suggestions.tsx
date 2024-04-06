@@ -10,17 +10,17 @@ export function LinkDomainPurchaseSuggestions() {
 
 	return (
 		<div className='grid grid-flow-row grid-cols-3 gap-3'>
-			{suggestedDomains && suggestedDomains.length > 0
-				? suggestedDomains.map((d, index) => (
-						<Link
-							href={`/dash/${d.domain}`}
-							key={index}
-							className='flex flex-col items-center gap-2 rounded-xl border border-border bg-slate-50 px-1 py-2'
-						>
-							<Text variant='sm/normal'>{d.domain}</Text>
-						</Link>
-					))
-				: null}
+			{suggestedDomains && suggestedDomains.length > 0 ?
+				suggestedDomains.map((d, index) => (
+					<Link
+						href={`/dash/${d.domain}`}
+						key={index}
+						className='flex flex-col items-center gap-2 rounded-xl border border-border bg-slate-50 px-1 py-2'
+					>
+						<Text variant='sm/normal'>{d.domain}</Text>
+					</Link>
+				))
+			:	null}
 		</div>
 	);
 }

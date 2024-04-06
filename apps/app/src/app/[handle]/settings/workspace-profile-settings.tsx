@@ -31,9 +31,9 @@ export function DisplayOrWorkspaceNameForm() {
 			onSubmit={onSubmit}
 			title={isPersonal ? 'Your Name' : 'Workspace Name'}
 			subtitle={
-				isPersonal
-					? 'Please enter your full name, or a display name you are comfortable with. This is how your name will appear to others on the platform.'
-					: `This is your workspace's visible name within Barely. For example, the name of your band, solo project, or company.`
+				isPersonal ?
+					'Please enter your full name, or a display name you are comfortable with. This is how your name will appear to others on the platform.'
+				:	`This is your workspace's visible name within Barely. For example, the name of your band, solo project, or company.`
 			}
 			disableSubmit={!form.formState.isDirty}
 			formHint='Please use a maximum of 32 characters'
@@ -52,9 +52,9 @@ export function HandleForm() {
 			onSubmit={onSubmit}
 			title={isPersonal ? 'Your Handle' : 'Workspace Handle'}
 			subtitle={
-				isPersonal
-					? 'Please enter a personal handle that you are comfortable with. This is how your name will appear to others on the platform.'
-					: `This is your workspace's unique handle on Barely. It'll be used for your public links and bio.`
+				isPersonal ?
+					'Please enter a personal handle that you are comfortable with. This is how your name will appear to others on the platform.'
+				:	`This is your workspace's unique handle on Barely. It'll be used for your public links and bio.`
 			}
 			disableSubmit={!form.formState.isDirty}
 			formHint='Only lowercase letters, numbers, and underscores are allowed.'
@@ -157,9 +157,9 @@ export function WorkspaceAvatarForm() {
 		<SettingsCard
 			title={isPersonal ? 'Your Avatar' : 'Workspace Avatar'}
 			subtitle={
-				isPersonal
-					? 'This is your personal avatar on Barely.'
-					: `This is your workspace's avatar on Barely.`
+				isPersonal ?
+					'This is your personal avatar on Barely.'
+				:	`This is your workspace's avatar on Barely.`
 			}
 			onSubmit={handleSubmit}
 			disableSubmit={
@@ -214,9 +214,9 @@ export function WorkspaceHeaderForm() {
 		<SettingsCard
 			title={isPersonal ? 'Your Header' : 'Workspace Header'}
 			subtitle={
-				isPersonal
-					? 'This is your personal header on Barely.'
-					: `This is your workspace's header on Barely.`
+				isPersonal ?
+					'This is your personal header on Barely.'
+				:	`This is your workspace's header on Barely.`
 			}
 			onSubmit={handleSubmit}
 			disableSubmit={
@@ -250,9 +250,9 @@ export function WorkspaceBioForm() {
 			onSubmit={onSubmit}
 			title={isPersonal ? 'Your Bio' : 'Workspace Bio'}
 			subtitle={
-				isPersonal
-					? 'This is your personal bio on Barely.'
-					: `This is your workspace's bio on Barely.`
+				isPersonal ?
+					'This is your personal bio on Barely.'
+				:	`This is your workspace's bio on Barely.`
 			}
 			disableSubmit={!form.formState.isDirty}
 		>

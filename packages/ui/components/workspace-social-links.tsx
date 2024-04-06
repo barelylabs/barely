@@ -21,21 +21,21 @@ export function WorkspaceSocialLinks({
 	};
 }) {
 	const igLink =
-		show?.instagram && workspace.instagramUsername
-			? `https://instagram.com/${workspace.instagramUsername}`
-			: null;
+		show?.instagram && workspace.instagramUsername ?
+			`https://instagram.com/${workspace.instagramUsername}`
+		:	null;
 	const ytLink =
-		show?.youtube && workspace.youtubeChannelId
-			? `https://youtube.com/channel/${workspace.youtubeChannelId}`
-			: null;
+		show?.youtube && workspace.youtubeChannelId ?
+			`https://youtube.com/channel/${workspace.youtubeChannelId}`
+		:	null;
 	const tiktokLink =
-		show?.tiktok && workspace.tiktokUsername
-			? `https://tiktok.com/@${workspace.tiktokUsername}`
-			: null;
+		show?.tiktok && workspace.tiktokUsername ?
+			`https://tiktok.com/@${workspace.tiktokUsername}`
+		:	null;
 	const spotifyLink =
-		show?.spotify && workspace.spotifyArtistId
-			? `https://open.spotify.com/artist/${workspace.spotifyArtistId}`
-			: null;
+		show?.spotify && workspace.spotifyArtistId ?
+			`https://open.spotify.com/artist/${workspace.spotifyArtistId}`
+		:	null;
 	return (
 		<div className='flex flex-row items-center gap-2'>
 			{igLink && (

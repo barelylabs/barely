@@ -136,9 +136,8 @@ export function useUpload({
 					const newQueue = acceptedFiles
 						.filter(f => !prev.some(q => q.file.name === f.name))
 						.map(f => {
-							const previewImage = f.type.startsWith('image/')
-								? URL.createObjectURL(f)
-								: null;
+							const previewImage =
+								f.type.startsWith('image/') ? URL.createObjectURL(f) : null;
 
 							return {
 								file: f,

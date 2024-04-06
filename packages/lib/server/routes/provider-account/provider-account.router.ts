@@ -39,9 +39,9 @@ const providerAccountRouter = createTRPCRouter({
 				where: and(
 					eq(ProviderAccounts.userId, ctx.user.id),
 					// todo - check if this is working for filtering providerAccounts by provider(s)
-					input?.providers
-						? inArray(ProviderAccounts.provider, input.providers)
-						: undefined,
+					input?.providers ?
+						inArray(ProviderAccounts.provider, input.providers)
+					:	undefined,
 				),
 			});
 			return accounts;

@@ -37,11 +37,9 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
 		ref,
 	) => {
 		const initialFocusedValue =
-			initialValue === 0
-				? ''
-				: outputUnits === 'cents'
-					? initialValue / 100
-					: initialValue.toString();
+			initialValue === 0 ? ''
+			: outputUnits === 'cents' ? initialValue / 100
+			: initialValue.toString();
 		const [focusedValue, setFocusedValue] = useState(initialFocusedValue);
 		const [isFocused, setIsFocused] = useState(false);
 
@@ -52,11 +50,10 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
 		) => {
 			setFocusedValue(value ?? '');
 
-			const valueInUnits = !values?.float
-				? 0
-				: outputUnits === 'cents'
-					? values.float * 100
-					: values.float;
+			const valueInUnits =
+				!values?.float ? 0
+				: outputUnits === 'cents' ? values.float * 100
+				: values.float;
 
 			if (!isNaN(valueInUnits)) {
 				await onValueChange?.(
@@ -75,11 +72,10 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
 
 		const valueInDollars = outputUnits === 'cents' ? (value ?? 0) / 100 : value ?? 0;
 
-		const inputValue = isFocused
-			? focusedValue
-			: Number.isInteger(valueInDollars)
-				? valueInDollars
-				: valueInDollars.toFixed(2);
+		const inputValue =
+			isFocused ? focusedValue
+			: Number.isInteger(valueInDollars) ? valueInDollars
+			: valueInDollars.toFixed(2);
 
 		return (
 			<>

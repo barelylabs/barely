@@ -22,13 +22,10 @@ export const Rating = (props: { value: number; onChange: () => void }) => {
 						<Icon.star
 							className={cn(
 								'-m-1 h-6 w-6 p-1',
-								isFilledButMoreThanHovered
-									? 'fill-yellow-300 text-yellow-300'
-									: isFilled
-										? 'fill-yellow-500 text-yellow-500'
-										: isHovered
-											? 'fill-yellow-300 text-yellow-300'
-											: 'dark:fill-slate-200 dark:text-slate-200',
+								isFilledButMoreThanHovered ? 'fill-yellow-300 text-yellow-300'
+								: isFilled ? 'fill-yellow-500 text-yellow-500'
+								: isHovered ? 'fill-yellow-300 text-yellow-300'
+								: 'dark:fill-slate-200 dark:text-slate-200',
 							)}
 							onMouseEnter={() => setHoverRating(star)}
 							onMouseLeave={() => setHoverRating(0)}
@@ -53,9 +50,9 @@ const RatingDisplay = (props: { rating: number; by?: string }) => {
 							key={starIndex}
 							className={cn(
 								'-m-1 h-6 w-6 p-1',
-								isFilled
-									? 'fill-yellow-500 text-yellow-500'
-									: 'dark:fill-slate-200 dark:text-slate-200',
+								isFilled ?
+									'fill-yellow-500 text-yellow-500'
+								:	'dark:fill-slate-200 dark:text-slate-200',
 							)}
 						/>
 					);

@@ -68,18 +68,18 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 		updateCart.mainStripePaymentMethodId = charge.payment_method;
 
 		// update or create fan
-		const fan = prevCart.fan
-			? prevCart.fan
-			: stripeCustomerId ?? charge.billing_details.email
-				? await db.pool.query.Fans.findFirst({
-						where: or(
-							charge.billing_details.email
-								? eq(Fans.email, charge.billing_details.email)
-								: undefined,
-							stripeCustomerId ? eq(Fans.stripeCustomerId, stripeCustomerId) : undefined,
-						),
-					})
-				: undefined;
+		const fan =
+			prevCart.fan ? prevCart.fan
+			: stripeCustomerId ?? charge.billing_details.email ?
+				await db.pool.query.Fans.findFirst({
+					where: or(
+						charge.billing_details.email ?
+							eq(Fans.email, charge.billing_details.email)
+						:	undefined,
+						stripeCustomerId ? eq(Fans.stripeCustomerId, stripeCustomerId) : undefined,
+					),
+				})
+			:	undefined;
 
 		console.log('existing fan:', fan);
 
@@ -224,7 +224,7 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 export function getStripeConnectAccountId(
 	workspace: Pick<Workspace, 'stripeConnectAccountId' | 'stripeConnectAccountId_devMode'>,
 ) {
-	return isProduction()
-		? workspace.stripeConnectAccountId
-		: workspace.stripeConnectAccountId_devMode;
+	return isProduction() ?
+			workspace.stripeConnectAccountId
+		:	workspace.stripeConnectAccountId_devMode;
 }

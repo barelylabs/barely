@@ -44,7 +44,9 @@ function PressQuote({
 		<p className='text-left text-lg leading-tight'>
 			&quot;{quote.quote}&quot; -{' '}
 			<span className='italic'>
-				{quote.link ? <a href={quote.link}>{quote.quote}</a> : <>{quote.source}</>}
+				{quote.link ?
+					<a href={quote.link}>{quote.quote}</a>
+				:	<>{quote.source}</>}
 			</span>
 		</p>
 	);

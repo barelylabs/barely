@@ -1,7 +1,5 @@
 import { renderAsync } from '@react-email/render';
 
-import { env } from './env';
-
 interface SendEmailProps {
 	from: string;
 	to: string | string[];
@@ -24,7 +22,7 @@ export async function sendEmail(props: SendEmailProps) {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${env.RESEND_API_KEY}`,
+				Authorization: `Bearer ${process.env.RESEND_API_KEY!}`,
 			},
 			body: JSON.stringify({
 				from: props.from,

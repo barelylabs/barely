@@ -85,12 +85,13 @@ export function TrackContextProvider({
 	}
 
 	const lastSelectedTrackId =
-		optimisticSelection === 'all'
-			? undefined
-			: Array.from(optimisticSelection)[0]?.toString();
-	const lastSelectedTrack = lastSelectedTrackId
-		? tracks.find(track => track.id === lastSelectedTrackId)
-		: undefined;
+		optimisticSelection === 'all' ? undefined : (
+			Array.from(optimisticSelection)[0]?.toString()
+		);
+	const lastSelectedTrack =
+		lastSelectedTrackId ?
+			tracks.find(track => track.id === lastSelectedTrackId)
+		:	undefined;
 
 	const contextValue = {
 		tracks,

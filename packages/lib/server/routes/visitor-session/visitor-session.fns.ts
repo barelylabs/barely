@@ -7,13 +7,14 @@ export function getDeviceData(req: NextRequest) {
 	const { os, browser, ua } = deviceProps;
 
 	const platform =
-		os?.name?.toLowerCase().includes('ios') ??
-		browser?.name?.toLowerCase().includes('mobile safari') ??
-		ua?.toLowerCase().includes('iphone' || 'ipad')
-			? 'ios'
-			: os?.name?.toLowerCase().includes('android')
-				? 'android'
-				: 'web';
+		(
+			os?.name?.toLowerCase().includes('ios') ??
+			browser?.name?.toLowerCase().includes('mobile safari') ??
+			ua?.toLowerCase().includes('iphone' || 'ipad')
+		) ?
+			'ios'
+		: os?.name?.toLowerCase().includes('android') ? 'android'
+		: 'web';
 
 	return { platform, ...deviceProps };
 }

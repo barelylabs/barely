@@ -38,9 +38,9 @@
 	},
 	"devDependencies": {
 		"@barely/prettier-config": "workspace:^0.1.0",
-		"prettier": "^3.1.1",
+		"prettier": "^3.2.5",
 		"turbo": "^1.11.3",
-		"typescript": "^5.3.3",
+		"typescript": "^5.4.3",
 		"vercel": "33.2.0"
 	},
 	"pnpm": {

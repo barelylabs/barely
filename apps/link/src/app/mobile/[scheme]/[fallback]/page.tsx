@@ -28,14 +28,12 @@ export default function MobileRedirectPage({
 
 	return (
 		<>
-			{ogTitle ? (
+			{ogTitle ?
 				<>
 					<title>{ogTitle}</title>
 					<meta property='og:title' content={decodeURIComponent(ogTitle)} />
 				</>
-			) : (
-				<title>barely.link</title>
-			)}
+			:	<title>barely.link</title>}
 
 			{ogDescription && (
 				<meta property='og:description' content={decodeURIComponent(ogDescription)} />

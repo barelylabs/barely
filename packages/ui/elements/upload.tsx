@@ -54,9 +54,9 @@ export const UploadDropzone = React.forwardRef<
 							'absolute flex h-full w-full flex-col items-center justify-center border-dashed bg-background p-4 transition-all',
 							props.isDragActive &&
 								'cursor-copy border-2 border-black bg-muted opacity-100',
-							imagePreview
-								? 'opacity-0 group-hover:opacity-75'
-								: 'group-hover:bg-slate-100',
+							imagePreview ?
+								'opacity-0 group-hover:opacity-75'
+							:	'group-hover:bg-slate-100',
 						)}
 					>
 						<Icon.upload
@@ -122,11 +122,9 @@ export function UploadQueue({
 			</div>
 
 			<ScrollArea className='w-full'>
-				{mode === 'grid' ? (
+				{mode === 'grid' ?
 					<UploadQueueGrid {...uploadState} />
-				) : (
-					<UploadQueueList uploadQueue={uploadState.uploadQueue} />
-				)}
+				:	<UploadQueueList uploadQueue={uploadState.uploadQueue} />}
 			</ScrollArea>
 		</div>
 	);
@@ -232,17 +230,15 @@ export function UploadQueueList({ uploadQueue }: { uploadQueue: UploadQueueItem[
 						className='ml-2 w-1/2'
 						aria-label='progress'
 					/>
-					{item.status === 'pendingPresign' ? (
+					{item.status === 'pendingPresign' ?
 						<LoadingSpinner />
-					) : item.status === 'readyToUpload' ? (
+					: item.status === 'readyToUpload' ?
 						<Icon.upload />
-					) : item.status === 'uploading' ? (
+					: item.status === 'uploading' ?
 						<Icon.rocket />
-					) : item.status === 'complete' ? (
+					: item.status === 'complete' ?
 						<Icon.check />
-					) : (
-						<Icon.xCircleFilled />
-					)}
+					:	<Icon.xCircleFilled />}
 				</div>
 			</li>
 		));

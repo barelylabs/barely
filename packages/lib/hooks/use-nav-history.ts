@@ -19,11 +19,10 @@ export function useUpdateNavHistory() {
 
 			const defaultSettingsBackPath = `/${workspace.handle}/links`;
 
-			let settingsBackPath = prev.settingsBackPath?.includes(
-				`/${workspace.handle}/settings`,
-			)
-				? defaultSettingsBackPath
-				: prev.settingsBackPath ?? defaultSettingsBackPath;
+			let settingsBackPath =
+				prev.settingsBackPath?.includes(`/${workspace.handle}/settings`) ?
+					defaultSettingsBackPath
+				:	prev.settingsBackPath ?? defaultSettingsBackPath;
 
 			if (
 				workspaces.some(w => pathname?.includes(`/${w.handle}/settings`)) &&

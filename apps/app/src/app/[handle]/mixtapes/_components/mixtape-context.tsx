@@ -88,9 +88,9 @@ export function MixtapeContextProvider({
 	}
 
 	const lastSelectedMixtapeId =
-		optimisticSelection === 'all'
-			? undefined
-			: Array.from(optimisticSelection).pop()?.toString();
+		optimisticSelection === 'all' ? undefined : (
+			Array.from(optimisticSelection).pop()?.toString()
+		);
 	const lastSelectedMixtape = mixtapes.find(
 		mixtape => mixtape.id === lastSelectedMixtapeId,
 	);

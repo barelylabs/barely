@@ -27,9 +27,9 @@ export class Tinybird {
 				continue;
 			}
 			const stringValue =
-				value !== null && typeof value === 'object'
-					? JSON.stringify(value)
-					: String(value);
+				value !== null && typeof value === 'object' ?
+					JSON.stringify(value)
+				:	String(value);
 			url.searchParams.set(key, stringValue);
 		}
 		console.log('fetchUrl => ', url.href);
@@ -105,9 +105,10 @@ export class Tinybird {
 		return async (events: TInput | TInput[]) => {
 			let validatedEvents: TOutput | TOutput[] | undefined = undefined;
 			if (req.event) {
-				const v = Array.isArray(events)
-					? req.event.array().safeParse(events)
-					: req.event.safeParse(events);
+				const v =
+					Array.isArray(events) ?
+						req.event.array().safeParse(events)
+					:	req.event.safeParse(events);
 				if (!v.success) {
 					throw new Error(v.error.message);
 				}

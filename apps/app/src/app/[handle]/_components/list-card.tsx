@@ -46,8 +46,7 @@ export function ListCard<T extends ItemWithId>({
 
 	const handleClickOnListItem = useCallback(
 		(e: MouseEvent) => {
-			const isListCardClick =
-				itemRef.current && itemRef.current.contains(e.target as Node);
+			const isListCardClick = itemRef.current?.contains(e.target as Node);
 
 			const isAnotherListCardClick =
 				!isListCardClick &&

@@ -43,12 +43,14 @@ export function UpgradeModal(props: {
 		createUpgradeCheckoutLink({
 			planId: 'pro',
 			billingCycle,
-			successPath: props.checkoutSuccessPath
-				? `${workspace.handle}/${props.checkoutSuccessPath}`
-				: undefined,
-			cancelPath: props.checkoutCancelPath
-				? `${workspace.handle}/${props.checkoutCancelPath}`
-				: undefined,
+			successPath:
+				props.checkoutSuccessPath ?
+					`${workspace.handle}/${props.checkoutSuccessPath}`
+				:	undefined,
+			cancelPath:
+				props.checkoutCancelPath ?
+					`${workspace.handle}/${props.checkoutCancelPath}`
+				:	undefined,
 		});
 	};
 

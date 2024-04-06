@@ -142,11 +142,9 @@ function CalendarGrid({ state, ...props }: CalendarGridProps) {
 						{state
 							.getDatesInWeek(weekIndex)
 							.map((date, i) =>
-								date ? (
+								date ?
 									<CalendarCell key={i} state={state} date={date} />
-								) : (
-									<td key={i} />
-								),
+								:	<td key={i} />,
 							)}
 					</tr>
 				))}

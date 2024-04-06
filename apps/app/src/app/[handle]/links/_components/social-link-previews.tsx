@@ -36,24 +36,19 @@ export function TwitterPreview(props: SocialPreviewProps) {
 			<div className='overflow-hidden rounded-md border border-border'>
 				{props.previewImage}
 				<div className='grid gap-1 p-3'>
-					{props.hostname ? (
+					{props.hostname ?
 						<p className='text-sm text-[#536471]'>{props.hostname}</p>
-					) : (
-						<div className='mb-1 h-4 w-24 rounded-md bg-gray-100' />
-					)}
-					{props.title ? (
+					:	<div className='mb-1 h-4 w-24 rounded-md bg-gray-100' />}
+					{props.title ?
 						<h3 className='truncate text-sm text-[#0f1419]'>{props.title}</h3>
-					) : (
-						<div className='mb-1 h-4 w-full rounded-md bg-gray-100' />
-					)}
-					{props.description ? (
+					:	<div className='mb-1 h-4 w-full rounded-md bg-gray-100' />}
+					{props.description ?
 						<p className='line-clamp-2 text-sm text-[#536471]'>{props.description}</p>
-					) : (
-						<div className='grid gap-2'>
+					:	<div className='grid gap-2'>
 							<div className='h-4 w-full rounded-md bg-gray-100' />
 							<div className='h-4 w-48 rounded-md bg-gray-100' />
 						</div>
-					)}
+					}
 				</div>
 			</div>
 		</div>
@@ -77,24 +72,19 @@ export function FacebookPreview(props: SocialPreviewProps) {
 			<div className='overflow-hidden border border-border'>
 				{props.previewImage}
 				<div className='grid gap-1 bg-[#f2f3f5] p-3'>
-					{props.hostname ? (
+					{props.hostname ?
 						<p className='text-[0.8rem] uppercase text-[#606770]'>{props.hostname}</p>
-					) : (
-						<div className='mb-1 h-4 w-24 rounded-md bg-gray-200' />
-					)}
-					{props.title ? (
+					:	<div className='mb-1 h-4 w-24 rounded-md bg-gray-200' />}
+					{props.title ?
 						<h3 className='truncate font-semibold text-[#1d2129]'>{props.title}</h3>
-					) : (
-						<div className='mb-1 h-5 w-full rounded-md bg-gray-200' />
-					)}
-					{props.description ? (
+					:	<div className='mb-1 h-5 w-full rounded-md bg-gray-200' />}
+					{props.description ?
 						<p className='line-clamp-2 text-sm text-[#606770]'>{props.description}</p>
-					) : (
-						<div className='grid gap-2'>
+					:	<div className='grid gap-2'>
 							<div className='h-4 w-full rounded-md bg-gray-200' />
 							<div className='h-4 w-48 rounded-md bg-gray-200' />
 						</div>
-					)}
+					}
 				</div>
 			</div>
 		</div>
@@ -118,16 +108,12 @@ export function LinkedinPreview(props: SocialPreviewProps) {
 			<div className='overflow-hidden rounded-[2px] shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_2px_3px_rgba(0,0,0,0.2)]'>
 				{props.previewImage}
 				<div className='grid gap-1 bg-white p-3'>
-					{props.title ? (
+					{props.title ?
 						<h3 className='truncate font-semibold text-[#000000E6]'>{props.title}</h3>
-					) : (
-						<div className='mb-1 h-5 w-full rounded-md bg-gray-200' />
-					)}
-					{props.hostname ? (
+					:	<div className='mb-1 h-5 w-full rounded-md bg-gray-200' />}
+					{props.hostname ?
 						<p className='text-xs text-[#00000099]'>{props.hostname}</p>
-					) : (
-						<div className='mb-1 h-4 w-24 rounded-md bg-gray-200' />
-					)}
+					:	<div className='mb-1 h-4 w-24 rounded-md bg-gray-200' />}
 				</div>
 			</div>
 		</div>

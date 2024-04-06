@@ -133,15 +133,17 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 		false;
 
 	const metaTags = useMemo(() => {
-		return form.watch('customMetaTags') ??
-			(mode === 'update' && !form.formState.dirtyFields.url)
-			? {
+		return (
+				form.watch('customMetaTags') ??
+					(mode === 'update' && !form.formState.dirtyFields.url)
+			) ?
+				{
 					image: '',
 					title: form.watch('title') ?? '',
 					description: form.watch('description') ?? '',
 					favicon: form.watch('favicon') ?? '',
 				}
-			: metaTagsFromUrl;
+			:	metaTagsFromUrl;
 	}, [mode, form, metaTagsFromUrl]);
 
 	/**
@@ -196,9 +198,9 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 						icon='link'
 						iconOverride={LinkIconOrFavicon}
 						title={
-							mode === 'update' && selectedLink
-								? `Update ${selectedLink.domain}/${selectedLink.key}`
-								: 'Create a new link'
+							mode === 'update' && selectedLink ?
+								`Update ${selectedLink.domain}/${selectedLink.key}`
+							:	'Create a new link'
 						}
 					/>
 
@@ -222,10 +224,12 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 
 									<AddWorkspaceSpotifyArtistId
 										spotifyArtistId={
-											transparentLinkData?.app === 'spotify' &&
-											transparentLinkData.appRoute?.startsWith('artist/')
-												? transparentLinkData.appRoute.split('/')[1]
-												: ''
+											(
+												transparentLinkData?.app === 'spotify' &&
+												transparentLinkData.appRoute?.startsWith('artist/')
+											) ?
+												transparentLinkData.appRoute.split('/')[1]
+											:	''
 										}
 									/>
 
@@ -254,11 +258,9 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 														onClick={() => randomizeKey()}
 														disabled={generatingKey}
 													>
-														{generatingKey ? (
+														{generatingKey ?
 															<LoadingSpinner />
-														) : (
-															<Icon.shuffle className='h-3 w-3' />
-														)}
+														:	<Icon.shuffle className='h-3 w-3' />}
 														<p>{generatingKey ? 'Generating' : 'Randomize'}</p>
 													</button>
 												</Label>
@@ -266,10 +268,9 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 										</div>
 
 										<div className='flex w-full flex-grow flex-row'>
-											{loadingDomains ? (
+											{loadingDomains ?
 												'loading domains'
-											) : (
-												<>
+											:	<>
 													<SelectField
 														name='domain'
 														options={domainOptions}
@@ -282,7 +283,7 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 														disabled={mode === 'update' && !!selectedLink?.key}
 													/>
 												</>
-											)}
+											}
 										</div>
 									</div>
 									{mode === 'update' && selectedLink?.transparent && (

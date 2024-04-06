@@ -14,9 +14,10 @@ export const stripeConnectRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			let stripeConnectAccountId = isStripeTestEnvironment()
-				? ctx.workspace.stripeConnectAccountId_devMode
-				: ctx.workspace.stripeConnectAccountId;
+			let stripeConnectAccountId =
+				isStripeTestEnvironment() ?
+					ctx.workspace.stripeConnectAccountId_devMode
+				:	ctx.workspace.stripeConnectAccountId;
 			console.log('stripeConnectAccountId', stripeConnectAccountId);
 
 			if (stripeConnectAccountId && ctx.workspace.stripeConnectChargesEnabled === true) {
@@ -50,9 +51,9 @@ export const stripeConnectRouter = createTRPCRouter({
 						name: ctx.workspace.name,
 						url: ctx.workspace.website ?? undefined,
 						product_description:
-							ctx.workspace.type === 'solo_artist' || ctx.workspace.type === 'band'
-								? 'We sell band merchandise such as T-shirts, CDs, and other music-related items'
-								: undefined,
+							ctx.workspace.type === 'solo_artist' || ctx.workspace.type === 'band' ?
+								'We sell band merchandise such as T-shirts, CDs, and other music-related items'
+							:	undefined,
 					},
 					metadata: {
 						workspaceId: ctx.workspace.id,
@@ -64,9 +65,9 @@ export const stripeConnectRouter = createTRPCRouter({
 				await ctx.db.http
 					.update(Workspaces)
 					.set(
-						isStripeTestEnvironment()
-							? { stripeConnectAccountId_devMode: stripeConnectAccountId }
-							: { stripeConnectAccountId },
+						isStripeTestEnvironment() ?
+							{ stripeConnectAccountId_devMode: stripeConnectAccountId }
+						:	{ stripeConnectAccountId },
 					)
 					.where(eq(Workspaces.id, ctx.workspace.id));
 			}

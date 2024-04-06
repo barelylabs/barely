@@ -20,52 +20,45 @@ import { _Users_To_Workspaces } from '../routes/user/user.sql';
 const trpcSources = ['nextjs-react', 'rsc', 'rest'] as const;
 type TRPCSource = (typeof trpcSources)[number];
 
-export const createTRPCContext = async (opts: {
+export const createTRPCContext = (opts: {
 	headers: Headers;
 	session: Session | null;
 	rest?: boolean;
 }) => {
-	let session: Session | null = null;
+	const session = opts.session;
 
-	if (opts.session) {
-		session = opts.session;
-	} else if (!opts.rest) {
-		const { auth } = await import('../auth');
-		session = await auth();
-	}
+	const source =
+		opts.rest ? 'rest'
+		: trpcSources.includes(opts.headers.get('x-trpc-source') as TRPCSource) ?
+			(opts.headers.get('x-trpc-source') as TRPCSource)
+		:	'unknown';
 
-	const source = opts.rest
-		? 'rest'
-		: trpcSources.includes(opts.headers.get('x-trpc-source') as TRPCSource)
-			? (opts.headers.get('x-trpc-source') as TRPCSource)
-			: 'unknown';
-
-	const longitude = opts.rest
-		? undefined
-		: opts.headers.get('x-longitude') ??
+	const longitude =
+		opts.rest ? undefined : (
+			opts.headers.get('x-longitude') ??
 			opts.headers.get('x-vercel-ip-longitude') ??
-			undefined;
-	const latitude = opts.rest
-		? undefined
-		: opts.headers.get('x-latitude') ??
+			undefined
+		);
+	const latitude =
+		opts.rest ? undefined : (
+			opts.headers.get('x-latitude') ??
 			opts.headers.get('x-vercel-ip-latitude') ??
-			undefined;
+			undefined
+		);
 
-	const pageSessionId = opts.rest
-		? undefined
-		: opts.headers.get('x-page-session-id') ?? null;
+	const pageSessionId =
+		opts.rest ? undefined : opts.headers.get('x-page-session-id') ?? null;
 
-	const pusherSocketId = opts.rest
-		? undefined
-		: opts.headers.get('x-pusher-socket-id') ?? null;
+	const pusherSocketId =
+		opts.rest ? undefined : opts.headers.get('x-pusher-socket-id') ?? null;
 
-	const workspaceHandle = opts.rest
-		? undefined
-		: opts.headers.get('x-workspace-handle') ?? null;
+	const workspaceHandle =
+		opts.rest ? undefined : opts.headers.get('x-workspace-handle') ?? null;
 
-	const workspace = workspaceHandle
-		? session?.user.workspaces.find(w => w.handle === workspaceHandle)
-		: null;
+	const workspace =
+		workspaceHandle ?
+			session?.user.workspaces.find(w => w.handle === workspaceHandle)
+		:	null;
 
 	const ip = opts.rest ? '' : opts.headers.get('x-real-ip') ?? '';
 

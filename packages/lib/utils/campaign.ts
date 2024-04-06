@@ -25,11 +25,9 @@ export function playlistPitchCostInDollars(props: { curatorReach: number }) {
 	// console.log('curatorReach is', props.curatorReach);
 
 	const cost =
-		props.curatorReach <= 10
-			? 10 * props.curatorReach
-			: props.curatorReach <= 20
-				? 10 * 10 + 9 * (props.curatorReach - 10)
-				: 10 * 10 + 9 * 10 + 8 * (props.curatorReach - 20);
+		props.curatorReach <= 10 ? 10 * props.curatorReach
+		: props.curatorReach <= 20 ? 10 * 10 + 9 * (props.curatorReach - 10)
+		: 10 * 10 + 9 * 10 + 8 * (props.curatorReach - 20);
 
 	return Math.ceil(cost / 5) * 5;
 }

@@ -10,7 +10,7 @@ export const runtime = 'edge';
 export async function generateMetadata({ params }: { params: { linkId: string } }) {
 	const data = await getLinkById(params.linkId, db);
 
-	if (!data || !data.customMetaTags) {
+	if (!data?.customMetaTags) {
 		return;
 	}
 

@@ -137,11 +137,10 @@ export const GridListCard = React.forwardRef<
 		},
 		ref,
 	) => {
-		const textValue = props.textValue
-			? props.textValue
-			: typeof children === 'string'
-				? children
-				: undefined;
+		const textValue =
+			props.textValue ? props.textValue
+			: typeof children === 'string' ? children
+			: undefined;
 		const [showContextMenu, setShowContextMenu] = useState(false);
 
 		const atLeastOnePopoverAction =
@@ -280,13 +279,12 @@ export function GridItemCheckbox({ children, className, ...props }: CheckboxProp
 							'outline outline-0 outline-offset-2 outline-primary group-data-[selected]:bg-primary',
 						)}
 					>
-						{isIndeterminate ? (
+						{isIndeterminate ?
 							<rect x={1} y={7.5} width={15} height={3} />
-						) : (
-							isSelected && (
+						:	isSelected && (
 								<Check className='h-4 w-4 text-primary-foreground group-disabled:text-gray-400 ' />
 							)
-						)}
+						}
 					</div>
 					{children}
 				</>

@@ -131,9 +131,9 @@ export function MediaContextProvider({
 
 	/* last selected */
 	const lastSelectedFileId =
-		optimisticSelection === 'all'
-			? undefined
-			: Array.from(optimisticSelection).pop()?.toString();
+		optimisticSelection === 'all' ? undefined : (
+			Array.from(optimisticSelection).pop()?.toString()
+		);
 
 	const lastSelectedFile = files.find(f => f.id === lastSelectedFileId);
 

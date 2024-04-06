@@ -180,6 +180,7 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 			className='w-full'
 			preventDefaultClose={form.formState.isDirty || submitDisabled}
 			onClose={handleCloseModal}
+			onAutoFocus={() => form.setFocus('name')}
 		>
 			<ModalHeader
 				icon='product'

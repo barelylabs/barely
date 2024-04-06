@@ -64,12 +64,11 @@ const RegisterUserForm = ({ callbackUrl }: RegisterFormProps) => {
 
 	return (
 		<>
-			{loginEmailSent ? (
+			{loginEmailSent ?
 				<LoginLinkSent identifier={identifier} provider='email' />
-			) : creatingAccount ? (
+			: creatingAccount ?
 				<p className='text-sm text-subtle-foreground'>Creating your account...</p>
-			) : (
-				<>
+			:	<>
 					<p className='text-sm text-subtle-foreground'>
 						Enter your contact info to create an account
 					</p>
@@ -139,7 +138,7 @@ const RegisterUserForm = ({ callbackUrl }: RegisterFormProps) => {
 						</div>
 					</Form>
 				</>
-			)}
+			}
 		</>
 	);
 };

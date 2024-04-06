@@ -42,13 +42,13 @@ export async function createStripeWorkspaceCustomer(props: {
 	const stripeWorkspace = await db.http
 		.update(Workspaces)
 		.set(
-			env.VERCEL_ENV === 'development' || env.VERCEL_ENV === 'preview'
-				? {
-						stripeCustomerId_devMode: stripeCustomer.id,
-					}
-				: {
-						stripeCustomerId: stripeCustomer.id,
-					},
+			env.VERCEL_ENV === 'development' || env.VERCEL_ENV === 'preview' ?
+				{
+					stripeCustomerId_devMode: stripeCustomer.id,
+				}
+			:	{
+					stripeCustomerId: stripeCustomer.id,
+				},
 		)
 		.where(eq(Workspaces.id, props.workspaceId))
 		.returning();
@@ -109,9 +109,8 @@ export async function handleStripeCheckoutSessionComplete(
 				/**
 				 * WORKSPACE PLAN
 				 * */
-				const plan = line_item.price?.id
-					? getPlanByStripePriceId(line_item.price.id)
-					: undefined;
+				const plan =
+					line_item.price?.id ? getPlanByStripePriceId(line_item.price.id) : undefined;
 
 				if (plan) {
 					//
@@ -161,8 +160,9 @@ export async function handleStripeCheckoutSessionComplete(
 				}
 
 				/** CAMPAIGNS */
-				const campaign = lineItemMetadata.campaignId
-					? await db.http.query.Campaigns.findFirst({
+				const campaign =
+					lineItemMetadata.campaignId ?
+						await db.http.query.Campaigns.findFirst({
 							where: eq(Campaigns.id, lineItemMetadata.campaignId),
 							with: {
 								track: {
@@ -172,7 +172,7 @@ export async function handleStripeCheckoutSessionComplete(
 								},
 							},
 						})
-					: undefined;
+					:	undefined;
 
 				let name = '';
 				let description = '';

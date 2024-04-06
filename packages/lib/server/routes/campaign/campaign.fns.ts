@@ -46,9 +46,10 @@ export async function createPitchCheckoutLink(props: {
 		throw new Error('Campaign must have a defined curator reach.');
 	}
 
-	const workspace = props.workspace.stripeCustomerId
-		? props.workspace
-		: await createStripeWorkspaceCustomer({
+	const workspace =
+		props.workspace.stripeCustomerId ?
+			props.workspace
+		:	await createStripeWorkspaceCustomer({
 				workspaceId: props.workspace.id,
 				email: props.user.email,
 				name:

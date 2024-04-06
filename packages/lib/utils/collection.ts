@@ -68,16 +68,18 @@ export function insert<T extends Item>({
 	console.log('itemsToInsert', itemsToInsert);
 	console.log('collection', collection);
 
-	const filteredCollection = reorder
-		? collection.filter(item => !itemsToInsert.some(i => i.id === item.id))
-		: collection;
+	const filteredCollection =
+		reorder ?
+			collection.filter(item => !itemsToInsert.some(i => i.id === item.id))
+		:	collection;
 
 	console.log('filteredCollection', filteredCollection);
 	console.log('insertId', insertId);
 
-	const insertIndex = filteredCollection.length
-		? filteredCollection.findIndex(item => item.id === insertId)
-		: 0;
+	const insertIndex =
+		filteredCollection.length ?
+			filteredCollection.findIndex(item => item.id === insertId)
+		:	0;
 
 	console.log('insertIndex', insertIndex);
 
@@ -86,23 +88,23 @@ export function insert<T extends Item>({
 	}
 
 	const lexobefore =
-		position === 'before'
-			? filteredCollection[insertIndex - 1]?.lexorank
-			: filteredCollection[insertIndex]?.lexorank;
+		position === 'before' ?
+			filteredCollection[insertIndex - 1]?.lexorank
+		:	filteredCollection[insertIndex]?.lexorank;
 
 	const lexoafter =
-		position === 'before'
-			? filteredCollection[insertIndex]?.lexorank
-			: filteredCollection[insertIndex + 1]?.lexorank;
+		position === 'before' ?
+			filteredCollection[insertIndex]?.lexorank
+		:	filteredCollection[insertIndex + 1]?.lexorank;
 
 	// calculate lexorank for each item to insert
 	for (let i = 0; i < itemsToInsert.length; i++) {
 		if (!itemsToInsert[i]) continue;
 
 		const lexorank =
-			i === 0
-				? lexoBetween(lexobefore, lexoafter)
-				: lexoBetween(itemsToInsert[i - 1]?.lexorank, lexoafter);
+			i === 0 ?
+				lexoBetween(lexobefore, lexoafter)
+			:	lexoBetween(itemsToInsert[i - 1]?.lexorank, lexoafter);
 
 		console.log('updated lexorank', lexorank);
 		itemsToInsert[i]!.lexorank = lexorank;

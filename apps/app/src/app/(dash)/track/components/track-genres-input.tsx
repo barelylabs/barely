@@ -47,13 +47,14 @@ export function TrackGenresInput(props: { trackId: string }) {
 		},
 	});
 
-	const values: GenreWithPlaylistStats[] = trackGenres
-		? trackGenres.map(tg => ({
+	const values: GenreWithPlaylistStats[] =
+		trackGenres ?
+			trackGenres.map(tg => ({
 				...tg,
 				totalPlaylists: 0,
 				totalPitchReviewers: 0,
 			}))
-		: [];
+		:	[];
 	const options = playlistGenreOptions ?? [];
 
 	return (

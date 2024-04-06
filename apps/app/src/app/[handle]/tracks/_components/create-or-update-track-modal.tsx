@@ -61,9 +61,9 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 	/* form */
 	const { form, onSubmit: onSubmitTrack } = useCreateOrUpdateForm({
 		updateItem:
-			mode === 'update' && selectedTrack
-				? formatWorkspaceTrackToUpsertTrackForm(selectedTrack)
-				: null,
+			mode === 'update' && selectedTrack ?
+				formatWorkspaceTrackToUpsertTrackForm(selectedTrack)
+			:	null,
 		upsertSchema: upsertTrackSchema,
 		defaultValues: defaultTrack,
 		handleCreateItem: async d => {
@@ -90,9 +90,9 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 	} = artworkUploadState;
 
 	const artworkImagePreview =
-		artworkUploadQueue[0]?.previewImage ?? mode === 'update'
-			? selectedTrack?.artworkFiles?.find(f => f.current)?.src ?? ''
-			: '';
+		artworkUploadQueue[0]?.previewImage ?? mode === 'update' ?
+			selectedTrack?.artworkFiles?.find(f => f.current)?.src ?? ''
+		:	'';
 
 	/* Audio upload */
 	const audioUploadState = useUpload({
@@ -125,11 +125,13 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 						const af: InsertTrackAudioFile = {
 							fileId: item.presigned?.fileRecord.id ?? '',
 							masterCompressed:
-								item.file.type === 'audio/mpeg' ||
-								item.file.type === 'audio/m4a' ||
-								item.file.type === 'audio/x-m4a'
-									? true
-									: undefined,
+								(
+									item.file.type === 'audio/mpeg' ||
+									item.file.type === 'audio/m4a' ||
+									item.file.type === 'audio/x-m4a'
+								) ?
+									true
+								:	undefined,
 							masterWav: item.file.type === 'audio/wav' ? true : undefined,
 						};
 						return af;
@@ -157,9 +159,9 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 
 	// MASTERS
 	const masterCompressed =
-		mode === 'update'
-			? selectedTrack?.audioFiles?.find(f => f.masterCompressed)
-			: undefined;
+		mode === 'update' ?
+			selectedTrack?.audioFiles?.find(f => f.masterCompressed)
+		:	undefined;
 	const masterWav =
 		mode === 'update' ? selectedTrack?.audioFiles?.find(f => f.masterWav) : undefined;
 

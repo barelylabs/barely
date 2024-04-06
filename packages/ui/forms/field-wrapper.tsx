@@ -49,18 +49,18 @@ export function FieldWrapper({
 	toggleDisabled?: () => void;
 } & FieldLabelAddonProps &
 	FieldMessagesProps) {
-	const _labelButton = labelButton ? (
-		labelButton
-	) : isDisabled && toggleDisabled ? (
-		<button
-			type='button'
-			onClick={toggleDisabled}
-			className='flex flex-row items-center gap-1'
-		>
-			<Icon.lock className='h-[11px] w-[11px]' />
-			Unlock
-		</button>
-	) : null;
+	const _labelButton =
+		labelButton ? labelButton
+		: isDisabled && toggleDisabled ?
+			<button
+				type='button'
+				onClick={toggleDisabled}
+				className='flex flex-row items-center gap-1'
+			>
+				<Icon.lock className='h-[11px] w-[11px]' />
+				Unlock
+			</button>
+		:	null;
 
 	return (
 		<>

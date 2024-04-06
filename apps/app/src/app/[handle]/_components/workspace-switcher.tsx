@@ -114,9 +114,9 @@ export function WorkspaceSwitcher() {
 									<Icon.check
 										className={cn(
 											'ml-auto h-4 w-4',
-											currentWorkspace.handle === personalAccount.handle
-												? 'opacity-100'
-												: 'opacity-0',
+											currentWorkspace.handle === personalAccount.handle ?
+												'opacity-100'
+											:	'opacity-0',
 										)}
 									/>
 								</CommandItem>
@@ -150,9 +150,9 @@ export function WorkspaceSwitcher() {
 									<Icon.check
 										className={cn(
 											'ml-auto h-4 w-4',
-											currentWorkspace.handle === workspace.handle
-												? 'opacity-100'
-												: 'opacity-0',
+											currentWorkspace.handle === workspace.handle ?
+												'opacity-100'
+											:	'opacity-0',
 										)}
 									/>
 								</CommandItem>

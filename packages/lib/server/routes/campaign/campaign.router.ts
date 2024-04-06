@@ -51,17 +51,18 @@ export const campaignRouter = createTRPCRouter({
 					message: 'Artist must have an id or spotifyArtistId',
 				});
 
-			let dbArtist = input.artist.id
-				? await ctx.db.http.query.Workspaces.findFirst({
+			let dbArtist =
+				input.artist.id ?
+					await ctx.db.http.query.Workspaces.findFirst({
 						where: eq(Workspaces.id, input.artist.id),
 						with: { _users: true },
 					})
-				: input.artist.spotifyArtistId
-					? await ctx.db.http.query.Workspaces.findFirst({
-							where: eq(Workspaces.spotifyArtistId, input.artist.spotifyArtistId),
-							with: { _users: true },
-						})
-					: null;
+				: input.artist.spotifyArtistId ?
+					await ctx.db.http.query.Workspaces.findFirst({
+						where: eq(Workspaces.spotifyArtistId, input.artist.spotifyArtistId),
+						with: { _users: true },
+					})
+				:	null;
 
 			// 👩‍💻 ↔️ 👩‍🎤 if artist exists, check if user is a member of the artist team
 
@@ -112,15 +113,16 @@ export const campaignRouter = createTRPCRouter({
 
 			// 💿 check if track exists
 
-			let dbTrack = input.track.id
-				? await ctx.db.http.query.Tracks.findFirst({
+			let dbTrack =
+				input.track.id ?
+					await ctx.db.http.query.Tracks.findFirst({
 						where: eq(Tracks.id, input.track.id),
 					})
-				: input.track.spotifyId
-					? await ctx.db.http.query.Tracks.findFirst({
-							where: eq(Tracks.spotifyId, input.track.spotifyId),
-						})
-					: null;
+				: input.track.spotifyId ?
+					await ctx.db.http.query.Tracks.findFirst({
+						where: eq(Tracks.spotifyId, input.track.spotifyId),
+					})
+				:	null;
 
 			// 💿 if track doesn't exist, create new track
 

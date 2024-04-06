@@ -1,7 +1,7 @@
 {
 	"name": "@barely/eslint-config",
 	"version": "0.1.0",
-	"license": "MIT",
+	"private": true,
 	"files": [
 		"./base.js",
 		"./nextjs.js",
@@ -15,27 +15,28 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@barely/tsconfig": "workspace:^0.1.0",
-		"@next/eslint-plugin-next": "^13.4.16",
-		"@types/eslint": "^8.44.2",
-		"@typescript-eslint/eslint-plugin": "^6.10.0",
-		"@typescript-eslint/parser": "^6.10.0",
-		"eslint-config-prettier": "^9.1.0",
-		"eslint-config-turbo": "^1.11.3",
-		"eslint-plugin-import": "^2.29.0",
+		"@next/eslint-plugin-next": "^14.1.4",
+		"@typescript-eslint/eslint-plugin": "^7.4.0",
+		"@typescript-eslint/parser": "^7.4.0",
+		"eslint-config-turbo": "^1.13.0",
+		"eslint-plugin-import": "^2.29.1",
 		"eslint-plugin-jsx-a11y": "^6.8.0",
-		"eslint-plugin-react": "^7.33.2",
+		"eslint-plugin-react": "^7.34.1",
 		"eslint-plugin-react-hooks": "^4.6.0"
 	},
 	"devDependencies": {
-		"eslint": "^8.56.0",
-		"prettier": "^3.1.1",
-		"typescript": "^5.3.3"
+		"@barely/prettier-config": "workspace:*",
+		"@barely/tsconfig": "workspace:*",
+		"@types/eslint": "^8.56.6",
+		"eslint": "^8.57.0",
+		"prettier": "^3.2.5",
+		"typescript": "^5.4.3"
 	},
 	"eslintConfig": {
 		"root": true,
 		"extends": [
 			"./base.js"
 		]
-	}
+	},
+	"prettier": "@barely/prettier-config"
 }

@@ -50,11 +50,9 @@ const Tooltip = ({
 								className,
 							)}
 						>
-							{typeof content === 'string' ? (
+							{typeof content === 'string' ?
 								<span className='block text-center'>{content}</span>
-							) : (
-								content
-							)}
+							:	content}
 						</div>
 					</Drawer.Content>
 				</Drawer.Portal>
@@ -73,13 +71,11 @@ const Tooltip = ({
 					side={side}
 					className='animate-slide-up-fade z-[99] items-center overflow-hidden rounded-md border border-gray-200 bg-white shadow-md md:block'
 				>
-					{typeof content === 'string' ? (
+					{typeof content === 'string' ?
 						<div className='block max-w-xs px-4 py-2 text-center text-sm text-gray-700'>
 							{content}
 						</div>
-					) : (
-						content
-					)}
+					:	content}
 				</TooltipPrimitive.Content>
 			</TooltipPrimitive.Portal>
 		</TooltipPrimitive.Root>

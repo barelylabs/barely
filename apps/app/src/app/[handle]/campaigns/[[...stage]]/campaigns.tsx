@@ -59,23 +59,21 @@ export const AllCampaigns = () => {
 					);
 
 					const badge =
-						campaign.stage === 'approved' ? (
-							<Badge variant='success'>Approved</Badge>
-						) : campaign.stage === 'screening' ? (
-							<Badge variant='warning'>Pending</Badge>
-						) : undefined;
+						campaign.stage === 'approved' ? <Badge variant='success'>Approved</Badge>
+						: campaign.stage === 'screening' ? <Badge variant='warning'>Pending</Badge>
+						: undefined;
 					const badgeVariant = campaign.stage === 'approved' ? 'success' : undefined;
 
 					const button =
-						campaign.stage === 'approved' ? (
+						campaign.stage === 'approved' ?
 							<Link href={`/${workspace.handle}/campaign/${campaign.id}/launch`} passHref>
 								<Button>Launch Campaign 🚀</Button>
 							</Link>
-						) : campaign.stage === 'active' ? (
+						: campaign.stage === 'active' ?
 							<Link href={`/${workspace.handle}/campaign/${campaign.id}`} passHref>
 								<Button look='muted'>View Campaign</Button>
 							</Link>
-						) : null;
+						:	null;
 
 					return (
 						<Fragment key={`${campaignIndex}`}>

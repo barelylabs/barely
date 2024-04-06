@@ -52,7 +52,9 @@ export function LinkDevices() {
 	});
 
 	const listData =
-		tab === 'Device' ? devices : tab === 'Browser' ? browsers : operatingSystems;
+		tab === 'Device' ? devices
+		: tab === 'Browser' ? browsers
+		: operatingSystems;
 
 	const barList = (limit?: number) => {
 		if (!listData) return null;

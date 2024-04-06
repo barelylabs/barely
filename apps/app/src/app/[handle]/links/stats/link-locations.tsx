@@ -25,9 +25,10 @@ export function LinkLocations() {
 	const locationData =
 		tab === 'Country' ? countries.map(c => ({ ...c, city: '' })) : cities;
 
-	const plotData: BarListBarProps[] = !locationData
-		? []
-		: locationData?.map(c => ({
+	const plotData: BarListBarProps[] =
+		!locationData ?
+			[]
+		:	locationData?.map(c => ({
 				name: tab === 'Country' ? COUNTRIES[c.country] ?? c.country : c.city,
 				value: c.sessions,
 				icon: () => (
@@ -40,9 +41,9 @@ export function LinkLocations() {
 					</picture>
 				),
 				href:
-					tab === 'Country'
-						? getSetFilterPath('country', c.country)
-						: getSetFilterPath('city', c.city),
+					tab === 'Country' ?
+						getSetFilterPath('country', c.country)
+					:	getSetFilterPath('city', c.city),
 				target: '_self',
 			}));
 

@@ -25,7 +25,7 @@ export function LinkFilters() {
 					<Text className='text-left' variant='lg/semibold'>
 						Filters
 					</Text>
-					{showClearButton ? (
+					{showClearButton ?
 						<Button
 							look='outline'
 							size='sm'
@@ -39,7 +39,7 @@ export function LinkFilters() {
 							<Icon.x className='mr-1 h-3 w-3' />
 							Clear
 						</Button>
-					) : null}
+					:	null}
 				</div>
 
 				<Input

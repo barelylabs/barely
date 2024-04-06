@@ -34,7 +34,7 @@ export function Countdown({
 		} else {
 			return (
 				<div className={cn('flex flex-row gap-2 text-4xl font-bold', className)}>
-					{showZeros ?? days > 0 ? (
+					{showZeros ?? days > 0 ?
 						<>
 							<div className='flex flex-col items-center'>
 								<span>{days.toString().padStart(2, '0')}</span>
@@ -42,8 +42,8 @@ export function Countdown({
 							</div>
 							<span>:</span>
 						</>
-					) : null}
-					{showZeros ?? days > 0 ?? hours > 0 ? (
+					:	null}
+					{showZeros ?? days > 0 ?? hours > 0 ?
 						<>
 							<div className='flex flex-col items-center'>
 								<span>{hours.toString().padStart(2, '0')}</span>
@@ -51,8 +51,8 @@ export function Countdown({
 							</div>
 							<span>:</span>
 						</>
-					) : null}
-					{showZeroMinutes ?? showZeros ?? days > 0 ?? hours > 0 ?? minutes > 0 ? (
+					:	null}
+					{showZeroMinutes ?? showZeros ?? days > 0 ?? hours > 0 ?? minutes > 0 ?
 						<>
 							<div className='flex flex-col items-center'>
 								<span>{minutes.toString().padStart(2, '0')}</span>
@@ -60,7 +60,7 @@ export function Countdown({
 							</div>
 							<span>:</span>
 						</>
-					) : null}
+					:	null}
 
 					<>
 						<div className='flex flex-col items-center'>

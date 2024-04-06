@@ -139,9 +139,9 @@ export function ProductContextProvider({
 	}
 
 	const lastSelectedProductId =
-		optimisticSelection === 'all'
-			? undefined
-			: Array.from(optimisticSelection).pop()?.toString();
+		optimisticSelection === 'all' ? undefined : (
+			Array.from(optimisticSelection).pop()?.toString()
+		);
 
 	const lastSelectedProduct = products.products.find(p => p.id === lastSelectedProductId);
 

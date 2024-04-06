@@ -53,9 +53,9 @@ export const SelectField = <
 										<SelectItem
 											key={option.value}
 											value={
-												typeof option.value === 'string'
-													? option.value
-													: option.value.toString()
+												typeof option.value === 'string' ?
+													option.value
+												:	option.value.toString()
 											}
 										>
 											{option.label}

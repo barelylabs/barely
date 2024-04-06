@@ -48,9 +48,10 @@ export interface TextProps extends Omit<TextStylesProps, 'size' | 'weight'> {
 }
 
 const Text = ({ variant, children, className, ...props }: TextProps) => {
-	const [size, weight]: [TextStylesProps['size'], TextStylesProps['weight']] = !variant
-		? ['md', 'normal']
-		: (variant.split('/') as [TextStylesProps['size'], TextStylesProps['weight']]);
+	const [size, weight]: [TextStylesProps['size'], TextStylesProps['weight']] =
+		!variant ?
+			['md', 'normal']
+		:	(variant.split('/') as [TextStylesProps['size'], TextStylesProps['weight']]);
 
 	return (
 		<p className={cn(textStyles({ size: size, weight, ...props }), className)}>
