@@ -68,20 +68,20 @@ export const env = createEnv({
 	client: {
 		NEXT_PUBLIC_APP_BASE_URL: z.string().url(),
 		NEXT_PUBLIC_APP_DEV_PORT: devPortSchema,
-		NEXT_PUBLIC_BIO_BASE_URL: z.string().url(),
+		NEXT_PUBLIC_BIO_BASE_URL: z.string(),
 		NEXT_PUBLIC_BIO_DEV_PORT: devPortSchema,
-		NEXT_PUBLIC_CART_BASE_URL: z.string().url(),
+		NEXT_PUBLIC_CART_BASE_URL: z.string(),
 		NEXT_PUBLIC_CART_DEV_PORT: devPortSchema,
-		NEXT_PUBLIC_PRESS_BASE_URL: z.string().url(),
+		NEXT_PUBLIC_PRESS_BASE_URL: z.string(),
 		NEXT_PUBLIC_PRESS_DEV_PORT: devPortSchema,
 		NEXT_PUBLIC_CURRENT_APP: z.enum(['app', 'bio', 'cart', 'link', 'press', 'www']),
-		NEXT_PUBLIC_LINK_BASE_URL: z.string().url(),
+		NEXT_PUBLIC_LINK_BASE_URL: z.string(),
 		NEXT_PUBLIC_LINK_DEV_PORT: devPortSchema,
 		NEXT_PUBLIC_PUSHER_APP_ID: z.string(),
 		NEXT_PUBLIC_PUSHER_APP_KEY: z.string(),
 		NEXT_PUBLIC_PUSHER_APP_CLUSTER: z.string(),
 		NEXT_PUBLIC_VERCEL_ENV: z.enum(['development', 'preview', 'production']),
-		NEXT_PUBLIC_WWW_BASE_URL: z.string().url(),
+		NEXT_PUBLIC_WWW_BASE_URL: z.string(),
 		NEXT_PUBLIC_WWW_DEV_PORT: devPortSchema,
 	},
 	experimental__runtimeEnv: {
@@ -103,7 +103,9 @@ export const env = createEnv({
 		NEXT_PUBLIC_WWW_BASE_URL: process.env.NEXT_PUBLIC_WWW_BASE_URL,
 		NEXT_PUBLIC_WWW_DEV_PORT: process.env.NEXT_PUBLIC_WWW_DEV_PORT,
 	},
-	skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
+	skipValidation:
+		// !!process.env.CI ||
+		!!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === 'lint',
 });
 
 // export const { env, clientEnv } = zEnv({
