@@ -64,6 +64,7 @@ export const env = createEnv({
 		VERCEL_LINK_PROJECT_ID: z.string(),
 		VERCEL_TEAM_ID: z.string(),
 		VERCEL_TOKEN: z.string(),
+		VERCEL_TOOKEN: z.string(),
 	},
 	client: {
 		NEXT_PUBLIC_APP_BASE_URL: z.string(),
