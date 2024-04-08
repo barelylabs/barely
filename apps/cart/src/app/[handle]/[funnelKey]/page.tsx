@@ -32,9 +32,10 @@ export default function CartPage({
 
 	const cartId = cookies().get(`${handle}.${funnelKey}.cartId`)?.value;
 
-	const initialData = cartId
-		? cartApi.getByIdAndFunnelKey({ id: cartId, handle, funnelKey })
-		: cartApi.createByFunnelKey({
+	const initialData =
+		cartId ?
+			cartApi.getByIdAndFunnelKey({ id: cartId, handle, funnelKey })
+		:	cartApi.createByFunnelKey({
 				handle,
 				funnelKey,
 				shipTo: {
