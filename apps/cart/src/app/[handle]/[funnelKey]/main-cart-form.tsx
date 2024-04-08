@@ -160,7 +160,7 @@ export function MainCartForm({
 	const form = useZodForm({
 		schema: updateMainCartFromCartSchema,
 		values: {
-			id: cart.id,
+			...cart,
 			handle: funnel.workspace.handle,
 			funnelKey: funnel.key,
 
@@ -169,13 +169,7 @@ export function MainCartForm({
 				: cart.mainProductPayWhatYouWantPrice,
 
 			mainProductQuantity: cart.mainProductQuantity ?? 1,
-			mainProductApparelSize: cart.mainProductApparelSize,
-
-			addedBumpProduct: cart.addedBumpProduct,
 			bumpProductQuantity: cart.bumpProductQuantity ?? 1,
-			bumpProductApparelSize: cart.bumpProductApparelSize,
-
-			marketingOptIn: cart.marketingOptIn,
 		},
 		resetOptions: {
 			keepDirtyValues: true,
