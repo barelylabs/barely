@@ -14,17 +14,20 @@ export const stripeConnectRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			let stripeConnectAccountId =
-				isStripeTestEnvironment() ?
-					ctx.workspace.stripeConnectAccountId_devMode
-				:	ctx.workspace.stripeConnectAccountId;
+			let stripeConnectAccountId = isStripeTestEnvironment()
+				? ctx.workspace.stripeConnectAccountId_devMode
+				: ctx.workspace.stripeConnectAccountId;
 			console.log('stripeConnectAccountId', stripeConnectAccountId);
 
-			if (stripeConnectAccountId && ctx.workspace.stripeConnectChargesEnabled === true) {
+			const chargesEnabled = isStripeTestEnvironment()
+				? ctx.workspace.stripeConnectChargesEnabled_devMode
+				: ctx.workspace.stripeConnectChargesEnabled;
+
+			if (stripeConnectAccountId && chargesEnabled) {
 				return null;
 			}
 
-			if (stripeConnectAccountId && !ctx.workspace.stripeConnectChargesEnabled) {
+			if (stripeConnectAccountId && !chargesEnabled) {
 				const stripeAccount = await stripe.accounts.retrieve(stripeConnectAccountId);
 
 				console.log('stripeAccount', stripeAccount);
@@ -32,9 +35,13 @@ export const stripeConnectRouter = createTRPCRouter({
 				if (stripeAccount.charges_enabled) {
 					await ctx.db.http
 						.update(Workspaces)
-						.set({
-							stripeConnectChargesEnabled: true,
-						})
+						.set(
+							isStripeTestEnvironment()
+								? { stripeConnectChargesEnabled_devMode: true }
+								: {
+										stripeConnectChargesEnabled: true,
+									},
+						)
 						.where(eq(Workspaces.id, ctx.workspace.id));
 					return null;
 				}
@@ -51,9 +58,9 @@ export const stripeConnectRouter = createTRPCRouter({
 						name: ctx.workspace.name,
 						url: ctx.workspace.website ?? undefined,
 						product_description:
-							ctx.workspace.type === 'solo_artist' || ctx.workspace.type === 'band' ?
-								'We sell band merchandise such as T-shirts, CDs, and other music-related items'
-							:	undefined,
+							ctx.workspace.type === 'solo_artist' || ctx.workspace.type === 'band'
+								? 'We sell band merchandise such as T-shirts, CDs, and other music-related items'
+								: undefined,
 					},
 					metadata: {
 						workspaceId: ctx.workspace.id,
@@ -65,9 +72,9 @@ export const stripeConnectRouter = createTRPCRouter({
 				await ctx.db.http
 					.update(Workspaces)
 					.set(
-						isStripeTestEnvironment() ?
-							{ stripeConnectAccountId_devMode: stripeConnectAccountId }
-						:	{ stripeConnectAccountId },
+						isStripeTestEnvironment()
+							? { stripeConnectAccountId_devMode: stripeConnectAccountId }
+							: { stripeConnectAccountId },
 					)
 					.where(eq(Workspaces.id, ctx.workspace.id));
 			}

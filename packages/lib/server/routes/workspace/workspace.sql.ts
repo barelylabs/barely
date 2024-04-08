@@ -87,6 +87,9 @@ export const Workspaces = pgTable(
 			length: 255,
 		}),
 		stripeConnectChargesEnabled: boolean('stripeConnectChargesEnabled').default(false),
+		stripeConnectChargesEnabled_devMode: boolean(
+			'stripeConnectChargesEnabled_devMode',
+		).default(false),
 
 		billingCycleStart: integer('billingCycleStart'),
 		plan: varchar('plan', { length: 10, enum: ['free', 'pro', 'enterprise'] })
