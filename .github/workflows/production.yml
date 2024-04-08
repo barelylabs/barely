@@ -111,21 +111,6 @@ jobs:
 
   # 📱 DEPLOY APPS -- PROD (Not Aliasing to Production Yet) #
 
-  deploy-www:
-    uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, db-push]
-    with:
-      app_name: www
-      working_directory: apps/www
-      scope: barely
-      environment: production
-      git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
-      vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-    secrets:
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_WWW_PROJECT_ID }}
-
   deploy-app:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push]
@@ -200,6 +185,21 @@ jobs:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SPARROW_PROJECT_ID }}
+
+  deploy-www:
+    uses: ./.github/workflows/deploy-to-vercel.yml
+    needs: [git-meta, db-push]
+    with:
+      app_name: www
+      working_directory: apps/www
+      scope: barely
+      environment: production
+      git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
+      vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_WWW_PROJECT_ID }}
 
   # 🔀 MERGE PR BRANCH TO MAIN 🔀
 

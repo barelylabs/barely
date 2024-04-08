@@ -104,7 +104,6 @@ export const env = createEnv({
 		NEXT_PUBLIC_WWW_DEV_PORT: process.env.NEXT_PUBLIC_WWW_DEV_PORT,
 	},
 	skipValidation:
-		// !!process.env.CI ||
 		!!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === 'lint',
 });
 
