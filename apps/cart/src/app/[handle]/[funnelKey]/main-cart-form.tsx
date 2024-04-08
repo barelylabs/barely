@@ -164,10 +164,9 @@ export function MainCartForm({
 			handle: funnel.workspace.handle,
 			funnelKey: funnel.key,
 
-			mainProductPayWhatYouWantPrice:
-				cart.mainProductPayWhatYouWantPrice ?
-					cart.mainProductPayWhatYouWantPrice / 100
-				:	cart.mainProductPayWhatYouWantPrice,
+			mainProductPayWhatYouWantPrice: cart.mainProductPayWhatYouWantPrice
+				? cart.mainProductPayWhatYouWantPrice / 100
+				: cart.mainProductPayWhatYouWantPrice,
 
 			mainProductQuantity: cart.mainProductQuantity ?? 1,
 			mainProductApparelSize: cart.mainProductApparelSize,
@@ -175,6 +174,8 @@ export function MainCartForm({
 			addedBumpProduct: cart.addedBumpProduct,
 			bumpProductQuantity: cart.bumpProductQuantity ?? 1,
 			bumpProductApparelSize: cart.bumpProductApparelSize,
+
+			marketingOptIn: cart.marketingOptIn,
 		},
 		resetOptions: {
 			keepDirtyValues: true,
@@ -335,9 +336,9 @@ export function MainCartForm({
 									</div>
 
 									<Text variant='md/normal'>
-										{funnel.bumpProductDescription?.length ?
-											funnel.bumpProductDescription
-										:	bumpProduct?.description}
+										{funnel.bumpProductDescription?.length
+											? funnel.bumpProductDescription
+											: bumpProduct?.description}
 									</Text>
 
 									<div className='flex flex-row items-center justify-center gap-2'>
@@ -366,9 +367,9 @@ export function MainCartForm({
 												onValueChange={size => {
 													updateCart({
 														addedBumpProduct: size.length > 0 ? true : false,
-														...(isApparelSize(size) ?
-															{ bumpProductApparelSize: size }
-														:	{}),
+														...(isApparelSize(size)
+															? { bumpProductApparelSize: size }
+															: {}),
 													});
 												}}
 											>

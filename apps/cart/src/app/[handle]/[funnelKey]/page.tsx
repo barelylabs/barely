@@ -26,16 +26,15 @@ export default function CartPage({
 	const cartParams = cartPageSearchParams.safeParse(searchParams);
 
 	if (!cartParams.success) {
-		console.log('cartParams', cartParams.error);
+		console.log('cartParams error', cartParams.error);
 		return redirect('/');
 	}
 
 	const cartId = cookies().get(`${handle}.${funnelKey}.cartId`)?.value;
 
-	const initialData =
-		cartId ?
-			cartApi.getByIdAndFunnelKey({ id: cartId, handle, funnelKey })
-		:	cartApi.createByFunnelKey({
+	const initialData = cartId
+		? cartApi.getByIdAndFunnelKey({ id: cartId, handle, funnelKey })
+		: cartApi.createByFunnelKey({
 				handle,
 				funnelKey,
 				shipTo: {

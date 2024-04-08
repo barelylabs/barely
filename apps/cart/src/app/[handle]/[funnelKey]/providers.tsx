@@ -39,7 +39,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 				unstable_httpBatchStreamLink({
 					transformer: SuperJSON,
-					url: getUrl('cart', 'api/edge'),
+					url: getUrl('cart', 'api/cart'),
 					headers() {
 						const headers = new Headers();
 						headers.set('x-trpc-source', 'nextjs-react-cart');
