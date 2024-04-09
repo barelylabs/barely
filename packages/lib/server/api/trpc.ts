@@ -27,38 +27,38 @@ export const createTRPCContext = (opts: {
 }) => {
 	const session = opts.session;
 
-	const source = opts.rest
-		? 'rest'
-		: trpcSources.includes(opts.headers.get('x-trpc-source') as TRPCSource)
-			? (opts.headers.get('x-trpc-source') as TRPCSource)
-			: 'unknown';
+	const source =
+		opts.rest ? 'rest'
+		: trpcSources.includes(opts.headers.get('x-trpc-source') as TRPCSource) ?
+			(opts.headers.get('x-trpc-source') as TRPCSource)
+		:	'unknown';
 
-	const longitude = opts.rest
-		? undefined
-		: opts.headers.get('x-longitude') ??
+	const longitude =
+		opts.rest ? undefined : (
+			opts.headers.get('x-longitude') ??
 			opts.headers.get('x-vercel-ip-longitude') ??
-			undefined;
-	const latitude = opts.rest
-		? undefined
-		: opts.headers.get('x-latitude') ??
+			undefined
+		);
+	const latitude =
+		opts.rest ? undefined : (
+			opts.headers.get('x-latitude') ??
 			opts.headers.get('x-vercel-ip-latitude') ??
-			undefined;
+			undefined
+		);
 
-	const pageSessionId = opts.rest
-		? undefined
-		: opts.headers.get('x-page-session-id') ?? null;
+	const pageSessionId =
+		opts.rest ? undefined : opts.headers.get('x-page-session-id') ?? null;
 
-	const pusherSocketId = opts.rest
-		? undefined
-		: opts.headers.get('x-pusher-socket-id') ?? null;
+	const pusherSocketId =
+		opts.rest ? undefined : opts.headers.get('x-pusher-socket-id') ?? null;
 
-	const workspaceHandle = opts.rest
-		? undefined
-		: opts.headers.get('x-workspace-handle') ?? null;
+	const workspaceHandle =
+		opts.rest ? undefined : opts.headers.get('x-workspace-handle') ?? null;
 
-	const workspace = workspaceHandle
-		? session?.user.workspaces.find(w => w.handle === workspaceHandle)
-		: null;
+	const workspace =
+		workspaceHandle ?
+			session?.user.workspaces.find(w => w.handle === workspaceHandle)
+		:	null;
 
 	const ip = opts.rest ? '' : opts.headers.get('x-real-ip') ?? '';
 
