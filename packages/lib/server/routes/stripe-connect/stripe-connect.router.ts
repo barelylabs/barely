@@ -20,11 +20,16 @@ export const stripeConnectRouter = createTRPCRouter({
 				:	ctx.workspace.stripeConnectAccountId;
 			console.log('stripeConnectAccountId', stripeConnectAccountId);
 
-			if (stripeConnectAccountId && ctx.workspace.stripeConnectChargesEnabled === true) {
+			const chargesEnabled =
+				isStripeTestEnvironment() ?
+					ctx.workspace.stripeConnectChargesEnabled_devMode
+				:	ctx.workspace.stripeConnectChargesEnabled;
+
+			if (stripeConnectAccountId && chargesEnabled) {
 				return null;
 			}
 
-			if (stripeConnectAccountId && !ctx.workspace.stripeConnectChargesEnabled) {
+			if (stripeConnectAccountId && !chargesEnabled) {
 				const stripeAccount = await stripe.accounts.retrieve(stripeConnectAccountId);
 
 				console.log('stripeAccount', stripeAccount);
@@ -32,9 +37,13 @@ export const stripeConnectRouter = createTRPCRouter({
 				if (stripeAccount.charges_enabled) {
 					await ctx.db.http
 						.update(Workspaces)
-						.set({
-							stripeConnectChargesEnabled: true,
-						})
+						.set(
+							isStripeTestEnvironment() ?
+								{ stripeConnectChargesEnabled_devMode: true }
+							:	{
+									stripeConnectChargesEnabled: true,
+								},
+						)
 						.where(eq(Workspaces.id, ctx.workspace.id));
 					return null;
 				}

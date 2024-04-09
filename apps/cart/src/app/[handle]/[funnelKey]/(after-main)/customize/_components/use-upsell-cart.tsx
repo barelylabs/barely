@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { api } from '@barely/lib/server/api/react';
 import { cartApi } from '@barely/lib/server/routes/cart/cart.api.react';
 
 export function useUpsellCart({ cartId }: { cartId: string }) {
@@ -21,7 +20,7 @@ export function useUpsellCart({ cartId }: { cartId: string }) {
 		buyUpsell({ cartId });
 	};
 
-	const { mutate: cancelUpsell } = api.cart.declineUpsell.useMutation({
+	const { mutate: cancelUpsell } = cartApi.declineUpsell.useMutation({
 		onSuccess: res => {
 			router.push(`/${res.handle}/${res.funnelKey}/success/${cartId}`);
 		},

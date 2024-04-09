@@ -90,6 +90,7 @@ export function SidebarNav(props: SidebarNavProps) {
 			icon: 'remarketing',
 			href: `/${handle}/settings/remarketing`,
 		},
+		{ title: 'payouts', icon: 'payouts', href: `/${handle}/settings/payouts` },
 		{ title: 'billing', icon: 'billing', href: `/${handle}/settings/billing` },
 	];
 

@@ -16,7 +16,10 @@ export default function PayoutsSettingsPage() {
 	const workspace = useWorkspace();
 	const params = useParams();
 
-	const needsOnboarding = !workspace.stripeConnectChargesEnabled;
+	const needsOnboarding =
+		isProduction() ?
+			!workspace.stripeConnectChargesEnabled
+		:	!workspace.stripeConnectChargesEnabled_devMode;
 
 	const { mutateAsync: startOnboarding } =
 		api.stripeConnect.getOnboardingLink.useMutation({
