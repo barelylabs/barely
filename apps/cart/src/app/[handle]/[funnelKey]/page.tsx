@@ -34,8 +34,8 @@ export default function CartPage({
 
 	const initialData =
 		cartId ?
-			cartApi.getByIdAndFunnelKey({ id: cartId, handle, funnelKey })
-		:	cartApi.createByFunnelKey({
+			cartApi.byIdAndParams({ id: cartId, handle, funnelKey })
+		:	cartApi.create({
 				handle,
 				funnelKey,
 				shipTo: {

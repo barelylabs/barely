@@ -22,7 +22,7 @@ export default async function UpsellPage({
 
 	if (!cartId) return null;
 
-	const { cart, funnel } = await cartApi.getByIdAndFunnelKey({
+	const { cart, funnel } = await cartApi.byIdAndParams({
 		id: cartId,
 		handle,
 		funnelKey,

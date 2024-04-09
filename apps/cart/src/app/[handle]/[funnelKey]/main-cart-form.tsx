@@ -43,7 +43,7 @@ export function MainCartForm({
 	shouldWriteToCookie,
 }: {
 	shouldWriteToCookie?: boolean;
-	initialData: Promise<NonNullable<CartRouterOutputs['createByFunnelKey']>>;
+	initialData: Promise<NonNullable<CartRouterOutputs['create']>>;
 }) {
 	const { cart: initialCart, funnel: initialFunnel } = use(initialData);
 
@@ -65,7 +65,7 @@ export function MainCartForm({
 
 	const {
 		data: { cart, funnel },
-	} = cartApi.getByIdAndFunnelKey.useQuery(
+	} = cartApi.byIdAndParams.useQuery(
 		{
 			id: initialCart.id,
 			handle: initialFunnel.handle,
@@ -84,9 +84,9 @@ export function MainCartForm({
 
 	const { mutate: mutateCart } = cartApi.updateMainCartFromCart.useMutation({
 		onMutate: async data => {
-			await apiUtils.getByIdAndFunnelKey.cancel();
+			await apiUtils.byIdAndParams.cancel();
 
-			const prevCart = apiUtils.getByIdAndFunnelKey.getData({
+			const prevCart = apiUtils.byIdAndParams.getData({
 				id: cart.id,
 				handle: funnel.handle,
 				funnelKey: funnel.key,
@@ -94,7 +94,7 @@ export function MainCartForm({
 
 			if (!prevCart) return;
 
-			apiUtils.getByIdAndFunnelKey.setData(
+			apiUtils.byIdAndParams.setData(
 				{ id: cart.id, handle: funnel.handle, funnelKey: funnel.key },
 				old => {
 					if (!old) return old;
@@ -110,7 +110,7 @@ export function MainCartForm({
 			);
 		},
 		onSettled: async () => {
-			await apiUtils.getByIdAndFunnelKey.invalidate();
+			await apiUtils.byIdAndParams.invalidate();
 		},
 	});
 
@@ -126,9 +126,9 @@ export function MainCartForm({
 	const debouncedUpdateCart = useDebouncedCallback(updateCart, 500);
 
 	const updatePayWhatYouWantPrice = async (value: number) => {
-		await apiUtils.getByIdAndFunnelKey.cancel();
+		await apiUtils.byIdAndParams.cancel();
 
-		const prevCart = apiUtils.getByIdAndFunnelKey.getData({
+		const prevCart = apiUtils.byIdAndParams.getData({
 			id: cart.id,
 			handle: funnel.handle,
 			funnelKey: funnel.key,
@@ -136,7 +136,7 @@ export function MainCartForm({
 
 		if (!prevCart) return;
 
-		apiUtils.getByIdAndFunnelKey.setData(
+		apiUtils.byIdAndParams.setData(
 			{ id: cart.id, handle: funnel.handle, funnelKey: funnel.key },
 			old => {
 				if (!old) return old;
@@ -164,10 +164,9 @@ export function MainCartForm({
 			handle: funnel.workspace.handle,
 			funnelKey: funnel.key,
 
-			mainProductPayWhatYouWantPrice:
-				cart.mainProductPayWhatYouWantPrice ?
-					cart.mainProductPayWhatYouWantPrice / 100
-				:	cart.mainProductPayWhatYouWantPrice,
+			mainProductPayWhatYouWantPrice: cart.mainProductPayWhatYouWantPrice
+				? cart.mainProductPayWhatYouWantPrice / 100
+				: cart.mainProductPayWhatYouWantPrice,
 
 			mainProductQuantity: cart.mainProductQuantity ?? 1,
 			bumpProductQuantity: cart.bumpProductQuantity ?? 1,
@@ -328,9 +327,9 @@ export function MainCartForm({
 									</div>
 
 									<Text variant='md/normal'>
-										{funnel.bumpProductDescription?.length ?
-											funnel.bumpProductDescription
-										:	bumpProduct?.description}
+										{funnel.bumpProductDescription?.length
+											? funnel.bumpProductDescription
+											: bumpProduct?.description}
 									</Text>
 
 									<div className='flex flex-row items-center justify-center gap-2'>
@@ -359,9 +358,9 @@ export function MainCartForm({
 												onValueChange={size => {
 													updateCart({
 														addedBumpProduct: size.length > 0 ? true : false,
-														...(isApparelSize(size) ?
-															{ bumpProductApparelSize: size }
-														:	{}),
+														...(isApparelSize(size)
+															? { bumpProductApparelSize: size }
+															: {}),
 													});
 												}}
 											>
