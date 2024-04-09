@@ -13,7 +13,7 @@ export function ElementsProvider({
 	children,
 }: {
 	stage: InsertCart['stage'];
-	initialData: Promise<CartRouterOutputs['createByFunnelKey']>;
+	initialData: Promise<CartRouterOutputs['create']>;
 	children: React.ReactNode;
 }) {
 	const { cart, funnel } = use(initialData);

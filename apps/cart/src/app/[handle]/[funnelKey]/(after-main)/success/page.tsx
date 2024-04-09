@@ -21,7 +21,7 @@ export default async function CartSuccessPage({
 
 	if (!cartId) return null;
 
-	const { funnel } = await cartApi.getByIdAndFunnelKey({
+	const { funnel } = await cartApi.byIdAndParams({
 		id: cartId,
 		handle,
 		funnelKey,

@@ -23,7 +23,7 @@ import { Carts } from './cart.sql';
 import { getAmountsForMainCart } from './cart.utils';
 
 export const cartRouter = createTRPCRouter({
-	createByFunnelKey: publicProcedure
+	create: publicProcedure
 		.input(
 			z.object({
 				handle: z.string(),
@@ -50,7 +50,7 @@ export const cartRouter = createTRPCRouter({
 			};
 		}),
 
-	getByIdAndFunnelKey: publicProcedure
+	byIdAndParams: publicProcedure
 		.input(z.object({ id: z.string(), handle: z.string(), funnelKey: z.string() }))
 		.query(async ({ input, ctx }) => {
 			const funnel = await ctx.db.pool.query.CartFunnels.findFirst({
@@ -156,7 +156,7 @@ export const cartRouter = createTRPCRouter({
 			}
 
 			const amounts = getAmountsForMainCart(funnel, updatedCart);
-			console.log('amounts', amounts);
+			console.log('updated amounts', amounts);
 
 			const carts = await ctx.db.pool
 				.update(Carts)
@@ -180,6 +180,10 @@ export const cartRouter = createTRPCRouter({
 				{ amount: amounts.amount },
 				{ stripeAccount: stripeAccount ?? raise('stripeAccount not found') },
 			);
+
+			return {
+				cart: carts[0],
+			};
 		}),
 
 	buyUpsell: publicProcedure
