@@ -3,7 +3,7 @@ import { cartRouter } from '@barely/lib/server/routes/cart/cart.router';
 import { setCorsHeaders } from '@barely/lib/utils/trpc-route';
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 export { OPTIONS } from '@barely/lib/utils/trpc-route';
 

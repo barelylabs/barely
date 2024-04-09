@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { cartApi } from '@barely/lib/server/routes/cart/cart.api.react';
 import { getUrl } from '@barely/lib/utils/url';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { loggerLink, unstable_httpBatchStreamLink } from '@trpc/client';
+import { httpBatchLink, loggerLink } from '@trpc/client';
 import SuperJSON from 'superjson';
 
 import { ThemeProvider } from '@barely/ui/elements/next-theme-provider';
@@ -37,7 +37,8 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 						(opts.direction === 'down' && opts.result instanceof Error),
 				}),
 
-				unstable_httpBatchStreamLink({
+				// unstable_httpBatchStreamLink({
+				httpBatchLink({
 					transformer: SuperJSON,
 					url: getUrl('cart', 'api/trpc/cart'),
 					headers() {
