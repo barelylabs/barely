@@ -42,8 +42,8 @@ export function MainCartForm({
 	initialData,
 	shouldWriteToCookie,
 }: {
-	shouldWriteToCookie?: boolean;
 	initialData: Promise<NonNullable<CartRouterOutputs['create']>>;
+	shouldWriteToCookie?: boolean;
 }) {
 	const { cart: initialCart, funnel: initialFunnel } = use(initialData);
 
@@ -82,7 +82,7 @@ export function MainCartForm({
 		},
 	);
 
-	const { mutate: mutateCart } = cartApi.updateMainCartFromCart.useMutation({
+	const { mutateAsync: mutateCart } = cartApi.updateMainCartFromCart.useMutation({
 		onMutate: async data => {
 			await apiUtils.byIdAndParams.cancel();
 
@@ -114,8 +114,10 @@ export function MainCartForm({
 		},
 	});
 
-	function updateCart(updateData: Partial<z.infer<typeof updateMainCartFromCartSchema>>) {
-		mutateCart({
+	async function updateCart(
+		updateData: Partial<z.infer<typeof updateMainCartFromCartSchema>>,
+	) {
+		await mutateCart({
 			handle: funnel.handle,
 			funnelKey: funnel.key,
 			...cart,
@@ -151,7 +153,7 @@ export function MainCartForm({
 			},
 		);
 
-		debouncedUpdateCart({
+		await debouncedUpdateCart({
 			mainProductPayWhatYouWantPrice: value,
 		});
 	};
@@ -164,10 +166,9 @@ export function MainCartForm({
 			handle: funnel.workspace.handle,
 			funnelKey: funnel.key,
 
-			mainProductPayWhatYouWantPrice:
-				cart.mainProductPayWhatYouWantPrice ?
-					cart.mainProductPayWhatYouWantPrice / 100
-				:	cart.mainProductPayWhatYouWantPrice,
+			mainProductPayWhatYouWantPrice: cart.mainProductPayWhatYouWantPrice
+				? cart.mainProductPayWhatYouWantPrice / 100
+				: cart.mainProductPayWhatYouWantPrice,
 
 			mainProductQuantity: cart.mainProductQuantity ?? 1,
 			bumpProductQuantity: cart.bumpProductQuantity ?? 1,
@@ -253,10 +254,10 @@ export function MainCartForm({
 						<div className='flex min-h-[285px] flex-col gap-2'>
 							<H size='3'>Contact Information</H>
 							<LinkAuthenticationElement
-								onChange={e => {
+								onChange={async e => {
 									if (e.complete) {
 										if (z.string().email().safeParse(e.value.email).success) {
-											debouncedUpdateCart({
+											await debouncedUpdateCart({
 												email: e.value.email,
 											});
 										}
@@ -266,11 +267,11 @@ export function MainCartForm({
 
 							<AddressElement
 								options={{ mode: 'shipping' }}
-								onChange={e => {
+								onChange={async e => {
 									if (e.complete) {
 										const address = e.value.address;
 
-										debouncedUpdateCart({
+										await debouncedUpdateCart({
 											firstName: e.value.firstName,
 											lastName: e.value.lastName,
 											fullName: e.value.name,
@@ -314,7 +315,7 @@ export function MainCartForm({
 													onCheckedChange={c => {
 														updateCart({
 															addedBumpProduct: c,
-														});
+														}).catch(console.error);
 													}}
 												/>
 											</div>
@@ -328,9 +329,9 @@ export function MainCartForm({
 									</div>
 
 									<Text variant='md/normal'>
-										{funnel.bumpProductDescription?.length ?
-											funnel.bumpProductDescription
-										:	bumpProduct?.description}
+										{funnel.bumpProductDescription?.length
+											? funnel.bumpProductDescription
+											: bumpProduct?.description}
 									</Text>
 
 									<div className='flex flex-row items-center justify-center gap-2'>
@@ -356,12 +357,12 @@ export function MainCartForm({
 												type='single'
 												size='md'
 												className='grid grid-cols-3'
-												onValueChange={size => {
-													updateCart({
+												onValueChange={async size => {
+													await updateCart({
 														addedBumpProduct: size.length > 0 ? true : false,
-														...(isApparelSize(size) ?
-															{ bumpProductApparelSize: size }
-														:	{}),
+														...(isApparelSize(size)
+															? { bumpProductApparelSize: size }
+															: {}),
 													});
 												}}
 											>
@@ -394,7 +395,7 @@ export function MainCartForm({
 									if (typeof c === 'boolean')
 										updateCart({
 											marketingOptIn: c,
-										});
+										}).catch(console.error);
 								}}
 							/>
 						</div>
