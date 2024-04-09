@@ -14,8 +14,9 @@ import {
 	createMainCartFromFunnel,
 	funnelWith,
 	getCartById,
+	getFunnelByParams,
 	getProductsShippingRateEstimate,
-	getPublicFunnelByHandleAndKey,
+	getPublicFunnelFromServerFunnel,
 	sendCartReceiptEmail,
 } from './cart.fns';
 import { updateMainCartFromCartSchema } from './cart.schema';
@@ -38,15 +39,15 @@ export const cartRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ input }) => {
-			const funnel = await getPublicFunnelByHandleAndKey(input.handle, input.funnelKey);
+			const funnel = await getFunnelByParams(input.handle, input.funnelKey);
 
 			if (!funnel) throw new Error('funnel not found');
 
 			const cart = await createMainCartFromFunnel(funnel, input.shipTo);
 
 			return {
-				funnel,
 				cart,
+				publicFunnel: getPublicFunnelFromServerFunnel(funnel),
 			};
 		}),
 
@@ -72,28 +73,33 @@ export const cartRouter = createTRPCRouter({
 			const cart = funnel._carts[0];
 			return {
 				cart: cart ?? (await createMainCartFromFunnel(funnel)),
-				funnel,
+				publicFunnel: getPublicFunnelFromServerFunnel(funnel),
+				// funnel: {
+				// 	...funnel,
+				// 	workspace: {
+				// 		handle: funnel.workspace.handle,
+				// 	},
+				// },
 			};
 		}),
 
 	updateMainCartFromCart: publicProcedure
 		.input(updateMainCartFromCartSchema)
 		.mutation(async ({ input, ctx }) => {
-			const { id, ...update } = input;
+			const { id, handle, funnelKey, ...update } = input;
 
-			const cart = await getCartById(id);
+			const cart = await getCartById(id, handle, funnelKey);
 			if (!cart) throw new TRPCError({ code: 'NOT_FOUND', message: 'Cart not found' });
 
 			const { funnel } = cart;
 			if (!funnel) throw new Error('funnel not found');
 
-			const updatedCart = {
+			const updatedCart: UpdateCart = {
 				...cart,
 				...update,
 			};
 
 			if (update.shippingAddressPostalCode) {
-				console.log('postal code updated');
 				const toCountry = update.shippingAddressCountry ?? cart.shippingAddressCountry;
 				const toState = update.shippingAddressState ?? cart.shippingAddressState;
 				const toCity = update.shippingAddressCity ?? cart.shippingAddressCity;
@@ -161,6 +167,7 @@ export const cartRouter = createTRPCRouter({
 			const carts = await ctx.db.pool
 				.update(Carts)
 				.set({
+					...update,
 					...amounts,
 				})
 				.where(and(eq(Carts.id, id), not(eq(Carts.status, 'converted'))))

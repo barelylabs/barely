@@ -103,6 +103,7 @@ const t = initTRPC
  * Create a server-side caller
  * @see https://trpc.io/docs/server/server-side-calls
  */
+
 export const createCallerFactory = t.createCallerFactory;
 
 /**
@@ -116,8 +117,6 @@ export const mergeRouters = t.mergeRouters;
 export const publicProcedure = t.procedure;
 
 export const privateProcedure = t.procedure.use(async opts => {
-	// const { ctx } = opts;
-
 	if (!opts.ctx.user) {
 		throw new TRPCError({
 			code: 'UNAUTHORIZED',

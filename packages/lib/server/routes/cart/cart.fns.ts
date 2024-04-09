@@ -18,6 +18,7 @@ import { getShippingEstimates } from '../../shipengine/shipengine.endpts';
 import { stripe } from '../../stripe';
 import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
 import { MEDIAMAIL_TYPES, MERCH_DIMENSIONS } from '../product/product.constants';
+import { getPublicWorkspaceFromWorkspace } from '../workspace/workspace.schema';
 import { Carts } from './cart.sql';
 import { getAmountsForMainCart } from './cart.utils';
 
@@ -55,23 +56,31 @@ export const funnelWith = {
 	},
 } as const;
 
-export async function getPublicFunnelByHandleAndKey(handle: string, funnelKey: string) {
+export async function getFunnelByParams(handle: string, funnelKey: string) {
 	const funnel = await db.pool.query.CartFunnels.findFirst({
 		where: and(eq(CartFunnels.handle, handle), eq(CartFunnels.key, funnelKey)),
 		with: funnelWith,
 	});
 
 	if (!funnel) return null;
+
 	return funnel;
 }
 
-export type PublicFunnel = NonNullable<
-	Awaited<ReturnType<typeof getPublicFunnelByHandleAndKey>>
->;
+export type ServerFunnel = NonNullable<Awaited<ReturnType<typeof getFunnelByParams>>>;
+
+export function getPublicFunnelFromServerFunnel(funnel: ServerFunnel) {
+	return {
+		...funnel,
+		workspace: getPublicWorkspaceFromWorkspace(funnel.workspace),
+	};
+}
+
+export type PublicFunnel = ReturnType<typeof getPublicFunnelFromServerFunnel>;
 
 /* create cart */
 export async function createMainCartFromFunnel(
-	funnel: PublicFunnel,
+	funnel: ServerFunnel,
 	shipTo?: {
 		country: string | null;
 		state: string | null;
@@ -174,7 +183,7 @@ export async function createMainCartFromFunnel(
 }
 
 /* get cart */
-export async function getCartById(id: string) {
+export async function getCartById(id: string, handle?: string, funnelKey?: string) {
 	const cart = await db.pool.query.Carts.findFirst({
 		where: eq(Carts.id, id),
 		with: {
@@ -185,6 +194,9 @@ export async function getCartById(id: string) {
 	});
 
 	if (!cart) return null;
+	if (handle && cart.workspace.handle !== handle) return null;
+	if (funnelKey && cart.funnel?.key !== funnelKey) return null;
+
 	return cart;
 }
 
@@ -245,7 +257,7 @@ interface ReceiptCart extends Cart {
 	bumpProduct: Product | null;
 	upsellProduct: Product | null;
 	fan: Fan;
-	funnel: PublicFunnel;
+	funnel: ServerFunnel;
 }
 
 export async function sendCartReceiptEmail(cart: ReceiptCart) {

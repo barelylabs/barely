@@ -16,12 +16,12 @@ export function ElementsProvider({
 	initialData: Promise<CartRouterOutputs['create']>;
 	children: React.ReactNode;
 }) {
-	const { cart, funnel } = use(initialData);
+	const { cart, publicFunnel } = use(initialData);
 
 	const stripeAccount =
 		isProduction() ?
-			funnel.workspace.stripeConnectAccountId ?? undefined
-		:	funnel.workspace.stripeConnectAccountId_devMode ?? undefined;
+			publicFunnel.workspace.stripeConnectAccountId ?? undefined
+		:	publicFunnel.workspace.stripeConnectAccountId_devMode ?? undefined;
 
 	const clientSecret = cart.mainStripeClientSecret;
 

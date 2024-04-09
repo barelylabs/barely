@@ -22,7 +22,7 @@ export default async function UpsellPage({
 
 	if (!cartId) return null;
 
-	const { cart, funnel } = await cartApi.byIdAndParams({
+	const { cart, publicFunnel } = await cartApi.byIdAndParams({
 		id: cartId,
 		handle,
 		funnelKey,
@@ -41,8 +41,9 @@ export default async function UpsellPage({
 	const expiresAt =
 		(cart.upsellCreatedAt ? cart.upsellCreatedAt.getTime() : Date.now()) + 5 * 60 * 1000; // 5 minutes from now
 
-	const normalPrice = funnel.upsellProduct?.price;
-	const price = (funnel.upsellProduct?.price ?? 0) - (funnel.upsellProductDiscount ?? 0);
+	const normalPrice = publicFunnel.upsellProduct?.price;
+	const price =
+		(publicFunnel.upsellProduct?.price ?? 0) - (publicFunnel.upsellProductDiscount ?? 0);
 
 	return (
 		<>
@@ -50,7 +51,7 @@ export default async function UpsellPage({
 				<CartSteps />
 
 				<H size='1' className='text-center'>
-					{funnel.upsellProductHeadline}
+					{publicFunnel.upsellProductHeadline}
 				</H>
 
 				<UpsellCountdown cartId={cartId} expiresAt={expiresAt} />
@@ -58,15 +59,15 @@ export default async function UpsellPage({
 
 			<div className='flex flex-col items-center gap-6'>
 				<Img
-					src={funnel.upsellProduct?._images[0]?.file.src ?? ''}
-					alt={funnel.upsellProduct?.name ?? ''}
+					src={publicFunnel.upsellProduct?._images[0]?.file.src ?? ''}
+					alt={publicFunnel.upsellProduct?.name ?? ''}
 					width={1000}
 					height={1000}
 					className='mx-auto h-auto w-full max-w-[300px] rounded-lg sm:max-w-[400px]'
 				/>
 
-				{funnel.upsellProductAboveTheFold && (
-					<CartMDX markdown={funnel.upsellProductAboveTheFold} />
+				{publicFunnel.upsellProductAboveTheFold && (
+					<CartMDX markdown={publicFunnel.upsellProductAboveTheFold} />
 				)}
 
 				<ProductPrice price={price} normalPrice={normalPrice} variant='xl/bold' />
@@ -74,9 +75,9 @@ export default async function UpsellPage({
 				<UpsellButtons cartId={cartId} />
 			</div>
 
-			{funnel.upsellProductBelowTheFold && (
+			{publicFunnel.upsellProductBelowTheFold && (
 				<>
-					<CartMDX markdown={funnel.upsellProductBelowTheFold} />
+					<CartMDX markdown={publicFunnel.upsellProductBelowTheFold} />
 					<UpsellButtons cartId={cartId} />
 				</>
 			)}

@@ -163,6 +163,8 @@ export async function getPublicPressKit({
 	// normalize workspace
 	const publicWorkspace: PublicWorkspace = {
 		...publicPressKitData.workspace,
+		stripeConnectAccountId: null,
+		stripeConnectAccountId_devMode: null,
 		avatarImageUrl: publicPressKitData.workspace._avatarImages[0]?.file.src,
 		headerImageUrl: publicPressKitData.workspace._headerImages[0]?.file.src,
 	};
