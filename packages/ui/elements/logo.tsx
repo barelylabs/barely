@@ -1,4 +1,4 @@
-interface LogoProps {
+export interface LogoProps {
 	className?: string;
 }
 

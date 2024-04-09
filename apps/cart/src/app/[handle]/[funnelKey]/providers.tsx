@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { useState } from 'react';
-import { api } from '@barely/lib/server/api/react';
+import { cartApi } from '@barely/lib/server/routes/cart/cart.api.react';
 import { getUrl } from '@barely/lib/utils/url';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { loggerLink, unstable_httpBatchStreamLink } from '@trpc/client';
@@ -29,7 +29,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 	const queryClient = getQueryClient();
 
 	const [trpcClient] = useState(() =>
-		api.createClient({
+		cartApi.createClient({
 			links: [
 				loggerLink({
 					enabled: opts =>
@@ -39,7 +39,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 				unstable_httpBatchStreamLink({
 					transformer: SuperJSON,
-					url: getUrl('cart', 'api/cart'),
+					url: getUrl('cart', 'api/trpc/cart'),
 					headers() {
 						const headers = new Headers();
 						headers.set('x-trpc-source', 'nextjs-react-cart');
@@ -52,9 +52,9 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 	return (
 		<QueryClientProvider client={queryClient}>
-			<api.Provider client={trpcClient} queryClient={queryClient}>
+			<cartApi.Provider client={trpcClient} queryClient={queryClient}>
 				{props.children}
-			</api.Provider>
+			</cartApi.Provider>
 		</QueryClientProvider>
 	);
 }

@@ -2,7 +2,7 @@
 
 import type { CartRouterOutputs } from '@barely/lib/server/routes/cart/cart.api.react';
 import { use, useEffect } from 'react';
-import { api } from '@barely/lib/server/api/react';
+import { cartApi } from '@barely/lib/server/routes/cart/cart.api.react';
 import { updateMainCartFromCartSchema } from '@barely/lib/server/routes/cart/cart.schema';
 import { getAmountsForMainCart } from '@barely/lib/server/routes/cart/cart.utils';
 import {
@@ -61,11 +61,11 @@ export function MainCartForm({
 	const stripe = useStripe();
 	const elements = useElements();
 
-	const apiUtils = api.useUtils();
+	const apiUtils = cartApi.useUtils();
 
 	const {
 		data: { cart, funnel },
-	} = api.cart.getByIdAndFunnelKey.useQuery(
+	} = cartApi.getByIdAndFunnelKey.useQuery(
 		{
 			id: initialCart.id,
 			handle: initialFunnel.handle,
@@ -82,11 +82,11 @@ export function MainCartForm({
 		},
 	);
 
-	const { mutate: mutateCart } = api.cart.updateMainCartFromCart.useMutation({
+	const { mutate: mutateCart } = cartApi.updateMainCartFromCart.useMutation({
 		onMutate: async data => {
-			await apiUtils.cart.getByIdAndFunnelKey.cancel();
+			await apiUtils.getByIdAndFunnelKey.cancel();
 
-			const prevCart = apiUtils.cart.getByIdAndFunnelKey.getData({
+			const prevCart = apiUtils.getByIdAndFunnelKey.getData({
 				id: cart.id,
 				handle: funnel.handle,
 				funnelKey: funnel.key,
@@ -94,7 +94,7 @@ export function MainCartForm({
 
 			if (!prevCart) return;
 
-			apiUtils.cart.getByIdAndFunnelKey.setData(
+			apiUtils.getByIdAndFunnelKey.setData(
 				{ id: cart.id, handle: funnel.handle, funnelKey: funnel.key },
 				old => {
 					if (!old) return old;
@@ -110,7 +110,7 @@ export function MainCartForm({
 			);
 		},
 		onSettled: async () => {
-			await apiUtils.cart.getByIdAndFunnelKey.invalidate();
+			await apiUtils.getByIdAndFunnelKey.invalidate();
 		},
 	});
 
@@ -126,9 +126,9 @@ export function MainCartForm({
 	const debouncedUpdateCart = useDebouncedCallback(updateCart, 500);
 
 	const updatePayWhatYouWantPrice = async (value: number) => {
-		await apiUtils.cart.getByIdAndFunnelKey.cancel();
+		await apiUtils.getByIdAndFunnelKey.cancel();
 
-		const prevCart = apiUtils.cart.getByIdAndFunnelKey.getData({
+		const prevCart = apiUtils.getByIdAndFunnelKey.getData({
 			id: cart.id,
 			handle: funnel.handle,
 			funnelKey: funnel.key,
@@ -136,7 +136,7 @@ export function MainCartForm({
 
 		if (!prevCart) return;
 
-		apiUtils.cart.getByIdAndFunnelKey.setData(
+		apiUtils.getByIdAndFunnelKey.setData(
 			{ id: cart.id, handle: funnel.handle, funnelKey: funnel.key },
 			old => {
 				if (!old) return old;
@@ -164,10 +164,9 @@ export function MainCartForm({
 			handle: funnel.workspace.handle,
 			funnelKey: funnel.key,
 
-			mainProductPayWhatYouWantPrice:
-				cart.mainProductPayWhatYouWantPrice ?
-					cart.mainProductPayWhatYouWantPrice / 100
-				:	cart.mainProductPayWhatYouWantPrice,
+			mainProductPayWhatYouWantPrice: cart.mainProductPayWhatYouWantPrice
+				? cart.mainProductPayWhatYouWantPrice / 100
+				: cart.mainProductPayWhatYouWantPrice,
 
 			mainProductQuantity: cart.mainProductQuantity ?? 1,
 			bumpProductQuantity: cart.bumpProductQuantity ?? 1,
@@ -220,7 +219,7 @@ export function MainCartForm({
 									src={mainProductImageSrc}
 									width={208}
 									height={208}
-									className='h-auto w-52 rounded-md bg-neutral-600'
+									className='h-auto w-[208px] rounded-md bg-neutral-600'
 									priority
 								/>
 								<div className='flex flex-col gap-2'>
@@ -232,9 +231,6 @@ export function MainCartForm({
 										price={amounts.mainProductPrice}
 										normalPrice={mainProduct.price}
 									/>
-									{/* <Text variant='lg/normal' className='text-brand'>
-										{formatCentsToDollars(amounts.mainProductPrice)}
-									</Text> */}
 								</div>
 							</div>
 
@@ -331,9 +327,9 @@ export function MainCartForm({
 									</div>
 
 									<Text variant='md/normal'>
-										{funnel.bumpProductDescription?.length ?
-											funnel.bumpProductDescription
-										:	bumpProduct?.description}
+										{funnel.bumpProductDescription?.length
+											? funnel.bumpProductDescription
+											: bumpProduct?.description}
 									</Text>
 
 									<div className='flex flex-row items-center justify-center gap-2'>
@@ -362,9 +358,9 @@ export function MainCartForm({
 												onValueChange={size => {
 													updateCart({
 														addedBumpProduct: size.length > 0 ? true : false,
-														...(isApparelSize(size) ?
-															{ bumpProductApparelSize: size }
-														:	{}),
+														...(isApparelSize(size)
+															? { bumpProductApparelSize: size }
+															: {}),
 													});
 												}}
 											>
@@ -408,7 +404,7 @@ export function MainCartForm({
 					</div>
 				</div>
 
-				<div className='flex w-full flex-col bg-brand p-8 sm:min-h-svh sm:p-12'>
+				<div className='flex w-full flex-col bg-brand p-8 sm:sticky sm:top-0 sm:h-svh sm:p-12'>
 					<div className='flex max-w-sm flex-col gap-2'>
 						<Text variant='md/normal'>Total payment</Text>
 						<div className='flex flex-row justify-between '>
