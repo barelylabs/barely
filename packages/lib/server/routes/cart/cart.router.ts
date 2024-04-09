@@ -79,21 +79,20 @@ export const cartRouter = createTRPCRouter({
 	updateMainCartFromCart: publicProcedure
 		.input(updateMainCartFromCartSchema)
 		.mutation(async ({ input, ctx }) => {
-			const { id, ...update } = input;
+			const { id, handle, funnelKey, ...update } = input;
 
-			const cart = await getCartById(id);
+			const cart = await getCartById(id, handle, funnelKey);
 			if (!cart) throw new TRPCError({ code: 'NOT_FOUND', message: 'Cart not found' });
 
 			const { funnel } = cart;
 			if (!funnel) throw new Error('funnel not found');
 
-			const updatedCart = {
+			const updatedCart: UpdateCart = {
 				...cart,
 				...update,
 			};
 
 			if (update.shippingAddressPostalCode) {
-				console.log('postal code updated');
 				const toCountry = update.shippingAddressCountry ?? cart.shippingAddressCountry;
 				const toState = update.shippingAddressState ?? cart.shippingAddressState;
 				const toCity = update.shippingAddressCity ?? cart.shippingAddressCity;
@@ -121,10 +120,9 @@ export const cartRouter = createTRPCRouter({
 						mainProductShippingRate?.shipping_amount.amount ?? 1000;
 					updatedCart.mainProductShippingAmount = mainProductShippingAmount;
 
-					const mainPlusBumpShippingRate =
-						!funnel.bumpProduct ?
-							mainProductShippingRate
-						:	await getProductsShippingRateEstimate({
+					const mainPlusBumpShippingRate = !funnel.bumpProduct
+						? mainProductShippingRate
+						: await getProductsShippingRateEstimate({
 								products: [
 									{
 										product: funnel.mainProduct,
@@ -161,6 +159,7 @@ export const cartRouter = createTRPCRouter({
 			const carts = await ctx.db.pool
 				.update(Carts)
 				.set({
+					...update,
 					...amounts,
 				})
 				.where(and(eq(Carts.id, id), not(eq(Carts.status, 'converted'))))
@@ -169,10 +168,9 @@ export const cartRouter = createTRPCRouter({
 			const stripePaymentIntentId = carts[0]?.mainStripePaymentIntentId;
 			if (!stripePaymentIntentId) throw new Error('stripePaymentIntentId not found');
 
-			const stripeAccount =
-				isProduction() ?
-					funnel.workspace.stripeConnectAccountId
-				:	funnel.workspace.stripeConnectAccountId_devMode;
+			const stripeAccount = isProduction()
+				? funnel.workspace.stripeConnectAccountId
+				: funnel.workspace.stripeConnectAccountId_devMode;
 
 			// we need to update the paymentIntent amount
 			await stripe.paymentIntents.update(

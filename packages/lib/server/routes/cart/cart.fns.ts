@@ -78,10 +78,9 @@ export async function createMainCartFromFunnel(
 		city: string | null;
 	},
 ) {
-	const stripeAccount =
-		isProduction() ?
-			funnel.workspace.stripeConnectAccountId
-		:	funnel.workspace.stripeConnectAccountId_devMode;
+	const stripeAccount = isProduction()
+		? funnel.workspace.stripeConnectAccountId
+		: funnel.workspace.stripeConnectAccountId_devMode;
 
 	if (!stripeAccount) throw new Error('Stripe account not found');
 
@@ -143,10 +142,9 @@ export async function createMainCartFromFunnel(
 			mainProductShippingRate?.shipping_amount.amount ?? 1000;
 		cart.mainProductShippingAmount = mainProductShippingAmount;
 
-		const mainPlusBumpShippingRate =
-			!funnel.bumpProduct ?
-				mainProductShippingRate
-			:	await getProductsShippingRateEstimate({
+		const mainPlusBumpShippingRate = !funnel.bumpProduct
+			? mainProductShippingRate
+			: await getProductsShippingRateEstimate({
 					products: [
 						{ product: funnel.mainProduct, quantity: 1 },
 						{ product: funnel.bumpProduct, quantity: 1 },
@@ -174,7 +172,7 @@ export async function createMainCartFromFunnel(
 }
 
 /* get cart */
-export async function getCartById(id: string) {
+export async function getCartById(id: string, handle?: string, funnelKey?: string) {
 	const cart = await db.pool.query.Carts.findFirst({
 		where: eq(Carts.id, id),
 		with: {
@@ -185,6 +183,9 @@ export async function getCartById(id: string) {
 	});
 
 	if (!cart) return null;
+	if (handle && cart.workspace.handle !== handle) return null;
+	if (funnelKey && cart.funnel?.key !== funnelKey) return null;
+
 	return cart;
 }
 
@@ -262,32 +263,31 @@ export async function sendCartReceiptEmail(cart: ReceiptCart) {
 				mainCartAmounts.mainProductShippingAmount +
 					mainCartAmounts.mainProductHandlingAmount,
 			),
-			payWhatYouWantPrice:
-				cart.funnel.mainProductPayWhatYouWant ?
-					formatCentsToDollars(mainCartAmounts.mainProductPayWhatYouWantPrice)
-				:	undefined,
+			payWhatYouWantPrice: cart.funnel.mainProductPayWhatYouWant
+				? formatCentsToDollars(mainCartAmounts.mainProductPayWhatYouWantPrice)
+				: undefined,
 		},
 
 		// bump product
-		...(cart.bumpProduct && cart.addedBumpProduct ?
-			[
-				{
-					name: cart.bumpProduct.name,
-					price: formatCentsToDollars(mainCartAmounts.bumpProductAmount),
-					shipping: formatCentsToDollars(mainCartAmounts.bumpProductShippingPrice),
-				},
-			]
-		:	[]),
+		...(cart.bumpProduct && cart.addedBumpProduct
+			? [
+					{
+						name: cart.bumpProduct.name,
+						price: formatCentsToDollars(mainCartAmounts.bumpProductAmount),
+						shipping: formatCentsToDollars(mainCartAmounts.bumpProductShippingPrice),
+					},
+				]
+			: []),
 
-		...(cart.upsellProduct && cart.stage === 'upsellConverted' ?
-			[
-				{
-					name: cart.upsellProduct.name,
-					price: formatCentsToDollars(cart.upsellProductAmount ?? 0),
-					shipping: formatCentsToDollars(cart.upsellProductShippingPrice ?? 0),
-				},
-			]
-		:	[]),
+		...(cart.upsellProduct && cart.stage === 'upsellConverted'
+			? [
+					{
+						name: cart.upsellProduct.name,
+						price: formatCentsToDollars(cart.upsellProductAmount ?? 0),
+						shipping: formatCentsToDollars(cart.upsellProductShippingPrice ?? 0),
+					},
+				]
+			: []),
 	];
 
 	const ReceiptEmail = ReceiptEmailTemplate({
