@@ -16,9 +16,10 @@ export default function PayoutsSettingsPage() {
 	const workspace = useWorkspace();
 	const params = useParams();
 
-	const needsOnboarding = isProduction()
-		? !workspace.stripeConnectChargesEnabled
-		: !workspace.stripeConnectChargesEnabled_devMode;
+	const needsOnboarding =
+		isProduction() ?
+			!workspace.stripeConnectChargesEnabled
+		:	!workspace.stripeConnectChargesEnabled_devMode;
 
 	const { mutateAsync: startOnboarding } =
 		api.stripeConnect.getOnboardingLink.useMutation({
@@ -36,14 +37,15 @@ export default function PayoutsSettingsPage() {
 		}
 	}, [workspace.handle, params?.refreshOnboarding, startOnboarding, needsOnboarding]);
 
-	const stripeConnectAccountId = isProduction()
-		? workspace.stripeConnectAccountId
-		: workspace.stripeConnectAccountId_devMode;
+	const stripeConnectAccountId =
+		isProduction() ?
+			workspace.stripeConnectAccountId
+		:	workspace.stripeConnectAccountId_devMode;
 
 	return (
 		<>
 			<DashContentHeader title='Payouts' subtitle='We use Stripe to process payouts.' />
-			{needsOnboarding ? (
+			{needsOnboarding ?
 				<>
 					<Button
 						onClick={() =>
@@ -55,8 +57,7 @@ export default function PayoutsSettingsPage() {
 						Start Onboarding
 					</Button>
 				</>
-			) : (
-				<div className='flex flex-col gap-2'>
+			:	<div className='flex flex-col gap-2'>
 					<Text variant='md/semibold'>Stripe Connect</Text>
 					<div className='w-fit rounded-md bg-slate-100 p-2'>
 						<InlineCode>
@@ -67,7 +68,7 @@ export default function PayoutsSettingsPage() {
 						Your Stripe Connect account is connected and ready to receive payouts.
 					</Text>
 				</div>
-			)}
+			}
 		</>
 	);
 }

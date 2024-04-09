@@ -32,7 +32,6 @@ export function ElementsProvider({
 			variables: {
 				colorPrimary: '#ffffff',
 				colorBackground: '#ffffff',
-				colorTextSecondary: '#f1f5f9',
 
 				spacingUnit: '4px',
 				fontSizeBase: '14px',
