@@ -14,8 +14,9 @@ import {
 	createMainCartFromFunnel,
 	funnelWith,
 	getCartById,
+	getFunnelByParams,
 	getProductsShippingRateEstimate,
-	getPublicFunnelByHandleAndKey,
+	getPublicFunnelFromServerFunnel,
 	sendCartReceiptEmail,
 } from './cart.fns';
 import { updateMainCartFromCartSchema } from './cart.schema';
@@ -38,15 +39,15 @@ export const cartRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ input }) => {
-			const funnel = await getPublicFunnelByHandleAndKey(input.handle, input.funnelKey);
+			const funnel = await getFunnelByParams(input.handle, input.funnelKey);
 
 			if (!funnel) throw new Error('funnel not found');
 
 			const cart = await createMainCartFromFunnel(funnel, input.shipTo);
 
 			return {
-				funnel,
 				cart,
+				publicFunnel: getPublicFunnelFromServerFunnel(funnel),
 			};
 		}),
 
@@ -72,7 +73,13 @@ export const cartRouter = createTRPCRouter({
 			const cart = funnel._carts[0];
 			return {
 				cart: cart ?? (await createMainCartFromFunnel(funnel)),
-				funnel,
+				publicFunnel: getPublicFunnelFromServerFunnel(funnel),
+				// funnel: {
+				// 	...funnel,
+				// 	workspace: {
+				// 		handle: funnel.workspace.handle,
+				// 	},
+				// },
 			};
 		}),
 
@@ -120,9 +127,10 @@ export const cartRouter = createTRPCRouter({
 						mainProductShippingRate?.shipping_amount.amount ?? 1000;
 					updatedCart.mainProductShippingAmount = mainProductShippingAmount;
 
-					const mainPlusBumpShippingRate = !funnel.bumpProduct
-						? mainProductShippingRate
-						: await getProductsShippingRateEstimate({
+					const mainPlusBumpShippingRate =
+						!funnel.bumpProduct ?
+							mainProductShippingRate
+						:	await getProductsShippingRateEstimate({
 								products: [
 									{
 										product: funnel.mainProduct,
@@ -168,9 +176,10 @@ export const cartRouter = createTRPCRouter({
 			const stripePaymentIntentId = carts[0]?.mainStripePaymentIntentId;
 			if (!stripePaymentIntentId) throw new Error('stripePaymentIntentId not found');
 
-			const stripeAccount = isProduction()
-				? funnel.workspace.stripeConnectAccountId
-				: funnel.workspace.stripeConnectAccountId_devMode;
+			const stripeAccount =
+				isProduction() ?
+					funnel.workspace.stripeConnectAccountId
+				:	funnel.workspace.stripeConnectAccountId_devMode;
 
 			// we need to update the paymentIntent amount
 			await stripe.paymentIntents.update(

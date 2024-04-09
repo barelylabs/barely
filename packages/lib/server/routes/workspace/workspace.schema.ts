@@ -70,6 +70,9 @@ export const publicWorkspaceSchema = selectWorkspaceSchema
 		instagramFollowers: true,
 		twitterFollowers: true,
 		facebookFollowers: true,
+		// stripe
+		stripeConnectAccountId: true,
+		stripeConnectAccountId_devMode: true,
 	})
 	.extend({
 		avatarImageUrl: z.string().nullish(),
@@ -77,3 +80,34 @@ export const publicWorkspaceSchema = selectWorkspaceSchema
 	});
 
 export type PublicWorkspace = z.infer<typeof publicWorkspaceSchema>;
+
+export interface PublicWorkspaceWithStripe extends PublicWorkspace {
+	stripeConnectAccountId: string | null;
+	stripeConnectAccountId_devMode: string | null;
+}
+
+export function getPublicWorkspaceFromWorkspace(workspace: Workspace): PublicWorkspace {
+	return {
+		name: workspace.name,
+		handle: workspace.handle,
+		type: workspace.type,
+		bio: workspace.bio,
+		bookingTitle: workspace.bookingTitle,
+		bookingName: workspace.bookingName,
+		bookingEmail: workspace.bookingEmail,
+		spotifyArtistId: workspace.spotifyArtistId,
+		youtubeChannelId: workspace.youtubeChannelId,
+		tiktokUsername: workspace.tiktokUsername,
+		instagramUsername: workspace.instagramUsername,
+		spotifyFollowers: workspace.spotifyFollowers,
+		spotifyMonthlyListeners: workspace.spotifyMonthlyListeners,
+		youtubeSubscribers: workspace.youtubeSubscribers,
+		tiktokFollowers: workspace.tiktokFollowers,
+		instagramFollowers: workspace.instagramFollowers,
+		twitterFollowers: workspace.twitterFollowers,
+		facebookFollowers: workspace.facebookFollowers,
+
+		stripeConnectAccountId: workspace.stripeConnectAccountId,
+		stripeConnectAccountId_devMode: workspace.stripeConnectAccountId_devMode,
+	};
+}

@@ -21,7 +21,7 @@ export default async function CartSuccessPage({
 
 	if (!cartId) return null;
 
-	const { funnel } = await cartApi.byIdAndParams({
+	const { publicFunnel } = await cartApi.byIdAndParams({
 		id: cartId,
 		handle,
 		funnelKey,
@@ -30,18 +30,18 @@ export default async function CartSuccessPage({
 	return (
 		<>
 			<H size='hero' className='mt-4 text-center text-brand'>
-				{funnel.successPageHeadline ?? 'Thank you!'}
+				{publicFunnel.successPageHeadline ?? 'Thank you!'}
 			</H>
 
-			<CartMDX markdown={funnel.successPageContent ?? ''} />
+			<CartMDX markdown={publicFunnel.successPageContent ?? ''} />
 
-			{funnel.successPageCTA && funnel.successPageCTALink && (
-				<Button size='xl' look='brand' href={funnel.successPageCTALink}>
-					{funnel.successPageCTA}
+			{publicFunnel.successPageCTA && publicFunnel.successPageCTALink && (
+				<Button size='xl' look='brand' href={publicFunnel.successPageCTALink}>
+					{publicFunnel.successPageCTA}
 				</Button>
 			)}
 
-			<WorkspaceSocialLinks workspace={funnel.workspace} />
+			<WorkspaceSocialLinks workspace={publicFunnel.workspace} />
 		</>
 	);
 }

@@ -45,7 +45,7 @@ export function MainCartForm({
 	initialData: Promise<NonNullable<CartRouterOutputs['create']>>;
 	shouldWriteToCookie?: boolean;
 }) {
-	const { cart: initialCart, funnel: initialFunnel } = use(initialData);
+	const { cart: initialCart, publicFunnel: initialFunnel } = use(initialData);
 
 	useEffect(() => {
 		if (shouldWriteToCookie && initialCart.id) {
@@ -64,7 +64,7 @@ export function MainCartForm({
 	const apiUtils = cartApi.useUtils();
 
 	const {
-		data: { cart, funnel },
+		data: { cart, publicFunnel },
 	} = cartApi.byIdAndParams.useQuery(
 		{
 			id: initialCart.id,
@@ -74,9 +74,8 @@ export function MainCartForm({
 		{
 			initialData: {
 				cart: initialCart,
-				funnel: {
+				publicFunnel: {
 					...initialFunnel,
-					_carts: [],
 				},
 			},
 		},
@@ -88,14 +87,14 @@ export function MainCartForm({
 
 			const prevCart = apiUtils.byIdAndParams.getData({
 				id: cart.id,
-				handle: funnel.handle,
-				funnelKey: funnel.key,
+				handle: publicFunnel.handle,
+				funnelKey: publicFunnel.key,
 			});
 
 			if (!prevCart) return;
 
 			apiUtils.byIdAndParams.setData(
-				{ id: cart.id, handle: funnel.handle, funnelKey: funnel.key },
+				{ id: cart.id, handle: publicFunnel.handle, funnelKey: publicFunnel.key },
 				old => {
 					if (!old) return old;
 
@@ -118,8 +117,8 @@ export function MainCartForm({
 		updateData: Partial<z.infer<typeof updateMainCartFromCartSchema>>,
 	) {
 		await mutateCart({
-			handle: funnel.handle,
-			funnelKey: funnel.key,
+			handle: publicFunnel.handle,
+			funnelKey: publicFunnel.key,
 			...cart,
 			...updateData,
 		});
@@ -132,14 +131,14 @@ export function MainCartForm({
 
 		const prevCart = apiUtils.byIdAndParams.getData({
 			id: cart.id,
-			handle: funnel.handle,
-			funnelKey: funnel.key,
+			handle: publicFunnel.handle,
+			funnelKey: publicFunnel.key,
 		});
 
 		if (!prevCart) return;
 
 		apiUtils.byIdAndParams.setData(
-			{ id: cart.id, handle: funnel.handle, funnelKey: funnel.key },
+			{ id: cart.id, handle: publicFunnel.handle, funnelKey: publicFunnel.key },
 			old => {
 				if (!old) return old;
 
@@ -163,8 +162,8 @@ export function MainCartForm({
 		schema: updateMainCartFromCartSchema,
 		values: {
 			...cart,
-			handle: funnel.workspace.handle,
-			funnelKey: funnel.key,
+			handle: publicFunnel.workspace.handle,
+			funnelKey: publicFunnel.key,
 
 			mainProductPayWhatYouWantPrice:
 				cart.mainProductPayWhatYouWantPrice ?
@@ -188,15 +187,18 @@ export function MainCartForm({
 		await stripe.confirmPayment({
 			elements,
 			confirmParams: {
-				return_url: getAbsoluteUrl('cart', `/${funnel.handle}/${funnel.key}/customize`),
+				return_url: getAbsoluteUrl(
+					'cart',
+					`/${publicFunnel.handle}/${publicFunnel.key}/customize`,
+				),
 			},
 		});
 	};
 
 	/* derived state */
-	const amounts = getAmountsForMainCart(funnel, cart);
+	const amounts = getAmountsForMainCart(publicFunnel, cart);
 
-	const { mainProduct, bumpProduct } = funnel;
+	const { mainProduct, bumpProduct } = publicFunnel;
 	const mainProductImageSrc = mainProduct?._images[0]?.file.src ?? '';
 
 	const bumpNormalPrice = bumpProduct?.price ?? 0;
@@ -237,7 +239,7 @@ export function MainCartForm({
 								</div>
 							</div>
 
-							{funnel.mainProductPayWhatYouWant && (
+							{publicFunnel.mainProductPayWhatYouWant && (
 								<div className='flex flex-col gap-2'>
 									<Text variant='md/semibold'>Choose your price!</Text>
 									<CurrencyInput
@@ -325,13 +327,13 @@ export function MainCartForm({
 											variant='2xl/bold'
 											className='-mt-1 align-top !leading-normal text-brand'
 										>
-											{funnel.bumpProductHeadline}
+											{publicFunnel.bumpProductHeadline}
 										</Text>
 									</div>
 
 									<Text variant='md/normal'>
-										{funnel.bumpProductDescription?.length ?
-											funnel.bumpProductDescription
+										{publicFunnel.bumpProductDescription?.length ?
+											publicFunnel.bumpProductDescription
 										:	bumpProduct?.description}
 									</Text>
 
@@ -346,7 +348,7 @@ export function MainCartForm({
 											/>
 										)}
 										<ProductPrice
-											price={bumpProduct.price - (funnel.bumpProductDiscount ?? 0)}
+											price={bumpProduct.price - (publicFunnel.bumpProductDiscount ?? 0)}
 											normalPrice={bumpNormalPrice}
 										/>
 									</div>

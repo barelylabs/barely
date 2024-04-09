@@ -6,7 +6,16 @@ or client (where we optimistically update the cart)
 */
 
 export function getAmountsForMainCart(
-	funnel: PublicFunnel,
+	funnel: Pick<
+		PublicFunnel,
+		| 'mainProduct'
+		| 'mainProductPayWhatYouWant'
+		| 'mainProductPayWhatYouWantMin'
+		| 'bumpProduct'
+		| 'mainProductDiscount'
+		| 'bumpProductDiscount'
+		| 'mainProductHandling'
+	>,
 	cart: Partial<
 		Pick<
 			InsertCart,

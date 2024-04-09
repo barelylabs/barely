@@ -18,6 +18,7 @@ import { getShippingEstimates } from '../../shipengine/shipengine.endpts';
 import { stripe } from '../../stripe';
 import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
 import { MEDIAMAIL_TYPES, MERCH_DIMENSIONS } from '../product/product.constants';
+import { getPublicWorkspaceFromWorkspace } from '../workspace/workspace.schema';
 import { Carts } from './cart.sql';
 import { getAmountsForMainCart } from './cart.utils';
 
@@ -55,32 +56,41 @@ export const funnelWith = {
 	},
 } as const;
 
-export async function getPublicFunnelByHandleAndKey(handle: string, funnelKey: string) {
+export async function getFunnelByParams(handle: string, funnelKey: string) {
 	const funnel = await db.pool.query.CartFunnels.findFirst({
 		where: and(eq(CartFunnels.handle, handle), eq(CartFunnels.key, funnelKey)),
 		with: funnelWith,
 	});
 
 	if (!funnel) return null;
+
 	return funnel;
 }
 
-export type PublicFunnel = NonNullable<
-	Awaited<ReturnType<typeof getPublicFunnelByHandleAndKey>>
->;
+export type ServerFunnel = NonNullable<Awaited<ReturnType<typeof getFunnelByParams>>>;
+
+export function getPublicFunnelFromServerFunnel(funnel: ServerFunnel) {
+	return {
+		...funnel,
+		workspace: getPublicWorkspaceFromWorkspace(funnel.workspace),
+	};
+}
+
+export type PublicFunnel = ReturnType<typeof getPublicFunnelFromServerFunnel>;
 
 /* create cart */
 export async function createMainCartFromFunnel(
-	funnel: PublicFunnel,
+	funnel: ServerFunnel,
 	shipTo?: {
 		country: string | null;
 		state: string | null;
 		city: string | null;
 	},
 ) {
-	const stripeAccount = isProduction()
-		? funnel.workspace.stripeConnectAccountId
-		: funnel.workspace.stripeConnectAccountId_devMode;
+	const stripeAccount =
+		isProduction() ?
+			funnel.workspace.stripeConnectAccountId
+		:	funnel.workspace.stripeConnectAccountId_devMode;
 
 	if (!stripeAccount) throw new Error('Stripe account not found');
 
@@ -142,9 +152,10 @@ export async function createMainCartFromFunnel(
 			mainProductShippingRate?.shipping_amount.amount ?? 1000;
 		cart.mainProductShippingAmount = mainProductShippingAmount;
 
-		const mainPlusBumpShippingRate = !funnel.bumpProduct
-			? mainProductShippingRate
-			: await getProductsShippingRateEstimate({
+		const mainPlusBumpShippingRate =
+			!funnel.bumpProduct ?
+				mainProductShippingRate
+			:	await getProductsShippingRateEstimate({
 					products: [
 						{ product: funnel.mainProduct, quantity: 1 },
 						{ product: funnel.bumpProduct, quantity: 1 },
@@ -246,7 +257,7 @@ interface ReceiptCart extends Cart {
 	bumpProduct: Product | null;
 	upsellProduct: Product | null;
 	fan: Fan;
-	funnel: PublicFunnel;
+	funnel: ServerFunnel;
 }
 
 export async function sendCartReceiptEmail(cart: ReceiptCart) {
@@ -263,31 +274,32 @@ export async function sendCartReceiptEmail(cart: ReceiptCart) {
 				mainCartAmounts.mainProductShippingAmount +
 					mainCartAmounts.mainProductHandlingAmount,
 			),
-			payWhatYouWantPrice: cart.funnel.mainProductPayWhatYouWant
-				? formatCentsToDollars(mainCartAmounts.mainProductPayWhatYouWantPrice)
-				: undefined,
+			payWhatYouWantPrice:
+				cart.funnel.mainProductPayWhatYouWant ?
+					formatCentsToDollars(mainCartAmounts.mainProductPayWhatYouWantPrice)
+				:	undefined,
 		},
 
 		// bump product
-		...(cart.bumpProduct && cart.addedBumpProduct
-			? [
-					{
-						name: cart.bumpProduct.name,
-						price: formatCentsToDollars(mainCartAmounts.bumpProductAmount),
-						shipping: formatCentsToDollars(mainCartAmounts.bumpProductShippingPrice),
-					},
-				]
-			: []),
+		...(cart.bumpProduct && cart.addedBumpProduct ?
+			[
+				{
+					name: cart.bumpProduct.name,
+					price: formatCentsToDollars(mainCartAmounts.bumpProductAmount),
+					shipping: formatCentsToDollars(mainCartAmounts.bumpProductShippingPrice),
+				},
+			]
+		:	[]),
 
-		...(cart.upsellProduct && cart.stage === 'upsellConverted'
-			? [
-					{
-						name: cart.upsellProduct.name,
-						price: formatCentsToDollars(cart.upsellProductAmount ?? 0),
-						shipping: formatCentsToDollars(cart.upsellProductShippingPrice ?? 0),
-					},
-				]
-			: []),
+		...(cart.upsellProduct && cart.stage === 'upsellConverted' ?
+			[
+				{
+					name: cart.upsellProduct.name,
+					price: formatCentsToDollars(cart.upsellProductAmount ?? 0),
+					shipping: formatCentsToDollars(cart.upsellProductShippingPrice ?? 0),
+				},
+			]
+		:	[]),
 	];
 
 	const ReceiptEmail = ReceiptEmailTemplate({
