@@ -20,15 +20,17 @@ export function middleware(req: NextRequest) {
 
 	/* the mode is set in the subdomain. set the mode in the URL */
 	if (domain?.startsWith('preview.')) {
-		const previewUrl = getUrl('cart', `preview${pathname}`);
+		const previewUrl = getUrl('cart', `preview${pathname}`, {
+			subdomain: 'preview',
+		});
 		console.log('pushing to preview', previewUrl);
 		return NextResponse.rewrite(previewUrl);
 	}
 
 	/* assuming we are in live mode */
-	const liveUrl = getUrl('cart', pathname);
+	const liveUrl = getUrl('cart', `live${pathname}`);
 	console.log('pushing to live', liveUrl);
-	return NextResponse.rewrite(getUrl('cart', `live${pathname}`));
+	return NextResponse.rewrite(liveUrl);
 }
 
 export const config = {
