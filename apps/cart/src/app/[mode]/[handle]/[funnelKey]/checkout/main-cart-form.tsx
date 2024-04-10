@@ -393,6 +393,8 @@ export function MainCartForm({
 							<H size='3'>Payment Information</H>
 							<PaymentElement />
 							<CheckboxField
+								look='brand'
+								className='border-white bg-white'
 								control={form.control}
 								name='marketingOptIn'
 								label='Yes, I want to receive exclusive offers and updates via email.'

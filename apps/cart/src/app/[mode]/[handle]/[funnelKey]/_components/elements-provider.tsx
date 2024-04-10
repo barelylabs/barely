@@ -25,12 +25,21 @@ export function ElementsProvider({
 
 	const clientSecret = cart.mainStripeClientSecret;
 
+	// todo: get these from db, based on handle + funnelKey
+	const theme = {
+		'--brand': '329 66% 67%',
+		'--brand-foreground': '0 0% 100%',
+		'--brand-accent': '198 97% 50%',
+		'--brand-accent-foreground': '0 0% 100%',
+	};
+
 	const options: StripeElementsOptions = {
 		clientSecret: clientSecret,
 		appearance: {
 			theme: 'stripe',
 			variables: {
-				colorPrimary: '#ffffff',
+				// colorPrimary: 'hsl(329 66% 67%)',
+				colorPrimary: `hsl(${theme['--brand']})`,
 				colorBackground: '#ffffff',
 
 				spacingUnit: '4px',
