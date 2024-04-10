@@ -5,7 +5,7 @@ import { WorkspaceSocialLinks } from '@barely/ui/components/workspace-social-lin
 import { Button } from '@barely/ui/elements/button';
 import { H } from '@barely/ui/elements/typography';
 
-import { CartMDX } from '~/app/[handle]/[funnelKey]/_components/cart-mdx';
+import { CartMDX } from '~/app/[mode]/[handle]/[funnelKey]/_components/cart-mdx';
 
 export default async function CartSuccessPage({
 	params,

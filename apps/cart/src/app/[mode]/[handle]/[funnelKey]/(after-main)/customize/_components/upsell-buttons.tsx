@@ -2,10 +2,25 @@
 
 import { Button } from '@barely/ui/elements/button';
 
-import { useUpsellCart } from '~/app/[handle]/[funnelKey]/(after-main)/customize/_components/use-upsell-cart';
+import { useUpsellCart } from '~/app/[mode]/[handle]/[funnelKey]/(after-main)/customize/_components/use-upsell-cart';
 
-export function UpsellButtons({ cartId }: { cartId: string }) {
-	const { submitting, handleBuyUpsell, handleDeclineUpsell } = useUpsellCart({ cartId });
+export function UpsellButtons({
+	mode,
+	handle,
+	funnelKey,
+	cartId,
+}: {
+	mode: 'preview' | 'live';
+	handle: string;
+	funnelKey: string;
+	cartId: string;
+}) {
+	const { submitting, handleBuyUpsell, handleDeclineUpsell } = useUpsellCart({
+		mode,
+		handle,
+		funnelKey,
+		cartId,
+	});
 
 	return (
 		<div className='flex w-full flex-col gap-4'>

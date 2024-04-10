@@ -12,7 +12,7 @@ import { Toaster } from '@barely/ui/elements/toaster';
 import Providers from './providers';
 
 const fontHeading = localFont({
-	src: '../../../fonts/CalSans-SemiBold.woff2',
+	src: '../../../../fonts/CalSans-SemiBold.woff2',
 	variable: '--font-heading',
 });
 
