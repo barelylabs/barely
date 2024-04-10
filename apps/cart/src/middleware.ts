@@ -20,9 +20,7 @@ export function middleware(req: NextRequest) {
 
 	/* the mode is set in the subdomain. set the mode in the URL */
 	if (domain?.startsWith('preview.')) {
-		const previewUrl = getUrl('cart', `preview${pathname}`, {
-			subdomain: 'preview',
-		});
+		const previewUrl = getUrl('cart', `preview${pathname}`).replace('www.', 'preview.');
 		console.log('pushing to preview', previewUrl);
 		return NextResponse.rewrite(previewUrl);
 	}

@@ -93,11 +93,7 @@ export function getAbsoluteUrl(app: (typeof apps)[number], path?: string) {
 	return `${appBaseUrl}${path ? `/${path}` : ''}`;
 }
 
-export function getUrl(
-	app: (typeof apps)[number],
-	path?: string,
-	params?: { subdomain?: string },
-) {
+export function getUrl(app: (typeof apps)[number], path?: string) {
 	const appBaseUrl = getBaseUrl(app);
-	return `${params?.subdomain ? `${params.subdomain}.` : ''}${appBaseUrl}${path ? `/${path}` : ''}`;
+	return `${appBaseUrl}${path ? `/${path}` : ''}`;
 }
