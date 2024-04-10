@@ -2,6 +2,7 @@
 
 import type { CartRouterOutputs } from '@barely/lib/server/routes/cart/cart.api.react';
 import { use, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { cartApi } from '@barely/lib/server/routes/cart/cart.api.react';
 import { updateMainCartFromCartSchema } from '@barely/lib/server/routes/cart/cart.schema';
 import { getAmountsForMainCart } from '@barely/lib/server/routes/cart/cart.utils';
@@ -35,17 +36,21 @@ import { WrapBalancer } from '@barely/ui/elements/wrap-balancer';
 import { Form } from '@barely/ui/forms';
 import { CheckboxField } from '@barely/ui/forms/checkbox-field';
 
-import { setCartCookie } from '~/app/[handle]/[funnelKey]/_actions';
-import { ProductPrice } from '~/app/[handle]/[funnelKey]/_components/product-price';
+import { setCartCookie } from '~/app/[mode]/[handle]/[funnelKey]/_actions';
+import { ProductPrice } from '~/app/[mode]/[handle]/[funnelKey]/_components/product-price';
 
 export function MainCartForm({
+	mode,
 	initialData,
 	shouldWriteToCookie,
 }: {
+	mode: 'preview' | 'live';
 	initialData: Promise<NonNullable<CartRouterOutputs['create']>>;
 	shouldWriteToCookie?: boolean;
 }) {
 	const { cart: initialCart, publicFunnel: initialFunnel } = use(initialData);
+
+	const router = useRouter();
 
 	useEffect(() => {
 		if (shouldWriteToCookie && initialCart.id) {
@@ -178,7 +183,6 @@ export function MainCartForm({
 		},
 	});
 
-	// const handleSubmit = async (data: z.infer<typeof updateMainCartFromCartSchema>) => {
 	const handleSubmit = async () => {
 		if (!stripe || !elements) {
 			return;
@@ -360,6 +364,7 @@ export function MainCartForm({
 												type='single'
 												size='md'
 												className='grid grid-cols-3'
+												value={cart.bumpProductApparelSize ?? undefined}
 												onValueChange={async size => {
 													await updateCart({
 														addedBumpProduct: size.length > 0 ? true : false,
@@ -403,12 +408,21 @@ export function MainCartForm({
 							/>
 						</div>
 
-						<Button type='submit' fullWidth size='xl' look='brand'>
+						<Button
+							type={mode === 'live' ? 'submit' : 'button'}
+							fullWidth
+							size='xl'
+							look='brand'
+							onClick={() => {
+								if (mode === 'preview') {
+									router.push(`/${publicFunnel.handle}/${publicFunnel.key}/customize`);
+								}
+							}}
+						>
 							Complete Order
 						</Button>
 					</div>
 				</div>
-
 				<div className='flex w-full flex-col bg-brand p-8 sm:sticky sm:top-0 sm:h-svh sm:p-12'>
 					<div className='flex max-w-sm flex-col gap-2'>
 						<Text variant='md/normal'>Total payment</Text>

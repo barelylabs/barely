@@ -5,18 +5,18 @@ import { cartApi } from '@barely/lib/server/routes/cart/cart.api.server';
 import { Img } from '@barely/ui/elements/img';
 import { H } from '@barely/ui/elements/typography';
 
-import { CartMDX } from '~/app/[handle]/[funnelKey]/_components/cart-mdx';
-import { ProductPrice } from '~/app/[handle]/[funnelKey]/_components/product-price';
-import { CartSteps } from '~/app/[handle]/[funnelKey]/(after-main)/customize/_components/cart-steps';
-import { UpsellButtons } from '~/app/[handle]/[funnelKey]/(after-main)/customize/_components/upsell-buttons';
-import { UpsellCountdown } from '~/app/[handle]/[funnelKey]/(after-main)/customize/_components/upsell-countdown';
+import { CartMDX } from '~/app/[mode]/[handle]/[funnelKey]/_components/cart-mdx';
+import { ProductPrice } from '~/app/[mode]/[handle]/[funnelKey]/_components/product-price';
+import { CartSteps } from '~/app/[mode]/[handle]/[funnelKey]/(after-main)/customize/_components/cart-steps';
+import { UpsellButtons } from '~/app/[mode]/[handle]/[funnelKey]/(after-main)/customize/_components/upsell-buttons';
+import { UpsellCountdown } from '~/app/[mode]/[handle]/[funnelKey]/(after-main)/customize/_components/upsell-countdown';
 
 export default async function UpsellPage({
 	params,
 }: {
-	params: { handle: string; funnelKey: string };
+	params: { mode: 'preview' | 'live'; handle: string; funnelKey: string };
 }) {
-	const { handle, funnelKey } = params;
+	const { mode, handle, funnelKey } = params;
 
 	const cartId = cookies().get(`${params.handle}.${params.funnelKey}.cartId`)?.value;
 
@@ -31,9 +31,10 @@ export default async function UpsellPage({
 	if (!cart) return null;
 
 	if (
-		cart.stage === 'mainConverted' ||
-		cart.stage === 'upsellConverted' ||
-		cart.stage === 'upsellDeclined'
+		mode === 'live' &&
+		(cart.stage === 'mainConverted' ||
+			cart.stage === 'upsellConverted' ||
+			cart.stage === 'upsellDeclined')
 	) {
 		return redirect(`/${handle}/${funnelKey}/success`);
 	}
@@ -54,7 +55,13 @@ export default async function UpsellPage({
 					{publicFunnel.upsellProductHeadline}
 				</H>
 
-				<UpsellCountdown cartId={cartId} expiresAt={expiresAt} />
+				<UpsellCountdown
+					mode={mode}
+					handle={handle}
+					funnelKey={funnelKey}
+					cartId={cartId}
+					expiresAt={expiresAt}
+				/>
 			</div>
 
 			<div className='flex flex-col items-center gap-6'>
@@ -72,13 +79,23 @@ export default async function UpsellPage({
 
 				<ProductPrice price={price} normalPrice={normalPrice} variant='xl/bold' />
 
-				<UpsellButtons cartId={cartId} />
+				<UpsellButtons
+					mode={mode}
+					handle={handle}
+					funnelKey={funnelKey}
+					cartId={cartId}
+				/>
 			</div>
 
 			{publicFunnel.upsellProductBelowTheFold && (
 				<>
 					<CartMDX markdown={publicFunnel.upsellProductBelowTheFold} />
-					<UpsellButtons cartId={cartId} />
+					<UpsellButtons
+						mode={mode}
+						handle={handle}
+						funnelKey={funnelKey}
+						cartId={cartId}
+					/>
 				</>
 			)}
 		</>

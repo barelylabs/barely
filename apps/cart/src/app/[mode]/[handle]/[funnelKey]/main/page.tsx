@@ -6,7 +6,7 @@ import { cartApi } from '@barely/lib/server/routes/cart/cart.api.server';
 import { cartPageSearchParams } from '@barely/lib/server/routes/cart/cart.schema';
 import { isDevelopment } from '@barely/lib/utils/environment';
 
-import { ElementsProvider } from '~/app/[handle]/[funnelKey]/_components/elements-provider';
+import { ElementsProvider } from '~/app/[mode]/[handle]/[funnelKey]/_components/elements-provider';
 import { MainCartForm } from './main-cart-form';
 
 export default function CartPage({
@@ -14,12 +14,13 @@ export default function CartPage({
 	searchParams,
 }: {
 	params: {
+		mode: 'preview' | 'live';
 		handle: string;
 		funnelKey: string;
 	};
 	searchParams: z.infer<typeof cartPageSearchParams>;
 }) {
-	const { handle, funnelKey } = params;
+	const { mode, handle, funnelKey } = params;
 
 	const headersList = headers();
 
@@ -49,7 +50,11 @@ export default function CartPage({
 		<>
 			<Suspense fallback={<LoadingSkeleton />}>
 				<ElementsProvider stage='mainCreated' initialData={initialData}>
-					<MainCartForm initialData={initialData} shouldWriteToCookie={!cartId} />
+					<MainCartForm
+						mode={mode}
+						initialData={initialData}
+						shouldWriteToCookie={!cartId}
+					/>
 				</ElementsProvider>
 			</Suspense>
 		</>
