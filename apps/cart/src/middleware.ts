@@ -10,7 +10,11 @@ export function middleware(req: NextRequest) {
 	console.log('path', pathname);
 
 	/* the mode is already set in the URL */
-	if (pathname.startsWith('/live/') || pathname.startsWith('/preview/')) {
+	if (
+		pathname.startsWith('/live/') ||
+		pathname.startsWith('/preview/') ||
+		pathname === '/'
+	) {
 		return NextResponse.next();
 	}
 
