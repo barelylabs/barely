@@ -415,7 +415,7 @@ export function MainCartForm({
 							look='brand'
 							onClick={() => {
 								if (mode === 'preview') {
-									router.push(`/${publicFunnel.handle}/${publicFunnel.key}/customize`);
+									router.push(`customize`);
 								}
 							}}
 						>

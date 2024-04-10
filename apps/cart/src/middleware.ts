@@ -2,19 +2,33 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { getUrl } from '@barely/lib/utils/url';
 
-// This function can be marked `async` if using `await` inside
 export function middleware(req: NextRequest) {
-	const path = req.nextUrl.pathname;
+	const pathname = req.nextUrl.pathname;
 	const domain = req.headers.get('host');
 
 	console.log('domain', domain);
-	console.log('path', path);
+	console.log('path', pathname);
 
-	if (domain?.startsWith('preview.')) {
-		return NextResponse.rewrite(getUrl('cart', `preview${path}`));
-	} else {
-		return NextResponse.rewrite(getUrl('cart', `live${path}`));
+	/* the mode is already set in the URL */
+	if (
+		pathname.startsWith('/live/') ||
+		pathname.startsWith('/preview/') ||
+		pathname === '/'
+	) {
+		return NextResponse.next();
 	}
+
+	/* the mode is set in the subdomain. set the mode in the URL */
+	if (domain?.startsWith('preview.')) {
+		const previewUrl = getUrl('cart', `preview${pathname}`);
+		console.log('pushing to preview', previewUrl);
+		return NextResponse.rewrite(previewUrl);
+	}
+
+	/* assuming we are in live mode */
+	const liveUrl = getUrl('cart', pathname);
+	console.log('pushing to live', liveUrl);
+	return NextResponse.rewrite(getUrl('cart', `live${pathname}`));
 }
 
 export const config = {
@@ -22,10 +36,14 @@ export const config = {
 		/*
 		 * Match all request paths except for the ones starting with:
 		 * - api (API routes)
-		 * - _next/static (static files)
-		 * - _next/image (image optimization files)
-		 * - favicon.ico (favicon file)
+		 * - _next
+		 * - _static
+		 * - .well-known
+		 * - favicon (favicon file)
+		 * - logos (logos file)
+		 * - sitemap (sitemap file)
+		 * - site.webmanifest (site.webmanifest file)
 		 */
-		'/((?!api|_next/static|_next/image|favicon.ico).*)',
+		'/((?!api|_next|_static|.well-known|favicon|logos|sitemap|site.webmanifest).*)',
 	],
 };
