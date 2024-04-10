@@ -170,10 +170,9 @@ export function MainCartForm({
 			handle: publicFunnel.workspace.handle,
 			funnelKey: publicFunnel.key,
 
-			mainProductPayWhatYouWantPrice:
-				cart.mainProductPayWhatYouWantPrice ?
-					cart.mainProductPayWhatYouWantPrice / 100
-				:	cart.mainProductPayWhatYouWantPrice,
+			mainProductPayWhatYouWantPrice: cart.mainProductPayWhatYouWantPrice
+				? cart.mainProductPayWhatYouWantPrice / 100
+				: cart.mainProductPayWhatYouWantPrice,
 
 			mainProductQuantity: cart.mainProductQuantity ?? 1,
 			bumpProductQuantity: cart.bumpProductQuantity ?? 1,
@@ -336,9 +335,9 @@ export function MainCartForm({
 									</div>
 
 									<Text variant='md/normal'>
-										{publicFunnel.bumpProductDescription?.length ?
-											publicFunnel.bumpProductDescription
-										:	bumpProduct?.description}
+										{publicFunnel.bumpProductDescription?.length
+											? publicFunnel.bumpProductDescription
+											: bumpProduct?.description}
 									</Text>
 
 									<div className='flex flex-row items-center justify-center gap-2'>
@@ -368,9 +367,9 @@ export function MainCartForm({
 												onValueChange={async size => {
 													await updateCart({
 														addedBumpProduct: size.length > 0 ? true : false,
-														...(isApparelSize(size) ?
-															{ bumpProductApparelSize: size }
-														:	{}),
+														...(isApparelSize(size)
+															? { bumpProductApparelSize: size }
+															: {}),
 													});
 												}}
 											>
@@ -415,7 +414,7 @@ export function MainCartForm({
 							look='brand'
 							onClick={() => {
 								if (mode === 'preview') {
-									router.push(`/${publicFunnel.handle}/${publicFunnel.key}/customize`);
+									router.push(`customize`);
 								}
 							}}
 						>
