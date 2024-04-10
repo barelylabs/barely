@@ -27,7 +27,9 @@ export function middleware(req: NextRequest) {
 
 	/* assuming we are in live mode */
 	const liveUrl = getUrl('cart', `live${pathname}`);
+	const liveUrl = getUrl('cart', `live${pathname}`);
 	console.log('pushing to live', liveUrl);
+	return NextResponse.rewrite(liveUrl);
 	return NextResponse.rewrite(liveUrl);
 }
 
