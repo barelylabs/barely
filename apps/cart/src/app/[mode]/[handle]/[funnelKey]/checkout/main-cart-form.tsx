@@ -86,7 +86,7 @@ export function MainCartForm({
 		},
 	);
 
-	const { mutateAsync: mutateCart } = cartApi.updateMainCartFromCart.useMutation({
+	const { mutate: mutateCart } = cartApi.updateMainCartFromCart.useMutation({
 		onMutate: async data => {
 			await apiUtils.byIdAndParams.cancel();
 
@@ -118,10 +118,8 @@ export function MainCartForm({
 		},
 	});
 
-	async function updateCart(
-		updateData: Partial<z.infer<typeof updateMainCartFromCartSchema>>,
-	) {
-		await mutateCart({
+	function updateCart(updateData: Partial<z.infer<typeof updateMainCartFromCartSchema>>) {
+		mutateCart({
 			handle: publicFunnel.handle,
 			funnelKey: publicFunnel.key,
 			...cart,
@@ -157,7 +155,7 @@ export function MainCartForm({
 			},
 		);
 
-		await debouncedUpdateCart({
+		debouncedUpdateCart({
 			mainProductPayWhatYouWantPrice: value,
 		});
 	};
@@ -170,10 +168,9 @@ export function MainCartForm({
 			handle: publicFunnel.workspace.handle,
 			funnelKey: publicFunnel.key,
 
-			mainProductPayWhatYouWantPrice:
-				cart.mainProductPayWhatYouWantPrice ?
-					cart.mainProductPayWhatYouWantPrice / 100
-				:	cart.mainProductPayWhatYouWantPrice,
+			mainProductPayWhatYouWantPrice: cart.mainProductPayWhatYouWantPrice
+				? cart.mainProductPayWhatYouWantPrice / 100
+				: cart.mainProductPayWhatYouWantPrice,
 
 			mainProductQuantity: cart.mainProductQuantity ?? 1,
 			bumpProductQuantity: cart.bumpProductQuantity ?? 1,
@@ -264,7 +261,7 @@ export function MainCartForm({
 								onChange={async e => {
 									if (e.complete) {
 										if (z.string().email().safeParse(e.value.email).success) {
-											await debouncedUpdateCart({
+											debouncedUpdateCart({
 												email: e.value.email,
 											});
 										}
@@ -278,7 +275,7 @@ export function MainCartForm({
 									if (e.complete) {
 										const address = e.value.address;
 
-										await debouncedUpdateCart({
+										debouncedUpdateCart({
 											firstName: e.value.firstName,
 											lastName: e.value.lastName,
 											fullName: e.value.name,
@@ -322,7 +319,7 @@ export function MainCartForm({
 													onCheckedChange={c => {
 														updateCart({
 															addedBumpProduct: c,
-														}).catch(console.error);
+														});
 													}}
 												/>
 											</div>
@@ -336,9 +333,9 @@ export function MainCartForm({
 									</div>
 
 									<Text variant='md/normal'>
-										{publicFunnel.bumpProductDescription?.length ?
-											publicFunnel.bumpProductDescription
-										:	bumpProduct?.description}
+										{publicFunnel.bumpProductDescription?.length
+											? publicFunnel.bumpProductDescription
+											: bumpProduct?.description}
 									</Text>
 
 									<div className='flex flex-row items-center justify-center gap-2'>
@@ -359,18 +356,17 @@ export function MainCartForm({
 
 									{bumpHasSizes && (
 										<div className='flex flex-col gap-2'>
-											{/* <Icon.arrowDown className='animate-pulse text-brand' /> */}
 											<ToggleGroup
 												type='single'
 												size='md'
 												className='grid grid-cols-3'
-												value={cart.bumpProductApparelSize ?? undefined}
-												onValueChange={async size => {
-													await updateCart({
+												value={cart.bumpProductApparelSize ?? ''}
+												onValueChange={size => {
+													updateCart({
 														addedBumpProduct: size.length > 0 ? true : false,
-														...(isApparelSize(size) ?
-															{ bumpProductApparelSize: size }
-														:	{}),
+														...(isApparelSize(size)
+															? { bumpProductApparelSize: size }
+															: { bumpProductApparelSize: null }),
 													});
 												}}
 											>
@@ -380,7 +376,7 @@ export function MainCartForm({
 														value={size}
 														key={size}
 														aria-label={`Toggle ${size}`}
-														className='data-[state=on]:bg-brand hover:bg-brand'
+														className='data-[state=on]:bg-brand hover:bg-brand/90'
 													>
 														{size}
 													</ToggleGroupItem>
@@ -403,7 +399,7 @@ export function MainCartForm({
 									if (typeof c === 'boolean')
 										updateCart({
 											marketingOptIn: c,
-										}).catch(console.error);
+										});
 								}}
 							/>
 						</div>
