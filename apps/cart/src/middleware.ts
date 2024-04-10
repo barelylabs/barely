@@ -11,8 +11,12 @@ export function middleware(req: NextRequest) {
 	console.log('path', path);
 
 	if (domain?.startsWith('preview.')) {
-		return NextResponse.rewrite(getUrl('cart', `preview${path}`));
+		const previewUrl = getUrl('cart', `preview${path}`);
+		console.log('pushing to preview', previewUrl);
+		return NextResponse.rewrite(previewUrl);
 	} else {
+		const liveUrl = getUrl('cart', `live${path}`);
+		console.log('pushing to live', liveUrl);
 		return NextResponse.rewrite(getUrl('cart', `live${path}`));
 	}
 }
