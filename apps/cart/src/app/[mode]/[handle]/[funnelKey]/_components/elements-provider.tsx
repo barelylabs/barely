@@ -18,9 +18,10 @@ export function ElementsProvider({
 }) {
 	const { cart, publicFunnel } = use(initialData);
 
-	const stripeAccount = isProduction()
-		? publicFunnel.workspace.stripeConnectAccountId ?? undefined
-		: publicFunnel.workspace.stripeConnectAccountId_devMode ?? undefined;
+	const stripeAccount =
+		isProduction() ?
+			publicFunnel.workspace.stripeConnectAccountId ?? undefined
+		:	publicFunnel.workspace.stripeConnectAccountId_devMode ?? undefined;
 
 	const clientSecret = cart.mainStripeClientSecret;
 
