@@ -116,7 +116,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	if (ua.device === 'mobile') {
 		if (link.url.includes('open.spotify.com')) {
 			console.log('Spotify link detected on mobile');
-			const spotifyAppLink = new URL(link.url);
+			const spotifyAppLink = new URL('https://spotify.app.link');
 			spotifyAppLink.searchParams.set('product', 'open');
 			spotifyAppLink.searchParams.set('$full_url', link.url);
 			spotifyAppLink.searchParams.set('$fallback_url', link.url);
