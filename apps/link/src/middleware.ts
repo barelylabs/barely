@@ -31,10 +31,19 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	let where: SQL | undefined = undefined;
 
 	if (linkProps.linkClickType === 'transparentLinkClick') {
-		if (!linkProps.handle && !linkProps.app)
+		if (!linkProps.handle && !linkProps.app) {
+			console.log(
+				'no handle or app found for transparent link click',
+				url.href,
+				linkProps,
+			);
 			return NextResponse.rewrite(getAbsoluteUrl('www', '/link'));
+		}
 
-		if (!linkProps.handle) return NextResponse.rewrite(getAbsoluteUrl('link', '/404'));
+		if (!linkProps.handle) {
+			console.log('no handle found for transparent link click', url.href, linkProps);
+			return NextResponse.rewrite(getAbsoluteUrl('link', '/404'));
+		}
 
 		where = sqlAnd([
 			eq(Links.handle, linkProps.handle),
@@ -71,6 +80,8 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 		},
 	});
 
+	console.log('link for ', url.href, link);
+
 	//* 🚧 handle route errors 🚧  *//
 	if (!link ?? !link?.url) return NextResponse.rewrite(getAbsoluteUrl('link', '404'));
 
@@ -79,7 +90,6 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	const geo = parseGeo(req);
 	const ua = parseUserAgent(req);
 	const isBot = detectBot(req);
-
 	const { referer, referer_url } = parseReferer(req);
 
 	const recordClickProps: RecordClickProps = {
@@ -103,5 +113,17 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 
 	if (isBot && link.customMetaTags) return NextResponse.redirect(`/_proxy/${link.id}`); // 👈 send bots to proxy for meta tags
 
-	return NextResponse.redirect(link.url); // 👈 just doing url redirects for now
+	if (ua.device === 'mobile') {
+		if (link.url.includes('open.spotify.com')) {
+			console.log('Spotify link detected on mobile');
+			const spotifyAppLink = new URL(link.url);
+			spotifyAppLink.searchParams.set('product', 'open');
+			spotifyAppLink.searchParams.set('$full_url', link.url);
+			spotifyAppLink.searchParams.set('$fallback_url', link.url);
+			spotifyAppLink.searchParams.set('$android_redirect_timeout', '3000');
+			link.url = spotifyAppLink.toString();
+		}
+	}
+
+	return NextResponse.redirect(link.url);
 }
