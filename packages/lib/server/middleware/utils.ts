@@ -19,6 +19,7 @@ export function parseLinkDomain(req: NextRequest) {
 		)
 		?.replace('www.', '');
 
+	console.log('domain from req', domain);
 	if (!domain) throw new Error('No domain found');
 
 	// special case for Vercel preview deployment URLs
@@ -31,10 +32,13 @@ export function parseLinkDomain(req: NextRequest) {
 		}`;
 	}
 	const handleParam = req.nextUrl.searchParams.get('handle');
+	console.log('handleParam', handleParam);
 
-	if (domain.match(/^link-\d+-barely\.vercel\.app$/) && handleParam) {
+	if (domain.match(/^link-.+-barely\.vercel\.app$/) && handleParam) {
 		domain = `${handleParam}.${process.env.NEXT_PUBLIC_TRANSPARENT_LINK_ROOT_DOMAIN}`;
 	}
+
+	console.log('domain after parsing', domain);
 
 	// if hostname is {handle}.barely.link, it's a transparent link. otherwise, it's a short link
 	const linkClickType: RecordClickProps['type'] =
