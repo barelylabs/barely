@@ -100,7 +100,7 @@ export function getTransparentLinkDataFromUrl(url: string, workspace: SessionWor
 	const urlObject = new URL(url);
 
 	let app: string;
-	let pathname = urlObject.pathname;
+	const pathname = urlObject.pathname;
 	const searchParams = urlObject.searchParams;
 
 	switch (true) {
@@ -108,19 +108,21 @@ export function getTransparentLinkDataFromUrl(url: string, workspace: SessionWor
 			app = 'spotify';
 			searchParams.delete('si');
 			console.log('wsSpotArtistId', workspace?.spotifyArtistId);
-			const isCurrentArtistPage =
-				pathname.startsWith('/artist/') &&
-				pathname.split('/')[2] === workspace?.spotifyArtistId;
+			// const isCurrentArtistPage =
+			// 	pathname.startsWith('/artist/') &&
+			// 	pathname.split('/')[2] === workspace?.spotifyArtistId;
 
-			if (isCurrentArtistPage) {
-				pathname = '';
-			}
+			// if (isCurrentArtistPage) {
+			// 	pathname = '';
+			// }
 
 			break;
 		}
-		case domain.includes('youtube') || domain.includes('youtu.be'):
-			app = 'youtube';
-			break;
+
+		// todo - handle youtube cases with channels & videos (we need to handle search params. it makes parsing too hard if some search params are part of the appRoute)
+		// case domain.includes('youtube') || domain.includes('youtu.be'):
+		// 	app = 'youtube';
+		// 	break;
 
 		default: {
 			// app = convertToHandle(domain);
