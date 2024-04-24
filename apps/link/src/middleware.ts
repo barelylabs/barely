@@ -121,7 +121,8 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 			spotifyAppLink.searchParams.set('$full_url', link.url);
 			spotifyAppLink.searchParams.set('$fallback_url', link.url);
 			spotifyAppLink.searchParams.set('$android_redirect_timeout', '3000');
-			link.url = spotifyAppLink.toString();
+			console.log('redirecting to mobile spotify', spotifyAppLink.href);
+			return NextResponse.redirect(spotifyAppLink.href);
 		}
 	}
 
