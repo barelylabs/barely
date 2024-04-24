@@ -83,8 +83,8 @@ export function parseTransparentLink(req: NextRequest) {
 	// Here, we are using decodeURIComponent to handle foreign languages
 	const app = decodeURIComponent(path.split('/')[1] ?? ''); // app is the first part of the path (e.g. properyouth.barely.link/spotify/track/12345 => spotify)
 
-	// appRoute is the rest of the path (e.g. properyouth.barely.link/spotify/track/12345?si=aparam => track/12345?si=aparam)
-	const appRoute = decodeURIComponent(fullPath.split('/').slice(2).join('/'));
+	// appRoute is the rest of the path (e.g. properyouth.barely.link/spotify/track/12345 => track/12345)
+	const appRoute = decodeURIComponent(path.split('/').slice(2).join('/'));
 
 	const transparentLinkParams: TransparentLinkParams = {
 		handle,
