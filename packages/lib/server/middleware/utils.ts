@@ -19,6 +19,7 @@ export function parseLinkDomain(req: NextRequest) {
 		)
 		?.replace('www.', '');
 
+	console.log('domain from req', domain);
 	if (!domain) throw new Error('No domain found');
 
 	// special case for Vercel preview deployment URLs
@@ -30,6 +31,14 @@ export function parseLinkDomain(req: NextRequest) {
 			process.env.NEXT_PUBLIC_TRANSPARENT_LINK_ROOT_DOMAIN
 		}`;
 	}
+	const handleParam = req.nextUrl.searchParams.get('handle');
+	console.log('handleParam', handleParam);
+
+	if (domain.match(/^link-.+-barely\.vercel\.app$/) && handleParam) {
+		domain = `${handleParam}.${process.env.NEXT_PUBLIC_TRANSPARENT_LINK_ROOT_DOMAIN}`;
+	}
+
+	console.log('domain after parsing', domain);
 
 	// if hostname is {handle}.barely.link, it's a transparent link. otherwise, it's a short link
 	const linkClickType: RecordClickProps['type'] =
@@ -83,8 +92,8 @@ export function parseTransparentLink(req: NextRequest) {
 	// Here, we are using decodeURIComponent to handle foreign languages
 	const app = decodeURIComponent(path.split('/')[1] ?? ''); // app is the first part of the path (e.g. properyouth.barely.link/spotify/track/12345 => spotify)
 
-	// appRoute is the rest of the path (e.g. properyouth.barely.link/spotify/track/12345?si=aparam => track/12345?si=aparam)
-	const appRoute = decodeURIComponent(fullPath.split('/').slice(2).join('/'));
+	// appRoute is the rest of the path (e.g. properyouth.barely.link/spotify/track/12345 => track/12345)
+	const appRoute = decodeURIComponent(path.split('/').slice(2).join('/'));
 
 	const transparentLinkParams: TransparentLinkParams = {
 		handle,
