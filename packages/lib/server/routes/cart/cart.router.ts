@@ -1,5 +1,5 @@
 import { TRPCError } from '@trpc/server';
-import { and, eq, not } from 'drizzle-orm';
+import { and, eq, notInArray } from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { UpdateCart } from './cart.schema';
@@ -9,6 +9,8 @@ import { getAbsoluteUrl } from '../../../utils/url';
 import { createTRPCRouter, publicProcedure } from '../../api/trpc';
 import { stripe } from '../../stripe';
 import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
+import { recordCartEvent } from '../event/event.fns';
+import { WEB_EVENT_TYPES__CART } from '../event/event.tb';
 import { getStripeConnectAccountId } from '../stripe-connect/stripe-connect.fns';
 import {
 	createMainCartFromFunnel,
@@ -21,7 +23,7 @@ import {
 } from './cart.fns';
 import { updateMainCartFromCartSchema } from './cart.schema';
 import { Carts } from './cart.sql';
-import { getAmountsForMainCart } from './cart.utils';
+import { getAmountsForCheckout } from './cart.utils';
 
 export const cartRouter = createTRPCRouter({
 	create: publicProcedure
@@ -83,7 +85,7 @@ export const cartRouter = createTRPCRouter({
 			};
 		}),
 
-	updateMainCartFromCart: publicProcedure
+	updateCheckoutFromCheckout: publicProcedure
 		.input(updateMainCartFromCartSchema)
 		.mutation(async ({ input, ctx }) => {
 			const { id, handle, funnelKey, ...update } = input;
@@ -107,30 +109,28 @@ export const cartRouter = createTRPCRouter({
 					update.shippingAddressPostalCode ?? cart.shippingAddressPostalCode;
 
 				if (toCountry && toState && toCity && toPostalCode) {
-					const mainProductShippingRate = await getProductsShippingRateEstimate({
-						products: [
-							{ product: funnel.mainProduct, quantity: cart.mainProductQuantity ?? 1 },
-						],
-						shipFrom: {
-							postalCode: funnel.workspace.shippingAddressPostalCode ?? '',
-							countryCode: funnel.workspace.shippingAddressCountry ?? '',
-						},
-						shipTo: {
-							country: toCountry,
-							state: toState,
-							city: toCity,
-							postalCode: toPostalCode,
-						},
-					});
+					const { lowestShippingPrice: mainShippingAmount } =
+						await getProductsShippingRateEstimate({
+							products: [
+								{ product: funnel.mainProduct, quantity: cart.mainProductQuantity ?? 1 },
+							],
+							shipFrom: {
+								postalCode: funnel.workspace.shippingAddressPostalCode ?? '',
+								countryCode: funnel.workspace.shippingAddressCountry ?? '',
+							},
+							shipTo: {
+								country: toCountry,
+								state: toState,
+								city: toCity,
+								postalCode: toPostalCode,
+							},
+						});
 
-					const mainProductShippingAmount =
-						mainProductShippingRate?.shipping_amount.amount ?? 1000;
-					updatedCart.mainProductShippingAmount = mainProductShippingAmount;
+					updatedCart.mainShippingAmount = mainShippingAmount;
 
-					const mainPlusBumpShippingRate =
-						!funnel.bumpProduct ?
-							mainProductShippingRate
-						:	await getProductsShippingRateEstimate({
+					const mainPlusBumpShippingPrice =
+						!funnel.bumpProduct ? mainShippingAmount : (
+							await getProductsShippingRateEstimate({
 								products: [
 									{
 										product: funnel.mainProduct,
@@ -151,17 +151,14 @@ export const cartRouter = createTRPCRouter({
 									state: toState,
 									city: toCity,
 								},
-							});
+							}).then(({ lowestShippingPrice }) => lowestShippingPrice)
+						);
 
-					if (mainPlusBumpShippingRate) {
-						console.log('mainPlusBumpShippingAmount', mainPlusBumpShippingRate);
-						updatedCart.bumpProductShippingPrice =
-							mainPlusBumpShippingRate.shipping_amount.amount - mainProductShippingAmount;
-					}
+					updatedCart.bumpShippingPrice = mainPlusBumpShippingPrice - mainShippingAmount;
 				}
 			}
 
-			const amounts = getAmountsForMainCart(funnel, updatedCart);
+			const amounts = getAmountsForCheckout(funnel, updatedCart);
 			console.log('updated amounts', amounts);
 
 			const carts = await ctx.db.pool
@@ -170,10 +167,15 @@ export const cartRouter = createTRPCRouter({
 					...update,
 					...amounts,
 				})
-				.where(and(eq(Carts.id, id), not(eq(Carts.status, 'converted'))))
+				.where(
+					and(
+						eq(Carts.id, id),
+						notInArray(Carts.stage, ['checkoutConverted', 'upsellConverted']),
+					),
+				)
 				.returning();
 
-			const stripePaymentIntentId = carts[0]?.mainStripePaymentIntentId;
+			const stripePaymentIntentId = carts[0]?.checkoutStripePaymentIntentId;
 			if (!stripePaymentIntentId) throw new Error('stripePaymentIntentId not found');
 
 			const stripeAccount =
@@ -184,7 +186,7 @@ export const cartRouter = createTRPCRouter({
 			// we need to update the paymentIntent amount
 			await stripe.paymentIntents.update(
 				stripePaymentIntentId,
-				{ amount: amounts.amount },
+				{ amount: amounts.orderAmount },
 				{ stripeAccount: stripeAccount ?? raise('stripeAccount not found') },
 			);
 
@@ -214,11 +216,12 @@ export const cartRouter = createTRPCRouter({
 			const upsellProduct = funnel.upsellProduct ?? raise('upsell product not found');
 
 			const stripePaymentMethodId =
-				cart.mainStripePaymentMethodId ?? raise('stripePaymentMethodId not found');
+				cart.checkoutStripePaymentMethodId ?? raise('stripePaymentMethodId not found');
 
 			const upsellProductAmount =
 				upsellProduct.price - (funnel.upsellProductDiscount ?? 0);
-			const upsellShippingAmount = cart.upsellProductShippingPrice ?? 0; // todo - get shipping delta for upsell product
+			const upsellShippingAmount = cart.upsellShippingPrice ?? 0; // todo - get shipping delta for upsell product
+			const upsellHandlingAmount = 0;
 
 			const paymentIntentRes = await stripe.paymentIntents.create(
 				{
@@ -251,19 +254,41 @@ export const cartRouter = createTRPCRouter({
 			updateCart.upsellProductId = upsellProduct.id;
 			updateCart.upsellProductAmount = upsellProductAmount;
 			updateCart.upsellShippingAmount = upsellShippingAmount;
-			updateCart.upsellAmount = upsellProductAmount + upsellShippingAmount;
-			updateCart.amount =
-				cart.mainPlusBumpAmount + upsellProductAmount + upsellShippingAmount;
+			updateCart.upsellHandlingAmount = 0;
+			updateCart.upsellShippingAndHandlingAmount =
+				upsellShippingAmount + upsellHandlingAmount;
+			updateCart.upsellAmount =
+				upsellProductAmount + upsellShippingAmount + upsellHandlingAmount;
+
 			updateCart.upsellStripePaymentIntentId = paymentIntentRes.id;
 			updateCart.upsellStripeChargeId =
 				typeof charge === 'string' ? charge : charge?.id ?? null;
 
-			updateCart.shippingAndHandlingAmount =
-				(cart.mainPlusBumpShippingAndHandlingAmount ?? 0) + upsellShippingAmount;
-			updateCart.amount =
-				cart.mainPlusBumpAmount + upsellProductAmount + upsellShippingAmount;
+			updateCart.orderProductAmount =
+				cart.mainProductAmount + (cart.bumpProductAmount ?? 0) + upsellProductAmount;
+			updateCart.orderShippingAmount =
+				(cart.mainShippingAmount ?? 0) +
+				(cart.bumpShippingAmount ?? 0) +
+				upsellShippingAmount;
+			updateCart.orderHandlingAmount =
+				(cart.mainHandlingAmount ?? 0) +
+				(cart.bumpHandlingAmount ?? 0) +
+				upsellHandlingAmount;
+			updateCart.orderShippingAndHandlingAmount =
+				updateCart.orderShippingAmount + updateCart.orderHandlingAmount;
+			updateCart.orderAmount =
+				updateCart.orderProductAmount + updateCart.orderShippingAndHandlingAmount;
 
 			updateCart.stage = 'upsellConverted';
+
+			if (ctx.visitor?.ip) {
+				await recordCartEvent({
+					cart,
+					cartFunnel: funnel,
+					type: 'cart_purchaseUpsell',
+					...ctx.visitor,
+				});
+			}
 
 			await sendCartReceiptEmail({
 				...cart,
@@ -273,9 +298,9 @@ export const cartRouter = createTRPCRouter({
 				mainProduct: funnel.mainProduct,
 				bumpProduct: funnel.bumpProduct,
 				upsellProduct: funnel.upsellProduct,
+			}).then(() => {
+				updateCart.orderReceiptSent = true;
 			});
-
-			updateCart.receiptSent = true;
 
 			await ctx.db.pool.update(Carts).set(updateCart).where(eq(Carts.id, input.cartId));
 
@@ -295,6 +320,15 @@ export const cartRouter = createTRPCRouter({
 
 			cart.stage === 'upsellDeclined';
 
+			if (ctx.visitor?.ip) {
+				await recordCartEvent({
+					cart,
+					cartFunnel: funnel,
+					type: 'cart_declineUpsell',
+					...ctx.visitor,
+				});
+			}
+
 			await sendCartReceiptEmail({
 				...cart,
 				fan,
@@ -302,9 +336,9 @@ export const cartRouter = createTRPCRouter({
 				mainProduct: funnel.mainProduct,
 				bumpProduct: funnel.bumpProduct,
 				upsellProduct: funnel.upsellProduct,
+			}).then(() => {
+				cart.orderReceiptSent = true;
 			});
-
-			cart.receiptSent = true;
 
 			await ctx.db.pool.update(Carts).set(cart).where(eq(Carts.id, input.cartId));
 
@@ -313,5 +347,37 @@ export const cartRouter = createTRPCRouter({
 				funnelKey: funnel.key,
 				success: true,
 			};
+		}),
+
+	// events
+
+	logEvent: publicProcedure
+		.input(
+			z.object({
+				cartId: z.string(),
+				event: z.enum(WEB_EVENT_TYPES__CART),
+			}),
+		)
+		.mutation(async ({ input, ctx }) => {
+			if (!ctx.visitor?.ip) {
+				throw new Error('visitor info not found');
+			}
+
+			const cart =
+				(await ctx.db.pool.query.Carts.findFirst({
+					where: eq(Carts.id, input.cartId),
+					with: {
+						funnel: true,
+					},
+				})) ?? raise('cart not found');
+
+			const cartFunnel = cart.funnel ?? raise('funnel not found');
+
+			await recordCartEvent({
+				cart,
+				cartFunnel,
+				type: input.event,
+				...ctx.visitor,
+			});
 		}),
 });

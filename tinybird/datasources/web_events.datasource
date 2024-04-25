@@ -1,8 +1,9 @@
+
 SCHEMA >
     `workspaceId` String `json:$.workspaceId`,
     `sessionId` String `json:$.sessionId`,
     `href` String `json:$.href`,
-    `assetId` String `json:$.assetId`,    
+    `assetId` String `json:$.assetId`,
     `domain` String `json:$.domain`,
     `key` String `json:$.key`,
     `timestamp` DateTime `json:$.timestamp`,

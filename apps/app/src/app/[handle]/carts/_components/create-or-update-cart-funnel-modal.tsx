@@ -28,11 +28,11 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 
 	/* funnel context */
 	const {
-		lastSelectedCartFunnel: selectedFunnel,
-		showCreateCartFunnelModal: showCreateFunnelModal,
-		setShowCreateCartFunnelModal: setShowCreateFunnelModal,
-		showUpdateCartFunnelModal: showUpdateFunnelModal,
-		setShowUpdateCartFunnelModal: setShowUpdateFunnelModal,
+		lastSelectedCartFunnel: selectedCartFunnel,
+		showCreateCartFunnelModal,
+		setShowCreateCartFunnelModal,
+		showUpdateCartFunnelModal,
+		setShowUpdateCartFunnelModal,
 		focusGridList,
 	} = useCartFunnelContext();
 
@@ -69,7 +69,7 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 
 	/* form */
 	const { form, onSubmit: onSubmitFunnel } = useCreateOrUpdateForm({
-		updateItem: selectedFunnel ? selectedFunnel : null,
+		updateItem: selectedCartFunnel ? selectedCartFunnel : null,
 		upsertSchema: upsertCartFunnelSchema,
 		defaultValues: defaultCartFunnel,
 		handleCreateItem: async d => {
@@ -88,9 +88,10 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 	);
 
 	/* modal */
-	const showModal = mode === 'create' ? showCreateFunnelModal : showUpdateFunnelModal;
+	const showModal =
+		mode === 'create' ? showCreateCartFunnelModal : showUpdateCartFunnelModal;
 	const setShowModal =
-		mode === 'create' ? setShowCreateFunnelModal : setShowUpdateFunnelModal;
+		mode === 'create' ? setShowCreateCartFunnelModal : setShowUpdateCartFunnelModal;
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
@@ -110,7 +111,7 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 		>
 			<ModalHeader
 				icon='cart'
-				title={selectedFunnel ? `Update ${selectedFunnel.name}` : 'New Cart'}
+				title={selectedCartFunnel ? `Update ${selectedCartFunnel.name}` : 'New Cart'}
 			/>
 			<Form form={form} onSubmit={handleSubmit}>
 				<ModalBody>
@@ -187,7 +188,7 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 					<Label>Description</Label>
 					<MDXEditor
 						markdown={
-							mode === 'update' ? selectedFunnel?.bumpProductDescription ?? '' : ''
+							mode === 'update' ? selectedCartFunnel?.bumpProductDescription ?? '' : ''
 						}
 						onChange={markdown => {
 							form.setValue('bumpProductDescription', markdown, { shouldDirty: true });
@@ -217,7 +218,7 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 					<Label>Above the Fold</Label>
 					<MDXEditor
 						markdown={
-							mode === 'update' ? selectedFunnel?.upsellProductAboveTheFold ?? '' : ''
+							mode === 'update' ? selectedCartFunnel?.upsellProductAboveTheFold ?? '' : ''
 						}
 						onChange={markdown => {
 							form.setValue('upsellProductAboveTheFold', markdown, { shouldDirty: true });
@@ -227,7 +228,7 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 					<Label>Below the Fold</Label>
 					<MDXEditor
 						markdown={
-							mode === 'update' ? selectedFunnel?.upsellProductBelowTheFold ?? '' : ''
+							mode === 'update' ? selectedCartFunnel?.upsellProductBelowTheFold ?? '' : ''
 						}
 						onChange={markdown => {
 							form.setValue('upsellProductBelowTheFold', markdown, { shouldDirty: true });
@@ -239,7 +240,9 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 					<TextField name='successPageHeadline' label='Headline' control={form.control} />
 					<Label>Content</Label>
 					<MDXEditor
-						markdown={mode === 'update' ? selectedFunnel?.successPageContent ?? '' : ''}
+						markdown={
+							mode === 'update' ? selectedCartFunnel?.successPageContent ?? '' : ''
+						}
 						onChange={markdown => {
 							form.setValue('successPageContent', markdown, { shouldDirty: true });
 						}}

@@ -30,9 +30,15 @@ export default async function UpsellPage({
 
 	if (!cart) return null;
 
+	// log a success checkout conversion event
+	await cartApi.logEvent({
+		cartId,
+		event: cart.addedBump ? 'cart_purchaseMainWithBump' : 'cart_purchaseMainWithoutBump',
+	});
+
 	if (
 		mode === 'live' &&
-		(cart.stage === 'mainConverted' ||
+		(cart.stage === 'checkoutConverted' ||
 			cart.stage === 'upsellConverted' ||
 			cart.stage === 'upsellDeclined')
 	) {
@@ -40,7 +46,8 @@ export default async function UpsellPage({
 	}
 
 	const expiresAt =
-		(cart.upsellCreatedAt ? cart.upsellCreatedAt.getTime() : Date.now()) + 5 * 60 * 1000; // 5 minutes from now
+		(cart.checkoutConvertedAt ? cart.checkoutConvertedAt.getTime() : Date.now()) +
+		5 * 60 * 1000; // 5 minutes from now
 
 	const normalPrice = publicFunnel.upsellProduct?.price;
 	const price =

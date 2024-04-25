@@ -125,6 +125,8 @@ export const Workspaces = pgTable(
 		defaultSpotifyAccountId: varchar('defaultSpotifyAccountId', {
 			length: 255,
 		}),
+
+		orders: integer('orders').default(0).notNull(),
 	},
 
 	workspace => ({

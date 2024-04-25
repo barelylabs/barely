@@ -8,7 +8,6 @@ import { env } from '../../env';
 import { db } from '../db';
 import { NeonAdapter } from './auth.adapter';
 import { generateVerificationToken, sendLoginEmail } from './auth.fns';
-import Spotify from './auth.spotify';
 
 //* 🧫 CUSTOM TYPES 🧫 *//
 
@@ -32,6 +31,7 @@ declare module 'next-auth' {
 export type { Session } from 'next-auth';
 
 //* 🎛 AUTH OPTIONS 🎛 *//
+
 const authConfig: NextAuthConfig = {
 	adapter: NeonAdapter(db),
 
@@ -60,7 +60,6 @@ const authConfig: NextAuthConfig = {
 			id: 'email',
 			type: 'email',
 			name: 'Email',
-			server: '',
 			from: 'support@barely.io',
 			maxAge: 24 * 60 * 60,
 			options: {},
@@ -71,11 +70,6 @@ const authConfig: NextAuthConfig = {
 			},
 			generateVerificationToken,
 		},
-
-		Spotify({
-			clientId: env.SPOTIFY_CLIENT_ID,
-			clientSecret: env.SPOTIFY_CLIENT_SECRET,
-		}),
 	],
 
 	callbacks: {

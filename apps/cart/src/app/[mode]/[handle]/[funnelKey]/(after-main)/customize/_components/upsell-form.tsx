@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { cartApi } from '@barely/lib/server/routes/cart/cart.api.react';
 
@@ -14,6 +14,15 @@ export function UpsellForm({ cartId }: { cartId: string }) {
 	const [loading, setLoading] = useState(false);
 
 	const router = useRouter();
+
+	const { mutate: logEvent } = cartApi.logEvent.useMutation();
+
+	useEffect(() => {
+		logEvent({
+			cartId,
+			event: 'cart_viewUpsell',
+		});
+	}, [cartId, logEvent]);
 
 	const { mutate: buyUpsell } = cartApi.buyUpsell.useMutation({
 		onSuccess: res => {

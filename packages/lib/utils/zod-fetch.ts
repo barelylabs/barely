@@ -165,7 +165,7 @@ async function zGet<Schema extends ZodType, ErrorSchema extends ZodType>(
 	const response = await fetch(endpoint, {
 		method: 'GET',
 		headers: {
-			authorization: options?.auth ?? '',
+			...(options?.auth ? { authorization: options.auth } : {}),
 			'Content-Type': options?.contentType ?? 'application/json',
 			...options?.headers,
 		},

@@ -5,7 +5,7 @@ import type {
 	PublicTrackWith_Artist_Files,
 	TrackWith_Workspace_Genres_Files,
 } from '../track/track.schema';
-import { queryStringArraySchema } from '../../../hooks/use-typed-query';
+import { queryStringArraySchema } from '../../../utils/zod-helpers';
 import { selectTrackSchema } from '../track/track.schema';
 import { Mixtapes } from './mixtape.sql';
 

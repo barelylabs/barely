@@ -49,3 +49,16 @@ export function parseReferer(req: NextRequest) {
 
 	return { referer, referer_url };
 }
+
+export function parseReqForVisitorInfo(req: NextRequest) {
+	const ip = parseIp(req);
+	const geo = parseGeo(req);
+	const ua = parseUserAgent(req);
+	const isBot = detectBot(req);
+	const href = req.nextUrl.href;
+	const { referer, referer_url } = parseReferer(req);
+
+	return { ip, geo, ua, isBot, referer, referer_url, href };
+}
+
+export type VisitorInfo = ReturnType<typeof parseReqForVisitorInfo>;

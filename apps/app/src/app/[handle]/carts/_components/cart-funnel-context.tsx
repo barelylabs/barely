@@ -22,7 +22,7 @@ import { api } from '@barely/lib/server/api/react';
 import { cartFunnelSearchParamsSchema } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
 
 interface CartFunnelContext {
-	cartFunnels: AppRouterOutputs['cartFunnel']['byWorkspace']['funnels'];
+	cartFunnels: AppRouterOutputs['cartFunnel']['byWorkspace']['cartFunnels'];
 	cartFunnelSelection: Selection;
 	lastSelectedCartFunnelId: string | undefined;
 	lastSelectedCartFunnel: CartFunnel | undefined;
@@ -147,12 +147,12 @@ export function CartFunnelContextProvider({
 			Array.from(optimisticSelection).pop()?.toString()
 		);
 
-	const lastSelectedFunnel = infiniteFunnels.funnels.find(
+	const lastSelectedFunnel = infiniteFunnels.cartFunnels.find(
 		f => f.id === lastSelectedFunnelId,
 	);
 
 	const contextValue = {
-		cartFunnels: infiniteFunnels.funnels,
+		cartFunnels: infiniteFunnels.cartFunnels,
 		cartFunnelSelection: optimisticSelection,
 		lastSelectedCartFunnelId: lastSelectedFunnelId,
 		lastSelectedCartFunnel: lastSelectedFunnel,

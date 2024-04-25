@@ -15,6 +15,13 @@
 			"when": 1704490822016,
 			"tag": "0001_previous_fabian_cortez",
 			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "5",
+			"when": 1712944285977,
+			"tag": "0002_special_micromacro",
+			"breakpoints": true
 		}
 	]
 }

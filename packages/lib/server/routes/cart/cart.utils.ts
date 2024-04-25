@@ -5,7 +5,7 @@ import type { InsertCart } from './cart.schema';
 or client (where we optimistically update the cart) 
 */
 
-export function getAmountsForMainCart(
+export function getAmountsForCheckout(
 	funnel: Pick<
 		PublicFunnel,
 		| 'mainProduct'
@@ -19,14 +19,14 @@ export function getAmountsForMainCart(
 	cart: Partial<
 		Pick<
 			InsertCart,
-			// main
 			| 'mainProductPayWhatYouWantPrice'
 			| 'mainProductQuantity'
-			| 'mainProductShippingAmount'
+			| 'mainShippingAmount'
+
 			// bump
-			| 'addedBumpProduct'
+			| 'addedBump'
 			| 'bumpProductQuantity'
-			| 'bumpProductShippingPrice'
+			| 'bumpShippingPrice'
 		>
 	>,
 ) {
@@ -51,51 +51,65 @@ export function getAmountsForMainCart(
 	}
 	const mainProductQuantity = cart.mainProductQuantity ?? 1;
 	const mainProductAmount = mainProductPrice * mainProductQuantity;
-	const mainProductHandlingAmount = funnel.mainProductHandling ?? 0;
-	const mainProductShippingAmount = cart.mainProductShippingAmount ?? 0;
-	const mainProductShippingAndHandlingAmount =
-		mainProductShippingAmount + mainProductHandlingAmount;
+	const mainHandlingAmount = funnel.mainProductHandling ?? 0;
+	const mainShippingAmount = cart.mainShippingAmount ?? 0;
+	const mainShippingAndHandlingAmount = mainShippingAmount + mainHandlingAmount;
 
 	// bump product
-	const addedBumpProduct = cart.addedBumpProduct ?? false;
+	const addedBump = cart.addedBump ?? false;
 	const bumpProductPrice =
 		!funnel.bumpProduct ? 0 : (
 			funnel.bumpProduct.price - (funnel.bumpProductDiscount ?? 0)
 		);
 	const bumpProductQuantity = cart.bumpProductQuantity ?? 1;
-	const bumpProductAmount =
-		cart.addedBumpProduct ? bumpProductPrice * bumpProductQuantity : 0;
-	const bumpProductShippingPrice = cart.bumpProductShippingPrice ?? 0;
-	const bumpProductShippingAndHandlingAmount =
-		addedBumpProduct ? cart.bumpProductShippingPrice ?? 0 : 0;
+	const bumpProductAmount = cart.addedBump ? bumpProductPrice * bumpProductQuantity : 0;
+	const bumpShippingPrice = cart.bumpShippingPrice ?? 0;
+	const bumpShippingAmount = cart.addedBump ? bumpShippingPrice : 0;
+	const bumpHandlingAmount = 0;
+	const bumpShippingAndHandlingAmount = bumpShippingAmount + bumpHandlingAmount;
 
 	// main + bump
-	const mainPlusBumpShippingAndHandlingAmount =
-		mainProductShippingAndHandlingAmount + bumpProductShippingAndHandlingAmount;
-	const mainPlusBumpAmount =
-		mainProductAmount + bumpProductAmount + mainPlusBumpShippingAndHandlingAmount;
+	const checkoutProductAmount = mainProductAmount + bumpProductAmount;
+	const checkoutShippingAmount = mainShippingAmount + bumpShippingAmount;
+	const checkoutHandlingAmount = mainHandlingAmount + bumpHandlingAmount;
+	const checkoutShippingAndHandlingAmount =
+		checkoutShippingAmount + checkoutHandlingAmount;
+	const checkoutAmount =
+		checkoutProductAmount + checkoutShippingAmount + checkoutHandlingAmount;
 
 	return {
 		// formatted inputs
 		mainProductPayWhatYouWantPrice, // this is the entered amount, unless it's less than the minimum, then it's the minimum
 		mainProductQuantity,
-		addedBumpProduct,
+		addedBump,
 		bumpProductQuantity,
-		bumpProductShippingPrice,
+		bumpShippingPrice,
 
 		// calculated amounts
 		mainProductPrice,
 		mainProductAmount,
-		mainProductShippingAmount,
-		mainProductHandlingAmount,
+		mainShippingAmount,
+		mainHandlingAmount,
+		mainShippingAndHandlingAmount,
+
 		bumpProductPrice,
 		bumpProductAmount,
-		bumpProductShippingAndHandlingAmount,
+		bumpShippingAmount,
+		bumpHandlingAmount,
+		bumpShippingAndHandlingAmount,
 
-		mainPlusBumpShippingAndHandlingAmount,
-		mainPlusBumpAmount,
+		checkoutProductAmount,
+		checkoutShippingAmount,
+		checkoutHandlingAmount,
+		checkoutShippingAndHandlingAmount,
+		checkoutAmount,
 
-		amount: mainPlusBumpAmount,
-		shippingAndHandlingAmount: mainPlusBumpShippingAndHandlingAmount,
+		orderProductAmount: checkoutProductAmount,
+		orderShippingAmount: checkoutShippingAmount,
+		orderHandlingAmount: checkoutHandlingAmount,
+		orderShippingAndHandlingAmount: checkoutShippingAndHandlingAmount,
+		orderAmount: checkoutAmount,
+
+		// shippingAndHandlingAmount: mainPlusBumpShippingAndHandlingAmount,
 	} satisfies Partial<InsertCart>;
 }

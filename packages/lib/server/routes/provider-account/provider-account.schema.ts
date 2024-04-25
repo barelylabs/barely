@@ -1,5 +1,5 @@
-import type { z } from 'zod';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import { z } from 'zod';
 
 import { ProviderAccounts } from './provider-account.sql';
 
@@ -12,3 +12,8 @@ export const selectProviderAccountSchema = createSelectSchema(ProviderAccounts);
 
 export type ProviderAccount = z.infer<typeof insertProviderAccountSchema>;
 export type SelectProviderAccount = z.infer<typeof selectProviderAccountSchema>;
+
+export const providerStateSchema = z.object({
+	workspaceId: z.string(),
+	redirectUrl: z.string().url(),
+});

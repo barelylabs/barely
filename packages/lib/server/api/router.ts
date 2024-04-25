@@ -12,6 +12,7 @@ import { fileRouter } from '../routes/file/file.router';
 import { formResponseRouter } from '../routes/form/form-response.router';
 import { genreRouter } from '../routes/genre/genre.router';
 import { linkRouter } from '../routes/link/link.router';
+import { mailchimpRouter } from '../routes/mailchimp/mailchimp.router';
 import { mixtapeRouter } from '../routes/mixtape/mixtape.router';
 import { playlistPitchReviewRouter } from '../routes/playlist-pitch-review/playlist-pitch-review.router';
 import { playlistPlacementRouter } from '../routes/playlist-placement/playlist-placement.router';
@@ -25,6 +26,7 @@ import { stripeConnectRouter } from '../routes/stripe-connect/stripe-connect.rou
 import { trackRouter } from '../routes/track/track.router';
 import { userRouter } from '../routes/user/user.router';
 import { visitorSessionRouter } from '../routes/visitor-session/visitor-session.router';
+import { workflowRouter } from '../routes/workflow/workflow.router';
 import { workspaceInviteRouter } from '../routes/workspace-invite/workspace-invite.router';
 import { workspaceStripeRouter } from '../routes/workspace-stripe/workspace-stripe.router';
 import { workspaceRouter } from '../routes/workspace/workspace.router';
@@ -44,6 +46,7 @@ const appRouter = createTRPCRouter({
 	genre: genreRouter,
 	link: linkRouter,
 	mixtape: mixtapeRouter,
+	mailchimp: mailchimpRouter,
 	playlist: playlistRouter,
 	playlistPitchReview: playlistPitchReviewRouter,
 	playlistPlacement: playlistPlacementRouter,
@@ -53,6 +56,7 @@ const appRouter = createTRPCRouter({
 	spotify: spotifyRouter,
 	stat: statRouter,
 	stripeConnect: stripeConnectRouter,
+	workflow: workflowRouter,
 	workspace: workspaceRouter,
 	workspaceInvite: workspaceInviteRouter,
 	workspaceStripe: workspaceStripeRouter,

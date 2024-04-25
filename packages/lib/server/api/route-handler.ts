@@ -1,6 +1,7 @@
 import type { AnyRouter } from '@trpc/server';
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 
+import { parseReqForVisitorInfo } from '../../utils/middleware';
 import { setCorsHeaders } from '../../utils/trpc-route';
 import { auth } from '../auth';
 import { createTRPCContext } from './trpc';
@@ -15,6 +16,7 @@ export const routeHandler = (path: string, router: AnyRouter) =>
 				createTRPCContext({
 					session: req.auth,
 					headers: req.headers,
+					visitor: parseReqForVisitorInfo(req),
 				}),
 			onError({ error, path }) {
 				console.error(`>>> tRPC Error on '${path}'`, error);

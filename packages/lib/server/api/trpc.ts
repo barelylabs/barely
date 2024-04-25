@@ -8,6 +8,7 @@ import { initTRPC, TRPCError } from '@trpc/server';
 import superjson from 'superjson';
 import { z, ZodError } from 'zod';
 
+import type { VisitorInfo } from '../../utils/middleware';
 import { getUserWorkspaceByHandle } from '../../utils/auth';
 import { ratelimit } from '../../utils/upstash';
 /**
@@ -22,6 +23,7 @@ type TRPCSource = (typeof trpcSources)[number];
 
 export const createTRPCContext = (opts: {
 	headers: Headers;
+	visitor?: VisitorInfo;
 	session: Session | null;
 	rest?: boolean;
 }) => {
@@ -32,19 +34,6 @@ export const createTRPCContext = (opts: {
 		: trpcSources.includes(opts.headers.get('x-trpc-source') as TRPCSource) ?
 			(opts.headers.get('x-trpc-source') as TRPCSource)
 		:	'unknown';
-
-	const longitude =
-		opts.rest ? undefined : (
-			opts.headers.get('x-longitude') ??
-			opts.headers.get('x-vercel-ip-longitude') ??
-			undefined
-		);
-	const latitude =
-		opts.rest ? undefined : (
-			opts.headers.get('x-latitude') ??
-			opts.headers.get('x-vercel-ip-latitude') ??
-			undefined
-		);
 
 	const pageSessionId =
 		opts.rest ? undefined : opts.headers.get('x-page-session-id') ?? null;
@@ -60,7 +49,7 @@ export const createTRPCContext = (opts: {
 			session?.user.workspaces.find(w => w.handle === workspaceHandle)
 		:	null;
 
-	const ip = opts.rest ? '' : opts.headers.get('x-real-ip') ?? '';
+	// const ip = opts.rest ? '' : opts.headers.get('x-real-ip') ?? '';
 
 	const context = {
 		// auth
@@ -71,9 +60,7 @@ export const createTRPCContext = (opts: {
 		pageSessionId,
 		pusherSocketId,
 		// pii
-		ip,
-		longitude,
-		latitude,
+		visitor: opts.visitor,
 		// for convenience
 		db,
 		source,

@@ -1,7 +1,7 @@
 import type { ReadonlyURLSearchParams } from 'next/navigation';
+import type { z } from 'zod';
 import { useCallback, useMemo } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { z } from 'zod';
 
 type OptionalKeys<T> = {
 	[K in keyof T]-?: Record<string, unknown> extends Pick<T, K> ? K : never;
@@ -12,25 +12,25 @@ type FilteredKeys<T, U> = {
 };
 
 // Take array as a string and return zod array
-export const queryNumberArraySchema = z
-	.string()
-	.or(z.number())
-	.or(z.array(z.number()))
-	.transform(a => {
-		if (typeof a === 'string') return a.split(',').map(a => Number(a));
-		if (Array.isArray(a)) return a;
-		return [a];
-	});
+// export const queryNumberArraySchema = z
+// 	.string()
+// 	.or(z.number())
+// 	.or(z.array(z.number()))
+// 	.transform(a => {
+// 		if (typeof a === 'string') return a.split(',').map(a => Number(a));
+// 		if (Array.isArray(a)) return a;
+// 		return [a];
+// 	});
 
 // Take array as a string and return zod string array
-export const queryStringArraySchema = z
-	.string()
-	.or(z.array(z.string()))
-	.transform(a => {
-		if (typeof a === 'string') return a.split(',');
-		if (Array.isArray(a)) return a;
-		return [a];
-	});
+// export const queryStringArraySchema = z
+// 	.string()
+// 	.or(z.array(z.string()))
+// 	.transform(a => {
+// 		if (typeof a === 'string') return a.split(',');
+// 		if (Array.isArray(a)) return a;
+// 		return [a];
+// 	});
 
 // Take string and return zod string array - comma separated
 // export const queryStringArray = z

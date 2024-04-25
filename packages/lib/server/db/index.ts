@@ -43,6 +43,7 @@ import * as transactionSql from '../routes/transaction/transaction.sql';
 import * as userSessionSql from '../routes/user/user-session.sql';
 import * as userSql from '../routes/user/user.sql';
 import * as visitorSessionSql from '../routes/visitor-session/visitor-session.sql';
+import * as workflowSql from '../routes/workflow/workflow.sql';
 import * as workspaceInviteSql from '../routes/workspace-invite/workspace-invite.sql';
 import * as workspaceSql from '../routes/workspace/workspace.sql';
 import * as vidRenderSql from '../vid-render.sql';
@@ -89,6 +90,7 @@ export const dbSchema = {
 	...verificationTokenSql,
 	...vidRenderSql,
 	...visitorSessionSql,
+	...workflowSql,
 	...workspaceSql,
 	...workspaceInviteSql,
 };

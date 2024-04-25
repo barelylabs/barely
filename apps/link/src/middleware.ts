@@ -7,13 +7,7 @@ import { db } from '@barely/lib/server/db/index';
 import { parseLink } from '@barely/lib/server/middleware/utils';
 import { recordLinkClick } from '@barely/lib/server/routes/event/event.fns';
 import { Links } from '@barely/lib/server/routes/link/link.sql';
-import {
-	detectBot,
-	parseGeo,
-	parseIp,
-	parseReferer,
-	parseUserAgent,
-} from '@barely/lib/utils/middleware';
+import { parseReqForVisitorInfo } from '@barely/lib/utils/middleware';
 import { sqlAnd } from '@barely/lib/utils/sql';
 import { getAbsoluteUrl } from '@barely/lib/utils/url';
 import { eq, isNull } from 'drizzle-orm';
@@ -75,25 +69,16 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	if (!link ?? !link?.url) return NextResponse.rewrite(getAbsoluteUrl('link', '404'));
 
 	//* 📈 report event to analytics + remarketing *//
-	const ip = parseIp(req);
-	const geo = parseGeo(req);
-	const ua = parseUserAgent(req);
-	const isBot = detectBot(req);
 
-	const { referer, referer_url } = parseReferer(req);
+	const visitorInfo = parseReqForVisitorInfo(req);
 
 	const recordClickProps: RecordClickProps = {
 		// link data
 		link,
-		href: linkProps.href,
 		// visit data
 		type: linkProps.linkClickType,
-		ip,
-		geo,
-		ua,
-		isBot,
-		referer,
-		referer_url,
+		...visitorInfo,
+		href: linkProps.href,
 	};
 
 	ev.waitUntil(recordLinkClick(recordClickProps)); // 👈 record click in background. Will continue after response is sent.
@@ -101,7 +86,8 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	//* 🧭 route based on device platform and available schemes *//
 	// ➡️ 🍏 || 🤖 || 💻
 
-	if (isBot && link.customMetaTags) return NextResponse.redirect(`/_proxy/${link.id}`); // 👈 send bots to proxy for meta tags
+	if (visitorInfo.isBot && link.customMetaTags)
+		return NextResponse.redirect(`/_proxy/${link.id}`); // 👈 send bots to proxy for meta tags
 
 	return NextResponse.redirect(link.url); // 👈 just doing url redirects for now
 }

@@ -51,7 +51,7 @@ export const cartFunnelRouter = createTRPCRouter({
 			}
 
 			return {
-				funnels: funnels.slice(0, limit),
+				cartFunnels: funnels.slice(0, limit),
 				nextCursor,
 			};
 		}),

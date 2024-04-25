@@ -58,14 +58,17 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 	}
 
 	/* update cart */
-	if (preChargeCartStage === 'mainCreated' || preChargeCartStage === 'mainAbandoned') {
+	if (
+		preChargeCartStage === 'checkoutCreated' ||
+		preChargeCartStage === 'checkoutAbandoned'
+	) {
 		console.log('this is the first payment since the cart was created');
 
 		const updateCart: UpdateCart = { id: prevCart.id };
 
-		updateCart.stage = funnel?.upsellProductId ? 'upsellCreated' : 'mainConverted';
-		updateCart.mainStripeChargeId = charge.id;
-		updateCart.mainStripePaymentMethodId = charge.payment_method;
+		updateCart.stage = funnel?.upsellProductId ? 'upsellCreated' : 'checkoutConverted';
+		updateCart.checkoutStripeChargeId = charge.id;
+		updateCart.checkoutStripePaymentMethodId = charge.payment_method;
 
 		// update or create fan
 		const fan =
@@ -127,7 +130,7 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 
 		if (!fan) throw new Error('Fan not found');
 
-		if (updateCart.stage === 'mainConverted') {
+		if (updateCart.stage === 'checkoutConverted') {
 			await sendCartReceiptEmail({
 				...prevCart,
 				...updateCart,
@@ -139,86 +142,6 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 			});
 		}
 	}
-
-	// switch (true) {
-	// 	/* this is the first payment since the cart was created */
-	// 	case preChargeCartStage === 'mainCreated' || preChargeCartStage === 'mainAbandoned': {
-	// 		console.log('this is the first payment since the cart was created');
-
-	// 		const updateCart: UpdateCart = { id: prevCart.id };
-
-	// 		updateCart.stage = funnel?.upsellProductId ? 'upsellCreated' : 'mainConverted';
-	// 		updateCart.mainStripeChargeId = charge.id;
-	// 		updateCart.mainStripePaymentMethodId = charge.payment_method;
-
-	// 		// update or create fan
-	// 		const fan = prevCart.fan
-	// 			? prevCart.fan
-	// 			: stripeCustomerId ?? charge.billing_details.email
-	// 				? await db.pool.query.Fans.findFirst({
-	// 						where: or(
-	// 							charge.billing_details.email
-	// 								? eq(Fans.email, charge.billing_details.email)
-	// 								: undefined,
-	// 							stripeCustomerId
-	// 								? eq(Fans.stripeCustomerId, stripeCustomerId)
-	// 								: undefined,
-	// 						),
-	// 					})
-	// 				: undefined;
-
-	// 		if (fan) {
-	// 			updateCart.fanId = fan.id;
-	// 			await db.pool
-	// 				.update(Fans)
-	// 				.set({
-	// 					stripeCustomerId,
-	// 					stripePaymentMethodId: charge.payment_method,
-	// 				})
-	// 				.where(eq(Fans.id, fan.id));
-	// 		} else {
-	// 			const fan =
-	// 				(
-	// 					await db.pool
-	// 						.insert(Fans)
-	// 						.values({
-	// 							id: newId('fan'),
-	// 							workspaceId: prevCart.workspaceId,
-	// 							fullName: charge.billing_details.name ?? prevCart.fullName ?? '',
-	// 							email: charge.billing_details.email ?? prevCart.email ?? '',
-
-	// 							shippingAddressLine1: charge.shipping?.address?.line1,
-	// 							shippingAddressLine2: charge.shipping?.address?.line2,
-	// 							shippingAddressCity: charge.shipping?.address?.city,
-	// 							shippingAddressState: charge.shipping?.address?.state,
-	// 							shippingAddressPostalCode: charge.shipping?.address?.postal_code,
-	// 							shippingAddressCountry: charge.shipping?.address?.country,
-
-	// 							billingAddressPostalCode: charge.billing_details.address?.postal_code,
-	// 							billingAddressCountry: charge.billing_details.address?.country,
-
-	// 							stripeCustomerId,
-	// 							stripePaymentMethodId: charge.payment_method,
-	// 						})
-	// 						.returning()
-	// 				)[0] ?? raise('error creating new fan');
-	// 			updateCart.fanId = fan.id;
-	// 		}
-
-	// 		await db.pool.update(Carts).set(updateCart).where(eq(Carts.id, cartId));
-
-	// 		if (!fan) throw new Error('Fan not found');
-
-	// 		await sendCartReceiptEmail({
-	// 			...prevCart,
-	// 			...updateCart,
-	// 			fan,
-	// 			funnel,
-	// 		});
-
-	// 		break;
-	// 	}
-	// }
 }
 
 export function getStripeConnectAccountId(

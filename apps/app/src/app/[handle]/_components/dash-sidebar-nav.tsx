@@ -74,6 +74,11 @@ export function SidebarNav(props: SidebarNavProps) {
 			icon: 'press',
 		},
 		{
+			title: 'workflows',
+			href: `/${handle}/workflows`,
+			icon: 'workflow',
+		},
+		{
 			title: 'settings',
 			href: `/${handle}/settings`,
 			icon: 'settings',
@@ -84,6 +89,11 @@ export function SidebarNav(props: SidebarNavProps) {
 		{ title: 'profile', icon: 'profile', href: `/${handle}/settings` },
 		{ title: 'socials', icon: 'socials', href: `/${handle}/settings/socials` },
 		{ title: 'team', icon: 'users', href: `/${handle}/settings/team` },
+		{
+			title: 'integrations',
+			icon: 'integrations',
+			href: `/${handle}/settings/integrations`,
+		},
 		{ title: 'domains', icon: 'domain', href: `/${handle}/settings/domains` },
 		{
 			title: 'remarketing',

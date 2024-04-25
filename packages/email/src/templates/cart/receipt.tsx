@@ -27,7 +27,7 @@ import {
 } from '../../styles';
 
 export interface ReceiptEmailProps {
-	cartId: string;
+	orderId: string;
 	sellerName: string;
 	date: Date;
 	supportEmail: string;
@@ -58,7 +58,7 @@ export interface ReceiptEmailProps {
 }
 
 export default function ReceiptEmail({
-	cartId,
+	orderId,
 	sellerName,
 	supportEmail,
 	shippingAddress,
@@ -126,7 +126,7 @@ export default function ReceiptEmail({
 							<InformationTableColumn>
 								<InformationTableRow>
 									<InformationTableLabel>Invoice</InformationTableLabel>
-									<InformationTableValue>{cartId}</InformationTableValue>
+									<InformationTableValue>{orderId}</InformationTableValue>
 								</InformationTableRow>
 
 								<InformationTableRow>
@@ -354,7 +354,7 @@ export default function ReceiptEmail({
 }
 
 ReceiptEmail.PreviewProps = {
-	cartId: 'ML4F5L8522',
+	orderId: 'ML4F5L8522',
 	sellerName: 'Proper Youth',
 	// buyerName: 'Adam Barito',
 	shippingTotal: '$5.55',

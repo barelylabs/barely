@@ -7,18 +7,35 @@ import { log } from '../../utils/log';
 import { zPost } from '../../utils/zod-fetch';
 import { z_optStr_hash, z_optStr_lowerCase_hash } from '../../utils/zod-helpers';
 
-interface MetaEventProps {
+interface MetaEventParams {
+	content_category?: string;
+	content_ids?: string[];
+	content_name?: string;
+	content_type?: string;
+	currency?: string;
+	num_items?: number;
+	value?: number;
+}
+
+export interface MetaEventProps {
 	pixelId: string;
 	accessToken: string;
 	// event data
+	eventName:
+		| 'ViewContent'
+		| 'InitiateCheckout'
+		| 'AddToCart'
+		| 'AddPaymentInfo'
+		| 'Purchase'
+		| 'Barely_LinkClick';
 	url: string;
 	ip?: string;
 	ua?: string;
-	eventName: 'ViewContent' | 'Barely_LinkClick';
 	time?: number;
 	geo?: NextGeo;
 	eventId?: string;
 	testEventCode?: string;
+	customData?: MetaEventParams;
 }
 
 export async function reportEventToMeta(props: MetaEventProps) {
@@ -38,6 +55,7 @@ export async function reportEventToMeta(props: MetaEventProps) {
 		eventTime: Math.floor(time ?? Date.now() / 1000),
 		actionSource: 'website',
 		sourceUrl: url,
+		customData: props.customData,
 	});
 
 	const testEventCode =
