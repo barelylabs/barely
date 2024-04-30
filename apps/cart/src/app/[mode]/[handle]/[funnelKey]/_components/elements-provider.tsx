@@ -23,7 +23,7 @@ export function ElementsProvider({
 			publicFunnel.workspace.stripeConnectAccountId ?? undefined
 		:	publicFunnel.workspace.stripeConnectAccountId_devMode ?? undefined;
 
-	const clientSecret = cart.mainStripeClientSecret;
+	const clientSecret = cart.checkoutStripeClientSecret;
 
 	// todo: get these from db, based on handle + funnelKey
 	const theme = {

@@ -11,11 +11,11 @@ import { CreateCartFunnelButton } from '~/app/[handle]/carts/_components/create-
 
 export function AllCartFunnels() {
 	const {
-		cartFunnels: funnels,
-		cartFunnelSelection: funnelSelection,
-		setCartFunnelSelection: setFunnelSelection,
+		cartFunnels,
+		cartFunnelSelection,
+		setCartFunnelSelection,
 		gridListRef,
-		setShowUpdateCartFunnelModal: setShowUpdateFunnelModal,
+		setShowUpdateCartFunnelModal,
 	} = useCartFunnelContext();
 
 	return (
@@ -28,12 +28,12 @@ export function AllCartFunnels() {
 				selectionMode='multiple'
 				selectionBehavior='replace'
 				// funnels
-				items={funnels}
-				selectedKeys={funnelSelection}
-				setSelectedKeys={setFunnelSelection}
+				items={cartFunnels}
+				selectedKeys={cartFunnelSelection}
+				setSelectedKeys={setCartFunnelSelection}
 				onAction={() => {
-					if (!funnelSelection) return;
-					setShowUpdateFunnelModal(true);
+					if (!cartFunnelSelection) return;
+					setShowUpdateCartFunnelModal(true);
 				}}
 				// empty
 				renderEmptyState={() => (
@@ -47,15 +47,16 @@ export function AllCartFunnels() {
 			>
 				{funnel => <CartFunnelCard cartFunnel={funnel} />}
 			</GridList>
+			{/* <pre>{JSON.stringify(mailchimpAudiences, null, 2)}</pre> */}
 		</>
 	);
 }
 
 function CartFunnelCard({ cartFunnel }: { cartFunnel: CartFunnel }) {
 	const {
-		setShowUpdateCartFunnelModal: setShowUpdateFunnelModal,
-		setShowArchiveCartFunnelModal: setShowArchiveFunnelModal,
-		setShowDeleteCartFunnelModal: setShowDeleteFunnelModal,
+		setShowUpdateCartFunnelModal: setShowUpdateCartFunnelModal,
+		setShowArchiveCartFunnelModal: setShowArchiveCartFunnelModal,
+		setShowDeleteCartFunnelModal: setShowDeleteCartFunnelModal,
 	} = useCartFunnelContext();
 
 	return (
@@ -63,9 +64,9 @@ function CartFunnelCard({ cartFunnel }: { cartFunnel: CartFunnel }) {
 			id={cartFunnel.id}
 			key={cartFunnel.id}
 			textValue={cartFunnel.name}
-			setShowUpdateModal={setShowUpdateFunnelModal}
-			setShowArchiveModal={setShowArchiveFunnelModal}
-			setShowDeleteModal={setShowDeleteFunnelModal}
+			setShowUpdateModal={setShowUpdateCartFunnelModal}
+			setShowArchiveModal={setShowArchiveCartFunnelModal}
+			setShowDeleteModal={setShowDeleteCartFunnelModal}
 		>
 			<div className='flex flex-grow flex-row items-center gap-4'>
 				<div className='flex flex-col items-start gap-1'>

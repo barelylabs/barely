@@ -18,7 +18,6 @@ import {
 	CalendarBlank,
 	CassetteTape,
 	Disc,
-	GridNine,
 	Hoodie,
 	MetaLogo,
 	PlayCircle,
@@ -48,6 +47,7 @@ import {
 	BarChart,
 	Bell,
 	Binary,
+	Blocks,
 	Bold,
 	Bot,
 	Check,
@@ -297,7 +297,7 @@ export const Icon = {
 	import: Import,
 	info: InformationCircleIcon,
 	infinity: InfinityIcon,
-	integrations: GridNine,
+	integrations: Blocks,
 	italic: Italic,
 
 	joystick: Joystick,
@@ -409,6 +409,7 @@ export const Icon = {
 	wand: Wand2,
 	warning: AlertTriangle,
 	watch: Watch,
+	workflow: Zap,
 	wrench: Wrench,
 
 	x: X,

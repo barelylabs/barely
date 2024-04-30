@@ -8,20 +8,21 @@ import { useCartFunnelContext } from '~/app/[handle]/carts/_components/cart-funn
 
 export function ArchiveOrDeleteFunnelModal({ mode }: { mode: 'archive' | 'delete' }) {
 	const {
-		cartFunnelSelection: funnelSelection,
-		lastSelectedCartFunnel: lastSelectedFunnel,
-		showArchiveCartFunnelModal: showArchiveFunnelModal,
-		showDeleteCartFunnelModal: showDeleteFunnelModal,
-		setShowArchiveCartFunnelModal: setShowArchiveFunnelModal,
-		setShowDeleteCartFunnelModal: setShowDeleteFunnelModal,
+		cartFunnelSelection,
+		lastSelectedCartFunnel,
+		showArchiveCartFunnelModal,
+		showDeleteCartFunnelModal,
+		setShowArchiveCartFunnelModal,
+		setShowDeleteCartFunnelModal,
 	} = useCartFunnelContext();
 
 	const apiUtils = api.useUtils();
 
-	const showModal = mode === 'archive' ? showArchiveFunnelModal : showDeleteFunnelModal;
+	const showModal =
+		mode === 'archive' ? showArchiveCartFunnelModal : showDeleteCartFunnelModal;
 
 	const setShowModal =
-		mode === 'archive' ? setShowArchiveFunnelModal : setShowDeleteFunnelModal;
+		mode === 'archive' ? setShowArchiveCartFunnelModal : setShowDeleteCartFunnelModal;
 
 	const onSuccess = useCallback(async () => {
 		await apiUtils.cartFunnel.invalidate();
@@ -34,13 +35,13 @@ export function ArchiveOrDeleteFunnelModal({ mode }: { mode: 'archive' | 'delete
 	const { mutate: deleteFunnels, isPending: isPendingDelete } =
 		api.cartFunnel.delete.useMutation({ onSuccess });
 
-	if (!lastSelectedFunnel) return null;
+	if (!lastSelectedCartFunnel) return null;
 
 	return (
 		<ArchiveOrDeleteModal
 			mode={mode}
-			selection={funnelSelection}
-			lastSelected={lastSelectedFunnel}
+			selection={cartFunnelSelection}
+			lastSelected={lastSelectedCartFunnel}
 			showModal={showModal}
 			setShowModal={setShowModal}
 			archiveItems={archiveFunnels}

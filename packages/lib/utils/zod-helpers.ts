@@ -92,3 +92,22 @@ export function stringToJSONSafe<Schema extends ZodType>(
 		data: parsed.data,
 	};
 }
+
+export const queryNumberArraySchema = z
+	.string()
+	.or(z.number())
+	.or(z.array(z.number()))
+	.transform(a => {
+		if (typeof a === 'string') return a.split(',').map(a => Number(a));
+		if (Array.isArray(a)) return a;
+		return [a];
+	});
+
+export const queryStringArraySchema = z
+	.string()
+	.or(z.array(z.string()))
+	.transform(a => {
+		if (typeof a === 'string') return a.split(',');
+		if (Array.isArray(a)) return a;
+		return [a];
+	});

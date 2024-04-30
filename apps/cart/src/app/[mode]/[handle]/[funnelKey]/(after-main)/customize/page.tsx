@@ -20,7 +20,10 @@ export default async function UpsellPage({
 
 	const cartId = cookies().get(`${params.handle}.${params.funnelKey}.cartId`)?.value;
 
-	if (!cartId) return null;
+	if (!cartId) {
+		console.log('cartId not found');
+		return null;
+	}
 
 	const { cart, publicFunnel } = await cartApi.byIdAndParams({
 		id: cartId,
@@ -28,11 +31,20 @@ export default async function UpsellPage({
 		funnelKey,
 	});
 
-	if (!cart) return null;
+	if (!cart) {
+		console.log('cart not found');
+		return null;
+	}
+
+	// log a success checkout conversion event
+	await cartApi.logEvent({
+		cartId,
+		event: cart.addedBump ? 'cart_purchaseMainWithBump' : 'cart_purchaseMainWithoutBump',
+	});
 
 	if (
 		mode === 'live' &&
-		(cart.stage === 'mainConverted' ||
+		(cart.stage === 'checkoutConverted' ||
 			cart.stage === 'upsellConverted' ||
 			cart.stage === 'upsellDeclined')
 	) {
@@ -40,7 +52,8 @@ export default async function UpsellPage({
 	}
 
 	const expiresAt =
-		(cart.upsellCreatedAt ? cart.upsellCreatedAt.getTime() : Date.now()) + 5 * 60 * 1000; // 5 minutes from now
+		(cart.checkoutConvertedAt ? cart.checkoutConvertedAt.getTime() : Date.now()) +
+		5 * 60 * 1000; // 5 minutes from now
 
 	const normalPrice = publicFunnel.upsellProduct?.price;
 	const price =

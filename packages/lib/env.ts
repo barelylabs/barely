@@ -15,6 +15,23 @@ const devPortSchema = z
 		message: 'You need a dev port in order to run the app locally',
 	});
 
+const rateLimitSchema = z
+	.string()
+	.refine(
+		v => {
+			const isValid = /^\d+\s[msdh](s)?$/i.test(v);
+			return isValid;
+		},
+		{
+			message: 'Rate limit must be in the format: {number} {ms|s|m|h|d|ms}',
+		},
+	)
+	.transform(v => {
+		return v as RateLimitTime;
+	})
+	.optional()
+	.default('1 h');
+
 export const env = createEnv({
 	server: {
 		AWS_S3_BUCKET_NAME: z.string(),
@@ -27,33 +44,23 @@ export const env = createEnv({
 		DATABASE_POOL_URL: z.string().url(),
 		GANDI_API_KEY: z.string(),
 		LOCALHOST_IP: z.string(),
+		MAILCHIMP_CLIENT_ID: z.string(),
+		MAILCHIMP_CLIENT_SECRET: z.string(),
 		META_TEST_EVENT_CODE: z.string().optional(),
 		NEXTAUTH_SECRET: z.string(),
 		OPENAI_API_KEY: z.string(),
 		OPENAI_ORG_ID: z.string(),
 		PUSHER_APP_SECRET: z.string(),
-		RATE_LIMIT_RECORD_LINK_CLICK: z
-			.string()
-			.refine(
-				v => {
-					const isValid = /^\d+\s[msdh](s)?$/i.test(v);
-					return isValid;
-				},
-				{
-					message: 'Rate limit must be in the format: {number} {ms|s|m|h|d|ms}',
-				},
-			)
-			.transform(v => {
-				return v as RateLimitTime;
-			})
-			.optional()
-			.default('1 h'),
+		RATE_LIMIT_RECORD_CART_EVENT: rateLimitSchema,
+		RATE_LIMIT_RECORD_LINK_CLICK: rateLimitSchema,
 		RESEND_API_KEY: z.string(),
 		SCREENING_PHONE_NUMBER: z.string(),
 		SHIPENGINE_API_KEY: z.string(),
 		SPOTIFY_CLIENT_ID: z.string(),
 		SPOTIFY_CLIENT_SECRET: z.string(),
 		STRIPE_SECRET_KEY: z.string(),
+		TIKTOK_CLIENT_KEY: z.string(),
+		TIKTOK_CLIENT_SECRET: z.string(),
 		TINYBIRD_API_KEY: z.string(),
 		TWILIO_ACCOUNT_SID: z.string(),
 		TWILIO_AUTH_TOKEN: z.string(),

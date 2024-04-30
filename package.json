@@ -31,7 +31,7 @@
 		"neon:reset-dev-branch": "./scripts/reset-dev-branch.sh",
 		"postinstall": "pnpm lint:ws",
 		"start": "turbo start",
-		"tunnelto": "tunnelto --port 3000 --subdomain barely",
+		"tunnelto": "tunnelto --scheme https --port 3000 --subdomain barely",
 		"tunnelto:auth": "./scripts/tunnelto-auth.sh",
 		"typecheck": "turbo typecheck",
 		"vercel:pull-env": "pnpm vercel env pull --cwd apps/app ../../.env"

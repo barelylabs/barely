@@ -3,7 +3,7 @@ import { z } from 'zod';
 import ClientRedirect from './ClientRedirect';
 
 export const dynamicParams = true;
-export const runtime = 'experimental-edge';
+// export const runtime = 'experimental-edge';
 
 const mobileRedirectParamsSchema = z.object({
 	scheme: z.string(),

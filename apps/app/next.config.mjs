@@ -40,6 +40,9 @@ const config = {
 
 	/** Enables hot reloading for local packages without a build step */
 	transpilePackages: ['@barely/email', '@barely/env', '@barely/lib', '@barely/ui'],
+	experimental: {
+		serverComponentsExternalPackages: ['langchain', '@langchain/openai'],
+	},
 
 	eslint: { ignoreDuringBuilds: true },
 	typescript: { ignoreBuildErrors: true },

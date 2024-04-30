@@ -2,7 +2,7 @@ import type { InferSelectModel } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-import { queryStringArraySchema } from '../../../hooks/use-typed-query';
+import { queryStringArraySchema } from '../../../utils/zod-helpers';
 import { CartFunnels } from './cart-funnel.sql';
 
 export const insertCartFunnelSchema = createInsertSchema(CartFunnels, {

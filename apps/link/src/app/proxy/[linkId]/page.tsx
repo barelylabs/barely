@@ -5,7 +5,7 @@ import { GOOGLE_FAVICON_URL } from '@barely/lib/utils/constants';
 import { constructMetadata, getApexDomain } from '@barely/lib/utils/link';
 import { unescape } from 'html-escaper';
 
-export const runtime = 'edge';
+// export const runtime = 'edge';
 
 export async function generateMetadata({ params }: { params: { linkId: string } }) {
 	const data = await getLinkById(params.linkId, db);

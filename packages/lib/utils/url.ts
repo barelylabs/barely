@@ -44,7 +44,7 @@ export function getBaseUrl(app: (typeof apps)[number], absolute = false) {
 				raise('Invalid app');
 		}
 
-		return `https://localhost:${devPort}`; // dev SSR should use localhost
+		return `https://${app === 'app' ? '127.0.0.1' : 'localhost'}:${devPort}`; // dev SSR should use localhost
 	}
 
 	const vercelUrl =

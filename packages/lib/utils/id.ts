@@ -10,7 +10,7 @@ export const nanoid = customAlphabet(
 const prefixes = {
 	user: 'user',
 	workspace: 'ws',
-	providerAccount: 'provider_account',
+	providerAccount: 'app',
 	// web
 	link: 'link',
 	bio: 'bio',
@@ -36,6 +36,12 @@ const prefixes = {
 	lineItem: 'txli',
 	mixtape: 'mx',
 	mixtapeTrack: 'mxtr',
+	// workflows
+	workflow: 'wf',
+	workflowTrigger: 'wft',
+	workflowAction: 'wfa',
+	workflowRun: 'wfr',
+	workflowRunAction: 'wfra',
 } as const;
 
 export function newId(prefix: keyof typeof prefixes) {

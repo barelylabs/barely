@@ -4,7 +4,7 @@ import { ALLOWED_FILE_TYPES } from '@uploadthing/shared';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-import { queryStringArraySchema } from '../../../hooks/use-typed-query';
+import { queryStringArraySchema } from '../../../utils/zod-helpers';
 import { Files } from './file.sql';
 
 export const insertFileSchema = createInsertSchema(Files, {

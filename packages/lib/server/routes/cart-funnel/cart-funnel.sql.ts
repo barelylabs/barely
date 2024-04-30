@@ -63,6 +63,19 @@ export const CartFunnels = pgTable(
 		successPageContent: text('successPageDescription'),
 		successPageCTA: varchar('successPageCTA', { length: 255 }),
 		successPageCTALink: varchar('successPageCTALink', { length: 255 }),
+
+		// metrics
+		count_viewLandingPage: integer('count_viewLandingPage').default(0),
+		count_initiateCheckout: integer('count_initiateCheckout').default(0),
+		count_addPaymentInfo: integer('count_addPaymentInfo').default(0),
+		count_addBump: integer('count_addBump').default(0),
+		count_removeBump: integer('count_removeBump').default(0),
+		count_purchaseMainWithoutBump: integer('count_purchaseMainWithoutBump').default(0),
+		count_purchaseMainWithBump: integer('count_purchaseMainWithBump').default(0),
+		count_viewUpsell: integer('count_viewUpsell').default(0),
+		count_declineUpsell: integer('count_declineUpsell').default(0),
+		count_purchaseUpsell: integer('count_purchaseUpsell').default(0),
+		count_viewOrderConfirmation: integer('count_viewOrderConfirmation').default(0),
 	},
 	funnel => ({
 		workspace: index('Funnels_workspaceId_idx').on(funnel.workspaceId),

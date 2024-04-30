@@ -2,7 +2,7 @@ import type { ReceiptEmailProps } from '@barely/email/src/templates/cart/receipt
 import type { z } from 'zod';
 import { sendEmail } from '@barely/email';
 import ReceiptEmailTemplate from '@barely/email/src/templates/cart/receipt';
-import { and, eq, lt } from 'drizzle-orm';
+import { and, count, eq, isNotNull, lt } from 'drizzle-orm';
 
 import type { ShippingEstimateProps } from '../../shipengine/shipengine.endpts';
 import type { Fan } from '../fan/fan.schema';
@@ -12,6 +12,7 @@ import type { Cart, InsertCart, UpdateCart } from './cart.schema';
 import { formatCentsToDollars } from '../../../utils/currency';
 import { isProduction } from '../../../utils/environment';
 import { newId } from '../../../utils/id';
+import { numToPaddedString } from '../../../utils/number';
 import { raise } from '../../../utils/raise';
 import { db } from '../../db';
 import { getShippingEstimates } from '../../shipengine/shipengine.endpts';
@@ -20,7 +21,7 @@ import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
 import { MEDIAMAIL_TYPES, MERCH_DIMENSIONS } from '../product/product.constants';
 import { getPublicWorkspaceFromWorkspace } from '../workspace/workspace.schema';
 import { Carts } from './cart.sql';
-import { getAmountsForMainCart } from './cart.utils';
+import { getAmountsForCheckout } from './cart.utils';
 
 /* get funnel */
 export const funnelWith = {
@@ -96,18 +97,18 @@ export async function createMainCartFromFunnel(
 
 	const cartId = newId('cart');
 
-	const amounts = getAmountsForMainCart(funnel, {
+	const amounts = getAmountsForCheckout(funnel, {
 		mainProductQuantity: 1,
 	});
 
 	const metadata: z.infer<typeof stripeConnectChargeMetadataSchema> = {
 		cartId,
-		preChargeCartStage: 'mainCreated',
+		preChargeCartStage: 'checkoutCreated',
 	};
 
 	const paymentIntent = await stripe.paymentIntents.create(
 		{
-			amount: amounts.mainPlusBumpAmount,
+			amount: amounts.checkoutAmount,
 			currency: 'usd',
 			setup_future_usage: 'off_session',
 			metadata,
@@ -123,11 +124,11 @@ export async function createMainCartFromFunnel(
 	const cart: InsertCart = {
 		id: cartId,
 		workspaceId: funnel.workspace.id,
-		funnelId: funnel.id,
-		stage: 'mainCreated',
+		cartFunnelId: funnel.id,
+		stage: 'checkoutCreated',
 		// stripe
-		mainStripePaymentIntentId: paymentIntent.id,
-		mainStripeClientSecret: paymentIntent.client_secret,
+		checkoutStripePaymentIntentId: paymentIntent.id,
+		checkoutStripeClientSecret: paymentIntent.client_secret,
 		// main product
 		mainProductId: funnel.mainProduct.id, // bump product
 		bumpProductId: funnel.bumpProduct?.id ?? null,
@@ -136,26 +137,25 @@ export async function createMainCartFromFunnel(
 	};
 
 	if (shipTo?.country && shipTo.state && shipTo.city) {
-		const mainProductShippingRate = await getProductsShippingRateEstimate({
-			products: [{ product: funnel.mainProduct, quantity: 1 }],
-			shipFrom: {
-				postalCode: funnel.workspace.shippingAddressPostalCode ?? '',
-				countryCode: funnel.workspace.shippingAddressCountry ?? '',
-			},
-			shipTo: {
-				country: shipTo.country,
-				state: shipTo.state,
-				city: shipTo.city,
-			},
-		});
-		const mainProductShippingAmount =
-			mainProductShippingRate?.shipping_amount.amount ?? 1000;
-		cart.mainProductShippingAmount = mainProductShippingAmount;
+		const { lowestShippingPrice: mainShippingAmount } =
+			await getProductsShippingRateEstimate({
+				products: [{ product: funnel.mainProduct, quantity: 1 }],
+				shipFrom: {
+					postalCode: funnel.workspace.shippingAddressPostalCode ?? '',
+					countryCode: funnel.workspace.shippingAddressCountry ?? '',
+				},
+				shipTo: {
+					country: shipTo.country,
+					state: shipTo.state,
+					city: shipTo.city,
+				},
+			});
 
-		const mainPlusBumpShippingRate =
-			!funnel.bumpProduct ?
-				mainProductShippingRate
-			:	await getProductsShippingRateEstimate({
+		cart.mainShippingAmount = mainShippingAmount;
+
+		const mainPlusBumpShippingPrice =
+			!funnel.bumpProduct ? mainShippingAmount : (
+				await getProductsShippingRateEstimate({
 					products: [
 						{ product: funnel.mainProduct, quantity: 1 },
 						{ product: funnel.bumpProduct, quantity: 1 },
@@ -169,12 +169,10 @@ export async function createMainCartFromFunnel(
 						state: shipTo.state,
 						city: shipTo.city,
 					},
-				});
+				}).then(rates => rates.lowestShippingPrice)
+			);
 
-		if (mainPlusBumpShippingRate) {
-			cart.bumpProductShippingPrice = mainPlusBumpShippingRate.shipping_amount.amount;
-			-mainProductShippingAmount;
-		}
+		cart.bumpShippingPrice = mainPlusBumpShippingPrice - mainShippingAmount;
 	}
 
 	await db.pool.insert(Carts).values(cart);
@@ -248,7 +246,10 @@ export async function getProductsShippingRateEstimate(props: {
 		eligibleForMediaMail,
 	});
 
-	return rates[0] ?? null;
+	return {
+		rates,
+		lowestShippingPrice: rates[0]?.shipping_amount.amount ?? 0,
+	};
 }
 
 /* email updates */
@@ -261,50 +262,48 @@ interface ReceiptCart extends Cart {
 }
 
 export async function sendCartReceiptEmail(cart: ReceiptCart) {
-	const mainCartAmounts = getAmountsForMainCart(cart.funnel, cart);
-
-	const shipping = cart.shippingAndHandlingAmount ?? 0;
-
 	const products: ReceiptEmailProps['products'] = [
 		// main product
 		{
 			name: cart.mainProduct.name,
-			price: formatCentsToDollars(cart.mainProductPrice),
-			shipping: formatCentsToDollars(
-				mainCartAmounts.mainProductShippingAmount +
-					mainCartAmounts.mainProductHandlingAmount,
-			),
+			price: formatCentsToDollars(cart.mainProductAmount),
+			shipping: formatCentsToDollars(cart.mainShippingAndHandlingAmount ?? 0),
 			payWhatYouWantPrice:
 				cart.funnel.mainProductPayWhatYouWant ?
-					formatCentsToDollars(mainCartAmounts.mainProductPayWhatYouWantPrice)
+					formatCentsToDollars(cart.mainProductPayWhatYouWantPrice ?? 0)
 				:	undefined,
 		},
 
 		// bump product
-		...(cart.bumpProduct && cart.addedBumpProduct ?
+		...(cart.bumpProduct && cart.addedBump ?
 			[
 				{
 					name: cart.bumpProduct.name,
-					price: formatCentsToDollars(mainCartAmounts.bumpProductAmount),
-					shipping: formatCentsToDollars(mainCartAmounts.bumpProductShippingPrice),
+					price: formatCentsToDollars(cart.bumpProductAmount ?? 0),
+					shipping: formatCentsToDollars(cart.bumpShippingAndHandlingAmount ?? 0),
 				},
 			]
 		:	[]),
 
+		// upsell product
 		...(cart.upsellProduct && cart.stage === 'upsellConverted' ?
 			[
 				{
 					name: cart.upsellProduct.name,
 					price: formatCentsToDollars(cart.upsellProductAmount ?? 0),
-					shipping: formatCentsToDollars(cart.upsellProductShippingPrice ?? 0),
+					shipping: formatCentsToDollars(cart.upsellShippingAndHandlingAmount ?? 0),
 				},
 			]
 		:	[]),
 	];
 
+	const orderId = numToPaddedString(await getOrCreateCartOrderId(cart), {
+		digits: 4,
+	});
+
 	const ReceiptEmail = ReceiptEmailTemplate({
-		cartId: cart.id,
-		date: cart.upsellCreatedAt ?? new Date(),
+		orderId,
+		date: cart.checkoutConvertedAt ?? new Date(),
 		sellerName: cart.funnel.workspace.name,
 		billingAddress: {
 			name: cart.fan.fullName,
@@ -323,23 +322,38 @@ export async function sendCartReceiptEmail(cart: ReceiptCart) {
 			country: cart.shippingAddressCountry,
 		},
 		products,
-		shippingTotal: formatCentsToDollars(shipping),
-		total: formatCentsToDollars(cart.amount),
+		shippingTotal: formatCentsToDollars(cart.orderShippingAndHandlingAmount ?? 0),
+		total: formatCentsToDollars(cart.orderAmount),
 	});
 
-	console.log(
-		'about to send cart receipt email',
-		cart.fan.email,
-		cart.funnel.workspace.cartSupportEmail,
-	);
 	await sendEmail({
 		from: 'receipts@barelycart.email',
 		to: cart.fan.email,
 		bcc: cart.funnel.workspace.cartSupportEmail ?? undefined,
-		subject: `${cart.funnel.workspace.name}: Invoice ${cart.id}`,
+		subject: `${cart.funnel.workspace.name}: Invoice ${orderId}`,
 		type: 'transactional',
 		react: ReceiptEmail,
 	});
+}
+
+export async function getOrCreateCartOrderId(cart: Cart) {
+	if (cart.orderId) return cart.orderId;
+
+	const ordersCount = await db.pool
+		.select({ count: count() })
+		.from(Carts)
+		.where(and(eq(Carts.workspaceId, cart.workspaceId), isNotNull(Carts.orderId)))
+		.then(r => r[0]?.count ?? raise('count not found'));
+
+	const orderId = ordersCount + 1;
+	await db.pool
+		.update(Carts)
+		.set({
+			orderId,
+		})
+		.where(eq(Carts.id, cart.id));
+
+	return orderId;
 }
 
 /* cron */
@@ -351,8 +365,8 @@ export async function checkForAbandonedUpsellCarts() {
 		},
 		where: and(
 			eq(Carts.stage, 'upsellCreated'),
-			eq(Carts.receiptSent, false),
-			lt(Carts.upsellCreatedAt, new Date(Date.now() - 5 * 60 * 1000)), // upsells created more than 5 minutes ago
+			eq(Carts.orderReceiptSent, false),
+			lt(Carts.checkoutConvertedAt, new Date(Date.now() - 5 * 60 * 1000)), // upsells created more than 5 minutes ago
 		),
 	});
 
@@ -372,7 +386,7 @@ export async function checkForAbandonedUpsellCarts() {
 					bumpProduct: cart.funnel.bumpProduct,
 					upsellProduct: cart.funnel.upsellProduct,
 				});
-				updateCartData.receiptSent = true;
+				updateCartData.orderReceiptSent = true;
 			}
 
 			// todo: trigger any automations (e.g. mailchimp, zapier, etc.)

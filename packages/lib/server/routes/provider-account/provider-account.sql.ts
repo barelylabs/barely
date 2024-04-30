@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm';
-import { index, integer, pgTable, uniqueIndex, varchar } from 'drizzle-orm/pg-core';
+import { index, integer, pgTable, text, uniqueIndex, varchar } from 'drizzle-orm/pg-core';
 
 import { dbId, primaryId } from '../../../utils/sql';
 import { AdCreatives } from '../ad-creative/ad-creative.sql';
@@ -13,6 +13,7 @@ export const providersEnum = [
 	'discord',
 	'facebook',
 	'google',
+	'mailchimp',
 	'spotify',
 	'tiktok',
 ] as const;
@@ -50,6 +51,7 @@ export const ProviderAccounts = pgTable(
 		scope: varchar('scope', { length: 2000 }),
 		id_token: varchar('id_token', { length: 255 }),
 		session_state: varchar('session_state', { length: 255 }),
+		server: text('server'),
 
 		// custom
 		username: varchar('username', { length: 255 }),

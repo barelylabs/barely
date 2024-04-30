@@ -35,7 +35,7 @@ export const cartPageSearchParams = insertCartSchema
 		mainProductQuantity: true,
 		mainProductApparelSize: true,
 
-		addedBumpProduct: true,
+		addedBump: true,
 		bumpProductQuantity: true,
 		bumpProductApparelSize: true,
 	})

@@ -2,11 +2,14 @@ import { and, asc, desc, eq, gt, inArray, lt, notInArray, or, sql } from 'drizzl
 import { z } from 'zod';
 
 import type { NormalizedProductWith_Images } from './product.schema';
-import { getUserWorkspaceByHandle } from '../../../utils/auth';
 import { newId } from '../../../utils/id';
 import { raise } from '../../../utils/raise';
 import { sqlAnd, sqlStringContains } from '../../../utils/sql';
-import { createTRPCRouter, privateProcedure } from '../../api/trpc';
+import {
+	createTRPCRouter,
+	privateProcedure,
+	workspaceQueryProcedure,
+} from '../../api/trpc';
 import { _Files_To_Products__Images } from '../file/file.sql';
 import {
 	createProductSchema,
@@ -16,11 +19,11 @@ import {
 import { ApparelSizes, Products } from './product.sql';
 
 export const productRouter = createTRPCRouter({
-	byWorkspace: privateProcedure
+	byWorkspace: workspaceQueryProcedure
 		.input(selectWorkspaceProductsSchema)
 		.query(async ({ input, ctx }) => {
-			const { handle, limit, cursor, search } = input;
-			const workspace = getUserWorkspaceByHandle(ctx.user, handle);
+			const { limit, cursor, search } = input;
+
 			const products = await ctx.db.http.query.Products.findMany({
 				with: {
 					_images: {
@@ -34,7 +37,7 @@ export const productRouter = createTRPCRouter({
 					_apparelSizes: true,
 				},
 				where: sqlAnd([
-					eq(Products.workspaceId, workspace.id),
+					eq(Products.workspaceId, ctx.workspace.id),
 					!!search?.length && sqlStringContains(Products.name, search),
 					!!cursor &&
 						or(
@@ -189,14 +192,14 @@ export const productRouter = createTRPCRouter({
 	archive: privateProcedure
 		.input(z.array(z.string()))
 		.mutation(async ({ input, ctx }) => {
-			const updatedProduct = await ctx.db.http
+			const archivedProduct = await ctx.db.http
 				.update(Products)
 				.set({ archived: true })
 				.where(
 					and(eq(Products.workspaceId, ctx.workspace.id), inArray(Products.id, input)),
 				)
 				.returning();
-			return updatedProduct[0] ?? raise('Failed to archive product');
+			return archivedProduct[0] ?? raise('Failed to archive product');
 		}),
 
 	delete: privateProcedure.input(z.array(z.string())).mutation(async ({ input, ctx }) => {

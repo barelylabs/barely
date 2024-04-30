@@ -87,7 +87,6 @@ export const DUMMY_GEO_DATA: NextGeo[] = [
 
 export function getRandomGeoData() {
 	const randomIndex = Math.floor(Math.random() * DUMMY_GEO_DATA.length);
-	console.log('randomIndex => ', randomIndex);
 	return DUMMY_GEO_DATA[randomIndex] ?? raise('no geo data');
 }
 

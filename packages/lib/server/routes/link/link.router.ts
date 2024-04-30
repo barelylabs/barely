@@ -185,7 +185,7 @@ export const linkRouter = createTRPCRouter({
 
 		// Rate limit if user is not logged in
 		if (!ctx.user) {
-			const ip = ctx.ip ?? env.LOCALHOST_IP;
+			const ip = ctx.visitor?.ip ?? env.LOCALHOST_IP;
 			const { success } = await ctx.ratelimit().limit(ip);
 			if (!success) {
 				throw new TRPCError({

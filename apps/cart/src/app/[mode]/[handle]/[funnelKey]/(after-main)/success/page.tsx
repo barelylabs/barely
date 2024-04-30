@@ -27,6 +27,13 @@ export default async function CartSuccessPage({
 		funnelKey,
 	});
 
+	cartApi
+		.logEvent({
+			cartId,
+			event: 'cart_viewOrderConfirmation',
+		})
+		.catch(console.error);
+
 	return (
 		<>
 			<H size='hero' className='mt-4 text-center text-brand'>

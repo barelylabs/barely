@@ -36,3 +36,10 @@ export function nFormatter(
 			(num / item.value).toFixed(opts.digits).replace(rx, '$1') + item.symbol
 		:	'0';
 }
+
+export function numToPaddedString(
+	num: number,
+	{ digits = 4 }: { digits?: number } = {},
+): string {
+	return num.toString().padStart(digits, '0');
+}

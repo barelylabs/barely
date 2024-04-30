@@ -1,28 +1,4 @@
-/**
- * <div style={{backgroundColor: "#000", display: "flex", justifyContent: "space-between", color: "#fff", padding: 16}}>
- * <span>Built-in <b>Spotify</b> integration.</span>
- * <a href="https://www.spotify.com/">
- *   <img style={{display: "block"}} src="https://authjs.dev/img/providers/spotify.svg" height="48" />
- * </a>
- * </div>
- *
- * @module providers/spotify
- */
-
-// import type { OAuth2Config, OAuthConfig, OAuthUserConfig } from '@auth/core/providers';
 import type { OAuth2Config } from 'next-auth/providers';
-// export interface SpotifyImage {
-// 	url: string;
-// }
-
-// // eslint-disable-next-line @typescript-eslint/no-explicit-any
-// export interface SpotifyProfile extends Record<string, any> {
-// 	id: string;
-// 	display_name: string;
-// 	email: string;
-// 	images: SpotifyImage[];
-// }
-
 import type { SpotifyProfile } from 'next-auth/providers/spotify';
 
 /**

@@ -1,0 +1,31 @@
+NODE endpoint
+
+DESCRIPTION >
+    Parsed 'cart_viewMain' events
+
+SQL >
+    SELECT
+        type,
+        timestamp,
+        workspaceId,
+        assetId,
+        sessionId,
+        href,
+
+        key,
+
+        city,
+        country,
+        device,
+        browser,
+        os,
+        referrer,
+
+    FROM web_events
+    where
+        type IN ('cart_initiateCheckout')
+        {% if defined(workspaceId) %}
+            AND workspaceId = {{ String(workspaceId) }}
+        {% end %}
+        {% if defined(assetId) %} AND assetId = {{ String(assetId) }} {% end %}
+

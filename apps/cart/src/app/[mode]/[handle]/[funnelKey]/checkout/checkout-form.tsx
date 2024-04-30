@@ -1,11 +1,11 @@
 'use client';
 
 import type { CartRouterOutputs } from '@barely/lib/server/routes/cart/cart.api.react';
-import { use, useEffect } from 'react';
+import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { cartApi } from '@barely/lib/server/routes/cart/cart.api.react';
 import { updateMainCartFromCartSchema } from '@barely/lib/server/routes/cart/cart.schema';
-import { getAmountsForMainCart } from '@barely/lib/server/routes/cart/cart.utils';
+import { getAmountsForCheckout } from '@barely/lib/server/routes/cart/cart.utils';
 import {
 	APPAREL_SIZES,
 	isApparelSize,
@@ -39,7 +39,7 @@ import { CheckboxField } from '@barely/ui/forms/checkbox-field';
 import { setCartCookie } from '~/app/[mode]/[handle]/[funnelKey]/_actions';
 import { ProductPrice } from '~/app/[mode]/[handle]/[funnelKey]/_components/product-price';
 
-export function MainCartForm({
+export function CheckoutForm({
 	mode,
 	initialData,
 	shouldWriteToCookie,
@@ -52,21 +52,36 @@ export function MainCartForm({
 
 	const router = useRouter();
 
+	const { mutate: logEvent } = cartApi.logEvent.useMutation();
+
 	useEffect(() => {
-		if (shouldWriteToCookie && initialCart.id) {
+		if (logEvent && shouldWriteToCookie && initialCart.id) {
 			setCartCookie({
 				handle: initialFunnel.handle,
 				funnelKey: initialFunnel.key,
 				cartId: initialCart.id,
 			}).catch(console.error);
+
+			logEvent({
+				cartId: initialCart.id,
+				event: 'cart_initiateCheckout',
+			});
 		}
-	}, [initialCart.id, initialFunnel.handle, initialFunnel.key, shouldWriteToCookie]);
+	}, [
+		initialCart.id,
+		initialFunnel.handle,
+		initialFunnel.key,
+		shouldWriteToCookie,
+		logEvent,
+	]);
 
 	/* stripe */
 	const stripe = useStripe();
 	const elements = useElements();
 
 	const apiUtils = cartApi.useUtils();
+
+	const [paymentAdded, setPaymentAdded] = useState(false);
 
 	const {
 		data: { cart, publicFunnel },
@@ -86,7 +101,7 @@ export function MainCartForm({
 		},
 	);
 
-	const { mutate: mutateCart } = cartApi.updateMainCartFromCart.useMutation({
+	const { mutate: mutateCart } = cartApi.updateCheckoutFromCheckout.useMutation({
 		onMutate: async data => {
 			await apiUtils.byIdAndParams.cancel();
 
@@ -120,9 +135,9 @@ export function MainCartForm({
 
 	function updateCart(updateData: Partial<z.infer<typeof updateMainCartFromCartSchema>>) {
 		mutateCart({
+			id: cart.id,
 			handle: publicFunnel.handle,
 			funnelKey: publicFunnel.key,
-			...cart,
 			...updateData,
 		});
 	}
@@ -198,7 +213,7 @@ export function MainCartForm({
 	};
 
 	/* derived state */
-	const amounts = getAmountsForMainCart(publicFunnel, cart);
+	const amounts = getAmountsForCheckout(publicFunnel, cart);
 
 	const { mainProduct, bumpProduct } = publicFunnel;
 	const mainProductImageSrc = mainProduct?._images[0]?.file.src ?? '';
@@ -309,17 +324,22 @@ export function MainCartForm({
 												<Icon.arrowBigRight
 													className={cn(
 														'h-[26px] w-[26px] text-brand',
-														!cart.addedBumpProduct && 'animate-pulse',
+														!cart.addedBump && 'animate-pulse',
 													)}
 													weight='fill'
 												/>
 												<Switch
-													name='addedBumpProduct'
+													name='addedBump'
 													size='lg'
-													checked={cart.addedBumpProduct ?? false}
+													checked={cart.addedBump ?? false}
 													onCheckedChange={c => {
 														updateCart({
-															addedBumpProduct: c,
+															addedBump: c,
+														});
+
+														logEvent({
+															cartId: cart.id,
+															event: c ? 'cart_addBump' : 'cart_removeBump',
 														});
 													}}
 												/>
@@ -344,7 +364,7 @@ export function MainCartForm({
 											<Icon.arrowBigDown
 												className={cn(
 													'h-4 w-4 text-brand',
-													!cart.addedBumpProduct && 'animate-pulse',
+													!cart.addedBump && 'animate-pulse',
 												)}
 												weight='fill'
 											/>
@@ -363,11 +383,16 @@ export function MainCartForm({
 												className='grid grid-cols-3'
 												value={cart.bumpProductApparelSize ?? ''}
 												onValueChange={size => {
+													const addedBump = size.length > 0 ? true : false;
 													updateCart({
-														addedBumpProduct: size.length > 0 ? true : false,
+														addedBump,
 														...(isApparelSize(size) ?
 															{ bumpProductApparelSize: size }
 														:	{ bumpProductApparelSize: null }),
+													});
+													logEvent({
+														cartId: cart.id,
+														event: addedBump ? 'cart_addBump' : 'cart_removeBump',
 													});
 												}}
 											>
@@ -391,7 +416,17 @@ export function MainCartForm({
 
 						<div className='flex flex-col gap-2'>
 							<H size='3'>Payment Information</H>
-							<PaymentElement />
+							<PaymentElement
+								onChange={e => {
+									if (e.complete && !paymentAdded) {
+										logEvent({
+											cartId: cart.id,
+											event: 'cart_addPaymentInfo',
+										});
+										setPaymentAdded(true);
+									}
+								}}
+							/>
 							<CheckboxField
 								look='brand'
 								className='border-white bg-white'
@@ -434,7 +469,7 @@ export function MainCartForm({
 							</Text>
 						</div>
 
-						{cart.addedBumpProduct && bumpProduct && (
+						{cart.addedBump && bumpProduct && (
 							<div className='flex flex-row items-center justify-between'>
 								<Text variant='sm/light' className='opacity-90'>
 									{bumpProduct.name}
@@ -448,32 +483,20 @@ export function MainCartForm({
 						<div className='flex flex-row justify-between'>
 							<Text variant='md/normal'>Shipping</Text>
 							<Text variant='md/normal'>
-								{formatCentsToDollars(amounts.shippingAndHandlingAmount)}
+								{formatCentsToDollars(amounts.checkoutShippingAndHandlingAmount)}
 							</Text>
 						</div>
 
 						<div className='flex flex-row justify-between'>
 							<Text variant='xl/semibold'>Total</Text>
-							<Text variant='xl/semibold'>{formatCentsToDollars(amounts.amount)}</Text>
+							<Text variant='xl/semibold'>
+								{formatCentsToDollars(amounts.checkoutAmount)}
+							</Text>
 						</div>
 
 						<Text variant='2xs/normal' className='ml-auto opacity-90'>
 							All prices in USD
 						</Text>
-
-						{/* <p>mainProductShippingAmount :: {amounts.mainProductShippingAmount}</p>
-						<p>addedBumpProduct :: {amounts.addedBumpProduct ? 'true' : 'false'}</p>
-						<p>bumpProductShippingPrice :: {cart.bumpProductShippingPrice}</p>
-						<p>
-							bumpProductShippingAndHandlingAmount ::{' '}
-							{amounts.bumpProductShippingAndHandlingAmount}
-						</p>
-						<p>
-							mainPlusBumpShippingAndHandlingAmount ::{' '}
-							{amounts.mainPlusBumpShippingAndHandlingAmount}
-						</p>
-
-						<p>amount :: {amounts.amount}</p> */}
 					</div>
 				</div>
 			</div>

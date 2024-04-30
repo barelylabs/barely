@@ -4,7 +4,10 @@ import { getAbsoluteUrl } from '@barely/lib/utils/url';
 import { auth } from '@barely/server/auth';
 
 export default auth(async req => {
-	if (!req.auth?.user) return NextResponse.redirect(getAbsoluteUrl('app', 'login'));
+	if (!req.auth?.user) {
+		console.log('no user, redirecting to login');
+		return NextResponse.redirect(getAbsoluteUrl('app', 'login'));
+	}
 
 	if (req.nextUrl.pathname === '/') {
 		const defaultWorkspace = await getDefaultWorkspaceOfCurrentUser();

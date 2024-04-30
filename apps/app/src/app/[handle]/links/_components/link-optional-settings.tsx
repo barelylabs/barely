@@ -1,3 +1,5 @@
+'use client';
+
 import type { Link, UpsertLink } from '@barely/lib/server/routes/link/link.schema';
 import type { TransparentLinkData } from '@barely/lib/utils/link';
 import type { UseFormReturn } from 'react-hook-form';

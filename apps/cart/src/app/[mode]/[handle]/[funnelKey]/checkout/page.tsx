@@ -7,9 +7,9 @@ import { cartPageSearchParams } from '@barely/lib/server/routes/cart/cart.schema
 import { isDevelopment } from '@barely/lib/utils/environment';
 
 import { ElementsProvider } from '~/app/[mode]/[handle]/[funnelKey]/_components/elements-provider';
-import { MainCartForm } from './main-cart-form';
+import { CheckoutForm } from './checkout-form';
 
-export default function CartPage({
+export default async function CartPage({
 	params,
 	searchParams,
 }: {
@@ -49,8 +49,8 @@ export default function CartPage({
 	return (
 		<>
 			<Suspense fallback={<LoadingSkeleton />}>
-				<ElementsProvider stage='mainCreated' initialData={initialData}>
-					<MainCartForm
+				<ElementsProvider stage='checkoutCreated' initialData={initialData}>
+					<CheckoutForm
 						mode={mode}
 						initialData={initialData}
 						shouldWriteToCookie={!cartId}

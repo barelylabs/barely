@@ -3,7 +3,7 @@ import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
 import type { SortableFile } from '../file/file.schema';
-import { queryStringArraySchema } from '../../../hooks/use-typed-query';
+import { queryStringArraySchema } from '../../../utils/zod-helpers';
 import { Products } from './product.sql';
 
 const insertProductImagesSchema = z.array(

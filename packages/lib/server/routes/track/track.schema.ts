@@ -9,7 +9,7 @@ import type {
 } from '../file/file.sql';
 import type { Genre } from '../genre/genre.schema';
 import type { PublicWorkspace, Workspace } from '../workspace/workspace.schema';
-import { queryStringArraySchema } from '../../../hooks/use-typed-query';
+import { queryStringArraySchema } from '../../../utils/zod-helpers';
 import { genreIdSchema } from '../genre/genre.schema';
 import { Tracks } from './track.sql';
 

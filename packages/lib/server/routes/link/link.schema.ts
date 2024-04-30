@@ -2,9 +2,8 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
 import type { AnalyticsEndpoint } from '../analytics-endpoint/analytics-endpoint-schema';
-import { queryStringArraySchema } from '../../../hooks/use-typed-query';
 import { isValidUrl } from '../../../utils/link';
-import { z_boolean } from '../../../utils/zod-helpers';
+import { queryStringArraySchema, z_boolean } from '../../../utils/zod-helpers';
 import { Links } from './link.sql';
 
 export const insertLinkSchema = createInsertSchema(Links, {

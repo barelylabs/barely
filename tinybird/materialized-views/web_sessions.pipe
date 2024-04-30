@@ -1,7 +1,6 @@
 DESCRIPTION >
 	Aggregate by session_id
 
-
 NODE mv
 DESCRIPTION >
     Aggregate by session_id

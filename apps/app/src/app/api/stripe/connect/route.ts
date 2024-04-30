@@ -4,7 +4,7 @@ import Stripe from 'stripe';
 
 import { env } from '~/env';
 
-export const runtime = 'edge';
+// export const runtime = 'edge';
 
 const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
 	apiVersion: '2023-10-16',
