@@ -89,21 +89,27 @@ export async function incrementWorkspaceFileUsage(
 	tx?: DbPoolTransaction,
 ) {
 	if (tx) {
-		await tx.update(Workspaces).set({
-			fileUsage_total: sqlIncrement(Workspaces.fileUsage_total, fileSizeInBytes),
-			fileUsage_billingCycle: sqlIncrement(
-				Workspaces.fileUsage_billingCycle,
-				fileSizeInBytes,
-			),
-		});
+		await tx
+			.update(Workspaces)
+			.set({
+				fileUsage_total: sqlIncrement(Workspaces.fileUsage_total, fileSizeInBytes),
+				fileUsage_billingCycle: sqlIncrement(
+					Workspaces.fileUsage_billingCycle,
+					fileSizeInBytes,
+				),
+			})
+			.where(eq(Workspaces.id, workspaceId));
 	} else {
-		await db.pool.update(Workspaces).set({
-			fileUsage_total: sqlIncrement(Workspaces.fileUsage_total, fileSizeInBytes),
-			fileUsage_billingCycle: sqlIncrement(
-				Workspaces.fileUsage_billingCycle,
-				fileSizeInBytes,
-			),
-		});
+		await db.pool
+			.update(Workspaces)
+			.set({
+				fileUsage_total: sqlIncrement(Workspaces.fileUsage_total, fileSizeInBytes),
+				fileUsage_billingCycle: sqlIncrement(
+					Workspaces.fileUsage_billingCycle,
+					fileSizeInBytes,
+				),
+			})
+			.where(eq(Workspaces.id, workspaceId));
 	}
 }
 

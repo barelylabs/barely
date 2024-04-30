@@ -156,6 +156,11 @@ export const Carts = pgTable(
 		orderAmount: integer('orderAmount').notNull(),
 
 		orderReceiptSent: boolean('orderReceiptSent').default(false),
+
+		// fulfillment
+		shippingCarrier: varchar('shippingCarrier', { length: 255 }),
+		shippingTrackingNumber: varchar('shippingTrackingNumber', { length: 255 }),
+		shippedAt: timestamp('shippedAt'),
 	},
 	cart => ({
 		workspaceOrderId: uniqueIndex('workspace_orderId_unique').on(
