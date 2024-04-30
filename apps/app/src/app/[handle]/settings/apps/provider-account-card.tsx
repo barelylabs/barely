@@ -41,26 +41,26 @@ export const ProviderAccountCard = ({ provider }: ExternalAccountCardProps) => {
 		},
 	});
 
-	const deleteAccount = api.providerAccount.delete.useMutation();
+	const { mutateAsync: deleteAccount } = api.providerAccount.delete.useMutation();
 
 	const addAccount = async () => {
 		console.log('addAccount', provider);
 
 		if (provider === 'mailchimp') {
 			authorize({ provider });
-		}
+		} else {
+			const signInRes = await signIn(provider, {});
 
-		const signInRes = await signIn(provider, {});
-
-		if (signInRes?.error) {
-			toast.error(signInRes.error);
+			if (signInRes?.error) {
+				toast.error(signInRes.error);
+			}
 		}
 
 		return utils.providerAccount.byCurrentUser.invalidate();
 	};
 
 	const removeAccount = async (accountId: string) => {
-		await deleteAccount.mutateAsync({
+		await deleteAccount({
 			provider,
 			providerAccountId: accountId,
 		});

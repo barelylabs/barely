@@ -207,6 +207,7 @@ export const Icon = {
 	alignLeft: AlignLeft,
 	alignRight: AlignRight,
 	apple: Apple,
+	apps: Blocks,
 	archive: Archive,
 	arrowLeft: ArrowLeft,
 	arrowRight: ArrowRight,
