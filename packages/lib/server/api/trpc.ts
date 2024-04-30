@@ -9,7 +9,9 @@ import superjson from 'superjson';
 import { z, ZodError } from 'zod';
 
 import type { VisitorInfo } from '../../utils/middleware';
+import { env } from '../../env';
 import { getUserWorkspaceByHandle } from '../../utils/auth';
+import { DEFAULT_VISITOR_INFO } from '../../utils/middleware';
 import { ratelimit } from '../../utils/upstash';
 /**
  * 🎁 CONTEXT
@@ -49,7 +51,7 @@ export const createTRPCContext = (opts: {
 			session?.user.workspaces.find(w => w.handle === workspaceHandle)
 		:	null;
 
-	// const ip = opts.rest ? '' : opts.headers.get('x-real-ip') ?? '';
+	// console.log('opts.visitor', opts.visitor);
 
 	const context = {
 		// auth
@@ -60,7 +62,7 @@ export const createTRPCContext = (opts: {
 		pageSessionId,
 		pusherSocketId,
 		// pii
-		visitor: opts.visitor,
+		visitor: env.VERCEL_ENV === 'development' ? DEFAULT_VISITOR_INFO : opts.visitor,
 		// for convenience
 		db,
 		source,

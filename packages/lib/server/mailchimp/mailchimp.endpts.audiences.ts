@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
-import { zGet } from '../../utils/zod-fetch';
+import type { Fan } from '../routes/fan/fan.schema';
+import { zGet, zPost } from '../../utils/zod-fetch';
 import { mailchimpErrorSchema } from './mailchimp.endpts.error';
 
 export async function getMailchimpAudiences({
@@ -85,4 +86,72 @@ const getMailchimpAudiencesSchema = z.object({
 			_links: z.array(z.object({})),
 		}),
 	),
+});
+
+export async function addToMailchimpAudience({
+	accessToken,
+	server,
+	listId,
+	fan,
+	tags,
+}: {
+	accessToken: string;
+	server: string;
+	listId: string;
+	fan: Fan;
+	tags?: string[];
+}) {
+	const endpoint = `https://${server}.api.mailchimp.com/3.0/lists/${listId}/members`;
+	const res = await zPost(endpoint, addToMailchimpAudienceSchema, {
+		auth: `Bearer ${accessToken}`,
+		body: {
+			email_address: fan.email,
+			status: 'subscribed',
+			tags: tags,
+		},
+		errorSchema: mailchimpErrorSchema,
+		logResponse: true,
+	});
+
+	if (res.success && res.parsed) {
+		return res.data;
+	}
+
+	if (res.success && !res.parsed) {
+		throw new Error('Mailchimp response could not be parsed');
+	}
+
+	if (!res.success && res.parsed) {
+		console.error('Mailchimp response failed', res.data);
+		throw new Error('Mailchimp response failed');
+	}
+
+	if (!res.success && !res.parsed) {
+		console.error('Mailchimp response failed', res.data);
+		throw new Error('Mailchimp response failed');
+	}
+}
+
+const addToMailchimpAudienceSchema = z.object({
+	id: z.string(),
+	email_address: z.string(),
+	unique_email_id: z.string(),
+	email_type: z.string(),
+	status: z.string(),
+	merge_fields: z.object({}),
+	stats: z.object({}),
+	ip_signup: z.string(),
+	timestamp_signup: z.string(),
+	ip_opt: z.string(),
+	timestamp_opt: z.string(),
+	member_rating: z.number(),
+	last_changed: z.string(),
+	language: z.string(),
+	vip: z.boolean(),
+	email_client: z.string(),
+	location: z.object({}),
+	marketing_permissions: z.array(z.object({})).optional(),
+	tags: z.array(z.object({})),
+	list_id: z.string(),
+	_links: z.array(z.object({})),
 });

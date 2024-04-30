@@ -2,7 +2,7 @@ import type { ReceiptEmailProps } from '@barely/email/src/templates/cart/receipt
 import type { z } from 'zod';
 import { sendEmail } from '@barely/email';
 import ReceiptEmailTemplate from '@barely/email/src/templates/cart/receipt';
-import { and, eq, lt } from 'drizzle-orm';
+import { and, count, eq, isNotNull, lt } from 'drizzle-orm';
 
 import type { ShippingEstimateProps } from '../../shipengine/shipengine.endpts';
 import type { Fan } from '../fan/fan.schema';
@@ -297,7 +297,7 @@ export async function sendCartReceiptEmail(cart: ReceiptCart) {
 		:	[]),
 	];
 
-	const orderId = numToPaddedString(cart.orderId ?? raise('orderId not found'), {
+	const orderId = numToPaddedString(await getOrCreateCartOrderId(cart), {
 		digits: 4,
 	});
 
@@ -334,6 +334,26 @@ export async function sendCartReceiptEmail(cart: ReceiptCart) {
 		type: 'transactional',
 		react: ReceiptEmail,
 	});
+}
+
+export async function getOrCreateCartOrderId(cart: Cart) {
+	if (cart.orderId) return cart.orderId;
+
+	const ordersCount = await db.pool
+		.select({ count: count() })
+		.from(Carts)
+		.where(and(eq(Carts.workspaceId, cart.workspaceId), isNotNull(Carts.orderId)))
+		.then(r => r[0]?.count ?? raise('count not found'));
+
+	const orderId = ordersCount + 1;
+	await db.pool
+		.update(Carts)
+		.set({
+			orderId,
+		})
+		.where(eq(Carts.id, cart.id));
+
+	return orderId;
 }
 
 /* cron */

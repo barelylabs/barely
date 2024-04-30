@@ -212,7 +212,7 @@ export const cartRouter = createTRPCRouter({
 			}
 
 			const funnel = cart.funnel ?? raise('funnel not found');
-			const fan = cart.fan ?? raise('fan not found');
+			const fan = cart.fan ?? raise('fan not found to buy upsell');
 			const upsellProduct = funnel.upsellProduct ?? raise('upsell product not found');
 
 			const stripePaymentMethodId =
@@ -315,7 +315,7 @@ export const cartRouter = createTRPCRouter({
 		.input(z.object({ cartId: z.string() }))
 		.mutation(async ({ input, ctx }) => {
 			const cart = (await getCartById(input.cartId)) ?? raise('cart not found');
-			const fan = cart.fan ?? raise('fan not found');
+			const fan = cart.fan ?? raise('fan not found to decline upsell');
 			const funnel = cart.funnel ?? raise('funnel not found');
 
 			cart.stage === 'upsellDeclined';
@@ -360,7 +360,8 @@ export const cartRouter = createTRPCRouter({
 		)
 		.mutation(async ({ input, ctx }) => {
 			if (!ctx.visitor?.ip) {
-				throw new Error('visitor info not found');
+				console.log('no visitor ip');
+				return;
 			}
 
 			const cart =

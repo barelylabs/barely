@@ -36,7 +36,7 @@ export function useUpsellCart({
 
 	const { mutate: cancelUpsell } = cartApi.declineUpsell.useMutation({
 		onSuccess: res => {
-			router.push(`/${res.handle}/${res.funnelKey}/success/${cartId}`);
+			router.push(`/${res.handle}/${res.funnelKey}/success`);
 		},
 	});
 

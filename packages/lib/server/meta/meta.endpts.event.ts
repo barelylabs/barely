@@ -137,7 +137,7 @@ export const metaServerEventSchema = z
 		actionSource: z.enum(['website', 'mobile_app']),
 		sourceUrl: z.string().url(),
 		// optional
-		customData: z.record(z.string()).optional(),
+		customData: z.record(z.coerce.string()).optional(),
 		optOut: z.boolean().optional(),
 		eventId: z.string().optional(),
 	})

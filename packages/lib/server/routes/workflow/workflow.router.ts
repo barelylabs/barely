@@ -1,4 +1,16 @@
-import { and, asc, desc, eq, gt, inArray, lt, notInArray, or, sql } from 'drizzle-orm';
+import {
+	and,
+	asc,
+	desc,
+	eq,
+	gt,
+	inArray,
+	isNull,
+	lt,
+	notInArray,
+	or,
+	sql,
+} from 'drizzle-orm';
 import { z } from 'zod';
 
 import { newId } from '../../../utils/id';
@@ -20,7 +32,7 @@ export const workflowRouter = createTRPCRouter({
 	byWorkspace: workspaceQueryProcedure
 		.input(selectWorkspaceWorkflowsSchema)
 		.query(async ({ ctx, input }) => {
-			const { limit, cursor, search } = input;
+			const { showArchived, showDeleted, limit, cursor, search } = input;
 
 			const workflows = await ctx.db.http.query.Workflows.findMany({
 				with: {
@@ -44,6 +56,8 @@ export const workflowRouter = createTRPCRouter({
 							lt(Workflows.createdAt, cursor.createdAt),
 							and(eq(Workflows.createdAt, cursor.createdAt), gt(Workflows.id, cursor.id)),
 						),
+					!showArchived && eq(Workflows.archived, false),
+					!showDeleted && isNull(Workflows.deletedAt),
 				]),
 				orderBy: [desc(Workflows.createdAt), asc(Workflows.id)],
 				limit: limit + 1,

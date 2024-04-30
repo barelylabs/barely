@@ -4,7 +4,7 @@ import { useCallback } from 'react';
 import { api } from '@barely/lib/server/api/react';
 
 import { ArchiveOrDeleteModal } from '~/app/[handle]/_components/archive-or-delete-modal';
-import { useWorkflowContext } from '~/app/[handle]/workflows/workflow-context';
+import { useWorkflowContext } from '~/app/[handle]/workflows/_components/workflow-context';
 
 export function ArchiveOrDeleteWorkflowModal({ mode }: { mode: 'archive' | 'delete' }) {
 	const {

@@ -2,6 +2,7 @@ import type { InferSelectModel } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
+import { lexoMiddle } from '../../../utils/collection';
 import { queryStringArraySchema } from '../../../utils/zod-helpers';
 import { WorkflowActions, Workflows, WorkflowTriggers } from './workflow.sql';
 
@@ -29,10 +30,11 @@ export const upsertWorkflowActionSchema = insertWorkflowActionSchema.partial({
 	workflowId: true,
 	handle: true,
 });
+export type WorkflowAction = InferSelectModel<typeof WorkflowActions>;
 
 /** workflows */
 export const insertWorkflowSchema = createInsertSchema(Workflows, {
-	name: s => s.name.min(1, 'Name is required'),
+	name: s => s.name.min(1, 'Please give your workflow a name'),
 }).extend({
 	triggers: z.array(createWorkflowTriggerSchema),
 	actions: z.array(createWorkflowActionSchema),
@@ -67,6 +69,7 @@ export const selectWorkspaceWorkflowsSchema = z.object({
 	handle: z.string(),
 	search: z.string().optional(),
 	showArchived: z.boolean().optional(),
+	showDeleted: z.boolean().optional().default(false),
 	cursor: z.object({ id: z.string(), createdAt: z.string() }).optional(),
 	limit: z.coerce.number().min(1).max(100).optional().default(20),
 });
@@ -75,6 +78,7 @@ export const selectWorkspaceWorkflowsSchema = z.object({
 export const workflowFilterParamsSchema = z.object({
 	search: z.string().optional(),
 	showArchived: z.boolean().optional(),
+	showDeleted: z.boolean().optional(),
 });
 
 export const workflowSearchParamsSchema = workflowFilterParamsSchema.extend({
@@ -84,6 +88,15 @@ export const workflowSearchParamsSchema = workflowFilterParamsSchema.extend({
 export const defaultWorkflow: CreateWorkflow = {
 	name: '',
 	description: '',
-	triggers: [],
-	actions: [],
+	triggers: [
+		{
+			trigger: 'NEW_FAN',
+		},
+	],
+	actions: [
+		{
+			action: 'ADD_TO_MAILCHIMP_AUDIENCE',
+			lexorank: lexoMiddle(),
+		},
+	],
 };

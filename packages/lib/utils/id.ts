@@ -40,6 +40,8 @@ const prefixes = {
 	workflow: 'wf',
 	workflowTrigger: 'wft',
 	workflowAction: 'wfa',
+	workflowRun: 'wfr',
+	workflowRunAction: 'wfra',
 } as const;
 
 export function newId(prefix: keyof typeof prefixes) {

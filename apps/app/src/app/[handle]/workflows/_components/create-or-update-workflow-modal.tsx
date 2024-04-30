@@ -9,9 +9,14 @@ import {
 	defaultWorkflow,
 	upsertWorkflowSchema,
 } from '@barely/lib/server/routes/workflow/workflow.schema';
+import { useFieldArray } from 'react-hook-form';
 
-import { Modal, ModalBody, ModalHeader } from '@barely/ui/elements/modal';
-import { Form } from '@barely/ui/forms';
+import { Icon } from '@barely/ui/elements/icon';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
+import { Separator } from '@barely/ui/elements/separator';
+import { H, Text } from '@barely/ui/elements/typography';
+import { Form, SubmitButton } from '@barely/ui/forms';
+import { SelectField } from '@barely/ui/forms/select-field';
 import { TextField } from '@barely/ui/forms/text-field';
 
 import { useWorkflowContext } from '~/app/[handle]/workflows/_components/workflow-context';
@@ -63,7 +68,7 @@ export function CreateOrUpdateWorkflowModal({ mode }: { mode: 'create' | 'update
 
 	/* form */
 	const { form, onSubmit: onSubmitWorkflow } = useCreateOrUpdateForm({
-		updateItem: selectedWorkflow ? selectedWorkflow : null,
+		updateItem: mode === 'create' ? null : selectedWorkflow ?? null,
 		upsertSchema: upsertWorkflowSchema,
 		defaultValues: defaultWorkflow,
 		handleCreateItem: async d => {
@@ -74,12 +79,24 @@ export function CreateOrUpdateWorkflowModal({ mode }: { mode: 'create' | 'update
 		},
 	});
 
+	const { control } = form;
+
 	const handleSubmit = useCallback(
 		async (data: z.infer<typeof upsertWorkflowSchema>) => {
 			await onSubmitWorkflow(data);
 		},
 		[onSubmitWorkflow],
 	);
+
+	const triggersFieldArray = useFieldArray({
+		control,
+		name: 'triggers',
+	});
+
+	const actionsFieldArray = useFieldArray({
+		control,
+		name: 'actions',
+	});
 
 	/* modal */
 	const showModal = mode === 'create' ? showCreateWorkflowModal : showUpdateWorkflowModal;
@@ -129,10 +146,92 @@ export function CreateOrUpdateWorkflowModal({ mode }: { mode: 'create' | 'update
 					/>
 
 					{/* TRIGGERS */}
+					<div className='flex flex-col gap-2 rounded-md border border-border bg-background p-4'>
+						<div className='flex flex-row items-center gap-1'>
+							<Icon.zap className='h-4 w-4' />
+							<H size='5'>Triggers</H>
+						</div>
+
+						<Text variant='sm/normal'>When something happens</Text>
+						<Separator />
+						{triggersFieldArray.fields.map((trigger, index) => (
+							<div key={trigger.id} className='flex flex-col gap-2'>
+								<SelectField
+									label='Trigger'
+									name={`triggers.${index}.trigger`}
+									options={[
+										{ label: 'New Fan', value: 'NEW_FAN' },
+										{ label: 'New Order', value: 'NEW_CART_ORDER' },
+									]}
+								/>
+								{form.watch(`triggers.${index}.trigger`) === 'NEW_CART_ORDER' && (
+									<SelectField
+										label='Cart'
+										name={`triggers.${index}.cartFunnelId`}
+										options={cartFunnelOptions}
+									/>
+								)}
+							</div>
+						))}
+					</div>
+					<Icon.arrowDown className='mx-auto' />
 
 					{/* ACTIONS */}
+					{actionsFieldArray.fields.map((action, index) => (
+						<div
+							key={action.id}
+							className='flex flex-col gap-2 rounded-md border border-border bg-background p-4'
+						>
+							<div className='flex flex-row items-center gap-1'>
+								<Icon.zap className='h-4 w-4' />
+								<H size='5'>Action</H>
+							</div>
+
+							<Text variant='sm/normal'>An action is performed</Text>
+							<Separator />
+							<SelectField
+								label='Do this'
+								name={`actions.${index}.action`}
+								options={[
+									{
+										label: 'Add to Mailchimp Audience',
+										value: 'ADD_TO_MAILCHIMP_AUDIENCE',
+									},
+								]}
+							/>
+							{form.watch(`actions.${index}.action`) === 'ADD_TO_MAILCHIMP_AUDIENCE' && (
+								<SelectMailchimpAudience index={index} />
+							)}
+						</div>
+					))}
+					<pre>{JSON.stringify(form.watch(), null, 2)}</pre>
 				</ModalBody>
+				<ModalFooter>
+					<SubmitButton fullWidth>
+						{mode === 'create' ? 'Create Workflow' : 'Update Workflow'}
+					</SubmitButton>
+				</ModalFooter>
 			</Form>
 		</Modal>
+	);
+}
+
+function SelectMailchimpAudience({ index }: { index: number }) {
+	const workspace = useWorkspace();
+	const { data: mailchimpAudiences } = api.mailchimp.audiencesByWorkspace.useQuery({
+		handle: workspace.handle,
+	});
+
+	const mailchimpAudienceOptions =
+		mailchimpAudiences?.map(audience => ({
+			label: audience.name,
+			value: audience.id,
+		})) ?? [];
+	return (
+		<SelectField
+			label='Mailchimp Audience'
+			name={`actions.${index}.mailchimpAudienceId`}
+			options={mailchimpAudienceOptions}
+		/>
 	);
 }

@@ -100,7 +100,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	if (visitorInfo.isBot && link.customMetaTags)
 		return NextResponse.redirect(`/_proxy/${link.id}`); // 👈 send bots to proxy for meta tags
 
-	if (ua.device === 'mobile') {
+	if (visitorInfo.ua.device === 'mobile') {
 		if (link.url.includes('open.spotify.com')) {
 			console.log('Spotify link detected on mobile');
 			const spotifyAppLink = new URL('https://spotify.app.link');

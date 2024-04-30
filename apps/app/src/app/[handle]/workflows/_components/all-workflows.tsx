@@ -15,7 +15,7 @@ export function AllWorkflows() {
 		workflowSelection,
 		setWorkflowSelection,
 		gridListRef,
-		setShowCreateWorkflowModal,
+		setShowUpdateWorkflowModal,
 	} = useWorkflowContext();
 
 	return (
@@ -33,7 +33,7 @@ export function AllWorkflows() {
 				setSelectedKeys={setWorkflowSelection}
 				onAction={() => {
 					if (!workflowSelection) return;
-					setShowCreateWorkflowModal(true);
+					setShowUpdateWorkflowModal(true);
 				}}
 				renderEmptyState={() => (
 					<NoResultsPlaceholder

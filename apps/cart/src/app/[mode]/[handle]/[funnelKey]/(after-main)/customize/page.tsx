@@ -20,7 +20,10 @@ export default async function UpsellPage({
 
 	const cartId = cookies().get(`${params.handle}.${params.funnelKey}.cartId`)?.value;
 
-	if (!cartId) return null;
+	if (!cartId) {
+		console.log('cartId not found');
+		return null;
+	}
 
 	const { cart, publicFunnel } = await cartApi.byIdAndParams({
 		id: cartId,
@@ -28,7 +31,10 @@ export default async function UpsellPage({
 		funnelKey,
 	});
 
-	if (!cart) return null;
+	if (!cart) {
+		console.log('cart not found');
+		return null;
+	}
 
 	// log a success checkout conversion event
 	await cartApi.logEvent({

@@ -62,3 +62,26 @@ export function parseReqForVisitorInfo(req: NextRequest) {
 }
 
 export type VisitorInfo = ReturnType<typeof parseReqForVisitorInfo>;
+
+export const DEFAULT_VISITOR_INFO: VisitorInfo = {
+	ip: env.LOCALHOST_IP,
+	geo: getRandomGeoData(),
+	ua: {
+		ua: 'Unknown',
+		browser: 'Unknown',
+		browser_version: 'Unknown',
+		device: 'Unknown',
+		engine: 'Unknown',
+		engine_version: 'Unknown',
+		os: 'Unknown',
+		os_version: 'Unknown',
+		bot: false,
+		device_model: 'Unknown',
+		device_vendor: 'Unknown',
+		cpu_architecture: 'Unknown',
+	},
+	isBot: false,
+	referer: null,
+	referer_url: null,
+	href: 'https://localhost:3000/',
+};

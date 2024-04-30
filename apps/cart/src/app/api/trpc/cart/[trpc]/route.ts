@@ -5,8 +5,6 @@ import { parseReqForVisitorInfo } from '@barely/lib/utils/middleware';
 import { setCorsHeaders } from '@barely/lib/utils/trpc-route';
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 
-export const runtime = 'edge';
-
 export { OPTIONS } from '@barely/lib/utils/trpc-route';
 
 const handler = async function (req: NextRequest) {

@@ -31,6 +31,7 @@ export const timestamps = {
 	})
 		.notNull()
 		.defaultNow(),
+
 	deletedAt: timestamp('deleted_at', {
 		mode: 'string',
 	}),
