@@ -20,7 +20,7 @@
 		"@t3-oss/env-nextjs": "^0.9.2",
 		"@vercel/edge": "^0.1.2",
 		"dotenv-cli": "^7.2.1",
-		"next": "^14.2.0",
+		"next": "^14.2.3",
 		"react-currency-input-field": "^3.8.0",
 		"react-dom": "^18.2.0",
 		"react-icons": "^4.11.0",
