@@ -89,11 +89,7 @@ export function SidebarNav(props: SidebarNavProps) {
 		{ title: 'profile', icon: 'profile', href: `/${handle}/settings` },
 		{ title: 'socials', icon: 'socials', href: `/${handle}/settings/socials` },
 		{ title: 'team', icon: 'users', href: `/${handle}/settings/team` },
-		{
-			title: 'integrations',
-			icon: 'integrations',
-			href: `/${handle}/settings/integrations`,
-		},
+		{ title: 'apps', icon: 'apps', href: `/${handle}/settings/apps` },
 		{ title: 'domains', icon: 'domain', href: `/${handle}/settings/domains` },
 		{
 			title: 'remarketing',
