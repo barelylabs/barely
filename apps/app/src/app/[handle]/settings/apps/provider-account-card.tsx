@@ -3,11 +3,8 @@
 import type { ProviderAccount } from '@barely/lib/server/routes/provider-account/provider-account.schema';
 import { useRouter } from 'next/navigation';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { signIn } from '@barely/server/auth/auth.react';
 
 import { api } from '@barely/api/react';
-
-import { useToast } from '@barely/hooks/use-toast';
 
 import { AlertDialog } from '@barely/ui/elements/alert-dialog';
 import { Button } from '@barely/ui/elements/button';
@@ -23,7 +20,6 @@ interface ExternalAccountCardProps {
 }
 
 export const ProviderAccountCard = ({ provider }: ExternalAccountCardProps) => {
-	const { toast } = useToast();
 	const router = useRouter();
 	const utils = api.useUtils();
 	const workspace = useWorkspace();
@@ -43,19 +39,8 @@ export const ProviderAccountCard = ({ provider }: ExternalAccountCardProps) => {
 
 	const { mutateAsync: deleteAccount } = api.providerAccount.delete.useMutation();
 
-	const addAccount = async () => {
-		console.log('addAccount', provider);
-
-		if (provider === 'mailchimp') {
-			authorize({ provider });
-		} else {
-			const signInRes = await signIn(provider, {});
-
-			if (signInRes?.error) {
-				toast.error(signInRes.error);
-			}
-		}
-
+	const addAccount = () => {
+		authorize({ provider });
 		return utils.providerAccount.byCurrentUser.invalidate();
 	};
 
