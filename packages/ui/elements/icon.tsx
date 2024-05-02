@@ -16,6 +16,7 @@ import {
 	ArrowFatUp,
 	BracketsAngle,
 	CalendarBlank,
+	CashRegister,
 	CassetteTape,
 	Disc,
 	Hoodie,
@@ -231,6 +232,7 @@ export const Icon = {
 	calendar: CalendarBlank,
 	cart: ShoppingCart,
 	cartFunnel: ShoppingCart,
+	cashRegister: CashRegister,
 	cassette: CassetteTape,
 	cd: Disc,
 	chart: LineChart,
@@ -330,6 +332,8 @@ export const Icon = {
 	mute: VolumeX,
 
 	newspaper: Newspaper,
+
+	orders: CashRegister,
 
 	page: File,
 	palette: Palette,

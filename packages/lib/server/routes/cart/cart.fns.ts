@@ -298,7 +298,7 @@ export async function sendCartReceiptEmail(cart: ReceiptCart) {
 	];
 
 	const orderId = numToPaddedString(await getOrCreateCartOrderId(cart), {
-		digits: 4,
+		digits: 6,
 	});
 
 	const ReceiptEmail = ReceiptEmailTemplate({

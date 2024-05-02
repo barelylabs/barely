@@ -2,11 +2,14 @@ import { and, asc, desc, eq, gt, inArray, lt, or } from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { InsertCartFunnel } from './cart-funnel.schema';
-import { getUserWorkspaceByHandle } from '../../../utils/auth';
 import { newId } from '../../../utils/id';
 import { raise } from '../../../utils/raise';
 import { sqlAnd, sqlStringContains } from '../../../utils/sql';
-import { createTRPCRouter, privateProcedure } from '../../api/trpc';
+import {
+	createTRPCRouter,
+	privateProcedure,
+	workspaceQueryProcedure,
+} from '../../api/trpc';
 import {
 	createCartFunnelSchema,
 	selectWorkspaceCartFunnelsSchema,
@@ -15,14 +18,13 @@ import {
 import { CartFunnels } from './cart-funnel.sql';
 
 export const cartFunnelRouter = createTRPCRouter({
-	byWorkspace: privateProcedure
+	byWorkspace: workspaceQueryProcedure
 		.input(selectWorkspaceCartFunnelsSchema)
 		.query(async ({ input, ctx }) => {
-			const { handle, limit, cursor, search } = input;
-			const workspace = getUserWorkspaceByHandle(ctx.user, handle);
+			const { limit, cursor, search } = input;
 			const funnels = await ctx.db.http.query.CartFunnels.findMany({
 				where: sqlAnd([
-					eq(CartFunnels.workspaceId, workspace.id),
+					eq(CartFunnels.workspaceId, ctx.workspace.id),
 					!!search?.length && sqlStringContains(CartFunnels.name, search),
 					!!cursor &&
 						or(

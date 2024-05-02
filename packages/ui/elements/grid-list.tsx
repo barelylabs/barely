@@ -1,4 +1,5 @@
 import type { VariantProps } from 'class-variance-authority';
+import type { ReactNode } from 'react';
 import type {
 	CheckboxProps,
 	GridListItemProps,
@@ -109,6 +110,13 @@ export const gridListCardVariants = cva(
 	},
 );
 
+export interface GridListCommandItemProps {
+	icon: keyof typeof Icon;
+	label: ReactNode;
+	shortcut?: string[];
+	action: () => void;
+}
+
 interface GridListCardProps
 	extends GridListItemProps,
 		VariantProps<typeof gridListCardVariants> {
@@ -117,6 +125,8 @@ interface GridListCardProps
 	setShowDeleteModal?: (show: boolean) => void;
 	disableDragHandle?: boolean;
 	disableContextMenu?: boolean;
+
+	commandItems?: GridListCommandItemProps[];
 }
 
 export const GridListCard = React.forwardRef<
@@ -133,6 +143,7 @@ export const GridListCard = React.forwardRef<
 			setShowUpdateModal,
 			disableContextMenu,
 			disableDragHandle,
+			commandItems,
 			...props
 		},
 		ref,
@@ -144,7 +155,10 @@ export const GridListCard = React.forwardRef<
 		const [showContextMenu, setShowContextMenu] = useState(false);
 
 		const atLeastOnePopoverAction =
-			!!setShowUpdateModal || !!setShowArchiveModal || !!setShowDeleteModal;
+			!!commandItems?.length ||
+			!!setShowUpdateModal ||
+			!!setShowArchiveModal ||
+			!!setShowDeleteModal;
 
 		// handle keyboard shortcuts - close the popover if it's not currently closed
 		useEffect(() => {
@@ -211,6 +225,33 @@ export const GridListCard = React.forwardRef<
 														<CommandShortcut>enter</CommandShortcut>
 													</CommandItem>
 												)}
+
+												{commandItems?.map((item, index) => {
+													const CommandIcon = item.icon ? Icon[item.icon] : null;
+
+													return (
+														<CommandItem
+															key={index}
+															className='justify-between'
+															onSelect={() => {
+																setShowContextMenu(false);
+																item.action();
+															}}
+														>
+															<div className='flex flex-row items-center justify-start gap-2 text-muted-foreground'>
+																{CommandIcon && <CommandIcon className='h-4 w-4 ' />}
+																<p className='text-sm'>{item.label}</p>
+															</div>
+															<div className='flex flex-row items-center gap-1 text-muted-foreground'>
+																{item.shortcut?.map(shortcut => (
+																	<CommandShortcut key={shortcut}>
+																		{shortcut}
+																	</CommandShortcut>
+																))}
+															</div>
+														</CommandItem>
+													);
+												})}
 
 												{!!setShowArchiveModal && (
 													<CommandItem

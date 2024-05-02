@@ -69,6 +69,11 @@ export function SidebarNav(props: SidebarNavProps) {
 			icon: 'cartFunnel',
 		},
 		{
+			title: 'orders',
+			href: `/${handle}/orders`,
+			icon: 'orders',
+		},
+		{
 			title: 'press',
 			href: `/${handle}/press`,
 			icon: 'press',

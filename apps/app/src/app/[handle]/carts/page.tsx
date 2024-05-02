@@ -46,7 +46,6 @@ export default function CartFunnelsPage({
 			<ArchiveOrDeleteFunnelModal mode='delete' />
 
 			<CartFunnelHotkeys />
-			{/* <UpgradeModal checkoutCancelPath="carts" checkoutSuccessPath="carts" /> */}
 		</CartFunnelContextProvider>
 	);
 }

@@ -5,6 +5,7 @@ import { authRouter } from '../routes/auth/auth.router';
 import { bioRouter } from '../routes/bio/bio.router';
 import { campaignRouter } from '../routes/campaign/campaign.router';
 import { cartFunnelRouter } from '../routes/cart-funnel/cart-funnel.router';
+import { cartOrderRouter } from '../routes/cart-order/cart-order.router';
 import { cartRouter } from '../routes/cart/cart.router';
 import { domainRouter } from '../routes/domain/domain.router';
 import { eventRouter } from '../routes/event/event.router';
@@ -39,6 +40,7 @@ const appRouter = createTRPCRouter({
 	campaign: campaignRouter,
 	cart: cartRouter,
 	cartFunnel: cartFunnelRouter,
+	cartOrder: cartOrderRouter,
 	domain: domainRouter,
 	event: eventRouter,
 	file: fileRouter,
