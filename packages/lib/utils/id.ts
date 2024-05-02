@@ -18,6 +18,7 @@ const prefixes = {
 	webSession: 'web_session',
 	// carts
 	cart: 'cart',
+	cartFulfillment: 'cart_fulfill',
 	fan: 'fan',
 	product: 'prod',
 	funnel: 'funnel',

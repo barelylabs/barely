@@ -43,7 +43,7 @@
 		"@lexical/rich-text": "^0.13.1",
 		"@lexical/table": "^0.13.1",
 		"@mdxeditor/editor": "^2.18.0",
-		"@phosphor-icons/react": "^2.0.15",
+		"@phosphor-icons/react": "^2.1.5",
 		"@radix-ui/react-accordion": "^1.1.2",
 		"@radix-ui/react-alert-dialog": "^1.0.5",
 		"@radix-ui/react-aspect-ratio": "^1.0.3",

@@ -1,6 +1,9 @@
 import { useCallback, useEffect } from 'react';
 
-// import { wait } from "../utils/wait";
+interface CustomHotkey {
+	condition: (e: KeyboardEvent) => boolean;
+	action: () => void;
+}
 
 export function useModalHotKeys({
 	setShowCreateModal,
@@ -18,6 +21,7 @@ export function useModalHotKeys({
 	pasteDisabled,
 	itemSelected,
 	// onClose,
+	customHotkeys,
 }: {
 	setShowCreateModal?: (show: boolean) => void;
 	setShowUpdateModal?: (show: boolean) => void;
@@ -32,6 +36,8 @@ export function useModalHotKeys({
 	pasteDisabled?: boolean;
 	itemSelected?: boolean;
 	onClose?: () => void;
+
+	customHotkeys?: CustomHotkey[];
 }) {
 	const onKeydown = useCallback(
 		(e: KeyboardEvent) => {
@@ -114,6 +120,21 @@ export function useModalHotKeys({
 			) {
 				e.preventDefault(); // otherwise it'll show up in the input field since that's getting auto-selected
 				setShowDeleteModal?.(true);
+			}
+
+			// custom hotkeys
+			if (customHotkeys) {
+				customHotkeys.forEach(({ condition, action }) => {
+					if (
+						condition(e) &&
+						target.tagName !== 'INPUT' &&
+						target.tagName !== 'TEXTAREA' &&
+						!existingModalBackdrop &&
+						!!itemSelected
+					) {
+						action();
+					}
+				});
 			}
 		},
 		[itemSelected, closeModalsDisabled, archiveDisabled, createDisabled, updateDisabled],

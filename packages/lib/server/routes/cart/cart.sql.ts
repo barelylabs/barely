@@ -17,8 +17,8 @@ import { Workspaces } from '../workspace/workspace.sql';
 
 export const CART_STAGES = [
 	'checkoutCreated',
-	'checkoutConverted',
 	'checkoutAbandoned',
+	'checkoutConverted',
 	'upsellCreated',
 	'upsellDeclined',
 	'upsellConverted',
@@ -158,10 +158,19 @@ export const Carts = pgTable(
 		orderReceiptSent: boolean('orderReceiptSent').default(false),
 
 		// fulfillment
+		fulfillmentStatus: varchar('fulfillmentStatus', {
+			length: 255,
+			enum: ['pending', 'partially_fulfilled', 'fulfilled'],
+		})
+			.notNull()
+			.default('pending'),
+		fulfilledAt: timestamp('fulfilledAt'),
+
 		shippingCarrier: varchar('shippingCarrier', { length: 255 }),
 		shippingTrackingNumber: varchar('shippingTrackingNumber', { length: 255 }),
 		shippedAt: timestamp('shippedAt'),
 	},
+
 	cart => ({
 		workspaceOrderId: uniqueIndex('workspace_orderId_unique').on(
 			cart.workspaceId,
@@ -170,7 +179,7 @@ export const Carts = pgTable(
 	}),
 );
 
-export const Cart_Relations = relations(Carts, ({ one }) => ({
+export const Cart_Relations = relations(Carts, ({ one, many }) => ({
 	// one-to-many
 	workspace: one(Workspaces, {
 		fields: [Carts.workspaceId],
@@ -199,4 +208,47 @@ export const Cart_Relations = relations(Carts, ({ one }) => ({
 		references: [Products.id],
 		relationName: 'upsellProduct',
 	}),
+	fulfillments: many(CartFullfillments),
 }));
+
+/* Cart Fulfillment */
+export const CartFullfillments = pgTable('CartFullfillments', {
+	...primaryId,
+	...timestamps,
+	cartId: dbId('cartId').references(() => Carts.id),
+
+	shippingCarrier: varchar('shippingCarrier', { length: 255 }),
+	shippingTrackingNumber: varchar('shippingTrackingNumber', { length: 255 }),
+	fulfilledAt: timestamp('fulfilledAt'),
+});
+
+export const CartFullfillment_Relations = relations(
+	CartFullfillments,
+	({ one, many }) => ({
+		cart: one(Carts, {
+			fields: [CartFullfillments.cartId],
+			references: [Carts.id],
+		}),
+		products: many(CartFulfillmentProducts),
+	}),
+);
+
+/* Cart Fulfillment Products */
+export const CartFulfillmentProducts = pgTable('CartFulfillmentProducts', {
+	cartFulfillmentId: dbId('cartFulfillmentId').references(() => CartFullfillments.id),
+	productId: dbId('productId').references(() => Products.id),
+});
+
+export const CartFulfillmentProduct_Relations = relations(
+	CartFulfillmentProducts,
+	({ one }) => ({
+		cartFulfillment: one(CartFullfillments, {
+			fields: [CartFulfillmentProducts.cartFulfillmentId],
+			references: [CartFullfillments.id],
+		}),
+		product: one(Products, {
+			fields: [CartFulfillmentProducts.productId],
+			references: [Products.id],
+		}),
+	}),
+);
