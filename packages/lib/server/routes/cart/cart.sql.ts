@@ -110,6 +110,9 @@ export const Carts = pgTable(
 		shippingAddressCountry: varchar('shippingAddressCountry', { length: 255 }),
 		marketingOptIn: boolean('marketingOptIn').default(false),
 
+		emailMarketingOptIn: boolean('emailMarketingOptIn').default(false),
+		smsMarketingOptIn: boolean('smsMarketingOptIn').default(false),
+
 		// -> on conversion
 		fanId: dbId('fanId').references(() => Fans.id),
 		orderId: integer('orderId'),

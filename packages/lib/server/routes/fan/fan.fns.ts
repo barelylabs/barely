@@ -2,6 +2,7 @@ import { and, asc, eq, isNull } from 'drizzle-orm';
 
 import { newId } from '../../../utils/id';
 import { raise } from '../../../utils/raise';
+import { getAbsoluteUrl } from '../../../utils/url';
 import { db } from '../../db';
 import {
 	WorkflowActions,
@@ -27,6 +28,9 @@ export async function createFan(props: {
 
 	stripeCustomerId?: string | null;
 	stripePaymentMethodId?: string | null;
+
+	emailMarketingOptIn?: boolean;
+	smsMarketingOptIn?: boolean;
 }) {
 	const newFans = await db.pool
 		.insert(Fans)
@@ -37,13 +41,6 @@ export async function createFan(props: {
 		.returning();
 
 	const newFan = newFans[0] ?? raise('error creating new fan');
-
-	// if there are any new fan workflows, create workflowRuns here
-	// const newFanTriggers = await db.pool.query.WorkflowTriggers.findMany({
-	//     where: and(
-	//         eq(Workflows.workspaceId, props.workspaceId),
-	//     )
-	// })
 
 	const newFanTriggers = await db.pool
 		.select()
@@ -88,7 +85,7 @@ export async function createFan(props: {
 					firstAction.waitFor ? new Date(Date.now() + firstAction.waitFor) : new Date(),
 			});
 
-			void fetch('/api/workflow/run', {
+			void fetch(getAbsoluteUrl('app', 'api/workflows/run'), {
 				method: 'POST',
 			});
 		}

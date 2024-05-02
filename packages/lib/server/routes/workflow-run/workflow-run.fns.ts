@@ -108,19 +108,26 @@ export async function handleAction_addToMailchimpAudience({
 	};
 
 	// add to mailchimp audience
-	try {
-		await addToMailchimpAudience({
-			accessToken:
-				mailchimpAccount.access_token ?? raise('Mailchimp access token not set'),
-			server: mailchimpAccount.server ?? raise('Mailchimp server not set'),
-			listId: mailchimpAudienceId,
-			fan,
-		});
-		workflowRunAction.completedAt = new Date();
-	} catch (error) {
-		workflowRunAction.status = 'failed';
-		workflowRunAction.failedAt = new Date();
-		workflowRunAction.error = 'error adding to mailchimp audience';
+
+	if (!fan.emailMarketingOptIn) {
+		workflowRunAction.status = 'skipped';
+		workflowRunAction.skippedReason = 'Fan has not opted in to email marketing';
+		return;
+	} else {
+		try {
+			await addToMailchimpAudience({
+				accessToken:
+					mailchimpAccount.access_token ?? raise('Mailchimp access token not set'),
+				server: mailchimpAccount.server ?? raise('Mailchimp server not set'),
+				listId: mailchimpAudienceId,
+				fan,
+			});
+			workflowRunAction.completedAt = new Date();
+		} catch (error) {
+			workflowRunAction.status = 'failed';
+			workflowRunAction.failedAt = new Date();
+			workflowRunAction.error = 'error adding to mailchimp audience';
+		}
 	}
 
 	// add action record

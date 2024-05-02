@@ -2,7 +2,7 @@ export function parseFullName(fullName: string) {
 	const [firstName, ...rest] = fullName.split(' ');
 	const lastName = rest.join(' ');
 
-	return { firstName, lastName };
+	return { firstName: firstName ?? '', lastName: lastName };
 }
 
 export function fullNameToFirstAndLast(

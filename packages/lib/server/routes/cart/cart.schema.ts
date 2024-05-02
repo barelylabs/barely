@@ -29,7 +29,7 @@ export const cartPageSearchParams = insertCartSchema
 		lastName: true,
 		fullName: true,
 		phone: true,
-		marketingOptIn: true,
+		emailMarketingOptIn: true,
 		// client input
 		mainProductPayWhatYouWantPrice: true,
 		mainProductQuantity: true,

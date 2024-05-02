@@ -114,6 +114,9 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 
 				stripeCustomerId,
 				stripePaymentMethodId: charge.payment_method,
+
+				emailMarketingOptIn: prevCart.emailMarketingOptIn ?? false,
+				smsMarketingOptIn: prevCart.smsMarketingOptIn ?? false,
 			});
 			console.log('new fan:', fan);
 			updateCart.fanId = fan.id;
