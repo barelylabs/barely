@@ -239,7 +239,7 @@ export const GridListCard = React.forwardRef<
 															}}
 														>
 															<div className='flex flex-row items-center justify-start gap-2 text-muted-foreground'>
-																<CommandIcon className='h-4 w-4 ' />
+																{CommandIcon && <CommandIcon className='h-4 w-4 ' />}
 																<p className='text-sm'>{item.label}</p>
 															</div>
 															<div className='flex flex-row items-center gap-1 text-muted-foreground'>
