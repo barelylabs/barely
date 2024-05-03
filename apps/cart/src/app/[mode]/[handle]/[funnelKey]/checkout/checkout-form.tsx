@@ -431,12 +431,12 @@ export function CheckoutForm({
 								look='brand'
 								className='border-white bg-white'
 								control={form.control}
-								name='marketingOptIn'
+								name='emailMarketingOptIn'
 								label='Yes, I want to receive exclusive offers and updates via email.'
 								onCheckedChange={c => {
 									if (typeof c === 'boolean')
 										updateCart({
-											marketingOptIn: c,
+											emailMarketingOptIn: c,
 										});
 								}}
 							/>
@@ -447,6 +447,7 @@ export function CheckoutForm({
 							fullWidth
 							size='xl'
 							look='brand'
+							loading={mode === 'live' && form.formState.isSubmitting}
 							onClick={() => {
 								if (mode === 'preview') {
 									router.push(`customize`);

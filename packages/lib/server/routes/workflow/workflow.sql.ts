@@ -158,8 +158,10 @@ export const WorkflowRunActions = pgTable('WorkflowRunActions', {
 		}),
 
 	status: text('status', {
-		enum: ['pending', 'in_progress', 'success', 'failed'],
+		enum: ['pending', 'skipped', 'in_progress', 'success', 'failed'],
 	}).notNull(),
+
+	skippedReason: text('skippedReason'),
 
 	error: varchar('error', { length: 255 }),
 	failedAt: timestamp('failedAt'),

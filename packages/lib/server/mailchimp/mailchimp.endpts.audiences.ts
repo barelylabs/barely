@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import type { Fan } from '../routes/fan/fan.schema';
+import { parseFullName } from '../../utils/name';
 import { zGet, zPost } from '../../utils/zod-fetch';
 import { mailchimpErrorSchema } from './mailchimp.endpts.error';
 
@@ -102,11 +103,26 @@ export async function addToMailchimpAudience({
 	tags?: string[];
 }) {
 	const endpoint = `https://${server}.api.mailchimp.com/3.0/lists/${listId}/members`;
+
+	const { firstName, lastName } = parseFullName(fan.fullName);
+
 	const res = await zPost(endpoint, addToMailchimpAudienceSchema, {
 		auth: `Bearer ${accessToken}`,
 		body: {
 			email_address: fan.email,
 			status: 'subscribed',
+			merge_fields: {
+				FNAME: firstName,
+				LNAME: lastName,
+				// ADDRESS: {
+				// 	addr1: fan.shippingAddressLine1,
+				// 	addr2: fan.shippingAddressLine2,
+				// 	city: fan.shippingAddressCity,
+				// 	state: fan.shippingAddressState,
+				// 	zip: fan.shippingAddressPostalCode,
+				// 	country: fan.shippingAddressCountry,
+				// },
+			},
 			tags: tags,
 		},
 		errorSchema: mailchimpErrorSchema,

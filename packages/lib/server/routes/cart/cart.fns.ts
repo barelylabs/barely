@@ -132,7 +132,7 @@ export async function createMainCartFromFunnel(
 		// main product
 		mainProductId: funnel.mainProduct.id, // bump product
 		bumpProductId: funnel.bumpProduct?.id ?? null,
-		marketingOptIn: true,
+		emailMarketingOptIn: true,
 		...amounts,
 	};
 
