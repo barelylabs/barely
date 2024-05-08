@@ -9,7 +9,6 @@ async function LogoutPage() {
 	if (!session) return redirect('/login');
 
 	return <Logout />;
-	return null;
 }
 
 export default LogoutPage;
