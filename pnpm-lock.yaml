@@ -827,6 +827,12 @@ importers:
       '@trpc/server':
         specifier: 11.0.0-rc.334
         version: 11.0.0-rc.334
+      '@uploadthing/mime-types':
+        specifier: 0.2.2
+        version: 0.2.2
+      '@uploadthing/shared':
+        specifier: 6.2.1
+        version: 6.2.1(@uploadthing/mime-types@0.2.2)
       '@upstash/ratelimit':
         specifier: ^0.4.4
         version: 0.4.4

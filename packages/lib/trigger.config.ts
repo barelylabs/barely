@@ -16,8 +16,15 @@ export const config: TriggerConfig = {
 		},
 	},
 	dependenciesToBundle: [
+		// t3-env
 		'@t3-oss/env-core',
 		'@t3-oss/env-nextjs',
+		// uploadthing
+		'@uploadthing/shared',
+		'@uploadthing/mime-types',
+		'std-env',
+
+		// internal
 		'@barely/email',
 		/@barely\/email\/.*/,
 		'nanoid',
@@ -25,4 +32,7 @@ export const config: TriggerConfig = {
 	enableConsoleLogging: true, // enable console logging with dev cli
 	//The paths for your trigger folders
 	triggerDirectories: ['./trigger'],
+	additionalPackages: ['resend@3.2.0', '@react-email/column@0.1.10'],
+	// additionalPackages: ['@react-email/render@0.1.13'],
+	// additionalPackages: ['@uploadthing/shared@6.2.1', '@uploadthing/mime-types@0.2.2'],
 };
