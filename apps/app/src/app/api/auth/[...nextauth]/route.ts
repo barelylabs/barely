@@ -1,2 +1,2 @@
 export { GET, POST } from '@barely/server/auth';
-export const runtime = 'edge';
+// export const runtime = 'edge';

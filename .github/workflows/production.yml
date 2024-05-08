@@ -110,7 +110,6 @@ jobs:
           pnpm db:push
 
   # 📱 DEPLOY APPS -- PROD (Not Aliasing to Production Yet) #
-
   deploy-app:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push]
@@ -201,8 +200,43 @@ jobs:
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_WWW_PROJECT_ID }}
 
-  # 🔀 MERGE PR BRANCH TO MAIN 🔀
+  # trigger.dev
+  trigger-production:
+    name: trigger production
+    needs:
+      [
+        git-meta,
+        db-push,
+        deploy-app,
+        deploy-cart,
+        deploy-link,
+        deploy-press,
+        deploy-sparrow,
+        deploy-www,
+      ]
+    if: always() && github.event_name == 'merge_group' # skip if pull request, which allows entry into merge queue
+    permissions:
+      actions: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Transform outcomes to JSON
+        env:
+          NEEDS_JSON: '${{ toJson(needs) }}'
+        run: |
+          echo "ALL_SUCCESS=$(echo "$NEEDS_JSON" | jq '. | to_entries | map([.value.result == "success", .value.result == "skipped"] | any) | all')" >> $GITHUB_ENV
+      - name: Check outcomes
+        run: '[ $ALL_SUCCESS = true ]'
+      - uses: actions/checkout@v4
 
+      - name: setup node/pnpm/turbo/vercel
+        uses: ./tooling/github/setup
+
+      - name: deploy trigger.dev
+        env:
+          TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
+        run: pnpm deploy-trigger:production
+
+  # 🔀 MERGE PR BRANCH TO MAIN 🔀
   production--can-merge:
     needs:
       [
@@ -214,6 +248,7 @@ jobs:
         deploy-press,
         deploy-sparrow,
         deploy-www,
+        trigger-production,
       ]
     if: always() && github.event_name == 'merge_group' # skip if pull request, which allows entry into merge queue
     permissions:

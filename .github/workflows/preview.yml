@@ -344,6 +344,7 @@ jobs:
     needs:
       [
         neon-preview,
+        trigger-preview,
         deploy-app,
         deploy-cart,
         deploy-link,
