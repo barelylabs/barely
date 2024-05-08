@@ -1,6 +1,6 @@
 import { sendEmail } from '@barely/email';
-import { PlaylistPitchConfirmEmailTemplate } from '@barely/email/src/templates/playlist-pitch-confirm';
-import { PlaylistPitchToScreenEmailTemplate } from '@barely/email/src/templates/playlist-pitch-to-screen';
+import { PlaylistPitchConfirmEmailTemplate } from '@barely/email/src/templates/playlist-pitch/playlist-pitch-confirm';
+import { PlaylistPitchToScreenEmailTemplate } from '@barely/email/src/templates/playlist-pitch/playlist-pitch-to-screen';
 import { TRPCError } from '@trpc/server';
 import { eq } from 'drizzle-orm';
 

@@ -1,5 +1,5 @@
 import { sendEmail } from '@barely/email';
-import { WorkspaceInviteEmailTemplate } from '@barely/email/src/templates/workspace-invite';
+import { WorkspaceInviteEmailTemplate } from '@barely/email/src/templates/auth/workspace-invite';
 import { and, eq } from 'drizzle-orm';
 
 import type { SessionUser, SessionWorkspace } from '../../auth';

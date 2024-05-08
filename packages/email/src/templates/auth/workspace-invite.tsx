@@ -1,11 +1,8 @@
 import * as React from 'react';
-import { Head } from '@react-email/head';
-import { Html } from '@react-email/html';
-import { Preview } from '@react-email/preview';
-import { Text } from '@react-email/text';
+import { Head, Html, Preview, Text } from '@react-email/components';
 
-import { EmailFooter } from '../components/email-footer';
-import { EmailHeaderLogo } from '../components/email-header-logo';
+import { EmailFooter } from '../../components/email-footer';
+import { EmailHeaderLogo } from '../../components/email-header-logo';
 import {
 	Body,
 	EmailButton,
@@ -13,7 +10,7 @@ import {
 	EmailHeading,
 	EmailLink,
 	EmailSeparator,
-} from '../primitives';
+} from '../../primitives';
 
 interface WorkspaceInviteEmailProps {
 	inviterName: string;

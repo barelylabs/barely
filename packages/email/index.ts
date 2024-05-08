@@ -17,7 +17,7 @@ interface SendEmailProps {
 }
 
 export async function sendEmail(props: SendEmailProps) {
-	const { data, error } = await resend.emails.send({
+	const { error } = await resend.emails.send({
 		from: props.from,
 		to: props.to,
 		subject: props.subject,

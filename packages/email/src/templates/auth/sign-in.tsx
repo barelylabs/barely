@@ -4,8 +4,8 @@ import { Html } from '@react-email/html';
 import { Preview } from '@react-email/preview';
 import { Text } from '@react-email/text';
 
-import { EmailFooter } from '../components/email-footer';
-import { EmailHeaderLogo } from '../components/email-header-logo';
+import { EmailFooter } from '../../components/email-footer';
+import { EmailHeaderLogo } from '../../components/email-header-logo';
 import {
 	Body,
 	EmailButton,
@@ -13,7 +13,7 @@ import {
 	EmailHeading,
 	EmailLink,
 	EmailSeparator,
-} from '../primitives';
+} from '../../primitives';
 
 interface SignInEmailTemplateProps {
 	firstName?: string;

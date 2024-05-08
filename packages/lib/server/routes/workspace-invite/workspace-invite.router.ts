@@ -1,5 +1,5 @@
 import { sendEmail } from '@barely/email';
-import WorkspaceInviteEmailTemplate from '@barely/email/src/templates/workspace-invite';
+import WorkspaceInviteEmailTemplate from '@barely/email/src/templates/auth/workspace-invite';
 
 import { TWO_WEEKS_IN_SECONDS } from '../../../utils/time.constants';
 import { createTRPCRouter, privateProcedure } from '../../api/trpc';

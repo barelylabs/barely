@@ -1,16 +1,18 @@
 import React from 'react';
-import { Body } from '@react-email/body';
-import { Button } from '@react-email/button';
-import { Column } from '@react-email/column';
-import { Container } from '@react-email/container';
-import { Head } from '@react-email/head';
-import { Hr } from '@react-email/hr';
-import { Html } from '@react-email/html';
-import { Img } from '@react-email/img';
-import { Preview } from '@react-email/preview';
-import { Row } from '@react-email/row';
-import { Section } from '@react-email/section';
-import { Text } from '@react-email/text';
+import {
+	Body,
+	Button,
+	Column,
+	Container,
+	Head,
+	Hr,
+	Html,
+	Img,
+	Preview,
+	Row,
+	Section,
+	Text,
+} from '@react-email/components';
 
 import {
 	InformationTableColumn,

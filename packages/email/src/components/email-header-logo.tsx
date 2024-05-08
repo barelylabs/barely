@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Img } from '@react-email/img';
+import { Img } from '@react-email/components';
 
 export function getBaseUrl(devPort?: string) {
 	if (typeof window !== 'undefined') {
