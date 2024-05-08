@@ -1,3 +1,4 @@
+import React from 'react';
 import { Body } from '@react-email/body';
 import { Button } from '@react-email/button';
 import { Column } from '@react-email/column';

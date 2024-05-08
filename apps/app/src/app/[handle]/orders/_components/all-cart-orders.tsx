@@ -2,6 +2,7 @@
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/router';
 import type { GridListCommandItemProps } from '@barely/ui/elements/grid-list';
+import { api } from '@barely/lib/server/api/react';
 import { formatCentsToDollars } from '@barely/lib/utils/currency';
 import { numToPaddedString } from '@barely/lib/utils/number';
 
@@ -15,6 +16,8 @@ import { useCartOrderContext } from '~/app/[handle]/orders/_components/cart-orde
 export function AllCartOrders() {
 	const { cartOrders, cartOrderSelection, setCartOrderSelection, gridListRef } =
 		useCartOrderContext();
+
+	const { data } = api.workspace.example.useQuery();
 
 	return (
 		<>
@@ -36,6 +39,7 @@ export function AllCartOrders() {
 			>
 				{order => <CartOrderCard cartOrder={order} />}
 			</GridList>
+			<pre>{JSON.stringify(data, null, 2)}</pre>
 		</>
 	);
 }

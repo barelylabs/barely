@@ -1,6 +1,8 @@
 import { and, eq, gt } from 'drizzle-orm';
 import { z } from 'zod';
 
+import { handleAbandonedUpsell } from '../../../trigger/cart.trigger';
+import { exampleTask } from '../../../trigger/example';
 import { newId } from '../../../utils/id';
 import { pushEvent } from '../../../utils/pusher-server';
 import {
@@ -13,14 +15,21 @@ import {
 	_Files_To_Workspaces__AvatarImage,
 	_Files_To_Workspaces__HeaderImage,
 } from '../file/file.sql';
-// import { createPlanCheckoutLink } from './stripe.fns';
 import { _Users_To_Workspaces } from '../user/user.sql';
 import { WorkspaceInvites } from '../workspace-invite/workspace-invite.sql';
-// import { inviteUserToWorkspace } from './workspace.edge.fns';
 import { createWorkspaceSchema, updateCurrentWorkspaceSchema } from './workspace.schema';
 import { Workspaces } from './workspace.sql';
 
 export const workspaceRouter = createTRPCRouter({
+	example: privateProcedure.query(async () => {
+		const res = await exampleTask.trigger({ number: 42 });
+		console.log('exampleTask res => ', res);
+
+		await handleAbandonedUpsell.trigger({ cartId: 'cart_MasTVfFoTmNSkW1B' });
+
+		return res;
+	}),
+
 	current: privateProcedure.query(({ ctx }) => {
 		if (!ctx.workspace) return null;
 		return ctx.workspace;

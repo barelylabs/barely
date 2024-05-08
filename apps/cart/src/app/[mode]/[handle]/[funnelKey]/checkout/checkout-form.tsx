@@ -4,7 +4,7 @@ import type { CartRouterOutputs } from '@barely/lib/server/routes/cart/cart.api.
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { cartApi } from '@barely/lib/server/routes/cart/cart.api.react';
-import { updateMainCartFromCartSchema } from '@barely/lib/server/routes/cart/cart.schema';
+import { updateCheckoutCartFromCheckoutSchema } from '@barely/lib/server/routes/cart/cart.schema';
 import { getAmountsForCheckout } from '@barely/lib/server/routes/cart/cart.utils';
 import {
 	APPAREL_SIZES,
@@ -48,9 +48,8 @@ export function CheckoutForm({
 	initialData: Promise<NonNullable<CartRouterOutputs['create']>>;
 	shouldWriteToCookie?: boolean;
 }) {
-	const { cart: initialCart, publicFunnel: initialFunnel } = use(initialData);
-
 	const router = useRouter();
+	const { cart: initialCart, publicFunnel: initialFunnel } = use(initialData);
 
 	const { mutate: logEvent } = cartApi.logEvent.useMutation();
 
@@ -133,7 +132,11 @@ export function CheckoutForm({
 		},
 	});
 
-	function updateCart(updateData: Partial<z.infer<typeof updateMainCartFromCartSchema>>) {
+	const { mutateAsync: syncCart } = cartApi.updateCheckoutFromCheckout.useMutation();
+
+	function updateCart(
+		updateData: Partial<z.infer<typeof updateCheckoutCartFromCheckoutSchema>>,
+	) {
 		mutateCart({
 			id: cart.id,
 			handle: publicFunnel.handle,
@@ -142,7 +145,9 @@ export function CheckoutForm({
 		});
 	}
 
-	const debouncedUpdateCart = useDebouncedCallback(updateCart, 500);
+	const debouncedUpdatePayWhatYouWantPrice = useDebouncedCallback(updateCart, 500);
+	const debouncedUpdateEmail = useDebouncedCallback(updateCart, 500);
+	const debouncedUpdateAddress = useDebouncedCallback(updateCart, 500);
 
 	const updatePayWhatYouWantPrice = async (value: number) => {
 		await apiUtils.byIdAndParams.cancel();
@@ -170,14 +175,14 @@ export function CheckoutForm({
 			},
 		);
 
-		debouncedUpdateCart({
+		debouncedUpdatePayWhatYouWantPrice({
 			mainProductPayWhatYouWantPrice: value,
 		});
 	};
 
 	/* form */
 	const form = useZodForm({
-		schema: updateMainCartFromCartSchema,
+		schema: updateCheckoutCartFromCheckoutSchema,
 		values: {
 			...cart,
 			handle: publicFunnel.workspace.handle,
@@ -187,7 +192,6 @@ export function CheckoutForm({
 				cart.mainProductPayWhatYouWantPrice ?
 					cart.mainProductPayWhatYouWantPrice / 100
 				:	cart.mainProductPayWhatYouWantPrice,
-
 			mainProductQuantity: cart.mainProductQuantity ?? 1,
 			bumpProductQuantity: cart.bumpProductQuantity ?? 1,
 		},
@@ -196,10 +200,14 @@ export function CheckoutForm({
 		},
 	});
 
-	const handleSubmit = async () => {
+	const handleSubmit = async (
+		data: z.infer<typeof updateCheckoutCartFromCheckoutSchema>,
+	) => {
 		if (!stripe || !elements) {
 			return;
 		}
+
+		await syncCart(data);
 
 		await stripe.confirmPayment({
 			elements,
@@ -277,7 +285,7 @@ export function CheckoutForm({
 								onChange={async e => {
 									if (e.complete) {
 										if (z.string().email().safeParse(e.value.email).success) {
-											debouncedUpdateCart({
+											debouncedUpdateEmail({
 												email: e.value.email,
 											});
 										}
@@ -291,7 +299,7 @@ export function CheckoutForm({
 									if (e.complete) {
 										const address = e.value.address;
 
-										debouncedUpdateCart({
+										debouncedUpdateAddress({
 											firstName: e.value.firstName,
 											lastName: e.value.lastName,
 											fullName: e.value.name,
@@ -448,6 +456,7 @@ export function CheckoutForm({
 							size='xl'
 							look='brand'
 							loading={mode === 'live' && form.formState.isSubmitting}
+							loadingText='Completing order...'
 							onClick={() => {
 								if (mode === 'preview') {
 									router.push(`customize`);

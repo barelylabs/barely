@@ -1,6 +1,7 @@
 import { neon, neonConfig, Pool } from '@neondatabase/serverless';
 import { drizzle as drizzleHttp } from 'drizzle-orm/neon-http';
 import { drizzle as drizzlePool } from 'drizzle-orm/neon-serverless';
+import ws from 'ws';
 
 import { env } from '../../env';
 import * as adCreativeSql from '../routes/ad-creative/ad-creative.sql';
@@ -102,6 +103,7 @@ const dbHttp = drizzleHttp(http, {
 	schema: dbSchema,
 });
 
+neonConfig.webSocketConstructor = ws;
 const pool = new Pool({ connectionString: env.DATABASE_POOL_URL });
 export const dbPool = drizzlePool(pool, {
 	schema: dbSchema,

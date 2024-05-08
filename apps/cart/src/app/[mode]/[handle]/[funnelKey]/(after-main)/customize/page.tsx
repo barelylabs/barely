@@ -54,6 +54,7 @@ export default async function UpsellPage({
 	const expiresAt =
 		(cart.checkoutConvertedAt ? cart.checkoutConvertedAt.getTime() : Date.now()) +
 		5 * 60 * 1000; // 5 minutes from now
+	// 10 * 1000; // 10 seconds from now
 
 	const normalPrice = publicFunnel.upsellProduct?.price;
 	const price =

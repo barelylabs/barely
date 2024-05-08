@@ -2,13 +2,13 @@ import type { ReceiptEmailProps } from '@barely/email/src/templates/cart/receipt
 import type { z } from 'zod';
 import { sendEmail } from '@barely/email';
 import ReceiptEmailTemplate from '@barely/email/src/templates/cart/receipt';
-import { and, count, eq, isNotNull, lt } from 'drizzle-orm';
+import { and, count, eq, isNotNull } from 'drizzle-orm';
 
 import type { ShippingEstimateProps } from '../../shipengine/shipengine.endpts';
 import type { Fan } from '../fan/fan.schema';
 import type { Product } from '../product/product.schema';
 import type { stripeConnectChargeMetadataSchema } from '../stripe-connect/stripe-connect.schema';
-import type { Cart, InsertCart, UpdateCart } from './cart.schema';
+import type { Cart, InsertCart } from './cart.schema';
 import { formatCentsToDollars } from '../../../utils/currency';
 import { isProduction } from '../../../utils/environment';
 import { newId } from '../../../utils/id';
@@ -130,6 +130,7 @@ export async function createMainCartFromFunnel(
 		checkoutStripePaymentIntentId: paymentIntent.id,
 		checkoutStripeClientSecret: paymentIntent.client_secret,
 		// main product
+		mainProductQuantity: 1,
 		mainProductId: funnel.mainProduct.id, // bump product
 		bumpProductId: funnel.bumpProduct?.id ?? null,
 		emailMarketingOptIn: true,
@@ -336,6 +337,18 @@ export async function sendCartReceiptEmail(cart: ReceiptCart) {
 	});
 }
 
+export async function createOrderIdForCart(cart: Cart) {
+	const ordersCount = await db.pool
+		.select({ count: count() })
+		.from(Carts)
+		.where(and(eq(Carts.workspaceId, cart.workspaceId), isNotNull(Carts.orderId)))
+		.then(r => r[0]?.count ?? raise('count not found'));
+
+	const orderId = ordersCount + 1;
+
+	return orderId;
+}
+
 export async function getOrCreateCartOrderId(cart: Cart) {
 	if (cart.orderId) return cart.orderId;
 
@@ -354,44 +367,4 @@ export async function getOrCreateCartOrderId(cart: Cart) {
 		.where(eq(Carts.id, cart.id));
 
 	return orderId;
-}
-
-/* cron */
-export async function checkForAbandonedUpsellCarts() {
-	const carts = await db.pool.query.Carts.findMany({
-		with: {
-			funnel: { with: funnelWith },
-			fan: true,
-		},
-		where: and(
-			eq(Carts.stage, 'upsellCreated'),
-			eq(Carts.orderReceiptSent, false),
-			lt(Carts.checkoutConvertedAt, new Date(Date.now() - 5 * 60 * 1000)), // upsells created more than 5 minutes ago
-		),
-	});
-
-	await Promise.allSettled(
-		carts.map(async cart => {
-			const updateCartData: UpdateCart = {
-				id: cart.id,
-				stage: 'upsellAbandoned',
-			};
-
-			if (cart.email && cart.funnel && cart.fan) {
-				await sendCartReceiptEmail({
-					...cart,
-					fan: cart.fan,
-					funnel: cart.funnel,
-					mainProduct: cart.funnel.mainProduct,
-					bumpProduct: cart.funnel.bumpProduct,
-					upsellProduct: cart.funnel.upsellProduct,
-				});
-				updateCartData.orderReceiptSent = true;
-			}
-
-			// todo: trigger any automations (e.g. mailchimp, zapier, etc.)
-
-			return await db.pool.update(Carts).set(updateCartData).where(eq(Carts.id, cart.id));
-		}),
-	);
 }

@@ -6,6 +6,7 @@ import type { UpdateCart } from './cart.schema';
 import { isProduction } from '../../../utils/environment';
 import { raise } from '../../../utils/raise';
 import { getAbsoluteUrl } from '../../../utils/url';
+import { wait } from '../../../utils/wait';
 import { createTRPCRouter, publicProcedure } from '../../api/trpc';
 import { stripe } from '../../stripe';
 import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
@@ -21,7 +22,7 @@ import {
 	getPublicFunnelFromServerFunnel,
 	sendCartReceiptEmail,
 } from './cart.fns';
-import { updateMainCartFromCartSchema } from './cart.schema';
+import { updateCheckoutCartFromCheckoutSchema } from './cart.schema';
 import { Carts } from './cart.sql';
 import { getAmountsForCheckout } from './cart.utils';
 
@@ -86,7 +87,7 @@ export const cartRouter = createTRPCRouter({
 		}),
 
 	updateCheckoutFromCheckout: publicProcedure
-		.input(updateMainCartFromCartSchema)
+		.input(updateCheckoutCartFromCheckoutSchema)
 		.mutation(async ({ input, ctx }) => {
 			const { id, handle, funnelKey, ...update } = input;
 
@@ -108,7 +109,13 @@ export const cartRouter = createTRPCRouter({
 				const toPostalCode =
 					update.shippingAddressPostalCode ?? cart.shippingAddressPostalCode;
 
-				if (toCountry && toState && toCity && toPostalCode) {
+				if (
+					toCountry &&
+					toState &&
+					toCity &&
+					toPostalCode &&
+					toPostalCode !== cart.shippingAddressPostalCode
+				) {
 					const { lowestShippingPrice: mainShippingAmount } =
 						await getProductsShippingRateEstimate({
 							products: [
@@ -200,7 +207,20 @@ export const cartRouter = createTRPCRouter({
 			z.object({ cartId: z.string(), upsellIndex: z.number().optional().default(0) }),
 		)
 		.mutation(async ({ input, ctx }) => {
-			const cart = (await getCartById(input.cartId)) ?? raise('cart not found');
+			let cart = (await getCartById(input.cartId)) ?? raise('cart not found');
+
+			// if there is not a fan attached to this cart yet, that means the webhook hasn't fired yet. we need to poll until it does
+			const startTime = Date.now();
+			const timeout = 15000; // 15 seconds
+
+			do {
+				await wait(1000);
+				const polledCart = await getCartById(input.cartId); // re-fetch the cart
+				if (polledCart) cart = polledCart; // if the cart was found, update the cart
+				if (Date.now() - startTime > timeout) {
+					throw new Error('Timeout: Fan information not found after 15 seconds');
+				}
+			} while (!cart.fan);
 
 			/* don't charge the user if they've already converted */
 			if (cart.stage === 'upsellConverted') {
@@ -212,8 +232,9 @@ export const cartRouter = createTRPCRouter({
 			}
 
 			const funnel = cart.funnel ?? raise('funnel not found');
-			const fan = cart.fan ?? raise('fan not found to buy upsell');
 			const upsellProduct = funnel.upsellProduct ?? raise('upsell product not found');
+
+			const fan = cart.fan ?? raise('fan not found to buy upsell');
 
 			const stripePaymentMethodId =
 				cart.checkoutStripePaymentMethodId ?? raise('stripePaymentMethodId not found');
@@ -314,11 +335,25 @@ export const cartRouter = createTRPCRouter({
 	declineUpsell: publicProcedure
 		.input(z.object({ cartId: z.string() }))
 		.mutation(async ({ input, ctx }) => {
-			const cart = (await getCartById(input.cartId)) ?? raise('cart not found');
+			let cart = (await getCartById(input.cartId)) ?? raise('cart not found');
+
+			// if there is not a fan attached to this cart yet, that means the webhook hasn't fired yet. we need to poll until it does
+			const startTime = Date.now();
+			const timeout = 15000; // 15 seconds
+
+			do {
+				await wait(1000);
+				const polledCart = await getCartById(input.cartId); // re-fetch the cart
+				if (polledCart) cart = polledCart; // if the cart was found, update the cart
+				if (Date.now() - startTime > timeout) {
+					throw new Error('Timeout: Fan information not found after 15 seconds');
+				}
+			} while (!cart.fan);
+
 			const fan = cart.fan ?? raise('fan not found to decline upsell');
 			const funnel = cart.funnel ?? raise('funnel not found');
 
-			cart.stage === 'upsellDeclined';
+			cart.stage = 'upsellDeclined';
 
 			if (ctx.visitor?.ip) {
 				await recordCartEvent({
@@ -340,6 +375,8 @@ export const cartRouter = createTRPCRouter({
 				cart.orderReceiptSent = true;
 			});
 
+			console.log('updating declined upsell cart', cart);
+
 			await ctx.db.pool.update(Carts).set(cart).where(eq(Carts.id, input.cartId));
 
 			return {
@@ -350,7 +387,6 @@ export const cartRouter = createTRPCRouter({
 		}),
 
 	// events
-
 	logEvent: publicProcedure
 		.input(
 			z.object({

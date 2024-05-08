@@ -3,11 +3,16 @@ import { Stripe } from 'stripe';
 
 import type { UpdateCart } from '../cart/cart.schema';
 import type { Workspace } from '../workspace/workspace.schema';
+import { handleAbandonedUpsell } from '../../../trigger/cart.trigger';
 import { isProduction } from '../../../utils/environment';
 import { raise } from '../../../utils/raise';
 import { db } from '../../db';
 import { stripe } from '../../stripe';
-import { getCartById, sendCartReceiptEmail } from '../cart/cart.fns';
+import {
+	createOrderIdForCart,
+	getCartById,
+	sendCartReceiptEmail,
+} from '../cart/cart.fns';
 import { Carts } from '../cart/cart.sql';
 import { createFan } from '../fan/fan.fns';
 import { Fans } from '../fan/fan.sql';
@@ -70,6 +75,8 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 		updateCart.checkoutStripeChargeId = charge.id;
 		updateCart.checkoutStripePaymentMethodId = charge.payment_method;
 
+		updateCart.orderId = await createOrderIdForCart(prevCart);
+
 		// update or create fan
 		let fan =
 			prevCart.fan ? prevCart.fan
@@ -125,6 +132,10 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 		await db.pool.update(Carts).set(updateCart).where(eq(Carts.id, cartId));
 
 		if (!fan) throw new Error('Fan not created or found after charge success');
+
+		if (updateCart.stage === 'upsellCreated') {
+			await handleAbandonedUpsell.trigger({ cartId: prevCart.id }); // this waits 5 minutes and then marks the cart abandoned if it hasn't been converted or declined
+		}
 
 		if (updateCart.stage === 'checkoutConverted') {
 			await sendCartReceiptEmail({

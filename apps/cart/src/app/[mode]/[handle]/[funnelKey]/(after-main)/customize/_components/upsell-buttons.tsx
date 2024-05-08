@@ -15,26 +15,33 @@ export function UpsellButtons({
 	funnelKey: string;
 	cartId: string;
 }) {
-	const { submitting, handleBuyUpsell, handleDeclineUpsell } = useUpsellCart({
-		mode,
-		handle,
-		funnelKey,
-		cartId,
-	});
+	const { converting, declining, submitting, handleBuyUpsell, handleDeclineUpsell } =
+		useUpsellCart({
+			mode,
+			handle,
+			funnelKey,
+			cartId,
+		});
 
 	return (
 		<div className='flex w-full flex-col gap-4'>
 			<Button
 				onClick={handleBuyUpsell}
 				size='xl'
-				loading={submitting}
+				loading={converting}
 				disabled={submitting}
+				loadingText='Using same payment method...'
 				look='brand'
 				fullWidth
 			>
 				Use same payment method
 			</Button>
-			<Button look='link' onClick={handleDeclineUpsell} disabled={submitting}>
+			<Button
+				look='link'
+				onClick={handleDeclineUpsell}
+				disabled={submitting}
+				loading={declining}
+			>
 				No thanks
 			</Button>
 		</div>

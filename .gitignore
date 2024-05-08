@@ -24,6 +24,8 @@ expo-env.d.ts
 # production
 build
 
+.trigger
+
 # misc
 .DS_Store
 *.pem

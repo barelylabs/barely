@@ -1,4 +1,5 @@
 import type { ColumnProps } from '@react-email/column';
+import React from 'react';
 import { Body as BodyPrimitive } from '@react-email/body';
 import { Button as ButtonPrimitive } from '@react-email/button';
 import { Column } from '@react-email/column';
