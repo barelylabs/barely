@@ -39,6 +39,26 @@
 				".vercel/output/**"
 			]
 		},
+		"deploy-trigger:staging": {
+			"dependsOn": ["^deploy-trigger:staging"],
+			"outputs": [
+				".next/**",
+				"!.next/cache/**",
+				"next-env.d.ts",
+				".output/**",
+				".vercel/output/**"
+			]
+		},
+		"deploy-trigger:production": {
+			"dependsOn": ["^deploy-trigger:production"],
+			"outputs": [
+				".next/**",
+				"!.next/cache/**",
+				"next-env.d.ts",
+				".output/**",
+				".vercel/output/**"
+			]
+		},
 		"format": {
 			"outputs": ["node_modules/.cache/.prettiercache"],
 			"outputMode": "new-only"
@@ -93,7 +113,6 @@
 		"AWS_S3_SECRET_ACCESS_KEY",
 		"BOT_SPOTIFY_ACCOUNT_ID",
 		"BOT_THREADS_API_KEY",
-		"CLOUDINARY_API_SECRET",
 		"DATABASE_NAME",
 		"DATABASE_URL",
 		"DATABASE_POOL_URL",

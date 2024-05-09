@@ -15,7 +15,8 @@ export function useUpsellCart({
 	funnelKey: string;
 	cartId: string;
 }) {
-	const [submitting, setSubmitting] = useState(false);
+	const [converting, setConverting] = useState(false);
+	const [declining, setDeclining] = useState(false);
 
 	const router = useRouter();
 	const pathname = usePathname();
@@ -27,7 +28,7 @@ export function useUpsellCart({
 	});
 
 	const handleBuyUpsell = () => {
-		setSubmitting(true);
+		setConverting(true);
 		if (mode === 'preview') {
 			return router.push(`/${handle}/${funnelKey}/success`);
 		}
@@ -41,7 +42,7 @@ export function useUpsellCart({
 	});
 
 	const handleDeclineUpsell = () => {
-		setSubmitting(true);
+		setDeclining(true);
 		if (mode === 'preview') {
 			return router.push(pathname.replace('/customize', '/success'));
 		}
@@ -49,8 +50,9 @@ export function useUpsellCart({
 	};
 
 	return {
-		submitting,
-		setSubmitting,
+		submitting: converting || declining,
+		converting,
+		declining,
 		handleBuyUpsell,
 		handleDeclineUpsell,
 	};

@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { Link } from '@react-email/link';
-import { Text } from '@react-email/text';
+import { Link, Text } from '@react-email/components';
 
 export function EmailFooter() {
 	return (

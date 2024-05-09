@@ -41,7 +41,7 @@ export const cartPageSearchParams = insertCartSchema
 	})
 	.partial();
 
-export const updateMainCartFromCartSchema = cartPageSearchParams
+export const updateCheckoutCartFromCheckoutSchema = cartPageSearchParams
 	.required({ id: true })
 	.extend({
 		handle: z.string(),

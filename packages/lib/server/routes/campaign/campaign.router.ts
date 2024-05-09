@@ -1,7 +1,7 @@
 import type { SQL } from 'drizzle-orm';
 import { sendEmail } from '@barely/email';
-import { PlaylistPitchApprovedEmailTemplate } from '@barely/email/src/templates/playlist-pitch-approved';
-import { PlaylistPitchRejectedEmailTemplate } from '@barely/email/src/templates/playlist-pitch-rejected';
+import { PlaylistPitchApprovedEmailTemplate } from '@barely/email/src/templates/playlist-pitch/playlist-pitch-approved';
+import { PlaylistPitchRejectedEmailTemplate } from '@barely/email/src/templates/playlist-pitch/playlist-pitch-rejected';
 import { TRPCError } from '@trpc/server';
 import { and, asc, eq, inArray } from 'drizzle-orm';
 import { z } from 'zod';

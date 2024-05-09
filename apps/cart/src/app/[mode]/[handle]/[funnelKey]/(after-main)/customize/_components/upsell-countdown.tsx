@@ -25,6 +25,7 @@ export function UpsellCountdown({
 			onComplete={handleDeclineUpsell}
 			showZeroMinutes
 			className='text-brand'
+			timesUpMessage='Offer expired!'
 		/>
 	);
 }

@@ -1,13 +1,16 @@
 import type { ColumnProps } from '@react-email/column';
-import { Body as BodyPrimitive } from '@react-email/body';
-import { Button as ButtonPrimitive } from '@react-email/button';
-import { Column } from '@react-email/column';
-import { Container as ContainerPrimitive } from '@react-email/container';
-import { Heading as HeadingPrimitive } from '@react-email/heading';
-import { Hr as HrPrimitive } from '@react-email/hr';
-import { Link as LinkPrimitive } from '@react-email/link';
-import { Row } from '@react-email/row';
-import { Text } from '@react-email/text';
+import React from 'react';
+import {
+	Body as BodyPrimitive,
+	Button as ButtonPrimitive,
+	Column,
+	Container as ContainerPrimitive,
+	Heading as HeadingPrimitive,
+	Hr as HrPrimitive,
+	Link as LinkPrimitive,
+	Row,
+	Text,
+} from '@react-email/components';
 
 export const resetText = {
 	margin: '0',

@@ -5,6 +5,7 @@
 		"tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
 	},
 	"include": [
+		"trigger.config.ts",
 		"env",
 		"../types/next-auth.d.ts",
 		"./atoms/**/*",
@@ -12,8 +13,8 @@
 		"./files/**/*",
 		"./hooks/**/*",
 		"./server/**/*",
-		"./utils/**/*",
-		"../../apps/app/src/app/[handle]/tracks/_components/use-create-or-edit-form.ts"
+		"./trigger/**/*",
+		"./utils/**/*"
 	],
 	"exclude": ["dist", "build", "node_modules"]
 }

@@ -196,8 +196,22 @@ jobs:
     outputs:
       neon_branch_id: ${{ steps.get-neon-branch.outputs.branch_id }}
 
-  # 👀 DEPLOY PREVIEWS
+  trigger-preview:
+    name: trigger staging
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
+      - name: setup node/pnpm/turbo/vercel
+        uses: ./tooling/github/setup
+
+      - name: deploy trigger.dev
+        env:
+          TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
+        run: pnpm deploy-trigger:staging
+
+  # 👀 DEPLOY PREVIEWS
   deploy-www:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [neon-preview, git-meta]
@@ -330,6 +344,7 @@ jobs:
     needs:
       [
         neon-preview,
+        trigger-preview,
         deploy-app,
         deploy-cart,
         deploy-link,

@@ -56,7 +56,7 @@ export function getAmountsForCheckout(
 	const mainShippingAndHandlingAmount = mainShippingAmount + mainHandlingAmount;
 
 	// bump product
-	const addedBump = cart.addedBump ?? false;
+	// const addedBump = cart.addedBump ?? false;
 	const bumpProductPrice =
 		!funnel.bumpProduct ? 0 : (
 			funnel.bumpProduct.price - (funnel.bumpProductDiscount ?? 0)
@@ -79,11 +79,11 @@ export function getAmountsForCheckout(
 
 	return {
 		// formatted inputs
-		mainProductPayWhatYouWantPrice, // this is the entered amount, unless it's less than the minimum, then it's the minimum
-		mainProductQuantity,
-		addedBump,
-		bumpProductQuantity,
-		bumpShippingPrice,
+		// mainProductPayWhatYouWantPrice, // this is the entered amount, unless it's less than the minimum, then it's the minimum
+		// mainProductQuantity,
+		// addedBump,
+		// bumpProductQuantity,
+		// bumpShippingPrice,
 
 		// calculated amounts
 		mainProductPrice,

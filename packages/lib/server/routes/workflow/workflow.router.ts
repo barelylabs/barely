@@ -153,6 +153,7 @@ export const workflowRouter = createTRPCRouter({
 					.values(
 						triggers.map(t => ({
 							...t,
+
 							id: newId('workflowTrigger'),
 							workflowId: id,
 						})),

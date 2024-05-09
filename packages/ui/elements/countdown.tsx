@@ -7,6 +7,7 @@ import CountdownPrimitive from 'react-countdown';
 interface CountdownProps extends CountdownPrimitiveProps {
 	showZeros?: boolean;
 	showZeroMinutes?: boolean;
+	timesUpMessage?: string;
 }
 
 export function Countdown({
@@ -14,6 +15,7 @@ export function Countdown({
 	className,
 	showZeros,
 	showZeroMinutes,
+	timesUpMessage,
 	...props
 }: CountdownProps) {
 	const renderer = ({
@@ -30,7 +32,7 @@ export function Countdown({
 		completed: boolean;
 	}) => {
 		if (completed) {
-			return <span>{`Time's up!`}</span>;
+			return <span>{timesUpMessage ?? "Time's up!"}</span>;
 		} else {
 			return (
 				<div className={cn('flex flex-row gap-2 text-4xl font-bold', className)}>
@@ -73,5 +75,7 @@ export function Countdown({
 		}
 	};
 
-	return <CountdownPrimitive date={date} renderer={props.renderer ?? renderer} />;
+	return (
+		<CountdownPrimitive date={date} {...props} renderer={props.renderer ?? renderer} />
+	);
 }

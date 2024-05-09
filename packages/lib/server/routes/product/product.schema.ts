@@ -40,7 +40,7 @@ export const createProductSchema = insertProductSchema.omit({
 export const upsertProductSchema = insertProductSchema.partial({
 	id: true,
 	workspaceId: true,
-	handle: true,
+	// handle: true,
 });
 export const updateProductSchema = insertProductSchema.partial().required({ id: true });
 

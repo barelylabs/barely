@@ -18,6 +18,8 @@
 		"db:push:force": "--filter=@barely/lib db:push:force",
 		"db:pull": "pnpm --filter=@barely/lib db:pull",
 		"db:studio": "pnpm --filter=@barely/lib db:studio",
+		"deploy-trigger:staging": "turbo deploy-trigger:staging --filter=@barely/lib",
+		"deploy-trigger:production": "turbo deploy-trigger:production --filter=@barely/lib",
 		"dev": "./scripts/dev-qr-codes.sh && turbo dev --parallel",
 		"dev:enable": "chmod +x ./scripts/dev-qr-codes.sh && chmod +x scripts/dev_kill.sh && chmod +x ./scripts/create-dev-branch.sh && chmod +x ./scripts/reset-dev-branch.sh && chmod +x ./scripts/tunnelto-auth.sh",
 		"dev:pre": "sudo ./scripts/dev_kill.sh && turbo dev:pre",

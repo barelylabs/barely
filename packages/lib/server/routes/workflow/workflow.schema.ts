@@ -16,7 +16,7 @@ export const createWorkflowTriggerSchema = insertWorkflowTriggerSchema.omit({
 export const upsertWorkflowTriggerSchema = insertWorkflowTriggerSchema.partial({
 	id: true,
 	workflowId: true,
-	handle: true,
+	// handle: true,
 });
 
 /** actions */
@@ -28,7 +28,7 @@ export const createWorkflowActionSchema = insertWorkflowActionSchema.omit({
 export const upsertWorkflowActionSchema = insertWorkflowActionSchema.partial({
 	id: true,
 	workflowId: true,
-	handle: true,
+	// handle: true,
 });
 export type WorkflowAction = InferSelectModel<typeof WorkflowActions>;
 
@@ -48,7 +48,7 @@ export const createWorkflowSchema = insertWorkflowSchema.omit({
 export const upsertWorkflowSchema = insertWorkflowSchema.partial({
 	id: true,
 	workspaceId: true,
-	handle: true,
+	// handle: true,
 });
 
 export const updateWorkflowSchema = insertWorkflowSchema
