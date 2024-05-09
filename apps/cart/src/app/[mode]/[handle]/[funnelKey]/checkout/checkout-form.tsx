@@ -506,8 +506,6 @@ export function CheckoutForm({
 						<Text variant='2xs/normal' className='ml-auto opacity-90'>
 							All prices in USD
 						</Text>
-
-						<pre>{JSON.stringify(form.watch(), null, 2)}</pre>
 					</div>
 				</div>
 			</div>
