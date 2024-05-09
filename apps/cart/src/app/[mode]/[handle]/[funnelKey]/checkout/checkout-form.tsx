@@ -12,7 +12,6 @@ import {
 } from '@barely/lib/server/routes/product/product.constants';
 import { cn } from '@barely/lib/utils/cn';
 import { formatCentsToDollars } from '@barely/lib/utils/currency';
-import { getAbsoluteUrl } from '@barely/lib/utils/url';
 import {
 	AddressElement,
 	LinkAuthenticationElement,
@@ -26,7 +25,6 @@ import { useDebouncedCallback } from '@barely/hooks/use-debounced-callback';
 import { useZodForm } from '@barely/hooks/use-zod-form';
 
 import { Button } from '@barely/ui/elements/button';
-import { CurrencyInput } from '@barely/ui/elements/currency-input';
 import { Icon } from '@barely/ui/elements/icon';
 import { Img } from '@barely/ui/elements/img';
 import { Switch } from '@barely/ui/elements/switch';
@@ -35,6 +33,7 @@ import { H, Text } from '@barely/ui/elements/typography';
 import { WrapBalancer } from '@barely/ui/elements/wrap-balancer';
 import { Form } from '@barely/ui/forms';
 import { CheckboxField } from '@barely/ui/forms/checkbox-field';
+import { CurrencyField } from '@barely/ui/forms/currency-field';
 
 import { setCartCookie } from '~/app/[mode]/[handle]/[funnelKey]/_actions';
 import { ProductPrice } from '~/app/[mode]/[handle]/[funnelKey]/_components/product-price';
@@ -206,18 +205,18 @@ export function CheckoutForm({
 		if (!stripe || !elements) {
 			return;
 		}
-
+		console.log('data', data);
 		await syncCart(data);
 
-		await stripe.confirmPayment({
-			elements,
-			confirmParams: {
-				return_url: getAbsoluteUrl(
-					'cart',
-					`/${publicFunnel.handle}/${publicFunnel.key}/customize`,
-				),
-			},
-		});
+		// await stripe.confirmPayment({
+		// 	elements,
+		// 	confirmParams: {
+		// 		return_url: getAbsoluteUrl(
+		// 			'cart',
+		// 			`/${publicFunnel.handle}/${publicFunnel.key}/customize`,
+		// 		),
+		// 	},
+		// });
 	};
 
 	/* derived state */
@@ -267,11 +266,10 @@ export function CheckoutForm({
 							{publicFunnel.mainProductPayWhatYouWant && (
 								<div className='flex flex-col gap-2'>
 									<Text variant='md/semibold'>Choose your price!</Text>
-									<CurrencyInput
+									<CurrencyField
+										control={form.control}
 										name='mainProductPayWhatYouWantPrice'
 										outputUnits='cents'
-										initialValue={cart.mainProductPayWhatYouWantPrice ?? 0}
-										value={cart.mainProductPayWhatYouWantPrice ?? 0}
 										onValueChange={v => updatePayWhatYouWantPrice(v)}
 										className='h-12 w-[80px] bg-white text-black'
 									/>
@@ -507,6 +505,8 @@ export function CheckoutForm({
 						<Text variant='2xs/normal' className='ml-auto opacity-90'>
 							All prices in USD
 						</Text>
+
+						<pre>{JSON.stringify(form.watch(), null, 2)}</pre>
 					</div>
 				</div>
 			</div>
