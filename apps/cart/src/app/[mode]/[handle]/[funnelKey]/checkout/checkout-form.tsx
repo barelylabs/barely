@@ -12,6 +12,7 @@ import {
 } from '@barely/lib/server/routes/product/product.constants';
 import { cn } from '@barely/lib/utils/cn';
 import { formatCentsToDollars } from '@barely/lib/utils/currency';
+import { getAbsoluteUrl } from '@barely/lib/utils/url';
 import {
 	AddressElement,
 	LinkAuthenticationElement,
@@ -208,15 +209,15 @@ export function CheckoutForm({
 		console.log('data', data);
 		await syncCart(data);
 
-		// await stripe.confirmPayment({
-		// 	elements,
-		// 	confirmParams: {
-		// 		return_url: getAbsoluteUrl(
-		// 			'cart',
-		// 			`/${publicFunnel.handle}/${publicFunnel.key}/customize`,
-		// 		),
-		// 	},
-		// });
+		await stripe.confirmPayment({
+			elements,
+			confirmParams: {
+				return_url: getAbsoluteUrl(
+					'cart',
+					`${publicFunnel.handle}/${publicFunnel.key}/customize`,
+				),
+			},
+		});
 	};
 
 	/* derived state */

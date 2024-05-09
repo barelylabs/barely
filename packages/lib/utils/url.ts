@@ -90,7 +90,7 @@ export function getBaseUrl(app: (typeof apps)[number], absolute = false) {
 export function getAbsoluteUrl(app: (typeof apps)[number], path?: string) {
 	const appBaseUrl = getBaseUrl(app, true);
 
-	return `${appBaseUrl}${path ? `/${path}` : ''}`;
+	return `${appBaseUrl}${path ? `/${path.replace(/^\//, '')}` : ''}`;
 }
 
 export function getUrl(
@@ -99,5 +99,5 @@ export function getUrl(
 	params?: { subdomain?: string },
 ) {
 	const appBaseUrl = getBaseUrl(app);
-	return `${params?.subdomain ? `${params.subdomain}.` : ''}${appBaseUrl}${path ? `/${path}` : ''}`;
+	return `${params?.subdomain ? `${params.subdomain}.` : ''}${appBaseUrl}${path ? `/${path.replace(/^\//, '')}` : ''}`;
 }
