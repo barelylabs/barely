@@ -22,10 +22,9 @@ export async function sendEmail(props: SendEmailProps) {
 		to: props.to,
 		subject: props.subject,
 		html: props.html,
-		// text: props.text,
 		react: props.react,
-		bcc: props.bcc,
 		cc: props.cc,
+		bcc: props.bcc,
 		reply_to: props.reply_to,
 	});
 
