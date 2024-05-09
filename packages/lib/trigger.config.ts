@@ -29,8 +29,6 @@ export const config: TriggerConfig = {
 		'@barely/email',
 		/@barely\/email\/.*/,
 		'nanoid',
-
-		// '@react-email/column',
 	],
 	enableConsoleLogging: true, // enable console logging with dev cli
 	//The paths for your trigger folders
