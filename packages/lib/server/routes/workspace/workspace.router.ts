@@ -1,8 +1,6 @@
 import { and, eq, gt } from 'drizzle-orm';
 import { z } from 'zod';
 
-import { handleAbandonedUpsell } from '../../../trigger/cart.trigger';
-import { exampleTask } from '../../../trigger/example';
 import { newId } from '../../../utils/id';
 import { pushEvent } from '../../../utils/pusher-server';
 import {
@@ -21,14 +19,14 @@ import { createWorkspaceSchema, updateCurrentWorkspaceSchema } from './workspace
 import { Workspaces } from './workspace.sql';
 
 export const workspaceRouter = createTRPCRouter({
-	example: privateProcedure.query(async () => {
-		const res = await exampleTask.trigger({ number: 42 });
-		console.log('exampleTask res => ', res);
+	// example: privateProcedure.query(async () => {
+	// 	const res = await exampleTask.trigger({ number: 42 });
+	// 	console.log('exampleTask res => ', res);
 
-		await handleAbandonedUpsell.trigger({ cartId: 'cart_MasTVfFoTmNSkW1B' });
+	// 	await handleAbandonedUpsell.trigger({ cartId: 'cart_MasTVfFoTmNSkW1B' });
 
-		return res;
-	}),
+	// 	return res;
+	// }),
 
 	current: privateProcedure.query(({ ctx }) => {
 		if (!ctx.workspace) return null;
