@@ -59,7 +59,12 @@ export const CurrencyField = <
 											{...props}
 											initialValue={field.value}
 											value={field.value}
-											onValueChange={v => field.onChange(v)}
+											onValueChange={async v => {
+												field.onChange(v);
+												if (props.onValueChange) {
+													await props.onValueChange(v);
+												}
+											}}
 										/>
 									</FieldControl>
 									<FieldErrorIcon isValidating={isValidating} />

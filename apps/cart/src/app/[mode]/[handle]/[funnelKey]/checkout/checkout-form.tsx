@@ -206,7 +206,7 @@ export function CheckoutForm({
 		if (!stripe || !elements) {
 			return;
 		}
-		console.log('data', data);
+		// console.log('data', data);
 		await syncCart(data);
 
 		await stripe.confirmPayment({
@@ -271,7 +271,9 @@ export function CheckoutForm({
 										control={form.control}
 										name='mainProductPayWhatYouWantPrice'
 										outputUnits='cents'
-										onValueChange={v => updatePayWhatYouWantPrice(v)}
+										onValueChange={async v => {
+											await updatePayWhatYouWantPrice(v);
+										}}
 										className='h-12 w-[80px] bg-white text-black'
 									/>
 								</div>
