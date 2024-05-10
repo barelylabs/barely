@@ -49,6 +49,9 @@ export const handleAbandonedUpsell = task({
 
 		logger.log('Cart abandoned: ' + cart.id);
 	},
+	handleError: error => {
+		logger.error('Error handling abandoned upsell cart', error);
+	},
 });
 
 export const handleAbandonedUpsells = schedules.task({
