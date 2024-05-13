@@ -6,6 +6,7 @@ import { cartFunnelSearchParamsSchema } from '@barely/lib/server/routes/cart-fun
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllCartFunnels } from '~/app/[handle]/carts/_components/all-cart-funnels';
 import { ArchiveOrDeleteFunnelModal } from '~/app/[handle]/carts/_components/archive-or-delete-funnel-modal';
+import { CartDialogs } from '~/app/[handle]/carts/_components/cart-dialogs';
 import { CartFunnelContextProvider } from '~/app/[handle]/carts/_components/cart-funnel-context';
 import { CartFunnelHotkeys } from '~/app/[handle]/carts/_components/cart-funnel-hotkeys';
 import { CreateCartFunnelButton } from '~/app/[handle]/carts/_components/create-cart-funnel-button';
@@ -35,7 +36,13 @@ export default function CartFunnelsPage({
 			filters={filters}
 			selectedFunnelIds={selectedFunnelIds ?? []}
 		>
-			<DashContentHeader title='Carts' button={<CreateCartFunnelButton />} />
+			<DashContentHeader
+				title='Carts'
+				settingsHref={`/${params.handle}/settings/cart`}
+				button={<CreateCartFunnelButton />}
+			/>
+
+			<CartDialogs />
 
 			<AllCartFunnels />
 

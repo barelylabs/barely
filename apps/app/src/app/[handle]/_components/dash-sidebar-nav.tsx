@@ -1,5 +1,6 @@
 'use client';
 
+import type { User } from '@barely/lib/server/routes/user/user.schema';
 import type { Workspace } from '@barely/lib/server/routes/workspace/workspace.schema';
 import { Fragment, useMemo } from 'react';
 import Link from 'next/link';
@@ -18,14 +19,28 @@ import { Text } from '@barely/ui/elements/typography';
 
 import { cn } from '@barely/utils/cn';
 
-import type { SidebarNavItem } from '~/types/nav';
 import { WorkspaceSwitcher } from '~/app/[handle]/_components/workspace-switcher';
 
-export interface SidebarNavProps {
-	workspace: Workspace;
+interface SidebarNavLink {
+	title: string;
+	href?: string;
+	disabled?: boolean;
+	external?: boolean;
+	icon?: keyof typeof Icon;
+	label?: string;
+	userFilters?: (keyof User)[];
+	workspaceFilters?: (keyof Workspace)[];
 }
 
-export function SidebarNav(props: SidebarNavProps) {
+interface SidebarNavGroup {
+	title: string;
+	links: SidebarNavLink[];
+	workspaceFilters?: (keyof Workspace)[];
+}
+
+type SidebarNavItem = SidebarNavLink | SidebarNavGroup;
+
+export function SidebarNav(props: { workspace: Workspace }) {
 	const handle = props.workspace.handle;
 	const pathname = usePathname();
 	const workspace = useWorkspace();
@@ -37,56 +52,48 @@ export function SidebarNav(props: SidebarNavProps) {
 
 	const navHistory = useAtomValue(navHistoryAtom);
 
+	const merchLinks: SidebarNavLink[] = [
+		{ title: 'products', icon: 'product', href: `/${handle}/products` },
+		{ title: 'carts', icon: 'cartFunnel', href: `/${handle}/carts` },
+		{ title: 'orders', icon: 'orders', href: `/${handle}/orders` },
+	];
+
+	const mediaLinks: SidebarNavLink[] = [
+		{ title: 'media', icon: 'media', href: `/${handle}/media` },
+		{ title: 'tracks', icon: 'music', href: `/${handle}/tracks` },
+		{ title: 'mixtapes', icon: 'mixtape', href: `/${handle}/mixtapes` },
+	];
+
+	const pageLinks: SidebarNavLink[] = [
+		{ title: 'links', icon: 'link', href: `/${handle}/links` },
+		{ title: 'bio', icon: 'bio', href: `/${handle}/bio` },
+		{ title: 'press', icon: 'press', href: `/${handle}/press` },
+	];
+
+	const otherLinks: SidebarNavLink[] = [
+		{ title: 'workflows', icon: 'workflow', href: `/${handle}/workflows` },
+		{ title: 'settings', icon: 'settings', href: `/${handle}/settings` },
+	];
+
 	const topMainLinks: SidebarNavItem[] = [
 		{
-			title: 'links',
-			href: `/${handle}/links`,
-			icon: 'link',
+			title: 'content',
+			links: mediaLinks,
 		},
+
 		{
-			title: 'media',
-			href: `/${handle}/media`,
-			icon: 'media',
+			title: 'destinations',
+			links: pageLinks,
 		},
+
 		{
-			title: 'tracks',
-			href: `/${handle}/tracks`,
-			icon: 'music',
+			title: 'merch',
+			links: merchLinks,
 		},
+
 		{
-			title: 'mixtapes',
-			href: `/${handle}/mixtapes`,
-			icon: 'mixtape',
-		},
-		{
-			title: 'products',
-			href: `/${handle}/products`,
-			icon: 'product',
-		},
-		{
-			title: 'carts',
-			href: `/${handle}/carts`,
-			icon: 'cartFunnel',
-		},
-		{
-			title: 'orders',
-			href: `/${handle}/orders`,
-			icon: 'orders',
-		},
-		{
-			title: 'press',
-			href: `/${handle}/press`,
-			icon: 'press',
-		},
-		{
-			title: 'workflows',
-			href: `/${handle}/workflows`,
-			icon: 'workflow',
-		},
-		{
-			title: 'settings',
-			href: `/${handle}/settings`,
-			icon: 'settings',
+			title: 'other',
+			links: otherLinks,
 		},
 	];
 
@@ -101,6 +108,7 @@ export function SidebarNav(props: SidebarNavProps) {
 			icon: 'remarketing',
 			href: `/${handle}/settings/remarketing`,
 		},
+		{ title: 'cart', icon: 'cart', href: `/${handle}/settings/cart` },
 		{ title: 'payouts', icon: 'payouts', href: `/${handle}/settings/payouts` },
 		{ title: 'billing', icon: 'billing', href: `/${handle}/settings/billing` },
 	];
@@ -134,7 +142,8 @@ export function SidebarNav(props: SidebarNavProps) {
 						{topLinks.map((item, index) => {
 							if (
 								item.workspaceFilters &&
-								!item.workspaceFilters.map(filter => workspace[filter]).includes(true)
+								item.workspaceFilters.length > 0 &&
+								item.workspaceFilters.map(filter => workspace[filter]).includes(true)
 							) {
 								return null;
 							}
@@ -152,7 +161,7 @@ export function SidebarNav(props: SidebarNavProps) {
 	);
 }
 
-function NavItem(props: { item: SidebarNavItem }) {
+function NavLink(props: { item: SidebarNavLink }) {
 	const NavIcon = props.item.icon ? Icon[props.item.icon] : null;
 
 	const isCurrent = usePathnameMatchesCurrentPath(props.item.href ?? '');
@@ -170,4 +179,21 @@ function NavItem(props: { item: SidebarNavItem }) {
 			<Text variant='sm/medium'>{props.item.title}</Text>
 		</Link>
 	);
+}
+
+function NavGroup(props: { item: SidebarNavGroup }) {
+	return (
+		<div className='mb-2 flex flex-col gap-1'>
+			<Text variant={'sm/medium'}>{props.item.title}</Text>
+			{props.item.links.map((item, index) => (
+				<NavLink key={index} item={item} />
+			))}
+		</div>
+	);
+}
+
+function NavItem(props: { item: SidebarNavItem }) {
+	return 'links' in props.item ?
+			<NavGroup item={props.item} />
+		:	<NavLink item={props.item} />;
 }
