@@ -13,7 +13,7 @@ import { getAbsoluteUrl } from '@barely/lib/utils/url';
 import { eq, isNull } from 'drizzle-orm';
 
 export const config = {
-	matcher: ['/((?!api|mobile|_next|favicon|logos|sitemap|atom|404|500).*)'],
+	matcher: ['/((?!api|mobile|_next|_static|favicon|logos|sitemap|atom|404|500).*)'],
 };
 
 export async function middleware(req: NextRequest, ev: NextFetchEvent) {
@@ -67,6 +67,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 			url: true,
 			androidScheme: true,
 			appleScheme: true,
+			externalAppLinkUrl: true,
 			// remarketing
 			remarketing: true,
 			// custom meta tags
@@ -100,16 +101,33 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	if (visitorInfo.isBot && link.customMetaTags)
 		return NextResponse.redirect(`/_proxy/${link.id}`); // 👈 send bots to proxy for meta tags
 
+	if (link.url.includes('link.dice.fm') && !link.externalAppLinkUrl) {
+		const diceUrl = new URL(getAbsoluteUrl('link', '/api/dice'));
+		diceUrl.searchParams.set('url', link.url);
+		diceUrl.searchParams.set('linkId', link.id);
+		await fetch(diceUrl.href, { method: 'POST' });
+	}
+
 	if (visitorInfo.ua.device === 'mobile') {
-		if (link.url.includes('open.spotify.com')) {
-			console.log('Spotify link detected on mobile');
-			const spotifyAppLink = new URL('https://spotify.app.link');
-			spotifyAppLink.searchParams.set('product', 'open');
-			spotifyAppLink.searchParams.set('$full_url', link.url);
-			spotifyAppLink.searchParams.set('$fallback_url', link.url);
-			spotifyAppLink.searchParams.set('$android_redirect_timeout', '3000');
-			console.log('redirecting to mobile spotify', spotifyAppLink.href);
-			return NextResponse.redirect(spotifyAppLink.href);
+		switch (true) {
+			case link.url.includes('open.spotify.com'): {
+				console.log('Spotify link detected on mobile');
+				const spotifyAppLink = new URL('https://spotify.app.link');
+				spotifyAppLink.searchParams.set('product', 'open');
+				spotifyAppLink.searchParams.set('$full_url', link.url);
+				spotifyAppLink.searchParams.set('$fallback_url', link.url);
+				spotifyAppLink.searchParams.set('$android_redirect_timeout', '3000');
+				console.log('redirecting to mobile spotify', spotifyAppLink.href);
+				return NextResponse.redirect(spotifyAppLink.href);
+			}
+
+			case link.url.includes('link.dice.fm') && !!link.externalAppLinkUrl: {
+				console.log('Dice link detected on mobile');
+				return NextResponse.redirect(link.externalAppLinkUrl);
+			}
+
+			default:
+				break;
 		}
 	}
 

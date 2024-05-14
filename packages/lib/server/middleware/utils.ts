@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server';
 import type { RecordClickProps } from '../routes/event/event.fns';
 import { getDomainWithoutWWW } from '../../utils/link';
 import { raise } from '../../utils/raise';
+import { getSearchParams } from '../../utils/url';
 
 export interface ParseLinkOutput {
 	domain: string;
@@ -11,6 +12,12 @@ export interface ParseLinkOutput {
 }
 
 export function parseLinkDomain(req: NextRequest) {
+	const host = req.headers.get('host');
+	console.log('host', host);
+
+	const hrefRaw = req.nextUrl.href;
+	console.log('hrefRaw', hrefRaw);
+
 	let domain = req.headers
 		.get('host')
 		?.replace(
@@ -31,6 +38,10 @@ export function parseLinkDomain(req: NextRequest) {
 			process.env.NEXT_PUBLIC_TRANSPARENT_LINK_ROOT_DOMAIN
 		}`;
 	}
+
+	const searchParams = getSearchParams(req.nextUrl.href);
+	console.log('searchParams', searchParams);
+
 	const handleParam = req.nextUrl.searchParams.get('handle');
 	console.log('handleParam', handleParam);
 
@@ -51,6 +62,8 @@ export function parseLinkDomain(req: NextRequest) {
 		(process.env.VERCEL_ENV === 'development' || process.env.VERCEL_ENV === 'preview')
 	) {
 		const domainParam = req.nextUrl.searchParams.get('domain');
+		console.log('domainParam', domainParam);
+
 		if (!domainParam)
 			throw new Error(
 				'Domain query parameter not provided. We need that to test in local & preview environments',

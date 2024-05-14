@@ -70,6 +70,7 @@ export const Links = pgTable(
 		url: varchar('url', { length: 1000 }).notNull(),
 		appleScheme: varchar('appleScheme', { length: 1000 }),
 		androidScheme: varchar('androidScheme', { length: 1000 }),
+		externalAppLinkUrl: varchar('externalAppLinkUrl', { length: 1000 }),
 
 		// custom meta tags
 		customMetaTags: boolean('customMetaTags').default(false),
