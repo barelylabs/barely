@@ -68,10 +68,10 @@ export const linkRouter = createTRPCRouter({
 	create: privateProcedure.input(createLinkSchema).mutation(async ({ input, ctx }) => {
 		const transparentLinkData = getTransparentLinkDataFromUrl(input.url, ctx.workspace);
 
-		if (!transparentLinkData) {
+		if (input.transparent && !transparentLinkData) {
 			throw new TRPCError({
 				code: 'BAD_REQUEST',
-				message: `Invalid URL`,
+				message: `Invalid URL for transparent link`,
 			});
 		}
 

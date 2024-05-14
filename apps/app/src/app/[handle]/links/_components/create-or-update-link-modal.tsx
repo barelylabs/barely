@@ -169,8 +169,9 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 	const handleCloseModal = useCallback(async () => {
 		form.reset();
 		focusGridList();
+		setShowLinkModal(false);
 		await apiUtils.link.byWorkspace.invalidate();
-	}, [focusGridList, form, apiUtils.link]);
+	}, [focusGridList, form, apiUtils.link, setShowLinkModal]);
 
 	const LinkIconOrFavicon = useMemo(() => {
 		if (!metaTags?.favicon) return null;

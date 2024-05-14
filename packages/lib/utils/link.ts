@@ -86,12 +86,16 @@ export function getTransparentLinkDataFromUrl(url: string, workspace: SessionWor
 	// an example url: https://www.youtube.com/channel/UC-lHJZR3Gqxm24_Vd_AJ5Yw
 	// in this case, the app would be 'youtube', the appRoute would be 'channel', and the appId would be 'UC-lHJZR3Gqxm24_Vd_AJ5Yw'
 
-	if (!isValidUrl(url)) return null;
+	if (!isValidUrl(url)) {
+		console.log('url is not valid');
+		return null;
+	}
 
 	// get the domain of the url (e.g. 'youtube.com' or 'open.spotify.com')
 	const domain = getDomainWithoutWWW(url);
 
 	if (!domain) {
+		console.log('domain is not valid');
 		return null;
 	}
 
@@ -108,14 +112,6 @@ export function getTransparentLinkDataFromUrl(url: string, workspace: SessionWor
 			app = 'spotify';
 			searchParams.delete('si');
 			console.log('wsSpotArtistId', workspace?.spotifyArtistId);
-			// const isCurrentArtistPage =
-			// 	pathname.startsWith('/artist/') &&
-			// 	pathname.split('/')[2] === workspace?.spotifyArtistId;
-
-			// if (isCurrentArtistPage) {
-			// 	pathname = '';
-			// }
-
 			break;
 		}
 
