@@ -309,6 +309,9 @@ importers:
       '@vercel/edge':
         specifier: ^0.1.2
         version: 0.1.2
+      follow-redirects:
+        specifier: ^1.15.6
+        version: 1.15.6
       html-escaper:
         specifier: ^3.0.3
         version: 3.0.3
@@ -777,8 +780,8 @@ importers:
         specifier: ^0.10.1
         version: 0.10.1(typescript@5.4.4)(zod@3.23.8)
       '@trigger.dev/sdk':
-        specifier: 3.0.0-beta.29
-        version: 3.0.0-beta.29(typescript@5.4.4)
+        specifier: 3.0.0-beta.31
+        version: 3.0.0-beta.31(typescript@5.4.4)
       '@trpc/react-query':
         specifier: 11.0.0-rc.334
         version: 11.0.0-rc.334(@tanstack/react-query@5.25.0)(@trpc/client@11.0.0-rc.334)(@trpc/server@11.0.0-rc.334)(react-dom@18.2.0)(react@18.2.0)
@@ -821,6 +824,9 @@ importers:
       fast-xml-parser:
         specifier: ^4.3.2
         version: 4.3.3
+      follow-redirects:
+        specifier: ^1.15.6
+        version: 1.15.6
       jotai:
         specifier: ^2.6.1
         version: 2.6.3(@types/react@18.2.48)(react@18.2.0)
@@ -921,6 +927,9 @@ importers:
       '@polyscale/serverless-js':
         specifier: ^1.4.0
         version: 1.4.0
+      '@types/follow-redirects':
+        specifier: 1.14.4
+        version: 1.14.4
       '@types/html-escaper':
         specifier: ^3.0.1
         version: 3.0.2
@@ -959,7 +968,7 @@ importers:
         version: 7.4.1
       drizzle-kit:
         specifier: ^0.20.17
-        version: 0.20.17
+        version: 0.20.18
       encoding:
         specifier: ^0.1.13
         version: 0.1.13
@@ -982,8 +991,8 @@ importers:
         specifier: ^7.45.4
         version: 7.49.3(react@18.2.0)
       trigger.dev:
-        specifier: 3.0.0-beta.29
-        version: 3.0.0-beta.29(@types/react@18.2.48)
+        specifier: 3.0.0-beta.31
+        version: 3.0.0-beta.31(@types/react@18.2.48)
       typescript:
         specifier: ^5.4.3
         version: 5.4.4
@@ -5363,13 +5372,13 @@ packages:
     engines: {node: '>=18.14.1'}
     dev: true
 
-  /@hono/zod-validator@0.2.1(hono@4.2.9)(zod@3.23.8):
+  /@hono/zod-validator@0.2.1(hono@4.3.6)(zod@3.23.8):
     resolution: {integrity: sha512-HFoxln7Q6JsE64qz2WBS28SD33UB2alp3aRKmcWnNLDzEL1BLsWfbdX6e1HIiUprHYTIXf5y7ax8eYidKUwyaA==}
     peerDependencies:
       hono: '>=3.9.0'
       zod: ^3.19.1
     dependencies:
-      hono: 4.2.9
+      hono: 4.3.6
       zod: 3.23.8
     dev: true
 
@@ -11627,15 +11636,15 @@ packages:
       - tailwindcss
     dev: false
 
-  /@trigger.dev/core-backend@3.0.0-beta.29:
-    resolution: {integrity: sha512-Sr1bx+h5vo5XQw/NgLa8hKmDatKjKLcNbQyvZZ8J7ZAmy1907DZB5MbqCH3E6zOv+Ss9ae81gewJpa5qiENWYw==}
+  /@trigger.dev/core-backend@3.0.0-beta.31:
+    resolution: {integrity: sha512-t+FvuMsMG2lH53sfJRwLFjplXOkjaLEpmb6Rh4Ad1QHBXRGK1FEPEGZkfqp6W2ShPfb+SI7eqdUVgpztaNu73A==}
     engines: {node: '>=18.0.0'}
     dependencies:
       '@opentelemetry/api': 1.8.0
     dev: false
 
-  /@trigger.dev/core@3.0.0-beta.29:
-    resolution: {integrity: sha512-otn2u+THyUMWRGBAJiUXdg0eVa/8ZbMemBa1Sly3gSlL17EwGLKTruZu7ylfmZHrD6u33kr5gIuja793L800yQ==}
+  /@trigger.dev/core@3.0.0-beta.31:
+    resolution: {integrity: sha512-5jXb1kL7MvdUFxNsug1SG6VxzpJqPxxcseBPriyVGWWyS+MSieaDro5k6otjHowRoORaQraiJfIbfTOhWxN/nA==}
     engines: {node: '>=18.0.0'}
     dependencies:
       '@google-cloud/precise-date': 4.0.0
@@ -11662,15 +11671,15 @@ packages:
       - supports-color
       - utf-8-validate
 
-  /@trigger.dev/sdk@3.0.0-beta.29(typescript@5.4.4):
-    resolution: {integrity: sha512-frbBdb62fbDh8qfhx3MK0aHhuuOJufE3yIEnBYtyC2yPfhOeKq2qZlr5dPf0Y0V4b1Cxf8DfbWe9AWHqhj6OYQ==}
+  /@trigger.dev/sdk@3.0.0-beta.31(typescript@5.4.4):
+    resolution: {integrity: sha512-0Gb2UjSeHvGR3pMB71xZzg0B3ixtapEZziVekz+ldaF+1/o4Yv3bDrqEbvqZ1BiV3ieiGEBAukU3TDFbEmLy8w==}
     engines: {node: '>=18.0.0'}
     dependencies:
       '@opentelemetry/api': 1.8.0
       '@opentelemetry/api-logs': 0.48.0
       '@opentelemetry/semantic-conventions': 1.24.0
-      '@trigger.dev/core': 3.0.0-beta.29
-      '@trigger.dev/core-backend': 3.0.0-beta.29
+      '@trigger.dev/core': 3.0.0-beta.31
+      '@trigger.dev/core-backend': 3.0.0-beta.31
       chalk: 5.3.0
       cronstrue: 2.49.0
       debug: 4.3.4
@@ -11898,6 +11907,12 @@ packages:
       '@types/qs': 6.9.11
       '@types/serve-static': 1.15.5
     dev: false
+
+  /@types/follow-redirects@1.14.4:
+    resolution: {integrity: sha512-GWXfsD0Jc1RWiFmMuMFCpXMzi9L7oPDVwxUnZdg89kDNnqsRfUKXEtUYtA98A6lig1WXH/CYY/fvPW9HuN5fTA==}
+    dependencies:
+      '@types/node': 20.12.8
+    dev: true
 
   /@types/hast@2.3.9:
     resolution: {integrity: sha512-pTHyNlaMD/oKJmS+ZZUyFUcsZeBZpC0lmGquw98CqRVNgAdJZJeD7GoeLiT6Xbx5rU9VCjSt0RwEvDgzh4obFw==}
@@ -13399,7 +13414,7 @@ packages:
   /axios@0.26.1:
     resolution: {integrity: sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==}
     dependencies:
-      follow-redirects: 1.15.5
+      follow-redirects: 1.15.6
     transitivePeerDependencies:
       - debug
     dev: false
@@ -13407,7 +13422,7 @@ packages:
   /axios@1.6.7:
     resolution: {integrity: sha512-/hDJGff6/c7u0hDkvkGxR/oy6CbCs8ziCsC7SqmhjfozqiJGc8Z11wrv9z9lYfY4K8l+H9TpjcMDX0xOZmx+RA==}
     dependencies:
-      follow-redirects: 1.15.5
+      follow-redirects: 1.15.6
       form-data: 4.0.0
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
@@ -15262,13 +15277,13 @@ packages:
       wordwrap: 1.0.0
     dev: true
 
-  /drizzle-kit@0.20.17:
-    resolution: {integrity: sha512-mLVDS4nXmO09wFVlzGrdshWnAL+U9eQGC5zRs6hTN6Q9arwQGWU2XnZ17I8BM8Quau8CQRx3Ms6VPgRWJFVp7Q==}
+  /drizzle-kit@0.20.18:
+    resolution: {integrity: sha512-fLTwcnLqtBxGd+51H/dEm9TC0FW6+cIX/RVPyNcitBO77X9+nkogEfMAJebpd/8Yl4KucmePHRYRWWvUlW0rqg==}
     hasBin: true
     dependencies:
       '@esbuild-kit/esm-loader': 2.6.5
       '@hono/node-server': 1.11.1
-      '@hono/zod-validator': 0.2.1(hono@4.2.9)(zod@3.23.8)
+      '@hono/zod-validator': 0.2.1(hono@4.3.6)(zod@3.23.8)
       camelcase: 7.0.1
       chalk: 5.3.0
       commander: 9.5.0
@@ -15277,7 +15292,7 @@ packages:
       esbuild-register: 3.5.0(esbuild@0.19.12)
       glob: 8.1.0
       hanji: 0.0.5
-      hono: 4.2.9
+      hono: 4.3.6
       json-diff: 0.9.0
       minimatch: 7.4.6
       semver: 7.5.4
@@ -17059,8 +17074,8 @@ packages:
       readable-stream: 2.3.8
     dev: true
 
-  /follow-redirects@1.15.5:
-    resolution: {integrity: sha512-vSFWUON1B+yAw1VN4xMfxgn5fTUiaOzAJCKBwIIgT/+7CuGy9+r+5gITvP62j3RmaD5Ph65UaERdOSRGUzZtgw==}
+  /follow-redirects@1.15.6:
+    resolution: {integrity: sha512-wWN62YITEaOpSK584EZXJafH1AGpO8RVgElfkuXbTOrPX4fIfOyEpW/CsiNd8JdYrAoOvafRTOEnvsO++qCqFA==}
     engines: {node: '>=4.0'}
     peerDependencies:
       debug: '*'
@@ -17884,8 +17899,8 @@ packages:
       react-is: 16.13.1
     dev: false
 
-  /hono@4.2.9:
-    resolution: {integrity: sha512-59FAv52UxDWUt/NlC0NzrRCjeVCThUnVlqlrKYm+k80XujBu6uJwBIa5gACKKZWobjA0MJ6Vds0I3URKf383Cw==}
+  /hono@4.3.6:
+    resolution: {integrity: sha512-2IqXwrxWF4tG2AR7b5tMYn+KEnWK8UvdC/NUSbOKWj/Kj11OJqel58FxyiXLK5CcKLiL8aGtTe4lkBKXyaHMBQ==}
     engines: {node: '>=16.0.0'}
     dev: true
 
@@ -25228,8 +25243,8 @@ packages:
     hasBin: true
     dev: true
 
-  /trigger.dev@3.0.0-beta.29(@types/react@18.2.48):
-    resolution: {integrity: sha512-6nMgDdFzkLXE2sCyCTR26FcmOXLZAfkMl+gVIPC3dSQiFWC3ILsvet/ZSt/5kQQDqa1ozwVMEt9uoIXFmQphYQ==}
+  /trigger.dev@3.0.0-beta.31(@types/react@18.2.48):
+    resolution: {integrity: sha512-OdFvKOja85wz7949te9K7RtrLgUvdnINQrLQlmKUbYl5+eXxrMsMGJR8dzO22LNbH732SVktQvfKchEXdA8dhQ==}
     engines: {node: '>=18.0.0'}
     hasBin: true
     dependencies:
@@ -25248,7 +25263,7 @@ packages:
       '@opentelemetry/sdk-trace-base': 1.24.0(@opentelemetry/api@1.8.0)
       '@opentelemetry/sdk-trace-node': 1.24.0(@opentelemetry/api@1.8.0)
       '@opentelemetry/semantic-conventions': 1.24.0
-      '@trigger.dev/core': 3.0.0-beta.29
+      '@trigger.dev/core': 3.0.0-beta.31
       '@types/degit': 2.8.6
       chalk: 5.3.0
       chokidar: 3.5.3

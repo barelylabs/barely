@@ -70,6 +70,7 @@ export const linkRoutingSchema = insertLinkSchema.pick({
 	url: true,
 	appleScheme: true,
 	androidScheme: true,
+	externalAppLinkUrl: true,
 });
 
 export type LinkRoutingProps = z.infer<typeof linkRoutingSchema>;
