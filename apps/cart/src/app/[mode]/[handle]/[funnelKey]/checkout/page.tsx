@@ -44,9 +44,12 @@ export default async function CartPage({
 	console.log('checkoutPageServer >> initialShipTo', shipTo);
 
 	console.log('checkoutPageServer >> userAgent', headersList.get('user-agent'));
-
 	console.log('checkoutPageServer >> device', headersList.get('device'));
 	console.log('checkoutPageServer >> browser', headersList.get('browser'));
+	console.log(
+		'checkoutPageServer >> all headers',
+		Object.fromEntries(headersList.entries()),
+	);
 
 	const initialData =
 		cartId ?
