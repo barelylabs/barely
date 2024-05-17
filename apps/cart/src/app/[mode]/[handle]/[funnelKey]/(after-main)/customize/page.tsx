@@ -36,11 +36,11 @@ export default async function UpsellPage({
 		return null;
 	}
 
-	// log a success checkout conversion event
-	await cartApi.logEvent({
-		cartId,
-		event: cart.addedBump ? 'cart_purchaseMainWithBump' : 'cart_purchaseMainWithoutBump',
-	});
+	// log a success checkout conversion event >> we do this in the stripe webhook now
+	// await cartApi.logEvent({
+	// 	cartId,
+	// 	event: cart.addedBump ? 'cart_purchaseMainWithBump' : 'cart_purchaseMainWithoutBump',
+	// });
 
 	if (
 		mode === 'live' &&

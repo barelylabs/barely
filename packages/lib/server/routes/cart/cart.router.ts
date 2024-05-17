@@ -91,6 +91,7 @@ export const cartRouter = createTRPCRouter({
 			const { id, handle, funnelKey, ...update } = input;
 
 			console.log(' trpc.cart.updateCheckoutFromCheckout >> visitor', ctx.visitor);
+
 			const cart = await getCartById(id, handle, funnelKey);
 			if (!cart) throw new TRPCError({ code: 'NOT_FOUND', message: 'Cart not found' });
 
@@ -310,7 +311,7 @@ export const cartRouter = createTRPCRouter({
 					cart,
 					cartFunnel: funnel,
 					type: 'cart_purchaseUpsell',
-					...ctx.visitor,
+					visitor: ctx.visitor,
 				});
 			}
 
@@ -366,12 +367,12 @@ export const cartRouter = createTRPCRouter({
 
 			cart.stage = 'upsellDeclined';
 
-			if (ctx.visitor?.ip) {
+			if (!!ctx.visitor?.ip || !!cart.visitorIp) {
 				await recordCartEvent({
 					cart,
 					cartFunnel: funnel,
 					type: 'cart_declineUpsell',
-					...ctx.visitor,
+					visitor: ctx.visitor,
 				});
 			}
 
@@ -424,12 +425,37 @@ export const cartRouter = createTRPCRouter({
 
 			const cartFunnel = cart.funnel ?? raise('funnel not found');
 
+			if (!ctx.visitor?.ip && !cart.visitorIp) {
+				console.log(
+					`no visitor ip to log cart event [${input.event}] for cart ${input.cartId}. visitor >> `,
+					ctx.visitor,
+				);
+				return;
+			}
+
 			console.log('preparing to record cart event', cart.id, input.event, ctx.visitor);
+
+			const updateCart: UpdateCart = { id: cart.id };
+
+			if (!cart.visitorIp) updateCart.visitorIp = ctx.visitor.ip;
+			if (!cart.visitorGeo) updateCart.visitorGeo = ctx.visitor.geo;
+			if (!cart.visitorUserAgent) updateCart.visitorUserAgent = ctx.visitor.userAgent;
+			if (!cart.visitorReferer) updateCart.visitorReferer = ctx.visitor.referer;
+			if (!cart.visitorRefererUrl) updateCart.visitorRefererUrl = ctx.visitor.referer_url;
+
+			if (
+				Object.keys(updateCart).some(
+					key => key !== 'id' && updateCart[key as keyof UpdateCart] !== undefined,
+				)
+			) {
+				await ctx.db.pool.update(Carts).set(updateCart).where(eq(Carts.id, cart.id));
+			}
+
 			await recordCartEvent({
 				cart,
 				cartFunnel,
 				type: input.event,
-				...ctx.visitor,
+				visitor: ctx.visitor,
 			});
 		}),
 });

@@ -8,6 +8,7 @@ import { isProduction } from '../../../utils/environment';
 import { raise } from '../../../utils/raise';
 import { db } from '../../db';
 import { stripe } from '../../stripe';
+import { cartApi } from '../cart/cart.api.server';
 import {
 	createOrderIdForCart,
 	getCartById,
@@ -68,6 +69,12 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 		preChargeCartStage === 'checkoutAbandoned'
 	) {
 		console.log('this is the first payment since the cart was created');
+
+		await cartApi.logEvent({
+			cartId: prevCart.id,
+			event:
+				prevCart.addedBump ? 'cart_purchaseMainWithBump' : 'cart_purchaseMainWithoutBump',
+		});
 
 		const updateCart: UpdateCart = { id: prevCart.id };
 

@@ -42,7 +42,6 @@ export default async function CartPage({
 		city: isDevelopment() ? 'New York' : headersList.get('x-vercel-ip-city'),
 	};
 	console.log('checkoutPageServer >> initialShipTo', shipTo);
-
 	console.log('checkoutPageServer >> userAgent', headersList.get('user-agent'));
 	console.log('checkoutPageServer >> device', headersList.get('device'));
 	console.log('checkoutPageServer >> browser', headersList.get('browser'));
