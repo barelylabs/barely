@@ -53,6 +53,18 @@ export const createTRPCContext = (opts: {
 
 	// console.log('opts.visitor', opts.visitor);
 
+	// const visitor = env.VERCEL_ENV === 'development' ? DEFAULT_VISITOR_INFO : {
+	//     ip: opts.visitor?.ip ?? opts.headers.get('x-forwarded-for') ?? opts.headers.get('x-vercel-ip') ?? 'Unknown',
+	//     geo: {
+	//         latitude: opts.visitor?.geo.latitude ?? parseFloat(opts.headers.get('x-vercel-ip-latitude') ?? '0'),
+	//         longitude: opts.visitor?.geo.longitude ?? parseFloat(opts.headers.get('x-vercel-ip-longitude') ?? '0'),
+	//         city: opts.visitor?.geo.city ?? opts.headers.get('x-vercel-ip-city') ?? 'Unknown',
+	//         country: opts.visitor?.geo.country ?? opts.headers.get('x-vercel-ip-country') ?? 'Unknown',
+	//         region: opts.visitor?.geo.region ?? opts.headers.get('x-vercel-ip-region') ?? 'Unknown',
+	//     },
+	//     userAgent: opts.visitor?.userAgent ?? opts.headers.g,
+	// };
+
 	const context = {
 		// auth
 		session: opts.session,

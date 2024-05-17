@@ -56,7 +56,6 @@ export const Carts = pgTable(
 		visitorIsBot: boolean('visitorIsBot').default(false),
 		visitorReferer: varchar('visitorReferer', { length: 255 }),
 		visitorRefererUrl: varchar('visitorRefererUrl', { length: 255 }),
-		visitorHref: varchar('visitorHref', { length: 255 }),
 
 		// stripe (on creation)
 		checkoutStripePaymentIntentId: varchar('checkoutStripePaymentIntentId', {

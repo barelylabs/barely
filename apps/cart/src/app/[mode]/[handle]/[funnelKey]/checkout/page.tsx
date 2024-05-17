@@ -43,6 +43,11 @@ export default async function CartPage({
 	};
 	console.log('checkoutPageServer >> initialShipTo', shipTo);
 
+	console.log('checkoutPageServer >> userAgent', headersList.get('user-agent'));
+
+	console.log('checkoutPageServer >> device', headersList.get('device'));
+	console.log('checkoutPageServer >> browser', headersList.get('browser'));
+
 	const initialData =
 		cartId ?
 			cartApi.byIdAndParams({ id: cartId, handle, funnelKey })
