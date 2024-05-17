@@ -367,14 +367,14 @@ export const cartRouter = createTRPCRouter({
 
 			cart.stage = 'upsellDeclined';
 
-			if (!!ctx.visitor?.ip || !!cart.visitorIp) {
-				await recordCartEvent({
-					cart,
-					cartFunnel: funnel,
-					type: 'cart_declineUpsell',
-					visitor: ctx.visitor,
-				});
-			}
+			await recordCartEvent({
+				cart,
+				cartFunnel: funnel,
+				type: 'cart_declineUpsell',
+				visitor: ctx.visitor,
+			});
+			// if (!!ctx.visitor?.ip || !!cart.visitorIp) {
+			// }
 
 			await sendCartReceiptEmail({
 				...cart,
@@ -407,13 +407,13 @@ export const cartRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ input, ctx }) => {
-			if (!ctx.visitor?.ip) {
-				console.log(
-					`no visitor ip to log cart event [${input.event}] for cart ${input.cartId}. visitor >> `,
-					ctx.visitor,
-				);
-				return;
-			}
+			// if (!ctx.visitor?.ip) {
+			// 	console.log(
+			// 		`no visitor ip to log cart event [${input.event}] for cart ${input.cartId}. visitor >> `,
+			// 		ctx.visitor,
+			// 	);
+			// 	return;
+			// }
 
 			const cart =
 				(await ctx.db.pool.query.Carts.findFirst({
@@ -437,16 +437,19 @@ export const cartRouter = createTRPCRouter({
 
 			const updateCart: UpdateCart = { id: cart.id };
 
-			if (!cart.visitorIp) updateCart.visitorIp = ctx.visitor.ip;
-			if (!cart.visitorGeo) updateCart.visitorGeo = ctx.visitor.geo;
-			if (!cart.visitorUserAgent) updateCart.visitorUserAgent = ctx.visitor.userAgent;
-			if (!cart.visitorReferer) updateCart.visitorReferer = ctx.visitor.referer;
-			if (!cart.visitorRefererUrl) updateCart.visitorRefererUrl = ctx.visitor.referer_url;
+			if (!cart.visitorIp) updateCart.visitorIp = ctx.visitor?.ip;
+			if (!cart.visitorGeo) updateCart.visitorGeo = ctx.visitor?.geo;
+			if (!cart.visitorUserAgent) updateCart.visitorUserAgent = ctx.visitor?.userAgent;
+			if (!cart.visitorReferer) updateCart.visitorReferer = ctx.visitor?.referer;
+			if (!cart.visitorRefererUrl)
+				updateCart.visitorRefererUrl = ctx.visitor?.referer_url;
 
 			if (
-				Object.keys(updateCart).some(
-					key => key !== 'id' && updateCart[key as keyof UpdateCart] !== undefined,
-				)
+				!!updateCart.visitorIp ||
+				!!updateCart.visitorGeo ||
+				!!updateCart.visitorUserAgent ||
+				!!updateCart.visitorReferer ||
+				!!updateCart.visitorRefererUrl
 			) {
 				await ctx.db.pool.update(Carts).set(updateCart).where(eq(Carts.id, cart.id));
 			}
