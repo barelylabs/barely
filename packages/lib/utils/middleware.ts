@@ -34,7 +34,14 @@ export const detectBot = (req: NextRequest) => {
 export function parseGeo(req: NextRequest) {
 	return env.VERCEL_ENV === 'development' ?
 			getRandomGeoData()
-		:	nextGeoSchema.parse(req.geo);
+		:	nextGeoSchema.parse({
+				country: req.geo?.country ?? req.headers.get('x-vercel-ip-country') ?? 'US',
+				region: req.geo?.region ?? req.headers.get('x-vercel-ip-country-region') ?? 'NY',
+				city: req.geo?.city ?? req.headers.get('x-vercel-ip-city') ?? 'New York',
+				latitude: req.geo?.latitude ?? req.headers.get('x-vercel-ip-latitude') ?? 40.7128,
+				longitude:
+					req.geo?.longitude ?? req.headers.get('x-vercel-ip-longitude') ?? -74.006,
+			});
 }
 
 export function parseUserAgent(req: NextRequest) {
