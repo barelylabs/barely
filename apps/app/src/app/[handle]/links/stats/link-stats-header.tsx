@@ -2,6 +2,7 @@
 
 import type { StatDateRange } from '@barely/lib/server/routes/stat/stat.schema';
 import { Suspense } from 'react';
+import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
 import { statDateRange } from '@barely/lib/server/routes/stat/stat.schema';
 import { api } from '@barely/server/api/react';
 
@@ -17,8 +18,6 @@ import { Skeleton } from '@barely/ui/elements/skeleton';
 import { Text } from '@barely/ui/elements/typography';
 
 import { getShortLinkUrlFromLink } from '@barely/utils/link';
-
-import { useWebEventStatFilters } from '~/app/[handle]/links/stats/use-stat-filters';
 
 const dateRangeOptions: StatDateRange[] = ['1d', '1w', '28d'];
 

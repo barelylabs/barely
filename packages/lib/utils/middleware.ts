@@ -1,9 +1,11 @@
 import type { NextRequest } from 'next/server';
 import { userAgent } from 'next/server';
 import { ipAddress } from '@vercel/edge';
+import { z } from 'zod';
 
 import { env } from '../env';
 import {
+	formattedUserAgentSchema,
 	nextGeoSchema,
 	nextUserAgentToFormattedSchema,
 } from '../server/next/next.schema';
@@ -32,7 +34,14 @@ export const detectBot = (req: NextRequest) => {
 export function parseGeo(req: NextRequest) {
 	return env.VERCEL_ENV === 'development' ?
 			getRandomGeoData()
-		:	nextGeoSchema.parse(req.geo);
+		:	nextGeoSchema.parse({
+				country: req.geo?.country ?? req.headers.get('x-vercel-ip-country') ?? 'US',
+				region: req.geo?.region ?? req.headers.get('x-vercel-ip-country-region') ?? 'NY',
+				city: req.geo?.city ?? req.headers.get('x-vercel-ip-city') ?? 'New York',
+				latitude: req.geo?.latitude ?? req.headers.get('x-vercel-ip-latitude') ?? 40.7128,
+				longitude:
+					req.geo?.longitude ?? req.headers.get('x-vercel-ip-longitude') ?? -74.006,
+			});
 }
 
 export function parseUserAgent(req: NextRequest) {
@@ -50,23 +59,49 @@ export function parseReferer(req: NextRequest) {
 	return { referer, referer_url };
 }
 
+export const visitorInfoSchema = z.object({
+	ip: z.string(),
+	// geo: nextGeoSchema.required({
+	// 	latitude: true,
+	// 	longitude: true,
+	// 	city: true,
+	// 	country: true,
+	// 	region: true,
+	// }),
+	geo: nextGeoSchema,
+	userAgent: formattedUserAgentSchema,
+	isBot: z.boolean(),
+	referer: z.string().nullable(),
+	referer_url: z.string().nullable(),
+	href: z.string(),
+});
+export type VisitorInfo = z.infer<typeof visitorInfoSchema>;
+
 export function parseReqForVisitorInfo(req: NextRequest) {
 	const ip = parseIp(req);
 	const geo = parseGeo(req);
-	const ua = parseUserAgent(req);
+	const userAgent = parseUserAgent(req);
 	const isBot = detectBot(req);
 	const href = req.nextUrl.href;
 	const { referer, referer_url } = parseReferer(req);
 
-	return { ip, geo, ua, isBot, referer, referer_url, href };
+	return {
+		ip,
+		geo,
+		userAgent,
+		isBot,
+		referer,
+		referer_url,
+		href,
+	} satisfies VisitorInfo;
 }
 
-export type VisitorInfo = ReturnType<typeof parseReqForVisitorInfo>;
+// export type VisitorInfo = ReturnType<typeof parseReqForVisitorInfo>;
 
 export const DEFAULT_VISITOR_INFO: VisitorInfo = {
 	ip: env.LOCALHOST_IP,
 	geo: getRandomGeoData(),
-	ua: {
+	userAgent: {
 		ua: 'Unknown',
 		browser: 'Unknown',
 		browser_version: 'Unknown',

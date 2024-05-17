@@ -93,4 +93,12 @@ export const nextGeoSchema = z.object({
 	region: z.string().nullish().default('Unknown'),
 });
 
+// export const formattedNextGeoSchema = z.object({
+// 	city: z.string().nullable.default('Unknown'),
+// 	country: z.string().default('Unknown'),
+// 	latitude: z.string().default('Unknown'),
+// 	longitude: z.string().default('Unknown'),
+// 	region: z.string().default('Unknown'),
+// });
+
 export type NextGeo = z.infer<typeof nextGeoSchema>;

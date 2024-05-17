@@ -4,6 +4,7 @@ import { sendEmail } from '@barely/email';
 import ReceiptEmailTemplate from '@barely/email/src/templates/cart/receipt';
 import { and, count, eq, isNotNull } from 'drizzle-orm';
 
+import type { VisitorInfo } from '../../../utils/middleware';
 import type { ShippingEstimateProps } from '../../shipengine/shipengine.endpts';
 import type { Fan } from '../fan/fan.schema';
 import type { Product } from '../product/product.schema';
@@ -80,14 +81,21 @@ export function getPublicFunnelFromServerFunnel(funnel: ServerFunnel) {
 export type PublicFunnel = ReturnType<typeof getPublicFunnelFromServerFunnel>;
 
 /* create cart */
-export async function createMainCartFromFunnel(
-	funnel: ServerFunnel,
+export async function createMainCartFromFunnel({
+	funnel,
+	shipTo,
+	landingPageId,
+	visitorInfo,
+}: {
+	funnel: ServerFunnel;
 	shipTo?: {
 		country: string | null;
 		state: string | null;
 		city: string | null;
-	},
-) {
+	};
+	landingPageId?: string | null;
+	visitorInfo?: VisitorInfo;
+}) {
 	const stripeAccount =
 		isProduction() ?
 			funnel.workspace.stripeConnectAccountId
@@ -126,6 +134,11 @@ export async function createMainCartFromFunnel(
 		workspaceId: funnel.workspace.id,
 		cartFunnelId: funnel.id,
 		stage: 'checkoutCreated',
+		landingPageId,
+		// visitor
+		visitorIp: visitorInfo?.ip,
+		visitorGeo: visitorInfo?.geo,
+		visitorUserAgent: visitorInfo?.userAgent,
 		// stripe
 		checkoutStripePaymentIntentId: paymentIntent.id,
 		checkoutStripeClientSecret: paymentIntent.client_secret,

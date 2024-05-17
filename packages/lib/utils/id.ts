@@ -16,12 +16,12 @@ const prefixes = {
 	bio: 'bio',
 	pressKit: 'pk',
 	webSession: 'web_session',
-	// carts
+	// merch
+	product: 'prod',
+	cartFunnel: 'cart_funnel',
 	cart: 'cart',
 	cartFulfillment: 'cart_fulfill',
 	fan: 'fan',
-	product: 'prod',
-	funnel: 'funnel',
 	// assets
 	file: 'file',
 	playlist: 'pl',

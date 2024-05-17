@@ -800,6 +800,9 @@ importers:
       '@upstash/redis':
         specifier: ^1.24.3
         version: 1.28.2
+      '@vercel/functions':
+        specifier: ^1.0.2
+        version: 1.0.2
       axios:
         specifier: ^1.4.0
         version: 1.6.7
@@ -12480,6 +12483,11 @@ packages:
       - encoding
       - supports-color
     dev: true
+
+  /@vercel/functions@1.0.2:
+    resolution: {integrity: sha512-j3udyHOv/05Y8o3WQ/ANMWa1aYagsY5B3ouImiwgYsz5z4CBUHTY5dk74oQAXYr+bgoVDpdDlmxkpnxGzKEdLQ==}
+    engines: {node: '>= 16'}
+    dev: false
 
   /@vercel/gatsby-plugin-vercel-analytics@1.0.11:
     resolution: {integrity: sha512-iTEA0vY6RBPuEzkwUTVzSHDATo1aF6bdLLspI68mQ/BTbi5UQEGjpjyzdKOVcSYApDtFU6M6vypZ1t4vIEnHvw==}

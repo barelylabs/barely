@@ -4,34 +4,22 @@ import {
 	getIsoDateFromDate,
 	getIsoDateRangeFromDescription,
 } from '../../../utils/format-date';
+import { queryStringEnumArrayToCommaString } from '../../../utils/zod-helpers';
 import { tinybird } from '../../tinybird/client';
+import { WEB_EVENT_TYPES } from '../event/event.tb';
 
 export const statDateRange = z.enum(['1d', '1w', '28d', '1y']);
 export type StatDateRange = z.infer<typeof statDateRange>;
 
-// export const timeseriesDateRangeSchema = z
-// 	.object({
-// 		dateRange: statDateRange.optional(),
-// 		date_from: z.coerce.date().optional(),
-// 		date_to: z.coerce.date().optional(),
-// 	})
-// 	.optional()
-
-// 	.transform(data => {
-// 		if (data?.date_from && data.date_to) {
-// 			return {
-// 				date_from: getIsoDateFromDate(data.date_from),
-// 				date_to: getIsoDateFromDate(data.date_to),
-// 			};
-// 		}
-
-// 		return getIsoDateRangeFromDescription(data?.dateRange ?? '1w');
-// 	});
-
 // standard pipe params
 export const stdStatPipeParamsSchema = z.object({
+	handle: z.string().optional(),
 	workspaceId: z.string().optional(),
 	assetId: z.string().optional(),
+	// types: z
+	// 	.array(z.enum(['transparentLinkClick', 'shortLinkClick', 'cart_initiateCheckout']))
+	// 	.optional(),
+	types: queryStringEnumArrayToCommaString(WEB_EVENT_TYPES).optional(),
 	date_from: z.string(),
 	date_to: z.string(),
 
@@ -107,7 +95,7 @@ export const stdWebEventQueryToPipeParamsSchema =
 export const webHitTimeseriesPipeDataSchema = z.object({
 	date: z.coerce.date(),
 	visits: z.number(),
-	pageviews: z.number(),
+	events: z.number(),
 	bounce_rate: z.number().nullable(),
 	avg_session_sec: z.number(),
 });
@@ -134,6 +122,9 @@ export const pipe_webSourcesTopBrowsers = tinybird.buildPipe({
 	pipe: 'web_sources__top_browsers',
 	parameters: stdWebEventPipeParamsSchema,
 	data: topBrowsersPipeDataSchema,
+	opts: {
+		logParams: true,
+	},
 });
 
 // device

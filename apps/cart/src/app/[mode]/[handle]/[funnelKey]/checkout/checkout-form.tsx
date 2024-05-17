@@ -45,7 +45,10 @@ export function CheckoutForm({
 	shouldWriteToCookie,
 }: {
 	mode: 'preview' | 'live';
-	initialData: Promise<NonNullable<CartRouterOutputs['create']>>;
+	initialData: Promise<
+		| NonNullable<CartRouterOutputs['create']>
+		| NonNullable<CartRouterOutputs['byIdAndParams']>
+	>;
 	shouldWriteToCookie?: boolean;
 }) {
 	const router = useRouter();
@@ -79,8 +82,6 @@ export function CheckoutForm({
 	const elements = useElements();
 
 	const apiUtils = cartApi.useUtils();
-
-	const [paymentAdded, setPaymentAdded] = useState(false);
 
 	const {
 		data: { cart, publicFunnel },
@@ -134,21 +135,42 @@ export function CheckoutForm({
 
 	const { mutateAsync: syncCart } = cartApi.updateCheckoutFromCheckout.useMutation();
 
-	function updateCart(
+	const updateCart = (
 		updateData: Partial<z.infer<typeof updateCheckoutCartFromCheckoutSchema>>,
-	) {
+	) => {
 		mutateCart({
 			id: cart.id,
 			handle: publicFunnel.handle,
 			funnelKey: publicFunnel.key,
 			...updateData,
 		});
-	}
+	};
 
-	const debouncedUpdatePayWhatYouWantPrice = useDebouncedCallback(updateCart, 500);
-	const debouncedUpdateEmail = useDebouncedCallback(updateCart, 500);
-	const debouncedUpdateAddress = useDebouncedCallback(updateCart, 500);
+	// update email
+	const updateEmail = ({ email }: { email: string }) => {
+		updateCart({
+			email,
+		});
+		logEvent({
+			cartId: cart.id,
+			event: 'cart_addEmail',
+		});
+	};
+	const debouncedUpdateEmail = useDebouncedCallback(updateEmail, 500);
 
+	// update address
+	const updateAddress = (
+		data: Partial<z.infer<typeof updateCheckoutCartFromCheckoutSchema>>,
+	) => {
+		updateCart(data);
+		logEvent({
+			cartId: cart.id,
+			event: 'cart_addShippingInfo',
+		});
+	};
+	const debouncedUpdateAddress = useDebouncedCallback(updateAddress, 500);
+
+	// update pay what you want price
 	const updatePayWhatYouWantPrice = async (value: number) => {
 		await apiUtils.byIdAndParams.cancel();
 
@@ -178,6 +200,25 @@ export function CheckoutForm({
 		debouncedUpdatePayWhatYouWantPrice({
 			mainProductPayWhatYouWantPrice: value,
 		});
+
+		logEvent({
+			cartId: cart.id,
+			event: 'cart_updateMainProductPayWhatYouWantPrice',
+		});
+	};
+	const debouncedUpdatePayWhatYouWantPrice = useDebouncedCallback(updateCart, 500);
+
+	// update payment
+	const [paymentAdded, setPaymentAdded] = useState(false);
+
+	const handlePaymentAdded = () => {
+		if (!paymentAdded) {
+			logEvent({
+				cartId: cart.id,
+				event: 'cart_addPaymentInfo',
+			});
+			setPaymentAdded(true);
+		}
 	};
 
 	/* form */
@@ -427,13 +468,16 @@ export function CheckoutForm({
 							<H size='3'>Payment Information</H>
 							<PaymentElement
 								onChange={e => {
-									if (e.complete && !paymentAdded) {
-										logEvent({
-											cartId: cart.id,
-											event: 'cart_addPaymentInfo',
-										});
-										setPaymentAdded(true);
+									if (e.complete) {
+										handlePaymentAdded();
 									}
+									// if (e.complete && !paymentAdded) {
+									// 	logEvent({
+									// 		cartId: cart.id,
+									// 		event: 'cart_addPaymentInfo',
+									// 	});
+									// 	setPaymentAdded(true);
+									// }
 								}}
 							/>
 							<CheckboxField

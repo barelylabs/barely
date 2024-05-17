@@ -42,7 +42,7 @@ export async function recordLinkClick({
 	href,
 	ip,
 	geo,
-	ua,
+	userAgent: ua,
 	referer,
 	referer_url,
 	isBot,
@@ -153,28 +153,77 @@ export async function recordLinkClick({
 	return true;
 }
 
-interface RecordCartEventProps extends VisitorInfo {
+interface RecordCartEventProps {
 	cart: Cart;
 	cartFunnel: CartFunnel;
 	type: (typeof WEB_EVENT_TYPES__CART)[number];
+	visitor?: VisitorInfo;
 }
 
 export async function recordCartEvent({
 	cart,
 	cartFunnel,
 	type,
-	...parsedReq
+	visitor,
 }: RecordCartEventProps) {
-	if (parsedReq.isBot) return null;
+	const visitorInfo: VisitorInfo = {
+		ip: cart.visitorIp ?? visitor?.ip ?? 'Unknown',
+		geo: {
+			country: cart.visitorGeo?.country ?? visitor?.geo.country ?? 'Unknown',
+			region: cart.visitorGeo?.region ?? visitor?.geo.region ?? 'Unknown',
+			city: cart.visitorGeo?.city ?? visitor?.geo.city ?? 'Unknown',
+			latitude: cart.visitorGeo?.latitude ?? visitor?.geo.latitude ?? 'Unknown',
+			longitude: cart.visitorGeo?.longitude ?? visitor?.geo.longitude ?? 'Unknown',
+		},
+		userAgent: {
+			ua: cart.visitorUserAgent?.ua ?? visitor?.userAgent.ua ?? 'Unknown',
+			browser: cart.visitorUserAgent?.browser ?? visitor?.userAgent.browser ?? 'Unknown',
+			browser_version:
+				cart.visitorUserAgent?.browser_version ??
+				visitor?.userAgent.browser_version ??
+				'Unknown',
+			engine: cart.visitorUserAgent?.engine ?? visitor?.userAgent.engine ?? 'Unknown',
+			engine_version:
+				cart.visitorUserAgent?.engine_version ??
+				visitor?.userAgent.engine_version ??
+				'Unknown',
+			os: cart.visitorUserAgent?.os ?? visitor?.userAgent.os ?? 'Unknown',
+			os_version:
+				cart.visitorUserAgent?.os_version ?? visitor?.userAgent.os_version ?? 'Unknown',
+			device: cart.visitorUserAgent?.device ?? visitor?.userAgent.device ?? 'Unknown',
+			device_vendor:
+				cart.visitorUserAgent?.device_vendor ??
+				visitor?.userAgent.device_vendor ??
+				'Unknown',
+			device_model:
+				cart.visitorUserAgent?.device_model ??
+				visitor?.userAgent.device_model ??
+				'Unknown',
+			cpu_architecture:
+				cart.visitorUserAgent?.cpu_architecture ??
+				visitor?.userAgent.cpu_architecture ??
+				'Unknown',
+			bot: cart.visitorUserAgent?.bot ?? visitor?.userAgent.bot ?? false,
+		},
+		referer: cart.visitorReferer ?? visitor?.referer ?? 'Unknown',
+		referer_url: cart.visitorRefererUrl ?? visitor?.referer_url ?? 'Unknown',
+		isBot: visitor?.isBot ?? false,
+		href: visitor?.href ?? 'Unknown',
+	};
+
+	if (visitorInfo.isBot) return null;
 
 	// deduplication events from the same ip & cartId - only record 1 cart event per ip per cartId per hour
 	const rateLimitPeriod = env.RATE_LIMIT_RECORD_CART_EVENT ?? '1 h';
 
 	const { success } = await ratelimit(10, rateLimitPeriod).limit(
-		`recordCartEvent:${parsedReq.ip}:${cart.id}:${type}`,
+		`recordCartEvent:${visitorInfo.ip}:${cart.id}:${type}`,
 	);
 
-	if (!success) return null;
+	if (!success) {
+		console.log('rate limit exceeded for ', visitorInfo.ip, cart.id, type);
+		return null;
+	}
 
 	const timestamp = new Date(Date.now()).toISOString();
 
@@ -194,12 +243,15 @@ export async function recordCartEvent({
 			await reportEventToMeta({
 				pixelId: metaPixel.id,
 				accessToken: metaPixel.accessToken,
-				url: parsedReq.href,
-				ip: parsedReq.ip,
-				ua: parsedReq.ua.ua,
-				geo: parsedReq.geo,
+				url: visitorInfo.href,
+				ip: visitorInfo.ip,
+				ua: visitorInfo.userAgent.ua,
+				geo: visitorInfo.geo,
 				eventName: metaEvent.eventName,
 				customData: metaEvent.customData,
+			}).catch(err => {
+				console.log('err reporting cart event to meta => ', err);
+				return { reported: false };
 			})
 		:	{ reported: false };
 
@@ -213,20 +265,20 @@ export async function recordCartEvent({
 			workspaceId: cart.workspaceId,
 			assetId: cartFunnel.id,
 			sessionId: cart.id,
-			href: parsedReq.href,
+			href: visitorInfo.href,
 			type,
 			key: cartFunnel.key,
 			// analytics
-			...parsedReq.geo,
-			...parsedReq.ua,
-			referer: parsedReq.referer,
-			referer_url: parsedReq.referer_url,
+			...visitorInfo.geo,
+			...visitorInfo.userAgent,
+			referer: visitorInfo.referer,
+			referer_url: visitorInfo.referer_url,
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
 			// cart specifics
 			...cartEventData,
 		});
 
-		console.log('tinybirdRes => ', tinybirdRes);
+		console.log('tinybirdRes for cart event => ', tinybirdRes);
 	} catch (error) {
 		console.log('error => ', error);
 		throw new Error('ah!');
@@ -265,6 +317,25 @@ function getMetaEventFromCartEvent({
 					value: cart.mainProductPrice,
 				},
 			};
+
+		// case 'cart_addEmail':
+		// 	return {
+		// 		eventName: 'Barely_AddEmail',
+		// 		customData: {
+		// 			content_ids: [cart.mainProductId],
+		// 			content_type: 'product',
+		// 		},
+		// 	};
+
+		// case 'cart_addShippingInfo':
+		// 	return {
+		// 		eventName: 'Barely_AddShippingInfo',
+		// 		customData: {
+		// 			content_ids: [cart.mainProductId],
+		// 			content_type: 'product',
+		// 		},
+		// 	};
+
 		case 'cart_addPaymentInfo':
 			return {
 				eventName: 'AddPaymentInfo',

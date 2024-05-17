@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
 import { api } from '@barely/server/api/react';
 
 import { BarList } from '@barely/ui/charts/bar-list';
@@ -8,8 +9,6 @@ import { Card } from '@barely/ui/elements/card';
 import { BrowserIcon, DeviceIcon, OSIcon } from '@barely/ui/elements/icon';
 import { TabButtons } from '@barely/ui/elements/tab-buttons';
 import { H } from '@barely/ui/elements/typography';
-
-import { useWebEventStatFilters } from '~/app/[handle]/links/stats/use-stat-filters';
 
 export type DeviceTabs = 'Device' | 'Browser' | 'OS';
 

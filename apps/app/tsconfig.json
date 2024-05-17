@@ -19,6 +19,10 @@
 		"tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
 		"module": "esnext"
 	},
-	"include": [".", ".next/types/**/*.ts"],
+	"include": [
+		".",
+		".next/types/**/*.ts",
+		"../../packages/lib/hooks/use-web-event-stat-filters.tsx"
+	],
 	"exclude": ["node_modules"]
 }

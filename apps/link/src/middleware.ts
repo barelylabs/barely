@@ -108,7 +108,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 		await fetch(diceUrl.href, { method: 'POST' });
 	}
 
-	if (visitorInfo.ua.device === 'mobile') {
+	if (visitorInfo.userAgent.device === 'mobile') {
 		switch (true) {
 			case link.url.includes('open.spotify.com'): {
 				console.log('Spotify link detected on mobile');

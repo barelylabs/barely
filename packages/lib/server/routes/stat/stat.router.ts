@@ -1,4 +1,8 @@
-import { createTRPCRouter, publicProcedure } from '../../api/trpc';
+import {
+	createTRPCRouter,
+	publicProcedure,
+	workspaceQueryProcedure,
+} from '../../api/trpc';
 import {
 	pipe_webHitsTimeseries,
 	pipe_webSourcesTopBrowsers,
@@ -24,11 +28,23 @@ export const statRouter = createTRPCRouter({
 				workspaceId: ctx.workspace?.id,
 			});
 
-			console.log('timeseries => ', timeseries);
+			// console.log('timeseries => ', timeseries);
 			return timeseries.data.map(row => ({
 				...row,
-				clicks: row.pageviews,
+				clicks: row.events,
 			}));
+		}),
+
+	webEventTimeseries: workspaceQueryProcedure
+		.input(stdWebEventQueryToPipeParamsSchema)
+		.query(async ({ ctx, input }) => {
+			const timeseries = await pipe_webHitsTimeseries({
+				...input,
+				assetId: 'funnel_7GjPMHVAotXuKDDw',
+				workspaceId: ctx.workspace.id,
+			});
+
+			return timeseries.data;
 		}),
 
 	topBrowsers: publicProcedure
