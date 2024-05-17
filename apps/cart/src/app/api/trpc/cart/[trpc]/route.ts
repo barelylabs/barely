@@ -8,6 +8,12 @@ import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 export { OPTIONS } from '@barely/lib/utils/trpc-route';
 
 const handler = async function (req: NextRequest) {
+	const visitor = parseReqForVisitorInfo(req);
+	console.log('trpc cart visitor >>', visitor);
+
+	const forwaredFor = req.headers.get('x-forwarded-for');
+	console.log('trpc cart forwaredFor >>', forwaredFor);
+
 	const response = await fetchRequestHandler({
 		endpoint: '/api/trpc/cart',
 		router: cartRouter,

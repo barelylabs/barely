@@ -1,7 +1,7 @@
 NODE endpoint
 
 DESCRIPTION >
-    Parsed 'cart_viewMain' events
+    Parsed 'cart_initiateCheckout' events
 
 SQL >
     SELECT
@@ -19,9 +19,10 @@ SQL >
         device,
         browser,
         os,
-        referrer,
+        referer,
 
     FROM web_events
+    
     where
         type IN ('cart_initiateCheckout')
         {% if defined(workspaceId) %}

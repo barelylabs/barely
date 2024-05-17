@@ -33,17 +33,24 @@ export default async function CartPage({
 
 	const cartId = cookies().get(`${handle}.${funnelKey}.cartId`)?.value;
 
+	console.log('checkoutPageServer >> ip', headersList.get('x-vercel-ip'));
+	console.log('checkoutPageServer >> forwardedFor', headersList.get('x-forwarded-for'));
+
+	const shipTo = {
+		country: isDevelopment() ? 'US' : headersList.get('x-vercel-ip-country'),
+		state: isDevelopment() ? 'NY' : headersList.get('x-vercel-ip-country-region'),
+		city: isDevelopment() ? 'New York' : headersList.get('x-vercel-ip-city'),
+	};
+	console.log('checkoutPageServer >> initialShipTo', shipTo);
+
 	const initialData =
 		cartId ?
 			cartApi.byIdAndParams({ id: cartId, handle, funnelKey })
 		:	cartApi.create({
 				handle,
 				funnelKey,
-				shipTo: {
-					country: isDevelopment() ? 'US' : headersList.get('x-vercel-ip-country'),
-					state: isDevelopment() ? 'NY' : headersList.get('x-vercel-ip-country-region'),
-					city: isDevelopment() ? 'New York' : headersList.get('x-vercel-ip-city'),
-				},
+				shipTo,
+				landingPageId: cartParams.data.landingPageId,
 			});
 
 	return (

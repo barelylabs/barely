@@ -20,8 +20,11 @@ SQL >
         os,
         referer
     FROM web_events
-    where
-        type IN ('transparentLinkClick', 'shortLinkClick')
+    where        
+        1=1
+        {% if defined(types) %}
+            AND type IN {{ Array(types, 'String')}}
+        {% end %}
         {% if defined(workspaceId) %}
             AND workspaceId = {{ String(workspaceId) }}
         {% end %}

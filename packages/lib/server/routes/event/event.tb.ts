@@ -28,6 +28,9 @@ export const WEB_EVENT_TYPES__LINK = ['shortLinkClick', 'transparentLinkClick'] 
 export const WEB_EVENT_TYPES__CART = [
 	'cart_viewLandingPage',
 	'cart_initiateCheckout', // ✅
+	'cart_updateMainProductPayWhatYouWantPrice',
+	'cart_addEmail', // ✅ not reported to meta
+	'cart_addShippingInfo', // ✅ not reported to meta
 	'cart_addPaymentInfo', // ✅
 	'cart_addBump', // ✅
 	'cart_removeBump', // ✅ not reported to meta
@@ -37,6 +40,11 @@ export const WEB_EVENT_TYPES__CART = [
 	'cart_declineUpsell', // ✅ not reported to meta
 	'cart_purchaseUpsell', // ✅
 	'cart_viewOrderConfirmation', // ✅ not reported to meta
+] as const;
+
+export const WEB_EVENT_TYPES = [
+	...WEB_EVENT_TYPES__LINK,
+	...WEB_EVENT_TYPES__CART,
 ] as const;
 
 // publish web events

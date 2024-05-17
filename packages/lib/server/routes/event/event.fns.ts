@@ -42,7 +42,7 @@ export async function recordLinkClick({
 	href,
 	ip,
 	geo,
-	ua,
+	userAgent: ua,
 	referer,
 	referer_url,
 	isBot,
@@ -174,7 +174,10 @@ export async function recordCartEvent({
 		`recordCartEvent:${parsedReq.ip}:${cart.id}:${type}`,
 	);
 
-	if (!success) return null;
+	if (!success) {
+		console.log('rate limit exceeded for ', parsedReq.ip, cart.id, type);
+		return null;
+	}
 
 	const timestamp = new Date(Date.now()).toISOString();
 
@@ -196,10 +199,13 @@ export async function recordCartEvent({
 				accessToken: metaPixel.accessToken,
 				url: parsedReq.href,
 				ip: parsedReq.ip,
-				ua: parsedReq.ua.ua,
+				ua: parsedReq.userAgent.ua,
 				geo: parsedReq.geo,
 				eventName: metaEvent.eventName,
 				customData: metaEvent.customData,
+			}).catch(err => {
+				console.log('err reporting cart event to meta => ', err);
+				return { reported: false };
 			})
 		:	{ reported: false };
 
@@ -218,7 +224,7 @@ export async function recordCartEvent({
 			key: cartFunnel.key,
 			// analytics
 			...parsedReq.geo,
-			...parsedReq.ua,
+			...parsedReq.userAgent,
 			referer: parsedReq.referer,
 			referer_url: parsedReq.referer_url,
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
@@ -226,7 +232,7 @@ export async function recordCartEvent({
 			...cartEventData,
 		});
 
-		console.log('tinybirdRes => ', tinybirdRes);
+		console.log('tinybirdRes for cart event => ', tinybirdRes);
 	} catch (error) {
 		console.log('error => ', error);
 		throw new Error('ah!');
@@ -265,6 +271,25 @@ function getMetaEventFromCartEvent({
 					value: cart.mainProductPrice,
 				},
 			};
+
+		// case 'cart_addEmail':
+		// 	return {
+		// 		eventName: 'Barely_AddEmail',
+		// 		customData: {
+		// 			content_ids: [cart.mainProductId],
+		// 			content_type: 'product',
+		// 		},
+		// 	};
+
+		// case 'cart_addShippingInfo':
+		// 	return {
+		// 		eventName: 'Barely_AddShippingInfo',
+		// 		customData: {
+		// 			content_ids: [cart.mainProductId],
+		// 			content_type: 'product',
+		// 		},
+		// 	};
+
 		case 'cart_addPaymentInfo':
 			return {
 				eventName: 'AddPaymentInfo',

@@ -27,7 +27,9 @@ export interface MetaEventProps {
 		| 'AddToCart'
 		| 'AddPaymentInfo'
 		| 'Purchase'
-		| 'Barely_LinkClick';
+		| 'Barely_LinkClick'
+		| 'Barely_AddEmail'
+		| 'Barely_AddShippingInfo';
 	url: string;
 	ip?: string;
 	ua?: string;

@@ -2,12 +2,14 @@ import { relations } from 'drizzle-orm';
 import {
 	boolean,
 	integer,
+	jsonb,
 	pgTable,
 	timestamp,
 	uniqueIndex,
 	varchar,
 } from 'drizzle-orm/pg-core';
 
+import type { NextFormattedUserAgent, NextGeo } from '../../next/next.schema';
 import { dbId, primaryId, timestamps } from '../../../utils/sql';
 import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
 import { Fans } from '../fan/fan.sql';
@@ -46,7 +48,15 @@ export const Carts = pgTable(
 
 		/* 
             🛒 cart checkout (main + bump) 
-    */
+        */
+
+		visitorIp: varchar('visitorIp', { length: 255 }),
+		visitorGeo: jsonb('visitorGeo').$type<Partial<NextGeo>>(),
+		visitorUserAgent: jsonb('visitorUserAgent').$type<Partial<NextFormattedUserAgent>>(),
+		visitorIsBot: boolean('visitorIsBot').default(false),
+		visitorReferer: varchar('visitorReferer', { length: 255 }),
+		visitorRefererUrl: varchar('visitorRefererUrl', { length: 255 }),
+		visitorHref: varchar('visitorHref', { length: 255 }),
 
 		// stripe (on creation)
 		checkoutStripePaymentIntentId: varchar('checkoutStripePaymentIntentId', {

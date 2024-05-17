@@ -2,6 +2,7 @@
 
 import type { BarListBarProps } from '@barely/ui/charts/bar-list';
 import { useState } from 'react';
+import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
 import { api } from '@barely/server/api/react';
 
 import { BarList } from '@barely/ui/charts/bar-list';
@@ -10,8 +11,6 @@ import { TabButtons } from '@barely/ui/elements/tab-buttons';
 import { H } from '@barely/ui/elements/typography';
 
 import { COUNTRIES } from '@barely/utils/constants';
-
-import { useWebEventStatFilters } from '~/app/[handle]/links/stats/use-stat-filters';
 
 export function LinkLocations() {
 	const [tab, setTab] = useState<'Country' | 'City'>('Country');

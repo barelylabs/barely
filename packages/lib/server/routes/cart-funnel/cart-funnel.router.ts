@@ -63,7 +63,7 @@ export const cartFunnelRouter = createTRPCRouter({
 		.mutation(async ({ input, ctx }) => {
 			const funnelData: InsertCartFunnel = {
 				...input,
-				id: newId('funnel'),
+				id: newId('cartFunnel'),
 				workspaceId: ctx.workspace.id,
 				handle: ctx.workspace.handle,
 			};

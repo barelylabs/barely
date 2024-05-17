@@ -94,6 +94,7 @@ export function getAmountsForCheckout(
 
 		bumpProductPrice,
 		bumpProductAmount,
+		bumpShippingPrice,
 		bumpShippingAmount,
 		bumpHandlingAmount,
 		bumpShippingAndHandlingAmount,

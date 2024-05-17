@@ -111,3 +111,34 @@ export const queryStringArraySchema = z
 		if (Array.isArray(a)) return a;
 		return [a];
 	});
+
+export const queryStringArrayToCommaString = z
+	.string()
+	.or(z.array(z.string()))
+	.transform(a => {
+		if (typeof a === 'string') return a;
+		if (Array.isArray(a)) return a.join(',');
+		return a;
+	});
+
+export const queryStringEnumArrayToCommaString = <
+	T extends readonly [string, ...string[]],
+>(
+	enumValues: T,
+) =>
+	z
+		.string()
+		.or(z.array(z.enum(enumValues)))
+		.transform(a => {
+			if (typeof a === 'string') {
+				// convert string to array, check enum, and join array to string
+				const array = a.split(',');
+				const parsedArray = array.map(value => {
+					if (enumValues.includes(value as T[number])) return value;
+					throw new Error(`Invalid enum value: ${value}`);
+				});
+				return parsedArray.join(',');
+			}
+			if (Array.isArray(a)) return a.join(',');
+			return a;
+		});

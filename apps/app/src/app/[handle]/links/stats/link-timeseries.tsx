@@ -1,45 +1,19 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
 import { api } from '@barely/server/api/react';
 
 import { AreaChart } from '@barely/ui/charts/area-chart';
-import { Badge } from '@barely/ui/elements/badge';
 import { Card } from '@barely/ui/elements/card';
 import { Icon } from '@barely/ui/elements/icon';
 import { H, Text } from '@barely/ui/elements/typography';
 
 import { nFormatter } from '@barely/utils/number';
-import { capitalize } from '@barely/utils/text';
 
-import { useWebEventStatFilters } from '~/app/[handle]/links/stats/use-stat-filters';
+import { WebEventFilterBadges } from '~/app/[handle]/_components/filter-badges';
 
 export function LinkTimeseries() {
-	const { filters, removeFilter } = useWebEventStatFilters();
-
-	const formatTimestamp = useCallback(
-		(d: Date) => {
-			switch (filters.dateRange) {
-				// case '1h':
-				// 	return new Date(d).toLocaleDateString('en-us', {
-				// 		hour: 'numeric',
-				// 		minute: 'numeric',
-				// 	});
-				case '1d':
-					return new Date(d).toLocaleDateString('en-us', {
-						month: 'short',
-						day: 'numeric',
-						hour: 'numeric',
-					});
-				default:
-					return new Date(d).toLocaleDateString('en-us', {
-						month: 'short',
-						day: 'numeric',
-					});
-			}
-		},
-		[filters.dateRange],
-	);
+	const { filters, formatTimestamp, badgeFilters } = useWebEventStatFilters();
 
 	const [timeseries] = api.stat.linkTimeseries.useSuspenseQuery(
 		{ ...filters },
@@ -54,29 +28,6 @@ export function LinkTimeseries() {
 
 	const totalClicks = timeseries.reduce((acc, row) => acc + row.clicks, 0);
 
-	const filterBadges = useMemo(() => {
-		return Object.entries(filters)
-			.filter(
-				([key, value]) => value !== undefined && key !== 'assetId' && key !== 'dateRange',
-			)
-			.map(([key, value]) => {
-				const filterKey = key as keyof typeof filters;
-				return (
-					<Badge
-						key={filterKey}
-						className='mr-2'
-						variant='muted'
-						onRemove={() => removeFilter(filterKey)}
-						removeButton
-						rectangle
-					>
-						{filterKey === 'os' ? 'OS' : capitalize(filterKey)}
-						<span className='ml-2 font-bold'>{value.toString()}</span>
-					</Badge>
-				);
-			});
-	}, [filters, removeFilter]);
-
 	return (
 		<Card className='p-6'>
 			<div className='flex flex-row items-center justify-between'>
@@ -89,7 +40,9 @@ export function LinkTimeseries() {
 						TOTAL CLICKS
 					</Text>
 				</div>
-				<div className='flex flex-row justify-between gap-2'>{filterBadges}</div>
+				<div className='flex flex-row justify-between gap-2'>
+					<WebEventFilterBadges filters={badgeFilters} />
+				</div>
 			</div>
 			<AreaChart
 				className='mt-4 h-72 '

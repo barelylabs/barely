@@ -2,18 +2,31 @@ import type { InferSelectModel } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
+import { formattedUserAgentSchema, nextGeoSchema } from '../../next/next.schema';
 import { Carts } from './cart.sql';
 
-export const insertCartSchema = createInsertSchema(Carts);
+export const insertCartSchema = createInsertSchema(Carts, {
+	visitorGeo: nextGeoSchema,
+	visitorUserAgent: formattedUserAgentSchema,
+});
+
 export const createCartSchema = insertCartSchema.omit({ id: true }).partial({
 	workspaceId: true,
 });
-export const updateCartSchema = insertCartSchema.partial().required({ id: true });
 
-export type InsertCart = z.input<typeof insertCartSchema>;
+export const updateCartSchema = insertCartSchema.partial().required({ id: true });
+// .extend({
+// 	visitorGeo: nextGeoSchema,
+// 	visitorUserAgent: formattedUserAgentSchema,
+// });
+
+export type InsertCart = z.infer<typeof insertCartSchema>;
 export type CreateCart = z.input<typeof createCartSchema>;
 export type UpdateCart = z.input<typeof updateCartSchema>;
 export type Cart = InferSelectModel<typeof Carts>;
+
+// type InsertCartVisitorGeo = InsertCart['visitorGeo'];
+// type UpdateCartVisitorGeo = UpdateCart['visitorGeo'];
 
 // query params // on cart page
 export const updateFromCartSchema = updateCartSchema.extend({
@@ -30,6 +43,7 @@ export const cartPageSearchParams = insertCartSchema
 		fullName: true,
 		phone: true,
 		emailMarketingOptIn: true,
+		landingPageId: true,
 		// client input
 		mainProductPayWhatYouWantPrice: true,
 		mainProductQuantity: true,
