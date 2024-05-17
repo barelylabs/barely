@@ -8,13 +8,14 @@ import { isProduction } from '../../../utils/environment';
 import { raise } from '../../../utils/raise';
 import { db } from '../../db';
 import { stripe } from '../../stripe';
-import { cartApi } from '../cart/cart.api.server';
+// import { cartApi } from '../cart/cart.api.server';
 import {
 	createOrderIdForCart,
 	getCartById,
 	sendCartReceiptEmail,
 } from '../cart/cart.fns';
 import { Carts } from '../cart/cart.sql';
+import { recordCartEvent } from '../event/event.fns';
 import { createFan } from '../fan/fan.fns';
 import { Fans } from '../fan/fan.sql';
 import { stripeConnectChargeMetadataSchema } from './stripe-connect.schema';
@@ -70,10 +71,18 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 	) {
 		console.log('this is the first payment since the cart was created');
 
-		await cartApi.logEvent({
-			cartId: prevCart.id,
-			event:
+		// await cartApi.logEvent({
+		// 	cartId: prevCart.id,
+		// 	event:
+		// 		prevCart.addedBump ? 'cart_purchaseMainWithBump' : 'cart_purchaseMainWithoutBump',
+		// });
+
+		await recordCartEvent({
+			cart: prevCart,
+			cartFunnel: funnel,
+			type:
 				prevCart.addedBump ? 'cart_purchaseMainWithBump' : 'cart_purchaseMainWithoutBump',
+			// visitor: prevCart.visitor,
 		});
 
 		const updateCart: UpdateCart = { id: prevCart.id };
