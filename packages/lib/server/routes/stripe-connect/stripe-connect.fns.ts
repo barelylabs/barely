@@ -71,27 +71,29 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 	) {
 		console.log('this is the first payment since the cart was created');
 
-		// await cartApi.logEvent({
-		// 	cartId: prevCart.id,
-		// 	event:
-		// 		prevCart.addedBump ? 'cart_purchaseMainWithBump' : 'cart_purchaseMainWithoutBump',
-		// });
-
 		await recordCartEvent({
 			cart: prevCart,
 			cartFunnel: funnel,
 			type:
 				prevCart.addedBump ? 'cart_purchaseMainWithBump' : 'cart_purchaseMainWithoutBump',
-			// visitor: prevCart.visitor,
 		});
 
 		const updateCart: UpdateCart = { id: prevCart.id };
+
+		updateCart.orderId = await createOrderIdForCart(prevCart);
 
 		updateCart.stage = funnel?.upsellProductId ? 'upsellCreated' : 'checkoutConverted';
 		updateCart.checkoutStripeChargeId = charge.id;
 		updateCart.checkoutStripePaymentMethodId = charge.payment_method;
 
-		updateCart.orderId = await createOrderIdForCart(prevCart);
+		updateCart.fullName =
+			charge.billing_details.name ?? charge.shipping?.name ?? prevCart.fullName;
+		updateCart.shippingAddressLine1 = charge.shipping?.address?.line1;
+		updateCart.shippingAddressLine2 = charge.shipping?.address?.line2;
+		updateCart.shippingAddressCity = charge.shipping?.address?.city;
+		updateCart.shippingAddressState = charge.shipping?.address?.state;
+		updateCart.shippingAddressPostalCode = charge.shipping?.address?.postal_code;
+		updateCart.shippingAddressCountry = charge.shipping?.address?.country;
 
 		// update or create fan
 		let fan =

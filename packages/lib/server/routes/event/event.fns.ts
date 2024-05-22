@@ -208,7 +208,11 @@ export async function recordCartEvent({
 		referer: cart.visitorReferer ?? visitor?.referer ?? 'Unknown',
 		referer_url: cart.visitorRefererUrl ?? visitor?.referer_url ?? 'Unknown',
 		isBot: visitor?.isBot ?? false,
-		href: visitor?.href ?? 'Unknown',
+		// href: visitor?.href ?? 'Unknown',
+		href:
+			type === 'cart_purchaseMainWithoutBump' || type === 'cart_purchaseMainWithBump' ?
+				cart.visitorCheckoutHref ?? visitor?.href ?? 'Unknown'
+			:	visitor?.href ?? 'Unknown',
 	};
 
 	if (visitorInfo.isBot) return null;
