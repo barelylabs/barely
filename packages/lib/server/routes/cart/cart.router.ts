@@ -407,14 +407,6 @@ export const cartRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ input, ctx }) => {
-			// if (!ctx.visitor?.ip) {
-			// 	console.log(
-			// 		`no visitor ip to log cart event [${input.event}] for cart ${input.cartId}. visitor >> `,
-			// 		ctx.visitor,
-			// 	);
-			// 	return;
-			// }
-
 			const cart =
 				(await ctx.db.pool.query.Carts.findFirst({
 					where: eq(Carts.id, input.cartId),
@@ -443,13 +435,16 @@ export const cartRouter = createTRPCRouter({
 			if (!cart.visitorReferer) updateCart.visitorReferer = ctx.visitor?.referer;
 			if (!cart.visitorRefererUrl)
 				updateCart.visitorRefererUrl = ctx.visitor?.referer_url;
+			if (!cart.visitorCheckoutHref && input.event === 'cart_initiateCheckout')
+				updateCart.visitorCheckoutHref = ctx.visitor?.href;
 
 			if (
 				!!updateCart.visitorIp ||
 				!!updateCart.visitorGeo ||
 				!!updateCart.visitorUserAgent ||
 				!!updateCart.visitorReferer ||
-				!!updateCart.visitorRefererUrl
+				!!updateCart.visitorRefererUrl ||
+				!!updateCart.visitorCheckoutHref
 			) {
 				await ctx.db.pool.update(Carts).set(updateCart).where(eq(Carts.id, cart.id));
 			}

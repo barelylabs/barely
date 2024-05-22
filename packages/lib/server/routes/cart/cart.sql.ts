@@ -57,6 +57,8 @@ export const Carts = pgTable(
 		visitorReferer: varchar('visitorReferer', { length: 255 }),
 		visitorRefererUrl: varchar('visitorRefererUrl', { length: 255 }),
 
+		visitorCheckoutHref: varchar('visitorCheckoutHref', { length: 255 }),
+
 		// stripe (on creation)
 		checkoutStripePaymentIntentId: varchar('checkoutStripePaymentIntentId', {
 			length: 255,
