@@ -1,17 +1,23 @@
 // https://ui.shadcn.com/docs/primitives/button
 
 import type { VariantProps } from 'class-variance-authority';
+import type { ButtonProps as ReactAriaButtonProps } from 'react-aria-components';
 import * as React from 'react';
 import Link from 'next/link';
 import { cn } from '@barely/lib/utils/cn';
 import { Loader2 } from 'lucide-react';
+import { useButton, useLink } from 'react-aria';
+import { ButtonContext, useContextProps } from 'react-aria-components';
 
 import type { ButtonVariants } from './button.variants';
 import { buttonIconVariants, buttonVariants } from './button.variants';
 import { Icon } from './icon';
 import { Tooltip } from './tooltip';
 
-interface ButtonBaseProps extends VariantProps<ButtonVariants> {
+type AriaButtonProps = ReactAriaButtonProps & VariantProps<ButtonVariants>;
+
+// interface ButtonBaseProps extends VariantProps<ButtonVariants>  {
+interface ButtonBaseProps extends AriaButtonProps {
 	iconClassName?: string;
 	/** left-aligned icon */
 	startIcon?: keyof typeof Icon;
@@ -76,20 +82,37 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 				pill,
 				fullWidth,
 			}),
-			// color === 'pink' && 'bg-pink-500 text-white hover:bg-pink-600',
 			className,
 		);
+		const StartIcon = startIcon ? Icon[startIcon] : null;
+		const EndIcon = endIcon ? Icon[endIcon] : null;
+
+		const [ariaProps, ariaRef] = useContextProps(props, ref, ButtonContext);
+		const { buttonProps } = useButton(ariaProps, ariaRef);
+
+		const { linkProps } = useLink(ariaProps, ariaRef);
 
 		if ('href' in props && props.href !== undefined) {
 			return (
-				<Link {...props} className={classes} passHref>
+				<Link {...props} {...linkProps} className={classes} passHref>
+					{StartIcon && (
+						<StartIcon
+							className={cn(
+								buttonIconVariants({
+									variant,
+									look: look,
+									size,
+									position: 'start',
+								}),
+								iconClassName,
+							)}
+						/>
+					)}
+
 					{children}
 				</Link>
 			);
 		}
-
-		const StartIcon = startIcon ? Icon[startIcon] : null;
-		const EndIcon = endIcon ? Icon[endIcon] : null;
 
 		const btn = (
 			<span
@@ -100,10 +123,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 			>
 				<button
 					ref={ref}
-					type={type as 'button' | 'submit' | 'reset'}
+					{...buttonProps}
+					type={type}
 					className={classes}
 					disabled={loading ?? props.disabled}
-					{...props}
 					/* if button is disabled, prevent onClick handler */
 					onClick={
 						props.disabled ? (e: React.MouseEvent) => e.preventDefault() : props.onClick

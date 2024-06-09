@@ -305,6 +305,7 @@ export const cartRouter = createTRPCRouter({
 				updateCart.orderProductAmount + updateCart.orderShippingAndHandlingAmount;
 
 			updateCart.stage = 'upsellConverted';
+			updateCart.upsellConvertedAt = new Date();
 
 			if (ctx.visitor?.ip) {
 				await recordCartEvent({

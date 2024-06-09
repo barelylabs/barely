@@ -5,7 +5,7 @@ import { useCallback } from 'react';
 import { useZodForm } from '@barely/lib/hooks/use-zod-form';
 import { api } from '@barely/lib/server/api/react';
 import { markCartOrderAsFulfilledSchema } from '@barely/lib/server/routes/cart-order/cart-order.schema';
-import { SHIPPING_CARRIERS } from '@barely/lib/server/shipengine/shipping.constants';
+import { SHIPPING_CARRIERS } from '@barely/lib/server/shipping/shipping.constants';
 import { useFieldArray } from 'react-hook-form';
 
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
@@ -40,12 +40,14 @@ export function MarkCartOrderFulfilledModal() {
 	/* form */
 	const form = useZodForm({
 		schema: markCartOrderAsFulfilledSchema,
-		values: {
+		defaultValues: {
 			cartId: selectedCartOrder?.id ?? '',
 			products: unfulfilledProducts.map(product => ({
 				id: product.id,
 				fulfilled: true,
 			})),
+			shippingCarrier: '',
+			shippingTrackingNumber: '',
 		},
 		resetOptions: {
 			keepValues: true,
@@ -58,6 +60,7 @@ export function MarkCartOrderFulfilledModal() {
 	});
 
 	const handleSubmit = async (data: z.infer<typeof markCartOrderAsFulfilledSchema>) => {
+		console.log('submitting ', data);
 		await markAsFulfilled(data);
 	};
 
@@ -94,11 +97,20 @@ export function MarkCartOrderFulfilledModal() {
 							value: carrier,
 						}))}
 					/>
+
 					<TextField
 						control={form.control}
 						name='shippingTrackingNumber'
 						label='Tracking Number'
 						placeholder='Enter tracking number'
+						onPaste={e => {
+							e.preventDefault();
+							return form.setValue(
+								'shippingTrackingNumber',
+								e.clipboardData.getData('text/plain').replace(/\s/g, ''),
+								{ shouldValidate: true },
+							);
+						}}
 					/>
 					{productsFieldArray.fields.map((p, index) => {
 						const product = unfulfilledProducts[index];
@@ -114,6 +126,7 @@ export function MarkCartOrderFulfilledModal() {
 						);
 					})}
 				</ModalBody>
+
 				<ModalFooter>
 					<SubmitButton fullWidth>Mark as Fulfilled</SubmitButton>
 				</ModalFooter>

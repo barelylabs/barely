@@ -32,6 +32,14 @@ export const markCartOrderAsFulfilledSchema = z.object({
 			fulfilled: z.boolean(),
 		}),
 	),
-	shippingCarrier: z.string().optional(),
-	shippingTrackingNumber: z.string().optional(),
+	shippingCarrier: z
+		.string()
+		.min(1)
+		.transform(v => (typeof v === 'string' && v.length ? v : undefined))
+		.optional(),
+	shippingTrackingNumber: z
+		.string()
+		.min(1)
+		.optional()
+		.transform(v => (typeof v === 'string' ? v.replace(/\s/g, '') : undefined)),
 });

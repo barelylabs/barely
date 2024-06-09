@@ -5,7 +5,7 @@ import ReceiptEmailTemplate from '@barely/email/src/templates/cart/receipt';
 import { and, count, eq, isNotNull } from 'drizzle-orm';
 
 import type { VisitorInfo } from '../../../utils/middleware';
-import type { ShippingEstimateProps } from '../../shipengine/shipengine.endpts';
+import type { ShippingEstimateProps } from '../../shipping/shipengine.endpts';
 import type { Fan } from '../fan/fan.schema';
 import type { Product } from '../product/product.schema';
 import type { stripeConnectChargeMetadataSchema } from '../stripe-connect/stripe-connect.schema';
@@ -16,7 +16,7 @@ import { newId } from '../../../utils/id';
 import { numToPaddedString } from '../../../utils/number';
 import { raise } from '../../../utils/raise';
 import { db } from '../../db';
-import { getShippingEstimates } from '../../shipengine/shipengine.endpts';
+import { getShippingEstimates } from '../../shipping/shipengine.endpts';
 import { stripe } from '../../stripe';
 import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
 import { MEDIAMAIL_TYPES, MERCH_DIMENSIONS } from '../product/product.constants';
@@ -341,9 +341,8 @@ export async function sendCartReceiptEmail(cart: ReceiptCart) {
 	});
 
 	await sendEmail({
-		from: 'receipts@barelycart.email',
+		from: 'orders@barelycart.email',
 		to: cart.fan.email,
-		// bcc: cart.funnel.workspace.cartSupportEmail ?? undefined,
 		bcc: ['adam@barely.io', cart.funnel.workspace.cartSupportEmail ?? ''].filter(
 			s => s.length > 0,
 		),

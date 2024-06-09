@@ -39,7 +39,6 @@ import {
 } from '@internationalized/date';
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon, X } from 'lucide-react';
 import {
-	useButton,
 	useCalendar,
 	useCalendarCell,
 	useCalendarGrid,
@@ -75,14 +74,14 @@ function Calendar(props: CalendarProps<DateValue>) {
 		nextButtonProps: _nextButtonProps,
 		title,
 	} = useCalendar(props, state);
-	const { buttonProps: prevButtonProps } = useButton(_prevButtonProps, prevButtonRef);
-	const { buttonProps: nextButtonProps } = useButton(_nextButtonProps, nextButtonRef);
+	// const { buttonProps: prevButtonProps } = useButton(_prevButtonProps, prevButtonRef);
+	// const { buttonProps: nextButtonProps } = useButton(_nextButtonProps, nextButtonRef);
 
 	return (
 		<div {...calendarProps} className='space-y-4'>
 			<div className='relative flex items-center justify-center pt-1'>
 				<Button
-					{...prevButtonProps}
+					{..._prevButtonProps}
 					ref={prevButtonRef}
 					look='outline'
 					className={cn(
@@ -93,7 +92,7 @@ function Calendar(props: CalendarProps<DateValue>) {
 				</Button>
 				<div className='text-sm font-medium'>{title}</div>
 				<Button
-					{...nextButtonProps}
+					{..._nextButtonProps}
 					ref={nextButtonRef}
 					look='outline'
 					className={cn(
@@ -196,6 +195,24 @@ function CalendarCell({ state, date }: CalendarCellProps) {
 					isOutsideVisibleRange && 'text-muted-foreground opacity-50',
 					isDisabled && 'text-muted-foreground opacity-50',
 				)}
+				onFocus={e => {
+					if (buttonProps.onFocus) {
+						// @ts-expect-error - onFocus is not a function
+						buttonProps.onFocus(e);
+					}
+				}}
+				onBlur={e => {
+					if (buttonProps.onBlur) {
+						// @ts-expect-error - onBlur is not a function
+						buttonProps.onBlur(e);
+					}
+				}}
+				// onFocus={e => {
+				// 	if (buttonProps.onFocus) {
+				// 		buttonProps.onFocus(e as unknown as FocusEvent<React.FocusableElement, Element>);
+				// 	}
+				// }}
+				// onBlur={undefined}
 			>
 				{formattedDate}
 			</Button>
@@ -342,7 +359,7 @@ const DateTimePicker = React.forwardRef<
 		dialogProps,
 		calendarProps,
 	} = useDatePicker(props, state, divRef);
-	const { buttonProps } = useButton(_buttonProps, buttonRef);
+	// const { buttonProps } = useButton(_buttonProps, buttonRef);
 
 	const currentValue = useCallback(() => {
 		if (!jsDatetime) {
@@ -383,7 +400,7 @@ const DateTimePicker = React.forwardRef<
 			<Popover open={props.isOpen} onOpenChange={props.onOpenChange}>
 				<PopoverTrigger asChild>
 					<Button
-						{...buttonProps}
+						{..._buttonProps}
 						look='ghost'
 						className='border-r'
 						disabled={props.isDisabled}

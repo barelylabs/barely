@@ -4,6 +4,4 @@ import { OPTIONS } from '@barely/lib/utils/trpc-route';
 
 const handler = routeHandler('bio', bioRouter);
 
-// export const runtime = 'edge';
-
 export { OPTIONS, handler as GET, handler as POST };
