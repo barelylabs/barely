@@ -1,5 +1,7 @@
 // https://ui.shadcn.com/docs/primitives/button
 
+'use client';
+
 import type { VariantProps } from 'class-variance-authority';
 import type { ButtonProps as ReactAriaButtonProps } from 'react-aria-components';
 import * as React from 'react';
