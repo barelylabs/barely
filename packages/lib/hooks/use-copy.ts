@@ -5,12 +5,19 @@ export function useCopy() {
 	const [isCopied, setIsCopied] = useState(false);
 	const { toast } = useToast();
 
-	const copyToClipboard = (text: string) => {
+	const copyToClipboard = (
+		text: string,
+		{
+			successMessage = 'Copied to clipboard!',
+		}: {
+			successMessage?: string;
+		} = {},
+	) => {
 		navigator?.clipboard
 			?.writeText(text)
 			.then(() => setIsCopied(true))
 			.then(() => {
-				toast.success('Copied to clipboard!');
+				toast.success(successMessage);
 			})
 			.catch(error => console.error('Copy to clipboard failed:', error));
 	};

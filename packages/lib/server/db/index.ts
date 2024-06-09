@@ -109,17 +109,34 @@ export const dbPool = drizzlePool(pool, {
 	schema: dbSchema,
 });
 
+export const dbPoolo = () => {
+	const pool = new Pool({ connectionString: env.DATABASE_POOL_URL });
+	return drizzlePool(pool, {
+		schema: dbSchema,
+	});
+};
+
 export type DbHttp = typeof dbHttp;
 export type DbHttpTransaction = Parameters<Parameters<DbHttp['transaction']>[0]>[0];
-export type DbPool = typeof dbPool;
-export type DbPoolTransaction = Parameters<Parameters<DbPool['transaction']>[0]>[0];
+// export type DbPool = typeof dbPool;
+// export type DbPoolTransaction = Parameters<Parameters<DbPool['transaction']>[0]>[0];
+
+// export type DbPool = ReturnType<typeof dbPoolo>;
+// export type DbPoolTransaction = Parameters<Parameters<DbPool['transaction']>[0]>[0];
+export type DbPoolTransaction = DbHttpTransaction;
 
 export interface Db {
 	http: DbHttp;
-	pool: DbPool;
+	// pool: DbPool;
+	pool: DbHttp;
 }
 
 export const db: Db = {
 	http: dbHttp,
-	pool: dbPool,
+	pool: dbHttp, // having issues w/ pool handling in different environments (serverless, localhost, trigger.dev).
+	/* https://neon.tech/docs/serverless/serverless-driver#use-the-driver-over-websockets
+    Probably need to properly iniitalize the pool in the route handler, pass to trpc as context, and then ctx.waitUntil(pool.end()) in the route handler
+
+    */
+	// pool: dbPoolo(),
 };

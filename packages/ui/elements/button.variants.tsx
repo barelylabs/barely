@@ -17,19 +17,21 @@ const buttonVariants = cva(
 				brandAccent:
 					'bg-brand-accent text-brand-accent-foreground hover:bg-brand-accent/90',
 				success: 'bg-success text-success-foreground hover:bg-success/80',
-
 				destructive:
 					'bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:ring-destructive',
 				outline:
 					'border-[1.5px] border-input bg-transparent hover:bg-accent hover:text-accent-foreground ',
 				muted: 'bg-muted text-muted-foreground hover:bg-muted/90',
 				minimal: 'bg-transparent text-muted-foreground hover:bg-muted',
+
 				ghost: 'bg-transparent hover:bg-accent hover:text-accent-foreground',
+
 				link: '!focus-visible:ring-transparent !m-0 !h-fit bg-transparent !p-0 text-foreground underline-offset-4 ring-transparent ring-offset-transparent hover:underline',
 				tab: '!focus-visible:ring-transparent',
 			},
 
 			size: {
+				'2xs': 'h-4 w-4',
 				xs: 'h-5 rounded-md px-[2px] py-[2px] text-xs',
 				sm: 'h-6 rounded-md px-2 py-1 text-sm',
 				md: 'h-9 rounded-md px-4 py-2.5 text-sm md:text-md',
@@ -123,6 +125,7 @@ const buttonIconVariants = cva('', {
 			end: '',
 		},
 		size: {
+			'2xs': 'h-[10px] w-[10px]',
 			xs: 'h-3 w-3',
 			sm: 'h-4 w-4',
 			md: 'h-6 w-6',

@@ -342,6 +342,7 @@ export default function ReceiptEmail({
 								color: '#64748b',
 								fontSize: '12px',
 								lineHeight: '1rem',
+								paddingTop: '8px',
 							}}
 							// className='text-slate text-center text-xs'
 						>
