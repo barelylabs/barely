@@ -6,8 +6,8 @@ import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placehold
 import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
 import { Text } from '@barely/ui/elements/typography';
 
-import { useCartFunnelContext } from '~/app/[handle]/carts/_components/cart-funnel-context';
-import { CreateCartFunnelButton } from '~/app/[handle]/carts/_components/create-cart-funnel-button';
+import { useCartFunnelContext } from '~/app/[handle]/carts/_components/cartFunnel-context';
+import { CreateCartFunnelButton } from '~/app/[handle]/carts/_components/create-cartFunnel-button';
 
 export function AllCartFunnels() {
 	const {

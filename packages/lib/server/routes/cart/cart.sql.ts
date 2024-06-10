@@ -50,7 +50,6 @@ export const Carts = pgTable(
 		/* 
             🛒 cart checkout (main + bump) 
         */
-
 		visitorIp: varchar('visitorIp', { length: 255 }),
 		visitorGeo: jsonb('visitorGeo').$type<Partial<NextGeo>>(),
 		visitorUserAgent: jsonb('visitorUserAgent').$type<Partial<NextFormattedUserAgent>>(),
@@ -266,7 +265,7 @@ export const CartFulfillmentProducts = pgTable(
 	},
 	product => ({
 		pk: primaryKey({
-			name: 'CartFulfillmentProducts_pk',
+			name: 'CartFulfillment_Products_pk',
 			columns: [product.cartFulfillmentId, product.productId],
 		}),
 	}),

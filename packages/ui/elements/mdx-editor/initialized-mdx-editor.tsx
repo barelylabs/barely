@@ -73,13 +73,14 @@ const InsertVideo = () => {
 	const insertJsx = usePublisher(insertJsx$);
 	return (
 		<Button
-			onClick={() =>
+			onClick={() => {
+				console.log('insertJsx');
 				insertJsx({
 					name: 'VideoPlayer',
 					kind: 'text',
 					props: { url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' },
-				})
-			}
+				});
+			}}
 		>
 			<Icon.video className='h-5 w-5' weight='fill' />
 		</Button>

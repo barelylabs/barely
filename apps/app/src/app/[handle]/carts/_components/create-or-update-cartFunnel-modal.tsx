@@ -20,7 +20,7 @@ import { SelectField } from '@barely/ui/forms/select-field';
 import { SwitchField } from '@barely/ui/forms/switch-field';
 import { TextField } from '@barely/ui/forms/text-field';
 
-import { useCartFunnelContext } from '~/app/[handle]/carts/_components/cart-funnel-context';
+import { useCartFunnelContext } from '~/app/[handle]/carts/_components/cartFunnel-context';
 
 export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' }) {
 	const apiUtils = api.useUtils();
@@ -69,7 +69,7 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 
 	/* form */
 	const { form, onSubmit: onSubmitFunnel } = useCreateOrUpdateForm({
-		updateItem: selectedCartFunnel ? selectedCartFunnel : null,
+		updateItem: mode === 'create' ? null : selectedCartFunnel ?? null,
 		upsertSchema: upsertCartFunnelSchema,
 		defaultValues: defaultCartFunnel,
 		handleCreateItem: async d => {
@@ -111,7 +111,7 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 		>
 			<ModalHeader
 				icon='cart'
-				title={selectedCartFunnel ? `Update ${selectedCartFunnel.name}` : 'New Cart'}
+				title={mode === 'create' ? 'New Cart' : `Update ${selectedCartFunnel?.name}`}
 			/>
 			<Form form={form} onSubmit={handleSubmit}>
 				<ModalBody>

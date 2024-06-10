@@ -4,7 +4,7 @@ import { useCallback } from 'react';
 import { api } from '@barely/lib/server/api/react';
 
 import { ArchiveOrDeleteModal } from '~/app/[handle]/_components/archive-or-delete-modal';
-import { useCartFunnelContext } from '~/app/[handle]/carts/_components/cart-funnel-context';
+import { useCartFunnelContext } from '~/app/[handle]/carts/_components/cartFunnel-context';
 
 export function ArchiveOrDeleteFunnelModal({ mode }: { mode: 'archive' | 'delete' }) {
 	const {

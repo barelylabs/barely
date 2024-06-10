@@ -103,6 +103,7 @@ import {
 	Italic,
 	Joystick,
 	KanbanSquare,
+	LandPlot,
 	Laptop,
 	LineChart,
 	Linkedin,
@@ -307,6 +308,7 @@ export const Icon = {
 
 	kanban: KanbanSquare,
 
+	landingPage: LandPlot,
 	laptop: Laptop,
 	link: LinkIcon,
 	linkedin: Linkedin,

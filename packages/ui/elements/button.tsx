@@ -126,9 +126,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 				<button
 					ref={ref}
 					{...buttonProps}
+					// {...props}
 					type={type}
 					className={classes}
-					disabled={loading ?? props.disabled}
+					disabled={loading || props.disabled}
 					/* if button is disabled, prevent onClick handler */
 					onClick={
 						props.disabled ? (e: React.MouseEvent) => e.preventDefault() : props.onClick
