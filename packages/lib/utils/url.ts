@@ -1,7 +1,7 @@
 import { env } from '../env';
 import { raise } from './raise';
 
-const apps = ['app', 'bio', 'cart', 'link', 'press', 'www'] as const;
+const apps = ['app', 'bio', 'cart', 'link', 'page', 'press', 'www'] as const;
 
 export function getBaseUrl(app: (typeof apps)[number], absolute = false) {
 	if (!absolute && typeof window !== 'undefined') return ''; // browser should use relative url
@@ -23,6 +23,10 @@ export function getBaseUrl(app: (typeof apps)[number], absolute = false) {
 			case 'link':
 				devPort =
 					env.NEXT_PUBLIC_LINK_DEV_PORT ?? raise('NEXT_PUBLIC_LINK_DEV_PORT not found');
+				break;
+			case 'page':
+				devPort =
+					env.NEXT_PUBLIC_PAGE_DEV_PORT ?? raise('NEXT_PUBLIC_PAGE_DEV_PORT not found');
 				break;
 			case 'www':
 				devPort =
@@ -60,6 +64,9 @@ export function getBaseUrl(app: (typeof apps)[number], absolute = false) {
 		case 'link':
 			baseUrl = env.NEXT_PUBLIC_LINK_BASE_URL;
 			break;
+		case 'page':
+			baseUrl = env.NEXT_PUBLIC_PAGE_BASE_URL;
+			break;
 		case 'www':
 			baseUrl = env.NEXT_PUBLIC_WWW_BASE_URL;
 			break;
@@ -87,19 +94,14 @@ export function getBaseUrl(app: (typeof apps)[number], absolute = false) {
 	return raise('getBaseUrl :: Invalid vercel env');
 }
 
-export function getAbsoluteUrl(app: (typeof apps)[number], path?: string) {
-	const appBaseUrl = getBaseUrl(app, true);
-
-	return `${appBaseUrl}${path ? `/${path.replace(/^\//, '')}` : ''}`;
-}
-
-export function getUrl(
+export function getAbsoluteUrl(
 	app: (typeof apps)[number],
 	path?: string,
-	params?: { subdomain?: string },
+	opts?: { subdomain?: string; query?: Record<string, string> },
 ) {
-	const appBaseUrl = getBaseUrl(app);
-	return `${params?.subdomain ? `${params.subdomain}.` : ''}${appBaseUrl}${path ? `/${path.replace(/^\//, '')}` : ''}`;
+	const appBaseUrl = getBaseUrl(app, true);
+
+	return `${opts?.subdomain ? `${opts.subdomain}.` : ''}${appBaseUrl}${path ? `/${path.replace(/^\//, '')}` : ''}${opts?.query ? `?${new URLSearchParams(opts.query).toString()}` : ''}`;
 }
 
 export const getSearchParams = (url: string) => {

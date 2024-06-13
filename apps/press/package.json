@@ -7,7 +7,7 @@
 		"build:preview": "pnpm with-env vercel build",
 		"build:production": "pnpm with-env vercel build --prod",
 		"clean": "git clean -xdf .next .turbo node_modules",
-		"dev": "pnpm with-env next dev -- -p 3005",
+		"dev": "pnpm with-env next dev -- -p 3003",
 		"format": "prettier --check . --ignore-path ../../.gitignore",
 		"lint": "dotenv -v SKIP_ENV_VALIDATION=1 next lint",
 		"start": "pnpm with-env next start",

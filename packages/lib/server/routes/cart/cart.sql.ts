@@ -56,7 +56,7 @@ export const Carts = pgTable(
 		visitorIsBot: boolean('visitorIsBot').default(false),
 		visitorReferer: varchar('visitorReferer', { length: 255 }),
 		visitorRefererUrl: varchar('visitorRefererUrl', { length: 255 }),
-
+		visitorRefererId: varchar('visitorRefererId', { length: 255 }),
 		visitorCheckoutHref: varchar('visitorCheckoutHref', { length: 255 }),
 
 		// stripe (on creation)
@@ -265,7 +265,7 @@ export const CartFulfillmentProducts = pgTable(
 	},
 	product => ({
 		pk: primaryKey({
-			name: 'CartFulfillment_Products_pk',
+			name: 'CartFulfillment_Product_pk',
 			columns: [product.cartFulfillmentId, product.productId],
 		}),
 	}),

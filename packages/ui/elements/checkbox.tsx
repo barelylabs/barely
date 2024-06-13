@@ -15,7 +15,7 @@ const checkboxVariants = cva(
 				primary:
 					'border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground',
 				brand:
-					'border-brand data-[state=checked]:border-brand data-[state=checked]:bg-brand data-[state=checked]:text-brand-foreground',
+					'data-[state=checked]:text-brand-foreground border-brand data-[state=checked]:border-brand data-[state=checked]:bg-brand',
 			},
 		},
 	},

@@ -139,7 +139,7 @@ export function PressKitForm({
 							}}
 						/>
 					)}
-					<pre>{JSON.stringify(form.watch('bio'), null, 2)}</pre>
+					{/* <pre>{JSON.stringify(form.watch('bio'), null, 2)}</pre> */}
 				</PressKitCard>
 
 				<PressKitCard

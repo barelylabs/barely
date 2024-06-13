@@ -57,6 +57,10 @@ export const Workspaces = pgTable(
 		bookingName: varchar('bookingName', { length: 255 }),
 		bookingEmail: varchar('bookingEmail', { length: 255 }),
 
+		// theme
+		brandHue: integer('brandHue').notNull().default(30),
+		brandAccentHue: integer('brandAccentHue').notNull().default(200),
+
 		// feature flags
 		feature__tracks: boolean('feature__tracks').default(false).notNull(),
 		feature__mixtapes: boolean('feature__mixtapes').default(false).notNull(),

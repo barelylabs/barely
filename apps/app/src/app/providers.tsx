@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import { usePusherSocketId } from '@barely/lib/hooks/use-pusher';
-import { getUrl } from '@barely/lib/utils/url';
+import { getAbsoluteUrl } from '@barely/lib/utils/url';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ReactQueryStreamedHydration } from '@tanstack/react-query-next-experimental';
@@ -62,7 +62,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 						// combined app router. if it hasn't been split off, it'll default to calling here
 						edge: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/edge'),
+							url: getAbsoluteUrl('app', 'api/trpc/edge'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -71,7 +71,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 						// split off routers
 						analyticsEndpoint: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/analyticsEndpoint'),
+							url: getAbsoluteUrl('app', 'api/trpc/analyticsEndpoint'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -79,7 +79,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						auth: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/auth'),
+							url: getAbsoluteUrl('app', 'api/trpc/auth'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -87,7 +87,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						bio: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/bio'),
+							url: getAbsoluteUrl('app', 'api/trpc/bio'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -95,7 +95,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						campaign: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/campaign'),
+							url: getAbsoluteUrl('app', 'api/trpc/campaign'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -103,7 +103,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						cart: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/cart'),
+							url: getAbsoluteUrl('app', 'api/trpc/cart'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -111,7 +111,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						cartFunnel: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/cartFunnel'),
+							url: getAbsoluteUrl('app', 'api/trpc/cartFunnel'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -119,7 +119,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						domain: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/domain'),
+							url: getAbsoluteUrl('app', 'api/trpc/domain'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -127,7 +127,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						event: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/event'),
+							url: getAbsoluteUrl('app', 'api/trpc/event'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -135,7 +135,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						file: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/file'),
+							url: getAbsoluteUrl('app', 'api/trpc/file'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -143,7 +143,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						formResponse: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/formResponse'),
+							url: getAbsoluteUrl('app', 'api/trpc/formResponse'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -151,7 +151,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						genre: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/genre'),
+							url: getAbsoluteUrl('app', 'api/trpc/genre'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -159,7 +159,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						link: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/link'),
+							url: getAbsoluteUrl('app', 'api/trpc/link'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -167,7 +167,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						mixtape: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/mixtape'),
+							url: getAbsoluteUrl('app', 'api/trpc/mixtape'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -175,7 +175,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						playlist: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/playlist'),
+							url: getAbsoluteUrl('app', 'api/trpc/playlist'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -183,7 +183,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						playlistPitchReview: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/playlistPitchReview'),
+							url: getAbsoluteUrl('app', 'api/trpc/playlistPitchReview'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -191,7 +191,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						playlistPlacement: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/playlistPlacement'),
+							url: getAbsoluteUrl('app', 'api/trpc/playlistPlacement'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -199,7 +199,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						pressKit: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/pressKit'),
+							url: getAbsoluteUrl('app', 'api/trpc/pressKit'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -207,7 +207,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						product: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/product'),
+							url: getAbsoluteUrl('app', 'api/trpc/product'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -215,7 +215,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						providerAccount: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/providerAccount'),
+							url: getAbsoluteUrl('app', 'api/trpc/providerAccount'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -223,7 +223,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						spotify: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/spotify'),
+							url: getAbsoluteUrl('app', 'api/trpc/spotify'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -231,7 +231,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						stat: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/stat'),
+							url: getAbsoluteUrl('app', 'api/trpc/stat'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -239,7 +239,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						stripeConnect: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/stripeConnect'),
+							url: getAbsoluteUrl('app', 'api/trpc/stripeConnect'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -247,7 +247,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						track: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/track'),
+							url: getAbsoluteUrl('app', 'api/trpc/track'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -255,7 +255,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						user: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/user'),
+							url: getAbsoluteUrl('app', 'api/trpc/user'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -263,7 +263,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						visitorSession: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/visitorSession'),
+							url: getAbsoluteUrl('app', 'api/trpc/visitorSession'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -271,7 +271,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						workspace: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/workspace'),
+							url: getAbsoluteUrl('app', 'api/trpc/workspace'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -279,7 +279,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						workspaceInvite: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/workspaceInvite'),
+							url: getAbsoluteUrl('app', 'api/trpc/workspaceInvite'),
 							headers() {
 								return preparedHeaders;
 							},
@@ -287,7 +287,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 						workspaceStripe: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
-							url: getUrl('app', 'api/trpc/workspaceStripe'),
+							url: getAbsoluteUrl('app', 'api/trpc/workspaceStripe'),
 							headers() {
 								return preparedHeaders;
 							},

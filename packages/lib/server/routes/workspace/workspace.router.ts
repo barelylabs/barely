@@ -3,19 +3,27 @@ import { z } from 'zod';
 
 import { newId } from '../../../utils/id';
 import { pushEvent } from '../../../utils/pusher-server';
+import { sqlAnd, sqlStringContains } from '../../../utils/sql';
 import {
 	createTRPCRouter,
 	privateProcedure,
 	publicProcedure,
 	workspaceQueryProcedure,
 } from '../../api/trpc';
+import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
 import {
 	_Files_To_Workspaces__AvatarImage,
 	_Files_To_Workspaces__HeaderImage,
 } from '../file/file.sql';
+import { LandingPages } from '../landing-page/landing-page.sql';
+import { PressKits } from '../press-kit/press-kit.sql';
 import { _Users_To_Workspaces } from '../user/user.sql';
 import { WorkspaceInvites } from '../workspace-invite/workspace-invite.sql';
-import { createWorkspaceSchema, updateCurrentWorkspaceSchema } from './workspace.schema';
+import {
+	createWorkspaceSchema,
+	updateCurrentWorkspaceSchema,
+	workspaceAssetsSchema,
+} from './workspace.schema';
 import { Workspaces } from './workspace.sql';
 
 export const workspaceRouter = createTRPCRouter({
@@ -32,6 +40,51 @@ export const workspaceRouter = createTRPCRouter({
 		if (!ctx.workspace) return null;
 		return ctx.workspace;
 	}),
+
+	assets: workspaceQueryProcedure
+		.input(workspaceAssetsSchema)
+		.query(async ({ input, ctx }) => {
+			const { types } = input;
+			const search = input.search?.length ? input.search : null;
+
+			const cartFunnels =
+				!types || types.includes('cartFunnel') ?
+					await ctx.db.http.query.CartFunnels.findMany({
+						where: sqlAnd([
+							eq(CartFunnels.workspaceId, ctx.workspace.id),
+							search ? sqlStringContains(CartFunnels.name, search) : null,
+						]),
+						limit: 20,
+					})
+				:	[];
+
+			const pressKits =
+				!types || types.includes('pressKit') ?
+					await ctx.db.http.query.PressKits.findMany({
+						where: sqlAnd([eq(PressKits.workspaceId, ctx.workspace.id)]),
+						limit: 20,
+					})
+				:	[];
+
+			const landingPages =
+				!types || types.includes('landingPage') ?
+					await ctx.db.http.query.LandingPages.findMany({
+						where: sqlAnd([
+							eq(LandingPages.workspaceId, ctx.workspace.id),
+							search?.length ? sqlStringContains(LandingPages.name, search) : null,
+						]),
+						limit: 20,
+					})
+				:	[];
+
+			const assets = [
+				...cartFunnels.map(cf => ({ type: 'cartFunnel', id: cf.id, name: cf.name })),
+				...pressKits.map(pk => ({ type: 'pressKit', id: pk.id, name: 'Press Kit' })),
+				...landingPages.map(lp => ({ type: 'landingPage', id: lp.id, name: lp.name })),
+			];
+
+			return assets;
+		}),
 
 	members: workspaceQueryProcedure
 		.input(

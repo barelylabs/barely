@@ -207,8 +207,9 @@ export async function recordCartEvent({
 		},
 		referer: cart.visitorReferer ?? visitor?.referer ?? 'Unknown',
 		referer_url: cart.visitorRefererUrl ?? visitor?.referer_url ?? 'Unknown',
+		referer_id: cart.visitorRefererId ?? visitor?.referer_id ?? 'Unknown',
 		isBot: visitor?.isBot ?? false,
-		// href: visitor?.href ?? 'Unknown',
+
 		href:
 			type === 'cart_purchaseMainWithoutBump' || type === 'cart_purchaseMainWithBump' ?
 				cart.visitorCheckoutHref ?? visitor?.href ?? 'Unknown'
@@ -276,6 +277,7 @@ export async function recordCartEvent({
 			...visitorInfo.geo,
 			...visitorInfo.userAgent,
 			referer: visitorInfo.referer,
+			referer_id: visitorInfo.referer_id,
 			referer_url: visitorInfo.referer_url,
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
 			// cart specifics

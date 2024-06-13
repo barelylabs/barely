@@ -6,14 +6,16 @@ import type {
 } from '@barely/lib/server/routes/campaign/campaign.schema';
 import type { GenreWithPlaylistStats } from '@barely/lib/server/routes/genre/genre.schema';
 import type { Control } from 'react-hook-form';
+// import { useZodForm } from '@barely/lib/hooks/use-zod-form';
 import { api } from '@barely/lib/server/api/react';
+// import { updatePlaylistPitchCampaign_LaunchSchema } from '@barely/lib/server/routes/campaign/campaign.schema';
 import deepEqual from 'fast-deep-equal';
 
 import { MultiSelect } from '@barely/ui/elements/multiselect';
 import { MultiSelectField } from '@barely/ui/forms/multiselect-field';
 
 export function TrackGenresInput(props: { trackId: string }) {
-	const utils = api.useContext();
+	const utils = api.useUtils();
 
 	const [trackGenres] = api.track.byId.useSuspenseQuery(props.trackId, {
 		select: track => track?.genres,
@@ -94,7 +96,7 @@ type TrackGenresFieldProps = {
 );
 
 export function TrackGenresField(props: TrackGenresFieldProps) {
-	const utils = api.useContext();
+	const utils = api.useUtils();
 
 	const { data: playlistGenreOptions, isFetching: isFetchingOptions } =
 		api.genre.allInPitchPlaylists.useQuery();
@@ -141,6 +143,35 @@ export function TrackGenresField(props: TrackGenresFieldProps) {
 
 	// fixme: I don't know how to make Typescript happy here. I'd rather do this a different way, but this should work for now.
 
+	// const { control } = useZodForm({
+	// 	schema: updatePlaylistPitchCampaign_LaunchSchema,
+	// });
+	// if (props.formType === 'playlist-pitch-launch') {
+	// 	return (
+	// 		<MultiSelectField
+	// 			name='genres'
+	// 			label={label}
+	// 			placeholder='Search for genres...'
+	// 			control={props.control}
+	// 			// control={control}
+	// 			options={playlistGenreOptions ?? []}
+	// 			isFetchingOptions={isFetchingOptions}
+	// 			getItemId={item => item.id}
+	// 			displayValue={item => item.name}
+	// 			optTitle={option => option.name}
+	// 			optSubtitle={option => `${option.totalPlaylists ?? '?'} playlists`}
+	// 			onValuesChangeDebounced={genres => {
+	// 				updateTrackGenres({
+	// 					trackId: props.trackId,
+	// 					genres,
+	// 				});
+	// 			}}
+	// 			debounce={500}
+	// 			displayMode={'select'}
+	// 		/>
+	// 	);
+	// }
+
 	if (props.formType === 'playlist-pitch-screening')
 		return (
 			<MultiSelectField
@@ -148,6 +179,7 @@ export function TrackGenresField(props: TrackGenresFieldProps) {
 				label={label}
 				placeholder='Search for genres...'
 				control={props.control}
+				// control={control}
 				options={playlistGenreOptions ?? []}
 				isFetchingOptions={isFetchingOptions}
 				getItemId={item => item.id}

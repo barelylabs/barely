@@ -59,7 +59,7 @@ export const updateCheckoutCartFromCheckoutSchema = cartPageSearchParams
 	.required({ id: true })
 	.extend({
 		handle: z.string(),
-		funnelKey: z.string(),
+		key: z.string(),
 		shippingAddressLine1: z.string().nullish(),
 		shippingAddressLine2: z.string().nullish(),
 		shippingAddressCity: z.string().nullish(),

@@ -2,6 +2,8 @@ import type { Config } from 'tailwindcss';
 import colors from 'tailwindcss/colors';
 import defaultTheme from 'tailwindcss/defaultTheme';
 
+import { dynamicTwClasses } from './lib/dynamic-tw';
+
 export default {
 	darkMode: ['class'],
 	content: ['src/**/*.{ts,tsx}'],
@@ -60,67 +62,70 @@ export default {
 						'background-position': 'right center',
 					},
 				},
-				// 'bg-pulse': {
-				//     from:
-
-				// }
 			},
 			transitionDelay: {
 				250: '250ms',
 			},
 			colors: {
-				border: 'hsl(var(--border))',
-				input: 'hsl(var(--input))',
-				ring: 'hsl(var(--ring))',
-				background: 'hsl(var(--background))',
-				foreground: 'hsl(var(--foreground))',
+				// border: 'hsl(var(--border))',
+				border: 'oklch(var(--border) / <alpha-value>)',
+				input: 'oklch(var(--input) / <alpha-value>)',
+				ring: 'oklch(var(--ring) / <alpha-value>)',
+				background: 'oklch(var(--background) / <alpha-value>)',
+				foreground: 'oklch(var(--foreground) / <alpha-value>)',
 				primary: {
-					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))',
+					DEFAULT: 'oklch(var(--primary) / <alpha-value>)',
+					foreground: 'oklch(var(--primary-foreground) / <alpha-value>)',
 				},
 				secondary: {
-					DEFAULT: 'hsl(var(--secondary))',
-					foreground: 'hsl(var(--secondary-foreground))',
+					DEFAULT: 'oklch(var(--secondary) / <alpha-value>)',
+					foreground: 'oklch(var(--secondary-foreground) / <alpha-value>)',
 				},
 				success: {
-					DEFAULT: 'hsl(var(--success))',
-					foreground: 'hsl(var(--success-foreground))',
+					// DEFAULT: 'hsl(var(--success))',
+					DEFAULT: 'oklch(var(--success) / <alpha-value>)',
+					// foreground: 'hsl(var(--success-foreground))',
+					foreground: 'oklch(var(--success-foreground) / <alpha-value>)',
 				},
 				destructive: {
-					DEFAULT: 'hsl(var(--destructive))',
-					foreground: 'hsl(var(--destructive-foreground))',
+					DEFAULT: 'oklch(var(--destructive) / <alpha-value>)',
+					foreground: 'oklch(var(--destructive-foreground) / <alpha-value>)',
 				},
 				muted: {
-					DEFAULT: 'hsl(var(--muted))',
-					foreground: 'hsl(var(--muted-foreground))',
+					DEFAULT: 'oklch(var(--muted) / <alpha-value>)',
+					foreground: 'oklch(var(--muted-foreground) / <alpha-value>)',
 				},
 				warning: {
-					DEFAULT: 'hsl(var(--warning))',
-					foreground: 'hsl(var(--warning-foreground))',
+					DEFAULT: 'oklch(var(--warning) / <alpha-value>)',
+					foreground: 'oklch(var(--warning-foreground) / <alpha-value>)',
 				},
 				brand: {
-					DEFAULT: 'hsl(var(--brand))',
-					foreground: 'hsl(var(--brand-foreground))',
+					DEFAULT: 'oklch(var(--brand) / <alpha-value>)',
+					...dynamicTwClasses('brand', 40),
 				},
-				'brand-accent': {
-					DEFAULT: 'hsl(var(--brand-accent))',
-					foreground: 'hsl(var(--brand-accent-foreground))',
-				},
+				// brand: {
+				// 	DEFAULT: 'oklch(var(--brand) / <alpha-value>)',
+				// 	foreground: 'oklch(var(--brand-foreground) / <alpha-value>)',
+				// },
+				// 'brand-accent': {
+				// 	DEFAULT: 'oklch(var(--brand-accent) / <alpha-value>)',
+				// 	foreground: 'oklch(var(--brand-accent-foreground) / <alpha-value>)',
+				// },
 				accent: {
-					DEFAULT: 'hsl(var(--accent))',
-					foreground: 'hsl(var(--accent-foreground))',
+					DEFAULT: 'oklch(var(--accent) / <alpha-value>)',
+					foreground: 'oklch(var(--accent-foreground) / <alpha-value>)',
 				},
 				popover: {
-					DEFAULT: 'hsl(var(--popover))',
-					foreground: 'hsl(var(--popover-foreground))',
+					DEFAULT: 'oklch(var(--popover) / <alpha-value>)',
+					foreground: 'oklch(var(--popover-foreground) / <alpha-value>)',
 				},
 				subtle: {
-					DEFAULT: 'hsl(var(--subtle))',
-					foreground: 'hsl(var(--subtle-foreground))',
+					DEFAULT: 'oklch(var(--subtle) / <alpha-value>)',
+					foreground: 'oklch(var(--subtle-foreground) / <alpha-value>)',
 				},
 				card: {
-					DEFAULT: 'hsl(var(--card))',
-					foreground: 'hsl(var(--card-foreground))',
+					DEFAULT: 'oklch(var(--card) / <alpha-value>)',
+					foreground: 'oklch(var(--card-foreground) / <alpha-value>)',
 				},
 				transparent: 'transparent',
 				current: 'currentColor',
