@@ -874,8 +874,8 @@ importers:
         specifier: ^0.10.1
         version: 0.10.1(typescript@5.4.4)(zod@3.23.8)
       '@trigger.dev/sdk':
-        specifier: 3.0.0-beta.31
-        version: 3.0.0-beta.31(typescript@5.4.4)
+        specifier: 3.0.0-beta.37
+        version: 3.0.0-beta.37(typescript@5.4.4)
       '@trpc/react-query':
         specifier: 11.0.0-rc.334
         version: 11.0.0-rc.334(@tanstack/react-query@5.25.0)(@trpc/client@11.0.0-rc.334)(@trpc/server@11.0.0-rc.334)(react-dom@18.2.0)(react@18.2.0)
@@ -12817,8 +12817,8 @@ packages:
       - tailwindcss
     dev: false
 
-  /@trigger.dev/core-backend@3.0.0-beta.31:
-    resolution: {integrity: sha512-t+FvuMsMG2lH53sfJRwLFjplXOkjaLEpmb6Rh4Ad1QHBXRGK1FEPEGZkfqp6W2ShPfb+SI7eqdUVgpztaNu73A==}
+  /@trigger.dev/core-backend@3.0.0-beta.37:
+    resolution: {integrity: sha512-cXmQJmu6phQoY8rQUbC+Ay1MevmtVgalXFMcAOmTVhgq7xGrZHMdqCdkAFoBe5pI7k+Cdsvl595Xx3ZbInNL5g==}
     engines: {node: '>=18.0.0'}
     dependencies:
       '@opentelemetry/api': 1.8.0
@@ -12851,16 +12851,47 @@ packages:
       - bufferutil
       - supports-color
       - utf-8-validate
+    dev: true
 
-  /@trigger.dev/sdk@3.0.0-beta.31(typescript@5.4.4):
-    resolution: {integrity: sha512-0Gb2UjSeHvGR3pMB71xZzg0B3ixtapEZziVekz+ldaF+1/o4Yv3bDrqEbvqZ1BiV3ieiGEBAukU3TDFbEmLy8w==}
+  /@trigger.dev/core@3.0.0-beta.37:
+    resolution: {integrity: sha512-4TRqd9g6tqfa6/Fl4PxlYWqkwCKYFhadOo6LWt4CUtCSR6er2o7mpQY2cGqm1zd4KUSSxGQlWwiWfp0AjjncAA==}
+    engines: {node: '>=18.0.0'}
+    dependencies:
+      '@google-cloud/precise-date': 4.0.0
+      '@opentelemetry/api': 1.8.0
+      '@opentelemetry/api-logs': 0.48.0
+      '@opentelemetry/exporter-logs-otlp-http': 0.49.1(@opentelemetry/api@1.8.0)
+      '@opentelemetry/exporter-trace-otlp-http': 0.49.1(@opentelemetry/api@1.8.0)
+      '@opentelemetry/instrumentation': 0.49.1(@opentelemetry/api@1.8.0)
+      '@opentelemetry/resources': 1.24.0(@opentelemetry/api@1.8.0)
+      '@opentelemetry/sdk-logs': 0.49.1(@opentelemetry/api-logs@0.48.0)(@opentelemetry/api@1.8.0)
+      '@opentelemetry/sdk-node': 0.49.1(@opentelemetry/api@1.8.0)
+      '@opentelemetry/sdk-trace-base': 1.24.0(@opentelemetry/api@1.8.0)
+      '@opentelemetry/sdk-trace-node': 1.24.0(@opentelemetry/api@1.8.0)
+      '@opentelemetry/semantic-conventions': 1.24.0
+      form-data-encoder: 4.0.2
+      humanize-duration: 3.32.0
+      socket.io-client: 4.7.4
+      superjson: 2.2.1
+      ulidx: 2.3.0
+      zod: 3.22.3
+      zod-error: 1.5.0
+      zod-validation-error: 1.5.0(zod@3.22.3)
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+    dev: false
+
+  /@trigger.dev/sdk@3.0.0-beta.37(typescript@5.4.4):
+    resolution: {integrity: sha512-lHrGrWG8Lmek2radQxlaKZEEsG1m8I4MPx2gfcGuMJIyVUjFdoB7t8Khb52KS5ymKpgANdYrfrB58UzuSZSE1A==}
     engines: {node: '>=18.0.0'}
     dependencies:
       '@opentelemetry/api': 1.8.0
       '@opentelemetry/api-logs': 0.48.0
       '@opentelemetry/semantic-conventions': 1.24.0
-      '@trigger.dev/core': 3.0.0-beta.31
-      '@trigger.dev/core-backend': 3.0.0-beta.31
+      '@trigger.dev/core': 3.0.0-beta.37
+      '@trigger.dev/core-backend': 3.0.0-beta.37
       chalk: 5.3.0
       cronstrue: 2.49.0
       debug: 4.3.4
@@ -18379,6 +18410,11 @@ packages:
 
   /form-data-encoder@1.7.2:
     resolution: {integrity: sha512-qfqtYan3rxrnCk1VYaA4H+Ms9xdpPqvLZa6xmMgFvhO32x7/3J/ExcTd6qpxM0vH2GdMI+poehyBZvqfMTto8A==}
+    dev: false
+
+  /form-data-encoder@4.0.2:
+    resolution: {integrity: sha512-KQVhvhK8ZkWzxKxOr56CPulAhH3dobtuQ4+hNQ+HekH/Wp5gSOafqRAeTphQUJAIk0GBvHZgJ2ZGRWd5kphMuw==}
+    engines: {node: '>= 18'}
     dev: false
 
   /form-data@2.5.1:
