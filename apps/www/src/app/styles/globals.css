@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import '../../../../tooling/tailwind/shared-styles.css';
+@import '../../../../../tooling/tailwind/shared-styles.css';
 
 @layer utilities {
 	.device-lg {
