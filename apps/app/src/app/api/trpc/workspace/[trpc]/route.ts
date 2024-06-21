@@ -7,7 +7,7 @@ import { parseReqForVisitorInfo } from '@barely/lib/utils/middleware';
 import { OPTIONS, setCorsHeaders } from '@barely/lib/utils/trpc-route';
 import { Pool } from '@neondatabase/serverless';
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
-// import { waitUntil } from '@vercel/functions';
+import { waitUntil } from '@vercel/functions';
 import { drizzle } from 'drizzle-orm/neon-serverless';
 
 import { env } from '~/env';
@@ -20,58 +20,71 @@ const handler = auth(async req => {
 		schema: dbSchema,
 	});
 
-	try {
-		const response = await fetchRequestHandler({
-			endpoint: '/api/trpc/workspace',
-			router: workspaceRouter,
-			req,
-			createContext: () =>
-				createTRPCContext({
-					session: req.auth,
-					headers: req.headers,
-					visitor: parseReqForVisitorInfo(req),
-					dbPool,
-				}),
-			onError({ error, path }) {
-				console.error(`>>> tRPC Error on '${path}'`, error);
-			},
-		});
+	// try {
+	// 	const response = await fetchRequestHandler({
+	// 		endpoint: '/api/trpc/workspace',
+	// 		router: workspaceRouter,
+	// 		req,
+	// 		createContext: () =>
+	// 			createTRPCContext({
+	// 				session: req.auth,
+	// 				headers: req.headers,
+	// 				visitor: parseReqForVisitorInfo(req),
+	// 				dbPool,
+	// 			}),
+	// 		onError({ error, path }) {
+	// 			console.error(`>>> tRPC Error on '${path}'`, error);
+	// 		},
+	// 	});
 
-		setCorsHeaders(response);
+	// 	setCorsHeaders(response);
 
-		return response;
-	} catch (error) {
-		console.error('err => ', error);
-		return new Response(null, {
-			statusText: 'Internal Server Error',
-			status: 500,
-		});
-	} finally {
-		console.log('finally, closing pool for workspace route');
-		await pool.end();
-	}
-
-	// const response = await fetchRequestHandler({
-	// 	endpoint: '/api/trpc/workspace',
-	// 	router: workspaceRouter,
-	// 	req,
-	// 	createContext: () =>
-	// 		createTRPCContext({
-	// 			session: req.auth,
-	// 			headers: req.headers,
-	// 			visitor: parseReqForVisitorInfo(req),
-	// 			dbPool,
-	// 		}),
-	// 	onError({ error, path }) {
-	// 		console.error(`>>> tRPC Error on '${path}'`, error);
-	// 	},
-	// }).catch(err => {
-	// 	console.error('err => ', err);
+	// 	return response;
+	// } catch (error) {
+	// 	console.error('err => ', error);
 	// 	return new Response(null, {
 	// 		statusText: 'Internal Server Error',
 	// 		status: 500,
 	// 	});
-	// });
+	// } finally {
+	// 	console.log('finally, closing pool for workspace route');
+	// 	await pool.end();
+	// }
+
+	await fetchRequestHandler({
+		endpoint: '/api/trpc/workspace',
+		router: workspaceRouter,
+		req,
+		createContext: () =>
+			createTRPCContext({
+				session: req.auth,
+				headers: req.headers,
+				visitor: parseReqForVisitorInfo(req),
+				dbPool,
+			}),
+		onError({ error, path }) {
+			console.error(`>>> tRPC Error on '${path}'`, error);
+		},
+	})
+		.then(res => {
+			console.log('we got a response => ', res);
+
+			setCorsHeaders(res);
+
+			console.log('we set the cors headers');
+
+			waitUntil(pool.end());
+
+			return res;
+		})
+
+		.catch(err => {
+			console.error('err => ', err);
+			return new Response(null, {
+				statusText: 'Internal Server Error',
+				status: 500,
+			});
+		});
 
 	// setCorsHeaders(response);
 
