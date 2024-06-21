@@ -7,7 +7,7 @@ import type { SessionUser } from '.';
 import { auth } from '.';
 import { raise } from '../../utils/raise';
 import { getAbsoluteUrl } from '../../utils/url';
-import { db } from '../db';
+import { dbHttp } from '../db';
 import { VerificationTokens } from '../routes/auth/verification-token.sql';
 import { UserSessions } from '../routes/user/user-session.sql';
 import { Users } from '../routes/user/user.sql';
@@ -43,7 +43,7 @@ export async function createLoginLink(props: CreateLoginLinkProps) {
 
 	const expires = new Date(Date.now() + expiresIn * 1000);
 
-	await db.http.insert(VerificationTokens).values({
+	await dbHttp.insert(VerificationTokens).values({
 		token: hashedToken,
 		expires,
 		identifier: props.identifier,
@@ -86,7 +86,7 @@ export function generateVerificationToken() {
 export async function sendLoginEmail(props: { email: string; callbackUrl?: string }) {
 	console.log('sendLoginEmail', props.email, props.callbackUrl);
 
-	const dbUser = await db.http.query.Users.findFirst({
+	const dbUser = await dbHttp.query.Users.findFirst({
 		where: eq(Users.email, props.email),
 		with: {
 			personalWorkspace: {
@@ -140,5 +140,5 @@ export async function sendLoginEmail(props: { email: string; callbackUrl?: strin
 }
 
 export async function deleteSession(sessionToken: string) {
-	await db.http.delete(UserSessions).where(eq(UserSessions.sessionToken, sessionToken));
+	await dbHttp.delete(UserSessions).where(eq(UserSessions.sessionToken, sessionToken));
 }

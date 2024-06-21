@@ -16,7 +16,8 @@ import { newId } from '../../../utils/id';
 import { log } from '../../../utils/log';
 import { sqlIncrement } from '../../../utils/sql';
 import { ratelimit } from '../../../utils/upstash';
-import { db } from '../../db';
+import { dbHttp } from '../../db';
+// import { db } from '../../db';
 import { reportEventToMeta } from '../../meta/meta.endpts.event';
 import { AnalyticsEndpoints } from '../analytics-endpoint/analytics-endpoint.sql';
 import { Links } from '../link/link.sql';
@@ -63,13 +64,13 @@ export async function recordLinkClick({
 	const timestamp = new Date(time).toISOString();
 
 	// increment the link click count in db
-	await db.http
+	await dbHttp
 		.update(Links)
 		.set({ clicks: sqlIncrement(Links.clicks) })
 		.where(eq(Links.id, link.id));
 
 	// increment the workspace link usage count in db
-	await db.http
+	await dbHttp
 		.update(Workspaces)
 		.set({ linkUsage: sqlIncrement(Workspaces.linkUsage) })
 		.where(eq(Workspaces.id, link.workspaceId));
@@ -80,7 +81,7 @@ export async function recordLinkClick({
 
 	const analyticsEndpoints =
 		link.remarketing ?
-			await db.pool.query.AnalyticsEndpoints.findMany({
+			await dbHttp.query.AnalyticsEndpoints.findMany({
 				where: eq(AnalyticsEndpoints.workspaceId, link.workspaceId),
 			})
 		:	[];
@@ -232,7 +233,7 @@ export async function recordCartEvent({
 
 	const timestamp = new Date(Date.now()).toISOString();
 
-	const analyticsEndpoints = await db.pool.query.AnalyticsEndpoints.findMany({
+	const analyticsEndpoints = await dbHttp.query.AnalyticsEndpoints.findMany({
 		where: eq(AnalyticsEndpoints.workspaceId, cart.workspaceId),
 	});
 

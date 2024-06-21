@@ -1,5 +1,5 @@
 import { auth } from '@barely/lib/server/auth';
-import { db } from '@barely/lib/server/db';
+import { dbHttp } from '@barely/lib/server/db';
 import { providerStateSchema } from '@barely/lib/server/routes/provider-account/provider-account.schema';
 import { ProviderAccounts } from '@barely/lib/server/routes/provider-account/provider-account.sql';
 import { newId } from '@barely/lib/utils/id';
@@ -64,7 +64,7 @@ export const GET = auth(async req => {
 
 	const metadata = mailchimpMetadataSchema.parse(await metadataRes.json());
 
-	await db.http.insert(ProviderAccounts).values({
+	await dbHttp.insert(ProviderAccounts).values({
 		provider: 'mailchimp',
 		id: newId('providerAccount'),
 		userId,

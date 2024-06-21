@@ -3,7 +3,7 @@ import { and, eq } from 'drizzle-orm';
 import type { CartFunnel } from '../cart-funnel/cart-funnel.schema';
 import type { Link } from '../link/link.schema';
 import type { PressKit } from '../press-kit/press-kit.schema';
-import { db } from '../../db';
+import { dbHttp } from '../../db';
 import { LandingPages } from './landing-page.sql';
 
 export async function getLandingPageData({
@@ -13,7 +13,7 @@ export async function getLandingPageData({
 	handle: string;
 	key: string;
 }) {
-	const lpRaw = await db.http.query.LandingPages.findFirst({
+	const lpRaw = await dbHttp.query.LandingPages.findFirst({
 		where: and(eq(LandingPages.handle, handle), eq(LandingPages.key, key)),
 		with: {
 			workspace: {

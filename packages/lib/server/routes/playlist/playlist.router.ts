@@ -99,9 +99,9 @@ const playlistRouter = createTRPCRouter({
 		//     averagePlaylistsPerCurator: z.number(),
 		//   }),
 		// )
-		.query(async ({ ctx, input }) => {
+		.query(async ({ input }) => {
 			const { totalPlaylists, totalCurators, averagePlaylistsPerCurator } =
-				await totalPlaylistReachByGenres(input.genreIds, ctx.db);
+				await totalPlaylistReachByGenres(input.genreIds);
 
 			return {
 				totalPlaylists,

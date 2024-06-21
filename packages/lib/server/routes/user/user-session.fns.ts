@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 
-import type { Db } from '../../db';
 import type { UserSession } from './user-session.schema';
+import { dbHttp } from '../../db';
 import { UserSessions } from './user-session.sql';
 import {
 	deserializeUser,
@@ -27,8 +27,8 @@ export function serializeUserSession(userSession: {
 	};
 }
 
-export async function getSessionAndUser(sessionToken: string, db: Db) {
-	const sessionWithUser = await db.http.query.UserSessions.findFirst({
+export async function getSessionAndUser(sessionToken: string) {
+	const sessionWithUser = await dbHttp.query.UserSessions.findFirst({
 		where: eq(UserSessions.sessionToken, sessionToken),
 		with: {
 			user: {

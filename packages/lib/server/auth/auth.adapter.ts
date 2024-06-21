@@ -1,9 +1,9 @@
 import type { Adapter } from '@auth/core/adapters';
 import { and, eq } from 'drizzle-orm';
 
-import type { Db } from '../db';
 import { newId } from '../../utils/id';
 import { raise } from '../../utils/raise';
+import { dbHttp } from '../db';
 import {
 	deserializeVerificationToken,
 	serializeVerificationToken,
@@ -29,7 +29,7 @@ import { Users } from '../routes/user/user.sql';
 import { getSpotifyUser } from '../spotify/spotify.endpts.user';
 import { deleteSession } from './auth.fns';
 
-export function NeonAdapter(db: Db): Adapter {
+export function NeonAdapter(): Adapter {
 	return {
 		createUser: async userData => {
 			const newUser = await createUser(
@@ -38,10 +38,10 @@ export function NeonAdapter(db: Db): Adapter {
 					emailVerified:
 						userData.emailVerified ? userData.emailVerified.toISOString() : null,
 				},
-				db,
+				// db.pool,
 			);
 
-			const user = await getSessionUserByUserId(newUser.id, db);
+			const user = await getSessionUserByUserId(newUser.id);
 
 			if (!user) {
 				throw new Error('No user found after creating user');
@@ -51,7 +51,7 @@ export function NeonAdapter(db: Db): Adapter {
 		},
 
 		getUser: async userId => {
-			const user = await getSessionUserByUserId(userId, db);
+			const user = await getSessionUserByUserId(userId);
 
 			if (!user) return null;
 
@@ -61,7 +61,7 @@ export function NeonAdapter(db: Db): Adapter {
 		getUserByEmail: async email => {
 			// console.log('getting user by email: ', email);
 
-			const user = await getSessionUserByEmail(email, db);
+			const user = await getSessionUserByEmail(email);
 
 			if (!user) return null;
 
@@ -80,7 +80,6 @@ export function NeonAdapter(db: Db): Adapter {
 			const user = await getSessionUserByAccount(
 				provider.data,
 				account.providerAccountId,
-				db,
 			);
 
 			if (!user) return null;
@@ -93,12 +92,12 @@ export function NeonAdapter(db: Db): Adapter {
 				throw new Error('No user id');
 			}
 
-			await db.http
+			await dbHttp
 				.update(Users)
 				.set(serializeUser(userData))
 				.where(eq(Users.id, userData.id));
 
-			const user = await getSessionUserByUserId(userData.id, db);
+			const user = await getSessionUserByUserId(userData.id);
 
 			if (!user) {
 				throw new Error('No updated user found');
@@ -108,7 +107,7 @@ export function NeonAdapter(db: Db): Adapter {
 		},
 
 		deleteUser: async id => {
-			await db.pool.delete(Users).where(eq(Users.id, id));
+			await dbHttp.delete(Users).where(eq(Users.id, id));
 		},
 
 		linkAccount: async account => {
@@ -128,7 +127,7 @@ export function NeonAdapter(db: Db): Adapter {
 			}
 
 			// get user by id
-			const user = await getSessionUserByUserId(account.userId, db);
+			const user = await getSessionUserByUserId(account.userId);
 
 			if (!user) {
 				throw new Error('No user found after linking account');
@@ -138,41 +137,41 @@ export function NeonAdapter(db: Db): Adapter {
 				user.workspaces.find(w => w.type === 'personal') ??
 				raise('No personal workspace found');
 
-			await db.pool.transaction(async tx => {
-				await tx.insert(ProviderAccounts).values({
-					...account,
-					type: type.data,
-					provider: provider.data,
-					id: newId('providerAccount'),
-					workspaceId: personalWorkspace.id,
+			// await db.pool.transaction(async tx => {
+			await dbHttp.insert(ProviderAccounts).values({
+				...account,
+				type: type.data,
+				provider: provider.data,
+				id: newId('providerAccount'),
+				workspaceId: personalWorkspace.id,
+			});
+
+			if (account.provider === 'spotify' && account.access_token) {
+				const spotifyUser = await getSpotifyUser({
+					accessToken: account.access_token,
 				});
 
-				if (account.provider === 'spotify' && account.access_token) {
-					const spotifyUser = await getSpotifyUser({
-						accessToken: account.access_token,
-					});
+				// console.log("spotifyUser => ", spotifyUser);
 
-					// console.log("spotifyUser => ", spotifyUser);
+				await dbHttp
+					.update(ProviderAccounts)
+					.set({
+						username: spotifyUser.display_name,
+						email: spotifyUser.email,
+						image: spotifyUser.images?.[0]?.url,
+						externalProfileUrl: spotifyUser.external_urls.spotify,
+					})
+					.where(eq(ProviderAccounts.providerAccountId, account.providerAccountId));
 
-					await tx
-						.update(ProviderAccounts)
-						.set({
-							username: spotifyUser.display_name,
-							email: spotifyUser.email,
-							image: spotifyUser.images?.[0]?.url,
-							externalProfileUrl: spotifyUser.external_urls.spotify,
-						})
-						.where(eq(ProviderAccounts.providerAccountId, account.providerAccountId));
+				// trigger syncing playlists, but don't wait for it to finish. otherwise, the user hangs on the spotify auth screen which is confusing
+				// const syncPlaylistsEndpoint = `${env.NEXT_PUBLIC_APP_BASE_URL}/api/rest/spotify/sync-playlists/${account.providerAccountId}`;
 
-					// trigger syncing playlists, but don't wait for it to finish. otherwise, the user hangs on the spotify auth screen which is confusing
-					// const syncPlaylistsEndpoint = `${env.NEXT_PUBLIC_APP_BASE_URL}/api/rest/spotify/sync-playlists/${account.providerAccountId}`;
-
-					// // eslint-disable-next-line @typescript-eslint/no-floating-promises
-					// fetch(syncPlaylistsEndpoint, {
-					//   method: "POST",
-					// }); //fixme: was having trouble with open-api. figure out how to call separate instance to sync playlists in the background.
-				}
-			});
+				// // eslint-disable-next-line @typescript-eslint/no-floating-promises
+				// fetch(syncPlaylistsEndpoint, {
+				//   method: "POST",
+				// }); //fixme: was having trouble with open-api. figure out how to call separate instance to sync playlists in the background.
+			}
+			// });
 		},
 
 		unlinkAccount: async account => {
@@ -184,7 +183,7 @@ export function NeonAdapter(db: Db): Adapter {
 				throw new Error('Invalid provider');
 			}
 
-			await db.http
+			await dbHttp
 				.delete(ProviderAccounts)
 				.where(
 					and(
@@ -195,11 +194,11 @@ export function NeonAdapter(db: Db): Adapter {
 		},
 
 		createVerificationToken: async token => {
-			await db.pool
+			await dbHttp
 				.insert(VerificationTokens)
 				.values({ ...serializeVerificationToken(token) });
 
-			const verificationToken = await db.pool
+			const verificationToken = await dbHttp
 				.select()
 				.from(VerificationTokens)
 				.where(eq(VerificationTokens.token, token.token))
@@ -214,7 +213,7 @@ export function NeonAdapter(db: Db): Adapter {
 				// console.log("using verification token => ", token);
 
 				const deletedToken =
-					(await db.http
+					(await dbHttp
 						.select()
 						.from(VerificationTokens)
 						.where(
@@ -247,9 +246,9 @@ export function NeonAdapter(db: Db): Adapter {
 
 		createSession: async sessionData => {
 			// console.log("creating session => ", sessionData);
-			await db.pool.insert(UserSessions).values(serializeUserSession(sessionData));
+			await dbHttp.insert(UserSessions).values(serializeUserSession(sessionData));
 
-			const session = await db.pool
+			const session = await dbHttp
 				.select()
 				.from(UserSessions)
 				.where(eq(UserSessions.sessionToken, sessionData.sessionToken))
@@ -283,12 +282,12 @@ export function NeonAdapter(db: Db): Adapter {
 			// // console.log('returning session and user => ', sessionAndUser);
 
 			// return sessionAndUser;
-			return await getSessionAndUser(sessionToken, db);
+			return await getSessionAndUser(sessionToken);
 		},
 
 		updateSession: async sessionData => {
 			// console.log("updating session => ", sessionData);
-			await db.pool
+			await dbHttp
 				.update(UserSessions)
 				.set({
 					...sessionData,
@@ -296,7 +295,7 @@ export function NeonAdapter(db: Db): Adapter {
 				})
 				.where(eq(UserSessions.sessionToken, sessionData.sessionToken));
 
-			const session = await db.pool
+			const session = await dbHttp
 				.select()
 				.from(UserSessions)
 				.where(eq(UserSessions.sessionToken, sessionData.sessionToken))

@@ -29,7 +29,7 @@ import { sendText } from '../../../utils/sms';
 import { sqlAnd } from '../../../utils/sql';
 import { getAbsoluteUrl } from '../../../utils/url';
 import { createLoginLink } from '../../auth/auth.fns';
-import { db } from '../../db';
+import { dbHttp } from '../../db';
 import { stripe } from '../../stripe';
 import { totalPlaylistReachByGenres } from '../playlist/playlist.fns';
 import { Tracks } from '../track/track.sql';
@@ -78,7 +78,6 @@ export async function createPitchCheckoutLink(props: {
 
 	const { totalPlaylists, totalCurators } = await totalPlaylistReachByGenres(
 		props.campaign.track.genres.map(g => g.id),
-		db,
 	);
 
 	const estimatedPlaylists = Math.ceil(
@@ -120,8 +119,8 @@ export async function createPitchCheckoutLink(props: {
 
 	return session.url;
 }
-export async function getCampaignById(campaignId: string, db: Db) {
-	const campaign = await db.http.query.Campaigns.findFirst({
+export async function getCampaignById(campaignId: string) {
+	const campaign = await dbHttp.query.Campaigns.findFirst({
 		where: eq(Campaigns.id, campaignId),
 		with: {
 			workspace: true,
@@ -319,7 +318,7 @@ export async function createPlaylistPitchCampaign(props: {
 
 	await props.db.http.insert(Campaigns).values(newCampaign);
 
-	const campaign = await getCampaignById(newCampaign.id, props.db);
+	const campaign = await getCampaignById(newCampaign.id);
 
 	// 📧 send email/text to A&R team for screening
 

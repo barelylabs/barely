@@ -1,7 +1,8 @@
 import type { z } from 'zod';
 import { eq } from 'drizzle-orm';
 
-import type { Db, DbPoolTransaction } from '../../db';
+import type { Db } from '../../db';
+import type { DbPoolTransaction } from '../../db/pool';
 import type {
 	createTrackSchema,
 	InsertTrack,

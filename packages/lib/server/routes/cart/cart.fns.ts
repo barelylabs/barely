@@ -15,7 +15,8 @@ import { isProduction } from '../../../utils/environment';
 import { newId } from '../../../utils/id';
 import { numToPaddedString } from '../../../utils/number';
 import { raise } from '../../../utils/raise';
-import { db } from '../../db';
+import { dbHttp } from '../../db';
+// import { db } from '../../db';
 import { getShippingEstimates } from '../../shipping/shipengine.endpts';
 import { stripe } from '../../stripe';
 import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
@@ -59,7 +60,7 @@ export const funnelWith = {
 } as const;
 
 export async function getFunnelByParams(handle: string, key: string) {
-	const funnel = await db.pool.query.CartFunnels.findFirst({
+	const funnel = await dbHttp.query.CartFunnels.findFirst({
 		where: and(eq(CartFunnels.handle, handle), eq(CartFunnels.key, key)),
 		with: funnelWith,
 	});
@@ -189,14 +190,14 @@ export async function createMainCartFromFunnel({
 		cart.bumpShippingPrice = mainPlusBumpShippingPrice - mainShippingAmount;
 	}
 
-	await db.pool.insert(Carts).values(cart);
+	await dbHttp.insert(Carts).values(cart);
 
 	return cart;
 }
 
 /* get cart */
 export async function getCartById(id: string, handle?: string, funnelKey?: string) {
-	const cart = await db.pool.query.Carts.findFirst({
+	const cart = await dbHttp.query.Carts.findFirst({
 		where: eq(Carts.id, id),
 		with: {
 			fan: true,
@@ -353,7 +354,7 @@ export async function sendCartReceiptEmail(cart: ReceiptCart) {
 }
 
 export async function createOrderIdForCart(cart: Cart) {
-	const ordersCount = await db.pool
+	const ordersCount = await dbHttp
 		.select({ count: count() })
 		.from(Carts)
 		.where(and(eq(Carts.workspaceId, cart.workspaceId), isNotNull(Carts.orderId)))
@@ -367,14 +368,14 @@ export async function createOrderIdForCart(cart: Cart) {
 export async function getOrCreateCartOrderId(cart: Cart) {
 	if (cart.orderId) return cart.orderId;
 
-	const ordersCount = await db.pool
+	const ordersCount = await dbHttp
 		.select({ count: count() })
 		.from(Carts)
 		.where(and(eq(Carts.workspaceId, cart.workspaceId), isNotNull(Carts.orderId)))
 		.then(r => r[0]?.count ?? raise('count not found'));
 
 	const orderId = ordersCount + 1;
-	await db.pool
+	await dbHttp
 		.update(Carts)
 		.set({
 			orderId,

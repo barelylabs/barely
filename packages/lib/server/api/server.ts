@@ -2,6 +2,7 @@ import { cache } from 'react';
 import { headers } from 'next/headers';
 
 import { auth } from '../auth';
+import { dbPool } from '../db';
 import { appRouter } from './router';
 import { createCallerFactory, createTRPCContext } from './trpc';
 
@@ -10,6 +11,7 @@ import { createCallerFactory, createTRPCContext } from './trpc';
  * handling a tRPC call from a React Server Component.
  */
 interface ServerContextProps {
+	// dbPool: DbPool;
 	handle?: string;
 }
 
@@ -22,10 +24,11 @@ const createContext = cache(async ({ handle }: ServerContextProps) => {
 	return createTRPCContext({
 		session: await auth(),
 		headers: heads,
+		dbPool,
 	});
 });
 
 const createCaller = createCallerFactory(appRouter);
 
-export const api = (props?: ServerContextProps) =>
-	createCaller(() => createContext(props ?? {}));
+export const api = (props: ServerContextProps) =>
+	createCaller(() => createContext(props));

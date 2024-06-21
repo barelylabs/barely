@@ -9,7 +9,7 @@ import { newId } from '../../../utils/id';
 import { log } from '../../../utils/log';
 import { pushEvent } from '../../../utils/pusher-server';
 import { raise } from '../../../utils/raise';
-import { db } from '../../db';
+import { dbHttp } from '../../db';
 import { stripe } from '../../stripe';
 import {
 	stripeLineItemMetadataSchema,
@@ -39,7 +39,7 @@ export async function createStripeWorkspaceCustomer(props: {
 	});
 
 	// update workspace
-	const stripeWorkspace = await db.http
+	const stripeWorkspace = await dbHttp
 		.update(Workspaces)
 		.set(
 			env.VERCEL_ENV === 'development' || env.VERCEL_ENV === 'preview' ?
@@ -120,7 +120,7 @@ export async function handleStripeCheckoutSessionComplete(
 					 * billingCycleStart,
 					 */
 
-					const workspace = await db.http.query.Workspaces.findFirst({
+					const workspace = await dbHttp.query.Workspaces.findFirst({
 						where: eq(Workspaces.id, transactionMetadata.workspaceId),
 					});
 
@@ -134,7 +134,7 @@ export async function handleStripeCheckoutSessionComplete(
 						return NextResponse.json({ received: true }, { status: 200 });
 					}
 
-					await db.pool
+					await dbHttp
 						.update(Workspaces)
 						.set({
 							plan: plan.id,
@@ -162,7 +162,7 @@ export async function handleStripeCheckoutSessionComplete(
 				/** CAMPAIGNS */
 				const campaign =
 					lineItemMetadata.campaignId ?
-						await db.http.query.Campaigns.findFirst({
+						await dbHttp.query.Campaigns.findFirst({
 							where: eq(Campaigns.id, lineItemMetadata.campaignId),
 							with: {
 								track: {
@@ -187,11 +187,10 @@ export async function handleStripeCheckoutSessionComplete(
 							}
 
 							console.log('assigning playlist pitch to reviewers');
-							await assignPlaylistPitchToReviewers(campaign.id, db);
+							await assignPlaylistPitchToReviewers(campaign.id);
 
 							const { totalPlaylists, totalCurators } = await totalPlaylistReachByGenres(
 								campaign.track._genres.map(_g => _g.genreId),
-								db,
 							);
 
 							const estimatedPlaylists = Math.ceil(
@@ -219,24 +218,39 @@ export async function handleStripeCheckoutSessionComplete(
 		);
 	}
 
-	await db.pool.transaction(async tx => {
-		console.log('adding transaction to db => ', transaction);
+	// await db.pool.transaction(async tx => {
+	// 	console.log('adding transaction to db => ', transaction);
 
-		await tx.insert(Transactions).values(transaction);
+	// 	await tx.insert(Transactions).values(transaction);
 
-		console.log('adding line items to db => ', lineItems);
+	// 	console.log('adding line items to db => ', lineItems);
 
-		await tx.insert(TransactionLineItems).values(lineItems);
+	// 	await tx.insert(TransactionLineItems).values(lineItems);
 
-		await Promise.allSettled(
-			campaignIds.map(async campaignId => {
-				await tx
-					.update(Campaigns)
-					.set({
-						stage: 'active',
-					})
-					.where(eq(Campaigns.id, campaignId));
-			}),
-		);
-	});
+	// 	await Promise.allSettled(
+	// 		campaignIds.map(async campaignId => {
+	// 			await tx
+	// 				.update(Campaigns)
+	// 				.set({
+	// 					stage: 'active',
+	// 				})
+	// 				.where(eq(Campaigns.id, campaignId));
+	// 		}),
+	// 	);
+	// });
+
+	await dbHttp.insert(Transactions).values(transaction);
+
+	await dbHttp.insert(TransactionLineItems).values(lineItems);
+
+	await Promise.allSettled(
+		campaignIds.map(async campaignId => {
+			await dbHttp
+				.update(Campaigns)
+				.set({
+					stage: 'active',
+				})
+				.where(eq(Campaigns.id, campaignId));
+		}),
+	);
 }

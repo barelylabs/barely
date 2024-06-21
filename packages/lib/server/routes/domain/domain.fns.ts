@@ -7,7 +7,7 @@ import { validDomainRegex } from '../../../utils/domain';
 import { getApexDomain, getDomainWithoutWWW } from '../../../utils/link';
 import { sqlStringEndsWith } from '../../../utils/sql';
 import { zDelete, zGet, zPost } from '../../../utils/zod-fetch';
-import { db } from '../../db';
+import { dbHttp } from '../../db';
 import { Domains } from './domain.sql';
 
 export async function validateDomain(domain: string) {
@@ -42,7 +42,7 @@ export async function validateDomain(domain: string) {
 }
 
 export async function domainExists(domain: string) {
-	const existingDomain = await db.http.query.Domains.findFirst({
+	const existingDomain = await dbHttp.query.Domains.findFirst({
 		where: eq(Domains.domain, domain),
 		columns: {
 			domain: true,
@@ -138,7 +138,7 @@ export async function removeDomainFromVercel(props: {
 	}
 
 	const apexDomain = getApexDomain(`https://${props.domain}`);
-	const domainCount = await db.http
+	const domainCount = await dbHttp
 		.select({
 			count: sql<number>`cast(count(${Domains.domain}) as int)`,
 		})

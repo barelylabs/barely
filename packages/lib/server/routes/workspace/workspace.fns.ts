@@ -3,13 +3,15 @@ import { WorkspaceInviteEmailTemplate } from '@barely/email/src/templates/auth/w
 import { and, eq } from 'drizzle-orm';
 
 import type { SessionUser, SessionWorkspace } from '../../auth';
-import type { Db, DbPoolTransaction } from '../../db';
+import type { Db } from '../../db';
+import type { DbPoolTransaction } from '../../db/pool';
 import type { User } from '../user/user.schema';
 import type { CreateWorkspace, InsertWorkspace } from './workspace.schema';
 import { newId } from '../../../utils/id';
 import { sqlIncrement } from '../../../utils/sql';
 import { createLoginLink } from '../../auth/auth.fns';
-import { db } from '../../db';
+import { dbHttp } from '../../db';
+// import { db } from '../../db';
 import { _Users_To_Workspaces } from '../user/user.sql';
 import { WorkspaceInvites } from '../workspace-invite/workspace-invite.sql';
 import { Workspaces } from './workspace.sql';
@@ -114,7 +116,7 @@ export async function incrementWorkspaceFileUsage(
 }
 
 export async function getWorkspaceByHandle(handle: string) {
-	return await db.http.query.Workspaces.findFirst({
+	return await dbHttp.query.Workspaces.findFirst({
 		where: eq(Workspaces.handle, handle),
 	});
 }
@@ -133,7 +135,7 @@ export async function inviteUserToWorkspace({
 	const expiresAt = new Date(Date.now() + TWO_WEEKS_IN_SECONDS * 1000); // 2 weeks
 
 	try {
-		await db.pool.insert(WorkspaceInvites).values({
+		await dbHttp.insert(WorkspaceInvites).values({
 			email,
 			workspaceId: workspace.id,
 			expiresAt,
@@ -173,7 +175,7 @@ export async function checkIfWorkspaceHasPendingInviteForUser({
 	user: SessionUser;
 	workspaceHandle: string;
 }) {
-	const workspaceWithPendingInvite = await db.pool.query.Workspaces.findFirst({
+	const workspaceWithPendingInvite = await dbHttp.query.Workspaces.findFirst({
 		where: eq(Workspaces.handle, workspaceHandle),
 		with: {
 			invites: {
@@ -189,14 +191,14 @@ export async function checkIfWorkspaceHasPendingInviteForUser({
 		console.log('pendingInvite => ', pendingInvite);
 		// add user to workspace
 		try {
-			await db.pool.insert(_Users_To_Workspaces).values({
+			await dbHttp.insert(_Users_To_Workspaces).values({
 				workspaceId: workspaceWithPendingInvite.id,
 				userId: user.id,
 				role: pendingInvite.role,
 			});
 
 			// delete any pending invites for this user
-			await db.pool
+			await dbHttp
 				.delete(WorkspaceInvites)
 				.where(
 					and(

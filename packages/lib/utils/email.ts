@@ -15,7 +15,7 @@ export function isRealEmail(email: string) {
 export async function checkEmailExists(email: string, db?: Db) {
 	if (window === undefined && !!db) {
 		const { checkEmailExistsOnServer } = await import('../server/routes/user/user.fns');
-		return checkEmailExistsOnServer(email, db);
+		return checkEmailExistsOnServer(email);
 	}
 
 	const { checkEmailExistsServerAction } = await import(

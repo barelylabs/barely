@@ -3,7 +3,8 @@ import { and, asc, eq, isNull } from 'drizzle-orm';
 import { newId } from '../../../utils/id';
 import { raise } from '../../../utils/raise';
 import { getAbsoluteUrl } from '../../../utils/url';
-import { db } from '../../db';
+import { dbHttp } from '../../db';
+// import { db } from '../../db';
 import {
 	WorkflowActions,
 	WorkflowRuns,
@@ -13,6 +14,7 @@ import {
 import { Fans } from './fan.sql';
 
 export async function createFan(props: {
+	// dbPool: DbPool;
 	workspaceId: string;
 	fullName: string;
 	email: string;
@@ -32,7 +34,9 @@ export async function createFan(props: {
 	emailMarketingOptIn?: boolean;
 	smsMarketingOptIn?: boolean;
 }) {
-	const newFans = await db.pool
+	// const { dbPool } = props;
+
+	const newFans = await dbHttp
 		.insert(Fans)
 		.values({
 			id: newId('fan'),
@@ -42,7 +46,7 @@ export async function createFan(props: {
 
 	const newFan = newFans[0] ?? raise('error creating new fan');
 
-	const newFanTriggers = await db.pool
+	const newFanTriggers = await dbHttp
 		.select()
 		.from(WorkflowTriggers)
 		.leftJoin(
@@ -69,12 +73,12 @@ export async function createFan(props: {
 			const trigger =
 				newFanWorkflows.WorkflowTriggers ?? raise('no trigger found for new fan trigger');
 			const firstAction =
-				(await db.pool.query.WorkflowActions.findFirst({
+				(await dbHttp.query.WorkflowActions.findFirst({
 					where: eq(WorkflowActions.workflowId, workflow.id),
 					orderBy: asc(WorkflowActions.lexorank),
 				})) ?? raise('no first action found for workflow');
 
-			await db.pool.insert(WorkflowRuns).values({
+			await dbHttp.insert(WorkflowRuns).values({
 				id: newId('workflowRun'),
 				workflowId: workflow.id,
 				triggerId: trigger.id,

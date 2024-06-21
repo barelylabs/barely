@@ -151,7 +151,7 @@ export const campaignRouter = createTRPCRouter({
 			console.log('createUserAndPlaylistPitch', input);
 
 			// 🙋‍♂️ create user
-			const newUser = await createUser(input.user, ctx.db);
+			const newUser = await createUser(input.user);
 
 			// 🔎 check if artist already exists in db
 			if (input.artist.spotifyArtistId) {
@@ -244,7 +244,7 @@ export const campaignRouter = createTRPCRouter({
 			// };
 
 			const newSessionUser =
-				(await getSessionUserByUserId(newUser.id, ctx.db)) ?? raise('no user found');
+				(await getSessionUserByUserId(newUser.id)) ?? raise('no user found');
 
 			const newCampaign = createPlaylistPitchCampaign({
 				user: newSessionUser,
@@ -265,7 +265,7 @@ export const campaignRouter = createTRPCRouter({
 		.mutation(async ({ ctx, input }) => {
 			const { campaignId } = input;
 
-			const campaign = await getCampaignById(campaignId, ctx.db);
+			const campaign = await getCampaignById(campaignId);
 
 			if (!campaign)
 				throw new TRPCError({
@@ -286,9 +286,9 @@ export const campaignRouter = createTRPCRouter({
 
 	// GET
 
-	byId: publicProcedure.input(z.string()).query(async ({ input: campaignId, ctx }) => {
+	byId: publicProcedure.input(z.string()).query(async ({ input: campaignId }) => {
 		console.log('fetching campaign', campaignId);
-		const campaign = await getCampaignById(campaignId, ctx.db);
+		const campaign = await getCampaignById(campaignId);
 		if (!campaign) throw new TRPCError({ code: 'NOT_FOUND' });
 		return campaign;
 	}),
@@ -541,7 +541,7 @@ export const campaignRouter = createTRPCRouter({
 
 				// send email to the user that created the campaign
 				const user =
-					(await getSessionUserByUserId(campaign.createdBy.id, ctx.db)) ??
+					(await getSessionUserByUserId(campaign.createdBy.id)) ??
 					raise('no user found for that campaign');
 				const emailLoginLink = await createLoginLink({
 					user,

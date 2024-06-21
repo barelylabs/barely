@@ -2,10 +2,12 @@
 
 import { eq } from 'drizzle-orm';
 
-import { db } from '../../db';
+import { dbHttp } from '../../db';
+
+// import { db } from '../../db';
 
 export async function checkEmailExistsServerAction(email: string) {
-	const emailExists = await db.http.query.Users.findFirst({
+	const emailExists = await dbHttp.query.Users.findFirst({
 		where: Users => eq(Users.email, email),
 	}).then(u => !!u);
 
@@ -13,7 +15,7 @@ export async function checkEmailExistsServerAction(email: string) {
 }
 
 export async function checkPhoneNumberExistsServerAction(phone: string) {
-	const phoneExists = await db.http.query.Users.findFirst({
+	const phoneExists = await dbHttp.query.Users.findFirst({
 		where: Users => eq(Users.phone, phone),
 	}).then(u => !!u);
 

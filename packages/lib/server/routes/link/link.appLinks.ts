@@ -3,7 +3,7 @@ import type { RequestOptions } from 'https';
 import { eq } from 'drizzle-orm';
 import { http, https } from 'follow-redirects';
 
-import { db } from '../../db';
+import { dbHttp } from '../../db';
 import { Links } from './link.sql';
 
 export function getDiceAppLinkUrl({ url, linkId }: { url: string; linkId: string }) {
@@ -26,7 +26,7 @@ export function getDiceAppLinkUrl({ url, linkId }: { url: string; linkId: string
 			if (typeof nextUrl === 'string' && nextUrl.includes('agzl.app.link')) {
 				console.log('setting app link', nextUrl);
 
-				db.http
+				dbHttp
 					.update(Links)
 					.set({ externalAppLinkUrl: nextUrl })
 					.where(eq(Links.id, linkId))
