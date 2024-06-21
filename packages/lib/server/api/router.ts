@@ -12,6 +12,7 @@ import { eventRouter } from '../routes/event/event.router';
 import { fileRouter } from '../routes/file/file.router';
 import { formResponseRouter } from '../routes/form/form-response.router';
 import { genreRouter } from '../routes/genre/genre.router';
+import { landingPageRouter } from '../routes/landing-page/landing-page.router';
 import { linkRouter } from '../routes/link/link.router';
 import { mailchimpRouter } from '../routes/mailchimp/mailchimp.router';
 import { mixtapeRouter } from '../routes/mixtape/mixtape.router';
@@ -46,6 +47,7 @@ const appRouter = createTRPCRouter({
 	file: fileRouter,
 	formResponse: formResponseRouter,
 	genre: genreRouter,
+	landingPage: landingPageRouter,
 	link: linkRouter,
 	mixtape: mixtapeRouter,
 	mailchimp: mailchimpRouter,

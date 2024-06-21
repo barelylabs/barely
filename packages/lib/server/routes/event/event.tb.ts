@@ -14,6 +14,10 @@ export const visitorSessionTinybirdSchema = z
 			.string()
 			.nullish()
 			.transform(s => s ?? '(direct)'),
+		referer_id: z
+			.string()
+			.nullish()
+			.transform(s => s ?? '(direct)'),
 	})
 	.merge(nextGeoSchema)
 	.merge(formattedUserAgentSchema);

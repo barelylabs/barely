@@ -50,14 +50,13 @@ export const Carts = pgTable(
 		/* 
             🛒 cart checkout (main + bump) 
         */
-
 		visitorIp: varchar('visitorIp', { length: 255 }),
 		visitorGeo: jsonb('visitorGeo').$type<Partial<NextGeo>>(),
 		visitorUserAgent: jsonb('visitorUserAgent').$type<Partial<NextFormattedUserAgent>>(),
 		visitorIsBot: boolean('visitorIsBot').default(false),
 		visitorReferer: varchar('visitorReferer', { length: 255 }),
 		visitorRefererUrl: varchar('visitorRefererUrl', { length: 255 }),
-
+		visitorRefererId: varchar('visitorRefererId', { length: 255 }),
 		visitorCheckoutHref: varchar('visitorCheckoutHref', { length: 255 }),
 
 		// stripe (on creation)
@@ -266,7 +265,7 @@ export const CartFulfillmentProducts = pgTable(
 	},
 	product => ({
 		pk: primaryKey({
-			name: 'CartFulfillmentProducts_pk',
+			name: 'CartFulfillment_Product_pk',
 			columns: [product.cartFulfillmentId, product.productId],
 		}),
 	}),

@@ -75,6 +75,9 @@
 		"clean": {
 			"cache": false
 		},
+		"clean:next": {
+			"cache": false
+		},
 		"//#clean": {
 			"cache": false
 		}

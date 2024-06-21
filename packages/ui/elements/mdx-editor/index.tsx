@@ -20,7 +20,7 @@ const Editor = dynamic(
 				<Skeleton className='h-8 w-full' />
 				<Skeleton className='h-8 w-full' />
 				<Skeleton className='h-8 w-full' />
-				<Skeleton className='h-8 w-full' />
+				{/* <Skeleton className='h-8 w-full' /> */}
 			</div>
 		),
 	},

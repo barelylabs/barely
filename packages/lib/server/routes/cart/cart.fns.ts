@@ -58,9 +58,9 @@ export const funnelWith = {
 	},
 } as const;
 
-export async function getFunnelByParams(handle: string, funnelKey: string) {
+export async function getFunnelByParams(handle: string, key: string) {
 	const funnel = await db.pool.query.CartFunnels.findFirst({
-		where: and(eq(CartFunnels.handle, handle), eq(CartFunnels.key, funnelKey)),
+		where: and(eq(CartFunnels.handle, handle), eq(CartFunnels.key, key)),
 		with: funnelWith,
 	});
 

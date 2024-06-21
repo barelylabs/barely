@@ -4,23 +4,20 @@ import '@mdxeditor/editor/style.css';
 
 // InitializedMDXEditor.tsx
 import type {
-	CodeBlockEditorDescriptor,
-	JsxComponentDescriptor,
+	// CodeBlockEditorDescriptor,
+	// JsxComponentDescriptor,
 	MDXEditorMethods,
 	MDXEditorProps,
 } from '@mdxeditor/editor';
 import type { ForwardedRef } from 'react';
 import { cn } from '@barely/lib/utils/cn';
 import {
-	BlockTypeSelect,
+	// BlockTypeSelect,
 	BoldItalicUnderlineToggles,
-	Button,
-	codeBlockPlugin,
 	codeMirrorPlugin,
 	CreateLink,
-	GenericJsxEditor,
+	// GenericJsxEditor,
 	headingsPlugin,
-	insertJsx$,
 	jsxPlugin,
 	linkDialogPlugin,
 	linkPlugin,
@@ -32,78 +29,38 @@ import {
 	thematicBreakPlugin,
 	toolbarPlugin,
 	UndoRedo,
-	useCodeBlockEditorContext,
-	usePublisher,
+	// useCodeBlockEditorContext,
 } from '@mdxeditor/editor';
 import { useTheme } from 'next-themes';
 
-import { Icon } from '../icon';
-import { VideoPlayer } from '../video-player';
+import { BlockTypeSelect } from './plugins/block-type-select';
+import {
+	buttonComponentDescriptors,
+	InsertAssetButtonButton,
+} from './plugins/mdx-button-plugin';
+import {
+	InsertVideoButton,
+	videoJsxComponentDescriptors,
+} from './plugins/mdx-video-plugin';
 
-const jsxComponentDescriptors: JsxComponentDescriptor[] = [
-	{
-		name: 'VideoPlayer',
-		kind: 'text',
-		props: [
-			{
-				name: 'url',
-				type: 'string',
-			},
-		],
-		Editor: props => {
-			const videoUrl = props.mdastNode.attributes.find(
-				a => a.type === 'mdxJsxAttribute' && a.name === 'url',
-			)?.value;
-
-			return (
-				<div className='mx-auto h-fit w-full'>
-					<div className='flex w-full flex-col'>
-						{typeof videoUrl === 'string' && (
-							<VideoPlayer className='w-full' controls={false} url={videoUrl} />
-						)}
-						<GenericJsxEditor {...props} />
-					</div>
-				</div>
-			);
-		},
-	},
-];
-
-const InsertVideo = () => {
-	const insertJsx = usePublisher(insertJsx$);
-	return (
-		<Button
-			onClick={() =>
-				insertJsx({
-					name: 'VideoPlayer',
-					kind: 'text',
-					props: { url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' },
-				})
-			}
-		>
-			<Icon.video className='h-5 w-5' weight='fill' />
-		</Button>
-	);
-};
-
-const PlainTextCodeEditorDescriptor: CodeBlockEditorDescriptor = {
-	match: () => true,
-	priority: 0,
-	Editor: props => {
-		const cb = useCodeBlockEditorContext();
-		return (
-			// eslint-disable-next-line jsx-a11y/no-static-element-interactions
-			<div onKeyDown={e => e.nativeEvent.stopImmediatePropagation()}>
-				<textarea
-					rows={3}
-					cols={20}
-					defaultValue={props.code}
-					onChange={e => cb.setCode(e.target.value)}
-				/>
-			</div>
-		);
-	},
-};
+// const PlainTextCodeEditorDescriptor: CodeBlockEditorDescriptor = {
+// 	match: () => true,
+// 	priority: 0,
+// 	Editor: props => {
+// 		const cb = useCodeBlockEditorContext();
+// 		return (
+// 			// eslint-disable-next-line jsx-a11y/no-static-element-interactions
+// 			<div onKeyDown={e => e.nativeEvent.stopImmediatePropagation()}>
+// 				<textarea
+// 					rows={3}
+// 					cols={20}
+// 					defaultValue={props.code}
+// 					onChange={e => cb.setCode(e.target.value)}
+// 				/>
+// 			</div>
+// 		);
+// 	},
+// };
 
 // Only import this to the next file
 export function InitializedMDXEditor({
@@ -124,19 +81,26 @@ export function InitializedMDXEditor({
 				linkDialogPlugin(),
 				thematicBreakPlugin(),
 				markdownShortcutPlugin(),
-				codeBlockPlugin({ codeBlockEditorDescriptors: [PlainTextCodeEditorDescriptor] }),
+				// codeBlockPlugin({ codeBlockEditorDescriptors: [PlainTextCodeEditorDescriptor] }),
 				codeMirrorPlugin({ codeBlockLanguages: { js: 'Javascript', ts: 'Typescript' } }),
-				jsxPlugin({ jsxComponentDescriptors }),
+				jsxPlugin({
+					jsxComponentDescriptors: [
+						...videoJsxComponentDescriptors,
+						...buttonComponentDescriptors,
+					],
+				}),
 
 				toolbarPlugin({
 					toolbarContents: () => (
 						<>
 							<UndoRedo />
+							{/* <BlockTypeSelect /> */}
 							<BlockTypeSelect />
 							<ListsToggle />
 							<BoldItalicUnderlineToggles />
 							<CreateLink />
-							<InsertVideo />
+							<InsertVideoButton />
+							<InsertAssetButtonButton />
 						</>
 					),
 				}),

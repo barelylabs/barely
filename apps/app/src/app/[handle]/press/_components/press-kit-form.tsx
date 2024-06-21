@@ -132,12 +132,14 @@ export function PressKitForm({
 						<MDXEditor
 							markdown={form.getValues('bio') ?? ''}
 							onChange={markdown => {
+								console.log('markdown changed', markdown);
 								form.setValue('bio', markdown, {
 									shouldDirty: true,
 								});
 							}}
 						/>
 					)}
+					{/* <pre>{JSON.stringify(form.watch('bio'), null, 2)}</pre> */}
 				</PressKitCard>
 
 				<PressKitCard

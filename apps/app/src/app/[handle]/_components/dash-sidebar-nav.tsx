@@ -67,6 +67,7 @@ export function SidebarNav(props: { workspace: Workspace }) {
 	const pageLinks: SidebarNavLink[] = [
 		{ title: 'links', icon: 'link', href: `/${handle}/links` },
 		{ title: 'bio', icon: 'bio', href: `/${handle}/bio` },
+		{ title: 'pages', icon: 'landingPage', href: `/${handle}/pages` },
 		{ title: 'press', icon: 'press', href: `/${handle}/press` },
 	];
 

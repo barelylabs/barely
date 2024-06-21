@@ -31,7 +31,7 @@ export const cartRouter = createTRPCRouter({
 		.input(
 			z.object({
 				handle: z.string(),
-				funnelKey: z.string(),
+				key: z.string(),
 				shipTo: z
 					.object({
 						country: z.string().nullable(),
@@ -40,11 +40,12 @@ export const cartRouter = createTRPCRouter({
 					})
 					.optional(),
 				landingPageId: z.string().nullish(),
+				// refererId: z.string().nullish(),
 			}),
 		)
 		.mutation(async ({ input, ctx }) => {
-			const { handle, funnelKey, ...cartParams } = input;
-			const funnel = await getFunnelByParams(handle, funnelKey);
+			const { handle, key, ...cartParams } = input;
+			const funnel = await getFunnelByParams(handle, key);
 
 			if (!funnel) throw new Error('funnel not found');
 
@@ -59,13 +60,10 @@ export const cartRouter = createTRPCRouter({
 		}),
 
 	byIdAndParams: publicProcedure
-		.input(z.object({ id: z.string(), handle: z.string(), funnelKey: z.string() }))
+		.input(z.object({ id: z.string(), handle: z.string(), key: z.string() }))
 		.query(async ({ input, ctx }) => {
 			const funnel = await ctx.db.pool.query.CartFunnels.findFirst({
-				where: and(
-					eq(CartFunnels.handle, input.handle),
-					eq(CartFunnels.key, input.funnelKey),
-				),
+				where: and(eq(CartFunnels.handle, input.handle), eq(CartFunnels.key, input.key)),
 				with: {
 					...funnelWith,
 					_carts: {
@@ -88,11 +86,11 @@ export const cartRouter = createTRPCRouter({
 	updateCheckoutFromCheckout: publicProcedure
 		.input(updateCheckoutCartFromCheckoutSchema)
 		.mutation(async ({ input, ctx }) => {
-			const { id, handle, funnelKey, ...update } = input;
+			const { id, handle, key, ...update } = input;
 
 			console.log(' trpc.cart.updateCheckoutFromCheckout >> visitor', ctx.visitor);
 
-			const cart = await getCartById(id, handle, funnelKey);
+			const cart = await getCartById(id, handle, key);
 			if (!cart) throw new TRPCError({ code: 'NOT_FOUND', message: 'Cart not found' });
 
 			const { funnel } = cart;
@@ -340,7 +338,7 @@ export const cartRouter = createTRPCRouter({
 
 			return {
 				handle: funnel.workspace.handle,
-				funnelKey: funnel.key,
+				key: funnel.key,
 				paymentStatus,
 			};
 		}),
@@ -394,7 +392,7 @@ export const cartRouter = createTRPCRouter({
 
 			return {
 				handle: funnel.workspace.handle,
-				funnelKey: funnel.key,
+				key: funnel.key,
 				success: true,
 			};
 		}),

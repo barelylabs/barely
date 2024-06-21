@@ -1,8 +1,9 @@
 {
 	"extends": "@barely/tsconfig/base.json",
 	"compilerOptions": {
+		"lib": ["dom", "dom.iterable", "ES2022"],
 		"tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
 	},
-	"include": ["."],
+	"include": [".", "lib/**/*.ts", "lib/**/*.tsx", "lib/**/*.d.ts"],
 	"exclude": ["node_modules"]
 }

@@ -12,6 +12,7 @@ const prefixes = {
 	workspace: 'ws',
 	providerAccount: 'app',
 	// web
+	landingPage: 'lp',
 	link: 'link',
 	bio: 'bio',
 	pressKit: 'pk',

@@ -52,6 +52,8 @@ export const publicWorkspaceSchema = selectWorkspaceSchema
 		// id: true,
 		name: true,
 		handle: true,
+		brandHue: true,
+		brandAccentHue: true,
 		type: true,
 		bio: true,
 		bookingTitle: true,
@@ -91,6 +93,10 @@ export function getPublicWorkspaceFromWorkspace(workspace: Workspace): PublicWor
 		name: workspace.name,
 		handle: workspace.handle,
 		type: workspace.type,
+
+		brandHue: workspace.brandHue,
+		brandAccentHue: workspace.brandAccentHue,
+
 		bio: workspace.bio,
 		bookingTitle: workspace.bookingTitle,
 		bookingName: workspace.bookingName,
@@ -111,3 +117,10 @@ export function getPublicWorkspaceFromWorkspace(workspace: Workspace): PublicWor
 		stripeConnectAccountId_devMode: workspace.stripeConnectAccountId_devMode,
 	};
 }
+
+// assets
+export const workspaceAssetsSchema = z.object({
+	handle: z.string(),
+	types: z.array(z.enum(['cartFunnel', 'pressKit', 'landingPage'])).optional(),
+	search: z.string().optional(),
+});

@@ -28,6 +28,7 @@ import * as fileSql from '../routes/file/file.sql';
 import * as formResponseSql from '../routes/form/form-response.sql';
 import * as formSql from '../routes/form/form.sql';
 import * as genreSql from '../routes/genre/genre.sql';
+import * as landingPageSql from '../routes/landing-page/landing-page.sql';
 import * as linkSql from '../routes/link/link.sql';
 import * as mixtapeSql from '../routes/mixtape/mixtape.sql';
 import * as playlistPitchReviewSql from '../routes/playlist-pitch-review/playlist-pitch-review.sql';
@@ -73,6 +74,7 @@ export const dbSchema = {
 	...formResponseSql,
 	...funnelSql,
 	...genreSql,
+	...landingPageSql,
 	...linkSql,
 	...mixtapeSql,
 	...playlistSql,

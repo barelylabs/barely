@@ -55,8 +55,9 @@ export function parseIp(req: NextRequest) {
 export function parseReferer(req: NextRequest) {
 	const referer_url = req.headers.get('referer'); // today i learned that referer is spelled wrong (https://en.wikipedia.org/wiki/HTTP_referer)
 	const referer = referer_url ? getDomainWithoutWWW(referer_url) : null;
+	const referer_id = req.nextUrl.searchParams.get('refererId');
 
-	return { referer, referer_url };
+	return { referer, referer_url, referer_id };
 }
 
 export const visitorInfoSchema = z.object({
@@ -73,6 +74,7 @@ export const visitorInfoSchema = z.object({
 	isBot: z.boolean(),
 	referer: z.string().nullable(),
 	referer_url: z.string().nullable(),
+	referer_id: z.string().nullable(),
 	href: z.string(),
 });
 export type VisitorInfo = z.infer<typeof visitorInfoSchema>;
@@ -83,7 +85,7 @@ export function parseReqForVisitorInfo(req: NextRequest) {
 	const userAgent = parseUserAgent(req);
 	const isBot = detectBot(req);
 	const href = req.nextUrl.href;
-	const { referer, referer_url } = parseReferer(req);
+	const { referer, referer_url, referer_id } = parseReferer(req);
 
 	return {
 		ip,
@@ -92,6 +94,7 @@ export function parseReqForVisitorInfo(req: NextRequest) {
 		isBot,
 		referer,
 		referer_url,
+		referer_id,
 		href,
 	} satisfies VisitorInfo;
 }
@@ -118,5 +121,6 @@ export const DEFAULT_VISITOR_INFO: VisitorInfo = {
 	isBot: false,
 	referer: null,
 	referer_url: null,
+	referer_id: null,
 	href: 'https://localhost:3000/',
 };

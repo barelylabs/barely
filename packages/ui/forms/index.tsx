@@ -37,7 +37,13 @@ const Form = <T extends FieldValues>({
 			<form
 				{...props}
 				className='w-full'
-				onSubmit={onPromise(form.handleSubmit(onSubmit))}
+				// onSubmit={onPromise(form.handleSubmit(onSubmit))}
+				onSubmit={e => {
+					onPromise(form.handleSubmit(onSubmit))(e);
+					e.stopPropagation();
+					e.preventDefault();
+					// onSubmit(form.getValues());
+				}}
 			>
 				<fieldset
 					className={cn('flex w-full max-w-full flex-col', props.className)}

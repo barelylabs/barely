@@ -22,6 +22,9 @@ export async function getPublicPressKit({
 					type: true,
 					bio: true,
 
+					// theme
+					brandHue: true,
+					brandAccentHue: true,
 					// booking
 					bookingTitle: true,
 					bookingName: true,

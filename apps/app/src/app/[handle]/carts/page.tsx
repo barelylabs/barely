@@ -4,13 +4,13 @@ import { api } from '@barely/lib/server/api/server';
 import { cartFunnelSearchParamsSchema } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
-import { AllCartFunnels } from '~/app/[handle]/carts/_components/all-cart-funnels';
-import { ArchiveOrDeleteFunnelModal } from '~/app/[handle]/carts/_components/archive-or-delete-funnel-modal';
+import { AllCartFunnels } from '~/app/[handle]/carts/_components/all-cartFunnels';
+import { ArchiveOrDeleteFunnelModal } from '~/app/[handle]/carts/_components/archive-or-delete-cartFunnel-modal';
 import { CartDialogs } from '~/app/[handle]/carts/_components/cart-dialogs';
-import { CartFunnelContextProvider } from '~/app/[handle]/carts/_components/cart-funnel-context';
-import { CartFunnelHotkeys } from '~/app/[handle]/carts/_components/cart-funnel-hotkeys';
-import { CreateCartFunnelButton } from '~/app/[handle]/carts/_components/create-cart-funnel-button';
-import { CreateOrUpdateFunnelModal } from '~/app/[handle]/carts/_components/create-or-update-cart-funnel-modal';
+import { CartFunnelContextProvider } from '~/app/[handle]/carts/_components/cartFunnel-context';
+import { CartFunnelHotkeys } from '~/app/[handle]/carts/_components/cartFunnel-hotkeys';
+import { CreateCartFunnelButton } from '~/app/[handle]/carts/_components/create-cartFunnel-button';
+import { CreateOrUpdateFunnelModal } from '~/app/[handle]/carts/_components/create-or-update-cartFunnel-modal';
 
 export default function CartFunnelsPage({
 	params,

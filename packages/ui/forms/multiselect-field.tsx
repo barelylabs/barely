@@ -27,7 +27,7 @@ export const MultiSelectField = <
 						<FormItem>
 							<FieldWrapper {...{ ...props }}>
 								<FieldControl>
-									<MultiSelect
+									<MultiSelect<TFieldValues[TName][number]>
 										{...props}
 										values={field.value}
 										onValuesChange={v => {

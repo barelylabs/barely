@@ -1,13 +1,6 @@
 import { getPublicPressKit } from '@barely/lib/server/routes/press-kit/press-kit.fns';
 
 import type { SocialStat } from './_components/press-social-stats';
-// const bio = `The second album by dream pop trio Proper Youth draws the bulk of its inspiration from all three members' biggest shared passion: 80's music. It was a singular decade full of chorused guitars, analog synths, saxophone, and plenty of reverb that welcomed listeners to escape into an aural arena replete with romanticism and earnesty. The new record modernizes this approach, incorporating themes about aging, loneliness, and narcissism into a dreamy soundscape that sounds best when played loud.
-
-// Singers/songwriters Adam Barito and Amy Nesky and producer/drummer Bobb Barito went right back to work after releasing their debut album featuring the surprise hit, *Off My Mind*. Initially split between Ann Arbor and Brooklyn, they came together in Louisville for four months in 2020 to care for an ailing family member. It was in an apartment there that they channeled the anguish of that historic year into the groundwork of production. The intimate collaboration galvanized Amy and Adam to finally move to Brooklyn, where they spent two more years finishing the songs with Bobb in a Bedstuy studio.
-
-// *Rusty Grand Am* is named after a car Adam and Bobb's dad owned when they were growing up. It stuck around well after its expiration date, resilient against the unstoppable threat of decay. Revisiting the old piece of junk served as a vehicle for the thrilling and never-ending road toward the heart of nostalgia--one which Proper Youth never plans on exiting.
-//   `;
-
 import { PressBio } from './_components/press-bio';
 import { PressContact } from './_components/press-contact';
 import { PressHero } from './_components/press-hero';
