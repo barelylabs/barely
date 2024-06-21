@@ -3,7 +3,7 @@ import type { LinkAnalyticsProps } from '@barely/lib/server/routes/link/link.sch
 import type { SQL } from 'drizzle-orm';
 import type { NextFetchEvent, NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { db } from '@barely/lib/server/db/index';
+import { dbHttp } from '@barely/lib/server/db';
 import { parseLink } from '@barely/lib/server/middleware/utils';
 import { recordLinkClick } from '@barely/lib/server/routes/event/event.fns';
 import { Links } from '@barely/lib/server/routes/link/link.sql';
@@ -55,7 +55,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 
 	if (!where) return NextResponse.rewrite(getAbsoluteUrl('link', '/404'));
 
-	const link: LinkAnalyticsProps | undefined = await db.http.query.Links.findFirst({
+	const link: LinkAnalyticsProps | undefined = await dbHttp.query.Links.findFirst({
 		where,
 		columns: {
 			// for analytics

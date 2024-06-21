@@ -200,7 +200,7 @@ export const linkRouter = createTRPCRouter({
 
 	generateRandomKey: publicProcedure
 		.input(z.object({ domain: z.string() }))
-		.mutation(async ({ input, ctx }) => {
-			return await getRandomKey(input.domain, ctx.db);
+		.mutation(async ({ input }) => {
+			return await getRandomKey(input.domain);
 		}),
 });
