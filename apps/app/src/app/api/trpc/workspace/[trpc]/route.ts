@@ -7,7 +7,7 @@ import { parseReqForVisitorInfo } from '@barely/lib/utils/middleware';
 import { OPTIONS, setCorsHeaders } from '@barely/lib/utils/trpc-route';
 import { Pool } from '@neondatabase/serverless';
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
-import { waitUntil } from '@vercel/functions';
+// import { waitUntil } from '@vercel/functions';
 import { drizzle } from 'drizzle-orm/neon-serverless';
 
 import { env } from '~/env';
@@ -44,7 +44,7 @@ const handler = auth(async req => {
 
 	setCorsHeaders(response);
 
-	waitUntil(pool.end());
+	// waitUntil(pool.end());
 
 	return response;
 });
