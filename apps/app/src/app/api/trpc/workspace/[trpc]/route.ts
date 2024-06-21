@@ -20,33 +20,63 @@ const handler = auth(async req => {
 		schema: dbSchema,
 	});
 
-	const response = await fetchRequestHandler({
-		endpoint: '/api/trpc/workspace',
-		router: workspaceRouter,
-		req,
-		createContext: () =>
-			createTRPCContext({
-				session: req.auth,
-				headers: req.headers,
-				visitor: parseReqForVisitorInfo(req),
-				dbPool,
-			}),
-		onError({ error, path }) {
-			console.error(`>>> tRPC Error on '${path}'`, error);
-		},
-	}).catch(err => {
-		console.error('err => ', err);
+	try {
+		const response = await fetchRequestHandler({
+			endpoint: '/api/trpc/workspace',
+			router: workspaceRouter,
+			req,
+			createContext: () =>
+				createTRPCContext({
+					session: req.auth,
+					headers: req.headers,
+					visitor: parseReqForVisitorInfo(req),
+					dbPool,
+				}),
+			onError({ error, path }) {
+				console.error(`>>> tRPC Error on '${path}'`, error);
+			},
+		});
+
+		setCorsHeaders(response);
+
+		return response;
+	} catch (error) {
+		console.error('err => ', error);
 		return new Response(null, {
 			statusText: 'Internal Server Error',
 			status: 500,
 		});
-	});
+	} finally {
+		await pool.end();
+	}
 
-	setCorsHeaders(response);
+	// const response = await fetchRequestHandler({
+	// 	endpoint: '/api/trpc/workspace',
+	// 	router: workspaceRouter,
+	// 	req,
+	// 	createContext: () =>
+	// 		createTRPCContext({
+	// 			session: req.auth,
+	// 			headers: req.headers,
+	// 			visitor: parseReqForVisitorInfo(req),
+	// 			dbPool,
+	// 		}),
+	// 	onError({ error, path }) {
+	// 		console.error(`>>> tRPC Error on '${path}'`, error);
+	// 	},
+	// }).catch(err => {
+	// 	console.error('err => ', err);
+	// 	return new Response(null, {
+	// 		statusText: 'Internal Server Error',
+	// 		status: 500,
+	// 	});
+	// });
+
+	// setCorsHeaders(response);
 
 	// waitUntil(pool.end());
 
-	return response;
+	// return response;
 });
 
 export { OPTIONS, handler as GET, handler as POST };
