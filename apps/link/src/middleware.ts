@@ -108,6 +108,12 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 		await fetch(diceUrl.href, { method: 'POST' });
 	}
 
+	if (link.url.includes('open.spotify.com')) {
+		const spotifyUrl = new URL(link.url);
+		spotifyUrl.searchParams.set('si', ''); // this seems to make a difference in terms of opening the app on desktop
+		link.url = spotifyUrl.href;
+	}
+
 	if (visitorInfo.userAgent.device === 'mobile') {
 		switch (true) {
 			case link.url.includes('open.spotify.com'): {
