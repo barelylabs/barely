@@ -46,3 +46,4 @@ export const routeHandler = (path: string, router: AnyRouter) =>
 
 		return response;
 	});
+``;
