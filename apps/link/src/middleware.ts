@@ -112,6 +112,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 		const spotifyUrl = new URL(link.url);
 		spotifyUrl.searchParams.set('si', ''); // this seems to make a difference in terms of opening the app on desktop
 		link.url = spotifyUrl.href;
+		console.log('spotify url + blank si', link.url);
 	}
 
 	if (visitorInfo.userAgent.device === 'mobile') {
@@ -127,13 +128,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 				return NextResponse.redirect(spotifyAppLink.href);
 			}
 
-			// case link.url.includes('link.dice.fm') && !!link.externalAppLinkUrl: {
-			// 	console.log('Dice link detected on mobile');
-			// 	return NextResponse.redirect(link.externalAppLinkUrl);
-			// }
-
 			case !!link.externalAppLinkUrl: {
-				// console.log('external app link detected on mobile');
 				return NextResponse.redirect(link.externalAppLinkUrl);
 			}
 		}
