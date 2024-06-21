@@ -47,6 +47,7 @@ const handler = auth(async req => {
 			status: 500,
 		});
 	} finally {
+		console.log('finally, closing pool for workspace route');
 		await pool.end();
 	}
 
