@@ -4,7 +4,8 @@ import type { PublicMixtapeWith_Tracks } from '../mixtape/mixtape.schema';
 import type { PublicTrackWith_Artist_Files } from '../track/track.schema';
 import type { PublicWorkspace } from '../workspace/workspace.schema';
 import type { PublicPressKit, PublicPressPhoto } from './press-kit.schema';
-import { db } from '../../db';
+import { dbHttp } from '../../db';
+// import { db } from '../../db';
 import { PressKits } from './press-kit.sql';
 
 export async function getPublicPressKit({
@@ -12,7 +13,7 @@ export async function getPublicPressKit({
 }: {
 	handle: string;
 }): Promise<PublicPressKit | null> {
-	const preparedPublicPressKitQuery = db.http.query.PressKits.findFirst({
+	const preparedPublicPressKitQuery = dbHttp.query.PressKits.findFirst({
 		where: eq(PressKits.handle, sql.placeholder('handle')),
 		with: {
 			workspace: {

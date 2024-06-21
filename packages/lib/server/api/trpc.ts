@@ -9,15 +9,16 @@ import superjson from 'superjson';
 import { z, ZodError } from 'zod';
 
 import type { VisitorInfo } from '../../utils/middleware';
-import { env } from '../../env';
-import { getUserWorkspaceByHandle } from '../../utils/auth';
-import { DEFAULT_VISITOR_INFO } from '../../utils/middleware';
-import { ratelimit } from '../../utils/upstash';
+import type { DbPool } from '../db/pool';
 /**
  * 🎁 CONTEXT
  */
 
-import { db } from '../db';
+import { env } from '../../env';
+import { getUserWorkspaceByHandle } from '../../utils/auth';
+import { DEFAULT_VISITOR_INFO } from '../../utils/middleware';
+import { ratelimit } from '../../utils/upstash';
+import { dbHttp } from '../db';
 import { _Users_To_Workspaces } from '../routes/user/user.sql';
 
 const trpcSources = ['nextjs-react', 'rsc', 'rest'] as const;
@@ -26,6 +27,7 @@ type TRPCSource = (typeof trpcSources)[number];
 export const createTRPCContext = (opts: {
 	headers: Headers;
 	visitor?: VisitorInfo;
+	dbPool: DbPool;
 	session: Session | null;
 	rest?: boolean;
 }) => {
@@ -76,7 +78,10 @@ export const createTRPCContext = (opts: {
 		// pii
 		visitor: env.VERCEL_ENV === 'development' ? DEFAULT_VISITOR_INFO : opts.visitor,
 		// for convenience
-		db,
+		db: {
+			http: dbHttp,
+			pool: opts.dbPool,
+		},
 		source,
 		ratelimit,
 	};

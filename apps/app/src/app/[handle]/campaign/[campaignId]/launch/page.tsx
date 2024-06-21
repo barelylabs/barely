@@ -1,5 +1,4 @@
 import { Suspense } from 'react';
-import { db } from '@barely/lib/server/db';
 import { getCampaignById } from '@barely/lib/server/routes/campaign/campaign.fns';
 
 import { InfoCard } from '@barely/ui/elements/card';
@@ -14,7 +13,7 @@ import { LaunchPlaylistPitchForm } from '~/app/[handle]/campaign/[campaignId]/la
 // import { LaunchCampaignForm } from './launch-campaign-form';
 
 const LaunchCampaignPage = async ({ params }: { params: { campaignId: string } }) => {
-	const campaign = await getCampaignById(params.campaignId, db);
+	const campaign = await getCampaignById(params.campaignId);
 
 	return (
 		<>

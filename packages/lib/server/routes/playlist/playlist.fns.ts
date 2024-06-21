@@ -6,6 +6,7 @@ import type { Db } from '../../db';
 import type { Genre } from '../genre/genre.schema';
 import type { ProviderAccount } from '../provider-account/provider-account.schema';
 import type { Playlist } from './playlist.schema';
+import { dbHttp } from '../../db';
 import { getSpotifyPlaylistTracks } from '../../spotify/spotify.endpts.playlist';
 import { estimateGenresByTracks } from '../genre/genre.gpt';
 import { _Playlists_To_Genres, Genres } from '../genre/genre.sql';
@@ -155,8 +156,8 @@ const userGetPlaylistById = async (userId: string, playlistId: string, db: Db) =
 	return userPlaylists.get(playlistId);
 };
 
-const totalPlaylistReachByGenres = async (genreIds: Genre['id'][], db: Db) => {
-	const matchingGenres = await db.http.query.Genres.findMany({
+const totalPlaylistReachByGenres = async (genreIds: Genre['id'][]) => {
+	const matchingGenres = await dbHttp.query.Genres.findMany({
 		where: inArray(Genres.id, genreIds),
 		with: {
 			_playlists: {

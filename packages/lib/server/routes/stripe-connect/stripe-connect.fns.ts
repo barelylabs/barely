@@ -6,7 +6,8 @@ import type { Workspace } from '../workspace/workspace.schema';
 import { handleAbandonedUpsell } from '../../../trigger/cart.trigger';
 import { isProduction } from '../../../utils/environment';
 import { raise } from '../../../utils/raise';
-import { db } from '../../db';
+import { dbHttp } from '../../db';
+// import { db } from '../../db';
 import { stripe } from '../../stripe';
 // import { cartApi } from '../cart/cart.api.server';
 import {
@@ -99,7 +100,7 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 		let fan =
 			prevCart.fan ? prevCart.fan
 			: stripeCustomerId ?? charge.billing_details.email ?
-				await db.pool.query.Fans.findFirst({
+				await dbHttp.query.Fans.findFirst({
 					where: or(
 						charge.billing_details.email ?
 							eq(Fans.email, charge.billing_details.email)
@@ -113,7 +114,7 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 
 		if (fan) {
 			updateCart.fanId = fan.id;
-			await db.pool
+			await dbHttp
 				.update(Fans)
 				.set({
 					stripeCustomerId,
@@ -147,7 +148,7 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 			updateCart.fanId = fan.id;
 		}
 
-		await db.pool.update(Carts).set(updateCart).where(eq(Carts.id, cartId));
+		await dbHttp.update(Carts).set(updateCart).where(eq(Carts.id, cartId));
 
 		if (!fan) throw new Error('Fan not created or found after charge success');
 

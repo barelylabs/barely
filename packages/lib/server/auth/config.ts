@@ -5,7 +5,7 @@ import Discord from 'next-auth/providers/discord';
 
 import type { User as DbUser, User_To_Workspace } from '../routes/user/user.schema';
 import type { Workspace } from '../routes/workspace/workspace.schema';
-import { db } from '../db';
+import { dbHttp } from '../db';
 
 export interface SessionWorkspace extends Workspace {
 	role: User_To_Workspace['role'];
@@ -26,7 +26,7 @@ declare module 'next-auth' {
 export type { Session } from 'next-auth';
 
 export const authConfig: NextAuthConfig = {
-	adapter: DrizzleAdapter(db.http),
+	adapter: DrizzleAdapter(dbHttp),
 	providers: [Discord],
 	callbacks: {
 		session: opts => {

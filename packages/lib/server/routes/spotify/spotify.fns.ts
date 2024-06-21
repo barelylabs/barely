@@ -4,7 +4,7 @@ import { and, eq } from 'drizzle-orm';
 import type { Db } from '../../db';
 import type { ProviderAccount } from '../provider-account/provider-account.schema';
 import { newId } from '../../../utils/id';
-import { db } from '../../db';
+import { dbHttp } from '../../db';
 import { getSpotifyUserPlaylists } from '../../spotify/spotify.endpts.playlist';
 import { refreshSpotifyAccessToken } from '../../spotify/spotify.endpts.token';
 import { getSpotifyUser } from '../../spotify/spotify.endpts.user';
@@ -37,7 +37,7 @@ const getSpotifyAccessToken = async (spotifyAccount: ProviderAccount) => {
 		// console.log('new expires_at => ', expires_at);
 
 		try {
-			await db.http
+			await dbHttp
 				.update(ProviderAccounts)
 				.set({
 					access_token: refreshedToken.access_token,

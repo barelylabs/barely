@@ -1,5 +1,4 @@
 import { Suspense } from 'react';
-import { db } from '@barely/lib/server/db';
 import { getCampaignById } from '@barely/lib/server/routes/campaign/campaign.fns';
 
 import { InfoCard } from '@barely/ui/elements/card';
@@ -13,7 +12,7 @@ import { DashContentHeader } from '~/app/[handle]/_components/dash-content-heade
 import { CampaignReviews } from './campaign-reviews';
 
 const getCampaign = async (campaignId: string) => {
-	const campaign = await getCampaignById(campaignId, db);
+	const campaign = await getCampaignById(campaignId);
 
 	if (!campaign) throw new Error('Campaign not found');
 	return campaign;

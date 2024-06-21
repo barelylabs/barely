@@ -2,6 +2,7 @@ import { cache } from 'react';
 import { headers } from 'next/headers';
 
 import { createCallerFactory, createTRPCContext } from '../../api/trpc';
+import { dbPool } from '../../db';
 import { cartRouter } from './cart.router';
 
 const createContext = cache(() => {
@@ -11,6 +12,7 @@ const createContext = cache(() => {
 	return createTRPCContext({
 		session: null,
 		headers: heads,
+		dbPool: dbPool,
 	});
 });
 

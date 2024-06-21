@@ -8,8 +8,8 @@ import { createUserSchema } from './user.schema';
 import { Users } from './user.sql';
 
 const userRouter = createTRPCRouter({
-	create: publicProcedure.input(createUserSchema).mutation(async ({ input, ctx }) => {
-		const newUser = await createUser({ ...input }, ctx.db);
+	create: publicProcedure.input(createUserSchema).mutation(async ({ input }) => {
+		const newUser = await createUser({ ...input });
 
 		return newUser;
 	}),
@@ -31,9 +31,9 @@ const userRouter = createTRPCRouter({
 		.meta({ openapi: { method: 'GET', path: '/user/email-exists' } })
 		.input(z.object({ email: z.string() }))
 		.output(z.boolean())
-		.query(async ({ ctx, input }) => {
+		.query(async ({ input }) => {
 			console.log('checking email exists on the server');
-			return await checkEmailExistsOnServer(input.email, ctx.db);
+			return await checkEmailExistsOnServer(input.email);
 		}),
 
 	phoneExists: publicProcedure

@@ -3,12 +3,13 @@ import { desc, eq, inArray } from 'drizzle-orm';
 import type { Db } from '../../db';
 import type { InsertPlaylistPitchReview } from './playlist-pitch-review-schema';
 import { newId } from '../../../utils/id';
+import { dbHttp } from '../../db';
 import { getCampaignById } from '../campaign/campaign.fns';
 import { _Playlists_To_Genres, _Tracks_To_Genres } from '../genre/genre.sql';
 import { PlaylistPitchReviews } from './playlist-pitch-review.sql';
 
-const assignPlaylistPitchToReviewers = async (campaignId: string, db: Db) => {
-	const campaign = await getCampaignById(campaignId, db);
+const assignPlaylistPitchToReviewers = async (campaignId: string) => {
+	const campaign = await getCampaignById(campaignId);
 
 	if (!campaign) throw new Error('Campaign not found');
 	if (!campaign.curatorReach) throw new Error('Campaign curator reach not set');
@@ -38,7 +39,7 @@ const assignPlaylistPitchToReviewers = async (campaignId: string, db: Db) => {
 	// 	}
 	// })
 
-	const allGenres = await db.http.query._Playlists_To_Genres.findMany({
+	const allGenres = await dbHttp.query._Playlists_To_Genres.findMany({
 		where: inArray(
 			_Playlists_To_Genres.genreId,
 			campaign.track.genres.map(g => g.id),
@@ -96,7 +97,7 @@ const assignPlaylistPitchToReviewers = async (campaignId: string, db: Db) => {
 		return review;
 	});
 
-	return await db.http.insert(PlaylistPitchReviews).values(reviews);
+	return await dbHttp.insert(PlaylistPitchReviews).values(reviews);
 };
 
 const getPlaylistPitchReviewsByCampaignId = async (campaignId: string, db: Db) => {

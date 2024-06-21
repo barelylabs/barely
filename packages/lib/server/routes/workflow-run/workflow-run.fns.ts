@@ -6,7 +6,7 @@ import type {
 } from './workflow-run.schema';
 import { newId } from '../../../utils/id';
 import { raise } from '../../../utils/raise';
-import { db } from '../../db';
+import { dbHttp } from '../../db';
 import { addToMailchimpAudience } from '../../mailchimp/mailchimp.endpts.audiences';
 import { Fans } from '../fan/fan.sql';
 import { ProviderAccounts } from '../provider-account/provider-account.sql';
@@ -20,7 +20,7 @@ export async function getActionableWorkflowRuns() {
 	const now = new Date();
 	const limit = 10;
 
-	const workflowRuns = (await db.pool.query.WorkflowRuns.findMany({
+	const workflowRuns = (await dbHttp.query.WorkflowRuns.findMany({
 		where: and(
 			inArray(WorkflowRuns.status, ['pending', 'in_progress']),
 			lt(WorkflowRuns.runCurrentActionAt, now),
@@ -88,12 +88,12 @@ export async function handleAction_addToMailchimpAudience({
 		currentAction.mailchimpAudienceId ?? raise('Mailchimp audience ID not set');
 
 	const fan =
-		(await db.pool.query.Fans.findFirst({
+		(await dbHttp.query.Fans.findFirst({
 			where: eq(Fans.id, triggerFanId),
 		})) ?? raise('Fan not found to add to mailchimp audience');
 
 	const mailchimpAccount =
-		(await db.pool.query.ProviderAccounts.findFirst({
+		(await dbHttp.query.ProviderAccounts.findFirst({
 			where: and(
 				eq(ProviderAccounts.provider, 'mailchimp'),
 				eq(ProviderAccounts.workspaceId, workflow.workspaceId),
@@ -131,7 +131,7 @@ export async function handleAction_addToMailchimpAudience({
 	}
 
 	// add action record
-	await db.pool.insert(WorkflowRunActions).values(workflowRunAction);
+	await dbHttp.insert(WorkflowRunActions).values(workflowRunAction);
 
 	if (workflowRunAction.status !== 'failed') {
 		await handleNextActionOrCompleteRun({ workflowRun });
@@ -145,7 +145,7 @@ async function handleNextActionOrCompleteRun({
 }) {
 	const { currentAction } = workflowRun;
 
-	const nextAction = await db.pool.query.WorkflowActions.findFirst({
+	const nextAction = await dbHttp.query.WorkflowActions.findFirst({
 		where: and(
 			eq(WorkflowActions.workflowId, workflowRun.workflowId),
 			gt(
@@ -156,7 +156,7 @@ async function handleNextActionOrCompleteRun({
 	});
 
 	if (!nextAction) {
-		await db.pool
+		await dbHttp
 			.update(WorkflowRuns)
 			.set({
 				status: 'complete',
@@ -164,7 +164,7 @@ async function handleNextActionOrCompleteRun({
 			})
 			.where(eq(WorkflowRuns.id, workflowRun.id));
 	} else {
-		await db.pool
+		await dbHttp
 			.update(WorkflowRuns)
 			.set({
 				currentActionId: nextAction.id,
