@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm';
-import { pgTable, primaryKey, unique, uniqueIndex, varchar } from 'drizzle-orm/pg-core';
+import { index, pgTable, primaryKey, varchar } from 'drizzle-orm/pg-core';
 
 import { dbId } from '../../../utils/sql';
 import { EventReports } from '../event/event-report.sql';
@@ -29,11 +29,11 @@ export const AnalyticsEndpoints = pgTable(
 				name: 'analyticsendpoints_platform_id_pk',
 				columns: [endpoint.platform, endpoint.id],
 			}),
-			workspacePlatformUnique: unique('workspace_platform_unique').on(
-				endpoint.workspaceId,
-				endpoint.platform,
-			),
-			workspacePlatformIdx: uniqueIndex('workspace_platform_idx').on(
+			// workspacePlatformUnique: unique('workspace_platform_unique').on(
+			// 	endpoint.workspaceId,
+			// 	endpoint.platform,
+			// ),
+			workspacePlatformIdx: index('workspace_platform_idx').on(
 				endpoint.workspaceId,
 				endpoint.platform,
 			),

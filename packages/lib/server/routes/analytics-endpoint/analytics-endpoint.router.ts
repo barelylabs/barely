@@ -1,5 +1,5 @@
 import { TRPCError } from '@trpc/server';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
 import { createTRPCRouter, privateProcedure } from '../../api/trpc';
 import { insertAnalyticsEndpointSchema } from './analytics-endpoint-schema';
@@ -43,14 +43,39 @@ export const analyticsEndpointRouter = createTRPCRouter({
 				});
 
 			// upsert the endpoint
-			const updatedEndpoint = await ctx.db.http
-				.insert(AnalyticsEndpoints)
-				.values(input)
-				.onConflictDoUpdate({
-					target: [AnalyticsEndpoints.workspaceId, AnalyticsEndpoints.platform],
-					set: input,
+			// const updatedEndpoint = await ctx.db.http
+			// 	.insert(AnalyticsEndpoints)
+			// 	.values(input)
+			// 	.onConflictDoUpdate({
+			// 		target: [AnalyticsEndpoints.workspaceId, AnalyticsEndpoints.platform],
+			// 		set: input,
+			// 	});
+
+			const existingPlatformEndpoint =
+				await ctx.db.http.query.AnalyticsEndpoints.findFirst({
+					where: and(
+						eq(AnalyticsEndpoints.workspaceId, input.workspaceId),
+						eq(AnalyticsEndpoints.platform, input.platform),
+					),
 				});
 
-			return updatedEndpoint;
+			if (existingPlatformEndpoint) {
+				const updatedEndpoint = await ctx.db.http
+					.update(AnalyticsEndpoints)
+					.set(input)
+					.where(
+						and(
+							eq(AnalyticsEndpoints.workspaceId, input.workspaceId),
+							eq(AnalyticsEndpoints.platform, input.platform),
+						),
+					);
+				return updatedEndpoint;
+			} else {
+				const updatedEndpoint = await ctx.db.http
+					.insert(AnalyticsEndpoints)
+					.values(input)
+					.returning();
+				return updatedEndpoint;
+			}
 		}),
 });
