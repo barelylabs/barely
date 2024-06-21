@@ -2,7 +2,7 @@ import { cache } from 'react';
 import { headers } from 'next/headers';
 
 import { auth } from '../auth';
-import { dbPool } from '../db';
+// import { dbPool } from '../db';
 import { appRouter } from './router';
 import { createCallerFactory, createTRPCContext } from './trpc';
 
@@ -24,7 +24,7 @@ const createContext = cache(async ({ handle }: ServerContextProps) => {
 	return createTRPCContext({
 		session: await auth(),
 		headers: heads,
-		dbPool,
+		// dbPool,
 	});
 });
 
