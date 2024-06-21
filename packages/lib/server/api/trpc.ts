@@ -4,12 +4,15 @@
 
 import type { Session } from 'next-auth';
 import type { OpenApiMeta } from 'trpc-openapi';
+import { Pool } from '@neondatabase/serverless';
 import { initTRPC, TRPCError } from '@trpc/server';
+import { waitUntil } from '@vercel/functions';
+import { drizzle } from 'drizzle-orm/neon-serverless';
 import superjson from 'superjson';
 import { z, ZodError } from 'zod';
 
 import type { VisitorInfo } from '../../utils/middleware';
-import type { DbPool } from '../db/pool';
+// import type { DbPool } from '../db/pool';
 /**
  * 🎁 CONTEXT
  */
@@ -18,7 +21,7 @@ import { env } from '../../env';
 import { getUserWorkspaceByHandle } from '../../utils/auth';
 import { DEFAULT_VISITOR_INFO } from '../../utils/middleware';
 import { ratelimit } from '../../utils/upstash';
-import { dbHttp } from '../db';
+import { dbHttp, dbSchema } from '../db';
 import { _Users_To_Workspaces } from '../routes/user/user.sql';
 
 const trpcSources = ['nextjs-react', 'rsc', 'rest'] as const;
@@ -27,7 +30,7 @@ type TRPCSource = (typeof trpcSources)[number];
 export const createTRPCContext = (opts: {
 	headers: Headers;
 	visitor?: VisitorInfo;
-	dbPool: DbPool;
+	// dbPool: DbPool;
 	session: Session | null;
 	rest?: boolean;
 }) => {
@@ -80,7 +83,7 @@ export const createTRPCContext = (opts: {
 		// for convenience
 		db: {
 			http: dbHttp,
-			pool: opts.dbPool,
+			// pool: opts.dbPool,
 		},
 		source,
 		ratelimit,
@@ -120,9 +123,30 @@ export const middleware = t.middleware;
 export const createTRPCRouter = t.router;
 export const mergeRouters = t.mergeRouters;
 
-export const publicProcedure = t.procedure;
+const dbPoolMiddleware = middleware(async ({ next, ctx }) => {
+	const pool = new Pool({ connectionString: env.DATABASE_POOL_URL });
+	const dbPool = drizzle(pool, {
+		schema: dbSchema,
+	});
 
-export const privateProcedure = t.procedure.use(async opts => {
+	const res = await next({
+		ctx: {
+			...ctx,
+			db: {
+				http: dbHttp,
+				pool: dbPool,
+			},
+		},
+	});
+
+	waitUntil(pool.end());
+
+	return res;
+});
+
+export const publicProcedure = t.procedure.use(dbPoolMiddleware);
+
+export const privateProcedure = t.procedure.use(dbPoolMiddleware).use(async opts => {
 	if (!opts.ctx.user) {
 		throw new TRPCError({
 			code: 'UNAUTHORIZED',
