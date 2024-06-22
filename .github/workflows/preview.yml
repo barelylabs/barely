@@ -229,21 +229,6 @@ jobs:
         run: pnpm deploy-trigger:staging
 
   # 👀 DEPLOY PREVIEWS
-  deploy-www:
-    uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [neon-preview, git-meta]
-    with:
-      app_name: www
-      working_directory: apps/www
-      scope: barely
-      environment: preview
-      git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
-      vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-    secrets:
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_WWW_PROJECT_ID }}
-
   deploy-app:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [neon-preview, git-meta]
@@ -333,6 +318,21 @@ jobs:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SPARROW_PROJECT_ID }}
+
+  deploy-www:
+    uses: ./.github/workflows/deploy-to-vercel.yml
+    needs: [neon-preview, git-meta]
+    with:
+      app_name: www
+      working_directory: apps/www
+      scope: barely
+      environment: preview
+      git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
+      vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_WWW_PROJECT_ID }}
 
   # 💬 COMMENT ON PR #
 
