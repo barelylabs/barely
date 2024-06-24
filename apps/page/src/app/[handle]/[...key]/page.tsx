@@ -54,7 +54,7 @@ export default async function LandingPage({
 	const { cartFunnels, links, pressKits, ...lp } = data;
 
 	return (
-		<div className='mx-auto flex min-h-screen w-full max-w-7xl flex-col items-center  gap-6 px-4 py-10'>
+		<div className='mx-auto flex min-h-screen w-full max-w-7xl flex-col items-center gap-6 px-4 py-10'>
 			<MDXRemote
 				source={lp.content ?? ''}
 				components={{
