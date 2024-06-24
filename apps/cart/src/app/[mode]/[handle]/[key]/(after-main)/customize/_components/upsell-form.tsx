@@ -20,7 +20,7 @@ export function UpsellForm({ cartId }: { cartId: string }) {
 	useEffect(() => {
 		logEvent({
 			cartId,
-			event: 'cart_viewUpsell',
+			event: 'cart/viewUpsell',
 		});
 	}, [cartId, logEvent]);
 

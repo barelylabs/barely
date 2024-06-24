@@ -27,28 +27,36 @@ export const reportedEventTinybirdSchema = z.object({
 	reportedToTiktok: z.string().optional().default(''),
 });
 
-export const WEB_EVENT_TYPES__LINK = ['shortLinkClick', 'transparentLinkClick'] as const;
-
 export const WEB_EVENT_TYPES__CART = [
-	'cart_viewLandingPage',
-	'cart_initiateCheckout', // ✅
-	'cart_updateMainProductPayWhatYouWantPrice',
-	'cart_addEmail', // ✅ not reported to meta
-	'cart_addShippingInfo', // ✅ not reported to meta
-	'cart_addPaymentInfo', // ✅
-	'cart_addBump', // ✅
-	'cart_removeBump', // ✅ not reported to meta
-	'cart_purchaseMainWithoutBump', // ✅
-	'cart_purchaseMainWithBump', // ✅
-	'cart_viewUpsell', // ✅
-	'cart_declineUpsell', // ✅ not reported to meta
-	'cart_purchaseUpsell', // ✅
-	'cart_viewOrderConfirmation', // ✅ not reported to meta
+	'cart/viewCheckout', // ✅
+	'cart/updateMainProductPayWhatYouWantPrice',
+	'cart/addEmail', // ✅ not reported to meta
+	'cart/addShippingInfo', // ✅ not reported to meta
+	'cart/addPaymentInfo', // ✅
+	'cart/addBump', // ✅
+	'cart/removeBump', // ✅ not reported to meta
+	'cart/purchaseMainWithoutBump', // ✅
+	'cart/purchaseMainWithBump', // ✅
+	'cart/viewUpsell', // ✅
+	'cart/declineUpsell', // ✅ not reported to meta
+	'cart/purchaseUpsell', // ✅
+	'cart/viewOrderConfirmation', // ✅ not reported to meta
 ] as const;
 
+export const WEB_EVENT_TYPES__FM = ['fm/view', 'fm/linkClick'] as const;
+
+export const WEB_EVENT_TYPES__LINK = [
+	'link/click',
+	// 'link/transparentLinkClick',
+] as const;
+
+export const WEB_EVENT_TYPES__PAGE = ['page/view', 'page/linkClick'] as const;
+
 export const WEB_EVENT_TYPES = [
-	...WEB_EVENT_TYPES__LINK,
 	...WEB_EVENT_TYPES__CART,
+	...WEB_EVENT_TYPES__FM,
+	...WEB_EVENT_TYPES__LINK,
+	...WEB_EVENT_TYPES__PAGE,
 ] as const;
 
 // publish web events
@@ -63,11 +71,17 @@ export const webEventIngestSchema = z
 		key: z.string().optional().default(''), // short link, cartFunnel
 
 		// short link data
+		linkType: z.enum(['short', 'transparent', '']).optional().default(''),
 		domain: z.string().optional().default(''),
 
 		// event data
 		timestamp: z.string().datetime(),
-		type: z.enum([...WEB_EVENT_TYPES__LINK, ...WEB_EVENT_TYPES__CART]),
+		type: z.enum([
+			...WEB_EVENT_TYPES__CART,
+			...WEB_EVENT_TYPES__FM,
+			...WEB_EVENT_TYPES__LINK,
+			...WEB_EVENT_TYPES__PAGE,
+		]),
 	})
 	.merge(visitorSessionTinybirdSchema)
 	.merge(reportedEventTinybirdSchema);

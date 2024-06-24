@@ -34,7 +34,7 @@ export function CartTimeseries() {
 	);
 
 	const [addPaymentInfoTimeseries] = api.stat.webEventTimeseries.useSuspenseQuery(
-		{ ...filters, handle, types: ['cart_addPaymentInfo'] },
+		{ ...filters, handle, types: ['cart/addPaymentInfo'] },
 		{
 			select: data => data.map(row => ({ ...row, date: formatTimestamp(row.date) })),
 		},

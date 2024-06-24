@@ -8,6 +8,7 @@ import { zPost } from '../../utils/zod-fetch';
 import { z_optStr_hash, z_optStr_lowerCase_hash } from '../../utils/zod-helpers';
 
 interface MetaEventParams {
+	// meta params
 	content_category?: string;
 	content_ids?: string[];
 	content_name?: string;
@@ -15,21 +16,44 @@ interface MetaEventParams {
 	currency?: string;
 	num_items?: number;
 	value?: number;
+	// barely params
+	cartId?: string;
+	withBump?: boolean;
+	linkType?: 'short' | 'transparent';
 }
+
+const META_EVENT_NAMES = [
+	'barely.cart/viewCheckout',
+	'barely.cart/updateMainProductPayWhatYouWantPrice',
+	'barely.cart/addEmail',
+	'barely.cart/addShippingInfo',
+	'barely.cart/addPaymentInfo',
+	'barely.cart/addBump',
+	'barely.cart/removeBump',
+	'barely.cart/purchaseMain',
+	'barely.cart/viewUpsell',
+	'barely.cart/declineUpsell',
+	'barely.cart/purchaseUpsell',
+	'barely.cart/viewOrderConfirmation',
+
+	// fm
+	'barely.fm/view',
+	'barely.fm/linkClick',
+
+	// link
+	'barely.link/click',
+
+	// page
+	'barely.page/view',
+	'barely.page/linkClick',
+] as const;
 
 export interface MetaEventProps {
 	pixelId: string;
 	accessToken: string;
 	// event data
-	eventName:
-		| 'ViewContent'
-		| 'InitiateCheckout'
-		| 'AddToCart'
-		| 'AddPaymentInfo'
-		| 'Purchase'
-		| 'Barely_LinkClick'
-		| 'Barely_AddEmail'
-		| 'Barely_AddShippingInfo';
+	eventName: (typeof META_EVENT_NAMES)[number];
+
 	url: string;
 	ip?: string;
 	ua?: string;

@@ -9,7 +9,7 @@ import type { LinkAnalyticsProps } from '../link/link.schema';
 import type {
 	cartEventIngestSchema,
 	WEB_EVENT_TYPES__CART,
-	WEB_EVENT_TYPES__LINK,
+	// WEB_EVENT_TYPES__LINK,
 } from './event.tb';
 import { env } from '../../../env';
 import { newId } from '../../../utils/id';
@@ -33,7 +33,7 @@ import { ingestCartEvent, ingestWebEvent, webEventIngestSchema } from './event.t
 
 export interface RecordClickProps extends VisitorInfo {
 	link: LinkAnalyticsProps;
-	type: (typeof WEB_EVENT_TYPES__LINK)[number];
+	type: 'short' | 'transparent';
 	href: string;
 }
 
@@ -103,8 +103,11 @@ export async function recordLinkClick({
 				url: href,
 				ip,
 				ua: ua.ua,
-				eventName: 'Barely_LinkClick',
+				eventName: 'barely.link/click',
 				geo,
+				customData: {
+					linkType: type,
+				},
 			})
 		:	{ reported: false };
 
@@ -131,8 +134,8 @@ export async function recordLinkClick({
 			href,
 			// link specifics (short link or transparent link)
 			type,
-			domain: type === 'shortLinkClick' ? link.domain : undefined,
-			key: type === 'shortLinkClick' ? link.key : undefined,
+			domain: type === 'short' ? link.domain : undefined,
+			key: type === 'short' ? link.key : undefined,
 			// analytics
 			...geo,
 			...ua,
@@ -212,7 +215,7 @@ export async function recordCartEvent({
 		isBot: visitor?.isBot ?? false,
 
 		href:
-			type === 'cart_purchaseMainWithoutBump' || type === 'cart_purchaseMainWithBump' ?
+			type === 'cart/purchaseMainWithoutBump' || type === 'cart/purchaseMainWithBump' ?
 				cart.visitorCheckoutHref ?? visitor?.href ?? 'Unknown'
 			:	visitor?.href ?? 'Unknown',
 	};
@@ -304,20 +307,11 @@ function getMetaEventFromCartEvent({
 	customData: MetaEventProps['customData'];
 } | null {
 	switch (eventType) {
-		case 'cart_viewLandingPage':
-			if (!cart.landingPageId) return null;
+		case 'cart/viewCheckout':
 			return {
-				eventName: 'ViewContent',
+				eventName: 'barely.cart/viewCheckout',
 				customData: {
-					content_ids: [cart.mainProductId],
-					content_name: cart.landingPageId,
-					content_type: 'product',
-				},
-			};
-		case 'cart_initiateCheckout':
-			return {
-				eventName: 'InitiateCheckout',
-				customData: {
+					cartId: cart.id,
 					content_ids: [cart.mainProductId],
 					content_type: 'product',
 					currency: 'USD',
@@ -343,62 +337,70 @@ function getMetaEventFromCartEvent({
 		// 		},
 		// 	};
 
-		case 'cart_addPaymentInfo':
+		case 'cart/addPaymentInfo':
 			return {
-				eventName: 'AddPaymentInfo',
+				eventName: 'barely.cart/addPaymentInfo',
 				customData: {
+					cartId: cart.id,
 					content_ids: [cart.mainProductId],
 					content_type: 'product',
 					currency: 'USD',
 					value: cart.checkoutAmount,
 				},
 			};
-		case 'cart_addBump':
+		case 'cart/addBump':
 			if (!cart.bumpProductId) return null;
 			return {
-				eventName: 'AddToCart',
+				eventName: 'barely.cart/addBump',
 				customData: {
+					cartId: cart.id,
 					content_ids: [cart.bumpProductId],
 					content_type: 'product',
 					currency: 'USD',
 					value: cart.bumpProductPrice ?? 0,
 				},
 			};
-		case 'cart_purchaseMainWithoutBump':
+		case 'cart/purchaseMainWithoutBump':
 			return {
-				eventName: 'Purchase',
+				eventName: 'barely.cart/purchaseMain',
 				customData: {
+					cartId: cart.id,
 					content_ids: [cart.mainProductId],
 					content_type: 'product',
 					currency: 'USD',
+					withBump: false,
 					value: cart.checkoutAmount,
 				},
 			};
-		case 'cart_purchaseMainWithBump':
+		case 'cart/purchaseMainWithBump':
 			if (!cart.bumpProductId) return null;
 			return {
-				eventName: 'Purchase',
+				eventName: 'barely.cart/purchaseMain',
 				customData: {
+					cartId: cart.id,
 					content_ids: [cart.mainProductId, cart.bumpProductId],
 					content_type: 'product',
 					currency: 'USD',
+					withBump: true,
 					value: cart.checkoutAmount,
 				},
 			};
-		case 'cart_viewUpsell':
+		case 'cart/viewUpsell':
 			if (!cart.upsellProductId) return null;
 			return {
-				eventName: 'ViewContent',
+				eventName: 'barely.cart/viewUpsell',
 				customData: {
+					cartId: cart.id,
 					content_ids: [cart.upsellProductId],
 					content_type: 'product',
 				},
 			};
-		case 'cart_purchaseUpsell':
+		case 'cart/purchaseUpsell':
 			if (!cart.upsellProductId) return null;
 			return {
-				eventName: 'Purchase',
+				eventName: 'barely.cart/purchaseUpsell',
 				customData: {
+					cartId: cart.id,
 					content_ids: [cart.upsellProductId],
 					content_type: 'product',
 					currency: 'USD',
@@ -418,13 +420,7 @@ function getCartEventData({
 	eventType: (typeof WEB_EVENT_TYPES__CART)[number];
 }): Partial<z.infer<typeof cartEventIngestSchema>> {
 	switch (eventType) {
-		case 'cart_viewLandingPage':
-			return {
-				cart_landingPageId: cart.landingPageId,
-				cart_landingPage_mainProductId: cart.mainProductId,
-			};
-
-		case 'cart_initiateCheckout':
+		case 'cart/viewCheckout':
 			return {
 				cart_checkout_mainProductId: cart.mainProductId,
 				cart_checkout_mainProductPrice: cart.mainProductPrice,
@@ -433,7 +429,7 @@ function getCartEventData({
 				cart_checkout_bumpProductPrice: cart.bumpProductPrice,
 			};
 
-		case 'cart_addPaymentInfo':
+		case 'cart/addPaymentInfo':
 			return {
 				cart_checkout_mainProductId: cart.mainProductId,
 				cart_checkout_mainProductPrice: cart.mainProductPrice,
@@ -442,7 +438,7 @@ function getCartEventData({
 				cart_checkout_bumpProductPrice: cart.bumpProductPrice,
 			};
 
-		case 'cart_addBump':
+		case 'cart/addBump':
 			return {
 				cart_checkout_mainProductId: cart.mainProductId,
 				cart_checkout_mainProductPrice: cart.mainProductPrice,
@@ -451,7 +447,7 @@ function getCartEventData({
 				cart_checkout_bumpProductPrice: cart.bumpProductPrice,
 			};
 
-		case 'cart_removeBump':
+		case 'cart/removeBump':
 			return {
 				cart_checkout_mainProductId: cart.mainProductId,
 				cart_checkout_mainProductPrice: cart.mainProductPrice,
@@ -460,7 +456,7 @@ function getCartEventData({
 				cart_checkout_bumpProductPrice: cart.bumpProductPrice,
 			};
 
-		case 'cart_purchaseMainWithoutBump':
+		case 'cart/purchaseMainWithoutBump':
 			return {
 				cart_checkout_mainProductId: cart.mainProductId,
 				cart_checkoutPurchase_mainProductPrice: cart.mainProductPrice,
@@ -478,7 +474,7 @@ function getCartEventData({
 				cart_checkout_bumpProductId: cart.bumpProductId,
 				cart_checkout_bumpProductPrice: cart.bumpProductPrice,
 			};
-		case 'cart_purchaseMainWithBump':
+		case 'cart/purchaseMainWithBump':
 			return {
 				cart_checkout_mainProductId: cart.mainProductId,
 				cart_checkoutPurchase_mainProductPrice: cart.mainProductPrice,
@@ -500,12 +496,12 @@ function getCartEventData({
 				cart_checkoutPurchase_amount: cart.checkoutAmount,
 			};
 
-		case 'cart_viewUpsell':
+		case 'cart/viewUpsell':
 			return {
 				cart_upsell_upsellProductId: cart.upsellProductId,
 			};
 
-		case 'cart_declineUpsell':
+		case 'cart/declineUpsell':
 			return {
 				// maybe insight into why upsell was declined
 				cart_checkoutPurchase_amount: cart.checkoutAmount,
@@ -513,7 +509,7 @@ function getCartEventData({
 				cart_upsell_upsellProductId: cart.upsellProductId,
 			};
 
-		case 'cart_purchaseUpsell':
+		case 'cart/purchaseUpsell':
 			return {
 				cart_checkoutPurchase_amount: cart.checkoutAmount,
 
@@ -526,7 +522,7 @@ function getCartEventData({
 				cart_upsellPurchase_amount: cart.upsellAmount,
 			};
 
-		case 'cart_viewOrderConfirmation':
+		case 'cart/viewOrderConfirmation':
 			return {};
 
 		default:

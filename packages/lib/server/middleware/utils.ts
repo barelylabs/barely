@@ -54,11 +54,11 @@ export function parseLinkDomain(req: NextRequest) {
 	// if hostname is {handle}.barely.link, it's a transparent link. otherwise, it's a short link
 	const linkClickType: RecordClickProps['type'] =
 		domain.endsWith(`.${process.env.NEXT_PUBLIC_TRANSPARENT_LINK_ROOT_DOMAIN}`) ?
-			'transparentLinkClick'
-		:	'shortLinkClick';
+			'transparent'
+		:	'short';
 
 	if (
-		linkClickType === 'shortLinkClick' &&
+		linkClickType === 'short' &&
 		(process.env.VERCEL_ENV === 'development' || process.env.VERCEL_ENV === 'preview')
 	) {
 		const domainParam = req.nextUrl.searchParams.get('domain');
@@ -133,13 +133,13 @@ export function parseShortLink(req: NextRequest) {
 export function parseLink(req: NextRequest) {
 	const { href, linkClickType } = parseLinkDomain(req);
 
-	if (linkClickType === 'transparentLinkClick') {
+	if (linkClickType === 'transparent') {
 		return {
 			linkClickType,
 			href,
 			...parseTransparentLink(req),
 		};
-	} else if (linkClickType === 'shortLinkClick') {
+	} else if (linkClickType === 'short') {
 		return {
 			linkClickType,
 			href,

@@ -24,7 +24,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 
 	let where: SQL | undefined = undefined;
 
-	if (linkProps.linkClickType === 'transparentLinkClick') {
+	if (linkProps.linkClickType === 'transparent') {
 		if (!linkProps.handle && !linkProps.app) {
 			console.log(
 				'no handle or app found for transparent link click',
@@ -46,7 +46,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 				eq(Links.appRoute, linkProps.appRoute)
 			:	isNull(Links.appRoute),
 		]);
-	} else if (linkProps.linkClickType === 'shortLinkClick') {
+	} else if (linkProps.linkClickType === 'short') {
 		where = sqlAnd([
 			eq(Links.domain, linkProps.domain),
 			eq(Links.key, url.pathname.replace('/', '')),
