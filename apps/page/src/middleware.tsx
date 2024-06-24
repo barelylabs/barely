@@ -31,6 +31,11 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	console.log('domainParts >', domainParts);
 	console.log('domainParts.length >', domainParts?.length);
 
+	// if www is the first part of the domain, we assume it's structured as www.barely.com/[handle]/[key]. Skip the rest of the middleware.
+	if (domainParts?.[0] === 'www') {
+		return NextResponse.next();
+	}
+
 	let handle: string | null = null;
 
 	if (domainParts && domainParts.length >= 2) {

@@ -3,7 +3,6 @@
 import type { LandingPage } from '@barely/lib/server/routes/landing-page/landing-page.schema';
 
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { Button } from '@barely/ui/elements/button';
 import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
 import { Text } from '@barely/ui/elements/typography';
 
@@ -48,7 +47,7 @@ export function AllLandingPages() {
 			>
 				{landingPage => <LandingPageCard landingPage={landingPage} />}
 			</GridList>
-			<Button look='success'>success</Button>
+			{/* <Button look='success'>success</Button> */}
 		</>
 	);
 }
