@@ -23,7 +23,7 @@ import { VideoPlayer } from '../../video-player';
 export const videoJsxComponentDescriptors: JsxComponentDescriptor[] = [
 	{
 		name: 'VideoPlayer',
-		kind: 'text',
+		kind: 'flow',
 		props: [
 			{
 				name: 'url',
@@ -41,8 +41,6 @@ export const videoJsxComponentDescriptors: JsxComponentDescriptor[] = [
 						{typeof videoUrl === 'string' && (
 							<VideoPlayer className='w-full' controls={false} url={videoUrl} />
 						)}
-						{/* <GenericJsxEditor {...props} />
-						 */}
 						<VideoEditor {...props} />
 					</div>
 				</div>
@@ -53,13 +51,14 @@ export const videoJsxComponentDescriptors: JsxComponentDescriptor[] = [
 
 export const InsertVideoButton = () => {
 	const insertJsx = usePublisher(insertJsx$);
+	// const insertMarkdown = usePublisher(insertMarkdown$);
 	return (
 		<EditorButton
 			onClick={() => {
 				console.log('insertJsx');
 				insertJsx({
 					name: 'VideoPlayer',
-					kind: 'text',
+					kind: 'flow',
 					props: { url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' },
 				});
 			}}

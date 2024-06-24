@@ -32,7 +32,7 @@ import { H, Text } from '../../typography';
 export const buttonComponentDescriptors: JsxComponentDescriptor[] = [
 	{
 		name: 'AssetButton',
-		kind: 'text',
+		kind: 'flow',
 		props: [
 			{
 				name: 'assetId',
@@ -84,20 +84,23 @@ export const buttonComponentDescriptors: JsxComponentDescriptor[] = [
 
 export const InsertAssetButtonButton = () => {
 	const insertJsx = usePublisher(insertJsx$);
+	// const insertMarkdown = usePublisher(insertMarkdown$);
 	return (
 		<ToolbarButton
-			onClick={() =>
+			onClick={() => {
+				// insertMarkdown('/n');
 				insertJsx({
 					name: 'AssetButton',
-					kind: 'text',
+					kind: 'flow',
 					props: {
 						assetId: '',
 						assetName: '',
 						assetType: '',
 						label: 'Link to asset',
 					},
-				})
-			}
+				});
+				// insertMarkdown('\n');
+			}}
 		>
 			<Icon.connect className='h-5 w-5' weight='fill' />
 		</ToolbarButton>
