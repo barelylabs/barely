@@ -35,7 +35,7 @@ async function formatResponse(
 	if (options?.returnType === 'text') {
 		const text = await res.text();
 
-		options.logResponse && console.log('zGet res.text => ', text);
+		options.logResponse && console.log('zFetch res.text => ', text);
 
 		return {
 			res,
@@ -45,7 +45,7 @@ async function formatResponse(
 	} else if (options?.returnType === 'xml') {
 		const text = await res.text();
 
-		options.logResponse && console.log('zGet res.text => ', text);
+		options.logResponse && console.log('zFetch res.text => ', text);
 
 		const parsed: unknown = xmlParser.parse(text);
 
@@ -57,7 +57,7 @@ async function formatResponse(
 	} else {
 		const json = await res.json();
 
-		options?.logResponse && console.log('zGet res.json => ', json);
+		options?.logResponse && console.log('zFetch res.json => ', json);
 
 		return {
 			res,
