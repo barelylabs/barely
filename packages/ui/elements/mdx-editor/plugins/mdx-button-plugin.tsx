@@ -84,11 +84,9 @@ export const buttonComponentDescriptors: JsxComponentDescriptor[] = [
 
 export const InsertAssetButtonButton = () => {
 	const insertJsx = usePublisher(insertJsx$);
-	// const insertMarkdown = usePublisher(insertMarkdown$);
 	return (
 		<ToolbarButton
 			onClick={() => {
-				// insertMarkdown('/n');
 				insertJsx({
 					name: 'AssetButton',
 					kind: 'flow',
@@ -99,7 +97,6 @@ export const InsertAssetButtonButton = () => {
 						label: 'Link to asset',
 					},
 				});
-				// insertMarkdown('\n');
 			}}
 		>
 			<Icon.connect className='h-5 w-5' weight='fill' />

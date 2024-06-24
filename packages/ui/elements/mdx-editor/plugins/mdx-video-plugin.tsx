@@ -51,7 +51,6 @@ export const videoJsxComponentDescriptors: JsxComponentDescriptor[] = [
 
 export const InsertVideoButton = () => {
 	const insertJsx = usePublisher(insertJsx$);
-	// const insertMarkdown = usePublisher(insertMarkdown$);
 	return (
 		<EditorButton
 			onClick={() => {
