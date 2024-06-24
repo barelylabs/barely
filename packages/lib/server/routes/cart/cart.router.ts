@@ -309,7 +309,7 @@ export const cartRouter = createTRPCRouter({
 				await recordCartEvent({
 					cart,
 					cartFunnel: funnel,
-					type: 'cart_purchaseUpsell',
+					type: 'cart/purchaseUpsell',
 					visitor: ctx.visitor,
 				});
 			}
@@ -369,7 +369,7 @@ export const cartRouter = createTRPCRouter({
 			await recordCartEvent({
 				cart,
 				cartFunnel: funnel,
-				type: 'cart_declineUpsell',
+				type: 'cart/declineUpsell',
 				visitor: ctx.visitor,
 			});
 			// if (!!ctx.visitor?.ip || !!cart.visitorIp) {
@@ -434,7 +434,7 @@ export const cartRouter = createTRPCRouter({
 			if (!cart.visitorReferer) updateCart.visitorReferer = ctx.visitor?.referer;
 			if (!cart.visitorRefererUrl)
 				updateCart.visitorRefererUrl = ctx.visitor?.referer_url;
-			if (!cart.visitorCheckoutHref && input.event === 'cart_initiateCheckout')
+			if (!cart.visitorCheckoutHref && input.event === 'cart/viewCheckout')
 				updateCart.visitorCheckoutHref = ctx.visitor?.href;
 
 			if (

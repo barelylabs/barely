@@ -65,7 +65,7 @@ export function CheckoutForm({
 
 			logEvent({
 				cartId: initialCart.id,
-				event: 'cart_initiateCheckout',
+				event: 'cart/viewCheckout',
 			});
 		}
 	}, [
@@ -152,7 +152,7 @@ export function CheckoutForm({
 		});
 		logEvent({
 			cartId: cart.id,
-			event: 'cart_addEmail',
+			event: 'cart/addEmail',
 		});
 	};
 	const debouncedUpdateEmail = useDebouncedCallback(updateEmail, 500);
@@ -164,7 +164,7 @@ export function CheckoutForm({
 		updateCart(data);
 		logEvent({
 			cartId: cart.id,
-			event: 'cart_addShippingInfo',
+			event: 'cart/addShippingInfo',
 		});
 	};
 	const debouncedUpdateAddress = useDebouncedCallback(updateAddress, 500);
@@ -202,7 +202,7 @@ export function CheckoutForm({
 
 		logEvent({
 			cartId: cart.id,
-			event: 'cart_updateMainProductPayWhatYouWantPrice',
+			event: 'cart/updateMainProductPayWhatYouWantPrice',
 		});
 	};
 	const debouncedUpdatePayWhatYouWantPrice = useDebouncedCallback(updateCart, 500);
@@ -214,7 +214,7 @@ export function CheckoutForm({
 		if (!paymentAdded) {
 			logEvent({
 				cartId: cart.id,
-				event: 'cart_addPaymentInfo',
+				event: 'cart/addPaymentInfo',
 			});
 			setPaymentAdded(true);
 		}
@@ -388,7 +388,7 @@ export function CheckoutForm({
 
 														logEvent({
 															cartId: cart.id,
-															event: c ? 'cart_addBump' : 'cart_removeBump',
+															event: c ? 'cart/addBump' : 'cart/removeBump',
 														});
 													}}
 												/>
@@ -441,7 +441,7 @@ export function CheckoutForm({
 													});
 													logEvent({
 														cartId: cart.id,
-														event: addedBump ? 'cart_addBump' : 'cart_removeBump',
+														event: addedBump ? 'cart/addBump' : 'cart/removeBump',
 													});
 												}}
 											>

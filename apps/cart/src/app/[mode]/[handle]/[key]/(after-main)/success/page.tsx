@@ -30,7 +30,7 @@ export default async function CartSuccessPage({
 	cartApi
 		.logEvent({
 			cartId,
-			event: 'cart_viewOrderConfirmation',
+			event: 'cart/viewOrderConfirmation',
 		})
 		.catch(console.error);
 

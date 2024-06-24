@@ -76,7 +76,7 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 			cart: prevCart,
 			cartFunnel: funnel,
 			type:
-				prevCart.addedBump ? 'cart_purchaseMainWithBump' : 'cart_purchaseMainWithoutBump',
+				prevCart.addedBump ? 'cart/purchaseMainWithBump' : 'cart/purchaseMainWithoutBump',
 		});
 
 		const updateCart: UpdateCart = { id: prevCart.id };
