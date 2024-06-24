@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define an array of ports to check and kill processes on
-PORTS=(3000 3001 3002 3005 5555)
+PORTS=(3000 3001 3002 3003 3005 3006 3007 3008 4000 5555)
 
 for PORT in "${PORTS[@]}"; do
   # Find process ID listening on the current port

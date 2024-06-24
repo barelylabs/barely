@@ -6,7 +6,7 @@
 		".react-email"
 	],
 	"scripts": {
-		"dev": "pnpm with-env email dev --port 3011 --dir src/templates",
+		"dev": "pnpm with-env email dev --port 4000 --dir src/templates",
 		"clean": "rm -rf .turbo node_modules",
 		"format": "prettier --check . --ignore-path ../../.gitignore",
 		"lint": "eslint .",
