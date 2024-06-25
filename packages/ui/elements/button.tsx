@@ -111,7 +111,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 						/>
 					)}
 
-					{children}
+					{/* {children} */}
+					{loading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+					{loading && loadingText ? loadingText : children}
 				</Link>
 			);
 		}
@@ -177,4 +179,17 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = 'Button';
 
-export { Button, buttonVariants, type ButtonProps };
+const LoadingOnClickButton = ({ children, ...props }: ButtonProps) => {
+	const [isLoading, setIsLoading] = React.useState(false);
+	return (
+		<Button
+			{...props}
+			onClick={() => setIsLoading(true)}
+			loading={props.loading ?? isLoading}
+		>
+			{children}
+		</Button>
+	);
+};
+
+export { Button, LoadingOnClickButton, buttonVariants, type ButtonProps };
