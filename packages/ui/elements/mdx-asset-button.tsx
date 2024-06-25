@@ -3,7 +3,7 @@ import type { Link } from '@barely/lib/server/routes/link/link.schema';
 import type { PressKit } from '@barely/lib/server/routes/press-kit/press-kit.schema';
 import { getAbsoluteUrl } from '@barely/lib/utils/url';
 
-import { Button } from './button';
+import { LoadingOnClickButton } from './button';
 
 export const mdxAssetButton = ({
 	cartFunnels,
@@ -41,9 +41,9 @@ export const mdxAssetButton = ({
 
 		return (
 			<div className='flex w-full flex-col items-center'>
-				<Button size='xl' href={href} pill look='brand'>
+				<LoadingOnClickButton size='xl' href={href} pill look='brand'>
 					{label}
-				</Button>
+				</LoadingOnClickButton>
 			</div>
 		);
 	};
