@@ -140,6 +140,21 @@ jobs:
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_CART_PROJECT_ID }}
 
+  deploy-fm:
+    uses: ./.github/workflows/deploy-to-vercel.yml
+    needs: [git-meta, db-push]
+    with:
+      app_name: fm
+      working_directory: apps/fm
+      scope: barely
+      environment: production
+      git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
+      vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_FM_PROJECT_ID }}
+
   deploy-link:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push]
@@ -260,6 +275,7 @@ jobs:
         db-push,
         deploy-app,
         deploy-cart,
+        deploy-fm,
         deploy-link,
         deploy-page,
         deploy-press,
@@ -314,6 +330,22 @@ jobs:
 
       - name: Promote cart to production
         run: vercel promote dpl_${{ needs.deploy-cart.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+
+  promote-fm:
+    name: promote fm to production
+    needs: [production--can-merge, deploy-fm]
+    if: always() && github.event_name == 'merge_group' && ${{ needs.production--can-merge.result }} == 'success'
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_FM_PROJECT_ID }}
+    steps:
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Promote fm to production
+        run: vercel promote dpl_${{ needs.deploy-fm.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
   promote-link:
     name: promote link to production
@@ -451,6 +483,35 @@ jobs:
       - name: Rollback cart
         run: |
           ROLLBACK_DEPLOYMENT_ID=$(curl -s "https://api.vercel.com/v6/deployments?teamId=${{ secrets.VERCEL_TEAM_ID }}&projectId=${{ secrets.VERCEL_CART_PROJECT_ID}}&limit=2&rollbackCandidate=true&state=READY&target=production" -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | jq -r '.deployments[1].uid')
+          echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
+          vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+
+  rollback-fm:
+    name: rollback fm if any deployments fail
+    needs:
+      [
+        promote-app,
+        promote-cart,
+        promote-fm,
+        promote-link,
+        promote-page,
+        promote-press,
+        promote-sparrow,
+        promote-www,
+      ]
+    if: ${{ failure() && needs.promote-fm.result == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_FM_PROJECT_ID }}
+    steps:
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Rollback fm
+        run: |
+          ROLLBACK_DEPLOYMENT_ID=$(curl -s "https://api.vercel.com/v6/deployments?teamId=${{ secrets.VERCEL_TEAM_ID }}&projectId=${{ secrets.VERCEL_FM_PROJECT_ID}}&limit=2&rollbackCandidate=true&state=READY&target=production" -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | jq -r '.deployments[1].uid')
           echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
           vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
@@ -601,6 +662,7 @@ jobs:
         production--can-merge,
         promote-app,
         promote-cart,
+        promote-fm,
         promote-link,
         promote-page,
         promote-press,
@@ -612,6 +674,7 @@ jobs:
       needs.production--can-merge.result == 'success' &&
       needs.promote-app.result == 'success' &&
       needs.promote-cart.result == 'success' &&
+      needs.promote-fm.result == 'success' &&
       needs.promote-link.result == 'success' &&
       needs.promote-page.result == 'success' &&
       needs.promote-press.result == 'success' &&
