@@ -88,6 +88,7 @@ export const env = createEnv({
 			'app',
 			'bio',
 			'cart',
+			'fm',
 			'link',
 			'page',
 			'press',

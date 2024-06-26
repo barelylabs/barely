@@ -159,6 +159,23 @@ jobs:
           echo $DATABASE_URL | pnpm vercel env add DATABASE_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
           echo $DATABASE_POOL_URL | pnpm vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
 
+      - name: update vercel env - fm/preview/branch
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_FM_PROJECT_ID }}
+        run: |
+          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
+
+          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
+            pnpm vercel env rm DATABASE_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
+            pnpm vercel env rm DATABASE_POOL_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+          echo $DATABASE_URL | pnpm vercel env add DATABASE_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
+          echo $DATABASE_POOL_URL | pnpm vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
+
       - name: update vercel env - link/preview/branch
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
@@ -274,6 +291,21 @@ jobs:
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
 
+  deploy-fm:
+    uses: ./.github/workflows/deploy-to-vercel.yml
+    needs: [neon-preview, git-meta]
+    with:
+      app_name: fm
+      working_directory: apps/fm
+      scope: barely
+      environment: preview
+      git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
+      vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_FM_PROJECT_ID }}
+
   deploy-page:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [neon-preview, git-meta]
@@ -344,6 +376,7 @@ jobs:
         deploy-app,
         deploy-cart,
         deploy-link,
+        deploy-fm,
         deploy-page,
         deploy-press,
         deploy-sparrow,
@@ -364,6 +397,7 @@ jobs:
             | :iphone: app | [preview](${{ needs.deploy-app.outputs.deployment_url }}) | [inspect](${{ needs.deploy-app.outputs.inspect_url }}) |
             | :shopping_cart: cart | [preview](${{ needs.deploy-cart.outputs.deployment_url }}) | [inspect](${{ needs.deploy-cart.outputs.inspect_url }}) |
             | :link: link | [preview](${{ needs.deploy-link.outputs.deployment_url }}) | [inspect](${{ needs.deploy-link.outputs.inspect_url }}) |
+            | :radio: fm | [preview](${{ needs.deploy-fm.outputs.deployment_url }}) | [inspect](${{ needs.deploy-fm.outputs.inspect_url }}) |
             | :newspaper: press | [preview](${{ needs.deploy-press.outputs.deployment_url }}) | [inspect](${{ needs.deploy-press.outputs.inspect_url }}) |
             | :bird: sparrow | [preview](${{ needs.deploy-sparrow.outputs.deployment_url }}) | [inspect](${{ needs.deploy-sparrow.outputs.inspect_url }}) |
             | :globe_with_meridians: www | [preview](${{ needs.deploy-www.outputs.deployment_url }}) | [inspect](${{ needs.deploy-www.outputs.inspect_url }}) |
@@ -381,6 +415,7 @@ jobs:
         trigger-preview,
         deploy-app,
         deploy-cart,
+        deploy-fm,
         deploy-link,
         deploy-page,
         deploy-press,
