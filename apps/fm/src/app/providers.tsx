@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { cartApi } from '@barely/lib/server/routes/cart/cart.api.react';
+import { fmPageApi } from '@barely/lib/server/routes/fm-page/fm-page.api.react';
 import { getAbsoluteUrl } from '@barely/lib/utils/url';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { httpBatchLink, loggerLink } from '@trpc/client';
@@ -29,7 +30,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 	const queryClient = getQueryClient();
 
 	const [trpcClient] = useState(() =>
-		cartApi.createClient({
+		fmPageApi.createClient({
 			links: [
 				loggerLink({
 					enabled: opts =>
@@ -40,10 +41,10 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 				// unstable_httpBatchStreamLink({
 				httpBatchLink({
 					transformer: SuperJSON,
-					url: getAbsoluteUrl('cart', 'api/trpc/cart'),
+					url: getAbsoluteUrl('fm', 'api/trpc/fmPage'),
 					headers() {
 						const headers = new Headers();
-						headers.set('x-trpc-source', 'nextjs-react-cart');
+						headers.set('x-trpc-source', 'nextjs-react-fm');
 						return headers;
 					},
 				}),

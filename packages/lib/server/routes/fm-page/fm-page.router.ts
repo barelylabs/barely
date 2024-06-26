@@ -5,10 +5,10 @@ import { raise } from '../../../utils/raise';
 import { createTRPCRouter, publicProcedure } from '../../api/trpc';
 import { recordFmEvent } from '../event/event.fns';
 import { WEB_EVENT_TYPES__FM } from '../event/event.tb';
-import { FM_LINK_PLATFORMS } from './fm.constants';
-import { FmLinks, FmPages } from './fm.sql';
+import { FM_LINK_PLATFORMS } from '../fm/fm.constants';
+import { FmLinks, FmPages } from '../fm/fm.sql';
 
-export const fmLogRouter = createTRPCRouter({
+export const fmPageRouter = createTRPCRouter({
 	logEvent: publicProcedure
 		.input(
 			z.object({
@@ -24,6 +24,8 @@ export const fmLogRouter = createTRPCRouter({
 		.mutation(async ({ ctx, input }) => {
 			const { visitor } = ctx;
 			const { fmId, fmLinkParams, type } = input;
+
+			console.log('logging fmPageEvent', { fmId, fmLinkParams, type });
 
 			const fmPage =
 				(await ctx.db.http.query.FmPages.findFirst({

@@ -1,7 +1,7 @@
 import { env } from '../env';
 import { raise } from './raise';
 
-const apps = ['app', 'bio', 'cart', 'link', 'page', 'press', 'www'] as const;
+const apps = ['app', 'bio', 'cart', 'fm', 'link', 'page', 'press', 'www'] as const;
 
 export function getBaseUrl(app: (typeof apps)[number], absolute = false) {
 	if (!absolute && typeof window !== 'undefined') return ''; // browser should use relative url
@@ -20,18 +20,6 @@ export function getBaseUrl(app: (typeof apps)[number], absolute = false) {
 				devPort =
 					env.NEXT_PUBLIC_APP_DEV_PORT ?? raise('NEXT_PUBLIC_APP_DEV_PORT not found');
 				break;
-			case 'link':
-				devPort =
-					env.NEXT_PUBLIC_LINK_DEV_PORT ?? raise('NEXT_PUBLIC_LINK_DEV_PORT not found');
-				break;
-			case 'page':
-				devPort =
-					env.NEXT_PUBLIC_PAGE_DEV_PORT ?? raise('NEXT_PUBLIC_PAGE_DEV_PORT not found');
-				break;
-			case 'www':
-				devPort =
-					env.NEXT_PUBLIC_WWW_DEV_PORT ?? raise('NEXT_PUBLIC_WWW_DEV_PORT not found');
-				break;
 			case 'bio':
 				devPort =
 					env.NEXT_PUBLIC_BIO_DEV_PORT ?? raise('NEXT_PUBLIC_BIO_DEV_PORT not found');
@@ -40,9 +28,25 @@ export function getBaseUrl(app: (typeof apps)[number], absolute = false) {
 				devPort =
 					env.NEXT_PUBLIC_CART_DEV_PORT ?? raise('NEXT_PUBLIC_CART_DEV_PORT not found');
 				break;
+			case 'fm':
+				devPort =
+					env.NEXT_PUBLIC_FM_DEV_PORT ?? raise('NEXT_PUBLIC_FM_DEV_PORT not found');
+				break;
+			case 'link':
+				devPort =
+					env.NEXT_PUBLIC_LINK_DEV_PORT ?? raise('NEXT_PUBLIC_LINK_DEV_PORT not found');
+				break;
+			case 'page':
+				devPort =
+					env.NEXT_PUBLIC_PAGE_DEV_PORT ?? raise('NEXT_PUBLIC_PAGE_DEV_PORT not found');
+				break;
 			case 'press':
 				devPort =
 					env.NEXT_PUBLIC_PRESS_DEV_PORT ?? raise('NEXT_PUBLIC_PRESS_DEV_PORT not found');
+				break;
+			case 'www':
+				devPort =
+					env.NEXT_PUBLIC_WWW_DEV_PORT ?? raise('NEXT_PUBLIC_WWW_DEV_PORT not found');
 				break;
 			default:
 				raise('Invalid app');

@@ -1,12 +1,15 @@
 'use client';
 
 import type { FmLink } from '@barely/lib/server/routes/fm/fm.schema';
+import { fmPageApi } from '@barely/lib/server/routes/fm-page/fm-page.api.react';
 
 import { Button } from '@barely/ui/elements/button';
 import { Img } from '@barely/ui/elements/img';
 
 export const FmLinkButton = ({ link }: { link: FmLink }) => {
 	const theme = 'dark';
+
+	const { mutate: logEvent } = fmPageApi.logEvent.useMutation();
 
 	return (
 		<div className='flex flex-row items-center justify-between gap-4'>
@@ -27,7 +30,14 @@ export const FmLinkButton = ({ link }: { link: FmLink }) => {
 				target='_blank'
 				rel='noopener noreferrer'
 				onClick={() => {
-					console.log('clicked');
+					logEvent({
+						type: 'fm/linkClick',
+						fmId: link.fmPageId,
+						fmLinkParams: {
+							platform: link.platform,
+							// url: link.url, // todo: add destination url to event logging
+						},
+					});
 				}}
 			>
 				PLAY

@@ -1,7 +1,7 @@
 import { and, eq } from 'drizzle-orm';
 
 import { dbHttp } from '../../db';
-import { FmPages } from './fm.sql';
+import { FmPages } from '../fm/fm.sql';
 
 export async function getFmPageData({ handle, key }: { handle: string; key: string }) {
 	const fmPageRaw = await dbHttp.query.FmPages.findFirst({
