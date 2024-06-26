@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { createTRPCContext } from '@barely/lib/server/api/trpc';
-import { cartRouter } from '@barely/lib/server/routes/cart/cart.router';
+import { fmPageRouter } from '@barely/lib/server/routes/fm-page/fm-page.router';
 import { parseReqForVisitorInfo } from '@barely/lib/utils/middleware';
 import { setCorsHeaders } from '@barely/lib/utils/trpc-route';
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
@@ -9,14 +9,14 @@ export { OPTIONS } from '@barely/lib/utils/trpc-route';
 
 const handler = async function (req: NextRequest) {
 	const visitor = parseReqForVisitorInfo(req);
-	console.log('trpc cart visitor >>', visitor);
+	console.log('trpc fm visitor >>', visitor);
 
 	const forwaredFor = req.headers.get('x-forwarded-for');
-	console.log('trpc cart forwaredFor >>', forwaredFor);
+	console.log('trpc fm forwaredFor >>', forwaredFor);
 
 	const response = await fetchRequestHandler({
-		endpoint: '/api/trpc/cart',
-		router: cartRouter,
+		endpoint: '/api/trpc/fmPage',
+		router: fmPageRouter,
 		req,
 		createContext: () =>
 			createTRPCContext({
