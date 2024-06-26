@@ -12,6 +12,7 @@ import {
 
 import { dbId, lexorank, primaryId, timestamps } from '../../../utils/sql';
 import { VidRenders } from '../../vid-render.sql';
+import { FmPages } from '../fm/fm.sql';
 import { PressKits } from '../press-kit/press-kit.sql';
 import { Products } from '../product/product.sql';
 import { Tracks } from '../track/track.sql';
@@ -114,6 +115,7 @@ export const File_Relations = relations(Files, ({ one, many }) => ({
 	}),
 	// many-to-one
 	parentForVidRender: many(VidRenders),
+	fmPages: many(FmPages),
 
 	// many-to-many
 	_pressKits: many(_Files_To_PressKits_PressPhotos, {

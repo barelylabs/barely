@@ -141,6 +141,14 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 							},
 						})(runtime),
 
+						fm: unstable_httpBatchStreamLink({
+							transformer: SuperJSON,
+							url: getAbsoluteUrl('app', 'api/trpc/fm'),
+							headers() {
+								return preparedHeaders;
+							},
+						})(runtime),
+
 						formResponse: unstable_httpBatchStreamLink({
 							transformer: SuperJSON,
 							url: getAbsoluteUrl('app', 'api/trpc/formResponse'),

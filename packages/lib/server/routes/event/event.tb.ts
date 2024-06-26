@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { formattedUserAgentSchema, nextGeoSchema } from '../../next/next.schema';
 import { tinybird } from '../../tinybird/client';
+import { FM_LINK_PLATFORMS } from '../fm/fm.constants';
 
 // schema
 export const visitorSessionTinybirdSchema = z
@@ -45,10 +46,7 @@ export const WEB_EVENT_TYPES__CART = [
 
 export const WEB_EVENT_TYPES__FM = ['fm/view', 'fm/linkClick'] as const;
 
-export const WEB_EVENT_TYPES__LINK = [
-	'link/click',
-	// 'link/transparentLinkClick',
-] as const;
+export const WEB_EVENT_TYPES__LINK = ['link/click'] as const;
 
 export const WEB_EVENT_TYPES__PAGE = ['page/view', 'page/linkClick'] as const;
 
@@ -136,4 +134,17 @@ export const cartEventIngestSchema = z.object({
 export const ingestCartEvent = tinybird.buildIngestEndpoint({
 	datasource: 'web_events',
 	event: webEventIngestSchema.merge(cartEventIngestSchema),
+});
+
+export const fmEventIngestSchema = z.object({
+	// fmId: z.string(),
+	destinationPlatform: z
+		.enum([...FM_LINK_PLATFORMS, ''])
+		.optional()
+		.default(''),
+});
+
+export const ingestFmEvent = tinybird.buildIngestEndpoint({
+	datasource: 'web_events',
+	event: webEventIngestSchema.merge(fmEventIngestSchema),
 });

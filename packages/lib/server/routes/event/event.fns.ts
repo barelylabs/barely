@@ -5,10 +5,12 @@ import type { VisitorInfo } from '../../../utils/middleware';
 import type { MetaEventProps } from '../../meta/meta.endpts.event';
 import type { CartFunnel } from '../cart-funnel/cart-funnel.schema';
 import type { Cart } from '../cart/cart.schema';
+import type { FmLink, FmPage } from '../fm/fm.schema';
 import type { LinkAnalyticsProps } from '../link/link.schema';
 import type {
 	cartEventIngestSchema,
 	WEB_EVENT_TYPES__CART,
+	WEB_EVENT_TYPES__FM,
 	// WEB_EVENT_TYPES__LINK,
 } from './event.tb';
 import { env } from '../../../env';
@@ -20,9 +22,15 @@ import { dbHttp } from '../../db';
 // import { db } from '../../db';
 import { reportEventToMeta } from '../../meta/meta.endpts.event';
 import { AnalyticsEndpoints } from '../analytics-endpoint/analytics-endpoint.sql';
+import { FmLinks, FmPages } from '../fm/fm.sql';
 import { Links } from '../link/link.sql';
 import { Workspaces } from '../workspace/workspace.sql';
-import { ingestCartEvent, ingestWebEvent, webEventIngestSchema } from './event.tb';
+import {
+	ingestCartEvent,
+	ingestFmEvent,
+	ingestWebEvent,
+	webEventIngestSchema,
+} from './event.tb';
 
 /**
  * Record clicks with geo, ua, referer, and timestamp data
@@ -157,19 +165,17 @@ export async function recordLinkClick({
 	return true;
 }
 
-interface RecordCartEventProps {
-	cart: Cart;
-	cartFunnel: CartFunnel;
-	type: (typeof WEB_EVENT_TYPES__CART)[number];
-	visitor?: VisitorInfo;
-}
-
 export async function recordCartEvent({
 	cart,
 	cartFunnel,
 	type,
 	visitor,
-}: RecordCartEventProps) {
+}: {
+	cart: Cart;
+	cartFunnel: CartFunnel;
+	type: (typeof WEB_EVENT_TYPES__CART)[number];
+	visitor?: VisitorInfo;
+}) {
 	const visitorInfo: VisitorInfo = {
 		ip: cart.visitorIp ?? visitor?.ip ?? 'Unknown',
 		geo: {
@@ -527,5 +533,140 @@ function getCartEventData({
 
 		default:
 			return {};
+	}
+}
+
+/*
+FM
+*/
+
+export async function recordFmEvent({
+	fmPage,
+	fmLink,
+	type,
+	visitor,
+}: {
+	fmPage: FmPage;
+	type: (typeof WEB_EVENT_TYPES__FM)[number];
+	fmLink?: FmLink;
+	visitor?: VisitorInfo;
+}) {
+	if (visitor?.isBot) return null;
+
+	// const rateLimitPeriod = env.RATE_LIMIT_RECORD_FM_EVENT ?? '1 h';
+	const rateLimitPeriod = '1 s';
+
+	const { success } = await ratelimit(10, rateLimitPeriod).limit(
+		`recordFmEvent:${visitor?.ip}:${fmPage.id}:${type}:${fmLink?.platform}`,
+	);
+
+	if (!success) {
+		console.log(
+			'rate limit exceeded for ',
+			visitor?.ip,
+			fmPage.id,
+			type,
+			fmLink?.platform,
+		);
+		return null;
+	}
+
+	const timestamp = new Date(Date.now()).toISOString();
+
+	const analyticsEndpoints = await dbHttp.query.AnalyticsEndpoints.findMany({
+		where: eq(AnalyticsEndpoints.workspaceId, fmPage.workspaceId),
+	});
+
+	const metaPixel = analyticsEndpoints.find(endpoint => endpoint.platform === 'meta');
+	const metaEvent = getMetaEventFromFmEvent({
+		fmPage,
+		fmLink,
+		eventType: type,
+	});
+	const metaRes =
+		metaPixel?.accessToken && metaEvent ?
+			await reportEventToMeta({
+				pixelId: metaPixel.id,
+				accessToken: metaPixel.accessToken,
+				url: visitor?.href ?? '',
+				ip: visitor?.ip,
+				ua: visitor?.userAgent.ua,
+				geo: visitor?.geo,
+				eventName: metaEvent.eventName,
+				customData: metaEvent.customData,
+			}).catch(err => {
+				console.log('error => ', err);
+				return { reported: false };
+			})
+		:	{ reported: false };
+
+	// report event to tinybird
+	try {
+		const tinybirdRes = await ingestFmEvent({
+			timestamp,
+			workspaceId: fmPage.workspaceId,
+			assetId: fmPage.id,
+			sessionId: newId('fmSession'),
+			type,
+			...visitor,
+			href: visitor?.href ?? '',
+			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
+		});
+
+		console.log('tinybirdRes for fm event => ', tinybirdRes);
+	} catch (error) {
+		console.log('error => ', error);
+		throw new Error('ah!');
+	}
+
+	if (type === 'fm/view') {
+		// increment fmPage views
+		await dbHttp
+			.update(FmPages)
+			.set({ views: sqlIncrement(FmPages.views) })
+			.where(eq(FmPages.id, fmPage.id));
+	} else if (type === 'fm/linkClick' && fmLink) {
+		// increment fmLinkClicks
+		await dbHttp
+			.update(FmLinks)
+			.set({ clicks: sqlIncrement(FmLinks.clicks) })
+			.where(eq(FmLinks.id, fmLink.id));
+		await dbHttp
+			.update(FmPages)
+			.set({ clicks: sqlIncrement(FmPages.clicks) })
+			.where(eq(FmPages.id, fmPage.id));
+	}
+}
+
+function getMetaEventFromFmEvent({
+	fmPage,
+	fmLink,
+	eventType,
+}: {
+	fmPage: FmPage;
+	fmLink?: FmLink;
+	eventType: (typeof WEB_EVENT_TYPES__FM)[number];
+}): {
+	eventName: MetaEventProps['eventName'];
+	customData: MetaEventProps['customData'];
+} | null {
+	switch (eventType) {
+		case 'fm/view':
+			return {
+				eventName: 'barely.fm/view',
+				customData: {
+					fmId: fmPage.id,
+				},
+			};
+		case 'fm/linkClick':
+			return {
+				eventName: 'barely.fm/linkClick',
+				customData: {
+					fmId: fmPage.id,
+					destinationPlatform: fmLink?.platform,
+				},
+			};
+		default:
+			return null;
 	}
 }

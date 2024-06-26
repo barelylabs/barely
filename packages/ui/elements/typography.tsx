@@ -28,6 +28,8 @@ const textStyles = cva(['align-text-bottom leading-none'], {
 			medium: 'font-medium',
 			semibold: 'font-semibold',
 			bold: 'font-bold',
+			extrabold: 'font-extrabold',
+			black: 'font-black',
 		},
 
 		subtle: { true: 'text-subtle-foreground' },

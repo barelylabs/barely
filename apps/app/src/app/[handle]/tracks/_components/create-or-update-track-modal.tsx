@@ -90,9 +90,10 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 	} = artworkUploadState;
 
 	const artworkImagePreview =
-		artworkUploadQueue[0]?.previewImage ?? mode === 'update' ?
+		artworkUploadQueue[0]?.previewImage ??
+		(mode === 'update' ?
 			selectedTrack?.artworkFiles?.find(f => f.current)?.src ?? ''
-		:	'';
+		:	'');
 
 	/* Audio upload */
 	const audioUploadState = useUpload({

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import type { NextGeo } from '../next/next.schema';
+import type { FM_LINK_PLATFORMS } from '../routes/fm/fm.constants';
 import { env } from '../../env';
 import { sha256 } from '../../utils/hash';
 import { log } from '../../utils/log';
@@ -20,6 +21,8 @@ interface MetaEventParams {
 	cartId?: string;
 	withBump?: boolean;
 	linkType?: 'short' | 'transparent';
+	fmId?: string;
+	destinationPlatform?: (typeof FM_LINK_PLATFORMS)[number];
 }
 
 const META_EVENT_NAMES = [

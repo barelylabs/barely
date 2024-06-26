@@ -69,9 +69,13 @@ export function useTypedQuery<T extends z.AnyZodObject>(
 	const setPath = useCallback(
 		function setPath(path: string) {
 			if (options?.replace) {
-				router.replace(path);
+				router.replace(path, {
+					scroll: false,
+				});
 			} else {
-				return router.push(path);
+				return router.push(path, {
+					scroll: false,
+				});
 			}
 		},
 		[router],
