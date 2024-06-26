@@ -49,7 +49,7 @@ const LandingPageContext = createContext<LandingPageContext | undefined>(undefin
 
 export function LandingPageContextProvider({
 	children,
-	initialInfiniteLandingPages: initialInfiniteLandingPages,
+	initialInfiniteLandingPages,
 	filters,
 	selectedLandingPageIds,
 }: {

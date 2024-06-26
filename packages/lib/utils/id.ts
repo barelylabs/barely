@@ -30,6 +30,10 @@ const prefixes = {
 	// campaigns
 	campaign: 'camp',
 	playlistPitchReview: 'plpr',
+	// fm
+	fmPage: 'fm',
+	fmLink: 'fml',
+	fmSession: 'fms',
 	// forms
 	form: 'form',
 	formResponse: 'form_res',

@@ -10,6 +10,7 @@ import { cartRouter } from '../routes/cart/cart.router';
 import { domainRouter } from '../routes/domain/domain.router';
 import { eventRouter } from '../routes/event/event.router';
 import { fileRouter } from '../routes/file/file.router';
+import { fmRouter } from '../routes/fm/fm.router';
 import { formResponseRouter } from '../routes/form/form-response.router';
 import { genreRouter } from '../routes/genre/genre.router';
 import { landingPageRouter } from '../routes/landing-page/landing-page.router';
@@ -45,6 +46,7 @@ const appRouter = createTRPCRouter({
 	domain: domainRouter,
 	event: eventRouter,
 	file: fileRouter,
+	fm: fmRouter,
 	formResponse: formResponseRouter,
 	genre: genreRouter,
 	landingPage: landingPageRouter,

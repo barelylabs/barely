@@ -26,6 +26,7 @@ import * as externalWebsiteSql from '../routes/external-website/external-website
 import * as fanSql from '../routes/fan/fan.sql';
 import * as fileFolderSql from '../routes/file/file-folder.sql';
 import * as fileSql from '../routes/file/file.sql';
+import * as fmSql from '../routes/fm/fm.sql';
 import * as formResponseSql from '../routes/form/form-response.sql';
 import * as formSql from '../routes/form/form.sql';
 import * as genreSql from '../routes/genre/genre.sql';
@@ -71,6 +72,7 @@ export const dbSchema = {
 	...fanSql,
 	...fileSql,
 	...fileFolderSql,
+	...fmSql,
 	...formSql,
 	...formResponseSql,
 	...funnelSql,
