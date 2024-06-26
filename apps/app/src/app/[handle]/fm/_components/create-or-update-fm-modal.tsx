@@ -7,7 +7,7 @@ import { useCallback } from 'react';
 import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
 import { useUpload } from '@barely/lib/hooks/use-upload';
 import { api } from '@barely/lib/server/api/react';
-import { availableFmLinkPlatforms } from '@barely/lib/server/routes/fm/fm.constants';
+import { FM_LINK_PLATFORMS } from '@barely/lib/server/routes/fm/fm.constants';
 import { upsertFmPageSchema } from '@barely/lib/server/routes/fm/fm.schema';
 import { atom } from 'jotai';
 import { useFieldArray } from 'react-hook-form';
@@ -80,7 +80,7 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 	});
 
 	const activeLinks = form.watch('links');
-	const availableLinks = availableFmLinkPlatforms.filter(
+	const availableLinks = FM_LINK_PLATFORMS.filter(
 		platform => !activeLinks.some(link => link.platform === platform),
 	);
 
