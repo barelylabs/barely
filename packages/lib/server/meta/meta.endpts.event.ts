@@ -17,12 +17,19 @@ interface MetaEventParams {
 	currency?: string;
 	num_items?: number;
 	value?: number;
-	// barely params
+
+	/* barely params */
+	// cart
 	cartId?: string;
-	withBump?: boolean;
-	linkType?: 'short' | 'transparent';
+	cartPurchaseType?: 'mainWithoutBump' | 'mainWithBump' | 'upsell';
+	upsellProductId?: string;
+
+	// fm
 	fmId?: string;
 	destinationPlatform?: (typeof FM_LINK_PLATFORMS)[number];
+
+	// link
+	linkType?: 'short' | 'transparent';
 }
 
 const META_EVENT_NAMES = [
@@ -33,10 +40,10 @@ const META_EVENT_NAMES = [
 	'barely.cart/addPaymentInfo',
 	'barely.cart/addBump',
 	'barely.cart/removeBump',
-	'barely.cart/purchaseMain',
+	// 'barely.cart/purchaseMain',
+	'barely.cart/purchase',
 	'barely.cart/viewUpsell',
 	'barely.cart/declineUpsell',
-	'barely.cart/purchaseUpsell',
 	'barely.cart/viewOrderConfirmation',
 
 	// fm

@@ -368,26 +368,26 @@ function getMetaEventFromCartEvent({
 			};
 		case 'cart/purchaseMainWithoutBump':
 			return {
-				eventName: 'barely.cart/purchaseMain',
+				eventName: 'barely.cart/purchase',
 				customData: {
 					cartId: cart.id,
 					content_ids: [cart.mainProductId],
 					content_type: 'product',
 					currency: 'USD',
-					withBump: false,
+					cartPurchaseType: 'mainWithoutBump',
 					value: cart.checkoutAmount,
 				},
 			};
 		case 'cart/purchaseMainWithBump':
 			if (!cart.bumpProductId) return null;
 			return {
-				eventName: 'barely.cart/purchaseMain',
+				eventName: 'barely.cart/purchase',
 				customData: {
 					cartId: cart.id,
 					content_ids: [cart.mainProductId, cart.bumpProductId],
 					content_type: 'product',
 					currency: 'USD',
-					withBump: true,
+					cartPurchaseType: 'mainWithBump',
 					value: cart.checkoutAmount,
 				},
 			};
@@ -404,12 +404,14 @@ function getMetaEventFromCartEvent({
 		case 'cart/purchaseUpsell':
 			if (!cart.upsellProductId) return null;
 			return {
-				eventName: 'barely.cart/purchaseUpsell',
+				eventName: 'barely.cart/purchase',
 				customData: {
 					cartId: cart.id,
+					upsellProductId: cart.upsellProductId,
 					content_ids: [cart.upsellProductId],
 					content_type: 'product',
 					currency: 'USD',
+					cartPurchaseType: 'upsell',
 					value: cart.upsellProductPrice ?? 0,
 				},
 			};

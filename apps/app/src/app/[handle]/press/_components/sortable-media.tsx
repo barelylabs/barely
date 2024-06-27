@@ -42,6 +42,7 @@ export function MediaListBoxCard(props: MediaCardProps) {
 	return (
 		<ListBoxItem id={file.id} key={file.id} textValue={file.name}>
 			<MediaCard {...props} />
+			{/* {file.lexorank} */}
 		</ListBoxItem>
 	);
 }
@@ -61,9 +62,14 @@ export function SortableMedia({
 }) {
 	const { dragAndDropHooks } = useDragAndDrop({
 		getItems: keys => {
-			const fileRecords = [...keys].map(key => ({
-				fileRecord: JSON.stringify(media.find(f => f.id === key)) ?? '',
-			}));
+			const fileRecords = [...keys].map(key => {
+				const file = media.find(f => f.id === key);
+				return {
+					'text/plain': file?.id ?? '',
+					fileRecord: JSON.stringify(file) ?? '',
+					...(file?.type === 'image' ? { imageRecord: JSON.stringify(file) } : {}),
+				};
+			});
 			return fileRecords;
 		},
 

@@ -10,6 +10,7 @@ import {
 	upsertCartFunnelSchema,
 } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
 
+import { Button } from '@barely/ui/elements/button';
 import { Label } from '@barely/ui/elements/label';
 import { MDXEditor } from '@barely/ui/elements/mdx-editor';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
@@ -99,6 +100,10 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 
 		await apiUtils.cartFunnel.invalidate();
 	}, [setShowModal, focusGridList, apiUtils.cartFunnel]);
+
+	// state
+	// const bumpSelected = form.watch('bumpProductId') !== null;
+	const upsellSelected = !!form.watch('upsellProductId');
 
 	return (
 		<Modal
@@ -197,22 +202,39 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 
 					{/* UPSELL */}
 					<H size='3'>Upsell</H>
+
 					<SelectField
 						control={form.control}
 						name='upsellProductId'
 						label='Upsell Product'
+						labelButton={
+							upsellSelected ?
+								<Button
+									startIcon='x'
+									variant='icon'
+									size='xs'
+									look='minimal'
+									onClick={() =>
+										form.setValue('upsellProductId', null, { shouldDirty: true })
+									}
+								/>
+							:	null
+						}
 						options={productOptions}
 					/>
+
 					<TextField
 						control={form.control}
 						name='upsellProductHeadline'
 						label='Headline'
+						// disabled={!upsellSelected}
 					/>
 					<CurrencyField
 						control={form.control}
 						name='upsellProductDiscount'
 						label='Discount'
 						outputUnits='cents'
+						// disabled={!upsellSelected}
 					/>
 
 					<Label>Above the Fold</Label>
