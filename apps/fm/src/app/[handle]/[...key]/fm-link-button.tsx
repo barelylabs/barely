@@ -27,8 +27,8 @@ export const FmLinkButton = ({ link }: { link: FmLink }) => {
 				look='outline'
 				className='min-w-[100px] sm:min-w-[150px]'
 				href={link.url}
-				target='_blank'
-				rel='noopener noreferrer'
+				// target='_blank'
+				// rel='noopener noreferrer'
 				onClick={() => {
 					logEvent({
 						type: 'fm/linkClick',
