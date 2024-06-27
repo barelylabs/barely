@@ -27,7 +27,7 @@ export function lexoMiddle() {
 }
 
 export function insert<T extends Item>({
-	collection,
+	collection: rawCollection,
 	insertId,
 	itemsToInsert,
 	position,
@@ -39,7 +39,33 @@ export function insert<T extends Item>({
 	position: 'before' | 'after';
 	reorder?: boolean;
 }) {
-	console.log('collection', collection);
+	let collection = rawCollection;
+	console.log(
+		'rawCollection lexoranks',
+		collection.map(v => v.lexorank),
+	);
+
+	try {
+		rawCollection.forEach(v => LexoRank.parse(v.lexorank ?? ''));
+	} catch (error) {
+		const lexoSafeCollection = [...rawCollection];
+		for (let i = 0; i < collection.length; i++) {
+			collection[i] = {
+				...collection[i],
+				lexorank:
+					i === 0 ?
+						LexoRank.min().toString()
+					:	lexoAfterLast(collection[i - 1]?.lexorank ?? ''),
+			} as T;
+		}
+
+		collection = lexoSafeCollection;
+	}
+
+	console.log(
+		'updatedCollection lexoranks',
+		collection.map(v => v.lexorank),
+	);
 
 	// "reordering"
 	if (reorder && position === 'before' && insertId === itemsToInsert[0]?.id) {
@@ -92,10 +118,14 @@ export function insert<T extends Item>({
 			filteredCollection[insertIndex - 1]?.lexorank
 		:	filteredCollection[insertIndex]?.lexorank;
 
+	console.log('lexobefore', lexobefore);
+
 	const lexoafter =
 		position === 'before' ?
 			filteredCollection[insertIndex]?.lexorank
 		:	filteredCollection[insertIndex + 1]?.lexorank;
+
+	console.log('lexoafter', lexoafter);
 
 	// calculate lexorank for each item to insert
 	for (let i = 0; i < itemsToInsert.length; i++) {

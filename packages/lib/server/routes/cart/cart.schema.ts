@@ -53,7 +53,10 @@ export const cartPageSearchParams = insertCartSchema
 		bumpProductQuantity: true,
 		bumpProductApparelSize: true,
 	})
-	.partial();
+	.partial()
+	.extend({
+		warmup: z.coerce.boolean().optional(),
+	});
 
 export const updateCheckoutCartFromCheckoutSchema = cartPageSearchParams
 	.required({ id: true })

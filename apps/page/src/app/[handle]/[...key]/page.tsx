@@ -6,6 +6,8 @@ import { mdxAssetButton } from '@barely/ui/elements/mdx-asset-button';
 import { mdxTypography } from '@barely/ui/elements/mdx-typography';
 import { mdxVideoPlayer } from '@barely/ui/elements/mdx-video-player';
 
+import { WarmupCart } from '~/app/[handle]/[...key]/warmup-cart';
+
 export async function generateMetadata({
 	params,
 }: {
@@ -55,6 +57,7 @@ export default async function LandingPage({
 
 	return (
 		<div className='mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center gap-6 px-4 py-10'>
+			{cartFunnels?.length > 0 && <WarmupCart />}
 			<MDXRemote
 				source={lp.content ?? ''}
 				components={{

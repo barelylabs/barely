@@ -7,7 +7,20 @@ import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 
 export { OPTIONS } from '@barely/lib/utils/trpc-route';
 
-const handler = async function (req: NextRequest) {
+const handler = async function (
+	req: NextRequest,
+	// { params }: { params: { trpc: string } },
+) {
+	// if (params.trpc === 'warmup') {
+	//     // currently just trying to warmup the cart
+	// 	console.log('trpc cart warmup');
+
+	// 	return new Response(null, {
+	// 		statusText: 'OK',
+	// 		status: 200,
+	// 	});
+	// }
+
 	const visitor = parseReqForVisitorInfo(req);
 	console.log('trpc cart visitor >>', visitor);
 

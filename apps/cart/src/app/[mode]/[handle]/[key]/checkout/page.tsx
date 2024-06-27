@@ -29,6 +29,12 @@ export default async function CartPage({
 		return redirect('/');
 	}
 
+	console.log('cartParams', cartParams.data);
+
+	if (cartParams.data.warmup) {
+		return <div>warmingup</div>;
+	}
+
 	const cartId = cookies().get(`${handle}.${key}.cartId`)?.value;
 
 	//  estimate shipTo from IP
