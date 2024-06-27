@@ -65,23 +65,26 @@ export function getBaseUrl(app: (typeof apps)[number], absolute = false) {
 		case 'app':
 			baseUrl = env.NEXT_PUBLIC_APP_BASE_URL;
 			break;
-		case 'link':
-			baseUrl = env.NEXT_PUBLIC_LINK_BASE_URL;
-			break;
-		case 'page':
-			baseUrl = env.NEXT_PUBLIC_PAGE_BASE_URL;
-			break;
-		case 'www':
-			baseUrl = env.NEXT_PUBLIC_WWW_BASE_URL;
-			break;
 		case 'bio':
 			baseUrl = env.NEXT_PUBLIC_BIO_BASE_URL;
 			break;
 		case 'cart':
 			baseUrl = env.NEXT_PUBLIC_CART_BASE_URL;
 			break;
+		case 'fm':
+			baseUrl = env.NEXT_PUBLIC_FM_BASE_URL;
+			break;
+		case 'link':
+			baseUrl = env.NEXT_PUBLIC_LINK_BASE_URL;
+			break;
+		case 'page':
+			baseUrl = env.NEXT_PUBLIC_PAGE_BASE_URL;
+			break;
 		case 'press':
 			baseUrl = env.NEXT_PUBLIC_PRESS_BASE_URL;
+			break;
+		case 'www':
+			baseUrl = env.NEXT_PUBLIC_WWW_BASE_URL;
 			break;
 		default:
 			raise('Invalid app');
