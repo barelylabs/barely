@@ -3,6 +3,7 @@ export const FM_LINK_PLATFORMS = [
 	'appleMusic',
 	'custom',
 	'deezer',
+	'itunes',
 	'spotify',
 	'tidal',
 	'tiktok',
