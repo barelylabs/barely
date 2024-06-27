@@ -22,12 +22,12 @@ export async function generateMetadata({
 
 	if (!data) {
 		return {
-			title: 'barely.page',
+			title: 'barely.fm',
 		};
 	}
 
 	return {
-		title: `barely.fm | ${data.title}`,
+		title: `${data.title} ${data.workspace?.name ? `by ${data.workspace.name}` : ''}`,
 	};
 }
 
@@ -79,7 +79,8 @@ export default async function LandingPage({
 					</div>
 				</div>
 				{/* {<pre>{JSON.stringify(fm, null, 2)}</pre>} */}
-				<div className='flex h-full w-full flex-col gap-6 bg-background px-6 py-4 sm:max-w-sm sm:rounded-b-md'>
+
+				<div className='flex h-full w-full flex-col gap-6 bg-background p-9 sm:max-w-sm sm:rounded-b-md'>
 					<div className='flex flex-col'>
 						<Text variant='3xl/black'>{fm.title}</Text>
 						<Text variant='2xl/normal'>{fm.workspace?.name}</Text>

@@ -11,6 +11,8 @@ export const FmLinkButton = ({ link }: { link: FmLink }) => {
 
 	const { mutate: logEvent } = fmPageApi.logEvent.useMutation();
 
+	const label = link.platform === 'itunes' ? 'BUY' : 'PLAY';
+
 	return (
 		<div className='flex flex-row items-center justify-between gap-4'>
 			<div className='relative h-7 sm:h-8'>
@@ -25,10 +27,10 @@ export const FmLinkButton = ({ link }: { link: FmLink }) => {
 			</div>
 			<Button
 				look='outline'
-				className='min-w-[100px] sm:min-w-[150px]'
+				className='min-w-[100px] border-foreground/40 text-foreground/60 hover:border-foreground hover:text-foreground sm:min-w-[150px] md:text-sm'
 				href={link.url}
-				// target='_blank'
-				// rel='noopener noreferrer'
+				target='_blank'
+				rel='noopener noreferrer'
 				onClick={() => {
 					logEvent({
 						type: 'fm/linkClick',
@@ -40,7 +42,7 @@ export const FmLinkButton = ({ link }: { link: FmLink }) => {
 					});
 				}}
 			>
-				PLAY
+				<span className='font-extrabold'>{label}</span>
 			</Button>
 		</div>
 	);
