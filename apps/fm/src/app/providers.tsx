@@ -2,7 +2,6 @@
 
 import type { ReactNode } from 'react';
 import { useState } from 'react';
-import { cartApi } from '@barely/lib/server/routes/cart/cart.api.react';
 import { fmPageApi } from '@barely/lib/server/routes/fm-page/fm-page.api.react';
 import { getAbsoluteUrl } from '@barely/lib/utils/url';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -54,9 +53,9 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 	return (
 		<QueryClientProvider client={queryClient}>
-			<cartApi.Provider client={trpcClient} queryClient={queryClient}>
+			<fmPageApi.Provider client={trpcClient} queryClient={queryClient}>
 				{props.children}
-			</cartApi.Provider>
+			</fmPageApi.Provider>
 		</QueryClientProvider>
 	);
 }

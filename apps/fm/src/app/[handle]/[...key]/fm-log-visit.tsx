@@ -9,6 +9,9 @@ export function LogVisit({ fmId }: { fmId: string }) {
 	const hasLoggedView = useRef(false);
 
 	useEffect(() => {
+		// console.log('fmId', fmId);
+		// console.log('hasLoggedView.current', hasLoggedView.current);
+
 		if (hasLoggedView.current) return;
 
 		logEvent({

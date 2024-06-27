@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 
 import { raise } from '../../../utils/raise';
@@ -35,7 +35,10 @@ export const fmPageRouter = createTRPCRouter({
 			const fmLink =
 				!fmLinkParams ? undefined : (
 					(await ctx.db.http.query.FmLinks.findFirst({
-						where: eq(FmLinks.id, fmLinkParams.platform),
+						where: and(
+							eq(FmLinks.fmPageId, fmId),
+							eq(FmLinks.platform, fmLinkParams.platform),
+						),
 					})) ?? raise('fmLink not found')
 				);
 
