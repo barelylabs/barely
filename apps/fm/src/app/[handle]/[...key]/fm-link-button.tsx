@@ -19,10 +19,10 @@ export const FmLinkButton = ({ link }: { link: FmLink }) => {
 				<Img
 					src={`/_static/platforms/fm-${link.platform.toLowerCase()}-${theme}-logo.png`}
 					alt={link.platform}
-					width={100}
-					height={100}
-					className='h-full w-auto '
-					// style={{ width: '100%', height: 'auto' }} // optional
+					width={0}
+					height={0}
+					sizes='150px'
+					className='h-full w-auto'
 				/>
 			</div>
 			<Button
