@@ -158,7 +158,7 @@ export const metaUserDataSchema = z
 		ua: z.string(), // ua -- required for web events
 		leadId: z.string().optional(), // lead id
 		externalId: z_optStr_hash, // external id
-		fbclid: z.string().optional(), // fbclid
+		fbc: z.string().optional(), // fbclid
 	})
 	// https://developers.facebook.com/docs/marketing-api/conversions-api/parameters/customer-information-parameters
 	.transform(obj => ({
@@ -176,7 +176,7 @@ export const metaUserDataSchema = z
 		client_ip_address: obj.ip,
 		client_user_agent: obj.ua,
 		lead_id: obj.leadId,
-		fbclid: obj.fbclid,
+		fbc: obj.fbc,
 	}));
 
 export const metaServerEventSchema = z
