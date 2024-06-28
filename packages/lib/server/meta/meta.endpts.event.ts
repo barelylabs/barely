@@ -65,6 +65,7 @@ export interface MetaEventProps {
 	eventName: (typeof META_EVENT_NAMES)[number];
 
 	sourceUrl: string;
+	sourceUrl: string;
 	ip?: string;
 	ua?: string;
 	time?: number;
@@ -76,6 +77,15 @@ export interface MetaEventProps {
 
 export async function reportEventToMeta(props: MetaEventProps) {
 	const { ip, geo, ua, time } = props;
+	const { pixelId, accessToken, sourceUrl, eventName } = props;
+
+	const urlObject = new URL(sourceUrl);
+	const fbclid = urlObject.searchParams.get('fbclid');
+
+	console.log(`fbclid for ${eventName} >> `, fbclid);
+
+	const unixTimeSinceEpochInMs = Math.floor(time ?? Date.now()); // unix timestamp in ms
+	const unixTimeSinceEpochInS = unixTimeSinceEpochInMs / 1000; // unix timestamp in seconds
 	const { pixelId, accessToken, sourceUrl, eventName } = props;
 
 	const urlObject = new URL(sourceUrl);
