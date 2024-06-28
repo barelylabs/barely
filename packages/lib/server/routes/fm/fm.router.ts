@@ -24,7 +24,9 @@ export const fmRouter = createTRPCRouter({
 			const { limit, cursor, search } = input;
 			const fmPages = await ctx.db.http.query.FmPages.findMany({
 				with: {
-					links: true,
+					links: {
+						orderBy: [asc(FmLinks.index)],
+					},
 					coverArt: true,
 				},
 				where: sqlAnd([
@@ -96,7 +98,10 @@ export const fmRouter = createTRPCRouter({
 			await Promise.all(
 				links.map(async (link, index) => {
 					if (link.id) {
-						await ctx.db.pool.update(FmLinks).set(link).where(eq(FmLinks.id, link.id));
+						await ctx.db.pool
+							.update(FmLinks)
+							.set({ ...link, index })
+							.where(eq(FmLinks.id, link.id));
 					} else {
 						const newLinkId = newId('fmLink');
 						await ctx.db.pool.insert(FmLinks).values({
