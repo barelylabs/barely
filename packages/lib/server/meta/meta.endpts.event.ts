@@ -64,7 +64,7 @@ export interface MetaEventProps {
 	// event data
 	eventName: (typeof META_EVENT_NAMES)[number];
 
-	url: string;
+	sourceUrl: string;
 	ip?: string;
 	ua?: string;
 	time?: number;
@@ -76,7 +76,15 @@ export interface MetaEventProps {
 
 export async function reportEventToMeta(props: MetaEventProps) {
 	const { ip, geo, ua, time } = props;
-	const { pixelId, accessToken, url, eventName } = props;
+	const { pixelId, accessToken, sourceUrl, eventName } = props;
+
+	const urlObject = new URL(sourceUrl);
+	const fbclid = urlObject.searchParams.get('fbclid');
+
+	console.log(`fbclid for ${eventName} >> `, fbclid);
+
+	const unixTimeSinceEpochInMs = Math.floor(time ?? Date.now()); // unix timestamp in ms
+	const unixTimeSinceEpochInS = unixTimeSinceEpochInMs / 1000; // unix timestamp in seconds
 
 	const userData = metaUserDataSchema.parse({
 		ip,
@@ -84,15 +92,20 @@ export async function reportEventToMeta(props: MetaEventProps) {
 		city: geo?.city,
 		state: geo?.region,
 		country: geo?.country,
+		fbc: fbclid ? `fb.1.${unixTimeSinceEpochInMs}.${fbclid}` : undefined,
 	});
+
+	console.log(`meta userData for ${eventName} `, userData);
 
 	const serverEventData = metaServerEventSchema.parse({
 		eventName,
-		eventTime: Math.floor(time ?? Date.now() / 1000),
+		eventTime: unixTimeSinceEpochInS,
 		actionSource: 'website',
-		sourceUrl: url,
+		sourceUrl,
 		customData: props.customData,
 	});
+
+	console.log(`meta serverEventData for ${eventName} >>`, serverEventData);
 
 	const testEventCode =
 		env.VERCEL_ENV === 'development' ? env.META_TEST_EVENT_CODE : undefined;
@@ -145,6 +158,7 @@ export const metaUserDataSchema = z
 		ua: z.string(), // ua -- required for web events
 		leadId: z.string().optional(), // lead id
 		externalId: z_optStr_hash, // external id
+		fbclid: z.string().optional(), // fbclid
 	})
 	// https://developers.facebook.com/docs/marketing-api/conversions-api/parameters/customer-information-parameters
 	.transform(obj => ({
@@ -162,6 +176,7 @@ export const metaUserDataSchema = z
 		client_ip_address: obj.ip,
 		client_user_agent: obj.ua,
 		lead_id: obj.leadId,
+		fbclid: obj.fbclid,
 	}));
 
 export const metaServerEventSchema = z

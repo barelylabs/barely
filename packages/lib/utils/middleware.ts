@@ -62,13 +62,6 @@ export function parseReferer(req: NextRequest) {
 
 export const visitorInfoSchema = z.object({
 	ip: z.string(),
-	// geo: nextGeoSchema.required({
-	// 	latitude: true,
-	// 	longitude: true,
-	// 	city: true,
-	// 	country: true,
-	// 	region: true,
-	// }),
 	geo: nextGeoSchema,
 	userAgent: formattedUserAgentSchema,
 	isBot: z.boolean(),
