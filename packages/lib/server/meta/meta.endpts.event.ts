@@ -63,8 +63,7 @@ export interface MetaEventProps {
 	accessToken: string;
 	// event data
 	eventName: (typeof META_EVENT_NAMES)[number];
-
-	sourceUrl: string;
+	
 	sourceUrl: string;
 	ip?: string;
 	ua?: string;
