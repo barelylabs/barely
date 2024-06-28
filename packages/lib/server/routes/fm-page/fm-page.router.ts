@@ -9,7 +9,7 @@ import { FM_LINK_PLATFORMS } from '../fm/fm.constants';
 import { FmLinks, FmPages } from '../fm/fm.sql';
 
 export const fmPageRouter = createTRPCRouter({
-	logEvent: publicProcedure
+	log: publicProcedure
 		.input(
 			z.object({
 				fmId: z.string(),

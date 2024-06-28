@@ -398,7 +398,7 @@ export const cartRouter = createTRPCRouter({
 		}),
 
 	// events
-	logEvent: publicProcedure
+	log: publicProcedure
 		.input(
 			z.object({
 				cartId: z.string(),

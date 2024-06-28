@@ -15,7 +15,7 @@ export function UpsellForm({ cartId }: { cartId: string }) {
 
 	const router = useRouter();
 
-	const { mutate: logEvent } = cartApi.logEvent.useMutation();
+	const { mutate: logEvent } = cartApi.log.useMutation();
 
 	useEffect(() => {
 		logEvent({

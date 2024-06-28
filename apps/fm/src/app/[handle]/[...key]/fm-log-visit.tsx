@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { fmPageApi } from '@barely/lib/server/routes/fm-page/fm-page.api.react';
 
 export function LogVisit({ fmId }: { fmId: string }) {
-	const { mutate: logEvent } = fmPageApi.logEvent.useMutation();
+	const { mutate: logEvent } = fmPageApi.log.useMutation();
 
 	const hasLoggedView = useRef(false);
 

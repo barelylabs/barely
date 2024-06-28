@@ -9,7 +9,7 @@ import { Img } from '@barely/ui/elements/img';
 export const FmLinkButton = ({ link }: { link: FmLink }) => {
 	const theme = 'dark';
 
-	const { mutate: logEvent } = fmPageApi.logEvent.useMutation();
+	const { mutate: logEvent } = fmPageApi.log.useMutation();
 
 	const label = link.platform === 'itunes' ? 'BUY' : 'PLAY';
 

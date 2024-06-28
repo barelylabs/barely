@@ -56,8 +56,8 @@ export default async function LandingPage({
 	return (
 		<>
 			<LogVisit fmId={fm.id} />
-			<div className='relative flex h-full w-full flex-col items-center sm:py-6 lg:flex-row lg:p-0'>
-				<div className='absolute left-0 top-0 z-[-1] flex h-full w-full items-center justify-center overflow-hidden'>
+			<div className='relative flex h-full w-full flex-col items-center sm:pt-6 lg:flex-row lg:p-0'>
+				<div className='fixed left-0 top-0 z-[-1] flex h-full w-full items-center justify-center overflow-hidden'>
 					<BackgroundImage
 						src={fm.coverArt?.src ?? ''}
 						alt={''}
@@ -74,26 +74,27 @@ export default async function LandingPage({
 							width={500}
 							height={500}
 							priority={true}
-							className='w-full rounded-t-md border-[11px] border-background'
+							className='w-full rounded-t-md border-[11px] border-background lg:rounded-b-md'
 						/>
 					</div>
 				</div>
-				{/* {<pre>{JSON.stringify(fm, null, 2)}</pre>} */}
 
-				<div className='flex h-full w-full flex-col gap-6 bg-background p-9 sm:max-w-sm sm:rounded-b-md'>
-					<div className='flex flex-col'>
-						<Text variant='3xl/black'>{fm.title}</Text>
-						<Text variant='2xl/normal'>{fm.workspace?.name}</Text>
+				<div className='flex h-full w-full flex-col items-center sm:max-w-sm sm:pb-6 lg:p-0'>
+					<div className='flex h-full w-full flex-col gap-6 bg-background p-9 sm:rounded-b-md lg:rounded-b-none'>
+						<div className='flex flex-col'>
+							<Text variant='3xl/black'>{fm.title}</Text>
+							<Text variant='2xl/normal'>{fm.workspace?.name}</Text>
+						</div>
+
+						{links?.length ?
+							links.map((link, index) => (
+								<Fragment key={link.platform + index}>
+									<Separator />
+									<FmLinkButton link={link} />
+								</Fragment>
+							))
+						:	null}
 					</div>
-
-					{links?.length ?
-						links.map((link, index) => (
-							<Fragment key={link.platform + index}>
-								<Separator />
-								<FmLinkButton link={link} />
-							</Fragment>
-						))
-					:	null}
 				</div>
 			</div>
 		</>

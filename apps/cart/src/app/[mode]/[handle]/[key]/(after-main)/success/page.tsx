@@ -28,7 +28,7 @@ export default async function CartSuccessPage({
 	});
 
 	cartApi
-		.logEvent({
+		.log({
 			cartId,
 			event: 'cart/viewOrderConfirmation',
 		})

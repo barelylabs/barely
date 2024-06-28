@@ -53,7 +53,7 @@ export function CheckoutForm({
 	const router = useRouter();
 	const { cart: initialCart, publicFunnel: initialFunnel } = initialData;
 
-	const { mutate: logEvent } = cartApi.logEvent.useMutation();
+	const { mutate: logEvent } = cartApi.log.useMutation();
 
 	useEffect(() => {
 		if (logEvent && shouldWriteToCookie && initialCart.id) {
