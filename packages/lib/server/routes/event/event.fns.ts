@@ -108,7 +108,7 @@ export async function recordLinkClick({
 			await reportEventToMeta({
 				pixelId: metaPixel.id,
 				accessToken: metaPixel.accessToken,
-				url: href,
+				sourceUrl: href, // this is being logged directly from middleware, so href is the sourceUrl
 				ip,
 				ua: ua.ua,
 				eventName: 'barely.link/click',
@@ -218,6 +218,7 @@ export async function recordCartEvent({
 		referer: cart.visitorReferer ?? visitor?.referer ?? 'Unknown',
 		referer_url: cart.visitorRefererUrl ?? visitor?.referer_url ?? 'Unknown',
 		referer_id: cart.visitorRefererId ?? visitor?.referer_id ?? 'Unknown',
+
 		isBot: visitor?.isBot ?? false,
 
 		href:
@@ -258,7 +259,7 @@ export async function recordCartEvent({
 			await reportEventToMeta({
 				pixelId: metaPixel.id,
 				accessToken: metaPixel.accessToken,
-				url: visitorInfo.href,
+				sourceUrl: visitorInfo.referer_url ?? '', // this is an api route, so we want the source of the api call
 				ip: visitorInfo.ip,
 				ua: visitorInfo.userAgent.ua,
 				geo: visitorInfo.geo,
@@ -590,7 +591,7 @@ export async function recordFmEvent({
 			await reportEventToMeta({
 				pixelId: metaPixel.id,
 				accessToken: metaPixel.accessToken,
-				url: visitor?.href ?? '',
+				sourceUrl: visitor?.referer_url ?? '', // this is being logged from an api route
 				ip: visitor?.ip,
 				ua: visitor?.userAgent.ua,
 				geo: visitor?.geo,
