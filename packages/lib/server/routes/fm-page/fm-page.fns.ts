@@ -1,7 +1,7 @@
-import { and, eq } from 'drizzle-orm';
+import { and, asc, eq } from 'drizzle-orm';
 
 import { dbHttp } from '../../db';
-import { FmPages } from '../fm/fm.sql';
+import { FmLinks, FmPages } from '../fm/fm.sql';
 
 export async function getFmPageData({ handle, key }: { handle: string; key: string }) {
 	const fmPageRaw = await dbHttp.query.FmPages.findFirst({
@@ -15,7 +15,9 @@ export async function getFmPageData({ handle, key }: { handle: string; key: stri
 					brandAccentHue: true,
 				},
 			},
-			links: true,
+			links: {
+				orderBy: [asc(FmLinks.index)],
+			},
 			coverArt: true,
 		},
 	});

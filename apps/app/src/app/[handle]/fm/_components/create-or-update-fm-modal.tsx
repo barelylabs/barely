@@ -62,6 +62,7 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 		},
 		handleCreateItem: async d => {
 			await createFm(d);
+			d;
 		},
 		handleUpdateItem: async d => {
 			await updateFm(d);
@@ -128,10 +129,10 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 		mode === 'create' ? setShowCreateFmPageModal : setShowUpdateFmPageModal;
 
 	const handleCloseModal = useCallback(async () => {
-		form.reset();
 		focusGridList();
 		setArtworkUploadQueue([]);
 		await apiUtils.fm.invalidate();
+		form.reset();
 		setShowFmModal(false);
 	}, [form, focusGridList, apiUtils.fm, setShowFmModal, setArtworkUploadQueue]);
 
