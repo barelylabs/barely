@@ -83,8 +83,8 @@ export async function reportEventToMeta(props: MetaEventProps) {
 
 	console.log(`fbclid for ${eventName} >> `, fbclid);
 
-	const unixTimeSinceEpochInMs = Math.floor(time ?? Date.now()); // unix timestamp in ms
-	const unixTimeSinceEpochInS = unixTimeSinceEpochInMs / 1000; // unix timestamp in seconds
+	const unixTimeSinceEpoch_ms = Math.floor(time ?? Date.now()); // unix timestamp in ms
+	const unixTimeSinceEpoch_s = Math.floor(unixTimeSinceEpoch_ms / 1000); // unix timestamp in seconds
 
 	const userData = metaUserDataSchema.parse({
 		ip,
@@ -92,14 +92,14 @@ export async function reportEventToMeta(props: MetaEventProps) {
 		city: geo?.city,
 		state: geo?.region,
 		country: geo?.country,
-		fbc: fbclid ? `fb.1.${unixTimeSinceEpochInMs}.${fbclid}` : undefined,
+		fbc: fbclid ? `fb.1.${unixTimeSinceEpoch_ms}.${fbclid}` : undefined,
 	});
 
 	console.log(`meta userData for ${eventName} `, userData);
 
 	const serverEventData = metaServerEventSchema.parse({
 		eventName,
-		eventTime: unixTimeSinceEpochInS,
+		eventTime: unixTimeSinceEpoch_s,
 		actionSource: 'website',
 		sourceUrl,
 		customData: props.customData,
