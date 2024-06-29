@@ -119,7 +119,11 @@ jobs:
           echo "DATABASE_URL=$DATABASE_URL" >> .env
           echo "DATABASE_POOL_URL=$DATABASE_POOL_URL" >> .env
 
-          pnpm db:push
+          output=$(pnpm db:push)
+          echo "output: $output"
+          if [[ $output == *"ERROR:"* ]]; then
+            echo "Unhandled error: $output" && exit 1
+          fi
 
       # Using Vercel as our secret store for the DATABASE_URL and DATABASE_POOL_URL
       # -- to my knowledge, using an external store is the only way to pass secrets between Github Actions jobs?
