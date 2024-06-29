@@ -107,7 +107,10 @@ jobs:
           echo DATABASE_URL=$(neonctl cs ${{ secrets.NEON_MAIN_BRANCH_NAME }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }}) >> .env
           echo DIRECT_DATABASE_URL=$(neonctl cs ${{ secrets.NEON_MAIN_BRANCH_NAME }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }}) >> .env
 
-          pnpm db:push
+          if ! pnpm db:push; then
+            echo "Error: pnpm db:push failed" >&2
+            exit 1
+          fi
 
   # 📱 DEPLOY APPS -- PROD (Not Aliasing to Production Yet) #
   deploy-app:
