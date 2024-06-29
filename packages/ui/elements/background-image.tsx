@@ -11,7 +11,7 @@ interface BackGroundImageProps extends ImageProps {
 export const BackgroundImage = React.forwardRef<
 	HTMLDivElement,
 	React.HTMLAttributes<HTMLDivElement> & BackGroundImageProps
->(({ children, style, sizes, src, ...props }, ref) => {
+>(({ children, style, sizes, priority, quality, src, ...props }, ref) => {
 	return (
 		<div
 			ref={ref}
@@ -23,7 +23,8 @@ export const BackgroundImage = React.forwardRef<
 				alt=''
 				className='absolute inset-0 h-full w-full object-cover object-center'
 				fill
-				priority
+				priority={priority}
+				quality={quality}
 				sizes={sizes}
 			/>
 			{children}
