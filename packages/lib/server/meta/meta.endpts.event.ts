@@ -3,6 +3,7 @@ import { z } from 'zod';
 import type { NextGeo } from '../next/next.schema';
 import type { FM_LINK_PLATFORMS } from '../routes/fm/fm.constants';
 import { env } from '../../env';
+import { isDevelopment } from '../../utils/environment';
 import { sha256 } from '../../utils/hash';
 import { log } from '../../utils/log';
 import { zPost } from '../../utils/zod-fetch';
@@ -26,7 +27,7 @@ interface MetaEventParams {
 
 	// fm
 	fmId?: string;
-	destinationPlatform?: (typeof FM_LINK_PLATFORMS)[number];
+	fmLinkPlatform?: (typeof FM_LINK_PLATFORMS)[number];
 
 	// link
 	linkType?: 'short' | 'transparent';
@@ -78,6 +79,7 @@ export async function reportEventToMeta(props: MetaEventProps) {
 	const { ip, geo, ua, time } = props;
 	const { pixelId, accessToken, sourceUrl, eventName } = props;
 
+	console.log('sourceUrl >>', sourceUrl);
 	const urlObject = new URL(sourceUrl);
 	const fbclid = urlObject.searchParams.get('fbclid');
 
@@ -107,8 +109,7 @@ export async function reportEventToMeta(props: MetaEventProps) {
 
 	console.log(`meta serverEventData for ${eventName} >>`, serverEventData);
 
-	const testEventCode =
-		env.VERCEL_ENV === 'development' ? env.META_TEST_EVENT_CODE : undefined;
+	const testEventCode = isDevelopment() ? env.META_TEST_EVENT_CODE : undefined;
 
 	if (testEventCode)
 		await log({

@@ -138,7 +138,7 @@ export const ingestCartEvent = tinybird.buildIngestEndpoint({
 
 export const fmEventIngestSchema = z.object({
 	// fmId: z.string(),
-	destinationPlatform: z
+	fmLinkPlatform: z
 		.enum([...FM_LINK_PLATFORMS, ''])
 		.optional()
 		.default(''),
