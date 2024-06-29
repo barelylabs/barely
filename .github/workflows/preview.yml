@@ -91,7 +91,7 @@ jobs:
           output=$(neonctl branches create --project-id ${{ secrets.NEON_PROJECT_ID }} --name ${{ needs.git-meta.outputs.git_branch_name }} --api-key ${{ secrets.NEON_API_KEY }} --compute --type read_write 2>&1) || true          
           if [[ $output == *"branch with the provided name \"${{ needs.git-meta.outputs.git_branch_name }}\" already exists"* ]]; then
             echo "A branch named \"${{ needs.git-meta.outputs.git_branch_name }}\" already exists. Using that branch for this preview deployment."
-          elif [[ $output == *"ERROR:"* ]]; then
+          elif [[ $output == *"error:"* || $output == *"severity: 'ERROR'"* ]]; then
             echo "Unhandled error: $output" && exit 1
           fi
 
@@ -109,7 +109,6 @@ jobs:
 
       - name: db:push
         run: |
-          set -e  # Exit immediately if a command exits with a non-zero status
           rm -f .env
           touch .env
 
@@ -121,7 +120,7 @@ jobs:
 
           output=$(pnpm db:push)
           echo "output: $output"
-          if [[ $output == *"ERROR:"* ]]; then
+          if [[ $output == *"error:"* || $output == *"severity: 'ERROR'"* ]]; then
             echo "Unhandled error: $output" && exit 1
           fi
 
