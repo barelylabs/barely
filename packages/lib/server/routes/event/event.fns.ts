@@ -630,9 +630,40 @@ export async function recordFmEvent({
 			.where(eq(FmPages.id, fmPage.id));
 	} else if (type === 'fm/linkClick' && fmLink) {
 		// increment fmLinkClicks
+
+		const platformClickIncrement = {
+			...(fmLink.platform === 'amazonMusic' ?
+				{ amazonMusicClicks: sqlIncrement(FmPages.amazonMusicClicks) }
+			:	{}),
+			...(fmLink.platform === 'appleMusic' ?
+				{ appleMusicClicks: sqlIncrement(FmPages.appleMusicClicks) }
+			:	{}),
+			...(fmLink.platform === 'deezer' ?
+				{ deezerClicks: sqlIncrement(FmPages.deezerClicks) }
+			:	{}),
+			...(fmLink.platform === 'itunes' ?
+				{ itunesClicks: sqlIncrement(FmPages.itunesClicks) }
+			:	{}),
+			...(fmLink.platform === 'spotify' ?
+				{ spotifyClicks: sqlIncrement(FmPages.spotifyClicks) }
+			:	{}),
+			...(fmLink.platform === 'tidal' ?
+				{ tidalClicks: sqlIncrement(FmPages.tidalClicks) }
+			:	{}),
+			...(fmLink.platform === 'tiktok' ?
+				{ tiktokClicks: sqlIncrement(FmPages.tiktokClicks) }
+			:	{}),
+			...(fmLink.platform === 'youtube' ?
+				{ youtubeClicks: sqlIncrement(FmPages.youtubeClicks) }
+			:	{}),
+			...(fmLink.platform === 'youtubeMusic' ?
+				{ youtubeMusicClicks: sqlIncrement(FmPages.youtubeMusicClicks) }
+			:	{}),
+		};
+
 		await dbHttp
 			.update(FmLinks)
-			.set({ clicks: sqlIncrement(FmLinks.clicks) })
+			.set({ clicks: sqlIncrement(FmLinks.clicks), ...platformClickIncrement })
 			.where(eq(FmLinks.id, fmLink.id));
 		await dbHttp
 			.update(FmPages)
