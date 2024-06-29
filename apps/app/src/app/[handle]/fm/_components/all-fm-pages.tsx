@@ -73,6 +73,14 @@ function FmPageCard({
 				<div className='flex flex-col gap-1'>
 					<Text variant='md/medium'>{fmPage.title}</Text>
 				</div>
+				<Text variant='sm/normal'>clicks: {fmPage.clicks}</Text>
+				<Text variant='sm/normal'>amazonMusicClicks: {fmPage.amazonMusicClicks}</Text>
+				<Text variant='sm/normal'>appleMusicClicks: {fmPage.appleMusicClicks}</Text>
+				<Text variant='sm/normal'>spotifyClicks: {fmPage.spotifyClicks}</Text>
+				{/* <Text variant='sm/normal'>deezerClicks: {fmPage.deezerClicks}</Text> */}
+				{/* <Text variant='sm/normal'>itunesClicks: {fmPage.itunesClicks}</Text> */}
+				{/* <Text variant='sm/normal'>tidalClicks: {fmPage.tidalClicks}</Text> */}
+				<Text variant='sm/normal'>youtubeClicks: {fmPage.youtubeClicks}</Text>
 			</div>
 		</GridListCard>
 	);

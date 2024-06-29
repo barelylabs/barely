@@ -37,6 +37,15 @@ export const FmPages = pgTable('FmPages', {
 	remarketing: boolean('remarketing').default(false).notNull(),
 	views: integer('views').default(0),
 	clicks: integer('clicks').default(0),
+	amazonMusicClicks: integer('amazonMusicClicks').default(0),
+	appleMusicClicks: integer('appleMusicClicks').default(0),
+	deezerClicks: integer('deezerClicks').default(0),
+	itunesClicks: integer('itunesClicks').default(0),
+	spotifyClicks: integer('spotifyClicks').default(0),
+	tidalClicks: integer('tidalClicks').default(0),
+	tiktokClicks: integer('tiktokClicks').default(0),
+	youtubeClicks: integer('youtubeClicks').default(0),
+	youtubeMusicClicks: integer('youtubeMusicClicks').default(0),
 });
 
 export const FmPagesRelations = relations(FmPages, ({ one, many }) => ({
