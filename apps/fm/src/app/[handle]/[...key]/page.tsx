@@ -62,6 +62,9 @@ export default async function LandingPage({
 						src={fm.coverArt?.src ?? ''}
 						alt={''}
 						className='scale-125 opacity-90 blur-lg'
+						sizes='(max-width: 639px) 0vw, 100vw'
+						quality={25}
+						priority
 					/>
 				</div>
 
