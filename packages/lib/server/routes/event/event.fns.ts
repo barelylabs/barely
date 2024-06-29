@@ -663,11 +663,11 @@ export async function recordFmEvent({
 
 		await dbHttp
 			.update(FmLinks)
-			.set({ clicks: sqlIncrement(FmLinks.clicks), ...platformClickIncrement })
+			.set({ clicks: sqlIncrement(FmLinks.clicks) })
 			.where(eq(FmLinks.id, fmLink.id));
 		await dbHttp
 			.update(FmPages)
-			.set({ clicks: sqlIncrement(FmPages.clicks) })
+			.set({ clicks: sqlIncrement(FmPages.clicks), ...platformClickIncrement })
 			.where(eq(FmPages.id, fmPage.id));
 	}
 }
