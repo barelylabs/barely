@@ -109,6 +109,7 @@ jobs:
 
       - name: db:push
         run: |
+          set -e  # Exit immediately if a command exits with a non-zero status
           rm -f .env
           touch .env
 
@@ -118,10 +119,7 @@ jobs:
           echo "DATABASE_URL=$DATABASE_URL" >> .env
           echo "DATABASE_POOL_URL=$DATABASE_POOL_URL" >> .env
 
-          if ! pnpm db:push; then
-            echo "Error: pnpm db:push failed" >&2
-            exit 1
-          fi
+          pnpm db:push
 
       # Using Vercel as our secret store for the DATABASE_URL and DATABASE_POOL_URL
       # -- to my knowledge, using an external store is the only way to pass secrets between Github Actions jobs?
