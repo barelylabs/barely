@@ -265,7 +265,7 @@ export const CartFulfillmentProducts = pgTable(
 	},
 	product => ({
 		pk: primaryKey({
-			name: 'CartFulfillment_Products_pk',
+			name: 'CartFulfill_Product_pk',
 			columns: [product.cartFulfillmentId, product.productId],
 		}),
 	}),

@@ -91,7 +91,7 @@ jobs:
           output=$(neonctl branches create --project-id ${{ secrets.NEON_PROJECT_ID }} --name ${{ needs.git-meta.outputs.git_branch_name }} --api-key ${{ secrets.NEON_API_KEY }} --compute --type read_write 2>&1) || true          
           if [[ $output == *"branch with the provided name \"${{ needs.git-meta.outputs.git_branch_name }}\" already exists"* ]]; then
             echo "A branch named \"${{ needs.git-meta.outputs.git_branch_name }}\" already exists. Using that branch for this preview deployment."
-          elif [[ $output == *"ERROR:"* ]]; then
+          elif [[ $output == *"error:"* || $output == *"severity: 'ERROR'"* ]]; then
             echo "Unhandled error: $output" && exit 1
           fi
 
@@ -118,9 +118,10 @@ jobs:
           echo "DATABASE_URL=$DATABASE_URL" >> .env
           echo "DATABASE_POOL_URL=$DATABASE_POOL_URL" >> .env
 
-          if ! pnpm db:push; then
-            echo "Error: pnpm db:push failed" >&2
-            exit 1
+          output=$(pnpm db:push)
+          echo "output: $output"
+          if [[ $output == *"error:"* || $output == *"severity: 'ERROR'"* ]]; then
+            echo "Unhandled error: $output" && exit 1
           fi
 
       # Using Vercel as our secret store for the DATABASE_URL and DATABASE_POOL_URL
