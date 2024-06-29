@@ -14,6 +14,7 @@ import type {
 	// WEB_EVENT_TYPES__LINK,
 } from './event.tb';
 import { env } from '../../../env';
+import { isDevelopment } from '../../../utils/environment';
 import { newId } from '../../../utils/id';
 import { log } from '../../../utils/log';
 import { sqlIncrement } from '../../../utils/sql';
@@ -554,6 +555,8 @@ export async function recordFmEvent({
 	fmLink?: FmLink;
 	visitor?: VisitorInfo;
 }) {
+	console.log('visitor >>', visitor);
+
 	if (visitor?.isBot) return null;
 
 	// const rateLimitPeriod = env.RATE_LIMIT_RECORD_FM_EVENT ?? '1 h';
@@ -586,12 +589,15 @@ export async function recordFmEvent({
 		fmLink,
 		eventType: type,
 	});
+
+	const sourceUrl = isDevelopment() ? visitor?.href : visitor?.referer_url; // this is being logged from an api route in preview/production, so we want the referer_url
+
 	const metaRes =
 		metaPixel?.accessToken && metaEvent ?
 			await reportEventToMeta({
 				pixelId: metaPixel.id,
 				accessToken: metaPixel.accessToken,
-				sourceUrl: visitor?.referer_url ?? '', // this is being logged from an api route
+				sourceUrl: sourceUrl ?? '',
 				ip: visitor?.ip,
 				ua: visitor?.userAgent.ua,
 				geo: visitor?.geo,
@@ -697,7 +703,7 @@ function getMetaEventFromFmEvent({
 				eventName: 'barely.fm/linkClick',
 				customData: {
 					fmId: fmPage.id,
-					destinationPlatform: fmLink?.platform,
+					fmLinkPlatform: fmLink?.platform,
 				},
 			};
 		default:
