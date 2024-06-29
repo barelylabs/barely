@@ -31,8 +31,8 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	console.log('domainParts >', domainParts);
 	console.log('domainParts.length >', domainParts?.length);
 
-	// if www is the first part of the domain, we assume it's structured as www.barely.com/[handle]/[key]. Skip the rest of the middleware.
-	if (domainParts?.[0] === 'www') {
+	// if barely is the first part of the domain, we assume it's structured as www.barely.com/[handle]/[key]. Skip the rest of the middleware.
+	if (domainParts?.[0] === 'barely') {
 		return NextResponse.next();
 	}
 
@@ -45,7 +45,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	}
 
 	if (handle) {
-		const url = getAbsoluteUrl('page', `/${handle}${pathname}`);
+		const url = getAbsoluteUrl('fm', `/${handle}${pathname}`);
 		console.log('rewriting to', url);
 		return NextResponse.rewrite(url);
 	}
