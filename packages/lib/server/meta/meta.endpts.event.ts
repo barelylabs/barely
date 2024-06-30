@@ -27,7 +27,7 @@ interface MetaEventParams {
 
 	// fm
 	fmId?: string;
-	fmLinkPlatform?: (typeof FM_LINK_PLATFORMS)[number];
+	platform?: (typeof FM_LINK_PLATFORMS)[number];
 
 	// link
 	linkType?: 'short' | 'transparent';
