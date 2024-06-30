@@ -703,7 +703,7 @@ function getMetaEventFromFmEvent({
 				eventName: 'barely.fm/linkClick',
 				customData: {
 					fmId: fmPage.id,
-					fmLinkPlatform: fmLink?.platform,
+					platform: fmLink?.platform,
 				},
 			};
 		default:
