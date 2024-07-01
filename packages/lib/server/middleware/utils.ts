@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 
 import type { RecordClickProps } from '../routes/event/event.fns';
+import type { FM_LINK_PLATFORMS } from '../routes/fm/fm.constants';
 import { getDomainWithoutWWW } from '../../utils/link';
 import { raise } from '../../utils/raise';
 import { getSearchParams } from '../../utils/url';
@@ -78,7 +79,19 @@ export function parseLinkDomain(req: NextRequest) {
 		`${process.env.NEXT_PUBLIC_TRANSPARENT_LINK_ROOT_DOMAIN}`,
 	);
 
-	return { domain, href, linkClickType };
+	const platform: (typeof FM_LINK_PLATFORMS)[number] | undefined =
+		href.includes('music.amazon') ? 'amazonMusic'
+		: href.includes('music.apple') ? 'appleMusic'
+		: href.includes('deezer') ? 'deezer'
+		: href.includes('app=itunes') ? 'itunes'
+		: href.includes('open.spotify') ? 'spotify'
+		: href.includes('tidal.com') ? 'tidal'
+		: href.includes('tiktok.com') ? 'tiktok'
+		: href.includes('music.youtube') ? 'youtubeMusic'
+		: href.includes('youtu.be') || href.includes('youtube') ? 'youtube'
+		: undefined;
+
+	return { domain, href, linkClickType, platform };
 }
 
 export interface TransparentLinkParams {
@@ -131,18 +144,20 @@ export function parseShortLink(req: NextRequest) {
 }
 
 export function parseLink(req: NextRequest) {
-	const { href, linkClickType } = parseLinkDomain(req);
+	const { href, linkClickType, platform } = parseLinkDomain(req);
 
 	if (linkClickType === 'transparent') {
 		return {
 			linkClickType,
 			href,
+			platform,
 			...parseTransparentLink(req),
 		};
 	} else if (linkClickType === 'short') {
 		return {
 			linkClickType,
 			href,
+			platform,
 			...parseShortLink(req),
 		};
 	} else {
