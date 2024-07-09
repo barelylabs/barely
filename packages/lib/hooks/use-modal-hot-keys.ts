@@ -137,7 +137,14 @@ export function useModalHotKeys({
 				});
 			}
 		},
-		[itemSelected, closeModalsDisabled, archiveDisabled, createDisabled, updateDisabled],
+		[
+			customHotkeys,
+			itemSelected,
+			closeModalsDisabled,
+			archiveDisabled,
+			createDisabled,
+			updateDisabled,
+		],
 	);
 
 	const handlePaste = useCallback(

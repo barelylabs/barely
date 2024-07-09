@@ -35,6 +35,7 @@ interface CartOrderContext {
 	pendingFiltersTransition: boolean;
 	setSearch: (search: string) => void;
 	toggleArchived: () => void;
+	toggleFulfilled: () => void;
 	clearAllFilters: () => void;
 }
 
@@ -121,6 +122,20 @@ export function CartOrderContextProvider({
 		});
 	}
 
+	// toggle fulfilled
+	function toggleFulfilled() {
+		startFiltersTransition(() => {
+			if (data.showFulfilled) {
+				setOptimisticFilters({ ...optimisticFilters, showFulfilled: false });
+				removeByKey('showFulfilled');
+				return;
+			} else {
+				setOptimisticFilters({ ...optimisticFilters, showFulfilled: true });
+				return setQuery('showFulfilled', true);
+			}
+		});
+	}
+
 	// search
 	function setSearch(search: string) {
 		if (search.length) {
@@ -155,6 +170,7 @@ export function CartOrderContextProvider({
 		pendingFiltersTransition,
 		setSearch,
 		toggleArchived,
+		toggleFulfilled,
 		clearAllFilters,
 	} satisfies CartOrderContext;
 

@@ -126,6 +126,7 @@ interface GridListCardProps
 	disableDragHandle?: boolean;
 	disableContextMenu?: boolean;
 
+	actionOnCommandMenuOpen?: () => void;
 	commandItems?: GridListCommandItemProps[];
 }
 
@@ -144,6 +145,7 @@ export const GridListCard = React.forwardRef<
 			disableContextMenu,
 			disableDragHandle,
 			commandItems,
+			actionOnCommandMenuOpen,
 			...props
 		},
 		ref,
@@ -193,6 +195,9 @@ export const GridListCard = React.forwardRef<
 								<Popover
 									open={showContextMenu}
 									onOpenChange={open => {
+										if (open) {
+											actionOnCommandMenuOpen?.();
+										}
 										setShowContextMenu(open);
 									}}
 								>
