@@ -51,7 +51,7 @@ function CartOrderCard({
 }: {
 	cartOrder: AppRouterOutputs['cartOrder']['byWorkspace']['cartOrders'][0];
 }) {
-	const { setShowMarkAsFulfilledModal: setShowMarkAsFulfilledModal } =
+	const { setShowMarkAsFulfilledModal, setCartOrderSelection, cartOrderSelection } =
 		useCartOrderContext();
 
 	const { handle } = useWorkspace();
@@ -60,10 +60,13 @@ function CartOrderCard({
 		label: 'Mark as fulfilled',
 		icon: 'check',
 		shortcut: ['f'],
-		action: () => setShowMarkAsFulfilledModal(true),
+		action: () => {
+			setCartOrderSelection(new Set([cartOrder.id]));
+			setShowMarkAsFulfilledModal(true);
+		},
 	};
 
-	const [fulfillments] = api.cartOrder.fulfillmentsByCartId.useSuspenseQuery({
+	const { data: fulfillments } = api.cartOrder.fulfillmentsByCartId.useQuery({
 		handle,
 		cartId: cartOrder.id,
 	});
@@ -80,6 +83,14 @@ function CartOrderCard({
 					[markAsFulfilledCommandItem]
 				:	[]),
 			]}
+			actionOnCommandMenuOpen={() => {
+				// if cartOrderSelection includes cartOrder.id, return early
+				// otherwise, set cartOrderSelection to [cartOrder.id]
+				if (cartOrderSelection === 'all' || cartOrderSelection.has(cartOrder.id)) {
+					return;
+				}
+				setCartOrderSelection(new Set([cartOrder.id]));
+			}}
 		>
 			<div className='flex w-full flex-col gap-4'>
 				<div className='flex w-full flex-row gap-2'>
@@ -97,6 +108,9 @@ function CartOrderCard({
 										{product.apparelSize && (
 											<Text variant='sm/normal'> (size: {product.apparelSize})</Text>
 										)}
+
+										{cartOrder.fulfillmentStatus === 'partially_fulfilled' &&
+											product.fulfilled === false && <Badge size='2xs'>pending</Badge>}
 									</div>
 								))}
 								<Text variant='sm/medium'>
@@ -179,9 +193,11 @@ function CartOrderCard({
 						</div>
 					</div>
 				</div>
+
 				<Separator />
+
 				<div className='group/tracking flex flex-col gap-1'>
-					{fulfillments.map(fulfillment => {
+					{(fulfillments ?? []).map(fulfillment => {
 						const carrier = fulfillment.shippingCarrier;
 						const trackingNumber = fulfillment.shippingTrackingNumber;
 						if (!carrier || !trackingNumber) return null;

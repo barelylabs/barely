@@ -21,6 +21,7 @@ interface ModalProps {
 	dismissable?: boolean;
 	showModal?: boolean;
 	setShowModal?: (show: boolean) => void;
+	onOpen?: () => void;
 	onClose?: () => void;
 	preventDefaultClose?: boolean;
 	onAutoFocus?: () => void;
@@ -31,6 +32,8 @@ function Modal({
 	setShowModal,
 	onAutoFocus,
 	dismissable = true,
+	onOpen,
+	onClose,
 	...props
 }: ModalProps) {
 	const router = useRouter();
@@ -42,7 +45,7 @@ function Modal({
 		if (props.preventDefaultClose && !dragged && !byCloseButton) return;
 
 		// fire onClose event if provided
-		props.onClose?.();
+		onClose?.();
 
 		if (setShowModal) {
 			setShowModal(false);
@@ -57,6 +60,9 @@ function Modal({
 			<Drawer.Root
 				open={showModal ?? true}
 				onOpenChange={open => {
+					if (open) {
+						onOpen?.();
+					}
 					if (!open) {
 						closeModal({ dragged: true });
 					}
@@ -87,7 +93,13 @@ function Modal({
 		<Dialog.Root
 			open={showModal ?? true}
 			onOpenChange={open => {
+				console.log('onOpenChange modal >> ', open);
+				if (open) {
+					console.log('onOpenChange modal >> open');
+					onOpen?.();
+				}
 				if (!open) {
+					console.log('onOpenChange modal >> close');
 					closeModal();
 				}
 			}}

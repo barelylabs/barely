@@ -222,11 +222,11 @@ export const Cart_Relations = relations(Carts, ({ one, many }) => ({
 		references: [Products.id],
 		relationName: 'upsellProduct',
 	}),
-	fulfillments: many(CartFullfillments),
+	fulfillments: many(CartFulfillments),
 }));
 
 /* Cart Fulfillment */
-export const CartFullfillments = pgTable(
+export const CartFulfillments = pgTable(
 	'CartFullfillments',
 	{
 		...primaryId,
@@ -246,10 +246,10 @@ export const CartFullfillments = pgTable(
 );
 
 export const CartFullfillment_Relations = relations(
-	CartFullfillments,
+	CartFulfillments,
 	({ one, many }) => ({
 		cart: one(Carts, {
-			fields: [CartFullfillments.cartId],
+			fields: [CartFulfillments.cartId],
 			references: [Carts.id],
 		}),
 		products: many(CartFulfillmentProducts),
@@ -260,23 +260,28 @@ export const CartFullfillment_Relations = relations(
 export const CartFulfillmentProducts = pgTable(
 	'CartFulfillmentProducts',
 	{
-		cartFulfillmentId: dbId('cartFulfillmentId').references(() => CartFullfillments.id),
+		// cartId: dbId('cartId').references(() => Carts.id),
+		cartFulfillmentId: dbId('cartFulfillmentId').references(() => CartFulfillments.id),
 		productId: dbId('productId').references(() => Products.id),
 	},
 	product => ({
 		pk: primaryKey({
-			name: 'CartFulfillment_Products_pk',
+			name: 'CartFulfillment_Product_pk',
 			columns: [product.cartFulfillmentId, product.productId],
 		}),
+		// cart_product: uniqueIndex('cart_product_unique').on(
+		// 	product.cartId,
+		// 	product.productId,
+		// ),
 	}),
 );
 
 export const CartFulfillmentProduct_Relations = relations(
 	CartFulfillmentProducts,
 	({ one }) => ({
-		cartFulfillment: one(CartFullfillments, {
+		cartFulfillment: one(CartFulfillments, {
 			fields: [CartFulfillmentProducts.cartFulfillmentId],
-			references: [CartFullfillments.id],
+			references: [CartFulfillments.id],
 		}),
 		product: one(Products, {
 			fields: [CartFulfillmentProducts.productId],

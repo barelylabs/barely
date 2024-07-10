@@ -1,7 +1,7 @@
 'use client';
 
 import type { z } from 'zod';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useZodForm } from '@barely/lib/hooks/use-zod-form';
 import { api } from '@barely/lib/server/api/react';
 import { markCartOrderAsFulfilledSchema } from '@barely/lib/server/routes/cart-order/cart-order.schema';
@@ -34,13 +34,15 @@ export function MarkCartOrderFulfilledModal() {
 		},
 	});
 
-	const unfulfilledProducts =
-		selectedCartOrder?.products.filter(product => !product.fulfilled) ?? [];
+	const unfulfilledProducts = useMemo(
+		() => selectedCartOrder?.products.filter(product => !product.fulfilled) ?? [],
+		[selectedCartOrder],
+	);
 
 	/* form */
-	const form = useZodForm({
-		schema: markCartOrderAsFulfilledSchema,
-		defaultValues: {
+
+	const defaultValues = useMemo(() => {
+		return {
 			cartId: selectedCartOrder?.id ?? '',
 			products: unfulfilledProducts.map(product => ({
 				id: product.id,
@@ -48,10 +50,15 @@ export function MarkCartOrderFulfilledModal() {
 			})),
 			shippingCarrier: '',
 			shippingTrackingNumber: '',
-		},
-		resetOptions: {
-			keepValues: true,
-		},
+		};
+	}, [selectedCartOrder, unfulfilledProducts]);
+
+	const form = useZodForm({
+		schema: markCartOrderAsFulfilledSchema,
+		defaultValues,
+		// resetOptions: {
+		// 	keepValues: true,
+		// },
 	});
 
 	const productsFieldArray = useFieldArray({
@@ -59,8 +66,10 @@ export function MarkCartOrderFulfilledModal() {
 		name: 'products',
 	});
 
+	const { remove: removeProducts, replace: replaceProducts } = productsFieldArray;
+
 	const handleSubmit = async (data: z.infer<typeof markCartOrderAsFulfilledSchema>) => {
-		console.log('submitting ', data);
+		console.log('marking as fulfilled ', data);
 		await markAsFulfilled(data);
 	};
 
@@ -70,15 +79,32 @@ export function MarkCartOrderFulfilledModal() {
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
 		setShowModal(false);
+		removeProducts();
+		form.reset();
 
 		await apiUtils.cartOrder.invalidate();
-	}, [apiUtils, focusGridList, setShowModal]);
+	}, [apiUtils, focusGridList, setShowModal, form, removeProducts]);
+
+	useEffect(() => {
+		// fixme- i don't like updating the products like this, but it seems to work for now
+		replaceProducts(
+			unfulfilledProducts.map(product => ({
+				id: product.id,
+				fulfilled: true,
+			})),
+		);
+	}, [unfulfilledProducts, replaceProducts]);
 
 	return (
 		<Modal
 			showModal={showModal}
 			setShowModal={setShowModal}
 			preventDefaultClose={form.formState.isDirty}
+			// onOpen={handleOpenModal}
+			// onOpen={() => {
+			// 	console.log('onOpen fulfilment modal >> ', defaultValues);
+			// 	form.reset();
+			// }}
 			onClose={handleCloseModal}
 		>
 			<ModalHeader

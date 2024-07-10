@@ -1,11 +1,12 @@
 import { z } from 'zod';
 
-import { queryStringArraySchema } from '../../../utils/zod-helpers';
+import { queryStringArraySchema, z_boolean } from '../../../utils/zod-helpers';
 
 export const selectWorkspaceCartOrdersSchema = z.object({
 	handle: z.string(),
 	search: z.string().optional(),
-	showArchived: z.boolean().optional(),
+	showArchived: z_boolean.optional(),
+	showFulfilled: z_boolean.optional().default(false),
 	cursor: z
 		.object({ orderId: z.coerce.number(), checkoutConvertedAt: z.coerce.date() })
 		.optional(),
@@ -14,9 +15,9 @@ export const selectWorkspaceCartOrdersSchema = z.object({
 
 export const cartOrderFilterParamsSchema = z.object({
 	search: z.string().optional(),
-	showArchived: z.boolean().optional(),
-	showPending: z.boolean().optional(),
-	showFulfilled: z.boolean().optional(),
+	showArchived: z_boolean.optional(),
+	showPending: z_boolean.optional(),
+	showFulfilled: z_boolean.optional(),
 });
 
 export const cartOrderSearchParamsSchema = cartOrderFilterParamsSchema.extend({
