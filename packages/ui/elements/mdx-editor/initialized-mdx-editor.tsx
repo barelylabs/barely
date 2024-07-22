@@ -37,6 +37,7 @@ import { BlockTypeSelect } from './plugins/block-type-select';
 import {
 	buttonComponentDescriptors,
 	InsertAssetButtonButton,
+	InsertLinkButtonButton,
 } from './plugins/mdx-button-plugin';
 import {
 	InsertVideoButton,
@@ -101,6 +102,7 @@ export function InitializedMDXEditor({
 							<CreateLink />
 							<InsertVideoButton />
 							<InsertAssetButtonButton />
+							<InsertLinkButtonButton />
 						</>
 					),
 				}),

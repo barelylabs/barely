@@ -5,59 +5,43 @@ import { WrapBalancer } from './wrap-balancer';
 
 export const mdxTypography = {
 	p: ({ children }: { children?: ReactNode }) => (
-		<WrapBalancer ratio={0}>
-			<Text variant='lg/normal' className='text-center'>
-				{children}
-			</Text>
-		</WrapBalancer>
+		<Text variant='lg/normal' className='text-center'>
+			<WrapBalancer ratio={0}>{children}</WrapBalancer>
+		</Text>
 	),
 	hero: ({ children }: { children?: ReactNode }) => (
-		<WrapBalancer>
-			<H size='hero' className='text-center'>
-				{children}
-			</H>
-		</WrapBalancer>
+		<H size='hero' className='text-center'>
+			<WrapBalancer>{children}</WrapBalancer>
+		</H>
 	),
 	title: ({ children }: { children?: ReactNode }) => (
-		<WrapBalancer>
-			<H size='title' className='text-center'>
-				{children}
-			</H>
-		</WrapBalancer>
+		<H size='title' className='text-center'>
+			<WrapBalancer>{children}</WrapBalancer>
+		</H>
 	),
 	h1: ({ children }: { children?: ReactNode }) => (
-		<WrapBalancer>
-			<H size='1' className='text-center'>
-				{children}
-			</H>
-		</WrapBalancer>
+		<H size='1' className='text-center'>
+			<WrapBalancer>{children}</WrapBalancer>
+		</H>
 	),
 	h2: ({ children }: { children?: ReactNode }) => (
-		<WrapBalancer>
-			<H size='2' className='text-center'>
-				{children}
-			</H>
-		</WrapBalancer>
+		<H size='2' className='text-center'>
+			<WrapBalancer>{children}</WrapBalancer>
+		</H>
 	),
 	h3: ({ children }: { children?: ReactNode }) => (
-		<WrapBalancer>
-			<H size='3' className='text-center'>
-				{children}
-			</H>
-		</WrapBalancer>
+		<H size='3' className='text-center'>
+			<WrapBalancer>{children}</WrapBalancer>
+		</H>
 	),
 	h4: ({ children }: { children?: ReactNode }) => (
-		<WrapBalancer>
-			<H size='4' className='text-center'>
-				{children}
-			</H>
-		</WrapBalancer>
+		<H size='4' className='text-center'>
+			<WrapBalancer>{children}</WrapBalancer>
+		</H>
 	),
 	h5: ({ children }: { children?: ReactNode }) => (
-		<WrapBalancer>
-			<H size='5' className='text-center'>
-				{children}
-			</H>
-		</WrapBalancer>
+		<H size='5' className='text-center'>
+			<WrapBalancer>{children}</WrapBalancer>
+		</H>
 	),
 };

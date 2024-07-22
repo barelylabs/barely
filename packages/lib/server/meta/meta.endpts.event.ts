@@ -31,6 +31,11 @@ interface MetaEventParams {
 
 	// link
 	linkType?: 'short' | 'transparent';
+
+	// page
+	pageId?: string;
+	linkClickDestinationAssetId?: string;
+	linkClickDestinationHref?: string;
 }
 
 const META_EVENT_NAMES = [

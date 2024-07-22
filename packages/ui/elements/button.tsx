@@ -179,12 +179,20 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = 'Button';
 
-const LoadingOnClickButton = ({ children, ...props }: ButtonProps) => {
+const LoadingLinkButton = ({
+	children,
+	...props
+}: ButtonBaseProps & ButtonAsAnchorProps) => {
 	const [isLoading, setIsLoading] = React.useState(false);
 	return (
 		<Button
 			{...props}
-			onClick={() => setIsLoading(true)}
+			onClick={(e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
+				setIsLoading(true);
+				(
+					props.onClick as React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>
+				)?.(e);
+			}}
 			loading={props.loading ?? isLoading}
 		>
 			{children}
@@ -192,4 +200,4 @@ const LoadingOnClickButton = ({ children, ...props }: ButtonProps) => {
 	);
 };
 
-export { Button, LoadingOnClickButton, buttonVariants, type ButtonProps };
+export { Button, LoadingLinkButton, buttonVariants, type ButtonProps };

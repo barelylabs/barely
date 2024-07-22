@@ -6,11 +6,13 @@ import type { MetaEventProps } from '../../meta/meta.endpts.event';
 import type { CartFunnel } from '../cart-funnel/cart-funnel.schema';
 import type { Cart } from '../cart/cart.schema';
 import type { FmLink, FmPage } from '../fm/fm.schema';
+import type { LandingPage } from '../landing-page/landing-page.schema';
 import type { LinkAnalyticsProps } from '../link/link.schema';
 import type {
 	cartEventIngestSchema,
 	WEB_EVENT_TYPES__CART,
 	WEB_EVENT_TYPES__FM,
+	WEB_EVENT_TYPES__PAGE,
 	// WEB_EVENT_TYPES__LINK,
 } from './event.tb';
 import { env } from '../../../env';
@@ -24,11 +26,13 @@ import { dbHttp } from '../../db';
 import { reportEventToMeta } from '../../meta/meta.endpts.event';
 import { AnalyticsEndpoints } from '../analytics-endpoint/analytics-endpoint.sql';
 import { FmLinks, FmPages } from '../fm/fm.sql';
+import { LandingPages } from '../landing-page/landing-page.sql';
 import { Links } from '../link/link.sql';
 import { Workspaces } from '../workspace/workspace.sql';
 import {
 	ingestCartEvent,
 	ingestFmEvent,
+	ingestPageEvent,
 	ingestWebEvent,
 	webEventIngestSchema,
 } from './event.tb';
@@ -165,6 +169,8 @@ export async function recordLinkClick({
 
 	return true;
 }
+
+/* CART */
 
 export async function recordCartEvent({
 	cart,
@@ -540,9 +546,7 @@ function getCartEventData({
 	}
 }
 
-/*
-FM
-*/
+/* FM */
 
 export async function recordFmEvent({
 	fmPage,
@@ -618,7 +622,8 @@ export async function recordFmEvent({
 			sessionId: newId('fmSession'),
 			type,
 			...visitor,
-			href: visitor?.href ?? '',
+			href: sourceUrl ?? '',
+			linkClickDestinationHref: fmLink?.url,
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
 		});
 
@@ -704,6 +709,142 @@ function getMetaEventFromFmEvent({
 				customData: {
 					fmId: fmPage.id,
 					platform: fmLink?.platform,
+				},
+			};
+		default:
+			return null;
+	}
+}
+
+/* PAGE */
+export async function recordLandingPageEvent({
+	page,
+	type,
+	visitor,
+	linkClickDestinationAssetId,
+	linkClickDestinationHref,
+}: {
+	page: LandingPage;
+	type: (typeof WEB_EVENT_TYPES__PAGE)[number];
+	visitor?: VisitorInfo;
+	linkClickDestinationAssetId?: string;
+	linkClickDestinationHref?: string;
+}) {
+	if (visitor?.isBot) return null;
+
+	const rateLimitPeriod = '1 s';
+
+	const { success } = await ratelimit(10, rateLimitPeriod).limit(
+		`recordLandingPageEvent:${visitor?.ip}:${page.id}:${type}:${linkClickDestinationAssetId}`,
+	);
+
+	if (!success) {
+		console.log(
+			'rate limit exceeded for ',
+			visitor?.ip,
+			page.id,
+			type,
+			linkClickDestinationAssetId,
+		);
+		return null;
+	}
+
+	const timestamp = new Date(Date.now()).toISOString();
+
+	const analyticsEndpoints = await dbHttp.query.AnalyticsEndpoints.findMany({
+		where: eq(AnalyticsEndpoints.workspaceId, page.workspaceId),
+	});
+
+	const metaPixel = analyticsEndpoints.find(endpoint => endpoint.platform === 'meta');
+	const metaEvent = getMetaEventFromPageEvent({
+		page,
+		linkClickDestinationHref,
+		linkClickDestinationAssetId,
+		eventType: type,
+	});
+
+	const sourceUrl = isDevelopment() ? visitor?.href : visitor?.referer_url; // this is being logged from an api route, so we want the referer_url (i.e. the client url calling the logged route)
+
+	const metaRes =
+		metaPixel?.accessToken && metaEvent ?
+			await reportEventToMeta({
+				pixelId: metaPixel.id,
+				accessToken: metaPixel.accessToken,
+				sourceUrl: sourceUrl ?? '',
+				ip: visitor?.ip,
+				ua: visitor?.userAgent.ua,
+				geo: visitor?.geo,
+				eventName: metaEvent.eventName,
+				customData: metaEvent.customData,
+			})
+		:	{ reported: false };
+
+	// report event to tinybird
+	try {
+		const tinybirdRes = await ingestPageEvent({
+			timestamp,
+			workspaceId: page.workspaceId,
+			assetId: page.id,
+			sessionId: newId('landingPageSession'),
+			type,
+			...visitor,
+			href: sourceUrl ?? '',
+			linkClickDestinationAssetId,
+			linkClickDestinationHref,
+			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
+		});
+
+		console.log('tinybirdRes for page event => ', tinybirdRes);
+	} catch (error) {
+		console.log('error >>', error);
+		throw new Error('ah!');
+	}
+
+	/* increment stats on landingPage */
+	if (type === 'page/view') {
+		// increment page views
+		await dbHttp
+			.update(LandingPages)
+			.set({ views: sqlIncrement(LandingPages.views) })
+			.where(eq(LandingPages.id, page.id));
+	} else if (type === 'page/linkClick') {
+		// increment page clicks
+		await dbHttp
+			.update(LandingPages)
+			.set({ clicks: sqlIncrement(LandingPages.clicks) })
+			.where(eq(LandingPages.id, page.id));
+	}
+}
+
+function getMetaEventFromPageEvent({
+	page,
+	eventType,
+	linkClickDestinationHref,
+	linkClickDestinationAssetId,
+}: {
+	page: LandingPage;
+	linkClickDestinationHref?: string;
+	linkClickDestinationAssetId?: string;
+	eventType: (typeof WEB_EVENT_TYPES__PAGE)[number];
+}): {
+	eventName: MetaEventProps['eventName'];
+	customData: MetaEventProps['customData'];
+} | null {
+	switch (eventType) {
+		case 'page/view':
+			return {
+				eventName: 'barely.page/view',
+				customData: {
+					pageId: page.id,
+				},
+			};
+		case 'page/linkClick':
+			return {
+				eventName: 'barely.page/linkClick',
+				customData: {
+					pageId: page.id,
+					linkClickDestinationAssetId,
+					linkClickDestinationHref,
 				},
 			};
 		default:

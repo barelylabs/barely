@@ -4,6 +4,11 @@ export const mdxVideoSchema = z.object({
 	url: z.string(),
 });
 
+export const mdxLinkButtonSchema = z.object({
+	href: z.string(),
+	label: z.string().optional(),
+});
+
 export const mdxAssetButtonSchema = z.object({
 	asset: z.object({
 		id: z.string().min(1, 'Asset ID is required'),

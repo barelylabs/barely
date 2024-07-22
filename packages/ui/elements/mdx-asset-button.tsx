@@ -3,7 +3,7 @@ import type { Link } from '@barely/lib/server/routes/link/link.schema';
 import type { PressKit } from '@barely/lib/server/routes/press-kit/press-kit.schema';
 import { getAbsoluteUrl } from '@barely/lib/utils/url';
 
-import { LoadingOnClickButton } from './button';
+import { LoadingLinkButton } from './button';
 
 export const mdxAssetButton = ({
 	cartFunnels,
@@ -36,14 +36,17 @@ export const mdxAssetButton = ({
 			});
 		}
 
-		const queryParamsString = refererId ? `?refererId=${refererId}` : '';
-		href += queryParamsString;
+		const url = new URL(href);
+		if (refererId) {
+			url.searchParams.set('refererId', refererId);
+		}
+		href = url.toString();
 
 		return (
 			<div className='flex w-full flex-col items-center'>
-				<LoadingOnClickButton size='xl' href={href} pill look='brand'>
+				<LoadingLinkButton size='xl' href={href} pill look='brand'>
 					{label}
-				</LoadingOnClickButton>
+				</LoadingLinkButton>
 			</div>
 		);
 	};

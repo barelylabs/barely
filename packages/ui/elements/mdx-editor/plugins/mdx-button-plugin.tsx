@@ -6,7 +6,10 @@ import { useMemo, useState } from 'react';
 import { useDebounce } from '@barely/lib/hooks/use-debounce';
 import { useWorkspaceAssets } from '@barely/lib/hooks/use-workspace-assets';
 import { useZodForm } from '@barely/lib/hooks/use-zod-form';
-import { mdxAssetButtonSchema } from '@barely/lib/server/mdx/mdx.schema';
+import {
+	mdxAssetButtonSchema,
+	mdxLinkButtonSchema,
+} from '@barely/lib/server/mdx/mdx.schema';
 import {
 	insertJsx$,
 	Button as ToolbarButton,
@@ -30,6 +33,44 @@ import { Popover, PopoverContent, PopoverTrigger } from '../../popover';
 import { H, Text } from '../../typography';
 
 export const buttonComponentDescriptors: JsxComponentDescriptor[] = [
+	{
+		name: 'LinkButton',
+		kind: 'flow',
+		props: [
+			{
+				name: 'href',
+				type: 'string',
+			},
+			{
+				name: 'label',
+				type: 'string',
+			},
+		],
+		Editor: props => {
+			const href = props.mdastNode.attributes.find(
+				a => a.type === 'mdxJsxAttribute' && a.name === 'href',
+			)?.value;
+
+			const label = props.mdastNode.attributes.find(
+				a => a.type === 'mdxJsxAttribute' && a.name === 'label',
+			)?.value;
+
+			return (
+				<div className='mx-auto h-fit w-full py-4'>
+					<div className='flex w-full flex-col'>
+						<Button
+							href={typeof href === 'string' ? href : '#'}
+							target='_blank'
+							fullWidth
+						>
+							{typeof label === 'string' ? label : ''}
+						</Button>
+						<LinkButtonEditor {...props} />
+					</div>
+				</div>
+			);
+		},
+	},
 	{
 		name: 'AssetButton',
 		kind: 'flow',
@@ -56,14 +97,6 @@ export const buttonComponentDescriptors: JsxComponentDescriptor[] = [
 				a => a.type === 'mdxJsxAttribute' && a.name === 'assetId',
 			)?.value;
 
-			// const assetName = props.mdastNode.attributes.find(
-			//     a => a.type === 'mdxJsxAttribute' && a.name === 'assetName',
-			// )?.value;
-
-			// const assetType = props.mdastNode.attributes.find(
-			//     a => a.type === 'mdxJsxAttribute' && a.name === 'assetType',
-			// )?.value;
-
 			const label = props.mdastNode.attributes.find(
 				a => a.type === 'mdxJsxAttribute' && a.name === 'label',
 			)?.value;
@@ -82,6 +115,95 @@ export const buttonComponentDescriptors: JsxComponentDescriptor[] = [
 	},
 ];
 
+// LINK BUTTON
+export const InsertLinkButtonButton = () => {
+	const insertJsx = usePublisher(insertJsx$);
+	return (
+		<ToolbarButton
+			onClick={() => {
+				insertJsx({
+					name: 'LinkButton',
+					kind: 'flow',
+					props: {
+						href: '',
+						label: 'Link to asset',
+					},
+				});
+			}}
+		>
+			<Icon.link className='h-5 w-5' />
+		</ToolbarButton>
+	);
+};
+
+export const LinkButtonEditor: React.FC<JsxEditorProps> = ({ mdastNode }) => {
+	const [showEditModal, setShowEditModal] = useState(false);
+
+	const updateMdastNode = useMdastNodeUpdater();
+
+	const properties = useMemo(() => {
+		const href = mdastNode.attributes.find(
+			a => a.type === 'mdxJsxAttribute' && a.name === 'href',
+		)?.value;
+
+		const label = mdastNode.attributes.find(
+			a => a.type === 'mdxJsxAttribute' && a.name === 'label',
+		)?.value;
+
+		return {
+			href: typeof href === 'string' ? href : '',
+			label: typeof label === 'string' ? label : '',
+		};
+	}, [mdastNode]);
+
+	const form = useZodForm({
+		schema: mdxLinkButtonSchema,
+		defaultValues: {
+			href: properties.href,
+			label: properties.label,
+		},
+	});
+
+	const onSubmit = (values: z.infer<typeof mdxLinkButtonSchema>) => {
+		const updatedAttributes = Object.entries({
+			href: values.href,
+			label: values.label,
+		}).map(([name, value]) => ({
+			type: 'mdxJsxAttribute' as const,
+			name,
+			value,
+		}));
+
+		updateMdastNode({ attributes: updatedAttributes });
+		setShowEditModal(false);
+	};
+
+	return (
+		<div className='flex flex-row items-center justify-between gap-2 rounded-md bg-gray-100 px-2 py-2'>
+			<div className='flex flex-row items-center gap-2'>
+				<Icon.link className='h-4 w-4' />
+				{/* <Text variant='sm/normal' className='m-0' muted>
+                    {properties.label}
+                </Text> */}
+			</div>
+			<Popover open={showEditModal} onOpenChange={open => setShowEditModal(open)}>
+				<PopoverTrigger asChild>
+					<Button size='sm' startIcon='settings' variant='icon' look='ghost' />
+				</PopoverTrigger>
+				<PopoverContent className='w-full p-2 sm:w-96'>
+					<Form form={form} onSubmit={onSubmit} className='flex flex-col gap-2 p-2'>
+						<H size='5'>Link Button Settings</H>
+						<TextField control={form.control} label='Link' name='href' />
+						<TextField control={form.control} label='Label' name='label' />
+						<SubmitButton fullWidth>Save</SubmitButton>
+					</Form>
+				</PopoverContent>
+			</Popover>
+		</div>
+	);
+};
+
+// ASSET BUTTON
 export const InsertAssetButtonButton = () => {
 	const insertJsx = usePublisher(insertJsx$);
 	return (
@@ -173,10 +295,7 @@ export const AssetButtonEditor: React.FC<JsxEditorProps> = ({ mdastNode }) => {
 	const AssetIcon = Icon[assetOptions[0]?.type as keyof typeof Icon] ?? Icon.image;
 
 	return (
-		<div
-			className='flex flex-row items-center justify-between gap-2 rounded-md bg-gray-100 px-2 py-2'
-			// className={styles.inlineEditor}
-		>
+		<div className='flex flex-row items-center justify-between gap-2 rounded-md bg-gray-100 px-2 py-2'>
 			<div className='flex flex-row items-center gap-2'>
 				<AssetIcon className='h-4 w-4' />
 				<Text variant='sm/normal' className='m-0' muted>
