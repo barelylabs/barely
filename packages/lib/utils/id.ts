@@ -15,6 +15,7 @@ const prefixes = {
 	landingPage: 'lp',
 	link: 'link',
 	bio: 'bio',
+	landingPageSession: 'lp_session',
 	pressKit: 'pk',
 	webSession: 'web_session',
 	// merch

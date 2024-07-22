@@ -72,6 +72,10 @@ export const webEventIngestSchema = z
 		linkType: z.enum(['short', 'transparent', '']).optional().default(''),
 		domain: z.string().optional().default(''),
 
+		// linkClick data
+		linkClickDestinationAssetId: z.string().nullish().default(''),
+		linkClickDestinationHref: z.string().nullish().default(''),
+
 		// event data
 		timestamp: z.string().datetime(),
 		type: z.enum([
@@ -137,7 +141,6 @@ export const ingestCartEvent = tinybird.buildIngestEndpoint({
 });
 
 export const fmEventIngestSchema = z.object({
-	// fmId: z.string(),
 	fmLinkPlatform: z
 		.enum([...FM_LINK_PLATFORMS, ''])
 		.optional()
@@ -147,4 +150,10 @@ export const fmEventIngestSchema = z.object({
 export const ingestFmEvent = tinybird.buildIngestEndpoint({
 	datasource: 'web_events',
 	event: webEventIngestSchema.merge(fmEventIngestSchema),
+});
+
+/* page */
+export const ingestPageEvent = tinybird.buildIngestEndpoint({
+	datasource: 'web_events',
+	event: webEventIngestSchema,
 });

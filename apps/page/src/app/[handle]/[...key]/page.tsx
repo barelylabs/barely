@@ -1,11 +1,16 @@
+import type { CartFunnel } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
+import type { Link } from '@barely/lib/server/routes/link/link.schema';
+import type { PressKit } from '@barely/lib/server/routes/press-kit/press-kit.schema';
 import type { Metadata } from 'next';
 import { getLandingPageData } from '@barely/lib/server/routes/landing-page/landing-page.render.fns';
+import { getAssetHref } from '@barely/lib/utils/mdx';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 
-import { mdxAssetButton } from '@barely/ui/elements/mdx-asset-button';
 import { mdxTypography } from '@barely/ui/elements/mdx-typography';
 import { mdxVideoPlayer } from '@barely/ui/elements/mdx-video-player';
 
+import { LandingPageLinkButton } from '~/app/[handle]/[...key]/lp-link-button';
+import { LogVisit } from '~/app/[handle]/[...key]/lp-log-visit';
 import { WarmupCart } from '~/app/[handle]/[...key]/warmup-cart';
 
 export async function generateMetadata({
@@ -17,8 +22,6 @@ export async function generateMetadata({
 		handle: params.handle,
 		key: params.key.join('/'),
 	});
-
-	// console.log(data);
 
 	if (!data) {
 		return {
@@ -63,9 +66,65 @@ export default async function LandingPage({
 				components={{
 					...mdxTypography,
 					...mdxVideoPlayer,
-					...mdxAssetButton({ cartFunnels, links, pressKits, refererId: data.id }),
+					...mdxAssetButton({
+						landingPageId: lp.id,
+						cartFunnels,
+						links,
+						pressKits,
+					}),
+					...mdxLinkButton({ landingPageId: lp.id }),
 				}}
 			/>
+			<LogVisit landingPageId={lp.id} />
 		</div>
 	);
+}
+
+function mdxLinkButton({ landingPageId }: { landingPageId: string }) {
+	const LinkButton = ({ href, label }: { href: string; label: string }) => (
+		<div className='flex w-full flex-col items-center'>
+			<LandingPageLinkButton landingPageId={landingPageId} href={href} label={label} />
+		</div>
+	);
+
+	return {
+		LinkButton,
+	};
+}
+
+function mdxAssetButton({
+	landingPageId,
+	cartFunnels,
+	links,
+	pressKits,
+}: {
+	landingPageId: string;
+	cartFunnels: CartFunnel[];
+	links: Link[];
+	pressKits: PressKit[];
+}) {
+	const AssetButton = ({ assetId, label }: { assetId: string; label: string }) => {
+		const href = getAssetHref({
+			assetId,
+			cartFunnels,
+			links,
+			pressKits,
+			refererId: landingPageId,
+		});
+
+		return (
+			<div className='flex w-full flex-col items-center'>
+				<LandingPageLinkButton
+					landingPageId={landingPageId}
+					assetId={assetId}
+					href={href}
+					label={label}
+				/>
+			</div>
+		);
+	};
+
+	return {
+		AssetButton,
+	};
 }

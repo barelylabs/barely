@@ -29,6 +29,8 @@ export default async function RootLayout({
 	children: React.ReactNode;
 	params: { handle: string; key: string[] };
 }) {
+	console.log(params.key.join('/'));
+
 	const landingPageData = await getLandingPageData({
 		handle: params.handle,
 		key: params.key.join('/'),
