@@ -261,7 +261,7 @@ export const CartFulfillmentProducts = pgTable(
 	'CartFulfillmentProducts',
 	{
 		// cartId: dbId('cartId').references(() => Carts.id),
-		cartFulfillmentId: dbId('cartFulfillmentId').references(() => CartFulfillments.id),
+		cartFulfillmentId: dbId('cartFulfillmentsId').references(() => CartFulfillments.id),
 		productId: dbId('productId').references(() => Products.id),
 	},
 	product => ({
