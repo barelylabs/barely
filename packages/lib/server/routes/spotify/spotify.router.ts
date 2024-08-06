@@ -20,7 +20,7 @@ import {
 } from './spotify.fns';
 
 const spotifyRouter = createTRPCRouter({
-	getImageUrl: publicProcedure
+	getMetadata: publicProcedure
 		.input(
 			z.object({
 				query: z.string(),
@@ -67,16 +67,20 @@ const spotifyRouter = createTRPCRouter({
 
 				console.log('playlist => ', playlist);
 
-				return playlist?.images[0]?.url ?? null;
+				return {
+					title: playlist?.name,
+					imageUrl: playlist?.images[0]?.url ?? null,
+				};
 			} else if (type === 'track') {
 				const track = await getSpotifyTrack({
 					accessToken,
 					spotifyId: id,
 				});
 
-				console.log('track => ', track);
-
-				return track?.album?.images[0]?.url ?? null;
+				return {
+					title: track?.name,
+					imageUrl: track?.album?.images[0]?.url ?? null,
+				};
 			} else if (type === 'album') {
 				const album = await getSpotifyAlbum({
 					accessToken,
@@ -85,7 +89,10 @@ const spotifyRouter = createTRPCRouter({
 
 				console.log('album => ', album);
 
-				return album?.images[0]?.url ?? null;
+				return {
+					title: album?.name,
+					imageUrl: album?.images[0]?.url ?? null,
+				};
 			} else if (type === 'artist') {
 				const artist = await getSpotifyArtist({
 					accessToken,
@@ -94,7 +101,10 @@ const spotifyRouter = createTRPCRouter({
 
 				console.log('artist => ', artist);
 
-				return artist?.images[0]?.url ?? null;
+				return {
+					title: artist?.name,
+					imageUrl: artist?.images[0]?.url ?? null,
+				};
 			}
 
 			return null;
