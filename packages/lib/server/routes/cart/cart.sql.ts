@@ -261,12 +261,16 @@ export const CartFulfillmentProducts = pgTable(
 	'CartFulfillmentProducts',
 	{
 		// cartId: dbId('cartId').references(() => Carts.id),
-		cartFulfillmentId: dbId('cartFulfillmentId').references(() => CartFulfillments.id),
-		productId: dbId('productId').references(() => Products.id),
+		cartFulfillmentId: dbId('cartFulfillmentId')
+			.references(() => CartFulfillments.id)
+			.notNull(),
+		productId: dbId('productId')
+			.references(() => Products.id)
+			.notNull(),
 	},
 	product => ({
 		pk: primaryKey({
-			name: 'Fulfill_Product_pk',
+			name: 'CartFulfillment_Product_pk',
 			columns: [product.cartFulfillmentId, product.productId],
 		}),
 		// cart_product: uniqueIndex('cart_product_unique').on(
