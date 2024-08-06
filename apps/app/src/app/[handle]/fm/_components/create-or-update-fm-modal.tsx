@@ -135,7 +135,11 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 			sourceUrl.includes('open.spotify.com') &&
 			!linkFields.some(link => link.platform === 'spotify')
 		) {
-			appendLink({ platform: 'spotify', url: sourceUrl, spotifyTrackUrl: '' });
+			appendLink({
+				platform: 'spotify',
+				url: sourceUrl,
+				spotifyTrackUrl: sourceUrl.includes('open.spotify.com/track') ? sourceUrl : '',
+			});
 		}
 	}, [sourceUrl, appendLink, linkFields]);
 
@@ -206,8 +210,6 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 					<TextField label='Title' control={form.control} name='title' />
 					<TextField label='Key' control={form.control} name='key' />
 
-					<pre>{JSON.stringify(spotifyImageUrl, null, 2)}</pre>
-
 					<div className='flex flex-col items-start gap-1'>
 						<Label>Artwork</Label>
 						<UploadDropzone
@@ -257,14 +259,15 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 												</div>
 											}
 										/>
-										{isSpotifyPlaylistUrl && (
-											<TextField
-												label='spotify track url (optional)'
-												infoTooltip='If you provide a link to a track included the playlist, we can link directly to the track within the playlist'
-												control={form.control}
-												name={`links.${index}.spotifyTrackUrl`}
-											/>
-										)}
+										{isSpotifyPlaylistUrl &&
+											form.getValues(`links.${index}.platform`) === 'spotify' && (
+												<TextField
+													label='spotify track url (optional)'
+													infoTooltip='If you provide a link to a track included the playlist, we can link directly to the track within the playlist'
+													control={form.control}
+													name={`links.${index}.spotifyTrackUrl`}
+												/>
+											)}
 									</div>
 								);
 							})}

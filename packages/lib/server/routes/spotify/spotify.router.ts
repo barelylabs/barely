@@ -99,6 +99,70 @@ const spotifyRouter = createTRPCRouter({
 
 			return null;
 		}),
+
+	// getAppleMusic: publicProcedure
+	// 	.input(z.string().url())
+	// 	.query(async ({ ctx, input }) => {
+	// 		const botSpotifyAccount = await ctx.db.http.query.ProviderAccounts.findFirst({
+	// 			where: and(
+	// 				eq(ProviderAccounts.provider, 'spotify'),
+	// 				eq(ProviderAccounts.providerAccountId, env.BOT_SPOTIFY_ACCOUNT_ID),
+	// 			),
+	// 		});
+
+	// 		if (!botSpotifyAccount) {
+	// 			throw new TRPCError({
+	// 				code: 'INTERNAL_SERVER_ERROR',
+	// 				message: "We're having trouble with the Spotify API right now. Bear with us.",
+	// 				cause: 'No bot Spotify account found.',
+	// 			});
+	// 		}
+
+	// 		const accessToken = await getSpotifyAccessToken(botSpotifyAccount);
+
+	// 		if (!accessToken) {
+	// 			throw new TRPCError({
+	// 				code: 'INTERNAL_SERVER_ERROR',
+	// 				message: "We're having trouble with the Spotify API right now. Bear with us.",
+	// 				cause: 'No Spotify access token found for bot.',
+	// 			});
+	// 		}
+
+	// 		// Extract Spotify track ID from the input URL
+	// 		const parsed = parseSpotifyUrl(input);
+
+	// 		if (!parsed || parsed.type !== 'track' || !parsed.id) {
+	// 			throw new TRPCError({
+	// 				code: 'BAD_REQUEST',
+	// 				message: 'Invalid Spotify track URL',
+	// 			});
+	// 		}
+
+	// 		// Get track details from Spotify
+	// 		const track = await getSpotifyTrack({
+	// 			accessToken,
+	// 			spotifyId: parsed.id,
+	// 		});
+
+	// 		if (!track) {
+	// 			throw new TRPCError({
+	// 				code: 'NOT_FOUND',
+	// 				message: 'Spotify track not found',
+	// 			});
+	// 		}
+
+	// 		// Search for the track on Apple Music
+	// 		const searchQuery = `${track.name} ${track.artists[0].name}`;
+	// 		const appleMusicResults = await searchAppleMusic(searchQuery);
+
+	// 		if (!appleMusicResults || appleMusicResults.length === 0) {
+	// 			return null; // No matching track found on Apple Music
+	// 		}
+
+	// 		// Return the URL of the first matching track on Apple Music
+	// 		return appleMusicResults[0].url;
+	// 	}),
+
 	search: publicProcedure
 		.input(
 			z.object({
