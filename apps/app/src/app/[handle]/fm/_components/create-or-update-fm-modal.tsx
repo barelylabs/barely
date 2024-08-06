@@ -70,6 +70,8 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 		},
 	});
 
+	const { setValue } = form;
+
 	// link array
 	const {
 		fields: linkFields,
@@ -143,16 +145,41 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 		}
 	}, [sourceUrl, appendLink, linkFields]);
 
-	/* spotify image */
+	/* spotify metadata */
 	const [debouncedSourceUrl] = useDebounce(sourceUrl, 500);
-	const { data: spotifyImageUrl } = api.spotify.getImageUrl.useQuery(
+	const { data: sourceUrlSpotifyMetadata } = api.spotify.getMetadata.useQuery(
 		{
 			query: debouncedSourceUrl,
 		},
 		{
-			enabled: !!sourceUrl,
+			enabled: !!sourceUrl && sourceUrl.includes('open.spotify.com'),
 		},
 	);
+
+	const spotifyImageUrl = useMemo(() => {
+		return sourceUrlSpotifyMetadata?.imageUrl ?? undefined;
+	}, [sourceUrlSpotifyMetadata]);
+
+	const spotifyTitle = useMemo(() => {
+		return sourceUrlSpotifyMetadata?.title ?? undefined;
+	}, [sourceUrlSpotifyMetadata]);
+
+	const currentTitle = form.watch('title');
+	const currentKey = form.watch('key');
+
+	useEffect(() => {
+		if (!spotifyTitle) return;
+		if (currentTitle === '') {
+			setValue('title', spotifyTitle);
+		}
+		if (currentKey === '') {
+			const key = spotifyTitle
+				.toLowerCase()
+				.replace(/\s+/g, '-')
+				.replace(/[^a-z0-9-]/g, '');
+			setValue('key', key);
+		}
+	}, [spotifyTitle, currentTitle, currentKey, setValue]);
 
 	const artworkImagePreview =
 		uploadPreviewImage ??
