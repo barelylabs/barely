@@ -1,5 +1,19 @@
 import { z } from 'zod';
 
+import { zGet } from '../../utils/zod-fetch';
+
+export async function getSpotifyTrack(props: { accessToken: string; spotifyId: string }) {
+	const endpoint = `https://api.spotify.com/v1/tracks/${props.spotifyId}`;
+
+	const auth = `Bearer ${props.accessToken}`;
+
+	const res = await zGet(endpoint, spotifyTrackResponseSchema, { auth });
+
+	if (!res.success || !res.parsed) return null;
+
+	return res.data;
+}
+
 const spotifyTrackResponseSchema = z.object({
 	album: z.object({
 		album_type: z.string(),

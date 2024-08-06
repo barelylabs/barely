@@ -5,8 +5,13 @@ import { z } from 'zod';
 
 import type { SpotifyTrackOption } from './spotify.schema';
 import { env } from '../../../env';
+import { parseSpotifyUrl } from '../../../utils/spotify';
 import { createTRPCRouter, privateProcedure, publicProcedure } from '../../api/trpc';
+import { getSpotifyAlbum } from '../../spotify/spotify.endpts.album';
+import { getSpotifyArtist } from '../../spotify/spotify.endpts.artist';
+import { getSpotifyPlaylist } from '../../spotify/spotify.endpts.playlist';
 import { searchSpotify } from '../../spotify/spotify.endpts.search';
+import { getSpotifyTrack } from '../../spotify/spotify.endpts.track';
 import { ProviderAccounts } from '../provider-account/provider-account.sql';
 import {
 	getSpotifyAccessToken,
@@ -15,6 +20,127 @@ import {
 } from './spotify.fns';
 
 const spotifyRouter = createTRPCRouter({
+	getImageUrl: publicProcedure
+		.input(
+			z.object({
+				query: z.string(),
+			}),
+		)
+		.query(async ({ input, ctx }) => {
+			const parsedItem = parseSpotifyUrl(input.query);
+			console.log('parsedItem => ', parsedItem);
+			if (!parsedItem) return null;
+			const { type, id } = parsedItem;
+
+			if (!type || !id) return null;
+
+			const botSpotifyAccount = await ctx.db.http.query.ProviderAccounts.findFirst({
+				where: and(
+					eq(ProviderAccounts.provider, 'spotify'),
+					eq(ProviderAccounts.providerAccountId, env.BOT_SPOTIFY_ACCOUNT_ID),
+				),
+			});
+
+			if (!botSpotifyAccount) {
+				throw new TRPCError({
+					code: 'INTERNAL_SERVER_ERROR',
+					message: "We're having trouble with the Spotify API right now. Bear with us.",
+					cause: 'No bot Spotify account found.',
+				});
+			}
+
+			const accessToken = await getSpotifyAccessToken(botSpotifyAccount);
+
+			if (!accessToken) {
+				throw new TRPCError({
+					code: 'INTERNAL_SERVER_ERROR',
+					message: "We're having trouble with the Spotify API right now. Bear with us.",
+					cause: 'No Spotify access token found for bot.',
+				});
+			}
+
+			if (type === 'playlist') {
+				const playlist = await getSpotifyPlaylist({
+					accessToken,
+					spotifyId: id,
+				});
+
+				console.log('playlist => ', playlist);
+
+				return playlist?.images[0]?.url ?? null;
+			} else if (type === 'track') {
+				const track = await getSpotifyTrack({
+					accessToken,
+					spotifyId: id,
+				});
+
+				console.log('track => ', track);
+
+				return track?.album?.images[0]?.url ?? null;
+			} else if (type === 'album') {
+				const album = await getSpotifyAlbum({
+					accessToken,
+					spotifyId: id,
+				});
+
+				console.log('album => ', album);
+
+				return album?.images[0]?.url ?? null;
+			} else if (type === 'artist') {
+				const artist = await getSpotifyArtist({
+					accessToken,
+					spotifyId: id,
+				});
+
+				console.log('artist => ', artist);
+
+				return artist?.images[0]?.url ?? null;
+			}
+
+			return null;
+		}),
+	search: publicProcedure
+		.input(
+			z.object({
+				query: z.string(),
+				limit: z.number().optional(),
+			}),
+		)
+		.query(async ({ ctx, input }) => {
+			const botSpotifyAccount = await ctx.db.http.query.ProviderAccounts.findFirst({
+				where: and(
+					eq(ProviderAccounts.provider, 'spotify'),
+					eq(ProviderAccounts.providerAccountId, env.BOT_SPOTIFY_ACCOUNT_ID),
+				),
+			});
+
+			if (!botSpotifyAccount) {
+				throw new TRPCError({
+					code: 'INTERNAL_SERVER_ERROR',
+					message: "We're having trouble with the Spotify API right now. Bear with us.",
+					cause: 'No bot Spotify account found.',
+				});
+			}
+
+			const accessToken = await getSpotifyAccessToken(botSpotifyAccount);
+
+			if (!accessToken) {
+				throw new TRPCError({
+					code: 'INTERNAL_SERVER_ERROR',
+					message: "We're having trouble with the Spotify API right now. Bear with us.",
+					cause: 'No Spotify access token found for bot.',
+				});
+			}
+
+			const searchResults = await searchSpotify({
+				accessToken,
+				query: input.query,
+				limit: input.limit,
+			});
+
+			return searchResults;
+		}),
+
 	findTrack: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
 		if (input.length === 0) return [];
 

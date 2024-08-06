@@ -11,20 +11,20 @@ import {
 	SPECIAL_APEX_DOMAINS,
 } from './constants';
 
-export function parseSpotifyLink(link: string) {
-	const match = link.match(
-		/https?:\/\/open\.spotify\.com\/(artist|track|album|playlist)\/([a-zA-Z0-9]+)/,
-	);
+// export function parseSpotifyLink(link: string) {
+// 	const match = link.match(
+// 		/https?:\/\/open\.spotify\.com\/(artist|track|album|playlist)\/([a-zA-Z0-9]+)/,
+// 	);
 
-	if (!match) {
-		return null;
-	}
+// 	if (!match) {
+// 		return null;
+// 	}
 
-	return {
-		type: match[1],
-		id: match[2],
-	};
-}
+// 	return {
+// 		type: match[1],
+// 		id: match[2],
+// 	};
+// }
 
 export function parseInstagramLink(link: string) {
 	const match = link.match(/https?:\/\/(?:www\.)?instagram\.com\/([^/?]+)/);

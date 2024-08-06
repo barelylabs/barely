@@ -70,6 +70,16 @@ export const fileRouter = createTRPCRouter({
 			};
 		}),
 
+	// uploadFileFromUrl: privateProcedure
+	//     .input(z.object({
+	//         fileUrl: z.string().url(),
+	//         folder: z.string(),
+	//     }))
+	//     .mutation(async ({ input, ctx }) => {
+	//         // fetch the file
+	//         const response = await
+	//     }),
+
 	getPresigned: privateProcedure
 		.input(
 			z.object({

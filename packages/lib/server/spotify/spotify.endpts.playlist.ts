@@ -9,7 +9,12 @@ const getSpotifyPlaylist = async (props: { accessToken: string; spotifyId: strin
 	const endpoint = `https://api.spotify.com/v1/playlists/${props.spotifyId}`;
 	const auth = `Bearer ${props.accessToken}`;
 	const response = await zGet(endpoint, getPlaylistResponseSchema, { auth });
-	return response;
+
+	console.log('response => ', response.data);
+
+	if (!response.success || !response.parsed) return null;
+
+	return response.data;
 };
 
 const getSpotifyUserPlaylists = async (props: {
@@ -161,8 +166,8 @@ const getPlaylistResponseSchema = z.object({
 	name: z.string(),
 	description: z.string(),
 	followers: z.object({
-		href: z.string(),
-		total: z.number(),
+		href: z.string().nullable(),
+		total: z.number().int(),
 	}),
 	images: z.array(
 		z.object({
