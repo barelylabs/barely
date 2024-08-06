@@ -135,7 +135,11 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 			sourceUrl.includes('open.spotify.com') &&
 			!linkFields.some(link => link.platform === 'spotify')
 		) {
-			appendLink({ platform: 'spotify', url: sourceUrl, spotifyTrackUrl: sourceUrl.includes('open.spotify.com/track') ? sourceUrl : '' });
+			appendLink({
+				platform: 'spotify',
+				url: sourceUrl,
+				spotifyTrackUrl: sourceUrl.includes('open.spotify.com/track') ? sourceUrl : '',
+			});
 		}
 	}, [sourceUrl, appendLink, linkFields]);
 
