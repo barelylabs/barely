@@ -35,6 +35,7 @@ const prefixes = {
 	fmPage: 'fm',
 	fmLink: 'fml',
 	fmSession: 'fms',
+	fmCoverArt: 'fmca',
 	// forms
 	form: 'form',
 	formResponse: 'form_res',

@@ -46,7 +46,7 @@ export const ProviderAccounts = pgTable(
 		// token management
 		refresh_token: varchar('refresh_token', { length: 2000 }),
 		access_token: varchar('access_token', { length: 2000 }),
-		expires_at: integer('expires_at'),
+		expires_at: integer('expires_at'), // unix timestamp in seconds
 		token_type: varchar('token_type', { length: 255 }),
 		scope: varchar('scope', { length: 2000 }),
 		id_token: varchar('id_token', { length: 255 }),

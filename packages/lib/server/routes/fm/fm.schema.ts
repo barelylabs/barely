@@ -31,6 +31,8 @@ export const insertFmPageSchema = createInsertSchema(FmPages, {
 	key: s => s.key.min(4, 'Key is required'),
 	title: s => s.title.min(1, 'Title is required'),
 	sourceUrl: s => s.sourceUrl.min(1, 'Source URL is required'),
+}).extend({
+	coverArtUrl: z.string().optional(),
 });
 
 export const createFmPageSchema = insertFmPageSchema

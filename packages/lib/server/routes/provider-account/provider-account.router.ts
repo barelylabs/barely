@@ -104,6 +104,27 @@ const providerAccountRouter = createTRPCRouter({
 				return mailchimpAuthorization.toString();
 			}
 
+			if (provider === 'spotify') {
+				const spotifyAuthorization = new URL('https://accounts.spotify.com/authorize');
+				spotifyAuthorization.searchParams.set('client_id', env.SPOTIFY_CLIENT_ID);
+				spotifyAuthorization.searchParams.set('response_type', 'code');
+				const redirectUri = getAbsoluteUrl('app', `api/apps/callback/spotify`);
+				console.log('redirectUri', redirectUri);
+				spotifyAuthorization.searchParams.set(
+					'redirect_uri',
+					getAbsoluteUrl('app', `api/apps/callback/spotify`),
+				);
+				spotifyAuthorization.searchParams.set('state', base64EncodedState);
+				spotifyAuthorization.searchParams.set(
+					'scope',
+					'ugc-image-upload,user-modify-playback-state,user-read-playback-state,user-modify-playback-state,user-read-currently-playing,user-follow-modify,user-follow-read,user-read-recently-played,user-read-playback-position,user-top-read,playlist-read-collaborative,playlist-modify-public,playlist-read-private,playlist-modify-private,app-remote-control,streaming,user-read-email,user-read-private,user-library-modify,user-library-read',
+				);
+				spotifyAuthorization.searchParams.set('show_dialog', 'true');
+				const authUrl = spotifyAuthorization.toString();
+				console.log('authUrl', authUrl);
+				return authUrl;
+			}
+
 			return null;
 		}),
 });

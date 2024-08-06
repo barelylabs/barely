@@ -27,6 +27,11 @@ const config = {
 			},
 			{
 				protocol: 'https',
+				hostname: 'image-cdn-ak.spotifycdn.com',
+				pathname: '/**',
+			},
+			{
+				protocol: 'https',
 				hostname: 'res.cloudinary.com',
 				pathname: '/**',
 			},
