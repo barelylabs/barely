@@ -200,7 +200,7 @@ export const landingPageRouter = createTRPCRouter({
 	delete: privateProcedure.input(z.array(z.string())).mutation(async ({ input, ctx }) => {
 		const updatedLandingPage = await ctx.db.http
 			.update(LandingPages)
-			.set({ deletedAt: new Date().toISOString() })
+			.set({ deletedAt: new Date() })
 			.where(
 				and(
 					eq(LandingPages.workspaceId, ctx.workspace.id),

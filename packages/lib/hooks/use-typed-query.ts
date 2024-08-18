@@ -1,7 +1,11 @@
-import type { ReadonlyURLSearchParams } from 'next/navigation';
+'use client';
+
+// import type { ReadonlyURLSearchParams } from 'next/navigation';
 import type { z } from 'zod';
-import { useCallback, useMemo } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useMemo } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+
+import { useRouterQuery } from './use-router-query';
 
 type OptionalKeys<T> = {
 	[K in keyof T]-?: Record<string, unknown> extends Pick<T, K> ? K : never;
@@ -11,38 +15,7 @@ type FilteredKeys<T, U> = {
 	[K in keyof T as T[K] extends U ? K : never]: T[K];
 };
 
-// Take array as a string and return zod array
-// export const queryNumberArraySchema = z
-// 	.string()
-// 	.or(z.number())
-// 	.or(z.array(z.number()))
-// 	.transform(a => {
-// 		if (typeof a === 'string') return a.split(',').map(a => Number(a));
-// 		if (Array.isArray(a)) return a;
-// 		return [a];
-// 	});
-
-// Take array as a string and return zod string array
-// export const queryStringArraySchema = z
-// 	.string()
-// 	.or(z.array(z.string()))
-// 	.transform(a => {
-// 		if (typeof a === 'string') return a.split(',');
-// 		if (Array.isArray(a)) return a;
-// 		return [a];
-// 	});
-
-// Take string and return zod string array - comma separated
-// export const queryStringArray = z
-//   .preprocess((a) => z.string().parse(a).split(","), z.string().array())
-//   .or(z.string().array());
-
-export function useTypedQuery<T extends z.AnyZodObject>(
-	schema: T,
-	options?: {
-		replace?: boolean;
-	},
-) {
+export function useTypedQuery<T extends z.AnyZodObject>(schema: T) {
 	type Output = z.infer<typeof schema>;
 	type FullOutput = Required<Output>;
 	type OutputKeys = Required<keyof FullOutput>;
@@ -51,72 +24,45 @@ export function useTypedQuery<T extends z.AnyZodObject>(
 	type ArrayOutputKeys = keyof ArrayOutput;
 
 	const router = useRouter();
-	const pathname = usePathname() as null | string;
-	const unparsedQuery = useSearchParams() as null | ReadonlyURLSearchParams;
+	const unparsedQuery = useRouterQuery();
+	const pathname = usePathname();
 
 	const parsedQuerySchema =
-		unparsedQuery ?
-			schema.safeParse(Object.fromEntries(unparsedQuery))
-		:	schema.safeParse({});
+		unparsedQuery ? schema.safeParse(unparsedQuery) : schema.safeParse({});
 
 	let parsedQuery: Output = useMemo(() => {
 		return {} as Output;
 	}, []);
 
+	useEffect(() => {
+		if (parsedQuerySchema.success && parsedQuerySchema.data && unparsedQuery) {
+			Object.entries(parsedQuerySchema.data).forEach(([key, value]) => {
+				if (key in unparsedQuery || !value) return;
+				const search = new URLSearchParams(parsedQuery);
+				search.set(String(key), String(value));
+				router.replace(`${pathname}?${search.toString()}`);
+			});
+		}
+	}, [parsedQuerySchema, schema, router, pathname, unparsedQuery, parsedQuery]);
+
 	if (parsedQuerySchema.success) parsedQuery = parsedQuerySchema.data;
 	else if (!parsedQuerySchema.success) console.error(parsedQuerySchema.error);
 
-	const setPath = useCallback(
-		function setPath(path: string) {
-			if (options?.replace) {
-				router.replace(path, {
-					scroll: false,
-				});
-			} else {
-				return router.push(path, {
-					scroll: false,
-				});
-			}
-		},
-		[router],
-	);
-
-	// Set the query based on schema values
-	const getSetQueryPath = useCallback(
-		function getSetQueryPath<J extends OutputKeys>(key: J, value: Output[J]) {
-			// Remove old value by key so we can merge new value
-			const { [key]: _, ...newQuery } = parsedQuery;
-			const newValue = { ...newQuery, [key]: value };
-			const queryString = new URLSearchParams(newValue).toString();
-			const newPath = `${pathname}${queryString.length > 0 ? `?${queryString}` : ''}`;
-			return newPath;
-		},
-		[parsedQuery, pathname],
-	);
-
 	const setQuery = useCallback(
 		function setQuery<J extends OutputKeys>(key: J, value: Output[J]) {
-			const newPath = getSetQueryPath(key, value);
-
-			setPath(newPath);
+			// Remove old value by key so we can merge new value
+			const search = new URLSearchParams(parsedQuery);
+			search.set(String(key), String(value));
+			router.replace(`${pathname}?${search.toString()}`);
 		},
-		[getSetQueryPath, setPath],
-	);
 
-	// Delete a key from the query
-	const getRemoveByKeyPath = useCallback(
-		function getRemoveByKeyPath<J extends OutputOptionalKeys>(key: J) {
-			const { [key]: _, ...newQuery } = parsedQuery;
-			const queryString = new URLSearchParams(newQuery).toString();
-			const newPath = `${pathname}${queryString.length > 0 ? `?${queryString}` : ''}`;
-			return newPath;
-		},
-		[parsedQuery, pathname],
+		[parsedQuery, router],
 	);
 
 	function removeByKey(key: OutputOptionalKeys) {
-		const newPath = getRemoveByKeyPath(key);
-		setPath(newPath);
+		const search = new URLSearchParams(parsedQuery);
+		search.delete(String(key));
+		router.replace(`${pathname}?${search.toString()}`);
 	}
 
 	// push item to existing key
@@ -162,9 +108,7 @@ export function useTypedQuery<T extends z.AnyZodObject>(
 
 	return {
 		data: parsedQuery,
-		getSetQueryPath,
 		setQuery,
-		getRemoveByKeyPath,
 		removeByKey,
 		pushItemToKey,
 		removeItemByKeyAndValue,

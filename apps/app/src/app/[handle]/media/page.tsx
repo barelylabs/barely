@@ -21,11 +21,9 @@ export default function MediaLibraryPage({
 		redirect(`/${params.handle}/files`);
 	}
 
-	const { selectedFileIds, ...filters } = parsedFilters.data;
-
 	return (
 		<>
-			<MediaContextProvider selectedFileIds={selectedFileIds} filters={filters}>
+			<MediaContextProvider>
 				<DashContentHeader title='Media Library' button={<UploadMediaButton />} />
 				<AllMedia />
 				<UploadMediaModal />

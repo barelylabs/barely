@@ -24,6 +24,7 @@ export function AllCartOrders() {
 
 	return (
 		<>
+			{/* <pre>{JSON.stringify(, null, 2)}</pre> */}
 			<GridList
 				glRef={gridListRef}
 				aria-label='Orders'

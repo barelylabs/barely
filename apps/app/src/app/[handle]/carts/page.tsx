@@ -24,18 +24,13 @@ export default function CartFunnelsPage({
 		redirect(`/${params.handle}/funnels`);
 	}
 
-	const { selectedFunnelIds, ...filters } = parsedFilters.data;
-	const funnels = api({ handle: params.handle }).cartFunnel.byWorkspace({
+	const infiniteCartFunnels = api({ handle: params.handle }).cartFunnel.byWorkspace({
 		handle: params.handle,
-		...filters,
+		...parsedFilters.data,
 	});
 
 	return (
-		<CartFunnelContextProvider
-			initialFunnels={funnels}
-			filters={filters}
-			selectedFunnelIds={selectedFunnelIds ?? []}
-		>
+		<CartFunnelContextProvider initialInfiniteCartFunnels={infiniteCartFunnels}>
 			<DashContentHeader
 				title='Carts'
 				settingsHref={`/${params.handle}/settings/cart`}

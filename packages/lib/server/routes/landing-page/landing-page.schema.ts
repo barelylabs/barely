@@ -2,7 +2,7 @@ import type { InferSelectModel } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-import { queryStringArraySchema } from '../../../utils/zod-helpers';
+import { querySelectionSchema } from '../../../utils/zod-helpers';
 import { LandingPages } from './landing-page.sql';
 
 export const insertLandingPageSchema = createInsertSchema(LandingPages, {
@@ -37,12 +37,12 @@ export const landingPageFilterParamsSchema = z.object({
 	showArchived: z.boolean().optional(),
 });
 export const landingPageSearchParamsSchema = landingPageFilterParamsSchema.extend({
-	selectedLandingPageIds: queryStringArraySchema.optional(),
+	selectedLandingPageIds: querySelectionSchema.optional(),
 });
 
 export const selectWorkspaceLandingPagesSchema = landingPageFilterParamsSchema.extend({
 	handle: z.string(),
-	cursor: z.object({ id: z.string(), createdAt: z.string() }).optional(),
+	cursor: z.object({ id: z.string(), createdAt: z.coerce.date() }).optional(),
 	limit: z.coerce.number().min(1).max(100).optional().default(20),
 });
 

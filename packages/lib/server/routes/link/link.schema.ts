@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 import type { AnalyticsEndpoint } from '../analytics-endpoint/analytics-endpoint-schema';
 import { isValidUrl } from '../../../utils/link';
-import { queryStringArraySchema, z_boolean } from '../../../utils/zod-helpers';
+import { queryBooleanSchema, querySelectionSchema } from '../../../utils/zod-helpers';
 import { Links } from './link.sql';
 
 export const insertLinkSchema = createInsertSchema(Links, {
@@ -43,11 +43,17 @@ export interface LinkWithAnalyticsEndpoints extends Link {
 export const linkFilterParamsSchema = z.object({
 	search: z.string().optional(),
 	userId: z.string().optional(),
-	showArchived: z_boolean.optional(),
+	showArchived: queryBooleanSchema.optional(),
 });
 
 export const linkSearchParamsSchema = linkFilterParamsSchema.extend({
-	selectedLinkIds: queryStringArraySchema.optional(),
+	selectedLinkIds: querySelectionSchema.optional(),
+});
+
+export const selectWorkspaceLinksSchema = linkFilterParamsSchema.extend({
+	handle: z.string(),
+	cursor: z.object({ id: z.string(), createdAt: z.coerce.date() }).optional(),
+	limit: z.coerce.number().min(1).max(100).optional().default(20),
 });
 
 export const defaultLink: CreateLink = {

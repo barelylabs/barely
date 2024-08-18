@@ -8,13 +8,32 @@ import { markCartOrderAsFulfilledSchema } from '@barely/lib/server/routes/cart-o
 import { SHIPPING_CARRIERS } from '@barely/lib/server/shipping/shipping.constants';
 import { useFieldArray } from 'react-hook-form';
 
+import { Icon } from '@barely/ui/elements/icon';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
+import { Text } from '@barely/ui/elements/typography';
 import { Form, SubmitButton } from '@barely/ui/forms';
 import { CheckboxField } from '@barely/ui/forms/checkbox-field';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { TextField } from '@barely/ui/forms/text-field';
 
 import { useCartOrderContext } from '~/app/[handle]/orders/_components/cart-order-context';
+
+const shippingCarrierOptions = SHIPPING_CARRIERS.map(carrier => ({
+	label: (
+		<div className='flex flex-row items-center gap-2'>
+			{(() => {
+				const CarrierIcon = Icon[carrier];
+				return (
+					<div className='flex flex-row items-center gap-2'>
+						<CarrierIcon className='h-5 w-5' />
+						<Text>{carrier}</Text>
+					</div>
+				);
+			})()}
+		</div>
+	),
+	value: carrier,
+}));
 
 export function MarkCartOrderFulfilledModal() {
 	const apiUtils = api.useUtils();
@@ -23,7 +42,7 @@ export function MarkCartOrderFulfilledModal() {
 	const {
 		lastSelectedCartOrder: selectedCartOrder,
 		showMarkAsFulfilledModal,
-		setShowMarkAsFulfilledModal: setShowModal,
+		setShowMarkAsFulfilledModal,
 		focusGridList,
 	} = useCartOrderContext();
 
@@ -40,25 +59,21 @@ export function MarkCartOrderFulfilledModal() {
 	);
 
 	/* form */
-
-	const defaultValues = useMemo(() => {
-		return {
+	const form = useZodForm({
+		schema: markCartOrderAsFulfilledSchema,
+		values: {
 			cartId: selectedCartOrder?.id ?? '',
 			products: unfulfilledProducts.map(product => ({
 				id: product.id,
 				fulfilled: true,
+				apparelSize: product.apparelSize ?? undefined,
 			})),
-			shippingCarrier: '',
+			shippingCarrier: 'usps',
 			shippingTrackingNumber: '',
-		};
-	}, [selectedCartOrder, unfulfilledProducts]);
-
-	const form = useZodForm({
-		schema: markCartOrderAsFulfilledSchema,
-		defaultValues,
-		// resetOptions: {
-		// 	keepValues: true,
-		// },
+		},
+		resetOptions: {
+			keepDirtyValues: true,
+		},
 	});
 
 	const productsFieldArray = useFieldArray({
@@ -69,7 +84,7 @@ export function MarkCartOrderFulfilledModal() {
 	const { remove: removeProducts, replace: replaceProducts } = productsFieldArray;
 
 	const handleSubmit = async (data: z.infer<typeof markCartOrderAsFulfilledSchema>) => {
-		console.log('marking as fulfilled ', data);
+		console.log('marking as fulfilled ', data.products);
 		await markAsFulfilled(data);
 	};
 
@@ -78,12 +93,12 @@ export function MarkCartOrderFulfilledModal() {
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
-		setShowModal(false);
+		setShowMarkAsFulfilledModal(false);
 		removeProducts();
 		form.reset();
 
 		await apiUtils.cartOrder.invalidate();
-	}, [apiUtils, focusGridList, setShowModal, form, removeProducts]);
+	}, [apiUtils, focusGridList, setShowMarkAsFulfilledModal, form, removeProducts]);
 
 	useEffect(() => {
 		// fixme- i don't like updating the products like this, but it seems to work for now
@@ -91,6 +106,7 @@ export function MarkCartOrderFulfilledModal() {
 			unfulfilledProducts.map(product => ({
 				id: product.id,
 				fulfilled: true,
+				apparelSize: product.apparelSize ?? undefined,
 			})),
 		);
 	}, [unfulfilledProducts, replaceProducts]);
@@ -98,13 +114,8 @@ export function MarkCartOrderFulfilledModal() {
 	return (
 		<Modal
 			showModal={showModal}
-			setShowModal={setShowModal}
+			setShowModal={setShowMarkAsFulfilledModal}
 			preventDefaultClose={form.formState.isDirty}
-			// onOpen={handleOpenModal}
-			// onOpen={() => {
-			// 	console.log('onOpen fulfilment modal >> ', defaultValues);
-			// 	form.reset();
-			// }}
 			onClose={handleCloseModal}
 		>
 			<ModalHeader
@@ -118,10 +129,7 @@ export function MarkCartOrderFulfilledModal() {
 						name='shippingCarrier'
 						label='Shipping Carrier'
 						placeholder='Select shipping carrier'
-						options={SHIPPING_CARRIERS.map(carrier => ({
-							label: carrier,
-							value: carrier,
-						}))}
+						options={shippingCarrierOptions}
 					/>
 
 					<TextField
@@ -141,12 +149,14 @@ export function MarkCartOrderFulfilledModal() {
 					{productsFieldArray.fields.map((p, index) => {
 						const product = unfulfilledProducts[index];
 
+						if (!product) return null;
+
 						return (
 							<div key={index} className='flex flex-col gap-2'>
 								<CheckboxField
 									control={form.control}
 									name={`products.${index}.fulfilled`}
-									label={product?.name ?? 'Product name should be here 🌀'}
+									label={`${product.name} ${product.apparelSize ? `(size: ${product.apparelSize})` : ''}`}
 								/>
 							</div>
 						);

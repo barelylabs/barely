@@ -23,12 +23,13 @@ export default function TracksPage({
 		redirect(`/${params.handle}/tracks`);
 	}
 
-	const initialTracks = api({ handle: params.handle }).track.byWorkspace(
-		parsedFilters.data,
-	);
+	const initialInfiniteTracks = api({ handle: params.handle }).track.byWorkspace({
+		handle: params.handle,
+		...parsedFilters.data,
+	});
 
 	return (
-		<TrackContextProvider initialTracks={initialTracks} filters={parsedFilters.data}>
+		<TrackContextProvider initialInfiniteTracks={initialInfiniteTracks}>
 			<DashContentHeader title='Tracks' button={<CreateTrackButton />} />
 			<AllTracks />
 

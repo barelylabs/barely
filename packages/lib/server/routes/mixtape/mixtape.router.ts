@@ -1,26 +1,67 @@
-import { and, eq, inArray, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { InsertMixtape } from './mixtape.schema';
-import { getUserWorkspaceByHandle } from '../../../utils/auth';
+// import { getUserWorkspaceByHandle } from '../../../utils/auth';
 import { newId } from '../../../utils/id';
-import { createTRPCRouter, privateProcedure } from '../../api/trpc';
-import { getMixtapeById, getMixtapesByWorkspaceId } from './mixtape.fns';
+import { sqlAnd, sqlStringContains } from '../../../utils/sql';
+import {
+	createTRPCRouter,
+	privateProcedure,
+	workspaceQueryProcedure,
+} from '../../api/trpc';
+import { trackWith_workspace_genres_files } from '../track/track.fns';
+import { getMixtapeById, getMixtapeWith_Tracks__fromRawMixtape } from './mixtape.fns';
 import {
 	createMixtapeSchema,
 	insertMixtapeTracksSchema,
+	selectWorkspaceMixtapesSchema,
 	updateMixtapeSchema,
 } from './mixtape.schema';
 import { _Mixtapes_To_Tracks, Mixtapes } from './mixtape.sql';
 
 export const mixtapeRouter = createTRPCRouter({
-	byWorkspace: privateProcedure
-		.input(z.object({ handle: z.string() }))
+	byWorkspace: workspaceQueryProcedure
+		.input(selectWorkspaceMixtapesSchema)
 		.query(async ({ input, ctx }) => {
-			const workspace = getUserWorkspaceByHandle(ctx.user, input.handle);
-			const mixtapes = await getMixtapesByWorkspaceId(workspace.id, ctx.db);
-			// console.log("mixtapes => ", mixtapes);
-			return mixtapes;
+			const { limit, cursor, search, showArchived } = input;
+
+			const rawMixtapes = await ctx.db.http.query.Mixtapes.findMany({
+				where: sqlAnd([
+					eq(Mixtapes.workspaceId, ctx.workspace.id),
+					showArchived ? undefined : eq(Mixtapes.archived, false),
+					!!search?.length && sqlStringContains(Mixtapes.name, search),
+				]),
+				with: {
+					_tracks: {
+						orderBy: _tracks => [asc(_tracks.lexorank)],
+						with: {
+							track: {
+								with: trackWith_workspace_genres_files,
+							},
+						},
+					},
+				},
+
+				orderBy: [desc(Mixtapes.createdAt), desc(Mixtapes.id)],
+				limit: limit + 1,
+			});
+
+			const mixtapes = rawMixtapes.map(getMixtapeWith_Tracks__fromRawMixtape);
+
+			let nextCursor: typeof cursor | undefined = undefined;
+			if (mixtapes.length > limit) {
+				const nextMixtape = mixtapes.pop();
+				nextCursor =
+					nextMixtape ?
+						{ id: nextMixtape.id, createdAt: nextMixtape.createdAt }
+					:	undefined;
+			}
+
+			return {
+				mixtapes,
+				nextCursor,
+			};
 		}),
 
 	byId: privateProcedure.input(z.string()).query(async ({ input, ctx }) => {
@@ -147,7 +188,7 @@ export const mixtapeRouter = createTRPCRouter({
 	delete: privateProcedure.input(z.array(z.string())).mutation(async ({ ctx, input }) => {
 		await ctx.db.http
 			.update(Mixtapes)
-			.set({ deletedAt: new Date().toISOString() })
+			.set({ deletedAt: new Date() })
 			.where(inArray(Mixtapes.id, input));
 	}),
 });

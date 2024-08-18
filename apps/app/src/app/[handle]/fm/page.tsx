@@ -24,19 +24,13 @@ export default function FmPagesPage({
 		redirect(`/${params.handle}/fm`);
 	}
 
-	const { selectedFmPageIds, ...filters } = parsedFilters.data;
-
 	const fmPages = api({ handle: params.handle }).fm.byWorkspace({
 		handle: params.handle,
-		...filters,
+		...parsedFilters.data,
 	});
 
 	return (
-		<FmContextProvider
-			initialFmPages={fmPages}
-			filters={filters}
-			selectedFmPageIds={selectedFmPageIds ?? []}
-		>
+		<FmContextProvider initialFmPages={fmPages}>
 			<DashContentHeader title='FM Pages' button={<CreateFmPageButton />} />
 			<ALlFmPages />
 

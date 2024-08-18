@@ -185,13 +185,17 @@ import {
 	ZoomOut,
 } from 'lucide-react';
 import {
+	FaDhl,
 	FaFacebook,
+	FaFedex,
 	FaGithub,
 	FaInstagram,
 	FaSpotify,
 	FaTiktok,
 	FaTwitch,
 	FaTwitter,
+	FaUps,
+	FaUsps,
 	FaYoutube,
 } from 'react-icons/fa';
 
@@ -265,6 +269,7 @@ export const Icon = {
 
 	database: Database,
 	delete: Trash,
+	dhl: FaDhl,
 	dollar: DollarSign,
 	domain: Globe,
 	dots: MoreHorizontal,
@@ -276,6 +281,7 @@ export const Icon = {
 	externalLink: ExternalLink,
 	eyeDropper: EyeDropperIcon,
 
+	fedex: FaFedex,
 	file: File,
 	fileAudio: FileAudio,
 	fileVideo: FileVideo,
@@ -412,12 +418,13 @@ export const Icon = {
 	tv: Tv,
 
 	upload: UploadCloud,
+	ups: FaUps,
+	usps: FaUsps,
 	user: User,
 	userPlus: UserPlus,
 	users: Users,
 
 	verified: Verified,
-
 	video: Video,
 	vinyl: VinylRecord,
 

@@ -14,12 +14,6 @@ import {
 	Text,
 } from '@react-email/components';
 
-// import {
-// 	InformationTableColumn,
-// 	InformationTableLabel,
-// 	InformationTableRow,
-// 	InformationTableValue,
-// } from '../../primitives';
 import {
 	container,
 	heading,
@@ -50,9 +44,7 @@ export interface ShippingUpdateEmailProps {
 
 	products: {
 		name: string;
-		// price: string;
-		// payWhatYouWantPrice?: string;
-		// shipping?: string;
+		apparelSize?: string;
 	}[];
 }
 
@@ -76,37 +68,6 @@ export default function ShippingUpdateEmail({
 
 			<Body style={main}>
 				<Container style={container}>
-					{/* <Section>
-						<Row>
-							<Column>
-								<Img
-									src={'https://app.barely.io/_static/logo.png'}
-									width='42'
-									height='42'
-									alt='Logo'
-								/>
-							</Column>
-
-							<Column align='right' style={{ display: 'table-cell' }}>
-								<Text style={{ ...heading, fontWeight: 'bold' }}>Shipping</Text>
-							</Column>
-						</Row>
-					</Section> */}
-
-					{/* <Section>
-						<Row>
-							<Column align='right'>
-								<Text>
-									{date.toLocaleDateString(undefined, {
-										month: 'long',
-										day: 'numeric',
-										year: 'numeric',
-									})}
-								</Text>
-							</Column>
-						</Row>
-					</Section> */}
-
 					<Section>
 						<Hr style={{ margin: 0 }} />
 
@@ -168,7 +129,8 @@ export default function ShippingUpdateEmail({
 									Shipping to: {shippingAddress?.name}
 								</Text>
 								<Text style={{ ...resetText, marginTop: '10px', marginBottom: '10px' }}>
-									{shippingAddress?.line1}, {shippingAddress?.line2},{' '}
+									{shippingAddress?.line1},{' '}
+									{shippingAddress?.line2 ? `${shippingAddress?.line2} , ` : ' '}
 									{shippingAddress?.city}, {shippingAddress?.state},{' '}
 									{shippingAddress?.postalCode}, {shippingAddress?.country}
 								</Text>
@@ -179,7 +141,6 @@ export default function ShippingUpdateEmail({
 							style={{
 								marginTop: '8px',
 							}}
-							// className='mt-2'
 						>
 							<Column>
 								<Text
@@ -212,64 +173,21 @@ export default function ShippingUpdateEmail({
 													paddingRight: '8px',
 												}}
 											>
-												{product.name}
+												{product.name}{' '}
+												{product.apparelSize ? `(size: ${product.apparelSize})` : ''}
 											</Text>
 										</Column>
-
-										{/* <Column align='right' style={{ verticalAlign: 'top' }}>
-											<Text
-												style={{
-													fontSize: '14px',
-													margin: '0',
-													padding: '0',
-													lineHeight: 1.4,
-												}}
-											>
-												{product.price}
-											</Text>
-										</Column> */}
 									</Row>
 								</Section>
 							);
 						})}
 						<Hr />
-
-						{/* <Section style={{ width: 'fit-content' }} align='right'>
-							{shippingTotal && (
-								<>
-									<Row>
-										<Column style={{ display: 'table-cell' }} align='right'>
-											<Text style={{ ...resetText, marginTop: '8px' }}>Shipping:</Text>
-										</Column>
-										<Column
-											align='right'
-											style={{ display: 'table-cell', width: '90px' }}
-										>
-											<Text style={{ ...resetText, marginTop: '8px' }}>
-												{shippingTotal}
-											</Text>
-										</Column>
-									</Row>
-									<Hr />
-								</>
-							)}
-
-							<Row>
-								<Column style={{ display: 'table-cell' }} align='right'>
-									<Text style={{ ...resetText, fontWeight: 'bold' }}>Total:</Text>
-								</Column>
-								<Column align='right' style={{ display: 'table-cell', width: '90px' }}>
-									<Text style={{ ...resetText, fontWeight: 'bold' }}>{total}</Text>
-								</Column>
-							</Row>
-						</Section> */}
 					</Section>
 
 					<Section
 						style={{
 							marginTop: '24px',
 						}}
-						// className='mt-6 sm:mt-20'
 					>
 						<Row>
 							<Column>
@@ -287,7 +205,6 @@ export default function ShippingUpdateEmail({
 								lineHeight: '1rem',
 								paddingTop: '8px',
 							}}
-							// className='text-slate text-center text-xs'
 						>
 							If you need any help, please use the link above to contact the creator
 							directly.
@@ -303,7 +220,6 @@ export default function ShippingUpdateEmail({
 ShippingUpdateEmail.PreviewProps = {
 	orderId: 'ML4F5L8522',
 	sellerName: 'Proper Youth',
-	// buyerName: 'Adam Barito',
 
 	date: new Date(),
 	supportEmail: 'support@properyouth.com',
@@ -323,13 +239,10 @@ ShippingUpdateEmail.PreviewProps = {
 	products: [
 		{
 			name: 'So Close To Paradise :: Autographed CD',
-			// price: '$100.00',
-			// payWhatYouWantPrice: '$100.00',
-			// shipping: '$5.55',
 		},
 		{
-			name: 'Rusty Grand Am :: Pre-Order CD',
-			// price: '$10.00',
+			name: 'Rusty Grand Am T-Shirt',
+			apparelSize: 'M',
 		},
 	],
 } satisfies ShippingUpdateEmailProps;

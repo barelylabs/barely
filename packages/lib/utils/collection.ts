@@ -29,7 +29,7 @@ export function lexoMiddle() {
 export function insert<T extends Item>({
 	collection: rawCollection,
 	insertId,
-	itemsToInsert,
+	itemsToInsert: rawItemsToInsert,
 	position,
 	reorder = true,
 }: {
@@ -39,7 +39,8 @@ export function insert<T extends Item>({
 	position: 'before' | 'after';
 	reorder?: boolean;
 }) {
-	let collection = rawCollection;
+	let collection: (T & { lexorank: string })[] = [];
+	// let preCheckedCollection = rawCollection;
 	console.log(
 		'rawCollection lexoranks',
 		collection.map(v => v.lexorank),
@@ -47,6 +48,7 @@ export function insert<T extends Item>({
 
 	try {
 		rawCollection.forEach(v => LexoRank.parse(v.lexorank ?? ''));
+		collection = rawCollection as (T & { lexorank: string })[];
 	} catch (error) {
 		const lexoSafeCollection = [...rawCollection];
 		for (let i = 0; i < collection.length; i++) {
@@ -56,10 +58,10 @@ export function insert<T extends Item>({
 					i === 0 ?
 						LexoRank.min().toString()
 					:	lexoAfterLast(collection[i - 1]?.lexorank ?? ''),
-			} as T;
+			} as T & { lexorank: string };
 		}
 
-		collection = lexoSafeCollection;
+		collection = lexoSafeCollection as (T & { lexorank: string })[];
 	}
 
 	console.log(
@@ -68,10 +70,10 @@ export function insert<T extends Item>({
 	);
 
 	// "reordering"
-	if (reorder && position === 'before' && insertId === itemsToInsert[0]?.id) {
+	if (reorder && position === 'before' && insertId === rawItemsToInsert[0]?.id) {
 		console.log('reordering before first item to be reordered... skipping');
 		return {
-			itemsToInsert,
+			itemsToInsert: rawItemsToInsert as (T & { lexorank: string })[],
 			updatedCollection: collection,
 			collectionChanged: false,
 		};
@@ -80,23 +82,23 @@ export function insert<T extends Item>({
 	if (
 		reorder &&
 		position === 'after' &&
-		insertId === itemsToInsert[itemsToInsert.length - 1]?.id
+		insertId === rawItemsToInsert[rawItemsToInsert.length - 1]?.id
 	) {
 		console.log('reordering after last item to be reordered... skipping');
 		return {
-			itemsToInsert,
+			itemsToInsert: rawItemsToInsert as (T & { lexorank: string })[],
 			updatedCollection: collection,
 			collectionChanged: false,
 		};
 	}
 
 	console.log('reorder', reorder);
-	console.log('itemsToInsert', itemsToInsert);
+	console.log('itemsToInsert', rawItemsToInsert);
 	console.log('collection', collection);
 
 	const filteredCollection =
 		reorder ?
-			collection.filter(item => !itemsToInsert.some(i => i.id === item.id))
+			collection.filter(item => !rawItemsToInsert.some(i => i.id === item.id))
 		:	collection;
 
 	console.log('filteredCollection', filteredCollection);
@@ -128,31 +130,31 @@ export function insert<T extends Item>({
 	console.log('lexoafter', lexoafter);
 
 	// calculate lexorank for each item to insert
-	for (let i = 0; i < itemsToInsert.length; i++) {
-		if (!itemsToInsert[i]) continue;
+	for (let i = 0; i < rawItemsToInsert.length; i++) {
+		if (!rawItemsToInsert[i]) continue;
 
 		const lexorank =
 			i === 0 ?
 				lexoBetween(lexobefore, lexoafter)
-			:	lexoBetween(itemsToInsert[i - 1]?.lexorank, lexoafter);
+			:	lexoBetween(rawItemsToInsert[i - 1]?.lexorank, lexoafter);
 
 		console.log('updated lexorank', lexorank);
-		itemsToInsert[i]!.lexorank = lexorank;
+		rawItemsToInsert[i]!.lexorank = lexorank;
 	}
 
 	console.log(
 		'itemsToInsert lexoranks',
-		itemsToInsert.map(i => i.lexorank),
+		rawItemsToInsert.map(i => i.lexorank),
 	);
 
 	return {
-		itemsToInsert,
+		itemsToInsert: rawItemsToInsert as (T & { lexorank: string })[],
 		updatedCollection: [
 			...filteredCollection.slice(
 				0,
 				position === 'before' ? insertIndex : insertIndex + 1,
 			),
-			...itemsToInsert,
+			...(rawItemsToInsert as (T & { lexorank: string })[]),
 			...filteredCollection.slice(position === 'before' ? insertIndex : insertIndex + 1),
 		],
 		collectionChanged: true,
