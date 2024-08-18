@@ -26,7 +26,7 @@ export async function getRawMixtapeById(id: string, db: Db) {
 
 type RawMixtapeWith_Tracks = NonNullable<Awaited<ReturnType<typeof getRawMixtapeById>>>;
 
-function getMixtapeWith_Tracks__fromRawMixtape(rawMixtape: RawMixtapeWith_Tracks) {
+export function getMixtapeWith_Tracks__fromRawMixtape(rawMixtape: RawMixtapeWith_Tracks) {
 	const { _tracks, ...mixtapeData } = rawMixtape;
 
 	return {

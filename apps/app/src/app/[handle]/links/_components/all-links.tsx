@@ -60,7 +60,11 @@ export function AllLinks() {
 	);
 }
 
-function LinkCard({ link }: { link: AppRouterOutputs['link']['byWorkspace'][0] }) {
+function LinkCard({
+	link,
+}: {
+	link: AppRouterOutputs['link']['byWorkspace']['links'][0];
+}) {
 	const { setShowUpdateLinkModal, setShowArchiveLinkModal, setShowDeleteLinkModal } =
 		useLinkContext();
 

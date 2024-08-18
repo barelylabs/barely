@@ -4,16 +4,8 @@ import type { AppRouterOutputs } from '@barely/lib/server/api/react';
 import type { productFilterParamsSchema } from '@barely/lib/server/routes/product/product.schema';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
-import {
-	createContext,
-	use,
-	useContext,
-	useOptimistic,
-	useRef,
-	useState,
-	useTransition,
-} from 'react';
-import { useTypedQuery } from '@barely/lib/hooks/use-typed-query';
+import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
+import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 import { productSearchParamsSchema } from '@barely/lib/server/routes/product/product.schema';
@@ -23,7 +15,7 @@ export interface ProductCtx {
 	productSelection: Selection;
 	lastSelectedProductId: string | undefined;
 	lastSelectedProduct:
-		| AppRouterOutputs['product']['byWorkspace']['products'][0]
+		| AppRouterOutputs['product']['byWorkspace']['products'][number]
 		| undefined;
 	setProductSelection: (selection: Selection) => void;
 	gridListRef: React.RefObject<HTMLDivElement>;
@@ -48,14 +40,10 @@ const ProductContext = createContext<ProductCtx | undefined>(undefined);
 
 export function ProductContextProvider({
 	children,
-	initialProducts,
-	filters,
-	selectedProductIds,
+	initialInfiniteProducts,
 }: {
 	children: React.ReactNode;
-	initialProducts: Promise<AppRouterOutputs['product']['byWorkspace']>;
-	filters: z.infer<typeof productFilterParamsSchema>;
-	selectedProductIds: string[];
+	initialInfiniteProducts: Promise<AppRouterOutputs['product']['byWorkspace']>;
 }) {
 	const [showCreateProductModal, setShowCreateProductModal] = useState(false);
 	const [showUpdateProductModal, setShowUpdateProductModal] = useState(false);
@@ -63,91 +51,86 @@ export function ProductContextProvider({
 	const [showDeleteProductModal, setShowDeleteProductModal] = useState(false);
 
 	const { handle } = useWorkspace();
-	const { data: products } = api.product.byWorkspace.useQuery(
+
+	const {
+		data,
+		setQuery,
+		removeByKey,
+		removeAllQueryParams,
+		pending: pendingFiltersTransition,
+	} = useTypedOptimisticQuery(productSearchParamsSchema);
+
+	const { selectedProductIds, ...filters } = data;
+
+	const productSelection: Selection =
+		!selectedProductIds ? new Set()
+		: selectedProductIds === 'all' ? 'all'
+		: new Set(selectedProductIds);
+
+	const initialData = use(initialInfiniteProducts);
+
+	const { data: infiniteProducts } = api.product.byWorkspace.useInfiniteQuery(
 		{ handle, ...filters },
 		{
-			initialData: use(initialProducts),
+			initialData: () => {
+				return {
+					pages: [
+						{
+							products: initialData.products,
+							nextCursor: initialData.nextCursor,
+						},
+					],
+					pageParams: [], // fixme: add page params
+				};
+			},
+			getNextPageParam: lastPage => lastPage.nextCursor,
 		},
 	);
 
-	const gridListRef = useRef<HTMLDivElement>(null);
+	const products = infiniteProducts?.pages.flatMap(page => page.products) ?? [];
 
-	const { data, setQuery, removeByKey, removeAllQueryParams } = useTypedQuery(
-		productSearchParamsSchema,
-	);
-
-	/* selection */
-	const [optimisticSelection, setOptimisticSelection] = useOptimistic<Selection>(
-		new Set(selectedProductIds),
-	);
-	const [, startSelectTransition] = useTransition();
-
-	function setProductSelection(selection: Selection) {
-		startSelectTransition(() => {
-			setOptimisticSelection(selection);
-
+	const setProductSelection = useCallback(
+		(selection: Selection) => {
 			if (selection === 'all') return;
-
-			if (selection.size === 0) {
-				return removeByKey('selectedProductIds');
-			}
-
+			if (selection.size === 0) return removeByKey('selectedProductIds');
 			return setQuery(
 				'selectedProductIds',
 				Array.from(selection).map(key => key.toString()),
 			);
-		});
-	}
+		},
+		[removeByKey, setQuery],
+	);
 
-	/* filters */
-	const [optimisticFilters, setOptimisticFilters] = useOptimistic(filters);
-	const [pendingFiltersTransition, startFiltersTransition] = useTransition();
+	const clearAllFilters = useCallback(() => {
+		removeAllQueryParams();
+	}, [removeAllQueryParams]);
 
-	// clear all filters
-	function clearAllFilters() {
-		startFiltersTransition(() => {
-			setOptimisticSelection(new Set());
-			removeAllQueryParams();
-		});
-	}
+	const toggleArchived = useCallback(() => {
+		if (filters.showArchived) return removeByKey('showArchived');
 
-	// toggle archived
-	function toggleArchived() {
-		startFiltersTransition(() => {
-			if (data.showArchived) {
-				setOptimisticFilters({ ...optimisticFilters, showArchived: false });
-				removeByKey('showArchived');
-				return;
-			} else {
-				setOptimisticFilters({ ...optimisticFilters, showArchived: true });
-				setQuery('showArchived', true);
-				return;
-			}
-		});
-	}
-	// search
-	function setSearch(search: string) {
-		startFiltersTransition(() => {
-			if (search.length) {
-				setOptimisticFilters({ ...optimisticFilters, search });
-				setQuery('search', search);
-			} else {
-				setOptimisticFilters({ ...optimisticFilters, search: '' });
-				removeByKey('search');
-			}
-		});
-	}
+		setQuery('showArchived', true);
+	}, [filters.showArchived, removeByKey, setQuery]);
+
+	const setSearch = useCallback(
+		(search: string) => {
+			if (search.length) return setQuery('search', search);
+			return removeByKey('search');
+		},
+		[removeByKey, setQuery],
+	);
 
 	const lastSelectedProductId =
-		optimisticSelection === 'all' ? undefined : (
-			Array.from(optimisticSelection).pop()?.toString()
-		);
+		!productSelection || productSelection === 'all' ?
+			undefined
+		:	Array.from(productSelection).pop()?.toString();
 
-	const lastSelectedProduct = products.products.find(p => p.id === lastSelectedProductId);
+	const lastSelectedProduct = products.find(p => p.id === lastSelectedProductId);
+
+	const gridListRef = useRef<HTMLDivElement>(null);
 
 	const contextValue = {
-		products: products.products,
-		productSelection: optimisticSelection,
+		products: products,
+		productSelection,
 		lastSelectedProductId,
 		lastSelectedProduct,
 		setProductSelection,
@@ -162,7 +145,7 @@ export function ProductContextProvider({
 		showDeleteProductModal,
 		setShowDeleteProductModal,
 		// filters
-		filters: optimisticFilters,
+		filters,
 		pendingFiltersTransition,
 		setSearch,
 		toggleArchived,

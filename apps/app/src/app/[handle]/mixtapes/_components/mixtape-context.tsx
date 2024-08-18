@@ -1,29 +1,23 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/react';
-import type { MixtapeWith_Tracks } from '@barely/lib/server/routes/mixtape/mixtape.schema';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
-import {
-	createContext,
-	use,
-	useContext,
-	useOptimistic,
-	useRef,
-	useState,
-	useTransition,
-} from 'react';
-import { useTypedQuery } from '@barely/lib/hooks/use-typed-query';
+import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
+import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
-import { mixtapeFilterParamsSchema } from '@barely/lib/server/routes/mixtape/mixtape.schema';
+import { mixtapeSearchParamsSchema } from '@barely/lib/server/routes/mixtape/mixtape.schema';
 import { wait } from '@barely/lib/utils/wait';
 
 interface MixtapeContext {
-	mixtapes: MixtapeWith_Tracks[];
+	// infiniteMixtapes: AppRouterOutputs['mixtape']['byWorkspace'];
+	mixtapes: AppRouterOutputs['mixtape']['byWorkspace']['mixtapes'];
 	mixtapeSelection: Selection;
 	lastSelectedMixtapeId: string | undefined;
-	lastSelectedMixtape: MixtapeWith_Tracks | undefined;
+	lastSelectedMixtape:
+		| AppRouterOutputs['mixtape']['byWorkspace']['mixtapes'][number]
+		| undefined;
 	setMixtapeSelection: (selection: Selection) => void;
 	gridListRef: React.RefObject<HTMLDivElement>;
 	focusGridList: () => void;
@@ -35,18 +29,22 @@ interface MixtapeContext {
 	setShowArchiveMixtapeModal: (show: boolean) => void;
 	showDeleteMixtapeModal: boolean;
 	setShowDeleteMixtapeModal: (show: boolean) => void;
+	// filters
+	filters: z.infer<typeof mixtapeSearchParamsSchema>;
+	pendingFiltersTransition: boolean;
+	setSearch: (search: string) => void;
+	clearAllFilters: () => void;
+	toggleArchived: () => void;
 }
 
 const MixtapeContext = createContext<MixtapeContext | undefined>(undefined);
 
 export function MixtapeContextProvider({
 	children,
-	initialMixtapes,
-	filters = {},
+	initialInfiniteMixtapes,
 }: {
 	children: React.ReactNode;
-	initialMixtapes: Promise<AppRouterOutputs['mixtape']['byWorkspace']>;
-	filters: z.infer<typeof mixtapeFilterParamsSchema> | undefined;
+	initialInfiniteMixtapes: Promise<AppRouterOutputs['mixtape']['byWorkspace']>;
 }) {
 	const [showCreateMixtapeModal, setShowCreateMixtapeModal] = useState(false);
 	const [showEditMixtapeModal, setShowEditMixtapeModal] = useState(false);
@@ -54,53 +52,88 @@ export function MixtapeContextProvider({
 	const [showDeleteMixtapeModal, setShowDeleteMixtapeModal] = useState(false);
 
 	const { handle } = useWorkspace();
-	const { data: mixtapes } = api.mixtape.byWorkspace.useQuery(
-		{ handle },
+
+	const { data, setQuery, removeByKey, removeAllQueryParams, pending } =
+		useTypedOptimisticQuery(mixtapeSearchParamsSchema);
+
+	const { selectedMixtapeIds, ...filters } = data;
+
+	const mixtapeSelection: Selection =
+		!selectedMixtapeIds ? new Set()
+		: selectedMixtapeIds === 'all' ? 'all'
+		: new Set(selectedMixtapeIds);
+
+	const initialData = use(initialInfiniteMixtapes);
+
+	const { data: infiniteMixtapes } = api.mixtape.byWorkspace.useInfiniteQuery(
+		{ handle, ...filters },
 		{
-			initialData: use(initialMixtapes),
+			initialData: () => {
+				return {
+					pages: [
+						{
+							mixtapes: initialData.mixtapes,
+							nextCursor: initialData.nextCursor,
+						},
+					],
+					pageParams: [],
+				};
+			},
+			getNextPageParam: lastPage => lastPage.nextCursor,
 		},
 	);
 
-	const gridListRef = useRef<HTMLDivElement>(null);
+	const mixtapes = infiniteMixtapes?.pages.flatMap(page => page.mixtapes) ?? [];
 
-	const [optimisticSelection, setOptimisticSelection] = useOptimistic<Selection>(
-		new Set(filters.selectedMixtapeIds),
+	// setters
+	const setMixtapeSelection = useCallback(
+		(selection: Selection) => {
+			if (selection === 'all') return;
+			if (selection.size === 0) return removeByKey('selectedMixtapeIds');
+			setQuery(
+				'selectedMixtapeIds',
+				Array.from(selection).map(key => key.toString()),
+			);
+		},
+		[removeByKey, setQuery],
 	);
 
-	const { setQuery, removeByKey } = useTypedQuery(mixtapeFilterParamsSchema);
-	const [, startSelectTransition] = useTransition();
+	const clearAllFilters = useCallback(() => {
+		removeAllQueryParams();
+	}, [removeAllQueryParams]);
 
-	function setSelectedKeys(selection: Selection) {
-		startSelectTransition(() => {
-			setOptimisticSelection(selection);
-			if (selection === 'all') {
-				return;
-			}
-			if (selection.size === 0) {
-				return removeByKey('selectedMixtapeIds');
-			} else {
-				setQuery(
-					'selectedMixtapeIds',
-					Array.from(selection).map(key => key.toString()),
-				);
-			}
-		});
-	}
+	const toggleArchived = useCallback(() => {
+		if (filters.showArchived) return removeByKey('showArchived');
+		setQuery('showArchived', true);
+	}, [filters.showArchived, removeByKey, setQuery]);
+
+	const setSearch = useCallback(
+		(search: string) => {
+			setQuery('search', search);
+		},
+		[setQuery],
+	);
 
 	const lastSelectedMixtapeId =
-		optimisticSelection === 'all' ? undefined : (
-			Array.from(optimisticSelection).pop()?.toString()
+		mixtapeSelection === 'all' ? undefined : (
+			Array.from(mixtapeSelection).pop()?.toString()
 		);
 	const lastSelectedMixtape = mixtapes.find(
 		mixtape => mixtape.id === lastSelectedMixtapeId,
 	);
 
+	const gridListRef = useRef<HTMLDivElement>(null);
+
 	const contextValue = {
+		// infiniteMixtapes: infiniteMixtapes ?? {
+		//     pages: [],
+		//     pageParams: [],
+		// },
 		mixtapes,
-		mixtapeSelection: optimisticSelection,
+		mixtapeSelection,
 		lastSelectedMixtapeId,
 		lastSelectedMixtape,
-		setMixtapeSelection: setSelectedKeys,
+		setMixtapeSelection,
 		gridListRef,
 		focusGridList: () => {
 			wait(1)
@@ -115,6 +148,11 @@ export function MixtapeContextProvider({
 		setShowArchiveMixtapeModal,
 		showDeleteMixtapeModal,
 		setShowDeleteMixtapeModal,
+		filters,
+		pendingFiltersTransition: pending,
+		setSearch,
+		clearAllFilters,
+		toggleArchived,
 	} satisfies MixtapeContext;
 
 	return (

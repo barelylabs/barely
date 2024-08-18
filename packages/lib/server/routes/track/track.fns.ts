@@ -46,7 +46,7 @@ type RawTrackWith_Workspace_Genres_Files = NonNullable<
 	Awaited<ReturnType<typeof getRawTrackById>>
 >;
 
-function getTrackWith_Workspace_Genres_Files__fromRawTrack(
+export function getTrackWith_Workspace_Genres_Files__fromRawTrack(
 	rawTrack: RawTrackWith_Workspace_Genres_Files,
 ) {
 	const { _genres, _artworkFiles, _audioFiles, ...trackData } = rawTrack;

@@ -267,6 +267,7 @@ export const CartFulfillmentProducts = pgTable(
 		productId: dbId('productId')
 			.references(() => Products.id)
 			.notNull(),
+		apparelSize: varchar('apparelSize', { length: 25, enum: APPAREL_SIZES }),
 	},
 	product => ({
 		pk: primaryKey({

@@ -25,18 +25,14 @@ export default function LinksPage({
 		redirect(`/${params.handle}/links`);
 	}
 
-	const { selectedLinkIds, ...filters } = parsedFilters.data;
+	// const { selectedLinkIds, ...filters } = parsedFilters.data;
 	const links = api({ handle: params.handle }).link.byWorkspace({
 		handle: params.handle,
-		filters,
+		...parsedFilters.data,
 	});
 
 	return (
-		<LinkContextProvider
-			initialLinks={links}
-			selectedLinkIds={selectedLinkIds}
-			filters={filters}
-		>
+		<LinkContextProvider initialInfiniteLinks={links}>
 			<DashContentHeader title='Links' button={<CreateLinkButton />} />
 
 			<div className='grid grid-cols-1 gap-5 md:grid-cols-[auto,1fr]'>

@@ -41,7 +41,7 @@ export const playlistPitchReviewRouter = createTRPCRouter({
 				campaignId: z.string(),
 				complete: z.boolean().optional(),
 				limit: z.number().min(1).max(50).nullish(),
-				cursor: z.string(),
+				cursor: z.coerce.date().nullish(),
 			}),
 		)
 		.query(async ({ input, ctx }) => {

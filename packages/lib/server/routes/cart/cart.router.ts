@@ -88,7 +88,7 @@ export const cartRouter = createTRPCRouter({
 		.mutation(async ({ input, ctx }) => {
 			const { id, handle, key, ...update } = input;
 
-			console.log(' trpc.cart.updateCheckoutFromCheckout >> visitor', ctx.visitor);
+			console.log('trpc.cart.updateCheckoutFromCheckout >> visitor', ctx.visitor);
 
 			const cart = await getCartById(id, handle, key);
 			if (!cart) throw new TRPCError({ code: 'NOT_FOUND', message: 'Cart not found' });

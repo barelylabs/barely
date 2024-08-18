@@ -21,19 +21,19 @@ export const id = {
 
 export const timestamps = {
 	createdAt: timestamp('created_at', {
-		mode: 'string',
+		// mode: 'string',
 	})
 		.notNull()
 		.defaultNow(),
 
 	updatedAt: timestamp('updated_at', {
-		mode: 'string',
+		// mode: 'string',
 	})
 		.notNull()
 		.defaultNow(),
 
 	deletedAt: timestamp('deleted_at', {
-		mode: 'string',
+		// mode: 'string',
 	}),
 };
 

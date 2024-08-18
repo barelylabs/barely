@@ -24,19 +24,13 @@ export default function ProductsPage({
 		redirect(`/${params.handle}/products`);
 	}
 
-	const { selectedProductIds, ...filters } = parsedFilters.data;
-
 	const products = api({ handle: params.handle }).product.byWorkspace({
 		handle: params.handle,
-		...filters,
+		...parsedFilters.data,
 	});
 
 	return (
-		<ProductContextProvider
-			initialProducts={products}
-			filters={filters}
-			selectedProductIds={selectedProductIds ?? []}
-		>
+		<ProductContextProvider initialInfiniteProducts={products}>
 			<DashContentHeader title='Products' button={<CreateProductButton />} />
 
 			<AllProducts />

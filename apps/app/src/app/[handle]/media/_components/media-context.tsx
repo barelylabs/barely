@@ -4,16 +4,9 @@ import type { AppRouterOutputs } from '@barely/lib/server/api/router';
 import type { FileRecord } from '@barely/lib/server/routes/file/file.schema';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
-import {
-	createContext,
-	useContext,
-	useOptimistic,
-	useRef,
-	useState,
-	useTransition,
-} from 'react';
+import { createContext, useCallback, useContext, useRef, useState } from 'react';
 import { useFiles } from '@barely/lib/hooks/use-files';
-import { useTypedQuery } from '@barely/lib/hooks/use-typed-query';
+import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
 import { fileSearchParamsSchema } from '@barely/lib/server/routes/file/file.schema';
 import { wait } from '@barely/lib/utils/wait';
 
@@ -50,13 +43,13 @@ const MediaContext = createContext<MediaContext | undefined>(undefined);
 export function MediaContextProvider({
 	children,
 	//   initialFiles,
-	filters,
-	selectedFileIds,
+	// filters,
+	// selectedFileIds,
 }: {
 	children: React.ReactNode;
 	//   initialFiles: EdgeRouterOutputs["file"]["byWorkspace"];
-	filters: z.infer<typeof fileSearchParamsSchema>;
-	selectedFileIds: z.infer<typeof fileSearchParamsSchema>['selectedFileIds'];
+	// filters: z.infer<typeof fileSearchParamsSchema>;
+	// selectedFileIds: z.infer<typeof fileSearchParamsSchema>['selectedFileIds'];
 }) {
 	const gridListRef = useRef<HTMLDivElement>(null);
 
@@ -65,81 +58,64 @@ export function MediaContextProvider({
 	const [showArchiveFileModal, setShowArchiveFileModal] = useState(false);
 	const [showDeleteFileModal, setShowDeleteFileModal] = useState(false);
 
+	const { data, setQuery, removeByKey, removeAllQueryParams, pending } =
+		useTypedOptimisticQuery(fileSearchParamsSchema);
+
+	const { selectedFileIds, ...filters } = data;
+
 	const { files, hasMoreFiles, fetchMoreFiles } = useFiles({ ...filters });
 
-	const { data, setQuery, removeByKey, removeAllQueryParams } =
-		useTypedQuery(fileSearchParamsSchema);
+	// /* selection */
+	// const [optimisticSelection, setOptimisticSelection] = useOptimistic<Selection>(
+	// 	new Set(selectedFileIds),
+	// );
+	// const [, startSelectTransition] = useTransition();
 
-	/* selection */
-	const [optimisticSelection, setOptimisticSelection] = useOptimistic<Selection>(
-		new Set(selectedFileIds),
-	);
-	const [, startSelectTransition] = useTransition();
+	const fileSelection: Selection =
+		!selectedFileIds ? new Set()
+		: selectedFileIds === 'all' ? 'all'
+		: new Set(selectedFileIds);
 
-	function setFileSelection(selection: Selection) {
-		startSelectTransition(() => {
-			setOptimisticSelection(selection);
+	const setFileSelection = useCallback(
+		(selection: Selection) => {
 			if (selection === 'all') return;
-
-			if (selection.size === 0) {
-				return removeByKey('selectedFileIds');
-			}
-
+			if (selection.size === 0) return removeByKey('selectedFileIds');
 			return setQuery(
 				'selectedFileIds',
 				Array.from(selection).map(key => key.toString()),
 			);
-		});
-	}
+		},
+		[setQuery, removeByKey],
+	);
 
-	/* filters */
-	const [optimisticFilters, setOptimisticFilters] = useOptimistic(filters);
-	const [pendingFiltersTransition, startFiltersTransition] = useTransition();
-	// clear all filters
-	function clearAllFilters() {
-		startFiltersTransition(() => {
-			setOptimisticSelection(new Set());
-			removeAllQueryParams();
-		});
-	}
-	// toggle archived
-	function toggleArchived() {
-		startFiltersTransition(() => {
-			if (data.showArchived) {
-				setOptimisticFilters({ ...optimisticFilters, showArchived: false });
-				removeByKey('showArchived');
-				return;
-			} else {
-				setOptimisticFilters({ ...optimisticFilters, showArchived: true });
-				setQuery('showArchived', true);
-				return;
-			}
-		});
-	}
-	// search
-	function setSearch(search: string) {
-		startFiltersTransition(() => {
-			if (search.length) {
-				setOptimisticFilters({ ...optimisticFilters, search });
-				setQuery('search', search);
-			} else {
-				setOptimisticFilters({ ...optimisticFilters });
-				removeByKey('search');
-			}
-		});
-	}
+	const clearAllFilters = useCallback(() => {
+		removeAllQueryParams();
+	}, [removeAllQueryParams]);
+
+	const toggleArchived = useCallback(() => {
+		if (data.showArchived) return removeByKey('showArchived');
+		return setQuery('showArchived', true);
+	}, [data.showArchived, removeByKey, setQuery]);
+
+	const setSearch = useCallback(
+		(search: string) => {
+			if (search.length) return setQuery('search', search);
+			return removeByKey('search');
+		},
+		[setQuery, removeByKey],
+	);
 
 	/* last selected */
 	const lastSelectedFileId =
-		optimisticSelection === 'all' ? undefined : (
-			Array.from(optimisticSelection).pop()?.toString()
-		);
+		fileSelection === 'all' || !fileSelection.size ?
+			undefined
+		:	Array.from(fileSelection).pop()?.toString();
 
 	const lastSelectedFile = files.find(f => f.id === lastSelectedFileId);
 
 	const contextValue = {
 		files,
-		fileSelection: optimisticSelection,
+		fileSelection,
 		hasMoreFiles,
 		fetchMoreFiles: () => {
 			fetchMoreFiles().catch(e => console.error(e));
@@ -166,8 +142,8 @@ export function MediaContextProvider({
 		showDeleteFileModal,
 		setShowDeleteFileModal,
 		// filters
-		filters: optimisticFilters,
-		pendingFiltersTransition,
+		filters,
+		pendingFiltersTransition: pending,
 		setSearch,
 		toggleArchived,
 		clearAllFilters,

@@ -1,6 +1,18 @@
 import { sendEmail } from '@barely/email';
 import ShippingUpdateEmailTemplate from '@barely/email/src/templates/cart/shipping-update';
-import { and, asc, desc, eq, gt, inArray, isNotNull, lt, ne, or } from 'drizzle-orm';
+import {
+	and,
+	asc,
+	// desc,
+	eq,
+	gt,
+	inArray,
+	isNotNull,
+	isNull,
+	lt,
+	ne,
+	or,
+} from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { ApparelSize } from '../product/product.constants';
@@ -41,7 +53,10 @@ export const cartOrderRouter = createTRPCRouter({
 					]),
 					!!cursor &&
 						or(
-							lt(Carts.checkoutConvertedAt, cursor.checkoutConvertedAt),
+							or(
+								lt(Carts.checkoutConvertedAt, cursor.checkoutConvertedAt),
+								isNull(Carts.checkoutConvertedAt),
+							),
 							and(
 								eq(Carts.checkoutConvertedAt, cursor.checkoutConvertedAt),
 								gt(Carts.orderId, cursor.orderId),
@@ -58,9 +73,24 @@ export const cartOrderRouter = createTRPCRouter({
 						},
 					},
 				},
-				orderBy: [desc(Carts.checkoutConvertedAt), asc(Carts.orderId)],
+				orderBy: [asc(Carts.checkoutConvertedAt), asc(Carts.orderId)],
 				limit: limit + 1,
 			});
+
+			// for any orders where checkoutConvertedAt is null, set it to the createdAt date
+			// todo - fix this in the db and remove this logic
+			await Promise.all(
+				orders.map(async order => {
+					if (!order.checkoutConvertedAt) {
+						await ctx.db.pool
+							.update(Carts)
+							.set({
+								checkoutConvertedAt: order.createdAt,
+							})
+							.where(eq(Carts.id, order.id));
+					}
+				}),
+			);
 
 			let nextCursor: typeof cursor | undefined = undefined;
 
@@ -112,7 +142,7 @@ export const cartOrderRouter = createTRPCRouter({
 			});
 
 			return {
-				cartOrders,
+				cartOrders: cartOrders.slice(0, limit),
 				nextCursor,
 			};
 		}),
@@ -144,7 +174,11 @@ export const cartOrderRouter = createTRPCRouter({
 	markAsFullfilled: privateProcedure
 		.input(markCartOrderAsFulfilledSchema)
 		.mutation(async ({ input, ctx }) => {
-			console.log('marking as fulfilled', input.cartId);
+			// console.log('marking as fulfilled', input.cartId);
+
+			// console.log('products', input.products);
+
+			// return;
 			const cart =
 				(await ctx.db.pool.query.Carts.findFirst({
 					where: and(eq(Carts.workspaceId, ctx.workspace.id), eq(Carts.id, input.cartId)),
@@ -160,7 +194,7 @@ export const cartOrderRouter = createTRPCRouter({
 
 			const fan = cart.fan ?? raise('Fan not found');
 
-			console.log('cart to mark as fulfilled', cart);
+			// console.log('cart to mark as fulfilled', cart);
 
 			// create a new fulfillment
 			const cartFulfillmentId = newId('cartFulfillment');
@@ -172,15 +206,17 @@ export const cartOrderRouter = createTRPCRouter({
 				shippingTrackingNumber: input.shippingTrackingNumber,
 			});
 
-			console.log('cartFulfillmentId', cartFulfillmentId);
+			// console.log('cartFulfillmentId', cartFulfillmentId);
 
 			const fulfilledProducts = input.products.filter(product => product.fulfilled);
+
+			// console.log('fulfilledProducts', fulfilledProducts);
 
 			await ctx.db.pool.insert(CartFulfillmentProducts).values(
 				fulfilledProducts.map(product => ({
 					cartFulfillmentId,
 					productId: product.id,
-					// todo add variant info to sql table
+					apparelSize: product.apparelSize,
 				})),
 			);
 
@@ -211,7 +247,6 @@ export const cartOrderRouter = createTRPCRouter({
 					'fulfilled'
 				:	'partially_fulfilled';
 
-			// await ctx.db.http
 			await ctx.db.pool
 				.update(Carts)
 				.set({
@@ -237,22 +272,28 @@ export const cartOrderRouter = createTRPCRouter({
 						return {
 							id: fulfilledProduct.id,
 							name: allProducts.find(p => p?.id === fulfilledProduct.id)?.name ?? '',
+							apparelSize: fulfilledProduct.apparelSize,
 						};
 					})
 					.filter(p => p.name.length > 0);
+
+				// console.log('shippedProducts', shippedProducts);
 
 				const ShippingUpdateEmail = ShippingUpdateEmailTemplate({
 					orderId,
 					date: new Date(),
 					sellerName: cart.funnel?.workspace.name ?? 'Barely',
-					supportEmail: cart.funnel?.workspace.cartSupportEmail ?? 'support@barely.io',
+					supportEmail:
+						isDevelopment() ? 'adam@barely.io' : (
+							cart.funnel?.workspace.cartSupportEmail ?? 'support@barely.io'
+						),
 					trackingNumber: shippingTrackingNumber,
 					trackingLink: getTrackingLink({
 						carrier: shippingCarrier,
 						trackingNumber: shippingTrackingNumber,
 					}),
 					shippingAddress: {
-						name: fan.fullName,
+						name: fan.fullName ?? cart.fullName,
 						line1: cart.shippingAddressLine1,
 						line2: cart.shippingAddressLine2,
 						city: cart.shippingAddressCity,

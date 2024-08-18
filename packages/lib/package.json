@@ -48,7 +48,7 @@
 		"@react-email/components": "^0.0.17",
 		"@sindresorhus/slugify": "2.2.1",
 		"@t3-oss/env-nextjs": "^0.10.1",
-		"@trigger.dev/sdk": "3.0.0-beta.37",
+		"@trigger.dev/sdk": "3.0.0-beta.53",
 		"@trpc/react-query": "11.0.0-rc.334",
 		"@trpc/server": "11.0.0-rc.334",
 		"@uploadthing/mime-types": "0.2.2",
@@ -92,7 +92,8 @@
 		"use-debounce": "^10.0.0",
 		"ws": "^8.17.0",
 		"xml2js": "^0.6.2",
-		"zod": "^3.23.8"
+		"zod": "^3.23.8",
+		"zustand": "^4.5.5"
 	},
 	"devDependencies": {
 		"@barely/eslint-config": "workspace:*",
@@ -121,7 +122,7 @@
 		"react": "18.2.0",
 		"react-dom": "18.2.0",
 		"react-hook-form": "^7.45.4",
-		"trigger.dev": "3.0.0-beta.37",
+		"trigger.dev": "3.0.0-beta.53",
 		"typescript": "^5.4.3"
 	},
 	"peerDependencies": {

@@ -297,7 +297,7 @@ export const campaignRouter = createTRPCRouter({
 		.input(
 			z.object({
 				limit: z.number().min(1).max(50).nullish(),
-				cursor: z.string().nullish(),
+				cursor: z.coerce.date().nullish(),
 				type: selectCampaignSchema.shape.type.optional(),
 				stage: selectCampaignSchema.shape.stage.optional(),
 			}),
@@ -329,7 +329,7 @@ export const campaignRouter = createTRPCRouter({
 			z.object({
 				workspaceId: z.string(),
 				limit: z.number().min(1).max(50).nullish(),
-				cursor: z.string().nullish(),
+				cursor: z.coerce.date().nullish(),
 				type: selectCampaignSchema.shape.type.optional(),
 				stage: selectCampaignSchema.shape.stage.optional(),
 			}),

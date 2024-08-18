@@ -7,16 +7,8 @@ import type {
 } from '@barely/lib/server/routes/landing-page/landing-page.schema';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
-import {
-	createContext,
-	use,
-	useContext,
-	useOptimistic,
-	useRef,
-	useState,
-	useTransition,
-} from 'react';
-import { useTypedQuery } from '@barely/lib/hooks/use-typed-query';
+import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
+import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 import { landingPageSearchParamsSchema } from '@barely/lib/server/routes/landing-page/landing-page.schema';
@@ -50,13 +42,9 @@ const LandingPageContext = createContext<LandingPageContext | undefined>(undefin
 export function LandingPageContextProvider({
 	children,
 	initialInfiniteLandingPages,
-	filters,
-	selectedLandingPageIds,
 }: {
 	children: React.ReactNode;
 	initialInfiniteLandingPages: Promise<AppRouterOutputs['landingPage']['byWorkspace']>;
-	filters: z.infer<typeof landingPageFilterParamsSchema>;
-	selectedLandingPageIds: string[];
 }) {
 	const [showCreateLandingPageModal, setShowCreateLandingPageModal] = useState(false);
 	const [showUpdateLandingPageModal, setShowUpdateLandingPageModal] = useState(false);
@@ -64,6 +52,21 @@ export function LandingPageContextProvider({
 	const [showDeleteLandingPageModal, setShowDeleteLandingPageModal] = useState(false);
 
 	const { handle } = useWorkspace();
+
+	const {
+		data,
+		setQuery,
+		removeByKey,
+		removeAllQueryParams,
+		pending: pendingFiltersTransition,
+	} = useTypedOptimisticQuery(landingPageSearchParamsSchema);
+
+	const { selectedLandingPageIds, ...filters } = data;
+
+	const landingPageSelection: Selection =
+		!selectedLandingPageIds ? new Set()
+		: selectedLandingPageIds === 'all' ? 'all'
+		: new Set(selectedLandingPageIds);
 
 	const initialData = use(initialInfiniteLandingPages);
 
@@ -92,89 +95,49 @@ export function LandingPageContextProvider({
 	const landingPages =
 		infiniteLandingPages?.pages.flatMap(page => page.landingPages) ?? [];
 
-	const gridListRef = useRef<HTMLDivElement>(null);
-
-	const { data, setQuery, removeByKey, removeAllQueryParams } = useTypedQuery(
-		landingPageSearchParamsSchema,
-	);
-
-	/* selection */
-	const [optimisticSelection, setOptimisticSelection] = useOptimistic<Selection>(
-		new Set(selectedLandingPageIds),
-	);
-
-	const [, startSelectTransition] = useTransition();
-
-	function setLandingPageSelection(selection: Selection) {
-		startSelectTransition(() => {
-			setOptimisticSelection(selection);
-
+	// setters
+	const setLandingPageSelection = useCallback(
+		(selection: Selection) => {
 			if (selection === 'all') return;
-
-			if (selection.size === 0) {
-				return removeByKey('selectedLandingPageIds');
-			}
-
+			if (selection.size === 0) return removeByKey('selectedLandingPageIds');
 			return setQuery(
 				'selectedLandingPageIds',
 				Array.from(selection).map(key => key.toString()),
 			);
-		});
-	}
+		},
+		[setQuery, removeByKey],
+	);
 
-	/* filters */
-	const [optimisticFilters, setOptimisticFilters] = useOptimistic(filters);
-	const [pendingFiltersTransition, startFiltersTransition] = useTransition();
+	const clearAllFilters = useCallback(() => {
+		removeAllQueryParams();
+	}, [removeAllQueryParams]);
 
-	// clear all filters
-	function clearAllFilters() {
-		startFiltersTransition(() => {
-			setOptimisticSelection(new Set());
-			removeAllQueryParams();
-		});
-	}
+	const toggleArchived = useCallback(() => {
+		if (filters.showArchived) return removeByKey('showArchived');
+		return setQuery('showArchived', true);
+	}, [filters.showArchived, removeByKey, setQuery]);
 
-	// toggle archived
-	function toggleArchived() {
-		startFiltersTransition(() => {
-			if (data.showArchived) {
-				setOptimisticFilters({ ...optimisticFilters, showArchived: false });
-				removeByKey('showArchived');
-				return;
-			} else {
-				setOptimisticFilters({ ...optimisticFilters, showArchived: true });
-				setQuery('showArchived', true);
-				return;
-			}
-		});
-	}
-
-	// search
-	function setSearch(search: string) {
-		startFiltersTransition(() => {
-			if (search.length) {
-				setOptimisticFilters({ ...optimisticFilters, search });
-				setQuery('search', search);
-			} else {
-				setOptimisticFilters({ ...optimisticFilters, search: undefined });
-				removeByKey('search');
-			}
-		});
-	}
+	const setSearch = useCallback(
+		(search: string) => {
+			if (search.length) return setQuery('search', search);
+			return removeByKey('search');
+		},
+		[removeByKey, setQuery],
+	);
 
 	const lastSelectedLandingPageId =
-		optimisticSelection === 'all' ? undefined : (
-			Array.from(optimisticSelection).pop()?.toString()
-		);
+		landingPageSelection === 'all' || !landingPageSelection ?
+			undefined
+		:	Array.from(landingPageSelection).pop()?.toString();
+	const lastSelectedLandingPage = landingPages.find(
+		landingPage => landingPage.id === lastSelectedLandingPageId,
+	);
 
-	const lastSelectedLandingPage =
-		lastSelectedLandingPageId ?
-			landingPages.find(landingPage => landingPage.id === lastSelectedLandingPageId)
-		:	undefined;
+	const gridListRef = useRef<HTMLDivElement>(null);
 
 	const contextValue = {
 		landingPages,
-		landingPageSelection: optimisticSelection,
+		landingPageSelection,
 		lastSelectedLandingPageId,
 		lastSelectedLandingPage,
 		setLandingPageSelection,
@@ -189,7 +152,7 @@ export function LandingPageContextProvider({
 		showDeleteLandingPageModal,
 		setShowDeleteLandingPageModal,
 		// filters
-		filters: optimisticFilters,
+		filters,
 		pendingFiltersTransition,
 		setSearch,
 		toggleArchived,

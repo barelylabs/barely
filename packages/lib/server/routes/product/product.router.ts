@@ -205,7 +205,7 @@ export const productRouter = createTRPCRouter({
 	delete: privateProcedure.input(z.array(z.string())).mutation(async ({ input, ctx }) => {
 		const updatedProduct = await ctx.db.http
 			.update(Products)
-			.set({ deletedAt: new Date().toISOString() })
+			.set({ deletedAt: new Date() })
 			.where(and(eq(Products.workspaceId, ctx.workspace.id), inArray(Products.id, input)))
 			.returning();
 		return updatedProduct[0] ?? raise('Failed to delete product');

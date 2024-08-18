@@ -88,13 +88,14 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 		updateCart.checkoutStripePaymentMethodId = charge.payment_method;
 
 		updateCart.fullName =
-			charge.billing_details.name ?? charge.shipping?.name ?? prevCart.fullName;
+			charge.shipping?.name ?? charge.billing_details.name ?? prevCart.fullName;
 		updateCart.shippingAddressLine1 = charge.shipping?.address?.line1;
 		updateCart.shippingAddressLine2 = charge.shipping?.address?.line2;
 		updateCart.shippingAddressCity = charge.shipping?.address?.city;
 		updateCart.shippingAddressState = charge.shipping?.address?.state;
 		updateCart.shippingAddressPostalCode = charge.shipping?.address?.postal_code;
 		updateCart.shippingAddressCountry = charge.shipping?.address?.country;
+		updateCart.checkoutConvertedAt = new Date();
 
 		// update or create fan
 		let fan =

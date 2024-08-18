@@ -1,10 +1,9 @@
 import { TRPCError } from '@trpc/server';
-import { and, eq, inArray, or } from 'drizzle-orm';
+import { and, desc, eq, inArray, lt, or } from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { InsertLink } from './link.schema';
 import { env } from '../../../env';
-import { getUserWorkspaceByHandle } from '../../../utils/auth';
 import { newId } from '../../../utils/id';
 import {
 	getMetaTags,
@@ -17,7 +16,7 @@ import { createTRPCRouter, privateProcedure, publicProcedure } from '../../api/t
 import { getRandomKey } from './link.fns';
 import {
 	createLinkSchema,
-	linkFilterParamsSchema,
+	selectWorkspaceLinksSchema,
 	updateLinkSchema,
 } from './link.schema';
 import { Links } from './link.sql';
@@ -34,34 +33,47 @@ export const linkRouter = createTRPCRouter({
 	}),
 
 	byWorkspace: privateProcedure
-		.input(
-			z.object({
-				handle: z.string(),
-				filters: linkFilterParamsSchema,
-			}),
-		)
+		.input(selectWorkspaceLinksSchema)
 		.query(async ({ input, ctx }) => {
-			const { handle, filters } = input;
-			const workspace = getUserWorkspaceByHandle(ctx.user, handle);
-
-			const searchCondition =
-				filters?.search && filters.search.length > 0 ?
-					or(
-						sqlStringContains(Links.key, filters.search),
-						sqlStringContains(Links.url, filters.search),
-					)
-				:	undefined;
+			const { limit, cursor, search, showArchived } = input;
 
 			const links = await ctx.db.http.query.Links.findMany({
 				where: sqlAnd([
-					eq(Links.workspaceId, workspace.id),
-					!!filters?.userId && eq(Links.userId, filters.userId),
-					!filters?.showArchived && eq(Links.archived, false),
-					searchCondition,
+					eq(Links.workspaceId, ctx.workspace.id),
+					!!search?.length &&
+						or(
+							sqlStringContains(Links.key, search),
+							sqlStringContains(Links.url, search),
+						),
+					showArchived ? undefined : eq(Links.archived, false),
+					!!cursor &&
+						or(
+							lt(Links.createdAt, cursor.createdAt),
+							and(eq(Links.createdAt, cursor.createdAt), eq(Links.id, cursor.id)),
+						),
 				]),
+
+				orderBy: [desc(Links.createdAt), desc(Links.id)],
+				limit: limit + 1,
 			});
 
-			return links;
+			let nextCursor: typeof cursor | undefined = undefined;
+
+			if (links.length > limit) {
+				const nextLink = links.pop();
+				nextCursor =
+					nextLink ?
+						{
+							id: nextLink.id,
+							createdAt: nextLink.createdAt,
+						}
+					:	undefined;
+			}
+
+			return {
+				links,
+				nextCursor,
+			};
 		}),
 
 	// mutate
@@ -169,7 +181,7 @@ export const linkRouter = createTRPCRouter({
 		await ctx.db.http
 			.update(Links)
 			.set({
-				deletedAt: new Date().toISOString(),
+				deletedAt: new Date(),
 			})
 			.where(and(eq(Links.workspaceId, ctx.workspace.id), inArray(Links.id, input)));
 	}),

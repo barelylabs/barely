@@ -1,32 +1,30 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/react';
-import type {
-	Link,
-	linkFilterParamsSchema,
-} from '@barely/lib/server/routes/link/link.schema';
+import type { linkFilterParamsSchema } from '@barely/lib/server/routes/link/link.schema';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
 import {
 	createContext,
 	use,
+	useCallback,
 	useContext,
-	useOptimistic,
+	useMemo,
 	useRef,
 	useState,
-	useTransition,
 } from 'react';
-import { useTypedQuery } from '@barely/lib/hooks/use-typed-query';
+import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 import { linkSearchParamsSchema } from '@barely/lib/server/routes/link/link.schema';
-import { wait } from '@barely/lib/utils/wait';
+
+// import { wait } from '@barely/lib/utils/wait';
 
 interface LinkContext {
-	links: AppRouterOutputs['link']['byWorkspace'];
+	links: AppRouterOutputs['link']['byWorkspace']['links'];
 	linkSelection: Selection;
 	lastSelectedLinkId: string | undefined;
-	lastSelectedLink: Link | undefined;
+	lastSelectedLink: AppRouterOutputs['link']['byWorkspace']['links'][number] | undefined;
 	setLinkSelection: (selection: Selection) => void;
 	gridListRef: React.RefObject<HTMLDivElement>;
 	focusGridList: () => void;
@@ -50,16 +48,16 @@ const LinkContext = createContext<LinkContext | undefined>(undefined);
 
 export function LinkContextProvider({
 	children,
-	initialLinks,
-	filters,
-	selectedLinkIds,
+	initialInfiniteLinks,
+	// filters,
+	// selectedLinkIds,
 }: {
 	children: React.ReactNode;
-	initialLinks: Promise<AppRouterOutputs['link']['byWorkspace']>;
-	filters: z.infer<typeof linkFilterParamsSchema>;
-	selectedLinkIds:
-		| z.infer<typeof linkSearchParamsSchema.shape.selectedLinkIds>
-		| undefined;
+	initialInfiniteLinks: Promise<AppRouterOutputs['link']['byWorkspace']>;
+	// filters: z.infer<typeof linkFilterParamsSchema>;
+	// selectedLinkIds:
+	// 	| z.infer<typeof linkSearchParamsSchema.shape.selectedLinkIds>
+	// 	| undefined;
 }) {
 	const [showCreateLinkModal, setShowCreateLinkModal] = useState(false);
 	const [showUpdateLinkModal, setShowUpdateLinkModal] = useState(false);
@@ -68,101 +66,97 @@ export function LinkContextProvider({
 
 	const { handle } = useWorkspace();
 
-	const { data: links } = api.link.byWorkspace.useQuery(
-		{ handle, filters },
+	const { data, setQuery, removeByKey, removeAllQueryParams, pending } =
+		useTypedOptimisticQuery(linkSearchParamsSchema);
+
+	const { selectedLinkIds, ...filters } = data;
+
+	const linkSelection: Selection =
+		!selectedLinkIds ? new Set()
+		: selectedLinkIds === 'all' ? 'all'
+		: new Set(selectedLinkIds);
+
+	const initialData = use(initialInfiniteLinks);
+
+	const { data: infiniteLinks } = api.link.byWorkspace.useInfiniteQuery(
+		{ handle, ...filters },
 		{
-			initialData: use(initialLinks),
+			initialData: () => {
+				return {
+					pages: [
+						{
+							links: initialData.links,
+							nextCursor: initialData.nextCursor,
+						},
+					],
+					pageParams: [], // todo: fix this
+				};
+			},
+			getNextPageParam: lastPage => lastPage.nextCursor,
 		},
 	);
 
-	const gridListRef = useRef<HTMLDivElement>(null);
+	const links = useMemo(() => {
+		return infiniteLinks?.pages.flatMap(page => page.links) ?? [];
+	}, [infiniteLinks]);
 
-	const { data, setQuery, removeByKey, removeAllQueryParams } =
-		useTypedQuery(linkSearchParamsSchema);
-
-	/* selection */
-	const [optimisticSelection, setOptimisticSelection] = useOptimistic<Selection>(
-		new Set(selectedLinkIds),
-	);
-	const [, startSelectTransition] = useTransition();
-
-	function setLinkSelection(selection: Selection) {
-		startSelectTransition(() => {
-			setOptimisticSelection(selection);
+	const setLinkSelection = useCallback(
+		(selection: Selection) => {
 			if (selection === 'all') return;
-
-			if (selection.size === 0) {
-				return removeByKey('selectedLinkIds');
-			}
+			if (selection.size === 0) return removeByKey('selectedLinkIds');
 			return setQuery(
 				'selectedLinkIds',
 				Array.from(selection).map(key => key.toString()),
 			);
-		});
-	}
+		},
+		[removeByKey, setQuery],
+	);
 
-	/* filters */
-	const [optimisticFilters, setOptimisticFilters] = useOptimistic(filters);
-	const [pendingFiltersTransition, startFiltersTransition] = useTransition();
-	// clear all filters
-	function clearAllFilters() {
-		startFiltersTransition(() => {
-			setOptimisticSelection(new Set());
-			removeAllQueryParams();
-		});
-	}
-	// toggle archived
-	function toggleArchived() {
-		startFiltersTransition(() => {
-			if (data.showArchived) {
-				setOptimisticFilters({ ...optimisticFilters, showArchived: false });
-				removeByKey('showArchived');
-				return;
-			} else {
-				setOptimisticFilters({ ...optimisticFilters, showArchived: true });
-				setQuery('showArchived', true);
-				return;
-			}
-		});
-	}
-	// search
-	function setSearch(search: string) {
-		startFiltersTransition(() => {
-			if (search.length) {
-				setOptimisticFilters({ ...optimisticFilters, search });
-				setQuery('search', search);
-			} else {
-				setOptimisticFilters({ ...optimisticFilters });
-				removeByKey('search');
-			}
-		});
-	}
+	const clearAllFilters = useCallback(() => {
+		removeAllQueryParams();
+	}, [removeAllQueryParams]);
+
+	const toggleArchived = useCallback(() => {
+		if (data.showArchived) return removeByKey('showArchived');
+		return setQuery('showArchived', true);
+	}, [data.showArchived, removeByKey, setQuery]);
+
+	const setSearch = useCallback(
+		(search: string) => {
+			if (search.length) return setQuery('search', search);
+			return removeByKey('search');
+		},
+		[setQuery, removeByKey],
+	);
 
 	const lastSelectedLinkId =
-		optimisticSelection === 'all' ? undefined : (
-			Array.from(optimisticSelection).pop()?.toString()
-		);
+		linkSelection === 'all' || !linkSelection ?
+			undefined
+		:	Array.from(linkSelection).pop()?.toString();
 
 	const lastSelectedLink = links.find(l => l.id === lastSelectedLinkId);
 
+	const gridListRef = useRef<HTMLDivElement>(null);
+
 	const contextValue = {
 		links,
-		linkSelection: optimisticSelection,
+		linkSelection,
 		setLinkSelection,
 		// current selection
 		lastSelectedLinkId,
 		lastSelectedLink,
 		// grid list
 		gridListRef,
-		focusGridList: () => {
-			wait(1)
-				.then(() => {
-					gridListRef.current?.focus();
-				})
-				.catch(e => {
-					console.error(e);
-				});
-		}, // fixme: this is a workaround for focus not working on modal closing
+		focusGridList: () => gridListRef.current?.focus(),
+		// focusGridList: () => {
+		// 	wait(1)
+		// 		.then(() => {
+		// 			gridListRef.current?.focus();
+		// 		})
+		// 		.catch(e => {
+		// 			console.error(e);
+		// 		});
+		// }, // fixme: this is a workaround for focus not working on modal closing
 		// modal
 		showCreateLinkModal,
 		setShowCreateLinkModal,
@@ -173,8 +167,8 @@ export function LinkContextProvider({
 		showDeleteLinkModal,
 		setShowDeleteLinkModal,
 		// filters
-		filters: optimisticFilters,
-		pendingFiltersTransition,
+		filters,
+		pendingFiltersTransition: pending,
 		setSearch,
 		toggleArchived,
 		clearAllFilters,

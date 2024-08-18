@@ -2,7 +2,7 @@ import type { InferSelectModel } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-import { queryStringArraySchema } from '../../../utils/zod-helpers';
+import { querySelectionSchema } from '../../../utils/zod-helpers';
 import { FmLinks, FmPages } from './fm.sql';
 
 // FmLinks
@@ -78,12 +78,12 @@ export const fmFilterParamsSchema = z.object({
 	showArchived: z.boolean().optional(),
 });
 export const fmSearchParamsSchema = fmFilterParamsSchema.extend({
-	selectedFmPageIds: queryStringArraySchema.optional(),
+	selectedFmPageIds: querySelectionSchema.optional(),
 });
 
 export const selectWorkspaceFmPagesSchema = fmFilterParamsSchema.extend({
 	handle: z.string(),
-	cursor: z.object({ id: z.string(), createdAt: z.string() }).optional(),
+	cursor: z.object({ id: z.string(), createdAt: z.coerce.date() }).optional(),
 	limit: z.coerce.number().min(1).max(100).optional().default(20),
 });
 

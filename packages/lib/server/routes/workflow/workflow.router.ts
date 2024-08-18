@@ -225,7 +225,7 @@ export const workflowRouter = createTRPCRouter({
 		const deletedWorkflows = await ctx.db.http
 			.update(Workflows)
 			.set({
-				deletedAt: new Date().toISOString(),
+				deletedAt: new Date(),
 			})
 			.where(
 				and(eq(Workflows.workspaceId, ctx.workspace.id), inArray(Workflows.id, input)),

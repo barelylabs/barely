@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 import { sha256 } from './hash';
 
-export const z_boolean = z.preprocess(v => {
+export const queryBooleanSchema = z.preprocess(v => {
 	if (typeof v === 'string') {
 		if (v === 'true') return true;
 		if (v === 'false') return false;
@@ -142,3 +142,5 @@ export const queryStringEnumArrayToCommaString = <
 			if (Array.isArray(a)) return a.join(',');
 			return a;
 		});
+
+export const querySelectionSchema = z.union([z.literal('all'), queryStringArraySchema]);

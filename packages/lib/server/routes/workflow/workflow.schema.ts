@@ -70,7 +70,7 @@ export const selectWorkspaceWorkflowsSchema = z.object({
 	search: z.string().optional(),
 	showArchived: z.boolean().optional(),
 	showDeleted: z.boolean().optional().default(false),
-	cursor: z.object({ id: z.string(), createdAt: z.string() }).optional(),
+	cursor: z.object({ id: z.string(), createdAt: z.coerce.date() }).optional(),
 	limit: z.coerce.number().min(1).max(100).optional().default(20),
 });
 

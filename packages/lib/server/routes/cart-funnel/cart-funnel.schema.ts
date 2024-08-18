@@ -2,7 +2,7 @@ import type { InferSelectModel } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-import { queryStringArraySchema } from '../../../utils/zod-helpers';
+import { querySelectionSchema } from '../../../utils/zod-helpers';
 import { CartFunnels } from './cart-funnel.sql';
 
 export const insertCartFunnelSchema = createInsertSchema(CartFunnels, {
@@ -54,7 +54,7 @@ export const selectWorkspaceCartFunnelsSchema = z.object({
 	handle: z.string(),
 	search: z.string().optional(),
 	showArchived: z.boolean().optional(),
-	cursor: z.object({ id: z.string(), createdAt: z.string() }).optional(),
+	cursor: z.object({ id: z.string(), createdAt: z.coerce.date() }).optional(),
 	limit: z.coerce.number().min(1).max(100).optional().default(20),
 });
 
@@ -64,7 +64,8 @@ export const cartFunnelFilterParamsSchema = z.object({
 	showArchived: z.boolean().optional(),
 });
 export const cartFunnelSearchParamsSchema = cartFunnelFilterParamsSchema.extend({
-	selectedFunnelIds: queryStringArraySchema.optional(),
+	// selectedCartFunnelIdz: z.union([z.literal('all'), queryStringArraySchema]).optional(),
+	selectedCartFunnelIds: querySelectionSchema.optional(),
 });
 
 export const defaultCartFunnel: CreateCartFunnel = {

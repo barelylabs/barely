@@ -4,7 +4,7 @@ import { ALLOWED_FILE_TYPES } from '@uploadthing/shared';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-import { queryStringArraySchema } from '../../../utils/zod-helpers';
+import { querySelectionSchema } from '../../../utils/zod-helpers';
 import { Files } from './file.sql';
 
 export const insertFileSchema = createInsertSchema(Files, {
@@ -23,7 +23,7 @@ export const selectWorkspaceFilesSchema = z.object({
 	types: z.array(z.enum(ALLOWED_FILE_TYPES)).optional(),
 	search: z.string().optional(),
 	showArchived: z.boolean().optional(),
-	cursor: z.object({ id: z.string(), createdAt: z.string() }).optional(),
+	cursor: z.object({ id: z.string(), createdAt: z.coerce.date() }).optional(),
 	limit: z.coerce.number().min(1).max(100).optional().default(20),
 });
 export const selectFileSchema = createSelectSchema(Files);
@@ -140,5 +140,5 @@ export const fileFilterParamsSchema = selectWorkspaceFilesSchema.omit({
 });
 
 export const fileSearchParamsSchema = fileFilterParamsSchema.extend({
-	selectedFileIds: queryStringArraySchema.optional(),
+	selectedFileIds: querySelectionSchema.optional(),
 });

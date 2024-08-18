@@ -41,7 +41,7 @@ export function DomainCard(props: { domain: Domain }) {
 						passHref
 						className='flex flex-row items-center gap-2'
 					>
-						<Text variant='2xl/semibold'>{punycode.toUnicode(props.domain.domain)}</Text>
+						<Text variant='2xl/semibold'>{punycode(props.domain.domain)}</Text>
 						<Icon.externalLink className='h-5 w-5' />
 					</Link>
 					<Badge variant='solid' size='sm' className='flex flex-row gap-2'>

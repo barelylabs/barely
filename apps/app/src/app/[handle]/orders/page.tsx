@@ -17,25 +17,19 @@ export default function CartOrdersPage({
 	params: { handle: string };
 	searchParams: z.infer<typeof cartOrderSearchParamsSchema>;
 }) {
-	console.log('searchParams', searchParams);
 	const parsedFilters = cartOrderSearchParamsSchema.safeParse(searchParams);
 	if (!parsedFilters.success) {
 		console.error('Failed to parse search params', parsedFilters.error);
 		redirect(`/${params.handle}/orders`);
 	}
 
-	const { selectedOrderCartIds, ...filters } = parsedFilters.data;
-	const orders = api({ handle: params.handle }).cartOrder.byWorkspace({
+	const initialInfiniteOrders = api({ handle: params.handle }).cartOrder.byWorkspace({
 		handle: params.handle,
-		...filters,
+		...parsedFilters.data,
 	});
 
 	return (
-		<CartOrderContextProvider
-			initialOrders={orders}
-			filters={filters}
-			selectedOrderCartIds={selectedOrderCartIds ?? []}
-		>
+		<CartOrderContextProvider initialInfiniteOrders={initialInfiniteOrders}>
 			<DashContentHeader title='Orders' />
 
 			<div className='grid grid-cols-1 gap-5 md:grid-cols-[auto,1fr]'>

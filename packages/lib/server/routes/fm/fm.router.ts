@@ -62,7 +62,7 @@ export const fmRouter = createTRPCRouter({
 			}
 
 			return {
-				fmPages: fmPages.slice(0, limit),
+				fmPages,
 				nextCursor,
 			};
 		}),
@@ -183,7 +183,7 @@ export const fmRouter = createTRPCRouter({
 	delete: privateProcedure.input(z.array(z.string())).mutation(async ({ input, ctx }) => {
 		const updatedFmPage = await ctx.db.http
 			.update(FmPages)
-			.set({ deletedAt: new Date().toISOString() })
+			.set({ deletedAt: new Date() })
 			.where(and(eq(FmPages.workspaceId, ctx.workspace.id), inArray(FmPages.id, input)))
 			.returning();
 

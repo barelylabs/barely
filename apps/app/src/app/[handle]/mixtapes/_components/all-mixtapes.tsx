@@ -51,7 +51,7 @@ export function AllMixtapes() {
 function MixtapeCard({
 	mixtape,
 }: {
-	mixtape: AppRouterOutputs['mixtape']['byWorkspace'][0];
+	mixtape: AppRouterOutputs['mixtape']['byWorkspace']['mixtapes'][0];
 }) {
 	const {
 		setShowUpdateMixtapeModal,

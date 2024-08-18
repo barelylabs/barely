@@ -5,7 +5,7 @@ import type {
 	PublicTrackWith_Artist_Files,
 	TrackWith_Workspace_Genres_Files,
 } from '../track/track.schema';
-import { queryStringArraySchema } from '../../../utils/zod-helpers';
+import { queryBooleanSchema, querySelectionSchema } from '../../../utils/zod-helpers';
 import { selectTrackSchema } from '../track/track.schema';
 import { Mixtapes } from './mixtape.sql';
 
@@ -63,7 +63,18 @@ export const formatEditMixtapeToUpsertMixtapeForm = (
 // query params
 export const mixtapeFilterParamsSchema = z.object({
 	search: z.string().optional(),
-	selectedMixtapeIds: queryStringArraySchema.optional(),
+	showArchived: queryBooleanSchema.optional(),
+	// selectedMixtapeIds: queryStringArraySchema.optional(),
+});
+
+export const mixtapeSearchParamsSchema = mixtapeFilterParamsSchema.extend({
+	selectedMixtapeIds: querySelectionSchema.optional(),
+});
+
+export const selectWorkspaceMixtapesSchema = mixtapeFilterParamsSchema.extend({
+	handle: z.string(),
+	cursor: z.object({ id: z.string(), createdAt: z.coerce.date() }).optional(),
+	limit: z.coerce.number().min(1).max(100).optional().default(10),
 });
 
 export type PublicMixtape = Pick<Mixtape, 'id' | 'name' | 'description'>;

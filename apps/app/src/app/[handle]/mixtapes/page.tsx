@@ -1,4 +1,5 @@
 import type { z } from 'zod';
+import { redirect } from 'next/navigation';
 import { api } from '@barely/lib/server/api/server';
 import { mixtapeFilterParamsSchema } from '@barely/lib/server/routes/mixtape/mixtape.schema';
 
@@ -17,15 +18,16 @@ export default function MixtapesPage({
 	searchParams: z.infer<typeof mixtapeFilterParamsSchema>;
 	params: { handle: string };
 }) {
-	const mixtapes = api({ handle: params.handle }).mixtape.byWorkspace({
+	const parsedFilters = mixtapeFilterParamsSchema.safeParse(searchParams);
+	if (!parsedFilters.success) redirect(`/${params.handle}/mixtapes`);
+
+	const initialInfiniteMixtapes = api({ handle: params.handle }).mixtape.byWorkspace({
 		handle: params.handle,
+		...parsedFilters.data,
 	});
 
-	const parsedFilters = mixtapeFilterParamsSchema.safeParse(searchParams);
-	const filters = parsedFilters.success ? parsedFilters.data : undefined;
-
 	return (
-		<MixtapeContextProvider initialMixtapes={mixtapes} filters={filters}>
+		<MixtapeContextProvider initialInfiniteMixtapes={initialInfiniteMixtapes}>
 			<DashContentHeader title='Mixtapes' button={<CreateMixtapeButton />} />
 			<AllMixtapes />
 

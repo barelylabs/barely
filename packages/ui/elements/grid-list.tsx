@@ -96,7 +96,7 @@ export const GridListItem = React.forwardRef<
 GridListItem.displayName = 'GridListItem';
 
 export const gridListCardVariants = cva(
-	'group relative flex flex-row items-center justify-between gap-4 rounded-lg border border-border bg-background p-3 pr-1 hover:cursor-default focus:border-input focus:outline-none focus-visible:border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background selected:bg-muted sm:p-4',
+	'group relative flex flex-row items-center justify-between gap-4 rounded-lg border border-border bg-background p-3 pr-1 hover:cursor-default focus:border-input focus:outline-none focus-visible:border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background selected:bg-muted/25 sm:p-4',
 	{
 		variants: {
 			size: {
