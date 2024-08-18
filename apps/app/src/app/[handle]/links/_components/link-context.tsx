@@ -49,15 +49,9 @@ const LinkContext = createContext<LinkContext | undefined>(undefined);
 export function LinkContextProvider({
 	children,
 	initialInfiniteLinks,
-	// filters,
-	// selectedLinkIds,
 }: {
 	children: React.ReactNode;
 	initialInfiniteLinks: Promise<AppRouterOutputs['link']['byWorkspace']>;
-	// filters: z.infer<typeof linkFilterParamsSchema>;
-	// selectedLinkIds:
-	// 	| z.infer<typeof linkSearchParamsSchema.shape.selectedLinkIds>
-	// 	| undefined;
 }) {
 	const [showCreateLinkModal, setShowCreateLinkModal] = useState(false);
 	const [showUpdateLinkModal, setShowUpdateLinkModal] = useState(false);

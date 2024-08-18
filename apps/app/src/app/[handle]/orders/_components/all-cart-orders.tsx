@@ -23,8 +23,7 @@ export function AllCartOrders() {
 		useCartOrderContext();
 
 	return (
-		<>
-			{/* <pre>{JSON.stringify(, null, 2)}</pre> */}
+		<div className='flex flex-col gap-4'>
 			<GridList
 				glRef={gridListRef}
 				aria-label='Orders'
@@ -43,7 +42,29 @@ export function AllCartOrders() {
 			>
 				{order => <CartOrderCard cartOrder={order} />}
 			</GridList>
-		</>
+			<LoadMoreButton />
+		</div>
+	);
+}
+
+function LoadMoreButton() {
+	const { hasNextPage, fetchNextPage, isFetchingNextPage } = useCartOrderContext();
+	if (!hasNextPage)
+		return (
+			<div className='flex w-full justify-center'>
+				<Text variant='sm/normal'>No more orders to load.</Text>
+			</div>
+		);
+	return (
+		<Button
+			look='primary'
+			// size='sm'
+			onClick={() => fetchNextPage()}
+			loading={isFetchingNextPage}
+			fullWidth
+		>
+			Load more orders
+		</Button>
 	);
 }
 
