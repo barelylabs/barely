@@ -2,6 +2,12 @@
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/react';
 import type { cartOrderFilterParamsSchema } from '@barely/lib/server/routes/cart-order/cart-order.schema';
+import type {
+	FetchNextPageOptions,
+	// 	InfiniteData,
+	// 	InfiniteQueryObserverResult,
+	// 	UseInfiniteQueryResult,
+} from '@tanstack/react-query';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
 import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
@@ -22,6 +28,10 @@ interface CartOrderContext {
 	focusGridList: () => void;
 	showMarkAsFulfilledModal: boolean;
 	setShowMarkAsFulfilledModal: (show: boolean) => void;
+	//infinite
+	hasNextPage: boolean;
+	fetchNextPage: (options?: FetchNextPageOptions) => void | Promise<void>;
+	isFetchingNextPage: boolean;
 	// filters
 	filters: z.infer<typeof cartOrderFilterParamsSchema>;
 	pendingFiltersTransition: boolean;
@@ -55,7 +65,12 @@ export function CartOrderContextProvider({
 
 	const initialData = use(initialInfiniteOrders);
 
-	const { data: infiniteCartOrders } = api.cartOrder.byWorkspace.useInfiniteQuery(
+	const {
+		data: infiniteCartOrders,
+		hasNextPage,
+		fetchNextPage,
+		isFetchingNextPage,
+	} = api.cartOrder.byWorkspace.useInfiniteQuery(
 		{
 			handle,
 			...filters,
@@ -72,6 +87,10 @@ export function CartOrderContextProvider({
 			getNextPageParam: lastPage => lastPage.nextCursor,
 		},
 	);
+
+	// const getNextPage = useCallback(() => {
+	//     return fetchNextPage();
+	// }, [fetchNextPage]);
 
 	const cartOrders = infiniteCartOrders?.pages.flatMap(page => page.cartOrders) ?? [];
 
@@ -147,6 +166,10 @@ export function CartOrderContextProvider({
 		toggleArchived,
 		toggleFulfilled,
 		clearAllFilters,
+		// infinite
+		hasNextPage,
+		fetchNextPage: () => void fetchNextPage(),
+		isFetchingNextPage,
 	} satisfies CartOrderContext;
 
 	return (
