@@ -28,7 +28,14 @@ function PressQuote({
 			&quot;{quote.quote}&quot; -{' '}
 			<span className='italic'>
 				{quote.link ?
-					<a href={quote.link}>{quote.source}</a>
+					<a
+						target='_blank'
+						rel='noopener noreferrer'
+						href={quote.link}
+						className='hover:underline'
+					>
+						{quote.source}
+					</a>
 				:	<>{quote.source}</>}
 			</span>
 		</p>
