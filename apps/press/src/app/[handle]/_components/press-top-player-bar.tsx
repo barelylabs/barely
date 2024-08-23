@@ -24,9 +24,9 @@ export function TopPlayerBar({ artistName }: { artistName: string }) {
 				const isAtTop = playerBarTop - scrollAreaTop <= 0;
 
 				if (isAtTop) {
-					setStuckClassName('shadow-lg shadow-slate-800/50');
-				} else {
 					setStuckClassName('');
+				} else {
+					setStuckClassName('shadow-lg shadow-zinc-800/50');
 				}
 			}
 		};
@@ -47,7 +47,7 @@ export function TopPlayerBar({ artistName }: { artistName: string }) {
 		<Section
 			ref={playerBarRef}
 			id='player-bar'
-			className={cn('top-0 z-50 py-6 sm:sticky', stuckClassName)}
+			className={cn('top-0 z-50 bg-zinc-800 py-6 sm:sticky', stuckClassName)}
 		>
 			<SectionDiv>
 				<div className='flex flex-row items-center'>
