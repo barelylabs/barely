@@ -9,7 +9,7 @@ import { atom, useAtom } from 'jotai';
 
 import { atomWithToggle } from '@barely/atoms/atom-with-toggle';
 
-import { useDomains } from '@barely/hooks/use-domains';
+import { useWebDomains } from '@barely/hooks/use-web-domains';
 import { useWorkspace } from '@barely/hooks/use-workspace';
 import { useZodForm } from '@barely/hooks/use-zod-form';
 
@@ -25,10 +25,10 @@ export const showDomainModalAtom = atomWithToggle(false);
 export const editDomainAtom = atom<InsertDomain | undefined>(undefined);
 
 export function DomainModal() {
-	const apiContext = api.useContext();
+	const apiUtils = api.useUtils();
 	const workspace = useWorkspace();
 	// const { data: domains } = api.domain.byWorkspace.useQuery();
-	const { domains } = useDomains();
+	const { domains } = useWebDomains();
 
 	const [editDomain, setEditDomain] = useAtom(editDomainAtom);
 	const [showDomainModal, setShowDomainModal] = useAtom(showDomainModalAtom);
@@ -51,25 +51,25 @@ export function DomainModal() {
 		},
 	});
 
-	const { mutateAsync: addDomain } = api.domain.add.useMutation({
+	const { mutateAsync: addDomain } = api.webDomain.add.useMutation({
 		onSuccess: async () => {
-			await apiContext.domain.byWorkspace.invalidate();
+			await apiUtils.webDomain.byWorkspace.invalidate();
 			setShowDomainModal(false);
 			setEditDomain(undefined);
 			domainForm.reset();
 		},
 	});
-	const { mutateAsync: updateDomain } = api.domain.update.useMutation({
+	const { mutateAsync: updateDomain } = api.webDomain.update.useMutation({
 		onSuccess: async () => {
-			await apiContext.domain.byWorkspace.invalidate();
+			await apiUtils.webDomain.byWorkspace.invalidate();
 			setShowDomainModal(false);
 			setEditDomain(undefined);
 			domainForm.reset();
 		},
 	});
-	const { mutateAsync: deleteDomain } = api.domain.delete.useMutation({
+	const { mutateAsync: deleteDomain } = api.webDomain.delete.useMutation({
 		onSuccess: async () => {
-			await apiContext.domain.byWorkspace.invalidate();
+			await apiUtils.webDomain.byWorkspace.invalidate();
 			setShowDomainModal(false);
 			setEditDomain(undefined);
 			domainForm.reset();

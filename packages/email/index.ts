@@ -1,7 +1,10 @@
 // import { renderAsync } from '@react-email/render';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+export const resend = new Resend(process.env.RESEND_API_KEY);
+
+type Resend_GetDomain = Awaited<ReturnType<typeof resend.domains.get>>;
+export type Resend_DomainRecord = NonNullable<Resend_GetDomain['data']>['records'][0];
 
 interface SendEmailProps {
 	from: string;

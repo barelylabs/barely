@@ -34,8 +34,11 @@ interface SidebarNavLink {
 
 interface SidebarNavGroup {
 	title: string;
+	icon?: keyof typeof Icon;
+	href?: string;
 	links: SidebarNavLink[];
 	workspaceFilters?: (keyof Workspace)[];
+	hideLinksWhenNotActive?: boolean; // New prop to control visibility of NavLinks
 }
 
 type SidebarNavItem = SidebarNavLink | SidebarNavGroup;
@@ -67,7 +70,6 @@ export function SidebarNav(props: { workspace: Workspace }) {
 	const pageLinks: SidebarNavLink[] = [
 		{ title: 'links', icon: 'link', href: `/${handle}/links` },
 		{ title: 'fm', icon: 'fm', href: `/${handle}/fm` },
-		// { title: 'bio', icon: 'bio', href: `/${handle}/bio` },
 		{ title: 'pages', icon: 'landingPage', href: `/${handle}/pages` },
 		{ title: 'press', icon: 'press', href: `/${handle}/press` },
 	];
@@ -104,7 +106,19 @@ export function SidebarNav(props: { workspace: Workspace }) {
 		{ title: 'socials', icon: 'socials', href: `/${handle}/settings/socials` },
 		{ title: 'team', icon: 'users', href: `/${handle}/settings/team` },
 		{ title: 'apps', icon: 'apps', href: `/${handle}/settings/apps` },
-		{ title: 'domains', icon: 'domain', href: `/${handle}/settings/domains` },
+		{
+			title: 'domains',
+			icon: 'domain',
+			href: `/${handle}/settings/domains/web`,
+			links: [
+				{ title: 'web domains', href: `/${handle}/settings/domains/web` },
+				{
+					title: 'email domains',
+					href: `/${handle}/settings/domains/email`,
+				},
+			],
+			hideLinksWhenNotActive: true, // Set to true to hide NavLinks when not active
+		},
 		{
 			title: 'remarketing',
 			icon: 'remarketing',
@@ -184,13 +198,55 @@ function NavLink(props: { item: SidebarNavLink }) {
 }
 
 function NavGroup(props: { item: SidebarNavGroup }) {
-	return (
-		<div className='mb-2 flex flex-col gap-1'>
+	const NavIcon = props.item.icon ? Icon[props.item.icon] : null;
+	const pathname = usePathname();
+	const isCurrentGroup = props.item.links.some(link =>
+		usePathnameMatchesCurrentPath(link.href ?? ''),
+	);
+
+	const groupContent = (
+		<>
+			{NavIcon && <NavIcon className='h-[15px] w-[15px]' />}
 			<Text variant={'sm/medium'}>{props.item.title}</Text>
-			{props.item.links.map((item, index) => (
-				<NavLink key={index} item={item} />
-			))}
-		</div>
+		</>
+	);
+
+	return (
+		<>
+			{props.item.href && !isCurrentGroup ?
+				<Link
+					href={isCurrentGroup ? '#' : props.item.links[0]?.href ?? '#'}
+					className={cn(
+						'group flex w-full items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted',
+						isCurrentGroup && 'bg-muted',
+					)}
+					passHref
+				>
+					{groupContent}
+				</Link>
+			:	<div
+					className={cn(
+						'group flex w-full items-center gap-2 rounded-md px-2 py-1.5',
+						!isCurrentGroup && 'hover:bg-muted',
+						// isCurrentGroup && 'bg-muted',
+					)}
+				>
+					{groupContent}
+				</div>
+			}
+			{(!props.item.hideLinksWhenNotActive || isCurrentGroup) && (
+				<div
+					className={cn(
+						'mb-2 flex flex-col gap-1',
+						props.item.hideLinksWhenNotActive && 'ml-6',
+					)}
+				>
+					{props.item.links.map((item, index) => (
+						<NavLink key={index} item={item} />
+					))}
+				</div>
+			)}
+		</>
 	);
 }
 

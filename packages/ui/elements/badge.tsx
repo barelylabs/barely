@@ -9,7 +9,7 @@ import type { IconSelection } from './icon';
 import { Icon } from './icon';
 
 const badgeVariants = cva(
-	'inline-flex h-fit w-fit items-center justify-center rounded-full font-medium',
+	'inline-flex h-fit w-fit items-center justify-center font-medium',
 	{
 		variants: {
 			variant: {
@@ -31,6 +31,10 @@ const badgeVariants = cva(
 				md: 'space-x-1 px-3 py-1 text-xs sm:text-sm',
 				lg: 'space-x-2 px-4 py-2 text-sm',
 			},
+			shape: {
+				pill: 'rounded-full',
+				rectangle: 'rounded-sm',
+			},
 			button: {
 				true: 'active:scale-95 ',
 				false: '',
@@ -48,9 +52,9 @@ const badgeIconVariants = cva('mr-1', {
 		size: {
 			'2xs': 'h-3 w-3',
 			xs: 'h-3 w-3',
-			sm: 'h-4 w-4',
-			md: 'h-5 w-5',
-			lg: 'h-6 w-6',
+			sm: 'h-3 w-3',
+			md: 'h-3 w-3',
+			lg: 'h-4 w-4',
 		},
 	},
 });
@@ -69,9 +73,10 @@ export interface BadgeProps
 const Badge = ({
 	className,
 	variant,
-	size,
+	size = 'md',
 	asButton,
-	rectangle,
+	// rectangle,
+	shape = 'rectangle',
 	grow,
 	icon,
 	removeButton,
@@ -83,8 +88,7 @@ const Badge = ({
 	return (
 		<span
 			className={cn(
-				badgeVariants({ variant, size }),
-				rectangle && 'rounded-sm',
+				badgeVariants({ variant, size, shape }),
 				grow && 'w-full',
 				asButton && 'active:scale-95 hover:cursor-pointer',
 				className,

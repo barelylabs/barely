@@ -18,6 +18,12 @@ const prefixes = {
 	landingPageSession: 'lp_session',
 	pressKit: 'pk',
 	webSession: 'web_session',
+	// flow
+	flow: 'flow',
+	flowTrigger: 'flow_trigger',
+	flowAction: 'flow_action',
+	flowRun: 'flow_run',
+	flowRunAction: 'flow_run_action',
 	// merch
 	product: 'prod',
 	cartFunnel: 'cart_funnel',
@@ -28,6 +34,10 @@ const prefixes = {
 	file: 'file',
 	playlist: 'pl',
 	track: 'tr',
+	// email
+	email: 'email',
+	emailAddress: 'email_addr',
+	emailDomain: 'email_domain',
 	// campaigns
 	campaign: 'camp',
 	playlistPitchReview: 'plpr',

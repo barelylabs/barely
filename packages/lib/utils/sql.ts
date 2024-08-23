@@ -1,7 +1,7 @@
 import type { SQL } from 'drizzle-orm';
 import type { PgColumn } from 'drizzle-orm/pg-core';
 import { and, sql } from 'drizzle-orm';
-import { timestamp, varchar } from 'drizzle-orm/pg-core';
+import { customType, timestamp, varchar } from 'drizzle-orm/pg-core';
 
 import { raise } from './raise';
 
@@ -36,6 +36,17 @@ export const timestamps = {
 		// mode: 'string',
 	}),
 };
+
+// https://orm.drizzle.team/docs/custom-types#common-way-of-defining-custom-types
+export const customJsonb = <TData>(name: string) =>
+	customType<{ data: TData; driverData: string }>({
+		dataType() {
+			return 'jsonb';
+		},
+		toDriver(value: TData): string {
+			return JSON.stringify(value);
+		},
+	})(name);
 
 export const lexorank = {
 	lexorank: varchar('lexorank', { length: 255 }).notNull(),

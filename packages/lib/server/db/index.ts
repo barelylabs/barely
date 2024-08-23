@@ -20,12 +20,15 @@ import * as campaignSql from '../routes/campaign/campaign.sql';
 import * as funnelSql from '../routes/cart-funnel/cart-funnel.sql';
 import * as cartSql from '../routes/cart/cart.sql';
 import * as domainSql from '../routes/domain/domain.sql';
+import * as emailDomainSql from '../routes/email-domain/email-domain.sql';
+import * as emailSql from '../routes/email/email.sql';
 import * as eventReportSql from '../routes/event/event-report.sql';
 import * as eventSql from '../routes/event/event.sql';
 import * as externalWebsiteSql from '../routes/external-website/external-website.sql';
 import * as fanSql from '../routes/fan/fan.sql';
 import * as fileFolderSql from '../routes/file/file-folder.sql';
 import * as fileSql from '../routes/file/file.sql';
+import * as flowSql from '../routes/flow/flow.sql';
 import * as fmSql from '../routes/fm/fm.sql';
 import * as formResponseSql from '../routes/form/form-response.sql';
 import * as formSql from '../routes/form/form.sql';
@@ -66,12 +69,15 @@ export const dbSchema = {
 	...campaignSql,
 	...cartSql,
 	...domainSql,
+	...emailSql,
+	...emailDomainSql,
 	...eventSql,
 	...eventReportSql,
 	...externalWebsiteSql,
 	...fanSql,
 	...fileSql,
 	...fileFolderSql,
+	...flowSql,
 	...fmSql,
 	...formSql,
 	...formResponseSql,

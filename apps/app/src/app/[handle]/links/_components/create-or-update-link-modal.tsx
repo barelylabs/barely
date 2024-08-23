@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
 import { useDebounce } from '@barely/lib/hooks/use-debounce';
-import { useDomains } from '@barely/lib/hooks/use-domains';
+import { useWebDomains } from '@barely/lib/hooks/use-web-domains';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 import {
@@ -53,7 +53,7 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 	/* api */
 	const apiUtils = api.useUtils();
 
-	const { linkDomains, primaryLinkDomain, isLoading: loadingDomains } = useDomains();
+	const { linkDomains, primaryLinkDomain, isLoading: loadingDomains } = useWebDomains();
 
 	const domainOptions = linkDomains.map(domain => ({
 		value: domain.domain,
