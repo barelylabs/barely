@@ -32,9 +32,13 @@ export const workspaceAnalyticsEndpointsFormSchema = z.object({
 
 export const insertMetaPixelSchema = createInsertSchema(AnalyticsEndpoints, {
 	id: schema =>
-		schema.id.length(15, {
-			message: 'Your meta pixel id should be 15 characters',
-		}),
+		schema.id
+			.min(15, {
+				message: 'Your meta pixel id should be 15-16 characters long',
+			})
+			.max(16, {
+				message: 'Your meta pixel id should be 15-16 characters long',
+			}),
 	platform: schema => schema.platform.refine(p => p === 'meta'),
 	accessToken: schema =>
 		schema.accessToken.min(150, {
