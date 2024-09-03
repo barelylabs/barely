@@ -20,6 +20,7 @@ const config = {
 			'error',
 			{ argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
 		],
+		'@typescript-eslint/switch-exhaustiveness-check': 'error',
 		'@typescript-eslint/consistent-type-imports': [
 			'warn',
 			{ prefer: 'type-imports', fixStyle: 'separate-type-imports' },

@@ -33,6 +33,7 @@ import { Tracks } from '../track/track.sql';
 import { Transactions } from '../transaction/transaction.sql';
 import { _Users_To_Workspaces } from '../user/user.sql';
 import { WorkspaceInvites } from '../workspace-invite/workspace-invite.sql';
+import { WORKSPACE_PLAN_TYPES } from './workspace.settings';
 
 export const Workspaces = pgTable(
 	'Workspaces',
@@ -96,13 +97,21 @@ export const Workspaces = pgTable(
 		).default(false),
 
 		billingCycleStart: integer('billingCycleStart'),
-		plan: varchar('plan', { length: 10, enum: ['free', 'pro', 'enterprise'] })
+		plan: varchar('plan', {
+			length: 10,
+			enum: WORKSPACE_PLAN_TYPES,
+		})
 			.default('free')
 			.notNull(),
+
+		/* email usage */
+		emailUsage: integer('emailUsage').default(0).notNull(),
+		emailUsageLimitOverride: integer('emailUsageLimitOverride'),
 
 		/* link usage */
 		linkUsage: integer('linkUsage').default(0).notNull(),
 		linkUsageLimit: integer('linkUsageLimit').default(1000).notNull(),
+		linkUsageLimitOverride: integer('linkUsageLimitOverride'),
 
 		/* file storage */
 		fileUsage_total: integer('fileUsage_total').default(0).notNull(),
@@ -114,8 +123,11 @@ export const Workspaces = pgTable(
 			.default(200000000) // 200MB
 			.notNull(),
 
-		/* for shipping */
+		/* cart */
 		cartSupportEmail: varchar('cartSupportEmail', { length: 255 }),
+		cartFeePercentageOverride: integer('cartFeePercentageOverride'),
+
+		/* for shipping */
 		shippingAddressLine1: varchar('shippingAddressLine1', { length: 255 }),
 		shippingAddressLine2: varchar('shippingAddressLine2', { length: 255 }),
 		shippingAddressCity: varchar('shippingAddressCity', { length: 255 }),

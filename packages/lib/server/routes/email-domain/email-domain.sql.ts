@@ -3,7 +3,6 @@ import { relations } from 'drizzle-orm';
 import { pgTable, text, varchar } from 'drizzle-orm/pg-core';
 
 import { customJsonb, dbId, primaryId, timestamps } from '../../../utils/sql';
-import { Emails } from '../email/email.sql';
 import { Workspaces } from '../workspace/workspace.sql';
 import { EMAIL_DOMAIN_REGIONS, EMAIL_DOMAIN_STATUSES } from './email-domain.constants';
 
@@ -36,24 +35,4 @@ export const EmailDomainRelations = relations(EmailDomains, ({ one }) => ({
 		fields: [EmailDomains.workspaceId],
 		references: [Workspaces.id],
 	}),
-}));
-
-/* Email Addresses */
-export const EmailAddresses = pgTable('EmailAddresses', {
-	...primaryId,
-	...timestamps,
-
-	workspaceId: dbId('workspaceId')
-		.notNull()
-		.references(() => Workspaces.id),
-
-	email: varchar('email', { length: 256 }).notNull(),
-});
-
-export const EmailAddressRelations = relations(EmailAddresses, ({ one, many }) => ({
-	workspace: one(Workspaces, {
-		fields: [EmailAddresses.workspaceId],
-		references: [Workspaces.id],
-	}),
-	emails: many(Emails),
 }));

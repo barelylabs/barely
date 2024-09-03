@@ -7,6 +7,42 @@ import { getMailchimpAudiences } from '../../mailchimp/mailchimp.endpts.audience
 import { ProviderAccounts } from '../provider-account/provider-account.sql';
 
 export const mailchimpRouter = createTRPCRouter({
+	defaultAudience: workspaceQueryProcedure
+		.input(
+			z.object({
+				handle: z.string(),
+			}),
+		)
+		.query(async ({ ctx }) => {
+			const mailchimpAccounts = await ctx.db.http.query.ProviderAccounts.findMany({
+				where: and(
+					eq(ProviderAccounts.provider, 'mailchimp'),
+					eq(ProviderAccounts.workspaceId, ctx.workspace.id),
+				),
+				limit: 1,
+			});
+
+			const mailchimpAccount = mailchimpAccounts[0];
+
+			if (!mailchimpAccount) {
+				return null;
+			}
+
+			if (!mailchimpAccount?.access_token || !mailchimpAccount.server) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Mailchimp account not configured',
+				});
+			}
+
+			const audiencesRes = await getMailchimpAudiences({
+				server: mailchimpAccount.server,
+				accessToken: mailchimpAccount.access_token,
+			});
+
+			return audiencesRes?.lists[0]?.id;
+		}),
+
 	audiencesByWorkspace: workspaceQueryProcedure
 		.input(
 			z.object({

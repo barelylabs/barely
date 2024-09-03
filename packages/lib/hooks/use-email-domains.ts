@@ -1,7 +1,15 @@
 import { api } from '../server/api/react';
+import { useWorkspace } from './use-workspace';
 
 export function useEmailDomains() {
-	const { data: domains, error, isLoading } = api.emailDomain.byWorkspace.useQuery();
+	const { handle } = useWorkspace();
+	const {
+		data: infiniteDomainsFirstPage,
+		error,
+		isLoading,
+	} = api.emailDomain.byWorkspace.useQuery({ handle });
+
+	const domains = infiniteDomainsFirstPage?.domains ?? [];
 
 	return {
 		domains,

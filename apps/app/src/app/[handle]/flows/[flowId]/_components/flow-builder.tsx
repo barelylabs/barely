@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import {
 	Background,
 	Controls,
@@ -13,19 +13,30 @@ import { useShallow } from 'zustand/react/shallow';
 
 import '@xyflow/react/dist/style.css';
 
+import type {
+	FlowNode,
+	FlowState,
+	SimpleEdge,
+} from '@barely/lib/server/routes/flow/flow.ui.types';
+
 import { Button } from '@barely/ui/elements/button';
 
-import type { FlowNode, FlowState } from '../_react-flow/flow-types';
+import {
+	BooleanEdgeType,
+	SimpleEdgeType,
+} from '~/app/[handle]/flows/[flowId]/_components/flow-builder-edges';
 import {
 	BooleanNodeType,
 	EmptyNodeType,
+	MailchimpAudienceNodeType,
 	SendEmailNodeType,
 	TriggerNodeType,
 	WaitNodeType,
 } from '~/app/[handle]/flows/[flowId]/_components/flow-builder-nodes';
-import { useFlowStore } from '../_react-flow/flow-store';
+import { FlowMailchimpAudienceModal } from '~/app/[handle]/flows/[flowId]/_components/flow-mailchimp-audience-modal';
 import { FlowBooleanModal } from './flow-boolean-modal';
 import { FlowEmailModal } from './flow-email-modal';
+import { useFlowStore } from './flow-store';
 import { FlowTriggerModal } from './flow-trigger-modal';
 import { FlowWaitModal } from './flow-wait-modal';
 
@@ -61,26 +72,16 @@ export function FlowBuilder() {
 		nodes,
 		edges,
 		// history
-		// history,
 		undo,
 		redo,
 		saveSnapshot,
 		// setters
 		setEdges,
-		// setCurrentNode,
-		// on
+		//on
 		onNodesChange,
 		onEdgesChange,
 		onConnect,
-		// onNodesDelete,
 		onLayout,
-		// setters
-		// replaceEmptyWithNode,
-		// modals
-		// setShowWaitModal,
-		// setShowEmailModal,
-		// setShowBooleanModal,
-		// setShowTriggerModal,
 	} = useFlowStore(useShallow(selector));
 
 	const nodeTypes = {
@@ -89,160 +90,16 @@ export function FlowBuilder() {
 		wait: WaitNodeType,
 		sendEmail: SendEmailNodeType,
 		boolean: BooleanNodeType,
+		addToMailchimpAudience: MailchimpAudienceNodeType,
 	};
 
-	// const nodeTypes = useMemo(
-	// 	() => ({
-	// 		trigger: ({ data, id }: { id: string; data: TriggerNode['data'] }) => (
-	// 			<div className='relative flex items-center justify-center rounded border border-border bg-background p-2'>
-	// 				<div className='flex flex-col items-center gap-2'>
-	// 					<Text variant='md/bold'>Trigger</Text>
-	// 					<Text variant='xs/normal'>{data.trigger}</Text>
-	// 				</div>
-	// 				<Button
-	// 					look='ghost'
-	// 					size='2xs'
-	// 					variant='icon'
-	// 					startIcon='edit'
-	// 					onClick={() => {
-	// 						setCurrentNode(id);
-	// 						setShowTriggerModal(true);
-	// 					}}
-	// 					className='absolute right-1 top-1'
-	// 				/>
-	// 				<Handle type='source' position={Position.Bottom} />
-	// 			</div>
-	// 		),
-
-	// 		empty: ({ id }: { id: string }) => (
-	// 			<div className='flex items-center justify-center rounded border border-dashed border-border bg-background p-2'>
-	// 				<Handle type='target' position={Position.Top} />
-	// 				<div
-	// 					className='grid auto-cols-fr gap-2'
-	// 					style={{
-	// 						gridTemplateColumns: 'repeat(auto-fit, minmax(0, 1fr))',
-	// 						maxWidth: 'calc(4 * (24px + 0.5rem))',
-	// 					}}
-	// 				>
-	// 					<Button
-	// 						look='muted'
-	// 						size='sm'
-	// 						variant='icon'
-	// 						startIcon='wait'
-	// 						onClick={() => replaceEmptyWithNode(id, 'wait')}
-	// 					/>
-	// 					<Button
-	// 						look='muted'
-	// 						size='sm'
-	// 						variant='icon'
-	// 						startIcon='email'
-	// 						onClick={() => replaceEmptyWithNode(id, 'sendEmail')}
-	// 					/>
-	// 					<Button
-	// 						look='muted'
-	// 						size='sm'
-	// 						variant='icon'
-	// 						startIcon='branch'
-	// 						onClick={() => replaceEmptyWithNode(id, 'boolean')}
-	// 					/>
-	// 				</div>
-	// 			</div>
-	// 		),
-
-	// 		wait: ({ data, id }: { data: WaitNode['data']; id: string }) => (
-	// 			<div className='relative flex w-[172px] flex-col items-center justify-center rounded border border-border bg-background p-2 px-4'>
-	// 				<Handle type='target' position={Position.Top} />
-	// 				<div className='flex flex-col items-center gap-2'>
-	// 					<div className='flex flex-row items-center gap-1'>
-	// 						<Icon.wait className='h-[14px] w-[14px]' />
-	// 						<Text variant='md/bold'>Wait</Text>
-	// 					</div>
-	// 					<Text variant='xs/normal' className='text-center'>
-	// 						Wait for {data.duration} {data.units}
-	// 					</Text>
-	// 				</div>
-	// 				<Button
-	// 					look='ghost'
-	// 					size='2xs'
-	// 					variant='icon'
-	// 					startIcon='edit'
-	// 					onClick={() => {
-	// 						setCurrentNode(id);
-	// 						setShowWaitModal(true);
-	// 					}}
-	// 					className='absolute right-1 top-1'
-	// 				/>
-	// 				<Handle type='source' position={Position.Bottom} id={`${id}-bottom`} />
-	// 			</div>
-	// 		),
-
-	// 		sendEmail: ({ id }: { data: SendEmailNode['data']; id: string }) => (
-	// 			<div className='relative flex flex-col items-center justify-center rounded border border-border bg-background p-2 px-8'>
-	// 				<Handle type='target' position={Position.Top} />
-	// 				<div className='flex flex-col items-center gap-2'>
-	// 					<div className='flex flex-row items-center gap-1'>
-	// 						<Icon.email className='h-[13px] w-[13px]' />
-	// 						<Text variant='md/bold'>Send Email</Text>
-	// 					</div>
-	// 				</div>
-	// 				<Button
-	// 					look='minimal'
-	// 					size='2xs'
-	// 					variant='icon'
-	// 					startIcon='edit'
-	// 					onClick={() => {
-	// 						setCurrentNode(id);
-	// 						setShowEmailModal(true);
-	// 					}}
-	// 					className='absolute right-1 top-1'
-	// 				/>
-	// 				<Handle type='source' position={Position.Bottom} id={`${id}-bottom`} />
-	// 			</div>
-	// 		),
-
-	// 		boolean: ({ data, id }: { data: BooleanNode['data']; id: string }) => (
-	// 			<div className='relative flex flex-col items-center justify-center rounded border border-border bg-background p-2 px-8'>
-	// 				<Handle type='target' position={Position.Top} />
-	// 				<div className='flex flex-col items-center gap-2'>
-	// 					<div className='flex flex-row items-center gap-1'>
-	// 						<Icon.branch className='h-[13px] w-[13px]' />
-	// 						<Text variant='md/bold'>Decision</Text>
-	// 					</div>
-	// 					<Text variant='xs/normal' className='text-center'>
-	// 						Condition: {data.condition}
-	// 					</Text>
-	// 				</div>
-	// 				<Button
-	// 					look='minimal'
-	// 					size='2xs'
-	// 					variant='icon'
-	// 					startIcon='edit'
-	// 					onClick={() => {
-	// 						setCurrentNode(id);
-	// 						setShowBooleanModal(true);
-	// 					}}
-	// 					className='absolute right-1 top-1'
-	// 				/>
-	// 				<Handle type='source' position={Position.Bottom} id={`${id}-bottom`} />
-	// 			</div>
-	// 		),
-	// 	}),
-	// 	[
-	// 		setCurrentNode,
-	// 		setShowWaitModal,
-	// 		setShowEmailModal,
-	// 		setShowBooleanModal,
-	// 		setShowTriggerModal,
-	// 		replaceEmptyWithNode,
-	// 	],
-	// );
+	const edgeTypes = {
+		simple: SimpleEdgeType,
+		boolean: BooleanEdgeType,
+	};
 
 	const onNodesDelete = useCallback(
 		(deleted: FlowNode[]) => {
-			// console.log(deleted);
-			// console.log(nodes);
-			// console.log(edges);
-
 			const newEdges = deleted.reduce((acc, node) => {
 				const incomers = getIncomers(node, nodes, edges);
 				const outgoers = getOutgoers(node, nodes, edges);
@@ -255,11 +112,14 @@ export function FlowBuilder() {
 				const remainingEdges = acc.filter(edge => !connectedEdges.includes(edge));
 
 				const createdEdges = incomers.flatMap(({ id: source }) =>
-					outgoers.map(({ id: target }) => ({
-						id: `${source}-${target}`,
-						source,
-						target,
-					})),
+					outgoers.map(({ id: target }) => {
+						return {
+							id: `${source}-${target}`,
+							source,
+							target,
+							type: 'simple',
+						} satisfies SimpleEdge;
+					}),
 				);
 
 				console.log('createdEdges', createdEdges);
@@ -274,8 +134,21 @@ export function FlowBuilder() {
 		[edges, nodes, setEdges, saveSnapshot],
 	);
 
+	const initialLayout = useRef(false);
+
+	useEffect(() => {
+		if (!nodes || !edges || !onLayout) return;
+
+		if (!initialLayout.current) {
+			initialLayout.current = true;
+			setTimeout(() => {
+				onLayout('TB');
+			}, 1);
+		}
+	}, [nodes, edges, onLayout]);
+
 	return (
-		<div className='h-[800px] w-full rounded-lg border border-border'>
+		<div className='h-[800px] w-full rounded-lg border border-border bg-background'>
 			<ReactFlow
 				nodes={nodes}
 				edges={edges}
@@ -284,6 +157,7 @@ export function FlowBuilder() {
 				onNodesDelete={onNodesDelete}
 				onConnect={onConnect}
 				nodeTypes={nodeTypes}
+				edgeTypes={edgeTypes}
 				panOnScroll={true}
 			>
 				<Controls />
@@ -293,8 +167,6 @@ export function FlowBuilder() {
 				<Button look='muted' size='sm' variant='icon' startIcon='undo' onClick={undo} />
 				<Button look='muted' size='sm' variant='icon' startIcon='redo' onClick={redo} />
 			</div>
-			{/* <p> {history.length}</p>
-			<pre className='h-fit w-full'>{JSON.stringify(history, null, 2)}</pre> */}
 			<div className='controls'>
 				<button onClick={() => onLayout('TB')}>Vertical Layout</button>
 				{/* <button onClick={() => onLayout('LR')}>Horizontal Layout</button> */}
@@ -303,6 +175,7 @@ export function FlowBuilder() {
 			<FlowWaitModal />
 			<FlowBooleanModal />
 			<FlowTriggerModal />
+			<FlowMailchimpAudienceModal />
 		</div>
 	);
 }

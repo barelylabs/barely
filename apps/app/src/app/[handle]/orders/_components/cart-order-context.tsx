@@ -88,10 +88,6 @@ export function CartOrderContextProvider({
 		},
 	);
 
-	// const getNextPage = useCallback(() => {
-	//     return fetchNextPage();
-	// }, [fetchNextPage]);
-
 	const cartOrders = infiniteCartOrders?.pages.flatMap(page => page.cartOrders) ?? [];
 
 	const gridListRef = useRef<HTMLDivElement>(null);

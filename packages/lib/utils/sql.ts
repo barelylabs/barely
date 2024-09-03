@@ -69,7 +69,7 @@ export const sqlStringEndsWith = (column: PgColumn, value: string) =>
 export function sqlAnd(conditions: (SQL | false | undefined | null)[]) {
 	const filteredConditions = conditions.filter(
 		c => c !== undefined && c !== false && c !== null,
-	) as SQL[];
+	);
 	const _and = filteredConditions.length > 0 ? and(...filteredConditions) : undefined;
 
 	if (_and === undefined) {

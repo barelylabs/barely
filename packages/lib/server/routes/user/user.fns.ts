@@ -10,7 +10,7 @@ import type { CreateUser, InsertUser } from './user.schema';
 //
 import { convertToHandle } from '../../../utils/handle';
 import { newId } from '../../../utils/id';
-import { fullNameToFirstAndLast, parseFullName } from '../../../utils/name';
+import { getFullNameFromFirstAndLast, parseFullName } from '../../../utils/name';
 import { parseForDb } from '../../../utils/phone-number';
 import { raise } from '../../../utils/raise';
 import { dbHttp } from '../../db';
@@ -89,7 +89,7 @@ export async function createUser(user: CreateUser) {
 	let fullName =
 		user.fullName ??
 		user.email.split('@')[0]?.replace(/\W/g, '') ??
-		fullNameToFirstAndLast(user.firstName, user.lastName);
+		getFullNameFromFirstAndLast(user.firstName, user.lastName);
 	const firstName = user.firstName ?? parseFullName(fullName).firstName;
 	const lastName = user.lastName ?? parseFullName(fullName).lastName;
 	let handle =

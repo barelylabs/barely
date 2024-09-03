@@ -7,7 +7,7 @@ import { Progress } from '@barely/ui/elements/progress';
 import { Review } from '@barely/ui/elements/review-card';
 import { Text } from '@barely/ui/elements/typography';
 
-import { fullNameToFirstAndLast } from '@barely/utils/name';
+import { getFullNameFromFirstAndLast } from '@barely/utils/name';
 
 const CampaignReviews = (props: { campaignId: string; reach: number }) => {
 	const [totalPlaylistPitchReviews] =
@@ -46,7 +46,10 @@ const CampaignReviews = (props: { campaignId: string; reach: number }) => {
 			{flatPlaylistPitchReviews.map(review => {
 				const reviewerDisplayName =
 					review.reviewer?.handle ??
-					fullNameToFirstAndLast(review.reviewer?.firstName, review.reviewer?.lastName);
+					getFullNameFromFirstAndLast(
+						review.reviewer?.firstName,
+						review.reviewer?.lastName,
+					);
 
 				return (
 					<Review

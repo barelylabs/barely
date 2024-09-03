@@ -138,7 +138,7 @@ export async function handleStripeCheckoutSessionComplete(
 						.update(Workspaces)
 						.set({
 							plan: plan.id,
-							linkUsageLimit: plan.linkUsageLimit,
+							// linkUsageLimit: plan.link.usageLimit,
 							billingCycleStart: new Date().getDate(),
 						})
 						.where(eq(Workspaces.id, workspace.id));
@@ -201,6 +201,10 @@ export async function handleStripeCheckoutSessionComplete(
 							description = `👥 ${campaign.curatorReach} curators · 🎧 ${estimatedPlaylists} playlists `;
 
 							break;
+						}
+
+						default: {
+							throw new Error('Unknown campaign type');
 						}
 					}
 					const item: InsertTransactionLineItem = {

@@ -1,9 +1,10 @@
+/* FLOWS */
+
 import { relations } from 'drizzle-orm';
 import {
 	boolean,
 	foreignKey,
 	integer,
-	jsonb,
 	pgTable,
 	primaryKey,
 	text,
@@ -11,11 +12,13 @@ import {
 	varchar,
 } from 'drizzle-orm/pg-core';
 
+import type { FlowEdge } from './flow.ui.types';
 import { TRIGGER_WAIT_UNITS } from '../../../trigger/trigger.constants';
-import { dbId, primaryId, timestamps } from '../../../utils/sql';
+import { customJsonb, dbId, primaryId, timestamps } from '../../../utils/sql';
 import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
-import { Emails } from '../email/email.sql';
+import { EmailTemplates } from '../email/email.sql';
 import { Fans } from '../fan/fan.sql';
+import { Products } from '../product/product.sql';
 import { Workspaces } from '../workspace/workspace.sql';
 import {
 	FLOW_ACTIONS,
@@ -24,8 +27,6 @@ import {
 	FLOW_RUN_STATUSES,
 	FLOW_TRIGGERS,
 } from './flow.constants';
-
-/* FLOWS */
 
 export const Flows = pgTable('Flows', {
 	...primaryId,
@@ -38,7 +39,7 @@ export const Flows = pgTable('Flows', {
 	name: varchar('name', { length: 256 }).notNull(),
 	description: text('description'),
 
-	edges: jsonb('edges').notNull().default({}),
+	edges: customJsonb<FlowEdge[]>('edges').notNull().default([]),
 
 	archived: boolean('archived').default(false),
 });
@@ -50,6 +51,7 @@ export const FlowsRelations = relations(Flows, ({ one, many }) => ({
 	}),
 
 	triggers: many(Flow_Triggers),
+	actions: many(Flow_Actions),
 }));
 
 /* FLOW TRIGGERS */
@@ -63,10 +65,12 @@ export const Flow_Triggers = pgTable(
 			.references(() => Flows.id, { onDelete: 'cascade' }),
 		id: dbId('id').notNull(),
 
-		trigger: text('trigger', { enum: FLOW_TRIGGERS }).notNull(),
+		type: text('type', { enum: FLOW_TRIGGERS }).notNull(),
 
 		// potential triggers:
+		productId: dbId('productId').references(() => Products.id),
 		cartFunnelId: dbId('cartFunnels').references(() => CartFunnels.id),
+		totalOrderAmount: integer('totalOrderAmount'), // in cents
 	},
 	table => ({
 		primaryKey: primaryKey({ columns: [table.flowId, table.id] }),
@@ -95,15 +99,20 @@ export const Flow_Actions = pgTable(
 			.references(() => Flows.id, { onDelete: 'cascade' }),
 		id: dbId('id').notNull(),
 
-		action: text('action', { enum: FLOW_ACTIONS }).notNull(),
+		type: text('type', { enum: FLOW_ACTIONS }).notNull(),
 
-		// potential actions:
+		/* potential actions: */
+		// 🕒
 		waitFor: integer('waitFor'),
 		waitForUnits: text('waitForUnits', { enum: TRIGGER_WAIT_UNITS }),
-		emailId: dbId('emailId').references(() => Emails.id),
+		// 📧
+		emailTemplateId: dbId('emailTemplateId').references(() => EmailTemplates.id),
+		// 🔄
 		booleanCondition: text('booleanCondition', { enum: FLOW_BOOLEAN_CONDITIONS }),
-
 		// external actions:
+		productId: dbId('productId').references(() => Products.id),
+		cartFunnelId: dbId('cartFunnelId').references(() => CartFunnels.id),
+		totalOrderAmount: integer('totalOrderAmount'), // in cents
 		mailchimpAudienceId: text('mailchimpAudienceId'),
 	},
 	table => ({
@@ -116,9 +125,9 @@ export const FlowActionRelations = relations(Flow_Actions, ({ one }) => ({
 		fields: [Flow_Actions.flowId],
 		references: [Flows.id],
 	}),
-	email: one(Emails, {
-		fields: [Flow_Actions.emailId],
-		references: [Emails.id],
+	emailTemplate: one(EmailTemplates, {
+		fields: [Flow_Actions.emailTemplateId],
+		references: [EmailTemplates.id],
 	}),
 }));
 
@@ -135,10 +144,9 @@ export const Flow_Runs = pgTable(
 				onDelete: 'cascade',
 			}),
 		triggerId: dbId('triggerId').notNull(),
-
 		triggerFanId: dbId('triggerFanId').references(() => Fans.id),
 
-		currentActionNodeId: text('currentActionNodeId').notNull(),
+		currentActionNodeId: text('currentActionNodeId'),
 
 		status: text('status', { enum: FLOW_RUN_STATUSES }).notNull(),
 

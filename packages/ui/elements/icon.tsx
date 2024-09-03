@@ -195,6 +195,7 @@ import {
 	FaFedex,
 	FaGithub,
 	FaInstagram,
+	FaMailchimp,
 	FaSpotify,
 	FaTiktok,
 	FaTwitch,
@@ -288,6 +289,7 @@ export const Icon = {
 	externalLink: ExternalLink,
 	eyeDropper: EyeDropperIcon,
 
+	fan: User,
 	fedex: FaFedex,
 	file: File,
 	fileAudio: FileAudio,
@@ -297,6 +299,7 @@ export const Icon = {
 	flame: Flame,
 	flipHorizontal: FlipHorizontal,
 	flipVertical: FlipVertical,
+	flow: Zap,
 	fm: RadioTower,
 	fmPage: RadioTower,
 	focus: Focus,
@@ -339,6 +342,7 @@ export const Icon = {
 
 	magic: SparklesIcon,
 	magnet: Magnet,
+	mailchimp: FaMailchimp,
 	media: FileVideo,
 	megaphone: Megaphone,
 	meta: MetaLogo,
@@ -355,7 +359,7 @@ export const Icon = {
 
 	newspaper: Newspaper,
 
-	orders: CashRegister,
+	order: CashRegister,
 
 	page: File,
 	palette: Palette,
@@ -465,7 +469,7 @@ export const Icon = {
 
 export type IconType = LucideIcon | ReactIcon;
 
-export type IconSelection = keyof typeof Icon;
+export type IconKey = keyof typeof Icon;
 
 export function DeviceIcon({
 	display,

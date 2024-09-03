@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import type { IconSelection } from '../elements/icon';
+import type { IconKey } from '../elements/icon';
 import { Icon } from '../elements/icon';
 import { H, Text } from '../elements/typography';
 
@@ -8,7 +8,7 @@ export function NoResultsPlaceholder(props: {
 	title?: string;
 	subtitle?: string;
 	button?: ReactNode;
-	icon?: IconSelection;
+	icon?: IconKey;
 }) {
 	const IconComponent = props.icon ? Icon[props.icon] : null;
 	return (

@@ -137,9 +137,7 @@ export const fmRouter = createTRPCRouter({
 		await ctx.db.pool.update(FmPages).set(data).where(eq(FmPages.id, id)).returning();
 
 		if (links !== undefined) {
-			const linkIds = links
-				.map(link => link.id)
-				.filter(id => id !== undefined) as string[];
+			const linkIds = links.map(link => link.id).filter(id => id !== undefined);
 
 			await Promise.all(
 				links.map(async (link, index) => {

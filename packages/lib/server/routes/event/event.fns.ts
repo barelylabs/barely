@@ -91,7 +91,6 @@ export async function recordLinkClick({
 	/**
 	 * 👾 remarketing/analytics 👾
 	 *  */
-
 	const analyticsEndpoints =
 		link.remarketing ?
 			await dbHttp.query.AnalyticsEndpoints.findMany({

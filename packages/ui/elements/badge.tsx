@@ -5,7 +5,7 @@ import { cn } from '@barely/lib/utils/cn';
 import { cva } from 'class-variance-authority';
 import { X } from 'lucide-react';
 
-import type { IconSelection } from './icon';
+import type { IconKey } from './icon';
 import { Icon } from './icon';
 
 const badgeVariants = cva(
@@ -65,10 +65,12 @@ export interface BadgeProps
 	asButton?: boolean;
 	rectangle?: boolean;
 	grow?: boolean;
-	icon?: IconSelection;
+	icon?: IconKey;
 	removeButton?: boolean;
 	onRemove?: () => void;
 }
+
+export type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
 
 const Badge = ({
 	className,

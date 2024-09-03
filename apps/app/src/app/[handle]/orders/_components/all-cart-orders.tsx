@@ -37,7 +37,7 @@ export function AllCartOrders() {
 					if (!cartOrderSelection) return;
 				}}
 				renderEmptyState={() => (
-					<NoResultsPlaceholder icon='orders' title='No orders found.' />
+					<NoResultsPlaceholder icon='order' title='No orders found.' />
 				)}
 			>
 				{order => <CartOrderCard cartOrder={order} />}
@@ -106,8 +106,6 @@ function CartOrderCard({
 				:	[]),
 			]}
 			actionOnCommandMenuOpen={() => {
-				// if cartOrderSelection includes cartOrder.id, return early
-				// otherwise, set cartOrderSelection to [cartOrder.id]
 				if (cartOrderSelection === 'all' || cartOrderSelection.has(cartOrder.id)) {
 					return;
 				}

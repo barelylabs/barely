@@ -2,7 +2,6 @@ import { resend } from '@barely/email';
 import { and, asc, desc, eq, gt, lt, or } from 'drizzle-orm';
 import { z } from 'zod';
 
-import type { InsertEmailAddress } from './email-domain.schema';
 import { newId } from '../../../utils/id';
 import { sqlAnd, sqlStringContains } from '../../../utils/sql';
 import {
@@ -11,13 +10,12 @@ import {
 	workspaceQueryProcedure,
 } from '../../api/trpc';
 import {
-	createEmailAddressSchema,
 	createEmailDomainSchema,
 	selectWorkspaceEmailDomainsSchema,
-	updateEmailAddressSchema,
 	updateEmailDomainSchema,
 } from './email-domain.schema';
-import { EmailAddresses, EmailDomains } from './email-domain.sql';
+import { EmailDomains } from './email-domain.sql';
+import { verifyEmailDomain } from './email-domain.trigger';
 
 export const emailDomainRouter = createTRPCRouter({
 	create: privateProcedure
@@ -71,6 +69,7 @@ export const emailDomainRouter = createTRPCRouter({
 		.input(
 			z.object({
 				id: z.string(),
+				force: z.boolean().optional(),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -81,34 +80,63 @@ export const emailDomainRouter = createTRPCRouter({
 				),
 			});
 
+			console.log('domain', domain);
+
 			if (!domain) {
 				throw new Error('Domain not found');
 			}
 
-			const verifyRes = await resend.domains.verify(domain.resendId);
-
-			if (verifyRes.error) {
-				throw new Error(verifyRes.error.message);
-			} else if (!verifyRes.data) {
-				throw new Error('No data returned from Resend');
+			if (domain.status !== 'pending' && !input.force) {
+				// if the domain is already verified and we're not forcing a re-verification, return the domain
+				return domain;
 			}
 
-			const updatedDomainRes = await resend.domains.get(domain.resendId);
-
-			if (!updatedDomainRes?.data) {
-				throw new Error('No data returned from Resend');
+			if (!input.force) {
+				const currentDomainRes = await resend.domains.get(domain.resendId);
+				if (currentDomainRes.data?.status === 'verified') {
+					const updatedDomain = await ctx.db.pool
+						.update(EmailDomains)
+						.set({
+							status: 'verified',
+							records: currentDomainRes.data.records,
+						})
+						.where(eq(EmailDomains.id, domain.id))
+						.returning();
+					return updatedDomain;
+				}
 			}
 
-			const updatedDomain = await ctx.db.pool
-				.update(EmailDomains)
-				.set({
-					status: updatedDomainRes.data.status,
-					records: updatedDomainRes.data.records,
-				})
-				.where(eq(EmailDomains.id, domain.id))
-				.returning();
+			await verifyEmailDomain.trigger(domain);
 
-			return updatedDomain;
+			// const verifyRes = await resend.domains.verify(domain.resendId);
+
+			// if (verifyRes.error) {
+			// 	throw new Error(verifyRes.error.message);
+			// } else if (!verifyRes.data) {
+			// 	throw new Error('No data returned from Resend');
+			// }
+
+			// // await wait(15 * 1000) // wait for 15 seconds to allow the domain to be verified
+
+			// const updatedDomainRes = await resend.domains.get(domain.resendId);
+
+			// console.log('updatedDomainRes', updatedDomainRes);
+			// console.log('updatedDomainRes.records', updatedDomainRes.data?.records);
+
+			// if (!updatedDomainRes?.data) {
+			// 	throw new Error('No data returned from Resend');
+			// }
+
+			// const updatedDomain = await ctx.db.pool
+			// 	.update(EmailDomains)
+			// 	.set({
+			// 		status: updatedDomainRes.data.status,
+			// 		records: updatedDomainRes.data.records,
+			// 	})
+			// 	.where(eq(EmailDomains.id, domain.id))
+			// 	.returning();
+
+			// return updatedDomain;
 		}),
 
 	byName: workspaceQueryProcedure.input(z.string()).query(async ({ ctx, input }) => {
@@ -157,37 +185,6 @@ export const emailDomainRouter = createTRPCRouter({
 					:	undefined;
 			}
 
-			return { domains: domains.slice(0, limit), nextCursor };
-		}),
-
-	createEmailAddress: privateProcedure
-		.input(createEmailAddressSchema)
-		.mutation(async ({ ctx, input }) => {
-			const newEmailAddressData: InsertEmailAddress = {
-				...input,
-				id: newId('emailAddress'),
-				workspaceId: ctx.workspace.id,
-			};
-			const newEmailAddress = await ctx.db.http
-				.insert(EmailAddresses)
-				.values(newEmailAddressData)
-				.returning();
-			return newEmailAddress;
-		}),
-
-	updateEmailAddress: privateProcedure
-		.input(updateEmailAddressSchema)
-		.mutation(async ({ ctx, input }) => {
-			const updatedEmailAddress = await ctx.db.http
-				.update(EmailAddresses)
-				.set({ email: input.email })
-				.where(
-					and(
-						eq(EmailAddresses.id, input.id),
-						eq(EmailAddresses.workspaceId, ctx.workspace.id),
-					),
-				)
-				.returning();
-			return updatedEmailAddress;
+			return { domains, nextCursor };
 		}),
 });

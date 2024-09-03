@@ -9,7 +9,7 @@ import { Text } from '@barely/ui/elements/typography';
 import { CreateFmPageButton } from '~/app/[handle]/fm/_components/create-fm-page-button';
 import { useFmContext } from '~/app/[handle]/fm/_components/fm-context';
 
-export function ALlFmPages() {
+export function AllFmPages() {
 	const {
 		fmPages,
 		fmPageSelection,

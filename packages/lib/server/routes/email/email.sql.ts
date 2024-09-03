@@ -1,11 +1,12 @@
 import { relations } from 'drizzle-orm';
-import { pgTable, text } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 import { dbId, primaryId, timestamps } from '../../../utils/sql';
-import { EmailAddresses } from '../email-domain/email-domain.sql';
+import { EmailAddresses } from '../email-address/email-address.sql';
+import { Fans } from '../fan/fan.sql';
 import { Workspaces } from '../workspace/workspace.sql';
 
-export const Emails = pgTable('Emails', {
+export const EmailTemplates = pgTable('EmailTemplates', {
 	...primaryId,
 	...timestamps,
 
@@ -13,22 +14,60 @@ export const Emails = pgTable('Emails', {
 		.notNull()
 		.references(() => Workspaces.id),
 
-	fromId: dbId('fromId').references(() => EmailAddresses.id, {
-		onUpdate: 'cascade',
-		onDelete: 'cascade',
-	}),
+	fromId: dbId('fromId')
+		.notNull()
+		.references(() => EmailAddresses.id, {
+			onUpdate: 'cascade',
+			onDelete: 'cascade',
+		}),
 
+	replyTo: text('replyTo'),
 	subject: text('subject').notNull(),
 	body: text('body').notNull(),
 });
 
-export const EmailRelations = relations(Emails, ({ one }) => ({
+export const EmailRelations = relations(EmailTemplates, ({ one }) => ({
 	from: one(EmailAddresses, {
-		fields: [Emails.fromId],
+		fields: [EmailTemplates.fromId],
 		references: [EmailAddresses.id],
 	}),
 	workspace: one(Workspaces, {
-		fields: [Emails.workspaceId],
+		fields: [EmailTemplates.workspaceId],
 		references: [Workspaces.id],
+	}),
+}));
+
+export const EmailDeliveries = pgTable('EmailDeliveries', {
+	...primaryId,
+	...timestamps,
+	workspaceId: dbId('workspaceId')
+		.notNull()
+		.references(() => Workspaces.id),
+	emailTemplateId: dbId('emailTemplateId')
+		.notNull()
+		.references(() => EmailTemplates.id),
+
+	// delivery
+	resendId: text('resendId'),
+	fanId: dbId('fanId')
+		.notNull()
+		.references(() => Fans.id),
+	status: text('status', { enum: ['scheduled', 'sent', 'failed'] }).notNull(),
+	scheduledAt: timestamp('scheduledAt'),
+	sentAt: timestamp('sentAt'),
+});
+
+export const EmailDeliveryRelations = relations(EmailDeliveries, ({ one }) => ({
+	emailTemplate: one(EmailTemplates, {
+		fields: [EmailDeliveries.emailTemplateId],
+		references: [EmailTemplates.id],
+	}),
+	workspace: one(Workspaces, {
+		fields: [EmailDeliveries.workspaceId],
+		references: [Workspaces.id],
+	}),
+	fan: one(Fans, {
+		fields: [EmailDeliveries.fanId],
+		references: [Fans.id],
 	}),
 }));

@@ -1,3 +1,4 @@
+import type { FlowState } from '@barely/lib/server/routes/flow/flow.ui.types';
 import type { z } from 'zod';
 import { useMemo } from 'react';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
@@ -10,25 +11,25 @@ import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/
 import { Form, SubmitButton } from '@barely/ui/forms';
 import { SelectField } from '@barely/ui/forms/select-field';
 
-import type { FlowState } from '~/app/[handle]/flows/[flowId]/_react-flow/flow-types';
-import { useFlowStore } from '~/app/[handle]/flows/[flowId]/_react-flow/flow-store';
+// import type { FlowState } from '~/app/[handle]/flows/[flowId]/_react-flow/flow-types';
+import { useFlowStore } from '~/app/[handle]/flows/[flowId]/_components/flow-store';
 
 const triggerFormSchema = updateFlowTriggerSchema.shape.data;
 
 const conditionOptions: {
-	value: z.infer<typeof updateFlowTriggerSchema>['data']['trigger'];
+	value: z.infer<typeof updateFlowTriggerSchema>['data']['type'];
 	label: string;
 }[] = [
 	{
-		value: 'CALL_FLOW',
+		value: 'callFlow',
 		label: 'Call Flow',
 	},
 	{
-		value: 'NEW_FAN',
+		value: 'newFan',
 		label: 'New Fan',
 	},
 	{
-		value: 'NEW_CART_ORDER',
+		value: 'newCartOrder',
 		label: 'New Cart Order',
 	},
 ];
@@ -38,11 +39,17 @@ const selector = (state: FlowState) => ({
 	updateTriggerNode: state.updateTriggerNode,
 	showTriggerModal: state.showTriggerModal,
 	setShowTriggerModal: state.setShowTriggerModal,
+	onLayout: state.onLayout,
 });
 
 export function FlowTriggerModal() {
-	const { currentNode, updateTriggerNode, showTriggerModal, setShowTriggerModal } =
-		useFlowStore(useShallow(selector));
+	const {
+		currentNode,
+		updateTriggerNode,
+		showTriggerModal,
+		setShowTriggerModal,
+		onLayout,
+	} = useFlowStore(useShallow(selector));
 
 	const currentTriggerNode = currentNode?.type === 'trigger' ? currentNode : null;
 
@@ -76,9 +83,10 @@ export function FlowTriggerModal() {
 
 	const handleSubmit = async (values: z.infer<typeof triggerFormSchema>) => {
 		if (!currentTriggerNode) return;
-		setShowTriggerModal(false);
 		updateTriggerNode(currentTriggerNode.id, values);
+		setShowTriggerModal(false);
 		form.reset();
+		setTimeout(() => onLayout('TB'), 100);
 	};
 
 	return (
@@ -92,13 +100,13 @@ export function FlowTriggerModal() {
 			<Form form={form} onSubmit={handleSubmit}>
 				<ModalBody>
 					<SelectField
-						name='trigger'
+						name='type'
 						label='Trigger'
 						options={conditionOptions}
 						control={form.control}
 					/>
 
-					{form.watch('trigger') === 'NEW_CART_ORDER' ?
+					{form.watch('type') === 'newCartOrder' ?
 						<SelectField
 							name='cartFunnelId'
 							label='Cart'

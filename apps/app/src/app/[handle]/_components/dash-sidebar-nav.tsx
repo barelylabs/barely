@@ -5,6 +5,7 @@ import type { Workspace } from '@barely/lib/server/routes/workspace/workspace.sc
 import { Fragment, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { usePathnameMatchesCurrentGroup } from '@barely/lib/hooks/use-pathname-matches-current-group';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { useAtomValue } from 'jotai';
 
@@ -58,7 +59,7 @@ export function SidebarNav(props: { workspace: Workspace }) {
 	const merchLinks: SidebarNavLink[] = [
 		{ title: 'products', icon: 'product', href: `/${handle}/products` },
 		{ title: 'carts', icon: 'cartFunnel', href: `/${handle}/carts` },
-		{ title: 'orders', icon: 'orders', href: `/${handle}/orders` },
+		{ title: 'orders', icon: 'order', href: `/${handle}/orders` },
 	];
 
 	const mediaLinks: SidebarNavLink[] = [
@@ -75,7 +76,7 @@ export function SidebarNav(props: { workspace: Workspace }) {
 	];
 
 	const otherLinks: SidebarNavLink[] = [
-		{ title: 'workflows', icon: 'workflow', href: `/${handle}/workflows` },
+		{ title: 'flows', icon: 'flow', href: `/${handle}/flows` },
 		{ title: 'settings', icon: 'settings', href: `/${handle}/settings` },
 	];
 
@@ -107,17 +108,22 @@ export function SidebarNav(props: { workspace: Workspace }) {
 		{ title: 'team', icon: 'users', href: `/${handle}/settings/team` },
 		{ title: 'apps', icon: 'apps', href: `/${handle}/settings/apps` },
 		{
-			title: 'domains',
-			icon: 'domain',
-			href: `/${handle}/settings/domains/web`,
+			title: 'email',
+			icon: 'email',
+			href: `/${handle}/settings/email/domains`,
 			links: [
-				{ title: 'web domains', href: `/${handle}/settings/domains/web` },
+				{ title: 'domains', href: `/${handle}/settings/email/domains` },
 				{
-					title: 'email domains',
-					href: `/${handle}/settings/domains/email`,
+					title: 'addresses',
+					href: `/${handle}/settings/email/addresses`,
 				},
 			],
-			hideLinksWhenNotActive: true, // Set to true to hide NavLinks when not active
+			hideLinksWhenNotActive: true,
+		},
+		{
+			title: 'domains',
+			icon: 'domain',
+			href: `/${handle}/settings/domains`,
 		},
 		{
 			title: 'remarketing',
@@ -199,9 +205,9 @@ function NavLink(props: { item: SidebarNavLink }) {
 
 function NavGroup(props: { item: SidebarNavGroup }) {
 	const NavIcon = props.item.icon ? Icon[props.item.icon] : null;
-	const pathname = usePathname();
-	const isCurrentGroup = props.item.links.some(link =>
-		usePathnameMatchesCurrentPath(link.href ?? ''),
+
+	const isCurrentGroup = usePathnameMatchesCurrentGroup(
+		props.item.links.map(link => link.href ?? ''),
 	);
 
 	const groupContent = (

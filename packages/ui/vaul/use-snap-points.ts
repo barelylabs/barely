@@ -154,7 +154,7 @@ export function useSnapPoints({
 				newIndex !== -1 &&
 				typeof snapPointsOffset[newIndex] === 'number'
 			) {
-				snapToPoint(snapPointsOffset[newIndex]!);
+				snapToPoint(snapPointsOffset[newIndex]);
 			}
 		}
 	}, [activeSnapPointProp, snapPoints, snapPointsOffset, snapToPoint]);

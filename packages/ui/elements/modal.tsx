@@ -7,7 +7,7 @@ import { useMediaQuery } from '@barely/lib/hooks/use-media-query';
 import { cn } from '@barely/lib/utils/cn';
 import * as Dialog from '@radix-ui/react-dialog';
 
-import type { IconSelection } from './icon';
+import type { IconKey } from './icon';
 import { Drawer } from '../vaul';
 import { Button } from './button';
 import { Icon } from './icon';
@@ -152,7 +152,7 @@ function Modal({
 }
 
 interface ModalHeaderProps {
-	icon?: IconSelection;
+	icon?: IconKey;
 	iconOverride?: ReactNode;
 	title?: ReactNode;
 	subtitle?: ReactNode;
@@ -164,6 +164,7 @@ function ModalHeader(props: ModalHeaderProps) {
 
 	return (
 		<div className='z-10 flex flex-col items-center justify-center gap-3 border-b border-border bg-background px-6 py-6 text-center sm:px-10 md:sticky md:top-0'>
+			{/* <div className='flex flex-row items-center justify-center gap-3'></div> */}
 			{props.iconOverride ?
 				props.iconOverride
 			: IconComponent ?

@@ -3,7 +3,7 @@ import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
 import { queryStringArraySchema } from '../../../utils/zod-helpers';
-import { EmailAddresses, EmailDomains } from './email-domain.sql';
+import { EmailDomains } from './email-domain.sql';
 
 /* EMAIL DOMAIN */
 export const insertEmailDomainSchema = createInsertSchema(EmailDomains);
@@ -38,22 +38,6 @@ export const emailDomainSearchParamsSchema = emailDomainFilterParamsSchema.exten
 
 export const selectWorkspaceEmailDomainsSchema = emailDomainFilterParamsSchema.extend({
 	handle: z.string(),
-	cursor: z.object({ id: z.string(), createdAt: z.string() }).optional(),
+	cursor: z.object({ id: z.string(), createdAt: z.coerce.date() }).optional(),
 	limit: z.coerce.number().min(1).max(100).optional().default(20),
 });
-
-/* EMAIL ADDRESS */
-export const insertEmailAddressSchema = createInsertSchema(EmailAddresses);
-export const createEmailAddressSchema = insertEmailAddressSchema
-	.omit({ id: true })
-	.partial({
-		workspaceId: true,
-	});
-export const updateEmailAddressSchema = insertEmailAddressSchema.partial().required({
-	id: true,
-});
-
-export type InsertEmailAddress = z.infer<typeof insertEmailAddressSchema>;
-export type CreateEmailAddress = z.infer<typeof createEmailAddressSchema>;
-export type UpdateEmailAddress = z.infer<typeof updateEmailAddressSchema>;
-export type EmailAddress = InferSelectModel<typeof EmailAddresses>;

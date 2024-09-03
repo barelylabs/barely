@@ -1,6 +1,7 @@
+import type { FlowState } from '@barely/lib/server/routes/flow/flow.ui.types';
 import type { z } from 'zod';
 import { useZodForm } from '@barely/lib/hooks/use-zod-form';
-import { updateFlowAction_waitSchema } from '@barely/lib/server/routes/flow/flow.schema';
+import { flowForm_waitSchema } from '@barely/lib/server/routes/flow/flow.schema';
 import { raise } from '@barely/lib/utils/raise';
 import { useShallow } from 'zustand/react/shallow';
 
@@ -9,11 +10,10 @@ import { Form, SubmitButton } from '@barely/ui/forms';
 import { NumberField } from '@barely/ui/forms/number-field';
 import { SelectField } from '@barely/ui/forms/select-field';
 
-import type { FlowState } from '../_react-flow/flow-types';
-import { useFlowStore } from '../_react-flow/flow-store';
+import { useFlowStore } from './flow-store';
 
 const unitOptions: {
-	value: z.infer<typeof updateFlowAction_waitSchema>['data']['units'];
+	value: z.infer<typeof flowForm_waitSchema>['waitForUnits'];
 	label: string;
 }[] = [
 	{ value: 'minutes', label: 'Minutes' },
@@ -28,34 +28,27 @@ const selector = (state: FlowState) => ({
 	setShowWaitModal: state.setShowWaitModal,
 });
 
-const waitFormSchema = updateFlowAction_waitSchema.shape.data;
-
 export const FlowWaitModal = () => {
 	const { currentNode, updateWaitNode, showWaitModal, setShowWaitModal } = useFlowStore(
 		useShallow(selector),
 	);
 
-	const currentWaitNode = currentNode?.type === 'wait' ? currentNode : null;
+	const currentWaitNode = currentNode?.type === 'wait' ? currentNode : undefined;
 
 	const form = useZodForm({
-		schema: waitFormSchema,
+		schema: flowForm_waitSchema,
 		values: currentWaitNode?.data,
 		resetOptions: {
 			keepDirtyValues: true,
 		},
 	});
 
-	const handleSubmit = (data: z.infer<typeof waitFormSchema>) => {
+	const handleSubmit = (data: z.infer<typeof flowForm_waitSchema>) => {
 		console.log(data);
 		setShowWaitModal(false);
 		updateWaitNode(currentWaitNode?.id ?? raise('No wait node found'), data);
 		form.reset();
 	};
-
-	// const handleCloseModal = useCallback(() => {
-	// 	setShowModal(false);
-	// 	form.reset();
-	// }, [setShowModal, form]);
 
 	return (
 		<Modal
@@ -67,10 +60,10 @@ export const FlowWaitModal = () => {
 			<ModalHeader icon='wait' title='Edit Wait Time' />
 			<Form form={form} onSubmit={handleSubmit}>
 				<div className='space-y-4 p-4'>
-					<NumberField label='Duration' name='duration' control={form.control} min={1} />
+					<NumberField label='Duration' name='waitFor' control={form.control} min={1} />
 					<SelectField
 						label='Units'
-						name='units'
+						name='waitForUnits'
 						control={form.control}
 						options={unitOptions}
 						// options={unitOptions}
