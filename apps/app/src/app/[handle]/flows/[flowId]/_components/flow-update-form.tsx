@@ -4,6 +4,7 @@ import type { AppRouterOutputs } from '@barely/lib/server/api/router';
 import type { FlowState } from '@barely/lib/server/routes/flow/flow.ui.types';
 import type { z } from 'zod';
 import { use } from 'react';
+import { useToast } from '@barely/lib/hooks/use-toast';
 import { useZodForm } from '@barely/lib/hooks/use-zod-form';
 import { api } from '@barely/lib/server/api/react';
 import { updateFlowAndNodesSchema } from '@barely/lib/server/routes/flow/flow.schema';
@@ -12,20 +13,19 @@ import {
 	getFlowTriggerFromTriggerNode,
 } from '@barely/lib/server/routes/flow/flow.utils';
 import { raise } from '@barely/lib/utils/raise';
-import { useToast } from '@barely/toast';
 import { useShallow } from 'zustand/react/shallow';
 
 import { Form, SubmitButton } from '@barely/ui/forms';
 import { TextField } from '@barely/ui/forms/text-field';
 
-import { useFlowStore } from '~/app/[handle]/flows/[flowId]/_components/flow-store';
+import { useFlowStore } from './flow-store';
 
 const selector = (state: FlowState) => ({
 	nodes: state.nodes,
 	edges: state.edges,
 });
 
-export function FlowMetadataForm(props: {
+export function FlowUpdateForm(props: {
 	initialFlow: Promise<AppRouterOutputs['flow']['byId']>;
 }) {
 	const initialFlow = use(props.initialFlow);

@@ -1,8 +1,8 @@
 import { api } from '@barely/lib/server/api/server';
 
 import { FlowBuilder } from '~/app/[handle]/flows/[flowId]/_components/flow-builder';
-import { FlowMetadataForm } from '~/app/[handle]/flows/[flowId]/_components/flow-metadata-form';
 import { FlowStoreProvider } from '~/app/[handle]/flows/[flowId]/_components/flow-store';
+import { FlowUpdateForm } from '~/app/[handle]/flows/[flowId]/_components/flow-update-form';
 
 export default function FlowsPage({
 	params,
@@ -23,7 +23,7 @@ export default function FlowsPage({
 			initialDefaultMailchimpAudienceId={defaultMailchimpAudienceId}
 		>
 			<div className='flex flex-col gap-8 xl:flex-row'>
-				<FlowMetadataForm initialFlow={initialFlow} />
+				<FlowUpdateForm initialFlow={initialFlow} />
 				<div className='flex w-full items-center justify-center rounded-xl border border-border bg-border/25 p-10'>
 					<FlowBuilder />
 				</div>
