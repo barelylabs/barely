@@ -9,7 +9,8 @@ import { cn } from '@barely/lib/utils/cn';
 
 import { TailwindIndicator } from '@barely/ui/components/tailwind-indicator';
 import { Container } from '@barely/ui/elements/container';
-import { Toaster } from '@barely/ui/elements/toaster';
+
+// import { Toaster } from '@barely/ui/elements/toaster';
 
 import Providers from './providers';
 
@@ -57,7 +58,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
 				<Providers headers={headers()}>
 					<Container className='max-w-full px-0 py-0'>{children}</Container>
 				</Providers>
-				<Toaster />
+				{/* <Toaster /> */}
 				<TailwindIndicator />
 			</body>
 		</html>
