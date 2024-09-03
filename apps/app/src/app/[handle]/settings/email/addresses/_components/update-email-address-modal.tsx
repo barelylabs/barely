@@ -71,7 +71,7 @@ export function UpdateEmailAddressModal() {
 			<ModalHeader icon='email' title='Update Email Address' />
 			<Form form={form} onSubmit={handleSubmit}>
 				<ModalBody>
-                    <Text variant='lg/semibold'>{lastSelectedEmailAddress?.email}</Text>
+					<Text variant='lg/semibold'>{lastSelectedEmailAddress?.email}</Text>
 					<TextField
 						control={control}
 						name='replyTo'
