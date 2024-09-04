@@ -24,7 +24,7 @@ import { playlistPitchCostInDollars } from '../../../utils/campaign';
 // import { APP_BASE_URL } from "../utils/constants";
 
 import { newId } from '../../../utils/id';
-import { fullNameToFirstAndLast } from '../../../utils/name';
+import { getFullNameFromFirstAndLast } from '../../../utils/name';
 import { sendText } from '../../../utils/sms';
 import { sqlAnd } from '../../../utils/sql';
 import { getAbsoluteUrl } from '../../../utils/url';
@@ -54,7 +54,7 @@ export async function createPitchCheckoutLink(props: {
 				email: props.user.email,
 				name:
 					props.user.fullName ??
-					fullNameToFirstAndLast(props.user.firstName, props.user.lastName),
+					getFullNameFromFirstAndLast(props.user.firstName, props.user.lastName),
 				phone: props.user.phone ?? undefined,
 			});
 

@@ -6,7 +6,7 @@ import { Text } from '@barely/ui/elements/typography';
 
 export function LinkDomainPurchaseSuggestions() {
 	const [suggestedDomains] =
-		api.domain.getSuggestedLinkDomainsToPurchase.useSuspenseQuery('properyouth');
+		api.webDomain.getSuggestedLinkDomainsToPurchase.useSuspenseQuery('properyouth');
 
 	return (
 		<div className='grid grid-flow-row grid-cols-3 gap-3'>

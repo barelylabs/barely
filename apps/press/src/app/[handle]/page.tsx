@@ -83,7 +83,7 @@ export default async function PressPage({ params }: { params: { handle: string }
 			},
 	];
 
-	const filteredSocialStats = socialStats.filter(v => !!v) as SocialStat[]; // i don't like this
+	const filteredSocialStats = socialStats.filter(v => !!v);
 
 	return (
 		<>

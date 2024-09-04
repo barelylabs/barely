@@ -3,8 +3,8 @@ import { useMemo } from 'react';
 import { api } from '../server/api/react';
 import { BARELY_SHORTLINK_DOMAIN } from '../server/routes/link/link.constants';
 
-export function useDomains() {
-	const { data: domains, error, isLoading } = api.domain.byWorkspace.useQuery();
+export function useWebDomains() {
+	const { data: domains, error, isLoading } = api.webDomain.byWorkspace.useQuery();
 
 	const linkDomains = useMemo(() => {
 		const _linkDomains = domains?.filter(d => d.type === 'link') ?? [];

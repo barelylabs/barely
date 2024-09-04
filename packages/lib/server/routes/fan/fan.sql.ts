@@ -17,6 +17,8 @@ export const Fans = pgTable('Fans', {
 	smsMarketingOptIn: boolean('smsMarketingOptIn').default(false).notNull(),
 
 	// contact info
+	firstName: varchar('firstName', { length: 255 }),
+	lastName: varchar('lastName', { length: 255 }),
 	fullName: varchar('fullName', { length: 255 }).notNull(),
 	email: varchar('email', { length: 255 }).notNull(),
 	phoneNumber: varchar('phoneNumber', { length: 255 }),

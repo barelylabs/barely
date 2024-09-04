@@ -1,5 +1,5 @@
 import { TRPCError } from '@trpc/server';
-import { and, desc, eq, inArray, lt, or } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNull, lt, or } from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { InsertLink } from './link.schema';
@@ -45,7 +45,7 @@ export const linkRouter = createTRPCRouter({
 							sqlStringContains(Links.key, search),
 							sqlStringContains(Links.url, search),
 						),
-					showArchived ? undefined : eq(Links.archived, false),
+					showArchived ? undefined : isNull(Links.archivedAt),
 					!!cursor &&
 						or(
 							lt(Links.createdAt, cursor.createdAt),
@@ -173,7 +173,7 @@ export const linkRouter = createTRPCRouter({
 		.mutation(async ({ ctx, input }) => {
 			await ctx.db.http
 				.update(Links)
-				.set({ archived: true })
+				.set({ archivedAt: new Date() })
 				.where(and(eq(Links.workspaceId, ctx.workspace.id), inArray(Links.id, input)));
 		}),
 

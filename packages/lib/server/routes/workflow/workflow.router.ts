@@ -56,7 +56,7 @@ export const workflowRouter = createTRPCRouter({
 							lt(Workflows.createdAt, cursor.createdAt),
 							and(eq(Workflows.createdAt, cursor.createdAt), gt(Workflows.id, cursor.id)),
 						),
-					!showArchived && eq(Workflows.archived, false),
+					!showArchived && isNull(Workflows.archivedAt),
 					!showDeleted && isNull(Workflows.deletedAt),
 				]),
 				orderBy: [desc(Workflows.createdAt), asc(Workflows.id)],
@@ -210,9 +210,7 @@ export const workflowRouter = createTRPCRouter({
 		.mutation(async ({ input, ctx }) => {
 			const archivedWorkflows = await ctx.db.http
 				.update(Workflows)
-				.set({
-					archived: true,
-				})
+				.set({ archivedAt: new Date() })
 				.where(
 					and(eq(Workflows.workspaceId, ctx.workspace.id), inArray(Workflows.id, input)),
 				)

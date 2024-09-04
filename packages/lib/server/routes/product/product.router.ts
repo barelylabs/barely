@@ -194,7 +194,7 @@ export const productRouter = createTRPCRouter({
 		.mutation(async ({ input, ctx }) => {
 			const archivedProduct = await ctx.db.http
 				.update(Products)
-				.set({ archived: true })
+				.set({ archivedAt: new Date() })
 				.where(
 					and(eq(Products.workspaceId, ctx.workspace.id), inArray(Products.id, input)),
 				)

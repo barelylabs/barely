@@ -1,7 +1,7 @@
 import type { SQL } from 'drizzle-orm';
 import type { PgColumn } from 'drizzle-orm/pg-core';
 import { and, sql } from 'drizzle-orm';
-import { timestamp, varchar } from 'drizzle-orm/pg-core';
+import { customType, timestamp, varchar } from 'drizzle-orm/pg-core';
 
 import { raise } from './raise';
 
@@ -20,22 +20,25 @@ export const id = {
 };
 
 export const timestamps = {
-	createdAt: timestamp('created_at', {
-		// mode: 'string',
-	})
-		.notNull()
-		.defaultNow(),
+	createdAt: timestamp('created_at').notNull().defaultNow(),
 
-	updatedAt: timestamp('updated_at', {
-		// mode: 'string',
-	})
-		.notNull()
-		.defaultNow(),
+	updatedAt: timestamp('updated_at').notNull().defaultNow(),
 
-	deletedAt: timestamp('deleted_at', {
-		// mode: 'string',
-	}),
+	deletedAt: timestamp('deleted_at'),
+
+	archivedAt: timestamp('archived_at'),
 };
+
+// https://orm.drizzle.team/docs/custom-types#common-way-of-defining-custom-types
+export const customJsonb = <TData>(name: string) =>
+	customType<{ data: TData; driverData: string }>({
+		dataType() {
+			return 'jsonb';
+		},
+		toDriver(value: TData): string {
+			return JSON.stringify(value);
+		},
+	})(name);
 
 export const lexorank = {
 	lexorank: varchar('lexorank', { length: 255 }).notNull(),
@@ -58,7 +61,7 @@ export const sqlStringEndsWith = (column: PgColumn, value: string) =>
 export function sqlAnd(conditions: (SQL | false | undefined | null)[]) {
 	const filteredConditions = conditions.filter(
 		c => c !== undefined && c !== false && c !== null,
-	) as SQL[];
+	);
 	const _and = filteredConditions.length > 0 ? and(...filteredConditions) : undefined;
 
 	if (_and === undefined) {

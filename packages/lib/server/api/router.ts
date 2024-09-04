@@ -8,8 +8,13 @@ import { cartFunnelRouter } from '../routes/cart-funnel/cart-funnel.router';
 import { cartOrderRouter } from '../routes/cart-order/cart-order.router';
 import { cartRouter } from '../routes/cart/cart.router';
 import { domainRouter } from '../routes/domain/domain.router';
+import { emailAddressRouter } from '../routes/email-address/email-address.router';
+import { emailDomainRouter } from '../routes/email-domain/email-domain.router';
+import { emailRouter } from '../routes/email/email.router';
 import { eventRouter } from '../routes/event/event.router';
+import { fanRouter } from '../routes/fan/fan.router';
 import { fileRouter } from '../routes/file/file.router';
+import { flowRouter } from '../routes/flow/flow.router';
 import { fmRouter } from '../routes/fm/fm.router';
 import { formResponseRouter } from '../routes/form/form-response.router';
 import { genreRouter } from '../routes/genre/genre.router';
@@ -43,9 +48,13 @@ const appRouter = createTRPCRouter({
 	cart: cartRouter,
 	cartFunnel: cartFunnelRouter,
 	cartOrder: cartOrderRouter,
-	domain: domainRouter,
+	email: emailRouter,
+	emailAddress: emailAddressRouter,
+	emailDomain: emailDomainRouter,
 	event: eventRouter,
+	fan: fanRouter,
 	file: fileRouter,
+	flow: flowRouter,
 	fm: fmRouter,
 	formResponse: formResponseRouter,
 	genre: genreRouter,
@@ -62,6 +71,7 @@ const appRouter = createTRPCRouter({
 	spotify: spotifyRouter,
 	stat: statRouter,
 	stripeConnect: stripeConnectRouter,
+	webDomain: domainRouter,
 	workflow: workflowRouter,
 	workspace: workspaceRouter,
 	workspaceInvite: workspaceInviteRouter,

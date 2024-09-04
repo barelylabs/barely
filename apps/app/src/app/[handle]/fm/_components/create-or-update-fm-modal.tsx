@@ -63,7 +63,6 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 		},
 		handleCreateItem: async d => {
 			await createFm(d);
-			d;
 		},
 		handleUpdateItem: async d => {
 			await updateFm(d);

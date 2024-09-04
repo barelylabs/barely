@@ -185,7 +185,7 @@ export const landingPageRouter = createTRPCRouter({
 		.mutation(async ({ input, ctx }) => {
 			const updatedLandingPage = await ctx.db.http
 				.update(LandingPages)
-				.set({ archived: true })
+				.set({ archivedAt: new Date() })
 				.where(
 					and(
 						eq(LandingPages.workspaceId, ctx.workspace.id),

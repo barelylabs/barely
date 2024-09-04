@@ -13,19 +13,25 @@ import { Text } from '@barely/ui/elements/typography';
 
 import { punycode } from '@barely/utils/punycode';
 
-import { DomainConfiguration } from '~/app/[handle]/settings/domains/domain-configuration';
+import { DomainConfiguration } from '~/app/[handle]/settings/domains/_components/web-domain-configuration';
 import {
 	editDomainAtom,
 	showDomainModalAtom,
-} from '~/app/[handle]/settings/domains/domain-modal';
+} from '~/app/[handle]/settings/domains/_components/web-domain-modal';
+
+// import { DomainConfiguration } from '~/app/[handle]/settings/domains/web/_components/web-domain-configuration';
+// import {
+// 	editDomainAtom,
+// 	showDomainModalAtom,
+// } from '~/app/[handle]/settings/domains/web/_components/web-domain-modal';
 
 export function DomainCard(props: { domain: Domain }) {
-	const { data: domain } = api.domain.byDomain.useQuery(props.domain.domain, {
+	const { data: domain } = api.webDomain.byDomain.useQuery(props.domain.domain, {
 		initialData: props.domain,
 	});
 
 	const { data: domainVerification, isFetching: fetchingDomainVerification } =
-		api.domain.verifyOnVercel.useQuery(props.domain.domain);
+		api.webDomain.verifyOnVercel.useQuery(props.domain.domain);
 
 	const setEditDomain = useSetAtom(editDomainAtom);
 	const showDomainModal = useSetAtom(showDomainModalAtom);

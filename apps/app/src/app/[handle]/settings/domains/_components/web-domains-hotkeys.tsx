@@ -3,7 +3,9 @@
 import { useCallback, useEffect } from 'react';
 import { useSetAtom } from 'jotai';
 
-import { showDomainModalAtom } from '~/app/[handle]/settings/domains/domain-modal';
+import { showDomainModalAtom } from '~/app/[handle]/settings/domains/_components/web-domain-modal';
+
+// import { showDomainModalAtom } from '~/app/[handle]/settings/domains/web/_components/web-domain-modal';
 
 export function DomainsHotKeys() {
 	const setShowDomainModal = useSetAtom(showDomainModalAtom);

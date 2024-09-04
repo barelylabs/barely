@@ -18,7 +18,7 @@
 	},
 	"devDependencies": {
 		"@barely/tsconfig": "workspace:*",
-		"typescript": "^5.4.3"
+		"typescript": "^5.5.4"
 	},
 	"prettier": "@barely/prettier-config"
 }

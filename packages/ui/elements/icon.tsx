@@ -19,6 +19,7 @@ import {
 	CashRegister,
 	CassetteTape,
 	Disc,
+	Envelope,
 	Hoodie,
 	MetaLogo,
 	PlayCircle,
@@ -64,6 +65,7 @@ import {
 	CircleUserRound,
 	Clipboard,
 	ClipboardCheck,
+	Clock,
 	Code,
 	Code2,
 	Coins,
@@ -152,6 +154,7 @@ import {
 	SkipBack,
 	SkipForward,
 	Sliders,
+	Split,
 	Square,
 	Star,
 	StarHalf,
@@ -162,11 +165,13 @@ import {
 	Tags,
 	Target,
 	Terminal,
+	TestTubes,
 	ThumbsDown,
 	ThumbsUp,
 	Trash,
 	Triangle,
 	Tv,
+	Undo,
 	UploadCloud,
 	User,
 	UserCircle2,
@@ -190,6 +195,7 @@ import {
 	FaFedex,
 	FaGithub,
 	FaInstagram,
+	FaMailchimp,
 	FaSpotify,
 	FaTiktok,
 	FaTwitch,
@@ -235,6 +241,7 @@ export const Icon = {
 	bio: UserCircle2,
 	bold: Bold,
 	bot: Bot,
+	branch: Split,
 	broadcast: Radio,
 
 	calendar: CalendarBlank,
@@ -278,9 +285,12 @@ export const Icon = {
 
 	edit: Edit,
 	ellipsis: MoreVertical,
+	email: Envelope,
 	externalLink: ExternalLink,
 	eyeDropper: EyeDropperIcon,
 
+	fan: User,
+	fans: Users,
 	fedex: FaFedex,
 	file: File,
 	fileAudio: FileAudio,
@@ -290,6 +300,7 @@ export const Icon = {
 	flame: Flame,
 	flipHorizontal: FlipHorizontal,
 	flipVertical: FlipVertical,
+	flow: Zap,
 	fm: RadioTower,
 	fmPage: RadioTower,
 	focus: Focus,
@@ -332,6 +343,7 @@ export const Icon = {
 
 	magic: SparklesIcon,
 	magnet: Magnet,
+	mailchimp: FaMailchimp,
 	media: FileVideo,
 	megaphone: Megaphone,
 	meta: MetaLogo,
@@ -348,7 +360,7 @@ export const Icon = {
 
 	newspaper: Newspaper,
 
-	orders: CashRegister,
+	order: CashRegister,
 
 	page: File,
 	palette: Palette,
@@ -395,6 +407,7 @@ export const Icon = {
 	socials: ExternalLink,
 	spark: Zap,
 	spinner: Loader2,
+	splitTest: TestTubes,
 	square: Square,
 	star: Star,
 	starHalf: StarHalf,
@@ -414,9 +427,11 @@ export const Icon = {
 	track: Music,
 	trash: Trash,
 	triangle: Triangle,
+	trigger: Zap,
 	tshirt: TShirt,
 	tv: Tv,
 
+	undo: Undo,
 	upload: UploadCloud,
 	ups: FaUps,
 	usps: FaUsps,
@@ -428,6 +443,7 @@ export const Icon = {
 	video: Video,
 	vinyl: VinylRecord,
 
+	wait: Clock,
 	wand: Wand2,
 	warning: AlertTriangle,
 	watch: Watch,
@@ -454,7 +470,7 @@ export const Icon = {
 
 export type IconType = LucideIcon | ReactIcon;
 
-export type IconSelection = keyof typeof Icon;
+export type IconKey = keyof typeof Icon;
 
 export function DeviceIcon({
 	display,

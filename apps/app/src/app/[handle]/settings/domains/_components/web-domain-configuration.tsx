@@ -6,8 +6,8 @@ import { getSubdomain } from '@barely/utils/domain';
 
 export function DomainConfiguration(props: {
 	status: DomainStatus;
-	domainResponse: AppRouterOutputs['domain']['verifyOnVercel']['vercelDomainResponse'];
-	configResponse: AppRouterOutputs['domain']['verifyOnVercel']['vercelConfigResponse'];
+	domainResponse: AppRouterOutputs['webDomain']['verifyOnVercel']['vercelDomainResponse'];
+	configResponse: AppRouterOutputs['webDomain']['verifyOnVercel']['vercelConfigResponse'];
 }) {
 	const { status, domainResponse, configResponse } = props;
 
