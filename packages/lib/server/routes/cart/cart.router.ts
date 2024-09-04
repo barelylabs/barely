@@ -24,7 +24,7 @@ import {
 } from './cart.fns';
 import { updateCheckoutCartFromCheckoutSchema } from './cart.schema';
 import { Carts } from './cart.sql';
-import { getAmountsForCheckout } from './cart.utils';
+import { getAmountsForCheckout, getFeeAmountForCheckout } from './cart.utils';
 
 export const cartRouter = createTRPCRouter({
 	create: publicProcedure
@@ -195,7 +195,13 @@ export const cartRouter = createTRPCRouter({
 			// we need to update the paymentIntent amount
 			await stripe.paymentIntents.update(
 				stripePaymentIntentId,
-				{ amount: amounts.orderAmount },
+				{
+					amount: amounts.orderAmount,
+					application_fee_amount: getFeeAmountForCheckout({
+						amount: amounts.orderProductAmount,
+						workspace: funnel.workspace,
+					}),
+				},
 				{ stripeAccount: stripeAccount ?? raise('stripeAccount not found') },
 			);
 
@@ -249,6 +255,10 @@ export const cartRouter = createTRPCRouter({
 			const paymentIntentRes = await stripe.paymentIntents.create(
 				{
 					amount: upsellProductAmount + upsellShippingAmount,
+					application_fee_amount: getFeeAmountForCheckout({
+						amount: upsellProductAmount,
+						workspace: funnel.workspace,
+					}),
 					currency: 'usd',
 					customer: cart.fan?.stripeCustomerId ?? undefined,
 					payment_method: stripePaymentMethodId,
