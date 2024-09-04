@@ -104,19 +104,19 @@ export const emailDomainRouter = createTRPCRouter({
 				),
 			});
 
-			console.log('domain', domain);
-
 			if (!domain) {
 				throw new Error('Domain not found');
 			}
 
-			if (domain.status !== 'pending' && !input.force) {
-				// if the domain is already verified and we're not forcing a re-verification, return the domain
+			// if the domain is already verified and we're not forcing a re-verification, return the domain
+			if (domain.status === 'verified' && !input.force) {
 				return domain;
 			}
 
+			// if we're not forcing a re-verification, check if the domain is already verified on Resend
 			if (!input.force) {
 				const currentDomainRes = await resend.domains.get(domain.resendId);
+
 				if (currentDomainRes.data?.status === 'verified') {
 					const updatedDomain = await ctx.db.pool
 						.update(EmailDomains)
@@ -130,37 +130,19 @@ export const emailDomainRouter = createTRPCRouter({
 				}
 			}
 
+			/**
+			 * we're either forcing a re-verification or the domain is not verified on Resend.
+			 * in either case, we need to update the domain to pending and trigger a verification
+			 */
+
+			await ctx.db.pool
+				.update(EmailDomains)
+				.set({
+					status: 'pending',
+				})
+				.where(eq(EmailDomains.id, domain.id));
+
 			await tasks.trigger<typeof verifyEmailDomain>('verify-email-domain', domain);
-
-			// const verifyRes = await resend.domains.verify(domain.resendId);
-
-			// if (verifyRes.error) {
-			// 	throw new Error(verifyRes.error.message);
-			// } else if (!verifyRes.data) {
-			// 	throw new Error('No data returned from Resend');
-			// }
-
-			// // await wait(15 * 1000) // wait for 15 seconds to allow the domain to be verified
-
-			// const updatedDomainRes = await resend.domains.get(domain.resendId);
-
-			// console.log('updatedDomainRes', updatedDomainRes);
-			// console.log('updatedDomainRes.records', updatedDomainRes.data?.records);
-
-			// if (!updatedDomainRes?.data) {
-			// 	throw new Error('No data returned from Resend');
-			// }
-
-			// const updatedDomain = await ctx.db.pool
-			// 	.update(EmailDomains)
-			// 	.set({
-			// 		status: updatedDomainRes.data.status,
-			// 		records: updatedDomainRes.data.records,
-			// 	})
-			// 	.where(eq(EmailDomains.id, domain.id))
-			// 	.returning();
-
-			// return updatedDomain;
 		}),
 
 	byName: workspaceQueryProcedure.input(z.string()).query(async ({ ctx, input }) => {
