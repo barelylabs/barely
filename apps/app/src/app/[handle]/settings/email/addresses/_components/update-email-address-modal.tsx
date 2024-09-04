@@ -74,6 +74,12 @@ export function UpdateEmailAddressModal() {
 					<Text variant='lg/semibold'>{lastSelectedEmailAddress?.email}</Text>
 					<TextField
 						control={control}
+						name='defaultFriendlyName'
+						label='Friendly Name (optional)'
+						placeholder='My Name'
+					/>
+					<TextField
+						control={control}
 						name='replyTo'
 						label='Reply to (optional)'
 						placeholder='me@gmail.com'

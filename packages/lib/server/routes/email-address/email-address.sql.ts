@@ -21,8 +21,10 @@ export const EmailAddresses = pgTable(
 		domainId: dbId('domainId')
 			.notNull()
 			.references(() => EmailDomains.id),
-		default: boolean('default').notNull().default(false),
 		replyTo: varchar('replyTo', { length: 256 }),
+
+		defaultFriendlyName: varchar('defaultFriendlyName', { length: 256 }),
+		default: boolean('default').notNull().default(false),
 	},
 	table => ({
 		unique: unique().on(table.username, table.domainId),

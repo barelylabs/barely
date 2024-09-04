@@ -343,6 +343,7 @@ export async function sendCartReceiptEmail(cart: ReceiptCart) {
 
 	await sendEmail({
 		from: 'orders@barelycart.email',
+		fromFriendlyName: cart.funnel.workspace.name,
 		to: cart.fan.email,
 		bcc: ['adam@barely.io', cart.funnel.workspace.cartSupportEmail ?? ''].filter(
 			s => s.length > 0,

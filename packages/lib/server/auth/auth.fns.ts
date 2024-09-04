@@ -130,7 +130,8 @@ export async function sendLoginEmail(props: { email: string; callbackUrl?: strin
 	});
 
 	const emailRes = await sendEmail({
-		from: 'barely.io <support@barely.io>',
+		from: 'support@barely.io',
+		fromFriendlyName: 'Barely',
 		to: props.email,
 		subject: 'Barely Login Link',
 		type: 'transactional',
