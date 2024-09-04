@@ -1,7 +1,6 @@
 import { resend } from '@barely/email';
 import { tasks } from '@trigger.dev/sdk/v3';
 import { TRPCError } from '@trpc/server';
-import { TRPCError } from '@trpc/server';
 import { and, asc, desc, eq, gt, lt, or } from 'drizzle-orm';
 import { z } from 'zod';
 
@@ -154,18 +153,6 @@ export const emailDomainRouter = createTRPCRouter({
 				.set({
 					status: currentDomainRes.data.status,
 					records: currentDomainRes.data.records,
-				})
-				.where(eq(EmailDomains.id, domain.id));
-
-			/**
-			 * we're either forcing a re-verification or the domain is not verified on Resend.
-			 * in either case, we need to update the domain to pending and trigger a verification
-			 */
-
-			await ctx.db.pool
-				.update(EmailDomains)
-				.set({
-					status: 'pending',
 				})
 				.where(eq(EmailDomains.id, domain.id));
 

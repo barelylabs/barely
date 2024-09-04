@@ -41,7 +41,7 @@ export const verifyEmailDomain = task({
 					records: updatedDomainRes.data.records,
 				})
 				.where(eq(EmailDomains.id, domain.id));
-			// todo: send pusher event to invalidate emailDomain query cache
+			// todo: send pusher event to invalidate emailDomain query cache on client
 
 			if (updatedDomainRes.data.status === 'verified') {
 				logger.info(`Email domain ${domain.id} verified successfully`);
@@ -49,7 +49,7 @@ export const verifyEmailDomain = task({
 			}
 
 			if (updatedDomainRes.data.status === 'failed') {
-				logger.warn(`Email domain ${domain.id} not verified after 24 hours`);
+				logger.warn(`Email domain ${domain.id} failed to verify`);
 				attempt = maxAttempts;
 			}
 
