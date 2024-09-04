@@ -1,5 +1,6 @@
 import { resend } from '@barely/email';
 import { tasks } from '@trigger.dev/sdk/v3';
+import { TRPCError } from '@trpc/server';
 import { and, asc, desc, eq, gt, lt, or } from 'drizzle-orm';
 import { z } from 'zod';
 
@@ -18,8 +19,6 @@ import {
 } from './email-domain.schema';
 import { EmailDomains } from './email-domain.sql';
 
-// import type {verifyEmailDomain} from '../'
-
 export const emailDomainRouter = createTRPCRouter({
 	create: privateProcedure
 		.input(createEmailDomainSchema)
@@ -31,8 +30,30 @@ export const emailDomainRouter = createTRPCRouter({
 			});
 
 			if (domainRes.error) {
-				throw new Error(domainRes.error.message);
-			} else if (!domainRes.data) {
+				switch (domainRes.error.name) {
+					case 'validation_error': {
+						throw new TRPCError({
+							code: 'FORBIDDEN',
+							message: `Resend validation error: ${domainRes.error.message}`,
+						});
+					}
+
+					case 'rate_limit_exceeded': {
+						throw new TRPCError({
+							code: 'TOO_MANY_REQUESTS',
+							message: `Resend rate limit exceeded: ${domainRes.error.message}`,
+						});
+					}
+					default: {
+						throw new TRPCError({
+							code: 'INTERNAL_SERVER_ERROR',
+							message: `Resend error: ${domainRes.error.name} - ${domainRes.error.message}`,
+						});
+					}
+				}
+			}
+
+			if (!domainRes.data) {
 				throw new Error('No data returned from Resend');
 			}
 
