@@ -72,20 +72,23 @@ export function CreateEmailAddressModal() {
 			<Form form={form} onSubmit={handleSubmit}>
 				<ModalBody>
 					<div className='flex flex-row gap-1'>
-						<TextField
-							control={control}
-							name='username'
-							label='Username'
-							placeholder='user'
-							className='w-1/2'
-						/>
-						<SelectField
-							control={control}
-							name='domainId'
-							label='Domain'
-							options={domainOptions}
-							className='w-1/2'
-						/>
+						<div className='w-full flex-grow'>
+							<TextField
+								control={control}
+								name='username'
+								label='Username'
+								placeholder='user'
+							/>
+						</div>
+						<div className='min-w-1/2 w-full flex-grow'>
+							<SelectField
+								control={control}
+								name='domainId'
+								label='Domain'
+								options={domainOptions}
+								className='flex-grow'
+							/>
+						</div>
 					</div>
 
 					<TextField
