@@ -34,20 +34,6 @@ export const verifyEmailDomain = task({
 				throw new Error('No data returned from Resend');
 			}
 
-			if (updatedDomainRes.data.status === 'verified') {
-				await dbHttp
-					.update(EmailDomains)
-					.set({
-						status: updatedDomainRes.data.status,
-						records: updatedDomainRes.data.records,
-					})
-					.where(eq(EmailDomains.id, domain.id));
-
-				logger.info(`Email domain ${domain.id} verified successfully`);
-				// todo: send pusher event to invalidate emailDomain query cache
-				return;
-			}
-
 			await dbHttp
 				.update(EmailDomains)
 				.set({
@@ -56,6 +42,11 @@ export const verifyEmailDomain = task({
 				})
 				.where(eq(EmailDomains.id, domain.id));
 			// todo: send pusher event to invalidate emailDomain query cache
+
+			if (updatedDomainRes.data.status === 'verified') {
+				logger.info(`Email domain ${domain.id} verified successfully`);
+				return;
+			}
 
 			if (updatedDomainRes.data.status === 'failed') {
 				logger.warn(`Email domain ${domain.id} not verified after 24 hours`);
