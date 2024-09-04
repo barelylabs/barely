@@ -3,8 +3,9 @@
 import type { AppRouterOutputs } from '@barely/lib/server/api/router';
 import type { FlowState } from '@barely/lib/server/routes/flow/flow.ui.types';
 import type { z } from 'zod';
-import { use } from 'react';
+import { use, useState } from 'react';
 import { useToast } from '@barely/lib/hooks/use-toast';
+import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { useZodForm } from '@barely/lib/hooks/use-zod-form';
 import { api } from '@barely/lib/server/api/react';
 import { updateFlowAndNodesSchema } from '@barely/lib/server/routes/flow/flow.schema';
@@ -15,7 +16,11 @@ import {
 import { raise } from '@barely/lib/utils/raise';
 import { useShallow } from 'zustand/react/shallow';
 
+import { Button } from '@barely/ui/elements/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/elements/popover';
+import { Separator } from '@barely/ui/elements/separator';
 import { Form, SubmitButton } from '@barely/ui/forms';
+import { SelectField } from '@barely/ui/forms/select-field';
 import { TextField } from '@barely/ui/forms/text-field';
 
 import { useFlowStore } from './flow-store';
@@ -28,8 +33,9 @@ const selector = (state: FlowState) => ({
 export function FlowUpdateForm(props: {
 	initialFlow: Promise<AppRouterOutputs['flow']['byId']>;
 }) {
-	const initialFlow = use(props.initialFlow);
+	const { toast } = useToast();
 
+	const initialFlow = use(props.initialFlow);
 	const { nodes, edges } = useFlowStore(useShallow(selector));
 
 	const form = useZodForm({
@@ -46,8 +52,6 @@ export function FlowUpdateForm(props: {
 			keepDirtyValues: true,
 		},
 	});
-
-	const { toast } = useToast();
 
 	const { mutateAsync: updateFlow } = api.flow.update.useMutation({
 		onSuccess: () => {
@@ -89,22 +93,84 @@ export function FlowUpdateForm(props: {
 		return console.log('res', res);
 	};
 
+	const { mutate: triggerTestFlow } = api.flow.triggerTestFlow.useMutation({
+		onSuccess: () => {
+			setTestPopoverOpen(false);
+			toast('Test flow triggered');
+		},
+	});
+	const [testPopoverOpen, setTestPopoverOpen] = useState(false);
+
+	const handleTriggerTestFlow = async (
+		data: z.infer<typeof updateFlowAndNodesSchema>,
+	) => {
+		if (!data.testFanId) return toast('Please select a fan');
+
+		triggerTestFlow({
+			flowId: data.id,
+			fanId: data.testFanId,
+		});
+	};
+
+	const { handle } = useWorkspace();
+	const { data: fanOptions } = api.fan.byWorkspace.useQuery(
+		{ handle, limit: 20 },
+		{
+			select: data =>
+				data.fans.map(fan => ({
+					label: `${fan.fullName} - ${fan.email}`,
+					value: fan.id,
+				})),
+		},
+	);
+
 	return (
 		<div className='flex w-full max-w-64 flex-col gap-4'>
 			<Form form={form} onSubmit={handleSubmit}>
-				<TextField
-					name='name'
-					label='Flow Name'
-					control={form.control}
-					placeholder='Flow Name'
-				/>
-				<TextField
-					name='description'
-					label='Description'
-					control={form.control}
-					placeholder='Flow Description'
-				/>
-				<SubmitButton fullWidth>Save</SubmitButton>
+				<div className='flex flex-col gap-4'>
+					<TextField
+						name='name'
+						label='Flow Name'
+						control={form.control}
+						placeholder='Flow Name'
+					/>
+					<TextField
+						name='description'
+						label='Description'
+						control={form.control}
+						placeholder='Flow Description'
+					/>
+					<SubmitButton fullWidth>Save</SubmitButton>
+
+					<Separator className='my-4' />
+
+					<div className='mb-4 flex w-full flex-row'>
+						<Popover open={testPopoverOpen} onOpenChange={setTestPopoverOpen}>
+							<PopoverTrigger asChild>
+								<Button look='outline' fullWidth size='sm'>
+									Trigger Test Flow
+								</Button>
+							</PopoverTrigger>
+							<PopoverContent className='w-80'>
+								<div className='space-y-4'>
+									<h4 className='font-medium leading-none'>Trigger Test Flow</h4>
+									<SelectField
+										label='Select Fan'
+										name='testFanId'
+										control={form.control}
+										options={fanOptions ?? []}
+									/>
+									<Button
+										onClick={() => handleTriggerTestFlow(form.getValues())}
+										fullWidth
+									>
+										Trigger Test Flow
+									</Button>
+								</div>
+							</PopoverContent>
+						</Popover>
+					</div>
+				</div>
 			</Form>
 		</div>
 	);

@@ -2,11 +2,14 @@ import type { MDXRemoteProps } from 'next-mdx-remote/rsc';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { Button, Heading, Link, Text } from '@react-email/components';
+// import { MDXRemote } from 'next-mdx-remote';
 import { MDXRemote } from 'next-mdx-remote/rsc';
+
+// import { serialize } from 'next-mdx-remote/serialize';
 
 import type { EmailVariableName } from './email.constants';
 
-export function renderMarkdownToReactEmail(props: {
+export async function renderMarkdownToReactEmail(props: {
 	subject: string;
 	body: string;
 	variables: Record<EmailVariableName, string>;
@@ -49,18 +52,16 @@ export function renderMarkdownToReactEmail(props: {
 		),
 	};
 
+	// const mdxSource = await serialize(bodyWithVars);
+	const awaitedBody = await MDXRemote({
+		source: bodyWithVars,
+		components,
+	});
+
 	return {
 		subject: subjectWithVars,
-
-		reactBody: <MDXRemote source={bodyWithVars} components={components} />,
+		// reactBody: <MDXRemote {...mdxSource} components={components} />,
+		// reactBody: <MDXRemote source={bodyWithVars} components={components} />,
+		reactBody: awaitedBody,
 	};
-
-	// return (<MDXRemote source={bodyWithVars} components={components} />)
-
-	// return (
-	// 	<>
-	// 		<Heading>{subjectWithVars}</Heading>
-
-	// 	</>
-	// );
 }

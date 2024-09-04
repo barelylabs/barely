@@ -1,6 +1,6 @@
 import type { z } from 'zod';
 
-import type { Email } from '../email/email.schema';
+import type { EmailTemplate } from '../email/email.schema';
 import type {
 	FlowAction,
 	flowForm_sendEmailSchema,
@@ -37,7 +37,7 @@ export function getTriggerNodeFromFlowTrigger(
 
 export function getActionNodeFromFlowAction(
 	node: InsertFlowAction_NotStrict & {
-		email?: z.infer<typeof flowForm_sendEmailSchema> | null;
+		emailTemplate?: z.infer<typeof flowForm_sendEmailSchema> | null;
 	},
 	position?: { x: number; y: number },
 ): FlowNode {
@@ -66,12 +66,14 @@ export function getActionNodeFromFlowAction(
 				deletable: false,
 			} satisfies BooleanNode;
 		case 'sendEmail': {
-			const email = node.email ?? raise(`No email found for action ${node.id}`);
+			const emailTemplate =
+				node.emailTemplate ??
+				raise(`getActionNodeFromFlowAction // No email found for action ${node.id}`);
 			return {
 				...node,
 				type: 'sendEmail',
 				data: {
-					...email,
+					...emailTemplate,
 				},
 				position: position ?? { x: 400, y: 25 },
 			} satisfies SendEmailNode;
@@ -125,7 +127,7 @@ export function getFlowActionFromActionNode(
 				flowId,
 				type: 'sendEmail',
 				emailTemplateId: node.data.id,
-				email: {
+				emailTemplate: {
 					...node.data,
 				},
 			};
@@ -156,17 +158,21 @@ export function getFlowActionFromActionNode(
 }
 
 export function getInsertableFlowActionsFromFlowActions(
-	flowActions: (FlowAction & { email?: Email | null })[],
+	flowActions: (FlowAction & { emailTemplate?: EmailTemplate | null })[],
 ): InsertFlowAction[] {
 	const strictFlowActions: InsertFlowAction[] = flowActions.map(fa => {
 		switch (fa.type) {
 			case 'sendEmail': {
-				const email = fa.email ?? raise(`No email found for action ${fa.id}`);
+				const emailTemplate =
+					fa.emailTemplate ??
+					raise(
+						`getInsertableFlowActionsFromFlowActions // No email template found for action ${fa.id}`,
+					);
 
 				return {
 					...fa,
 					type: 'sendEmail',
-					email,
+					emailTemplate,
 				} satisfies InsertFlowAction;
 			}
 			case 'wait':
@@ -286,7 +292,7 @@ export function getDefaultFlowAction_sendEmail(props: {
 	const flowActionNode = getActionNodeFromFlowAction(
 		{
 			...flowAction,
-			email: {
+			emailTemplate: {
 				id: flowAction.emailTemplateId,
 				fromId: props.emailFromId,
 				subject: '',

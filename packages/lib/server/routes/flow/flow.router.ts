@@ -1,7 +1,9 @@
+import { tasks } from '@trigger.dev/sdk/v3';
 import { TRPCError } from '@trpc/server';
 import { and, asc, desc, eq, gt, lt, notInArray, or } from 'drizzle-orm';
 import { z } from 'zod';
 
+import type { handleFlow } from '../../../trigger/flow.trigger';
 import type { InsertFlowAction, InsertFlowTrigger } from './flow.schema';
 import type { BooleanEdge, FlowEdge, FlowNode, SimpleEdge } from './flow.ui.types';
 import { newId } from '../../../utils/id';
@@ -209,19 +211,22 @@ export const flowRouter = createTRPCRouter({
 			await Promise.all(
 				actions.map(async action => {
 					if (action.type === 'sendEmail') {
-						const { id, ...email } =
-							action.email ?? raise(`No email found for action ${action.id}`);
+						const { id, ...emailTemplate } =
+							action.emailTemplate ??
+							raise(
+								`No email template found for action ${action.id} in flowRouter.update`,
+							);
 
 						await ctx.db.pool
 							.insert(EmailTemplates)
 							.values({
 								id,
-								...email,
+								...emailTemplate,
 								workspaceId: ctx.workspace.id,
 							})
 							.onConflictDoUpdate({
 								target: EmailTemplates.id,
-								set: email,
+								set: emailTemplate,
 							});
 					}
 
@@ -254,5 +259,22 @@ export const flowRouter = createTRPCRouter({
 			return {
 				flowId: flow.id,
 			};
+		}),
+
+	triggerTestFlow: privateProcedure
+		.input(
+			z.object({
+				flowId: z.string(),
+				fanId: z.string(),
+			}),
+		)
+		.mutation(async ({ input }) => {
+			const { flowId, fanId } = input;
+
+			// await handleFlow.trigger({
+			await tasks.trigger<typeof handleFlow>('handle-flow', {
+				flowId,
+				fanId,
+			});
 		}),
 });

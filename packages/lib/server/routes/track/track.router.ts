@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, lt, notInArray, or } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNull, lt, notInArray, or } from 'drizzle-orm';
 import { z } from 'zod';
 
 import { pushEvent } from '../../../utils/pusher-server';
@@ -36,7 +36,7 @@ export const trackRouter = createTRPCRouter({
 				where: sqlAnd([
 					eq(Tracks.workspaceId, ctx.workspace.id),
 					!!search?.length && or(eq(Tracks.name, search), eq(Tracks.spotifyId, search)),
-					showArchived ? undefined : eq(Tracks.archived, false),
+					showArchived ? undefined : isNull(Tracks.archivedAt),
 					!!cursor &&
 						or(
 							lt(Tracks.createdAt, cursor.createdAt),
@@ -215,7 +215,7 @@ export const trackRouter = createTRPCRouter({
 		.mutation(async ({ ctx, input }) => {
 			await ctx.db.http
 				.update(Tracks)
-				.set({ archived: true })
+				.set({ archivedAt: new Date() })
 				.where(and(eq(Tracks.workspaceId, ctx.workspace.id), inArray(Tracks.id, input)));
 		}),
 

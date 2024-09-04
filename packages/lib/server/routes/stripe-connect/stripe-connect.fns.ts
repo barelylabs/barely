@@ -1,9 +1,10 @@
+import { tasks } from '@trigger.dev/sdk/v3';
 import { eq, or } from 'drizzle-orm';
 import { Stripe } from 'stripe';
 
+import type { handleAbandonedUpsell } from '../../../trigger/cart.trigger';
 import type { UpdateCart } from '../cart/cart.schema';
 import type { Workspace } from '../workspace/workspace.schema';
-import { handleAbandonedUpsell } from '../../../trigger/cart.trigger';
 import { isProduction } from '../../../utils/environment';
 import { raise } from '../../../utils/raise';
 import { dbHttp } from '../../db';
@@ -154,7 +155,9 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 		if (!fan) throw new Error('Fan not created or found after charge success');
 
 		if (updateCart.stage === 'upsellCreated') {
-			await handleAbandonedUpsell.trigger({ cartId: prevCart.id }); // this waits 5 minutes and then marks the cart abandoned if it hasn't been converted or declined
+			await tasks.trigger<typeof handleAbandonedUpsell>('handle-abandoned-upsell', {
+				cartId: prevCart.id,
+			}); // this waits 5 minutes and then marks the cart abandoned if it hasn't been converted or declined
 		}
 
 		if (updateCart.stage === 'checkoutConverted') {

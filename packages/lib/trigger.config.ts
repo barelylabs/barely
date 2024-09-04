@@ -1,4 +1,23 @@
-import type { TriggerConfig } from '@trigger.dev/sdk/v3';
+// import { resolve } from 'path';
+import type {
+	// ResolveEnvironmentVariablesFunction,
+	TriggerConfig,
+} from '@trigger.dev/sdk/v3';
+
+// import * as dotenv from 'dotenv';
+
+// dotenv.config({
+// 	path: resolve(__dirname, '../../.env'),
+// });
+
+// export const resolveEnvVars: ResolveEnvironmentVariablesFunction = () => {
+// 	return {
+// 		variables: Object.entries(process.env).map(([key, value]) => ({
+// 			name: key,
+// 			value: value ?? '',
+// 		})),
+// 	};
+// };
 
 export const config: TriggerConfig = {
 	//Your project ref (you can see it on the Project settings page in the dashboard)
@@ -15,21 +34,24 @@ export const config: TriggerConfig = {
 			randomize: true,
 		},
 	},
-	dependenciesToBundle: [
-		// t3-env
-		'@t3-oss/env-core',
-		'@t3-oss/env-nextjs',
 
-		// uploadthing
-		'@uploadthing/shared',
-		'@uploadthing/mime-types',
-		'std-env',
+	dependenciesToBundle: [/.*/],
+	// dependenciesToBundle: [
+	// 	'next-mdx-remote',
+	// 	// t3-env
+	// 	'@t3-oss/env-core',
+	// 	'@t3-oss/env-nextjs',
 
-		// internal
-		'@barely/email',
-		/@barely\/email\/.*/,
-		'nanoid',
-	],
+	// 	// uploadthing
+	// 	'@uploadthing/shared',
+	// 	'@uploadthing/mime-types',
+	// 	'std-env',
+
+	// 	// internal
+	// 	'@barely/email',
+	// 	/@barely\/email\/.*/,
+	// 	'nanoid',
+	// ],
 	enableConsoleLogging: true, // enable console logging with dev cli
 	//The paths for your trigger folders
 	triggerDirectories: ['./trigger'],

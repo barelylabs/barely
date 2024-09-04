@@ -1,4 +1,4 @@
-import { TRPCError } from '@trpc/server';
+// import { TRPCError } from '@trpc/server';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 
@@ -28,11 +28,12 @@ export const mailchimpRouter = createTRPCRouter({
 				return null;
 			}
 
-			if (!mailchimpAccount?.access_token || !mailchimpAccount.server) {
-				throw new TRPCError({
-					code: 'NOT_FOUND',
-					message: 'Mailchimp account not configured',
-				});
+			if (!mailchimpAccount.access_token || !mailchimpAccount.server) {
+				// throw new TRPCError({
+				// 	code: 'NOT_FOUND',
+				// 	message: 'Mailchimp account not configured',
+				// });
+				return null;
 			}
 
 			const audiencesRes = await getMailchimpAudiences({
@@ -61,10 +62,11 @@ export const mailchimpRouter = createTRPCRouter({
 			const mailchimpAccount = mailchimpAccounts[0];
 
 			if (!mailchimpAccount?.access_token || !mailchimpAccount.server) {
-				throw new TRPCError({
-					code: 'NOT_FOUND',
-					message: 'Mailchimp account not configured',
-				});
+				// throw new TRPCError({
+				// 	code: 'NOT_FOUND',
+				// 	message: 'Mailchimp account not configured',
+				// });
+				return null;
 			}
 
 			const audiencesRes = await getMailchimpAudiences({

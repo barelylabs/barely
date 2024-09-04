@@ -3,7 +3,7 @@ import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
 import { querySelectionSchema } from '../../../utils/zod-helpers';
-import { insertEmailSchema } from '../email/email.schema';
+import { insertEmailTemplateSchema } from '../email/email.schema';
 import {
 	Flow_Actions,
 	Flow_Runs,
@@ -83,10 +83,6 @@ export const updateFlowTriggerSchema = insertFlowTriggerSchema
 	})
 	.merge(
 		z.object({
-			// data: z.object({
-			// 	trigger: z.enum(FLOW_TRIGGERS),
-			// 	cartFunnelId: z.string().optional(),
-			// }),
 			data: insertFlowTriggerSchema.partial().required({
 				type: true,
 			}),
@@ -126,10 +122,10 @@ const insertFlowAction_sendEmailSchema = insertFlowActionSchema_notStrict
 	})
 	.extend({
 		type: z.literal('sendEmail'),
-		email: insertEmailSchema.omit({ workspaceId: true }),
+		emailTemplate: insertEmailTemplateSchema.omit({ workspaceId: true }),
 	});
 
-export const flowForm_sendEmailSchema = insertEmailSchema
+export const flowForm_sendEmailSchema = insertEmailTemplateSchema
 	.partial({
 		workspaceId: true,
 	})
@@ -212,6 +208,7 @@ export const updateFlowAndNodesSchema = updateFlowSchema.extend({
 				.optional(),
 		}),
 	),
+	testFanId: z.string().optional(),
 });
 
 // flow runs

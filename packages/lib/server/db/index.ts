@@ -1,7 +1,8 @@
-import { neon, neonConfig, Pool } from '@neondatabase/serverless';
+import { neon, neonConfig } from '@neondatabase/serverless';
 import { drizzle as drizzleHttp } from 'drizzle-orm/neon-http';
-import { drizzle as drizzlePool } from 'drizzle-orm/neon-serverless';
-import ws from 'ws';
+
+// import { drizzle as drizzlePool } from 'drizzle-orm/neon-serverless';
+// import ws from 'ws';
 
 import type { DbPool } from './pool';
 import { env } from '../../env';
@@ -116,11 +117,11 @@ export const dbHttp = drizzleHttp(http, {
 	schema: dbSchema,
 });
 
-neonConfig.webSocketConstructor = ws;
-const pool = new Pool({ connectionString: env.DATABASE_POOL_URL });
-export const dbPool = drizzlePool(pool, {
-	schema: dbSchema,
-});
+// neonConfig.webSocketConstructor = ws;
+// const pool = new Pool({ connectionString: env.DATABASE_POOL_URL });
+// export const dbPool = drizzlePool(pool, {
+// 	schema: dbSchema,
+// });
 
 export type DbHttp = typeof dbHttp;
 export type DbHttpTransaction = Parameters<Parameters<DbHttp['transaction']>[0]>[0];
@@ -134,7 +135,6 @@ export type DbHttpTransaction = Parameters<Parameters<DbHttp['transaction']>[0]>
 export interface Db {
 	http: DbHttp;
 	pool: DbPool;
-	// pool: DbHttp;
 }
 
 // export const db: Db = {

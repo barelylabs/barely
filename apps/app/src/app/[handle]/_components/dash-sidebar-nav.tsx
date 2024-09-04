@@ -76,6 +76,7 @@ export function SidebarNav(props: { workspace: Workspace }) {
 	];
 
 	const otherLinks: SidebarNavLink[] = [
+		{ title: 'fans', icon: 'fans', href: `/${handle}/fans` },
 		{ title: 'flows', icon: 'flow', href: `/${handle}/flows` },
 		{ title: 'settings', icon: 'settings', href: `/${handle}/settings` },
 	];

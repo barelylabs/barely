@@ -98,7 +98,7 @@ export async function handleAction_addToMailchimpAudience({
 				eq(ProviderAccounts.provider, 'mailchimp'),
 				eq(ProviderAccounts.workspaceId, workflow.workspaceId),
 			),
-		})) ?? raise('Mailchimp account not configured');
+		})) ?? raise('Mailchimp account not configured for action');
 
 	const workflowRunAction: InsertWorkflowRunAction = {
 		id: newId('workflowRunAction'),

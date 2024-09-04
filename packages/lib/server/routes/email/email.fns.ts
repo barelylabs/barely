@@ -1,12 +1,18 @@
 import { and, eq } from 'drizzle-orm';
 
-import type { CreateEmail, InsertEmail, UpdateEmail } from './email.schema';
+import type {
+	CreateEmailTemplate,
+	InsertEmailTemplate,
+	UpdateEmailTemplate,
+} from './email.schema';
 import { newId } from '../../../utils/id';
 import { dbHttp } from '../../db';
 import { EmailTemplates } from './email.sql';
 
-export async function createEmailTemplate(input: CreateEmail & { workspaceId: string }) {
-	const newEmailData: InsertEmail = {
+export async function createEmailTemplate(
+	input: CreateEmailTemplate & { workspaceId: string },
+) {
+	const newEmailData: InsertEmailTemplate = {
 		...input,
 		id: newId('emailTemplate'),
 	};
@@ -14,7 +20,9 @@ export async function createEmailTemplate(input: CreateEmail & { workspaceId: st
 	return newEmail;
 }
 
-export async function updateEmailTemplate(input: UpdateEmail & { workspaceId: string }) {
+export async function updateEmailTemplate(
+	input: UpdateEmailTemplate & { workspaceId: string },
+) {
 	const updatedEmail = await dbHttp
 		.update(EmailTemplates)
 		.set({ subject: input.subject, body: input.body })

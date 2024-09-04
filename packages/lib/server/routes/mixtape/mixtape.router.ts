@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { InsertMixtape } from './mixtape.schema';
@@ -29,7 +29,7 @@ export const mixtapeRouter = createTRPCRouter({
 			const rawMixtapes = await ctx.db.http.query.Mixtapes.findMany({
 				where: sqlAnd([
 					eq(Mixtapes.workspaceId, ctx.workspace.id),
-					showArchived ? undefined : eq(Mixtapes.archived, false),
+					showArchived ? undefined : isNull(Mixtapes.archivedAt),
 					!!search?.length && sqlStringContains(Mixtapes.name, search),
 				]),
 				with: {
@@ -179,7 +179,7 @@ export const mixtapeRouter = createTRPCRouter({
 		.mutation(async ({ ctx, input }) => {
 			await ctx.db.http
 				.update(Mixtapes)
-				.set({ archived: true })
+				.set({ archivedAt: new Date() })
 				.where(
 					and(eq(Mixtapes.workspaceId, ctx.workspace.id), inArray(Mixtapes.id, input)),
 				);

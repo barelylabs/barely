@@ -6,14 +6,14 @@ import { EmailAddresses } from '../email-address/email-address.sql';
 import { createEmailTemplate, updateEmailTemplate } from './email.fns';
 import { renderMarkdownToReactEmail } from './email.mdx';
 import {
-	createEmailSchema,
+	createEmailTemplateSchema,
 	sendTestEmailSchema,
-	updateEmailSchema,
+	updateEmailTemplateSchema,
 } from './email.schema';
 
 export const emailRouter = createTRPCRouter({
-	createEmail: privateProcedure
-		.input(createEmailSchema)
+	createEmailTemplate: privateProcedure
+		.input(createEmailTemplateSchema)
 		.mutation(async ({ ctx, input }) => {
 			return createEmailTemplate({
 				...input,
@@ -21,8 +21,8 @@ export const emailRouter = createTRPCRouter({
 			});
 		}),
 
-	updateEmail: privateProcedure
-		.input(updateEmailSchema)
+	updateEmailTemplate: privateProcedure
+		.input(updateEmailTemplateSchema)
 		.mutation(async ({ ctx, input }) => {
 			return updateEmailTemplate({
 				...input,
@@ -51,7 +51,7 @@ export const emailRouter = createTRPCRouter({
 
 			const from = `${fromRes.username}@${fromRes.domain.name}`;
 
-			const { subject, reactBody } = renderMarkdownToReactEmail({
+			const { subject, reactBody } = await renderMarkdownToReactEmail({
 				subject: input.subject,
 				body: input.body,
 				variables,

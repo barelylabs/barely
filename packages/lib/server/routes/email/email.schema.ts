@@ -4,22 +4,24 @@ import { z } from 'zod';
 
 import { EmailTemplates } from './email.sql';
 
-export const insertEmailSchema = createInsertSchema(EmailTemplates, {
+export const insertEmailTemplateSchema = createInsertSchema(EmailTemplates, {
 	replyTo: z.preprocess(v => (v === '' ? undefined : v), z.string().email()).optional(),
 });
-export const createEmailSchema = insertEmailSchema.omit({ id: true }).partial({
-	workspaceId: true,
-});
-export const updateEmailSchema = insertEmailSchema.partial().required({
+export const createEmailTemplateSchema = insertEmailTemplateSchema
+	.omit({ id: true })
+	.partial({
+		workspaceId: true,
+	});
+export const updateEmailTemplateSchema = insertEmailTemplateSchema.partial().required({
 	id: true,
 });
 
-export type InsertEmail = z.infer<typeof insertEmailSchema>;
-export type CreateEmail = z.infer<typeof createEmailSchema>;
-export type UpdateEmail = z.infer<typeof updateEmailSchema>;
-export type Email = InferSelectModel<typeof EmailTemplates>;
+export type InsertEmailTemplate = z.infer<typeof insertEmailTemplateSchema>;
+export type CreateEmailTemplate = z.infer<typeof createEmailTemplateSchema>;
+export type UpdateEmailTemplate = z.infer<typeof updateEmailTemplateSchema>;
+export type EmailTemplate = InferSelectModel<typeof EmailTemplates>;
 
-export const sendTestEmailSchema = createEmailSchema.extend({
+export const sendTestEmailSchema = createEmailTemplateSchema.extend({
 	to: z.string().email(),
 	variables: z.object({
 		firstName: z.string().optional().default('John'),

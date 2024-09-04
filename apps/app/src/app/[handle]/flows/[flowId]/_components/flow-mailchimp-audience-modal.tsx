@@ -36,10 +36,10 @@ export const FlowMailchimpAudienceModal = () => {
 		{ handle },
 		{
 			select: data =>
-				data.map(audience => ({
+				data?.map(audience => ({
 					label: audience.name,
 					value: audience.id,
-				})),
+				})) ?? [],
 		},
 	);
 

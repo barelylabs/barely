@@ -1,10 +1,12 @@
+import { tasks } from '@trigger.dev/sdk/v3';
 import { and, eq, isNull } from 'drizzle-orm';
 
+import type { handleFlow } from '../../../trigger/flow.trigger';
 import { newId } from '../../../utils/id';
 import { raise } from '../../../utils/raise';
 import { dbHttp } from '../../db';
 import { Flow_Triggers, Flows } from '../flow/flow.sql';
-import { handleFlow } from '../flow/flow.trigger';
+// import { handleFlow } from '../flow/trigger/flow.trigger';
 import { Fans } from './fan.sql';
 
 export async function createFan(props: {
@@ -45,7 +47,7 @@ export async function createFan(props: {
 			and(
 				eq(Flows.id, Flow_Triggers.flowId),
 				isNull(Flows.deletedAt),
-				eq(Flows.archived, false),
+				isNull(Flows.archivedAt),
 			),
 		)
 		.where(
@@ -58,8 +60,8 @@ export async function createFan(props: {
 		// todo: add prop that lets us bypass newFanFlowTriggers (e.g. if a cartOrder flowRun wants to supercede it)
 		for (const newFanFlows of newFanFlowTriggers) {
 			if (!newFanFlows.Flows) continue;
-
-			await handleFlow.trigger({
+			await tasks.trigger<typeof handleFlow>('handle-flow', {
+				// await handleFlow.trigger({
 				flowId: newFanFlows.Flows.id,
 				fanId: newFan.id,
 			});

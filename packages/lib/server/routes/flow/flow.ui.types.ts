@@ -51,8 +51,6 @@ export type FlowNode = TriggerNode | ActionNode;
 
 export type SimpleEdge = Edge & {
 	type: 'simple';
-	// data: {
-	// };
 };
 export type BooleanEdge = Edge & {
 	type: 'boolean';

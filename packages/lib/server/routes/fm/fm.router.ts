@@ -171,7 +171,7 @@ export const fmRouter = createTRPCRouter({
 		.mutation(async ({ input, ctx }) => {
 			const updatedFmPage = await ctx.db.http
 				.update(FmPages)
-				.set({ archived: true })
+				.set({ archivedAt: new Date() })
 				.where(and(eq(FmPages.workspaceId, ctx.workspace.id), inArray(FmPages.id, input)))
 				.returning();
 

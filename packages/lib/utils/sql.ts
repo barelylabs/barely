@@ -20,21 +20,13 @@ export const id = {
 };
 
 export const timestamps = {
-	createdAt: timestamp('created_at', {
-		// mode: 'string',
-	})
-		.notNull()
-		.defaultNow(),
+	createdAt: timestamp('created_at').notNull().defaultNow(),
 
-	updatedAt: timestamp('updated_at', {
-		// mode: 'string',
-	})
-		.notNull()
-		.defaultNow(),
+	updatedAt: timestamp('updated_at').notNull().defaultNow(),
 
-	deletedAt: timestamp('deleted_at', {
-		// mode: 'string',
-	}),
+	deletedAt: timestamp('deleted_at'),
+
+	archivedAt: timestamp('archived_at'),
 };
 
 // https://orm.drizzle.team/docs/custom-types#common-way-of-defining-custom-types

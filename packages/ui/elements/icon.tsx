@@ -290,6 +290,7 @@ export const Icon = {
 	eyeDropper: EyeDropperIcon,
 
 	fan: User,
+	fans: Users,
 	fedex: FaFedex,
 	file: File,
 	fileAudio: FileAudio,

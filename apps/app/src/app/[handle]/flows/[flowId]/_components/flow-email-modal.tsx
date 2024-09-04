@@ -91,8 +91,14 @@ export const FlowEmailModal = () => {
 		});
 	};
 
+	const preventDefaultClose = form.formState.isDirty;
+
 	return (
-		<Modal showModal={showSendEmailModal} setShowModal={setShowSendEmailModal}>
+		<Modal
+			showModal={showSendEmailModal}
+			setShowModal={setShowSendEmailModal}
+			preventDefaultClose={preventDefaultClose}
+		>
 			<ModalHeader icon='email' title='Edit Email' />
 
 			<Form form={form} onSubmit={handleSubmit}>

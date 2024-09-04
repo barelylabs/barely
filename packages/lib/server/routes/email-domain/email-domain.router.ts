@@ -1,7 +1,9 @@
 import { resend } from '@barely/email';
+import { tasks } from '@trigger.dev/sdk/v3';
 import { and, asc, desc, eq, gt, lt, or } from 'drizzle-orm';
 import { z } from 'zod';
 
+import type { verifyEmailDomain } from '../../../trigger/email-domain.trigger';
 import { newId } from '../../../utils/id';
 import { sqlAnd, sqlStringContains } from '../../../utils/sql';
 import {
@@ -15,7 +17,8 @@ import {
 	updateEmailDomainSchema,
 } from './email-domain.schema';
 import { EmailDomains } from './email-domain.sql';
-import { verifyEmailDomain } from './email-domain.trigger';
+
+// import type {verifyEmailDomain} from '../'
 
 export const emailDomainRouter = createTRPCRouter({
 	create: privateProcedure
@@ -106,7 +109,7 @@ export const emailDomainRouter = createTRPCRouter({
 				}
 			}
 
-			await verifyEmailDomain.trigger(domain);
+			await tasks.trigger<typeof verifyEmailDomain>('verify-email-domain', domain);
 
 			// const verifyRes = await resend.domains.verify(domain.resendId);
 

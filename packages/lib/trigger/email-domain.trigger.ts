@@ -2,9 +2,9 @@ import { resend } from '@barely/email';
 import { logger, task, wait } from '@trigger.dev/sdk/v3';
 import { eq } from 'drizzle-orm';
 
-import type { EmailDomain } from './email-domain.schema';
-import { dbHttp } from '../../db';
-import { EmailDomains } from './email-domain.sql';
+import type { EmailDomain } from '../server/routes/email-domain/email-domain.schema';
+import { dbHttp } from '../server/db';
+import { EmailDomains } from '../server/routes/email-domain/email-domain.sql';
 
 export const verifyEmailDomain = task({
 	id: 'verify-email-domain',
