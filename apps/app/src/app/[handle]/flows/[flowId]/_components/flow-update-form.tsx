@@ -98,18 +98,23 @@ export function FlowUpdateForm(props: {
 			setTestPopoverOpen(false);
 			toast('Test flow triggered');
 		},
+		onError: error => {
+			toast(error.message);
+		},
 	});
 	const [testPopoverOpen, setTestPopoverOpen] = useState(false);
 
-	const handleTriggerTestFlow = async (
-		data: z.infer<typeof updateFlowAndNodesSchema>,
-	) => {
+	const handleTriggerTestFlow = (data: z.infer<typeof updateFlowAndNodesSchema>) => {
 		if (!data.testFanId) return toast('Please select a fan');
 
-		triggerTestFlow({
-			flowId: data.id,
-			fanId: data.testFanId,
-		});
+		const fan = fanOptions?.find(fan => fan.value === data.testFanId);
+		window.confirm(
+			`This will initialize a flow run for {${fan?.label}}. Are you sure you want to continue?`,
+		) &&
+			triggerTestFlow({
+				flowId: data.id,
+				fanId: data.testFanId,
+			});
 	};
 
 	const { handle } = useWorkspace();
@@ -161,7 +166,9 @@ export function FlowUpdateForm(props: {
 										options={fanOptions ?? []}
 									/>
 									<Button
-										onClick={() => handleTriggerTestFlow(form.getValues())}
+										onClick={() => {
+											handleTriggerTestFlow(form.getValues());
+										}}
 										fullWidth
 									>
 										Trigger Test Flow
