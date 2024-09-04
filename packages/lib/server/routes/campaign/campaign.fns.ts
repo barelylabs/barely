@@ -324,6 +324,7 @@ export async function createPlaylistPitchCampaign(props: {
 
 	await sendEmail({
 		from: 'support@barely.io',
+		fromFriendlyName: 'Barely',
 		to: 'adam@barelysparrow.com',
 		subject: 'New campaign for screening',
 		type: 'transactional',
@@ -350,6 +351,7 @@ export async function createPlaylistPitchCampaign(props: {
 
 		await sendEmail({
 			from: 'support@barely.io',
+			fromFriendlyName: 'Barely',
 			to: props.user.email,
 			subject: `Confirm your playlist.pitch submission for ${track.name}`,
 			react: PlaylistPitchConfirmEmailTemplate({

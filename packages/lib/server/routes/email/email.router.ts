@@ -39,6 +39,7 @@ export const emailRouter = createTRPCRouter({
 				columns: {
 					username: true,
 					replyTo: true,
+					defaultFriendlyName: true,
 				},
 				with: {
 					domain: true,
@@ -60,6 +61,7 @@ export const emailRouter = createTRPCRouter({
 			await sendEmail({
 				to,
 				from,
+				fromFriendlyName: fromRes.defaultFriendlyName ?? undefined,
 				subject,
 				react: reactBody,
 				type: 'transactional',

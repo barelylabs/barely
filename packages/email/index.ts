@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { z } from 'zod';
 
 export const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -7,6 +8,7 @@ export type Resend_DomainRecord = NonNullable<Resend_GetDomain['data']>['records
 
 interface SendEmailProps {
 	from: string;
+	fromFriendlyName?: string;
 	to: string | string[];
 	subject: string;
 	type: 'transactional' | 'marketing';
@@ -19,8 +21,15 @@ interface SendEmailProps {
 }
 
 export async function sendEmail(props: SendEmailProps) {
+	const safeParsedFrom = z.string().email().safeParse(props.from);
+
+	const from =
+		props.fromFriendlyName && safeParsedFrom.success ?
+			`${props.fromFriendlyName} <${props.from}>`
+		:	props.from;
+
 	const res = await resend.emails.send({
-		from: props.from,
+		from,
 		to: props.to,
 		subject: props.subject,
 		html: props.html,

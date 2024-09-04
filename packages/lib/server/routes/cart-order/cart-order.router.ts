@@ -295,6 +295,7 @@ export const cartOrderRouter = createTRPCRouter({
 
 				await sendEmail({
 					from: 'orders@barelycart.email',
+					fromFriendlyName: ctx.workspace.name,
 					to: isDevelopment() ? `adam+order-${orderId}@barely.io` : fan.email,
 					bcc: [
 						'adam@barely.io',

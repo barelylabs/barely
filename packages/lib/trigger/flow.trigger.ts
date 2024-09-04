@@ -357,6 +357,7 @@ async function handleAction({
 				to: fan.email,
 				bcc: 'adam+flow-monitoring@barely.io',
 				from: getEmailAddressFromEmailAddress(emailTemplate.from),
+				fromFriendlyName: emailTemplate.from.defaultFriendlyName ?? undefined,
 				replyTo: emailTemplate.from.replyTo ?? undefined,
 				subject,
 				react: reactBody,
