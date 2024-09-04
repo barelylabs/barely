@@ -108,37 +108,51 @@ export const emailDomainRouter = createTRPCRouter({
 				throw new Error('Domain not found');
 			}
 
+			// if the domain is pending, it should still be in the emailDomain trigger
 			// if the domain is already verified and we're not forcing a re-verification, return the domain
-			if (domain.status === 'verified' && !input.force) {
+			if (domain.status === 'pending' || (domain.status === 'verified' && !input.force)) {
 				return domain;
 			}
 
 			// if we're not forcing a re-verification, check if the domain is already verified on Resend
-			if (!input.force) {
-				const currentDomainRes = await resend.domains.get(domain.resendId);
+			const currentDomainRes = await resend.domains.get(domain.resendId);
 
-				if (currentDomainRes.data?.status === 'verified') {
-					const updatedDomain = await ctx.db.pool
-						.update(EmailDomains)
-						.set({
-							status: 'verified',
-							records: currentDomainRes.data.records,
-						})
-						.where(eq(EmailDomains.id, domain.id))
-						.returning();
-					return updatedDomain;
-				}
+			if (currentDomainRes.error) {
+				throw new TRPCError({
+					code: 'INTERNAL_SERVER_ERROR',
+					message: `Resend error: ${currentDomainRes.error.name} - ${currentDomainRes.error.message}`,
+				});
+			}
+
+			if (!currentDomainRes.data) {
+				throw new TRPCError({
+					code: 'INTERNAL_SERVER_ERROR',
+					message: `Resend error: No data returned for domain ${domain.resendId}`,
+				});
+			}
+
+			if (!input.force && currentDomainRes.data.status === 'verified') {
+				const updatedDomain = await ctx.db.pool
+					.update(EmailDomains)
+					.set({
+						status: 'verified',
+						records: currentDomainRes.data.records,
+					})
+					.where(eq(EmailDomains.id, domain.id))
+					.returning();
+				return updatedDomain;
 			}
 
 			/**
-			 * we're either forcing a re-verification or the domain is not verified on Resend.
+			 * we're either forcing a re-verification or the domain verification hasn't started yet.
 			 * in either case, we need to update the domain to pending and trigger a verification
 			 */
 
 			await ctx.db.pool
 				.update(EmailDomains)
 				.set({
-					status: 'pending',
+					status: currentDomainRes.data.status,
+					records: currentDomainRes.data.records,
 				})
 				.where(eq(EmailDomains.id, domain.id));
 

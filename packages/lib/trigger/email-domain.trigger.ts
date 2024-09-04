@@ -48,17 +48,30 @@ export const verifyEmailDomain = task({
 				return;
 			}
 
-			if (updatedDomainRes.data.status === 'failed' || attempt === maxAttempts - 1) {
+			await dbHttp
+				.update(EmailDomains)
+				.set({
+					status: updatedDomainRes.data.status,
+					records: updatedDomainRes.data.records,
+				})
+				.where(eq(EmailDomains.id, domain.id));
+			// todo: send pusher event to invalidate emailDomain query cache
+
+			if (updatedDomainRes.data.status === 'failed') {
+				logger.warn(`Email domain ${domain.id} not verified after 24 hours`);
+				attempt = maxAttempts;
+			}
+
+			if (attempt === maxAttempts - 1) {
+				logger.warn(`Email domain ${domain.id} not verified after 24 hours`);
+
 				await dbHttp
 					.update(EmailDomains)
 					.set({
-						status: updatedDomainRes.data.status,
+						status: 'failed',
 						records: updatedDomainRes.data.records,
 					})
 					.where(eq(EmailDomains.id, domain.id));
-
-				logger.warn(`Email domain ${domain.id} not verified after 24 hours`);
-				// todo: send pusher event to invalidate emailDomain query cache
 			}
 
 			attempt++;
