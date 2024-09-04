@@ -9,7 +9,7 @@ import { log } from '../../utils/log';
 import { zPost } from '../../utils/zod-fetch';
 import { z_optStr_hash, z_optStr_lowerCase_hash } from '../../utils/zod-helpers';
 
-interface MetaEventParams {
+export interface MetaEventCustomData {
 	// meta params
 	content_category?: string;
 	content_ids?: string[];
@@ -39,6 +39,27 @@ interface MetaEventParams {
 }
 
 const META_EVENT_NAMES = [
+	// standard events - ref: https://developers.facebook.com/docs/meta-pixel/reference
+	'AddPaymentInfo',
+	'AddToCart',
+	'AddToWishlist',
+	'CompleteRegistration',
+	'Contact',
+	'CustomizeProduct',
+	'Donate',
+	'FindLocation',
+	'InitiateCheckout',
+	'Lead',
+	'PageView',
+	'Purchase',
+	'Schedule',
+	'Search',
+	'StartTrial',
+	'SubmitApplication',
+	'Subscribe',
+	'ViewContent',
+
+	// cart
 	'barely.cart/viewCheckout',
 	'barely.cart/updateMainProductPayWhatYouWantPrice',
 	'barely.cart/addEmail',
@@ -46,7 +67,6 @@ const META_EVENT_NAMES = [
 	'barely.cart/addPaymentInfo',
 	'barely.cart/addBump',
 	'barely.cart/removeBump',
-	// 'barely.cart/purchaseMain',
 	'barely.cart/purchase',
 	'barely.cart/viewUpsell',
 	'barely.cart/declineUpsell',
@@ -64,12 +84,17 @@ const META_EVENT_NAMES = [
 	'barely.page/linkClick',
 ] as const;
 
+export type MetaEventName = (typeof META_EVENT_NAMES)[number];
+export interface MetaEvent {
+	eventName: MetaEventName;
+	customData: MetaEventCustomData;
+}
+
 export interface MetaEventProps {
 	pixelId: string;
 	accessToken: string;
-	// event data
-	eventName: (typeof META_EVENT_NAMES)[number];
 
+	// event data (covers all events)
 	sourceUrl: string;
 	ip?: string;
 	ua?: string;
@@ -77,18 +102,17 @@ export interface MetaEventProps {
 	geo?: NextGeo;
 	eventId?: string;
 	testEventCode?: string;
-	customData?: MetaEventParams;
+
+	// event data (specific to event)
+	events: MetaEvent[];
 }
 
-export async function reportEventToMeta(props: MetaEventProps) {
+export async function reportEventsToMeta(props: MetaEventProps) {
 	const { ip, geo, ua, time } = props;
-	const { pixelId, accessToken, sourceUrl, eventName } = props;
+	const { pixelId, accessToken, sourceUrl, events } = props;
 
-	console.log('sourceUrl >>', sourceUrl);
 	const urlObject = new URL(sourceUrl);
 	const fbclid = urlObject.searchParams.get('fbclid');
-
-	console.log(`fbclid for ${eventName} >> `, fbclid);
 
 	const unixTimeSinceEpoch_ms = Math.floor(time ?? Date.now()); // unix timestamp in ms
 	const unixTimeSinceEpoch_s = Math.floor(unixTimeSinceEpoch_ms / 1000); // unix timestamp in seconds
@@ -102,17 +126,30 @@ export async function reportEventToMeta(props: MetaEventProps) {
 		fbc: fbclid ? `fb.1.${unixTimeSinceEpoch_ms}.${fbclid}` : undefined,
 	});
 
-	console.log(`meta userData for ${eventName} `, userData);
+	const data: (z.infer<typeof metaServerEventSchema> & { user_data: typeof userData })[] =
+		[];
 
-	const serverEventData = metaServerEventSchema.parse({
-		eventName,
-		eventTime: unixTimeSinceEpoch_s,
-		actionSource: 'website',
-		sourceUrl,
-		customData: props.customData,
+	events.map(event => {
+		const safeParsedEvent = metaServerEventSchema.safeParse({
+			eventName: event.eventName,
+			eventTime: unixTimeSinceEpoch_s,
+			actionSource: 'website',
+			sourceUrl,
+			customData: event.customData,
+		});
+
+		if (safeParsedEvent.success) {
+			data.push({ ...safeParsedEvent.data, user_data: userData });
+		}
 	});
 
-	console.log(`meta serverEventData for ${eventName} >>`, serverEventData);
+	// const serverEventData = metaServerEventSchema.parse({
+	// 	eventName,
+	// 	eventTime: unixTimeSinceEpoch_s,
+	// 	actionSource: 'website',
+	// 	sourceUrl,
+	// 	customData: props.customData,
+	// });
 
 	const testEventCode = isDevelopment() ? env.META_TEST_EVENT_CODE : undefined;
 
@@ -129,7 +166,10 @@ export async function reportEventToMeta(props: MetaEventProps) {
 			{
 				body: {
 					access_token: accessToken,
-					data: [{ user_data: userData, ...serverEventData }],
+					data,
+					// data: [{ user_data: userData, ...serverEventData }],
+
+					// test event code
 					...(testEventCode !== undefined && {
 						test_event_code: testEventCode,
 					}),
