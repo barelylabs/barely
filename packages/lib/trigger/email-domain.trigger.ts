@@ -34,31 +34,35 @@ export const verifyEmailDomain = task({
 				throw new Error('No data returned from Resend');
 			}
 
-			if (updatedDomainRes.data.status === 'verified') {
-				await dbHttp
-					.update(EmailDomains)
-					.set({
-						status: updatedDomainRes.data.status,
-						records: updatedDomainRes.data.records,
-					})
-					.where(eq(EmailDomains.id, domain.id));
+			await dbHttp
+				.update(EmailDomains)
+				.set({
+					status: updatedDomainRes.data.status,
+					records: updatedDomainRes.data.records,
+				})
+				.where(eq(EmailDomains.id, domain.id));
+			// todo: send pusher event to invalidate emailDomain query cache on client
 
+			if (updatedDomainRes.data.status === 'verified') {
 				logger.info(`Email domain ${domain.id} verified successfully`);
-				// todo: send pusher event to invalidate emailDomain query cache
 				return;
 			}
 
-			if (updatedDomainRes.data.status === 'failed' || attempt === maxAttempts - 1) {
+			if (updatedDomainRes.data.status === 'failed') {
+				logger.warn(`Email domain ${domain.id} failed to verify`);
+				attempt = maxAttempts;
+			}
+
+			if (attempt === maxAttempts - 1) {
+				logger.warn(`Email domain ${domain.id} not verified after 24 hours`);
+
 				await dbHttp
 					.update(EmailDomains)
 					.set({
-						status: updatedDomainRes.data.status,
+						status: 'failed',
 						records: updatedDomainRes.data.records,
 					})
 					.where(eq(EmailDomains.id, domain.id));
-
-				logger.warn(`Email domain ${domain.id} not verified after 24 hours`);
-				// todo: send pusher event to invalidate emailDomain query cache
 			}
 
 			attempt++;
