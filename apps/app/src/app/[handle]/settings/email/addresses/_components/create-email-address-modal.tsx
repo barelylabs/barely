@@ -71,28 +71,29 @@ export function CreateEmailAddressModal() {
 			<ModalHeader icon='email' title='Add Email Address' />
 			<Form form={form} onSubmit={handleSubmit}>
 				<ModalBody>
-					<div className='flex flex-row'>
+					<div className='flex flex-row gap-1'>
 						<TextField
 							control={control}
 							name='username'
-							label='Email address'
+							label='Username'
 							placeholder='user'
+							className='w-1/2'
 						/>
-
-						<TextField
-							control={control}
-							name='replyTo'
-							label='Reply to (optional)'
-							placeholder='me@gmail.com'
-						/>
-
 						<SelectField
 							control={control}
 							name='domainId'
 							label='Domain'
 							options={domainOptions}
+							className='w-1/2'
 						/>
 					</div>
+
+					<TextField
+						control={control}
+						name='replyTo'
+						label='Reply to (optional)'
+						placeholder='me@gmail.com'
+					/>
 					<SwitchField control={control} name='default' label='Default' />
 				</ModalBody>
 				<ModalFooter>
