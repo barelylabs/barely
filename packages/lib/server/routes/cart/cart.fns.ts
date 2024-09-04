@@ -23,7 +23,7 @@ import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
 import { MEDIAMAIL_TYPES, MERCH_DIMENSIONS } from '../product/product.constants';
 import { getPublicWorkspaceFromWorkspace } from '../workspace/workspace.schema';
 import { Carts } from './cart.sql';
-import { getAmountsForCheckout } from './cart.utils';
+import { getAmountsForCheckout, getFeeAmountForCheckout } from './cart.utils';
 
 /* get funnel */
 export const funnelWith = {
@@ -118,6 +118,10 @@ export async function createMainCartFromFunnel({
 	const paymentIntent = await stripe.paymentIntents.create(
 		{
 			amount: amounts.checkoutAmount,
+			application_fee_amount: getFeeAmountForCheckout({
+				amount: amounts.orderProductAmount,
+				workspace: funnel.workspace,
+			}),
 			currency: 'usd',
 			setup_future_usage: 'off_session',
 			metadata,

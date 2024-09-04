@@ -1,5 +1,7 @@
+import type { Workspace } from '../workspace/workspace.schema';
 import type { PublicFunnel } from './cart.fns';
 import type { InsertCart } from './cart.schema';
+import { WORKSPACE_PLANS } from '../workspace/workspace.settings';
 
 /* this can be used on the server (where we create or update the payment intent) 
 or client (where we optimistically update the cart) 
@@ -113,4 +115,20 @@ export function getAmountsForCheckout(
 
 		// shippingAndHandlingAmount: mainPlusBumpShippingAndHandlingAmount,
 	} satisfies Partial<InsertCart>;
+}
+
+export function getFeeAmountForCheckout({
+	amount,
+	workspace,
+}: {
+	amount: number;
+	workspace: Pick<Workspace, 'plan' | 'cartFeePercentageOverride'>;
+}) {
+	const workspacePlan = workspace.plan;
+	const feePercentage =
+		typeof workspace.cartFeePercentageOverride === 'number' ?
+			workspace.cartFeePercentageOverride
+		:	WORKSPACE_PLANS.get(workspacePlan)?.cart.feePercentage ?? 0;
+
+	return Math.round(amount * (feePercentage / 100));
 }
