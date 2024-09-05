@@ -230,6 +230,17 @@ async function handleAction({
 			})
 		:	null;
 
+	if (!action.enabled) {
+		logger.info(`action ${action.id} is disabled`);
+
+		const nextAction = await getNextAction({
+			flowId: action.flowId,
+			currentNodeId: action.id,
+		});
+
+		return { nextAction };
+	}
+
 	switch (action.type) {
 		case 'empty': {
 			return { nextAction: null };

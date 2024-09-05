@@ -101,6 +101,8 @@ export const Flow_Actions = pgTable(
 
 		type: text('type', { enum: FLOW_ACTIONS }).notNull(),
 
+		enabled: boolean('enabled').notNull().default(true),
+
 		/* potential actions: */
 		// 🕒
 		waitFor: integer('waitFor'),

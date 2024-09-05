@@ -6,16 +6,19 @@ import type {
 	TriggerNode,
 	WaitNode,
 } from '@barely/lib/server/routes/flow/flow.ui.types';
+import type { IconKey } from '@barely/ui/elements/icon';
 import { useMemo } from 'react';
 import { useCartFunnels } from '@barely/lib/hooks/use-cart-funnels';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 import { MERCH_TYPES } from '@barely/lib/server/routes/product/product.constants';
+import { cn } from '@barely/lib/utils/cn';
 import { Handle, Position } from '@xyflow/react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { Button } from '@barely/ui/elements/button';
 import { Icon } from '@barely/ui/elements/icon';
+import { Switch } from '@barely/ui/elements/switch';
 import { Text } from '@barely/ui/elements/typography';
 
 import { useFlowStore } from './flow-store';
@@ -76,15 +79,81 @@ export function TriggerNodeType({ data, id }: { id: string; data: TriggerNode['d
 }
 
 const emptyStoreSelector = (state: FlowState) => ({
-	replaceEmptyWithNode: state.replaceEmptyWithNode,
+	replaceEmptyWithNode: state.replaceEmptyWithActionNode,
 });
+
+const TargetHandle = () => {
+	return (
+		<Handle
+			type='target'
+			position={Position.Top}
+			// className='!w-4 !rounded-none !rounded-t-full !bg-border'
+			className='opacity-0'
+		/>
+	);
+};
+
+const SourceHandle = () => {
+	return <Handle type='source' position={Position.Bottom} className='opacity-0' />;
+};
+
+function NodeDiv({
+	children,
+	stripeClassName,
+	icon,
+	iconClassName,
+	onEdit,
+	title,
+	subtitle,
+}: {
+	children?: React.ReactNode;
+	stripeClassName?: string;
+	icon: IconKey;
+	iconClassName?: string;
+	onEdit: () => void;
+	title: string;
+	subtitle: string;
+}) {
+	const IconComponent = Icon[icon];
+
+	return (
+		<div className='relative flex flex-col items-center justify-center gap-2 overflow-visible rounded border border-border bg-background p-2 px-8 '>
+			<TargetHandle />
+			<SourceHandle />
+			<div className='flex flex-col items-center gap-2'>
+				<div className='flex flex-row items-center gap-1'>
+					{IconComponent && (
+						<IconComponent className={cn('h-[13px] w-[13px]', iconClassName)} />
+					)}
+					<Text variant='md/bold'>{title}</Text>
+				</div>
+			</div>
+			{subtitle && <Text variant='xs/normal'>{subtitle}</Text>}
+			{children}
+			<Button
+				look='minimal'
+				size='2xs'
+				variant='icon'
+				startIcon='edit'
+				onClick={onEdit}
+				className='absolute right-1 top-1'
+			/>
+			<div
+				className={cn(
+					'absolute -bottom-1 -left-[1.5px] h-1.5 w-[calc(100%+3px)] rounded-b bg-border',
+					stripeClassName,
+				)}
+			/>
+		</div>
+	);
+}
 
 export function EmptyNodeType({ id }: { id: string }) {
 	const { replaceEmptyWithNode } = useFlowStore(useShallow(emptyStoreSelector));
 
 	return (
 		<div className='flex items-center justify-center rounded border border-dashed border-border bg-background p-2'>
-			<Handle type='target' position={Position.Top} />
+			<TargetHandle />
 			<div
 				className='grid auto-cols-fr gap-2'
 				style={{
@@ -136,36 +205,50 @@ export function WaitNodeType({ id, data }: { id: string; data: WaitNode['data'] 
 	);
 
 	return (
-		<div className='relative flex w-[172px] flex-col items-center justify-center rounded border border-border bg-background p-2 px-4'>
-			<Handle type='target' position={Position.Top} />
-			<div className='flex flex-col items-center gap-2'>
-				<div className='flex flex-row items-center gap-1'>
-					<Icon.wait className='h-[14px] w-[14px]' />
-					<Text variant='md/bold'>Wait</Text>
-				</div>
-				<Text variant='xs/normal' className='text-center'>
-					Wait for {data.waitFor} {data.waitForUnits}
-				</Text>
-			</div>
-			<Button
-				look='ghost'
-				size='2xs'
-				variant='icon'
-				startIcon='edit'
-				onClick={() => {
-					setCurrentNode(id);
-					setShowWaitModal(true);
-				}}
-				className='absolute right-1 top-1'
-			/>
-			<Handle type='source' position={Position.Bottom} id={`${id}-bottom`} />
-		</div>
+		<NodeDiv
+			icon='wait'
+			onEdit={() => {
+				setCurrentNode(id);
+				setShowWaitModal(true);
+			}}
+			title='Wait'
+			subtitle={`Wait for ${data.waitFor} ${data.waitForUnits}`}
+			iconClassName='h-[13.5px] w-[13.5px] text-orange-400'
+			stripeClassName='bg-orange-400'
+		/>
+		// <div className='relative flex w-[172px] flex-col items-center justify-center rounded border border-border bg-background p-2 px-4'>
+		// 	<TargetHandle />
+		// 	{/* <Handle type='target' position={Position.Top} /> */}
+		// 	<div className='flex flex-col items-center gap-2'>
+		// 		<div className='flex flex-row items-center gap-1'>
+		// 			<Icon.wait className='h-[14px] w-[14px]' />
+		// 			<Text variant='md/bold'>Wait</Text>
+		// 		</div>
+		// 		<Text variant='xs/normal' className='text-center'>
+		// 			Wait for {data.waitFor} {data.waitForUnits}
+		// 		</Text>
+		// 	</div>
+		// 	<Button
+		// 		look='ghost'
+		// 		size='2xs'
+		// 		variant='icon'
+		// 		startIcon='edit'
+		// 		onClick={() => {
+		// 			setCurrentNode(id);
+		// 			setShowWaitModal(true);
+		// 		}}
+		// 		className='absolute right-1 top-1'
+		// 	/>
+		// 	<SourceHandle />
+		// 	{/* <Handle type='source' position={Position.Bottom} id={`${id}-bottom`} /> */}
+		// </div>
 	);
 }
 
 const sendEmailStoreSelector = (state: FlowState) => ({
 	setCurrentNode: state.setCurrentNode,
 	setShowEmailModal: state.setShowEmailModal,
+	updateNodeEnabled: state.updateNodeEnabled,
 });
 
 export function SendEmailNodeType({
@@ -175,33 +258,52 @@ export function SendEmailNodeType({
 	id: string;
 	data: SendEmailNode['data'];
 }) {
-	const { setCurrentNode, setShowEmailModal } = useFlowStore(
+	const { setCurrentNode, setShowEmailModal, updateNodeEnabled } = useFlowStore(
 		useShallow(sendEmailStoreSelector),
 	);
 
 	return (
-		<div className='relative flex flex-col items-center justify-center rounded border border-border bg-background p-2 px-8'>
-			<Handle type='target' position={Position.Top} />
-			<div className='flex flex-col items-center gap-2'>
-				<div className='flex flex-row items-center gap-1'>
-					<Icon.email className='h-[13px] w-[13px]' />
-					<Text variant='md/bold'>Send Email</Text>
-				</div>
-				<Text variant='sm/bold'>{data.subject}</Text>
-			</div>
-			<Button
-				look='minimal'
-				size='2xs'
-				variant='icon'
-				startIcon='edit'
-				onClick={() => {
-					setCurrentNode(id);
-					setShowEmailModal(true);
-				}}
-				className='absolute right-1 top-1'
+		<NodeDiv
+			icon='email'
+			onEdit={() => {
+				setCurrentNode(id);
+				setShowEmailModal(true);
+			}}
+			title='Email'
+			subtitle={`Send "${data.name}"`}
+			iconClassName='h-[16px] w-[16px] text-blue-400'
+			stripeClassName='bg-blue-400'
+		>
+			<Switch
+				checked={data.enabled}
+				onCheckedChange={checked => updateNodeEnabled(id, checked)}
+				size='md'
+				className='data-[state=checked]:bg-blue-400'
 			/>
-			<Handle type='source' position={Position.Bottom} id={`${id}-bottom`} />
-		</div>
+		</NodeDiv>
+		// <div className='relative flex flex-col items-center justify-center overflow-visible rounded border border-border bg-background p-2 px-8 pb-4'>
+		// 	<TargetHandle />
+		// 	<div className='flex flex-col items-center gap-2'>
+		// 		<div className='flex flex-row items-center gap-1'>
+		// 			<Icon.email className='h-[13px] w-[13px]' />
+		// 			<Text variant='md/bold'>Send Email</Text>
+		// 		</div>
+		// 		<Text variant='sm/bold'>{data.subject}</Text>
+		// 	</div>
+		// 	<Button
+		// 		look='minimal'
+		// 		size='2xs'
+		// 		variant='icon'
+		// 		startIcon='edit'
+		// 		onClick={() => {
+		// 			setCurrentNode(id);
+		// 			setShowEmailModal(true);
+		// 		}}
+		// 		className='absolute right-1 top-1'
+		// 	/>
+		// 	<Handle type='source' position={Position.Bottom} className='opacity-0' />
+		// 	<div className='absolute -bottom-1 -left-[1.5px] h-1.5 w-[calc(100%+3px)] rounded-b bg-red-500' />
+		// </div>
 	);
 }
 

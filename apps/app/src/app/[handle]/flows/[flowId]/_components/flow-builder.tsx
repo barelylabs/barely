@@ -59,7 +59,7 @@ const selector = (state: FlowState) => ({
 	// onNodesDelete: state.onNodesDelete,
 	onLayout: state.onLayout,
 	// setters
-	replaceEmptyWithNode: state.replaceEmptyWithNode,
+	replaceEmptyWithNode: state.replaceEmptyWithActionNode,
 	//modals
 	setShowWaitModal: state.setShowWaitModal,
 	setShowEmailModal: state.setShowEmailModal,
