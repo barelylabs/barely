@@ -37,7 +37,7 @@ export const MERCH_DIMENSIONS: Record<
 	tshirt: { weight: 6, width: 8, length: 10, height: 1 },
 	sweatshirt: { weight: 12, width: 12, length: 12, height: 1 },
 	sticker: { weight: 0.1, width: 3, length: 3, height: 0.1 },
-	poster: { weight: 0.1, width: 12, length: 12, height: 0.1 },
+	poster: { weight: 0.1, width: 19, length: 3, height: 3 },
 	print: { weight: 0.1, width: 12, length: 12, height: 0.1 },
 	digital: { weight: 0, width: 0, length: 0, height: 0 },
 };

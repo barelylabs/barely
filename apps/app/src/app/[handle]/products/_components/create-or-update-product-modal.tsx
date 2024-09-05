@@ -29,7 +29,9 @@ import { Icon } from '@barely/ui/elements/icon';
 import { Label } from '@barely/ui/elements/label';
 import { MDXEditor } from '@barely/ui/elements/mdx-editor';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
+import { Separator } from '@barely/ui/elements/separator';
 import { ToggleGroup, ToggleGroupItem } from '@barely/ui/elements/toggle-group';
+import { Tooltip } from '@barely/ui/elements/tooltip';
 import { UploadDropzone } from '@barely/ui/elements/upload';
 import { Form, SubmitButton } from '@barely/ui/forms';
 import { CurrencyField } from '@barely/ui/forms/currency-field';
@@ -224,12 +226,25 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 							<Icon.cassette className='h-5 w-5' />
 						</ProductTypeToggleItem>
 
+						<Separator orientation='vertical' className='h-6' />
+
 						<ProductTypeToggleItem value='tshirt'>
 							<Icon.tshirt className='h-5 w-5' />
 						</ProductTypeToggleItem>
 						<ProductTypeToggleItem value='sweatshirt'>
 							<Icon.sweatshirt className='h-5 w-5' />
 						</ProductTypeToggleItem>
+
+						<Separator orientation='vertical' className='h-6' />
+
+						<ProductTypeToggleItem value='sticker'>
+							<Icon.sticker className='h-5 w-5' />
+						</ProductTypeToggleItem>
+						<ProductTypeToggleItem value='poster'>
+							<Icon.poster className='h-5 w-5 rotate-90' />
+						</ProductTypeToggleItem>
+
+						<Separator orientation='vertical' className='h-6' />
 
 						<ProductTypeToggleItem value='digital'>
 							<Icon.download className='h-5 w-5' />
@@ -323,7 +338,13 @@ function ProductTypeToggleItem({
 	value: MerchType;
 	children: React.ReactNode;
 }) {
-	return <ToggleGroupItem value={value}>{children}</ToggleGroupItem>;
+	return (
+		<Tooltip content={value}>
+			<span>
+				<ToggleGroupItem value={value}>{children}</ToggleGroupItem>
+			</span>
+		</Tooltip>
+	);
 }
 
 function ApparelSizeToggleItem({
