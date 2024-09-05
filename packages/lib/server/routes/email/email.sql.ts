@@ -21,6 +21,9 @@ export const EmailTemplates = pgTable('EmailTemplates', {
 			onDelete: 'cascade',
 		}),
 
+	name: text('name').notNull().default('Email Template'),
+	description: text('description'),
+
 	replyTo: text('replyTo'),
 	subject: text('subject').notNull(),
 	body: text('body').notNull(),

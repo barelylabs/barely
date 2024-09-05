@@ -155,7 +155,7 @@ export function InfoTooltip({ content }: { content: React.ReactNode | string }) 
 	return (
 		<Tooltip content={content}>
 			<Icon.help
-				className='h-4 w-4 text-gray-500'
+				className='h-[14px] w-[14px] text-muted-foreground'
 				// onClick={onPromise(async event => {
 				// 	const target = event.currentTarget;
 				// 	if (!target) return;

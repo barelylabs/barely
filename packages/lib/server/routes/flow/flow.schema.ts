@@ -100,6 +100,7 @@ const insertFlowAction_waitSchema = insertFlowActionSchema_notStrict
 	.required({
 		id: true,
 		flowId: true,
+		enabled: true,
 
 		waitFor: true,
 		waitForUnits: true,
@@ -111,6 +112,7 @@ const insertFlowAction_waitSchema = insertFlowActionSchema_notStrict
 export const flowForm_waitSchema = z.object({
 	waitFor: z.coerce.number().min(1),
 	waitForUnits: insertFlowActionSchema_notStrict.shape.waitForUnits.unwrap().unwrap(),
+	enabled: z.boolean(),
 });
 
 // send email
@@ -119,6 +121,7 @@ const insertFlowAction_sendEmailSchema = insertFlowActionSchema_notStrict
 	.required({
 		id: true,
 		flowId: true,
+		enabled: true,
 	})
 	.extend({
 		type: z.literal('sendEmail'),
@@ -130,6 +133,7 @@ export const flowForm_sendEmailSchema = insertEmailTemplateSchema
 		workspaceId: true,
 	})
 	.extend({
+		enabled: z.boolean(),
 		sendTestEmailTo: z.string().email().optional(),
 	});
 
@@ -139,6 +143,7 @@ const insertFlowAction_booleanSchema = insertFlowActionSchema_notStrict
 	.required({
 		id: true,
 		flowId: true,
+		enabled: true,
 		booleanCondition: true,
 	})
 	.extend({
@@ -150,6 +155,7 @@ export const flowForm_booleanSchema = z.object({
 	productId: insertFlowAction_booleanSchema.shape.productId.optional(),
 	cartFunnelId: insertFlowAction_booleanSchema.shape.cartFunnelId.optional(),
 	totalOrderAmount: insertFlowAction_booleanSchema.shape.totalOrderAmount.optional(),
+	enabled: z.boolean(),
 });
 
 // add to mailchimp audience
@@ -159,6 +165,7 @@ const insertFlowAction_addToMailchimpAudienceSchema = insertFlowActionSchema_not
 		id: true,
 		flowId: true,
 		mailchimpAudienceId: true,
+		enabled: true,
 	})
 	.extend({
 		type: z.literal('addToMailchimpAudience'),
@@ -167,6 +174,7 @@ const insertFlowAction_addToMailchimpAudienceSchema = insertFlowActionSchema_not
 export const flowForm_addToMailchimpAudienceSchema = z.object({
 	mailchimpAudienceId:
 		insertFlowAction_addToMailchimpAudienceSchema.shape.mailchimpAudienceId.unwrap(),
+	enabled: z.boolean(),
 });
 
 // empty

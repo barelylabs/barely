@@ -496,6 +496,68 @@ export const FlowStoreProvider = ({
 				}, 100);
 			},
 
+			updateNodeEnabled: (id: string, enabled: boolean) => {
+				const prevNodes = get().nodes;
+				const nodeIndex = prevNodes.findIndex(node => node.id === id);
+				const node = prevNodes[nodeIndex];
+				if (!node) return;
+
+				const updatedNodes = prevNodes.map(node => {
+					if (node.id === id && node.type !== 'trigger') {
+						if (node.type === 'wait') {
+							return {
+								...node,
+								data: {
+									...node.data,
+									enabled,
+								},
+							} satisfies WaitNode;
+						}
+
+						if (node.type === 'sendEmail') {
+							return {
+								...node,
+								data: {
+									...node.data,
+									enabled,
+								},
+							} satisfies SendEmailNode;
+						}
+
+						if (node.type === 'addToMailchimpAudience') {
+							return {
+								...node,
+								data: {
+									...node.data,
+									enabled,
+								},
+							} satisfies AddToMailchimpAudienceNode;
+						}
+
+						if (node.type === 'boolean') {
+							return {
+								...node,
+								data: {
+									...node.data,
+									enabled,
+								},
+							} satisfies BooleanNode;
+						}
+
+						return {
+							...node,
+							data: {
+								...node.data,
+								enabled,
+							},
+						} satisfies EmptyNode;
+					}
+					return node;
+				});
+
+				set({ nodes: updatedNodes });
+			},
+
 			//layout
 			onLayout: (direction: 'TB' | 'LR' = 'TB') => {
 				const initialNodes = get().nodes;

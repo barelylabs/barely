@@ -17,6 +17,7 @@ import { Label } from '@barely/ui/elements/label';
 import { MDXEditor } from '@barely/ui/elements/mdx-editor';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
 import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/elements/popover';
+import { Separator } from '@barely/ui/elements/separator';
 import { Form, SubmitButton } from '@barely/ui/forms';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { TextField } from '@barely/ui/forms/text-field';
@@ -126,6 +127,7 @@ export const FlowEmailModal = () => {
 							</PopoverContent>
 						</Popover>
 					</div>
+
 					<SelectField
 						label='From'
 						name='fromId'
@@ -133,7 +135,20 @@ export const FlowEmailModal = () => {
 						options={emailAddressOptions ?? []}
 					/>
 
-					<TextField label='subject' name='subject' control={form.control} />
+					<Separator className='mt-4' />
+					<TextField
+						label='Name'
+						name='name'
+						control={form.control}
+						infoTooltip='The name of the email template. This is just for your reference.'
+					/>
+					{/* <TextField
+						label='Reply To'
+						name='replyTo'
+						control={form.control}
+						infoTooltip='The email address to reply to'
+					/> */}
+					<TextField label='Subject' name='subject' control={form.control} />
 
 					<Label>Body</Label>
 					<MDXEditor

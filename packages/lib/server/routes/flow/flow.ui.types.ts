@@ -94,6 +94,7 @@ export interface FlowState {
 	updateBooleanNode: (id: string, data: BooleanNode['data']) => void;
 	updateWaitNode: (id: string, data: WaitNode['data']) => void;
 	updateSendEmailNode: (id: string, data: SendEmailNode['data']) => void;
+	updateNodeEnabled: (id: string, enabled: boolean) => void;
 	updateAddToMailchimpAudienceNode: (
 		id: string,
 		data: AddToMailchimpAudienceNode['data'],

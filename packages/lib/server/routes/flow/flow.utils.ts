@@ -37,7 +37,7 @@ export function getTriggerNodeFromFlowTrigger(
 
 export function getActionNodeFromFlowAction(
 	node: InsertFlowAction_NotStrict & {
-		emailTemplate?: z.infer<typeof flowForm_sendEmailSchema> | null;
+		emailTemplate?: Omit<z.infer<typeof flowForm_sendEmailSchema>, 'enabled'> | null;
 	},
 	position?: { x: number; y: number },
 ): ActionNode {
@@ -50,6 +50,7 @@ export function getActionNodeFromFlowAction(
 					...node,
 					waitFor: node.waitFor ?? 5,
 					waitForUnits: node.waitForUnits ?? 'minutes',
+					enabled: node.enabled ?? true,
 				},
 				position: position ?? { x: 400, y: 25 },
 				deletable: false,
@@ -61,6 +62,7 @@ export function getActionNodeFromFlowAction(
 				data: {
 					...node,
 					booleanCondition: node.booleanCondition ?? 'hasOrderedProduct',
+					enabled: node.enabled ?? true,
 				},
 				position: position ?? { x: 400, y: 25 },
 				deletable: false,
@@ -74,6 +76,7 @@ export function getActionNodeFromFlowAction(
 				type: 'sendEmail',
 				data: {
 					...emailTemplate,
+					enabled: node.enabled ?? true,
 				},
 				position: position ?? { x: 400, y: 25 },
 			} satisfies SendEmailNode;
@@ -88,6 +91,7 @@ export function getActionNodeFromFlowAction(
 				data: {
 					...node,
 					mailchimpAudienceId,
+					enabled: node.enabled ?? true,
 				},
 				position: position ?? { x: 400, y: 25 },
 			} satisfies AddToMailchimpAudienceNode;
@@ -125,6 +129,7 @@ export function getFlowActionFromActionNode(
 			return {
 				id: node.id,
 				flowId,
+				enabled: node.data.enabled ?? true,
 				type: 'sendEmail',
 				emailTemplateId: node.data.id,
 				emailTemplate: {

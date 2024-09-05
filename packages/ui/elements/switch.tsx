@@ -11,7 +11,7 @@ import { cva } from 'class-variance-authority';
 import { Tooltip } from './tooltip';
 
 const switchVariants = cva(
-	'peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors data-[state=checked]:bg-primary data-[state=unchecked]:bg-input data-[state=unchecked]:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+	'peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors data-[state=checked]:bg-primary data-[state=unchecked]:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
 	{
 		variants: {
 			size: {
@@ -57,7 +57,7 @@ export const Switch = React.forwardRef<
 				<div
 					className={cn(
 						switchVariants({ size }),
-						'relative cursor-not-allowed bg-slate-200 radix-state-checked:bg-primary radix-state-unchecked:bg-input radix-state-unchecked:bg-slate-200',
+						'relative cursor-not-allowed bg-slate-200 radix-state-checked:bg-primary radix-state-unchecked:bg-slate-200',
 					)}
 					data-state='delayed-open'
 				>
