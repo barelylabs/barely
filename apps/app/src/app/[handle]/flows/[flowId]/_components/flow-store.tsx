@@ -6,11 +6,11 @@ https://gist.github.com/bryanltobing/e09cb4bb110c4d10cefde665b572d899#file-viewm
 */
 import type { AppRouterOutputs } from '@barely/lib/server/api/router';
 import type {
+	ActionNode,
 	AddToMailchimpAudienceNode,
 	BooleanEdge,
 	BooleanNode,
 	EmptyNode,
-	FlowNode,
 	FlowState,
 	SendEmailNode,
 	SimpleEdge,
@@ -22,15 +22,10 @@ import { createContext, use, useContext, useState } from 'react';
 import { useToast } from '@barely/lib/hooks/use-toast';
 import { getFlowLayout } from '@barely/lib/server/routes/flow/flow.layout';
 import {
-	getDefaultFlowAction_addToMailchimpAudience,
-	getDefaultFlowAction_boolean,
+	getDefaultFlowAction,
 	getDefaultFlowAction_empty,
-	getDefaultFlowAction_sendEmail,
-	getDefaultFlowAction_wait,
 } from '@barely/lib/server/routes/flow/flow.utils';
 import { newId } from '@barely/lib/utils/id';
-import { raise } from '@barely/lib/utils/raise';
-// import dagre from '@dagrejs/dagre';
 import { addEdge, applyEdgeChanges, applyNodeChanges } from '@xyflow/react';
 import { createStore, useStore } from 'zustand';
 
@@ -141,7 +136,7 @@ export const FlowStoreProvider = ({
 				set({ edges });
 			},
 
-			replaceEmptyWithNode: (id: string, type: FlowNode['type']) => {
+			replaceEmptyWithActionNode: (id: string, type: ActionNode['type']) => {
 				const spacing = { x: 0, y: 100 }; // Horizontal and vertical spacing
 
 				const prevNodes = get().nodes;
@@ -172,47 +167,58 @@ export const FlowStoreProvider = ({
 
 				const updatedNodes = prevNodes.map((node, index) => {
 					if (index === replacedNodeIndex) {
-						// const newNodeId = get().nodes.length.toString();
-						if (type === 'boolean') {
-							const { flowActionNode } = getDefaultFlowAction_boolean({
-								flowId,
-								id,
-								position: { x: newNodeX, y: emptyNodeY },
-							});
+						const { flowActionNode } = getDefaultFlowAction({
+							flowId,
+							id,
+							position: { x: newNodeX, y: emptyNodeY },
+							type,
+							toast,
+							emailFromId: defaultFromEmail?.id,
+							mailchimpAudienceId: defaultMailchimpAudienceId ?? undefined,
+						});
 
-							return flowActionNode;
-						} else if (type === 'wait') {
-							const { flowActionNode } = getDefaultFlowAction_wait({
-								flowId,
-								id,
-								position: { x: newNodeX, y: emptyNodeY },
-							});
-							return flowActionNode;
-						} else if (type === 'sendEmail') {
-							const emailFromId = defaultFromEmail?.id;
+						return flowActionNode;
 
-							if (!emailFromId) {
-								toast('No default email address');
-								raise('No default email address');
-							}
+						// if (type === 'boolean') {
+						// 	const { flowActionNode } = getDefaultFlowAction_boolean({
+						// 		flowId,
+						// 		id,
+						// 		position: { x: newNodeX, y: emptyNodeY },
+						// 	});
 
-							const { flowActionNode } = getDefaultFlowAction_sendEmail({
-								flowId,
-								id,
-								emailFromId: defaultFromEmail?.id ?? raise('No default email address'),
-								position: { x: newNodeX, y: emptyNodeY },
-							});
-							return flowActionNode;
-						} else if (type === 'addToMailchimpAudience') {
-							const { flowActionNode } = getDefaultFlowAction_addToMailchimpAudience({
-								flowId,
-								id,
-								position: { x: newNodeX, y: emptyNodeY },
-								defaultMailchimpAudienceId:
-									defaultMailchimpAudienceId ?? raise('No default mailchimp audience id'),
-							});
-							return flowActionNode;
-						}
+						// 	return flowActionNode;
+						// } else if (type === 'wait') {
+						// 	const { flowActionNode } = getDefaultFlowAction_wait({
+						// 		flowId,
+						// 		id,
+						// 		position: { x: newNodeX, y: emptyNodeY },
+						// 	});
+						// 	return flowActionNode;
+						// } else if (type === 'sendEmail') {
+						// 	const emailFromId = defaultFromEmail?.id;
+
+						// 	if (!emailFromId) {
+						// 		toast('No default email address');
+						// 		raise('No default email address');
+						// 	}
+
+						// 	const { flowActionNode } = getDefaultFlowAction_sendEmail({
+						// 		flowId,
+						// 		id,
+						// 		emailFromId: defaultFromEmail?.id ?? raise('No default email address'),
+						// 		position: { x: newNodeX, y: emptyNodeY },
+						// 	});
+						// 	return flowActionNode;
+						// } else if (type === 'addToMailchimpAudience') {
+						// 	const { flowActionNode } = getDefaultFlowAction_addToMailchimpAudience({
+						// 		flowId,
+						// 		id,
+						// 		position: { x: newNodeX, y: emptyNodeY },
+						// 		mailchimpAudienceId:
+						// 			defaultMailchimpAudienceId ?? raise('No default mailchimp audience id'),
+						// 	});
+						// 	return flowActionNode;
+						// }
 					} else if (index > replacedNodeIndex) {
 						return {
 							...node,
@@ -421,6 +427,73 @@ export const FlowStoreProvider = ({
 				});
 
 				return set({ nodes: updatedNodes });
+			},
+
+			// insert in between nodes
+			canInsertNodeInEdge: (edgeId: string) => {
+				const edges = get().edges;
+				const edge = edges.find(edge => edge.id === edgeId);
+
+				const target = edge ? get().nodes.find(node => node.id === edge.target) : null;
+
+				if (!target || target.type === 'empty') return false;
+				return true;
+			},
+
+			insertActionNodeInEdge: (edgeId: string, type: ActionNode['type']) => {
+				const prevEdges = get().edges;
+				const prevNodes = get().nodes;
+
+				const edge = prevEdges.find(edge => edge.id === edgeId);
+				if (!edge) return;
+
+				const source = get().nodes.find(node => node.id === edge.source);
+				if (!source || source.type === 'empty') return;
+
+				const target = get().nodes.find(node => node.id === edge.target);
+				if (!target || target.type === 'empty') return;
+
+				// create new node
+				const { flowActionNode } = getDefaultFlowAction({
+					flowId,
+					id: newId('flowAction'),
+					position: { x: target.position.x, y: target.position.y + 100 },
+					type,
+					toast,
+					emailFromId: defaultFromEmail?.id,
+					mailchimpAudienceId: defaultMailchimpAudienceId ?? undefined,
+				});
+
+				set({ nodes: [...prevNodes, flowActionNode] });
+
+				// remove current edge
+				const updatedEdges = prevEdges.filter(edge => edge.id !== edgeId);
+
+				// connect source to new node
+				updatedEdges.push({
+					id: `e-${flowActionNode.id}-${edge.source}`,
+					source: edge.source,
+					target: flowActionNode.id,
+					deletable: false,
+					type: 'simple',
+				} satisfies SimpleEdge);
+
+				// connect new node to target
+				updatedEdges.push({
+					id: `e-${flowActionNode.id}-${edge.target}`,
+					source: flowActionNode.id,
+					target: edge.target,
+					deletable: false,
+					type: 'simple',
+				} satisfies SimpleEdge);
+
+				set({ edges: updatedEdges });
+
+				get().saveSnapshot();
+
+				return setTimeout(() => {
+					get().onLayout('TB');
+				}, 100);
 			},
 
 			//layout

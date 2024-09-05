@@ -86,8 +86,10 @@ export interface FlowState {
 	onConnect: OnConnect;
 	// onNodesDelete: (nodesToDelete: FlowNode[]) => void;
 	onLayout: (direction: 'TB' | 'LR') => void;
+	canInsertNodeInEdge: (edgeId: string) => boolean;
+	insertActionNodeInEdge: (edgeId: string, type: ActionNode['type']) => void;
 	// custom setters
-	replaceEmptyWithNode: (id: string, type: FlowNode['type']) => void;
+	replaceEmptyWithActionNode: (id: string, type: ActionNode['type']) => void;
 	updateTriggerNode: (id: string, data: TriggerNode['data']) => void;
 	updateBooleanNode: (id: string, data: BooleanNode['data']) => void;
 	updateWaitNode: (id: string, data: WaitNode['data']) => void;

@@ -76,7 +76,7 @@ export function TriggerNodeType({ data, id }: { id: string; data: TriggerNode['d
 }
 
 const emptyStoreSelector = (state: FlowState) => ({
-	replaceEmptyWithNode: state.replaceEmptyWithNode,
+	replaceEmptyWithNode: state.replaceEmptyWithActionNode,
 });
 
 export function EmptyNodeType({ id }: { id: string }) {

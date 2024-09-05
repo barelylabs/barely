@@ -1,3 +1,4 @@
+import type { UseToastOutput } from '@barely/toast';
 import type { z } from 'zod';
 
 import type { EmailTemplate } from '../email/email.schema';
@@ -13,7 +14,6 @@ import type {
 	AddToMailchimpAudienceNode,
 	BooleanNode,
 	EmptyNode,
-	FlowNode,
 	SendEmailNode,
 	TriggerNode,
 	WaitNode,
@@ -25,7 +25,7 @@ import { raise } from '../../../utils/raise';
 export function getTriggerNodeFromFlowTrigger(
 	node: InsertFlowTrigger,
 	position?: { x: number; y: number },
-): FlowNode {
+): TriggerNode {
 	return {
 		id: node.id,
 		type: 'trigger',
@@ -40,7 +40,7 @@ export function getActionNodeFromFlowAction(
 		emailTemplate?: z.infer<typeof flowForm_sendEmailSchema> | null;
 	},
 	position?: { x: number; y: number },
-): FlowNode {
+): ActionNode {
 	switch (node.type) {
 		case 'wait':
 			return {
@@ -209,7 +209,6 @@ export function getDefaultFlowTrigger({ flowId }: { flowId: string }): InsertFlo
 }
 
 /* default flow actions */
-
 export function getDefaultFlowAction_empty(props: {
 	flowId: string;
 	position?: { x: number; y: number };
@@ -307,7 +306,7 @@ export function getDefaultFlowAction_sendEmail(props: {
 
 export function getDefaultFlowAction_addToMailchimpAudience(props: {
 	flowId: string;
-	defaultMailchimpAudienceId: string;
+	mailchimpAudienceId: string;
 	id?: string;
 	position?: { x: number; y: number };
 }) {
@@ -315,10 +314,51 @@ export function getDefaultFlowAction_addToMailchimpAudience(props: {
 		id: props.id ?? newId('flowAction'),
 		flowId: props.flowId,
 		type: 'addToMailchimpAudience',
-		mailchimpAudienceId: props.defaultMailchimpAudienceId,
+		mailchimpAudienceId: props.mailchimpAudienceId,
 	} satisfies InsertFlowAction_NotStrict;
 
 	const flowActionNode = getActionNodeFromFlowAction(flowAction, props.position);
 
 	return { flowAction, flowActionNode };
+}
+
+interface DefaultFlowActionProps {
+	flowId: string;
+	id?: string;
+	position?: { x: number; y: number };
+	emailFromId?: string;
+	mailchimpAudienceId?: string;
+	type: 'empty' | 'boolean' | 'wait' | 'sendEmail' | 'addToMailchimpAudience';
+	toast?: UseToastOutput['toast'];
+}
+
+export function getDefaultFlowAction(props: DefaultFlowActionProps) {
+	switch (props.type) {
+		case 'empty':
+			return getDefaultFlowAction_empty(props);
+		case 'boolean':
+			return getDefaultFlowAction_boolean(props);
+		case 'wait':
+			return getDefaultFlowAction_wait(props);
+		case 'sendEmail': {
+			if (!props.emailFromId) {
+				props.toast?.error('No email from id found');
+			}
+
+			return getDefaultFlowAction_sendEmail({
+				...props,
+				emailFromId: props.emailFromId ?? raise('No email from id found'),
+			});
+		}
+		case 'addToMailchimpAudience':
+			if (!props.mailchimpAudienceId) {
+				props.toast?.error('No mailchimp audience id found');
+			}
+
+			return getDefaultFlowAction_addToMailchimpAudience({
+				...props,
+				mailchimpAudienceId:
+					props.mailchimpAudienceId ?? raise('No mailchimp audience id found'),
+			});
+	}
 }

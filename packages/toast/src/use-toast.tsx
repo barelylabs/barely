@@ -200,3 +200,5 @@ function useToast() {
 }
 
 export { useToast, plainToast as toast };
+
+export type UseToastOutput = ReturnType<typeof useToast>;
