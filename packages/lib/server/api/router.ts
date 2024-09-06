@@ -10,7 +10,8 @@ import { cartRouter } from '../routes/cart/cart.router';
 import { domainRouter } from '../routes/domain/domain.router';
 import { emailAddressRouter } from '../routes/email-address/email-address.router';
 import { emailDomainRouter } from '../routes/email-domain/email-domain.router';
-import { emailRouter } from '../routes/email/email.router';
+import { emailTemplateGroupRouter } from '../routes/email-template-group/email-template-group.router';
+import { emailTemplateRouter } from '../routes/email-template/email-template.router';
 import { eventRouter } from '../routes/event/event.router';
 import { fanRouter } from '../routes/fan/fan.router';
 import { fileRouter } from '../routes/file/file.router';
@@ -48,9 +49,10 @@ const appRouter = createTRPCRouter({
 	cart: cartRouter,
 	cartFunnel: cartFunnelRouter,
 	cartOrder: cartOrderRouter,
-	email: emailRouter,
 	emailAddress: emailAddressRouter,
 	emailDomain: emailDomainRouter,
+	emailTemplate: emailTemplateRouter,
+	emailTemplateGroup: emailTemplateGroupRouter,
 	event: eventRouter,
 	fan: fanRouter,
 	file: fileRouter,

@@ -7,7 +7,7 @@ import { useToast } from '@barely/lib/hooks/use-toast';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { useZodForm } from '@barely/lib/hooks/use-zod-form';
 import { api } from '@barely/lib/server/api/react';
-import { EMAIL_VARIABLES } from '@barely/lib/server/routes/email/email.constants';
+import { EMAIL_TEMPLATE_VARIABLES } from '@barely/lib/server/routes/email-template/email-template.constants';
 import { flowForm_sendEmailSchema } from '@barely/lib/server/routes/flow/flow.schema';
 // import { updateFlowAction_sendEmailSchema } from '@barely/lib/server/routes/flow/flow.schema';
 import { useShallow } from 'zustand/react/shallow';
@@ -71,7 +71,7 @@ export const FlowEmailModal = () => {
 	};
 
 	const [isTestEmailModalOpen, setIsTestEmailModalOpen] = useState(false);
-	const { mutate: sendTestEmail } = api.email.sendTestEmail.useMutation({
+	const { mutate: sendTestEmail } = api.emailTemplate.sendTestEmail.useMutation({
 		onSuccess: () => {
 			toast('Test email sent', {
 				description: `Check ${form.getValues('sendTestEmailTo')} for the test email`,
@@ -152,7 +152,7 @@ export const FlowEmailModal = () => {
 
 					<Label>Body</Label>
 					<MDXEditor
-						variables={EMAIL_VARIABLES}
+						variables={EMAIL_TEMPLATE_VARIABLES}
 						markdown={currentEmailNode?.data.body ?? ''}
 						onChange={markdown => {
 							form.setValue('body', markdown);

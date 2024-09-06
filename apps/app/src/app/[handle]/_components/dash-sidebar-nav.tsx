@@ -75,6 +75,15 @@ export function SidebarNav(props: { workspace: Workspace }) {
 		{ title: 'press', icon: 'press', href: `/${handle}/press` },
 	];
 
+	const emailLinks: SidebarNavLink[] = [
+		{ title: 'templates', icon: 'email', href: `/${handle}/email-templates` },
+		{
+			title: 'template groups',
+			icon: 'emailTemplateGroup',
+			href: `/${handle}/email-template-groups`,
+		},
+	];
+
 	const otherLinks: SidebarNavLink[] = [
 		{ title: 'fans', icon: 'fans', href: `/${handle}/fans` },
 		{ title: 'flows', icon: 'flow', href: `/${handle}/flows` },
@@ -96,7 +105,10 @@ export function SidebarNav(props: { workspace: Workspace }) {
 			title: 'merch',
 			links: merchLinks,
 		},
-
+		{
+			title: 'email',
+			links: emailLinks,
+		},
 		{
 			title: 'other',
 			links: otherLinks,

@@ -3,7 +3,7 @@ import { boolean, pgTable, unique, varchar } from 'drizzle-orm/pg-core';
 
 import { dbId, primaryId, timestamps } from '../../../utils/sql';
 import { EmailDomains } from '../email-domain/email-domain.sql';
-import { EmailTemplates } from '../email/email.sql';
+import { EmailTemplates } from '../email-template/email-template.sql';
 import { Workspaces } from '../workspace/workspace.sql';
 
 /* Email Addresses */

@@ -26,7 +26,7 @@ export type CreateFmLink = z.infer<typeof createFmLinkSchema>;
 export type UpsertFmLink = z.infer<typeof upsertFmLinkSchema>;
 export type FmLink = InferSelectModel<typeof FmLinks>;
 
-// export const insertFmPageSchema = createInsertSchema
+// export const insertFmPageSchema = createxInsertSchema
 export const insertFmPageSchema = createInsertSchema(FmPages, {
 	key: s => s.key.min(4, 'Key is required'),
 	title: s => s.title.min(1, 'Title is required'),

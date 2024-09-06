@@ -41,7 +41,7 @@ export function EmailDomainModal() {
 
 	const { mutateAsync: createEmailDomain } = api.emailDomain.create.useMutation({
 		onSuccess: async () => {
-			await apiUtils.email.invalidate();
+			await apiUtils.emailTemplate.invalidate();
 			setShowEmailDomainModal(false);
 			setEditEmailDomain(undefined);
 			form.reset();
@@ -50,7 +50,7 @@ export function EmailDomainModal() {
 
 	const { mutateAsync: updateEmailDomain } = api.emailDomain.update.useMutation({
 		onSuccess: async () => {
-			await apiUtils.email.invalidate();
+			await apiUtils.emailTemplate.invalidate();
 			setShowEmailDomainModal(false);
 			setEditEmailDomain(undefined);
 			form.reset();

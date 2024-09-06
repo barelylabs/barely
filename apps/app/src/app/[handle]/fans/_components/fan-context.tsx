@@ -43,10 +43,10 @@ const FanContext = createContext<FanContext | undefined>(undefined);
 
 export function FanContextProvider({
 	children,
-	initialFans,
+	initialFansFirstPage,
 }: {
 	children: React.ReactNode;
-	initialFans: Promise<AppRouterOutputs['fan']['byWorkspace']>;
+	initialFansFirstPage: Promise<AppRouterOutputs['fan']['byWorkspace']>;
 }) {
 	const [showCreateFanModal, setShowCreateFanModal] = useState(false);
 	const [showUpdateFanModal, setShowUpdateFanModal] = useState(false);
@@ -65,7 +65,7 @@ export function FanContextProvider({
 		: selectedFanIds === 'all' ? 'all'
 		: new Set(selectedFanIds);
 
-	const initialData = use(initialFans);
+	const initialData = use(initialFansFirstPage);
 	const {
 		data: infiniteFans,
 		hasNextPage,
