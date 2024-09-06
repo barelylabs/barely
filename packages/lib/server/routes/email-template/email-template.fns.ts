@@ -4,10 +4,10 @@ import type {
 	CreateEmailTemplate,
 	InsertEmailTemplate,
 	UpdateEmailTemplate,
-} from './email.schema';
+} from './email-template.schema';
 import { newId } from '../../../utils/id';
 import { dbHttp } from '../../db';
-import { EmailTemplates } from './email.sql';
+import { EmailTemplates } from './email-template.sql';
 
 export async function createEmailTemplate(
 	input: CreateEmailTemplate & { workspaceId: string },

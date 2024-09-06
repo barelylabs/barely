@@ -36,6 +36,7 @@ const prefixes = {
 	track: 'tr',
 	// email
 	emailTemplate: 'email_temp',
+	emailTemplateGroup: 'email_temp_grp',
 	emailAddress: 'email_addr',
 	emailDomain: 'email_domain',
 	emailDelivery: 'email_delivery',

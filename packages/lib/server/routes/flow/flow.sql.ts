@@ -16,7 +16,7 @@ import type { FlowEdge } from './flow.ui.types';
 import { TRIGGER_WAIT_UNITS } from '../../../trigger/trigger.constants';
 import { customJsonb, dbId, primaryId, timestamps } from '../../../utils/sql';
 import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
-import { EmailTemplates } from '../email/email.sql';
+import { EmailTemplates } from '../email-template/email-template.sql';
 import { Fans } from '../fan/fan.sql';
 import { Products } from '../product/product.sql';
 import { Workspaces } from '../workspace/workspace.sql';

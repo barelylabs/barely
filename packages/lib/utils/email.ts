@@ -1,6 +1,8 @@
 import { z } from 'zod';
 
 import type { Db } from '../server/db';
+import type { EmailAddress } from '../server/routes/email-address/email-address.schema';
+import type { EmailDomain } from '../server/routes/email-domain/email-domain.schema';
 
 export function isRealEmail(email: string) {
 	const isRealEmail = z.string().email().safeParse(email);
@@ -22,4 +24,10 @@ export async function checkEmailExists(email: string, db?: Db) {
 		'../server/routes/user/user.actions'
 	);
 	return checkEmailExistsServerAction(email);
+}
+
+export function getEmailAddressFromEmailAddress(
+	email: EmailAddress & { domain: EmailDomain },
+) {
+	return `${email.username}@${email.domain.name}`;
 }
