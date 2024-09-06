@@ -3,7 +3,7 @@ import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
 import { querySelectionSchema } from '../../../utils/zod-helpers';
-import { insertEmailTemplateSchema } from '../email/email.schema';
+import { insertEmailTemplateSchema } from '../email-template/email-template.schema';
 import {
 	Flow_Actions,
 	Flow_Runs,

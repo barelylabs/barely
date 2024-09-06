@@ -14,7 +14,7 @@ import {
 	privateProcedure,
 	workspaceQueryProcedure,
 } from '../../api/trpc';
-import { EmailTemplates } from '../email/email.sql';
+import { EmailTemplates } from '../email-template/email-template.sql';
 import { selectWorkspaceFlowsSchema, updateFlowAndNodesSchema } from './flow.schema';
 import { Flow_Actions, Flow_Triggers, Flows } from './flow.sql';
 import {

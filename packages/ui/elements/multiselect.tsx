@@ -25,11 +25,11 @@ export interface MultiSelectProps<T> {
 	focusOnMount?: boolean;
 	inputOnChange?: (search: string) => void;
 	displayValue: (option: T) => string;
-	optImgSrc?: (option: T) => string | undefined;
-	optImgAlt?: (option: T) => string | undefined;
-	optTitle?: (option: T) => string | undefined;
-	optSubtitle?: (option: T) => string | undefined;
-	optInfo?: (option: T) => string | undefined;
+	optImgSrc?: (option: T) => string | null | undefined;
+	optImgAlt?: (option: T) => string | null | undefined;
+	optTitle?: (option: T) => string | null | undefined;
+	optSubtitle?: (option: T) => string | null | undefined;
+	optInfo?: (option: T) => string | null | undefined;
 	optDisplay?: (option: T) => React.ReactNode;
 	isFetchingOptions?: boolean;
 	noOptionsText?: string;

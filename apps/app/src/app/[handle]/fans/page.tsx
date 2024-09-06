@@ -30,7 +30,7 @@ export default function FansPage({
 	});
 
 	return (
-		<FanContextProvider initialFans={fans}>
+		<FanContextProvider initialFansFirstPage={fans}>
 			<DashContentHeader title='Fans' button={<CreateFanButton />} />
 			<AllFans />
 

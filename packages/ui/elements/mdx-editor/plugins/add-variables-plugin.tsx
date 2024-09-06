@@ -3,12 +3,13 @@
 import type { LexicalEditor } from 'lexical';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocale } from '@barely/lib/hooks/use-locale';
+import { EMAIL_TEMPLATE_VARIABLES } from '@barely/lib/server/routes/email-template/email-template.constants';
 /**
  * Holds the allowed variables for the current editor instance.
  *
  * @param allowedVariables - The allowed variables for the current editor instance.
  */
-import { EMAIL_VARIABLES } from '@barely/lib/server/routes/email/email.constants';
+
 import { cn } from '@barely/lib/utils/cn';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import {
@@ -36,7 +37,7 @@ function $findAndTransformVariable(node: TextNode): null | TextNode {
 		if (match !== null) {
 			const matchedText = match[0]; // The entire matched text {VARIABLE_NAME <whatever here>}
 
-			if (!EMAIL_VARIABLES.some(v => `{${v.name}}` === matchedText)) return null; // todo: this is hardcoded. we want to pull this from state (i.e. variables passed to the editor) and check against those
+			if (!EMAIL_TEMPLATE_VARIABLES.some(v => `{${v.name}}` === matchedText)) return null; // todo: this is hardcoded. we want to pull this from state (i.e. variables passed to the editor) and check against those
 
 			console.log('matchedText', matchedText);
 
@@ -200,7 +201,7 @@ export const addVariablesPlugin = realmPlugin({
 	init(realm) {
 		// const pluginIds = realm.getValue(activePlugins$)
 		// const allowedVariables: string[] = pluginIds.includes('add-variables-plugin') ? realm.getValue(allowedVariables$) : []
-		const allowedVariables = EMAIL_VARIABLES;
+		const allowedVariables = EMAIL_TEMPLATE_VARIABLES;
 		// realm.register(VariableNode)
 		realm.pubIn({
 			[addComposerChild$]: () => <AddVariablesPlugin variables={allowedVariables} />,

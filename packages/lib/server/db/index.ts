@@ -23,7 +23,7 @@ import * as cartSql from '../routes/cart/cart.sql';
 import * as domainSql from '../routes/domain/domain.sql';
 import * as emailAddressSql from '../routes/email-address/email-address.sql';
 import * as emailDomainSql from '../routes/email-domain/email-domain.sql';
-import * as emailSql from '../routes/email/email.sql';
+import * as emailSql from '../routes/email-template/email-template.sql';
 import * as eventReportSql from '../routes/event/event-report.sql';
 import * as eventSql from '../routes/event/event.sql';
 import * as externalWebsiteSql from '../routes/external-website/external-website.sql';
@@ -47,6 +47,7 @@ import * as productSql from '../routes/product/product.sql';
 import * as providerAccountSql from '../routes/provider-account/provider-account.sql';
 import * as providerSubAccountSql from '../routes/provider-account/provider-sub-account.sql';
 import * as statSql from '../routes/stat/stat.sql';
+import * as tagSql from '../routes/tag/tag.sql';
 import * as trackSql from '../routes/track/track.sql';
 import * as transactionSql from '../routes/transaction/transaction.sql';
 import * as userSessionSql from '../routes/user/user-session.sql';
@@ -98,6 +99,7 @@ export const dbSchema = {
 	...providerAccountSql,
 	...providerSubAccountSql,
 	...statSql,
+	...tagSql,
 	...trackSql,
 	...transactionSql,
 	...userSql,

@@ -1,7 +1,7 @@
 import type { UseToastOutput } from '@barely/toast';
 import type { z } from 'zod';
 
-import type { EmailTemplate } from '../email/email.schema';
+import type { EmailTemplate } from '../email-template/email-template.schema';
 import type {
 	FlowAction,
 	flowForm_sendEmailSchema,
