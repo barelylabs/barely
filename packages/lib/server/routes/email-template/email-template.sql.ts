@@ -74,6 +74,7 @@ export const EmailTemplateTags = pgTable(
 				emailTemplateTag.emailTemplateId,
 				emailTemplateTag.tagName,
 			],
+			name: 'email_template_tags_pk',
 		}),
 		tagFk: foreignKey({
 			columns: [emailTemplateTag.workspaceId, emailTemplateTag.tagName],
@@ -134,6 +135,7 @@ export const _EmailTemplates_To_EmailTemplateGroups = pgTable(
 	table => ({
 		pk: primaryKey({
 			columns: [table.emailTemplateGroupId, table.emailTemplateId],
+			name: '_email_templates_to_template_groups_pk',
 		}),
 	}),
 );
