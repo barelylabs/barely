@@ -183,7 +183,7 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 			// todo: abstract this to a function. require cartOrderId and fanId
 			await tasks.trigger<typeof handleFlow>('handle-flow', {
 				triggerId: trigger.id,
-				cartOrderId: prevCart.id,
+				cartId: prevCart.id,
 				fanId: fan.id,
 			});
 		}
