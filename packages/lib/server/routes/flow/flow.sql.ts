@@ -16,7 +16,10 @@ import type { FlowEdge } from './flow.ui.types';
 import { TRIGGER_WAIT_UNITS } from '../../../trigger/trigger.constants';
 import { customJsonb, dbId, primaryId, timestamps } from '../../../utils/sql';
 import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
-import { EmailTemplates } from '../email-template/email-template.sql';
+import {
+	EmailTemplateGroups,
+	EmailTemplates,
+} from '../email-template/email-template.sql';
 import { Fans } from '../fan/fan.sql';
 import { Products } from '../product/product.sql';
 import { Workspaces } from '../workspace/workspace.sql';
@@ -42,6 +45,8 @@ export const Flows = pgTable('Flows', {
 	edges: customJsonb<FlowEdge[]>('edges').notNull().default([]),
 
 	archived: boolean('archived').default(false),
+	enabled: boolean('enabled').notNull().default(false),
+	paused: boolean('paused').notNull().default(false), // paused is different from enabled. if paused, the flow will trigger but not execute actions
 });
 
 export const FlowsRelations = relations(Flows, ({ one, many }) => ({
@@ -67,6 +72,7 @@ export const Flow_Triggers = pgTable(
 
 		type: text('type', { enum: FLOW_TRIGGERS }).notNull(),
 
+		enabled: boolean('enabled').notNull().default(true),
 		// potential triggers:
 		productId: dbId('productId').references(() => Products.id),
 		cartFunnelId: dbId('cartFunnels').references(() => CartFunnels.id),
@@ -109,6 +115,10 @@ export const Flow_Actions = pgTable(
 		waitForUnits: text('waitForUnits', { enum: TRIGGER_WAIT_UNITS }),
 		// 📧
 		emailTemplateId: dbId('emailTemplateId').references(() => EmailTemplates.id),
+		emailTemplateGroupId: dbId('emailTemplateGroupId').references(
+			() => EmailTemplateGroups.id,
+		),
+
 		// 🔄
 		booleanCondition: text('booleanCondition', { enum: FLOW_BOOLEAN_CONDITIONS }),
 		// external actions:

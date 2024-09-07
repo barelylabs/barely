@@ -1,3 +1,6 @@
+export const FLOW_STATUSES = ['disabled', 'active', 'paused'] as const;
+export type FlowStatus = (typeof FLOW_STATUSES)[number];
+
 export const FLOW_TRIGGERS = ['callFlow', 'newFan', 'newCartOrder'] as const;
 export type FlowTriggerType = (typeof FLOW_TRIGGERS)[number];
 
@@ -5,6 +8,7 @@ export const FLOW_ACTIONS = [
 	'wait',
 	'addToMailchimpAudience',
 	'sendEmail',
+	'sendEmailFromTemplateGroup',
 	'boolean',
 	'empty',
 ] as const;

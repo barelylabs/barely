@@ -7,6 +7,7 @@ import type {
 	flowForm_sendEmailSchema,
 	InsertFlowAction,
 	InsertFlowAction_NotStrict,
+	InsertFlowAction_SendEmail,
 	InsertFlowTrigger,
 } from './flow.schema';
 import type {
@@ -14,6 +15,7 @@ import type {
 	AddToMailchimpAudienceNode,
 	BooleanNode,
 	EmptyNode,
+	SendEmailFromTemplateGroupNode,
 	SendEmailNode,
 	TriggerNode,
 	WaitNode,
@@ -77,10 +79,27 @@ export function getActionNodeFromFlowAction(
 				data: {
 					...emailTemplate,
 					enabled: node.enabled ?? true,
+					name: emailTemplate.name ?? '',
 				},
 				position: position ?? { x: 400, y: 25 },
 			} satisfies SendEmailNode;
 		}
+		case 'sendEmailFromTemplateGroup': {
+			const emailTemplateGroupId =
+				node.emailTemplateGroupId ??
+				raise(`No email template group id found for action ${node.id}`);
+			return {
+				id: node.id,
+				type: 'sendEmailFromTemplateGroup',
+				data: {
+					...node,
+					emailTemplateGroupId,
+					enabled: node.enabled ?? true,
+				},
+				position: position ?? { x: 400, y: 25 },
+			} satisfies SendEmailFromTemplateGroupNode;
+		}
+
 		case 'addToMailchimpAudience': {
 			const mailchimpAudienceId =
 				node.mailchimpAudienceId ??
@@ -107,8 +126,46 @@ export function getActionNodeFromFlowAction(
 	}
 }
 
-/* get flow elements from nodes */
+export function hasEdgeLoop(edges: { source: string; target: string }[]): boolean {
+	console.log('edges', edges);
+	const graph: Record<string, string[]> = {};
+	const visited: Record<string, boolean> = {};
+	const recursionStack: Record<string, boolean> = {};
 
+	// Build the graph
+	for (const edge of edges) {
+		if (!graph[edge.source]) graph[edge.source] = [];
+		graph[edge.source]?.push(edge.target);
+	}
+
+	// DFS function to detect cycle
+	function dfs(node: string): boolean {
+		if (!visited[node]) {
+			visited[node] = true;
+			recursionStack[node] = true;
+
+			for (const neighbor of graph[node] ?? []) {
+				if (!visited[neighbor] && dfs(neighbor)) {
+					return true;
+				} else if (recursionStack[neighbor]) {
+					return true;
+				}
+			}
+		}
+
+		recursionStack[node] = false;
+		return false;
+	}
+
+	// Check for cycles starting from each node
+	for (const node in graph) {
+		if (dfs(node)) return true;
+	}
+
+	return false;
+}
+
+/* get flow elements from nodes */
 export function getFlowTriggerFromTriggerNode(
 	node: TriggerNode,
 	flowId: string,
@@ -157,8 +214,20 @@ export function getFlowActionFromActionNode(
 				type: 'boolean',
 				...node.data,
 			};
-		default:
-			throw new Error(`Unsupported node type`);
+		case 'sendEmailFromTemplateGroup':
+			return {
+				id: node.id,
+				flowId,
+				type: 'sendEmailFromTemplateGroup',
+				...node.data,
+			};
+		case 'addToMailchimpAudience':
+			return {
+				id: node.id,
+				flowId,
+				type: 'addToMailchimpAudience',
+				...node.data,
+			};
 	}
 }
 
@@ -195,8 +264,16 @@ export function getInsertableFlowActionsFromFlowActions(
 					...fa,
 					type: 'boolean',
 				} satisfies InsertFlowAction;
-			default:
-				throw new Error(`Unsupported action type: ${fa.type}`);
+			case 'sendEmailFromTemplateGroup':
+				return {
+					...fa,
+					type: 'sendEmailFromTemplateGroup',
+				} satisfies InsertFlowAction;
+			case 'addToMailchimpAudience':
+				return {
+					...fa,
+					type: 'addToMailchimpAudience',
+				} satisfies InsertFlowAction;
 		}
 	});
 
@@ -204,7 +281,6 @@ export function getInsertableFlowActionsFromFlowActions(
 }
 
 /* default flow triggers */
-
 export function getDefaultFlowTrigger({ flowId }: { flowId: string }): InsertFlowTrigger {
 	return {
 		id: newId('flowTrigger'),
@@ -283,28 +359,54 @@ export function getDefaultFlowAction_wait(props: {
 export function getDefaultFlowAction_sendEmail(props: {
 	flowId: string;
 	id?: string;
-	emailFromId: string;
 	position?: { x: number; y: number };
+
+	emailTemplate: Partial<EmailTemplate> & { fromId: EmailTemplate['fromId'] };
 }) {
+	const emailTemplate = props.emailTemplate ?? {};
+
+	const emailTemplateId = newId('emailTemplate');
+
 	const flowAction = {
 		id: props.id ?? newId('flowAction'),
 		flowId: props.flowId,
 		type: 'sendEmail',
-		emailTemplateId: newId('emailTemplate'),
-	} satisfies InsertFlowAction_NotStrict;
+		enabled: true,
+		emailTemplateId,
+	} satisfies Omit<InsertFlowAction_SendEmail, 'emailTemplate'>;
 
 	const flowActionNode = getActionNodeFromFlowAction(
 		{
 			...flowAction,
 			emailTemplate: {
+				...emailTemplate,
 				id: flowAction.emailTemplateId,
-				fromId: props.emailFromId,
-				subject: '',
-				body: '',
+				fromId: emailTemplate.fromId ?? '',
+				subject: emailTemplate.subject ?? '',
+				body: emailTemplate.body ?? '',
+				type: emailTemplate.type ?? 'marketing',
 			},
 		},
 		props.position,
 	);
+
+	return { flowAction, flowActionNode };
+}
+
+export function getDefaultFlowAction_sendEmailTemplateGroup(props: {
+	flowId: string;
+	emailTemplateGroupId: string;
+	id?: string;
+	position?: { x: number; y: number };
+}) {
+	const flowAction = {
+		id: props.id ?? newId('flowAction'),
+		flowId: props.flowId,
+		type: 'sendEmailFromTemplateGroup',
+		emailTemplateGroupId: props.emailTemplateGroupId,
+	} satisfies InsertFlowAction_NotStrict;
+
+	const flowActionNode = getActionNodeFromFlowAction(flowAction, props.position);
 
 	return { flowAction, flowActionNode };
 }
@@ -331,10 +433,13 @@ interface DefaultFlowActionProps {
 	flowId: string;
 	id?: string;
 	position?: { x: number; y: number };
-	emailFromId?: string;
-	mailchimpAudienceId?: string;
-	type: 'empty' | 'boolean' | 'wait' | 'sendEmail' | 'addToMailchimpAudience';
+	type: FlowAction['type'];
 	toast?: UseToastOutput['toast'];
+
+	emailTemplate?: Partial<EmailTemplate> & { fromId: EmailTemplate['fromId'] };
+	// emailFromId?: string;
+	emailTemplateGroupId?: string;
+	mailchimpAudienceId?: string;
 }
 
 export function getDefaultFlowAction(props: DefaultFlowActionProps) {
@@ -346,15 +451,28 @@ export function getDefaultFlowAction(props: DefaultFlowActionProps) {
 		case 'wait':
 			return getDefaultFlowAction_wait(props);
 		case 'sendEmail': {
-			if (!props.emailFromId) {
+			if (!props.emailTemplate?.fromId) {
 				props.toast?.error('No email from id found');
 			}
 
 			return getDefaultFlowAction_sendEmail({
 				...props,
-				emailFromId: props.emailFromId ?? raise('No email from id found'),
+				emailTemplate: {
+					...props.emailTemplate,
+					fromId: props.emailTemplate?.fromId ?? raise('No email from id found'),
+				},
 			});
 		}
+		case 'sendEmailFromTemplateGroup':
+			if (!props.emailTemplateGroupId) {
+				props.toast?.error('No email template group id found');
+			}
+
+			return getDefaultFlowAction_sendEmailTemplateGroup({
+				...props,
+				emailTemplateGroupId:
+					props.emailTemplateGroupId ?? raise('No email template group id found'),
+			});
 		case 'addToMailchimpAudience':
 			if (!props.mailchimpAudienceId) {
 				props.toast?.error('No mailchimp audience id found');

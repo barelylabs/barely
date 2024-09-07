@@ -39,7 +39,7 @@ export function AllEmailTemplateGroups() {
 				setSelectedKeys={setEmailTemplateGroupSelection}
 				renderEmptyState={() => (
 					<NoResultsPlaceholder
-						icon='email'
+						icon='emailTemplateGroup'
 						title='No Email Template Groups'
 						subtitle='Create a new email template group to get started.'
 						button={<CreateEmailTemplateGroupButton />}

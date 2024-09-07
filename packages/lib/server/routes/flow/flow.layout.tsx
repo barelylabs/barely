@@ -10,7 +10,12 @@ dagreGraph.setDefaultEdgeLabel(() => ({}));
 
 export const getFlowLayout = (nodes: FlowNode[], edges: FlowEdge[], direction = 'TB') => {
 	const isHorizontal = direction === 'LR';
-	dagreGraph.setGraph({ rankdir: direction, ranker: 'network-simplex' });
+	dagreGraph.setGraph({
+		rankdir: direction,
+		ranker: 'network-simplex',
+
+		ranksep: 75,
+	});
 
 	nodes.forEach(node => {
 		dagreGraph.setNode(node.id, {

@@ -200,7 +200,7 @@ export default {
 					900: '#0E1625',
 				},
 				instagram: {
-					DEFAULT: '#8a3ab9',
+					DEFAULT: '#FFE01B',
 					50: '#F4ECF9',
 					100: '#E0C9EE',
 					200: '#CCA6E3',
@@ -211,6 +211,19 @@ export default {
 					700: '#572574',
 					800: '#3A184E',
 					900: '#1D0C27',
+				},
+				mailchimp: {
+					DEFAULT: '#0077C1',
+					'50': '#FFFCE5',
+					'100': '#FFF5B8',
+					'200': '#FFEF8A',
+					'300': '#FFE95C',
+					'400': '#FFE32E',
+					'500': '#FFDC00',
+					'600': '#CCB000',
+					'700': '#998400',
+					'800': '#665800',
+					'900': '#332C00',
 				},
 				meta: {
 					DEFAULT: '#0668E1',

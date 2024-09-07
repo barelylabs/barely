@@ -29,10 +29,12 @@ import {
 	BooleanNodeType,
 	EmptyNodeType,
 	MailchimpAudienceNodeType,
+	SendEmailFromTemplateGroupNodeType,
 	SendEmailNodeType,
 	TriggerNodeType,
 	WaitNodeType,
 } from '~/app/[handle]/flows/[flowId]/_components/flow-builder-nodes';
+import { FlowEmailTemplateGroupModal } from '~/app/[handle]/flows/[flowId]/_components/flow-email-template-group-modal';
 import { FlowMailchimpAudienceModal } from '~/app/[handle]/flows/[flowId]/_components/flow-mailchimp-audience-modal';
 import { FlowBooleanModal } from './flow-boolean-modal';
 import { FlowEmailModal } from './flow-email-modal';
@@ -89,6 +91,7 @@ export function FlowBuilder() {
 		empty: EmptyNodeType,
 		wait: WaitNodeType,
 		sendEmail: SendEmailNodeType,
+		sendEmailFromTemplateGroup: SendEmailFromTemplateGroupNodeType,
 		boolean: BooleanNodeType,
 		addToMailchimpAudience: MailchimpAudienceNodeType,
 	};
@@ -156,6 +159,7 @@ export function FlowBuilder() {
 				onEdgesChange={onEdgesChange}
 				onNodesDelete={onNodesDelete}
 				onConnect={onConnect}
+				// onClickConnectStart={c => console.log(c)}
 				nodeTypes={nodeTypes}
 				edgeTypes={edgeTypes}
 				panOnScroll={true}
@@ -172,6 +176,7 @@ export function FlowBuilder() {
 				{/* <button onClick={() => onLayout('LR')}>Horizontal Layout</button> */}
 			</div>
 			<FlowEmailModal />
+			<FlowEmailTemplateGroupModal />
 			<FlowWaitModal />
 			<FlowBooleanModal />
 			<FlowTriggerModal />

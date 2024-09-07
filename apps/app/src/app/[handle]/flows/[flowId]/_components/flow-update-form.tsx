@@ -71,11 +71,11 @@ export function FlowUpdateForm(props: {
 
 		const updatedActions: z.infer<typeof updateFlowAndNodesSchema>['actions'] = nodes
 			.filter(
-				node =>
-					node.type === 'boolean' ||
-					node.type === 'empty' ||
-					node.type === 'sendEmail' ||
-					node.type === 'wait',
+				node => node.type !== 'trigger',
+				// node.type === 'boolean' ||
+				// node.type === 'empty' ||
+				// node.type === 'sendEmail' ||
+				// node.type === 'wait',
 			)
 			.map(action => getFlowActionFromActionNode(action, initialFlow.flow.id));
 

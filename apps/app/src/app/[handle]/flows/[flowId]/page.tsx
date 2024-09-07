@@ -15,12 +15,16 @@ export default function FlowsPage({
 	const defaultMailchimpAudienceId = api({ handle }).mailchimp.defaultAudience({
 		handle,
 	});
+	const defaultEmailTemplateGroup = api({ handle }).emailTemplateGroup.default({
+		handle,
+	});
 
 	return (
 		<FlowStoreProvider
 			initialFlow={initialFlow}
 			defaultEmailAddress={defaultEmailAddress}
 			initialDefaultMailchimpAudienceId={defaultMailchimpAudienceId}
+			initialDefaultEmailTemplateGroup={defaultEmailTemplateGroup}
 		>
 			<div className='flex flex-col gap-8 xl:flex-row'>
 				<FlowUpdateForm initialFlow={initialFlow} />

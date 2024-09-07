@@ -2,6 +2,8 @@ import type { InferSelectModel } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
+import type { EmailAddress } from '../email-address/email-address.schema';
+import type { EmailDomain } from '../email-domain/email-domain.schema';
 import { querySelectionSchema } from '../../../utils/zod-helpers';
 import { EmailTemplates } from './email-template.sql';
 
@@ -26,6 +28,9 @@ export type InsertEmailTemplate = z.infer<typeof insertEmailTemplateSchema>;
 export type CreateEmailTemplate = z.infer<typeof createEmailTemplateSchema>;
 export type UpdateEmailTemplate = z.infer<typeof updateEmailTemplateSchema>;
 export type EmailTemplate = InferSelectModel<typeof EmailTemplates>;
+export type EmailTemplateWithFrom = EmailTemplate & {
+	from: EmailAddress & { domain: EmailDomain };
+};
 
 export const emailTemplateFilterParamsSchema = z.object({
 	search: z.string().optional(),

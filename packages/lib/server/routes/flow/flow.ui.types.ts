@@ -4,6 +4,7 @@ import type { z } from 'zod';
 import type {
 	flowForm_addToMailchimpAudienceSchema,
 	flowForm_booleanSchema,
+	flowForm_sendEmailFromTemplateGroupSchema,
 	flowForm_sendEmailSchema,
 	flowForm_waitSchema,
 	FlowTrigger,
@@ -12,7 +13,9 @@ import type {
 export interface TriggerNode extends Node {
 	type: 'trigger';
 	data: Pick<FlowTrigger, 'type'> &
-		Partial<Pick<FlowTrigger, 'cartFunnelId' | 'productId' | 'totalOrderAmount'>>;
+		Partial<
+			Pick<FlowTrigger, 'cartFunnelId' | 'productId' | 'totalOrderAmount' | 'enabled'>
+		>;
 }
 
 export interface EmptyNode extends Node {
@@ -25,10 +28,15 @@ export interface WaitNode extends Node {
 	data: z.infer<typeof flowForm_waitSchema>;
 }
 
-export type SendEmailNode = Node & {
+export interface SendEmailNode extends Node {
 	type: 'sendEmail';
 	data: z.infer<typeof flowForm_sendEmailSchema>;
-};
+}
+
+export interface SendEmailFromTemplateGroupNode extends Node {
+	type: 'sendEmailFromTemplateGroup';
+	data: z.infer<typeof flowForm_sendEmailFromTemplateGroupSchema>;
+}
 
 export interface BooleanNode extends Node {
 	type: 'boolean';
@@ -44,6 +52,7 @@ export type ActionNode =
 	| EmptyNode
 	| WaitNode
 	| SendEmailNode
+	| SendEmailFromTemplateGroupNode
 	| BooleanNode
 	| AddToMailchimpAudienceNode;
 
@@ -94,6 +103,10 @@ export interface FlowState {
 	updateBooleanNode: (id: string, data: BooleanNode['data']) => void;
 	updateWaitNode: (id: string, data: WaitNode['data']) => void;
 	updateSendEmailNode: (id: string, data: SendEmailNode['data']) => void;
+	updateSendEmailFromTemplateGroupNode: (
+		id: string,
+		data: SendEmailFromTemplateGroupNode['data'],
+	) => void;
 	updateNodeEnabled: (id: string, enabled: boolean) => void;
 	updateAddToMailchimpAudienceNode: (
 		id: string,
@@ -104,6 +117,8 @@ export interface FlowState {
 	setShowTriggerModal: (open: boolean) => void;
 	showEmailModal: boolean;
 	setShowEmailModal: (open: boolean) => void;
+	showEmailFromTemplateGroupModal: boolean;
+	setShowEmailFromTemplateGroupModal: (open: boolean) => void;
 	showWaitModal: boolean;
 	setShowWaitModal: (open: boolean) => void;
 	showBooleanModal: boolean;

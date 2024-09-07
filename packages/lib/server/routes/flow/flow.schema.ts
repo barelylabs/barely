@@ -47,29 +47,6 @@ export const selectWorkspaceFlowsSchema = flowFilterParamsSchema.extend({
 
 // Flow Action
 export const insertFlowActionSchema_notStrict = createInsertSchema(Flow_Actions);
-// export const updateFlowAction_sendEmailSchema = insertFlowActionSchema_notStrict
-// 	.partial()
-// 	.required({
-// 		id: true,
-// 	})
-// 	.merge(
-// 		z.object({
-// 			email: updateEmailSchema,
-// 		}),
-// 	);
-
-// export const updateFlowAction_booleanSchema = insertFlowActionSchema_notStrict
-// 	.partial()
-// 	.required({
-// 		id: true,
-// 	})
-// 	.merge(
-// 		z.object({
-// 			data: insertFlowActionSchema_notStrict.partial().required({
-// 				booleanCondition: true,
-// 			}),
-// 		}),
-// 	);
 
 export type InsertFlowAction_NotStrict = z.infer<typeof insertFlowActionSchema_notStrict>;
 export type FlowAction = InferSelectModel<typeof Flow_Actions>;
@@ -115,7 +92,9 @@ export const flowForm_waitSchema = z.object({
 	enabled: z.boolean(),
 });
 
-// send email
+export type InsertFlowAction_Wait = z.infer<typeof insertFlowAction_waitSchema>;
+
+// send email from template
 const insertFlowAction_sendEmailSchema = insertFlowActionSchema_notStrict
 	.partial()
 	.required({
@@ -136,6 +115,30 @@ export const flowForm_sendEmailSchema = insertEmailTemplateSchema
 		enabled: z.boolean(),
 		sendTestEmailTo: z.string().email().optional(),
 	});
+
+export type InsertFlowAction_SendEmail = z.infer<typeof insertFlowAction_sendEmailSchema>;
+
+// send email from template group
+const insertFlowAction_sendEmailFromTemplateGroupSchema = insertFlowActionSchema_notStrict
+	.partial()
+	.required({
+		id: true,
+		flowId: true,
+		enabled: true,
+	})
+	.extend({
+		type: z.literal('sendEmailFromTemplateGroup'),
+		// emailTemplateGroup: insertEmailTemplateGroupSchema.omit({ workspaceId: true }),
+	});
+
+export const flowForm_sendEmailFromTemplateGroupSchema = z.object({
+	emailTemplateGroupId: z.string(),
+	enabled: z.boolean(),
+});
+
+export type InsertFlowAction_SendEmailFromTemplateGroup = z.infer<
+	typeof insertFlowAction_sendEmailFromTemplateGroupSchema
+>;
 
 // boolean
 const insertFlowAction_booleanSchema = insertFlowActionSchema_notStrict
@@ -188,13 +191,16 @@ const insertFlowAction_emptySchema = insertFlowActionSchema_notStrict
 		type: z.literal('empty'),
 	});
 
+export type InsertFlowAction_Empty = z.infer<typeof insertFlowAction_emptySchema>;
+
 // upsert flow action
 const insertFlowActionSchema = z.union([
 	insertFlowAction_emptySchema,
+	insertFlowAction_addToMailchimpAudienceSchema,
 	insertFlowAction_booleanSchema,
 	insertFlowAction_sendEmailSchema,
+	insertFlowAction_sendEmailFromTemplateGroupSchema,
 	insertFlowAction_waitSchema,
-	insertFlowAction_addToMailchimpAudienceSchema,
 ]);
 
 export type InsertFlowAction = z.infer<typeof insertFlowActionSchema>;

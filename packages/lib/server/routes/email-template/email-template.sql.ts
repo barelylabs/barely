@@ -33,6 +33,9 @@ export const EmailTemplates = pgTable('EmailTemplates', {
 
 	name: text('name').notNull().default('Email Template'),
 	description: text('description'),
+	type: text('type', { enum: ['marketing', 'transactional'] })
+		.notNull()
+		.default('marketing'),
 
 	replyTo: text('replyTo'),
 	subject: text('subject').notNull(),
@@ -48,13 +51,14 @@ export const EmailTemplateRelations = relations(EmailTemplates, ({ one, many }) 
 		fields: [EmailTemplates.workspaceId],
 		references: [Workspaces.id],
 	}),
+	deliveries: many(EmailDeliveries),
 	_emailTemplates_To_EmailTemplateGroups: many(_EmailTemplates_To_EmailTemplateGroups),
 }));
 
+/* Email Template Tags */
 export const EmailTemplateTags = pgTable(
 	'EmailTemplateTags',
 	{
-		// ...primaryId,
 		...timestamps,
 
 		emailTemplateId: dbId('emailTemplateId')
@@ -62,23 +66,17 @@ export const EmailTemplateTags = pgTable(
 			.references(() => EmailTemplates.id),
 
 		workspaceId: dbId('workspaceId').notNull(),
-		// .references(() => Tags.workspaceId),
-
 		tagName: text('tagName').notNull(),
-		// .references(() => Tags.name),
 	},
-	emailTemplateTag => ({
+	t => ({
 		pk: primaryKey({
-			columns: [
-				emailTemplateTag.workspaceId,
-				emailTemplateTag.emailTemplateId,
-				emailTemplateTag.tagName,
-			],
+			columns: [t.emailTemplateId, t.workspaceId, t.tagName],
 			name: 'email_template_tags_pk',
 		}),
 		tagFk: foreignKey({
-			columns: [emailTemplateTag.workspaceId, emailTemplateTag.tagName],
+			columns: [t.workspaceId, t.tagName],
 			foreignColumns: [Tags.workspaceId, Tags.name],
+			name: 'email_template_tags_tag_fk',
 		}),
 	}),
 );

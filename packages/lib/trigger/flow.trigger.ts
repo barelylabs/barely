@@ -1,7 +1,9 @@
 import { sendEmail } from '@barely/email';
 import { logger, task, wait } from '@trigger.dev/sdk/v3';
-import { and, eq, isNotNull, sql } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 
+import type { EmailTemplateWithFrom } from '../server/routes/email-template/email-template.schema';
+import type { Fan } from '../server/routes/fan/fan.schema';
 import type { FlowAction } from '../server/routes/flow/flow.schema';
 // import { env } from '../env';
 // import { renderMarkdownToReactEmail } from '../../email/email.mdx';
@@ -10,7 +12,9 @@ import { addToMailchimpAudience } from '../server/mailchimp/mailchimp.endpts.aud
 import { Carts } from '../server/routes/cart/cart.sql';
 import { renderMarkdownToReactEmail } from '../server/routes/email-template/email-template.render';
 import {
+	_EmailTemplates_To_EmailTemplateGroups,
 	EmailDeliveries,
+	EmailTemplateGroups,
 	EmailTemplates,
 } from '../server/routes/email-template/email-template.sql';
 import { Fans } from '../server/routes/fan/fan.sql';
@@ -35,14 +39,14 @@ export const handleFlow = task({
 	run: async (payload: HandleFlowPayload) => {
 		const { fanId, flowId } = payload;
 
-		// console.log('db pool url >> ', env.DATABASE_POOL_URL);
-
 		/* find flow */
 		const flow = await dbHttp.query.Flows.findFirst({
 			where: eq(Flows.id, payload.flowId),
 			columns: {
 				workspaceId: true,
 				edges: true,
+				enabled: true,
+				paused: true,
 			},
 			with: {
 				triggers: true,
@@ -54,10 +58,18 @@ export const handleFlow = task({
 
 		if (!flow) return logger.error(`no flow found with id ${flowId}`);
 
-		const { workspaceId, triggers } = flow;
+		const { enabled, workspaceId, triggers } = flow;
 
-		const triggerId = triggers[0]?.id;
-		if (!triggerId) return logger.error(`no trigger found for flow ${flowId}`);
+		if (!enabled) return logger.info(`flow ${flowId} is disabled`);
+
+		// at some point we should support multiple triggers
+		const trigger = triggers[0];
+		if (!trigger) return logger.error(`no trigger found for flow ${flowId}`);
+
+		const { id: triggerId, enabled: triggerEnabled } = trigger;
+
+		if (!triggerEnabled)
+			return logger.info(`trigger ${triggerId} for flow ${flowId} is disabled`);
 
 		/* first action */
 		const firstActionRes = await getNextAction({
@@ -67,18 +79,21 @@ export const handleFlow = task({
 
 		if (!firstActionRes) return logger.error(`no first action found for flow ${flowId}`);
 
-		let currentAction: typeof firstActionRes.action | null = firstActionRes.action;
-
 		const flowRunId = newId('flowRun');
+		const firstAction = firstActionRes.nextAction;
 
-		await dbHttp.insert(Flow_Runs).values({
-			id: flowRunId,
-			flowId,
-			triggerId,
-			triggerFanId: fanId,
-			status: 'pending',
-			currentActionNodeId: currentAction.id,
-		});
+		if (firstAction) {
+			await dbHttp.insert(Flow_Runs).values({
+				id: flowRunId,
+				flowId,
+				triggerId,
+				triggerFanId: fanId,
+				status: 'pending',
+				currentActionNodeId: firstAction.id,
+			});
+		}
+
+		let currentAction: FlowAction | null = firstActionRes.nextAction;
 
 		while (currentAction) {
 			const { nextAction } = await handleAction({
@@ -88,7 +103,7 @@ export const handleFlow = task({
 				flowRunId,
 			});
 
-			currentAction = nextAction ? nextAction.action : null;
+			currentAction = nextAction ? nextAction : null;
 		}
 
 		await dbHttp
@@ -108,7 +123,9 @@ async function getNextAction({
 	flowId: string;
 	currentNodeId: string;
 	booleanCondition?: boolean;
-}) {
+}): Promise<{
+	nextAction: FlowAction | null;
+}> {
 	const flow = await dbHttp.query.Flows.findFirst({
 		where: eq(Flows.id, flowId),
 		columns: {
@@ -121,14 +138,14 @@ async function getNextAction({
 
 	if (!flow) {
 		logger.error(`no flow found with id ${flowId}`);
-		return null;
+		return { nextAction: null };
 	}
 
 	const edgesFromCurrentNode = flow?.edges?.filter(edge => edge.source === currentNodeId);
 
 	if (!edgesFromCurrentNode?.length) {
 		logger.error(`no edges found for node ${currentNodeId}`);
-		return null;
+		return { nextAction: null };
 	}
 
 	/* simple edge */
@@ -137,12 +154,12 @@ async function getNextAction({
 
 		if (!currentEdge) {
 			logger.error(`no edge found for node ${currentNodeId}`);
-			return null;
+			return { nextAction: null };
 		}
 
 		if (currentEdge.type !== 'simple') {
 			logger.error(`edge type ${currentEdge.type} not supported`);
-			return null;
+			return { nextAction: null };
 		}
 
 		const nextNodeId = currentEdge.target;
@@ -150,28 +167,28 @@ async function getNextAction({
 
 		if (!nextNode) {
 			logger.error(`no action found for node ${nextNodeId}`);
-			return null;
+			return { nextAction: null };
 		}
 
 		return {
-			action: nextNode,
+			nextAction: nextNode,
 		};
 	}
 
-	/* boolean edge */
 	if (edgesFromCurrentNode.length === 2) {
+		/* boolean edge */
 		const isBooleanDecision = edgesFromCurrentNode.every(edge => edge.type === 'boolean');
 
 		if (!isBooleanDecision) {
 			logger.error(
 				`more than one edge coming from node ${currentNodeId}, but not all are boolean`,
 			);
-			return null;
+			return { nextAction: null };
 		}
 
 		if (booleanCondition === undefined) {
 			logger.error(`boolean condition not provided for node ${currentNodeId}`);
-			return null;
+			return { nextAction: null };
 		}
 
 		const nextNodeId = edgesFromCurrentNode.find(
@@ -182,22 +199,22 @@ async function getNextAction({
 			logger.error(
 				`no next node found for boolean condition ${booleanCondition} for node ${currentNodeId}`,
 			);
-			return null;
+			return { nextAction: null };
 		}
 
 		const nextNode = flow.actions.find(action => action.id === nextNodeId);
 
 		if (!nextNode) {
 			logger.error(`no action found for node ${nextNodeId}`);
-			return null;
+			return { nextAction: null };
 		}
 
 		return {
-			action: nextNode,
+			nextAction: nextNode,
 		};
 	}
 
-	return null;
+	return { nextAction: null };
 }
 
 async function handleAction({
@@ -210,7 +227,9 @@ async function handleAction({
 	flowRunId: string;
 	workspaceId: string;
 	fanId?: string;
-}) {
+}): Promise<{
+	nextAction: FlowAction | null;
+}> {
 	const flowRunActionId = newId('flowRunAction');
 
 	await dbHttp
@@ -236,7 +255,7 @@ async function handleAction({
 	if (!action.enabled) {
 		logger.info(`action ${action.id} is disabled`);
 
-		const nextAction = await getNextAction({
+		const { nextAction } = await getNextAction({
 			flowId: action.flowId,
 			currentNodeId: action.id,
 		});
@@ -250,8 +269,6 @@ async function handleAction({
 		}
 
 		case 'boolean': {
-			// todo: check condition and return booleanCondition
-
 			if (!action.booleanCondition) {
 				logger.error(`no boolean condition provided for action ${action.id}`);
 				return { nextAction: null };
@@ -267,7 +284,7 @@ async function handleAction({
 				return { nextAction: null };
 			}
 
-			const nextAction = await getNextAction({
+			const { nextAction } = await getNextAction({
 				flowId: action.flowId,
 				currentNodeId: action.id,
 				booleanCondition,
@@ -299,7 +316,7 @@ async function handleAction({
 				.set({ status: 'completed' })
 				.where(eq(FlowRunActions.id, flowRunActionId));
 
-			const nextAction = await getNextAction({
+			const { nextAction } = await getNextAction({
 				flowId: action.flowId,
 				currentNodeId: action.id,
 			});
@@ -337,86 +354,105 @@ async function handleAction({
 			}
 
 			/* if fan has opted out of email marketing, skip to next action */
-			if (!fan.emailMarketingOptIn) {
-				logger.info(`fan ${fanId} has opted out of email marketing`);
+			const { nextAction } = await handleSendEmailFromTemplateToFan({
+				action,
+				emailTemplate,
+				fan,
+				flowRunActionId,
+				workspaceId,
+				flowId: action.flowId,
+				currentNodeId: action.id,
+			});
 
-				const nextAction = await getNextAction({
+			return { nextAction };
+		}
+
+		case 'sendEmailFromTemplateGroup': {
+			if (!action.emailTemplateGroupId) {
+				logger.error(`no email template group id provided for action ${action.id}`);
+				return { nextAction: null };
+			}
+
+			if (!fan) {
+				logger.error(`no fan found with id ${fanId}`);
+				return { nextAction: null };
+			}
+
+			const emailTemplateGroup = await dbHttp.query.EmailTemplateGroups.findFirst({
+				where: eq(EmailTemplateGroups.id, action.emailTemplateGroupId),
+				with: {
+					_emailTemplates_To_EmailTemplateGroups: {
+						with: {
+							emailTemplate: {
+								with: {
+									from: {
+										with: {
+											domain: true,
+										},
+									},
+								},
+							},
+						},
+						orderBy: asc(_EmailTemplates_To_EmailTemplateGroups.index),
+					},
+				},
+			});
+
+			if (!emailTemplateGroup) {
+				logger.error(
+					`no email template group found with id ${action.emailTemplateGroupId}`,
+				);
+				return { nextAction: null };
+			}
+
+			const emailTemplates =
+				emailTemplateGroup._emailTemplates_To_EmailTemplateGroups.map(
+					ets => ets.emailTemplate,
+				);
+
+			// check if fan has received any of these email templates
+			const emailDeliveries = await dbHttp.query.EmailDeliveries.findMany({
+				where: and(
+					eq(EmailDeliveries.fanId, fan.id),
+					inArray(
+						EmailDeliveries.emailTemplateId,
+						emailTemplates.map(et => et.id),
+					),
+				),
+				with: {
+					emailTemplate: {
+						columns: {
+							id: true,
+						},
+					},
+				},
+			});
+
+			const unsentEmailTemplates = emailTemplates.filter(
+				et => !emailDeliveries.some(ed => ed.emailTemplate.id === et.id),
+			);
+
+			const emailTemplate = unsentEmailTemplates[0];
+
+			if (!emailTemplate) {
+				logger.info(
+					`all email templates in group ${action.emailTemplateGroupId} have been sent to fan ${fanId}`,
+				);
+
+				const { nextAction } = await getNextAction({
 					flowId: action.flowId,
 					currentNodeId: action.id,
 				});
 
-				await dbHttp
-					.update(FlowRunActions)
-					.set({
-						status: 'skipped',
-						skippedReason: 'fan has opted out of email marketing',
-					})
-					.where(eq(FlowRunActions.id, flowRunActionId));
-
 				return { nextAction };
 			}
 
-			const { firstName, lastName } = parseFullName(fan.fullName);
-
-			const { subject, reactBody } = await renderMarkdownToReactEmail({
-				subject: emailTemplate.subject,
-				body: emailTemplate.body,
-				variables: {
-					firstName,
-					lastName,
-				},
-			});
-
-			const res = await sendEmail({
-				to: fan.email,
-				bcc: 'adam+flow-monitoring@barely.io',
-				from: getEmailAddressFromEmailAddress(emailTemplate.from),
-				fromFriendlyName: emailTemplate.from.defaultFriendlyName ?? undefined,
-				replyTo: emailTemplate.from.replyTo ?? undefined,
-				subject,
-				react: reactBody,
-				type: 'marketing',
-			});
-
-			if (res.error) {
-				const error = typeof res.error === 'string' ? res.error : res.error.message;
-				logger.error(`error sending email for action ${action.id}: ${error}`);
-
-				await dbHttp
-					.update(FlowRunActions)
-					.set({ status: 'failed', error })
-					.where(eq(FlowRunActions.id, flowRunActionId));
-
-				await dbHttp.insert(EmailDeliveries).values({
-					id: newId('emailDelivery'),
-					workspaceId: workspaceId,
-					emailTemplateId: action.emailTemplateId,
-					fanId: fan.id,
-					status: 'failed',
-					sentAt: new Date(),
-				});
-			} else {
-				await dbHttp
-					.update(FlowRunActions)
-					.set({ status: 'completed' })
-					.where(eq(FlowRunActions.id, flowRunActionId));
-
-				await dbHttp.insert(EmailDeliveries).values({
-					id: newId('emailDelivery'),
-					workspaceId: workspaceId,
-					emailTemplateId: action.emailTemplateId,
-					fanId: fan.id,
-					status: 'sent',
-					sentAt: new Date(),
-				});
-
-				await dbHttp
-					.update(Workspaces)
-					.set({ emailUsage: sqlIncrement(Workspaces.emailUsage) })
-					.where(eq(Workspaces.id, workspaceId));
-			}
-
-			const nextAction = await getNextAction({
+			const { nextAction } = await handleSendEmailFromTemplateToFan({
+				action,
+				emailTemplate,
+				fan,
+				flowRunActionId,
+				workspaceId,
 				flowId: action.flowId,
 				currentNodeId: action.id,
 			});
@@ -433,7 +469,7 @@ async function handleAction({
 			if (!fan?.emailMarketingOptIn) {
 				logger.info(`fan ${fanId} has opted out of email marketing`);
 
-				const nextAction = await getNextAction({
+				const { nextAction } = await getNextAction({
 					flowId: action.flowId,
 					currentNodeId: action.id,
 				});
@@ -478,12 +514,12 @@ async function handleAction({
 					.set({ status: 'completed', completedAt: new Date() })
 					.where(eq(FlowRunActions.id, flowRunActionId));
 
-				return {
-					nextAction: await getNextAction({
-						flowId: action.flowId,
-						currentNodeId: action.id,
-					}),
-				};
+				const { nextAction } = await getNextAction({
+					flowId: action.flowId,
+					currentNodeId: action.id,
+				});
+
+				return { nextAction };
 			} catch (error) {
 				console.log(error);
 				logger.error(
@@ -590,4 +626,107 @@ async function checkBooleanCondition({
 		case null:
 			return 'error';
 	}
+}
+
+async function handleSendEmailFromTemplateToFan({
+	workspaceId,
+	action,
+	flowRunActionId,
+
+	emailTemplate,
+	fan,
+}: {
+	action: FlowAction;
+	emailTemplate: EmailTemplateWithFrom;
+	fan: Fan;
+	flowRunActionId: string;
+	workspaceId: string;
+	flowId: string;
+	currentNodeId: string;
+}): Promise<{ nextAction: FlowAction | null; emailSent: boolean }> {
+	if (emailTemplate.type === 'marketing' && !fan.emailMarketingOptIn) {
+		logger.info(`fan ${fan.id} has opted out of email marketing`);
+
+		const { nextAction } = await getNextAction({
+			flowId: action.flowId,
+			currentNodeId: action.id,
+		});
+
+		await dbHttp
+			.update(FlowRunActions)
+			.set({
+				status: 'skipped',
+				skippedReason: 'fan has opted out of email marketing',
+			})
+			.where(eq(FlowRunActions.id, flowRunActionId));
+
+		return { nextAction, emailSent: false };
+	}
+
+	const { firstName, lastName } = parseFullName(fan.fullName);
+
+	const { subject, reactBody } = await renderMarkdownToReactEmail({
+		subject: emailTemplate.subject,
+		body: emailTemplate.body,
+		variables: {
+			firstName,
+			lastName,
+		},
+	});
+
+	const res = await sendEmail({
+		to: fan.email,
+		bcc: 'adam+flow-monitoring@barely.io',
+		from: getEmailAddressFromEmailAddress(emailTemplate.from),
+		fromFriendlyName: emailTemplate.from.defaultFriendlyName ?? undefined,
+		replyTo: emailTemplate.from.replyTo ?? undefined,
+		subject,
+		react: reactBody,
+		type: 'marketing',
+	});
+
+	if (res.error) {
+		const error = typeof res.error === 'string' ? res.error : res.error.message;
+		logger.error(`error sending email for action ${action.id}: ${error}`);
+
+		await dbHttp
+			.update(FlowRunActions)
+			.set({ status: 'failed', error })
+			.where(eq(FlowRunActions.id, flowRunActionId));
+
+		await dbHttp.insert(EmailDeliveries).values({
+			id: newId('emailDelivery'),
+			workspaceId: workspaceId,
+			emailTemplateId: emailTemplate.id,
+			fanId: fan.id,
+			status: 'failed',
+			sentAt: new Date(),
+		});
+	} else {
+		await dbHttp
+			.update(FlowRunActions)
+			.set({ status: 'completed' })
+			.where(eq(FlowRunActions.id, flowRunActionId));
+
+		await dbHttp.insert(EmailDeliveries).values({
+			id: newId('emailDelivery'),
+			workspaceId: workspaceId,
+			emailTemplateId: emailTemplate.id,
+			fanId: fan.id,
+			status: 'sent',
+			sentAt: new Date(),
+		});
+
+		await dbHttp
+			.update(Workspaces)
+			.set({ emailUsage: sqlIncrement(Workspaces.emailUsage) })
+			.where(eq(Workspaces.id, workspaceId));
+	}
+
+	const { nextAction } = await getNextAction({
+		flowId: action.flowId,
+		currentNodeId: action.id,
+	});
+
+	return { nextAction, emailSent: true };
 }
