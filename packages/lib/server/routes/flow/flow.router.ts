@@ -150,6 +150,7 @@ export const flowRouter = createTRPCRouter({
 
 			// create a trigger node
 			await ctx.db.pool.insert(Flow_Triggers).values({
+				workspaceId: ctx.workspace.id,
 				id: newFlowTriggerId,
 				flowId: newFlowId,
 				type: 'callFlow',
@@ -204,7 +205,7 @@ export const flowRouter = createTRPCRouter({
 			// update the trigger
 			await ctx.db.pool
 				.update(Flow_Triggers)
-				.set(trigger)
+				.set({ ...trigger, workspaceId: ctx.workspace.id })
 				.where(and(eq(Flow_Triggers.id, trigger.id), eq(Flow_Triggers.flowId, flow.id)));
 
 			// update the actions (upsert). I think we need to map over each action to handle the upsert
@@ -268,12 +269,23 @@ export const flowRouter = createTRPCRouter({
 				fanId: z.string(),
 			}),
 		)
-		.mutation(async ({ input }) => {
+		.mutation(async ({ ctx, input }) => {
 			const { flowId, fanId } = input;
+
+			// find a trigger for this flow 🤷‍♂️
+			const trigger = await ctx.db.http.query.Flow_Triggers.findFirst({
+				where: and(eq(Flow_Triggers.flowId, flowId), eq(Flow_Triggers.type, 'callFlow')),
+			});
+
+			if (!trigger)
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Trigger not found',
+				});
 
 			// await handleFlow.trigger({
 			await tasks.trigger<typeof handleFlow>('handle-flow', {
-				flowId,
+				triggerId: trigger.id,
 				fanId,
 			});
 		}),

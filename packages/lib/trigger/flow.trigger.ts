@@ -18,7 +18,12 @@ import {
 	EmailTemplates,
 } from '../server/routes/email-template/email-template.sql';
 import { Fans } from '../server/routes/fan/fan.sql';
-import { Flow_Runs, FlowRunActions, Flows } from '../server/routes/flow/flow.sql';
+import {
+	Flow_Runs,
+	Flow_Triggers,
+	FlowRunActions,
+	Flows,
+} from '../server/routes/flow/flow.sql';
 import { ProviderAccounts } from '../server/routes/provider-account/provider-account.sql';
 import { Workspaces } from '../server/routes/workspace/workspace.sql';
 import { getEmailAddressFromEmailAddress } from '../utils/email';
@@ -28,56 +33,76 @@ import { raise } from '../utils/raise';
 import { sqlAnd, sqlIncrement } from '../utils/sql';
 
 interface HandleFlowPayload {
-	flowId: string;
-	// possible trigger event data
+	triggerId: string;
 	fanId?: string;
-	cartOrderId?: string;
+	cartId?: string;
 }
 
 export const handleFlow = task({
 	id: 'handle-flow',
 	run: async (payload: HandleFlowPayload) => {
-		const { fanId, flowId } = payload;
+		const { triggerId, fanId, cartId } = payload;
 
 		/* find flow */
-		const flow = await dbHttp.query.Flows.findFirst({
-			where: eq(Flows.id, payload.flowId),
-			columns: {
-				workspaceId: true,
-				edges: true,
-				enabled: true,
-				paused: true,
-			},
+		const trigger = await dbHttp.query.Flow_Triggers.findFirst({
+			where: eq(Flow_Triggers.id, triggerId),
 			with: {
-				triggers: true,
-				actions: true,
+				flow: {
+					columns: {
+						id: true,
+						workspaceId: true,
+						edges: true,
+						enabled: true,
+						paused: true,
+					},
+					with: {
+						actions: true,
+					},
+				},
 			},
 		});
 
-		logger.info(`flow ${flowId} found`);
+		if (!trigger) return logger.error(`no trigger found with id ${triggerId}`);
 
-		if (!flow) return logger.error(`no flow found with id ${flowId}`);
+		const { flow, type, enabled: triggerEnabled } = trigger;
 
-		const { enabled, workspaceId, triggers } = flow;
+		if (type === 'newFan') {
+			if (!fanId) return logger.error(`no fan id provided for trigger ${triggerId}`);
 
-		if (!enabled) return logger.info(`flow ${flowId} is disabled`);
+			const flowRuns = await dbHttp.query.Flow_Runs.findMany({
+				where: and(eq(Flow_Runs.flowId, flow.id), eq(Flow_Runs.triggerFanId, fanId)),
+			});
 
-		// at some point we should support multiple triggers
-		const trigger = triggers[0];
-		if (!trigger) return logger.error(`no trigger found for flow ${flowId}`);
+			if (flowRuns.length)
+				return logger.info(`flow ${flow.id} already ran for fan ${fanId}`);
 
-		const { id: triggerId, enabled: triggerEnabled } = trigger;
+			// todo: we might want to wait on this one in case a more specific flow runs first
+			// in that case, we could have an option to bypass if more specific flow has already ran
+		} else if (type === 'newCartOrder') {
+			if (!cartId) return logger.error(`no cart id provided for trigger ${triggerId}`);
 
-		if (!triggerEnabled)
-			return logger.info(`trigger ${triggerId} for flow ${flowId} is disabled`);
+			const flowRuns = await dbHttp.query.Flow_Runs.findMany({
+				where: and(eq(Flow_Runs.flowId, flow.id), eq(Flow_Runs.triggerCartId, cartId)),
+			});
+
+			if (flowRuns.length)
+				return logger.info(`flow ${flow.id} already ran for cart ${cartId}`);
+		}
+
+		if (!triggerEnabled) return logger.info(`trigger ${triggerId} is disabled`);
+		if (!flow) return logger.error(`no flow found for trigger ${triggerId}`);
+
+		const { workspaceId, enabled } = flow;
+
+		if (!enabled) return logger.info(`flow ${flow.id} is disabled`);
 
 		/* first action */
 		const firstActionRes = await getNextAction({
-			flowId,
+			flowId: flow.id,
 			currentNodeId: triggerId,
 		});
 
-		if (!firstActionRes) return logger.error(`no first action found for flow ${flowId}`);
+		if (!firstActionRes) return logger.error(`no first action found for flow ${flow.id}`);
 
 		const flowRunId = newId('flowRun');
 		const firstAction = firstActionRes.nextAction;
@@ -85,9 +110,10 @@ export const handleFlow = task({
 		if (firstAction) {
 			await dbHttp.insert(Flow_Runs).values({
 				id: flowRunId,
-				flowId,
+				flowId: flow.id,
 				triggerId,
 				triggerFanId: fanId,
+				triggerCartId: cartId,
 				status: 'pending',
 				currentActionNodeId: firstAction.id,
 			});
@@ -111,7 +137,7 @@ export const handleFlow = task({
 			.set({ status: 'completed', currentActionNodeId: null })
 			.where(eq(Flow_Runs.id, flowRunId));
 
-		logger.info(`flow ${flowId} completed`);
+		logger.info(`flow ${flow.id} completed`);
 	},
 });
 

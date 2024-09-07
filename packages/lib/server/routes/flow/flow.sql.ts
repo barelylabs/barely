@@ -16,6 +16,7 @@ import type { FlowEdge } from './flow.ui.types';
 import { TRIGGER_WAIT_UNITS } from '../../../trigger/trigger.constants';
 import { customJsonb, dbId, primaryId, timestamps } from '../../../utils/sql';
 import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
+import { Carts } from '../cart/cart.sql';
 import {
 	EmailTemplateGroups,
 	EmailTemplates,
@@ -68,6 +69,11 @@ export const Flow_Triggers = pgTable(
 		flowId: dbId('flowId')
 			.notNull()
 			.references(() => Flows.id, { onDelete: 'cascade' }),
+		workspaceId: dbId('workspaceId'),
+		//fixme: uncomment this once workspaceId is added to existing triggers
+		// .notNull()
+		// .references(() => Flows.workspaceId),
+
 		id: dbId('id').notNull(),
 
 		type: text('type', { enum: FLOW_TRIGGERS }).notNull(),
@@ -157,6 +163,7 @@ export const Flow_Runs = pgTable(
 			}),
 		triggerId: dbId('triggerId').notNull(),
 		triggerFanId: dbId('triggerFanId').references(() => Fans.id),
+		triggerCartId: dbId('triggerCartId').references(() => Carts.id),
 
 		currentActionNodeId: text('currentActionNodeId'),
 

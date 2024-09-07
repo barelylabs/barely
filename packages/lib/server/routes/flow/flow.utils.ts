@@ -173,6 +173,7 @@ export function getFlowTriggerFromTriggerNode(
 	return {
 		id: node.id,
 		flowId,
+		workspaceId: '',
 		...node.data,
 	};
 }
@@ -281,10 +282,17 @@ export function getInsertableFlowActionsFromFlowActions(
 }
 
 /* default flow triggers */
-export function getDefaultFlowTrigger({ flowId }: { flowId: string }): InsertFlowTrigger {
+export function getDefaultFlowTrigger({
+	flowId,
+	workspaceId,
+}: {
+	flowId: string;
+	workspaceId: string;
+}): InsertFlowTrigger {
 	return {
 		id: newId('flowTrigger'),
 		flowId,
+		workspaceId,
 		type: 'callFlow',
 	};
 }
