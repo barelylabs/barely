@@ -283,7 +283,6 @@ export const flowRouter = createTRPCRouter({
 					message: 'Trigger not found',
 				});
 
-			// await handleFlow.trigger({
 			await tasks.trigger<typeof handleFlow>('handle-flow', {
 				triggerId: trigger.id,
 				fanId,

@@ -5,8 +5,6 @@ import { and, asc, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 import type { EmailTemplateWithFrom } from '../server/routes/email-template/email-template.schema';
 import type { Fan } from '../server/routes/fan/fan.schema';
 import type { FlowAction } from '../server/routes/flow/flow.schema';
-// import { env } from '../env';
-// import { renderMarkdownToReactEmail } from '../../email/email.mdx';
 import { dbHttp } from '../server/db';
 import { addToMailchimpAudience } from '../server/mailchimp/mailchimp.endpts.audiences';
 import { Carts } from '../server/routes/cart/cart.sql';
@@ -63,8 +61,11 @@ export const handleFlow = task({
 		});
 
 		if (!trigger) return logger.error(`no trigger found with id ${triggerId}`);
+		if (!trigger.enabled) return logger.info(`trigger ${triggerId} is disabled`);
 
-		const { flow, type, enabled: triggerEnabled } = trigger;
+		const { flow, type } = trigger;
+
+		if (!flow) return logger.error(`no flow found for trigger ${triggerId}`);
 
 		if (type === 'newFan') {
 			if (!fanId) return logger.error(`no fan id provided for trigger ${triggerId}`);
@@ -88,9 +89,6 @@ export const handleFlow = task({
 			if (flowRuns.length)
 				return logger.info(`flow ${flow.id} already ran for cart ${cartId}`);
 		}
-
-		if (!triggerEnabled) return logger.info(`trigger ${triggerId} is disabled`);
-		if (!flow) return logger.error(`no flow found for trigger ${triggerId}`);
 
 		const { workspaceId, enabled } = flow;
 
