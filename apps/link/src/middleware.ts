@@ -87,6 +87,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	const recordClickProps: RecordClickProps = {
 		// link data
 		link,
+		platform: linkProps.platform,
 		// visit data
 		type: linkProps.linkClickType,
 		...visitorInfo,

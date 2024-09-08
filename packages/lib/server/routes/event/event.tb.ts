@@ -72,6 +72,11 @@ export const webEventIngestSchema = z
 		linkType: z.enum(['short', 'transparent', '']).optional().default(''),
 		domain: z.string().optional().default(''),
 
+		// destination
+		platform: z
+			.enum([...FM_LINK_PLATFORMS, ''])
+			.optional()
+			.default(''),
 		// linkClick data
 		linkClickDestinationAssetId: z.string().nullish().default(''),
 		linkClickDestinationHref: z.string().nullish().default(''),

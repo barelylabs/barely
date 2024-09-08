@@ -5,6 +5,7 @@ import type { VisitorInfo } from '../../../utils/middleware';
 import type { MetaEvent } from '../../meta/meta.endpts.event';
 import type { CartFunnel } from '../cart-funnel/cart-funnel.schema';
 import type { Cart } from '../cart/cart.schema';
+import type { FM_LINK_PLATFORMS } from '../fm/fm.constants';
 import type { FmLink, FmPage } from '../fm/fm.schema';
 import type { LandingPage } from '../landing-page/landing-page.schema';
 import type { LinkAnalyticsProps } from '../link/link.schema';
@@ -47,6 +48,7 @@ export interface RecordClickProps extends VisitorInfo {
 	link: LinkAnalyticsProps;
 	type: 'short' | 'transparent';
 	href: string;
+	platform?: (typeof FM_LINK_PLATFORMS)[number];
 }
 
 export async function recordLinkClick({
@@ -59,6 +61,7 @@ export async function recordLinkClick({
 	referer,
 	referer_url,
 	isBot,
+	platform,
 }: RecordClickProps) {
 	if (isBot) return null;
 
@@ -120,6 +123,7 @@ export async function recordLinkClick({
 						eventName: 'barely.link/click',
 						customData: {
 							linkType: type,
+							platform,
 						},
 					},
 				],
@@ -154,6 +158,7 @@ export async function recordLinkClick({
 			// analytics
 			...geo,
 			...ua,
+			platform,
 			referer,
 			referer_url,
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
