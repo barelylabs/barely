@@ -1,12 +1,11 @@
 import { tasks } from '@trigger.dev/sdk/v3';
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
 import type { handleFlow } from '../../../trigger/flow.trigger';
 import { newId } from '../../../utils/id';
 import { raise } from '../../../utils/raise';
 import { dbHttp } from '../../db';
-import { Flow_Triggers, Flows } from '../flow/flow.sql';
-// import { handleFlow } from '../flow/trigger/flow.trigger';
+import { Flow_Triggers } from '../flow/flow.sql';
 import { Fans } from './fan.sql';
 
 export async function createFan(props: {
@@ -42,80 +41,22 @@ export async function createFan(props: {
 	const newFanFlowTriggers = await dbHttp
 		.select()
 		.from(Flow_Triggers)
-		.leftJoin(
-			Flows,
-			and(
-				eq(Flows.id, Flow_Triggers.flowId),
-				isNull(Flows.deletedAt),
-				isNull(Flows.archivedAt),
-			),
-		)
 		.where(
-			and(eq(Flow_Triggers.type, 'newFan'), eq(Flows.workspaceId, props.workspaceId)),
+			and(
+				eq(Flow_Triggers.type, 'newFan'),
+				eq(Flow_Triggers.workspaceId, props.workspaceId),
+			),
 		)
 		.execute();
 
 	if (newFanFlowTriggers.length) {
-		// create flowRuns
-		// todo: add prop that lets us bypass newFanFlowTriggers (e.g. if a cartOrder flowRun wants to supercede it)
-		for (const newFanFlows of newFanFlowTriggers) {
-			if (!newFanFlows.Flows) continue;
+		for (const newFanFlowTrigger of newFanFlowTriggers) {
 			await tasks.trigger<typeof handleFlow>('handle-flow', {
-				// await handleFlow.trigger({
-				flowId: newFanFlows.Flows.id,
+				triggerId: newFanFlowTrigger.id,
 				fanId: newFan.id,
 			});
 		}
 	}
-
-	// const newFanTriggers = await dbHttp
-	// 	.select()
-	// 	.from(WorkflowTriggers)
-	// 	.leftJoin(
-	// 		Workflows,
-	// 		and(
-	// 			eq(Workflows.id, WorkflowTriggers.workflowId),
-	// 			isNull(Workflows.deletedAt),
-	// 			eq(Workflows.archived, false),
-	// 		),
-	// 	)
-	// 	.where(
-	// 		and(
-	// 			eq(WorkflowTriggers.trigger, 'NEW_FAN'),
-	// 			eq(Workflows.workspaceId, props.workspaceId),
-	// 		),
-	// 	)
-	// 	.execute();
-
-	// if (newFanTriggers.length) {
-	// 	// create workflowRuns
-	// 	for (const newFanWorkflows of newFanTriggers) {
-	// 		const workflow =
-	// 			newFanWorkflows.Workflows ?? raise('no workflow found for new fan trigger');
-	// 		const trigger =
-	// 			newFanWorkflows.WorkflowTriggers ?? raise('no trigger found for new fan trigger');
-	// 		const firstAction =
-	// 			(await dbHttp.query.WorkflowActions.findFirst({
-	// 				where: eq(WorkflowActions.workflowId, workflow.id),
-	// 				orderBy: asc(WorkflowActions.lexorank),
-	// 			})) ?? raise('no first action found for workflow');
-
-	// 		await dbHttp.insert(WorkflowRuns).values({
-	// 			id: newId('workflowRun'),
-	// 			workflowId: workflow.id,
-	// 			triggerId: trigger.id,
-	// 			triggerFanId: newFan.id,
-	// 			status: 'pending',
-	// 			currentActionId: firstAction.id,
-	// 			runCurrentActionAt:
-	// 				firstAction.waitFor ? new Date(Date.now() + firstAction.waitFor) : new Date(),
-	// 		});
-
-	// 		void fetch(getAbsoluteUrl('app', 'api/workflows/run'), {
-	// 			method: 'POST',
-	// 		});
-	// 	}
-	// }
 
 	return newFan;
 }

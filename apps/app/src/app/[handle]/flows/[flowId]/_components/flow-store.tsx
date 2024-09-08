@@ -11,7 +11,9 @@ import type {
 	BooleanEdge,
 	BooleanNode,
 	EmptyNode,
+	FlowEdge,
 	FlowState,
+	SendEmailFromTemplateGroupNode,
 	SendEmailNode,
 	SimpleEdge,
 	TriggerNode,
@@ -24,6 +26,7 @@ import { getFlowLayout } from '@barely/lib/server/routes/flow/flow.layout';
 import {
 	getDefaultFlowAction,
 	getDefaultFlowAction_empty,
+	hasEdgeLoop,
 } from '@barely/lib/server/routes/flow/flow.utils';
 import { newId } from '@barely/lib/utils/id';
 import { addEdge, applyEdgeChanges, applyNodeChanges } from '@xyflow/react';
@@ -35,6 +38,7 @@ export const FlowStoreProvider = ({
 	children,
 	initialFlow,
 	defaultEmailAddress,
+	initialDefaultEmailTemplateGroup,
 	initialDefaultMailchimpAudienceId,
 }: {
 	children: React.ReactNode;
@@ -43,10 +47,14 @@ export const FlowStoreProvider = ({
 	initialDefaultMailchimpAudienceId: Promise<
 		AppRouterOutputs['mailchimp']['defaultAudience']
 	>;
+	initialDefaultEmailTemplateGroup: Promise<
+		AppRouterOutputs['emailTemplateGroup']['default']
+	>;
 }) => {
 	const initialData = use(initialFlow);
 	const defaultFromEmail = use(defaultEmailAddress);
 	const defaultMailchimpAudienceId = use(initialDefaultMailchimpAudienceId);
+	const defaultEmailTemplateGroup = use(initialDefaultEmailTemplateGroup);
 	const flowId = initialData.flow.id;
 
 	const { toast } = useToast();
@@ -117,6 +125,45 @@ export const FlowStoreProvider = ({
 			},
 
 			onConnect: connection => {
+				// console.log('onConnect', connection);
+
+				const hasLoop = hasEdgeLoop([...get().edges, connection]);
+				console.log('hasLoop', hasLoop);
+
+				if (hasLoop) {
+					toast('Cannot create a loop');
+					return;
+				}
+
+				// if the source is an empty node, instead of adding a new edge we should
+				// modify the existing edge to point to the target
+
+				const prevNodes = get().nodes;
+				const prevEdges = get().edges;
+
+				const sourceNode = prevNodes.find(node => node.id === connection.source);
+				// const targetNode = prevNodes.find(node => node.id === connection.target);
+
+				if (sourceNode?.type === 'empty') {
+					const edgeAboveEmpty = prevEdges.find(
+						edge => edge.target === connection.source,
+					);
+					if (edgeAboveEmpty) {
+						return set({
+							nodes: prevNodes.filter(node => node.id !== sourceNode.id),
+							edges: prevEdges.map(edge => {
+								if (edge.id === edgeAboveEmpty.id) {
+									return {
+										...edge,
+										target: connection.target,
+									};
+								}
+								return edge;
+							}),
+						});
+					}
+				}
+
 				set({
 					edges: addEdge(connection, get().edges),
 				});
@@ -167,58 +214,28 @@ export const FlowStoreProvider = ({
 
 				const updatedNodes = prevNodes.map((node, index) => {
 					if (index === replacedNodeIndex) {
-						const { flowActionNode } = getDefaultFlowAction({
-							flowId,
-							id,
-							position: { x: newNodeX, y: emptyNodeY },
-							type,
-							toast,
-							emailFromId: defaultFromEmail?.id,
-							mailchimpAudienceId: defaultMailchimpAudienceId ?? undefined,
-						});
+						try {
+							const { flowActionNode } = getDefaultFlowAction({
+								flowId,
+								id,
+								position: { x: newNodeX, y: emptyNodeY },
+								type,
+								toast,
+								mailchimpAudienceId: defaultMailchimpAudienceId ?? undefined,
+								emailTemplateGroupId: defaultEmailTemplateGroup?.id ?? undefined,
+								emailTemplate:
+									defaultFromEmail ?
+										{
+											fromId: defaultFromEmail?.id ?? undefined,
+										}
+									:	undefined,
+							});
 
-						return flowActionNode;
-
-						// if (type === 'boolean') {
-						// 	const { flowActionNode } = getDefaultFlowAction_boolean({
-						// 		flowId,
-						// 		id,
-						// 		position: { x: newNodeX, y: emptyNodeY },
-						// 	});
-
-						// 	return flowActionNode;
-						// } else if (type === 'wait') {
-						// 	const { flowActionNode } = getDefaultFlowAction_wait({
-						// 		flowId,
-						// 		id,
-						// 		position: { x: newNodeX, y: emptyNodeY },
-						// 	});
-						// 	return flowActionNode;
-						// } else if (type === 'sendEmail') {
-						// 	const emailFromId = defaultFromEmail?.id;
-
-						// 	if (!emailFromId) {
-						// 		toast('No default email address');
-						// 		raise('No default email address');
-						// 	}
-
-						// 	const { flowActionNode } = getDefaultFlowAction_sendEmail({
-						// 		flowId,
-						// 		id,
-						// 		emailFromId: defaultFromEmail?.id ?? raise('No default email address'),
-						// 		position: { x: newNodeX, y: emptyNodeY },
-						// 	});
-						// 	return flowActionNode;
-						// } else if (type === 'addToMailchimpAudience') {
-						// 	const { flowActionNode } = getDefaultFlowAction_addToMailchimpAudience({
-						// 		flowId,
-						// 		id,
-						// 		position: { x: newNodeX, y: emptyNodeY },
-						// 		mailchimpAudienceId:
-						// 			defaultMailchimpAudienceId ?? raise('No default mailchimp audience id'),
-						// 	});
-						// 	return flowActionNode;
-						// }
+							return flowActionNode;
+						} catch (error) {
+							console.error('Error creating flow action node', error);
+							return node;
+						}
 					} else if (index > replacedNodeIndex) {
 						return {
 							...node,
@@ -378,6 +395,35 @@ export const FlowStoreProvider = ({
 				return set({ nodes: updatedNodes });
 			},
 
+			updateSendEmailFromTemplateGroupNode: (
+				id: string,
+				data: SendEmailFromTemplateGroupNode['data'],
+			) => {
+				const prevNodes = get().nodes;
+				const sendEmailFromTemplateGroupNodeIndex = prevNodes.findIndex(
+					node => node.id === id,
+				);
+				const sendEmailFromTemplateGroupNode =
+					prevNodes[sendEmailFromTemplateGroupNodeIndex];
+				if (!sendEmailFromTemplateGroupNode) {
+					console.error('Node not found');
+					return set({ nodes: prevNodes });
+				}
+
+				const updatedNodes = prevNodes.map(node => {
+					if (node.id === id) {
+						return {
+							...node,
+							type: 'sendEmailFromTemplateGroup',
+							data,
+						} satisfies SendEmailFromTemplateGroupNode;
+					}
+					return node;
+				});
+
+				return set({ nodes: updatedNodes });
+			},
+
 			updateBooleanNode: (id: string, data: BooleanNode['data']) => {
 				const prevNodes = get().nodes;
 				const booleanNodeIndex = prevNodes.findIndex(node => node.id === id);
@@ -444,13 +490,13 @@ export const FlowStoreProvider = ({
 				const prevEdges = get().edges;
 				const prevNodes = get().nodes;
 
-				const edge = prevEdges.find(edge => edge.id === edgeId);
-				if (!edge) return;
+				const prevEdge = prevEdges.find(edge => edge.id === edgeId);
+				if (!prevEdge) return;
 
-				const source = get().nodes.find(node => node.id === edge.source);
+				const source = get().nodes.find(node => node.id === prevEdge.source);
 				if (!source || source.type === 'empty') return;
 
-				const target = get().nodes.find(node => node.id === edge.target);
+				const target = get().nodes.find(node => node.id === prevEdge.target);
 				if (!target || target.type === 'empty') return;
 
 				// create new node
@@ -460,8 +506,14 @@ export const FlowStoreProvider = ({
 					position: { x: target.position.x, y: target.position.y + 100 },
 					type,
 					toast,
-					emailFromId: defaultFromEmail?.id,
 					mailchimpAudienceId: defaultMailchimpAudienceId ?? undefined,
+					emailTemplateGroupId: defaultEmailTemplateGroup?.id ?? undefined,
+					emailTemplate:
+						defaultFromEmail ?
+							{
+								fromId: defaultFromEmail?.id ?? undefined,
+							}
+						:	undefined,
 				});
 
 				set({ nodes: [...prevNodes, flowActionNode] });
@@ -469,20 +521,20 @@ export const FlowStoreProvider = ({
 				// remove current edge
 				const updatedEdges = prevEdges.filter(edge => edge.id !== edgeId);
 
-				// connect source to new node
+				// connect prev source to new node
 				updatedEdges.push({
-					id: `e-${flowActionNode.id}-${edge.source}`,
-					source: edge.source,
+					...prevEdge,
+					id: `e-${prevEdge.source}-${flowActionNode.id}`,
+					// source: prevEdge.source,
 					target: flowActionNode.id,
-					deletable: false,
-					type: 'simple',
-				} satisfies SimpleEdge);
+				} satisfies FlowEdge);
 
-				// connect new node to target
+				// connect new node to prev target
 				updatedEdges.push({
-					id: `e-${flowActionNode.id}-${edge.target}`,
+					...prevEdge,
+					id: `e-${flowActionNode.id}-${prevEdge.target}`,
 					source: flowActionNode.id,
-					target: edge.target,
+					// target: prevEdge.target,
 					deletable: false,
 					type: 'simple',
 				} satisfies SimpleEdge);
@@ -503,7 +555,16 @@ export const FlowStoreProvider = ({
 				if (!node) return;
 
 				const updatedNodes = prevNodes.map(node => {
-					if (node.id === id && node.type !== 'trigger') {
+					if (node.id === id) {
+						if (node.type === 'trigger') {
+							return {
+								...node,
+								data: {
+									...node.data,
+									enabled,
+								},
+							} satisfies TriggerNode;
+						}
 						if (node.type === 'wait') {
 							return {
 								...node,
@@ -522,6 +583,16 @@ export const FlowStoreProvider = ({
 									enabled,
 								},
 							} satisfies SendEmailNode;
+						}
+
+						if (node.type === 'sendEmailFromTemplateGroup') {
+							return {
+								...node,
+								data: {
+									...node.data,
+									enabled,
+								},
+							} satisfies SendEmailFromTemplateGroupNode;
 						}
 
 						if (node.type === 'addToMailchimpAudience') {
@@ -583,6 +654,10 @@ export const FlowStoreProvider = ({
 			showEmailModal: false,
 			setShowEmailModal: (open: boolean) => {
 				set({ showEmailModal: open });
+			},
+			showEmailFromTemplateGroupModal: false,
+			setShowEmailFromTemplateGroupModal: (open: boolean) => {
+				set({ showEmailFromTemplateGroupModal: open });
 			},
 			showWaitModal: false,
 			setShowWaitModal: (open: boolean) => {

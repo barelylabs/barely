@@ -60,6 +60,19 @@ export const emailTemplateGroupRouter = createTRPCRouter({
 			};
 		}),
 
+	default: workspaceQueryProcedure
+		.input(z.object({ handle: z.string() }))
+		.query(async ({ ctx }) => {
+			const emailTemplateGroup = await ctx.db.http.query.EmailTemplateGroups.findFirst({
+				where: and(
+					eq(EmailTemplateGroups.workspaceId, ctx.workspace.id),
+					// eq(EmailTemplateGroups.isDefault, true),
+				),
+			});
+
+			return emailTemplateGroup;
+		}),
+
 	byId: workspaceQueryProcedure
 		.input(z.object({ id: z.string(), handle: z.string() }))
 		.query(async ({ input: { id }, ctx }) => {

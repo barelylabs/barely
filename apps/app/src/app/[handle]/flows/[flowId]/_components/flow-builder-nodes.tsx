@@ -2,6 +2,7 @@ import type {
 	AddToMailchimpAudienceNode,
 	BooleanNode,
 	FlowState,
+	SendEmailFromTemplateGroupNode,
 	SendEmailNode,
 	TriggerNode,
 	WaitNode,
@@ -22,65 +23,6 @@ import { Switch } from '@barely/ui/elements/switch';
 import { Text } from '@barely/ui/elements/typography';
 
 import { useFlowStore } from './flow-store';
-
-const triggerStoreSelector = (state: FlowState) => ({
-	setCurrentNode: state.setCurrentNode,
-	setShowTriggerModal: state.setShowTriggerModal,
-});
-
-export function TriggerNodeType({ data, id }: { id: string; data: TriggerNode['data'] }) {
-	const { setCurrentNode, setShowTriggerModal } = useFlowStore(
-		useShallow(triggerStoreSelector),
-	);
-
-	const { cartFunnels } = useCartFunnels();
-
-	const cartFunnel = cartFunnels?.find(c => c.id === data.cartFunnelId);
-
-	return (
-		<div className='relative flex items-center justify-center rounded border border-border bg-background p-2'>
-			<div className='flex flex-col items-center gap-2'>
-				<div className='flex flex-row items-center gap-1'>
-					<Icon.trigger className='h-[13px] w-[13px]' />
-					<Text variant='md/bold'>Trigger</Text>
-				</div>
-
-				{data.type === 'newCartOrder' ?
-					<>
-						<Text variant='xs/normal'>New cart order:</Text>
-						<Text variant='xs/normal'>{cartFunnel?.name}</Text>
-					</>
-				: data.type === 'callFlow' ?
-					<div className='flex flex-row items-center gap-1'>
-						<Icon.trigger className='h-3 w-3' />
-						<Text variant='xs/normal'>Trigger from another flow</Text>
-					</div>
-				: data.type === 'newFan' ?
-					<div className='flex flex-row items-center gap-1'>
-						<Icon.fan className='h-[13px] w-[13px]' />
-						<Text variant='xs/normal'>New fan</Text>
-					</div>
-				:	<Text variant='xs/normal'>Choose a trigger</Text>}
-			</div>
-			<Button
-				look='ghost'
-				size='2xs'
-				variant='icon'
-				startIcon='edit'
-				onClick={() => {
-					setCurrentNode(id);
-					setShowTriggerModal(true);
-				}}
-				className='absolute right-1 top-1'
-			/>
-			<Handle type='source' position={Position.Bottom} />
-		</div>
-	);
-}
-
-const emptyStoreSelector = (state: FlowState) => ({
-	replaceEmptyWithNode: state.replaceEmptyWithActionNode,
-});
 
 const TargetHandle = () => {
 	return (
@@ -148,6 +90,105 @@ function NodeDiv({
 	);
 }
 
+/* TRIGGER */
+
+const triggerStoreSelector = (state: FlowState) => ({
+	setCurrentNode: state.setCurrentNode,
+	setShowTriggerModal: state.setShowTriggerModal,
+	updateNodeEnabled: state.updateNodeEnabled,
+});
+
+export function TriggerNodeType({ data, id }: { id: string; data: TriggerNode['data'] }) {
+	const { setCurrentNode, setShowTriggerModal, updateNodeEnabled } = useFlowStore(
+		useShallow(triggerStoreSelector),
+	);
+
+	const { cartFunnels } = useCartFunnels();
+
+	const cartFunnel = cartFunnels?.find(c => c.id === data.cartFunnelId);
+
+	const TriggerIcon =
+		Icon[
+			data.type === 'newCartOrder' ? 'cart'
+			: data.type === 'callFlow' ? 'flow'
+			: 'fan'
+		];
+
+	return (
+		<NodeDiv
+			icon='trigger'
+			onEdit={() => {
+				setCurrentNode(id);
+				setShowTriggerModal(true);
+			}}
+			title='Trigger'
+			subtitle={
+				data.type === 'newCartOrder' ?
+					`New cart order${cartFunnel?.name ? `: ${cartFunnel?.name}` : ''}`
+				: data.type === 'callFlow' ?
+					'Trigger from another flow'
+				: data.type === 'newFan' ?
+					'New fan'
+				:	'Choose a trigger'
+			}
+			iconClassName='h-[16px] w-[16px] text-amber-400'
+			stripeClassName='bg-amber-400'
+		>
+			{TriggerIcon && <TriggerIcon className='h-[16px] w-[16px]' />}
+			<Switch
+				checked={data.enabled}
+				onCheckedChange={checked => updateNodeEnabled(id, checked)}
+				size='md'
+				className='data-[state=checked]:bg-amber-400'
+			/>
+		</NodeDiv>
+
+		// <div className='relative flex items-center justify-center rounded border border-border bg-background p-2'>
+		// 	<div className='flex flex-col items-center gap-2'>
+		// 		<div className='flex flex-row items-center gap-1'>
+		// 			<Icon.trigger className='h-[13px] w-[13px]' />
+		// 			<Text variant='md/bold'>Trigger</Text>
+		// 		</div>
+
+		// 		{data.type === 'newCartOrder' ?
+		// 			<>
+		// 				<Text variant='xs/normal'>New cart order:</Text>
+		// 				<Text variant='xs/normal'>{cartFunnel?.name}</Text>
+		// 			</>
+		// 		: data.type === 'callFlow' ?
+		// 			<div className='flex flex-row items-center gap-1'>
+		// 				<Icon.trigger className='h-3 w-3' />
+		// 				<Text variant='xs/normal'>Trigger from another flow</Text>
+		// 			</div>
+		// 		: data.type === 'newFan' ?
+		// 			<div className='flex flex-row items-center gap-1'>
+		// 				<Icon.fan className='h-[13px] w-[13px]' />
+		// 				<Text variant='xs/normal'>New fan</Text>
+		// 			</div>
+		// 		:	<Text variant='xs/normal'>Choose a trigger</Text>}
+		// 	</div>
+		// 	<Button
+		// 		look='ghost'
+		// 		size='2xs'
+		// 		variant='icon'
+		// 		startIcon='edit'
+		// 		onClick={() => {
+		// 			setCurrentNode(id);
+		// 			setShowTriggerModal(true);
+		// 		}}
+		// 		className='absolute right-1 top-1'
+		// 	/>
+		// 	<Handle type='source' position={Position.Bottom} />
+		// </div>
+	);
+}
+
+/* EMPTY */
+
+const emptyStoreSelector = (state: FlowState) => ({
+	replaceEmptyWithNode: state.replaceEmptyWithActionNode,
+});
+
 export function EmptyNodeType({ id }: { id: string }) {
 	const { replaceEmptyWithNode } = useFlowStore(useShallow(emptyStoreSelector));
 
@@ -167,6 +208,8 @@ export function EmptyNodeType({ id }: { id: string }) {
 					variant='icon'
 					startIcon='wait'
 					onClick={() => replaceEmptyWithNode(id, 'wait')}
+					className='group hover:bg-orange-400'
+					iconClassName='group-hover:text-background'
 				/>
 				<Button
 					look='muted'
@@ -174,6 +217,17 @@ export function EmptyNodeType({ id }: { id: string }) {
 					variant='icon'
 					startIcon='email'
 					onClick={() => replaceEmptyWithNode(id, 'sendEmail')}
+					className='group hover:bg-blue-400'
+					iconClassName='group-hover:text-background'
+				/>
+				<Button
+					look='muted'
+					size='sm'
+					variant='icon'
+					startIcon='emailTemplateGroup'
+					onClick={() => replaceEmptyWithNode(id, 'sendEmailFromTemplateGroup')}
+					className='group hover:bg-indigo-400'
+					iconClassName='group-hover:text-background'
 				/>
 				<Button
 					look='muted'
@@ -181,6 +235,8 @@ export function EmptyNodeType({ id }: { id: string }) {
 					variant='icon'
 					startIcon='branch'
 					onClick={() => replaceEmptyWithNode(id, 'boolean')}
+					className='group hover:bg-green-400'
+					iconClassName='group-hover:text-background'
 				/>
 				<Button
 					look='muted'
@@ -188,11 +244,16 @@ export function EmptyNodeType({ id }: { id: string }) {
 					variant='icon'
 					startIcon='mailchimp'
 					onClick={() => replaceEmptyWithNode(id, 'addToMailchimpAudience')}
+					className='group hover:bg-mailchimp-500'
+					iconClassName='group-hover:text-background'
 				/>
 			</div>
+			<Handle type='source' position={Position.Bottom} />
 		</div>
 	);
 }
+
+/* WAIT */
 
 const waitStoreSelector = (state: FlowState) => ({
 	setCurrentNode: state.setCurrentNode,
@@ -244,6 +305,8 @@ export function WaitNodeType({ id, data }: { id: string; data: WaitNode['data'] 
 		// </div>
 	);
 }
+
+/* SEND EMAIL */
 
 const sendEmailStoreSelector = (state: FlowState) => ({
 	setCurrentNode: state.setCurrentNode,
@@ -307,6 +370,54 @@ export function SendEmailNodeType({
 	);
 }
 
+/* SEND EMAIL FROM TEMPLATE GROUP */
+
+const sendEmailFromTemplateGroupStoreSelector = (state: FlowState) => ({
+	setCurrentNode: state.setCurrentNode,
+	setShowEmailFromTemplateGroupModal: state.setShowEmailFromTemplateGroupModal,
+	updateNodeEnabled: state.updateNodeEnabled,
+});
+
+export function SendEmailFromTemplateGroupNodeType({
+	id,
+	data,
+}: {
+	id: string;
+	data: SendEmailFromTemplateGroupNode['data'];
+}) {
+	const { setCurrentNode, setShowEmailFromTemplateGroupModal, updateNodeEnabled } =
+		useFlowStore(useShallow(sendEmailFromTemplateGroupStoreSelector));
+
+	const { handle } = useWorkspace();
+
+	const { data: emailTemplateGroup } = api.emailTemplateGroup.byId.useQuery({
+		id: data.emailTemplateGroupId,
+		handle,
+	});
+
+	return (
+		<NodeDiv
+			icon='email'
+			onEdit={() => {
+				setCurrentNode(id);
+				setShowEmailFromTemplateGroupModal(true);
+			}}
+			title='Email Template Group'
+			subtitle={`Send Email from "${emailTemplateGroup?.name}"`}
+			iconClassName='h-[16px] w-[16px] text-indigo-400'
+			stripeClassName='bg-indigo-400'
+		>
+			<Switch
+				checked={data.enabled}
+				onCheckedChange={checked => updateNodeEnabled(id, checked)}
+				size='md'
+				className='data-[state=checked]:bg-indigo-400'
+			/>
+		</NodeDiv>
+	);
+}
+/* BOOLEAN */
+
 const booleanStoreSelector = (state: FlowState) => ({
 	setCurrentNode: state.setCurrentNode,
 	setShowBooleanModal: state.setShowBooleanModal,
@@ -353,57 +464,98 @@ export function BooleanNodeType({ id, data }: { id: string; data: BooleanNode['d
 	}, [product?.merchType]);
 
 	return (
-		<div className='relative flex flex-col items-center justify-center rounded border border-border bg-background p-2 px-8'>
-			<Handle type='target' position={Position.Top} />
-			<div className='flex flex-col items-center gap-2'>
-				<div className='flex flex-row items-center gap-1'>
-					<Icon.branch className='h-[13px] w-[13px]' />
-					<Text variant='md/bold'>Decision</Text>
-				</div>
-				<div className='flex flex-col items-center gap-2'>
-					{data.booleanCondition === 'hasOrderedProduct' ?
-						// <Text variant='xs/normal'>Has ordered product: {product?.name}</Text>
-						<>
-							<Text variant='xs/normal'>Ordered product:</Text>
-							<div className='flex flex-row items-center gap-1'>
-								{ProductIcon && <ProductIcon className='h-[13px] w-[13px]' />}
-								<Text variant='xs/normal'>{product?.name}</Text>
-							</div>
-						</>
-					: data.booleanCondition === 'hasOrderedCart' ?
-						<>
-							<Text variant='xs/normal'>Ordered cart:</Text>
-							<div className='flex flex-row items-center gap-1'>
-								<Icon.cart className='h-[13px] w-[13px]' />
-								<Text variant='xs/normal'>{cartFunnel?.name}</Text>
-							</div>
-						</>
-					: data.booleanCondition === 'hasOrderedAmount' ?
-						<Text variant='xs/normal'>
-							Has ordered at least: ${data.totalOrderAmount}
-						</Text>
-					:	null}
-				</div>
-			</div>
-			<Button
-				look='minimal'
-				size='2xs'
-				variant='icon'
-				startIcon='edit'
-				onClick={() => {
-					setCurrentNode(id);
-					setShowBooleanModal(true);
-				}}
-				className='absolute right-1 top-1'
-			/>
-			<Handle type='source' position={Position.Bottom} id={`${id}-bottom`} />
-		</div>
+		<NodeDiv
+			icon='branch'
+			onEdit={() => {
+				setCurrentNode(id);
+				setShowBooleanModal(true);
+			}}
+			title='Decision'
+			subtitle={
+				data.booleanCondition === 'hasOrderedProduct' ? 'Ordered product:'
+				: data.booleanCondition === 'hasOrderedCart' ?
+					'Ordered cart:'
+				:	`at least $${data.totalOrderAmount}`
+			}
+			iconClassName='h-[16px] w-[16px] text-green-400'
+			stripeClassName='bg-green-400'
+		>
+			{data.booleanCondition === 'hasOrderedProduct' ?
+				// <Text variant='xs/normal'>Has ordered product: {product?.name}</Text>
+				<>
+					{/* <Text variant='xs/normal'>Ordered product:</Text> */}
+					<div className='flex flex-row items-center gap-1'>
+						{ProductIcon && <ProductIcon className='h-[13px] w-[13px]' />}
+						<Text variant='xs/normal'>{product?.name}</Text>
+					</div>
+				</>
+			: data.booleanCondition === 'hasOrderedCart' ?
+				<>
+					{/* <Text variant='xs/normal'>Ordered cart:</Text> */}
+					<div className='flex flex-row items-center gap-1'>
+						<Icon.cart className='h-[13px] w-[13px]' />
+						<Text variant='xs/normal'>{cartFunnel?.name}</Text>
+					</div>
+				</>
+				// : data.booleanCondition === 'hasOrderedAmount' ?
+				// 	<Text variant='xs/normal'>Has ordered at least: ${data.totalOrderAmount}</Text>
+			:	null}
+		</NodeDiv>
+
+		// <div className='relative flex flex-col items-center justify-center rounded border border-border bg-background p-2 px-8'>
+		// 	<Handle type='target' position={Position.Top} />
+		// 	<div className='flex flex-col items-center gap-2'>
+		// 		<div className='flex flex-row items-center gap-1'>
+		// 			<Icon.branch className='h-[13px] w-[13px]' />
+		// 			<Text variant='md/bold'>Decision</Text>
+		// 		</div>
+		// 		<div className='flex flex-col items-center gap-2'>
+		// 			{data.booleanCondition === 'hasOrderedProduct' ?
+		// 				// <Text variant='xs/normal'>Has ordered product: {product?.name}</Text>
+		// 				<>
+		// 					<Text variant='xs/normal'>Ordered product:</Text>
+		// 					<div className='flex flex-row items-center gap-1'>
+		// 						{ProductIcon && <ProductIcon className='h-[13px] w-[13px]' />}
+		// 						<Text variant='xs/normal'>{product?.name}</Text>
+		// 					</div>
+		// 				</>
+		// 			: data.booleanCondition === 'hasOrderedCart' ?
+		// 				<>
+		// 					<Text variant='xs/normal'>Ordered cart:</Text>
+		// 					<div className='flex flex-row items-center gap-1'>
+		// 						<Icon.cart className='h-[13px] w-[13px]' />
+		// 						<Text variant='xs/normal'>{cartFunnel?.name}</Text>
+		// 					</div>
+		// 				</>
+		// 			: data.booleanCondition === 'hasOrderedAmount' ?
+		// 				<Text variant='xs/normal'>
+		// 					Has ordered at least: ${data.totalOrderAmount}
+		// 				</Text>
+		// 			:	null}
+		// 		</div>
+		// 	</div>
+		// 	<Button
+		// 		look='minimal'
+		// 		size='2xs'
+		// 		variant='icon'
+		// 		startIcon='edit'
+		// 		onClick={() => {
+		// 			setCurrentNode(id);
+		// 			setShowBooleanModal(true);
+		// 		}}
+		// 		className='absolute right-1 top-1'
+		// 	/>
+		// 	<Handle type='source' position={Position.Bottom} id={`${id}-bottom`} />
+		// </div>
 	);
 }
+
+/* MAILCHIMP AUDIENCE */
 
 const mailchimpStoreSelector = (state: FlowState) => ({
 	setCurrentNode: state.setCurrentNode,
 	setShowMailchimpAudienceModal: state.setShowMailchimpAudienceModal,
+	updateNodeEnabled: state.updateNodeEnabled,
 });
 
 export function MailchimpAudienceNodeType({
@@ -413,48 +565,58 @@ export function MailchimpAudienceNodeType({
 	id: string;
 	data: AddToMailchimpAudienceNode['data'];
 }) {
-	const { setCurrentNode, setShowMailchimpAudienceModal } = useFlowStore(
-		useShallow(mailchimpStoreSelector),
-	);
+	const { setCurrentNode, setShowMailchimpAudienceModal, updateNodeEnabled } =
+		useFlowStore(useShallow(mailchimpStoreSelector));
 
 	const { handle } = useWorkspace();
-	const { data: mailchimpAudiences } = api.mailchimp.audiencesByWorkspace.useQuery(
-		{ handle },
-		// {
-		// 	select: data =>
-		// 		data.map(audience => ({
-		// 			label: audience.name,
-		// 			value: audience.id,
-		// 		})),
-		// },
-	);
+	const { data: mailchimpAudiences } = api.mailchimp.audiencesByWorkspace.useQuery({
+		handle,
+	});
 
 	const currentMailchimpAudience = mailchimpAudiences?.find(
 		audience => audience.id === data.mailchimpAudienceId,
 	);
 
 	return (
-		<div className='relative flex flex-col items-center justify-center rounded border border-border bg-background p-2 px-8'>
-			<Handle type='target' position={Position.Top} />
-			<div className='flex flex-col items-center gap-2'>
-				<div className='flex flex-row items-center gap-1'>
-					<Icon.mailchimp className='h-[13px] w-[13px]' />
-					<Text variant='md/bold'>Add to Mailchimp Audience</Text>
-				</div>
-				<Text variant='xs/normal'>{currentMailchimpAudience?.name}</Text>
-			</div>
-			<Button
-				look='minimal'
-				size='2xs'
-				variant='icon'
-				startIcon='edit'
-				onClick={() => {
-					setCurrentNode(id);
-					setShowMailchimpAudienceModal(true);
-				}}
-				className='absolute right-1 top-1'
+		<NodeDiv
+			icon='mailchimp'
+			onEdit={() => {
+				setCurrentNode(id);
+				setShowMailchimpAudienceModal(true);
+			}}
+			title='Add to Mailchimp Audience'
+			subtitle={`Audience: ${currentMailchimpAudience?.name}` ?? 'Choose an audience'}
+			iconClassName='h-[16px] w-[16px] text-mailchimp-400'
+			stripeClassName='bg-mailchimp-400'
+		>
+			<Switch
+				checked={data.enabled}
+				onCheckedChange={checked => updateNodeEnabled(id, checked)}
+				size='md'
+				className='data-[state=checked]:bg-mailchimp-400'
 			/>
-			<Handle type='source' position={Position.Bottom} id={`${id}-bottom`} />
-		</div>
+		</NodeDiv>
+		// <div className='relative flex flex-col items-center justify-center rounded border border-border bg-background p-2 px-8'>
+		// 	<Handle type='target' position={Position.Top} />
+		// 	<div className='flex flex-col items-center gap-2'>
+		// 		<div className='flex flex-row items-center gap-1'>
+		// 			<Icon.mailchimp className='h-[13px] w-[13px]' />
+		// 			<Text variant='md/bold'>Add to Mailchimp Audience</Text>
+		// 		</div>
+		// 		<Text variant='xs/normal'>{currentMailchimpAudience?.name}</Text>
+		// 	</div>
+		// 	<Button
+		// 		look='minimal'
+		// 		size='2xs'
+		// 		variant='icon'
+		// 		startIcon='edit'
+		// 		onClick={() => {
+		// 			setCurrentNode(id);
+		// 			setShowMailchimpAudienceModal(true);
+		// 		}}
+		// 		className='absolute right-1 top-1'
+		// 	/>
+		// 	<Handle type='source' position={Position.Bottom} id={`${id}-bottom`} />
+		// </div>
 	);
 }

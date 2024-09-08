@@ -21,7 +21,7 @@ export const Tags = pgTable(
 		description: text('description'),
 	},
 	tag => ({
-		pk: primaryKey({ columns: [tag.workspaceId, tag.name] }),
+		pk: primaryKey({ columns: [tag.workspaceId, tag.name], name: 'tag_pk' }),
 	}),
 );
 

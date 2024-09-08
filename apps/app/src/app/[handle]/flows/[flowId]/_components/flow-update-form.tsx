@@ -21,6 +21,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/elements/pop
 import { Separator } from '@barely/ui/elements/separator';
 import { Form, SubmitButton } from '@barely/ui/forms';
 import { SelectField } from '@barely/ui/forms/select-field';
+import { SwitchField } from '@barely/ui/forms/switch-field';
 import { TextField } from '@barely/ui/forms/text-field';
 
 import { useFlowStore } from './flow-store';
@@ -41,9 +42,10 @@ export function FlowUpdateForm(props: {
 	const form = useZodForm({
 		schema: updateFlowAndNodesSchema,
 		values: {
-			id: initialFlow.flow.id,
-			name: initialFlow.flow.name,
-			description: initialFlow.flow.description,
+			...initialFlow.flow,
+			// id: initialFlow.flow.id,
+			// name: initialFlow.flow.name,
+			// description: initialFlow.flow.description,
 			trigger: initialFlow.trigger,
 			actions: initialFlow.actions,
 			edges,
@@ -71,11 +73,11 @@ export function FlowUpdateForm(props: {
 
 		const updatedActions: z.infer<typeof updateFlowAndNodesSchema>['actions'] = nodes
 			.filter(
-				node =>
-					node.type === 'boolean' ||
-					node.type === 'empty' ||
-					node.type === 'sendEmail' ||
-					node.type === 'wait',
+				node => node.type !== 'trigger',
+				// node.type === 'boolean' ||
+				// node.type === 'empty' ||
+				// node.type === 'sendEmail' ||
+				// node.type === 'wait',
 			)
 			.map(action => getFlowActionFromActionNode(action, initialFlow.flow.id));
 
@@ -145,6 +147,7 @@ export function FlowUpdateForm(props: {
 						control={form.control}
 						placeholder='Flow Description'
 					/>
+					<SwitchField name='enabled' label='Enabled' control={form.control} />
 					<SubmitButton fullWidth>Save</SubmitButton>
 
 					<Separator className='my-4' />
