@@ -81,12 +81,6 @@ export const webEventIngestSchema = z
 		linkClickDestinationAssetId: z.string().nullish().default(''),
 		linkClickDestinationHref: z.string().nullish().default(''),
 
-		// destination
-		platform: z
-			.enum([...FM_LINK_PLATFORMS, ''])
-			.optional()
-			.default(''),
-
 		// event data
 		timestamp: z.string().datetime(),
 		type: z.enum([
