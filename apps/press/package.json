@@ -7,7 +7,7 @@
 		"build:preview": "pnpm with-env vercel build",
 		"build:production": "pnpm with-env vercel build --prod",
 		"clean": "git clean -xdf .next .turbo node_modules",
-		"dev": "pnpm with-env next dev -- -p 3006",
+		"dev": "pnpm with-env next dev --port=3006",
 		"format": "prettier --check . --ignore-path ../../.gitignore",
 		"lint": "dotenv -v SKIP_ENV_VALIDATION=1 next lint",
 		"start": "pnpm with-env next start",
@@ -46,7 +46,7 @@
 		"prettier": "^3.2.5",
 		"tailwindcss": "^3.4.0",
 		"tailwindcss-animate": "^1.0.7",
-		"typescript": "^5.4.3"
+		"typescript": "^5.5.4"
 	},
 	"eslintConfig": {
 		"root": true,

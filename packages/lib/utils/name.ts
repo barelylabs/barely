@@ -5,7 +5,7 @@ export function parseFullName(fullName: string) {
 	return { firstName: firstName ?? '', lastName: lastName };
 }
 
-export function fullNameToFirstAndLast(
+export function getFullNameFromFirstAndLast(
 	firstName?: string | null,
 	lastName?: string | null,
 ) {

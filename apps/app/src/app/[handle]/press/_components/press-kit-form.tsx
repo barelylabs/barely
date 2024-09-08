@@ -39,12 +39,15 @@ export function PressKitForm({
 		},
 	);
 
-	const { data: mixtapeOptions } = api.mixtape.byWorkspace.useQuery(
+	const { data: infiniteMixtapeOptions } = api.mixtape.byWorkspace.useInfiniteQuery(
 		{ handle },
-		{
-			select: data => data.map(mixtape => ({ label: mixtape.name, value: mixtape.id })),
-		},
+		{ getNextPageParam: lastPage => lastPage.nextCursor },
 	);
+
+	const mixtapeOptions =
+		infiniteMixtapeOptions?.pages
+			.flatMap(page => page.mixtapes)
+			.map(mixtape => ({ label: mixtape.name, value: mixtape.id })) ?? [];
 
 	const { mutateAsync: updatePressKit } = api.pressKit.update.useMutation();
 

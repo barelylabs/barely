@@ -13,7 +13,11 @@ export function UserAvatar({ user, fallbackName, ...props }: UserAvatarProps) {
 	return (
 		<AvatarRoot {...props}>
 			{user.image ?
-				<AvatarImage alt='Picture' src={user.image} />
+				<AvatarImage
+					alt='Picture'
+					src={user.image}
+					className='focus:outline-none focus:ring-0 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background'
+				/>
 			:	<AvatarFallback>
 					<span className='sr-only'>{fallbackName ?? user.email}</span>
 					<Icon.user className='h-4 w-4' />

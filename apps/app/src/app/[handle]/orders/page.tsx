@@ -6,6 +6,7 @@ import { cartOrderSearchParamsSchema } from '@barely/lib/server/routes/cart-orde
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllCartOrders } from '~/app/[handle]/orders/_components/all-cart-orders';
 import { CartOrderContextProvider } from '~/app/[handle]/orders/_components/cart-order-context';
+import { CartOrderFilters } from '~/app/[handle]/orders/_components/cart-order-filters';
 import { CartOrderHotkeys } from '~/app/[handle]/orders/_components/cart-order-hotkeys';
 import { MarkCartOrderFulfilledModal } from '~/app/[handle]/orders/_components/mark-cart-order-fulfilled-modal';
 
@@ -22,20 +23,20 @@ export default function CartOrdersPage({
 		redirect(`/${params.handle}/orders`);
 	}
 
-	const { selectedOrderCartIds, ...filters } = parsedFilters.data;
-	const orders = api({ handle: params.handle }).cartOrder.byWorkspace({
+	const initialInfiniteOrders = api({ handle: params.handle }).cartOrder.byWorkspace({
 		handle: params.handle,
-		...filters,
+		...parsedFilters.data,
 	});
 
 	return (
-		<CartOrderContextProvider
-			initialOrders={orders}
-			filters={filters}
-			selectedOrderCartIds={selectedOrderCartIds ?? []}
-		>
+		<CartOrderContextProvider initialInfiniteOrders={initialInfiniteOrders}>
 			<DashContentHeader title='Orders' />
-			<AllCartOrders />
+
+			<div className='grid grid-cols-1 gap-5 md:grid-cols-[auto,1fr]'>
+				<CartOrderFilters />
+				<AllCartOrders />
+			</div>
+
 			<MarkCartOrderFulfilledModal />
 			<CartOrderHotkeys />
 		</CartOrderContextProvider>

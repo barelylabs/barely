@@ -1,13 +1,21 @@
 'use client';
 
-import type { MDXEditorMethods, MDXEditorProps } from '@mdxeditor/editor';
+import type {
+	MDXEditorMethods,
+	MDXEditorProps as MDXEditorPropsBase,
+} from '@mdxeditor/editor';
 import { forwardRef } from 'react';
 import dynamic from 'next/dynamic';
 
 import { Skeleton } from '../skeleton';
 
-export type { MDXEditorMethods, MDXEditorProps };
-// ForwardRefEditor.tsx
+export type { MDXEditorMethods };
+export interface MDXEditorProps extends MDXEditorPropsBase {
+	variables?: readonly {
+		name: string;
+		description: string;
+	}[];
+}
 
 // This is the only place InitializedMDXEditor is imported directly.
 const Editor = dynamic(

@@ -9,7 +9,11 @@ import type {
 } from '../file/file.sql';
 import type { Genre } from '../genre/genre.schema';
 import type { PublicWorkspace, Workspace } from '../workspace/workspace.schema';
-import { queryStringArraySchema } from '../../../utils/zod-helpers';
+import {
+	queryBooleanSchema,
+	querySelectionSchema,
+	queryStringArraySchema,
+} from '../../../utils/zod-helpers';
 import { genreIdSchema } from '../genre/genre.schema';
 import { Tracks } from './track.sql';
 
@@ -142,6 +146,17 @@ export interface PublicTrackWith_Artist_Files extends PublicTrack {
 export const trackFilterParamsSchema = z.object({
 	search: z.string().optional(),
 	genres: queryStringArraySchema.optional(),
-	released: z.boolean().optional(),
-	selectedTrackIds: queryStringArraySchema.optional(),
+	showArchived: queryBooleanSchema.optional(),
+	released: queryBooleanSchema.optional(),
+	// selectedTrackIds: queryStringArraySchema.optional(),
+});
+
+export const trackSearchParamsSchema = trackFilterParamsSchema.extend({
+	selectedTrackIds: querySelectionSchema.optional(),
+});
+
+export const selectWorkspaceTracksSchema = trackFilterParamsSchema.extend({
+	handle: z.string(),
+	cursor: z.object({ id: z.string(), createdAt: z.coerce.date() }).optional(),
+	limit: z.coerce.number().min(1).max(100).optional().default(10),
 });

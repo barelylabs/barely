@@ -4,7 +4,7 @@ import { Controller } from 'react-hook-form';
 
 import type { InputProps } from '../elements/input';
 import type { FieldProps } from './field-wrapper';
-import { FormControl } from '../elements/form';
+// import { FormControl } from '../elements/form';
 import {
 	Select,
 	SelectContent,
@@ -13,7 +13,7 @@ import {
 	SelectValue,
 } from '../elements/select';
 import { FieldWrapper } from './field-wrapper';
-import { FormFieldContext, FormItem } from './index';
+import { FieldControl, FormFieldContext, FormItem } from './index';
 
 export interface SelectFieldOption<TOption extends string | number> {
 	value: TOption;
@@ -43,11 +43,11 @@ export const SelectField = <
 								value={field.value}
 								disabled={props.disabled}
 							>
-								<FormControl>
+								<FieldControl>
 									<SelectTrigger className={props.className}>
 										<SelectValue placeholder={props.placeholder} />
 									</SelectTrigger>
-								</FormControl>
+								</FieldControl>
 								<SelectContent>
 									{props.options.map((option: SelectFieldOption<string | number>) => (
 										<SelectItem

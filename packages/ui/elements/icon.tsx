@@ -14,11 +14,14 @@ import {
 	ArrowFatLeft,
 	ArrowFatRight,
 	ArrowFatUp,
+	At,
 	BracketsAngle,
 	CalendarBlank,
 	CashRegister,
 	CassetteTape,
 	Disc,
+	// Envelope,
+	FrameCorners,
 	Hoodie,
 	MetaLogo,
 	PlayCircle,
@@ -64,6 +67,7 @@ import {
 	CircleUserRound,
 	Clipboard,
 	ClipboardCheck,
+	Clock,
 	Code,
 	Code2,
 	Coins,
@@ -114,6 +118,8 @@ import {
 	Loader2,
 	Lock,
 	Magnet,
+	Mail,
+	Mails,
 	Megaphone,
 	Menu,
 	MessageSquare,
@@ -152,9 +158,11 @@ import {
 	SkipBack,
 	SkipForward,
 	Sliders,
+	Split,
 	Square,
 	Star,
 	StarHalf,
+	Sticker,
 	StickyNote,
 	Sun,
 	Tablet,
@@ -162,11 +170,13 @@ import {
 	Tags,
 	Target,
 	Terminal,
+	TestTubes,
 	ThumbsDown,
 	ThumbsUp,
 	Trash,
 	Triangle,
 	Tv,
+	Undo,
 	UploadCloud,
 	User,
 	UserCircle2,
@@ -185,13 +195,18 @@ import {
 	ZoomOut,
 } from 'lucide-react';
 import {
+	FaDhl,
 	FaFacebook,
+	FaFedex,
 	FaGithub,
 	FaInstagram,
+	FaMailchimp,
 	FaSpotify,
 	FaTiktok,
 	FaTwitch,
 	FaTwitter,
+	FaUps,
+	FaUsps,
 	FaYoutube,
 } from 'react-icons/fa';
 
@@ -231,6 +246,7 @@ export const Icon = {
 	bio: UserCircle2,
 	bold: Bold,
 	bot: Bot,
+	branch: Split,
 	broadcast: Radio,
 
 	calendar: CalendarBlank,
@@ -265,6 +281,7 @@ export const Icon = {
 
 	database: Database,
 	delete: Trash,
+	dhl: FaDhl,
 	dollar: DollarSign,
 	domain: Globe,
 	dots: MoreHorizontal,
@@ -273,9 +290,17 @@ export const Icon = {
 
 	edit: Edit,
 	ellipsis: MoreVertical,
+	emailAddress: At,
+	email: Mail,
+	emails: Mails,
+	emailTemplate: Mail,
+	emailTemplateGroup: Mails,
 	externalLink: ExternalLink,
 	eyeDropper: EyeDropperIcon,
 
+	fan: User,
+	fans: Users,
+	fedex: FaFedex,
 	file: File,
 	fileAudio: FileAudio,
 	fileVideo: FileVideo,
@@ -284,6 +309,7 @@ export const Icon = {
 	flame: Flame,
 	flipHorizontal: FlipHorizontal,
 	flipVertical: FlipVertical,
+	flow: Zap,
 	fm: RadioTower,
 	fmPage: RadioTower,
 	focus: Focus,
@@ -326,6 +352,7 @@ export const Icon = {
 
 	magic: SparklesIcon,
 	magnet: Magnet,
+	mailchimp: FaMailchimp,
 	media: FileVideo,
 	megaphone: Megaphone,
 	meta: MetaLogo,
@@ -342,7 +369,7 @@ export const Icon = {
 
 	newspaper: Newspaper,
 
-	orders: CashRegister,
+	order: CashRegister,
 
 	page: File,
 	palette: Palette,
@@ -359,6 +386,7 @@ export const Icon = {
 	plus: Plus,
 	plusCircle: PlusCircle,
 	post: FileText,
+	poster: FrameCorners,
 	press: Newspaper,
 	pressKit: Newspaper,
 	profile: CircleUserRound,
@@ -389,10 +417,12 @@ export const Icon = {
 	socials: ExternalLink,
 	spark: Zap,
 	spinner: Loader2,
+	splitTest: TestTubes,
 	square: Square,
 	star: Star,
 	starHalf: StarHalf,
 	stat: BarChart,
+	sticker: Sticker,
 	stickyNote: StickyNote,
 	sun: Sun,
 	sweatshirt: Hoodie,
@@ -408,19 +438,23 @@ export const Icon = {
 	track: Music,
 	trash: Trash,
 	triangle: Triangle,
+	trigger: Zap,
 	tshirt: TShirt,
 	tv: Tv,
 
+	undo: Undo,
 	upload: UploadCloud,
+	ups: FaUps,
+	usps: FaUsps,
 	user: User,
 	userPlus: UserPlus,
 	users: Users,
 
 	verified: Verified,
-
 	video: Video,
 	vinyl: VinylRecord,
 
+	wait: Clock,
 	wand: Wand2,
 	warning: AlertTriangle,
 	watch: Watch,
@@ -447,7 +481,7 @@ export const Icon = {
 
 export type IconType = LucideIcon | ReactIcon;
 
-export type IconSelection = keyof typeof Icon;
+export type IconKey = keyof typeof Icon;
 
 export function DeviceIcon({
 	display,

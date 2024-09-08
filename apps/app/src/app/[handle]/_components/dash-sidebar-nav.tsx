@@ -5,6 +5,7 @@ import type { Workspace } from '@barely/lib/server/routes/workspace/workspace.sc
 import { Fragment, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { usePathnameMatchesCurrentGroup } from '@barely/lib/hooks/use-pathname-matches-current-group';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { useAtomValue } from 'jotai';
 
@@ -34,8 +35,11 @@ interface SidebarNavLink {
 
 interface SidebarNavGroup {
 	title: string;
+	icon?: keyof typeof Icon;
+	href?: string;
 	links: SidebarNavLink[];
 	workspaceFilters?: (keyof Workspace)[];
+	hideLinksWhenNotActive?: boolean; // New prop to control visibility of NavLinks
 }
 
 type SidebarNavItem = SidebarNavLink | SidebarNavGroup;
@@ -55,7 +59,7 @@ export function SidebarNav(props: { workspace: Workspace }) {
 	const merchLinks: SidebarNavLink[] = [
 		{ title: 'products', icon: 'product', href: `/${handle}/products` },
 		{ title: 'carts', icon: 'cartFunnel', href: `/${handle}/carts` },
-		{ title: 'orders', icon: 'orders', href: `/${handle}/orders` },
+		{ title: 'orders', icon: 'order', href: `/${handle}/orders` },
 	];
 
 	const mediaLinks: SidebarNavLink[] = [
@@ -67,13 +71,22 @@ export function SidebarNav(props: { workspace: Workspace }) {
 	const pageLinks: SidebarNavLink[] = [
 		{ title: 'links', icon: 'link', href: `/${handle}/links` },
 		{ title: 'fm', icon: 'fm', href: `/${handle}/fm` },
-		// { title: 'bio', icon: 'bio', href: `/${handle}/bio` },
 		{ title: 'pages', icon: 'landingPage', href: `/${handle}/pages` },
 		{ title: 'press', icon: 'press', href: `/${handle}/press` },
 	];
 
+	const emailLinks: SidebarNavLink[] = [
+		{ title: 'templates', icon: 'email', href: `/${handle}/email-templates` },
+		{
+			title: 'template groups',
+			icon: 'emailTemplateGroup',
+			href: `/${handle}/email-template-groups`,
+		},
+	];
+
 	const otherLinks: SidebarNavLink[] = [
-		{ title: 'workflows', icon: 'workflow', href: `/${handle}/workflows` },
+		{ title: 'fans', icon: 'fans', href: `/${handle}/fans` },
+		{ title: 'flows', icon: 'flow', href: `/${handle}/flows` },
 		{ title: 'settings', icon: 'settings', href: `/${handle}/settings` },
 	];
 
@@ -92,7 +105,10 @@ export function SidebarNav(props: { workspace: Workspace }) {
 			title: 'merch',
 			links: merchLinks,
 		},
-
+		{
+			title: 'email',
+			links: emailLinks,
+		},
 		{
 			title: 'other',
 			links: otherLinks,
@@ -104,7 +120,24 @@ export function SidebarNav(props: { workspace: Workspace }) {
 		{ title: 'socials', icon: 'socials', href: `/${handle}/settings/socials` },
 		{ title: 'team', icon: 'users', href: `/${handle}/settings/team` },
 		{ title: 'apps', icon: 'apps', href: `/${handle}/settings/apps` },
-		{ title: 'domains', icon: 'domain', href: `/${handle}/settings/domains` },
+		{
+			title: 'email',
+			icon: 'email',
+			href: `/${handle}/settings/email/domains`,
+			links: [
+				{ title: 'domains', href: `/${handle}/settings/email/domains` },
+				{
+					title: 'addresses',
+					href: `/${handle}/settings/email/addresses`,
+				},
+			],
+			hideLinksWhenNotActive: true,
+		},
+		{
+			title: 'domains',
+			icon: 'domain',
+			href: `/${handle}/settings/domains`,
+		},
 		{
 			title: 'remarketing',
 			icon: 'remarketing',
@@ -184,13 +217,55 @@ function NavLink(props: { item: SidebarNavLink }) {
 }
 
 function NavGroup(props: { item: SidebarNavGroup }) {
-	return (
-		<div className='mb-2 flex flex-col gap-1'>
+	const NavIcon = props.item.icon ? Icon[props.item.icon] : null;
+
+	const isCurrentGroup = usePathnameMatchesCurrentGroup(
+		props.item.links.map(link => link.href ?? ''),
+	);
+
+	const groupContent = (
+		<>
+			{NavIcon && <NavIcon className='h-[15px] w-[15px]' />}
 			<Text variant={'sm/medium'}>{props.item.title}</Text>
-			{props.item.links.map((item, index) => (
-				<NavLink key={index} item={item} />
-			))}
-		</div>
+		</>
+	);
+
+	return (
+		<>
+			{props.item.href && !isCurrentGroup ?
+				<Link
+					href={isCurrentGroup ? '#' : props.item.links[0]?.href ?? '#'}
+					className={cn(
+						'group flex w-full items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted',
+						isCurrentGroup && 'bg-muted',
+					)}
+					passHref
+				>
+					{groupContent}
+				</Link>
+			:	<div
+					className={cn(
+						'group flex w-full items-center gap-2 rounded-md px-2 py-1.5',
+						!isCurrentGroup && 'hover:bg-muted',
+						// isCurrentGroup && 'bg-muted',
+					)}
+				>
+					{groupContent}
+				</div>
+			}
+			{(!props.item.hideLinksWhenNotActive || isCurrentGroup) && (
+				<div
+					className={cn(
+						'mb-2 flex flex-col gap-1',
+						props.item.hideLinksWhenNotActive && 'ml-6',
+					)}
+				>
+					{props.item.links.map((item, index) => (
+						<NavLink key={index} item={item} />
+					))}
+				</div>
+			)}
+		</>
 	);
 }
 

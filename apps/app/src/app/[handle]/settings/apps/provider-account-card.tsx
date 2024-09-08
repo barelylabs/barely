@@ -49,7 +49,7 @@ export const ProviderAccountCard = ({ provider }: ExternalAccountCardProps) => {
 			provider,
 			providerAccountId: accountId,
 		});
-		return utils.providerAccount.byCurrentUser.invalidate();
+		return utils.providerAccount.invalidate();
 	};
 
 	const platform = toTitleCase(provider);
@@ -71,6 +71,9 @@ export const ProviderAccountCard = ({ provider }: ExternalAccountCardProps) => {
 										{account.username ?? account.providerAccountId}
 									</p>
 									<p className='text-sm text-muted-foreground'>{account.email}</p>
+									<p className='text-sm text-muted-foreground'>
+										{account.providerAccountId}
+									</p>
 								</div>
 
 								<AlertDialog

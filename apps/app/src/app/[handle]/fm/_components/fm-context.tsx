@@ -4,26 +4,14 @@ import type { AppRouterOutputs } from '@barely/lib/server/api/react';
 import type { fmFilterParamsSchema } from '@barely/lib/server/routes/fm/fm.schema';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
-import {
-	createContext,
-	use,
-	useContext,
-	useOptimistic,
-	useRef,
-	useState,
-	useTransition,
-} from 'react';
-import { useTypedQuery } from '@barely/lib/hooks/use-typed-query';
+import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
+import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 import { fmSearchParamsSchema } from '@barely/lib/server/routes/fm/fm.schema';
 
 interface FmContext {
 	fmPages: AppRouterOutputs['fm']['byWorkspace']['fmPages'];
-	// infinite
-	// hasMoreFmPages: boolean;
-	// fetchMoreFmPages: () => void;
-	// selection
 	fmPageSelection: Selection;
 	lastSelectedFmPageId: string | undefined;
 	lastSelectedFmPage:
@@ -53,13 +41,9 @@ const FmContext = createContext<FmContext | undefined>(undefined);
 export function FmContextProvider({
 	children,
 	initialFmPages,
-	filters = {},
-	selectedFmPageIds = [],
 }: {
 	children: React.ReactNode;
 	initialFmPages: Promise<AppRouterOutputs['fm']['byWorkspace']>;
-	filters: z.infer<typeof fmFilterParamsSchema> | undefined;
-	selectedFmPageIds: string[];
 }) {
 	const [showCreateFmPageModal, setShowCreateFmPageModal] = useState(false);
 	const [showUpdateFmPageModal, setShowUpdateFmPageModal] = useState(false);
@@ -68,8 +52,17 @@ export function FmContextProvider({
 
 	const { handle } = useWorkspace();
 
-	const initialData = use(initialFmPages);
+	const { data, setQuery, removeByKey, removeAllQueryParams, pending } =
+		useTypedOptimisticQuery(fmSearchParamsSchema);
 
+	const { selectedFmPageIds, ...filters } = data;
+
+	const fmPageSelection: Selection =
+		!selectedFmPageIds ? new Set()
+		: selectedFmPageIds === 'all' ? 'all'
+		: new Set(selectedFmPageIds);
+
+	const initialData = use(initialFmPages);
 	const { data: infiniteFmPages } = api.fm.byWorkspace.useInfiniteQuery(
 		{ handle, ...filters },
 		{
@@ -87,85 +80,46 @@ export function FmContextProvider({
 
 	const gridListRef = useRef<HTMLDivElement>(null);
 
-	const { data, setQuery, removeByKey, removeAllQueryParams } =
-		useTypedQuery(fmSearchParamsSchema);
-
-	/* selection */
-	const [optimisticSelection, setOptimisticSelection] = useOptimistic<Selection>(
-		new Set(selectedFmPageIds),
-	);
-
-	const [, startSelectTransition] = useTransition();
-
-	function setFmPageSelection(selection: Selection) {
-		startSelectTransition(() => {
-			setOptimisticSelection(selection);
-			if (selection === 'all') {
-				return;
-			}
-			if (selection.size === 0) {
-				return removeByKey('selectedFmPageIds');
-			}
+	/* setters */
+	const setFmPageSelection = useCallback(
+		(selection: Selection) => {
+			if (selection === 'all') return;
+			if (selection.size === 0) return removeByKey('selectedFmPageIds');
 			return setQuery(
 				'selectedFmPageIds',
 				Array.from(selection).map(key => key.toString()),
 			);
-		});
-	}
+		},
+		[setQuery, removeByKey],
+	);
 
-	/* filters */
-	const [optimisticFilters, setOptimisticFilters] = useOptimistic(filters);
-	const [pendingFiltersTransition, startFiltersTransition] = useTransition();
+	const clearAllFilters = useCallback(() => {
+		removeAllQueryParams();
+	}, [removeAllQueryParams]);
 
-	// clear all filters
-	function clearAllFilters() {
-		startFiltersTransition(() => {
-			setOptimisticSelection(new Set());
-			removeAllQueryParams();
-		});
-	}
+	const toggleArchived = useCallback(() => {
+		if (data.showArchived) return removeByKey('showArchived');
+		return setQuery('showArchived', true);
+	}, [data.showArchived, setQuery, removeByKey]);
 
-	// toggle archived
-	function toggleArchived() {
-		startFiltersTransition(() => {
-			if (data.showArchived) {
-				setOptimisticFilters({ ...optimisticFilters, showArchived: false });
-				removeByKey('showArchived');
-				return;
-			} else {
-				setOptimisticFilters({ ...optimisticFilters, showArchived: true });
-				setQuery('showArchived', true);
-				return;
-			}
-		});
-	}
-
-	// search
-	function setSearch(search: string) {
-		startFiltersTransition(() => {
-			if (search.length) {
-				setOptimisticFilters({ ...optimisticFilters, search });
-				setQuery('search', search);
-			} else {
-				setOptimisticFilters({ ...optimisticFilters });
-				removeByKey('search');
-			}
-		});
-	}
+	const setSearch = useCallback(
+		(search: string) => {
+			if (search.length) return setQuery('search', search);
+			return removeByKey('search');
+		},
+		[setQuery, removeByKey],
+	);
 
 	const lastSelectedFmPageId =
-		optimisticSelection === 'all' ? undefined : (
-			Array.from(optimisticSelection).pop()?.toString()
-		);
+		fmPageSelection === 'all' || !fmPageSelection ?
+			undefined
+		:	Array.from(fmPageSelection).pop()?.toString();
 
-	const lastSelectedFmPage =
-		lastSelectedFmPageId ?
-			fmPages.find(fmPage => fmPage.id === lastSelectedFmPageId)
-		:	undefined;
+	const lastSelectedFmPage = fmPages.find(fmPage => fmPage.id === lastSelectedFmPageId);
 
 	const contextValue = {
 		fmPages,
-		fmPageSelection: optimisticSelection,
+		fmPageSelection,
 		lastSelectedFmPageId,
 		lastSelectedFmPage,
 		setFmPageSelection,
@@ -182,8 +136,8 @@ export function FmContextProvider({
 		showDeleteFmPageModal,
 		setShowDeleteFmPageModal,
 		// filters
-		filters: optimisticFilters,
-		pendingFiltersTransition,
+		filters,
+		pendingFiltersTransition: pending,
 		setSearch,
 		toggleArchived,
 		clearAllFilters,

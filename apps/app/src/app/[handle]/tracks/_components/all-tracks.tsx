@@ -51,7 +51,11 @@ export function AllTracks() {
 	);
 }
 
-function TrackCard({ track }: { track: AppRouterOutputs['track']['byWorkspace'][0] }) {
+function TrackCard({
+	track,
+}: {
+	track: AppRouterOutputs['track']['byWorkspace']['tracks'][number];
+}) {
 	const { setShowEditTrackModal, setShowArchiveTrackModal, setShowDeleteTrackModal } =
 		useTrackContext();
 

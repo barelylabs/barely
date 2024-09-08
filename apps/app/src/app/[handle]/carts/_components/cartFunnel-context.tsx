@@ -1,22 +1,11 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/react';
-import type {
-	CartFunnel,
-	cartFunnelFilterParamsSchema,
-} from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
+import type { cartFunnelFilterParamsSchema } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
-import {
-	createContext,
-	use,
-	useContext,
-	useOptimistic,
-	useRef,
-	useState,
-	useTransition,
-} from 'react';
-import { useTypedQuery } from '@barely/lib/hooks/use-typed-query';
+import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
+import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 import { cartFunnelSearchParamsSchema } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
@@ -25,7 +14,9 @@ interface CartFunnelContext {
 	cartFunnels: AppRouterOutputs['cartFunnel']['byWorkspace']['cartFunnels'];
 	cartFunnelSelection: Selection;
 	lastSelectedCartFunnelId: string | undefined;
-	lastSelectedCartFunnel: CartFunnel | undefined;
+	lastSelectedCartFunnel:
+		| AppRouterOutputs['cartFunnel']['byWorkspace']['cartFunnels'][number]
+		| undefined;
 	setCartFunnelSelection: (selection: Selection) => void;
 	gridListRef: React.RefObject<HTMLDivElement>;
 	focusGridList: () => void;
@@ -49,14 +40,10 @@ const CartFunnelContext = createContext<CartFunnelContext | undefined>(undefined
 
 export function CartFunnelContextProvider({
 	children,
-	initialFunnels,
-	filters,
-	selectedFunnelIds,
+	initialInfiniteCartFunnels,
 }: {
 	children: React.ReactNode;
-	initialFunnels: Promise<AppRouterOutputs['cartFunnel']['byWorkspace']>;
-	filters: z.infer<typeof cartFunnelFilterParamsSchema>;
-	selectedFunnelIds: string[];
+	initialInfiniteCartFunnels: Promise<AppRouterOutputs['cartFunnel']['byWorkspace']>;
 }) {
 	const [showCreateFunnelModal, setShowCreateFunnelModal] = useState(false);
 	const [showUpdateFunnelModal, setShowUpdateFunnelModal] = useState(false);
@@ -64,99 +51,87 @@ export function CartFunnelContextProvider({
 	const [showDeleteFunnelModal, setShowDeleteFunnelModal] = useState(false);
 
 	const { handle } = useWorkspace();
-	const { data: infiniteFunnels } = api.cartFunnel.byWorkspace.useQuery(
+
+	const { data, setQuery, removeByKey, removeAllQueryParams, pending } =
+		useTypedOptimisticQuery(cartFunnelSearchParamsSchema);
+
+	const { selectedCartFunnelIds, ...filters } = data;
+
+	const cartFunnelSelection: Selection =
+		!selectedCartFunnelIds ? new Set()
+		: selectedCartFunnelIds === 'all' ? 'all'
+		: new Set(selectedCartFunnelIds);
+
+	const initialData = use(initialInfiniteCartFunnels);
+
+	const { data: infiniteFunnels } = api.cartFunnel.byWorkspace.useInfiniteQuery(
 		{
 			handle,
 			...filters,
 		},
 		{
-			initialData: use(initialFunnels),
+			initialData: () => {
+				return {
+					pages: [
+						{
+							cartFunnels: initialData.cartFunnels,
+							nextCursor: initialData.nextCursor,
+						},
+					],
+					pageParams: [], // todo: add page params
+				};
+			},
+			getNextPageParam: lastPage => lastPage.nextCursor,
 		},
 	);
 
-	const gridListRef = useRef<HTMLDivElement>(null);
+	const cartFunnels = infiniteFunnels?.pages.flatMap(page => page.cartFunnels) ?? [];
 
-	const { data, setQuery, removeByKey, removeAllQueryParams } = useTypedQuery(
-		cartFunnelSearchParamsSchema,
-	);
-
-	/* selection */
-	const [optimisticSelection, setOptimisticSelection] = useOptimistic<Selection>(
-		new Set(selectedFunnelIds),
-	);
-	const [, startSelectTransition] = useTransition();
-
-	function setFunnelSelection(selection: Selection) {
-		startSelectTransition(() => {
-			setOptimisticSelection(selection);
-
+	// setters
+	const setCartFunnelSelection = useCallback(
+		(selection: Selection) => {
 			if (selection === 'all') return;
-
-			if (selection.size === 0) {
-				return removeByKey('selectedFunnelIds');
-			}
-
+			if (selection.size === 0) return removeByKey('selectedCartFunnelIds');
 			return setQuery(
-				'selectedFunnelIds',
+				'selectedCartFunnelIds',
 				Array.from(selection).map(key => key.toString()),
 			);
-		});
-	}
-
-	/* filters */
-	const [optimisticFilters, setOptimisticFilters] = useOptimistic(filters);
-	const [pendingFiltersTransition, startFiltersTransition] = useTransition();
-
-	// clear all filters
-	function clearAllFilters() {
-		startFiltersTransition(() => {
-			setOptimisticSelection(new Set());
-			removeAllQueryParams();
-		});
-	}
-
-	// toggle archived
-	function toggleArchived() {
-		startFiltersTransition(() => {
-			if (data.showArchived) {
-				setOptimisticFilters({ ...optimisticFilters, showArchived: false });
-				removeByKey('showArchived');
-				return;
-			} else {
-				setOptimisticFilters({ ...optimisticFilters, showArchived: true });
-				setQuery('showArchived', true);
-				return;
-			}
-		});
-	}
-	// search
-	function setSearch(search: string) {
-		startFiltersTransition(() => {
-			if (search.length) {
-				setOptimisticFilters({ ...optimisticFilters, search });
-				setQuery('search', search);
-			} else {
-				setOptimisticFilters({ ...optimisticFilters, search: '' });
-				removeByKey('search');
-			}
-		});
-	}
-
-	const lastSelectedFunnelId =
-		optimisticSelection === 'all' ? undefined : (
-			Array.from(optimisticSelection).pop()?.toString()
-		);
-
-	const lastSelectedFunnel = infiniteFunnels.cartFunnels.find(
-		f => f.id === lastSelectedFunnelId,
+		},
+		[removeByKey, setQuery],
 	);
 
+	const clearAllFilters = useCallback(() => {
+		removeAllQueryParams();
+	}, [removeAllQueryParams]);
+
+	const toggleArchived = useCallback(() => {
+		if (filters.showArchived) return removeByKey('showArchived');
+		return setQuery('showArchived', true);
+	}, [filters.showArchived, removeByKey, setQuery]);
+
+	const setSearch = useCallback(
+		(search: string) => {
+			if (search.length) return setQuery('search', search);
+			return removeByKey('search');
+		},
+		[removeByKey, setQuery],
+	);
+
+	const lastSelectedCartFunnelId =
+		cartFunnelSelection === 'all' || !cartFunnelSelection ?
+			undefined
+		:	Array.from(cartFunnelSelection).pop()?.toString();
+
+	const lastSelectedCartFunnel = cartFunnels.find(f => f.id === lastSelectedCartFunnelId);
+
+	const gridListRef = useRef<HTMLDivElement>(null);
+
 	const contextValue = {
-		cartFunnels: infiniteFunnels.cartFunnels,
-		cartFunnelSelection: optimisticSelection,
-		lastSelectedCartFunnelId: lastSelectedFunnelId,
-		lastSelectedCartFunnel: lastSelectedFunnel,
-		setCartFunnelSelection: setFunnelSelection,
+		cartFunnels,
+		cartFunnelSelection,
+		lastSelectedCartFunnelId,
+		lastSelectedCartFunnel,
+		setCartFunnelSelection: setCartFunnelSelection,
 		gridListRef,
 		focusGridList: () => gridListRef.current?.focus(),
 		showCreateCartFunnelModal: showCreateFunnelModal,
@@ -168,8 +143,8 @@ export function CartFunnelContextProvider({
 		showDeleteCartFunnelModal: showDeleteFunnelModal,
 		setShowDeleteCartFunnelModal: setShowDeleteFunnelModal,
 		// filters
-		filters: optimisticFilters,
-		pendingFiltersTransition,
+		filters,
+		pendingFiltersTransition: pending,
 		setSearch,
 		toggleArchived,
 		clearAllFilters,

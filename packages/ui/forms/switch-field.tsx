@@ -3,8 +3,8 @@ import { Controller } from 'react-hook-form';
 
 import type { SwitchAddonProps } from '../elements/switch';
 import type { FieldProps } from './field-wrapper';
-import { FieldControl, FieldLabel, FormFieldContext } from '.';
-import { FormItem } from '../elements/form';
+import { FieldControl, FieldLabel, FormFieldContext, FormItem } from '.';
+// import { FormItem } from '../elements/form';
 import { Switch } from '../elements/switch';
 import { FieldMessages } from './field-wrapper';
 

@@ -15,7 +15,7 @@ import {
 	formatWorkspaceTrackToUpsertTrackForm,
 	upsertTrackSchema,
 } from '@barely/lib/server/routes/track/track.schema';
-import { parseSpotifyLink } from '@barely/lib/utils/link';
+import { parseSpotifyUrl } from '@barely/lib/utils/spotify';
 import { atom } from 'jotai';
 
 import { Badge } from '@barely/ui/elements/badge';
@@ -222,7 +222,7 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 						label='Spotify ID'
 						onPaste={e => {
 							const input = e.clipboardData.getData('text');
-							const parsed = parseSpotifyLink(input);
+							const parsed = parseSpotifyUrl(input);
 							if (!input ?? parsed?.type !== 'track') return;
 							e.preventDefault();
 							form.setValue('spotifyId', parsed.id);

@@ -132,6 +132,10 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 			case !!link.externalAppLinkUrl: {
 				return NextResponse.redirect(link.externalAppLinkUrl);
 			}
+
+			default: {
+				return NextResponse.redirect(link.url);
+			}
 		}
 	}
 

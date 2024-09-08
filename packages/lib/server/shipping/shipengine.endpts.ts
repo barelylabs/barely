@@ -76,6 +76,12 @@ export async function getShippingEstimates(props: ShippingEstimateProps) {
 				currency: z.string(),
 				amount: z.number(),
 			}),
+			requested_comparison_amount: z
+				.object({
+					currency: z.string(),
+					amount: z.number(),
+				})
+				.optional(),
 			tax_amount: z
 				.object({
 					currency: z.string(),
@@ -138,21 +144,36 @@ export async function getShippingEstimates(props: ShippingEstimateProps) {
 			},
 			delivery_confirmation: deliveryConfirmation,
 			residential_indicator: residentialIndicator,
+			comparison_rate_type: 'retail',
 		},
 		errorSchema,
 	});
 
 	if (response.success && response.parsed) {
+		console.log(
+			'shipping responses',
+			response.data.map(r => r.requested_comparison_amount),
+		);
+
 		const sortedRates = response.data
 			.filter(r => (eligibleForMediaMail ? r : r.service_code !== 'usps_media_mail'))
-			.map(r => ({
-				...r,
-				// convert amounts to cents
-				shipping_amount: {
-					...r.shipping_amount,
-					amount: r.shipping_amount.amount * 100,
-				},
-			}))
+			.map(r => {
+				const negotiatedAmountInDollars = r.shipping_amount.amount;
+				const retailAmountInDollars = r.requested_comparison_amount?.amount ?? 0;
+				const amountInDollars = Math.max(
+					negotiatedAmountInDollars * 1.1,
+					retailAmountInDollars,
+				); // 10% over the negotiated rate, or the retail rate, whichever is higher
+
+				return {
+					...r,
+					// convert amounts to cents
+					shipping_amount: {
+						...r.shipping_amount,
+						amount: amountInDollars * 100,
+					},
+				};
+			})
 			.sort((a, b) => a.shipping_amount.amount - b.shipping_amount.amount);
 
 		return sortedRates.slice(0, limit);

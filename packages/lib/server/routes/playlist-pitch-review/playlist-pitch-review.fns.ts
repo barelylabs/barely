@@ -71,7 +71,7 @@ const assignPlaylistPitchToReviewers = async (campaignId: string) => {
 		.filter(curator =>
 			curator?.playlistPitchReviews.every(r => r.campaignId !== campaignId),
 		)
-		.filter(c => !!c) as NonNullable<(typeof allGenres)[0]['playlist']['curator']>[];
+		.filter(c => !!c);
 
 	const randomCurators = allCurators
 		.sort(() => Math.random() - 0.5)

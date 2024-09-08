@@ -2,17 +2,18 @@ import type { z } from 'zod';
 import { eq } from 'drizzle-orm';
 
 import type { VisitorInfo } from '../../../utils/middleware';
-import type { MetaEventProps } from '../../meta/meta.endpts.event';
+import type { MetaEvent } from '../../meta/meta.endpts.event';
 import type { CartFunnel } from '../cart-funnel/cart-funnel.schema';
 import type { Cart } from '../cart/cart.schema';
 import type { FM_LINK_PLATFORMS } from '../fm/fm.constants';
 import type { FmLink, FmPage } from '../fm/fm.schema';
+import type { LandingPage } from '../landing-page/landing-page.schema';
 import type { LinkAnalyticsProps } from '../link/link.schema';
 import type {
 	cartEventIngestSchema,
 	WEB_EVENT_TYPES__CART,
 	WEB_EVENT_TYPES__FM,
-	// WEB_EVENT_TYPES__LINK,
+	WEB_EVENT_TYPES__PAGE,
 } from './event.tb';
 import { env } from '../../../env';
 import { isDevelopment } from '../../../utils/environment';
@@ -22,14 +23,16 @@ import { sqlIncrement } from '../../../utils/sql';
 import { ratelimit } from '../../../utils/upstash';
 import { dbHttp } from '../../db';
 // import { db } from '../../db';
-import { reportEventToMeta } from '../../meta/meta.endpts.event';
+import { reportEventsToMeta } from '../../meta/meta.endpts.event';
 import { AnalyticsEndpoints } from '../analytics-endpoint/analytics-endpoint.sql';
 import { FmLinks, FmPages } from '../fm/fm.sql';
+import { LandingPages } from '../landing-page/landing-page.sql';
 import { Links } from '../link/link.sql';
 import { Workspaces } from '../workspace/workspace.sql';
 import {
 	ingestCartEvent,
 	ingestFmEvent,
+	ingestPageEvent,
 	ingestWebEvent,
 	webEventIngestSchema,
 } from './event.tb';
@@ -90,7 +93,6 @@ export async function recordLinkClick({
 	/**
 	 * 👾 remarketing/analytics 👾
 	 *  */
-
 	const analyticsEndpoints =
 		link.remarketing ?
 			await dbHttp.query.AnalyticsEndpoints.findMany({
@@ -109,18 +111,22 @@ export async function recordLinkClick({
 
 	const metaRes =
 		metaPixel?.accessToken ?
-			await reportEventToMeta({
+			await reportEventsToMeta({
 				pixelId: metaPixel.id,
 				accessToken: metaPixel.accessToken,
 				sourceUrl: href, // this is being logged directly from middleware, so href is the sourceUrl
 				ip,
 				ua: ua.ua,
-				eventName: 'barely.link/click',
 				geo,
-				customData: {
-					linkType: type,
-					platform,
-				},
+				events: [
+					{
+						eventName: 'barely.link/click',
+						customData: {
+							linkType: type,
+							platform,
+						},
+					},
+				],
 			})
 		:	{ reported: false };
 
@@ -170,6 +176,8 @@ export async function recordLinkClick({
 
 	return true;
 }
+
+/* CART */
 
 export async function recordCartEvent({
 	cart,
@@ -255,22 +263,21 @@ export async function recordCartEvent({
 
 	// ∞ Meta ∞
 	const metaPixel = analyticsEndpoints.find(endpoint => endpoint.platform === 'meta');
-	const metaEvent = getMetaEventFromCartEvent({
+	const metaEvents = getMetaEventsFromCartEvent({
 		cart,
 		funnel: cartFunnel,
 		eventType: type,
 	});
 	const metaRes =
-		metaPixel?.accessToken && metaEvent ?
-			await reportEventToMeta({
+		metaPixel?.accessToken && metaEvents ?
+			await reportEventsToMeta({
 				pixelId: metaPixel.id,
 				accessToken: metaPixel.accessToken,
 				sourceUrl: visitorInfo.referer_url ?? '', // this is an api route, so we want the source of the api call
 				ip: visitorInfo.ip,
 				ua: visitorInfo.userAgent.ua,
 				geo: visitorInfo.geo,
-				eventName: metaEvent.eventName,
-				customData: metaEvent.customData,
+				events: metaEvents,
 			}).catch(err => {
 				console.log('err reporting cart event to meta => ', err);
 				return { reported: false };
@@ -308,120 +315,181 @@ export async function recordCartEvent({
 	}
 }
 
-function getMetaEventFromCartEvent({
+function getMetaEventsFromCartEvent({
 	cart,
 	eventType,
 }: {
 	cart: Cart;
 	funnel: CartFunnel;
 	eventType: (typeof WEB_EVENT_TYPES__CART)[number];
-}): {
-	eventName: MetaEventProps['eventName'];
-	customData: MetaEventProps['customData'];
-} | null {
+}): MetaEvent[] | null {
 	switch (eventType) {
 		case 'cart/viewCheckout':
-			return {
-				eventName: 'barely.cart/viewCheckout',
-				customData: {
-					cartId: cart.id,
-					content_ids: [cart.mainProductId],
-					content_type: 'product',
-					currency: 'USD',
-					value: cart.mainProductPrice,
+			return [
+				{
+					eventName: 'barely.cart/viewCheckout',
+					customData: {
+						cartId: cart.id,
+						content_ids: [cart.mainProductId],
+						content_type: 'product',
+						currency: 'USD',
+						value: cart.mainProductPrice,
+					},
 				},
-			};
-
-		// case 'cart_addEmail':
-		// 	return {
-		// 		eventName: 'Barely_AddEmail',
-		// 		customData: {
-		// 			content_ids: [cart.mainProductId],
-		// 			content_type: 'product',
-		// 		},
-		// 	};
-
-		// case 'cart_addShippingInfo':
-		// 	return {
-		// 		eventName: 'Barely_AddShippingInfo',
-		// 		customData: {
-		// 			content_ids: [cart.mainProductId],
-		// 			content_type: 'product',
-		// 		},
-		// 	};
+				{
+					eventName: 'InitiateCheckout',
+					customData: {
+						cartId: cart.id,
+						content_ids: [cart.mainProductId],
+						content_type: 'product',
+						currency: 'USD',
+						value: cart.mainProductPrice,
+					},
+				},
+			];
 
 		case 'cart/addPaymentInfo':
-			return {
-				eventName: 'barely.cart/addPaymentInfo',
-				customData: {
-					cartId: cart.id,
-					content_ids: [cart.mainProductId],
-					content_type: 'product',
-					currency: 'USD',
-					value: cart.checkoutAmount,
+			return [
+				{
+					eventName: 'barely.cart/addPaymentInfo',
+					customData: {
+						cartId: cart.id,
+						content_ids: [cart.mainProductId],
+						content_type: 'product',
+						currency: 'USD',
+						value: cart.checkoutAmount,
+					},
 				},
-			};
+				{
+					eventName: 'AddPaymentInfo',
+					customData: {
+						cartId: cart.id,
+						content_ids: [cart.mainProductId],
+						content_type: 'product',
+						currency: 'USD',
+						value: cart.checkoutAmount,
+					},
+				},
+			];
 		case 'cart/addBump':
 			if (!cart.bumpProductId) return null;
-			return {
-				eventName: 'barely.cart/addBump',
-				customData: {
-					cartId: cart.id,
-					content_ids: [cart.bumpProductId],
-					content_type: 'product',
-					currency: 'USD',
-					value: cart.bumpProductPrice ?? 0,
+			return [
+				{
+					eventName: 'barely.cart/addBump',
+					customData: {
+						cartId: cart.id,
+						content_ids: [cart.bumpProductId],
+						content_type: 'product',
+						currency: 'USD',
+						value: cart.bumpProductPrice ?? 0,
+					},
 				},
-			};
+				{
+					eventName: 'AddToCart',
+					customData: {
+						cartId: cart.id,
+						content_ids: [cart.bumpProductId],
+						content_type: 'product',
+						currency: 'USD',
+						value: cart.bumpProductPrice ?? 0,
+					},
+				},
+			];
 		case 'cart/purchaseMainWithoutBump':
-			return {
-				eventName: 'barely.cart/purchase',
-				customData: {
-					cartId: cart.id,
-					content_ids: [cart.mainProductId],
-					content_type: 'product',
-					currency: 'USD',
-					cartPurchaseType: 'mainWithoutBump',
-					value: cart.checkoutAmount,
+			return [
+				{
+					eventName: 'barely.cart/purchase',
+					customData: {
+						cartId: cart.id,
+						content_ids: [cart.mainProductId],
+						content_type: 'product',
+						currency: 'USD',
+						cartPurchaseType: 'mainWithoutBump',
+						value: cart.checkoutAmount,
+					},
 				},
-			};
+				{
+					eventName: 'Purchase',
+					customData: {
+						cartId: cart.id,
+						content_ids: [cart.mainProductId],
+						content_type: 'product',
+						currency: 'USD',
+						value: cart.checkoutAmount,
+					},
+				},
+			];
 		case 'cart/purchaseMainWithBump':
 			if (!cart.bumpProductId) return null;
-			return {
-				eventName: 'barely.cart/purchase',
-				customData: {
-					cartId: cart.id,
-					content_ids: [cart.mainProductId, cart.bumpProductId],
-					content_type: 'product',
-					currency: 'USD',
-					cartPurchaseType: 'mainWithBump',
-					value: cart.checkoutAmount,
+			return [
+				{
+					eventName: 'barely.cart/purchase',
+					customData: {
+						cartId: cart.id,
+						content_ids: [cart.mainProductId, cart.bumpProductId],
+						content_type: 'product',
+						currency: 'USD',
+						cartPurchaseType: 'mainWithBump',
+						value: cart.checkoutAmount,
+					},
 				},
-			};
+				{
+					eventName: 'Purchase',
+					customData: {
+						cartId: cart.id,
+						content_ids: [cart.mainProductId, cart.bumpProductId],
+						content_type: 'product',
+						currency: 'USD',
+						value: cart.checkoutAmount,
+					},
+				},
+			];
 		case 'cart/viewUpsell':
 			if (!cart.upsellProductId) return null;
-			return {
-				eventName: 'barely.cart/viewUpsell',
-				customData: {
-					cartId: cart.id,
-					content_ids: [cart.upsellProductId],
-					content_type: 'product',
+			return [
+				{
+					eventName: 'barely.cart/viewUpsell',
+					customData: {
+						cartId: cart.id,
+						content_ids: [cart.upsellProductId],
+						content_type: 'product',
+					},
 				},
-			};
+				{
+					eventName: 'ViewContent',
+					customData: {
+						cartId: cart.id,
+						content_ids: [cart.upsellProductId],
+						content_type: 'product',
+					},
+				},
+			];
 		case 'cart/purchaseUpsell':
 			if (!cart.upsellProductId) return null;
-			return {
-				eventName: 'barely.cart/purchase',
-				customData: {
-					cartId: cart.id,
-					upsellProductId: cart.upsellProductId,
-					content_ids: [cart.upsellProductId],
-					content_type: 'product',
-					currency: 'USD',
-					cartPurchaseType: 'upsell',
-					value: cart.upsellProductPrice ?? 0,
+			return [
+				{
+					eventName: 'barely.cart/purchase',
+					customData: {
+						cartId: cart.id,
+						upsellProductId: cart.upsellProductId,
+						content_ids: [cart.upsellProductId],
+						content_type: 'product',
+						currency: 'USD',
+						cartPurchaseType: 'upsell',
+						value: cart.upsellProductPrice ?? 0,
+					},
 				},
-			};
+				{
+					eventName: 'Purchase',
+					customData: {
+						cartId: cart.id,
+						content_ids: [cart.upsellProductId],
+						content_type: 'product',
+						currency: 'USD',
+						value: cart.upsellProductPrice ?? 0,
+					},
+				},
+			];
 		default:
 			return null;
 	}
@@ -545,9 +613,7 @@ function getCartEventData({
 	}
 }
 
-/*
-FM
-*/
+/* FM */
 
 export async function recordFmEvent({
 	fmPage,
@@ -589,7 +655,7 @@ export async function recordFmEvent({
 	});
 
 	const metaPixel = analyticsEndpoints.find(endpoint => endpoint.platform === 'meta');
-	const metaEvent = getMetaEventFromFmEvent({
+	const metaEvents = getMetaEventFromFmEvent({
 		fmPage,
 		fmLink,
 		eventType: type,
@@ -598,16 +664,15 @@ export async function recordFmEvent({
 	const sourceUrl = isDevelopment() ? visitor?.href : visitor?.referer_url; // this is being logged from an api route in preview/production, so we want the referer_url
 
 	const metaRes =
-		metaPixel?.accessToken && metaEvent ?
-			await reportEventToMeta({
+		metaPixel?.accessToken && metaEvents ?
+			await reportEventsToMeta({
 				pixelId: metaPixel.id,
 				accessToken: metaPixel.accessToken,
 				sourceUrl: sourceUrl ?? '',
 				ip: visitor?.ip,
 				ua: visitor?.userAgent.ua,
 				geo: visitor?.geo,
-				eventName: metaEvent.eventName,
-				customData: metaEvent.customData,
+				events: metaEvents,
 			}).catch(err => {
 				console.log('error => ', err);
 				return { reported: false };
@@ -623,7 +688,8 @@ export async function recordFmEvent({
 			sessionId: newId('fmSession'),
 			type,
 			...visitor,
-			href: visitor?.href ?? '',
+			href: sourceUrl ?? '',
+			linkClickDestinationHref: fmLink?.url,
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
 		});
 
@@ -691,26 +757,175 @@ function getMetaEventFromFmEvent({
 	fmPage: FmPage;
 	fmLink?: FmLink;
 	eventType: (typeof WEB_EVENT_TYPES__FM)[number];
-}): {
-	eventName: MetaEventProps['eventName'];
-	customData: MetaEventProps['customData'];
-} | null {
+}): MetaEvent[] | null {
 	switch (eventType) {
 		case 'fm/view':
-			return {
-				eventName: 'barely.fm/view',
-				customData: {
-					fmId: fmPage.id,
+			return [
+				{
+					eventName: 'barely.fm/view',
+					customData: {
+						fmId: fmPage.id,
+					},
 				},
-			};
+				{
+					eventName: 'ViewContent',
+					customData: {
+						fmId: fmPage.id,
+					},
+				},
+			];
 		case 'fm/linkClick':
-			return {
-				eventName: 'barely.fm/linkClick',
-				customData: {
-					fmId: fmPage.id,
-					platform: fmLink?.platform,
+			return [
+				{
+					eventName: 'barely.fm/linkClick',
+					customData: {
+						fmId: fmPage.id,
+						platform: fmLink?.platform,
+					},
 				},
-			};
+			];
+		default:
+			return null;
+	}
+}
+
+/* PAGE */
+export async function recordLandingPageEvent({
+	page,
+	type,
+	visitor,
+	linkClickDestinationAssetId,
+	linkClickDestinationHref,
+}: {
+	page: LandingPage;
+	type: (typeof WEB_EVENT_TYPES__PAGE)[number];
+	visitor?: VisitorInfo;
+	linkClickDestinationAssetId?: string;
+	linkClickDestinationHref?: string;
+}) {
+	if (visitor?.isBot) return null;
+
+	const rateLimitPeriod = '1 s';
+
+	const { success } = await ratelimit(10, rateLimitPeriod).limit(
+		`recordLandingPageEvent:${visitor?.ip}:${page.id}:${type}:${linkClickDestinationAssetId}`,
+	);
+
+	if (!success) {
+		console.log(
+			'rate limit exceeded for ',
+			visitor?.ip,
+			page.id,
+			type,
+			linkClickDestinationAssetId,
+		);
+		return null;
+	}
+
+	const timestamp = new Date(Date.now()).toISOString();
+
+	const analyticsEndpoints = await dbHttp.query.AnalyticsEndpoints.findMany({
+		where: eq(AnalyticsEndpoints.workspaceId, page.workspaceId),
+	});
+
+	const metaPixel = analyticsEndpoints.find(endpoint => endpoint.platform === 'meta');
+	const metaEvents = getMetaEventFromPageEvent({
+		page,
+		linkClickDestinationHref,
+		linkClickDestinationAssetId,
+		eventType: type,
+	});
+
+	const sourceUrl = isDevelopment() ? visitor?.href : visitor?.referer_url; // this is being logged from an api route, so we want the referer_url (i.e. the client url calling the logged route)
+
+	const metaRes =
+		metaPixel?.accessToken && metaEvents ?
+			await reportEventsToMeta({
+				pixelId: metaPixel.id,
+				accessToken: metaPixel.accessToken,
+				sourceUrl: sourceUrl ?? '',
+				ip: visitor?.ip,
+				ua: visitor?.userAgent.ua,
+				geo: visitor?.geo,
+				events: metaEvents,
+			})
+		:	{ reported: false };
+
+	// report event to tinybird
+	try {
+		const tinybirdRes = await ingestPageEvent({
+			timestamp,
+			workspaceId: page.workspaceId,
+			assetId: page.id,
+			sessionId: newId('landingPageSession'),
+			type,
+			...visitor,
+			href: sourceUrl ?? '',
+			linkClickDestinationAssetId,
+			linkClickDestinationHref,
+			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
+		});
+
+		console.log('tinybirdRes for page event => ', tinybirdRes);
+	} catch (error) {
+		console.log('error >>', error);
+		throw new Error('ah!');
+	}
+
+	/* increment stats on landingPage */
+	if (type === 'page/view') {
+		// increment page views
+		await dbHttp
+			.update(LandingPages)
+			.set({ views: sqlIncrement(LandingPages.views) })
+			.where(eq(LandingPages.id, page.id));
+	} else if (type === 'page/linkClick') {
+		// increment page clicks
+		await dbHttp
+			.update(LandingPages)
+			.set({ clicks: sqlIncrement(LandingPages.clicks) })
+			.where(eq(LandingPages.id, page.id));
+	}
+}
+
+function getMetaEventFromPageEvent({
+	page,
+	eventType,
+	linkClickDestinationHref,
+	linkClickDestinationAssetId,
+}: {
+	page: LandingPage;
+	linkClickDestinationHref?: string;
+	linkClickDestinationAssetId?: string;
+	eventType: (typeof WEB_EVENT_TYPES__PAGE)[number];
+}): MetaEvent[] | null {
+	switch (eventType) {
+		case 'page/view':
+			return [
+				{
+					eventName: 'barely.page/view',
+					customData: {
+						pageId: page.id,
+					},
+				},
+				{
+					eventName: 'ViewContent',
+					customData: {
+						content_ids: [page.id],
+					},
+				},
+			];
+		case 'page/linkClick':
+			return [
+				{
+					eventName: 'barely.page/linkClick',
+					customData: {
+						pageId: page.id,
+						linkClickDestinationAssetId,
+						linkClickDestinationHref,
+					},
+				},
+			];
 		default:
 			return null;
 	}

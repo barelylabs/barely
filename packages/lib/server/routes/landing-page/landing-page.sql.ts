@@ -1,5 +1,13 @@
 import { relations } from 'drizzle-orm';
-import { boolean, index, pgTable, text, uniqueIndex, varchar } from 'drizzle-orm/pg-core';
+import {
+	boolean,
+	index,
+	integer,
+	pgTable,
+	text,
+	uniqueIndex,
+	varchar,
+} from 'drizzle-orm/pg-core';
 
 import { dbId, primaryId, timestamps } from '../../../utils/sql';
 import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
@@ -37,6 +45,10 @@ export const LandingPages = pgTable(
 
 		// content
 		content: text('content'),
+
+		// stats
+		views: integer('views').default(0),
+		clicks: integer('clicks').default(0),
 	},
 	lp => ({
 		workspace: index('lp_workspaceId_idx').on(lp.workspaceId),

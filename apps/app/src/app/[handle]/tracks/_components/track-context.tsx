@@ -1,27 +1,21 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/react';
+import type { trackFilterParamsSchema } from '@barely/lib/server/routes/track/track.schema';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
-import {
-	createContext,
-	use,
-	useContext,
-	useOptimistic,
-	useRef,
-	useState,
-	useTransition,
-} from 'react';
-import { useTypedQuery } from '@barely/lib/hooks/use-typed-query';
+import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
+import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
+import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
-import { trackFilterParamsSchema } from '@barely/lib/server/routes/track/track.schema';
+import { trackSearchParamsSchema } from '@barely/lib/server/routes/track/track.schema';
 import { wait } from '@barely/lib/utils/wait';
 
 interface TrackContext {
-	tracks: AppRouterOutputs['track']['byWorkspace'];
+	tracks: AppRouterOutputs['track']['byWorkspace']['tracks'];
 	trackSelection: Selection;
 	lastSelectedTrackId: string | undefined;
-	lastSelectedTrack: AppRouterOutputs['track']['byWorkspace'][0] | undefined;
+	lastSelectedTrack: AppRouterOutputs['track']['byWorkspace']['tracks'][0] | undefined;
 	setTrackSelection: (selection: Selection) => void;
 	gridListRef: React.RefObject<HTMLDivElement>;
 	focusGridList: () => void;
@@ -34,71 +28,119 @@ interface TrackContext {
 	setShowArchiveTrackModal: (show: boolean) => void;
 	showDeleteTrackModal: boolean;
 	setShowDeleteTrackModal: (show: boolean) => void;
+	// filters
+	filters: z.infer<typeof trackFilterParamsSchema>;
+	pendingFilters: boolean;
+	setSearch: (search: string) => void;
+	toggleArchived: (archived: boolean) => void;
+	clearAllFilters: () => void;
 }
 
 const TrackContext = createContext<TrackContext | undefined>(undefined);
 
 export function TrackContextProvider({
 	children,
-	initialTracks,
-	filters,
+	initialInfiniteTracks,
+	// filters,
 }: {
 	children: React.ReactNode;
-	initialTracks: Promise<AppRouterOutputs['track']['byWorkspace']>;
-	filters: z.infer<typeof trackFilterParamsSchema>;
+	initialInfiniteTracks: Promise<AppRouterOutputs['track']['byWorkspace']>;
+	// filters: z.infer<typeof trackFilterParamsSchema>;
 }) {
 	const [showCreateTrackModal, setShowCreateTrackModal] = useState(false);
 	const [showEditTrackModal, setShowEditTrackModal] = useState(false);
 	const [showArchiveTrackModal, setShowArchiveTrackModal] = useState(false);
 	const [showDeleteTrackModal, setShowDeleteTrackModal] = useState(false);
 
-	// const { selectedTrackIds, ...restFilters } = filters;
+	const { handle } = useWorkspace();
 
-	const { data: tracks } = api.track.byWorkspace.useQuery(filters, {
-		initialData: use(initialTracks),
-	});
+	const {
+		data,
+		setQuery,
+		removeByKey,
+		removeAllQueryParams,
+		pending: pendingFilters,
+	} = useTypedOptimisticQuery(trackSearchParamsSchema);
+
+	const { selectedTrackIds, ...filters } = data;
+
+	const trackSelection: Selection =
+		!selectedTrackIds ? new Set()
+		: selectedTrackIds === 'all' ? 'all'
+		: new Set(selectedTrackIds);
+
+	const initialData = use(initialInfiniteTracks);
+
+	const { data: infiniteTracks } = api.track.byWorkspace.useInfiniteQuery(
+		{
+			handle,
+			...filters,
+		},
+		{
+			initialData: () => {
+				return {
+					pages: [
+						{
+							tracks: initialData.tracks,
+							nextCursor: initialData.nextCursor,
+						},
+					],
+					pageParams: [], // fixme: add page params
+				};
+			},
+			getNextPageParam: lastPage => lastPage.nextCursor,
+		},
+	);
+
+	const tracks = infiniteTracks?.pages.flatMap(page => page.tracks) ?? [];
+
+	const setTrackSelection = useCallback(
+		(selection: Selection) => {
+			if (selection === 'all') return;
+			if (selection.size === 0) return removeByKey('selectedTrackIds');
+			return setQuery(
+				'selectedTrackIds',
+				Array.from(selection).map(key => key.toString()),
+			);
+		},
+		[removeByKey, setQuery],
+	);
+
+	const clearAllFilters = useCallback(() => {
+		removeAllQueryParams();
+	}, [removeAllQueryParams]);
+
+	const toggleArchived = useCallback(
+		(archived: boolean) => {
+			if (filters.showArchived) return removeByKey('showArchived');
+			return setQuery('showArchived', archived);
+		},
+		[filters.showArchived, removeByKey, setQuery],
+	);
+
+	const setSearch = useCallback(
+		(search: string) => {
+			if (search.length) return setQuery('search', search);
+			return removeByKey('search');
+		},
+		[removeByKey, setQuery],
+	);
+
+	const lastSelectedTrackId =
+		!trackSelection || trackSelection === 'all' ?
+			undefined
+		:	Array.from(trackSelection).pop()?.toString();
+
+	const lastSelectedTrack = tracks.find(track => track.id === lastSelectedTrackId);
 
 	const gridListRef = useRef<HTMLDivElement>(null);
 
-	const [optimisticSelection, setOptimisticSelection] = useOptimistic<Selection>(
-		new Set(filters.selectedTrackIds),
-	);
-
-	const { setQuery, removeByKey } = useTypedQuery(trackFilterParamsSchema);
-	const [, startSelectTransition] = useTransition();
-
-	function setSelectedKeys(selection: Selection) {
-		startSelectTransition(() => {
-			setOptimisticSelection(selection);
-			if (selection === 'all') {
-				return;
-			}
-			if (selection.size === 0) {
-				removeByKey('selectedTrackIds');
-			} else {
-				setQuery(
-					'selectedTrackIds',
-					Array.from(selection).map(key => key.toString()),
-				);
-			}
-		});
-	}
-
-	const lastSelectedTrackId =
-		optimisticSelection === 'all' ? undefined : (
-			Array.from(optimisticSelection)[0]?.toString()
-		);
-	const lastSelectedTrack =
-		lastSelectedTrackId ?
-			tracks.find(track => track.id === lastSelectedTrackId)
-		:	undefined;
-
 	const contextValue = {
 		tracks,
-		trackSelection: optimisticSelection,
+		trackSelection,
 		lastSelectedTrackId,
 		lastSelectedTrack,
-		setTrackSelection: setSelectedKeys,
+		setTrackSelection,
 		gridListRef,
 		focusGridList: () => {
 			wait(1)
@@ -113,6 +155,12 @@ export function TrackContextProvider({
 		setShowArchiveTrackModal,
 		showDeleteTrackModal,
 		setShowDeleteTrackModal,
+		// filters
+		filters,
+		pendingFilters,
+		setSearch,
+		toggleArchived,
+		clearAllFilters,
 	} satisfies TrackContext;
 
 	return <TrackContext.Provider value={contextValue}>{children}</TrackContext.Provider>;

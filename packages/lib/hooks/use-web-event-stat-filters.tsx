@@ -1,10 +1,11 @@
 import { useCallback, useMemo } from 'react';
 
 import { stdWebEventPipeQueryParamsSchema } from '../server/routes/stat/stat.schema';
-import { useTypedQuery } from './use-typed-query';
+// import { useTypedQuery } from './use-typed-query';
+import { useTypedOptimisticQuery } from './use-typed-optimistic-query';
 
 export function useWebEventStatFilters() {
-	const q = useTypedQuery(stdWebEventPipeQueryParamsSchema);
+	const q = useTypedOptimisticQuery(stdWebEventPipeQueryParamsSchema);
 
 	const formatTimestamp = useCallback(
 		(d: Date) => {
@@ -41,7 +42,6 @@ export function useWebEventStatFilters() {
 		filters: q.data,
 		getSetFilterPath: q.getSetQueryPath,
 		setFilter: q.setQuery,
-		getRemoveByKeyPath: q.getRemoveByKeyPath,
 		removeFilter: q.removeByKey,
 		removeAllFilters: q.removeAllQueryParams,
 		formatTimestamp,

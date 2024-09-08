@@ -7,7 +7,7 @@ import { useMediaQuery } from '@barely/lib/hooks/use-media-query';
 import { cn } from '@barely/lib/utils/cn';
 import * as Dialog from '@radix-ui/react-dialog';
 
-import type { IconSelection } from './icon';
+import type { IconKey } from './icon';
 import { Drawer } from '../vaul';
 import { Button } from './button';
 import { Icon } from './icon';
@@ -21,6 +21,7 @@ interface ModalProps {
 	dismissable?: boolean;
 	showModal?: boolean;
 	setShowModal?: (show: boolean) => void;
+	onOpen?: () => void;
 	onClose?: () => void;
 	preventDefaultClose?: boolean;
 	onAutoFocus?: () => void;
@@ -31,6 +32,8 @@ function Modal({
 	setShowModal,
 	onAutoFocus,
 	dismissable = true,
+	onOpen,
+	onClose,
 	...props
 }: ModalProps) {
 	const router = useRouter();
@@ -42,7 +45,7 @@ function Modal({
 		if (props.preventDefaultClose && !dragged && !byCloseButton) return;
 
 		// fire onClose event if provided
-		props.onClose?.();
+		onClose?.();
 
 		if (setShowModal) {
 			setShowModal(false);
@@ -57,6 +60,9 @@ function Modal({
 			<Drawer.Root
 				open={showModal ?? true}
 				onOpenChange={open => {
+					if (open) {
+						onOpen?.();
+					}
 					if (!open) {
 						closeModal({ dragged: true });
 					}
@@ -87,7 +93,13 @@ function Modal({
 		<Dialog.Root
 			open={showModal ?? true}
 			onOpenChange={open => {
+				console.log('onOpenChange modal >> ', open);
+				if (open) {
+					console.log('onOpenChange modal >> open');
+					onOpen?.();
+				}
 				if (!open) {
+					console.log('onOpenChange modal >> close');
 					closeModal();
 				}
 			}}
@@ -140,7 +152,7 @@ function Modal({
 }
 
 interface ModalHeaderProps {
-	icon?: IconSelection;
+	icon?: IconKey;
 	iconOverride?: ReactNode;
 	title?: ReactNode;
 	subtitle?: ReactNode;
@@ -152,6 +164,7 @@ function ModalHeader(props: ModalHeaderProps) {
 
 	return (
 		<div className='z-10 flex flex-col items-center justify-center gap-3 border-b border-border bg-background px-6 py-6 text-center sm:px-10 md:sticky md:top-0'>
+			{/* <div className='flex flex-row items-center justify-center gap-3'></div> */}
 			{props.iconOverride ?
 				props.iconOverride
 			: IconComponent ?

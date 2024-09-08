@@ -2,18 +2,16 @@
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/react';
 import type { cartOrderFilterParamsSchema } from '@barely/lib/server/routes/cart-order/cart-order.schema';
+import type {
+	FetchNextPageOptions,
+	// 	InfiniteData,
+	// 	InfiniteQueryObserverResult,
+	// 	UseInfiniteQueryResult,
+} from '@tanstack/react-query';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
-import {
-	createContext,
-	use,
-	useContext,
-	useOptimistic,
-	useRef,
-	useState,
-	useTransition,
-} from 'react';
-import { useTypedQuery } from '@barely/lib/hooks/use-typed-query';
+import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
+import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 import { cartOrderSearchParamsSchema } from '@barely/lib/server/routes/cart-order/cart-order.schema';
@@ -30,11 +28,16 @@ interface CartOrderContext {
 	focusGridList: () => void;
 	showMarkAsFulfilledModal: boolean;
 	setShowMarkAsFulfilledModal: (show: boolean) => void;
+	//infinite
+	hasNextPage: boolean;
+	fetchNextPage: (options?: FetchNextPageOptions) => void | Promise<void>;
+	isFetchingNextPage: boolean;
 	// filters
 	filters: z.infer<typeof cartOrderFilterParamsSchema>;
 	pendingFiltersTransition: boolean;
 	setSearch: (search: string) => void;
 	toggleArchived: () => void;
+	toggleFulfilled: () => void;
 	clearAllFilters: () => void;
 }
 
@@ -42,108 +45,109 @@ const CartOrderContext = createContext<CartOrderContext | undefined>(undefined);
 
 export function CartOrderContextProvider({
 	children,
-	initialOrders,
-	filters,
-	selectedOrderCartIds,
+	initialInfiniteOrders,
 }: {
 	children: React.ReactNode;
-	initialOrders: Promise<AppRouterOutputs['cartOrder']['byWorkspace']>;
-	filters: z.infer<typeof cartOrderFilterParamsSchema>;
-	selectedOrderCartIds: string[];
+	initialInfiniteOrders: Promise<AppRouterOutputs['cartOrder']['byWorkspace']>;
 }) {
 	const [showMarkAsFulfilledModal, setShowMarkAsFulfilledModal] = useState(false);
-
 	const { handle } = useWorkspace();
 
-	const { data: infiniteCartOrders } = api.cartOrder.byWorkspace.useQuery(
+	const { data, setQuery, removeByKey, removeAllQueryParams, pending } =
+		useTypedOptimisticQuery(cartOrderSearchParamsSchema);
+
+	const { selectedOrderCartIds, ...filters } = data;
+
+	const cartOrderSelection: Selection =
+		!selectedOrderCartIds ? new Set()
+		: selectedOrderCartIds === 'all' ? 'all'
+		: new Set(selectedOrderCartIds);
+
+	const initialData = use(initialInfiniteOrders);
+
+	const {
+		data: infiniteCartOrders,
+		hasNextPage,
+		fetchNextPage,
+		isFetchingNextPage,
+	} = api.cartOrder.byWorkspace.useInfiniteQuery(
 		{
 			handle,
 			...filters,
 		},
 		{
-			initialData: use(initialOrders),
+			initialData: () => {
+				return {
+					pages: [
+						{ cartOrders: initialData.cartOrders, nextCursor: initialData.nextCursor },
+					],
+					pageParams: [], // todo - figure out how to structure this
+				};
+			},
+			getNextPageParam: lastPage => lastPage.nextCursor,
 		},
 	);
 
+	const cartOrders = infiniteCartOrders?.pages.flatMap(page => page.cartOrders) ?? [];
+
 	const gridListRef = useRef<HTMLDivElement>(null);
 
-	const { data, setQuery, removeByKey, removeAllQueryParams } = useTypedQuery(
-		cartOrderSearchParamsSchema,
-	);
-
-	/* selection */
-	const [optimisticSelection, setOptimisticSelection] = useOptimistic<Selection>(
-		new Set(selectedOrderCartIds),
-	);
-
-	const [, startSelectTransition] = useTransition();
-
-	function setCartOrderSelection(selection: Selection) {
-		startSelectTransition(() => {
-			setOptimisticSelection(selection);
-
+	const setCartOrderSelection = useCallback(
+		(selection: Selection) => {
 			if (selection === 'all') return;
-
-			if (selection.size === 0) {
-				return removeByKey('selectedOrderCartIds');
-			}
+			if (selection.size === 0) return removeByKey('selectedOrderCartIds');
 
 			return setQuery(
 				'selectedOrderCartIds',
 				Array.from(selection).map(key => key.toString()),
 			);
-		});
-	}
+		},
+		[removeByKey, setQuery],
+	);
 
-	/* filters */
-	const [optimisticFilters, setOptimisticFilters] = useOptimistic(filters);
-	const [pendingFiltersTransition, startFiltersTransition] = useTransition();
+	const clearAllFilters = useCallback(() => {
+		removeAllQueryParams();
+	}, [removeAllQueryParams]);
 
-	// clear all filters
-	function clearAllFilters() {
-		startFiltersTransition(() => {
-			setOptimisticSelection(new Set());
-			removeAllQueryParams();
-		});
-	}
-
-	// toggle archived
-	function toggleArchived() {
-		startFiltersTransition(() => {
-			if (data.showArchived) {
-				setOptimisticFilters({ ...optimisticFilters, showArchived: false });
-				removeByKey('showArchived');
-				return;
-			} else {
-				setOptimisticFilters({ ...optimisticFilters, showArchived: true });
-				return setQuery('showArchived', true);
-			}
-		});
-	}
-
-	// search
-	function setSearch(search: string) {
-		if (search.length) {
-			setOptimisticFilters({ ...optimisticFilters, search });
-			return setQuery('search', search);
+	const toggleArchived = useCallback(() => {
+		if (filters.showArchived) {
+			removeByKey('showArchived');
 		} else {
-			setOptimisticFilters({ ...optimisticFilters, search: '' });
-			removeByKey('search');
+			return setQuery('showArchived', true);
 		}
-	}
+	}, [filters.showArchived, removeByKey, setQuery]);
+
+	const toggleFulfilled = useCallback(() => {
+		if (filters.showFulfilled) {
+			removeByKey('showFulfilled');
+		} else {
+			return setQuery('showFulfilled', true);
+		}
+	}, [filters.showFulfilled, removeByKey, setQuery]);
+
+	const setSearch = useCallback(
+		(search: string) => {
+			if (search.length) {
+				return setQuery('search', search);
+			} else {
+				return removeByKey('search');
+			}
+		},
+		[removeByKey, setQuery],
+	);
 
 	const lastSelectedCartOrderId =
-		optimisticSelection === 'all' ? undefined : (
-			Array.from(optimisticSelection).pop()?.toString()
-		);
+		cartOrderSelection === 'all' || !cartOrderSelection ?
+			undefined
+		:	Array.from(cartOrderSelection).pop()?.toString();
 
-	const lastSelectedCartOrder = infiniteCartOrders.cartOrders.find(
+	const lastSelectedCartOrder = cartOrders.find(
 		order => order.id === lastSelectedCartOrderId,
 	);
 
 	const contextValue = {
-		cartOrders: infiniteCartOrders.cartOrders,
-		cartOrderSelection: optimisticSelection,
+		cartOrders,
+		cartOrderSelection,
 		lastSelectedCartOrderId,
 		lastSelectedCartOrder,
 		setCartOrderSelection,
@@ -151,11 +155,17 @@ export function CartOrderContextProvider({
 		focusGridList: () => gridListRef.current?.focus(),
 		showMarkAsFulfilledModal,
 		setShowMarkAsFulfilledModal,
-		filters: optimisticFilters,
-		pendingFiltersTransition,
+		// filters
+		filters,
+		pendingFiltersTransition: pending,
 		setSearch,
 		toggleArchived,
+		toggleFulfilled,
 		clearAllFilters,
+		// infinite
+		hasNextPage,
+		fetchNextPage: () => void fetchNextPage(),
+		isFetchingNextPage,
 	} satisfies CartOrderContext;
 
 	return (

@@ -79,6 +79,7 @@ export const FmLinks = pgTable('FmLinks', {
 		enum: FM_LINK_PLATFORMS,
 	}).notNull(),
 	url: varchar('url', { length: 255 }).notNull(),
+	spotifyTrackUrl: varchar('spotifyTrackUrl', { length: 255 }),
 	customPlatformName: varchar('customPlatformName', { length: 255 }),
 	customButtonTextColor: varchar('customButtonTextColor', { length: 255 }),
 	clicks: integer('clicks').default(0),

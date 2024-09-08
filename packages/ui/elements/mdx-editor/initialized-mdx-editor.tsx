@@ -2,21 +2,13 @@
 
 import '@mdxeditor/editor/style.css';
 
-// InitializedMDXEditor.tsx
-import type {
-	// CodeBlockEditorDescriptor,
-	// JsxComponentDescriptor,
-	MDXEditorMethods,
-	MDXEditorProps,
-} from '@mdxeditor/editor';
+import type { MDXEditorMethods } from '@mdxeditor/editor';
 import type { ForwardedRef } from 'react';
 import { cn } from '@barely/lib/utils/cn';
 import {
-	// BlockTypeSelect,
 	BoldItalicUnderlineToggles,
 	codeMirrorPlugin,
 	CreateLink,
-	// GenericJsxEditor,
 	headingsPlugin,
 	jsxPlugin,
 	linkDialogPlugin,
@@ -29,47 +21,30 @@ import {
 	thematicBreakPlugin,
 	toolbarPlugin,
 	UndoRedo,
-	// useCodeBlockEditorContext,
 } from '@mdxeditor/editor';
-import { useTheme } from 'next-themes';
 
+import type { MDXEditorProps } from '.';
+import { variablePlugin } from './nodes/variable-node';
+import { addVariablesPlugin } from './plugins/add-variables-plugin';
 import { BlockTypeSelect } from './plugins/block-type-select';
+import { LinkDialog } from './plugins/link-dialog/link-dialog';
 import {
 	buttonComponentDescriptors,
 	InsertAssetButtonButton,
+	InsertLinkButtonButton,
 } from './plugins/mdx-button-plugin';
 import {
 	InsertVideoButton,
 	videoJsxComponentDescriptors,
 } from './plugins/mdx-video-plugin';
 
-// const PlainTextCodeEditorDescriptor: CodeBlockEditorDescriptor = {
-// 	match: () => true,
-// 	priority: 0,
-// 	Editor: props => {
-// 		const cb = useCodeBlockEditorContext();
-// 		return (
-// 			// eslint-disable-next-line jsx-a11y/no-static-element-interactions
-// 			<div onKeyDown={e => e.nativeEvent.stopImmediatePropagation()}>
-// 				<textarea
-// 					rows={3}
-// 					cols={20}
-// 					defaultValue={props.code}
-// 					onChange={e => cb.setCode(e.target.value)}
-// 				/>
-// 			</div>
-// 		);
-// 	},
-// };
-
 // Only import this to the next file
+
 export function InitializedMDXEditor({
 	editorRef,
 	className,
 	...props
 }: { editorRef: ForwardedRef<MDXEditorMethods> | null } & MDXEditorProps) {
-	const { theme } = useTheme();
-
 	return (
 		<MDXEditor
 			ref={editorRef}
@@ -77,11 +52,14 @@ export function InitializedMDXEditor({
 				headingsPlugin(),
 				listsPlugin(),
 				quotePlugin(),
+				variablePlugin(),
+				addVariablesPlugin(),
 				linkPlugin(),
-				linkDialogPlugin(),
+				linkDialogPlugin({
+					LinkDialog: () => <LinkDialog />,
+				}),
 				thematicBreakPlugin(),
 				markdownShortcutPlugin(),
-				// codeBlockPlugin({ codeBlockEditorDescriptors: [PlainTextCodeEditorDescriptor] }),
 				codeMirrorPlugin({ codeBlockLanguages: { js: 'Javascript', ts: 'Typescript' } }),
 				jsxPlugin({
 					jsxComponentDescriptors: [
@@ -94,24 +72,23 @@ export function InitializedMDXEditor({
 					toolbarContents: () => (
 						<>
 							<UndoRedo />
-							{/* <BlockTypeSelect /> */}
 							<BlockTypeSelect />
 							<ListsToggle />
 							<BoldItalicUnderlineToggles />
 							<CreateLink />
+							{/* {props?.variables ?
+								<AddVariablesPlugin variables={props.variables} />
+							:	null} */}
 							<InsertVideoButton />
 							<InsertAssetButtonButton />
+							<InsertLinkButtonButton />
 						</>
 					),
 				}),
 			]}
 			{...props}
 			contentEditableClassName='prose'
-			className={cn(
-				'rounded-lg border border-border bg-background p-4 text-red',
-				theme === 'dark' && 'dark-theme',
-				className,
-			)}
+			className={cn('rounded-lg border border-border bg-background p-4', className)}
 		/>
 	);
 }

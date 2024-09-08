@@ -4,7 +4,7 @@ import { api } from '@barely/lib/server/api/server';
 import { fmSearchParamsSchema } from '@barely/lib/server/routes/fm/fm.schema';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
-import { ALlFmPages } from '~/app/[handle]/fm/_components/all-fm-pages';
+import { AllFmPages } from '~/app/[handle]/fm/_components/all-fm-pages';
 import { ArchiveOrDeleteFmModal } from '~/app/[handle]/fm/_components/archive-or-delete-fm-modal';
 import { CreateFmPageButton } from '~/app/[handle]/fm/_components/create-fm-page-button';
 import { CreateOrUpdateFmModal } from '~/app/[handle]/fm/_components/create-or-update-fm-modal';
@@ -24,21 +24,15 @@ export default function FmPagesPage({
 		redirect(`/${params.handle}/fm`);
 	}
 
-	const { selectedFmPageIds, ...filters } = parsedFilters.data;
-
 	const fmPages = api({ handle: params.handle }).fm.byWorkspace({
 		handle: params.handle,
-		...filters,
+		...parsedFilters.data,
 	});
 
 	return (
-		<FmContextProvider
-			initialFmPages={fmPages}
-			filters={filters}
-			selectedFmPageIds={selectedFmPageIds ?? []}
-		>
+		<FmContextProvider initialFmPages={fmPages}>
 			<DashContentHeader title='FM Pages' button={<CreateFmPageButton />} />
-			<ALlFmPages />
+			<AllFmPages />
 
 			<CreateOrUpdateFmModal mode='create' />
 			<CreateOrUpdateFmModal mode='update' />

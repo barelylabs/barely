@@ -3,7 +3,7 @@ import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
 import type { SortableFile } from '../file/file.schema';
-import { queryStringArraySchema } from '../../../utils/zod-helpers';
+import { querySelectionSchema } from '../../../utils/zod-helpers';
 import { Products } from './product.sql';
 
 const insertProductImagesSchema = z.array(
@@ -54,7 +54,7 @@ export const selectWorkspaceProductsSchema = z.object({
 	handle: z.string(),
 	search: z.string().optional(),
 	showArchived: z.boolean().optional(),
-	cursor: z.object({ id: z.string(), createdAt: z.string() }).optional(),
+	cursor: z.object({ id: z.string(), createdAt: z.coerce.date() }).optional(),
 	limit: z.coerce.number().min(1).max(100).optional().default(20),
 });
 
@@ -64,7 +64,7 @@ export const productFilterParamsSchema = z.object({
 	showArchived: z.boolean().optional(),
 });
 export const productSearchParamsSchema = productFilterParamsSchema.extend({
-	selectedProductIds: queryStringArraySchema.optional(),
+	selectedProductIds: querySelectionSchema.optional(),
 });
 
 export const defaultProduct: CreateProduct = {

@@ -11,10 +11,10 @@ interface SpotifySearchProps {
 	limit?: number;
 }
 
-const searchSpotify = async (props: SpotifySearchProps) => {
-	// console.log('searching spotify');
+export async function searchSpotify(props: SpotifySearchProps) {
 	const query = props.query;
-	const types = props.types ? props.types.join(',') : '';
+	const types = props.types ? props.types.join(',') : 'artist,album,track,playlist';
+
 	const limit = props.limit ?? 20;
 
 	const endpoint = `https://api.spotify.com/v1/search?q=${query}&type=${types}&limit=${limit}`;
@@ -24,13 +24,17 @@ const searchSpotify = async (props: SpotifySearchProps) => {
 		auth,
 	});
 
-	if (!searchResponse.success) throw new Error('Error searching Spotify.');
-	if (!searchResponse.parsed) throw new Error('Error parsing Spotify search response.');
+	if (!searchResponse.success) {
+		console.log('searchResponse.data error', searchResponse.data);
+		throw new Error('Error searching Spotify.', { cause: searchResponse.data });
+	}
+	if (!searchResponse.parsed)
+		throw new Error('Error parsing Spotify search response.', {
+			cause: searchResponse.data,
+		});
 
 	return searchResponse.data;
-};
-
-export { searchSpotify };
+}
 
 //* 📓 SCHEMA 📓 *//
 

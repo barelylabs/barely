@@ -39,11 +39,12 @@ export function UserAccountNav() {
 
 	return (
 		<DropdownMenu>
-			<DropdownMenuTrigger>
+			<DropdownMenuTrigger className='rounded-full focus:outline-none focus:ring-0 focus:ring-ring'>
+				{/* user */}
 				<UserAvatar
 					user={{ email: user.email, image: user.image ?? null }}
 					fallbackName={fullName ?? user.email}
-					className='h-8 w-8'
+					className='h-8 w-8 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background'
 				/>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align='end'>

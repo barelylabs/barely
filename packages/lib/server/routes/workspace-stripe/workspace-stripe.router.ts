@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import type { StripeTransactionMetadata } from '../../stripe/stripe.schema';
 import { env } from '../../../env';
-import { fullNameToFirstAndLast } from '../../../utils/name';
+import { getFullNameFromFirstAndLast } from '../../../utils/name';
 import { getAbsoluteUrl } from '../../../utils/url';
 import { createTRPCRouter, privateProcedure } from '../../api/trpc';
 import { stripe } from '../../stripe';
@@ -42,7 +42,7 @@ export const workspaceStripeRouter = createTRPCRouter({
 						email: ctx.user.email,
 						name:
 							ctx.user.fullName ??
-							fullNameToFirstAndLast(ctx.user.firstName, ctx.user.lastName),
+							getFullNameFromFirstAndLast(ctx.user.firstName, ctx.user.lastName),
 						phone: ctx.user.phone ?? undefined,
 					});
 

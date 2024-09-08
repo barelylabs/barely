@@ -23,18 +23,13 @@ export default function LandingPagesPage({
 		redirect(`/${params.handle}/landing-pages`);
 	}
 
-	const { selectedLandingPageIds, ...filters } = parsedFilters.data;
 	const landingPages = api({ handle: params.handle }).landingPage.byWorkspace({
 		handle: params.handle,
-		...filters,
+		...parsedFilters.data,
 	});
 
 	return (
-		<LandingPageContextProvider
-			initialInfiniteLandingPages={landingPages}
-			filters={filters}
-			selectedLandingPageIds={selectedLandingPageIds ?? []}
-		>
+		<LandingPageContextProvider initialInfiniteLandingPages={landingPages}>
 			<DashContentHeader
 				title='Landing Pages'
 				settingsHref={`/${params.handle}/settings/landing-page`}

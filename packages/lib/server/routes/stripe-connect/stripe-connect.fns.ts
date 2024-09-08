@@ -1,15 +1,15 @@
-import { eq, or } from 'drizzle-orm';
+import { tasks } from '@trigger.dev/sdk/v3';
+import { and, eq, or } from 'drizzle-orm';
 import { Stripe } from 'stripe';
 
+import type { handleAbandonedUpsell } from '../../../trigger/cart.trigger';
+import type { handleFlow } from '../../../trigger/flow.trigger';
 import type { UpdateCart } from '../cart/cart.schema';
 import type { Workspace } from '../workspace/workspace.schema';
-import { handleAbandonedUpsell } from '../../../trigger/cart.trigger';
 import { isProduction } from '../../../utils/environment';
 import { raise } from '../../../utils/raise';
 import { dbHttp } from '../../db';
-// import { db } from '../../db';
 import { stripe } from '../../stripe';
-// import { cartApi } from '../cart/cart.api.server';
 import {
 	createOrderIdForCart,
 	getCartById,
@@ -19,6 +19,7 @@ import { Carts } from '../cart/cart.sql';
 import { recordCartEvent } from '../event/event.fns';
 import { createFan } from '../fan/fan.fns';
 import { Fans } from '../fan/fan.sql';
+import { Flow_Triggers } from '../flow/flow.sql';
 import { stripeConnectChargeMetadataSchema } from './stripe-connect.schema';
 
 export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
@@ -27,7 +28,7 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 	);
 
 	const prevCart = (await getCartById(cartId)) ?? raise('cart not found');
-	const funnel = prevCart.funnel ?? raise('funnel not found');
+	const cartFunnel = prevCart.funnel ?? raise('funnel not found');
 
 	let stripeCustomerId =
 		typeof charge.customer === 'string' ? charge.customer : charge.customer?.id;
@@ -74,7 +75,7 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 
 		await recordCartEvent({
 			cart: prevCart,
-			cartFunnel: funnel,
+			cartFunnel: cartFunnel,
 			type:
 				prevCart.addedBump ? 'cart/purchaseMainWithBump' : 'cart/purchaseMainWithoutBump',
 		});
@@ -83,18 +84,20 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 
 		updateCart.orderId = await createOrderIdForCart(prevCart);
 
-		updateCart.stage = funnel?.upsellProductId ? 'upsellCreated' : 'checkoutConverted';
+		updateCart.stage =
+			cartFunnel?.upsellProductId ? 'upsellCreated' : 'checkoutConverted';
 		updateCart.checkoutStripeChargeId = charge.id;
 		updateCart.checkoutStripePaymentMethodId = charge.payment_method;
 
 		updateCart.fullName =
-			charge.billing_details.name ?? charge.shipping?.name ?? prevCart.fullName;
+			charge.shipping?.name ?? charge.billing_details.name ?? prevCart.fullName;
 		updateCart.shippingAddressLine1 = charge.shipping?.address?.line1;
 		updateCart.shippingAddressLine2 = charge.shipping?.address?.line2;
 		updateCart.shippingAddressCity = charge.shipping?.address?.city;
 		updateCart.shippingAddressState = charge.shipping?.address?.state;
 		updateCart.shippingAddressPostalCode = charge.shipping?.address?.postal_code;
 		updateCart.shippingAddressCountry = charge.shipping?.address?.country;
+		updateCart.checkoutConvertedAt = new Date();
 
 		// update or create fan
 		let fan =
@@ -153,19 +156,56 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 		if (!fan) throw new Error('Fan not created or found after charge success');
 
 		if (updateCart.stage === 'upsellCreated') {
-			await handleAbandonedUpsell.trigger({ cartId: prevCart.id }); // this waits 5 minutes and then marks the cart abandoned if it hasn't been converted or declined
-		}
-
-		if (updateCart.stage === 'checkoutConverted') {
+			await tasks.trigger<typeof handleAbandonedUpsell>('handle-abandoned-upsell', {
+				cartId: prevCart.id,
+			}); // this waits 5 minutes and then marks the cart abandoned if it hasn't been converted or declined
+		} else if (updateCart.stage === 'checkoutConverted') {
 			await sendCartReceiptEmail({
 				...prevCart,
 				...updateCart,
 				fan,
-				funnel,
-				mainProduct: funnel.mainProduct,
-				bumpProduct: funnel.bumpProduct,
-				upsellProduct: funnel.upsellProduct,
+				funnel: cartFunnel,
+				mainProduct: cartFunnel.mainProduct,
+				bumpProduct: cartFunnel.bumpProduct,
+				upsellProduct: cartFunnel.upsellProduct,
 			});
+		}
+
+		// check for any triggers
+		const newCartOrderTriggers = await dbHttp.query.Flow_Triggers.findMany({
+			where: and(
+				eq(Flow_Triggers.type, 'newCartOrder'),
+				eq(Flow_Triggers.cartFunnelId, cartFunnel.id),
+			),
+		});
+
+		for (const trigger of newCartOrderTriggers) {
+			// todo: abstract this to a function. require cartOrderId and fanId
+			await tasks.trigger<typeof handleFlow>('handle-flow', {
+				triggerId: trigger.id,
+				cartId: prevCart.id,
+				fanId: fan.id,
+			});
+		}
+
+		// newFan triggers
+
+		if (!prevCart.fan && fan) {
+			// i.e. we just created a fan
+			const newFanTriggers = await dbHttp.query.Flow_Triggers.findMany({
+				where: and(
+					eq(Flow_Triggers.type, 'newFan'),
+					eq(Flow_Triggers.workspaceId, prevCart.workspaceId),
+				),
+			});
+
+			for (const trigger of newFanTriggers) {
+				// todo: abstract this to a function. require fanId
+				await tasks.trigger<typeof handleFlow>('handle-flow', {
+					triggerId: trigger.id,
+					fanId: fan.id,
+				});
+			}
 		}
 	}
 }

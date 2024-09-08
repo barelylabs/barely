@@ -13,6 +13,7 @@ const IntegrationsPage = () => {
 			<DashContentHeader title='Accounts' subtitle='Connect your external accounts' />
 			<ProviderAccountCard provider='mailchimp' />
 			<ProviderAccountCard provider='tiktok' />
+			<ProviderAccountCard provider='spotify' />
 		</>
 	);
 };

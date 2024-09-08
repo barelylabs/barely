@@ -20,16 +20,6 @@ import {
 	SelectValue,
 } from '../../select';
 
-// import {
-// 	activePlugins$,
-// 	BlockType,
-// 	convertSelectionToNode$,
-// 	currentBlockType$,
-// 	useTranslation,
-// } from '../../core';
-// import { allowedHeadingLevels$ } from '../../headings';
-// import { Select } from '.././primitives/select';
-
 /**
  * A toolbar component that allows the user to change the block type of the current selection.
  * Supports paragraphs, headings and block quotes.

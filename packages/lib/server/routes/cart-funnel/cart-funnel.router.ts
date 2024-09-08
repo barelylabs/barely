@@ -95,7 +95,7 @@ export const cartFunnelRouter = createTRPCRouter({
 		.mutation(async ({ input, ctx }) => {
 			const updatedFunnel = await ctx.db.http
 				.update(CartFunnels)
-				.set({ archived: true })
+				.set({ archivedAt: new Date() })
 				.where(
 					and(
 						eq(CartFunnels.workspaceId, ctx.workspace.id),
@@ -110,7 +110,7 @@ export const cartFunnelRouter = createTRPCRouter({
 	delete: privateProcedure.input(z.array(z.string())).mutation(async ({ input, ctx }) => {
 		const updatedFunnel = await ctx.db.http
 			.update(CartFunnels)
-			.set({ deletedAt: new Date().toISOString() })
+			.set({ deletedAt: new Date() })
 			.where(
 				and(
 					eq(CartFunnels.workspaceId, ctx.workspace.id),

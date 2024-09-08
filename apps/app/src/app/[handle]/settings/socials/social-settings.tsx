@@ -4,10 +4,10 @@ import { useWorkspaceUpdateForm } from '@barely/lib/hooks/use-workspace-update-f
 import {
 	isValidUrl,
 	parseInstagramLink,
-	parseSpotifyLink,
 	parseTikTokLink,
 	parseYoutubeLink,
 } from '@barely/lib/utils/link';
+import { parseSpotifyUrl } from '@barely/lib/utils/spotify';
 
 import { SettingsCardForm } from '@barely/ui/components/settings-card';
 import { NumberField } from '@barely/ui/forms/number-field';
@@ -83,7 +83,7 @@ export function SocialLinksForm() {
 				onPaste={e => {
 					const input = e.clipboardData.getData('text');
 					if (!input || !isValidUrl(input)) return;
-					const parsedSpotifyLink = parseSpotifyLink(input);
+					const parsedSpotifyLink = parseSpotifyUrl(input);
 					if (!parsedSpotifyLink || parsedSpotifyLink.type !== 'artist') return;
 					e.preventDefault();
 					form.setValue('spotifyArtistId', parsedSpotifyLink.id, { shouldDirty: true });

@@ -1,4 +1,4 @@
-import { and, eq, inArray, notInArray } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNull, lt, notInArray, or } from 'drizzle-orm';
 import { z } from 'zod';
 
 import { pushEvent } from '../../../utils/pusher-server';
@@ -11,11 +11,12 @@ import {
 	createTrack,
 	getTrackById,
 	getTrackBySpotifyId,
-	getTracksByWorkspaceId,
+	getTrackWith_Workspace_Genres_Files__fromRawTrack,
+	trackWith_workspace_genres_files,
 } from './track.fns';
 import {
 	createTrackSchema,
-	trackFilterParamsSchema,
+	selectWorkspaceTracksSchema,
 	updateTrackSchema,
 } from './track.schema';
 import { Tracks } from './track.sql';
@@ -26,9 +27,50 @@ export const trackRouter = createTRPCRouter({
 	}),
 
 	byWorkspace: privateProcedure
-		.input(trackFilterParamsSchema.omit({ selectedTrackIds: true }).optional())
-		.query(async ({ ctx }) => {
-			return await getTracksByWorkspaceId(ctx.workspace.id, ctx.db);
+		.input(selectWorkspaceTracksSchema)
+		.query(async ({ ctx, input }) => {
+			const { limit, cursor, search, showArchived } = input;
+
+			const rawTracks = await ctx.db.http.query.Tracks.findMany({
+				with: trackWith_workspace_genres_files,
+				where: sqlAnd([
+					eq(Tracks.workspaceId, ctx.workspace.id),
+					!!search?.length && or(eq(Tracks.name, search), eq(Tracks.spotifyId, search)),
+					showArchived ? undefined : isNull(Tracks.archivedAt),
+					!!cursor &&
+						or(
+							lt(Tracks.createdAt, cursor.createdAt),
+							and(eq(Tracks.createdAt, cursor.createdAt), lt(Tracks.id, cursor.id)),
+						),
+				]),
+
+				orderBy: [desc(Tracks.createdAt), desc(Tracks.id)],
+				limit: limit + 1,
+			});
+
+			const tracks = rawTracks.map(rawTrack =>
+				getTrackWith_Workspace_Genres_Files__fromRawTrack(rawTrack),
+			);
+
+			let nextCursor: typeof cursor | undefined = undefined;
+
+			if (tracks.length > limit) {
+				const nextTrack = tracks.pop();
+				nextCursor =
+					nextTrack ?
+						{
+							id: nextTrack.id,
+							createdAt: nextTrack.createdAt,
+						}
+					:	undefined;
+			}
+
+			return {
+				tracks,
+				nextCursor,
+			};
+
+			// return await getTracksByWorkspaceId(ctx.workspace.id, ctx.db);
 		}),
 
 	bySpotifyId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
@@ -173,7 +215,7 @@ export const trackRouter = createTRPCRouter({
 		.mutation(async ({ ctx, input }) => {
 			await ctx.db.http
 				.update(Tracks)
-				.set({ archived: true })
+				.set({ archivedAt: new Date() })
 				.where(and(eq(Tracks.workspaceId, ctx.workspace.id), inArray(Tracks.id, input)));
 		}),
 
@@ -181,7 +223,7 @@ export const trackRouter = createTRPCRouter({
 		await ctx.db.http
 			.update(Tracks)
 			.set({
-				deletedAt: new Date().toISOString(),
+				deletedAt: new Date(),
 			})
 			.where(and(eq(Tracks.workspaceId, ctx.workspace.id), inArray(Tracks.id, input)));
 	}),

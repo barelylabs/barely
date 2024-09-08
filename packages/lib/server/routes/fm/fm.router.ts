@@ -1,7 +1,11 @@
 import { and, asc, desc, eq, gt, inArray, lt, notInArray, or } from 'drizzle-orm';
 import { z } from 'zod';
 
+import type { FileRecord } from '../file/file.schema';
 import type { InsertFmLink, InsertFmPage } from './fm.schema';
+import { env } from '../../../env';
+import { uploadFileFromUrl } from '../../../files/upload-from-url';
+import { getFileKey } from '../../../files/utils';
 import { newId } from '../../../utils/id';
 import { raise } from '../../../utils/raise';
 import { sqlAnd, sqlStringContains } from '../../../utils/sql';
@@ -10,6 +14,7 @@ import {
 	privateProcedure,
 	workspaceQueryProcedure,
 } from '../../api/trpc';
+import { Files } from '../file/file.sql';
 import {
 	createFmPageSchema,
 	selectWorkspaceFmPagesSchema,
@@ -57,14 +62,55 @@ export const fmRouter = createTRPCRouter({
 			}
 
 			return {
-				fmPages: fmPages.slice(0, limit),
+				fmPages,
 				nextCursor,
 			};
 		}),
 
 	create: privateProcedure.input(createFmPageSchema).mutation(async ({ input, ctx }) => {
+		const { coverArtUrl, ...data } = input;
+
+		if (!data.coverArtId && coverArtUrl) {
+			console.log('creating coverArt file ');
+
+			const fileId = newId('file');
+			const key = getFileKey({
+				workspaceId: ctx.workspace.id,
+				folder: 'fm-cover-art',
+				fileName: newId('fmCoverArt'),
+			});
+
+			const upload = await uploadFileFromUrl({
+				url: coverArtUrl,
+				key,
+			});
+
+			const fileRecord: FileRecord = {
+				id: fileId,
+				workspaceId: ctx.workspace.id,
+				bucket: env.AWS_S3_BUCKET_NAME,
+				folder: 'fm-cover-art',
+				key,
+				name: key,
+				type: 'image',
+				src: upload.src,
+				size: upload.fileSize,
+				internal: true,
+				createdById: ctx.user.id,
+				uploadedById: ctx.user.id,
+			};
+
+			await ctx.db.pool.insert(Files).values(fileRecord).returning();
+			data.coverArtId = fileId;
+
+			console.log('fileId >> ', fileId);
+			console.log('data.coverArtId', data.coverArtId);
+		}
+
+		console.log('data >> ', data);
+
 		const fmPageData: InsertFmPage = {
-			...input,
+			...data,
 			id: newId('fmPage'),
 			workspaceId: ctx.workspace.id,
 			handle: ctx.workspace.handle,
@@ -91,9 +137,7 @@ export const fmRouter = createTRPCRouter({
 		await ctx.db.pool.update(FmPages).set(data).where(eq(FmPages.id, id)).returning();
 
 		if (links !== undefined) {
-			const linkIds = links
-				.map(link => link.id)
-				.filter(id => id !== undefined) as string[];
+			const linkIds = links.map(link => link.id).filter(id => id !== undefined);
 
 			await Promise.all(
 				links.map(async (link, index) => {
@@ -127,7 +171,7 @@ export const fmRouter = createTRPCRouter({
 		.mutation(async ({ input, ctx }) => {
 			const updatedFmPage = await ctx.db.http
 				.update(FmPages)
-				.set({ archived: true })
+				.set({ archivedAt: new Date() })
 				.where(and(eq(FmPages.workspaceId, ctx.workspace.id), inArray(FmPages.id, input)))
 				.returning();
 
@@ -137,7 +181,7 @@ export const fmRouter = createTRPCRouter({
 	delete: privateProcedure.input(z.array(z.string())).mutation(async ({ input, ctx }) => {
 		const updatedFmPage = await ctx.db.http
 			.update(FmPages)
-			.set({ deletedAt: new Date().toISOString() })
+			.set({ deletedAt: new Date() })
 			.where(and(eq(FmPages.workspaceId, ctx.workspace.id), inArray(FmPages.id, input)))
 			.returning();
 

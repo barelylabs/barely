@@ -1,4 +1,5 @@
-export type PlanType = 'free' | 'pro' | 'enterprise';
+export const WORKSPACE_PLAN_TYPES = ['free', 'pro', 'agency', 'enterprise'] as const;
+export type PlanType = (typeof WORKSPACE_PLAN_TYPES)[number];
 
 export interface Plan {
 	id: PlanType;
@@ -8,7 +9,15 @@ export interface Plan {
 		production: string;
 	};
 	description: string;
-	linkUsageLimit: number;
+	email: {
+		usageLimit: number;
+	};
+	link: {
+		usageLimit: number;
+	};
+	cart: {
+		feePercentage: number;
+	};
 	price: {
 		monthly: {
 			amount: number;
@@ -29,6 +38,43 @@ export interface Plan {
 
 export const WORKSPACE_PLANS = new Map<PlanType, Plan>([
 	[
+		'free',
+		{
+			id: 'free',
+			name: 'Free',
+			description: 'Free Plan',
+			productId: {
+				test: 'prod_free_test',
+				production: 'prod_free_production',
+			},
+			email: {
+				usageLimit: 1000,
+			},
+			link: {
+				usageLimit: 1000,
+			},
+			cart: {
+				feePercentage: 15,
+			},
+			price: {
+				monthly: {
+					amount: 0,
+					priceIds: {
+						test: 'price_free_monthly_test',
+						production: 'price_free_monthly_production',
+					},
+				},
+				yearly: {
+					amount: 0,
+					priceIds: {
+						test: 'price_free_yearly_test',
+						production: 'price_free_yearly_production',
+					},
+				},
+			},
+		},
+	],
+	[
 		'pro',
 		{
 			id: 'pro',
@@ -38,7 +84,15 @@ export const WORKSPACE_PLANS = new Map<PlanType, Plan>([
 				test: 'prod_P3OhzmfamZ6E1D',
 				production: 'prod_PbK7nyXH7BxZnO',
 			},
-			linkUsageLimit: 50000,
+			email: {
+				usageLimit: 50000,
+			},
+			link: {
+				usageLimit: 50000,
+			},
+			cart: {
+				feePercentage: 10,
+			},
 			price: {
 				monthly: {
 					amount: 9,
@@ -57,49 +111,41 @@ export const WORKSPACE_PLANS = new Map<PlanType, Plan>([
 			},
 		},
 	],
+	[
+		'agency',
+		{
+			id: 'agency',
+			name: 'Agency',
+			description: 'Agency Plan',
+			productId: {
+				test: 'prod_agency_test',
+				production: 'prod_agency_production',
+			},
+			email: {
+				usageLimit: 100000,
+			},
+			link: {
+				usageLimit: 100000,
+			},
+			cart: {
+				feePercentage: 5,
+			},
+			price: {
+				monthly: {
+					amount: 350,
+					priceIds: {
+						test: 'price_agency_monthly_test',
+						production: 'price_agency_monthly_production',
+					},
+				},
+				yearly: {
+					amount: 290,
+					priceIds: {
+						test: 'price_agency_yearly_test',
+						production: 'price_agency_yearly_production',
+					},
+				},
+			},
+		},
+	],
 ]);
-
-// export const LINK_CLICKS_METERED_PLANS = new Map([
-// 	[
-// 		'freePlanLinkClicks',
-// 		{
-// 			id: 'freePlanLinkClicks',
-// 			name: 'Link Clicks (Free Plan)',
-// 			productId: {
-// 				test: 'prod_P3WygtjTIHFG2d',
-// 				production: '', // fixme
-// 			},
-// 			freeLinkUsageLimit: 1000,
-// 			price: {
-// 				monthly: {
-// 					amount: 0.001,
-// 					priceIds: {
-// 						test: 'price_1OFPuYHDMmzntRhpwQzS8z3L',
-// 						production: '', // fixme
-// 					},
-// 				},
-// 			},
-// 		},
-// 	],
-// 	[
-// 		'pro',
-// 		{
-// 			id: 'pro',
-// 			name: 'Pro',
-// 			productId: {
-// 				test: 'prod_P3WygtjTIHFG2d',
-// 				production: '', // fixme
-// 			},
-// 			freeLinkUsageLimit: 50000,
-// 			price: {
-// 				monthly: {
-// 					amount: 0.0001,
-// 					priceIds: {
-// 						test: 'price_1OFQ3THDMmzntRhpP1O9O0ym',
-// 						production: '', // fixme
-// 					},
-// 				},
-// 			},
-// 		},
-// 	],
-// ]);

@@ -23,7 +23,7 @@
 		}
 
 		& a {
-			@apply text-accent;
+			@apply text-muted;
 			text-decoration: none;
 		}
 
@@ -104,6 +104,26 @@
 
 		& li[role='checkbox']::after {
 			transform: translate(6px, 6px) rotate(45deg);
+		}
+
+		/* Add this new rule */
+		& :not(pre) > code {
+			position: relative;
+		}
+
+		&
+			:not(pre)
+			> code:matches([class*='language-'], [data-lexical-text]):not(::before, ::after) {
+			background: none;
+		}
+
+		& :not(pre) > code:not([class*='language-'], [data-lexical-text])::before {
+			content: attr(data-content);
+			position: absolute;
+			left: 0;
+			right: 0;
+			background-color: theme('colors.muted.DEFAULT');
+			z-index: -1;
 		}
 	}
 
@@ -221,4 +241,12 @@
 
 .mdxeditor-popup-container {
 	z-index: z-50;
+}
+
+@layer utilities {
+	.bracket-bg {
+		&::before {
+			content: attr(data-content);
+		}
+	}
 }

@@ -17,7 +17,7 @@ export function LinkDevices() {
 
 	const { filters, getSetFilterPath } = useWebEventStatFilters();
 
-	const [devices] = api.stat.topDevices.useSuspenseQuery(filters, {
+	const { data: devices } = api.stat.topDevices.useQuery(filters, {
 		select: data =>
 			data.map(d => ({
 				name: d.device,

@@ -1,38 +1,60 @@
-// import { renderAsync } from '@react-email/render';
 import { Resend } from 'resend';
+import { z } from 'zod';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+export const resend = new Resend(process.env.RESEND_API_KEY);
+
+type Resend_GetDomain = Awaited<ReturnType<typeof resend.domains.get>>;
+export type Resend_DomainRecord = NonNullable<Resend_GetDomain['data']>['records'][0];
 
 interface SendEmailProps {
 	from: string;
+	fromFriendlyName?: string;
 	to: string | string[];
 	subject: string;
 	type: 'transactional' | 'marketing';
+	replyTo?: string;
 	bcc?: string | string[];
 	cc?: string | string[];
-	reply_to?: string;
 	react: JSX.Element;
 	text?: string;
 	html?: string;
 }
 
 export async function sendEmail(props: SendEmailProps) {
-	const { error } = await resend.emails.send({
-		from: props.from,
+	const safeParsedFrom = z.string().email().safeParse(props.from);
+
+	const from =
+		props.fromFriendlyName && safeParsedFrom.success ?
+			`${props.fromFriendlyName} <${props.from}>`
+		:	props.from;
+
+	const res = await resend.emails.send({
+		from,
 		to: props.to,
 		subject: props.subject,
 		html: props.html,
 		react: props.react,
 		cc: props.cc,
 		bcc: props.bcc,
-		reply_to: props.reply_to,
+		reply_to: props.replyTo,
 	});
 
-	if (error) {
-		console.error(error);
-		return false;
+	if (res.error) {
+		console.error(res.error);
+		return {
+			error: res.error,
+		};
 	}
-	return true;
+
+	if (!res.data) {
+		return {
+			error: 'No data returned from Resend',
+		};
+	}
+
+	return {
+		resendId: res.data.id,
+	};
 }
 
 // export async function sendEmail(props: SendEmailProps) {

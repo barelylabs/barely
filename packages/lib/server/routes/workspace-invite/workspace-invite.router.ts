@@ -40,7 +40,8 @@ export const workspaceInviteRouter = createTRPCRouter({
 			});
 
 			await sendEmail({
-				from: 'barely.io <support@barely.io>',
+				from: 'support@barely.io',
+				fromFriendlyName: 'Barely',
 				to: input.email,
 				subject: `You've been invited to join ${ctx.workspace.name} on barely.io`,
 				type: 'transactional',

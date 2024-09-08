@@ -3,8 +3,9 @@
 import type { UploadQueueItem } from '@barely/lib/hooks/use-upload';
 import type { UpsertFmPage } from '@barely/lib/server/routes/fm/fm.schema';
 import type { z } from 'zod';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
+import { useDebounce } from '@barely/lib/hooks/use-debounce';
 import { useUpload } from '@barely/lib/hooks/use-upload';
 import { api } from '@barely/lib/server/api/react';
 import { FM_LINK_PLATFORMS } from '@barely/lib/server/routes/fm/fm.constants';
@@ -54,20 +55,21 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 		updateItem: mode === 'create' ? null : selectedFmPage ?? null,
 		upsertSchema: upsertFmPageSchema,
 		defaultValues: {
-			title: selectedFmPage?.title ?? '',
+			title: mode === 'update' ? selectedFmPage?.title ?? '' : '',
 			key: '',
 			sourceUrl: '',
 			scheme: 'light',
-			links: selectedFmPage?.links ?? [],
+			links: mode === 'update' ? selectedFmPage?.links ?? [] : [],
 		},
 		handleCreateItem: async d => {
 			await createFm(d);
-			d;
 		},
 		handleUpdateItem: async d => {
 			await updateFm(d);
 		},
 	});
+
+	const { setValue } = form;
 
 	// link array
 	const {
@@ -102,27 +104,6 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 
 	const uploadPreviewImage = artworkUploadQueue[0]?.previewImage;
 
-	const artworkImagePreview =
-		uploadPreviewImage ?? (mode === 'update' ? selectedFmPage?.coverArt?.src ?? '' : '');
-
-	const handleSubmit = useCallback(
-		async (data: z.infer<typeof upsertFmPageSchema>) => {
-			const upsertFmPageData: UpsertFmPage = {
-				...data,
-				coverArtId: artworkUploadQueue[0]?.presigned?.fileRecord.id ?? undefined,
-			};
-
-			await handleArtworkUpload();
-			await onSubmit(upsertFmPageData);
-		},
-		[artworkUploadQueue, handleArtworkUpload, onSubmit],
-	);
-
-	const submitDisabled =
-		isPendingPresignsArtwork ||
-		uploadingArtwork ||
-		(mode === 'update' && !form.formState.isDirty && !artworkUploadQueue.length);
-
 	/* modal */
 	const showFmModal = mode === 'create' ? showCreateFmPageModal : showUpdateFmPageModal;
 	const setShowFmModal =
@@ -135,6 +116,105 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 		form.reset();
 		setShowFmModal(false);
 	}, [form, focusGridList, apiUtils.fm, setShowFmModal, setArtworkUploadQueue]);
+
+	/* state */
+	const sourceUrl = form.watch('sourceUrl');
+	const spotifyLinkUrl = form
+		.watch('links')
+		.find(link => link.platform === 'spotify')?.url;
+
+	const isSpotifyPlaylistUrl = useMemo(() => {
+		// we need to check if source url is a playlist and/or the spotify link in linkFields is a playlist
+		return (
+			sourceUrl.includes('spotify.com/playlist/') ||
+			spotifyLinkUrl?.includes('spotify.com/playlist')
+		);
+	}, [sourceUrl, spotifyLinkUrl]);
+
+	useEffect(() => {
+		if (
+			sourceUrl.includes('open.spotify.com') &&
+			!linkFields.some(link => link.platform === 'spotify')
+		) {
+			appendLink({
+				platform: 'spotify',
+				url: sourceUrl,
+				spotifyTrackUrl: sourceUrl.includes('open.spotify.com/track') ? sourceUrl : '',
+			});
+		}
+	}, [sourceUrl, appendLink, linkFields]);
+
+	/* spotify metadata */
+	const [debouncedSourceUrl] = useDebounce(sourceUrl, 500);
+	const { data: sourceUrlSpotifyMetadata } = api.spotify.getMetadata.useQuery(
+		{
+			query: debouncedSourceUrl,
+		},
+		{
+			enabled: !!sourceUrl && sourceUrl.includes('open.spotify.com'),
+		},
+	);
+
+	const spotifyImageUrl = useMemo(() => {
+		return sourceUrlSpotifyMetadata?.imageUrl ?? undefined;
+	}, [sourceUrlSpotifyMetadata]);
+
+	const spotifyTitle = useMemo(() => {
+		return sourceUrlSpotifyMetadata?.title ?? undefined;
+	}, [sourceUrlSpotifyMetadata]);
+
+	const currentTitle = form.watch('title');
+	const currentKey = form.watch('key');
+
+	useEffect(() => {
+		if (!spotifyTitle) return;
+		if (currentTitle === '') {
+			setValue('title', spotifyTitle);
+		}
+		if (currentKey === '') {
+			const key = spotifyTitle
+				.toLowerCase()
+				.replace(/\s+/g, '-')
+				.replace(/[^a-z0-9-]/g, '');
+			setValue('key', key);
+		}
+	}, [spotifyTitle, currentTitle, currentKey, setValue]);
+
+	const artworkImagePreview =
+		uploadPreviewImage ??
+		(mode === 'update' ?
+			selectedFmPage?.coverArt?.src ?? spotifyImageUrl
+		:	spotifyImageUrl ?? '');
+
+	// form submit
+	const handleSubmit = useCallback(
+		async (data: z.infer<typeof upsertFmPageSchema>) => {
+			// const coverArtUrl = artworkUploadQueue[0]?.presigned?.fileRecord.url ?
+
+			let coverArtUrl: string | undefined = undefined;
+			if (!artworkUploadQueue.length && !selectedFmPage?.coverArt?.src) {
+				coverArtUrl = spotifyImageUrl ?? undefined;
+			}
+
+			const upsertFmPageData: UpsertFmPage = {
+				...data,
+				coverArtUrl,
+				coverArtId: artworkUploadQueue[0]?.presigned?.fileRecord.id ?? undefined,
+			};
+
+			await handleArtworkUpload();
+
+			console.log('upsertFmPageData', upsertFmPageData);
+
+			await onSubmit(upsertFmPageData);
+		},
+		[artworkUploadQueue, handleArtworkUpload, onSubmit, spotifyImageUrl, selectedFmPage],
+	);
+
+	const submitDisabled =
+		isPendingPresignsArtwork ||
+		uploadingArtwork ||
+		(mode === 'update' && !form.formState.isDirty && !artworkUploadQueue.length);
 
 	return (
 		<Modal
@@ -167,6 +247,7 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 
 					<div className='flex w-full flex-col items-start gap-1'>
 						<Label>Links</Label>
+
 						<div className='flex w-full flex-col gap-4'>
 							{linkFields.map((field, index) => {
 								return (
@@ -204,6 +285,15 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 												</div>
 											}
 										/>
+										{isSpotifyPlaylistUrl &&
+											form.getValues(`links.${index}.platform`) === 'spotify' && (
+												<TextField
+													label='spotify track url (optional)'
+													infoTooltip='If you provide a link to a track included the playlist, we can link directly to the track within the playlist'
+													control={form.control}
+													name={`links.${index}.spotifyTrackUrl`}
+												/>
+											)}
 									</div>
 								);
 							})}
@@ -220,7 +310,7 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 									endIcon='plus'
 									fullWidth
 									onClick={() => {
-										appendLink({ platform, url: '' });
+										appendLink({ platform, url: '', spotifyTrackUrl: '' });
 									}}
 								>
 									<span>{platform}</span>
