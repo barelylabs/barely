@@ -7,9 +7,13 @@ import { api } from '@barely/lib/server/api/react';
 import { EMAIL_TEMPLATE_VARIABLES } from '@barely/lib/server/routes/email-template/email-template.constants';
 import { upsertEmailTemplateSchema } from '@barely/lib/server/routes/email-template/email-template.schema';
 
+import { Icon } from '@barely/ui/elements/icon';
 import { Label } from '@barely/ui/elements/label';
 import { MDXEditor } from '@barely/ui/elements/mdx-editor';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
+import { Separator } from '@barely/ui/elements/separator';
+import { Switch } from '@barely/ui/elements/switch';
+import { Text } from '@barely/ui/elements/typography';
 import { Form, SubmitButton } from '@barely/ui/forms';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { TextField } from '@barely/ui/forms/text-field';
@@ -66,6 +70,7 @@ export function CreateOrUpdateEmailTemplateModal({
 			subject: mode === 'update' ? selectedEmailTemplate?.subject ?? '' : '',
 			body: mode === 'update' ? selectedEmailTemplate?.body ?? '' : '',
 			fromId: mode === 'update' ? selectedEmailTemplate?.fromId ?? '' : '',
+			...selectedEmailTemplate,
 		},
 		handleCreateItem: async d => {
 			d.fromId;
@@ -114,6 +119,33 @@ export function CreateOrUpdateEmailTemplateModal({
 						control={form.control}
 						infoTooltip='The name of the email template. This is just for your reference.'
 					/>
+
+					<div className='flex flex-row items-center gap-3'>
+						<Label>Type</Label>
+						<Switch
+							size='sm'
+							checked={form.watch('type') === 'marketing'}
+							onCheckedChange={c => {
+								if (c) return form.setValue('type', 'marketing');
+								return form.setValue('type', 'transactional');
+							}}
+						/>
+						<Text>
+							{form.watch('type') === 'marketing' ?
+								<div className='flex flex-row items-center gap-2'>
+									<Icon.marketing className='h-4 w-4' />
+									Marketing
+								</div>
+							:	<div className='flex flex-row items-center gap-1'>
+									<Icon.transactional className='h-4 w-4' />
+									Transactional
+								</div>
+							}
+						</Text>
+					</div>
+
+					<Separator className='my-4' />
+
 					<SelectField
 						label='From'
 						name='fromId'

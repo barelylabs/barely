@@ -24,7 +24,7 @@ export const emailTemplateRouter = createTRPCRouter({
 	byWorkspace: workspaceQueryProcedure
 		.input(selectWorkspaceEmailTemplatesSchema)
 		.query(async ({ input, ctx }) => {
-			const { limit, cursor, search } = input;
+			const { limit, cursor, search, showFlowOnly, showTypes } = input;
 			const emailTemplates = await ctx.db.http.query.EmailTemplates.findMany({
 				where: sqlAnd([
 					eq(EmailTemplates.workspaceId, ctx.workspace.id),
@@ -37,6 +37,8 @@ export const emailTemplateRouter = createTRPCRouter({
 								gt(EmailTemplates.id, cursor.id),
 							),
 						),
+					showTypes && inArray(EmailTemplates.type, showTypes),
+					!showFlowOnly && eq(EmailTemplates.flowOnly, false),
 				]),
 				orderBy: [desc(EmailTemplates.createdAt), asc(EmailTemplates.id)],
 				limit: limit + 1,
