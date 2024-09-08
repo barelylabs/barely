@@ -12,13 +12,17 @@ import { flowForm_sendEmailSchema } from '@barely/lib/server/routes/flow/flow.sc
 import { useShallow } from 'zustand/react/shallow';
 
 import { Button } from '@barely/ui/elements/button';
+import { Icon } from '@barely/ui/elements/icon';
 import { Label } from '@barely/ui/elements/label';
 import { MDXEditor } from '@barely/ui/elements/mdx-editor';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
 import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/elements/popover';
 import { Separator } from '@barely/ui/elements/separator';
+import { Switch } from '@barely/ui/elements/switch';
+import { Text } from '@barely/ui/elements/typography';
 import { Form, SubmitButton } from '@barely/ui/forms';
 import { SelectField } from '@barely/ui/forms/select-field';
+import { SwitchField } from '@barely/ui/forms/switch-field';
 import { TextField } from '@barely/ui/forms/text-field';
 
 import { useFlowStore } from './flow-store';
@@ -127,26 +131,49 @@ export const FlowEmailModal = () => {
 						</Popover>
 					</div>
 
-					<SelectField
-						label='From'
-						name='fromId'
-						control={form.control}
-						options={emailAddressOptions ?? []}
-					/>
-
-					<Separator className='mt-4' />
 					<TextField
 						label='Name'
 						name='name'
 						control={form.control}
 						infoTooltip='The name of the email template. This is just for your reference.'
 					/>
-					{/* <TextField
-						label='Reply To'
-						name='replyTo'
+					<div className='flex flex-row items-center gap-3'>
+						<Label>Type</Label>
+						<Switch
+							size='sm'
+							checked={form.watch('type') === 'marketing'}
+							onCheckedChange={c => {
+								if (c) return form.setValue('type', 'marketing');
+								return form.setValue('type', 'transactional');
+							}}
+						/>
+						<Text>
+							{form.watch('type') === 'marketing' ?
+								<div className='flex flex-row items-center gap-2'>
+									<Icon.marketing className='h-4 w-4' />
+									Marketing
+								</div>
+							:	<div className='flex flex-row items-center gap-1'>
+									<Icon.transactional className='h-4 w-4' />
+									Transactional
+								</div>
+							}
+						</Text>
+					</div>
+
+					{currentEmailNode?.data.flowOnly && (
+						<div className='flex flex-row items-center gap-3'>
+							<SwitchField label='Flow Only' name='flowOnly' control={form.control} />
+						</div>
+					)}
+
+					<Separator className='mt-4' />
+					<SelectField
+						label='From'
+						name='fromId'
 						control={form.control}
-						infoTooltip='The email address to reply to'
-					/> */}
+						options={emailAddressOptions ?? []}
+					/>
 					<TextField label='Subject' name='subject' control={form.control} />
 
 					<Label>Body</Label>

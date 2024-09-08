@@ -468,6 +468,7 @@ export function getDefaultFlowAction(props: DefaultFlowActionProps) {
 				emailTemplate: {
 					...props.emailTemplate,
 					fromId: props.emailTemplate?.fromId ?? raise('No email from id found'),
+					flowOnly: props.emailTemplate?.flowOnly ?? true,
 				},
 			});
 		}

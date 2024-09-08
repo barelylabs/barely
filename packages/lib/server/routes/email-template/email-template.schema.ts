@@ -35,6 +35,8 @@ export type EmailTemplateWithFrom = EmailTemplate & {
 export const emailTemplateFilterParamsSchema = z.object({
 	search: z.string().optional(),
 	showArchived: z.boolean().optional(),
+	showFlowOnly: z.boolean().optional(),
+	showTypes: z.array(z.enum(['marketing', 'transactional'])).optional(),
 });
 
 export const emailTemplateSearchParamsSchema = emailTemplateFilterParamsSchema.extend({

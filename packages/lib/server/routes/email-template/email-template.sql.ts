@@ -1,5 +1,6 @@
 import { relations } from 'drizzle-orm';
 import {
+    boolean,
 	foreignKey,
 	integer,
 	pgTable,
@@ -33,9 +34,11 @@ export const EmailTemplates = pgTable('EmailTemplates', {
 
 	name: text('name').notNull().default('Email Template'),
 	description: text('description'),
-	type: text('type', { enum: ['marketing', 'transactional'] })
+	
+    type: text('type', { enum: ['marketing', 'transactional'] })
 		.notNull()
 		.default('marketing'),
+    flowOnly: boolean('flowOnly').notNull().default(false),
 
 	replyTo: text('replyTo'),
 	subject: text('subject').notNull(),
