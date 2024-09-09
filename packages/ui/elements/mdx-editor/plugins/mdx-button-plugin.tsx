@@ -182,9 +182,6 @@ export const LinkButtonEditor: React.FC<JsxEditorProps> = ({ mdastNode }) => {
 		<div className='flex flex-row items-center justify-between gap-2 rounded-md bg-gray-100 px-2 py-2'>
 			<div className='flex flex-row items-center gap-2'>
 				<Icon.link className='h-4 w-4' />
-				{/* <Text variant='sm/normal' className='m-0' muted>
-                    {properties.label}
-                </Text> */}
 			</div>
 			<Popover open={showEditModal} onOpenChange={open => setShowEditModal(open)}>
 				<PopoverTrigger asChild>
