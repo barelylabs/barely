@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 patchedDependencies:
+  '@mdxeditor/editor@3.11.3':
+    hash: nl7qy3amym57mbtc57naavgcjy
+    path: patches/@mdxeditor__editor@3.11.3.patch
   '@noble/hashes@1.3.0':
     hash: dxkmpojtw7fsummeivtgacg5du
     path: patches/@noble__hashes@1.3.0.patch
@@ -1296,30 +1299,15 @@ importers:
       '@hookform/error-message':
         specifier: ^2.0.1
         version: 2.0.1(react-dom@18.2.0)(react-hook-form@7.49.3)(react@18.2.0)
-      '@lexical/code':
-        specifier: ^0.17.0
-        version: 0.17.1
-      '@lexical/link':
-        specifier: ^0.17.0
-        version: 0.17.1
-      '@lexical/list':
-        specifier: ^0.17.0
-        version: 0.17.1
-      '@lexical/markdown':
-        specifier: ^0.17.0
-        version: 0.17.1
       '@lexical/react':
         specifier: ^0.17.0
         version: 0.17.1(react-dom@18.2.0)(react@18.2.0)(yjs@13.6.14)
       '@lexical/rich-text':
         specifier: ^0.17.0
         version: 0.17.1
-      '@lexical/table':
-        specifier: ^0.17.0
-        version: 0.17.1
       '@mdxeditor/editor':
-        specifier: ^3.11.3
-        version: 3.11.3(@codemirror/language@6.10.1)(@lezer/common@1.2.1)(@lezer/highlight@1.2.0)(@types/react-dom@18.2.18)(@types/react@18.2.48)(react-dom@18.2.0)(react@18.2.0)(yjs@13.6.14)
+        specifier: 3.11.3
+        version: 3.11.3(patch_hash=nl7qy3amym57mbtc57naavgcjy)(@codemirror/language@6.10.1)(@lezer/common@1.2.1)(@lezer/highlight@1.2.0)(@types/react-dom@18.2.18)(@types/react@18.2.48)(react-dom@18.2.0)(react@18.2.0)(yjs@13.6.14)
       '@phosphor-icons/react':
         specifier: ^2.1.5
         version: 2.1.5(react-dom@18.2.0)(react@18.2.0)
@@ -1420,7 +1408,7 @@ importers:
         specifier: ^2.6.1
         version: 2.6.3(@types/react@18.2.48)(react@18.2.0)
       lexical:
-        specifier: ^0.17.1
+        specifier: ^0.17.0
         version: 0.17.1
       lucide-react:
         specifier: ^0.309.0
@@ -7980,7 +7968,7 @@ packages:
     resolution: {integrity: sha512-H1rQc1ZOHANWBvPcW+JpGwr+juXSxM8Q8YCkm3GhZd8REu1fHR3z99CErO1p9pkcfcxZnMdIZdIsXkOHY0NilA==}
     dev: true
 
-  /@mdxeditor/editor@3.11.3(@codemirror/language@6.10.1)(@lezer/common@1.2.1)(@lezer/highlight@1.2.0)(@types/react-dom@18.2.18)(@types/react@18.2.48)(react-dom@18.2.0)(react@18.2.0)(yjs@13.6.14):
+  /@mdxeditor/editor@3.11.3(patch_hash=nl7qy3amym57mbtc57naavgcjy)(@codemirror/language@6.10.1)(@lezer/common@1.2.1)(@lezer/highlight@1.2.0)(@types/react-dom@18.2.18)(@types/react@18.2.48)(react-dom@18.2.0)(react@18.2.0)(yjs@13.6.14):
     resolution: {integrity: sha512-3KreMALnB+9WC7Owl3QYpUjAV9pKRWBxQIreCLADvznGlzLNEFxQzFcOIDm40D/oUsNv2vieak3LFgz+qEeIYg==}
     engines: {node: '>=16'}
     peerDependencies:
@@ -8050,6 +8038,7 @@ packages:
       - supports-color
       - yjs
     dev: false
+    patched: true
 
   /@mdxeditor/gurx@1.1.2:
     resolution: {integrity: sha512-7JjgGeMqaM5SDCV3mrb1Gx0+rFfSoN/+Ah9S7YRbxA0Bc3C+ymMu1qK/xed9Nzlfz8fgdwi73Oe8lCY9wfn/dw==}
