@@ -6,8 +6,8 @@ import { cartApi } from '@barely/lib/server/routes/cart/cart.api.react';
 
 export function useUpsellCart({
 	mode,
-	handle,
-	key,
+	// handle,
+	// key,
 	cartId,
 }: {
 	mode: 'preview' | 'live';
@@ -20,31 +20,32 @@ export function useUpsellCart({
 
 	const router = useRouter();
 	const pathname = usePathname();
+	const successPath = pathname.replace('/customize', '/success');
 
 	const { mutate: buyUpsell } = cartApi.buyUpsell.useMutation({
 		onSuccess: () => {
-			router.push(`/${handle}/${key}/success`);
+			router.push(successPath);
 		},
 	});
 
 	const handleBuyUpsell = () => {
 		setConverting(true);
 		if (mode === 'preview') {
-			return router.push(`/${handle}/${key}/success`);
+			return router.push(successPath);
 		}
 		buyUpsell({ cartId });
 	};
 
 	const { mutate: cancelUpsell } = cartApi.declineUpsell.useMutation({
-		onSuccess: res => {
-			router.push(`/${res.handle}/${res.key}/success`);
+		onSuccess: () => {
+			router.push(successPath);
 		},
 	});
 
 	const handleDeclineUpsell = () => {
 		setDeclining(true);
 		if (mode === 'preview') {
-			return router.push(pathname.replace('/customize', '/success'));
+			return router.push(successPath);
 		}
 		cancelUpsell({ cartId });
 	};

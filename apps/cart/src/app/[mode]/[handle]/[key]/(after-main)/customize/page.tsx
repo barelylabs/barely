@@ -10,6 +10,7 @@ import { ProductPrice } from '~/app/[mode]/[handle]/[key]/_components/product-pr
 import { CartSteps } from '~/app/[mode]/[handle]/[key]/(after-main)/customize/_components/cart-steps';
 import { UpsellButtons } from '~/app/[mode]/[handle]/[key]/(after-main)/customize/_components/upsell-buttons';
 import { UpsellCountdown } from '~/app/[mode]/[handle]/[key]/(after-main)/customize/_components/upsell-countdown';
+import { UpsellLog } from '~/app/[mode]/[handle]/[key]/(after-main)/customize/_components/upsell-log';
 
 export default async function UpsellPage({
 	params,
@@ -55,6 +56,7 @@ export default async function UpsellPage({
 
 	return (
 		<>
+			<UpsellLog cartId={cartId} />
 			<div className='flex flex-col items-center gap-6 sm:gap-8'>
 				<CartSteps />
 
