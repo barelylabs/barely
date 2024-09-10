@@ -28,7 +28,6 @@ import { getAmountsForCheckout, getFeeAmountForCheckout } from './cart.utils';
 /* get funnel */
 export const funnelWith = {
 	workspace: true,
-	key: true,
 	mainProduct: {
 		with: {
 			_images: {
@@ -60,10 +59,44 @@ export const funnelWith = {
 	},
 } as const;
 
+type FunnelWith = typeof funnelWith;
+
 export async function getFunnelByParams(handle: string, key: string) {
 	const funnel = await dbHttp.query.CartFunnels.findFirst({
 		where: and(eq(CartFunnels.handle, handle), eq(CartFunnels.key, key)),
-		with: funnelWith,
+		with: {
+			workspace: true,
+			// key: true,
+			mainProduct: {
+				with: {
+					_images: {
+						with: {
+							file: true,
+						},
+					},
+				},
+			},
+			bumpProduct: {
+				with: {
+					_images: {
+						with: {
+							file: true,
+						},
+					},
+					_apparelSizes: true,
+				},
+			},
+			upsellProduct: {
+				with: {
+					_images: {
+						with: {
+							file: true,
+						},
+					},
+					_apparelSizes: true,
+				},
+			},
+		} satisfies FunnelWith,
 	});
 
 	if (!funnel) return null;
