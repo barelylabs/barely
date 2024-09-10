@@ -5,7 +5,7 @@ import { and, asc, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 import type { EmailTemplateWithFrom } from '../server/routes/email-template/email-template.schema';
 import type { Fan } from '../server/routes/fan/fan.schema';
 import type { FlowAction } from '../server/routes/flow/flow.schema';
-import { dbHttp } from '../server/db';
+import { dbPool } from '../server/db/pool';
 import { addToMailchimpAudience } from '../server/mailchimp/mailchimp.endpts.audiences';
 import { getAssetsFromMdx } from '../server/mdx/mdx.fns';
 import { Carts } from '../server/routes/cart/cart.sql';
@@ -39,11 +39,14 @@ interface HandleFlowPayload {
 
 export const handleFlow = task({
 	id: 'handle-flow',
+	machine: {
+		preset: 'medium-2x',
+	},
 	run: async (payload: HandleFlowPayload) => {
 		const { triggerId, fanId, cartId } = payload;
 
 		/* find flow */
-		const trigger = await dbHttp.query.Flow_Triggers.findFirst({
+		const trigger = await dbPool.query.Flow_Triggers.findFirst({
 			where: eq(Flow_Triggers.id, triggerId),
 			with: {
 				flow: {
@@ -71,11 +74,11 @@ export const handleFlow = task({
 		if (type === 'newFan') {
 			if (!fanId) return logger.error(`no fan id provided for trigger ${triggerId}`);
 
-			const flowRuns = await dbHttp.query.Flow_Runs.findMany({
+			const flowRuns = await dbPool.query.Flow_Runs.findMany({
 				where: and(eq(Flow_Runs.flowId, flow.id), eq(Flow_Runs.triggerFanId, fanId)),
 			});
 
-			if (flowRuns.length)
+			if (flowRuns.length && flowRuns.every(fr => fr.status === 'completed'))
 				return logger.info(`flow ${flow.id} already ran for fan ${fanId}`);
 
 			// todo: we might want to wait on this one in case a more specific flow runs first
@@ -83,11 +86,11 @@ export const handleFlow = task({
 		} else if (type === 'newCartOrder') {
 			if (!cartId) return logger.error(`no cart id provided for trigger ${triggerId}`);
 
-			const flowRuns = await dbHttp.query.Flow_Runs.findMany({
+			const flowRuns = await dbPool.query.Flow_Runs.findMany({
 				where: and(eq(Flow_Runs.flowId, flow.id), eq(Flow_Runs.triggerCartId, cartId)),
 			});
 
-			if (flowRuns.length)
+			if (flowRuns.length && flowRuns.every(fr => fr.status === 'completed'))
 				return logger.info(`flow ${flow.id} already ran for cart ${cartId}`);
 		}
 
@@ -107,7 +110,7 @@ export const handleFlow = task({
 		const firstAction = firstActionRes.nextAction;
 
 		if (firstAction) {
-			await dbHttp.insert(Flow_Runs).values({
+			await dbPool.insert(Flow_Runs).values({
 				id: flowRunId,
 				flowId: flow.id,
 				triggerId,
@@ -131,7 +134,7 @@ export const handleFlow = task({
 			currentAction = nextAction ? nextAction : null;
 		}
 
-		await dbHttp
+		await dbPool
 			.update(Flow_Runs)
 			.set({ status: 'completed', currentActionNodeId: null })
 			.where(eq(Flow_Runs.id, flowRunId));
@@ -151,7 +154,7 @@ async function getNextAction({
 }): Promise<{
 	nextAction: FlowAction | null;
 }> {
-	const flow = await dbHttp.query.Flows.findFirst({
+	const flow = await dbPool.query.Flows.findFirst({
 		where: eq(Flows.id, flowId),
 		columns: {
 			edges: true,
@@ -257,12 +260,12 @@ async function handleAction({
 }> {
 	const flowRunActionId = newId('flowRunAction');
 
-	await dbHttp
+	await dbPool
 		.update(Flow_Runs)
 		.set({ currentActionNodeId: action.id })
 		.where(eq(Flow_Runs.id, flowRunId));
 
-	await dbHttp.insert(FlowRunActions).values({
+	await dbPool.insert(FlowRunActions).values({
 		id: flowRunActionId,
 		flowId: action.flowId,
 		flowActionId: action.id,
@@ -272,7 +275,7 @@ async function handleAction({
 
 	const fan =
 		fanId ?
-			await dbHttp.query.Fans.findFirst({
+			await dbPool.query.Fans.findFirst({
 				where: eq(Fans.id, fanId),
 			})
 		:	null;
@@ -336,7 +339,7 @@ async function handleAction({
 				: { weeks: waitFor },
 			);
 
-			await dbHttp
+			await dbPool
 				.update(FlowRunActions)
 				.set({ status: 'completed' })
 				.where(eq(FlowRunActions.id, flowRunActionId));
@@ -357,7 +360,7 @@ async function handleAction({
 				};
 			}
 
-			const emailTemplate = await dbHttp.query.EmailTemplates.findFirst({
+			const emailTemplate = await dbPool.query.EmailTemplates.findFirst({
 				where: eq(EmailTemplates.id, action.emailTemplateId),
 				with: {
 					from: {
@@ -403,7 +406,7 @@ async function handleAction({
 				return { nextAction: null };
 			}
 
-			const emailTemplateGroup = await dbHttp.query.EmailTemplateGroups.findFirst({
+			const emailTemplateGroup = await dbPool.query.EmailTemplateGroups.findFirst({
 				where: eq(EmailTemplateGroups.id, action.emailTemplateGroupId),
 				with: {
 					_emailTemplates_To_EmailTemplateGroups: {
@@ -436,7 +439,7 @@ async function handleAction({
 				);
 
 			// check if fan has received any of these email templates
-			const emailDeliveries = await dbHttp.query.EmailDeliveries.findMany({
+			const emailDeliveries = await dbPool.query.EmailDeliveries.findMany({
 				where: and(
 					eq(EmailDeliveries.fanId, fan.id),
 					inArray(
@@ -507,7 +510,7 @@ async function handleAction({
 				raise(`no mailchimp audience id provided for action ${action.id}`);
 
 			const mailchimpAccount =
-				(await dbHttp.query.ProviderAccounts.findFirst({
+				(await dbPool.query.ProviderAccounts.findFirst({
 					where: and(
 						eq(ProviderAccounts.provider, 'mailchimp'),
 						eq(ProviderAccounts.workspaceId, workspaceId),
@@ -534,7 +537,7 @@ async function handleAction({
 					fan,
 				});
 
-				await dbHttp
+				await dbPool
 					.update(FlowRunActions)
 					.set({ status: 'completed', completedAt: new Date() })
 					.where(eq(FlowRunActions.id, flowRunActionId));
@@ -550,7 +553,7 @@ async function handleAction({
 				logger.error(
 					`error adding fan ${fanId} to mailchimp audience ${mailchimpAudienceId}`,
 				);
-				await dbHttp
+				await dbPool
 					.update(FlowRunActions)
 					.set({
 						status: 'failed',
@@ -578,7 +581,7 @@ async function checkBooleanCondition({
 				return 'error';
 			}
 
-			const orders = await dbHttp.query.Carts.findMany({
+			const orders = await dbPool.query.Carts.findMany({
 				where: and(eq(Carts.fanId, fanId), isNotNull(Carts.checkoutConvertedAt)),
 				with: {
 					mainProduct: true,
@@ -611,7 +614,7 @@ async function checkBooleanCondition({
 				return 'error';
 			}
 
-			const orders = await dbHttp.query.Carts.findMany({
+			const orders = await dbPool.query.Carts.findMany({
 				where: sqlAnd([
 					eq(Carts.fanId, fanId),
 					isNotNull(Carts.checkoutConvertedAt),
@@ -637,7 +640,7 @@ async function checkBooleanCondition({
 				return 'error';
 			}
 
-			const result = await dbHttp
+			const result = await dbPool
 				.select({
 					totalAmount: sql<number>`sum(${Carts.orderAmount})`.mapWith(Number),
 				})
@@ -677,7 +680,7 @@ async function handleSendEmailFromTemplateToFan({
 			currentNodeId: action.id,
 		});
 
-		await dbHttp
+		await dbPool
 			.update(FlowRunActions)
 			.set({
 				status: 'skipped',
@@ -726,12 +729,12 @@ async function handleSendEmailFromTemplateToFan({
 		const error = typeof res.error === 'string' ? res.error : res.error.message;
 		logger.error(`error sending email for action ${action.id}: ${error}`);
 
-		await dbHttp
+		await dbPool
 			.update(FlowRunActions)
 			.set({ status: 'failed', error })
 			.where(eq(FlowRunActions.id, flowRunActionId));
 
-		await dbHttp.insert(EmailDeliveries).values({
+		await dbPool.insert(EmailDeliveries).values({
 			id: newId('emailDelivery'),
 			workspaceId: workspaceId,
 			emailTemplateId: emailTemplate.id,
@@ -740,12 +743,12 @@ async function handleSendEmailFromTemplateToFan({
 			sentAt: new Date(),
 		});
 	} else {
-		await dbHttp
+		await dbPool
 			.update(FlowRunActions)
 			.set({ status: 'completed' })
 			.where(eq(FlowRunActions.id, flowRunActionId));
 
-		await dbHttp.insert(EmailDeliveries).values({
+		await dbPool.insert(EmailDeliveries).values({
 			id: newId('emailDelivery'),
 			workspaceId: workspaceId,
 			emailTemplateId: emailTemplate.id,
@@ -754,7 +757,7 @@ async function handleSendEmailFromTemplateToFan({
 			sentAt: new Date(),
 		});
 
-		await dbHttp
+		await dbPool
 			.update(Workspaces)
 			.set({ emailUsage: sqlIncrement(Workspaces.emailUsage) })
 			.where(eq(Workspaces.id, workspaceId));
