@@ -63,7 +63,12 @@ export const LandingPage_Relations = relations(LandingPages, ({ one, many }) => 
 	}),
 	_cartFunnels: many(_LandingPage_To_CartFunnels),
 	_pressKits: many(_LandingPage_To_PressKit),
-	_landingPages: many(_LandingPage_To_LandingPage),
+	_landingPageSources: many(_LandingPage_To_LandingPage, {
+		relationName: 'landingPageSource',
+	}),
+	_landingPageDestinations: many(_LandingPage_To_LandingPage, {
+		relationName: 'landingPageDestination',
+	}),
 	_links: many(_LandingPage_To_Link),
 }));
 
@@ -139,11 +144,13 @@ export const _LandingPage_To_LandingPage_Relations = relations(
 		landingPageSource: one(LandingPages, {
 			fields: [_LandingPage_To_LandingPage.landingPageSourceId],
 			references: [LandingPages.id],
+			relationName: 'landingPageSource',
 		}),
 
 		landingPageDestination: one(LandingPages, {
 			fields: [_LandingPage_To_LandingPage.landingPageDestinationId],
 			references: [LandingPages.id],
+			relationName: 'landingPageDestination',
 		}),
 	}),
 );

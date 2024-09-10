@@ -30,7 +30,7 @@ export async function getLandingPageData({
 					cartFunnel: true,
 				},
 			},
-			_landingPages: {
+			_landingPageDestinations: {
 				with: {
 					landingPageDestination: true,
 				},
@@ -52,7 +52,7 @@ export async function getLandingPageData({
 		return null;
 	}
 
-	const { _cartFunnels, _landingPages, _links, _pressKits, ...lp } = lpRaw;
+	const { _cartFunnels, _landingPageDestinations, _links, _pressKits, ...lp } = lpRaw;
 
 	const cartFunnels: CartFunnel[] = [];
 	const landingPages: LandingPage[] = [];
@@ -69,7 +69,7 @@ export async function getLandingPageData({
 		if (pressKit) pressKits.push(pressKit);
 	});
 
-	_landingPages.map(({ landingPageDestination }) => {
+	_landingPageDestinations.map(({ landingPageDestination }) => {
 		if (landingPageDestination) landingPages.push(landingPageDestination);
 	});
 
