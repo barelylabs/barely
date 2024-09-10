@@ -3,6 +3,7 @@ import { and, eq } from 'drizzle-orm';
 import type { CartFunnel } from '../cart-funnel/cart-funnel.schema';
 import type { Link } from '../link/link.schema';
 import type { PressKit } from '../press-kit/press-kit.schema';
+import type { LandingPage } from './landing-page.schema';
 import { dbHttp } from '../../db';
 import { LandingPages } from './landing-page.sql';
 
@@ -29,6 +30,11 @@ export async function getLandingPageData({
 					cartFunnel: true,
 				},
 			},
+			_landingPages: {
+				with: {
+					landingPageDestination: true,
+				},
+			},
 			_links: {
 				with: {
 					link: true,
@@ -46,9 +52,10 @@ export async function getLandingPageData({
 		return null;
 	}
 
-	const { _cartFunnels, _links, _pressKits, ...lp } = lpRaw;
+	const { _cartFunnels, _landingPages, _links, _pressKits, ...lp } = lpRaw;
 
 	const cartFunnels: CartFunnel[] = [];
+	const landingPages: LandingPage[] = [];
 	const links: Link[] = [];
 	const pressKits: PressKit[] = [];
 
@@ -62,9 +69,14 @@ export async function getLandingPageData({
 		if (pressKit) pressKits.push(pressKit);
 	});
 
+	_landingPages.map(({ landingPageDestination }) => {
+		if (landingPageDestination) landingPages.push(landingPageDestination);
+	});
+
 	return {
 		...lp,
 		cartFunnels,
+		landingPages,
 		links,
 		pressKits,
 	};

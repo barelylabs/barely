@@ -63,6 +63,7 @@ export const LandingPage_Relations = relations(LandingPages, ({ one, many }) => 
 	}),
 	_cartFunnels: many(_LandingPage_To_CartFunnels),
 	_pressKits: many(_LandingPage_To_PressKit),
+	_landingPages: many(_LandingPage_To_LandingPage),
 	_links: many(_LandingPage_To_Link),
 }));
 
@@ -118,6 +119,34 @@ export const _LandingPage_To_PressKit_Relations = relations(
 	}),
 );
 
+// LandingPage Join
+export const _LandingPage_To_LandingPage = pgTable('_LandingPage_To_LandingPage', {
+	landingPageSourceId: dbId('landingPageParentId').references(() => LandingPages.id, {
+		onDelete: 'cascade',
+	}),
+
+	landingPageDestinationId: dbId('landingPageDestinationId').references(
+		() => LandingPages.id,
+		{
+			onDelete: 'cascade',
+		},
+	),
+});
+
+export const _LandingPage_To_LandingPage_Relations = relations(
+	_LandingPage_To_LandingPage,
+	({ one }) => ({
+		landingPageSource: one(LandingPages, {
+			fields: [_LandingPage_To_LandingPage.landingPageSourceId],
+			references: [LandingPages.id],
+		}),
+
+		landingPageDestination: one(LandingPages, {
+			fields: [_LandingPage_To_LandingPage.landingPageDestinationId],
+			references: [LandingPages.id],
+		}),
+	}),
+);
 // Link Join
 export const _LandingPage_To_Link = pgTable('_LandingPage_To_Link', {
 	landingPageId: dbId('landingPageId').references(() => LandingPages.id, {

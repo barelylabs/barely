@@ -27,7 +27,7 @@ export async function checkEmailExists(email: string, db?: Db) {
 }
 
 export function getEmailAddressFromEmailAddress(
-	email: EmailAddress & { domain: EmailDomain },
+	email: Pick<EmailAddress, 'username'> & { domain: EmailDomain },
 ) {
 	return `${email.username}@${email.domain.name}`;
 }

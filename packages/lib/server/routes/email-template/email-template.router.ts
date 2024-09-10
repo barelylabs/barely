@@ -2,6 +2,7 @@ import { sendEmail } from '@barely/email';
 import { and, asc, desc, eq, gt, inArray, lt, or } from 'drizzle-orm';
 import { z } from 'zod';
 
+import { getEmailAddressFromEmailAddress } from '../../../utils/email';
 import { raise } from '../../../utils/raise';
 import { sqlAnd, sqlStringContains } from '../../../utils/sql';
 import {
@@ -9,9 +10,10 @@ import {
 	privateProcedure,
 	workspaceQueryProcedure,
 } from '../../api/trpc';
+import { getAssetsFromMdx } from '../../mdx/mdx.fns';
 import { EmailAddresses } from '../email-address/email-address.sql';
 import { createEmailTemplate, updateEmailTemplate } from './email-template.fns';
-import { renderMarkdownToReactEmail } from './email-template.render';
+import { renderMarkdownToReactEmail } from './email-template.mdx';
 import {
 	createEmailTemplateSchema,
 	selectWorkspaceEmailTemplatesSchema,
@@ -165,12 +167,23 @@ export const emailTemplateRouter = createTRPCRouter({
 				throw new Error('From email address not found');
 			}
 
-			const from = `${fromRes.username}@${fromRes.domain.name}`;
+			const from = getEmailAddressFromEmailAddress(fromRes);
+
+			const { cartFunnels, landingPages, links, pressKits } = await getAssetsFromMdx(
+				input.body,
+			);
 
 			const { subject, reactBody } = await renderMarkdownToReactEmail({
 				subject: input.subject,
 				body: input.body,
 				variables,
+				cartFunnels,
+				landingPages,
+				links,
+				pressKits,
+				// tracking
+				emailTemplateId: '',
+				fanId: '',
 			});
 
 			await sendEmail({
