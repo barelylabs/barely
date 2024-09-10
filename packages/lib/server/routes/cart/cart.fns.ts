@@ -28,6 +28,7 @@ import { getAmountsForCheckout, getFeeAmountForCheckout } from './cart.utils';
 /* get funnel */
 export const funnelWith = {
 	workspace: true,
+	key: true,
 	mainProduct: {
 		with: {
 			_images: {
