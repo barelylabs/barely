@@ -43,13 +43,13 @@ export const cartRouter = createTRPCRouter({
 				// refererId: z.string().nullish(),
 			}),
 		)
-		.mutation(async ({ input, ctx }) => {
+		.mutation(async ({ input }) => {
 			const { handle, key, ...cartParams } = input;
 			const funnel = await getFunnelByParams(handle, key);
 
 			if (!funnel) throw new Error('funnel not found');
 
-			console.log('trpc.cart.create >> visitor', ctx.visitor);
+			// console.log('trpc.cart.create >> visitor', ctx.visitor);
 
 			const cart = await createMainCartFromFunnel({ funnel, ...cartParams });
 
@@ -88,7 +88,7 @@ export const cartRouter = createTRPCRouter({
 		.mutation(async ({ input, ctx }) => {
 			const { id, handle, key, ...update } = input;
 
-			console.log('trpc.cart.updateCheckoutFromCheckout >> visitor', ctx.visitor);
+			// console.log('trpc.cart.updateCheckoutFromCheckout >> visitor', ctx.visitor);
 
 			const cart = await getCartById(id, handle, key);
 			if (!cart) throw new TRPCError({ code: 'NOT_FOUND', message: 'Cart not found' });
@@ -168,7 +168,7 @@ export const cartRouter = createTRPCRouter({
 				...cart,
 				...updateCart,
 			});
-			console.log('updated amounts', amounts);
+			// console.log('updated amounts', amounts);
 
 			const carts = await ctx.db.pool
 				.update(Carts)
@@ -396,7 +396,7 @@ export const cartRouter = createTRPCRouter({
 				cart.orderReceiptSent = true;
 			});
 
-			console.log('updating declined upsell cart', cart);
+			// console.log('updating declined upsell cart', cart);
 
 			await ctx.db.pool.update(Carts).set(cart).where(eq(Carts.id, input.cartId));
 
@@ -434,7 +434,7 @@ export const cartRouter = createTRPCRouter({
 				return;
 			}
 
-			console.log('preparing to record cart event', cart.id, input.event, ctx.visitor);
+			// console.log('preparing to record cart event', cart.id, input.event, ctx.visitor);
 
 			const updateCart: UpdateCart = { id: cart.id };
 
