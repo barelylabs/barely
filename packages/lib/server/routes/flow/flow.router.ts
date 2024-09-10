@@ -274,7 +274,7 @@ export const flowRouter = createTRPCRouter({
 
 			// find a trigger for this flow 🤷‍♂️
 			const trigger = await ctx.db.http.query.Flow_Triggers.findFirst({
-				where: and(eq(Flow_Triggers.flowId, flowId), eq(Flow_Triggers.type, 'callFlow')),
+				where: eq(Flow_Triggers.flowId, flowId),
 			});
 
 			if (!trigger)
