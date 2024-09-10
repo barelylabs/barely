@@ -267,12 +267,13 @@ export const flowRouter = createTRPCRouter({
 			z.object({
 				flowId: z.string(),
 				fanId: z.string(),
+				cartId: z.string().optional(),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const { flowId, fanId } = input;
+			const { flowId, fanId, cartId } = input;
 
-			// find a trigger for this flow 🤷‍♂️
+			// find a trigger for this flow. we'll need to refactor this when we add more triggers 🤷‍♂️
 			const trigger = await ctx.db.http.query.Flow_Triggers.findFirst({
 				where: eq(Flow_Triggers.flowId, flowId),
 			});
@@ -286,6 +287,7 @@ export const flowRouter = createTRPCRouter({
 			await tasks.trigger<typeof handleFlow>('handle-flow', {
 				triggerId: trigger.id,
 				fanId,
+				cartId,
 			});
 		}),
 });

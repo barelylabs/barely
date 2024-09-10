@@ -6,6 +6,7 @@ import { APPAREL_SIZES } from '../product/product.constants';
 export const selectWorkspaceCartOrdersSchema = z.object({
 	handle: z.string(),
 	search: z.string().optional(),
+	fanId: z.string().optional(),
 	showArchived: queryBooleanSchema.optional(),
 	showFulfilled: queryBooleanSchema.optional().default(false),
 	cursor: z
