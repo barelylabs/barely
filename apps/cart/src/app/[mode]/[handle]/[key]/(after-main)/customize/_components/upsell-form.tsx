@@ -26,7 +26,7 @@ export function UpsellForm({ cartId }: { cartId: string }) {
 
 	const { mutate: buyUpsell } = cartApi.buyUpsell.useMutation({
 		onSuccess: res => {
-			router.push(`/${res.handle}/${res.funnelKey}/success`);
+			router.push(`/${res.handle}/${res.key}/success`);
 		},
 	});
 

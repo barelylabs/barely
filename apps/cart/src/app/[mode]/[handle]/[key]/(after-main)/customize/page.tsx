@@ -36,12 +36,6 @@ export default async function UpsellPage({
 		return null;
 	}
 
-	// log a success checkout conversion event >> we do this in the stripe webhook now
-	// await cartApi.logEvent({
-	// 	cartId,
-	// 	event: cart.addedBump ? 'cart_purchaseMainWithBump' : 'cart_purchaseMainWithoutBump',
-	// });
-
 	if (
 		mode === 'live' &&
 		(cart.stage === 'checkoutConverted' ||
@@ -54,7 +48,6 @@ export default async function UpsellPage({
 	const expiresAt =
 		(cart.checkoutConvertedAt ? cart.checkoutConvertedAt.getTime() : Date.now()) +
 		5 * 60 * 1000; // 5 minutes from now
-	// 10 * 1000; // 10 seconds from now
 
 	const normalPrice = publicFunnel.upsellProduct?.price;
 	const price =
