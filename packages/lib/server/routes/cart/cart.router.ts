@@ -216,6 +216,7 @@ export const cartRouter = createTRPCRouter({
 		)
 		.mutation(async ({ input, ctx }) => {
 			let cart = (await getCartById(input.cartId)) ?? raise('cart not found');
+			const funnel = cart.funnel ?? raise('funnel not found');
 
 			// if there is not a fan attached to this cart yet, that means the webhook hasn't fired yet. we need to poll until it does
 			const startTime = Date.now();
@@ -233,13 +234,12 @@ export const cartRouter = createTRPCRouter({
 			/* don't charge the user if they've already converted */
 			if (cart.stage === 'upsellConverted') {
 				return {
-					handle: cart.funnel?.workspace.handle ?? '',
-					funnelKey: cart.funnel?.key ?? '',
+					handle: funnel.workspace.handle,
+					key: funnel.key,
 					paymentStatus: 'succeeded',
 				};
 			}
 
-			const funnel = cart.funnel ?? raise('funnel not found');
 			const upsellProduct = funnel.upsellProduct ?? raise('upsell product not found');
 
 			const fan = cart.fan ?? raise('fan not found to buy upsell');

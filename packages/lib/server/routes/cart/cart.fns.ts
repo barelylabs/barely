@@ -28,6 +28,7 @@ import { getAmountsForCheckout, getFeeAmountForCheckout } from './cart.utils';
 /* get funnel */
 export const funnelWith = {
 	workspace: true,
+	key: true,
 	mainProduct: {
 		with: {
 			_images: {
@@ -213,6 +214,7 @@ export async function getCartById(id: string, handle?: string, funnelKey?: strin
 	});
 
 	if (!cart) return null;
+	if (!cart.funnel) return null;
 	if (handle && cart.workspace.handle !== handle) return null;
 	if (funnelKey && cart.funnel?.key !== funnelKey) return null;
 
