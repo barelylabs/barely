@@ -150,11 +150,6 @@ export async function getShippingEstimates(props: ShippingEstimateProps) {
 	});
 
 	if (response.success && response.parsed) {
-		console.log(
-			'shipping responses',
-			response.data.map(r => r.requested_comparison_amount),
-		);
-
 		const sortedRates = response.data
 			.filter(r => (eligibleForMediaMail ? r : r.service_code !== 'usps_media_mail'))
 			.map(r => {
@@ -170,12 +165,13 @@ export async function getShippingEstimates(props: ShippingEstimateProps) {
 					// convert amounts to cents
 					shipping_amount: {
 						...r.shipping_amount,
-						amount: amountInDollars * 100,
+						amount: Math.ceil(amountInDollars * 100),
 					},
 				};
 			})
 			.sort((a, b) => a.shipping_amount.amount - b.shipping_amount.amount);
 
+		// console.log('sorted rates', sortedRates);
 		return sortedRates.slice(0, limit);
 	}
 

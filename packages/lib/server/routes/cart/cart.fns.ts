@@ -110,6 +110,8 @@ export async function createMainCartFromFunnel({
 		mainProductQuantity: 1,
 	});
 
+	// console.log('createMainCartFromFunnel >> amounts', amounts);
+
 	const metadata: z.infer<typeof stripeConnectChargeMetadataSchema> = {
 		cartId,
 		preChargeCartStage: 'checkoutCreated',
@@ -251,7 +253,7 @@ export async function getProductsShippingRateEstimate(props: {
 		MEDIAMAIL_TYPES.includes(p.product.merchType),
 	);
 
-	console.log('eligibleForMediaMail', eligibleForMediaMail);
+	// console.log('eligibleForMediaMail', eligibleForMediaMail);
 
 	const rates = await getShippingEstimates({
 		shipFrom,
