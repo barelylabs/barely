@@ -1,4 +1,5 @@
 import type { CartFunnel } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
+import type { LandingPage } from '@barely/lib/server/routes/landing-page/landing-page.schema';
 import type { Link } from '@barely/lib/server/routes/link/link.schema';
 import type { PressKit } from '@barely/lib/server/routes/press-kit/press-kit.schema';
 import type { Metadata } from 'next';
@@ -56,7 +57,7 @@ export default async function LandingPage({
 		return <div>Not found</div>;
 	}
 
-	const { cartFunnels, links, pressKits, ...lp } = data;
+	const { cartFunnels, links, pressKits, landingPages, ...lp } = data;
 
 	return (
 		<div className='mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center gap-6 px-4 py-10'>
@@ -71,6 +72,7 @@ export default async function LandingPage({
 						cartFunnels,
 						links,
 						pressKits,
+						landingPages,
 					}),
 					...mdxLinkButton({ landingPageId: lp.id }),
 				}}
@@ -95,11 +97,13 @@ function mdxLinkButton({ landingPageId }: { landingPageId: string }) {
 function mdxAssetButton({
 	landingPageId,
 	cartFunnels,
+	landingPages,
 	links,
 	pressKits,
 }: {
 	landingPageId: string;
 	cartFunnels: CartFunnel[];
+	landingPages: LandingPage[];
 	links: Link[];
 	pressKits: PressKit[];
 }) {
@@ -107,6 +111,7 @@ function mdxAssetButton({
 		const href = getAssetHref({
 			assetId,
 			cartFunnels,
+			landingPages,
 			links,
 			pressKits,
 			refererId: landingPageId,

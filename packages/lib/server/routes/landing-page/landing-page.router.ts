@@ -18,6 +18,7 @@ import {
 } from './landing-page.schema';
 import {
 	_LandingPage_To_CartFunnels,
+	_LandingPage_To_LandingPage,
 	_LandingPage_To_Link,
 	_LandingPage_To_PressKit,
 	LandingPages,
@@ -81,10 +82,11 @@ export const landingPageRouter = createTRPCRouter({
 
 			const landingPage = landingPages[0] ?? raise('Failed to create landing page');
 
-			const { cartFunnelJoins, linkJoins, pressKitJoins } = getLandingPageAssetJoins({
-				content: input.content ?? '',
-				landingPageId: landingPage.id,
-			});
+			const { cartFunnelJoins, linkJoins, pressKitJoins, landingPageJoins } =
+				getLandingPageAssetJoins({
+					content: input.content ?? '',
+					landingPageId: landingPage.id,
+				});
 
 			await Promise.allSettled([
 				cartFunnelJoins.length > 0 ?
@@ -92,6 +94,9 @@ export const landingPageRouter = createTRPCRouter({
 				:	Promise.resolve(),
 				pressKitJoins.length > 0 ?
 					ctx.db.http.insert(_LandingPage_To_PressKit).values(pressKitJoins)
+				:	Promise.resolve(),
+				landingPageJoins.length > 0 ?
+					ctx.db.http.insert(_LandingPage_To_LandingPage).values(landingPageJoins)
 				:	Promise.resolve(),
 				linkJoins.length > 0 ?
 					ctx.db.http.insert(_LandingPage_To_Link).values(linkJoins)
@@ -123,6 +128,8 @@ export const landingPageRouter = createTRPCRouter({
 			const {
 				cartFunnelIds,
 				cartFunnelJoins,
+				landingPageDestinationIds,
+				landingPageJoins,
 				linkIds,
 				linkJoins,
 				pressKitIds,
@@ -159,6 +166,24 @@ export const landingPageRouter = createTRPCRouter({
 							eq(_LandingPage_To_PressKit.landingPageId, input.id),
 							pressKitIds.length ?
 								notInArray(_LandingPage_To_PressKit.pressKitId, pressKitIds)
+							:	undefined,
+						]),
+					),
+
+				// landing pages
+				landingPageJoins.length > 0 ?
+					ctx.db.http.insert(_LandingPage_To_LandingPage).values(landingPageJoins)
+				:	Promise.resolve(),
+				ctx.db.http
+					.delete(_LandingPage_To_LandingPage)
+					.where(
+						sqlAnd([
+							eq(_LandingPage_To_LandingPage.landingPageSourceId, input.id),
+							landingPageDestinationIds.length ?
+								notInArray(
+									_LandingPage_To_LandingPage.landingPageDestinationId,
+									landingPageDestinationIds,
+								)
 							:	undefined,
 						]),
 					),

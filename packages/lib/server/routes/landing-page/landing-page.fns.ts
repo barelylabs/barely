@@ -1,3 +1,5 @@
+import { getAssetIdsFromMdx } from '../../../utils/mdx';
+
 export function getLandingPageAssetJoins({
 	content,
 	landingPageId,
@@ -5,22 +7,17 @@ export function getLandingPageAssetJoins({
 	content: string;
 	landingPageId: string;
 }) {
-	const assetIdRegex = /assetId="([^"]+)"/g;
-	const assetIds = [...content.matchAll(assetIdRegex)]
-		.map(match => match[1])
-		.filter(Boolean) as string[];
-	console.log('assetIds ', assetIds);
-
-	const cartFunnelIds = assetIds.filter(
-		assetId => assetId.startsWith('cart_funnel') || assetId.startsWith('funnel'), //fixme - funnel is a legacy id
-	);
-
-	const pressKitIds = assetIds.filter(assetId => assetId.startsWith('pk'));
-	const linkIds = assetIds.filter(assetId => assetId.startsWith('link'));
+	const { cartFunnelIds, pressKitIds, landingPageDestinationIds, linkIds } =
+		getAssetIdsFromMdx(content);
 
 	const cartFunnelJoins = cartFunnelIds.map(assetId => ({
 		landingPageId,
 		cartFunnelId: assetId,
+	}));
+
+	const landingPageJoins = landingPageDestinationIds.map(assetId => ({
+		landingPageSourceId: landingPageId,
+		landingPageDestinationId: assetId,
 	}));
 
 	const pressKitJoins = pressKitIds.map(assetId => ({
@@ -36,6 +33,8 @@ export function getLandingPageAssetJoins({
 	return {
 		cartFunnelIds,
 		cartFunnelJoins,
+		landingPageDestinationIds,
+		landingPageJoins,
 		linkIds,
 		linkJoins,
 		pressKitIds,

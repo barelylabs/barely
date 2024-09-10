@@ -7,8 +7,9 @@ import type { Fan } from '../server/routes/fan/fan.schema';
 import type { FlowAction } from '../server/routes/flow/flow.schema';
 import { dbHttp } from '../server/db';
 import { addToMailchimpAudience } from '../server/mailchimp/mailchimp.endpts.audiences';
+import { getAssetsFromMdx } from '../server/mdx/mdx.fns';
 import { Carts } from '../server/routes/cart/cart.sql';
-import { renderMarkdownToReactEmail } from '../server/routes/email-template/email-template.render';
+import { renderMarkdownToReactEmail } from '../server/routes/email-template/email-template.mdx';
 import {
 	_EmailTemplates_To_EmailTemplateGroups,
 	EmailDeliveries,
@@ -689,6 +690,10 @@ async function handleSendEmailFromTemplateToFan({
 
 	const { firstName, lastName } = parseFullName(fan.fullName);
 
+	const { cartFunnels, landingPages, links, pressKits } = await getAssetsFromMdx(
+		emailTemplate.body,
+	);
+
 	const { subject, reactBody } = await renderMarkdownToReactEmail({
 		subject: emailTemplate.subject,
 		body: emailTemplate.body,
@@ -696,6 +701,14 @@ async function handleSendEmailFromTemplateToFan({
 			firstName,
 			lastName,
 		},
+		// tracking
+		emailTemplateId: emailTemplate.id,
+		fanId: fan.id,
+		// asets
+		cartFunnels,
+		landingPages,
+		links,
+		pressKits,
 	});
 
 	const res = await sendEmail({
