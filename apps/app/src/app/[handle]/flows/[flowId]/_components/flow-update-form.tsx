@@ -13,6 +13,7 @@ import {
 	getFlowActionFromActionNode,
 	getFlowTriggerFromTriggerNode,
 } from '@barely/lib/server/routes/flow/flow.utils';
+import { formatDate } from '@barely/lib/utils/format-date';
 import { raise } from '@barely/lib/utils/raise';
 import { useShallow } from 'zustand/react/shallow';
 
@@ -35,6 +36,7 @@ export function FlowUpdateForm(props: {
 	initialFlow: Promise<AppRouterOutputs['flow']['byId']>;
 }) {
 	const { toast } = useToast();
+	const { handle } = useWorkspace();
 
 	const initialFlow = use(props.initialFlow);
 	const { nodes, edges } = useFlowStore(useShallow(selector));
@@ -43,9 +45,6 @@ export function FlowUpdateForm(props: {
 		schema: updateFlowAndNodesSchema,
 		values: {
 			...initialFlow.flow,
-			// id: initialFlow.flow.id,
-			// name: initialFlow.flow.name,
-			// description: initialFlow.flow.description,
 			trigger: initialFlow.trigger,
 			actions: initialFlow.actions,
 			edges,
@@ -54,6 +53,31 @@ export function FlowUpdateForm(props: {
 			keepDirtyValues: true,
 		},
 	});
+
+	const { data: fanOptions } = api.fan.byWorkspace.useQuery(
+		{ handle, limit: 20 },
+		{
+			select: data =>
+				data.fans.map(fan => ({
+					label: `${fan.fullName} - ${fan.email}`,
+					value: fan.id,
+				})),
+		},
+	);
+
+	const { data: cartOptions } = api.cartOrder.byWorkspace.useQuery(
+		{ handle, fanId: form.watch('testFanId'), limit: 20 },
+		{
+			enabled: !!form.watch('testFanId'),
+			select: data =>
+				data.cartOrders.map(cart => ({
+					label: `#${cart.orderId} - ${cart.funnel?.name} - ${formatDate(
+						cart.createdAt.toISOString(),
+					)}`,
+					value: cart.id,
+				})),
+		},
+	);
 
 	const { mutateAsync: updateFlow } = api.flow.update.useMutation({
 		onSuccess: () => {
@@ -72,16 +96,10 @@ export function FlowUpdateForm(props: {
 			getFlowTriggerFromTriggerNode(currentTrigger, initialFlow.flow.id);
 
 		const updatedActions: z.infer<typeof updateFlowAndNodesSchema>['actions'] = nodes
-			.filter(
-				node => node.type !== 'trigger',
-				// node.type === 'boolean' ||
-				// node.type === 'empty' ||
-				// node.type === 'sendEmail' ||
-				// node.type === 'wait',
-			)
+			.filter(node => node.type !== 'trigger')
 			.map(action => getFlowActionFromActionNode(action, initialFlow.flow.id));
 
-		console.log('updatedActions', updatedActions);
+		// console.log('updatedActions', updatedActions);
 
 		const updateFlowAndNodesData: z.infer<typeof updateFlowAndNodesSchema> = {
 			...data,
@@ -110,26 +128,25 @@ export function FlowUpdateForm(props: {
 		if (!data.testFanId) return toast('Please select a fan');
 
 		const fan = fanOptions?.find(fan => fan.value === data.testFanId);
+		const cart = cartOptions?.find(cart => cart.value === data.testCartId);
+
+		if (!fan) return toast('Please select a fan');
+
+		if (data.trigger.type === 'newCartOrder') {
+			if (!data.testCartId) return toast('Please select a cart');
+
+			if (!cart) return toast('Please select a cart');
+		}
+
 		window.confirm(
-			`This will initialize a flow run for {${fan?.label}}. Are you sure you want to continue?`,
+			`This will initialize a flow run for {${fan?.label} ${cart ? `- ${cart.label}` : ''}}. Are you sure you want to continue?`,
 		) &&
 			triggerTestFlow({
 				flowId: data.id,
 				fanId: data.testFanId,
+				cartId: data.testCartId,
 			});
 	};
-
-	const { handle } = useWorkspace();
-	const { data: fanOptions } = api.fan.byWorkspace.useQuery(
-		{ handle, limit: 20 },
-		{
-			select: data =>
-				data.fans.map(fan => ({
-					label: `${fan.fullName} - ${fan.email}`,
-					value: fan.id,
-				})),
-		},
-	);
 
 	return (
 		<div className='flex w-full max-w-64 flex-col gap-4'>
@@ -168,6 +185,14 @@ export function FlowUpdateForm(props: {
 										control={form.control}
 										options={fanOptions ?? []}
 									/>
+									{form.watch('testFanId') && (
+										<SelectField
+											label='Select Cart'
+											name='testCartId'
+											control={form.control}
+											options={cartOptions ?? []}
+										/>
+									)}
 									<Button
 										onClick={() => {
 											handleTriggerTestFlow(form.getValues());

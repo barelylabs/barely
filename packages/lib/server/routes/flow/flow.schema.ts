@@ -223,6 +223,7 @@ export const updateFlowAndNodesSchema = updateFlowSchema.extend({
 		}),
 	),
 	testFanId: z.string().optional(),
+	testCartId: z.string().optional(),
 });
 
 // flow runs

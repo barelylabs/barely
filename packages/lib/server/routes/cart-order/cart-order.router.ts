@@ -27,7 +27,7 @@ export const cartOrderRouter = createTRPCRouter({
 	byWorkspace: workspaceQueryProcedure
 		.input(selectWorkspaceCartOrdersSchema)
 		.query(async ({ input, ctx }) => {
-			const { showFulfilled, limit, cursor } = input;
+			const { showFulfilled, fanId, limit, cursor } = input;
 			const orders = await ctx.db.http.query.Carts.findMany({
 				where: sqlAnd([
 					eq(Carts.workspaceId, ctx.workspace.id),
@@ -39,6 +39,7 @@ export const cartOrderRouter = createTRPCRouter({
 						'upsellAbandoned',
 						'upsellDeclined',
 					]),
+					!!fanId && eq(Carts.fanId, fanId),
 					!!cursor &&
 						or(
 							or(
@@ -58,6 +59,12 @@ export const cartOrderRouter = createTRPCRouter({
 					fulfillments: {
 						with: {
 							products: true,
+						},
+					},
+
+					funnel: {
+						columns: {
+							name: true,
 						},
 					},
 				},
