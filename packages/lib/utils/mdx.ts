@@ -14,14 +14,17 @@ export function getAssetHref({
 	// tracking
 	fanId,
 	refererId,
+	fbclid,
 }: {
 	assetId: string;
+	// assets
 	cartFunnels: CartFunnel[];
 	landingPages: LandingPage[];
 	links: Link[];
 	pressKits: PressKit[];
 	fanId?: string;
 	refererId: string;
+	fbclid?: string;
 }): string {
 	let href = '#';
 
@@ -54,6 +57,9 @@ export function getAssetHref({
 	if (fanId) {
 		url.searchParams.set('fanId', fanId);
 	}
+	if (fbclid) {
+		url.searchParams.set('fbclid', fbclid);
+	}
 	return url.toString();
 }
 
@@ -61,10 +67,12 @@ export function getLinkHref({
 	href,
 	refererId,
 	fanId,
+	fbclid,
 }: {
 	href: string;
 	refererId: string;
 	fanId?: string;
+	fbclid?: string;
 }): string {
 	const url = new URL(href);
 	if (refererId) {
@@ -72,6 +80,9 @@ export function getLinkHref({
 	}
 	if (fanId) {
 		url.searchParams.set('fanId', fanId);
+	}
+	if (fbclid) {
+		url.searchParams.set('fbclid', fbclid);
 	}
 	return url.toString();
 }
