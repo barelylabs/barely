@@ -124,6 +124,7 @@ export const handleFlow = task({
 		let currentAction: FlowAction | null = firstActionRes.nextAction;
 
 		while (currentAction) {
+			logger.info('currentAction', currentAction);
 			const { nextAction } = await handleAction({
 				action: currentAction,
 				workspaceId,
