@@ -82,7 +82,7 @@ export const emailTemplateGroupRouter = createTRPCRouter({
 					eq(EmailTemplateGroups.workspaceId, ctx.workspace.id),
 				),
 				with: {
-					_emailTemplates_To_EmailTemplateGroups: {
+					_templates_To_Groups: {
 						with: {
 							emailTemplate: {
 								columns: {
@@ -103,9 +103,9 @@ export const emailTemplateGroupRouter = createTRPCRouter({
 
 			return {
 				...emailTemplateGroup,
-				emailTemplates: emailTemplateGroup._emailTemplates_To_EmailTemplateGroups.map(
-					et => ({ ...et.emailTemplate }),
-				),
+				emailTemplates: emailTemplateGroup._templates_To_Groups.map(et => ({
+					...et.emailTemplate,
+				})),
 			};
 		}),
 
