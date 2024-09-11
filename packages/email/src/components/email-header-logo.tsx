@@ -1,20 +1,20 @@
 import * as React from 'react';
 import { Img } from '@react-email/components';
 
-export function getBaseUrl(devPort?: string) {
-	if (typeof window !== 'undefined') {
-		return ''; // browser should use relative url
-	}
+// export function getBaseUrl(devPort?: string) {
+// 	if (typeof window !== 'undefined') {
+// 		return ''; // browser should use relative url
+// 	}
 
-	if (process.env.VERCEL_ENV === 'production' || process.env.VERCEL_ENV === 'preview') {
-		if (!process.env.VERCEL_URL) throw new Error('VERCEL_URL not found');
-		return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
-	}
+// 	if (process.env.VERCEL_ENV === 'production' || process.env.VERCEL_ENV === 'preview') {
+// 		if (!process.env.VERCEL_URL) throw new Error('VERCEL_URL not found');
+// 		return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
+// 	}
 
-	if (!devPort) console.error('devPort not found for base url');
+// 	if (!devPort) console.error('devPort not found for base url');
 
-	return `http://localhost:${devPort ?? ''}`; // dev SSR should use localhost
-}
+// 	return `http://localhost:${devPort ?? ''}`; // dev SSR should use localhost
+// }
 
 const EmailHeaderLogo = () => {
 	return (

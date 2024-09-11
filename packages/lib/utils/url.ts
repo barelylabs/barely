@@ -55,11 +55,6 @@ export function getBaseUrl(app: (typeof apps)[number], absolute = false) {
 		return `https://${app === 'app' ? '127.0.0.1' : 'localhost'}:${devPort}`; // dev SSR should use localhost
 	}
 
-	const vercelUrl =
-		process.env.VERCEL_URL ??
-		process.env.NEXT_PUBLIC_VERCEL_URL ??
-		raise('getBaseUrl :: VERCEL_URL not found');
-
 	let baseUrl;
 	switch (app) {
 		case 'app':
@@ -90,6 +85,10 @@ export function getBaseUrl(app: (typeof apps)[number], absolute = false) {
 			raise('Invalid app');
 	}
 	if (vercelEnv === 'preview') {
+		const vercelUrl =
+			process.env.VERCEL_URL ??
+			process.env.NEXT_PUBLIC_VERCEL_URL ??
+			raise('getBaseUrl :: VERCEL_URL not found'); // this will need to be manually synced in trigger.dev staging env
 		const previewBaseUrl = app === currentApp ? vercelUrl : baseUrl;
 		return `https://${previewBaseUrl}`; // SSR should use vercel url
 	}
