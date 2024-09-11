@@ -77,7 +77,7 @@ export const emailTemplateRouter = createTRPCRouter({
 			const emailTemplateGroup = await ctx.db.http.query.EmailTemplateGroups.findFirst({
 				where: eq(EmailTemplateGroups.id, emailTemplateGroupId),
 				with: {
-					_emailTemplates_To_EmailTemplateGroups: {
+					_templates_To_Groups: {
 						with: {
 							emailTemplate: true,
 						},
@@ -90,7 +90,7 @@ export const emailTemplateRouter = createTRPCRouter({
 			}
 
 			return {
-				emailTemplates: emailTemplateGroup._emailTemplates_To_EmailTemplateGroups.map(
+				emailTemplates: emailTemplateGroup._templates_To_Groups.map(
 					_et => _et.emailTemplate,
 				),
 				emailTemplateGroup,
