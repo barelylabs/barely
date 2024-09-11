@@ -12,18 +12,26 @@ export async function getAssetsFromMdx(content: string) {
 
 	const [cartFunnelsResult, pressKitsResult, landingPagesResult, linksResult] =
 		await Promise.allSettled([
-			dbHttp.query.CartFunnels.findMany({
-				where: inArray(CartFunnels.id, assetIds.cartFunnelIds),
-			}),
-			dbHttp.query.PressKits.findMany({
-				where: inArray(PressKits.id, assetIds.pressKitIds),
-			}),
-			dbHttp.query.LandingPages.findMany({
-				where: inArray(LandingPages.id, assetIds.landingPageDestinationIds),
-			}),
-			dbHttp.query.Links.findMany({
-				where: inArray(Links.id, assetIds.linkIds),
-			}),
+			assetIds.cartFunnelIds.length ?
+				dbHttp.query.CartFunnels.findMany({
+					where: inArray(CartFunnels.id, assetIds.cartFunnelIds),
+				})
+			:	Promise.resolve([]),
+			assetIds.pressKitIds.length ?
+				dbHttp.query.PressKits.findMany({
+					where: inArray(PressKits.id, assetIds.pressKitIds),
+				})
+			:	Promise.resolve([]),
+			assetIds.landingPageDestinationIds.length ?
+				dbHttp.query.LandingPages.findMany({
+					where: inArray(LandingPages.id, assetIds.landingPageDestinationIds),
+				})
+			:	Promise.resolve([]),
+			assetIds.linkIds.length ?
+				dbHttp.query.Links.findMany({
+					where: inArray(Links.id, assetIds.linkIds),
+				})
+			:	Promise.resolve([]),
 		]);
 
 	const cartFunnels =

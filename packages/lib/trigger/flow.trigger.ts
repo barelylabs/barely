@@ -1,11 +1,17 @@
 import { sendEmail } from '@barely/email';
+import { neonConfig, Pool } from '@neondatabase/serverless';
 import { logger, task, wait } from '@trigger.dev/sdk/v3';
 import { and, asc, eq, inArray, isNotNull, sql } from 'drizzle-orm';
+import { drizzle } from 'drizzle-orm/neon-serverless';
+import ws from 'ws';
 
+import type { DbPool } from '../server/db/pool';
 import type { EmailTemplateWithFrom } from '../server/routes/email-template/email-template.schema';
 import type { Fan } from '../server/routes/fan/fan.schema';
 import type { FlowAction } from '../server/routes/flow/flow.schema';
-import { dbPool } from '../server/db/pool';
+import { env } from '../env';
+import { dbSchema } from '../server/db';
+// import { dbPool } from '../server/db/pool';
 import { addToMailchimpAudience } from '../server/mailchimp/mailchimp.endpts.audiences';
 import { getAssetsFromMdx } from '../server/mdx/mdx.fns';
 import { Carts } from '../server/routes/cart/cart.sql';
@@ -31,6 +37,33 @@ import { parseFullName } from '../utils/name';
 import { raise } from '../utils/raise';
 import { sqlAnd, sqlIncrement } from '../utils/sql';
 
+neonConfig.webSocketConstructor = ws;
+
+let pool: Pool | null = null;
+let dbPool: DbPool | null = null;
+
+const getPool = () => {
+	if (!pool) {
+		pool = new Pool({ connectionString: env.DATABASE_POOL_URL });
+	}
+	return pool;
+};
+
+const getDbPool = () => {
+	if (!dbPool) {
+		dbPool = drizzle(getPool(), { schema: dbSchema });
+	}
+	return dbPool;
+};
+
+const cleanUpDbPool = async () => {
+	if (pool) {
+		await pool.end();
+	}
+	pool = null;
+	dbPool = null;
+};
+
 interface HandleFlowPayload {
 	triggerId: string;
 	fanId?: string;
@@ -46,7 +79,7 @@ export const handleFlow = task({
 		const { triggerId, fanId, cartId } = payload;
 
 		/* find flow */
-		const trigger = await dbPool.query.Flow_Triggers.findFirst({
+		const trigger = await getDbPool().query.Flow_Triggers.findFirst({
 			where: eq(Flow_Triggers.id, triggerId),
 			with: {
 				flow: {
@@ -74,7 +107,7 @@ export const handleFlow = task({
 		if (type === 'newFan') {
 			if (!fanId) return logger.error(`no fan id provided for trigger ${triggerId}`);
 
-			const flowRuns = await dbPool.query.Flow_Runs.findMany({
+			const flowRuns = await getDbPool().query.Flow_Runs.findMany({
 				where: and(eq(Flow_Runs.flowId, flow.id), eq(Flow_Runs.triggerFanId, fanId)),
 			});
 
@@ -86,7 +119,7 @@ export const handleFlow = task({
 		} else if (type === 'newCartOrder') {
 			if (!cartId) return logger.error(`no cart id provided for trigger ${triggerId}`);
 
-			const flowRuns = await dbPool.query.Flow_Runs.findMany({
+			const flowRuns = await getDbPool().query.Flow_Runs.findMany({
 				where: and(eq(Flow_Runs.flowId, flow.id), eq(Flow_Runs.triggerCartId, cartId)),
 			});
 
@@ -110,7 +143,7 @@ export const handleFlow = task({
 		const firstAction = firstActionRes.nextAction;
 
 		if (firstAction) {
-			await dbPool.insert(Flow_Runs).values({
+			await getDbPool().insert(Flow_Runs).values({
 				id: flowRunId,
 				flowId: flow.id,
 				triggerId,
@@ -135,7 +168,7 @@ export const handleFlow = task({
 			currentAction = nextAction ? nextAction : null;
 		}
 
-		await dbPool
+		await getDbPool()
 			.update(Flow_Runs)
 			.set({ status: 'completed', currentActionNodeId: null })
 			.where(eq(Flow_Runs.id, flowRunId));
@@ -148,14 +181,16 @@ async function getNextAction({
 	flowId,
 	currentNodeId,
 	booleanCondition,
+	// dbPool,
 }: {
 	flowId: string;
 	currentNodeId: string;
 	booleanCondition?: boolean;
+	// dbPool: DbPool;
 }): Promise<{
 	nextAction: FlowAction | null;
 }> {
-	const flow = await dbPool.query.Flows.findFirst({
+	const flow = await getDbPool().query.Flows.findFirst({
 		where: eq(Flows.id, flowId),
 		columns: {
 			edges: true,
@@ -251,22 +286,25 @@ async function handleAction({
 	flowRunId,
 	fanId,
 	workspaceId,
+	// dbPool,
 }: {
 	action: FlowAction;
 	flowRunId: string;
 	workspaceId: string;
 	fanId?: string;
+	// dbPool: DbPool;
 }): Promise<{
 	nextAction: FlowAction | null;
+	// dbPool: DbPool;
 }> {
 	const flowRunActionId = newId('flowRunAction');
 
-	await dbPool
+	await getDbPool()
 		.update(Flow_Runs)
 		.set({ currentActionNodeId: action.id })
 		.where(eq(Flow_Runs.id, flowRunId));
 
-	await dbPool.insert(FlowRunActions).values({
+	await getDbPool().insert(FlowRunActions).values({
 		id: flowRunActionId,
 		flowId: action.flowId,
 		flowActionId: action.id,
@@ -276,7 +314,7 @@ async function handleAction({
 
 	const fan =
 		fanId ?
-			await dbPool.query.Fans.findFirst({
+			await getDbPool().query.Fans.findFirst({
 				where: eq(Fans.id, fanId),
 			})
 		:	null;
@@ -287,6 +325,7 @@ async function handleAction({
 		const { nextAction } = await getNextAction({
 			flowId: action.flowId,
 			currentNodeId: action.id,
+			// dbPool,
 		});
 
 		return { nextAction };
@@ -317,6 +356,7 @@ async function handleAction({
 				flowId: action.flowId,
 				currentNodeId: action.id,
 				booleanCondition,
+				// dbPool,
 			});
 
 			return { nextAction };
@@ -333,6 +373,11 @@ async function handleAction({
 				};
 			}
 
+			const shouldClosePool = true;
+			if (shouldClosePool) {
+				await cleanUpDbPool();
+			}
+
 			await wait.for(
 				units === 'minutes' ? { minutes: waitFor }
 				: units === 'hours' ? { hours: waitFor }
@@ -340,7 +385,7 @@ async function handleAction({
 				: { weeks: waitFor },
 			);
 
-			await dbPool
+			await getDbPool()
 				.update(FlowRunActions)
 				.set({ status: 'completed' })
 				.where(eq(FlowRunActions.id, flowRunActionId));
@@ -361,7 +406,7 @@ async function handleAction({
 				};
 			}
 
-			const emailTemplate = await dbPool.query.EmailTemplates.findFirst({
+			const emailTemplate = await getDbPool().query.EmailTemplates.findFirst({
 				where: eq(EmailTemplates.id, action.emailTemplateId),
 				with: {
 					from: {
@@ -407,10 +452,10 @@ async function handleAction({
 				return { nextAction: null };
 			}
 
-			const emailTemplateGroup = await dbPool.query.EmailTemplateGroups.findFirst({
+			const emailTemplateGroup = await getDbPool().query.EmailTemplateGroups.findFirst({
 				where: eq(EmailTemplateGroups.id, action.emailTemplateGroupId),
 				with: {
-					_emailTemplates_To_EmailTemplateGroups: {
+					_templates_To_Groups: {
 						with: {
 							emailTemplate: {
 								with: {
@@ -434,13 +479,12 @@ async function handleAction({
 				return { nextAction: null };
 			}
 
-			const emailTemplates =
-				emailTemplateGroup._emailTemplates_To_EmailTemplateGroups.map(
-					ets => ets.emailTemplate,
-				);
+			const emailTemplates = emailTemplateGroup._templates_To_Groups.map(
+				ets => ets.emailTemplate,
+			);
 
 			// check if fan has received any of these email templates
-			const emailDeliveries = await dbPool.query.EmailDeliveries.findMany({
+			const emailDeliveries = await getDbPool().query.EmailDeliveries.findMany({
 				where: and(
 					eq(EmailDeliveries.fanId, fan.id),
 					inArray(
@@ -511,7 +555,7 @@ async function handleAction({
 				raise(`no mailchimp audience id provided for action ${action.id}`);
 
 			const mailchimpAccount =
-				(await dbPool.query.ProviderAccounts.findFirst({
+				(await getDbPool().query.ProviderAccounts.findFirst({
 					where: and(
 						eq(ProviderAccounts.provider, 'mailchimp'),
 						eq(ProviderAccounts.workspaceId, workspaceId),
@@ -538,7 +582,7 @@ async function handleAction({
 					fan,
 				});
 
-				await dbPool
+				await getDbPool()
 					.update(FlowRunActions)
 					.set({ status: 'completed', completedAt: new Date() })
 					.where(eq(FlowRunActions.id, flowRunActionId));
@@ -554,7 +598,7 @@ async function handleAction({
 				logger.error(
 					`error adding fan ${fanId} to mailchimp audience ${mailchimpAudienceId}`,
 				);
-				await dbPool
+				await getDbPool()
 					.update(FlowRunActions)
 					.set({
 						status: 'failed',
@@ -582,7 +626,7 @@ async function checkBooleanCondition({
 				return 'error';
 			}
 
-			const orders = await dbPool.query.Carts.findMany({
+			const orders = await getDbPool().query.Carts.findMany({
 				where: and(eq(Carts.fanId, fanId), isNotNull(Carts.checkoutConvertedAt)),
 				with: {
 					mainProduct: true,
@@ -615,7 +659,7 @@ async function checkBooleanCondition({
 				return 'error';
 			}
 
-			const orders = await dbPool.query.Carts.findMany({
+			const orders = await getDbPool().query.Carts.findMany({
 				where: sqlAnd([
 					eq(Carts.fanId, fanId),
 					isNotNull(Carts.checkoutConvertedAt),
@@ -641,7 +685,7 @@ async function checkBooleanCondition({
 				return 'error';
 			}
 
-			const result = await dbPool
+			const result = await getDbPool()
 				.select({
 					totalAmount: sql<number>`sum(${Carts.orderAmount})`.mapWith(Number),
 				})
@@ -681,7 +725,7 @@ async function handleSendEmailFromTemplateToFan({
 			currentNodeId: action.id,
 		});
 
-		await dbPool
+		await getDbPool()
 			.update(FlowRunActions)
 			.set({
 				status: 'skipped',
@@ -730,35 +774,39 @@ async function handleSendEmailFromTemplateToFan({
 		const error = typeof res.error === 'string' ? res.error : res.error.message;
 		logger.error(`error sending email for action ${action.id}: ${error}`);
 
-		await dbPool
+		await getDbPool()
 			.update(FlowRunActions)
 			.set({ status: 'failed', error })
 			.where(eq(FlowRunActions.id, flowRunActionId));
 
-		await dbPool.insert(EmailDeliveries).values({
-			id: newId('emailDelivery'),
-			workspaceId: workspaceId,
-			emailTemplateId: emailTemplate.id,
-			fanId: fan.id,
-			status: 'failed',
-			sentAt: new Date(),
-		});
+		await getDbPool()
+			.insert(EmailDeliveries)
+			.values({
+				id: newId('emailDelivery'),
+				workspaceId: workspaceId,
+				emailTemplateId: emailTemplate.id,
+				fanId: fan.id,
+				status: 'failed',
+				sentAt: new Date(),
+			});
 	} else {
-		await dbPool
+		await getDbPool()
 			.update(FlowRunActions)
 			.set({ status: 'completed' })
 			.where(eq(FlowRunActions.id, flowRunActionId));
 
-		await dbPool.insert(EmailDeliveries).values({
-			id: newId('emailDelivery'),
-			workspaceId: workspaceId,
-			emailTemplateId: emailTemplate.id,
-			fanId: fan.id,
-			status: 'sent',
-			sentAt: new Date(),
-		});
+		await getDbPool()
+			.insert(EmailDeliveries)
+			.values({
+				id: newId('emailDelivery'),
+				workspaceId: workspaceId,
+				emailTemplateId: emailTemplate.id,
+				fanId: fan.id,
+				status: 'sent',
+				sentAt: new Date(),
+			});
 
-		await dbPool
+		await getDbPool()
 			.update(Workspaces)
 			.set({ emailUsage: sqlIncrement(Workspaces.emailUsage) })
 			.where(eq(Workspaces.id, workspaceId));

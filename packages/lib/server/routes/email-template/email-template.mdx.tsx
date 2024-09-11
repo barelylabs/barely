@@ -38,8 +38,8 @@ export async function renderMarkdownToReactEmail(props: {
 		links,
 		pressKits,
 	} = props;
-
-	console.log('body', body);
+	//
+	// console.log('body', body);
 	// Replace variables with values or empty string if not found
 	const subjectWithVars = subject
 		.replaceAll('{firstName}', variables.firstName)
@@ -49,7 +49,7 @@ export async function renderMarkdownToReactEmail(props: {
 		.replaceAll('\\{firstName}', variables.firstName)
 		.replaceAll('\\{lastName}', variables.lastName);
 
-	console.log('bodyWithVars', bodyWithVars);
+	// console.log('bodyWithVars', bodyWithVars);
 
 	const components: MDXRemoteProps['components'] = {
 		p: ({ children }: { children?: ReactNode }) => <Text>{children}</Text>,
