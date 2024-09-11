@@ -55,7 +55,9 @@ export const EmailTemplateRelations = relations(EmailTemplates, ({ one, many }) 
 		references: [Workspaces.id],
 	}),
 	deliveries: many(EmailDeliveries),
-	_emailTemplates_To_EmailTemplateGroups: many(_EmailTemplates_To_EmailTemplateGroups),
+	_emailTemplates_To_TemplateGroups: many(_EmailTemplates_To_EmailTemplateGroups, {
+		relationName: 'template',
+	}),
 }));
 
 /* Email Template Tags */
@@ -115,7 +117,9 @@ export const EmailTemplateGroupRelations = relations(
 			fields: [EmailTemplateGroups.workspaceId],
 			references: [Workspaces.id],
 		}),
-		_emailTemplates_To_EmailTemplateGroups: many(_EmailTemplates_To_EmailTemplateGroups),
+		_templates_To_Groups: many(_EmailTemplates_To_EmailTemplateGroups, {
+			relationName: 'templateGroup',
+		}),
 	}),
 );
 
@@ -131,7 +135,6 @@ export const _EmailTemplates_To_EmailTemplateGroups = pgTable(
 			.notNull()
 			.references(() => EmailTemplates.id),
 		index: integer('index').notNull(),
-		// lexorank: text('lexorank').notNull(),
 	},
 	table => ({
 		pk: primaryKey({
@@ -147,10 +150,12 @@ export const _EmailTemplates_To_EmailTemplateGroupsRelations = relations(
 		emailTemplateGroup: one(EmailTemplateGroups, {
 			fields: [_EmailTemplates_To_EmailTemplateGroups.emailTemplateGroupId],
 			references: [EmailTemplateGroups.id],
+			relationName: 'templateGroup',
 		}),
 		emailTemplate: one(EmailTemplates, {
 			fields: [_EmailTemplates_To_EmailTemplateGroups.emailTemplateId],
 			references: [EmailTemplates.id],
+			relationName: 'template',
 		}),
 	}),
 );
