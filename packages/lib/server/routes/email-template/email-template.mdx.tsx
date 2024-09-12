@@ -12,9 +12,17 @@ import type { PressKit } from '../press-kit/press-kit.schema';
 import type { EmailTemplateVariableName } from './email-template.constants';
 import { getAssetHref, getLinkHref } from '../../../utils/mdx';
 
-// todo - style the email link && asset buttons!
-
-export async function renderMarkdownToReactEmail(props: {
+export async function renderMarkdownToReactEmail({
+	subject,
+	body,
+	variables,
+	fanId,
+	emailTemplateId,
+	cartFunnels,
+	landingPages,
+	links,
+	pressKits,
+}: {
 	subject: string;
 	body: string;
 	variables: Record<EmailTemplateVariableName, string>;
@@ -27,19 +35,6 @@ export async function renderMarkdownToReactEmail(props: {
 	links: Link[];
 	pressKits: PressKit[];
 }) {
-	const {
-		subject,
-		body,
-		variables,
-		fanId,
-		emailTemplateId,
-		cartFunnels,
-		landingPages,
-		links,
-		pressKits,
-	} = props;
-	//
-	// console.log('body', body);
 	// Replace variables with values or empty string if not found
 	const subjectWithVars = subject
 		.replaceAll('{firstName}', variables.firstName)
@@ -49,8 +44,6 @@ export async function renderMarkdownToReactEmail(props: {
 		.replaceAll('\\{firstName}', variables.firstName)
 		.replaceAll('\\{lastName}', variables.lastName);
 
-	// console.log('bodyWithVars', bodyWithVars);
-
 	const components: MDXRemoteProps['components'] = {
 		p: ({ children }: { children?: ReactNode }) => <Text>{children}</Text>,
 		h1: ({ children }: { children?: ReactNode }) => <Heading as='h1'>{children}</Heading>,
@@ -59,9 +52,8 @@ export async function renderMarkdownToReactEmail(props: {
 		h4: ({ children }: { children?: ReactNode }) => <Heading as='h4'>{children}</Heading>,
 		h5: ({ children }: { children?: ReactNode }) => <Heading as='h5'>{children}</Heading>,
 		h6: ({ children }: { children?: ReactNode }) => <Heading as='h6'>{children}</Heading>,
-		a: ({ href, children }: { href?: string; children?: ReactNode }) => (
-			<EmailLink href={href ?? ''}>{children}</EmailLink>
-		),
+
+		...mdxEmailLink({ fanId, emailTemplateId }),
 		...mdxLinkButton({ fanId, emailTemplateId }),
 		...mdxEmailAssetButton({
 			fanId,
@@ -71,16 +63,8 @@ export async function renderMarkdownToReactEmail(props: {
 			links,
 			pressKits,
 		}),
-
-		// LinkButton: ({ href, label }: { href: string; label: string }) => (
-		// 	<Button href={href}>{label}</Button>
-		// ),
-		// EmailAssetButton: ({ assetId, label }: { assetId: string; label: string }) => (
-		// 	<Button href={href}>{label}</Button>
-		// ),
 	};
 
-	// const mdxSource = await serialize(bodyWithVars);
 	const awaitedBody = await MDXRemote({
 		source: bodyWithVars,
 		components,
@@ -92,6 +76,23 @@ export async function renderMarkdownToReactEmail(props: {
 	};
 }
 
+function mdxEmailLink({
+	fanId,
+	emailTemplateId,
+}: {
+	fanId: string;
+	emailTemplateId: string;
+}) {
+	const MdxEmailLink = ({ href, children }: { href?: string; children?: ReactNode }) => {
+		const hrefWithQueryParams =
+			href ? getLinkHref({ href, fanId, refererId: emailTemplateId }) : '';
+		return <EmailLink href={hrefWithQueryParams}>{children}</EmailLink>;
+	};
+
+	return {
+		a: MdxEmailLink,
+	};
+}
 function mdxLinkButton({
 	fanId,
 	emailTemplateId,
