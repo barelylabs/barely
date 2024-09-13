@@ -55,6 +55,7 @@ export const cartPageSearchParams = insertCartSchema
 	})
 	.partial()
 	.extend({
+		fbclid: z.string().optional(),
 		warmup: z.coerce.boolean().optional(),
 	});
 
