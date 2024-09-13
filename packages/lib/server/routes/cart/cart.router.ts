@@ -40,7 +40,6 @@ export const cartRouter = createTRPCRouter({
 					})
 					.optional(),
 				landingPageId: z.string().nullish(),
-				// refererId: z.string().nullish(),
 			}),
 		)
 		.mutation(async ({ input }) => {
@@ -48,8 +47,6 @@ export const cartRouter = createTRPCRouter({
 			const funnel = await getFunnelByParams(handle, key);
 
 			if (!funnel) throw new Error('funnel not found');
-
-			// console.log('trpc.cart.create >> visitor', ctx.visitor);
 
 			const cart = await createMainCartFromFunnel({ funnel, ...cartParams });
 
@@ -433,8 +430,6 @@ export const cartRouter = createTRPCRouter({
 				);
 				return;
 			}
-
-			// console.log('preparing to record cart event', cart.id, input.event, ctx.visitor);
 
 			const updateCart: UpdateCart = { id: cart.id };
 

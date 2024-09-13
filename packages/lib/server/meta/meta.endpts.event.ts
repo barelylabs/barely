@@ -105,6 +105,9 @@ export interface MetaEventProps {
 
 	// event data (specific to event)
 	events: MetaEvent[];
+
+	// tracking data
+	fbclid: string | null;
 }
 
 export async function reportEventsToMeta(props: MetaEventProps) {
@@ -112,7 +115,7 @@ export async function reportEventsToMeta(props: MetaEventProps) {
 	const { pixelId, accessToken, sourceUrl, events } = props;
 
 	const urlObject = new URL(sourceUrl);
-	const fbclid = urlObject.searchParams.get('fbclid');
+	const fbclid = props.fbclid ?? urlObject.searchParams.get('fbclid');
 
 	const unixTimeSinceEpoch_ms = Math.floor(time ?? Date.now()); // unix timestamp in ms
 	const unixTimeSinceEpoch_s = Math.floor(unixTimeSinceEpoch_ms / 1000); // unix timestamp in seconds

@@ -36,6 +36,8 @@ export default async function CartPage({
 	}
 
 	const cartId = cookies().get(`${handle}.${key}.cartId`)?.value;
+	const fbclid =
+		searchParams.fbclid ?? cookies().get(`${handle}.${key}.fbclid`)?.value ?? null;
 
 	//  estimate shipTo from IP
 	const headersList = headers();
@@ -71,17 +73,9 @@ export default async function CartPage({
 					mode={mode}
 					initialData={initialData}
 					shouldWriteToCookie={!cartId}
+					fbclid={fbclid}
 				/>
 			</ElementsProvider>
 		</>
 	);
 }
-
-// function LoadingSkeleton() {
-// 	return (
-// 		<div className='grid min-h-svh grid-cols-1 gap-4 sm:grid-cols-[5fr_4fr]'>
-// 			<div className='flex w-full flex-grow flex-col items-center bg-background p-8 sm:items-end sm:p-12'></div>
-// 			<div className='flex w-full flex-col bg-brand p-8 sm:min-h-svh sm:p-12'></div>
-// 		</div>
-// 	);
-// }

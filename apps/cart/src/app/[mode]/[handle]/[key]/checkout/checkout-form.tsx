@@ -43,12 +43,14 @@ export function CheckoutForm({
 	mode,
 	initialData,
 	shouldWriteToCookie,
+	fbclid,
 }: {
 	mode: 'preview' | 'live';
 	initialData:
 		| NonNullable<CartRouterOutputs['create']>
 		| NonNullable<CartRouterOutputs['byIdAndParams']>;
 	shouldWriteToCookie?: boolean;
+	fbclid: string | null;
 }) {
 	const router = useRouter();
 	const { cart: initialCart, publicFunnel: initialFunnel } = initialData;
@@ -59,8 +61,9 @@ export function CheckoutForm({
 		if (logEvent && shouldWriteToCookie && initialCart.id) {
 			setCartCookie({
 				handle: initialFunnel.handle,
-				funnelKey: initialFunnel.key,
+				key: initialFunnel.key,
 				cartId: initialCart.id,
+				fbclid,
 			}).catch(console.error);
 
 			logEvent({
@@ -69,6 +72,7 @@ export function CheckoutForm({
 			});
 		}
 	}, [
+		fbclid,
 		initialCart.id,
 		initialFunnel.handle,
 		initialFunnel.key,

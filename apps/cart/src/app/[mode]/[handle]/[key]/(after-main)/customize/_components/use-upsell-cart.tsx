@@ -6,14 +6,13 @@ import { cartApi } from '@barely/lib/server/routes/cart/cart.api.react';
 
 export function useUpsellCart({
 	mode,
-	// handle,
-	// key,
 	cartId,
 }: {
 	mode: 'preview' | 'live';
+	cartId: string;
+	//
 	handle: string;
 	key: string;
-	cartId: string;
 }) {
 	const [converting, setConverting] = useState(false);
 	const [declining, setDeclining] = useState(false);

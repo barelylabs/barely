@@ -1,4 +1,5 @@
 import type { z } from 'zod';
+import { cookies } from 'next/headers';
 import { eq } from 'drizzle-orm';
 
 import type { VisitorInfo } from '../../../utils/middleware';
@@ -109,12 +110,16 @@ export async function recordLinkClick({
 		message: `metaPixel => ${metaPixel?.id}`,
 	});
 
+	const fbclid = new URL(href).searchParams.get('fbclid');
+	const sourceUrl = href; // this is being logged directly from middleware, so href is the sourceUrl
+
 	const metaRes =
 		metaPixel?.accessToken ?
 			await reportEventsToMeta({
 				pixelId: metaPixel.id,
 				accessToken: metaPixel.accessToken,
-				sourceUrl: href, // this is being logged directly from middleware, so href is the sourceUrl
+				sourceUrl,
+				fbclid,
 				ip,
 				ua: ua.ua,
 				geo,
@@ -268,16 +273,24 @@ export async function recordCartEvent({
 		funnel: cartFunnel,
 		eventType: type,
 	});
+
+	const sourceUrl = visitorInfo.referer_url ?? ''; // this is an api route, so we want the source of the api call
+
+	const fbclid =
+		cookies().get(`${cartFunnel.handle}.${cartFunnel.key}.fbclid`)?.value ??
+		new URL(sourceUrl).searchParams.get('fbclid');
+
 	const metaRes =
 		metaPixel?.accessToken && metaEvents ?
 			await reportEventsToMeta({
 				pixelId: metaPixel.id,
 				accessToken: metaPixel.accessToken,
-				sourceUrl: visitorInfo.referer_url ?? '', // this is an api route, so we want the source of the api call
+				sourceUrl,
 				ip: visitorInfo.ip,
 				ua: visitorInfo.userAgent.ua,
 				geo: visitorInfo.geo,
 				events: metaEvents,
+				fbclid,
 			}).catch(err => {
 				console.log('err reporting cart event to meta => ', err);
 				return { reported: false };
@@ -661,18 +674,21 @@ export async function recordFmEvent({
 		eventType: type,
 	});
 
-	const sourceUrl = isDevelopment() ? visitor?.href : visitor?.referer_url; // this is being logged from an api route in preview/production, so we want the referer_url
+	const sourceUrl = isDevelopment() ? visitor?.href ?? '' : visitor?.referer_url ?? ''; // this is being logged from an api route in preview/production, so we want the referer_url
+
+	const fbclid = new URL(sourceUrl).searchParams.get('fbclid');
 
 	const metaRes =
 		metaPixel?.accessToken && metaEvents ?
 			await reportEventsToMeta({
 				pixelId: metaPixel.id,
 				accessToken: metaPixel.accessToken,
-				sourceUrl: sourceUrl ?? '',
+				sourceUrl,
 				ip: visitor?.ip,
 				ua: visitor?.userAgent.ua,
 				geo: visitor?.geo,
 				events: metaEvents,
+				fbclid,
 			}).catch(err => {
 				console.log('error => ', err);
 				return { reported: false };
@@ -688,7 +704,7 @@ export async function recordFmEvent({
 			sessionId: newId('fmSession'),
 			type,
 			...visitor,
-			href: sourceUrl ?? '',
+			href: sourceUrl,
 			linkClickDestinationHref: fmLink?.url,
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
 		});
@@ -836,18 +852,20 @@ export async function recordLandingPageEvent({
 		eventType: type,
 	});
 
-	const sourceUrl = isDevelopment() ? visitor?.href : visitor?.referer_url; // this is being logged from an api route, so we want the referer_url (i.e. the client url calling the logged route)
+	const sourceUrl = isDevelopment() ? visitor?.href ?? '' : visitor?.referer_url ?? ''; // this is being logged from an api route, so we want the referer_url (i.e. the client url calling the logged route)
+	const fbclid = new URL(sourceUrl).searchParams.get('fbclid');
 
 	const metaRes =
 		metaPixel?.accessToken && metaEvents ?
 			await reportEventsToMeta({
 				pixelId: metaPixel.id,
 				accessToken: metaPixel.accessToken,
-				sourceUrl: sourceUrl ?? '',
+				sourceUrl,
 				ip: visitor?.ip,
 				ua: visitor?.userAgent.ua,
 				geo: visitor?.geo,
 				events: metaEvents,
+				fbclid,
 			})
 		:	{ reported: false };
 
@@ -860,7 +878,7 @@ export async function recordLandingPageEvent({
 			sessionId: newId('landingPageSession'),
 			type,
 			...visitor,
-			href: sourceUrl ?? '',
+			href: sourceUrl,
 			linkClickDestinationAssetId,
 			linkClickDestinationHref,
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
