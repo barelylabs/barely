@@ -6,7 +6,7 @@ import { getFileTypeFromFileName } from '@barely/lib/files/utils';
 import { cn } from '@barely/lib/utils/cn';
 import { nFormatter } from '@barely/lib/utils/number';
 
-import BackgroundImage from './background-image';
+import BackgroundImg from './background-image';
 import { Button } from './button';
 import { GridList, GridListItem } from './grid-list';
 import { Icon } from './icon';
@@ -77,7 +77,7 @@ export const UploadDropzone = React.forwardRef<
 					</div>
 				</div>
 
-				{imagePreview && <BackgroundImage src={imagePreview} alt='Preview' />}
+				{imagePreview && <BackgroundImg src={imagePreview} alt='Preview' />}
 			</div>
 		);
 	},
@@ -182,7 +182,7 @@ function UploadQueueGridCard({
 
 				{fileType.startsWith('image') && previewImage && (
 					<div className='relative inset-0 flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-md'>
-						<BackgroundImage
+						<BackgroundImg
 							src={previewImage}
 							alt={uploadQueueItem.file.name}
 							className='rounded-inherit object-cover'

@@ -51,6 +51,8 @@ export const Files = pgTable(
 			enum: ['pending', 'uploading', 'processing', 'complete', 'failed'],
 		}),
 
+		blurHash: varchar('blurHash', { length: 1000 }),
+
 		description: varchar('description', { length: 255 }),
 		src: varchar('src', { length: 255 }).notNull(),
 		url: varchar('url', { length: 255 }), // deprecated in favor of src - remove in future

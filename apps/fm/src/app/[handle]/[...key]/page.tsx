@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Fragment } from 'react';
 import { getFmPageData } from '@barely/lib/server/routes/fm-page/fm-page.fns';
 
-import { BackgroundImage } from '@barely/ui/elements/background-image';
+import { BackgroundImg } from '@barely/ui/elements/background-image';
 import { Img } from '@barely/ui/elements/img';
 import { Separator } from '@barely/ui/elements/separator';
 import { Text } from '@barely/ui/elements/typography';
@@ -58,27 +58,35 @@ export default async function LandingPage({
 			<LogVisit fmId={fm.id} />
 			<div className='relative flex h-full w-full flex-col items-center sm:pt-6 lg:flex-row lg:p-0'>
 				<div className='fixed left-0 top-0 z-[-1] flex h-full w-full items-center justify-center overflow-hidden'>
-					<BackgroundImage
-						src={fm.coverArt?.src ?? ''}
-						alt={''}
-						className='scale-125 opacity-90 blur-lg'
-						sizes='(max-width: 639px) 0vw, 100vw'
-						quality={25}
-						priority
-					/>
+					{fm.coverArt && (
+						<BackgroundImg
+							s3Key={fm.coverArt.key}
+							alt={''}
+							className='scale-125 opacity-90 blur-lg'
+							sizes='(max-width: 639px) 0vw, 100vw'
+							quality={15}
+							placeholder={fm.coverArt?.blurHash ? 'blur' : undefined}
+							blurDataURL={fm.coverArt?.blurHash ?? undefined}
+							priority
+						/>
+					)}
 				</div>
 
 				<div className='relative flex h-fit w-full flex-grow items-center justify-center'>
 					{/* Content */}
 					<div className='relative z-10 flex h-full w-full items-center justify-center overflow-hidden sm:max-w-sm lg:max-w-md'>
-						<Img
-							src={fm.coverArt?.src ?? ''}
-							alt={''}
-							width={500}
-							height={500}
-							priority={true}
-							className='w-full rounded-t-md border-[11px] border-background lg:rounded-b-md'
-						/>
+						{fm.coverArt && (
+							<Img
+								s3Key={fm.coverArt.key}
+								alt={''}
+								width={500}
+								height={500}
+								priority
+								className='w-full rounded-t-md border-[11px] border-background lg:rounded-b-md'
+								placeholder={fm.coverArt?.blurHash ? 'blur' : undefined}
+								blurDataURL={fm.coverArt?.blurHash ?? undefined}
+							/>
+						)}
 					</div>
 				</div>
 

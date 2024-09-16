@@ -1,37 +1,62 @@
+import type { StaticImport } from 'next/dist/shared/lib/get-img-props';
 import type { ImageProps } from 'next/image';
 import type { CSSProperties } from 'react';
 import * as React from 'react';
-import Image from 'next/image';
 import { cn } from '@barely/lib/utils/cn';
 
-interface BackGroundImageProps extends ImageProps {
-	divStyle?: CSSProperties;
-}
+import { Img } from './img';
 
-export const BackgroundImage = React.forwardRef<
+type BackGroundImageProps = Omit<ImageProps, 'src'> & {
+	divStyle?: CSSProperties;
+} & (
+		| {
+				s3Key?: never;
+				src: string | StaticImport;
+		  }
+		| {
+				s3Key: string;
+				src?: never;
+		  }
+	);
+
+export const BackgroundImg = React.forwardRef<
 	HTMLDivElement,
 	React.HTMLAttributes<HTMLDivElement> & BackGroundImageProps
->(({ children, style, sizes, priority, quality, src, ...props }, ref) => {
+>(({ children, style, sizes, priority, quality, src, s3Key, ...props }, ref) => {
+	if (!s3Key && typeof src !== 'string') return null;
+
 	return (
 		<div
 			ref={ref}
 			className={cn('absolute bottom-0 left-0 right-0 top-0 z-[-1]', props.className)}
 			style={style}
 		>
-			<Image
-				src={src}
-				alt=''
-				className='absolute inset-0 h-full w-full object-cover object-center'
-				fill
-				priority={priority}
-				quality={quality}
-				sizes={sizes}
-			/>
+			{s3Key ?
+				<Img
+					s3Key={s3Key}
+					// src={s3Key ? undefined : src}
+					className='absolute inset-0 h-full w-full object-cover object-center'
+					fill
+					priority={priority}
+					quality={quality}
+					sizes={sizes}
+					{...props}
+				/>
+			:	<Img
+					src={src ?? ''}
+					className='absolute inset-0 h-full w-full object-cover object-center'
+					fill
+					priority={priority}
+					quality={quality}
+					sizes={sizes}
+					{...props}
+				/>
+			}
 			{children}
 		</div>
 	);
 });
 
-BackgroundImage.displayName = 'BackgroundImage';
+BackgroundImg.displayName = 'BackgroundImage';
 
-export default BackgroundImage;
+export default BackgroundImg;

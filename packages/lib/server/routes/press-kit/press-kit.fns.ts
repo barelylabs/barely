@@ -50,7 +50,9 @@ export async function getPublicPressKit({
 						with: {
 							file: {
 								columns: {
-									src: true,
+									// src: true,
+									key: true,
+									blurHash: true,
 								},
 							},
 						},
@@ -60,7 +62,9 @@ export async function getPublicPressKit({
 						with: {
 							file: {
 								columns: {
-									src: true,
+									// src: true,
+									key: true,
+									blurHash: true,
 								},
 							},
 						},
@@ -98,6 +102,7 @@ export async function getPublicPressKit({
 													id: true,
 													name: true,
 													src: true,
+													key: true,
 													size: true,
 													width: true,
 													height: true,
@@ -143,10 +148,12 @@ export async function getPublicPressKit({
 						columns: {
 							id: true,
 							name: true,
-							src: true,
+							// src: true,
+							key: true,
 							size: true,
 							width: true,
 							height: true,
+							blurHash: true,
 						},
 					},
 				},
@@ -169,8 +176,10 @@ export async function getPublicPressKit({
 		...publicPressKitData.workspace,
 		stripeConnectAccountId: null,
 		stripeConnectAccountId_devMode: null,
-		avatarImageUrl: publicPressKitData.workspace._avatarImages[0]?.file.src,
-		headerImageUrl: publicPressKitData.workspace._headerImages[0]?.file.src,
+		avatarImageKey: publicPressKitData.workspace._avatarImages[0]?.file.key,
+		headerImageKey: publicPressKitData.workspace._headerImages[0]?.file.key,
+		avatarImageBlurHash: publicPressKitData.workspace._avatarImages[0]?.file.blurHash,
+		headerImageBlurHash: publicPressKitData.workspace._headerImages[0]?.file.blurHash,
 	};
 
 	// normalize mixtape
@@ -188,7 +197,6 @@ export async function getPublicPressKit({
 				_t.track._artworkFiles[0] ?
 					{
 						..._t.track._artworkFiles[0]?.file,
-
 						width: _t.track._artworkFiles[0]?.file.width ?? 300,
 						height: _t.track._artworkFiles[0]?.file.height ?? 300,
 					}
@@ -218,6 +226,8 @@ export async function getPublicPressKit({
 	const publicPressPhotos: PublicPressPhoto[] = publicPressKitData._pressPhotos
 		.filter(_p => _p.file.width && _p.file.height)
 		.map(_p => {
+			// let blurHash = _p.file.blurHash;
+
 			return {
 				..._p.file,
 				lexorank: _p.lexorank,
