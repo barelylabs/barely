@@ -1,3 +1,5 @@
+'use client';
+
 import type { StaticImport } from 'next/dist/shared/lib/get-img-props';
 import type { ImageLoaderProps, ImageProps } from 'next/image';
 import Image from 'next/image';
@@ -20,7 +22,7 @@ const s3Loader = ({
 	width,
 	quality,
 }: Omit<ImageLoaderProps, 'src'> & { s3Key: string }) => {
-	const url = new URL(`https://${env.NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN}/${s3Key}`);
+	const url = new URL(`${env.NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN}/${s3Key}`);
 	url.searchParams.set('format', 'auto');
 	url.searchParams.set('width', width ? width.toString() : 'auto');
 	url.searchParams.set('quality', quality ? quality.toString() : '75');
@@ -40,14 +42,11 @@ export function Img({
 	if (s3Key) {
 		return (
 			<Image
-				// fill
 				src={s3Key}
 				width={width}
 				height={height}
 				alt={alt}
 				quality={quality}
-				// priority
-				// unoptimized
 				priority={priority}
 				{...props}
 				loader={({ src, width, quality }) => s3Loader({ s3Key: src, width, quality })}

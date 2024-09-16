@@ -23,14 +23,20 @@ export async function getFmPageData({ handle, key }: { handle: string; key: stri
 		},
 	});
 
-	if (fmPageRaw?.coverArt && !fmPageRaw.coverArt.blurHash) {
-		const { getBlurHash } = await import('../file/file.blurhash');
-		const blurHash = await getBlurHash(fmPageRaw.coverArt.key);
+	// const coverArt = fmPageRaw?.coverArt;
 
-		await dbHttp
-			.update(Files)
-			.set({ blurHash })
-			.where(eq(Files.id, fmPageRaw.coverArt.id));
+	if (fmPageRaw?.coverArt && !fmPageRaw.coverArt.blurDataUrl) {
+		const { getBlurHash } = await import('../file/file.blurhash');
+		const { blurHash, blurDataUrl } = await getBlurHash(fmPageRaw.coverArt.key);
+
+		if (blurHash && blurDataUrl) {
+			fmPageRaw.coverArt.blurHash = blurHash;
+			fmPageRaw.coverArt.blurDataUrl = blurDataUrl;
+			await dbHttp
+				.update(Files)
+				.set({ blurHash, blurDataUrl })
+				.where(eq(Files.id, fmPageRaw.coverArt.id));
+		}
 	}
 
 	return {

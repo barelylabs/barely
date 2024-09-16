@@ -65,8 +65,8 @@ export default async function LandingPage({
 							className='scale-125 opacity-90 blur-lg'
 							sizes='(max-width: 639px) 0vw, 100vw'
 							quality={15}
-							placeholder={fm.coverArt?.blurHash ? 'blur' : undefined}
-							blurDataURL={fm.coverArt?.blurHash ?? undefined}
+							placeholder={fm.coverArt.blurDataUrl ? 'blur' : undefined}
+							blurDataURL={fm.coverArt.blurDataUrl ?? undefined}
 							priority
 						/>
 					)}
@@ -76,16 +76,19 @@ export default async function LandingPage({
 					{/* Content */}
 					<div className='relative z-10 flex h-full w-full items-center justify-center overflow-hidden sm:max-w-sm lg:max-w-md'>
 						{fm.coverArt && (
-							<Img
-								s3Key={fm.coverArt.key}
-								alt={''}
-								width={500}
-								height={500}
-								priority
-								className='w-full rounded-t-md border-[11px] border-background lg:rounded-b-md'
-								placeholder={fm.coverArt?.blurHash ? 'blur' : undefined}
-								blurDataURL={fm.coverArt?.blurHash ?? undefined}
-							/>
+							<>
+								<Img
+									s3Key={fm.coverArt.key}
+									alt={''}
+									width={500}
+									height={500}
+									className='w-full rounded-t-md border-[11px] border-background lg:rounded-b-md'
+									placeholder={fm.coverArt.blurDataUrl ? 'blur' : undefined}
+									blurDataURL={fm.coverArt.blurDataUrl ?? undefined}
+									priority
+								/>
+								{/* <pre>{fm.coverArt.blurHash}</pre> */}
+							</>
 						)}
 					</div>
 				</div>

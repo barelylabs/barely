@@ -1018,6 +1018,9 @@ importers:
       axios:
         specifier: ^1.4.0
         version: 1.6.7
+      blurhash:
+        specifier: 2.0.5
+        version: 2.0.5
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.0
@@ -1069,6 +1072,9 @@ importers:
       node-html-parser:
         specifier: ^6.1.11
         version: 6.1.12
+      plaiceholder:
+        specifier: 3.0.0
+        version: 3.0.0(sharp@0.33.2)
       punycode:
         specifier: ^2.3.1
         version: 2.3.1
@@ -24201,6 +24207,14 @@ packages:
     dependencies:
       find-up: 5.0.0
     dev: true
+
+  /plaiceholder@3.0.0(sharp@0.33.2):
+    resolution: {integrity: sha512-jwHxxHPnr1BwRzPCeZgEK2BMsEy2327sWynw3qb6XC/oGgGDUTPtR8pFxFQmNArhMBwhkUbUr5OPhhIJpCa8eQ==}
+    peerDependencies:
+      sharp: '>= 0.30.6'
+    dependencies:
+      sharp: 0.33.2
+    dev: false
 
   /pop-iterate@1.0.1:
     resolution: {integrity: sha512-HRCx4+KJE30JhX84wBN4+vja9bNfysxg1y28l0DuJmkoaICiv2ZSilKddbS48pq50P8d2erAhqDLbp47yv3MbQ==}
