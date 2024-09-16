@@ -1,4 +1,4 @@
-import type { NextFetchEvent, NextRequest } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { isPreview } from '@barely/lib/utils/environment';
 import { getAbsoluteUrl } from '@barely/lib/utils/url';
@@ -19,7 +19,7 @@ export const config = {
 		'/((?!api|_next|_static|.well-known|favicon|logos|sitemap|site.webmanifest).*)',
 	],
 };
-export async function middleware(req: NextRequest, ev: NextFetchEvent) {
+export async function middleware(req: NextRequest) {
 	const pathname = req.nextUrl.pathname;
 	const domain = req.headers.get('host');
 	const params = req.nextUrl.searchParams;
@@ -49,8 +49,6 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 		console.log('rewriting to', url);
 		return NextResponse.rewrite(url);
 	}
-
-	ev.waitUntil(Promise.resolve().then(() => console.log('waitUntil')));
 
 	return NextResponse.next();
 }

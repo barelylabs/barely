@@ -52,6 +52,7 @@ export const Files = pgTable(
 		}),
 
 		blurHash: varchar('blurHash', { length: 1000 }),
+		blurDataUrl: varchar('blurDataUrl', { length: 2000 }),
 
 		description: varchar('description', { length: 255 }),
 		src: varchar('src', { length: 255 }).notNull(),
