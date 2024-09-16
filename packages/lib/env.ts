@@ -76,6 +76,7 @@ export const env = createEnv({
 	client: {
 		NEXT_PUBLIC_APP_BASE_URL: z.string(),
 		NEXT_PUBLIC_APP_DEV_PORT: devPortSchema,
+		NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN: z.string(),
 		NEXT_PUBLIC_BIO_BASE_URL: z.string(),
 		NEXT_PUBLIC_BIO_DEV_PORT: devPortSchema,
 		NEXT_PUBLIC_CART_BASE_URL: z.string(),
@@ -108,6 +109,7 @@ export const env = createEnv({
 	experimental__runtimeEnv: {
 		NEXT_PUBLIC_APP_BASE_URL: process.env.NEXT_PUBLIC_APP_BASE_URL,
 		NEXT_PUBLIC_APP_DEV_PORT: process.env.NEXT_PUBLIC_APP_DEV_PORT,
+		NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN: process.env.NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN,
 		NEXT_PUBLIC_BIO_BASE_URL: process.env.NEXT_PUBLIC_BIO_BASE_URL,
 		NEXT_PUBLIC_BIO_DEV_PORT: process.env.NEXT_PUBLIC_BIO_DEV_PORT,
 		NEXT_PUBLIC_CART_BASE_URL: process.env.NEXT_PUBLIC_CART_BASE_URL,

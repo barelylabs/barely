@@ -77,8 +77,12 @@ export const publicWorkspaceSchema = selectWorkspaceSchema
 		stripeConnectAccountId_devMode: true,
 	})
 	.extend({
-		avatarImageUrl: z.string().nullish(),
-		headerImageUrl: z.string().nullish(),
+		// avatarImageUrl: z.string().nullish(),
+		avatarImageKey: z.string().nullish(),
+		avatarImageBlurHash: z.string().nullish(),
+		// headerImageUrl: z.string().nullish(),
+		headerImageKey: z.string().nullish(),
+		headerImageBlurHash: z.string().nullish(),
 	});
 
 export type PublicWorkspace = z.infer<typeof publicWorkspaceSchema>;

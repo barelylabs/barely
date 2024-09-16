@@ -2,7 +2,7 @@
 
 import type { FileRecord } from '@barely/lib/server/routes/file/file.schema';
 
-import BackgroundImage from '@barely/ui/elements/background-image';
+import BackgroundImg from '@barely/ui/elements/background-image';
 import { Button } from '@barely/ui/elements/button';
 import { GridItemCheckbox } from '@barely/ui/elements/grid-list';
 import { Tooltip } from '@barely/ui/elements/tooltip';
@@ -23,7 +23,7 @@ export function MediaCard({ file, removeFile, isSelectable }: MediaCardProps) {
 				)}
 				{file.type === 'image' && (
 					<div className='relative inset-0 flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-md'>
-						<BackgroundImage sizes='128px' src={file.src} alt={file.name} />
+						<BackgroundImg sizes='128px' src={file.src} alt={file.name} />
 					</div>
 				)}
 				{!!removeFile && (

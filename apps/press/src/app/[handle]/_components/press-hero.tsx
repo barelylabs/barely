@@ -4,7 +4,7 @@ import type { PublicPressKit } from '@barely/lib/server/routes/press-kit/press-k
 import { useContext, useEffect, useRef, useState } from 'react';
 
 import { WorkspaceSocialLinks } from '@barely/ui/components/workspace-social-links';
-import { BackgroundImage } from '@barely/ui/elements/background-image';
+import { BackgroundImg } from '@barely/ui/elements/background-image';
 import { BottomThirdFadeGradient } from '@barely/ui/elements/gradient';
 import { Icon } from '@barely/ui/elements/icon';
 
@@ -86,8 +86,9 @@ export function PressHero({
 			className='relative h-[350px] w-full py-6 sm:hidden sm:h-[400px] md:h-[450px] md:py-10'
 			id='intro-mobile'
 		>
-			<BackgroundImage
-				src={workspace.avatarImageUrl ?? workspace.headerImageUrl ?? ''}
+			<BackgroundImg
+				// src={workspace.avatarImageUrl ?? workspace.headerImageUrl ?? ''}
+				s3Key={workspace.avatarImageKey ?? workspace.headerImageKey ?? ''}
 				alt={workspace.name}
 				divStyle={{
 					opacity: headerOpacity,
@@ -95,7 +96,7 @@ export function PressHero({
 				}}
 			>
 				<BottomThirdFadeGradient />
-			</BackgroundImage>
+			</BackgroundImg>
 			{heroText}
 		</section>
 	);
@@ -105,8 +106,9 @@ export function PressHero({
 			id='intro-desktop'
 			className='relative hidden h-[350px] w-full py-6 sm:block sm:h-[400px] md:h-[450px] md:py-10'
 		>
-			<BackgroundImage
-				src={workspace.headerImageUrl ?? workspace.avatarImageUrl ?? ''}
+			<BackgroundImg
+				// src={workspace.headerImageUrl ?? workspace.avatarImageUrl ?? ''}
+				s3Key={workspace.headerImageKey ?? workspace.avatarImageKey ?? ''}
 				alt={workspace.name}
 				divStyle={{
 					opacity: headerOpacity,
@@ -114,7 +116,7 @@ export function PressHero({
 				}}
 			>
 				<BottomThirdFadeGradient />
-			</BackgroundImage>
+			</BackgroundImg>
 			{heroText}
 		</section>
 	);

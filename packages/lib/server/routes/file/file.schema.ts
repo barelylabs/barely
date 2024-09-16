@@ -35,7 +35,7 @@ export type UpdateFileRecord = z.infer<typeof updateFileSchema>;
 export type SelectFileRecord = z.infer<typeof selectFileSchema>;
 
 export type Image = Required<
-	Pick<FileRecord, 'id' | 'name' | 'src'> & {
+	Pick<FileRecord, 'id' | 'name' | 'src' | 'key'> & {
 		width: number;
 		height: number;
 	}
@@ -48,6 +48,7 @@ export const publicFileSchema = selectFileSchema.pick({
 	type: true,
 	extension: true,
 	src: true,
+	key: true,
 	size: true,
 	width: true,
 	height: true,
@@ -61,7 +62,8 @@ export const publicImageSchema = publicFileSchema
 	.pick({
 		id: true,
 		name: true,
-		src: true,
+		// src: true,
+		key: true,
 		size: true,
 	})
 	.extend({

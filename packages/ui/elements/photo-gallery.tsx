@@ -5,7 +5,7 @@ import type { PhotoAlbumProps, RenderPhotoProps } from 'react-photo-album';
 import { useMediaQuery } from '@barely/lib/hooks/use-media-query';
 import ReactPhotoAlbum from 'react-photo-album';
 
-import BackgroundImage from './background-image';
+import BackgroundImg from './background-image';
 import {
 	Carousel,
 	CarouselContent,
@@ -27,12 +27,20 @@ function NextJsImage({
 }: RenderPhotoProps & { priority?: boolean }) {
 	return (
 		<div style={{ ...wrapperStyle, position: 'relative' }}>
-			<Img
-				fill
-				src={photo}
-				placeholder={'blurDataURL' in photo ? 'blur' : undefined}
-				{...{ alt, title, sizes, className, onClick, priority }}
-			/>
+			{photo.key ?
+				<Img
+					fill
+					s3Key={photo.key}
+					placeholder={'blurDataURL' in photo ? 'blur' : undefined}
+					{...{ alt, title, sizes, className, onClick, priority }}
+				/>
+			:	<Img
+					fill
+					src={photo}
+					placeholder={'blurDataURL' in photo ? 'blur' : undefined}
+					{...{ alt, title, sizes, className, onClick, priority }}
+				/>
+			}
 		</div>
 	);
 }
@@ -74,7 +82,7 @@ export function PhotoGallery({
 							<div className='relative h-full w-full'>
 								{/* Blurred background */}
 								<div className='absolute left-0 top-0 flex h-full w-full items-center justify-center overflow-hidden'>
-									<BackgroundImage
+									<BackgroundImg
 										src={photo.src}
 										alt={photo.alt ?? ''}
 										className='scale-125 opacity-50 blur-lg'

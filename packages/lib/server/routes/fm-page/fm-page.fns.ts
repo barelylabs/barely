@@ -1,6 +1,7 @@
 import { and, asc, eq } from 'drizzle-orm';
 
 import { dbHttp } from '../../db';
+import { Files } from '../file/file.sql';
 import { FmLinks, FmPages } from '../fm/fm.sql';
 
 export async function getFmPageData({ handle, key }: { handle: string; key: string }) {
@@ -21,6 +22,16 @@ export async function getFmPageData({ handle, key }: { handle: string; key: stri
 			coverArt: true,
 		},
 	});
+
+	if (fmPageRaw?.coverArt && !fmPageRaw.coverArt.blurHash) {
+		const { getBlurHash } = await import('../file/file.blurhash');
+		const blurHash = await getBlurHash(fmPageRaw.coverArt.key);
+
+		await dbHttp
+			.update(Files)
+			.set({ blurHash })
+			.where(eq(Files.id, fmPageRaw.coverArt.id));
+	}
 
 	return {
 		...fmPageRaw,

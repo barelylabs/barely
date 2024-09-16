@@ -8,7 +8,16 @@ export function PressPhotos({ photos }: { photos: PublicImage[] }) {
 	return (
 		<Section id='photos'>
 			<SectionDiv title='Photos'>
-				<PhotoGallery photos={photos} carouselPrevNext='below' prioritize />
+				<PhotoGallery
+					photos={{
+						...photos.map(p => ({
+							...p,
+							src: p.key,
+						})),
+					}}
+					carouselPrevNext='below'
+					prioritize
+				/>
 			</SectionDiv>
 		</Section>
 	);

@@ -11,6 +11,7 @@ import ReactPlayer from 'react-player/lazy';
 
 import type { ButtonProps } from './button';
 import { Button } from './button';
+import { Img } from './img';
 import { Slider } from './slider';
 import { videoPlayerGlobalCurrentAtom } from './video-player';
 
@@ -249,7 +250,8 @@ export function MusicPlayerBar() {
 
 	const currentOrFirstTrack = currentTrack ?? tracklist[0];
 
-	const artworkUrl = currentOrFirstTrack?.artwork?.src;
+	// const artworkUrl = currentOrFirstTrack?.artwork?.src;
+	const artworkKey = currentOrFirstTrack?.artwork?.key;
 
 	return (
 		<>
@@ -260,13 +262,18 @@ export function MusicPlayerBar() {
 						<div className='flex h-full flex-row gap-3 px-4 py-4 sm:px-0'>
 							{currentOrFirstTrack && (
 								<>
-									<picture>
+									<Img
+										s3Key={artworkKey ?? ''}
+										alt={currentOrFirstTrack.name}
+										className='h-11 w-11 rounded-xs'
+									/>
+									{/* <picture>
 										<img
 											alt={currentOrFirstTrack.name}
 											src={artworkUrl ?? ''}
 											className='h-11  w-11 rounded-xs'
 										/>
-									</picture>
+									</picture> */}
 									<div className='flex flex-col items-start justify-center gap-[2px]'>
 										<p className='text-xs md:text-sm'>{currentOrFirstTrack.name}</p>
 										<p className='text-2xs font-light md:text-xs'>
