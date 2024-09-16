@@ -20,6 +20,7 @@
 		"@barely/ui": "workspace:*",
 		"@t3-oss/env-nextjs": "^0.10.1",
 		"@vercel/edge": "^0.1.2",
+		"blurhash": "2.0.5",
 		"dotenv-cli": "^7.4.1",
 		"drizzle-orm": "^0.30.9",
 		"jiti": "^1.21.0",
