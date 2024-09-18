@@ -287,7 +287,7 @@ export const ImageFileEditor: React.FC<JsxEditorProps> = ({ mdastNode }) => {
 									{...imageUploadState}
 									title='Upload image'
 									imagePreviewSrc={uploadPreviewImage}
-									imagePreviewS3Key={form.watch('file.s3Key')}
+									existingImageS3Key={form.watch('file.s3Key')}
 								/>
 							</div>
 

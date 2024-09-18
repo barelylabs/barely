@@ -102,7 +102,7 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 		setUploadQueue: setArtworkUploadQueue,
 	} = artworkUploadState;
 
-	const uploadPreviewImage = artworkUploadQueue[0]?.previewImage;
+	// const uploadPreviewImage = artworkUploadQueue[0]?.previewImage;
 
 	/* modal */
 	const showFmModal = mode === 'create' ? showCreateFmPageModal : showUpdateFmPageModal;
@@ -180,19 +180,23 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 		}
 	}, [spotifyTitle, currentTitle, currentKey, setValue]);
 
+	const artworkImagePreviewS3Key = selectedFmPage?.coverArt?.s3Key;
+	const artworkImagePreviewBlurDataUrl = selectedFmPage?.coverArt?.blurDataUrl;
+
 	const artworkImagePreview =
-		uploadPreviewImage ??
+		artworkUploadQueue[0]?.previewImage ??
 		(mode === 'update' ?
-			selectedFmPage?.coverArt?.src ?? spotifyImageUrl
+			selectedFmPage?.coverArt?.src ?? spotifyImageUrl ?? ''
 		:	spotifyImageUrl ?? '');
 
 	// form submit
 	const handleSubmit = useCallback(
 		async (data: z.infer<typeof upsertFmPageSchema>) => {
-			// const coverArtUrl = artworkUploadQueue[0]?.presigned?.fileRecord.url ?
-
 			let coverArtUrl: string | undefined = undefined;
-			if (!artworkUploadQueue.length && !selectedFmPage?.coverArt?.src) {
+			if (
+				!artworkUploadQueue.length &&
+				(mode === 'create' || !selectedFmPage?.coverArt?.src)
+			) {
 				coverArtUrl = spotifyImageUrl ?? undefined;
 			}
 
@@ -208,7 +212,14 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 
 			await onSubmit(upsertFmPageData);
 		},
-		[artworkUploadQueue, handleArtworkUpload, onSubmit, spotifyImageUrl, selectedFmPage],
+		[
+			artworkUploadQueue,
+			handleArtworkUpload,
+			onSubmit,
+			spotifyImageUrl,
+			selectedFmPage,
+			mode,
+		],
 	);
 
 	const submitDisabled =
@@ -242,6 +253,8 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 							{...artworkUploadState}
 							title='Upload cover art'
 							imagePreviewSrc={artworkImagePreview}
+							existingImageS3Key={artworkImagePreviewS3Key}
+							existingImageBlurDataUrl={artworkImagePreviewBlurDataUrl}
 						/>
 					</div>
 

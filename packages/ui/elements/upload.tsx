@@ -19,7 +19,8 @@ interface DropzoneProps extends UseUploadReturn {
 	title?: string;
 	subtitle?: string;
 	imagePreviewSrc?: string | null;
-	imagePreviewS3Key?: string | null;
+	existingImageS3Key?: string | null;
+	existingImageBlurDataUrl?: string | null;
 }
 
 export const UploadDropzone = React.forwardRef<
@@ -31,7 +32,8 @@ export const UploadDropzone = React.forwardRef<
 			title = 'Upload',
 			subtitle = 'Drop file here, or click to select files',
 			imagePreviewSrc,
-			imagePreviewS3Key,
+			existingImageS3Key,
+			existingImageBlurDataUrl,
 			className,
 			...props
 		},
@@ -41,11 +43,18 @@ export const UploadDropzone = React.forwardRef<
 			if (imagePreviewSrc) {
 				return <BackgroundImg sizes='200px' src={imagePreviewSrc} alt='Preview' />;
 			}
-			if (imagePreviewS3Key) {
-				return <BackgroundImg sizes='200px' s3Key={imagePreviewS3Key} alt='Preview' />;
+			if (existingImageS3Key) {
+				return (
+					<BackgroundImg
+						sizes='200px'
+						s3Key={existingImageS3Key}
+						blurDataURL={existingImageBlurDataUrl ?? undefined}
+						alt='Preview'
+					/>
+				);
 			}
 			return null;
-		}, [imagePreviewSrc, imagePreviewS3Key]);
+		}, [imagePreviewSrc, existingImageS3Key, existingImageBlurDataUrl]);
 
 		return (
 			<div
