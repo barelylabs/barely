@@ -78,10 +78,10 @@ export const publicWorkspaceSchema = selectWorkspaceSchema
 	})
 	.extend({
 		// avatarImageUrl: z.string().nullish(),
-		avatarImageKey: z.string().nullish(),
+		avatarImageS3Key: z.string().nullish(),
 		avatarImageBlurHash: z.string().nullish(),
 		// headerImageUrl: z.string().nullish(),
-		headerImageKey: z.string().nullish(),
+		headerImageS3Key: z.string().nullish(),
 		headerImageBlurHash: z.string().nullish(),
 	});
 

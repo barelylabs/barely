@@ -12,14 +12,13 @@ import { useFieldArray } from 'react-hook-form';
 
 import { Button } from '@barely/ui/elements/button';
 import { MDXEditor } from '@barely/ui/elements/mdx-editor/index';
+import { SelectableMedia } from '@barely/ui/elements/media/selectable-media';
+import { SortableMedia } from '@barely/ui/elements/media/sortable-media';
 import { H } from '@barely/ui/elements/typography';
 import { Form, SubmitButton } from '@barely/ui/forms';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { SwitchField } from '@barely/ui/forms/switch-field';
 import { TextField } from '@barely/ui/forms/text-field';
-
-import { SelectableMedia } from '~/app/[handle]/press/_components/selectable-media';
-import { SortableMedia } from '~/app/[handle]/press/_components/sortable-media';
 
 export function PressKitForm({
 	initialPressKit,
@@ -340,11 +339,15 @@ export function PressKitForm({
 					</div>
 				</PressKitCard>
 
+				{/* PHOTOS */}
 				<PressKitCard
 					title='Photos'
 					Toggle={<SwitchField control={form.control} name='showPressPhotos' size='md' />}
 				>
-					<SelectableMedia unavailableFiles={pressPhotos} />
+					<SelectableMedia
+						unavailableFiles={pressPhotos}
+						// onAction={key => console.log(key)}
+					/>
 					<SortableMedia media={pressPhotos} setMedia={setPressPhotos} />
 				</PressKitCard>
 

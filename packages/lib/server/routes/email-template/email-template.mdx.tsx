@@ -1,16 +1,19 @@
 import type { MDXRemoteProps } from 'next-mdx-remote/rsc';
 import type { ReactNode } from 'react';
 import React from 'react';
-import { EmailButton, EmailLink } from '@barely/email/src/primitives';
+import { EmailButton, EmailImage, EmailLink } from '@barely/email/src/primitives';
 import { Heading, Text } from '@react-email/components';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 
+import type { MdxImageSize } from '../../mdx/mdx.constants';
 import type { CartFunnel } from '../cart-funnel/cart-funnel.schema';
 import type { LandingPage } from '../landing-page/landing-page.schema';
 import type { Link } from '../link/link.schema';
 import type { PressKit } from '../press-kit/press-kit.schema';
 import type { EmailTemplateVariableName } from './email-template.constants';
+import { env } from '../../../env';
 import { getAssetHref, getLinkHref } from '../../../utils/mdx';
+import { MDX_IMAGE_SIZE_TO_WIDTH } from '../../mdx/mdx.constants';
 
 export async function renderMarkdownToReactEmail({
 	subject,
@@ -54,6 +57,7 @@ export async function renderMarkdownToReactEmail({
 		h6: ({ children }: { children?: ReactNode }) => <Heading as='h6'>{children}</Heading>,
 
 		...mdxEmailLink({ fanId, emailTemplateId }),
+		...mdxEmailImageFile(),
 		...mdxLinkButton({ fanId, emailTemplateId }),
 		...mdxEmailAssetButton({
 			fanId,
@@ -93,6 +97,44 @@ function mdxEmailLink({
 		a: MdxEmailLink,
 	};
 }
+
+function mdxEmailImageFile() {
+	const MdxEmailImageFile = ({
+		s3Key,
+		alt,
+		width,
+		height,
+		size = 'md',
+	}: {
+		s3Key: string;
+		size: MdxImageSize;
+		alt: string;
+		width: number;
+		height: number;
+	}) => {
+		const adjustedWidth = MDX_IMAGE_SIZE_TO_WIDTH[size];
+		const aspectRatio = width / height;
+		const adjustedHeight = Math.round(adjustedWidth / aspectRatio);
+
+		const src = `${env.NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN}/${s3Key}?format=auto&width=${Math.round(adjustedWidth * 1.5)}`;
+		return (
+			<EmailImage
+				src={src}
+				alt={alt}
+				width={adjustedWidth}
+				height={adjustedHeight}
+				style={{
+					borderRadius: '10px',
+				}}
+			/>
+		);
+	};
+
+	return {
+		ImageFile: MdxEmailImageFile,
+	};
+}
+
 function mdxLinkButton({
 	fanId,
 	emailTemplateId,

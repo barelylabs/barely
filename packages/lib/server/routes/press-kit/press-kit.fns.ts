@@ -51,7 +51,7 @@ export async function getPublicPressKit({
 							file: {
 								columns: {
 									// src: true,
-									key: true,
+									s3Key: true,
 									blurHash: true,
 								},
 							},
@@ -63,7 +63,7 @@ export async function getPublicPressKit({
 							file: {
 								columns: {
 									// src: true,
-									key: true,
+									s3Key: true,
 									blurHash: true,
 								},
 							},
@@ -102,7 +102,7 @@ export async function getPublicPressKit({
 													id: true,
 													name: true,
 													src: true,
-													key: true,
+													s3Key: true,
 													size: true,
 													width: true,
 													height: true,
@@ -149,7 +149,7 @@ export async function getPublicPressKit({
 							id: true,
 							name: true,
 							// src: true,
-							key: true,
+							s3Key: true,
 							size: true,
 							width: true,
 							height: true,
@@ -176,8 +176,8 @@ export async function getPublicPressKit({
 		...publicPressKitData.workspace,
 		stripeConnectAccountId: null,
 		stripeConnectAccountId_devMode: null,
-		avatarImageKey: publicPressKitData.workspace._avatarImages[0]?.file.key,
-		headerImageKey: publicPressKitData.workspace._headerImages[0]?.file.key,
+		avatarImageS3Key: publicPressKitData.workspace._avatarImages[0]?.file.s3Key,
+		headerImageS3Key: publicPressKitData.workspace._headerImages[0]?.file.s3Key,
 		avatarImageBlurHash: publicPressKitData.workspace._avatarImages[0]?.file.blurHash,
 		headerImageBlurHash: publicPressKitData.workspace._headerImages[0]?.file.blurHash,
 	};

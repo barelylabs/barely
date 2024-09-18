@@ -42,6 +42,7 @@ const Form = <T extends FieldValues>({
 					onPromise(form.handleSubmit(onSubmit))(e);
 					e.stopPropagation();
 					e.preventDefault();
+					console.log('form errors', form.formState.errors);
 					// onSubmit(form.getValues());
 				}}
 			>

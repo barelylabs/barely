@@ -22,7 +22,7 @@ export const fileRouter = createTRPCRouter({
 	byWorkspace: privateProcedure
 		.input(selectWorkspaceFilesSchema)
 		.query(async ({ input, ctx }) => {
-			const { handle, limit, cursor, types, search, folder } = input;
+			const { handle, limit, cursor, types, search, folder, excludeFolders } = input;
 
 			console.log('filesByWorkspace input', input);
 
@@ -32,8 +32,9 @@ export const fileRouter = createTRPCRouter({
 				where: sqlAnd([
 					eq(Files.workspaceId, workspace.id),
 					eq(Files.uploadStatus, 'complete'),
-					notInArray(Files.folder, ['avatars', 'product-images']),
 					!!folder && eq(Files.folder, folder),
+					!!excludeFolders?.length && notInArray(Files.folder, excludeFolders),
+					// notInArray(Files.folder, ['avatars', 'product-images']),
 					!!types?.length && inArray(Files.type, types),
 					!!search?.length && sqlStringContains(Files.name, search),
 					!!cursor &&
@@ -103,7 +104,7 @@ export const fileRouter = createTRPCRouter({
 					console.log('f', f);
 					const fileId = newId('file');
 
-					const key = getFileKey({
+					const s3Key = getFileKey({
 						workspaceId: ctx.workspace.id,
 						folder: input.folder,
 						fileName: fileId.replace('file_', ''),
@@ -124,7 +125,7 @@ export const fileRouter = createTRPCRouter({
 						id: fileId,
 						workspaceId: ctx.workspace.id,
 						bucket: env.AWS_S3_BUCKET_NAME,
-						key,
+						s3Key,
 						folder: input.folder,
 						createdById: ctx.user.id,
 						uploadedById: ctx.user.id,
@@ -139,7 +140,7 @@ export const fileRouter = createTRPCRouter({
 					const presignedFile = await getPresigned({
 						fileRecord,
 						workspaceId: ctx.workspace.id,
-						key,
+						s3Key,
 						name: f.name,
 						fileContentType,
 						fileSizeInBytes: f.size,
@@ -157,7 +158,7 @@ export const fileRouter = createTRPCRouter({
 		.input(
 			z.object({
 				fileId: z.string(),
-				key: z.string(),
+				s3Key: z.string(),
 			}),
 		)
 		.mutation(async ({ input, ctx }) => {
@@ -165,7 +166,7 @@ export const fileRouter = createTRPCRouter({
 				.update(Files)
 				.set({
 					uploadStatus: 'complete',
-					src: `https://${env.AWS_S3_BUCKET_NAME}.s3.amazonaws.com/${input.key}`,
+					src: `https://${env.AWS_S3_BUCKET_NAME}.s3.amazonaws.com/${input.s3Key}`,
 				})
 				.where(and(eq(Files.workspaceId, ctx.workspace.id), eq(Files.id, input.fileId)))
 				.returning();
@@ -183,7 +184,7 @@ export const fileRouter = createTRPCRouter({
 		.input(
 			z.object({
 				fileId: z.string(),
-				key: z.string(),
+				s3Key: z.string(),
 				uploadId: z.string(),
 				parts: z.array(z.object({ tag: z.string(), partNumber: z.number() })),
 			}),
@@ -196,7 +197,7 @@ export const fileRouter = createTRPCRouter({
 				.update(Files)
 				.set({
 					uploadStatus: 'complete',
-					src: `https://${env.AWS_S3_BUCKET_NAME}.s3.amazonaws.com/${input.key}`,
+					src: `https://${env.AWS_S3_BUCKET_NAME}.s3.amazonaws.com/${input.s3Key}`,
 				})
 				.where(and(eq(Files.workspaceId, ctx.workspace.id), eq(Files.id, input.fileId)))
 				.returning();

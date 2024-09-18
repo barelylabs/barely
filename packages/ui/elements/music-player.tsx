@@ -251,7 +251,7 @@ export function MusicPlayerBar() {
 	const currentOrFirstTrack = currentTrack ?? tracklist[0];
 
 	// const artworkUrl = currentOrFirstTrack?.artwork?.src;
-	const artworkKey = currentOrFirstTrack?.artwork?.key;
+	const artworkKey = currentOrFirstTrack?.artwork?.s3Key;
 
 	return (
 		<>

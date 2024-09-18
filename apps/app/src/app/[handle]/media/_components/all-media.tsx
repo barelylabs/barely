@@ -61,8 +61,10 @@ function FileCard({ file }: { file: FileRecord }) {
 							<Img
 								sizes='200px'
 								fill
-								src={file.src}
+								s3Key={file.s3Key}
 								alt={file.name}
+								placeholder={file.blurDataUrl ? 'blur' : undefined}
+								blurDataURL={file.blurDataUrl ? file.blurDataUrl : ''}
 								className='rounded-inherit object-contain'
 							/>
 						</div>

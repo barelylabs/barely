@@ -12,7 +12,7 @@ import { calculateChunkSize, metadataToAmzHeaders } from './utils';
 interface GetPresignedProps {
 	fileRecord: FileRecord;
 	workspaceId: string;
-	key: string;
+	s3Key: string;
 	name: string;
 	fileContentType: FileContentType;
 	fileSizeInBytes: number;
@@ -25,7 +25,7 @@ interface GetPresignedProps {
 export async function getPresigned({
 	fileRecord,
 	workspaceId,
-	key,
+	s3Key,
 	name,
 	fileContentType,
 	fileSizeInBytes,
@@ -43,7 +43,7 @@ export async function getPresigned({
 	if (isSinglePartUpload) {
 		const { url, fields } = await createPresignedPost(s3, {
 			Bucket: env.AWS_S3_BUCKET_NAME,
-			Key: key,
+			Key: s3Key,
 			Conditions: [
 				{ acl },
 				['content-length-range', 0, fileSizeInBytes],
@@ -51,7 +51,7 @@ export async function getPresigned({
 				['starts-with', '$key', `${workspaceId}/`],
 			],
 			Fields: {
-				key,
+				key: s3Key,
 				acl,
 				'Content-Type': fileContentType,
 				'Content-Disposition': contentDisposition,
@@ -61,7 +61,7 @@ export async function getPresigned({
 
 		return {
 			fileRecord,
-			key,
+			s3Key,
 			name,
 			contentType: fileContentType,
 			contentDisposition,
@@ -72,7 +72,7 @@ export async function getPresigned({
 		const uploadId = (
 			await s3.createMultipartUpload({
 				Bucket: env.AWS_S3_BUCKET_NAME,
-				Key: key,
+				Key: s3Key,
 				ACL: acl,
 				ContentType: fileContentType,
 				ContentDisposition: contentDisposition,
@@ -91,7 +91,7 @@ export async function getPresigned({
 		for (let i = 1; i <= chunkCount; i++) {
 			const uploadPartCommand = new UploadPartCommand({
 				Bucket: env.AWS_S3_BUCKET_NAME,
-				Key: key,
+				Key: s3Key,
 				UploadId: uploadId,
 				PartNumber: i,
 			});
@@ -103,7 +103,7 @@ export async function getPresigned({
 
 		return {
 			fileRecord,
-			key,
+			s3Key,
 			name,
 			contentType: fileContentType,
 			contentDisposition,
@@ -117,12 +117,12 @@ export async function getPresigned({
 
 export async function completeMultipartUpload({
 	bucket = env.AWS_S3_BUCKET_NAME,
-	key,
+	s3Key,
 	uploadId,
 	parts,
 }: {
 	bucket?: string;
-	key: string;
+	s3Key: string;
 	uploadId: string;
 	parts: {
 		tag: string;
@@ -131,7 +131,7 @@ export async function completeMultipartUpload({
 }) {
 	const completeUploadResponse = await s3.completeMultipartUpload({
 		Bucket: bucket,
-		Key: key,
+		Key: s3Key,
 		UploadId: uploadId,
 		MultipartUpload: {
 			Parts: parts.map(part => ({

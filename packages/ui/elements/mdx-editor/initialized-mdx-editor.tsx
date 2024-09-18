@@ -7,8 +7,8 @@ import type { ForwardedRef } from 'react';
 import { cn } from '@barely/lib/utils/cn';
 import {
 	BoldItalicUnderlineToggles,
-	codeMirrorPlugin,
-	CreateLink,
+	// codeMirrorPlugin,
+	// CreateLink,
 	headingsPlugin,
 	jsxPlugin,
 	linkDialogPlugin,
@@ -34,12 +34,21 @@ import {
 	InsertLinkButtonButton,
 } from './plugins/mdx-button-plugin';
 import {
+	InsertCard,
+	InsertGrid,
+	// InsertTwoColumnGrid,
+	mdxGridPlugin,
+} from './plugins/mdx-grid-plugin';
+import {
+	imageFileJsxComponentDescriptors,
+	InsertImageFileButton,
+} from './plugins/mdx-image-file-plugin';
+import {
 	InsertVideoButton,
 	videoJsxComponentDescriptors,
 } from './plugins/mdx-video-plugin';
 
 // Only import this to the next file
-
 export function InitializedMDXEditor({
 	editorRef,
 	className,
@@ -60,11 +69,13 @@ export function InitializedMDXEditor({
 				}),
 				thematicBreakPlugin(),
 				markdownShortcutPlugin(),
-				codeMirrorPlugin({ codeBlockLanguages: { js: 'Javascript', ts: 'Typescript' } }),
+				// codeMirrorPlugin({ codeBlockLanguages: { js: 'Javascript', ts: 'Typescript' } }),
 				jsxPlugin({
 					jsxComponentDescriptors: [
 						...videoJsxComponentDescriptors,
 						...buttonComponentDescriptors,
+						...imageFileJsxComponentDescriptors,
+						...mdxGridPlugin,
 					],
 				}),
 
@@ -75,13 +86,26 @@ export function InitializedMDXEditor({
 							<BlockTypeSelect />
 							<ListsToggle />
 							<BoldItalicUnderlineToggles />
-							<CreateLink />
+							{/* <CreateLink /> */}
 							{/* {props?.variables ?
 								<AddVariablesPlugin variables={props.variables} />
 							:	null} */}
-							<InsertVideoButton />
-							<InsertAssetButtonButton />
-							<InsertLinkButtonButton />
+							{/* <InsertTwoColumnGrid /> */}
+
+							<div className='mx-2 flex flex-row items-center'>
+								<InsertGrid />
+								<InsertCard />
+							</div>
+
+							<div className='mx-2 flex flex-row items-center'>
+								<InsertVideoButton />
+								<InsertLinkButtonButton />
+							</div>
+
+							<div className='mx-2 flex flex-row items-center'>
+								<InsertImageFileButton />
+								<InsertAssetButtonButton />
+							</div>
 						</>
 					),
 				}),

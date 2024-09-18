@@ -67,7 +67,7 @@ const headerStyles = cva(['scroll-m-20 font-heading '], {
 		size: {
 			hero: 'text-6xl md:text-7xl lg:text-[105px]',
 			title: 'text-5xl lg:text-6xl',
-			'1': 'text-4xl lg:text-5xl',
+			'1': 'text-4xl sm:text-5xl',
 			'2': 'text-3xl lg:text-4xl',
 			'3': 'text-2xl lg:text-3xl',
 			'4': 'text-xl lg:text-2xl',

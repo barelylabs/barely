@@ -33,12 +33,12 @@ export type OnUploadProgress = (p: { file: string; progress: number }) => void;
 
 export type OnSinglePartUploadedFromClient = (p: {
 	fileId: string;
-	key: string;
+	s3Key: string;
 }) => Promise<FileRecord>;
 
 export type OnAllPartsUploadedFromClient = (p: {
 	fileId: string;
-	key: string;
+	s3Key: string;
 	uploadId: string;
 	parts: { tag: string; partNumber: number }[];
 }) => Promise<FileRecord>;
@@ -86,7 +86,7 @@ export async function uploadPresignedPost(
 	const fileRecord = await opts
 		.onSinglePartUploadedFromClient?.({
 			fileId: presigned.fileRecord.id,
-			key: presigned.key,
+			s3Key: presigned.s3Key,
 		})
 		.then(async fileRecord => {
 			await opts.onUploadComplete?.(fileRecord);
@@ -146,7 +146,7 @@ export async function uploadMultipart(
 	// Tell the server that the upload is complete
 	const fileRecord = (await opts.onAllPartsUploadedFromClient({
 		fileId: presigned.fileRecord.id,
-		key: presigned.key,
+		s3Key: presigned.s3Key,
 		uploadId: presigned.uploadId,
 		parts: etags,
 	})) satisfies FileRecord;

@@ -241,7 +241,7 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 						<UploadDropzone
 							{...artworkUploadState}
 							title='Upload cover art'
-							imagePreview={artworkImagePreview}
+							imagePreviewSrc={artworkImagePreview}
 						/>
 					</div>
 

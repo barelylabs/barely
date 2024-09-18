@@ -174,7 +174,7 @@ export function WorkspaceAvatarForm() {
 				{...avatarUploadState}
 				title=''
 				subtitle=''
-				imagePreview={imagePreview}
+				imagePreviewSrc={imagePreview}
 				className='h-28 w-28 rounded-full'
 			/>
 		</SettingsCard>
@@ -231,7 +231,7 @@ export function WorkspaceHeaderForm() {
 				{...headerUploadState}
 				title=''
 				subtitle=''
-				imagePreview={imagePreview}
+				imagePreviewSrc={imagePreview}
 				className='h-80 w-full rounded-md'
 			/>
 		</SettingsCard>

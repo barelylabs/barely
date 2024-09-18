@@ -90,7 +90,7 @@ export const fmRouter = createTRPCRouter({
 				workspaceId: ctx.workspace.id,
 				bucket: env.AWS_S3_BUCKET_NAME,
 				folder: 'fm-cover-art',
-				key,
+				s3Key: key,
 				name: key,
 				type: 'image',
 				src: upload.src,

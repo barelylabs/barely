@@ -125,6 +125,11 @@
 			background-color: theme('colors.muted.DEFAULT');
 			z-index: -1;
 		}
+
+		& :where(img):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+			margin-top: 0;
+			margin-bottom: 0;
+		}
 	}
 
 	.api-ref-nav > a {

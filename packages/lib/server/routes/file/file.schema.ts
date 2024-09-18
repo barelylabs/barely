@@ -25,6 +25,7 @@ export const selectWorkspaceFilesSchema = z.object({
 	showArchived: z.boolean().optional(),
 	cursor: z.object({ id: z.string(), createdAt: z.coerce.date() }).optional(),
 	limit: z.coerce.number().min(1).max(100).optional().default(20),
+	excludeFolders: z.array(z.enum(['avatars', 'product-images'])).optional(),
 });
 export const selectFileSchema = createSelectSchema(Files);
 
@@ -35,7 +36,7 @@ export type UpdateFileRecord = z.infer<typeof updateFileSchema>;
 export type SelectFileRecord = z.infer<typeof selectFileSchema>;
 
 export type Image = Required<
-	Pick<FileRecord, 'id' | 'name' | 'src' | 'key'> & {
+	Pick<FileRecord, 'id' | 'name' | 'src' | 's3Key'> & {
 		width: number;
 		height: number;
 	}
@@ -48,7 +49,7 @@ export const publicFileSchema = selectFileSchema.pick({
 	type: true,
 	extension: true,
 	src: true,
-	key: true,
+	s3Key: true,
 	size: true,
 	width: true,
 	height: true,
@@ -63,7 +64,7 @@ export const publicImageSchema = publicFileSchema
 		id: true,
 		name: true,
 		// src: true,
-		key: true,
+		s3Key: true,
 		size: true,
 	})
 	.extend({

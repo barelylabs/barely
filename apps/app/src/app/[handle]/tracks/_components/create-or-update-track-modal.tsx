@@ -234,7 +234,7 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 						<UploadDropzone
 							{...artworkUploadState}
 							title='Upload album art'
-							imagePreview={artworkImagePreview}
+							imagePreviewSrc={artworkImagePreview}
 						/>
 						<UploadQueueList uploadQueue={artworkUploadState.uploadQueue} />
 					</div>

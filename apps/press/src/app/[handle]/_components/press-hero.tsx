@@ -88,7 +88,7 @@ export function PressHero({
 		>
 			<BackgroundImg
 				// src={workspace.avatarImageUrl ?? workspace.headerImageUrl ?? ''}
-				s3Key={workspace.avatarImageKey ?? workspace.headerImageKey ?? ''}
+				s3Key={workspace.avatarImageS3Key ?? workspace.headerImageS3Key ?? ''}
 				alt={workspace.name}
 				divStyle={{
 					opacity: headerOpacity,
@@ -108,7 +108,7 @@ export function PressHero({
 		>
 			<BackgroundImg
 				// src={workspace.headerImageUrl ?? workspace.avatarImageUrl ?? ''}
-				s3Key={workspace.headerImageKey ?? workspace.avatarImageKey ?? ''}
+				s3Key={workspace.headerImageS3Key ?? workspace.avatarImageS3Key ?? ''}
 				alt={workspace.name}
 				divStyle={{
 					opacity: headerOpacity,

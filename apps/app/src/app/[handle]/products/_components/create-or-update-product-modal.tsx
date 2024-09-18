@@ -28,6 +28,7 @@ import { atom } from 'jotai';
 import { Icon } from '@barely/ui/elements/icon';
 import { Label } from '@barely/ui/elements/label';
 import { MDXEditor } from '@barely/ui/elements/mdx-editor';
+import { SortableMedia } from '@barely/ui/elements/media/sortable-media';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
 import { Separator } from '@barely/ui/elements/separator';
 import { ToggleGroup, ToggleGroupItem } from '@barely/ui/elements/toggle-group';
@@ -39,7 +40,6 @@ import { DatetimeField } from '@barely/ui/forms/datetime-field';
 import { SwitchField } from '@barely/ui/forms/switch-field';
 import { TextField } from '@barely/ui/forms/text-field';
 
-import { SortableMedia } from '~/app/[handle]/press/_components/sortable-media';
 import { useProductContext } from '~/app/[handle]/products/_components/product-context';
 
 const productImageUploadQueueAtom = atom<UploadQueueItem[]>([]);

@@ -1,14 +1,18 @@
+import type { MdxImageSize } from '@barely/lib/server/mdx/mdx.constants';
 import type { CartFunnel } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
 import type { LandingPage } from '@barely/lib/server/routes/landing-page/landing-page.schema';
 import type { Link } from '@barely/lib/server/routes/link/link.schema';
 import type { PressKit } from '@barely/lib/server/routes/press-kit/press-kit.schema';
 import type { Metadata } from 'next';
 import type { z } from 'zod';
+import { MDX_IMAGE_SIZE_TO_WIDTH } from '@barely/lib/server/mdx/mdx.constants';
 import { eventReportSearchParamsSchema } from '@barely/lib/server/routes/event/event-report.schema';
 import { getLandingPageData } from '@barely/lib/server/routes/landing-page/landing-page.render.fns';
+import { cn } from '@barely/lib/utils/cn';
 import { getAssetHref, getLinkHref } from '@barely/lib/utils/mdx';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 
+import { Img } from '@barely/ui/elements/img';
 import { mdxTypography } from '@barely/ui/elements/mdx-typography';
 import { mdxVideoPlayer } from '@barely/ui/elements/mdx-video-player';
 
@@ -68,7 +72,7 @@ export default async function LandingPage({
 	const { cartFunnels, links, pressKits, landingPages, ...lp } = data;
 
 	return (
-		<div className='mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center gap-6 px-4 py-10'>
+		<div className='mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center gap-8 px-4  py-10 sm:gap-10'>
 			{cartFunnels?.length > 0 && <WarmupCart />}
 			<MDXRemote
 				source={lp.content ?? ''}
@@ -87,6 +91,9 @@ export default async function LandingPage({
 						fanId,
 					}),
 					...mdxLinkButton({ landingPageId: lp.id, fbclid, fanId }),
+					...mdxImageFile(),
+					...mdxGrid(),
+					...mdxCard(),
 				}}
 			/>
 			<LogVisit landingPageId={lp.id} />
@@ -171,5 +178,74 @@ function mdxAssetButton({
 
 	return {
 		AssetButton,
+	};
+}
+
+function mdxImageFile() {
+	const ImageFile = ({
+		s3Key,
+		alt,
+		width,
+		height,
+		size = 'md',
+	}: {
+		s3Key: string;
+		alt: string;
+		width: number;
+		height: number;
+		size: MdxImageSize;
+	}) => {
+		const adjustedWidth = MDX_IMAGE_SIZE_TO_WIDTH[size];
+		const aspectRatio = width / height;
+		const adjustedHeight = Math.round(adjustedWidth / aspectRatio);
+
+		return (
+			<Img
+				s3Key={s3Key}
+				alt={alt}
+				width={adjustedWidth}
+				height={adjustedHeight}
+				className={cn(
+					'rounded-md',
+					size === 'xs' && 'max-w-[min(100%,200px)]',
+					size === 'sm' && 'max-w-[min(100%,18rem)]', // 18rem = 288px (max-w-xs)
+					size === 'md' && 'max-w-[min(100%,24rem)]', // 24rem = 384px (max-w-sm)
+					size === 'lg' && 'max-w-[min(100%,28rem)]', // 28rem = 448px (max-w-md)
+					size === 'xl' && 'max-w-[min(100%,32rem)]', // 32rem = 512px (max-w-lg)
+				)}
+			/>
+		);
+	};
+
+	return {
+		ImageFile,
+	};
+}
+
+function mdxGrid() {
+	const Grid = ({ children }: { children: React.ReactNode[] }) => {
+		return <div className='grid gap-6 sm:gap-10 md:grid-cols-2'>{children}</div>;
+	};
+
+	return {
+		Grid,
+	};
+}
+
+function mdxCard() {
+	const Card = ({
+		children,
+		border = false,
+	}: {
+		children: React.ReactNode;
+		border?: boolean;
+	}) => {
+		return (
+			<div className={cn('rounded-md', border && 'border border-border')}>{children}</div>
+		);
+	};
+
+	return {
+		Card,
 	};
 }

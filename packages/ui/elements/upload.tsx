@@ -6,7 +6,7 @@ import { getFileTypeFromFileName } from '@barely/lib/files/utils';
 import { cn } from '@barely/lib/utils/cn';
 import { nFormatter } from '@barely/lib/utils/number';
 
-import BackgroundImg from './background-image';
+import { BackgroundImg } from './background-image';
 import { Button } from './button';
 import { GridList, GridListItem } from './grid-list';
 import { Icon } from './icon';
@@ -18,7 +18,8 @@ import { Text } from './typography';
 interface DropzoneProps extends UseUploadReturn {
 	title?: string;
 	subtitle?: string;
-	imagePreview?: string | null;
+	imagePreviewSrc?: string | null;
+	imagePreviewS3Key?: string | null;
 }
 
 export const UploadDropzone = React.forwardRef<
@@ -29,12 +30,23 @@ export const UploadDropzone = React.forwardRef<
 		{
 			title = 'Upload',
 			subtitle = 'Drop file here, or click to select files',
-			imagePreview,
+			imagePreviewSrc,
+			imagePreviewS3Key,
 			className,
 			...props
 		},
 		ref,
 	) => {
+		const ImagePreview = useMemo(() => {
+			if (imagePreviewSrc) {
+				return <BackgroundImg sizes='200px' src={imagePreviewSrc} alt='Preview' />;
+			}
+			if (imagePreviewS3Key) {
+				return <BackgroundImg sizes='200px' s3Key={imagePreviewS3Key} alt='Preview' />;
+			}
+			return null;
+		}, [imagePreviewSrc, imagePreviewS3Key]);
+
 		return (
 			<div
 				ref={ref}
@@ -54,7 +66,7 @@ export const UploadDropzone = React.forwardRef<
 							'absolute flex h-full w-full flex-col items-center justify-center border-dashed bg-background p-4 transition-all',
 							props.isDragActive &&
 								'cursor-copy border-2 border-black bg-muted opacity-100',
-							imagePreview ?
+							ImagePreview ?
 								'opacity-0 group-hover:opacity-75'
 							:	'group-hover:bg-slate-100',
 						)}
@@ -64,20 +76,22 @@ export const UploadDropzone = React.forwardRef<
 								props.isDragActive ? 'scale-110' : 'scale-100'
 							} h-5 w-5 text-gray-500 transition-all duration-75 group-active:scale-95 group-hover:scale-110`}
 						/>
-						{title && !imagePreview && (
+
+						{title && !imagePreviewSrc && (
 							<Text variant='sm/medium' className='text-gray-500'>
 								{title}
 							</Text>
 						)}
-						{subtitle && !imagePreview && (
+						{subtitle && !imagePreviewSrc && (
 							<Text variant='xs/normal' className='text-center text-gray-500'>
 								{subtitle}
 							</Text>
 						)}
 					</div>
 				</div>
+				{/* <BackgroundImg s3Key={imagePreviewS3Key} alt='Preview' /> */}
 
-				{imagePreview && <BackgroundImg src={imagePreview} alt='Preview' />}
+				{ImagePreview}
 			</div>
 		);
 	},

@@ -1,23 +1,15 @@
-import type { StaticImport } from 'next/dist/shared/lib/get-img-props';
-import type { ImageProps } from 'next/image';
+// import type { StaticImport } from 'next/dist/shared/lib/get-img-props';
+// import type { ImageProps } from 'next/image';
 import type { CSSProperties } from 'react';
 import * as React from 'react';
 import { cn } from '@barely/lib/utils/cn';
 
+import type { ImgProps } from './img';
 import { Img } from './img';
 
-type BackGroundImageProps = Omit<ImageProps, 'src'> & {
+type BackGroundImageProps = ImgProps & {
 	divStyle?: CSSProperties;
-} & (
-		| {
-				s3Key?: never;
-				src: string | StaticImport;
-		  }
-		| {
-				s3Key: string;
-				src?: never;
-		  }
-	);
+};
 
 export const BackgroundImg = React.forwardRef<
 	HTMLDivElement,
@@ -59,4 +51,4 @@ export const BackgroundImg = React.forwardRef<
 
 BackgroundImg.displayName = 'BackgroundImage';
 
-export default BackgroundImg;
+// export default BackgroundImg;
