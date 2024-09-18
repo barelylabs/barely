@@ -73,7 +73,7 @@
 		"embla-carousel-react": "8.0.0-rc22",
 		"jotai": "^2.6.1",
 		"lexical": "^0.17.0",
-		"lucide-react": "^0.309.0",
+		"lucide-react": "^0.441.0",
 		"next-mdx-remote": "^4.4.1",
 		"next-seo": "^5.15.0",
 		"next-themes": "^0.2.1",

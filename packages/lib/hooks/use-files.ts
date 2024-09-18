@@ -7,9 +7,7 @@ import { useWorkspace } from './use-workspace';
 type UseFilesProps = Omit<
 	z.infer<typeof selectWorkspaceFilesSchema>,
 	'handle' | 'cursor'
-> & {
-	// initialFiles?: EdgeRouterOutputs["file"]["byWorkspace"];
-};
+>;
 
 export function useFiles(props?: UseFilesProps) {
 	const { handle } = useWorkspace();

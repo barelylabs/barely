@@ -12,7 +12,7 @@ export function PressPhotos({ photos }: { photos: PublicImage[] }) {
 					photos={{
 						...photos.map(p => ({
 							...p,
-							src: p.key,
+							src: p.s3Key,
 						})),
 					}}
 					carouselPrevNext='below'

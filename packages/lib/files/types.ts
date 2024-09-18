@@ -16,7 +16,7 @@ export type FileContentType = keyof typeof extensions;
 // presigned urls (single & multi part)
 interface BasePresigned {
 	fileRecord: FileRecord;
-	key: string;
+	s3Key: string;
 	name: string;
 	contentType: FileContentType;
 	contentDisposition: ContentDisposition;

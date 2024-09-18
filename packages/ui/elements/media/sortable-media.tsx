@@ -18,10 +18,14 @@ import {
 	useDragAndDrop,
 } from 'react-aria-components';
 
-import { ListBoxItem } from '@barely/ui/elements/list-box';
+import type { MediaCardProps } from './media-card';
+import { ListBoxItem } from '../list-box';
+import { MediaCard } from './media-card';
 
-import type { MediaCardProps } from '~/app/[handle]/press/_components/media-card';
-import { MediaCard } from '~/app/[handle]/press/_components/media-card';
+// import { ListBoxItem } from '@barely/ui/elements/list-box';
+
+// import type { MediaCardProps } from '~/app/[handle]/press/_components/media-card';
+// import { MediaCard } from '~/app/[handle]/press/_components/media-card';
 
 async function getDroppedFileRecords(droppedItems: DropItem[]) {
 	const fileRecords = await Promise.all(

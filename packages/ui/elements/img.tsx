@@ -5,7 +5,7 @@ import type { ImageLoaderProps, ImageProps } from 'next/image';
 import Image from 'next/image';
 import { env } from '@barely/lib/env';
 
-type ImgProps = Omit<ImageProps, 'src'> &
+export type ImgProps = Omit<ImageProps, 'src'> &
 	(
 		| {
 				s3Key?: never;
@@ -17,7 +17,7 @@ type ImgProps = Omit<ImageProps, 'src'> &
 		  }
 	);
 
-const s3Loader = ({
+export const s3Loader = ({
 	s3Key,
 	width,
 	quality,

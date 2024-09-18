@@ -60,7 +60,7 @@ export default async function LandingPage({
 				<div className='fixed left-0 top-0 z-[-1] flex h-full w-full items-center justify-center overflow-hidden'>
 					{fm.coverArt && (
 						<BackgroundImg
-							s3Key={fm.coverArt.key}
+							s3Key={fm.coverArt.s3Key}
 							alt={''}
 							className='scale-125 opacity-90 blur-lg'
 							sizes='(max-width: 639px) 0vw, 100vw'
@@ -78,7 +78,7 @@ export default async function LandingPage({
 						{fm.coverArt && (
 							<>
 								<Img
-									s3Key={fm.coverArt.key}
+									s3Key={fm.coverArt.s3Key}
 									alt={''}
 									width={500}
 									height={500}

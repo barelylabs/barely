@@ -41,7 +41,7 @@ export const Files = pgTable(
 			enum: ALLOWED_FILE_TYPES,
 		}).notNull(),
 		bucket: varchar('bucket', { length: 255 }).notNull(),
-		key: varchar('key', { length: 255 }).notNull(),
+		s3Key: varchar('key', { length: 255 }).notNull(),
 		folder: varchar('folder', { length: 255 }).notNull(),
 		name: varchar('name', { length: 255 }).notNull(),
 		extension: varchar('extension', { length: 255 }), // deprecated in favor of type - remove in future
@@ -78,7 +78,7 @@ export const Files = pgTable(
 	},
 	table => ({
 		workspace: index('Files_workspace_idx').on(table.workspaceId),
-		key: unique('Files_key_unique').on(table.workspaceId, table.key),
+		key: unique('Files_key_unique').on(table.workspaceId, table.s3Key),
 	}),
 );
 

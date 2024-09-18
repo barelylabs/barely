@@ -2,10 +2,15 @@
 
 import type { FileRecord } from '@barely/lib/server/routes/file/file.schema';
 
-import BackgroundImg from '@barely/ui/elements/background-image';
-import { Button } from '@barely/ui/elements/button';
-import { GridItemCheckbox } from '@barely/ui/elements/grid-list';
-import { Tooltip } from '@barely/ui/elements/tooltip';
+import { BackgroundImg } from '../background-image';
+import { Button } from '../button';
+import { GridItemCheckbox } from '../grid-list';
+import { Tooltip } from '../tooltip';
+
+// import BackgroundImg from '@barely/ui/elements/background-image';
+// import { Button } from '@barely/ui/elements/button';
+// import { GridItemCheckbox } from '@barely/ui/elements/grid-list';
+// import { Tooltip } from '@barely/ui/elements/tooltip';
 
 export interface MediaCardProps {
 	file: FileRecord;
@@ -23,7 +28,13 @@ export function MediaCard({ file, removeFile, isSelectable }: MediaCardProps) {
 				)}
 				{file.type === 'image' && (
 					<div className='relative inset-0 flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-md'>
-						<BackgroundImg sizes='128px' src={file.src} alt={file.name} />
+						<BackgroundImg
+							sizes='128px'
+							s3Key={file.s3Key}
+							alt={file.name}
+							placeholder={file.blurDataUrl ? 'blur' : undefined}
+							blurDataURL={file.blurDataUrl ? file.blurDataUrl : ''}
+						/>
 					</div>
 				)}
 				{!!removeFile && (

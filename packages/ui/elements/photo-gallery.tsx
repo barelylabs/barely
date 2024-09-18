@@ -5,7 +5,7 @@ import type { PhotoAlbumProps, RenderPhotoProps } from 'react-photo-album';
 import { useMediaQuery } from '@barely/lib/hooks/use-media-query';
 import ReactPhotoAlbum from 'react-photo-album';
 
-import BackgroundImg from './background-image';
+import { BackgroundImg } from './background-image';
 import {
 	Carousel,
 	CarouselContent,

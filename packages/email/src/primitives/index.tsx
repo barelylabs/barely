@@ -7,6 +7,7 @@ import {
 	Container as ContainerPrimitive,
 	Heading as HeadingPrimitive,
 	Hr as HrPrimitive,
+	Img as ImgPrimitive,
 	Link as LinkPrimitive,
 	Row,
 	Text,
@@ -52,6 +53,24 @@ export function EmailButton(props: { children: React.ReactNode; href: string }) 
 		<ButtonPrimitive href={props.href} style={style}>
 			{props.children}
 		</ButtonPrimitive>
+	);
+}
+
+export function EmailImage(props: {
+	src: string;
+	alt: string;
+	width: number;
+	height: number;
+	style: React.CSSProperties;
+}) {
+	return (
+		<ImgPrimitive
+			src={props.src}
+			alt={props.alt}
+			width={props.width}
+			height={props.height}
+			style={props.style}
+		/>
 	);
 }
 
