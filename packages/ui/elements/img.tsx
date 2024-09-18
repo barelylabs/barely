@@ -63,6 +63,7 @@ export function Img({
 		<Image
 			src={src}
 			alt={alt}
+			unoptimized
 			// loader={myLoader}
 			width={width}
 			height={height}
