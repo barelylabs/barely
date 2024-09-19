@@ -7,8 +7,6 @@ import type { ForwardedRef } from 'react';
 import { cn } from '@barely/lib/utils/cn';
 import {
 	BoldItalicUnderlineToggles,
-	// codeMirrorPlugin,
-	// CreateLink,
 	headingsPlugin,
 	jsxPlugin,
 	linkDialogPlugin,

@@ -40,7 +40,7 @@ const Hero = (props: HeroProps) => {
 						{props.badgeLabel}
 					</Badge>
 				)}
-				<H size='hero' className={className}>
+				<H size='1' className={className}>
 					{props.title}
 				</H>
 				<Lead className={cn(className, 'delay-500')}>{props.subtitle}</Lead>

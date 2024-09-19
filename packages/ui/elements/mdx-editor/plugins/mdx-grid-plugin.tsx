@@ -1,12 +1,17 @@
 'use client';
 
-import type { JsxComponentDescriptor } from '@mdxeditor/editor';
+import type { JsxComponentDescriptor, JsxEditorProps } from '@mdxeditor/editor';
 import type { LexicalEditor } from 'lexical';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
+import type { z } from 'zod';
+import { useMemo, useState } from 'react';
+import { useZodForm } from '@barely/lib/hooks/use-zod-form';
+import { mdxGridSchema } from '@barely/lib/server/mdx/mdx.schema';
 import {
 	insertJsx$,
 	NestedLexicalEditor,
 	Button as ToolbarButton,
+	useMdastNodeUpdater,
 	useNestedEditorContext,
 	usePublisher,
 } from '@mdxeditor/editor';
@@ -20,7 +25,12 @@ import {
 	KEY_BACKSPACE_COMMAND,
 } from 'lexical';
 
+import { Form, SubmitButton } from '../../../forms';
+import { SelectField } from '../../../forms/select-field';
+import { ToggleField } from '../../../forms/toggle-field';
+import { Button } from '../../button';
 import { Icon } from '../../icon';
+import { Popover, PopoverContent, PopoverTrigger } from '../../popover';
 
 export const mdxGridPlugin: JsxComponentDescriptor[] = [
 	{
@@ -50,9 +60,18 @@ export const mdxGridPlugin: JsxComponentDescriptor[] = [
 	{
 		name: 'Grid',
 		kind: 'flow',
-		props: [],
+		props: [
+			{
+				name: 'reverseOnMobile',
+				type: 'string',
+			},
+			{
+				name: 'growColumn',
+				type: 'string',
+			},
+		],
 		hasChildren: true,
-		Editor: () => {
+		Editor: props => {
 			const { parentEditor } = useNestedEditorContext();
 
 			parentEditor.registerCommand(
@@ -68,7 +87,7 @@ export const mdxGridPlugin: JsxComponentDescriptor[] = [
 			);
 
 			return (
-				<div className='flex flex-col gap-4 rounded-md border border-red p-4'>
+				<div className='my-4 flex flex-col gap-4 rounded-md border border-red p-4'>
 					<NestedLexicalEditor<MdxJsxFlowElement>
 						block={true}
 						getContent={node => {
@@ -92,16 +111,138 @@ export const mdxGridPlugin: JsxComponentDescriptor[] = [
 							};
 						}}
 					/>
+
+					<GridEditor {...props} />
+
+					{/* <div className='flex flex-row gap-4'>
+						<Toggle
+							pressed={reverse}
+							onPressedChange={value => {
+								console.log('typeof value', typeof value);
+								console.log('value', value);
+								console.log('value.toString()', value.toString());
+								updateMdastNode({
+									...mdastNode,
+									attributes: [
+										...mdastNode.attributes,
+										{
+											type: 'mdxJsxAttribute',
+											name: 'reverse',
+											value: reverse ? 'true' : 'false',
+										},
+									],
+								});
+							}}
+						>
+							{reverse ? 'Reverse' : 'Normal'}
+							<Icon.swap className='h-5 w-5' />
+						</Toggle>
+					</div> */}
 				</div>
 			);
 		},
 	},
 ];
 
+export const GridEditor: React.FC<JsxEditorProps> = ({ mdastNode }) => {
+	const [showEditModal, setShowEditModal] = useState(false);
+
+	const updateMdastNode = useMdastNodeUpdater();
+
+	const properties = useMemo(() => {
+		const reverseOnMobile = mdastNode.attributes.find(
+			a => a.type === 'mdxJsxAttribute' && a.name === 'reverseOnMobile',
+		)?.value;
+
+		const growColumn = mdastNode.attributes.find(
+			a => a.type === 'mdxJsxAttribute' && a.name === 'growColumn',
+		)?.value;
+
+		const GrowColumnIcon =
+			growColumn === 'left' ? Icon.gridGrowLeft
+			: growColumn === 'right' ? Icon.gridGrowRight
+			: Icon.gridGrowNone;
+
+		console.log('growColumn', growColumn, 'reverseOnMobile', reverseOnMobile);
+
+		return {
+			reverseOnMobile: typeof reverseOnMobile === 'string' ? reverseOnMobile : '',
+			growColumn:
+				typeof growColumn !== 'string' ? undefined : (
+					(growColumn as 'left' | 'right' | 'none')
+				),
+			GrowColumnIcon,
+		};
+	}, [mdastNode]);
+
+	const form = useZodForm({
+		schema: mdxGridSchema,
+		defaultValues: {
+			reverseOnMobile: properties.reverseOnMobile === 'true',
+			growColumn: properties.growColumn,
+		},
+	});
+
+	const onSubmit = (values: z.infer<typeof mdxGridSchema>) => {
+		const updatedAttributes = [
+			{
+				type: 'mdxJsxAttribute' as const,
+				name: 'reverseOnMobile',
+				value: values.reverseOnMobile ? 'true' : 'false',
+			},
+			{
+				type: 'mdxJsxAttribute' as const,
+				name: 'growColumn',
+				value: values.growColumn ?? 'none',
+			},
+		];
+
+		console.log('updatedAttributes', updatedAttributes);
+
+		updateMdastNode({
+			attributes: updatedAttributes,
+		});
+		setShowEditModal(false);
+	};
+
+	return (
+		<div className='flex flex-row items-center justify-between gap-2 rounded-md bg-gray-100 px-3 py-2'>
+			{/* <Icon.grid className='h-5 w-5' /> */}
+			<div className='flex flex-row items-center gap-2'>
+				<properties.GrowColumnIcon className='h-4 w-4' />
+				{properties.reverseOnMobile === 'true' && <Icon.swap className='h-4 w-4' />}
+			</div>
+			<Popover open={showEditModal} onOpenChange={setShowEditModal}>
+				<PopoverTrigger asChild>
+					<Button size='sm' startIcon='settings' variant='icon' look='ghost' />
+				</PopoverTrigger>
+				<PopoverContent>
+					<Form form={form} onSubmit={onSubmit} className='gap-2'>
+						<SelectField
+							options={[
+								{ value: 'left', label: <Icon.gridGrowLeft className='h-5 w-5' /> },
+								{ value: 'right', label: <Icon.gridGrowRight className='h-5 w-5' /> },
+								{ value: 'none', label: <Icon.gridGrowNone className='h-5 w-5' /> },
+							]}
+							control={form.control}
+							name='growColumn'
+						/>
+						<ToggleField control={form.control} name='reverseOnMobile'>
+							<Icon.swap className='h-5 w-5' />
+						</ToggleField>
+
+						<SubmitButton>Save</SubmitButton>
+					</Form>
+				</PopoverContent>
+			</Popover>
+		</div>
+	);
+};
+
 export const InsertCard = () => {
 	const insertJsx = usePublisher(insertJsx$);
 	return (
-		<>
+		<div className='flex flex-row items-center justify-between gap-2 rounded-md bg-gray-100 px-2 py-2'>
 			<ToolbarButton
 				onClick={() =>
 					insertJsx({
@@ -113,7 +254,7 @@ export const InsertCard = () => {
 			>
 				<Icon.card className='h-5 w-5' />
 			</ToolbarButton>
-		</>
+		</div>
 	);
 };
 
@@ -126,7 +267,10 @@ export const InsertGrid = () => {
 					insertJsx({
 						name: 'Grid',
 						kind: 'flow',
-						props: {},
+						props: {
+							growColumn: 'none',
+							reverseOnMobile: 'false',
+						},
 					})
 				}
 			>

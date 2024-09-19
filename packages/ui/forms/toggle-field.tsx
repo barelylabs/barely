@@ -6,21 +6,33 @@ import { Toggle } from '../elements/toggle';
 import { FieldMessages } from './field-wrapper';
 import { FieldControl, FormFieldContext, FormItem } from './index';
 
-export const ToggleField = <
+type ToggleFieldProps<
 	TFieldValues extends FieldValues = FieldValues,
 	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+> = FieldProps<TFieldValues, TName> & {
+	children?: React.ReactNode;
+};
+
+export const ToggleField = <
+	TFieldValues extends FieldValues = FieldValues,
+	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues> & {
+		children?: React.ReactNode;
+	},
 >({
 	hint,
+	children,
 	...props
-}: FieldProps<TFieldValues, TName>) => {
+}: ToggleFieldProps<TFieldValues, TName>) => {
 	return (
 		<FormFieldContext.Provider value={{ name: props.name }}>
 			<Controller
 				{...props}
 				render={({ field }) => (
-					<FormItem className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4'>
+					<FormItem>
 						<FieldControl>
-							<Toggle pressed={field.value} onPressedChange={field.onChange} />
+							<Toggle pressed={field.value} onPressedChange={field.onChange}>
+								{children}
+							</Toggle>
 						</FieldControl>
 						<FieldMessages {...{ description: props.description, hint }} />
 					</FormItem>

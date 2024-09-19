@@ -27,6 +27,7 @@ import {
 	PlayCircle,
 	Plugs,
 	ShoppingCart,
+	Swap,
 	TShirt,
 	Video,
 	VinylRecord,
@@ -73,6 +74,7 @@ import {
 	Code,
 	Code2,
 	Coins,
+	Columns2,
 	Copy,
 	Copyleft,
 	Copyright,
@@ -134,6 +136,8 @@ import {
 	Music,
 	Newspaper,
 	Palette,
+	PanelLeft,
+	PanelRight,
 	PartyPopper,
 	Pause,
 	Phone,
@@ -328,6 +332,10 @@ export const Icon = {
 	ghost: Ghost,
 	globe: Globe,
 	grid: LayoutGrid,
+	gridGrowLeft: PanelLeft,
+	gridGrowRight: PanelRight,
+	gridGrowNone: Columns2,
+
 	gridCell: BlocksIcon,
 	grip: GripVertical,
 
@@ -435,6 +443,7 @@ export const Icon = {
 	sticker: Sticker,
 	stickyNote: StickyNote,
 	sun: Sun,
+	swap: Swap,
 	sweatshirt: Hoodie,
 
 	tablet: Tablet,

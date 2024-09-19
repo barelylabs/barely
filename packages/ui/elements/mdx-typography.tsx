@@ -1,24 +1,25 @@
 import type { ReactNode } from 'react';
 
-import { H, Text } from './typography';
+import { H } from './typography';
 import { WrapBalancer } from './wrap-balancer';
 
 export const mdxTypography = {
 	p: ({ children }: { children?: ReactNode }) => (
-		<Text variant='lg/normal' className='text-center'>
+		// <Text variant='md/normal' className='text-center text-[1.125rem]'>
+		<p className='text-center align-text-bottom text-[1.125rem] leading-snug'>
 			<WrapBalancer ratio={0}>{children}</WrapBalancer>
-		</Text>
+		</p>
 	),
-	hero: ({ children }: { children?: ReactNode }) => (
-		<H size='hero' className='text-center'>
-			<WrapBalancer>{children}</WrapBalancer>
-		</H>
-	),
-	title: ({ children }: { children?: ReactNode }) => (
-		<H size='title' className='text-center'>
-			<WrapBalancer>{children}</WrapBalancer>
-		</H>
-	),
+	// hero: ({ children }: { children?: ReactNode }) => (
+	// 	<H size='hero' className='text-center'>
+	// 		<WrapBalancer>{children}</WrapBalancer>
+	// 	</H>
+	// ),
+	// title: ({ children }: { children?: ReactNode }) => (
+	// 	<H size='title' className='text-center'>
+	// 		<WrapBalancer>{children}</WrapBalancer>
+	// 	</H>
+	// ),
 	h1: ({ children }: { children?: ReactNode }) => (
 		<H size='1' className='text-center'>
 			<WrapBalancer>{children}</WrapBalancer>

@@ -1,5 +1,6 @@
 import '~/styles/globals.css';
 
+import type { Metadata } from 'next';
 import React from 'react';
 import { Inter as FontSans } from 'next/font/google';
 import localFont from 'next/font/local';
@@ -21,6 +22,23 @@ const fontSans = FontSans({
 	subsets: ['latin'],
 	variable: '--font-sans',
 });
+
+export const metadata: Metadata = {
+	title: 'barely.page',
+	icons: {
+		icon: [
+			{ url: '/_static/favicons/favicon-32x32.png', sizes: '32x32' },
+			{ url: '/_static/favicons/favicon-16x16.png', sizes: '16x16' },
+		],
+		apple: '/_static/favicons/apple-touch-icon.png',
+		other: [
+			{
+				rel: 'mask-icon',
+				url: '/_static/favicons/safari-pinned-tab.svg',
+			},
+		],
+	},
+};
 
 export default async function RootLayout({
 	children,
