@@ -113,6 +113,15 @@ export function CreateOrUpdateLandingPageModal({ mode }: { mode: 'create' | 'upd
 						data-bwignore
 						data-lpignore='true'
 					/>
+					<TextField
+						name='metaTitle'
+						label='Meta Title'
+						placeholder='Enter a meta title for the landing page'
+						control={form.control}
+						data-1p-ignore
+						data-bwignore
+						data-lpignore='true'
+					/>
 
 					<Label>Content</Label>
 					<MDXEditor

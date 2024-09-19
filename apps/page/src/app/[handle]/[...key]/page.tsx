@@ -13,6 +13,8 @@ import { getAssetHref, getLinkHref } from '@barely/lib/utils/mdx';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 
 import { Img } from '@barely/ui/elements/img';
+import { mdxCard } from '@barely/ui/elements/mdx-card';
+import { mdxGrid } from '@barely/ui/elements/mdx-grid';
 import { mdxTypography } from '@barely/ui/elements/mdx-typography';
 import { mdxVideoPlayer } from '@barely/ui/elements/mdx-video-player';
 
@@ -72,7 +74,7 @@ export default async function LandingPage({
 	const { cartFunnels, links, pressKits, landingPages, ...lp } = data;
 
 	return (
-		<div className='mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center gap-8 px-4  py-10 sm:gap-10'>
+		<div className='mx-auto flex min-h-screen w-full max-w-[824px] flex-col items-center gap-12 px-6 py-12 sm:gap-[3.25rem] md:gap-14'>
 			{cartFunnels?.length > 0 && <WarmupCart />}
 			<MDXRemote
 				source={lp.content ?? ''}
@@ -92,8 +94,8 @@ export default async function LandingPage({
 					}),
 					...mdxLinkButton({ landingPageId: lp.id, fbclid, fanId }),
 					...mdxImageFile(),
-					...mdxGrid(),
-					...mdxCard(),
+					...mdxGrid,
+					...mdxCard,
 				}}
 			/>
 			<LogVisit landingPageId={lp.id} />
@@ -219,33 +221,5 @@ function mdxImageFile() {
 
 	return {
 		ImageFile,
-	};
-}
-
-function mdxGrid() {
-	const Grid = ({ children }: { children: React.ReactNode[] }) => {
-		return <div className='grid gap-6 sm:gap-10 md:grid-cols-2'>{children}</div>;
-	};
-
-	return {
-		Grid,
-	};
-}
-
-function mdxCard() {
-	const Card = ({
-		children,
-		border = false,
-	}: {
-		children: React.ReactNode;
-		border?: boolean;
-	}) => {
-		return (
-			<div className={cn('rounded-md', border && 'border border-border')}>{children}</div>
-		);
-	};
-
-	return {
-		Card,
 	};
 }

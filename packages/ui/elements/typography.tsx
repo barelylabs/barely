@@ -65,13 +65,19 @@ const Text = ({ variant, children, className, ...props }: TextProps) => {
 const headerStyles = cva(['scroll-m-20 font-heading '], {
 	variants: {
 		size: {
-			hero: 'text-6xl md:text-7xl lg:text-[105px]',
-			title: 'text-5xl lg:text-6xl',
-			'1': 'text-4xl sm:text-5xl',
-			'2': 'text-3xl lg:text-4xl',
-			'3': 'text-2xl lg:text-3xl',
-			'4': 'text-xl lg:text-2xl',
-			'5': 'text-lg',
+			// hero: 'text-6xl md:text-7xl lg:text-[105px]',
+			// title: 'text-5xl lg:text-6xl',
+			// '1': 'text-4xl sm:text-5xl',
+			// '2': 'text-3xl lg:text-4xl',
+			// '3': 'text-2xl lg:text-3xl',
+			// '4': 'text-xl lg:text-2xl',
+			// '5': 'text-lg',
+			'1': 'text-6xl md:text-7xl lg:text-[85px]',
+			'2': 'text-5xl lg:text-6xl',
+			'3': 'text-4xl sm:text-5xl',
+			'4': 'text-3xl lg:text-4xl',
+			'5': 'text-2xl lg:text-3xl',
+			'6': 'text-xl lg:text-2xl',
 		},
 
 		subtle: { true: 'text-subtle-foreground' },
@@ -96,7 +102,7 @@ const H = forwardRef<HTMLHeadingElement, HeaderProps>(
 		const wrapBalancedChildren = <WrapBalancer>{children}</WrapBalancer>;
 
 		switch (size) {
-			case 'hero' || 'title' || '1' || null || undefined:
+			case '1' || null || undefined:
 				return (
 					<h1 ref={ref} className={styles} {...props}>
 						{wrapBalancedChildren}

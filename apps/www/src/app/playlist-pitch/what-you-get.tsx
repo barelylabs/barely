@@ -43,7 +43,7 @@ const WhatYouGet = () => {
 	return (
 		<div className='mt-10 flex w-full flex-col items-center space-y-4 text-center sm:mt-20'>
 			<AnimateOnScroll fade slideFrom='bottom'>
-				<H size='hero' className='mt-14'>
+				<H size='1' className='mt-14'>
 					What you get
 				</H>
 			</AnimateOnScroll>

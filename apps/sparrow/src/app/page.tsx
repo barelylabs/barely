@@ -16,7 +16,7 @@ export default function Component() {
 						/>
 					</picture>
 
-					<H size='hero'>Barely Sparrow</H>
+					<H size='1'>Barely Sparrow</H>
 				</div>
 				<p className='mt-6 text-lg md:max-w-2xl md:text-xl'>
 					An independent record label and digital marketing agency based in Brooklyn, NY.

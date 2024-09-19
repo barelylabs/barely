@@ -42,7 +42,7 @@ const HowItWorks = () => {
 			<div className='max-w-2xl'>
 				<AnimateOnScroll repeat fade slideFrom='bottom'>
 					<H
-						size='hero'
+						size='2'
 						className='pb-6 text-center animate-in slide-in-from-top-0 sm:pb-10'
 					>
 						How it works
@@ -61,7 +61,7 @@ const HowItWorks = () => {
 								{/* <Card> */}
 								<div className='flex flex-row'>
 									<div className='min-w-[75px]'>
-										<H size='hero' className='mb-0 font-extralight text-pink-200 '>
+										<H size='2' className='mb-0 font-extralight text-pink-200 '>
 											0{index + 1}
 										</H>
 										<Text variant='sm/semibold' className='uppercase text-pink-200'>

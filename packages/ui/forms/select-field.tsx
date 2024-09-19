@@ -4,7 +4,6 @@ import { Controller } from 'react-hook-form';
 
 import type { InputProps } from '../elements/input';
 import type { FieldProps } from './field-wrapper';
-// import { FormControl } from '../elements/form';
 import {
 	Select,
 	SelectContent,

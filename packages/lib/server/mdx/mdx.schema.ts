@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { queryBooleanSchema } from '../../utils/zod-helpers';
 import { MDX_IMAGE_SIZES } from './mdx.constants';
 
 export const mdxVideoSchema = z.object({
@@ -33,4 +34,9 @@ export const mdxImageFileSchema = z.object({
 
 	alt: z.string(),
 	size: z.enum(MDX_IMAGE_SIZES).optional(),
+});
+
+export const mdxGridSchema = z.object({
+	reverseOnMobile: queryBooleanSchema,
+	growColumn: z.enum(['left', 'right', 'none']).optional(),
 });

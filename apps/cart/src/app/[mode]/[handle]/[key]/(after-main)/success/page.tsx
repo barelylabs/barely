@@ -36,7 +36,7 @@ export default async function CartSuccessPage({
 
 	return (
 		<>
-			<H size='hero' className='mt-4 text-center text-brand'>
+			<H size='1' className='mt-4 text-center text-brand'>
 				{publicFunnel.successPageHeadline ?? 'Thank you!'}
 			</H>
 

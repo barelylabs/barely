@@ -7,7 +7,7 @@ const LetsGetStarted = () => {
 		<Card className='mt-24 p-6 sm:p-8'>
 			<div className='grid grid-cols-1 items-center gap-4 sm:grid-flow-col'>
 				<div className='flex flex-grow flex-col space-y-4'>
-					<H size='title'>Let&apos;s get started</H>
+					<H size='1'>Let&apos;s get started</H>
 					<Text variant='xl/normal' muted>
 						Create your first campaign, and we&apos;ll get to work matching you with the
 						perfect playlists!
@@ -27,7 +27,7 @@ const LetsGetStarted = () => {
 const GetStartedToday = () => {
 	return (
 		<div className='mt-20 flex max-w-2xl flex-col items-center space-y-4 text-left'>
-			<H size='title'>Get started today</H>
+			<H size='1'>Get started today</H>
 			<Text variant='xl/normal' muted className='pb-2'>
 				Submit your track in under 2 minutes.
 			</Text>
