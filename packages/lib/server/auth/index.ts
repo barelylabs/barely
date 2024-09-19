@@ -13,8 +13,11 @@ import { generateVerificationToken, sendLoginEmail } from './auth.fns';
 
 export interface SessionWorkspace extends Workspace {
 	role: User_To_Workspace['role'];
-	avatarImageUrl?: string;
-	headerImageUrl?: string;
+	// avatarImageUrl?: string;
+	// headerImageUrl?: string;
+
+	avatarImageS3Key?: string;
+	headerImageS3Key?: string;
 }
 
 export interface SessionUser extends DbUser {

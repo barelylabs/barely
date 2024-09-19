@@ -67,8 +67,11 @@ export function getSessionUserFromRawUser(user: RawSessionUser): SessionUser {
 		...user,
 		workspaces: user._workspaces.map(_w => ({
 			..._w.workspace,
-			avatarImageUrl: _w.workspace._avatarImages[0]?.file?.src ?? '',
-			headerImageUrl: _w.workspace._headerImages[0]?.file?.src ?? '',
+			// avatarImageUrl: _w.workspace._avatarImages[0]?.file?.src ?? '',
+			// headerImageUrl: _w.workspace._headerImages[0]?.file?.src ?? '',
+
+			avatarImageS3Key: _w.workspace._avatarImages[0]?.file?.s3Key ?? '',
+			headerImageS3Key: _w.workspace._headerImages[0]?.file?.s3Key ?? '',
 			role: _w.role,
 		})),
 	};

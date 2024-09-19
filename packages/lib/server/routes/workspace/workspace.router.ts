@@ -27,15 +27,6 @@ import {
 import { Workspaces } from './workspace.sql';
 
 export const workspaceRouter = createTRPCRouter({
-	// example: privateProcedure.query(async () => {
-	// 	const res = await exampleTask.trigger({ number: 42 });
-	// 	console.log('exampleTask res => ', res);
-
-	// 	await handleAbandonedUpsell.trigger({ cartId: 'cart_MasTVfFoTmNSkW1B' });
-
-	// 	return res;
-	// }),
-
 	current: privateProcedure.query(({ ctx }) => {
 		if (!ctx.workspace) return null;
 		return ctx.workspace;

@@ -17,7 +17,10 @@ const Review = (props: {
 		<div className='flex flex-row items-start gap-5 pb-3'>
 			<Avatar
 				imageUrl={props.reviewer?.imageUrl}
+				// imageS3Key={props.reviewer?.imageS3Key}
 				initials={initials(props.reviewer?.displayName ?? 'U')}
+				imageWidth={50}
+				imageHeight={50}
 			/>
 			<div className='flex flex-col space-y-2'>
 				<RatingDisplay rating={props.rating} by={props.reviewer?.displayName} />
