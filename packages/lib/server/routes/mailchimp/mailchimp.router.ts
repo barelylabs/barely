@@ -1,6 +1,7 @@
 // import { TRPCError } from '@trpc/server';
 import { and, eq } from 'drizzle-orm';
-import { z } from 'zod';
+
+// import { z } from 'zod';
 
 import { createTRPCRouter, workspaceQueryProcedure } from '../../api/trpc';
 import { getMailchimpAudiences } from '../../mailchimp/mailchimp.endpts.audiences';
@@ -8,11 +9,11 @@ import { ProviderAccounts } from '../provider-account/provider-account.sql';
 
 export const mailchimpRouter = createTRPCRouter({
 	defaultAudience: workspaceQueryProcedure
-		.input(
-			z.object({
-				handle: z.string(),
-			}),
-		)
+		// .input(
+		// 	z.object({
+		// 		handle: z.string(),
+		// 	}),
+		// )
 		.query(async ({ ctx }) => {
 			const mailchimpAccounts = await ctx.db.http.query.ProviderAccounts.findMany({
 				where: and(
@@ -45,11 +46,11 @@ export const mailchimpRouter = createTRPCRouter({
 		}),
 
 	audiencesByWorkspace: workspaceQueryProcedure
-		.input(
-			z.object({
-				handle: z.string(),
-			}),
-		)
+		// .input(
+		// 	z.object({
+		// 		handle: z.string(),
+		// 	}),
+		// )
 		.query(async ({ ctx }) => {
 			const mailchimpAccounts = await ctx.db.http.query.ProviderAccounts.findMany({
 				where: and(

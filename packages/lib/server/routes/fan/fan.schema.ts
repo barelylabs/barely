@@ -29,7 +29,7 @@ export const fanSearchParamsSchema = fanFilterParamsSchema.extend({
 });
 
 export const selectWorkspaceFansSchema = fanFilterParamsSchema.extend({
-	handle: z.string(),
+	// handle: z.string(),
 	cursor: z.object({ id: z.string(), createdAt: z.coerce.date() }).optional(),
 	limit: z.coerce.number().min(1).max(100).optional().default(20),
 });

@@ -169,33 +169,42 @@ export const privateProcedure = t.procedure.use(dbPoolMiddleware).use(async opts
 	});
 });
 
-export const workspaceQueryProcedure = privateProcedure.use(async opts => {
-	const { ctx } = opts;
+/* I believe this was implemented to differentiate workspace queries between different workspaces
+    On the server it's not a problem, because the workspace is well defined, 
+    but on the client (once we've moved into an SPA), React Query caches queries
+    and needs a way to differentiate between them. Otherwise, when a user switches workspaces, the
+    cached query data will still reference the previous workspace.
 
-	const rawInput = await opts.getRawInput();
+    The solution is to use the handle as part of the cache key.
+*/
+export const workspaceQueryProcedure = privateProcedure
+	.input(z.object({ handle: z.string() }))
+	.use(async opts => {
+		const { ctx } = opts;
+		const rawInput = await opts.getRawInput();
 
-	const parsedHandle = z.object({ handle: z.string() }).safeParse(rawInput);
+		const parsedHandle = z.object({ handle: z.string() }).safeParse(rawInput);
 
-	if (!parsedHandle.success) {
-		throw new TRPCError({
-			code: 'BAD_REQUEST',
-			message: 'Invalid handle',
+		if (!parsedHandle.success) {
+			throw new TRPCError({
+				code: 'BAD_REQUEST',
+				message: 'Invalid handle',
+			});
+		}
+
+		const workspace = getUserWorkspaceByHandle(ctx.user, parsedHandle.data.handle);
+
+		if (!workspace) {
+			throw new TRPCError({
+				code: 'NOT_FOUND',
+				message: 'Workspace not found',
+			});
+		}
+
+		return opts.next({
+			ctx: {
+				...opts.ctx,
+				workspace,
+			},
 		});
-	}
-
-	const workspace = getUserWorkspaceByHandle(ctx.user, parsedHandle.data.handle);
-
-	if (!workspace) {
-		throw new TRPCError({
-			code: 'NOT_FOUND',
-			message: 'Workspace not found',
-		});
-	}
-
-	return opts.next({
-		ctx: {
-			...opts.ctx,
-			workspace,
-		},
 	});
-});

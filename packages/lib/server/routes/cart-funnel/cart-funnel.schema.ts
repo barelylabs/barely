@@ -51,7 +51,7 @@ export type UpdateCartFunnel = z.infer<typeof updateCartFunnelSchema>;
 export type CartFunnel = InferSelectModel<typeof CartFunnels>;
 
 export const selectWorkspaceCartFunnelsSchema = z.object({
-	handle: z.string(),
+	// handle: z.string(),
 	search: z.string().optional(),
 	showArchived: z.boolean().optional(),
 	cursor: z.object({ id: z.string(), createdAt: z.coerce.date() }).optional(),

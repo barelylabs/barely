@@ -61,7 +61,7 @@ export const emailTemplateGroupSearchParamsSchema =
 /* select workspace email template groups */
 export const selectWorkspaceEmailTemplateGroupsSchema =
 	emailTemplateGroupFilterParamsSchema.extend({
-		handle: z.string(),
+		// handle: z.string(),
 		limit: z.number().min(1).max(100).default(50),
 		cursor: z
 			.object({

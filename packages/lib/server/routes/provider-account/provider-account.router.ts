@@ -57,7 +57,7 @@ const providerAccountRouter = createTRPCRouter({
 	byWorkspace: workspaceQueryProcedure
 		.input(
 			z.object({
-				handle: z.string(),
+				// handle: z.string(),
 				providers: insertProviderAccountSchema.shape.provider.array().optional(),
 			}),
 		)

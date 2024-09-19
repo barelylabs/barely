@@ -46,8 +46,10 @@ export default async function DashboardLayout({
 				<NewWorkspaceModal />
 				<div className='flex h-[100vh] w-full flex-col'>
 					<DashboardHeader />
-					<div className='grid h-fit grid-cols-1 gap-6 overflow-y-scroll px-6 py-6 lg:py-10'>
-						{children}
+					<div className='flex h-full w-full flex-col overflow-clip  p-6 lg:py-8'>
+						<div className='grid h-fit grid-cols-1 gap-6 overflow-y-scroll'>
+							{children}
+						</div>
 					</div>
 				</div>
 			</div>

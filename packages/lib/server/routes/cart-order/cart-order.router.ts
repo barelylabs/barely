@@ -146,7 +146,7 @@ export const cartOrderRouter = createTRPCRouter({
 		.input(
 			z.object({
 				cartId: z.string(),
-				handle: z.string(),
+				// handle: z.string(),
 			}),
 		)
 		.query(async ({ input, ctx }) => {

@@ -124,12 +124,14 @@ export function CreateOrUpdateLandingPageModal({ mode }: { mode: 'create' | 'upd
 					/>
 
 					<Label>Content</Label>
+					{/* <div className='rounded-lg border border-border bg-background p-4'> */}
 					<MDXEditor
 						markdown={mode === 'update' ? selectedLandingPage?.content ?? '' : ''}
 						onChange={content => {
 							form.setValue('content', content, { shouldDirty: true });
 						}}
 					/>
+					{/* </div> */}
 				</ModalBody>
 				<ModalFooter>
 					<SubmitButton fullWidth>{mode === 'create' ? 'Create' : 'Update'}</SubmitButton>

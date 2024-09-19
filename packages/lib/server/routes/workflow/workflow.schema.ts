@@ -66,7 +66,7 @@ export type UpdateWorkflow = z.infer<typeof updateWorkflowSchema>;
 export type Workflow = InferSelectModel<typeof Workflows>;
 
 export const selectWorkspaceWorkflowsSchema = z.object({
-	handle: z.string(),
+	// handle: z.string(),
 	search: z.string().optional(),
 	showArchived: z.boolean().optional(),
 	showDeleted: z.boolean().optional().default(false),

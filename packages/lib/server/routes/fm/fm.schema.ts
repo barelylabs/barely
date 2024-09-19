@@ -82,7 +82,7 @@ export const fmSearchParamsSchema = fmFilterParamsSchema.extend({
 });
 
 export const selectWorkspaceFmPagesSchema = fmFilterParamsSchema.extend({
-	handle: z.string(),
+	// handle: z.string(),
 	cursor: z.object({ id: z.string(), createdAt: z.coerce.date() }).optional(),
 	limit: z.coerce.number().min(1).max(100).optional().default(20),
 });

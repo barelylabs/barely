@@ -51,7 +51,7 @@ export type UpdateProduct = z.infer<typeof updateProductSchema>;
 export type Product = InferSelectModel<typeof Products>;
 
 export const selectWorkspaceProductsSchema = z.object({
-	handle: z.string(),
+	// handle: z.string(),
 	search: z.string().optional(),
 	showArchived: z.boolean().optional(),
 	cursor: z.object({ id: z.string(), createdAt: z.coerce.date() }).optional(),
