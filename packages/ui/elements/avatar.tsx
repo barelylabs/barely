@@ -52,6 +52,9 @@ AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName;
 
 const Avatar = (props: {
 	size?: string;
+	imageWidth: number;
+	imageHeight: number;
+	imageS3Key?: string;
 	imageUrl?: string;
 	displayName?: string;
 	initials?: string;
@@ -61,14 +64,30 @@ const Avatar = (props: {
 }) => {
 	return (
 		<AvatarRoot className={props.className}>
-			{props.imageUrl?.length ?
+			{props.imageS3Key?.length ?
+				<>
+					{/* <pre>{props.imageS3Key}</pre> */}
+					<Img
+						s3Key={props.imageS3Key}
+						alt={props.displayName ?? ''}
+						className={cn('aspect-square h-full w-full', props.className)}
+						sizes={props.sizes}
+						priority={props.priority}
+						width={props.imageWidth}
+						height={props.imageHeight}
+						// fill
+					/>
+				</>
+			: props.imageUrl ?
 				<Img
 					src={props.imageUrl}
 					alt={props.displayName ?? ''}
 					className={cn('aspect-square h-full w-full', props.className)}
 					sizes={props.sizes}
 					priority={props.priority}
-					fill
+					width={props.imageWidth}
+					height={props.imageHeight}
+					// fill
 				/>
 			:	<AvatarFallback>{props.initials}</AvatarFallback>}
 		</AvatarRoot>

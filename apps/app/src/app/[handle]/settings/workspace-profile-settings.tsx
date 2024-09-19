@@ -150,8 +150,8 @@ export function WorkspaceAvatarForm() {
 
 	const { isPendingPresigns, uploadQueue, uploading, handleSubmit } = avatarUploadState;
 
-	const imagePreview =
-		avatarUploadState.uploadQueue[0]?.previewImage ?? workspace.avatarImageUrl;
+	// const imagePreview =
+	// 	avatarUploadState.uploadQueue[0]?.previewImage;
 
 	return (
 		<SettingsCard
@@ -174,7 +174,8 @@ export function WorkspaceAvatarForm() {
 				{...avatarUploadState}
 				title=''
 				subtitle=''
-				imagePreviewSrc={imagePreview}
+				imagePreviewSrc={avatarUploadState.uploadQueue[0]?.previewImage}
+				existingImageS3Key={workspace.avatarImageS3Key}
 				className='h-28 w-28 rounded-full'
 			/>
 		</SettingsCard>
@@ -207,8 +208,8 @@ export function WorkspaceHeaderForm() {
 
 	const { isPendingPresigns, uploadQueue, uploading, handleSubmit } = headerUploadState;
 
-	const imagePreview =
-		headerUploadState.uploadQueue[0]?.previewImage ?? workspace.headerImageUrl;
+	// const imagePreview =
+	// 	headerUploadState.uploadQueue[0]?.previewImage ?? workspace.headerImageUrl;
 
 	return (
 		<SettingsCard
@@ -231,7 +232,8 @@ export function WorkspaceHeaderForm() {
 				{...headerUploadState}
 				title=''
 				subtitle=''
-				imagePreviewSrc={imagePreview}
+				imagePreviewSrc={headerUploadState.uploadQueue[0]?.previewImage}
+				existingImageS3Key={workspace.headerImageS3Key}
 				className='h-80 w-full rounded-md'
 			/>
 		</SettingsCard>

@@ -47,7 +47,8 @@ export function WorkspaceSwitcher() {
 	const normalizedObject = {
 		id: currentWorkspace.id,
 		name: currentWorkspace.name ?? currentWorkspace.handle,
-		avatarImageUrl: currentWorkspace.avatarImageUrl ?? '',
+		avatarImageS3Key: currentWorkspace.avatarImageS3Key,
+		// avatarImageUrl: currentWorkspace.avatarImageUrl ?? '',
 		type: toTitleCase(underscoresToSpaces(currentWorkspace.type)),
 	};
 
@@ -67,7 +68,10 @@ export function WorkspaceSwitcher() {
 				>
 					<Avatar
 						className='h-7 w-7'
-						imageUrl={normalizedObject.avatarImageUrl}
+						imageWidth={28}
+						imageHeight={28}
+						// imageUrl={normalizedObject.avatarImageUrl}
+						imageS3Key={normalizedObject.avatarImageS3Key}
 						sizes='50'
 						priority
 					/>
@@ -108,7 +112,9 @@ export function WorkspaceSwitcher() {
 										sizes='50'
 										priority
 										className='mr-2 h-5 w-5'
-										imageUrl={personalAccount.avatarImageUrl ?? ''}
+										imageS3Key={personalAccount.avatarImageS3Key}
+										imageWidth={20}
+										imageHeight={20}
 									/>
 									{personalAccount.name ?? personalAccount.handle}
 									<Icon.check
@@ -142,8 +148,10 @@ export function WorkspaceSwitcher() {
 								>
 									<Avatar
 										className='mr-2 h-5 w-5'
-										imageUrl={workspace.avatarImageUrl ?? ''}
-										sizes='50'
+										imageS3Key={workspace.avatarImageS3Key}
+										imageWidth={20}
+										imageHeight={20}
+										// sizes='50'
 										priority
 									/>
 									{workspace.name ?? workspace.handle}
