@@ -7,8 +7,6 @@ import { api } from '@barely/lib/server/api/react';
 
 import { Button } from '@barely/ui/elements/button';
 
-// import { useFlowContext } from '~/app/[handle]/flows/_components/flow-context';
-
 export function CreateFlowButton() {
 	const { handle } = useWorkspace();
 	const router = useRouter();

@@ -65,6 +65,24 @@ export const landingPageRouter = createTRPCRouter({
 			};
 		}),
 
+	byId: workspaceQueryProcedure
+		.input(
+			z.object({
+				landingPageId: z.string(),
+			}),
+		)
+		.query(async ({ input, ctx }) => {
+			const { landingPageId } = input;
+			const landingPage = await ctx.db.http.query.LandingPages.findFirst({
+				where: and(
+					eq(LandingPages.id, landingPageId),
+					eq(LandingPages.workspaceId, ctx.workspace.id),
+				),
+			});
+
+			return landingPage ?? raise('Landing page not found');
+		}),
+
 	create: privateProcedure
 		.input(createLandingPageSchema)
 		.mutation(async ({ input, ctx }) => {

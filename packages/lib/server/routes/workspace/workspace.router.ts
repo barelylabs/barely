@@ -78,11 +78,11 @@ export const workspaceRouter = createTRPCRouter({
 		}),
 
 	members: workspaceQueryProcedure
-		.input(
-			z.object({
-				handle: z.string(),
-			}),
-		)
+		// .input(
+		// 	z.object({
+		// 		handle: z.string(),
+		// 	}),
+		// )
 		.query(async ({ ctx }) => {
 			const members = await ctx.db.http.query._Users_To_Workspaces.findMany({
 				where: eq(_Users_To_Workspaces.workspaceId, ctx.workspace.id),
@@ -99,11 +99,11 @@ export const workspaceRouter = createTRPCRouter({
 		}),
 
 	invites: workspaceQueryProcedure
-		.input(
-			z.object({
-				handle: z.string(),
-			}),
-		)
+		// .input(
+		// 	z.object({
+		// 		handle: z.string(),
+		// 	}),
+		// )
 		.query(async ({ ctx }) => {
 			const invites = await ctx.db.http.query.WorkspaceInvites.findMany({
 				where: and(

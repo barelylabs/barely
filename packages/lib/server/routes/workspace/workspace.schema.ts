@@ -124,7 +124,7 @@ export function getPublicWorkspaceFromWorkspace(workspace: Workspace): PublicWor
 
 // assets
 export const workspaceAssetsSchema = z.object({
-	handle: z.string(),
+	// handle: z.string(),
 	types: z.array(z.enum(['cartFunnel', 'pressKit', 'landingPage'])).optional(),
 	search: z.string().optional(),
 });

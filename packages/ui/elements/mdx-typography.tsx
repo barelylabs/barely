@@ -10,16 +10,6 @@ export const mdxTypography = {
 			<WrapBalancer ratio={0}>{children}</WrapBalancer>
 		</p>
 	),
-	// hero: ({ children }: { children?: ReactNode }) => (
-	// 	<H size='hero' className='text-center'>
-	// 		<WrapBalancer>{children}</WrapBalancer>
-	// 	</H>
-	// ),
-	// title: ({ children }: { children?: ReactNode }) => (
-	// 	<H size='title' className='text-center'>
-	// 		<WrapBalancer>{children}</WrapBalancer>
-	// 	</H>
-	// ),
 	h1: ({ children }: { children?: ReactNode }) => (
 		<H size='1' className='text-center'>
 			<WrapBalancer>{children}</WrapBalancer>

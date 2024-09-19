@@ -159,16 +159,18 @@ export const emailDomainRouter = createTRPCRouter({
 			await tasks.trigger<typeof verifyEmailDomain>('verify-email-domain', domain);
 		}),
 
-	byName: workspaceQueryProcedure.input(z.string()).query(async ({ ctx, input }) => {
-		const domain = await ctx.db.http.query.EmailDomains.findFirst({
-			where: and(
-				eq(EmailDomains.name, input),
-				eq(EmailDomains.workspaceId, ctx.workspace.id),
-			),
-		});
+	byName: workspaceQueryProcedure
+		.input(z.object({ name: z.string() }))
+		.query(async ({ ctx, input }) => {
+			const domain = await ctx.db.http.query.EmailDomains.findFirst({
+				where: and(
+					eq(EmailDomains.name, input.name),
+					eq(EmailDomains.workspaceId, ctx.workspace.id),
+				),
+			});
 
-		return domain;
-	}),
+			return domain;
+		}),
 
 	byWorkspace: workspaceQueryProcedure
 		.input(selectWorkspaceEmailDomainsSchema)
