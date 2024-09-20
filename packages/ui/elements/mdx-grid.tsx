@@ -13,9 +13,9 @@ export const mdxGrid = {
 		return (
 			<div
 				className={cn(
-					'flex flex-col gap-8 sm:gap-10 md:grid md:grid-cols-2',
+					'flex flex-col gap-5 sm:gap-10 md:grid md:grid-cols-2',
 
-					!!reverseOnMobile && 'flex-col-reverse',
+					reverseOnMobile === true && 'flex-col-reverse',
 
 					growColumn === 'left' ? 'md:grid-cols-[3fr_2fr]'
 					: growColumn === 'right' ? 'md:grid-cols-[2fr_3fr]'

@@ -4,6 +4,7 @@ import type { LandingPage } from '@barely/lib/server/routes/landing-page/landing
 import type { Link } from '@barely/lib/server/routes/link/link.schema';
 import type { PressKit } from '@barely/lib/server/routes/press-kit/press-kit.schema';
 import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
 import type { z } from 'zod';
 import { MDX_IMAGE_SIZE_TO_WIDTH } from '@barely/lib/server/mdx/mdx.constants';
 import { eventReportSearchParamsSchema } from '@barely/lib/server/routes/event/event-report.schema';
@@ -12,6 +13,7 @@ import { cn } from '@barely/lib/utils/cn';
 import { getAssetHref, getLinkHref } from '@barely/lib/utils/mdx';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 
+import { Button } from '@barely/ui/elements/button';
 import { Img } from '@barely/ui/elements/img';
 import { mdxCard } from '@barely/ui/elements/mdx-card';
 import { mdxGrid } from '@barely/ui/elements/mdx-grid';
@@ -92,6 +94,7 @@ export default async function LandingPage({
 						fbclid,
 						fanId,
 					}),
+					...mdxLink({ fanId, landingPageId: lp.id }),
 					...mdxLinkButton({ landingPageId: lp.id, fbclid, fanId }),
 					...mdxImageFile(),
 					...mdxGrid,
@@ -221,5 +224,27 @@ function mdxImageFile() {
 
 	return {
 		ImageFile,
+	};
+}
+
+function mdxLink({ fanId, landingPageId }: { fanId?: string; landingPageId: string }) {
+	const MdxLandingPageLink = ({
+		href,
+		children,
+	}: {
+		href?: string;
+		children?: ReactNode;
+	}) => {
+		const hrefWithQueryParams =
+			href ? getLinkHref({ href, fanId, refererId: landingPageId }) : '';
+		return (
+			<Button look='link' href={hrefWithQueryParams}>
+				{children}
+			</Button>
+		);
+	};
+
+	return {
+		a: MdxLandingPageLink,
 	};
 }

@@ -11,7 +11,7 @@ export const mdxCard = {
 		return (
 			<div
 				className={cn(
-					'flex min-h-full flex-col items-center justify-center gap-5 rounded-md p-4',
+					'flex min-h-full flex-col items-center justify-center gap-5 rounded-md p-4 sm:gap-6',
 					border && 'border border-border',
 				)}
 			>
