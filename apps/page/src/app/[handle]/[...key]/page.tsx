@@ -76,7 +76,7 @@ export default async function LandingPage({
 	const { cartFunnels, links, pressKits, landingPages, ...lp } = data;
 
 	return (
-		<div className='mx-auto flex min-h-screen w-full max-w-[824px] flex-col items-center gap-12 px-6 py-12 sm:gap-[3.25rem] md:gap-14'>
+		<div className='mx-auto flex min-h-screen w-full max-w-[824px] flex-col items-center gap-12 px-4 py-10 sm:gap-[3.25rem] sm:px-6 sm:py-12 md:gap-14'>
 			{cartFunnels?.length > 0 && <WarmupCart />}
 			<MDXRemote
 				source={lp.content ?? ''}
