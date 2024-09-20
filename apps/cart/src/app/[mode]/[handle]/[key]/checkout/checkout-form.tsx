@@ -268,7 +268,11 @@ export function CheckoutForm({
 	const amounts = getAmountsForCheckout(publicFunnel, cart);
 
 	const { mainProduct, bumpProduct } = publicFunnel;
-	const mainProductImageSrc = mainProduct?._images[0]?.file.src ?? '';
+	// const mainProductImageSrc = mainProduct?._images[0]?.file.src ?? '';
+	const mainProductImageS3Key = mainProduct?._images[0]?.file.s3Key ?? '';
+	const mainProductBlurDataUrl = mainProduct?._images[0]?.file.blurDataUrl ?? '';
+	const bumpProductImageS3Key = bumpProduct?._images[0]?.file.s3Key ?? '';
+	const bumpProductBlurDataUrl = bumpProduct?._images[0]?.file.blurDataUrl ?? '';
 
 	const bumpNormalPrice = bumpProduct?.price ?? 0;
 
@@ -290,7 +294,8 @@ export function CheckoutForm({
 							<div className='mb-4 flex w-full flex-col gap-6 sm:flex-row'>
 								<Img
 									alt={mainProduct.name}
-									src={mainProductImageSrc}
+									s3Key={mainProductImageS3Key}
+									blurDataURL={mainProductBlurDataUrl}
 									width={208}
 									height={208}
 									className='h-auto w-[208px] rounded-md bg-neutral-600'
@@ -364,7 +369,8 @@ export function CheckoutForm({
 						{bumpProduct && (
 							<div className='grid grid-cols-1 gap-4 rounded-md border-3 border-dashed border-brand bg-background p-6 sm:grid-cols-[4fr_5fr]'>
 								<Img
-									src={bumpProduct._images[0]?.file.src ?? ''}
+									s3Key={bumpProductImageS3Key}
+									blurDataURL={bumpProductBlurDataUrl}
 									alt={bumpProduct?.name}
 									width={208}
 									height={208}
@@ -395,6 +401,7 @@ export function CheckoutForm({
 															event: c ? 'cart/addBump' : 'cart/removeBump',
 														});
 													}}
+													className='radix-state-checked:bg-brand'
 												/>
 											</div>
 										)}

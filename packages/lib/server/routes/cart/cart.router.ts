@@ -12,6 +12,7 @@ import { stripe } from '../../stripe';
 import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
 import { recordCartEvent } from '../event/event.fns';
 import { WEB_EVENT_TYPES__CART } from '../event/event.tb';
+import { Files } from '../file/file.sql';
 import { getStripeConnectAccountId } from '../stripe-connect/stripe-connect.fns';
 import {
 	createMainCartFromFunnel,
@@ -72,10 +73,56 @@ export const cartRouter = createTRPCRouter({
 
 			if (!funnel) throw new Error('funnel not found');
 
-			const cart = funnel._carts[0];
+			// check if product images have blurDataURLs. if not, generate them
+			if (
+				!funnel.mainProduct?._images[0]?.file.blurDataUrl &&
+				funnel.mainProduct?._images[0]?.file.s3Key
+			) {
+				const { getBlurHash } = await import('../file/file.blurhash');
+				const { blurHash, blurDataUrl } = await getBlurHash(
+					funnel.mainProduct?._images[0]?.file.s3Key,
+				);
+
+				await ctx.db.pool
+					.update(Files)
+					.set({ blurHash, blurDataUrl })
+					.where(eq(Files.id, funnel.mainProduct?._images[0]?.file.id));
+			}
+
+			if (
+				!funnel.bumpProduct?._images[0]?.file.blurDataUrl &&
+				funnel.bumpProduct?._images[0]?.file.s3Key
+			) {
+				const { getBlurHash } = await import('../file/file.blurhash');
+				const { blurHash, blurDataUrl } = await getBlurHash(
+					funnel.bumpProduct?._images[0]?.file.s3Key,
+				);
+
+				await ctx.db.pool
+					.update(Files)
+					.set({ blurHash, blurDataUrl })
+					.where(eq(Files.id, funnel.bumpProduct?._images[0]?.file.id));
+			}
+
+			if (
+				!funnel.upsellProduct?._images[0]?.file.blurDataUrl &&
+				funnel.upsellProduct?._images[0]?.file.s3Key
+			) {
+				const { getBlurHash } = await import('../file/file.blurhash');
+				const { blurHash, blurDataUrl } = await getBlurHash(
+					funnel.upsellProduct?._images[0]?.file.s3Key,
+				);
+
+				await ctx.db.pool
+					.update(Files)
+					.set({ blurHash, blurDataUrl })
+					.where(eq(Files.id, funnel.upsellProduct?._images[0]?.file.id));
+			}
+
+			const cart = funnel._carts[0] ?? (await createMainCartFromFunnel({ funnel }));
 
 			return {
-				cart: cart ?? (await createMainCartFromFunnel({ funnel })),
+				cart,
 				publicFunnel: getPublicFunnelFromServerFunnel(funnel),
 			};
 		}),

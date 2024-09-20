@@ -7,15 +7,15 @@ export const mdxGrid = {
 		growColumn,
 	}: {
 		children: React.ReactNode[];
-		reverseOnMobile?: boolean;
+		reverseOnMobile?: 'true' | 'false';
 		growColumn?: 'left' | 'right' | 'none';
 	}) => {
 		return (
 			<div
 				className={cn(
-					'flex flex-col gap-5 sm:gap-10 md:grid md:grid-cols-2',
+					'flex flex-col gap-3 sm:gap-10 md:grid md:grid-cols-2',
 
-					reverseOnMobile === true && 'flex-col-reverse',
+					reverseOnMobile === 'true' && 'flex-col-reverse',
 
 					growColumn === 'left' ? 'md:grid-cols-[3fr_2fr]'
 					: growColumn === 'right' ? 'md:grid-cols-[2fr_3fr]'
