@@ -6,7 +6,7 @@ import { WrapBalancer } from './wrap-balancer';
 export const mdxTypography = {
 	p: ({ children }: { children?: ReactNode }) => (
 		// <Text variant='md/normal' className='text-center text-[1.125rem]'>
-		<p className='text-center align-text-bottom text-sm leading-snug sm:text-[1.1rem] sm:leading-[1.425rem]'>
+		<p className='text-center align-text-bottom text-sm leading-snug sm:text-[1.05rem] sm:leading-[1.425rem]'>
 			<WrapBalancer ratio={0}>{children}</WrapBalancer>
 		</p>
 	),

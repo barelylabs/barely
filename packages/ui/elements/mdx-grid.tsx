@@ -13,7 +13,7 @@ export const mdxGrid = {
 		return (
 			<div
 				className={cn(
-					'flex flex-col gap-8 sm:gap-10 md:grid md:grid-cols-2',
+					'flex flex-col gap-5 sm:gap-10 md:grid md:grid-cols-2',
 
 					reverseOnMobile === true && 'flex-col-reverse',
 
