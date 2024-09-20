@@ -401,6 +401,7 @@ export function CheckoutForm({
 															event: c ? 'cart/addBump' : 'cart/removeBump',
 														});
 													}}
+													className='radix-state-checked:bg-brand'
 												/>
 											</div>
 										)}
