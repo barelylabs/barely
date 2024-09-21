@@ -15,10 +15,10 @@ import { dbSchema } from '../server/db';
 import { addToMailchimpAudience } from '../server/mailchimp/mailchimp.endpts.audiences';
 import { getAssetsFromMdx } from '../server/mdx/mdx.fns';
 import { Carts } from '../server/routes/cart/cart.sql';
+import { EmailDeliveries } from '../server/routes/email-delivery/email-delivery.sql';
 import { renderMarkdownToReactEmail } from '../server/routes/email-template/email-template.mdx';
 import {
 	_EmailTemplates_To_EmailTemplateGroups,
-	EmailDeliveries,
 	EmailTemplateGroups,
 	EmailTemplates,
 } from '../server/routes/email-template/email-template.sql';

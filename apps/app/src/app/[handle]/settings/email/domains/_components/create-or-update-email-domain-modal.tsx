@@ -10,6 +10,7 @@ import { cn } from '@barely/lib/utils/cn';
 import { Icon } from '@barely/ui/elements/icon';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
 import { Form, SubmitButton } from '@barely/ui/forms';
+import { SwitchField } from '@barely/ui/forms/switch-field';
 import { TextField } from '@barely/ui/forms/text-field';
 
 import { useEmailDomainContext } from '~/app/[handle]/settings/email/domains/_components/email-domain-context';
@@ -129,6 +130,18 @@ export function CreateOrUpdateEmailDomainModal({ mode }: { mode: 'create' | 'upd
 						disabled={mode === 'update' && selectedEmailDomain && domainInputLocked}
 						placeholder='hello.example.com'
 						infoTooltip='This is the domain that will be used to send emails from.'
+					/>
+					<SwitchField
+						control={control}
+						name='openTracking'
+						label='Open Tracking'
+						infoTooltip='This will track opens on your emails.'
+					/>
+					<SwitchField
+						control={control}
+						name='clickTracking'
+						label='Click Tracking'
+						infoTooltip='This will track clicks on marketing links in your emails.'
 					/>
 				</ModalBody>
 				<ModalFooter>

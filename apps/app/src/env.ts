@@ -5,6 +5,7 @@ import { z } from 'zod';
 export const env = createEnv({
 	extends: [libEnv],
 	server: {
+		RESEND_WEBHOOK_SECRET: z.string(),
 		STRIPE_WEBHOOK_SECRET: z.string(),
 		STRIPE_CONNECT_WEBHOOK_SECRET: z.string(),
 	},

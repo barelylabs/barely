@@ -57,11 +57,20 @@ export const emailDomainRouter = createTRPCRouter({
 				throw new Error('No data returned from Resend');
 			}
 
+			if (input.clickTracking ?? input.openTracking) {
+				await resend.domains.update({
+					id: domainRes.data.id,
+					clickTracking: input.clickTracking ?? false,
+					openTracking: input.openTracking ?? false,
+				});
+			}
+
 			await ctx.db.http.insert(EmailDomains).values({
 				id: newId('emailDomain'),
 				workspaceId: ctx.workspace.id,
-				name: input.name,
-				region: input.region,
+				...input,
+				// name: input.name,
+				// region: input.region,
 				resendId: domainRes.data.id,
 				records: domainRes.data.records,
 			});
@@ -72,11 +81,43 @@ export const emailDomainRouter = createTRPCRouter({
 	update: privateProcedure
 		.input(updateEmailDomainSchema)
 		.mutation(async ({ ctx, input }) => {
-			const updatedDomain = await ctx.db.http
+			const { clickTracking, openTracking } = input;
+			const domain = await ctx.db.pool.query.EmailDomains.findFirst({
+				where: and(
+					eq(EmailDomains.id, input.id),
+					eq(EmailDomains.workspaceId, ctx.workspace.id),
+				),
+			});
+
+			if (!domain) {
+				throw new Error('Domain not found');
+			}
+
+			if (
+				(clickTracking === true && domain.clickTracking === false) ||
+				(openTracking === true && domain.openTracking === false)
+			) {
+				const resendRes = await resend.domains.update({
+					id: domain.resendId,
+					clickTracking: clickTracking ?? false,
+					openTracking: openTracking ?? false,
+				});
+
+				if (resendRes.error) {
+					throw new TRPCError({
+						code: 'INTERNAL_SERVER_ERROR',
+						message: `Resend error: ${resendRes.error.name} - ${resendRes.error.message}`,
+					});
+				}
+			}
+
+			const updatedDomain = await ctx.db.pool
 				.update(EmailDomains)
 				.set({
 					name: input.name,
 					region: input.region,
+					clickTracking: input.clickTracking,
+					openTracking: input.openTracking,
 				})
 				.where(
 					and(

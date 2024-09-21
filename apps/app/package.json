@@ -54,6 +54,7 @@
 		"remeda": "^1.24.0",
 		"sharp": "^0.33.2",
 		"superjson": "^2.2.1",
+		"svix": "^1.35.0",
 		"tailwindcss-animate": "^1.0.7",
 		"trpc-openapi": "^1.2.0",
 		"zod": "^3.23.8",
