@@ -1,5 +1,6 @@
 import { eq } from 'drizzle-orm';
 
+import { wait } from '../../../utils/wait';
 import { dbHttp } from '../../db';
 import { emailEventSchema } from './email-delivery.schema';
 import { EmailDeliveries } from './email-delivery.sql';
@@ -13,6 +14,8 @@ export async function handleEmailEvent(payload: unknown) {
 
 	const { type, data } = event.data;
 
+	await wait(10000); // hacky, but trying to make sure we've added the email delivery to our db at the point of receiving the event from Resend
+
 	switch (type) {
 		case 'email.bounced': {
 			const { email_id } = data;
@@ -20,6 +23,7 @@ export async function handleEmailEvent(payload: unknown) {
 			await dbHttp
 				.update(EmailDeliveries)
 				.set({
+					status: 'bounced',
 					bouncedAt: new Date(),
 				})
 				.where(eq(EmailDeliveries.resendId, email_id));
@@ -32,6 +36,7 @@ export async function handleEmailEvent(payload: unknown) {
 			await dbHttp
 				.update(EmailDeliveries)
 				.set({
+					status: 'delivered',
 					deliveredAt: new Date(),
 				})
 				.where(eq(EmailDeliveries.resendId, email_id));
@@ -44,6 +49,7 @@ export async function handleEmailEvent(payload: unknown) {
 			await dbHttp
 				.update(EmailDeliveries)
 				.set({
+					status: 'opened',
 					openedAt: new Date(),
 				})
 				.where(eq(EmailDeliveries.resendId, email_id));
@@ -56,6 +62,7 @@ export async function handleEmailEvent(payload: unknown) {
 			await dbHttp
 				.update(EmailDeliveries)
 				.set({
+					status: 'clicked',
 					clickedAt: new Date(),
 				})
 				.where(eq(EmailDeliveries.resendId, email_id));
@@ -68,6 +75,7 @@ export async function handleEmailEvent(payload: unknown) {
 			await dbHttp
 				.update(EmailDeliveries)
 				.set({
+					status: 'complained',
 					complainedAt: new Date(),
 				})
 				.where(eq(EmailDeliveries.resendId, email_id));
