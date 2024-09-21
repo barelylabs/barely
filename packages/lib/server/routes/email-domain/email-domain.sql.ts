@@ -1,6 +1,6 @@
 import type { Resend_DomainRecord } from '@barely/email';
 import { relations } from 'drizzle-orm';
-import { pgTable, text, varchar } from 'drizzle-orm/pg-core';
+import { boolean, pgTable, text, varchar } from 'drizzle-orm/pg-core';
 
 import { customJsonb, dbId, primaryId, timestamps } from '../../../utils/sql';
 import { Workspaces } from '../workspace/workspace.sql';
@@ -28,6 +28,9 @@ export const EmailDomains = pgTable('EmailDomains', {
 		.default('not_started'),
 
 	records: customJsonb<Resend_DomainRecord[]>('records').notNull().default([]),
+
+	clickTracking: boolean('clickTracking').notNull().default(false),
+	openTracking: boolean('openTracking').notNull().default(false),
 });
 
 export const EmailDomainRelations = relations(EmailDomains, ({ one }) => ({

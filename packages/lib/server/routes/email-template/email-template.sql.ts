@@ -6,13 +6,12 @@ import {
 	pgTable,
 	primaryKey,
 	text,
-	timestamp,
 	unique,
 } from 'drizzle-orm/pg-core';
 
 import { dbId, primaryId, timestamps } from '../../../utils/sql';
 import { EmailAddresses } from '../email-address/email-address.sql';
-import { Fans } from '../fan/fan.sql';
+import { EmailDeliveries } from '../email-delivery/email-delivery.sql';
 import { Tags } from '../tag/tag.sql';
 import { Workspaces } from '../workspace/workspace.sql';
 
@@ -196,39 +195,3 @@ export const EmailTemplateGroupTagsRelations = relations(
 		}),
 	}),
 );
-
-/* Email Deliveries */
-export const EmailDeliveries = pgTable('EmailDeliveries', {
-	...primaryId,
-	...timestamps,
-	workspaceId: dbId('workspaceId')
-		.notNull()
-		.references(() => Workspaces.id),
-	emailTemplateId: dbId('emailTemplateId')
-		.notNull()
-		.references(() => EmailTemplates.id),
-
-	// delivery
-	resendId: text('resendId'),
-	fanId: dbId('fanId')
-		.notNull()
-		.references(() => Fans.id),
-	status: text('status', { enum: ['scheduled', 'sent', 'failed'] }).notNull(),
-	scheduledAt: timestamp('scheduledAt'),
-	sentAt: timestamp('sentAt'),
-});
-
-export const EmailDeliveryRelations = relations(EmailDeliveries, ({ one }) => ({
-	emailTemplate: one(EmailTemplates, {
-		fields: [EmailDeliveries.emailTemplateId],
-		references: [EmailTemplates.id],
-	}),
-	workspace: one(Workspaces, {
-		fields: [EmailDeliveries.workspaceId],
-		references: [Workspaces.id],
-	}),
-	fan: one(Fans, {
-		fields: [EmailDeliveries.fanId],
-		references: [Fans.id],
-	}),
-}));
