@@ -75,6 +75,8 @@ function EmailDomainCard({
 	const { name, records } = emailDomain;
 	const [isVerifying, setIsVerifying] = useState(false);
 	const { copyToClipboard } = useCopy();
+	const { setShowUpdateEmailDomainModal, setEmailDomainSelection } =
+		useEmailDomainContext();
 
 	const { mutate: verifyDomain } = api.emailDomain.verifyOnResend.useMutation({
 		onMutate: () => {
@@ -112,6 +114,16 @@ function EmailDomainCard({
 						>
 							Verify DNS Records
 						</Button>
+
+						<Button
+							look='ghost'
+							size='sm'
+							startIcon='dots'
+							onClick={() => {
+								setEmailDomainSelection(new Set([emailDomain.id]));
+								setShowUpdateEmailDomainModal(true);
+							}}
+						/>
 					</div>
 				</div>
 				<Table>
