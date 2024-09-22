@@ -102,7 +102,9 @@ export function CreateOrUpdateEmailDomainModal({ mode }: { mode: 'create' | 'upd
 		>
 			<ModalHeader
 				icon='domain'
-				title={mode === 'create' ? 'Add Email Domain' : selectedEmailDomain?.name}
+				title={
+					mode === 'create' ? 'Add Email Domain' : `Update ${selectedEmailDomain?.name}`
+				}
 			/>
 			<Form form={form} onSubmit={handleSubmit}>
 				<ModalBody>

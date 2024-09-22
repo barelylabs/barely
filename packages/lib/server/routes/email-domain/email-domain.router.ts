@@ -95,7 +95,9 @@ export const emailDomainRouter = createTRPCRouter({
 
 			if (
 				(clickTracking === true && domain.clickTracking === false) ||
-				(openTracking === true && domain.openTracking === false)
+				(openTracking === true && domain.openTracking === false) ||
+				(clickTracking === false && domain.clickTracking === true) ||
+				(openTracking === false && domain.openTracking === true)
 			) {
 				const resendRes = await resend.domains.update({
 					id: domain.resendId,
