@@ -8,7 +8,7 @@ const secret = env.RESEND_WEBHOOK_SECRET;
 
 const wh = new Webhook(secret);
 
-export default async function POST(req: NextRequest) {
+export async function POST(req: NextRequest) {
 	const body = await req.text();
 	// const payload = req.body;
 	// const headers = req.headers;
