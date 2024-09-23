@@ -38,3 +38,24 @@ export const defaultFan: CreateFan = {
 	fullName: '',
 	email: '',
 };
+
+export const importFansFromCsvColumnMappingsSchema = z.object({
+	firstName: z.string().optional().describe('The first name (firstName) of the fan'),
+	lastName: z.string().optional().describe('The last name (lastName) of the fan'),
+	fullName: z.string().optional().describe('The full name (fullName) of the fan'),
+	email: z.string().describe('The email address of the fan'),
+	phoneNumber: z
+		.string()
+		.optional()
+		.describe('The phone number (phoneNumber) of the fan'),
+	createdAt: z.string().describe('The date and time the fan was created (createdAt)'),
+});
+
+/* making this shallow b/c the SelectFieldOption type inference currently only works one level deep
+I'd prefer to fix that and go back to having a nested columnMappings object */
+export const importFansFromCsvSchema = importFansFromCsvColumnMappingsSchema.extend({
+	csvFileId: z.string(),
+	// columnMappings: importFansFromCsvColumnMappingsSchema,
+	optIntoEmailMarketing: z.boolean(),
+	optIntoSmsMarketing: z.boolean(),
+});

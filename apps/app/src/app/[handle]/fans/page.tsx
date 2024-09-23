@@ -10,6 +10,10 @@ import { CreateFanButton } from '~/app/[handle]/fans/_components/create-fan-butt
 import { CreateOrUpdateFanModal } from '~/app/[handle]/fans/_components/create-or-update-fan-modal';
 import { FanContextProvider } from '~/app/[handle]/fans/_components/fan-context';
 import { FanHotkeys } from '~/app/[handle]/fans/_components/fan-hotkeys';
+import {
+	ImportFansButton,
+	ImportFansFromCsvModal,
+} from '~/app/[handle]/fans/_components/import-fans-modal';
 
 export default function FansPage({
 	params,
@@ -31,7 +35,15 @@ export default function FansPage({
 
 	return (
 		<FanContextProvider initialFansFirstPage={fans}>
-			<DashContentHeader title='Fans' button={<CreateFanButton />} />
+			<DashContentHeader
+				title='Fans'
+				button={
+					<div className='flex flex-row gap-2'>
+						<ImportFansButton />
+						<CreateFanButton />
+					</div>
+				}
+			/>
 			<AllFans />
 
 			<CreateOrUpdateFanModal mode='create' />
@@ -39,6 +51,8 @@ export default function FansPage({
 
 			<ArchiveOrDeleteFanModal mode='archive' />
 			<ArchiveOrDeleteFanModal mode='delete' />
+
+			<ImportFansFromCsvModal />
 
 			<FanHotkeys />
 		</FanContextProvider>
