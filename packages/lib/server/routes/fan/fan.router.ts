@@ -1,6 +1,8 @@
+import { tasks } from '@trigger.dev/sdk/v3';
 import { and, asc, desc, eq, gt, inArray, lt, or } from 'drizzle-orm';
 import { z } from 'zod';
 
+import type { importFansFromCsv } from '../../../trigger/fan.trigger';
 import { newId } from '../../../utils/id';
 import { raise } from '../../../utils/raise';
 import { sqlAnd, sqlStringContains } from '../../../utils/sql';
@@ -11,6 +13,8 @@ import {
 } from '../../api/trpc';
 import {
 	createFanSchema,
+	// importFansFromCsvColumnMappingsSchema,
+	importFansFromCsvSchema,
 	selectWorkspaceFansSchema,
 	updateFanSchema,
 } from './fan.schema';
@@ -52,6 +56,38 @@ export const fanRouter = createTRPCRouter({
 				fans,
 				nextCursor,
 			};
+		}),
+
+	generateCsvMapping: privateProcedure
+		.input(
+			z.object({
+				fieldColumns: z.array(z.string()),
+				firstRows: z.array(
+					z.record(z.union([z.string(), z.number(), z.boolean()]).nullable()),
+				),
+			}),
+		)
+		.mutation(async ({ input }) => {
+			const { fieldColumns, firstRows } = input;
+
+			const { generateCsvMapping } = await import('./fan.ai');
+
+			const csvMapping = await generateCsvMapping(fieldColumns, firstRows);
+
+			return csvMapping;
+		}),
+
+	importFromCsv: privateProcedure
+		.input(importFansFromCsvSchema)
+		.mutation(async ({ input }) => {
+			const { csvFileId, optIntoEmailMarketing, optIntoSmsMarketing, ...columnMappings } =
+				input;
+			await tasks.trigger<typeof importFansFromCsv>('import-fans-from-csv', {
+				csvFileId,
+				columnMappings,
+				optIntoEmailMarketing,
+				optIntoSmsMarketing,
+			});
 		}),
 
 	create: privateProcedure.input(createFanSchema).mutation(async ({ input, ctx }) => {

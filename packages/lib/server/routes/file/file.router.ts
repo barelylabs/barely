@@ -34,6 +34,7 @@ export const fileRouter = createTRPCRouter({
 					eq(Files.uploadStatus, 'complete'),
 					!!folder && eq(Files.folder, folder),
 					!!excludeFolders?.length && notInArray(Files.folder, excludeFolders),
+					notInArray(Files.folder, ['imports/fans']),
 					// notInArray(Files.folder, ['avatars', 'product-images']),
 					!!types?.length && inArray(Files.type, types),
 					!!search?.length && sqlStringContains(Files.name, search),

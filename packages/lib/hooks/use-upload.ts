@@ -51,7 +51,7 @@ export function useUpload({
 		),
 	);
 
-	const { mutate: getPresigned, isPending: presignedIsPending } =
+	const { mutate: getPresigned, isPending: isPendingPresigns } =
 		api.file.getPresigned.useMutation();
 
 	const { mutateAsync: onAllPartsUploaded } =
@@ -285,7 +285,7 @@ export function useUpload({
 		setUploadQueue,
 		removeFromUploadQueue,
 		clearUploadQueue,
-		isPendingPresigns: presignedIsPending,
+		isPendingPresigns,
 		uploading,
 		handleSubmit,
 		...useDropzoneReturn,

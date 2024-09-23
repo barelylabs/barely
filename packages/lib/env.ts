@@ -35,6 +35,7 @@ const rateLimitSchema = z
 
 export const env = createEnv({
 	server: {
+		ANTHROPIC_API_KEY: z.string(),
 		AWS_S3_BUCKET_NAME: z.string(),
 		AWS_S3_REGION: z.string(),
 		AWS_S3_ACCESS_KEY_ID: z.string(),

@@ -123,6 +123,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 				className={cn(
 					'flex items-center justify-center',
 					props.disabled ? 'cursor-not-allowed' : '',
+					fullWidth ? 'w-full' : '',
 				)}
 			>
 				<button
