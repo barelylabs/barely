@@ -1,24 +1,35 @@
 import { Resend } from 'resend';
 import { z } from 'zod';
 
-export const resend = new Resend(process.env.RESEND_API_KEY);
+import { env } from './env';
+
+export const resend = new Resend(env.RESEND_API_KEY);
 
 type Resend_GetDomain = Awaited<ReturnType<typeof resend.domains.get>>;
 export type Resend_DomainRecord = NonNullable<Resend_GetDomain['data']>['records'][0];
 
-interface SendEmailProps {
+type SendEmailProps = {
 	from: string;
 	fromFriendlyName?: string;
 	to: string | string[];
 	subject: string;
-	type: 'transactional' | 'marketing';
+
 	replyTo?: string;
 	bcc?: string | string[];
 	cc?: string | string[];
 	react: JSX.Element;
 	text?: string;
 	html?: string;
-}
+} & (
+	| {
+			type: 'transactional';
+			listUnsubscribeUrl?: string;
+	  }
+	| {
+			type: 'marketing';
+			listUnsubscribeUrl: string;
+	  }
+);
 
 export async function sendEmail(props: SendEmailProps) {
 	const safeParsedFrom = z.string().email().safeParse(props.from);
@@ -37,6 +48,13 @@ export async function sendEmail(props: SendEmailProps) {
 		cc: props.cc,
 		bcc: props.bcc,
 		reply_to: props.replyTo,
+		headers:
+			props.type === 'marketing' ?
+				{
+					'List-Unsubscribe': `<${props.listUnsubscribeUrl}>`,
+					'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+				}
+			:	undefined,
 	});
 
 	if (res.error) {

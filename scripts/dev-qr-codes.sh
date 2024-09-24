@@ -6,10 +6,11 @@ bio_qr=http://$ip_address:3001
 cart_qr=http://$ip_address:3002
 fm_qr=http://$ip_address:3003
 link_qr=http://$ip_address:3004
-page_qr=http://$ip_address:3005
-press_qr=http://$ip_address:3006
-sparrow_qr=http://$ip_address:3007
-www_qr=http://$ip_address:3008
+manage_email_qr=http://$ip_address:3005
+page_qr=http://$ip_address:3006
+press_qr=http://$ip_address:3007
+sparrow_qr=http://$ip_address:3008
+www_qr=http://$ip_address:3009
 
 echo "app::3000"
 qrencode -t ansiutf8 -o - $app_qr

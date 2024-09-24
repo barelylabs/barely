@@ -150,7 +150,8 @@ export const emailTemplateRouter = createTRPCRouter({
 	sendTestEmail: privateProcedure
 		.input(sendTestEmailSchema)
 		.mutation(async ({ ctx, input }) => {
-			const { to, fromId, variables } = input;
+			const { to, fromId, variables, type } = input;
+
 			const fromRes = await ctx.db.http.query.EmailAddresses.findFirst({
 				where: eq(EmailAddresses.id, fromId),
 				columns: {
@@ -184,7 +185,10 @@ export const emailTemplateRouter = createTRPCRouter({
 				// tracking
 				emailTemplateId: '',
 				fanId: '',
+				listUnsubscribeUrl: type === 'marketing' ? 'email_delivery_test' : undefined,
 			});
+
+			// const listUnsubscribeHeader = getAbsoluteUrl('manageEmail', `unsubscribe/`)
 
 			await sendEmail({
 				to,
@@ -192,8 +196,14 @@ export const emailTemplateRouter = createTRPCRouter({
 				fromFriendlyName: fromRes.defaultFriendlyName ?? undefined,
 				subject,
 				react: reactBody,
-				type: 'transactional',
 				replyTo: fromRes.replyTo ?? undefined,
+				type: 'transactional',
+				// ...(type === 'transactional' ?  {
+				//     type: 'transactional',
+				// } : {
+				//     type: 'marketing',
+				//     listUnsubscribeHeader: '',
+				// }),
 			});
 		}),
 });

@@ -62,7 +62,7 @@ const Text = ({ variant, children, className, ...props }: TextProps) => {
 	);
 };
 
-const headerStyles = cva(['scroll-m-20 font-heading '], {
+const headerStyles = cva(['scroll-m-20 font-heading'], {
 	variants: {
 		size: {
 			// hero: 'text-6xl md:text-7xl lg:text-[105px]',

@@ -25,6 +25,7 @@ export async function renderMarkdownToReactEmail({
 	landingPages,
 	links,
 	pressKits,
+	listUnsubscribeUrl,
 }: {
 	subject: string;
 	body: string;
@@ -37,6 +38,7 @@ export async function renderMarkdownToReactEmail({
 	landingPages: LandingPage[];
 	links: Link[];
 	pressKits: PressKit[];
+	listUnsubscribeUrl?: string;
 }) {
 	// Replace variables with values or empty string if not found
 	const subjectWithVars = subject
@@ -74,9 +76,25 @@ export async function renderMarkdownToReactEmail({
 		components,
 	});
 
+	let reactBody = awaitedBody;
+
+	if (listUnsubscribeUrl) {
+		const unsubscribeLink = (
+			<div style={{ marginTop: '1.25rem', marginBottom: '1.25rem' }}>
+				<EmailLink href={listUnsubscribeUrl}>unsubscribe</EmailLink>;
+			</div>
+		);
+		reactBody = (
+			<>
+				{reactBody}
+				{unsubscribeLink}
+			</>
+		);
+	}
+
 	return {
 		subject: subjectWithVars,
-		reactBody: awaitedBody,
+		reactBody,
 	};
 }
 
