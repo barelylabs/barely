@@ -81,7 +81,7 @@ export async function renderMarkdownToReactEmail({
 	if (listUnsubscribeUrl) {
 		const unsubscribeLink = (
 			<div style={{ marginTop: '1.25rem', marginBottom: '1.25rem' }}>
-				<EmailLink href={listUnsubscribeUrl}>unsubscribe</EmailLink>;
+				<EmailLink href={listUnsubscribeUrl}>unsubscribe</EmailLink>
 			</div>
 		);
 		reactBody = (
