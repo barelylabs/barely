@@ -1,7 +1,17 @@
 import { env } from '../env';
 import { raise } from './raise';
 
-const apps = ['app', 'bio', 'cart', 'fm', 'link', 'page', 'press', 'www'] as const;
+const apps = [
+	'app',
+	'bio',
+	'cart',
+	'manageEmail',
+	'fm',
+	'link',
+	'page',
+	'press',
+	'www',
+] as const;
 
 export function getBaseUrl(app: (typeof apps)[number], absolute = false) {
 	if (!absolute && typeof window !== 'undefined') return ''; // browser should use relative url
@@ -35,6 +45,11 @@ export function getBaseUrl(app: (typeof apps)[number], absolute = false) {
 			case 'link':
 				devPort =
 					env.NEXT_PUBLIC_LINK_DEV_PORT ?? raise('NEXT_PUBLIC_LINK_DEV_PORT not found');
+				break;
+			case 'manageEmail':
+				devPort =
+					env.NEXT_PUBLIC_MANAGE_EMAIL_DEV_PORT ??
+					raise('NEXT_PUBLIC_MANAGE_EMAIL_DEV_PORT not found');
 				break;
 			case 'page':
 				devPort =
@@ -71,6 +86,9 @@ export function getBaseUrl(app: (typeof apps)[number], absolute = false) {
 			break;
 		case 'link':
 			baseUrl = env.NEXT_PUBLIC_LINK_BASE_URL;
+			break;
+		case 'manageEmail':
+			baseUrl = env.NEXT_PUBLIC_MANAGE_EMAIL_BASE_URL;
 			break;
 		case 'page':
 			baseUrl = env.NEXT_PUBLIC_PAGE_BASE_URL;

@@ -1,14 +1,8 @@
 import { env as libEnv } from '@barely/lib/env';
 import { createEnv } from '@t3-oss/env-nextjs';
-import { z } from 'zod';
 
 export const env = createEnv({
 	extends: [libEnv],
-	server: {
-		RESEND_WEBHOOK_SECRET: z.string(),
-		STRIPE_WEBHOOK_SECRET: z.string(),
-		STRIPE_CONNECT_WEBHOOK_SECRET: z.string(),
-	},
 	experimental__runtimeEnv: {
 		NEXT_PUBLIC_APP_BASE_URL: process.env.NEXT_PUBLIC_APP_BASE_URL,
 		NEXT_PUBLIC_APP_DEV_PORT: process.env.NEXT_PUBLIC_APP_DEV_PORT,
@@ -28,7 +22,4 @@ export const env = createEnv({
 		NEXT_PUBLIC_WWW_BASE_URL: process.env.NEXT_PUBLIC_WWW_BASE_URL,
 		NEXT_PUBLIC_WWW_DEV_PORT: process.env.NEXT_PUBLIC_WWW_DEV_PORT,
 	},
-	skipValidation:
-		// !!process.env.CI || <- It seems like this isn't what we want?
-		!!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === 'lint',
 });

@@ -36,6 +36,7 @@ import { newId } from '../utils/id';
 import { parseFullName } from '../utils/name';
 import { raise } from '../utils/raise';
 import { sqlAnd, sqlIncrement } from '../utils/sql';
+import { getAbsoluteUrl } from '../utils/url';
 
 neonConfig.webSocketConstructor = ws;
 
@@ -742,6 +743,12 @@ async function handleSendEmailFromTemplateToFan({
 		emailTemplate.body,
 	);
 
+	const emailDeliveryId = newId('emailDelivery');
+	const listUnsubscribeUrl = getAbsoluteUrl(
+		'manageEmail',
+		`unsubscribe/${emailDeliveryId}`,
+	);
+
 	const { subject, reactBody } = await renderMarkdownToReactEmail({
 		subject: emailTemplate.subject,
 		body: emailTemplate.body,
@@ -757,6 +764,9 @@ async function handleSendEmailFromTemplateToFan({
 		landingPages,
 		links,
 		pressKits,
+		// unsubscribe
+		listUnsubscribeUrl:
+			emailTemplate.type === 'marketing' ? listUnsubscribeUrl : undefined,
 	});
 
 	const res = await sendEmail({
@@ -767,7 +777,12 @@ async function handleSendEmailFromTemplateToFan({
 		replyTo: emailTemplate.from.replyTo ?? undefined,
 		subject,
 		react: reactBody,
-		type: 'marketing',
+		...(emailTemplate.type === 'transactional' ?
+			{ type: 'transactional' }
+		:	{
+				type: 'marketing',
+				listUnsubscribeUrl,
+			}),
 	});
 
 	if (res.error) {
@@ -779,16 +794,14 @@ async function handleSendEmailFromTemplateToFan({
 			.set({ status: 'failed', error })
 			.where(eq(FlowRunActions.id, flowRunActionId));
 
-		await getDbPool()
-			.insert(EmailDeliveries)
-			.values({
-				id: newId('emailDelivery'),
-				workspaceId: workspaceId,
-				emailTemplateId: emailTemplate.id,
-				fanId: fan.id,
-				status: 'failed',
-				sentAt: new Date(),
-			});
+		await getDbPool().insert(EmailDeliveries).values({
+			id: emailDeliveryId,
+			workspaceId: workspaceId,
+			emailTemplateId: emailTemplate.id,
+			fanId: fan.id,
+			status: 'failed',
+			sentAt: new Date(),
+		});
 	} else {
 		await getDbPool()
 			.update(FlowRunActions)
