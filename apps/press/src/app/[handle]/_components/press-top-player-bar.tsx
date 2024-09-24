@@ -53,7 +53,7 @@ export function TopPlayerBar({ artistName }: { artistName: string }) {
 				<div className='flex flex-row items-center'>
 					<MusicPlayButton size='lg' />
 					<div className='ml-4 flex flex-col justify-center'>
-						<H size='3' className='-mt-2 text-gray-300'>
+						<H size='5' className='-mt-2 text-gray-300'>
 							Listen to {artistName}
 						</H>
 					</div>

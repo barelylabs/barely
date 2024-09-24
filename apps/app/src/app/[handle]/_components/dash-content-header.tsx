@@ -15,7 +15,7 @@ const DashContentHeader = (props: DashContentHeaderProps) => {
 		<div className='flex flex-row items-center justify-between'>
 			<div className='flex flex-col space-y-2'>
 				<div className='group flex flex-row items-baseline gap-3'>
-					<H size='3'>{props.title}</H>
+					<H size='4'>{props.title}</H>
 					{props.settingsHref && (
 						<Link
 							href={props.settingsHref}

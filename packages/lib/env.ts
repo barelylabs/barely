@@ -94,6 +94,7 @@ export const env = createEnv({
 			'cart',
 			'fm',
 			'link',
+			'manageEmail',
 			'page',
 			'press',
 			'www',

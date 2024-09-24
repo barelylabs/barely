@@ -137,7 +137,7 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 					/>
 
 					{/* MAIN PRODUCT */}
-					<H size='3'>Main Product</H>
+					<H size='5'>Main Product</H>
 					<SelectField
 						control={form.control}
 						name='mainProductId'
@@ -175,7 +175,7 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 					/>
 
 					{/* BUMP */}
-					<H size='3'>Bump</H>
+					<H size='5'>Bump</H>
 					<SelectField
 						control={form.control}
 						name='bumpProductId'

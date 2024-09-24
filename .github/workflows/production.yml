@@ -174,6 +174,21 @@ jobs:
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
 
+  deploy-manage-email:
+    uses: ./.github/workflows/deploy-to-vercel.yml
+    needs: [git-meta, db-push]
+    with:
+      app_name: manage-email
+      working_directory: apps/manage-email
+      scope: barely
+      environment: production
+      git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
+      vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_MANAGE_EMAIL_PROJECT_ID }}
+
   deploy-page:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push]
@@ -244,6 +259,7 @@ jobs:
         deploy-app,
         deploy-cart,
         deploy-link,
+        deploy-manage-email,
         deploy-page,
         deploy-press,
         deploy-sparrow,
@@ -281,6 +297,7 @@ jobs:
         deploy-cart,
         deploy-fm,
         deploy-link,
+        deploy-manage-email,
         deploy-page,
         deploy-press,
         deploy-sparrow,
@@ -367,6 +384,22 @@ jobs:
       - name: Promote link to production
         run: vercel promote dpl_${{ needs.deploy-link.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
+  promote-manage-email:
+    name: promote manage-email to production
+    needs: [production--can-merge, deploy-manage-email]
+    if: always() && github.event_name == 'merge_group' && ${{ needs.production--can-merge.result }} == 'success'
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_MANAGE_EMAIL_PROJECT_ID }}
+    steps:
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Promote manage-email to production
+        run: vercel promote dpl_${{ needs.deploy-manage-email.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+
   promote-page:
     name: promote page to production
     needs: [production--can-merge, deploy-page]
@@ -441,6 +474,7 @@ jobs:
         promote-app,
         promote-cart,
         promote-link,
+        promote-manage-email,
         promote-page,
         promote-press,
         promote-sparrow,
@@ -469,6 +503,7 @@ jobs:
         promote-app,
         promote-cart,
         promote-link,
+        promote-manage-email,
         promote-page,
         promote-press,
         promote-sparrow,
@@ -498,6 +533,7 @@ jobs:
         promote-cart,
         promote-fm,
         promote-link,
+        promote-manage-email,
         promote-page,
         promote-press,
         promote-sparrow,
@@ -526,6 +562,7 @@ jobs:
         promote-app,
         promote-cart,
         promote-link,
+        promote-manage-email,
         promote-page,
         promote-press,
         promote-sparrow,
@@ -547,6 +584,35 @@ jobs:
           echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
           vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
+  rollback-manage-email:
+    name: rollback manage-email if any deployments fail
+    needs:
+      [
+        promote-app,
+        promote-cart,
+        promote-link,
+        promote-manage-email,
+        promote-page,
+        promote-press,
+        promote-sparrow,
+        promote-www,
+      ]
+    if: ${{ failure() && needs.promote-manage-email.result == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_MANAGE_EMAIL_PROJECT_ID }}
+    steps:
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Rollback manage-email
+        run: |
+          ROLLBACK_DEPLOYMENT_ID=$(curl -s "https://api.vercel.com/v6/deployments?teamId=${{ secrets.VERCEL_TEAM_ID }}&projectId=${{ secrets.VERCEL_MANAGE_EMAIL_PROJECT_ID}}&limit=2&rollbackCandidate=true&state=READY&target=production" -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | jq -r '.deployments[1].uid')
+          echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
+          vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+
   rollback-page:
     name: rollback page if any deployments fail
     needs:
@@ -554,6 +620,7 @@ jobs:
         promote-app,
         promote-cart,
         promote-link,
+        promote-manage-email,
         promote-page,
         promote-press,
         promote-sparrow,
@@ -582,6 +649,8 @@ jobs:
         promote-app,
         promote-cart,
         promote-link,
+        promote-manage-email,
+        promote-page,
         promote-press,
         promote-sparrow,
         promote-www,
@@ -609,6 +678,8 @@ jobs:
         promote-app,
         promote-cart,
         promote-link,
+        promote-manage-email,
+        promote-page,
         promote-press,
         promote-sparrow,
         promote-www,
@@ -636,6 +707,8 @@ jobs:
         promote-app,
         promote-cart,
         promote-link,
+        promote-manage-email,
+        promote-page,
         promote-press,
         promote-sparrow,
         promote-www,
@@ -668,6 +741,7 @@ jobs:
         promote-cart,
         promote-fm,
         promote-link,
+        promote-manage-email,
         promote-page,
         promote-press,
         promote-sparrow,
@@ -680,6 +754,7 @@ jobs:
       needs.promote-cart.result == 'success' &&
       needs.promote-fm.result == 'success' &&
       needs.promote-link.result == 'success' &&
+      needs.promote-manage-email.result == 'success' &&
       needs.promote-page.result == 'success' &&
       needs.promote-press.result == 'success' &&
       needs.promote-sparrow.result == 'success' &&
