@@ -11,7 +11,6 @@ import type { Fan } from '../server/routes/fan/fan.schema';
 import type { FlowAction } from '../server/routes/flow/flow.schema';
 import { env } from '../env';
 import { dbSchema } from '../server/db';
-// import { dbPool } from '../server/db/pool';
 import { addToMailchimpAudience } from '../server/mailchimp/mailchimp.endpts.audiences';
 import { getAssetsFromMdx } from '../server/mdx/mdx.fns';
 import { Carts } from '../server/routes/cart/cart.sql';
@@ -563,14 +562,6 @@ async function handleAction({
 					),
 				})) ?? raise(`no mailchimp account found for workspace ${workspaceId}`);
 
-			// const flowRunAction: InsertFlowRunAction= {
-			// 				id: newId('flowRunAction'),
-			//                 flowId: action.flowId,
-			// 				flowRunId: flowRunId,
-			// 				flowActionId: action.id,
-			// 				status: 'completed',
-			// 			};
-
 			try {
 				await addToMailchimpAudience({
 					accessToken:
@@ -744,6 +735,7 @@ async function handleSendEmailFromTemplateToFan({
 	);
 
 	const emailDeliveryId = newId('emailDelivery');
+
 	const listUnsubscribeUrl = getAbsoluteUrl(
 		'manageEmail',
 		`unsubscribe/${emailDeliveryId}`,
@@ -808,16 +800,14 @@ async function handleSendEmailFromTemplateToFan({
 			.set({ status: 'completed' })
 			.where(eq(FlowRunActions.id, flowRunActionId));
 
-		await getDbPool()
-			.insert(EmailDeliveries)
-			.values({
-				id: newId('emailDelivery'),
-				workspaceId: workspaceId,
-				emailTemplateId: emailTemplate.id,
-				fanId: fan.id,
-				status: 'sent',
-				sentAt: new Date(),
-			});
+		await getDbPool().insert(EmailDeliveries).values({
+			id: emailDeliveryId,
+			workspaceId: workspaceId,
+			emailTemplateId: emailTemplate.id,
+			fanId: fan.id,
+			status: 'sent',
+			sentAt: new Date(),
+		});
 
 		await getDbPool()
 			.update(Workspaces)
