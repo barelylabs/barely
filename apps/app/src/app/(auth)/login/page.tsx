@@ -33,7 +33,7 @@ const SignInPage = async ({ searchParams }: { searchParams?: { error: string } }
 					<div className='relative mx-auto mb-2 h-12 w-12'>
 						<Image src={logo} alt='barely.io' fill sizes='w-48 h-48' priority />
 					</div>
-					<H size='3' className='font-bold'>
+					<H size='4' className='font-bold'>
 						Welcome back
 					</H>
 				</div>

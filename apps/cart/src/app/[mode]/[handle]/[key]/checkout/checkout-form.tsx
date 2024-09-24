@@ -330,7 +330,7 @@ export function CheckoutForm({
 						</div>
 
 						<div className='flex min-h-[285px] flex-col gap-2'>
-							<H size='3'>Contact Information</H>
+							<H size='5'>Contact Information</H>
 							<LinkAuthenticationElement
 								onChange={async e => {
 									if (e.complete) {
@@ -475,7 +475,7 @@ export function CheckoutForm({
 						)}
 
 						<div className='flex flex-col gap-2'>
-							<H size='3'>Payment Information</H>
+							<H size='5'>Payment Information</H>
 							<PaymentElement
 								onChange={e => {
 									if (e.complete) {

@@ -29,7 +29,7 @@ const RegisterUserPage = async ({
 					<div className='relative mx-auto mb-2 h-11 w-11'>
 						<Image src={logo} alt='barely.io' fill priority sizes='44px' />
 					</div>
-					<H size='3'>Create an account</H>
+					<H size='4'>Create an account</H>
 				</div>
 
 				<RegisterUserForm callbackUrl={callbackUrl} />
