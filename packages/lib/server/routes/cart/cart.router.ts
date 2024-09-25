@@ -13,6 +13,7 @@ import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
 import { recordCartEvent } from '../event/event.fns';
 import { WEB_EVENT_TYPES__CART } from '../event/event.tb';
 import { Files } from '../file/file.sql';
+import { APPAREL_SIZES } from '../product/product.constants';
 import { getStripeConnectAccountId } from '../stripe-connect/stripe-connect.fns';
 import {
 	createMainCartFromFunnel,
@@ -256,7 +257,11 @@ export const cartRouter = createTRPCRouter({
 
 	buyUpsell: publicProcedure
 		.input(
-			z.object({ cartId: z.string(), upsellIndex: z.number().optional().default(0) }),
+			z.object({
+				cartId: z.string(),
+				apparelSize: z.enum(APPAREL_SIZES).optional(),
+				upsellIndex: z.number().optional().default(0),
+			}),
 		)
 		.mutation(async ({ input, ctx }) => {
 			let cart = (await getCartById(input.cartId)) ?? raise('cart not found');
@@ -329,6 +334,7 @@ export const cartRouter = createTRPCRouter({
 			const updateCart: UpdateCart = { id: cart.id };
 
 			updateCart.upsellProductId = upsellProduct.id;
+			if (input.apparelSize) updateCart.upsellProductApparelSize = input.apparelSize;
 			updateCart.upsellProductAmount = upsellProductAmount;
 			updateCart.upsellShippingAmount = upsellShippingAmount;
 			updateCart.upsellHandlingAmount = 0;
