@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { cartApi } from '@barely/lib/server/routes/cart/cart.api.server';
+import { APPAREL_SIZES } from '@barely/lib/server/routes/product/product.constants';
 
 import { Img } from '@barely/ui/elements/img';
 import { H } from '@barely/ui/elements/typography';
@@ -54,6 +55,13 @@ export default async function UpsellPage({
 	const price =
 		(publicFunnel.upsellProduct?.price ?? 0) - (publicFunnel.upsellProductDiscount ?? 0);
 
+	const upsellSizes = publicFunnel.upsellProduct?._apparelSizes
+		?.map(size => size.size)
+		.sort((a, b) => {
+			const order = APPAREL_SIZES;
+			return order.indexOf(a) - order.indexOf(b);
+		});
+
 	return (
 		<>
 			<UpsellLog cartId={cartId} />
@@ -89,13 +97,25 @@ export default async function UpsellPage({
 
 				<ProductPrice price={price} normalPrice={normalPrice} variant='xl/bold' />
 
-				<UpsellButtons mode={mode} handle={handle} key={key} cartId={cartId} />
+				<UpsellButtons
+					mode={mode}
+					handle={handle}
+					key={key}
+					cartId={cartId}
+					upsellSizes={upsellSizes}
+				/>
 			</div>
 
 			{publicFunnel.upsellProductBelowTheFold && (
 				<>
 					<CartMDX markdown={publicFunnel.upsellProductBelowTheFold} />
-					<UpsellButtons mode={mode} handle={handle} key={key} cartId={cartId} />
+					<UpsellButtons
+						mode={mode}
+						handle={handle}
+						key={key}
+						cartId={cartId}
+						upsellSizes={upsellSizes}
+					/>
 				</>
 			)}
 		</>

@@ -132,7 +132,6 @@ export const Carts = pgTable(
 			length: 255,
 		}),
 		checkoutConvertedAt: timestamp('checkoutConvertedAt'),
-
 		/* 
     🛒 upsell cart 
     */
