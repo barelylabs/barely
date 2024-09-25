@@ -107,7 +107,7 @@ export const fmRouter = createTRPCRouter({
 			console.log('data.coverArtId', data.coverArtId);
 		}
 
-		console.log('data >> ', data);
+		// console.log('data >> ', data);
 
 		const fmPageData: InsertFmPage = {
 			...data,
@@ -134,7 +134,11 @@ export const fmRouter = createTRPCRouter({
 	update: privateProcedure.input(updateFmPageSchema).mutation(async ({ input, ctx }) => {
 		const { id, links, ...data } = input;
 
-		await ctx.db.pool.update(FmPages).set(data).where(eq(FmPages.id, id)).returning();
+		await ctx.db.pool
+			.update(FmPages)
+			.set(data)
+			.where(and(eq(FmPages.id, id), eq(FmPages.workspaceId, ctx.workspace.id)))
+			.returning();
 
 		if (links !== undefined) {
 			const linkIds = links.map(link => link.id).filter(id => id !== undefined);

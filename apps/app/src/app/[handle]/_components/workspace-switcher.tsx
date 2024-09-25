@@ -72,7 +72,7 @@ export function WorkspaceSwitcher() {
 						imageHeight={28}
 						// imageUrl={normalizedObject.avatarImageUrl}
 						imageS3Key={normalizedObject.avatarImageS3Key}
-						sizes='50'
+						// sizes='50'
 						priority
 					/>
 					<Text variant='xs/medium'>{normalizedObject.name}</Text>
@@ -109,7 +109,6 @@ export function WorkspaceSwitcher() {
 									isSelected={currentWorkspace.handle === personalAccount.handle}
 								>
 									<Avatar
-										sizes='50'
 										priority
 										className='mr-2 h-5 w-5'
 										imageS3Key={personalAccount.avatarImageS3Key}

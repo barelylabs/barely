@@ -29,6 +29,7 @@ import {
 	ShoppingCart,
 	Swap,
 	TShirt,
+	UsersThree,
 	Video,
 	VinylRecord,
 } from '@phosphor-icons/react/dist/ssr';
@@ -189,6 +190,7 @@ import {
 	UploadCloud,
 	User,
 	UserCircle2,
+	UserMinus,
 	UserPlus,
 	Users,
 	Verified,
@@ -310,6 +312,7 @@ export const Icon = {
 	eyeDropper: EyeDropperIcon,
 
 	fan: User,
+	fanGroup: UsersThree,
 	fans: Users,
 	fedex: FaFedex,
 	file: File,
@@ -349,6 +352,8 @@ export const Icon = {
 
 	image: ImageIcon,
 	import: Import,
+	includeFan: UserPlus,
+	excludeFan: UserMinus,
 	info: InformationCircleIcon,
 	infinity: InfinityIcon,
 	integrations: Blocks,

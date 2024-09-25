@@ -11,6 +11,16 @@ export const queryBooleanSchema = z.preprocess(v => {
 	return v;
 }, z.boolean());
 
+export const optionalString_EmptyToUndefined = z.preprocess(v => {
+	if (typeof v === 'string' && v.length === 0) return undefined;
+	return v;
+}, z.string().optional());
+
+export const nullableString_EmptyToNull = z.preprocess(v => {
+	if (typeof v === 'string' && v.length === 0) return null;
+	return v;
+}, z.string().nullable());
+
 export const z_optStr_hash = z
 	.string()
 	.optional()

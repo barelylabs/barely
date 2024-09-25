@@ -29,7 +29,10 @@ const prefixes = {
 	cartFunnel: 'cart_funnel',
 	cart: 'cart',
 	cartFulfillment: 'cart_fulfill',
+	// fans
 	fan: 'fan',
+	fanGroup: 'fan_grp',
+	fanGroupCondition: 'fan_grp_cond',
 	// assets
 	file: 'file',
 	playlist: 'pl',

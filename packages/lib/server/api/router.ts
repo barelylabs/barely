@@ -13,6 +13,7 @@ import { emailDomainRouter } from '../routes/email-domain/email-domain.router';
 import { emailTemplateGroupRouter } from '../routes/email-template-group/email-template-group.router';
 import { emailTemplateRouter } from '../routes/email-template/email-template.router';
 import { eventRouter } from '../routes/event/event.router';
+import { fanGroupRouter } from '../routes/fan-group/fan-group.router';
 import { fanRouter } from '../routes/fan/fan.router';
 import { fileRouter } from '../routes/file/file.router';
 import { flowRouter } from '../routes/flow/flow.router';
@@ -55,6 +56,7 @@ const appRouter = createTRPCRouter({
 	emailTemplateGroup: emailTemplateGroupRouter,
 	event: eventRouter,
 	fan: fanRouter,
+	fanGroup: fanGroupRouter,
 	file: fileRouter,
 	flow: flowRouter,
 	fm: fmRouter,

@@ -46,6 +46,7 @@ export const lexorank = {
 
 // queries
 export const sqlCount = sql<number>`count(*)`.mapWith(Number);
+
 export const sqlCurrentDateTime = sql<string>`CURRENT_TIMESTAMP`;
 export const sqlCurrentTimestamp = sql<string>`CURRENT_TIMESTAMP`;
 
