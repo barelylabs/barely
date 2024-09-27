@@ -370,7 +370,7 @@ function getMetaEventsFromCartEvent({
 						content_ids: [cart.mainProductId],
 						content_type: 'product',
 						currency: 'USD',
-						value: cart.checkoutAmount / 100,
+						value: cart.mainProductPrice / 100,
 					},
 				},
 				{
@@ -380,7 +380,7 @@ function getMetaEventsFromCartEvent({
 						content_ids: [cart.mainProductId],
 						content_type: 'product',
 						currency: 'USD',
-						value: cart.checkoutAmount / 100,
+						value: cart.mainProductPrice / 100,
 					},
 				},
 			];
