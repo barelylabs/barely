@@ -418,7 +418,7 @@ function getMetaEventsFromCartEvent({
 						content_type: 'product',
 						currency: 'USD',
 						cartPurchaseType: 'mainWithoutBump',
-						value: cart.checkoutAmount / 100,
+						value: cart.mainProductPrice / 100,
 					},
 				},
 				{
@@ -428,7 +428,7 @@ function getMetaEventsFromCartEvent({
 						content_ids: [cart.mainProductId],
 						content_type: 'product',
 						currency: 'USD',
-						value: cart.checkoutAmount / 100,
+						value: cart.mainProductPrice / 100,
 					},
 				},
 			];
@@ -443,7 +443,7 @@ function getMetaEventsFromCartEvent({
 						content_type: 'product',
 						currency: 'USD',
 						cartPurchaseType: 'mainWithBump',
-						value: cart.checkoutAmount / 100,
+						value: (cart.mainProductPrice + (cart.bumpProductPrice ?? 0)) / 100,
 					},
 				},
 				{
@@ -453,7 +453,7 @@ function getMetaEventsFromCartEvent({
 						content_ids: [cart.mainProductId, cart.bumpProductId],
 						content_type: 'product',
 						currency: 'USD',
-						value: cart.checkoutAmount / 100,
+						value: (cart.mainProductPrice + (cart.bumpProductPrice ?? 0)) / 100,
 					},
 				},
 			];
