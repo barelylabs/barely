@@ -30,6 +30,7 @@ export function UpsellButtons({
 			handle,
 			key,
 			cartId,
+			apparelSize,
 		});
 
 	const convertUpsellDisabled =
