@@ -1,6 +1,7 @@
 'use client';
 
-import type { ApparelSize } from '@barely/lib/server/routes/product/product.constants';
+// import type { ApparelSize } from '@barely/lib/server/routes/product/product.constants';
+import type { ApparelSize } from '@barely/lib/server/routes/product/product.schema';
 import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { cartApi } from '@barely/lib/server/routes/cart/cart.api.react';
@@ -8,11 +9,11 @@ import { cartApi } from '@barely/lib/server/routes/cart/cart.api.react';
 export function useUpsellCart({
 	mode,
 	cartId,
-	apparelSize,
+	// apparelSize,
 }: {
 	mode: 'preview' | 'live';
 	cartId: string;
-	apparelSize?: ApparelSize;
+	// apparelSize?: ApparelSize;
 	handle: string;
 	key: string;
 }) {
@@ -29,7 +30,7 @@ export function useUpsellCart({
 		},
 	});
 
-	const handleBuyUpsell = () => {
+	const handleBuyUpsell = ({ apparelSize }: { apparelSize?: ApparelSize }) => {
 		setConverting(true);
 		if (mode === 'preview') {
 			return router.push(successPath);

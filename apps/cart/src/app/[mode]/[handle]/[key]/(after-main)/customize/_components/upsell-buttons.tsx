@@ -30,11 +30,14 @@ export function UpsellButtons({
 			handle,
 			key,
 			cartId,
-			apparelSize,
+			// apparelSize,
 		});
 
 	const convertUpsellDisabled =
-		(upsellSizes && !apparelSize) ?? converting ?? submitting ?? declining;
+		(upsellSizes && upsellSizes.length > 0 && !apparelSize) ??
+		converting ??
+		submitting ??
+		declining;
 	const declineUpsellDisabled = converting || declining || submitting;
 
 	return (
@@ -70,7 +73,7 @@ export function UpsellButtons({
 				</div>
 			)}
 			<Button
-				onClick={handleBuyUpsell}
+				onClick={() => handleBuyUpsell({ apparelSize })}
 				size='xl'
 				loading={converting}
 				disabled={convertUpsellDisabled}
@@ -78,7 +81,9 @@ export function UpsellButtons({
 				look='brand'
 				fullWidth
 			>
-				{upsellSizes && !apparelSize ? 'Select size' : 'Use same payment method'}
+				{upsellSizes && upsellSizes.length > 0 && !apparelSize ?
+					'Select size'
+				:	'Use same payment method'}
 			</Button>
 			<Button
 				look='link'
