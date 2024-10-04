@@ -30,7 +30,7 @@ export function UpsellButtons({
 			handle,
 			key,
 			cartId,
-			// apparelSize,
+			apparelSize,
 		});
 
 	const convertUpsellDisabled =
@@ -73,7 +73,7 @@ export function UpsellButtons({
 				</div>
 			)}
 			<Button
-				onClick={() => handleBuyUpsell({ apparelSize })}
+				onClick={handleBuyUpsell}
 				size='xl'
 				loading={converting}
 				disabled={convertUpsellDisabled}
