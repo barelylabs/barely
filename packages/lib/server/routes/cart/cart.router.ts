@@ -371,6 +371,8 @@ export const cartRouter = createTRPCRouter({
 					cartFunnel: funnel,
 					type: 'cart/purchaseUpsell',
 					visitor: ctx.visitor,
+				}).catch(err => {
+					console.log('error recording upsellcart event:', err);
 				});
 			}
 
