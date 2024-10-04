@@ -34,7 +34,10 @@ export function UpsellButtons({
 		});
 
 	const convertUpsellDisabled =
-		(upsellSizes && !apparelSize) ?? converting ?? submitting ?? declining;
+		(upsellSizes && upsellSizes.length > 0 && !apparelSize) ??
+		converting ??
+		submitting ??
+		declining;
 	const declineUpsellDisabled = converting || declining || submitting;
 
 	return (
@@ -78,7 +81,9 @@ export function UpsellButtons({
 				look='brand'
 				fullWidth
 			>
-				{upsellSizes && !apparelSize ? 'Select size' : 'Use same payment method'}
+				{upsellSizes && upsellSizes.length > 0 && !apparelSize ?
+					'Select size'
+				:	'Use same payment method'}
 			</Button>
 			<Button
 				look='link'

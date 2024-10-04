@@ -371,6 +371,8 @@ export const cartRouter = createTRPCRouter({
 					cartFunnel: funnel,
 					type: 'cart/purchaseUpsell',
 					visitor: ctx.visitor,
+				}).catch(err => {
+					console.log('error recording upsellcart event:', err);
 				});
 			}
 
@@ -410,14 +412,14 @@ export const cartRouter = createTRPCRouter({
 
 			// if there is not a fan attached to this cart yet, that means the webhook hasn't fired yet. we need to poll until it does
 			const startTime = Date.now();
-			const timeout = 15000; // 15 seconds
+			const timeout = 40000; // 40 seconds
 
 			do {
 				await wait(1000);
 				const polledCart = await getCartById(input.cartId); // re-fetch the cart
 				if (polledCart) cart = polledCart; // if the cart was found, update the cart
 				if (Date.now() - startTime > timeout) {
-					throw new Error('Timeout: Fan information not found after 15 seconds');
+					throw new Error('Timeout: Fan information not found after 40 seconds');
 				}
 			} while (!cart.fan);
 
