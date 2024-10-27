@@ -95,6 +95,8 @@ function CartOrderCard({
 
 	const { copyToClipboard } = useCopy();
 
+	const fullShippingAddressWithLineBreaks = `${cartOrder.fullName}\n${cartOrder.shippingAddressLine1}\n${cartOrder.shippingAddressLine2 ? `${cartOrder.shippingAddressLine2}\n` : ''}${cartOrder.shippingAddressCity}, ${cartOrder.shippingAddressState} ${cartOrder.shippingAddressPostalCode}`;
+
 	return (
 		<GridListCard
 			id={cartOrder.id}
@@ -138,6 +140,22 @@ function CartOrderCard({
 								</Text>
 							</div>
 							<div className='flex flex-col'>
+								<div className='group/shippingAddress flex flex-row items-center gap-1'>
+									<Text variant='sm/bold'>Shipping Address</Text>
+									<Button
+										variant='icon'
+										look='ghost'
+										size='2xs'
+										startIcon='copy'
+										className='opacity-0 transition-opacity duration-200 group-hover/shippingAddress:opacity-100'
+										onClick={e => {
+											e.stopPropagation();
+											copyToClipboard(fullShippingAddressWithLineBreaks ?? '', {
+												successMessage: 'Copied shipping address to clipboard!',
+											});
+										}}
+									/>
+								</div>
 								<div className='group/name flex flex-row items-center gap-1'>
 									<Text variant='sm/normal'>{cartOrder.fullName}</Text>
 									<Button
@@ -152,22 +170,6 @@ function CartOrderCard({
 												successMessage: 'Copied full name to clipboard!',
 											});
 										}}
-									/>
-								</div>
-
-								<div className='group/email flex flex-row items-center gap-1'>
-									<Text variant='sm/normal'>{cartOrder.email}</Text>
-									<Button
-										variant='icon'
-										look='ghost'
-										size='2xs'
-										startIcon='copy'
-										className='opacity-0 transition-opacity duration-200 group-hover/email:opacity-100'
-										onClick={() =>
-											copyToClipboard(cartOrder.email ?? '', {
-												successMessage: 'Copied email to clipboard!',
-											})
-										}
 									/>
 								</div>
 
@@ -205,10 +207,42 @@ function CartOrderCard({
 									</div>
 								)}
 
-								<Text variant='sm/normal'>
-									{cartOrder.shippingAddressCity}, {cartOrder.shippingAddressState}{' '}
-									{cartOrder.shippingAddressPostalCode}
-								</Text>
+								<div className='group/shippingAddressZipCityState flex flex-row items-center gap-1'>
+									<Text variant='sm/normal'>
+										{cartOrder.shippingAddressCity}, {cartOrder.shippingAddressState}{' '}
+										{cartOrder.shippingAddressPostalCode}
+									</Text>
+									<Button
+										variant='icon'
+										look='ghost'
+										size='2xs'
+										startIcon='copy'
+										className='opacity-0 transition-opacity duration-200 group-hover/shippingAddressZipCityState:opacity-100'
+										onClick={() =>
+											copyToClipboard(
+												`${cartOrder.shippingAddressCity}, ${cartOrder.shippingAddressState} ${cartOrder.shippingAddressPostalCode}`,
+												{
+													successMessage: 'Copied shipping address to clipboard!',
+												},
+											)
+										}
+									/>
+								</div>
+								<div className='group/email flex flex-row items-center gap-1'>
+									<Text variant='sm/normal'>{cartOrder.email}</Text>
+									<Button
+										variant='icon'
+										look='ghost'
+										size='2xs'
+										startIcon='copy'
+										className='opacity-0 transition-opacity duration-200 group-hover/email:opacity-100'
+										onClick={() =>
+											copyToClipboard(cartOrder.email ?? '', {
+												successMessage: 'Copied email to clipboard!',
+											})
+										}
+									/>
+								</div>
 							</div>
 						</div>
 					</div>

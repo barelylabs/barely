@@ -78,6 +78,8 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 			cartFunnel: cartFunnel,
 			type:
 				prevCart.addedBump ? 'cart/purchaseMainWithBump' : 'cart/purchaseMainWithoutBump',
+		}).catch(err => {
+			console.log('error recording cart event:', err);
 		});
 
 		const updateCart: UpdateCart = { id: prevCart.id };
