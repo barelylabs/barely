@@ -8,7 +8,7 @@ export const resend = new Resend(env.RESEND_API_KEY);
 type Resend_GetDomain = Awaited<ReturnType<typeof resend.domains.get>>;
 export type Resend_DomainRecord = NonNullable<Resend_GetDomain['data']>['records'][0];
 
-type SendEmailProps = {
+export type SendEmailProps = {
 	from: string;
 	fromFriendlyName?: string;
 	to: string | string[];
@@ -75,27 +75,53 @@ export async function sendEmail(props: SendEmailProps) {
 	};
 }
 
-// export async function sendEmail(props: SendEmailProps) {
-// 	try {
-// 		const html = await renderAsync(props.react);
-// 		const text = await renderAsync(props.react, { plainText: true });
+export type SendEmailBatchProps = SendEmailProps & {
+	emailDeliveryId: string;
+	fanId: string;
+};
 
-// 		const res = await fetch('https://api.resend.com/emails', {
-// 			method: 'POST',
-// 			headers: {
-// 				'Content-Type': 'application/json',
-// 				Authorization: `Bearer ${process.env.RESEND_API_KEY!}`,
-// 			},
-// 			body: JSON.stringify({
-// 				from: props.from,
-// 				to: props.to,
-// 				subject: props.subject,
-// 				html,
-// 				text,
-// 			}),
-// 		});
-// 		if (res.ok) return true;
-// 	} catch (err) {
-// 		console.error(err);
-// 	}
-// }
+export async function sendEmailBatch(emails: SendEmailBatchProps[]) {
+	const formattedEmails = emails.map(email => {
+		const safeParsedFrom = z.string().email().safeParse(email.from);
+
+		const from =
+			email.fromFriendlyName && safeParsedFrom.success ?
+				`${email.fromFriendlyName} <${email.from}>`
+			:	email.from;
+
+		return {
+			...email,
+			from,
+			headers:
+				email.type === 'marketing' ?
+					{
+						'List-Unsubscribe': `<${email.listUnsubscribeUrl}>`,
+						'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+					}
+				:	undefined,
+		};
+	});
+
+	const res = await resend.batch.send(formattedEmails);
+
+	if (res.error) {
+		console.error(res.error);
+		return {
+			error: res.error,
+		};
+	}
+
+	if (!res.data) {
+		return {
+			error: 'No data returned from Resend',
+		};
+	}
+
+	// we want to map the resend ids to the original email props
+	return {
+		emails: emails.map((email, index) => ({
+			...email,
+			resendId: res.data?.data[index]?.id,
+		})),
+	};
+}

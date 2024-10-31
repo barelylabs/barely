@@ -793,6 +793,7 @@ async function handleSendEmailFromTemplateToFan({
 			fanId: fan.id,
 			status: 'failed',
 			sentAt: new Date(),
+			flowRunActionId,
 		});
 	} else {
 		await getDbPool()
@@ -807,6 +808,7 @@ async function handleSendEmailFromTemplateToFan({
 			fanId: fan.id,
 			status: 'sent',
 			sentAt: new Date(),
+			flowRunActionId,
 		});
 
 		await getDbPool()

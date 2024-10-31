@@ -9,6 +9,7 @@ import { cartOrderRouter } from '../routes/cart-order/cart-order.router';
 import { cartRouter } from '../routes/cart/cart.router';
 import { domainRouter } from '../routes/domain/domain.router';
 import { emailAddressRouter } from '../routes/email-address/email-address.router';
+import { emailBroadcastRouter } from '../routes/email-broadcast/email-broadcast.router';
 import { emailDomainRouter } from '../routes/email-domain/email-domain.router';
 import { emailTemplateGroupRouter } from '../routes/email-template-group/email-template-group.router';
 import { emailTemplateRouter } from '../routes/email-template/email-template.router';
@@ -51,6 +52,7 @@ const appRouter = createTRPCRouter({
 	cartFunnel: cartFunnelRouter,
 	cartOrder: cartOrderRouter,
 	emailAddress: emailAddressRouter,
+	emailBroadcast: emailBroadcastRouter,
 	emailDomain: emailDomainRouter,
 	emailTemplate: emailTemplateRouter,
 	emailTemplateGroup: emailTemplateGroupRouter,

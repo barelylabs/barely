@@ -38,6 +38,7 @@ const prefixes = {
 	playlist: 'pl',
 	track: 'tr',
 	// email
+	emailBroadcast: 'email_bc',
 	emailTemplate: 'email_temp',
 	emailTemplateGroup: 'email_temp_grp',
 	emailAddress: 'email_addr',

@@ -1,32 +1,16 @@
-import {
-	and,
-	asc,
-	desc,
-	eq,
-	gt,
-	inArray,
-	isNotNull,
-	isNull,
-	lt,
-	not,
-	notInArray,
-	or,
-	sql,
-} from 'drizzle-orm';
+import { and, asc, desc, eq, gt, inArray, isNull, lt, notInArray, or } from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { InsertFanGroupCondition } from './fan-group.schema';
 import { newId } from '../../../utils/id';
 import { raise } from '../../../utils/raise';
-import { sqlAnd, sqlCount, sqlStringContains } from '../../../utils/sql';
+import { sqlAnd, sqlStringContains } from '../../../utils/sql';
 import {
 	createTRPCRouter,
 	privateProcedure,
 	workspaceQueryProcedure,
 } from '../../api/trpc';
-import { Carts } from '../cart/cart.sql';
-import { Fans } from '../fan/fan.sql';
-import { generateFanGroupConditions } from './fan-group.fns';
+import { getFanGroupCount } from './fan-group.fns';
 import {
 	createFanGroupSchema,
 	selectWorkspaceFanGroupsSchema,
@@ -89,89 +73,54 @@ export const fanGroupRouter = createTRPCRouter({
 
 			// count the number of fans that match the fan group conditions
 
-			const {
-				whereConditions: includeWhereConditions,
-				havingConditions: includeHavingConditions,
-			} = generateFanGroupConditions(
-				fanGroup.conditions.filter(condition => !condition.exclude),
-			);
-
-			const {
-				whereConditions: excludeWhereConditions,
-				havingConditions: excludeHavingConditions,
-			} = generateFanGroupConditions(
-				fanGroup.conditions.filter(condition => condition.exclude),
-			);
-
-			// const includeHavingConditions = generateFanGroupConditions(
-			// 	fanGroup.conditions.filter(
-			// 		condition => !condition.exclude && condition.type === 'hasOrderedAmount',
-			// 	),
-			// );
-			// const excludeHavingConditions = generateFanGroupConditions(
-			// 	fanGroup.conditions.filter(
-			// 		condition => condition.exclude && condition.type === 'hasOrderedAmount',
-			// 	),
+			// const { whereConditions: includeWhereConditions } = generateFanGroupConditions(
+			// 	fanGroup.conditions.filter(condition => !condition.exclude),
 			// );
 
-			console.log('includeWhereConditions', includeWhereConditions);
-			console.log('excludeWhereConditions', excludeWhereConditions);
-			console.log('includeHavingConditions', includeHavingConditions);
-			console.log('excludeHavingConditions', excludeHavingConditions);
-
-			const subquery = ctx.db.pool
-				.select({
-					fanId: Fans.id,
-					totalAmount: sum(Carts.orderAmount),
-				})
-				.from(Fans)
-				.leftJoin(
-					Carts,
-					sqlAnd([eq(Fans.id, Carts.fanId), isNotNull(Carts.checkoutConvertedAt)]),
-				)
-				.where(eq(Fans.workspaceId, ctx.workspace.id))
-				.groupBy(Fans.id)
-				.as('subquery');
-
-			const countRes = await ctx.db.pool
-				.select({
-					count: sqlCount,
-				})
-				.from(Fans)
-				.leftJoin(
-					Carts,
-					sqlAnd([eq(Fans.id, Carts.fanId), isNotNull(Carts.checkoutConvertedAt)]),
-				)
-				.where(
-					sqlAnd([
-						eq(Fans.workspaceId, ctx.workspace.id),
-						includeWhereConditions.length ? or(...includeWhereConditions) : undefined,
-						excludeWhereConditions.length ? or(...excludeWhereConditions) : undefined,
-					]),
-				);
-			// .groupBy(Fans.id)
-			// .having(
-			// 	sqlAnd([
-			// 		// includeHavingConditions.length ? or(...includeHavingConditions) : undefined,
-			// 		// excludeHavingConditions.length ? or(...excludeHavingConditions) : undefined,
-			// 	]),
+			// const { whereConditions: excludeWhereConditions } = generateFanGroupConditions(
+			// 	fanGroup.conditions.filter(condition => condition.exclude),
 			// );
 
-			const count = countRes[0]?.count ?? 0;
-
-			// find matching fans
-			// const matchingFans = []
-			// const matchingFans = await ctx.db.pool
+			// const fanSubquery = ctx.db.pool
 			// 	.select({
-			// 		id: Fans.id,
-			// 		fullName: Fans.fullName,
-			// 		email: Fans.email,
-			// 		// Add more fields as needed
+			// 		fanId: Fans.id,
 			// 	})
 			// 	.from(Fans)
-			// 	.leftJoin(Carts, eq(Fans.id, Carts.fanId))
-			// 	.where(sqlAnd([eq(Fans.workspaceId, ctx.workspace.id), ...sqlConditions]))
-			// 	.limit(10); // Adjust limit as needed
+			// 	.where(eq(Fans.workspaceId, ctx.workspace.id))
+			// 	.as('fans');
+
+			// const cartSubquery = ctx.db.pool
+			// 	.select({
+			// 		fanId: Carts.fanId,
+			// 		orderAmount: sql<number>`COALESCE(SUM(${Carts.orderAmount}), 0)`.as(
+			// 			'orderamount',
+			// 		),
+			// 		cartCount: sql<number>`COUNT(${Carts.id})`.as('cartCount'),
+			// 	})
+			// 	.from(Carts)
+			// 	.where(isNotNull(Carts.checkoutConvertedAt))
+			// 	.groupBy(Carts.fanId)
+			// 	.as('carts');
+
+			// const countQuery = ctx.db.pool
+			// 	.select({
+			// 		count: sqlCount,
+			// 	})
+			// 	.from(fanSubquery)
+			// 	.leftJoin(cartSubquery, eq(fanSubquery.fanId, cartSubquery.fanId))
+			// 	.leftJoin(Carts, eq(fanSubquery.fanId, Carts.fanId))
+			// 	.where(
+			// 		sqlAnd([
+			// 			includeWhereConditions.length ? or(...includeWhereConditions) : undefined,
+			// 			excludeWhereConditions.length ? or(...excludeWhereConditions) : undefined,
+			// 		]),
+			// 	);
+
+			// const countRes = await countQuery;
+
+			// const count = countRes[0]?.count ?? 0;
+
+			const count = await getFanGroupCount(fanGroup, ctx.db.pool);
 
 			const conditionsWithAny = fanGroup.conditions.map(condition => ({
 				...condition,
@@ -183,7 +132,6 @@ export const fanGroupRouter = createTRPCRouter({
 				...fanGroup,
 				conditions: conditionsWithAny,
 				count,
-				// matchingFans,
 			};
 		}),
 

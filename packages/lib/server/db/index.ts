@@ -22,6 +22,7 @@ import * as funnelSql from '../routes/cart-funnel/cart-funnel.sql';
 import * as cartSql from '../routes/cart/cart.sql';
 import * as domainSql from '../routes/domain/domain.sql';
 import * as emailAddressSql from '../routes/email-address/email-address.sql';
+import * as emailBroadcastSql from '../routes/email-broadcast/email-broadcast.sql';
 import * as emailDeliverySql from '../routes/email-delivery/email-delivery.sql';
 import * as emailDomainSql from '../routes/email-domain/email-domain.sql';
 import * as emailTemplateSql from '../routes/email-template/email-template.sql';
@@ -75,6 +76,7 @@ export const dbSchema = {
 	...cartSql,
 	...domainSql,
 	...emailAddressSql,
+	...emailBroadcastSql,
 	...emailDomainSql,
 	...emailTemplateSql,
 	...emailDeliverySql,

@@ -84,8 +84,12 @@ export function SidebarNav(props: { workspace: Workspace }) {
 		},
 	];
 
-	const otherLinks: SidebarNavLink[] = [
+	const fanLinks: SidebarNavLink[] = [
 		{ title: 'fans', icon: 'fans', href: `/${handle}/fans` },
+		{ title: 'fan groups', icon: 'fanGroup', href: `/${handle}/fan-groups` },
+	];
+
+	const otherLinks: SidebarNavLink[] = [
 		{ title: 'flows', icon: 'flow', href: `/${handle}/flows` },
 		{ title: 'settings', icon: 'settings', href: `/${handle}/settings` },
 	];
@@ -108,6 +112,10 @@ export function SidebarNav(props: { workspace: Workspace }) {
 		{
 			title: 'email',
 			links: emailLinks,
+		},
+		{
+			title: 'fans',
+			links: fanLinks,
 		},
 		{
 			title: 'other',

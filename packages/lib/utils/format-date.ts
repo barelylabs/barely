@@ -1,7 +1,10 @@
 import type { StatDateRange } from '../server/routes/stat/stat.schema';
 
-export function formatDate(input: string | number): string {
-	const date = new Date(input);
+export function formatDate(input: string | number | Date): string {
+	const date =
+		typeof input === 'string' ? new Date(input)
+		: typeof input === 'number' ? new Date(input)
+		: input;
 	return date.toLocaleDateString('en-US', {
 		month: 'long',
 		day: 'numeric',

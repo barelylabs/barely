@@ -18,6 +18,10 @@ export type CreateFan = z.input<typeof createFanSchema>;
 export type UpsertFan = z.input<typeof upsertFanSchema>;
 export type UpdateFan = z.input<typeof updateFanSchema>;
 export type Fan = InferSelectModel<typeof Fans>;
+export type FanForEmail = Pick<
+	Fan,
+	'id' | 'email' | 'firstName' | 'lastName' | 'fullName'
+>;
 
 // forms
 export const fanFilterParamsSchema = z.object({

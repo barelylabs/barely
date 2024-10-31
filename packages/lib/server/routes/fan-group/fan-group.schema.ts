@@ -65,6 +65,9 @@ export type CreateFanGroup = z.input<typeof createFanGroupSchema>;
 export type UpsertFanGroup = z.input<typeof upsertFanGroupSchema>;
 export type UpdateFanGroup = z.input<typeof updateFanGroupSchema>;
 export type FanGroup = InferSelectModel<typeof FanGroups>;
+export type FanGroupWithConditions = InferSelectModel<typeof FanGroups> & {
+	conditions: FanGroupCondition[];
+};
 
 // forms
 export const fanGroupFilterParamsSchema = z.object({

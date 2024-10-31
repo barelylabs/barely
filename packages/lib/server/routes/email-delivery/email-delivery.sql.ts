@@ -2,8 +2,10 @@ import { relations } from 'drizzle-orm';
 import { pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 import { dbId, primaryId, timestamps } from '../../../utils/sql';
+import { EmailBroadcasts } from '../email-broadcast/email-broadcast.sql';
 import { EmailTemplates } from '../email-template/email-template.sql';
 import { Fans } from '../fan/fan.sql';
+import { FlowRunActions } from '../flow/flow.sql';
 import { Workspaces } from '../workspace/workspace.sql';
 
 export const EmailDeliveries = pgTable('EmailDeliveries', {
@@ -15,6 +17,10 @@ export const EmailDeliveries = pgTable('EmailDeliveries', {
 	emailTemplateId: dbId('emailTemplateId')
 		.notNull()
 		.references(() => EmailTemplates.id),
+
+	// where was this sent from?
+	flowRunActionId: dbId('flowRunActionId').references(() => FlowRunActions.id),
+	emailBroadcastId: dbId('emailBroadcastId').references(() => EmailBroadcasts.id),
 
 	// delivery
 	resendId: text('resendId'),

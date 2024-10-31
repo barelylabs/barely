@@ -46,7 +46,6 @@ export const emailTemplateSearchParamsSchema = emailTemplateFilterParamsSchema.e
 /* select workspace email templates */
 export const selectWorkspaceEmailTemplatesSchema = emailTemplateFilterParamsSchema.extend(
 	{
-		// handle: z.string(),
 		limit: z.number().min(1).max(100).default(50),
 		cursor: z
 			.object({
