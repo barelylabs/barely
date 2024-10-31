@@ -14,9 +14,6 @@ const emailTemplateSchema = insertEmailTemplateSchema.pick({
 	name: true,
 	description: true,
 });
-// .extend({
-// 	lexorank: z.string(),
-// });
 
 export const createEmailTemplateGroupSchema = insertEmailTemplateGroupSchema
 	.omit({ id: true })

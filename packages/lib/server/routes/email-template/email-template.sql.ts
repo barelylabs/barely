@@ -38,6 +38,7 @@ export const EmailTemplates = pgTable('EmailTemplates', {
 		.notNull()
 		.default('marketing'),
 	flowOnly: boolean('flowOnly').notNull().default(false),
+	broadcastOnly: boolean('broadcastOnly').notNull().default(false),
 
 	replyTo: text('replyTo'),
 	subject: text('subject').notNull(),

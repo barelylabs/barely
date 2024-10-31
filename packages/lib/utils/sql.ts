@@ -3,7 +3,7 @@ import type { PgColumn } from 'drizzle-orm/pg-core';
 import { and, sql } from 'drizzle-orm';
 import { customType, timestamp, varchar } from 'drizzle-orm/pg-core';
 
-import { raise } from './raise';
+// import { raise } from './raise';
 
 export const dbId = (name: string) => varchar(name, { length: 255 });
 
@@ -46,6 +46,7 @@ export const lexorank = {
 
 // queries
 export const sqlCount = sql<number>`count(*)`.mapWith(Number);
+
 export const sqlCurrentDateTime = sql<string>`CURRENT_TIMESTAMP`;
 export const sqlCurrentTimestamp = sql<string>`CURRENT_TIMESTAMP`;
 
@@ -65,7 +66,8 @@ export function sqlAnd(conditions: (SQL | false | undefined | null)[]) {
 	const _and = filteredConditions.length > 0 ? and(...filteredConditions) : undefined;
 
 	if (_and === undefined) {
-		return raise('sqlAnd: no conditions provided');
+		// return raise('sqlAnd: no conditions provided');
+		return sql`1=1`;
 	}
 
 	return _and;

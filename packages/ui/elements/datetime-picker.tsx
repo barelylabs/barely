@@ -359,7 +359,6 @@ const DateTimePicker = React.forwardRef<
 		dialogProps,
 		calendarProps,
 	} = useDatePicker(props, state, divRef);
-	// const { buttonProps } = useButton(_buttonProps, buttonRef);
 
 	const currentValue = useCallback(() => {
 		if (!jsDatetime) {

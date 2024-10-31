@@ -70,10 +70,9 @@ export function CreateOrUpdateEmailTemplateModal({
 			subject: mode === 'update' ? selectedEmailTemplate?.subject ?? '' : '',
 			body: mode === 'update' ? selectedEmailTemplate?.body ?? '' : '',
 			fromId: mode === 'update' ? selectedEmailTemplate?.fromId ?? '' : '',
-			...selectedEmailTemplate,
+			// ...selectedEmailTemplate,
 		},
 		handleCreateItem: async d => {
-			d.fromId;
 			await createEmailTemplate(d);
 		},
 		handleUpdateItem: async d => {

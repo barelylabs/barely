@@ -102,8 +102,6 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 		setUploadQueue: setArtworkUploadQueue,
 	} = artworkUploadState;
 
-	// const uploadPreviewImage = artworkUploadQueue[0]?.previewImage;
-
 	/* modal */
 	const showFmModal = mode === 'create' ? showCreateFmPageModal : showUpdateFmPageModal;
 	const setShowFmModal =

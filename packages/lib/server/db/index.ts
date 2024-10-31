@@ -22,12 +22,14 @@ import * as funnelSql from '../routes/cart-funnel/cart-funnel.sql';
 import * as cartSql from '../routes/cart/cart.sql';
 import * as domainSql from '../routes/domain/domain.sql';
 import * as emailAddressSql from '../routes/email-address/email-address.sql';
+import * as emailBroadcastSql from '../routes/email-broadcast/email-broadcast.sql';
 import * as emailDeliverySql from '../routes/email-delivery/email-delivery.sql';
 import * as emailDomainSql from '../routes/email-domain/email-domain.sql';
 import * as emailTemplateSql from '../routes/email-template/email-template.sql';
 import * as eventReportSql from '../routes/event/event-report.sql';
 import * as eventSql from '../routes/event/event.sql';
 import * as externalWebsiteSql from '../routes/external-website/external-website.sql';
+import * as fanGroupSql from '../routes/fan-group/fan-group.sql';
 import * as fanSql from '../routes/fan/fan.sql';
 import * as fileFolderSql from '../routes/file/file-folder.sql';
 import * as fileSql from '../routes/file/file.sql';
@@ -74,6 +76,7 @@ export const dbSchema = {
 	...cartSql,
 	...domainSql,
 	...emailAddressSql,
+	...emailBroadcastSql,
 	...emailDomainSql,
 	...emailTemplateSql,
 	...emailDeliverySql,
@@ -81,6 +84,7 @@ export const dbSchema = {
 	...eventReportSql,
 	...externalWebsiteSql,
 	...fanSql,
+	...fanGroupSql,
 	...fileSql,
 	...fileFolderSql,
 	...flowSql,

@@ -206,4 +206,13 @@ export const emailTemplateRouter = createTRPCRouter({
 				// }),
 			});
 		}),
+
+	// sendBroadcast: privateProcedure
+	//     .input(sendEmailBroadcastSchema)
+	//     .mutation(async ({ ctx, input }) => {
+	//         const { emailTemplateId, fanGroupIds } = input;
+
+	//         // get all fans in fan groups
+
+	//     })
 });

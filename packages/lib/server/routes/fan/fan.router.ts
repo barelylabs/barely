@@ -13,7 +13,6 @@ import {
 } from '../../api/trpc';
 import {
 	createFanSchema,
-	// importFansFromCsvColumnMappingsSchema,
 	importFansFromCsvSchema,
 	selectWorkspaceFansSchema,
 	updateFanSchema,

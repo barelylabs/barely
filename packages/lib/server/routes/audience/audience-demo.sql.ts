@@ -8,7 +8,6 @@ import { Audiences } from './audience.sql';
 export const AudienceDemos = pgTable(
 	'AudienceDemos',
 	{
-		// id: cuid('id').notNull(),
 		...primaryId,
 		workspaceId: dbId('workspaceId')
 			.notNull()
@@ -28,7 +27,6 @@ export const AudienceDemos = pgTable(
 		public: boolean('public').default(false).notNull(),
 	},
 	demo => ({
-		// primary: primaryKey(demo.workspaceId, demo.id),
 		workspace: index('AudienceDemos_workspace_idx').on(demo.workspaceId),
 	}),
 );

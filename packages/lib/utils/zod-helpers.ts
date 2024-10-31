@@ -11,6 +11,16 @@ export const queryBooleanSchema = z.preprocess(v => {
 	return v;
 }, z.boolean());
 
+export const optionalString_EmptyToUndefined = z.preprocess(v => {
+	if (typeof v === 'string' && v.length === 0) return undefined;
+	return v;
+}, z.string().optional());
+
+export const nullableString_EmptyToNull = z.preprocess(v => {
+	if (typeof v === 'string' && v.length === 0) return null;
+	return v;
+}, z.string().nullable());
+
 export const z_optStr_hash = z
 	.string()
 	.optional()
@@ -111,6 +121,33 @@ export const queryStringArraySchema = z
 		if (Array.isArray(a)) return a;
 		return [a];
 	});
+
+export const queryStringEnumArraySchema = <T extends readonly [string, ...string[]]>(
+	enumValues: T,
+) =>
+	z
+		.string()
+		.or(z.array(z.enum(enumValues)))
+		.transform(a => {
+			console.log('enumValues', a);
+
+			if (typeof a === 'string') {
+				const array = a.split(',');
+				const invalidValues = array.filter(
+					value => !enumValues.includes(value as T[number]),
+				);
+				if (invalidValues.length > 0)
+					throw new Error(`Invalid enum values: ${invalidValues.join(', ')}`);
+				return array as z.Writeable<T>[number][];
+			}
+			if (Array.isArray(a)) return a;
+
+			// check if all values are in the enum
+			// const invalidValues = a.filter(value => !enumValues.includes(value as T[number]));
+			// if (invalidValues.length > 0) throw new Error(`Invalid enum values: ${invalidValues.join(', ')}`);
+
+			return a;
+		});
 
 export const queryStringArrayToCommaString = z
 	.string()
