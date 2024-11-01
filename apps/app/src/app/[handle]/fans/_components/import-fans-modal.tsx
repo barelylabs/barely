@@ -129,9 +129,6 @@ export function ImportFansFromCsvModal() {
 			const csvFileId = data[0]?.fileRecord.id ?? raise('No CSV file id');
 			setValue('csvFileId', csvFileId, { shouldDirty: true });
 		},
-		// onUploadComplete: data => {
-		// 	setValue('csvFileId', data.id, { shouldDirty: true });
-		// },
 	});
 
 	const {
