@@ -18,84 +18,40 @@ export function generateFanGroupConditions(conditions: FanGroupCondition[]) {
 				if (!condition.cartFunnelId)
 					return whereConditions.push(
 						condition.exclude ?
-							sql`carts.has_purchased_cart_funnel = FALSE`
-						:	sql`carts.has_purchased_cart_funnel = TRUE`,
+							sql`carts.has_purchased_cart_funnel = FALSE OR carts.cart_count = 0`
+						:	sql`carts.has_purchased_cart_funnel = TRUE and carts.cart_count > 0`,
 					);
 
 				return whereConditions.push(
 					condition.exclude ?
-						sql`NOT (${condition.cartFunnelId} = ANY(carts.purchased_cart_funnel_ids))`
+						sql`(${condition.cartFunnelId} != ALL(carts.purchased_cart_funnel_ids) OR carts.purchased_cart_funnel_ids IS NULL)`
 					:	sql`${condition.cartFunnelId} = ANY(carts.purchased_cart_funnel_ids)`,
-					// 	ne(Carts.cartFunnelId, condition.cartFunnelId)
-					// :	eq(Carts.cartFunnelId, condition.cartFunnelId),
 				);
 
 			case 'hasOrderedProduct':
 				if (!condition.productId)
 					return whereConditions.push(
-						// condition.exclude ? isNull(Carts.id) : isNotNull(Carts.id),
-						// condition.exclude ? sql`carts.id IS NULL` : sql`carts.id IS NOT NULL`,
 						condition.exclude ?
-							sql`carts.has_purchased_main_product = FALSE`
+							sql`carts.has_purchased_main_product = FALSE or carts.has_purchased_main_product IS NULL`
 						:	sql`carts.has_purchased_main_product = TRUE`,
 					); // this is the same as hasOrderedCart
 
-				if (!condition.exclude) {
-					// const cond = or(
-					// 	// eq(Carts.mainProductId, condition.productId),
-					// 	// and(eq(Carts.bumpProductId, condition.productId), eq(Carts.addedBump, true)),
-					// 	// and(
-					// 	// 	eq(Carts.upsellProductId, condition.productId),
-					// 	// 	isNotNull(Carts.upsellConvertedAt),
-					// 	// ),
-
-					// );
-
-					// if (cond === undefined) return;
-
-					return whereConditions.push(sql`(
-                            ${condition.productId} = ANY(carts.purchased_main_product_ids) OR
+				return whereConditions.push(
+					condition.exclude ?
+						sql`COALESCE(
+                            NOT (
+                                COALESCE(${condition.productId} = ANY(carts.purchased_main_product_ids), FALSE) OR 
+                                COALESCE(${condition.productId} = ANY(carts.purchased_bump_product_ids), FALSE) OR 
+                                COALESCE(${condition.productId} = ANY(carts.purchased_upsell_product_ids), FALSE)
+                            ),
+                            TRUE
+						)`
+					:	sql`(${condition.productId} = ANY(carts.purchased_main_product_ids) OR
                             ${condition.productId} = ANY(carts.purchased_bump_product_ids) OR
-                            ${condition.productId} = ANY(carts.purchased_upsell_product_ids)
-                        )`);
-				} else {
-					// const cond = and(
-					// 	// ne(Carts.mainProductId, condition.productId),
-					// 	// or(eq(Carts.addedBump, false), ne(Carts.bumpProductId, condition.productId)),
-					// 	// or(
-					// 	// 	isNull(Carts.upsellConvertedAt),
-					// 	// 	ne(Carts.upsellProductId, condition.productId),
-					// 	// ),
-
-					// );
-
-					// if (cond === undefined) return;
-
-					return whereConditions.push(sql`(
-                            ${condition.productId} != ALL(carts.purchased_main_product_ids) AND
-                            ${condition.productId} != ALL(carts.purchased_bump_product_ids) AND
-                            ${condition.productId} != ALL(carts.purchased_upsell_product_ids)
-                        )`);
-				}
+                            ${condition.productId} = ANY(carts.purchased_upsell_product_ids))`,
+				);
 
 			case 'hasOrderedAmount': {
-				// we need to check if the aggregate amount of all orders is greater than the amount
-				// return sql`${Carts.orderAmount} ${condition.operator} ${condition.totalOrderAmount}`;
-				// return undefined;
-
-				console.log('hasOrderedAmount condition', condition);
-				// const cond =
-				// 	condition.exclude ?
-				// 		// 	sql`(SELECT ${sum(Carts.orderAmount)} > ${condition.totalOrderAmount} from ${Carts})`
-				// 		// :	sql`(SELECT ${sum(Carts.orderAmount)} < ${condition.totalOrderAmount} from ${Carts})`;
-				// 		sql`(SELECT (${lte(sum(Carts.orderAmount), condition.totalOrderAmount)}) from ${Carts})`
-				// 	:	sql`(SELECT (${gte(sum(Carts.orderAmount), condition.totalOrderAmount)}) from ${Carts})`;
-				// :	gte(sum(Carts.orderAmount), condition.totalOrderAmount);
-
-				// const cond = condition.exclude ?
-				// sql`(SELECT ${sum(Carts.orderAmount)} > ${condition.totalOrderAmount} from ${Carts})`lte
-
-				// return;
 				const cond =
 					condition.exclude ?
 						sql`carts.order_amount <= ${condition.totalOrderAmount}`
@@ -113,7 +69,6 @@ export function generateFanGroupConditions(conditions: FanGroupCondition[]) {
 	return {
 		whereConditions,
 	};
-	// return [...sqlConditions, ...finalConditions];
 }
 
 export function generateFanGroupWhere(conditions: FanGroupCondition[]) {
@@ -210,8 +165,21 @@ const getCartsSubquery = (dbPool: Db['pool']) =>
 			>`array_agg(DISTINCT CASE WHEN ${Carts.upsellConvertedAt} IS NOT NULL THEN ${Carts.upsellProductId} END)`.as(
 				'purchased_upsell_product_ids',
 			),
+			// purchasedProductIds: sql<string[]>`
+			// 	array_agg(DISTINCT p.product_id)
+			// `.as('purchased_product_ids'),
 		})
 		.from(Carts)
+		// .leftJoin(
+		// 	sql`
+		// 		(SELECT UNNEST(ARRAY[
+		// 			${Carts.mainProductId},
+		// 			CASE WHEN ${Carts.addedBump} = true THEN ${Carts.bumpProductId} END,
+		// 			CASE WHEN ${Carts.upsellConvertedAt} IS NOT NULL THEN ${Carts.upsellProductId} END
+		// 		]) as product_id) p
+		// 	`,
+		// 	sql`true`,
+		// )
 		.where(isNotNull(Carts.checkoutConvertedAt))
 		.groupBy(Carts.fanId)
 		.as('carts');
@@ -229,7 +197,6 @@ export async function getFanGroupCount(
 		})
 		.from(fansSubquery)
 		.leftJoin(cartSubquery, eq(fansSubquery.fanId, cartSubquery.fanId))
-		// .leftJoin(Carts, eq(fansSubquery.fanId, Carts.fanId))
 		.where(generateFanGroupWhere(fanGroup.conditions));
 
 	const countRes = await countQuery;
