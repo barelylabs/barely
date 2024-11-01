@@ -178,6 +178,8 @@ export const fanGroupRouter = createTRPCRouter({
 				.returning();
 
 			if (conditions !== undefined) {
+				console.log('updated conditions', conditions);
+
 				const conditionIds = conditions
 					.map(condition => condition.id)
 					.filter(id => id !== undefined);

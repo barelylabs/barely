@@ -5,7 +5,7 @@ import { z } from 'zod';
 import type { importFansFromCsv } from '../../../trigger/fan.trigger';
 import { newId } from '../../../utils/id';
 import { raise } from '../../../utils/raise';
-import { sqlAnd, sqlStringContains } from '../../../utils/sql';
+import { sqlAnd, sqlCount, sqlStringContains } from '../../../utils/sql';
 import {
 	createTRPCRouter,
 	privateProcedure,
@@ -56,6 +56,17 @@ export const fanRouter = createTRPCRouter({
 				nextCursor,
 			};
 		}),
+
+	totalByWorkspace: workspaceQueryProcedure.query(async ({ ctx }) => {
+		const res = await ctx.db.http
+			.select({
+				count: sqlCount,
+			})
+			.from(Fans)
+			.where(eq(Fans.workspaceId, ctx.workspace.id));
+
+		return res[0]?.count ?? 0;
+	}),
 
 	generateCsvMapping: privateProcedure
 		.input(
