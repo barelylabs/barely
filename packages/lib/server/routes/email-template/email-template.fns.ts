@@ -25,7 +25,12 @@ export async function updateEmailTemplate(
 ) {
 	const updatedEmail = await dbHttp
 		.update(EmailTemplates)
-		.set({ subject: input.subject, body: input.body })
+		.set({
+			// name: input.name,
+			// subject: input.subject,
+			// body: input.body,
+			...input,
+		})
 		.where(
 			and(
 				eq(EmailTemplates.id, input.id),

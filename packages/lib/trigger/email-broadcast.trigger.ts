@@ -122,7 +122,13 @@ export const handleEmailBroadcast = task({
 				marketingOptInOnly: emailTemplate.type === 'marketing',
 			});
 			console.log('pushing fan group fans to fans array', fanGroupFans);
-			fans.push(...(fanGroupFans ?? []));
+
+			// just in case, we should filter out duplicates
+			const uniqueFanGroupFans = fanGroupFans.filter(
+				(fan, index, self) => index === self.findIndex(t => t.id === fan.id),
+			);
+
+			fans.push(...uniqueFanGroupFans);
 		} else {
 			const allFans = await getDbPool().query.Fans.findMany({
 				columns: {

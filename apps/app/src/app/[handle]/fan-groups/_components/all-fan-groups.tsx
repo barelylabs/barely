@@ -21,8 +21,15 @@ export function AllFanGroups() {
 		setShowUpdateFanGroupModal,
 	} = useFanGroupContext();
 
+	const { handle } = useWorkspace();
+
+	const { data: totalFans } = api.fan.totalByWorkspace.useQuery({
+		handle,
+	});
+
 	return (
 		<>
+			<Text variant='md/medium'>{totalFans} fans</Text>
 			<GridList
 				glRef={gridListRef}
 				className='flex flex-col gap-2'
