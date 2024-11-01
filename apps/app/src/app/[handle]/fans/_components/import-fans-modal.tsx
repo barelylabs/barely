@@ -34,12 +34,19 @@ export function ImportFansFromCsvModal() {
 
 	const { mutate: importFansFromCsv } = api.fan.importFromCsv.useMutation({
 		onSuccess: () => {
-			toast('Fans importing...');
+			handleCloseModal();
+			toast('Fans importing...check back in a bit');
 		},
 	});
 
 	const form = useZodForm({
 		schema: importFansFromCsvSchema,
+		defaultValues: {
+			// csvFileId: '',
+			// fixme: make these form fields
+			optIntoEmailMarketing: true,
+			optIntoSmsMarketing: false,
+		},
 	});
 	const { control, setValue } = form;
 
@@ -118,8 +125,12 @@ export function ImportFansFromCsvModal() {
 					setFileColumns(null);
 				});
 		},
+		onPresigned: data => {
+			const csvFileId = data[0]?.fileRecord.id ?? raise('No CSV file id');
+			setValue('csvFileId', csvFileId, { shouldDirty: true });
+		},
 		// onUploadComplete: data => {
-		// 	setValue('csvFileId', data.id);
+		// 	setValue('csvFileId', data.id, { shouldDirty: true });
 		// },
 	});
 
@@ -142,9 +153,6 @@ export function ImportFansFromCsvModal() {
 		importFansFromCsv({
 			...data,
 			csvFileId,
-			// fixme: make these form fields
-			optIntoEmailMarketing: true,
-			optIntoSmsMarketing: false,
 		});
 	};
 
