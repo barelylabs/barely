@@ -22,6 +22,7 @@ export function AllFans() {
 
 	return (
 		<div className='flex flex-col gap-4'>
+			{/* <Text variant='md/medium'>{totalFans} fans</Text> */}
 			<GridList
 				glRef={gridListRef}
 				className='flex flex-col gap-2'

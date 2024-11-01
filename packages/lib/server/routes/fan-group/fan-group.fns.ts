@@ -1,6 +1,6 @@
 // import type { SQL } from 'drizzle-orm';
 import type { SQL } from 'drizzle-orm';
-import { and, asc, eq, isNotNull, isNull, ne, or, sql } from 'drizzle-orm';
+import { and, asc, eq, isNotNull, or, sql } from 'drizzle-orm';
 
 import type { Db } from '../../db';
 import type { FanGroupCondition, FanGroupWithConditions } from './fan-group.schema';
@@ -17,47 +17,65 @@ export function generateFanGroupConditions(conditions: FanGroupCondition[]) {
 			case 'hasOrderedCart':
 				if (!condition.cartFunnelId)
 					return whereConditions.push(
-						condition.exclude ? isNull(Carts.id) : isNotNull(Carts.id),
+						condition.exclude ?
+							sql`carts.has_purchased_cart_funnel = FALSE`
+						:	sql`carts.has_purchased_cart_funnel = TRUE`,
 					);
 
 				return whereConditions.push(
 					condition.exclude ?
-						ne(Carts.cartFunnelId, condition.cartFunnelId)
-					:	eq(Carts.cartFunnelId, condition.cartFunnelId),
+						sql`NOT (${condition.cartFunnelId} = ANY(carts.purchased_cart_funnel_ids))`
+					:	sql`${condition.cartFunnelId} = ANY(carts.purchased_cart_funnel_ids)`,
+					// 	ne(Carts.cartFunnelId, condition.cartFunnelId)
+					// :	eq(Carts.cartFunnelId, condition.cartFunnelId),
 				);
 
 			case 'hasOrderedProduct':
 				if (!condition.productId)
 					return whereConditions.push(
-						condition.exclude ? isNull(Carts.id) : isNotNull(Carts.id),
+						// condition.exclude ? isNull(Carts.id) : isNotNull(Carts.id),
+						// condition.exclude ? sql`carts.id IS NULL` : sql`carts.id IS NOT NULL`,
+						condition.exclude ?
+							sql`carts.has_purchased_main_product = FALSE`
+						:	sql`carts.has_purchased_main_product = TRUE`,
 					); // this is the same as hasOrderedCart
 
 				if (!condition.exclude) {
-					const cond = or(
-						eq(Carts.mainProductId, condition.productId),
-						and(eq(Carts.bumpProductId, condition.productId), eq(Carts.addedBump, true)),
-						and(
-							eq(Carts.upsellProductId, condition.productId),
-							isNotNull(Carts.upsellConvertedAt),
-						),
-					);
+					// const cond = or(
+					// 	// eq(Carts.mainProductId, condition.productId),
+					// 	// and(eq(Carts.bumpProductId, condition.productId), eq(Carts.addedBump, true)),
+					// 	// and(
+					// 	// 	eq(Carts.upsellProductId, condition.productId),
+					// 	// 	isNotNull(Carts.upsellConvertedAt),
+					// 	// ),
 
-					if (cond === undefined) return;
+					// );
 
-					return whereConditions.push(cond);
+					// if (cond === undefined) return;
+
+					return whereConditions.push(sql`(
+                            ${condition.productId} = ANY(carts.purchased_main_product_ids) OR
+                            ${condition.productId} = ANY(carts.purchased_bump_product_ids) OR
+                            ${condition.productId} = ANY(carts.purchased_upsell_product_ids)
+                        )`);
 				} else {
-					const cond = and(
-						ne(Carts.mainProductId, condition.productId),
-						or(eq(Carts.addedBump, false), ne(Carts.bumpProductId, condition.productId)),
-						or(
-							isNull(Carts.upsellConvertedAt),
-							ne(Carts.upsellProductId, condition.productId),
-						),
-					);
+					// const cond = and(
+					// 	// ne(Carts.mainProductId, condition.productId),
+					// 	// or(eq(Carts.addedBump, false), ne(Carts.bumpProductId, condition.productId)),
+					// 	// or(
+					// 	// 	isNull(Carts.upsellConvertedAt),
+					// 	// 	ne(Carts.upsellProductId, condition.productId),
+					// 	// ),
 
-					if (cond === undefined) return;
+					// );
 
-					return whereConditions.push(cond);
+					// if (cond === undefined) return;
+
+					return whereConditions.push(sql`(
+                            ${condition.productId} != ALL(carts.purchased_main_product_ids) AND
+                            ${condition.productId} != ALL(carts.purchased_bump_product_ids) AND
+                            ${condition.productId} != ALL(carts.purchased_upsell_product_ids)
+                        )`);
 				}
 
 			case 'hasOrderedAmount': {
@@ -80,8 +98,8 @@ export function generateFanGroupConditions(conditions: FanGroupCondition[]) {
 				// return;
 				const cond =
 					condition.exclude ?
-						sql`carts.orderamount <= ${condition.totalOrderAmount}`
-					:	sql`carts.orderamount >= ${condition.totalOrderAmount}`;
+						sql`carts.order_amount <= ${condition.totalOrderAmount}`
+					:	sql`carts.order_amount >= ${condition.totalOrderAmount}`;
 				if (cond === undefined) return;
 
 				return whereConditions.push(cond);
@@ -96,6 +114,22 @@ export function generateFanGroupConditions(conditions: FanGroupCondition[]) {
 		whereConditions,
 	};
 	// return [...sqlConditions, ...finalConditions];
+}
+
+export function generateFanGroupWhere(conditions: FanGroupCondition[]) {
+	const { whereConditions: includeWhereConditions } = generateFanGroupConditions(
+		conditions.filter(condition => condition.exclude === false),
+	);
+
+	const { whereConditions: excludeWhereConditions } = generateFanGroupConditions(
+		conditions.filter(condition => condition.exclude === true),
+	);
+
+	return sqlAnd([
+		// emailMarketingOptInOnly ? eq(emailMarketingOptIn, true) : undefined,
+		includeWhereConditions.length ? or(...includeWhereConditions) : undefined,
+		excludeWhereConditions.length ? and(...excludeWhereConditions) : undefined,
+	]);
 }
 
 export async function getFanGroupById(id: string, dbPool: Db['pool']) {
@@ -138,9 +172,44 @@ const getFansForEmailSubquery = (workspaceId: string, dbPool: Db['pool']) =>
 const getCartsSubquery = (dbPool: Db['pool']) =>
 	dbPool
 		.select({
+			// id: Carts.id,
 			fanId: Carts.fanId,
-			orderAmount: sql<number>`COALESCE(SUM(${Carts.orderAmount}), 0)`.as('orderamount'),
-			cartCount: sql<number>`COUNT(${Carts.id})`.as('cartCount'),
+			orderAmount: sql<number>`COALESCE(SUM(${Carts.orderAmount}), 0)`.as('order_amount'),
+			cartCount: sql<number>`COUNT(${Carts.id})`.as('cart_count'),
+
+			// Use boolean aggregates for conditions we need to filter by
+			hasPurchasedCartFunnel: sql<boolean>`bool_or(${Carts.cartFunnelId} IS NOT NULL)`.as(
+				'has_purchased_cart_funnel',
+			),
+			hasPurchasedMainProduct:
+				sql<boolean>`bool_or(${Carts.mainProductId} IS NOT NULL)`.as(
+					'has_purchased_main_product',
+				),
+			hasPurchasedBumpProduct:
+				sql<boolean>`bool_or(${Carts.bumpProductId} IS NOT NULL AND ${Carts.addedBump} = true)`.as(
+					'has_purchased_bump_product',
+				),
+			hasPurchasedUpsellProduct:
+				sql<boolean>`bool_or(${Carts.upsellProductId} IS NOT NULL AND ${Carts.upsellConvertedAt} IS NOT NULL)`.as(
+					'has_purchased_upsell_product',
+				),
+			// Store arrays of IDs for specific filtering
+			purchasedCartFunnelIds: sql<string[]>`array_agg(DISTINCT ${Carts.cartFunnelId})`.as(
+				'purchased_cart_funnel_ids',
+			),
+			purchasedMainProductIds: sql<
+				string[]
+			>`array_agg(DISTINCT ${Carts.mainProductId})`.as('purchased_main_product_ids'),
+			purchasedBumpProductIds: sql<
+				string[]
+			>`array_agg(DISTINCT CASE WHEN ${Carts.addedBump} = true THEN ${Carts.bumpProductId} END)`.as(
+				'purchased_bump_product_ids',
+			),
+			purchasedUpsellProductIds: sql<
+				string[]
+			>`array_agg(DISTINCT CASE WHEN ${Carts.upsellConvertedAt} IS NOT NULL THEN ${Carts.upsellProductId} END)`.as(
+				'purchased_upsell_product_ids',
+			),
 		})
 		.from(Carts)
 		.where(isNotNull(Carts.checkoutConvertedAt))
@@ -151,31 +220,8 @@ export async function getFanGroupCount(
 	fanGroup: FanGroupWithConditions,
 	dbPool: Db['pool'],
 ) {
-	const { whereConditions: includeWhereConditions } = generateFanGroupConditions(
-		fanGroup.conditions.filter(condition => !condition.exclude),
-	);
-
-	const { whereConditions: excludeWhereConditions } = generateFanGroupConditions(
-		fanGroup.conditions.filter(condition => condition.exclude),
-	);
-
 	const fansSubquery = getFansWithIdSubquery(fanGroup.workspaceId, dbPool);
-	// const fanSubquery = dbPool
-	// 	.select({
-	// 		fanId: Fans.id,
-	// 	})
-	// 	.from(Fans)
-	// 	.where(eq(Fans.workspaceId, fanGroup.workspaceId))
-	// 	.as('fans');
-
 	const cartSubquery = getCartsSubquery(dbPool);
-	// 		orderAmount: sql<number>`COALESCE(SUM(${Carts.orderAmount}), 0)`.as('orderamount'),
-	// 		cartCount: sql<number>`COUNT(${Carts.id})`.as('cartCount'),
-	// 	})
-	// 	.from(Carts)
-	// 	.where(isNotNull(Carts.checkoutConvertedAt))
-	// 	.groupBy(Carts.fanId)
-	// 	.as('carts');
 
 	const countQuery = dbPool
 		.select({
@@ -183,17 +229,16 @@ export async function getFanGroupCount(
 		})
 		.from(fansSubquery)
 		.leftJoin(cartSubquery, eq(fansSubquery.fanId, cartSubquery.fanId))
-		.leftJoin(Carts, eq(fansSubquery.fanId, Carts.fanId))
-		.where(
-			sqlAnd([
-				includeWhereConditions.length ? or(...includeWhereConditions) : undefined,
-				excludeWhereConditions.length ? or(...excludeWhereConditions) : undefined,
-			]),
-		);
+		// .leftJoin(Carts, eq(fansSubquery.fanId, Carts.fanId))
+		.where(generateFanGroupWhere(fanGroup.conditions));
 
 	const countRes = await countQuery;
 
-	return countRes[0]?.count ?? 0;
+	const count = countRes[0]?.count ?? 0;
+
+	console.log(`count for ${fanGroup.name}`, count);
+
+	return count;
 }
 
 export async function getFanGroupFansForEmail(
@@ -205,13 +250,13 @@ export async function getFanGroupFansForEmail(
 		marketingOptInOnly?: boolean;
 	} = {},
 ) {
-	const { whereConditions: includeWhereConditions } = generateFanGroupConditions(
-		fanGroup.conditions.filter(condition => !condition.exclude),
-	);
+	// const { whereConditions: includeWhereConditions } = generateFanGroupConditions(
+	// 	fanGroup.conditions.filter(condition => !condition.exclude),
+	// );
 
-	const { whereConditions: excludeWhereConditions } = generateFanGroupConditions(
-		fanGroup.conditions.filter(condition => condition.exclude),
-	);
+	// const { whereConditions: excludeWhereConditions } = generateFanGroupConditions(
+	// 	fanGroup.conditions.filter(condition => condition.exclude),
+	// );
 
 	const fansSubquery = getFansForEmailSubquery(fanGroup.workspaceId, dbPool);
 	const cartSubquery = getCartsSubquery(dbPool);
@@ -227,12 +272,11 @@ export async function getFanGroupFansForEmail(
 		})
 		.from(fansSubquery)
 		.leftJoin(cartSubquery, eq(fansSubquery.fanId, cartSubquery.fanId))
-		.leftJoin(Carts, eq(fansSubquery.fanId, Carts.fanId))
+		// .leftJoin(Carts, eq(fansSubquery.fanId, Carts.fanId))
 		.where(
 			sqlAnd([
 				marketingOptInOnly ? eq(fansSubquery.emailMarketingOptIn, true) : undefined,
-				includeWhereConditions.length ? or(...includeWhereConditions) : undefined,
-				excludeWhereConditions.length ? or(...excludeWhereConditions) : undefined,
+				generateFanGroupWhere(fanGroup.conditions),
 			]),
 		);
 
