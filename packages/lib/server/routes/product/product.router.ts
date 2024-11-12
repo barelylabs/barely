@@ -92,10 +92,10 @@ export const productRouter = createTRPCRouter({
 			.returning();
 
 		if (_images?.length) {
-			const images = _images.map((_i, i) => ({
+			const images = _images.map((_i, index) => ({
 				productId,
 				fileId: _i.fileId,
-				lexorank: i.toString(),
+				lexorank: _i.lexorank ?? raise(`No lexorank for image ${index}`),
 			}));
 
 			await ctx.db.http.insert(_Files_To_Products__Images).values(images).returning();

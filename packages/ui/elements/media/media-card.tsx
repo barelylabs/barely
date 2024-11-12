@@ -7,11 +7,6 @@ import { Button } from '../button';
 import { GridItemCheckbox } from '../grid-list';
 import { Tooltip } from '../tooltip';
 
-// import BackgroundImg from '@barely/ui/elements/background-image';
-// import { Button } from '@barely/ui/elements/button';
-// import { GridItemCheckbox } from '@barely/ui/elements/grid-list';
-// import { Tooltip } from '@barely/ui/elements/tooltip';
-
 export interface MediaCardProps {
 	file: FileRecord;
 	previewImage?: string;
@@ -30,7 +25,9 @@ export function MediaCard({ file, removeFile, isSelectable }: MediaCardProps) {
 					<div className='relative inset-0 flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-md'>
 						<BackgroundImg
 							sizes='128px'
-							s3Key={file.s3Key}
+							{...(file.uploadStatus === 'pending' ?
+								{ src: file.src }
+							:	{ s3Key: file.s3Key })}
 							alt={file.name}
 							placeholder={file.blurDataUrl ? 'blur' : undefined}
 							blurDataURL={file.blurDataUrl ? file.blurDataUrl : ''}
