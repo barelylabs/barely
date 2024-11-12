@@ -132,7 +132,6 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 		isPendingPresigns: isPendingPresignsProductImage,
 		uploading: uploadingProductImage,
 		handleSubmit: handleProductImageUpload,
-		// uploadQueue: productImageUploadQueue,
 		setUploadQueue: setProductImageUploadQueue,
 	} = productImageUploadState;
 
@@ -152,6 +151,11 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 
 	const submitDisabled = isPendingPresignsProductImage || uploadingProductImage;
 
+	const submitButtonText = mode === 'create' ? 'Create' : 'Update';
+	const submitButtonLoadingText =
+		uploadingProductImage ? 'Uploading...'
+		: mode === 'create' ? 'Creating'
+		: 'Updating';
 	/* apparel sizes */
 
 	/* modal state */
@@ -322,8 +326,12 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 					</div>
 				</ModalBody>
 				<ModalFooter>
-					<SubmitButton fullWidth disabled={submitDisabled}>
-						{mode === 'create' ? 'Create' : 'Update'}
+					<SubmitButton
+						fullWidth
+						disabled={submitDisabled}
+						loadingText={submitButtonLoadingText}
+					>
+						{submitButtonText}
 					</SubmitButton>
 				</ModalFooter>
 			</Form>
