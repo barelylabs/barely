@@ -94,6 +94,15 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
 		const { linkProps } = useLink(ariaProps, ariaRef);
 
+		const loadingLabel =
+			!loadingText && typeof children === 'string' ?
+				children
+					.replace(/Create/g, 'Creating')
+					.replace(/Save/g, 'Saving')
+					.replace(/Update/g, 'Updating')
+			: loadingText ? loadingText
+			: children;
+
 		if ('href' in props && props.href !== undefined) {
 			return (
 				<Link {...props} {...linkProps} className={classes} passHref>
@@ -111,9 +120,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 						/>
 					)}
 
-					{/* {children} */}
 					{loading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
-					{loading && loadingText ? loadingText : children}
+					{loading ? loadingLabel : children}
 				</Link>
 			);
 		}
@@ -153,7 +161,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 					)}
 
 					{loading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
-					{loading && loadingText ? loadingText : children}
+					{loading ? loadingLabel : children}
 
 					{EndIcon && (
 						<EndIcon
