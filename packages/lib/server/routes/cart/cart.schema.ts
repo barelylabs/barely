@@ -3,6 +3,7 @@ import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
 import { formattedUserAgentSchema, nextGeoSchema } from '../../next/next.schema';
+import { eventReportSearchParamsSchema } from '../event/event-report.schema';
 import { Carts } from './cart.sql';
 
 export const insertCartSchema = createInsertSchema(Carts, {
@@ -54,8 +55,8 @@ export const cartPageSearchParams = insertCartSchema
 		bumpProductApparelSize: true,
 	})
 	.partial()
+	.merge(eventReportSearchParamsSchema)
 	.extend({
-		fbclid: z.string().optional(),
 		warmup: z.coerce.boolean().optional(),
 	});
 

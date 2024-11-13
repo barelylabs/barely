@@ -3,6 +3,7 @@ import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { cartApi } from '@barely/lib/server/routes/cart/cart.api.server';
 import { cartPageSearchParams } from '@barely/lib/server/routes/cart/cart.schema';
+import { eventReportSearchParamsSchema } from '@barely/lib/server/routes/event/event-report.schema';
 import { isDevelopment } from '@barely/lib/utils/environment';
 import { getDynamicStyleVariables } from 'node_modules/@barely/tailwind-config/lib/dynamic-tw.runtime';
 
@@ -23,6 +24,7 @@ export default async function CartPage({
 	const { mode, handle, key } = params;
 
 	const cartParams = cartPageSearchParams.safeParse(searchParams);
+	const eventTrackingParams = eventReportSearchParamsSchema.safeParse(searchParams);
 
 	if (!cartParams.success) {
 		console.log('cartParams error', cartParams.error);
@@ -36,8 +38,6 @@ export default async function CartPage({
 	}
 
 	const cartId = cookies().get(`${handle}.${key}.cartId`)?.value;
-	const fbclid =
-		searchParams.fbclid ?? cookies().get(`${handle}.${key}.fbclid`)?.value ?? null;
 
 	//  estimate shipTo from IP
 	const headersList = headers();
@@ -54,7 +54,7 @@ export default async function CartPage({
 				handle,
 				key,
 				shipTo,
-				landingPageId: cartParams.data.landingPageId,
+				tracking: eventTrackingParams.data ?? {},
 			});
 
 	const { defaultHex: colorPrimary } = getDynamicStyleVariables({
@@ -73,7 +73,7 @@ export default async function CartPage({
 					mode={mode}
 					initialData={initialData}
 					shouldWriteToCookie={!cartId}
-					fbclid={fbclid}
+					tracking={eventTrackingParams.data ?? {}}
 				/>
 			</ElementsProvider>
 		</>

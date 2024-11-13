@@ -49,6 +49,7 @@ export const LandingPages = pgTable(
 		// stats
 		views: integer('views').default(0),
 		clicks: integer('clicks').default(0),
+		value: integer('value').default(0),
 	},
 	lp => ({
 		workspace: index('lp_workspaceId_idx').on(lp.workspaceId),

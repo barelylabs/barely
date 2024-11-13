@@ -76,6 +76,9 @@ export const CartFunnels = pgTable(
 		count_declineUpsell: integer('count_declineUpsell').default(0),
 		count_purchaseUpsell: integer('count_purchaseUpsell').default(0),
 		count_viewOrderConfirmation: integer('count_viewOrderConfirmation').default(0),
+
+		// stats
+		value: integer('value').default(0),
 	},
 	funnel => ({
 		workspace: index('Funnels_workspaceId_idx').on(funnel.workspaceId),

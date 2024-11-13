@@ -21,8 +21,26 @@ export type EventReport = InferSelectModel<typeof EventReports>;
 export type InsertEventReport = InferInsertModel<typeof EventReports>;
 export type CreateEventReport = z.infer<typeof createEventReportSchema>;
 
+export const EventTrackingKeys = [
+	'emailBroadcastId',
+	'emailTemplateId',
+	'fanId',
+	'fbclid',
+	'flowActionId',
+	'landingPageId',
+	'refererId',
+] as const;
+
+export type EventTrackingProps = Partial<
+	Record<(typeof EventTrackingKeys)[number], string>
+>;
+
 export const eventReportSearchParamsSchema = z.object({
+	emailBroadcastId: z.string().optional(),
+	emailTemplateId: z.string().optional(),
 	fanId: z.string().optional(),
 	fbclid: z.string().optional(),
+	flowActionId: z.string().optional(),
+	landingPageId: z.string().optional(),
 	refererId: z.string().optional(),
 });

@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm';
-import { pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import { integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 import { dbId, primaryId, timestamps } from '../../../utils/sql';
 import { EmailTemplates } from '../email-template/email-template.sql';
@@ -31,6 +31,8 @@ export const EmailBroadcasts = pgTable('EmailBroadcasts', {
 
 	error: text('error'),
 	triggerRunId: text('triggerRunId'),
+
+	value: integer('value').default(0),
 });
 
 export const EmailBroadcastRelations = relations(EmailBroadcasts, ({ one }) => ({

@@ -1,6 +1,7 @@
 'use client';
 
 import type { CartRouterOutputs } from '@barely/lib/server/routes/cart/cart.api.react';
+import type { EventTrackingProps } from '@barely/lib/server/routes/event/event-report.schema';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { cartApi } from '@barely/lib/server/routes/cart/cart.api.react';
@@ -43,14 +44,15 @@ export function CheckoutForm({
 	mode,
 	initialData,
 	shouldWriteToCookie,
-	fbclid,
+	tracking,
 }: {
 	mode: 'preview' | 'live';
 	initialData:
 		| NonNullable<CartRouterOutputs['create']>
 		| NonNullable<CartRouterOutputs['byIdAndParams']>;
 	shouldWriteToCookie?: boolean;
-	fbclid: string | null;
+	// fbclid: string | null;
+	tracking: EventTrackingProps;
 }) {
 	const router = useRouter();
 	const { cart: initialCart, publicFunnel: initialFunnel } = initialData;
@@ -63,7 +65,7 @@ export function CheckoutForm({
 				handle: initialFunnel.handle,
 				key: initialFunnel.key,
 				cartId: initialCart.id,
-				fbclid,
+				tracking,
 			}).catch(console.error);
 
 			logEvent({
@@ -72,7 +74,7 @@ export function CheckoutForm({
 			});
 		}
 	}, [
-		fbclid,
+		tracking,
 		initialCart.id,
 		initialFunnel.handle,
 		initialFunnel.key,
@@ -229,8 +231,18 @@ export function CheckoutForm({
 		schema: updateCheckoutCartFromCheckoutSchema,
 		values: {
 			...cart,
+
 			handle: publicFunnel.workspace.handle,
 			key: publicFunnel.key,
+
+			// tracking
+			emailBroadcastId: tracking.emailBroadcastId,
+			emailTemplateId: tracking.emailTemplateId,
+			fanId: tracking.fanId,
+			fbclid: tracking.fbclid,
+			flowActionId: tracking.flowActionId,
+			landingPageId: tracking.landingPageId,
+			refererId: tracking.refererId,
 
 			mainProductPayWhatYouWantPrice:
 				cart.mainProductPayWhatYouWantPrice ?

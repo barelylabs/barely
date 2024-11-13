@@ -1,8 +1,7 @@
 import type { MdxImageSize } from '@barely/lib/server/mdx/mdx.constants';
-import type { CartFunnel } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
+import type { EventTrackingProps } from '@barely/lib/server/routes/event/event-report.schema';
 import type { LandingPage } from '@barely/lib/server/routes/landing-page/landing-page.schema';
-import type { Link } from '@barely/lib/server/routes/link/link.schema';
-import type { PressKit } from '@barely/lib/server/routes/press-kit/press-kit.schema';
+import type { MdxAssets } from '@barely/lib/utils/mdx';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import type { z } from 'zod';
@@ -62,8 +61,6 @@ export default async function LandingPage({
 
 	const searchParamsSafe = eventReportSearchParamsSchema.safeParse(searchParams);
 
-	const { fbclid, fanId } = searchParamsSafe.data ?? {};
-
 	const data = await getLandingPageData({
 		handle: params.handle,
 		key: key,
@@ -75,6 +72,12 @@ export default async function LandingPage({
 
 	const { cartFunnels, links, pressKits, landingPages, ...lp } = data;
 
+	const tracking = {
+		...searchParamsSafe.data,
+		landingPageId: lp.id,
+		refererId: lp.id,
+	};
+
 	return (
 		<div className='mx-auto flex min-h-screen w-full max-w-[824px] flex-col items-center gap-12 px-4 py-10 sm:gap-[3.25rem] sm:px-6 sm:py-12 md:gap-14'>
 			{cartFunnels?.length > 0 && <WarmupCart />}
@@ -83,19 +86,23 @@ export default async function LandingPage({
 				components={{
 					...mdxTypography,
 					...mdxVideoPlayer,
-					...mdxAssetButton({
+					...mdxLandingPageAssetButton({
 						landingPageId: lp.id,
-						// assets
-						cartFunnels,
-						links,
-						pressKits,
-						landingPages,
-						// tracking
-						fbclid,
-						fanId,
+						assets: {
+							cartFunnels,
+							links,
+							pressKits,
+							landingPages,
+						},
+						tracking,
 					}),
-					...mdxLink({ fanId, landingPageId: lp.id }),
-					...mdxLinkButton({ landingPageId: lp.id, fbclid, fanId }),
+					...mdxLink({
+						tracking,
+					}),
+					...mdxLinkButton({
+						landingPageId: lp.id,
+						tracking,
+					}),
 					...mdxImageFile(),
 					...mdxGrid,
 					...mdxCard,
@@ -108,19 +115,15 @@ export default async function LandingPage({
 
 function mdxLinkButton({
 	landingPageId,
-	fbclid,
-	fanId,
+	tracking,
 }: {
 	landingPageId: string;
-	fbclid?: string;
-	fanId?: string;
+	tracking: EventTrackingProps;
 }) {
 	const LinkButton = (props: { href: string; label: string }) => {
 		const href = getLinkHref({
 			href: props.href,
-			refererId: landingPageId,
-			fbclid,
-			fanId,
+			tracking,
 		});
 		return (
 			<div className='flex w-full flex-col items-center'>
@@ -138,35 +141,20 @@ function mdxLinkButton({
 	};
 }
 
-function mdxAssetButton({
+function mdxLandingPageAssetButton({
 	landingPageId,
-	cartFunnels,
-	landingPages,
-	links,
-	pressKits,
-	// tracking
-	fbclid,
-	fanId,
+	assets,
+	tracking,
 }: {
 	landingPageId: string;
-	cartFunnels: CartFunnel[];
-	landingPages: LandingPage[];
-	links: Link[];
-	pressKits: PressKit[];
-	// tracking
-	fbclid?: string;
-	fanId?: string;
+	assets: MdxAssets;
+	tracking: EventTrackingProps;
 }) {
 	const AssetButton = ({ assetId, label }: { assetId: string; label: string }) => {
 		const href = getAssetHref({
 			assetId,
-			cartFunnels,
-			landingPages,
-			links,
-			pressKits,
-			refererId: landingPageId,
-			fbclid,
-			fanId,
+			assets,
+			tracking,
 		});
 
 		return (
@@ -227,7 +215,7 @@ function mdxImageFile() {
 	};
 }
 
-function mdxLink({ fanId, landingPageId }: { fanId?: string; landingPageId: string }) {
+function mdxLink({ tracking }: { tracking: EventTrackingProps }) {
 	const MdxLandingPageLink = ({
 		href,
 		children,
@@ -235,8 +223,7 @@ function mdxLink({ fanId, landingPageId }: { fanId?: string; landingPageId: stri
 		href?: string;
 		children?: ReactNode;
 	}) => {
-		const hrefWithQueryParams =
-			href ? getLinkHref({ href, fanId, refererId: landingPageId }) : '';
+		const hrefWithQueryParams = href ? getLinkHref({ href, tracking }) : '';
 		return (
 			<Button look='link' href={hrefWithQueryParams}>
 				{children}
