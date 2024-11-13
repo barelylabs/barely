@@ -761,6 +761,7 @@ async function handleSendEmailFromTemplateToFan({
 			links,
 			pressKits,
 		},
+
 		listUnsubscribeUrl:
 			emailTemplate.type === 'marketing' ? listUnsubscribeUrl : undefined,
 	});
