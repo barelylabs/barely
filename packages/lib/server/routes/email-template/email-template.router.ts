@@ -178,13 +178,16 @@ export const emailTemplateRouter = createTRPCRouter({
 				subject: input.subject,
 				body: input.body,
 				variables,
-				cartFunnels,
-				landingPages,
-				links,
-				pressKits,
-				// tracking
-				emailTemplateId: '',
-				fanId: '',
+				tracking: {
+					emailTemplateId: '',
+					fanId: '',
+				},
+				assets: {
+					cartFunnels,
+					landingPages,
+					links,
+					pressKits,
+				},
 				listUnsubscribeUrl: type === 'marketing' ? 'email_delivery_test' : undefined,
 			});
 

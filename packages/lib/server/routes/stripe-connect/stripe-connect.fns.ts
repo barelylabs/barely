@@ -13,6 +13,7 @@ import { stripe } from '../../stripe';
 import {
 	createOrderIdForCart,
 	getCartById,
+	incrementAssetValuesOnCartPurchase,
 	sendCartReceiptEmail,
 } from '../cart/cart.fns';
 import { Carts } from '../cart/cart.sql';
@@ -157,6 +158,14 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 
 		if (!fan) throw new Error('Fan not created or found after charge success');
 
+		// increment value
+		await incrementAssetValuesOnCartPurchase(
+			prevCart,
+			prevCart.addedBump ?
+				prevCart.mainProductPrice + (prevCart.bumpProductPrice ?? 0)
+			:	prevCart.mainProductPrice,
+		);
+
 		if (updateCart.stage === 'upsellCreated') {
 			await tasks.trigger<typeof handleAbandonedUpsell>('handle-abandoned-upsell', {
 				cartId: prevCart.id,
@@ -191,7 +200,6 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 		}
 
 		// newFan triggers
-
 		if (!prevCart.fan && fan) {
 			// i.e. we just created a fan
 			const newFanTriggers = await dbHttp.query.Flow_Triggers.findMany({

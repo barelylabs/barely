@@ -748,15 +748,19 @@ async function handleSendEmailFromTemplateToFan({
 			firstName,
 			lastName,
 		},
-		// tracking
-		emailTemplateId: emailTemplate.id,
-		fanId: fan.id,
-		// asets
-		cartFunnels,
-		landingPages,
-		links,
-		pressKits,
-		// unsubscribe
+
+		tracking: {
+			emailTemplateId: emailTemplate.id,
+			fanId: fan.id,
+			flowActionId: action.id,
+		},
+
+		assets: {
+			cartFunnels,
+			landingPages,
+			links,
+			pressKits,
+		},
 		listUnsubscribeUrl:
 			emailTemplate.type === 'marketing' ? listUnsubscribeUrl : undefined,
 	});

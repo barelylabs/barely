@@ -45,7 +45,12 @@ export const Carts = pgTable(
 		}),
 
 		/* landing page */
+		emailBroadcastId: dbId('emailBroadcastId'),
+		emailTemplateId: dbId('emailTemplateId'),
 		landingPageId: dbId('landingPageId'),
+		refererId: dbId('refererId'),
+		fbclid: varchar('fbclid', { length: 255 }),
+		flowActionId: dbId('flowActionId'),
 
 		/* 
             🛒 cart checkout (main + bump) 

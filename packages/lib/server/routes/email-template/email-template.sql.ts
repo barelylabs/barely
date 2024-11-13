@@ -43,6 +43,8 @@ export const EmailTemplates = pgTable('EmailTemplates', {
 	replyTo: text('replyTo'),
 	subject: text('subject').notNull(),
 	body: text('body').notNull(),
+
+	value: integer('value').default(0),
 });
 
 export const EmailTemplateRelations = relations(EmailTemplates, ({ one, many }) => ({

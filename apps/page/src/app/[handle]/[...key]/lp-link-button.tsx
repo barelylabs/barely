@@ -12,17 +12,13 @@ export interface LandingPageLinkButtonProps {
 }
 
 export const LandingPageLinkButton = ({
+	href,
 	landingPageId,
 	assetId,
 	label,
-	...props
+	// ...props
 }: LandingPageLinkButtonProps) => {
 	const { mutate: logEvent } = landingPageApi.log.useMutation();
-
-	const url = new URL(props.href);
-	url.searchParams.set('refererId', landingPageId);
-
-	const href = url.toString();
 
 	return (
 		<LoadingLinkButton

@@ -2,10 +2,11 @@ import type { ReceiptEmailProps } from '@barely/email/src/templates/cart/receipt
 import type { z } from 'zod';
 import { sendEmail } from '@barely/email';
 import ReceiptEmailTemplate from '@barely/email/src/templates/cart/receipt';
-import { and, count, eq, isNotNull } from 'drizzle-orm';
+import { and, count, eq, isNotNull, sql } from 'drizzle-orm';
 
 import type { VisitorInfo } from '../../../utils/middleware';
 import type { ShippingEstimateProps } from '../../shipping/shipengine.endpts';
+import type { EventTrackingProps } from '../event/event-report.schema';
 import type { Fan } from '../fan/fan.schema';
 import type { Product } from '../product/product.schema';
 import type { stripeConnectChargeMetadataSchema } from '../stripe-connect/stripe-connect.schema';
@@ -20,6 +21,9 @@ import { dbHttp } from '../../db';
 import { getShippingEstimates } from '../../shipping/shipengine.endpts';
 import { stripe } from '../../stripe';
 import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
+import { EmailBroadcasts } from '../email-broadcast/email-broadcast.sql';
+import { EmailTemplates } from '../email-template/email-template.sql';
+import { LandingPages } from '../landing-page/landing-page.sql';
 import { MEDIAMAIL_TYPES, MERCH_DIMENSIONS } from '../product/product.constants';
 import { getPublicWorkspaceFromWorkspace } from '../workspace/workspace.schema';
 import { Carts } from './cart.sql';
@@ -120,8 +124,9 @@ export type PublicFunnel = ReturnType<typeof getPublicFunnelFromServerFunnel>;
 export async function createMainCartFromFunnel({
 	funnel,
 	shipTo,
-	landingPageId,
+	// landingPageId,
 	visitorInfo,
+	tracking,
 }: {
 	funnel: ServerFunnel;
 	shipTo?: {
@@ -129,8 +134,9 @@ export async function createMainCartFromFunnel({
 		state: string | null;
 		city: string | null;
 	};
-	landingPageId?: string | null;
+	// landingPageId?: string | null;
 	visitorInfo?: VisitorInfo;
+	tracking?: EventTrackingProps;
 }) {
 	const stripeAccount =
 		isProduction() ?
@@ -176,7 +182,15 @@ export async function createMainCartFromFunnel({
 		workspaceId: funnel.workspace.id,
 		cartFunnelId: funnel.id,
 		stage: 'checkoutCreated',
-		landingPageId,
+
+		// tracking
+		emailBroadcastId: tracking?.emailBroadcastId,
+		emailTemplateId: tracking?.emailTemplateId,
+		fanId: tracking?.fanId,
+		fbclid: tracking?.fbclid,
+		flowActionId: tracking?.flowActionId,
+		landingPageId: tracking?.landingPageId,
+		refererId: tracking?.refererId,
 		// visitor
 		visitorIp: visitorInfo?.ip,
 		visitorGeo: visitorInfo?.geo,
@@ -426,4 +440,43 @@ export async function getOrCreateCartOrderId(cart: Cart) {
 		.where(eq(Carts.id, cart.id));
 
 	return orderId;
+}
+
+/* increment value */
+export async function incrementAssetValuesOnCartPurchase(
+	cart: Cart,
+	incrementAmountInCents: number,
+) {
+	if (cart.emailTemplateId) {
+		await dbHttp
+			.update(EmailTemplates)
+			.set({
+				value: sql`${EmailTemplates.value} + ${incrementAmountInCents}`,
+			})
+			.where(eq(EmailTemplates.id, cart.emailTemplateId));
+	}
+	if (cart.emailBroadcastId) {
+		await dbHttp
+			.update(EmailBroadcasts)
+			.set({
+				value: sql`${EmailBroadcasts.value} + ${incrementAmountInCents}`,
+			})
+			.where(eq(EmailBroadcasts.id, cart.emailBroadcastId));
+	}
+	if (cart.landingPageId) {
+		await dbHttp
+			.update(LandingPages)
+			.set({
+				value: sql`${LandingPages.value} + ${incrementAmountInCents}`,
+			})
+			.where(eq(LandingPages.id, cart.landingPageId));
+	}
+	if (cart.cartFunnelId) {
+		await dbHttp
+			.update(CartFunnels)
+			.set({
+				value: sql`${CartFunnels.value} + ${incrementAmountInCents}`,
+			})
+			.where(eq(CartFunnels.id, cart.cartFunnelId));
+	}
 }

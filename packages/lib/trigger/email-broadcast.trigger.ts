@@ -187,9 +187,11 @@ export const handleEmailBroadcast = task({
 });
 
 async function getEmailDataForBatch({
+	emailBroadcast,
 	emailTemplate,
 	fan,
 }: {
+	emailBroadcast: EmailBroadcast;
 	emailTemplate: EmailTemplateWithFrom;
 	fan: FanForEmail;
 }) {
@@ -211,11 +213,13 @@ async function getEmailDataForBatch({
 			firstName,
 			lastName,
 		},
-		// tracking
-		emailTemplateId: emailTemplate.id,
-		fanId: fan.id,
+		tracking: {
+			emailTemplateId: emailTemplate.id,
+			fanId: fan.id,
+			emailBroadcastId: emailBroadcast.id,
+		},
 		// assets
-		...assets,
+		assets,
 	});
 
 	const toEmail =
@@ -252,6 +256,7 @@ async function handleSendEmailBatch({
 	const emails = await Promise.all(
 		fans.map(fan =>
 			getEmailDataForBatch({
+				emailBroadcast,
 				emailTemplate,
 				fan,
 			}),

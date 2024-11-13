@@ -5,11 +5,9 @@ import { EmailButton, EmailImage, EmailLink } from '@barely/email/src/primitives
 import { Heading, Text } from '@react-email/components';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 
+import type { MdxAssets } from '../../../utils/mdx';
 import type { MdxImageSize } from '../../mdx/mdx.constants';
-import type { CartFunnel } from '../cart-funnel/cart-funnel.schema';
-import type { LandingPage } from '../landing-page/landing-page.schema';
-import type { Link } from '../link/link.schema';
-import type { PressKit } from '../press-kit/press-kit.schema';
+import type { EventTrackingProps } from '../event/event-report.schema';
 import type { EmailTemplateVariableName } from './email-template.constants';
 import { env } from '../../../env';
 import { getAssetHref, getLinkHref } from '../../../utils/mdx';
@@ -19,25 +17,15 @@ export async function renderMarkdownToReactEmail({
 	subject,
 	body,
 	variables,
-	fanId,
-	emailTemplateId,
-	cartFunnels,
-	landingPages,
-	links,
-	pressKits,
+	tracking,
+	assets,
 	listUnsubscribeUrl,
 }: {
 	subject: string;
 	body: string;
 	variables: Record<EmailTemplateVariableName, string>;
-	// tracking
-	emailTemplateId: string;
-	fanId: string;
-	// assets
-	cartFunnels: CartFunnel[];
-	landingPages: LandingPage[];
-	links: Link[];
-	pressKits: PressKit[];
+	tracking: EventTrackingProps;
+	assets: MdxAssets;
 	listUnsubscribeUrl?: string;
 }) {
 	// Replace variables with values or empty string if not found
@@ -58,16 +46,12 @@ export async function renderMarkdownToReactEmail({
 		h5: ({ children }: { children?: ReactNode }) => <Heading as='h5'>{children}</Heading>,
 		h6: ({ children }: { children?: ReactNode }) => <Heading as='h6'>{children}</Heading>,
 
-		...mdxEmailLink({ fanId, emailTemplateId }),
+		...mdxEmailLink({ tracking }),
 		...mdxEmailImageFile(),
-		...mdxLinkButton({ fanId, emailTemplateId }),
+		...mdxLinkButton({ tracking }),
 		...mdxEmailAssetButton({
-			fanId,
-			emailTemplateId,
-			cartFunnels,
-			landingPages,
-			links,
-			pressKits,
+			tracking,
+			assets,
 		}),
 	};
 
@@ -98,16 +82,9 @@ export async function renderMarkdownToReactEmail({
 	};
 }
 
-function mdxEmailLink({
-	fanId,
-	emailTemplateId,
-}: {
-	fanId: string;
-	emailTemplateId: string;
-}) {
+function mdxEmailLink({ tracking }: { tracking: EventTrackingProps }) {
 	const MdxEmailLink = ({ href, children }: { href?: string; children?: ReactNode }) => {
-		const hrefWithQueryParams =
-			href ? getLinkHref({ href, fanId, refererId: emailTemplateId }) : '';
+		const hrefWithQueryParams = href ? getLinkHref({ href, tracking }) : '';
 		return <EmailLink href={hrefWithQueryParams}>{children}</EmailLink>;
 	};
 
@@ -153,15 +130,9 @@ function mdxEmailImageFile() {
 	};
 }
 
-function mdxLinkButton({
-	fanId,
-	emailTemplateId,
-}: {
-	fanId: string;
-	emailTemplateId: string;
-}) {
+function mdxLinkButton({ tracking }: { tracking: EventTrackingProps }) {
 	const LinkButton = ({ href, label }: { href: string; label: string }) => {
-		const hrefWithQueryParams = getLinkHref({ href, fanId, refererId: emailTemplateId });
+		const hrefWithQueryParams = getLinkHref({ href, tracking });
 
 		return <EmailButton href={hrefWithQueryParams}>{label}</EmailButton>;
 	};
@@ -172,29 +143,17 @@ function mdxLinkButton({
 }
 
 function mdxEmailAssetButton({
-	emailTemplateId,
-	cartFunnels,
-	landingPages,
-	links,
-	pressKits,
-	fanId,
+	tracking,
+	assets,
 }: {
-	emailTemplateId: string;
-	cartFunnels: CartFunnel[];
-	landingPages: LandingPage[];
-	links: Link[];
-	pressKits: PressKit[];
-	fanId: string;
+	tracking: EventTrackingProps;
+	assets: MdxAssets;
 }) {
 	const AssetButton = ({ assetId, label }: { assetId: string; label: string }) => {
 		const href = getAssetHref({
 			assetId,
-			cartFunnels,
-			landingPages,
-			links,
-			pressKits,
-			refererId: emailTemplateId,
-			fanId,
+			assets,
+			tracking,
 		});
 
 		return <EmailButton href={href}>{label}</EmailButton>;

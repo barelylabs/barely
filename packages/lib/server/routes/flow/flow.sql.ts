@@ -132,6 +132,9 @@ export const Flow_Actions = pgTable(
 		cartFunnelId: dbId('cartFunnelId').references(() => CartFunnels.id),
 		totalOrderAmount: integer('totalOrderAmount'), // in cents
 		mailchimpAudienceId: text('mailchimpAudienceId'),
+
+		// stats
+		value: integer('value').default(0),
 	},
 	table => ({
 		primaryKey: primaryKey({ columns: [table.flowId, table.id] }),

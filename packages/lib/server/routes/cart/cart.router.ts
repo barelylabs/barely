@@ -10,6 +10,7 @@ import { wait } from '../../../utils/wait';
 import { createTRPCRouter, publicProcedure } from '../../api/trpc';
 import { stripe } from '../../stripe';
 import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
+import { eventReportSearchParamsSchema } from '../event/event-report.schema';
 import { recordCartEvent } from '../event/event.fns';
 import { WEB_EVENT_TYPES__CART } from '../event/event.tb';
 import { Files } from '../file/file.sql';
@@ -22,6 +23,7 @@ import {
 	getFunnelByParams,
 	getProductsShippingRateEstimate,
 	getPublicFunnelFromServerFunnel,
+	incrementAssetValuesOnCartPurchase,
 	sendCartReceiptEmail,
 } from './cart.fns';
 import { updateCheckoutCartFromCheckoutSchema } from './cart.schema';
@@ -41,7 +43,8 @@ export const cartRouter = createTRPCRouter({
 						city: z.string().nullable(),
 					})
 					.optional(),
-				landingPageId: z.string().nullish(),
+				// tracking
+				tracking: eventReportSearchParamsSchema,
 			}),
 		)
 		.mutation(async ({ input }) => {
@@ -132,8 +135,6 @@ export const cartRouter = createTRPCRouter({
 		.input(updateCheckoutCartFromCheckoutSchema)
 		.mutation(async ({ input, ctx }) => {
 			const { id, handle, key, ...update } = input;
-
-			// console.log('trpc.cart.updateCheckoutFromCheckout >> visitor', ctx.visitor);
 
 			const cart = await getCartById(id, handle, key);
 			if (!cart) throw new TRPCError({ code: 'NOT_FOUND', message: 'Cart not found' });
@@ -397,6 +398,8 @@ export const cartRouter = createTRPCRouter({
 					visitorUserAgent: ctx.visitor?.userAgent,
 				})
 				.where(eq(Carts.id, input.cartId));
+
+			await incrementAssetValuesOnCartPurchase(cart, upsellProductAmount);
 
 			return {
 				handle: funnel.workspace.handle,

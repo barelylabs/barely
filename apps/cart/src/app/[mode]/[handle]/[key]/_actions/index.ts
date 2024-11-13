@@ -1,34 +1,33 @@
 'use server';
 
+import type { EventTrackingProps } from '@barely/lib/server/routes/event/event-report.schema';
 import { cookies } from 'next/headers';
+import { EventTrackingKeys } from '@barely/lib/server/routes/event/event-report.schema';
 
 export async function setCartCookie({
 	handle,
 	key,
 	cartId,
-	fbclid,
-	refererId,
+	tracking,
 }: {
 	handle: string;
 	key: string;
 	cartId: string;
-	fbclid: string | null;
-	refererId?: string;
+	tracking: EventTrackingProps;
 }) {
 	await Promise.resolve();
 	cookies().set(`${handle}.${key}.cartId`, cartId, {
 		maxAge: 60 * 60 * 24 * 7, // 7 days
 	});
 
-	if (fbclid) {
-		cookies().set(`${handle}.${key}.fbclid`, fbclid, {
-			maxAge: 60 * 60 * 24 * 7, // 7 days
-		});
-	}
+	// const { fbclid, refererId, fanId, landingPageId,  } = tracking;
 
-	if (refererId) {
-		cookies().set(`${handle}.${key}.refererId`, refererId, {
-			maxAge: 60 * 60 * 24 * 7, // 7 days
-		});
+	for (const key of EventTrackingKeys) {
+		const value = tracking[key];
+		if (value) {
+			cookies().set(`${handle}.${key}.${key}`, value, {
+				maxAge: 60 * 60 * 24 * 7, // 7 days
+			});
+		}
 	}
 }

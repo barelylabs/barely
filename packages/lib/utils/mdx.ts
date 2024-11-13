@@ -1,32 +1,30 @@
 import type { CartFunnel } from '../server/routes/cart-funnel/cart-funnel.schema';
+import type { EventTrackingProps } from '../server/routes/event/event-report.schema';
 import type { LandingPage } from '../server/routes/landing-page/landing-page.schema';
 import type { Link } from '../server/routes/link/link.schema';
 import type { PressKit } from '../server/routes/press-kit/press-kit.schema';
+import { EventTrackingKeys } from '../server/routes/event/event-report.schema';
 import { getAbsoluteUrl } from './url';
 
-export function getAssetHref({
-	assetId,
-	// assets
-	cartFunnels,
-	landingPages,
-	links,
-	pressKits,
-	// tracking
-	fanId,
-	refererId,
-	fbclid,
-}: {
-	assetId: string;
-	// assets
+export interface MdxAssets {
 	cartFunnels: CartFunnel[];
 	landingPages: LandingPage[];
 	links: Link[];
 	pressKits: PressKit[];
-	fanId?: string;
-	refererId: string;
-	fbclid?: string;
+}
+
+export function getAssetHref({
+	assetId,
+	assets,
+	tracking,
+}: {
+	assetId: string;
+	assets: MdxAssets;
+	tracking: EventTrackingProps;
 }): string {
 	let href = '#';
+
+	const { cartFunnels, landingPages, links, pressKits } = assets;
 
 	const funnel = cartFunnels.find(funnel => funnel.id === assetId);
 	if (funnel) {
@@ -50,39 +48,24 @@ export function getAssetHref({
 		});
 	}
 
-	const url = new URL(href);
-	if (refererId) {
-		url.searchParams.set('refererId', refererId);
-	}
-	if (fanId) {
-		url.searchParams.set('fanId', fanId);
-	}
-	if (fbclid) {
-		url.searchParams.set('fbclid', fbclid);
-	}
+	const url = getLinkHref({ href, tracking });
 	return url.toString();
 }
 
 export function getLinkHref({
 	href,
-	refererId,
-	fanId,
-	fbclid,
+	tracking,
 }: {
 	href: string;
-	refererId: string;
-	fanId?: string;
-	fbclid?: string;
+	tracking: EventTrackingProps;
 }): string {
 	const url = new URL(href);
-	if (refererId) {
-		url.searchParams.set('refererId', refererId);
-	}
-	if (fanId) {
-		url.searchParams.set('fanId', fanId);
-	}
-	if (fbclid) {
-		url.searchParams.set('fbclid', fbclid);
+
+	for (const key of EventTrackingKeys) {
+		const value = tracking[key];
+		if (value) {
+			url.searchParams.set(key, value);
+		}
 	}
 	return url.toString();
 }
