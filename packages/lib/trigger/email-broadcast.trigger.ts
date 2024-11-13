@@ -213,13 +213,17 @@ async function getEmailDataForBatch({
 			firstName,
 			lastName,
 		},
+
+		assets,
+
 		tracking: {
+			emailBroadcastId: emailBroadcast.id,
 			emailTemplateId: emailTemplate.id,
 			fanId: fan.id,
-			emailBroadcastId: emailBroadcast.id,
 		},
-		// assets
-		assets,
+
+		listUnsubscribeUrl:
+			emailTemplate.type === 'marketing' ? listUnsubscribeUrl : undefined,
 	});
 
 	const toEmail =

@@ -17,8 +17,6 @@ async function POST(
 			forceUnsubscribe: true,
 		});
 
-		console.log('unsubscribed');
-
 		return Response.json({}, { status: 200 });
 	} catch (error) {
 		if (error instanceof TRPCError) {
