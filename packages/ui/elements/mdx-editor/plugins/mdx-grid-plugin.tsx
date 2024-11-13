@@ -242,7 +242,7 @@ export const GridEditor: React.FC<JsxEditorProps> = ({ mdastNode }) => {
 export const InsertCard = () => {
 	const insertJsx = usePublisher(insertJsx$);
 	return (
-		<div className='flex flex-row items-center justify-between gap-2 rounded-md bg-gray-100 px-2 py-2'>
+		<div className='flex flex-row items-center justify-between gap-2 rounded-md px-2 py-2'>
 			<ToolbarButton
 				onClick={() =>
 					insertJsx({
