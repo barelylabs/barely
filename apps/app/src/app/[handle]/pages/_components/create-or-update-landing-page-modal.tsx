@@ -20,7 +20,6 @@ import { useLandingPageContext } from '~/app/[handle]/pages/_components/landing-
 
 export function CreateOrUpdateLandingPageModal({ mode }: { mode: 'create' | 'update' }) {
 	const apiUtils = api.useUtils();
-	// const workspace = useWorkspace();
 
 	/* landing page context */
 	const {
@@ -58,11 +57,20 @@ export function CreateOrUpdateLandingPageModal({ mode }: { mode: 'create' | 'upd
 		},
 	});
 
+	const { reset, setError } = form;
+
 	const handleSubmit = useCallback(
 		async (data: z.infer<typeof upsertLandingPageSchema>) => {
-			await onSubmitLandingPage(data);
+			await onSubmitLandingPage(data).catch(e => {
+				if (
+					e instanceof Error &&
+					e.message.includes('duplicate key value violates unique constraint')
+				) {
+					setError('key', { message: 'That key is already taken.' });
+				}
+			});
 		},
-		[onSubmitLandingPage],
+		[onSubmitLandingPage, setError],
 	);
 
 	/* modal */
@@ -74,9 +82,10 @@ export function CreateOrUpdateLandingPageModal({ mode }: { mode: 'create' | 'upd
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
 		setShowModal(false);
+		reset();
 
 		await apiUtils.landingPage.invalidate();
-	}, [apiUtils.landingPage, focusGridList, setShowModal]);
+	}, [apiUtils.landingPage, focusGridList, setShowModal, reset]);
 
 	return (
 		<Modal

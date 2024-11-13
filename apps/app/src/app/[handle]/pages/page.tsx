@@ -5,9 +5,9 @@ import { landingPageSearchParamsSchema } from '@barely/lib/server/routes/landing
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllLandingPages } from '~/app/[handle]/pages/_components/all-landing-pages';
-import { ArchiveOrDeleteLandingPageModal } from '~/app/[handle]/pages/_components/archive-or-delete-landingPage-modal';
+import { ArchiveOrDeleteLandingPageModal } from '~/app/[handle]/pages/_components/archive-or-delete-landing-page-modal';
 import { CreateLandingPageButton } from '~/app/[handle]/pages/_components/create-landing-page-button';
-import { CreateOrUpdateLandingPageModal } from '~/app/[handle]/pages/_components/create-or-update-landingPage-modal';
+import { CreateOrUpdateLandingPageModal } from '~/app/[handle]/pages/_components/create-or-update-landing-page-modal';
 import { LandingPageContextProvider } from '~/app/[handle]/pages/_components/landing-page-context';
 import { LandingPageHotkeys } from '~/app/[handle]/pages/_components/landing-page-hotkeys';
 
