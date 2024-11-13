@@ -100,6 +100,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 					.replace(/Create/g, 'Creating')
 					.replace(/Save/g, 'Saving')
 					.replace(/Update/g, 'Updating')
+					.replace(/Delete/g, 'Deleting')
+					.replace(/Add/g, 'Adding')
+					.replace(/Remove/g, 'Removing')
+					.replace(/Edit/g, 'Editing')
+					.replace(/Close/g, 'Closing')
+					.replace(/Load/g, 'Loading')
 			: loadingText ? loadingText
 			: children;
 

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useWorkspaces } from '@barely/lib/hooks/use-workspaces';
 import { getAbsoluteUrl } from '@barely/lib/utils/url';
 // import { APP_BASE_URL } from "@barely/utils/constants";
 import { signOut } from 'next-auth/react';
@@ -14,6 +15,7 @@ import { signOut } from 'next-auth/react';
 
 import { useUser } from '@barely/hooks/use-user';
 
+import { Avatar } from '@barely/ui/elements/avatar';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -23,11 +25,14 @@ import {
 } from '@barely/ui/elements/dropdown-menu';
 import { Icon } from '@barely/ui/elements/icon';
 
-import { UserAvatar } from './user-avatar';
-
 // export function UserAccountNav({ user }: UserAccountNavProps) {
 export function UserAccountNav() {
 	const user = useUser();
+	const allWorkspaces = useWorkspaces();
+
+	const personalAccount = allWorkspaces.find(
+		workspace => workspace.handle === user.handle,
+	);
 
 	const { firstName, lastName } = user;
 	const fullName =
@@ -40,11 +45,12 @@ export function UserAccountNav() {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger className='rounded-full focus:outline-none focus:ring-0 focus:ring-ring'>
-				{/* user */}
-				<UserAvatar
-					user={{ email: user.email, image: user.image ?? null }}
-					fallbackName={fullName ?? user.email}
-					className='h-8 w-8 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background'
+				<Avatar
+					className='h-6 w-6'
+					imageWidth={28}
+					imageHeight={28}
+					imageS3Key={personalAccount?.avatarImageS3Key}
+					priority
 				/>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align='end'>

@@ -48,7 +48,6 @@ export function WorkspaceSwitcher() {
 		id: currentWorkspace.id,
 		name: currentWorkspace.name ?? currentWorkspace.handle,
 		avatarImageS3Key: currentWorkspace.avatarImageS3Key,
-		// avatarImageUrl: currentWorkspace.avatarImageUrl ?? '',
 		type: toTitleCase(underscoresToSpaces(currentWorkspace.type)),
 	};
 
@@ -70,12 +69,12 @@ export function WorkspaceSwitcher() {
 						className='h-7 w-7'
 						imageWidth={28}
 						imageHeight={28}
-						// imageUrl={normalizedObject.avatarImageUrl}
 						imageS3Key={normalizedObject.avatarImageS3Key}
-						// sizes='50'
 						priority
 					/>
-					<Text variant='xs/medium'>{normalizedObject.name}</Text>
+					<Text variant='xs/extrabold' className='text-accent-foreground'>
+						{normalizedObject.name}
+					</Text>
 
 					<Badge variant='info' size='2xs' className='h-full'>
 						{capitalize(currentWorkspace.plan)}

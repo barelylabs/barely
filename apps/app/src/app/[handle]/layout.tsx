@@ -6,7 +6,6 @@ import { auth } from '@barely/server/auth';
 import { SidebarNav } from '~/app/[handle]/_components/dash-sidebar-nav';
 import { NewWorkspaceModal } from '~/app/[handle]/_components/new-workspace-modal';
 import { WorkspaceProviders } from '~/app/[handle]/_components/providers';
-import { DashboardHeader } from './_components/dash-header';
 
 export default async function DashboardLayout({
 	params,
@@ -41,14 +40,17 @@ export default async function DashboardLayout({
 
 	return (
 		<WorkspaceProviders user={user} workspace={currentWorkspace}>
-			<div className='mx-auto flex  w-full flex-1 flex-row'>
+			<div className='mx-auto flex  w-full flex-1 flex-row '>
 				<SidebarNav workspace={currentWorkspace} />
 				<NewWorkspaceModal />
-				<div className='flex h-[100vh] w-full flex-col'>
-					<DashboardHeader />
-					<div className='flex h-full w-full flex-col overflow-clip  p-6 lg:py-8'>
-						<div className='grid h-fit grid-cols-1 gap-6 overflow-y-scroll'>
-							{children}
+
+				<div className='flex h-[100vh] w-full flex-col bg-accent md:pt-2'>
+					{/* <DashboardHeader /> */}
+					<div className='flex h-full w-full border-l border-t border-subtle-foreground/70 bg-background md:rounded-tl-2xl '>
+						<div className='flex h-full w-full flex-col overflow-clip'>
+							<div className='grid h-fit grid-cols-1 gap-6 overflow-y-scroll p-6 lg:py-8'>
+								{children}
+							</div>
 						</div>
 					</div>
 				</div>
