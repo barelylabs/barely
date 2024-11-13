@@ -16,10 +16,11 @@ import { useWorkspaces } from '@barely/hooks/use-workspaces';
 
 import { Icon } from '@barely/ui/elements/icon';
 import { ScrollArea } from '@barely/ui/elements/scroll-area';
-import { Text } from '@barely/ui/elements/typography';
+import { H, Text } from '@barely/ui/elements/typography';
 
 import { cn } from '@barely/utils/cn';
 
+import { UserAccountNav } from '~/app/[handle]/_components/user-menu';
 import { WorkspaceSwitcher } from '~/app/[handle]/_components/workspace-switcher';
 
 interface SidebarNavLink {
@@ -179,7 +180,7 @@ export function SidebarNav(props: { workspace: Workspace }) {
 				</Link>
 			)}
 
-			<ScrollArea className='h-full items-center py-3'>
+			<ScrollArea className='h-full items-center py-3' hideScrollbar>
 				<div className='flex h-full flex-col justify-between'>
 					<div className='flex flex-col gap-1'>
 						{topLinks.map((item, index) => {
@@ -200,6 +201,18 @@ export function SidebarNav(props: { workspace: Workspace }) {
 					</div>
 				</div>
 			</ScrollArea>
+			<div className='flex flex-row items-center justify-between gap-2 px-2'>
+				<div className='flex flex-row items-baseline gap-2'>
+					<Icon.logo className='h-6 w-6' />
+					<div className='bottom-1 flex flex-row items-baseline'>
+						<H size='5' className='!text-2xl'>
+							barely
+							<span className='text-sm'>.io</span>
+						</H>
+					</div>
+				</div>
+				<UserAccountNav />
+			</div>
 		</aside>
 	);
 }

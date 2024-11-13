@@ -350,7 +350,7 @@ export default function Providers(props: { children: ReactNode; headers?: Header
 					<TRPCReactProvider>
 						<>
 							{props.children}
-							<ReactQueryDevtools buttonPosition='bottom-left' initialIsOpen={false} />
+							<ReactQueryDevtools buttonPosition='bottom-right' initialIsOpen={false} />
 						</>
 					</TRPCReactProvider>
 				</TooltipProvider>
