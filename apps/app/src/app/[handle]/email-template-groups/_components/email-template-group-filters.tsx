@@ -1,10 +1,11 @@
 'use client';
 
 import { Filters } from '~/app/[handle]/_components/filters';
-import { useLinkContext } from '~/app/[handle]/links/_components/link-context';
+import { useEmailTemplateGroupContext } from './email-template-group-context';
 
-export function LinkFilters() {
-	const { filters, setSearch, toggleArchived, clearAllFilters } = useLinkContext();
+export function EmailTemplateGroupFilters() {
+	const { filters, setSearch, toggleArchived, clearAllFilters } =
+		useEmailTemplateGroupContext();
 
 	return (
 		<Filters

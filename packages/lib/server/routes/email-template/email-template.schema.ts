@@ -4,7 +4,8 @@ import { z } from 'zod';
 
 import type { EmailAddress } from '../email-address/email-address.schema';
 import type { EmailDomain } from '../email-domain/email-domain.schema';
-import { querySelectionSchema } from '../../../utils/zod-helpers';
+import { commonFiltersSchema, infiniteQuerySchema } from '../../../utils/filters';
+import { queryBooleanSchema, querySelectionSchema } from '../../../utils/zod-helpers';
 import { EmailTemplates } from './email-template.sql';
 
 export const insertEmailTemplateSchema = createInsertSchema(EmailTemplates, {
@@ -32,11 +33,17 @@ export type EmailTemplateWithFrom = EmailTemplate & {
 	from: EmailAddress & { domain: EmailDomain };
 };
 
-export const emailTemplateFilterParamsSchema = z.object({
-	search: z.string().optional(),
-	showArchived: z.boolean().optional(),
-	showFlowOnly: z.boolean().optional(),
+// export const emailTemplateFilterParamsSchema = z.object({
+// 	search: z.string().optional(),
+// 	showArchived: z.boolean().optional(),
+// 	showFlowOnly: z.boolean().optional(),
+// 	showTypes: z.array(z.enum(['marketing', 'transactional'])).optional(),
+// });
+
+export const emailTemplateFilterParamsSchema = commonFiltersSchema.extend({
+	showFlowOnly: queryBooleanSchema.optional(),
 	showTypes: z.array(z.enum(['marketing', 'transactional'])).optional(),
+	emailTemplateGroupId: z.string().optional(),
 });
 
 export const emailTemplateSearchParamsSchema = emailTemplateFilterParamsSchema.extend({
@@ -44,18 +51,8 @@ export const emailTemplateSearchParamsSchema = emailTemplateFilterParamsSchema.e
 });
 
 /* select workspace email templates */
-export const selectWorkspaceEmailTemplatesSchema = emailTemplateFilterParamsSchema.extend(
-	{
-		limit: z.number().min(1).max(100).default(50),
-		cursor: z
-			.object({
-				id: z.string(),
-				createdAt: z.date(),
-			})
-			.optional(),
-		emailTemplateGroupId: z.string().optional(),
-	},
-);
+export const selectWorkspaceEmailTemplatesSchema =
+	emailTemplateFilterParamsSchema.merge(infiniteQuerySchema);
 
 /* send test email */
 export const sendTestEmailSchema = createEmailTemplateSchema.extend({

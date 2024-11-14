@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gt, inArray, lt, or } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, inArray, isNull, lt, or } from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { InsertCartFunnel } from './cart-funnel.schema';
@@ -21,7 +21,7 @@ export const cartFunnelRouter = createTRPCRouter({
 	byWorkspace: workspaceQueryProcedure
 		.input(selectWorkspaceCartFunnelsSchema)
 		.query(async ({ input, ctx }) => {
-			const { limit, cursor, search } = input;
+			const { limit, cursor, search, showArchived, showDeleted } = input;
 			const funnels = await ctx.db.http.query.CartFunnels.findMany({
 				where: sqlAnd([
 					eq(CartFunnels.workspaceId, ctx.workspace.id),
@@ -34,6 +34,8 @@ export const cartFunnelRouter = createTRPCRouter({
 								gt(CartFunnels.id, cursor.id),
 							),
 						),
+					showArchived ? undefined : isNull(CartFunnels.archivedAt),
+					showDeleted ? undefined : isNull(CartFunnels.deletedAt),
 				]),
 				orderBy: [desc(CartFunnels.createdAt), asc(CartFunnels.id)],
 				limit: limit + 1,

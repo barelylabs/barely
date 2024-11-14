@@ -60,6 +60,9 @@ function ProductCard({
 		setShowDeleteProductModal,
 	} = useProductContext();
 
+	const s3Key = product.images[0]?.s3Key;
+	const blurDataUrl = product.images[0]?.blurDataUrl;
+
 	return (
 		<GridListCard
 			id={product.id}
@@ -73,7 +76,8 @@ function ProductCard({
 				<div className='flex flex-col items-start gap-1'>
 					<div className='flex flex-row items-center gap-2'>
 						<Img
-							src={product?.images[0]?.src ?? ''}
+							{...(s3Key ? { s3Key } : { src: '/images/product-placeholder.png' })}
+							{...(blurDataUrl ? { blurDataUrl } : {})}
 							alt='Product Image'
 							className='h-8 w-8 rounded-md bg-muted object-cover sm:h-16 sm:w-16'
 							width={40}

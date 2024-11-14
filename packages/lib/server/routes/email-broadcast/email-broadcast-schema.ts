@@ -3,6 +3,7 @@ import type { InferSelectModel } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
+import { commonFiltersSchema, infiniteQuerySchema } from '../../../utils/filters';
 import {
 	querySelectionSchema,
 	queryStringEnumArraySchema,
@@ -33,8 +34,7 @@ export const sendEmailBroadcastSchema = z.object({
 	scheduledAt: z.date().optional(),
 });
 
-export const emailBroadcastFilterParamsSchema = z.object({
-	search: z.string().optional(),
+export const emailBroadcastFilterParamsSchema = commonFiltersSchema.extend({
 	showStatuses: queryStringEnumArraySchema([
 		'draft',
 		'scheduled',
@@ -49,12 +49,4 @@ export const emailBroadcastSearchParamsSchema = emailBroadcastFilterParamsSchema
 });
 
 export const selectWorkspaceEmailBroadcastsSchema =
-	emailBroadcastSearchParamsSchema.extend({
-		limit: z.number().min(1).max(100).default(20),
-		cursor: z
-			.object({
-				id: z.string(),
-				createdAt: z.date(),
-			})
-			.optional(),
-	});
+	emailBroadcastSearchParamsSchema.merge(infiniteQuerySchema);

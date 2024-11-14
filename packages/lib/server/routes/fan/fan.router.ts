@@ -1,5 +1,5 @@
 import { tasks } from '@trigger.dev/sdk/v3';
-import { and, asc, desc, eq, gt, inArray, lt, or } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, inArray, isNull, lt, or } from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { importFansFromCsv } from '../../../trigger/fan.trigger';
@@ -23,11 +23,12 @@ export const fanRouter = createTRPCRouter({
 	byWorkspace: workspaceQueryProcedure
 		.input(selectWorkspaceFansSchema)
 		.query(async ({ input, ctx }) => {
-			const { limit, cursor, search } = input;
+			const { limit, cursor, search, showArchived } = input;
 			const fans = await ctx.db.http.query.Fans.findMany({
 				where: sqlAnd([
 					eq(Fans.workspaceId, ctx.workspace.id),
 					!!search?.length && sqlStringContains(Fans.fullName, search),
+					showArchived ? undefined : isNull(Fans.archivedAt),
 					!!cursor &&
 						or(
 							lt(Fans.createdAt, cursor.createdAt),

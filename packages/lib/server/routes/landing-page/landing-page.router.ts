@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gt, inArray, lt, notInArray, or } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, inArray, isNull, lt, notInArray, or } from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { InsertLandingPage } from './landing-page.schema';
@@ -28,11 +28,13 @@ export const landingPageRouter = createTRPCRouter({
 	byWorkspace: workspaceQueryProcedure
 		.input(selectWorkspaceLandingPagesSchema)
 		.query(async ({ input, ctx }) => {
-			const { limit, cursor, search } = input;
+			const { limit, cursor, search, showArchived, showDeleted } = input;
 			const landingPages = await ctx.db.http.query.LandingPages.findMany({
 				where: sqlAnd([
 					eq(LandingPages.workspaceId, ctx.workspace.id),
 					!!search?.length && sqlStringContains(LandingPages.name, search),
+					showArchived ? undefined : isNull(LandingPages.archivedAt),
+					showDeleted ? undefined : isNull(LandingPages.deletedAt),
 					!!cursor &&
 						or(
 							lt(LandingPages.createdAt, cursor.createdAt),

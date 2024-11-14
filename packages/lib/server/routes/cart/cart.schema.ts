@@ -16,18 +16,11 @@ export const createCartSchema = insertCartSchema.omit({ id: true }).partial({
 });
 
 export const updateCartSchema = insertCartSchema.partial().required({ id: true });
-// .extend({
-// 	visitorGeo: nextGeoSchema,
-// 	visitorUserAgent: formattedUserAgentSchema,
-// });
 
 export type InsertCart = z.infer<typeof insertCartSchema>;
 export type CreateCart = z.input<typeof createCartSchema>;
 export type UpdateCart = z.input<typeof updateCartSchema>;
 export type Cart = InferSelectModel<typeof Carts>;
-
-// type InsertCartVisitorGeo = InsertCart['visitorGeo'];
-// type UpdateCartVisitorGeo = UpdateCart['visitorGeo'];
 
 // query params // on cart page
 export const updateFromCartSchema = updateCartSchema.extend({

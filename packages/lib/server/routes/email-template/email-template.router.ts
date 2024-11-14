@@ -1,5 +1,5 @@
 import { sendEmail } from '@barely/email';
-import { and, asc, desc, eq, gt, inArray, lt, or } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, inArray, isNull, lt, or } from 'drizzle-orm';
 import { z } from 'zod';
 
 import { getEmailAddressFromEmailAddress } from '../../../utils/email';
@@ -26,7 +26,15 @@ export const emailTemplateRouter = createTRPCRouter({
 	byWorkspace: workspaceQueryProcedure
 		.input(selectWorkspaceEmailTemplatesSchema)
 		.query(async ({ input, ctx }) => {
-			const { limit, cursor, search, showFlowOnly, showTypes } = input;
+			const {
+				limit,
+				cursor,
+				search,
+				showFlowOnly,
+				showTypes,
+				showArchived,
+				showDeleted,
+			} = input;
 			const emailTemplates = await ctx.db.http.query.EmailTemplates.findMany({
 				where: sqlAnd([
 					eq(EmailTemplates.workspaceId, ctx.workspace.id),
@@ -41,6 +49,9 @@ export const emailTemplateRouter = createTRPCRouter({
 						),
 					showTypes && inArray(EmailTemplates.type, showTypes),
 					!showFlowOnly && eq(EmailTemplates.flowOnly, false),
+
+					showArchived ? undefined : isNull(EmailTemplates.archivedAt),
+					showDeleted ? undefined : isNull(EmailTemplates.deletedAt),
 				]),
 				orderBy: [desc(EmailTemplates.createdAt), asc(EmailTemplates.id)],
 				limit: limit + 1,

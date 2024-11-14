@@ -8,6 +8,7 @@ import { AllCartFunnels } from '~/app/[handle]/carts/_components/all-cartFunnels
 import { ArchiveOrDeleteFunnelModal } from '~/app/[handle]/carts/_components/archive-or-delete-cartFunnel-modal';
 import { CartDialogs } from '~/app/[handle]/carts/_components/cart-dialogs';
 import { CartFunnelContextProvider } from '~/app/[handle]/carts/_components/cartFunnel-context';
+import { CartFunnelFilters } from '~/app/[handle]/carts/_components/cartFunnel-filters';
 import { CartFunnelHotkeys } from '~/app/[handle]/carts/_components/cartFunnel-hotkeys';
 import { CreateCartFunnelButton } from '~/app/[handle]/carts/_components/create-cartFunnel-button';
 import { CreateOrUpdateFunnelModal } from '~/app/[handle]/carts/_components/create-or-update-cartFunnel-modal';
@@ -39,6 +40,7 @@ export default function CartFunnelsPage({
 
 			<CartDialogs />
 
+			<CartFunnelFilters />
 			<AllCartFunnels />
 
 			<CreateOrUpdateFunnelModal mode='create' />

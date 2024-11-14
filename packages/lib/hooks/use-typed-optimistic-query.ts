@@ -15,7 +15,10 @@ type FilteredKeys<T, U> = {
 	[K in keyof T as T[K] extends U ? K : never]: T[K];
 };
 
-export function useTypedOptimisticQuery<T extends z.AnyZodObject>(schema: T) {
+export function useTypedOptimisticQuery<T extends z.AnyZodObject>(
+	schema: T,
+	{ replaceOnChange = false }: { replaceOnChange?: boolean } = {},
+) {
 	type Output = z.infer<typeof schema>;
 	type FullOutput = Required<Output>;
 	type OutputKeys = Required<keyof FullOutput>;
@@ -38,23 +41,19 @@ export function useTypedOptimisticQuery<T extends z.AnyZodObject>(schema: T) {
 	const [optimisticParsedQuery, setOptimisticParsedQuery] =
 		useOptimistic<Output>(initialParsedQuery);
 
-	// let parsedQuery: Output = useMemo(() => {
-	// 	return {} as Output;
-	// }, []);
-
 	useEffect(() => {
 		if (parsedQuerySchema.success && parsedQuerySchema.data && unparsedQuery) {
 			Object.entries(parsedQuerySchema.data).forEach(([key, value]) => {
 				if (key in unparsedQuery || !value) return;
 				const search = new URLSearchParams(optimisticParsedQuery);
 				search.set(String(key), String(value));
-				router.replace(`${pathname}?${search.toString()}`, { scroll: false });
+				replaceOnChange ?
+					router.replace(`${pathname}?${search.toString()}`, { scroll: false })
+				:	router.push(`${pathname}?${search.toString()}`, { scroll: false });
+				// router.replace(`${pathname}?${search.toString()}`, { scroll: false });
 			});
 		}
 	}, [parsedQuerySchema, schema, router, pathname, unparsedQuery, optimisticParsedQuery]);
-
-	// if (parsedQuerySchema.success) parsedQuery = parsedQuerySchema.data;
-	// else if (!parsedQuerySchema.success) console.error(parsedQuerySchema.error);
 
 	const getSetQueryPath = useCallback(
 		function getSetQueryPath<J extends OutputKeys>(key: J, value: Output[J]) {
@@ -71,10 +70,9 @@ export function useTypedOptimisticQuery<T extends z.AnyZodObject>(schema: T) {
 			startTransition(() => {
 				setOptimisticParsedQuery(prev => ({ ...prev, [key]: value }));
 				const path = getSetQueryPath(key, value);
-				router.replace(path, { scroll: false });
-				// const search = new URLSearchParams(optimisticParsedQuery);
-				// search.set(String(key), String(value));
-				// router.replace(`${pathname}?${search.toString()}`, { scroll: false });
+				replaceOnChange ?
+					router.replace(path, { scroll: false })
+				:	router.push(path, { scroll: false });
 			});
 		},
 
@@ -86,7 +84,10 @@ export function useTypedOptimisticQuery<T extends z.AnyZodObject>(schema: T) {
 			setOptimisticParsedQuery(prev => ({ ...prev, [key]: undefined }));
 			const search = new URLSearchParams(optimisticParsedQuery);
 			search.delete(String(key));
-			router.replace(`${pathname}?${search.toString()}`, { scroll: false });
+			// router.replace(`${pathname}?${search.toString()}`, { scroll: false });
+			replaceOnChange ?
+				router.replace(`${pathname}?${search.toString()}`, { scroll: false })
+			:	router.push(`${pathname}?${search.toString()}`, { scroll: false });
 		});
 	}
 
@@ -144,7 +145,10 @@ export function useTypedOptimisticQuery<T extends z.AnyZodObject>(schema: T) {
 
 		startTransition(() => {
 			setOptimisticParsedQuery({});
-			router.replace(pathname, { scroll: false });
+			// router.replace(pathname, { scroll: false });
+			replaceOnChange ?
+				router.replace(pathname, { scroll: false })
+			:	router.push(pathname, { scroll: false });
 		});
 	}
 

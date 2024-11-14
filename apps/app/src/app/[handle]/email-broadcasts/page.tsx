@@ -6,6 +6,7 @@ import { emailBroadcastSearchParamsSchema } from '@barely/lib/server/routes/emai
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllEmailBroadcasts } from '~/app/[handle]/email-broadcasts/_components/all-email-broadcasts';
 import { CreateOrUpdateEmailBroadcastModal } from '~/app/[handle]/email-broadcasts/_components/create-or-update-email-broadcast-modal';
+import { EmailBroadcastFilters } from '~/app/[handle]/email-broadcasts/_components/email-broadcast-filters';
 import { CreateEmailBroadcastButton } from './_components/create-email-broadcast-button';
 import { EmailBroadcastsContextProvider } from './_components/email-broadcasts-context';
 
@@ -33,6 +34,7 @@ export default function EmailBroadcastsPage({
 				title='Email Broadcasts'
 				button={<CreateEmailBroadcastButton />}
 			/>
+			<EmailBroadcastFilters />
 			<AllEmailBroadcasts />
 
 			<CreateOrUpdateEmailBroadcastModal mode='create' />

@@ -1,10 +1,10 @@
 'use client';
 
 import { Filters } from '~/app/[handle]/_components/filters';
-import { useLinkContext } from '~/app/[handle]/links/_components/link-context';
+import { useProductContext } from '~/app/[handle]/products/_components/product-context';
 
-export function LinkFilters() {
-	const { filters, setSearch, toggleArchived, clearAllFilters } = useLinkContext();
+export function ProductFilters() {
+	const { filters, setSearch, toggleArchived, clearAllFilters } = useProductContext();
 
 	return (
 		<Filters

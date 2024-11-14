@@ -59,7 +59,9 @@ export const LoginForm = ({ callbackUrl }: RegisterFormProps) => {
 						placeholder='name@example.com'
 					/>
 
-					<SubmitButton fullWidth>Login with email 🚀</SubmitButton>
+					<SubmitButton fullWidth loadingText='Sending login link...'>
+						Login with email 🚀
+					</SubmitButton>
 					<Text variant={'sm/normal'} subtle underline>
 						<Link href='/register' className='hover:text-brand'>
 							{`Don't have an account? Sign Up`}

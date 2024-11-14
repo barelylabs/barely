@@ -9,6 +9,7 @@ import { ArchiveOrDeleteFanGroupModal } from '~/app/[handle]/fan-groups/_compone
 import { CreateFanGroupButton } from '~/app/[handle]/fan-groups/_components/create-fan-group-button';
 import { CreateOrUpdateFanGroupModal } from '~/app/[handle]/fan-groups/_components/create-or-update-fan-group-modal';
 import { FanGroupContextProvider } from '~/app/[handle]/fan-groups/_components/fan-group-context';
+import { FanGroupFilters } from '~/app/[handle]/fan-groups/_components/fan-group-filters';
 import { FanGroupHotkeys } from '~/app/[handle]/fan-groups/_components/fan-group-hotkeys';
 
 export default function FanGroupsPage({
@@ -32,6 +33,7 @@ export default function FanGroupsPage({
 	return (
 		<FanGroupContextProvider initialFanGroups={fanGroups}>
 			<DashContentHeader title='Fan Groups' button={<CreateFanGroupButton />} />
+			<FanGroupFilters />
 			<AllFanGroups />
 
 			<CreateOrUpdateFanGroupModal mode='create' />

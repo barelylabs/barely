@@ -1,10 +1,10 @@
 'use client';
 
 import { Filters } from '~/app/[handle]/_components/filters';
-import { useLinkContext } from '~/app/[handle]/links/_components/link-context';
+import { useCartFunnelContext } from '~/app/[handle]/carts/_components/cartFunnel-context';
 
-export function LinkFilters() {
-	const { filters, setSearch, toggleArchived, clearAllFilters } = useLinkContext();
+export function CartFunnelFilters() {
+	const { filters, setSearch, clearAllFilters, toggleArchived } = useCartFunnelContext();
 
 	return (
 		<Filters

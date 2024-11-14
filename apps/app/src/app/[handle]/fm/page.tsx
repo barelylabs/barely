@@ -9,6 +9,7 @@ import { ArchiveOrDeleteFmModal } from '~/app/[handle]/fm/_components/archive-or
 import { CreateFmPageButton } from '~/app/[handle]/fm/_components/create-fm-page-button';
 import { CreateOrUpdateFmModal } from '~/app/[handle]/fm/_components/create-or-update-fm-modal';
 import { FmContextProvider } from '~/app/[handle]/fm/_components/fm-context';
+import { FmFilters } from '~/app/[handle]/fm/_components/fm-filters';
 import { FmHotkeys } from '~/app/[handle]/fm/_components/fm-hotkeys';
 
 export default function FmPagesPage({
@@ -32,6 +33,7 @@ export default function FmPagesPage({
 	return (
 		<FmContextProvider initialFmPages={fmPages}>
 			<DashContentHeader title='FM Pages' button={<CreateFmPageButton />} />
+			<FmFilters />
 			<AllFmPages />
 
 			<CreateOrUpdateFmModal mode='create' />

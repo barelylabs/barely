@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gt, inArray, lt, notInArray, or } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, inArray, isNull, lt, notInArray, or } from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { FileRecord } from '../file/file.schema';
@@ -26,7 +26,7 @@ export const fmRouter = createTRPCRouter({
 	byWorkspace: workspaceQueryProcedure
 		.input(selectWorkspaceFmPagesSchema)
 		.query(async ({ input, ctx }) => {
-			const { limit, cursor, search } = input;
+			const { limit, cursor, search, showArchived, showDeleted } = input;
 			const fmPages = await ctx.db.http.query.FmPages.findMany({
 				with: {
 					links: {
@@ -36,6 +36,8 @@ export const fmRouter = createTRPCRouter({
 				},
 				where: sqlAnd([
 					eq(FmPages.workspaceId, ctx.workspace.id),
+					showArchived ? undefined : isNull(FmPages.archivedAt),
+					showDeleted ? undefined : isNull(FmPages.deletedAt),
 					!!search?.length && sqlStringContains(FmPages.title, search),
 					!!cursor &&
 						or(

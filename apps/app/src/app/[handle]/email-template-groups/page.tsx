@@ -4,6 +4,7 @@ import { api } from '@barely/lib/server/api/server';
 import { emailTemplateGroupSearchParamsSchema } from '@barely/lib/server/routes/email-template-group/email-template-group.schema';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
+import { EmailTemplateGroupFilters } from '~/app/[handle]/email-template-groups/_components/email-template-group-filters';
 import { AllEmailTemplateGroups } from './_components/all-email-template-groups';
 import { ArchiveOrDeleteEmailTemplateGroupModal } from './_components/archive-or-delete-email-template-group-modal';
 import { CreateEmailTemplateGroupButton } from './_components/create-email-template-group-button';
@@ -39,6 +40,8 @@ export default function EmailTemplateGroupsPage({
 				title='Email Template Groups'
 				button={<CreateEmailTemplateGroupButton />}
 			/>
+
+			<EmailTemplateGroupFilters />
 			<AllEmailTemplateGroups />
 
 			<CreateOrUpdateEmailTemplateGroupModal mode='create' />

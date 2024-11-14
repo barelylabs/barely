@@ -1,4 +1,16 @@
-import { and, asc, desc, eq, gt, inArray, lt, notInArray, or, sql } from 'drizzle-orm';
+import {
+	and,
+	asc,
+	desc,
+	eq,
+	gt,
+	inArray,
+	isNull,
+	lt,
+	notInArray,
+	or,
+	sql,
+} from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { NormalizedProductWith_Images } from './product.schema';
@@ -22,7 +34,7 @@ export const productRouter = createTRPCRouter({
 	byWorkspace: workspaceQueryProcedure
 		.input(selectWorkspaceProductsSchema)
 		.query(async ({ input, ctx }) => {
-			const { limit, cursor, search } = input;
+			const { limit, cursor, search, showArchived, showDeleted } = input;
 
 			const products = await ctx.db.http.query.Products.findMany({
 				with: {
@@ -39,6 +51,8 @@ export const productRouter = createTRPCRouter({
 				where: sqlAnd([
 					eq(Products.workspaceId, ctx.workspace.id),
 					!!search?.length && sqlStringContains(Products.name, search),
+					showArchived ? undefined : isNull(Products.archivedAt),
+					showDeleted ? undefined : isNull(Products.deletedAt),
 					!!cursor &&
 						or(
 							lt(Products.createdAt, cursor.createdAt),
