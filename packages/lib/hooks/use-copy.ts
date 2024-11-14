@@ -17,7 +17,9 @@ export function useCopy() {
 			?.writeText(text)
 			.then(() => setIsCopied(true))
 			.then(() => {
-				toast.success(successMessage);
+				toast.success(successMessage, {
+					duration: 1500,
+				});
 			})
 			.catch(error => console.error('Copy to clipboard failed:', error));
 	};

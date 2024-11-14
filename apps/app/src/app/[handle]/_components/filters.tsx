@@ -23,18 +23,24 @@ function DisplayShortcutIcon({ shortcut, icon }: { shortcut: string; icon: IconK
 export function Filters({
 	search,
 	setSearch,
+	searchPlaceholder,
 	showArchived,
 	toggleArchived,
 	showDeleted,
 	toggleDeleted,
+	showFulfilled,
+	toggleFulfilled,
 	clearAllFilters,
 	itemsName,
 }: {
 	itemsName?: string;
 	search?: string;
 	setSearch?: (search: string) => void;
+	searchPlaceholder?: string;
 	showArchived?: boolean;
 	toggleArchived?: () => void;
+	showFulfilled?: boolean;
+	toggleFulfilled?: () => void;
 	showDeleted?: boolean;
 	toggleDeleted?: () => void;
 	clearAllFilters: () => void;
@@ -62,6 +68,9 @@ export function Filters({
 			if (e.key === 'd' && hotkeysEnabled && noMetaOrCtrl) {
 				toggleDeleted?.();
 			}
+			if (e.key === 'f' && hotkeysEnabled && noMetaOrCtrl) {
+				toggleFulfilled?.();
+			}
 			if (e.key === 'Escape' && hotkeysEnabled && noMetaOrCtrl) {
 				clearAllFilters();
 				if (searchInputRef.current) {
@@ -69,7 +78,7 @@ export function Filters({
 				}
 			}
 		},
-		[clearAllFilters, toggleArchived, toggleDeleted],
+		[clearAllFilters, toggleArchived, toggleDeleted, toggleFulfilled],
 	);
 
 	useEffect(() => {
@@ -90,6 +99,23 @@ export function Filters({
 				</PopoverTrigger>
 
 				<PopoverContent>
+					{toggleFulfilled !== undefined && (
+						<div className='group flex flex-row items-center justify-between gap-4'>
+							<Label htmlFor='showFulfilledSwitch'>
+								<div className='flex flex-row items-center gap-2'>
+									<DisplayShortcutIcon shortcut='F' icon='check' />
+									Include fulfilled {itemsName ?? 'items'}
+								</div>
+							</Label>
+							<Switch
+								id='showFulfilledSwitch'
+								checked={!!showFulfilled}
+								onClick={() => toggleFulfilled()}
+								size='sm'
+							/>
+						</div>
+					)}
+
 					{toggleArchived !== undefined && (
 						<div className='group flex flex-row items-center justify-between gap-4'>
 							<Label htmlFor='showArchivedSwitch'>
@@ -134,7 +160,7 @@ export function Filters({
 					ref={searchInputRef}
 					onChangeDebounced={e => setSearch?.(e.target.value)}
 					debounce={500}
-					placeholder='Search...'
+					placeholder={searchPlaceholder ?? 'Search...'}
 					showClearButton={true}
 					onClear={() => setSearch?.('')}
 				/>

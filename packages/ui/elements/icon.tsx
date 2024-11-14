@@ -208,6 +208,8 @@ import {
 	ZoomOut,
 } from 'lucide-react';
 import {
+	FaAmazon,
+	FaApple,
 	FaDhl,
 	FaFacebook,
 	FaFedex,
@@ -239,7 +241,9 @@ export const Icon = {
 	alignJustify: AlignJustify,
 	alignLeft: AlignLeft,
 	alignRight: AlignRight,
+	amazonMusic: FaAmazon,
 	apple: Apple,
+	appleMusic: FaApple,
 	apps: Blocks,
 	archive: Archive,
 	arrowLeft: ArrowLeft,
