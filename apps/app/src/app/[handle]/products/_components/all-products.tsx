@@ -2,8 +2,6 @@
 
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
-import { Img } from '@barely/ui/elements/img';
-import { Text } from '@barely/ui/elements/typography';
 
 import type { ProductCtx } from '~/app/[handle]/products/_components/product-context';
 import { CreateProductButton } from '~/app/[handle]/products/_components/create-product-button';
@@ -60,9 +58,6 @@ function ProductCard({
 		setShowDeleteProductModal,
 	} = useProductContext();
 
-	const s3Key = product.images[0]?.s3Key;
-	const blurDataUrl = product.images[0]?.blurDataUrl;
-
 	return (
 		<GridListCard
 			id={product.id}
@@ -71,8 +66,10 @@ function ProductCard({
 			setShowUpdateModal={setShowUpdateProductModal}
 			setShowArchiveModal={setShowArchiveProductModal}
 			setShowDeleteModal={setShowDeleteProductModal}
+			title={product.name}
+			img={{ ...product.images[0], alt: `${product.name} product image` }}
 		>
-			<div className='flex flex-grow flex-row items-center gap-4'>
+			{/* <div className='flex flex-grow flex-row items-center gap-4'>
 				<div className='flex flex-col items-start gap-1'>
 					<div className='flex flex-row items-center gap-2'>
 						<Img
@@ -89,7 +86,7 @@ function ProductCard({
 						</Text>
 					</div>
 				</div>
-			</div>
+			</div> */}
 		</GridListCard>
 	);
 }

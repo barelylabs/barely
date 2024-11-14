@@ -1,6 +1,6 @@
 import { sendEmail } from '@barely/email';
 import ShippingUpdateEmailTemplate from '@barely/email/src/templates/cart/shipping-update';
-import { and, asc, eq, gt, inArray, isNotNull, isNull, ne, or } from 'drizzle-orm';
+import { and, asc, eq, gt, inArray, isNotNull, isNull, like, ne, or } from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { ApparelSize } from '../product/product.constants';
@@ -18,6 +18,7 @@ import {
 import { getTrackingLink } from '../../shipping/shipping.utils';
 import { getOrCreateCartOrderId } from '../cart/cart.fns';
 import { CartFulfillmentProducts, CartFulfillments, Carts } from '../cart/cart.sql';
+import { Fans } from '../fan/fan.sql';
 import {
 	markCartOrderAsFulfilledSchema,
 	selectWorkspaceCartOrdersSchema,
@@ -27,7 +28,24 @@ export const cartOrderRouter = createTRPCRouter({
 	byWorkspace: workspaceQueryProcedure
 		.input(selectWorkspaceCartOrdersSchema)
 		.query(async ({ input, ctx }) => {
-			const { showFulfilled, fanId, limit, cursor } = input;
+			const { showFulfilled, search, fanId, limit, cursor } = input;
+
+			let searchFanIds: string[] = [];
+			if (search) {
+				const fans = await ctx.db.http.query.Fans.findMany({
+					where: and(
+						eq(Fans.workspaceId, ctx.workspace.id),
+						or(
+							like(Fans.fullName, `%${search}%`),
+							like(Fans.email, `%${search}%`),
+							like(Fans.shippingAddressLine1, `%${search}%`),
+						),
+					),
+				});
+
+				searchFanIds = fans.map(f => f.id);
+			}
+
 			const orders = await ctx.db.http.query.Carts.findMany({
 				where: sqlAnd([
 					eq(Carts.workspaceId, ctx.workspace.id),
@@ -39,7 +57,9 @@ export const cartOrderRouter = createTRPCRouter({
 						'upsellAbandoned',
 						'upsellDeclined',
 					]),
+					eq(Carts.workspaceId, ctx.workspace.id),
 					!!fanId && eq(Carts.fanId, fanId),
+					!!searchFanIds.length && inArray(Carts.fanId, searchFanIds),
 					!!cursor &&
 						or(
 							or(

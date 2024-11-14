@@ -4,6 +4,7 @@ import type { AppRouterOutputs } from '@barely/lib/server/api/router';
 
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
+import { Icon } from '@barely/ui/elements/icon';
 import { Text } from '@barely/ui/elements/typography';
 
 import { CreateFmPageButton } from '~/app/[handle]/fm/_components/create-fm-page-button';
@@ -60,6 +61,10 @@ function FmPageCard({
 		setShowDeleteFmPageModal,
 	} = useFmContext();
 
+	const { coverArt } = fmPage;
+
+	const href = `https://barely.fm/${fmPage.handle}/${fmPage.key}`;
+
 	return (
 		<GridListCard
 			id={fmPage.id}
@@ -68,20 +73,52 @@ function FmPageCard({
 			setShowUpdateModal={setShowUpdateFmPageModal}
 			setShowArchiveModal={setShowArchiveFmPageModal}
 			setShowDeleteModal={setShowDeleteFmPageModal}
-		>
-			<div className='flex flex-grow flex-row items-center gap-4'>
-				<div className='flex flex-col gap-1'>
-					<Text variant='md/medium'>{fmPage.title}</Text>
+			img={{ ...coverArt, alt: `${fmPage.title} cover art` }}
+			title={fmPage.title}
+			subtitle={`${fmPage.clicks} clicks`}
+			quickActions={{
+				goToHref: href,
+				copyText: href,
+			}}
+			statsRight={
+				<div className='items-left flex flex-col'>
+					<div className='flex flex-row items-center gap-1'>
+						<Icon.spotify className='h-2.5 w-2.5' />
+						<Text variant='xs/normal'>Spotify: {fmPage.spotifyClicks}</Text>
+					</div>
+					<div className='flex flex-row items-center gap-1'>
+						<Icon.appleMusic className='h-2.5 w-2.5' />
+						<Text variant='xs/normal'>Apple Music: {fmPage.appleMusicClicks}</Text>
+					</div>
+					<div className='flex flex-row items-center gap-1'>
+						<Icon.youtube className='h-2.5 w-2.5' />
+						<Text variant='xs/normal'>YouTube: {fmPage.youtubeClicks}</Text>
+					</div>
+					<div className='flex flex-row items-center gap-1'>
+						<Icon.amazonMusic className='h-2.5 w-2.5' />
+						<Text variant='xs/normal'>Amazon Music: {fmPage.amazonMusicClicks}</Text>
+					</div>
 				</div>
-				<Text variant='sm/normal'>clicks: {fmPage.clicks}</Text>
-				<Text variant='sm/normal'>amazonMusicClicks: {fmPage.amazonMusicClicks}</Text>
-				<Text variant='sm/normal'>appleMusicClicks: {fmPage.appleMusicClicks}</Text>
-				<Text variant='sm/normal'>spotifyClicks: {fmPage.spotifyClicks}</Text>
-				{/* <Text variant='sm/normal'>deezerClicks: {fmPage.deezerClicks}</Text> */}
-				{/* <Text variant='sm/normal'>itunesClicks: {fmPage.itunesClicks}</Text> */}
-				{/* <Text variant='sm/normal'>tidalClicks: {fmPage.tidalClicks}</Text> */}
-				<Text variant='sm/normal'>youtubeClicks: {fmPage.youtubeClicks}</Text>
-			</div>
+			}
+		>
+			{/* <div className='items-left flex flex-col'>
+					<div className='flex flex-row items-center gap-1'>
+						<Icon.spotify className='h-2.5 w-2.5' />
+						<Text variant='xs/normal'>Spotify: {fmPage.spotifyClicks}</Text>
+					</div>
+					<div className='flex flex-row items-center gap-1'>
+						<Icon.appleMusic className='h-2.5 w-2.5' />
+						<Text variant='xs/normal'>Apple Music: {fmPage.appleMusicClicks}</Text>
+					</div>
+					<div className='flex flex-row items-center gap-1'>
+						<Icon.youtube className='h-2.5 w-2.5' />
+						<Text variant='xs/normal'>YouTube: {fmPage.youtubeClicks}</Text>
+					</div>
+					<div className='flex flex-row items-center gap-1'>
+						<Icon.amazonMusic className='h-2.5 w-2.5' />
+						<Text variant='xs/normal'>Amazon Music: {fmPage.amazonMusicClicks}</Text>
+					</div>
+				</div>			 */}
 		</GridListCard>
 	);
 }

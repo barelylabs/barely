@@ -32,10 +32,10 @@ export default function CartOrdersPage({
 		<CartOrderContextProvider initialInfiniteOrders={initialInfiniteOrders}>
 			<DashContentHeader title='Orders' />
 
-			<div className='grid grid-cols-1 gap-5 md:grid-cols-[auto,1fr]'>
-				<CartOrderFilters />
-				<AllCartOrders />
-			</div>
+			<CartOrderFilters />
+			<AllCartOrders />
+			{/* <div className='grid grid-cols-1 gap-5 md:grid-cols-[auto,1fr]'>
+			</div> */}
 
 			<MarkCartOrderFulfilledModal />
 			<CartOrderHotkeys />

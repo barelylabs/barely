@@ -7,6 +7,7 @@ import type {
 	Selection,
 } from 'react-aria-components';
 import React, { useCallback, useEffect, useState } from 'react';
+import { useCopy } from '@barely/lib/hooks/use-copy';
 import { cn } from '@barely/lib/utils/cn';
 import { cva } from 'class-variance-authority';
 import { Check } from 'lucide-react';
@@ -17,10 +18,13 @@ import {
 	GridList as GridListPrimitive,
 } from 'react-aria-components';
 
-import { Button } from './button';
+import type { ImgProps } from './img';
+import { Button, buttonVariants } from './button';
 import { Command, CommandItem, CommandList, CommandShortcut } from './command';
 import { Icon } from './icon';
+import { Img } from './img';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
+import { Text } from './typography';
 
 interface GridListProps<T extends { id: string }> extends GridListPrimitiveProps<T> {
 	setSelectedKeys?: (keys: Selection) => void;
@@ -96,12 +100,12 @@ export const GridListItem = React.forwardRef<
 GridListItem.displayName = 'GridListItem';
 
 export const gridListCardVariants = cva(
-	'group relative flex flex-row items-center justify-between gap-4 rounded-lg border border-border bg-background p-3 pr-1 hover:cursor-default focus:border-input focus:outline-none focus-visible:border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background selected:bg-muted/25 sm:p-4',
+	'group relative flex flex-row items-center justify-between gap-4 rounded-lg border border-border bg-background hover:cursor-default focus:border-input focus:outline-none focus-visible:border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background selected:bg-muted/25',
 	{
 		variants: {
 			size: {
-				sm: 'p-2 sm:p-2',
-				md: 'p-3 sm:p-4',
+				sm: 'p-2 pr-1',
+				md: 'p-3 pr-1 sm:p-4 sm:pr-2',
 			},
 		},
 		defaultVariants: {
@@ -120,6 +124,7 @@ export interface GridListCommandItemProps {
 interface GridListCardProps
 	extends GridListItemProps,
 		VariantProps<typeof gridListCardVariants> {
+	addToSelection?: (id: string) => void;
 	setShowUpdateModal?: (show: boolean) => void;
 	setShowArchiveModal?: (show: boolean) => void;
 	setShowDeleteModal?: (show: boolean) => void;
@@ -128,6 +133,15 @@ interface GridListCardProps
 
 	actionOnCommandMenuOpen?: () => void;
 	commandItems?: GridListCommandItemProps[];
+
+	img?: Omit<ImgProps, 'width' | 'height'> | null;
+	title?: string;
+	subtitle?: string;
+	quickActions?: {
+		goToHref?: string;
+		copyText?: string;
+	};
+	statsRight?: ReactNode;
 }
 
 export const GridListCard = React.forwardRef<
@@ -139,6 +153,7 @@ export const GridListCard = React.forwardRef<
 			children,
 			size,
 			className,
+			addToSelection,
 			setShowArchiveModal,
 			setShowDeleteModal,
 			setShowUpdateModal,
@@ -146,6 +161,11 @@ export const GridListCard = React.forwardRef<
 			disableDragHandle,
 			commandItems,
 			actionOnCommandMenuOpen,
+			img,
+			title,
+			subtitle,
+			quickActions = {},
+			statsRight,
 			...props
 		},
 		ref,
@@ -174,6 +194,11 @@ export const GridListCard = React.forwardRef<
 			return () => document.removeEventListener('keydown', handleKeyPress);
 		}, []);
 
+		const { copyToClipboard } = useCopy();
+
+		const { goToHref, copyText } = quickActions;
+		const showTitleBlock = !!title || !!subtitle || !!goToHref || !!copyText;
+
 		return (
 			<GridListItemPrimitive
 				{...props}
@@ -190,26 +215,87 @@ export const GridListCard = React.forwardRef<
 						)}
 
 						<div className='flex w-full flex-row items-center justify-between'>
-							<>{children}</>
+							<div className='flex flex-grow flex-row items-center gap-4'>
+								{img && (
+									<Img
+										{...(img.s3Key ? { s3Key: img.s3Key } : { src: img.src ?? '' })}
+										blurDataURL={img.blurDataURL ?? undefined}
+										width={100}
+										height={100}
+										alt={`${textValue} cover art`}
+										className='h-8 w-8 rounded-md sm:h-16 sm:w-16'
+									/>
+								)}
+								{showTitleBlock && (
+									<div className='flex h-full flex-col justify-between gap-2'>
+										<div className='flex flex-col gap-1'>
+											{title && <Text variant='md/semibold'>{title}</Text>}
+											{subtitle && <Text variant='xs/normal'>{subtitle}</Text>}
+										</div>
+										<div className='flex flex-row gap-1'>
+											{goToHref && (
+												<Button
+													variant='icon'
+													look='ghost'
+													startIcon='externalLink'
+													size='2xs'
+													href={goToHref}
+													target='_blank'
+												/>
+											)}
+											{copyText && (
+												<Button
+													variant='icon'
+													look='ghost'
+													startIcon='copy'
+													size='2xs'
+													onPress={() => {
+														copyToClipboard(copyText);
+													}}
+												/>
+											)}
+										</div>
+									</div>
+								)}
+								<div className='flex flex-grow flex-row items-center justify-between gap-4'>
+									<>{children}</>
+									{statsRight && <div className='ml-auto mr-2'>{statsRight}</div>}
+								</div>
+							</div>
 							{!disableContextMenu && atLeastOnePopoverAction && (
 								<Popover
 									open={showContextMenu}
 									onOpenChange={open => {
 										if (open) {
+											if (props.id) addToSelection?.(props.id.toString());
 											actionOnCommandMenuOpen?.();
 										}
 										setShowContextMenu(open);
 									}}
 								>
 									<PopoverTrigger asChild>
-										<Button
-											variant='icon'
-											look='ghost'
-											className='py-2 text-slate-500 opacity-0 group-hover:opacity-100 group-focus:opacity-100 group-focus-visible:opacity-100'
-											size='sm'
+										<button
+											type='button'
+											className={cn(
+												buttonVariants({
+													variant: 'icon',
+													look: 'ghost',
+													size: 'sm',
+												}),
+												'ml-2 py-2 text-slate-500 opacity-0 group-hover:opacity-100 group-focus:opacity-100 group-focus-visible:opacity-100',
+											)}
 										>
 											<Icon.dotsVertical />
-										</Button>
+										</button>
+										{/* <Button
+											variant='icon'
+											look='ghost'
+											className='ml-2 py-2 text-slate-500 opacity-0 group-hover:opacity-100 group-focus:opacity-100 group-focus-visible:opacity-100'
+											size='sm'
+											// slot='selection'
+										>
+											<Icon.dotsVertical />
+										</Button> */}
 									</PopoverTrigger>
 
 									<PopoverContent className='w-full p-2 sm:w-48' align='end'>

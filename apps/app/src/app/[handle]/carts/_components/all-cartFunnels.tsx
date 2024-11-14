@@ -4,7 +4,6 @@ import type { CartFunnel } from '@barely/lib/server/routes/cart-funnel/cart-funn
 
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
-import { Text } from '@barely/ui/elements/typography';
 
 import { useCartFunnelContext } from '~/app/[handle]/carts/_components/cartFunnel-context';
 import { CreateCartFunnelButton } from '~/app/[handle]/carts/_components/create-cartFunnel-button';
@@ -59,6 +58,8 @@ function CartFunnelCard({ cartFunnel }: { cartFunnel: CartFunnel }) {
 		setShowDeleteCartFunnelModal: setShowDeleteCartFunnelModal,
 	} = useCartFunnelContext();
 
+	const href = `https://barelycart.com/${cartFunnel.handle}/${cartFunnel.key}`;
+
 	return (
 		<GridListCard
 			id={cartFunnel.id}
@@ -67,21 +68,12 @@ function CartFunnelCard({ cartFunnel }: { cartFunnel: CartFunnel }) {
 			setShowUpdateModal={setShowUpdateCartFunnelModal}
 			setShowArchiveModal={setShowArchiveCartFunnelModal}
 			setShowDeleteModal={setShowDeleteCartFunnelModal}
-		>
-			<div className='flex flex-grow flex-row items-center gap-4'>
-				<div className='flex flex-col items-start gap-1'>
-					<div className='flex flex-row items-center gap-2'>
-						<div className='flex flex-col gap-1'>
-							<Text variant='xs/semibold'>{cartFunnel.name}</Text>
-							<div className='flex flex-row gap-1'>
-								<Text variant='xs/normal' muted>
-									{cartFunnel.key.toUpperCase()}
-								</Text>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</GridListCard>
+			title={cartFunnel.name}
+			subtitle={cartFunnel.key.toUpperCase()}
+			quickActions={{
+				goToHref: href,
+				copyText: href,
+			}}
+		></GridListCard>
 	);
 }

@@ -4,7 +4,15 @@ import type { AppRouterOutputs } from '@barely/lib/server/api/react';
 import type { fmFilterParamsSchema } from '@barely/lib/server/routes/fm/fm.schema';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
-import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
+import {
+	createContext,
+	use,
+	useCallback,
+	useContext,
+	useMemo,
+	useRef,
+	useState,
+} from 'react';
 import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
@@ -18,6 +26,7 @@ interface FmContext {
 		| AppRouterOutputs['fm']['byWorkspace']['fmPages'][number]
 		| undefined;
 	setFmPageSelection: (selection: Selection) => void;
+	addFmPageToSelection: (fmPageId: string) => void;
 	gridListRef: React.RefObject<HTMLDivElement>;
 	focusGridList: () => void;
 	showCreateFmPageModal: boolean;
@@ -57,10 +66,11 @@ export function FmContextProvider({
 
 	const { selectedFmPageIds, ...filters } = data;
 
-	const fmPageSelection: Selection =
-		!selectedFmPageIds ? new Set()
-		: selectedFmPageIds === 'all' ? 'all'
-		: new Set(selectedFmPageIds);
+	const fmPageSelection = useMemo<Selection>(() => {
+		if (!selectedFmPageIds) return new Set();
+		if (selectedFmPageIds === 'all') return 'all';
+		return new Set(selectedFmPageIds);
+	}, [selectedFmPageIds]);
 
 	const initialData = use(initialFmPages);
 	const { data: infiniteFmPages } = api.fm.byWorkspace.useInfiniteQuery(
@@ -93,6 +103,15 @@ export function FmContextProvider({
 		[setQuery, removeByKey],
 	);
 
+	const addFmPageToSelection = useCallback(
+		(fmPageId: string) => {
+			if (fmPageSelection === 'all') return;
+			if (fmPageSelection.has(fmPageId)) return;
+			setFmPageSelection(new Set([...fmPageSelection, fmPageId]));
+		},
+		[fmPageSelection, setFmPageSelection],
+	);
+
 	const clearAllFilters = useCallback(() => {
 		removeAllQueryParams();
 	}, [removeAllQueryParams]);
@@ -123,6 +142,7 @@ export function FmContextProvider({
 		lastSelectedFmPageId,
 		lastSelectedFmPage,
 		setFmPageSelection,
+		addFmPageToSelection,
 		gridListRef,
 		focusGridList: () => {
 			gridListRef.current?.focus();
