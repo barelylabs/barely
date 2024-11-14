@@ -1,5 +1,5 @@
 import { runs, tasks } from '@trigger.dev/sdk/v3';
-import { and, asc, desc, eq, gt, lt, or } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, isNull, lt, or } from 'drizzle-orm';
 
 import type { handleEmailBroadcast } from '../../../trigger/email-broadcast.trigger';
 import { newId } from '../../../utils/id';
@@ -21,7 +21,7 @@ export const emailBroadcastRouter = createTRPCRouter({
 	byWorkspace: workspaceQueryProcedure
 		.input(selectWorkspaceEmailBroadcastsSchema)
 		.query(async ({ input, ctx }) => {
-			const { limit, cursor } = input;
+			const { limit, cursor, showArchived, showDeleted } = input;
 
 			const emailBroadcasts = await ctx.db.http.query.EmailBroadcasts.findMany({
 				with: {
@@ -42,6 +42,8 @@ export const emailBroadcastRouter = createTRPCRouter({
 								gt(EmailBroadcasts.id, cursor.id),
 							),
 						),
+					showArchived ? undefined : isNull(EmailBroadcasts.archivedAt),
+					showDeleted ? undefined : isNull(EmailBroadcasts.deletedAt),
 					// !!showStatuses?.length && inArray(EmailBroadcasts.status, showStatuses),
 				]),
 				orderBy: [desc(EmailBroadcasts.createdAt), asc(EmailBroadcasts.id)],

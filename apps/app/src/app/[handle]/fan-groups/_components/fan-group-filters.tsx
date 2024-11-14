@@ -1,10 +1,10 @@
 'use client';
 
 import { Filters } from '~/app/[handle]/_components/filters';
-import { useLinkContext } from '~/app/[handle]/links/_components/link-context';
+import { useFanGroupContext } from '~/app/[handle]/fan-groups/_components/fan-group-context';
 
-export function LinkFilters() {
-	const { filters, setSearch, toggleArchived, clearAllFilters } = useLinkContext();
+export function FanGroupFilters() {
+	const { filters, setSearch, toggleArchived, clearAllFilters } = useFanGroupContext();
 
 	return (
 		<Filters

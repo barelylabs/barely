@@ -35,10 +35,12 @@ export default function LinksPage({
 		<LinkContextProvider initialInfiniteLinks={links}>
 			<DashContentHeader title='Links' button={<CreateLinkButton />} />
 
-			<div className='grid grid-cols-1 gap-5 md:grid-cols-[auto,1fr]'>
+			<div className='flex w-full flex-col gap-4'>
 				<LinkFilters />
 				<AllLinks />
 			</div>
+			{/* <div className='grid grid-cols-1 gap-5 md:grid-cols-[auto,1fr]'>
+			</div> */}
 
 			<CreateOrUpdateLinkModal mode='create' />
 			<CreateOrUpdateLinkModal mode='update' />

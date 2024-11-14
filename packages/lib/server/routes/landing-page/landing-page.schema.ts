@@ -1,8 +1,9 @@
 import type { InferSelectModel } from 'drizzle-orm';
+import type { z } from 'zod';
 import { createInsertSchema } from 'drizzle-zod';
-import { z } from 'zod';
 
 import { querySelectionSchema } from '../../../utils/zod-helpers';
+import { commonFiltersSchema, infiniteQuerySchema } from '../../common-filters';
 import { LandingPages } from './landing-page.sql';
 
 export const insertLandingPageSchema = createInsertSchema(LandingPages, {
@@ -32,19 +33,13 @@ export type UpdateLandingPage = z.infer<typeof updateLandingPageSchema>;
 export type LandingPage = InferSelectModel<typeof LandingPages>;
 
 // forms
-export const landingPageFilterParamsSchema = z.object({
-	search: z.string().optional(),
-	showArchived: z.boolean().optional(),
-});
+export const landingPageFilterParamsSchema = commonFiltersSchema;
 export const landingPageSearchParamsSchema = landingPageFilterParamsSchema.extend({
 	selectedLandingPageIds: querySelectionSchema.optional(),
 });
 
-export const selectWorkspaceLandingPagesSchema = landingPageFilterParamsSchema.extend({
-	// handle: z.string(),
-	cursor: z.object({ id: z.string(), createdAt: z.coerce.date() }).optional(),
-	limit: z.coerce.number().min(1).max(100).optional().default(20),
-});
+export const selectWorkspaceLandingPagesSchema =
+	commonFiltersSchema.merge(infiniteQuerySchema);
 
 export const defaultLandingPage: CreateLandingPage = {
 	name: '',

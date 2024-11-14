@@ -3,6 +3,7 @@ import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
 import { querySelectionSchema } from '../../../utils/zod-helpers';
+import { commonFiltersSchema, infiniteQuerySchema } from '../../common-filters';
 import { insertEmailTemplateSchema } from '../email-template/email-template.schema';
 import { EmailTemplateGroups } from '../email-template/email-template.sql';
 
@@ -45,10 +46,7 @@ export type CreateEmailTemplateGroup = z.infer<typeof createEmailTemplateGroupSc
 export type UpdateEmailTemplateGroup = z.infer<typeof updateEmailTemplateGroupSchema>;
 export type EmailTemplateGroup = InferSelectModel<typeof EmailTemplateGroups>;
 
-export const emailTemplateGroupFilterParamsSchema = z.object({
-	search: z.string().optional(),
-	showArchived: z.boolean().optional(),
-});
+export const emailTemplateGroupFilterParamsSchema = commonFiltersSchema;
 
 export const emailTemplateGroupSearchParamsSchema =
 	emailTemplateGroupFilterParamsSchema.extend({
@@ -57,13 +55,4 @@ export const emailTemplateGroupSearchParamsSchema =
 
 /* select workspace email template groups */
 export const selectWorkspaceEmailTemplateGroupsSchema =
-	emailTemplateGroupFilterParamsSchema.extend({
-		// handle: z.string(),
-		limit: z.number().min(1).max(100).default(50),
-		cursor: z
-			.object({
-				id: z.string(),
-				createdAt: z.date(),
-			})
-			.optional(),
-	});
+	emailTemplateGroupFilterParamsSchema.merge(infiniteQuerySchema);

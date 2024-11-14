@@ -5,6 +5,7 @@ import { emailTemplateSearchParamsSchema } from '@barely/lib/server/routes/email
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllEmailTemplates } from '~/app/[handle]/email-templates/_components/all-email-templates';
+import { EmailTemplateFilters } from '~/app/[handle]/email-templates/_components/email-template-filters';
 import { ArchiveOrDeleteEmailTemplateModal } from './_components/archive-or-delete-email-template-modal';
 import { CreateEmailTemplateButton } from './_components/create-email-template-button';
 import { CreateOrUpdateEmailTemplateModal } from './_components/create-or-update-email-template-modal';
@@ -32,6 +33,8 @@ export default function EmailTemplatesPage({
 	return (
 		<EmailTemplateContextProvider initialEmailTemplatesFirstPage={emailTemplates}>
 			<DashContentHeader title='Email Templates' button={<CreateEmailTemplateButton />} />
+
+			<EmailTemplateFilters />
 			<AllEmailTemplates />
 
 			<CreateOrUpdateEmailTemplateModal mode='create' />

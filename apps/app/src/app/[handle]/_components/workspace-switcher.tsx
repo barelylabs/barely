@@ -72,7 +72,7 @@ export function WorkspaceSwitcher() {
 						imageS3Key={normalizedObject.avatarImageS3Key}
 						priority
 					/>
-					<Text variant='xs/extrabold' className='text-accent-foreground'>
+					<Text variant='xs/bold' className='text-accent-foreground'>
 						{normalizedObject.name}
 					</Text>
 

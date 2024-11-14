@@ -9,6 +9,7 @@ import { ArchiveOrDeleteProductModal } from '~/app/[handle]/products/_components
 import { CreateOrUpdateProductModal } from '~/app/[handle]/products/_components/create-or-update-product-modal';
 import { CreateProductButton } from '~/app/[handle]/products/_components/create-product-button';
 import { ProductContextProvider } from '~/app/[handle]/products/_components/product-context';
+import { ProductFilters } from '~/app/[handle]/products/_components/product-filters';
 import { ProductHotkeys } from '~/app/[handle]/products/_components/product-hotkeys';
 
 export default function ProductsPage({
@@ -33,6 +34,7 @@ export default function ProductsPage({
 		<ProductContextProvider initialInfiniteProducts={products}>
 			<DashContentHeader title='Products' button={<CreateProductButton />} />
 
+			<ProductFilters />
 			<AllProducts />
 
 			<CreateOrUpdateProductModal mode='create' />

@@ -6,6 +6,7 @@ import {
 	optionalString_EmptyToUndefined,
 	querySelectionSchema,
 } from '../../../utils/zod-helpers';
+import { commonFiltersSchema, infiniteQuerySchema } from '../../common-filters';
 import { FanGroupConditions, FanGroups } from './fan-group.sql';
 
 // FanGroupConditions
@@ -20,9 +21,6 @@ export const createFanGroupConditionSchema = insertFanGroupConditionSchema
 	.partial({
 		fanGroupId: true,
 	});
-// export const updateFanGroupConditionSchema = insertFanGroupConditionSchema
-// 	.partial()
-// 	.required({ id: true });
 export const upsertFanGroupConditionSchema = insertFanGroupConditionSchema.partial({
 	id: true,
 	fanGroupId: true,
@@ -70,18 +68,13 @@ export type FanGroupWithConditions = InferSelectModel<typeof FanGroups> & {
 };
 
 // forms
-export const fanGroupFilterParamsSchema = z.object({
-	search: z.string().optional(),
-	showArchived: z.boolean().optional(),
-});
+export const fanGroupFilterParamsSchema = commonFiltersSchema;
 export const fanGroupSearchParamsSchema = fanGroupFilterParamsSchema.extend({
 	selectedFanGroupIds: querySelectionSchema.optional(),
 });
 
-export const selectWorkspaceFanGroupsSchema = fanGroupFilterParamsSchema.extend({
-	cursor: z.object({ id: z.string(), createdAt: z.coerce.date() }).optional(),
-	limit: z.coerce.number().min(1).max(100).optional().default(20),
-});
+export const selectWorkspaceFanGroupsSchema =
+	fanGroupFilterParamsSchema.merge(infiniteQuerySchema);
 
 export const defaultFanGroup: CreateFanGroup = {
 	name: '',

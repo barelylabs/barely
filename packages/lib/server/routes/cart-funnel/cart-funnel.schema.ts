@@ -1,8 +1,9 @@
 import type { InferSelectModel } from 'drizzle-orm';
+import type { z } from 'zod';
 import { createInsertSchema } from 'drizzle-zod';
-import { z } from 'zod';
 
 import { querySelectionSchema } from '../../../utils/zod-helpers';
+import { commonFiltersSchema, infiniteQuerySchema } from '../../common-filters';
 import { CartFunnels } from './cart-funnel.sql';
 
 export const insertCartFunnelSchema = createInsertSchema(CartFunnels, {
@@ -50,21 +51,12 @@ export type UpsertCartFunnel = z.infer<typeof upsertCartFunnelSchema>;
 export type UpdateCartFunnel = z.infer<typeof updateCartFunnelSchema>;
 export type CartFunnel = InferSelectModel<typeof CartFunnels>;
 
-export const selectWorkspaceCartFunnelsSchema = z.object({
-	// handle: z.string(),
-	search: z.string().optional(),
-	showArchived: z.boolean().optional(),
-	cursor: z.object({ id: z.string(), createdAt: z.coerce.date() }).optional(),
-	limit: z.coerce.number().min(1).max(100).optional().default(20),
-});
+export const cartFunnelFilterParamsSchema = commonFiltersSchema;
+export const selectWorkspaceCartFunnelsSchema =
+	commonFiltersSchema.merge(infiniteQuerySchema);
 
 // forms
-export const cartFunnelFilterParamsSchema = z.object({
-	search: z.string().optional(),
-	showArchived: z.boolean().optional(),
-});
 export const cartFunnelSearchParamsSchema = cartFunnelFilterParamsSchema.extend({
-	// selectedCartFunnelIdz: z.union([z.literal('all'), queryStringArraySchema]).optional(),
 	selectedCartFunnelIds: querySelectionSchema.optional(),
 });
 

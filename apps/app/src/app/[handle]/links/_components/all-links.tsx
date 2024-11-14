@@ -37,7 +37,7 @@ export function AllLinks() {
 				selectionMode='multiple'
 				selectionBehavior='replace'
 				// links
-				items={links}
+				items={links.map(link => ({ ...link, key: link.id, linkKey: link.key }))}
 				selectedKeys={linkSelection}
 				setSelectedKeys={setLinkSelection}
 				onAction={() => {
@@ -54,7 +54,7 @@ export function AllLinks() {
 					/>
 				)}
 			>
-				{link => <LinkCard link={link} />}
+				{link => <LinkCard key={link.id} link={link} />}
 			</GridList>
 		</>
 	);
@@ -63,7 +63,7 @@ export function AllLinks() {
 function LinkCard({
 	link,
 }: {
-	link: AppRouterOutputs['link']['byWorkspace']['links'][0];
+	link: AppRouterOutputs['link']['byWorkspace']['links'][0] & { linkKey: string };
 }) {
 	const { setShowUpdateLinkModal, setShowArchiveLinkModal, setShowDeleteLinkModal } =
 		useLinkContext();
@@ -90,13 +90,13 @@ function LinkCard({
 
 				<div className='flex flex-col items-start gap-1'>
 					<div className='flex flex-row items-center gap-2'>
-						<a href={`https://${link.domain}/${link.key}`}>
+						<a href={`https://${link.domain}/${link.linkKey}`}>
 							<Text
 								variant='md/semibold'
 								className='text-blue-800'
-							>{`${link.domain}/${link.key}`}</Text>
+							>{`${link.domain}/${link.linkKey}`}</Text>
 						</a>
-						<CopyButton text={`https://${link.domain}/${link.key}`} />
+						<CopyButton text={`https://${link.domain}/${link.linkKey}`} />
 					</div>
 
 					<a href={link.url} target='_blank' rel='noreferrer'>

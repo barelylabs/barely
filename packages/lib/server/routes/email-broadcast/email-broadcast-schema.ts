@@ -7,6 +7,7 @@ import {
 	querySelectionSchema,
 	queryStringEnumArraySchema,
 } from '../../../utils/zod-helpers';
+import { commonFiltersSchema, infiniteQuerySchema } from '../../common-filters';
 import { EmailBroadcasts } from './email-broadcast.sql';
 
 export const insertEmailBroadcastSchema = createInsertSchema(EmailBroadcasts);
@@ -33,8 +34,7 @@ export const sendEmailBroadcastSchema = z.object({
 	scheduledAt: z.date().optional(),
 });
 
-export const emailBroadcastFilterParamsSchema = z.object({
-	search: z.string().optional(),
+export const emailBroadcastFilterParamsSchema = commonFiltersSchema.extend({
 	showStatuses: queryStringEnumArraySchema([
 		'draft',
 		'scheduled',
@@ -49,12 +49,4 @@ export const emailBroadcastSearchParamsSchema = emailBroadcastFilterParamsSchema
 });
 
 export const selectWorkspaceEmailBroadcastsSchema =
-	emailBroadcastSearchParamsSchema.extend({
-		limit: z.number().min(1).max(100).default(20),
-		cursor: z
-			.object({
-				id: z.string(),
-				createdAt: z.date(),
-			})
-			.optional(),
-	});
+	emailBroadcastSearchParamsSchema.merge(infiniteQuerySchema);

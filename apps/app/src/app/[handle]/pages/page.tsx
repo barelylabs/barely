@@ -9,6 +9,7 @@ import { ArchiveOrDeleteLandingPageModal } from '~/app/[handle]/pages/_component
 import { CreateLandingPageButton } from '~/app/[handle]/pages/_components/create-landing-page-button';
 import { CreateOrUpdateLandingPageModal } from '~/app/[handle]/pages/_components/create-or-update-landing-page-modal';
 import { LandingPageContextProvider } from '~/app/[handle]/pages/_components/landing-page-context';
+import { LandingPageFilters } from '~/app/[handle]/pages/_components/landing-page-filters';
 import { LandingPageHotkeys } from '~/app/[handle]/pages/_components/landing-page-hotkeys';
 
 export default function LandingPagesPage({
@@ -36,6 +37,7 @@ export default function LandingPagesPage({
 				button={<CreateLandingPageButton />}
 			/>
 
+			<LandingPageFilters />
 			<AllLandingPages />
 
 			<CreateOrUpdateLandingPageModal mode='create' />

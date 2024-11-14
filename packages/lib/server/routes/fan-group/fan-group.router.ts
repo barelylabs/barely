@@ -22,7 +22,7 @@ export const fanGroupRouter = createTRPCRouter({
 	byWorkspace: workspaceQueryProcedure
 		.input(selectWorkspaceFanGroupsSchema)
 		.query(async ({ input, ctx }) => {
-			const { limit, cursor, search, showArchived } = input;
+			const { limit, cursor, search, showArchived, showDeleted } = input;
 			const fanGroups = await ctx.db.http.query.FanGroups.findMany({
 				where: sqlAnd([
 					eq(FanGroups.workspaceId, ctx.workspace.id),
@@ -33,6 +33,7 @@ export const fanGroupRouter = createTRPCRouter({
 							and(eq(FanGroups.createdAt, cursor.createdAt), gt(FanGroups.id, cursor.id)),
 						),
 					showArchived ? undefined : isNull(FanGroups.archivedAt),
+					showDeleted ? undefined : isNull(FanGroups.deletedAt),
 				]),
 				orderBy: [desc(FanGroups.createdAt), asc(FanGroups.id)],
 				limit: limit + 1,

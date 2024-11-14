@@ -18,8 +18,6 @@ import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 import { linkSearchParamsSchema } from '@barely/lib/server/routes/link/link.schema';
 
-// import { wait } from '@barely/lib/utils/wait';
-
 interface LinkContext {
 	links: AppRouterOutputs['link']['byWorkspace']['links'];
 	linkSelection: Selection;

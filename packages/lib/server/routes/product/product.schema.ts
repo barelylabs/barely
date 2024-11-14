@@ -4,6 +4,7 @@ import { z } from 'zod';
 
 import type { SortableFile } from '../file/file.schema';
 import { querySelectionSchema } from '../../../utils/zod-helpers';
+import { commonFiltersSchema, infiniteQuerySchema } from '../../common-filters';
 import { Products } from './product.sql';
 
 const insertProductImagesSchema = z.array(
@@ -50,19 +51,11 @@ export type UpsertProduct = z.infer<typeof upsertProductSchema>;
 export type UpdateProduct = z.infer<typeof updateProductSchema>;
 export type Product = InferSelectModel<typeof Products>;
 
-export const selectWorkspaceProductsSchema = z.object({
-	// handle: z.string(),
-	search: z.string().optional(),
-	showArchived: z.boolean().optional(),
-	cursor: z.object({ id: z.string(), createdAt: z.coerce.date() }).optional(),
-	limit: z.coerce.number().min(1).max(100).optional().default(20),
-});
+export const selectWorkspaceProductsSchema =
+	commonFiltersSchema.merge(infiniteQuerySchema);
 
 // forms
-export const productFilterParamsSchema = z.object({
-	search: z.string().optional(),
-	showArchived: z.boolean().optional(),
-});
+export const productFilterParamsSchema = commonFiltersSchema;
 export const productSearchParamsSchema = productFilterParamsSchema.extend({
 	selectedProductIds: querySelectionSchema.optional(),
 });

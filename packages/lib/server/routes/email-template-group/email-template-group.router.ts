@@ -1,4 +1,16 @@
-import { and, asc, desc, eq, gt, inArray, lt, notInArray, or, sql } from 'drizzle-orm';
+import {
+	and,
+	asc,
+	desc,
+	eq,
+	gt,
+	inArray,
+	isNull,
+	lt,
+	notInArray,
+	or,
+	sql,
+} from 'drizzle-orm';
 import { z } from 'zod';
 
 import { newId } from '../../../utils/id';
@@ -23,7 +35,7 @@ export const emailTemplateGroupRouter = createTRPCRouter({
 	byWorkspace: workspaceQueryProcedure
 		.input(selectWorkspaceEmailTemplateGroupsSchema)
 		.query(async ({ input, ctx }) => {
-			const { limit, cursor, search } = input;
+			const { limit, cursor, search, showArchived, showDeleted } = input;
 			const emailTemplateGroups = await ctx.db.http.query.EmailTemplateGroups.findMany({
 				where: sqlAnd([
 					eq(EmailTemplateGroups.workspaceId, ctx.workspace.id),
@@ -36,6 +48,8 @@ export const emailTemplateGroupRouter = createTRPCRouter({
 								gt(EmailTemplateGroups.id, cursor.id),
 							),
 						),
+					showArchived ? undefined : isNull(EmailTemplateGroups.archivedAt),
+					showDeleted ? undefined : isNull(EmailTemplateGroups.deletedAt),
 				]),
 				orderBy: [desc(EmailTemplateGroups.createdAt), asc(EmailTemplateGroups.id)],
 				limit: limit + 1,

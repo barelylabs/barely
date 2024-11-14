@@ -9,6 +9,7 @@ import { ArchiveOrDeleteFanModal } from '~/app/[handle]/fans/_components/archive
 import { CreateFanButton } from '~/app/[handle]/fans/_components/create-fan-button';
 import { CreateOrUpdateFanModal } from '~/app/[handle]/fans/_components/create-or-update-fan-modal';
 import { FanContextProvider } from '~/app/[handle]/fans/_components/fan-context';
+import { FanFilters } from '~/app/[handle]/fans/_components/fan-filters';
 import { FanHotkeys } from '~/app/[handle]/fans/_components/fan-hotkeys';
 import {
 	ImportFansButton,
@@ -44,6 +45,7 @@ export default function FansPage({
 					</div>
 				}
 			/>
+			<FanFilters />
 			<AllFans />
 
 			<CreateOrUpdateFanModal mode='create' />
