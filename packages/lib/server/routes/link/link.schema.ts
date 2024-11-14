@@ -2,9 +2,9 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
 import type { AnalyticsEndpoint } from '../analytics-endpoint/analytics-endpoint-schema';
+import { infiniteQuerySchema } from '../../../utils/filters';
 import { isValidUrl } from '../../../utils/link';
 import { queryBooleanSchema, querySelectionSchema } from '../../../utils/zod-helpers';
-import { infiniteQuerySchema } from '../../common-filters';
 import { Links } from './link.sql';
 
 export const insertLinkSchema = createInsertSchema(Links, {

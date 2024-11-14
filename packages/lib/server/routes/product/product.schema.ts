@@ -3,8 +3,8 @@ import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
 import type { SortableFile } from '../file/file.schema';
+import { commonFiltersSchema, infiniteQuerySchema } from '../../../utils/filters';
 import { querySelectionSchema } from '../../../utils/zod-helpers';
-import { commonFiltersSchema, infiniteQuerySchema } from '../../common-filters';
 import { Products } from './product.sql';
 
 const insertProductImagesSchema = z.array(

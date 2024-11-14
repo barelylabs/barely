@@ -4,8 +4,8 @@ import { z } from 'zod';
 
 import type { EmailAddress } from '../email-address/email-address.schema';
 import type { EmailDomain } from '../email-domain/email-domain.schema';
+import { commonFiltersSchema, infiniteQuerySchema } from '../../../utils/filters';
 import { queryBooleanSchema, querySelectionSchema } from '../../../utils/zod-helpers';
-import { commonFiltersSchema, infiniteQuerySchema } from '../../common-filters';
 import { EmailTemplates } from './email-template.sql';
 
 export const insertEmailTemplateSchema = createInsertSchema(EmailTemplates, {

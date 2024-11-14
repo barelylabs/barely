@@ -3,11 +3,11 @@ import type { InferSelectModel } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
+import { commonFiltersSchema, infiniteQuerySchema } from '../../../utils/filters';
 import {
 	querySelectionSchema,
 	queryStringEnumArraySchema,
 } from '../../../utils/zod-helpers';
-import { commonFiltersSchema, infiniteQuerySchema } from '../../common-filters';
 import { EmailBroadcasts } from './email-broadcast.sql';
 
 export const insertEmailBroadcastSchema = createInsertSchema(EmailBroadcasts);

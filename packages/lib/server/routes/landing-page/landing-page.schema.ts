@@ -2,8 +2,8 @@ import type { InferSelectModel } from 'drizzle-orm';
 import type { z } from 'zod';
 import { createInsertSchema } from 'drizzle-zod';
 
+import { commonFiltersSchema, infiniteQuerySchema } from '../../../utils/filters';
 import { querySelectionSchema } from '../../../utils/zod-helpers';
-import { commonFiltersSchema, infiniteQuerySchema } from '../../common-filters';
 import { LandingPages } from './landing-page.sql';
 
 export const insertLandingPageSchema = createInsertSchema(LandingPages, {

@@ -2,11 +2,11 @@ import type { InferSelectModel } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
+import { commonFiltersSchema, infiniteQuerySchema } from '../../../utils/filters';
 import {
 	optionalString_EmptyToUndefined,
 	querySelectionSchema,
 } from '../../../utils/zod-helpers';
-import { commonFiltersSchema, infiniteQuerySchema } from '../../common-filters';
 import { FanGroupConditions, FanGroups } from './fan-group.sql';
 
 // FanGroupConditions

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { queryBooleanSchema } from '../utils/zod-helpers';
+import { queryBooleanSchema } from './zod-helpers';
 
 export const commonFiltersSchema = z.object({
 	search: z.string().optional(),

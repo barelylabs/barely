@@ -2,8 +2,8 @@ import type { InferSelectModel } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
+import { commonFiltersSchema, infiniteQuerySchema } from '../../../utils/filters';
 import { querySelectionSchema } from '../../../utils/zod-helpers';
-import { commonFiltersSchema, infiniteQuerySchema } from '../../common-filters';
 import { insertEmailTemplateSchema } from '../email-template/email-template.schema';
 import { EmailTemplateGroups } from '../email-template/email-template.sql';
 
