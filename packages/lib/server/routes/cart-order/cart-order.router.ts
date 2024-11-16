@@ -44,6 +44,13 @@ export const cartOrderRouter = createTRPCRouter({
 				});
 
 				searchFanIds = fans.map(f => f.id);
+
+				if (searchFanIds.length === 0) {
+					return {
+						cartOrders: [],
+						nextCursor: undefined,
+					};
+				}
 			}
 
 			const orders = await ctx.db.http.query.Carts.findMany({
