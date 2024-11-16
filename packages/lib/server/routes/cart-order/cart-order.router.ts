@@ -1,6 +1,6 @@
 import { sendEmail } from '@barely/email';
 import ShippingUpdateEmailTemplate from '@barely/email/src/templates/cart/shipping-update';
-import { and, asc, eq, gt, inArray, isNotNull, isNull, like, ne, or } from 'drizzle-orm';
+import { and, asc, eq, gt, ilike, inArray, isNotNull, isNull, ne, or } from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { ApparelSize } from '../product/product.constants';
@@ -36,9 +36,9 @@ export const cartOrderRouter = createTRPCRouter({
 					where: and(
 						eq(Fans.workspaceId, ctx.workspace.id),
 						or(
-							like(Fans.fullName, `%${search}%`),
-							like(Fans.email, `%${search}%`),
-							like(Fans.shippingAddressLine1, `%${search}%`),
+							ilike(Fans.fullName, `%${search}%`),
+							ilike(Fans.email, `%${search}%`),
+							ilike(Fans.shippingAddressLine1, `%${search}%`),
 						),
 					),
 				});
