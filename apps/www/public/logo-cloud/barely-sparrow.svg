@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 532.37 146.8">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #231f20;
+      }
+
+      .cls-2 {
+        font-size: 69.02px;
+      }
+
+      .cls-3 {
+        font-family: HelveticaNeue-Light, 'Helvetica Neue';
+        font-weight: 300;
+      }
+
+      .cls-4 {
+        fill: #fff;
+      }
+
+      .cls-5 {
+        font-family: HelveticaNeue-Medium, 'Helvetica Neue';
+        font-weight: 500;
+      }
+
+      .cls-6 {
+        letter-spacing: 0em;
+      }
+
+      .cls-7 {
+        letter-spacing: -.07em;
+      }
+
+      .cls-8 {
+        letter-spacing: -.11em;
+      }
+    </style>
+  </defs>
+  <g>
+    <circle class="cls-1" cx="73.4" cy="73.4" r="73.4"/>
+    <path class="cls-4" d="M116.2,43.4c1.8-2.1,4.2-4,5.5-6.4h-8.9c-4.8-5.6-10-7.5-15.3-7-2.6.2-5.2,1-7.8,2.2-15.4,7.3-24.7,22.9-34.8,35.8-9.4,12.1-32.6,28.7-32.6,28.7l-2.5,1.8s4.2,11.9,21.7,21l29.3-40.5-9.1,5.5-.5-16.1h0v-2.3c.2-.5.5-.9.8-1.2h0c1.1-1.2,3-1.4,5.1-.3l27.8,14.9c1.5.8,2.3,1.8,2.6,2.9v1.2c-.2,1.1-1,2.2-2.4,3.1l-25.1,14.9c1.2-.3,2.7-.5,3.7-.7,3.2-.6,6.5-1.4,9.7-2.3,6.1-1.7,12.5-4,17.8-7.6,7.2-4.9,12.3-12.7,14.3-21.1.6-2.7.9-5.5.9-8.2s-.4-5.8-1.2-8.7c-.9-3.4-1.7-6.8.8-9.8v.2h.2ZM98.4,45.2c-2.3,0-4.1-1.8-4.1-4.1s1.8-4.1,4.1-4.1,4.1,1.8,4.1,4.1-1.8,4.1-4.1,4.1Z"/>
+  </g>
+  <text class="cls-2" transform="translate(194.64 62.93)"><tspan class="cls-5"><tspan x="0" y="0">BARE</tspan><tspan class="cls-8" x="186.71" y="0">L</tspan><tspan x="218.67" y="0">Y </tspan></tspan><tspan class="cls-3"><tspan x="0" y="69.12">S</tspan><tspan class="cls-7" x="43.48" y="69.12">P</tspan><tspan class="cls-6" x="81.86" y="69.12">ARROW</tspan></tspan></text>
+</svg>

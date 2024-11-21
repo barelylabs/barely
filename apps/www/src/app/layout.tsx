@@ -1,19 +1,21 @@
-import './styles/globals.css';
+import localFont from 'next/font/local';
+
+// import '@/styles/tailwind.css'
+import '../styles/globals.css';
 
 import type { Metadata } from 'next';
 import { Inter as FontSans } from 'next/font/google';
-import localFont from 'next/font/local';
 import { cn } from '@barely/lib/utils/cn';
 
-import { TailwindIndicator } from '@barely/ui/components/tailwind-indicator';
-import { Container } from '@barely/ui/elements/container';
-
-import Footer from '~/app/components/footer';
-import { Header } from '~/app/components/header';
-import Providers from '~/app/providers';
+export const metadata: Metadata = {
+	title: {
+		template: '%s - barely.io',
+		default: 'barely.io :: build your fanbase and music business',
+	},
+};
 
 const fontHeading = localFont({
-	src: '../assets/fonts/CalSans-SemiBold.woff2',
+	src: '../fonts/CalSans-SemiBold.woff2',
 	variable: '--font-heading',
 });
 
@@ -22,48 +24,33 @@ const fontSans = FontSans({
 	variable: '--font-sans',
 });
 
-export const metadata: Metadata = {
-	title: 'barely.io',
-	icons: {
-		icon: [
-			{ url: '/static/favicon-32x32', sizes: '32x32' },
-			{ url: '/static/favicon-16x16', sizes: '16x16' },
-		],
-		apple: '/static/apple-touch-icon.png',
-		other: [
-			{
-				rel: 'mask-icon',
-				url: '/static/safari-pinned-tab.svg',
-			},
-		],
-	},
-};
-
-interface RootLayoutProps {
+export default function RootLayout({
+	children,
+}: Readonly<{
 	children: React.ReactNode;
-}
-
-export default function RootLayout({ children }: RootLayoutProps) {
+}>) {
 	return (
-		<html lang='en' suppressHydrationWarning>
+		<html lang='en'>
+			<head>
+				<link
+					rel='stylesheet'
+					href='https://api.fontshare.com/css?f%5B%5D=switzer@400,500,600,700&amp;display=swap'
+				/>
+				{/* <link
+					rel='alternate'
+					type='application/rss+xml'
+					title='The Radiant Blog'
+					href='/blog/feed.xml'
+				/> */}
+			</head>
 			<body
 				className={cn(
-					'min-h-screen w-full bg-background font-sans text-primary antialiased',
+					'font-sans text-gray-950 antialiased',
 					fontHeading.variable,
 					fontSans.variable,
 				)}
 			>
-				<Providers>
-					<Header />
-
-					<Container className='mx-auto max-w-full px-6 py-6 md:max-w-6xl'>
-						{children}
-					</Container>
-
-					<Footer />
-					{/* <Toaster /> */}
-					<TailwindIndicator />
-				</Providers>
+				{children}
 			</body>
 		</html>
 	);

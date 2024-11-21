@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1405.8 348.4">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+      }
+
+      .cls-2 {
+        font-size: 103.8px;
+      }
+
+      .cls-2, .cls-3 {
+        font-family: CalSans-SemiBold, 'Cal Sans';
+        font-weight: 600;
+      }
+
+      .cls-4 {
+        fill: #2b8fce;
+      }
+
+      .cls-5 {
+        fill: #f89b49;
+      }
+
+      .cls-3 {
+        font-size: 323.3px;
+      }
+
+      .cls-6 {
+        fill: #ea0d80;
+      }
+    </style>
+  </defs>
+  <!-- Generator: Adobe Illustrator 28.7.1, SVG Export Plug-In . SVG Version: 1.2.0 Build 142)  -->
+  <g>
+    <g id="Layer_1">
+      <circle class="cls-6" cx="197.6" cy="212.7" r="70.8"/>
+      <line class="cls-1" x1="36.1" y1="252.5" x2="131.9" y2="36.1"/>
+      <path class="cls-4" d="M35.5,283.8c-4.8,0-9.7-1-14.3-3-17.9-7.9-26-28.9-18.1-46.8L97.3,21.1c7.9-17.9,28.9-26,46.8-18.1,17.9,7.9,26,28.9,18.1,46.8l-94.2,212.8c-5.9,13.2-18.8,21.1-32.5,21.1h0Z"/>
+      <circle class="cls-5" cx="197.6" cy="212.7" r="28.4"/>
+      <text class="cls-3" transform="translate(377.3 277.5)"><tspan x="0" y="0">barely</tspan></text>
+      <text class="cls-2" transform="translate(1300.8 283.8)"><tspan x="0" y="0">.io</tspan></text>
+    </g>
+  </g>
+</svg>

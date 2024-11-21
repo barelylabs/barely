@@ -62,7 +62,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
 						{children}
 					</div>
 				</Providers>
-				<Toaster />
+				
 				<TailwindIndicator />
 				{/* <FocusDebugger /> */}
 			</body>
