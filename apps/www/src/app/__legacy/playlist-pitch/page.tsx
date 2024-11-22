@@ -1,5 +1,8 @@
-import { Hero } from '~/app/legacy/components/hero';
-import { GetStartedToday, LetsGetStarted } from '~/app/legacy/playlist-pitch/get-started';
+import { Hero } from '~/app/__legacy/components/hero';
+import {
+	GetStartedToday,
+	LetsGetStarted,
+} from '~/app/__legacy/playlist-pitch/get-started';
 import { FAQ } from './faq';
 import { Features } from './high-quality-campaigns';
 import { HowItWorks } from './how-it-works';

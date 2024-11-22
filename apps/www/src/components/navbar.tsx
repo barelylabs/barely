@@ -4,8 +4,6 @@ import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react
 import { Bars2Icon } from '@heroicons/react/24/solid';
 import { motion } from 'framer-motion';
 
-import { Icon } from '@barely/ui/elements/icon';
-
 import { getAbsoluteUrl } from '@barely/utils/url';
 
 import { Link } from './link';

@@ -8,9 +8,9 @@ import { cn } from '@barely/lib/utils/cn';
 import { TailwindIndicator } from '@barely/ui/components/tailwind-indicator';
 import { Container } from '@barely/ui/elements/container';
 
-import Footer from '~/app/legacy/components/footer';
-import { Header } from '~/app/legacy/components/header';
-import Providers from '~/app/legacy/providers';
+import Footer from '~/app/__legacy/components/footer';
+import { Header } from '~/app/__legacy/components/header';
+import Providers from '~/app/__legacy/providers';
 
 const fontHeading = localFont({
 	src: '../assets/fonts/CalSans-SemiBold.woff2',

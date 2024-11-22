@@ -12,6 +12,19 @@ export const metadata: Metadata = {
 		template: '%s - barely.io',
 		default: 'barely.io :: build your fanbase and music business',
 	},
+	icons: {
+		icon: [
+			{ url: '/_static/favicons/favicon-32x32.png', sizes: '32x32' },
+			{ url: '/_static/favicons/favicon-16x16.png', sizes: '16x16' },
+		],
+		apple: '/_static/favicons/apple-touch-icon.png',
+		other: [
+			{
+				rel: 'mask-icon',
+				url: '/_static/favicons/safari-pinned-tab.svg',
+			},
+		],
+	},
 };
 
 const fontHeading = localFont({

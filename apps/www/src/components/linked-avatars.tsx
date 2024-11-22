@@ -1,6 +1,7 @@
 'use client';
 
-import { CheckIcon } from '@heroicons/react/16/solid';
+import Image from 'next/image';
+// import { CheckIcon } from '@heroicons/react/16/solid';
 import { clsx } from 'clsx';
 import { motion } from 'framer-motion';
 
@@ -46,24 +47,24 @@ function Rings() {
 	);
 }
 
-function Checkmark() {
-	return (
-		<div className='z-10 col-start-1 row-start-1 flex items-center justify-center'>
-			<motion.div
-				variants={{
-					idle: { scale: 1 },
-					active: {
-						scale: [1, 1.15, 1],
-						transition: { ...transition, duration: 0.75 },
-					},
-				}}
-				className='flex size-6 items-center justify-center rounded-full bg-gradient-to-t from-green-500 to-green-300 shadow'
-			>
-				<CheckIcon className='size-4 fill-white' />
-			</motion.div>
-		</div>
-	);
-}
+// function Checkmark() {
+// 	return (
+// 		<div className='z-10 col-start-1 row-start-1 flex items-center justify-center'>
+// 			<motion.div
+// 				variants={{
+// 					idle: { scale: 1 },
+// 					active: {
+// 						scale: [1, 1.15, 1],
+// 						transition: { ...transition, duration: 0.75 },
+// 					},
+// 				}}
+// 				className='flex size-6 items-center justify-center rounded-full bg-gradient-to-t from-green-500 to-green-300 shadow'
+// 			>
+// 				<CheckIcon className='size-4 fill-white' />
+// 			</motion.div>
+// 		</div>
+// 	);
+// }
 
 function Heart() {
 	return (
@@ -88,15 +89,19 @@ function Photos() {
 	return (
 		<div className='z-10 col-start-1 row-start-1'>
 			<div className='mx-auto flex size-full max-w-md items-center justify-around'>
-				<img
+				<Image
 					alt=''
-					src='/linked-avatars/customer.jpg'
+					src='/linked-avatars/proper-youth.jpg'
 					className='size-20 rounded-full bg-white/15 ring-4 ring-white/10'
+					width={80}
+					height={80}
 				/>
-				<img
+				<Image
 					alt=''
 					src='/linked-avatars/manager.jpg'
 					className='size-20 rounded-full bg-white/15 ring-4 ring-white/10'
+					width={80}
+					height={80}
 				/>
 			</div>
 		</div>
