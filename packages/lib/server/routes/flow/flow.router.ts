@@ -16,7 +16,7 @@ import {
 } from '../../api/trpc';
 import { EmailTemplates } from '../email-template/email-template.sql';
 import { selectWorkspaceFlowsSchema, updateFlowAndNodesSchema } from './flow.schema';
-import { Flow_Actions, Flow_Triggers, Flows } from './flow.sql';
+import { Flow_Triggers, FlowActions, Flows } from './flow.sql';
 import {
 	getActionNodeFromFlowAction,
 	getInsertableFlowActionsFromFlowActions,
@@ -157,7 +157,7 @@ export const flowRouter = createTRPCRouter({
 			});
 
 			// create an empty action node
-			await ctx.db.pool.insert(Flow_Actions).values({
+			await ctx.db.pool.insert(FlowActions).values({
 				id: newFlowActionId,
 				flowId: newFlowId,
 				type: 'empty',
@@ -234,24 +234,24 @@ export const flowRouter = createTRPCRouter({
 					const { id: actionId, ...actionData } = action;
 
 					await ctx.db.pool
-						.insert(Flow_Actions)
+						.insert(FlowActions)
 						.values({
 							id: actionId,
 							...actionData,
 						})
 						.onConflictDoUpdate({
-							target: [Flow_Actions.flowId, Flow_Actions.id],
+							target: [FlowActions.flowId, FlowActions.id],
 							set: actionData,
 						});
 				}),
 			);
 
 			// remove the actions that are no longer in the list
-			await ctx.db.pool.delete(Flow_Actions).where(
+			await ctx.db.pool.delete(FlowActions).where(
 				and(
-					eq(Flow_Actions.flowId, flow.id),
+					eq(FlowActions.flowId, flow.id),
 					notInArray(
-						Flow_Actions.id,
+						FlowActions.id,
 						actions.map(a => a.id),
 					),
 				),

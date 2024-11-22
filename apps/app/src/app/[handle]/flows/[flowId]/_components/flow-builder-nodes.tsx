@@ -14,6 +14,7 @@ import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 import { MERCH_TYPES } from '@barely/lib/server/routes/product/product.constants';
 import { cn } from '@barely/lib/utils/cn';
+import { formatCentsToDollars } from '@barely/lib/utils/currency';
 import { Handle, Position } from '@xyflow/react';
 import { useShallow } from 'zustand/react/shallow';
 
@@ -343,30 +344,11 @@ export function SendEmailNodeType({
 				size='md'
 				className='data-[state=checked]:bg-blue-400'
 			/>
+			<div className='flex flex-row items-center gap-1 text-muted-foreground'>
+				<Icon.value className='h-2.5 w-2.5' />
+				<Text variant='xs/normal'>{formatCentsToDollars(data.value ?? 0)}</Text>
+			</div>
 		</NodeDiv>
-		// <div className='relative flex flex-col items-center justify-center overflow-visible rounded border border-border bg-background p-2 px-8 pb-4'>
-		// 	<TargetHandle />
-		// 	<div className='flex flex-col items-center gap-2'>
-		// 		<div className='flex flex-row items-center gap-1'>
-		// 			<Icon.email className='h-[13px] w-[13px]' />
-		// 			<Text variant='md/bold'>Send Email</Text>
-		// 		</div>
-		// 		<Text variant='sm/bold'>{data.subject}</Text>
-		// 	</div>
-		// 	<Button
-		// 		look='minimal'
-		// 		size='2xs'
-		// 		variant='icon'
-		// 		startIcon='edit'
-		// 		onClick={() => {
-		// 			setCurrentNode(id);
-		// 			setShowEmailModal(true);
-		// 		}}
-		// 		className='absolute right-1 top-1'
-		// 	/>
-		// 	<Handle type='source' position={Position.Bottom} className='opacity-0' />
-		// 	<div className='absolute -bottom-1 -left-[1.5px] h-1.5 w-[calc(100%+3px)] rounded-b bg-red-500' />
-		// </div>
 	);
 }
 

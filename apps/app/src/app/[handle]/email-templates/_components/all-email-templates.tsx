@@ -1,6 +1,7 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/router';
+import { formatCentsToDollars } from '@barely/lib/utils/currency';
 
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { Button } from '@barely/ui/elements/button';
@@ -79,6 +80,8 @@ function EmailTemplateCard({
 	const { setShowUpdateEmailTemplateModal, setShowDeleteEmailTemplateModal } =
 		useEmailTemplateContext();
 
+	const { name, subject, opens, clicks, value } = emailTemplate;
+
 	return (
 		<GridListCard
 			id={emailTemplate.id}
@@ -86,13 +89,25 @@ function EmailTemplateCard({
 			textValue={emailTemplate.name}
 			setShowUpdateModal={setShowUpdateEmailTemplateModal}
 			setShowDeleteModal={setShowDeleteEmailTemplateModal}
-		>
-			<div className='flex flex-grow flex-row items-center gap-4'>
-				<div className='flex flex-col gap-1'>
-					<Text variant='md/medium'>{emailTemplate.name}</Text>
-					<Text variant='sm/normal'>{emailTemplate.subject}</Text>
-				</div>
-			</div>
-		</GridListCard>
+			title={name}
+			subtitle={subject}
+			stats={[
+				{
+					icon: 'view',
+					name: 'opens',
+					value: opens,
+				},
+				{
+					icon: 'click',
+					name: 'clicks',
+					value: clicks,
+				},
+				{
+					icon: 'value',
+					name: 'value',
+					value: formatCentsToDollars(value ?? 0),
+				},
+			]}
+		/>
 	);
 }

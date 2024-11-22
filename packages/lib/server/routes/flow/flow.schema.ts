@@ -4,13 +4,7 @@ import { z } from 'zod';
 
 import { querySelectionSchema } from '../../../utils/zod-helpers';
 import { insertEmailTemplateSchema } from '../email-template/email-template.schema';
-import {
-	Flow_Actions,
-	Flow_Runs,
-	Flow_Triggers,
-	FlowRunActions,
-	Flows,
-} from './flow.sql';
+import { Flow_Runs, Flow_Triggers, FlowActions, FlowRunActions, Flows } from './flow.sql';
 
 export const insertFlowSchema = createInsertSchema(Flows);
 export const createFlowSchema = insertFlowSchema
@@ -46,10 +40,10 @@ export const selectWorkspaceFlowsSchema = flowFilterParamsSchema.extend({
 });
 
 // Flow Action
-export const insertFlowActionSchema_notStrict = createInsertSchema(Flow_Actions);
+export const insertFlowActionSchema_notStrict = createInsertSchema(FlowActions);
 
 export type InsertFlowAction_NotStrict = z.infer<typeof insertFlowActionSchema_notStrict>;
-export type FlowAction = InferSelectModel<typeof Flow_Actions>;
+export type FlowAction = InferSelectModel<typeof FlowActions>;
 
 // Flow Trigger
 export const insertFlowTriggerSchema = createInsertSchema(Flow_Triggers);

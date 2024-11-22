@@ -18,6 +18,7 @@ import {
 	GridList as GridListPrimitive,
 } from 'react-aria-components';
 
+import type { IconKey } from './icon';
 import type { ImgProps } from './img';
 import { Button, buttonVariants } from './button';
 import { Command, CommandItem, CommandList, CommandShortcut } from './command';
@@ -137,11 +138,17 @@ interface GridListCardProps
 	img?: Omit<ImgProps, 'width' | 'height'> | null;
 	title?: string;
 	subtitle?: string;
+	description?: ReactNode;
 	quickActions?: {
 		goToHref?: string;
 		copyText?: string;
 	};
 	statsRight?: ReactNode;
+	stats?: {
+		icon?: IconKey;
+		name: string;
+		value?: number | string | null;
+	}[];
 }
 
 export const GridListCard = React.forwardRef<
@@ -164,8 +171,10 @@ export const GridListCard = React.forwardRef<
 			img,
 			title,
 			subtitle,
+			description,
 			quickActions = {},
 			statsRight,
+			stats,
 			...props
 		},
 		ref,
@@ -197,7 +206,8 @@ export const GridListCard = React.forwardRef<
 		const { copyToClipboard } = useCopy();
 
 		const { goToHref, copyText } = quickActions;
-		const showTitleBlock = !!title || !!subtitle || !!goToHref || !!copyText;
+		const showTitleBlock =
+			!!title || !!subtitle || !!description || !!goToHref || !!copyText;
 
 		return (
 			<GridListItemPrimitive
@@ -233,6 +243,7 @@ export const GridListCard = React.forwardRef<
 											{subtitle && <Text variant='xs/normal'>{subtitle}</Text>}
 										</div>
 										<div className='flex flex-row gap-1'>
+											{description && <Text variant='2xs/normal'>{description}</Text>}
 											{goToHref && (
 												<Button
 													variant='icon'
@@ -259,7 +270,27 @@ export const GridListCard = React.forwardRef<
 								)}
 								<div className='flex flex-grow flex-row items-center justify-between gap-4'>
 									<>{children}</>
-									{statsRight && <div className='ml-auto mr-2'>{statsRight}</div>}
+									<div className='ml-auto mr-2'>
+										{stats && stats.length > 0 && (
+											<div className='items-left flex flex-col'>
+												{stats.map((stat, i) => {
+													const StatIcon = stat.icon ? Icon[stat.icon] : Icon.stat;
+													return (
+														<div
+															key={stat.name + i}
+															className='flex flex-row items-center gap-1'
+														>
+															<StatIcon className='h-2.5 w-2.5' />
+															<Text variant='xs/normal'>
+																{stat.name}: {stat.value ?? 0}
+															</Text>
+														</div>
+													);
+												})}
+											</div>
+										)}
+										{statsRight && <div className='ml-auto mr-2'>{statsRight}</div>}
+									</div>
 								</div>
 							</div>
 							{!disableContextMenu && atLeastOnePopoverAction && (

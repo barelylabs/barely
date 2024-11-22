@@ -32,6 +32,10 @@ export const EmailBroadcasts = pgTable('EmailBroadcasts', {
 	error: text('error'),
 	triggerRunId: text('triggerRunId'),
 
+	// stats
+	deliveries: integer('deliveries').default(0),
+	opens: integer('opens').default(0),
+	clicks: integer('clicks').default(0),
 	value: integer('value').default(0),
 });
 

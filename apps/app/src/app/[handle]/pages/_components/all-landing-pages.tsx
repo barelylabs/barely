@@ -1,10 +1,11 @@
 'use client';
 
 import type { LandingPage } from '@barely/lib/server/routes/landing-page/landing-page.schema';
+import { formatCentsToDollars } from '@barely/lib/utils/currency';
+import { getAbsoluteUrl } from '@barely/lib/utils/url';
 
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
-import { Text } from '@barely/ui/elements/typography';
 
 import { CreateLandingPageButton } from '~/app/[handle]/pages/_components/create-landing-page-button';
 import { useLandingPageContext } from '~/app/[handle]/pages/_components/landing-page-context';
@@ -59,6 +60,8 @@ function LandingPageCard({ landingPage }: { landingPage: LandingPage }) {
 		setShowDeleteLandingPageModal,
 	} = useLandingPageContext();
 
+	const href = getAbsoluteUrl('page', `${landingPage.handle}/${landingPage.key}`);
+
 	return (
 		<GridListCard
 			id={landingPage.id}
@@ -67,15 +70,34 @@ function LandingPageCard({ landingPage }: { landingPage: LandingPage }) {
 			setShowUpdateModal={setShowUpdateLandingPageModal}
 			setShowArchiveModal={setShowArchiveLandingPageModal}
 			setShowDeleteModal={setShowDeleteLandingPageModal}
-		>
-			<div className='flex flex-grow flex-row items-center gap-4'>
-				<div className='flex flex-col gap-1'>
-					<Text variant='md/medium'>{landingPage.name}</Text>
-					<Text variant='sm/normal' muted>
-						{landingPage.key}
-					</Text>
-				</div>
-			</div>
-		</GridListCard>
+			title={landingPage.name}
+			subtitle={landingPage.key}
+			quickActions={{
+				goToHref: href,
+				copyText: href,
+			}}
+			// statsRight={
+			// 	<div className='items-left flex flex-col'>
+			// 		<Text variant='xs/normal'>clicks: {landingPage.clicks}</Text>
+			// 	</div>
+			// }
+			stats={[
+				{
+					icon: 'view',
+					name: 'views',
+					value: landingPage.views,
+				},
+				{
+					icon: 'click',
+					name: 'clicks',
+					value: landingPage.clicks,
+				},
+				{
+					icon: 'value',
+					name: 'value',
+					value: formatCentsToDollars(landingPage.value ?? 0),
+				},
+			]}
+		/>
 	);
 }

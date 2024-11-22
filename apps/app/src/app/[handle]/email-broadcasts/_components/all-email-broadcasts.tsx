@@ -1,6 +1,7 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/router';
+import { formatCentsToDollars } from '@barely/lib/utils/currency';
 import { formatDate } from '@barely/lib/utils/format-date';
 
 // import { useWorkspace } from '@barely/lib/hooks/use-workspace';
@@ -9,6 +10,7 @@ import { formatDate } from '@barely/lib/utils/format-date';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { Button } from '@barely/ui/elements/button';
 import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
+import { Icon } from '@barely/ui/elements/icon';
 import { Text } from '@barely/ui/elements/typography';
 
 import { CreateEmailBroadcastButton } from './create-email-broadcast-button';
@@ -81,7 +83,17 @@ function EmailBroadcastCard({
 }: {
 	emailBroadcast: AppRouterOutputs['emailBroadcast']['byWorkspace']['emailBroadcasts'][number];
 }) {
-	const { id, status, sentAt, scheduledAt, emailTemplate } = emailBroadcast;
+	const {
+		id,
+		status,
+		sentAt,
+		scheduledAt,
+		emailTemplate,
+		value,
+		clicks,
+		opens,
+		deliveries,
+	} = emailBroadcast;
 
 	const { setShowUpdateEmailBroadcastModal } = useEmailBroadcastsContext();
 
@@ -91,21 +103,51 @@ function EmailBroadcastCard({
 			key={id}
 			textValue={emailTemplate.name}
 			setShowUpdateModal={setShowUpdateEmailBroadcastModal}
-		>
-			<div className='flex flex-grow flex-row items-center gap-4'>
-				<div className='flex flex-col gap-1'>
-					<Text variant='md/medium'>{emailTemplate.name}</Text>
-					<div className='flex flex-row items-center gap-2'>
-						<Text variant='sm/normal'>{status}</Text>
-						{status === 'sent' && sentAt && (
-							<Text variant='sm/normal'>@{formatDate(sentAt)}</Text>
-						)}
-						{status === 'scheduled' && scheduledAt && (
-							<Text variant='sm/normal'>@{formatDate(scheduledAt)}</Text>
-						)}
-					</div>
+			title={emailTemplate.name}
+			subtitle={emailTemplate.name}
+			description={
+				<div className='flex flex-row items-center gap-2'>
+					{/* <Text variant='sm/normal'>{status}</Text> */}
+					{status === 'sent' && sentAt && (
+						<>
+							<Icon.send className='h-2.5 w-2.5' />
+							<Text variant='xs/normal' className='text-muted-foreground'>
+								{formatDate(sentAt)}
+							</Text>
+						</>
+					)}
+					{status === 'scheduled' && scheduledAt && (
+						<>
+							<Icon.schedule className='h-3 w-3' />
+							<Text variant='xs/normal' className='text-muted-foreground'>
+								{formatDate(scheduledAt)}
+							</Text>
+						</>
+					)}
 				</div>
-			</div>
-		</GridListCard>
+			}
+			stats={[
+				{
+					icon: 'send',
+					name: 'deliveries',
+					value: deliveries,
+				},
+				{
+					icon: 'view',
+					name: 'opens',
+					value: opens,
+				},
+				{
+					icon: 'click',
+					name: 'clicks',
+					value: clicks,
+				},
+				{
+					icon: 'value',
+					name: 'value',
+					value: formatCentsToDollars(value ?? 0),
+				},
+			]}
+		/>
 	);
 }
