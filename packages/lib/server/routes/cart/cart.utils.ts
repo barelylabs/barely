@@ -128,7 +128,7 @@ export function getFeeAmountForCheckout({
 	const feePercentage =
 		typeof workspace.cartFeePercentageOverride === 'number' ?
 			workspace.cartFeePercentageOverride
-		:	WORKSPACE_PLANS.get(workspacePlan)?.cart.feePercentage ?? 0;
+		:	WORKSPACE_PLANS.get(workspacePlan)?.cartFeePercentage ?? 0;
 
 	return Math.round(amount * (feePercentage / 100));
 }

@@ -14,11 +14,11 @@ const config = {
 	transpilePackages: ['@barely/db', '@barely/config', '@barely/lib', '@barely/ui'],
 	redirects: async () => {
 		return [
-			{
-				source: '/',
-				destination: '/link',
-				permanent: false,
-			},
+			// {
+			// 	source: '/',
+			// 	destination: '/link',
+			// 	permanent: false,
+			// },
 		];
 	},
 };
