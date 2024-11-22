@@ -57,7 +57,7 @@ export const FlowsRelations = relations(Flows, ({ one, many }) => ({
 	}),
 
 	triggers: many(Flow_Triggers),
-	actions: many(Flow_Actions),
+	actions: many(FlowActions),
 }));
 
 /* FLOW TRIGGERS */
@@ -101,7 +101,7 @@ export const FlowTriggerRelations = relations(Flow_Triggers, ({ one }) => ({
 }));
 
 /* FLOW ACTIONS */
-export const Flow_Actions = pgTable(
+export const FlowActions = pgTable(
 	'Flow_Actions',
 	{
 		...timestamps,
@@ -134,6 +134,9 @@ export const Flow_Actions = pgTable(
 		mailchimpAudienceId: text('mailchimpAudienceId'),
 
 		// stats
+		deliveries: integer('deliveries').default(0),
+		opens: integer('opens').default(0),
+		clicks: integer('clicks').default(0),
 		value: integer('value').default(0),
 	},
 	table => ({
@@ -141,13 +144,13 @@ export const Flow_Actions = pgTable(
 	}),
 );
 
-export const FlowActionRelations = relations(Flow_Actions, ({ one }) => ({
+export const FlowActionRelations = relations(FlowActions, ({ one }) => ({
 	flow: one(Flows, {
-		fields: [Flow_Actions.flowId],
+		fields: [FlowActions.flowId],
 		references: [Flows.id],
 	}),
 	emailTemplate: one(EmailTemplates, {
-		fields: [Flow_Actions.emailTemplateId],
+		fields: [FlowActions.emailTemplateId],
 		references: [EmailTemplates.id],
 	}),
 }));
@@ -178,7 +181,7 @@ export const Flow_Runs = pgTable(
 	t => ({
 		actionFk: foreignKey({
 			columns: [t.flowId, t.currentActionNodeId],
-			foreignColumns: [Flow_Actions.flowId, Flow_Actions.id],
+			foreignColumns: [FlowActions.flowId, FlowActions.id],
 		}),
 		triggerFk: foreignKey({
 			columns: [t.flowId, t.triggerId],
@@ -200,9 +203,9 @@ export const FlowRunRelations = relations(Flow_Runs, ({ one, many }) => ({
 		fields: [Flow_Runs.triggerFanId],
 		references: [Fans.id],
 	}),
-	currentAction: one(Flow_Actions, {
+	currentAction: one(FlowActions, {
 		fields: [Flow_Runs.flowId, Flow_Runs.currentActionNodeId],
-		references: [Flow_Actions.flowId, Flow_Actions.id],
+		references: [FlowActions.flowId, FlowActions.id],
 	}),
 	actions: many(FlowRunActions),
 }));
@@ -238,7 +241,7 @@ export const FlowRunActions = pgTable(
 	t => ({
 		flowActionFk: foreignKey({
 			columns: [t.flowId, t.flowActionId],
-			foreignColumns: [Flow_Actions.flowId, Flow_Actions.id],
+			foreignColumns: [FlowActions.flowId, FlowActions.id],
 		}),
 	}),
 );
@@ -248,8 +251,8 @@ export const FlowRunActionRelations = relations(FlowRunActions, ({ one }) => ({
 		fields: [FlowRunActions.flowRunId],
 		references: [Flow_Runs.id],
 	}),
-	flowAction: one(Flow_Actions, {
+	flowAction: one(FlowActions, {
 		fields: [FlowRunActions.flowId, FlowRunActions.flowActionId],
-		references: [Flow_Actions.flowId, Flow_Actions.id],
+		references: [FlowActions.flowId, FlowActions.id],
 	}),
 }));

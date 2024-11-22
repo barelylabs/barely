@@ -798,6 +798,7 @@ async function handleSendEmailFromTemplateToFan({
 			fanId: fan.id,
 			status: 'failed',
 			sentAt: new Date(),
+			// flowActionId: action.id,
 			flowRunActionId,
 		});
 	} else {
@@ -813,6 +814,7 @@ async function handleSendEmailFromTemplateToFan({
 			fanId: fan.id,
 			status: 'sent',
 			sentAt: new Date(),
+			// flowActionId: action.id,
 			flowRunActionId,
 		});
 

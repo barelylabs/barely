@@ -19,6 +19,7 @@ export const EmailDeliveries = pgTable('EmailDeliveries', {
 		.references(() => EmailTemplates.id),
 
 	// where was this sent from?
+	// flowActionId: dbId('flowActionId').references(() => Flow_Actions.id),
 	flowRunActionId: dbId('flowRunActionId').references(() => FlowRunActions.id),
 	emailBroadcastId: dbId('emailBroadcastId').references(() => EmailBroadcasts.id),
 

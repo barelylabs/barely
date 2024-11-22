@@ -44,6 +44,9 @@ export const EmailTemplates = pgTable('EmailTemplates', {
 	subject: text('subject').notNull(),
 	body: text('body').notNull(),
 
+	// stats
+	opens: integer('opens').default(0),
+	clicks: integer('clicks').default(0),
 	value: integer('value').default(0),
 });
 

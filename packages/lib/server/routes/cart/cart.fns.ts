@@ -2,7 +2,7 @@ import type { ReceiptEmailProps } from '@barely/email/src/templates/cart/receipt
 import type { z } from 'zod';
 import { sendEmail } from '@barely/email';
 import ReceiptEmailTemplate from '@barely/email/src/templates/cart/receipt';
-import { and, count, eq, isNotNull, sql } from 'drizzle-orm';
+import { and, count, eq, isNotNull } from 'drizzle-orm';
 
 import type { VisitorInfo } from '../../../utils/middleware';
 import type { ShippingEstimateProps } from '../../shipping/shipengine.endpts';
@@ -16,6 +16,7 @@ import { isProduction } from '../../../utils/environment';
 import { newId } from '../../../utils/id';
 import { numToPaddedString } from '../../../utils/number';
 import { raise } from '../../../utils/raise';
+import { sqlIncrement } from '../../../utils/sql';
 import { dbHttp } from '../../db';
 // import { db } from '../../db';
 import { getShippingEstimates } from '../../shipping/shipengine.endpts';
@@ -23,6 +24,7 @@ import { stripe } from '../../stripe';
 import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
 import { EmailBroadcasts } from '../email-broadcast/email-broadcast.sql';
 import { EmailTemplates } from '../email-template/email-template.sql';
+import { FlowActions } from '../flow/flow.sql';
 import { LandingPages } from '../landing-page/landing-page.sql';
 import { MEDIAMAIL_TYPES, MERCH_DIMENSIONS } from '../product/product.constants';
 import { getPublicWorkspaceFromWorkspace } from '../workspace/workspace.schema';
@@ -451,7 +453,7 @@ export async function incrementAssetValuesOnCartPurchase(
 		await dbHttp
 			.update(EmailTemplates)
 			.set({
-				value: sql`${EmailTemplates.value} + ${incrementAmountInCents}`,
+				value: sqlIncrement(EmailTemplates.value, incrementAmountInCents),
 			})
 			.where(eq(EmailTemplates.id, cart.emailTemplateId));
 	}
@@ -459,15 +461,24 @@ export async function incrementAssetValuesOnCartPurchase(
 		await dbHttp
 			.update(EmailBroadcasts)
 			.set({
-				value: sql`${EmailBroadcasts.value} + ${incrementAmountInCents}`,
+				value: sqlIncrement(EmailBroadcasts.value, incrementAmountInCents),
 			})
 			.where(eq(EmailBroadcasts.id, cart.emailBroadcastId));
 	}
+	if (cart.flowActionId) {
+		await dbHttp
+			.update(FlowActions)
+			.set({
+				value: sqlIncrement(FlowActions.value, incrementAmountInCents),
+			})
+			.where(eq(FlowActions.id, cart.flowActionId));
+	}
+
 	if (cart.landingPageId) {
 		await dbHttp
 			.update(LandingPages)
 			.set({
-				value: sql`${LandingPages.value} + ${incrementAmountInCents}`,
+				value: sqlIncrement(LandingPages.value, incrementAmountInCents),
 			})
 			.where(eq(LandingPages.id, cart.landingPageId));
 	}
@@ -475,7 +486,7 @@ export async function incrementAssetValuesOnCartPurchase(
 		await dbHttp
 			.update(CartFunnels)
 			.set({
-				value: sql`${CartFunnels.value} + ${incrementAmountInCents}`,
+				value: sqlIncrement(CartFunnels.value, incrementAmountInCents),
 			})
 			.where(eq(CartFunnels.id, cart.cartFunnelId));
 	}

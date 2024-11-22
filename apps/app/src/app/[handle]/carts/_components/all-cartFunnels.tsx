@@ -1,6 +1,7 @@
 'use client';
 
 import type { CartFunnel } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
+import { formatCentsToDollars } from '@barely/lib/utils/currency';
 
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
@@ -58,7 +59,9 @@ function CartFunnelCard({ cartFunnel }: { cartFunnel: CartFunnel }) {
 		setShowDeleteCartFunnelModal: setShowDeleteCartFunnelModal,
 	} = useCartFunnelContext();
 
-	const href = `https://barelycart.com/${cartFunnel.handle}/${cartFunnel.key}`;
+	const { handle, key, value } = cartFunnel;
+
+	const href = `https://barelycart.com/${handle}/${key}`;
 
 	return (
 		<GridListCard
@@ -74,6 +77,13 @@ function CartFunnelCard({ cartFunnel }: { cartFunnel: CartFunnel }) {
 				goToHref: href,
 				copyText: href,
 			}}
-		></GridListCard>
+			stats={[
+				{
+					icon: 'value',
+					name: 'value',
+					value: formatCentsToDollars(value ?? 0),
+				},
+			]}
+		/>
 	);
 }

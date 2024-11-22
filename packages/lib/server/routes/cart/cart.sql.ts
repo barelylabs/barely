@@ -44,7 +44,7 @@ export const Carts = pgTable(
 			enum: CART_STAGES,
 		}),
 
-		/* landing page */
+		/* referers */
 		emailBroadcastId: dbId('emailBroadcastId'),
 		emailTemplateId: dbId('emailTemplateId'),
 		landingPageId: dbId('landingPageId'),
