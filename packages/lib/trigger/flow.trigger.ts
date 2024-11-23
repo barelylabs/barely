@@ -809,6 +809,7 @@ async function handleSendEmailFromTemplateToFan({
 
 		await getDbPool().insert(EmailDeliveries).values({
 			id: emailDeliveryId,
+			resendId: res.resendId,
 			workspaceId: workspaceId,
 			emailTemplateId: emailTemplate.id,
 			fanId: fan.id,

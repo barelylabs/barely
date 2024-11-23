@@ -286,6 +286,7 @@ async function handleSendEmailBatch({
 		.values(
 			res.emails.map(email => ({
 				id: email.emailDeliveryId,
+				resendId: email.resendId,
 				workspaceId: emailBroadcast.workspaceId,
 				emailTemplateId: emailTemplate.id,
 				fanId: email.fanId,
