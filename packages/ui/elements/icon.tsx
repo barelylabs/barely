@@ -45,6 +45,7 @@ import {
 	AlignLeft,
 	AlignRight,
 	Archive,
+	ArrowBigUp,
 	ArrowDown,
 	ArrowLeft,
 	ArrowLeftRight,
@@ -449,6 +450,7 @@ export const Icon = {
 	settings: Settings,
 	share: Share2,
 	shield: ShieldCheck,
+	shift: ArrowBigUp,
 	shuffle: Shuffle,
 	// slash:
 	skipBackward: SkipBack,
