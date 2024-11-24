@@ -1,5 +1,6 @@
 import type { IconKey } from '@barely/ui/elements/icon';
 import { useCallback, useEffect, useRef } from 'react';
+import { cn } from '@barely/lib/utils/cn';
 
 import { Button } from '@barely/ui/elements/button';
 import { Icon } from '@barely/ui/elements/icon';
@@ -8,14 +9,38 @@ import { Label } from '@barely/ui/elements/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/elements/popover';
 import { Switch } from '@barely/ui/elements/switch';
 
-function DisplayShortcutIcon({ shortcut, icon }: { shortcut: string; icon: IconKey }) {
+function DisplayShortcutIcon({
+	shortcut,
+	icon,
+}: {
+	shortcut: string | string[];
+	icon: IconKey;
+}) {
 	const ShortcutIcon = Icon[icon];
 	return (
-		<div className='flex h-4 w-4 flex-row items-center justify-center gap-2'>
+		<div className='flex h-4 w-fit flex-row items-center justify-center gap-1'>
 			<ShortcutIcon className='h-[14px] w-[14px] group-hover:hidden' />
-			<kbd className='hidden rounded-sm border border-border bg-muted px-1 py-[1px] text-xs group-hover:block'>
-				{shortcut}
-			</kbd>
+			{Array.isArray(shortcut) ?
+				shortcut.map((s, i) => (
+					<div className='hidden flex-row items-center gap-1 group-hover:flex' key={i}>
+						<kbd
+							className={cn(
+								'inline-flex h-3.5 min-w-[14px] items-center justify-center rounded-sm border border-border bg-muted px-1 py-[1px]',
+								s === 'Shift' && 'px-[2px]',
+							)}
+							key={s}
+						>
+							{s === 'Shift' ?
+								<Icon.shift className='h-3 w-2.5 p-0' />
+							:	<span className='text-2xs leading-none'>{s}</span>}
+						</kbd>
+						{i < shortcut.length - 1 && <span className='text-2xs'>+</span>}
+					</div>
+				))
+			:	<kbd className='hidden h-3.5 min-w-[14px] items-center justify-center rounded-sm border border-border bg-muted px-1 py-[1px] text-xs group-hover:block'>
+					{shortcut}
+				</kbd>
+			}
 		</div>
 	);
 }
@@ -52,7 +77,7 @@ export function Filters({
 			const target = e.target as HTMLElement;
 			const existingModalBackdrop = document.getElementById('modal-backdrop');
 			const existingPopoverBackdrop = document.querySelector('.z-50[role="dialog"]');
-			console.log('existingPopoverBackdrop', existingPopoverBackdrop);
+			// console.log('existingPopoverBackdrop', existingPopoverBackdrop);
 
 			const hotkeysEnabled =
 				target.tagName !== 'INPUT' &&
@@ -60,18 +85,24 @@ export function Filters({
 				!existingModalBackdrop &&
 				!existingPopoverBackdrop;
 
-			const noMetaOrCtrl = !e.metaKey && !e.ctrlKey;
+			const metaOrCtrl = e.metaKey || e.ctrlKey;
 
-			if (e.key === 'a' && hotkeysEnabled && noMetaOrCtrl) {
+			console.log('key === f', e.key === 'f');
+			console.log('metaOrCtrl', metaOrCtrl);
+			console.log('shiftKey', e.shiftKey);
+
+			if (e.key === 'a' && hotkeysEnabled && !metaOrCtrl) {
+				console.log('toggleArchived');
 				toggleArchived?.();
 			}
-			if (e.key === 'd' && hotkeysEnabled && noMetaOrCtrl) {
+			if (e.key === 'd' && hotkeysEnabled && !metaOrCtrl) {
 				toggleDeleted?.();
 			}
-			if (e.key === 'f' && hotkeysEnabled && noMetaOrCtrl) {
+			if (e.shiftKey && e.key === 'F' && hotkeysEnabled && !metaOrCtrl) {
+				console.log('toggleFulfilled');
 				toggleFulfilled?.();
 			}
-			if (e.key === 'Escape' && hotkeysEnabled && noMetaOrCtrl) {
+			if (e.key === 'Escape' && hotkeysEnabled && !metaOrCtrl) {
 				clearAllFilters();
 				if (searchInputRef.current) {
 					searchInputRef.current.value = '';
@@ -103,7 +134,7 @@ export function Filters({
 						<div className='group flex flex-row items-center justify-between gap-4'>
 							<Label htmlFor='showFulfilledSwitch'>
 								<div className='flex flex-row items-center gap-2'>
-									<DisplayShortcutIcon shortcut='F' icon='check' />
+									<DisplayShortcutIcon shortcut={['Shift', 'F']} icon='check' />
 									Include fulfilled {itemsName ?? 'items'}
 								</div>
 							</Label>

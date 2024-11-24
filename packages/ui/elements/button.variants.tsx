@@ -1,7 +1,7 @@
 import { cva } from 'class-variance-authority';
 
 const buttonVariants = cva(
-	'inline-flex w-fit items-center justify-center whitespace-nowrap rounded-md font-medium ring-offset-background transition-colors active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+	'inline-flex w-fit items-center justify-center gap-3.5 whitespace-nowrap rounded-md font-medium ring-offset-background transition-colors active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
 	{
 		variants: {
 			variant: {
@@ -134,6 +134,11 @@ const buttonIconVariants = cva('', {
 		},
 	},
 	compoundVariants: [
+		{
+			variant: 'button',
+			size: 'md',
+			className: 'h-4 w-4',
+		},
 		{
 			variant: 'button',
 			position: 'start',

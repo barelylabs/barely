@@ -8,6 +8,7 @@ import { api } from '@barely/lib/server/api/react';
 import { upsertEmailBroadcastSchema } from '@barely/lib/server/routes/email-broadcast/email-broadcast-schema';
 
 import { Button } from '@barely/ui/elements/button';
+import { Icon } from '@barely/ui/elements/icon';
 import { Label } from '@barely/ui/elements/label';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
 import { Switch } from '@barely/ui/elements/switch';
@@ -89,6 +90,7 @@ export function CreateOrUpdateEmailBroadcastModal({
 			fanGroupId: null,
 			status: 'draft',
 			scheduledAt: null,
+			// scheduledAt: mode === 'update' ? selectedEmailBroadcast?.scheduledAt ?? null : null,
 		},
 		handleCreateItem: async d => {
 			await createEmailBroadcast(d);
@@ -111,8 +113,8 @@ export function CreateOrUpdateEmailBroadcastModal({
 			fanGroupId: data.fanGroupId === 'all' ? null : data.fanGroupId,
 			status: 'draft' as const,
 		};
-		return console.log('handleSaveDraft', d);
-		// return onSubmit(d);
+		// return console.log('handleSaveDraft', d);
+		return onSubmit(d);
 	};
 
 	const handleSchedule = (data: z.infer<typeof upsertEmailBroadcastSchema>) => {
@@ -122,6 +124,18 @@ export function CreateOrUpdateEmailBroadcastModal({
 			status: 'scheduled' as const,
 		};
 
+		// Show confirmation dialog before sending
+		if (
+			!window.confirm(
+				data.scheduledAt ?
+					`Schedule this email broadcast for ${new Date(data.scheduledAt).toLocaleString()}?`
+				:	'Send this email broadcast now?',
+			)
+		) {
+			return;
+		}
+
+		// console.log('scheduling');
 		return onSubmit(d);
 	};
 
@@ -139,72 +153,97 @@ export function CreateOrUpdateEmailBroadcastModal({
 		setShowEmailBroadcastModal(false);
 	}, [form, focusGridList, apiUtils.emailBroadcast, setShowEmailBroadcastModal]);
 
-	const submitDisabled = mode === 'update' && !form.formState.isDirty;
+	const canEdit =
+		mode === 'create' || (mode === 'update' && form.watch('status') !== 'sent');
+
+	const submitDisabled = !canEdit || (mode === 'update' && !form.formState.isDirty);
 
 	return (
 		<Modal
 			showModal={showEmailBroadcastModal}
 			setShowModal={setShowEmailBroadcastModal}
-			preventDefaultClose={submitDisabled}
+			preventDefaultClose={canEdit && form.formState.isDirty}
 			onClose={handleCloseModal}
 		>
 			<ModalHeader
 				icon='email'
-				title={mode === 'update' ? 'Update Email Broadcast' : 'Create Email Broadcast'}
+				title={
+					mode === 'update' ?
+						canEdit ?
+							'Update Email Broadcast'
+						:	'Email Broadcast Sent'
+					:	'Create Email Broadcast'
+				}
 			/>
 
 			<Form form={form} onSubmit={onSubmit}>
 				<ModalBody>
-					<SelectField
-						label='To'
-						name='fanGroupId'
-						control={form.control}
-						options={fanGroupOptions ?? []}
-					/>
+					{/* <pre>{JSON.stringify(!canEdit, null, 2)}</pre> */}
+					{!canEdit && (
+						<div className='flex flex-row items-center justify-center gap-2'>
+							<Icon.send className='h-4 w-4' />
+							<span>Sent @{selectedEmailBroadcast?.sentAt?.toLocaleString()}</span>
+						</div>
+					)}
 
-					<SelectField
-						label='Email Template'
-						name='emailTemplateId'
-						control={form.control}
-						options={emailTemplateOptions ?? []}
-					/>
+					{canEdit && (
+						<>
+							<SelectField
+								label='To'
+								name='fanGroupId'
+								control={form.control}
+								options={fanGroupOptions ?? []}
+							/>
 
-					<Label>Schedule</Label>
-					<Switch
-						checked={!!form.watch('scheduledAt')}
-						onCheckedChange={c => {
-							if (c) return form.setValue('scheduledAt', new Date());
-							return form.setValue('scheduledAt', null);
-						}}
-					/>
+							<SelectField
+								label='Email Template'
+								name='emailTemplateId'
+								control={form.control}
+								options={emailTemplateOptions ?? []}
+							/>
 
-					{form.watch('scheduledAt') && (
-						<DatetimeField
-							name='scheduledAt'
-							granularity='minute'
-							hourCycle={12}
-							control={form.control}
-						/>
+							<Label>Schedule</Label>
+							<Switch
+								checked={!!form.watch('scheduledAt')}
+								onCheckedChange={c => {
+									if (c) return form.setValue('scheduledAt', new Date());
+									return form.setValue('scheduledAt', null);
+								}}
+							/>
+
+							{form.watch('scheduledAt') && (
+								<DatetimeField
+									name='scheduledAt'
+									granularity='minute'
+									hourCycle={12}
+									control={form.control}
+								/>
+							)}
+						</>
 					)}
 				</ModalBody>
 
-				<ModalFooter>
-					<div className='flex flex-row items-center gap-3'>
-						<Button
-							look='secondary'
-							onClick={handleSubmit(() => handleSaveDraft(form.getValues()))}
-						>
-							Save Draft
-						</Button>
+				{canEdit && (
+					<ModalFooter>
+						<div className='flex flex-row items-center justify-end gap-3'>
+							<Button
+								disabled={submitDisabled}
+								look='secondary'
+								onClick={handleSubmit(() => handleSaveDraft(form.getValues()))}
+							>
+								Save Draft
+							</Button>
 
-						<Button
-							onClick={handleSubmit(() => handleSchedule(form.getValues()))}
-							endIcon={form.watch('scheduledAt') ? 'calendar' : 'send'}
-						>
-							{form.watch('scheduledAt') ? 'Schedule' : 'Send'}
-						</Button>
-					</div>
-				</ModalFooter>
+							<Button
+								// disabled={submitDisabled && }
+								onClick={handleSubmit(() => handleSchedule(form.getValues()))}
+								endIcon={form.watch('scheduledAt') ? 'calendar' : 'send'}
+							>
+								{form.watch('scheduledAt') ? 'Schedule' : 'Send'}
+							</Button>
+						</div>
+					</ModalFooter>
+				)}
 			</Form>
 		</Modal>
 	);

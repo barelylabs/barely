@@ -20,7 +20,7 @@ export function CartOrderHotkeys() {
 		itemSelected: cartOrderSelection !== 'all' && !!cartOrderSelection.size,
 		customHotkeys: [
 			{
-				condition: e => e.key === 'f',
+				condition: e => e.key === 'f' && !e.metaKey && !e.ctrlKey && !e.shiftKey,
 				action: fulfillAction,
 			},
 		],

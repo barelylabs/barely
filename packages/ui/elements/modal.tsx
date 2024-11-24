@@ -42,7 +42,12 @@ function Modal({
 		dragged,
 		byCloseButton,
 	}: { dragged?: boolean; byCloseButton?: boolean } = {}) => {
-		if (props.preventDefaultClose && !dragged && !byCloseButton) return;
+		if (props.preventDefaultClose && !dragged && !byCloseButton) {
+			console.log('closeModal >> preventDefaultClose', props.preventDefaultClose);
+			console.log('closeModal >> dragged', dragged);
+			console.log('closeModal >> byCloseButton', byCloseButton);
+			return;
+		}
 
 		// fire onClose event if provided
 		onClose?.();
