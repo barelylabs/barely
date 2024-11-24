@@ -12,6 +12,7 @@ import { Icon } from '@barely/ui/elements/icon';
 import { Label } from '@barely/ui/elements/label';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
 import { Switch } from '@barely/ui/elements/switch';
+import { Text } from '@barely/ui/elements/typography';
 import { Form } from '@barely/ui/forms';
 import { DatetimeField } from '@barely/ui/forms/datetime-field-new';
 import { SelectField } from '@barely/ui/forms/select-field';
@@ -180,9 +181,14 @@ export function CreateOrUpdateEmailBroadcastModal({
 				<ModalBody>
 					{/* <pre>{JSON.stringify(!canEdit, null, 2)}</pre> */}
 					{!canEdit && (
-						<div className='flex flex-row items-center justify-center gap-2'>
-							<Icon.send className='h-4 w-4' />
-							<span>Sent @{selectedEmailBroadcast?.sentAt?.toLocaleString()}</span>
+						<div className='flex flex-col items-center justify-center gap-2'>
+							<Text variant='md/semibold'>
+								{selectedEmailBroadcast?.emailTemplate.name}
+							</Text>
+							<div className='flex flex-row items-center justify-center gap-2'>
+								<Icon.send className='h-4 w-4' />
+								<span>Sent @{selectedEmailBroadcast?.sentAt?.toLocaleString()}</span>
+							</div>
 						</div>
 					)}
 
