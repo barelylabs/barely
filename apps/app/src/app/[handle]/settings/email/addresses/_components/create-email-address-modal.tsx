@@ -7,6 +7,7 @@ import { useZodForm } from '@barely/lib/hooks/use-zod-form';
 import { api } from '@barely/lib/server/api/react';
 import { createEmailAddressSchema } from '@barely/lib/server/routes/email-address/email-address.schema';
 
+import { Icon } from '@barely/ui/elements/icon';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
 import { Form, SubmitButton } from '@barely/ui/forms';
 import { SelectField } from '@barely/ui/forms/select-field';
@@ -71,7 +72,7 @@ export function CreateEmailAddressModal() {
 			<ModalHeader icon='email' title='Add Email Address' />
 			<Form form={form} onSubmit={handleSubmit}>
 				<ModalBody>
-					<div className='flex flex-row gap-1'>
+					<div className='flex flex-row items-center gap-1.5'>
 						<div className='w-full flex-grow'>
 							<TextField
 								control={control}
@@ -80,6 +81,7 @@ export function CreateEmailAddressModal() {
 								placeholder='user'
 							/>
 						</div>
+						<Icon.at className='mt-[31px] h-8 w-8 text-muted-foreground' />
 						<div className='min-w-1/2 w-full flex-grow'>
 							<SelectField
 								control={control}
@@ -87,6 +89,7 @@ export function CreateEmailAddressModal() {
 								label='Domain'
 								options={domainOptions}
 								className='flex-grow'
+								placeholder='hello.thebeatles.com'
 							/>
 						</div>
 					</div>
@@ -95,14 +98,14 @@ export function CreateEmailAddressModal() {
 						control={control}
 						name='defaultFriendlyName'
 						label='Friendly Name (optional)'
-						placeholder='My Name'
+						placeholder='Paul // The Beatles'
 					/>
 
 					<TextField
 						control={control}
 						name='replyTo'
 						label='Reply to (optional)'
-						placeholder='me@gmail.com'
+						placeholder='paul@thebeatles.com'
 					/>
 					<SwitchField control={control} name='default' label='Default' />
 				</ModalBody>
