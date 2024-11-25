@@ -55,6 +55,8 @@ export function Filters({
 	toggleDeleted,
 	showFulfilled,
 	toggleFulfilled,
+	showPreorders,
+	togglePreorders,
 	clearAllFilters,
 	itemsName,
 }: {
@@ -64,6 +66,8 @@ export function Filters({
 	searchPlaceholder?: string;
 	showArchived?: boolean;
 	toggleArchived?: () => void;
+	showPreorders?: boolean;
+	togglePreorders?: () => void;
 	showFulfilled?: boolean;
 	toggleFulfilled?: () => void;
 	showDeleted?: boolean;
@@ -87,20 +91,22 @@ export function Filters({
 
 			const metaOrCtrl = e.metaKey || e.ctrlKey;
 
-			console.log('key === f', e.key === 'f');
-			console.log('metaOrCtrl', metaOrCtrl);
-			console.log('shiftKey', e.shiftKey);
-
-			if (e.key === 'a' && hotkeysEnabled && !metaOrCtrl) {
+			if (e.shiftKey && e.key === 'A' && hotkeysEnabled && !metaOrCtrl) {
 				console.log('toggleArchived');
 				toggleArchived?.();
 			}
-			if (e.key === 'd' && hotkeysEnabled && !metaOrCtrl) {
+
+			if (e.shiftKey && e.key === 'D' && hotkeysEnabled && !metaOrCtrl) {
+				console.log('toggleDeleted');
 				toggleDeleted?.();
 			}
 			if (e.shiftKey && e.key === 'F' && hotkeysEnabled && !metaOrCtrl) {
 				console.log('toggleFulfilled');
 				toggleFulfilled?.();
+			}
+			if (e.shiftKey && e.key === 'P' && hotkeysEnabled && !metaOrCtrl) {
+				console.log('togglePreorders');
+				togglePreorders?.();
 			}
 			if (e.key === 'Escape' && hotkeysEnabled && !metaOrCtrl) {
 				clearAllFilters();
@@ -109,7 +115,7 @@ export function Filters({
 				}
 			}
 		},
-		[clearAllFilters, toggleArchived, toggleDeleted, toggleFulfilled],
+		[clearAllFilters, toggleArchived, toggleDeleted, toggleFulfilled, togglePreorders],
 	);
 
 	useEffect(() => {
@@ -147,11 +153,28 @@ export function Filters({
 						</div>
 					)}
 
+					{togglePreorders !== undefined && (
+						<div className='group flex flex-row items-center justify-between gap-4'>
+							<Label htmlFor='showPreordersSwitch'>
+								<div className='flex flex-row items-center gap-2'>
+									<DisplayShortcutIcon shortcut={['Shift', 'P']} icon='check' />
+									Include preorders
+								</div>
+							</Label>
+							<Switch
+								id='showPreordersSwitch'
+								checked={!!showPreorders}
+								onClick={() => togglePreorders()}
+								size='sm'
+							/>
+						</div>
+					)}
+
 					{toggleArchived !== undefined && (
 						<div className='group flex flex-row items-center justify-between gap-4'>
 							<Label htmlFor='showArchivedSwitch'>
 								<div className='flex flex-row items-center gap-2'>
-									<DisplayShortcutIcon shortcut='A' icon='archive' />
+									<DisplayShortcutIcon shortcut={['Shift', 'A']} icon='archive' />
 									Include archived {itemsName ?? 'items'}
 								</div>
 							</Label>
@@ -168,7 +191,7 @@ export function Filters({
 						<div className='group flex flex-row items-center justify-between gap-4'>
 							<Label htmlFor='showDeletedSwitch'>
 								<div className='flex flex-row items-center gap-2'>
-									<DisplayShortcutIcon shortcut='D' icon='trash' />
+									<DisplayShortcutIcon shortcut={['Shift', 'D']} icon='trash' />
 									Include deleted {itemsName ?? 'items'}
 								</div>
 							</Label>

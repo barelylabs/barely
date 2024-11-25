@@ -39,6 +39,7 @@ interface CartOrderContext {
 	toggleArchived: () => void;
 	toggleFulfilled: () => void;
 	clearAllFilters: () => void;
+	togglePreorders: () => void;
 }
 
 const CartOrderContext = createContext<CartOrderContext | undefined>(undefined);
@@ -125,6 +126,14 @@ export function CartOrderContextProvider({
 		}
 	}, [filters.showFulfilled, removeByKey, setQuery]);
 
+	const togglePreorders = useCallback(() => {
+		if (filters.showPreorders) {
+			removeByKey('showPreorders');
+		} else {
+			return setQuery('showPreorders', true);
+		}
+	}, [filters.showPreorders, removeByKey, setQuery]);
+
 	const setSearch = useCallback(
 		(search: string) => {
 			if (search.length) {
@@ -161,6 +170,7 @@ export function CartOrderContextProvider({
 		setSearch,
 		toggleArchived,
 		toggleFulfilled,
+		togglePreorders,
 		clearAllFilters,
 		// infinite
 		hasNextPage,
