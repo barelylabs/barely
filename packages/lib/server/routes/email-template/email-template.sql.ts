@@ -42,6 +42,7 @@ export const EmailTemplates = pgTable('EmailTemplates', {
 
 	replyTo: text('replyTo'),
 	subject: text('subject').notNull(),
+	previewText: text('previewText'),
 	body: text('body').notNull(),
 
 	// stats

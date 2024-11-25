@@ -10,6 +10,11 @@ import { EmailTemplates } from './email-template.sql';
 
 export const insertEmailTemplateSchema = createInsertSchema(EmailTemplates, {
 	replyTo: z.preprocess(v => (v === '' ? undefined : v), z.string().email()).optional(),
+	previewText: z.preprocess(
+		v => (v === '' ? undefined : v),
+		z.string().max(90, 'Preview text should be 90 characters or less').optional(),
+	),
+	// .optional(),
 });
 export const createEmailTemplateSchema = insertEmailTemplateSchema
 	.omit({ id: true })

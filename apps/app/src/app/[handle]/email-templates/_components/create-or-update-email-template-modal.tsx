@@ -68,9 +68,9 @@ export function CreateOrUpdateEmailTemplateModal({
 		defaultValues: {
 			name: mode === 'update' ? selectedEmailTemplate?.name ?? '' : '',
 			subject: mode === 'update' ? selectedEmailTemplate?.subject ?? '' : '',
+			previewText: mode === 'update' ? selectedEmailTemplate?.previewText ?? '' : '',
 			body: mode === 'update' ? selectedEmailTemplate?.body ?? '' : '',
 			fromId: mode === 'update' ? selectedEmailTemplate?.fromId ?? '' : '',
-			// ...selectedEmailTemplate,
 		},
 		handleCreateItem: async d => {
 			await createEmailTemplate(d);
@@ -152,6 +152,7 @@ export function CreateOrUpdateEmailTemplateModal({
 						options={emailAddressOptions ?? []}
 					/>
 					<TextField label='Subject' name='subject' control={form.control} />
+					<TextField label='Preview Text' name='previewText' control={form.control} />
 
 					<Label>Body</Label>
 					<MDXEditor

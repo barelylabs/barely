@@ -47,6 +47,7 @@ export function EmailButton(props: { children: React.ReactNode; href: string }) 
 		paddingBottom: '11px',
 		paddingLeft: '23px',
 		paddingRight: '23px',
+		margin: '16px 0',
 	};
 
 	return (
@@ -82,7 +83,8 @@ export function EmailContainer(props: { children: React.ReactNode }) {
 		marginTop: '1.25rem',
 		flexDirection: 'column' as const,
 		width: '100%',
-		maxWidth: '36rem',
+		maxWidth: '42rem',
+		gap: '1.25rem',
 	};
 
 	return <ContainerPrimitive style={style}>{props.children}</ContainerPrimitive>;
