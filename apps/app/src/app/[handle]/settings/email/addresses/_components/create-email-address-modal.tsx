@@ -110,7 +110,9 @@ export function CreateEmailAddressModal() {
 					<SwitchField control={control} name='default' label='Default' />
 				</ModalBody>
 				<ModalFooter>
-					<SubmitButton fullWidth>Add Email Address</SubmitButton>
+					<SubmitButton loadingText='Adding Email Address' fullWidth>
+						Add Email Address
+					</SubmitButton>
 				</ModalFooter>
 			</Form>
 		</Modal>
