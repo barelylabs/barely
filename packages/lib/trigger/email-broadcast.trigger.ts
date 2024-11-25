@@ -208,6 +208,7 @@ async function getEmailDataForBatch({
 
 	const { subject, reactBody } = await renderMarkdownToReactEmail({
 		subject: emailTemplate.subject,
+		previewText: emailTemplate.previewText,
 		body: emailTemplate.body,
 		variables: {
 			firstName,

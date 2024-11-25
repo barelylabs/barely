@@ -60,7 +60,13 @@ export const FlowEmailModal = () => {
 
 	const form = useZodForm({
 		schema: flowForm_sendEmailSchema,
-		values: currentEmailNode?.data,
+		values:
+			currentEmailNode ?
+				{
+					...currentEmailNode.data,
+					previewText: currentEmailNode.data.previewText ?? '',
+				}
+			:	undefined,
 		resetOptions: {
 			keepDirtyValues: true, // retain user-interacted input
 		},
@@ -90,6 +96,7 @@ export const FlowEmailModal = () => {
 			to: currentValues.sendTestEmailTo,
 			fromId: currentValues.fromId,
 			subject: currentValues.subject,
+			previewText: currentValues.previewText,
 			body: currentValues.body,
 			variables: {}, // Add variables if needed
 		});
@@ -175,6 +182,7 @@ export const FlowEmailModal = () => {
 						options={emailAddressOptions ?? []}
 					/>
 					<TextField label='Subject' name='subject' control={form.control} />
+					<TextField label='Preview Text' name='previewText' control={form.control} />
 
 					<Label>Body</Label>
 					<MDXEditor

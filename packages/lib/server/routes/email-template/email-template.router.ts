@@ -161,7 +161,7 @@ export const emailTemplateRouter = createTRPCRouter({
 	sendTestEmail: privateProcedure
 		.input(sendTestEmailSchema)
 		.mutation(async ({ ctx, input }) => {
-			const { to, fromId, variables, type } = input;
+			const { to, fromId, variables, type, previewText } = input;
 
 			const fromRes = await ctx.db.http.query.EmailAddresses.findFirst({
 				where: eq(EmailAddresses.id, fromId),
@@ -187,6 +187,7 @@ export const emailTemplateRouter = createTRPCRouter({
 
 			const { subject, reactBody } = await renderMarkdownToReactEmail({
 				subject: input.subject,
+				previewText,
 				body: input.body,
 				variables,
 				tracking: {

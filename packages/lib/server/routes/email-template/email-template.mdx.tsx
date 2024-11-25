@@ -1,8 +1,14 @@
 import type { MDXRemoteProps } from 'next-mdx-remote/rsc';
 import type { ReactNode } from 'react';
 import React from 'react';
-import { EmailButton, EmailImage, EmailLink } from '@barely/email/src/primitives';
-import { Heading, Text } from '@react-email/components';
+import {
+	Body,
+	EmailButton,
+	EmailContainer,
+	EmailImage,
+	EmailLink,
+} from '@barely/email/src/primitives';
+import { Heading, Html, Preview, Text } from '@react-email/components';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 
 import type { MdxAssets } from '../../../utils/mdx';
@@ -15,6 +21,7 @@ import { MDX_IMAGE_SIZE_TO_WIDTH } from '../../mdx/mdx.constants';
 
 export async function renderMarkdownToReactEmail({
 	subject,
+	previewText,
 	body,
 	variables,
 	tracking,
@@ -22,6 +29,7 @@ export async function renderMarkdownToReactEmail({
 	listUnsubscribeUrl,
 }: {
 	subject: string;
+	previewText?: string | null;
 	body: string;
 	variables: Record<EmailTemplateVariableName, string>;
 	tracking: EventTrackingProps;
@@ -60,21 +68,50 @@ export async function renderMarkdownToReactEmail({
 		components,
 	});
 
-	let reactBody = awaitedBody;
-
-	if (listUnsubscribeUrl) {
-		const unsubscribeLink = (
-			<div style={{ marginTop: '1.25rem', marginBottom: '1.25rem' }}>
+	const unsubscribeLink =
+		listUnsubscribeUrl ?
+			<div
+				style={{ marginTop: '1.25rem', marginBottom: '1.25rem', fontSize: '0.875rem' }}
+			>
 				<EmailLink href={listUnsubscribeUrl}>unsubscribe</EmailLink>
 			</div>
-		);
-		reactBody = (
-			<>
-				{reactBody}
-				{unsubscribeLink}
-			</>
-		);
-	}
+		:	null;
+
+	const reactBody = (
+		<Html>
+			{previewText && <Preview>{previewText}</Preview>}
+			<Body>
+				<EmailContainer>
+					{awaitedBody}
+					{unsubscribeLink}
+				</EmailContainer>
+			</Body>
+		</Html>
+	);
+
+	// if (previewText && previewText.length > 0) {
+	// 	reactBody = (
+	// 		<>
+	// 			<Body>{reactBody}</Body>
+	// 		</>
+	// 	);
+	// }
+
+	// if (listUnsubscribeUrl) {
+	// 	const unsubscribeLink = (
+	// 		<div
+	// 			style={{ marginTop: '1.25rem', marginBottom: '1.25rem', fontSize: '0.875rem' }}
+	// 		>
+	// 			<EmailLink href={listUnsubscribeUrl}>unsubscribe</EmailLink>
+	// 		</div>
+	// 	);
+	// 	reactBody = (
+	// 		<>
+	// 			{reactBody}
+	// 			{unsubscribeLink}
+	// 		</>
+	// 	);
+	// }
 
 	return {
 		subject: subjectWithVars,
@@ -119,7 +156,8 @@ function mdxEmailImageFile() {
 				width={adjustedWidth}
 				height={adjustedHeight}
 				style={{
-					borderRadius: '10px',
+					borderRadius: '6px',
+					margin: '16px 0',
 				}}
 			/>
 		);
