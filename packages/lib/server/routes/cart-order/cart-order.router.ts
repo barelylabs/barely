@@ -1,6 +1,18 @@
 import { sendEmail } from '@barely/email';
 import ShippingUpdateEmailTemplate from '@barely/email/src/templates/cart/shipping-update';
-import { and, asc, eq, gt, ilike, inArray, isNotNull, isNull, ne, or } from 'drizzle-orm';
+import {
+	and,
+	asc,
+	eq,
+	gt,
+	ilike,
+	inArray,
+	isNotNull,
+	isNull,
+	ne,
+	notInArray,
+	or,
+} from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { ApparelSize } from '../product/product.constants';
@@ -19,6 +31,7 @@ import { getTrackingLink } from '../../shipping/shipping.utils';
 import { getOrCreateCartOrderId } from '../cart/cart.fns';
 import { CartFulfillmentProducts, CartFulfillments, Carts } from '../cart/cart.sql';
 import { Fans } from '../fan/fan.sql';
+import { Products } from '../product/product.sql';
 import {
 	markCartOrderAsFulfilledSchema,
 	selectWorkspaceCartOrdersSchema,
@@ -28,11 +41,11 @@ export const cartOrderRouter = createTRPCRouter({
 	byWorkspace: workspaceQueryProcedure
 		.input(selectWorkspaceCartOrdersSchema)
 		.query(async ({ input, ctx }) => {
-			const { showFulfilled, search, fanId, limit, cursor } = input;
+			const { showFulfilled, showPreorders, search, fanId, limit, cursor } = input;
 
 			let searchFanIds: string[] = [];
 			if (search) {
-				const fans = await ctx.db.http.query.Fans.findMany({
+				const fans = await ctx.db.pool.query.Fans.findMany({
 					where: and(
 						eq(Fans.workspaceId, ctx.workspace.id),
 						or(
@@ -53,7 +66,22 @@ export const cartOrderRouter = createTRPCRouter({
 				}
 			}
 
-			const orders = await ctx.db.http.query.Carts.findMany({
+			let preorderProductIds: string[] = [];
+			if (!showPreorders) {
+				preorderProductIds = (
+					await ctx.db.pool.query.Products.findMany({
+						where: and(
+							eq(Products.workspaceId, ctx.workspace.id),
+							eq(Products.preorder, true),
+						),
+						columns: {
+							id: true,
+						},
+					})
+				).map(p => p.id);
+			}
+
+			const orders = await ctx.db.pool.query.Carts.findMany({
 				where: sqlAnd([
 					eq(Carts.workspaceId, ctx.workspace.id),
 					isNotNull(Carts.orderId),
@@ -67,6 +95,18 @@ export const cartOrderRouter = createTRPCRouter({
 					eq(Carts.workspaceId, ctx.workspace.id),
 					!!fanId && eq(Carts.fanId, fanId),
 					!!searchFanIds.length && inArray(Carts.fanId, searchFanIds),
+					!!preorderProductIds.length &&
+						sqlAnd([
+							notInArray(Carts.mainProductId, preorderProductIds),
+							or(
+								isNull(Carts.bumpProductId),
+								notInArray(Carts.bumpProductId, preorderProductIds),
+							),
+							or(
+								isNull(Carts.upsellProductId),
+								notInArray(Carts.upsellProductId, preorderProductIds),
+							),
+						]),
 					!!cursor &&
 						or(
 							or(
@@ -88,7 +128,6 @@ export const cartOrderRouter = createTRPCRouter({
 							products: true,
 						},
 					},
-
 					funnel: {
 						columns: {
 							name: true,
@@ -98,21 +137,6 @@ export const cartOrderRouter = createTRPCRouter({
 				orderBy: [asc(Carts.checkoutConvertedAt), asc(Carts.orderId)],
 				limit: limit + 1,
 			});
-
-			// for any orders where checkoutConvertedAt is null, set it to the createdAt date
-			// todo - fix this in the db and remove this logic
-			await Promise.all(
-				orders.map(async order => {
-					if (!order.checkoutConvertedAt) {
-						await ctx.db.pool
-							.update(Carts)
-							.set({
-								checkoutConvertedAt: order.createdAt,
-							})
-							.where(eq(Carts.id, order.id));
-					}
-				}),
-			);
 
 			let nextCursor: typeof cursor | undefined = undefined;
 

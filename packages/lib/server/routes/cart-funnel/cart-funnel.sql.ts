@@ -34,6 +34,7 @@ export const CartFunnels = pgTable(
 		key: varchar('key', { length: 255 }).notNull(),
 
 		// funnel settings
+		// preorder: boolean('preorder').default(false),
 		archived: boolean('archived').default(false),
 
 		// main product

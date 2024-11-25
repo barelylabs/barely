@@ -7,30 +7,13 @@ import { APPAREL_SIZES } from '../product/product.constants';
 export const cartOrderFilterParamsSchema = commonFiltersSchema.extend({
 	fanId: z.string().optional(),
 	showFulfilled: queryBooleanSchema.optional(),
+	showPreorders: queryBooleanSchema.optional(),
 });
-
-// export const cartOrderFilterParamsSchema = z.object({
-// 	search: z.string().optional(),
-// 	showArchived: queryBooleanSchema.optional(),
-// 	showPending: queryBooleanSchema.optional(),
-// 	showFulfilled: queryBooleanSchema.optional(),
-// });
 
 export const cartOrderSearchParamsSchema = cartOrderFilterParamsSchema.extend({
 	selectedOrderCartIds: z.union([z.literal('all'), queryStringArraySchema]).optional(),
 });
 
-// export const selectWorkspaceCartOrdersSchema = z.object({
-// 	handle: z.string(),
-// 	search: z.string().optional(),
-// 	fanId: z.string().optional(),
-// 	showArchived: queryBooleanSchema.optional(),
-// 	showFulfilled: queryBooleanSchema.optional().default(false),
-// 	cursor: z
-// 		.object({ orderId: z.coerce.number(), checkoutConvertedAt: z.coerce.date() })
-// 		.optional(),
-// 	limit: z.coerce.number().min(1).max(100).optional().default(20),
-// });
 export const selectWorkspaceCartOrdersSchema = cartOrderFilterParamsSchema
 	.merge(infiniteQuerySchema)
 	.extend({
