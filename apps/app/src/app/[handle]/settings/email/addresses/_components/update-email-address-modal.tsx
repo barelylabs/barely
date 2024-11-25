@@ -33,9 +33,12 @@ export function UpdateEmailAddressModal() {
 	const form = useZodForm({
 		schema: updateEmailAddressSchema,
 		values: {
+			...lastSelectedEmailAddress,
 			id: lastSelectedEmailAddress?.id ?? '',
 			username: lastSelectedEmailAddress?.username ?? '',
 			default: lastSelectedEmailAddress?.default ?? false,
+			defaultFriendlyName: lastSelectedEmailAddress?.defaultFriendlyName ?? '',
+			replyTo: lastSelectedEmailAddress?.replyTo ?? '',
 		},
 		resetOptions: {
 			keepDirtyValues: true,
@@ -76,13 +79,13 @@ export function UpdateEmailAddressModal() {
 						control={control}
 						name='defaultFriendlyName'
 						label='Friendly Name (optional)'
-						placeholder='My Name'
+						placeholder='Paul // The Beatles'
 					/>
 					<TextField
 						control={control}
 						name='replyTo'
 						label='Reply to (optional)'
-						placeholder='me@gmail.com'
+						placeholder='paul@thebeatles.com'
 					/>
 
 					<SwitchField control={control} name='default' label='Default' />
