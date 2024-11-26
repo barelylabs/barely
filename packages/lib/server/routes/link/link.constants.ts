@@ -19,6 +19,7 @@ export const DUMMY_GEO_DATA: NextGeo[] = [
 		country: 'GB',
 		latitude: '51.5074',
 		longitude: '-0.1278',
+		zip: 'EC1A 1BB',
 	},
 	{
 		city: 'Manchester',
@@ -26,6 +27,7 @@ export const DUMMY_GEO_DATA: NextGeo[] = [
 		country: 'GB',
 		latitude: '53.4808',
 		longitude: '-2.2426',
+		zip: 'M1 1AA',
 	},
 	{
 		city: 'Toronto',
@@ -33,6 +35,7 @@ export const DUMMY_GEO_DATA: NextGeo[] = [
 		country: 'CA',
 		latitude: '43.6532',
 		longitude: '-79.3832',
+		zip: 'M1 1AA',
 	},
 	{
 		city: 'Sydney',
@@ -40,6 +43,7 @@ export const DUMMY_GEO_DATA: NextGeo[] = [
 		country: 'AU',
 		latitude: '-33.8688',
 		longitude: '151.2093',
+		zip: '2000',
 	},
 	{
 		city: 'Auckland',
@@ -47,6 +51,7 @@ export const DUMMY_GEO_DATA: NextGeo[] = [
 		country: 'NZ',
 		latitude: '-36.8485',
 		longitude: '174.7633',
+		zip: '1010',
 	},
 	{
 		city: 'New York',
@@ -54,6 +59,7 @@ export const DUMMY_GEO_DATA: NextGeo[] = [
 		country: 'US',
 		latitude: '40.7128',
 		longitude: '74.0060',
+		zip: '10001',
 	},
 	{
 		city: 'Los Angeles',
@@ -61,6 +67,7 @@ export const DUMMY_GEO_DATA: NextGeo[] = [
 		country: 'US',
 		latitude: '34.0522',
 		longitude: '118.2437',
+		zip: '90001',
 	},
 	{
 		city: 'Chicago',
@@ -68,6 +75,7 @@ export const DUMMY_GEO_DATA: NextGeo[] = [
 		country: 'US',
 		latitude: '41.8781',
 		longitude: '87.6298',
+		zip: '60601',
 	},
 	{
 		city: 'Houston',
@@ -75,6 +83,7 @@ export const DUMMY_GEO_DATA: NextGeo[] = [
 		country: 'US',
 		latitude: '29.7604',
 		longitude: '95.3698',
+		zip: '77001',
 	},
 	{
 		city: 'Phoenix',
@@ -82,6 +91,7 @@ export const DUMMY_GEO_DATA: NextGeo[] = [
 		country: 'US',
 		latitude: '33.4484',
 		longitude: '112.0740',
+		zip: '85001',
 	},
 ];
 

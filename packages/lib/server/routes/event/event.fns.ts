@@ -20,6 +20,7 @@ import { env } from '../../../env';
 import { isDevelopment } from '../../../utils/environment';
 import { newId } from '../../../utils/id';
 import { log } from '../../../utils/log';
+import { getFirstAndLastName } from '../../../utils/name';
 import { sqlIncrement } from '../../../utils/sql';
 import { ratelimit } from '../../../utils/upstash';
 import { dbHttp } from '../../db';
@@ -203,6 +204,7 @@ export async function recordCartEvent({
 			city: cart.visitorGeo?.city ?? visitor?.geo.city ?? 'Unknown',
 			latitude: cart.visitorGeo?.latitude ?? visitor?.geo.latitude ?? 'Unknown',
 			longitude: cart.visitorGeo?.longitude ?? visitor?.geo.longitude ?? 'Unknown',
+			zip: cart.shippingAddressPostalCode ?? visitor?.geo.zip ?? 'Unknown',
 		},
 		userAgent: {
 			ua: cart.visitorUserAgent?.ua ?? visitor?.userAgent.ua ?? 'Unknown',
@@ -277,8 +279,18 @@ export async function recordCartEvent({
 	const sourceUrl = visitorInfo.referer_url ?? ''; // this is an api route, so we want the source of the api call
 
 	const fbclid =
+		cart.fbclid ??
 		cookies().get(`${cartFunnel.handle}.${cartFunnel.key}.fbclid`)?.value ??
 		new URL(sourceUrl).searchParams.get('fbclid');
+
+	const email = cart.emailMarketingOptIn && cart.email ? cart.email : undefined;
+	const phone = cart.smsMarketingOptIn && cart.phone ? cart.phone : undefined;
+
+	const { firstName, lastName } = getFirstAndLastName({
+		fullName: cart.fullName,
+		firstName: cart.firstName,
+		lastName: cart.lastName,
+	});
 
 	const metaRes =
 		metaPixel?.accessToken && metaEvents ?
@@ -286,6 +298,10 @@ export async function recordCartEvent({
 				pixelId: metaPixel.id,
 				accessToken: metaPixel.accessToken,
 				sourceUrl,
+				email,
+				phone,
+				firstName,
+				lastName,
 				ip: visitorInfo.ip,
 				ua: visitorInfo.userAgent.ua,
 				geo: visitorInfo.geo,

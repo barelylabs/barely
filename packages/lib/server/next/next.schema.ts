@@ -91,6 +91,7 @@ export const nextGeoSchema = z.object({
 	latitude: z.string().nullish().default('Unknown'),
 	longitude: z.string().nullish().default('Unknown'),
 	region: z.string().nullish().default('Unknown'),
+	zip: z.string().nullish().default('Unknown'),
 });
 
 // export const formattedNextGeoSchema = z.object({

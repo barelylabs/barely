@@ -234,7 +234,7 @@ async function getEmailDataForBatch({
 		emailDeliveryId,
 		fanId: fan.id,
 		to: toEmail,
-		bcc: 'adam+broadcast-monitoring@barely.io', // fixme: remove once we're happy with this
+		// bcc: 'adam+broadcast-monitoring@barely.io',
 		from: getEmailAddressFromEmailAddress(emailTemplate.from),
 		fromFriendlyName: emailTemplate.from.defaultFriendlyName ?? undefined,
 		replyTo: emailTemplate.from.replyTo ?? undefined,

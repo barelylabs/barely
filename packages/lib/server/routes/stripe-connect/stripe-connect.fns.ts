@@ -74,15 +74,6 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 	) {
 		console.log('this is the first payment since the cart was created');
 
-		await recordCartEvent({
-			cart: prevCart,
-			cartFunnel: cartFunnel,
-			type:
-				prevCart.addedBump ? 'cart/purchaseMainWithBump' : 'cart/purchaseMainWithoutBump',
-		}).catch(err => {
-			console.log('error recording cart event:', err);
-		});
-
 		const updateCart: UpdateCart = { id: prevCart.id };
 
 		updateCart.orderId = await createOrderIdForCart(prevCart);
@@ -154,7 +145,23 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 			updateCart.fanId = fan.id;
 		}
 
-		await dbHttp.update(Carts).set(updateCart).where(eq(Carts.id, cartId));
+		const updatedCart = (
+			await dbHttp.update(Carts).set(updateCart).where(eq(Carts.id, cartId)).returning()
+		)[0] ?? {
+			...prevCart,
+			...updateCart,
+		};
+
+		await recordCartEvent({
+			cart: updatedCart,
+			cartFunnel: cartFunnel,
+			type:
+				updatedCart.addedBump ?
+					'cart/purchaseMainWithBump'
+				:	'cart/purchaseMainWithoutBump',
+		}).catch(err => {
+			console.log('error recording cart event:', err);
+		});
 
 		if (!fan) throw new Error('Fan not created or found after charge success');
 
