@@ -96,10 +96,15 @@ export interface MetaEventProps {
 
 	// event data (covers all events)
 	sourceUrl: string;
+	email?: string;
+	phone?: string;
+	firstName?: string;
+	lastName?: string;
 	ip?: string;
 	ua?: string;
 	time?: number;
 	geo?: NextGeo;
+
 	eventId?: string;
 	testEventCode?: string;
 
@@ -111,7 +116,7 @@ export interface MetaEventProps {
 }
 
 export async function reportEventsToMeta(props: MetaEventProps) {
-	const { ip, geo, ua, time } = props;
+	const { ip, geo, ua, time, email, phone, firstName, lastName } = props;
 	const { pixelId, accessToken, sourceUrl, events } = props;
 
 	const urlObject = new URL(sourceUrl);
@@ -123,8 +128,13 @@ export async function reportEventsToMeta(props: MetaEventProps) {
 	const userData = metaUserDataSchema.parse({
 		ip,
 		ua,
+		email,
+		phone,
+		firstName,
+		lastName,
 		city: geo?.city,
 		state: geo?.region,
+		zipCode: geo?.zip,
 		country: geo?.country,
 		fbc: fbclid ? `fb.1.${unixTimeSinceEpoch_ms}.${fbclid}` : undefined,
 	});
@@ -146,14 +156,6 @@ export async function reportEventsToMeta(props: MetaEventProps) {
 		}
 	});
 
-	// const serverEventData = metaServerEventSchema.parse({
-	// 	eventName,
-	// 	eventTime: unixTimeSinceEpoch_s,
-	// 	actionSource: 'website',
-	// 	sourceUrl,
-	// 	customData: props.customData,
-	// });
-
 	const testEventCode = isDevelopment() ? env.META_TEST_EVENT_CODE : undefined;
 
 	if (testEventCode)
@@ -170,8 +172,6 @@ export async function reportEventsToMeta(props: MetaEventProps) {
 				body: {
 					access_token: accessToken,
 					data,
-					// data: [{ user_data: userData, ...serverEventData }],
-
 					// test event code
 					...(testEventCode !== undefined && {
 						test_event_code: testEventCode,
