@@ -122,17 +122,17 @@ export function LaunchPlaylistPitchForm(props: LaunchPlaylistPitchFormProps) {
 			/>
 
 			<div className='flex flex-row gap-3 pb-3 pt-4'>
-				<Badge rectangle size='lg' variant='outline' grow>
+				<Badge shape='rectangle' size='lg' variant='outline' grow>
 					<Icon.users className='h-5 w-5' />
 					<span>{reach} curators</span>
 				</Badge>
 
-				<Badge rectangle size='lg' variant='outline' grow>
+				<Badge shape='rectangle' size='lg' variant='outline' grow>
 					<Icon.playlist className='h-5 w-5' />
 					<span>{`~${estimatedPlaylists} playlists`}</span>
 				</Badge>
 
-				<Badge rectangle size='lg' variant='outline' grow>
+				<Badge shape='rectangle' size='lg' variant='outline' grow>
 					<Icon.coins className='h-5 w-5' />
 					<span>${campaignBudget} budget</span>
 				</Badge>
