@@ -266,6 +266,8 @@ export function MusicPlayerBar() {
 										s3Key={artworkKey ?? ''}
 										alt={currentOrFirstTrack.name}
 										className='h-11 w-11 rounded-xs'
+										width={44}
+										height={44}
 									/>
 									{/* <picture>
 										<img

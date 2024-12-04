@@ -88,6 +88,7 @@ export function PressHero({
 		>
 			<BackgroundImg
 				// src={workspace.avatarImageUrl ?? workspace.headerImageUrl ?? ''}
+				sizes='100vw'
 				s3Key={workspace.avatarImageS3Key ?? workspace.headerImageS3Key ?? ''}
 				alt={workspace.name}
 				divStyle={{
@@ -108,6 +109,7 @@ export function PressHero({
 		>
 			<BackgroundImg
 				// src={workspace.headerImageUrl ?? workspace.avatarImageUrl ?? ''}
+				sizes='100vw'
 				s3Key={workspace.headerImageS3Key ?? workspace.avatarImageS3Key ?? ''}
 				alt={workspace.name}
 				divStyle={{
