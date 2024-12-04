@@ -63,7 +63,7 @@ export interface BadgeProps
 	extends React.HTMLAttributes<HTMLSpanElement>,
 		VariantProps<typeof badgeVariants> {
 	asButton?: boolean;
-	rectangle?: boolean;
+	// rectangle?: boolean;
 	grow?: boolean;
 	icon?: IconKey;
 	removeButton?: boolean;

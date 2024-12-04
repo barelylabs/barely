@@ -96,12 +96,12 @@ export const Combobox = <T extends NonNullable<unknown>>(props: ComboboxProps<T>
 			{/* fixme: This is hacky, and I'm sure it's not good for focus management/accessibility. I want to do this with a popover/dialog, but couldn't figure out focus
 			https://github.com/pacocoursey/cmdk/discussions/221
 			*/}
-			<div className={cn('relative -z-50 mt-2', open && 'z-50')}>
+			<div className={cn('relative -z-50 mt-2', open && 'z-[100]')}>
 				<div
 					className={cn(
-						'absolute top-0 h-fit w-full rounded-md border bg-popover p-1 text-popover-foreground shadow-md outline-none animate-in',
-						open && 'opacity-100 animate-in fade-in-0 zoom-in-75',
-						!open && 'opacity-0 animate-out fade-out-0 zoom-out-50',
+						'absolute top-0 w-full rounded-md border bg-popover p-1 text-popover-foreground shadow-md outline-none animate-in',
+						open && 'h-fit opacity-100 animate-in fade-in-0 zoom-in-75',
+						!open && 'h-0 opacity-0 animate-out fade-out-0 zoom-out-50',
 					)}
 				>
 					<CommandList>

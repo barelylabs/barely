@@ -18,7 +18,7 @@ export function WebEventFilterBadges(props: {
 				variant='muted'
 				onRemove={() => removeFilter(key)}
 				removeButton
-				rectangle
+				shape='rectangle'
 			>
 				{key === 'os' ? 'OS' : capitalize(key)}
 				<span className='ml-2 font-bold'>{value.toString()}</span>

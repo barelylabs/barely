@@ -180,7 +180,6 @@ export const MultiSelect = <T extends NonNullable<unknown>>(
 								key={getItemIdCallback(item)}
 								variant='subtle'
 								size='sm'
-								rectangle
 								removeButton
 								onRemove={() => {
 									handleUnselect(item);
