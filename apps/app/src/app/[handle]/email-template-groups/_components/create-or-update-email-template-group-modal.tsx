@@ -137,9 +137,16 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
 		await apiUtils.emailTemplateGroup.invalidate();
+		await apiUtils.emailTemplate.invalidate();
 		form.reset();
 		setShowModal(false);
-	}, [form, focusGridList, apiUtils.emailTemplateGroup, setShowModal]);
+	}, [
+		form,
+		focusGridList,
+		apiUtils.emailTemplateGroup,
+		apiUtils.emailTemplate,
+		setShowModal,
+	]);
 
 	const submitDisabled = mode === 'update' && !form.formState.isDirty;
 

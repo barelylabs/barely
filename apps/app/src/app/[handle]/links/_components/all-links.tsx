@@ -108,7 +108,7 @@ function LinkCard({
 			</div>
 
 			<Link href={`/${link.handle}/links/stats?assetId=${link.id}`} passHref>
-				<Badge size='md' icon={'stat'} variant='muted' rectangle asButton>
+				<Badge size='md' icon={'stat'} variant='muted' shape='rectangle' asButton>
 					{link.clicks} clicks
 				</Badge>
 			</Link>
