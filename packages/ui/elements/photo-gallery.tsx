@@ -24,19 +24,21 @@ function NextJsImage({
 	imageProps: { alt, title, sizes, className, onClick },
 	wrapperStyle,
 	priority = false,
-}: RenderPhotoProps & { priority?: boolean }) {
+}: RenderPhotoProps<Image> & {
+	priority?: boolean;
+}) {
 	return (
 		<div style={{ ...wrapperStyle, position: 'relative' }}>
-			{photo.key ?
+			{photo.s3Key ?
 				<Img
 					fill
-					s3Key={photo.key}
+					s3Key={photo.s3Key}
 					placeholder={'blurDataURL' in photo ? 'blur' : undefined}
 					{...{ alt, title, sizes, className, onClick, priority }}
 				/>
 			:	<Img
 					fill
-					src={photo}
+					src={photo.src}
 					placeholder={'blurDataURL' in photo ? 'blur' : undefined}
 					{...{ alt, title, sizes, className, onClick, priority }}
 				/>
@@ -45,11 +47,11 @@ function NextJsImage({
 	);
 }
 
-function NextJsImageWithPriority(props: RenderPhotoProps) {
+function NextJsImageWithPriority(props: RenderPhotoProps<Image>) {
 	return <NextJsImage {...props} priority />;
 }
 
-export type GalleryProps = Omit<PhotoAlbumProps, 'layout'> & {
+export type GalleryProps = Omit<PhotoAlbumProps, 'layout' | 'photos'> & {
 	layout?: 'masonry' | 'columns' | 'rows';
 	carousel?: boolean | 'mobileOnly';
 	carouselIndicator?: boolean;
@@ -77,30 +79,39 @@ export function PhotoGallery({
 		return (
 			<Carousel opts={{ containScroll: false }}>
 				<CarouselContent className='-ml-11'>
-					{photos.map((photo, index) => (
-						<CarouselItem key={index} className='basis-3/4'>
-							<div className='relative h-full w-full'>
-								{/* Blurred background */}
-								<div className='absolute left-0 top-0 flex h-full w-full items-center justify-center overflow-hidden'>
-									<BackgroundImg
-										src={photo.src}
-										alt={photo.alt ?? ''}
-										className='scale-125 opacity-50 blur-lg'
-									/>
+					{photos?.length &&
+						photos.map((photo, index) => (
+							<CarouselItem key={index} className='basis-3/4'>
+								<div className='relative h-full w-full'>
+									{/* Blurred background */}
+									{/* s3Key: {photo.s3Key} */}
+									<div className='absolute left-0 top-0 flex h-full w-full items-center justify-center overflow-hidden'>
+										<BackgroundImg
+											// src={photo.src}
+											s3Key={photo.s3Key ?? ''}
+											alt={''}
+											className='scale-125 overflow-hidden opacity-70 blur-lg'
+											sizes='(max-width: 450px) 100vw, (max-width: 640px) 50vw, 33vw'
+										/>
+									</div>
+									{/* Content */}
+									<div className='relative z-10 flex h-full items-center justify-center'>
+										{/* <pre>{JSON.stringify(photo, null, 2)}</pre> */}
+										<Img
+											// src={photo.src}
+											s3Key={photo.s3Key ?? ''}
+											alt={''}
+											width={photo.width}
+											height={photo.height}
+											priority={index < 2}
+											sizes='(max-width: 450px) 100vw, (max-width: 640px) 50vw, 33vw'
+
+											// className='h-20 w-20 object-cover'
+										/>
+									</div>
 								</div>
-								{/* Content */}
-								<div className='relative z-10 flex h-full items-center justify-center'>
-									<Img
-										src={photo.src}
-										alt={photo.alt ?? ''}
-										width={photo.width}
-										height={photo.height}
-										priority={index < 2}
-									/>
-								</div>
-							</div>
-						</CarouselItem>
-					))}
+							</CarouselItem>
+						))}
 				</CarouselContent>
 				{carouselPrevNext === 'overlay' ?
 					<>
@@ -110,14 +121,14 @@ export function PhotoGallery({
 				: carouselPrevNext === 'below' ?
 					<CarouselPreviousNext />
 				:	null}
-
 				{carouselIndicator && <CarouselIndicator />}
 			</Carousel>
 		);
 	}
 
 	return (
-		<ReactPhotoAlbum
+		// @ts-expect-error - TODO: type inference not working here
+		<ReactPhotoAlbum<Image>
 			{...props}
 			layout={layout}
 			columns={columns}

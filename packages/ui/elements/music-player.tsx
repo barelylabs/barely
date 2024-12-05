@@ -56,7 +56,7 @@ export function useMusicPlayer() {
 
 	const ref = useCallback(
 		(playerInstance: ReactPlayer | null) => {
-			console.log('player instance updated:', playerInstance);
+			// console.log('player instance updated:', playerInstance);
 			setPlayer(playerInstance);
 		},
 		[setPlayer],
@@ -266,6 +266,8 @@ export function MusicPlayerBar() {
 										s3Key={artworkKey ?? ''}
 										alt={currentOrFirstTrack.name}
 										className='h-11 w-11 rounded-xs'
+										width={44}
+										height={44}
 									/>
 									{/* <picture>
 										<img
