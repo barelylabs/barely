@@ -87,14 +87,14 @@ export function PressHero({
 			id='intro-mobile'
 		>
 			<BackgroundImg
-				// src={workspace.avatarImageUrl ?? workspace.headerImageUrl ?? ''}
-				sizes='100vw'
 				s3Key={workspace.avatarImageS3Key ?? workspace.headerImageS3Key ?? ''}
 				alt={workspace.name}
 				divStyle={{
 					opacity: headerOpacity,
 					transform: `scale(${headerZoom})`,
 				}}
+				priority
+				sizes='100vw'
 			>
 				<BottomThirdFadeGradient />
 			</BackgroundImg>
@@ -108,7 +108,6 @@ export function PressHero({
 			className='relative hidden h-[350px] w-full py-6 sm:block sm:h-[400px] md:h-[450px] md:py-10'
 		>
 			<BackgroundImg
-				// src={workspace.headerImageUrl ?? workspace.avatarImageUrl ?? ''}
 				sizes='100vw'
 				s3Key={workspace.headerImageS3Key ?? workspace.avatarImageS3Key ?? ''}
 				alt={workspace.name}
@@ -116,6 +115,7 @@ export function PressHero({
 					opacity: headerOpacity,
 					transform: `scale(${headerZoom})`,
 				}}
+				priority
 			>
 				<BottomThirdFadeGradient />
 			</BackgroundImg>

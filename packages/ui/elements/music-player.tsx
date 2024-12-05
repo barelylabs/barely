@@ -56,7 +56,7 @@ export function useMusicPlayer() {
 
 	const ref = useCallback(
 		(playerInstance: ReactPlayer | null) => {
-			console.log('player instance updated:', playerInstance);
+			// console.log('player instance updated:', playerInstance);
 			setPlayer(playerInstance);
 		},
 		[setPlayer],

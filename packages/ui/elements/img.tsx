@@ -23,7 +23,8 @@ export const s3Loader = ({
 	quality,
 }: Omit<ImageLoaderProps, 'src'> & { s3Key: string }) => {
 	const url = new URL(`${env.NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN}/${s3Key}`);
-	url.searchParams.set('format', 'auto');
+	url.searchParams.set('format', 'webp');
+	// console.log(`width for ${s3Key}`, width);
 	url.searchParams.set('width', width ? width.toString() : 'auto');
 	url.searchParams.set('quality', quality ? quality.toString() : '75');
 	return url.toString();
@@ -42,13 +43,13 @@ export function Img({
 	if (s3Key) {
 		return (
 			<Image
+				{...props}
 				src={s3Key}
 				width={width}
 				height={height}
 				alt={alt}
 				quality={quality}
 				priority={priority}
-				{...props}
 				loader={({ src, width, quality }) => s3Loader({ s3Key: src, width, quality })}
 			/>
 		);
@@ -59,36 +60,6 @@ export function Img({
 	}
 
 	return (
-		// <div className='relative h-full w-full'>
-		<Image
-			src={src}
-			alt={alt}
-			unoptimized
-			// loader={myLoader}
-			width={width}
-			height={height}
-			{...props}
-		/>
-		// </div>
+		<Image src={src} alt={alt} unoptimized width={width} height={height} {...props} />
 	);
 }
-
-// export function BarelyImg({ src, alt, width, height, ...props }: ImageProps) {
-// 	if (!src) {
-// 		return <div {...props} />;
-// 	}
-
-// 	return (
-// 		<div className='relative h-full w-full'>
-
-// 			<Image
-// 				src={src}
-// 				alt={alt}
-// 				loader={myLoader}
-// 				width={width}
-// 				height={height}
-// 				{...props}
-// 			/>
-// 		</div>
-// 	);
-// }
