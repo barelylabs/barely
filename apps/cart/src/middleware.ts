@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { setVisitorCookies } from '@barely/lib/utils/middleware';
 import { getAbsoluteUrl } from '@barely/lib/utils/url';
 
 export function middleware(req: NextRequest) {
@@ -8,7 +9,6 @@ export function middleware(req: NextRequest) {
 
 	console.log('domain', domain);
 	console.log('path', pathname);
-	// what about query params
 	console.log('query', req.nextUrl.search);
 
 	/* the mode is already set in the URL */
@@ -17,7 +17,10 @@ export function middleware(req: NextRequest) {
 		pathname.startsWith('/preview/') ||
 		pathname === '/'
 	) {
-		return NextResponse.next();
+		const res = NextResponse.next();
+		setVisitorCookies(req, res);
+
+		return res;
 	}
 
 	/* the mode is set in the subdomain. set the mode in the URL */
@@ -26,13 +29,21 @@ export function middleware(req: NextRequest) {
 			getAbsoluteUrl('cart', `preview${pathname}`).replace('www.', 'preview.') +
 			req.nextUrl.search;
 		console.log('pushing to preview', previewUrl);
-		return NextResponse.rewrite(previewUrl);
+
+		const res = NextResponse.rewrite(previewUrl);
+		setVisitorCookies(req, res);
+
+		return res;
 	}
 
 	/* assuming we are in live mode */
 	const liveUrl = getAbsoluteUrl('cart', `live${pathname}${req.nextUrl.search}`);
 	console.log('pushing to live', liveUrl);
-	return NextResponse.rewrite(liveUrl);
+
+	const res = NextResponse.rewrite(liveUrl);
+	setVisitorCookies(req, res);
+
+	return res;
 }
 
 export const config = {

@@ -3,10 +3,11 @@
 import type { StatDateRange } from '@barely/lib/server/routes/stat/stat.schema';
 import { Suspense } from 'react';
 import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
+import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { statDateRange } from '@barely/lib/server/routes/stat/stat.schema';
 import { api } from '@barely/server/api/react';
 
-import { ChevronRightToArrow } from '@barely/ui/elements/icon';
+import { ChevronRightToArrow, Icon } from '@barely/ui/elements/icon';
 import {
 	Select,
 	SelectContent,
@@ -17,17 +18,18 @@ import {
 import { Skeleton } from '@barely/ui/elements/skeleton';
 import { Text } from '@barely/ui/elements/typography';
 
+import { getFmPageUrlFromFmPage } from '@barely/utils/fm';
 import { getShortLinkUrlFromLink } from '@barely/utils/link';
 
 const dateRangeOptions: StatDateRange[] = ['1d', '1w', '28d'];
 
-export function LinkStatsHeader() {
+export function StatsHeader() {
 	const { filters, setFilter } = useWebEventStatFilters();
 
 	return (
 		<div className='flex flex-row items-center justify-between'>
 			<Suspense fallback={<Skeleton className='h-5 w-32' />}>
-				<ShortLinkLaunch />
+				<AssetLinkLaunch />
 			</Suspense>
 
 			<Select
@@ -55,22 +57,44 @@ export function LinkStatsHeader() {
 	);
 }
 
-export function ShortLinkLaunch() {
+export function AssetLinkLaunch() {
 	const { filters } = useWebEventStatFilters();
 
-	const [link] = api.link.byId.useSuspenseQuery(filters?.assetId ?? '', {});
+	const { handle } = useWorkspace();
 
-	if (!link) return <Text variant='xl/semibold'>All Links</Text>;
+	const [asset] = api.stat.assetById.useSuspenseQuery({
+		handle: handle,
+		assetId: filters.assetId,
+	});
 
-	return (
-		<a
-			className='group flex flex-row items-center gap-1'
-			href={getShortLinkUrlFromLink(link)}
-			target='_blank'
-			rel='noreferrer'
-		>
-			<Text variant='xl/semibold'>{`${link.domain}/${link.key}`}</Text>
-			<ChevronRightToArrow />
-		</a>
-	);
+	if (!asset) return <Text variant='xl/semibold'>All</Text>;
+
+	if (asset.type === 'fm') {
+		return (
+			<a
+				className='group flex flex-row items-center gap-2'
+				href={getFmPageUrlFromFmPage(asset.fmPage)}
+				target='_blank'
+				rel='noreferrer'
+			>
+				<Icon.fm size='18' />
+				<Text variant='xl/semibold'>{asset.fmPage.title}</Text>
+				<ChevronRightToArrow />
+			</a>
+		);
+	}
+
+	if (asset.type === 'link') {
+		return (
+			<a
+				className='group flex flex-row items-center gap-1'
+				href={getShortLinkUrlFromLink(asset.link)}
+				target='_blank'
+				rel='noreferrer'
+			>
+				<Text variant='xl/semibold'>{`${asset.link.domain}/${asset.link.key}`}</Text>
+				<ChevronRightToArrow />
+			</a>
+		);
+	}
 }

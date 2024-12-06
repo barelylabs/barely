@@ -52,6 +52,9 @@ export const Carts = pgTable(
 		fbclid: varchar('fbclid', { length: 255 }),
 		flowActionId: dbId('flowActionId'),
 
+		sessionReferer: varchar('sessionReferer', { length: 255 }),
+		sessionRefererUrl: varchar('sessionRefererUrl', { length: 255 }),
+
 		/* 
             🛒 cart checkout (main + bump) 
         */

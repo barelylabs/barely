@@ -193,6 +193,8 @@ export async function createMainCartFromFunnel({
 		flowActionId: tracking?.flowActionId,
 		landingPageId: tracking?.landingPageId,
 		refererId: tracking?.refererId,
+		sessionReferer: visitorInfo?.sessionReferer,
+		sessionRefererUrl: visitorInfo?.sessionRefererUrl,
 		// visitor
 		visitorIp: visitorInfo?.ip,
 		visitorGeo: visitorInfo?.geo,

@@ -15,10 +15,21 @@ export const visitorSessionTinybirdSchema = z
 			.string()
 			.nullish()
 			.transform(s => s ?? '(direct)'),
-		referer_id: z
+		sessionId: z.string(),
+		sessionRefererId: z
 			.string()
 			.nullish()
 			.transform(s => s ?? '(direct)'),
+
+		sessionReferer: z
+			.string()
+			.nullish()
+			.transform(s => s ?? '(direct)'),
+		sessionRefererUrl: z
+			.string()
+			.nullish()
+			.transform(s => s ?? '(direct)'),
+		fbclid: z.string().nullish(),
 	})
 	.merge(nextGeoSchema)
 	.merge(formattedUserAgentSchema);
@@ -63,13 +74,12 @@ export const webEventIngestSchema = z
 		workspaceId: z.string(),
 
 		// where the event happened
-		sessionId: z.string(),
 		assetId: z.string(),
 		href: z.string(),
-		key: z.string().optional().default(''), // short link, cartFunnel
+		key: z.string().optional().default(''), // link, cartFunnel, page, fm
 
 		// short link data
-		linkType: z.enum(['short', 'transparent', '']).optional().default(''),
+		// linkType: z.enum(['short', 'transparent', '']).optional().default(''),
 		domain: z.string().optional().default(''),
 
 		// destination
@@ -78,8 +88,14 @@ export const webEventIngestSchema = z
 			.optional()
 			.default(''),
 		// linkClick data
-		linkClickDestinationAssetId: z.string().nullish().default(''),
-		linkClickDestinationHref: z.string().nullish().default(''),
+		linkClickDestinationAssetId: z
+			.string()
+			.nullish()
+			.transform(s => s ?? ''),
+		linkClickDestinationHref: z
+			.string()
+			.nullish()
+			.transform(s => s ?? ''),
 
 		// event data
 		timestamp: z.string().datetime(),

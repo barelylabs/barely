@@ -74,7 +74,7 @@ DESCRIPTION >
 SQL >
 
     %
-    {% if defined(date_from) and day_diff(date_from, date_to) == 0 %}
+    {% if defined(date_from) and day_diff(date_from, date_to) <=1 0 %}
         select
             toStartOfHour(timestamp) as date,
             session_id,

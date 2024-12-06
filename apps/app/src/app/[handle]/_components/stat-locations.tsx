@@ -12,17 +12,16 @@ import { H } from '@barely/ui/elements/typography';
 
 import { COUNTRIES } from '@barely/utils/constants';
 
-export function LinkLocations() {
+export function StatLocations() {
 	const [tab, setTab] = useState<'Country' | 'City'>('Country');
 
-	const { filters, getSetFilterPath } = useWebEventStatFilters();
+	const { filtersWithHandle, getSetFilterPath } = useWebEventStatFilters();
 
-	const [countries] = api.stat.topCountries.useSuspenseQuery(filters);
-
-	const { data: cities } = api.stat.topCities.useQuery(filters);
+	const { data: countries } = api.stat.topCountries.useQuery(filtersWithHandle);
+	const { data: cities } = api.stat.topCities.useQuery(filtersWithHandle);
 
 	const locationData =
-		tab === 'Country' ? countries.map(c => ({ ...c, city: '' })) : cities;
+		tab === 'Country' ? countries?.map(c => ({ ...c, city: '' })) : cities;
 
 	const plotData: BarListBarProps[] =
 		!locationData ?

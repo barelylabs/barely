@@ -14,10 +14,12 @@ const prefixes = {
 	// web
 	landingPage: 'lp',
 	link: 'link',
+	linkClick: 'lc',
 	bio: 'bio',
 	landingPageSession: 'lp_session',
 	pressKit: 'pk',
 	webSession: 'web_session',
+	barelySession: 'bs',
 	// flow
 	flow: 'flow',
 	flowTrigger: 'flow_trigger',

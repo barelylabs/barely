@@ -35,7 +35,7 @@ Object.values(writes).forEach(({ name, description, schema }) => {
 
 		while (shape instanceof ZodOptional) {
 			// console.log(`${key} (before unwrapping) => `, shape._def.typeName);
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+			// @ts-expect-error - typescript isn't aware that we've already checked for ZodOptional
 			shape = shape.unwrap();
 			// console.log(`${key} (after unwrapping) => `, shape._def.typeName);
 		}

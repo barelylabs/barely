@@ -12,12 +12,12 @@ import { H } from '@barely/ui/elements/typography';
 
 export type DeviceTabs = 'Device' | 'Browser' | 'OS';
 
-export function LinkDevices() {
+export function StatDevices() {
 	const [tab, setTab] = useState<DeviceTabs>('Device');
 
-	const { filters, getSetFilterPath } = useWebEventStatFilters();
+	const { filtersWithHandle, getSetFilterPath } = useWebEventStatFilters();
 
-	const { data: devices } = api.stat.topDevices.useQuery(filters, {
+	const { data: devices } = api.stat.topDevices.useQuery(filtersWithHandle, {
 		select: data =>
 			data.map(d => ({
 				name: d.device,
@@ -28,7 +28,7 @@ export function LinkDevices() {
 			})),
 	});
 
-	const { data: browsers } = api.stat.topBrowsers.useQuery(filters, {
+	const { data: browsers } = api.stat.topBrowsers.useQuery(filtersWithHandle, {
 		select: data =>
 			data.map(d => ({
 				name: d.browser,
@@ -39,16 +39,19 @@ export function LinkDevices() {
 			})),
 	});
 
-	const { data: operatingSystems } = api.stat.topOperatingSystems.useQuery(filters, {
-		select: data =>
-			data.map(d => ({
-				name: d.os,
-				value: d.sessions,
-				icon: () => <OSIcon display={d.os} className='my-auto mr-2' />,
-				href: getSetFilterPath('os', d.os),
-				target: '_self',
-			})),
-	});
+	const { data: operatingSystems } = api.stat.topOperatingSystems.useQuery(
+		filtersWithHandle,
+		{
+			select: data =>
+				data.map(d => ({
+					name: d.os,
+					value: d.sessions,
+					icon: () => <OSIcon display={d.os} className='my-auto mr-2' />,
+					href: getSetFilterPath('os', d.os),
+					target: '_self',
+				})),
+		},
+	);
 
 	const listData =
 		tab === 'Device' ? devices

@@ -14,6 +14,7 @@ import type {
 	cartEventIngestSchema,
 	WEB_EVENT_TYPES__CART,
 	WEB_EVENT_TYPES__FM,
+	WEB_EVENT_TYPES__LINK,
 	WEB_EVENT_TYPES__PAGE,
 } from './event.tb';
 import { env } from '../../../env';
@@ -24,7 +25,6 @@ import { getFirstAndLastName } from '../../../utils/name';
 import { sqlIncrement } from '../../../utils/sql';
 import { ratelimit } from '../../../utils/upstash';
 import { dbHttp } from '../../db';
-// import { db } from '../../db';
 import { reportEventsToMeta } from '../../meta/meta.endpts.event';
 import { AnalyticsEndpoints } from '../analytics-endpoint/analytics-endpoint.sql';
 import { FmLinks, FmPages } from '../fm/fm.sql';
@@ -48,14 +48,13 @@ import {
 
 export interface RecordClickProps extends VisitorInfo {
 	link: LinkAnalyticsProps;
-	type: 'short' | 'transparent';
+	type: (typeof WEB_EVENT_TYPES__LINK)[number];
 	href: string;
 	platform?: (typeof FM_LINK_PLATFORMS)[number];
 }
 
 export async function recordLinkClick({
 	link,
-	type,
 	href,
 	ip,
 	geo,
@@ -79,18 +78,6 @@ export async function recordLinkClick({
 
 	const time = Date.now();
 	const timestamp = new Date(time).toISOString();
-
-	// increment the link click count in db
-	await dbHttp
-		.update(Links)
-		.set({ clicks: sqlIncrement(Links.clicks) })
-		.where(eq(Links.id, link.id));
-
-	// increment the workspace link usage count in db
-	await dbHttp
-		.update(Workspaces)
-		.set({ linkUsage: sqlIncrement(Workspaces.linkUsage) })
-		.where(eq(Workspaces.id, link.workspaceId));
 
 	/**
 	 * 👾 remarketing/analytics 👾
@@ -128,7 +115,6 @@ export async function recordLinkClick({
 					{
 						eventName: 'barely.link/click',
 						customData: {
-							linkType: type,
 							platform,
 						},
 					},
@@ -142,31 +128,26 @@ export async function recordLinkClick({
 		message: `metaRes => ${JSON.stringify(metaRes)}`,
 	});
 
-	// ♪ TikTok ♪
-
-	/**
-	 * 👾 end remarketing/analytics 👾
-	 */
-
 	// report event to tinybird
-
 	try {
 		const eventData = webEventIngestSchema.parse({
 			timestamp,
 			workspaceId: link.workspaceId,
 			assetId: link.id,
-			sessionId: newId('webSession'),
+			sessionId: newId('linkClick'),
 			href,
 			// link specifics (short link or transparent link)
-			type,
-			domain: type === 'short' ? link.domain : undefined,
-			key: type === 'short' ? link.key : undefined,
+			type: 'link/click',
+			domain: link.domain,
+			key: link.key,
 			// analytics
 			...geo,
 			...ua,
 			platform,
 			referer,
 			referer_url,
+			sessionReferer: referer,
+			sessionRefererUrl: referer_url,
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
 		});
 
@@ -178,9 +159,19 @@ export async function recordLinkClick({
 		throw new Error('ah!');
 	}
 
-	// console.log('tinybirdRes => ', tinybirdRes);
+	// increment the link click count in db
+	await dbHttp
+		.update(Links)
+		.set({ clicks: sqlIncrement(Links.clicks) })
+		.where(eq(Links.id, link.id));
 
-	return true;
+	// increment the workspace link usage count in db
+	await dbHttp
+		.update(Workspaces)
+		.set({ linkUsage: sqlIncrement(Workspaces.linkUsage) })
+		.where(eq(Workspaces.id, link.workspaceId));
+
+	return;
 }
 
 /* CART */
@@ -238,7 +229,12 @@ export async function recordCartEvent({
 		},
 		referer: cart.visitorReferer ?? visitor?.referer ?? 'Unknown',
 		referer_url: cart.visitorRefererUrl ?? visitor?.referer_url ?? 'Unknown',
-		referer_id: cart.visitorRefererId ?? visitor?.referer_id ?? 'Unknown',
+		fbclid: cart.fbclid ?? visitor?.fbclid ?? 'Unknown',
+		sessionId: cart.id,
+		sessionRefererId: cart.visitorRefererId ?? visitor?.sessionRefererId ?? 'Unknown',
+		// we need to add these to the cart, because sometimes events are reported from stripe webhooks
+		sessionReferer: cart.sessionReferer ?? visitor?.sessionReferer ?? 'Unknown',
+		sessionRefererUrl: cart.sessionRefererUrl ?? visitor?.sessionRefererUrl ?? 'Unknown',
 
 		isBot: visitor?.isBot ?? false,
 
@@ -330,10 +326,12 @@ export async function recordCartEvent({
 			...visitorInfo.geo,
 			...visitorInfo.userAgent,
 			referer: visitorInfo.referer,
-			referer_id: visitorInfo.referer_id,
-			referer_url: visitorInfo.referer_url,
+			sessionReferer: visitorInfo.sessionReferer,
+			sessionRefererUrl: visitorInfo.sessionRefererUrl,
+			sessionRefererId: visitorInfo.sessionRefererId,
+			fbclid: visitorInfo.fbclid,
+
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
-			// cart specifics
 			...cartEventData,
 		});
 
@@ -659,8 +657,7 @@ export async function recordFmEvent({
 
 	if (visitor?.isBot) return null;
 
-	// const rateLimitPeriod = env.RATE_LIMIT_RECORD_FM_EVENT ?? '1 h';
-	const rateLimitPeriod = '1 s';
+	const rateLimitPeriod = isDevelopment() ? '1 s' : '1 h';
 
 	const { success } = await ratelimit(10, rateLimitPeriod).limit(
 		`recordFmEvent:${visitor?.ip}:${fmPage.id}:${type}:${fmLink?.platform}`,
@@ -690,9 +687,8 @@ export async function recordFmEvent({
 		eventType: type,
 	});
 
-	const sourceUrl = isDevelopment() ? visitor?.href ?? '' : visitor?.referer_url ?? ''; // this is being logged from an api route in preview/production, so we want the referer_url
-
-	const fbclid = new URL(sourceUrl).searchParams.get('fbclid');
+	// this is being logged from an api route in preview/production, so the sourceUrl is the referer_url
+	const sourceUrl = (isDevelopment() ? visitor?.href : visitor?.referer_url) ?? '';
 
 	const metaRes =
 		metaPixel?.accessToken && metaEvents ?
@@ -704,28 +700,35 @@ export async function recordFmEvent({
 				ua: visitor?.userAgent.ua,
 				geo: visitor?.geo,
 				events: metaEvents,
-				fbclid,
+				fbclid: visitor?.fbclid ?? null,
 			}).catch(err => {
 				console.log('error => ', err);
 				return { reported: false };
 			})
 		:	{ reported: false };
 
-	// report event to tinybird
+	// report event to tb
 	try {
-		const tinybirdRes = await ingestFmEvent({
+		await ingestFmEvent({
 			timestamp,
 			workspaceId: fmPage.workspaceId,
 			assetId: fmPage.id,
-			sessionId: newId('fmSession'),
-			type,
 			...visitor,
+			sessionId: visitor?.sessionId ?? newId('barelySession'),
+			sessionRefererId: visitor?.sessionRefererId ?? null,
+			sessionRefererUrl: visitor?.sessionRefererUrl ?? '',
+			type,
 			href: sourceUrl,
-			linkClickDestinationHref: fmLink?.url,
+			linkClickDestinationHref: fmLink?.url ?? null,
+			platform: fmLink?.platform ?? '',
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
+			...(type === 'fm/view' ?
+				{
+					referer: visitor?.sessionReferer,
+					referer_url: visitor?.sessionRefererUrl,
+				}
+			:	{}),
 		});
-
-		console.log('tinybirdRes for fm event => ', tinybirdRes);
 	} catch (error) {
 		console.log('error => ', error);
 		throw new Error('ah!');
@@ -869,7 +872,6 @@ export async function recordLandingPageEvent({
 	});
 
 	const sourceUrl = isDevelopment() ? visitor?.href ?? '' : visitor?.referer_url ?? ''; // this is being logged from an api route, so we want the referer_url (i.e. the client url calling the logged route)
-	const fbclid = new URL(sourceUrl).searchParams.get('fbclid');
 
 	const metaRes =
 		metaPixel?.accessToken && metaEvents ?
@@ -881,26 +883,29 @@ export async function recordLandingPageEvent({
 				ua: visitor?.userAgent.ua,
 				geo: visitor?.geo,
 				events: metaEvents,
-				fbclid,
+				fbclid: visitor?.fbclid ?? null,
 			})
 		:	{ reported: false };
 
 	// report event to tinybird
 	try {
-		const tinybirdRes = await ingestPageEvent({
+		await ingestPageEvent({
 			timestamp,
 			workspaceId: page.workspaceId,
 			assetId: page.id,
-			sessionId: newId('landingPageSession'),
-			type,
 			...visitor,
+			sessionId: visitor?.sessionId ?? newId('landingPageSession'),
+			sessionRefererId: visitor?.sessionRefererId ?? null,
+			sessionReferer: visitor?.sessionReferer ?? null,
+			sessionRefererUrl: visitor?.sessionRefererUrl ?? null,
+			type,
 			href: sourceUrl,
 			linkClickDestinationAssetId,
 			linkClickDestinationHref,
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
 		});
 
-		console.log('tinybirdRes for page event => ', tinybirdRes);
+		// console.log('tinybirdRes for page event => ', tinybirdRes);
 	} catch (error) {
 		console.log('error >>', error);
 		throw new Error('ah!');

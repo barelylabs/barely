@@ -25,8 +25,6 @@ export const fmPageRouter = createTRPCRouter({
 			const { visitor } = ctx;
 			const { fmId, fmLinkParams, type } = input;
 
-			console.log('logging fmPageEvent', { fmId, fmLinkParams, type });
-
 			const fmPage =
 				(await ctx.db.http.query.FmPages.findFirst({
 					where: eq(FmPages.id, fmId),

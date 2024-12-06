@@ -53,14 +53,15 @@ export function parseLinkDomain(req: NextRequest) {
 	console.log('domain after parsing', domain);
 
 	// if hostname is {handle}.barely.link, it's a transparent link. otherwise, it's a short link
-	const linkClickType: RecordClickProps['type'] =
-		domain.endsWith(`.${process.env.NEXT_PUBLIC_TRANSPARENT_LINK_ROOT_DOMAIN}`) ?
-			'transparent'
-		:	'short';
+	// const linkClickType: RecordClickProps['type'] =
+	// 	domain.endsWith(`.${process.env.NEXT_PUBLIC_TRANSPARENT_LINK_ROOT_DOMAIN}`) ?
+	// 		'transparent'
+	// 	:	'short';
 
 	if (
-		linkClickType === 'short' &&
-		(process.env.VERCEL_ENV === 'development' || process.env.VERCEL_ENV === 'preview')
+		// linkClickType === 'short' &&
+		process.env.VERCEL_ENV === 'development' ||
+		process.env.VERCEL_ENV === 'preview'
 	) {
 		const domainParam = req.nextUrl.searchParams.get('domain');
 		console.log('domainParam', domainParam);
@@ -91,7 +92,7 @@ export function parseLinkDomain(req: NextRequest) {
 		: href.includes('youtu.be') || href.includes('youtube') ? 'youtube'
 		: undefined;
 
-	return { domain, href, linkClickType, platform };
+	return { domain, href, platform };
 }
 
 export interface TransparentLinkParams {
@@ -144,23 +145,23 @@ export function parseShortLink(req: NextRequest) {
 }
 
 export function parseLink(req: NextRequest) {
-	const { href, linkClickType, platform } = parseLinkDomain(req);
+	const { href, platform } = parseLinkDomain(req);
+	return {
+		// linkClickType,
+		href,
+		platform,
+		...parseShortLink(req),
+	};
 
-	if (linkClickType === 'transparent') {
-		return {
-			linkClickType,
-			href,
-			platform,
-			...parseTransparentLink(req),
-		};
-	} else if (linkClickType === 'short') {
-		return {
-			linkClickType,
-			href,
-			platform,
-			...parseShortLink(req),
-		};
-	} else {
-		throw new Error('Invalid link click type');
-	}
+	// if (linkClickType === 'transparent') {
+	// 	return {
+	// 		linkClickType,
+	// 		href,
+	// 		platform,
+	// 		...parseTransparentLink(req),
+	// 	};
+	// } else if (linkClickType === 'short') {
+	// } else {
+	// 	throw new Error('Invalid link click type');
+	// }
 }

@@ -1,7 +1,7 @@
 import { BlurImage } from '@barely/ui/elements/blur-image';
 import { Icon } from '@barely/ui/elements/icon';
 
-import type { DeviceTabs } from '~/app/[handle]/links/stats/link-devices';
+import type { DeviceTabs } from '~/app/[handle]/_components/stat-devices';
 
 export default function DeviceIcon({
 	display,
