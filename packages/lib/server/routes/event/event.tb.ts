@@ -15,6 +15,11 @@ export const visitorSessionTinybirdSchema = z
 			.string()
 			.nullish()
 			.transform(s => s ?? '(direct)'),
+
+		referer_id: z
+			.string()
+			.nullish()
+			.transform(s => s ?? ''), // deprecated
 		sessionId: z.string(),
 		sessionRefererId: z
 			.string()
