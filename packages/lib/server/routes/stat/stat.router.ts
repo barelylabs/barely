@@ -76,7 +76,6 @@ export const statRouter = createTRPCRouter({
 				types: ['link/click'],
 			});
 
-			// console.log('timeseries => ', timeseries);
 			return timeseries.data.map(row => ({
 				...row,
 				clicks: row.events,
