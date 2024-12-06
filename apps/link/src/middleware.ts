@@ -23,10 +23,10 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	//* 🧬 parse the incoming request *//
 
 	// let where: SQL | undefined = undefined;
-	const where = sqlAnd([
-		eq(Links.domain, linkProps.domain),
-		eq(Links.key, url.pathname.replace('/', '')),
-	]);
+	// const where = sqlAnd([
+	// 	eq(Links.domain, linkProps.domain),
+	// 	eq(Links.key, url.pathname.replace('/', '')),
+	// ]);
 
 	// if (linkProps.linkClickType === 'transparent') {
 	// 	if (!linkProps.handle && !linkProps.app) {
@@ -57,7 +57,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	// 	]);
 	// }
 
-	if (!where) return NextResponse.rewrite(getAbsoluteUrl('link', '/404'));
+	// if (!where) return NextResponse.rewrite(getAbsoluteUrl('link', '/404'));
 
 	const link: LinkAnalyticsProps | undefined = await dbHttp.query.Links.findFirst({
 		where: sqlAnd([
@@ -96,8 +96,8 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 		link,
 		platform: linkProps.platform,
 		// visit data
-		type: 'link/click',
 		...visitorInfo,
+		type: 'link/click',
 		href: linkProps.href,
 	};
 

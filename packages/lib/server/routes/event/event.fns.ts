@@ -62,6 +62,7 @@ export async function recordLinkClick({
 	referer,
 	referer_url,
 	isBot,
+	type,
 	platform,
 }: RecordClickProps) {
 	if (isBot) return null;
@@ -122,12 +123,6 @@ export async function recordLinkClick({
 			})
 		:	{ reported: false };
 
-	await log({
-		type: 'link',
-		fn: 'recordLinkClick',
-		message: `metaRes => ${JSON.stringify(metaRes)}`,
-	});
-
 	// report event to tinybird
 	try {
 		const eventData = webEventIngestSchema.parse({
@@ -137,7 +132,7 @@ export async function recordLinkClick({
 			sessionId: newId('linkClick'),
 			href,
 			// link specifics (short link or transparent link)
-			type: 'link/click',
+			type,
 			domain: link.domain,
 			key: link.key,
 			// analytics

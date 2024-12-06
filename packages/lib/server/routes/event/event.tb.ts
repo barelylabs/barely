@@ -79,7 +79,7 @@ export const webEventIngestSchema = z
 		key: z.string().optional().default(''), // link, cartFunnel, page, fm
 
 		// short link data
-		// linkType: z.enum(['short', 'transparent', '']).optional().default(''),
+		linkType: z.enum(['short', 'transparent', '']).optional().default(''), // deprecated
 		domain: z.string().optional().default(''),
 
 		// destination
