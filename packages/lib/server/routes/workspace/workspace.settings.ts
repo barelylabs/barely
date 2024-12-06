@@ -61,6 +61,9 @@ export interface Plan {
 	}[];
 }
 
+export const WORKSPACE_TIMEZONES = ['America/New_York', 'America/Los_Angeles'] as const;
+export type WorkspaceTimezone = (typeof WORKSPACE_TIMEZONES)[number];
+
 export const WORKSPACE_PLANS = new Map<PlanType, Plan>([
 	[
 		'free',

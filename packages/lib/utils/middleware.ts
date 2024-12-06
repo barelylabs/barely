@@ -1,4 +1,4 @@
-import type { NextRequest } from 'next/server';
+import type { NextRequest, NextResponse } from 'next/server';
 import { userAgent } from 'next/server';
 import { ipAddress } from '@vercel/edge';
 import { z } from 'zod';
@@ -10,6 +10,7 @@ import {
 	nextUserAgentToFormattedSchema,
 } from '../server/next/next.schema';
 import { getRandomGeoData } from '../server/routes/link/link.constants';
+import { newId } from './id';
 import { getDomainWithoutWWW } from './link';
 
 export const detectBot = (req: NextRequest) => {
@@ -55,9 +56,18 @@ export function parseIp(req: NextRequest) {
 export function parseReferer(req: NextRequest) {
 	const referer_url = req.headers.get('referer'); // today i learned that referer is spelled wrong (https://en.wikipedia.org/wiki/HTTP_referer)
 	const referer = referer_url ? getDomainWithoutWWW(referer_url) : null;
-	const referer_id = req.nextUrl.searchParams.get('refererId');
 
-	return { referer, referer_url, referer_id };
+	return { referer, referer_url };
+}
+
+export function parseSession(req: NextRequest) {
+	const sessionId = req.cookies.get('bsid')?.value ?? null;
+	const sessionReferer = req.cookies.get('session_referer')?.value ?? null;
+	const sessionRefererUrl = req.cookies.get('session_referer_url')?.value ?? null;
+	const sessionRefererId = req.cookies.get('session_referer_id')?.value ?? null;
+	const fbclid = req.cookies.get('fbclid')?.value ?? null;
+
+	return { sessionId, sessionReferer, sessionRefererUrl, sessionRefererId, fbclid };
 }
 
 export const visitorInfoSchema = z.object({
@@ -67,8 +77,14 @@ export const visitorInfoSchema = z.object({
 	isBot: z.boolean(),
 	referer: z.string().nullable(),
 	referer_url: z.string().nullable(),
-	referer_id: z.string().nullable(),
+	// referer_id: z.string().nullable(),
 	href: z.string(),
+	// session
+	sessionId: z.string().nullable(),
+	fbclid: z.string().nullable(),
+	sessionReferer: z.string().nullable(),
+	sessionRefererUrl: z.string().nullable(),
+	sessionRefererId: z.string().nullable(),
 });
 export type VisitorInfo = z.infer<typeof visitorInfoSchema>;
 
@@ -78,7 +94,10 @@ export function parseReqForVisitorInfo(req: NextRequest) {
 	const userAgent = parseUserAgent(req);
 	const isBot = detectBot(req);
 	const href = req.nextUrl.href;
-	const { referer, referer_url, referer_id } = parseReferer(req);
+	const { referer, referer_url } = parseReferer(req);
+
+	const { sessionId, sessionReferer, sessionRefererUrl, sessionRefererId, fbclid } =
+		parseSession(req);
 
 	return {
 		ip,
@@ -87,12 +106,52 @@ export function parseReqForVisitorInfo(req: NextRequest) {
 		isBot,
 		referer,
 		referer_url,
-		referer_id,
+		// referer_id,
 		href,
+		sessionId,
+		fbclid,
+		sessionReferer,
+		sessionRefererUrl,
+		sessionRefererId,
 	} satisfies VisitorInfo;
 }
 
-// export type VisitorInfo = ReturnType<typeof parseReqForVisitorInfo>;
+export function setVisitorCookies(req: NextRequest, res: NextResponse) {
+	const params = req.nextUrl.searchParams;
+	const { referer, referer_url } = parseReferer(req);
+
+	const barelySessionId = res.cookies.get('bsid');
+
+	if (!barelySessionId) {
+		res.cookies.set('bsid', newId('barelySession'), {
+			httpOnly: true,
+			maxAge: 60 * 60 * 24,
+		});
+	}
+
+	if (referer)
+		res.cookies.set('session_referer', referer, { httpOnly: true, maxAge: 60 * 60 * 24 });
+	if (referer_url)
+		res.cookies.set('session_referer_url', referer_url, {
+			httpOnly: true,
+			maxAge: 60 * 60 * 24,
+		});
+
+	const sessionRefererId = res.cookies.get('sessionRefererId')?.value;
+	if (sessionRefererId)
+		res.cookies.set('sessionRefererId', sessionRefererId, {
+			httpOnly: true,
+			maxAge: 60 * 60 * 24,
+		});
+
+	if (params.has('fbclid'))
+		res.cookies.set('fbclid', params.get('fbclid') ?? '', {
+			httpOnly: true,
+			maxAge: 60 * 60 * 24,
+		});
+
+	return;
+}
 
 export const DEFAULT_VISITOR_INFO: VisitorInfo = {
 	ip: env.LOCALHOST_IP,
@@ -114,6 +173,10 @@ export const DEFAULT_VISITOR_INFO: VisitorInfo = {
 	isBot: false,
 	referer: null,
 	referer_url: null,
-	referer_id: null,
+	sessionId: null,
+	sessionReferer: null,
+	sessionRefererUrl: null,
+	sessionRefererId: null,
 	href: 'https://localhost:3000/',
+	fbclid: null,
 };

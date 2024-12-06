@@ -100,6 +100,7 @@ function FmPageCard({
 					value: fmPage.amazonMusicClicks,
 				},
 			]}
+			statsHref={`/${fmPage.handle}/fm/stats?assetId=${fmPage.id}`}
 		/>
 	);
 }

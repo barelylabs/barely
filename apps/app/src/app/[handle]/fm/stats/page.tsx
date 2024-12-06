@@ -1,20 +1,16 @@
-import { Suspense } from 'react';
-
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { StatDevices } from '~/app/[handle]/_components/stat-devices';
 import { StatLocations } from '~/app/[handle]/_components/stat-locations';
 import { StatReferers } from '~/app/[handle]/_components/stat-referers';
 import { StatsHeader } from '~/app/[handle]/_components/stats-header';
-import { LinkTimeseries } from '~/app/[handle]/links/stats/link-timeseries';
+import { FmTimeseries } from '~/app/[handle]/fm/stats/fm-timeseries';
 
-export default function LinkStatsPage() {
+export default function FmStatsPage() {
 	return (
 		<>
-			<DashContentHeader title='Link Stats' />
+			<DashContentHeader title='FM Stats' />
 			<StatsHeader />
-			<Suspense fallback={<div>Loading...</div>}>
-				<LinkTimeseries />
-			</Suspense>
+			<FmTimeseries />
 
 			<div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
 				<StatLocations />

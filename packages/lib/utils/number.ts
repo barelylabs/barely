@@ -43,3 +43,12 @@ export function numToPaddedString(
 ): string {
 	return num.toString().padStart(digits, '0');
 }
+
+export function calcPercent(num: number, total: number): string {
+	if (!total) return '0%';
+	return `${((num / total) * 100).toFixed(0)}%`;
+}
+
+export function numToPercent(num: number): string {
+	return `${(num * 100).toFixed(0)}%`;
+}

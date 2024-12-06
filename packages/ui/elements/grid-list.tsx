@@ -7,6 +7,7 @@ import type {
 	Selection,
 } from 'react-aria-components';
 import React, { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useCopy } from '@barely/lib/hooks/use-copy';
 import { cn } from '@barely/lib/utils/cn';
 import { cva } from 'class-variance-authority';
@@ -149,6 +150,7 @@ interface GridListCardProps
 		name: string;
 		value?: number | string | null;
 	}[];
+	statsHref?: string;
 }
 
 export const GridListCard = React.forwardRef<
@@ -175,6 +177,7 @@ export const GridListCard = React.forwardRef<
 			quickActions = {},
 			statsRight,
 			stats,
+			statsHref,
 			...props
 		},
 		ref,
@@ -272,22 +275,24 @@ export const GridListCard = React.forwardRef<
 									<>{children}</>
 									<div className='ml-auto mr-2'>
 										{stats && stats.length > 0 && (
-											<div className='items-left flex flex-col'>
-												{stats.map((stat, i) => {
-													const StatIcon = stat.icon ? Icon[stat.icon] : Icon.stat;
-													return (
-														<div
-															key={stat.name + i}
-															className='flex flex-row items-center gap-1'
-														>
-															<StatIcon className='h-2.5 w-2.5' />
-															<Text variant='xs/normal'>
-																{stat.name}: {stat.value ?? 0}
-															</Text>
-														</div>
-													);
-												})}
-											</div>
+											<Link href={statsHref ?? '#'}>
+												<div className='items-left flex flex-col'>
+													{stats.map((stat, i) => {
+														const StatIcon = stat.icon ? Icon[stat.icon] : Icon.stat;
+														return (
+															<div
+																key={stat.name + i}
+																className='flex flex-row items-center gap-1'
+															>
+																<StatIcon className='h-2.5 w-2.5' />
+																<Text variant='xs/normal'>
+																	{stat.name}: {stat.value ?? 0}
+																</Text>
+															</div>
+														);
+													})}
+												</div>
+											</Link>
 										)}
 										{statsRight && <div className='ml-auto mr-2'>{statsRight}</div>}
 									</div>

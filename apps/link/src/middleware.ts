@@ -1,6 +1,6 @@
 import type { RecordClickProps } from '@barely/lib/server/routes/event/event.fns';
 import type { LinkAnalyticsProps } from '@barely/lib/server/routes/link/link.schema';
-import type { SQL } from 'drizzle-orm';
+// import type { SQL } from 'drizzle-orm';
 import type { NextFetchEvent, NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { dbHttp } from '@barely/lib/server/db';
@@ -10,7 +10,7 @@ import { Links } from '@barely/lib/server/routes/link/link.sql';
 import { parseReqForVisitorInfo } from '@barely/lib/utils/middleware';
 import { sqlAnd } from '@barely/lib/utils/sql';
 import { getAbsoluteUrl } from '@barely/lib/utils/url';
-import { eq, isNull } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
 export const config = {
 	matcher: ['/((?!api|mobile|_next|_static|favicon|logos|sitemap|atom|404|500).*)'],
@@ -22,41 +22,48 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 
 	//* 🧬 parse the incoming request *//
 
-	let where: SQL | undefined = undefined;
+	// let where: SQL | undefined = undefined;
+	const where = sqlAnd([
+		eq(Links.domain, linkProps.domain),
+		eq(Links.key, url.pathname.replace('/', '')),
+	]);
 
-	if (linkProps.linkClickType === 'transparent') {
-		if (!linkProps.handle && !linkProps.app) {
-			console.log(
-				'no handle or app found for transparent link click',
-				url.href,
-				linkProps,
-			);
-			return NextResponse.rewrite(getAbsoluteUrl('www', '/link'));
-		}
+	// if (linkProps.linkClickType === 'transparent') {
+	// 	if (!linkProps.handle && !linkProps.app) {
+	// 		console.log(
+	// 			'no handle or app found for transparent link click',
+	// 			url.href,
+	// 			linkProps,
+	// 		);
+	// 		return NextResponse.rewrite(getAbsoluteUrl('www', '/link'));
+	// 	}
 
-		if (!linkProps.handle) {
-			console.log('no handle found for transparent link click', url.href, linkProps);
-			return NextResponse.rewrite(getAbsoluteUrl('link', '/404'));
-		}
+	// 	if (!linkProps.handle) {
+	// 		console.log('no handle found for transparent link click', url.href, linkProps);
+	// 		return NextResponse.rewrite(getAbsoluteUrl('link', '/404'));
+	// 	}
 
-		where = sqlAnd([
-			eq(Links.handle, linkProps.handle),
-			linkProps.app ? eq(Links.app, linkProps.app) : isNull(Links.app),
-			linkProps.appRoute ?
-				eq(Links.appRoute, linkProps.appRoute)
-			:	isNull(Links.appRoute),
-		]);
-	} else if (linkProps.linkClickType === 'short') {
-		where = sqlAnd([
-			eq(Links.domain, linkProps.domain),
-			eq(Links.key, url.pathname.replace('/', '')),
-		]);
-	}
+	// 	where = sqlAnd([
+	// 		eq(Links.handle, linkProps.handle),
+	// 		linkProps.app ? eq(Links.app, linkProps.app) : isNull(Links.app),
+	// 		linkProps.appRoute ?
+	// 			eq(Links.appRoute, linkProps.appRoute)
+	// 		:	isNull(Links.appRoute),
+	// 	]);
+	// } else if (linkProps.linkClickType === 'short') {
+	// 	where = sqlAnd([
+	// 		eq(Links.domain, linkProps.domain),
+	// 		eq(Links.key, url.pathname.replace('/', '')),
+	// 	]);
+	// }
 
 	if (!where) return NextResponse.rewrite(getAbsoluteUrl('link', '/404'));
 
 	const link: LinkAnalyticsProps | undefined = await dbHttp.query.Links.findFirst({
-		where,
+		where: sqlAnd([
+			eq(Links.domain, linkProps.domain),
+			eq(Links.key, url.pathname.replace('/', '')),
+		]),
 		columns: {
 			// for analytics
 			id: true,
@@ -89,7 +96,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 		link,
 		platform: linkProps.platform,
 		// visit data
-		type: linkProps.linkClickType,
+		type: 'link/click',
 		...visitorInfo,
 		href: linkProps.href,
 	};

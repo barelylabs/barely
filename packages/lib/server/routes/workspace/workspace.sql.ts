@@ -33,7 +33,7 @@ import { Tracks } from '../track/track.sql';
 import { Transactions } from '../transaction/transaction.sql';
 import { _Users_To_Workspaces } from '../user/user.sql';
 import { WorkspaceInvites } from '../workspace-invite/workspace-invite.sql';
-import { WORKSPACE_PLAN_TYPES } from './workspace.settings';
+import { WORKSPACE_PLAN_TYPES, WORKSPACE_TIMEZONES } from './workspace.settings';
 
 export const Workspaces = pgTable(
 	'Workspaces',
@@ -81,6 +81,11 @@ export const Workspaces = pgTable(
 		instagramFollowers: integer('instagramFollowers'),
 		twitterFollowers: integer('twitterFollowers'),
 		facebookFollowers: integer('facebookFollowers'),
+
+		//
+		timezone: text('timezone', { enum: WORKSPACE_TIMEZONES })
+			.notNull()
+			.default('America/New_York'),
 
 		// billing
 		stripeCustomerId: varchar('stripeCustomerId', { length: 255 }),

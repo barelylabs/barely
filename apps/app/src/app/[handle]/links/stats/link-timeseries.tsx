@@ -1,6 +1,7 @@
 'use client';
 
 import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
+import { cn } from '@barely/lib/utils/cn';
 import { api } from '@barely/server/api/react';
 
 import { AreaChart } from '@barely/ui/charts/area-chart';
@@ -13,10 +14,10 @@ import { nFormatter } from '@barely/utils/number';
 import { WebEventFilterBadges } from '~/app/[handle]/_components/filter-badges';
 
 export function LinkTimeseries() {
-	const { filters, formatTimestamp, badgeFilters } = useWebEventStatFilters();
+	const { filtersWithHandle, formatTimestamp, badgeFilters } = useWebEventStatFilters();
 
 	const [timeseries] = api.stat.linkTimeseries.useSuspenseQuery(
-		{ ...filters },
+		{ ...filtersWithHandle },
 		{
 			select: data =>
 				data.map(row => ({
@@ -32,13 +33,29 @@ export function LinkTimeseries() {
 		<Card className='p-6'>
 			<div className='flex flex-row items-center justify-between'>
 				<div className='flex flex-col gap-1'>
-					<div className='flex flex-row items-end gap-1'>
-						<H size='1'>{totalClicks}</H>
-						<Icon.stat className='mb-0.5 h-7 w-7' />
+					<div className='flex flex-row'>
+						<button
+							type='button'
+							className={cn(
+								'flex flex-col gap-1 rounded-t-md py-3 pl-4 pr-8',
+								'border-b-3 border-blue-500 bg-blue-100',
+							)}
+							disabled
+							// onClick={() => setShowClicks(!showClicks)}
+						>
+							<div className='flex flex-row items-center gap-1'>
+								<div className='m-auto rounded-sm bg-blue p-0.5'>
+									<Icon.click className='mb-[1px] h-3.5 w-3.5 text-white' />
+								</div>
+								<Text variant='sm/medium' className='uppercase '>
+									CLICKS
+								</Text>
+							</div>
+							<div className='flex flex-row items-baseline gap-1'>
+								<H size='4'>{totalClicks}</H>
+							</div>
+						</button>
 					</div>
-					<Text variant='sm/medium' className='uppercase'>
-						TOTAL CLICKS
-					</Text>
 				</div>
 				<div className='flex flex-row justify-between gap-2'>
 					<WebEventFilterBadges filters={badgeFilters} />
@@ -49,7 +66,7 @@ export function LinkTimeseries() {
 				data={timeseries}
 				index='date'
 				categories={['clicks']}
-				colors={['indigo']}
+				colors={['blue']}
 				showXAxis={true}
 				showLegend={false}
 				curveType='linear'

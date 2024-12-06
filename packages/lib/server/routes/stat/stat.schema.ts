@@ -7,21 +7,31 @@ import {
 import { queryStringEnumArrayToCommaString } from '../../../utils/zod-helpers';
 import { tinybird } from '../../tinybird/client';
 import { WEB_EVENT_TYPES } from '../event/event.tb';
+import { WORKSPACE_TIMEZONES } from '../workspace/workspace.settings';
 
 export const statDateRange = z.enum(['1d', '1w', '28d', '1y']);
 export type StatDateRange = z.infer<typeof statDateRange>;
 
+// export const TIMEZONE_TO_MV_MAP = {
+// 	'America/New_York': 'web_sessions_et_mv',
+// 	'America/Los_Angeles': 'web_sessions_pt_mv',
+// 	// 'Europe/London': 'web_sessions_uk_mv',
+// 	// Add other timezone -> materialized view mappings as needed
+// } as const;
+
 // standard pipe params
 export const stdStatPipeParamsSchema = z.object({
-	handle: z.string().optional(),
+	// handle: z.string().optional(),
 	workspaceId: z.string().optional(),
 	assetId: z.string().optional(),
-	// types: z
-	// 	.array(z.enum(['transparentLinkClick', 'shortLinkClick', 'cart_initiateCheckout']))
-	// 	.optional(),
-	types: queryStringEnumArrayToCommaString(WEB_EVENT_TYPES).optional(),
+	types: queryStringEnumArrayToCommaString([
+		...WEB_EVENT_TYPES,
+		'transparentLinkClick',
+		'shortLinkClick',
+	]).optional(),
 	date_from: z.string(),
 	date_to: z.string(),
+	timezone: z.enum(WORKSPACE_TIMEZONES).optional(),
 
 	// pagination
 	skip: z.number().optional(),

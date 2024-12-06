@@ -76,19 +76,16 @@ export default async function LandingPage({
 					{/* Content */}
 					<div className='relative z-10 flex h-full w-full items-center justify-center overflow-hidden sm:max-w-sm lg:max-w-md'>
 						{fm.coverArt && (
-							<>
-								<Img
-									s3Key={fm.coverArt.s3Key}
-									alt={''}
-									width={500}
-									height={500}
-									className='w-full rounded-t-md border-[11px] border-background lg:rounded-b-md'
-									placeholder={fm.coverArt.blurDataUrl ? 'blur' : undefined}
-									blurDataURL={fm.coverArt.blurDataUrl ?? undefined}
-									priority
-								/>
-								{/* <pre>{fm.coverArt.blurHash}</pre> */}
-							</>
+							<Img
+								s3Key={fm.coverArt.s3Key}
+								alt={''}
+								width={500}
+								height={500}
+								className='w-full rounded-t-md border-[11px] border-background lg:rounded-b-md'
+								placeholder={fm.coverArt.blurDataUrl ? 'blur' : undefined}
+								blurDataURL={fm.coverArt.blurDataUrl ?? undefined}
+								priority
+							/>
 						)}
 					</div>
 				</div>
