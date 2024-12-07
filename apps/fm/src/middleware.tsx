@@ -17,10 +17,10 @@ export async function middleware(req: NextRequest) {
 
 	let handle: string | null = null;
 
-	if (domainParts && domainParts.length >= 2) {
-		handle = domainParts[0] ?? null;
-	} else if (isPreview()) {
+	if (isPreview()) {
 		handle = params.get('handle');
+	} else if (domainParts && domainParts.length >= 2) {
+		handle = domainParts[0] ?? null;
 	}
 
 	if (handle) {
