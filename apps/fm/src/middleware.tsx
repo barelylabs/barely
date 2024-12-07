@@ -29,14 +29,16 @@ export async function middleware(req: NextRequest) {
 		const res = NextResponse.rewrite(url);
 		setVisitorCookies(req, res);
 
-		console.log('fm cookies >>', res.cookies.getAll());
-
+		console.log('fm cookies (rewrite) >>', res.cookies.getAll());
 		console.log('rewriting to', url);
 		return res;
 	}
 
 	const res = NextResponse.next();
 	setVisitorCookies(req, res);
+
+	console.log('fm cookies (no rewrite) >>', res.cookies.getAll());
+	// console.log('fm cookies (no rewrite) >>', res.cookies.getAll());
 	return res;
 }
 

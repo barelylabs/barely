@@ -19,7 +19,7 @@ import type { VisitorInfo } from '../../utils/middleware';
 
 import { env } from '../../env';
 import { getUserWorkspaceByHandle } from '../../utils/auth';
-import { DEFAULT_VISITOR_INFO } from '../../utils/middleware';
+// import { DEFAULT_VISITOR_INFO } from '../../utils/middleware';
 import { ratelimit } from '../../utils/upstash';
 import { dbHttp, dbSchema } from '../db';
 import { _Users_To_Workspaces } from '../routes/user/user.sql';
@@ -70,6 +70,8 @@ export const createTRPCContext = (opts: {
 	//     userAgent: opts.visitor?.userAgent ?? opts.headers.g,
 	// };
 
+	console.log('trpc context visitor >>', opts.visitor);
+
 	const context = {
 		// auth
 		session: opts.session,
@@ -79,7 +81,8 @@ export const createTRPCContext = (opts: {
 		pageSessionId,
 		pusherSocketId,
 		// pii
-		visitor: env.VERCEL_ENV === 'development' ? DEFAULT_VISITOR_INFO : opts.visitor,
+		// visitor: env.VERCEL_ENV === 'development' ? DEFAULT_VISITOR_INFO : opts.visitor,
+		visitor: opts.visitor,
 		// for convenience
 		db: {
 			http: dbHttp,
@@ -124,6 +127,8 @@ export const createTRPCRouter = t.router;
 export const mergeRouters = t.mergeRouters;
 
 const dbPoolMiddleware = middleware(async ({ next, ctx }) => {
+	console.log('dbPoolMiddleware visitor >>', ctx.visitor); // Add this log
+
 	const pool = new Pool({ connectionString: env.DATABASE_POOL_URL });
 	const dbPool = drizzle(pool, {
 		schema: dbSchema,

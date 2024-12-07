@@ -180,7 +180,10 @@ export async function reportEventsToMeta(props: MetaEventProps) {
 			},
 		);
 
-		console.log('metaEventResponse => ', metaEventResJson);
+		if (metaEventResJson.status !== 200) {
+			console.log('metaEventResponse errored => ', metaEventResJson);
+		}
+
 		return { reported: true };
 	} catch (err) {
 		return { reported: false, error: err as string };

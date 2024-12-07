@@ -62,9 +62,9 @@ export function parseReferer(req: NextRequest) {
 
 export function parseSession(req: NextRequest) {
 	const sessionId = req.cookies.get('bsid')?.value ?? null;
-	const sessionReferer = req.cookies.get('session_referer')?.value ?? null;
-	const sessionRefererUrl = req.cookies.get('session_referer_url')?.value ?? null;
-	const sessionRefererId = req.cookies.get('session_referer_id')?.value ?? null;
+	const sessionReferer = req.cookies.get('sessionReferer')?.value ?? null;
+	const sessionRefererUrl = req.cookies.get('sessionRefererUrl')?.value ?? null;
+	const sessionRefererId = req.cookies.get('sessionRefererId')?.value ?? null;
 	const fbclid = req.cookies.get('fbclid')?.value ?? null;
 
 	return { sessionId, sessionReferer, sessionRefererUrl, sessionRefererId, fbclid };
@@ -130,9 +130,10 @@ export function setVisitorCookies(req: NextRequest, res: NextResponse) {
 	}
 
 	if (referer)
-		res.cookies.set('session_referer', referer, { httpOnly: true, maxAge: 60 * 60 * 24 });
+		res.cookies.set('sessionReferer', referer, { httpOnly: true, maxAge: 60 * 60 * 24 });
+
 	if (referer_url)
-		res.cookies.set('session_referer_url', referer_url, {
+		res.cookies.set('sessionRefererUrl', referer_url, {
 			httpOnly: true,
 			maxAge: 60 * 60 * 24,
 		});

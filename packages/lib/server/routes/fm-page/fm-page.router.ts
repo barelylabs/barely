@@ -23,6 +23,7 @@ export const fmPageRouter = createTRPCRouter({
 		)
 		.mutation(async ({ ctx, input }) => {
 			const { visitor } = ctx;
+			console.log('fmPageRouter.log visitor >>', visitor);
 			const { fmId, fmLinkParams, type } = input;
 
 			const fmPage =
