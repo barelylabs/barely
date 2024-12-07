@@ -24,7 +24,7 @@ export const visitorSessionTinybirdSchema = z
 		sessionRefererId: z
 			.string()
 			.nullish()
-			.transform(s => s ?? '(direct)'),
+			.transform(s => s ?? null),
 
 		sessionReferer: z
 			.string()

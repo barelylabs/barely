@@ -54,7 +54,16 @@ export function parseIp(req: NextRequest) {
 }
 
 export function parseReferer(req: NextRequest) {
-	const referer_url = req.headers.get('referer'); // today i learned that referer is spelled wrong (https://en.wikipedia.org/wiki/HTTP_referer)
+	let referer_url = req.headers.get('referer'); // today i learned that referer is spelled wrong (https://en.wikipedia.org/wiki/HTTP_referer)
+
+	if (!referer_url) {
+		// let's check for signs it's from meta
+		const ua = parseUserAgent(req);
+		if (ua.browser === 'Instagram') referer_url = 'http://instagram.com';
+		if (ua.browser === 'Facebook') referer_url = 'http://facebook.com';
+		//fixme: add more as needed. also, is this an appropriate thing to do?
+	}
+
 	const referer = referer_url ? getDomainWithoutWWW(referer_url) : null;
 
 	return { referer, referer_url };
