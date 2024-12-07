@@ -9,6 +9,9 @@ export async function middleware(req: NextRequest) {
 	const domain = req.headers.get('host');
 	const params = req.nextUrl.searchParams;
 
+	const referer = req.headers.get('referer');
+	console.log('fm middleware referer', referer);
+
 	const domainParts = domain?.split('.');
 	// if barely is the first part of the domain, we assume it's structured as www.barely.fm/[handle]/[key]. Skip the rest of the middleware.
 	if (domainParts?.[0] === 'barely') {
@@ -24,7 +27,7 @@ export async function middleware(req: NextRequest) {
 	}
 
 	if (handle) {
-		const url = getAbsoluteUrl('fm', `/${handle}${pathname}`);
+		const url = getAbsoluteUrl('fm', `${handle}${pathname}`);
 
 		const res = NextResponse.rewrite(url);
 		setVisitorCookies(req, res);
