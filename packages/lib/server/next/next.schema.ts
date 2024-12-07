@@ -89,28 +89,30 @@ export const nextGeoSchema = z.object({
 	city: z
 		.string()
 		.nullish()
-		.transform(s => (s ? decodeURIComponent(s) : 'Unknown')),
+		.default('Unknown')
+		.transform(s => (s ? decodeURIComponent(s) : s)),
 	country: z
 		.string()
 		.nullish()
-		.transform(s => (s ? decodeURIComponent(s) : 'Unknown')),
+		.default('Unknown')
+		.transform(s => (s ? decodeURIComponent(s) : s)),
+	latitude: z.string().nullish().default('Unknown'),
+	longitude: z.string().nullish().default('Unknown'),
 	region: z
 		.string()
 		.nullish()
-		.transform(s => (s ? decodeURIComponent(s) : 'Unknown')),
-	zip: z
-		.string()
-		.nullish()
-		.transform(s => s ?? 'Unknown'),
-	latitude: z
-		.string()
-		.nullish()
-		.transform(s => s ?? 'Unknown'),
-	longitude: z
-		.string()
-		.nullish()
-		.transform(s => s ?? 'Unknown'),
+		.default('Unknown')
+		.transform(s => (s ? decodeURIComponent(s) : s)),
+	zip: z.string().nullish().default('Unknown'),
 });
+// .transform(geo => ({
+// 	city: geo.city ? decodeURIComponent(geo.city) : geo.city,
+// 	country: geo.country ? decodeURIComponent(geo.country) : geo.country,
+// 	latitude: geo.latitude,
+// 	longitude: geo.longitude,
+// 	region: geo.region ? decodeURIComponent(geo.region) : geo.region,
+// 	zip: geo.zip,
+// }));
 
 // export const formattedNextGeoSchema = z.object({
 // 	city: z.string().nullable.default('Unknown'),
