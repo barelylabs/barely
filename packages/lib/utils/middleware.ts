@@ -62,9 +62,9 @@ export function parseReferer(req: NextRequest) {
 
 export function parseSession(req: NextRequest) {
 	const sessionId = req.cookies.get('bsid')?.value ?? null;
-	const sessionReferer = req.cookies.get('session_referer')?.value ?? null;
-	const sessionRefererUrl = req.cookies.get('session_referer_url')?.value ?? null;
-	const sessionRefererId = req.cookies.get('session_referer_id')?.value ?? null;
+	const sessionReferer = req.cookies.get('sessionReferer')?.value ?? null;
+	const sessionRefererUrl = req.cookies.get('sessionRefererUrl')?.value ?? null;
+	const sessionRefererId = req.cookies.get('sessionRefererId')?.value ?? null;
 	const fbclid = req.cookies.get('fbclid')?.value ?? null;
 
 	return { sessionId, sessionReferer, sessionRefererUrl, sessionRefererId, fbclid };
@@ -120,25 +120,24 @@ export function setVisitorCookies(req: NextRequest, res: NextResponse) {
 	const params = req.nextUrl.searchParams;
 	const { referer, referer_url } = parseReferer(req);
 
-	const barelySessionId = res.cookies.get('bsid');
-
-	if (!barelySessionId) {
+	if (!res.cookies.get('bsid')) {
 		res.cookies.set('bsid', newId('barelySession'), {
 			httpOnly: true,
 			maxAge: 60 * 60 * 24,
 		});
 	}
 
-	if (referer)
-		res.cookies.set('session_referer', referer, { httpOnly: true, maxAge: 60 * 60 * 24 });
-	if (referer_url)
-		res.cookies.set('session_referer_url', referer_url, {
+	if (referer && !res.cookies.get('sessionReferer'))
+		res.cookies.set('sessionReferer', referer, { httpOnly: true, maxAge: 60 * 60 * 24 });
+
+	if (referer_url && !res.cookies.get('sessionRefererUrl'))
+		res.cookies.set('sessionRefererUrl', referer_url, {
 			httpOnly: true,
 			maxAge: 60 * 60 * 24,
 		});
 
 	const sessionRefererId = res.cookies.get('sessionRefererId')?.value;
-	if (sessionRefererId)
+	if (sessionRefererId && !res.cookies.get('sessionRefererId'))
 		res.cookies.set('sessionRefererId', sessionRefererId, {
 			httpOnly: true,
 			maxAge: 60 * 60 * 24,

@@ -648,7 +648,7 @@ export async function recordFmEvent({
 	fmLink?: FmLink;
 	visitor?: VisitorInfo;
 }) {
-	console.log('visitor >>', visitor);
+	console.log('recordFmEvent visitor >>', visitor);
 
 	if (visitor?.isBot) return null;
 

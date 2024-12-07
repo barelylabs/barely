@@ -15,13 +15,13 @@ const handler = async function (req: NextRequest) {
 	const sessionId = cookies().get('bsid')?.value ?? null;
 	console.log('trpc fm sessionId from cookies >>', sessionId);
 
-	const sessionReferer = cookies().get('session_referer')?.value ?? null;
+	const sessionReferer = cookies().get('sessionReferer')?.value ?? null;
 	console.log('trpc fm sessionReferer from cookies >>', sessionReferer);
 
-	const sessionRefererUrl = cookies().get('session_referer_url')?.value ?? null;
+	const sessionRefererUrl = cookies().get('sessionRefererUrl')?.value ?? null;
 	console.log('trpc fm sessionRefererUrl from cookies >>', sessionRefererUrl);
 
-	const sessionRefererId = cookies().get('session_referer_id')?.value ?? null;
+	const sessionRefererId = cookies().get('sessionRefererId')?.value ?? null;
 	console.log('trpc fm sessionRefererId from cookies >>', sessionRefererId);
 
 	const fbclid = cookies().get('fbclid')?.value ?? null;
