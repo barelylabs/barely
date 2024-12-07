@@ -96,7 +96,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 		link,
 		platform: linkProps.platform,
 		// visit data
-		...visitorInfo,
+		visitor: visitorInfo,
 		type: 'link/click',
 		href: linkProps.href,
 	};
