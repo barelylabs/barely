@@ -15,7 +15,11 @@ export async function middleware(req: NextRequest) {
 	const domainParts = domain?.split('.');
 	// if barely is the first part of the domain, we assume it's structured as www.barely.fm/[handle]/[key]. Skip the rest of the middleware.
 	if (domainParts?.[0] === 'barely') {
-		return NextResponse.next();
+		const res = NextResponse.next();
+		setVisitorCookies(req, res);
+
+		console.log('fm cookies (barely) >>', res.cookies.getAll());
+		return res;
 	}
 
 	let handle: string | null = null;
