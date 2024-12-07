@@ -45,34 +45,45 @@ import {
  */
 
 // export type RecordClickProp = z.infer<typeof visitorSessionTinybirdSchema>;
+export const flattenVisitorForIngest = (visitor?: VisitorInfo) => {
+	if (!visitor) return {};
+	const { geo, userAgent, ...rest } = visitor;
+	return {
+		...rest,
+		...geo,
+		...userAgent,
+	};
+};
 
-export interface RecordClickProps extends VisitorInfo {
+export interface RecordClickProps {
 	link: LinkAnalyticsProps;
 	type: (typeof WEB_EVENT_TYPES__LINK)[number];
 	href: string;
 	platform?: (typeof FM_LINK_PLATFORMS)[number];
+	visitor?: VisitorInfo;
 }
 
 export async function recordLinkClick({
 	link,
 	href,
-	ip,
-	geo,
-	userAgent: ua,
-	referer,
-	referer_url,
-	isBot,
+	// ip,
+	// geo,
+	// userAgent: ua,
+	// referer,
+	// referer_url,
+	// isBot,
 	type,
 	platform,
+	visitor,
 }: RecordClickProps) {
-	if (isBot) return null;
+	if (visitor?.isBot) return null;
 
 	// deduplicate clicks from the same ip & linkId - only record 1 link click per ip per linkId per hour
 	const rateLimitPeriod =
 		env.RATE_LIMIT_RECORD_LINK_CLICK ?? env.VERCEL_ENV === 'development' ? '1 s' : '1 h';
 
 	const { success } = await ratelimit(10, rateLimitPeriod).limit(
-		`recordClick:${ip}:${link.id ?? '_root'}`,
+		`recordClick:${visitor?.ip}:${link.id ?? '_root'}`,
 	);
 
 	if (!success) return null;
@@ -109,9 +120,9 @@ export async function recordLinkClick({
 				accessToken: metaPixel.accessToken,
 				sourceUrl,
 				fbclid,
-				ip,
-				ua: ua.ua,
-				geo,
+				ip: visitor?.ip,
+				ua: visitor?.userAgent.ua,
+				geo: visitor?.geo,
 				events: [
 					{
 						eventName: 'barely.link/click',
@@ -136,13 +147,8 @@ export async function recordLinkClick({
 			domain: link.domain,
 			key: link.key,
 			// analytics
-			...geo,
-			...ua,
+			...flattenVisitorForIngest(visitor),
 			platform,
-			referer,
-			referer_url,
-			sessionReferer: referer,
-			sessionRefererUrl: referer_url,
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
 		});
 
@@ -318,13 +324,12 @@ export async function recordCartEvent({
 			type,
 			key: cartFunnel.key,
 			// analytics
-			...visitorInfo.geo,
-			...visitorInfo.userAgent,
-			referer: visitorInfo.referer,
-			sessionReferer: visitorInfo.sessionReferer,
-			sessionRefererUrl: visitorInfo.sessionRefererUrl,
-			sessionRefererId: visitorInfo.sessionRefererId,
-			fbclid: visitorInfo.fbclid,
+			...flattenVisitorForIngest(visitor),
+			// referer: visitorInfo.referer,
+			// sessionReferer: visitorInfo.sessionReferer,
+			// sessionRefererUrl: visitorInfo.sessionRefererUrl,
+			// sessionRefererId: visitorInfo.sessionRefererId,
+			// fbclid: visitorInfo.fbclid,
 
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
 			...cartEventData,
@@ -703,26 +708,27 @@ export async function recordFmEvent({
 		:	{ reported: false };
 
 	// report event to tb
+
 	try {
 		await ingestFmEvent({
 			timestamp,
 			workspaceId: fmPage.workspaceId,
 			assetId: fmPage.id,
-			...visitor,
 			sessionId: visitor?.sessionId ?? newId('barelySession'),
-			sessionRefererId: visitor?.sessionRefererId ?? null,
-			sessionRefererUrl: visitor?.sessionRefererUrl ?? '',
+			...flattenVisitorForIngest(visitor),
+			// sessionRefererId: visitor?.sessionRefererId ?? null,
+			// sessionRefererUrl: visitor?.sessionRefererUrl ?? '',
 			type,
 			href: sourceUrl,
 			linkClickDestinationHref: fmLink?.url ?? null,
 			platform: fmLink?.platform ?? '',
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
-			...(type === 'fm/view' ?
-				{
-					referer: visitor?.sessionReferer,
-					referer_url: visitor?.sessionRefererUrl,
-				}
-			:	{}),
+			// ...(type === 'fm/view' ?
+			// 	{
+			// 		referer: visitor?.sessionReferer,
+			// 		referer_url: visitor?.sessionRefererUrl,
+			// 	}
+			// :	{}),
 		});
 	} catch (error) {
 		console.log('error => ', error);
@@ -888,11 +894,13 @@ export async function recordLandingPageEvent({
 			timestamp,
 			workspaceId: page.workspaceId,
 			assetId: page.id,
-			...visitor,
 			sessionId: visitor?.sessionId ?? newId('landingPageSession'),
-			sessionRefererId: visitor?.sessionRefererId ?? null,
-			sessionReferer: visitor?.sessionReferer ?? null,
-			sessionRefererUrl: visitor?.sessionRefererUrl ?? null,
+			...flattenVisitorForIngest(visitor),
+			// ...visitor,
+			// sessionId: visitor?.sessionId ?? newId('landingPageSession'),
+			// sessionRefererId: visitor?.sessionRefererId ?? null,
+			// sessionReferer: visitor?.sessionReferer ?? null,
+			// sessionRefererUrl: visitor?.sessionRefererUrl ?? null,
 			type,
 			href: sourceUrl,
 			linkClickDestinationAssetId,
