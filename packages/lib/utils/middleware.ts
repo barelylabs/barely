@@ -10,6 +10,7 @@ import {
 	nextUserAgentToFormattedSchema,
 } from '../server/next/next.schema';
 import { getRandomGeoData } from '../server/routes/link/link.constants';
+import { isDevelopment } from './environment';
 import { newId } from './id';
 import { getDomainWithoutWWW } from './link';
 
@@ -33,16 +34,15 @@ export const detectBot = (req: NextRequest) => {
 };
 
 export function parseGeo(req: NextRequest) {
-	return env.VERCEL_ENV === 'development' ?
-			getRandomGeoData()
-		:	nextGeoSchema.parse({
-				country: req.geo?.country ?? req.headers.get('x-vercel-ip-country') ?? 'US',
-				region: req.geo?.region ?? req.headers.get('x-vercel-ip-country-region') ?? 'NY',
-				city: req.geo?.city ?? req.headers.get('x-vercel-ip-city') ?? 'New York',
-				latitude: req.geo?.latitude ?? req.headers.get('x-vercel-ip-latitude') ?? 40.7128,
-				longitude:
-					req.geo?.longitude ?? req.headers.get('x-vercel-ip-longitude') ?? -74.006,
-			});
+	return isDevelopment() ? getRandomGeoData() : (
+			nextGeoSchema.parse({
+				country: req.geo?.country ?? req.headers.get('x-vercel-ip-country'),
+				region: req.geo?.region ?? req.headers.get('x-vercel-ip-country-region'),
+				city: req.geo?.city ?? req.headers.get('x-vercel-ip-city'),
+				latitude: req.geo?.latitude ?? req.headers.get('x-vercel-ip-latitude'),
+				longitude: req.geo?.longitude ?? req.headers.get('x-vercel-ip-longitude'),
+			})
+		);
 }
 
 export function parseUserAgent(req: NextRequest) {
