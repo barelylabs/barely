@@ -69,6 +69,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 			id: true,
 			workspaceId: true,
 			domain: true,
+			handle: true,
 			key: true,
 			// for routing
 			url: true,
@@ -85,11 +86,12 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	console.log('link for ', url.href, link);
 
 	//* 🚧 handle route errors 🚧  *//
-	if (!link ?? !link?.url) return NextResponse.rewrite(getAbsoluteUrl('link', '404'));
+	if (!link ?? !link?.url ?? !link?.key)
+		return NextResponse.rewrite(getAbsoluteUrl('link', '404'));
 
 	//* 📈 report event to analytics + remarketing *//
 
-	const visitorInfo = parseReqForVisitorInfo(req);
+	const visitorInfo = parseReqForVisitorInfo({ req, handle: '', key: link.key });
 
 	const recordClickProps: RecordClickProps = {
 		// link data

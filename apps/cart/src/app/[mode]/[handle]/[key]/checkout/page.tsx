@@ -54,7 +54,7 @@ export default async function CartPage({
 				handle,
 				key,
 				shipTo,
-				tracking: eventTrackingParams.data ?? {},
+				// tracking: eventTrackingParams.data ?? {},
 			});
 
 	const { defaultHex: colorPrimary } = getDynamicStyleVariables({

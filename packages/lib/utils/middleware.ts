@@ -13,6 +13,7 @@ import { getRandomGeoData } from '../server/routes/link/link.constants';
 import { isDevelopment } from './environment';
 import { newId } from './id';
 import { getDomainWithoutWWW } from './link';
+import { raise } from './raise';
 
 export const detectBot = (req: NextRequest) => {
 	const url = req.nextUrl;
@@ -33,6 +34,34 @@ export const detectBot = (req: NextRequest) => {
 	return false;
 };
 
+// cart
+export const parseCartUrl = (url: string) => {
+	const parsed = new URL(url);
+	const handle = parsed.pathname.split('/')[1] ?? raise('handle is required');
+	const key = parsed.pathname.split('/')[2] ?? raise('key is required');
+
+	return { handle, key };
+};
+
+// fm
+export const parseFmUrl = (url: string) => {
+	console.log('parseFmUrl', url);
+	const parsed = new URL(url);
+	const handle = parsed.pathname.split('/')[1] ?? raise('handle is required');
+	const key = parsed.pathname.split('/')[2] ?? raise('key is required');
+
+	return { handle, key };
+};
+
+// page
+export const parsePageUrl = (url: string) => {
+	const parsed = new URL(url);
+	const handle = parsed.pathname.split('/')[1] ?? raise('handle is required');
+	const key = parsed.pathname.split('/')[2] ?? raise('key is required');
+
+	return { handle, key };
+};
+
 export function parseGeo(req: NextRequest) {
 	return isDevelopment() ? getRandomGeoData() : (
 			nextGeoSchema.parse({
@@ -44,6 +73,7 @@ export function parseGeo(req: NextRequest) {
 					req.geo?.latitude ?? req.headers.get('x-vercel-ip-latitude') ?? 'Unknown',
 				longitude:
 					req.geo?.longitude ?? req.headers.get('x-vercel-ip-longitude') ?? 'Unknown',
+				zip: 'Unknown',
 			})
 		);
 }
@@ -72,18 +102,32 @@ export function parseReferer(req: NextRequest) {
 	return { referer, referer_url };
 }
 
-export function parseSession(req: NextRequest) {
-	const fanId = req.cookies.get('fanId')?.value ?? null;
-	const sessionId = req.cookies.get('bsid')?.value ?? null;
-	const sessionReferer = req.cookies.get('sessionReferer')?.value ?? null;
-	const sessionRefererUrl = req.cookies.get('sessionRefererUrl')?.value ?? null;
-	const sessionRefererId = req.cookies.get('sessionRefererId')?.value ?? null;
-	const fbclid = req.cookies.get('fbclid')?.value ?? null;
+export function parseSession({
+	req,
+	handle,
+	key,
+}: {
+	req: NextRequest;
+	handle: string;
+	key: string;
+}) {
+	const fanId = req.cookies.get(`${handle}.${key}.fanId`)?.value ?? null;
+	const sessionId = req.cookies.get(`${handle}.${key}.bsid`)?.value ?? null;
+	const sessionReferer =
+		req.cookies.get(`${handle}.${key}.sessionReferer`)?.value ?? null;
+	const sessionRefererUrl =
+		req.cookies.get(`${handle}.${key}.sessionRefererUrl`)?.value ?? null;
+	const sessionRefererId =
+		req.cookies.get(`${handle}.${key}.sessionRefererId`)?.value ?? null;
+	const fbclid = req.cookies.get(`${handle}.${key}.fbclid`)?.value ?? null;
 	const sessionEmailBroadcastId =
-		req.cookies.get('sessionEmailBroadcastId')?.value ?? null;
-	const sessionEmailTemplateId = req.cookies.get('sessionEmailTemplateId')?.value ?? null;
-	const sessionFlowActionId = req.cookies.get('sessionFlowActionId')?.value ?? null;
-	const sessionLandingPageId = req.cookies.get('sessionLandingPageId')?.value ?? null;
+		req.cookies.get(`${handle}.${key}.sessionEmailBroadcastId`)?.value ?? null;
+	const sessionEmailTemplateId =
+		req.cookies.get(`${handle}.${key}.sessionEmailTemplateId`)?.value ?? null;
+	const sessionFlowActionId =
+		req.cookies.get(`${handle}.${key}.sessionFlowActionId`)?.value ?? null;
+	const sessionLandingPageId =
+		req.cookies.get(`${handle}.${key}.sessionLandingPageId`)?.value ?? null;
 
 	return {
 		fanId,
@@ -123,7 +167,15 @@ export const visitorInfoSchema = z.object({
 });
 export type VisitorInfo = z.infer<typeof visitorInfoSchema>;
 
-export function parseReqForVisitorInfo(req: NextRequest) {
+export function parseReqForVisitorInfo({
+	req,
+	handle,
+	key,
+}: {
+	req: NextRequest;
+	handle: string;
+	key: string;
+}) {
 	const ip = parseIp(req);
 	const geo = parseGeo(req);
 	const userAgent = parseUserAgent(req);
@@ -131,7 +183,7 @@ export function parseReqForVisitorInfo(req: NextRequest) {
 	const href = req.nextUrl.href;
 	const { referer, referer_url } = parseReferer(req);
 
-	const visitorSession = parseSession(req);
+	const visitorSession = parseSession({ req, handle, key });
 
 	return {
 		ip,
@@ -146,65 +198,91 @@ export function parseReqForVisitorInfo(req: NextRequest) {
 	} satisfies VisitorInfo;
 }
 
-export function setVisitorCookies(req: NextRequest, res: NextResponse) {
+export function setVisitorCookies({
+	req,
+	res,
+	handle,
+	key,
+}: {
+	req: NextRequest;
+	res: NextResponse;
+	handle: string;
+	key: string;
+}) {
 	const params = req.nextUrl.searchParams;
 	const { referer, referer_url } = parseReferer(req);
 
-	if (!res.cookies.get('bsid')) {
-		res.cookies.set('bsid', newId('barelySession'), {
+	if (!res.cookies.get(`${handle}.${key}.bsid`)) {
+		res.cookies.set(`${handle}.${key}.bsid`, newId('barelySession'), {
 			httpOnly: true,
 			maxAge: 60 * 60 * 24,
 		});
 	}
 
-	if (referer && !res.cookies.get('sessionReferer'))
+	if (referer && !res.cookies.get(`${handle}.${key}.sessionReferer`))
 		res.cookies.set('sessionReferer', referer, { httpOnly: true, maxAge: 60 * 60 * 24 });
 
-	if (referer_url && !res.cookies.get('sessionRefererUrl'))
-		res.cookies.set('sessionRefererUrl', referer_url, {
+	if (referer_url && !res.cookies.get(`${handle}.${key}.sessionRefererUrl`))
+		res.cookies.set(`${handle}.${key}.sessionRefererUrl`, referer_url, {
 			httpOnly: true,
 			maxAge: 60 * 60 * 24,
 		});
 
 	// params
 	if (params.has('emailBroadcastId'))
-		res.cookies.set('sessionEmailBroadcastId', params.get('emailBroadcastId') ?? '', {
-			httpOnly: true,
-			maxAge: 60 * 60 * 24,
-		});
+		res.cookies.set(
+			`${handle}.${key}.sessionEmailBroadcastId`,
+			params.get('emailBroadcastId') ?? '',
+			{
+				httpOnly: true,
+				maxAge: 60 * 60 * 24,
+			},
+		);
 
 	if (params.has('emailTemplateId'))
-		res.cookies.set('sessionEmailTemplateId', params.get('emailTemplateId') ?? '', {
-			httpOnly: true,
-			maxAge: 60 * 60 * 24,
-		});
+		res.cookies.set(
+			`${handle}.${key}.sessionEmailTemplateId`,
+			params.get('emailTemplateId') ?? '',
+			{
+				httpOnly: true,
+				maxAge: 60 * 60 * 24,
+			},
+		);
 
 	if (params.has('fanId'))
-		res.cookies.set('fanId', params.get('fanId') ?? '', {
+		res.cookies.set(`${handle}.${key}.fanId`, params.get('fanId') ?? '', {
 			httpOnly: true,
 			maxAge: 60 * 60 * 24,
 		});
 
 	if (params.has('fbclid'))
-		res.cookies.set('fbclid', params.get('fbclid') ?? '', {
+		res.cookies.set(`${handle}.${key}.fbclid`, params.get('fbclid') ?? '', {
 			httpOnly: true,
 			maxAge: 60 * 60 * 24,
 		});
 
 	if (params.has('flowActionId'))
-		res.cookies.set('sessionFlowActionId', params.get('flowActionId') ?? '', {
-			httpOnly: true,
-			maxAge: 60 * 60 * 24,
-		});
+		res.cookies.set(
+			`${handle}.${key}.sessionFlowActionId`,
+			params.get('flowActionId') ?? '',
+			{
+				httpOnly: true,
+				maxAge: 60 * 60 * 24,
+			},
+		);
 
 	if (params.has('landingPageId'))
-		res.cookies.set('sessionLandingPageId', params.get('landingPageId') ?? '', {
-			httpOnly: true,
-			maxAge: 60 * 60 * 24,
-		});
+		res.cookies.set(
+			`${handle}.${key}.sessionLandingPageId`,
+			params.get('landingPageId') ?? '',
+			{
+				httpOnly: true,
+				maxAge: 60 * 60 * 24,
+			},
+		);
 
-	if (params.has('refererId') && !res.cookies.get('sessionRefererId'))
-		res.cookies.set('sessionRefererId', params.get('refererId') ?? '', {
+	if (params.has('refererId') && !res.cookies.get(`${handle}.${key}.sessionRefererId`))
+		res.cookies.set(`${handle}.${key}.sessionRefererId`, params.get('refererId') ?? '', {
 			httpOnly: true,
 			maxAge: 60 * 60 * 24,
 		});

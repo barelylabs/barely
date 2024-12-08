@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { isPreview } from '@barely/lib/utils/environment';
-import { setVisitorCookies } from '@barely/lib/utils/middleware';
+import { isDevelopment, isPreview } from '@barely/lib/utils/environment';
+import { parseFmUrl, setVisitorCookies } from '@barely/lib/utils/middleware';
 import { getAbsoluteUrl } from '@barely/lib/utils/url';
 
 export async function middleware(req: NextRequest) {
@@ -14,9 +14,10 @@ export async function middleware(req: NextRequest) {
 
 	const domainParts = domain?.split('.');
 	// if barely is the first part of the domain, we assume it's structured as www.barely.fm/[handle]/[key]. Skip the rest of the middleware.
-	if (domainParts?.[0] === 'barely') {
+	if (isDevelopment() || domainParts?.[0] === 'barely') {
+		const { handle, key } = parseFmUrl(req.url);
 		const res = NextResponse.next();
-		setVisitorCookies(req, res);
+		setVisitorCookies({ req, res, handle, key });
 
 		console.log('fm cookies (barely) >>', res.cookies.getAll());
 		return res;
@@ -24,17 +25,19 @@ export async function middleware(req: NextRequest) {
 
 	let handle: string | null = null;
 
+	const key = pathname.replace('/', '');
+
 	if (isPreview()) {
 		handle = params.get('handle');
 	} else if (domainParts && domainParts.length >= 2) {
 		handle = domainParts[0] ?? null;
 	}
 
-	if (handle) {
+	if (handle && key) {
 		const url = getAbsoluteUrl('fm', `${handle}${pathname}`);
 
 		const res = NextResponse.rewrite(url);
-		setVisitorCookies(req, res);
+		setVisitorCookies({ req, res, handle, key });
 
 		console.log('fm cookies (rewrite) >>', res.cookies.getAll());
 		console.log('rewriting to', url);
@@ -42,7 +45,7 @@ export async function middleware(req: NextRequest) {
 	}
 
 	const res = NextResponse.next();
-	setVisitorCookies(req, res);
+	// setVisitorCookies({ req, res, handle, key });
 
 	console.log('fm cookies (no rewrite) >>', res.cookies.getAll());
 	// console.log('fm cookies (no rewrite) >>', res.cookies.getAll());

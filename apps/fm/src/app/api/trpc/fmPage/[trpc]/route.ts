@@ -2,14 +2,16 @@ import type { NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
 import { createTRPCContext } from '@barely/lib/server/api/trpc';
 import { fmPageRouter } from '@barely/lib/server/routes/fm-page/fm-page.router';
-import { parseReqForVisitorInfo } from '@barely/lib/utils/middleware';
+import { parseFmUrl, parseReqForVisitorInfo } from '@barely/lib/utils/middleware';
 import { setCorsHeaders } from '@barely/lib/utils/trpc-route';
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 
 export { OPTIONS } from '@barely/lib/utils/trpc-route';
 
 const handler = async function (req: NextRequest) {
-	const visitor = parseReqForVisitorInfo(req);
+	const { handle, key } = parseFmUrl(req.referrer ?? req.headers.get('referer') ?? '');
+
+	const visitor = parseReqForVisitorInfo({ req, handle, key });
 	console.log('trpc fm visitor >>', visitor);
 
 	const sessionId = cookies().get('bsid')?.value ?? null;
@@ -38,7 +40,7 @@ const handler = async function (req: NextRequest) {
 			createTRPCContext({
 				session: null,
 				headers: req.headers,
-				visitor: parseReqForVisitorInfo(req),
+				visitor: parseReqForVisitorInfo({ req, handle, key }),
 			}),
 		onError({ error, path }) {
 			console.error(`>>> tRPC Error on '${path}'`, error);

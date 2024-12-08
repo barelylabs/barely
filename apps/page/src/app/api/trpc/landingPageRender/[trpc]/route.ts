@@ -1,14 +1,16 @@
 import type { NextRequest } from 'next/server';
 import { createTRPCContext } from '@barely/lib/server/api/trpc';
 import { landingPageRenderRouter } from '@barely/lib/server/routes/landing-page-render/landing-page-render.router';
-import { parseReqForVisitorInfo } from '@barely/lib/utils/middleware';
+import { parsePageUrl, parseReqForVisitorInfo } from '@barely/lib/utils/middleware';
 import { setCorsHeaders } from '@barely/lib/utils/trpc-route';
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 
 export { OPTIONS } from '@barely/lib/utils/trpc-route';
 
 const handler = async function (req: NextRequest) {
-	const visitor = parseReqForVisitorInfo(req);
+	const { handle, key } = parsePageUrl(req.referrer ?? req.headers.get('referer') ?? '');
+
+	const visitor = parseReqForVisitorInfo({ req, handle, key });
 	console.log('trpc lp visitor >>', visitor);
 
 	const forwaredFor = req.headers.get('x-forwarded-for');
@@ -22,7 +24,7 @@ const handler = async function (req: NextRequest) {
 			createTRPCContext({
 				session: null,
 				headers: req.headers,
-				visitor: parseReqForVisitorInfo(req),
+				visitor: parseReqForVisitorInfo({ req, handle, key }),
 			}),
 		onError({ error, path }) {
 			console.error(`>>> tRPC Error on '${path}'`, error);

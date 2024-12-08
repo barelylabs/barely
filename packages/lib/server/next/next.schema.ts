@@ -86,15 +86,12 @@ export const formattedUserAgentSchema = z.object({
 export type NextFormattedUserAgent = z.infer<typeof formattedUserAgentSchema>;
 
 export const nextGeoSchema = z.object({
-	city: z.string().nullish(),
-	// .transform(s => (s ? decodeURIComponent(s) : s)),
-	country: z.string().nullish(),
-	// .transform(s => (s ? decodeURIComponent(s) : s)),
-	latitude: z.string().nullish(),
-	longitude: z.string().nullish(),
-	region: z.string().nullish(),
-	// .transform(s => (s ? decodeURIComponent(s) : s)),
-	zip: z.string().nullish(),
+	city: z.string().nullish().default('Unknown'),
+	country: z.string().nullish().default('Unknown'),
+	latitude: z.string().nullish().default('Unknown'),
+	longitude: z.string().nullish().default('Unknown'),
+	region: z.string().nullish().default('Unknown'),
+	zip: z.string().nullish().default('Unknown'),
 });
 
 // export const formattedNextGeoSchema = z.object({
