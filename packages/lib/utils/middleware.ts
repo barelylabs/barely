@@ -53,7 +53,6 @@ export const parseFmUrl = (url: string) => {
 
 	const handle = parts[0] ?? raise('handle is required');
 	const key = parts.slice(1).join('/') ?? raise('key is required');
-	// const key = parts[1] ?? raise('key is required');
 
 	return { handle, key };
 };
@@ -72,10 +71,15 @@ export const parsePageUrl = (url: string) => {
 export function parseGeo(req: NextRequest) {
 	return isDevelopment() ? getRandomGeoData() : (
 			nextGeoSchema.parse({
-				country: req.geo?.country ?? req.headers.get('x-vercel-ip-country') ?? 'Unknown',
+				country:
+					req.geo?.country ??
+					decodeURIComponent(req.headers.get('x-vercel-ip-country') ?? 'Unknown'),
 				region:
-					req.geo?.region ?? req.headers.get('x-vercel-ip-country-region') ?? 'Unknown',
-				city: req.geo?.city ?? req.headers.get('x-vercel-ip-city') ?? 'Unknown',
+					req.geo?.region ??
+					decodeURIComponent(req.headers.get('x-vercel-ip-country-region') ?? 'Unknown'),
+				city:
+					req.geo?.city ??
+					decodeURIComponent(req.headers.get('x-vercel-ip-city') ?? 'Unknown'),
 				latitude:
 					req.geo?.latitude ?? req.headers.get('x-vercel-ip-latitude') ?? 'Unknown',
 				longitude:
