@@ -1,11 +1,11 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { setVisitorCookies } from '@barely/lib/utils/middleware';
+import { parseCartUrl, setVisitorCookies } from '@barely/lib/utils/middleware';
 import { getAbsoluteUrl } from '@barely/lib/utils/url';
 
 export function middleware(req: NextRequest) {
-	const pathname = req.nextUrl.pathname;
 	const domain = req.headers.get('host');
+	const pathname = req.nextUrl.pathname;
 
 	console.log('domain', domain);
 	console.log('path', pathname);
@@ -18,12 +18,20 @@ export function middleware(req: NextRequest) {
 		pathname === '/'
 	) {
 		const res = NextResponse.next();
-		setVisitorCookies(req, res);
+
+		const { handle, key } = parseCartUrl(
+			req.url.replace('/live', '').replace('/preview', ''),
+		);
+
+		setVisitorCookies({ req, res, handle, key });
 
 		return res;
 	}
 
 	/* the mode is set in the subdomain. set the mode in the URL */
+
+	const { handle, key } = parseCartUrl(req.url);
+
 	if (domain?.startsWith('preview.')) {
 		const previewUrl =
 			getAbsoluteUrl('cart', `preview${pathname}`).replace('www.', 'preview.') +
@@ -31,7 +39,8 @@ export function middleware(req: NextRequest) {
 		console.log('pushing to preview', previewUrl);
 
 		const res = NextResponse.rewrite(previewUrl);
-		setVisitorCookies(req, res);
+
+		setVisitorCookies({ req, res, handle, key });
 
 		return res;
 	}
@@ -41,7 +50,7 @@ export function middleware(req: NextRequest) {
 	console.log('pushing to live', liveUrl);
 
 	const res = NextResponse.rewrite(liveUrl);
-	setVisitorCookies(req, res);
+	setVisitorCookies({ req, res, handle, key });
 
 	return res;
 }

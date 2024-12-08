@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { isPreview } from '@barely/lib/utils/environment';
-import { setVisitorCookies } from '@barely/lib/utils/middleware';
+import { isDevelopment, isPreview } from '@barely/lib/utils/environment';
+import { parsePageUrl, setVisitorCookies } from '@barely/lib/utils/middleware';
 import { getAbsoluteUrl } from '@barely/lib/utils/url';
 
 export function middleware(req: NextRequest) {
@@ -17,13 +17,16 @@ export function middleware(req: NextRequest) {
 	console.log('domainParts.length >', domainParts?.length);
 
 	// if www is the first part of the domain, we assume it's structured as barely.page/[handle]/[key]. Skip the rest of the middleware.
-	if (domainParts?.[0] === 'barely') {
+	if (isDevelopment() || domainParts?.[0] === 'barely') {
+		const { handle, key } = parsePageUrl(req.url);
+
 		const res = NextResponse.next();
-		setVisitorCookies(req, res);
+		setVisitorCookies({ req, res, handle, key });
 		return res;
 	}
 
 	let handle: string | null = null;
+	const key = pathname.replace('/', '');
 
 	if (domainParts && domainParts.length >= 2) {
 		handle = domainParts[0] ?? null;
@@ -35,7 +38,7 @@ export function middleware(req: NextRequest) {
 		const url = getAbsoluteUrl('page', `/${handle}${pathname}`);
 
 		const res = NextResponse.rewrite(url);
-		setVisitorCookies(req, res);
+		setVisitorCookies({ req, res, handle, key });
 
 		return res;
 	}
