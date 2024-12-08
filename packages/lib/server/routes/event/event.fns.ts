@@ -189,14 +189,15 @@ export async function recordCartEvent({
 	visitor?: VisitorInfo;
 }) {
 	const visitorInfo: VisitorInfo = {
+		...visitor,
 		ip: cart.visitorIp ?? visitor?.ip ?? 'Unknown',
 		geo: {
 			country: cart.visitorGeo?.country ?? visitor?.geo.country ?? 'Unknown',
 			region: cart.visitorGeo?.region ?? visitor?.geo.region ?? 'Unknown',
 			city: cart.visitorGeo?.city ?? visitor?.geo.city ?? 'Unknown',
+			zip: cart.shippingAddressPostalCode ?? visitor?.geo.zip ?? 'Unknown',
 			latitude: cart.visitorGeo?.latitude ?? visitor?.geo.latitude ?? 'Unknown',
 			longitude: cart.visitorGeo?.longitude ?? visitor?.geo.longitude ?? 'Unknown',
-			zip: cart.shippingAddressPostalCode ?? visitor?.geo.zip ?? 'Unknown',
 		},
 		userAgent: {
 			ua: cart.visitorUserAgent?.ua ?? visitor?.userAgent.ua ?? 'Unknown',
@@ -228,12 +229,12 @@ export async function recordCartEvent({
 				'Unknown',
 			bot: cart.visitorUserAgent?.bot ?? visitor?.userAgent.bot ?? false,
 		},
+
 		referer: cart.visitorReferer ?? visitor?.referer ?? 'Unknown',
 		referer_url: cart.visitorRefererUrl ?? visitor?.referer_url ?? 'Unknown',
-		fbclid: cart.fbclid ?? visitor?.fbclid ?? 'Unknown',
+		fbclid: cart.fbclid ?? visitor?.fbclid ?? null,
 		sessionId: cart.id,
 		sessionRefererId: cart.visitorRefererId ?? visitor?.sessionRefererId ?? 'Unknown',
-		// we need to add these to the cart, because sometimes events are reported from stripe webhooks
 		sessionReferer: cart.sessionReferer ?? visitor?.sessionReferer ?? 'Unknown',
 		sessionRefererUrl: cart.sessionRefererUrl ?? visitor?.sessionRefererUrl ?? 'Unknown',
 		sessionEmailBroadcastId:
@@ -251,6 +252,8 @@ export async function recordCartEvent({
 				cart.visitorCheckoutHref ?? visitor?.href ?? 'Unknown'
 			:	visitor?.href ?? 'Unknown',
 	};
+
+	console.log(`visitorInfo for cart event ${type} => `, visitorInfo);
 
 	if (visitorInfo.isBot) return null;
 

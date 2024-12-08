@@ -36,11 +36,14 @@ export const detectBot = (req: NextRequest) => {
 export function parseGeo(req: NextRequest) {
 	return isDevelopment() ? getRandomGeoData() : (
 			nextGeoSchema.parse({
-				country: req.geo?.country ?? req.headers.get('x-vercel-ip-country'),
-				region: req.geo?.region ?? req.headers.get('x-vercel-ip-country-region'),
-				city: req.geo?.city ?? req.headers.get('x-vercel-ip-city'),
-				latitude: req.geo?.latitude ?? req.headers.get('x-vercel-ip-latitude'),
-				longitude: req.geo?.longitude ?? req.headers.get('x-vercel-ip-longitude'),
+				country: req.geo?.country ?? req.headers.get('x-vercel-ip-country') ?? 'Unknown',
+				region:
+					req.geo?.region ?? req.headers.get('x-vercel-ip-country-region') ?? 'Unknown',
+				city: req.geo?.city ?? req.headers.get('x-vercel-ip-city') ?? 'Unknown',
+				latitude:
+					req.geo?.latitude ?? req.headers.get('x-vercel-ip-latitude') ?? 'Unknown',
+				longitude:
+					req.geo?.longitude ?? req.headers.get('x-vercel-ip-longitude') ?? 'Unknown',
 			})
 		);
 }

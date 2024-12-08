@@ -6,7 +6,7 @@ import { and, count, eq, isNotNull } from 'drizzle-orm';
 
 import type { VisitorInfo } from '../../../utils/middleware';
 import type { ShippingEstimateProps } from '../../shipping/shipengine.endpts';
-import type { EventTrackingProps } from '../event/event-report.schema';
+// import type { EventTrackingProps } from '../event/event-report.schema';
 import type { Fan } from '../fan/fan.schema';
 import type { Product } from '../product/product.schema';
 import type { stripeConnectChargeMetadataSchema } from '../stripe-connect/stripe-connect.schema';
@@ -125,20 +125,16 @@ export type PublicFunnel = ReturnType<typeof getPublicFunnelFromServerFunnel>;
 /* create cart */
 export async function createMainCartFromFunnel({
 	funnel,
+	visitor,
 	shipTo,
-	// landingPageId,
-	visitorInfo,
-	tracking,
 }: {
 	funnel: ServerFunnel;
+	visitor?: VisitorInfo;
 	shipTo?: {
 		country: string | null;
 		state: string | null;
 		city: string | null;
 	};
-	// landingPageId?: string | null;
-	visitorInfo?: VisitorInfo;
-	tracking?: EventTrackingProps;
 }) {
 	const stripeAccount =
 		isProduction() ?
@@ -152,8 +148,6 @@ export async function createMainCartFromFunnel({
 	const amounts = getAmountsForCheckout(funnel, {
 		mainProductQuantity: 1,
 	});
-
-	// console.log('createMainCartFromFunnel >> amounts', amounts);
 
 	const metadata: z.infer<typeof stripeConnectChargeMetadataSchema> = {
 		cartId,
@@ -184,21 +178,10 @@ export async function createMainCartFromFunnel({
 		workspaceId: funnel.workspace.id,
 		cartFunnelId: funnel.id,
 		stage: 'checkoutCreated',
-
-		// tracking
-		emailBroadcastId: tracking?.emailBroadcastId,
-		emailTemplateId: tracking?.emailTemplateId,
-		fanId: tracking?.fanId,
-		fbclid: tracking?.fbclid,
-		flowActionId: tracking?.flowActionId,
-		landingPageId: tracking?.landingPageId,
-		refererId: tracking?.refererId,
-		sessionReferer: visitorInfo?.sessionReferer,
-		sessionRefererUrl: visitorInfo?.sessionRefererUrl,
 		// visitor
-		visitorIp: visitorInfo?.ip,
-		visitorGeo: visitorInfo?.geo,
-		visitorUserAgent: visitorInfo?.userAgent,
+		...visitor,
+		visitorGeo: visitor?.geo,
+		visitorUserAgent: visitor?.userAgent,
 		// stripe
 		checkoutStripePaymentIntentId: paymentIntent.id,
 		checkoutStripeClientSecret: paymentIntent.client_secret,
@@ -206,7 +189,10 @@ export async function createMainCartFromFunnel({
 		mainProductQuantity: 1,
 		mainProductId: funnel.mainProduct.id, // bump product
 		bumpProductId: funnel.bumpProduct?.id ?? null,
+		upsellProductId: funnel.upsellProduct?.id ?? null,
+		// marketing
 		emailMarketingOptIn: true,
+		// amounts
 		...amounts,
 	};
 

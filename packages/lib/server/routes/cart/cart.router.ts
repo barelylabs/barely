@@ -10,7 +10,7 @@ import { wait } from '../../../utils/wait';
 import { createTRPCRouter, publicProcedure } from '../../api/trpc';
 import { stripe } from '../../stripe';
 import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
-import { eventReportSearchParamsSchema } from '../event/event-report.schema';
+// import { eventReportSearchParamsSchema } from '../event/event-report.schema';
 import { recordCartEvent } from '../event/event.fns';
 import { WEB_EVENT_TYPES__CART } from '../event/event.tb';
 import { Files } from '../file/file.sql';
@@ -43,8 +43,8 @@ export const cartRouter = createTRPCRouter({
 						city: z.string().nullable(),
 					})
 					.optional(),
-				// tracking
-				tracking: eventReportSearchParamsSchema,
+				// // tracking
+				// tracking: eventReportSearchParamsSchema,
 			}),
 		)
 		.mutation(async ({ input }) => {
@@ -471,9 +471,12 @@ export const cartRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ input, ctx }) => {
+			const { visitor } = ctx;
+			const { cartId, event } = input;
+
 			const cart =
 				(await ctx.db.pool.query.Carts.findFirst({
-					where: eq(Carts.id, input.cartId),
+					where: eq(Carts.id, cartId),
 					with: {
 						funnel: true,
 					},
@@ -481,9 +484,9 @@ export const cartRouter = createTRPCRouter({
 
 			const cartFunnel = cart.funnel ?? raise('funnel not found');
 
-			if (!ctx.visitor?.ip && !cart.visitorIp) {
+			if (!visitor?.ip && !cart.visitorIp) {
 				console.log(
-					`no visitor ip to log cart event [${input.event}] for cart ${input.cartId}. visitor >> `,
+					`no visitor ip to log cart event [${event}] for cart ${input.cartId}. visitor >> `,
 					ctx.visitor,
 				);
 				return;
@@ -498,7 +501,7 @@ export const cartRouter = createTRPCRouter({
 			if (!cart.visitorRefererUrl)
 				updateCart.visitorRefererUrl = ctx.visitor?.referer_url;
 			if (!cart.visitorCheckoutHref && input.event === 'cart/viewCheckout')
-				updateCart.visitorCheckoutHref = ctx.visitor?.href;
+				updateCart.visitorCheckoutHref = visitor?.href;
 
 			if (
 				!!updateCart.visitorIp ||
@@ -514,8 +517,8 @@ export const cartRouter = createTRPCRouter({
 			await recordCartEvent({
 				cart,
 				cartFunnel,
-				type: input.event,
-				visitor: ctx.visitor,
+				type: event,
+				visitor,
 			});
 		}),
 });
