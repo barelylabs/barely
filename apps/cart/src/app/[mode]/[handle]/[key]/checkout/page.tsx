@@ -3,7 +3,7 @@ import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { cartApi } from '@barely/lib/server/routes/cart/cart.api.server';
 import { cartPageSearchParams } from '@barely/lib/server/routes/cart/cart.schema';
-import { eventReportSearchParamsSchema } from '@barely/lib/server/routes/event/event-report.schema';
+// import { eventReportSearchParamsSchema } from '@barely/lib/server/routes/event/event-report.schema';
 import { isDevelopment } from '@barely/lib/utils/environment';
 import { getDynamicStyleVariables } from 'node_modules/@barely/tailwind-config/lib/dynamic-tw.runtime';
 
@@ -24,7 +24,7 @@ export default async function CartPage({
 	const { mode, handle, key } = params;
 
 	const cartParams = cartPageSearchParams.safeParse(searchParams);
-	const eventTrackingParams = eventReportSearchParamsSchema.safeParse(searchParams);
+	// const eventTrackingParams = eventReportSearchParamsSchema.safeParse(searchParams);
 
 	if (!cartParams.success) {
 		console.log('cartParams error', cartParams.error);
@@ -72,8 +72,8 @@ export default async function CartPage({
 				<CheckoutForm
 					mode={mode}
 					initialData={initialData}
-					shouldWriteToCookie={!cartId}
-					tracking={eventTrackingParams.data ?? {}}
+					// shouldWriteToCookie={!cartId}
+					// tracking={eventTrackingParams.data ?? {}}
 				/>
 			</ElementsProvider>
 		</>
