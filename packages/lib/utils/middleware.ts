@@ -37,8 +37,10 @@ export const detectBot = (req: NextRequest) => {
 // cart
 export const parseCartUrl = (url: string) => {
 	const parsed = new URL(url);
-	const handle = parsed.pathname.split('/')[1] ?? raise('handle is required');
-	const key = parsed.pathname.split('/')[2] ?? raise('key is required');
+	const parts = parsed.pathname.split('/').filter(Boolean);
+
+	const handle = parts[0] ?? raise('handle is required');
+	const key = parts.slice(1).join('/') ?? raise('key is required');
 
 	return { handle, key };
 };
@@ -47,8 +49,10 @@ export const parseCartUrl = (url: string) => {
 export const parseFmUrl = (url: string) => {
 	console.log('parseFmUrl', url);
 	const parsed = new URL(url);
-	const handle = parsed.pathname.split('/')[1] ?? raise('handle is required');
-	const key = parsed.pathname.split('/')[2] ?? raise('key is required');
+	const parts = parsed.pathname.split('/').filter(Boolean);
+
+	const handle = parts[0] ?? raise('handle is required');
+	const key = parts.slice(1).join('/') ?? raise('key is required');
 
 	return { handle, key };
 };
@@ -56,8 +60,10 @@ export const parseFmUrl = (url: string) => {
 // page
 export const parsePageUrl = (url: string) => {
 	const parsed = new URL(url);
-	const handle = parsed.pathname.split('/')[1] ?? raise('handle is required');
-	const key = parsed.pathname.split('/')[2] ?? raise('key is required');
+	const parts = parsed.pathname.split('/').filter(Boolean);
+
+	const handle = parts[0] ?? raise('handle is required');
+	const key = parts.slice(1).join('/') ?? raise('key is required');
 
 	return { handle, key };
 };

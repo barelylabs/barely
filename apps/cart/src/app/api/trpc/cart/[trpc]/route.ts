@@ -8,7 +8,7 @@ import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 export { OPTIONS } from '@barely/lib/utils/trpc-route';
 
 const handler = async function (req: NextRequest) {
-	const { handle, key } = parseCartUrl(req.referrer ?? req.headers.get('referer') ?? '');
+	const { handle, key } = parseCartUrl(req.headers.get('referer') ?? '');
 
 	const visitor = parseReqForVisitorInfo({ req, handle, key });
 	console.log('trpc cart visitor >>', visitor);

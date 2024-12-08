@@ -9,7 +9,10 @@ import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 export { OPTIONS } from '@barely/lib/utils/trpc-route';
 
 const handler = async function (req: NextRequest) {
-	const { handle, key } = parseFmUrl(req.referrer ?? req.headers.get('referer') ?? '');
+	const { handle, key } = parseFmUrl(req.headers.get('referer') ?? '');
+
+	console.log('trpc fm handle from referrer >>>', handle);
+	console.log('trpc fm key from referrer >>>', key);
 
 	const visitor = parseReqForVisitorInfo({ req, handle, key });
 	console.log('trpc fm visitor >>', visitor);

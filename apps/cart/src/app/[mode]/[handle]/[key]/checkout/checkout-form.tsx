@@ -1,7 +1,7 @@
 'use client';
 
 import type { CartRouterOutputs } from '@barely/lib/server/routes/cart/cart.api.react';
-import type { EventTrackingProps } from '@barely/lib/server/routes/event/event-report.schema';
+// import type { EventTrackingProps } from '@barely/lib/server/routes/event/event-report.schema';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { cartApi } from '@barely/lib/server/routes/cart/cart.api.react';
@@ -37,22 +37,22 @@ import { Form } from '@barely/ui/forms';
 import { CheckboxField } from '@barely/ui/forms/checkbox-field';
 import { CurrencyField } from '@barely/ui/forms/currency-field';
 
-import { setCartCookie } from '~/app/[mode]/[handle]/[key]/_actions';
+// import { setCartCookie } from '~/app/[mode]/[handle]/[key]/_actions';
 import { ProductPrice } from '~/app/[mode]/[handle]/[key]/_components/product-price';
 
 export function CheckoutForm({
 	mode,
 	initialData,
-	shouldWriteToCookie,
-	tracking,
+	// shouldWriteToCookie,
+	// tracking,
 }: {
 	mode: 'preview' | 'live';
 	initialData:
 		| NonNullable<CartRouterOutputs['create']>
 		| NonNullable<CartRouterOutputs['byIdAndParams']>;
-	shouldWriteToCookie?: boolean;
+	// shouldWriteToCookie?: boolean;
 	// fbclid: string | null;
-	tracking: EventTrackingProps;
+	// tracking: EventTrackingProps;
 }) {
 	const router = useRouter();
 	const { cart: initialCart, publicFunnel: initialFunnel } = initialData;
@@ -60,13 +60,13 @@ export function CheckoutForm({
 	const { mutate: logEvent } = cartApi.log.useMutation();
 
 	useEffect(() => {
-		if (logEvent && shouldWriteToCookie && initialCart.id) {
-			setCartCookie({
-				handle: initialFunnel.handle,
-				key: initialFunnel.key,
-				cartId: initialCart.id,
-				tracking,
-			}).catch(console.error);
+		if (logEvent && initialCart.id) {
+			// setCartCookie({
+			// 	handle: initialFunnel.handle,
+			// 	key: initialFunnel.key,
+			// 	cartId: initialCart.id,
+			// 	tracking,
+			// }).catch(console.error);
 
 			logEvent({
 				cartId: initialCart.id,
@@ -74,11 +74,11 @@ export function CheckoutForm({
 			});
 		}
 	}, [
-		tracking,
+		// tracking,
 		initialCart.id,
-		initialFunnel.handle,
-		initialFunnel.key,
-		shouldWriteToCookie,
+		// initialFunnel.handle,
+		// initialFunnel.key,
+		// shouldWriteToCookie,
 		logEvent,
 	]);
 
@@ -231,18 +231,17 @@ export function CheckoutForm({
 		schema: updateCheckoutCartFromCheckoutSchema,
 		values: {
 			...cart,
-
 			handle: publicFunnel.workspace.handle,
 			key: publicFunnel.key,
 
 			// tracking
-			emailBroadcastId: tracking.emailBroadcastId,
-			emailTemplateId: tracking.emailTemplateId,
-			fanId: tracking.fanId,
-			fbclid: tracking.fbclid,
-			flowActionId: tracking.flowActionId,
-			landingPageId: tracking.landingPageId,
-			refererId: tracking.refererId,
+			// emailBroadcastId: tracking.emailBroadcastId,
+			// emailTemplateId: tracking.emailTemplateId,
+			// fanId: 'tracking.fanId',
+			// fbclid: tracking.fbclid,
+			// flowActionId: tracking.flowActionId,
+			// landingPageId: tracking.landingPageId,
+			// refererId: tracking.refererId,
 
 			mainProductPayWhatYouWantPrice:
 				cart.mainProductPayWhatYouWantPrice ?
