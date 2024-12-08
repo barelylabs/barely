@@ -16,10 +16,8 @@ export const visitorSessionTinybirdSchema = z
 			.nullish()
 			.transform(s => s ?? '(direct)'),
 
-		referer_id: z
-			.string()
-			.nullish()
-			.transform(s => s ?? ''), // deprecated
+		fanId: z.string().nullish(),
+		fbclid: z.string().nullish(),
 		sessionId: z.string(),
 		sessionRefererId: z
 			.string()
@@ -34,7 +32,16 @@ export const visitorSessionTinybirdSchema = z
 			.string()
 			.nullish()
 			.transform(s => s ?? '(direct)'),
-		fbclid: z.string().nullish(),
+		sessionEmailBroadcastId: z.string().nullish(),
+		sessionEmailTemplateId: z.string().nullish(),
+		sessionFlowActionId: z.string().nullish(),
+		sessionLandingPageId: z.string().nullish(),
+
+		// deprecated
+		referer_id: z
+			.string()
+			.nullish()
+			.transform(s => s ?? ''), // deprecated
 	})
 	.merge(nextGeoSchema)
 	.merge(formattedUserAgentSchema);
