@@ -32,6 +32,7 @@ import { LandingPages } from '../landing-page/landing-page.sql';
 import { Links } from '../link/link.sql';
 import { Workspaces } from '../workspace/workspace.sql';
 import {
+	fmEventIngestSchema,
 	ingestCartEvent,
 	ingestFmEvent,
 	ingestPageEvent,
@@ -40,11 +41,9 @@ import {
 } from './event.tb';
 
 /**
- * Record clicks with geo, ua, referer, and timestamp data
- * If linkId is not specified, it's a root click (key="_root", eg. properyouth.barely.link, or properyouth.link)
+ * Flattens visitor info (specifically geo and userAgent)
+ * for ingestion into tinybird
  */
-
-// export type RecordClickProp = z.infer<typeof visitorSessionTinybirdSchema>;
 export const flattenVisitorForIngest = (visitor?: VisitorInfo) => {
 	if (!visitor) return {};
 	const { geo, userAgent, ...rest } = visitor;
@@ -66,12 +65,6 @@ export interface RecordClickProps {
 export async function recordLinkClick({
 	link,
 	href,
-	// ip,
-	// geo,
-	// userAgent: ua,
-	// referer,
-	// referer_url,
-	// isBot,
 	type,
 	platform,
 	visitor,
@@ -714,26 +707,34 @@ export async function recordFmEvent({
 	// report event to tb
 
 	try {
-		await ingestFmEvent({
+		const eventData = webEventIngestSchema.merge(fmEventIngestSchema).parse({
 			timestamp,
 			workspaceId: fmPage.workspaceId,
 			assetId: fmPage.id,
 			sessionId: visitor?.sessionId ?? newId('barelySession'),
 			...flattenVisitorForIngest(visitor),
-			// sessionRefererId: visitor?.sessionRefererId ?? null,
-			// sessionRefererUrl: visitor?.sessionRefererUrl ?? '',
 			type,
 			href: sourceUrl,
 			linkClickDestinationHref: fmLink?.url ?? null,
 			platform: fmLink?.platform ?? '',
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
-			// ...(type === 'fm/view' ?
-			// 	{
-			// 		referer: visitor?.sessionReferer,
-			// 		referer_url: visitor?.sessionRefererUrl,
-			// 	}
-			// :	{}),
 		});
+
+		console.log('fmeventData => ', eventData);
+		const fmEventRes = await ingestFmEvent({
+			timestamp,
+			workspaceId: fmPage.workspaceId,
+			assetId: fmPage.id,
+			sessionId: visitor?.sessionId ?? newId('barelySession'),
+			...flattenVisitorForIngest(visitor),
+			type,
+			href: sourceUrl,
+			linkClickDestinationHref: fmLink?.url ?? null,
+			platform: fmLink?.platform ?? '',
+			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
+		});
+
+		console.log('fmEventRes => ', fmEventRes);
 	} catch (error) {
 		console.log('error => ', error);
 		throw new Error('ah!');
