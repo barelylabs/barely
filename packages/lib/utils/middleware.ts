@@ -40,7 +40,7 @@ export const parseCartUrl = (url: string) => {
 	const parts = parsed.pathname.split('/').filter(Boolean);
 
 	const handle = parts[0] ?? raise('handle is required');
-	const key = parts.slice(1).join('/') ?? raise('key is required');
+	const key = parts[1] ?? raise('key is required');
 
 	return { handle, key };
 };
@@ -53,6 +53,7 @@ export const parseFmUrl = (url: string) => {
 
 	const handle = parts[0] ?? raise('handle is required');
 	const key = parts.slice(1).join('/') ?? raise('key is required');
+	// const key = parts[1] ?? raise('key is required');
 
 	return { handle, key };
 };
