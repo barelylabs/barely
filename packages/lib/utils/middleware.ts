@@ -220,7 +220,10 @@ export function setVisitorCookies({
 	}
 
 	if (referer && !res.cookies.get(`${handle}.${key}.sessionReferer`))
-		res.cookies.set('sessionReferer', referer, { httpOnly: true, maxAge: 60 * 60 * 24 });
+		res.cookies.set(`${handle}.${key}.sessionReferer`, referer, {
+			httpOnly: true,
+			maxAge: 60 * 60 * 24,
+		});
 
 	if (referer_url && !res.cookies.get(`${handle}.${key}.sessionRefererUrl`))
 		res.cookies.set(`${handle}.${key}.sessionRefererUrl`, referer_url, {
