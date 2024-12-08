@@ -236,6 +236,13 @@ export async function recordCartEvent({
 		// we need to add these to the cart, because sometimes events are reported from stripe webhooks
 		sessionReferer: cart.sessionReferer ?? visitor?.sessionReferer ?? 'Unknown',
 		sessionRefererUrl: cart.sessionRefererUrl ?? visitor?.sessionRefererUrl ?? 'Unknown',
+		sessionEmailBroadcastId:
+			cart.emailBroadcastId ?? visitor?.sessionEmailBroadcastId ?? null,
+		sessionEmailTemplateId:
+			cart.emailTemplateId ?? visitor?.sessionEmailTemplateId ?? null,
+		fanId: cart.fanId ?? visitor?.fanId ?? null,
+		sessionFlowActionId: cart.flowActionId ?? visitor?.sessionFlowActionId ?? null,
+		sessionLandingPageId: cart.landingPageId ?? visitor?.sessionLandingPageId ?? null,
 
 		isBot: visitor?.isBot ?? false,
 
@@ -325,12 +332,6 @@ export async function recordCartEvent({
 			key: cartFunnel.key,
 			// analytics
 			...flattenVisitorForIngest(visitor),
-			// referer: visitorInfo.referer,
-			// sessionReferer: visitorInfo.sessionReferer,
-			// sessionRefererUrl: visitorInfo.sessionRefererUrl,
-			// sessionRefererId: visitorInfo.sessionRefererId,
-			// fbclid: visitorInfo.fbclid,
-
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
 			...cartEventData,
 		});

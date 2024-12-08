@@ -70,13 +70,30 @@ export function parseReferer(req: NextRequest) {
 }
 
 export function parseSession(req: NextRequest) {
+	const fanId = req.cookies.get('fanId')?.value ?? null;
 	const sessionId = req.cookies.get('bsid')?.value ?? null;
 	const sessionReferer = req.cookies.get('sessionReferer')?.value ?? null;
 	const sessionRefererUrl = req.cookies.get('sessionRefererUrl')?.value ?? null;
 	const sessionRefererId = req.cookies.get('sessionRefererId')?.value ?? null;
 	const fbclid = req.cookies.get('fbclid')?.value ?? null;
+	const sessionEmailBroadcastId =
+		req.cookies.get('sessionEmailBroadcastId')?.value ?? null;
+	const sessionEmailTemplateId = req.cookies.get('sessionEmailTemplateId')?.value ?? null;
+	const sessionFlowActionId = req.cookies.get('sessionFlowActionId')?.value ?? null;
+	const sessionLandingPageId = req.cookies.get('sessionLandingPageId')?.value ?? null;
 
-	return { sessionId, sessionReferer, sessionRefererUrl, sessionRefererId, fbclid };
+	return {
+		fanId,
+		fbclid,
+		sessionId,
+		sessionReferer,
+		sessionRefererUrl,
+		sessionRefererId,
+		sessionEmailBroadcastId,
+		sessionEmailTemplateId,
+		sessionFlowActionId,
+		sessionLandingPageId,
+	};
 }
 
 export const visitorInfoSchema = z.object({
@@ -88,12 +105,18 @@ export const visitorInfoSchema = z.object({
 	referer_url: z.string().nullable(),
 	// referer_id: z.string().nullable(),
 	href: z.string(),
+
+	fanId: z.string().nullable(),
 	// session
 	sessionId: z.string().nullable(),
 	fbclid: z.string().nullable(),
 	sessionReferer: z.string().nullable(),
 	sessionRefererUrl: z.string().nullable(),
 	sessionRefererId: z.string().nullable(),
+	sessionEmailBroadcastId: z.string().nullable(),
+	sessionEmailTemplateId: z.string().nullable(),
+	sessionFlowActionId: z.string().nullable(),
+	sessionLandingPageId: z.string().nullable(),
 });
 export type VisitorInfo = z.infer<typeof visitorInfoSchema>;
 
@@ -105,8 +128,7 @@ export function parseReqForVisitorInfo(req: NextRequest) {
 	const href = req.nextUrl.href;
 	const { referer, referer_url } = parseReferer(req);
 
-	const { sessionId, sessionReferer, sessionRefererUrl, sessionRefererId, fbclid } =
-		parseSession(req);
+	const visitorSession = parseSession(req);
 
 	return {
 		ip,
@@ -117,11 +139,7 @@ export function parseReqForVisitorInfo(req: NextRequest) {
 		referer_url,
 		// referer_id,
 		href,
-		sessionId,
-		fbclid,
-		sessionReferer,
-		sessionRefererUrl,
-		sessionRefererId,
+		...visitorSession,
 	} satisfies VisitorInfo;
 }
 
@@ -145,15 +163,45 @@ export function setVisitorCookies(req: NextRequest, res: NextResponse) {
 			maxAge: 60 * 60 * 24,
 		});
 
-	const sessionRefererId = res.cookies.get('sessionRefererId')?.value;
-	if (sessionRefererId && !res.cookies.get('sessionRefererId'))
-		res.cookies.set('sessionRefererId', sessionRefererId, {
+	// params
+	if (params.has('emailBroadcastId'))
+		res.cookies.set('sessionEmailBroadcastId', params.get('emailBroadcastId') ?? '', {
+			httpOnly: true,
+			maxAge: 60 * 60 * 24,
+		});
+
+	if (params.has('emailTemplateId'))
+		res.cookies.set('sessionEmailTemplateId', params.get('emailTemplateId') ?? '', {
+			httpOnly: true,
+			maxAge: 60 * 60 * 24,
+		});
+
+	if (params.has('fanId'))
+		res.cookies.set('fanId', params.get('fanId') ?? '', {
 			httpOnly: true,
 			maxAge: 60 * 60 * 24,
 		});
 
 	if (params.has('fbclid'))
 		res.cookies.set('fbclid', params.get('fbclid') ?? '', {
+			httpOnly: true,
+			maxAge: 60 * 60 * 24,
+		});
+
+	if (params.has('flowActionId'))
+		res.cookies.set('sessionFlowActionId', params.get('flowActionId') ?? '', {
+			httpOnly: true,
+			maxAge: 60 * 60 * 24,
+		});
+
+	if (params.has('landingPageId'))
+		res.cookies.set('sessionLandingPageId', params.get('landingPageId') ?? '', {
+			httpOnly: true,
+			maxAge: 60 * 60 * 24,
+		});
+
+	if (params.has('refererId') && !res.cookies.get('sessionRefererId'))
+		res.cookies.set('sessionRefererId', params.get('refererId') ?? '', {
 			httpOnly: true,
 			maxAge: 60 * 60 * 24,
 		});
@@ -186,5 +234,10 @@ export const DEFAULT_VISITOR_INFO: VisitorInfo = {
 	sessionRefererUrl: null,
 	sessionRefererId: null,
 	href: 'https://localhost:3000/',
+	fanId: null,
 	fbclid: null,
+	sessionEmailBroadcastId: null,
+	sessionEmailTemplateId: null,
+	sessionFlowActionId: null,
+	sessionLandingPageId: null,
 };
