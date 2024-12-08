@@ -73,6 +73,7 @@ export function parseGeo(req: NextRequest) {
 					req.geo?.latitude ?? req.headers.get('x-vercel-ip-latitude') ?? 'Unknown',
 				longitude:
 					req.geo?.longitude ?? req.headers.get('x-vercel-ip-longitude') ?? 'Unknown',
+				zip: 'Unknown',
 			})
 		);
 }
