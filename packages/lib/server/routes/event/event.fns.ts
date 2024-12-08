@@ -73,9 +73,9 @@ export async function recordLinkClick({
 
 	// deduplicate clicks from the same ip & linkId - only record 1 link click per ip per linkId per hour
 	const rateLimitPeriod =
-		env.RATE_LIMIT_RECORD_LINK_CLICK ?? env.VERCEL_ENV === 'development' ? '1 s' : '1 h';
+		env.RATE_LIMIT_RECORD_LINK_CLICK ?? isDevelopment() ? '1 s' : '1 h';
 
-	const { success } = await ratelimit(10, rateLimitPeriod).limit(
+	const { success } = await ratelimit(1, rateLimitPeriod).limit(
 		`recordClick:${visitor?.ip}:${link.id ?? '_root'}`,
 	);
 
@@ -251,9 +251,10 @@ export async function recordCartEvent({
 	if (visitorInfo.isBot) return null;
 
 	// deduplication events from the same ip & cartId - only record 1 cart event per ip per cartId per hour
-	const rateLimitPeriod = env.RATE_LIMIT_RECORD_CART_EVENT ?? '1 h';
+	const rateLimitPeriod =
+		env.RATE_LIMIT_RECORD_CART_EVENT ?? isDevelopment() ? '1 s' : '1 h';
 
-	const { success } = await ratelimit(10, rateLimitPeriod).limit(
+	const { success } = await ratelimit(1, rateLimitPeriod).limit(
 		`recordCartEvent:${visitorInfo.ip}:${cart.id}:${type}`,
 	);
 
@@ -656,7 +657,7 @@ export async function recordFmEvent({
 
 	const rateLimitPeriod = isDevelopment() ? '1 s' : '1 h';
 
-	const { success } = await ratelimit(10, rateLimitPeriod).limit(
+	const { success } = await ratelimit(1, rateLimitPeriod).limit(
 		`recordFmEvent:${visitor?.ip}:${fmPage.id}:${type}:${fmLink?.platform}`,
 	);
 
@@ -846,9 +847,9 @@ export async function recordLandingPageEvent({
 }) {
 	if (visitor?.isBot) return null;
 
-	const rateLimitPeriod = '1 s';
+	const rateLimitPeriod = isDevelopment() ? '1 s' : '1 h';
 
-	const { success } = await ratelimit(10, rateLimitPeriod).limit(
+	const { success } = await ratelimit(1, rateLimitPeriod).limit(
 		`recordLandingPageEvent:${visitor?.ip}:${page.id}:${type}:${linkClickDestinationAssetId}`,
 	);
 
