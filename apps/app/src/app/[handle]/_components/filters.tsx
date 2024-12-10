@@ -53,6 +53,8 @@ export function Filters({
 	toggleArchived,
 	showDeleted,
 	toggleDeleted,
+	showCanceled,
+	toggleCanceled,
 	showFulfilled,
 	toggleFulfilled,
 	showPreorders,
@@ -66,6 +68,8 @@ export function Filters({
 	searchPlaceholder?: string;
 	showArchived?: boolean;
 	toggleArchived?: () => void;
+	showCanceled?: boolean;
+	toggleCanceled?: () => void;
 	showPreorders?: boolean;
 	togglePreorders?: () => void;
 	showFulfilled?: boolean;
@@ -108,6 +112,10 @@ export function Filters({
 				console.log('togglePreorders');
 				togglePreorders?.();
 			}
+			if (e.shiftKey && e.key === 'X' && hotkeysEnabled && !metaOrCtrl) {
+				console.log('toggleCanceled');
+				toggleCanceled?.();
+			}
 			if (e.key === 'Escape' && hotkeysEnabled && !metaOrCtrl) {
 				clearAllFilters();
 				if (searchInputRef.current) {
@@ -115,7 +123,14 @@ export function Filters({
 				}
 			}
 		},
-		[clearAllFilters, toggleArchived, toggleDeleted, toggleFulfilled, togglePreorders],
+		[
+			clearAllFilters,
+			toggleArchived,
+			toggleDeleted,
+			toggleFulfilled,
+			togglePreorders,
+			toggleCanceled,
+		],
 	);
 
 	useEffect(() => {
@@ -199,6 +214,23 @@ export function Filters({
 								id='showDeletedSwitch'
 								checked={!!showDeleted}
 								onClick={() => toggleDeleted()}
+								size='sm'
+							/>
+						</div>
+					)}
+
+					{toggleCanceled !== undefined && (
+						<div className='group flex flex-row items-center justify-between gap-4'>
+							<Label htmlFor='showCanceledSwitch'>
+								<div className='flex flex-row items-center gap-2'>
+									<DisplayShortcutIcon shortcut={['Shift', 'X']} icon='x' />
+									Include canceled {itemsName ?? 'items'}
+								</div>
+							</Label>
+							<Switch
+								id='showCanceledSwitch'
+								checked={!!showCanceled}
+								onClick={() => toggleCanceled()}
 								size='sm'
 							/>
 						</div>
