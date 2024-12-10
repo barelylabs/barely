@@ -113,7 +113,9 @@ function CartOrderCard({
 
 	const commandItems = [
 		cartOrder.fulfillmentStatus !== 'fulfilled' && markAsFulfilledCommandItem,
-		cartOrder.canceledAt && cancelCommandItem,
+		!cartOrder.canceledAt &&
+			cartOrder.fulfillmentStatus === 'pending' &&
+			cancelCommandItem,
 	].filter((item): item is GridListCommandItemProps => Boolean(item));
 
 	return (

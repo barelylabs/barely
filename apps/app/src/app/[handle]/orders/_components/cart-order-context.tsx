@@ -42,6 +42,7 @@ interface CartOrderContext {
 	toggleFulfilled: () => void;
 	clearAllFilters: () => void;
 	togglePreorders: () => void;
+	toggleCanceled: () => void;
 }
 
 const CartOrderContext = createContext<CartOrderContext | undefined>(undefined);
@@ -138,6 +139,14 @@ export function CartOrderContextProvider({
 		}
 	}, [filters.showPreorders, removeByKey, setQuery]);
 
+	const toggleCanceled = useCallback(() => {
+		if (filters.showCanceled) {
+			removeByKey('showCanceled');
+		} else {
+			return setQuery('showCanceled', true);
+		}
+	}, [filters.showCanceled, removeByKey, setQuery]);
+
 	const setSearch = useCallback(
 		(search: string) => {
 			if (search.length) {
@@ -178,6 +187,7 @@ export function CartOrderContextProvider({
 		toggleArchived,
 		toggleFulfilled,
 		togglePreorders,
+		toggleCanceled,
 		clearAllFilters,
 		// infinite
 		hasNextPage,

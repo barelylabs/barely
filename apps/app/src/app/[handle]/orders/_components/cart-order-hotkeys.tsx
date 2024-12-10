@@ -14,14 +14,21 @@ export function CartOrderHotkeys() {
 	} = useCartOrderContext();
 
 	const fulfillAction = useCallback(() => {
-		if (lastSelectedCartOrder?.fulfillmentStatus === 'fulfilled') {
+		if (
+			!lastSelectedCartOrder ||
+			lastSelectedCartOrder.fulfillmentStatus === 'fulfilled'
+		) {
 			return;
 		}
 		setShowMarkAsFulfilledModal(true);
 	}, [lastSelectedCartOrder, setShowMarkAsFulfilledModal]);
 
 	const cancelAction = useCallback(() => {
-		if (lastSelectedCartOrder?.canceledAt) {
+		if (
+			!lastSelectedCartOrder ||
+			!!lastSelectedCartOrder.canceledAt ||
+			lastSelectedCartOrder.fulfillmentStatus !== 'pending'
+		) {
 			return;
 		}
 		setShowCancelCartOrderModal(true);
