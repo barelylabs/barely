@@ -42,6 +42,16 @@ export function CancelCartOrderModal() {
 	});
 
 	const handleSubmit = async (data: z.infer<typeof cancelCartOrderSchema>) => {
+		if (!selectedCartOrder) return;
+
+		if (
+			!window.confirm(
+				`Are you sure you want to cancel order #${selectedCartOrder.orderId}? The payment will be reversed and ${selectedCartOrder.fullName} will be refunded ${selectedCartOrder?.orderAmount}`,
+			)
+		)
+			return;
+
+		console.log('cancelling order', data);
 		await cancelCartOrder(data);
 	};
 
