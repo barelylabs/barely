@@ -23,9 +23,13 @@ import { getShortLinkUrlFromLink } from '@barely/utils/link';
 
 const dateRangeOptions: StatDateRange[] = ['1d', '1w', '28d'];
 
-export function StatsHeader() {
-	const { filters, setFilter } = useWebEventStatFilters();
-
+export function StatsHeader({
+	dateRange,
+	setDateRange,
+}: {
+	dateRange?: StatDateRange;
+	setDateRange: (dateRange: StatDateRange) => void;
+}) {
 	return (
 		<div className='flex flex-row items-center justify-between'>
 			<Suspense fallback={<Skeleton className='h-5 w-32' />}>
@@ -33,10 +37,10 @@ export function StatsHeader() {
 			</Suspense>
 
 			<Select
-				defaultValue={filters.dateRange ?? '1w'}
+				defaultValue={dateRange ?? '1w'}
 				onValueChange={v => {
 					const value = statDateRange.safeParse(v);
-					if (value.success) setFilter('dateRange', value.data);
+					if (value.success) setDateRange(value.data);
 				}}
 			>
 				<SelectTrigger icon='calendar' className='w-[180px]'>
@@ -57,7 +61,7 @@ export function StatsHeader() {
 	);
 }
 
-export function AssetLinkLaunch() {
+function AssetLinkLaunch() {
 	const { filters } = useWebEventStatFilters();
 
 	const { handle } = useWorkspace();

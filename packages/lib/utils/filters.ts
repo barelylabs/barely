@@ -13,3 +13,11 @@ export const infiniteQuerySchema = z.object({
 	cursor: z.object({ id: z.string(), createdAt: z.coerce.date() }).optional(),
 	limit: z.coerce.number().min(1).max(100).optional().default(20),
 });
+
+export const platformFiltersSchema = z.object({
+	showSpotify: queryBooleanSchema.optional(),
+	showAppleMusic: queryBooleanSchema.optional(),
+	showYoutube: queryBooleanSchema.optional(),
+	showAmazonMusic: queryBooleanSchema.optional(),
+	showYoutubeMusic: queryBooleanSchema.optional(),
+});

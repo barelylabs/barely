@@ -4,7 +4,10 @@ import {
 	getIsoDateFromDate,
 	getIsoDateRangeFromDescription,
 } from '../../../utils/format-date';
-import { queryStringEnumArrayToCommaString } from '../../../utils/zod-helpers';
+import {
+	queryBooleanSchema,
+	queryStringEnumArrayToCommaString,
+} from '../../../utils/zod-helpers';
 import { tinybird } from '../../tinybird/client';
 import { WEB_EVENT_TYPES } from '../event/event.tb';
 import { WORKSPACE_TIMEZONES } from '../workspace/workspace.settings';
@@ -26,11 +29,15 @@ export const stdStatPipeParamsSchema = z.object({
 	assetId: z.string().optional(),
 	types: queryStringEnumArrayToCommaString([
 		...WEB_EVENT_TYPES,
-		'transparentLinkClick',
-		'shortLinkClick',
+		// 'transparentLinkClick',
+		// 'shortLinkClick',
 	]).optional(),
-	date_from: z.string(),
-	date_to: z.string(),
+	// date_from: z.string(),
+	// date_to: z.string(),
+	start: z.string(),
+	end: z.string(),
+	dateRange: statDateRange.optional(),
+	granularity: z.enum(['month', 'day', 'hour']).optional(),
 	timezone: z.enum(WORKSPACE_TIMEZONES).optional(),
 
 	// pagination
@@ -66,14 +73,16 @@ export const stdWebEventPipeParamsSchema = stdStatPipeParamsSchema
 // query schema :: for use on client
 export const stdWebEventPipeQueryParamsSchema = stdWebEventPipeParamsSchema
 	.omit({
-		date_from: true,
-		date_to: true,
+		start: true,
+		end: true,
 	})
 	.merge(
 		z.object({
 			dateRange: statDateRange.optional(),
-			date_from: z.coerce.date().optional(),
-			date_to: z.coerce.date().optional(),
+			start: z.string().optional(),
+			end: z.string().optional(),
+			showVisits: queryBooleanSchema.optional().default(true),
+			showClicks: queryBooleanSchema.optional().default(true),
 		}),
 	);
 
@@ -83,10 +92,10 @@ export type StdWebEventPipeQueryParams = z.infer<typeof stdWebEventPipeQueryPara
 export const stdWebEventQueryToPipeParamsSchema =
 	stdWebEventPipeQueryParamsSchema.transform(data => {
 		const date_range =
-			data?.date_from && data.date_to ?
+			data?.start && data.end ?
 				{
-					date_from: getIsoDateFromDate(data.date_from),
-					date_to: getIsoDateFromDate(data.date_to),
+					start: getIsoDateFromDate(new Date(data.start)),
+					end: getIsoDateFromDate(new Date(data.end)),
 				}
 			:	getIsoDateRangeFromDescription(data?.dateRange ?? '1w');
 
@@ -97,6 +106,25 @@ export const stdWebEventQueryToPipeParamsSchema =
 			limit: data.limit ?? 50,
 		};
 	});
+
+export function getWebEventDateRange({
+	start,
+	end,
+	dateRange,
+}: {
+	start?: Date;
+	end?: Date;
+	dateRange?: StatDateRange;
+}) {
+	if (start && end) {
+		return {
+			start: getIsoDateFromDate(start),
+			end: getIsoDateFromDate(end),
+		};
+	}
+
+	return getIsoDateRangeFromDescription(dateRange ?? '1w');
+}
 
 /**
  * web_hits_timeseries
@@ -114,6 +142,55 @@ export const pipe_webHitsTimeseries = tinybird.buildPipe({
 	pipe: 'web_hits__timeseries',
 	parameters: stdWebEventPipeParamsSchema,
 	data: webHitTimeseriesPipeDataSchema,
+});
+
+// fm
+// export const fmTimeseriesPipeParamsSchema = stdWebEventPipeParamsSchema.merge(
+// 	z.object({
+// 		fmId: z.string().optional(),
+// 	}),
+// );
+
+// export const fmTimeseriesQueryToPipeParamsSchema = fmTimeseriesPipeParamsSchema
+// 	.omit({
+// 		start: true,
+// 		end: true,
+// 	})
+// 	.merge(
+// 		z.object({
+// 			dateRange: statDateRange.optional(),
+// 			start: z.coerce.date().optional(),
+// 			end: z.coerce.date().optional(),
+// 		}),
+// 	)
+// 	.transform(data => {
+// 		const date_range = getWebEventDateRange({
+// 			start: data.start,
+// 			end: data.end,
+// 			dateRange: data.dateRange,
+// 		});
+
+// 		return {
+// 			...data,
+// 			...date_range,
+// 			skip: data.skip ?? 0,
+// 			limit: data.limit ?? 50,
+// 		};
+// 	});
+
+export const pipe_fmTimeseries = tinybird.buildPipe({
+	pipe: 'v2_fm_timeseries',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		start: z.string(),
+		fm_views: z.number(),
+		fm_linkClicks: z.number(),
+		fm_appleMusicClicks: z.number(),
+		fm_amazonMusicClicks: z.number(),
+		fm_spotifyClicks: z.number(),
+		fm_youtubeClicks: z.number(),
+		fm_youtubeMusicClicks: z.number(),
+	}),
 });
 
 /**

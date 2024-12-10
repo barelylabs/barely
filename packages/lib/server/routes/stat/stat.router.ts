@@ -7,6 +7,9 @@ import { createTRPCRouter, workspaceQueryProcedure } from '../../api/trpc';
 import { FmPages } from '../fm/fm.sql';
 import { Links } from '../link/link.sql';
 import {
+	fmTimeseriesPipeParamsSchema,
+	fmTimeseriesQueryToPipeParamsSchema,
+	pipe_fmTimeseries,
 	pipe_webHitsTimeseries,
 	pipe_webSourcesTopBrowsers,
 	pipe_webSourcesTopCities,
@@ -85,36 +88,65 @@ export const statRouter = createTRPCRouter({
 	fmTimeseries: workspaceQueryProcedure
 		.input(stdWebEventQueryToPipeParamsSchema)
 		.query(async ({ ctx, input }) => {
-			const [visitsResult, clicksResult] = await Promise.allSettled([
-				pipe_webHitsTimeseries({
-					...input,
-					workspaceId: ctx.workspace.id,
-					types: ['fm/view'],
-					timezone: ctx.workspace.timezone,
-				}),
-				pipe_webHitsTimeseries({
-					...input,
-					workspaceId: ctx.workspace.id,
-					types: ['fm/linkClick'],
-					timezone: ctx.workspace.timezone,
-				}),
-			]);
+			const { dateRange, granularity } = input;
+			const fmTimeseries = await pipe_fmTimeseries({
+				...input,
+				workspaceId: ctx.workspace.id,
+				timezone: ctx.workspace.timezone,
+				granularity: granularity ?? (dateRange === '1d' ? 'hour' : 'day'),
+			});
 
-			const visits =
-				visitsResult.status === 'fulfilled' ? visitsResult.value : { data: [] };
-			const clicks =
-				clicksResult.status === 'fulfilled' ? clicksResult.value : { data: [] };
+			console.log('fmTimeseries => ', fmTimeseries.data);
 
-			console.log('visits => ', visits.data);
-			console.log('clicks => ', clicks.data);
+			return fmTimeseries.data;
 
-			const merged = visits.data.map((visit, index) => ({
-				...visit,
-				visits: visit.events,
-				clicks: clicks.data[index]?.events ?? 0,
-			}));
+			// const [visitsResult, clicksResult] = await Promise.allSettled([
+			// 	pipe_webHitsTimeseries({
+			// 		...input,
+			// 		workspaceId: ctx.workspace.id,
+			// 		types: ['fm/view'],
+			// 		timezone: ctx.workspace.timezone,
+			// 		// date_from: '2024-12-08',
+			// 		// date_to: '2024-12-08',
+			// 	}),
+			// 	pipe_webHitsTimeseries({
+			// 		...input,
+			// 		workspaceId: ctx.workspace.id,
+			// 		types: ['fm/linkClick'],
+			// 		timezone: ctx.workspace.timezone,
+			// 		// date_from: '2024-12-08',
+			// 		// date_to: '2024-12-08',
+			// 	}),
+			// ]);
 
-			return merged;
+			// const visits =
+			// 	visitsResult.status === 'fulfilled' ? visitsResult.value : { data: [] };
+			// const clicks =
+			// 	clicksResult.status === 'fulfilled' ? clicksResult.value : { data: [] };
+
+			// console.log('visits => ', visits.data);
+			// console.log('clicks => ', clicks.data);
+
+			// const merged = visits.data.map((visit, index) => {
+			// 	return {
+			// 		...visit,
+			// 		visits: visit.visits,
+			// 		// visits: clicks.data[index]?.visits ?? 0,
+			// 		clicks: clicks.data[index]?.visits ?? 0,
+			// 	};
+			// });
+
+			// if the max date is greater than today, chop off the last day. otherwise chop off the first day
+			// const maxDate = new Date(
+			// 	Math.max(...merged.map(row => new Date(row.date).getTime())),
+			// );
+			// if (maxDate > new Date()) {
+			// 	merged.pop();
+			// } else {
+			// 	merged.shift();
+			// }
+
+			// return merged;
 		}),
 
 	webEventTimeseries: workspaceQueryProcedure

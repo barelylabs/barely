@@ -16,32 +16,51 @@ export function getIsoDateRangeFromDescription(range?: StatDateRange) {
 	switch (range) {
 		case '1d':
 			return {
-				date_from: getIsoDateFromDate(new Date(Date.now() - 24 * 60 * 60 * 1000)),
-				date_to: new Date().toISOString().replace(/T.*/, ''),
+				start: getIsoDateFromDate(new Date(Date.now() - 24 * 60 * 60 * 1000)),
+				end: getIsoDateFromDate(new Date()),
+				granularity: 'hour' as const,
 			};
+
+		// for anything > 1w, we grab an extra day to account for timezone differences
 		case '1w':
 			return {
-				date_from: getIsoDateFromDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)),
-				date_to: getIsoDateFromDate(new Date()),
+				start: getIsoDateFromDate(new Date(Date.now() - 8 * 24 * 60 * 60 * 1000)),
+				end: getIsoDateFromDate(new Date()),
+				granularity: 'day' as const,
 			};
 		case '28d':
 			return {
-				date_from: getIsoDateFromDate(new Date(Date.now() - 28 * 24 * 60 * 60 * 1000)),
-				date_to: getIsoDateFromDate(new Date()),
+				start: getIsoDateFromDate(new Date(Date.now() - 29 * 24 * 60 * 60 * 1000)),
+				end: getIsoDateFromDate(new Date()),
+				granularity: 'day' as const,
 			};
 		case '1y':
 			return {
-				date_from: getIsoDateFromDate(new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)),
-				date_to: getIsoDateFromDate(new Date()),
+				start: getIsoDateFromDate(new Date(Date.now() - 366 * 24 * 60 * 60 * 1000)),
+				end: getIsoDateFromDate(new Date()),
+				granularity: 'day' as const,
 			};
 		default:
 			return {
-				date_from: getIsoDateFromDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)),
-				date_to: getIsoDateFromDate(new Date()),
+				start: getIsoDateFromDate(new Date(Date.now() - 8 * 24 * 60 * 60 * 1000)),
+				end: getIsoDateFromDate(new Date()),
+				granularity: 'day' as const,
 			};
 	}
 }
 
 export function getIsoDateFromDate(date: Date) {
-	return date.toISOString().replace(/T.*/, '');
+	return date.toISOString().replace('T', ' ').replace('Z', '');
+}
+
+export function getDateFromIsoString(isoString: string) {
+	// iso could be in the format of '2024-12-0700:00:00.000-0500'
+	// we need to convert it to the format of '2024-12-07T00:00:00.000'
+
+	const fixedDateString = isoString.replace(
+		/(\d{4})-(\d{2})-(\d{2})(\d{2}):(\d{2}):(\d{2})\.(\d{3})([-+]\d{4})/,
+		'$1-$2-$3T$4:$5:$6.$7$8',
+	);
+
+	return new Date(fixedDateString);
 }
