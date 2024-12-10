@@ -5,6 +5,7 @@ import { useCallback } from 'react';
 import { useZodForm } from '@barely/lib/hooks/use-zod-form';
 import { api } from '@barely/lib/server/api/react';
 import { cancelCartOrderSchema } from '@barely/lib/server/routes/cart-order/cart-order.schema';
+import { formatCentsToDollars } from '@barely/lib/utils/currency';
 
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
 import { Form, SubmitButton } from '@barely/ui/forms';
@@ -46,7 +47,7 @@ export function CancelCartOrderModal() {
 
 		if (
 			!window.confirm(
-				`Are you sure you want to cancel order #${selectedCartOrder.orderId}? The payment will be reversed and ${selectedCartOrder.fullName} will be refunded ${selectedCartOrder?.orderAmount}`,
+				`Are you sure you want to cancel order #${selectedCartOrder.orderId}? ${selectedCartOrder.fullName} will be refunded ${formatCentsToDollars(selectedCartOrder?.orderAmount)}`,
 			)
 		)
 			return;

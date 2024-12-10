@@ -240,7 +240,7 @@ export const cartOrderRouter = createTRPCRouter({
 						charge:
 							cart.checkoutStripeChargeId ?? raise('checkoutStripeChargeId not found'),
 						reason: input.reason,
-						reverse_transfer: true,
+						// reverse_transfer: true,
 					},
 					{
 						stripeAccount:
@@ -261,7 +261,7 @@ export const cartOrderRouter = createTRPCRouter({
 						{
 							charge: cart.upsellStripeChargeId,
 							reason: input.reason,
-							reverse_transfer: true,
+							// reverse_transfer: true,
 						},
 						{
 							stripeAccount:
