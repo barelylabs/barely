@@ -140,7 +140,7 @@ function CartOrderCard({
 								{cartOrder.canceledAt ? 'canceled' : cartOrder.fulfillmentStatus}
 							</Badge>
 						</div>
-						d{/* <Text>{cartOrder.id}</Text> */}
+						{/* <Text>{cartOrder.id}</Text> */}
 						<div className='flex flex-row gap-10'>
 							<div className='flex flex-col gap-2'>
 								{cartOrder.products.map(product => (
