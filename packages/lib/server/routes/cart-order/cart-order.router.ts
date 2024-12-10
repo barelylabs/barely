@@ -28,10 +28,12 @@ import {
 	workspaceQueryProcedure,
 } from '../../api/trpc';
 import { getTrackingLink } from '../../shipping/shipping.utils';
+import { stripe } from '../../stripe';
 import { getOrCreateCartOrderId } from '../cart/cart.fns';
 import { CartFulfillmentProducts, CartFulfillments, Carts } from '../cart/cart.sql';
 import { Fans } from '../fan/fan.sql';
 import { Products } from '../product/product.sql';
+import { getStripeConnectAccountId } from '../stripe-connect/stripe-connect.fns';
 import {
 	markCartOrderAsFulfilledSchema,
 	selectWorkspaceCartOrdersSchema,
@@ -41,7 +43,8 @@ export const cartOrderRouter = createTRPCRouter({
 	byWorkspace: workspaceQueryProcedure
 		.input(selectWorkspaceCartOrdersSchema)
 		.query(async ({ input, ctx }) => {
-			const { showFulfilled, showPreorders, search, fanId, limit, cursor } = input;
+			const { showFulfilled, showCanceled, showPreorders, search, fanId, limit, cursor } =
+				input;
 
 			let searchFanIds: string[] = [];
 			if (search) {
@@ -86,6 +89,7 @@ export const cartOrderRouter = createTRPCRouter({
 					eq(Carts.workspaceId, ctx.workspace.id),
 					isNotNull(Carts.orderId),
 					!showFulfilled && ne(Carts.fulfillmentStatus, 'fulfilled'),
+					!showCanceled && isNull(Carts.canceledAt),
 					inArray(Carts.stage, [
 						'checkoutConverted',
 						'upsellConverted',
@@ -217,6 +221,71 @@ export const cartOrderRouter = createTRPCRouter({
 			);
 		}),
 
+	cancel: privateProcedure
+		.input(
+			z.object({
+				cartId: z.string(),
+				reason: z.enum(['duplicate', 'fraudulent', 'requested_by_customer']),
+			}),
+		)
+		.mutation(async ({ input, ctx }) => {
+			const cart =
+				(await ctx.db.pool.query.Carts.findFirst({
+					where: and(eq(Carts.workspaceId, ctx.workspace.id), eq(Carts.id, input.cartId)),
+				})) ?? raise('Cart not found to cancel');
+
+			await stripe.refunds
+				.create(
+					{
+						charge:
+							cart.checkoutStripeChargeId ?? raise('checkoutStripeChargeId not found'),
+						reason: input.reason,
+						reverse_transfer: true,
+					},
+					{
+						stripeAccount:
+							getStripeConnectAccountId(ctx.workspace) ??
+							raise('stripeAccount not found'),
+					},
+				)
+				.catch(error => {
+					console.error('error refunding charge', error);
+					throw new Error(
+						`Failed to process refund: ${error instanceof Error ? error.message : 'Unknown error'}`,
+					);
+				});
+
+			if (cart.upsellConvertedAt && cart.upsellStripeChargeId) {
+				await stripe.refunds
+					.create(
+						{
+							charge: cart.upsellStripeChargeId,
+							reason: input.reason,
+							reverse_transfer: true,
+						},
+						{
+							stripeAccount:
+								getStripeConnectAccountId(ctx.workspace) ??
+								raise('stripeAccount not found'),
+						},
+					)
+					.catch(error => {
+						console.error('error refunding upsell charge', error);
+						throw new Error(
+							`Failed to process upsell refund: ${error instanceof Error ? error.message : 'Unknown error'}`,
+						);
+					});
+			}
+
+			await ctx.db.pool
+				.update(Carts)
+				.set({
+					canceledAt: new Date(),
+					refundedAt: new Date(),
+					refundedAmount: cart.orderAmount,
+				})
+				.where(and(eq(Carts.workspaceId, ctx.workspace.id), eq(Carts.id, input.cartId)));
+		}),
 	markAsFullfilled: privateProcedure
 		.input(markCartOrderAsFulfilledSchema)
 		.mutation(async ({ input, ctx }) => {

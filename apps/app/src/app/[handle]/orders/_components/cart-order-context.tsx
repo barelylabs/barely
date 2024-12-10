@@ -28,6 +28,8 @@ interface CartOrderContext {
 	focusGridList: () => void;
 	showMarkAsFulfilledModal: boolean;
 	setShowMarkAsFulfilledModal: (show: boolean) => void;
+	showCancelCartOrderModal: boolean;
+	setShowCancelCartOrderModal: (show: boolean) => void;
 	//infinite
 	hasNextPage: boolean;
 	fetchNextPage: (options?: FetchNextPageOptions) => void | Promise<void>;
@@ -52,6 +54,8 @@ export function CartOrderContextProvider({
 	initialInfiniteOrders: Promise<AppRouterOutputs['cartOrder']['byWorkspace']>;
 }) {
 	const [showMarkAsFulfilledModal, setShowMarkAsFulfilledModal] = useState(false);
+	const [showCancelCartOrderModal, setShowCancelCartOrderModal] = useState(false);
+
 	const { handle } = useWorkspace();
 
 	const { data, setQuery, removeByKey, removeAllQueryParams, pending } =
@@ -162,8 +166,11 @@ export function CartOrderContextProvider({
 		setCartOrderSelection,
 		gridListRef,
 		focusGridList: () => gridListRef.current?.focus(),
+		// modals
 		showMarkAsFulfilledModal,
 		setShowMarkAsFulfilledModal,
+		showCancelCartOrderModal,
+		setShowCancelCartOrderModal,
 		// filters
 		filters,
 		pendingFiltersTransition: pending,

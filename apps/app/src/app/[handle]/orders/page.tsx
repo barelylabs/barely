@@ -5,6 +5,7 @@ import { cartOrderSearchParamsSchema } from '@barely/lib/server/routes/cart-orde
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllCartOrders } from '~/app/[handle]/orders/_components/all-cart-orders';
+import { CancelCartOrderModal } from '~/app/[handle]/orders/_components/cancel-cart-order-modal';
 import { CartOrderContextProvider } from '~/app/[handle]/orders/_components/cart-order-context';
 import { CartOrderFilters } from '~/app/[handle]/orders/_components/cart-order-filters';
 import { CartOrderHotkeys } from '~/app/[handle]/orders/_components/cart-order-hotkeys';
@@ -38,6 +39,7 @@ export default function CartOrdersPage({
 			</div> */}
 
 			<MarkCartOrderFulfilledModal />
+			<CancelCartOrderModal />
 			<CartOrderHotkeys />
 		</CartOrderContextProvider>
 	);
