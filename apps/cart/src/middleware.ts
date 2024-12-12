@@ -24,6 +24,11 @@ export function middleware(req: NextRequest) {
 		);
 
 		if (!handle || !key) {
+			// console.log('missing handle or key for /live or /preview', handle, key);
+			return res;
+		}
+
+		if (!handle || !key) {
 			console.log('missing handle or key for /live or /preview', handle, key);
 			// return res;
 		}
@@ -44,6 +49,11 @@ export function middleware(req: NextRequest) {
 		console.log('pushing to preview', previewUrl);
 
 		const res = NextResponse.rewrite(previewUrl);
+
+		if (!handle || !key) {
+			// console.log('missing handle or key for preview', handle, key);
+			return res;
+		}
 
 		if (!handle || !key) {
 			console.log('missing handle or key for preview', handle, key);
@@ -84,7 +94,9 @@ export const config = {
 		 * - sitemap (sitemap file)
 		 * - site.webmanifest (site.webmanifest file)
 		 * - robots (robots file)
+		 * - robots (robots file)
 		 */
+		'/((?!api|_next|_static|.well-known|favicon|logos|sitemap|site.webmanifest|robots).*)',
 		'/((?!api|_next|_static|.well-known|favicon|logos|sitemap|site.webmanifest|robots).*)',
 	],
 };
