@@ -28,6 +28,8 @@ interface CartOrderContext {
 	focusGridList: () => void;
 	showMarkAsFulfilledModal: boolean;
 	setShowMarkAsFulfilledModal: (show: boolean) => void;
+	showCancelCartOrderModal: boolean;
+	setShowCancelCartOrderModal: (show: boolean) => void;
 	//infinite
 	hasNextPage: boolean;
 	fetchNextPage: (options?: FetchNextPageOptions) => void | Promise<void>;
@@ -40,6 +42,7 @@ interface CartOrderContext {
 	toggleFulfilled: () => void;
 	clearAllFilters: () => void;
 	togglePreorders: () => void;
+	toggleCanceled: () => void;
 }
 
 const CartOrderContext = createContext<CartOrderContext | undefined>(undefined);
@@ -52,6 +55,8 @@ export function CartOrderContextProvider({
 	initialInfiniteOrders: Promise<AppRouterOutputs['cartOrder']['byWorkspace']>;
 }) {
 	const [showMarkAsFulfilledModal, setShowMarkAsFulfilledModal] = useState(false);
+	const [showCancelCartOrderModal, setShowCancelCartOrderModal] = useState(false);
+
 	const { handle } = useWorkspace();
 
 	const { data, setQuery, removeByKey, removeAllQueryParams, pending } =
@@ -134,6 +139,14 @@ export function CartOrderContextProvider({
 		}
 	}, [filters.showPreorders, removeByKey, setQuery]);
 
+	const toggleCanceled = useCallback(() => {
+		if (filters.showCanceled) {
+			removeByKey('showCanceled');
+		} else {
+			return setQuery('showCanceled', true);
+		}
+	}, [filters.showCanceled, removeByKey, setQuery]);
+
 	const setSearch = useCallback(
 		(search: string) => {
 			if (search.length) {
@@ -162,8 +175,11 @@ export function CartOrderContextProvider({
 		setCartOrderSelection,
 		gridListRef,
 		focusGridList: () => gridListRef.current?.focus(),
+		// modals
 		showMarkAsFulfilledModal,
 		setShowMarkAsFulfilledModal,
+		showCancelCartOrderModal,
+		setShowCancelCartOrderModal,
 		// filters
 		filters,
 		pendingFiltersTransition: pending,
@@ -171,6 +187,7 @@ export function CartOrderContextProvider({
 		toggleArchived,
 		toggleFulfilled,
 		togglePreorders,
+		toggleCanceled,
 		clearAllFilters,
 		// infinite
 		hasNextPage,

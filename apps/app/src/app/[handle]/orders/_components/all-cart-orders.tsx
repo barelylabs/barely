@@ -73,18 +73,32 @@ function CartOrderCard({
 }: {
 	cartOrder: AppRouterOutputs['cartOrder']['byWorkspace']['cartOrders'][0];
 }) {
-	const { setShowMarkAsFulfilledModal, setCartOrderSelection, cartOrderSelection } =
-		useCartOrderContext();
+	const {
+		setShowMarkAsFulfilledModal,
+		setShowCancelCartOrderModal,
+		setCartOrderSelection,
+		cartOrderSelection,
+	} = useCartOrderContext();
 
 	const { handle } = useWorkspace();
 
 	const markAsFulfilledCommandItem: GridListCommandItemProps = {
 		label: 'Mark as fulfilled',
-		icon: 'check',
+		icon: 'fulfillment',
 		shortcut: ['f'],
 		action: () => {
 			setCartOrderSelection(new Set([cartOrder.id]));
 			setShowMarkAsFulfilledModal(true);
+		},
+	};
+
+	const cancelCommandItem: GridListCommandItemProps = {
+		label: 'Cancel',
+		icon: 'x',
+		shortcut: ['x'],
+		action: () => {
+			setCartOrderSelection(new Set([cartOrder.id]));
+			setShowCancelCartOrderModal(true);
 		},
 	};
 
@@ -97,16 +111,19 @@ function CartOrderCard({
 
 	const fullShippingAddressWithLineBreaks = `${cartOrder.fullName}\n${cartOrder.shippingAddressLine1}\n${cartOrder.shippingAddressLine2 ? `${cartOrder.shippingAddressLine2}\n` : ''}${cartOrder.shippingAddressCity}, ${cartOrder.shippingAddressState} ${cartOrder.shippingAddressPostalCode}`;
 
+	const commandItems = [
+		cartOrder.fulfillmentStatus !== 'fulfilled' && markAsFulfilledCommandItem,
+		!cartOrder.canceledAt &&
+			cartOrder.fulfillmentStatus === 'pending' &&
+			cancelCommandItem,
+	].filter((item): item is GridListCommandItemProps => Boolean(item));
+
 	return (
 		<GridListCard
 			id={cartOrder.id}
 			key={cartOrder.id}
 			textValue={cartOrder.id}
-			commandItems={[
-				...(cartOrder.fulfillmentStatus !== 'fulfilled' ?
-					[markAsFulfilledCommandItem]
-				:	[]),
-			]}
+			commandItems={commandItems}
 			actionOnCommandMenuOpen={() => {
 				if (cartOrderSelection === 'all' || cartOrderSelection.has(cartOrder.id)) {
 					return;
@@ -119,7 +136,9 @@ function CartOrderCard({
 					<div className='flex flex-col gap-2'>
 						<div className='flex flex-row items-center gap-2'>
 							<Text variant='lg/bold'>{numToPaddedString(cartOrder.orderId ?? 0)}</Text>
-							<Badge size='xs'>{cartOrder.fulfillmentStatus}</Badge>
+							<Badge size='xs'>
+								{cartOrder.canceledAt ? 'canceled' : cartOrder.fulfillmentStatus}
+							</Badge>
 						</div>
 						{/* <Text>{cartOrder.id}</Text> */}
 						<div className='flex flex-row gap-10'>
@@ -248,59 +267,63 @@ function CartOrderCard({
 					</div>
 				</div>
 
-				<Separator />
+				{(fulfillments ?? []).length > 0 && (
+					<>
+						<Separator />
 
-				<div className='group/tracking flex flex-col gap-1'>
-					{(fulfillments ?? []).map(fulfillment => {
-						const carrier = fulfillment.shippingCarrier;
-						const trackingNumber = fulfillment.shippingTrackingNumber;
-						if (!carrier || !trackingNumber) return null;
-						const trackingUrl = getTrackingLink({
-							carrier: carrier,
-							trackingNumber: trackingNumber,
-						});
-						return (
-							<div className='flex flex-row items-center gap-2' key={fulfillment.id}>
-								<Text variant='sm/normal'>
-									{carrier} :: {trackingNumber}
-								</Text>
-								<div className='group/tracking-buttons flex flex-row gap-1 opacity-0 transition-opacity duration-200 group-hover/tracking:opacity-100'>
-									<Button
-										variant='icon'
-										look='ghost'
-										size='xs'
-										startIcon='externalLink'
-										href={trackingUrl}
-										target='_blank'
-										rel='noopener noreferrer'
-									/>
-									<Button
-										variant='icon'
-										look='ghost'
-										size='xs'
-										startIcon='link'
-										onClick={() =>
-											copyToClipboard(trackingUrl, {
-												successMessage: 'Copied tracking url to clipboard!',
-											})
-										}
-									/>
-									<Button
-										variant='icon'
-										look='ghost'
-										size='xs'
-										startIcon='copy'
-										onClick={() =>
-											copyToClipboard(trackingNumber, {
-												successMessage: 'Copied tracking number to clipboard!',
-											})
-										}
-									/>
-								</div>
-							</div>
-						);
-					})}
-				</div>
+						<div className='group/tracking flex flex-col gap-1'>
+							{(fulfillments ?? []).map(fulfillment => {
+								const carrier = fulfillment.shippingCarrier;
+								const trackingNumber = fulfillment.shippingTrackingNumber;
+								if (!carrier || !trackingNumber) return null;
+								const trackingUrl = getTrackingLink({
+									carrier: carrier,
+									trackingNumber: trackingNumber,
+								});
+								return (
+									<div className='flex flex-row items-center gap-2' key={fulfillment.id}>
+										<Text variant='sm/normal'>
+											{carrier} :: {trackingNumber}
+										</Text>
+										<div className='group/tracking-buttons flex flex-row gap-1 opacity-0 transition-opacity duration-200 group-hover/tracking:opacity-100'>
+											<Button
+												variant='icon'
+												look='ghost'
+												size='xs'
+												startIcon='externalLink'
+												href={trackingUrl}
+												target='_blank'
+												rel='noopener noreferrer'
+											/>
+											<Button
+												variant='icon'
+												look='ghost'
+												size='xs'
+												startIcon='link'
+												onClick={() =>
+													copyToClipboard(trackingUrl, {
+														successMessage: 'Copied tracking url to clipboard!',
+													})
+												}
+											/>
+											<Button
+												variant='icon'
+												look='ghost'
+												size='xs'
+												startIcon='copy'
+												onClick={() =>
+													copyToClipboard(trackingNumber, {
+														successMessage: 'Copied tracking number to clipboard!',
+													})
+												}
+											/>
+										</div>
+									</div>
+								);
+							})}
+						</div>
+					</>
+				)}
 			</div>
 		</GridListCard>
 	);

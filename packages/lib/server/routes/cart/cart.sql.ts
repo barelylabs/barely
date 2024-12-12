@@ -190,6 +190,11 @@ export const Carts = pgTable(
 		shippingCarrier: varchar('shippingCarrier', { length: 255 }),
 		shippingTrackingNumber: varchar('shippingTrackingNumber', { length: 255 }),
 		shippedAt: timestamp('shippedAt'),
+
+		// refund
+		canceledAt: timestamp('canceledAt'),
+		refundedAt: timestamp('refundedAt'),
+		refundedAmount: integer('refundedAmount'),
 	},
 
 	cart => ({
