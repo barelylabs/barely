@@ -7,17 +7,15 @@ import { createTRPCRouter, workspaceQueryProcedure } from '../../api/trpc';
 import { FmPages } from '../fm/fm.sql';
 import { Links } from '../link/link.sql';
 import {
-	fmTimeseriesPipeParamsSchema,
-	fmTimeseriesQueryToPipeParamsSchema,
 	pipe_fmTimeseries,
+	pipe_topBrowsers,
+	pipe_topCities,
+	pipe_topCountries,
+	pipe_topDevices,
+	pipe_topOs,
+	pipe_topReferers,
+	pipe_topRegions,
 	pipe_webHitsTimeseries,
-	pipe_webSourcesTopBrowsers,
-	pipe_webSourcesTopCities,
-	pipe_webSourcesTopCountries,
-	pipe_webSourcesTopDevices,
-	pipe_webSourcesTopOs,
-	pipe_webSourcesTopReferers,
-	stdWebEventPipeParamsSchema,
 	stdWebEventQueryToPipeParamsSchema,
 } from './stat.schema';
 
@@ -89,6 +87,8 @@ export const statRouter = createTRPCRouter({
 		.input(stdWebEventQueryToPipeParamsSchema)
 		.query(async ({ ctx, input }) => {
 			const { dateRange, granularity } = input;
+
+			console.log('fmTimeseries input => ', input);
 			const fmTimeseries = await pipe_fmTimeseries({
 				...input,
 				workspaceId: ctx.workspace.id,
@@ -96,57 +96,7 @@ export const statRouter = createTRPCRouter({
 				granularity: granularity ?? (dateRange === '1d' ? 'hour' : 'day'),
 			});
 
-			console.log('fmTimeseries => ', fmTimeseries.data);
-
 			return fmTimeseries.data;
-
-			// const [visitsResult, clicksResult] = await Promise.allSettled([
-			// 	pipe_webHitsTimeseries({
-			// 		...input,
-			// 		workspaceId: ctx.workspace.id,
-			// 		types: ['fm/view'],
-			// 		timezone: ctx.workspace.timezone,
-			// 		// date_from: '2024-12-08',
-			// 		// date_to: '2024-12-08',
-			// 	}),
-			// 	pipe_webHitsTimeseries({
-			// 		...input,
-			// 		workspaceId: ctx.workspace.id,
-			// 		types: ['fm/linkClick'],
-			// 		timezone: ctx.workspace.timezone,
-			// 		// date_from: '2024-12-08',
-			// 		// date_to: '2024-12-08',
-			// 	}),
-			// ]);
-
-			// const visits =
-			// 	visitsResult.status === 'fulfilled' ? visitsResult.value : { data: [] };
-			// const clicks =
-			// 	clicksResult.status === 'fulfilled' ? clicksResult.value : { data: [] };
-
-			// console.log('visits => ', visits.data);
-			// console.log('clicks => ', clicks.data);
-
-			// const merged = visits.data.map((visit, index) => {
-			// 	return {
-			// 		...visit,
-			// 		visits: visit.visits,
-			// 		// visits: clicks.data[index]?.visits ?? 0,
-			// 		clicks: clicks.data[index]?.visits ?? 0,
-			// 	};
-			// });
-
-			// if the max date is greater than today, chop off the last day. otherwise chop off the first day
-			// const maxDate = new Date(
-			// 	Math.max(...merged.map(row => new Date(row.date).getTime())),
-			// );
-			// if (maxDate > new Date()) {
-			// 	merged.pop();
-			// } else {
-			// 	merged.shift();
-			// }
-
-			// return merged;
 		}),
 
 	webEventTimeseries: workspaceQueryProcedure
@@ -166,7 +116,9 @@ export const statRouter = createTRPCRouter({
 	topBrowsers: workspaceQueryProcedure
 		.input(stdWebEventQueryToPipeParamsSchema)
 		.query(async ({ ctx, input }) => {
-			const topBrowsers = await pipe_webSourcesTopBrowsers({
+			console.log('topBrowsers input ', input);
+
+			const topBrowsers = await pipe_topBrowsers({
 				...input,
 				workspaceId: ctx.workspace.id,
 				timezone: ctx.workspace.timezone,
@@ -178,9 +130,11 @@ export const statRouter = createTRPCRouter({
 	topDevices: workspaceQueryProcedure
 		.input(stdWebEventQueryToPipeParamsSchema)
 		.query(async ({ ctx, input }) => {
-			const topDevices = await pipe_webSourcesTopDevices({
+			console.log('topDevices input ', input);
+			const topDevices = await pipe_topDevices({
 				...input,
 				workspaceId: ctx.workspace?.id,
+				timezone: ctx.workspace.timezone,
 			});
 
 			return topDevices.data;
@@ -189,13 +143,10 @@ export const statRouter = createTRPCRouter({
 	topOperatingSystems: workspaceQueryProcedure
 		.input(stdWebEventQueryToPipeParamsSchema)
 		.query(async ({ ctx, input }) => {
-			if (!ctx.workspace && !input.assetId) {
-				throw new Error('assetId is required');
-			}
-
-			const topOperatingSystems = await pipe_webSourcesTopOs({
+			const topOperatingSystems = await pipe_topOs({
 				...input,
 				workspaceId: ctx.workspace?.id,
+				timezone: ctx.workspace.timezone,
 			});
 
 			return topOperatingSystems.data;
@@ -204,37 +155,35 @@ export const statRouter = createTRPCRouter({
 	topCities: workspaceQueryProcedure
 		.input(stdWebEventQueryToPipeParamsSchema)
 		.query(async ({ ctx, input }) => {
-			console.log('cities workspaceId : ', ctx.workspace?.id);
-			if (!ctx.workspace && !input.assetId) {
-				throw new Error('assetId is required');
-			}
-
-			const topCities = await pipe_webSourcesTopCities({
+			const topCities = await pipe_topCities({
 				...input,
 				workspaceId: ctx.workspace?.id,
+				timezone: ctx.workspace.timezone,
 			});
 
 			return topCities.data;
 		}),
 
+	topRegions: workspaceQueryProcedure
+		.input(stdWebEventQueryToPipeParamsSchema)
+		.query(async ({ ctx, input }) => {
+			const topRegions = await pipe_topRegions({
+				...input,
+				workspaceId: ctx.workspace?.id,
+				timezone: ctx.workspace.timezone,
+			});
+
+			return topRegions.data;
+		}),
+
 	topCountries: workspaceQueryProcedure
 		.input(stdWebEventQueryToPipeParamsSchema)
 		.query(async ({ ctx, input }) => {
-			const props = stdWebEventPipeParamsSchema.parse({
-				...input,
-				workspaceId: ctx.workspace?.id,
-			});
-
-			console.log('country props : ', props);
-
-			const topCountries = await pipe_webSourcesTopCountries({
+			const topCountries = await pipe_topCountries({
 				...input,
 				workspaceId: ctx.workspace.id,
 				timezone: ctx.workspace.timezone,
-				types: ['link/click', 'transparentLinkClick', 'shortLinkClick'], //fixme remove deprecated types
 			});
-
-			console.log('topCountries => ', topCountries);
 
 			return topCountries.data;
 		}),
@@ -242,13 +191,10 @@ export const statRouter = createTRPCRouter({
 	topReferers: workspaceQueryProcedure
 		.input(stdWebEventQueryToPipeParamsSchema)
 		.query(async ({ ctx, input }) => {
-			if (!ctx.workspace && !input.assetId) {
-				throw new Error('assetId is required');
-			}
-
-			const topReferers = await pipe_webSourcesTopReferers({
+			const topReferers = await pipe_topReferers({
 				...input,
 				workspaceId: ctx.workspace?.id,
+				timezone: ctx.workspace.timezone,
 			});
 
 			return topReferers.data;

@@ -10,6 +10,7 @@ import {
 } from '../../../utils/zod-helpers';
 import { tinybird } from '../../tinybird/client';
 import { WEB_EVENT_TYPES } from '../event/event.tb';
+import { FM_LINK_PLATFORMS } from '../fm/fm.constants';
 import { WORKSPACE_TIMEZONES } from '../workspace/workspace.settings';
 
 export const statDateRange = z.enum(['1d', '1w', '28d', '1y']);
@@ -24,16 +25,10 @@ export type StatDateRange = z.infer<typeof statDateRange>;
 
 // standard pipe params
 export const stdStatPipeParamsSchema = z.object({
-	// handle: z.string().optional(),
 	workspaceId: z.string().optional(),
 	assetId: z.string().optional(),
-	types: queryStringEnumArrayToCommaString([
-		...WEB_EVENT_TYPES,
-		// 'transparentLinkClick',
-		// 'shortLinkClick',
-	]).optional(),
-	// date_from: z.string(),
-	// date_to: z.string(),
+	types: queryStringEnumArrayToCommaString([...WEB_EVENT_TYPES]).optional(),
+	platforms: queryStringEnumArrayToCommaString([...FM_LINK_PLATFORMS]).optional(),
 	start: z.string(),
 	end: z.string(),
 	dateRange: statDateRange.optional(),
@@ -61,7 +56,7 @@ export const statReferrersPipeParamsSchema = z.object({
 });
 
 /**
- * web_events
+ * barely_events
  */
 
 // pipe schema :: for use in calls to tinybird pipes
@@ -194,19 +189,24 @@ export const pipe_fmTimeseries = tinybird.buildPipe({
 });
 
 /**
- * web_sources
+ * top sources
  * */
+
+const sharedSourcePipeDataSchema = z.object({
+	fm_views: z.number().optional().default(0),
+	fm_linkClicks: z.number().optional().default(0),
+});
 
 // browser
 
-export const topBrowsersPipeDataSchema = z.object({
-	browser: z.string(),
-	sessions: z.number(),
-	hits: z.number(),
-});
+export const topBrowsersPipeDataSchema = sharedSourcePipeDataSchema.merge(
+	z.object({
+		browser: z.string(),
+	}),
+);
 
-export const pipe_webSourcesTopBrowsers = tinybird.buildPipe({
-	pipe: 'web_sources__top_browsers',
+export const pipe_topBrowsers = tinybird.buildPipe({
+	pipe: 'v2_browsers',
 	parameters: stdWebEventPipeParamsSchema,
 	data: topBrowsersPipeDataSchema,
 	opts: {
@@ -216,74 +216,87 @@ export const pipe_webSourcesTopBrowsers = tinybird.buildPipe({
 
 // device
 
-export const topDevicesPipeDataSchema = z.object({
-	device: z.string(),
-	sessions: z.number(),
-	hits: z.number(),
-});
+export const topDevicesPipeDataSchema = sharedSourcePipeDataSchema.merge(
+	z.object({
+		device: z.string(),
+	}),
+);
 
-export const pipe_webSourcesTopDevices = tinybird.buildPipe({
-	pipe: 'web_sources__top_devices',
+export const pipe_topDevices = tinybird.buildPipe({
+	pipe: 'v2_devices',
 	parameters: stdWebEventPipeParamsSchema,
 	data: topDevicesPipeDataSchema,
 });
 
 // os
 
-export const topOsPipeDataSchema = z.object({
-	os: z.string(),
-	sessions: z.number(),
-	hits: z.number(),
-});
+export const topOsPipeDataSchema = sharedSourcePipeDataSchema.merge(
+	z.object({
+		os: z.string(),
+	}),
+);
 
-export const pipe_webSourcesTopOs = tinybird.buildPipe({
-	pipe: 'web_sources__top_os',
+export const pipe_topOs = tinybird.buildPipe({
+	pipe: 'v2_os',
 	parameters: stdWebEventPipeParamsSchema,
 	data: topOsPipeDataSchema,
 });
 
 // city
 
-export const topCitiesPipeDataSchema = z.object({
-	city: z.string(),
-	country: z.string(),
-	sessions: z.number(),
-	hits: z.number(),
-});
+export const topCitiesPipeDataSchema = sharedSourcePipeDataSchema.merge(
+	z.object({
+		city: z.string(),
+		region: z.string().optional(),
+		country: z.string(),
+	}),
+);
 
-export const pipe_webSourcesTopCities = tinybird.buildPipe({
-	pipe: 'web_sources__top_cities',
+export const pipe_topCities = tinybird.buildPipe({
+	pipe: 'v2_cities',
 	parameters: stdWebEventPipeParamsSchema,
 	data: topCitiesPipeDataSchema,
 });
 
-// country
+// region
 
-export const topCountriesPipeDataSchema = z.object({
-	country: z.string(),
-	sessions: z.number(),
-	hits: z.number(),
+export const topRegionsPipeDataSchema = sharedSourcePipeDataSchema.merge(
+	z.object({
+		region: z.string(),
+		country: z.string(),
+	}),
+);
+
+export const pipe_topRegions = tinybird.buildPipe({
+	pipe: 'v2_regions',
+	parameters: stdWebEventPipeParamsSchema,
+	data: topRegionsPipeDataSchema,
 });
 
-export const pipe_webSourcesTopCountries = tinybird.buildPipe({
-	pipe: 'web_sources__top_countries',
+// country
+
+export const topCountriesPipeDataSchema = sharedSourcePipeDataSchema.merge(
+	z.object({
+		country: z.string(),
+	}),
+);
+
+export const pipe_topCountries = tinybird.buildPipe({
+	pipe: 'v2_countries',
 	parameters: stdWebEventPipeParamsSchema,
 	data: topCountriesPipeDataSchema,
-	opts: {
-		logParams: true,
-	},
 });
 
 // referers
 
-export const topReferersPipeDataSchema = z.object({
-	referer: z.string(),
-	sessions: z.number(),
-	hits: z.number(),
-});
+export const topReferersPipeDataSchema = sharedSourcePipeDataSchema.merge(
+	z.object({
+		referer: z.string(),
+	}),
+);
 
-export const pipe_webSourcesTopReferers = tinybird.buildPipe({
-	pipe: 'web_sources__top_referers',
+export const pipe_topReferers = tinybird.buildPipe({
+	pipe: 'v2_referers',
 	parameters: stdWebEventPipeParamsSchema,
 	data: topReferersPipeDataSchema,
 });

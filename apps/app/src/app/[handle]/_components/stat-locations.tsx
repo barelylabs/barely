@@ -1,5 +1,6 @@
 'use client';
 
+import type { WebEventType } from '@barely/lib/server/routes/event/event.tb';
 import type { BarListBarProps } from '@barely/ui/charts/bar-list';
 import { useState } from 'react';
 import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
@@ -12,23 +13,29 @@ import { H } from '@barely/ui/elements/typography';
 
 import { COUNTRIES } from '@barely/utils/constants';
 
-export function StatLocations() {
-	const [tab, setTab] = useState<'Country' | 'City'>('Country');
+export function StatLocations({ eventType }: { eventType: WebEventType }) {
+	const [tab, setTab] = useState<'Country' | 'Region' | 'City'>('Country');
 
 	const { filtersWithHandle, getSetFilterPath } = useWebEventStatFilters();
 
 	const { data: countries } = api.stat.topCountries.useQuery(filtersWithHandle);
+	const { data: regions } = api.stat.topRegions.useQuery(filtersWithHandle);
 	const { data: cities } = api.stat.topCities.useQuery(filtersWithHandle);
 
 	const locationData =
-		tab === 'Country' ? countries?.map(c => ({ ...c, city: '' })) : cities;
+		tab === 'Country' ? countries?.map(c => ({ ...c, region: '', city: '' }))
+		: tab === 'Region' ? regions?.map(r => ({ ...r, city: '' }))
+		: cities;
 
 	const plotData: BarListBarProps[] =
 		!locationData ?
 			[]
 		:	locationData?.map(c => ({
-				name: tab === 'Country' ? COUNTRIES[c.country] ?? c.country : c.city,
-				value: c.sessions,
+				name:
+					tab === 'Country' ? COUNTRIES[c.country] ?? c.country
+					: tab === 'Region' && 'region' in c ? c.region ?? ''
+					: c.city,
+				value: eventType === 'fm/linkClick' ? c.fm_linkClicks : c.fm_views,
 				icon: () => (
 					<picture className='mr-2 flex items-center '>
 						<img
@@ -56,6 +63,7 @@ export function StatLocations() {
 				<TabButtons
 					tabs={[
 						{ label: 'Country', value: 'Country' },
+						{ label: 'Region', value: 'Region' },
 						{ label: 'City', value: 'City' },
 					]}
 					selectedTab={tab}

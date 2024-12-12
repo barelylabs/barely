@@ -1,8 +1,7 @@
 'use client';
 
 import { useFmStatFilters } from '@barely/lib/hooks/use-fm-stat-filters';
-import { usePlatformFilters } from '@barely/lib/hooks/use-platform-filters';
-import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
+import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { cn } from '@barely/lib/utils/cn';
 import { api } from '@barely/server/api/react';
 
@@ -75,16 +74,6 @@ export function FmTimeseries() {
 		0,
 	);
 
-	// const [showVisits, setShowVisits] = useState(true);
-	// const [showClicks, setShowClicks] = useState(true);
-	// const [showSpotify, setShowSpotify] = useState(false);
-	// const [showAppleMusic, setShowAppleMusic] = useState(false);
-	// const [showYoutube, setShowYoutube] = useState(false);
-	// const [showAmazonMusic, setShowAmazonMusic] = useState(false);
-	// const [showYoutubeMusic, setShowYoutubeMusic] = useState(false);
-
-	// const { showVisits, showClicks } = filtersWithHandle;
-
 	const chartData = (timeseries ?? [])?.map(row => ({
 		...row,
 		visits: showVisits ? row.fm_views : undefined,
@@ -154,6 +143,7 @@ export function FmTimeseries() {
 						)}
 					>
 						<PlatformClicks
+							fmId={filtersWithHandle.assetId}
 							totalSpotify={totalSpotifyClicks ?? 0}
 							totalAppleMusic={totalAppleMusicClicks ?? 0}
 							totalYoutube={totalYoutubeClicks ?? 0}
@@ -206,6 +196,7 @@ export function FmTimeseries() {
 }
 
 const PlatformClicks = ({
+	fmId,
 	totalSpotify,
 	totalAppleMusic,
 	totalYoutube,
@@ -222,6 +213,7 @@ const PlatformClicks = ({
 	toggleAmazonMusic,
 	toggleYoutubeMusic,
 }: {
+	fmId?: string;
 	totalSpotify: number;
 	totalAppleMusic: number;
 	totalYoutube: number;
@@ -238,9 +230,88 @@ const PlatformClicks = ({
 	toggleAmazonMusic: () => void;
 	toggleYoutubeMusic: () => void;
 }) => {
+	const { handle } = useWorkspace();
+	const { data: platforms } = api.fm.byId.useQuery(
+		{ handle, id: fmId ?? '' },
+		{
+			enabled: !!fmId,
+			select: fm => fm?.links.map(link => link.platform),
+		},
+	);
+
+	const toggles = [
+		{
+			platform: 'spotify' as const,
+			total: totalSpotify,
+			show: showSpotify,
+			toggle: toggleSpotify,
+			fmHas: !fmId || platforms?.some(platform => platform === 'spotify'),
+		},
+		{
+			platform: 'appleMusic' as const,
+			total: totalAppleMusic,
+			show: showAppleMusic,
+			toggle: toggleAppleMusic,
+			fmHas: !fmId || platforms?.some(platform => platform === 'appleMusic'),
+		},
+		{
+			platform: 'youtube' as const,
+			total: totalYoutube,
+			show: showYoutube,
+			toggle: toggleYoutube,
+			fmHas: !fmId || platforms?.some(platform => platform === 'youtube'),
+		},
+		{
+			platform: 'amazonMusic' as const,
+			total: totalAmazonMusic,
+			show: showAmazonMusic,
+			toggle: toggleAmazonMusic,
+			fmHas: !fmId || platforms?.some(platform => platform === 'amazonMusic'),
+		},
+		{
+			platform: 'youtubeMusic' as const,
+			total: totalYoutubeMusic,
+			show: showYoutubeMusic,
+			toggle: toggleYoutubeMusic,
+			fmHas: !fmId || platforms?.some(platform => platform === 'youtubeMusic'),
+		},
+	].sort((a, b) => b.total - a.total);
+
 	return (
 		<div className='h-max-full grid auto-cols-max grid-flow-col grid-rows-3 gap-x-4 gap-y-1'>
-			<button
+			{/* <pre>{JSON.stringify(toggles, null, 2)}</pre> */}
+			{toggles.map(toggle => {
+				if (!toggle.fmHas) return null;
+
+				const PlatformIcon = Icon[toggle.platform];
+
+				return (
+					<button
+						key={toggle.platform}
+						type='button'
+						className={cn(
+							'bg-slate flex flex-row items-center gap-x-1 gap-y-0.5 rounded-sm p-0.5',
+						)}
+						onClick={toggle.toggle}
+					>
+						<PlatformIcon
+							className={cn(
+								'mb-[1px] h-3 w-3 text-slate-500',
+								toggle.show && `text-${toggle.platform}`,
+							)}
+						/>
+
+						<Text
+							variant='xs/medium'
+							className={toggle.show ? `text-${toggle.platform}` : 'text-slate-500'}
+						>
+							{toggle.platform}: {toggle.total}
+						</Text>
+					</button>
+				);
+			})}
+
+			{/* <button
 				type='button'
 				className={cn(
 					'bg-slate flex flex-row items-center gap-x-1 gap-y-0.5 rounded-sm p-0.5',
@@ -329,7 +400,7 @@ const PlatformClicks = ({
 				>
 					YouTube Music: {totalYoutubeMusic}
 				</Text>
-			</button>
+			</button> */}
 		</div>
 	);
 };
