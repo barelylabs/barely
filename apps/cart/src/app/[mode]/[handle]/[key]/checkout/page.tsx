@@ -24,7 +24,6 @@ export default async function CartPage({
 	const { mode, handle, key } = params;
 
 	const cartParams = cartPageSearchParams.safeParse(searchParams);
-	// const eventTrackingParams = eventReportSearchParamsSchema.safeParse(searchParams);
 
 	if (!cartParams.success) {
 		console.log('cartParams error', cartParams.error);
@@ -38,6 +37,7 @@ export default async function CartPage({
 	}
 
 	const cartId = cookies().get(`${handle}.${key}.cartId`)?.value;
+	const cartStage = cookies().get(`${handle}.${key}.cartStage`)?.value;
 
 	//  estimate shipTo from IP
 	const headersList = headers();
@@ -48,13 +48,13 @@ export default async function CartPage({
 	};
 
 	const initialData =
-		cartId ?
+		cartId && cartStage === 'cartIdCreated' ?
 			await cartApi.byIdAndParams({ id: cartId, handle, key })
 		:	await cartApi.create({
 				handle,
 				key,
 				shipTo,
-				// tracking: eventTrackingParams.data ?? {},
+				cartId: cartId,
 			});
 
 	const { defaultHex: colorPrimary } = getDynamicStyleVariables({

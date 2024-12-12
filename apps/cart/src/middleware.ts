@@ -28,7 +28,7 @@ export function middleware(req: NextRequest) {
 			return res;
 		}
 
-		setVisitorCookies({ req, res, handle, key });
+		setVisitorCookies({ req, res, handle, key, isCart: true });
 
 		return res;
 	}
@@ -50,7 +50,7 @@ export function middleware(req: NextRequest) {
 			return res;
 		}
 
-		setVisitorCookies({ req, res, handle, key });
+		setVisitorCookies({ req, res, handle, key, isCart: true });
 
 		return res;
 	}
@@ -66,7 +66,7 @@ export function middleware(req: NextRequest) {
 		// return res;
 	}
 
-	setVisitorCookies({ req, res, handle, key });
+	setVisitorCookies({ req, res, handle, key, isCart: true });
 
 	return res;
 }
