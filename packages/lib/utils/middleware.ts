@@ -13,7 +13,6 @@ import { getRandomGeoData } from '../server/routes/link/link.constants';
 import { isDevelopment } from './environment';
 import { newId } from './id';
 import { getDomainWithoutWWW } from './link';
-import { raise } from './raise';
 
 export const detectBot = (req: NextRequest) => {
 	const url = req.nextUrl;
@@ -36,24 +35,32 @@ export const detectBot = (req: NextRequest) => {
 
 // cart
 export const parseCartUrl = (url: string) => {
-	console.log('parseCartUrl', url);
 	const parsed = new URL(url);
 	const parts = parsed.pathname.split('/').filter(Boolean);
 
-	const handle = parts[0] ?? raise('handle is required');
-	const key = parts[1] ?? raise('key is required');
+	const handle = parts[0] ?? null;
+	const key = parts[1] ?? null;
+
+	if (!handle || !key) {
+		console.log('parseCartUrl', url);
+		console.log('missing handle or key', handle, key);
+	}
 
 	return { handle, key };
 };
 
 // fm
 export const parseFmUrl = (url: string) => {
-	console.log('parseFmUrl', url);
 	const parsed = new URL(url);
 	const parts = parsed.pathname.split('/').filter(Boolean);
 
-	const handle = parts[0] ?? raise('handle is required');
-	const key = parts.slice(1).join('/') ?? raise('key is required');
+	const handle = parts[0] ?? null;
+	const key = parts.slice(1).join('/') ?? null;
+
+	if (!handle || !key) {
+		console.log('parseFmUrl', url);
+		console.log('missing handle or key', handle, key);
+	}
 
 	return { handle, key };
 };
@@ -63,8 +70,13 @@ export const parsePageUrl = (url: string) => {
 	const parsed = new URL(url);
 	const parts = parsed.pathname.split('/').filter(Boolean);
 
-	const handle = parts[0] ?? raise('handle is required');
-	const key = parts.slice(1).join('/') ?? raise('key is required');
+	const handle = parts[0] ?? null;
+	const key = parts.slice(1).join('/') ?? null;
+
+	if (!handle || !key) {
+		console.log('parsePageUrl', url);
+		console.log('missing handle or key', handle, key);
+	}
 
 	return { handle, key };
 };
@@ -120,26 +132,69 @@ export function parseSession({
 	key,
 }: {
 	req: NextRequest;
-	handle: string;
-	key: string;
+	handle: string | null;
+	key: string | null;
 }) {
-	const fanId = req.cookies.get(`${handle}.${key}.fanId`)?.value ?? null;
-	const sessionId = req.cookies.get(`${handle}.${key}.bsid`)?.value ?? null;
+	const handleAndKeyExist = handle && key;
+
+	const fanId =
+		(handleAndKeyExist ?
+			req.cookies.get(`${handle}.${key}.fanId`)?.value
+		:	req.cookies.getAll().filter(cookie => cookie.name.endsWith('.fanId'))[0]?.value) ??
+		null;
+	const sessionId =
+		(handleAndKeyExist ?
+			req.cookies.get(`${handle}.${key}.bsid`)?.value
+		:	req.cookies.getAll().filter(cookie => cookie.name.endsWith('.bsid'))[0]?.value) ??
+		null;
 	const sessionReferer =
-		req.cookies.get(`${handle}.${key}.sessionReferer`)?.value ?? null;
+		(handleAndKeyExist ?
+			req.cookies.get(`${handle}.${key}.sessionReferer`)?.value
+		:	req.cookies.getAll().filter(cookie => cookie.name.endsWith('.sessionReferer'))[0]
+				?.value) ?? null;
 	const sessionRefererUrl =
-		req.cookies.get(`${handle}.${key}.sessionRefererUrl`)?.value ?? null;
+		(handleAndKeyExist ?
+			req.cookies.get(`${handle}.${key}.sessionRefererUrl`)?.value
+		:	req.cookies.getAll().filter(cookie => cookie.name.endsWith('.sessionRefererUrl'))[0]
+				?.value) ?? null;
 	const sessionRefererId =
-		req.cookies.get(`${handle}.${key}.sessionRefererId`)?.value ?? null;
-	const fbclid = req.cookies.get(`${handle}.${key}.fbclid`)?.value ?? null;
+		(handleAndKeyExist ?
+			req.cookies.get(`${handle}.${key}.sessionRefererId`)?.value
+		:	req.cookies.getAll().filter(cookie => cookie.name.endsWith('.sessionRefererId'))[0]
+				?.value) ?? null;
+	const fbclid =
+		(handleAndKeyExist ?
+			req.cookies.get(`${handle}.${key}.fbclid`)?.value
+		:	req.cookies.getAll().filter(cookie => cookie.name.endsWith('.fbclid'))[0]?.value) ??
+		null;
 	const sessionEmailBroadcastId =
-		req.cookies.get(`${handle}.${key}.sessionEmailBroadcastId`)?.value ?? null;
+		(handleAndKeyExist ?
+			req.cookies.get(`${handle}.${key}.sessionEmailBroadcastId`)?.value
+		:	req.cookies
+				.getAll()
+				.filter(cookie => cookie.name.endsWith('.sessionEmailBroadcastId'))[0]?.value) ??
+		null;
 	const sessionEmailTemplateId =
-		req.cookies.get(`${handle}.${key}.sessionEmailTemplateId`)?.value ?? null;
+		(handleAndKeyExist ?
+			req.cookies.get(`${handle}.${key}.sessionEmailTemplateId`)?.value
+		:	req.cookies
+				.getAll()
+				.filter(cookie => cookie.name.endsWith('.sessionEmailTemplateId'))[0]?.value) ??
+		null;
 	const sessionFlowActionId =
-		req.cookies.get(`${handle}.${key}.sessionFlowActionId`)?.value ?? null;
+		(handleAndKeyExist ?
+			req.cookies.get(`${handle}.${key}.sessionFlowActionId`)?.value
+		:	req.cookies
+				.getAll()
+				.filter(cookie => cookie.name.endsWith('.sessionFlowActionId'))[0]?.value) ??
+		null;
 	const sessionLandingPageId =
-		req.cookies.get(`${handle}.${key}.sessionLandingPageId`)?.value ?? null;
+		(handleAndKeyExist ?
+			req.cookies.get(`${handle}.${key}.sessionLandingPageId`)?.value
+		:	req.cookies
+				.getAll()
+				.filter(cookie => cookie.name.endsWith('.sessionLandingPageId'))[0]?.value) ??
+		null;
 
 	return {
 		fanId,
@@ -185,8 +240,8 @@ export function parseReqForVisitorInfo({
 	key,
 }: {
 	req: NextRequest;
-	handle: string;
-	key: string;
+	handle: string | null;
+	key: string | null;
 }) {
 	const ip = parseIp(req);
 	const geo = parseGeo(req);
@@ -213,14 +268,16 @@ export function parseReqForVisitorInfo({
 export function setVisitorCookies({
 	req,
 	res,
-	handle,
-	key,
+	...rest
 }: {
 	req: NextRequest;
 	res: NextResponse;
-	handle: string;
-	key: string;
+	handle: string | null;
+	key: string | null;
 }) {
+	const handle = rest.handle ?? '_';
+	const key = rest.key ?? '_';
+
 	const params = req.nextUrl.searchParams;
 	const { referer, referer_url } = parseReferer(req);
 

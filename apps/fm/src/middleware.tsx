@@ -17,6 +17,12 @@ export async function middleware(req: NextRequest) {
 	if (isDevelopment() || domainParts?.[0] === 'barely') {
 		const { handle, key } = parseFmUrl(req.url);
 		const res = NextResponse.next();
+
+		if (!handle || !key) {
+			console.log('missing handle or key for barely', handle, key);
+			// return res;
+		}
+
 		setVisitorCookies({ req, res, handle, key });
 
 		console.log('fm cookies (barely) >>', res.cookies.getAll());
