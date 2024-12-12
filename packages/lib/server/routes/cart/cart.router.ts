@@ -405,6 +405,7 @@ export const cartRouter = createTRPCRouter({
 
 			await incrementAssetValuesOnCartPurchase(cart, upsellProductAmount);
 
+			// 👇 ok because it only happens in a route handler
 			cookies().set(`${funnel.handle}.${funnel.key}.cartStage`, 'upsellConverted');
 
 			return {
@@ -461,7 +462,7 @@ export const cartRouter = createTRPCRouter({
 
 			await ctx.db.pool.update(Carts).set(cart).where(eq(Carts.id, input.cartId));
 
-			cookies().set(`${funnel.handle}.${funnel.key}.cartStage`, 'upsellDeclined');
+			cookies().set(`${funnel.handle}.${funnel.key}.cartStage`, 'upsellDeclined'); // ok because it only happens in a route handler
 
 			return {
 				handle: funnel.workspace.handle,

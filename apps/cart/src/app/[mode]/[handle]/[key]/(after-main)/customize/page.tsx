@@ -72,7 +72,7 @@ export default async function UpsellPage({
 
 	return (
 		<>
-			<UpsellLog cartId={cartId} />
+			<UpsellLog cartId={cartId} handle={handle} key={key} />
 			<div className='flex flex-col items-center gap-6 sm:gap-8'>
 				<CartSteps />
 

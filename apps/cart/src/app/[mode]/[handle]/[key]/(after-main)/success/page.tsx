@@ -6,6 +6,7 @@ import { Button } from '@barely/ui/elements/button';
 import { H } from '@barely/ui/elements/typography';
 
 import { CartMDX } from '~/app/[mode]/[handle]/[key]/_components/cart-mdx';
+import { SuccessLog } from '~/app/[mode]/[handle]/[key]/(after-main)/success/success-log';
 
 export default async function CartSuccessPage({
 	params,
@@ -18,6 +19,9 @@ export default async function CartSuccessPage({
 	const { handle, key } = params;
 
 	const cartId = cookies().get(`${params.handle}.${params.key}.cartId`)?.value;
+	const currentCartStage = cookies().get(
+		`${params.handle}.${params.key}.cartStage`,
+	)?.value;
 
 	if (!cartId) return null;
 
@@ -36,6 +40,12 @@ export default async function CartSuccessPage({
 
 	return (
 		<>
+			<SuccessLog
+				handle={handle}
+				key={key}
+				currentCartStage={currentCartStage ?? 'checkoutCreated'}
+			/>
+
 			<H size='1' className='mt-4 text-center text-brand'>
 				{publicFunnel.successPageHeadline ?? 'Thank you!'}
 			</H>

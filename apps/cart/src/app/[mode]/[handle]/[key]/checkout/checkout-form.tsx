@@ -37,6 +37,7 @@ import { Form } from '@barely/ui/forms';
 import { CheckboxField } from '@barely/ui/forms/checkbox-field';
 import { CurrencyField } from '@barely/ui/forms/currency-field';
 
+import { setCartStageCookie } from '~/app/[mode]/[handle]/[key]/_actions';
 // import { setCartCookie } from '~/app/[mode]/[handle]/[key]/_actions';
 import { ProductPrice } from '~/app/[mode]/[handle]/[key]/_components/product-price';
 
@@ -61,6 +62,11 @@ export function CheckoutForm({
 
 	useEffect(() => {
 		if (logEvent && initialCart.id) {
+			setCartStageCookie({
+				handle: initialFunnel.handle,
+				key: initialFunnel.key,
+				stage: 'checkoutCreated',
+			}).catch(console.error);
 			// setCartCookie({
 			// 	handle: initialFunnel.handle,
 			// 	key: initialFunnel.key,
@@ -76,8 +82,9 @@ export function CheckoutForm({
 	}, [
 		// tracking,
 		initialCart.id,
-		// initialFunnel.handle,
-		// initialFunnel.key,
+
+		initialFunnel.handle,
+		initialFunnel.key,
 		// shouldWriteToCookie,
 		logEvent,
 	]);
