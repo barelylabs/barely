@@ -94,9 +94,7 @@ export const config = {
 		 * - sitemap (sitemap file)
 		 * - site.webmanifest (site.webmanifest file)
 		 * - robots (robots file)
-		 * - robots (robots file)
 		 */
-		'/((?!api|_next|_static|.well-known|favicon|logos|sitemap|site.webmanifest|robots).*)',
 		'/((?!api|_next|_static|.well-known|favicon|logos|sitemap|site.webmanifest|robots).*)',
 	],
 };
