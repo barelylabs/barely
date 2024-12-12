@@ -24,8 +24,8 @@ export function middleware(req: NextRequest) {
 		);
 
 		if (!handle || !key) {
-			// console.log('missing handle or key for /live or /preview', handle, key);
-			return res;
+			console.log('missing handle or key for /live or /preview', handle, key);
+			// return res;
 		}
 
 		setVisitorCookies({ req, res, handle, key, isCart: true });
@@ -46,8 +46,8 @@ export function middleware(req: NextRequest) {
 		const res = NextResponse.rewrite(previewUrl);
 
 		if (!handle || !key) {
-			// console.log('missing handle or key for preview', handle, key);
-			return res;
+			console.log('missing handle or key for preview', handle, key);
+			// return res;
 		}
 
 		setVisitorCookies({ req, res, handle, key, isCart: true });
