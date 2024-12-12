@@ -1,6 +1,6 @@
 import type { ReceiptEmailProps } from '@barely/email/src/templates/cart/receipt';
 import type { z } from 'zod';
-import { cookies } from 'next/headers';
+// import { cookies } from 'next/headers';
 import { sendEmail } from '@barely/email';
 import ReceiptEmailTemplate from '@barely/email/src/templates/cart/receipt';
 import { and, count, eq, isNotNull } from 'drizzle-orm';
@@ -240,7 +240,7 @@ export async function createMainCartFromFunnel({
 
 	await dbHttp.insert(Carts).values(cart);
 
-	cookies().set(`${funnel.handle}.${funnel.key}.cartStage`, 'checkoutCreated');
+	// cookies().set(`${funnel.handle}.${funnel.key}.cartStage`, 'checkoutCreated');
 
 	return cart;
 }

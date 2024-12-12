@@ -1,7 +1,8 @@
 'use server';
 
 // import type { EventTrackingProps } from '@barely/lib/server/routes/event/event-report.schema';
-// import { cookies } from 'next/headers';
+import { cookies } from 'next/headers';
+
 // import { EventTrackingKeys } from '@barely/lib/server/routes/event/event-report.schema';
 
 // export async function setCartCookie({
@@ -31,3 +32,17 @@
 // 		}
 // 	}
 // }
+
+export async function setCartStageCookie({
+	handle,
+	key,
+	stage,
+}: {
+	handle: string;
+	key: string;
+	stage: string;
+}) {
+	cookies().set(`${handle}.${key}.cartStage`, stage, {
+		maxAge: 60 * 60 * 24 * 7, // 7 days
+	});
+}
