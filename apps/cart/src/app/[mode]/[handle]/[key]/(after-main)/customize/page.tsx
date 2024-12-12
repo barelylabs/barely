@@ -49,11 +49,11 @@ export default async function UpsellPage({
 			cart.stage === 'upsellConverted' ||
 			cart.stage === 'upsellDeclined')
 	) {
-		cookies().set(`${handle}.${key}.cartStage`, cart.stage);
+		// cookies().set(`${handle}.${key}.cartStage`, cart.stage);
 		return redirect(`/${handle}/${key}/success`);
 	}
 
-	cookies().set(`${handle}.${key}.cartStage`, 'upsellCreated');
+	// cookies().set(`${handle}.${key}.cartStage`, 'upsellCreated');
 
 	const expiresAt =
 		(cart.checkoutConvertedAt ? cart.checkoutConvertedAt.getTime() : Date.now()) +

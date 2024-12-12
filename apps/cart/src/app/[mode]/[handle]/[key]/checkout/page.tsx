@@ -5,6 +5,7 @@ import { cartApi } from '@barely/lib/server/routes/cart/cart.api.server';
 import { cartPageSearchParams } from '@barely/lib/server/routes/cart/cart.schema';
 // import { eventReportSearchParamsSchema } from '@barely/lib/server/routes/event/event-report.schema';
 import { isDevelopment } from '@barely/lib/utils/environment';
+import { newId } from '@barely/lib/utils/id';
 import { getDynamicStyleVariables } from 'node_modules/@barely/tailwind-config/lib/dynamic-tw.runtime';
 
 import { ElementsProvider } from '~/app/[mode]/[handle]/[key]/_components/elements-provider';
@@ -47,15 +48,18 @@ export default async function CartPage({
 		city: isDevelopment() ? 'New York' : headersList.get('x-vercel-ip-city'),
 	};
 
+	console.log('checkoutcartId', cartId);
+	console.log('checkout cartStage', cartStage);
+
 	const initialData =
-		cartId && cartStage === 'cartIdCreated' ?
-			await cartApi.byIdAndParams({ id: cartId, handle, key })
-		:	await cartApi.create({
+		cartStage === 'cartIdCreated' ?
+			await cartApi.create({
 				handle,
 				key,
 				shipTo,
 				cartId: cartId,
-			});
+			})
+		:	await cartApi.byIdAndParams({ id: cartId ?? newId('cart'), handle, key });
 
 	const { defaultHex: colorPrimary } = getDynamicStyleVariables({
 		baseName: 'brand',
