@@ -268,10 +268,12 @@ export function parseReqForVisitorInfo({
 export function setVisitorCookies({
 	req,
 	res,
+	isCart,
 	...rest
 }: {
 	req: NextRequest;
 	res: NextResponse;
+	isCart?: boolean;
 	handle: string | null;
 	key: string | null;
 }) {
@@ -280,6 +282,20 @@ export function setVisitorCookies({
 
 	const params = req.nextUrl.searchParams;
 	const { referer, referer_url } = parseReferer(req);
+
+	if (isCart) {
+		if (!res.cookies.get(`${handle}.${key}.cartId`)) {
+			res.cookies.set(`${handle}.${key}.cartId`, newId('cart'), {
+				httpOnly: true,
+				maxAge: 60 * 60 * 24,
+			});
+
+			res.cookies.set(`${handle}.${key}.cartStage`, 'cartIdCreated', {
+				httpOnly: true,
+				maxAge: 60 * 60 * 24,
+			});
+		}
+	}
 
 	if (!res.cookies.get(`${handle}.${key}.bsid`)) {
 		res.cookies.set(`${handle}.${key}.bsid`, newId('barelySession'), {

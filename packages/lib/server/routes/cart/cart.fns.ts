@@ -1,5 +1,6 @@
 import type { ReceiptEmailProps } from '@barely/email/src/templates/cart/receipt';
 import type { z } from 'zod';
+import { cookies } from 'next/headers';
 import { sendEmail } from '@barely/email';
 import ReceiptEmailTemplate from '@barely/email/src/templates/cart/receipt';
 import { and, count, eq, isNotNull } from 'drizzle-orm';
@@ -13,7 +14,7 @@ import type { stripeConnectChargeMetadataSchema } from '../stripe-connect/stripe
 import type { Cart, InsertCart } from './cart.schema';
 import { formatCentsToDollars } from '../../../utils/currency';
 import { isProduction } from '../../../utils/environment';
-import { newId } from '../../../utils/id';
+// import { newId } from '../../../utils/id';
 import { numToPaddedString } from '../../../utils/number';
 import { raise } from '../../../utils/raise';
 import { sqlIncrement } from '../../../utils/sql';
@@ -127,6 +128,7 @@ export async function createMainCartFromFunnel({
 	funnel,
 	visitor,
 	shipTo,
+	cartId,
 }: {
 	funnel: ServerFunnel;
 	visitor?: VisitorInfo;
@@ -135,6 +137,7 @@ export async function createMainCartFromFunnel({
 		state: string | null;
 		city: string | null;
 	};
+	cartId: string;
 }) {
 	const stripeAccount =
 		isProduction() ?
@@ -143,7 +146,7 @@ export async function createMainCartFromFunnel({
 
 	if (!stripeAccount) throw new Error('Stripe account not found');
 
-	const cartId = newId('cart');
+	// const cartId = newId('cart');
 
 	const amounts = getAmountsForCheckout(funnel, {
 		mainProductQuantity: 1,
@@ -236,6 +239,8 @@ export async function createMainCartFromFunnel({
 	}
 
 	await dbHttp.insert(Carts).values(cart);
+
+	cookies().set(`${funnel.handle}.${funnel.key}.cartStage`, 'checkoutCreated');
 
 	return cart;
 }

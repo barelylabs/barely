@@ -21,6 +21,11 @@ export default async function UpsellPage({
 	const { mode, handle, key } = params;
 
 	const cartId = cookies().get(`${params.handle}.${params.key}.cartId`)?.value;
+	// const cartStage = cookies().get(`${params.handle}.${params.key}.cartStage`)?.value;
+
+	// if (cartStage !== 'checkoutCreated') {
+	// 	cookies().set(`${params.handle}.${params.key}.cartStage`, 'upsellCreated');
+	// }
 
 	if (!cartId) {
 		console.log('cartId not found');
@@ -44,8 +49,11 @@ export default async function UpsellPage({
 			cart.stage === 'upsellConverted' ||
 			cart.stage === 'upsellDeclined')
 	) {
+		cookies().set(`${handle}.${key}.cartStage`, cart.stage);
 		return redirect(`/${handle}/${key}/success`);
 	}
+
+	cookies().set(`${handle}.${key}.cartStage`, 'upsellCreated');
 
 	const expiresAt =
 		(cart.checkoutConvertedAt ? cart.checkoutConvertedAt.getTime() : Date.now()) +

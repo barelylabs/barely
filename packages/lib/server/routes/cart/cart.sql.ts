@@ -19,6 +19,7 @@ import { Products } from '../product/product.sql';
 import { Workspaces } from '../workspace/workspace.sql';
 
 export const CART_STAGES = [
+	'cartIdCreated',
 	'checkoutCreated',
 	'checkoutAbandoned',
 	'checkoutConverted',

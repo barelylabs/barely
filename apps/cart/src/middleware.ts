@@ -28,7 +28,12 @@ export function middleware(req: NextRequest) {
 			return res;
 		}
 
-		setVisitorCookies({ req, res, handle, key });
+		if (!handle || !key) {
+			console.log('missing handle or key for /live or /preview', handle, key);
+			// return res;
+		}
+
+		setVisitorCookies({ req, res, handle, key, isCart: true });
 
 		return res;
 	}
@@ -50,7 +55,12 @@ export function middleware(req: NextRequest) {
 			return res;
 		}
 
-		setVisitorCookies({ req, res, handle, key });
+		if (!handle || !key) {
+			console.log('missing handle or key for preview', handle, key);
+			// return res;
+		}
+
+		setVisitorCookies({ req, res, handle, key, isCart: true });
 
 		return res;
 	}
@@ -66,7 +76,7 @@ export function middleware(req: NextRequest) {
 		// return res;
 	}
 
-	setVisitorCookies({ req, res, handle, key });
+	setVisitorCookies({ req, res, handle, key, isCart: true });
 
 	return res;
 }

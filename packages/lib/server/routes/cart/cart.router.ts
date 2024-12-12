@@ -1,9 +1,11 @@
+import { cookies } from 'next/headers';
 import { TRPCError } from '@trpc/server';
 import { and, eq, notInArray } from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { UpdateCart } from './cart.schema';
 import { isProduction } from '../../../utils/environment';
+import { newId } from '../../../utils/id';
 import { raise } from '../../../utils/raise';
 import { getAbsoluteUrl } from '../../../utils/url';
 import { wait } from '../../../utils/wait';
@@ -43,8 +45,7 @@ export const cartRouter = createTRPCRouter({
 						city: z.string().nullable(),
 					})
 					.optional(),
-				// // tracking
-				// tracking: eventReportSearchParamsSchema,
+				cartId: z.string().optional(), // // tracking
 			}),
 		)
 		.mutation(async ({ input }) => {
@@ -53,7 +54,8 @@ export const cartRouter = createTRPCRouter({
 
 			if (!funnel) throw new Error('funnel not found');
 
-			const cart = await createMainCartFromFunnel({ funnel, ...cartParams });
+			const cartId = input.cartId ?? newId('cart');
+			const cart = await createMainCartFromFunnel({ funnel, ...cartParams, cartId });
 
 			return {
 				cart,
@@ -123,7 +125,9 @@ export const cartRouter = createTRPCRouter({
 					.where(eq(Files.id, funnel.upsellProduct?._images[0]?.file.id));
 			}
 
-			const cart = funnel._carts[0] ?? (await createMainCartFromFunnel({ funnel }));
+			const cart =
+				funnel._carts[0] ??
+				(await createMainCartFromFunnel({ funnel, cartId: input.id }));
 
 			return {
 				cart,
@@ -401,6 +405,8 @@ export const cartRouter = createTRPCRouter({
 
 			await incrementAssetValuesOnCartPurchase(cart, upsellProductAmount);
 
+			cookies().set(`${funnel.handle}.${funnel.key}.cartStage`, 'upsellConverted');
+
 			return {
 				handle: funnel.workspace.handle,
 				key: funnel.key,
@@ -454,6 +460,8 @@ export const cartRouter = createTRPCRouter({
 			// console.log('updating declined upsell cart', cart);
 
 			await ctx.db.pool.update(Carts).set(cart).where(eq(Carts.id, input.cartId));
+
+			cookies().set(`${funnel.handle}.${funnel.key}.cartStage`, 'upsellDeclined');
 
 			return {
 				handle: funnel.workspace.handle,
