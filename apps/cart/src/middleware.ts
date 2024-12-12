@@ -23,6 +23,11 @@ export function middleware(req: NextRequest) {
 			req.url.replace('/live', '').replace('/preview', ''),
 		);
 
+		if (!handle || !key) {
+			// console.log('missing handle or key for /live or /preview', handle, key);
+			return res;
+		}
+
 		setVisitorCookies({ req, res, handle, key });
 
 		return res;
@@ -40,6 +45,11 @@ export function middleware(req: NextRequest) {
 
 		const res = NextResponse.rewrite(previewUrl);
 
+		if (!handle || !key) {
+			// console.log('missing handle or key for preview', handle, key);
+			return res;
+		}
+
 		setVisitorCookies({ req, res, handle, key });
 
 		return res;
@@ -50,6 +60,12 @@ export function middleware(req: NextRequest) {
 	console.log('pushing to live', liveUrl);
 
 	const res = NextResponse.rewrite(liveUrl);
+
+	if (!handle || !key) {
+		console.log('missing handle or key for live', handle, key);
+		// return res;
+	}
+
 	setVisitorCookies({ req, res, handle, key });
 
 	return res;
@@ -67,7 +83,8 @@ export const config = {
 		 * - logos (logos file)
 		 * - sitemap (sitemap file)
 		 * - site.webmanifest (site.webmanifest file)
+		 * - robots (robots file)
 		 */
-		'/((?!api|_next|_static|.well-known|favicon|logos|sitemap|site.webmanifest).*)',
+		'/((?!api|_next|_static|.well-known|favicon|logos|sitemap|site.webmanifest|robots).*)',
 	],
 };

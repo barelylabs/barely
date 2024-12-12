@@ -21,6 +21,12 @@ export function middleware(req: NextRequest) {
 		const { handle, key } = parsePageUrl(req.url);
 
 		const res = NextResponse.next();
+
+		if (!handle || !key) {
+			console.log('missing handle or key for barely', handle, key);
+			// return res;
+		}
+
 		setVisitorCookies({ req, res, handle, key });
 		return res;
 	}

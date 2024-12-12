@@ -9,7 +9,6 @@ export { OPTIONS } from '@barely/lib/utils/trpc-route';
 
 const handler = async function (req: NextRequest) {
 	const referer = req.headers.get('referer') ?? '';
-	// console.log('referrer', req.headers.get('referrer'));
 
 	console.log('req.headers.referer in cart trpc >>', req.headers.get('referer'));
 	console.log('req.referer in cart trpc >>', req.referrer);
