@@ -36,6 +36,7 @@ export const detectBot = (req: NextRequest) => {
 
 // cart
 export const parseCartUrl = (url: string) => {
+	console.log('parseCartUrl', url);
 	const parsed = new URL(url);
 	const parts = parsed.pathname.split('/').filter(Boolean);
 
