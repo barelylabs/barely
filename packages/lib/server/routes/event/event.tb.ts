@@ -79,6 +79,8 @@ export const WEB_EVENT_TYPES = [
 	...WEB_EVENT_TYPES__PAGE,
 ] as const;
 
+export type WebEventType = (typeof WEB_EVENT_TYPES)[number];
+
 // publish web events
 export const webEventIngestSchema = z
 	.object({
@@ -121,7 +123,7 @@ export const webEventIngestSchema = z
 	.merge(reportedEventTinybirdSchema);
 
 export const ingestWebEvent = tinybird.buildIngestEndpoint({
-	datasource: 'web_events',
+	datasource: 'barely_events',
 	event: webEventIngestSchema,
 });
 
@@ -168,7 +170,7 @@ export const cartEventIngestSchema = z.object({
 });
 
 export const ingestCartEvent = tinybird.buildIngestEndpoint({
-	datasource: 'web_events',
+	datasource: 'barely_events',
 	event: webEventIngestSchema.merge(cartEventIngestSchema),
 });
 
@@ -180,12 +182,12 @@ export const fmEventIngestSchema = z.object({
 });
 
 export const ingestFmEvent = tinybird.buildIngestEndpoint({
-	datasource: 'web_events',
+	datasource: 'barely_events',
 	event: webEventIngestSchema.merge(fmEventIngestSchema),
 });
 
 /* page */
 export const ingestPageEvent = tinybird.buildIngestEndpoint({
-	datasource: 'web_events',
+	datasource: 'barely_events',
 	event: webEventIngestSchema,
 });

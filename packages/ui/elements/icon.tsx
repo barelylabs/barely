@@ -525,6 +525,7 @@ export const Icon = {
 	twitter: FaTwitter,
 	twitch: FaTwitch,
 	youtube: FaYoutube,
+	youtubeMusic: PlayCircle,
 };
 
 export type IconType = LucideIcon | ReactIcon;

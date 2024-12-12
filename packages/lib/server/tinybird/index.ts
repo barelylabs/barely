@@ -5,8 +5,8 @@ import { tinybird } from './client';
 
 export const writes = {
 	webEvents: {
-		name: 'web_events',
-		description: 'Web events',
+		name: 'barely_events',
+		description: 'Barely events',
 		schema: webEventIngestSchema,
 	},
 } as const;

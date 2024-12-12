@@ -1,5 +1,6 @@
 'use client';
 
+import type { WebEventType } from '@barely/lib/server/routes/event/event.tb';
 import { useState } from 'react';
 import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
 import { api } from '@barely/server/api/react';
@@ -12,7 +13,7 @@ import { H } from '@barely/ui/elements/typography';
 
 export type DeviceTabs = 'Device' | 'Browser' | 'OS';
 
-export function StatDevices() {
+export function StatDevices({ eventType }: { eventType: WebEventType }) {
 	const [tab, setTab] = useState<DeviceTabs>('Device');
 
 	const { filtersWithHandle, getSetFilterPath } = useWebEventStatFilters();
@@ -21,7 +22,7 @@ export function StatDevices() {
 		select: data =>
 			data.map(d => ({
 				name: d.device,
-				value: d.sessions,
+				value: eventType === 'fm/linkClick' ? d.fm_linkClicks : d.fm_views,
 				icon: () => <DeviceIcon display={d.device} className='my-auto mr-2 h-4 w-4' />,
 				href: getSetFilterPath('device', d.device),
 				target: '_self',
@@ -32,7 +33,7 @@ export function StatDevices() {
 		select: data =>
 			data.map(d => ({
 				name: d.browser,
-				value: d.sessions,
+				value: eventType === 'fm/linkClick' ? d.fm_linkClicks : d.fm_views,
 				icon: () => <BrowserIcon display={d.browser} className='my-auto mr-2 h-4 w-4' />,
 				href: getSetFilterPath('browser', d.browser),
 				target: '_self',
@@ -45,7 +46,7 @@ export function StatDevices() {
 			select: data =>
 				data.map(d => ({
 					name: d.os,
-					value: d.sessions,
+					value: eventType === 'fm/linkClick' ? d.fm_linkClicks : d.fm_views,
 					icon: () => <OSIcon display={d.os} className='my-auto mr-2' />,
 					href: getSetFilterPath('os', d.os),
 					target: '_self',

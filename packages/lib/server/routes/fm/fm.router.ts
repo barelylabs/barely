@@ -69,6 +69,22 @@ export const fmRouter = createTRPCRouter({
 			};
 		}),
 
+	byId: workspaceQueryProcedure
+		.input(z.object({ id: z.string() }))
+		.query(async ({ input, ctx }) => {
+			const fmPage = await ctx.db.http.query.FmPages.findFirst({
+				where: and(eq(FmPages.id, input.id), eq(FmPages.workspaceId, ctx.workspace.id)),
+				with: {
+					links: {
+						orderBy: [asc(FmLinks.index)],
+					},
+					coverArt: true,
+				},
+			});
+
+			return fmPage;
+		}),
+
 	create: privateProcedure.input(createFmPageSchema).mutation(async ({ input, ctx }) => {
 		const { coverArtUrl, ...data } = input;
 
