@@ -43,6 +43,14 @@ export async function middleware(req: NextRequest) {
 
 	const { handle, key } = parseCartUrl(req.url);
 
+	if (!handle || !key) {
+		await log({
+			location: 'cart/middleware.ts',
+			message: `missing handle or key for ${req.url}`,
+			type: 'errors',
+		});
+	}
+
 	if (domain?.startsWith('preview.')) {
 		const previewUrl =
 			getAbsoluteUrl('cart', `preview${pathname}`).replace('www.', 'preview.') +
@@ -51,19 +59,6 @@ export async function middleware(req: NextRequest) {
 
 		const res = NextResponse.rewrite(previewUrl);
 
-		// if (!handle || !key) {
-
-		// 	return res;
-		// }
-
-		if (!handle || !key) {
-			await log({
-				location: 'cart/middleware.ts',
-				message: 'missing handle or key for preview',
-				type: 'errors',
-			});
-		}
-
 		await setVisitorCookies({ req, res, handle, key, app: 'cart' });
 
 		return res;
@@ -71,17 +66,8 @@ export async function middleware(req: NextRequest) {
 
 	/* assuming we are in live mode */
 	const liveUrl = getAbsoluteUrl('cart', `live${pathname}${req.nextUrl.search}`);
-	// console.log('pushing to live', liveUrl);
 
 	const res = NextResponse.rewrite(liveUrl);
-
-	if (!handle || !key) {
-		await log({
-			location: 'cart/middleware.ts',
-			message: 'missing handle or key for live',
-			type: 'errors',
-		});
-	}
 
 	await setVisitorCookies({ req, res, handle, key, app: 'cart' });
 

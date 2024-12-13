@@ -8,6 +8,14 @@ const logTypeToEnv = {
 	logs: process.env.BARELY_SLACK_HOOK_LOGS,
 };
 
+const TYPE_ICONS = {
+	alerts: ':rotating_light:',
+	errors: ':no_entry:',
+	sales: ':money_with_wings:',
+	users: ':busts_in_silhouette:',
+	logs: ':speech_balloon:',
+};
+
 export const log = async ({
 	message,
 	type,
@@ -35,6 +43,9 @@ export const log = async ({
 
 	const HOOK = logTypeToEnv[type];
 	if (!HOOK) return;
+
+	const mentionUser = process.env.BARELY_SLACK_NOTIFY_USER ?? null;
+
 	try {
 		/* 
 		Log a message to Threads error channel 
@@ -51,14 +62,7 @@ export const log = async ({
 						type: 'section',
 						text: {
 							type: 'mrkdwn',
-							text: `${mention ? '<@U0850L6UFHA> ' : ''}${
-								type === 'alerts' ? ':rotating_light: '
-								: type === 'errors' ? ':no_entry: '
-								: type === 'sales' ? ':money_with_wings: '
-								: type === 'users' ? ':busts_in_silhouette: '
-								: type === 'logs' ? ':speech_balloon: '
-								: ''
-							}${message}`,
+							text: `${mention && mentionUser ? `<@${mentionUser}>\n` : ''}${TYPE_ICONS[type]} *${location}*\n${message}`,
 						},
 					},
 				],
