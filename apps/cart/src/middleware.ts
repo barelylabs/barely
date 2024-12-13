@@ -33,7 +33,7 @@ export async function middleware(req: NextRequest) {
 			// return res;
 		}
 
-		await setVisitorCookies({ req, res, handle, key, isCart: true });
+		await setVisitorCookies({ req, res, handle, key, app: 'cart' });
 
 		return res;
 	}
@@ -60,7 +60,7 @@ export async function middleware(req: NextRequest) {
 			// return res;
 		}
 
-		await setVisitorCookies({ req, res, handle, key, isCart: true });
+		await setVisitorCookies({ req, res, handle, key, app: 'cart' });
 
 		return res;
 	}
@@ -75,7 +75,7 @@ export async function middleware(req: NextRequest) {
 		console.log('missing handle or key for live', handle, key);
 	}
 
-	await setVisitorCookies({ req, res, handle, key, isCart: true });
+	await setVisitorCookies({ req, res, handle, key, app: 'cart' });
 
 	return res;
 }
