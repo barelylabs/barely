@@ -51,7 +51,14 @@ export const log = async ({
 						type: 'section',
 						text: {
 							type: 'mrkdwn',
-							text: `${mention ? '<@U0850L6UFHA> ' : ''}${type === 'alerts' || type === 'errors' ? ':alert: ' : ''}${message}`,
+							text: `${mention ? '<@U0850L6UFHA> ' : ''}${
+								type === 'alerts' ? ':rotating_light: '
+								: type === 'errors' ? ':no_entry: '
+								: type === 'sales' ? ':money_with_wings: '
+								: type === 'users' ? ':busts_in_silhouette: '
+								: type === 'logs' ? ':speech_balloon: '
+								: ''
+							}${message}`,
 						},
 					},
 				],
