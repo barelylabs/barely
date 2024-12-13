@@ -35,7 +35,31 @@ export const detectBot = (req: NextRequest) => {
 	return false;
 };
 
+const parseHeadersForHandleAndKey = (headers: Headers) => {
+	const handleFromHeaders = headers.get('x-handle');
+	const keyFromHeaders = headers.get('x-key');
+
+	return { handle: handleFromHeaders, key: keyFromHeaders };
+};
+
 // cart
+export const parseCartReqForHandleAndKey = (req: NextRequest) => {
+	const { handle: handleFromHeaders, key: keyFromHeaders } = parseHeadersForHandleAndKey(
+		req.headers,
+	);
+
+	if (handleFromHeaders && keyFromHeaders)
+		return { handle: handleFromHeaders, key: keyFromHeaders };
+
+	const referer = req.headers.get('referer') ?? '';
+	const { handle: handleFromReferer, key: keyFromReferer } = parseCartUrl(referer);
+
+	return {
+		handle: handleFromHeaders ?? handleFromReferer,
+		key: keyFromHeaders ?? keyFromReferer,
+	};
+};
+
 export const parseCartUrl = (url: string) => {
 	const parsed = new URL(url);
 	const parts = parsed.pathname.split('/').filter(Boolean);
@@ -52,12 +76,29 @@ export const parseCartUrl = (url: string) => {
 };
 
 // fm
+export const parseFmReqForHandleAndKey = (req: NextRequest) => {
+	const { handle: handleFromHeaders, key: keyFromHeaders } = parseHeadersForHandleAndKey(
+		req.headers,
+	);
+
+	if (handleFromHeaders && keyFromHeaders)
+		return { handle: handleFromHeaders, key: keyFromHeaders };
+
+	const referer = req.headers.get('referer') ?? '';
+	const { handle: handleFromReferer, key: keyFromReferer } = parseFmUrl(referer);
+
+	return {
+		handle: handleFromHeaders ?? handleFromReferer,
+		key: keyFromHeaders ?? keyFromReferer,
+	};
+};
+
 export const parseFmUrl = (url: string) => {
 	const parsed = new URL(url);
 	const parts = parsed.pathname.split('/').filter(Boolean);
 
 	const handle = parts[0] ?? null;
-	const key = parts.slice(1).join('/') ?? null;
+	const key = parts.slice(1) ? parts.slice(1).join('/') : null;
 
 	if (!handle || !key) {
 		console.log('parseFmUrl', url);
@@ -68,12 +109,29 @@ export const parseFmUrl = (url: string) => {
 };
 
 // page
-export const parsePageUrl = (url: string) => {
+export const parseLandingPageReqForHandleAndKey = (req: NextRequest) => {
+	const { handle: handleFromHeaders, key: keyFromHeaders } = parseHeadersForHandleAndKey(
+		req.headers,
+	);
+
+	if (handleFromHeaders && keyFromHeaders)
+		return { handle: handleFromHeaders, key: keyFromHeaders };
+
+	const referer = req.headers.get('referer') ?? '';
+	const { handle: handleFromReferer, key: keyFromReferer } = parseLandingPageUrl(referer);
+
+	return {
+		handle: handleFromHeaders ?? handleFromReferer,
+		key: keyFromHeaders ?? keyFromReferer,
+	};
+};
+
+export const parseLandingPageUrl = (url: string) => {
 	const parsed = new URL(url);
 	const parts = parsed.pathname.split('/').filter(Boolean);
 
 	const handle = parts[0] ?? null;
-	const key = parts.slice(1).join('/') ?? null;
+	const key = parts.slice(1) ? parts.slice(1).join('/') : null;
 
 	if (!handle || !key) {
 		console.log('parsePageUrl', url);
