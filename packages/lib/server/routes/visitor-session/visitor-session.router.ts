@@ -9,7 +9,7 @@ export const visitorSessionRouter = createTRPCRouter({
 		.mutation(async ({ input, ctx }) => {
 			return await ctx.db.http
 				.insert(VisitorSessions)
-				.values({ ...input, id: newId('webSession') })
+				.values({ ...input, id: newId('barelySession') })
 				.execute();
 		}),
 });

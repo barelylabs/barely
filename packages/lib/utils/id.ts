@@ -16,9 +16,10 @@ const prefixes = {
 	link: 'link',
 	linkClick: 'lc',
 	bio: 'bio',
-	landingPageSession: 'lp_session',
+	landingPageSession: 'lps',
 	pressKit: 'pk',
-	webSession: 'web_session',
+	// webSession: 'web_session',
+	wwwSession: 'wwws',
 	barelySession: 'bs',
 	// flow
 	flow: 'flow',

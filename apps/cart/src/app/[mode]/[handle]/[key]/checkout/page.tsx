@@ -5,7 +5,6 @@ import { cartApi } from '@barely/lib/server/routes/cart/cart.api.server';
 import { cartPageSearchParams } from '@barely/lib/server/routes/cart/cart.schema';
 // import { eventReportSearchParamsSchema } from '@barely/lib/server/routes/event/event-report.schema';
 import { isDevelopment } from '@barely/lib/utils/environment';
-import { log } from '@barely/lib/utils/log';
 import { getDynamicStyleVariables } from 'node_modules/@barely/tailwind-config/lib/dynamic-tw.runtime';
 
 import { ElementsProvider } from '~/app/[mode]/[handle]/[key]/_components/elements-provider';
@@ -40,12 +39,12 @@ export default async function CartPage({
 	const cartId = cookies().get(`${handle}.${key}.cartId`)?.value;
 	// const cartStage = cookies().get(`${handle}.${key}.cartStage`)?.value;
 
-	await log({
-		type: 'logs',
-		location: 'checkout page',
-		message: `checkout page loaded. cartId: ${cartId}`,
-		mention: true,
-	});
+	// await log({
+	// 	type: 'logs',
+	// 	location: 'checkout page',
+	// 	message: `checkout page loaded. cartId: ${cartId}`,
+	// 	mention: true,
+	// });
 
 	//  estimate shipTo from IP
 	const headersList = headers();

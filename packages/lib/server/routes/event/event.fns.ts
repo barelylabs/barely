@@ -18,6 +18,7 @@ import type {
 	WEB_EVENT_TYPES__PAGE,
 } from './event.tb';
 import { env } from '../../../env';
+import { formatCentsToDollars } from '../../../utils/currency';
 import { isDevelopment } from '../../../utils/environment';
 import { newId } from '../../../utils/id';
 import { log } from '../../../utils/log';
@@ -140,14 +141,13 @@ export async function recordLinkClick({
 			timestamp,
 			workspaceId: link.workspaceId,
 			assetId: link.id,
-			sessionId: newId('linkClick'),
 			href,
-			// link specifics (short link or transparent link)
 			type,
 			domain: link.domain,
 			key: link.key,
 			// analytics
 			...flattenVisitorForIngest(visitor),
+			sessionId: visitor?.sessionId ?? newId('linkClick'),
 			platform,
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
 		});
@@ -161,7 +161,6 @@ export async function recordLinkClick({
 			location: 'recordLinkClick',
 			message: `error ingesting link click => ${String(error)}`,
 		});
-		throw new Error('ah!');
 	}
 
 	// increment the link click count in db
@@ -360,6 +359,23 @@ export async function recordCartEvent({
 			type: 'errors',
 			location: 'recordCartEvent',
 			message: `error ingesting cart event '${type}' => ${String(error)}`,
+		});
+	}
+
+	// report sales to slack
+	if (type === 'cart/purchaseMainWithoutBump' || type === 'cart/purchaseMainWithBump') {
+		await log({
+			type: 'sales',
+			location: 'recordCartEvent',
+			message: `${cartFunnel.handle} checkout [${cart.id}] :: ${formatCentsToDollars(cart.checkoutAmount)}`,
+		});
+	}
+
+	if (type === 'cart/purchaseUpsell') {
+		await log({
+			type: 'sales',
+			location: 'recordCartEvent',
+			message: `${cartFunnel.handle} upsell [${cart.id}] :: ${formatCentsToDollars(cart.upsellProductPrice ?? 0)}`,
 		});
 	}
 }
@@ -740,8 +756,8 @@ export async function recordFmEvent({
 			timestamp,
 			workspaceId: fmPage.workspaceId,
 			assetId: fmPage.id,
-			sessionId: visitor?.sessionId ?? newId('barelySession'),
 			...flattenVisitorForIngest(visitor),
+			sessionId: visitor?.sessionId ?? newId('barelySession'),
 			type,
 			href: sourceUrl,
 			linkClickDestinationHref: fmLink?.url ?? null,
@@ -754,7 +770,7 @@ export async function recordFmEvent({
 			timestamp,
 			workspaceId: fmPage.workspaceId,
 			assetId: fmPage.id,
-			sessionId: visitor?.sessionId ?? newId('barelySession'),
+			sessionId: visitor?.sessionId ?? newId('fmSession'),
 			...flattenVisitorForIngest(visitor),
 			type,
 			href: sourceUrl,
