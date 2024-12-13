@@ -160,8 +160,8 @@ export async function reportEventsToMeta(props: MetaEventProps) {
 
 	if (testEventCode)
 		await log({
-			type: 'link',
-			fn: 'reportEventToMeta',
+			type: 'logs',
+			location: 'reportEventToMeta',
 			message: `testEventCode => ${testEventCode}`,
 		});
 	try {

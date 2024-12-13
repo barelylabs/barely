@@ -23,7 +23,7 @@ export async function middleware(req: NextRequest) {
 			// return res;
 		}
 
-		setVisitorCookies({ req, res, handle, key });
+		await setVisitorCookies({ req, res, handle, key });
 
 		console.log('fm cookies (barely) >>', res.cookies.getAll());
 		return res;
@@ -43,7 +43,7 @@ export async function middleware(req: NextRequest) {
 		const url = getAbsoluteUrl('fm', `${handle}${pathname}`);
 
 		const res = NextResponse.rewrite(url);
-		setVisitorCookies({ req, res, handle, key });
+		await setVisitorCookies({ req, res, handle, key });
 
 		console.log('fm cookies (rewrite) >>', res.cookies.getAll());
 		console.log('rewriting to', url);

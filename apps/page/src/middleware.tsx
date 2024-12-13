@@ -4,7 +4,7 @@ import { isDevelopment, isPreview } from '@barely/lib/utils/environment';
 import { parsePageUrl, setVisitorCookies } from '@barely/lib/utils/middleware';
 import { getAbsoluteUrl } from '@barely/lib/utils/url';
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
 	const pathname = req.nextUrl.pathname;
 	const domain = req.headers.get('host');
 	const params = req.nextUrl.searchParams;
@@ -27,7 +27,7 @@ export function middleware(req: NextRequest) {
 			// return res;
 		}
 
-		setVisitorCookies({ req, res, handle, key });
+		await setVisitorCookies({ req, res, handle, key });
 		return res;
 	}
 
@@ -44,7 +44,7 @@ export function middleware(req: NextRequest) {
 		const url = getAbsoluteUrl('page', `/${handle}${pathname}`);
 
 		const res = NextResponse.rewrite(url);
-		setVisitorCookies({ req, res, handle, key });
+		await setVisitorCookies({ req, res, handle, key });
 
 		return res;
 	}

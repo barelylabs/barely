@@ -19,10 +19,10 @@ type SingleVariable = [string, string];
 
 export function oklchToHex(oklchString: string): string {
 	const oklchColor = parse(`oklch(${oklchString})`);
-	console.log('oklchColor', oklchColor);
+	// console.log('oklchColor', oklchColor);
 	const hex = formatHex(oklchColor);
 
-	console.log('oklchToHex', oklchString, hex);
+	// console.log('oklchToHex', oklchString, hex);
 	return hex ?? '';
 }
 

@@ -97,11 +97,11 @@ export async function recordLinkClick({
 	// ∞ Meta ∞
 	const metaPixel = analyticsEndpoints.find(endpoint => endpoint.platform === 'meta');
 
-	await log({
-		type: 'link',
-		fn: 'recordLinkClick',
-		message: `metaPixel => ${metaPixel?.id}`,
-	});
+	// await log({
+	// 	type: 'link',
+	// 	location: 'recordLinkClick',
+	// 	message: `metaPixel => ${metaPixel?.id}`,
+	// });
 
 	const fbclid = new URL(href).searchParams.get('fbclid');
 	const sourceUrl = href; // this is being logged directly from middleware, so href is the sourceUrl
@@ -124,6 +124,13 @@ export async function recordLinkClick({
 						},
 					},
 				],
+			}).catch(async err => {
+				await log({
+					type: 'errors',
+					location: 'recordLinkClick',
+					message: `err reporting link click to meta => ${err}`,
+				});
+				return { reported: false };
 			})
 		:	{ reported: false };
 
@@ -149,7 +156,11 @@ export async function recordLinkClick({
 
 		console.log('tinybirdRes => ', tinybirdRes);
 	} catch (error) {
-		console.log('error => ', error);
+		await log({
+			type: 'errors',
+			location: 'recordLinkClick',
+			message: `error ingesting link click => ${String(error)}`,
+		});
 		throw new Error('ah!');
 	}
 
@@ -246,7 +257,7 @@ export async function recordCartEvent({
 			:	visitor?.href ?? 'Unknown',
 	};
 
-	console.log(`visitorInfo for cart event ${type} => `, visitorInfo);
+	// console.log(`visitorInfo for cart event ${type} => `, visitorInfo);
 
 	if (visitorInfo.isBot) return null;
 
@@ -308,8 +319,12 @@ export async function recordCartEvent({
 				geo: visitorInfo.geo,
 				events: metaEvents,
 				fbclid,
-			}).catch(err => {
-				console.log('err reporting cart event to meta => ', err);
+			}).catch(async err => {
+				await log({
+					type: 'errors',
+					location: 'recordCartEvent',
+					message: `err reporting cart event to meta => ${err}`,
+				});
 				return { reported: false };
 			})
 		:	{ reported: false };
@@ -333,10 +348,19 @@ export async function recordCartEvent({
 			...cartEventData,
 		});
 
-		console.log('tinybirdRes for cart event => ', tinybirdRes);
+		if (tinybirdRes.quarantined_rows) {
+			await log({
+				type: 'errors',
+				location: 'recordCartEvent',
+				message: `quarantined_rows => ${tinybirdRes.quarantined_rows}`,
+			});
+		}
 	} catch (error) {
-		console.log('error => ', error);
-		throw new Error('ah!');
+		await log({
+			type: 'errors',
+			location: 'recordCartEvent',
+			message: `error ingesting cart event '${type}' => ${String(error)}`,
+		});
 	}
 }
 
@@ -699,8 +723,12 @@ export async function recordFmEvent({
 				geo: visitor?.geo,
 				events: metaEvents,
 				fbclid: visitor?.fbclid ?? null,
-			}).catch(err => {
-				console.log('error => ', err);
+			}).catch(async err => {
+				await log({
+					type: 'errors',
+					location: 'recordFmEvent',
+					message: `err reporting link click to meta => ${err}`,
+				});
 				return { reported: false };
 			})
 		:	{ reported: false };
@@ -737,8 +765,11 @@ export async function recordFmEvent({
 
 		console.log('fmEventRes => ', fmEventRes);
 	} catch (error) {
-		console.log('error => ', error);
-		throw new Error('ah!');
+		await log({
+			type: 'errors',
+			location: 'recordFmEvent',
+			message: `error ingesting fm event => ${String(error)}`,
+		});
 	}
 
 	if (type === 'fm/view') {

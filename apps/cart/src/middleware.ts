@@ -3,13 +3,13 @@ import { NextResponse } from 'next/server';
 import { parseCartUrl, setVisitorCookies } from '@barely/lib/utils/middleware';
 import { getAbsoluteUrl } from '@barely/lib/utils/url';
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
 	const domain = req.headers.get('host');
 	const pathname = req.nextUrl.pathname;
 
-	console.log('domain', domain);
-	console.log('path', pathname);
-	console.log('query', req.nextUrl.search);
+	console.log('middleware domain', domain);
+	console.log('middleware path', pathname);
+	console.log('middleware query', req.nextUrl.search);
 
 	/* the mode is already set in the URL */
 	if (
@@ -33,7 +33,7 @@ export function middleware(req: NextRequest) {
 			// return res;
 		}
 
-		setVisitorCookies({ req, res, handle, key, isCart: true });
+		await setVisitorCookies({ req, res, handle, key, isCart: true });
 
 		return res;
 	}
@@ -60,7 +60,7 @@ export function middleware(req: NextRequest) {
 			// return res;
 		}
 
-		setVisitorCookies({ req, res, handle, key, isCart: true });
+		await setVisitorCookies({ req, res, handle, key, isCart: true });
 
 		return res;
 	}
@@ -73,10 +73,9 @@ export function middleware(req: NextRequest) {
 
 	if (!handle || !key) {
 		console.log('missing handle or key for live', handle, key);
-		// return res;
 	}
 
-	setVisitorCookies({ req, res, handle, key, isCart: true });
+	await setVisitorCookies({ req, res, handle, key, isCart: true });
 
 	return res;
 }

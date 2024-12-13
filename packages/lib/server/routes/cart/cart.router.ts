@@ -6,6 +6,7 @@ import { z } from 'zod';
 import type { UpdateCart } from './cart.schema';
 import { isProduction } from '../../../utils/environment';
 import { newId } from '../../../utils/id';
+import { log } from '../../../utils/log';
 import { raise } from '../../../utils/raise';
 import { getAbsoluteUrl } from '../../../utils/url';
 import { wait } from '../../../utils/wait';
@@ -45,7 +46,7 @@ export const cartRouter = createTRPCRouter({
 						city: z.string().nullable(),
 					})
 					.optional(),
-				cartId: z.string().optional(), // // tracking
+				// cartId: z.string().optional(), // // tracking
 			}),
 		)
 		.mutation(async ({ input }) => {
@@ -54,8 +55,12 @@ export const cartRouter = createTRPCRouter({
 
 			if (!funnel) throw new Error('funnel not found');
 
-			const cartId = input.cartId ?? newId('cart');
-			const cart = await createMainCartFromFunnel({ funnel, ...cartParams, cartId });
+			// const cartId = input.cartId ?? newId('cart');
+			const cart = await createMainCartFromFunnel({
+				funnel,
+				...cartParams,
+				cartId: newId('cart'),
+			});
 
 			return {
 				cart,
@@ -66,6 +71,12 @@ export const cartRouter = createTRPCRouter({
 	byIdAndParams: publicProcedure
 		.input(z.object({ id: z.string(), handle: z.string(), key: z.string() }))
 		.query(async ({ input, ctx }) => {
+			await log({
+				type: 'logs',
+				location: 'cart.router.byIdAndParams',
+				message: `byIdAndParams called for cart ${input.id}`,
+			});
+
 			const funnel = await ctx.db.pool.query.CartFunnels.findFirst({
 				where: and(eq(CartFunnels.handle, input.handle), eq(CartFunnels.key, input.key)),
 				with: {
@@ -125,9 +136,24 @@ export const cartRouter = createTRPCRouter({
 					.where(eq(Files.id, funnel.upsellProduct?._images[0]?.file.id));
 			}
 
+			// const existingCart = funnel._carts[0];
+
+			// if (!existingCart) {
+			// 	await log({
+			// 		type: 'errors',
+			// 		location: 'cart.router.byIdAndParams',
+			// 		message: `no existing cart found for cart ${input.id}`,
+			// 	});
+			// }
 			const cart =
 				funnel._carts[0] ??
 				(await createMainCartFromFunnel({ funnel, cartId: input.id }));
+
+			// await log({
+			// 	type: 'alerts',
+			// 	location: 'cart.router.byIdAndParams',
+			// 	message: `new cart (${newCart.id}) created for cart ${input.id}`,
+			// });
 
 			return {
 				cart,
@@ -443,6 +469,8 @@ export const cartRouter = createTRPCRouter({
 				cartFunnel: funnel,
 				type: 'cart/declineUpsell',
 				visitor: ctx.visitor,
+			}).catch(err => {
+				console.log('error recording upsellcart event:', err);
 			});
 			// if (!!ctx.visitor?.ip || !!cart.visitorIp) {
 			// }
@@ -528,6 +556,12 @@ export const cartRouter = createTRPCRouter({
 				cartFunnel,
 				type: event,
 				visitor,
+			}).catch(err => {
+				console.log('error recording cart event in cart.router.log:', err);
 			});
+
+			return {
+				success: true,
+			};
 		}),
 });
