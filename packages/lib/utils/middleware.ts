@@ -14,6 +14,8 @@ import { isDevelopment } from './environment';
 import { newId } from './id';
 import { getDomainWithoutWWW } from './link';
 
+// import { log } from './log';
+
 export const detectBot = (req: NextRequest) => {
 	const url = req.nextUrl;
 	if (url.searchParams.get('bot')) return true;
@@ -265,10 +267,9 @@ export function parseReqForVisitorInfo({
 	} satisfies VisitorInfo;
 }
 
-export function setVisitorCookies({
+export async function setVisitorCookies({
 	req,
 	res,
-	isCart,
 	...rest
 }: {
 	req: NextRequest;
@@ -283,21 +284,9 @@ export function setVisitorCookies({
 	const params = req.nextUrl.searchParams;
 	const { referer, referer_url } = parseReferer(req);
 
-	if (isCart) {
-		if (!res.cookies.get(`${handle}.${key}.cartId`)) {
-			res.cookies.set(`${handle}.${key}.cartId`, newId('cart'), {
-				httpOnly: true,
-				maxAge: 60 * 60 * 24,
-			});
+	await Promise.resolve(1); // fixme
 
-			res.cookies.set(`${handle}.${key}.cartStage`, 'cartIdCreated', {
-				httpOnly: true,
-				maxAge: 60 * 60 * 24,
-			});
-		}
-	}
-
-	if (!res.cookies.get(`${handle}.${key}.bsid`)) {
+	if (!req.cookies.get(`${handle}.${key}.bsid`)) {
 		res.cookies.set(`${handle}.${key}.bsid`, newId('barelySession'), {
 			httpOnly: true,
 			maxAge: 60 * 60 * 24,

@@ -126,8 +126,8 @@ export async function handleStripeCheckoutSessionComplete(
 
 					if (!workspace) {
 						await log({
-							type: 'stripe',
-							fn: 'handleStripeCheckoutSessionComplete',
+							type: 'errors',
+							location: 'handleStripeCheckoutSessionComplete',
 							message: `Workspace with Stripe ID ${transactionMetadata.workspaceId} not found.`,
 						});
 

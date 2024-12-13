@@ -44,7 +44,7 @@ export default async function RootLayout({
 		);
 	}
 
-	console.log('cartFunnel', cartFunnel);
+	console.log('cartFunnel id', cartFunnel.id);
 
 	const { variables: brandStyles } = getDynamicStyleVariables({
 		baseName: 'brand',

@@ -5,7 +5,7 @@ import { cartApi } from '@barely/lib/server/routes/cart/cart.api.server';
 import { cartPageSearchParams } from '@barely/lib/server/routes/cart/cart.schema';
 // import { eventReportSearchParamsSchema } from '@barely/lib/server/routes/event/event-report.schema';
 import { isDevelopment } from '@barely/lib/utils/environment';
-import { newId } from '@barely/lib/utils/id';
+import { log } from '@barely/lib/utils/log';
 import { getDynamicStyleVariables } from 'node_modules/@barely/tailwind-config/lib/dynamic-tw.runtime';
 
 import { ElementsProvider } from '~/app/[mode]/[handle]/[key]/_components/elements-provider';
@@ -34,11 +34,18 @@ export default async function CartPage({
 	console.log('cartParams', cartParams.data);
 
 	if (cartParams.data.warmup) {
-		return <div>warmingup</div>;
+		return <div>warming up</div>;
 	}
 
 	const cartId = cookies().get(`${handle}.${key}.cartId`)?.value;
-	const cartStage = cookies().get(`${handle}.${key}.cartStage`)?.value;
+	// const cartStage = cookies().get(`${handle}.${key}.cartStage`)?.value;
+
+	await log({
+		type: 'logs',
+		location: 'checkout page',
+		message: `checkout page loaded. cartId: ${cartId}`,
+		mention: true,
+	});
 
 	//  estimate shipTo from IP
 	const headersList = headers();
@@ -49,17 +56,16 @@ export default async function CartPage({
 	};
 
 	console.log('checkoutcartId', cartId);
-	console.log('checkout cartStage', cartStage);
+	// console.log('checkout cartStage', cartStage);
 
 	const initialData =
-		cartStage === 'cartIdCreated' ?
-			await cartApi.create({
+		cartId ?
+			await cartApi.byIdAndParams({ id: cartId, handle, key })
+		:	await cartApi.create({
 				handle,
 				key,
 				shipTo,
-				cartId: cartId,
-			})
-		:	await cartApi.byIdAndParams({ id: cartId ?? newId('cart'), handle, key });
+			});
 
 	const { defaultHex: colorPrimary } = getDynamicStyleVariables({
 		baseName: 'brand',
@@ -73,12 +79,7 @@ export default async function CartPage({
 				initialData={initialData}
 				theme={{ colorPrimary }}
 			>
-				<CheckoutForm
-					mode={mode}
-					initialData={initialData}
-					// shouldWriteToCookie={!cartId}
-					// tracking={eventTrackingParams.data ?? {}}
-				/>
+				<CheckoutForm mode={mode} initialData={initialData} />
 			</ElementsProvider>
 		</>
 	);

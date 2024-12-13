@@ -1,7 +1,10 @@
 'use server';
 
 // import type { EventTrackingProps } from '@barely/lib/server/routes/event/event-report.schema';
+// import type { EventTrackingProps } from '@barely/lib/server/routes/event/event-report.schema';
 import { cookies } from 'next/headers';
+
+// import { EventTrackingKeys } from '@barely/lib/server/routes/event/event-report.schema';
 
 // import { EventTrackingKeys } from '@barely/lib/server/routes/event/event-report.schema';
 
@@ -14,7 +17,7 @@ import { cookies } from 'next/headers';
 // 	handle: string;
 // 	key: string;
 // 	cartId: string;
-// 	tracking: EventTrackingProps;
+// 	// tracking: EventTrackingProps;
 // }) {
 // 	await Promise.resolve();
 // 	cookies().set(`${handle}.${key}.cartId`, cartId, {
@@ -32,6 +35,20 @@ import { cookies } from 'next/headers';
 // 		}
 // 	}
 // }
+
+export async function setCartIdCookie({
+	handle,
+	key,
+	cartId,
+}: {
+	handle: string;
+	key: string;
+	cartId: string;
+}) {
+	cookies().set(`${handle}.${key}.cartId`, cartId, {
+		maxAge: 60 * 60 * 24 * 7, // 7 days
+	});
+}
 
 export async function setCartStageCookie({
 	handle,

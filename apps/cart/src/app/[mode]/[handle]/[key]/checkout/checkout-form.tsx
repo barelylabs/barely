@@ -37,7 +37,11 @@ import { Form } from '@barely/ui/forms';
 import { CheckboxField } from '@barely/ui/forms/checkbox-field';
 import { CurrencyField } from '@barely/ui/forms/currency-field';
 
-import { setCartStageCookie } from '~/app/[mode]/[handle]/[key]/_actions';
+import {
+	// setCartCookie,
+	setCartIdCookie,
+	setCartStageCookie,
+} from '~/app/[mode]/[handle]/[key]/_actions';
 // import { setCartCookie } from '~/app/[mode]/[handle]/[key]/_actions';
 import { ProductPrice } from '~/app/[mode]/[handle]/[key]/_components/product-price';
 
@@ -71,8 +75,12 @@ export function CheckoutForm({
 			// 	handle: initialFunnel.handle,
 			// 	key: initialFunnel.key,
 			// 	cartId: initialCart.id,
-			// 	tracking,
 			// }).catch(console.error);
+			setCartIdCookie({
+				handle: initialFunnel.handle,
+				key: initialFunnel.key,
+				cartId: initialCart.id,
+			}).catch(console.error);
 
 			logEvent({
 				cartId: initialCart.id,

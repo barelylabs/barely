@@ -70,7 +70,7 @@ export const createTRPCContext = (opts: {
 	//     userAgent: opts.visitor?.userAgent ?? opts.headers.g,
 	// };
 
-	console.log('trpc context visitor >>', opts.visitor);
+	// console.log('trpc context visitor >>', opts.visitor);
 
 	const context = {
 		// auth
@@ -127,7 +127,7 @@ export const createTRPCRouter = t.router;
 export const mergeRouters = t.mergeRouters;
 
 const dbPoolMiddleware = middleware(async ({ next, ctx }) => {
-	console.log('dbPoolMiddleware visitor >>', ctx.visitor); // Add this log
+	// console.log('dbPoolMiddleware visitor >>', ctx.visitor); // Add this log
 
 	const pool = new Pool({ connectionString: env.DATABASE_POOL_URL });
 	const dbPool = drizzle(pool, {

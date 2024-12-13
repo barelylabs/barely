@@ -1,43 +1,70 @@
-import { z } from 'zod';
+import { isDevelopment } from './environment';
 
-import { env } from '../env';
-import { zPost } from './zod-fetch';
+const logTypeToEnv = {
+	alerts: process.env.BARELY_SLACK_HOOK_ALERTS,
+	errors: process.env.BARELY_SLACK_HOOK_ERRORS,
+	sales: process.env.BARELY_SLACK_HOOK_SALES,
+	users: process.env.BARELY_SLACK_HOOK_USERS,
+	logs: process.env.BARELY_SLACK_HOOK_LOGS,
+};
 
-export const log = async (opts: {
-	type: 'link' | 'stripe' | 'meta';
-	fn: string;
+export const log = async ({
+	message,
+	type,
+	location,
+	mention = false,
+}: {
+	type: 'alerts' | 'errors' | 'sales' | 'users' | 'logs';
+	location: string;
 	message: string;
 	mention?: boolean;
 }) => {
 	/* 
   Log a message to the console 
   */
-	if (process.env.NODE_ENV === 'development' || !env.BOT_THREADS_API_KEY) {
-		return console.log(`>> ${opts.fn ? `fn :: ${opts.fn} // ` : ''}`, opts.message);
+	if (
+		isDevelopment() ||
+		!process.env.BARELY_SLACK_HOOK_ALERTS ||
+		!process.env.BARELY_SLACK_HOOK_ERRORS ||
+		!process.env.BARELY_SLACK_HOOK_SALES ||
+		!process.env.BARELY_SLACK_HOOK_USERS ||
+		!process.env.BARELY_SLACK_HOOK_LOGS
+	) {
+		return console.log(`>> ${location ? `loc :: ${location} // ` : ''}`, message);
 	}
 
+	const HOOK = logTypeToEnv[type];
+	if (!HOOK) return;
 	try {
 		/* 
 		Log a message to Threads error channel 
 		*/
 
-		await zPost('https://threads.com/api/public/postThread', z.object({}), {
-			auth: `Bearer ${env.BOT_THREADS_API_KEY}`,
-			body: {
-				channel: `${opts.type}-errors`,
+		return await fetch(HOOK, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
 				blocks: [
 					{
 						type: 'section',
 						text: {
 							type: 'mrkdwn',
-							text: `${opts.mention ? '<@34548329863> ' : ''}${opts.message}`,
+							text: `${mention ? '<@U0850L6UFHA> ' : ''}${
+								type === 'alerts' ? ':rotating_light: '
+								: type === 'errors' ? ':no_entry: '
+								: type === 'sales' ? ':money_with_wings: '
+								: type === 'users' ? ':busts_in_silhouette: '
+								: type === 'logs' ? ':speech_balloon: '
+								: ''
+							}${message}`,
 						},
 					},
 				],
-			},
-			logResponse: true,
+			}),
 		});
 	} catch (error) {
-		console.log('Failed to log to Barely Threads. Error: ', error);
+		console.log('Failed to log to Barely Slack. Error: ', error);
 	}
 };
