@@ -72,8 +72,6 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 		preChargeCartStage === 'checkoutCreated' ||
 		preChargeCartStage === 'checkoutAbandoned'
 	) {
-		console.log('this is the first payment since the cart was created');
-
 		const updateCart: UpdateCart = { id: prevCart.id };
 
 		updateCart.orderId = await createOrderIdForCart(prevCart);
@@ -107,8 +105,6 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 				})
 			:	undefined;
 
-		console.log('existing fan:', fan);
-
 		if (fan) {
 			updateCart.fanId = fan.id;
 			await dbHttp
@@ -119,7 +115,6 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 				})
 				.where(eq(Fans.id, fan.id));
 		} else {
-			console.log('creating new fan');
 			fan = await createFan({
 				workspaceId: prevCart.workspaceId,
 				fullName: charge.billing_details.name ?? prevCart.fullName ?? '',
@@ -141,7 +136,6 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 				emailMarketingOptIn: prevCart.emailMarketingOptIn ?? false,
 				smsMarketingOptIn: prevCart.smsMarketingOptIn ?? false,
 			});
-			console.log('new fan:', fan);
 			updateCart.fanId = fan.id;
 		}
 

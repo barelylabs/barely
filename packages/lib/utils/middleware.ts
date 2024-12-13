@@ -270,13 +270,14 @@ export function parseReqForVisitorInfo({
 export async function setVisitorCookies({
 	req,
 	res,
+	app,
 	...rest
 }: {
 	req: NextRequest;
 	res: NextResponse;
-	isCart?: boolean;
 	handle: string | null;
 	key: string | null;
+	app: 'cart' | 'link' | 'fm' | 'page' | 'press' | 'sparrow' | 'www';
 }) {
 	const handle = rest.handle ?? '_';
 	const key = rest.key ?? '_';
@@ -287,10 +288,19 @@ export async function setVisitorCookies({
 	await Promise.resolve(1); // fixme
 
 	if (!req.cookies.get(`${handle}.${key}.bsid`)) {
-		res.cookies.set(`${handle}.${key}.bsid`, newId('barelySession'), {
-			httpOnly: true,
-			maxAge: 60 * 60 * 24,
-		});
+		res.cookies.set(
+			`${handle}.${key}.bsid`,
+			app === 'cart' ? newId('cart')
+			: app === 'link' ? newId('linkClick')
+			: app === 'fm' ? newId('fmSession')
+			: app === 'page' ? newId('landingPageSession')
+			: app === 'www' ? newId('wwwSession')
+			: newId('barelySession'),
+			{
+				httpOnly: true,
+				maxAge: 60 * 60 * 24,
+			},
+		);
 	}
 
 	if (referer && !res.cookies.get(`${handle}.${key}.sessionReferer`))

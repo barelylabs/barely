@@ -6,7 +6,6 @@ import { z } from 'zod';
 import type { UpdateCart } from './cart.schema';
 import { isProduction } from '../../../utils/environment';
 import { newId } from '../../../utils/id';
-import { log } from '../../../utils/log';
 import { raise } from '../../../utils/raise';
 import { getAbsoluteUrl } from '../../../utils/url';
 import { wait } from '../../../utils/wait';
@@ -46,7 +45,6 @@ export const cartRouter = createTRPCRouter({
 						city: z.string().nullable(),
 					})
 					.optional(),
-				// cartId: z.string().optional(), // // tracking
 			}),
 		)
 		.mutation(async ({ input }) => {
@@ -71,12 +69,6 @@ export const cartRouter = createTRPCRouter({
 	byIdAndParams: publicProcedure
 		.input(z.object({ id: z.string(), handle: z.string(), key: z.string() }))
 		.query(async ({ input, ctx }) => {
-			await log({
-				type: 'logs',
-				location: 'cart.router.byIdAndParams',
-				message: `byIdAndParams called for cart ${input.id}`,
-			});
-
 			const funnel = await ctx.db.pool.query.CartFunnels.findFirst({
 				where: and(eq(CartFunnels.handle, input.handle), eq(CartFunnels.key, input.key)),
 				with: {
