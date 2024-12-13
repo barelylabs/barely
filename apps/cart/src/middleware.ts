@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { log } from '@barely/lib/utils/log';
 import { parseCartUrl, setVisitorCookies } from '@barely/lib/utils/middleware';
 import { getAbsoluteUrl } from '@barely/lib/utils/url';
 
@@ -7,9 +8,9 @@ export async function middleware(req: NextRequest) {
 	const domain = req.headers.get('host');
 	const pathname = req.nextUrl.pathname;
 
-	console.log('middleware domain', domain);
-	console.log('middleware path', pathname);
-	console.log('middleware query', req.nextUrl.search);
+	// console.log('middleware domain', domain);
+	// console.log('middleware path', pathname);
+	// console.log('middleware query', req.nextUrl.search);
 
 	/* the mode is already set in the URL */
 	if (
@@ -50,14 +51,17 @@ export async function middleware(req: NextRequest) {
 
 		const res = NextResponse.rewrite(previewUrl);
 
-		if (!handle || !key) {
-			// console.log('missing handle or key for preview', handle, key);
-			return res;
-		}
+		// if (!handle || !key) {
+
+		// 	return res;
+		// }
 
 		if (!handle || !key) {
-			console.log('missing handle or key for preview', handle, key);
-			// return res;
+			await log({
+				location: 'cart/middleware.ts',
+				message: 'missing handle or key for preview',
+				type: 'errors',
+			});
 		}
 
 		await setVisitorCookies({ req, res, handle, key, app: 'cart' });
@@ -67,12 +71,16 @@ export async function middleware(req: NextRequest) {
 
 	/* assuming we are in live mode */
 	const liveUrl = getAbsoluteUrl('cart', `live${pathname}${req.nextUrl.search}`);
-	console.log('pushing to live', liveUrl);
+	// console.log('pushing to live', liveUrl);
 
 	const res = NextResponse.rewrite(liveUrl);
 
 	if (!handle || !key) {
-		console.log('missing handle or key for live', handle, key);
+		await log({
+			location: 'cart/middleware.ts',
+			message: 'missing handle or key for live',
+			type: 'errors',
+		});
 	}
 
 	await setVisitorCookies({ req, res, handle, key, app: 'cart' });

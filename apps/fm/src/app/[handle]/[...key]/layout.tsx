@@ -9,7 +9,7 @@ import { cn } from '@barely/lib/utils/cn';
 import { TailwindIndicator } from '@barely/ui/components/tailwind-indicator';
 import { Container } from '@barely/ui/elements/container';
 
-import Providers from '~/app/providers';
+import Providers from '~/app/[handle]/[...key]/providers';
 
 const fontHeading = localFont({
 	src: '../../../fonts/CalSans-SemiBold.woff2',

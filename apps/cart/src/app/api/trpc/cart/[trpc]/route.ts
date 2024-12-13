@@ -1,16 +1,26 @@
 import type { NextRequest } from 'next/server';
 import { createTRPCContext } from '@barely/lib/server/api/trpc';
 import { cartRouter } from '@barely/lib/server/routes/cart/cart.router';
-import { parseCartUrl, parseReqForVisitorInfo } from '@barely/lib/utils/middleware';
+import { log } from '@barely/lib/utils/log';
+import {
+	parseCartReqForHandleAndKey,
+	parseReqForVisitorInfo,
+} from '@barely/lib/utils/middleware';
 import { setCorsHeaders } from '@barely/lib/utils/trpc-route';
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 
 export { OPTIONS } from '@barely/lib/utils/trpc-route';
 
 const handler = async function (req: NextRequest) {
-	const referer = req.headers.get('referer') ?? '';
+	const { handle, key } = parseCartReqForHandleAndKey(req);
 
-	const { handle, key } = parseCartUrl(referer);
+	if (!handle || !key) {
+		await log({
+			location: 'cart/api/trpc/cart/[trpc]/route.ts',
+			message: 'missing handle or key in api call',
+			type: 'errors',
+		});
+	}
 
 	const response = await fetchRequestHandler({
 		endpoint: '/api/trpc/cart',

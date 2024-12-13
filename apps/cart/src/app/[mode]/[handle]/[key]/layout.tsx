@@ -30,8 +30,6 @@ export default async function RootLayout({
 	params: { handle: string; key: string };
 	children: React.ReactNode;
 }) {
-	console.log('params', params);
-
 	const cartFunnel = await getFunnelByParams(params.handle, params.key);
 
 	if (!cartFunnel) {
@@ -43,8 +41,6 @@ export default async function RootLayout({
 			</html>
 		);
 	}
-
-	console.log('cartFunnel id', cartFunnel.id);
 
 	const { variables: brandStyles } = getDynamicStyleVariables({
 		baseName: 'brand',

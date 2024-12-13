@@ -5,6 +5,7 @@ import { cartApi } from '@barely/lib/server/routes/cart/cart.api.server';
 import { cartPageSearchParams } from '@barely/lib/server/routes/cart/cart.schema';
 // import { eventReportSearchParamsSchema } from '@barely/lib/server/routes/event/event-report.schema';
 import { isDevelopment } from '@barely/lib/utils/environment';
+import { log } from '@barely/lib/utils/log';
 import { getDynamicStyleVariables } from 'node_modules/@barely/tailwind-config/lib/dynamic-tw.runtime';
 
 import { ElementsProvider } from '~/app/[mode]/[handle]/[key]/_components/elements-provider';
@@ -27,24 +28,19 @@ export default async function CartPage({
 
 	if (!cartParams.success) {
 		console.log('cartParams error', cartParams.error);
+		await log({
+			location: 'cart/app/[mode]/[handle]/[key]/checkout/page.tsx',
+			message: `cartParams error: ${cartParams.error.message}`,
+			type: 'errors',
+		});
 		return redirect('/');
 	}
-
-	console.log('cartParams', cartParams.data);
 
 	if (cartParams.data.warmup) {
 		return <div>warming up</div>;
 	}
 
 	const cartId = cookies().get(`${handle}.${key}.cartId`)?.value;
-	// const cartStage = cookies().get(`${handle}.${key}.cartStage`)?.value;
-
-	// await log({
-	// 	type: 'logs',
-	// 	location: 'checkout page',
-	// 	message: `checkout page loaded. cartId: ${cartId}`,
-	// 	mention: true,
-	// });
 
 	//  estimate shipTo from IP
 	const headersList = headers();
@@ -53,9 +49,6 @@ export default async function CartPage({
 		state: isDevelopment() ? 'NY' : headersList.get('x-vercel-ip-country-region'),
 		city: isDevelopment() ? 'New York' : headersList.get('x-vercel-ip-city'),
 	};
-
-	console.log('checkoutcartId', cartId);
-	// console.log('checkout cartStage', cartStage);
 
 	const initialData =
 		cartId ?
