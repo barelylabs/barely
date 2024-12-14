@@ -8,6 +8,7 @@ import { api } from '@barely/server/api/react';
 
 import { BarList } from '@barely/ui/charts/bar-list';
 import { Card } from '@barely/ui/elements/card';
+import { ScrollArea, ScrollBar } from '@barely/ui/elements/scroll-area';
 import { TabButtons } from '@barely/ui/elements/tab-buttons';
 import { H } from '@barely/ui/elements/typography';
 
@@ -56,17 +57,22 @@ export function StatLocations({ eventType }: { eventType: WebEventType }) {
 
 	return (
 		<Card className='h-[400px]'>
-			<div className='flex flex-row items-center justify-between'>
+			<div className='flex flex-row items-center justify-between gap-6'>
 				<H size='4'>Locations</H>
-				<TabButtons
-					tabs={[
-						{ label: 'Country', value: 'Country' },
-						{ label: 'Region', value: 'Region' },
-						{ label: 'City', value: 'City' },
-					]}
-					selectedTab={tab}
-					setSelectedTab={setTab}
-				/>
+				<ScrollArea>
+					<div className='p-2'>
+						<TabButtons
+							tabs={[
+								{ label: 'Country', value: 'Country' },
+								{ label: 'Region', value: 'Region' },
+								{ label: 'City', value: 'City' },
+							]}
+							selectedTab={tab}
+							setSelectedTab={setTab}
+						/>
+					</div>
+					<ScrollBar hidden orientation='horizontal' />
+				</ScrollArea>
 			</div>
 			{barList(7)}
 		</Card>

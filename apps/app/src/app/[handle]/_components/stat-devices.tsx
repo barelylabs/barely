@@ -8,6 +8,7 @@ import { api } from '@barely/server/api/react';
 import { BarList } from '@barely/ui/charts/bar-list';
 import { Card } from '@barely/ui/elements/card';
 import { BrowserIcon, DeviceIcon, OSIcon } from '@barely/ui/elements/icon';
+import { ScrollArea, ScrollBar } from '@barely/ui/elements/scroll-area';
 import { TabButtons } from '@barely/ui/elements/tab-buttons';
 import { H } from '@barely/ui/elements/typography';
 
@@ -65,17 +66,22 @@ export function StatDevices({ eventType }: { eventType: WebEventType }) {
 	};
 	return (
 		<Card className='h-[400px]'>
-			<div className='flex flex-row items-center justify-between'>
+			<div className='flex flex-row items-center justify-between gap-6'>
 				<H size='4'>Devices</H>
-				<TabButtons
-					tabs={[
-						{ label: 'Device', value: 'Device' },
-						{ label: 'Browser', value: 'Browser' },
-						{ label: 'OS', value: 'OS' },
-					]}
-					selectedTab={tab}
-					setSelectedTab={setTab}
-				/>
+				<ScrollArea>
+					<div className='p-2'>
+						<TabButtons
+							tabs={[
+								{ label: 'Device', value: 'Device' },
+								{ label: 'Browser', value: 'Browser' },
+								{ label: 'OS', value: 'OS' },
+							]}
+							selectedTab={tab}
+							setSelectedTab={setTab}
+						/>
+					</div>
+					<ScrollBar hidden orientation='horizontal' />
+				</ScrollArea>
 			</div>
 			{barList(9)}
 		</Card>

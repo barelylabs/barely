@@ -33,7 +33,6 @@ export function useWebEventStatFilters() {
 						month: 'short',
 						day: 'numeric',
 					});
-					console.log('formatted => ', formatted);
 					return formatted;
 				}
 			}

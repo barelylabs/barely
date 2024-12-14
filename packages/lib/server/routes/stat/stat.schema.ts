@@ -263,7 +263,7 @@ export const pipe_topReferers = tinybird.buildPipe({
 // landing pages
 
 export const topLandingPagesPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({ landingPageId: z.string() }),
+	z.object({ sessionLandingPageId: z.string() }),
 );
 
 export const pipe_topLandingPages = tinybird.buildPipe({
@@ -275,7 +275,7 @@ export const pipe_topLandingPages = tinybird.buildPipe({
 // email broadcasts
 
 export const topEmailBroadcastsPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({ emailBroadcastId: z.string() }),
+	z.object({ sessionEmailBroadcastId: z.string() }),
 );
 
 export const pipe_topEmailBroadcasts = tinybird.buildPipe({
@@ -287,7 +287,7 @@ export const pipe_topEmailBroadcasts = tinybird.buildPipe({
 // email templates
 
 export const topEmailTemplatesPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({ emailTemplateId: z.string() }),
+	z.object({ sessionEmailTemplateId: z.string() }),
 );
 
 export const pipe_topEmailTemplates = tinybird.buildPipe({
@@ -299,7 +299,7 @@ export const pipe_topEmailTemplates = tinybird.buildPipe({
 // flow actions
 
 export const topFlowActionsPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({ flowActionId: z.string() }),
+	z.object({ sessionFlowActionId: z.string() }),
 );
 
 export const pipe_topFlowActions = tinybird.buildPipe({
@@ -311,7 +311,7 @@ export const pipe_topFlowActions = tinybird.buildPipe({
 // meta campaigns
 
 export const topMetaCampaignsPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({ metaCampaignId: z.string() }),
+	z.object({ sessionMetaCampaignId: z.string() }),
 );
 
 export const pipe_topMetaCampaigns = tinybird.buildPipe({
@@ -323,7 +323,7 @@ export const pipe_topMetaCampaigns = tinybird.buildPipe({
 // meta ad sets
 
 export const topMetaAdSetsPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({ metaAdSetId: z.string() }),
+	z.object({ sessionMetaAdSetId: z.string() }),
 );
 
 export const pipe_topMetaAdSets = tinybird.buildPipe({
@@ -335,7 +335,7 @@ export const pipe_topMetaAdSets = tinybird.buildPipe({
 // meta ad ids
 
 export const topMetaAdsPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({ metaAdId: z.string() }),
+	z.object({ sessionMetaAdId: z.string() }),
 );
 
 export const pipe_topMetaAds = tinybird.buildPipe({
@@ -347,7 +347,7 @@ export const pipe_topMetaAds = tinybird.buildPipe({
 // meta placements
 
 export const topMetaPlacementsPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({ metaPlacementId: z.string() }),
+	z.object({ sessionMetaPlacement: z.string() }),
 );
 
 export const pipe_topMetaPlacements = tinybird.buildPipe({
