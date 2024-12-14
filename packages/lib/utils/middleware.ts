@@ -311,7 +311,6 @@ export const visitorInfoSchema = z.object({
 	isBot: z.boolean(),
 	referer: z.string().nullable(),
 	referer_url: z.string().nullable(),
-	// referer_id: z.string().nullable(),
 	href: z.string(),
 
 	fanId: z.string().nullable(),

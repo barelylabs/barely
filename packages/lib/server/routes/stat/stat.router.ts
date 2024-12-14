@@ -12,6 +12,14 @@ import {
 	pipe_topCities,
 	pipe_topCountries,
 	pipe_topDevices,
+	pipe_topEmailBroadcasts,
+	pipe_topEmailTemplates,
+	pipe_topFlowActions,
+	pipe_topLandingPages,
+	pipe_topMetaAds,
+	pipe_topMetaAdSets,
+	pipe_topMetaCampaigns,
+	pipe_topMetaPlacements,
 	pipe_topOs,
 	pipe_topReferers,
 	pipe_topRegions,
@@ -198,5 +206,101 @@ export const statRouter = createTRPCRouter({
 			});
 
 			return topReferers.data;
+		}),
+
+	topMetaCampaigns: workspaceQueryProcedure
+		.input(stdWebEventQueryToPipeParamsSchema)
+		.query(async ({ ctx, input }) => {
+			const topMetaCampaigns = await pipe_topMetaCampaigns({
+				...input,
+				workspaceId: ctx.workspace.id,
+				timezone: ctx.workspace.timezone,
+			});
+
+			return topMetaCampaigns.data;
+		}),
+
+	topMetaAdSets: workspaceQueryProcedure
+		.input(stdWebEventQueryToPipeParamsSchema)
+		.query(async ({ ctx, input }) => {
+			const topMetaAdSets = await pipe_topMetaAdSets({
+				...input,
+				workspaceId: ctx.workspace.id,
+				timezone: ctx.workspace.timezone,
+			});
+
+			return topMetaAdSets.data;
+		}),
+
+	topMetaAds: workspaceQueryProcedure
+		.input(stdWebEventQueryToPipeParamsSchema)
+		.query(async ({ ctx, input }) => {
+			const topMetaAds = await pipe_topMetaAds({
+				...input,
+				workspaceId: ctx.workspace.id,
+				timezone: ctx.workspace.timezone,
+			});
+
+			return topMetaAds.data;
+		}),
+
+	topMetaPlacements: workspaceQueryProcedure
+		.input(stdWebEventQueryToPipeParamsSchema)
+		.query(async ({ ctx, input }) => {
+			const topMetaPlacements = await pipe_topMetaPlacements({
+				...input,
+				workspaceId: ctx.workspace.id,
+				timezone: ctx.workspace.timezone,
+			});
+
+			return topMetaPlacements.data;
+		}),
+
+	topLandingPages: workspaceQueryProcedure
+		.input(stdWebEventQueryToPipeParamsSchema)
+		.query(async ({ ctx, input }) => {
+			const topLandingPages = await pipe_topLandingPages({
+				...input,
+				workspaceId: ctx.workspace.id,
+				timezone: ctx.workspace.timezone,
+			});
+
+			return topLandingPages.data;
+		}),
+
+	topEmailBroadcasts: workspaceQueryProcedure
+		.input(stdWebEventQueryToPipeParamsSchema)
+		.query(async ({ ctx, input }) => {
+			const topEmailBroadcasts = await pipe_topEmailBroadcasts({
+				...input,
+				workspaceId: ctx.workspace.id,
+				timezone: ctx.workspace.timezone,
+			});
+
+			return topEmailBroadcasts.data;
+		}),
+
+	topEmailTemplates: workspaceQueryProcedure
+		.input(stdWebEventQueryToPipeParamsSchema)
+		.query(async ({ ctx, input }) => {
+			const topEmailTemplates = await pipe_topEmailTemplates({
+				...input,
+				workspaceId: ctx.workspace.id,
+				timezone: ctx.workspace.timezone,
+			});
+
+			return topEmailTemplates.data;
+		}),
+
+	topFlowActions: workspaceQueryProcedure
+		.input(stdWebEventQueryToPipeParamsSchema)
+		.query(async ({ ctx, input }) => {
+			const topFlowActions = await pipe_topFlowActions({
+				...input,
+				workspaceId: ctx.workspace.id,
+				timezone: ctx.workspace.timezone,
+			});
+
+			return topFlowActions.data;
 		}),
 });
