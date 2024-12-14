@@ -16,13 +16,6 @@ import { WORKSPACE_TIMEZONES } from '../workspace/workspace.settings';
 export const statDateRange = z.enum(['1d', '1w', '28d', '1y']);
 export type StatDateRange = z.infer<typeof statDateRange>;
 
-// export const TIMEZONE_TO_MV_MAP = {
-// 	'America/New_York': 'web_sessions_et_mv',
-// 	'America/Los_Angeles': 'web_sessions_pt_mv',
-// 	// 'Europe/London': 'web_sessions_uk_mv',
-// 	// Add other timezone -> materialized view mappings as needed
-// } as const;
-
 // standard pipe params
 export const stdStatPipeParamsSchema = z.object({
 	workspaceId: z.string().optional(),
@@ -53,6 +46,14 @@ export const statDevicePipeParamsSchema = z.object({
 
 export const statReferrersPipeParamsSchema = z.object({
 	referer: z.string().optional(),
+	sessionMetaCampaignId: z.string().optional(),
+	sessionMetaAdSetId: z.string().optional(),
+	sessionMetaAdId: z.string().optional(),
+	sessionMetaPlacementId: z.string().optional(),
+	sessionLandingPageId: z.string().optional(),
+	sessionEmailBroadcastId: z.string().optional(),
+	sessionEmailTemplateId: z.string().optional(),
+	sessionFlowActionId: z.string().optional(),
 });
 
 /**
@@ -140,38 +141,6 @@ export const pipe_webHitsTimeseries = tinybird.buildPipe({
 });
 
 // fm
-// export const fmTimeseriesPipeParamsSchema = stdWebEventPipeParamsSchema.merge(
-// 	z.object({
-// 		fmId: z.string().optional(),
-// 	}),
-// );
-
-// export const fmTimeseriesQueryToPipeParamsSchema = fmTimeseriesPipeParamsSchema
-// 	.omit({
-// 		start: true,
-// 		end: true,
-// 	})
-// 	.merge(
-// 		z.object({
-// 			dateRange: statDateRange.optional(),
-// 			start: z.coerce.date().optional(),
-// 			end: z.coerce.date().optional(),
-// 		}),
-// 	)
-// 	.transform(data => {
-// 		const date_range = getWebEventDateRange({
-// 			start: data.start,
-// 			end: data.end,
-// 			dateRange: data.dateRange,
-// 		});
-
-// 		return {
-// 			...data,
-// 			...date_range,
-// 			skip: data.skip ?? 0,
-// 			limit: data.limit ?? 50,
-// 		};
-// 	});
 
 export const pipe_fmTimeseries = tinybird.buildPipe({
 	pipe: 'v2_fm_timeseries',
@@ -200,9 +169,7 @@ const sharedSourcePipeDataSchema = z.object({
 // browser
 
 export const topBrowsersPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({
-		browser: z.string(),
-	}),
+	z.object({ browser: z.string() }),
 );
 
 export const pipe_topBrowsers = tinybird.buildPipe({
@@ -217,9 +184,7 @@ export const pipe_topBrowsers = tinybird.buildPipe({
 // device
 
 export const topDevicesPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({
-		device: z.string(),
-	}),
+	z.object({ device: z.string() }),
 );
 
 export const pipe_topDevices = tinybird.buildPipe({
@@ -231,9 +196,7 @@ export const pipe_topDevices = tinybird.buildPipe({
 // os
 
 export const topOsPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({
-		os: z.string(),
-	}),
+	z.object({ os: z.string() }),
 );
 
 export const pipe_topOs = tinybird.buildPipe({
@@ -276,9 +239,7 @@ export const pipe_topRegions = tinybird.buildPipe({
 // country
 
 export const topCountriesPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({
-		country: z.string(),
-	}),
+	z.object({ country: z.string() }),
 );
 
 export const pipe_topCountries = tinybird.buildPipe({
@@ -290,13 +251,107 @@ export const pipe_topCountries = tinybird.buildPipe({
 // referers
 
 export const topReferersPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({
-		referer: z.string(),
-	}),
+	z.object({ referer: z.string() }),
 );
 
 export const pipe_topReferers = tinybird.buildPipe({
 	pipe: 'v2_referers',
 	parameters: stdWebEventPipeParamsSchema,
 	data: topReferersPipeDataSchema,
+});
+
+// landing pages
+
+export const topLandingPagesPipeDataSchema = sharedSourcePipeDataSchema.merge(
+	z.object({ landingPageId: z.string() }),
+);
+
+export const pipe_topLandingPages = tinybird.buildPipe({
+	pipe: 'v2_landingPages',
+	parameters: stdWebEventPipeParamsSchema,
+	data: topLandingPagesPipeDataSchema,
+});
+
+// email broadcasts
+
+export const topEmailBroadcastsPipeDataSchema = sharedSourcePipeDataSchema.merge(
+	z.object({ emailBroadcastId: z.string() }),
+);
+
+export const pipe_topEmailBroadcasts = tinybird.buildPipe({
+	pipe: 'v2_emailBroadcasts',
+	parameters: stdWebEventPipeParamsSchema,
+	data: topEmailBroadcastsPipeDataSchema,
+});
+
+// email templates
+
+export const topEmailTemplatesPipeDataSchema = sharedSourcePipeDataSchema.merge(
+	z.object({ emailTemplateId: z.string() }),
+);
+
+export const pipe_topEmailTemplates = tinybird.buildPipe({
+	pipe: 'v2_emailTemplates',
+	parameters: stdWebEventPipeParamsSchema,
+	data: topEmailTemplatesPipeDataSchema,
+});
+
+// flow actions
+
+export const topFlowActionsPipeDataSchema = sharedSourcePipeDataSchema.merge(
+	z.object({ flowActionId: z.string() }),
+);
+
+export const pipe_topFlowActions = tinybird.buildPipe({
+	pipe: 'v2_flowActions',
+	parameters: stdWebEventPipeParamsSchema,
+	data: topFlowActionsPipeDataSchema,
+});
+
+// meta campaigns
+
+export const topMetaCampaignsPipeDataSchema = sharedSourcePipeDataSchema.merge(
+	z.object({ metaCampaignId: z.string() }),
+);
+
+export const pipe_topMetaCampaigns = tinybird.buildPipe({
+	pipe: 'v2_metaCampaigns',
+	parameters: stdWebEventPipeParamsSchema,
+	data: topMetaCampaignsPipeDataSchema,
+});
+
+// meta ad sets
+
+export const topMetaAdSetsPipeDataSchema = sharedSourcePipeDataSchema.merge(
+	z.object({ metaAdSetId: z.string() }),
+);
+
+export const pipe_topMetaAdSets = tinybird.buildPipe({
+	pipe: 'v2_metaAdSets',
+	parameters: stdWebEventPipeParamsSchema,
+	data: topMetaAdSetsPipeDataSchema,
+});
+
+// meta ad ids
+
+export const topMetaAdsPipeDataSchema = sharedSourcePipeDataSchema.merge(
+	z.object({ metaAdId: z.string() }),
+);
+
+export const pipe_topMetaAds = tinybird.buildPipe({
+	pipe: 'v2_metaAds',
+	parameters: stdWebEventPipeParamsSchema,
+	data: topMetaAdsPipeDataSchema,
+});
+
+// meta placements
+
+export const topMetaPlacementsPipeDataSchema = sharedSourcePipeDataSchema.merge(
+	z.object({ metaPlacementId: z.string() }),
+);
+
+export const pipe_topMetaPlacements = tinybird.buildPipe({
+	pipe: 'v2_metaPlacements',
+	parameters: stdWebEventPipeParamsSchema,
+	data: topMetaPlacementsPipeDataSchema,
 });

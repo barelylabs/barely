@@ -7,6 +7,8 @@ import { FM_LINK_PLATFORMS } from '../fm/fm.constants';
 // schema
 export const visitorSessionTinybirdSchema = z
 	.object({
+		fanId: z.string().nullish(),
+		fbclid: z.string().nullish(),
 		referer: z
 			.string()
 			.nullish()
@@ -15,26 +17,27 @@ export const visitorSessionTinybirdSchema = z
 			.string()
 			.nullish()
 			.transform(s => s ?? '(direct)'),
-
-		fanId: z.string().nullish(),
-		fbclid: z.string().nullish(),
+		sessionEmailBroadcastId: z.string().nullish(),
+		sessionEmailTemplateId: z.string().nullish(),
+		sessionFlowActionId: z.string().nullish(),
 		sessionId: z.string(),
-		sessionRefererId: z
-			.string()
-			.nullish()
-			.transform(s => s ?? null),
+		sessionLandingPageId: z.string().nullish(),
+		sessionMetaCampaignId: z.string().nullish(),
+		sessionMetaAdsetId: z.string().nullish(),
+		sessionMetaAdId: z.string().nullish(),
+		sessionMetaPlacement: z.string().nullish(),
 		sessionReferer: z
 			.string()
 			.nullish()
 			.transform(s => s ?? '(direct)'),
+		sessionRefererId: z
+			.string()
+			.nullish()
+			.transform(s => s ?? null),
 		sessionRefererUrl: z
 			.string()
 			.nullish()
 			.transform(s => s ?? '(direct)'),
-		sessionEmailBroadcastId: z.string().nullish(),
-		sessionEmailTemplateId: z.string().nullish(),
-		sessionFlowActionId: z.string().nullish(),
-		sessionLandingPageId: z.string().nullish(),
 
 		// deprecated
 		referer_id: z

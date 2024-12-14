@@ -1,4 +1,5 @@
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
+import { StatBarely } from '~/app/[handle]/_components/stat-barely';
 import { StatDevices } from '~/app/[handle]/_components/stat-devices';
 import { StatLocations } from '~/app/[handle]/_components/stat-locations';
 import { StatReferers } from '~/app/[handle]/_components/stat-referers';
@@ -16,6 +17,7 @@ export default function FmStatsPage() {
 				<StatLocations eventType='fm/view' />
 				<StatDevices eventType='fm/view' />
 				<StatReferers eventType='fm/view' />
+				<StatBarely eventType='fm/view' />
 			</div>
 		</>
 	);

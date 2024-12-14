@@ -12,7 +12,6 @@ import { wait } from '../../../utils/wait';
 import { createTRPCRouter, publicProcedure } from '../../api/trpc';
 import { stripe } from '../../stripe';
 import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
-// import { eventReportSearchParamsSchema } from '../event/event-report.schema';
 import { recordCartEvent } from '../event/event.fns';
 import { WEB_EVENT_TYPES__CART } from '../event/event.tb';
 import { Files } from '../file/file.sql';
@@ -47,7 +46,7 @@ export const cartRouter = createTRPCRouter({
 					.optional(),
 			}),
 		)
-		.mutation(async ({ input }) => {
+		.mutation(async ({ input, ctx }) => {
 			const { handle, key, ...cartParams } = input;
 			const funnel = await getFunnelByParams(handle, key);
 
@@ -58,6 +57,7 @@ export const cartRouter = createTRPCRouter({
 				funnel,
 				...cartParams,
 				cartId: newId('cart'),
+				visitor: ctx.visitor ?? null,
 			});
 
 			return {
@@ -128,24 +128,13 @@ export const cartRouter = createTRPCRouter({
 					.where(eq(Files.id, funnel.upsellProduct?._images[0]?.file.id));
 			}
 
-			// const existingCart = funnel._carts[0];
-
-			// if (!existingCart) {
-			// 	await log({
-			// 		type: 'errors',
-			// 		location: 'cart.router.byIdAndParams',
-			// 		message: `no existing cart found for cart ${input.id}`,
-			// 	});
-			// }
 			const cart =
 				funnel._carts[0] ??
-				(await createMainCartFromFunnel({ funnel, cartId: input.id }));
-
-			// await log({
-			// 	type: 'alerts',
-			// 	location: 'cart.router.byIdAndParams',
-			// 	message: `new cart (${newCart.id}) created for cart ${input.id}`,
-			// });
+				(await createMainCartFromFunnel({
+					funnel,
+					cartId: input.id,
+					visitor: ctx.visitor ?? null,
+				}));
 
 			return {
 				cart,
@@ -236,7 +225,6 @@ export const cartRouter = createTRPCRouter({
 				...cart,
 				...updateCart,
 			});
-			// console.log('updated amounts', amounts);
 
 			const carts = await ctx.db.pool
 				.update(Carts)
@@ -260,7 +248,6 @@ export const cartRouter = createTRPCRouter({
 					funnel.workspace.stripeConnectAccountId
 				:	funnel.workspace.stripeConnectAccountId_devMode;
 
-			// we need to update the paymentIntent amount
 			await stripe.paymentIntents.update(
 				stripePaymentIntentId,
 				{

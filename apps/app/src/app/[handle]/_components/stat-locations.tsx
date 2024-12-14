@@ -28,29 +28,27 @@ export function StatLocations({ eventType }: { eventType: WebEventType }) {
 		: cities;
 
 	const plotData: BarListBarProps[] =
-		!locationData ?
-			[]
-		:	locationData?.map(c => ({
-				name:
-					tab === 'Country' ? COUNTRIES[c.country] ?? c.country
-					: tab === 'Region' && 'region' in c ? c.region ?? ''
-					: c.city,
-				value: eventType === 'fm/linkClick' ? c.fm_linkClicks : c.fm_views,
-				icon: () => (
-					<picture className='mr-2 flex items-center '>
-						<img
-							alt={c.country}
-							src={`https://flag.vercel.app/m/${c.country}.svg`}
-							className='h-3 w-5'
-						/>
-					</picture>
-				),
-				href:
-					tab === 'Country' ?
-						getSetFilterPath('country', c.country)
-					:	getSetFilterPath('city', c.city),
-				target: '_self',
-			}));
+		locationData?.map(c => ({
+			name:
+				tab === 'Country' ? COUNTRIES[c.country] ?? c.country
+				: tab === 'Region' && 'region' in c ? c.region ?? ''
+				: c.city,
+			value: eventType === 'fm/linkClick' ? c.fm_linkClicks : c.fm_views,
+			icon: () => (
+				<picture className='mr-2 flex items-center '>
+					<img
+						alt={c.country}
+						src={`https://flag.vercel.app/m/${c.country}.svg`}
+						className='h-3 w-5'
+					/>
+				</picture>
+			),
+			href:
+				tab === 'Country' ?
+					getSetFilterPath('country', c.country)
+				:	getSetFilterPath('city', c.city),
+			target: '_self',
+		})) ?? [];
 
 	const barList = (limit?: number) => {
 		return <BarList color='amber' data={limit ? plotData.slice(0, limit) : plotData} />;

@@ -29,6 +29,10 @@ export const EventTrackingKeys = [
 	'flowActionId',
 	'landingPageId',
 	'refererId',
+	'metaCampaignId',
+	'metaAdSetId',
+	'metaAdId',
+	'metaPlacementId',
 ] as const;
 
 export type EventTrackingProps = Partial<
@@ -43,4 +47,8 @@ export const eventReportSearchParamsSchema = z.object({
 	flowActionId: z.string().optional(),
 	landingPageId: z.string().optional(),
 	refererId: z.string().optional(),
+	metaCampaignId: z.string().optional(),
+	metaAdSetId: z.string().optional(),
+	metaAdId: z.string().optional(),
+	metaPlacementId: z.string().optional(),
 });
