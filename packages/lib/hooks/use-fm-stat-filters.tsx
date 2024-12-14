@@ -29,7 +29,7 @@ export function useFmStatFilters() {
 						month: 'short',
 						day: 'numeric',
 					});
-					console.log('formatted => ', formatted);
+					// console.log('formatted => ', formatted);
 					return formatted;
 				}
 			}
