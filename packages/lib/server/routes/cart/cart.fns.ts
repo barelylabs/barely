@@ -131,7 +131,7 @@ export async function createMainCartFromFunnel({
 	cartId,
 }: {
 	funnel: ServerFunnel;
-	visitor?: VisitorInfo;
+	visitor: VisitorInfo | null;
 	shipTo?: {
 		country: string | null;
 		state: string | null;
@@ -145,8 +145,6 @@ export async function createMainCartFromFunnel({
 		:	funnel.workspace.stripeConnectAccountId_devMode;
 
 	if (!stripeAccount) throw new Error('Stripe account not found');
-
-	// const cartId = newId('cart');
 
 	const amounts = getAmountsForCheckout(funnel, {
 		mainProductQuantity: 1,

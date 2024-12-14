@@ -237,6 +237,12 @@ export async function recordCartEvent({
 		referer_url: cart.visitorRefererUrl ?? visitor?.referer_url ?? 'Unknown',
 		fbclid: cart.fbclid ?? visitor?.fbclid ?? null,
 		sessionId: cart.id,
+		sessionMetaCampaignId:
+			cart.sessionMetaCampaignId ?? visitor?.sessionMetaCampaignId ?? null,
+		sessionMetaAdsetId: cart.sessionMetaAdsetId ?? visitor?.sessionMetaAdsetId ?? null,
+		sessionMetaAdId: cart.sessionMetaAdId ?? visitor?.sessionMetaAdId ?? null,
+		sessionMetaPlacement:
+			cart.sessionMetaPlacement ?? visitor?.sessionMetaPlacement ?? null,
 		sessionRefererId: cart.visitorRefererId ?? visitor?.sessionRefererId ?? 'Unknown',
 		sessionReferer: cart.sessionReferer ?? visitor?.sessionReferer ?? 'Unknown',
 		sessionRefererUrl: cart.sessionRefererUrl ?? visitor?.sessionRefererUrl ?? 'Unknown',
@@ -255,8 +261,6 @@ export async function recordCartEvent({
 				cart.visitorCheckoutHref ?? visitor?.href ?? 'Unknown'
 			:	visitor?.href ?? 'Unknown',
 	};
-
-	// console.log(`visitorInfo for cart event ${type} => `, visitorInfo);
 
 	if (visitorInfo.isBot) return null;
 

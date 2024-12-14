@@ -14,8 +14,6 @@ import { isDevelopment } from './environment';
 import { newId } from './id';
 import { getDomainWithoutWWW } from './link';
 
-// import { log } from './log';
-
 export const detectBot = (req: NextRequest) => {
 	const url = req.nextUrl;
 	if (url.searchParams.get('bot')) return true;
@@ -141,6 +139,7 @@ export const parseLandingPageUrl = (url: string) => {
 	return { handle, key };
 };
 
+// common
 export function parseGeo(req: NextRequest) {
 	return isDevelopment() ? getRandomGeoData() : (
 			nextGeoSchema.parse({
@@ -186,6 +185,7 @@ export function parseReferer(req: NextRequest) {
 	return { referer, referer_url };
 }
 
+// session
 export function parseSession({
 	req,
 	handle,
@@ -222,11 +222,7 @@ export function parseSession({
 			req.cookies.get(`${handle}.${key}.sessionRefererId`)?.value
 		:	req.cookies.getAll().filter(cookie => cookie.name.endsWith('.sessionRefererId'))[0]
 				?.value) ?? null;
-	const fbclid =
-		(handleAndKeyExist ?
-			req.cookies.get(`${handle}.${key}.fbclid`)?.value
-		:	req.cookies.getAll().filter(cookie => cookie.name.endsWith('.fbclid'))[0]?.value) ??
-		null;
+
 	const sessionEmailBroadcastId =
 		(handleAndKeyExist ?
 			req.cookies.get(`${handle}.${key}.sessionEmailBroadcastId`)?.value
@@ -256,10 +252,48 @@ export function parseSession({
 				.filter(cookie => cookie.name.endsWith('.sessionLandingPageId'))[0]?.value) ??
 		null;
 
+	const fbclid =
+		(handleAndKeyExist ?
+			req.cookies.get(`${handle}.${key}.fbclid`)?.value
+		:	req.cookies.getAll().filter(cookie => cookie.name.endsWith('.fbclid'))[0]?.value) ??
+		null;
+
+	const sessionMetaCampaignId =
+		(handleAndKeyExist ?
+			req.cookies.get(`${handle}.${key}.sessionMetaCampaignId`)?.value
+		:	req.cookies
+				.getAll()
+				.filter(cookie => cookie.name.endsWith('.sessionMetaCampaignId'))[0]?.value) ??
+		null;
+
+	const sessionMetaAdsetId =
+		(handleAndKeyExist ?
+			req.cookies.get(`${handle}.${key}.sessionMetaAdsetId`)?.value
+		:	req.cookies.getAll().filter(cookie => cookie.name.endsWith('.sessionMetaAdsetId'))[0]
+				?.value) ?? null;
+
+	const sessionMetaAdId =
+		(handleAndKeyExist ?
+			req.cookies.get(`${handle}.${key}.sessionMetaAdId`)?.value
+		:	req.cookies.getAll().filter(cookie => cookie.name.endsWith('.sessionMetaAdId'))[0]
+				?.value) ?? null;
+
+	const sessionMetaPlacement =
+		(handleAndKeyExist ?
+			req.cookies.get(`${handle}.${key}.sessionMetaPlacement`)?.value
+		:	req.cookies
+				.getAll()
+				.filter(cookie => cookie.name.endsWith('.sessionMetaPlacement'))[0]?.value) ??
+		null;
+
 	return {
 		fanId,
 		fbclid,
 		sessionId,
+		sessionMetaCampaignId,
+		sessionMetaAdsetId,
+		sessionMetaAdId,
+		sessionMetaPlacement,
 		sessionReferer,
 		sessionRefererUrl,
 		sessionRefererId,
@@ -284,6 +318,10 @@ export const visitorInfoSchema = z.object({
 	// session
 	sessionId: z.string().nullable(),
 	fbclid: z.string().nullable(),
+	sessionMetaCampaignId: z.string().nullable(),
+	sessionMetaAdsetId: z.string().nullable(),
+	sessionMetaAdId: z.string().nullable(),
+	sessionMetaPlacement: z.string().nullable(),
 	sessionReferer: z.string().nullable(),
 	sessionRefererUrl: z.string().nullable(),
 	sessionRefererId: z.string().nullable(),
@@ -319,7 +357,6 @@ export function parseReqForVisitorInfo({
 		isBot,
 		referer,
 		referer_url,
-		// referer_id,
 		href,
 		...visitorSession,
 	} satisfies VisitorInfo;
@@ -329,7 +366,7 @@ export async function setVisitorCookies({
 	req,
 	res,
 	app,
-	...rest
+	...handleAndKey
 }: {
 	req: NextRequest;
 	res: NextResponse;
@@ -337,8 +374,8 @@ export async function setVisitorCookies({
 	key: string | null;
 	app: 'cart' | 'link' | 'fm' | 'page' | 'press' | 'sparrow' | 'www';
 }) {
-	const handle = rest.handle ?? '_';
-	const key = rest.key ?? '_';
+	const handle = handleAndKey.handle ?? '_';
+	const key = handleAndKey.key ?? '_';
 
 	const params = req.nextUrl.searchParams;
 	const { referer, referer_url } = parseReferer(req);
@@ -361,13 +398,13 @@ export async function setVisitorCookies({
 		);
 	}
 
-	if (referer && !res.cookies.get(`${handle}.${key}.sessionReferer`))
+	if (referer && !req.cookies.get(`${handle}.${key}.sessionReferer`))
 		res.cookies.set(`${handle}.${key}.sessionReferer`, referer, {
 			httpOnly: true,
 			maxAge: 60 * 60 * 24,
 		});
 
-	if (referer_url && !res.cookies.get(`${handle}.${key}.sessionRefererUrl`))
+	if (referer_url && !req.cookies.get(`${handle}.${key}.sessionRefererUrl`))
 		res.cookies.set(`${handle}.${key}.sessionRefererUrl`, referer_url, {
 			httpOnly: true,
 			maxAge: 60 * 60 * 24,
@@ -405,6 +442,42 @@ export async function setVisitorCookies({
 			httpOnly: true,
 			maxAge: 60 * 60 * 24,
 		});
+
+	if (params.has('metaCampaignId'))
+		res.cookies.set(
+			`${handle}.${key}.sessionMetaCampaignId`,
+			params.get('metaCampaignId') ?? '',
+			{
+				httpOnly: true,
+				maxAge: 60 * 60 * 24,
+			},
+		);
+
+	if (params.has('metaAdsetId'))
+		res.cookies.set(
+			`${handle}.${key}.sessionMetaAdsetId`,
+			params.get('metaAdsetId') ?? '',
+			{
+				httpOnly: true,
+				maxAge: 60 * 60 * 24,
+			},
+		);
+
+	if (params.has('metaAdId'))
+		res.cookies.set(`${handle}.${key}.sessionMetaAdId`, params.get('metaAdId') ?? '', {
+			httpOnly: true,
+			maxAge: 60 * 60 * 24,
+		});
+
+	if (params.has('metaPlacement'))
+		res.cookies.set(
+			`${handle}.${key}.sessionMetaPlacement`,
+			params.get('metaPlacement') ?? '',
+			{
+				httpOnly: true,
+				maxAge: 60 * 60 * 24,
+			},
+		);
 
 	if (params.has('flowActionId'))
 		res.cookies.set(
@@ -462,6 +535,10 @@ export const DEFAULT_VISITOR_INFO: VisitorInfo = {
 	href: 'https://localhost:3000/',
 	fanId: null,
 	fbclid: null,
+	sessionMetaCampaignId: null,
+	sessionMetaAdsetId: null,
+	sessionMetaAdId: null,
+	sessionMetaPlacement: null,
 	sessionEmailBroadcastId: null,
 	sessionEmailTemplateId: null,
 	sessionFlowActionId: null,

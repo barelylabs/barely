@@ -55,6 +55,10 @@ export const Carts = pgTable(
 
 		sessionReferer: varchar('sessionReferer', { length: 255 }),
 		sessionRefererUrl: varchar('sessionRefererUrl', { length: 255 }),
+		sessionMetaCampaignId: varchar('sessionMetaCampaignId', { length: 255 }),
+		sessionMetaAdsetId: varchar('sessionMetaAdsetId', { length: 255 }),
+		sessionMetaAdId: varchar('sessionMetaAdId', { length: 255 }),
+		sessionMetaPlacement: varchar('sessionMetaPlacement', { length: 255 }),
 
 		/* 
             🛒 cart checkout (main + bump) 
