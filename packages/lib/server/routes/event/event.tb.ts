@@ -194,3 +194,28 @@ export const ingestPageEvent = tinybird.buildIngestEndpoint({
 	datasource: 'barely_events',
 	event: webEventIngestSchema,
 });
+
+// publish email events
+
+export const emailEventIngestSchema = z.object({
+	timestamp: z.string().datetime(),
+	type: z.enum(['bounced', 'delivered', 'opened', 'clicked', 'complained']),
+	fanId: z.string(),
+	emailTemplateId: z.string(),
+
+	subject: z.string(),
+	from: z.string(),
+	to: z.string(),
+	clickDestinationAssetId: z.string().nullable(),
+	clickDestinationHref: z.string().nullable(),
+
+	flowId: z.string().nullable(),
+	flowActionId: z.string().nullable(),
+	emailBroadcastId: z.string().nullable(),
+	resendId: z.string().nullable(),
+});
+
+export const ingestEmailEvent = tinybird.buildIngestEndpoint({
+	datasource: 'email_events',
+	event: emailEventIngestSchema,
+});
