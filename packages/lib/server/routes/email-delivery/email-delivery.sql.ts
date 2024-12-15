@@ -7,6 +7,7 @@ import { EmailTemplates } from '../email-template/email-template.sql';
 import { Fans } from '../fan/fan.sql';
 import { FlowRunActions } from '../flow/flow.sql';
 import { Workspaces } from '../workspace/workspace.sql';
+import { EMAIL_DELIVERY_STATUSES } from './email-delivery.constants';
 
 export const EmailDeliveries = pgTable('EmailDeliveries', {
 	...primaryId,
@@ -29,17 +30,7 @@ export const EmailDeliveries = pgTable('EmailDeliveries', {
 		.notNull()
 		.references(() => Fans.id),
 	status: text('status', {
-		enum: [
-			'scheduled',
-			'sent',
-			'failed',
-			'delivered',
-			'opened',
-			'clicked',
-			'complained',
-			'bounced',
-			'unsubscribed',
-		],
+		enum: EMAIL_DELIVERY_STATUSES,
 	}).notNull(),
 	scheduledAt: timestamp('scheduledAt'),
 	sentAt: timestamp('sentAt'),

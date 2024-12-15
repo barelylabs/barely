@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { handleEmailEvent } from '@barely/lib/server/routes/email-delivery/email-delivery.event-fns';
+import { log } from '@barely/lib/utils/log';
 import { Webhook } from 'svix';
 
 import { env } from '~/env';
@@ -10,8 +11,6 @@ const wh = new Webhook(secret);
 
 export async function POST(req: NextRequest) {
 	const body = await req.text();
-	// const payload = req.body;
-	// const headers = req.headers;
 	const svixId = req.headers.get('svix-id');
 	const svixTimestamp = req.headers.get('svix-timestamp');
 	const svixSignature = req.headers.get('svix-signature');
@@ -30,5 +29,15 @@ export async function POST(req: NextRequest) {
 		'svix-signature': svixSignature,
 	});
 
-	return await handleEmailEvent(payload);
+	await handleEmailEvent(payload).catch(async e => {
+		await log({
+			message: `Error handling email event: ${e}`,
+			type: 'errors',
+			location: 'api/resend',
+		});
+
+		return new Response('Error handling email event', { status: 500 });
+	});
+
+	return new Response('Email event handled', { status: 200 });
 }
