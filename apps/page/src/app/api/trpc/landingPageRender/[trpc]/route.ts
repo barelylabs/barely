@@ -33,7 +33,13 @@ const handler = async function (req: NextRequest) {
 				visitor: parseReqForVisitorInfo({ req, handle, key }),
 			}),
 		onError({ error, path }) {
-			console.error(`>>> tRPC Error on '${path}'`, error);
+			log({
+				location: 'page/api/trpc/landingPageRender/[trpc]/route.ts',
+				message: `tRPC Error on '${path}' :: ${error.message}`,
+				type: 'errors',
+			}).catch(() => {
+				console.error(`>>> tRPC Error on '${path}'`, error);
+			});
 		},
 	}).catch(err => {
 		console.error('err => ', err);

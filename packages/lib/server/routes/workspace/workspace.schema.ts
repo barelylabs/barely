@@ -92,7 +92,11 @@ export interface PublicWorkspaceWithStripe extends PublicWorkspace {
 	stripeConnectAccountId_devMode: string | null;
 }
 
-export function getPublicWorkspaceFromWorkspace(workspace: Workspace): PublicWorkspace {
+// type WorkspaceForPublicWorkspace = PublicWorkspace & Partial<Workspace>;
+
+export function getPublicWorkspaceFromWorkspace(
+	workspace: PublicWorkspace & Partial<Workspace>,
+): PublicWorkspace {
 	return {
 		name: workspace.name,
 		handle: workspace.handle,

@@ -33,10 +33,20 @@ const handler = async function (req: NextRequest) {
 				visitor: parseReqForVisitorInfo({ req, handle, key }),
 			}),
 		onError({ error, path }) {
-			console.error(`>>> tRPC Error on '${path}'`, error);
+			log({
+				location: 'cart/api/trpc/cart/[trpc]/route.ts',
+				message: `tRPC Error on '${path}' :: ${error.message}`,
+				type: 'errors',
+			}).catch(() => {
+				console.error(`>>> tRPC Error on '${path}'`, error);
+			});
 		},
-	}).catch(err => {
-		console.error('err => ', err);
+	}).catch(async err => {
+		await log({
+			location: 'cart/api/trpc/cart/[trpc]/route.ts',
+			message: `tRPC error: ${err}`,
+			type: 'errors',
+		});
 		return new Response(null, {
 			statusText: 'Internal Server Error',
 			status: 500,
