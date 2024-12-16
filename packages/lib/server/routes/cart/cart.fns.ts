@@ -34,8 +34,40 @@ import { getAmountsForCheckout, getFeeAmountForCheckout } from './cart.utils';
 
 /* get funnel */
 export const funnelWith = {
-	workspace: true,
-	// key: true,
+	workspace: {
+		columns: {
+			id: true,
+			name: true,
+			handle: true,
+			type: true,
+			brandHue: true,
+			brandAccentHue: true,
+
+			bio: true,
+			bookingTitle: true,
+			bookingName: true,
+			bookingEmail: true,
+			spotifyArtistId: true,
+			youtubeChannelId: true,
+			tiktokUsername: true,
+			instagramUsername: true,
+			spotifyFollowers: true,
+			spotifyMonthlyListeners: true,
+			youtubeSubscribers: true,
+			tiktokFollowers: true,
+			instagramFollowers: true,
+			twitterFollowers: true,
+			facebookFollowers: true,
+
+			plan: true,
+			cartFeePercentageOverride: true,
+			cartSupportEmail: true,
+			shippingAddressPostalCode: true,
+			shippingAddressCountry: true,
+			stripeConnectAccountId: true,
+			stripeConnectAccountId_devMode: true,
+		},
+	},
 	mainProduct: {
 		with: {
 			_images: {
@@ -73,7 +105,40 @@ export async function getFunnelByParams(handle: string, key: string) {
 	const funnel = await dbHttp.query.CartFunnels.findFirst({
 		where: and(eq(CartFunnels.handle, handle), eq(CartFunnels.key, key)),
 		with: {
-			workspace: true,
+			workspace: {
+				columns: {
+					id: true,
+					name: true,
+					handle: true,
+					type: true,
+					brandHue: true,
+					brandAccentHue: true,
+
+					bio: true,
+					bookingTitle: true,
+					bookingName: true,
+					bookingEmail: true,
+					spotifyArtistId: true,
+					youtubeChannelId: true,
+					tiktokUsername: true,
+					instagramUsername: true,
+					spotifyFollowers: true,
+					spotifyMonthlyListeners: true,
+					youtubeSubscribers: true,
+					tiktokFollowers: true,
+					instagramFollowers: true,
+					twitterFollowers: true,
+					facebookFollowers: true,
+
+					plan: true,
+					cartFeePercentageOverride: true,
+					cartSupportEmail: true,
+					shippingAddressPostalCode: true,
+					shippingAddressCountry: true,
+					stripeConnectAccountId: true,
+					stripeConnectAccountId_devMode: true,
+				},
+			},
 			// key: true,
 			mainProduct: {
 				with: {
