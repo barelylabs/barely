@@ -69,13 +69,25 @@ export const cartRouter = createTRPCRouter({
 	byIdAndParams: publicProcedure
 		.input(z.object({ id: z.string(), handle: z.string(), key: z.string() }))
 		.query(async ({ input, ctx }) => {
+			console.log('byIdAndParams', input);
+
 			const funnel = await ctx.db.pool.query.CartFunnels.findFirst({
 				where: and(eq(CartFunnels.handle, input.handle), eq(CartFunnels.key, input.key)),
 				with: {
 					...funnelWith,
+
 					_carts: {
 						where: eq(Carts.id, input.id),
 						limit: 1,
+						columns: {
+							fulfillmentStatus: false,
+							fulfilledAt: false,
+							shippingTrackingNumber: false,
+							shippedAt: false,
+							canceledAt: false,
+							refundedAt: false,
+							refundedAmount: false,
+						},
 					},
 				},
 			});
