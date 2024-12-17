@@ -24,12 +24,9 @@ export function useSetWorkspace({ onBeginSet }: { onBeginSet?: () => void }) {
 
 	const setCurrentWorkspace = useCallback(
 		async (workspace: SessionWorkspace) => {
-			console.log('setting current workspace to', workspace, '@', Date.now());
 			apiUtils.workspace.current.setData(undefined, workspace);
 
-			// apiUtils.cancel()
-
-			console.log('currentPath', currentPath);
+			onBeginSet?.();
 
 			if (currentPath?.endsWith('carts')) {
 				apiUtils.cartFunnel.byWorkspace.setInfiniteData(
@@ -313,8 +310,6 @@ export function useSetWorkspace({ onBeginSet }: { onBeginSet?: () => void }) {
 
 				await apiUtils.track.byWorkspace.invalidate();
 			}
-
-			onBeginSet?.();
 
 			if (currentWorkspace.handle === workspace.handle) return;
 			if (currentPath) {
