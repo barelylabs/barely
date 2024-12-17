@@ -314,10 +314,10 @@ export function useSetWorkspace({ onBeginSet }: { onBeginSet?: () => void }) {
 			if (currentWorkspace.handle === workspace.handle) return;
 			if (currentPath) {
 				router.push(currentPath.replace(currentWorkspace.handle, workspace.handle));
-				return console.log('pushed @', Date.now());
+				// return console.log('pushed @', Date.now());
 			}
 			router.push(`/${workspace.handle}`);
-			console.log('pushed @', Date.now());
+			// console.log('pushed @', Date.now());
 		},
 		[apiUtils, currentPath, currentWorkspace, router, onBeginSet],
 	);
