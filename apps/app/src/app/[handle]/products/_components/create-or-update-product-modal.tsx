@@ -49,11 +49,11 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 
 	/* product context */
 	const {
-		lastSelectedProduct: selectedProduct,
-		showCreateProductModal,
-		setShowCreateProductModal,
-		showUpdateProductModal,
-		setShowUpdateProductModal,
+		lastSelectedItem: selectedProduct,
+		showCreateModal,
+		setShowCreateModal,
+		showUpdateModal,
+		setShowUpdateModal,
 		focusGridList,
 	} = useProductContext();
 
@@ -70,7 +70,7 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 		},
 	});
 
-	upsertProductSchema.shape.preorderDeliveryEstimate;
+	// upsertProductSchema.shape.preorderDeliveryEstimate;
 
 	/* form */
 	const { form, onSubmit: onSubmitProduct } = useCreateOrUpdateForm({
@@ -159,9 +159,8 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 	/* apparel sizes */
 
 	/* modal state */
-	const showModal = mode === 'create' ? showCreateProductModal : showUpdateProductModal;
-	const setShowModal =
-		mode === 'create' ? setShowCreateProductModal : setShowUpdateProductModal;
+	const showModal = mode === 'create' ? showCreateModal : showUpdateModal;
+	const setShowModal = mode === 'create' ? setShowCreateModal : setShowUpdateModal;
 
 	const handleCloseModal = useCallback(async () => {
 		reset();

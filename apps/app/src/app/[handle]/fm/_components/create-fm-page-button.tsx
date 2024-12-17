@@ -5,12 +5,12 @@ import { Button } from '@barely/ui/elements/button';
 import { useFmContext } from '~/app/[handle]/fm/_components/fm-context';
 
 export function CreateFmPageButton() {
-	const { setShowCreateFmPageModal } = useFmContext();
+	const { setShowCreateModal } = useFmContext();
 
 	return (
 		<Button
 			onClick={() => {
-				setShowCreateFmPageModal(true);
+				setShowCreateModal(true);
 			}}
 			className='space-x-3'
 		>

@@ -1,4 +1,7 @@
 import { useCallback, useEffect } from 'react';
+import { useAtom } from 'jotai';
+
+import { gKeyPressedAtom } from './use-workspace-hotkeys';
 
 interface CustomHotkey {
 	condition: (e: KeyboardEvent) => boolean;
@@ -39,11 +42,14 @@ export function useModalHotKeys({
 
 	customHotkeys?: CustomHotkey[];
 }) {
+	const [gKeyPressed] = useAtom(gKeyPressedAtom);
+
 	const onKeydown = useCallback(
 		(e: KeyboardEvent) => {
 			const target = e.target as HTMLElement;
 			const existingModalBackdrop = document.getElementById('modal-backdrop');
 
+			// console.log('gKeyPressed in modal hotkeys', gKeyPressed);
 			/* create */
 			// only open add--modal w/ keyboard shortcut if:
 			// - c is pressed
@@ -51,6 +57,7 @@ export function useModalHotKeys({
 			// - user is not typing in an input or textarea
 			// - there is no existing modal backdrop (i.e. no other modal is open)
 			if (
+				!gKeyPressed &&
 				e.key === 'c' &&
 				!e.metaKey &&
 				!e.ctrlKey &&
@@ -144,6 +151,7 @@ export function useModalHotKeys({
 			archiveDisabled,
 			createDisabled,
 			updateDisabled,
+			gKeyPressed,
 		],
 	);
 

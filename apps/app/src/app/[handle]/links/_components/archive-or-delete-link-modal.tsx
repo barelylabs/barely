@@ -8,20 +8,19 @@ import { useLinkContext } from '~/app/[handle]/links/_components/link-context';
 
 export function ArchiveOrDeleteLinkModal({ mode }: { mode: 'archive' | 'delete' }) {
 	const {
-		linkSelection,
-		lastSelectedLink,
-		showArchiveLinkModal,
-		showDeleteLinkModal,
-		setShowArchiveLinkModal,
-		setShowDeleteLinkModal,
+		selection: linkSelection,
+		lastSelectedItem: lastSelectedLink,
+		showArchiveModal,
+		showDeleteModal,
+		setShowArchiveModal,
+		setShowDeleteModal,
 	} = useLinkContext();
 
 	const apiUtils = api.useUtils();
 
-	const showModal = mode === 'archive' ? showArchiveLinkModal : showDeleteLinkModal;
+	const showModal = mode === 'archive' ? showArchiveModal : showDeleteModal;
 
-	const setShowModal =
-		mode === 'archive' ? setShowArchiveLinkModal : setShowDeleteLinkModal;
+	const setShowModal = mode === 'archive' ? setShowArchiveModal : setShowDeleteModal;
 
 	const onSuccess = useCallback(async () => {
 		await apiUtils.link.invalidate();

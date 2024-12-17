@@ -41,7 +41,7 @@ export default async function DashboardLayout({
 	return (
 		<WorkspaceProviders user={user} workspace={currentWorkspace}>
 			<div className='mx-auto flex  w-full flex-1 flex-row '>
-				<SidebarNav workspace={currentWorkspace} />
+				<SidebarNav />
 				<NewWorkspaceModal />
 
 				<div className='flex h-[100vh] w-full flex-col bg-accent md:pt-2'>

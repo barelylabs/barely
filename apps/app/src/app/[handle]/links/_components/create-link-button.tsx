@@ -5,12 +5,12 @@ import { Button } from '@barely/ui/elements/button';
 import { useLinkContext } from '~/app/[handle]/links/_components/link-context';
 
 export function CreateLinkButton() {
-	const { setShowCreateLinkModal } = useLinkContext();
+	const { setShowCreateModal } = useLinkContext();
 
 	return (
 		<Button
 			onClick={() => {
-				setShowCreateLinkModal(true);
+				setShowCreateModal(true);
 			}}
 			className='space-x-3'
 		>

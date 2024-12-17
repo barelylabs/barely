@@ -18,32 +18,12 @@ import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 import { fmSearchParamsSchema } from '@barely/lib/server/routes/fm/fm.schema';
 
-interface FmContext {
-	fmPages: AppRouterOutputs['fm']['byWorkspace']['fmPages'];
-	fmPageSelection: Selection;
-	lastSelectedFmPageId: string | undefined;
-	lastSelectedFmPage:
-		| AppRouterOutputs['fm']['byWorkspace']['fmPages'][number]
-		| undefined;
-	setFmPageSelection: (selection: Selection) => void;
-	addFmPageToSelection: (fmPageId: string) => void;
-	gridListRef: React.RefObject<HTMLDivElement>;
-	focusGridList: () => void;
-	showCreateFmPageModal: boolean;
-	setShowCreateFmPageModal: (show: boolean) => void;
-	showUpdateFmPageModal: boolean;
-	setShowUpdateFmPageModal: (show: boolean) => void;
-	showArchiveFmPageModal: boolean;
-	setShowArchiveFmPageModal: (show: boolean) => void;
-	showDeleteFmPageModal: boolean;
-	setShowDeleteFmPageModal: (show: boolean) => void;
-	// filters
-	filters: z.infer<typeof fmFilterParamsSchema>;
-	pendingFiltersTransition: boolean;
-	setSearch: (search: string) => void;
-	toggleArchived: () => void;
-	clearAllFilters: () => void;
-}
+import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
+
+type FmContext = InfiniteItemsContext<
+	AppRouterOutputs['fm']['byWorkspace']['fmPages'][number],
+	z.infer<typeof fmFilterParamsSchema>
+>;
 
 const FmContext = createContext<FmContext | undefined>(undefined);
 
@@ -54,10 +34,10 @@ export function FmContextProvider({
 	children: React.ReactNode;
 	initialFmPages: Promise<AppRouterOutputs['fm']['byWorkspace']>;
 }) {
-	const [showCreateFmPageModal, setShowCreateFmPageModal] = useState(false);
-	const [showUpdateFmPageModal, setShowUpdateFmPageModal] = useState(false);
-	const [showArchiveFmPageModal, setShowArchiveFmPageModal] = useState(false);
-	const [showDeleteFmPageModal, setShowDeleteFmPageModal] = useState(false);
+	const [showCreateModal, setShowCreateModal] = useState(false);
+	const [showUpdateModal, setShowUpdateModal] = useState(false);
+	const [showArchiveModal, setShowArchiveModal] = useState(false);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
 
 	const { handle } = useWorkspace();
 
@@ -73,7 +53,15 @@ export function FmContextProvider({
 	}, [selectedFmPageIds]);
 
 	const initialData = use(initialFmPages);
-	const { data: infiniteFmPages } = api.fm.byWorkspace.useInfiniteQuery(
+	const {
+		data: infiniteFmPages,
+		hasNextPage,
+		fetchNextPage,
+		isFetchingNextPage,
+		isFetching,
+		isRefetching,
+		isPending,
+	} = api.fm.byWorkspace.useInfiniteQuery(
 		{ handle, ...filters },
 		{
 			initialData: () => {
@@ -103,14 +91,14 @@ export function FmContextProvider({
 		[setQuery, removeByKey],
 	);
 
-	const addFmPageToSelection = useCallback(
-		(fmPageId: string) => {
-			if (fmPageSelection === 'all') return;
-			if (fmPageSelection.has(fmPageId)) return;
-			setFmPageSelection(new Set([...fmPageSelection, fmPageId]));
-		},
-		[fmPageSelection, setFmPageSelection],
-	);
+	// const addFmPageToSelection = useCallback(
+	// 	(fmPageId: string) => {
+	// 		if (fmPageSelection === 'all') return;
+	// 		if (fmPageSelection.has(fmPageId)) return;
+	// 		setFmPageSelection(new Set([...fmPageSelection, fmPageId]));
+	// 	},
+	// 	[fmPageSelection, setFmPageSelection],
+	// );
 
 	const clearAllFilters = useCallback(() => {
 		removeAllQueryParams();
@@ -137,30 +125,37 @@ export function FmContextProvider({
 	const lastSelectedFmPage = fmPages.find(fmPage => fmPage.id === lastSelectedFmPageId);
 
 	const contextValue = {
-		fmPages,
-		fmPageSelection,
-		lastSelectedFmPageId,
-		lastSelectedFmPage,
-		setFmPageSelection,
-		addFmPageToSelection,
+		items: fmPages,
+		selection: fmPageSelection,
+		lastSelectedItemId: lastSelectedFmPageId,
+		lastSelectedItem: lastSelectedFmPage,
+		setSelection: setFmPageSelection,
+		// addItemToSelection: addFmPageToSelection,
 		gridListRef,
 		focusGridList: () => {
 			gridListRef.current?.focus();
 		},
-		showCreateFmPageModal,
-		setShowCreateFmPageModal,
-		showUpdateFmPageModal,
-		setShowUpdateFmPageModal,
-		showArchiveFmPageModal,
-		setShowArchiveFmPageModal,
-		showDeleteFmPageModal,
-		setShowDeleteFmPageModal,
+		showCreateModal,
+		setShowCreateModal,
+		showUpdateModal,
+		setShowUpdateModal,
+		showArchiveModal,
+		setShowArchiveModal,
+		showDeleteModal,
+		setShowDeleteModal,
 		// filters
 		filters,
 		pendingFiltersTransition: pending,
 		setSearch,
 		toggleArchived,
 		clearAllFilters,
+		// infinite
+		hasNextPage,
+		fetchNextPage: () => void fetchNextPage(),
+		isFetchingNextPage,
+		isFetching,
+		isRefetching,
+		isPending,
 	} satisfies FmContext;
 
 	return <FmContext.Provider value={contextValue}>{children}</FmContext.Provider>;

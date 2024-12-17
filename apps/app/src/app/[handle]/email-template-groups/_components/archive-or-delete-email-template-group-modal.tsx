@@ -12,25 +12,19 @@ export function ArchiveOrDeleteEmailTemplateGroupModal({
 	mode: 'archive' | 'delete';
 }) {
 	const {
-		emailTemplateGroupSelection,
-		lastSelectedEmailTemplateGroup,
-		showArchiveEmailTemplateGroupModal,
-		showDeleteEmailTemplateGroupModal,
-		setShowArchiveEmailTemplateGroupModal,
-		setShowDeleteEmailTemplateGroupModal,
+		selection,
+		lastSelectedItem,
+		showArchiveModal,
+		showDeleteModal,
+		setShowArchiveModal,
+		setShowDeleteModal,
 	} = useEmailTemplateGroupContext();
 
 	const apiUtils = api.useUtils();
 
-	const showModal =
-		mode === 'archive' ?
-			showArchiveEmailTemplateGroupModal
-		:	showDeleteEmailTemplateGroupModal;
+	const showModal = mode === 'archive' ? showArchiveModal : showDeleteModal;
 
-	const setShowModal =
-		mode === 'archive' ?
-			setShowArchiveEmailTemplateGroupModal
-		:	setShowDeleteEmailTemplateGroupModal;
+	const setShowModal = mode === 'archive' ? setShowArchiveModal : setShowDeleteModal;
 
 	const onSuccess = useCallback(async () => {
 		await apiUtils.emailTemplateGroup.invalidate();
@@ -45,15 +39,15 @@ export function ArchiveOrDeleteEmailTemplateGroupModal({
 			onSuccess,
 		});
 
-	if (!lastSelectedEmailTemplateGroup) return null;
+	if (!lastSelectedItem) return null;
 
 	return (
 		<ArchiveOrDeleteModal
 			mode={mode}
-			selection={emailTemplateGroupSelection}
+			selection={selection}
 			lastSelected={{
-				...lastSelectedEmailTemplateGroup,
-				name: lastSelectedEmailTemplateGroup.name,
+				...lastSelectedItem,
+				name: lastSelectedItem.name,
 			}}
 			showModal={showModal}
 			setShowModal={setShowModal}

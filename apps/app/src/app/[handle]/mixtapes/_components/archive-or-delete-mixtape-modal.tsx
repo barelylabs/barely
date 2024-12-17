@@ -8,20 +8,19 @@ import { useMixtapesContext } from '~/app/[handle]/mixtapes/_components/mixtape-
 
 export function ArchiveOrDeleteMixtapeModal({ mode }: { mode: 'archive' | 'delete' }) {
 	const {
-		mixtapeSelection,
-		lastSelectedMixtape,
-		showArchiveMixtapeModal,
-		showDeleteMixtapeModal,
-		setShowArchiveMixtapeModal,
-		setShowDeleteMixtapeModal,
+		selection,
+		lastSelectedItem,
+		showArchiveModal,
+		showDeleteModal,
+		setShowArchiveModal,
+		setShowDeleteModal,
 	} = useMixtapesContext();
 
 	const apiUtils = api.useUtils();
 
-	const showModal = mode === 'archive' ? showArchiveMixtapeModal : showDeleteMixtapeModal;
+	const showModal = mode === 'archive' ? showArchiveModal : showDeleteModal;
 
-	const setShowModal =
-		mode === 'archive' ? setShowArchiveMixtapeModal : setShowDeleteMixtapeModal;
+	const setShowModal = mode === 'archive' ? setShowArchiveModal : setShowDeleteModal;
 
 	const onSuccess = useCallback(async () => {
 		await apiUtils.mixtape.invalidate();
@@ -34,13 +33,13 @@ export function ArchiveOrDeleteMixtapeModal({ mode }: { mode: 'archive' | 'delet
 	const { mutate: deleteMixtapes, isPending: isPendingDelete } =
 		api.mixtape.delete.useMutation({ onSuccess });
 
-	if (!lastSelectedMixtape) return null;
+	if (!lastSelectedItem) return null;
 
 	return (
 		<ArchiveOrDeleteModal
 			mode={mode}
-			selection={mixtapeSelection}
-			lastSelected={lastSelectedMixtape}
+			selection={selection}
+			lastSelected={lastSelectedItem}
 			showModal={showModal}
 			setShowModal={setShowModal}
 			archiveItems={archiveMixtapes}

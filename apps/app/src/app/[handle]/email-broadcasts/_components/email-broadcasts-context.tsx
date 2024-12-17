@@ -2,7 +2,6 @@
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/react';
 import type { emailBroadcastFilterParamsSchema } from '@barely/lib/server/routes/email-broadcast/email-broadcast-schema';
-import type { FetchNextPageOptions } from '@tanstack/react-query';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
 import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
@@ -11,32 +10,12 @@ import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 import { emailBroadcastSearchParamsSchema } from '@barely/lib/server/routes/email-broadcast/email-broadcast-schema';
 
-interface EmailBroadcastsContext {
-	emailBroadcasts: AppRouterOutputs['emailBroadcast']['byWorkspace']['emailBroadcasts'];
-	emailBroadcastSelection: Selection;
-	lastSelectedEmailBroadcastId: string | undefined;
-	lastSelectedEmailBroadcast:
-		| AppRouterOutputs['emailBroadcast']['byWorkspace']['emailBroadcasts'][number]
-		| undefined;
-	setEmailBroadcastSelection: (selection: Selection) => void;
-	gridListRef: React.RefObject<HTMLDivElement>;
-	focusGridList: () => void;
-	showCreateEmailBroadcastModal: boolean;
-	setShowCreateEmailBroadcastModal: (show: boolean) => void;
-	showUpdateEmailBroadcastModal: boolean;
-	setShowUpdateEmailBroadcastModal: (show: boolean) => void;
-	showDeleteEmailBroadcastModal: boolean;
-	setShowDeleteEmailBroadcastModal: (show: boolean) => void;
-	// filters
-	filters: z.infer<typeof emailBroadcastFilterParamsSchema>;
-	pendingFiltersTransition: boolean;
-	setSearch: (search: string) => void;
-	clearAllFilters: () => void;
-	// infinite
-	hasNextPage: boolean;
-	fetchNextPage: (options?: FetchNextPageOptions) => void | Promise<void>;
-	isFetchingNextPage: boolean;
-}
+import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
+
+type EmailBroadcastsContext = InfiniteItemsContext<
+	AppRouterOutputs['emailBroadcast']['byWorkspace']['emailBroadcasts'][number],
+	z.infer<typeof emailBroadcastFilterParamsSchema>
+>;
 
 const EmailBroadcastsContext = createContext<EmailBroadcastsContext | undefined>(
 	undefined,
@@ -51,12 +30,9 @@ export function EmailBroadcastsContextProvider({
 		AppRouterOutputs['emailBroadcast']['byWorkspace']
 	>;
 }) {
-	const [showCreateEmailBroadcastModal, setShowCreateEmailBroadcastModal] =
-		useState(false);
-	const [showUpdateEmailBroadcastModal, setShowUpdateEmailBroadcastModal] =
-		useState(false);
-	const [showDeleteEmailBroadcastModal, setShowDeleteEmailBroadcastModal] =
-		useState(false);
+	const [showCreateModal, setShowCreateModal] = useState(false);
+	const [showUpdateModal, setShowUpdateModal] = useState(false);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
 
 	const { handle } = useWorkspace();
 
@@ -76,6 +52,9 @@ export function EmailBroadcastsContextProvider({
 		hasNextPage,
 		fetchNextPage,
 		isFetchingNextPage,
+		isRefetching,
+		isFetching,
+		isPending,
 	} = api.emailBroadcast.byWorkspace.useInfiniteQuery(
 		{ handle, ...filters },
 		{
@@ -131,23 +110,24 @@ export function EmailBroadcastsContextProvider({
 	);
 
 	const contextValue = {
-		emailBroadcasts,
-		emailBroadcastSelection,
-		lastSelectedEmailBroadcastId,
-		lastSelectedEmailBroadcast,
-		setEmailBroadcastSelection,
+		items: emailBroadcasts,
+		selection: emailBroadcastSelection,
+		lastSelectedItemId: lastSelectedEmailBroadcastId,
+		lastSelectedItem: lastSelectedEmailBroadcast,
+		setSelection: setEmailBroadcastSelection,
 		gridListRef,
 		focusGridList: () => {
 			gridListRef.current?.focus();
 		},
-		showCreateEmailBroadcastModal,
-		setShowCreateEmailBroadcastModal,
-		showUpdateEmailBroadcastModal,
-		setShowUpdateEmailBroadcastModal,
-		// showArchiveEmailBroadcastModal,
-		// setShowArchiveEmailBroadcastModal,
-		showDeleteEmailBroadcastModal,
-		setShowDeleteEmailBroadcastModal,
+		showCreateModal,
+		setShowCreateModal,
+		showUpdateModal,
+		setShowUpdateModal,
+		showDeleteModal,
+		setShowDeleteModal,
+		showArchiveModal: false,
+		setShowArchiveModal: () => void {},
+		toggleArchived: () => void {},
 		// filters
 		filters,
 		pendingFiltersTransition: pending,
@@ -157,6 +137,9 @@ export function EmailBroadcastsContextProvider({
 		hasNextPage,
 		fetchNextPage: () => void fetchNextPage(),
 		isFetchingNextPage,
+		isFetching,
+		isRefetching,
+		isPending,
 	} satisfies EmailBroadcastsContext;
 
 	return (

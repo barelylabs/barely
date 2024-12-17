@@ -18,11 +18,11 @@ export function CreateOrUpdateFanModal({ mode }: { mode: 'create' | 'update' }) 
 
 	/* fan context */
 	const {
-		lastSelectedFan: selectedFan,
-		showCreateFanModal,
-		showUpdateFanModal,
-		setShowCreateFanModal,
-		setShowUpdateFanModal,
+		lastSelectedItem: selectedFan,
+		showCreateModal,
+		showUpdateModal,
+		setShowCreateModal,
+		setShowUpdateModal,
 		focusGridList,
 	} = useFanContext();
 
@@ -56,23 +56,22 @@ export function CreateOrUpdateFanModal({ mode }: { mode: 'create' | 'update' }) 
 	});
 
 	/* modal */
-	const showFanModal = mode === 'create' ? showCreateFanModal : showUpdateFanModal;
-	const setShowFanModal =
-		mode === 'create' ? setShowCreateFanModal : setShowUpdateFanModal;
+	const showModal = mode === 'create' ? showCreateModal : showUpdateModal;
+	const setShowModal = mode === 'create' ? setShowCreateModal : setShowUpdateModal;
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
 		await apiUtils.fan.invalidate();
 		form.reset();
-		setShowFanModal(false);
-	}, [form, focusGridList, apiUtils.fan, setShowFanModal]);
+		setShowModal(false);
+	}, [form, focusGridList, apiUtils.fan, setShowModal]);
 
 	const submitDisabled = mode === 'update' && !form.formState.isDirty;
 
 	return (
 		<Modal
-			showModal={showFanModal}
-			setShowModal={setShowFanModal}
+			showModal={showModal}
+			setShowModal={setShowModal}
 			preventDefaultClose={form.formState.isDirty}
 			onClose={handleCloseModal}
 		>

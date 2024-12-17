@@ -9,6 +9,7 @@ import { getTrackingLink } from '@barely/lib/server/shipping/shipping.utils';
 import { formatCentsToDollars } from '@barely/lib/utils/currency';
 import { numToPaddedString } from '@barely/lib/utils/number';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { Badge } from '@barely/ui/elements/badge';
 import { Button } from '@barely/ui/elements/button';
@@ -19,7 +20,7 @@ import { Text } from '@barely/ui/elements/typography';
 import { useCartOrderContext } from '~/app/[handle]/orders/_components/cart-order-context';
 
 export function AllCartOrders() {
-	const { cartOrders, cartOrderSelection, setCartOrderSelection, gridListRef } =
+	const { items, selection, setSelection, gridListRef, isFetching } =
 		useCartOrderContext();
 
 	return (
@@ -30,17 +31,21 @@ export function AllCartOrders() {
 				className='flex flex-col gap-4'
 				selectionMode='multiple'
 				selectionBehavior='replace'
-				items={cartOrders}
-				selectedKeys={cartOrderSelection}
-				setSelectedKeys={setCartOrderSelection}
+				items={items}
+				selectedKeys={selection}
+				setSelectedKeys={setSelection}
 				onAction={() => {
-					if (!cartOrderSelection) return;
+					if (!selection) return;
 				}}
 				renderEmptyState={() => (
-					<NoResultsPlaceholder icon='order' title='No orders found.' />
+					<>
+						{isFetching ?
+							<GridListSkeleton />
+						:	<NoResultsPlaceholder icon='order' title='No orders found.' />}
+					</>
 				)}
 			>
-				{order => <CartOrderCard cartOrder={order} />}
+				{item => <CartOrderCard cartOrder={item} />}
 			</GridList>
 			<LoadMoreButton />
 		</div>
@@ -76,8 +81,8 @@ function CartOrderCard({
 	const {
 		setShowMarkAsFulfilledModal,
 		setShowCancelCartOrderModal,
-		setCartOrderSelection,
-		cartOrderSelection,
+		setSelection,
+		selection,
 	} = useCartOrderContext();
 
 	const { handle } = useWorkspace();
@@ -87,7 +92,7 @@ function CartOrderCard({
 		icon: 'fulfillment',
 		shortcut: ['f'],
 		action: () => {
-			setCartOrderSelection(new Set([cartOrder.id]));
+			setSelection(new Set([cartOrder.id]));
 			setShowMarkAsFulfilledModal(true);
 		},
 	};
@@ -97,7 +102,7 @@ function CartOrderCard({
 		icon: 'x',
 		shortcut: ['x'],
 		action: () => {
-			setCartOrderSelection(new Set([cartOrder.id]));
+			setSelection(new Set([cartOrder.id]));
 			setShowCancelCartOrderModal(true);
 		},
 	};
@@ -125,10 +130,10 @@ function CartOrderCard({
 			textValue={cartOrder.id}
 			commandItems={commandItems}
 			actionOnCommandMenuOpen={() => {
-				if (cartOrderSelection === 'all' || cartOrderSelection.has(cartOrder.id)) {
+				if (selection === 'all' || selection.has(cartOrder.id)) {
 					return;
 				}
-				setCartOrderSelection(new Set([cartOrder.id]));
+				setSelection(new Set([cartOrder.id]));
 			}}
 		>
 			<div className='flex w-full flex-col gap-4'>

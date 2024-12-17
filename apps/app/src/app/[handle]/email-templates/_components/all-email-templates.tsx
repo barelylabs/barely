@@ -3,6 +3,7 @@
 import type { AppRouterOutputs } from '@barely/lib/server/api/router';
 import { formatCentsToDollars } from '@barely/lib/utils/currency';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { Button } from '@barely/ui/elements/button';
 import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
@@ -13,12 +14,13 @@ import { useEmailTemplateContext } from './email-template-context';
 
 export function AllEmailTemplates() {
 	const {
-		emailTemplates,
-		emailTemplateSelection,
-		lastSelectedEmailTemplateId,
-		setEmailTemplateSelection,
+		items,
+		selection,
+		lastSelectedItemId,
+		setSelection,
 		gridListRef,
-		setShowUpdateEmailTemplateModal,
+		setShowUpdateModal,
+		isFetching,
 	} = useEmailTemplateContext();
 
 	return (
@@ -30,24 +32,26 @@ export function AllEmailTemplates() {
 				selectionMode='multiple'
 				selectionBehavior='replace'
 				onAction={() => {
-					if (!lastSelectedEmailTemplateId) return;
-					setShowUpdateEmailTemplateModal(true);
+					if (!lastSelectedItemId) return;
+					setShowUpdateModal(true);
 				}}
-				items={emailTemplates}
-				selectedKeys={emailTemplateSelection}
-				setSelectedKeys={setEmailTemplateSelection}
-				renderEmptyState={() => (
-					<NoResultsPlaceholder
-						icon='email'
-						title='No Email Templates'
-						subtitle='Create a new email template to get started.'
-						button={<CreateEmailTemplateButton />}
-					/>
-				)}
+				items={items}
+				selectedKeys={selection}
+				setSelectedKeys={setSelection}
+				renderEmptyState={() =>
+					isFetching ?
+						<GridListSkeleton />
+					:	<NoResultsPlaceholder
+							icon='email'
+							title='No Email Templates'
+							subtitle='Create a new email template to get started.'
+							button={<CreateEmailTemplateButton />}
+						/>
+				}
 			>
 				{emailTemplate => <EmailTemplateCard emailTemplate={emailTemplate} />}
 			</GridList>
-			<LoadMoreButton />
+			{!!items.length && <LoadMoreButton />}
 		</div>
 	);
 }
@@ -77,8 +81,7 @@ function EmailTemplateCard({
 }: {
 	emailTemplate: AppRouterOutputs['emailTemplate']['byWorkspace']['emailTemplates'][0];
 }) {
-	const { setShowUpdateEmailTemplateModal, setShowDeleteEmailTemplateModal } =
-		useEmailTemplateContext();
+	const { setShowUpdateModal, setShowDeleteModal } = useEmailTemplateContext();
 
 	const { name, subject, opens, clicks, value } = emailTemplate;
 
@@ -87,8 +90,8 @@ function EmailTemplateCard({
 			id={emailTemplate.id}
 			key={emailTemplate.id}
 			textValue={emailTemplate.name}
-			setShowUpdateModal={setShowUpdateEmailTemplateModal}
-			setShowDeleteModal={setShowDeleteEmailTemplateModal}
+			setShowUpdateModal={setShowUpdateModal}
+			setShowDeleteModal={setShowDeleteModal}
 			title={name}
 			subtitle={subject}
 			stats={[

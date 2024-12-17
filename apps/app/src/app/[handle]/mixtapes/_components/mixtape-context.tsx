@@ -8,34 +8,13 @@ import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 import { mixtapeSearchParamsSchema } from '@barely/lib/server/routes/mixtape/mixtape.schema';
-import { wait } from '@barely/lib/utils/wait';
 
-interface MixtapeContext {
-	// infiniteMixtapes: AppRouterOutputs['mixtape']['byWorkspace'];
-	mixtapes: AppRouterOutputs['mixtape']['byWorkspace']['mixtapes'];
-	mixtapeSelection: Selection;
-	lastSelectedMixtapeId: string | undefined;
-	lastSelectedMixtape:
-		| AppRouterOutputs['mixtape']['byWorkspace']['mixtapes'][number]
-		| undefined;
-	setMixtapeSelection: (selection: Selection) => void;
-	gridListRef: React.RefObject<HTMLDivElement>;
-	focusGridList: () => void;
-	showCreateMixtapeModal: boolean;
-	setShowCreateMixtapeModal: (show: boolean) => void;
-	showUpdateMixtapeModal: boolean;
-	setShowUpdateMixtapeModal: (show: boolean) => void;
-	showArchiveMixtapeModal: boolean;
-	setShowArchiveMixtapeModal: (show: boolean) => void;
-	showDeleteMixtapeModal: boolean;
-	setShowDeleteMixtapeModal: (show: boolean) => void;
-	// filters
-	filters: z.infer<typeof mixtapeSearchParamsSchema>;
-	pendingFiltersTransition: boolean;
-	setSearch: (search: string) => void;
-	clearAllFilters: () => void;
-	toggleArchived: () => void;
-}
+import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
+
+type MixtapeContext = InfiniteItemsContext<
+	AppRouterOutputs['mixtape']['byWorkspace']['mixtapes'][number],
+	z.infer<typeof mixtapeSearchParamsSchema>
+>;
 
 const MixtapeContext = createContext<MixtapeContext | undefined>(undefined);
 
@@ -46,10 +25,10 @@ export function MixtapeContextProvider({
 	children: React.ReactNode;
 	initialInfiniteMixtapes: Promise<AppRouterOutputs['mixtape']['byWorkspace']>;
 }) {
-	const [showCreateMixtapeModal, setShowCreateMixtapeModal] = useState(false);
-	const [showEditMixtapeModal, setShowEditMixtapeModal] = useState(false);
-	const [showArchiveMixtapeModal, setShowArchiveMixtapeModal] = useState(false);
-	const [showDeleteMixtapeModal, setShowDeleteMixtapeModal] = useState(false);
+	const [showCreateModal, setShowCreateModal] = useState(false);
+	const [showEditModal, setShowEditModal] = useState(false);
+	const [showArchiveModal, setShowArchiveModal] = useState(false);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
 
 	const { handle } = useWorkspace();
 
@@ -65,7 +44,15 @@ export function MixtapeContextProvider({
 
 	const initialData = use(initialInfiniteMixtapes);
 
-	const { data: infiniteMixtapes } = api.mixtape.byWorkspace.useInfiniteQuery(
+	const {
+		data: infiniteMixtapes,
+		hasNextPage,
+		fetchNextPage,
+		isFetchingNextPage,
+		isFetching,
+		isRefetching,
+		isPending,
+	} = api.mixtape.byWorkspace.useInfiniteQuery(
 		{ handle, ...filters },
 		{
 			initialData: () => {
@@ -125,34 +112,32 @@ export function MixtapeContextProvider({
 	const gridListRef = useRef<HTMLDivElement>(null);
 
 	const contextValue = {
-		// infiniteMixtapes: infiniteMixtapes ?? {
-		//     pages: [],
-		//     pageParams: [],
-		// },
-		mixtapes,
-		mixtapeSelection,
-		lastSelectedMixtapeId,
-		lastSelectedMixtape,
-		setMixtapeSelection,
+		items: mixtapes,
+		selection: mixtapeSelection,
+		lastSelectedItemId: lastSelectedMixtapeId,
+		lastSelectedItem: lastSelectedMixtape,
+		setSelection: setMixtapeSelection,
 		gridListRef,
-		focusGridList: () => {
-			wait(1)
-				.then(() => gridListRef.current?.focus())
-				.catch(console.error);
-		}, // fixme: this is a workaround for focus not working on modal closing
-		showCreateMixtapeModal,
-		setShowCreateMixtapeModal,
-		showUpdateMixtapeModal: showEditMixtapeModal,
-		setShowUpdateMixtapeModal: setShowEditMixtapeModal,
-		showArchiveMixtapeModal,
-		setShowArchiveMixtapeModal,
-		showDeleteMixtapeModal,
-		setShowDeleteMixtapeModal,
+		focusGridList: () => gridListRef.current?.focus(),
+		showCreateModal,
+		setShowCreateModal,
+		showUpdateModal: showEditModal,
+		setShowUpdateModal: setShowEditModal,
+		showArchiveModal,
+		setShowArchiveModal,
+		showDeleteModal,
+		setShowDeleteModal,
 		filters,
 		pendingFiltersTransition: pending,
 		setSearch,
 		clearAllFilters,
 		toggleArchived,
+		hasNextPage,
+		fetchNextPage: () => void fetchNextPage(),
+		isFetchingNextPage,
+		isFetching,
+		isRefetching,
+		isPending,
 	} satisfies MixtapeContext;
 
 	return (

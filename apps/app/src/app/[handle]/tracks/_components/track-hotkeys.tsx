@@ -6,19 +6,19 @@ import { useTrackContext } from '~/app/[handle]/tracks/_components/track-context
 
 export function TrackHotkeys() {
 	const {
-		trackSelection,
-		setShowArchiveTrackModal,
-		setShowDeleteTrackModal,
-		setShowCreateTrackModal,
-		setShowEditTrackModal,
+		selection,
+		setShowArchiveModal,
+		setShowDeleteModal,
+		setShowCreateModal,
+		setShowUpdateModal,
 	} = useTrackContext();
 
 	useModalHotKeys({
-		setShowCreateModal: setShowCreateTrackModal,
-		setShowUpdateModal: setShowEditTrackModal,
-		setShowArchiveModal: setShowArchiveTrackModal,
-		setShowDeleteModal: setShowDeleteTrackModal,
-		itemSelected: trackSelection !== 'all' && !!trackSelection.size,
+		setShowCreateModal,
+		setShowUpdateModal,
+		setShowArchiveModal,
+		setShowDeleteModal,
+		itemSelected: selection !== 'all' && !!selection.size,
 	});
 
 	return null;

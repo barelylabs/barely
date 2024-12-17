@@ -6,19 +6,19 @@ import { useFanGroupContext } from '~/app/[handle]/fan-groups/_components/fan-gr
 
 export function FanGroupHotkeys() {
 	const {
-		fanGroupSelection,
-		setShowArchiveFanGroupModal,
-		setShowDeleteFanGroupModal,
-		setShowCreateFanGroupModal,
-		setShowUpdateFanGroupModal,
+		selection,
+		setShowArchiveModal,
+		setShowDeleteModal,
+		setShowCreateModal,
+		setShowUpdateModal,
 	} = useFanGroupContext();
 
 	useModalHotKeys({
-		setShowCreateModal: setShowCreateFanGroupModal,
-		setShowUpdateModal: setShowUpdateFanGroupModal,
-		setShowArchiveModal: setShowArchiveFanGroupModal,
-		setShowDeleteModal: setShowDeleteFanGroupModal,
-		itemSelected: fanGroupSelection !== 'all' && !!fanGroupSelection.size,
+		setShowCreateModal,
+		setShowUpdateModal,
+		setShowArchiveModal,
+		setShowDeleteModal,
+		itemSelected: selection !== 'all' && !!selection.size,
 	});
 	return null;
 }

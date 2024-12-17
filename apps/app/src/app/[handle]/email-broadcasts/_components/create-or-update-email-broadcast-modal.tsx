@@ -27,11 +27,11 @@ export function CreateOrUpdateEmailBroadcastModal({
 	const apiUtils = api.useUtils();
 
 	const {
-		lastSelectedEmailBroadcast: selectedEmailBroadcast,
-		showCreateEmailBroadcastModal,
-		showUpdateEmailBroadcastModal,
-		setShowCreateEmailBroadcastModal,
-		setShowUpdateEmailBroadcastModal,
+		lastSelectedItem,
+		showCreateModal,
+		showUpdateModal,
+		setShowCreateModal,
+		setShowUpdateModal,
 		focusGridList,
 	} = useEmailBroadcastsContext();
 
@@ -83,11 +83,10 @@ export function CreateOrUpdateEmailBroadcastModal({
 	});
 
 	const { form, onSubmit } = useCreateOrUpdateForm({
-		updateItem: mode === 'create' ? null : selectedEmailBroadcast ?? null,
+		updateItem: mode === 'create' ? null : lastSelectedItem ?? null,
 		upsertSchema: upsertEmailBroadcastSchema,
 		defaultValues: {
-			emailTemplateId:
-				mode === 'update' ? selectedEmailBroadcast?.emailTemplateId ?? '' : '',
+			emailTemplateId: mode === 'update' ? lastSelectedItem?.emailTemplateId ?? '' : '',
 			fanGroupId: null,
 			status: 'draft',
 			scheduledAt: null,
@@ -140,12 +139,9 @@ export function CreateOrUpdateEmailBroadcastModal({
 		return onSubmit(d);
 	};
 
-	const showEmailBroadcastModal =
-		mode === 'create' ? showCreateEmailBroadcastModal : showUpdateEmailBroadcastModal;
+	const showEmailBroadcastModal = mode === 'create' ? showCreateModal : showUpdateModal;
 	const setShowEmailBroadcastModal =
-		mode === 'create' ?
-			setShowCreateEmailBroadcastModal
-		:	setShowUpdateEmailBroadcastModal;
+		mode === 'create' ? setShowCreateModal : setShowUpdateModal;
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
@@ -182,12 +178,10 @@ export function CreateOrUpdateEmailBroadcastModal({
 					{/* <pre>{JSON.stringify(!canEdit, null, 2)}</pre> */}
 					{!canEdit && (
 						<div className='flex flex-col items-center justify-center gap-2'>
-							<Text variant='md/semibold'>
-								{selectedEmailBroadcast?.emailTemplate.name}
-							</Text>
+							<Text variant='md/semibold'>{lastSelectedItem?.emailTemplate.name}</Text>
 							<div className='flex flex-row items-center justify-center gap-2'>
 								<Icon.send className='h-4 w-4' />
-								<span>Sent @{selectedEmailBroadcast?.sentAt?.toLocaleString()}</span>
+								<span>Sent @{lastSelectedItem?.sentAt?.toLocaleString()}</span>
 							</div>
 						</div>
 					)}

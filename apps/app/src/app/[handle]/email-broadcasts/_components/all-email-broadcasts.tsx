@@ -4,6 +4,7 @@ import type { AppRouterOutputs } from '@barely/lib/server/api/router';
 import { formatCentsToDollars } from '@barely/lib/utils/currency';
 import { formatDate } from '@barely/lib/utils/format-date';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 // import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 // import { api } from '@barely/lib/server/api/react';
 
@@ -18,12 +19,13 @@ import { useEmailBroadcastsContext } from './email-broadcasts-context';
 
 export function AllEmailBroadcasts() {
 	const {
-		emailBroadcasts,
-		emailBroadcastSelection,
-		lastSelectedEmailBroadcastId,
-		setEmailBroadcastSelection,
+		items,
+		selection,
+		lastSelectedItemId,
+		setSelection,
 		gridListRef,
-		setShowUpdateEmailBroadcastModal,
+		setShowUpdateModal,
+		isFetching,
 	} = useEmailBroadcastsContext();
 
 	return (
@@ -35,24 +37,26 @@ export function AllEmailBroadcasts() {
 				selectionMode='multiple'
 				selectionBehavior='replace'
 				onAction={() => {
-					if (!lastSelectedEmailBroadcastId) return;
-					setShowUpdateEmailBroadcastModal(true);
+					if (!lastSelectedItemId) return;
+					setShowUpdateModal(true);
 				}}
-				items={emailBroadcasts}
-				selectedKeys={emailBroadcastSelection}
-				setSelectedKeys={setEmailBroadcastSelection}
-				renderEmptyState={() => (
-					<NoResultsPlaceholder
-						icon='broadcast'
-						title='No Email Broadcasts'
-						subtitle='Create a new email broadcast to get started.'
-						button={<CreateEmailBroadcastButton />}
-					/>
-				)}
+				items={items}
+				selectedKeys={selection}
+				setSelectedKeys={setSelection}
+				renderEmptyState={() =>
+					isFetching ?
+						<GridListSkeleton />
+					:	<NoResultsPlaceholder
+							icon='broadcast'
+							title='No Email Broadcasts'
+							subtitle='Create a new email broadcast to get started.'
+							button={<CreateEmailBroadcastButton />}
+						/>
+				}
 			>
 				{emailBroadcast => <EmailBroadcastCard emailBroadcast={emailBroadcast} />}
 			</GridList>
-			<LoadMoreButton />
+			{!!items.length && <LoadMoreButton />}
 		</div>
 	);
 }
@@ -95,14 +99,14 @@ function EmailBroadcastCard({
 		deliveries,
 	} = emailBroadcast;
 
-	const { setShowUpdateEmailBroadcastModal } = useEmailBroadcastsContext();
+	const { setShowUpdateModal } = useEmailBroadcastsContext();
 
 	return (
 		<GridListCard
 			id={id}
 			key={id}
 			textValue={emailTemplate.name}
-			setShowUpdateModal={setShowUpdateEmailBroadcastModal}
+			setShowUpdateModal={setShowUpdateModal}
 			title={emailTemplate.name}
 			subtitle={emailTemplate.name}
 			description={

@@ -8,20 +8,19 @@ import { useFmContext } from '~/app/[handle]/fm/_components/fm-context';
 
 export function ArchiveOrDeleteFmModal({ mode }: { mode: 'archive' | 'delete' }) {
 	const {
-		fmPageSelection,
-		lastSelectedFmPage,
-		showArchiveFmPageModal,
-		showDeleteFmPageModal,
-		setShowArchiveFmPageModal,
-		setShowDeleteFmPageModal,
+		selection,
+		lastSelectedItem,
+		showArchiveModal,
+		showDeleteModal,
+		setShowArchiveModal,
+		setShowDeleteModal,
 	} = useFmContext();
 
 	const apiUtils = api.useUtils();
 
-	const showModal = mode === 'archive' ? showArchiveFmPageModal : showDeleteFmPageModal;
+	const showModal = mode === 'archive' ? showArchiveModal : showDeleteModal;
 
-	const setShowModal =
-		mode === 'archive' ? setShowArchiveFmPageModal : setShowDeleteFmPageModal;
+	const setShowModal = mode === 'archive' ? setShowArchiveModal : setShowDeleteModal;
 
 	const onSuccess = useCallback(async () => {
 		await apiUtils.fm.invalidate();
@@ -35,13 +34,13 @@ export function ArchiveOrDeleteFmModal({ mode }: { mode: 'archive' | 'delete' })
 		{ onSuccess },
 	);
 
-	if (!lastSelectedFmPage) return null;
+	if (!lastSelectedItem) return null;
 
 	return (
 		<ArchiveOrDeleteModal
 			mode={mode}
-			selection={fmPageSelection}
-			lastSelected={{ ...lastSelectedFmPage, name: lastSelectedFmPage.title }}
+			selection={selection}
+			lastSelected={{ ...lastSelectedItem, name: lastSelectedItem.title }}
 			showModal={showModal}
 			setShowModal={setShowModal}
 			archiveItems={archiveFmPages}

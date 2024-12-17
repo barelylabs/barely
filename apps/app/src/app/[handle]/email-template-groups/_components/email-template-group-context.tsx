@@ -2,7 +2,6 @@
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/react';
 import type { emailTemplateGroupFilterParamsSchema } from '@barely/lib/server/routes/email-template-group/email-template-group.schema';
-import type { FetchNextPageOptions } from '@tanstack/react-query';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
 import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
@@ -11,38 +10,12 @@ import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 import { emailTemplateGroupSearchParamsSchema } from '@barely/lib/server/routes/email-template-group/email-template-group.schema';
 
-interface EmailTemplateGroupContext {
-	emailTemplateGroups: AppRouterOutputs['emailTemplateGroup']['byWorkspace']['emailTemplateGroups'];
-	emailTemplateGroupSelection: Selection;
-	lastSelectedEmailTemplateGroupId: string | undefined;
-	lastSelectedEmailTemplateGroup:
-		| AppRouterOutputs['emailTemplateGroup']['byWorkspace']['emailTemplateGroups'][number]
-		| undefined;
-	// lastSelectedEmailTemplateGroupEmailTemplates:
-	// 	| AppRouterOutputs['emailTemplate']['byEmailTemplateGroup']['emailTemplates']
-	// 	| undefined;
-	setEmailTemplateGroupSelection: (selection: Selection) => void;
-	gridListRef: React.RefObject<HTMLDivElement>;
-	focusGridList: () => void;
-	showCreateEmailTemplateGroupModal: boolean;
-	setShowCreateEmailTemplateGroupModal: (show: boolean) => void;
-	showUpdateEmailTemplateGroupModal: boolean;
-	setShowUpdateEmailTemplateGroupModal: (show: boolean) => void;
-	showDeleteEmailTemplateGroupModal: boolean;
-	setShowDeleteEmailTemplateGroupModal: (show: boolean) => void;
-	showArchiveEmailTemplateGroupModal: boolean;
-	setShowArchiveEmailTemplateGroupModal: (show: boolean) => void;
-	// filters
-	filters: z.infer<typeof emailTemplateGroupFilterParamsSchema>;
-	pendingFiltersTransition: boolean;
-	setSearch: (search: string) => void;
-	toggleArchived: () => void;
-	clearAllFilters: () => void;
-	// infinite
-	hasNextPage: boolean;
-	fetchNextPage: (options?: FetchNextPageOptions) => void | Promise<void>;
-	isFetchingNextPage: boolean;
-}
+import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
+
+type EmailTemplateGroupContext = InfiniteItemsContext<
+	AppRouterOutputs['emailTemplateGroup']['byWorkspace']['emailTemplateGroups'][number],
+	z.infer<typeof emailTemplateGroupFilterParamsSchema>
+>;
 
 const EmailTemplateGroupContext = createContext<EmailTemplateGroupContext | undefined>(
 	undefined,
@@ -57,14 +30,10 @@ export function EmailTemplateGroupContextProvider({
 		AppRouterOutputs['emailTemplateGroup']['byWorkspace']
 	>;
 }) {
-	const [showCreateEmailTemplateGroupModal, setShowCreateEmailTemplateGroupModal] =
-		useState(false);
-	const [showUpdateEmailTemplateGroupModal, setShowUpdateEmailTemplateGroupModal] =
-		useState(false);
-	const [showDeleteEmailTemplateGroupModal, setShowDeleteEmailTemplateGroupModal] =
-		useState(false);
-	const [showArchiveEmailTemplateGroupModal, setShowArchiveEmailTemplateGroupModal] =
-		useState(false);
+	const [showCreateModal, setShowCreateModal] = useState(false);
+	const [showUpdateModal, setShowUpdateModal] = useState(false);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const [showArchiveModal, setShowArchiveModal] = useState(false);
 
 	const { handle } = useWorkspace();
 
@@ -84,6 +53,9 @@ export function EmailTemplateGroupContextProvider({
 		hasNextPage,
 		fetchNextPage,
 		isFetchingNextPage,
+		isRefetching,
+		isFetching,
+		isPending,
 	} = api.emailTemplateGroup.byWorkspace.useInfiniteQuery(
 		{ handle, ...filters },
 		{
@@ -145,37 +117,24 @@ export function EmailTemplateGroupContextProvider({
 		group => group.id === lastSelectedEmailTemplateGroupId,
 	);
 
-	// const { data: lastSelectedEmailTemplateGroupEmailTemplates } =
-	// 	api.emailTemplate.byEmailTemplateGroup.useQuery(
-	// 		{
-	// 			handle,
-	// 			emailTemplateGroupId: lastSelectedEmailTemplateGroupId ?? '',
-	// 		},
-	// 		{
-	// 			enabled: !!lastSelectedEmailTemplateGroupId,
-	// 			select: data => data.emailTemplates,
-	// 		},
-	// 	);
-
 	const contextValue = {
-		emailTemplateGroups,
-		emailTemplateGroupSelection,
-		lastSelectedEmailTemplateGroupId,
-		lastSelectedEmailTemplateGroup,
-		// lastSelectedEmailTemplateGroupEmailTemplates,
-		setEmailTemplateGroupSelection,
+		items: emailTemplateGroups,
+		selection: emailTemplateGroupSelection,
+		lastSelectedItemId: lastSelectedEmailTemplateGroupId,
+		lastSelectedItem: lastSelectedEmailTemplateGroup,
+		setSelection: setEmailTemplateGroupSelection,
 		gridListRef,
 		focusGridList: () => {
 			gridListRef.current?.focus();
 		},
-		showCreateEmailTemplateGroupModal,
-		setShowCreateEmailTemplateGroupModal,
-		showUpdateEmailTemplateGroupModal,
-		setShowUpdateEmailTemplateGroupModal,
-		showDeleteEmailTemplateGroupModal,
-		setShowDeleteEmailTemplateGroupModal,
-		showArchiveEmailTemplateGroupModal,
-		setShowArchiveEmailTemplateGroupModal,
+		showCreateModal,
+		setShowCreateModal,
+		showUpdateModal,
+		setShowUpdateModal,
+		showDeleteModal,
+		setShowDeleteModal,
+		showArchiveModal,
+		setShowArchiveModal,
 		// filters
 		filters,
 		pendingFiltersTransition: pending,
@@ -186,6 +145,9 @@ export function EmailTemplateGroupContextProvider({
 		hasNextPage,
 		fetchNextPage: () => void fetchNextPage(),
 		isFetchingNextPage,
+		isRefetching,
+		isFetching,
+		isPending,
 	} satisfies EmailTemplateGroupContext;
 
 	return (

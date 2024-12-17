@@ -5,12 +5,12 @@ import { Button } from '@barely/ui/elements/button';
 import { useLandingPageContext } from '~/app/[handle]/pages/_components/landing-page-context';
 
 export function CreateLandingPageButton() {
-	const { setShowCreateLandingPageModal } = useLandingPageContext();
+	const { setShowCreateModal } = useLandingPageContext();
 
 	return (
 		<Button
 			onClick={() => {
-				setShowCreateLandingPageModal(true);
+				setShowCreateModal(true);
 			}}
 			className='space-x-3'
 		>

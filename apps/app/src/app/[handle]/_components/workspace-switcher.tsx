@@ -1,16 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 import { usePusherSocketId } from '@barely/lib/hooks/use-pusher';
 import { useSetAtom } from 'jotai';
 
 import { useUser } from '@barely/hooks/use-user';
-import { useWorkspace } from '@barely/hooks/use-workspace';
+import { useSetWorkspace, useWorkspace } from '@barely/hooks/use-workspace';
 import { useWorkspaces } from '@barely/hooks/use-workspaces';
 
 import { Avatar } from '@barely/ui/elements/avatar';
-import { Badge } from '@barely/ui/elements/badge';
 import { Button } from '@barely/ui/elements/button';
 import {
 	Command,
@@ -24,12 +22,16 @@ import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/elements/pop
 import { Text } from '@barely/ui/elements/typography';
 
 import { cn } from '@barely/utils/cn';
-import { capitalize, toTitleCase, underscoresToSpaces } from '@barely/utils/text';
+import {
+	capitalize,
+	toTitleCase,
+	truncate,
+	underscoresToSpaces,
+} from '@barely/utils/text';
 
 import { showNewWorkspaceModalAtom } from '~/app/[handle]/_components/new-workspace-modal';
 
 export function WorkspaceSwitcher() {
-	const router = useRouter();
 	usePusherSocketId();
 
 	const [switcherOpen, setSwitcherOpen] = useState(false);
@@ -51,7 +53,69 @@ export function WorkspaceSwitcher() {
 		type: toTitleCase(underscoresToSpaces(currentWorkspace.type)),
 	};
 
-	const currentPath = usePathname();
+	const onKeydown = useCallback((e: KeyboardEvent) => {
+		if (e.key === '.' && (e.metaKey || !e.ctrlKey)) {
+			setSwitcherOpen(true);
+		}
+	}, []);
+
+	useEffect(() => {
+		document.addEventListener('keydown', onKeydown);
+		return () => {
+			document.removeEventListener('keydown', onKeydown);
+		};
+	}, [onKeydown]);
+
+	// useEffect(() => {
+	// 	console.log(currentWorkspace);
+	// }, [currentWorkspace]);
+
+	// const setCurrentWorkspace = useCallback(
+	// 	async (workspace: SessionWorkspace) => {
+	// 		console.log('setting current workspace to', workspace, '@', Date.now());
+	// 		apiUtils.workspace.current.setData(undefined, workspace);
+
+	// 		const newWorkspaceCartData = apiUtils.cartFunnel.byWorkspace.getInfiniteData({
+	// 			handle: workspace.handle,
+	// 		});
+
+	// 		if (newWorkspaceCartData) {
+	// 			apiUtils.cartFunnel.byWorkspace.setInfiniteData(
+	// 				{ handle: workspace.handle },
+	// 				newWorkspaceCartData,
+	// 			);
+	// 		} else {
+	// 			apiUtils.cartFunnel.byWorkspace.setInfiniteData(
+	// 				{ handle: workspace.handle },
+	// 				{
+	// 					pages: [
+	// 						{
+	// 							cartFunnels: [],
+	// 							nextCursor: undefined,
+	// 						},
+	// 					],
+	// 					pageParams: [],
+	// 				},
+	// 			);
+	// 		}
+
+	// 		console.log(currentWorkspace.handle, workspace.handle);
+	// 		setSwitcherOpen(false);
+	// 		if (currentWorkspace.handle === workspace.handle) return;
+	// 		if (currentPath) {
+	// 			router.push(currentPath.replace(currentWorkspace.handle, workspace.handle));
+	// 			return console.log('pushed @', Date.now());
+	// 		}
+	// 		router.push(`/${workspace.handle}`);
+	// 		console.log('pushed @', Date.now());
+	// 	},
+	// 	[apiUtils, currentPath, currentWorkspace, router, setSwitcherOpen],
+	// );
+	const { setCurrentWorkspace } = useSetWorkspace({
+		onBeginSet: () => {
+			setSwitcherOpen(false);
+		},
+	});
 
 	return (
 		<Popover open={switcherOpen} onOpenChange={setSwitcherOpen}>
@@ -62,24 +126,24 @@ export function WorkspaceSwitcher() {
 					role='combobox'
 					aria-expanded={switcherOpen}
 					aria-label='Select a workspace'
-					className='flex h-fit w-full flex-row gap-2 px-2 py-2'
+					className='flex h-fit w-full max-w-full flex-row gap-2 px-2 py-2'
 					fullWidth
 				>
 					<Avatar
-						className='h-7 w-7'
+						className='mr-[1px] h-7 w-7'
 						imageWidth={28}
 						imageHeight={28}
 						imageS3Key={normalizedObject.avatarImageS3Key}
 						priority
 					/>
-					<Text variant='xs/bold' className='text-accent-foreground'>
-						{normalizedObject.name}
-					</Text>
-
-					<Badge variant='info' size='2xs' className='h-full'>
-						{capitalize(currentWorkspace.plan)}
-					</Badge>
-
+					<div className='my-auto flex h-full flex-col items-start justify-center gap-0.5'>
+						<Text variant='xs/bold' className='leading-tight text-accent-foreground'>
+							{truncate(normalizedObject.name, 20)}
+						</Text>
+						<Text variant='2xs/normal' className='leading-tight text-muted-foreground'>
+							{capitalize(currentWorkspace.plan)}
+						</Text>
+					</div>
 					<Icon.chevronsUpDown className='ml-auto h-4 w-4 shrink-0 opacity-50' />
 				</Button>
 			</PopoverTrigger>
@@ -92,19 +156,7 @@ export function WorkspaceSwitcher() {
 						{personalAccount && (
 							<CommandGroup heading='Personal Account'>
 								<CommandItem
-									onSelect={() => {
-										setSwitcherOpen(false);
-										if (currentWorkspace.handle === personalAccount.handle) return;
-										if (currentPath) {
-											return router.push(
-												currentPath.replace(
-													currentWorkspace.handle,
-													personalAccount.handle,
-												),
-											);
-										}
-										return router.push(`/${personalAccount.handle}`);
-									}}
+									onSelect={() => setCurrentWorkspace(personalAccount)}
 									isSelected={currentWorkspace.handle === personalAccount.handle}
 								>
 									<Avatar
@@ -131,16 +183,7 @@ export function WorkspaceSwitcher() {
 							{workspaces.map(workspace => (
 								<CommandItem
 									key={workspace.id}
-									onSelect={() => {
-										setSwitcherOpen(false);
-										if (currentWorkspace.handle === workspace.handle) return;
-										if (currentPath) {
-											return router.push(
-												currentPath.replace(currentWorkspace.handle, workspace.handle),
-											);
-										}
-										return router.push(`/${workspace.handle}`);
-									}}
+									onSelect={() => setCurrentWorkspace(workspace)}
 									className='cursor-pointer text-sm'
 									isSelected={currentWorkspace.handle === workspace.handle}
 								>
@@ -149,7 +192,6 @@ export function WorkspaceSwitcher() {
 										imageS3Key={workspace.avatarImageS3Key}
 										imageWidth={20}
 										imageHeight={20}
-										// sizes='50'
 										priority
 									/>
 									{workspace.name ?? workspace.handle}

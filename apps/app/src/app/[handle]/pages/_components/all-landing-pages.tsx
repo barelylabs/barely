@@ -4,6 +4,7 @@ import type { LandingPage } from '@barely/lib/server/routes/landing-page/landing
 import { formatCentsToDollars } from '@barely/lib/utils/currency';
 import { getAbsoluteUrl } from '@barely/lib/utils/url';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
 
@@ -11,13 +12,8 @@ import { CreateLandingPageButton } from '~/app/[handle]/pages/_components/create
 import { useLandingPageContext } from '~/app/[handle]/pages/_components/landing-page-context';
 
 export function AllLandingPages() {
-	const {
-		landingPages,
-		landingPageSelection,
-		setLandingPageSelection,
-		gridListRef,
-		setShowUpdateLandingPageModal,
-	} = useLandingPageContext();
+	const { items, selection, setSelection, gridListRef, setShowUpdateModal, isFetching } =
+		useLandingPageContext();
 
 	return (
 		<>
@@ -29,24 +25,26 @@ export function AllLandingPages() {
 				selectionMode='multiple'
 				selectionBehavior='replace'
 				// landingPages
-				items={landingPages}
-				selectedKeys={landingPageSelection}
-				setSelectedKeys={setLandingPageSelection}
+				items={items}
+				selectedKeys={selection}
+				setSelectedKeys={setSelection}
 				onAction={() => {
-					if (!landingPageSelection) return;
-					setShowUpdateLandingPageModal(true);
+					if (!selection) return;
+					setShowUpdateModal(true);
 				}}
 				// empty
-				renderEmptyState={() => (
-					<NoResultsPlaceholder
-						icon='landingPage'
-						title='No landing pages found.'
-						subtitle='Create your first landing page to get started.'
-						button={<CreateLandingPageButton />}
-					/>
-				)}
+				renderEmptyState={() =>
+					isFetching ?
+						<GridListSkeleton />
+					:	<NoResultsPlaceholder
+							icon='landingPage'
+							title='No landing pages found.'
+							subtitle='Create your first landing page to get started.'
+							button={<CreateLandingPageButton />}
+						/>
+				}
 			>
-				{landingPage => <LandingPageCard landingPage={landingPage} />}
+				{item => <LandingPageCard landingPage={item} />}
 			</GridList>
 			{/* <Button look='success'>success</Button> */}
 		</>
@@ -54,11 +52,8 @@ export function AllLandingPages() {
 }
 
 function LandingPageCard({ landingPage }: { landingPage: LandingPage }) {
-	const {
-		setShowUpdateLandingPageModal,
-		setShowArchiveLandingPageModal,
-		setShowDeleteLandingPageModal,
-	} = useLandingPageContext();
+	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } =
+		useLandingPageContext();
 
 	const href = getAbsoluteUrl('page', `${landingPage.handle}/${landingPage.key}`);
 
@@ -67,9 +62,9 @@ function LandingPageCard({ landingPage }: { landingPage: LandingPage }) {
 			id={landingPage.id}
 			key={landingPage.id}
 			textValue={landingPage.name}
-			setShowUpdateModal={setShowUpdateLandingPageModal}
-			setShowArchiveModal={setShowArchiveLandingPageModal}
-			setShowDeleteModal={setShowDeleteLandingPageModal}
+			setShowUpdateModal={setShowUpdateModal}
+			setShowArchiveModal={setShowArchiveModal}
+			setShowDeleteModal={setShowDeleteModal}
 			title={landingPage.name}
 			subtitle={landingPage.key}
 			quickActions={{

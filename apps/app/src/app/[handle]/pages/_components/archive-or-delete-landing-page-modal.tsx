@@ -12,21 +12,19 @@ export function ArchiveOrDeleteLandingPageModal({
 	mode: 'archive' | 'delete';
 }) {
 	const {
-		landingPageSelection,
-		lastSelectedLandingPage,
-		showArchiveLandingPageModal,
-		showDeleteLandingPageModal,
-		setShowArchiveLandingPageModal,
-		setShowDeleteLandingPageModal,
+		selection,
+		lastSelectedItem,
+		showArchiveModal,
+		showDeleteModal,
+		setShowArchiveModal,
+		setShowDeleteModal,
 	} = useLandingPageContext();
 
 	const apiUtils = api.useUtils();
 
-	const showModal =
-		mode === 'archive' ? showArchiveLandingPageModal : showDeleteLandingPageModal;
+	const showModal = mode === 'archive' ? showArchiveModal : showDeleteModal;
 
-	const setShowModal =
-		mode === 'archive' ? setShowArchiveLandingPageModal : setShowDeleteLandingPageModal;
+	const setShowModal = mode === 'archive' ? setShowArchiveModal : setShowDeleteModal;
 
 	const onSuccess = useCallback(async () => {
 		await apiUtils.landingPage.invalidate();
@@ -39,13 +37,13 @@ export function ArchiveOrDeleteLandingPageModal({
 	const { mutate: deleteLandingPages, isPending: isPendingDelete } =
 		api.landingPage.delete.useMutation({ onSuccess });
 
-	if (!lastSelectedLandingPage) return null;
+	if (!lastSelectedItem) return null;
 
 	return (
 		<ArchiveOrDeleteModal
 			mode={mode}
-			selection={landingPageSelection}
-			lastSelected={lastSelectedLandingPage}
+			selection={selection}
+			lastSelected={lastSelectedItem}
 			showModal={showModal}
 			setShowModal={setShowModal}
 			archiveItems={archiveLandingPages}

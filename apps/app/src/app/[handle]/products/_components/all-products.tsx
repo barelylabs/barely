@@ -1,20 +1,16 @@
 'use client';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
 
-import type { ProductCtx } from '~/app/[handle]/products/_components/product-context';
+import type { ProductContext } from '~/app/[handle]/products/_components/product-context';
 import { CreateProductButton } from '~/app/[handle]/products/_components/create-product-button';
 import { useProductContext } from '~/app/[handle]/products/_components/product-context';
 
 export function AllProducts() {
-	const {
-		products,
-		productSelection,
-		setProductSelection,
-		gridListRef,
-		setShowUpdateProductModal,
-	} = useProductContext();
+	const { items, selection, setSelection, gridListRef, setShowUpdateModal, isFetching } =
+		useProductContext();
 
 	return (
 		<GridList
@@ -25,24 +21,26 @@ export function AllProducts() {
 			selectionMode='multiple'
 			selectionBehavior='replace'
 			// products
-			items={products}
-			selectedKeys={productSelection}
-			setSelectedKeys={setProductSelection}
+			items={items}
+			selectedKeys={selection}
+			setSelectedKeys={setSelection}
 			onAction={() => {
-				if (!productSelection) return;
-				setShowUpdateProductModal(true);
+				if (!selection) return;
+				setShowUpdateModal(true);
 			}}
 			// empty
-			renderEmptyState={() => (
-				<NoResultsPlaceholder
-					icon='product'
-					title='No products found.'
-					subtitle='Create a product to get started.'
-					button={<CreateProductButton />}
-				/>
-			)}
+			renderEmptyState={() =>
+				isFetching ?
+					<GridListSkeleton />
+				:	<NoResultsPlaceholder
+						icon='product'
+						title='No products found.'
+						subtitle='Create a product to get started.'
+						button={<CreateProductButton />}
+					/>
+			}
 		>
-			{product => <ProductCard product={product} />}
+			{item => <ProductCard product={item} />}
 		</GridList>
 	);
 }
@@ -50,22 +48,19 @@ export function AllProducts() {
 function ProductCard({
 	product,
 }: {
-	product: NonNullable<ProductCtx['lastSelectedProduct']>;
+	product: NonNullable<ProductContext['lastSelectedItem']>;
 }) {
-	const {
-		setShowUpdateProductModal,
-		setShowArchiveProductModal,
-		setShowDeleteProductModal,
-	} = useProductContext();
+	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } =
+		useProductContext();
 
 	return (
 		<GridListCard
 			id={product.id}
 			key={product.id}
 			textValue={product.name}
-			setShowUpdateModal={setShowUpdateProductModal}
-			setShowArchiveModal={setShowArchiveProductModal}
-			setShowDeleteModal={setShowDeleteProductModal}
+			setShowUpdateModal={setShowUpdateModal}
+			setShowArchiveModal={setShowArchiveModal}
+			setShowDeleteModal={setShowDeleteModal}
 			title={product.name}
 			img={{ ...product.images[0], alt: `${product.name} product image` }}
 		>

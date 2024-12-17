@@ -37,18 +37,17 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 
 	/* link context */
 	const {
-		lastSelectedLink: selectedLink,
-		showCreateLinkModal,
-		setShowCreateLinkModal,
-		showUpdateLinkModal,
-		setShowUpdateLinkModal,
+		lastSelectedItem: selectedLink,
+		showCreateModal,
+		setShowCreateModal,
+		showUpdateModal,
+		setShowUpdateModal,
 		focusGridList,
 	} = useLinkContext();
 
 	/* modal state */
-	const showLinkModal = mode === 'create' ? showCreateLinkModal : showUpdateLinkModal;
-	const setShowLinkModal =
-		mode === 'create' ? setShowCreateLinkModal : setShowUpdateLinkModal;
+	const showLinkModal = mode === 'create' ? showCreateModal : showUpdateModal;
+	const setShowLinkModal = mode === 'create' ? setShowCreateModal : setShowUpdateModal;
 
 	/* api */
 	const apiUtils = api.useUtils();

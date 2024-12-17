@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { cn } from '@barely/lib/utils/cn';
 import { truncate } from '@barely/lib/utils/text';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { Badge } from '@barely/ui/elements/badge';
 import { BlurImage } from '@barely/ui/elements/blur-image';
@@ -18,13 +19,14 @@ import { useLinkContext } from '~/app/[handle]/links/_components/link-context';
 
 export function AllLinks() {
 	const {
-		links,
-		linkSelection,
-		lastSelectedLinkId,
-		setLinkSelection,
+		items,
+		selection,
+		lastSelectedItemId,
+		setSelection,
 		gridListRef,
-		setShowUpdateLinkModal,
+		setShowUpdateModal,
 		pendingFiltersTransition,
+		isFetching,
 	} = useLinkContext();
 
 	return (
@@ -37,24 +39,29 @@ export function AllLinks() {
 				selectionMode='multiple'
 				selectionBehavior='replace'
 				// links
-				items={links.map(link => ({ ...link, key: link.id, linkKey: link.key }))}
-				selectedKeys={linkSelection}
-				setSelectedKeys={setLinkSelection}
+				items={items.map(item => ({ ...item, key: item.id, linkKey: item.key }))}
+				selectedKeys={selection}
+				setSelectedKeys={setSelection}
 				onAction={() => {
-					if (!lastSelectedLinkId) return;
-					setShowUpdateLinkModal(true);
+					if (!lastSelectedItemId) return;
+					setShowUpdateModal(true);
 				}}
 				// empty
 				renderEmptyState={() => (
-					<NoResultsPlaceholder
-						icon='link'
-						title='No links found.'
-						subtitle='Create a new link to get started.'
-						button={<CreateLinkButton />}
-					/>
+					<>
+						{isFetching ?
+							<GridListSkeleton />
+						:	<NoResultsPlaceholder
+								icon='link'
+								title='No links found.'
+								subtitle='Create a new link to get started.'
+								button={<CreateLinkButton />}
+							/>
+						}
+					</>
 				)}
 			>
-				{link => <LinkCard key={link.id} link={link} />}
+				{item => <LinkCard key={item.id} link={item} />}
 			</GridList>
 		</>
 	);
@@ -65,7 +72,7 @@ function LinkCard({
 }: {
 	link: AppRouterOutputs['link']['byWorkspace']['links'][0] & { linkKey: string };
 }) {
-	const { setShowUpdateLinkModal, setShowArchiveLinkModal, setShowDeleteLinkModal } =
+	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } =
 		useLinkContext();
 
 	return (
@@ -73,9 +80,9 @@ function LinkCard({
 			id={link.id}
 			key={link.id}
 			textValue={link.url}
-			setShowUpdateModal={setShowUpdateLinkModal}
-			setShowArchiveModal={setShowArchiveLinkModal}
-			setShowDeleteModal={setShowDeleteLinkModal}
+			setShowUpdateModal={setShowUpdateModal}
+			setShowArchiveModal={setShowArchiveModal}
+			setShowDeleteModal={setShowDeleteModal}
 		>
 			<div className='flex flex-grow flex-row items-center gap-4'>
 				{link.favicon ?

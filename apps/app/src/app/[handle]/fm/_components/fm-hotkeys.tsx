@@ -6,19 +6,19 @@ import { useFmContext } from '~/app/[handle]/fm/_components/fm-context';
 
 export function FmHotkeys() {
 	const {
-		fmPageSelection,
-		setShowArchiveFmPageModal,
-		setShowDeleteFmPageModal,
-		setShowCreateFmPageModal,
-		setShowUpdateFmPageModal,
+		selection,
+		setShowArchiveModal,
+		setShowDeleteModal,
+		setShowCreateModal,
+		setShowUpdateModal,
 	} = useFmContext();
 
 	useModalHotKeys({
-		setShowCreateModal: setShowCreateFmPageModal,
-		setShowUpdateModal: setShowUpdateFmPageModal,
-		setShowArchiveModal: setShowArchiveFmPageModal,
-		setShowDeleteModal: setShowDeleteFmPageModal,
-		itemSelected: fmPageSelection !== 'all' && !!fmPageSelection.size,
+		setShowCreateModal,
+		setShowUpdateModal,
+		setShowArchiveModal,
+		setShowDeleteModal,
+		itemSelected: selection !== 'all' && !!selection.size,
 	});
 	return null;
 }

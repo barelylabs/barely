@@ -2,6 +2,7 @@
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/router';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { Button } from '@barely/ui/elements/button';
 import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
@@ -12,12 +13,13 @@ import { useFanContext } from '~/app/[handle]/fans/_components/fan-context';
 
 export function AllFans() {
 	const {
-		fans,
-		fanSelection,
-		lastSelectedFanId,
-		setFanSelection,
+		items,
+		selection,
+		lastSelectedItemId,
+		setSelection,
 		gridListRef,
-		setShowUpdateFanModal,
+		setShowUpdateModal,
+		isFetching,
 	} = useFanContext();
 
 	return (
@@ -30,24 +32,29 @@ export function AllFans() {
 				selectionMode='multiple'
 				selectionBehavior='replace'
 				onAction={() => {
-					if (!lastSelectedFanId) return;
-					setShowUpdateFanModal(true);
+					if (!lastSelectedItemId) return;
+					setShowUpdateModal(true);
 				}}
-				items={fans}
-				selectedKeys={fanSelection}
-				setSelectedKeys={setFanSelection}
+				items={items}
+				selectedKeys={selection}
+				setSelectedKeys={setSelection}
 				renderEmptyState={() => (
-					<NoResultsPlaceholder
-						icon='fan'
-						title='No Fans'
-						subtitle='Create a new fan to get started.'
-						button={<CreateFanButton />}
-					/>
+					<>
+						{isFetching ?
+							<GridListSkeleton />
+						:	<NoResultsPlaceholder
+								icon='fan'
+								title='No Fans'
+								subtitle='Create a new fan to get started.'
+								button={<CreateFanButton />}
+							/>
+						}
+					</>
 				)}
 			>
-				{fan => <FanCard fan={fan} />}
+				{item => <FanCard fan={item} />}
 			</GridList>
-			<LoadMoreButton />
+			{items.length > 0 && <LoadMoreButton />}
 		</div>
 	);
 }
@@ -73,15 +80,15 @@ function LoadMoreButton() {
 }
 
 function FanCard({ fan }: { fan: AppRouterOutputs['fan']['byWorkspace']['fans'][0] }) {
-	const { setShowUpdateFanModal, setShowDeleteFanModal } = useFanContext();
+	const { setShowUpdateModal, setShowDeleteModal } = useFanContext();
 
 	return (
 		<GridListCard
 			id={fan.id}
 			key={fan.id}
 			textValue={fan.fullName}
-			setShowUpdateModal={setShowUpdateFanModal}
-			setShowDeleteModal={setShowDeleteFanModal}
+			setShowUpdateModal={setShowUpdateModal}
+			setShowDeleteModal={setShowDeleteModal}
 		>
 			<div className='flex flex-grow flex-row items-center gap-4'>
 				<div className='flex flex-col gap-1'>

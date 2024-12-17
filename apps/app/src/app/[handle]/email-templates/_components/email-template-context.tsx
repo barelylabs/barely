@@ -2,7 +2,7 @@
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/react';
 import type { emailTemplateFilterParamsSchema } from '@barely/lib/server/routes/email-template/email-template.schema';
-import type { FetchNextPageOptions } from '@tanstack/react-query';
+// import type { FetchNextPageOptions } from '@tanstack/react-query';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
 import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
@@ -11,35 +11,45 @@ import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 import { emailTemplateSearchParamsSchema } from '@barely/lib/server/routes/email-template/email-template.schema';
 
-interface EmailTemplateContext {
-	emailTemplates: AppRouterOutputs['emailTemplate']['byWorkspace']['emailTemplates'];
-	emailTemplateSelection: Selection;
-	lastSelectedEmailTemplateId: string | undefined;
-	lastSelectedEmailTemplate:
-		| AppRouterOutputs['emailTemplate']['byWorkspace']['emailTemplates'][number]
-		| undefined;
-	setEmailTemplateSelection: (selection: Selection) => void;
-	gridListRef: React.RefObject<HTMLDivElement>;
-	focusGridList: () => void;
-	showCreateEmailTemplateModal: boolean;
-	setShowCreateEmailTemplateModal: (show: boolean) => void;
-	showUpdateEmailTemplateModal: boolean;
-	setShowUpdateEmailTemplateModal: (show: boolean) => void;
-	showDeleteEmailTemplateModal: boolean;
-	setShowDeleteEmailTemplateModal: (show: boolean) => void;
-	showArchiveEmailTemplateModal: boolean;
-	setShowArchiveEmailTemplateModal: (show: boolean) => void;
-	// filters
-	filters: z.infer<typeof emailTemplateFilterParamsSchema>;
-	pendingFiltersTransition: boolean;
-	setSearch: (search: string) => void;
-	toggleArchived: () => void;
-	clearAllFilters: () => void;
-	// infinite
-	hasNextPage: boolean;
-	fetchNextPage: (options?: FetchNextPageOptions) => void | Promise<void>;
-	isFetchingNextPage: boolean;
-}
+import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
+
+// interface EmailTemplateContext {
+// 	// emailTemplates: AppRouterOutputs['emailTemplate']['byWorkspace']['emailTemplates'];
+// 	// emailTemplateSelection: Selection;
+// 	// lastSelectedEmailTemplateId: string | undefined;
+// 	// lastSelectedEmailTemplate:
+// 	// 	| AppRouterOutputs['emailTemplate']['byWorkspace']['emailTemplates'][number]
+// 	// 	| undefined;
+// 	// setEmailTemplateSelection: (selection: Selection) => void;
+// 	// gridListRef: React.RefObject<HTMLDivElement>;
+// 	// focusGridList: () => void;
+// 	// showCreateEmailTemplateModal: boolean;
+// 	// setShowCreateEmailTemplateModal: (show: boolean) => void;
+// 	// showUpdateEmailTemplateModal: boolean;
+// 	// setShowUpdateEmailTemplateModal: (show: boolean) => void;
+// 	// showDeleteEmailTemplateModal: boolean;
+// 	// setShowDeleteEmailTemplateModal: (show: boolean) => void;
+// 	// showArchiveEmailTemplateModal: boolean;
+// 	// setShowArchiveEmailTemplateModal: (show: boolean) => void;
+// 	// filters
+// 	// filters: z.infer<typeof emailTemplateFilterParamsSchema>;
+// 	// pendingFiltersTransition: boolean;
+// 	// setSearch: (search: string) => void;
+// 	// toggleArchived: () => void;
+// 	// clearAllFilters: () => void;
+// 	// infinite
+// 	// hasNextPage: boolean;
+// 	// fetchNextPage: (options?: FetchNextPageOptions) => void | Promise<void>;
+// 	// isFetchingNextPage: boolean;
+// 	// isRefetching: boolean;
+// 	// isFetching: boolean;
+// 	// isPending: boolean;
+// }
+
+type EmailTemplateContext = InfiniteItemsContext<
+	AppRouterOutputs['emailTemplate']['byWorkspace']['emailTemplates'][number],
+	z.infer<typeof emailTemplateFilterParamsSchema>
+>;
 
 const EmailTemplateContext = createContext<EmailTemplateContext | undefined>(undefined);
 
@@ -52,11 +62,11 @@ export function EmailTemplateContextProvider({
 		AppRouterOutputs['emailTemplate']['byWorkspace']
 	>;
 }) {
-	const [showCreateEmailTemplateModal, setShowCreateEmailTemplateModal] = useState(false);
-	const [showUpdateEmailTemplateModal, setShowUpdateEmailTemplateModal] = useState(false);
-	const [showDeleteEmailTemplateModal, setShowDeleteEmailTemplateModal] = useState(false);
-	const [showArchiveEmailTemplateModal, setShowArchiveEmailTemplateModal] =
-		useState(false);
+	const [showCreateModal, setShowCreateModal] = useState(false);
+	const [showUpdateModal, setShowUpdateModal] = useState(false);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const [showArchiveModal, setShowArchiveModal] = useState(false);
+	useState(false);
 
 	const { handle } = useWorkspace();
 
@@ -76,6 +86,9 @@ export function EmailTemplateContextProvider({
 		hasNextPage,
 		fetchNextPage,
 		isFetchingNextPage,
+		isRefetching,
+		isFetching,
+		isPending,
 	} = api.emailTemplate.byWorkspace.useInfiniteQuery(
 		{ handle, ...filters },
 		{
@@ -138,23 +151,23 @@ export function EmailTemplateContextProvider({
 	);
 
 	const contextValue = {
-		emailTemplates,
-		emailTemplateSelection,
-		lastSelectedEmailTemplateId,
-		lastSelectedEmailTemplate,
-		setEmailTemplateSelection,
+		items: emailTemplates,
+		selection: emailTemplateSelection,
+		lastSelectedItemId: lastSelectedEmailTemplateId,
+		lastSelectedItem: lastSelectedEmailTemplate,
+		setSelection: setEmailTemplateSelection,
 		gridListRef,
 		focusGridList: () => {
 			gridListRef.current?.focus();
 		},
-		showCreateEmailTemplateModal,
-		setShowCreateEmailTemplateModal,
-		showUpdateEmailTemplateModal,
-		setShowUpdateEmailTemplateModal,
-		showDeleteEmailTemplateModal,
-		setShowDeleteEmailTemplateModal,
-		showArchiveEmailTemplateModal,
-		setShowArchiveEmailTemplateModal,
+		showCreateModal,
+		setShowCreateModal,
+		showUpdateModal,
+		setShowUpdateModal,
+		showArchiveModal,
+		setShowArchiveModal,
+		showDeleteModal,
+		setShowDeleteModal,
 		// filters
 		filters,
 		pendingFiltersTransition: pending,
@@ -165,6 +178,9 @@ export function EmailTemplateContextProvider({
 		hasNextPage,
 		fetchNextPage: () => void fetchNextPage(),
 		isFetchingNextPage,
+		isFetching,
+		isRefetching,
+		isPending,
 	} satisfies EmailTemplateContext;
 
 	return (

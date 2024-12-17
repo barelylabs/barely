@@ -6,12 +6,12 @@ import { CommandShortcut } from '@barely/ui/elements/command';
 import { useProductContext } from '~/app/[handle]/products/_components/product-context';
 
 export function CreateProductButton() {
-	const { setShowCreateProductModal } = useProductContext();
+	const { setShowCreateModal } = useProductContext();
 
 	return (
 		<Button
 			onClick={() => {
-				setShowCreateProductModal(true);
+				setShowCreateModal(true);
 			}}
 			className='space-x-3'
 		>

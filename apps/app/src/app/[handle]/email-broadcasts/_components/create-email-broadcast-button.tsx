@@ -5,12 +5,12 @@ import { Button } from '@barely/ui/elements/button';
 import { useEmailBroadcastsContext } from './email-broadcasts-context';
 
 export function CreateEmailBroadcastButton() {
-	const { setShowCreateEmailBroadcastModal } = useEmailBroadcastsContext();
+	const { setShowCreateModal } = useEmailBroadcastsContext();
 
 	return (
 		<Button
 			onClick={() => {
-				setShowCreateEmailBroadcastModal(true);
+				setShowCreateModal(true);
 			}}
 			className='space-x-3'
 		>

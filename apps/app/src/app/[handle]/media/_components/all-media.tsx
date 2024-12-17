@@ -3,6 +3,7 @@
 import type { FileRecord } from '@barely/lib/server/routes/file/file.schema';
 import { nFormatter } from '@barely/lib/utils/number';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { GridItemCheckbox, GridList, GridListItem } from '@barely/ui/elements/grid-list';
 import { Icon } from '@barely/ui/elements/icon';
@@ -12,7 +13,7 @@ import { Text } from '@barely/ui/elements/typography';
 import { useMediaContext } from '~/app/[handle]/media/_components/media-context';
 
 export function AllMedia() {
-	const { files, fileSelection, setFileSelection, gridListRef } = useMediaContext();
+	const { items, selection, setSelection, gridListRef, isFetching } = useMediaContext();
 
 	return (
 		<>
@@ -27,19 +28,24 @@ export function AllMedia() {
 				selectionMode='multiple'
 				selectionBehavior='toggle'
 				// files
-				items={files}
-				selectedKeys={fileSelection}
-				setSelectedKeys={setFileSelection}
+				items={items}
+				selectedKeys={selection}
+				setSelectedKeys={setSelection}
 				// empty
 				renderEmptyState={() => (
-					<NoResultsPlaceholder
-						icon='file'
-						title='No files found.'
-						subtitle='Upload a file to get started.'
-					/>
+					<>
+						{isFetching ?
+							<GridListSkeleton />
+						:	<NoResultsPlaceholder
+								icon='file'
+								title='No files found.'
+								subtitle='Upload a file to get started.'
+							/>
+						}{' '}
+					</>
 				)}
 			>
-				{file => <FileCard file={file} />}
+				{item => <FileCard file={item} />}
 			</GridList>
 		</>
 	);

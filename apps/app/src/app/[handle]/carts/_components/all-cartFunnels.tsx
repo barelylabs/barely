@@ -3,6 +3,7 @@
 import type { CartFunnel } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
 import { formatCentsToDollars } from '@barely/lib/utils/currency';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
 
@@ -16,6 +17,8 @@ export function AllCartFunnels() {
 		setCartFunnelSelection,
 		gridListRef,
 		setShowUpdateCartFunnelModal,
+
+		isFetching,
 	} = useCartFunnelContext();
 
 	return (
@@ -36,18 +39,19 @@ export function AllCartFunnels() {
 					setShowUpdateCartFunnelModal(true);
 				}}
 				// empty
-				renderEmptyState={() => (
-					<NoResultsPlaceholder
-						icon='cart'
-						title='No carts found.'
-						subtitle='Create a cart to get started.'
-						button={<CreateCartFunnelButton />}
-					/>
-				)}
+				renderEmptyState={() =>
+					isFetching ?
+						<GridListSkeleton />
+					:	<NoResultsPlaceholder
+							icon='cart'
+							title='No carts found.'
+							subtitle='Create a cart to get started.'
+							button={<CreateCartFunnelButton />}
+						/>
+				}
 			>
 				{funnel => <CartFunnelCard cartFunnel={funnel} />}
 			</GridList>
-			{/* <pre>{JSON.stringify(mailchimpAudiences, null, 2)}</pre> */}
 		</>
 	);
 }

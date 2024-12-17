@@ -6,19 +6,19 @@ import { useLinkContext } from '~/app/[handle]/links/_components/link-context';
 
 export function LinkHotkeys() {
 	const {
-		linkSelection,
-		setShowCreateLinkModal,
-		setShowUpdateLinkModal,
-		setShowArchiveLinkModal,
-		setShowDeleteLinkModal,
+		selection,
+		setShowCreateModal,
+		setShowUpdateModal,
+		setShowArchiveModal,
+		setShowDeleteModal,
 	} = useLinkContext();
 
 	useModalHotKeys({
-		setShowCreateModal: setShowCreateLinkModal,
-		setShowUpdateModal: setShowUpdateLinkModal,
-		setShowArchiveModal: setShowArchiveLinkModal,
-		setShowDeleteModal: setShowDeleteLinkModal,
-		itemSelected: linkSelection !== 'all' && !!linkSelection.size,
+		setShowCreateModal: setShowCreateModal,
+		setShowUpdateModal: setShowUpdateModal,
+		setShowArchiveModal: setShowArchiveModal,
+		setShowDeleteModal: setShowDeleteModal,
+		itemSelected: selection !== 'all' && !!selection.size,
 	});
 
 	return null;

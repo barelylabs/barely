@@ -40,7 +40,7 @@ export function MarkCartOrderFulfilledModal() {
 
 	/* cart order context */
 	const {
-		lastSelectedCartOrder: selectedCartOrder,
+		lastSelectedItem: selectedCartOrder,
 		showMarkAsFulfilledModal,
 		setShowMarkAsFulfilledModal,
 		focusGridList,

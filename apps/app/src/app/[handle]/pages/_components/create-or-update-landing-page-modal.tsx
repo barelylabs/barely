@@ -23,11 +23,11 @@ export function CreateOrUpdateLandingPageModal({ mode }: { mode: 'create' | 'upd
 
 	/* landing page context */
 	const {
-		lastSelectedLandingPage: selectedLandingPage,
-		showCreateLandingPageModal,
-		setShowCreateLandingPageModal,
-		showUpdateLandingPageModal,
-		setShowUpdateLandingPageModal,
+		lastSelectedItem: selectedLandingPage,
+		showCreateModal,
+		setShowCreateModal,
+		showUpdateModal,
+		setShowUpdateModal,
 		focusGridList,
 	} = useLandingPageContext();
 
@@ -74,10 +74,8 @@ export function CreateOrUpdateLandingPageModal({ mode }: { mode: 'create' | 'upd
 	);
 
 	/* modal */
-	const showModal =
-		mode === 'create' ? showCreateLandingPageModal : showUpdateLandingPageModal;
-	const setShowModal =
-		mode === 'create' ? setShowCreateLandingPageModal : setShowUpdateLandingPageModal;
+	const showModal = mode === 'create' ? showCreateModal : showUpdateModal;
+	const setShowModal = mode === 'create' ? setShowCreateModal : setShowUpdateModal;
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();

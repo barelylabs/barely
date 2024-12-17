@@ -11,7 +11,7 @@ import { useAtomValue } from 'jotai';
 
 import { navHistoryAtom } from '@barely/atoms/navigation-history.atom';
 
-import { usePathnameMatchesCurrentPath } from '@barely/hooks/use-pathname-matches-current-path';
+import { usePathnameEndsWith } from '@barely/hooks/use-pathname-matches-current-path';
 import { useWorkspaces } from '@barely/hooks/use-workspaces';
 
 import { Icon } from '@barely/ui/elements/icon';
@@ -45,10 +45,11 @@ interface SidebarNavGroup {
 
 type SidebarNavItem = SidebarNavLink | SidebarNavGroup;
 
-export function SidebarNav(props: { workspace: Workspace }) {
-	const handle = props.workspace.handle;
+export function SidebarNav() {
+	// const handle = props.workspace.handle;
 	const pathname = usePathname();
 	const workspace = useWorkspace();
+	const handle = workspace.handle;
 	const workspaces = useWorkspaces();
 
 	const allHandles = workspaces.map(workspace => workspace.handle);
@@ -194,7 +195,7 @@ export function SidebarNav(props: { workspace: Workspace }) {
 
 							return (
 								<Fragment key={index}>
-									<NavItem item={item} />
+									<NavItem item={item} handle={handle} />
 								</Fragment>
 							);
 						})}
@@ -217,11 +218,13 @@ export function SidebarNav(props: { workspace: Workspace }) {
 	);
 }
 
-function NavLink(props: { item: SidebarNavLink }) {
+function NavLink(props: { item: SidebarNavLink; handle: string }) {
 	const NavIcon = props.item.icon ? Icon[props.item.icon] : null;
 
-	const isCurrent = usePathnameMatchesCurrentPath(props.item.href ?? '');
-
+	// const isCurrent = usePathnameMatchesCurrentPath(props.item.href ?? '');
+	const isCurrent = usePathnameEndsWith(
+		props.item.href?.replace(`/${props.handle}`, '') ?? '',
+	);
 	return (
 		<Link
 			href={props.item.href ?? '#'}
@@ -237,7 +240,7 @@ function NavLink(props: { item: SidebarNavLink }) {
 	);
 }
 
-function NavGroup(props: { item: SidebarNavGroup }) {
+function NavGroup(props: { item: SidebarNavGroup; handle: string }) {
 	const NavIcon = props.item.icon ? Icon[props.item.icon] : null;
 
 	const isCurrentGroup = usePathnameMatchesCurrentGroup(
@@ -282,7 +285,7 @@ function NavGroup(props: { item: SidebarNavGroup }) {
 					)}
 				>
 					{props.item.links.map((item, index) => (
-						<NavLink key={index} item={item} />
+						<NavLink key={index} item={item} handle={props.handle} />
 					))}
 				</div>
 			)}
@@ -290,8 +293,8 @@ function NavGroup(props: { item: SidebarNavGroup }) {
 	);
 }
 
-function NavItem(props: { item: SidebarNavItem }) {
+function NavItem(props: { item: SidebarNavItem; handle: string }) {
 	return 'links' in props.item ?
-			<NavGroup item={props.item} />
-		:	<NavLink item={props.item} />;
+			<NavGroup item={props.item} handle={props.handle} />
+		:	<NavLink item={props.item} handle={props.handle} />;
 }

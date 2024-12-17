@@ -1,10 +1,7 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/react';
-import type {
-	LandingPage,
-	landingPageFilterParamsSchema,
-} from '@barely/lib/server/routes/landing-page/landing-page.schema';
+import type { landingPageFilterParamsSchema } from '@barely/lib/server/routes/landing-page/landing-page.schema';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
 import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
@@ -13,29 +10,12 @@ import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 import { landingPageSearchParamsSchema } from '@barely/lib/server/routes/landing-page/landing-page.schema';
 
-interface LandingPageContext {
-	landingPages: AppRouterOutputs['landingPage']['byWorkspace']['landingPages'];
-	landingPageSelection: Selection;
-	lastSelectedLandingPageId: string | undefined;
-	lastSelectedLandingPage: LandingPage | undefined;
-	setLandingPageSelection: (selection: Selection) => void;
-	gridListRef: React.RefObject<HTMLDivElement>;
-	focusGridList: () => void;
-	showCreateLandingPageModal: boolean;
-	setShowCreateLandingPageModal: (show: boolean) => void;
-	showUpdateLandingPageModal: boolean;
-	setShowUpdateLandingPageModal: (show: boolean) => void;
-	showArchiveLandingPageModal: boolean;
-	setShowArchiveLandingPageModal: (show: boolean) => void;
-	showDeleteLandingPageModal: boolean;
-	setShowDeleteLandingPageModal: (show: boolean) => void;
-	// filters
-	filters: z.infer<typeof landingPageFilterParamsSchema>;
-	pendingFiltersTransition: boolean;
-	setSearch: (search: string) => void;
-	toggleArchived: () => void;
-	clearAllFilters: () => void;
-}
+import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
+
+type LandingPageContext = InfiniteItemsContext<
+	AppRouterOutputs['landingPage']['byWorkspace']['landingPages'][number],
+	z.infer<typeof landingPageFilterParamsSchema>
+>;
 
 const LandingPageContext = createContext<LandingPageContext | undefined>(undefined);
 
@@ -46,10 +26,10 @@ export function LandingPageContextProvider({
 	children: React.ReactNode;
 	initialInfiniteLandingPages: Promise<AppRouterOutputs['landingPage']['byWorkspace']>;
 }) {
-	const [showCreateLandingPageModal, setShowCreateLandingPageModal] = useState(false);
-	const [showUpdateLandingPageModal, setShowUpdateLandingPageModal] = useState(false);
-	const [showArchiveLandingPageModal, setShowArchiveLandingPageModal] = useState(false);
-	const [showDeleteLandingPageModal, setShowDeleteLandingPageModal] = useState(false);
+	const [showCreateModal, setShowCreateModal] = useState(false);
+	const [showUpdateModal, setShowUpdateModal] = useState(false);
+	const [showArchiveModal, setShowArchiveModal] = useState(false);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
 
 	const { handle } = useWorkspace();
 
@@ -70,7 +50,15 @@ export function LandingPageContextProvider({
 
 	const initialData = use(initialInfiniteLandingPages);
 
-	const { data: infiniteLandingPages } = api.landingPage.byWorkspace.useInfiniteQuery(
+	const {
+		data: infiniteLandingPages,
+		hasNextPage,
+		fetchNextPage,
+		isFetchingNextPage,
+		isFetching,
+		isRefetching,
+		isPending,
+	} = api.landingPage.byWorkspace.useInfiniteQuery(
 		{
 			handle,
 			...filters,
@@ -136,27 +124,34 @@ export function LandingPageContextProvider({
 	const gridListRef = useRef<HTMLDivElement>(null);
 
 	const contextValue = {
-		landingPages,
-		landingPageSelection,
-		lastSelectedLandingPageId,
-		lastSelectedLandingPage,
-		setLandingPageSelection,
+		items: landingPages,
+		selection: landingPageSelection,
+		lastSelectedItemId: lastSelectedLandingPageId,
+		lastSelectedItem: lastSelectedLandingPage,
+		setSelection: setLandingPageSelection,
 		gridListRef,
 		focusGridList: () => gridListRef.current?.focus(),
-		showCreateLandingPageModal,
-		setShowCreateLandingPageModal,
-		showUpdateLandingPageModal,
-		setShowUpdateLandingPageModal,
-		showArchiveLandingPageModal,
-		setShowArchiveLandingPageModal,
-		showDeleteLandingPageModal,
-		setShowDeleteLandingPageModal,
+		showCreateModal,
+		setShowCreateModal,
+		showUpdateModal,
+		setShowUpdateModal,
+		showArchiveModal,
+		setShowArchiveModal,
+		showDeleteModal,
+		setShowDeleteModal,
 		// filters
 		filters,
 		pendingFiltersTransition,
 		setSearch,
 		toggleArchived,
 		clearAllFilters,
+		// infinite
+		hasNextPage,
+		fetchNextPage: () => void fetchNextPage(),
+		isFetchingNextPage,
+		isFetching,
+		isRefetching,
+		isPending,
 	} satisfies LandingPageContext;
 
 	return (

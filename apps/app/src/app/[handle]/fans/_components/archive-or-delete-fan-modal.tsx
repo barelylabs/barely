@@ -8,20 +8,19 @@ import { useFanContext } from '~/app/[handle]/fans/_components/fan-context';
 
 export function ArchiveOrDeleteFanModal({ mode }: { mode: 'archive' | 'delete' }) {
 	const {
-		fanSelection,
-		lastSelectedFan,
-		showArchiveFanModal,
-		showDeleteFanModal,
-		setShowArchiveFanModal,
-		setShowDeleteFanModal,
+		selection,
+		lastSelectedItem,
+		showArchiveModal,
+		showDeleteModal,
+		setShowArchiveModal,
+		setShowDeleteModal,
 	} = useFanContext();
 
 	const apiUtils = api.useUtils();
 
-	const showModal = mode === 'archive' ? showArchiveFanModal : showDeleteFanModal;
+	const showModal = mode === 'archive' ? showArchiveModal : showDeleteModal;
 
-	const setShowModal =
-		mode === 'archive' ? setShowArchiveFanModal : setShowDeleteFanModal;
+	const setShowModal = mode === 'archive' ? setShowArchiveModal : setShowDeleteModal;
 
 	const onSuccess = useCallback(async () => {
 		await apiUtils.fan.invalidate();
@@ -35,13 +34,13 @@ export function ArchiveOrDeleteFanModal({ mode }: { mode: 'archive' | 'delete' }
 		onSuccess,
 	});
 
-	if (!lastSelectedFan) return null;
+	if (!lastSelectedItem) return null;
 
 	return (
 		<ArchiveOrDeleteModal
 			mode={mode}
-			selection={fanSelection}
-			lastSelected={{ ...lastSelectedFan, name: lastSelectedFan.fullName }}
+			selection={selection}
+			lastSelected={{ ...lastSelectedItem, name: lastSelectedItem.fullName }}
 			showModal={showModal}
 			setShowModal={setShowModal}
 			archiveItems={archiveFans}

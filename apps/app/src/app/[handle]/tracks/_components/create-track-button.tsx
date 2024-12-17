@@ -5,12 +5,12 @@ import { Button } from '@barely/ui/elements/button';
 import { useTrackContext } from '~/app/[handle]/tracks/_components/track-context';
 
 export function CreateTrackButton() {
-	const { setShowCreateTrackModal } = useTrackContext();
+	const { setShowCreateModal } = useTrackContext();
 
 	return (
 		<Button
 			onClick={() => {
-				setShowCreateTrackModal(true);
+				setShowCreateModal(true);
 			}}
 			className='space-x-3'
 		>
