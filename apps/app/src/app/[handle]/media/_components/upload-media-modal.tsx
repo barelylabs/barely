@@ -16,7 +16,7 @@ const mediaUploadQueueAtom = atom<UploadQueueItem[]>([]);
 export function UploadMediaModal() {
 	const apiUtils = api.useUtils();
 
-	const { showUploadMediaModal, setShowUploadMediaModal } = useMediaContext();
+	const { showCreateModal, setShowCreateModal } = useMediaContext();
 
 	const mediaUploadState = useUpload({
 		uploadQueueAtom: mediaUploadQueueAtom,
@@ -24,7 +24,7 @@ export function UploadMediaModal() {
 		maxFiles: 50,
 		onUploadComplete: async () => {
 			await apiUtils.file.invalidate();
-			setShowUploadMediaModal(false);
+			setShowCreateModal(false);
 		},
 	});
 
@@ -32,8 +32,8 @@ export function UploadMediaModal() {
 
 	return (
 		<Modal
-			showModal={showUploadMediaModal}
-			setShowModal={setShowUploadMediaModal}
+			showModal={showCreateModal}
+			setShowModal={setShowCreateModal}
 			className='w-full'
 		>
 			<ModalHeader title='Upload Media' icon='media' />

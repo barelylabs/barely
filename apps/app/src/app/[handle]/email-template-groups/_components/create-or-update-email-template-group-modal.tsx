@@ -25,11 +25,11 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 	const apiUtils = api.useUtils();
 
 	const {
-		lastSelectedEmailTemplateGroup: selectedEmailTemplateGroup,
-		showCreateEmailTemplateGroupModal,
-		showUpdateEmailTemplateGroupModal,
-		setShowCreateEmailTemplateGroupModal,
-		setShowUpdateEmailTemplateGroupModal,
+		lastSelectedItem,
+		showCreateModal,
+		showUpdateModal,
+		setShowCreateModal,
+		setShowUpdateModal,
 		focusGridList,
 	} = useEmailTemplateGroupContext();
 
@@ -38,7 +38,7 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 	const { data: selectedEmailTemplates } = api.emailTemplateGroup.byId.useQuery(
 		{
 			handle,
-			id: selectedEmailTemplateGroup?.id ?? '',
+			id: lastSelectedItem?.id ?? '',
 		},
 		{
 			select: data => data.emailTemplates,
@@ -75,17 +75,17 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 	const { form, onSubmit } = useCreateOrUpdateForm({
 		updateItem:
 			mode === 'create' ? null
-			: selectedEmailTemplateGroup ?
+			: lastSelectedItem ?
 				{
-					...selectedEmailTemplateGroup,
+					...lastSelectedItem,
 					emailTemplates: selectedEmailTemplates ?? [],
 				}
 			:	null,
 		upsertSchema: upsertEmailTemplateGroupSchema,
 		// mode === 'create' ? createEmailTemplateGroupSchema : updateEmailTemplateGroupSchema,
 		defaultValues: {
-			name: mode === 'update' ? selectedEmailTemplateGroup?.name ?? '' : '',
-			description: mode === 'update' ? selectedEmailTemplateGroup?.description ?? '' : '',
+			name: mode === 'update' ? lastSelectedItem?.name ?? '' : '',
+			description: mode === 'update' ? lastSelectedItem?.description ?? '' : '',
 			emailTemplates: mode === 'update' ? selectedEmailTemplates ?? [] : [],
 		},
 		handleCreateItem: async d => {
@@ -125,14 +125,8 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 			eto => !activeEmailTemplates.some(aet => aet.id === eto.id),
 		) ?? [];
 
-	const showModal =
-		mode === 'create' ?
-			showCreateEmailTemplateGroupModal
-		:	showUpdateEmailTemplateGroupModal;
-	const setShowModal =
-		mode === 'create' ?
-			setShowCreateEmailTemplateGroupModal
-		:	setShowUpdateEmailTemplateGroupModal;
+	const showModal = mode === 'create' ? showCreateModal : showUpdateModal;
+	const setShowModal = mode === 'create' ? setShowCreateModal : setShowUpdateModal;
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
@@ -161,7 +155,7 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 				icon='emails'
 				title={
 					mode === 'update' ?
-						`Update ${selectedEmailTemplateGroup?.name ?? ''}`
+						`Update ${lastSelectedItem?.name ?? ''}`
 					:	'Create Email Template Group'
 				}
 			/>

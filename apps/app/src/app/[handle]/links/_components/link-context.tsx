@@ -18,29 +18,36 @@ import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 import { linkSearchParamsSchema } from '@barely/lib/server/routes/link/link.schema';
 
-interface LinkContext {
-	links: AppRouterOutputs['link']['byWorkspace']['links'];
-	linkSelection: Selection;
-	lastSelectedLinkId: string | undefined;
-	lastSelectedLink: AppRouterOutputs['link']['byWorkspace']['links'][number] | undefined;
-	setLinkSelection: (selection: Selection) => void;
-	gridListRef: React.RefObject<HTMLDivElement>;
-	focusGridList: () => void;
-	showCreateLinkModal: boolean;
-	setShowCreateLinkModal: (show: boolean) => void;
-	showUpdateLinkModal: boolean;
-	setShowUpdateLinkModal: (show: boolean) => void;
-	showArchiveLinkModal: boolean;
-	setShowArchiveLinkModal: (show: boolean) => void;
-	showDeleteLinkModal: boolean;
-	setShowDeleteLinkModal: (show: boolean) => void;
-	// filters
-	filters: z.infer<typeof linkFilterParamsSchema>;
-	pendingFiltersTransition: boolean;
-	setSearch: (search: string) => void;
-	toggleArchived: () => void;
-	clearAllFilters: () => void;
-}
+import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
+
+// interface LinkContext {
+// 	links: AppRouterOutputs['link']['byWorkspace']['links'];
+// 	linkSelection: Selection;
+// 	lastSelectedLinkId: string | undefined;
+// 	lastSelectedLink: AppRouterOutputs['link']['byWorkspace']['links'][number] | undefined;
+// 	setLinkSelection: (selection: Selection) => void;
+// 	gridListRef: React.RefObject<HTMLDivElement>;
+// 	focusGridList: () => void;
+// 	showCreateLinkModal: boolean;
+// 	setShowCreateLinkModal: (show: boolean) => void;
+// 	showUpdateLinkModal: boolean;
+// 	setShowUpdateLinkModal: (show: boolean) => void;
+// 	showArchiveLinkModal: boolean;
+// 	setShowArchiveLinkModal: (show: boolean) => void;
+// 	showDeleteLinkModal: boolean;
+// 	setShowDeleteLinkModal: (show: boolean) => void;
+// 	// filters
+// 	filters: z.infer<typeof linkFilterParamsSchema>;
+// 	pendingFiltersTransition: boolean;
+// 	setSearch: (search: string) => void;
+// 	toggleArchived: () => void;
+// 	clearAllFilters: () => void;
+// }
+
+type LinkContext = InfiniteItemsContext<
+	AppRouterOutputs['link']['byWorkspace']['links'][0],
+	z.infer<typeof linkFilterParamsSchema>
+>;
 
 const LinkContext = createContext<LinkContext | undefined>(undefined);
 
@@ -51,10 +58,10 @@ export function LinkContextProvider({
 	children: React.ReactNode;
 	initialInfiniteLinks: Promise<AppRouterOutputs['link']['byWorkspace']>;
 }) {
-	const [showCreateLinkModal, setShowCreateLinkModal] = useState(false);
-	const [showUpdateLinkModal, setShowUpdateLinkModal] = useState(false);
-	const [showArchiveLinkModal, setShowArchiveLinkModal] = useState(false);
-	const [showDeleteLinkModal, setShowDeleteLinkModal] = useState(false);
+	const [showCreateModal, setShowCreateModal] = useState(false);
+	const [showUpdateModal, setShowUpdateModal] = useState(false);
+	const [showArchiveModal, setShowArchiveModal] = useState(false);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
 
 	const { handle } = useWorkspace();
 
@@ -70,7 +77,15 @@ export function LinkContextProvider({
 
 	const initialData = use(initialInfiniteLinks);
 
-	const { data: infiniteLinks } = api.link.byWorkspace.useInfiniteQuery(
+	const {
+		data: infiniteLinks,
+		hasNextPage,
+		fetchNextPage,
+		isFetchingNextPage,
+		isFetching,
+		isRefetching,
+		isPending,
+	} = api.link.byWorkspace.useInfiniteQuery(
 		{ handle, ...filters },
 		{
 			initialData: () => {
@@ -131,39 +146,36 @@ export function LinkContextProvider({
 	const gridListRef = useRef<HTMLDivElement>(null);
 
 	const contextValue = {
-		links,
-		linkSelection,
-		setLinkSelection,
-		// current selection
-		lastSelectedLinkId,
-		lastSelectedLink,
+		items: links,
+		selection: linkSelection,
+		lastSelectedItemId: lastSelectedLinkId,
+		lastSelectedItem: lastSelectedLink,
+		setSelection: setLinkSelection,
 		// grid list
 		gridListRef,
 		focusGridList: () => gridListRef.current?.focus(),
-		// focusGridList: () => {
-		// 	wait(1)
-		// 		.then(() => {
-		// 			gridListRef.current?.focus();
-		// 		})
-		// 		.catch(e => {
-		// 			console.error(e);
-		// 		});
-		// }, // fixme: this is a workaround for focus not working on modal closing
 		// modal
-		showCreateLinkModal,
-		setShowCreateLinkModal,
-		showUpdateLinkModal,
-		setShowUpdateLinkModal,
-		showArchiveLinkModal,
-		setShowArchiveLinkModal,
-		showDeleteLinkModal,
-		setShowDeleteLinkModal,
+		showCreateModal,
+		setShowCreateModal,
+		showUpdateModal,
+		setShowUpdateModal,
+		showArchiveModal,
+		setShowArchiveModal,
+		showDeleteModal,
+		setShowDeleteModal,
 		// filters
 		filters,
 		pendingFiltersTransition: pending,
 		setSearch,
 		toggleArchived,
 		clearAllFilters,
+		// infinite
+		hasNextPage,
+		fetchNextPage: () => void fetchNextPage(),
+		isFetchingNextPage,
+		isFetching,
+		isRefetching,
+		isPending,
 	} satisfies LinkContext;
 
 	return <LinkContext.Provider value={contextValue}>{children}</LinkContext.Provider>;

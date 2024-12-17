@@ -34,6 +34,10 @@ interface CartFunnelContext {
 	setSearch: (search: string) => void;
 	toggleArchived: () => void;
 	clearAllFilters: () => void;
+
+	isPending: boolean;
+	isFetching: boolean;
+	isRefetching: boolean;
 }
 
 const CartFunnelContext = createContext<CartFunnelContext | undefined>(undefined);
@@ -64,7 +68,12 @@ export function CartFunnelContextProvider({
 
 	const initialData = use(initialInfiniteCartFunnels);
 
-	const { data: infiniteFunnels } = api.cartFunnel.byWorkspace.useInfiniteQuery(
+	const {
+		data: infiniteFunnels,
+		isRefetching,
+		isFetching,
+		isPending,
+	} = api.cartFunnel.byWorkspace.useInfiniteQuery(
 		{
 			handle,
 			...filters,
@@ -148,6 +157,9 @@ export function CartFunnelContextProvider({
 		setSearch,
 		toggleArchived,
 		clearAllFilters,
+		isRefetching,
+		isFetching,
+		isPending,
 	} satisfies CartFunnelContext;
 
 	return (

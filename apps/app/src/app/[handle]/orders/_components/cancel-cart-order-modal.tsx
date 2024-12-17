@@ -17,7 +17,7 @@ export function CancelCartOrderModal() {
 
 	// cart order context
 	const {
-		lastSelectedCartOrder: selectedCartOrder,
+		lastSelectedItem: selectedCartOrder,
 		showCancelCartOrderModal,
 		setShowCancelCartOrderModal,
 		focusGridList,

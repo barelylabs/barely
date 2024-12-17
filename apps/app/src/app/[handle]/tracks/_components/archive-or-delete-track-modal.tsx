@@ -8,20 +8,19 @@ import { useTrackContext } from '~/app/[handle]/tracks/_components/track-context
 
 export function ArchiveOrDeleteTrackModal({ mode }: { mode: 'archive' | 'delete' }) {
 	const {
-		trackSelection,
-		lastSelectedTrack,
-		showArchiveTrackModal,
-		showDeleteTrackModal,
-		setShowArchiveTrackModal,
-		setShowDeleteTrackModal,
+		selection,
+		lastSelectedItem,
+		showArchiveModal,
+		showDeleteModal,
+		setShowArchiveModal,
+		setShowDeleteModal,
 	} = useTrackContext();
 
 	const apiUtils = api.useUtils();
 
-	const showModal = mode === 'archive' ? showArchiveTrackModal : showDeleteTrackModal;
+	const showModal = mode === 'archive' ? showArchiveModal : showDeleteModal;
 
-	const setShowModal =
-		mode === 'archive' ? setShowArchiveTrackModal : setShowDeleteTrackModal;
+	const setShowModal = mode === 'archive' ? setShowArchiveModal : setShowDeleteModal;
 
 	const onSuccess = useCallback(async () => {
 		await apiUtils.track.invalidate();
@@ -34,13 +33,13 @@ export function ArchiveOrDeleteTrackModal({ mode }: { mode: 'archive' | 'delete'
 	const { mutate: deleteTracks, isPending: isPendingDelete } =
 		api.track.delete.useMutation({ onSuccess });
 
-	if (!lastSelectedTrack) return null;
+	if (!lastSelectedItem) return null;
 
 	return (
 		<ArchiveOrDeleteModal
 			mode={mode}
-			selection={trackSelection}
-			lastSelected={lastSelectedTrack}
+			selection={selection}
+			lastSelected={lastSelectedItem}
 			showModal={showModal}
 			setShowModal={setShowModal}
 			archiveItems={archiveTracks}

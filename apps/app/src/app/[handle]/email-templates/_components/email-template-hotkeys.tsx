@@ -6,19 +6,19 @@ import { useEmailTemplateContext } from './email-template-context';
 
 export function EmailTemplateHotkeys() {
 	const {
-		emailTemplateSelection,
-		setShowCreateEmailTemplateModal,
-		setShowUpdateEmailTemplateModal,
-		setShowArchiveEmailTemplateModal,
-		setShowDeleteEmailTemplateModal,
+		selection,
+		setShowCreateModal,
+		setShowUpdateModal,
+		setShowArchiveModal,
+		setShowDeleteModal,
 	} = useEmailTemplateContext();
 
 	useModalHotKeys({
-		setShowCreateModal: setShowCreateEmailTemplateModal,
-		setShowUpdateModal: setShowUpdateEmailTemplateModal,
-		setShowArchiveModal: setShowArchiveEmailTemplateModal,
-		setShowDeleteModal: setShowDeleteEmailTemplateModal,
-		itemSelected: emailTemplateSelection !== 'all' && !!emailTemplateSelection.size,
+		setShowCreateModal,
+		setShowUpdateModal,
+		setShowArchiveModal,
+		setShowDeleteModal,
+		itemSelected: selection !== 'all' && !!selection.size,
 	});
 
 	return null;

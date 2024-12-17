@@ -4,6 +4,7 @@ import type { AppRouterOutputs } from '@barely/lib/server/api/router';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { Button } from '@barely/ui/elements/button';
 import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
@@ -14,12 +15,13 @@ import { useEmailTemplateGroupContext } from './email-template-group-context';
 
 export function AllEmailTemplateGroups() {
 	const {
-		emailTemplateGroups,
-		emailTemplateGroupSelection,
-		lastSelectedEmailTemplateGroupId,
-		setEmailTemplateGroupSelection,
+		items,
+		selection,
+		lastSelectedItemId,
+		setSelection,
 		gridListRef,
-		setShowUpdateEmailTemplateGroupModal,
+		setShowUpdateModal,
+		isFetching,
 	} = useEmailTemplateGroupContext();
 
 	return (
@@ -31,26 +33,26 @@ export function AllEmailTemplateGroups() {
 				selectionMode='multiple'
 				selectionBehavior='replace'
 				onAction={() => {
-					if (!lastSelectedEmailTemplateGroupId) return;
-					setShowUpdateEmailTemplateGroupModal(true);
+					if (!lastSelectedItemId) return;
+					setShowUpdateModal(true);
 				}}
-				items={emailTemplateGroups}
-				selectedKeys={emailTemplateGroupSelection}
-				setSelectedKeys={setEmailTemplateGroupSelection}
-				renderEmptyState={() => (
-					<NoResultsPlaceholder
-						icon='emailTemplateGroup'
-						title='No Email Template Groups'
-						subtitle='Create a new email template group to get started.'
-						button={<CreateEmailTemplateGroupButton />}
-					/>
-				)}
+				items={items}
+				selectedKeys={selection}
+				setSelectedKeys={setSelection}
+				renderEmptyState={() =>
+					isFetching ?
+						<GridListSkeleton />
+					:	<NoResultsPlaceholder
+							icon='emailTemplateGroup'
+							title='No Email Template Groups'
+							subtitle='Create a new email template group to get started.'
+							button={<CreateEmailTemplateGroupButton />}
+						/>
+				}
 			>
-				{emailTemplateGroup => (
-					<EmailTemplateGroupCard emailTemplateGroup={emailTemplateGroup} />
-				)}
+				{item => <EmailTemplateGroupCard emailTemplateGroup={item} />}
 			</GridList>
-			<LoadMoreButton />
+			{!!items.length && <LoadMoreButton />}
 		</div>
 	);
 }
@@ -81,8 +83,7 @@ function EmailTemplateGroupCard({
 }: {
 	emailTemplateGroup: AppRouterOutputs['emailTemplateGroup']['byWorkspace']['emailTemplateGroups'][0];
 }) {
-	const { setShowUpdateEmailTemplateGroupModal, setShowDeleteEmailTemplateGroupModal } =
-		useEmailTemplateGroupContext();
+	const { setShowUpdateModal, setShowDeleteModal } = useEmailTemplateGroupContext();
 
 	const { handle } = useWorkspace();
 
@@ -102,8 +103,8 @@ function EmailTemplateGroupCard({
 			id={emailTemplateGroup.id}
 			key={emailTemplateGroup.id}
 			textValue={emailTemplateGroup.name}
-			setShowUpdateModal={setShowUpdateEmailTemplateGroupModal}
-			setShowDeleteModal={setShowDeleteEmailTemplateGroupModal}
+			setShowUpdateModal={setShowUpdateModal}
+			setShowDeleteModal={setShowDeleteModal}
 		>
 			<div className='flex flex-grow flex-row items-center gap-4'>
 				<div className='flex flex-col gap-1'>

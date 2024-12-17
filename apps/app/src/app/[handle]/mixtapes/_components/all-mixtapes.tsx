@@ -2,6 +2,7 @@
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/router';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
 
@@ -10,12 +11,13 @@ import { useMixtapesContext } from '~/app/[handle]/mixtapes/_components/mixtape-
 
 export function AllMixtapes() {
 	const {
-		mixtapes,
-		mixtapeSelection,
-		lastSelectedMixtapeId,
-		setMixtapeSelection,
+		items,
+		selection,
+		lastSelectedItemId,
+		setSelection,
 		gridListRef,
-		setShowUpdateMixtapeModal,
+		setShowUpdateModal,
+		isFetching,
 	} = useMixtapesContext();
 
 	return (
@@ -27,22 +29,27 @@ export function AllMixtapes() {
 				selectionMode='multiple'
 				selectionBehavior='replace'
 				onAction={() => {
-					if (!lastSelectedMixtapeId) return;
-					setShowUpdateMixtapeModal(true);
+					if (!lastSelectedItemId) return;
+					setShowUpdateModal(true);
 				}}
-				items={mixtapes}
-				selectedKeys={mixtapeSelection}
-				setSelectedKeys={setMixtapeSelection}
+				items={items}
+				selectedKeys={selection}
+				setSelectedKeys={setSelection}
 				renderEmptyState={() => (
-					<NoResultsPlaceholder
-						icon='mixtape'
-						title='No Mixtapes'
-						subtitle='Create a new mixtape to get started.'
-						button={<CreateMixtapeButton />}
-					/>
+					<>
+						{isFetching ?
+							<GridListSkeleton />
+						:	<NoResultsPlaceholder
+								icon='mixtape'
+								title='No Mixtapes'
+								subtitle='Create a new mixtape to get started.'
+								button={<CreateMixtapeButton />}
+							/>
+						}
+					</>
 				)}
 			>
-				{mixtape => <MixtapeCard mixtape={mixtape} />}
+				{item => <MixtapeCard mixtape={item} />}
 			</GridList>
 		</>
 	);
@@ -53,20 +60,17 @@ function MixtapeCard({
 }: {
 	mixtape: AppRouterOutputs['mixtape']['byWorkspace']['mixtapes'][0];
 }) {
-	const {
-		setShowUpdateMixtapeModal,
-		setShowArchiveMixtapeModal,
-		setShowDeleteMixtapeModal,
-	} = useMixtapesContext();
+	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } =
+		useMixtapesContext();
 
 	return (
 		<GridListCard
 			id={mixtape.id}
 			key={mixtape.id}
 			textValue={mixtape.name}
-			setShowUpdateModal={setShowUpdateMixtapeModal}
-			setShowArchiveModal={setShowArchiveMixtapeModal}
-			setShowDeleteModal={setShowDeleteMixtapeModal}
+			setShowUpdateModal={setShowUpdateModal}
+			setShowArchiveModal={setShowArchiveModal}
+			setShowDeleteModal={setShowDeleteModal}
 		>
 			{mixtape.name}
 		</GridListCard>

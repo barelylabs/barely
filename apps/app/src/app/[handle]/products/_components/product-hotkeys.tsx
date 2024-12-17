@@ -6,19 +6,19 @@ import { useProductContext } from '~/app/[handle]/products/_components/product-c
 
 export function ProductHotkeys() {
 	const {
-		productSelection,
-		setShowCreateProductModal,
-		setShowUpdateProductModal,
-		setShowArchiveProductModal,
-		setShowDeleteProductModal,
+		selection,
+		setShowCreateModal,
+		setShowUpdateModal,
+		setShowArchiveModal,
+		setShowDeleteModal,
 	} = useProductContext();
 
 	useModalHotKeys({
-		setShowCreateModal: setShowCreateProductModal,
-		setShowUpdateModal: setShowUpdateProductModal,
-		setShowArchiveModal: setShowArchiveProductModal,
-		setShowDeleteModal: setShowDeleteProductModal,
-		itemSelected: productSelection !== 'all' && !!productSelection.size,
+		setShowCreateModal,
+		setShowUpdateModal,
+		setShowArchiveModal,
+		setShowDeleteModal,
+		itemSelected: selection !== 'all' && !!selection.size,
 	});
 
 	return null;

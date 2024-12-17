@@ -6,19 +6,19 @@ import { useLandingPageContext } from '~/app/[handle]/pages/_components/landing-
 
 export function LandingPageHotkeys() {
 	const {
-		landingPageSelection,
-		setShowCreateLandingPageModal,
-		setShowUpdateLandingPageModal,
-		setShowArchiveLandingPageModal,
-		setShowDeleteLandingPageModal,
+		selection,
+		setShowCreateModal,
+		setShowUpdateModal,
+		setShowArchiveModal,
+		setShowDeleteModal,
 	} = useLandingPageContext();
 
 	useModalHotKeys({
-		setShowCreateModal: setShowCreateLandingPageModal,
-		setShowUpdateModal: setShowUpdateLandingPageModal,
-		setShowArchiveModal: setShowArchiveLandingPageModal,
-		setShowDeleteModal: setShowDeleteLandingPageModal,
-		itemSelected: landingPageSelection !== 'all' && !!landingPageSelection.size,
+		setShowCreateModal: setShowCreateModal,
+		setShowUpdateModal: setShowUpdateModal,
+		setShowArchiveModal: setShowArchiveModal,
+		setShowDeleteModal: setShowDeleteModal,
+		itemSelected: selection !== 'all' && !!selection.size,
 	});
 
 	return null;

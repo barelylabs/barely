@@ -2,35 +2,20 @@
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/router';
 import type { fmFilterParamsSchema } from '@barely/lib/server/routes/fm/fm.schema';
-import type { FetchNextPageOptions } from '@tanstack/react-query';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
-import { createContext, use, useCallback, useContext, useState } from 'react';
+import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
 import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 import { fmSearchParamsSchema } from '@barely/lib/server/routes/fm/fm.schema';
 
-interface FlowContext {
-	flows: AppRouterOutputs['flow']['byWorkspace']['flows'];
-	flowSelection: Selection;
-	lastSelectedFlowId: string | undefined;
-	setFlowSelection: (selection: Selection) => void;
-	showArchiveFlowModal: boolean;
-	setShowArchiveFlowModal: (show: boolean) => void;
-	showDeleteFlowModal: boolean;
-	setShowDeleteFlowModal: (show: boolean) => void;
-	//infinite
-	hasNextPage: boolean;
-	fetchNextPage: (options?: FetchNextPageOptions) => void | Promise<void>;
-	isFetchingNextPage: boolean;
-	// filters
-	filters: z.infer<typeof fmFilterParamsSchema>;
-	pendingFiltersTransition: boolean;
-	setSearch: (search: string) => void;
-	toggleArchived: () => void;
-	clearAllFilters: () => void;
-}
+import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
+
+type FlowContext = InfiniteItemsContext<
+	AppRouterOutputs['flow']['byWorkspace']['flows'][0],
+	z.infer<typeof fmFilterParamsSchema>
+>;
 
 const FlowContext = createContext<FlowContext | undefined>(undefined);
 
@@ -41,8 +26,8 @@ export function FlowContextProvider({
 	children: React.ReactNode;
 	initialFlows: Promise<AppRouterOutputs['flow']['byWorkspace']>;
 }) {
-	const [showArchiveFlowModal, setShowArchiveFlowModal] = useState(false);
-	const [showDeleteFlowModal, setShowDeleteFlowModal] = useState(false);
+	const [showArchiveModal, setShowArchiveModal] = useState(false);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
 
 	const { handle } = useWorkspace();
 
@@ -62,6 +47,9 @@ export function FlowContextProvider({
 		hasNextPage,
 		fetchNextPage,
 		isFetchingNextPage,
+		isFetching,
+		isRefetching,
+		isPending,
 	} = api.flow.byWorkspace.useInfiniteQuery(
 		{ handle, ...filters },
 		{
@@ -115,25 +103,39 @@ export function FlowContextProvider({
 			undefined
 		:	Array.from(flowSelection).pop()?.toString();
 
+	const gridListRef = useRef<HTMLDivElement>(null);
+
 	const contextValue = {
-		flows,
-		flowSelection,
-		lastSelectedFlowId,
-		setFlowSelection,
-		showArchiveFlowModal,
-		setShowArchiveFlowModal,
-		showDeleteFlowModal,
-		setShowDeleteFlowModal,
+		items: flows,
+		selection: flowSelection,
+		lastSelectedItemId: lastSelectedFlowId,
+		lastSelectedItem: flows.find(flow => flow.id === lastSelectedFlowId),
+		setSelection: setFlowSelection,
+		showCreateModal: false,
+		setShowCreateModal: () => void {},
+		showUpdateModal: false,
+		setShowUpdateModal: () => void {},
+		showArchiveModal,
+		setShowArchiveModal,
+		showDeleteModal,
+		setShowDeleteModal,
 		// infinite
 		hasNextPage,
 		fetchNextPage: () => void fetchNextPage(),
 		isFetchingNextPage,
+		isFetching,
+		isRefetching,
+		isPending,
 		// filters
 		filters,
 		pendingFiltersTransition: pending,
 		setSearch,
 		toggleArchived,
 		clearAllFilters,
+		gridListRef,
+		focusGridList: () => {
+			gridListRef.current?.focus();
+		},
 	} satisfies FlowContext;
 
 	return <FlowContext.Provider value={contextValue}>{children}</FlowContext.Provider>;

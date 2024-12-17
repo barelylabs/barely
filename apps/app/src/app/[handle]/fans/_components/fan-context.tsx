@@ -2,7 +2,6 @@
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/react';
 import type { fanFilterParamsSchema } from '@barely/lib/server/routes/fan/fan.schema';
-import type { FetchNextPageOptions } from '@tanstack/react-query';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
 import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
@@ -11,33 +10,12 @@ import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 import { fanSearchParamsSchema } from '@barely/lib/server/routes/fan/fan.schema';
 
-interface FanContext {
-	fans: AppRouterOutputs['fan']['byWorkspace']['fans'];
-	fanSelection: Selection;
-	lastSelectedFanId: string | undefined;
-	lastSelectedFan: AppRouterOutputs['fan']['byWorkspace']['fans'][number] | undefined;
-	setFanSelection: (selection: Selection) => void;
-	gridListRef: React.RefObject<HTMLDivElement>;
-	focusGridList: () => void;
-	showCreateFanModal: boolean;
-	setShowCreateFanModal: (show: boolean) => void;
-	showUpdateFanModal: boolean;
-	setShowUpdateFanModal: (show: boolean) => void;
-	showDeleteFanModal: boolean;
-	setShowDeleteFanModal: (show: boolean) => void;
-	showArchiveFanModal: boolean;
-	setShowArchiveFanModal: (show: boolean) => void;
-	// filters
-	filters: z.infer<typeof fanFilterParamsSchema>;
-	pendingFiltersTransition: boolean;
-	setSearch: (search: string) => void;
-	toggleArchived: () => void;
-	clearAllFilters: () => void;
-	// infinite
-	hasNextPage: boolean;
-	fetchNextPage: (options?: FetchNextPageOptions) => void | Promise<void>;
-	isFetchingNextPage: boolean;
-}
+import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
+
+type FanContext = InfiniteItemsContext<
+	AppRouterOutputs['fan']['byWorkspace']['fans'][number],
+	z.infer<typeof fanFilterParamsSchema>
+>;
 
 const FanContext = createContext<FanContext | undefined>(undefined);
 
@@ -48,10 +26,10 @@ export function FanContextProvider({
 	children: React.ReactNode;
 	initialFansFirstPage: Promise<AppRouterOutputs['fan']['byWorkspace']>;
 }) {
-	const [showCreateFanModal, setShowCreateFanModal] = useState(false);
-	const [showUpdateFanModal, setShowUpdateFanModal] = useState(false);
-	const [showDeleteFanModal, setShowDeleteFanModal] = useState(false);
-	const [showArchiveFanModal, setShowArchiveFanModal] = useState(false);
+	const [showCreateModal, setShowCreateModal] = useState(false);
+	const [showUpdateModal, setShowUpdateModal] = useState(false);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const [showArchiveModal, setShowArchiveModal] = useState(false);
 
 	const { handle } = useWorkspace();
 
@@ -71,6 +49,9 @@ export function FanContextProvider({
 		hasNextPage,
 		fetchNextPage,
 		isFetchingNextPage,
+		isFetching,
+		isRefetching,
+		isPending,
 	} = api.fan.byWorkspace.useInfiniteQuery(
 		{ handle, ...filters },
 		{
@@ -125,23 +106,23 @@ export function FanContextProvider({
 	const lastSelectedFan = fans.find(fan => fan.id === lastSelectedFanId);
 
 	const contextValue = {
-		fans,
-		fanSelection,
-		lastSelectedFanId,
-		lastSelectedFan,
-		setFanSelection,
+		items: fans,
+		selection: fanSelection,
+		lastSelectedItemId: lastSelectedFanId,
+		lastSelectedItem: lastSelectedFan,
+		setSelection: setFanSelection,
 		gridListRef,
 		focusGridList: () => {
 			gridListRef.current?.focus();
 		},
-		showCreateFanModal,
-		setShowCreateFanModal,
-		showUpdateFanModal,
-		setShowUpdateFanModal,
-		showDeleteFanModal,
-		setShowDeleteFanModal,
-		showArchiveFanModal,
-		setShowArchiveFanModal,
+		showCreateModal,
+		setShowCreateModal,
+		showUpdateModal,
+		setShowUpdateModal,
+		showDeleteModal,
+		setShowDeleteModal,
+		showArchiveModal,
+		setShowArchiveModal,
 		// filters
 		filters,
 		pendingFiltersTransition: pending,
@@ -152,6 +133,9 @@ export function FanContextProvider({
 		hasNextPage,
 		fetchNextPage: () => void fetchNextPage(),
 		isFetchingNextPage,
+		isFetching,
+		isRefetching,
+		isPending,
 	} satisfies FanContext;
 
 	return <FanContext.Provider value={contextValue}>{children}</FanContext.Provider>;

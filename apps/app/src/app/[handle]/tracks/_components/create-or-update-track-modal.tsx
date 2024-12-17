@@ -37,11 +37,11 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 
 	/* track context */
 	const {
-		lastSelectedTrack: selectedTrack,
-		showCreateTrackModal,
-		setShowCreateTrackModal,
-		showEditTrackModal,
-		setShowEditTrackModal,
+		lastSelectedItem: selectedTrack,
+		showCreateModal,
+		setShowCreateModal,
+		showUpdateModal,
+		setShowUpdateModal,
 		focusGridList,
 	} = useTrackContext();
 
@@ -167,9 +167,8 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 		mode === 'update' ? selectedTrack?.audioFiles?.find(f => f.masterWav) : undefined;
 
 	/* modal */
-	const showModal = mode === 'create' ? showCreateTrackModal : showEditTrackModal;
-	const setShowModal =
-		mode === 'create' ? setShowCreateTrackModal : setShowEditTrackModal;
+	const showModal = mode === 'create' ? showCreateModal : showUpdateModal;
+	const setShowModal = mode === 'create' ? setShowCreateModal : setShowUpdateModal;
 
 	const handleCloseModal = useCallback(async () => {
 		form.reset();

@@ -6,19 +6,19 @@ import { useFanContext } from '~/app/[handle]/fans/_components/fan-context';
 
 export function FanHotkeys() {
 	const {
-		fanSelection,
-		setShowArchiveFanModal,
-		setShowDeleteFanModal,
-		setShowCreateFanModal,
-		setShowUpdateFanModal,
+		selection,
+		setShowArchiveModal,
+		setShowDeleteModal,
+		setShowCreateModal,
+		setShowUpdateModal,
 	} = useFanContext();
 
 	useModalHotKeys({
-		setShowCreateModal: setShowCreateFanModal,
-		setShowUpdateModal: setShowUpdateFanModal,
-		setShowArchiveModal: setShowArchiveFanModal,
-		setShowDeleteModal: setShowDeleteFanModal,
-		itemSelected: fanSelection !== 'all' && !!fanSelection.size,
+		setShowCreateModal,
+		setShowUpdateModal,
+		setShowArchiveModal,
+		setShowDeleteModal,
+		itemSelected: selection !== 'all' && !!selection.size,
 	});
 	return null;
 }

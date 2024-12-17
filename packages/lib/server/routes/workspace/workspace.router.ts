@@ -27,6 +27,22 @@ import {
 import { Workspaces } from './workspace.sql';
 
 export const workspaceRouter = createTRPCRouter({
+	// byHandle: privateProcedure
+	// 	.input(z.object({ handle: z.string() }))
+	// 	.query(async ({ input, ctx }) => {
+	// 		const workspace = await ctx.db.http.query.Workspaces.findFirst({
+	// 			where: and(
+	// 				eq(Workspaces.handle, input.handle),
+	// 				inArray(
+	// 					Workspaces.id,
+	// 					ctx.user.workspaces.map(w => w.id),
+	// 				),
+	// 			),
+	// 		});
+
+	// 		return workspace;
+	// 	}),
+
 	current: privateProcedure.query(({ ctx }) => {
 		if (!ctx.workspace) return null;
 		return ctx.workspace;
@@ -77,43 +93,31 @@ export const workspaceRouter = createTRPCRouter({
 			return assets;
 		}),
 
-	members: workspaceQueryProcedure
-		// .input(
-		// 	z.object({
-		// 		handle: z.string(),
-		// 	}),
-		// )
-		.query(async ({ ctx }) => {
-			const members = await ctx.db.http.query._Users_To_Workspaces.findMany({
-				where: eq(_Users_To_Workspaces.workspaceId, ctx.workspace.id),
-				limit: 20,
-				with: {
-					user: true,
-				},
-			});
+	members: workspaceQueryProcedure.query(async ({ ctx }) => {
+		const members = await ctx.db.http.query._Users_To_Workspaces.findMany({
+			where: eq(_Users_To_Workspaces.workspaceId, ctx.workspace.id),
+			limit: 20,
+			with: {
+				user: true,
+			},
+		});
 
-			return members.map(m => ({
-				...m.user,
-				role: m.role,
-			}));
-		}),
+		return members.map(m => ({
+			...m.user,
+			role: m.role,
+		}));
+	}),
 
-	invites: workspaceQueryProcedure
-		// .input(
-		// 	z.object({
-		// 		handle: z.string(),
-		// 	}),
-		// )
-		.query(async ({ ctx }) => {
-			const invites = await ctx.db.http.query.WorkspaceInvites.findMany({
-				where: and(
-					eq(WorkspaceInvites.workspaceId, ctx.workspace.id),
-					gt(WorkspaceInvites.expiresAt, new Date()),
-				),
-			});
+	invites: workspaceQueryProcedure.query(async ({ ctx }) => {
+		const invites = await ctx.db.http.query.WorkspaceInvites.findMany({
+			where: and(
+				eq(WorkspaceInvites.workspaceId, ctx.workspace.id),
+				gt(WorkspaceInvites.expiresAt, new Date()),
+			),
+		});
 
-			return invites;
-		}),
+		return invites;
+	}),
 
 	create: privateProcedure
 		.input(createWorkspaceSchema)

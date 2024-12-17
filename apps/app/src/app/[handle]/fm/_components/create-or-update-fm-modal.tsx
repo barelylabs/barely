@@ -29,11 +29,11 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 
 	/* fm context */
 	const {
-		lastSelectedFmPage: selectedFmPage,
-		showCreateFmPageModal,
-		showUpdateFmPageModal,
-		setShowCreateFmPageModal,
-		setShowUpdateFmPageModal,
+		lastSelectedItem: selectedFmPage,
+		showCreateModal,
+		showUpdateModal,
+		setShowCreateModal,
+		setShowUpdateModal,
 		focusGridList,
 	} = useFmContext();
 
@@ -103,9 +103,8 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 	} = artworkUploadState;
 
 	/* modal */
-	const showFmModal = mode === 'create' ? showCreateFmPageModal : showUpdateFmPageModal;
-	const setShowFmModal =
-		mode === 'create' ? setShowCreateFmPageModal : setShowUpdateFmPageModal;
+	const showFmModal = mode === 'create' ? showCreateModal : showUpdateModal;
+	const setShowFmModal = mode === 'create' ? setShowCreateModal : setShowUpdateModal;
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();

@@ -4,6 +4,7 @@ import type { AppRouterOutputs } from '@barely/lib/server/api/router';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
 import { Text } from '@barely/ui/elements/typography';
@@ -13,12 +14,13 @@ import { useFanGroupContext } from '~/app/[handle]/fan-groups/_components/fan-gr
 
 export function AllFanGroups() {
 	const {
-		fanGroups,
+		items,
+		selection,
+		lastSelectedItemId,
+		setSelection,
+		setShowUpdateModal,
 		gridListRef,
-		fanGroupSelection,
-		lastSelectedFanGroupId,
-		setFanGroupSelection,
-		setShowUpdateFanGroupModal,
+		isFetching,
 	} = useFanGroupContext();
 
 	const { handle } = useWorkspace();
@@ -37,19 +39,24 @@ export function AllFanGroups() {
 				selectionMode='multiple'
 				selectionBehavior='replace'
 				onAction={() => {
-					if (!lastSelectedFanGroupId) return;
-					setShowUpdateFanGroupModal(true);
+					if (!lastSelectedItemId) return;
+					setShowUpdateModal(true);
 				}}
-				items={fanGroups}
-				selectedKeys={fanGroupSelection}
-				setSelectedKeys={setFanGroupSelection}
+				items={items}
+				selectedKeys={selection}
+				setSelectedKeys={setSelection}
 				renderEmptyState={() => (
-					<NoResultsPlaceholder
-						icon='fanGroup'
-						title='No Fan Groups'
-						subtitle='Create a new fan group to get started.'
-						button={<CreateFanGroupButton />}
-					/>
+					<>
+						{isFetching ?
+							<GridListSkeleton />
+						:	<NoResultsPlaceholder
+								icon='fanGroup'
+								title='No Fan Groups'
+								subtitle='Create a new fan group to get started.'
+								button={<CreateFanGroupButton />}
+							/>
+						}
+					</>
 				)}
 			>
 				{fanGroup => <FanGroupCard fanGroup={fanGroup} />}
@@ -63,11 +70,8 @@ function FanGroupCard({
 }: {
 	fanGroup: AppRouterOutputs['fanGroup']['byWorkspace']['fanGroups'][0];
 }) {
-	const {
-		setShowUpdateFanGroupModal,
-		setShowArchiveFanGroupModal,
-		setShowDeleteFanGroupModal,
-	} = useFanGroupContext();
+	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } =
+		useFanGroupContext();
 
 	const { handle } = useWorkspace();
 	const { data: fanGroupById } = api.fanGroup.byId.useQuery({
@@ -80,9 +84,9 @@ function FanGroupCard({
 			id={fanGroup.id}
 			key={fanGroup.id}
 			textValue={fanGroup.name}
-			setShowUpdateModal={setShowUpdateFanGroupModal}
-			setShowArchiveModal={setShowArchiveFanGroupModal}
-			setShowDeleteModal={setShowDeleteFanGroupModal}
+			setShowUpdateModal={setShowUpdateModal}
+			setShowArchiveModal={setShowArchiveModal}
+			setShowDeleteModal={setShowDeleteModal}
 		>
 			<div className='flex flex-grow flex-row items-center gap-4'>
 				<div className='flex flex-col gap-1'>

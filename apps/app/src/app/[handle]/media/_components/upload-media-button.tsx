@@ -5,12 +5,12 @@ import { Button } from '@barely/ui/elements/button';
 import { useMediaContext } from '~/app/[handle]/media/_components/media-context';
 
 export function UploadMediaButton() {
-	const { setShowUploadMediaModal } = useMediaContext();
+	const { setShowCreateModal } = useMediaContext();
 
 	return (
 		<Button
 			onClick={() => {
-				setShowUploadMediaModal(true);
+				setShowCreateModal(true);
 			}}
 			className='space-x-3'
 		>

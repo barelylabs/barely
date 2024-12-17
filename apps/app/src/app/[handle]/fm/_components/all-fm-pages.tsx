@@ -2,6 +2,7 @@
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/router';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
 
@@ -10,12 +11,13 @@ import { useFmContext } from '~/app/[handle]/fm/_components/fm-context';
 
 export function AllFmPages() {
 	const {
-		fmPages,
-		fmPageSelection,
-		lastSelectedFmPageId,
-		setFmPageSelection,
+		items,
+		selection,
+		lastSelectedItemId,
+		setSelection,
 		gridListRef,
-		setShowUpdateFmPageModal,
+		setShowUpdateModal,
+		isFetching,
 	} = useFmContext();
 
 	return (
@@ -27,22 +29,27 @@ export function AllFmPages() {
 				selectionMode='multiple'
 				selectionBehavior='replace'
 				onAction={() => {
-					if (!lastSelectedFmPageId) return;
-					setShowUpdateFmPageModal(true);
+					if (!lastSelectedItemId) return;
+					setShowUpdateModal(true);
 				}}
-				items={fmPages}
-				selectedKeys={fmPageSelection}
-				setSelectedKeys={setFmPageSelection}
+				items={items}
+				selectedKeys={selection}
+				setSelectedKeys={setSelection}
 				renderEmptyState={() => (
-					<NoResultsPlaceholder
-						icon='fm'
-						title='No FM Pages'
-						subtitle='Create a new fm page to get started.'
-						button={<CreateFmPageButton />}
-					/>
+					<>
+						{isFetching ?
+							<GridListSkeleton />
+						:	<NoResultsPlaceholder
+								icon='fm'
+								title='No FM Pages'
+								subtitle='Create a new fm page to get started.'
+								button={<CreateFmPageButton />}
+							/>
+						}
+					</>
 				)}
 			>
-				{fmPage => <FmPageCard fmPage={fmPage} />}
+				{item => <FmPageCard fmPage={item} />}
 			</GridList>
 		</>
 	);
@@ -53,11 +60,7 @@ function FmPageCard({
 }: {
 	fmPage: AppRouterOutputs['fm']['byWorkspace']['fmPages'][0];
 }) {
-	const {
-		setShowUpdateFmPageModal,
-		setShowArchiveFmPageModal,
-		setShowDeleteFmPageModal,
-	} = useFmContext();
+	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } = useFmContext();
 
 	const { coverArt } = fmPage;
 
@@ -68,9 +71,9 @@ function FmPageCard({
 			id={fmPage.id}
 			key={fmPage.id}
 			textValue={fmPage.title}
-			setShowUpdateModal={setShowUpdateFmPageModal}
-			setShowArchiveModal={setShowArchiveFmPageModal}
-			setShowDeleteModal={setShowDeleteFmPageModal}
+			setShowUpdateModal={setShowUpdateModal}
+			setShowArchiveModal={setShowArchiveModal}
+			setShowDeleteModal={setShowDeleteModal}
 			img={{ ...coverArt, alt: `${fmPage.title} cover art` }}
 			title={fmPage.title}
 			subtitle={`${fmPage.clicks} clicks`}

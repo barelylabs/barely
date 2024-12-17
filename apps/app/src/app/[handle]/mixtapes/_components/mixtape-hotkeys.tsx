@@ -6,19 +6,19 @@ import { useMixtapesContext } from '~/app/[handle]/mixtapes/_components/mixtape-
 
 export function MixtapeHotkeys() {
 	const {
-		mixtapeSelection,
-		setShowArchiveMixtapeModal,
-		setShowDeleteMixtapeModal,
-		setShowCreateMixtapeModal,
-		setShowUpdateMixtapeModal,
+		selection,
+		setShowArchiveModal,
+		setShowDeleteModal,
+		setShowCreateModal,
+		setShowUpdateModal,
 	} = useMixtapesContext();
 
 	useModalHotKeys({
-		setShowCreateModal: setShowCreateMixtapeModal,
-		setShowUpdateModal: setShowUpdateMixtapeModal,
-		setShowArchiveModal: setShowArchiveMixtapeModal,
-		setShowDeleteModal: setShowDeleteMixtapeModal,
-		itemSelected: mixtapeSelection !== 'all' && !!mixtapeSelection.size,
+		setShowCreateModal,
+		setShowUpdateModal,
+		setShowArchiveModal,
+		setShowDeleteModal,
+		itemSelected: selection !== 'all' && !!selection.size,
 	});
 
 	return null;

@@ -5,12 +5,12 @@ import { Button } from '@barely/ui/elements/button';
 import { useMixtapesContext } from '~/app/[handle]/mixtapes/_components/mixtape-context';
 
 export function CreateMixtapeButton() {
-	const { setShowCreateMixtapeModal } = useMixtapesContext();
+	const { setShowCreateModal } = useMixtapesContext();
 
 	return (
 		<Button
 			onClick={() => {
-				setShowCreateMixtapeModal(true);
+				setShowCreateModal(true);
 			}}
 			className='space-x-3'
 		>

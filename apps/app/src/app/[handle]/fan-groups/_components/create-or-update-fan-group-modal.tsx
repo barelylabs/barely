@@ -35,21 +35,21 @@ export function CreateOrUpdateFanGroupModal({ mode }: { mode: 'create' | 'update
 	const { handle } = useWorkspace();
 	/* fan group context */
 	const {
-		lastSelectedFanGroupId,
-		showCreateFanGroupModal,
-		showUpdateFanGroupModal,
-		setShowCreateFanGroupModal,
-		setShowUpdateFanGroupModal,
+		lastSelectedItemId,
+		showCreateModal,
+		showUpdateModal,
+		setShowCreateModal,
+		setShowUpdateModal,
 		focusGridList,
 	} = useFanGroupContext();
 
 	const { data: selectedFanGroup } = api.fanGroup.byId.useQuery(
 		{
-			id: lastSelectedFanGroupId ?? '',
+			id: lastSelectedItemId ?? '',
 			handle,
 		},
 		{
-			enabled: mode === 'update' && !!lastSelectedFanGroupId,
+			enabled: mode === 'update' && !!lastSelectedItemId,
 		},
 	);
 
@@ -117,17 +117,15 @@ export function CreateOrUpdateFanGroupModal({ mode }: { mode: 'create' | 'update
 	});
 
 	/* modal */
-	const showFanGroupModal =
-		mode === 'create' ? showCreateFanGroupModal : showUpdateFanGroupModal;
-	const setShowFanGroupModal =
-		mode === 'create' ? setShowCreateFanGroupModal : setShowUpdateFanGroupModal;
+	const showModal = mode === 'create' ? showCreateModal : showUpdateModal;
+	const setShowModal = mode === 'create' ? setShowCreateModal : setShowUpdateModal;
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
 		await apiUtils.fanGroup.invalidate();
 		form.reset();
-		setShowFanGroupModal(false);
-	}, [form, focusGridList, apiUtils.fanGroup, setShowFanGroupModal]);
+		setShowModal(false);
+	}, [form, focusGridList, apiUtils.fanGroup, setShowModal]);
 
 	/* form submit */
 	const handleSubmit = useCallback(
@@ -142,8 +140,8 @@ export function CreateOrUpdateFanGroupModal({ mode }: { mode: 'create' | 'update
 
 	return (
 		<Modal
-			showModal={showFanGroupModal}
-			setShowModal={setShowFanGroupModal}
+			showModal={showModal}
+			setShowModal={setShowModal}
 			preventDefaultClose={form.formState.isDirty}
 			onClose={handleCloseModal}
 			className='max-w-2xl'

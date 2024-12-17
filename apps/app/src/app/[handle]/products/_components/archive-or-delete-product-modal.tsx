@@ -8,20 +8,19 @@ import { useProductContext } from '~/app/[handle]/products/_components/product-c
 
 export function ArchiveOrDeleteProductModal({ mode }: { mode: 'archive' | 'delete' }) {
 	const {
-		productSelection,
-		lastSelectedProduct,
-		showArchiveProductModal,
-		showDeleteProductModal,
-		setShowArchiveProductModal,
-		setShowDeleteProductModal,
+		selection,
+		lastSelectedItem,
+		showArchiveModal,
+		showDeleteModal,
+		setShowArchiveModal,
+		setShowDeleteModal,
 	} = useProductContext();
 
 	const apiUtils = api.useUtils();
 
-	const showModal = mode === 'archive' ? showArchiveProductModal : showDeleteProductModal;
+	const showModal = mode === 'archive' ? showArchiveModal : showDeleteModal;
 
-	const setShowModal =
-		mode === 'archive' ? setShowArchiveProductModal : setShowDeleteProductModal;
+	const setShowModal = mode === 'archive' ? setShowArchiveModal : setShowDeleteModal;
 
 	const onSuccess = useCallback(async () => {
 		await apiUtils.product.invalidate();
@@ -34,13 +33,13 @@ export function ArchiveOrDeleteProductModal({ mode }: { mode: 'archive' | 'delet
 	const { mutate: deleteProducts, isPending: isPendingDelete } =
 		api.product.delete.useMutation({ onSuccess });
 
-	if (!lastSelectedProduct) return null;
+	if (!lastSelectedItem) return null;
 
 	return (
 		<ArchiveOrDeleteModal
 			mode={mode}
-			selection={productSelection}
-			lastSelected={lastSelectedProduct}
+			selection={selection}
+			lastSelected={lastSelectedItem}
 			showModal={showModal}
 			setShowModal={setShowModal}
 			archiveItems={archiveProducts}

@@ -8,21 +8,19 @@ import { useFanGroupContext } from '~/app/[handle]/fan-groups/_components/fan-gr
 
 export function ArchiveOrDeleteFanGroupModal({ mode }: { mode: 'archive' | 'delete' }) {
 	const {
-		fanGroupSelection,
-		lastSelectedFanGroup,
-		showArchiveFanGroupModal,
-		showDeleteFanGroupModal,
-		setShowArchiveFanGroupModal,
-		setShowDeleteFanGroupModal,
+		selection,
+		lastSelectedItem,
+		showArchiveModal,
+		showDeleteModal,
+		setShowArchiveModal,
+		setShowDeleteModal,
 	} = useFanGroupContext();
 
 	const apiUtils = api.useUtils();
 
-	const showModal =
-		mode === 'archive' ? showArchiveFanGroupModal : showDeleteFanGroupModal;
+	const showModal = mode === 'archive' ? showArchiveModal : showDeleteModal;
 
-	const setShowModal =
-		mode === 'archive' ? setShowArchiveFanGroupModal : setShowDeleteFanGroupModal;
+	const setShowModal = mode === 'archive' ? setShowArchiveModal : setShowDeleteModal;
 
 	const onSuccess = useCallback(async () => {
 		await apiUtils.fanGroup.invalidate();
@@ -35,13 +33,13 @@ export function ArchiveOrDeleteFanGroupModal({ mode }: { mode: 'archive' | 'dele
 	const { mutate: deleteFanGroups, isPending: isPendingDelete } =
 		api.fanGroup.delete.useMutation({ onSuccess });
 
-	if (!lastSelectedFanGroup) return null;
+	if (!lastSelectedItem) return null;
 
 	return (
 		<ArchiveOrDeleteModal
 			mode={mode}
-			selection={fanGroupSelection}
-			lastSelected={{ ...lastSelectedFanGroup, name: lastSelectedFanGroup.name }}
+			selection={selection}
+			lastSelected={{ ...lastSelectedItem, name: lastSelectedItem.name }}
 			showModal={showModal}
 			setShowModal={setShowModal}
 			archiveItems={archiveFanGroups}

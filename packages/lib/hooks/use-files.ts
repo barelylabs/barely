@@ -12,7 +12,15 @@ type UseFilesProps = Omit<
 export function useFiles(props?: UseFilesProps) {
 	const { handle } = useWorkspace();
 
-	const infiniteFilesQuery = api.file.byWorkspace.useInfiniteQuery(
+	const {
+		data,
+		hasNextPage,
+		fetchNextPage,
+		isFetchingNextPage,
+		isFetching,
+		isRefetching,
+		isPending,
+	} = api.file.byWorkspace.useInfiniteQuery(
 		{
 			handle,
 			...props,
@@ -22,12 +30,15 @@ export function useFiles(props?: UseFilesProps) {
 		},
 	);
 
-	const files = infiniteFilesQuery.data?.pages.flatMap(page => page.files) ?? [];
+	const files = data?.pages.flatMap(page => page.files) ?? [];
 
 	return {
 		files,
-		hasMoreFiles: !!infiniteFilesQuery.hasNextPage,
-		fetchMoreFiles: infiniteFilesQuery.fetchNextPage,
-		_query: infiniteFilesQuery,
+		hasMoreFiles: !!hasNextPage,
+		fetchMoreFiles: fetchNextPage,
+		isFetchingNextPage,
+		isFetching,
+		isRefetching,
+		isPending,
 	};
 }

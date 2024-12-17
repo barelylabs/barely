@@ -10,33 +10,39 @@ import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 import { productSearchParamsSchema } from '@barely/lib/server/routes/product/product.schema';
 
-export interface ProductCtx {
-	products: AppRouterOutputs['product']['byWorkspace']['products'];
-	productSelection: Selection;
-	lastSelectedProductId: string | undefined;
-	lastSelectedProduct:
-		| AppRouterOutputs['product']['byWorkspace']['products'][number]
-		| undefined;
-	setProductSelection: (selection: Selection) => void;
-	gridListRef: React.RefObject<HTMLDivElement>;
-	focusGridList: () => void;
-	showCreateProductModal: boolean;
-	setShowCreateProductModal: (show: boolean) => void;
-	showUpdateProductModal: boolean;
-	setShowUpdateProductModal: (show: boolean) => void;
-	showArchiveProductModal: boolean;
-	setShowArchiveProductModal: (show: boolean) => void;
-	showDeleteProductModal: boolean;
-	setShowDeleteProductModal: (show: boolean) => void;
-	// filters
-	filters: z.infer<typeof productFilterParamsSchema>;
-	pendingFiltersTransition: boolean;
-	setSearch: (search: string) => void;
-	toggleArchived: () => void;
-	clearAllFilters: () => void;
-}
+import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
 
-const ProductContext = createContext<ProductCtx | undefined>(undefined);
+// export interface ProductCtx {
+// 	products: AppRouterOutputs['product']['byWorkspace']['products'];
+// 	productSelection: Selection;
+// 	lastSelectedProductId: string | undefined;
+// 	lastSelectedProduct:
+// 		| AppRouterOutputs['product']['byWorkspace']['products'][number]
+// 		| undefined;
+// 	setProductSelection: (selection: Selection) => void;
+// 	gridListRef: React.RefObject<HTMLDivElement>;
+// 	focusGridList: () => void;
+// 	showCreateProductModal: boolean;
+// 	setShowCreateProductModal: (show: boolean) => void;
+// 	showUpdateProductModal: boolean;
+// 	setShowUpdateProductModal: (show: boolean) => void;
+// 	showArchiveProductModal: boolean;
+// 	setShowArchiveProductModal: (show: boolean) => void;
+// 	showDeleteProductModal: boolean;
+// 	setShowDeleteProductModal: (show: boolean) => void;
+// 	// filters
+// 	filters: z.infer<typeof productFilterParamsSchema>;
+// 	pendingFiltersTransition: boolean;
+// 	setSearch: (search: string) => void;
+// 	toggleArchived: () => void;
+// 	clearAllFilters: () => void;
+// }
+export type ProductContext = InfiniteItemsContext<
+	AppRouterOutputs['product']['byWorkspace']['products'][number],
+	z.infer<typeof productFilterParamsSchema>
+>;
+
+const ProductContext = createContext<ProductContext | undefined>(undefined);
 
 export function ProductContextProvider({
 	children,
@@ -45,10 +51,10 @@ export function ProductContextProvider({
 	children: React.ReactNode;
 	initialInfiniteProducts: Promise<AppRouterOutputs['product']['byWorkspace']>;
 }) {
-	const [showCreateProductModal, setShowCreateProductModal] = useState(false);
-	const [showUpdateProductModal, setShowUpdateProductModal] = useState(false);
-	const [showArchiveProductModal, setShowArchiveProductModal] = useState(false);
-	const [showDeleteProductModal, setShowDeleteProductModal] = useState(false);
+	const [showCreateModal, setShowCreateModal] = useState(false);
+	const [showUpdateModal, setShowUpdateModal] = useState(false);
+	const [showArchiveModal, setShowArchiveModal] = useState(false);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
 
 	const { handle } = useWorkspace();
 
@@ -69,7 +75,15 @@ export function ProductContextProvider({
 
 	const initialData = use(initialInfiniteProducts);
 
-	const { data: infiniteProducts } = api.product.byWorkspace.useInfiniteQuery(
+	const {
+		data: infiniteProducts,
+		hasNextPage,
+		fetchNextPage,
+		isFetchingNextPage,
+		isFetching,
+		isRefetching,
+		isPending,
+	} = api.product.byWorkspace.useInfiniteQuery(
 		{ handle, ...filters },
 		{
 			initialData: () => {
@@ -129,28 +143,35 @@ export function ProductContextProvider({
 	const gridListRef = useRef<HTMLDivElement>(null);
 
 	const contextValue = {
-		products: products,
-		productSelection,
-		lastSelectedProductId,
-		lastSelectedProduct,
-		setProductSelection,
+		items: products,
+		selection: productSelection,
+		lastSelectedItemId: lastSelectedProductId,
+		lastSelectedItem: lastSelectedProduct,
+		setSelection: setProductSelection,
 		gridListRef,
 		focusGridList: () => gridListRef.current?.focus(),
-		showCreateProductModal,
-		setShowCreateProductModal,
-		showUpdateProductModal,
-		setShowUpdateProductModal,
-		showArchiveProductModal,
-		setShowArchiveProductModal,
-		showDeleteProductModal,
-		setShowDeleteProductModal,
+		showCreateModal,
+		setShowCreateModal,
+		showUpdateModal,
+		setShowUpdateModal,
+		showArchiveModal,
+		setShowArchiveModal,
+		showDeleteModal,
+		setShowDeleteModal,
 		// filters
 		filters,
 		pendingFiltersTransition,
 		setSearch,
 		toggleArchived,
 		clearAllFilters,
-	} satisfies ProductCtx;
+		// infinite
+		hasNextPage,
+		fetchNextPage: () => void fetchNextPage(),
+		isFetchingNextPage,
+		isFetching,
+		isRefetching,
+		isPending,
+	} satisfies ProductContext;
 
 	return (
 		<ProductContext.Provider value={contextValue}>{children}</ProductContext.Provider>

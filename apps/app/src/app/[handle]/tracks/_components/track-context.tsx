@@ -9,48 +9,27 @@ import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 import { trackSearchParamsSchema } from '@barely/lib/server/routes/track/track.schema';
-import { wait } from '@barely/lib/utils/wait';
 
-interface TrackContext {
-	tracks: AppRouterOutputs['track']['byWorkspace']['tracks'];
-	trackSelection: Selection;
-	lastSelectedTrackId: string | undefined;
-	lastSelectedTrack: AppRouterOutputs['track']['byWorkspace']['tracks'][0] | undefined;
-	setTrackSelection: (selection: Selection) => void;
-	gridListRef: React.RefObject<HTMLDivElement>;
-	focusGridList: () => void;
-	// modals
-	showCreateTrackModal: boolean;
-	setShowCreateTrackModal: (show: boolean) => void;
-	showEditTrackModal: boolean;
-	setShowEditTrackModal: (show: boolean) => void;
-	showArchiveTrackModal: boolean;
-	setShowArchiveTrackModal: (show: boolean) => void;
-	showDeleteTrackModal: boolean;
-	setShowDeleteTrackModal: (show: boolean) => void;
-	// filters
-	filters: z.infer<typeof trackFilterParamsSchema>;
-	pendingFilters: boolean;
-	setSearch: (search: string) => void;
-	toggleArchived: (archived: boolean) => void;
-	clearAllFilters: () => void;
-}
+import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
+
+export type TrackContext = InfiniteItemsContext<
+	AppRouterOutputs['track']['byWorkspace']['tracks'][number],
+	z.infer<typeof trackFilterParamsSchema>
+>;
 
 const TrackContext = createContext<TrackContext | undefined>(undefined);
 
 export function TrackContextProvider({
 	children,
 	initialInfiniteTracks,
-	// filters,
 }: {
 	children: React.ReactNode;
 	initialInfiniteTracks: Promise<AppRouterOutputs['track']['byWorkspace']>;
-	// filters: z.infer<typeof trackFilterParamsSchema>;
 }) {
-	const [showCreateTrackModal, setShowCreateTrackModal] = useState(false);
-	const [showEditTrackModal, setShowEditTrackModal] = useState(false);
-	const [showArchiveTrackModal, setShowArchiveTrackModal] = useState(false);
-	const [showDeleteTrackModal, setShowDeleteTrackModal] = useState(false);
+	const [showCreateModal, setShowCreateModal] = useState(false);
+	const [showUpdateModal, setShowUpdateModal] = useState(false);
+	const [showArchiveModal, setShowArchiveModal] = useState(false);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
 
 	const { handle } = useWorkspace();
 
@@ -59,7 +38,7 @@ export function TrackContextProvider({
 		setQuery,
 		removeByKey,
 		removeAllQueryParams,
-		pending: pendingFilters,
+		pending: pendingFiltersTransition,
 	} = useTypedOptimisticQuery(trackSearchParamsSchema);
 
 	const { selectedTrackIds, ...filters } = data;
@@ -71,7 +50,15 @@ export function TrackContextProvider({
 
 	const initialData = use(initialInfiniteTracks);
 
-	const { data: infiniteTracks } = api.track.byWorkspace.useInfiniteQuery(
+	const {
+		data: infiniteTracks,
+		hasNextPage,
+		fetchNextPage,
+		isFetchingNextPage,
+		isFetching,
+		isRefetching,
+		isPending,
+	} = api.track.byWorkspace.useInfiniteQuery(
 		{
 			handle,
 			...filters,
@@ -85,7 +72,7 @@ export function TrackContextProvider({
 							nextCursor: initialData.nextCursor,
 						},
 					],
-					pageParams: [], // fixme: add page params
+					pageParams: [],
 				};
 			},
 			getNextPageParam: lastPage => lastPage.nextCursor,
@@ -110,13 +97,10 @@ export function TrackContextProvider({
 		removeAllQueryParams();
 	}, [removeAllQueryParams]);
 
-	const toggleArchived = useCallback(
-		(archived: boolean) => {
-			if (filters.showArchived) return removeByKey('showArchived');
-			return setQuery('showArchived', archived);
-		},
-		[filters.showArchived, removeByKey, setQuery],
-	);
+	const toggleArchived = useCallback(() => {
+		if (filters.showArchived) return removeByKey('showArchived');
+		return setQuery('showArchived', true);
+	}, [filters.showArchived, removeByKey, setQuery]);
 
 	const setSearch = useCallback(
 		(search: string) => {
@@ -136,31 +120,34 @@ export function TrackContextProvider({
 	const gridListRef = useRef<HTMLDivElement>(null);
 
 	const contextValue = {
-		tracks,
-		trackSelection,
-		lastSelectedTrackId,
-		lastSelectedTrack,
-		setTrackSelection,
+		items: tracks,
+		selection: trackSelection,
+		lastSelectedItemId: lastSelectedTrackId,
+		lastSelectedItem: lastSelectedTrack,
+		setSelection: setTrackSelection,
 		gridListRef,
-		focusGridList: () => {
-			wait(1)
-				.then(() => gridListRef.current?.focus())
-				.catch(err => console.error(err));
-		}, // fixme: this is a workaround for focus not working on modal closing
-		showCreateTrackModal,
-		setShowCreateTrackModal,
-		showEditTrackModal,
-		setShowEditTrackModal,
-		showArchiveTrackModal,
-		setShowArchiveTrackModal,
-		showDeleteTrackModal,
-		setShowDeleteTrackModal,
+		focusGridList: () => gridListRef.current?.focus(),
+		showCreateModal,
+		setShowCreateModal,
+		showUpdateModal,
+		setShowUpdateModal,
+		showArchiveModal,
+		setShowArchiveModal,
+		showDeleteModal,
+		setShowDeleteModal,
 		// filters
 		filters,
-		pendingFilters,
+		pendingFiltersTransition,
 		setSearch,
 		toggleArchived,
 		clearAllFilters,
+		// infinite
+		hasNextPage,
+		fetchNextPage: () => void fetchNextPage(),
+		isFetchingNextPage,
+		isFetching,
+		isRefetching,
+		isPending,
 	} satisfies TrackContext;
 
 	return <TrackContext.Provider value={contextValue}>{children}</TrackContext.Provider>;

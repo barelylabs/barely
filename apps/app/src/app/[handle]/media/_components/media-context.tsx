@@ -1,42 +1,20 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/router';
-import type { FileRecord } from '@barely/lib/server/routes/file/file.schema';
+// import type { FileRecord } from '@barely/lib/server/routes/file/file.schema';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
 import { createContext, useCallback, useContext, useRef, useState } from 'react';
 import { useFiles } from '@barely/lib/hooks/use-files';
 import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
 import { fileSearchParamsSchema } from '@barely/lib/server/routes/file/file.schema';
-import { wait } from '@barely/lib/utils/wait';
 
-interface MediaContext {
-	files: AppRouterOutputs['file']['byWorkspace']['files'];
-	// infinite
-	hasMoreFiles: boolean;
-	fetchMoreFiles: () => void;
-	// selection
-	fileSelection: Selection;
-	lastSelectedFileId: string | undefined;
-	lastSelectedFile: FileRecord | undefined;
-	setFileSelection: (selection: Selection) => void;
-	gridListRef: React.RefObject<HTMLDivElement>;
-	focusGridList: () => void;
-	showUploadMediaModal: boolean;
-	setShowUploadMediaModal: (show: boolean) => void;
-	showUpdateFileModal: boolean;
-	setShowUpdateFileModal: (show: boolean) => void;
-	showArchiveFileModal: boolean;
-	setShowArchiveFileModal: (show: boolean) => void;
-	showDeleteFileModal: boolean;
-	setShowDeleteFileModal: (show: boolean) => void;
-	// filters
-	filters: z.infer<typeof fileSearchParamsSchema>;
-	pendingFiltersTransition: boolean;
-	setSearch: (search: string) => void;
-	toggleArchived: () => void;
-	clearAllFilters: () => void;
-}
+import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
+
+type MediaContext = InfiniteItemsContext<
+	AppRouterOutputs['file']['byWorkspace']['files'][number],
+	z.infer<typeof fileSearchParamsSchema>
+>;
 
 const MediaContext = createContext<MediaContext | undefined>(undefined);
 
@@ -53,17 +31,25 @@ export function MediaContextProvider({
 }) {
 	const gridListRef = useRef<HTMLDivElement>(null);
 
-	const [showCreateFileModal, setShowCreateFileModal] = useState(false);
-	const [showUpdateFileModal, setShowUpdateFileModal] = useState(false);
-	const [showArchiveFileModal, setShowArchiveFileModal] = useState(false);
-	const [showDeleteFileModal, setShowDeleteFileModal] = useState(false);
+	const [showCreateModal, setShowCreateModal] = useState(false);
+	const [showUpdateModal, setShowUpdateModal] = useState(false);
+	const [showArchiveModal, setShowArchiveModal] = useState(false);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
 
 	const { data, setQuery, removeByKey, removeAllQueryParams, pending } =
 		useTypedOptimisticQuery(fileSearchParamsSchema);
 
 	const { selectedFileIds, ...filters } = data;
 
-	const { files, hasMoreFiles, fetchMoreFiles } = useFiles({ ...filters });
+	const {
+		files,
+		hasMoreFiles,
+		fetchMoreFiles,
+		isFetchingNextPage,
+		isFetching,
+		isRefetching,
+		isPending,
+	} = useFiles({ ...filters });
 
 	// /* selection */
 	// const [optimisticSelection, setOptimisticSelection] = useOptimistic<Selection>(
@@ -114,39 +100,41 @@ export function MediaContextProvider({
 	const lastSelectedFile = files.find(f => f.id === lastSelectedFileId);
 
 	const contextValue = {
-		files,
-		fileSelection,
-		hasMoreFiles,
-		fetchMoreFiles: () => {
-			fetchMoreFiles().catch(e => console.error(e));
-		},
-		lastSelectedFileId,
-		lastSelectedFile,
-		setFileSelection,
+		items: files,
+		selection: fileSelection,
+		lastSelectedItemId: lastSelectedFileId,
+		lastSelectedItem: lastSelectedFile,
+		setSelection: setFileSelection,
 		gridListRef,
 		focusGridList: () => {
-			wait(1)
-				.then(() => {
-					gridListRef.current?.focus();
-				})
-				.catch(e => {
-					console.error(e);
-				});
-		}, // fixme: this is a workaround for focus not working on modal closing,
-		showUploadMediaModal: showCreateFileModal,
-		setShowUploadMediaModal: setShowCreateFileModal,
-		showUpdateFileModal,
-		setShowUpdateFileModal,
-		showArchiveFileModal,
-		setShowArchiveFileModal,
-		showDeleteFileModal,
-		setShowDeleteFileModal,
+			fetchMoreFiles().catch(e => console.error(e));
+		},
+		showCreateModal,
+		setShowCreateModal,
+		showUpdateModal,
+		setShowUpdateModal,
+		showArchiveModal,
+		setShowArchiveModal,
+		showDeleteModal,
+		setShowDeleteModal,
+
+		// showUploadMediaModal: showCreateFileModal,
+		// setShowUploadMediaModal: setShowCreateFileModal,
+
 		// filters
 		filters,
 		pendingFiltersTransition: pending,
 		setSearch,
 		toggleArchived,
 		clearAllFilters,
+
+		// infinite
+		hasNextPage: hasMoreFiles,
+		fetchNextPage: () => void fetchMoreFiles(),
+		isFetchingNextPage,
+		isFetching,
+		isRefetching,
+		isPending,
 	} satisfies MediaContext;
 
 	return <MediaContext.Provider value={contextValue}>{children}</MediaContext.Provider>;

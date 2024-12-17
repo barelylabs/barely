@@ -5,12 +5,12 @@ import { Button } from '@barely/ui/elements/button';
 import { useEmailTemplateGroupContext } from './email-template-group-context';
 
 export function CreateEmailTemplateGroupButton() {
-	const { setShowCreateEmailTemplateGroupModal } = useEmailTemplateGroupContext();
+	const { setShowCreateModal } = useEmailTemplateGroupContext();
 
 	return (
 		<Button
 			onClick={() => {
-				setShowCreateEmailTemplateGroupModal(true);
+				setShowCreateModal(true);
 			}}
 			className='space-x-3'
 		>

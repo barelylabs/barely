@@ -10,31 +10,38 @@ import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 import { fanGroupSearchParamsSchema } from '@barely/lib/server/routes/fan-group/fan-group.schema';
 
-interface FanGroupContext {
-	fanGroups: AppRouterOutputs['fanGroup']['byWorkspace']['fanGroups'];
-	fanGroupSelection: Selection;
-	lastSelectedFanGroupId: string | undefined;
-	lastSelectedFanGroup:
-		| AppRouterOutputs['fanGroup']['byWorkspace']['fanGroups'][number]
-		| undefined;
-	setFanGroupSelection: (selection: Selection) => void;
-	gridListRef: React.RefObject<HTMLDivElement>;
-	focusGridList: () => void;
-	showCreateFanGroupModal: boolean;
-	setShowCreateFanGroupModal: (show: boolean) => void;
-	showUpdateFanGroupModal: boolean;
-	setShowUpdateFanGroupModal: (show: boolean) => void;
-	showArchiveFanGroupModal: boolean;
-	setShowArchiveFanGroupModal: (show: boolean) => void;
-	showDeleteFanGroupModal: boolean;
-	setShowDeleteFanGroupModal: (show: boolean) => void;
-	// filters
-	filters: z.infer<typeof fanGroupFilterParamsSchema>;
-	pendingFiltersTransition: boolean;
-	setSearch: (search: string) => void;
-	toggleArchived: () => void;
-	clearAllFilters: () => void;
-}
+import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
+
+// interface FanGroupContext {
+// 	fanGroups: AppRouterOutputs['fanGroup']['byWorkspace']['fanGroups'];
+// 	fanGroupSelection: Selection;
+// 	lastSelectedFanGroupId: string | undefined;
+// 	lastSelectedFanGroup:
+// 		| AppRouterOutputs['fanGroup']['byWorkspace']['fanGroups'][number]
+// 		| undefined;
+// 	setFanGroupSelection: (selection: Selection) => void;
+// 	gridListRef: React.RefObject<HTMLDivElement>;
+// 	focusGridList: () => void;
+// 	showCreateFanGroupModal: boolean;
+// 	setShowCreateFanGroupModal: (show: boolean) => void;
+// 	showUpdateFanGroupModal: boolean;
+// 	setShowUpdateFanGroupModal: (show: boolean) => void;
+// 	showArchiveFanGroupModal: boolean;
+// 	setShowArchiveFanGroupModal: (show: boolean) => void;
+// 	showDeleteFanGroupModal: boolean;
+// 	setShowDeleteFanGroupModal: (show: boolean) => void;
+// 	// filters
+// 	filters: z.infer<typeof fanGroupFilterParamsSchema>;
+// 	pendingFiltersTransition: boolean;
+// 	setSearch: (search: string) => void;
+// 	toggleArchived: () => void;
+// 	clearAllFilters: () => void;
+// }
+
+type FanGroupContext = InfiniteItemsContext<
+	AppRouterOutputs['fanGroup']['byWorkspace']['fanGroups'][number],
+	z.infer<typeof fanGroupFilterParamsSchema>
+>;
 
 const FanGroupContext = createContext<FanGroupContext | undefined>(undefined);
 
@@ -45,10 +52,10 @@ export function FanGroupContextProvider({
 	children: React.ReactNode;
 	initialFanGroups: Promise<AppRouterOutputs['fanGroup']['byWorkspace']>;
 }) {
-	const [showCreateFanGroupModal, setShowCreateFanGroupModal] = useState(false);
-	const [showUpdateFanGroupModal, setShowUpdateFanGroupModal] = useState(false);
-	const [showArchiveFanGroupModal, setShowArchiveFanGroupModal] = useState(false);
-	const [showDeleteFanGroupModal, setShowDeleteFanGroupModal] = useState(false);
+	const [showCreateModal, setShowCreateModal] = useState(false);
+	const [showUpdateModal, setShowUpdateModal] = useState(false);
+	const [showArchiveModal, setShowArchiveModal] = useState(false);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
 
 	const { handle } = useWorkspace();
 
@@ -64,7 +71,14 @@ export function FanGroupContextProvider({
 
 	const initialData = use(initialFanGroups);
 
-	const { data: infiniteFanGroups } = api.fanGroup.byWorkspace.useInfiniteQuery(
+	const {
+		data: infiniteFanGroups,
+		hasNextPage,
+		fetchNextPage,
+		isPending,
+		isFetching,
+		isRefetching,
+	} = api.fanGroup.byWorkspace.useInfiniteQuery(
 		{ handle, ...filters },
 		{
 			initialData: () => {
@@ -122,29 +136,35 @@ export function FanGroupContextProvider({
 	);
 
 	const contextValue = {
-		fanGroups,
-		fanGroupSelection,
-		lastSelectedFanGroupId,
-		lastSelectedFanGroup,
-		setFanGroupSelection,
+		items: fanGroups,
+		selection: fanGroupSelection,
+		lastSelectedItemId: lastSelectedFanGroupId,
+		lastSelectedItem: lastSelectedFanGroup,
+		setSelection: setFanGroupSelection,
 		gridListRef,
 		focusGridList: () => {
 			gridListRef.current?.focus();
 		},
-		showCreateFanGroupModal,
-		setShowCreateFanGroupModal,
-		showUpdateFanGroupModal,
-		setShowUpdateFanGroupModal,
-		showArchiveFanGroupModal,
-		setShowArchiveFanGroupModal,
-		showDeleteFanGroupModal,
-		setShowDeleteFanGroupModal,
+		showCreateModal,
+		setShowCreateModal,
+		showUpdateModal,
+		setShowUpdateModal,
+		showArchiveModal,
+		setShowArchiveModal,
+		showDeleteModal,
+		setShowDeleteModal,
 		// filters
 		filters,
 		pendingFiltersTransition: pending,
 		setSearch,
 		toggleArchived,
 		clearAllFilters,
+		hasNextPage,
+		fetchNextPage: () => void fetchNextPage(),
+		isFetchingNextPage: isFetching,
+		isRefetching,
+		isPending,
+		isFetching,
 	} satisfies FanGroupContext;
 
 	return (

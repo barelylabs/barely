@@ -2,12 +2,6 @@
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/react';
 import type { cartOrderFilterParamsSchema } from '@barely/lib/server/routes/cart-order/cart-order.schema';
-import type {
-	FetchNextPageOptions,
-	// 	InfiniteData,
-	// 	InfiniteQueryObserverResult,
-	// 	UseInfiniteQueryResult,
-} from '@tanstack/react-query';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod';
 import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
@@ -16,34 +10,50 @@ import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
 import { cartOrderSearchParamsSchema } from '@barely/lib/server/routes/cart-order/cart-order.schema';
 
-interface CartOrderContext {
-	cartOrders: AppRouterOutputs['cartOrder']['byWorkspace']['cartOrders'];
-	cartOrderSelection: Selection;
-	lastSelectedCartOrderId: string | undefined;
-	lastSelectedCartOrder:
-		| AppRouterOutputs['cartOrder']['byWorkspace']['cartOrders'][0]
-		| undefined;
-	setCartOrderSelection: (selection: Selection) => void;
-	gridListRef: React.RefObject<HTMLDivElement>;
-	focusGridList: () => void;
+import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
+
+// interface CartOrderContext {
+// 	cartOrders: AppRouterOutputs['cartOrder']['byWorkspace']['cartOrders'];
+// 	cartOrderSelection: Selection;
+// 	lastSelectedCartOrderId: string | undefined;
+// 	lastSelectedCartOrder:
+// 		| AppRouterOutputs['cartOrder']['byWorkspace']['cartOrders'][0]
+// 		| undefined;
+// 	setCartOrderSelection: (selection: Selection) => void;
+// 	gridListRef: React.RefObject<HTMLDivElement>;
+// 	focusGridList: () => void;
+// 	showMarkAsFulfilledModal: boolean;
+// 	setShowMarkAsFulfilledModal: (show: boolean) => void;
+// 	showCancelCartOrderModal: boolean;
+// 	setShowCancelCartOrderModal: (show: boolean) => void;
+// 	//infinite
+// 	queryIsPending: boolean;
+// 	hasNextPage: boolean;
+// 	fetchNextPage: (options?: FetchNextPageOptions) => void | Promise<void>;
+// 	isFetchingNextPage: boolean;
+// 	// filters
+// 	filters: z.infer<typeof cartOrderFilterParamsSchema>;
+// 	pendingFiltersTransition: boolean;
+// 	setSearch: (search: string) => void;
+// 	toggleArchived: () => void;
+// 	toggleFulfilled: () => void;
+// 	clearAllFilters: () => void;
+// 	togglePreorders: () => void;
+// 	toggleCanceled: () => void;
+// }
+
+type CartOrderContext = InfiniteItemsContext<
+	AppRouterOutputs['cartOrder']['byWorkspace']['cartOrders'][0],
+	z.infer<typeof cartOrderFilterParamsSchema>
+> & {
 	showMarkAsFulfilledModal: boolean;
 	setShowMarkAsFulfilledModal: (show: boolean) => void;
 	showCancelCartOrderModal: boolean;
 	setShowCancelCartOrderModal: (show: boolean) => void;
-	//infinite
-	hasNextPage: boolean;
-	fetchNextPage: (options?: FetchNextPageOptions) => void | Promise<void>;
-	isFetchingNextPage: boolean;
-	// filters
-	filters: z.infer<typeof cartOrderFilterParamsSchema>;
-	pendingFiltersTransition: boolean;
-	setSearch: (search: string) => void;
-	toggleArchived: () => void;
 	toggleFulfilled: () => void;
-	clearAllFilters: () => void;
 	togglePreorders: () => void;
 	toggleCanceled: () => void;
-}
+};
 
 const CartOrderContext = createContext<CartOrderContext | undefined>(undefined);
 
@@ -56,6 +66,10 @@ export function CartOrderContextProvider({
 }) {
 	const [showMarkAsFulfilledModal, setShowMarkAsFulfilledModal] = useState(false);
 	const [showCancelCartOrderModal, setShowCancelCartOrderModal] = useState(false);
+
+	// const apiUtils = api.useUtils();
+
+	// apiUtils.
 
 	const { handle } = useWorkspace();
 
@@ -76,6 +90,9 @@ export function CartOrderContextProvider({
 		hasNextPage,
 		fetchNextPage,
 		isFetchingNextPage,
+		isFetching,
+		isRefetching,
+		isPending,
 	} = api.cartOrder.byWorkspace.useInfiniteQuery(
 		{
 			handle,
@@ -168,14 +185,22 @@ export function CartOrderContextProvider({
 	);
 
 	const contextValue = {
-		cartOrders,
-		cartOrderSelection,
-		lastSelectedCartOrderId,
-		lastSelectedCartOrder,
-		setCartOrderSelection,
+		items: cartOrders,
+		selection: cartOrderSelection,
+		lastSelectedItemId: lastSelectedCartOrderId,
+		lastSelectedItem: lastSelectedCartOrder,
+		setSelection: setCartOrderSelection,
 		gridListRef,
 		focusGridList: () => gridListRef.current?.focus(),
 		// modals
+		showCreateModal: false,
+		setShowCreateModal: () => void {},
+		showUpdateModal: false,
+		setShowUpdateModal: () => void {},
+		showDeleteModal: false,
+		setShowDeleteModal: () => void {},
+		showArchiveModal: false,
+		setShowArchiveModal: () => void {},
 		showMarkAsFulfilledModal,
 		setShowMarkAsFulfilledModal,
 		showCancelCartOrderModal,
@@ -193,6 +218,9 @@ export function CartOrderContextProvider({
 		hasNextPage,
 		fetchNextPage: () => void fetchNextPage(),
 		isFetchingNextPage,
+		isFetching,
+		isRefetching,
+		isPending,
 	} satisfies CartOrderContext;
 
 	return (

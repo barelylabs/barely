@@ -7,35 +7,32 @@ import { useCartOrderContext } from '~/app/[handle]/orders/_components/cart-orde
 
 export function CartOrderHotkeys() {
 	const {
-		cartOrderSelection,
+		selection,
 		setShowMarkAsFulfilledModal,
 		setShowCancelCartOrderModal,
-		lastSelectedCartOrder,
+		lastSelectedItem,
 	} = useCartOrderContext();
 
 	const fulfillAction = useCallback(() => {
-		if (
-			!lastSelectedCartOrder ||
-			lastSelectedCartOrder.fulfillmentStatus === 'fulfilled'
-		) {
+		if (!lastSelectedItem || lastSelectedItem.fulfillmentStatus === 'fulfilled') {
 			return;
 		}
 		setShowMarkAsFulfilledModal(true);
-	}, [lastSelectedCartOrder, setShowMarkAsFulfilledModal]);
+	}, [lastSelectedItem, setShowMarkAsFulfilledModal]);
 
 	const cancelAction = useCallback(() => {
 		if (
-			!lastSelectedCartOrder ||
-			!!lastSelectedCartOrder.canceledAt ||
-			lastSelectedCartOrder.fulfillmentStatus !== 'pending'
+			!lastSelectedItem ||
+			!!lastSelectedItem.canceledAt ||
+			lastSelectedItem.fulfillmentStatus !== 'pending'
 		) {
 			return;
 		}
 		setShowCancelCartOrderModal(true);
-	}, [lastSelectedCartOrder, setShowCancelCartOrderModal]);
+	}, [lastSelectedItem, setShowCancelCartOrderModal]);
 
 	useModalHotKeys({
-		itemSelected: cartOrderSelection !== 'all' && !!cartOrderSelection.size,
+		itemSelected: selection !== 'all' && !!selection.size,
 		customHotkeys: [
 			{
 				condition: e => e.key === 'f' && !e.metaKey && !e.ctrlKey && !e.shiftKey,

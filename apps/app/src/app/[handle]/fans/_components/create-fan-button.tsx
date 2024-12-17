@@ -5,12 +5,12 @@ import { Button } from '@barely/ui/elements/button';
 import { useFanContext } from '~/app/[handle]/fans/_components/fan-context';
 
 export function CreateFanButton() {
-	const { setShowCreateFanModal } = useFanContext();
+	const { setShowCreateModal } = useFanContext();
 
 	return (
 		<Button
 			onClick={() => {
-				setShowCreateFanModal(true);
+				setShowCreateModal(true);
 			}}
 			className='space-x-3'
 		>

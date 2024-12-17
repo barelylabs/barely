@@ -6,20 +6,19 @@ import { useEmailTemplateGroupContext } from './email-template-group-context';
 
 export function EmailTemplateGroupHotkeys() {
 	const {
-		emailTemplateGroupSelection,
-		setShowCreateEmailTemplateGroupModal,
-		setShowUpdateEmailTemplateGroupModal,
-		setShowArchiveEmailTemplateGroupModal,
-		setShowDeleteEmailTemplateGroupModal,
+		selection,
+		setShowCreateModal,
+		setShowUpdateModal,
+		setShowArchiveModal,
+		setShowDeleteModal,
 	} = useEmailTemplateGroupContext();
 
 	useModalHotKeys({
-		setShowCreateModal: setShowCreateEmailTemplateGroupModal,
-		setShowUpdateModal: setShowUpdateEmailTemplateGroupModal,
-		setShowArchiveModal: setShowArchiveEmailTemplateGroupModal,
-		setShowDeleteModal: setShowDeleteEmailTemplateGroupModal,
-		itemSelected:
-			emailTemplateGroupSelection !== 'all' && !!emailTemplateGroupSelection.size,
+		setShowCreateModal,
+		setShowUpdateModal,
+		setShowArchiveModal,
+		setShowDeleteModal,
+		itemSelected: selection !== 'all' && !!selection.size,
 	});
 
 	return null;

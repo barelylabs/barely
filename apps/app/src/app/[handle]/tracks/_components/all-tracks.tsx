@@ -2,6 +2,7 @@
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/router';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
 import { Img } from '@barely/ui/elements/img';
@@ -12,12 +13,13 @@ import { useTrackContext } from '~/app/[handle]/tracks/_components/track-context
 
 export function AllTracks() {
 	const {
-		tracks,
-		trackSelection,
-		lastSelectedTrackId,
-		setTrackSelection,
+		items,
+		selection,
+		lastSelectedItemId,
+		setSelection,
 		gridListRef,
-		setShowEditTrackModal,
+		setShowUpdateModal,
+		isFetching,
 	} = useTrackContext();
 
 	return (
@@ -29,22 +31,24 @@ export function AllTracks() {
 			selectionMode='multiple'
 			selectionBehavior='replace'
 			// tracks
-			items={tracks}
-			selectedKeys={trackSelection}
-			setSelectedKeys={setTrackSelection}
+			items={items}
+			selectedKeys={selection}
+			setSelectedKeys={setSelection}
 			onAction={() => {
-				if (!lastSelectedTrackId) return;
-				setShowEditTrackModal(true);
+				if (!lastSelectedItemId) return;
+				setShowUpdateModal(true);
 			}}
 			// empty
-			renderEmptyState={() => (
-				<NoResultsPlaceholder
-					icon='track'
-					title='No tracks found.'
-					subtitle='Create a new track to get started.'
-					button={<CreateTrackButton />}
-				/>
-			)}
+			renderEmptyState={() =>
+				isFetching ?
+					<GridListSkeleton />
+				:	<NoResultsPlaceholder
+						icon='track'
+						title='No tracks found.'
+						subtitle='Create a new track to get started.'
+						button={<CreateTrackButton />}
+					/>
+			}
 		>
 			{track => <TrackCard track={track} />}
 		</GridList>
@@ -56,7 +60,7 @@ function TrackCard({
 }: {
 	track: AppRouterOutputs['track']['byWorkspace']['tracks'][number];
 }) {
-	const { setShowEditTrackModal, setShowArchiveTrackModal, setShowDeleteTrackModal } =
+	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } =
 		useTrackContext();
 
 	return (
@@ -64,9 +68,9 @@ function TrackCard({
 			id={track.id}
 			key={track.id}
 			textValue={track.name}
-			setShowUpdateModal={setShowEditTrackModal}
-			setShowArchiveModal={setShowArchiveTrackModal}
-			setShowDeleteModal={setShowDeleteTrackModal}
+			setShowUpdateModal={setShowUpdateModal}
+			setShowArchiveModal={setShowArchiveModal}
+			setShowDeleteModal={setShowDeleteModal}
 		>
 			<div className='flex flex-grow flex-row items-center gap-4'>
 				<div className='flex flex-col items-start gap-1'>
