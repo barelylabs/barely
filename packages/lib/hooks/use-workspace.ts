@@ -28,6 +28,8 @@ export function useSetWorkspace({ onBeginSet }: { onBeginSet?: () => void }) {
 
 			onBeginSet?.();
 
+			if (currentWorkspace.handle === workspace.handle) return;
+
 			if (currentPath?.endsWith('carts')) {
 				apiUtils.cartFunnel.byWorkspace.setInfiniteData(
 					{ handle: workspace.handle },
@@ -311,13 +313,12 @@ export function useSetWorkspace({ onBeginSet }: { onBeginSet?: () => void }) {
 				await apiUtils.track.byWorkspace.invalidate();
 			}
 
-			if (currentWorkspace.handle === workspace.handle) return;
 			if (currentPath) {
-				router.push(currentPath.replace(currentWorkspace.handle, workspace.handle));
-				// return console.log('pushed @', Date.now());
+				return router.push(
+					currentPath.replace(currentWorkspace.handle, workspace.handle),
+				);
 			}
 			router.push(`/${workspace.handle}`);
-			// console.log('pushed @', Date.now());
 		},
 		[apiUtils, currentPath, currentWorkspace, router, onBeginSet],
 	);
