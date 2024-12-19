@@ -1,25 +1,30 @@
-import { H } from '@barely/ui/elements/typography';
-
-import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
-import { AddMemberButton } from '~/app/[handle]/settings/team/_components/add-member-button';
+import { AcceptInviteModal } from '~/app/[handle]/settings/team/_components/accept-invite-modal';
 import {
-	AllInvites,
-	AllMembers,
-} from '~/app/[handle]/settings/team/_components/all-members';
+	AllMyInvites,
+	AllMyWorkspaces,
+} from '~/app/[handle]/settings/team/_components/all-personal-teams';
+import {
+	AllWorkspaceInvites,
+	AllWorkspaceMembers,
+} from '~/app/[handle]/settings/team/_components/all-workspace-teams';
 import { InviteMemberModal } from '~/app/[handle]/settings/team/_components/invite-member-modal';
+import { PersonalInvitesContextProvider } from '~/app/[handle]/settings/team/_components/personal-invites-context';
+import { TeamDashContentHeader } from '~/app/[handle]/settings/team/_components/team-dash-content-header';
 
 export default function TeamPage() {
 	return (
 		<>
-			<DashContentHeader
-				title='Members'
-				subtitle='Manage your team'
-				button={<AddMemberButton />}
-			/>
-			<H size='2'>Members</H>
-			<AllMembers />
-			<H size='2'>Invites</H>
-			<AllInvites />
+			<TeamDashContentHeader />
+
+			<AllMyWorkspaces />
+
+			<PersonalInvitesContextProvider>
+				<AllMyInvites />
+				<AcceptInviteModal />
+			</PersonalInvitesContextProvider>
+
+			<AllWorkspaceMembers />
+			<AllWorkspaceInvites />
 			<InviteMemberModal />
 		</>
 	);

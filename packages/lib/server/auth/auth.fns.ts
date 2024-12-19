@@ -71,8 +71,11 @@ export async function getDefaultWorkspaceOfCurrentUser(session?: Session | null)
 
 export function getDefaultWorkspaceOfUser(user: SessionUser) {
 	const workspaces = user.workspaces ?? [];
-	const defaultWorkspace = workspaces[0];
-	return defaultWorkspace ?? raise('No default workspace');
+	return (
+		workspaces.filter(w => w.type !== 'personal')[0] ??
+		workspaces[0] ??
+		raise('No default workspace')
+	);
 }
 
 export function generateVerificationToken() {

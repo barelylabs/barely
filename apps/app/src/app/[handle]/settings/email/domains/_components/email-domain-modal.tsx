@@ -20,7 +20,7 @@ export const updateEmailDomainAtom = atom<InsertEmailDomain | undefined>(undefin
 
 export function EmailDomainModal() {
 	const apiUtils = api.useUtils();
-	// const workspace = useWorkspace();
+	// const {workspace} = useWorkspace();
 
 	// const { domains } = useEmailDomains();
 

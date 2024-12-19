@@ -1,4 +1,4 @@
-import { and, eq, gt } from 'drizzle-orm';
+import { and, eq, gt, isNull } from 'drizzle-orm';
 import { z } from 'zod';
 
 import { newId } from '../../../utils/id';
@@ -42,6 +42,14 @@ export const workspaceRouter = createTRPCRouter({
 
 	// 		return workspace;
 	// 	}),
+
+	nameById: publicProcedure.input(z.string()).query(async ({ input, ctx }) => {
+		const workspace = await ctx.db.http.query.Workspaces.findFirst({
+			where: eq(Workspaces.id, input),
+		});
+
+		return workspace?.name;
+	}),
 
 	current: privateProcedure.query(({ ctx }) => {
 		if (!ctx.workspace) return null;
@@ -94,6 +102,9 @@ export const workspaceRouter = createTRPCRouter({
 		}),
 
 	members: workspaceQueryProcedure.query(async ({ ctx }) => {
+		console.log('members ctx.workspace.id => ', ctx.workspace.id);
+		console.log('members ctx.workspace.handle => ', ctx.workspace.handle);
+
 		const members = await ctx.db.http.query._Users_To_Workspaces.findMany({
 			where: eq(_Users_To_Workspaces.workspaceId, ctx.workspace.id),
 			limit: 20,
@@ -101,6 +112,8 @@ export const workspaceRouter = createTRPCRouter({
 				user: true,
 			},
 		});
+
+		console.log('members => ', members);
 
 		return members.map(m => ({
 			...m.user,
@@ -113,6 +126,8 @@ export const workspaceRouter = createTRPCRouter({
 			where: and(
 				eq(WorkspaceInvites.workspaceId, ctx.workspace.id),
 				gt(WorkspaceInvites.expiresAt, new Date()),
+				isNull(WorkspaceInvites.acceptedAt),
+				isNull(WorkspaceInvites.declinedAt),
 			),
 		});
 

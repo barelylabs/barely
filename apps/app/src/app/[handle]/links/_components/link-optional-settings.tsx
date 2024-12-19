@@ -25,7 +25,7 @@ export function LinkOptionalSettings({
 }) {
 	const { data: endpoints } = api.analyticsEndpoint.byCurrentWorkspace.useQuery();
 	const setShowUpgradeModal = useSetAtom(showUpgradeModalAtom);
-	const workspace = useWorkspace();
+	const { workspace } = useWorkspace();
 
 	const hasEndpoint = Object.values(endpoints ?? {}).some(endpoint => endpoint !== null);
 

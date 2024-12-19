@@ -1,5 +1,6 @@
 'use client';
 
+import { useWorkspaceIsPersonal } from '@barely/lib/hooks/use-workspace';
 import { useAtom } from 'jotai';
 
 import { Button } from '@barely/ui/elements/button';
@@ -9,13 +10,9 @@ import { showInviteMemberModalAtom } from '~/app/[handle]/settings/team/_compone
 export function AddMemberButton() {
 	const [, showModal] = useAtom(showInviteMemberModalAtom);
 
-	return (
-		<Button
-			onClick={() => showModal(true)}
-			// icon='plus'
-			// className='w-full'
-		>
-			Add member
-		</Button>
-	);
+	const isPersonal = useWorkspaceIsPersonal();
+
+	if (isPersonal) return null;
+
+	return <Button onClick={() => showModal(true)}>Add member</Button>;
 }

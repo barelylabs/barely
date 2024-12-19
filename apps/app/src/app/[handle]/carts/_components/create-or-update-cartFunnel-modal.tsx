@@ -25,7 +25,7 @@ import { useCartFunnelContext } from '~/app/[handle]/carts/_components/cartFunne
 
 export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' }) {
 	const apiUtils = api.useUtils();
-	const workspace = useWorkspace();
+	const { workspace } = useWorkspace();
 
 	/* funnel context */
 	const {

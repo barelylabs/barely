@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 
 import { parseForDb } from '../../../utils/phone-number';
-import { createTRPCRouter, publicProcedure } from '../../api/trpc';
+import { createTRPCRouter, privateProcedure, publicProcedure } from '../../api/trpc';
 import { checkEmailExistsOnServer, createUser } from './user.fns';
 import { createUserSchema } from './user.schema';
 import { Users } from './user.sql';
@@ -25,6 +25,14 @@ const userRouter = createTRPCRouter({
 			.then(users => users[0]);
 
 		return user;
+	}),
+
+	workspaceInvites: privateProcedure.query(({ ctx }) => {
+		return ctx.user.workspaceInvites ?? [];
+	}),
+
+	workspaces: privateProcedure.query(({ ctx }) => {
+		return ctx.user.workspaces;
 	}),
 
 	emailExists: publicProcedure

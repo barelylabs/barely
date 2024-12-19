@@ -18,7 +18,7 @@ import { campaignTypeDisplay } from '@barely/utils/campaign';
 
 export const AllCampaigns = () => {
 	const params = useParams();
-	const workspace = useWorkspace();
+	const { workspace } = useWorkspace();
 
 	const stage = z
 		.enum(['screening', 'approved', 'active'])

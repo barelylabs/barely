@@ -22,7 +22,7 @@ interface ExternalAccountCardProps {
 export const ProviderAccountCard = ({ provider }: ExternalAccountCardProps) => {
 	const router = useRouter();
 	const utils = api.useUtils();
-	const workspace = useWorkspace();
+	const { workspace } = useWorkspace();
 
 	const { data: providerAccounts } = api.providerAccount.byWorkspace.useQuery({
 		handle: workspace.handle,

@@ -12,7 +12,7 @@ import { Icon } from '@barely/ui/elements/icon';
 const AllPlaylists = () => {
 	const utils = api.useContext();
 
-	const workspace = useWorkspace();
+	const { workspace } = useWorkspace();
 
 	const [playlistsMap] = api.playlist.byWorkspaceId.useSuspenseQuery({
 		workspaceId: workspace.id,

@@ -10,7 +10,7 @@ export function useWorkspaceAssets({
 	types?: ('cartFunnel' | 'pressKit' | 'landingPage')[];
 	search?: string;
 }) {
-	const workspace = useWorkspace();
+	const { workspace } = useWorkspace();
 
 	const { data, isPlaceholderData } = api.workspace.assets.useQuery(
 		{

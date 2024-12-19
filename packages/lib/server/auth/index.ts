@@ -4,8 +4,10 @@ import NextAuth from 'next-auth';
 
 // import type { Db } from '../db';
 import type { User as DbUser, User_To_Workspace } from '../routes/user/user.schema';
+import type { SessionWorkspaceInvite } from '../routes/workspace-invite/workspace-invite.schema';
 import type { Workspace } from '../routes/workspace/workspace.schema';
 import { env } from '../../env';
+import { isDevelopment } from '../../utils/environment';
 import { NeonAdapter } from './auth.adapter';
 import { generateVerificationToken, sendLoginEmail } from './auth.fns';
 
@@ -13,15 +15,13 @@ import { generateVerificationToken, sendLoginEmail } from './auth.fns';
 
 export interface SessionWorkspace extends Workspace {
 	role: User_To_Workspace['role'];
-	// avatarImageUrl?: string;
-	// headerImageUrl?: string;
-
 	avatarImageS3Key?: string;
 	headerImageS3Key?: string;
 }
 
 export interface SessionUser extends DbUser {
 	workspaces: SessionWorkspace[];
+	workspaceInvites?: SessionWorkspaceInvite[];
 }
 
 declare module 'next-auth' {
@@ -138,6 +138,23 @@ const authConfig: NextAuthConfig = {
 	callbacks: {
 		session: ({ session, user }) => {
 			return { ...session, user };
+		},
+		redirect: ({ url, baseUrl }) => {
+			console.log('redirect baseUrl => ', baseUrl);
+			console.log('redirect url => ', url);
+
+			if (url.startsWith('/')) return `${baseUrl}${url}`;
+
+			const origin = new URL(baseUrl).origin;
+			console.log('redirect origin => ', origin);
+
+			if (
+				origin === baseUrl ||
+				(isDevelopment() && url.startsWith('https://127.0.0.1:3000'))
+			)
+				return url;
+
+			return baseUrl;
 		},
 	},
 };

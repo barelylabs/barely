@@ -17,6 +17,7 @@ import { PlaylistCoverRenders } from '../playlist/playlist-cover.sql';
 import { ProviderAccounts } from '../provider-account/provider-account.sql';
 import { TrackRenders } from '../track/track-render.sql';
 import { Transactions } from '../transaction/transaction.sql';
+import { WorkspaceInvites } from '../workspace-invite/workspace-invite.sql';
 import { Workspaces } from '../workspace/workspace.sql';
 import { UserSessions } from './user-session.sql';
 
@@ -90,6 +91,7 @@ export const UserRelations = relations(Users, ({ one, many }) => ({
 
 	// many-to-many
 	_workspaces: many(_Users_To_Workspaces),
+	workspaceInvites: many(WorkspaceInvites),
 }));
 
 // join tables

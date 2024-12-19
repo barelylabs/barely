@@ -26,8 +26,7 @@ export const editDomainAtom = atom<InsertDomain | undefined>(undefined);
 
 export function DomainModal() {
 	const apiUtils = api.useUtils();
-	const workspace = useWorkspace();
-	// const { data: domains } = api.domain.byWorkspace.useQuery();
+	const { workspace } = useWorkspace();
 	const { domains } = useWebDomains();
 
 	const [editDomain, setEditDomain] = useAtom(editDomainAtom);

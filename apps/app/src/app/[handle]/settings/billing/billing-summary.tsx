@@ -16,7 +16,9 @@ import { capitalize } from '@barely/utils/text';
 import { showUpgradeModalAtom } from '~/app/[handle]/settings/billing/upgrade-modal';
 
 export function BillingSummary() {
-	const { plan, linkUsage, linkUsageLimit } = useWorkspace();
+	const {
+		workspace: { plan, linkUsage, linkUsageLimit },
+	} = useWorkspace();
 
 	const setShowUpgradeModal = useSetAtom(showUpgradeModalAtom);
 

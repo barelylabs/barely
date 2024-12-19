@@ -46,10 +46,9 @@ interface SidebarNavGroup {
 type SidebarNavItem = SidebarNavLink | SidebarNavGroup;
 
 export function SidebarNav() {
-	// const handle = props.workspace.handle;
 	const pathname = usePathname();
-	const workspace = useWorkspace();
-	const handle = workspace.handle;
+	const { workspace, handle, isPersonal } = useWorkspace();
+
 	const workspaces = useWorkspaces();
 
 	const allHandles = workspaces.map(workspace => workspace.handle);
@@ -127,8 +126,12 @@ export function SidebarNav() {
 
 	const topSettingsLinks: SidebarNavItem[] = [
 		{ title: 'profile', icon: 'profile', href: `/${handle}/settings` },
+		{
+			title: isPersonal ? 'teams' : 'team',
+			icon: 'users',
+			href: `/${handle}/settings/team`,
+		},
 		{ title: 'socials', icon: 'socials', href: `/${handle}/settings/socials` },
-		{ title: 'team', icon: 'users', href: `/${handle}/settings/team` },
 		{ title: 'apps', icon: 'apps', href: `/${handle}/settings/apps` },
 		{
 			title: 'email',

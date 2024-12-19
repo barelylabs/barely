@@ -61,14 +61,30 @@ const Avatar = (props: {
 	className?: string;
 	sizes?: string;
 	priority?: boolean;
+	notification?: boolean;
 }) => {
 	return (
-		<AvatarRoot className={props.className}>
-			{props.imageS3Key?.length ?
-				<>
-					{/* <pre>{props.imageS3Key}</pre> */}
+		<div className='relative inline-flex'>
+			{props.notification && (
+				<div className='absolute -right-0.5 -top-0.5 z-10 h-2 w-2 rounded-full bg-blue-500 ring-2 ring-white dark:ring-slate-900' />
+			)}
+			<AvatarRoot className={props.className}>
+				{props.imageS3Key?.length ?
+					<>
+						<Img
+							s3Key={props.imageS3Key}
+							alt={props.displayName ?? ''}
+							className={cn('aspect-square h-full w-full', props.className)}
+							sizes={props.sizes}
+							priority={props.priority}
+							width={props.imageWidth}
+							height={props.imageHeight}
+							// fill
+						/>
+					</>
+				: props.imageUrl ?
 					<Img
-						s3Key={props.imageS3Key}
+						src={props.imageUrl}
 						alt={props.displayName ?? ''}
 						className={cn('aspect-square h-full w-full', props.className)}
 						sizes={props.sizes}
@@ -77,20 +93,9 @@ const Avatar = (props: {
 						height={props.imageHeight}
 						// fill
 					/>
-				</>
-			: props.imageUrl ?
-				<Img
-					src={props.imageUrl}
-					alt={props.displayName ?? ''}
-					className={cn('aspect-square h-full w-full', props.className)}
-					sizes={props.sizes}
-					priority={props.priority}
-					width={props.imageWidth}
-					height={props.imageHeight}
-					// fill
-				/>
-			:	<AvatarFallback>{props.initials}</AvatarFallback>}
-		</AvatarRoot>
+				:	<AvatarFallback>{props.initials}</AvatarFallback>}
+			</AvatarRoot>
+		</div>
 	);
 };
 

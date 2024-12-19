@@ -59,7 +59,7 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 		label: domain.domain,
 	}));
 
-	const workspace = useWorkspace();
+	const { workspace } = useWorkspace();
 
 	const { mutateAsync: createLink } = api.link.create.useMutation({
 		onSuccess: async () => {
@@ -344,7 +344,7 @@ export function TransparentLinkDisplay({
 export function AddWorkspaceSpotifyArtistId(props: { spotifyArtistId?: string }) {
 	const [show, setShow] = useState(true);
 	const apiUtils = api.useUtils();
-	const workspace = useWorkspace();
+	const { workspace } = useWorkspace();
 	const { mutateAsync: updateWorkspace } = api.workspace.update.useMutation();
 
 	const { data: spotifyArtistIdTaken } = api.workspace.spotifyArtistIdTaken.useQuery(
