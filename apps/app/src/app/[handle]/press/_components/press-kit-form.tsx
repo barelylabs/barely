@@ -25,17 +25,15 @@ export function PressKitForm({
 }: {
 	initialPressKit: Promise<NormalizedPressKit>;
 }) {
-	const { handle, bio, bookingEmail, bookingName, bookingTitle } = useWorkspace();
+	const {
+		workspace: { handle, bio, bookingEmail, bookingName, bookingTitle },
+	} = useWorkspace();
 
 	const initialData = use(initialPressKit);
 
 	const { data: pressKit } = api.pressKit.byWorkspace.useQuery(
-		{
-			handle,
-		},
-		{
-			initialData,
-		},
+		{ handle },
+		{ initialData },
 	);
 
 	const { data: infiniteMixtapeOptions } = api.mixtape.byWorkspace.useInfiniteQuery(

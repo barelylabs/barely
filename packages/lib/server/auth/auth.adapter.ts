@@ -53,6 +53,7 @@ export function NeonAdapter(): Adapter {
 		getUser: async userId => {
 			const user = await getSessionUserByUserId(userId);
 
+			console.log('user in getUser => ', user);
 			if (!user) return null;
 
 			return deserializeUser(user);
@@ -282,7 +283,9 @@ export function NeonAdapter(): Adapter {
 			// // console.log('returning session and user => ', sessionAndUser);
 
 			// return sessionAndUser;
-			return await getSessionAndUser(sessionToken);
+			const sessionAndUser = await getSessionAndUser(sessionToken);
+			// console.log('sessionAndUser in getSessionAndUser => ', sessionAndUser);
+			return sessionAndUser;
 		},
 
 		updateSession: async sessionData => {

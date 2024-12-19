@@ -1,5 +1,5 @@
 import type { AdapterUser } from '@auth/core/adapters';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, gt, isNull, lt } from 'drizzle-orm';
 
 import type { SessionUser } from '../../auth';
 // import type { Db } from '../../db';
@@ -19,6 +19,7 @@ import {
 	_Files_To_Workspaces__HeaderImage,
 } from '../file/file.sql';
 import { ProviderAccounts } from '../provider-account/provider-account.sql';
+import { WorkspaceInvites } from '../workspace-invite/workspace-invite.sql';
 import { createStripeWorkspaceCustomer } from '../workspace-stripe/workspace-stripe.fns';
 import { Workspaces } from '../workspace/workspace.sql';
 import { _Users_To_Workspaces, Users } from './user.sql';
@@ -49,12 +50,54 @@ export const rawSessionUserWith = {
 			},
 		},
 	},
+	workspaceInvites: {
+		with: {
+			workspace: true,
+		},
+		where: and(
+			isNull(WorkspaceInvites.acceptedAt),
+			isNull(WorkspaceInvites.declinedAt),
+			gt(WorkspaceInvites.expiresAt, new Date()),
+		),
+	},
 } as const;
 
 export async function getRawSessionUserByUserId(userId: string) {
 	const userWithWorkspaces = await dbHttp.query.Users.findFirst({
 		where: Users => eq(Users.id, userId),
-		with: rawSessionUserWith,
+		with: {
+			_workspaces: {
+				with: {
+					workspace: {
+						with: {
+							_avatarImages: {
+								where: () => eq(_Files_To_Workspaces__AvatarImage.current, true),
+								with: {
+									file: true,
+								},
+								limit: 1,
+							},
+							_headerImages: {
+								where: () => eq(_Files_To_Workspaces__HeaderImage.current, true),
+								with: {
+									file: true,
+								},
+								limit: 1,
+							},
+						},
+					},
+				},
+			},
+			workspaceInvites: {
+				with: {
+					workspace: true,
+				},
+				where: and(
+					isNull(WorkspaceInvites.acceptedAt),
+					isNull(WorkspaceInvites.declinedAt),
+				),
+			},
+		} satisfies typeof rawSessionUserWith,
 	});
 
 	return userWithWorkspaces;
@@ -67,12 +110,13 @@ export function getSessionUserFromRawUser(user: RawSessionUser): SessionUser {
 		...user,
 		workspaces: user._workspaces.map(_w => ({
 			..._w.workspace,
-			// avatarImageUrl: _w.workspace._avatarImages[0]?.file?.src ?? '',
-			// headerImageUrl: _w.workspace._headerImages[0]?.file?.src ?? '',
-
 			avatarImageS3Key: _w.workspace._avatarImages[0]?.file?.s3Key ?? '',
 			headerImageS3Key: _w.workspace._headerImages[0]?.file?.s3Key ?? '',
 			role: _w.role,
+		})),
+		workspaceInvites: user.workspaceInvites.map(_wi => ({
+			..._wi,
+			role: _wi.role as 'admin' | 'member',
 		})),
 	};
 
@@ -154,19 +198,6 @@ export async function createUser(user: CreateUser) {
 		type: 'personal',
 	};
 
-	// await dbPool
-	// 	.transaction(async tx => {
-	// 		await tx.insert(Workspaces).values(newWorkspace);
-	// 		await tx.insert(Users).values(newUser).returning();
-	// 		await tx.insert(_Users_To_Workspaces).values({
-	// 			userId: newUserId,
-	// 			workspaceId: newWorkspaceId,
-	// 			role: 'owner',
-	// 		});
-	// 	})
-	// 	.catch(err => {
-	// 		raise('error creating user' + err);
-	// 	});
 	await dbHttp.insert(Workspaces).values(newWorkspace);
 	await dbHttp.insert(Users).values(newUser).returning();
 	await dbHttp.insert(_Users_To_Workspaces).values({
@@ -199,8 +230,39 @@ export async function getSessionUserByEmail(email: string) {
 
 	if (!userWithWorkspaces) {
 		// check if there is a workspace invite for this email
+		const workspaceInvite = await dbHttp.query.WorkspaceInvites.findFirst({
+			where: WorkspaceInvites =>
+				and(
+					eq(WorkspaceInvites.email, email),
+					lt(WorkspaceInvites.expiresAt, new Date()),
+				),
+		});
 
-		return null;
+		if (!workspaceInvite) return null;
+
+		const user = await createUser({
+			email: workspaceInvite.email,
+		});
+
+		await dbHttp.insert(_Users_To_Workspaces).values({
+			userId: user.id,
+			workspaceId: workspaceInvite.workspaceId,
+			role: workspaceInvite.role,
+		});
+
+		await dbHttp
+			.update(WorkspaceInvites)
+			.set({
+				acceptedAt: new Date(),
+			})
+			.where(
+				and(
+					eq(WorkspaceInvites.workspaceId, workspaceInvite.workspaceId),
+					eq(WorkspaceInvites.email, workspaceInvite.email),
+				),
+			);
+
+		return await getSessionUserByUserId(user.id);
 	}
 
 	return getSessionUserFromRawUser(userWithWorkspaces);

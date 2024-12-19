@@ -5,7 +5,7 @@ import { usePusherSocketId } from '@barely/lib/hooks/use-pusher';
 import { useSetAtom } from 'jotai';
 
 import { useUser } from '@barely/hooks/use-user';
-import { useSetWorkspace, useWorkspace } from '@barely/hooks/use-workspace';
+import { useWorkspace } from '@barely/hooks/use-workspace';
 import { useWorkspaces } from '@barely/hooks/use-workspaces';
 
 import { Avatar } from '@barely/ui/elements/avatar';
@@ -38,7 +38,13 @@ export function WorkspaceSwitcher() {
 	const setNewWorkspaceModalOpen = useSetAtom(showNewWorkspaceModalAtom);
 
 	const user = useUser();
-	const currentWorkspace = useWorkspace();
+	const { workspace: currentWorkspace, setWorkspace: setCurrentWorkspace } = useWorkspace(
+		{
+			onBeginSet: () => {
+				setSwitcherOpen(false);
+			},
+		},
+	);
 	const allWorkspaces = useWorkspaces();
 
 	const personalAccount = allWorkspaces.find(
@@ -53,11 +59,18 @@ export function WorkspaceSwitcher() {
 		type: toTitleCase(underscoresToSpaces(currentWorkspace.type)),
 	};
 
-	const onKeydown = useCallback((e: KeyboardEvent) => {
-		if (e.key === '.' && (e.metaKey || !e.ctrlKey)) {
-			setSwitcherOpen(true);
-		}
-	}, []);
+	const onKeydown = useCallback(
+		(e: KeyboardEvent) => {
+			if (e.key === '.' && (e.metaKey || e.ctrlKey)) {
+				if (switcherOpen) {
+					setSwitcherOpen(false);
+				} else {
+					setSwitcherOpen(true);
+				}
+			}
+		},
+		[switcherOpen, setSwitcherOpen],
+	);
 
 	useEffect(() => {
 		document.addEventListener('keydown', onKeydown);
@@ -66,56 +79,11 @@ export function WorkspaceSwitcher() {
 		};
 	}, [onKeydown]);
 
-	// useEffect(() => {
-	// 	console.log(currentWorkspace);
-	// }, [currentWorkspace]);
-
-	// const setCurrentWorkspace = useCallback(
-	// 	async (workspace: SessionWorkspace) => {
-	// 		console.log('setting current workspace to', workspace, '@', Date.now());
-	// 		apiUtils.workspace.current.setData(undefined, workspace);
-
-	// 		const newWorkspaceCartData = apiUtils.cartFunnel.byWorkspace.getInfiniteData({
-	// 			handle: workspace.handle,
-	// 		});
-
-	// 		if (newWorkspaceCartData) {
-	// 			apiUtils.cartFunnel.byWorkspace.setInfiniteData(
-	// 				{ handle: workspace.handle },
-	// 				newWorkspaceCartData,
-	// 			);
-	// 		} else {
-	// 			apiUtils.cartFunnel.byWorkspace.setInfiniteData(
-	// 				{ handle: workspace.handle },
-	// 				{
-	// 					pages: [
-	// 						{
-	// 							cartFunnels: [],
-	// 							nextCursor: undefined,
-	// 						},
-	// 					],
-	// 					pageParams: [],
-	// 				},
-	// 			);
-	// 		}
-
-	// 		console.log(currentWorkspace.handle, workspace.handle);
+	// const { setWorkspace: setCurrentWorkspace } = useOptimisticWorkspace({
+	// 	onBeginSet: () => {
 	// 		setSwitcherOpen(false);
-	// 		if (currentWorkspace.handle === workspace.handle) return;
-	// 		if (currentPath) {
-	// 			router.push(currentPath.replace(currentWorkspace.handle, workspace.handle));
-	// 			return console.log('pushed @', Date.now());
-	// 		}
-	// 		router.push(`/${workspace.handle}`);
-	// 		console.log('pushed @', Date.now());
 	// 	},
-	// 	[apiUtils, currentPath, currentWorkspace, router, setSwitcherOpen],
-	// );
-	const { setCurrentWorkspace } = useSetWorkspace({
-		onBeginSet: () => {
-			setSwitcherOpen(false);
-		},
-	});
+	// });
 
 	return (
 		<Popover open={switcherOpen} onOpenChange={setSwitcherOpen}>

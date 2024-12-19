@@ -9,7 +9,7 @@ import { useWorkspaces } from './use-workspaces';
 
 export function useUpdateNavHistory() {
 	const pathname = usePathname();
-	const workspace = useWorkspace();
+	const { workspace } = useWorkspace();
 	const workspaces = useWorkspaces();
 	const setNavHistory = useSetAtom(navHistoryAtom);
 

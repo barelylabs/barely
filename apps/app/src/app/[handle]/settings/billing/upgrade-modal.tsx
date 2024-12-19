@@ -23,7 +23,7 @@ export function UpgradeModal(props: {
 	checkoutSuccessPath?: string;
 	checkoutCancelPath?: string;
 }) {
-	const workspace = useWorkspace();
+	const { workspace } = useWorkspace();
 
 	const [showUpgradeModal, setShowUpgradeModal] = useAtom(showUpgradeModalAtom);
 

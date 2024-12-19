@@ -51,6 +51,7 @@ export function UserAccountNav() {
 					imageHeight={28}
 					imageS3Key={personalAccount?.avatarImageS3Key}
 					priority
+					notification={user.workspaceInvites && user.workspaceInvites.length > 0}
 				/>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align='end'>
@@ -63,16 +64,26 @@ export function UserAccountNav() {
 					</div>
 				</div>
 				<DropdownMenuSeparator />
-				{/* <DropdownMenuItem asChild>
-					<Link href={`/${user.handle}/`}>Dashboard</Link>
-				</DropdownMenuItem> */}
-				{/* <DropdownMenuItem asChild>
-					<Link href={`/${user.handle}/billing`}>Billing</Link>
-				</DropdownMenuItem> */}
 				<DropdownMenuItem asChild>
 					<Link href={`/${user.handle}/settings`}>Personal Settings</Link>
 				</DropdownMenuItem>
+
 				<DropdownMenuSeparator />
+				{user.workspaceInvites && user.workspaceInvites.length > 0 && (
+					<>
+						<DropdownMenuItem asChild>
+							<Link href={`/${user.handle}/settings/team`}>
+								<div className='flex flex-row items-center justify-between gap-2'>
+									<span>Invites</span>
+									<span className='text-sm text-slate-500'>
+										{user.workspaceInvites.length}
+									</span>
+								</div>
+							</Link>
+						</DropdownMenuItem>
+						<DropdownMenuSeparator />
+					</>
+				)}
 				<DropdownMenuItem
 					className='cursor-pointer'
 					onSelect={event => {

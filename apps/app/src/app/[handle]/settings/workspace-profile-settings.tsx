@@ -123,7 +123,7 @@ const avatarUploadQueueAtom = atom<UploadQueueItem[]>([]);
 export function WorkspaceAvatarForm() {
 	const apiUtils = api.useUtils();
 
-	const workspace = useWorkspace();
+	const { workspace } = useWorkspace();
 	const isPersonal = workspace.type === 'personal';
 
 	const { mutateAsync: updateWorkspaceAvatar } = api.workspace.updateAvatar.useMutation();
@@ -184,7 +184,7 @@ export function WorkspaceAvatarForm() {
 
 const headerUploadQueueAtom = atom<UploadQueueItem[]>([]);
 export function WorkspaceHeaderForm() {
-	const workspace = useWorkspace();
+	const { workspace } = useWorkspace();
 	const isPersonal = workspace.type === 'personal';
 	const apiUtils = api.useUtils();
 
@@ -241,7 +241,7 @@ export function WorkspaceHeaderForm() {
 }
 
 export function WorkspaceBioForm() {
-	const workspace = useWorkspace();
+	const { workspace } = useWorkspace();
 	const { form, onSubmit, isPersonal } = useWorkspaceUpdateForm();
 
 	const ref = useRef<MDXEditorMethods>(null);

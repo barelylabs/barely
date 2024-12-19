@@ -13,7 +13,7 @@ import { isProduction } from '@barely/utils/environment';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 
 export default function PayoutsSettingsPage() {
-	const workspace = useWorkspace();
+	const { workspace } = useWorkspace();
 	const params = useParams();
 
 	const needsOnboarding =

@@ -11,7 +11,7 @@ import { Button } from '@barely/ui/elements/button';
 import { Icon } from '@barely/ui/elements/icon';
 
 export function CampaignTabs() {
-	const workspace = useWorkspace();
+	const { workspace } = useWorkspace();
 
 	const params = useParams();
 

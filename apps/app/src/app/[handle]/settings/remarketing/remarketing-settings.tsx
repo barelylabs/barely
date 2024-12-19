@@ -14,8 +14,8 @@ import { TextField } from '@barely/ui/forms/text-field';
 export function RemarketingSettings() {
 	const [endpoints] = api.analyticsEndpoint.byCurrentWorkspace.useSuspenseQuery();
 
-	const context = api.useContext();
-	const workspace = useWorkspace();
+	const apiUtils = api.useUtils();
+	const { workspace } = useWorkspace();
 
 	const metaPixelForm = useZodForm({
 		schema: insertMetaPixelSchema,
@@ -29,7 +29,7 @@ export function RemarketingSettings() {
 
 	const { mutateAsync: updateEndpoint } = api.analyticsEndpoint.update.useMutation({
 		onSuccess: async () => {
-			await context.analyticsEndpoint.invalidate();
+			await apiUtils.analyticsEndpoint.invalidate();
 			metaPixelForm.reset();
 		},
 	});

@@ -524,6 +524,7 @@ export const Icon = {
 	tiktok: FaTiktok,
 	twitter: FaTwitter,
 	twitch: FaTwitch,
+	workspace: Users,
 	youtube: FaYoutube,
 	youtubeMusic: PlayCircle,
 };

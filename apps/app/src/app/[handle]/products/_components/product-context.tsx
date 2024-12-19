@@ -12,31 +12,6 @@ import { productSearchParamsSchema } from '@barely/lib/server/routes/product/pro
 
 import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
 
-// export interface ProductCtx {
-// 	products: AppRouterOutputs['product']['byWorkspace']['products'];
-// 	productSelection: Selection;
-// 	lastSelectedProductId: string | undefined;
-// 	lastSelectedProduct:
-// 		| AppRouterOutputs['product']['byWorkspace']['products'][number]
-// 		| undefined;
-// 	setProductSelection: (selection: Selection) => void;
-// 	gridListRef: React.RefObject<HTMLDivElement>;
-// 	focusGridList: () => void;
-// 	showCreateProductModal: boolean;
-// 	setShowCreateProductModal: (show: boolean) => void;
-// 	showUpdateProductModal: boolean;
-// 	setShowUpdateProductModal: (show: boolean) => void;
-// 	showArchiveProductModal: boolean;
-// 	setShowArchiveProductModal: (show: boolean) => void;
-// 	showDeleteProductModal: boolean;
-// 	setShowDeleteProductModal: (show: boolean) => void;
-// 	// filters
-// 	filters: z.infer<typeof productFilterParamsSchema>;
-// 	pendingFiltersTransition: boolean;
-// 	setSearch: (search: string) => void;
-// 	toggleArchived: () => void;
-// 	clearAllFilters: () => void;
-// }
 export type ProductContext = InfiniteItemsContext<
 	AppRouterOutputs['product']['byWorkspace']['products'][number],
 	z.infer<typeof productFilterParamsSchema>

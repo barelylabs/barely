@@ -35,7 +35,7 @@ export default async function DashboardLayout({
 		}
 
 		const defaultWorkspace = await getDefaultWorkspaceOfCurrentUser();
-		return redirect(`${defaultWorkspace.handle}/links`);
+		return redirect(`${defaultWorkspace.handle}/fm`);
 	}
 
 	return (

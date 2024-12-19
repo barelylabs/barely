@@ -23,7 +23,7 @@ import { useWorkflowContext } from '~/app/[handle]/workflows/_components/workflo
 
 export function CreateOrUpdateWorkflowModal({ mode }: { mode: 'create' | 'update' }) {
 	const apiUtils = api.useUtils();
-	const workspace = useWorkspace();
+	const { workspace } = useWorkspace();
 
 	/* workflow context */
 	const {
@@ -217,7 +217,7 @@ export function CreateOrUpdateWorkflowModal({ mode }: { mode: 'create' | 'update
 }
 
 function SelectMailchimpAudience({ index }: { index: number }) {
-	const workspace = useWorkspace();
+	const { workspace } = useWorkspace();
 	const { data: mailchimpAudiences } = api.mailchimp.audiencesByWorkspace.useQuery({
 		handle: workspace.handle,
 	});
