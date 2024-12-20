@@ -7,9 +7,13 @@ import type { MDXEditorMethods } from '@barely/ui/elements/mdx-editor';
 import type { SelectFieldOption } from '@barely/ui/forms/select-field';
 import type { z } from 'zod';
 import { useCallback, useRef } from 'react';
+import { useUpdateWorkspace } from '@barely/lib/hooks/use-update-workspace';
 import { useUpload } from '@barely/lib/hooks/use-upload';
+import { useZodForm } from '@barely/lib/hooks/use-zod-form';
+import { updateWorkspaceSchema } from '@barely/lib/server/routes/workspace/workspace.schema';
 import { api } from '@barely/server/api/react';
 import { atom } from 'jotai';
+import HuePicker from 'simple-hue-picker/react';
 
 import { useWorkspace } from '@barely/hooks/use-workspace';
 import { useWorkspaceUpdateForm } from '@barely/hooks/use-workspace-update-form';
@@ -23,7 +27,24 @@ import { SelectField } from '@barely/ui/forms/select-field';
 import { TextField } from '@barely/ui/forms/text-field';
 
 export function DisplayOrWorkspaceNameForm() {
-	const { form, onSubmit, isPersonal } = useWorkspaceUpdateForm();
+	const { workspace, isPersonal } = useWorkspace();
+
+	const form = useZodForm({
+		schema: updateWorkspaceSchema,
+		values: {
+			id: workspace.id,
+			name: workspace.name,
+		},
+		resetOptions: { keepDirtyValues: true },
+	});
+
+	const { updateWorkspace } = useUpdateWorkspace({
+		onSuccess: () => form.reset(),
+	});
+
+	const onSubmit = async (data: z.infer<typeof updateWorkspaceSchema>) => {
+		await updateWorkspace(data);
+	};
 
 	return (
 		<SettingsCardForm
@@ -44,7 +65,28 @@ export function DisplayOrWorkspaceNameForm() {
 }
 
 export function HandleForm() {
-	const { form, onSubmit, isPersonal } = useWorkspaceUpdateForm();
+	// const { form, onSubmit, isPersonal } = useWorkspaceUpdateForm({
+	// 	updateKeys: ['handle'],
+	// });
+
+	const { workspace, isPersonal } = useWorkspace();
+
+	const form = useZodForm({
+		schema: updateWorkspaceSchema,
+		values: {
+			id: workspace.id,
+			handle: workspace.handle,
+		},
+		resetOptions: { keepDirtyValues: true },
+	});
+
+	const { updateWorkspace } = useUpdateWorkspace({
+		onSuccess: () => form.reset(),
+	});
+
+	const onSubmit = async (data: z.infer<typeof updateWorkspaceSchema>) => {
+		await updateWorkspace(data);
+	};
 
 	return (
 		<SettingsCardForm
@@ -88,7 +130,24 @@ export function HandleForm() {
 }
 
 export function WorkspaceTypeForm() {
-	const { form, onSubmit, isPersonal } = useWorkspaceUpdateForm();
+	const { workspace, isPersonal } = useWorkspace();
+
+	const form = useZodForm({
+		schema: updateWorkspaceSchema,
+		values: {
+			id: workspace.id,
+			type: workspace.type,
+		},
+		resetOptions: { keepDirtyValues: true },
+	});
+
+	const { updateWorkspace } = useUpdateWorkspace({
+		onSuccess: () => form.reset(),
+	});
+
+	const onSubmit = async (data: z.infer<typeof updateWorkspaceSchema>) => {
+		await updateWorkspace(data);
+	};
 
 	if (isPersonal) {
 		return null;
@@ -242,7 +301,9 @@ export function WorkspaceHeaderForm() {
 
 export function WorkspaceBioForm() {
 	const { workspace } = useWorkspace();
-	const { form, onSubmit, isPersonal } = useWorkspaceUpdateForm();
+	const { form, onSubmit, isPersonal } = useWorkspaceUpdateForm({
+		updateKeys: ['bio'],
+	});
 
 	const ref = useRef<MDXEditorMethods>(null);
 
@@ -265,6 +326,55 @@ export function WorkspaceBioForm() {
 					form.setValue('bio', v, { shouldDirty: true });
 				}}
 			/>
+		</SettingsCardForm>
+	);
+}
+
+export function WorkspaceBrandHuesForm() {
+	// const { form, onSubmit, isPersonal } = useWorkspaceUpdateForm({
+	// 	updateKeys: ['brandHue'],
+	// });
+
+	const { workspace, isPersonal } = useWorkspace();
+
+	const form = useZodForm({
+		schema: updateWorkspaceSchema,
+		values: {
+			id: workspace.id,
+			brandHue: workspace.brandHue,
+		},
+		resetOptions: { keepDirtyValues: true },
+	});
+
+	const { updateWorkspace } = useUpdateWorkspace({
+		onSuccess: () => form.reset(),
+	});
+
+	const onSubmit = async (data: z.infer<typeof updateWorkspaceSchema>) => {
+		await updateWorkspace(data);
+	};
+
+	return (
+		<SettingsCardForm
+			form={form}
+			onSubmit={onSubmit}
+			title='Brand Hues'
+			subtitle={
+				isPersonal ?
+					'This is your personal brand hues on Barely.'
+				:	`This is your workspace's brand hues on Barely.`
+			}
+			disableSubmit={!form.formState.isDirty}
+		>
+			brandHue: {form.watch('brandHue')}
+			<HuePicker
+				step={10}
+				value={form.watch('brandHue')}
+				onChange={e => {
+					form.setValue('brandHue', e.detail, { shouldDirty: true });
+				}}
+			/>
+			{/* <pre>{JSON.stringify(form.formState.errors, null, 2)}</pre> */}
 		</SettingsCardForm>
 	);
 }

@@ -27,10 +27,15 @@ export function useWorkspace({ onBeginSet }: { onBeginSet?: () => void } = {}) {
 		useContext(WorkspaceContext) ??
 		raise('useOptimisticWorkspace must be used within a WorkspaceProvider');
 
+	const { data: currentWorkspace } = api.workspace.current.useQuery(undefined, {
+		initialData: initialWorkspace,
+	});
+
 	const [pendingTransition, startTransition] = useTransition();
 
-	const [optimisticWorkspace, setOptimisticWorkspace] =
-		useOptimistic<SessionWorkspace>(initialWorkspace);
+	const [optimisticWorkspace, setOptimisticWorkspace] = useOptimistic<SessionWorkspace>(
+		currentWorkspace ?? initialWorkspace,
+	);
 
 	const setWorkspace = useCallback(
 		function (workspace: SessionWorkspace) {

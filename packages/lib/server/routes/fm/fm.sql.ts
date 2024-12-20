@@ -20,8 +20,9 @@ export const FmPages = pgTable('FmPages', {
 	handle: varchar('handle', { length: 255 })
 		.notNull()
 		.references(() => Workspaces.handle, {
-			onDelete: 'cascade',
+			onUpdate: 'cascade',
 		}),
+
 	key: varchar('key', { length: 255 }).notNull(),
 	// source
 	sourceUrl: varchar('sourceUrl', { length: 255 }).notNull(),

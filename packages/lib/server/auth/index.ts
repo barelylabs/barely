@@ -140,13 +140,13 @@ const authConfig: NextAuthConfig = {
 			return { ...session, user };
 		},
 		redirect: ({ url, baseUrl }) => {
-			console.log('redirect baseUrl => ', baseUrl);
-			console.log('redirect url => ', url);
+			// console.log('redirect baseUrl => ', baseUrl);
+			// console.log('redirect url => ', url);
 
 			if (url.startsWith('/')) return `${baseUrl}${url}`;
 
 			const origin = new URL(baseUrl).origin;
-			console.log('redirect origin => ', origin);
+			// console.log('redirect origin => ', origin);
 
 			if (
 				origin === baseUrl ||
