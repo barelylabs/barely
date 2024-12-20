@@ -1,6 +1,11 @@
 'use client';
 
-import { useWorkspaceUpdateForm } from '@barely/lib/hooks/use-workspace-update-form';
+import type { z } from 'zod';
+import { useUpdateWorkspace } from '@barely/lib/hooks/use-update-workspace';
+import { useWorkspace } from '@barely/lib/hooks/use-workspace';
+// import { useWorkspaceUpdateForm } from '@barely/lib/hooks/use-workspace-update-form';
+import { useZodForm } from '@barely/lib/hooks/use-zod-form';
+import { updateWorkspaceSchema } from '@barely/lib/server/routes/workspace/workspace.schema';
 import {
 	isValidUrl,
 	parseInstagramLink,
@@ -14,7 +19,28 @@ import { NumberField } from '@barely/ui/forms/number-field';
 import { TextField } from '@barely/ui/forms/text-field';
 
 export function SocialStatsForm() {
-	const { form, onSubmit } = useWorkspaceUpdateForm();
+	const { workspace } = useWorkspace();
+
+	const form = useZodForm({
+		schema: updateWorkspaceSchema,
+		values: {
+			id: workspace.id,
+			facebookFollowers: workspace.facebookFollowers,
+			instagramFollowers: workspace.instagramFollowers,
+			spotifyFollowers: workspace.spotifyFollowers,
+			spotifyMonthlyListeners: workspace.spotifyMonthlyListeners,
+			twitterFollowers: workspace.twitterFollowers,
+			youtubeSubscribers: workspace.youtubeSubscribers,
+		},
+	});
+
+	const { updateWorkspace } = useUpdateWorkspace({
+		onSuccess: () => form.reset(),
+	});
+
+	const onSubmit = async (data: z.infer<typeof updateWorkspaceSchema>) => {
+		await updateWorkspace(data);
+	};
 
 	return (
 		<SettingsCardForm
@@ -65,7 +91,27 @@ export function SocialStatsForm() {
 }
 
 export function SocialLinksForm() {
-	const { form, onSubmit } = useWorkspaceUpdateForm();
+	const { workspace } = useWorkspace();
+
+	const form = useZodForm({
+		schema: updateWorkspaceSchema,
+		values: {
+			id: workspace.id,
+			spotifyArtistId: workspace.spotifyArtistId,
+			youtubeChannelId: workspace.youtubeChannelId,
+			tiktokUsername: workspace.tiktokUsername,
+			instagramUsername: workspace.instagramUsername,
+			website: workspace.website,
+		},
+	});
+
+	const { updateWorkspace } = useUpdateWorkspace({
+		onSuccess: () => form.reset(),
+	});
+
+	const onSubmit = async (data: z.infer<typeof updateWorkspaceSchema>) => {
+		await updateWorkspace(data);
+	};
 
 	return (
 		<SettingsCardForm

@@ -1,12 +1,33 @@
 'use client';
 
-import { useWorkspaceUpdateForm } from '@barely/lib/hooks/use-workspace-update-form';
+import type { z } from 'zod';
+import { useUpdateWorkspace } from '@barely/lib/hooks/use-update-workspace';
+import { useWorkspace } from '@barely/lib/hooks/use-workspace';
+// import { useWorkspaceUpdateForm } from '@barely/lib/hooks/use-workspace-update-form';
+import { useZodForm } from '@barely/lib/hooks/use-zod-form';
+import { updateWorkspaceSchema } from '@barely/lib/server/routes/workspace/workspace.schema';
 
 import { SettingsCardForm } from '@barely/ui/components/settings-card';
 import { TextField } from '@barely/ui/forms/text-field';
 
 export function CartShippingAddress() {
-	const { form, onSubmit } = useWorkspaceUpdateForm();
+	const { workspace } = useWorkspace();
+
+	const form = useZodForm({
+		schema: updateWorkspaceSchema,
+		values: {
+			id: workspace.id,
+			shippingAddressLine1: workspace.shippingAddressLine1,
+		},
+	});
+
+	const { updateWorkspace } = useUpdateWorkspace({
+		onSuccess: () => form.reset(),
+	});
+
+	const onSubmit = async (data: z.infer<typeof updateWorkspaceSchema>) => {
+		await updateWorkspace(data);
+	};
 
 	return (
 		<SettingsCardForm
@@ -39,7 +60,23 @@ export function CartShippingAddress() {
 }
 
 export function CartSupportEmail() {
-	const { form, onSubmit } = useWorkspaceUpdateForm();
+	const { workspace } = useWorkspace();
+
+	const form = useZodForm({
+		schema: updateWorkspaceSchema,
+		values: {
+			id: workspace.id,
+			cartSupportEmail: workspace.cartSupportEmail,
+		},
+	});
+
+	const { updateWorkspace } = useUpdateWorkspace({
+		onSuccess: () => form.reset(),
+	});
+
+	const onSubmit = async (data: z.infer<typeof updateWorkspaceSchema>) => {
+		await updateWorkspace(data);
+	};
 
 	return (
 		<SettingsCardForm

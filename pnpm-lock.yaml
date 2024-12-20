@@ -145,6 +145,9 @@ importers:
       sharp:
         specifier: ^0.33.2
         version: 0.33.2
+      simple-hue-picker:
+        specifier: ^0.2.0
+        version: 0.2.0(react@18.2.0)
       superjson:
         specifier: ^2.2.1
         version: 2.2.1
@@ -29679,6 +29682,17 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /simple-hue-picker@0.2.0(react@18.2.0):
+    resolution: {integrity: sha512-uEEtnAwqe/XHzqx9UUYpRkNyeJ21S8u2hxDmf+yZh3ioPT3k1hcsaYnwsmTrg+Ex5f9V80fjHdf6+ddiO4AiNA==}
+    peerDependencies:
+      react: ^16.0.0 || ^17.0.0 || ^18.0.0
+    peerDependenciesMeta:
+      react:
+        optional: true
+    dependencies:
+      react: 18.2.0
+    dev: false
 
   /simple-swizzle@0.2.2:
     resolution: {integrity: sha512-JA//kQgZtbuY83m+xT+tXJkmJncGMTFT+C+g2h2R9uxkYIrE2yy9sgmcLhCnw57/WSD+Eh3J97FPEDFnbXnDUg==}

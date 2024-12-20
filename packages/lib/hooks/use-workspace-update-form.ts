@@ -10,8 +10,26 @@ export function useWorkspaceUpdateForm() {
 	const { workspace } = useWorkspace();
 	const apiUtils = api.useUtils();
 
+	// const defaultValues: UpdateWorkspace = {
+	// 	id: workspace.id,
+	// };
+
+	// for (const key of updateKeys) {
+	// 	if (key in workspace) {
+	// 		defaultValues[key] = workspace[key] as UpdateWorkspace[typeof key];
+	// 	}
+	// }
+
+	// const updateValues = updateKeys.reduce<Partial<UpdateWorkspace>>((acc, key) => {
+	// 	if (key in workspace) {
+	// 		acc[key] = workspace[key] as UpdateWorkspace[keyof UpdateWorkspace];
+	// 	}
+	// 	return acc;
+	// }, {});
+
 	const form = useZodForm({
 		schema: updateWorkspaceSchema,
+		// defaultValues,
 		values: workspace,
 		resetOptions: {
 			keepDirtyValues: true, // retain user-interacted input
@@ -23,6 +41,7 @@ export function useWorkspaceUpdateForm() {
 
 	const { mutate: updateWorkspace } = api.workspace.update.useMutation({
 		onMutate: async data => {
+			console.log('onMutate', data);
 			await apiUtils.workspace.current.cancel();
 
 			const handleChanged = data.handle !== workspace.handle;
@@ -40,6 +59,10 @@ export function useWorkspaceUpdateForm() {
 				context.newHandle &&
 				currentPath
 			) {
+				console.log(
+					'pushing to',
+					currentPath.replace(context.oldHandle, context.newHandle),
+				);
 				return router.push(currentPath.replace(context.oldHandle, context.newHandle));
 			}
 

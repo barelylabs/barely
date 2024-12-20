@@ -4,6 +4,7 @@ import {
 	HandleForm,
 	WorkspaceAvatarForm,
 	WorkspaceBioForm,
+	WorkspaceBrandHuesForm,
 	WorkspaceHeaderForm,
 	WorkspaceTypeForm,
 } from '~/app/[handle]/settings/workspace-profile-settings';
@@ -18,6 +19,7 @@ export default function WorkspaceProfileSettingsPage() {
 			<WorkspaceHeaderForm />
 			<WorkspaceTypeForm />
 			<WorkspaceBioForm />
+			<WorkspaceBrandHuesForm />
 		</>
 	);
 }
