@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import type { InsertCartFunnel } from './cart-funnel.schema';
 import { newId } from '../../../utils/id';
+import { sanitizeKey } from '../../../utils/key';
 import { raise } from '../../../utils/raise';
 import { sqlAnd, sqlStringContains } from '../../../utils/sql';
 import {
@@ -68,6 +69,7 @@ export const cartFunnelRouter = createTRPCRouter({
 				id: newId('cartFunnel'),
 				workspaceId: ctx.workspace.id,
 				handle: ctx.workspace.handle,
+				key: sanitizeKey(input.key),
 			};
 
 			const funnel = await ctx.db.http.insert(CartFunnels).values(funnelData).returning();
@@ -80,7 +82,10 @@ export const cartFunnelRouter = createTRPCRouter({
 		.mutation(async ({ input, ctx }) => {
 			const updatedFunnel = await ctx.db.http
 				.update(CartFunnels)
-				.set(input)
+				.set({
+					...input,
+					key: input.key ? sanitizeKey(input.key) : undefined,
+				})
 				.where(
 					and(
 						eq(CartFunnels.id, input.id),

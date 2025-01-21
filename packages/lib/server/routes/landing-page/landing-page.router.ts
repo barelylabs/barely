@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import type { InsertLandingPage } from './landing-page.schema';
 import { newId } from '../../../utils/id';
+import { sanitizeKey } from '../../../utils/key';
 import { raise } from '../../../utils/raise';
 import { sqlAnd, sqlStringContains } from '../../../utils/sql';
 import {
@@ -93,6 +94,7 @@ export const landingPageRouter = createTRPCRouter({
 				id: newId('landingPage'),
 				workspaceId: ctx.workspace.id,
 				handle: ctx.workspace.handle,
+				key: sanitizeKey(input.key),
 			};
 
 			const landingPages = await ctx.db.http
@@ -131,7 +133,10 @@ export const landingPageRouter = createTRPCRouter({
 		.mutation(async ({ input, ctx }) => {
 			const updatedLandingPages = await ctx.db.http
 				.update(LandingPages)
-				.set(input)
+				.set({
+					...input,
+					key: input.key ? sanitizeKey(input.key) : undefined,
+				})
 				.where(
 					and(
 						eq(LandingPages.id, input.id),

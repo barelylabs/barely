@@ -10,6 +10,7 @@ import { useUpload } from '@barely/lib/hooks/use-upload';
 import { api } from '@barely/lib/server/api/react';
 import { FM_LINK_PLATFORMS } from '@barely/lib/server/routes/fm/fm.constants';
 import { upsertFmPageSchema } from '@barely/lib/server/routes/fm/fm.schema';
+import { sanitizeKey } from '@barely/lib/utils/key';
 import { atom } from 'jotai';
 import { useFieldArray } from 'react-hook-form';
 
@@ -242,7 +243,14 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 				<ModalBody>
 					<TextField label='Source URL' control={form.control} name='sourceUrl' />
 					<TextField label='Title' control={form.control} name='title' />
-					<TextField label='Key' control={form.control} name='key' />
+					<TextField
+						label='Key'
+						control={form.control}
+						name='key'
+						onChange={e => {
+							form.setValue('key', sanitizeKey(e.target.value), { shouldDirty: true });
+						}}
+					/>
 
 					<div className='flex flex-col items-start gap-1'>
 						<Label>Artwork</Label>

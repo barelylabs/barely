@@ -10,6 +10,7 @@ import {
 	defaultLink,
 	upsertLinkSchema,
 } from '@barely/lib/server/routes/link/link.schema';
+import { sanitizeKey } from '@barely/lib/utils/key';
 import {
 	getTransparentLinkDataFromUrl,
 	getUrlWithoutTrackingParams,
@@ -281,6 +282,11 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 														name='key'
 														className='flex-1 rounded-l-none'
 														disabled={mode === 'update' && !!selectedLink?.key}
+														onChange={e => {
+															form.setValue('key', sanitizeKey(e.target.value), {
+																shouldDirty: true,
+															});
+														}}
 													/>
 												</>
 											}

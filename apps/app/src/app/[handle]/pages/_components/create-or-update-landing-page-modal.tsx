@@ -9,6 +9,7 @@ import {
 	defaultLandingPage,
 	upsertLandingPageSchema,
 } from '@barely/lib/server/routes/landing-page/landing-page.schema';
+import { sanitizeKey } from '@barely/lib/utils/key';
 
 import { Label } from '@barely/ui/elements/label';
 import { MDXEditor } from '@barely/ui/elements/mdx-editor';
@@ -119,6 +120,9 @@ export function CreateOrUpdateLandingPageModal({ mode }: { mode: 'create' | 'upd
 						data-1p-ignore
 						data-bwignore
 						data-lpignore='true'
+						onChange={e => {
+							form.setValue('key', sanitizeKey(e.target.value), { shouldDirty: true });
+						}}
 					/>
 					<TextField
 						name='metaTitle'
