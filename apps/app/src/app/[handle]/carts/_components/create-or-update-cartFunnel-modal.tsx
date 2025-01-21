@@ -9,6 +9,7 @@ import {
 	defaultCartFunnel,
 	upsertCartFunnelSchema,
 } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
+import { sanitizeKey } from '@barely/lib/utils/key';
 
 import { Button } from '@barely/ui/elements/button';
 import { Label } from '@barely/ui/elements/label';
@@ -134,6 +135,9 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 						label='Key'
 						placeholder='Enter cart key'
 						control={form.control}
+						onChange={e => {
+							form.setValue('key', sanitizeKey(e.target.value), { shouldDirty: true });
+						}}
 					/>
 
 					{/* MAIN PRODUCT */}

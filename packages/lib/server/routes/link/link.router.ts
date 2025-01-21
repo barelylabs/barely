@@ -5,6 +5,7 @@ import { z } from 'zod';
 import type { InsertLink } from './link.schema';
 import { env } from '../../../env';
 import { newId } from '../../../utils/id';
+import { sanitizeKey } from '../../../utils/key';
 import {
 	getMetaTags,
 	getTransparentLinkDataFromUrl,
@@ -108,6 +109,7 @@ export const linkRouter = createTRPCRouter({
 			userId: ctx.user.id,
 			workspaceId: ctx.workspace.id,
 			handle: ctx.workspace.handle,
+			key: sanitizeKey(input.key),
 			...metaTags,
 			...(input.transparent ? transparentLinkData : {}),
 		} satisfies InsertLink;
@@ -162,7 +164,11 @@ export const linkRouter = createTRPCRouter({
 
 		const link = await ctx.db.pool
 			.update(Links)
-			.set({ ...input, ...metaTags })
+			.set({
+				...input,
+				...metaTags,
+				key: input.key ? sanitizeKey(input.key) : undefined,
+			})
 			.where(eq(Links.id, input.id))
 			.returning();
 		return link;

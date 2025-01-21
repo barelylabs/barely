@@ -7,6 +7,7 @@ import { env } from '../../../env';
 import { uploadFileFromUrl } from '../../../files/upload-from-url';
 import { getFileKey } from '../../../files/utils';
 import { newId } from '../../../utils/id';
+import { sanitizeKey } from '../../../utils/key';
 import { raise } from '../../../utils/raise';
 import { sqlAnd, sqlStringContains } from '../../../utils/sql';
 import {
@@ -132,6 +133,7 @@ export const fmRouter = createTRPCRouter({
 			id: newId('fmPage'),
 			workspaceId: ctx.workspace.id,
 			handle: ctx.workspace.handle,
+			key: sanitizeKey(data.key),
 		};
 
 		const fmPages = await ctx.db.pool.insert(FmPages).values(fmPageData).returning();
@@ -154,7 +156,10 @@ export const fmRouter = createTRPCRouter({
 
 		await ctx.db.pool
 			.update(FmPages)
-			.set(data)
+			.set({
+				...data,
+				key: data.key ? sanitizeKey(data.key) : undefined,
+			})
 			.where(and(eq(FmPages.id, id), eq(FmPages.workspaceId, ctx.workspace.id)))
 			.returning();
 
