@@ -4,7 +4,7 @@ import {
 	pgTable,
 	primaryKey,
 	timestamp,
-	unique,
+	// unique,
 	varchar,
 } from 'drizzle-orm/pg-core';
 
@@ -34,7 +34,7 @@ export const WorkspaceInvites = pgTable(
 	},
 	table => ({
 		pk: primaryKey({ columns: [table.email, table.workspaceId] }),
-		unique: unique().on(table.userId, table.workspaceId),
+		// unique: unique('WorkspaceInvites_unique').on(table.userId, table.workspaceId),
 		workspaceIndex: index('WorkspaceInvites_workspaceId_index').on(table.workspaceId),
 	}),
 );

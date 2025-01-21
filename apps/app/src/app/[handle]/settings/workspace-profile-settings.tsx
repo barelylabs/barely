@@ -16,7 +16,6 @@ import { atom } from 'jotai';
 import HuePicker from 'simple-hue-picker/react';
 
 import { useWorkspace } from '@barely/hooks/use-workspace';
-import { useWorkspaceUpdateForm } from '@barely/hooks/use-workspace-update-form';
 
 import { SettingsCard, SettingsCardForm } from '@barely/ui/components/settings-card';
 import { Icon } from '@barely/ui/elements/icon';
@@ -301,11 +300,28 @@ export function WorkspaceHeaderForm() {
 
 export function WorkspaceBioForm() {
 	const { workspace } = useWorkspace();
-	const { form, onSubmit, isPersonal } = useWorkspaceUpdateForm({
-		updateKeys: ['bio'],
+	// const { form, onSubmit, isPersonal } = useWorkspaceUpdateForm({
+	// 	updateKeys: ['bio'],
+	// });
+	const ref = useRef<MDXEditorMethods>(null);
+	const isPersonal = workspace.type === 'personal';
+
+	const form = useZodForm({
+		schema: updateWorkspaceSchema,
+		values: {
+			id: workspace.id,
+			bio: workspace.bio,
+		},
+		resetOptions: { keepDirtyValues: true },
 	});
 
-	const ref = useRef<MDXEditorMethods>(null);
+	const { updateWorkspace } = useUpdateWorkspace({
+		onSuccess: () => form.reset(),
+	});
+
+	const onSubmit = async (data: z.infer<typeof updateWorkspaceSchema>) => {
+		await updateWorkspace(data);
+	};
 
 	return (
 		<SettingsCardForm

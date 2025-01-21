@@ -20,7 +20,11 @@ export const workspaceInviteRouter = createTRPCRouter({
 				with: {
 					_workspaces: {
 						with: {
-							workspace: true,
+							workspace: {
+								with: {
+									invites: true,
+								},
+							},
 						},
 					},
 				},
@@ -31,13 +35,19 @@ export const workspaceInviteRouter = createTRPCRouter({
 			)?.workspace.handle;
 
 			try {
-				await ctx.db.pool.insert(WorkspaceInvites).values({
-					email: input.email,
-					workspaceId: ctx.workspace.id,
-					role: input.role,
-					userId: user?.id,
-					expiresAt,
-				});
+				const existingInvite = user?._workspaces
+					.find(w => w.workspace.id === ctx.workspace.id)
+					?.workspace.invites.find(i => i.email === input.email);
+
+				if (!existingInvite) {
+					await ctx.db.pool.insert(WorkspaceInvites).values({
+						email: input.email,
+						workspaceId: ctx.workspace.id,
+						role: input.role,
+						userId: user?.id,
+						expiresAt,
+					});
+				}
 			} catch (error) {
 				console.error('Error inviting user to workspace', error);
 				throw error;
