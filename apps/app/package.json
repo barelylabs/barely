@@ -29,7 +29,7 @@
 		"@tanstack/query-sync-storage-persister": "^5.25.0",
 		"@tanstack/react-query": "^5.25.0",
 		"@tanstack/react-query-devtools": "^5.25.0",
-		"@tanstack/react-query-next-experimental": "5.25.0",
+		"@tanstack/react-query-next-experimental": "^5.25.0",
 		"@tanstack/react-query-persist-client": "^5.25.0",
 		"@trpc/client": "11.0.0-rc.334",
 		"@trpc/next": "11.0.0-rc.334",
