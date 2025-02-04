@@ -2,8 +2,6 @@
 
 import type { FlowState } from '@barely/lib/server/routes/flow/flow.ui.types';
 import type { z } from 'zod';
-import { useState } from 'react';
-import { useToast } from '@barely/lib/hooks/use-toast';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { useZodForm } from '@barely/lib/hooks/use-zod-form';
 import { api } from '@barely/lib/server/api/react';
@@ -11,12 +9,12 @@ import { EMAIL_TEMPLATE_VARIABLES } from '@barely/lib/server/routes/email-templa
 import { flowForm_sendEmailSchema } from '@barely/lib/server/routes/flow/flow.schema';
 import { useShallow } from 'zustand/react/shallow';
 
-import { Button } from '@barely/ui/elements/button';
+// import { Button } from '@barely/ui/elements/button';
 import { Icon } from '@barely/ui/elements/icon';
 import { Label } from '@barely/ui/elements/label';
 import { MDXEditor } from '@barely/ui/elements/mdx-editor';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
-import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/elements/popover';
+// import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/elements/popover';
 import { Separator } from '@barely/ui/elements/separator';
 import { Switch } from '@barely/ui/elements/switch';
 import { Text } from '@barely/ui/elements/typography';
@@ -25,6 +23,7 @@ import { SelectField } from '@barely/ui/forms/select-field';
 import { SwitchField } from '@barely/ui/forms/switch-field';
 import { TextField } from '@barely/ui/forms/text-field';
 
+import { SendTestEmail } from '~/app/[handle]/_components/send-test-email';
 import { useFlowStore } from './flow-store';
 
 export type FlowEmailData = z.infer<typeof flowForm_sendEmailSchema>;
@@ -37,7 +36,7 @@ const selector = (state: FlowState) => ({
 });
 
 export const FlowEmailModal = () => {
-	const { toast } = useToast();
+	// const { toast } = useToast();
 	const { showSendEmailModal, setShowSendEmailModal, currentNode, updateEmailNode } =
 		useFlowStore(useShallow(selector));
 
@@ -57,7 +56,6 @@ export const FlowEmailModal = () => {
 	);
 
 	/* form */
-
 	const form = useZodForm({
 		schema: flowForm_sendEmailSchema,
 		values:
@@ -79,28 +77,28 @@ export const FlowEmailModal = () => {
 		form.reset();
 	};
 
-	const [isTestEmailModalOpen, setIsTestEmailModalOpen] = useState(false);
-	const { mutate: sendTestEmail } = api.emailTemplate.sendTestEmail.useMutation({
-		onSuccess: () => {
-			toast('Test email sent', {
-				description: `Check ${form.getValues('sendTestEmailTo')} for the test email`,
-			});
-			setIsTestEmailModalOpen(false);
-		},
-	});
+	// const [isTestEmailModalOpen, setIsTestEmailModalOpen] = useState(false);
+	// const { mutate: sendTestEmail } = api.emailTemplate.sendTestEmail.useMutation({
+	// 	onSuccess: () => {
+	// 		toast('Test email sent', {
+	// 			description: `Check ${form.getValues('sendTestEmailTo')} for the test email`,
+	// 		});
+	// 		setIsTestEmailModalOpen(false);
+	// 	},
+	// });
 
-	const handleSendTestEmail = () => {
-		const currentValues = form.getValues();
-		if (!currentValues.sendTestEmailTo) return;
-		sendTestEmail({
-			to: currentValues.sendTestEmailTo,
-			fromId: currentValues.fromId,
-			subject: currentValues.subject,
-			previewText: currentValues.previewText,
-			body: currentValues.body,
-			variables: {}, // Add variables if needed
-		});
-	};
+	// const handleSendTestEmail = () => {
+	// 	const currentValues = form.getValues();
+	// 	if (!currentValues.sendTestEmailTo) return;
+	// 	sendTestEmail({
+	// 		to: currentValues.sendTestEmailTo,
+	// 		fromId: currentValues.fromId,
+	// 		subject: currentValues.subject,
+	// 		previewText: currentValues.previewText,
+	// 		body: currentValues.body,
+	// 		variables: {}, // Add variables if needed
+	// 	});
+	// };
 
 	const preventDefaultClose = form.formState.isDirty;
 
@@ -115,7 +113,7 @@ export const FlowEmailModal = () => {
 			<Form form={form} onSubmit={handleSubmit}>
 				<ModalBody>
 					<div className='mb-4 flex flex-row justify-end'>
-						<Popover open={isTestEmailModalOpen} onOpenChange={setIsTestEmailModalOpen}>
+						{/* <Popover open={isTestEmailModalOpen} onOpenChange={setIsTestEmailModalOpen}>
 							<PopoverTrigger asChild>
 								<Button look='outline' size='sm'>
 									Send Test Email
@@ -135,7 +133,8 @@ export const FlowEmailModal = () => {
 									</Button>
 								</div>
 							</PopoverContent>
-						</Popover>
+						</Popover> */}
+						<SendTestEmail values={form.getValues()} />
 					</div>
 
 					<TextField

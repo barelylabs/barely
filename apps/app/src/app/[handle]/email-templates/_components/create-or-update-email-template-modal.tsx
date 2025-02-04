@@ -18,6 +18,7 @@ import { Form, SubmitButton } from '@barely/ui/forms';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { TextField } from '@barely/ui/forms/text-field';
 
+import { SendTestEmail } from '~/app/[handle]/_components/send-test-email';
 import { useEmailTemplateContext } from './email-template-context';
 
 export function CreateOrUpdateEmailTemplateModal({
@@ -26,6 +27,8 @@ export function CreateOrUpdateEmailTemplateModal({
 	mode: 'create' | 'update';
 }) {
 	const apiUtils = api.useUtils();
+	const updateMode = mode === 'update';
+	const createMode = mode === 'create';
 
 	const {
 		lastSelectedItem,
@@ -62,15 +65,15 @@ export function CreateOrUpdateEmailTemplateModal({
 	});
 
 	const { form, onSubmit } = useCreateOrUpdateForm({
-		updateItem: mode === 'create' ? null : lastSelectedItem ?? null,
+		updateItem: createMode ? null : lastSelectedItem ?? null,
 		upsertSchema: upsertEmailTemplateSchema,
-		// mode === 'create' ? createEmailTemplateSchema : updateEmailTemplateSchema,
 		defaultValues: {
-			name: mode === 'update' ? lastSelectedItem?.name ?? '' : '',
-			subject: mode === 'update' ? lastSelectedItem?.subject ?? '' : '',
-			previewText: mode === 'update' ? lastSelectedItem?.previewText ?? '' : '',
-			body: mode === 'update' ? lastSelectedItem?.body ?? '' : '',
-			fromId: mode === 'update' ? lastSelectedItem?.fromId ?? '' : '',
+			name: createMode ? '' : lastSelectedItem?.name ?? '',
+			type: updateMode ? lastSelectedItem?.type ?? 'marketing' : 'marketing',
+			subject: updateMode ? lastSelectedItem?.subject ?? '' : '',
+			previewText: updateMode ? lastSelectedItem?.previewText ?? '' : '',
+			body: updateMode ? lastSelectedItem?.body ?? '' : '',
+			fromId: updateMode ? lastSelectedItem?.fromId ?? '' : '',
 		},
 		handleCreateItem: async d => {
 			await createEmailTemplate(d);
@@ -111,6 +114,9 @@ export function CreateOrUpdateEmailTemplateModal({
 
 			<Form form={form} onSubmit={onSubmit}>
 				<ModalBody>
+					<div className='mb-4 flex flex-row justify-end'>
+						<SendTestEmail values={form.getValues()} />
+					</div>
 					<TextField
 						label='Name'
 						name='name'
@@ -158,7 +164,7 @@ export function CreateOrUpdateEmailTemplateModal({
 						variables={EMAIL_TEMPLATE_VARIABLES}
 						markdown={form.getValues('body') ?? ''}
 						onChange={markdown => {
-							form.setValue('body', markdown);
+							form.setValue('body', markdown, { shouldDirty: true });
 						}}
 					/>
 				</ModalBody>

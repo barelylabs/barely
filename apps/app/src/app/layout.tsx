@@ -6,8 +6,7 @@ import localFont from 'next/font/local';
 import { cn } from '@barely/lib/utils/cn';
 
 import { TailwindIndicator } from '@barely/ui/components/tailwind-indicator';
-
-// import { Toaster } from '@barely/ui/elements/toaster';
+import { Toaster } from '@barely/ui/elements/toaster';
 
 // import FocusDebugger from '~/components/focus-debugger';
 
@@ -55,6 +54,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
 				)}
 			>
 				<Providers>
+					<Toaster />
 					<div
 						// eslint-disable-next-line
 						vaul-drawer-wrapper=''

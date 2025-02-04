@@ -63,8 +63,16 @@ export const selectWorkspaceEmailTemplatesSchema =
 export const sendTestEmailSchema = createEmailTemplateSchema.extend({
 	to: z.string().email(),
 	// toFanId: z.string(),
-	variables: z.object({
-		firstName: z.string().optional().default('John'),
-		lastName: z.string().optional().default('Doe'),
-	}),
+	variables: z
+		.object({
+			firstName: z.string().optional().default('John'),
+			lastName: z.string().optional().default('Doe'),
+		})
+		.optional(),
 });
+
+export const emailTemplateForm_sendEmailSchema = createEmailTemplateSchema
+	.partial({ workspaceId: true })
+	.extend({
+		sendTestEmailTo: z.string().email().optional(),
+	});
