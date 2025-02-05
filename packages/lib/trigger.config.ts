@@ -22,6 +22,7 @@ import type {
 export const config: TriggerConfig = {
 	//Your project ref (you can see it on the Project settings page in the dashboard)
 	project: 'proj_qknwxraxikbauwjfqxlr',
+	maxDuration: 60,
 	retries: {
 		//If you want to retry a task in dev mode (when using the CLI)
 		enabledInDev: false,
