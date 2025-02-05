@@ -36,9 +36,9 @@ export const config: TriggerConfig = {
 		},
 	},
 
-	dependenciesToBundle: [/.*/],
+	// dependenciesToBundle: [/.*/], // deprecated by trigger.dev
 	enableConsoleLogging: true, // enable console logging with dev cli
 	//The paths for your trigger folders
-	triggerDirectories: ['./trigger'],
+	dirs: ['./trigger'],
 	additionalPackages: ['resend@3.2.0'],
 };
