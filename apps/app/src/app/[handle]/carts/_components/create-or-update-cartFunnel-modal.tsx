@@ -1,7 +1,7 @@
 'use client';
 
 import type { z } from 'zod';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
@@ -32,6 +32,7 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 	/* funnel context */
 	const {
 		lastSelectedCartFunnel: selectedCartFunnel,
+		lastSelectedCartFunnelId: selectedCartFunnelId,
 		showCreateCartFunnelModal,
 		setShowCreateCartFunnelModal,
 		showUpdateCartFunnelModal,
@@ -104,38 +105,42 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 	}, [setShowModal, focusGridList, apiUtils.cartFunnel]);
 
 	// state
-	// const bumpSelected = form.watch('bumpProductId') !== null;
-	// const mainProductSelected = !!form.watch('mainProductId');
-	// const bumpSelected = !!form.watch('bumpProductId');
-	// const upsellSelected = !!form.watch('upsellProductId');
-
-	const mainProduct = products.find(p => p.id === form.watch('mainProductId'));
-	const bumpProduct = products.find(p => p.id === form.watch('bumpProductId'));
-	const upsellProduct = products.find(p => p.id === form.watch('upsellProductId'));
-
-	// const mainProductDiscount = form.watch('mainProductDiscount') ?? 0;
-	// useEffect(() => {
-	// 	console.log('mainProductDiscount', mainProductDiscount);
-	// 	console.log('typeof', typeof mainProductDiscount);
-	// }, [mainProductDiscount]);
+	const mainProduct = products.find(p => p.id === form.getValues('mainProductId'));
+	const bumpProduct = products.find(p => p.id === form.getValues('bumpProductId'));
+	const upsellProduct = products.find(p => p.id === form.getValues('upsellProductId'));
 
 	const [mainProductPayWhatYouWantMin, setMainProductPayWhatYouWantMin] = useState(
-		form.getValues('mainProductPayWhatYouWantMin'),
+		selectedCartFunnel?.mainProductPayWhatYouWantMin ?? undefined,
 	);
 
-	const [mainProductDiscount, setMainProductDiscount] = useState(
-		form.getValues('mainProductDiscount'),
+	const [mainProductDiscount, setMainProductDiscount] = useState<number | undefined>(
+		selectedCartFunnel?.mainProductDiscount ?? undefined,
 	);
-	const [bumpProductDiscount, setBumpProductDiscount] = useState(
-		form.getValues('bumpProductDiscount'),
+	const [bumpProductDiscount, setBumpProductDiscount] = useState<number | undefined>(
+		selectedCartFunnel?.bumpProductDiscount ?? undefined,
 	);
-	const [upsellProductDiscount, setUpsellProductDiscount] = useState(
-		form.getValues('upsellProductDiscount'),
+	const [upsellProductDiscount, setUpsellProductDiscount] = useState<number | undefined>(
+		selectedCartFunnel?.upsellProductDiscount ?? undefined,
 	);
+
+	// const form_mainProductDiscount = form.watch('mainProductDiscount');
+	// const form_bumpProductDiscount = form.watch('bumpProductDiscount');
+	// const form_upsellProductDiscount = form.watch('upsellProductDiscount');
+
+	useEffect(() => {
+		if (!selectedCartFunnelId) return;
+
+		setMainProductPayWhatYouWantMin(
+			selectedCartFunnel?.mainProductPayWhatYouWantMin ?? undefined,
+		);
+		setMainProductDiscount(selectedCartFunnel?.mainProductDiscount ?? undefined);
+		setBumpProductDiscount(selectedCartFunnel?.bumpProductDiscount ?? undefined);
+		setUpsellProductDiscount(selectedCartFunnel?.upsellProductDiscount ?? undefined);
+	}, [form, selectedCartFunnel, selectedCartFunnelId]); // fixme this definitely feels like an anti-pattern (having seperate state for the discounts and updating when the form updates, but the main problem is that the currency input acts like a string input while focuses, which means it can have intermediate state values that aren't numbers)
 
 	const mainProductDiscountedPrice = Math.max(
 		0,
-		form.watch('mainProductPayWhatYouWant') ?
+		form.getValues('mainProductPayWhatYouWant') ?
 			Number(mainProductPayWhatYouWantMin ?? 0)
 		:	(mainProduct?.price ?? 0) - (mainProductDiscount ?? 0),
 	);
@@ -192,7 +197,14 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 								<ProductPrice
 									price={mainProductDiscountedPrice}
 									normalPrice={mainProduct?.price}
-									className={mainProductDiscountedPrice === 0 ? 'text-red-500' : ''}
+									className={
+										(
+											mainProductDiscountedPrice === 0 &&
+											!form.watch('mainProductPayWhatYouWant')
+										) ?
+											'text-red-500'
+										:	''
+									}
 								/>
 							</div>
 						)}
@@ -232,6 +244,7 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 							// max={mainProduct?.price ?? 0}
 
 							onValueChange={v => {
+								console.log('mainProductDiscount', v);
 								setMainProductDiscount(v);
 							}}
 						/>

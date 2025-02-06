@@ -258,10 +258,7 @@ export function CheckoutForm({
 			// landingPageId: tracking.landingPageId,
 			// refererId: tracking.refererId,
 
-			mainProductPayWhatYouWantPrice:
-				cart.mainProductPayWhatYouWantPrice ?
-					cart.mainProductPayWhatYouWantPrice / 100
-				:	cart.mainProductPayWhatYouWantPrice,
+			mainProductPayWhatYouWantPrice: cart.mainProductPayWhatYouWantPrice,
 			mainProductQuantity: cart.mainProductQuantity ?? 1,
 			bumpProductQuantity: cart.bumpProductQuantity ?? 1,
 		},
@@ -347,6 +344,7 @@ export function CheckoutForm({
 										name='mainProductPayWhatYouWantPrice'
 										outputUnits='cents'
 										onValueChange={async v => {
+											console.log('paywhatyouwant v', v);
 											await updatePayWhatYouWantPrice(v);
 										}}
 										className='h-12 w-[80px] bg-white text-black'
