@@ -29,7 +29,11 @@ import {
 } from './cart.fns';
 import { updateCheckoutCartFromCheckoutSchema } from './cart.schema';
 import { Carts } from './cart.sql';
-import { getAmountsForCheckout, getFeeAmountForCheckout } from './cart.utils';
+import {
+	getAmountsForCheckout,
+	getAmountsForUpsell,
+	getFeeAmountForCheckout,
+} from './cart.utils';
 
 export const cartRouter = createTRPCRouter({
 	create: publicProcedure
@@ -313,21 +317,18 @@ export const cartRouter = createTRPCRouter({
 
 			const upsellProduct = funnel.upsellProduct ?? raise('upsell product not found');
 
+			const amounts = getAmountsForUpsell(funnel, cart);
+
 			const fan = cart.fan ?? raise('fan not found to buy upsell');
 
 			const stripePaymentMethodId =
 				cart.checkoutStripePaymentMethodId ?? raise('stripePaymentMethodId not found');
 
-			const upsellProductAmount =
-				upsellProduct.price - (funnel.upsellProductDiscount ?? 0);
-			const upsellShippingAmount = cart.upsellShippingPrice ?? 0; // todo - get shipping delta for upsell product
-			const upsellHandlingAmount = 0;
-
 			const paymentIntentRes = await stripe.paymentIntents.create(
 				{
-					amount: upsellProductAmount + upsellShippingAmount,
+					amount: amounts.upsellAmount,
 					application_fee_amount: getFeeAmountForCheckout({
-						amount: upsellProductAmount,
+						amount: amounts.upsellProductAmount,
 						workspace: funnel.workspace,
 					}),
 					currency: 'usd',
@@ -357,30 +358,30 @@ export const cartRouter = createTRPCRouter({
 
 			updateCart.upsellProductId = upsellProduct.id;
 			if (input.apparelSize) updateCart.upsellProductApparelSize = input.apparelSize;
-			updateCart.upsellProductAmount = upsellProductAmount;
-			updateCart.upsellShippingAmount = upsellShippingAmount;
-			updateCart.upsellHandlingAmount = 0;
+			updateCart.upsellProductAmount = amounts.upsellProductAmount;
+			updateCart.upsellShippingAmount = amounts.upsellShippingAmount;
+			updateCart.upsellHandlingAmount = amounts.upsellHandlingAmount;
 			updateCart.upsellShippingAndHandlingAmount =
-				upsellShippingAmount + upsellHandlingAmount;
-			updateCart.upsellAmount =
-				upsellProductAmount + upsellShippingAmount + upsellHandlingAmount;
+				amounts.upsellShippingAndHandlingAmount;
+			updateCart.upsellAmount = amounts.upsellAmount;
 
 			updateCart.upsellStripePaymentIntentId = paymentIntentRes.id;
 			updateCart.upsellStripeChargeId =
 				typeof charge === 'string' ? charge : charge?.id ?? null;
 
 			updateCart.orderProductAmount =
-				cart.mainProductAmount + (cart.bumpProductAmount ?? 0) + upsellProductAmount;
+				cart.mainProductAmount +
+				(cart.bumpProductAmount ?? 0) +
+				amounts.upsellProductAmount;
 			updateCart.orderShippingAmount =
 				(cart.mainShippingAmount ?? 0) +
 				(cart.bumpShippingAmount ?? 0) +
-				upsellShippingAmount;
+				amounts.upsellShippingAmount;
 			updateCart.orderHandlingAmount =
 				(cart.mainHandlingAmount ?? 0) +
 				(cart.bumpHandlingAmount ?? 0) +
-				upsellHandlingAmount;
-			updateCart.orderShippingAndHandlingAmount =
-				updateCart.orderShippingAmount + updateCart.orderHandlingAmount;
+				amounts.upsellHandlingAmount;
+			updateCart.orderShippingAndHandlingAmount = amounts.upsellShippingAndHandlingAmount;
 			updateCart.orderAmount =
 				updateCart.orderProductAmount + updateCart.orderShippingAndHandlingAmount;
 
@@ -420,7 +421,7 @@ export const cartRouter = createTRPCRouter({
 				})
 				.where(eq(Carts.id, input.cartId));
 
-			await incrementAssetValuesOnCartPurchase(cart, upsellProductAmount);
+			await incrementAssetValuesOnCartPurchase(cart, amounts.upsellProductAmount);
 
 			// 👇 ok because it only happens in a route handler
 			cookies().set(`${funnel.handle}.${funnel.key}.cartStage`, 'upsellConverted');
