@@ -244,7 +244,6 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 							// max={mainProduct?.price ?? 0}
 
 							onValueChange={v => {
-								console.log('mainProductDiscount', v);
 								setMainProductDiscount(v);
 							}}
 						/>
