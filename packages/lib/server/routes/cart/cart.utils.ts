@@ -51,6 +51,8 @@ export function getAmountsForCheckout(
 	} else {
 		mainProductPrice = funnel.mainProduct.price - (funnel.mainProductDiscount ?? 0);
 	}
+	mainProductPrice = Math.max(0, mainProductPrice);
+
 	const mainProductQuantity = cart.mainProductQuantity ?? 1;
 	const mainProductAmount = mainProductPrice * mainProductQuantity;
 	const mainHandlingAmount = funnel.mainProductHandling ?? 0;
@@ -59,10 +61,12 @@ export function getAmountsForCheckout(
 
 	// bump product
 	// const addedBump = cart.addedBump ?? false;
-	const bumpProductPrice =
+	const bumpProductPrice = Math.max(
+		0,
 		!funnel.bumpProduct ? 0 : (
 			funnel.bumpProduct.price - (funnel.bumpProductDiscount ?? 0)
-		);
+		),
+	);
 	const bumpProductQuantity = cart.bumpProductQuantity ?? 1;
 	const bumpProductAmount = cart.addedBump ? bumpProductPrice * bumpProductQuantity : 0;
 	const bumpShippingPrice = cart.bumpShippingPrice ?? 0;
@@ -115,6 +119,36 @@ export function getAmountsForCheckout(
 
 		// shippingAndHandlingAmount: mainPlusBumpShippingAndHandlingAmount,
 	} satisfies Partial<InsertCart>;
+}
+
+export function getAmountsForUpsell(
+	funnel: Pick<PublicFunnel, 'upsellProduct' | 'upsellProductDiscount'>,
+	cart: Pick<
+		InsertCart,
+		'upsellProductId' | 'upsellProductQuantity' | 'upsellShippingPrice'
+	>,
+) {
+	const upsellProductPrice = Math.max(
+		0,
+		(funnel.upsellProduct?.price ?? 0) - (funnel.upsellProductDiscount ?? 0),
+	);
+
+	const upsellProductQuantity = cart.upsellProductQuantity ?? 1;
+	const upsellProductAmount = upsellProductPrice * upsellProductQuantity;
+
+	const upsellShippingAmount = cart.upsellShippingPrice ?? 0; // todo - get shipping delta for upsell product
+	const upsellHandlingAmount = 0;
+	const upsellShippingAndHandlingAmount = upsellShippingAmount + upsellHandlingAmount;
+	const upsellAmount = upsellProductAmount + upsellShippingAmount + upsellHandlingAmount;
+
+	return {
+		upsellProductPrice,
+		upsellProductAmount,
+		upsellShippingAmount,
+		upsellHandlingAmount,
+		upsellShippingAndHandlingAmount,
+		upsellAmount,
+	};
 }
 
 export function getFeeAmountForCheckout({

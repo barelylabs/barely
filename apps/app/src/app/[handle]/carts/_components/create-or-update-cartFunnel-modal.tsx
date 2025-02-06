@@ -1,7 +1,7 @@
 'use client';
 
 import type { z } from 'zod';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { api } from '@barely/lib/server/api/react';
@@ -11,6 +11,7 @@ import {
 } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
 import { sanitizeKey } from '@barely/lib/utils/key';
 
+import { ProductPrice } from '@barely/ui/components/cart/product-price';
 import { Button } from '@barely/ui/elements/button';
 import { Label } from '@barely/ui/elements/label';
 import { MDXEditor } from '@barely/ui/elements/mdx-editor';
@@ -104,7 +105,50 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 
 	// state
 	// const bumpSelected = form.watch('bumpProductId') !== null;
-	const upsellSelected = !!form.watch('upsellProductId');
+	// const mainProductSelected = !!form.watch('mainProductId');
+	// const bumpSelected = !!form.watch('bumpProductId');
+	// const upsellSelected = !!form.watch('upsellProductId');
+
+	const mainProduct = products.find(p => p.id === form.watch('mainProductId'));
+	const bumpProduct = products.find(p => p.id === form.watch('bumpProductId'));
+	const upsellProduct = products.find(p => p.id === form.watch('upsellProductId'));
+
+	// const mainProductDiscount = form.watch('mainProductDiscount') ?? 0;
+	// useEffect(() => {
+	// 	console.log('mainProductDiscount', mainProductDiscount);
+	// 	console.log('typeof', typeof mainProductDiscount);
+	// }, [mainProductDiscount]);
+
+	const [mainProductPayWhatYouWantMin, setMainProductPayWhatYouWantMin] = useState(
+		form.getValues('mainProductPayWhatYouWantMin'),
+	);
+
+	const [mainProductDiscount, setMainProductDiscount] = useState(
+		form.getValues('mainProductDiscount'),
+	);
+	const [bumpProductDiscount, setBumpProductDiscount] = useState(
+		form.getValues('bumpProductDiscount'),
+	);
+	const [upsellProductDiscount, setUpsellProductDiscount] = useState(
+		form.getValues('upsellProductDiscount'),
+	);
+
+	const mainProductDiscountedPrice = Math.max(
+		0,
+		form.watch('mainProductPayWhatYouWant') ?
+			Number(mainProductPayWhatYouWantMin ?? 0)
+		:	(mainProduct?.price ?? 0) - (mainProductDiscount ?? 0),
+	);
+
+	const bumpProductDiscountedPrice = Math.max(
+		0,
+		(bumpProduct?.price ?? 0) - (bumpProductDiscount ?? 0),
+	);
+
+	const upsellProductDiscountedPrice = Math.max(
+		0,
+		(upsellProduct?.price ?? 0) - (upsellProductDiscount ?? 0),
+	);
 
 	return (
 		<Modal
@@ -141,7 +185,19 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 					/>
 
 					{/* MAIN PRODUCT */}
-					<H size='5'>Main Product</H>
+					<div className='mt-4 flex flex-row items-center gap-5'>
+						<H size='5'>Main Product</H>
+						{mainProduct && (
+							<div className='my-auto h-fit rounded-md bg-muted bg-opacity-75 p-2 px-3'>
+								<ProductPrice
+									price={mainProductDiscountedPrice}
+									normalPrice={mainProduct?.price}
+									className={mainProductDiscountedPrice === 0 ? 'text-red-500' : ''}
+								/>
+							</div>
+						)}
+					</div>
+
 					<SelectField
 						control={form.control}
 						name='mainProductId'
@@ -153,12 +209,17 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 						name='mainProductPayWhatYouWant'
 						label='Pay What You Want?'
 					/>
+
 					{form.watch('mainProductPayWhatYouWant') && (
 						<CurrencyField
 							control={form.control}
 							name='mainProductPayWhatYouWantMin'
 							label='Minimum Price'
 							outputUnits='cents'
+							// value={mainProductPayWhatYouWantMin}
+							onValueChange={v => {
+								setMainProductPayWhatYouWantMin(v);
+							}}
 						/>
 					)}
 
@@ -168,6 +229,11 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 							name='mainProductDiscount'
 							label='Discount'
 							outputUnits='cents'
+							// max={mainProduct?.price ?? 0}
+
+							onValueChange={v => {
+								setMainProductDiscount(v);
+							}}
 						/>
 					)}
 
@@ -179,7 +245,18 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 					/>
 
 					{/* BUMP */}
-					<H size='5'>Bump</H>
+					<div className='mt-4 flex flex-row items-center gap-5'>
+						<H size='5'>Bump</H>
+						{bumpProduct && (
+							<div className='my-auto h-fit rounded-md bg-muted bg-opacity-75 p-2 px-3'>
+								<ProductPrice
+									price={bumpProductDiscountedPrice}
+									normalPrice={bumpProduct?.price}
+									className={bumpProductDiscountedPrice === 0 ? 'text-red-500' : ''}
+								/>
+							</div>
+						)}
+					</div>
 					<SelectField
 						control={form.control}
 						name='bumpProductId'
@@ -192,6 +269,9 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 						name='bumpProductDiscount'
 						label='Discount'
 						outputUnits='cents'
+						onValueChange={v => {
+							setBumpProductDiscount(v);
+						}}
 					/>
 
 					<Label>Description</Label>
@@ -205,14 +285,25 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 					/>
 
 					{/* UPSELL */}
-					<H size='3'>Upsell</H>
+					<div className='mt-4 flex flex-row items-center gap-5'>
+						<H size='5'>Upsell</H>
+						{upsellProduct && (
+							<div className='my-auto h-fit rounded-md bg-muted bg-opacity-75 p-2 px-3'>
+								<ProductPrice
+									price={upsellProductDiscountedPrice}
+									normalPrice={upsellProduct?.price}
+									className={upsellProductDiscountedPrice === 0 ? 'text-red-500' : ''}
+								/>
+							</div>
+						)}
+					</div>
 
 					<SelectField
 						control={form.control}
 						name='upsellProductId'
 						label='Upsell Product'
 						labelButton={
-							upsellSelected ?
+							upsellProduct ?
 								<Button
 									startIcon='x'
 									variant='icon'
@@ -238,6 +329,9 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 						name='upsellProductDiscount'
 						label='Discount'
 						outputUnits='cents'
+						onValueChange={v => {
+							setUpsellProductDiscount(v);
+						}}
 						// disabled={!upsellSelected}
 					/>
 
@@ -262,7 +356,9 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 					/>
 
 					{/* SUCCESS */}
-					<H size='3'>Success Page</H>
+					<div className='mt-4'>
+						<H size='5'>Success Page</H>
+					</div>
 					<TextField name='successPageHeadline' label='Headline' control={form.control} />
 					<Label>Content</Label>
 					<MDXEditor

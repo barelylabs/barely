@@ -154,7 +154,7 @@ export const WORKSPACE_PLANS = new Map<PlanType, Plan>([
 				tasksPerDay: 2500,
 				tasksPerMonth: 2500,
 			},
-			cartFeePercentage: 10,
+			cartFeePercentage: 14,
 			analyticsRetentionDays: 365,
 			supportLevel: 'priority',
 			price: {
@@ -221,7 +221,7 @@ export const WORKSPACE_PLANS = new Map<PlanType, Plan>([
 				tasksPerDay: 5000,
 				tasksPerMonth: 5000,
 			},
-			cartFeePercentage: 8,
+			cartFeePercentage: 13,
 			analyticsRetentionDays: 365 * 3,
 			supportLevel: 'priority',
 
@@ -286,7 +286,7 @@ export const WORKSPACE_PLANS = new Map<PlanType, Plan>([
 				tasksPerDay: 10000,
 				tasksPerMonth: 10000,
 			},
-			cartFeePercentage: 6,
+			cartFeePercentage: 12,
 			analyticsRetentionDays: 365 * 3,
 			supportLevel: 'priority',
 
@@ -350,7 +350,7 @@ export const WORKSPACE_PLANS = new Map<PlanType, Plan>([
 				tasksPerDay: 20000,
 				tasksPerMonth: 20000,
 			},
-			cartFeePercentage: 5,
+			cartFeePercentage: 11,
 			analyticsRetentionDays: 365 * 3,
 			supportLevel: 'priority',
 
@@ -412,7 +412,7 @@ export const WORKSPACE_PLANS = new Map<PlanType, Plan>([
 				tasksPerDay: 40000,
 				tasksPerMonth: 40000,
 			},
-			cartFeePercentage: 4,
+			cartFeePercentage: 10,
 			analyticsRetentionDays: 365 * 3,
 			supportLevel: 'priority',
 

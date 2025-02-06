@@ -26,6 +26,8 @@ import { z } from 'zod';
 import { useDebouncedCallback } from '@barely/hooks/use-debounced-callback';
 import { useZodForm } from '@barely/hooks/use-zod-form';
 
+// import { setCartCookie } from '~/app/[mode]/[handle]/[key]/_actions';
+import { ProductPrice } from '@barely/ui/components/cart/product-price';
 import { Button } from '@barely/ui/elements/button';
 import { Icon } from '@barely/ui/elements/icon';
 import { Img } from '@barely/ui/elements/img';
@@ -42,8 +44,6 @@ import {
 	setCartIdCookie,
 	setCartStageCookie,
 } from '~/app/[mode]/[handle]/[key]/_actions';
-// import { setCartCookie } from '~/app/[mode]/[handle]/[key]/_actions';
-import { ProductPrice } from '~/app/[mode]/[handle]/[key]/_components/product-price';
 
 export function CheckoutForm({
 	mode,

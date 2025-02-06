@@ -1,13 +1,14 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { cartApi } from '@barely/lib/server/routes/cart/cart.api.server';
+import { getAmountsForUpsell } from '@barely/lib/server/routes/cart/cart.utils';
 import { APPAREL_SIZES } from '@barely/lib/server/routes/product/product.constants';
 
+import { ProductPrice } from '@barely/ui/components/cart/product-price';
 import { Img } from '@barely/ui/elements/img';
 import { H } from '@barely/ui/elements/typography';
 
 import { CartMDX } from '~/app/[mode]/[handle]/[key]/_components/cart-mdx';
-import { ProductPrice } from '~/app/[mode]/[handle]/[key]/_components/product-price';
 import { CartSteps } from '~/app/[mode]/[handle]/[key]/(after-main)/customize/_components/cart-steps';
 import { UpsellButtons } from '~/app/[mode]/[handle]/[key]/(after-main)/customize/_components/upsell-buttons';
 import { UpsellCountdown } from '~/app/[mode]/[handle]/[key]/(after-main)/customize/_components/upsell-countdown';
@@ -60,8 +61,13 @@ export default async function UpsellPage({
 		5 * 60 * 1000; // 5 minutes from now
 
 	const normalPrice = publicFunnel.upsellProduct?.price;
-	const price =
-		(publicFunnel.upsellProduct?.price ?? 0) - (publicFunnel.upsellProductDiscount ?? 0);
+
+	const amounts = getAmountsForUpsell(publicFunnel, cart);
+
+	// const price = Math.max(
+	// 	0,
+	// 	(publicFunnel.upsellProduct?.price ?? 0) - (publicFunnel.upsellProductDiscount ?? 0),
+	// );
 
 	const upsellSizes = publicFunnel.upsellProduct?._apparelSizes
 		?.map(size => size.size)
@@ -103,7 +109,11 @@ export default async function UpsellPage({
 					<CartMDX markdown={publicFunnel.upsellProductAboveTheFold} />
 				)}
 
-				<ProductPrice price={price} normalPrice={normalPrice} variant='xl/bold' />
+				<ProductPrice
+					price={amounts.upsellProductPrice}
+					normalPrice={normalPrice}
+					variant='xl/bold'
+				/>
 
 				<UpsellButtons
 					mode={mode}

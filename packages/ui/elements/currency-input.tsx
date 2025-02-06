@@ -48,6 +48,8 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
 			name?: string,
 			values?: CurrencyInputOnChangeValues,
 		) => {
+			console.log('value', value);
+			console.log('values', values);
 			setFocusedValue(value ?? '');
 
 			const valueInUnits =
@@ -66,7 +68,14 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
 			setIsFocused(true);
 		};
 
-		const handleBlur = () => {
+		const handleBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
+			console.log('blur value', e.currentTarget.value);
+			console.log('typeof', typeof e.currentTarget.value);
+
+			if (e.currentTarget.value === '') {
+				// setFocusedValue(0);
+				await onValueChange?.(0);
+			}
 			setIsFocused(false);
 		};
 
@@ -79,6 +88,7 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
 
 		return (
 			<>
+				{/* max:: {props.max} */}
 				<CurrencyInputPrimitive
 					{...props}
 					ref={ref}

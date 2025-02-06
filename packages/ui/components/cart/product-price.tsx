@@ -1,8 +1,9 @@
-import type { TextProps } from '@barely/ui/elements/typography';
+// import type { TextProps } from '@barely/ui/elements/typography';
 import { cn } from '@barely/lib/utils/cn';
 import { formatCentsToDollars } from '@barely/lib/utils/currency';
 
-import { Text } from '@barely/ui/elements/typography';
+import type { TextProps } from '../../elements/typography';
+import { Text } from '../../elements/typography';
 
 export function ProductPrice({
 	price,
