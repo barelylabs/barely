@@ -4,8 +4,8 @@ import { gte, or } from 'drizzle-orm';
 import { dbHttp } from '../server/db';
 import { Workspaces } from '../server/routes/workspace/workspace.sql';
 
-export const workspaceUsageReset = task({
-	id: 'workspace-usage-reset',
+export const resetWorkspaceUsage = task({
+	id: 'reset-workspace-usage',
 	run: async () => {
 		await dbHttp
 			.update(Workspaces)
