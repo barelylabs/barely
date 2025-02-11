@@ -81,12 +81,22 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 			// custom meta tags
 			customMetaTags: true,
 		},
+		with: {
+			workspace: {
+				columns: {
+					id: true,
+					plan: true,
+					eventUsage: true,
+					eventUsageLimitOverride: true,
+				},
+			},
+		},
 	});
 
 	console.log('link for ', url.href, link);
 
 	//* 🚧 handle route errors 🚧  *//
-	if (!link ?? !link?.url ?? !link?.key)
+	if (!link || !link.url || !link.key)
 		return NextResponse.rewrite(getAbsoluteUrl('link', '404'));
 
 	//* 📈 report event to analytics + remarketing *//
@@ -97,6 +107,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 		// link data
 		link,
 		platform: linkProps.platform,
+		workspace: link.workspace,
 		// visit data
 		visitor: visitorInfo,
 		type: 'link/click',

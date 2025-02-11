@@ -29,6 +29,16 @@ export const fmPageRouter = createTRPCRouter({
 			const fmPage =
 				(await ctx.db.http.query.FmPages.findFirst({
 					where: eq(FmPages.id, fmId),
+					with: {
+						workspace: {
+							columns: {
+								id: true,
+								plan: true,
+								eventUsage: true,
+								eventUsageLimitOverride: true,
+							},
+						},
+					},
 				})) ?? raise('fmPage not found');
 
 			const fmLink =
@@ -46,6 +56,7 @@ export const fmPageRouter = createTRPCRouter({
 				fmLink,
 				visitor,
 				type,
+				workspace: fmPage.workspace,
 			});
 		}),
 });

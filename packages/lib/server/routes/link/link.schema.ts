@@ -2,6 +2,7 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
 import type { AnalyticsEndpoint } from '../analytics-endpoint/analytics-endpoint-schema';
+import type { Workspace } from '../workspace/workspace.schema';
 import { infiniteQuerySchema } from '../../../utils/filters';
 import { isValidUrl } from '../../../utils/link';
 import { queryBooleanSchema, querySelectionSchema } from '../../../utils/zod-helpers';
@@ -92,4 +93,11 @@ export type LinkEventProps = z.infer<typeof linkEventSchema>;
 
 export const linkAnalyticsSchema = linkRoutingSchema.merge(linkEventSchema);
 
-export type LinkAnalyticsProps = z.infer<typeof linkAnalyticsSchema>;
+export type LinkAnalyticsProps = z.infer<typeof linkAnalyticsSchema> & {
+	workspace: {
+		id: string;
+		plan: Workspace['plan'];
+		eventUsage: number;
+		eventUsageLimitOverride: number | null;
+	};
+};

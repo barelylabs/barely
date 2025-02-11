@@ -10,6 +10,7 @@ import type { FM_LINK_PLATFORMS } from '../fm/fm.constants';
 import type { FmLink, FmPage } from '../fm/fm.schema';
 import type { LandingPage } from '../landing-page/landing-page.schema';
 import type { LinkAnalyticsProps } from '../link/link.schema';
+import type { Workspace } from '../workspace/workspace.schema';
 import type {
 	cartEventIngestSchema,
 	WEB_EVENT_TYPES__CART,
@@ -31,6 +32,7 @@ import { AnalyticsEndpoints } from '../analytics-endpoint/analytics-endpoint.sql
 import { FmLinks, FmPages } from '../fm/fm.sql';
 import { LandingPages } from '../landing-page/landing-page.sql';
 import { Links } from '../link/link.sql';
+import { WORKSPACE_PLANS } from '../workspace/workspace.settings';
 import { Workspaces } from '../workspace/workspace.sql';
 import {
 	fmEventIngestSchema,
@@ -61,6 +63,7 @@ export interface RecordClickProps {
 	href: string;
 	platform?: (typeof FM_LINK_PLATFORMS)[number];
 	visitor?: VisitorInfo;
+	workspace: Pick<Workspace, 'id' | 'plan' | 'eventUsage' | 'eventUsageLimitOverride'>;
 }
 
 export async function recordLinkClick({
@@ -69,6 +72,7 @@ export async function recordLinkClick({
 	type,
 	platform,
 	visitor,
+	workspace,
 }: RecordClickProps) {
 	if (visitor?.isBot) return null;
 
@@ -81,6 +85,21 @@ export async function recordLinkClick({
 	);
 
 	if (!success) return null;
+
+	// check if the workspace is above the event usage limit.
+	const isAboveEventUsageLimit = await checkIfWorkspaceIsAboveEventUsageLimit({
+		workspace,
+	});
+
+	if (isAboveEventUsageLimit) {
+		await log({
+			type: 'alerts',
+			location: 'recordLinkClick',
+			message: `workspace ${link.workspaceId} is above the event usage limit`,
+		});
+
+		return;
+	}
 
 	const time = Date.now();
 	const timestamp = new Date(time).toISOString();
@@ -175,7 +194,38 @@ export async function recordLinkClick({
 		.set({ linkUsage: sqlIncrement(Workspaces.linkUsage) })
 		.where(eq(Workspaces.id, link.workspaceId));
 
+	// increment the workspace event usage count in db
+	await dbHttp
+		.update(Workspaces)
+		.set({ eventUsage: sqlIncrement(Workspaces.eventUsage) })
+		.where(eq(Workspaces.id, link.workspaceId));
+
 	return;
+}
+
+async function checkIfWorkspaceIsAboveEventUsageLimit({
+	workspace,
+}: {
+	workspace: Pick<Workspace, 'id' | 'plan' | 'eventUsage' | 'eventUsageLimitOverride'>;
+}) {
+	const eventUsageLimit =
+		workspace.eventUsageLimitOverride ??
+		WORKSPACE_PLANS.get(workspace.plan)?.usageLimits.trackedEventsPerMonth;
+
+	if (!eventUsageLimit) {
+		await log({
+			type: 'alerts',
+			location: 'checkIfWorkspaceIsAboveEventUsageLimit',
+			message: `no event usage limit found for workspace ${workspace.id}`,
+		});
+		return false;
+	}
+
+	if (workspace.eventUsage >= eventUsageLimit) {
+		return true;
+	}
+
+	return false;
 }
 
 /* CART */
@@ -189,6 +239,7 @@ export async function recordCartEvent({
 	cart: Cart;
 	cartFunnel: CartFunnel;
 	type: (typeof WEB_EVENT_TYPES__CART)[number];
+
 	visitor?: VisitorInfo;
 }) {
 	const visitorInfo: VisitorInfo = {
@@ -263,6 +314,8 @@ export async function recordCartEvent({
 	};
 
 	if (visitorInfo.isBot) return null;
+
+	// todo: check if the workspace is above the event usage limit. for now, we're letting all cart events get reported
 
 	// deduplication events from the same ip & cartId - only record 1 cart event per ip per cartId per hour
 	const rateLimitPeriod =
@@ -379,9 +432,15 @@ export async function recordCartEvent({
 		await log({
 			type: 'sales',
 			location: 'recordCartEvent',
-			message: `${cartFunnel.handle} upsell [${cart.id}] :: ${formatCentsToDollars(cart.upsellProductPrice ?? 0)}`,
+			message: `${cartFunnel.handle} upsell [${cart.id}] :: ${formatCentsToDollars(cart.upsellProductAmount ?? 0)}`,
 		});
 	}
+
+	// increment the workspace event usage count in db
+	await dbHttp
+		.update(Workspaces)
+		.set({ eventUsage: sqlIncrement(Workspaces.eventUsage) })
+		.where(eq(Workspaces.id, cart.workspaceId));
 }
 
 function getMetaEventsFromCartEvent({
@@ -689,11 +748,13 @@ export async function recordFmEvent({
 	fmLink,
 	type,
 	visitor,
+	workspace,
 }: {
 	fmPage: FmPage;
 	type: (typeof WEB_EVENT_TYPES__FM)[number];
 	fmLink?: FmLink;
 	visitor?: VisitorInfo;
+	workspace: Pick<Workspace, 'id' | 'plan' | 'eventUsage' | 'eventUsageLimitOverride'>;
 }) {
 	console.log('recordFmEvent visitor >>', visitor);
 
@@ -706,14 +767,26 @@ export async function recordFmEvent({
 	);
 
 	if (!success) {
-		console.log(
-			'rate limit exceeded for ',
-			visitor?.ip,
-			fmPage.id,
-			type,
-			fmLink?.platform,
-		);
+		await log({
+			type: 'alerts',
+			location: 'recordFmEvent',
+			message: `rate limit exceeded for ${visitor?.ip} ${fmPage.id} ${type} ${fmLink?.platform}`,
+		});
 		return null;
+	}
+
+	// check if the workspace is above the event usage limit.
+	const isAboveEventUsageLimit = await checkIfWorkspaceIsAboveEventUsageLimit({
+		workspace,
+	});
+
+	if (isAboveEventUsageLimit) {
+		await log({
+			type: 'alerts',
+			location: 'recordFmEvent',
+			message: `workspace ${fmPage.workspaceId} is above the event usage limit`,
+		});
+		return;
 	}
 
 	const timestamp = new Date(Date.now()).toISOString();
@@ -840,6 +913,12 @@ export async function recordFmEvent({
 			.set({ clicks: sqlIncrement(FmPages.clicks), ...platformClickIncrement })
 			.where(eq(FmPages.id, fmPage.id));
 	}
+
+	// increment the workspace event usage count in db
+	await dbHttp
+		.update(Workspaces)
+		.set({ eventUsage: sqlIncrement(Workspaces.eventUsage) })
+		.where(eq(Workspaces.id, fmPage.workspaceId));
 }
 
 function getMetaEventFromFmEvent({
@@ -889,12 +968,14 @@ export async function recordLandingPageEvent({
 	visitor,
 	linkClickDestinationAssetId,
 	linkClickDestinationHref,
+	workspace,
 }: {
 	page: LandingPage;
 	type: (typeof WEB_EVENT_TYPES__PAGE)[number];
 	visitor?: VisitorInfo;
 	linkClickDestinationAssetId?: string;
 	linkClickDestinationHref?: string;
+	workspace: Pick<Workspace, 'id' | 'plan' | 'eventUsage' | 'eventUsageLimitOverride'>;
 }) {
 	if (visitor?.isBot) return null;
 
@@ -913,6 +994,19 @@ export async function recordLandingPageEvent({
 			linkClickDestinationAssetId,
 		);
 		return null;
+	}
+
+	const isAboveEventUsageLimit = await checkIfWorkspaceIsAboveEventUsageLimit({
+		workspace,
+	});
+
+	if (isAboveEventUsageLimit) {
+		await log({
+			type: 'alerts',
+			location: 'recordLandingPageEvent',
+			message: `workspace ${page.workspaceId} is above the event usage limit`,
+		});
+		return;
 	}
 
 	const timestamp = new Date(Date.now()).toISOString();
@@ -980,6 +1074,12 @@ export async function recordLandingPageEvent({
 			.set({ clicks: sqlIncrement(LandingPages.clicks) })
 			.where(eq(LandingPages.id, page.id));
 	}
+
+	// increment the workspace event usage count in db
+	await dbHttp
+		.update(Workspaces)
+		.set({ eventUsage: sqlIncrement(Workspaces.eventUsage) })
+		.where(eq(Workspaces.id, page.workspaceId));
 }
 
 function getMetaEventFromPageEvent({

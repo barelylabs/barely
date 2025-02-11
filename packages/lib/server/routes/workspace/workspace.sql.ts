@@ -109,6 +109,10 @@ export const Workspaces = pgTable(
 			.default('free')
 			.notNull(),
 
+		/* event usage */
+		eventUsage: integer('eventUsage').default(0).notNull(),
+		eventUsageLimitOverride: integer('eventUsageLimitOverride'),
+
 		/* email usage */
 		emailUsage: integer('emailUsage').default(0).notNull(),
 		emailUsageLimitOverride: integer('emailUsageLimitOverride'),

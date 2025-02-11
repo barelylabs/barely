@@ -31,6 +31,16 @@ export const landingPageRenderRouter = createTRPCRouter({
 			const lp =
 				(await ctx.db.http.query.LandingPages.findFirst({
 					where: eq(LandingPages.id, landingPageId),
+					with: {
+						workspace: {
+							columns: {
+								id: true,
+								plan: true,
+								eventUsage: true,
+								eventUsageLimitOverride: true,
+							},
+						},
+					},
 				})) ?? raise('Landing page not found');
 
 			await recordLandingPageEvent({
@@ -39,6 +49,7 @@ export const landingPageRenderRouter = createTRPCRouter({
 				visitor,
 				linkClickDestinationAssetId,
 				linkClickDestinationHref,
+				workspace: lp.workspace,
 			});
 		}),
 });
