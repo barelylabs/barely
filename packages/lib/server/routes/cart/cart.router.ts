@@ -390,7 +390,10 @@ export const cartRouter = createTRPCRouter({
 
 			if (ctx.visitor?.ip) {
 				await recordCartEvent({
-					cart,
+					cart: {
+						...cart,
+						...updateCart,
+					},
 					cartFunnel: funnel,
 					type: 'cart/purchaseUpsell',
 					visitor: ctx.visitor,
