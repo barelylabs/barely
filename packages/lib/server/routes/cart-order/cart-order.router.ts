@@ -162,7 +162,7 @@ export const cartOrderRouter = createTRPCRouter({
 						fulfillment.products.map(product => product.productId),
 					);
 
-					console.log('fulfilledProductIds', fulfilledProductIds);
+					// console.log('fulfilledProductIds', fulfilledProductIds);
 
 					const unfulfilledProductIds = [];
 
@@ -186,13 +186,13 @@ export const cartOrderRouter = createTRPCRouter({
 						unfulfilledProductIds.push(order.upsellProductId);
 					}
 
-					console.log('unfulfilledProductIds', unfulfilledProductIds);
+					// console.log('unfulfilledProductIds', unfulfilledProductIds);
 
 					const hasFulfillableProduct = unfulfilledProductIds.some(
 						productId => !preorderProductIds.includes(productId),
 					);
 
-					console.log('hasFulfillableProduct', hasFulfillableProduct);
+					// console.log('hasFulfillableProduct', hasFulfillableProduct);
 
 					return hasFulfillableProduct;
 
