@@ -116,12 +116,10 @@ export const cartOrderRouter = createTRPCRouter({
 						or(
 							notInArray(Carts.mainProductId, preorderProductIds),
 							or(
-								isNull(Carts.bumpProductId),
 								eq(Carts.addedBump, false),
 								notInArray(Carts.bumpProductId, preorderProductIds),
 							),
 							or(
-								isNull(Carts.upsellProductId),
 								isNull(Carts.upsellConvertedAt),
 								notInArray(Carts.upsellProductId, preorderProductIds),
 							),
@@ -158,15 +156,49 @@ export const cartOrderRouter = createTRPCRouter({
 			});
 
 			// if we're not showing preorders, we filter out any orders where there are only preorders left to fulfill
-			if (preorderProductIds.length) {
+			if (!showFulfilled && preorderProductIds.length) {
 				orders = orders.filter(order => {
-					const remainingProducts = order.fulfillments.flatMap(fulfillment =>
+					const fulfilledProductIds = order.fulfillments.flatMap(fulfillment =>
 						fulfillment.products.map(product => product.productId),
 					);
 
-					return remainingProducts.every(productId =>
-						preorderProductIds.includes(productId),
+					// console.log('fulfilledProductIds', fulfilledProductIds);
+
+					const unfulfilledProductIds = [];
+
+					if (order.mainProductId && !fulfilledProductIds.includes(order.mainProductId)) {
+						unfulfilledProductIds.push(order.mainProductId);
+					}
+
+					if (
+						order.addedBump &&
+						order.bumpProductId &&
+						!fulfilledProductIds.includes(order.bumpProductId)
+					) {
+						unfulfilledProductIds.push(order.bumpProductId);
+					}
+
+					if (
+						order.upsellConvertedAt &&
+						order.upsellProductId &&
+						!fulfilledProductIds.includes(order.upsellProductId)
+					) {
+						unfulfilledProductIds.push(order.upsellProductId);
+					}
+
+					// console.log('unfulfilledProductIds', unfulfilledProductIds);
+
+					const hasFulfillableProduct = unfulfilledProductIds.some(
+						productId => !preorderProductIds.includes(productId),
 					);
+
+					// console.log('hasFulfillableProduct', hasFulfillableProduct);
+
+					return hasFulfillableProduct;
+
+					// return remainingProducts.every(productId =>
+					// 	preorderProductIds.includes(productId),
+					// );
 				});
 			}
 
