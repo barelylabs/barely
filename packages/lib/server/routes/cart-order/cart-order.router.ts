@@ -83,6 +83,7 @@ export const cartOrderRouter = createTRPCRouter({
 					})
 				).map(p => p.id);
 			}
+			console.log('preorderProductIds', preorderProductIds);
 
 			const orders = await ctx.db.pool.query.Carts.findMany({
 				where: sqlAnd([
@@ -104,10 +105,12 @@ export const cartOrderRouter = createTRPCRouter({
 							notInArray(Carts.mainProductId, preorderProductIds),
 							or(
 								isNull(Carts.bumpProductId),
+								eq(Carts.addedBump, false),
 								notInArray(Carts.bumpProductId, preorderProductIds),
 							),
 							or(
 								isNull(Carts.upsellProductId),
+								isNull(Carts.upsellConvertedAt),
 								notInArray(Carts.upsellProductId, preorderProductIds),
 							),
 						]),
