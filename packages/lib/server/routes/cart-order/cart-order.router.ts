@@ -84,8 +84,6 @@ export const cartOrderRouter = createTRPCRouter({
 				).map(p => p.id);
 			}
 
-			console.log('preorderProductIds', preorderProductIds);
-
 			let orders = await ctx.db.pool.query.Carts.findMany({
 				where: sqlAnd([
 					eq(Carts.workspaceId, ctx.workspace.id),
