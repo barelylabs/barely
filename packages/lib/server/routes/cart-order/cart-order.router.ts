@@ -84,7 +84,7 @@ export const cartOrderRouter = createTRPCRouter({
 				).map(p => p.id);
 			}
 
-			const orders = await ctx.db.pool.query.Carts.findMany({
+			let orders = await ctx.db.pool.query.Carts.findMany({
 				where: sqlAnd([
 					eq(Carts.workspaceId, ctx.workspace.id),
 					isNotNull(Carts.orderId),
@@ -100,17 +100,32 @@ export const cartOrderRouter = createTRPCRouter({
 					!!fanId && eq(Carts.fanId, fanId),
 					!!searchFanIds.length && inArray(Carts.fanId, searchFanIds),
 					!!preorderProductIds.length &&
-						sqlAnd([
+						// sqlAnd([
+						//     notInArray(Carts.mainProductId, preorderProductIds),
+						//     or(
+						//         isNull(Carts.bumpProductId),
+						//         eq(Carts.addedBump, false),
+						//         notInArray(Carts.bumpProductId, preorderProductIds),
+						//     ),
+						//     or(
+						//         isNull(Carts.upsellProductId),
+						//         isNull(Carts.upsellConvertedAt),
+						//         notInArray(Carts.upsellProductId, preorderProductIds),
+						//     ),
+						// ]),
+						or(
 							notInArray(Carts.mainProductId, preorderProductIds),
 							or(
 								isNull(Carts.bumpProductId),
+								eq(Carts.addedBump, false),
 								notInArray(Carts.bumpProductId, preorderProductIds),
 							),
 							or(
 								isNull(Carts.upsellProductId),
+								isNull(Carts.upsellConvertedAt),
 								notInArray(Carts.upsellProductId, preorderProductIds),
 							),
-						]),
+						),
 					!!cursor &&
 						or(
 							or(
@@ -141,6 +156,19 @@ export const cartOrderRouter = createTRPCRouter({
 				orderBy: [asc(Carts.checkoutConvertedAt), asc(Carts.orderId)],
 				limit: limit + 1,
 			});
+
+			// if we're not showing preorders, we filter out any orders where there are only preorders left to fulfill
+			if (preorderProductIds.length) {
+				orders = orders.filter(order => {
+					const remainingProducts = order.fulfillments.flatMap(fulfillment =>
+						fulfillment.products.map(product => product.productId),
+					);
+
+					return remainingProducts.every(productId =>
+						preorderProductIds.includes(productId),
+					);
+				});
+			}
 
 			let nextCursor: typeof cursor | undefined = undefined;
 
