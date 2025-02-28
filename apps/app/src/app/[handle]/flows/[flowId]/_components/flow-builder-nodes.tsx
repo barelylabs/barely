@@ -48,6 +48,7 @@ function NodeDiv({
 	onEdit,
 	title,
 	subtitle,
+	selected,
 }: {
 	children?: React.ReactNode;
 	stripeClassName?: string;
@@ -56,11 +57,17 @@ function NodeDiv({
 	onEdit: () => void;
 	title: string;
 	subtitle: string;
+	selected?: boolean;
 }) {
 	const IconComponent = Icon[icon];
 
 	return (
-		<div className='relative flex flex-col items-center justify-center gap-2 overflow-visible rounded border border-border bg-background p-2 px-8 '>
+		<div
+			className={cn(
+				'relative flex flex-col items-center justify-center gap-2 overflow-visible rounded border border-border bg-background p-2 px-8',
+				selected && 'border-primary',
+			)}
+		>
 			<TargetHandle />
 			<SourceHandle />
 			<div className='flex flex-col items-center gap-2'>
@@ -84,6 +91,7 @@ function NodeDiv({
 			<div
 				className={cn(
 					'absolute -bottom-1 -left-[1.5px] h-1.5 w-[calc(100%+3px)] rounded-b bg-border',
+					selected && 'border-b border-l border-r border-primary',
 					stripeClassName,
 				)}
 			/>
@@ -94,6 +102,7 @@ function NodeDiv({
 /* TRIGGER */
 
 const triggerStoreSelector = (state: FlowState) => ({
+	// currentNode: state.currentNode,
 	setCurrentNode: state.setCurrentNode,
 	setShowTriggerModal: state.setShowTriggerModal,
 	updateNodeEnabled: state.updateNodeEnabled,
@@ -103,6 +112,8 @@ export function TriggerNodeType({ data, id }: { id: string; data: TriggerNode['d
 	const { setCurrentNode, setShowTriggerModal, updateNodeEnabled } = useFlowStore(
 		useShallow(triggerStoreSelector),
 	);
+
+	// const selected = currentNode?.id === id;
 
 	const { cartFunnels } = useCartFunnels();
 
@@ -134,6 +145,7 @@ export function TriggerNodeType({ data, id }: { id: string; data: TriggerNode['d
 			}
 			iconClassName='h-[16px] w-[16px] text-amber-400'
 			stripeClassName='bg-amber-400'
+			// selected={selected}
 		>
 			{TriggerIcon && <TriggerIcon className='h-[16px] w-[16px]' />}
 			<Switch
@@ -257,14 +269,17 @@ export function EmptyNodeType({ id }: { id: string }) {
 /* WAIT */
 
 const waitStoreSelector = (state: FlowState) => ({
+	selectedNodes: state.selectedNodes,
 	setCurrentNode: state.setCurrentNode,
 	setShowWaitModal: state.setShowWaitModal,
 });
 
 export function WaitNodeType({ id, data }: { id: string; data: WaitNode['data'] }) {
-	const { setCurrentNode, setShowWaitModal } = useFlowStore(
+	const { selectedNodes, setCurrentNode, setShowWaitModal } = useFlowStore(
 		useShallow(waitStoreSelector),
 	);
+
+	const selected = selectedNodes.some(node => node.id === id);
 
 	return (
 		<NodeDiv
@@ -277,6 +292,7 @@ export function WaitNodeType({ id, data }: { id: string; data: WaitNode['data'] 
 			subtitle={`Wait for ${data.waitFor} ${data.waitForUnits}`}
 			iconClassName='h-[13.5px] w-[13.5px] text-orange-400'
 			stripeClassName='bg-orange-400'
+			selected={selected}
 		/>
 		// <div className='relative flex w-[172px] flex-col items-center justify-center rounded border border-border bg-background p-2 px-4'>
 		// 	<TargetHandle />
@@ -311,6 +327,7 @@ export function WaitNodeType({ id, data }: { id: string; data: WaitNode['data'] 
 
 const sendEmailStoreSelector = (state: FlowState) => ({
 	setCurrentNode: state.setCurrentNode,
+	selectedNodes: state.selectedNodes,
 	setShowEmailModal: state.setShowEmailModal,
 	updateNodeEnabled: state.updateNodeEnabled,
 });
@@ -322,9 +339,10 @@ export function SendEmailNodeType({
 	id: string;
 	data: SendEmailNode['data'];
 }) {
-	const { setCurrentNode, setShowEmailModal, updateNodeEnabled } = useFlowStore(
-		useShallow(sendEmailStoreSelector),
-	);
+	const { selectedNodes, setCurrentNode, setShowEmailModal, updateNodeEnabled } =
+		useFlowStore(useShallow(sendEmailStoreSelector));
+
+	const selected = selectedNodes.some(node => node.id === id);
 
 	return (
 		<NodeDiv
@@ -337,6 +355,7 @@ export function SendEmailNodeType({
 			subtitle={`Send "${data.name}"`}
 			iconClassName='h-[16px] w-[16px] text-blue-400'
 			stripeClassName='bg-blue-400'
+			selected={selected}
 		>
 			<Switch
 				checked={data.enabled}
@@ -356,6 +375,7 @@ export function SendEmailNodeType({
 
 const sendEmailFromTemplateGroupStoreSelector = (state: FlowState) => ({
 	setCurrentNode: state.setCurrentNode,
+	selectedNodes: state.selectedNodes,
 	setShowEmailFromTemplateGroupModal: state.setShowEmailFromTemplateGroupModal,
 	updateNodeEnabled: state.updateNodeEnabled,
 });
@@ -367,8 +387,14 @@ export function SendEmailFromTemplateGroupNodeType({
 	id: string;
 	data: SendEmailFromTemplateGroupNode['data'];
 }) {
-	const { setCurrentNode, setShowEmailFromTemplateGroupModal, updateNodeEnabled } =
-		useFlowStore(useShallow(sendEmailFromTemplateGroupStoreSelector));
+	const {
+		selectedNodes,
+		setCurrentNode,
+		setShowEmailFromTemplateGroupModal,
+		updateNodeEnabled,
+	} = useFlowStore(useShallow(sendEmailFromTemplateGroupStoreSelector));
+
+	const selected = selectedNodes.some(node => node.id === id);
 
 	const { handle } = useWorkspace();
 
@@ -388,6 +414,7 @@ export function SendEmailFromTemplateGroupNodeType({
 			subtitle={`Send Email from "${emailTemplateGroup?.name}"`}
 			iconClassName='h-[16px] w-[16px] text-indigo-400'
 			stripeClassName='bg-indigo-400'
+			selected={selected}
 		>
 			<Switch
 				checked={data.enabled}
@@ -536,6 +563,7 @@ export function BooleanNodeType({ id, data }: { id: string; data: BooleanNode['d
 
 const mailchimpStoreSelector = (state: FlowState) => ({
 	setCurrentNode: state.setCurrentNode,
+	selectedNodes: state.selectedNodes,
 	setShowMailchimpAudienceModal: state.setShowMailchimpAudienceModal,
 	updateNodeEnabled: state.updateNodeEnabled,
 });
@@ -547,8 +575,14 @@ export function MailchimpAudienceNodeType({
 	id: string;
 	data: AddToMailchimpAudienceNode['data'];
 }) {
-	const { setCurrentNode, setShowMailchimpAudienceModal, updateNodeEnabled } =
-		useFlowStore(useShallow(mailchimpStoreSelector));
+	const {
+		selectedNodes,
+		setCurrentNode,
+		setShowMailchimpAudienceModal,
+		updateNodeEnabled,
+	} = useFlowStore(useShallow(mailchimpStoreSelector));
+
+	const selected = selectedNodes.some(node => node.id === id);
 
 	const { handle } = useWorkspace();
 	const { data: mailchimpAudiences } = api.mailchimp.audiencesByWorkspace.useQuery({
@@ -567,9 +601,10 @@ export function MailchimpAudienceNodeType({
 				setShowMailchimpAudienceModal(true);
 			}}
 			title='Add to Mailchimp Audience'
-			subtitle={`Audience: ${currentMailchimpAudience?.name}` ?? 'Choose an audience'}
+			subtitle={`Audience: ${currentMailchimpAudience?.name}`}
 			iconClassName='h-[16px] w-[16px] text-mailchimp-400'
 			stripeClassName='bg-mailchimp-400'
+			selected={selected}
 		>
 			<Switch
 				checked={data.enabled}

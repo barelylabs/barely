@@ -1131,8 +1131,8 @@ importers:
         specifier: ^0.10.1
         version: 0.10.1(typescript@5.5.4)(zod@3.23.8)
       '@trigger.dev/sdk':
-        specifier: 3.3.14
-        version: 3.3.14(zod@3.23.8)
+        specifier: 3.3.16
+        version: 3.3.16(zod@3.23.8)
       '@trpc/react-query':
         specifier: 11.0.0-rc.334
         version: 11.0.0-rc.334(@tanstack/react-query@5.25.0)(@trpc/client@11.0.0-rc.334)(@trpc/server@11.0.0-rc.334)(react-dom@18.2.0)(react@18.2.0)
@@ -1363,8 +1363,8 @@ importers:
         specifier: ^7.45.4
         version: 7.49.3(react@18.2.0)
       trigger.dev:
-        specifier: 3.3.14
-        version: 3.3.14(typescript@5.5.4)
+        specifier: 3.3.16
+        version: 3.3.16(typescript@5.5.4)
       typescript:
         specifier: ^5.5.4
         version: 5.5.4
@@ -14938,11 +14938,11 @@ packages:
       - tailwindcss
     dev: false
 
-  /@trigger.dev/build@3.3.14(typescript@5.5.4):
-    resolution: {integrity: sha512-nbcXt5ce01o1yvq6Z8WwFPG7TVtkv4FfV1CS6rtkryPbMs5ceD9Wxl6N8C4meS2kL+/yETPwmNN6srGtIDKLDA==}
+  /@trigger.dev/build@3.3.16(typescript@5.5.4):
+    resolution: {integrity: sha512-PATGwN8bvDlOESmOgJO3mofulxActkSClBCdlsTT3NYzT6umFFXOieWzq5fLrPpaHsujrkazTERSiHOEdxEXxw==}
     engines: {node: '>=18.20.0'}
     dependencies:
-      '@trigger.dev/core': 3.3.14
+      '@trigger.dev/core': 3.3.16
       pkg-types: 1.3.1
       tinyglobby: 0.2.10
       tsconfck: 3.1.3(typescript@5.5.4)
@@ -14953,8 +14953,8 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@trigger.dev/core@3.3.14:
-    resolution: {integrity: sha512-3KQcYMvg3sAkd5UOPEwmq7S0/IXILSx7MO9yWZqluqRSDQK5gbUF9tXsB88hgfoiZor+6mpCqyzOj1DlLSEwcA==}
+  /@trigger.dev/core@3.3.16:
+    resolution: {integrity: sha512-OCxl9A7QvqLnGlnl195p8lw0pTY7hJQyaY35Sdy2GuYcm28ktwzx3F2Iu3ulgcmDlKQTpf1VZsSA5wP/enRRpQ==}
     engines: {node: '>=18.20.0'}
     dependencies:
       '@electric-sql/client': 1.0.0-beta.1
@@ -14988,8 +14988,8 @@ packages:
       - supports-color
       - utf-8-validate
 
-  /@trigger.dev/sdk@3.3.14(zod@3.23.8):
-    resolution: {integrity: sha512-M/8HateynrAYo8HawkYbJ3eS3+sHeRIALNQOGOuVZlTdcr+GI+RaCurwPHQ8ku8/L1MrQ1CH9uaSJL38MqKHhw==}
+  /@trigger.dev/sdk@3.3.16(zod@3.23.8):
+    resolution: {integrity: sha512-vObHP0P5ugyZNKiAOLTD1rWeHKiX97K82aj06HaOceRZxwztbBnuhD3AXAODISvroKguySUcrLDCMOSTpXUung==}
     engines: {node: '>=18.20.0'}
     peerDependencies:
       zod: ^3.0.0
@@ -14997,7 +14997,7 @@ packages:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/api-logs': 0.52.1
       '@opentelemetry/semantic-conventions': 1.25.1
-      '@trigger.dev/core': 3.3.14
+      '@trigger.dev/core': 3.3.16
       chalk: 5.3.0
       cronstrue: 2.49.0
       debug: 4.3.4
@@ -15005,6 +15005,7 @@ packages:
       slug: 6.1.0
       terminal-link: 3.0.0
       ulid: 2.3.0
+      uncrypto: 0.1.3
       uuid: 9.0.1
       ws: 8.18.0
       zod: 3.23.8
@@ -30593,8 +30594,8 @@ packages:
     hasBin: true
     dev: true
 
-  /trigger.dev@3.3.14(typescript@5.5.4):
-    resolution: {integrity: sha512-MfFLfbRWfeR9nc6piXZ27P0t4919xVMuT2jXQeB1VUKbGLKNzajQAkk8sw8eoYYvQdwzu23zCNVy2j1nP8peKQ==}
+  /trigger.dev@3.3.16(typescript@5.5.4):
+    resolution: {integrity: sha512-knbhbLl0b6TBn8fQeCSISeCJ4uu9RiXbeHvYEu6BD5kOfbHk4uSavBW+fXxs+eK5LZ62rb6abBw2gLZowH13CA==}
     engines: {node: '>=18.20.0'}
     hasBin: true
     dependencies:
@@ -30612,8 +30613,8 @@ packages:
       '@opentelemetry/sdk-trace-base': 1.25.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-node': 1.25.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.25.1
-      '@trigger.dev/build': 3.3.14(typescript@5.5.4)
-      '@trigger.dev/core': 3.3.14
+      '@trigger.dev/build': 3.3.16(typescript@5.5.4)
+      '@trigger.dev/core': 3.3.16
       c12: 1.11.2(magicast@0.3.5)
       chalk: 5.3.0
       chokidar: 3.6.0

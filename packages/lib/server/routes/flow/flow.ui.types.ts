@@ -82,14 +82,25 @@ export interface FlowState {
 	// history
 	history: FlowSnapshot[];
 	historyIndex: number;
+	lastCommittedHistoryIndex: number;
+	setCurrentAsLastSaved: () => void;
 	saveSnapshot: () => void;
+	isDirty: boolean;
+	checkIfDirty: () => boolean;
+	// undo/redo
 	undo: () => void;
 	redo: () => void;
+	// selection
+	selectedNodes: FlowNode[];
+	selectedEdges: FlowEdge[];
+	setSelectedNodes: (nodes: FlowNode[]) => void;
+	setSelectedEdges: (edges: FlowEdge[]) => void;
 	// set
 	setNodes: (nodes: FlowNode[]) => void;
 	setEdges: (edges: FlowEdge[]) => void;
 	setCurrentNode: (id: string) => void;
 	// on
+	onSelectionChange: (selection: { nodes: Node[]; edges: Edge[] }) => void;
 	onNodesChange: OnNodesChange<FlowNode>;
 	onEdgesChange: OnEdgesChange<FlowEdge>;
 	onConnect: OnConnect;

@@ -310,6 +310,7 @@ export const Icon = {
 	database: Database,
 	delete: Trash,
 	dhl: FaDhl,
+	digital: Download,
 	displaySettings: Settings2,
 	dollar: DollarSign,
 	domain: Globe,
@@ -429,6 +430,7 @@ export const Icon = {
 	poster: FrameCorners,
 	press: Newspaper,
 	pressKit: Newspaper,
+	print: File,
 	profile: CircleUserRound,
 	product: ScanBarcode,
 
