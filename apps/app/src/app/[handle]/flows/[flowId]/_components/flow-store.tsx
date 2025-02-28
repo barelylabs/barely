@@ -12,6 +12,7 @@ import type {
 	BooleanNode,
 	EmptyNode,
 	FlowEdge,
+	FlowNode,
 	FlowState,
 	SendEmailFromTemplateGroupNode,
 	SendEmailNode,
@@ -19,6 +20,7 @@ import type {
 	TriggerNode,
 	WaitNode,
 } from '@barely/lib/server/routes/flow/flow.ui.types';
+import type { Edge, Node } from '@xyflow/react';
 import type { StoreApi } from 'zustand';
 import { createContext, use, useContext, useState } from 'react';
 import { useToast } from '@barely/lib/hooks/use-toast';
@@ -29,8 +31,11 @@ import {
 	hasEdgeLoop,
 } from '@barely/lib/server/routes/flow/flow.utils';
 import { newId } from '@barely/lib/utils/id';
-import { addEdge, applyEdgeChanges, applyNodeChanges } from '@xyflow/react';
+import { addEdge, applyEdgeChanges, applyNodeChanges, getIncomers } from '@xyflow/react';
+import deepEqual from 'fast-deep-equal';
 import { createStore, useStore } from 'zustand';
+
+import { raise } from '@barely/utils/raise';
 
 const FlowStoreContext = createContext<StoreApi<FlowState> | null>(null);
 
@@ -66,8 +71,20 @@ export const FlowStoreProvider = ({
 			currentNode: null,
 
 			// history
-			history: [],
-			historyIndex: -1,
+			history: [
+				{
+					nodes: initialData.uiNodes ?? [],
+					edges: initialData.uiEdges ?? [],
+				},
+			],
+			historyIndex: 0,
+			lastCommittedHistoryIndex: 0,
+			setCurrentAsLastSaved: () => {
+				// const historyIndex = get().historyIndex;
+				set({
+					lastCommittedHistoryIndex: get().historyIndex,
+				});
+			},
 			saveSnapshot: () => {
 				const currentState = {
 					nodes: get().nodes,
@@ -75,11 +92,74 @@ export const FlowStoreProvider = ({
 				};
 				console.log('saving snapshot', currentState);
 				const historyIndex = get().historyIndex;
+				console.log('historyIndex', historyIndex);
+
+				// let isDirty = false;
+				// const lastCommittedHistoryIndex = get().lastCommittedHistoryIndex;
+				// const lastCommittedState = get().history[lastCommittedHistoryIndex];
+
+				// const isDirty = !deepEqual(currentState, lastCommittedState);
+				get().checkIfDirty();
+
+				// console.log('lastCommittedState', lastCommittedState);
+				// console.log('snapshot is dirty', isDirty);
+
 				set({
 					history: [...get().history.slice(0, historyIndex + 1), currentState],
 					historyIndex: historyIndex + 1,
+					// isDirty,
 				});
 			},
+
+			checkIfDirty: () => {
+				const currentState = {
+					nodes: get().nodes,
+					edges: get().edges,
+				};
+				const lastCommittedState = get().history[get().lastCommittedHistoryIndex];
+				const isDirty = !deepEqual(currentState, lastCommittedState);
+				console.log('isDirty', isDirty);
+
+				set({ isDirty });
+
+				return isDirty;
+			},
+			isDirty: false,
+			// setIsDirty: (dirty: boolean) => {
+			// 	set({ isDirty: dirty });
+			// },
+			// isDirty: () => {
+			//     // const
+			//     const currentState = {
+			//         nodes: get().nodes,
+			//         edges: get().edges
+			//     };
+			//     const lastCommittedState = get().history[get().lastCommittedHistoryIndex];
+
+			//     if (!lastCommittedState) {
+			//         return get().historyIndex >= 0;
+			//     }
+
+			//     return JSON.stringify(currentState) !== JSON.stringify(lastCommittedState);
+			//     return true;
+			// }
+			// isDirty: false,
+			// setIsDirty: (dirty: boolean) => {
+			// 	set({ isDirty: dirty });
+			// },
+
+			//selection
+			selectedNodes: [],
+			selectedEdges: [],
+			setSelectedNodes: (nodes: FlowNode[]) => {
+				set({ selectedNodes: nodes });
+			},
+			setSelectedEdges: (edges: FlowEdge[]) => {
+				set({ selectedEdges: edges });
+			},
+			// setSelection: (selection: { nodes: FlowNode[]; edges: FlowEdge[] }) => {
+			// 	set({ selectedNodes: selection.nodes, selectedEdges: selection.edges });
+			// },
 			undo: () => {
 				const historyIndex = get().historyIndex;
 				if (historyIndex <= 0) return;
@@ -92,6 +172,7 @@ export const FlowStoreProvider = ({
 					edges,
 					historyIndex: historyIndex - 1,
 				});
+				get().checkIfDirty();
 				return setTimeout(() => {
 					get().onLayout('TB');
 				}, 0);
@@ -107,12 +188,43 @@ export const FlowStoreProvider = ({
 					edges,
 					historyIndex: historyIndex + 1,
 				});
+				get().checkIfDirty();
 				return setTimeout(() => {
 					get().onLayout('TB');
 				}, 0);
 			},
 
 			onNodesChange: changes => {
+				// console.log('onNodesChange', changes);
+
+				// const removedNodeIds = changes
+				// 	.filter(change => change.type === 'remove')
+				// 	.map(change => change.id);
+				// console.log('removedNodeIds', removedNodeIds);
+
+				// const prevNodes = get().nodes;
+				// console.log('prevNodes', prevNodes);
+				// const prevEdges = get().edges;
+				// // console.log('prevEdges', prevEdges);
+
+				// const removedNodes = get().nodes.filter(node => removedNodeIds.includes(node.id));
+				// console.log('removedNodes', removedNodes);
+
+				// // const removedEdges = get().edges.filter(edge =>
+				// // 	removedNodeIds.includes(edge.source) || removedNodeIds.includes(edge.target),
+				// // );
+				// // console.log('removedEdges', removedEdges);
+
+				// if (
+				// 	removedNodes.length > 0 &&
+				// 	removedNodes.some(node => node.type === 'boolean')
+				// ) {
+				// 	console.log('removing nodes', removedNodes);
+
+				// 	console.log('boolean node deleted');
+				// 	return;
+				// } else {
+				// }
 				set({
 					nodes: applyNodeChanges(changes, get().nodes),
 				});
@@ -121,6 +233,13 @@ export const FlowStoreProvider = ({
 			onEdgesChange: changes => {
 				set({
 					edges: applyEdgeChanges(changes, get().edges),
+				});
+			},
+
+			onSelectionChange: (selection: { nodes: Node[]; edges: Edge[] }) => {
+				set({
+					selectedNodes: selection.nodes as unknown as FlowNode[],
+					selectedEdges: selection.edges as unknown as FlowEdge[],
 				});
 			},
 
@@ -142,17 +261,102 @@ export const FlowStoreProvider = ({
 				const prevEdges = get().edges;
 
 				const sourceNode = prevNodes.find(node => node.id === connection.source);
+
+				if (!sourceNode) {
+					console.error('sourceNode not found');
+					return;
+				}
+
+				// const incomers = getIncomers(sourceNode, prevNodes, prevEdges);
+				const sourceNodeParent = getIncomers(sourceNode, prevNodes, prevEdges)[0];
+				console.log('sourceNodeParent', sourceNodeParent);
+
+				const targetNode = prevNodes.find(node => node.id === connection.target);
+				console.log('targetNode', targetNode);
+
+				if (!targetNode) {
+					console.error('targetNode not found');
+					return;
+				}
+
+				const targetNodeParent = getIncomers(targetNode, prevNodes, prevEdges)[0];
+				console.log('targetNodeParent', targetNodeParent);
+
 				// const targetNode = prevNodes.find(node => node.id === connection.target);
 
 				if (sourceNode?.type === 'empty') {
-					const edgeAboveEmpty = prevEdges.find(
+					const edgeAboveEmptySource = prevEdges.find(
 						edge => edge.target === connection.source,
 					);
-					if (edgeAboveEmpty) {
+
+					console.log('edgeAboveEmptySource', edgeAboveEmptySource);
+
+					const edgeAboveEmptyTarget = prevEdges.find(
+						edge => edge.target === connection.target,
+					);
+
+					console.log('edgeAboveEmptyTarget', edgeAboveEmptyTarget);
+
+					if (edgeAboveEmptyTarget) {
+						// there's an 'edge' case we want to handle here:
+						// if the edgeAboveEmpty
+
+						if (edgeAboveEmptyTarget.source === edgeAboveEmptySource?.source) {
+							console.log(
+								'sourceNode and targetNode have the same source. that should only be possible if the sourceNode is a boolean node',
+								sourceNodeParent,
+							);
+							const deleteBooleanNode = window.confirm(
+								'This will delete the boolean node. Are you sure you want to continue?',
+							);
+							if (deleteBooleanNode) {
+								console.log('deleting boolean node and empty source node');
+
+								const sourceBooleanNodeParentNode = getIncomers(
+									sourceNodeParent ?? raise('no sourceNodeParent'),
+									prevNodes,
+									prevEdges,
+								)[0];
+								console.log('sourceBooleanNodeParentNode', sourceBooleanNodeParentNode);
+								const newNodes = prevNodes.filter(
+									node => node.id !== sourceNode.id && node.id !== sourceNodeParent?.id,
+								);
+
+								// we also want to delete 3 edges:
+								// 1. the edge above the sourceNode
+								// 2. the edge above the targetNode
+								// 3. the edge above the sourceNodeParent (which is the boolean node)
+
+								const filteredEdges = prevEdges.filter(
+									edge =>
+										edge.target !== connection.target &&
+										edge.target !== sourceNodeParent?.id &&
+										edge.id !== edgeAboveEmptyTarget.id &&
+										edge.id !== edgeAboveEmptySource.id,
+								);
+
+								const createdEdge = {
+									id: `e-${sourceBooleanNodeParentNode?.id}-${connection.target}`,
+									source: sourceBooleanNodeParentNode?.id ?? raise('no source'),
+									target: connection.target,
+									type: 'simple',
+								} satisfies SimpleEdge;
+
+								console.log('newNodes', newNodes);
+								console.log('filteredEdges', filteredEdges);
+								console.log('createdEdge', createdEdge);
+								return set({
+									nodes: [...newNodes],
+									edges: [...filteredEdges, createdEdge],
+								});
+							} else return;
+						}
+
+						console.log('edgeAboveEmpty', edgeAboveEmptyTarget);
 						return set({
 							nodes: prevNodes.filter(node => node.id !== sourceNode.id),
 							edges: prevEdges.map(edge => {
-								if (edge.id === edgeAboveEmpty.id) {
+								if (edge.id === edgeAboveEmptyTarget.id) {
 									return {
 										...edge,
 										target: connection.target,
@@ -290,7 +494,7 @@ export const FlowStoreProvider = ({
 					set({ edges: updatedEdges });
 				} else {
 					const newNode: EmptyNode = {
-						id: newId('flowAction'),
+						id: newId('flowAction'), //fixme: this would ideally be the same id as the replaced node (for history/dirty state tracking), and the new node would have a new id instead, but that'd require calculating new edges up top and then handling deleting edges properly too. for another time.
 						type: 'empty',
 						deletable: false,
 						position: { x: newNodeX, y: newEmptyNodeY },

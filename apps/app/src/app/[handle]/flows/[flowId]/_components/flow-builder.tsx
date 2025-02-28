@@ -14,12 +14,15 @@ import { useShallow } from 'zustand/react/shallow';
 import '@xyflow/react/dist/style.css';
 
 import type {
+	FlowEdge,
 	FlowNode,
 	FlowState,
 	SimpleEdge,
 } from '@barely/lib/server/routes/flow/flow.ui.types';
 
 import { Button } from '@barely/ui/elements/button';
+
+import { raise } from '@barely/utils/raise';
 
 import {
 	BooleanEdgeType,
@@ -57,6 +60,7 @@ const selector = (state: FlowState) => ({
 	// on
 	onNodesChange: state.onNodesChange,
 	onEdgesChange: state.onEdgesChange,
+	onSelectionChange: state.onSelectionChange,
 	onConnect: state.onConnect,
 	// onNodesDelete: state.onNodesDelete,
 	onLayout: state.onLayout,
@@ -78,12 +82,14 @@ export function FlowBuilder() {
 		redo,
 		saveSnapshot,
 		// setters
+		setNodes,
 		setEdges,
 		//on
 		onNodesChange,
 		onEdgesChange,
 		onConnect,
 		onLayout,
+		onSelectionChange,
 	} = useFlowStore(useShallow(selector));
 
 	const nodeTypes = {
@@ -101,14 +107,142 @@ export function FlowBuilder() {
 		boolean: BooleanEdgeType,
 	};
 
+	const onKeyDown = useCallback((event: KeyboardEvent) => {
+		if (event.key === 'Delete' || event.key === 'Backspace') {
+			event.preventDefault();
+			return false;
+		}
+	}, []);
+
+	useEffect(() => {
+		document.addEventListener('keydown', onKeyDown);
+		return () => {
+			document.removeEventListener('keydown', onKeyDown);
+		};
+	}, [onKeyDown]);
+
+	const onBeforeDelete = useCallback(
+		async ({
+			nodes: nodesToDelete,
+			edges: edgesToDelete,
+		}: {
+			nodes: FlowNode[];
+			edges: FlowEdge[];
+		}) => {
+			console.log('onBeforeDelete', nodesToDelete, edgesToDelete);
+			const booleanNodes = nodesToDelete.filter(node => node.type === 'boolean');
+			if (booleanNodes.length > 0) {
+				console.log('booleanNodes', booleanNodes);
+
+				// we can handle some cases here
+				// a) both are connected to an empty node
+
+				// b) one endpoint is connected to an empty, but the other isn't. Then we just remove the boolean node and connect the boolean source to the non-empty target
+				// c) both endpoints are connected to non-empty nodes. they musth confirm via window.confirm that they're OK with deleting everything under the boolean node
+
+				if (booleanNodes.length > 1) {
+					// not fucking around with multiple nodes that include a boolean atm
+					return false;
+				}
+
+				const booleanNode = booleanNodes[0];
+
+				console.log('booleanNode', booleanNode);
+
+				if (!booleanNode) return false; // this should never happen
+
+				console.log('nodes', nodes);
+				console.log('edges', edges);
+
+				const incomers = getIncomers(booleanNode, nodes, edges);
+				const outgoers = getOutgoers(booleanNode, nodes, edges);
+				const connectedEdges = getConnectedEdges([booleanNode], edges);
+
+				console.log('incomers', incomers);
+				console.log('outgoers', outgoers);
+				console.log('connectedEdges', connectedEdges);
+
+				// a) both are connected to an empty node ->
+				// we delete the false outgoer node and the edge connected to it.
+				// Our onNodesDelete will take care of connecting the boolean source to the true target
+				if (outgoers.every(outgoer => outgoer.type === 'empty')) {
+					// delete the false outgoer node and the edge connected to it.
+					const newNodes = nodes.filter(node => {
+						return node.id !== outgoers[0]?.id && node.id !== booleanNode.id;
+					});
+
+					const remainingEdges = edges.filter(edge => !connectedEdges.includes(edge));
+
+					const createdEdge = {
+						id: `${incomers[0]?.id}-${outgoers[1]?.id}`,
+						source: incomers[0]?.id ?? raise('no source'),
+						target: outgoers[1]?.id ?? raise('no target'),
+						type: 'simple',
+					} satisfies SimpleEdge;
+
+					setNodes([...newNodes]);
+					setEdges([...remainingEdges, createdEdge]);
+
+					return false;
+				}
+
+				if (outgoers.some(outgoer => outgoer.type === 'empty')) {
+					// b) one endpoint is connected to an empty, but the other isn't ->
+					// we delete the empty node and edge connected to it.
+					// Then we just remove the boolean node (our onNodesDelete will take care of connecting the boolean source to the non-empty target)
+
+					const emptyNodeToDelete = outgoers.find(outgoer => outgoer.type === 'empty');
+					const actionNodeToKeep = outgoers.find(outgoer => outgoer.type !== 'empty');
+					const newNodes = nodes.filter(node => {
+						return node.id !== emptyNodeToDelete?.id && node.id !== booleanNode.id;
+					});
+
+					const remainingEdges = edges.filter(edge => !connectedEdges.includes(edge));
+					const createdEdge = {
+						id: `${incomers[0]?.id}-${actionNodeToKeep?.id}`,
+						source: incomers[0]?.id ?? raise('no source'),
+						target: actionNodeToKeep?.id ?? raise('no target'),
+						type: 'simple',
+					} satisfies SimpleEdge;
+
+					setNodes([...newNodes]);
+					setEdges([...remainingEdges, createdEdge]);
+
+					return false;
+				}
+
+				// c) both endpoints are connected to non-empty nodes. they must confirm via window.confirm that they're OK with deleting everything under the boolean node
+				// const confirm = window.confirm('Are you sure you want to delete this boolean node?');
+				const confirm = window.confirm(
+					'This will delete everything under the boolean node. Are you sure you want to continue?',
+				);
+				if (!confirm) return false;
+
+				return false; // todo: we have to delete everything under the boolean node
+			}
+			console.log('go ahead with deletion');
+			return true;
+		},
+		[nodes, edges, setEdges, setNodes],
+	);
+
 	const onNodesDelete = useCallback(
 		(deleted: FlowNode[]) => {
+			console.log('deleted nodes', deleted);
+
+			console.log('nodes in onNodesDelete', nodes);
+
+			// console.log('deleted', deleted);
+			// const deleteable = deleted.filter(n => n.type !== 'boolean');
+			// console.log('deleteable', deleteable);
+
+			// if (deleted.length > 0 && deleteable.length === 0) return;
+
+			setNodes(nodes.filter(node => !deleted.includes(node)));
+
 			const newEdges = deleted.reduce((acc, node) => {
 				const incomers = getIncomers(node, nodes, edges);
 				const outgoers = getOutgoers(node, nodes, edges);
-				console.log('node', node);
-				console.log('incomers', incomers);
-				console.log('outgoers', outgoers);
 
 				const connectedEdges = getConnectedEdges([node], edges);
 
@@ -134,7 +268,7 @@ export function FlowBuilder() {
 
 			return saveSnapshot();
 		},
-		[edges, nodes, setEdges, saveSnapshot],
+		[edges, nodes, setEdges, setNodes, saveSnapshot],
 	);
 
 	const initialLayout = useRef(false);
@@ -150,6 +284,26 @@ export function FlowBuilder() {
 		}
 	}, [nodes, edges, onLayout]);
 
+	useEffect(() => {
+		const handleKeyDown = (event: KeyboardEvent) => {
+			// const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+			// const cmdKey = isMac ? event.metaKey : event.ctrlKey;
+
+			if ((event.metaKey || event.ctrlKey) && !event.shiftKey && event.key === 'z') {
+				event.preventDefault();
+				undo();
+			}
+
+			if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === 'z') {
+				event.preventDefault();
+				redo();
+			}
+		};
+
+		document.addEventListener('keydown', handleKeyDown);
+		return () => document.removeEventListener('keydown', handleKeyDown);
+	}, [undo, redo]);
+
 	return (
 		<div className='h-[800px] w-full rounded-lg border border-border bg-background'>
 			<ReactFlow
@@ -158,11 +312,13 @@ export function FlowBuilder() {
 				onNodesChange={onNodesChange}
 				onEdgesChange={onEdgesChange}
 				onNodesDelete={onNodesDelete}
+				onSelectionChange={onSelectionChange}
 				onConnect={onConnect}
-				// onClickConnectStart={c => console.log(c)}
 				nodeTypes={nodeTypes}
 				edgeTypes={edgeTypes}
 				panOnScroll={true}
+				onBeforeDelete={onBeforeDelete}
+				// delete
 			>
 				<Controls />
 				<Background />

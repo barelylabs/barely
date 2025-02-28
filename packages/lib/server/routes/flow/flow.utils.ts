@@ -55,7 +55,7 @@ export function getActionNodeFromFlowAction(
 					enabled: node.enabled ?? true,
 				},
 				position: position ?? { x: 400, y: 25 },
-				deletable: false,
+				// deletable: false,
 			} satisfies WaitNode;
 		case 'boolean':
 			return {
@@ -67,7 +67,7 @@ export function getActionNodeFromFlowAction(
 					enabled: node.enabled ?? true,
 				},
 				position: position ?? { x: 400, y: 25 },
-				deletable: false,
+				// deletable: false,
 			} satisfies BooleanNode;
 		case 'sendEmail': {
 			const emailTemplate =
@@ -84,6 +84,7 @@ export function getActionNodeFromFlowAction(
 				position: position ?? { x: 400, y: 25 },
 			} satisfies SendEmailNode;
 		}
+
 		case 'sendEmailFromTemplateGroup': {
 			const emailTemplateGroupId =
 				node.emailTemplateGroupId ??
@@ -346,20 +347,11 @@ export function getDefaultFlowAction_wait(props: {
 		id: props.id ?? newId('flowAction'),
 		flowId: props.flowId,
 		type: 'wait',
-		waitFor: 5,
-		waitForUnits: 'minutes',
+		waitFor: 1,
+		waitForUnits: 'days',
 	} satisfies InsertFlowAction_NotStrict;
 
 	const flowActionNode = getActionNodeFromFlowAction(flowAction, props.position);
-
-	// const { id, ...data } = flowAction;
-
-	// const flowActionNode: WaitNode = {
-	// 	id,
-	// 	type: 'wait',
-	// 	data,
-	// 	position: props.position ?? { x: 0, y: 0 },
-	// } satisfies WaitNode;
 
 	return { flowAction, flowActionNode };
 }

@@ -30,6 +30,8 @@ import { useFlowStore } from './flow-store';
 const selector = (state: FlowState) => ({
 	nodes: state.nodes,
 	edges: state.edges,
+	isDirty: state.isDirty,
+	setCurrentAsLastSaved: state.setCurrentAsLastSaved,
 });
 
 export function FlowUpdateForm(props: {
@@ -39,7 +41,9 @@ export function FlowUpdateForm(props: {
 	const { handle } = useWorkspace();
 
 	const initialFlow = use(props.initialFlow);
-	const { nodes, edges } = useFlowStore(useShallow(selector));
+	const { nodes, edges, isDirty, setCurrentAsLastSaved } = useFlowStore(
+		useShallow(selector),
+	);
 
 	const form = useZodForm({
 		schema: updateFlowAndNodesSchema,
@@ -53,6 +57,8 @@ export function FlowUpdateForm(props: {
 			keepDirtyValues: true,
 		},
 	});
+
+	const isFormDirty = form.formState.isDirty || isDirty;
 
 	const { data: fanOptions } = api.fan.byWorkspace.useQuery(
 		{ handle, limit: 20 },
@@ -81,6 +87,7 @@ export function FlowUpdateForm(props: {
 
 	const { mutateAsync: updateFlow } = api.flow.update.useMutation({
 		onSuccess: () => {
+			setCurrentAsLastSaved();
 			toast('Flow updated');
 		},
 	});
@@ -98,8 +105,6 @@ export function FlowUpdateForm(props: {
 		const updatedActions: z.infer<typeof updateFlowAndNodesSchema>['actions'] = nodes
 			.filter(node => node.type !== 'trigger')
 			.map(action => getFlowActionFromActionNode(action, initialFlow.flow.id));
-
-		// console.log('updatedActions', updatedActions);
 
 		const updateFlowAndNodesData: z.infer<typeof updateFlowAndNodesSchema> = {
 			...data,
@@ -165,7 +170,13 @@ export function FlowUpdateForm(props: {
 						placeholder='Flow Description'
 					/>
 					<SwitchField name='enabled' label='Enabled' control={form.control} />
-					<SubmitButton fullWidth>Save</SubmitButton>
+					<SubmitButton disabled={!isFormDirty} fullWidth>
+						Save
+					</SubmitButton>
+					{/* {isDirty ? 'isDirty' : 'isNotDirty'}
+					{isFormDirty ?
+						<div className='text-xs italic text-yellow-600'>You have unsaved changes</div>
+					:	<div className='text-xs italic text-gray-600'>No unsaved changes</div>} */}
 
 					<Separator className='my-4' />
 

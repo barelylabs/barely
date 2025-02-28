@@ -2,7 +2,8 @@ import type { FlowState } from '@barely/lib/server/routes/flow/flow.ui.types';
 import type { z } from 'zod';
 import { useEffect } from 'react';
 import { useCartFunnels } from '@barely/lib/hooks/use-cart-funnels';
-import { useProducts } from '@barely/lib/hooks/use-products';
+// import { useProducts } from '@barely/lib/hooks/use-products';
+
 import { useZodForm } from '@barely/lib/hooks/use-zod-form';
 import { flowForm_booleanSchema } from '@barely/lib/server/routes/flow/flow.schema';
 import { raise } from '@barely/lib/utils/raise';
@@ -13,6 +14,7 @@ import { Form, SubmitButton } from '@barely/ui/forms';
 import { NumberField } from '@barely/ui/forms/number-field';
 import { SelectField } from '@barely/ui/forms/select-field';
 
+import { useProducts } from '~/app/_hooks/use-products';
 import { useFlowStore } from './flow-store';
 
 const selector = (state: FlowState) => ({
@@ -45,6 +47,7 @@ export function FlowBooleanModal() {
 		useFlowStore(useShallow(selector));
 
 	const { productOptions } = useProducts();
+	console.log('productOptions', productOptions);
 
 	const { cartFunnelOptions } = useCartFunnels();
 
