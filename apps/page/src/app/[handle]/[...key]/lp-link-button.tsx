@@ -16,7 +16,6 @@ export const LandingPageLinkButton = ({
 	landingPageId,
 	assetId,
 	label,
-	// ...props
 }: LandingPageLinkButtonProps) => {
 	const { mutate: logEvent } = landingPageApi.log.useMutation();
 

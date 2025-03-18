@@ -31,12 +31,7 @@ import {
 	InsertAssetButtonButton,
 	InsertLinkButtonButton,
 } from './plugins/mdx-button-plugin';
-import {
-	InsertCard,
-	InsertGrid,
-	// InsertTwoColumnGrid,
-	mdxGridPlugin,
-} from './plugins/mdx-grid-plugin';
+import { InsertCard, InsertGrid, mdxGridPlugin } from './plugins/mdx-grid-plugin';
 import {
 	imageFileJsxComponentDescriptors,
 	InsertImageFileButton,
@@ -53,64 +48,62 @@ export function InitializedMDXEditor({
 	...props
 }: { editorRef: ForwardedRef<MDXEditorMethods> | null } & MDXEditorProps) {
 	return (
-		<MDXEditor
-			ref={editorRef}
-			plugins={[
-				headingsPlugin(),
-				listsPlugin(),
-				quotePlugin(),
-				variablePlugin(),
-				addVariablesPlugin(),
-				linkPlugin(),
-				linkDialogPlugin({
-					LinkDialog: () => <LinkDialog />,
-				}),
-				thematicBreakPlugin(),
-				markdownShortcutPlugin(),
-				// codeMirrorPlugin({ codeBlockLanguages: { js: 'Javascript', ts: 'Typescript' } }),
-				jsxPlugin({
-					jsxComponentDescriptors: [
-						...videoJsxComponentDescriptors,
-						...buttonComponentDescriptors,
-						...imageFileJsxComponentDescriptors,
-						...mdxGridPlugin,
-					],
-				}),
+		<div className='relative rounded-lg border border-border bg-background p-4'>
+			<div className='max-h-[70vh] overflow-y-auto'>
+				<MDXEditor
+					ref={editorRef}
+					plugins={[
+						headingsPlugin(),
+						listsPlugin(),
+						quotePlugin(),
+						variablePlugin(),
+						addVariablesPlugin(),
+						linkPlugin(),
+						linkDialogPlugin({
+							LinkDialog: () => <LinkDialog />,
+						}),
+						thematicBreakPlugin(),
+						markdownShortcutPlugin(),
+						jsxPlugin({
+							jsxComponentDescriptors: [
+								...videoJsxComponentDescriptors,
+								...buttonComponentDescriptors,
+								...imageFileJsxComponentDescriptors,
+								...mdxGridPlugin,
+							],
+						}),
 
-				toolbarPlugin({
-					toolbarContents: () => (
-						<>
-							<UndoRedo />
-							<BlockTypeSelect />
-							<ListsToggle />
-							<BoldItalicUnderlineToggles />
-							{/* <CreateLink /> */}
-							{/* {props?.variables ?
-								<AddVariablesPlugin variables={props.variables} />
-							:	null} */}
-							{/* <InsertTwoColumnGrid /> */}
+						toolbarPlugin({
+							toolbarContents: () => (
+								<>
+									<UndoRedo />
+									<BlockTypeSelect />
+									<ListsToggle />
+									<BoldItalicUnderlineToggles />
 
-							<div className='mx-2 flex flex-row items-center'>
-								<InsertGrid />
-								<InsertCard />
-							</div>
+									<div className='mx-2 flex flex-row items-center'>
+										<InsertGrid />
+										<InsertCard />
+									</div>
 
-							<div className='mx-2 flex flex-row items-center'>
-								<InsertVideoButton />
-								<InsertLinkButtonButton />
-							</div>
+									<div className='mx-2 flex flex-row items-center'>
+										<InsertVideoButton />
+										<InsertLinkButtonButton />
+									</div>
 
-							<div className='mx-2 flex flex-row items-center'>
-								<InsertImageFileButton />
-								<InsertAssetButtonButton />
-							</div>
-						</>
-					),
-				}),
-			]}
-			{...props}
-			contentEditableClassName='prose'
-			className={cn('rounded-lg border border-border bg-background p-4', className)}
-		/>
+									<div className='mx-2 flex flex-row items-center'>
+										<InsertImageFileButton />
+										<InsertAssetButtonButton />
+									</div>
+								</>
+							),
+						}),
+					]}
+					{...props}
+					contentEditableClassName='prose'
+					className={cn(className)}
+				/>
+			</div>
+		</div>
 	);
 }
