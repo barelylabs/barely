@@ -152,10 +152,6 @@ export const ImageFileEditor: React.FC<JsxEditorProps> = ({ mdastNode }) => {
 			a => a.type === 'mdxJsxAttribute' && a.name === 'height',
 		)?.value;
 
-		// const blurDataUrl = mdastNode.attributes.find(
-		// 	a => a.type === 'mdxJsxAttribute' && a.name === 'blurDataUrl',
-		// )?.value;
-
 		// render props
 		const size = mdastNode.attributes.find(
 			a => a.type === 'mdxJsxAttribute' && a.name === 'size',
@@ -172,7 +168,6 @@ export const ImageFileEditor: React.FC<JsxEditorProps> = ({ mdastNode }) => {
 				s3Key: typeof s3Key === 'string' ? s3Key : '',
 				width: typeof width === 'string' ? parseInt(width) : undefined,
 				height: typeof height === 'string' ? parseInt(height) : undefined,
-				// blurDataUrl: typeof blurDataUrl === 'string' ? blurDataUrl : '',
 			},
 
 			size: ((
@@ -189,9 +184,6 @@ export const ImageFileEditor: React.FC<JsxEditorProps> = ({ mdastNode }) => {
 		schema: mdxImageFileSchema,
 		values: {
 			...properties,
-			// file: properties.file,
-			// alt: properties.alt,
-			// size: properties.size,
 		},
 		resetOptions: {
 			keepDirtyValues: true,
@@ -202,6 +194,18 @@ export const ImageFileEditor: React.FC<JsxEditorProps> = ({ mdastNode }) => {
 		allowedFileTypes: ['image'],
 		uploadQueueAtom: imageUploadQueueAtom,
 		maxFiles: 1,
+		onPresigned: presigned => {
+			console.log('presigned', presigned);
+			const presignedFile = presigned[0];
+			if (!presignedFile) {
+				throw new Error('No presigned file found');
+			}
+			form.setValue('file.id', presignedFile.fileRecord.id);
+			form.setValue('file.name', presignedFile.fileRecord.name);
+			form.setValue('file.s3Key', presignedFile.fileRecord.s3Key);
+			form.setValue('file.width', presignedFile.fileRecord.width ?? undefined);
+			form.setValue('file.height', presignedFile.fileRecord.height ?? undefined);
+		},
 	});
 
 	const {

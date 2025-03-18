@@ -1,21 +1,17 @@
-import type { MdxImageSize } from '@barely/lib/server/mdx/mdx.constants';
 import type { EventTrackingProps } from '@barely/lib/server/routes/event/event-report.schema';
 import type { LandingPage } from '@barely/lib/server/routes/landing-page/landing-page.schema';
 import type { MdxAssets } from '@barely/lib/utils/mdx';
 import type { Metadata } from 'next';
-import type { ReactNode } from 'react';
 import type { z } from 'zod';
-import { MDX_IMAGE_SIZE_TO_WIDTH } from '@barely/lib/server/mdx/mdx.constants';
 import { eventReportSearchParamsSchema } from '@barely/lib/server/routes/event/event-report.schema';
 import { getLandingPageData } from '@barely/lib/server/routes/landing-page/landing-page.render.fns';
-import { cn } from '@barely/lib/utils/cn';
 import { getAssetHref, getLinkHref } from '@barely/lib/utils/mdx';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 
-import { Button } from '@barely/ui/elements/button';
-import { Img } from '@barely/ui/elements/img';
 import { mdxCard } from '@barely/ui/elements/mdx-card';
 import { mdxGrid } from '@barely/ui/elements/mdx-grid';
+import { mdxImageFile } from '@barely/ui/elements/mdx-image-file';
+import { mdxLink } from '@barely/ui/elements/mdx-link';
 import { mdxTypography } from '@barely/ui/elements/mdx-typography';
 import { mdxVideoPlayer } from '@barely/ui/elements/mdx-video-player';
 
@@ -171,67 +167,5 @@ function mdxLandingPageAssetButton({
 
 	return {
 		AssetButton,
-	};
-}
-
-function mdxImageFile() {
-	const ImageFile = ({
-		s3Key,
-		alt,
-		width,
-		height,
-		size = 'md',
-	}: {
-		s3Key: string;
-		alt: string;
-		width: number;
-		height: number;
-		size: MdxImageSize;
-	}) => {
-		const adjustedWidth = MDX_IMAGE_SIZE_TO_WIDTH[size];
-		const aspectRatio = width / height;
-		const adjustedHeight = Math.round(adjustedWidth / aspectRatio);
-
-		return (
-			<Img
-				s3Key={s3Key}
-				alt={alt}
-				width={adjustedWidth}
-				height={adjustedHeight}
-				className={cn(
-					'rounded-md',
-					size === 'xs' && 'max-w-[min(100%,200px)]',
-					size === 'sm' && 'max-w-[min(100%,18rem)]', // 18rem = 288px (max-w-xs)
-					size === 'md' && 'max-w-[min(100%,24rem)]', // 24rem = 384px (max-w-sm)
-					size === 'lg' && 'max-w-[min(100%,28rem)]', // 28rem = 448px (max-w-md)
-					size === 'xl' && 'max-w-[min(100%,32rem)]', // 32rem = 512px (max-w-lg)
-				)}
-			/>
-		);
-	};
-
-	return {
-		ImageFile,
-	};
-}
-
-function mdxLink({ tracking }: { tracking: EventTrackingProps }) {
-	const MdxLandingPageLink = ({
-		href,
-		children,
-	}: {
-		href?: string;
-		children?: ReactNode;
-	}) => {
-		const hrefWithQueryParams = href ? getLinkHref({ href, tracking }) : '';
-		return (
-			<Button look='link' href={hrefWithQueryParams}>
-				{children}
-			</Button>
-		);
-	};
-
-	return {
-		a: MdxLandingPageLink,
 	};
 }
