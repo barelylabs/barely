@@ -417,6 +417,7 @@ export const Icon = {
 	party: PartyPopper,
 	pause: Pause,
 	payouts: PiggyBank,
+	payment: CreditCard,
 	phone: Phone,
 	photo: ImageIcon,
 	pieChart: PieChart,
@@ -433,6 +434,7 @@ export const Icon = {
 	print: File,
 	profile: CircleUserRound,
 	product: ScanBarcode,
+	purchase: CashRegister,
 
 	qr: QrCode,
 

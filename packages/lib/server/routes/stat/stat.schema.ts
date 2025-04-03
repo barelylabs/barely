@@ -79,10 +79,51 @@ export const stdWebEventPipeQueryParamsSchema = stdWebEventPipeParamsSchema
 			end: z.string().optional(),
 			showVisits: queryBooleanSchema.optional().default(true),
 			showClicks: queryBooleanSchema.optional().default(true),
+			topEventType: z
+				.enum([
+					'cart/viewCheckout',
+					'cart/checkoutPurchase',
+					'cart/upsellPurchase',
+
+					'fm/view',
+					'fm/linkClick',
+
+					'link/click',
+
+					'page/view',
+					'page/linkClick',
+				])
+				.optional(),
 		}),
 	);
-
 export type StdWebEventPipeQueryParams = z.infer<typeof stdWebEventPipeQueryParamsSchema>;
+export type TopEventType = z.infer<
+	typeof stdWebEventPipeQueryParamsSchema
+>['topEventType'];
+
+export function getTopStatValue(
+	eventType: TopEventType,
+	d: {
+		fm_linkClicks?: number;
+		fm_views?: number;
+		cart_checkoutViews?: number;
+		cart_checkoutPurchases?: number;
+		cart_upsellPurchases?: number;
+		link_clicks?: number;
+		page_views?: number;
+		page_linkClicks?: number;
+	},
+) {
+	if (eventType === 'fm/linkClick') return d.fm_linkClicks ?? 0;
+	if (eventType === 'fm/view') return d.fm_views ?? 0;
+	if (eventType === 'cart/viewCheckout') return d.cart_checkoutViews ?? 0;
+	if (eventType === 'cart/checkoutPurchase') return d.cart_checkoutPurchases ?? 0;
+	if (eventType === 'cart/upsellPurchase') return d.cart_upsellPurchases ?? 0;
+	if (eventType === 'link/click') return d.link_clicks ?? 0;
+	if (eventType === 'page/view') return d.page_views ?? 0;
+	if (eventType === 'page/linkClick') return d.page_linkClicks ?? 0;
+	return 0;
+}
 
 // pipe->query schema :: for use in calls from client to barely api (shaping for tinybird pipes)
 export const stdWebEventQueryToPipeParamsSchema =
@@ -161,197 +202,698 @@ export const pipe_fmTimeseries = tinybird.buildPipe({
  * top sources
  * */
 
+// const sharedSourcePipeDataSchema = z.object({
+// 	fm_views: z.number().optional().default(0),
+// 	fm_linkClicks: z.number().optional().default(0),
+// 	cart_views: z.number().optional().default(0),
+// 	cart_checkoutPurchases: z.number().optional().default(0),
+// });
+
 const sharedSourcePipeDataSchema = z.object({
 	fm_views: z.number().optional().default(0),
 	fm_linkClicks: z.number().optional().default(0),
+	cart_checkoutViews: z.number().optional().default(0),
+	cart_checkoutPurchases: z.number().optional().default(0),
+	cart_upsellPurchases: z.number().optional().default(0),
+	link_clicks: z.number().optional().default(0),
+	page_views: z.number().optional().default(0),
+	page_linkClicks: z.number().optional().default(0),
 });
-
 // browser
 
-export const topBrowsersPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({ browser: z.string() }),
-);
+// export const topBrowsersPipeDataSchema = sharedSourcePipeDataSchema.merge(
+// 	z.object({ browser: z.string() }),
+// );
 
-export const pipe_topBrowsers = tinybird.buildPipe({
-	pipe: 'v2_browsers',
+const topBrowsersPipeDataSchema = sharedSourcePipeDataSchema.extend({
+	browser: z.string(),
+});
+
+export const pipe_fmTopBrowsers = tinybird.buildPipe({
+	pipe: 'v2_fm_browsers',
 	parameters: stdWebEventPipeParamsSchema,
 	data: topBrowsersPipeDataSchema,
-	opts: {
-		logParams: true,
-	},
+});
+
+export const pipe_linkTopBrowsers = tinybird.buildPipe({
+	pipe: 'v2_link_browsers',
+	parameters: stdWebEventPipeParamsSchema,
+	data: topBrowsersPipeDataSchema,
+});
+
+export const pipe_cartTopBrowsers = tinybird.buildPipe({
+	pipe: 'v2_cart_browsers',
+	parameters: stdWebEventPipeParamsSchema,
+	data: topBrowsersPipeDataSchema,
+});
+
+export const pipe_pageTopBrowsers = tinybird.buildPipe({
+	pipe: 'v2_page_browsers',
+	parameters: stdWebEventPipeParamsSchema,
+	data: topBrowsersPipeDataSchema,
 });
 
 // device
 
-export const topDevicesPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({ device: z.string() }),
-);
+// export const topDevicesPipeDataSchema = sharedSourcePipeDataSchema.merge(
+// 	z.object({ device: z.string() }),
+// );
 
-export const pipe_topDevices = tinybird.buildPipe({
-	pipe: 'v2_devices',
+const topDevicesPipeDataSchema = sharedSourcePipeDataSchema.extend({
+	device: z.string(),
+});
+
+export const pipe_fmTopDevices = tinybird.buildPipe({
+	pipe: 'v2_fm_devices',
+	parameters: stdWebEventPipeParamsSchema,
+	data: topDevicesPipeDataSchema,
+});
+
+export const pipe_linkTopDevices = tinybird.buildPipe({
+	pipe: 'v2_link_devices',
+	parameters: stdWebEventPipeParamsSchema,
+	data: topDevicesPipeDataSchema,
+});
+
+export const pipe_cartTopDevices = tinybird.buildPipe({
+	pipe: 'v2_cart_devices',
+	parameters: stdWebEventPipeParamsSchema,
+	data: topDevicesPipeDataSchema,
+});
+
+export const pipe_pageTopDevices = tinybird.buildPipe({
+	pipe: 'v2_page_devices',
 	parameters: stdWebEventPipeParamsSchema,
 	data: topDevicesPipeDataSchema,
 });
 
 // os
 
-export const topOsPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({ os: z.string() }),
-);
+const topOsPipeDataSchema = sharedSourcePipeDataSchema.extend({
+	os: z.string(),
+});
 
-export const pipe_topOs = tinybird.buildPipe({
-	pipe: 'v2_os',
+export const pipe_fmTopOs = tinybird.buildPipe({
+	pipe: 'v2_fm_os',
+	parameters: stdWebEventPipeParamsSchema,
+	data: topOsPipeDataSchema,
+});
+
+export const pipe_linkTopOs = tinybird.buildPipe({
+	pipe: 'v2_link_os',
+	parameters: stdWebEventPipeParamsSchema,
+	data: topOsPipeDataSchema,
+});
+
+export const pipe_cartTopOs = tinybird.buildPipe({
+	pipe: 'v2_cart_os',
+	parameters: stdWebEventPipeParamsSchema,
+	data: topOsPipeDataSchema,
+});
+
+export const pipe_pageTopOs = tinybird.buildPipe({
+	pipe: 'v2_page_os',
 	parameters: stdWebEventPipeParamsSchema,
 	data: topOsPipeDataSchema,
 });
 
 // city
 
-export const topCitiesPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({
+export const pipe_fmTopCities = tinybird.buildPipe({
+	pipe: 'v2_fm_cities',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		fm_views: z.number(),
+		fm_linkClicks: z.number(),
 		city: z.string(),
-		region: z.string().optional(),
+		region: z.string(),
 		country: z.string(),
 	}),
-);
+});
 
-export const pipe_topCities = tinybird.buildPipe({
-	pipe: 'v2_cities',
+export const pipe_linkTopCities = tinybird.buildPipe({
+	pipe: 'v2_link_cities',
 	parameters: stdWebEventPipeParamsSchema,
-	data: topCitiesPipeDataSchema,
+	data: z.object({
+		link_clicks: z.number(),
+		city: z.string(),
+		region: z.string(),
+		country: z.string(),
+	}),
+});
+
+export const pipe_cartTopCities = tinybird.buildPipe({
+	pipe: 'v2_cart_cities',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		cart_checkoutViews: z.number(),
+		cart_checkoutPurchases: z.number(),
+		cart_upsellPurchases: z.number(),
+		city: z.string(),
+		region: z.string(),
+		country: z.string(),
+	}),
+});
+
+export const pipe_pageTopCities = tinybird.buildPipe({
+	pipe: 'v2_page_cities',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		page_views: z.number(),
+		city: z.string(),
+		region: z.string(),
+		country: z.string(),
+	}),
 });
 
 // region
 
-export const topRegionsPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({
+export const pipe_fmTopRegions = tinybird.buildPipe({
+	pipe: 'v2_fm_regions',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		fm_views: z.number(),
+		fm_linkClicks: z.number(),
 		region: z.string(),
 		country: z.string(),
 	}),
-);
+});
 
-export const pipe_topRegions = tinybird.buildPipe({
-	pipe: 'v2_regions',
+export const pipe_linkTopRegions = tinybird.buildPipe({
+	pipe: 'v2_link_regions',
 	parameters: stdWebEventPipeParamsSchema,
-	data: topRegionsPipeDataSchema,
+	data: z.object({
+		link_clicks: z.number(),
+		region: z.string(),
+		country: z.string(),
+	}),
+});
+
+export const pipe_cartTopRegions = tinybird.buildPipe({
+	pipe: 'v2_cart_regions',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		cart_checkoutViews: z.number(),
+		cart_checkoutPurchases: z.number(),
+		cart_upsellPurchases: z.number(),
+		region: z.string(),
+		country: z.string(),
+	}),
+});
+
+export const pipe_pageTopRegions = tinybird.buildPipe({
+	pipe: 'v2_page_regions',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		page_views: z.number(),
+		region: z.string(),
+		country: z.string(),
+	}),
 });
 
 // country
 
-export const topCountriesPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({ country: z.string() }),
-);
-
-export const pipe_topCountries = tinybird.buildPipe({
-	pipe: 'v2_countries',
+export const pipe_fmTopCountries = tinybird.buildPipe({
+	pipe: 'v2_fm_countries',
 	parameters: stdWebEventPipeParamsSchema,
-	data: topCountriesPipeDataSchema,
+	data: z.object({
+		fm_views: z.number(),
+		fm_linkClicks: z.number(),
+		country: z.string(),
+	}),
 });
 
+export const pipe_linkTopCountries = tinybird.buildPipe({
+	pipe: 'v2_link_countries',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		link_clicks: z.number(),
+		country: z.string(),
+	}),
+});
+
+export const pipe_cartTopCountries = tinybird.buildPipe({
+	pipe: 'v2_cart_countries',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		cart_checkoutViews: z.number(),
+		cart_checkoutPurchases: z.number(),
+		cart_upsellPurchases: z.number(),
+		country: z.string(),
+	}),
+});
+
+export const pipe_pageTopCountries = tinybird.buildPipe({
+	pipe: 'v2_page_countries',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		page_views: z.number(),
+		country: z.string(),
+	}),
+});
 // referers
 
-export const topReferersPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({ referer: z.string() }),
-);
+// export const topReferersPipeDataSchema = sharedSourcePipeDataSchema.merge(
+// 	z.object({ referer: z.string() }),
+// );
 
-export const pipe_topReferers = tinybird.buildPipe({
-	pipe: 'v2_referers',
+export const pipe_fmTopReferers = tinybird.buildPipe({
+	pipe: 'v2_fm_referers',
 	parameters: stdWebEventPipeParamsSchema,
-	data: topReferersPipeDataSchema,
+	data: z.object({
+		fm_views: z.number(),
+		fm_linkClicks: z.number(),
+		referer: z.string(),
+	}),
+});
+
+export const pipe_linkTopReferers = tinybird.buildPipe({
+	pipe: 'v2_link_referers',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		link_clicks: z.number(),
+		referer: z.string(),
+	}),
+});
+
+export const pipe_cartTopReferers = tinybird.buildPipe({
+	pipe: 'v2_cart_referers',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		cart_checkoutViews: z.number(),
+		cart_checkoutPurchases: z.number(),
+		cart_upsellPurchases: z.number(),
+		referer: z.string(),
+	}),
+});
+
+export const pipe_pageTopReferers = tinybird.buildPipe({
+	pipe: 'v2_page_referers',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		page_views: z.number(),
+		referer: z.string(),
+	}),
+});
+
+// carts
+export const pipe_cartTimeseries = tinybird.buildPipe({
+	pipe: 'v2_cart_timeseries',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		start: z.string(),
+		cart_checkoutViews: z.number(),
+		cart_emailAdds: z.number(),
+		cart_shippingInfoAdds: z.number(),
+		cart_paymentInfoAdds: z.number(),
+		cart_mainWithoutBumpPurchases: z.number(),
+		cart_mainWithBumpPurchases: z.number(),
+		cart_upsellPurchases: z.number(),
+		cart_upsellDeclines: z.number(),
+		cart_checkoutPurchases: z.number(),
+
+		cart_checkoutPurchaseProductAmount: z.number(),
+		cart_checkoutPurchaseGrossAmount: z.number(),
+
+		cart_upsellPurchaseProductAmount: z.number(),
+		cart_upsellPurchaseGrossAmount: z.number(),
+
+		cart_purchaseProductAmount: z.number(),
+		cart_purchaseGrossAmount: z.number(),
+	}),
 });
 
 // landing pages
-
-export const topLandingPagesPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({ sessionLandingPageId: z.string() }),
-);
-
-export const pipe_topLandingPages = tinybird.buildPipe({
-	pipe: 'v2_landingPages',
+export const pipe_pageTimeseries = tinybird.buildPipe({
+	pipe: 'v2_page_timeseries',
 	parameters: stdWebEventPipeParamsSchema,
-	data: topLandingPagesPipeDataSchema,
+	data: z.object({
+		start: z.string(),
+		page_views: z.number(),
+		page_linkClicks: z.number(),
+	}),
+});
+
+// export const topLandingPagesPipeDataSchema = sharedSourcePipeDataSchema.merge(
+// 	z.object({ sessionLandingPageId: z.string() }),
+// );
+
+export const pipe_fmTopLandingPages = tinybird.buildPipe({
+	pipe: 'v2_fm_landingPages',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		fm_views: z.number(),
+		fm_linkClicks: z.number(),
+		sessionLandingPageId: z.string(),
+	}),
+});
+
+export const pipe_linkTopLandingPages = tinybird.buildPipe({
+	pipe: 'v2_link_landingPages',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		link_clicks: z.number(),
+		sessionLandingPageId: z.string(),
+	}),
+});
+
+export const pipe_cartTopLandingPages = tinybird.buildPipe({
+	pipe: 'v2_cart_landingPages',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		cart_checkoutViews: z.number(),
+		cart_checkoutPurchases: z.number(),
+		sessionLandingPageId: z.string(),
+	}),
+});
+
+export const pipe_pageTopLandingPages = tinybird.buildPipe({
+	pipe: 'v2_page_landingPages',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		page_views: z.number(),
+		sessionLandingPageId: z.string(),
+	}),
+});
+
+// links
+export const pipe_linkTimeseries = tinybird.buildPipe({
+	pipe: 'v2_link_timeseries',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		start: z.string(),
+		link_clicks: z.number(),
+	}),
 });
 
 // email broadcasts
 
-export const topEmailBroadcastsPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({ sessionEmailBroadcastId: z.string() }),
-);
+// export const topEmailBroadcastsPipeDataSchema = sharedSourcePipeDataSchema.merge(
+// 	z.object({ sessionEmailBroadcastId: z.string() }),
+// );
 
-export const pipe_topEmailBroadcasts = tinybird.buildPipe({
-	pipe: 'v2_emailBroadcasts',
+export const pipe_fmTopEmailBroadcasts = tinybird.buildPipe({
+	pipe: 'v2_fm_emailBroadcasts',
 	parameters: stdWebEventPipeParamsSchema,
-	data: topEmailBroadcastsPipeDataSchema,
+	data: z.object({
+		fm_views: z.number(),
+		fm_linkClicks: z.number(),
+		sessionEmailBroadcastId: z.string(),
+	}),
+});
+
+export const pipe_linkTopEmailBroadcasts = tinybird.buildPipe({
+	pipe: 'v2_link_emailBroadcasts',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		link_clicks: z.number(),
+		sessionEmailBroadcastId: z.string(),
+	}),
+});
+
+export const pipe_cartTopEmailBroadcasts = tinybird.buildPipe({
+	pipe: 'v2_cart_emailBroadcasts',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		cart_checkoutViews: z.number(),
+		cart_checkoutPurchases: z.number(),
+		sessionEmailBroadcastId: z.string(),
+	}),
+});
+
+export const pipe_pageTopEmailBroadcasts = tinybird.buildPipe({
+	pipe: 'v2_page_emailBroadcasts',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		page_views: z.number(),
+		sessionEmailBroadcastId: z.string(),
+	}),
 });
 
 // email templates
 
-export const topEmailTemplatesPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({ sessionEmailTemplateId: z.string() }),
-);
+// export const topEmailTemplatesPipeDataSchema = sharedSourcePipeDataSchema.merge(
+// 	z.object({ sessionEmailTemplateId: z.string() }),
+// );
 
-export const pipe_topEmailTemplates = tinybird.buildPipe({
-	pipe: 'v2_emailTemplates',
+export const pipe_fmTopEmailTemplates = tinybird.buildPipe({
+	pipe: 'v2_fm_emailTemplates',
 	parameters: stdWebEventPipeParamsSchema,
-	data: topEmailTemplatesPipeDataSchema,
+	data: z.object({
+		fm_views: z.number(),
+		fm_linkClicks: z.number(),
+		sessionEmailTemplateId: z.string(),
+	}),
+});
+
+export const pipe_linkTopEmailTemplates = tinybird.buildPipe({
+	pipe: 'v2_link_emailTemplates',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		link_clicks: z.number(),
+		sessionEmailTemplateId: z.string(),
+	}),
+});
+
+export const pipe_cartTopEmailTemplates = tinybird.buildPipe({
+	pipe: 'v2_cart_emailTemplates',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		cart_checkoutViews: z.number(),
+		cart_checkoutPurchases: z.number(),
+		sessionEmailTemplateId: z.string(),
+	}),
+});
+
+export const pipe_pageTopEmailTemplates = tinybird.buildPipe({
+	pipe: 'v2_page_emailTemplates',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		page_views: z.number(),
+		sessionEmailTemplateId: z.string(),
+	}),
 });
 
 // flow actions
 
-export const topFlowActionsPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({ sessionFlowActionId: z.string() }),
-);
+// export const topFlowActionsPipeDataSchema = sharedSourcePipeDataSchema.merge(
+// 	z.object({ sessionFlowActionId: z.string() }),
+// );
 
-export const pipe_topFlowActions = tinybird.buildPipe({
-	pipe: 'v2_flowActions',
+export const pipe_fmTopFlowActions = tinybird.buildPipe({
+	pipe: 'v2_fm_flowActions',
 	parameters: stdWebEventPipeParamsSchema,
-	data: topFlowActionsPipeDataSchema,
+	data: z.object({
+		fm_views: z.number(),
+		fm_linkClicks: z.number(),
+		sessionFlowActionId: z.string(),
+	}),
+});
+
+export const pipe_linkTopFlowActions = tinybird.buildPipe({
+	pipe: 'v2_link_flowActions',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		link_clicks: z.number(),
+		sessionFlowActionId: z.string(),
+	}),
+});
+
+export const pipe_cartTopFlowActions = tinybird.buildPipe({
+	pipe: 'v2_cart_flowActions',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		cart_checkoutViews: z.number(),
+		cart_checkoutPurchases: z.number(),
+		sessionFlowActionId: z.string(),
+	}),
+});
+
+export const pipe_pageTopFlowActions = tinybird.buildPipe({
+	pipe: 'v2_page_flowActions',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		page_views: z.number(),
+		sessionFlowActionId: z.string(),
+	}),
 });
 
 // meta campaigns
 
-export const topMetaCampaignsPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({ sessionMetaCampaignId: z.string() }),
-);
+// export const topMetaCampaignsPipeDataSchema = sharedSourcePipeDataSchema.merge(
+// 	z.object({ sessionMetaCampaignId: z.string() }),
+// );
 
-export const pipe_topMetaCampaigns = tinybird.buildPipe({
-	pipe: 'v2_metaCampaigns',
+export const pipe_fmTopMetaCampaigns = tinybird.buildPipe({
+	pipe: 'v2_fm_metaCampaigns',
 	parameters: stdWebEventPipeParamsSchema,
-	data: topMetaCampaignsPipeDataSchema,
+	data: z.object({
+		fm_views: z.number(),
+		fm_linkClicks: z.number(),
+		sessionMetaCampaignId: z.string(),
+	}),
+});
+
+export const pipe_linkTopMetaCampaigns = tinybird.buildPipe({
+	pipe: 'v2_link_metaCampaigns',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		link_clicks: z.number(),
+		sessionMetaCampaignId: z.string(),
+	}),
+});
+
+export const pipe_cartTopMetaCampaigns = tinybird.buildPipe({
+	pipe: 'v2_cart_metaCampaigns',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		cart_checkoutViews: z.number(),
+		cart_checkoutPurchases: z.number(),
+		cart_upsellPurchases: z.number(),
+		sessionMetaCampaignId: z.string(),
+	}),
+});
+
+export const pipe_pageTopMetaCampaigns = tinybird.buildPipe({
+	pipe: 'v2_page_metaCampaigns',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		page_views: z.number(),
+		sessionMetaCampaignId: z.string(),
+	}),
 });
 
 // meta ad sets
 
-export const topMetaAdSetsPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({ sessionMetaAdSetId: z.string() }),
-);
+// export const topMetaAdSetsPipeDataSchema = sharedSourcePipeDataSchema.merge(
+// 	z.object({ sessionMetaAdSetId: z.string() }),
+// );
 
-export const pipe_topMetaAdSets = tinybird.buildPipe({
-	pipe: 'v2_metaAdSets',
+export const pipe_fmTopMetaAdSets = tinybird.buildPipe({
+	pipe: 'v2_fm_metaAdSets',
 	parameters: stdWebEventPipeParamsSchema,
-	data: topMetaAdSetsPipeDataSchema,
+	data: z.object({
+		fm_views: z.number(),
+		fm_linkClicks: z.number(),
+		sessionMetaAdSetId: z.string(),
+	}),
+});
+
+export const pipe_linkTopMetaAdSets = tinybird.buildPipe({
+	pipe: 'v2_link_metaAdSets',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		link_clicks: z.number(),
+		sessionMetaAdSetId: z.string(),
+	}),
+});
+
+export const pipe_cartTopMetaAdSets = tinybird.buildPipe({
+	pipe: 'v2_cart_metaAdSets',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		cart_checkoutViews: z.number(),
+		cart_checkoutPurchases: z.number(),
+		cart_upsellPurchases: z.number(),
+		sessionMetaAdSetId: z.string(),
+	}),
+});
+
+export const pipe_pageTopMetaAdSets = tinybird.buildPipe({
+	pipe: 'v2_page_metaAdSets',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		page_views: z.number(),
+		sessionMetaAdSetId: z.string(),
+	}),
 });
 
 // meta ad ids
 
-export const topMetaAdsPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({ sessionMetaAdId: z.string() }),
-);
+// export const topMetaAdsPipeDataSchema = sharedSourcePipeDataSchema.merge(
+// 	z.object({ sessionMetaAdId: z.string() }),
+// );
 
-export const pipe_topMetaAds = tinybird.buildPipe({
-	pipe: 'v2_metaAds',
+export const pipe_fmTopMetaAds = tinybird.buildPipe({
+	pipe: 'v2_fm_metaAds',
 	parameters: stdWebEventPipeParamsSchema,
-	data: topMetaAdsPipeDataSchema,
+	data: z.object({
+		fm_views: z.number(),
+		fm_linkClicks: z.number(),
+		sessionMetaAdId: z.string(),
+	}),
+});
+
+export const pipe_linkTopMetaAds = tinybird.buildPipe({
+	pipe: 'v2_link_metaAds',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		link_clicks: z.number(),
+		sessionMetaAdId: z.string(),
+	}),
+});
+
+export const pipe_cartTopMetaAds = tinybird.buildPipe({
+	pipe: 'v2_cart_metaAds',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		cart_checkoutViews: z.number(),
+		cart_checkoutPurchases: z.number(),
+		cart_upsellPurchases: z.number(),
+		sessionMetaAdId: z.string(),
+	}),
+});
+
+export const pipe_pageTopMetaAds = tinybird.buildPipe({
+	pipe: 'v2_page_metaAds',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		page_views: z.number(),
+		sessionMetaAdId: z.string(),
+	}),
 });
 
 // meta placements
 
-export const topMetaPlacementsPipeDataSchema = sharedSourcePipeDataSchema.merge(
-	z.object({ sessionMetaPlacement: z.string() }),
-);
+// export const topMetaPlacementsPipeDataSchema = sharedSourcePipeDataSchema.merge(
+// 	z.object({ sessionMetaPlacement: z.string() }),
+// );
 
-export const pipe_topMetaPlacements = tinybird.buildPipe({
-	pipe: 'v2_metaPlacements',
+export const pipe_fmTopMetaPlacements = tinybird.buildPipe({
+	pipe: 'v2_fm_metaPlacements',
 	parameters: stdWebEventPipeParamsSchema,
-	data: topMetaPlacementsPipeDataSchema,
+	data: z.object({
+		fm_views: z.number(),
+		fm_linkClicks: z.number(),
+		sessionMetaPlacement: z.string(),
+	}),
+});
+
+export const pipe_linkTopMetaPlacements = tinybird.buildPipe({
+	pipe: 'v2_link_metaPlacements',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		link_clicks: z.number(),
+		sessionMetaPlacement: z.string(),
+	}),
+});
+
+export const pipe_cartTopMetaPlacements = tinybird.buildPipe({
+	pipe: 'v2_cart_metaPlacements',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		cart_checkoutViews: z.number(),
+		cart_checkoutPurchases: z.number(),
+		cart_upsellPurchases: z.number(),
+		sessionMetaPlacement: z.string(),
+	}),
+});
+
+export const pipe_pageTopMetaPlacements = tinybird.buildPipe({
+	pipe: 'v2_page_metaPlacements',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		page_views: z.number(),
+		sessionMetaPlacement: z.string(),
+	}),
 });

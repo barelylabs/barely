@@ -1,9 +1,10 @@
 'use client';
 
-import type { WebEventType } from '@barely/lib/server/routes/event/event.tb';
+import type { TopEventType } from '@barely/lib/server/routes/stat/stat.schema';
 import type { BarListBarProps } from '@barely/ui/charts/bar-list';
 import { useState } from 'react';
 import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
+import { getTopStatValue } from '@barely/lib/server/routes/stat/stat.schema';
 import { api } from '@barely/server/api/react';
 
 import { BarList } from '@barely/ui/charts/bar-list';
@@ -14,14 +15,23 @@ import { H } from '@barely/ui/elements/typography';
 
 import { COUNTRIES } from '@barely/utils/constants';
 
-export function StatLocations({ eventType }: { eventType: WebEventType }) {
+export function StatLocations({ eventType }: { eventType: TopEventType }) {
 	const [tab, setTab] = useState<'Country' | 'Region' | 'City'>('Country');
 
 	const { filtersWithHandle, getSetFilterPath } = useWebEventStatFilters();
 
-	const { data: countries } = api.stat.topCountries.useQuery(filtersWithHandle);
-	const { data: regions } = api.stat.topRegions.useQuery(filtersWithHandle);
-	const { data: cities } = api.stat.topCities.useQuery(filtersWithHandle);
+	const { data: countries } = api.stat.topCountries.useQuery({
+		...filtersWithHandle,
+		topEventType: eventType,
+	});
+	const { data: regions } = api.stat.topRegions.useQuery({
+		...filtersWithHandle,
+		topEventType: eventType,
+	});
+	const { data: cities } = api.stat.topCities.useQuery({
+		...filtersWithHandle,
+		topEventType: eventType,
+	});
 
 	const locationData =
 		tab === 'Country' ? countries?.map(c => ({ ...c, region: '', city: '' }))
@@ -34,7 +44,8 @@ export function StatLocations({ eventType }: { eventType: WebEventType }) {
 				tab === 'Country' ? COUNTRIES[c.country] ?? c.country
 				: tab === 'Region' && 'region' in c ? c.region ?? ''
 				: c.city,
-			value: eventType === 'fm/linkClick' ? c.fm_linkClicks : c.fm_views,
+			value: getTopStatValue(eventType, c),
+
 			icon: () => (
 				<picture className='mr-2 flex items-center '>
 					<img

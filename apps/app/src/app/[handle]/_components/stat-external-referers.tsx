@@ -1,9 +1,10 @@
 'use client';
 
-import type { WebEventType } from '@barely/lib/server/routes/event/event.tb';
+import type { TopEventType } from '@barely/lib/server/routes/stat/stat.schema';
 import type { BarListBarProps } from '@barely/ui/charts/bar-list';
 import { useState } from 'react';
 import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
+import { getTopStatValue } from '@barely/lib/server/routes/stat/stat.schema';
 import { api } from '@barely/server/api/react';
 
 import { BarList } from '@barely/ui/charts/bar-list';
@@ -12,49 +13,56 @@ import { ScrollArea, ScrollBar } from '@barely/ui/elements/scroll-area';
 import { TabButtons } from '@barely/ui/elements/tab-buttons';
 import { H } from '@barely/ui/elements/typography';
 
-export function StatExternalReferers({ eventType }: { eventType: WebEventType }) {
+export function StatExternalReferers({ eventType }: { eventType: TopEventType }) {
 	const [tab, setTab] = useState<
 		'referers' | 'metaCampaigns' | 'metaAdSets' | 'metaAds' | 'metaPlacements'
 	>('referers');
 
 	const { filtersWithHandle, getSetFilterPath } = useWebEventStatFilters();
 
-	const { data: referers } = api.stat.topReferers.useQuery(filtersWithHandle, {
-		select: data =>
-			data.map(d => ({
-				name: d.referer,
-				value: eventType === 'fm/linkClick' ? d.fm_linkClicks : d.fm_views,
-			})),
-	});
+	const { data: referers } = api.stat.topReferers.useQuery(
+		{ ...filtersWithHandle, topEventType: eventType },
+		{
+			select: data =>
+				data.map(d => ({
+					name: d.referer,
+					value: getTopStatValue(eventType, d),
+				})),
+			enabled: tab === 'referers',
+		},
+	);
 
 	const { data: topMetaCampaigns } = api.stat.topMetaCampaigns.useQuery(
-		filtersWithHandle,
+		{ ...filtersWithHandle, topEventType: eventType },
 		{
 			select: data =>
 				data.map(d => ({
 					name: d.sessionMetaCampaignId,
-					value: eventType === 'fm/linkClick' ? d.fm_linkClicks : d.fm_views,
+					value: getTopStatValue(eventType, d),
 				})),
 			enabled: tab === 'metaCampaigns',
 		},
 	);
 
-	const { data: topMetaAds } = api.stat.topMetaAds.useQuery(filtersWithHandle, {
-		select: data =>
-			data.map(d => ({
-				name: d.sessionMetaAdId,
-				value: eventType === 'fm/linkClick' ? d.fm_linkClicks : d.fm_views,
-			})),
-		enabled: tab === 'metaAds',
-	});
+	const { data: topMetaAds } = api.stat.topMetaAds.useQuery(
+		{ ...filtersWithHandle, topEventType: eventType },
+		{
+			select: data =>
+				data.map(d => ({
+					name: d.sessionMetaAdId,
+					value: getTopStatValue(eventType, d),
+				})),
+			enabled: tab === 'metaAds',
+		},
+	);
 
 	const { data: topMetaPlacements } = api.stat.topMetaPlacements.useQuery(
-		filtersWithHandle,
+		{ ...filtersWithHandle, topEventType: eventType },
 		{
 			select: data =>
 				data.map(d => ({
 					name: d.sessionMetaPlacement,
-					value: eventType === 'fm/linkClick' ? d.fm_linkClicks : d.fm_views,
+					value: getTopStatValue(eventType, d),
 				})),
 			enabled: tab === 'metaPlacements',
 		},

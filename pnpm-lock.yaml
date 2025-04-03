@@ -1131,8 +1131,8 @@ importers:
         specifier: ^0.10.1
         version: 0.10.1(typescript@5.5.4)(zod@3.23.8)
       '@trigger.dev/sdk':
-        specifier: 3.3.16
-        version: 3.3.16(zod@3.23.8)
+        specifier: 3.3.17
+        version: 3.3.17(zod@3.23.8)
       '@trpc/react-query':
         specifier: 11.0.0-rc.334
         version: 11.0.0-rc.334(@tanstack/react-query@5.25.0)(@trpc/client@11.0.0-rc.334)(@trpc/server@11.0.0-rc.334)(react-dom@18.2.0)(react@18.2.0)
@@ -1363,8 +1363,8 @@ importers:
         specifier: ^7.45.4
         version: 7.49.3(react@18.2.0)
       trigger.dev:
-        specifier: 3.3.16
-        version: 3.3.16(typescript@5.5.4)
+        specifier: 3.3.17
+        version: 3.3.17(typescript@5.5.4)
       typescript:
         specifier: ^5.5.4
         version: 5.5.4
@@ -5777,22 +5777,20 @@ packages:
       '@babel/helper-string-parser': 7.25.9
       '@babel/helper-validator-identifier': 7.25.9
 
-  /@clack/core@0.3.4:
-    resolution: {integrity: sha512-H4hxZDXgHtWTwV3RAVenqcC4VbJZNegbBjlPvzOzCouXtS2y3sDvlO3IsbrPNWuLWPPlYVYPghQdSF64683Ldw==}
+  /@clack/core@0.4.1:
+    resolution: {integrity: sha512-Pxhij4UXg8KSr7rPek6Zowm+5M22rbd2g1nfojHJkxp5YkFqiZ2+YLEM/XGVIzvGOcM0nqjIFxrpDwWRZYWYjA==}
     dependencies:
       picocolors: 1.1.0
       sisteransi: 1.0.5
     dev: true
 
-  /@clack/prompts@0.7.0:
-    resolution: {integrity: sha512-0MhX9/B4iL6Re04jPrttDm+BsP8y6mS7byuv0BvXgdXhbV5PdlsHt55dvNsuBCPZ7xq1oTAOOuotR9NFbQyMSA==}
+  /@clack/prompts@0.10.0:
+    resolution: {integrity: sha512-H3rCl6CwW1NdQt9rE3n373t7o5cthPv7yUoxF2ytZvyvlJv89C5RYMJu83Hed8ODgys5vpBU0GKxIRG83jd8NQ==}
     dependencies:
-      '@clack/core': 0.3.4
+      '@clack/core': 0.4.1
       picocolors: 1.1.0
       sisteransi: 1.0.5
     dev: true
-    bundledDependencies:
-      - is-unicode-supported
 
   /@codemirror/autocomplete@6.15.0(@codemirror/language@6.10.1)(@codemirror/state@6.4.1)(@codemirror/view@6.26.0)(@lezer/common@1.2.1):
     resolution: {integrity: sha512-G2Zm0mXznxz97JhaaOdoEG2cVupn4JjPaS4AcNvZzhOsnnG9YVN68VzfoUw6dYTsIxT6a/cmoFEN47KAWhXaOg==}
@@ -14938,11 +14936,11 @@ packages:
       - tailwindcss
     dev: false
 
-  /@trigger.dev/build@3.3.16(typescript@5.5.4):
-    resolution: {integrity: sha512-PATGwN8bvDlOESmOgJO3mofulxActkSClBCdlsTT3NYzT6umFFXOieWzq5fLrPpaHsujrkazTERSiHOEdxEXxw==}
+  /@trigger.dev/build@3.3.17(typescript@5.5.4):
+    resolution: {integrity: sha512-dfreMuVeLAcZypS3kkUA9nWNviiuOPIQ3ldy2ywPCmwmbHyd0BE8tI5D3A4kmVq/f53TdRMls4c+cYafxlwubQ==}
     engines: {node: '>=18.20.0'}
     dependencies:
-      '@trigger.dev/core': 3.3.16
+      '@trigger.dev/core': 3.3.17
       pkg-types: 1.3.1
       tinyglobby: 0.2.10
       tsconfck: 3.1.3(typescript@5.5.4)
@@ -14953,8 +14951,8 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@trigger.dev/core@3.3.16:
-    resolution: {integrity: sha512-OCxl9A7QvqLnGlnl195p8lw0pTY7hJQyaY35Sdy2GuYcm28ktwzx3F2Iu3ulgcmDlKQTpf1VZsSA5wP/enRRpQ==}
+  /@trigger.dev/core@3.3.17:
+    resolution: {integrity: sha512-KjnRxCuHq4R+MnE0zPvIQ7EIz4QSpJL+1Yn74n2cCGjyHYgQ/g8rcARn0Nxf2s8jzE38CnyRufjUrwG8k+DJrw==}
     engines: {node: '>=18.20.0'}
     dependencies:
       '@electric-sql/client': 1.0.0-beta.1
@@ -14988,8 +14986,8 @@ packages:
       - supports-color
       - utf-8-validate
 
-  /@trigger.dev/sdk@3.3.16(zod@3.23.8):
-    resolution: {integrity: sha512-vObHP0P5ugyZNKiAOLTD1rWeHKiX97K82aj06HaOceRZxwztbBnuhD3AXAODISvroKguySUcrLDCMOSTpXUung==}
+  /@trigger.dev/sdk@3.3.17(zod@3.23.8):
+    resolution: {integrity: sha512-wjIjlQWKybYWw/J7LxFIOO1pXzxXoj9lxbFMvjb51JtfebxnQnh6aExN47nOGhVhV38wHYstfBI/8ClWwBnFYw==}
     engines: {node: '>=18.20.0'}
     peerDependencies:
       zod: ^3.0.0
@@ -14997,7 +14995,7 @@ packages:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/api-logs': 0.52.1
       '@opentelemetry/semantic-conventions': 1.25.1
-      '@trigger.dev/core': 3.3.16
+      '@trigger.dev/core': 3.3.17
       chalk: 5.3.0
       cronstrue: 2.49.0
       debug: 4.3.4
@@ -30594,12 +30592,12 @@ packages:
     hasBin: true
     dev: true
 
-  /trigger.dev@3.3.16(typescript@5.5.4):
-    resolution: {integrity: sha512-knbhbLl0b6TBn8fQeCSISeCJ4uu9RiXbeHvYEu6BD5kOfbHk4uSavBW+fXxs+eK5LZ62rb6abBw2gLZowH13CA==}
+  /trigger.dev@3.3.17(typescript@5.5.4):
+    resolution: {integrity: sha512-xV0iPuY3RiBEyWZdqCAmKEHINYOsXUOA6eRY1It+mhW2tNPtGqtkncD5+EooN+RPbTr6RNnoG6mc9plKFMC79A==}
     engines: {node: '>=18.20.0'}
     hasBin: true
     dependencies:
-      '@clack/prompts': 0.7.0
+      '@clack/prompts': 0.10.0
       '@depot/cli': 0.0.1-cli.2.80.0
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/api-logs': 0.52.1
@@ -30613,8 +30611,8 @@ packages:
       '@opentelemetry/sdk-trace-base': 1.25.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-node': 1.25.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.25.1
-      '@trigger.dev/build': 3.3.16(typescript@5.5.4)
-      '@trigger.dev/core': 3.3.16
+      '@trigger.dev/build': 3.3.17(typescript@5.5.4)
+      '@trigger.dev/core': 3.3.17
       c12: 1.11.2(magicast@0.3.5)
       chalk: 5.3.0
       chokidar: 3.6.0

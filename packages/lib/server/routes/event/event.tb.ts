@@ -61,6 +61,7 @@ export const WEB_EVENT_TYPES__CART = [
 	'cart/addPaymentInfo', // ✅
 	'cart/addBump', // ✅
 	'cart/removeBump', // ✅ not reported to meta
+	'cart/checkoutPurchase', // ✅
 	'cart/purchaseMainWithoutBump', // ✅
 	'cart/purchaseMainWithBump', // ✅
 	'cart/viewUpsell', // ✅

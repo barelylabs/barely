@@ -4,6 +4,8 @@ import type { LandingPage } from '@barely/lib/server/routes/landing-page/landing
 import { formatCentsToDollars } from '@barely/lib/utils/currency';
 import { getAbsoluteUrl } from '@barely/lib/utils/url';
 
+import { useWorkspace } from '@barely/hooks/use-workspace';
+
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
@@ -55,6 +57,8 @@ function LandingPageCard({ landingPage }: { landingPage: LandingPage }) {
 	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } =
 		useLandingPageContext();
 
+	const { handle } = useWorkspace();
+
 	const href = getAbsoluteUrl('page', `${landingPage.handle}/${landingPage.key}`);
 
 	return (
@@ -71,11 +75,6 @@ function LandingPageCard({ landingPage }: { landingPage: LandingPage }) {
 				goToHref: href,
 				copyText: href,
 			}}
-			// statsRight={
-			// 	<div className='items-left flex flex-col'>
-			// 		<Text variant='xs/normal'>clicks: {landingPage.clicks}</Text>
-			// 	</div>
-			// }
 			stats={[
 				{
 					icon: 'view',
@@ -93,6 +92,7 @@ function LandingPageCard({ landingPage }: { landingPage: LandingPage }) {
 					value: formatCentsToDollars(landingPage.value ?? 0),
 				},
 			]}
+			statsHref={`/${handle}/pages/stats?assetId=${landingPage.id}`}
 		/>
 	);
 }

@@ -1,9 +1,10 @@
 'use client';
 
-import type { WebEventType } from '@barely/lib/server/routes/event/event.tb';
+import type { TopEventType } from '@barely/server/routes/stat/stat.schema';
 import type { BarListBarProps } from '@barely/ui/charts/bar-list';
 import { useState } from 'react';
 import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
+import { getTopStatValue } from '@barely/lib/server/routes/stat/stat.schema';
 import { api } from '@barely/server/api/react';
 
 import { BarList } from '@barely/ui/charts/bar-list';
@@ -12,54 +13,60 @@ import { ScrollArea, ScrollBar } from '@barely/ui/elements/scroll-area';
 import { TabButtons } from '@barely/ui/elements/tab-buttons';
 import { H } from '@barely/ui/elements/typography';
 
-export function StatBarelyReferers({ eventType }: { eventType: WebEventType }) {
+export function StatBarelyReferers({ eventType }: { eventType: TopEventType }) {
 	const [tab, setTab] = useState<
 		'landingPages' | 'emailBroadcasts' | 'emailTemplates' | 'flowActions'
 	>('landingPages');
 
 	const { filtersWithHandle, getSetFilterPath } = useWebEventStatFilters();
 
-	const { data: topLandingPages } = api.stat.topLandingPages.useQuery(filtersWithHandle, {
-		select: data =>
-			data.map(d => ({
-				name: d.sessionLandingPageId,
-				value: eventType === 'fm/linkClick' ? d.fm_linkClicks : d.fm_views,
-			})),
-		enabled: tab === 'landingPages',
-	});
+	const { data: topLandingPages } = api.stat.topLandingPages.useQuery(
+		{ ...filtersWithHandle, topEventType: eventType },
+		{
+			select: data =>
+				data.map(d => ({
+					name: d.sessionLandingPageId,
+					value: getTopStatValue(eventType, d),
+				})),
+			enabled: tab === 'landingPages',
+		},
+	);
 
 	const { data: topEmailBroadcasts } = api.stat.topEmailBroadcasts.useQuery(
-		filtersWithHandle,
+		{ ...filtersWithHandle, topEventType: eventType },
 		{
 			select: data =>
 				data.map(d => ({
 					name: d.sessionEmailBroadcastId,
-					value: eventType === 'fm/linkClick' ? d.fm_linkClicks : d.fm_views,
+					value: getTopStatValue(eventType, d),
 				})),
 			enabled: tab === 'emailBroadcasts',
 		},
 	);
 
 	const { data: topEmailTemplates } = api.stat.topEmailTemplates.useQuery(
-		filtersWithHandle,
+		{ ...filtersWithHandle, topEventType: eventType },
 		{
 			select: data =>
 				data.map(d => ({
 					name: d.sessionEmailTemplateId,
-					value: eventType === 'fm/linkClick' ? d.fm_linkClicks : d.fm_views,
+					value: getTopStatValue(eventType, d),
 				})),
 			enabled: tab === 'emailTemplates',
 		},
 	);
 
-	const { data: topFlowActions } = api.stat.topFlowActions.useQuery(filtersWithHandle, {
-		select: data =>
-			data.map(d => ({
-				name: d.sessionFlowActionId,
-				value: eventType === 'fm/linkClick' ? d.fm_linkClicks : d.fm_views,
-			})),
-		enabled: tab === 'flowActions',
-	});
+	const { data: topFlowActions } = api.stat.topFlowActions.useQuery(
+		{ ...filtersWithHandle, topEventType: eventType },
+		{
+			select: data =>
+				data.map(d => ({
+					name: d.sessionFlowActionId,
+					value: getTopStatValue(eventType, d),
+				})),
+			enabled: tab === 'flowActions',
+		},
+	);
 
 	const data =
 		tab === 'landingPages' ? topLandingPages

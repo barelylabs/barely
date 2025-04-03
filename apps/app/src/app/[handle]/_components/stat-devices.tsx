@@ -1,8 +1,9 @@
 'use client';
 
-import type { WebEventType } from '@barely/lib/server/routes/event/event.tb';
+import type { TopEventType } from '@barely/lib/server/routes/stat/stat.schema';
 import { useState } from 'react';
 import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
+import { getTopStatValue } from '@barely/lib/server/routes/stat/stat.schema';
 import { api } from '@barely/server/api/react';
 
 import { BarList } from '@barely/ui/charts/bar-list';
@@ -14,40 +15,73 @@ import { H } from '@barely/ui/elements/typography';
 
 export type DeviceTabs = 'Device' | 'Browser' | 'OS';
 
-export function StatDevices({ eventType }: { eventType: WebEventType }) {
+// function getTopStatValue(
+// 	eventType: TopEventType,
+// 	d: {
+// 		fm_linkClicks: number;
+// 		fm_views: number;
+// 		cart_checkoutViews: number;
+// 		cart_checkoutPurchases: number;
+// 		cart_upsellPurchases: number;
+// 		link_clicks: number;
+// 		page_views: number;
+// 		page_linkClicks: number;
+// 	},
+// ) {
+// 	if (eventType === 'fm/linkClick') return d.fm_linkClicks;
+// 	if (eventType === 'fm/view') return d.fm_views;
+// 	if (eventType === 'cart/viewCheckout') return d.cart_checkoutViews;
+// 	if (eventType === 'cart/checkoutPurchase') return d.cart_checkoutPurchases;
+// 	if (eventType === 'cart/upsellPurchase') return d.cart_upsellPurchases;
+// 	if (eventType === 'link/click') return d.link_clicks;
+// 	if (eventType === 'page/view') return d.page_views;
+// 	if (eventType === 'page/linkClick') return d.page_linkClicks;
+// 	return 0;
+// }
+
+export function StatDevices({ eventType }: { eventType: TopEventType }) {
 	const [tab, setTab] = useState<DeviceTabs>('Device');
 
 	const { filtersWithHandle, getSetFilterPath } = useWebEventStatFilters();
 
-	const { data: devices } = api.stat.topDevices.useQuery(filtersWithHandle, {
-		select: data =>
-			data.map(d => ({
-				name: d.device,
-				value: eventType === 'fm/linkClick' ? d.fm_linkClicks : d.fm_views,
-				icon: () => <DeviceIcon display={d.device} className='my-auto mr-2 h-4 w-4' />,
-				href: getSetFilterPath('device', d.device),
-				target: '_self',
-			})),
-	});
+	const { data: devices } = api.stat.topDevices.useQuery(
+		{ ...filtersWithHandle, topEventType: eventType },
+		{
+			select: data =>
+				data.map(d => ({
+					name: d.device,
+					value: getTopStatValue(eventType, d),
+					icon: () => <DeviceIcon display={d.device} className='my-auto mr-2 h-4 w-4' />,
+					href: getSetFilterPath('device', d.device),
+					target: '_self',
+				})),
+		},
+	);
 
-	const { data: browsers } = api.stat.topBrowsers.useQuery(filtersWithHandle, {
-		select: data =>
-			data.map(d => ({
-				name: d.browser,
-				value: eventType === 'fm/linkClick' ? d.fm_linkClicks : d.fm_views,
-				icon: () => <BrowserIcon display={d.browser} className='my-auto mr-2 h-4 w-4' />,
-				href: getSetFilterPath('browser', d.browser),
-				target: '_self',
-			})),
-	});
+	const { data: browsers } = api.stat.topBrowsers.useQuery(
+		{ ...filtersWithHandle, topEventType: eventType },
+		{
+			select: data =>
+				data.map(d => ({
+					name: d.browser,
+					value: getTopStatValue(eventType, d),
+
+					icon: () => (
+						<BrowserIcon display={d.browser} className='my-auto mr-2 h-4 w-4' />
+					),
+					href: getSetFilterPath('browser', d.browser),
+					target: '_self',
+				})),
+		},
+	);
 
 	const { data: operatingSystems } = api.stat.topOperatingSystems.useQuery(
-		filtersWithHandle,
+		{ ...filtersWithHandle, topEventType: eventType },
 		{
 			select: data =>
 				data.map(d => ({
 					name: d.os,
-					value: eventType === 'fm/linkClick' ? d.fm_linkClicks : d.fm_views,
+					value: getTopStatValue(eventType, d),
 					icon: () => <OSIcon display={d.os} className='my-auto mr-2' />,
 					href: getSetFilterPath('os', d.os),
 					target: '_self',
@@ -83,7 +117,7 @@ export function StatDevices({ eventType }: { eventType: WebEventType }) {
 					<ScrollBar hidden orientation='horizontal' />
 				</ScrollArea>
 			</div>
-			{barList(9)}
+			{barList(8)}
 		</Card>
 	);
 }

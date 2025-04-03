@@ -57,7 +57,7 @@ export const emailDomainRouter = createTRPCRouter({
 				throw new Error('No data returned from Resend');
 			}
 
-			if (input.clickTracking ?? input.openTracking) {
+			if (input.clickTracking === true || input.openTracking === true) {
 				await resend.domains.update({
 					id: domainRes.data.id,
 					clickTracking: input.clickTracking ?? false,
@@ -69,8 +69,6 @@ export const emailDomainRouter = createTRPCRouter({
 				id: newId('emailDomain'),
 				workspaceId: ctx.workspace.id,
 				...input,
-				// name: input.name,
-				// region: input.region,
 				resendId: domainRes.data.id,
 				records: domainRes.data.records,
 			});

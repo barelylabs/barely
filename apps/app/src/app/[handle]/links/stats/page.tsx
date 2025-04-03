@@ -1,24 +1,23 @@
-import { Suspense } from 'react';
-
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
-
-// import { StatDevices } from '~/app/[handle]/_components/stat-devices';
-// import { StatLocations } from '~/app/[handle]/_components/stat-locations';
-// import { StatReferers } from '~/app/[handle]/_components/stat-referers';
-// import { StatsHeader } from '~/app/[handle]/_components/stats-header';
-// import { LinkTimeseries } from '~/app/[handle]/links/stats/link-timeseries';
+import { StatBarelyReferers } from '~/app/[handle]/_components/stat-barely-referers';
+import { StatDevices } from '~/app/[handle]/_components/stat-devices';
+import { StatExternalReferers } from '~/app/[handle]/_components/stat-external-referers';
+import { StatLocations } from '~/app/[handle]/_components/stat-locations';
+import { LinkStatHeader } from './link-stat-header';
+import { LinkTimeseries } from './link-timeseries';
 
 export default function LinkStatsPage() {
 	return (
 		<>
 			<DashContentHeader title='Link Stats' />
-			{/* <StatsHeader /> */}
-			<Suspense fallback={<div>Loading...</div>}>{/* <LinkTimeseries /> */}</Suspense>
+			<LinkStatHeader />
+			<LinkTimeseries />
 
 			<div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-				{/* <StatLocations />
-                        <StatDevices />
-				<StatReferers /> */}
+				<StatLocations eventType='link/click' />
+				<StatDevices eventType='link/click' />
+				<StatExternalReferers eventType='link/click' />
+				<StatBarelyReferers eventType='link/click' />
 			</div>
 		</>
 	);

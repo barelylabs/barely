@@ -32,7 +32,7 @@ export class Tinybird {
 				:	String(value);
 			url.searchParams.set(key, stringValue);
 		}
-		console.log('fetchUrl => ', url.href);
+		// console.log('fetchUrl => ', url.href);
 		const res = await fetch(url, {
 			headers: {
 				Authorization: `Bearer ${this.token}`,
