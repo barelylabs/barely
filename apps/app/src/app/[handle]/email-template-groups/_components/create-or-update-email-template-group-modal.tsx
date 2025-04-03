@@ -84,9 +84,9 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 		upsertSchema: upsertEmailTemplateGroupSchema,
 		// mode === 'create' ? createEmailTemplateGroupSchema : updateEmailTemplateGroupSchema,
 		defaultValues: {
-			name: mode === 'update' ? lastSelectedItem?.name ?? '' : '',
-			description: mode === 'update' ? lastSelectedItem?.description ?? '' : '',
-			emailTemplates: mode === 'update' ? selectedEmailTemplates ?? [] : [],
+			name: mode === 'update' ? (lastSelectedItem?.name ?? '') : '',
+			description: mode === 'update' ? (lastSelectedItem?.description ?? '') : '',
+			emailTemplates: mode === 'update' ? (selectedEmailTemplates ?? []) : [],
 		},
 		handleCreateItem: async d => {
 			await createEmailTemplateGroup({

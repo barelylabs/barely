@@ -35,7 +35,7 @@
 		"@barely/tsconfig": "workspace:^0.1.0",
 		"@types/culori": "2.1.0",
 		"eslint": "^8.57.0",
-		"prettier": "^3.2.5",
+		"prettier": "^3.5.3",
 		"typescript": "^5.5.4"
 	},
 	"eslintConfig": {

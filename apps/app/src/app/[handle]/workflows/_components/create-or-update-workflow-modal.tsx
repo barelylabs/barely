@@ -68,7 +68,7 @@ export function CreateOrUpdateWorkflowModal({ mode }: { mode: 'create' | 'update
 
 	/* form */
 	const { form, onSubmit: onSubmitWorkflow } = useCreateOrUpdateForm({
-		updateItem: mode === 'create' ? null : selectedWorkflow ?? null,
+		updateItem: mode === 'create' ? null : (selectedWorkflow ?? null),
 		upsertSchema: upsertWorkflowSchema,
 		defaultValues: defaultWorkflow,
 		handleCreateItem: async d => {

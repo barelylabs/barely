@@ -41,13 +41,13 @@ export function StatLocations({ eventType }: { eventType: TopEventType }) {
 	const plotData: BarListBarProps[] =
 		locationData?.map(c => ({
 			name:
-				tab === 'Country' ? COUNTRIES[c.country] ?? c.country
-				: tab === 'Region' && 'region' in c ? c.region ?? ''
+				tab === 'Country' ? (COUNTRIES[c.country] ?? c.country)
+				: tab === 'Region' && 'region' in c ? (c.region ?? '')
 				: c.city,
 			value: getTopStatValue(eventType, c),
 
 			icon: () => (
-				<picture className='mr-2 flex items-center '>
+				<picture className='mr-2 flex items-center'>
 					<img
 						alt={c.country}
 						src={`https://flag.vercel.app/m/${c.country}.svg`}

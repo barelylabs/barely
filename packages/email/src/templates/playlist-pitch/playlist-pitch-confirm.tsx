@@ -42,7 +42,7 @@ const PlaylistPitchConfirmEmailTemplate = (props: {
 						clicking the button below.
 					</Text>
 					<Button
-						className=' hover:bg-slate-7000 rounded-md bg-slate-500 px-6 py-3 font-semibold text-white '
+						className='hover:bg-slate-7000 rounded-md bg-slate-500 px-6 py-3 font-semibold text-white'
 						href={props.loginLink}
 					>
 						Confirm my campaign 🏄‍♀️

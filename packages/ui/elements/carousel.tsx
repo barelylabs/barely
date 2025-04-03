@@ -348,7 +348,7 @@ const CarouselIndicator = () => {
 						key={i}
 						onClick={() => api?.scrollTo(i)}
 						className={cn(
-							'h-1 w-full cursor-pointer rounded-sm bg-muted sm:h-[6px] ',
+							'h-1 w-full cursor-pointer rounded-sm bg-muted sm:h-[6px]',
 							currentIndex === i && 'bg-slate-400',
 						)}
 					/>

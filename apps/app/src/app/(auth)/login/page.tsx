@@ -21,7 +21,7 @@ const SignInPage = async ({ searchParams }: { searchParams?: { error: string } }
 		<div className='container flex h-screen w-screen flex-col items-center justify-center'>
 			<Link
 				href='/'
-				className='absolute left-4 top-4 inline-flex items-center justify-center rounded-lg border border-transparent bg-transparent px-3 py-2 text-center text-sm  font-medium text-slate-900 hover:border-slate-200 hover:bg-slate-100 focus:z-10 focus:outline-none focus:ring-4 focus:ring-slate-200 md:left-8 md:top-8'
+				className='absolute left-4 top-4 inline-flex items-center justify-center rounded-lg border border-transparent bg-transparent px-3 py-2 text-center text-sm font-medium text-slate-900 hover:border-slate-200 hover:bg-slate-100 focus:z-10 focus:outline-none focus:ring-4 focus:ring-slate-200 md:left-8 md:top-8'
 			>
 				<>
 					<Icon.chevronLeft className='mr-2 h-4 w-4' />

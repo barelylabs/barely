@@ -48,7 +48,7 @@ const WhatYouGet = () => {
 				</H>
 			</AnimateOnScroll>
 			<AnimateOnScroll fade slideFrom='bottom'>
-				<Lead className=' max-w-2xl'>
+				<Lead className='max-w-2xl'>
 					Designed to be the <span className='font-medium underline'>first step</span> in
 					your marketing strategy, playlist.pitch campaigns combine access to relevant
 					listeners with actionable steps to continue growing your audience.
@@ -60,7 +60,7 @@ const WhatYouGet = () => {
 					{items.map((item, index) => (
 						<div
 							key={index}
-							className='md:shrink-1 relative flex w-full shrink-0 snap-center flex-col '
+							className='md:shrink-1 relative flex w-full shrink-0 snap-center flex-col'
 						>
 							<FeatureCard
 								className='h-full'

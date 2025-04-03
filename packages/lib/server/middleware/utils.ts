@@ -107,7 +107,7 @@ export interface TransparentLinkParams {
 export function parseTransparentLink(req: NextRequest) {
 	const { domain } = parseLinkDomain(req);
 
-	const handle = domain.split('.').length === 3 ? domain.split('.')[0] ?? null : null;
+	const handle = domain.split('.').length === 3 ? (domain.split('.')[0] ?? null) : null;
 
 	// path is the path of the URL (e.g. properyouth.barely.link/spotify/track/12345 => /spotify/track/12345)
 	const path = req.nextUrl.pathname;

@@ -94,7 +94,7 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 		// update or create fan
 		let fan =
 			prevCart.fan ? prevCart.fan
-			: stripeCustomerId ?? charge.billing_details.email ?
+			: (stripeCustomerId ?? charge.billing_details.email) ?
 				await dbHttp.query.Fans.findFirst({
 					where: or(
 						charge.billing_details.email ?

@@ -142,7 +142,7 @@ export const MultiSelect = <T extends NonNullable<unknown>>(
 
 	if (props.displayMode === 'display')
 		return (
-			<div className='flex w-full flex-row flex-wrap  items-center gap-2'>
+			<div className='flex w-full flex-row flex-wrap items-center gap-2'>
 				{props.values.map((v, index) => (
 					<Badge
 						key={`${getItemIdCallback(v)}.selected.${index}`}
@@ -165,7 +165,7 @@ export const MultiSelect = <T extends NonNullable<unknown>>(
 				className={cn(
 					'group rounded-md border border-input px-3 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
 					props.isError &&
-						'border-destructive focus-within:border-destructive focus-within:ring-destructive/60 ',
+						'border-destructive focus-within:border-destructive focus-within:ring-destructive/60',
 					props.values.length > 0 && 'px-2.5 py-2.5',
 				)}
 			>
@@ -215,7 +215,7 @@ export const MultiSelect = <T extends NonNullable<unknown>>(
 				</div>
 			</div>
 
-			<div className='relative mt-2 '>
+			<div className='relative mt-2'>
 				{open && (!!inputValue.length || !!props.options.length) && (
 					<div className='absolute top-0 z-10 h-fit w-full rounded-md border bg-popover p-1 text-popover-foreground shadow-md outline-none animate-in'>
 						<CommandList>
@@ -246,11 +246,11 @@ export const MultiSelect = <T extends NonNullable<unknown>>(
 										className={'cursor-pointer'}
 									>
 										<div className='flex w-full justify-between'>
-											<div className='flex min-h-full space-x-3 '>
+											<div className='flex min-h-full space-x-3'>
 												{props.optImgSrc && (
 													<Image
 														src={props.optImgSrc(opt) ?? ''}
-														alt={props.optImgAlt ? props.optImgAlt(opt) ?? '' : ''}
+														alt={props.optImgAlt ? (props.optImgAlt(opt) ?? '') : ''}
 														width={44}
 														height={44}
 														className='flex-shrink-0 rounded-sm bg-subtle'
@@ -289,7 +289,7 @@ export const MultiSelect = <T extends NonNullable<unknown>>(
 											)}
 
 											{isSelected && (
-												<Check className='my-auto h-4 w-4 text-muted-foreground ' />
+												<Check className='my-auto h-4 w-4 text-muted-foreground' />
 											)}
 										</div>
 									</CommandItem>

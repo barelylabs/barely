@@ -24,7 +24,7 @@ export function SettingsCard(props: SettingsCardProps) {
 
 	return (
 		<div className='space-y-4 rounded-md border border-border'>
-			<div className='flex flex-col gap-4 p-4 '>
+			<div className='flex flex-col gap-4 p-4'>
 				<div className='flex flex-row items-center gap-2'>
 					{TitleIcon && <TitleIcon className='h-[25px] w-[25px]' />}
 					<H size='4'>{props.title}</H>

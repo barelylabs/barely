@@ -135,7 +135,7 @@ export function ListCard<T extends ItemWithId>({
 									}}
 								>
 									<div className='flex flex-row items-center justify-start gap-2 text-muted-foreground'>
-										<Icon.edit className='h-4 w-4 ' />
+										<Icon.edit className='h-4 w-4' />
 										<p className='text-sm'>Edit</p>
 									</div>
 									<CommandShortcut>E</CommandShortcut>
@@ -151,7 +151,7 @@ export function ListCard<T extends ItemWithId>({
 									}}
 								>
 									<div className='flex flex-row items-center justify-start gap-2 text-muted-foreground'>
-										<Icon.archive className='h-4 w-4 ' />
+										<Icon.archive className='h-4 w-4' />
 										<p className='text-sm'>Archive</p>
 									</div>
 									<CommandShortcut>A</CommandShortcut>
@@ -167,7 +167,7 @@ export function ListCard<T extends ItemWithId>({
 									}}
 								>
 									<div className='flex flex-row items-center justify-start gap-2 text-muted-foreground'>
-										<Icon.trash className='h-4 w-4 ' />
+										<Icon.trash className='h-4 w-4' />
 										<p className='text-sm'>Delete</p>
 									</div>
 									<CommandShortcut>D</CommandShortcut>

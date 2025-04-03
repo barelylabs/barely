@@ -138,7 +138,7 @@ export function CartTimeseries() {
 				</div>
 
 				<AreaChart
-					className='mt-4 h-72 '
+					className='mt-4 h-72'
 					data={salesData}
 					index='date'
 					showLegend={false}
@@ -189,7 +189,7 @@ export function CartTimeseries() {
 				</div>
 
 				<AreaChart
-					className='mt-4 h-72 '
+					className='mt-4 h-72'
 					data={kpiData}
 					index='date'
 					showLegend={false}

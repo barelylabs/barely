@@ -89,7 +89,7 @@ export function DomainConfiguration(props: {
 					records={[
 						{
 							type: recordType,
-							name: recordType === 'A' ? '@' : subdomain ?? 'www',
+							name: recordType === 'A' ? '@' : (subdomain ?? 'www'),
 							value: recordType === 'A' ? `76.76.21.21` : `cname.barely.link`,
 							ttl: '86400',
 						},
@@ -132,7 +132,7 @@ export function DomainConfiguration(props: {
 				records={[
 					{
 						type: recordType,
-						name: recordType === 'A' ? '@' : subdomain ?? 'www',
+						name: recordType === 'A' ? '@' : (subdomain ?? 'www'),
 						value: recordType === 'A' ? `76.76.21.21` : `cname.barely.link`,
 						ttl: '86400',
 					},

@@ -147,7 +147,7 @@ H.displayName = 'H';
 
 const P = forwardRef<HTMLParagraphElement, { children: ReactNode; className?: string }>(
 	({ className, children, ...props }, ref) => (
-		<p ref={ref} className={cn('mt-6 leading-7 ', className)} {...props}>
+		<p ref={ref} className={cn('mt-6 leading-7', className)} {...props}>
 			{children}
 		</p>
 	),
@@ -159,7 +159,7 @@ const BlockQuote = forwardRef<
 	HTMLQuoteElement,
 	{ children: ReactNode; className?: string }
 >(({ className, children, ...props }, ref) => (
-	<blockquote ref={ref} className={cn('border-l-2 pl-6 italic ', className)} {...props}>
+	<blockquote ref={ref} className={cn('border-l-2 pl-6 italic', className)} {...props}>
 		{children}
 	</blockquote>
 ));
@@ -171,7 +171,7 @@ const InlineCode = forwardRef<HTMLElement, { children: ReactNode; className?: st
 		<code
 			ref={ref}
 			className={cn(
-				'relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold text-slate-900 ',
+				'relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold text-slate-900',
 				className,
 			)}
 			{...props}
@@ -189,7 +189,7 @@ const Lead = forwardRef<
 >(({ className, children, ...props }, ref) => (
 	<p
 		ref={ref}
-		className={cn('text-md  text-muted-foreground md:text-lg lg:text-xl', className)}
+		className={cn('text-md text-muted-foreground md:text-lg lg:text-xl', className)}
 		{...props}
 	>
 		{children}

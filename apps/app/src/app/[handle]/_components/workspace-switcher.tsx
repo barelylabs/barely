@@ -180,7 +180,7 @@ export function WorkspaceSwitcher() {
 									setNewWorkspaceModalOpen(true);
 									// setNewWorkspaceDialogOpen(true);
 								}}
-								className='cursor-pointer '
+								className='cursor-pointer'
 							>
 								<Icon.plusCircle className='mr-2 h-4 w-4' />
 								Create workspace

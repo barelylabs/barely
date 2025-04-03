@@ -159,7 +159,7 @@ export function SortableMedia({
 				<DropIndicator
 					target={target}
 					className={() => {
-						return 'w-full rounded-md border border-border bg-blue-200 ';
+						return 'w-full rounded-md border border-border bg-blue-200';
 					}}
 					style={{
 						left: '0',

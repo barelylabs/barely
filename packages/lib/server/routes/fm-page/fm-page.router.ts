@@ -43,12 +43,12 @@ export const fmPageRouter = createTRPCRouter({
 
 			const fmLink =
 				!fmLinkParams ? undefined : (
-					(await ctx.db.http.query.FmLinks.findFirst({
+					((await ctx.db.http.query.FmLinks.findFirst({
 						where: and(
 							eq(FmLinks.fmPageId, fmId),
 							eq(FmLinks.platform, fmLinkParams.platform),
 						),
-					})) ?? raise('fmLink not found')
+					})) ?? raise('fmLink not found'))
 				);
 
 			await recordFmEvent({

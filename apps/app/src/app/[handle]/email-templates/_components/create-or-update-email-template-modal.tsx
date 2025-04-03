@@ -65,15 +65,15 @@ export function CreateOrUpdateEmailTemplateModal({
 	});
 
 	const { form, onSubmit } = useCreateOrUpdateForm({
-		updateItem: createMode ? null : lastSelectedItem ?? null,
+		updateItem: createMode ? null : (lastSelectedItem ?? null),
 		upsertSchema: upsertEmailTemplateSchema,
 		defaultValues: {
-			name: createMode ? '' : lastSelectedItem?.name ?? '',
-			type: updateMode ? lastSelectedItem?.type ?? 'marketing' : 'marketing',
-			subject: updateMode ? lastSelectedItem?.subject ?? '' : '',
-			previewText: updateMode ? lastSelectedItem?.previewText ?? '' : '',
-			body: updateMode ? lastSelectedItem?.body ?? '' : '',
-			fromId: updateMode ? lastSelectedItem?.fromId ?? '' : '',
+			name: createMode ? '' : (lastSelectedItem?.name ?? ''),
+			type: updateMode ? (lastSelectedItem?.type ?? 'marketing') : 'marketing',
+			subject: updateMode ? (lastSelectedItem?.subject ?? '') : '',
+			previewText: updateMode ? (lastSelectedItem?.previewText ?? '') : '',
+			body: updateMode ? (lastSelectedItem?.body ?? '') : '',
+			fromId: updateMode ? (lastSelectedItem?.fromId ?? '') : '',
 		},
 		handleCreateItem: async d => {
 			await createEmailTemplate(d);

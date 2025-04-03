@@ -74,7 +74,7 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 
 	/* form */
 	const { form, onSubmit: onSubmitProduct } = useCreateOrUpdateForm({
-		updateItem: mode === 'create' ? null : selectedProduct ?? null,
+		updateItem: mode === 'create' ? null : (selectedProduct ?? null),
 		upsertSchema: upsertProductSchema,
 		defaultValues: defaultProduct,
 		handleCreateItem: async d => {
@@ -299,7 +299,7 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 
 					<Label>Description</Label>
 					<MDXEditor
-						markdown={mode === 'update' ? selectedProduct?.description ?? '' : ''}
+						markdown={mode === 'update' ? (selectedProduct?.description ?? '') : ''}
 						onChange={markdown =>
 							form.setValue('description', markdown, { shouldDirty: true })
 						}

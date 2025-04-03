@@ -407,11 +407,11 @@ export const FlowStoreProvider = ({
 				// fixme: this is hacky. we should hardcode widths
 				const newNodeWidth =
 					type === 'boolean' ?
-						prevNodes.find(node => node.type === 'boolean')?.measured?.width ?? 0
+						(prevNodes.find(node => node.type === 'boolean')?.measured?.width ?? 0)
 					: type === 'wait' ?
-						prevNodes.find(node => node.type === 'wait')?.measured?.width ?? 0
+						(prevNodes.find(node => node.type === 'wait')?.measured?.width ?? 0)
 					: type === 'sendEmail' ?
-						prevNodes.find(node => node.type === 'sendEmail')?.measured?.width ?? 0
+						(prevNodes.find(node => node.type === 'sendEmail')?.measured?.width ?? 0)
 					:	0;
 
 				const newNodeX = emptyNodeX + (emptyNodeWidth - newNodeWidth) / 2;

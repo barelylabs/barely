@@ -98,7 +98,7 @@ export function PageTimeseries() {
 			</div>
 
 			<AreaChart
-				className='mt-4 h-72 '
+				className='mt-4 h-72'
 				data={chartData}
 				index='date'
 				showLegend={false}

@@ -125,7 +125,7 @@ export const LinkDialog: React.FC = () => {
 			/>
 
 			<PopoverContent
-				className={'w-fit  p-2'}
+				className={'w-fit p-2'}
 				sideOffset={5}
 				onOpenAutoFocus={e => {
 					e.preventDefault();

@@ -84,7 +84,7 @@ export const PhoneField = <
 									<Input
 										type='tel'
 										placeholder={props.placeholder}
-										className='peer pl-16 '
+										className='peer pl-16'
 										{...field}
 										onKeyDown={e => handleInput(e)}
 										onFocus={() => setFocus(true)}

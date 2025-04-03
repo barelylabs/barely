@@ -123,7 +123,7 @@ export function FmTimeseries() {
 							<div className='m-auto rounded-sm bg-blue p-0.5'>
 								<Icon.click className='mb-[1px] h-3.5 w-3.5 text-white' />
 							</div>
-							<Text variant='sm/medium' className='uppercase '>
+							<Text variant='sm/medium' className='uppercase'>
 								CLICKS
 							</Text>
 						</div>
@@ -171,7 +171,7 @@ export function FmTimeseries() {
 			{/* <pre>{JSON.stringify(chartData, null, 2)}</pre> */}
 
 			<AreaChart
-				className='mt-4 h-72 '
+				className='mt-4 h-72'
 				data={chartData}
 				index='date'
 				categories={[

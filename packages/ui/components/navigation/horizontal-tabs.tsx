@@ -30,7 +30,7 @@ export function HorizontalTabs({
 	return (
 		<div className='flex h-10 max-w-full flex-row justify-between lg:mb-5'>
 			<nav
-				className='inline-flex items-center justify-center rounded-md bg-muted px-1 py-4 text-muted-foreground '
+				className='inline-flex items-center justify-center rounded-md bg-muted px-1 py-4 text-muted-foreground'
 				aria-label='Tabs'
 				{...props}
 			>

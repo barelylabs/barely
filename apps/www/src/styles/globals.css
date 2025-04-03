@@ -146,7 +146,8 @@
 }
 
 .device-iphone-14-pro .device-sensors::before {
-	background: radial-gradient(farthest-corner at 20% 20%, #6074bf 0, transparent 40%),
+	background:
+		radial-gradient(farthest-corner at 20% 20%, #6074bf 0, transparent 40%),
 		radial-gradient(farthest-corner at 80% 80%, #513785 0, #24555e 20%, transparent 50%);
 	border-radius: 50%;
 	box-shadow: 0 0 calc(var(--devices-scale) * 1px) calc(var(--devices-scale) * 1px)

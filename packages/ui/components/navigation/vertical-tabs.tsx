@@ -30,7 +30,7 @@ export function VerticalTabs({
 	return (
 		<div className='flex-column flex h-10 max-w-full justify-between lg:mb-5'>
 			<nav
-				className='inline-flex items-center justify-center rounded-md bg-muted px-1 py-4 text-muted-foreground '
+				className='inline-flex items-center justify-center rounded-md bg-muted px-1 py-4 text-muted-foreground'
 				aria-label='Tabs'
 				{...props}
 			>

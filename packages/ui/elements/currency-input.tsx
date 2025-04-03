@@ -79,7 +79,7 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
 			setIsFocused(false);
 		};
 
-		const valueInDollars = outputUnits === 'cents' ? (value ?? 0) / 100 : value ?? 0;
+		const valueInDollars = outputUnits === 'cents' ? (value ?? 0) / 100 : (value ?? 0);
 
 		const inputValue =
 			isFocused ? focusedValue

@@ -76,7 +76,7 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 
 	/* form */
 	const { form, onSubmit: handleSubmit } = useCreateOrUpdateForm({
-		updateItem: mode === 'create' ? null : selectedLink ?? null,
+		updateItem: mode === 'create' ? null : (selectedLink ?? null),
 		upsertSchema: upsertLinkSchema,
 		handleCreateItem: async d => {
 			await createLink(d);
@@ -134,8 +134,8 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 
 	const metaTags = useMemo(() => {
 		return (
-				form.watch('customMetaTags') ??
-					(mode === 'update' && !form.formState.dirtyFields.url)
+				(form.watch('customMetaTags') ??
+					(mode === 'update' && !form.formState.dirtyFields.url))
 			) ?
 				{
 					image: '',
@@ -193,8 +193,8 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 			preventDefaultClose={form.formState.isDirty}
 			onClose={handleCloseModal}
 		>
-			<div className='grid w-full grid-cols-2 '>
-				<div className='flex flex-col border-r-2 border-border '>
+			<div className='grid w-full grid-cols-2'>
+				<div className='flex flex-col border-r-2 border-border'>
 					<ModalHeader
 						icon='link'
 						iconOverride={LinkIconOrFavicon}

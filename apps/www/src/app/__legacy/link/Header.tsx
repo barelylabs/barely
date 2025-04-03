@@ -7,7 +7,7 @@ import logo from '@public/static/logo.png';
 
 export default function Header() {
 	return (
-		<Popover className=' w-full bg-slate-900'>
+		<Popover className='w-full bg-slate-900'>
 			<div
 				id='topbar'
 				className='mx-auto flex max-w-5xl items-center justify-between px-6 py-8 md:justify-start md:space-x-10 lg:px-8'
@@ -28,18 +28,18 @@ export default function Header() {
 
 				<div
 					id='top-links'
-					className='hidden justify-end space-x-10 text-gray-50 md:flex md:flex-1 md:items-center '
+					className='hidden justify-end space-x-10 text-gray-50 md:flex md:flex-1 md:items-center'
 				>
-					<a href='#brand' className='text-base font-medium hover:text-purple-200 '>
+					<a href='#brand' className='text-base font-medium hover:text-purple-200'>
 						brand
 					</a>
-					<a href='#track' className='text-base font-medium hover:text-purple-200 '>
+					<a href='#track' className='text-base font-medium hover:text-purple-200'>
 						track
 					</a>
-					<a href='#grow' className='text-base font-medium hover:text-purple-200 '>
+					<a href='#grow' className='text-base font-medium hover:text-purple-200'>
 						grow
 					</a>
-					<a href='#marketing' className='text-base font-medium hover:text-purple-200 '>
+					<a href='#marketing' className='text-base font-medium hover:text-purple-200'>
 						market
 					</a>
 				</div>

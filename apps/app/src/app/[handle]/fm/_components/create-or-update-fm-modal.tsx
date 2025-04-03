@@ -53,14 +53,14 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 
 	/* form */
 	const { form, onSubmit } = useCreateOrUpdateForm({
-		updateItem: mode === 'create' ? null : selectedFmPage ?? null,
+		updateItem: mode === 'create' ? null : (selectedFmPage ?? null),
 		upsertSchema: upsertFmPageSchema,
 		defaultValues: {
-			title: mode === 'update' ? selectedFmPage?.title ?? '' : '',
+			title: mode === 'update' ? (selectedFmPage?.title ?? '') : '',
 			key: '',
 			sourceUrl: '',
 			scheme: 'light',
-			links: mode === 'update' ? selectedFmPage?.links ?? [] : [],
+			links: mode === 'update' ? (selectedFmPage?.links ?? []) : [],
 		},
 		handleCreateItem: async d => {
 			await createFm(d);
@@ -184,8 +184,8 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 	const artworkImagePreview =
 		artworkUploadQueue[0]?.previewImage ??
 		(mode === 'update' ?
-			selectedFmPage?.coverArt?.src ?? spotifyImageUrl ?? ''
-		:	spotifyImageUrl ?? '');
+			(selectedFmPage?.coverArt?.src ?? spotifyImageUrl ?? '')
+		:	(spotifyImageUrl ?? ''));
 
 	// form submit
 	const handleSubmit = useCallback(

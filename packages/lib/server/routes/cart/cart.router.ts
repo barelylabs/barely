@@ -367,7 +367,7 @@ export const cartRouter = createTRPCRouter({
 
 			updateCart.upsellStripePaymentIntentId = paymentIntentRes.id;
 			updateCart.upsellStripeChargeId =
-				typeof charge === 'string' ? charge : charge?.id ?? null;
+				typeof charge === 'string' ? charge : (charge?.id ?? null);
 
 			updateCart.orderProductAmount =
 				cart.mainProductAmount +

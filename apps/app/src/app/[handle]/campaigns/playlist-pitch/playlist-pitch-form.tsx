@@ -153,7 +153,7 @@ export function PlaylistPitchForm(props: { user?: SessionUser }) {
 
 				{_trackSelected && (
 					<div className='border-1 mt-1 flex w-full flex-row justify-start space-x-4 border-red py-1 text-base animate-in fade-in-80 sm:text-sm'>
-						<div className='h-32 w-32 '>
+						<div className='h-32 w-32'>
 							<AspectRatio ratio={1}>
 								<Image
 									src={track.imageUrl ?? ''}
@@ -241,7 +241,7 @@ export function PlaylistPitchForm(props: { user?: SessionUser }) {
 
 	if (submitStatus === 'success')
 		return (
-			<div className={'flex max-w-xl flex-col '}>
+			<div className={'flex max-w-xl flex-col'}>
 				<H size='2'>🔥 🚀 🎊 🦄</H>
 				<H size='2' className=''>
 					submitted!

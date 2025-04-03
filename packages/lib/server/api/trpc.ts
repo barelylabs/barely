@@ -43,13 +43,13 @@ export const createTRPCContext = (opts: {
 		:	'unknown';
 
 	const pageSessionId =
-		opts.rest ? undefined : opts.headers.get('x-page-session-id') ?? null;
+		opts.rest ? undefined : (opts.headers.get('x-page-session-id') ?? null);
 
 	const pusherSocketId =
-		opts.rest ? undefined : opts.headers.get('x-pusher-socket-id') ?? null;
+		opts.rest ? undefined : (opts.headers.get('x-pusher-socket-id') ?? null);
 
 	const workspaceHandle =
-		opts.rest ? undefined : opts.headers.get('x-workspace-handle') ?? null;
+		opts.rest ? undefined : (opts.headers.get('x-workspace-handle') ?? null);
 
 	const workspace =
 		workspaceHandle ?

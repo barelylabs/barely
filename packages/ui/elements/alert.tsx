@@ -43,7 +43,7 @@ export function Alert(props: AlertProps) {
 					: props.variant === 'info' ?
 						<Icon.info className='h-5 w-5' />
 					: props.variant === 'warning' ?
-						<Icon.warning className=' h-[16px] w-[16px]' />
+						<Icon.warning className='h-[16px] w-[16px]' />
 					:	<Icon.xCircleFilled className='h-5 w-5' />}
 				</div>
 

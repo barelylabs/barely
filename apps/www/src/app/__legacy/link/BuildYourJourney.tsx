@@ -16,18 +16,18 @@ import { H, Text } from '@barely/ui/elements/typography';
 const Heading = () => {
 	return (
 		<div className='m-auto flex w-fit flex-col pb-7 pt-20'>
-			<H size='1' className=' pb-9'>
+			<H size='1' className='pb-9'>
 				{`Build your fan's journey.`}
 			</H>
 
 			<div className='flex flex-row space-x-4 text-xl font-semibold text-gray-50 sm:m-auto'>
-				<a href='#brand' className='rounded-xl bg-red-500 px-5 py-3 '>
+				<a href='#brand' className='rounded-xl bg-red-500 px-5 py-3'>
 					brand
 				</a>
-				<a href='#track' className='rounded-xl bg-green-500 px-5 py-3 '>
+				<a href='#track' className='rounded-xl bg-green-500 px-5 py-3'>
 					track
 				</a>
-				<a href='#grow' className='rounded-xl bg-blue-500 px-5 py-3  '>
+				<a href='#grow' className='rounded-xl bg-blue-500 px-5 py-3'>
 					grow
 				</a>
 			</div>
@@ -37,7 +37,7 @@ const Heading = () => {
 
 const Brand = () => {
 	return (
-		<div className='flex flex-col space-y-4 '>
+		<div className='flex flex-col space-y-4'>
 			<H size='2'>Brand</H>
 			<H size='3'>Tell your story</H>
 			<Text muted>
@@ -118,7 +118,7 @@ const BuildYourJourney = () => {
 	return (
 		<div
 			id='how-it-works'
-			className='flex max-w-4xl flex-col space-y-4 px-6 pb-32  pt-12 md:m-auto'
+			className='flex max-w-4xl flex-col space-y-4 px-6 pb-32 pt-12 md:m-auto'
 		>
 			<Heading />
 			<TimelineVertical

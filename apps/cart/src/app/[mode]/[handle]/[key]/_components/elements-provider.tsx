@@ -24,8 +24,8 @@ export function ElementsProvider({
 
 	const stripeAccount =
 		isProduction() ?
-			publicFunnel.workspace.stripeConnectAccountId ?? undefined
-		:	publicFunnel.workspace.stripeConnectAccountId_devMode ?? undefined;
+			(publicFunnel.workspace.stripeConnectAccountId ?? undefined)
+		:	(publicFunnel.workspace.stripeConnectAccountId_devMode ?? undefined);
 
 	const clientSecret = cart.checkoutStripeClientSecret;
 

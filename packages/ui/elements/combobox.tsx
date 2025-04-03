@@ -70,7 +70,7 @@ export const Combobox = <T extends NonNullable<unknown>>(props: ComboboxProps<T>
 				className={cn(
 					'group rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
 					isError &&
-						'border-destructive focus-within:border-destructive focus-within:ring-destructive/60 ',
+						'border-destructive focus-within:border-destructive focus-within:ring-destructive/60',
 				)}
 			>
 				<div className='flex flex-wrap gap-x-2 gap-y-2'>
@@ -137,7 +137,7 @@ export const Combobox = <T extends NonNullable<unknown>>(props: ComboboxProps<T>
 												{optImgSrc && (
 													<Image
 														src={optImgSrc(opt) ?? ''}
-														alt={optImgAlt ? optImgAlt(opt) ?? '' : ''}
+														alt={optImgAlt ? (optImgAlt(opt) ?? '') : ''}
 														width={44}
 														height={44}
 														className='flex-shrink-0 rounded-sm bg-subtle'
