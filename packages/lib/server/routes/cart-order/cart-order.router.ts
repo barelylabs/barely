@@ -460,7 +460,7 @@ export const cartOrderRouter = createTRPCRouter({
 					sellerName: cart.funnel?.workspace.name ?? 'Barely',
 					supportEmail:
 						isDevelopment() ? 'adam@barely.io' : (
-							cart.funnel?.workspace.cartSupportEmail ?? 'support@barely.io'
+							(cart.funnel?.workspace.cartSupportEmail ?? 'support@barely.io')
 						),
 					trackingNumber: shippingTrackingNumber,
 					trackingLink: getTrackingLink({

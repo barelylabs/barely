@@ -43,10 +43,10 @@ export function CreateOrUpdateEmailDomainModal({ mode }: { mode: 'create' | 'upd
 
 	/* form  */
 	const { form, onSubmit } = useCreateOrUpdateForm({
-		updateItem: mode === 'create' ? null : selectedEmailDomain ?? null,
+		updateItem: mode === 'create' ? null : (selectedEmailDomain ?? null),
 		upsertSchema: upsertEmailDomainSchema,
 		defaultValues: {
-			name: mode === 'update' ? selectedEmailDomain?.name ?? '' : '',
+			name: mode === 'update' ? (selectedEmailDomain?.name ?? '') : '',
 			region: mode === 'update' ? selectedEmailDomain?.region : 'us-east-1',
 			status: mode === 'update' ? selectedEmailDomain?.status : 'not_started',
 		},

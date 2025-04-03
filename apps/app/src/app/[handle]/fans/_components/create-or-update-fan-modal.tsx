@@ -41,11 +41,11 @@ export function CreateOrUpdateFanModal({ mode }: { mode: 'create' | 'update' }) 
 
 	/* form */
 	const { form, onSubmit } = useCreateOrUpdateForm({
-		updateItem: mode === 'create' ? null : selectedFan ?? null,
+		updateItem: mode === 'create' ? null : (selectedFan ?? null),
 		upsertSchema: upsertFanSchema,
 		defaultValues: {
-			fullName: mode === 'update' ? selectedFan?.fullName ?? '' : '',
-			email: mode === 'update' ? selectedFan?.email ?? '' : '',
+			fullName: mode === 'update' ? (selectedFan?.fullName ?? '') : '',
+			email: mode === 'update' ? (selectedFan?.email ?? '') : '',
 		},
 		handleCreateItem: async d => {
 			await createFan(d);

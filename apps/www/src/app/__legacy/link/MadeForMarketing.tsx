@@ -39,7 +39,7 @@ const MadeForMarketing = () => {
 			className='m-auto flex w-full flex-col place-items-center py-16 sm:py-20 lg:py-28'
 		>
 			<div className='space-y-4mx-auto flex max-w-5xl flex-col items-center px-6 lg:px-8'>
-				<H size='1' className='pb-12 '>
+				<H size='1' className='pb-12'>
 					Made For Marketing
 				</H>
 				<H size='3' className='text-3xl font-semibold text-gray-200'>

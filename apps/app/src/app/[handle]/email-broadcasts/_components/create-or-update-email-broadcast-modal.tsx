@@ -83,10 +83,10 @@ export function CreateOrUpdateEmailBroadcastModal({
 	});
 
 	const { form, onSubmit } = useCreateOrUpdateForm({
-		updateItem: mode === 'create' ? null : lastSelectedItem ?? null,
+		updateItem: mode === 'create' ? null : (lastSelectedItem ?? null),
 		upsertSchema: upsertEmailBroadcastSchema,
 		defaultValues: {
-			emailTemplateId: mode === 'update' ? lastSelectedItem?.emailTemplateId ?? '' : '',
+			emailTemplateId: mode === 'update' ? (lastSelectedItem?.emailTemplateId ?? '') : '',
 			fanGroupId: null,
 			status: 'draft',
 			scheduledAt: null,

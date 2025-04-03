@@ -13,14 +13,14 @@ const buttonVariants = cva(
 				primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
 				secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
 
-				brand: 'bg-brand-500 text-brand-50 hover:bg-brand-400 ',
+				brand: 'bg-brand-500 text-brand-50 hover:bg-brand-400',
 				brandAccent:
 					'bg-brand-accent text-brand-accent-foreground hover:bg-brand-accent/90',
 				success: 'bg-success text-success-foreground hover:bg-success/80',
 				destructive:
 					'bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:ring-destructive',
 				outline:
-					'border-[1.5px] border-input bg-transparent hover:bg-accent hover:text-accent-foreground ',
+					'border-[1.5px] border-input bg-transparent hover:bg-accent hover:text-accent-foreground',
 				muted: 'bg-muted text-muted-foreground hover:bg-muted/90',
 				minimal: 'bg-transparent text-muted-foreground hover:bg-muted',
 
@@ -66,7 +66,7 @@ const buttonVariants = cva(
 			{
 				look: 'tab',
 				selected: false,
-				className: 'bg-muted/10 text-secondary-foreground ',
+				className: 'bg-muted/10 text-secondary-foreground',
 			},
 			/** icon sizes */
 			{

@@ -36,7 +36,7 @@ const PlaylistPitchToScreenEmailTemplate = (props: {
 						Please screen the track below and let us know if it's a go or no go.
 					</Text>
 					<Button
-						className=' rounded-md bg-slate-500 px-6 py-3 font-semibold text-white hover:bg-slate-700 '
+						className='rounded-md bg-slate-500 px-6 py-3 font-semibold text-white hover:bg-slate-700'
 						href={props.loginLink}
 					>
 						Screen the track

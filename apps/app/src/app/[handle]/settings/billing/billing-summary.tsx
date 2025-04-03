@@ -23,7 +23,7 @@ export function BillingSummary() {
 	const setShowUpgradeModal = useSetAtom(showUpgradeModalAtom);
 
 	return (
-		<div className='flex flex-col  rounded-lg border'>
+		<div className='flex flex-col rounded-lg border'>
 			<div className='flex flex-col space-y-2 border-b px-6 py-10'>
 				<Text variant='2xl/semibold'>Plan & Usage</Text>
 

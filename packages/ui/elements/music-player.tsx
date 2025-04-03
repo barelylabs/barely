@@ -286,7 +286,7 @@ export function MusicPlayerBar() {
 							)}
 						</div>
 						{/* Music Player */}
-						<div className='hidden max-w-full flex-grow flex-col items-center justify-center gap-1 sm:flex '>
+						<div className='hidden max-w-full flex-grow flex-col items-center justify-center gap-1 sm:flex'>
 							<div className='flex w-full flex-row items-center justify-center gap-3'>
 								<MusicPreviousButton />
 								<MusicPlayButton />

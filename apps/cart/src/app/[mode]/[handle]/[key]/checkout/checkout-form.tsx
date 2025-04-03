@@ -549,7 +549,7 @@ export function CheckoutForm({
 				<div className='flex w-full flex-col bg-brand p-8 sm:sticky sm:top-0 sm:h-svh sm:p-12'>
 					<div className='flex max-w-sm flex-col gap-2'>
 						<Text variant='md/normal'>Total payment</Text>
-						<div className='flex flex-row justify-between '>
+						<div className='flex flex-row justify-between'>
 							<Text variant='sm/light' className='opacity-90'>
 								{mainProduct.name}
 							</Text>

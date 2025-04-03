@@ -88,6 +88,7 @@ function CartFunnelCard({ cartFunnel }: { cartFunnel: CartFunnel }) {
 					value: formatCentsToDollars(value ?? 0),
 				},
 			]}
+			statsHref={`/${handle}/carts/stats?assetId=${cartFunnel.id}`}
 		/>
 	);
 }

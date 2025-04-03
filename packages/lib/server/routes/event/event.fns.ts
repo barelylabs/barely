@@ -78,7 +78,7 @@ export async function recordLinkClick({
 
 	// deduplicate clicks from the same ip & linkId - only record 1 link click per ip per linkId per hour
 	const rateLimitPeriod =
-		env.RATE_LIMIT_RECORD_LINK_CLICK ?? isDevelopment() ? '1 s' : '1 h';
+		(env.RATE_LIMIT_RECORD_LINK_CLICK ?? isDevelopment()) ? '1 s' : '1 h';
 
 	const { success } = await ratelimit(1, rateLimitPeriod).limit(
 		`recordClick:${visitor?.ip}:${link.id ?? '_root'}`,
@@ -309,8 +309,8 @@ export async function recordCartEvent({
 
 		href:
 			type === 'cart/purchaseMainWithoutBump' || type === 'cart/purchaseMainWithBump' ?
-				cart.visitorCheckoutHref ?? visitor?.href ?? 'Unknown'
-			:	visitor?.href ?? 'Unknown',
+				(cart.visitorCheckoutHref ?? visitor?.href ?? 'Unknown')
+			:	(visitor?.href ?? 'Unknown'),
 	};
 
 	if (visitorInfo.isBot) return null;
@@ -319,7 +319,7 @@ export async function recordCartEvent({
 
 	// deduplication events from the same ip & cartId - only record 1 cart event per ip per cartId per hour
 	const rateLimitPeriod =
-		env.RATE_LIMIT_RECORD_CART_EVENT ?? isDevelopment() ? '1 s' : '1 h';
+		(env.RATE_LIMIT_RECORD_CART_EVENT ?? isDevelopment()) ? '1 s' : '1 h';
 
 	const { success } = await ratelimit(1, rateLimitPeriod).limit(
 		`recordCartEvent:${visitorInfo.ip}:${cart.id}:${type}`,
@@ -1023,7 +1023,8 @@ export async function recordLandingPageEvent({
 		eventType: type,
 	});
 
-	const sourceUrl = isDevelopment() ? visitor?.href ?? '' : visitor?.referer_url ?? ''; // this is being logged from an api route, so we want the referer_url (i.e. the client url calling the logged route)
+	const sourceUrl =
+		isDevelopment() ? (visitor?.href ?? '') : (visitor?.referer_url ?? ''); // this is being logged from an api route, so we want the referer_url (i.e. the client url calling the logged route)
 
 	const metaRes =
 		metaPixel?.accessToken && metaEvents ?

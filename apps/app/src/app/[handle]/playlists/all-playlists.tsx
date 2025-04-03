@@ -39,7 +39,7 @@ const AllPlaylists = () => {
 
 				const buttons = (
 					<Link href={`/${workspace.handle}/playlists/${playlist.id}`}>
-						<Icon.edit className='h-3 w-3 ' />
+						<Icon.edit className='h-3 w-3' />
 					</Link>
 				);
 

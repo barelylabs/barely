@@ -5,7 +5,7 @@ import { UserAccountNav } from './user-menu';
 
 const DashboardHeader = () => {
 	return (
-		<header className='sticky top-0 z-40 w-full bg-background '>
+		<header className='sticky top-0 z-40 w-full bg-background'>
 			<div className='container flex h-12 items-center'>
 				{/* <MainNav />
 				<MobileNav /> */}

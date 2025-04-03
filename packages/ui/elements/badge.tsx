@@ -36,7 +36,7 @@ const badgeVariants = cva(
 				rectangle: 'rounded-sm',
 			},
 			button: {
-				true: 'active:scale-95 ',
+				true: 'active:scale-95',
 				false: '',
 			},
 		},

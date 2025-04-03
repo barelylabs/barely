@@ -61,7 +61,7 @@ const HowItWorks = () => {
 								{/* <Card> */}
 								<div className='flex flex-row'>
 									<div className='min-w-[75px]'>
-										<H size='2' className='mb-0 font-extralight text-pink-200 '>
+										<H size='2' className='mb-0 font-extralight text-pink-200'>
 											0{index + 1}
 										</H>
 										<Text variant='sm/semibold' className='uppercase text-pink-200'>
@@ -69,7 +69,7 @@ const HowItWorks = () => {
 										</Text>
 									</div>
 									<div className='pl-4 pr-4 text-left sm:pl-20'>
-										<H size='1' className='pb-4 '>
+										<H size='1' className='pb-4'>
 											{item.title}
 										</H>
 										<Text variant='lg/light' muted>

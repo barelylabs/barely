@@ -257,7 +257,7 @@ const FieldErrorIcon = React.forwardRef<
 		<div
 			ref={ref}
 			id={`${formMessageId}-icon`}
-			className='pointer-events-none absolute inset-y-0 right-0 flex items-center '
+			className='pointer-events-none absolute inset-y-0 right-0 flex items-center'
 			{...props}
 		>
 			{isValidating ?

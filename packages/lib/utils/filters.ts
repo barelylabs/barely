@@ -21,3 +21,23 @@ export const platformFiltersSchema = z.object({
 	showAmazonMusic: queryBooleanSchema.optional(),
 	showYoutubeMusic: queryBooleanSchema.optional(),
 });
+
+export const cartFiltersSchema = z.object({
+	showEmailAdds: queryBooleanSchema.optional(),
+	showShippingInfoAdds: queryBooleanSchema.optional(),
+	showPaymentInfoAdds: queryBooleanSchema.optional(),
+	showMainWithoutBumpPurchases: queryBooleanSchema.optional(),
+	showMainWithBumpPurchases: queryBooleanSchema.optional(),
+	showUpsellPurchases: queryBooleanSchema.optional(),
+	showUpsellDeclines: queryBooleanSchema.optional(),
+
+	showPurchases: queryBooleanSchema.optional(),
+	showGrossSales: queryBooleanSchema.optional(),
+	showProductSales: queryBooleanSchema.optional(),
+	showNetSales: queryBooleanSchema.optional(),
+});
+
+export const pageFiltersSchema = cartFiltersSchema.extend({
+	showVisits: queryBooleanSchema.optional(),
+	showClicks: queryBooleanSchema.optional(),
+});

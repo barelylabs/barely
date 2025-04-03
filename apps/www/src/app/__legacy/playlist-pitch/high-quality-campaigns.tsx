@@ -61,7 +61,7 @@ const Features = () => {
 						))}
 					</div>
 
-					<div className='flex flex-1 items-end '>
+					<div className='flex flex-1 items-end'>
 						<Button
 							className='mb-1'
 							size='lg'

@@ -4,7 +4,7 @@ import { cva } from 'class-variance-authority';
 import { Loader2 } from 'lucide-react';
 
 const loadingDotStyles = cva(
-	['h-1 w-1 animate-bounce rounded-full bg-muted-foreground '],
+	['h-1 w-1 animate-bounce rounded-full bg-muted-foreground'],
 	{
 		variants: {
 			size: {

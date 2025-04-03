@@ -8,9 +8,9 @@ export function getDeviceData(req: NextRequest) {
 
 	const platform =
 		(
-			os?.name?.toLowerCase().includes('ios') ??
+			(os?.name?.toLowerCase().includes('ios') ??
 			browser?.name?.toLowerCase().includes('mobile safari') ??
-			ua?.toLowerCase().includes('iphone' || 'ipad')
+			ua?.toLowerCase().includes('iphone' || 'ipad'))
 		) ?
 			'ios'
 		: os?.name?.toLowerCase().includes('android') ? 'android'
@@ -30,7 +30,7 @@ export function parseTransparentLink(req: NextRequest) {
 
 	if (!domain) throw new Error('No domain found');
 
-	const handle = domain.split('.').length === 3 ? domain.split('.')[0] ?? null : null;
+	const handle = domain.split('.').length === 3 ? (domain.split('.')[0] ?? null) : null;
 
 	// path is the path of the URL (e.g. properyouth.barely.link/spotify/track/12345 => /spotify/track/12345)
 	const path = req.nextUrl.pathname;

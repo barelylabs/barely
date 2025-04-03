@@ -43,7 +43,7 @@ export function UpdateLandingPageForm({
 
 	return (
 		<Form form={form} onSubmit={handleSubmit}>
-			<div className='grid grid-cols-[250px_1fr] gap-4 '>
+			<div className='grid grid-cols-[250px_1fr] gap-4'>
 				<div className='sticky top-0 flex h-fit flex-col gap-2'>
 					<TextField
 						name='name'

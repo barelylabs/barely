@@ -92,7 +92,7 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 	const artworkImagePreview =
 		artworkUploadQueue[0]?.previewImage ??
 		(mode === 'update' ?
-			selectedTrack?.artworkFiles?.find(f => f.current)?.src ?? ''
+			(selectedTrack?.artworkFiles?.find(f => f.current)?.src ?? '')
 		:	'');
 
 	/* Audio upload */

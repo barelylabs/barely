@@ -42,12 +42,12 @@ export function getAmountsForCheckout(
 		mainProductPayWhatYouWantPrice =
 			mainProductPayWhatYouWantPrice >= mainProductPayWhatYouWantMin ?
 				mainProductPayWhatYouWantPrice
-			:	funnel.mainProductPayWhatYouWantMin ?? 0;
+			:	(funnel.mainProductPayWhatYouWantMin ?? 0);
 
 		mainProductPrice =
 			mainProductPayWhatYouWantPrice >= mainProductPayWhatYouWantMin ?
 				mainProductPayWhatYouWantPrice
-			:	funnel.mainProductPayWhatYouWantMin ?? 0;
+			:	(funnel.mainProductPayWhatYouWantMin ?? 0);
 	} else {
 		mainProductPrice = funnel.mainProduct.price - (funnel.mainProductDiscount ?? 0);
 	}
@@ -162,7 +162,7 @@ export function getFeeAmountForCheckout({
 	const feePercentage =
 		typeof workspace.cartFeePercentageOverride === 'number' ?
 			workspace.cartFeePercentageOverride
-		:	WORKSPACE_PLANS.get(workspacePlan)?.cartFeePercentage ?? 0;
+		:	(WORKSPACE_PLANS.get(workspacePlan)?.cartFeePercentage ?? 0);
 
 	return Math.round(amount * (feePercentage / 100));
 }

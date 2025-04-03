@@ -90,12 +90,12 @@ export function CreateOrUpdateFanGroupModal({ mode }: { mode: 'create' | 'update
 
 	/* form */
 	const { form, onSubmit } = useCreateOrUpdateForm({
-		updateItem: mode === 'create' ? null : selectedFanGroup ?? null,
+		updateItem: mode === 'create' ? null : (selectedFanGroup ?? null),
 		upsertSchema: upsertFanGroupSchema,
 		defaultValues: {
-			name: mode === 'update' ? selectedFanGroup?.name ?? '' : '',
-			description: mode === 'update' ? selectedFanGroup?.description ?? '' : '',
-			conditions: mode === 'update' ? selectedFanGroup?.conditions ?? [] : [],
+			name: mode === 'update' ? (selectedFanGroup?.name ?? '') : '',
+			description: mode === 'update' ? (selectedFanGroup?.description ?? '') : '',
+			conditions: mode === 'update' ? (selectedFanGroup?.conditions ?? []) : [],
 		},
 		handleCreateItem: async d => {
 			await createFanGroup(d);

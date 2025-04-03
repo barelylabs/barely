@@ -82,7 +82,7 @@ export function SelectableMedia({
 			/>
 			<GridList
 				aria-label='files'
-				className='grid w-full max-w-full gap-2 '
+				className='grid w-full max-w-full gap-2'
 				style={{
 					gridTemplateColumns:
 						'repeat(auto-fill, minmax(max(min(20%, 150px),100px), 1fr))',

@@ -56,7 +56,7 @@ const PrivacyPage = () => {
 			</p>
 
 			<Link href='/'>
-				<span className='py-10 text-blue '>Return to barely.link</span>
+				<span className='py-10 text-blue'>Return to barely.link</span>
 			</Link>
 		</div>
 	);

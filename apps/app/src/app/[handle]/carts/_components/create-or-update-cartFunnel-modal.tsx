@@ -73,7 +73,7 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 
 	/* form */
 	const { form, onSubmit: onSubmitFunnel } = useCreateOrUpdateForm({
-		updateItem: mode === 'create' ? null : selectedCartFunnel ?? null,
+		updateItem: mode === 'create' ? null : (selectedCartFunnel ?? null),
 		upsertSchema: upsertCartFunnelSchema,
 		defaultValues: defaultCartFunnel,
 		handleCreateItem: async d => {
@@ -289,7 +289,7 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 					<Label>Description</Label>
 					<MDXEditor
 						markdown={
-							mode === 'update' ? selectedCartFunnel?.bumpProductDescription ?? '' : ''
+							mode === 'update' ? (selectedCartFunnel?.bumpProductDescription ?? '') : ''
 						}
 						onChange={markdown => {
 							form.setValue('bumpProductDescription', markdown, { shouldDirty: true });
@@ -350,7 +350,9 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 					<Label>Above the Fold</Label>
 					<MDXEditor
 						markdown={
-							mode === 'update' ? selectedCartFunnel?.upsellProductAboveTheFold ?? '' : ''
+							mode === 'update' ?
+								(selectedCartFunnel?.upsellProductAboveTheFold ?? '')
+							:	''
 						}
 						onChange={markdown => {
 							form.setValue('upsellProductAboveTheFold', markdown, { shouldDirty: true });
@@ -360,7 +362,9 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 					<Label>Below the Fold</Label>
 					<MDXEditor
 						markdown={
-							mode === 'update' ? selectedCartFunnel?.upsellProductBelowTheFold ?? '' : ''
+							mode === 'update' ?
+								(selectedCartFunnel?.upsellProductBelowTheFold ?? '')
+							:	''
 						}
 						onChange={markdown => {
 							form.setValue('upsellProductBelowTheFold', markdown, { shouldDirty: true });
@@ -375,7 +379,7 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 					<Label>Content</Label>
 					<MDXEditor
 						markdown={
-							mode === 'update' ? selectedCartFunnel?.successPageContent ?? '' : ''
+							mode === 'update' ? (selectedCartFunnel?.successPageContent ?? '') : ''
 						}
 						onChange={markdown => {
 							form.setValue('successPageContent', markdown, { shouldDirty: true });

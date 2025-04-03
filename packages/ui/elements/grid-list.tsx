@@ -346,7 +346,7 @@ export const GridListCard = React.forwardRef<
 														}}
 													>
 														<div className='flex flex-row items-center justify-start gap-2 text-muted-foreground'>
-															<Icon.edit className='h-4 w-4 ' />
+															<Icon.edit className='h-4 w-4' />
 															<p className='text-sm'>Open</p>
 														</div>
 														<CommandShortcut>enter</CommandShortcut>
@@ -366,7 +366,7 @@ export const GridListCard = React.forwardRef<
 															}}
 														>
 															<div className='flex flex-row items-center justify-start gap-2 text-muted-foreground'>
-																{CommandIcon && <CommandIcon className='h-4 w-4 ' />}
+																{CommandIcon && <CommandIcon className='h-4 w-4' />}
 																<p className='text-sm'>{item.label}</p>
 															</div>
 															<div className='flex flex-row items-center gap-1 text-muted-foreground'>
@@ -389,7 +389,7 @@ export const GridListCard = React.forwardRef<
 														}}
 													>
 														<div className='flex flex-row items-center justify-start gap-2 text-muted-foreground'>
-															<Icon.archive className='h-4 w-4 ' />
+															<Icon.archive className='h-4 w-4' />
 															<p className='text-sm'>Archive</p>
 														</div>
 														<CommandShortcut>E</CommandShortcut>
@@ -450,7 +450,7 @@ export function GridItemCheckbox({ children, className, ...props }: CheckboxProp
 						{isIndeterminate ?
 							<rect x={1} y={7.5} width={15} height={3} />
 						:	isSelected && (
-								<Check className='h-4 w-4 text-primary-foreground group-disabled:text-gray-400 ' />
+								<Check className='h-4 w-4 text-primary-foreground group-disabled:text-gray-400' />
 							)
 						}
 					</div>

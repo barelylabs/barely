@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 
 import { stdWebEventPipeQueryParamsSchema } from '../server/routes/stat/stat.schema';
 import { platformFiltersSchema } from '../utils/filters';
-import { getDateFromIsoString } from '../utils/format-date';
+import { useFormatTimestamp } from './use-format-timestamp';
 import { useTypedOptimisticQuery } from './use-typed-optimistic-query';
 import { useWorkspace } from './use-workspace';
 
@@ -12,31 +12,7 @@ export function useFmStatFilters() {
 	);
 
 	const { handle } = useWorkspace();
-
-	const formatTimestamp = useCallback(
-		(d: string) => {
-			const date = getDateFromIsoString(d);
-
-			switch (q.data.dateRange) {
-				case '1d':
-					return new Date(date).toLocaleDateString('en-us', {
-						month: 'short',
-						day: 'numeric',
-						hour: 'numeric',
-					});
-				default: {
-					const formatted = new Date(date).toLocaleDateString('en-us', {
-						month: 'short',
-						day: 'numeric',
-					});
-					// console.log('formatted => ', formatted);
-					return formatted;
-				}
-			}
-		},
-
-		[q.data.dateRange],
-	);
+	const { formatTimestamp } = useFormatTimestamp(q.data.dateRange);
 
 	const {
 		showVisits,

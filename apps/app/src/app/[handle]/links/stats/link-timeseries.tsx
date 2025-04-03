@@ -1,78 +1,82 @@
-// 'use client';
+'use client';
 
-// import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
+import { useLinkStatFilters } from '@barely/lib/hooks/use-link-stat-filters';
+// import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 // import { cn } from '@barely/lib/utils/cn';
-// import { api } from '@barely/server/api/react';
+import { api } from '@barely/server/api/react';
 
-// import { AreaChart } from '@barely/ui/charts/area-chart';
-// import { Card } from '@barely/ui/elements/card';
-// import { Icon } from '@barely/ui/elements/icon';
-// import { H, Text } from '@barely/ui/elements/typography';
+import { AreaChart } from '@barely/ui/charts/area-chart';
+import { Card } from '@barely/ui/elements/card';
+import { InfoTabButton } from '@barely/ui/elements/info-tab-button';
 
-// import { nFormatter } from '@barely/utils/number';
+import { nFormatter } from '@barely/utils/number';
 
-// import { WebEventFilterBadges } from '~/app/[handle]/_components/filter-badges';
+import { WebEventFilterBadges } from '~/app/[handle]/_components/filter-badges';
 
-// export function LinkTimeseries() {
-// 	const { filtersWithHandle, formatTimestamp, badgeFilters } = useWebEventStatFilters();
+export function LinkTimeseries() {
+	const { filtersWithHandle, formatTimestamp, badgeFilters } = useLinkStatFilters();
 
-// 	const [timeseries] = api.stat.linkTimeseries.useSuspenseQuery(
-// 		{ ...filtersWithHandle },
-// 		{
-// 			select: data =>
-// 				data.map(row => ({
-// 					...row,
-// 					date: formatTimestamp(row.date),
-// 				})),
-// 		},
-// 	);
+	// const {showVisits, showClicks} = filters;
 
-// 	const totalClicks = timeseries.reduce((acc, row) => acc + row.clicks, 0);
+	const { data: timeseries } = api.stat.linkTimeseries.useQuery(
+		{ ...filtersWithHandle },
+		{
+			select: data =>
+				data.map(row => ({
+					...row,
+					date: formatTimestamp(row.start),
+				})),
+		},
+	);
 
-// 	return (
-// 		<Card className='p-6'>
-// 			<div className='flex flex-row items-center justify-between'>
-// 				<div className='flex flex-col gap-1'>
-// 					<div className='flex flex-row'>
-// 						<button
-// 							type='button'
-// 							className={cn(
-// 								'flex flex-col gap-1 rounded-t-md py-3 pl-4 pr-8',
-// 								'border-b-3 border-blue-500 bg-blue-100',
-// 							)}
-// 							disabled
-// 							// onClick={() => setShowClicks(!showClicks)}
-// 						>
-// 							<div className='flex flex-row items-center gap-1'>
-// 								<div className='m-auto rounded-sm bg-blue p-0.5'>
-// 									<Icon.click className='mb-[1px] h-3.5 w-3.5 text-white' />
-// 								</div>
-// 								<Text variant='sm/medium' className='uppercase '>
-// 									CLICKS
-// 								</Text>
-// 							</div>
-// 							<div className='flex flex-row items-baseline gap-1'>
-// 								<H size='4'>{totalClicks}</H>
-// 							</div>
-// 						</button>
-// 					</div>
-// 				</div>
-// 				<div className='flex flex-row justify-between gap-2'>
-// 					<WebEventFilterBadges filters={badgeFilters} />
-// 				</div>
-// 			</div>
-// 			<AreaChart
-// 				className='mt-4 h-72 '
-// 				data={timeseries}
-// 				index='date'
-// 				categories={['clicks']}
-// 				colors={['blue']}
-// 				showXAxis={true}
-// 				showLegend={false}
-// 				curveType='linear'
-// 				yAxisWidth={30}
-// 				valueFormatter={v => nFormatter(v)}
-// 			/>
-// 		</Card>
-// 	);
-// }
+	const totalClicks = timeseries?.reduce((acc, row) => acc + row.link_clicks, 0);
+
+	const chartData = (timeseries ?? []).map(row => ({
+		...row,
+		clicks: row.link_clicks,
+	}));
+
+	return (
+		<Card className='p-6'>
+			<div className='flex flex-row items-center justify-between'>
+				{/* <div className='flex flex-row'>
+					<div className='flex flex-row items-center gap-1'>
+						<div className='m-auto mb-0.5 rounded-sm bg-slate-500 p-[3px]'>
+							<Icon.click className='h-3.5 w-3.5 text-white' />
+						</div>
+						<Text variant='sm/medium' className='uppercase'>
+							CLICKS
+						</Text>
+					</div>
+					<H size='4'>{totalClicks}</H>
+				</div> */}
+				<InfoTabButton
+					icon='click'
+					label='CLICKS'
+					value={totalClicks ?? 0}
+					selected={true}
+					selectedClassName='border-blue-500 bg-blue-100'
+					isLeft
+					isRight
+				/>
+
+				<div className='flex flex-row justify-between gap-2'>
+					<WebEventFilterBadges filters={badgeFilters} />
+				</div>
+			</div>
+
+			<AreaChart
+				className='mt-4 h-72'
+				data={chartData}
+				index='date'
+				categories={['clicks']}
+				colors={['blue']}
+				showXAxis={true}
+				showLegend={false}
+				curveType='linear'
+				yAxisWidth={30}
+				valueFormatter={v => nFormatter(v)}
+			/>
+		</Card>
+	);
+}
