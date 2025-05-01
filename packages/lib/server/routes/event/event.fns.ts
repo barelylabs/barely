@@ -955,6 +955,14 @@ function getMetaEventFromFmEvent({
 						platform: fmLink?.platform,
 					},
 				},
+				{
+					eventName: 'ViewContent',
+					customData: {
+						content_type: 'barely.fm/linkClick',
+						fmId: fmPage.id,
+						platform: fmLink?.platform,
+					},
+				},
 			];
 		default:
 			return null;
