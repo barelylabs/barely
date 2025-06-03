@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { log } from '../../utils/log';
 import { zGet } from '../../utils/zod-fetch';
 
 export async function getSpotifyAlbum(props: { accessToken: string; spotifyId: string }) {
@@ -9,7 +10,15 @@ export async function getSpotifyAlbum(props: { accessToken: string; spotifyId: s
 
 	const res = await zGet(endpoint, spotifyAlbumResponseSchema, { auth });
 
-	if (!res.success || !res.parsed) return null;
+	if (!res.success || !res.parsed) {
+		await log({
+			message: 'Failed to get Spotify album' + JSON.stringify(res),
+			type: 'errors',
+			location: 'getSpotifyAlbum',
+			mention: true,
+		});
+		return null;
+	}
 
 	return res.data;
 }
@@ -73,7 +82,7 @@ const spotifyAlbumResponseSchema = z.object({
 				id: z.string(),
 				is_local: z.boolean(),
 				name: z.string(),
-				preview_url: z.string().optional(),
+				preview_url: z.string().nullish(),
 				track_number: z.number().nullish(),
 				type: z.string(),
 				uri: z.string(),
