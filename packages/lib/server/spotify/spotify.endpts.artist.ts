@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { log } from '../../utils/log';
 import { zGet } from '../../utils/zod-fetch';
 
 export async function getSpotifyArtist(props: {
@@ -12,7 +13,15 @@ export async function getSpotifyArtist(props: {
 
 	const res = await zGet(endpoint, spotifyArtistResponseSchema, { auth });
 
-	if (!res.success || !res.parsed) return null;
+	if (!res.success || !res.parsed) {
+		await log({
+			message: 'Failed to get Spotify artist' + JSON.stringify(res),
+			type: 'errors',
+			location: 'getSpotifyArtist',
+			mention: true,
+		});
+		return null;
+	}
 
 	return res.data;
 }

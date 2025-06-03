@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { log } from '../../utils/log';
 import { zGet } from '../../utils/zod-fetch';
 
 export async function getSpotifyTrack(props: { accessToken: string; spotifyId: string }) {
@@ -7,9 +8,22 @@ export async function getSpotifyTrack(props: { accessToken: string; spotifyId: s
 
 	const auth = `Bearer ${props.accessToken}`;
 
-	const res = await zGet(endpoint, spotifyTrackResponseSchema, { auth });
+	const res = await zGet(endpoint, spotifyTrackResponseSchema, {
+		auth,
+		logResponse: true,
+	});
 
-	if (!res.success || !res.parsed) return null;
+	console.log('res => ', res);
+
+	if (!res.success || !res.parsed) {
+		await log({
+			message: 'Failed to get Spotify track' + JSON.stringify(res),
+			type: 'errors',
+			location: 'getSpotifyTrack',
+			mention: true,
+		});
+		return null;
+	}
 
 	return res.data;
 }
@@ -76,7 +90,7 @@ const spotifyTrackResponseSchema = z.object({
 	is_local: z.boolean(),
 	name: z.string(),
 	popularity: z.number(),
-	preview_url: z.string().optional(),
+	preview_url: z.string().nullish(),
 	track_number: z.number().nullish(),
 });
 

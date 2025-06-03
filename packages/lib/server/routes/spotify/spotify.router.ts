@@ -32,6 +32,9 @@ const spotifyRouter = createTRPCRouter({
 			if (!parsedItem) return null;
 			const { type, id } = parsedItem;
 
+			console.log('type => ', type);
+			console.log('id => ', id);
+
 			if (!type || !id) return null;
 
 			const botSpotifyAccount = await ctx.db.http.query.ProviderAccounts.findFirst({
@@ -76,6 +79,8 @@ const spotifyRouter = createTRPCRouter({
 					accessToken,
 					spotifyId: id,
 				});
+
+				console.log('track => ', track);
 
 				return {
 					title: track?.name,
