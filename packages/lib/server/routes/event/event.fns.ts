@@ -143,6 +143,13 @@ export async function recordLinkClick({
 							platform,
 						},
 					},
+					{
+						eventName: 'ViewContent',
+						customData: {
+							content_type: 'barely.link/click',
+							linkId: link.id,
+						},
+					},
 				],
 			}).catch(async err => {
 				await log({
@@ -970,7 +977,7 @@ function getMetaEventFromFmEvent({
 }
 
 /* PAGE */
-export async function recordLandingPageEvent({
+export async function recordPageEvent({
 	page,
 	type,
 	visitor,
@@ -1114,7 +1121,8 @@ function getMetaEventFromPageEvent({
 				{
 					eventName: 'ViewContent',
 					customData: {
-						content_ids: [page.id],
+						content_type: 'barely.page/view',
+						pageId: page.id,
 					},
 				},
 			];
@@ -1123,6 +1131,15 @@ function getMetaEventFromPageEvent({
 				{
 					eventName: 'barely.page/linkClick',
 					customData: {
+						pageId: page.id,
+						linkClickDestinationAssetId,
+						linkClickDestinationHref,
+					},
+				},
+				{
+					eventName: 'ViewContent',
+					customData: {
+						content_type: 'barely.page/linkClick',
 						pageId: page.id,
 						linkClickDestinationAssetId,
 						linkClickDestinationHref,

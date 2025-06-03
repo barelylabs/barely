@@ -30,7 +30,7 @@ export interface MetaEventCustomData {
 	platform?: (typeof FM_LINK_PLATFORMS)[number];
 
 	// link
-	// linkType?: 'short' | 'transparent';
+	linkId?: string;
 
 	// page
 	pageId?: string;
