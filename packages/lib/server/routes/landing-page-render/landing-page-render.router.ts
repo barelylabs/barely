@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 import { raise } from '../../../utils/raise';
 import { createTRPCRouter, publicProcedure } from '../../api/trpc';
-import { recordLandingPageEvent } from '../event/event.fns';
+import { recordPageEvent } from '../event/event.fns';
 import { WEB_EVENT_TYPES__PAGE } from '../event/event.tb';
 import { LandingPages } from '../landing-page/landing-page.sql';
 
@@ -43,7 +43,7 @@ export const landingPageRenderRouter = createTRPCRouter({
 					},
 				})) ?? raise('Landing page not found');
 
-			await recordLandingPageEvent({
+			await recordPageEvent({
 				page: lp,
 				type,
 				visitor,
