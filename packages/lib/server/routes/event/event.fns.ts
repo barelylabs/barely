@@ -1121,7 +1121,8 @@ function getMetaEventFromPageEvent({
 				{
 					eventName: 'ViewContent',
 					customData: {
-						content_ids: [page.id],
+						content_type: 'barely.page/view',
+						pageId: page.id,
 					},
 				},
 			];
