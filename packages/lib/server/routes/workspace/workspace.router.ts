@@ -10,6 +10,7 @@ import {
 	publicProcedure,
 	workspaceQueryProcedure,
 } from '../../api/trpc';
+import { _Albums_To_Tracks } from '../album/album.sql';
 import { CartFunnels } from '../cart-funnel/cart-funnel.sql';
 import {
 	_Files_To_Workspaces__AvatarImage,

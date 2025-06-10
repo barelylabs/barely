@@ -2,6 +2,7 @@ import type { InferSelectModel } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
+import type { Album } from '../album/album.schema';
 import type { FileRecord, PublicAudio, PublicImage } from '../file/file.schema';
 import type {
 	_Files_To_Tracks__Artwork,
@@ -9,6 +10,7 @@ import type {
 } from '../file/file.sql';
 import type { Genre } from '../genre/genre.schema';
 import type { PublicWorkspace, Workspace } from '../workspace/workspace.schema';
+import { commonFiltersSchema } from '../../../utils/filters';
 import {
 	queryBooleanSchema,
 	querySelectionSchema,
@@ -128,6 +130,7 @@ export interface TrackWith_Workspace_Genres_Files extends Track {
 	genres: Genre[];
 	artworkFiles?: TrackArtworkFile[];
 	audioFiles?: TrackAudioFile[];
+	_albums?: { album: Album; trackNumber: number }[];
 }
 
 // public
@@ -143,12 +146,35 @@ export interface PublicTrackWith_Artist_Files extends PublicTrack {
 }
 
 // query params
-export const trackFilterParamsSchema = z.object({
-	search: z.string().optional(),
+// export const trackFilterParamsSchema = z.object({
+// 	search: z.string().optional(),
+// 	genres: queryStringArraySchema.optional(),
+// 	showArchived: queryBooleanSchema.optional(),
+// 	released: queryBooleanSchema.optional(),
+// 	// selectedTrackIds: queryStringArraySchema.optional(),
+// });
+
+const sortByValues = ['name', 'spotifyPopularity', 'releaseDate'] as const;
+export type TrackSortBy = (typeof sortByValues)[number];
+
+export const sortByOptions = [
+	{ label: 'Name', value: 'name' as TrackSortBy, icon: 'sortAscending' as const },
+	{
+		label: 'Spotify Popularity',
+		value: 'spotifyPopularity' as TrackSortBy,
+		icon: 'sortDescending' as const,
+	},
+	{
+		label: 'Release Date',
+		value: 'releaseDate' as TrackSortBy,
+		icon: 'sortDescending' as const,
+	},
+];
+
+export const trackFilterParamsSchema = commonFiltersSchema.extend({
 	genres: queryStringArraySchema.optional(),
-	showArchived: queryBooleanSchema.optional(),
 	released: queryBooleanSchema.optional(),
-	// selectedTrackIds: queryStringArraySchema.optional(),
+	sortBy: z.enum(sortByValues).optional(),
 });
 
 export const trackSearchParamsSchema = trackFilterParamsSchema.extend({
@@ -158,5 +184,5 @@ export const trackSearchParamsSchema = trackFilterParamsSchema.extend({
 export const selectWorkspaceTracksSchema = trackFilterParamsSchema.extend({
 	handle: z.string(),
 	cursor: z.object({ id: z.string(), createdAt: z.coerce.date() }).optional(),
-	limit: z.coerce.number().min(1).max(100).optional().default(10),
+	limit: z.coerce.number().min(1).max(100).optional().default(20),
 });

@@ -197,7 +197,6 @@ export const ingestPageEvent = tinybird.buildIngestEndpoint({
 });
 
 // publish email events
-
 export const emailEventIngestSchema = z.object({
 	timestamp: z.string().datetime(),
 	type: z.enum(['bounced', 'delivered', 'opened', 'clicked', 'complained']),

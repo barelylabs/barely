@@ -6,7 +6,15 @@ import { Button } from '@barely/ui/elements/button';
 import { Icon } from '@barely/ui/elements/icon';
 import { Input } from '@barely/ui/elements/input';
 import { Label } from '@barely/ui/elements/label';
+import { MultiToggle } from '@barely/ui/elements/multi-toggle';
 import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/elements/popover';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@barely/ui/elements/select';
 import { Switch } from '@barely/ui/elements/switch';
 
 function DisplayShortcutIcon({
@@ -45,23 +53,7 @@ function DisplayShortcutIcon({
 	);
 }
 
-export function Filters({
-	search,
-	setSearch,
-	searchPlaceholder,
-	showArchived,
-	toggleArchived,
-	showDeleted,
-	toggleDeleted,
-	showCanceled,
-	toggleCanceled,
-	showFulfilled,
-	toggleFulfilled,
-	showPreorders,
-	togglePreorders,
-	clearAllFilters,
-	itemsName,
-}: {
+interface FiltersProps<SortBy extends string = string> {
 	itemsName?: string;
 	search?: string;
 	setSearch?: (search: string) => void;
@@ -77,7 +69,41 @@ export function Filters({
 	showDeleted?: boolean;
 	toggleDeleted?: () => void;
 	clearAllFilters: () => void;
-}) {
+	groupBy?: boolean;
+	toggleGroupBy?: () => void;
+	groupByLabel?: string;
+	sortBy?: SortBy;
+	setSortBy?: (sortBy: SortBy) => void;
+	sortOrder?: 'asc' | 'desc';
+	setSortOrder?: (sortOrder: 'asc' | 'desc') => void;
+	sortByOptions?: { label: string; value: SortBy; icon: keyof typeof Icon }[];
+}
+
+export function Filters<SortBy extends string = string>({
+	search,
+	setSearch,
+	searchPlaceholder,
+	showArchived,
+	toggleArchived,
+	showDeleted,
+	toggleDeleted,
+	showCanceled,
+	toggleCanceled,
+	showFulfilled,
+	toggleFulfilled,
+	showPreorders,
+	togglePreorders,
+	clearAllFilters,
+	itemsName,
+	groupBy,
+	toggleGroupBy,
+	groupByLabel,
+	sortBy,
+	setSortBy,
+	sortOrder,
+	setSortOrder,
+	sortByOptions,
+}: FiltersProps<SortBy>) {
 	const searchInputRef = useRef<HTMLInputElement>(null);
 
 	const onKeydown = useCallback(
@@ -151,6 +177,78 @@ export function Filters({
 				</PopoverTrigger>
 
 				<PopoverContent>
+					{sortByOptions && sortBy && setSortBy && setSortOrder && (
+						<div className='flex flex-col gap-4 pb-4'>
+							<div className='flex flex-col gap-2'>
+								<Label>Sort by</Label>
+								<div className='flex flex-row items-center gap-2'>
+									<MultiToggle
+										options={[
+											{
+												value: 'asc',
+												icon: 'sortAscending',
+											},
+											{
+												value: 'desc',
+												icon: 'sortDescending',
+											},
+										]}
+										value={sortOrder ?? 'desc'}
+										onValueChange={setSortOrder}
+									/>
+
+									<Select
+										value={sortBy}
+										onValueChange={value => setSortBy(value as SortBy)}
+									>
+										<SelectTrigger>
+											<SelectValue placeholder='Select sort field' />
+										</SelectTrigger>
+										<SelectContent>
+											{sortByOptions.map(option => (
+												<SelectItem key={option.value} value={option.value}>
+													{option.label}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+								</div>
+							</div>
+
+							{/* <div className='group flex flex-row items-center justify-between gap-4'>
+								<Label htmlFor='sortOrderSwitch'>
+									<div className='flex flex-row items-center gap-2'>
+										<Icon.arrowUpDown className='h-4 w-4' />
+										Sort {sortOrder === 'asc' ? 'ascending' : 'descending'}
+									</div>
+								</Label>
+								<Switch
+									id='sortOrderSwitch'
+									checked={sortOrder === 'desc'}
+									onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+									size='sm'
+								/>
+							</div> */}
+						</div>
+					)}
+
+					{toggleGroupBy !== undefined && (
+						<div className='group flex flex-row items-center justify-between gap-4'>
+							<Label htmlFor='groupBySwitch'>
+								<div className='flex flex-row items-center gap-2'>
+									<Icon.group className='h-4 w-4' />
+									{groupByLabel ?? 'Group by'}
+								</div>
+							</Label>
+							<Switch
+								id='groupBySwitch'
+								checked={!!groupBy}
+								onClick={() => toggleGroupBy()}
+								size='sm'
+							/>
+						</div>
+					)}
+
 					{toggleFulfilled !== undefined && (
 						<div className='group flex flex-row items-center justify-between gap-4'>
 							<Label htmlFor='showFulfilledSwitch'>

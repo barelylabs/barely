@@ -11,6 +11,7 @@ import {
 import { dbId, primaryId, timestamps } from '../../../utils/sql';
 import { VidRenders } from '../../vid-render.sql';
 import { AdCreatives } from '../ad-creative/ad-creative.sql';
+import { Albums } from '../album/album.sql';
 import { AnalyticsEndpoints } from '../analytics-endpoint/analytics-endpoint.sql';
 import { Bios } from '../bio/bio.sql';
 import { Campaigns } from '../campaign/campaign.sql';
@@ -74,6 +75,7 @@ export const Workspaces = pgTable(
 		instagramUsername: varchar('instagramUsername', { length: 255 }),
 		website: varchar('website', { length: 255 }),
 
+		spotifyPopularity: integer('spotifyPopularity'),
 		spotifyFollowers: integer('spotifyFollowers'),
 		spotifyMonthlyListeners: integer('spotifyMonthlyListeners'),
 		youtubeSubscribers: integer('youtubeSubscribers'),
@@ -183,6 +185,7 @@ export const WorkspaceRelations = relations(Workspaces, ({ one, many }) => ({
 	_avatarImages: many(_Files_To_Workspaces__AvatarImage),
 	_headerImages: many(_Files_To_Workspaces__HeaderImage),
 
+	albums: many(Albums),
 	bios: many(Bios),
 	campaigns: many(Campaigns),
 	externalWebsites: many(ExternalWebsites),

@@ -2,10 +2,14 @@ import { z } from 'zod';
 
 import { queryBooleanSchema } from './zod-helpers';
 
+const sortOrderValues = ['asc', 'desc'] as const;
+export type SortOrder = (typeof sortOrderValues)[number];
+
 export const commonFiltersSchema = z.object({
 	search: z.string().optional(),
 	showArchived: queryBooleanSchema.optional(),
 	showDeleted: queryBooleanSchema.optional(),
+	sortOrder: z.enum(sortOrderValues).optional(),
 });
 
 export const infiniteQuerySchema = z.object({

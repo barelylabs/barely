@@ -31,6 +31,11 @@ export const trackWith_workspace_genres_files = {
 			file: true,
 		},
 	},
+	_albums: {
+		with: {
+			album: true,
+		},
+	},
 } as const;
 
 export async function getRawTrackById(id: string, db: Db) {
@@ -44,12 +49,33 @@ export async function getRawTrackById(id: string, db: Db) {
 
 type RawTrackWith_Workspace_Genres_Files = NonNullable<
 	Awaited<ReturnType<typeof getRawTrackById>>
->;
+> & {
+	_albums: {
+		album: {
+			id: string;
+			workspaceId: string;
+			name: string;
+			totalTracks: number;
+			imageUrl: string | null;
+			releaseDate: string | null;
+			appleMusicId: string | null;
+			deezerId: string | null;
+			soundcloudId: string | null;
+			spotifyId: string | null;
+			tidalId: string | null;
+			youtubeId: string | null;
+			createdAt: Date;
+			updatedAt: Date;
+			deletedAt: Date | null;
+			archivedAt: Date | null;
+		};
+	}[];
+};
 
 export function getTrackWith_Workspace_Genres_Files__fromRawTrack(
 	rawTrack: RawTrackWith_Workspace_Genres_Files,
 ) {
-	const { _genres, _artworkFiles, _audioFiles, ...trackData } = rawTrack;
+	const { _genres, _artworkFiles, _audioFiles, _albums, ...trackData } = rawTrack;
 
 	return {
 		...trackData,
@@ -65,6 +91,10 @@ export function getTrackWith_Workspace_Genres_Files__fromRawTrack(
 			instrumentalCompressed: _f.instrumentalCompressed,
 			instrumentalWav: _f.instrumentalWav,
 			stem: _f.stem,
+		})),
+		_albums: _albums.map(_a => ({
+			album: _a.album,
+			trackNumber: _a.trackNumber,
 		})),
 	} satisfies TrackWith_Workspace_Genres_Files;
 }

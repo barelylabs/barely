@@ -33,6 +33,8 @@ export async function searchSpotify(props: SpotifySearchProps) {
 			cause: searchResponse.data,
 		});
 
+	console.log('searchResponse => ', searchResponse.data);
+
 	return searchResponse.data;
 }
 
@@ -118,6 +120,134 @@ const spotifySearchResponseSchema = z.object({
 		.object({
 			href: z.string(),
 			items: spotifyTrackResponseSchema.array(),
+			limit: z.number(),
+			next: z.string().nullable(),
+			offset: z.number(),
+			previous: z.string().nullable(),
+			total: z.number(),
+		})
+		.optional(),
+	artists: z
+		.object({
+			href: z.string(),
+			items: z.array(
+				z.object({
+					external_urls: z.object({
+						spotify: z.string(),
+					}),
+					followers: z.object({
+						href: z.string().nullable(),
+						total: z.number(),
+					}),
+					genres: z.array(z.string()),
+					href: z.string(),
+					id: z.string(),
+					images: z.array(
+						z.object({
+							height: z.number().nullable(),
+							url: z.string(),
+							width: z.number().nullable(),
+						}),
+					),
+					name: z.string(),
+					popularity: z.number(),
+					type: z.string(),
+					uri: z.string(),
+				}),
+			),
+			limit: z.number(),
+			next: z.string().nullable(),
+			offset: z.number(),
+			previous: z.string().nullable(),
+			total: z.number(),
+		})
+		.optional(),
+	albums: z
+		.object({
+			href: z.string(),
+			items: z.array(
+				z.object({
+					album_type: z.string(),
+					artists: z.array(
+						z.object({
+							external_urls: z.object({
+								spotify: z.string(),
+							}),
+							href: z.string(),
+							id: z.string(),
+							name: z.string(),
+							type: z.string(),
+							uri: z.string(),
+						}),
+					),
+					available_markets: z.array(z.string()),
+					external_urls: z.object({
+						spotify: z.string(),
+					}),
+					href: z.string(),
+					id: z.string(),
+					images: z.array(
+						z.object({
+							height: z.number().nullable(),
+							url: z.string(),
+							width: z.number().nullable(),
+						}),
+					),
+					name: z.string(),
+					release_date: z.string(),
+					release_date_precision: z.string(),
+					total_tracks: z.number(),
+					type: z.string(),
+					uri: z.string(),
+				}),
+			),
+			limit: z.number(),
+			next: z.string().nullable(),
+			offset: z.number(),
+			previous: z.string().nullable(),
+			total: z.number(),
+		})
+		.optional(),
+	playlists: z
+		.object({
+			href: z.string(),
+			items: z.array(
+				z.object({
+					collaborative: z.boolean(),
+					description: z.string(),
+					external_urls: z.object({
+						spotify: z.string(),
+					}),
+					href: z.string(),
+					id: z.string(),
+					images: z.array(
+						z.object({
+							height: z.number().nullable(),
+							url: z.string(),
+							width: z.number().nullable(),
+						}),
+					),
+					name: z.string(),
+					owner: z.object({
+						display_name: z.string(),
+						external_urls: z.object({
+							spotify: z.string(),
+						}),
+						href: z.string(),
+						id: z.string(),
+						type: z.string(),
+						uri: z.string(),
+					}),
+					public: z.boolean(),
+					snapshot_id: z.string(),
+					tracks: z.object({
+						href: z.string(),
+						total: z.number(),
+					}),
+					type: z.string(),
+					uri: z.string(),
+				}),
+			),
 			limit: z.number(),
 			next: z.string().nullable(),
 			offset: z.number(),

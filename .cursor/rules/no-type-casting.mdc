@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Never force Typescript types onto variables. Don't use bang operators (!) after a variable to tell the compiler that the value is not null or undefined.

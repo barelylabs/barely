@@ -9,6 +9,7 @@ import { env } from '../../env';
 import * as adCreativeSql from '../routes/ad-creative/ad-creative.sql';
 import * as adSetSql from '../routes/ad-set/ad-set.sql';
 import * as adSql from '../routes/ad/ad.sql';
+import * as albumSql from '../routes/album/album.sql';
 import * as analyticsEndpointSql from '../routes/analytics-endpoint/analytics-endpoint.sql';
 import * as audienceDemoSql from '../routes/audience/audience-demo.sql';
 import * as audienceGeoSql from '../routes/audience/audience-geo.sql';
@@ -65,6 +66,7 @@ export const dbSchema = {
 	...adSql,
 	...adCreativeSql,
 	...adSetSql,
+	...albumSql,
 	...analyticsEndpointSql,
 	...audienceSql,
 	...audienceDemoSql,

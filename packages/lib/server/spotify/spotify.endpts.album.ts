@@ -23,7 +23,36 @@ export async function getSpotifyAlbum(props: { accessToken: string; spotifyId: s
 	return res.data;
 }
 
-const spotifyAlbumResponseSchema = z.object({
+export async function getSeveralSpotifyAlbums(props: {
+	accessToken: string;
+	albumIds: string[];
+}) {
+	const endpoint = `https://api.spotify.com/v1/albums?ids=${props.albumIds.join(',')}`;
+
+	const auth = `Bearer ${props.accessToken}`;
+
+	const res = await zGet(
+		endpoint,
+		z.object({
+			albums: z.array(spotifyAlbumResponseSchema),
+		}),
+		{ auth },
+	);
+
+	if (!res.success || !res.parsed) {
+		await log({
+			message: 'Failed to get several Spotify albums' + JSON.stringify(res),
+			type: 'errors',
+			location: 'getSeveralSpotifyAlbums',
+			mention: true,
+		});
+		return null;
+	}
+
+	return res.data.albums;
+}
+
+export const spotifyAlbumResponseSchema = z.object({
 	album_type: z.string(),
 	artists: z.array(
 		z.object({
@@ -56,6 +85,7 @@ const spotifyAlbumResponseSchema = z.object({
 	total_tracks: z.number(),
 	type: z.string(),
 	uri: z.string(),
+	popularity: z.number(),
 	tracks: z.object({
 		items: z.array(
 			z.object({
@@ -90,5 +120,3 @@ const spotifyAlbumResponseSchema = z.object({
 		),
 	}),
 });
-
-export { spotifyAlbumResponseSchema };

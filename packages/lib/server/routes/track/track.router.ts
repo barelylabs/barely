@@ -1,4 +1,15 @@
-import { and, desc, eq, inArray, isNull, lt, notInArray, or } from 'drizzle-orm';
+import {
+	and,
+	asc,
+	desc,
+	eq,
+	ilike,
+	inArray,
+	isNull,
+	lt,
+	notInArray,
+	or,
+} from 'drizzle-orm';
 import { z } from 'zod';
 
 import { pushEvent } from '../../../utils/pusher-server';
@@ -29,13 +40,14 @@ export const trackRouter = createTRPCRouter({
 	byWorkspace: privateProcedure
 		.input(selectWorkspaceTracksSchema)
 		.query(async ({ ctx, input }) => {
-			const { limit, cursor, search, showArchived } = input;
+			const { limit, cursor, search, showArchived, sortBy, sortOrder } = input;
 
 			const rawTracks = await ctx.db.http.query.Tracks.findMany({
 				with: trackWith_workspace_genres_files,
 				where: sqlAnd([
 					eq(Tracks.workspaceId, ctx.workspace.id),
-					!!search?.length && or(eq(Tracks.name, search), eq(Tracks.spotifyId, search)),
+					!!search?.length &&
+						or(ilike(Tracks.name, `%${search}%`), ilike(Tracks.spotifyId, `%${search}%`)),
 					showArchived ? undefined : isNull(Tracks.archivedAt),
 					!!cursor &&
 						or(
@@ -44,7 +56,27 @@ export const trackRouter = createTRPCRouter({
 						),
 				]),
 
-				orderBy: [desc(Tracks.createdAt), desc(Tracks.id)],
+				orderBy: [
+					sortBy === 'name' ?
+						sortOrder === 'asc' ?
+							asc(Tracks.name)
+						:	desc(Tracks.name)
+					: sortBy === 'releaseDate' ?
+						sortOrder === 'asc' ?
+							asc(Tracks.releaseDate)
+						:	desc(Tracks.releaseDate)
+					: sortBy === 'spotifyPopularity' ?
+						sortOrder === 'asc' ?
+							asc(Tracks.spotifyPopularity)
+						:	desc(Tracks.spotifyPopularity)
+					: (
+						sortOrder === 'asc' // default to popularity
+					) ?
+						asc(Tracks.spotifyPopularity)
+					:	desc(Tracks.spotifyPopularity),
+					desc(Tracks.createdAt),
+					desc(Tracks.id),
+				],
 				limit: limit + 1,
 			});
 

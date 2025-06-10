@@ -132,6 +132,7 @@ export function SidebarNav() {
 			href: `/${handle}/settings/team`,
 		},
 		{ title: 'socials', icon: 'socials', href: `/${handle}/settings/socials` },
+		{ title: 'streaming', icon: 'music', href: `/${handle}/settings/streaming` },
 		{ title: 'apps', icon: 'apps', href: `/${handle}/settings/apps` },
 		{
 			title: 'email',
