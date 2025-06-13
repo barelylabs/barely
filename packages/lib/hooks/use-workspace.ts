@@ -42,12 +42,24 @@ export function useWorkspace({ onBeginSet }: { onBeginSet?: () => void } = {}) {
 			console.log('setWorkspace', workspace, 'from', optimisticWorkspace);
 			onBeginSet?.();
 
+			// Capture the current workspace handle before optimistic update
+			const currentWorkspaceHandle = optimisticWorkspace?.handle;
+
 			startTransition(async () => {
+				// Immediately navigate to the new workspace to prevent flashing
+				if (pathname && currentWorkspaceHandle && currentWorkspaceHandle !== workspace.handle) {
+					router.push(pathname.replace(currentWorkspaceHandle, workspace.handle));
+				} else {
+					router.push(`/${workspace.handle}`);
+				}
+
+				// Then set the optimistic state
 				setOptimisticWorkspace(prev => {
 					if (prev?.handle === workspace.handle) return prev;
 					return workspace;
 				});
 
+				// Handle API invalidations for different routes
 				if (pathname?.endsWith('settings/team')) {
 					// 2 queries depend on the current handle:
 					// all workspace invites (depends on the current handle)
@@ -353,10 +365,6 @@ export function useWorkspace({ onBeginSet }: { onBeginSet?: () => void } = {}) {
 
 					await apiUtils.track.byWorkspace.invalidate();
 				}
-
-				pathname && optimisticWorkspace ?
-					router.push(pathname.replace(optimisticWorkspace.handle, workspace.handle))
-				:	router.push(`/${workspace.handle}`);
 			});
 		},
 		[apiUtils, pathname, optimisticWorkspace, router, onBeginSet],
