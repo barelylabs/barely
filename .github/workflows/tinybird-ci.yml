@@ -40,15 +40,10 @@ jobs:
           pip install tinybird-cli
           tb --version
 
-      - name: Authenticate Tinybird
-        env:
-          TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
-        run: |
-          cd external/tinybird
-          tb auth --token $TB_TOKEN --no-interactive
-
       - name: Create or Use CI Branch
         if: github.event_name == 'pull_request'
+        env:
+          TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
         run: |
           cd external/tinybird
           BRANCH_NAME="ci_pr_${{ github.event.pull_request.number }}"
@@ -64,10 +59,12 @@ jobs:
 
       - name: Push Changes to Branch
         if: github.event_name == 'pull_request'
+        env:
+          TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
         run: |
           cd external/tinybird
           echo "Pushing changes to CI branch..."
-          tb push --force --no-interactive
+          tb push --force --yes
 
           # Run diff to show what changed
           echo "\nChanges applied:"
@@ -75,10 +72,12 @@ jobs:
 
       - name: Validate Main Branch (Push to main)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
         run: |
           cd external/tinybird
           echo "Validating changes for main workspace..."
-          tb push --dry-run --no-interactive
+          tb push --dry-run --yes
 
   deploy:
     name: Deploy to Main Workspace
@@ -99,23 +98,20 @@ jobs:
           pip install tinybird-cli
           tb --version
 
-      - name: Authenticate Tinybird
+      - name: Deploy to Main Workspace
         env:
           TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
-        run: |
-          cd external/tinybird
-          tb auth --token $TB_TOKEN --no-interactive
-
-      - name: Deploy to Main Workspace
         run: |
           cd external/tinybird
           echo "Ensuring we're on main workspace..."
           tb branch use main
 
           echo "Deploying changes to main workspace..."
-          tb push --force --no-interactive
+          tb push --force --yes
 
       - name: Verify Deployment
+        env:
+          TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
         run: |
           cd external/tinybird
           echo "Verifying deployment..."
@@ -139,14 +135,10 @@ jobs:
         run: |
           pip install tinybird-cli
 
-      - name: Authenticate Tinybird
+      - name: Remove CI Branch
         env:
           TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
         run: |
-          tb auth --token $TB_TOKEN --no-interactive
-
-      - name: Remove CI Branch
-        run: |
           BRANCH_NAME="ci_pr_${{ github.event.pull_request.number }}"
           echo "Removing CI branch: $BRANCH_NAME"
-          tb branch rm $BRANCH_NAME || echo "Branch already removed or doesn't exist"
+          tb branch rm $BRANCH_NAME --yes || echo "Branch already removed or doesn't exist"
