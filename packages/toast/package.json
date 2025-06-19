@@ -5,6 +5,7 @@
 	"private": true,
 	"scripts": {
 		"clean": "rm -rf .turbo node_modules",
+		"clean:rm": "rm -rf node_modules && rm -f pnpm-lock.yaml",
 		"format": "prettier --check . --ignore-path ../../.gitignore",
 		"lint": "eslint .",
 		"typecheck": "tsc --noEmit --emitDeclarationOnly false"
@@ -14,7 +15,7 @@
 		"@radix-ui/react-toast": "^1.1.4",
 		"class-variance-authority": "^0.7.0",
 		"clsx": "^2.1.1",
-		"lucide-react": "^0.441.0",
+		"lucide-react": "^0.517.0",
 		"tailwind-merge": "^1.14.0",
 		"zod": "^3.23.8"
 	},

@@ -8,6 +8,8 @@
 	"scripts": {
 		"dev": "pnpm with-env email dev --port 4000 --dir src/templates",
 		"clean": "rm -rf .turbo node_modules",
+		"clean:rm": "rm -rf node_modules && rm -f pnpm-lock.yaml",
+
 		"format": "prettier --check . --ignore-path ../../.gitignore",
 		"lint": "eslint .",
 		"typecheck": "tsc --noEmit --emitDeclarationOnly false",

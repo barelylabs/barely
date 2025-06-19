@@ -7,7 +7,8 @@
 		"build:preview": "pnpm with-env vercel build",
 		"build:production": "pnpm with-env vercel build --prod",
 		"clean": "git clean -xdf .next .turbo node_modules",
-		"dev": "pnpm with-env next dev -- -p 3007",
+		"clean:rm": "rm -rf node_modules && rm -f pnpm-lock.yaml",
+		"dev": "pnpm with-env next dev -p 3007",
 		"format": "prettier --check . --ignore-path ../../.gitignore",
 		"lint": "dotenv -v SKIP_ENV_VALIDATION=1 next lint",
 		"start": "pnpm with-env next start",
@@ -15,11 +16,13 @@
 		"with-env": "dotenv -e ../../.env --"
 	},
 	"dependencies": {
+		"@barely/email": "workspace:*",
 		"@barely/lib": "workspace:*",
 		"@barely/ui": "workspace:*",
 		"@t3-oss/env-nextjs": "^0.10.1",
 		"@vercel/edge": "^0.1.2",
 		"dotenv-cli": "^7.4.1",
+		"gray-matter": "^4.0.3",
 		"jiti": "^1.21.0",
 		"next": "^14.2.3",
 		"react-dom": "18.2.0",

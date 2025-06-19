@@ -401,6 +401,7 @@ export const Icon = {
 	message: MessageSquare,
 	mixtape: CassetteTape,
 	money: Banknote,
+	// moneyUp:
 	moon: Moon,
 	more: MoreHorizontal,
 	moreVertical: MoreVertical,

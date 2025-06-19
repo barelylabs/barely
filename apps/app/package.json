@@ -8,6 +8,7 @@
 		"build:preview": "pnpm with-env vercel build",
 		"build:production": "pnpm with-env vercel build --prod",
 		"clean": "git clean -xdf .next .turbo node_modules",
+		"clean:rm": "rm -rf node_modules && rm -f pnpm-lock.yaml",
 		"dev": "pnpm with-env next dev --experimental-https --port=3000",
 		"dev:pre": "git clean -xdf .next",
 		"format": "prettier --check . --ignore-path ../../.gitignore",
