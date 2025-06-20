@@ -51,6 +51,10 @@ jobs:
           cd external/tinybird
           BRANCH_NAME="ci_pr_${{ github.event.pull_request.number }}"
 
+          # Establish workspace context first
+          echo "Setting workspace context to 'barely'..."
+          tb workspace use barely
+
           # Try to use existing branch, create if it doesn't exist
           if ! tb branch use $BRANCH_NAME 2>/dev/null; then
             echo "Creating new branch: $BRANCH_NAME"
@@ -67,6 +71,9 @@ jobs:
           TB_HOST: https://api.us-east.tinybird.co
         run: |
           cd external/tinybird
+          # Ensure workspace context is set
+          tb workspace use barely
+          
           echo "Pushing changes to CI branch..."
           tb push --force --yes
 
@@ -81,6 +88,10 @@ jobs:
           TB_HOST: https://api.us-east.tinybird.co
         run: |
           cd external/tinybird
+          # Ensure workspace context is set
+          echo "Setting workspace context to 'barely'..."
+          tb workspace use barely
+          
           echo "Validating changes for main workspace..."
           tb push --dry-run --yes
 
@@ -109,7 +120,11 @@ jobs:
           TB_HOST: https://api.us-east.tinybird.co
         run: |
           cd external/tinybird
-          echo "Ensuring we're on main workspace..."
+          # Establish workspace context first
+          echo "Setting workspace context to 'barely'..."
+          tb workspace use barely
+          
+          echo "Ensuring we're on main branch..."
           tb branch use main
 
           echo "Deploying changes to main workspace..."
@@ -121,6 +136,9 @@ jobs:
           TB_HOST: https://api.us-east.tinybird.co
         run: |
           cd external/tinybird
+          # Ensure workspace context is set
+          tb workspace use barely
+          
           echo "Verifying deployment..."
           tb workspace current
 
@@ -147,6 +165,9 @@ jobs:
           TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
           TB_HOST: https://api.us-east.tinybird.co
         run: |
+          # Establish workspace context first
+          tb workspace use barely
+          
           BRANCH_NAME="ci_pr_${{ github.event.pull_request.number }}"
           echo "Removing CI branch: $BRANCH_NAME"
           tb branch rm $BRANCH_NAME --yes || echo "Branch already removed or doesn't exist"
