@@ -55,10 +55,7 @@ jobs:
   tinybird-validate:
     name: Validate Tinybird
     runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'pull_request' && 
-      contains(github.event.pull_request.files.*.filename, 'external/tinybird/') ||
-      github.event_name == 'merge_group'
+    if: github.event_name == 'merge_group'
     steps:
       - uses: actions/checkout@v4
       
