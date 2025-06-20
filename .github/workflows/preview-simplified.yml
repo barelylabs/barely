@@ -1,0 +1,160 @@
+name: Preview (Simplified)
+
+on:
+  pull_request:
+  merge_group:
+    types: [checks_requested]
+
+jobs:
+  # Setup job to read app configuration
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    outputs:
+      apps: ${{ steps.read-apps.outputs.apps }}
+      branch_name: ${{ steps.git-meta.outputs.branch_name }}
+      git_metadata: ${{ steps.git-meta.outputs.vercel_git_metadata }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Read app configuration
+        id: read-apps
+        run: |
+          apps=$(cat .github/apps.json | jq -c '.apps')
+          echo "apps=$apps" >> $GITHUB_OUTPUT
+      
+      - name: Git metadata
+        id: git-meta
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            branch_name="${{ github.event.pull_request.head.ref }}"
+            sha="${{ github.event.pull_request.head.sha }}"
+            author="${{ github.actor }}"
+            message=$(git show -s --format=%s $sha)
+            ref="${{ github.event.pull_request.head.ref }}"
+          else
+            branch_name="${{ github.ref_name }}"
+            sha="${{ github.sha }}"
+            author="${{ github.actor }}"
+            message=$(git show -s --format=%s)
+            ref="${{ github.ref }}"
+          fi
+          
+          vercel_git_metadata="-m githubCommitSha=$sha -m githubCommitAuthorLogin=$author -m githubCommitMessage=\"$message\" -m githubCommitRef=$ref"
+          
+          echo "branch_name=$branch_name" >> $GITHUB_OUTPUT
+          echo "vercel_git_metadata=$vercel_git_metadata" >> $GITHUB_OUTPUT
+
+  # Neon database setup
+  neon-preview:
+    name: Neon Database
+    needs: setup
+    uses: ./.github/workflows/shared-neon-setup.yml
+    with:
+      branch_name: ${{ needs.setup.outputs.branch_name }}
+      action: create
+    secrets:
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+
+  # Update Vercel environment variables
+  update-vercel-env:
+    name: Update Vercel Env
+    needs: [setup, neon-preview]
+    uses: ./.github/workflows/shared-vercel-env.yml
+    with:
+      apps: ${{ needs.setup.outputs.apps }}
+      database_url: ${{ needs.neon-preview.outputs.database_url }}
+      environment: preview
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+
+  # Deploy all apps
+  deploy-apps:
+    name: Deploy Apps
+    needs: [setup, update-vercel-env]
+    uses: ./.github/workflows/shared-deploy-apps.yml
+    with:
+      apps: ${{ needs.setup.outputs.apps }}
+      environment: preview
+      git_metadata: ${{ needs.setup.outputs.git_metadata }}
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+
+  # Trigger.dev deployment
+  trigger-preview:
+    name: Deploy Trigger.dev
+    needs: neon-preview
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: ./tooling/github/setup
+      
+      - name: Deploy Trigger.dev
+        env:
+          DATABASE_URL: ${{ needs.neon-preview.outputs.database_url }}
+          TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
+        run: |
+          cd packages/lib
+          pnpm add @trigger.dev/cli@latest
+          pnpm exec trigger deploy
+
+  # Preview can merge check
+  preview--can-merge:
+    name: Preview Can Merge
+    needs: [deploy-apps, trigger-preview]
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check deployment status
+        env:
+          NEEDS_JSON: "${{ toJson(needs) }}"
+        run: |
+          ALL_SUCCESS=$(echo "$NEEDS_JSON" | jq '
+            . | to_entries | 
+            map([.value.result == "success", .value.result == "skipped"] | any) | 
+            all
+          ')
+          
+          if [ "$ALL_SUCCESS" = "true" ]; then
+            echo "✅ All preview deployments succeeded"
+            exit 0
+          else
+            echo "❌ Some preview deployments failed"
+            echo "Details: $NEEDS_JSON"
+            exit 1
+          fi
+
+  # Cleanup Neon on PR close
+  cleanup-neon:
+    name: Cleanup Neon Branch
+    if: github.event.action == 'closed'
+    uses: ./.github/workflows/shared-neon-setup.yml
+    with:
+      branch_name: ${{ github.event.pull_request.head.ref }}
+      action: delete
+    secrets:
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+  
+  # Cleanup Tinybird on PR close
+  cleanup-tinybird:
+    name: Cleanup Tinybird Branch
+    if: github.event.action == 'closed' && contains(github.event.pull_request.labels.*.name, 'tinybird')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Cleanup Tinybird branch
+        env:
+          TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
+          TB_HOST: https://api.us-east.tinybird.co
+        run: |
+          pip install tinybird-cli
+          tb branch rm ci_pr_${{ github.event.pull_request.number }} --yes || true

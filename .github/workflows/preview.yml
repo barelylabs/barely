@@ -1,4 +1,5 @@
-# neon ref: https://neon.tech/blog/branching-with-preview-environments
+# Preview deployments for pull requests
+# Uses shared workflows and centralized app configuration to reduce duplication
 
 name: Preview
 
@@ -8,33 +9,23 @@ on:
     types: [checks_requested]
 
 jobs:
-  # 👾 GIT METADATA #
-
+  # Extract git metadata for deployments
   git-meta:
+    name: Extract Git Metadata
     runs-on: ubuntu-latest
-    if: always() && github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request'
     outputs:
       git_branch_name: ${{ steps.git-meta.outputs.github_commit_ref }}
-      github_commit_sha: ${{ steps.git-meta.outputs.github_commit_sha }}
-      github_commit_author_name: ${{ steps.git-meta.outputs.github_commit_author_name }}
-      github_commit_author_login: ${{ steps.git-meta.outputs.github_commit_author_login }}
-      github_deployment: ${{ steps.git-meta.outputs.github_deployment }}
-      github_org: ${{ steps.git-meta.outputs.github_org }}
-      github_repo: ${{ steps.git-meta.outputs.github_repo }}
-      github_commit_org: ${{ steps.git-meta.outputs.github_commit_org }}
-      github_commit_repo: ${{ steps.git-meta.outputs.github_commit_repo }}
-      github_commit_message: ${{ steps.git-meta.outputs.github_commit_message }}
-      github_commit_ref: ${{ steps.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ steps.git-meta.outputs.vercel_git_metadata }}
     steps:
-      - name: checkout
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
       - id: git-meta
         run: |
-          github_commit_sha=${{ github.event.pull_request.head.sha }}          
+          github_commit_sha=${{ github.event.pull_request.head.sha }}
           github_commit_author_login=${{ github.actor }}
           github_deployment=1
           github_org=${{ github.repository_owner }}
@@ -44,85 +35,25 @@ jobs:
           github_commit_message=$(git show -s --format=%s $github_commit_sha)
           github_commit_ref=${{ github.event.pull_request.head.ref }}
 
-          vercel_git_metadata="-m githubCommitSha=$github_commit_sha -m githubCommitAuthorName=$github_commit_author_login -m githubCommitAuthorLogin=$github_commit_author_login -m githubDeployment=$github_deployment -m githubOrg=$github_org -m githubRepo=$github_repo -m githubCommitOrg=$github_commit_org -m githubCommitRepo=$github_commit_repo -m githubCommitMessage=\"$github_commit_message\" -m githubCommitRef=$github_commit_ref"                 
+          vercel_git_metadata="-m githubCommitSha=$github_commit_sha -m githubCommitAuthorName=$github_commit_author_login -m githubCommitAuthorLogin=$github_commit_author_login -m githubDeployment=$github_deployment -m githubOrg=$github_org -m githubRepo=$github_repo -m githubCommitOrg=$github_commit_org -m githubCommitRepo=$github_commit_repo -m githubCommitMessage=\"$github_commit_message\" -m githubCommitRef=$github_commit_ref"
 
-          echo "github_commit_sha=$github_commit_sha" >> $GITHUB_OUTPUT
-          echo "github_commit_author_name=$github_commit_author_name" >> $GITHUB_OUTPUT
-          echo "github_commit_author_login=$github_commit_author_login" >> $GITHUB_OUTPUT
-          echo "github_deployment=$github_deployment" >> $GITHUB_OUTPUT
-          echo "github_org=$github_org" >> $GITHUB_OUTPUT
-          echo "github_repo=$github_repo" >> $GITHUB_OUTPUT
-          echo "github_commit_org=$github_commit_org" >> $GITHUB_OUTPUT
-          echo "github_commit_repo=$github_commit_repo" >> $GITHUB_OUTPUT
-          echo "github_commit_message=$github_commit_message" >> $GITHUB_OUTPUT
           echo "github_commit_ref=$github_commit_ref" >> $GITHUB_OUTPUT
           echo "vercel_git_metadata=$vercel_git_metadata" >> $GITHUB_OUTPUT
 
-  # 🐘 NEON DB PREVIEW #
+  # Setup Neon preview branch
   neon-preview:
-    name: neon preview
-    if: always() && github.event_name == 'pull_request'
-    needs: [git-meta]
-    permissions: write-all
-    runs-on: ubuntu-latest
-    env:
-      VERCEL_ACCESS_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-
-      - name: setup node/pnpm/turbo/vercel
-        uses: ./tooling/github/setup
-
-      - name: install neon cli
-        run: pnpm i -g neonctl
-
-      # This is just so the env check doesn't fail on missing variables.
-      # DATABASE_URL && DATABASE_POOL_URL will be overwritten below.
-      - name: copy env
-        shell: bash
-        run: cp .env.example .env
-
-      # If the branch already exists, this command will fail but the workflow will continue
-      - id: create-branch
-        run: |
-          output=$(neonctl branches create --project-id ${{ secrets.NEON_PROJECT_ID }} --name ${{ needs.git-meta.outputs.git_branch_name }} --api-key ${{ secrets.NEON_API_KEY }} --compute --type read_write 2>&1) || true          
-          if [[ $output == *"branch with the provided name \"${{ needs.git-meta.outputs.git_branch_name }}\" already exists"* ]]; then
-            echo "A branch named \"${{ needs.git-meta.outputs.git_branch_name }}\" already exists. Using that branch for this preview deployment."
-          elif [[ $output == *"error:"* || $output == *"severity: 'ERROR'"* ]]; then
-            echo "Unhandled error: $output" && exit 1
-          fi
-
-      # The branch ID is needed to display the URL of the branch in the comment.
-      - id: get-neon-branch
-        run: |
-          branch_id=$(neonctl branches get ${{ needs.git-meta.outputs.git_branch_name }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --output json | jq -r '.id')
-          echo "branch_id=$branch_id" >> $GITHUB_ENV          
-
-          DATABASE_URL=$(neonctl connection-string ${{ needs.git-meta.outputs.git_branch_name }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }} | tr -d '\n')?sslmode=require
-          echo "DATABASE_URL=$DATABASE_URL" >> $GITHUB_ENV
-
-          DATABASE_POOL_URL=$(neonctl connection-string ${{ needs.git-meta.outputs.git_branch_name }} --pooled --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }} | tr -d '\n')?sslmode=require
-          echo "DATABASE_POOL_URL=$DATABASE_POOL_URL" >> $GITHUB_ENV
-
-      - name: db:push
-        run: |
-          rm -f .env
-          touch .env
-
-          echo "DATABASE_URL: $DATABASE_URL"
-          echo "DATABASE_POOL_URL: $DATABASE_POOL_URL"
-
-          echo "DATABASE_URL=$DATABASE_URL" >> .env
-          echo "DATABASE_POOL_URL=$DATABASE_POOL_URL" >> .env
-
-          output=$(pnpm db:push)
-          echo "output: $output"
-          if [[ $output == *"error:"* || $output == *"severity: 'ERROR'"* ]]; then
-            echo "Unhandled error: $output" && exit 1
-          fi
+    name: Neon Preview Branch
+    if: github.event_name == 'pull_request'
+    needs: git-meta
+    uses: ./.github/workflows/shared-neon-setup.yml
+    with:
+      action: create-branch
+      branch_name: ${{ needs.git-meta.outputs.git_branch_name }}
+    secrets:
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+      PG_USERNAME: ${{ secrets.PG_USERNAME }}
+      PG_DATABASE: ${{ secrets.PG_DATABASE }}
 
       # Using Vercel as our secret store for the DATABASE_URL and DATABASE_POOL_URL
       # -- to my knowledge, using an external store is the only way to pass secrets between Github Actions jobs?

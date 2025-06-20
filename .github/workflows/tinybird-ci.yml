@@ -13,6 +13,8 @@ on:
       - 'external/tinybird/**'
       - '!external/tinybird/**.md'
       - '.github/workflows/tinybird-ci.yml'
+  merge_group:
+    types: [checks_requested]
 
 jobs:
   validate:

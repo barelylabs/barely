@@ -1,0 +1,67 @@
+name: Neon Database Setup
+
+on:
+  workflow_call:
+    inputs:
+      branch_name:
+        required: true
+        type: string
+        description: 'Branch name for Neon database'
+      action:
+        required: true
+        type: string
+        description: 'Action to perform: create, delete, or check'
+    outputs:
+      database_url:
+        description: 'The database URL for the branch'
+        value: ${{ jobs.neon-setup.outputs.database_url }}
+    secrets:
+      NEON_API_KEY:
+        required: true
+      NEON_PROJECT_ID:
+        required: true
+
+jobs:
+  neon-setup:
+    name: Neon ${{ inputs.action }} branch
+    runs-on: ubuntu-latest
+    outputs:
+      database_url: ${{ steps.create-branch.outputs.db_url }}
+    steps:
+      - name: Install Neon CLI
+        run: npm i -g neonctl
+
+      - name: Check if branch exists
+        if: inputs.action == 'check' || inputs.action == 'create'
+        id: check-branch
+        run: |
+          if neonctl branches get ${{ inputs.branch_name }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} 2>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Neon branch
+        if: inputs.action == 'create' && steps.check-branch.outputs.exists == 'false'
+        id: create-branch
+        run: |
+          output=$(neonctl branches create --name=${{ inputs.branch_name }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --compute --type read_write --set-as-primary)
+          echo "$output"
+          
+          # Extract connection string
+          db_url=$(echo "$output" | grep -oE 'postgresql://[^ ]+' | head -n 1)
+          echo "db_url=$db_url" >> $GITHUB_OUTPUT
+          echo "::add-mask::$db_url"
+
+      - name: Get existing branch URL
+        if: inputs.action == 'create' && steps.check-branch.outputs.exists == 'true'
+        id: get-branch
+        run: |
+          output=$(neonctl connection-string ${{ inputs.branch_name }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --database-name neondb --role-name neondb_owner)
+          echo "db_url=$output" >> $GITHUB_OUTPUT
+          echo "::add-mask::$output"
+
+      - name: Delete Neon branch
+        if: inputs.action == 'delete'
+        run: |
+          neonctl branches delete ${{ inputs.branch_name }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} || echo "Branch already deleted or doesn't exist"

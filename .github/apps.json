@@ -1,0 +1,67 @@
+{
+  "apps": [
+    {
+      "name": "app",
+      "projectId": "VERCEL_APP_PROJECT_ID",
+      "port": 3000,
+      "envPrefix": "APP_",
+      "domain": "app.barely.io"
+    },
+    {
+      "name": "cart",
+      "projectId": "VERCEL_CART_PROJECT_ID",
+      "port": 3001,
+      "envPrefix": "CART_",
+      "domain": "cart.barely.io"
+    },
+    {
+      "name": "fm",
+      "projectId": "VERCEL_FM_PROJECT_ID",
+      "port": 3002,
+      "envPrefix": "FM_",
+      "domain": "fm.barely.io"
+    },
+    {
+      "name": "link",
+      "projectId": "VERCEL_LINK_PROJECT_ID",
+      "port": 3003,
+      "envPrefix": "LINK_",
+      "domain": "barely.link"
+    },
+    {
+      "name": "manage-email",
+      "projectId": "VERCEL_MANAGE_EMAIL_PROJECT_ID",
+      "port": 3005,
+      "envPrefix": "MANAGE_EMAIL_",
+      "domain": "manage.barelysend.email"
+    },
+    {
+      "name": "page",
+      "projectId": "VERCEL_PAGE_PROJECT_ID",
+      "port": 3006,
+      "envPrefix": "PAGE_",
+      "domain": "page.barely.io"
+    },
+    {
+      "name": "press",
+      "projectId": "VERCEL_PRESS_PROJECT_ID",
+      "port": 3007,
+      "envPrefix": "PRESS_",
+      "domain": "press.barely.io"
+    },
+    {
+      "name": "sparrow",
+      "projectId": "VERCEL_SPARROW_PROJECT_ID",
+      "port": 3008,
+      "envPrefix": "SPARROW_",
+      "domain": "sparrow.barely.io"
+    },
+    {
+      "name": "www",
+      "projectId": "VERCEL_WWW_PROJECT_ID",
+      "port": 3009,
+      "envPrefix": "WWW_",
+      "domain": "barely.io"
+    }
+  ]
+}

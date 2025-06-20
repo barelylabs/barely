@@ -1,0 +1,90 @@
+name: Update Vercel Environment Variables
+
+on:
+  workflow_call:
+    inputs:
+      apps:
+        required: true
+        type: string
+        description: 'JSON array of apps to update'
+      database_url:
+        required: true
+        type: string
+        description: 'Database URL to set'
+      environment:
+        required: true
+        type: string
+        description: 'Environment: preview or production'
+    secrets:
+      VERCEL_TOKEN:
+        required: true
+      VERCEL_TEAM_ID:
+        required: true
+
+jobs:
+  update-env:
+    name: Update Vercel env vars
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup environment
+        run: |
+          echo "VERCEL_ORG_ID=${{ secrets.VERCEL_TEAM_ID }}" >> $GITHUB_ENV
+          echo "VERCEL_TOKEN=${{ secrets.VERCEL_TOKEN }}" >> $GITHUB_ENV
+
+      - name: Create update script
+        run: |
+          cat > update-env.sh << 'EOF'
+          #!/bin/bash
+          set -e
+          
+          update_env_var() {
+            local app_name=$1
+            local project_id=$2
+            local env_type=$3
+            
+            echo "Updating $app_name..."
+            
+            # Update DATABASE_URL
+            echo "$DATABASE_URL" | vercel env add DATABASE_URL $env_type --yes --token=$VERCEL_TOKEN --scope=barely --project=$app_name || true
+            
+            # Update DATABASE_POOL_URL (same as DATABASE_URL for preview)
+            echo "$DATABASE_URL" | vercel env add DATABASE_POOL_URL $env_type --yes --token=$VERCEL_TOKEN --scope=barely --project=$app_name || true
+            
+            # Update DIRECT_DATABASE_URL (same as DATABASE_URL for preview)
+            echo "$DATABASE_URL" | vercel env add DIRECT_DATABASE_URL $env_type --yes --token=$VERCEL_TOKEN --scope=barely --project=$app_name || true
+            
+            echo "✓ Updated $app_name"
+          }
+          
+          export -f update_env_var
+          export DATABASE_URL="${{ inputs.database_url }}"
+          export VERCEL_TOKEN="${{ secrets.VERCEL_TOKEN }}"
+          
+          # Parse apps and update in parallel
+          echo '${{ inputs.apps }}' | jq -r '.[] | @base64' | while read app; do
+            _jq() {
+              echo ${app} | base64 --decode | jq -r ${1}
+            }
+            
+            app_name=$(_jq '.name')
+            project_id=$(_jq '.projectId')
+            
+            update_env_var "$app_name" "$project_id" "${{ inputs.environment }}" &
+          done
+          
+          # Wait for all background jobs to complete
+          wait
+          
+          echo "✅ All apps updated"
+          EOF
+          
+          chmod +x update-env.sh
+
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Update environment variables
+        run: ./update-env.sh

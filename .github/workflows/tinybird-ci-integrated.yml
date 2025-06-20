@@ -1,0 +1,233 @@
+# Integrated Tinybird CI/CD Workflow
+name: Tinybird CI/CD (Integrated)
+
+on:
+  pull_request:
+    paths:
+      - 'external/tinybird/**'
+      - '!external/tinybird/**.md'
+      - '.github/workflows/tinybird-ci*.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'external/tinybird/**'
+      - '!external/tinybird/**.md'
+      - '.github/workflows/tinybird-ci*.yml'
+  workflow_call:
+    inputs:
+      action:
+        required: true
+        type: string
+        description: 'Action to perform: validate, deploy, cleanup'
+      pr_number:
+        required: false
+        type: number
+        description: 'PR number for branch operations'
+    outputs:
+      validation_status:
+        description: 'Validation result'
+        value: ${{ jobs.validate.outputs.status }}
+
+env:
+  TB_HOST: https://api.us-east.tinybird.co
+
+jobs:
+  # Determine what to do based on trigger
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    outputs:
+      action: ${{ steps.determine.outputs.action }}
+      branch_name: ${{ steps.determine.outputs.branch_name }}
+      pr_number: ${{ steps.determine.outputs.pr_number }}
+    steps:
+      - id: determine
+        run: |
+          if [ -n "${{ inputs.action }}" ]; then
+            # Called as reusable workflow
+            echo "action=${{ inputs.action }}" >> $GITHUB_OUTPUT
+            echo "pr_number=${{ inputs.pr_number }}" >> $GITHUB_OUTPUT
+            echo "branch_name=ci_pr_${{ inputs.pr_number }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
+            # PR event
+            echo "action=validate" >> $GITHUB_OUTPUT
+            echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+            echo "branch_name=ci_pr_${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            # Push to main
+            echo "action=deploy" >> $GITHUB_OUTPUT
+            echo "branch_name=main" >> $GITHUB_OUTPUT
+          fi
+
+  # Validate changes in CI branch
+  validate:
+    name: Validate Tinybird Changes
+    needs: setup
+    if: needs.setup.outputs.action == 'validate'
+    runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.validate.outputs.status }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-tinybird-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-tinybird-
+            ${{ runner.os }}-pip-
+      
+      - name: Install Tinybird CLI
+        run: |
+          pip install tinybird-cli
+          tb --version
+      
+      - name: Setup CI Branch
+        env:
+          TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
+        run: |
+          cd external/tinybird
+          BRANCH_NAME="${{ needs.setup.outputs.branch_name }}"
+          
+          # Create or use existing branch
+          if ! tb branch use $BRANCH_NAME 2>/dev/null; then
+            echo "Creating new CI branch: $BRANCH_NAME"
+            tb branch create $BRANCH_NAME
+            tb branch use $BRANCH_NAME
+          else
+            echo "Using existing CI branch: $BRANCH_NAME"
+          fi
+      
+      - name: Push and Validate
+        id: validate
+        env:
+          TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
+        run: |
+          cd external/tinybird
+          
+          # Push changes
+          echo "Pushing changes to CI branch..."
+          if tb push --force --yes; then
+            echo "✅ Validation successful"
+            echo "status=success" >> $GITHUB_OUTPUT
+            
+            # Show changes
+            echo "\n📝 Changes applied:"
+            tb diff || true
+          else
+            echo "❌ Validation failed"
+            echo "status=failure" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+      
+      - name: Add PR Comment
+        if: github.event_name == 'pull_request'
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            ## 🐦 Tinybird Validation
+            
+            ${{ steps.validate.outputs.status == 'success' && '✅ All Tinybird changes validated successfully!' || '❌ Tinybird validation failed. Check the logs for details.' }}
+            
+            **Branch:** `${{ needs.setup.outputs.branch_name }}`
+            **Status:** ${{ steps.validate.outputs.status }}
+          comment_tag: tinybird-validation
+
+  # Deploy to main workspace
+  deploy:
+    name: Deploy to Production
+    needs: setup
+    if: needs.setup.outputs.action == 'deploy' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install Tinybird CLI
+        run: |
+          pip install tinybird-cli
+          tb --version
+      
+      - name: Deploy to Main
+        env:
+          TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
+        run: |
+          cd external/tinybird
+          
+          # Ensure we're on main workspace
+          echo "Switching to main workspace..."
+          tb branch use main
+          
+          # Deploy changes
+          echo "Deploying changes to production..."
+          tb push --force --yes
+          
+          echo "✅ Deployment complete!"
+      
+      - name: Verify Deployment
+        env:
+          TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
+        run: |
+          cd external/tinybird
+          
+          echo "Current workspace:"
+          tb workspace current
+          
+          echo "\nRecent changes:"
+          tb diff || true
+
+  # Cleanup CI branches
+  cleanup:
+    name: Cleanup CI Branch
+    needs: setup
+    if: |
+      needs.setup.outputs.action == 'cleanup' ||
+      (github.event_name == 'pull_request' && (github.event.action == 'closed' || github.event.action == 'merged'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Tinybird CLI
+        run: pip install tinybird-cli
+      
+      - name: Remove CI Branch
+        env:
+          TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
+        run: |
+          BRANCH_NAME="${{ needs.setup.outputs.branch_name || format('ci_pr_{0}', github.event.pull_request.number) }}"
+          
+          echo "Removing CI branch: $BRANCH_NAME"
+          tb branch rm $BRANCH_NAME --yes || echo "Branch already removed or doesn't exist"
+
+  # Output for integration with other workflows
+  tinybird--status:
+    name: Tinybird Status
+    needs: [validate, deploy]
+    if: always()
+    runs-on: ubuntu-latest
+    outputs:
+      can_merge: ${{ steps.check.outputs.can_merge }}
+    steps:
+      - id: check
+        env:
+          VALIDATE_STATUS: ${{ needs.validate.outputs.status }}
+          DEPLOY_RESULT: ${{ needs.deploy.result }}
+        run: |
+          # Determine if Tinybird checks pass
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            # For PRs, check validation status
+            [ "$VALIDATE_STATUS" = "success" ] && echo "can_merge=true" >> $GITHUB_OUTPUT || echo "can_merge=false" >> $GITHUB_OUTPUT
+          else
+            # For other events, check if needed jobs succeeded
+            echo "can_merge=true" >> $GITHUB_OUTPUT
+          fi

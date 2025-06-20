@@ -1,0 +1,175 @@
+name: Production (Simplified)
+
+on:
+  pull_request:
+  merge_group:
+    types: [checks_requested]
+
+jobs:
+  # Setup job
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    if: github.event_name == 'merge_group'
+    outputs:
+      apps: ${{ steps.read-apps.outputs.apps }}
+      pr_branch_name: ${{ steps.git-meta.outputs.pr_branch_name }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Read app configuration
+        id: read-apps
+        run: |
+          apps=$(cat .github/apps.json | jq -c '.apps')
+          echo "apps=$apps" >> $GITHUB_OUTPUT
+      
+      - name: Extract PR metadata
+        id: git-meta
+        run: |
+          # Extract PR number from merge group ref
+          commit_ref="${{ github.ref }}"
+          pr_number=$(echo $commit_ref | awk -F'/' '{print $5}' | awk -F'-' '{print $2}')
+          
+          # Get PR info
+          pr_info=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/pulls/$pr_number)
+          
+          pr_branch_name=$(echo $pr_info | jq -r '.head.ref')
+          
+          echo "pr_branch_name=$pr_branch_name" >> $GITHUB_OUTPUT
+
+  # Database migration
+  db-push:
+    name: Database Migration
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: ./tooling/github/setup
+      
+      - name: Push database changes
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          cd packages/lib
+          pnpm db:push
+
+  # Deploy all apps
+  deploy-apps:
+    name: Deploy Apps
+    needs: setup
+    uses: ./.github/workflows/shared-deploy-apps.yml
+    with:
+      apps: ${{ needs.setup.outputs.apps }}
+      environment: production
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+
+  # Deploy Trigger.dev
+  trigger-production:
+    name: Deploy Trigger.dev
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: ./tooling/github/setup
+      
+      - name: Deploy to production
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
+        run: |
+          cd packages/lib
+          pnpm exec trigger deploy --env prod
+
+  # Production can merge check
+  production--can-merge:
+    name: Production Can Merge
+    needs: [db-push, deploy-apps, trigger-production]
+    if: always() && github.event_name == 'merge_group'
+    runs-on: ubuntu-latest
+    outputs:
+      can_merge: ${{ steps.check.outputs.can_merge }}
+    steps:
+      - name: Check deployment status
+        id: check
+        env:
+          NEEDS_JSON: "${{ toJson(needs) }}"
+        run: |
+          ALL_SUCCESS=$(echo "$NEEDS_JSON" | jq '
+            . | to_entries | 
+            map([.value.result == "success", .value.result == "skipped"] | any) | 
+            all
+          ')
+          
+          echo "can_merge=$ALL_SUCCESS" >> $GITHUB_OUTPUT
+          
+          if [ "$ALL_SUCCESS" = "true" ]; then
+            echo "✅ All production deployments succeeded"
+            exit 0
+          else
+            echo "❌ Some production deployments failed"
+            echo "Details: $NEEDS_JSON"
+            exit 1
+          fi
+
+  # Promote apps to production domains
+  promote-apps:
+    name: Promote Apps
+    needs: [setup, deploy-apps, production--can-merge]
+    if: needs.production--can-merge.outputs.can_merge == 'true'
+    uses: ./.github/workflows/shared-promote-apps.yml
+    with:
+      apps: ${{ needs.setup.outputs.apps }}
+      deployments: ${{ needs.deploy-apps.outputs.deployments }}
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+
+  # Cleanup preview resources
+  cleanup-preview:
+    name: Cleanup Preview
+    needs: [setup, promote-apps]
+    if: always() && needs.promote-apps.result == 'success' && needs.setup.outputs.pr_branch_name != 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Neon CLI
+        run: npm i -g neonctl
+      
+      - name: Delete Neon preview branch
+        run: |
+          neonctl branches delete ${{ needs.setup.outputs.pr_branch_name }} \
+            --project-id ${{ secrets.NEON_PROJECT_ID }} \
+            --api-key ${{ secrets.NEON_API_KEY }} || true
+      
+      - name: Delete developer Neon branches
+        run: |
+          # List and delete any dev branches for this PR
+          branches=$(neonctl branches list --project-id ${{ secrets.NEON_PROJECT_ID }} \
+            --api-key ${{ secrets.NEON_API_KEY }} --output json)
+          
+          echo "$branches" | jq -r '.[] | select(.name | startswith("dev-${{ needs.setup.outputs.pr_branch_name }}")) | .name' | \
+          while read branch; do
+            echo "Deleting dev branch: $branch"
+            neonctl branches delete "$branch" \
+              --project-id ${{ secrets.NEON_PROJECT_ID }} \
+              --api-key ${{ secrets.NEON_API_KEY }} || true
+          done
+
+  # Rollback on failure
+  rollback-apps:
+    name: Rollback Apps
+    needs: [promote-apps]
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify rollback needed
+        run: |
+          echo "⚠️ Production deployment failed - manual rollback may be required"
+          echo "Failed jobs: ${{ toJson(needs) }}"
+          
+          # You could add automated rollback logic here
+          # or send notifications to Slack/Discord

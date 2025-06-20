@@ -1,0 +1,89 @@
+name: Deploy Apps
+
+on:
+  workflow_call:
+    inputs:
+      apps:
+        required: true
+        type: string
+        description: 'JSON array of apps to deploy'
+      environment:
+        required: true
+        type: string
+        description: 'Environment: preview or production'
+      git_metadata:
+        required: false
+        type: string
+        description: 'Git metadata for Vercel'
+    outputs:
+      deployments:
+        description: 'JSON object with deployment IDs'
+        value: ${{ jobs.aggregate.outputs.deployments }}
+    secrets:
+      VERCEL_TOKEN:
+        required: true
+      VERCEL_TEAM_ID:
+        required: true
+
+jobs:
+  deploy:
+    name: Deploy ${{ matrix.app.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: ${{ fromJson(inputs.apps) }}
+    outputs:
+      deployment_id: ${{ steps.deploy.outputs.deployment_id }}
+      app_name: ${{ matrix.app.name }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Deploy to Vercel
+        id: deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+        run: |
+          cd apps/${{ matrix.app.name }}
+          
+          if [ "${{ inputs.environment }}" == "preview" ]; then
+            deployment_url=$(vercel deploy --yes --token=${{ secrets.VERCEL_TOKEN }} --scope=barely ${{ inputs.git_metadata }} 2>&1 | tail -1)
+          else
+            deployment_url=$(vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }} --scope=barely 2>&1 | tail -1)
+          fi
+          
+          echo "deployment_url=$deployment_url"
+          
+          # Extract deployment ID from URL
+          deployment_id=$(echo $deployment_url | grep -oE 'dpl_[a-zA-Z0-9]+' || echo "")
+          
+          if [ -z "$deployment_id" ]; then
+            echo "Failed to extract deployment ID from: $deployment_url"
+            exit 1
+          fi
+          
+          echo "deployment_id=$deployment_id" >> $GITHUB_OUTPUT
+
+  aggregate:
+    name: Aggregate deployments
+    needs: deploy
+    runs-on: ubuntu-latest
+    outputs:
+      deployments: ${{ steps.aggregate.outputs.deployments }}
+    steps:
+      - name: Aggregate deployment IDs
+        id: aggregate
+        run: |
+          # Create JSON object from matrix outputs
+          deployments=$(echo '${{ toJson(needs.deploy.outputs) }}' | jq -c '
+            reduce (to_entries[] | select(.key | endswith("_name"))) as $item ({};
+              . + {($item.value): (to_entries[] | select(.key == ($item.value + "_deployment_id")) | .value)}
+            )
+          ')
+          
+          echo "deployments=$deployments" >> $GITHUB_OUTPUT
+          echo "Deployments: $deployments"

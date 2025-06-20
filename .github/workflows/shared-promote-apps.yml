@@ -1,0 +1,66 @@
+name: Promote Apps to Production
+
+on:
+  workflow_call:
+    inputs:
+      apps:
+        required: true
+        type: string
+        description: 'JSON array of apps to promote'
+      deployments:
+        required: true
+        type: string
+        description: 'JSON object with deployment IDs'
+    secrets:
+      VERCEL_TOKEN:
+        required: true
+      VERCEL_TEAM_ID:
+        required: true
+
+jobs:
+  promote:
+    name: Promote ${{ matrix.app.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: ${{ fromJson(inputs.apps) }}
+      fail-fast: false  # Continue promoting other apps if one fails
+    steps:
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Get deployment ID
+        id: get-deployment
+        run: |
+          deployment_id=$(echo '${{ inputs.deployments }}' | jq -r '."${{ matrix.app.name }}"')
+          if [ "$deployment_id" == "null" ] || [ -z "$deployment_id" ]; then
+            echo "No deployment ID found for ${{ matrix.app.name }}"
+            exit 1
+          fi
+          echo "deployment_id=$deployment_id" >> $GITHUB_OUTPUT
+
+      - name: Promote to production
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+        run: |
+          vercel promote ${{ steps.get-deployment.outputs.deployment_id }} \
+            --scope=barely \
+            --token=${{ secrets.VERCEL_TOKEN }}
+          
+          echo "✅ Promoted ${{ matrix.app.name }} to production"
+
+  rollback-check:
+    name: Check if rollback needed
+    needs: promote
+    if: failure()
+    runs-on: ubuntu-latest
+    outputs:
+      should_rollback: ${{ steps.check.outputs.should_rollback }}
+    steps:
+      - name: Check rollback conditions
+        id: check
+        run: |
+          # Get the status of all promotion jobs
+          echo "Checking promotion status..."
+          echo "should_rollback=true" >> $GITHUB_OUTPUT

@@ -1,0 +1,130 @@
+name: CI (Integrated)
+
+on:
+  pull_request:
+    branches: ["*"]
+  merge_group:
+    types: [checks_requested]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+env:
+  FORCE_COLOR: 3
+  TURBO_TEAM: ${{ secrets.VERCEL_TEAM_ID }}
+  TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+jobs:
+  # Code Quality Checks
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: ./tooling/github/setup
+      - name: Copy env
+        run: cp .env.example .env
+      - name: Lint
+        run: pnpm lint && pnpm lint:ws
+
+  format:
+    name: Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: ./tooling/github/setup
+      - name: Format
+        run: pnpm format
+
+  typecheck:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: ./tooling/github/setup
+      - name: Copy env
+        run: cp .env.example .env
+      - name: Typecheck
+        run: pnpm typecheck
+
+  # Tinybird Validation
+  tinybird-validate:
+    name: Validate Tinybird
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' && 
+      contains(github.event.pull_request.files.*.filename, 'external/tinybird/') ||
+      github.event_name == 'merge_group'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install Tinybird CLI
+        run: |
+          pip install tinybird-cli
+          tb --version
+      
+      - name: Validate Tinybird Resources
+        env:
+          TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
+          TB_HOST: https://api.us-east.tinybird.co
+        run: |
+          cd external/tinybird
+          
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            # For PRs, create a branch and validate
+            BRANCH_NAME="ci_pr_${{ github.event.pull_request.number }}"
+            
+            if ! tb branch use $BRANCH_NAME 2>/dev/null; then
+              echo "Creating new branch: $BRANCH_NAME"
+              tb branch create $BRANCH_NAME
+              tb branch use $BRANCH_NAME
+            fi
+            
+            tb push --force --yes
+          else
+            # For merge queue, just validate against main
+            tb push --dry-run --yes
+          fi
+
+  # Unified merge check
+  can-merge:
+    name: Can Merge
+    needs: [lint, format, typecheck]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check required jobs
+        env:
+          NEEDS_JSON: "${{ toJson(needs) }}"
+        run: |
+          # Check if all required jobs passed
+          ALL_SUCCESS=$(echo "$NEEDS_JSON" | jq '
+            . as $needs |
+            ["lint", "format", "typecheck"] |
+            map($needs[.].result == "success" or $needs[.].result == "skipped") |
+            all
+          ')
+          
+          # Check Tinybird if it ran
+          if [ "${{ needs.tinybird-validate.result }}" != "" ]; then
+            TINYBIRD_OK=${{ needs.tinybird-validate.result == 'success' || needs.tinybird-validate.result == 'skipped' }}
+            ALL_SUCCESS=$([ "$ALL_SUCCESS" = "true" ] && [ "$TINYBIRD_OK" = "true" ] && echo "true" || echo "false")
+          fi
+          
+          if [ "$ALL_SUCCESS" = "true" ]; then
+            echo "✅ All required checks passed"
+            exit 0
+          else
+            echo "❌ Some required checks failed"
+            echo "Details: $NEEDS_JSON"
+            exit 1
+          fi
