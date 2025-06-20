@@ -44,7 +44,7 @@ export default function RisingPlusPage() {
                 Ready to Accelerate Your Growth? Let Science Do the Heavy Lifting.
               </H>
               <p className="text-lg text-white/80 leading-relaxed mb-4">
-                Whether you're steadily growing past 10K monthly listeners or you're under 10K 
+                Whether you&apos;re steadily growing past 10K monthly listeners or you&apos;re under 10K 
                 with budget ready to jumpstart your results, Rising+ gives you professional 
                 campaign execution without the black-box mystery.
               </p>
@@ -104,7 +104,7 @@ export default function RisingPlusPage() {
                     <H size="5" className="mb-2">Merch Strategy + Revenue Optimization</H>
                     <p className="text-white/70">
                       Direct-to-fan sales platform plus active strategy development. Physical merch 
-                      can return 50-90% immediately vs. 2% for streaming - we'll help you build 
+                      can return 50-90% immediately vs. 2% for streaming - we&apos;ll help you build 
                       campaigns that convert listeners into buyers, not just streams.
                     </p>
                   </div>
@@ -135,8 +135,8 @@ export default function RisingPlusPage() {
                   <div>
                     <H size="5" className="mb-2">Monthly Strategy Calls with Performance Analysis</H>
                     <p className="text-white/70">
-                      30-minute sessions where we review exactly what worked, what didn't, and why. 
-                      You'll see the data behind every decision and understand the methodology for 
+                      30-minute sessions where we review exactly what worked, what didn&apos;t, and why. 
+                      You&apos;ll see the data behind every decision and understand the methodology for 
                       your next campaigns.
                     </p>
                   </div>
@@ -268,7 +268,7 @@ export default function RisingPlusPage() {
             {[
               'Complete transparency about strategy, spend allocation, and results',
               'Tools built in-house by a PhD scientist, not rented from third parties',
-              'Monthly education sessions so you understand what\'s working',
+              'Monthly education sessions so you understand what&apos;s working',
               'Open-source platform means you can see exactly how campaigns operate',
               'No guaranteed stream counts or fake playlist placements',
             ].map((item, index) => (
@@ -299,8 +299,8 @@ export default function RisingPlusPage() {
               <div className="glass rounded-xl p-8">
                 <blockquote className="mb-8">
                   <p className="text-lg text-white/90 mb-4 italic">
-                    "[Your name]'s campaigns helped us grow from 8K to 23K monthly listeners in 4 months. 
-                    Finally, marketing that makes sense instead of feeling like gambling."
+                    &quot;[Your name]&apos;s campaigns helped us grow from 8K to 23K monthly listeners in 4 months. 
+                    Finally, marketing that makes sense instead of feeling like gambling.&quot;
                   </p>
                   <cite className="text-white/70">- [Client Band], Indie Rock</cite>
                 </blockquote>
@@ -330,8 +330,8 @@ export default function RisingPlusPage() {
               <div className="glass rounded-xl p-8">
                 <blockquote className="mb-8">
                   <p className="text-lg text-white/90 mb-4 italic">
-                    "The transparency is incredible. I can see exactly where my ad spend goes and 
-                    why certain audiences convert better. Never had that with other agencies."
+                    &quot;The transparency is incredible. I can see exactly where my ad spend goes and 
+                    why certain audiences convert better. Never had that with other agencies.&quot;
                   </p>
                   <cite className="text-white/70">- [Client Name], Alt Rock</cite>
                 </blockquote>

@@ -14,7 +14,7 @@ const contactFormSchema = z.object({
 
 export async function POST(request: Request) {
 	try {
-		const body = await request.json();
+		const body = await request.json() as unknown;
 
 		// Validate input
 		const validatedData = contactFormSchema.parse(body);

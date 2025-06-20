@@ -30,7 +30,7 @@ export function BarChart({
     }
   }, [isIntersecting, animate, isAnimated]);
 
-  const max = maxValue || Math.max(...data.map(d => d.value));
+  const max = maxValue ?? Math.max(...data.map(d => d.value));
 
   return (
     <div ref={ref} className={cn('space-y-4', className)}>
@@ -48,7 +48,7 @@ export function BarChart({
             <div
               className={cn(
                 'absolute inset-y-0 left-0 rounded-full transition-all duration-1000 ease-out',
-                item.color || 'bg-gradient-to-r from-violet-600 to-pink-600'
+                item.color ?? 'bg-gradient-to-r from-violet-600 to-pink-600'
               )}
               style={{
                 width: isAnimated ? `${(item.value / max) * 100}%` : '0%',

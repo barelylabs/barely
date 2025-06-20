@@ -40,11 +40,11 @@ export default function BedroomPlusPage() {
           <AnimatedSection animation="fade-up">
             <div className="glass rounded-2xl p-8 mb-12">
               <H size="3" className="mb-6 text-2xl md:text-3xl">
-                For Artists Who Want to Understand the "Why"
+                For Artists Who Want to Understand the &quot;Why&quot;
               </H>
               <p className="text-lg text-white/80 leading-relaxed mb-4">
                 Most music marketing feels like throwing darts blindfolded. You spend money on ads, 
-                submit to playlists, post on social media... but you never really know what's working or why.
+                submit to playlists, post on social media... but you never really know what&apos;s working or why.
               </p>
               <p className="text-xl text-white font-semibold">
                 Bedroom+ changes that.
@@ -72,7 +72,7 @@ export default function BedroomPlusPage() {
                     <H size="5" className="mb-2">Bi-Weekly Strategy Sessions (30 minutes)</H>
                     <p className="text-white/70">
                       Direct access to a PhD scientist who treats your music career like a research project. 
-                      We'll form hypotheses about what will work for your specific situation, design tests, 
+                      We&apos;ll form hypotheses about what will work for your specific situation, design tests, 
                       and measure results.
                     </p>
                   </div>
@@ -88,7 +88,7 @@ export default function BedroomPlusPage() {
                     <H size="5" className="mb-2">Full Access to barely.io Tools (Bedroom Tier Included)</H>
                     <p className="text-white/70">
                       Smart links, landing pages, email automation, and analytics - all the technical 
-                      infrastructure you need, included free. Plus, since it's open-source, you can 
+                      infrastructure you need, included free. Plus, since it&apos;s open-source, you can 
                       see exactly how everything works.
                     </p>
                   </div>
@@ -103,7 +103,7 @@ export default function BedroomPlusPage() {
                   <div>
                     <H size="5" className="mb-2">Integrated Merch Platform + Strategy</H>
                     <p className="text-white/70">
-                      Direct-to-fan sales through barely.io's built-in store. We'll coach you on 
+                      Direct-to-fan sales through barely.io&apos;s built-in store. We&apos;ll coach you on 
                       optimizing physical sales that can return 50-90% immediately (vs. 2% for 
                       streaming campaigns).
                     </p>
@@ -119,7 +119,7 @@ export default function BedroomPlusPage() {
                   <div>
                     <H size="5" className="mb-2">Custom Monthly Campaign Blueprints</H>
                     <p className="text-white/70">
-                      Based on your data and goals, you'll get detailed, step-by-step plans for 
+                      Based on your data and goals, you&apos;ll get detailed, step-by-step plans for 
                       your next campaigns. No generic advice - everything tailored to your numbers 
                       and your audience.
                     </p>
@@ -217,7 +217,7 @@ export default function BedroomPlusPage() {
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="text-green-500 mt-0.5">✓</span>
-                    <span className="text-white/80">Anyone who values understanding the "why" behind every strategy</span>
+                    <span className="text-white/80">Anyone who values understanding the &quot;why&quot; behind every strategy</span>
                   </li>
                 </ul>
               </div>
@@ -233,7 +233,7 @@ export default function BedroomPlusPage() {
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="text-red-500 mt-0.5">✗</span>
-                    <span className="text-white/80">Musicians looking for guaranteed streaming numbers (we don't make false promises)</span>
+                    <span className="text-white/80">Musicians looking for guaranteed streaming numbers (we don&apos;t make false promises)</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="text-red-500 mt-0.5">✗</span>
@@ -265,8 +265,8 @@ export default function BedroomPlusPage() {
             {[
               'Real-time strategy based on current algorithms and your actual data',
               'Tools built by someone with a PhD in optimizing complex systems',
-              'Complete transparency about what we\'re testing and why',
-              'Skills you\'ll keep forever, not dependence on a service',
+              'Complete transparency about what we&apos;re testing and why',
+              'Skills you&apos;ll keep forever, not dependence on a service',
             ].map((item, index) => (
               <AnimatedSection key={index} animation="fade-up" delay={300 + index * 100}>
                 <div className="flex items-start gap-3">

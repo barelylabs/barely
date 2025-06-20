@@ -112,7 +112,7 @@ export default function ServicesPage() {
                 <ul className="space-y-2 text-white/80">
                   <li>• You have 0-10K monthly listeners</li>
                   <li>• You want to learn marketing skills yourself</li>
-                  <li>• You prefer understanding the "why" behind strategies</li>
+                  <li>• You prefer understanding the &quot;why&quot; behind strategies</li>
                   <li>• Your budget is limited but you have time to invest</li>
                 </ul>
               </div>
@@ -125,7 +125,7 @@ export default function ServicesPage() {
                   <li>• You have 10-50K monthly listeners (or budget to jumpstart)</li>
                   <li>• You want professional campaign execution</li>
                   <li>• You have $1-3K monthly to invest in ads</li>
-                  <li>• You'd rather focus on creating than marketing</li>
+                  <li>• You&apos;d rather focus on creating than marketing</li>
                 </ul>
               </div>
             </AnimatedSection>
@@ -135,7 +135,7 @@ export default function ServicesPage() {
                 <H size="4" className="mb-4 gradient-text">Choose Breakout+ if:</H>
                 <ul className="space-y-2 text-white/80">
                   <li>• You have 50K+ monthly listeners</li>
-                  <li>• You're ready for aggressive scaling</li>
+                  <li>• You&apos;re ready for aggressive scaling</li>
                   <li>• You have $3-6K monthly marketing budget</li>
                   <li>• You want maximum growth with full transparency</li>
                 </ul>

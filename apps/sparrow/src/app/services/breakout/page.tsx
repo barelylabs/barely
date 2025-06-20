@@ -40,10 +40,10 @@ export default function BreakoutPlusPage() {
           <AnimatedSection animation="fade-up">
             <div className="glass rounded-2xl p-8 mb-12 border border-purple-500/30 shadow-[0_0_60px_rgba(168,85,247,0.3)]">
               <H size="3" className="mb-6 text-2xl md:text-3xl">
-                You've Proven Your Music Works. Now Let's Engineer Your Breakthrough.
+                You&apos;ve Proven Your Music Works. Now Let&apos;s Engineer Your Breakthrough.
               </H>
               <p className="text-lg text-white/80 leading-relaxed mb-4">
-                You've built a solid fanbase and consistent streaming numbers. You're ready 
+                You&apos;ve built a solid fanbase and consistent streaming numbers. You&apos;re ready 
                 to invest serious resources into scaling to the next level - but you want 
                 every dollar working efficiently with complete transparency into the process.
               </p>
@@ -152,7 +152,7 @@ export default function BreakoutPlusPage() {
                     <H size="5" className="mb-2">Bi-Weekly Strategy Sessions with Advanced Analytics</H>
                     <p className="text-white/70">
                       30-minute deep dives into performance data, audience insights, and growth 
-                      optimization. You'll understand not just what's working, but how to 
+                      optimization. You&apos;ll understand not just what&apos;s working, but how to 
                       replicate and scale it.
                     </p>
                   </div>
@@ -168,7 +168,7 @@ export default function BreakoutPlusPage() {
                     <H size="5" className="mb-2">Priority Support + Rapid Campaign Adjustments</H>
                     <p className="text-white/70">
                       Direct access for urgent optimizations, algorithm updates, or time-sensitive 
-                      opportunities. When you need to move fast, we're ready.
+                      opportunities. When you need to move fast, we&apos;re ready.
                     </p>
                   </div>
                 </div>
@@ -311,9 +311,9 @@ export default function BreakoutPlusPage() {
             <AnimatedSection animation="fade-up" delay={200}>
               <blockquote className="glass rounded-xl p-6 border border-purple-500/20">
                 <p className="text-lg text-white/90 mb-4 italic">
-                  "In 6 months we went from 45K to 120K monthly listeners while tripling our 
-                  merch revenue. [Your name] doesn't just grow streams - he builds sustainable 
-                  music businesses."
+                  &quot;In 6 months we went from 45K to 120K monthly listeners while tripling our 
+                  merch revenue. [Your name] doesn&apos;t just grow streams - he builds sustainable 
+                  music businesses.&quot;
                 </p>
                 <cite className="text-white/70">- [Client Band], Alt Rock</cite>
               </blockquote>
@@ -322,8 +322,8 @@ export default function BreakoutPlusPage() {
             <AnimatedSection animation="fade-up" delay={300}>
               <blockquote className="glass rounded-xl p-6 border border-purple-500/20">
                 <p className="text-lg text-white/90 mb-4 italic">
-                  "Finally, an agency that shows me exactly where every dollar goes and why. 
-                  Our cost per fan acquisition dropped 60% while our lifetime value doubled."
+                  &quot;Finally, an agency that shows me exactly where every dollar goes and why. 
+                  Our cost per fan acquisition dropped 60% while our lifetime value doubled.&quot;
                 </p>
                 <cite className="text-white/70">- [Client Name], Indie Rock</cite>
               </blockquote>
@@ -379,7 +379,7 @@ export default function BreakoutPlusPage() {
           <AnimatedSection animation="fade-up" delay={300}>
             <p className="text-center text-white/60 mt-12 text-sm">
               Ready to discuss your specific growth goals? <a href="mailto:hello@barelysparrow.com" className="text-purple-300 hover:text-purple-300 underline">Email me directly</a> - no sales team, 
-              just the scientist who'll engineer your campaigns.
+              just the scientist who&apos;ll engineer your campaigns.
             </p>
           </AnimatedSection>
         </div>

@@ -39,7 +39,7 @@ export default function AboutPage() {
               <p className="text-lg text-white/80 leading-relaxed">
                 I spent years in research labs optimizing materials at the molecular level. 
                 PhD in Materials Science, degrees in Physics and Mechanical Engineering. 
-                I thought I'd spend my career perfecting atomic structures and publishing papers.
+                I thought I&apos;d spend my career perfecting atomic structures and publishing papers.
               </p>
               <p className="text-lg text-white/80 leading-relaxed">
                 But I had a problem.
@@ -63,7 +63,7 @@ export default function AboutPage() {
               </p>
               <p className="text-lg text-white/80 leading-relaxed">
                 There are billions of people in the world. I knew that even a tiny fraction 
-                who'd connect with my music could be an enormous audience. But somehow, 
+                who&apos;d connect with my music could be an enormous audience. But somehow, 
                 incredible art was getting buried under completely inefficient systems.
               </p>
             </div>
@@ -76,9 +76,9 @@ export default function AboutPage() {
                 The Connection
               </H>
               <p className="text-lg text-white/80 leading-relaxed">
-                It hit me: this was the same problem I'd been solving in the lab. 
-                Amazing potential - whether it's a new material or a great song - 
-                getting lost because the systems around it weren't optimized.
+                It hit me: this was the same problem I&apos;d been solving in the lab. 
+                Amazing potential - whether it&apos;s a new material or a great song - 
+                getting lost because the systems around it weren&apos;t optimized.
               </p>
               <p className="text-lg text-white/80 leading-relaxed">
                 The difference? In music, no one was applying engineering principles to fix it.
@@ -111,14 +111,14 @@ export default function AboutPage() {
                 The Mission
               </H>
               <p className="text-lg text-white/80 leading-relaxed">
-                My job isn't to be the star of your story. I'm the engineer who builds 
+                My job isn&apos;t to be the star of your story. I&apos;m the engineer who builds 
                 the stage, tunes the sound system, and optimizes the lighting so you 
                 can focus on what you do best: creating art that matters.
               </p>
               <p className="text-lg text-white/80 leading-relaxed">
                 You handle the music, the fan connections, the creative vision. I handle 
                 the algorithms, the data analysis, and all the technical stuff that makes 
-                sure your music finds the people who'll love it.
+                sure your music finds the people who&apos;ll love it.
               </p>
             </div>
           </AnimatedSection>
@@ -135,8 +135,8 @@ export default function AboutPage() {
                 by expensive publicists and risky playlist schemes that violate platform terms.
               </p>
               <p className="text-lg text-white/80 leading-relaxed">
-                There's a better way: transparent tools, data-driven strategies, and 
-                honest reporting about what's actually working.
+                There&apos;s a better way: transparent tools, data-driven strategies, and 
+                honest reporting about what&apos;s actually working.
               </p>
             </div>
           </AnimatedSection>

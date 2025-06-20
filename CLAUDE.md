@@ -89,7 +89,7 @@ pnpm deploy:production
   - `press` (port 3005) - Press kit builder
   - `www` (port 3006) - Marketing website
   - `manage-email` (port 3007) - Email management
-  - `sparrow` (port 3008) - Agency site
+  - `sparrow` (port 3008) - Music marketing agency (coaching & campaign services)
 
 - **Packages**:
   - `@barely/lib` - Core business logic, database, auth, APIs

@@ -38,17 +38,26 @@ export function getPostBySlug(slug: string): BlogPost | null {
     const fullPath = path.join(postsDirectory, `${slug}.mdx`);
     const fileContents = fs.readFileSync(fullPath, 'utf8');
     const { data, content } = matter(fileContents);
+    
+    // Type the data from gray-matter
+    const frontmatter = data as {
+      title?: string;
+      date?: string;
+      author?: string;
+      tags?: string[];
+      excerpt?: string;
+    };
 
-    const author = data.author || 'Barely Sparrow';
+    const author = frontmatter.author ?? 'Barely Sparrow';
     
     return {
       slug,
-      title: data.title || 'Untitled',
-      date: data.date || new Date().toISOString(),
+      title: frontmatter.title ?? 'Untitled',
+      date: frontmatter.date ?? new Date().toISOString(),
       author,
-      authorAvatar: authorAvatars[author] || authorAvatars['Barely Sparrow'],
-      tags: data.tags || [],
-      excerpt: data.excerpt || '',
+      authorAvatar: authorAvatars[author] ?? authorAvatars['Barely Sparrow'],
+      tags: frontmatter.tags ?? [],
+      excerpt: frontmatter.excerpt ?? '',
       content,
     };
   } catch {
