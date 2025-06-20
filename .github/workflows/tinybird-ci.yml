@@ -44,6 +44,7 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
+          TB_HOST: https://api.us-east.tinybird.co
         run: |
           cd external/tinybird
           BRANCH_NAME="ci_pr_${{ github.event.pull_request.number }}"
@@ -61,6 +62,7 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
+          TB_HOST: https://api.us-east.tinybird.co
         run: |
           cd external/tinybird
           echo "Pushing changes to CI branch..."
@@ -74,6 +76,7 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
+          TB_HOST: https://api.us-east.tinybird.co
         run: |
           cd external/tinybird
           echo "Validating changes for main workspace..."
@@ -101,6 +104,7 @@ jobs:
       - name: Deploy to Main Workspace
         env:
           TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
+          TB_HOST: https://api.us-east.tinybird.co
         run: |
           cd external/tinybird
           echo "Ensuring we're on main workspace..."
@@ -112,6 +116,7 @@ jobs:
       - name: Verify Deployment
         env:
           TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
+          TB_HOST: https://api.us-east.tinybird.co
         run: |
           cd external/tinybird
           echo "Verifying deployment..."
@@ -138,6 +143,7 @@ jobs:
       - name: Remove CI Branch
         env:
           TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
+          TB_HOST: https://api.us-east.tinybird.co
         run: |
           BRANCH_NAME="ci_pr_${{ github.event.pull_request.number }}"
           echo "Removing CI branch: $BRANCH_NAME"
