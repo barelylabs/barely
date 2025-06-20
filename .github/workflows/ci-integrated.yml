@@ -95,7 +95,7 @@ jobs:
   # Unified merge check
   can-merge:
     name: Can Merge
-    needs: [lint, format, typecheck]
+    needs: [lint, format, typecheck, tinybird-validate]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -105,17 +105,10 @@ jobs:
         run: |
           # Check if all required jobs passed
           ALL_SUCCESS=$(echo "$NEEDS_JSON" | jq '
-            . as $needs |
-            ["lint", "format", "typecheck"] |
-            map($needs[.].result == "success" or $needs[.].result == "skipped") |
+            . | to_entries | 
+            map([.value.result == "success", .value.result == "skipped"] | any) | 
             all
           ')
-          
-          # Check Tinybird if it ran
-          if [ "${{ needs.tinybird-validate.result }}" != "" ]; then
-            TINYBIRD_OK=${{ needs.tinybird-validate.result == 'success' || needs.tinybird-validate.result == 'skipped' }}
-            ALL_SUCCESS=$([ "$ALL_SUCCESS" = "true" ] && [ "$TINYBIRD_OK" = "true" ] && echo "true" || echo "false")
-          fi
           
           if [ "$ALL_SUCCESS" = "true" ]; then
             echo "✅ All required checks passed"
