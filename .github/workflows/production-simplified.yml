@@ -14,8 +14,11 @@ jobs:
     outputs:
       apps: ${{ steps.read-apps.outputs.apps }}
       pr_branch_name: ${{ steps.git-meta.outputs.pr_branch_name }}
+      git_metadata: ${{ steps.git-meta.outputs.vercel_git_metadata }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Need history for git show command
       
       - name: Read app configuration
         id: read-apps
@@ -23,7 +26,7 @@ jobs:
           apps=$(cat .github/apps.json | jq -c '.apps')
           echo "apps=$apps" >> $GITHUB_OUTPUT
       
-      - name: Extract PR metadata
+      - name: Extract PR metadata and create git metadata
         id: git-meta
         run: |
           # Extract PR number from merge group ref
@@ -35,8 +38,27 @@ jobs:
             https://api.github.com/repos/${{ github.repository }}/pulls/$pr_number)
           
           pr_branch_name=$(echo $pr_info | jq -r '.head.ref')
+          github_commit_sha=$(echo $pr_info | jq -r '.head.sha')
+          github_commit_author_login="${{ github.actor }}"
+          github_deployment=1
+          github_org="${{ github.repository_owner }}"
+          github_repo="${{ github.repository }}"
+          github_commit_org="${{ github.repository_owner }}"
+          github_commit_repo="${{ github.repository }}"
+          github_commit_message=$(git show -s --format=%s $github_commit_sha)
+          github_commit_ref="$pr_branch_name"
+          
+          # Prevent 'main' branch from proceeding (matching old workflow safety check)
+          if [ "$github_commit_ref" = "main" ]; then
+            echo "Error: Cannot proceed with 'main' branch."
+            exit 1
+          fi
+          
+          # Create Vercel git metadata string (matching old workflow format)
+          vercel_git_metadata="-m githubCommitSha=$github_commit_sha -m githubCommitAuthorName=$github_commit_author_login -m githubCommitAuthorLogin=$github_commit_author_login -m githubDeployment=$github_deployment -m githubOrg=$github_org -m githubRepo=$github_repo -m githubCommitOrg=$github_commit_org -m githubCommitRepo=$github_commit_repo -m githubCommitMessage=\"$github_commit_message\" -m githubCommitRef=$github_commit_ref"
           
           echo "pr_branch_name=$pr_branch_name" >> $GITHUB_OUTPUT
+          echo "vercel_git_metadata=$vercel_git_metadata" >> $GITHUB_OUTPUT
 
   # Database migration
   db-push:
@@ -48,21 +70,41 @@ jobs:
       - name: Setup
         uses: ./tooling/github/setup
       
-      - name: Push database changes
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - name: Install Neon CLI
+        run: pnpm i -g neonctl
+      
+      - name: Setup environment
+        run: cp .env.example .env
+      
+      - name: Push database changes to main branch
         run: |
+          # Use main branch connection (matching old workflow behavior)
+          # Get main branch ID first
+          main_branch_id=$(neonctl branches get main --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --output json | jq -r '.id')
+          
+          DATABASE_URL=$(neonctl connection-string main --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})
+          DIRECT_DATABASE_URL=$DATABASE_URL
+          
+          echo "DATABASE_URL=$DATABASE_URL" >> .env
+          echo "DIRECT_DATABASE_URL=$DIRECT_DATABASE_URL" >> .env
+          
           cd packages/lib
-          pnpm db:push
+          output=$(pnpm db:push)
+          echo "output: $output"
+          if [[ $output == *"error:"* || $output == *"severity: 'ERROR'"* ]]; then
+            echo "Unhandled error: $output" && exit 1
+          fi
 
   # Deploy all apps
   deploy-apps:
     name: Deploy Apps
-    needs: setup
+    needs: [setup, db-push]
     uses: ./.github/workflows/shared-deploy-apps.yml
     with:
       apps: ${{ needs.setup.outputs.apps }}
       environment: production
+      git_metadata: ${{ needs.setup.outputs.git_metadata }}
+      git_branch: ${{ needs.setup.outputs.pr_branch_name }}
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -70,12 +112,22 @@ jobs:
   # Deploy Trigger.dev
   trigger-production:
     name: Deploy Trigger.dev
-    needs: setup
+    needs: [setup, db-push, deploy-apps]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Setup
         uses: ./tooling/github/setup
+      
+      - name: Check all deployments succeeded
+        env:
+          NEEDS_JSON: "${{ toJson(needs) }}"
+        run: |
+          ALL_SUCCESS=$(echo "$NEEDS_JSON" | jq '. | to_entries | map([.value.result == "success", .value.result == "skipped"] | any) | all')
+          if [ "$ALL_SUCCESS" != "true" ]; then
+            echo "Some deployments failed, skipping trigger.dev deployment"
+            exit 1
+          fi
       
       - name: Deploy to production
         env:
@@ -126,6 +178,16 @@ jobs:
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      # Pass all Vercel project ID secrets needed for rollback
+      VERCEL_APP_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
+      VERCEL_CART_PROJECT_ID: ${{ secrets.VERCEL_CART_PROJECT_ID }}
+      VERCEL_FM_PROJECT_ID: ${{ secrets.VERCEL_FM_PROJECT_ID }}
+      VERCEL_LINK_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
+      VERCEL_MANAGE_EMAIL_PROJECT_ID: ${{ secrets.VERCEL_MANAGE_EMAIL_PROJECT_ID }}
+      VERCEL_PAGE_PROJECT_ID: ${{ secrets.VERCEL_PAGE_PROJECT_ID }}
+      VERCEL_PRESS_PROJECT_ID: ${{ secrets.VERCEL_PRESS_PROJECT_ID }}
+      VERCEL_SPARROW_PROJECT_ID: ${{ secrets.VERCEL_SPARROW_PROJECT_ID }}
+      VERCEL_WWW_PROJECT_ID: ${{ secrets.VERCEL_WWW_PROJECT_ID }}
 
   # Cleanup preview resources
   cleanup-preview:
@@ -158,17 +220,21 @@ jobs:
               --api-key ${{ secrets.NEON_API_KEY }} || true
           done
 
-  # Rollback on failure
-  rollback-apps:
-    name: Rollback Apps
+  # Rollback happens automatically in shared-promote-apps.yml if promotion fails
+  # This job just provides final status
+  deployment-status:
+    name: Final Deployment Status
     needs: [promote-apps]
-    if: failure()
+    if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: Notify rollback needed
+      - name: Report deployment status
         run: |
-          echo "⚠️ Production deployment failed - manual rollback may be required"
-          echo "Failed jobs: ${{ toJson(needs) }}"
-          
-          # You could add automated rollback logic here
-          # or send notifications to Slack/Discord
+          if [ "${{ needs.promote-apps.result }}" == "success" ]; then
+            echo "✅ Production deployment completed successfully"
+          else
+            echo "❌ Production deployment failed"
+            echo "Rollback procedures should have been executed automatically"
+            echo "Job details: ${{ toJson(needs) }}"
+            exit 1
+          fi

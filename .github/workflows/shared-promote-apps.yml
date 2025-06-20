@@ -16,6 +16,25 @@ on:
         required: true
       VERCEL_TEAM_ID:
         required: true
+      # All project ID secrets for rollback functionality
+      VERCEL_APP_PROJECT_ID:
+        required: true
+      VERCEL_CART_PROJECT_ID:
+        required: true
+      VERCEL_FM_PROJECT_ID:
+        required: true
+      VERCEL_LINK_PROJECT_ID:
+        required: true
+      VERCEL_MANAGE_EMAIL_PROJECT_ID:
+        required: true
+      VERCEL_PAGE_PROJECT_ID:
+        required: true
+      VERCEL_PRESS_PROJECT_ID:
+        required: true
+      VERCEL_SPARROW_PROJECT_ID:
+        required: true
+      VERCEL_WWW_PROJECT_ID:
+        required: true
 
 jobs:
   promote:
@@ -24,7 +43,7 @@ jobs:
     strategy:
       matrix:
         app: ${{ fromJson(inputs.apps) }}
-      fail-fast: false  # Continue promoting other apps if one fails
+      fail-fast: true  # Stop promoting if any app fails (matching old workflow behavior)
     steps:
       - name: Install Vercel CLI
         run: npm i -g vercel@latest
@@ -50,17 +69,47 @@ jobs:
           
           echo "✅ Promoted ${{ matrix.app.name }} to production"
 
-  rollback-check:
-    name: Check if rollback needed
+  rollback:
+    name: Rollback ${{ matrix.app.name }}
     needs: promote
     if: failure()
     runs-on: ubuntu-latest
-    outputs:
-      should_rollback: ${{ steps.check.outputs.should_rollback }}
+    strategy:
+      matrix:
+        app: ${{ fromJson(inputs.apps) }}
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets[matrix.app.projectId] }}
     steps:
-      - name: Check rollback conditions
-        id: check
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+      
+      - name: Check if this app was promoted successfully
+        id: check-promotion
         run: |
-          # Get the status of all promotion jobs
-          echo "Checking promotion status..."
-          echo "should_rollback=true" >> $GITHUB_OUTPUT
+          # Check if this specific app's promotion succeeded
+          # Only rollback apps that were successfully promoted
+          promotion_result="${{ needs.promote.result }}"
+          if [ "$promotion_result" == "success" ]; then
+            echo "App ${{ matrix.app.name }} was promoted successfully, will rollback"
+            echo "should_rollback=true" >> $GITHUB_OUTPUT
+          else
+            echo "App ${{ matrix.app.name }} promotion failed, no rollback needed"
+            echo "should_rollback=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Rollback to previous deployment
+        if: steps.check-promotion.outputs.should_rollback == 'true'
+        run: |
+          # Get the previous deployment ID for rollback (matching old workflow logic)
+          ROLLBACK_DEPLOYMENT_ID=$(curl -s "https://api.vercel.com/v6/deployments?teamId=${{ secrets.VERCEL_TEAM_ID }}&projectId=${{ secrets[matrix.app.projectId] }}&limit=2&rollbackCandidate=true&state=READY&target=production" -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | jq -r '.deployments[1].uid')
+          
+          if [ "$ROLLBACK_DEPLOYMENT_ID" = "null" ] || [ -z "$ROLLBACK_DEPLOYMENT_ID" ]; then
+            echo "❌ No rollback candidate found for ${{ matrix.app.name }}"
+            exit 1
+          fi
+          
+          echo "Rolling back ${{ matrix.app.name }} to deployment ID: $ROLLBACK_DEPLOYMENT_ID"
+          vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+          echo "✅ Rolled back ${{ matrix.app.name }} successfully"
