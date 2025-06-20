@@ -1,0 +1,245 @@
+name: Production (Simplified)
+
+on:
+  pull_request:
+  merge_group:
+    types: [checks_requested]
+
+jobs:
+  # Setup job
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    if: github.event_name == 'merge_group'
+    outputs:
+      apps: ${{ steps.read-apps.outputs.apps }}
+      pr_branch_name: ${{ steps.git-meta.outputs.pr_branch_name }}
+      git_metadata: ${{ steps.git-meta.outputs.vercel_git_metadata }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Need history for git show command
+      
+      - name: Read app configuration
+        id: read-apps
+        run: |
+          apps=$(cat .github/apps.json | jq -c '.apps')
+          echo "apps=$apps" >> $GITHUB_OUTPUT
+      
+      - name: Extract PR metadata and create git metadata
+        id: git-meta
+        run: |
+          # Extract PR number from merge group ref
+          commit_ref="${{ github.ref }}"
+          pr_number=$(echo $commit_ref | awk -F'/' '{print $5}' | awk -F'-' '{print $2}')
+          
+          # Get PR info
+          pr_info=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/pulls/$pr_number)
+          
+          pr_branch_name=$(echo $pr_info | jq -r '.head.ref')
+          github_commit_sha=$(echo $pr_info | jq -r '.head.sha')
+          github_commit_author_login="${{ github.actor }}"
+          github_deployment=1
+          github_org="${{ github.repository_owner }}"
+          github_repo="${{ github.repository }}"
+          github_commit_org="${{ github.repository_owner }}"
+          github_commit_repo="${{ github.repository }}"
+          github_commit_message=$(git show -s --format=%s $github_commit_sha)
+          github_commit_ref="$pr_branch_name"
+          
+          # Prevent 'main' branch from proceeding (matching old workflow safety check)
+          if [ "$github_commit_ref" = "main" ]; then
+            echo "Error: Cannot proceed with 'main' branch."
+            exit 1
+          fi
+          
+          # Create Vercel git metadata string (matching old workflow format)
+          vercel_git_metadata="-m githubCommitSha=$github_commit_sha -m githubCommitAuthorName=$github_commit_author_login -m githubCommitAuthorLogin=$github_commit_author_login -m githubDeployment=$github_deployment -m githubOrg=$github_org -m githubRepo=$github_repo -m githubCommitOrg=$github_commit_org -m githubCommitRepo=$github_commit_repo -m githubCommitMessage=\"$github_commit_message\" -m githubCommitRef=$github_commit_ref"
+          
+          echo "pr_branch_name=$pr_branch_name" >> $GITHUB_OUTPUT
+          echo "vercel_git_metadata=$vercel_git_metadata" >> $GITHUB_OUTPUT
+
+  # Database migration
+  db-push:
+    name: Database Migration
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: ./tooling/github/setup
+      
+      - name: Install Neon CLI
+        run: pnpm i -g neonctl
+      
+      - name: Setup environment
+        run: cp .env.example .env
+      
+      - name: Push database changes to main branch
+        run: |
+          # Use main branch connection (matching old workflow behavior)
+          # Get main branch ID first
+          main_branch_id=$(neonctl branches get main --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --output json | jq -r '.id')
+          
+          DATABASE_URL=$(neonctl connection-string main --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }})
+          DIRECT_DATABASE_URL=$DATABASE_URL
+          
+          echo "DATABASE_URL=$DATABASE_URL" >> .env
+          echo "DIRECT_DATABASE_URL=$DIRECT_DATABASE_URL" >> .env
+          
+          cd packages/lib
+          output=$(pnpm db:push)
+          echo "output: $output"
+          if [[ $output == *"error:"* || $output == *"severity: 'ERROR'"* ]]; then
+            echo "Unhandled error: $output" && exit 1
+          fi
+
+  # Deploy all apps
+  deploy-apps:
+    name: Deploy Apps
+    needs: [setup, db-push]
+    uses: ./.github/workflows/shared-deploy-apps.yml
+    with:
+      apps: ${{ needs.setup.outputs.apps }}
+      environment: production
+      git_metadata: ${{ needs.setup.outputs.git_metadata }}
+      git_branch: ${{ needs.setup.outputs.pr_branch_name }}
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+
+  # Deploy Trigger.dev
+  trigger-production:
+    name: Deploy Trigger.dev
+    needs: [setup, db-push, deploy-apps]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: ./tooling/github/setup
+      
+      - name: Check all deployments succeeded
+        env:
+          NEEDS_JSON: "${{ toJson(needs) }}"
+        run: |
+          ALL_SUCCESS=$(echo "$NEEDS_JSON" | jq '. | to_entries | map([.value.result == "success", .value.result == "skipped"] | any) | all')
+          if [ "$ALL_SUCCESS" != "true" ]; then
+            echo "Some deployments failed, skipping trigger.dev deployment"
+            exit 1
+          fi
+      
+      - name: Deploy to production
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
+        run: pnpm deploy-trigger:production
+
+  # Production can merge check
+  production--can-merge:
+    name: Production Can Merge
+    needs: [db-push, deploy-apps, trigger-production]
+    if: always() && github.event_name == 'merge_group'
+    runs-on: ubuntu-latest
+    outputs:
+      can_merge: ${{ steps.check.outputs.can_merge }}
+    steps:
+      - name: Check deployment status
+        id: check
+        env:
+          NEEDS_JSON: "${{ toJson(needs) }}"
+        run: |
+          ALL_SUCCESS=$(echo "$NEEDS_JSON" | jq '
+            . | to_entries | 
+            map([.value.result == "success", .value.result == "skipped"] | any) | 
+            all
+          ')
+          
+          echo "can_merge=$ALL_SUCCESS" >> $GITHUB_OUTPUT
+          
+          if [ "$ALL_SUCCESS" = "true" ]; then
+            echo "✅ All production deployments succeeded"
+            exit 0
+          else
+            echo "❌ Some production deployments failed"
+            echo "Details: $NEEDS_JSON"
+            exit 1
+          fi
+
+  # Promote apps to production domains
+  promote-apps:
+    name: Promote Apps
+    needs: [setup, deploy-apps, production--can-merge]
+    if: needs.production--can-merge.outputs.can_merge == 'true'
+    uses: ./.github/workflows/shared-promote-apps.yml
+    with:
+      apps: ${{ needs.setup.outputs.apps }}
+      deployments: ${{ needs.deploy-apps.outputs.deployments }}
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      # Pass all Vercel project ID secrets needed for rollback
+      VERCEL_APP_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
+      VERCEL_CART_PROJECT_ID: ${{ secrets.VERCEL_CART_PROJECT_ID }}
+      VERCEL_FM_PROJECT_ID: ${{ secrets.VERCEL_FM_PROJECT_ID }}
+      VERCEL_LINK_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
+      VERCEL_MANAGE_EMAIL_PROJECT_ID: ${{ secrets.VERCEL_MANAGE_EMAIL_PROJECT_ID }}
+      VERCEL_PAGE_PROJECT_ID: ${{ secrets.VERCEL_PAGE_PROJECT_ID }}
+      VERCEL_PRESS_PROJECT_ID: ${{ secrets.VERCEL_PRESS_PROJECT_ID }}
+      VERCEL_SPARROW_PROJECT_ID: ${{ secrets.VERCEL_SPARROW_PROJECT_ID }}
+      VERCEL_WWW_PROJECT_ID: ${{ secrets.VERCEL_WWW_PROJECT_ID }}
+
+  # Cleanup preview resources
+  cleanup-preview:
+    name: Cleanup Preview
+    needs: [setup, promote-apps]
+    if: always() && needs.promote-apps.result == 'success' && needs.setup.outputs.pr_branch_name != 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Neon CLI
+        run: npm i -g neonctl
+      
+      - name: Delete Neon preview branch
+        run: |
+          neonctl branches delete ${{ needs.setup.outputs.pr_branch_name }} \
+            --project-id ${{ secrets.NEON_PROJECT_ID }} \
+            --api-key ${{ secrets.NEON_API_KEY }} || true
+      
+      - name: Delete developer Neon branches
+        run: |
+          # List and delete any dev branches for this PR
+          branches=$(neonctl branches list --project-id ${{ secrets.NEON_PROJECT_ID }} \
+            --api-key ${{ secrets.NEON_API_KEY }} --output json)
+          
+          # Pattern for dev branches: {branch_name}__dev_{timestamp}
+          echo "$branches" | jq -r '.[] | select(.name | test("^${{ needs.setup.outputs.pr_branch_name }}__dev_")) | .name' | \
+          while read branch; do
+            echo "Deleting dev branch: $branch"
+            neonctl branches delete "$branch" \
+              --project-id ${{ secrets.NEON_PROJECT_ID }} \
+              --api-key ${{ secrets.NEON_API_KEY }} || true
+          done
+
+  # Rollback happens automatically in shared-promote-apps.yml if promotion fails
+  # This job just provides final status
+  deployment-status:
+    name: Final Deployment Status
+    needs: [promote-apps]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report deployment status
+        run: |
+          promote_result="${{ needs.promote-apps.result }}"
+          if [ "$promote_result" == "success" ] || [ "$promote_result" == "skipped" ]; then
+            if [ "$promote_result" == "success" ]; then
+              echo "✅ Production deployment completed successfully"
+            else
+              echo "✅ Production deployment skipped (no promotion needed)"
+            fi
+          else
+            echo "❌ Production deployment failed"
+            echo "Rollback procedures should have been executed automatically"
+            echo "Job details: ${{ toJson(needs) }}"
+            exit 1
+          fi

@@ -1,0 +1,33 @@
+DESCRIPTION >
+	Aggregate by session_id
+
+
+NODE mv
+DESCRIPTION >
+    Aggregate by session_id
+
+SQL >
+
+    SELECT
+        toDate(toTimezone(timestamp, 'America/Los_Angeles')) AS date,
+        sessionId,
+        anySimpleState(workspaceId) AS workspaceId,
+        anySimpleState(assetId) AS assetId,
+        anySimpleState(type) AS type,
+        anySimpleState(device) AS device,
+        anySimpleState(city) AS city,
+        anySimpleState(country) AS country,
+        anySimpleState(browser) AS browser,
+        anySimpleState(os) AS os,
+        minSimpleState(timestamp) AS first_hit,
+        maxSimpleState(timestamp) AS latest_hit,
+        countState() AS hits
+    FROM web_hits
+    GROUP BY
+        date,
+        sessionId
+
+TYPE materialized
+DATASOURCE web_sessions_pt_mv
+
+

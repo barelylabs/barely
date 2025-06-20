@@ -1,0 +1,21 @@
+VERSION 1
+
+NODE health_check
+DESCRIPTION >
+    Deployment Health Check Endpoint
+    
+    This endpoint returns deployment status and timing information.
+    It serves as verification that the CI/CD pipeline successfully
+    deployed changes to the main Tinybird workspace.
+    
+    Safe to call - returns only deployment metadata.
+
+SQL >
+    SELECT 
+        'healthy' as status,
+        'ci-cd-deployment-verified' as source,
+        now() as checked_at,
+        'main' as workspace_branch,
+        '2024-06-20' as pipeline_version
+
+TYPE endpoint
