@@ -18,6 +18,9 @@ on:
       database_pool_url:
         description: 'The database pool URL for the branch'
         value: ${{ jobs.neon-setup.outputs.database_pool_url }}
+      direct_database_url:
+        description: 'The direct database URL for the branch'
+        value: ${{ jobs.neon-setup.outputs.direct_database_url }}
       neon_branch_id:
         description: 'The Neon branch ID'
         value: ${{ jobs.neon-setup.outputs.neon_branch_id }}
@@ -38,6 +41,7 @@ jobs:
     outputs:
       database_url: ${{ steps.create-branch.outputs.db_url || steps.get-branch.outputs.db_url }}
       database_pool_url: ${{ steps.create-branch.outputs.db_pool_url || steps.get-branch.outputs.db_pool_url }}
+      direct_database_url: ${{ steps.create-branch.outputs.db_url || steps.get-branch.outputs.db_url }}
       neon_branch_id: ${{ steps.get-branch-id.outputs.branch_id }}
     steps:
       - name: Checkout code

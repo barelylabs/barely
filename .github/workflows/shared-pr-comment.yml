@@ -28,22 +28,34 @@ jobs:
           
           # Start building the comment
           comment_body="## Preview Deployments\n\n"
-          comment_body+="| App | Preview | Inspect |\n"
-          comment_body+="|-----|---------|----------|\n"
+          comment_body+="| 📱 App | 🚀 Preview | 🔍 Inspect |\n"
+          comment_body+="|--------|------------|------------|\n"
+          
+          # Map app names to emojis
+          declare -A emojis
+          emojis[app]="📱"
+          emojis[cart]="🛒"
+          emojis[fm]="📻"
+          emojis[link]="🔗"
+          emojis[manage-email]="📧"
+          emojis[page]="📄"
+          emojis[press]="📰"
+          emojis[sparrow]="🐦"
+          emojis[www]="🌐"
           
           # Add each app's deployment info
-          echo "$deployments" | jq -r 'to_entries[] | 
-            "| " + .key + " | [preview](" + .value.url + ") | [inspect](" + .value.inspect + ") |"' | \
-          while read line; do
-            comment_body+="$line\n"
+          echo "$deployments" | jq -r 'to_entries[] | .key + "|" + .value.url + "|" + .value.inspect' | \
+          while IFS='|' read app url inspect; do
+            emoji=${emojis[$app]:-"🚀"}
+            comment_body+="| $emoji $app | [preview]($url) | [inspect]($inspect) |\n"
           done
           
           # Add database info if available
           if [ -n "${{ inputs.neon_branch_id }}" ]; then
             comment_body+="\n## Database\n\n"
-            comment_body+="| Service | Inspect |\n"
-            comment_body+="|---------|----------|\n"
-            comment_body+="| Neon | [inspect](https://console.neon.tech/app/projects/${{ inputs.neon_branch_id }}) |\n"
+            comment_body+="| 💾 Service | 🔍 Inspect |\n"
+            comment_body+="|------------|------------|\n"
+            comment_body+="| 🐘 Neon | [inspect](https://console.neon.tech/app/projects/${{ inputs.neon_branch_id }}) |\n"
           fi
           
           # Save comment body to file (to handle special characters)
