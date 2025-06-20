@@ -8,6 +8,7 @@
 	},
 	"scripts": {
 		"clean": "rm -rf .turbo node_modules",
+		"clean:rm": "rm -rf node_modules && rm -f pnpm-lock.yaml",
 		"format": "prettier --check . --ignore-path ../../.gitignore",
 		"typecheck": "tsc --noEmit"
 	},

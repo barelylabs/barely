@@ -9,6 +9,7 @@
 	],
 	"scripts": {
 		"clean": "rm -rf .turbo node_modules",
+		"clean:rm": "rm -rf node_modules && rm -f pnpm-lock.yaml",
 		"format": "prettier --check . --ignore-path ../../.gitignore",
 		"format:fix": "turbo format --continue -- --write --cache --cache-location node_modules/.cache/.prettiercache",
 		"lint": "eslint .",

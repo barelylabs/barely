@@ -21,9 +21,9 @@ export function AnimatedNumber({
 	const ref = useRef(null);
 	const isInView = useInView(ref, { once: true, amount: 0.5 });
 
-	const value = useMotionValue(start);
+	const value = useMotionValue<number>(start);
 	const spring = useSpring(value, { damping: 30, stiffness: 100 });
-	const display = useTransform(spring, num => num.toFixed(decimals));
+	const display = useTransform(spring, (num: number) => num.toFixed(decimals));
 
 	useEffect(() => {
 		value.set(isInView ? end : start);

@@ -5,6 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"clean": "git clean -xdf .turbo node_modules",
+		"clean:rm": "rm -rf node_modules && rm -f pnpm-lock.yaml",
 		"format": "prettier --check . --ignore-path ../../.gitignore",
 		"lint": "eslint .",
 		"typecheck": "tsc --noEmit --emitDeclarationOnly false"
@@ -74,7 +75,7 @@
 		"embla-carousel-react": "8.0.0-rc22",
 		"jotai": "^2.6.1",
 		"lexical": "^0.17.0",
-		"lucide-react": "^0.441.0",
+		"lucide-react": "^0.517.0",
 		"next-mdx-remote": "^4.4.1",
 		"next-seo": "^5.15.0",
 		"next-themes": "^0.2.1",

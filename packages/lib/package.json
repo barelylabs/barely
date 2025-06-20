@@ -15,6 +15,7 @@
 	],
 	"scripts": {
 		"clean": "git clean -xdf .turbo node_modules",
+		"clean:rm": "rm -rf node_modules && rm -f pnpm-lock.yaml",
 		"db:check": "pnpm with-env drizzle-kit check:pg --config=server/db/drizzle.config.ts",
 		"db:drop": "pnpm with-env drizzle-kit drop --config=server/db/drizzle.config.ts",
 		"db:pull": "pnpm with-env drizzle-kit introspect:pg --config=server/db/drizzle.config.ts",

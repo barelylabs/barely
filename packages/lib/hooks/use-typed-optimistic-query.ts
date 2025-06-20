@@ -103,7 +103,7 @@ export function useTypedOptimisticQuery<T extends z.AnyZodObject>(
 			}));
 			const existingValue = optimisticParsedQuery[key];
 			if (Array.isArray(existingValue)) {
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				 
 				if (existingValue.includes(value)) return; // prevent adding the same value to the array
 				// @ts-expect-error this is too much for TS it seems
 				setQuery(key, [...existingValue, value]);
@@ -128,9 +128,9 @@ export function useTypedOptimisticQuery<T extends z.AnyZodObject>(
 
 			if (Array.isArray(existingValue) && existingValue.length > 1) {
 				// @ts-expect-error this is too much for TS it seems
-				// eslint-disable-next-line
+				 
 				const newValue = existingValue.filter(item => item !== value);
-				// eslint-disable-next-line
+				 
 				setQuery(key, newValue);
 			} else {
 				// @ts-expect-error this is too much for TS it seems
