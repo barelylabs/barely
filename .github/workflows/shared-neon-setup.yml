@@ -15,10 +15,20 @@ on:
       database_url:
         description: 'The database URL for the branch'
         value: ${{ jobs.neon-setup.outputs.database_url }}
+      database_pool_url:
+        description: 'The database pool URL for the branch'
+        value: ${{ jobs.neon-setup.outputs.database_pool_url }}
+      neon_branch_id:
+        description: 'The Neon branch ID'
+        value: ${{ jobs.neon-setup.outputs.neon_branch_id }}
     secrets:
       NEON_API_KEY:
         required: true
       NEON_PROJECT_ID:
+        required: true
+      PG_USERNAME:
+        required: true
+      PG_DATABASE:
         required: true
 
 jobs:
@@ -26,10 +36,22 @@ jobs:
     name: Neon ${{ inputs.action }} branch
     runs-on: ubuntu-latest
     outputs:
-      database_url: ${{ steps.create-branch.outputs.db_url }}
+      database_url: ${{ steps.create-branch.outputs.db_url || steps.get-branch.outputs.db_url }}
+      database_pool_url: ${{ steps.create-branch.outputs.db_pool_url || steps.get-branch.outputs.db_pool_url }}
+      neon_branch_id: ${{ steps.get-branch-id.outputs.branch_id }}
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup node/pnpm
+        uses: ./tooling/github/setup
+
       - name: Install Neon CLI
-        run: npm i -g neonctl
+        run: pnpm i -g neonctl
+
+      - name: Copy .env
+        shell: bash
+        run: cp .env.example .env
 
       - name: Check if branch exists
         if: inputs.action == 'check' || inputs.action == 'create'
@@ -45,21 +67,52 @@ jobs:
         if: inputs.action == 'create' && steps.check-branch.outputs.exists == 'false'
         id: create-branch
         run: |
-          output=$(neonctl branches create --name=${{ inputs.branch_name }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --compute --type read_write --set-as-primary)
+          output=$(neonctl branches create --name=${{ inputs.branch_name }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --compute --type read_write)
           echo "$output"
+
+          # Get connection strings
+          db_url=$(neonctl connection-string ${{ inputs.branch_name }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }} | tr -d '\n')?sslmode=require
+          db_pool_url=$(neonctl connection-string ${{ inputs.branch_name }} --pooled --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }} | tr -d '\n')?sslmode=require
           
-          # Extract connection string
-          db_url=$(echo "$output" | grep -oE 'postgresql://[^ ]+' | head -n 1)
           echo "db_url=$db_url" >> $GITHUB_OUTPUT
+          echo "db_pool_url=$db_pool_url" >> $GITHUB_OUTPUT
           echo "::add-mask::$db_url"
+          echo "::add-mask::$db_pool_url"
 
       - name: Get existing branch URL
         if: inputs.action == 'create' && steps.check-branch.outputs.exists == 'true'
         id: get-branch
         run: |
-          output=$(neonctl connection-string ${{ inputs.branch_name }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --database-name neondb --role-name neondb_owner)
-          echo "db_url=$output" >> $GITHUB_OUTPUT
-          echo "::add-mask::$output"
+          db_url=$(neonctl connection-string ${{ inputs.branch_name }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }} | tr -d '\n')?sslmode=require
+          db_pool_url=$(neonctl connection-string ${{ inputs.branch_name }} --pooled --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }} | tr -d '\n')?sslmode=require
+          
+          echo "db_url=$db_url" >> $GITHUB_OUTPUT
+          echo "db_pool_url=$db_pool_url" >> $GITHUB_OUTPUT
+          echo "::add-mask::$db_url"
+          echo "::add-mask::$db_pool_url"
+
+      - name: Get branch ID
+        if: inputs.action == 'create'
+        id: get-branch-id
+        run: |
+          branch_id=$(neonctl branches get ${{ inputs.branch_name }} --project-id ${{ secrets.NEON_PROJECT_ID }} --api-key ${{ secrets.NEON_API_KEY }} --output json | jq -r '.id')
+          echo "branch_id=$branch_id" >> $GITHUB_OUTPUT
+
+      - name: Push database schema
+        if: inputs.action == 'create'
+        env:
+          DATABASE_URL: ${{ steps.create-branch.outputs.db_url || steps.get-branch.outputs.db_url }}
+          DATABASE_POOL_URL: ${{ steps.create-branch.outputs.db_pool_url || steps.get-branch.outputs.db_pool_url }}
+        run: |
+          echo "DATABASE_URL=$DATABASE_URL" >> .env
+          echo "DATABASE_POOL_URL=$DATABASE_POOL_URL" >> .env
+          
+          cd packages/lib
+          output=$(pnpm db:push)
+          echo "output: $output"
+          if [[ $output == *"error:"* || $output == *"severity: 'ERROR'"* ]]; then
+            echo "Unhandled error: $output" && exit 1
+          fi
 
       - name: Delete Neon branch
         if: inputs.action == 'delete'

@@ -15,9 +15,13 @@ on:
         required: false
         type: string
         description: 'Git metadata for Vercel'
+      git_branch:
+        required: false
+        type: string
+        description: 'Git branch name for preview deployments'
     outputs:
       deployments:
-        description: 'JSON object with deployment IDs'
+        description: 'JSON object with deployment info'
         value: ${{ jobs.aggregate.outputs.deployments }}
     secrets:
       VERCEL_TOKEN:
@@ -32,41 +36,76 @@ jobs:
     strategy:
       matrix:
         app: ${{ fromJson(inputs.apps) }}
+    env:
+      TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      TURBO_TEAM: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets[matrix.app.projectId] }}
     outputs:
       deployment_id: ${{ steps.deploy.outputs.deployment_id }}
+      deployment_url: ${{ steps.deploy.outputs.deployment_url }}
+      inspect_url: ${{ steps.deploy.outputs.inspect_url }}
       app_name: ${{ matrix.app.name }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
-      - name: Install Vercel CLI
-        run: npm i -g vercel@latest
+      - name: Setup node/pnpm/turbo/vercel
+        uses: ./tooling/github/setup
+
+      - name: Link Vercel project
+        run: |
+          pnpm vercel link --repo --scope=barely --yes --token=${{ secrets.VERCEL_TOKEN }}
+          pnpm vercel link --cwd apps/${{ matrix.app.name }} --scope=barely --yes --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Pull Vercel environment
+        run: |
+          if [ "${{ inputs.environment }}" = "preview" ]; then
+            ENV_OPTIONS="--git-branch=${{ inputs.git_branch }}"
+          else
+            ENV_OPTIONS=""
+          fi
+
+          pnpm vercel pull --cwd apps/${{ matrix.app.name }} --yes --environment=${{ inputs.environment }} $ENV_OPTIONS --token=${{ secrets.VERCEL_TOKEN }}
+
+          # Set VERCEL_URL for the build
+          if [ "${{ inputs.environment }}" = "preview" ]; then
+            VERCEL_URL=${{ matrix.app.name }}-git-${{ inputs.git_branch }}-barely.vercel.app
+          else
+            VERCEL_URL=${{ matrix.app.domain }}
+          fi
+          sed -i '/VERCEL_URL/d' apps/${{ matrix.app.name }}/.vercel/.env.${{ inputs.environment }}.local || true
+          echo "VERCEL_URL=\"$VERCEL_URL\"" >> apps/${{ matrix.app.name }}/.vercel/.env.${{ inputs.environment }}.local
+          cp apps/${{ matrix.app.name }}/.vercel/.env.${{ inputs.environment }}.local .env
+
+      - name: Build project artifacts
+        run: pnpm turbo build:${{ inputs.environment }} --filter=@barely/${{ matrix.app.name }} --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy to Vercel
         id: deploy
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
         run: |
           cd apps/${{ matrix.app.name }}
           
-          if [ "${{ inputs.environment }}" == "preview" ]; then
-            deployment_url=$(vercel deploy --yes --token=${{ secrets.VERCEL_TOKEN }} --scope=barely ${{ inputs.git_metadata }} 2>&1 | tail -1)
+          if [ "${{ inputs.environment }}" = "production" ]; then
+            ENV_OPTIONS="--prod --skip-domain"
           else
-            deployment_url=$(vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }} --scope=barely 2>&1 | tail -1)
+            ENV_OPTIONS=""
           fi
+
+          deployment_url=$(pnpm vercel deploy --prebuilt $ENV_OPTIONS ${{ inputs.git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})
           
           echo "deployment_url=$deployment_url"
           
-          # Extract deployment ID from URL
-          deployment_id=$(echo $deployment_url | grep -oE 'dpl_[a-zA-Z0-9]+' || echo "")
-          
-          if [ -z "$deployment_id" ]; then
-            echo "Failed to extract deployment ID from: $deployment_url"
-            exit 1
-          fi
+          # Extract deployment info
+          inspect=$(pnpm vercel inspect $deployment_url --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+          deployment_id=$(echo "$inspect" | grep -m 1 '^    id' | awk '{print $NF}' | cut -d'_' -f 2-)
+          inspect_url="https://vercel.com/barely/${{ matrix.app.name }}/$deployment_id"
           
           echo "deployment_id=$deployment_id" >> $GITHUB_OUTPUT
+          echo "deployment_url=$deployment_url" >> $GITHUB_OUTPUT
+          echo "inspect_url=$inspect_url" >> $GITHUB_OUTPUT
 
   aggregate:
     name: Aggregate deployments
@@ -75,15 +114,35 @@ jobs:
     outputs:
       deployments: ${{ steps.aggregate.outputs.deployments }}
     steps:
-      - name: Aggregate deployment IDs
+      - name: Aggregate deployment info
         id: aggregate
         run: |
-          # Create JSON object from matrix outputs
-          deployments=$(echo '${{ toJson(needs.deploy.outputs) }}' | jq -c '
-            reduce (to_entries[] | select(.key | endswith("_name"))) as $item ({};
-              . + {($item.value): (to_entries[] | select(.key == ($item.value + "_deployment_id")) | .value)}
-            )
-          ')
+          # Create comprehensive deployment info
+          deployments='{'
+          
+          # Process each app's outputs
+          echo '${{ toJson(needs.deploy.outputs) }}' > outputs.json
+          
+          # Extract unique app names
+          app_names=$(cat outputs.json | jq -r 'to_entries[] | select(.key | endswith("_name")) | .value' | sort -u)
+          
+          first=true
+          for app in $app_names; do
+            if [ "$first" = true ]; then
+              first=false
+            else
+              deployments+=','
+            fi
+            
+            # Get deployment info for this app
+            deployment_id=$(cat outputs.json | jq -r --arg app "$app" 'to_entries[] | select(.key == ($app + "_deployment_id")) | .value // empty' | head -1)
+            deployment_url=$(cat outputs.json | jq -r --arg app "$app" 'to_entries[] | select(.key == ($app + "_deployment_url")) | .value // empty' | head -1)
+            inspect_url=$(cat outputs.json | jq -r --arg app "$app" 'to_entries[] | select(.key == ($app + "_inspect_url")) | .value // empty' | head -1)
+            
+            deployments+='"'$app'":{"id":"'$deployment_id'","url":"'$deployment_url'","inspect":"'$inspect_url'"}'
+          done
+          
+          deployments+='}'
           
           echo "deployments=$deployments" >> $GITHUB_OUTPUT
           echo "Deployments: $deployments"

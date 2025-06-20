@@ -81,9 +81,7 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
-        run: |
-          cd packages/lib
-          pnpm exec trigger deploy --env prod
+        run: pnpm deploy-trigger:production
 
   # Production can merge check
   production--can-merge:
@@ -151,7 +149,8 @@ jobs:
           branches=$(neonctl branches list --project-id ${{ secrets.NEON_PROJECT_ID }} \
             --api-key ${{ secrets.NEON_API_KEY }} --output json)
           
-          echo "$branches" | jq -r '.[] | select(.name | startswith("dev-${{ needs.setup.outputs.pr_branch_name }}")) | .name' | \
+          # Pattern for dev branches: {branch_name}__dev_{timestamp}
+          echo "$branches" | jq -r '.[] | select(.name | test("^${{ needs.setup.outputs.pr_branch_name }}__dev_")) | .name' | \
           while read branch; do
             echo "Deleting dev branch: $branch"
             neonctl branches delete "$branch" \

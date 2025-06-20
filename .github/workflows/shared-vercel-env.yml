@@ -11,10 +11,18 @@ on:
         required: true
         type: string
         description: 'Database URL to set'
+      database_pool_url:
+        required: false
+        type: string
+        description: 'Database pool URL to set'
       environment:
         required: true
         type: string
         description: 'Environment: preview or production'
+      branch_name:
+        required: false
+        type: string
+        description: 'Branch name for preview environments'
     secrets:
       VERCEL_TOKEN:
         required: true
@@ -29,14 +37,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup environment
-        run: |
-          echo "VERCEL_ORG_ID=${{ secrets.VERCEL_TEAM_ID }}" >> $GITHUB_ENV
-          echo "VERCEL_TOKEN=${{ secrets.VERCEL_TOKEN }}" >> $GITHUB_ENV
+      - name: Copy script from repo
+        run: cp .github/scripts/update-vercel-env.sh ./update-env.sh || echo "Script not found, will create inline"
 
-      - name: Create update script
+      - name: Create update script if needed
         run: |
-          cat > update-env.sh << 'EOF'
+          if [ ! -f ./update-env.sh ]; then
+            cat > update-env.sh << 'EOF'
           #!/bin/bash
           set -e
           
@@ -44,24 +51,47 @@ jobs:
             local app_name=$1
             local project_id=$2
             local env_type=$3
+            local branch=$4
             
             echo "Updating $app_name..."
             
+            # Prepare branch option for preview environments
+            BRANCH_OPT=""
+            if [ "$env_type" = "preview" ] && [ -n "$branch" ]; then
+              BRANCH_OPT="--git-branch=$branch"
+            fi
+            
+            # Check and remove existing vars if they exist
+            if [ "$env_type" = "preview" ] && [ -n "$branch" ]; then
+              vercel env ls preview $branch --token=$VERCEL_TOKEN --scope=barely 2>/dev/null | grep -q DATABASE_URL && \
+                vercel env rm DATABASE_URL preview $branch --yes --token=$VERCEL_TOKEN --scope=barely || true
+              vercel env ls preview $branch --token=$VERCEL_TOKEN --scope=barely 2>/dev/null | grep -q DATABASE_POOL_URL && \
+                vercel env rm DATABASE_POOL_URL preview $branch --yes --token=$VERCEL_TOKEN --scope=barely || true
+              vercel env ls preview $branch --token=$VERCEL_TOKEN --scope=barely 2>/dev/null | grep -q DIRECT_DATABASE_URL && \
+                vercel env rm DIRECT_DATABASE_URL preview $branch --yes --token=$VERCEL_TOKEN --scope=barely || true
+            fi
+            
             # Update DATABASE_URL
-            echo "$DATABASE_URL" | vercel env add DATABASE_URL $env_type --yes --token=$VERCEL_TOKEN --scope=barely --project=$app_name || true
+            echo "$DATABASE_URL" | vercel env add DATABASE_URL $env_type $BRANCH_OPT --yes --token=$VERCEL_TOKEN --scope=barely || true
             
-            # Update DATABASE_POOL_URL (same as DATABASE_URL for preview)
-            echo "$DATABASE_URL" | vercel env add DATABASE_POOL_URL $env_type --yes --token=$VERCEL_TOKEN --scope=barely --project=$app_name || true
+            # Update DATABASE_POOL_URL
+            if [ -n "$DATABASE_POOL_URL" ]; then
+              echo "$DATABASE_POOL_URL" | vercel env add DATABASE_POOL_URL $env_type $BRANCH_OPT --yes --token=$VERCEL_TOKEN --scope=barely || true
+            else
+              echo "$DATABASE_URL" | vercel env add DATABASE_POOL_URL $env_type $BRANCH_OPT --yes --token=$VERCEL_TOKEN --scope=barely || true
+            fi
             
-            # Update DIRECT_DATABASE_URL (same as DATABASE_URL for preview)
-            echo "$DATABASE_URL" | vercel env add DIRECT_DATABASE_URL $env_type --yes --token=$VERCEL_TOKEN --scope=barely --project=$app_name || true
+            # Update DIRECT_DATABASE_URL (same as DATABASE_URL)
+            echo "$DATABASE_URL" | vercel env add DIRECT_DATABASE_URL $env_type $BRANCH_OPT --yes --token=$VERCEL_TOKEN --scope=barely || true
             
             echo "✓ Updated $app_name"
           }
           
           export -f update_env_var
           export DATABASE_URL="${{ inputs.database_url }}"
+          export DATABASE_POOL_URL="${{ inputs.database_pool_url }}"
           export VERCEL_TOKEN="${{ secrets.VERCEL_TOKEN }}"
+          export VERCEL_PROJECT_ID=""
           
           # Parse apps and update in parallel
           echo '${{ inputs.apps }}' | jq -r '.[] | @base64' | while read app; do
@@ -72,7 +102,10 @@ jobs:
             app_name=$(_jq '.name')
             project_id=$(_jq '.projectId')
             
-            update_env_var "$app_name" "$project_id" "${{ inputs.environment }}" &
+            # Set project ID for this app
+            export VERCEL_PROJECT_ID=\${{ secrets[\$project_id] }}
+            
+            update_env_var "$app_name" "$project_id" "${{ inputs.environment }}" "${{ inputs.branch_name }}" &
           done
           
           # Wait for all background jobs to complete
@@ -80,6 +113,7 @@ jobs:
           
           echo "✅ All apps updated"
           EOF
+          fi
           
           chmod +x update-env.sh
 
@@ -87,4 +121,16 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Update environment variables
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_APP_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
+          VERCEL_CART_PROJECT_ID: ${{ secrets.VERCEL_CART_PROJECT_ID }}
+          VERCEL_FM_PROJECT_ID: ${{ secrets.VERCEL_FM_PROJECT_ID }}
+          VERCEL_LINK_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
+          VERCEL_MANAGE_EMAIL_PROJECT_ID: ${{ secrets.VERCEL_MANAGE_EMAIL_PROJECT_ID }}
+          VERCEL_PAGE_PROJECT_ID: ${{ secrets.VERCEL_PAGE_PROJECT_ID }}
+          VERCEL_PRESS_PROJECT_ID: ${{ secrets.VERCEL_PRESS_PROJECT_ID }}
+          VERCEL_SPARROW_PROJECT_ID: ${{ secrets.VERCEL_SPARROW_PROJECT_ID }}
+          VERCEL_WWW_PROJECT_ID: ${{ secrets.VERCEL_WWW_PROJECT_ID }}
         run: ./update-env.sh

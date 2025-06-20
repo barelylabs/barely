@@ -1,0 +1,56 @@
+name: PR Comment
+
+on:
+  workflow_call:
+    inputs:
+      deployments:
+        required: true
+        type: string
+        description: 'JSON object with deployment info'
+      neon_branch_id:
+        required: false
+        type: string
+        description: 'Neon branch ID for database inspection'
+
+jobs:
+  comment:
+    name: Post PR Comment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate comment body
+        id: comment
+        run: |
+          # Parse deployments
+          deployments='${{ inputs.deployments }}'
+          
+          # Start building the comment
+          comment_body="## Preview Deployments\n\n"
+          comment_body+="| App | Preview | Inspect |\n"
+          comment_body+="|-----|---------|----------|\n"
+          
+          # Add each app's deployment info
+          echo "$deployments" | jq -r 'to_entries[] | 
+            "| " + .key + " | [preview](" + .value.url + ") | [inspect](" + .value.inspect + ") |"' | \
+          while read line; do
+            comment_body+="$line\n"
+          done
+          
+          # Add database info if available
+          if [ -n "${{ inputs.neon_branch_id }}" ]; then
+            comment_body+="\n## Database\n\n"
+            comment_body+="| Service | Inspect |\n"
+            comment_body+="|---------|----------|\n"
+            comment_body+="| Neon | [inspect](https://console.neon.tech/app/projects/${{ inputs.neon_branch_id }}) |\n"
+          fi
+          
+          # Save comment body to file (to handle special characters)
+          echo -e "$comment_body" > comment.md
+          
+      - name: Comment on pull request
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          filePath: comment.md
+          comment_tag: preview-deployments
