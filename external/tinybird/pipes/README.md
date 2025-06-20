@@ -54,3 +54,14 @@ Cross-application endpoints:
 - `v2_` prefix indicates version 2 of the analytics API
 - `_mv` suffix indicates materialized view datasources
 - Double underscore (`__`) indicates sub-endpoints or variants
+
+## CI/CD Testing
+- `ci_test.pipe` - Test pipe for verifying CI/CD deployment
+- `deployment_health.pipe` - Health check endpoint for deployment verification
+
+---
+**CI/CD Deployment Info:**
+- Last updated: 2024-06-20
+- Pipeline: GitHub Actions Tinybird CI/CD
+- Purpose: Verify deployment pipeline works correctly
+- Status: Ready for main branch testing
