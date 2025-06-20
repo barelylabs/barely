@@ -230,8 +230,13 @@ jobs:
     steps:
       - name: Report deployment status
         run: |
-          if [ "${{ needs.promote-apps.result }}" == "success" ]; then
-            echo "✅ Production deployment completed successfully"
+          promote_result="${{ needs.promote-apps.result }}"
+          if [ "$promote_result" == "success" ] || [ "$promote_result" == "skipped" ]; then
+            if [ "$promote_result" == "success" ]; then
+              echo "✅ Production deployment completed successfully"
+            else
+              echo "✅ Production deployment skipped (no promotion needed)"
+            fi
           else
             echo "❌ Production deployment failed"
             echo "Rollback procedures should have been executed automatically"
