@@ -35,7 +35,7 @@ export function AllCartFunnels() {
 				selectedKeys={cartFunnelSelection}
 				setSelectedKeys={setCartFunnelSelection}
 				onAction={() => {
-					if (!cartFunnelSelection) return;
+					if (cartFunnelSelection === 'all' || !cartFunnelSelection.size) return;
 					setShowUpdateCartFunnelModal(true);
 				}}
 				// empty

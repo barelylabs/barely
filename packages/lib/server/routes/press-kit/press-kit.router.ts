@@ -1,5 +1,5 @@
 import { and, eq, notInArray, sql } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { NormalizedPressKit } from './press-kit.schema';
 import { getUserWorkspaceByHandle } from '../../../utils/auth';
@@ -40,8 +40,8 @@ export const pressKitRouter = createTRPCRouter({
 					})),
 				};
 
-				existingPressKit.videos;
-				normalizedPressKit.videos;
+				// existingPressKit.videos;
+				// normalizedPressKit.videos;
 
 				return normalizedPressKit;
 			}
@@ -71,7 +71,7 @@ export const pressKitRouter = createTRPCRouter({
 				pressPhotos: [],
 			};
 
-			normalizedPressKit.videos;
+			// normalizedPressKit.videos;
 
 			return normalizedPressKit;
 		}),

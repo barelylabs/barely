@@ -11,7 +11,6 @@ import { PlaylistPitchReviews } from './playlist-pitch-review.sql';
 const assignPlaylistPitchToReviewers = async (campaignId: string) => {
 	const campaign = await getCampaignById(campaignId);
 
-	if (!campaign) throw new Error('Campaign not found');
 	if (!campaign.curatorReach) throw new Error('Campaign curator reach not set');
 
 	// 🤹‍♂️ randomly select curators from all curators

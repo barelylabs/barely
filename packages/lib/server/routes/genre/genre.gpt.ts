@@ -1,7 +1,8 @@
 import { PromptTemplate } from '@langchain/core/prompts';
+// import { OutputParserr } from '@langchain/core/output_parsers';
 import { ChatOpenAI } from '@langchain/openai';
 import { OutputFixingParser, StructuredOutputParser } from 'langchain/output_parsers';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { Genre } from './genre.schema';
 import { insertGenreSchema } from './genre.schema';

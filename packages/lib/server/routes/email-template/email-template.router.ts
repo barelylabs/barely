@@ -1,6 +1,6 @@
 import { sendEmail } from '@barely/email';
 import { and, asc, desc, eq, gt, inArray, isNull, lt, or } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import { getEmailAddressFromEmailAddress } from '../../../utils/email';
 import { raise } from '../../../utils/raise';

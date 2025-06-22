@@ -56,7 +56,6 @@ export function generateFanGroupConditions(conditions: FanGroupCondition[]) {
 					condition.exclude ?
 						sql`carts.order_amount <= ${condition.totalOrderAmount}`
 					:	sql`carts.order_amount >= ${condition.totalOrderAmount}`;
-				if (cond === undefined) return;
 
 				return whereConditions.push(cond);
 			}

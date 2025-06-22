@@ -18,7 +18,7 @@ import { useCellValues, usePublisher } from '@mdxeditor/gurx';
 import * as TooltipOld from '@radix-ui/react-tooltip';
 import classNames from 'classnames';
 import { createCommand } from 'lexical';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import { Form, SubmitButton } from '../../../../forms';
 import { TextField } from '../../../../forms/text-field';
@@ -57,7 +57,7 @@ export function LinkEditForm({ url, title, onSubmit, onCancel }: LinkEditFormPro
 	return (
 		<Form form={form} onSubmit={onSubmit}>
 			<div className='flex min-w-96 flex-col gap-2'>
-				{/* eslint-disable-next-line jsx-a11y/no-autofocus */}
+				{}
 				<TextField name='url' label='URL' autoFocus />
 				<TextField name='title' label='Title' />
 				<div className='flex flex-row justify-end gap-2'>

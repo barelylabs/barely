@@ -9,7 +9,7 @@ import { initTRPC, TRPCError } from '@trpc/server';
 import { waitUntil } from '@vercel/functions';
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import superjson from 'superjson';
-import { z, ZodError } from 'zod';
+import { z, ZodError } from 'zod/v4';
 
 import type { VisitorInfo } from '../../utils/middleware';
 // import type { DbPool } from '../db/pool';
@@ -197,19 +197,18 @@ export const workspaceQueryProcedure = privateProcedure
 			});
 		}
 
-		const workspace = getUserWorkspaceByHandle(ctx.user, parsedHandle.data.handle);
-
-		if (!workspace) {
+		try {
+			const workspace = getUserWorkspaceByHandle(ctx.user, parsedHandle.data.handle);
+			return opts.next({
+				ctx: {
+					...opts.ctx,
+					workspace,
+				},
+			});
+		} catch {
 			throw new TRPCError({
 				code: 'NOT_FOUND',
 				message: 'Workspace not found',
 			});
 		}
-
-		return opts.next({
-			ctx: {
-				...opts.ctx,
-				workspace,
-			},
-		});
 	});

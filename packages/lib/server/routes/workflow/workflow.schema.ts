@@ -1,6 +1,6 @@
 import type { InferSelectModel } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import { lexoMiddle } from '../../../utils/collection';
 import { queryStringArraySchema } from '../../../utils/zod-helpers';
@@ -34,7 +34,7 @@ export type WorkflowAction = InferSelectModel<typeof WorkflowActions>;
 
 /** workflows */
 export const insertWorkflowSchema = createInsertSchema(Workflows, {
-	name: s => s.name.min(1, 'Please give your workflow a name'),
+	name: name => name.min(1, 'Please give your workflow a name'),
 }).extend({
 	triggers: z.array(createWorkflowTriggerSchema),
 	actions: z.array(createWorkflowActionSchema),

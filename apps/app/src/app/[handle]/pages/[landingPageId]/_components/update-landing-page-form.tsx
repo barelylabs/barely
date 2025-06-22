@@ -1,7 +1,7 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/router';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { use, useCallback } from 'react';
 import { useZodForm } from '@barely/lib/hooks/use-zod-form';
 import { api } from '@barely/lib/server/api/react';

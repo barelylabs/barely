@@ -1,16 +1,18 @@
 import { redirect } from 'next/navigation';
 
-export default function Page({
+export default async function Page({
 	params,
 	searchParams,
 }: {
-	params: {
+	params: Promise<{
 		mode: 'preview' | 'live';
 		handle: string;
 		key: string;
-	};
-	searchParams: Record<string, string>;
+	}>;
+	searchParams: Promise<Record<string, string>>;
 }) {
-	const queryString = new URLSearchParams(searchParams).toString();
-	redirect(`/${params.handle}/${params.key}/checkout?${queryString}`);
+	const awaitedParams = await params;
+	const awaitedSearchParams = await searchParams;
+	const queryString = new URLSearchParams(awaitedSearchParams).toString();
+	redirect(`/${awaitedParams.handle}/${awaitedParams.key}/checkout?${queryString}`);
 }

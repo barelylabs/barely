@@ -1,5 +1,5 @@
-import type { ZodType } from 'zod';
-import { z } from 'zod';
+import type { ZodType } from 'zod/v4';
+import { z } from 'zod/v4';
 
 import { sha256 } from './hash';
 
@@ -46,19 +46,21 @@ type Literal = z.infer<typeof literalSchema>;
 
 type Json = Literal | { [key: string]: Json } | Json[];
 
-const z_json: z.ZodType<Json> = z.lazy(() =>
-	z.union([literalSchema, z.array(z_json), z.record(z_json)]),
+const jsonSchema: z.ZodType<Json> = z.lazy(() =>
+	z.union([literalSchema, z.array(jsonSchema), z.record(z.string(), jsonSchema)]),
 );
 
-export const z_stringToJson = z.string().transform((str, ctx): z.infer<typeof z_json> => {
-	try {
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-		return JSON.parse(str);
-	} catch (e) {
-		ctx.addIssue({ code: 'custom', message: 'Invalid JSON' });
-		return z.NEVER;
-	}
-});
+export const z_stringToJson = z
+	.string()
+	.transform((str, ctx): z.infer<typeof jsonSchema> => {
+		try {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-return
+			return JSON.parse(str);
+		} catch (e) {
+			ctx.addIssue({ code: 'custom', message: 'Invalid JSON' });
+			return z.NEVER;
+		}
+	});
 
 export function stringToJSON<Schema extends ZodType>(
 	str: string,
@@ -66,13 +68,12 @@ export function stringToJSON<Schema extends ZodType>(
 ): z.infer<Schema> {
 	const json = z_stringToJson.safeParse(str);
 
-	if (!json.success) throw new Error(json.error.toString());
+	if (!json.success) throw new Error(json.error.message);
 
 	const parsed = schema.safeParse(json.data);
 
-	if (!parsed.success) throw new Error(parsed.error.toString());
+	if (!parsed.success) throw new Error(parsed.error.message);
 
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 	return parsed.data;
 }
 
@@ -98,7 +99,7 @@ export function stringToJSONSafe<Schema extends ZodType>(
 
 	return {
 		success: true,
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
 		data: parsed.data,
 	};
 }
@@ -138,7 +139,7 @@ export const queryStringEnumArraySchema = <T extends readonly [string, ...string
 				);
 				if (invalidValues.length > 0)
 					throw new Error(`Invalid enum values: ${invalidValues.join(', ')}`);
-				return array as z.Writeable<T>[number][];
+				return array as T[number][];
 			}
 			if (Array.isArray(a)) return a;
 

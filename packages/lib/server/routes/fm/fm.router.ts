@@ -1,5 +1,5 @@
 import { and, asc, desc, eq, gt, inArray, isNull, lt, notInArray, or } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { FileRecord } from '../file/file.schema';
 import type { InsertFmLink, InsertFmPage } from './fm.schema';
@@ -58,8 +58,8 @@ export const fmRouter = createTRPCRouter({
 				nextCursor =
 					nextFmPage ?
 						{
-							id: nextFmPage?.id,
-							createdAt: nextFmPage?.createdAt,
+							id: nextFmPage.id,
+							createdAt: nextFmPage.createdAt,
 						}
 					:	undefined;
 			}

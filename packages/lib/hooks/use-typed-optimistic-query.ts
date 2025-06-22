@@ -1,7 +1,7 @@
 'use client';
 
 // import type { ReadonlyURLSearchParams } from 'next/navigation';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useCallback, useEffect, useOptimistic, useTransition } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 

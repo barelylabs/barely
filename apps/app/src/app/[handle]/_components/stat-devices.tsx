@@ -3,8 +3,9 @@
 import type { TopEventType } from '@barely/lib/server/routes/stat/stat.schema';
 import { useState } from 'react';
 import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
+import { useTRPC } from '@barely/lib/server/api/react';
 import { getTopStatValue } from '@barely/lib/server/routes/stat/stat.schema';
-import { api } from '@barely/server/api/react';
+import { useQuery } from '@tanstack/react-query';
 
 import { BarList } from '@barely/ui/charts/bar-list';
 import { Card } from '@barely/ui/elements/card';
@@ -40,11 +41,13 @@ export type DeviceTabs = 'Device' | 'Browser' | 'OS';
 // }
 
 export function StatDevices({ eventType }: { eventType: TopEventType }) {
+	const trpc = useTRPC();
 	const [tab, setTab] = useState<DeviceTabs>('Device');
 
 	const { filtersWithHandle, getSetFilterPath } = useWebEventStatFilters();
 
-	const { data: devices } = api.stat.topDevices.useQuery(
+	const { data: devices } = useQuery(
+		trpc.stat.topDevices.queryOptions(
 		{ ...filtersWithHandle, topEventType: eventType },
 		{
 			select: data =>
@@ -55,10 +58,11 @@ export function StatDevices({ eventType }: { eventType: TopEventType }) {
 					href: getSetFilterPath('device', d.device),
 					target: '_self',
 				})),
-		},
+		}),
 	);
 
-	const { data: browsers } = api.stat.topBrowsers.useQuery(
+	const { data: browsers } = useQuery(
+		trpc.stat.topBrowsers.queryOptions(
 		{ ...filtersWithHandle, topEventType: eventType },
 		{
 			select: data =>
@@ -72,10 +76,11 @@ export function StatDevices({ eventType }: { eventType: TopEventType }) {
 					href: getSetFilterPath('browser', d.browser),
 					target: '_self',
 				})),
-		},
+		}),
 	);
 
-	const { data: operatingSystems } = api.stat.topOperatingSystems.useQuery(
+	const { data: operatingSystems } = useQuery(
+		trpc.stat.topOperatingSystems.queryOptions(
 		{ ...filtersWithHandle, topEventType: eventType },
 		{
 			select: data =>
@@ -86,7 +91,7 @@ export function StatDevices({ eventType }: { eventType: TopEventType }) {
 					href: getSetFilterPath('os', d.os),
 					target: '_self',
 				})),
-		},
+		}),
 	);
 
 	const listData =

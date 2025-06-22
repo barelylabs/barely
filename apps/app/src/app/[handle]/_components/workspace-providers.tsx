@@ -8,6 +8,8 @@ import { useWorkspaceHotkeys } from '@barely/lib/hooks/use-workspace-hotkeys';
 import { useUpdateNavHistory } from '@barely/hooks/use-nav-history';
 import { UserContext } from '@barely/hooks/use-user';
 
+import { ThemeProvider } from '@barely/ui/elements/next-theme-provider';
+
 interface UserContextProviderProps {
 	user: SessionUser;
 	children: ReactNode | JSX.Element;
@@ -42,10 +44,12 @@ export function WorkspaceProviders(
 	props: UserContextProviderProps & WorkspaceContextProviderProps,
 ) {
 	return (
-		<UserContextProvider user={props.user}>
-			<WorkspaceContextProvider workspace={props.workspace}>
-				<WorkspaceUpdateNavHistory>{props.children}</WorkspaceUpdateNavHistory>
-			</WorkspaceContextProvider>
-		</UserContextProvider>
+		<ThemeProvider attribute='class' defaultTheme='system' enableSystem>
+			<UserContextProvider user={props.user}>
+				<WorkspaceContextProvider workspace={props.workspace}>
+					<WorkspaceUpdateNavHistory>{props.children}</WorkspaceUpdateNavHistory>
+				</WorkspaceContextProvider>
+			</UserContextProvider>
+		</ThemeProvider>
 	);
 }

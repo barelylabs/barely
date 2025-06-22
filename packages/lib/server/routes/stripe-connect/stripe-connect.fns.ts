@@ -76,8 +76,7 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 
 		updateCart.orderId = await createOrderIdForCart(prevCart);
 
-		updateCart.stage =
-			cartFunnel?.upsellProductId ? 'upsellCreated' : 'checkoutConverted';
+		updateCart.stage = cartFunnel.upsellProductId ? 'upsellCreated' : 'checkoutConverted';
 		updateCart.checkoutStripeChargeId = charge.id;
 		updateCart.checkoutStripePaymentMethodId = charge.payment_method;
 
@@ -93,8 +92,8 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 
 		// update or create fan
 		let fan =
-			prevCart.fan ? prevCart.fan
-			: (stripeCustomerId ?? charge.billing_details.email) ?
+			prevCart.fan ??
+			((stripeCustomerId ?? charge.billing_details.email) ?
 				await dbHttp.query.Fans.findFirst({
 					where: or(
 						charge.billing_details.email ?
@@ -103,7 +102,7 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 						stripeCustomerId ? eq(Fans.stripeCustomerId, stripeCustomerId) : undefined,
 					),
 				})
-			:	undefined;
+			:	undefined);
 
 		if (fan) {
 			updateCart.fanId = fan.id;
@@ -157,8 +156,6 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 			console.log('error recording cart event:', err);
 		});
 
-		if (!fan) throw new Error('Fan not created or found after charge success');
-
 		// increment value
 		await incrementAssetValuesOnCartPurchase(
 			prevCart,
@@ -171,7 +168,7 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 			await tasks.trigger<typeof handleAbandonedUpsell>('handle-abandoned-upsell', {
 				cartId: prevCart.id,
 			}); // this waits 5 minutes and then marks the cart abandoned if it hasn't been converted or declined
-		} else if (updateCart.stage === 'checkoutConverted') {
+		} else {
 			await sendCartReceiptEmail({
 				...prevCart,
 				...updateCart,
@@ -201,7 +198,7 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 		}
 
 		// newFan triggers
-		if (!prevCart.fan && fan) {
+		if (!prevCart.fan) {
 			// i.e. we just created a fan
 			const newFanTriggers = await dbHttp.query.Flow_Triggers.findMany({
 				where: and(
@@ -219,6 +216,7 @@ export async function handleStripeConnectChargeSuccess(charge: Stripe.Charge) {
 			}
 		}
 	}
+	return;
 }
 
 export function getStripeConnectAccountId(

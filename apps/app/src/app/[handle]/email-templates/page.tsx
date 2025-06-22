@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { redirect } from 'next/navigation';
 import { api } from '@barely/lib/server/api/server';
 import { emailTemplateSearchParamsSchema } from '@barely/lib/server/routes/email-template/email-template.schema';
@@ -12,21 +12,23 @@ import { CreateOrUpdateEmailTemplateModal } from './_components/create-or-update
 import { EmailTemplateContextProvider } from './_components/email-template-context';
 import { EmailTemplateHotkeys } from './_components/email-template-hotkeys';
 
-export default function EmailTemplatesPage({
+export default async function EmailTemplatesPage({
 	params,
 	searchParams,
 }: {
-	params: { handle: string };
-	searchParams: z.infer<typeof emailTemplateSearchParamsSchema>;
+	params: Promise<{ handle: string }>;
+	searchParams: Promise<z.infer<typeof emailTemplateSearchParamsSchema>>;
 }) {
-	const parsedFilters = emailTemplateSearchParamsSchema.safeParse(searchParams);
+	const awaitedParams = await params;
+	const awaitedSearchParams = await searchParams;
+	const parsedFilters = emailTemplateSearchParamsSchema.safeParse(awaitedSearchParams);
 	if (!parsedFilters.success) {
 		console.log('parsedFilters error', parsedFilters.error);
-		redirect(`/${params.handle}/email-templates`);
+		redirect(`/${awaitedParams.handle}/email-templates`);
 	}
 
-	const emailTemplates = api({ handle: params.handle }).emailTemplate.byWorkspace({
-		handle: params.handle,
+	const emailTemplates = api({ handle: awaitedParams.handle }).emailTemplate.byWorkspace({
+		handle: awaitedParams.handle,
 		...parsedFilters.data,
 	});
 

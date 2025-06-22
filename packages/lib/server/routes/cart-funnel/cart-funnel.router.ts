@@ -1,5 +1,5 @@
 import { and, asc, desc, eq, gt, inArray, isNull, lt, or } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { InsertCartFunnel } from './cart-funnel.schema';
 import { newId } from '../../../utils/id';
@@ -49,8 +49,8 @@ export const cartFunnelRouter = createTRPCRouter({
 				nextCursor =
 					nextFunnel ?
 						{
-							id: nextFunnel?.id,
-							createdAt: nextFunnel?.createdAt,
+							id: nextFunnel.id,
+							createdAt: nextFunnel.createdAt,
 						}
 					:	undefined;
 			}

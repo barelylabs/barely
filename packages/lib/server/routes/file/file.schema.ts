@@ -1,8 +1,6 @@
-// import type { extensions } from "@uploadthing/mime-types";
-// import type { AllowedFileType, ContentDisposition } from "@uploadthing/shared";
 import { ALLOWED_FILE_TYPES } from '@uploadthing/shared';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import { querySelectionSchema } from '../../../utils/zod-helpers';
 import { Files } from './file.sql';
@@ -13,6 +11,7 @@ export const insertFileSchema = createInsertSchema(Files, {
 	duration: z.coerce.number().nullish(),
 	fps: z.coerce.number().nullish(),
 });
+
 export const createFileSchema = insertFileSchema.omit({ id: true });
 export const upsertFileSchema = insertFileSchema.partial({ id: true });
 export const updateFileSchema = insertFileSchema.partial().required({ id: true });

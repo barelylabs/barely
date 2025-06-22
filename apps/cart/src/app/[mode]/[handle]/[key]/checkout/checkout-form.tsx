@@ -21,7 +21,7 @@ import {
 	useElements,
 	useStripe,
 } from '@stripe/react-stripe-js';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import { useDebouncedCallback } from '@barely/hooks/use-debounced-callback';
 import { useZodForm } from '@barely/hooks/use-zod-form';

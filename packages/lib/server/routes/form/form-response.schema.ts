@@ -1,5 +1,5 @@
 import type { InferModel } from 'drizzle-orm';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 
 import { FormResponses } from './form-response.sql';

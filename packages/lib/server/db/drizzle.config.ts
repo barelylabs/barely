@@ -1,6 +1,6 @@
 import type { Config } from 'drizzle-kit';
 // import { defineConfig } from 'drizzle-kit';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 const DATABASE_URL = z.string().url().parse(process.env.DATABASE_URL);
 

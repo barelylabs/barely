@@ -54,7 +54,7 @@ export function WorkspaceSwitcher() {
 
 	const normalizedObject = {
 		id: currentWorkspace.id,
-		name: currentWorkspace.name ?? currentWorkspace.handle,
+		name: currentWorkspace.name,
 		avatarImageS3Key: currentWorkspace.avatarImageS3Key,
 		type: toTitleCase(underscoresToSpaces(currentWorkspace.type)),
 	};
@@ -134,7 +134,7 @@ export function WorkspaceSwitcher() {
 										imageWidth={20}
 										imageHeight={20}
 									/>
-									{personalAccount.name ?? personalAccount.handle}
+									{personalAccount.name}
 									<Icon.check
 										className={cn(
 											'ml-auto h-4 w-4',
@@ -162,7 +162,7 @@ export function WorkspaceSwitcher() {
 										imageHeight={20}
 										priority
 									/>
-									{workspace.name ?? workspace.handle}
+									{workspace.name}
 									<Icon.check
 										className={cn(
 											'ml-auto h-4 w-4',

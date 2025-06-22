@@ -5,7 +5,7 @@ import type {
 	InsertTrackAudioFile,
 	UpsertTrack,
 } from '@barely/lib/server/routes/track/track.schema';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useCallback } from 'react';
 import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
 import { useUpload } from '@barely/lib/hooks/use-upload';

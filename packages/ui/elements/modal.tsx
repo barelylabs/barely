@@ -6,9 +6,9 @@ import { useRouter } from 'next/navigation';
 import { useMediaQuery } from '@barely/lib/hooks/use-media-query';
 import { cn } from '@barely/lib/utils/cn';
 import * as Dialog from '@radix-ui/react-dialog';
+import { Drawer } from 'vaul';
 
 import type { IconKey } from './icon';
-import { Drawer } from '../vaul';
 import { Button } from './button';
 import { Icon } from './icon';
 import { ScrollArea } from './scroll-area';
@@ -134,7 +134,6 @@ function Modal({
 						variant='icon'
 						look='ghost'
 						size='sm'
-						// eslint-disable-next-line jsx-a11y/no-autofocus
 						autoFocus={false}
 						className='absolute right-1 top-1 z-20'
 						pill
@@ -170,11 +169,7 @@ function ModalHeader(props: ModalHeaderProps) {
 	return (
 		<div className='z-10 flex flex-col items-center justify-center gap-3 border-b border-border bg-background px-6 py-6 text-center sm:px-10 md:sticky md:top-0'>
 			{/* <div className='flex flex-row items-center justify-center gap-3'></div> */}
-			{props.iconOverride ?
-				props.iconOverride
-			: IconComponent ?
-				<IconComponent className='h-10 w-10' />
-			:	null}
+			{props.iconOverride ?? (IconComponent && <IconComponent className='h-10 w-10' />)}
 
 			{props.title ?
 				<H size='4'>{props.title}</H>

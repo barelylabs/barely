@@ -1,5 +1,5 @@
 import type { ReceiptEmailProps } from '@barely/email/src/templates/cart/receipt';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 // import { cookies } from 'next/headers';
 import { sendEmail } from '@barely/email';
 import ReceiptEmailTemplate from '@barely/email/src/templates/cart/receipt';
@@ -322,7 +322,7 @@ export async function getCartById(id: string, handle?: string, funnelKey?: strin
 	if (!cart) return null;
 	if (!cart.funnel) return null;
 	if (handle && cart.workspace.handle !== handle) return null;
-	if (funnelKey && cart.funnel?.key !== funnelKey) return null;
+	if (funnelKey && cart.funnel.key !== funnelKey) return null;
 
 	return cart;
 }

@@ -1,6 +1,6 @@
 import { cn } from '@barely/lib/utils/cn';
 
-interface BeaconProps extends React.HTMLAttributes<HTMLSpanElement> {}
+type BeaconProps = React.HTMLAttributes<HTMLSpanElement>;
 
 const Beacon = ({ className }: BeaconProps) => {
 	return (

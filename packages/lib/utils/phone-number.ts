@@ -34,7 +34,7 @@ const isPossiblePhoneNumber = (input: string) => {
 };
 
 const formatInternational = (input: string) => {
-	return parsePhoneNumber(input)?.formatInternational();
+	return parsePhoneNumber(input).formatInternational();
 };
 
 const parseForDb = (input: string) => {
@@ -42,7 +42,7 @@ const parseForDb = (input: string) => {
 };
 
 export async function checkPhoneNumberExists(phone: string, db?: Db) {
-	if (window === undefined && !!db) {
+	if (db) {
 		const { checkPhoneNumberExistsServerAction } = await import(
 			'../server/routes/user/user.actions'
 		);

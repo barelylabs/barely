@@ -1,6 +1,6 @@
 import type { InferSelectModel } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { FileRecord, PublicImage } from '../file/file.schema';
 import type { PublicMixtapeWith_Tracks } from '../mixtape/mixtape.schema';

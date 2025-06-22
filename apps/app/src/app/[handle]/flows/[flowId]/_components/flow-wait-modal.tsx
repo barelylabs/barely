@@ -1,5 +1,5 @@
 import type { FlowState } from '@barely/lib/server/routes/flow/flow.ui.types';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useZodForm } from '@barely/lib/hooks/use-zod-form';
 import { flowForm_waitSchema } from '@barely/lib/server/routes/flow/flow.schema';
 import { raise } from '@barely/lib/utils/raise';

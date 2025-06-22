@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { usePathname, useRouter } from 'next/navigation';
 
 import { api } from '../server/api/react';

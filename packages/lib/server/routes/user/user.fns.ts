@@ -24,7 +24,7 @@ import { createStripeWorkspaceCustomer } from '../workspace-stripe/workspace-str
 import { Workspaces } from '../workspace/workspace.sql';
 import { _Users_To_Workspaces, Users } from './user.sql';
 
-('@auth/core/adapters');
+// ('@auth/core/adapters');
 
 /** START HELPER FUNCTIONS */
 export const rawSessionUserWith = {
@@ -110,8 +110,8 @@ export function getSessionUserFromRawUser(user: RawSessionUser): SessionUser {
 		...user,
 		workspaces: user._workspaces.map(_w => ({
 			..._w.workspace,
-			avatarImageS3Key: _w.workspace._avatarImages[0]?.file?.s3Key ?? '',
-			headerImageS3Key: _w.workspace._headerImages[0]?.file?.s3Key ?? '',
+			avatarImageS3Key: _w.workspace._avatarImages[0]?.file.s3Key ?? '',
+			headerImageS3Key: _w.workspace._headerImages[0]?.file.s3Key ?? '',
 			role: _w.role,
 		})),
 		workspaceInvites: user.workspaceInvites.map(_wi => ({
@@ -180,8 +180,10 @@ export async function createUser(user: CreateUser) {
 		}
 	}
 
+	const { email, ...restOfUser } = user;
 	const newUser: InsertUser = {
-		...user,
+		...restOfUser,
+		email,
 		id: newUserId,
 		personalWorkspaceId: newWorkspaceId,
 		handle,

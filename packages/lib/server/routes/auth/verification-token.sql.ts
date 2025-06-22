@@ -8,6 +8,6 @@ export const VerificationTokens = pgTable(
 		expires: timestamp('expires').notNull(),
 	},
 	vt => ({
-		primary: primaryKey(vt.identifier, vt.token),
+		primary: primaryKey({ columns: [vt.identifier, vt.token] }),
 	}),
 );

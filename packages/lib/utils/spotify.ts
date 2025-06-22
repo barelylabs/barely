@@ -20,9 +20,10 @@ export function getSpotifyPlaylistTrackDeeplink({
 }
 
 export function parseSpotifyUrl(url: string) {
-	const match = url.match(
-		/https?:\/\/open\.spotify\.com\/(artist|track|album|playlist)\/([a-zA-Z0-9]+)/,
-	);
+	const match =
+		/https?:\/\/open\.spotify\.com\/(artist|track|album|playlist)\/([a-zA-Z0-9]+)/.exec(
+			url,
+		);
 
 	if (!match) {
 		return null;

@@ -5,7 +5,7 @@ import { ProviderAccounts } from '@barely/lib/server/routes/provider-account/pro
 import { newId } from '@barely/lib/utils/id';
 import { raise } from '@barely/lib/utils/raise';
 import { getAbsoluteUrl } from '@barely/lib/utils/url';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 export const GET = auth(async req => {
 	const params = req.nextUrl.searchParams;

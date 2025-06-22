@@ -242,7 +242,7 @@ function Calendar({
 	const MONTHS = React.useMemo(() => {
 		let locale = enUS;
 
-		const propsLocale = props.locale as Partial<Locale> | undefined;
+		const propsLocale = props.locale;
 		if (propsLocale) {
 			const { options, localize, formatLong } = propsLocale;
 

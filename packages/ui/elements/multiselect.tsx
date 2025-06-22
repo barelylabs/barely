@@ -119,7 +119,7 @@ export const MultiSelect = <T extends NonNullable<unknown>>(
 			if (input) {
 				if ((e.key === 'Delete' || e.key === 'Backspace') && input.value === '') {
 					const lastValue = values[values.length - 1];
-					!!lastValue && handleUnselect(lastValue);
+					if (lastValue) handleUnselect(lastValue);
 				}
 
 				if (e.key === 'Escape') {
@@ -186,7 +186,7 @@ export const MultiSelect = <T extends NonNullable<unknown>>(
 									// fixme: found this hack to fix the focus issue, but it's not ideal. Couldn't get their useEffect solution to work
 									// https://stackoverflow.com/questions/62839139/react-useref-forwardref-not-working-as-expected-when-focusing-a-radio-button
 									setTimeout(() => {
-										open && inputRef.current?.focus();
+										if (open) inputRef.current?.focus();
 									}, 1);
 								}}
 							>

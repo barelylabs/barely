@@ -21,19 +21,19 @@ export function WorkspaceSocialLinks({
 	};
 }) {
 	const igLink =
-		show?.instagram && workspace.instagramUsername ?
+		show.instagram && workspace.instagramUsername ?
 			`https://instagram.com/${workspace.instagramUsername}`
 		:	null;
 	const ytLink =
-		show?.youtube && workspace.youtubeChannelId ?
+		show.youtube && workspace.youtubeChannelId ?
 			`https://youtube.com/channel/${workspace.youtubeChannelId}`
 		:	null;
 	const tiktokLink =
-		show?.tiktok && workspace.tiktokUsername ?
+		show.tiktok && workspace.tiktokUsername ?
 			`https://tiktok.com/@${workspace.tiktokUsername}`
 		:	null;
 	const spotifyLink =
-		show?.spotify && workspace.spotifyArtistId ?
+		show.spotify && workspace.spotifyArtistId ?
 			`https://open.spotify.com/artist/${workspace.spotifyArtistId}`
 		:	null;
 	return (

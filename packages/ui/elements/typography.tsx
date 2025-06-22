@@ -102,7 +102,9 @@ const H = forwardRef<HTMLHeadingElement, HeaderProps>(
 		const wrapBalancedChildren = <WrapBalancer>{children}</WrapBalancer>;
 
 		switch (size) {
-			case '1' || null || undefined:
+			case undefined:
+			case null:
+			case '1':
 				return (
 					<h1 ref={ref} className={styles} {...props}>
 						{wrapBalancedChildren}
@@ -114,7 +116,6 @@ const H = forwardRef<HTMLHeadingElement, HeaderProps>(
 						{wrapBalancedChildren}
 					</h2>
 				);
-
 			case '3':
 				return (
 					<h3 ref={ref} className={styles} {...props}>
@@ -133,11 +134,17 @@ const H = forwardRef<HTMLHeadingElement, HeaderProps>(
 						{wrapBalancedChildren}
 					</h5>
 				);
-			default:
+			case '6':
 				return (
 					<h6 ref={ref} className={styles} {...props}>
 						{wrapBalancedChildren}
 					</h6>
+				);
+			default:
+				return (
+					<h1 ref={ref} className={styles} {...props}>
+						{wrapBalancedChildren}
+					</h1>
 				);
 		}
 	},

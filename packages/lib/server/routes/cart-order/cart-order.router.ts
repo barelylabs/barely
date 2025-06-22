@@ -13,7 +13,7 @@ import {
 	notInArray,
 	or,
 } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { ApparelSize } from '../product/product.constants';
 import type { Product } from '../product/product.schema';
@@ -209,9 +209,9 @@ export const cartOrderRouter = createTRPCRouter({
 				nextCursor =
 					nextOrder ?
 						{
-							orderId: nextOrder?.orderId ?? raise('orderId should be defined'),
+							orderId: nextOrder.orderId ?? raise('orderId should be defined'),
 							checkoutConvertedAt:
-								nextOrder?.checkoutConvertedAt ??
+								nextOrder.checkoutConvertedAt ??
 								raise('checkoutConvertedAt should be defined'),
 						}
 					:	undefined;
@@ -446,7 +446,7 @@ export const cartOrderRouter = createTRPCRouter({
 					.map(fulfilledProduct => {
 						return {
 							id: fulfilledProduct.id,
-							name: allProducts.find(p => p?.id === fulfilledProduct.id)?.name ?? '',
+							name: allProducts.find(p => p.id === fulfilledProduct.id)?.name ?? '',
 							apparelSize: fulfilledProduct.apparelSize,
 						};
 					})
@@ -468,7 +468,7 @@ export const cartOrderRouter = createTRPCRouter({
 						trackingNumber: shippingTrackingNumber,
 					}),
 					shippingAddress: {
-						name: fan.fullName ?? cart.fullName,
+						name: fan.fullName,
 						line1: cart.shippingAddressLine1,
 						line2: cart.shippingAddressLine2,
 						city: cart.shippingAddressCity,

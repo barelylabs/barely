@@ -1,7 +1,7 @@
 // import { TRPCError } from '@trpc/server';
 
 import { and, eq, lt } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import { createTRPCRouter, publicProcedure } from '../../api/trpc';
 import {
@@ -40,21 +40,21 @@ const playlistPlacementRouter = createTRPCRouter({
 
 			for (const queuedPlacement of queuedPlacements) {
 				console.log('queuedPlacement => ', queuedPlacement);
-				if (queuedPlacement.playlistPosition === null) continue;
+				// if (queuedPlacement.playlistPosition === null) continue;
 
 				const track = queuedPlacement.track;
 
-				console.log('queuedTrack => ', track?.name || 'no track found');
-				if (!track?.spotifyId) continue;
+				console.log('queuedTrack => ', track.name || 'no track found');
+				if (!track.spotifyId) continue;
 
 				const playlist = queuedPlacement.playlist;
 
-				console.log('queuedPlaylist => ', playlist || 'no playlist found');
-				if (!playlist?.spotifyId || !playlist.spotifyId) continue;
+				console.log('queuedPlaylist => ', playlist);
+				if (!playlist.spotifyId || !playlist.spotifyId) continue;
 
-				const spotifyAccount = playlist._providerAccounts.filter(
+				const spotifyAccount = playlist._providerAccounts.find(
 					_pa => _pa.providerAccount.provider === 'spotify',
-				)[0]?.providerAccount;
+				)?.providerAccount;
 
 				console.log(
 					'queuedSpotifyAccount => ',

@@ -1,5 +1,5 @@
 import { eq, or, sql } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { Domain } from './domain.schema';
 import { env } from '../../../env';
@@ -11,12 +11,12 @@ import { dbHttp } from '../../db';
 import { Domains } from './domain.sql';
 
 export async function validateDomain(domain: string) {
-	if (!domain ?? typeof domain !== 'string' ?? domain.length === 0) {
-		return {
-			valid: false,
-			error: 'Missing domain',
-		};
-	}
+	// if (!domain ?? typeof domain !== 'string' ?? domain.length === 0) {
+	// 	return {
+	// 		valid: false,
+	// 		error: 'Missing domain',
+	// 	};
+	// }
 
 	const validDomain = validDomainRegex.test(domain);
 
@@ -63,12 +63,15 @@ export function barelyDomainPrice(cost: number) {
 }
 
 export function getVercelProjectIdForDomainType(type: Domain['type']) {
-	if (type === 'link') {
-		return env.VERCEL_LINK_PROJECT_ID;
-	} else if (type === 'bio') {
-		return null; // fixme: when we have a bio project, add it here
-	} else if (type === 'press') {
-		return null; // fixme: when we have a press project, add it here
+	switch (type) {
+		case 'link':
+			return env.VERCEL_LINK_PROJECT_ID;
+		case 'bio':
+			return null; // fixme: when we have a bio project, add it here
+		case 'press':
+			return null; // fixme: when we have a press project, add it here
+		// default:
+		// 	return null;
 	}
 }
 
@@ -390,12 +393,10 @@ export async function getDomainsAvailable(domains: string[]) {
 				res.parsed &&
 				res.data.products?.some(product => product.status === 'available')
 			) {
-				const product = res.data.products?.find(
-					product => product.status === 'available',
-				);
+				const product = res.data.products.find(product => product.status === 'available');
 				const price =
 					product?.prices[0]?.price_after_taxes ?
-						barelyDomainPrice(product?.prices[0]?.price_after_taxes)
+						barelyDomainPrice(product.prices[0].price_after_taxes)
 					:	undefined;
 				const duration = product?.prices[0]?.min_duration;
 

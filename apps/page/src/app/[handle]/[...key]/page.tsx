@@ -2,7 +2,7 @@ import type { EventTrackingProps } from '@barely/lib/server/routes/event/event-r
 import type { LandingPage } from '@barely/lib/server/routes/landing-page/landing-page.schema';
 import type { MdxAssets } from '@barely/lib/utils/mdx';
 import type { Metadata } from 'next';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { eventReportSearchParamsSchema } from '@barely/lib/server/routes/event/event-report.schema';
 import { getLandingPageData } from '@barely/lib/server/routes/landing-page/landing-page.render.fns';
 import { getAssetHref, getLinkHref } from '@barely/lib/utils/mdx';
@@ -22,11 +22,12 @@ import { WarmupCart } from '~/app/[handle]/[...key]/warmup-cart';
 export async function generateMetadata({
 	params,
 }: {
-	params: { handle: string; key: string[] };
+	params: Promise<{ handle: string; key: string[] }>;
 }): Promise<Metadata> {
+	const awaitedParams = await params;
 	const data = await getLandingPageData({
-		handle: params.handle,
-		key: params.key.join('/'),
+		handle: awaitedParams.handle,
+		key: awaitedParams.key.join('/'),
 	});
 
 	if (!data) {
@@ -50,15 +51,17 @@ export default async function LandingPage({
 	params,
 	searchParams,
 }: {
-	params: { handle: string; key: string[] };
-	searchParams: z.infer<typeof eventReportSearchParamsSchema>;
+	params: Promise<{ handle: string; key: string[] }>;
+	searchParams: Promise<z.infer<typeof eventReportSearchParamsSchema>>;
 }) {
-	const key = params.key.join('/');
+	const awaitedParams = await params;
+	const awaitedSearchParams = await searchParams;
+	const key = awaitedParams.key.join('/');
 
-	const searchParamsSafe = eventReportSearchParamsSchema.safeParse(searchParams);
+	const searchParamsSafe = eventReportSearchParamsSchema.safeParse(awaitedSearchParams);
 
 	const data = await getLandingPageData({
-		handle: params.handle,
+		handle: awaitedParams.handle,
 		key: key,
 	});
 

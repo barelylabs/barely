@@ -1,5 +1,5 @@
-import type { InferModel } from 'drizzle-orm';
-import type { z } from 'zod';
+import type { InferSelectModel } from 'drizzle-orm';
+import type { z } from 'zod/v4';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 
 import { VisitorSessions } from './visitor-session.sql';
@@ -16,7 +16,7 @@ export const upsertVisitorSessionSchema = insertVisitorSessionSchema.partial({
 });
 export const selectVisitorSessionSchema = createSelectSchema(VisitorSessions);
 
-export type VisitorSession = InferModel<typeof VisitorSessions, 'select'>;
+export type VisitorSession = InferSelectModel<typeof VisitorSessions>;
 export type CreateVisitorSession = z.infer<typeof createVisitorSessionSchema>;
 export type UpdateVisitorSession = z.infer<typeof updateVisitorSessionSchema>;
 export type UpsertVisitorSession = z.infer<typeof upsertVisitorSessionSchema>;

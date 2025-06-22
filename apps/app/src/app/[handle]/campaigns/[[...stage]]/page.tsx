@@ -2,8 +2,8 @@
 
 import { Suspense } from 'react';
 
+import { AllCampaigns } from '~/app/[handle]/campaigns/[[...stage]]/all-campaigns';
 import { CampaignTabs } from '~/app/[handle]/campaigns/[[...stage]]/campaign-tabs';
-import { AllCampaigns } from '~/app/[handle]/campaigns/[[...stage]]/campaigns';
 import { DashContentHeader } from '../../_components/dash-content-header';
 
 export default function CampaignsPage() {

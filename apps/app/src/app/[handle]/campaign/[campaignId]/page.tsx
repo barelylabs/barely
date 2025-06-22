@@ -22,15 +22,17 @@ const CampaignPage = async ({
 	params,
 	searchParams,
 }: {
-	params: { campaignId: string };
-	searchParams: { success?: boolean };
+	params: Promise<{ campaignId: string }>;
+	searchParams: Promise<{ success?: boolean }>;
 }) => {
-	const initialCampaign = await getCampaign(params.campaignId);
+	const awaitedParams = await params;
+	const awaitedSearchParams = await searchParams;
+	const initialCampaign = await getCampaign(awaitedParams.campaignId);
 
 	return (
 		<>
 			<DashContentHeader title='Your campaign' />
-			{searchParams.success && <ConfettiRain />}
+			{awaitedSearchParams.success && <ConfettiRain />}
 			<Suspense fallback={<div>Loading...</div>}>
 				<InfoCard
 					title={initialCampaign.track.name}
@@ -48,7 +50,7 @@ const CampaignPage = async ({
 						<Suspense fallback={<div>Loading reviews...</div>}>
 							{
 								<CampaignReviews
-									campaignId={params.campaignId}
+									campaignId={awaitedParams.campaignId}
 									reach={initialCampaign.curatorReach}
 								/>
 							}

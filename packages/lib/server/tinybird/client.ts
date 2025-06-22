@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { PipeErrorResponse } from './util';
 import { eventIngestReponseData, pipeResponseWithoutData } from './util';
@@ -27,9 +27,8 @@ export class Tinybird {
 				continue;
 			}
 			const stringValue =
-				value !== null && typeof value === 'object' ?
-					JSON.stringify(value)
-				:	String(value);
+				// eslint-disable-next-line @typescript-eslint/no-base-to-string
+				typeof value === 'object' ? JSON.stringify(value) : String(value);
 			url.searchParams.set(key, stringValue);
 		}
 		// console.log('fetchUrl => ', url.href);
@@ -59,7 +58,7 @@ export class Tinybird {
 		pipe: string;
 		parameters?: z.ZodSchema<TParameters>;
 		// rome-ignore lint/suspicious/noExplicitAny: <explanation>
-		data: z.ZodSchema<TData, z.ZodTypeDef, unknown>;
+		data: z.ZodSchema<TData>;
 
 		opts?: {
 			logParams?: boolean;
@@ -72,7 +71,7 @@ export class Tinybird {
 	}): (
 		params: TParameters,
 	) => Promise<z.infer<typeof pipeResponseWithoutData> & { data: TData[] }> {
-		const outputSchema = pipeResponseWithoutData.setKey('data', z.array(req.data));
+		const outputSchema = pipeResponseWithoutData.extend({ data: z.array(req.data) });
 		return async (params: TParameters) => {
 			let validatedParams: TParameters | undefined = undefined;
 			if (req.parameters) {
@@ -100,20 +99,20 @@ export class Tinybird {
 		TInput = TOutput,
 	>(req: {
 		datasource: string;
-		event: z.ZodSchema<TOutput, z.ZodTypeDef, TInput>;
+		event: z.ZodSchema<TOutput>;
 	}): IngestEndpoint<TOutput, TInput> {
 		return async (events: TInput | TInput[]) => {
 			let validatedEvents: TOutput | TOutput[] | undefined = undefined;
-			if (req.event) {
-				const v =
-					Array.isArray(events) ?
-						req.event.array().safeParse(events)
-					:	req.event.safeParse(events);
-				if (!v.success) {
-					throw new Error(v.error.message);
-				}
-				validatedEvents = v.data;
+			// if (req.event) {
+			const v =
+				Array.isArray(events) ?
+					req.event.array().safeParse(events)
+				:	req.event.safeParse(events);
+			if (!v.success) {
+				throw new Error(v.error.message);
 			}
+			validatedEvents = v.data as TOutput[];
+			// }
 
 			const url = new URL('/v0/events', this.baseUrl);
 			url.searchParams.set('name', req.datasource);

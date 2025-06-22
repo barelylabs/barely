@@ -8,8 +8,13 @@ import { H } from '@barely/ui/elements/typography';
 import { handleLoggedInOnAuthPage } from '~/app/(auth)/handle-logged-in-on-auth-page';
 import { LoginForm } from './login-form';
 
-const SignInPage = async ({ searchParams }: { searchParams?: { error: string } }) => {
-	const { error } = searchParams ?? {};
+const SignInPage = async ({
+	searchParams,
+}: {
+	searchParams?: Promise<{ error: string }>;
+}) => {
+	const awaitedSearchParams = await searchParams;
+	const { error } = awaitedSearchParams ?? {};
 
 	if (error) {
 		console.error(error);

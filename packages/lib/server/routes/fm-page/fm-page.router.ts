@@ -1,5 +1,5 @@
 import { and, eq } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import { raise } from '../../../utils/raise';
 import { createTRPCRouter, publicProcedure } from '../../api/trpc';

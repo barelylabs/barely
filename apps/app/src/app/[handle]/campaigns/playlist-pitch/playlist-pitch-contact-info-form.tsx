@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import React from 'react';
 import Link from 'next/link';
 import {

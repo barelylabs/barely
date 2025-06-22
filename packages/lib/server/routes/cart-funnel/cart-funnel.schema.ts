@@ -1,5 +1,5 @@
 import type { InferSelectModel } from 'drizzle-orm';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { createInsertSchema } from 'drizzle-zod';
 
 import { commonFiltersSchema, infiniteQuerySchema } from '../../../utils/filters';
@@ -7,27 +7,27 @@ import { querySelectionSchema } from '../../../utils/zod-helpers';
 import { CartFunnels } from './cart-funnel.sql';
 
 export const insertCartFunnelSchema = createInsertSchema(CartFunnels, {
-	name: s => s.name.min(1, 'Name is required'),
-	key: s => s.key.min(4, 'Key is required'),
-	mainProductId: s => s.mainProductId.min(1, 'Main product is required'),
-	mainProductPayWhatYouWantMin: s =>
-		s.mainProductPayWhatYouWantMin
+	name: name => name.min(1, 'Name is required'),
+	key: key => key.min(4, 'Key is required'),
+	mainProductId: mainProductId => mainProductId.min(1, 'Main product is required'),
+	mainProductPayWhatYouWantMin: mainProductPayWhatYouWantMin =>
+		mainProductPayWhatYouWantMin
 			.min(0, 'Minimum price must be 0 or greater')
 			.max(100000, 'Max price is $1000'),
-	mainProductHandling: s =>
-		s.mainProductHandling
+	mainProductHandling: mainProductHandling =>
+		mainProductHandling
 			.min(0, 'Handling must be 0 or greater')
 			.max(100000, 'Max handling is $1000'),
-	mainProductDiscount: s =>
-		s.mainProductDiscount
+	mainProductDiscount: mainProductDiscount =>
+		mainProductDiscount
 			.min(0, 'Discount must be 0 or greater')
 			.max(100000, 'Max discount is $1000'),
-	bumpProductDiscount: s =>
-		s.bumpProductDiscount
+	bumpProductDiscount: bumpProductDiscount =>
+		bumpProductDiscount
 			.min(0, 'Discount must be 0 or greater')
 			.max(100000, 'Max discount is $1000'),
-	upsellProductDiscount: s =>
-		s.upsellProductDiscount
+	upsellProductDiscount: upsellProductDiscount =>
+		upsellProductDiscount
 			.min(0, 'Discount must be 0 or greater')
 			.max(100000, 'Max discount is $1000'),
 });

@@ -1,7 +1,7 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 export const inviteMemberSchema = z.object({
-	email: z.string().email(),
+	email: z.email(),
 	role: z.enum(['admin', 'member']),
 });
 

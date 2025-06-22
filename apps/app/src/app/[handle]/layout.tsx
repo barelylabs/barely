@@ -5,13 +5,13 @@ import { auth } from '@barely/server/auth';
 
 import { SidebarNav } from '~/app/[handle]/_components/dash-sidebar-nav';
 import { NewWorkspaceModal } from '~/app/[handle]/_components/new-workspace-modal';
-import { WorkspaceProviders } from '~/app/[handle]/_components/providers';
+import { WorkspaceProviders } from '~/app/[handle]/_components/workspace-providers';
 
 export default async function DashboardLayout({
 	params,
 	children,
 }: {
-	params: { handle: string };
+	params: Promise<{ handle: string }>;
 	children: React.ReactElement;
 }) {
 	const session = await auth();
@@ -22,12 +22,13 @@ export default async function DashboardLayout({
 	const userWorkspace = user.workspaces.find(w => w.type === 'personal');
 	if (userWorkspace) user.image = userWorkspace.imageUrl;
 
-	const currentWorkspace = user.workspaces.find(w => w.handle === params.handle);
+	const awaitedParams = await params;
+	const currentWorkspace = user.workspaces.find(w => w.handle === awaitedParams.handle);
 
 	if (!currentWorkspace) {
 		const addedToWorkspace = await checkIfWorkspaceHasPendingInviteForUser({
 			user,
-			workspaceHandle: params.handle,
+			workspaceHandle: awaitedParams.handle,
 		});
 
 		if (addedToWorkspace.success) {

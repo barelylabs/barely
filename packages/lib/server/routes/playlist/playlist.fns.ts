@@ -132,15 +132,14 @@ const getPlaylistsByUserId = async (userId: string, db: Db) => {
 
 	userWithPlaylists?.providerAccounts.forEach(providerAccount => {
 		providerAccount._playlists.forEach(_playlist => {
-			_playlist.playlist &&
-				playlists.set(_playlist.playlist.id, {
-					..._playlist.playlist,
-					tracklist: undefined,
-					providerAccounts: _playlist.playlist._providerAccounts.map(
-						_pa => _pa.providerAccount,
-					),
-					genres: _playlist.playlist._genres.map(_g => _g.genre),
-				});
+			playlists.set(_playlist.playlist.id, {
+				..._playlist.playlist,
+				tracklist: undefined,
+				providerAccounts: _playlist.playlist._providerAccounts.map(
+					_pa => _pa.providerAccount,
+				),
+				genres: _playlist.playlist._genres.map(_g => _g.genre),
+			});
 		});
 	});
 
@@ -223,7 +222,7 @@ const totalPlaylistReachByGenres = async (genreIds: Genre['id'][]) => {
 export async function estimateGenresByPlaylistId(playlistId: string, db: Db) {
 	const playlist = await getPlaylistById(playlistId, db);
 
-	if (!playlist?.spotifyId)
+	if (!playlist.spotifyId)
 		throw new TRPCError({
 			code: 'NOT_FOUND',
 			message: 'Spotify playlist not found',

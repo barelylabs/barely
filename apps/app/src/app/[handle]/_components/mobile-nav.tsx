@@ -7,16 +7,13 @@ import { Button } from '@barely/ui/elements/button';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
-	// DropdownMenuGroup,
 	DropdownMenuItem,
-	// DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@barely/ui/elements/dropdown-menu';
 import { Icon } from '@barely/ui/elements/icon';
 import { ScrollArea } from '@barely/ui/elements/scroll-area';
 
-// import { docsConfig } from '@/config/docs';
 import { siteConfig } from '~/config/site';
 
 export function MobileNav() {

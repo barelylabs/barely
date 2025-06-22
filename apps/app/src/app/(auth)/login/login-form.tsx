@@ -1,11 +1,12 @@
 'use client';
 
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useZodForm } from '@barely/lib/hooks/use-zod-form';
-import { api } from '@barely/lib/server/api/react';
 import { insertUserSchema } from '@barely/lib/server/routes/user/user.schema';
+import { useTRPC } from '@barely/server/api/react';
+import { useMutation } from '@tanstack/react-query';
 
 import { Text } from '@barely/ui/elements/typography';
 import { Form, SubmitButton } from '@barely/ui/forms';
@@ -20,6 +21,8 @@ interface RegisterFormProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export const LoginForm = ({ callbackUrl }: RegisterFormProps) => {
+	const trpc = useTRPC();
+
 	const form = useZodForm({
 		schema: signInSchema,
 		defaultValues: {
@@ -29,11 +32,13 @@ export const LoginForm = ({ callbackUrl }: RegisterFormProps) => {
 
 	const [loginEmailSent, setLoginEmailSent] = useState(false);
 
-	const { mutateAsync: sendLoginEmail } = api.auth.sendLoginEmail.useMutation({
-		onSuccess: () => {
-			setLoginEmailSent(true);
-		},
-	});
+	const { mutateAsync: sendLoginEmail } = useMutation(
+		trpc.auth.sendLoginEmail.mutationOptions({
+			onSuccess: () => {
+				setLoginEmailSent(true);
+			},
+		}),
+	);
 
 	const onSubmit = async (user: z.infer<typeof signInSchema>) => {
 		await sendLoginEmail({ email: user.email, callbackUrl });

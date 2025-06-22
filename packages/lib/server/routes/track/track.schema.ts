@@ -1,6 +1,6 @@
 import type { InferSelectModel } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { FileRecord, PublicAudio, PublicImage } from '../file/file.schema';
 import type {
@@ -42,15 +42,15 @@ export type InsertTrackArtworkFile = z.infer<
 >[number];
 
 export const insertTrackSchema = createInsertSchema(Tracks, {
-	name: schema => schema.name.min(1, 'Name is required').max(255, 'Name is too long'),
-	isrc: schema => schema.isrc.transform(v => (!v?.length ? null : v)),
-	appleMusicId: schema => schema.appleMusicId.transform(v => (!v?.length ? null : v)),
-	deezerId: schema => schema.deezerId.transform(v => (!v?.length ? null : v)),
-	soundcloudId: schema => schema.soundcloudId.transform(v => (!v?.length ? null : v)),
-	spotifyId: schema => schema.spotifyId.transform(v => (!v?.length ? null : v)),
-	tidalId: schema => schema.tidalId.transform(v => (!v?.length ? null : v)),
-	youtubeId: schema => schema.youtubeId.transform(v => (!v?.length ? null : v)),
-	releaseDate: schema => schema.releaseDate.transform(v => (!v?.length ? null : v)),
+	name: name => name.min(1, 'Name is required').max(255, 'Name is too long'),
+	isrc: isrc => isrc.transform(v => (v.length ? v : null)),
+	appleMusicId: appleMusicId => appleMusicId.transform(v => (v.length ? v : null)),
+	deezerId: deezerId => deezerId.transform(v => (v.length ? v : null)),
+	soundcloudId: soundcloudId => soundcloudId.transform(v => (v.length ? v : null)),
+	spotifyId: spotifyId => spotifyId.transform(v => (v.length ? v : null)),
+	tidalId: tidalId => tidalId.transform(v => (v.length ? v : null)),
+	youtubeId: youtubeId => youtubeId.transform(v => (v.length ? v : null)),
+	releaseDate: releaseDate => releaseDate.transform(v => (v.length ? v : null)),
 }).extend({
 	_genres: z.array(genreIdSchema).optional(),
 	_artworkFiles: insertTrackArtworkFilesSchema.optional(),

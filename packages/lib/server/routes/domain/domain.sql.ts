@@ -43,12 +43,12 @@ export const Domains = pgTable(
 			}),
 	},
 
-	domain => ({
-		workspace: index('Domains_workspace_idx').on(domain.workspaceId),
-		clicked: index('Domains_clicked_idx').on(domain.clicks).desc(),
-		lastClickedAt: index('Domains_lastClickedAt_idx').on(domain.lastClickedAt),
-		lastCheckedAt: index('Domains_lastCheckedAt_idx').on(domain.lastCheckedAt).asc(),
-	}),
+	domain => [
+		index('Domains_workspace_idx').on(domain.workspaceId),
+		index('Domains_clicked_idx').on(domain.clicks.desc()),
+		index('Domains_lastClickedAt_idx').on(domain.lastClickedAt),
+		index('Domains_lastCheckedAt_idx').on(domain.lastCheckedAt.asc()),
+	],
 );
 
 export const Domain_Relations = relations(Domains, ({ one, many }) => ({

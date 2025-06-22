@@ -13,8 +13,8 @@ export type DomainStatus =
 	| 'Unknown Error';
 
 export const insertDomainSchema = createInsertSchema(Domains, {
-	domain: schema =>
-		schema.domain.refine(value => isValidDomain(value), {
+	domain: domain =>
+		domain.refine(value => isValidDomain(value), {
 			message: 'Please enter a valid domain.',
 		}),
 });

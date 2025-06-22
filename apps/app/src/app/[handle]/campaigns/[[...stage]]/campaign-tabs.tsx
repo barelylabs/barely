@@ -2,7 +2,8 @@
 
 import type { HorizontalTabItemProps } from '@barely/ui/components/navigation/horizontal-tabs';
 import { useParams } from 'next/navigation';
-import { api } from '@barely/server/api/react';
+import { useTRPC } from '@barely/lib/server/api/react';
+import { useQuery } from '@tanstack/react-query';
 
 import { useWorkspace } from '@barely/hooks/use-workspace';
 
@@ -11,13 +12,16 @@ import { Button } from '@barely/ui/elements/button';
 import { Icon } from '@barely/ui/elements/icon';
 
 export function CampaignTabs() {
+	const trpc = useTRPC();
 	const { workspace } = useWorkspace();
 
 	const params = useParams();
 
-	const { data: totals } = api.campaign.countByWorkspaceId.useQuery({
-		workspaceId: workspace.id,
-	});
+	const { data: totals } = useQuery(
+		trpc.campaign.countByWorkspaceId.queryOptions({
+			workspaceId: workspace.id,
+		}),
+	);
 
 	const tabs: HorizontalTabItemProps[] = [
 		{
@@ -27,7 +31,7 @@ export function CampaignTabs() {
 		{
 			name: 'Approved',
 			href: `/${workspace.handle}/campaigns/approved`,
-			beacon: params?.stage?.[0] !== 'all' && !!totals?.approved,
+			beacon: params.stage?.[0] !== 'all' && !!totals?.approved,
 		},
 		{
 			name: 'Screening',

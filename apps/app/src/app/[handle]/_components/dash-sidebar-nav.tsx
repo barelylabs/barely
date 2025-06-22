@@ -53,7 +53,7 @@ export function SidebarNav() {
 
 	const allHandles = workspaces.map(workspace => workspace.handle);
 
-	const isSettings = pathname?.includes('/settings');
+	const isSettings = pathname.includes('/settings');
 
 	const navHistory = useAtomValue(navHistoryAtom);
 
@@ -164,12 +164,12 @@ export function SidebarNav() {
 	const topLinks = isSettings ? topSettingsLinks : topMainLinks;
 
 	const settingsBackLink = useMemo(() => {
-		let bl = navHistory?.settingsBackPath ?? `/${handle}/links`; // eg. /{handle}/settings/profile
+		let bl = navHistory.settingsBackPath ?? `/${handle}/links`; // eg. /{handle}/settings/profile
 		const blHandle = bl.split('/')[1]; // eg. {handle}
 		if (blHandle && allHandles.includes(blHandle) && blHandle !== handle)
 			bl = bl.replace(`/${blHandle}`, `/${handle}`); // eg. /{handle}/settings/profile
 		return bl;
-	}, [allHandles, handle, navHistory?.settingsBackPath]);
+	}, [allHandles, handle, navHistory.settingsBackPath]);
 
 	return (
 		<aside className='fixed left-0 top-14 hidden h-[100vh] max-h-[100vh] w-14 shrink-0 flex-col overflow-y-auto bg-accent px-3 py-3 md:sticky md:flex md:w-56'>
@@ -261,10 +261,10 @@ function NavGroup(props: { item: SidebarNavGroup; handle: string }) {
 		<>
 			{props.item.href && !isCurrentGroup ?
 				<Link
-					href={isCurrentGroup ? '#' : (props.item.links[0]?.href ?? '#')}
+					href={props.item.links[0]?.href ?? '#'}
 					className={cn(
 						'group flex w-full items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted',
-						isCurrentGroup && 'bg-muted',
+						'bg-muted',
 					)}
 					passHref
 				>

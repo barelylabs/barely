@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { cookies } from 'next/headers';
 import { eq } from 'drizzle-orm';
 
@@ -77,11 +77,10 @@ export async function recordLinkClick({
 	if (visitor?.isBot) return null;
 
 	// deduplicate clicks from the same ip & linkId - only record 1 link click per ip per linkId per hour
-	const rateLimitPeriod =
-		(env.RATE_LIMIT_RECORD_LINK_CLICK ?? isDevelopment()) ? '1 s' : '1 h';
+	const rateLimitPeriod = env.RATE_LIMIT_RECORD_LINK_CLICK;
 
 	const { success } = await ratelimit(1, rateLimitPeriod).limit(
-		`recordClick:${visitor?.ip}:${link.id ?? '_root'}`,
+		`recordClick:${visitor?.ip}:${link.id}`,
 	);
 
 	if (!success) return null;
@@ -175,7 +174,7 @@ export async function recordLinkClick({
 			...flattenVisitorForIngest(visitor),
 			sessionId: visitor?.sessionId ?? newId('linkClick'),
 			platform,
-			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
+			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : undefined,
 		});
 
 		const tinybirdRes = await ingestWebEvent(eventData);
@@ -325,8 +324,7 @@ export async function recordCartEvent({
 	// todo: check if the workspace is above the event usage limit. for now, we're letting all cart events get reported
 
 	// deduplication events from the same ip & cartId - only record 1 cart event per ip per cartId per hour
-	const rateLimitPeriod =
-		(env.RATE_LIMIT_RECORD_CART_EVENT ?? isDevelopment()) ? '1 s' : '1 h';
+	const rateLimitPeriod = env.RATE_LIMIT_RECORD_CART_EVENT;
 
 	const { success } = await ratelimit(1, rateLimitPeriod).limit(
 		`recordCartEvent:${visitorInfo.ip}:${cart.id}:${type}`,
@@ -352,10 +350,10 @@ export async function recordCartEvent({
 	});
 
 	const sourceUrl = visitorInfo.referer_url ?? ''; // this is an api route, so we want the source of the api call
-
+	const cookieStore = await cookies();
 	const fbclid =
 		cart.fbclid ??
-		cookies().get(`${cartFunnel.handle}.${cartFunnel.key}.fbclid`)?.value ??
+		cookieStore.get(`${cartFunnel.handle}.${cartFunnel.key}.fbclid`)?.value ??
 		new URL(sourceUrl).searchParams.get('fbclid');
 
 	const email = cart.emailMarketingOptIn && cart.email ? cart.email : undefined;
@@ -407,7 +405,7 @@ export async function recordCartEvent({
 			key: cartFunnel.key,
 			// analytics
 			...flattenVisitorForIngest(visitor),
-			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
+			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : '',
 			...cartEventData,
 		});
 
@@ -482,7 +480,6 @@ function getMetaEventsFromCartEvent({
 					},
 				},
 			];
-
 		case 'cart/addPaymentInfo':
 			return [
 				{
@@ -625,7 +622,19 @@ function getMetaEventsFromCartEvent({
 					},
 				},
 			];
-		default:
+		case 'cart/viewOrderConfirmation':
+			return null;
+		case 'cart/updateMainProductPayWhatYouWantPrice':
+			return null;
+		case 'cart/addEmail':
+			return null;
+		case 'cart/addShippingInfo':
+			return null;
+		case 'cart/removeBump':
+			return null;
+		case 'cart/checkoutPurchase':
+			return null;
+		case 'cart/declineUpsell':
 			return null;
 	}
 }
@@ -743,6 +752,15 @@ function getCartEventData({
 		case 'cart/viewOrderConfirmation':
 			return {};
 
+		case 'cart/updateMainProductPayWhatYouWantPrice':
+			return {};
+		case 'cart/addEmail':
+			return {};
+		case 'cart/addShippingInfo':
+			return {};
+		case 'cart/checkoutPurchase':
+			return {};
+
 		default:
 			return {};
 	}
@@ -846,21 +864,21 @@ export async function recordFmEvent({
 			href: sourceUrl,
 			linkClickDestinationHref: fmLink?.url ?? null,
 			platform: fmLink?.platform ?? '',
-			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
+			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : undefined,
 		});
 
 		console.log('fmeventData => ', eventData);
 		const fmEventRes = await ingestFmEvent({
 			timestamp,
+			type,
 			workspaceId: fmPage.workspaceId,
 			assetId: fmPage.id,
 			sessionId: visitor?.sessionId ?? newId('fmSession'),
 			...flattenVisitorForIngest(visitor),
-			type,
 			href: sourceUrl,
-			linkClickDestinationHref: fmLink?.url ?? null,
-			platform: fmLink?.platform ?? '',
-			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
+			linkClickDestinationHref: fmLink?.url ?? '',
+			fmLinkPlatform: fmLink?.platform ?? '',
+			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : '',
 		});
 
 		console.log('fmEventRes => ', fmEventRes);
@@ -878,7 +896,7 @@ export async function recordFmEvent({
 			.update(FmPages)
 			.set({ views: sqlIncrement(FmPages.views) })
 			.where(eq(FmPages.id, fmPage.id));
-	} else if (type === 'fm/linkClick' && fmLink) {
+	} else if (fmLink) {
 		// increment fmLinkClicks
 
 		const platformClickIncrement = {
@@ -1021,7 +1039,7 @@ export async function recordPageEvent({
 			location: 'recordLandingPageEvent',
 			message: `workspace ${page.workspaceId} is above the event usage limit`,
 		});
-		return;
+		return null;
 	}
 
 	const timestamp = new Date(Date.now()).toISOString();
@@ -1059,15 +1077,15 @@ export async function recordPageEvent({
 	try {
 		await ingestPageEvent({
 			timestamp,
+			type,
 			workspaceId: page.workspaceId,
 			assetId: page.id,
 			sessionId: visitor?.sessionId ?? newId('landingPageSession'),
 			...flattenVisitorForIngest(visitor),
-			type,
 			href: sourceUrl,
-			linkClickDestinationAssetId,
-			linkClickDestinationHref,
-			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : 'false',
+			linkClickDestinationAssetId: linkClickDestinationAssetId ?? '',
+			linkClickDestinationHref: linkClickDestinationHref ?? '',
+			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : '',
 		});
 
 		// console.log('tinybirdRes for page event => ', tinybirdRes);
@@ -1077,18 +1095,21 @@ export async function recordPageEvent({
 	}
 
 	/* increment stats on landingPage */
-	if (type === 'page/view') {
-		// increment page views
-		await dbHttp
-			.update(LandingPages)
-			.set({ views: sqlIncrement(LandingPages.views) })
-			.where(eq(LandingPages.id, page.id));
-	} else if (type === 'page/linkClick') {
-		// increment page clicks
-		await dbHttp
-			.update(LandingPages)
-			.set({ clicks: sqlIncrement(LandingPages.clicks) })
-			.where(eq(LandingPages.id, page.id));
+	switch (type) {
+		case 'page/view':
+			// increment page views
+			await dbHttp
+				.update(LandingPages)
+				.set({ views: sqlIncrement(LandingPages.views) })
+				.where(eq(LandingPages.id, page.id));
+			break;
+		case 'page/linkClick':
+			// increment page clicks
+			await dbHttp
+				.update(LandingPages)
+				.set({ clicks: sqlIncrement(LandingPages.clicks) })
+				.where(eq(LandingPages.id, page.id));
+			break;
 	}
 
 	// increment the workspace event usage count in db

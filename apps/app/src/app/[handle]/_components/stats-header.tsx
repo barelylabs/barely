@@ -4,8 +4,9 @@ import type { StatDateRange } from '@barely/lib/server/routes/stat/stat.schema';
 import { Suspense } from 'react';
 import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
+import { useTRPC } from '@barely/lib/server/api/react';
 import { statDateRange } from '@barely/lib/server/routes/stat/stat.schema';
-import { api } from '@barely/server/api/react';
+import { useSuspenseQuery } from '@tanstack/react-query';
 
 import { ChevronRightToArrow, Icon } from '@barely/ui/elements/icon';
 import {
@@ -62,14 +63,17 @@ export function StatsHeader({
 }
 
 function AssetLinkLaunch() {
+	const trpc = useTRPC();
 	const { filters } = useWebEventStatFilters();
 
 	const { handle } = useWorkspace();
 
-	const [asset] = api.stat.assetById.useSuspenseQuery({
-		handle: handle,
-		assetId: filters.assetId,
-	});
+	const { data: asset } = useSuspenseQuery(
+		trpc.stat.assetById.queryOptions({
+			handle: handle,
+			assetId: filters.assetId,
+		}),
+	);
 
 	if (!asset) return <Text variant='xl/semibold'>All</Text>;
 

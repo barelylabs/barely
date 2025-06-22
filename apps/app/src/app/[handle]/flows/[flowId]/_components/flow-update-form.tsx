@@ -2,7 +2,7 @@
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/router';
 import type { FlowState } from '@barely/lib/server/routes/flow/flow.ui.types';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { use, useState } from 'react';
 import { useToast } from '@barely/lib/hooks/use-toast';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';

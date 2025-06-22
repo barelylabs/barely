@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { eq } from 'drizzle-orm';
 
 import type { Db } from '../../db';
@@ -9,7 +9,6 @@ import type {
 	TrackWith_Workspace_Genres_Files,
 } from './track.schema';
 import { newId } from '../../../utils/id';
-import { raise } from '../../../utils/raise';
 import { _Files_To_Tracks__Artwork, _Files_To_Tracks__Audio } from '../file/file.sql';
 import { _Tracks_To_Genres } from '../genre/genre.sql';
 import { Tracks } from './track.sql';
@@ -163,11 +162,11 @@ export async function createTrack(
 ) {
 	if (tx) {
 		const newTrack = await createTrackTx(input, workspaceId, tx);
-		return getTrackById(newTrack.id, db) ?? raise('Track not found');
+		return getTrackById(newTrack.id, db);
 	} else {
 		return await db.pool.transaction(async tx => {
 			const newTrack = await createTrackTx(input, workspaceId, tx);
-			return getTrackById(newTrack.id, db) ?? raise('Track not found');
+			return getTrackById(newTrack.id, db);
 		});
 	}
 

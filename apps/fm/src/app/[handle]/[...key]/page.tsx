@@ -13,11 +13,12 @@ import { LogVisit } from '~/app/[handle]/[...key]/fm-log-visit';
 export async function generateMetadata({
 	params,
 }: {
-	params: { handle: string; key: string[] };
+	params: Promise<{ handle: string; key: string[] }>;
 }): Promise<Metadata> {
+	const awaitedParams = await params;
 	const data = await getFmPageData({
-		handle: params.handle,
-		key: params.key.join('/'),
+		handle: awaitedParams.handle,
+		key: awaitedParams.key.join('/'),
 	});
 
 	if (!data) {
@@ -34,12 +35,13 @@ export async function generateMetadata({
 export default async function LandingPage({
 	params,
 }: {
-	params: { handle: string; key: string[] };
+	params: Promise<{ handle: string; key: string[] }>;
 }) {
-	const key = params.key.join('/');
+	const awaitedParams = await params;
+	const key = awaitedParams.key.join('/');
 
 	const data = await getFmPageData({
-		handle: params.handle,
+		handle: awaitedParams.handle,
 		key: key,
 	});
 

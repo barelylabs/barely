@@ -1,6 +1,6 @@
 'use client';
 
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useCallback, useEffect, useState } from 'react';
 import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
 import { api } from '@barely/lib/server/api/react';

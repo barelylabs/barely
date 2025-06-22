@@ -1,9 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useTRPC } from '@barely/lib/server/api/react';
 import { updatePlaylistPitchCampaign_LaunchSchema } from '@barely/lib/server/routes/campaign/campaign.schema';
-import { playlistPitchSettings } from '@barely/lib/server/routes/campaign/campaign.settings';
-import { api } from '@barely/server/api/react';
+import { PLAYLIST_PITCH_SETTINGS } from '@barely/lib/server/routes/campaign/campaign.settings';
+import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+
+// import { api } from '@barely/server/api/react';
 
 import { useZodForm } from '@barely/hooks/use-zod-form';
 
@@ -23,7 +26,8 @@ interface LaunchPlaylistPitchFormProps {
 }
 
 export function LaunchPlaylistPitchForm(props: LaunchPlaylistPitchFormProps) {
-	const utils = api.useContext();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
 
 	// 📡 todo: subscriptions
 
@@ -32,47 +36,71 @@ export function LaunchPlaylistPitchForm(props: LaunchPlaylistPitchFormProps) {
 	const [creatingCheckoutSession, setCreatingCheckoutSession] = useState(false);
 
 	// 🔎 queries
-	const [campaign] = api.campaign.byId.useSuspenseQuery(props.campaignId);
+	const { data: campaign } = useSuspenseQuery(
+		trpc.campaign.byId.queryOptions({ campaignId: props.campaignId }),
+	);
 
-	const [maxReach] = api.playlist.countByGenres.useSuspenseQuery({
-		genreIds: campaign.track.genres.map(g => g.id),
-	});
+	const { data: maxReach } = useSuspenseQuery(
+		trpc.playlist.countByGenres.queryOptions({
+			genreIds: campaign.track.genres.map(g => g.id),
+		}),
+	);
 
-	const minCuratorReach = playlistPitchSettings.minCuratorReach;
+	const minCuratorReach = PLAYLIST_PITCH_SETTINGS.minCuratorReach;
 	const maxCuratorReach = maxReach.totalCurators;
 
 	// 🧬 mutations
-	const { mutate: updateCampaign } = api.campaign.update.useMutation({
-		async onMutate(campaignUpdate) {
-			await utils.campaign.byId.cancel();
-			const previousCampaign = utils.campaign.byId.getData(props.campaignId);
+	const { mutate: updateCampaign } = useMutation(
+		trpc.campaign.update.mutationOptions({
+			async onMutate(campaignUpdate) {
+				await queryClient.cancelQueries(
+					trpc.campaign.byId.queryFilter({ campaignId: props.campaignId }),
+				);
 
-			utils.campaign.byId.setData(props.campaignId, old => {
-				if (!old) return;
-				return {
-					...old,
-					curatorReach: campaignUpdate.curatorReach ?? null,
-				};
-			});
+				const previousCampaign = queryClient.getQueryData(
+					trpc.campaign.byId.queryKey({ campaignId: props.campaignId }),
+				);
+				if (!previousCampaign) return;
 
-			return { previousCampaign };
-		},
+				queryClient.setQueryData(
+					trpc.campaign.byId.queryKey({ campaignId: props.campaignId }),
+					old => {
+						if (!old) return;
+						return {
+							...old,
+							curatorReach: campaignUpdate.curatorReach ?? null,
+						};
+					},
+				);
 
-		onError(err, campaignUpdate, ctx) {
-			ctx && utils.campaign.byId.setData('campaign.byId', ctx.previousCampaign);
-		},
+				return { previousCampaign };
+			},
 
-		async onSuccess() {
-			await utils.campaign.byId.invalidate();
-		},
-	});
+			onError(err, campaignUpdate, ctx) {
+				if (ctx) {
+					queryClient.setQueryData(
+						trpc.campaign.byId.queryKey({ campaignId: props.campaignId }),
+						ctx.previousCampaign,
+					);
+				}
+			},
 
-	const createCheckout = api.campaign.createPlaylistPitchCheckoutLink.useMutation({
-		onMutate: () => setCreatingCheckoutSession(true),
-		onSuccess: checkoutLink => {
-			if (checkoutLink) window.location.replace(checkoutLink);
-		},
-	});
+			async onSuccess() {
+				await queryClient.invalidateQueries(
+					trpc.campaign.byId.queryFilter({ campaignId: props.campaignId }),
+				);
+			},
+		}),
+	);
+
+	const createCheckout = useMutation(
+		trpc.campaign.createPlaylistPitchCheckoutLink.mutationOptions({
+			onMutate: () => setCreatingCheckoutSession(true),
+			onSuccess: checkoutLink => {
+				if (checkoutLink) window.location.replace(checkoutLink);
+			},
+		}),
+	);
 
 	// form
 	const form = useZodForm({

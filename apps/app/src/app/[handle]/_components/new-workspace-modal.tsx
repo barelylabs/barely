@@ -1,10 +1,11 @@
 'use client';
 
 import type { SelectFieldOption } from '@barely/ui/forms/select-field';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useRouter } from 'next/navigation';
 import { createWorkspaceSchema } from '@barely/lib/server/routes/workspace/workspace.schema';
-import { api } from '@barely/server/api/react';
+import { useTRPC } from '@barely/server/api/react';
+import { useMutation } from '@tanstack/react-query';
 import { useAtom } from 'jotai';
 
 import { atomWithToggle } from '@barely/atoms/atom-with-toggle';
@@ -19,6 +20,8 @@ import { TextField } from '@barely/ui/forms/text-field';
 export const showNewWorkspaceModalAtom = atomWithToggle(false);
 
 export function NewWorkspaceModal() {
+	const trpc = useTRPC();
+
 	const [newWorkspaceModalOpen, setNewWorkspaceModalOpen] = useAtom(
 		showNewWorkspaceModalAtom,
 	);
@@ -42,12 +45,14 @@ export function NewWorkspaceModal() {
 		{ label: 'Product', value: 'product' },
 	];
 
-	const { mutateAsync: createWorkspace } = api.workspace.create.useMutation({
-		onSuccess: data => {
-			router.push(`/${data.handle}/settings`);
-			setNewWorkspaceModalOpen(false);
-		},
-	});
+	const { mutateAsync: createWorkspace } = useMutation(
+		trpc.workspace.create.mutationOptions({
+			onSuccess: data => {
+				router.push(`/${data.handle}/settings`);
+				setNewWorkspaceModalOpen(false);
+			},
+		}),
+	);
 
 	const onSubmit = async (data: z.infer<typeof createWorkspaceSchema>) => {
 		await createWorkspace(data);

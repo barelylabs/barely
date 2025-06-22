@@ -46,7 +46,7 @@ export function parseLinkDomain(req: NextRequest) {
 	const handleParam = req.nextUrl.searchParams.get('handle');
 	console.log('handleParam', handleParam);
 
-	if (domain.match(/^link-.+-barely\.vercel\.app$/) && handleParam) {
+	if (/^link-.+-barely\.vercel\.app$/.exec(domain) && handleParam) {
 		domain = `${handleParam}.${process.env.NEXT_PUBLIC_TRANSPARENT_LINK_ROOT_DOMAIN}`;
 	}
 

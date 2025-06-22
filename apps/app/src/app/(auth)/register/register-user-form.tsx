@@ -1,6 +1,6 @@
 'use client';
 
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useState } from 'react';
 import Link from 'next/link';
 import {

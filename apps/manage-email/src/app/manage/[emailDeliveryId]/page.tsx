@@ -2,7 +2,7 @@ import { dbPool } from '@barely/lib/server/db/pool';
 import { EmailDeliveries } from '@barely/lib/server/routes/email-delivery/email-delivery.sql';
 import { queryBooleanSchema } from '@barely/lib/utils/zod-helpers';
 import { eq } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import { H } from '@barely/ui/elements/typography';
 
@@ -16,11 +16,11 @@ export default async function ManageEmailDeliveryPage({
 	params,
 	searchParams,
 }: {
-	params: { emailDeliveryId: string };
-	searchParams: z.infer<typeof searchParamsSchema>;
+	params: Promise<{ emailDeliveryId: string }>;
+	searchParams: Promise<z.infer<typeof searchParamsSchema>>;
 }) {
-	const { emailDeliveryId } = params;
-	const { unsubscribed } = searchParamsSchema.parse(searchParams);
+	const { emailDeliveryId } = await params;
+	const { unsubscribed } = searchParamsSchema.parse(await searchParams);
 
 	console.log('emailDeliveryId', emailDeliveryId);
 	console.log('unsubscribed', unsubscribed);

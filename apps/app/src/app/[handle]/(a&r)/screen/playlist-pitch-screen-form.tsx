@@ -1,9 +1,10 @@
 'use client';
 
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useEffect } from 'react';
-import { api } from '@barely/lib/server/api/react';
+import { useTRPC } from '@barely/lib/server/api/react';
 import { updatePlaylistPitchCampaign_ScreeningSchema } from '@barely/lib/server/routes/campaign/campaign.schema';
+import { useMutation, useQuery, useSuspenseQuery } from '@tanstack/react-query';
 
 import { useSubscribe } from '@barely/hooks/use-subscribe';
 import { useZodForm } from '@barely/hooks/use-zod-form';
@@ -18,18 +19,22 @@ import { TextField } from '@barely/ui/forms/text-field';
 import { TrackGenresField } from '~/app/(dash)/track/components/track-genres-input';
 
 export function PlaylistPitchScreenForm() {
-	const utils = api.useContext();
+	const trpc = useTRPC();
+	const utils = trpc.useUtils();
 
-	const [campaigns] = api.campaign.toScreen.useSuspenseQuery(undefined, {
+	const { data: campaigns } = useSuspenseQuery({
+		...trpc.campaign.toScreen.queryOptions(undefined),
 		staleTime: Infinity,
 	});
 
 	const campaign = campaigns?.[0];
 
-	const { data: _genresCount } = api.playlist.countByGenres.useQuery(
-		{ genreIds: campaign?.track.genres.map(g => g.id) ?? [] },
-		{ enabled: !!campaign?.track.genres?.length },
-	);
+	const { data: _genresCount } = useQuery({
+		...trpc.playlist.countByGenres.queryOptions({
+			genreIds: campaign?.track.genres.map(g => g.id) ?? [],
+		}),
+		enabled: !!campaign?.track.genres?.length,
+	});
 
 	const genresCount =
 		campaign?.track.genres?.length ?
@@ -71,7 +76,8 @@ export function PlaylistPitchScreenForm() {
 		}
 	}, [genresCount?.totalCurators, form]);
 
-	const { mutate: updateCampaign } = api.campaign.update.useMutation({
+	const { mutate: updateCampaign } = useMutation({
+		...trpc.campaign.update.mutationOptions(),
 		onMutate: async updatedCampaign => {
 			await utils.campaign.toScreen.cancel();
 
@@ -100,42 +106,42 @@ export function PlaylistPitchScreenForm() {
 		},
 	});
 
-	const { mutate: submitScreening } =
-		api.campaign.submitPlaylistPitchScreening.useMutation({
-			onMutate: async () => {
-				await utils.campaign.toScreen.cancel();
+	const { mutate: submitScreening } = useMutation({
+		...trpc.campaign.submitPlaylistPitchScreening.mutationOptions(),
+		onMutate: async () => {
+			await utils.campaign.toScreen.cancel();
 
-				const previousCampaigns = utils.campaign.toScreen.getData();
-				const firstCampaign = previousCampaigns?.[0];
+			const previousCampaigns = utils.campaign.toScreen.getData();
+			const firstCampaign = previousCampaigns?.[0];
 
-				// optimistically remove the first campaign from the list
+			// optimistically remove the first campaign from the list
+			utils.campaign.toScreen.setData(undefined, old => {
+				if (!old || !firstCampaign) return old;
+				return old.filter(c => c.id !== firstCampaign.id);
+			});
+
+			if (firstCampaign) {
 				utils.campaign.toScreen.setData(undefined, old => {
-					if (!old || !firstCampaign) return old;
+					if (!old) return old;
 					return old.filter(c => c.id !== firstCampaign.id);
 				});
+			}
 
-				if (firstCampaign) {
-					utils.campaign.toScreen.setData(undefined, old => {
-						if (!old) return old;
-						return old.filter(c => c.id !== firstCampaign.id);
-					});
-				}
+			form.reset();
 
-				form.reset();
+			return { previousCampaigns };
+		},
 
-				return { previousCampaigns };
-			},
+		onSuccess: () => {
+			return utils.campaign.toScreen.invalidate();
+		},
 
-			onSuccess: () => {
-				return utils.campaign.toScreen.invalidate();
-			},
-
-			onError: (err, variables, context) => {
-				if (context?.previousCampaigns) {
-					utils.campaign.toScreen.setData(undefined, context.previousCampaigns);
-				}
-			},
-		});
+		onError: (err, variables, context) => {
+			if (context?.previousCampaigns) {
+				utils.campaign.toScreen.setData(undefined, context.previousCampaigns);
+			}
+		},
+	});
 
 	const handleScreenCampaign = (
 		data: z.infer<typeof updatePlaylistPitchCampaign_ScreeningSchema>,

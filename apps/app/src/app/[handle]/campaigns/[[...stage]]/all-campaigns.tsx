@@ -3,8 +3,9 @@
 import { Fragment } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { api } from '@barely/server/api/react';
-import { z } from 'zod';
+import { useTRPC } from '@barely/lib/server/api/react';
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
+import { z } from 'zod/v4';
 
 import { useWorkspace } from '@barely/hooks/use-workspace';
 
@@ -17,25 +18,28 @@ import { H, Text } from '@barely/ui/elements/typography';
 import { campaignTypeDisplay } from '@barely/utils/campaign';
 
 export const AllCampaigns = () => {
+	const trpc = useTRPC();
 	const params = useParams();
 	const { workspace } = useWorkspace();
 
 	const stage = z
 		.enum(['screening', 'approved', 'active'])
 		.optional()
-		.safeParse(params?.stage?.[0]);
+		.safeParse(params.stage?.[0]);
 
-	const [campaignsQuery] = api.campaign.byWorkspaceId.useSuspenseInfiniteQuery(
-		{
-			workspaceId: workspace.id,
-			stage: stage.success ? stage.data : undefined,
-		},
-		{
-			getNextPageParam: lastPage => lastPage.nextCursor,
-		},
-	);
+	const { data: campaignsQuery } = useSuspenseInfiniteQuery({
+		...trpc.campaign.byWorkspaceId.infiniteQueryOptions(
+			{
+				workspaceId: workspace.id,
+				stage: stage.success ? stage.data : undefined,
+			},
+			{
+				getNextPageParam: lastPage => lastPage.nextCursor,
+			},
+		),
+	});
 
-	const campaigns = campaignsQuery.pages.flatMap(page => page.campaigns) ?? [];
+	const campaigns = campaignsQuery.pages.flatMap(page => page.campaigns);
 
 	if (!campaigns.length) {
 		return (
@@ -78,9 +82,9 @@ export const AllCampaigns = () => {
 					return (
 						<Fragment key={`${campaignIndex}`}>
 							<InfoCard
-								imageUrl={campaign.track?.imageUrl ?? ''}
-								imageAlt={campaign.track?.name}
-								title={campaign.track?.name}
+								imageUrl={campaign.track.imageUrl ?? ''}
+								imageAlt={campaign.track.name}
+								title={campaign.track.name}
 								subtitle={workspace.name}
 								stats={description}
 								badges={badge}

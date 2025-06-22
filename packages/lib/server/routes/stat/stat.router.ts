@@ -1,5 +1,5 @@
 import { and, eq } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { FmPage } from '../fm/fm.schema';
 import type { Link } from '../link/link.schema';
@@ -272,7 +272,7 @@ export const statRouter = createTRPCRouter({
 			) {
 				const topDevices = await pipe_cartTopDevices({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -282,7 +282,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'fm/view' || input.topEventType === 'fm/linkClick') {
 				const topDevices = await pipe_fmTopDevices({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -292,7 +292,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'link/click') {
 				const topDevices = await pipe_linkTopDevices({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -302,7 +302,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topDevices = await pipe_pageTopDevices({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -323,7 +323,7 @@ export const statRouter = createTRPCRouter({
 			) {
 				const topOperatingSystems = await pipe_cartTopOs({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -333,7 +333,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'fm/view' || input.topEventType === 'fm/linkClick') {
 				const topOperatingSystems = await pipe_fmTopOs({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -343,7 +343,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'link/click') {
 				const topOperatingSystems = await pipe_linkTopOs({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -353,7 +353,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topOperatingSystems = await pipe_pageTopOs({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -377,7 +377,7 @@ export const statRouter = createTRPCRouter({
 			) {
 				const topCities = await pipe_cartTopCities({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -387,7 +387,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'fm/view' || input.topEventType === 'fm/linkClick') {
 				const topCities = await pipe_fmTopCities({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -397,7 +397,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'link/click') {
 				const topCities = await pipe_linkTopCities({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -407,7 +407,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topCities = await pipe_pageTopCities({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -426,7 +426,7 @@ export const statRouter = createTRPCRouter({
 			) {
 				const topRegions = await pipe_cartTopRegions({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -436,7 +436,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'fm/view' || input.topEventType === 'fm/linkClick') {
 				const topRegions = await pipe_fmTopRegions({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -446,7 +446,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'link/click') {
 				const topRegions = await pipe_linkTopRegions({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -456,7 +456,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topRegions = await pipe_pageTopRegions({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -475,7 +475,7 @@ export const statRouter = createTRPCRouter({
 			) {
 				const topCountries = await pipe_cartTopCountries({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -485,7 +485,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'fm/view' || input.topEventType === 'fm/linkClick') {
 				const topCountries = await pipe_fmTopCountries({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -495,7 +495,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'link/click') {
 				const topCountries = await pipe_linkTopCountries({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -505,7 +505,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topCountries = await pipe_pageTopCountries({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -531,7 +531,7 @@ export const statRouter = createTRPCRouter({
 			) {
 				const topReferers = await pipe_cartTopReferers({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -541,7 +541,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'fm/linkClick' || input.topEventType === 'fm/view') {
 				const topReferers = await pipe_fmTopReferers({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -551,7 +551,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'link/click') {
 				const topReferers = await pipe_linkTopReferers({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -561,7 +561,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topReferers = await pipe_pageTopReferers({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -584,7 +584,7 @@ export const statRouter = createTRPCRouter({
 			) {
 				const topMetaCampaigns = await pipe_cartTopMetaCampaigns({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -594,7 +594,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'fm/linkClick' || input.topEventType === 'fm/view') {
 				const topMetaCampaigns = await pipe_fmTopMetaCampaigns({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -604,7 +604,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'link/click') {
 				const topMetaCampaigns = await pipe_linkTopMetaCampaigns({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -614,7 +614,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topMetaCampaigns = await pipe_pageTopMetaCampaigns({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -637,7 +637,7 @@ export const statRouter = createTRPCRouter({
 			) {
 				const topMetaAdSets = await pipe_cartTopMetaAdSets({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -647,7 +647,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'fm/linkClick' || input.topEventType === 'fm/view') {
 				const topMetaAdSets = await pipe_fmTopMetaAdSets({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -657,7 +657,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'link/click') {
 				const topMetaAdSets = await pipe_linkTopMetaAdSets({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -667,7 +667,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topMetaAdSets = await pipe_pageTopMetaAdSets({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -690,7 +690,7 @@ export const statRouter = createTRPCRouter({
 			) {
 				const topMetaAds = await pipe_cartTopMetaAds({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -700,7 +700,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'fm/linkClick' || input.topEventType === 'fm/view') {
 				const topMetaAds = await pipe_fmTopMetaAds({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -710,7 +710,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'link/click') {
 				const topMetaAds = await pipe_linkTopMetaAds({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -720,7 +720,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topMetaAds = await pipe_pageTopMetaAds({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -743,7 +743,7 @@ export const statRouter = createTRPCRouter({
 			) {
 				const topMetaPlacements = await pipe_cartTopMetaPlacements({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -753,7 +753,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'fm/linkClick' || input.topEventType === 'fm/view') {
 				const topMetaPlacements = await pipe_fmTopMetaPlacements({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -763,7 +763,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'link/click') {
 				const topMetaPlacements = await pipe_linkTopMetaPlacements({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -773,7 +773,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topMetaPlacements = await pipe_pageTopMetaPlacements({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -796,7 +796,7 @@ export const statRouter = createTRPCRouter({
 			) {
 				const topLandingPages = await pipe_cartTopLandingPages({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -806,7 +806,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'fm/linkClick' || input.topEventType === 'fm/view') {
 				const topLandingPages = await pipe_fmTopLandingPages({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -816,7 +816,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'link/click') {
 				const topLandingPages = await pipe_linkTopLandingPages({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -826,7 +826,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topLandingPages = await pipe_pageTopLandingPages({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -849,7 +849,7 @@ export const statRouter = createTRPCRouter({
 			) {
 				const topEmailBroadcasts = await pipe_cartTopEmailBroadcasts({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -859,7 +859,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'fm/linkClick' || input.topEventType === 'fm/view') {
 				const topEmailBroadcasts = await pipe_fmTopEmailBroadcasts({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -869,7 +869,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'link/click') {
 				const topEmailBroadcasts = await pipe_linkTopEmailBroadcasts({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -879,7 +879,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topEmailBroadcasts = await pipe_pageTopEmailBroadcasts({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -902,7 +902,7 @@ export const statRouter = createTRPCRouter({
 			) {
 				const topEmailTemplates = await pipe_cartTopEmailTemplates({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -912,7 +912,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'fm/linkClick' || input.topEventType === 'fm/view') {
 				const topEmailTemplates = await pipe_fmTopEmailTemplates({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -922,7 +922,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'link/click') {
 				const topEmailTemplates = await pipe_linkTopEmailTemplates({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -932,7 +932,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topEmailTemplates = await pipe_pageTopEmailTemplates({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -955,7 +955,7 @@ export const statRouter = createTRPCRouter({
 			) {
 				const topFlowActions = await pipe_cartTopFlowActions({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -965,7 +965,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'fm/linkClick' || input.topEventType === 'fm/view') {
 				const topFlowActions = await pipe_fmTopFlowActions({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -975,7 +975,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'link/click') {
 				const topFlowActions = await pipe_linkTopFlowActions({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 
@@ -985,7 +985,7 @@ export const statRouter = createTRPCRouter({
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topFlowActions = await pipe_pageTopFlowActions({
 					...input,
-					workspaceId: ctx.workspace?.id,
+					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
 				});
 

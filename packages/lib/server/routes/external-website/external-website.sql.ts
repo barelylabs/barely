@@ -19,12 +19,7 @@ export const ExternalWebsites = pgTable(
 		...timestamps,
 		name: varchar('name', { length: 255 }).notNull(),
 	},
-	website => {
-		return {
-			// primary: primaryKey(website.workspaceId, website.id),
-			workspace: index('ExternalWebsite_workspace_idx').on(website.workspaceId),
-		};
-	},
+	website => [index('ExternalWebsite_workspace_idx').on(website.workspaceId)],
 );
 
 export const ExternalWebsite_Relations = relations(ExternalWebsites, ({ one }) => ({

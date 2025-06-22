@@ -1,5 +1,5 @@
 import type { Edge, Node, OnConnect, OnEdgesChange, OnNodesChange } from '@xyflow/react';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 
 import type {
 	flowForm_addToMailchimpAudienceSchema,

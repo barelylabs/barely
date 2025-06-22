@@ -1,5 +1,5 @@
 import type { UseToastOutput } from '@barely/toast';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 
 import type { EmailTemplate } from '../email-template/email-template.schema';
 import type {
@@ -63,7 +63,7 @@ export function getActionNodeFromFlowAction(
 				type: 'boolean',
 				data: {
 					...node,
-					booleanCondition: node.booleanCondition ?? 'hasOrderedProduct',
+					booleanCondition: node.booleanCondition ?? 'hasOrderedCart',
 					enabled: node.enabled ?? true,
 				},
 				position: position ?? { x: 400, y: 25 },
@@ -135,8 +135,7 @@ export function hasEdgeLoop(edges: { source: string; target: string }[]): boolea
 
 	// Build the graph
 	for (const edge of edges) {
-		if (!graph[edge.source]) graph[edge.source] = [];
-		graph[edge.source]?.push(edge.target);
+		(graph[edge.source] ??= []).push(edge.target);
 	}
 
 	// DFS function to detect cycle
@@ -188,7 +187,7 @@ export function getFlowActionFromActionNode(
 			return {
 				id: node.id,
 				flowId,
-				enabled: node.data.enabled ?? true,
+				enabled: node.data.enabled,
 				type: 'sendEmail',
 				emailTemplateId: node.data.id,
 				emailTemplate: {
@@ -215,6 +214,7 @@ export function getFlowActionFromActionNode(
 				flowId,
 				type: 'boolean',
 				...node.data,
+				booleanCondition: node.data.booleanCondition ?? 'hasOrderedCart',
 			};
 		case 'sendEmailFromTemplateGroup':
 			return {
@@ -229,6 +229,7 @@ export function getFlowActionFromActionNode(
 				flowId,
 				type: 'addToMailchimpAudience',
 				...node.data,
+				mailchimpAudienceId: node.data.mailchimpAudienceId ?? null,
 			};
 	}
 }
@@ -248,7 +249,11 @@ export function getInsertableFlowActionsFromFlowActions(
 				return {
 					...fa,
 					type: 'sendEmail',
-					emailTemplate,
+					emailTemplate: {
+						...emailTemplate,
+						replyTo: emailTemplate.replyTo ?? undefined,
+						previewText: emailTemplate.previewText ?? undefined,
+					},
 				} satisfies InsertFlowAction;
 			}
 			case 'wait':
@@ -363,7 +368,7 @@ export function getDefaultFlowAction_sendEmail(props: {
 
 	emailTemplate: Partial<EmailTemplate> & { fromId: EmailTemplate['fromId'] };
 }) {
-	const emailTemplate = props.emailTemplate ?? {};
+	const emailTemplate = props.emailTemplate;
 
 	const emailTemplateId = newId('emailTemplate');
 
@@ -381,10 +386,12 @@ export function getDefaultFlowAction_sendEmail(props: {
 			emailTemplate: {
 				...emailTemplate,
 				id: flowAction.emailTemplateId,
-				fromId: emailTemplate.fromId ?? '',
+				fromId: emailTemplate.fromId,
 				subject: emailTemplate.subject ?? '',
 				body: emailTemplate.body ?? '',
 				type: emailTemplate.type ?? 'marketing',
+				replyTo: emailTemplate.replyTo ?? undefined,
+				previewText: emailTemplate.previewText ?? undefined,
 			},
 		},
 		props.position,

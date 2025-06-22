@@ -1,6 +1,6 @@
 import type { InferSelectModel } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { SortableFile } from '../file/file.schema';
 import { commonFiltersSchema, infiniteQuerySchema } from '../../../utils/filters';
@@ -18,7 +18,7 @@ export const apparelSizeSchema = z.enum(['XS', 'S', 'M', 'L', 'XL', 'XXL']);
 export type ApparelSize = z.infer<typeof apparelSizeSchema>;
 
 export const insertProductSchema = createInsertSchema(Products, {
-	name: s => s.name.min(1, 'Name is required'),
+	name: name => name.min(1, 'Name is required'),
 }).extend({
 	_images: insertProductImagesSchema.optional(),
 	_apparelSizes: z

@@ -30,7 +30,7 @@ export function MediaCard({ file, removeFile, isSelectable }: MediaCardProps) {
 							:	{ s3Key: file.s3Key })}
 							alt={file.name}
 							placeholder={file.blurDataUrl ? 'blur' : undefined}
-							blurDataURL={file.blurDataUrl ? file.blurDataUrl : ''}
+							blurDataURL={file.blurDataUrl ?? ''}
 						/>
 					</div>
 				)}

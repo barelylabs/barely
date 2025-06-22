@@ -85,7 +85,7 @@ export const emailBroadcastRouter = createTRPCRouter({
 						status,
 					})
 					.returning()
-			)?.[0];
+			)[0];
 
 			if (!emailBroadcast) {
 				throw new Error('Failed to create email broadcast');
@@ -128,7 +128,7 @@ export const emailBroadcastRouter = createTRPCRouter({
 						),
 					)
 					.returning()
-			)?.[0];
+			)[0];
 
 			if (!updatedEmailBroadcast) {
 				throw new Error('Failed to update email broadcast');

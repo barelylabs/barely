@@ -3,6 +3,7 @@
 	"version": "0.1.0",
 	"types": "index.ts",
 	"private": true,
+	"type": "module",
 	"scripts": {
 		"clean": "rm -rf .turbo node_modules",
 		"format": "prettier --check . --ignore-path ../../.gitignore",
@@ -24,17 +25,17 @@
 		"@barely/tailwind-config": "workspace:^0.1.0",
 		"@barely/tsconfig": "workspace:^0.1.0",
 		"@types/node": "^20.10.6",
-		"@typescript-eslint/eslint-plugin": "^7.4.0",
-		"@typescript-eslint/parser": "^7.4.0",
-		"eslint": "^8.57.0",
-		"prettier": "^3.5.3",
-		"react": "18.2.0",
-		"react-dom": "18.2.0",
-		"typescript": "^5.5.4"
+		"@typescript-eslint/eslint-plugin": "catalog:",
+		"@typescript-eslint/parser": "catalog:",
+		"eslint": "catalog:",
+		"prettier": "catalog:",
+		"react": "catalog:react19",
+		"react-dom": "catalog:react19",
+		"typescript": "catalog:"
 	},
 	"peerDependencies": {
-		"react": "18.2.0",
-		"react-dom": "^18.2.0"
+		"react": "catalog:react19",
+		"react-dom": "^19.1.0"
 	},
 	"eslintConfig": {
 		"extends": [

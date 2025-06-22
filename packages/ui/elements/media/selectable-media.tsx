@@ -54,7 +54,7 @@ export function SelectableMedia({
 				const file = files.find(f => f.id === key);
 				return {
 					'text/plain': file?.id ?? '',
-					fileRecord: JSON.stringify(file) ?? '',
+					fileRecord: JSON.stringify(file),
 				};
 			});
 			return fileRecords;

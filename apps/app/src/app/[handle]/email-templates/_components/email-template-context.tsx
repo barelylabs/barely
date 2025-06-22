@@ -4,7 +4,7 @@ import type { AppRouterOutputs } from '@barely/lib/server/api/react';
 import type { emailTemplateFilterParamsSchema } from '@barely/lib/server/routes/email-template/email-template.schema';
 // import type { FetchNextPageOptions } from '@tanstack/react-query';
 import type { Selection } from 'react-aria-components';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
 import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';

@@ -58,7 +58,7 @@ export async function createPitchCheckoutLink(props: {
 				phone: props.user.phone ?? undefined,
 			});
 
-	if (!workspace?.stripeCustomerId) {
+	if (!workspace.stripeCustomerId) {
 		throw new Error('Workspace must have a stripeCustomerId.');
 	}
 
@@ -94,7 +94,7 @@ export async function createPitchCheckoutLink(props: {
 	};
 
 	const session = await stripe.checkout.sessions.create({
-		customer: workspace.stripeCustomerId ?? undefined,
+		customer: workspace.stripeCustomerId,
 		mode: 'payment',
 		success_url: successUrl,
 		cancel_url: cancelUrl,

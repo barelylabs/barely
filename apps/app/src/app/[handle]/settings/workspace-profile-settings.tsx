@@ -5,7 +5,7 @@ import type { UploadQueueItem } from '@barely/lib/hooks/use-upload';
 import type { workspaceTypeSchema } from '@barely/lib/server/routes/workspace/workspace.schema';
 import type { MDXEditorMethods } from '@barely/ui/elements/mdx-editor';
 import type { SelectFieldOption } from '@barely/ui/forms/select-field';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useCallback, useRef } from 'react';
 import { useUpdateWorkspace } from '@barely/lib/hooks/use-update-workspace';
 import { useUpload } from '@barely/lib/hooks/use-upload';

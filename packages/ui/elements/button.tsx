@@ -106,8 +106,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 					.replace(/Edit/g, 'Editing')
 					.replace(/Close/g, 'Closing')
 					.replace(/Load/g, 'Loading')
-			: loadingText ? loadingText
-			: children;
+			:	(loadingText ?? children);
 
 		if ('href' in props && props.href !== undefined) {
 			return (
@@ -202,11 +201,9 @@ const LoadingLinkButton = ({
 	return (
 		<Button
 			{...props}
-			onClick={(e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
+			onClick={e => {
 				setIsLoading(true);
-				(
-					props.onClick as React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>
-				)?.(e);
+				props.onClick?.(e);
 			}}
 			loading={props.loading ?? isLoading}
 		>

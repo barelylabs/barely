@@ -10,9 +10,10 @@ import RegisterUserForm from './register-user-form';
 const RegisterUserPage = async ({
 	searchParams,
 }: {
-	searchParams?: { callbackUrl?: string };
+	searchParams?: Promise<{ callbackUrl?: string }>;
 }) => {
-	const { callbackUrl } = searchParams ?? {};
+	const awaitedSearchParams = await searchParams;
+	const { callbackUrl } = awaitedSearchParams ?? {};
 
 	await handleLoggedInOnAuthPage({ callbackUrl });
 

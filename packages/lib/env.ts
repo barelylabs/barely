@@ -1,6 +1,5 @@
-import type { ZodError } from 'zod';
 import { createEnv } from '@t3-oss/env-nextjs';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 type RateLimitTime =
 	| `${number} ms`
@@ -136,11 +135,9 @@ export const env = createEnv({
 		NEXT_PUBLIC_WWW_BASE_URL: process.env.NEXT_PUBLIC_WWW_BASE_URL,
 		NEXT_PUBLIC_WWW_DEV_PORT: process.env.NEXT_PUBLIC_WWW_DEV_PORT,
 	},
-	onValidationError: (error: ZodError) => {
-		console.error('❌ Invalid environment variables:', error.flatten().fieldErrors);
-		throw new Error(
-			'Invalid environment variables' + JSON.stringify(error.flatten().fieldErrors),
-		);
+	onValidationError: issues => {
+		console.error('❌ Invalid environment variables:', issues);
+		throw new Error('Invalid environment variables');
 	},
 	skipValidation:
 		!!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === 'lint',

@@ -1,5 +1,5 @@
 import type { InferInsertModel } from 'drizzle-orm';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 
 import { Playlists } from './playlist.sql';

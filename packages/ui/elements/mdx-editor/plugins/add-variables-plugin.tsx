@@ -155,7 +155,6 @@ export default function AddVariablesPlugin({
 						>
 							<ul className='max-h-64 list-none overflow-y-scroll md:max-h-80'>
 								{options.map((option, index) => (
-									// eslint-disable-next-line jsx-a11y/click-events-have-key-events
 									<li
 										id={`typeahead-item-${index}`}
 										key={option.key}

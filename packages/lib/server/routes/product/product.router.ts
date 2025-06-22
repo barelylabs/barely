@@ -11,7 +11,7 @@ import {
 	or,
 	sql,
 } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { NormalizedProductWith_Images } from './product.schema';
 import { newId } from '../../../utils/id';
@@ -70,8 +70,8 @@ export const productRouter = createTRPCRouter({
 				nextCursor =
 					nextProduct ?
 						{
-							id: nextProduct?.id,
-							createdAt: nextProduct?.createdAt,
+							id: nextProduct.id,
+							createdAt: nextProduct.createdAt,
 						}
 					:	undefined;
 			}
@@ -93,23 +93,24 @@ export const productRouter = createTRPCRouter({
 
 	create: privateProcedure.input(createProductSchema).mutation(async ({ input, ctx }) => {
 		const { _images, _apparelSizes, ...productData } = input;
-
+		const { name, ...restOfProductData } = productData;
 		const productId = newId('product');
 
 		const product = await ctx.db.http
 			.insert(Products)
 			.values({
-				...productData,
+				...restOfProductData,
+				name,
 				id: productId,
 				workspaceId: ctx.workspace.id,
 			})
 			.returning();
 
 		if (_images?.length) {
-			const images = _images.map((_i, index) => ({
+			const images = _images.map(_i => ({
 				productId,
 				fileId: _i.fileId,
-				lexorank: _i.lexorank ?? raise(`No lexorank for image ${index}`),
+				lexorank: _i.lexorank,
 			}));
 
 			await ctx.db.http.insert(_Files_To_Products__Images).values(images).returning();

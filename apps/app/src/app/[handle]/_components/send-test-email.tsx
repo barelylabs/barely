@@ -2,8 +2,9 @@ import type { emailTemplateForm_sendEmailSchema } from '@barely/lib/server/route
 import type { flowForm_sendEmailSchema } from '@barely/lib/server/routes/flow/flow.schema';
 import { useState } from 'react';
 import { useToast } from '@barely/lib/hooks/use-toast';
-import { api } from '@barely/lib/server/api/react';
-import { z } from 'zod';
+import { useTRPC } from '@barely/lib/server/api/react';
+import { useMutation } from '@tanstack/react-query';
+import { z } from 'zod/v4';
 
 import { Button } from '@barely/ui/elements/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/elements/popover';
@@ -16,27 +17,30 @@ export function SendTestEmail({
 		| z.infer<typeof flowForm_sendEmailSchema>
 		| z.infer<typeof emailTemplateForm_sendEmailSchema>;
 }) {
+	const trpc = useTRPC();
 	const { toast } = useToast();
 
 	const [isTestEmailModalOpen, setIsTestEmailModalOpen] = useState(false);
 	const [sendTestEmailTo, setSendTestEmailTo] = useState('');
 	const [sending, setSending] = useState(false);
 
-	const { mutate: sendTestEmail } = api.emailTemplate.sendTestEmail.useMutation({
-		onMutate: () => {
-			setSending(true);
-		},
-		onSuccess: () => {
-			toast('Test email sent', {
-				description: `Check ${sendTestEmailTo} for the test email`,
-			});
-			setSending(false);
-			setIsTestEmailModalOpen(false);
-		},
-		onError: () => {
-			setSending(false);
-		},
-	});
+	const { mutate: sendTestEmail } = useMutation(
+		trpc.emailTemplate.sendTestEmail.mutationOptions({
+			onMutate: () => {
+				setSending(true);
+			},
+			onSuccess: () => {
+				toast('Test email sent', {
+					description: `Check ${sendTestEmailTo} for the test email`,
+				});
+				setSending(false);
+				setIsTestEmailModalOpen(false);
+			},
+			onError: () => {
+				setSending(false);
+			},
+		}),
+	);
 
 	const handleSendTestEmail = () => {
 		if (!values.sendTestEmailTo) return;
@@ -45,7 +49,7 @@ export function SendTestEmail({
 
 		try {
 			to = z.string().email().parse(sendTestEmailTo);
-		} catch (error) {
+		} catch {
 			toast('Invalid email address', {
 				description: 'Please enter a valid email address',
 			});

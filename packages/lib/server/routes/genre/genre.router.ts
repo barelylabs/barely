@@ -72,7 +72,7 @@ export const genreRouter = createTRPCRouter({
 	}),
 
 	allByCurrentUser: privateProcedure.query(async ({ ctx }) => {
-		if (!ctx.user?.id) return [];
+		if (!ctx.user.id) return [];
 		return await getGenresByUserId(ctx.user.id, ctx.db);
 	}),
 });

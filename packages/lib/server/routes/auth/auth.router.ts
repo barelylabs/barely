@@ -1,6 +1,6 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
-import { createTRPCRouter, privateProcedure, publicProcedure } from '../../api/trpc';
+import { createTRPCRouter, publicProcedure } from '../../api/trpc';
 import { sendLoginEmail } from '../../auth/auth.fns';
 
 export const authRouter = createTRPCRouter({
@@ -14,14 +14,9 @@ export const authRouter = createTRPCRouter({
 		.mutation(async ({ input }) => {
 			const emailRes = await sendLoginEmail(input);
 
-			if (!emailRes) return { success: false, message: 'Something went wrong' };
+			if ('error' in emailRes && emailRes.error)
+				return { success: false, message: 'Something went wrong' };
 
 			return { success: true };
 		}),
-
-	privateMessage: privateProcedure.query(({ ctx }) => {
-		return {
-			message: `Hello ${ctx.user?.email ?? ctx.user?.firstName ?? 'user'}`,
-		};
-	}),
 });

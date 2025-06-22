@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import {
 	getIsoDateFromDate,
@@ -129,12 +129,12 @@ export function getTopStatValue(
 export const stdWebEventQueryToPipeParamsSchema =
 	stdWebEventPipeQueryParamsSchema.transform(data => {
 		const date_range =
-			data?.start && data.end ?
+			data.start && data.end ?
 				{
 					start: getIsoDateFromDate(new Date(data.start)),
 					end: getIsoDateFromDate(new Date(data.end)),
 				}
-			:	getIsoDateRangeFromDescription(data?.dateRange ?? '1w');
+			:	getIsoDateRangeFromDescription(data.dateRange ?? '1w');
 
 		return {
 			...data,

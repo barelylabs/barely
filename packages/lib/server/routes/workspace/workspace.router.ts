@@ -1,5 +1,5 @@
 import { and, eq, gt, isNull } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import { newId } from '../../../utils/id';
 import { pushEvent } from '../../../utils/pusher-server';
@@ -52,7 +52,7 @@ export const workspaceRouter = createTRPCRouter({
 	}),
 
 	current: privateProcedure.query(({ ctx }) => {
-		if (!ctx.workspace) return null;
+		// if (!ctx.workspace) return null;
 		return ctx.workspace;
 	}),
 

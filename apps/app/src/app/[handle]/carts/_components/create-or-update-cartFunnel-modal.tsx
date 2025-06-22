@@ -1,15 +1,20 @@
 'use client';
 
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useCallback, useEffect, useState } from 'react';
 import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
 import {
 	defaultCartFunnel,
 	upsertCartFunnelSchema,
 } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
 import { sanitizeKey } from '@barely/lib/utils/key';
+import { useTRPC } from '@barely/server/api/react';
+import {
+	useMutation,
+	useQueryClient,
+	useSuspenseInfiniteQuery,
+} from '@tanstack/react-query';
 
 import { ProductPrice } from '@barely/ui/components/cart/product-price';
 import { Button } from '@barely/ui/elements/button';
@@ -26,7 +31,8 @@ import { TextField } from '@barely/ui/forms/text-field';
 import { useCartFunnelContext } from '~/app/[handle]/carts/_components/cartFunnel-context';
 
 export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' }) {
-	const apiUtils = api.useUtils();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
 	const { workspace } = useWorkspace();
 
 	/* funnel context */
@@ -41,35 +47,40 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 	} = useCartFunnelContext();
 
 	/* products */
-	const { data: productsInfinite } = api.product.byWorkspace.useInfiniteQuery(
-		{
-			handle: workspace.handle,
-		},
-		{
-			getNextPageParam: lastPage => lastPage.nextCursor,
-		},
+	const { data: productsInfinite } = useSuspenseInfiniteQuery(
+		trpc.product.byWorkspace.infiniteQueryOptions(
+			{
+				handle: workspace.handle,
+			},
+			{
+				getNextPageParam: lastPage => lastPage.nextCursor,
+			},
+		),
 	);
 
-	const products = productsInfinite?.pages.flatMap(page => page.products) ?? [];
+	const products = productsInfinite.pages.flatMap(page => page.products);
 
-	const productOptions =
-		products.map(product => ({
-			label: product.name,
-			value: product.id,
-		})) ?? [];
+	const productOptions = products.map(product => ({
+		label: product.name,
+		value: product.id,
+	}));
 
 	/* mutations */
-	const { mutateAsync: createFunnel } = api.cartFunnel.create.useMutation({
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: createFunnel } = useMutation(
+		trpc.cartFunnel.create.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
-	const { mutateAsync: updateFunnel } = api.cartFunnel.update.useMutation({
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: updateFunnel } = useMutation(
+		trpc.cartFunnel.update.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
 	/* form */
 	const { form, onSubmit: onSubmitFunnel } = useCreateOrUpdateForm({
@@ -101,8 +112,16 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 		focusGridList();
 		setShowModal(false);
 
-		await apiUtils.cartFunnel.invalidate();
-	}, [setShowModal, focusGridList, apiUtils.cartFunnel]);
+		await queryClient.invalidateQueries(
+			trpc.cartFunnel.byWorkspace.queryFilter({ handle: workspace.handle }),
+		);
+	}, [
+		setShowModal,
+		focusGridList,
+		queryClient,
+		trpc.cartFunnel.byWorkspace,
+		workspace.handle,
+	]);
 
 	// state
 	const mainProduct = products.find(p => p.id === form.getValues('mainProductId'));
@@ -196,7 +215,7 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 							<div className='my-auto h-fit rounded-md bg-muted bg-opacity-75 p-2 px-3'>
 								<ProductPrice
 									price={mainProductDiscountedPrice}
-									normalPrice={mainProduct?.price}
+									normalPrice={mainProduct.price}
 									className={
 										(
 											mainProductDiscountedPrice === 0 &&
@@ -263,7 +282,7 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 							<div className='my-auto h-fit rounded-md bg-muted bg-opacity-75 p-2 px-3'>
 								<ProductPrice
 									price={bumpProductDiscountedPrice}
-									normalPrice={bumpProduct?.price}
+									normalPrice={bumpProduct.price}
 									className={bumpProductDiscountedPrice === 0 ? 'text-red-500' : ''}
 								/>
 							</div>
@@ -303,7 +322,7 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 							<div className='my-auto h-fit rounded-md bg-muted bg-opacity-75 p-2 px-3'>
 								<ProductPrice
 									price={upsellProductDiscountedPrice}
-									normalPrice={upsellProduct?.price}
+									normalPrice={upsellProduct.price}
 									className={upsellProductDiscountedPrice === 0 ? 'text-red-500' : ''}
 								/>
 							</div>

@@ -1,7 +1,7 @@
 'use client';
 
 import type { InsertDomain } from '@barely/server/routes/domain/domain.schema';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useEffect, useState } from 'react';
 import { api } from '@barely/server/api/react';
 import { insertDomainSchema } from '@barely/server/routes/domain/domain.schema';

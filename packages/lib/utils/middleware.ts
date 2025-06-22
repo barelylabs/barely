@@ -1,7 +1,7 @@
 import type { NextRequest, NextResponse } from 'next/server';
 import { userAgent } from 'next/server';
 import { ipAddress } from '@vercel/edge';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import { env } from '../env';
 import {
@@ -14,7 +14,17 @@ import { isDevelopment } from './environment';
 import { newId } from './id';
 import { getDomainWithoutWWW } from './link';
 
-export const detectBot = (req: NextRequest) => {
+interface NextRequestWithGeo extends NextRequest {
+	geo?: {
+		country?: string;
+		region?: string;
+		city?: string;
+		latitude?: string;
+		longitude?: string;
+	};
+}
+
+export const detectBot = (req: NextRequestWithGeo) => {
 	const url = req.nextUrl;
 	if (url.searchParams.get('bot')) return true;
 	const ua = req.headers.get('User-Agent');
@@ -140,7 +150,7 @@ export const parseLandingPageUrl = (url: string) => {
 };
 
 // common
-export function parseGeo(req: NextRequest) {
+export function parseGeo(req: NextRequestWithGeo) {
 	return isDevelopment() ? getRandomGeoData() : (
 			nextGeoSchema.parse({
 				country:

@@ -1,6 +1,6 @@
 import type { InferSelectModel } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import { commonFiltersSchema, infiniteQuerySchema } from '../../../utils/filters';
 import {
@@ -33,7 +33,7 @@ export type FanGroupCondition = InferSelectModel<typeof FanGroupConditions>;
 
 // FanGroups
 export const insertFanGroupSchema = createInsertSchema(FanGroups, {
-	name: s => s.name.min(1, 'Name is required'),
+	name: name => name.min(1, 'Name is required'),
 });
 
 export const createFanGroupSchema = insertFanGroupSchema

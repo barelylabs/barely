@@ -1,4 +1,8 @@
-import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
+import type {
+	inferRouterContext,
+	inferRouterInputs,
+	inferRouterOutputs,
+} from '@trpc/server';
 
 import { analyticsEndpointRouter } from '../routes/analytics-endpoint/analytics-endpoint.router';
 import { authRouter } from '../routes/auth/auth.router';
@@ -90,5 +94,14 @@ const appRouter = createTRPCRouter({
 type AppRouter = typeof appRouter;
 type AppRouterInputs = inferRouterInputs<AppRouter>;
 type AppRouterOutputs = inferRouterOutputs<AppRouter>;
+type AppRouterContext = inferRouterContext<AppRouter>;
+type AppRouterKeys = keyof AppRouter;
 
-export { appRouter, type AppRouter, type AppRouterInputs, type AppRouterOutputs };
+export {
+	appRouter,
+	type AppRouter,
+	type AppRouterInputs,
+	type AppRouterOutputs,
+	type AppRouterContext,
+	type AppRouterKeys,
+};

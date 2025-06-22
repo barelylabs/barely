@@ -1,6 +1,6 @@
 import type { InferSelectModel } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import { isRealEmail } from '../../../utils/email';
 import { formatInternational, isPossiblePhoneNumber } from '../../../utils/phone-number';
@@ -12,7 +12,7 @@ import {
 import { _Users_To_Workspaces, Users } from './user.sql';
 
 export const insertUserSchema = createInsertSchema(Users, {
-	email: schema => schema.email.email(),
+	email: z.email(),
 });
 export const createUserSchema = insertUserSchema
 	.omit({

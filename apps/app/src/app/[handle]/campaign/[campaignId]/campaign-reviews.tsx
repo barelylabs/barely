@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { api } from '@barely/server/api/react';
+import { useTRPC } from '@barely/lib/server/api/react';
+import { useSuspenseInfiniteQuery, useSuspenseQuery } from '@tanstack/react-query';
 
 import { Progress } from '@barely/ui/elements/progress';
 import { Review } from '@barely/ui/elements/review-card';
@@ -10,14 +11,17 @@ import { Text } from '@barely/ui/elements/typography';
 import { getFullNameFromFirstAndLast } from '@barely/utils/name';
 
 const CampaignReviews = (props: { campaignId: string; reach: number }) => {
-	const [totalPlaylistPitchReviews] =
-		api.playlistPitchReview.countByCampaignId.useSuspenseQuery({
+	const trpc = useTRPC();
+
+	const { data: totalPlaylistPitchReviews } = useSuspenseQuery(
+		trpc.playlistPitchReview.countByCampaignId.queryOptions({
 			campaignId: props.campaignId,
 			complete: true,
-		});
+		}),
+	);
 
-	const [playlistPitchReviews] =
-		api.playlistPitchReview.byCampaignId.useSuspenseInfiniteQuery(
+	const { data: playlistPitchReviews } = useSuspenseInfiniteQuery({
+		...trpc.playlistPitchReview.byCampaignId.infiniteQueryOptions(
 			{
 				campaignId: props.campaignId,
 				complete: true,
@@ -27,7 +31,8 @@ const CampaignReviews = (props: { campaignId: string; reach: number }) => {
 				refetchOnMount: false,
 				staleTime: Infinity,
 			},
-		);
+		),
+	});
 
 	const flatPlaylistPitchReviews = playlistPitchReviews.pages.flatMap(
 		page => page.reviews,

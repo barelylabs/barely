@@ -1,6 +1,8 @@
 import type { InferSelectModel } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
-import { z } from 'zod';
+// eslint-disable-next-line no-restricted-imports
+import * as zv3 from 'zod';
+import { z } from 'zod/v4';
 
 import { querySelectionSchema } from '../../../utils/zod-helpers';
 import { Fans } from './fan.sql';
@@ -43,7 +45,20 @@ export const defaultFan: CreateFan = {
 	email: '',
 };
 
-export const importFansFromCsvColumnMappingsSchema = z.object({
+// fixme: we're using zv3 here because ai v4 doesn't support zod v4 yet. v5 is in alpha but not playing nice with the @ai-sdk/anthropic in alpha. We can fix once v5 ai is released.
+export const importFansFromCsvColumnMappingsSchema_zodv3 = zv3.object({
+	firstName: zv3.string().optional().describe('The first name (firstName) of the fan'),
+	lastName: zv3.string().optional().describe('The last name (lastName) of the fan'),
+	fullName: zv3.string().optional().describe('The full name (fullName) of the fan'),
+	email: zv3.string().describe('The email address of the fan'),
+	phoneNumber: zv3
+		.string()
+		.optional()
+		.describe('The phone number (phoneNumber) of the fan'),
+	createdAt: zv3.string().describe('The date and time the fan was created (createdAt)'),
+});
+
+export const importFansFromCsvColumnMappingsSchema_zodv4 = z.object({
 	firstName: z.string().optional().describe('The first name (firstName) of the fan'),
 	lastName: z.string().optional().describe('The last name (lastName) of the fan'),
 	fullName: z.string().optional().describe('The full name (fullName) of the fan'),
@@ -57,9 +72,11 @@ export const importFansFromCsvColumnMappingsSchema = z.object({
 
 /* making this shallow b/c the SelectFieldOption type inference currently only works one level deep
 I'd prefer to fix that and go back to having a nested columnMappings object */
-export const importFansFromCsvSchema = importFansFromCsvColumnMappingsSchema.extend({
-	csvFileId: z.string(),
-	// columnMappings: importFansFromCsvColumnMappingsSchema,
-	optIntoEmailMarketing: z.boolean(),
-	optIntoSmsMarketing: z.boolean(),
-});
+export const importFansFromCsvSchema = importFansFromCsvColumnMappingsSchema_zodv4.extend(
+	{
+		csvFileId: z.string(),
+		// columnMappings: importFansFromCsvColumnMappingsSchema,
+		optIntoEmailMarketing: z.boolean(),
+		optIntoSmsMarketing: z.boolean(),
+	},
+);

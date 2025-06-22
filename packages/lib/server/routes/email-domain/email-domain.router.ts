@@ -2,7 +2,7 @@ import { resend } from '@barely/email';
 import { tasks } from '@trigger.dev/sdk/v3';
 import { TRPCError } from '@trpc/server';
 import { and, asc, desc, eq, gt, lt, or } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { verifyEmailDomain } from '../../../trigger/email-domain.trigger';
 import { newId } from '../../../utils/id';
@@ -30,26 +30,49 @@ export const emailDomainRouter = createTRPCRouter({
 			});
 
 			if (domainRes.error) {
-				switch (domainRes.error.name) {
-					case 'validation_error': {
+				const { name, message } = domainRes.error;
+				switch (name) {
+					case 'validation_error':
+					case 'missing_required_field':
+					case 'invalid_parameter':
+					case 'invalid_region':
+					case 'invalid_from_address':
+					case 'invalid_idempotency_key':
+					case 'invalid_idempotent_request':
 						throw new TRPCError({
-							code: 'FORBIDDEN',
-							message: `Resend validation error: ${domainRes.error.message}`,
+							code: 'BAD_REQUEST',
+							message,
 						});
-					}
 
-					case 'rate_limit_exceeded': {
+					case 'rate_limit_exceeded':
 						throw new TRPCError({
 							code: 'TOO_MANY_REQUESTS',
-							message: `Resend rate limit exceeded: ${domainRes.error.message}`,
+							message,
 						});
-					}
-					default: {
+
+					case 'not_found':
+						throw new TRPCError({
+							code: 'NOT_FOUND',
+							message,
+						});
+
+					case 'missing_api_key':
+					case 'invalid_api_Key':
+					case 'invalid_access':
+						throw new TRPCError({
+							code: 'UNAUTHORIZED',
+							message,
+						});
+
+					case 'method_not_allowed':
+					case 'internal_server_error':
+					case 'application_error':
+					case 'concurrent_idempotent_requests':
+					default:
 						throw new TRPCError({
 							code: 'INTERNAL_SERVER_ERROR',
-							message: `Resend error: ${domainRes.error.name} - ${domainRes.error.message}`,
+							message: `Resend error: ${name} - ${message}`,
 						});
-					}
 				}
 			}
 

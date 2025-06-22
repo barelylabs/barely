@@ -11,7 +11,7 @@ import {
 	or,
 	sql,
 } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import { newId } from '../../../utils/id';
 import { raise } from '../../../utils/raise';
@@ -175,38 +175,36 @@ export const emailTemplateGroupRouter = createTRPCRouter({
 
 			// console.log('emailTemplates', emailTemplates);
 
-			if (emailTemplates) {
-				// delete email templates not in the updated list
-				await ctx.db.http.delete(_EmailTemplates_To_EmailTemplateGroups).where(
-					and(
-						eq(_EmailTemplates_To_EmailTemplateGroups.emailTemplateGroupId, groupId),
-						notInArray(
-							_EmailTemplates_To_EmailTemplateGroups.emailTemplateId,
-							emailTemplates.map(et => et.id),
-						),
+			// delete email templates not in the updated list
+			await ctx.db.http.delete(_EmailTemplates_To_EmailTemplateGroups).where(
+				and(
+					eq(_EmailTemplates_To_EmailTemplateGroups.emailTemplateGroupId, groupId),
+					notInArray(
+						_EmailTemplates_To_EmailTemplateGroups.emailTemplateId,
+						emailTemplates.map(et => et.id),
 					),
-				);
+				),
+			);
 
-				// add new email templates to group
-				await ctx.db.http
-					.insert(_EmailTemplates_To_EmailTemplateGroups)
-					.values(
-						emailTemplates.map((et, index) => ({
-							emailTemplateGroupId: updatedEmailTemplateGroup.id,
-							emailTemplateId: et.id,
-							index,
-						})),
-					)
-					.onConflictDoUpdate({
-						target: [
-							_EmailTemplates_To_EmailTemplateGroups.emailTemplateGroupId,
-							_EmailTemplates_To_EmailTemplateGroups.emailTemplateId,
-						],
-						set: {
-							index: sql`excluded.index`,
-						},
-					});
-			}
+			// add new email templates to group
+			await ctx.db.http
+				.insert(_EmailTemplates_To_EmailTemplateGroups)
+				.values(
+					emailTemplates.map((et, index) => ({
+						emailTemplateGroupId: updatedEmailTemplateGroup.id,
+						emailTemplateId: et.id,
+						index,
+					})),
+				)
+				.onConflictDoUpdate({
+					target: [
+						_EmailTemplates_To_EmailTemplateGroups.emailTemplateGroupId,
+						_EmailTemplates_To_EmailTemplateGroups.emailTemplateId,
+					],
+					set: {
+						index: sql`excluded.index`,
+					},
+				});
 
 			return updatedEmailTemplateGroup;
 		}),

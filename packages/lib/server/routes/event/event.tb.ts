@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import { formattedUserAgentSchema, nextGeoSchema } from '../../next/next.schema';
 import { tinybird } from '../../tinybird/client';
@@ -126,12 +126,15 @@ export const webEventIngestSchema = z
 	.merge(visitorSessionTinybirdSchema)
 	.merge(reportedEventTinybirdSchema);
 
-export const ingestWebEvent = tinybird.buildIngestEndpoint({
+export const ingestWebEvent = tinybird.buildIngestEndpoint<
+	z.output<typeof webEventIngestSchema>,
+	z.input<typeof webEventIngestSchema>
+>({
 	datasource: 'barely_events',
 	event: webEventIngestSchema,
 });
 
-export const cartEventIngestSchema = z.object({
+export const cartEventIngestSchema = webEventIngestSchema.extend({
 	cart_landingPageId: z.string().nullish().default(''),
 	cart_landingPage_mainProductId: z.string().nullish().default(''),
 
@@ -173,32 +176,44 @@ export const cartEventIngestSchema = z.object({
 	cart_upsellPurchase_orderAmount: z.number().nullish().default(0),
 });
 
-export const ingestCartEvent = tinybird.buildIngestEndpoint({
+export const ingestCartEvent = tinybird.buildIngestEndpoint<
+	z.output<typeof cartEventIngestSchema>,
+	z.input<typeof cartEventIngestSchema>
+>({
 	datasource: 'barely_events',
-	event: webEventIngestSchema.merge(cartEventIngestSchema),
+	event: cartEventIngestSchema,
 });
 
-export const fmEventIngestSchema = z.object({
+export const fmEventIngestSchema = webEventIngestSchema.extend({
 	fmLinkPlatform: z
 		.enum([...FM_LINK_PLATFORMS, ''])
 		.optional()
 		.default(''),
 });
 
-export const ingestFmEvent = tinybird.buildIngestEndpoint({
+export const ingestFmEvent = tinybird.buildIngestEndpoint<
+	z.output<typeof fmEventIngestSchema>,
+	z.input<typeof fmEventIngestSchema>
+>({
 	datasource: 'barely_events',
-	event: webEventIngestSchema.merge(fmEventIngestSchema),
+	event: fmEventIngestSchema,
 });
 
 /* page */
-export const ingestPageEvent = tinybird.buildIngestEndpoint({
+
+export const pageEventIngestSchema = webEventIngestSchema;
+
+export const ingestPageEvent = tinybird.buildIngestEndpoint<
+	z.output<typeof pageEventIngestSchema>,
+	z.input<typeof pageEventIngestSchema>
+>({
 	datasource: 'barely_events',
-	event: webEventIngestSchema,
+	event: pageEventIngestSchema,
 });
 
 // publish email events
 
-export const emailEventIngestSchema = z.object({
+export const emailEventIngestSchema = webEventIngestSchema.extend({
 	timestamp: z.string().datetime(),
 	type: z.enum(['bounced', 'delivered', 'opened', 'clicked', 'complained']),
 	fanId: z.string(),
@@ -216,7 +231,10 @@ export const emailEventIngestSchema = z.object({
 	resendId: z.string().nullable(),
 });
 
-export const ingestEmailEvent = tinybird.buildIngestEndpoint({
+export const ingestEmailEvent = tinybird.buildIngestEndpoint<
+	z.output<typeof emailEventIngestSchema>,
+	z.input<typeof emailEventIngestSchema>
+>({
 	datasource: 'email_events',
 	event: emailEventIngestSchema,
 });

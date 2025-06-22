@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import { wait } from '../../utils/wait';
 import { zDelete, zGet, zPost } from '../../utils/zod-fetch';
@@ -54,7 +54,7 @@ const getSpotifyPlaylistTracks = async (props: {
 	spotifyId: string;
 	limit?: number;
 }) => {
-	const totalLimit = props?.limit ?? 250;
+	const totalLimit = props.limit ?? 250;
 	const requestLimit = props.limit && props.limit < 50 ? props.limit : 50;
 	const fields =
 		'total,items(added_at,track(id,name,artists(id,name),album(id,name,images),external_ids,popularity))';
@@ -87,7 +87,7 @@ const getSpotifyPlaylistTrackIds = async (props: {
 	spotifyId: string;
 	limit?: number;
 }) => {
-	const totalLimit = props?.limit ?? 250;
+	const totalLimit = props.limit ?? 250;
 	const requestLimit = props.limit && props.limit < 50 ? props.limit : 50;
 	const fields = 'total,items(track(id))';
 	const endpoint = `https://api.spotify.com/v1/playlists/${props.spotifyId}/tracks?limit=${requestLimit}&fields=${fields}`;

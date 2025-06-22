@@ -1,6 +1,6 @@
 import { tasks } from '@trigger.dev/sdk/v3';
 import { and, asc, desc, eq, gt, inArray, isNull, lt, or } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { importFansFromCsv } from '../../../trigger/fan.trigger';
 import { newId } from '../../../utils/id';
@@ -74,7 +74,8 @@ export const fanRouter = createTRPCRouter({
 			z.object({
 				fieldColumns: z.array(z.string()),
 				firstRows: z.array(
-					z.record(z.union([z.string(), z.number(), z.boolean()]).nullable()),
+					// z.record(z.union([z.string(), z.number(), z.boolean()]).nullable()),
+					z.record(z.string(), z.string().nullable()),
 				),
 			}),
 		)

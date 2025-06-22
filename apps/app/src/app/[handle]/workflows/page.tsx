@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { redirect } from 'next/navigation';
 import { api } from '@barely/lib/server/api/server';
 import { workflowSearchParamsSchema } from '@barely/lib/server/routes/workflow/workflow.schema';

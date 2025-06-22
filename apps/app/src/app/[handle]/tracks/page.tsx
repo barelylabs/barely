@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { redirect } from 'next/navigation';
 import { api } from '@barely/lib/server/api/server';
 import { trackFilterParamsSchema } from '@barely/lib/server/routes/track/track.schema';
@@ -11,20 +11,21 @@ import { CreateTrackButton } from '~/app/[handle]/tracks/_components/create-trac
 import { TrackContextProvider } from '~/app/[handle]/tracks/_components/track-context';
 import { TrackHotkeys } from '~/app/[handle]/tracks/_components/track-hotkeys';
 
-export default function TracksPage({
+export default async function TracksPage({
 	params,
 	searchParams,
 }: {
-	params: { handle: string };
-	searchParams: z.infer<typeof trackFilterParamsSchema>;
+	params: Promise<{ handle: string }>;
+	searchParams: Promise<z.infer<typeof trackFilterParamsSchema>>;
 }) {
-	const parsedFilters = trackFilterParamsSchema.safeParse(searchParams);
+	const parsedFilters = trackFilterParamsSchema.safeParse(await searchParams);
+	const awaitedParams = await params;
 	if (!parsedFilters.success) {
-		redirect(`/${params.handle}/tracks`);
+		redirect(`/${awaitedParams.handle}/tracks`);
 	}
 
-	const initialInfiniteTracks = api({ handle: params.handle }).track.byWorkspace({
-		handle: params.handle,
+	const initialInfiniteTracks = api({ handle: awaitedParams.handle }).track.byWorkspace({
+		handle: awaitedParams.handle,
 		...parsedFilters.data,
 	});
 

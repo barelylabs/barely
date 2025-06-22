@@ -1,6 +1,6 @@
 import type { SQL } from 'drizzle-orm';
 import { and, desc, eq, gt, gte } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import { newId } from '../../../utils/id';
 import { sqlCount } from '../../../utils/sql';
@@ -122,7 +122,7 @@ export const playlistPitchReviewRouter = createTRPCRouter({
 				.set(data)
 				.where(eq(PlaylistPitchReviews.id, id));
 
-			if (placements?.length) {
+			if (placements.length) {
 				await ctx.db.http
 					.insert(PlaylistPlacements)
 					.values(placements.map(p => ({ ...p, id: newId('playlistPitchReview') })));

@@ -1,6 +1,6 @@
 import { TRPCError } from '@trpc/server';
 import { and, desc, eq, inArray, isNull, lt, or } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { InsertLink } from './link.schema';
 import { env } from '../../../env';
@@ -194,7 +194,7 @@ export const linkRouter = createTRPCRouter({
 
 	// utils
 	getMetaTags: publicProcedure.input(z.string()).query(async ({ input: url, ctx }) => {
-		if (!url?.length || !isValidUrl(url)) {
+		if (!url.length || !isValidUrl(url)) {
 			throw new TRPCError({
 				code: 'BAD_REQUEST',
 				message: `Invalid URL`,

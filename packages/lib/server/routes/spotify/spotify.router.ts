@@ -1,7 +1,7 @@
 import { TRPCError } from '@trpc/server';
 import { and, eq } from 'drizzle-orm';
 import * as r from 'remeda';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { SpotifyTrackOption } from './spotify.schema';
 import { env } from '../../../env';

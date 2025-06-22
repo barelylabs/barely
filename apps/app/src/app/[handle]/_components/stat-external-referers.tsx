@@ -4,8 +4,9 @@ import type { TopEventType } from '@barely/lib/server/routes/stat/stat.schema';
 import type { BarListBarProps } from '@barely/ui/charts/bar-list';
 import { useState } from 'react';
 import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
+import { useTRPC } from '@barely/lib/server/api/react';
 import { getTopStatValue } from '@barely/lib/server/routes/stat/stat.schema';
-import { api } from '@barely/server/api/react';
+import { useQuery } from '@tanstack/react-query';
 
 import { BarList } from '@barely/ui/charts/bar-list';
 import { Card } from '@barely/ui/elements/card';
@@ -14,13 +15,15 @@ import { TabButtons } from '@barely/ui/elements/tab-buttons';
 import { H } from '@barely/ui/elements/typography';
 
 export function StatExternalReferers({ eventType }: { eventType: TopEventType }) {
+	const trpc = useTRPC();
 	const [tab, setTab] = useState<
 		'referers' | 'metaCampaigns' | 'metaAdSets' | 'metaAds' | 'metaPlacements'
 	>('referers');
 
 	const { filtersWithHandle, getSetFilterPath } = useWebEventStatFilters();
 
-	const { data: referers } = api.stat.topReferers.useQuery(
+	const { data: referers } = useQuery(
+		trpc.stat.topReferers.queryOptions(
 		{ ...filtersWithHandle, topEventType: eventType },
 		{
 			select: data =>
@@ -29,10 +32,11 @@ export function StatExternalReferers({ eventType }: { eventType: TopEventType })
 					value: getTopStatValue(eventType, d),
 				})),
 			enabled: tab === 'referers',
-		},
+		}),
 	);
 
-	const { data: topMetaCampaigns } = api.stat.topMetaCampaigns.useQuery(
+	const { data: topMetaCampaigns } = useQuery(
+		trpc.stat.topMetaCampaigns.queryOptions(
 		{ ...filtersWithHandle, topEventType: eventType },
 		{
 			select: data =>
@@ -41,10 +45,11 @@ export function StatExternalReferers({ eventType }: { eventType: TopEventType })
 					value: getTopStatValue(eventType, d),
 				})),
 			enabled: tab === 'metaCampaigns',
-		},
+		}),
 	);
 
-	const { data: topMetaAds } = api.stat.topMetaAds.useQuery(
+	const { data: topMetaAds } = useQuery(
+		trpc.stat.topMetaAds.queryOptions(
 		{ ...filtersWithHandle, topEventType: eventType },
 		{
 			select: data =>
@@ -53,10 +58,11 @@ export function StatExternalReferers({ eventType }: { eventType: TopEventType })
 					value: getTopStatValue(eventType, d),
 				})),
 			enabled: tab === 'metaAds',
-		},
+		}),
 	);
 
-	const { data: topMetaPlacements } = api.stat.topMetaPlacements.useQuery(
+	const { data: topMetaPlacements } = useQuery(
+		trpc.stat.topMetaPlacements.queryOptions(
 		{ ...filtersWithHandle, topEventType: eventType },
 		{
 			select: data =>
@@ -65,7 +71,7 @@ export function StatExternalReferers({ eventType }: { eventType: TopEventType })
 					value: getTopStatValue(eventType, d),
 				})),
 			enabled: tab === 'metaPlacements',
-		},
+		}),
 	);
 
 	const data =

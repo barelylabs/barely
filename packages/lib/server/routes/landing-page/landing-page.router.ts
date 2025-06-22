@@ -1,5 +1,5 @@
 import { and, asc, desc, eq, gt, inArray, isNull, lt, notInArray, or } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { InsertLandingPage } from './landing-page.schema';
 import { newId } from '../../../utils/id';
@@ -56,8 +56,8 @@ export const landingPageRouter = createTRPCRouter({
 				nextCursor =
 					nextLandingPage ?
 						{
-							id: nextLandingPage?.id,
-							createdAt: nextLandingPage?.createdAt,
+							id: nextLandingPage.id,
+							createdAt: nextLandingPage.createdAt,
 						}
 					:	undefined;
 			}
@@ -89,12 +89,15 @@ export const landingPageRouter = createTRPCRouter({
 	create: privateProcedure
 		.input(createLandingPageSchema)
 		.mutation(async ({ input, ctx }) => {
+			const { name, key, content, ...rest } = input;
 			const landingPageData: InsertLandingPage = {
-				...input,
+				...rest,
+				name,
+				content,
 				id: newId('landingPage'),
 				workspaceId: ctx.workspace.id,
 				handle: ctx.workspace.handle,
-				key: sanitizeKey(input.key),
+				key: sanitizeKey(key),
 			};
 
 			const landingPages = await ctx.db.http

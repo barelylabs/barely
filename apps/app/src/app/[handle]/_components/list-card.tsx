@@ -70,9 +70,7 @@ export function ListCard<T extends ItemWithId>({
 				return setEditItem(null);
 			}
 
-			if (isListCardClick && !isExcludedElement) {
-				return setEditItem(item);
-			}
+			return setEditItem(item);
 		},
 		[setEditItem, item],
 	);

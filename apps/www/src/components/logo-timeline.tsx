@@ -63,7 +63,7 @@ export function LogoTimeline() {
 					<Logo
 						label='Gmail'
 						src='/logo-timeline/gmail.svg'
-						className='[animation-duration:30s] [animation-delay:-8s]'
+						className='[animation-delay:-8s] [animation-duration:30s]'
 					/>
 				</Row>
 				<Row>
@@ -75,19 +75,19 @@ export function LogoTimeline() {
 					<Logo
 						label='Microsoft Teams'
 						src='/logo-timeline/microsoft-teams.svg'
-						className='[animation-duration:40s] [animation-delay:-20s]'
+						className='[animation-delay:-20s] [animation-duration:40s]'
 					/>
 				</Row>
 				<Row>
 					<Logo
 						label='Google Calendar'
 						src='/logo-timeline/google-calendar.svg'
-						className='[animation-duration:40s] [animation-delay:-10s]'
+						className='[animation-delay:-10s] [animation-duration:40s]'
 					/>
 					<Logo
 						label='Google Drive'
 						src='/logo-timeline/google-drive.svg'
-						className='[animation-duration:40s] [animation-delay:-32s]'
+						className='[animation-delay:-32s] [animation-duration:40s]'
 					/>
 				</Row>
 				<Row>
@@ -99,7 +99,7 @@ export function LogoTimeline() {
 					<Logo
 						label='Discord'
 						src='/logo-timeline/discord.svg'
-						className='[animation-duration:45s] [animation-delay:-23s]'
+						className='[animation-delay:-23s] [animation-duration:45s]'
 					/>
 				</Row>
 				<Row>
@@ -118,12 +118,12 @@ export function LogoTimeline() {
 					<Logo
 						label='Adobe Creative Cloud'
 						src='/logo-timeline/adobe-creative-cloud.svg'
-						className='[animation-duration:40s] [animation-delay:-9s]'
+						className='[animation-delay:-9s] [animation-duration:40s]'
 					/>
 					<Logo
 						label='Zoom'
 						src='/logo-timeline/zoom.svg'
-						className='[animation-duration:40s] [animation-delay:-28s]'
+						className='[animation-delay:-28s] [animation-duration:40s]'
 					/>
 				</Row>
 			</div>

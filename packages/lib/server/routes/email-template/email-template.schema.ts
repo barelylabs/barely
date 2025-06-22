@@ -1,6 +1,6 @@
 import type { InferSelectModel } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { EmailAddress } from '../email-address/email-address.schema';
 import type { EmailDomain } from '../email-domain/email-domain.schema';

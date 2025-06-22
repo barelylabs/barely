@@ -19,7 +19,7 @@ export function UserAvatar({ user, fallbackName, ...props }: UserAvatarProps) {
 					className='focus:outline-none focus:ring-0 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background'
 				/>
 			:	<AvatarFallback>
-					<span className='sr-only'>{fallbackName ?? user.email}</span>
+					<span className='sr-only'>{fallbackName}</span>
 					<Icon.user className='h-4 w-4' />
 				</AvatarFallback>
 			}

@@ -1,6 +1,6 @@
 import { TRPCError } from '@trpc/server';
 import { and, eq, not } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { DomainStatus } from './domain.schema';
 import { env } from '../../../env';
@@ -290,7 +290,7 @@ export const domainRouter = createTRPCRouter({
 		if (
 			vercelConfigResponse.success &&
 			vercelConfigResponse.parsed &&
-			vercelConfigResponse.data.conflicts?.length > 0
+			vercelConfigResponse.data.conflicts.length > 0
 		) {
 			status = 'Conflicting DNS Records';
 			return {

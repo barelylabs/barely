@@ -1,5 +1,5 @@
 import type { InsertEmailDomain } from '@barely/lib/server/routes/email-domain/email-domain.schema';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useEffect, useState } from 'react';
 import { atomWithToggle } from '@barely/lib/atoms/atom-with-toggle';
 // import { useWorkspace } from '@barely/lib/hooks/use-workspace';

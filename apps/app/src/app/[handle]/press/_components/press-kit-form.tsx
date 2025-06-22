@@ -2,7 +2,7 @@
 
 import type { SortableFile } from '@barely/lib/server/routes/file/file.schema';
 import type { NormalizedPressKit } from '@barely/lib/server/routes/press-kit/press-kit.schema';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { use, useMemo, useState } from 'react';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { useZodForm } from '@barely/lib/hooks/use-zod-form';

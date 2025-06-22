@@ -11,16 +11,19 @@ import { SuccessLog } from '~/app/[mode]/[handle]/[key]/(after-main)/success/suc
 export default async function CartSuccessPage({
 	params,
 }: {
-	params: {
+	params: Promise<{
 		handle: string;
 		key: string;
-	};
+	}>;
 }) {
-	const { handle, key } = params;
+	const { handle, key } = await params;
 
-	const cartId = cookies().get(`${params.handle}.${params.key}.cartId`)?.value;
-	const currentCartStage = cookies().get(
-		`${params.handle}.${params.key}.cartStage`,
+	const awaitedParams = await params;
+	const cartId = (await cookies()).get(
+		`${awaitedParams.handle}.${awaitedParams.key}.cartId`,
+	)?.value;
+	const currentCartStage = (await cookies()).get(
+		`${awaitedParams.handle}.${awaitedParams.key}.cartStage`,
 	)?.value;
 
 	if (!cartId) return null;

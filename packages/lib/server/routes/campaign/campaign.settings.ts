@@ -1,3 +1,3 @@
-export const playlistPitchSettings = {
+export const PLAYLIST_PITCH_SETTINGS = {
 	minCuratorReach: 3,
 };

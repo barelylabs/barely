@@ -1,7 +1,7 @@
 'use client';
 
 import type { FlowState } from '@barely/lib/server/routes/flow/flow.ui.types';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { useZodForm } from '@barely/lib/hooks/use-zod-form';
 import { api } from '@barely/lib/server/api/react';

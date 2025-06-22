@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { cartApi } from '@barely/lib/server/routes/cart/cart.api.server';
@@ -15,16 +15,16 @@ export default async function CartPage({
 	params,
 	searchParams,
 }: {
-	params: {
+	params: Promise<{
 		mode: 'preview' | 'live';
 		handle: string;
 		key: string;
-	};
-	searchParams: z.infer<typeof cartPageSearchParams>;
+	}>;
+	searchParams: Promise<z.infer<typeof cartPageSearchParams>>;
 }) {
-	const { mode, handle, key } = params;
+	const { mode, handle, key } = await params;
 
-	const cartParams = cartPageSearchParams.safeParse(searchParams);
+	const cartParams = cartPageSearchParams.safeParse(await searchParams);
 
 	if (!cartParams.success) {
 		console.log('cartParams error', cartParams.error);
@@ -40,10 +40,10 @@ export default async function CartPage({
 		return <div>warming up</div>;
 	}
 
-	const cartId = cookies().get(`${handle}.${key}.cartId`)?.value;
+	const cartId = (await cookies()).get(`${handle}.${key}.cartId`)?.value;
 
 	//  estimate shipTo from IP
-	const headersList = headers();
+	const headersList = await headers();
 	const shipTo = {
 		country: isDevelopment() ? 'US' : headersList.get('x-vercel-ip-country'),
 		state: isDevelopment() ? 'NY' : headersList.get('x-vercel-ip-country-region'),

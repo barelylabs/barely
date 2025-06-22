@@ -123,7 +123,7 @@ export async function handleAction_addToMailchimpAudience({
 				fan,
 			});
 			workflowRunAction.completedAt = new Date();
-		} catch (error) {
+		} catch {
 			workflowRunAction.status = 'failed';
 			workflowRunAction.failedAt = new Date();
 			workflowRunAction.error = 'error adding to mailchimp audience';

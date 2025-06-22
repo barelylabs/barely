@@ -17,11 +17,14 @@ import { UpsellLog } from '~/app/[mode]/[handle]/[key]/(after-main)/customize/_c
 export default async function UpsellPage({
 	params,
 }: {
-	params: { mode: 'preview' | 'live'; handle: string; key: string };
+	params: Promise<{ mode: 'preview' | 'live'; handle: string; key: string }>;
 }) {
-	const { mode, handle, key } = params;
+	const { mode, handle, key } = await params;
 
-	const cartId = cookies().get(`${params.handle}.${params.key}.cartId`)?.value;
+	const awaitedParams = await params;
+	const cartId = (await cookies()).get(
+		`${awaitedParams.handle}.${awaitedParams.key}.cartId`,
+	)?.value;
 	// const cartStage = cookies().get(`${params.handle}.${params.key}.cartStage`)?.value;
 
 	// if (cartStage !== 'checkoutCreated') {

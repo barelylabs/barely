@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { StripeTransactionMetadata } from '../../stripe/stripe.schema';
 import { env } from '../../../env';

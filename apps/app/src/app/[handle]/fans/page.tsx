@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { redirect } from 'next/navigation';
 import { api } from '@barely/lib/server/api/server';
 import { fanSearchParamsSchema } from '@barely/lib/server/routes/fan/fan.schema';
@@ -16,21 +16,23 @@ import {
 	ImportFansFromCsvModal,
 } from '~/app/[handle]/fans/_components/import-fans-modal';
 
-export default function FansPage({
+export default async function FansPage({
 	params,
 	searchParams,
 }: {
-	params: { handle: string };
-	searchParams: z.infer<typeof fanSearchParamsSchema>;
+	params: Promise<{ handle: string }>;
+	searchParams: Promise<z.infer<typeof fanSearchParamsSchema>>;
 }) {
-	const parsedFilters = fanSearchParamsSchema.safeParse(searchParams);
+	const awaitedParams = await params;
+	const awaitedSearchParams = await searchParams;
+	const parsedFilters = fanSearchParamsSchema.safeParse(awaitedSearchParams);
 	if (!parsedFilters.success) {
 		console.log('parsedFilters error', parsedFilters.error);
-		redirect(`/${params.handle}/fans`);
+		redirect(`/${awaitedParams.handle}/fans`);
 	}
 
-	const fans = api({ handle: params.handle }).fan.byWorkspace({
-		handle: params.handle,
+	const fans = api({ handle: awaitedParams.handle }).fan.byWorkspace({
+		handle: awaitedParams.handle,
 		...parsedFilters.data,
 	});
 

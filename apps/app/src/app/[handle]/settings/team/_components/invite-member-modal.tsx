@@ -1,6 +1,6 @@
 'use client';
 
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { atomWithToggle } from '@barely/lib/atoms/atom-with-toggle';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { useZodForm } from '@barely/lib/hooks/use-zod-form';

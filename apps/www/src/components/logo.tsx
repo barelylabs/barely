@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 export function Logo({ className }: { className?: string }) {
 	const transition = {
 		duration: 0.5,
-		ease: 'easeInOut',
+		ease: 'easeInOut' as const,
 	};
 
 	return (

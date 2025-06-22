@@ -1,6 +1,6 @@
 'use client';
 
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { api } from '@barely/lib/server/api/react';
 import { insertMetaPixelSchema } from '@barely/lib/server/routes/analytics-endpoint/analytics-endpoint-schema';
 

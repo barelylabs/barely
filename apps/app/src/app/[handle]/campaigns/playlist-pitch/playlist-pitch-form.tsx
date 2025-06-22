@@ -3,14 +3,14 @@
 import type { SessionUser } from '@barely/lib/server/auth';
 import type { SpotifyTrackOption } from '@barely/lib/server/routes/spotify/spotify.schema';
 import type { newUserContactInfoSchemaWithRole } from '@barely/lib/server/routes/user/user.schema';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useDebounce } from '@barely/lib/hooks/use-debounce';
-import { api } from '@barely/server/api/react';
-import { keepPreviousData } from '@tanstack/react-query';
+import { useTRPC } from '@barely/lib/server/api/react';
+import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
 
 import { AspectRatio } from '@barely/ui/elements/aspect-ratio';
 import { Button } from '@barely/ui/elements/button';
@@ -24,6 +24,7 @@ import { onPromise } from '@barely/utils/on-promise';
 import { PlaylistPitchContactInfoForm } from './playlist-pitch-contact-info-form';
 
 export function PlaylistPitchForm(props: { user?: SessionUser }) {
+	const trpc = useTRPC();
 	const router = useRouter();
 
 	const [submitStatus, setSubmitStatus] = useState<'idle' | 'submitting' | 'success'>(
@@ -32,29 +33,25 @@ export function PlaylistPitchForm(props: { user?: SessionUser }) {
 
 	const [trackQ, setTrackQuery, , trackQIsDebounced] = useDebounce('', 300);
 
-	const { data: spotifyTrackOptions, isFetching } = api.spotify.findTrack.useQuery(
-		trackQ,
-		{
-			enabled: trackQ.length > 0,
-			placeholderData: keepPreviousData,
-		},
-	);
+	const { data: spotifyTrackOptions, isFetching } = useQuery({
+		...trpc.spotify.findTrack.queryOptions(trackQ),
+		enabled: trackQ.length > 0,
+		placeholderData: keepPreviousData,
+	});
 
 	const [selectedTrack, setSelectedTrack] = useState<SpotifyTrackOption | null>(null);
 
-	const { data: dbTrack } = api.track.bySpotifyId.useQuery(
-		selectedTrack?.spotifyId ?? '',
-		{
-			enabled: !!selectedTrack?.spotifyId?.length,
-			refetchOnWindowFocus: false,
-		},
-	);
+	const { data: dbTrack } = useQuery({
+		...trpc.track.bySpotifyId.queryOptions(selectedTrack?.spotifyId ?? ''),
+		enabled: !!selectedTrack?.spotifyId?.length,
+		refetchOnWindowFocus: false,
+	});
 
-	const { data: dbArtist, isFetching: _checkingDbArtist } =
-		api.workspace.bySpotifyId.useQuery(selectedTrack?.workspace.spotifyArtistId ?? '', {
-			enabled: !!selectedTrack?.workspace.spotifyArtistId,
-			staleTime: 1000 * 60 * 60 * 24 * 7, // 1 week
-		});
+	const { data: dbArtist, isFetching: _checkingDbArtist } = useQuery({
+		...trpc.workspace.bySpotifyId.queryOptions(selectedTrack?.workspace.spotifyArtistId ?? ''),
+		enabled: !!selectedTrack?.workspace.spotifyArtistId,
+		staleTime: 1000 * 60 * 60 * 24 * 7, // 1 week
+	});
 
 	// derived state
 
@@ -85,8 +82,9 @@ export function PlaylistPitchForm(props: { user?: SessionUser }) {
 
 	// mutations
 
-	const { mutateAsync: createUserAndPlaylistPitch } =
-		api.campaign.createUserAndPlaylistPitch.useMutation();
+	const { mutateAsync: createUserAndPlaylistPitch } = useMutation(
+		trpc.campaign.createUserAndPlaylistPitch.mutationOptions(),
+	);
 
 	async function handleSubmitUserAndPlaylistPitch(
 		data: z.infer<typeof newUserContactInfoSchemaWithRole>,
@@ -107,8 +105,9 @@ export function PlaylistPitchForm(props: { user?: SessionUser }) {
 		setSubmitStatus('success');
 	}
 
-	const { mutateAsync: createPlaylistPitch } =
-		api.campaign.createPlaylistPitch.useMutation();
+	const { mutateAsync: createPlaylistPitch } = useMutation(
+		trpc.campaign.createPlaylistPitch.mutationOptions(),
+	);
 
 	async function handleSubmitPlaylistPitch() {
 		if (!track) return;

@@ -1,6 +1,6 @@
 import type { InferSelectModel } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import { commonFiltersSchema, infiniteQuerySchema } from '../../../utils/filters';
 import { querySelectionSchema } from '../../../utils/zod-helpers';
@@ -29,9 +29,9 @@ export type FmLink = InferSelectModel<typeof FmLinks>;
 
 // export const insertFmPageSchema = createxInsertSchema
 export const insertFmPageSchema = createInsertSchema(FmPages, {
-	key: s => s.key.min(4, 'Key is required'),
-	title: s => s.title.min(1, 'Title is required'),
-	sourceUrl: s => s.sourceUrl.min(1, 'Source URL is required'),
+	key: key => key.min(4, 'Key is required'),
+	title: title => title.min(1, 'Title is required'),
+	sourceUrl: sourceUrl => sourceUrl.min(1, 'Source URL is required'),
 }).extend({
 	coverArtUrl: z.string().optional(),
 });

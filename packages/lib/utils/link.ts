@@ -27,7 +27,7 @@ import {
 // }
 
 export function parseInstagramLink(link: string) {
-	const match = link.match(/https?:\/\/(?:www\.)?instagram\.com\/([^/?]+)/);
+	const match = /https?:\/\/(?:www\.)?instagram\.com\/([^/?]+)/.exec(link);
 
 	if (!match) {
 		return null;
@@ -39,7 +39,7 @@ export function parseInstagramLink(link: string) {
 }
 
 export function parseTikTokLink(link: string) {
-	const match = link.match(/https?:\/\/(?:www\.)?tiktok\.com\/@([^/?]+)/);
+	const match = /https?:\/\/(?:www\.)?tiktok\.com\/@([^/?]+)/.exec(link);
 
 	if (!match) {
 		return null;
@@ -51,9 +51,10 @@ export function parseTikTokLink(link: string) {
 }
 
 export function parseYoutubeLink(link: string) {
-	const match = link.match(
-		/https?:\/\/(?:www\.)?(youtube\.com|youtu\.be)\/(channel|user|watch)\/?([^?]*).*/,
-	);
+	const match =
+		/https?:\/\/(?:www\.)?(youtube\.com|youtu\.be)\/(channel|user|watch)\/?([^?]*).*/.exec(
+			link,
+		);
 
 	if (!match) {
 		return null;

@@ -2,7 +2,7 @@
 
 import type { UploadQueueItem } from '@barely/lib/hooks/use-upload';
 import type { SelectFieldOption } from '@barely/ui/forms/select-field';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useMemo, useState } from 'react';
 import { atomWithToggle } from '@barely/lib/atoms/atom-with-toggle';
 import { useToast } from '@barely/lib/hooks/use-toast';

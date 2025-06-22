@@ -1,5 +1,5 @@
 import { and, asc, desc, eq, gt, inArray, isNull, lt, notInArray, or } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { InsertFanGroupCondition } from './fan-group.schema';
 import { newId } from '../../../utils/id';
@@ -159,6 +159,14 @@ export const fanGroupRouter = createTRPCRouter({
 					id: newId('fanGroupCondition'),
 					fanGroupId: fanGroup.id,
 					index,
+					productId:
+						condition.type === 'hasOrderedProduct' && condition.productId !== 'any' ?
+							(condition.productId ?? null)
+						:	null,
+					cartFunnelId:
+						condition.type === 'hasOrderedCart' && condition.cartFunnelId !== 'any' ?
+							(condition.cartFunnelId ?? null)
+						:	null,
 				})) satisfies InsertFanGroupCondition[];
 
 				await ctx.db.pool.insert(FanGroupConditions).values(fanGroupConditions);
@@ -187,17 +195,11 @@ export const fanGroupRouter = createTRPCRouter({
 
 				await Promise.all(
 					conditions.map(async condition => {
-						if (
-							condition.type !== 'hasOrderedProduct' ||
-							(condition.type === 'hasOrderedProduct' && condition.productId === 'any')
-						) {
-							condition.productId = null;
+						if (condition.type !== 'hasOrderedProduct' || condition.productId === 'any') {
+							condition.productId = undefined;
 						}
-						if (
-							condition.type !== 'hasOrderedCart' ||
-							(condition.type === 'hasOrderedCart' && condition.cartFunnelId === 'any')
-						) {
-							condition.cartFunnelId = null;
+						if (condition.type !== 'hasOrderedCart' || condition.cartFunnelId === 'any') {
+							condition.cartFunnelId = undefined;
 						}
 
 						if (condition.id) {

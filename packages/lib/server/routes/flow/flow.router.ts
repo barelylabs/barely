@@ -1,7 +1,7 @@
 import { tasks } from '@trigger.dev/sdk/v3';
 import { TRPCError } from '@trpc/server';
 import { and, asc, desc, eq, gt, lt, notInArray, or } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { handleFlow } from '../../../trigger/flow.trigger';
 import type { InsertFlowAction, InsertFlowTrigger } from './flow.schema';
@@ -91,11 +91,11 @@ export const flowRouter = createTRPCRouter({
 				flow.actions,
 			);
 
-			const actionNodes: FlowNode[] = flow.actions.map(node => {
+			const actionNodes: FlowNode[] = actions.map(node => {
 				return getActionNodeFromFlowAction(node, { x: 400, y: 25 });
 			});
 
-			const uiEdges: FlowEdge[] = flow.edges ?? [];
+			const uiEdges: FlowEdge[] = flow.edges;
 			const uiNodes: FlowNode[] = [triggerNode, ...actionNodes];
 
 			return {
@@ -212,11 +212,7 @@ export const flowRouter = createTRPCRouter({
 			await Promise.all(
 				actions.map(async action => {
 					if (action.type === 'sendEmail') {
-						const { id, ...emailTemplate } =
-							action.emailTemplate ??
-							raise(
-								`No email template found for action ${action.id} in flowRouter.update`,
-							);
+						const { id, ...emailTemplate } = action.emailTemplate;
 
 						await ctx.db.pool
 							.insert(EmailTemplates)

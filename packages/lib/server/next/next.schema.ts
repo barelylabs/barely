@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 export const nextUserAgentToFormattedSchema = z
 	.object({
@@ -55,16 +55,16 @@ export const nextUserAgentToFormattedSchema = z
 	})
 	.transform(userAgent => ({
 		ua: userAgent.ua,
-		browser: userAgent.browser?.name,
-		browser_version: userAgent.browser?.version,
-		engine: userAgent.engine?.name,
-		engine_version: userAgent.engine?.version,
-		os: userAgent.os?.name,
-		os_version: userAgent.os?.version,
-		device: userAgent.device?.type,
-		device_vendor: userAgent.device?.vendor,
-		device_model: userAgent.device?.model,
-		cpu_architecture: userAgent.cpu?.architecture,
+		browser: userAgent.browser.name,
+		browser_version: userAgent.browser.version,
+		engine: userAgent.engine.name,
+		engine_version: userAgent.engine.version,
+		os: userAgent.os.name,
+		os_version: userAgent.os.version,
+		device: userAgent.device.type,
+		device_vendor: userAgent.device.vendor,
+		device_model: userAgent.device.model,
+		cpu_architecture: userAgent.cpu.architecture,
 		bot: userAgent.isBot,
 	}));
 

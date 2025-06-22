@@ -196,9 +196,9 @@ export async function getPublicPressKit({
 			artwork:
 				_t.track._artworkFiles[0] ?
 					{
-						..._t.track._artworkFiles[0]?.file,
-						width: _t.track._artworkFiles[0]?.file.width ?? 300,
-						height: _t.track._artworkFiles[0]?.file.height ?? 300,
+						..._t.track._artworkFiles[0].file,
+						width: _t.track._artworkFiles[0].file.width ?? 300,
+						height: _t.track._artworkFiles[0].file.height ?? 300,
 					}
 				:	undefined,
 			audioFiles: _t.track._audioFiles.map(_f => ({

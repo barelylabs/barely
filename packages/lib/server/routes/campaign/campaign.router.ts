@@ -4,7 +4,7 @@ import { PlaylistPitchApprovedEmailTemplate } from '@barely/email/src/templates/
 import { PlaylistPitchRejectedEmailTemplate } from '@barely/email/src/templates/playlist-pitch/playlist-pitch-rejected';
 import { TRPCError } from '@trpc/server';
 import { and, asc, eq, inArray } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { InsertTrack } from '../track/track.schema';
 import type { Workspace } from '../workspace/workspace.schema';
@@ -126,7 +126,7 @@ export const campaignRouter = createTRPCRouter({
 
 			// 💿 if track doesn't exist, create new track
 
-			if (!dbTrack) dbTrack = await createTrack(input.track, dbArtist.id, ctx.db);
+			dbTrack ??= await createTrack(input.track, dbArtist.id, ctx.db);
 
 			if (!dbTrack)
 				throw new TRPCError({
@@ -267,13 +267,13 @@ export const campaignRouter = createTRPCRouter({
 
 			const campaign = await getCampaignById(campaignId);
 
-			if (!campaign)
-				throw new TRPCError({
-					code: 'NOT_FOUND',
-					message: 'Campaign not found',
-				});
-			if (!campaign.track)
-				throw new TRPCError({ code: 'NOT_FOUND', message: 'Track not found' });
+			// if (!campaign)
+			// 	throw new TRPCError({
+			// 		code: 'NOT_FOUND',
+			// 		message: 'Campaign not found',
+			// 	});
+			// if (!campaign.track)
+			// 	throw new TRPCError({ code: 'NOT_FOUND', message: 'Track not found' });
 
 			const checkoutLink = await createPitchCheckoutLink({
 				user: ctx.user,
@@ -286,12 +286,13 @@ export const campaignRouter = createTRPCRouter({
 
 	// GET
 
-	byId: publicProcedure.input(z.string()).query(async ({ input: campaignId }) => {
-		console.log('fetching campaign', campaignId);
-		const campaign = await getCampaignById(campaignId);
-		if (!campaign) throw new TRPCError({ code: 'NOT_FOUND' });
-		return campaign;
-	}),
+	byId: publicProcedure
+		.input(z.object({ campaignId: z.string() }))
+		.query(async ({ input: { campaignId } }) => {
+			console.log('fetching campaign', campaignId);
+			const campaign = await getCampaignById(campaignId);
+			return campaign;
+		}),
 
 	byUser: privateProcedure
 		.input(
@@ -512,7 +513,7 @@ export const campaignRouter = createTRPCRouter({
 				id: newCuid(),
 				campaignId: input.id,
 				createdById: ctx.user.id,
-				stage: input.stage ?? campaign.stage,
+				stage: input.stage,
 			});
 
 			if (input.stage === 'rejected') {

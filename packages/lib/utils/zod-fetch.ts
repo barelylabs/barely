@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 //* GET *//
-import type { Schema, z, ZodType } from 'zod';
+import type { Schema, z, ZodType } from 'zod/v4';
 import { XMLParser } from 'fast-xml-parser';
 
 type ZFetchProps<ErrorSchema extends Schema> = {
@@ -35,7 +35,7 @@ async function formatResponse(
 	if (options?.returnType === 'text') {
 		const text = await res.text();
 
-		options.logResponse && console.log('zFetch res.text => ', text);
+		if (options.logResponse) console.log('zFetch res.text => ', text);
 
 		return {
 			res,
@@ -45,7 +45,7 @@ async function formatResponse(
 	} else if (options?.returnType === 'xml') {
 		const text = await res.text();
 
-		options.logResponse && console.log('zFetch res.text => ', text);
+		if (options.logResponse) console.log('zFetch res.text => ', text);
 
 		const parsed: unknown = xmlParser.parse(text);
 
@@ -57,7 +57,7 @@ async function formatResponse(
 	} else {
 		const json = await res.json();
 
-		options?.logResponse && console.log('zFetch res.json => ', json);
+		if (options?.logResponse) console.log('zFetch res.json => ', json);
 
 		return {
 			res,
@@ -194,7 +194,7 @@ async function zPost<Schema extends ZodType, ErrorSchema extends ZodType>(
 		headers: {
 			'Content-Type': options.contentType ?? 'application/json',
 			...(options.auth ? { authorization: options.auth } : {}),
-			...options?.headers,
+			...options.headers,
 		},
 		body:
 			options.contentType === 'application/x-www-form-urlencoded' ?
@@ -203,7 +203,7 @@ async function zPost<Schema extends ZodType, ErrorSchema extends ZodType>(
 	})
 		.then(res => formatResponse(res, options))
 		.then(formattedRes =>
-			parseResponse(formattedRes, schema, options?.errorSchema, options),
+			parseResponse(formattedRes, schema, options.errorSchema, options),
 		)
 
 		.catch(err => {
@@ -226,7 +226,7 @@ async function zDelete<Schema extends ZodType, ErrorSchema extends ZodType>(
 		headers: {
 			'Content-Type': options.contentType ?? 'application/json',
 			...(options.auth ? { authorization: options.auth } : {}),
-			...options?.headers,
+			...options.headers,
 		},
 		body:
 			options.contentType === 'application/x-www-form-urlencoded' ?
@@ -235,7 +235,7 @@ async function zDelete<Schema extends ZodType, ErrorSchema extends ZodType>(
 	})
 		.then(res => formatResponse(res, options))
 		.then(formattedRes =>
-			parseResponse(formattedRes, schema, options?.errorSchema, options),
+			parseResponse(formattedRes, schema, options.errorSchema, options),
 		)
 
 		.catch(err => {

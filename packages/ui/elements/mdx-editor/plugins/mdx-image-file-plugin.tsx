@@ -3,7 +3,7 @@
 import type { UploadQueueItem } from '@barely/lib/hooks/use-upload';
 import type { MdxImageSize } from '@barely/lib/server/mdx/mdx.constants';
 import type { JsxComponentDescriptor, JsxEditorProps } from '@mdxeditor/editor';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useMemo, useState } from 'react';
 import { useUpload } from '@barely/lib/hooks/use-upload';
 import { useZodForm } from '@barely/lib/hooks/use-zod-form';

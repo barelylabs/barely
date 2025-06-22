@@ -1,5 +1,5 @@
 import { Resend } from 'resend';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import { env } from './env';
 
@@ -47,7 +47,7 @@ export async function sendEmail(props: SendEmailProps) {
 		react: props.react,
 		cc: props.cc,
 		bcc: props.bcc,
-		reply_to: props.replyTo,
+		replyTo: props.replyTo,
 		headers:
 			props.type === 'marketing' ?
 				{

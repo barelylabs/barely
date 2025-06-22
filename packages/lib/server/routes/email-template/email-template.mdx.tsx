@@ -1,5 +1,7 @@
-import type { MDXRemoteProps } from 'next-mdx-remote/rsc';
-import type { ReactNode } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */ // fixme once react 19 is supported
+// import type { MDXComponents } from 'next-mdx-remote-client/rsc';
+import type { MDXComponents } from 'mdx/types';
+// import type { ReactNode } from 'react';
 import React from 'react';
 import {
 	Body,
@@ -9,7 +11,7 @@ import {
 	EmailLink,
 } from '@barely/email/src/primitives';
 import { Heading, Html, Preview, Text } from '@react-email/components';
-import { MDXRemote } from 'next-mdx-remote/rsc';
+import { MDXRemote } from 'next-mdx-remote-client/rsc';
 
 import type { MdxAssets } from '../../../utils/mdx';
 import type { MdxImageSize } from '../../mdx/mdx.constants';
@@ -45,14 +47,15 @@ export async function renderMarkdownToReactEmail({
 		.replaceAll('\\{firstName}', variables.firstName)
 		.replaceAll('\\{lastName}', variables.lastName);
 
-	const components: MDXRemoteProps['components'] = {
-		p: ({ children }: { children?: ReactNode }) => <Text>{children}</Text>,
-		h1: ({ children }: { children?: ReactNode }) => <Heading as='h1'>{children}</Heading>,
-		h2: ({ children }: { children?: ReactNode }) => <Heading as='h2'>{children}</Heading>,
-		h3: ({ children }: { children?: ReactNode }) => <Heading as='h3'>{children}</Heading>,
-		h4: ({ children }: { children?: ReactNode }) => <Heading as='h4'>{children}</Heading>,
-		h5: ({ children }: { children?: ReactNode }) => <Heading as='h5'>{children}</Heading>,
-		h6: ({ children }: { children?: ReactNode }) => <Heading as='h6'>{children}</Heading>,
+	const components: MDXComponents = {
+		// ignore all these any types
+		p: (props: { children?: any }) => <Text>{props.children}</Text>,
+		h1: (props: { children?: any }) => <Heading as='h1'>{props.children}</Heading>,
+		h2: (props: { children?: any }) => <Heading as='h2'>{props.children}</Heading>,
+		h3: (props: { children?: any }) => <Heading as='h3'>{props.children}</Heading>,
+		h4: (props: { children?: any }) => <Heading as='h4'>{props.children}</Heading>,
+		h5: (props: { children?: any }) => <Heading as='h5'>{props.children}</Heading>,
+		h6: (props: { children?: any }) => <Heading as='h6'>{props.children}</Heading>,
 
 		...mdxEmailLink({ tracking }),
 		...mdxEmailImageFile(),
@@ -89,30 +92,6 @@ export async function renderMarkdownToReactEmail({
 		</Html>
 	);
 
-	// if (previewText && previewText.length > 0) {
-	// 	reactBody = (
-	// 		<>
-	// 			<Body>{reactBody}</Body>
-	// 		</>
-	// 	);
-	// }
-
-	// if (listUnsubscribeUrl) {
-	// 	const unsubscribeLink = (
-	// 		<div
-	// 			style={{ marginTop: '1.25rem', marginBottom: '1.25rem', fontSize: '0.875rem' }}
-	// 		>
-	// 			<EmailLink href={listUnsubscribeUrl}>unsubscribe</EmailLink>
-	// 		</div>
-	// 	);
-	// 	reactBody = (
-	// 		<>
-	// 			{reactBody}
-	// 			{unsubscribeLink}
-	// 		</>
-	// 	);
-	// }
-
 	return {
 		subject: subjectWithVars,
 		reactBody,
@@ -120,9 +99,11 @@ export async function renderMarkdownToReactEmail({
 }
 
 function mdxEmailLink({ tracking }: { tracking: EventTrackingProps }) {
-	const MdxEmailLink = ({ href, children }: { href?: string; children?: ReactNode }) => {
-		const hrefWithQueryParams = href ? getLinkHref({ href, tracking }) : '';
-		return <EmailLink href={hrefWithQueryParams}>{children}</EmailLink>;
+	const MdxEmailLink = (props: { href?: string; children?: any }) => {
+		const hrefWithQueryParams =
+			props.href ? getLinkHref({ href: props.href, tracking }) : '';
+		// return <a href={hrefWithQueryParams}>{props.children}</a>;
+		return <EmailLink href={hrefWithQueryParams}>{props.children}</EmailLink>;
 	};
 
 	return {

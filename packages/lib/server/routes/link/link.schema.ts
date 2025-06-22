@@ -1,5 +1,5 @@
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { AnalyticsEndpoint } from '../analytics-endpoint/analytics-endpoint-schema';
 import type { Workspace } from '../workspace/workspace.schema';
@@ -9,11 +9,11 @@ import { queryBooleanSchema, querySelectionSchema } from '../../../utils/zod-hel
 import { Links } from './link.sql';
 
 export const insertLinkSchema = createInsertSchema(Links, {
-	url: schema =>
-		schema.url.refine(v => isValidUrl(v), {
+	url: url =>
+		url.refine(v => isValidUrl(v), {
 			message: 'Please enter a valid URL.',
 		}),
-	key: schema => schema.key.min(1, 'Your key must be at least 1 character long'),
+	key: key => key.min(1, 'Your key must be at least 1 character long'),
 });
 export const createLinkSchema = insertLinkSchema.omit({ id: true }).partial({
 	userId: true,

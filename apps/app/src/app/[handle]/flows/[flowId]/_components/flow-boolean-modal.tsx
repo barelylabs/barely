@@ -1,5 +1,5 @@
 import type { FlowState } from '@barely/lib/server/routes/flow/flow.ui.types';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useEffect } from 'react';
 import { useCartFunnels } from '@barely/lib/hooks/use-cart-funnels';
 // import { useProducts } from '@barely/lib/hooks/use-products';

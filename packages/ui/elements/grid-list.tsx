@@ -183,9 +183,7 @@ export const GridListCard = React.forwardRef<
 		ref,
 	) => {
 		const textValue =
-			props.textValue ? props.textValue
-			: typeof children === 'string' ? children
-			: undefined;
+			props.textValue ?? (typeof children === 'string' ? children : undefined);
 		const [showContextMenu, setShowContextMenu] = useState(false);
 
 		const atLeastOnePopoverAction =
@@ -201,7 +199,7 @@ export const GridListCard = React.forwardRef<
 					setShowContextMenu(false);
 				}
 			};
-			0;
+
 			document.addEventListener('keydown', handleKeyPress);
 			return () => document.removeEventListener('keydown', handleKeyPress);
 		}, []);
@@ -272,7 +270,7 @@ export const GridListCard = React.forwardRef<
 									</div>
 								)}
 								<div className='flex flex-grow flex-row items-center justify-between gap-4'>
-									<>{children}</>
+									{typeof children === 'function' ? null : children}
 									<div className='ml-auto mr-2'>
 										{stats && stats.length > 0 && (
 											<Link href={statsHref ?? '#'}>
@@ -354,7 +352,7 @@ export const GridListCard = React.forwardRef<
 												)}
 
 												{commandItems?.map((item, index) => {
-													const CommandIcon = item.icon ? Icon[item.icon] : null;
+													const CommandIcon = Icon[item.icon];
 
 													return (
 														<CommandItem
@@ -366,7 +364,7 @@ export const GridListCard = React.forwardRef<
 															}}
 														>
 															<div className='flex flex-row items-center justify-start gap-2 text-muted-foreground'>
-																{CommandIcon && <CommandIcon className='h-4 w-4' />}
+																<CommandIcon className='h-4 w-4' />
 																<p className='text-sm'>{item.label}</p>
 															</div>
 															<div className='flex flex-row items-center gap-1 text-muted-foreground'>
@@ -454,7 +452,7 @@ export function GridItemCheckbox({ children, className, ...props }: CheckboxProp
 							)
 						}
 					</div>
-					{children}
+					{typeof children === 'function' ? null : children}
 				</>
 			)}
 		</Checkbox>

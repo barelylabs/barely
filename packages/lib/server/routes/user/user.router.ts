@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import { parseForDb } from '../../../utils/phone-number';
 import { createTRPCRouter, privateProcedure, publicProcedure } from '../../api/trpc';

@@ -2,7 +2,7 @@
 
 import type { UploadQueueItem } from '@barely/lib/hooks/use-upload';
 import type { UpsertFmPage } from '@barely/lib/server/routes/fm/fm.schema';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
 import { useDebounce } from '@barely/lib/hooks/use-debounce';

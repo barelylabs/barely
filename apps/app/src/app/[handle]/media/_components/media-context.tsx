@@ -3,7 +3,7 @@
 import type { AppRouterOutputs } from '@barely/lib/server/api/router';
 // import type { FileRecord } from '@barely/lib/server/routes/file/file.schema';
 import type { Selection } from 'react-aria-components';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { createContext, useCallback, useContext, useRef, useState } from 'react';
 import { useFiles } from '@barely/lib/hooks/use-files';
 import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';

@@ -1,7 +1,7 @@
 import { env } from '../env';
 import { raise } from './raise';
 
-const apps = [
+export const APPS = [
 	'app',
 	'bio',
 	'cart',
@@ -13,7 +13,7 @@ const apps = [
 	'www',
 ] as const;
 
-export function getBaseUrl(app: (typeof apps)[number], absolute = false) {
+export function getBaseUrl(app: (typeof APPS)[number], absolute = false) {
 	if (!absolute && typeof window !== 'undefined') return ''; // browser should use relative url
 
 	const currentApp = env.NEXT_PUBLIC_CURRENT_APP;
@@ -119,7 +119,7 @@ export function getBaseUrl(app: (typeof apps)[number], absolute = false) {
 }
 
 export function getAbsoluteUrl(
-	app: (typeof apps)[number],
+	app: (typeof APPS)[number],
 	path?: string,
 	opts?: { subdomain?: string; query?: Record<string, string> },
 ) {

@@ -1,7 +1,7 @@
 {
 	"$schema": "https://turbo.build/schema.json",
 	"globalDependencies": ["**/.env"],
-	"pipeline": {
+	"tasks": {
 		"dev:pre": {
 			"cache": false
 		},
@@ -61,7 +61,7 @@
 		},
 		"format": {
 			"outputs": ["node_modules/.cache/.prettiercache"],
-			"outputMode": "new-only"
+			"outputLogs": "new-only"
 		},
 		"lint": {
 			"outputs": ["node_modules/.cache/.eslintcache"]
@@ -129,6 +129,7 @@
 		"NEXTAUTH_URL",
 		"NEXTAUTH_URL_INTERNAL",
 		"NODE_ENV",
+		"npm_lifecycle_event",
 		"OPENAI_API_KEY",
 		"OPENAI_ORG_ID",
 		"POSTMARK_SERVER_API_TOKEN",
@@ -138,6 +139,7 @@
 		"SCREENING_PHONE_NUMBER",
 		"SENDGRID_API_KEY",
 		"SHIPENGINE_API_KEY",
+		"SKIP_ENV_VALIDATION",
 		"SPOTIFY_CLIENT_ID",
 		"SPOTIFY_CLIENT_SECRET",
 		"STRIPE_SECRET_KEY",

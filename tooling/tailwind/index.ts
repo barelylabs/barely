@@ -1,4 +1,12 @@
 import type { Config } from 'tailwindcss';
+import headlessUI from '@headlessui/tailwindcss';
+import forms from '@tailwindcss/forms';
+import typography from '@tailwindcss/typography';
+// @ts-expect-error - CommonJS module without proper types
+import scrollbarHide from 'tailwind-scrollbar-hide';
+import animate from 'tailwindcss-animate';
+import radix from 'tailwindcss-radix';
+import reactAriaComponents from 'tailwindcss-react-aria-components';
 import colors from 'tailwindcss/colors';
 import defaultTheme from 'tailwindcss/defaultTheme';
 
@@ -569,12 +577,12 @@ export default {
 		},
 	],
 	plugins: [
-		require('@headlessui/tailwindcss'),
-		require('tailwindcss-animate'),
-		require('@tailwindcss/forms'),
-		require('@tailwindcss/typography'),
-		require('tailwind-scrollbar-hide'),
-		require('tailwindcss-radix'),
-		require('tailwindcss-react-aria-components'),
+		headlessUI,
+		animate,
+		forms,
+		typography,
+		scrollbarHide,
+		radix,
+		reactAriaComponents,
 	],
 } satisfies Config;

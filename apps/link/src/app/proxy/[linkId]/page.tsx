@@ -6,8 +6,13 @@ import { unescape } from 'html-escaper';
 
 // export const runtime = 'edge';
 
-export async function generateMetadata({ params }: { params: { linkId: string } }) {
-	const data = await getLinkById(params.linkId);
+export async function generateMetadata({
+	params,
+}: {
+	params: Promise<{ linkId: string }>;
+}) {
+	const { linkId } = await params;
+	const data = await getLinkById(linkId);
 
 	if (!data?.customMetaTags) {
 		return;
@@ -24,8 +29,13 @@ export async function generateMetadata({ params }: { params: { linkId: string } 
 	});
 }
 
-export default async function ProxyPage({ params }: { params: { linkId: string } }) {
-	const data = await getLinkById(params.linkId);
+export default async function ProxyPage({
+	params,
+}: {
+	params: Promise<{ linkId: string }>;
+}) {
+	const { linkId } = await params;
+	const data = await getLinkById(linkId);
 
 	// if the link doesn't exist
 	if (!data) {

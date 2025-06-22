@@ -1,5 +1,5 @@
 import type { InferSelectModel } from 'drizzle-orm';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { createInsertSchema } from 'drizzle-zod';
 
 import { commonFiltersSchema, infiniteQuerySchema } from '../../../utils/filters';
@@ -7,10 +7,10 @@ import { querySelectionSchema } from '../../../utils/zod-helpers';
 import { LandingPages } from './landing-page.sql';
 
 export const insertLandingPageSchema = createInsertSchema(LandingPages, {
-	name: s => s.name.min(1, 'Name is required'),
-	key: s => s.key.min(4, 'Key is required'),
+	name: name => name.min(1, 'Name is required'),
+	key: key => key.min(4, 'Key is required'),
 
-	content: s => s.content.min(1, 'Content is required'),
+	content: content => content.min(1, 'Content is required'),
 });
 export const createLandingPageSchema = insertLandingPageSchema.omit({
 	id: true,

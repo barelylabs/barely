@@ -10,7 +10,7 @@ import type {
 	MerchType,
 } from '@barely/lib/server/routes/product/product.constants';
 import type { UpsertProduct } from '@barely/lib/server/routes/product/product.schema';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useCallback, useEffect, useState } from 'react';
 import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
 import { useUpload } from '@barely/lib/hooks/use-upload';

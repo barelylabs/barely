@@ -1,5 +1,5 @@
-import type { api } from '@barely/lib/server/api/react';
 import type { CommonKeys } from '@barely/lib/utils/types';
+import type { AppRouter } from '@barely/server/api/router';
 import type { Icon } from '@barely/ui/elements/icon';
 import type { Selection } from 'react-aria-components';
 
@@ -27,7 +27,7 @@ export function ArchiveOrDeleteModal<T extends { id: string; name: string }>({
 	isPendingArchive: boolean;
 	deleteItems: (selection: string[]) => void; // Replace 'any' with the appropriate mutation type
 	isPendingDelete: boolean;
-	itemName: keyof CommonKeys<typeof Icon, typeof api>;
+	itemName: keyof CommonKeys<typeof Icon, AppRouter>;
 }) {
 	const mutate = mode === 'archive' ? archiveItems : deleteItems;
 	const isPending = mode === 'archive' ? isPendingArchive : isPendingDelete;
@@ -38,9 +38,9 @@ export function ArchiveOrDeleteModal<T extends { id: string; name: string }>({
 		mode === 'archive' ?
 			selection === 'all' ?
 				`Archive all ${itemName}s?`
-			:	`Archive "${lastSelected?.name}" ${selection.size > 1 ? `and ${selection.size - 1} other ${itemName}?` : ''}`
+			:	`Archive "${lastSelected.name}" ${selection.size > 1 ? `and ${selection.size - 1} other ${itemName}?` : ''}`
 		: selection === 'all' ? `Delete all ${itemName}s?`
-		: `Delete "${lastSelected?.name}" ${selection.size > 1 ? `and ${selection.size - 1} other ${itemName}?` : ''}`;
+		: `Delete "${lastSelected.name}" ${selection.size > 1 ? `and ${selection.size - 1} other ${itemName}?` : ''}`;
 
 	const subtitle =
 		mode === 'archive' ?

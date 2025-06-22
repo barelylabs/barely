@@ -2,7 +2,7 @@ import type { AllowedFileType } from '@uploadthing/shared';
 import { lookup } from '@uploadthing/mime-types';
 import { ALLOWED_FILE_TYPES, getTypeFromFileName } from '@uploadthing/shared';
 import { and, asc, desc, eq, gt, inArray, lt, notInArray, or } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { Presigned } from '../../../files/types';
 import type { FileRecord } from './file.schema';
@@ -60,8 +60,8 @@ export const fileRouter = createTRPCRouter({
 				nextCursor =
 					nextFile ?
 						{
-							id: nextFile?.id,
-							createdAt: nextFile?.createdAt,
+							id: nextFile.id,
+							createdAt: nextFile.createdAt,
 						}
 					:	undefined;
 			}

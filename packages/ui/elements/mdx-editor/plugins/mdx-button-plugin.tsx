@@ -1,7 +1,7 @@
 'use client';
 
 import type { JsxComponentDescriptor, JsxEditorProps } from '@mdxeditor/editor';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useMemo, useState } from 'react';
 import { useDebounce } from '@barely/lib/hooks/use-debounce';
 import { useWorkspaceAssets } from '@barely/lib/hooks/use-workspace-assets';

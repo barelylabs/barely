@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 
 import type { selectWorkspaceFilesSchema } from '../server/routes/file/file.schema';
 import { api } from '../server/api/react';

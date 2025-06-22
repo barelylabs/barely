@@ -34,13 +34,20 @@ export const Events = pgTable(
 		formId: dbId('formId'),
 		visitorSessionId: dbId('visitorSessionId'),
 	},
-	event => ({
-		bio: index('Events_bio_idx').on(event.bioId),
-		bio_BioButton: index('Events_bio_bioButton_idx').on(event.bioId, event.bioButtonId),
-		form: index('Events_form_idx').on(event.formId),
-		link: index('Events_link_idx').on(event.linkId),
-		visitorSession: index('Events_visitorSession_idx').on(event.visitorSessionId),
-	}),
+	// event => ({
+	// 	bio: index('Events_bio_idx').on(event.bioId),
+	// 	bio_BioButton: index('Events_bio_bioButton_idx').on(event.bioId, event.bioButtonId),
+	// 	form: index('Events_form_idx').on(event.formId),
+	// 	link: index('Events_link_idx').on(event.linkId),
+	// 	visitorSession: index('Events_visitorSession_idx').on(event.visitorSessionId),
+	// }),
+	event => [
+		index('Events_bio_idx').on(event.bioId),
+		index('Events_bio_bioButton_idx').on(event.bioId, event.bioButtonId),
+		index('Events_form_idx').on(event.formId),
+		index('Events_link_idx').on(event.linkId),
+		index('Events_visitorSession_idx').on(event.visitorSessionId),
+	],
 );
 
 export const Event_Relations = relations(Events, ({ one, many }) => ({

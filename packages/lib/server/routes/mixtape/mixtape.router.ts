@@ -1,5 +1,5 @@
-import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
-import { z } from 'zod';
+import { and, asc, desc, eq, gt, inArray, isNull, lt, or, sql } from 'drizzle-orm';
+import { z } from 'zod/v4';
 
 import type { InsertMixtape } from './mixtape.schema';
 // import { getUserWorkspaceByHandle } from '../../../utils/auth';
@@ -31,6 +31,11 @@ export const mixtapeRouter = createTRPCRouter({
 					eq(Mixtapes.workspaceId, ctx.workspace.id),
 					showArchived ? undefined : isNull(Mixtapes.archivedAt),
 					!!search?.length && sqlStringContains(Mixtapes.name, search),
+					!!cursor &&
+						or(
+							lt(Mixtapes.createdAt, cursor.createdAt),
+							and(eq(Mixtapes.createdAt, cursor.createdAt), gt(Mixtapes.id, cursor.id)),
+						),
 				]),
 				with: {
 					_tracks: {

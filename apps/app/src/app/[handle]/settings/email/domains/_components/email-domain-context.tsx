@@ -3,7 +3,7 @@
 import type { AppRouterOutputs } from '@barely/lib/server/api/router';
 import type { emailDomainFilterParamsSchema } from '@barely/lib/server/routes/email-domain/email-domain.schema';
 import type { Selection } from 'react-aria-components';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import {
 	createContext,
 	use,

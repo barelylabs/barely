@@ -4,8 +4,9 @@ import type { TopEventType } from '@barely/lib/server/routes/stat/stat.schema';
 import type { BarListBarProps } from '@barely/ui/charts/bar-list';
 import { useState } from 'react';
 import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
+import { useTRPC } from '@barely/lib/server/api/react';
 import { getTopStatValue } from '@barely/lib/server/routes/stat/stat.schema';
-import { api } from '@barely/server/api/react';
+import { useQuery } from '@tanstack/react-query';
 
 import { BarList } from '@barely/ui/charts/bar-list';
 import { Card } from '@barely/ui/elements/card';
@@ -16,22 +17,29 @@ import { H } from '@barely/ui/elements/typography';
 import { COUNTRIES } from '@barely/utils/constants';
 
 export function StatLocations({ eventType }: { eventType: TopEventType }) {
+	const trpc = useTRPC();
 	const [tab, setTab] = useState<'Country' | 'Region' | 'City'>('Country');
 
 	const { filtersWithHandle, getSetFilterPath } = useWebEventStatFilters();
 
-	const { data: countries } = api.stat.topCountries.useQuery({
-		...filtersWithHandle,
-		topEventType: eventType,
-	});
-	const { data: regions } = api.stat.topRegions.useQuery({
-		...filtersWithHandle,
-		topEventType: eventType,
-	});
-	const { data: cities } = api.stat.topCities.useQuery({
-		...filtersWithHandle,
-		topEventType: eventType,
-	});
+	const { data: countries } = useQuery(
+		trpc.stat.topCountries.queryOptions({
+			...filtersWithHandle,
+			topEventType: eventType,
+		}),
+	);
+	const { data: regions } = useQuery(
+		trpc.stat.topRegions.queryOptions({
+			...filtersWithHandle,
+			topEventType: eventType,
+		}),
+	);
+	const { data: cities } = useQuery(
+		trpc.stat.topCities.queryOptions({
+			...filtersWithHandle,
+			topEventType: eventType,
+		}),
+	);
 
 	const locationData =
 		tab === 'Country' ? countries?.map(c => ({ ...c, region: '', city: '' }))

@@ -1,14 +1,15 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/react';
 import type { cartFunnelFilterParamsSchema } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
+import type { AppRouterOutputs } from '@barely/server/api/router';
 import type { Selection } from 'react-aria-components';
-import type { z } from 'zod';
-import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
+import type { z } from 'zod/v4';
+import { createContext, useCallback, useContext, useRef, useState } from 'react';
 import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
+import { useTRPC } from '@barely/lib/server/api/react';
 import { cartFunnelSearchParamsSchema } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
 
 interface CartFunnelContext {
 	cartFunnels: AppRouterOutputs['cartFunnel']['byWorkspace']['cartFunnels'];
@@ -18,7 +19,7 @@ interface CartFunnelContext {
 		| AppRouterOutputs['cartFunnel']['byWorkspace']['cartFunnels'][number]
 		| undefined;
 	setCartFunnelSelection: (selection: Selection) => void;
-	gridListRef: React.RefObject<HTMLDivElement>;
+	gridListRef: React.RefObject<HTMLDivElement | null>;
 	focusGridList: () => void;
 	showCreateCartFunnelModal: boolean;
 	setShowCreateCartFunnelModal: (show: boolean) => void;
@@ -42,13 +43,8 @@ interface CartFunnelContext {
 
 const CartFunnelContext = createContext<CartFunnelContext | undefined>(undefined);
 
-export function CartFunnelContextProvider({
-	children,
-	initialInfiniteCartFunnels,
-}: {
-	children: React.ReactNode;
-	initialInfiniteCartFunnels: Promise<AppRouterOutputs['cartFunnel']['byWorkspace']>;
-}) {
+export function CartFunnelContextProvider({ children }: { children: React.ReactNode }) {
+	const trpc = useTRPC();
 	const [showCreateFunnelModal, setShowCreateFunnelModal] = useState(false);
 	const [showUpdateFunnelModal, setShowUpdateFunnelModal] = useState(false);
 	const [showArchiveFunnelModal, setShowArchiveFunnelModal] = useState(false);
@@ -66,35 +62,24 @@ export function CartFunnelContextProvider({
 		: selectedCartFunnelIds === 'all' ? 'all'
 		: new Set(selectedCartFunnelIds);
 
-	const initialData = use(initialInfiniteCartFunnels);
-
 	const {
 		data: infiniteFunnels,
 		isRefetching,
 		isFetching,
 		isPending,
-	} = api.cartFunnel.byWorkspace.useInfiniteQuery(
-		{
-			handle,
-			...filters,
-		},
-		{
-			initialData: () => {
-				return {
-					pages: [
-						{
-							cartFunnels: initialData.cartFunnels,
-							nextCursor: initialData.nextCursor,
-						},
-					],
-					pageParams: [], // todo: add page params
-				};
+	} = useSuspenseInfiniteQuery({
+		...trpc.cartFunnel.byWorkspace.infiniteQueryOptions(
+			{
+				handle,
+				...filters,
 			},
-			getNextPageParam: lastPage => lastPage.nextCursor,
-		},
-	);
+			{
+				getNextPageParam: lastPage => lastPage.nextCursor,
+			},
+		),
+	});
 
-	const cartFunnels = infiniteFunnels?.pages.flatMap(page => page.cartFunnels) ?? [];
+	const cartFunnels = infiniteFunnels.pages.flatMap(page => page.cartFunnels);
 
 	// setters
 	const setCartFunnelSelection = useCallback(
@@ -127,7 +112,7 @@ export function CartFunnelContextProvider({
 	);
 
 	const lastSelectedCartFunnelId =
-		cartFunnelSelection === 'all' || !cartFunnelSelection ?
+		cartFunnelSelection === 'all' || !cartFunnelSelection.size ?
 			undefined
 		:	Array.from(cartFunnelSelection).pop()?.toString();
 

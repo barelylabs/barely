@@ -1,6 +1,6 @@
 import type { PrimitiveAtom } from 'jotai';
 import type { DropzoneOptions } from 'react-dropzone';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useCallback, useMemo } from 'react';
 import { atom, useAtom } from 'jotai';
 import { useDropzone } from 'react-dropzone';

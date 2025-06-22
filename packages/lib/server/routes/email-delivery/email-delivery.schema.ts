@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 const emailBouncedSchema = z.object({
 	type: z.literal('email.bounced'),

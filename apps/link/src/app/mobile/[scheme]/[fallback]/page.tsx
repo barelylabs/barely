@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import ClientRedirect from './ClientRedirect';
 
@@ -15,16 +15,17 @@ const mobileRedirectParamsSchema = z.object({
 });
 // type MobileRedirectParams = z.infer<typeof mobileRedirectParamsSchema>;
 
-export default function MobileRedirectPage({
+export default async function MobileRedirectPage({
 	params,
 	searchParams,
 }: {
-	params: { scheme: string; fallback: string };
-	searchParams?: Record<string, string | string[] | undefined>;
+	params: Promise<{ scheme: string; fallback: string }>;
+	searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-	const { scheme, fallback } = params;
+	const { scheme, fallback } = await params;
+	const awaitedSearchParams = await searchParams;
 	const { ogTitle, ogDescription, ogImage, favicon } =
-		mobileRedirectParamsSchema.parse(searchParams);
+		mobileRedirectParamsSchema.parse(awaitedSearchParams);
 
 	return (
 		<>

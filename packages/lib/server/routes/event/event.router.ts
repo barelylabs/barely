@@ -3,7 +3,7 @@ import { createTRPCRouter } from '../../api/trpc';
 // import { meta } from '@barely/meta';
 // import { geoSchema } from '../../../schema/next';
 
-// import { z } from 'zod';
+// import { z } from 'zod/v4';
 // import {
 //   adPlatformSchema,
 //   eventCreateSchema as eventCreateSchemaNeedsPatch,

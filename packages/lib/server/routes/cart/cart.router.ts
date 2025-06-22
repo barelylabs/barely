@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { TRPCError } from '@trpc/server';
 import { and, eq, notInArray } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { UpdateCart } from './cart.schema';
 import { isProduction } from '../../../utils/environment';
@@ -100,18 +100,18 @@ export const cartRouter = createTRPCRouter({
 
 			// check if product images have blurDataURLs. if not, generate them
 			if (
-				!funnel.mainProduct?._images[0]?.file.blurDataUrl &&
-				funnel.mainProduct?._images[0]?.file.s3Key
+				!funnel.mainProduct._images[0]?.file.blurDataUrl &&
+				funnel.mainProduct._images[0]?.file.s3Key
 			) {
 				const { getBlurHash } = await import('../file/file.blurhash');
 				const { blurHash, blurDataUrl } = await getBlurHash(
-					funnel.mainProduct?._images[0]?.file.s3Key,
+					funnel.mainProduct._images[0].file.s3Key,
 				);
 
 				await ctx.db.pool
 					.update(Files)
 					.set({ blurHash, blurDataUrl })
-					.where(eq(Files.id, funnel.mainProduct?._images[0]?.file.id));
+					.where(eq(Files.id, funnel.mainProduct._images[0].file.id));
 			}
 
 			if (
@@ -120,13 +120,13 @@ export const cartRouter = createTRPCRouter({
 			) {
 				const { getBlurHash } = await import('../file/file.blurhash');
 				const { blurHash, blurDataUrl } = await getBlurHash(
-					funnel.bumpProduct?._images[0]?.file.s3Key,
+					funnel.bumpProduct._images[0].file.s3Key,
 				);
 
 				await ctx.db.pool
 					.update(Files)
 					.set({ blurHash, blurDataUrl })
-					.where(eq(Files.id, funnel.bumpProduct?._images[0]?.file.id));
+					.where(eq(Files.id, funnel.bumpProduct._images[0].file.id));
 			}
 
 			if (
@@ -135,13 +135,13 @@ export const cartRouter = createTRPCRouter({
 			) {
 				const { getBlurHash } = await import('../file/file.blurhash');
 				const { blurHash, blurDataUrl } = await getBlurHash(
-					funnel.upsellProduct?._images[0]?.file.s3Key,
+					funnel.upsellProduct._images[0].file.s3Key,
 				);
 
 				await ctx.db.pool
 					.update(Files)
 					.set({ blurHash, blurDataUrl })
-					.where(eq(Files.id, funnel.upsellProduct?._images[0]?.file.id));
+					.where(eq(Files.id, funnel.upsellProduct._images[0].file.id));
 			}
 
 			const cart =
@@ -191,7 +191,7 @@ export const cartRouter = createTRPCRouter({
 					const { lowestShippingPrice: mainShippingAmount } =
 						await getProductsShippingRateEstimate({
 							products: [
-								{ product: funnel.mainProduct, quantity: cart.mainProductQuantity ?? 1 },
+								{ product: funnel.mainProduct, quantity: cart.mainProductQuantity },
 							],
 							shipFrom: {
 								postalCode: funnel.workspace.shippingAddressPostalCode ?? '',
@@ -213,7 +213,7 @@ export const cartRouter = createTRPCRouter({
 								products: [
 									{
 										product: funnel.mainProduct,
-										quantity: cart.mainProductQuantity ?? 1,
+										quantity: cart.mainProductQuantity,
 									},
 									{
 										product: funnel.bumpProduct,
@@ -319,7 +319,7 @@ export const cartRouter = createTRPCRouter({
 
 			const amounts = getAmountsForUpsell(funnel, cart);
 
-			const fan = cart.fan ?? raise('fan not found to buy upsell');
+			const fan = cart.fan;
 
 			const stripePaymentMethodId =
 				cart.checkoutStripePaymentMethodId ?? raise('stripePaymentMethodId not found');
@@ -332,7 +332,7 @@ export const cartRouter = createTRPCRouter({
 						workspace: funnel.workspace,
 					}),
 					currency: 'usd',
-					customer: cart.fan?.stripeCustomerId ?? undefined,
+					customer: cart.fan.stripeCustomerId ?? undefined,
 					payment_method: stripePaymentMethodId,
 					return_url: getAbsoluteUrl(
 						'app',
@@ -427,7 +427,10 @@ export const cartRouter = createTRPCRouter({
 			await incrementAssetValuesOnCartPurchase(cart, amounts.upsellProductAmount);
 
 			// 👇 ok because it only happens in a route handler
-			cookies().set(`${funnel.handle}.${funnel.key}.cartStage`, 'upsellConverted');
+			(await cookies()).set(
+				`${funnel.handle}.${funnel.key}.cartStage`,
+				'upsellConverted',
+			);
 
 			return {
 				handle: funnel.workspace.handle,
@@ -454,7 +457,7 @@ export const cartRouter = createTRPCRouter({
 				}
 			} while (!cart.fan);
 
-			const fan = cart.fan ?? raise('fan not found to decline upsell');
+			const fan = cart.fan;
 			const funnel = cart.funnel ?? raise('funnel not found');
 
 			cart.stage = 'upsellDeclined';
@@ -485,7 +488,7 @@ export const cartRouter = createTRPCRouter({
 
 			await ctx.db.pool.update(Carts).set(cart).where(eq(Carts.id, input.cartId));
 
-			cookies().set(`${funnel.handle}.${funnel.key}.cartStage`, 'upsellDeclined'); // ok because it only happens in a route handler
+			(await cookies()).set(`${funnel.handle}.${funnel.key}.cartStage`, 'upsellDeclined'); // ok because it only happens in a route handler
 
 			return {
 				handle: funnel.workspace.handle,

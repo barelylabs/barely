@@ -14,11 +14,9 @@ export async function handleLoggedInOnAuthPage(props?: { callbackUrl?: string })
 
 	try {
 		defaultWorkspace = await getDefaultWorkspaceOfCurrentUser(session);
-	} catch (err) {
+	} catch {
 		return;
 	}
 
-	if (defaultWorkspace) return redirect(`/${defaultWorkspace.handle}/links`);
-
-	return;
+	return redirect(`/${defaultWorkspace.handle}/links`);
 }

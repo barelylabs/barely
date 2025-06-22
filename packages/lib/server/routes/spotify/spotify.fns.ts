@@ -89,8 +89,6 @@ const syncSpotifyAccountUser = async (spotifyAccountId: string, db: Db) => {
 
 	const spotifyUser = await getSpotifyUser({ accessToken });
 
-	if (!spotifyUser) return;
-
 	console.log('updating spotify user info...');
 
 	await db.pool
@@ -141,8 +139,6 @@ const syncSpotifyAccountPlaylists = async (spotifyAccoundId: string, db: Db) => 
 		userSpotifyId: spotifyAccount.providerAccountId,
 	});
 
-	if (!userSpotifyPlaylists) return;
-
 	// sync user spotify playlists
 
 	console.log('syncing spotify playlists...');
@@ -172,8 +168,7 @@ const syncSpotifyAccountPlaylists = async (spotifyAccoundId: string, db: Db) => 
 						imageUrl: userSpotifyPlaylist.images[0]?.url,
 						totalTracks: userSpotifyPlaylist.tracks.total,
 						curatorId: existingPlaylist.curatorId ?? spotifyAccount.user.id,
-						workspaceId:
-							existingPlaylist.workspaceId ?? spotifyAccount.user.personalWorkspaceId,
+						workspaceId: existingPlaylist.workspaceId,
 					})
 					.where(eq(Playlists.id, playlistId));
 			} else {
@@ -220,7 +215,7 @@ const syncSpotifyAccountPlaylists = async (spotifyAccoundId: string, db: Db) => 
 
 		if (!syncedPlaylist) return console.error('No synced playlist found with that id.');
 
-		if (!syncedPlaylist._genres || syncedPlaylist._genres.length === 0) {
+		if (syncedPlaylist._genres.length === 0) {
 			console.log('generating playlist genres for playlist...');
 
 			const gptGenreIds = await estimateGenresByPlaylistId(syncedPlaylist.id, db);

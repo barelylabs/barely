@@ -45,7 +45,7 @@ interface RootLayoutProps {
 	children: React.ReactNode;
 }
 
-export default function RootLayout({ children }: RootLayoutProps) {
+export default async function RootLayout({ children }: RootLayoutProps) {
 	return (
 		<html lang='en' suppressHydrationWarning>
 			<body
@@ -55,7 +55,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
 					fontSans.variable,
 				)}
 			>
-				<Providers headers={headers()}>
+				<Providers headers={await headers()}>
 					<Container className='max-w-full px-0 py-0'>{children}</Container>
 				</Providers>
 				{/* <Toaster /> */}

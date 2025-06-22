@@ -8,12 +8,12 @@ export function getDeviceData(req: NextRequest) {
 
 	const platform =
 		(
-			(os?.name?.toLowerCase().includes('ios') ??
-			browser?.name?.toLowerCase().includes('mobile safari') ??
-			ua?.toLowerCase().includes('iphone' || 'ipad'))
+			(os.name?.toLowerCase().includes('ios') ??
+			browser.name?.toLowerCase().includes('mobile safari') ??
+			(ua.toLowerCase().includes('iphone') || ua.toLowerCase().includes('ipad')))
 		) ?
 			'ios'
-		: os?.name?.toLowerCase().includes('android') ? 'android'
+		: os.name?.toLowerCase().includes('android') ? 'android'
 		: 'web';
 
 	return { platform, ...deviceProps };
@@ -26,7 +26,7 @@ export function parseTransparentLink(req: NextRequest) {
 			`localhost:${process.env.NEXT_PUBLIC_LINK_DEV_PORT}`,
 			`${process.env.NEXT_PUBLIC_TRANSPARENT_LINK_ROOT_DOMAIN}`,
 		)
-		?.replace('www.', '');
+		.replace('www.', '');
 
 	if (!domain) throw new Error('No domain found');
 

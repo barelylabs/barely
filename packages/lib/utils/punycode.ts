@@ -6,7 +6,7 @@ export function punycode(str?: string | null) {
 	if (typeof str !== 'string') return '';
 	try {
 		return punycodeHelper.toUnicode(str);
-	} catch (e) {
+	} catch {
 		return str;
 	}
 }

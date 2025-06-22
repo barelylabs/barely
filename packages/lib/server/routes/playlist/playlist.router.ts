@@ -1,6 +1,6 @@
 import { TRPCError } from '@trpc/server';
 import { eq } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import { createTRPCRouter, privateProcedure, publicProcedure } from '../../api/trpc';
 import { insertGenreSchema } from '../genre/genre.schema';

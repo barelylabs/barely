@@ -1,14 +1,14 @@
 import type { InferSelectModel } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import { formattedUserAgentSchema, nextGeoSchema } from '../../next/next.schema';
 // import { eventReportSearchParamsSchema } from '../event/event-report.schema';
 import { Carts } from './cart.sql';
 
 export const insertCartSchema = createInsertSchema(Carts, {
-	visitorGeo: nextGeoSchema,
-	visitorUserAgent: formattedUserAgentSchema,
+	visitorGeo: nextGeoSchema.optional(),
+	visitorUserAgent: formattedUserAgentSchema.optional(),
 });
 
 export const createCartSchema = insertCartSchema.omit({ id: true }).partial({

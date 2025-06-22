@@ -1,14 +1,12 @@
 import { Readable } from 'node:stream';
 import { task } from '@trigger.dev/sdk/v3';
-// import * as csv from '@fast-csv/parse'
-// import { parse } from '@fast-csv/parse';
 import { parse } from 'csv-parse';
 import { eq } from 'drizzle-orm';
 import fetch from 'node-fetch';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type {
-	importFansFromCsvColumnMappingsSchema,
+	importFansFromCsvColumnMappingsSchema_zodv4,
 	InsertFan,
 } from '../server/routes/fan/fan.schema';
 import { dbPool } from '../server/db/pool';
@@ -27,7 +25,7 @@ export const importFansFromCsv = task({
 		optIntoSmsMarketing,
 	}: {
 		csvFileId: string;
-		columnMappings: z.infer<typeof importFansFromCsvColumnMappingsSchema>;
+		columnMappings: z.infer<typeof importFansFromCsvColumnMappingsSchema_zodv4>;
 		optIntoEmailMarketing: boolean;
 		optIntoSmsMarketing: boolean;
 	}) => {
@@ -64,7 +62,7 @@ export const importFansFromCsv = task({
 			let phoneNumber: unknown;
 			let createdAt: unknown;
 
-			const rec = z.record(z.string().optional()).parse(record);
+			const rec = z.record(z.string(), z.string().optional()).parse(record);
 
 			if (columnMappings.firstName) {
 				firstName =
@@ -114,10 +112,12 @@ export const importFansFromCsv = task({
 			}
 
 			if (columnMappings.createdAt) {
-				createdAt =
-					typeof rec[columnMappings.createdAt] === 'string' ?
-						new Date(rec[columnMappings.createdAt]!)
-					:	new Date();
+				const dateString = rec[columnMappings.createdAt];
+				if (typeof dateString === 'string') {
+					createdAt = new Date(dateString);
+				} else {
+					createdAt = new Date();
+				}
 			}
 
 			const insertFanRecord = insertFanSchema.safeParse({

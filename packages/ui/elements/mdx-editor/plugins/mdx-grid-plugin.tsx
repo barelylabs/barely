@@ -3,7 +3,7 @@
 import type { JsxComponentDescriptor, JsxEditorProps } from '@mdxeditor/editor';
 import type { LexicalEditor } from 'lexical';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useMemo, useState } from 'react';
 import { useZodForm } from '@barely/lib/hooks/use-zod-form';
 import { mdxGridSchema } from '@barely/lib/server/mdx/mdx.schema';

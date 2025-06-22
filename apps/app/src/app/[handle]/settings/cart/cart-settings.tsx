@@ -1,6 +1,6 @@
 'use client';
 
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useUpdateWorkspace } from '@barely/lib/hooks/use-update-workspace';
 import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 // import { useWorkspaceUpdateForm } from '@barely/lib/hooks/use-workspace-update-form';

@@ -45,7 +45,7 @@ export async function setCartIdCookie({
 	key: string;
 	cartId: string;
 }) {
-	cookies().set(`${handle}.${key}.cartId`, cartId, {
+	(await cookies()).set(`${handle}.${key}.cartId`, cartId, {
 		maxAge: 60 * 60 * 24 * 7, // 7 days
 	});
 }
@@ -59,7 +59,7 @@ export async function setCartStageCookie({
 	key: string;
 	stage: string;
 }) {
-	cookies().set(`${handle}.${key}.cartStage`, stage, {
+	(await cookies()).set(`${handle}.${key}.cartStage`, stage, {
 		maxAge: 60 * 60 * 24 * 7, // 7 days
 	});
 }

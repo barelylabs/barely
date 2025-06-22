@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { NextGeo } from '../next/next.schema';
 import type { FM_LINK_PLATFORMS } from '../routes/fm/fm.constants';
@@ -38,7 +38,7 @@ export interface MetaEventCustomData {
 	linkClickDestinationHref?: string;
 }
 
-const META_EVENT_NAMES = [
+export const META_EVENT_NAMES = [
 	// standard events - ref: https://developers.facebook.com/docs/meta-pixel/reference
 	'AddPaymentInfo',
 	'AddToCart',
@@ -240,7 +240,7 @@ export const metaServerEventSchema = z
 		actionSource: z.enum(['website', 'mobile_app']),
 		sourceUrl: z.string().url(),
 		// optional
-		customData: z.record(z.coerce.string()).optional(),
+		customData: z.record(z.string(), z.coerce.string()).optional(),
 		optOut: z.boolean().optional(),
 		eventId: z.string().optional(),
 	})

@@ -1,6 +1,6 @@
 'use client';
 
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useCallback } from 'react';
 import { useEmailDomains } from '@barely/lib/hooks/use-email-domains';
 import { useZodForm } from '@barely/lib/hooks/use-zod-form';

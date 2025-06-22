@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { Fan } from '../routes/fan/fan.schema';
 import { parseFullName } from '../../utils/name';

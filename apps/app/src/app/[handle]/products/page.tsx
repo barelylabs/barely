@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { redirect } from 'next/navigation';
 import { api } from '@barely/lib/server/api/server';
 import { productSearchParamsSchema } from '@barely/lib/server/routes/product/product.schema';
@@ -12,21 +12,23 @@ import { ProductContextProvider } from '~/app/[handle]/products/_components/prod
 import { ProductFilters } from '~/app/[handle]/products/_components/product-filters';
 import { ProductHotkeys } from '~/app/[handle]/products/_components/product-hotkeys';
 
-export default function ProductsPage({
+export default async function ProductsPage({
 	params,
 	searchParams,
 }: {
-	params: { handle: string };
-	searchParams: z.infer<typeof productSearchParamsSchema>;
+	params: Promise<{ handle: string }>;
+	searchParams: Promise<z.infer<typeof productSearchParamsSchema>>;
 }) {
-	const parsedFilters = productSearchParamsSchema.safeParse(searchParams);
+	const awaitedParams = await params;
+	const awaitedSearchParams = await searchParams;
+	const parsedFilters = productSearchParamsSchema.safeParse(awaitedSearchParams);
 	if (!parsedFilters.success) {
 		console.log(parsedFilters.error.errors);
-		redirect(`/${params.handle}/products`);
+		redirect(`/${awaitedParams.handle}/products`);
 	}
 
-	const products = api({ handle: params.handle }).product.byWorkspace({
-		handle: params.handle,
+	const products = api({ handle: awaitedParams.handle }).product.byWorkspace({
+		handle: awaitedParams.handle,
 		...parsedFilters.data,
 	});
 

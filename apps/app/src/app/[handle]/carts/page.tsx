@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { redirect } from 'next/navigation';
 import { api } from '@barely/lib/server/api/server';
 import { cartFunnelSearchParamsSchema } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
@@ -13,20 +13,24 @@ import { CartFunnelHotkeys } from '~/app/[handle]/carts/_components/cartFunnel-h
 import { CreateCartFunnelButton } from '~/app/[handle]/carts/_components/create-cartFunnel-button';
 import { CreateOrUpdateFunnelModal } from '~/app/[handle]/carts/_components/create-or-update-cartFunnel-modal';
 
-export default function CartFunnelsPage({
+export default async function CartFunnelsPage({
 	params,
 	searchParams,
 }: {
-	params: { handle: string };
-	searchParams: z.infer<typeof cartFunnelSearchParamsSchema>;
+	params: Promise<{ handle: string }>;
+	searchParams: Promise<z.infer<typeof cartFunnelSearchParamsSchema>>;
 }) {
-	const parsedFilters = cartFunnelSearchParamsSchema.safeParse(searchParams);
+	const awaitedParams = await params;
+	const awaitedSearchParams = await searchParams;
+	const parsedFilters = cartFunnelSearchParamsSchema.safeParse(awaitedSearchParams);
 	if (!parsedFilters.success) {
-		redirect(`/${params.handle}/funnels`);
+		redirect(`/${awaitedParams.handle}/funnels`);
 	}
 
-	const infiniteCartFunnels = api({ handle: params.handle }).cartFunnel.byWorkspace({
-		handle: params.handle,
+	const infiniteCartFunnels = api({
+		handle: awaitedParams.handle,
+	}).cartFunnel.byWorkspace({
+		handle: awaitedParams.handle,
 		...parsedFilters.data,
 	});
 
@@ -34,7 +38,7 @@ export default function CartFunnelsPage({
 		<CartFunnelContextProvider initialInfiniteCartFunnels={infiniteCartFunnels}>
 			<DashContentHeader
 				title='Carts'
-				settingsHref={`/${params.handle}/settings/cart`}
+				settingsHref={`/${awaitedParams.handle}/settings/cart`}
 				button={<CreateCartFunnelButton />}
 			/>
 

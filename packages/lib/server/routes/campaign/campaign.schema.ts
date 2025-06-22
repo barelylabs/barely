@@ -1,6 +1,6 @@
 import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { Genre } from '../genre/genre.schema';
 import type { InsertTrack } from '../track/track.schema';
@@ -15,7 +15,7 @@ import {
 } from '../workspace/workspace.schema';
 // import { APP_BASE_URL } from "../utils/constants";
 
-import { playlistPitchSettings } from './campaign.settings';
+import { PLAYLIST_PITCH_SETTINGS } from './campaign.settings';
 import { Campaigns } from './campaign.sql';
 
 export const insertCampaignSchema = createInsertSchema(Campaigns);
@@ -87,7 +87,7 @@ const playlistPitchGenresSchema = z
 
 		const { totalCurators } = await getTotalPlaylistReachByGenres_SA(g.map(g => g.id));
 
-		return totalCurators > playlistPitchSettings.minCuratorReach;
+		return totalCurators > PLAYLIST_PITCH_SETTINGS.minCuratorReach;
 	}, 'More curators plz');
 
 export const updatePlaylistPitchCampaign_ScreeningSchema = z.object({
@@ -104,7 +104,7 @@ export type UpdatePlaylistPitchCampaign_ScreeningSchema = z.infer<
 export const updatePlaylistPitchCampaign_LaunchSchema = z.object({
 	id: updateCampaignSchema.shape.id,
 	genres: playlistPitchGenresSchema,
-	reach: z.number().min(playlistPitchSettings.minCuratorReach),
+	reach: z.number().min(PLAYLIST_PITCH_SETTINGS.minCuratorReach),
 });
 
 export type UpdatePlaylistPitchCampaign_LaunchSchema = z.infer<

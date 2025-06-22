@@ -1,5 +1,5 @@
 import { and, desc, eq, inArray, isNull, lt, notInArray, or } from 'drizzle-orm';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import { pushEvent } from '../../../utils/pusher-server';
 import { sqlAnd } from '../../../utils/sql';
@@ -22,9 +22,11 @@ import {
 import { Tracks } from './track.sql';
 
 export const trackRouter = createTRPCRouter({
-	byId: privateProcedure.input(z.string()).query(async ({ ctx, input }) => {
-		return await getTrackById(input, ctx.db);
-	}),
+	byId: privateProcedure
+		.input(z.object({ trackId: z.string() }))
+		.query(async ({ ctx, input }) => {
+			return await getTrackById(input.trackId, ctx.db);
+		}),
 
 	byWorkspace: privateProcedure
 		.input(selectWorkspaceTracksSchema)
