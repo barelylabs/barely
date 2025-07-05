@@ -2,7 +2,7 @@
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
+import { GridList, GridListCard } from '@barely/ui/grid-list';
 
 import type { ProductContext } from '~/app/[handle]/products/_components/product-context';
 import { CreateProductButton } from '~/app/[handle]/products/_components/create-product-button';
@@ -25,7 +25,6 @@ export function AllProducts() {
 			selectedKeys={selection}
 			setSelectedKeys={setSelection}
 			onAction={() => {
-				if (!selection) return;
 				setShowUpdateModal(true);
 			}}
 			// empty

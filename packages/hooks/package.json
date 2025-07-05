@@ -1,0 +1,40 @@
+{
+	"name": "@barely/hooks",
+	"private": true,
+	"version": "0.1.0",
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"build": "tsc",
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"dev": "tsc",
+		"format": "prettier --check . --ignore-path ../../.gitignore",
+		"lint": "eslint",
+		"typecheck": "tsc --noEmit --emitDeclarationOnly false"
+	},
+	"dependencies": {
+		"@barely/api": "workspace:*",
+		"@barely/atoms": "workspace:*",
+		"@barely/auth": "workspace:*",
+		"@barely/const": "workspace:*",
+		"@barely/files": "workspace:*",
+		"@barely/lib": "workspace:*",
+		"@barely/tb": "workspace:*",
+		"@barely/toast": "workspace:*",
+		"@barely/utils": "workspace:*",
+		"@barely/validators": "workspace:*",
+		"jotai": "catalog:",
+		"trpc-navigation-plugin": "catalog:"
+	},
+	"devDependencies": {
+		"@barely/eslint-config": "workspace:*",
+		"@barely/prettier-config": "workspace:*",
+		"@barely/tsconfig": "workspace:*",
+		"eslint": "catalog:",
+		"prettier": "catalog:",
+		"typescript": "catalog:"
+	},
+	"prettier": "@barely/prettier-config"
+}

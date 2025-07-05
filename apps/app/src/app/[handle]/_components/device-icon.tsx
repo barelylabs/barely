@@ -1,5 +1,5 @@
-import { BlurImage } from '@barely/ui/elements/blur-image';
-import { Icon } from '@barely/ui/elements/icon';
+import { BlurImage } from '@barely/ui/blur-image';
+import { Icon } from '@barely/ui/icon';
 
 import type { DeviceTabs } from '~/app/[handle]/_components/stat-devices';
 

@@ -1,7 +1,9 @@
 import type { z } from 'zod/v4';
 import { redirect } from 'next/navigation';
-import { api } from '@barely/lib/server/api/server';
-import { trackFilterParamsSchema } from '@barely/lib/server/routes/track/track.schema';
+import { Suspense } from 'react';
+import { trackFilterParamsSchema } from '@barely/validators';
+
+import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllTracks } from '~/app/[handle]/tracks/_components/all-tracks';
@@ -18,19 +20,25 @@ export default async function TracksPage({
 	params: Promise<{ handle: string }>;
 	searchParams: Promise<z.infer<typeof trackFilterParamsSchema>>;
 }) {
-	const parsedFilters = trackFilterParamsSchema.safeParse(await searchParams);
 	const awaitedParams = await params;
+	const awaitedSearchParams = await searchParams;
+	const parsedFilters = trackFilterParamsSchema.safeParse(awaitedSearchParams);
 	if (!parsedFilters.success) {
 		redirect(`/${awaitedParams.handle}/tracks`);
 	}
 
-	const initialInfiniteTracks = api({ handle: awaitedParams.handle }).track.byWorkspace({
-		handle: awaitedParams.handle,
-		...parsedFilters.data,
-	});
+	// Prefetch data (not async - don't await)
+	prefetch(
+		trpc.track.byWorkspace.infiniteQueryOptions({
+			handle: awaitedParams.handle,
+			...parsedFilters.data,
+		})
+	);
 
 	return (
-		<TrackContextProvider initialInfiniteTracks={initialInfiniteTracks}>
+		<HydrateClient>
+			<Suspense fallback={<div>Loading...</div>}>
+				<TrackContextProvider>
 			<DashContentHeader title='Tracks' button={<CreateTrackButton />} />
 			<AllTracks />
 
@@ -39,7 +47,9 @@ export default async function TracksPage({
 			<ArchiveOrDeleteTrackModal mode='archive' />
 			<ArchiveOrDeleteTrackModal mode='delete' />
 
-			<TrackHotkeys />
-		</TrackContextProvider>
+					<TrackHotkeys />
+				</TrackContextProvider>
+			</Suspense>
+		</HydrateClient>
 	);
 }

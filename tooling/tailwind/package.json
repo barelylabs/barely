@@ -23,11 +23,11 @@
 		"autoprefixer": "^10.4.14",
 		"culori": "^4.0.1",
 		"postcss": "catalog:",
-		"tailwind-scrollbar-hide": "^1.1.7",
+		"tailwind-scrollbar-hide": "^4.0.0",
 		"tailwindcss": "catalog:",
 		"tailwindcss-animate": "^1.0.7",
-		"tailwindcss-radix": "2.8.0",
-		"tailwindcss-react-aria-components": "^1.1.1"
+		"tailwindcss-radix": "4.0.2",
+		"tailwindcss-react-aria-components": "^2.0.0"
 	},
 	"devDependencies": {
 		"@barely/eslint-config": "workspace:^0.1.0",

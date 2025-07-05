@@ -1,22 +1,24 @@
 'use client';
 
-import { useModalHotKeys } from '@barely/lib/hooks/use-modal-hot-keys';
+import { useModalHotKeys } from '@barely/hooks';
 
 import { useEmailDomainContext } from './email-domain-context';
 
 export function EmailDomainHotkeys() {
 	const {
-		emailDomainSelection,
-		setShowCreateEmailDomainModal,
-		setShowUpdateEmailDomainModal,
-		setShowDeleteEmailDomainModal,
+		selection,
+		setShowArchiveModal,
+		setShowDeleteModal,
+		setShowCreateModal,
+		setShowUpdateModal,
 	} = useEmailDomainContext();
 
 	useModalHotKeys({
-		setShowCreateModal: setShowCreateEmailDomainModal,
-		setShowUpdateModal: setShowUpdateEmailDomainModal,
-		setShowDeleteModal: setShowDeleteEmailDomainModal,
-		itemSelected: emailDomainSelection !== 'all' && !!emailDomainSelection.size,
+		setShowCreateModal,
+		setShowUpdateModal,
+		setShowArchiveModal,
+		setShowDeleteModal,
+		itemSelected: selection !== 'all' && !!selection.size,
 	});
 
 	return null;

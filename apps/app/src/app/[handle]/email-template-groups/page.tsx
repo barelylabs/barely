@@ -1,7 +1,7 @@
 import type { z } from 'zod/v4';
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import { api } from '@barely/lib/server/api/server';
-import { emailTemplateGroupSearchParamsSchema } from '@barely/lib/server/routes/email-template-group/email-template-group.schema';
+import { emailTemplateGroupSearchParamsSchema } from '@barely/validators';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { EmailTemplateGroupFilters } from '~/app/[handle]/email-template-groups/_components/email-template-group-filters';
@@ -11,46 +11,51 @@ import { CreateEmailTemplateGroupButton } from './_components/create-email-templ
 import { CreateOrUpdateEmailTemplateGroupModal } from './_components/create-or-update-email-template-group-modal';
 import { EmailTemplateGroupContextProvider } from './_components/email-template-group-context';
 import { EmailTemplateGroupHotkeys } from './_components/email-template-group-hotkeys';
+import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
-export default function EmailTemplateGroupsPage({
+export default async function EmailTemplateGroupsPage({
 	params,
 	searchParams,
 }: {
-	params: { handle: string };
-	searchParams: z.infer<typeof emailTemplateGroupSearchParamsSchema>;
+	params: Promise<{ handle: string }>;
+	searchParams: Promise<z.infer<typeof emailTemplateGroupSearchParamsSchema>>;
 }) {
-	const parsedFilters = emailTemplateGroupSearchParamsSchema.safeParse(searchParams);
+	const awaitedParams = await params;
+	const awaitedSearchParams = await searchParams;
+	const parsedFilters = emailTemplateGroupSearchParamsSchema.safeParse(awaitedSearchParams);
 	if (!parsedFilters.success) {
 		console.log('parsedFilters error', parsedFilters.error);
-		redirect(`/${params.handle}/email-template-groups`);
+		redirect(`/${awaitedParams.handle}/email-template-groups`);
 	}
 
-	const emailTemplateGroups = api({
-		handle: params.handle,
-	}).emailTemplateGroup.byWorkspace({
-		handle: params.handle,
-		...parsedFilters.data,
-	});
+	prefetch(
+		trpc.emailTemplateGroup.byWorkspace.infiniteQueryOptions({
+			handle: awaitedParams.handle,
+			...parsedFilters.data,
+		}),
+	);
 
 	return (
-		<EmailTemplateGroupContextProvider
-			initialEmailTemplateGroupsFirstPage={emailTemplateGroups}
-		>
-			<DashContentHeader
-				title='Email Template Groups'
-				button={<CreateEmailTemplateGroupButton />}
-			/>
+		<HydrateClient>
+			<Suspense fallback={<div>Loading...</div>}>
+				<EmailTemplateGroupContextProvider>
+					<DashContentHeader
+						title='Email Template Groups'
+						button={<CreateEmailTemplateGroupButton />}
+					/>
 
-			<EmailTemplateGroupFilters />
-			<AllEmailTemplateGroups />
+					<EmailTemplateGroupFilters />
+					<AllEmailTemplateGroups />
 
-			<CreateOrUpdateEmailTemplateGroupModal mode='create' />
-			<CreateOrUpdateEmailTemplateGroupModal mode='update' />
+					<CreateOrUpdateEmailTemplateGroupModal mode='create' />
+					<CreateOrUpdateEmailTemplateGroupModal mode='update' />
 
-			<ArchiveOrDeleteEmailTemplateGroupModal mode='archive' />
-			<ArchiveOrDeleteEmailTemplateGroupModal mode='delete' />
+					<ArchiveOrDeleteEmailTemplateGroupModal mode='archive' />
+					<ArchiveOrDeleteEmailTemplateGroupModal mode='delete' />
 
-			<EmailTemplateGroupHotkeys />
-		</EmailTemplateGroupContextProvider>
+					<EmailTemplateGroupHotkeys />
+				</EmailTemplateGroupContextProvider>
+			</Suspense>
+		</HydrateClient>
 	);
 }

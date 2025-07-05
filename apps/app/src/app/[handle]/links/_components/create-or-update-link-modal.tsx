@@ -1,33 +1,38 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
-import { useDebounce } from '@barely/lib/hooks/use-debounce';
-import { useWebDomains } from '@barely/lib/hooks/use-web-domains';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import {
-	defaultLink,
-	upsertLinkSchema,
-} from '@barely/lib/server/routes/link/link.schema';
-import { sanitizeKey } from '@barely/lib/utils/key';
+	useCreateOrUpdateForm,
+	useDebounce,
+	useWebDomains,
+	useWorkspace,
+} from '@barely/hooks';
+import { useTRPC } from '@barely/api/app/trpc.react';
 import {
 	getTransparentLinkDataFromUrl,
 	getUrlWithoutTrackingParams,
 	isValidUrl,
-} from '@barely/lib/utils/link';
+	sanitizeKey,
+} from '@barely/utils';
+import { defaultLink, upsertLinkSchema } from '@barely/validators';
+import {
+	useMutation,
+	useQuery,
+	useQueryClient,
+	useSuspenseQuery,
+} from '@tanstack/react-query';
 
-import { BlurImage } from '@barely/ui/elements/blur-image';
-import { Button } from '@barely/ui/elements/button';
-import { Icon } from '@barely/ui/elements/icon';
-import { Label } from '@barely/ui/elements/label';
-import { LoadingSpinner } from '@barely/ui/elements/loading';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
-import { InfoTooltip, TooltipContent } from '@barely/ui/elements/tooltip';
-import { Text } from '@barely/ui/elements/typography';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { BlurImage } from '@barely/ui/blur-image';
+import { Button } from '@barely/ui/button';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { TextField } from '@barely/ui/forms/text-field';
+import { Icon } from '@barely/ui/icon';
+import { Label } from '@barely/ui/label';
+import { LoadingSpinner } from '@barely/ui/loading';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
+import { InfoTooltip, TooltipContent } from '@barely/ui/tooltip';
+import { Text } from '@barely/ui/typography';
 
 import { useLinkContext } from '~/app/[handle]/links/_components/link-context';
 import { LinkOptionalSettings } from '~/app/[handle]/links/_components/link-optional-settings';
@@ -35,6 +40,7 @@ import { SocialLinkPreviews } from '~/app/[handle]/links/_components/social-link
 
 export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 	const { mode } = props;
+	const { handle } = useWorkspace();
 
 	/* link context */
 	const {
@@ -51,9 +57,10 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 	const setShowLinkModal = mode === 'create' ? setShowCreateModal : setShowUpdateModal;
 
 	/* api */
-	const apiUtils = api.useUtils();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
 
-	const { linkDomains, primaryLinkDomain, isLoading: loadingDomains } = useWebDomains();
+	const { linkDomains, primaryLinkDomain } = useWebDomains();
 
 	const domainOptions = linkDomains.map(domain => ({
 		value: domain.domain,
@@ -62,27 +69,37 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 
 	const { workspace } = useWorkspace();
 
-	const { mutateAsync: createLink } = api.link.create.useMutation({
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: createLink } = useMutation(
+		trpc.link.create.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
-	const { mutateAsync: updateLink } = api.link.update.useMutation({
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: updateLink } = useMutation(
+		trpc.link.update.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
 	/* form */
 	const { form, onSubmit: handleSubmit } = useCreateOrUpdateForm({
 		updateItem: mode === 'create' ? null : (selectedLink ?? null),
 		upsertSchema: upsertLinkSchema,
 		handleCreateItem: async d => {
-			await createLink(d);
+			await createLink({
+				...d,
+				handle,
+			});
 		},
 		handleUpdateItem: async d => {
-			await updateLink(d);
+			await updateLink({
+				...d,
+				handle,
+			});
 		},
 		defaultValues: {
 			...defaultLink,
@@ -111,25 +128,25 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 
 	// transparent link
 	const transparentLinkData = useMemo(() => {
-		if (!workspace || !debouncedUrl) return null;
+		if (!debouncedUrl) return null;
 
 		return getTransparentLinkDataFromUrl(debouncedUrl, workspace);
 	}, [workspace, debouncedUrl]);
 
 	// meta tags
-	const { data: metaTagsFromUrl, isFetching: isFetchingMetaTags } =
-		api.link.getMetaTags.useQuery(debouncedUrl, {
-			enabled: isValidUrl(debouncedUrl),
-			refetchOnWindowFocus: false,
-		});
+	const { data: metaTagsFromUrl, isFetching: isFetchingMetaTags } = useQuery({
+		...trpc.link.getMetaTags.queryOptions(debouncedUrl),
+		enabled: isValidUrl(debouncedUrl),
+		refetchOnWindowFocus: false,
+	});
 
 	// we are generating meta tags if:
 	// - mode === 'create' && isFetchingMetaTags
 	// - there is an selectedLink && url is dirty && isFetchingMetaTags
 	const generatingMetaTags =
-		(mode === 'create' && isFetchingMetaTags) ??
-		(mode === 'create' && !urlIsDebounced) ??
-		(mode === 'update' && form.formState.dirtyFields.url && isFetchingMetaTags) ??
+		((mode === 'create' && isFetchingMetaTags) ||
+			(mode === 'create' && !urlIsDebounced) ||
+			(mode === 'update' && form.formState.dirtyFields.url && isFetchingMetaTags)) ??
 		false;
 
 	const metaTags = useMemo(() => {
@@ -150,7 +167,9 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 	 * Generate random key
 	 * */
 	const [generatingKey, setGeneratingKey] = useState(false);
-	const { mutateAsync: generateRandomKey } = api.link.generateRandomKey.useMutation();
+	const { mutateAsync: generateRandomKey } = useMutation(
+		trpc.link.generateRandomKey.mutationOptions(),
+	);
 
 	const randomizeKey = useCallback(async () => {
 		setGeneratingKey(true);
@@ -170,8 +189,8 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 		form.reset();
 		focusGridList();
 		setShowLinkModal(false);
-		await apiUtils.link.byWorkspace.invalidate();
-	}, [focusGridList, form, apiUtils.link, setShowLinkModal]);
+		await queryClient.invalidateQueries(trpc.link.byWorkspace.queryFilter());
+	}, [focusGridList, form, queryClient, trpc.link.byWorkspace, setShowLinkModal]);
 
 	const LinkIconOrFavicon = useMemo(() => {
 		if (!metaTags?.favicon) return null;
@@ -269,27 +288,24 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 										</div>
 
 										<div className='flex w-full flex-grow flex-row'>
-											{loadingDomains ?
-												'loading domains'
-											:	<>
-													<SelectField
-														name='domain'
-														options={domainOptions}
-														className='w-fit flex-grow-0 rounded-r-none border-r-0'
-														disabled={mode === 'update' && !!selectedLink?.key}
-													/>
-													<TextField
-														name='key'
-														className='flex-1 rounded-l-none'
-														disabled={mode === 'update' && !!selectedLink?.key}
-														onChange={e => {
-															form.setValue('key', sanitizeKey(e.target.value), {
-																shouldDirty: true,
-															});
-														}}
-													/>
-												</>
-											}
+											<Suspense fallback={<LoadingSpinner />}>
+												<SelectField
+													name='domain'
+													options={domainOptions}
+													className='w-fit flex-grow-0 rounded-r-none border-r-0'
+													disabled={mode === 'update' && !!selectedLink?.key}
+												/>
+												<TextField
+													name='key'
+													className='flex-1 rounded-l-none'
+													disabled={mode === 'update' && !!selectedLink?.key}
+													onChange={e => {
+														form.setValue('key', sanitizeKey(e.target.value), {
+															shouldDirty: true,
+														});
+													}}
+												/>
+											</Suspense>
 										</div>
 									</div>
 									{mode === 'update' && selectedLink?.transparent && (
@@ -349,27 +365,28 @@ export function TransparentLinkDisplay({
 
 export function AddWorkspaceSpotifyArtistId(props: { spotifyArtistId?: string }) {
 	const [show, setShow] = useState(true);
-	const apiUtils = api.useUtils();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
 	const { workspace } = useWorkspace();
-	const { mutateAsync: updateWorkspace } = api.workspace.update.useMutation();
-
-	const { data: spotifyArtistIdTaken } = api.workspace.spotifyArtistIdTaken.useQuery(
-		props.spotifyArtistId ?? '',
-		{
-			enabled: !!props.spotifyArtistId,
-		},
+	const { mutateAsync: updateWorkspace } = useMutation(
+		trpc.workspace.update.mutationOptions(),
 	);
+
+	const { data: spotifyArtistIdTaken } = useSuspenseQuery({
+		...trpc.workspace.spotifyArtistIdTaken.queryOptions(props.spotifyArtistId ?? ''),
+		// enabled: !!props.spotifyArtistId,
+	});
 
 	const handleSubmit = async () => {
 		await updateWorkspace({
+			handle: workspace.handle,
 			spotifyArtistId: props.spotifyArtistId,
 		});
-		await apiUtils.workspace.invalidate();
+		await queryClient.invalidateQueries(trpc.workspace.byHandle.queryFilter());
 	};
 
 	if (
 		!show ||
-		spotifyArtistIdTaken === undefined ||
 		spotifyArtistIdTaken === true ||
 		!props.spotifyArtistId ||
 		(workspace.spotifyArtistId?.length ?? 0) > 0

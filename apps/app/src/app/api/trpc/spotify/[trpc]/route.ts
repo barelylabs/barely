@@ -1,8 +1,5 @@
-import { routeHandler } from '@barely/lib/server/api/route-handler';
-import { spotifyRouter } from '@barely/lib/server/routes/spotify/spotify.router';
+import { OPTIONS } from '@barely/utils';
 
-export { OPTIONS } from '@barely/lib/utils/trpc-route';
+import { spotifyHandler } from '@barely/api/app/sub/spotify.handler';
 
-const handler = routeHandler('spotify', spotifyRouter);
-
-export { handler as GET, handler as POST };
+export { OPTIONS, spotifyHandler as GET, spotifyHandler as POST };

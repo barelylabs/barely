@@ -1,27 +1,26 @@
 'use client';
 
-import type { FlowState } from '@barely/lib/server/routes/flow/flow.ui.types';
+import type { FlowState } from '@barely/validators';
 import type { z } from 'zod/v4';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { useZodForm } from '@barely/lib/hooks/use-zod-form';
-import { api } from '@barely/lib/server/api/react';
-import { EMAIL_TEMPLATE_VARIABLES } from '@barely/lib/server/routes/email-template/email-template.constants';
-import { flowForm_sendEmailSchema } from '@barely/lib/server/routes/flow/flow.schema';
+import { EMAIL_TEMPLATE_VARIABLES } from '@barely/const';
+import { useWorkspace, useZodForm } from '@barely/hooks';
+import { flowForm_sendEmailSchema } from '@barely/validators';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { useShallow } from 'zustand/react/shallow';
 
-// import { Button } from '@barely/ui/elements/button';
-import { Icon } from '@barely/ui/elements/icon';
-import { Label } from '@barely/ui/elements/label';
-import { MDXEditor } from '@barely/ui/elements/mdx-editor';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
-// import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/elements/popover';
-import { Separator } from '@barely/ui/elements/separator';
-import { Switch } from '@barely/ui/elements/switch';
-import { Text } from '@barely/ui/elements/typography';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { SwitchField } from '@barely/ui/forms/switch-field';
 import { TextField } from '@barely/ui/forms/text-field';
+import { Icon } from '@barely/ui/icon';
+import { Label } from '@barely/ui/label';
+import { MDXEditor } from '@barely/ui/mdx-editor';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
+import { Separator } from '@barely/ui/separator';
+import { Switch } from '@barely/ui/switch';
+import { Text } from '@barely/ui/typography';
 
 import { SendTestEmail } from '~/app/[handle]/_components/send-test-email';
 import { useFlowStore } from './flow-store';
@@ -42,17 +41,20 @@ export const FlowEmailModal = () => {
 
 	const currentEmailNode = currentNode?.type === 'sendEmail' ? currentNode : null;
 
+	const trpc = useTRPC();
 	const { handle } = useWorkspace();
 
-	const { data: emailAddressOptions } = api.emailAddress.byWorkspace.useQuery(
-		{ handle },
-		{
-			select: data =>
-				data.emailAddresses.map(email => ({
-					label: email.email,
-					value: email.id,
-				})),
-		},
+	const { data: emailAddressOptions } = useSuspenseQuery(
+		trpc.emailAddress.byWorkspace.queryOptions(
+			{ handle },
+			{
+				select: data =>
+					data.emailAddresses.map(email => ({
+						label: email.email,
+						value: email.id,
+					})),
+			},
+		),
 	);
 
 	/* form */
@@ -77,29 +79,6 @@ export const FlowEmailModal = () => {
 		form.reset();
 	};
 
-	// const [isTestEmailModalOpen, setIsTestEmailModalOpen] = useState(false);
-	// const { mutate: sendTestEmail } = api.emailTemplate.sendTestEmail.useMutation({
-	// 	onSuccess: () => {
-	// 		toast('Test email sent', {
-	// 			description: `Check ${form.getValues('sendTestEmailTo')} for the test email`,
-	// 		});
-	// 		setIsTestEmailModalOpen(false);
-	// 	},
-	// });
-
-	// const handleSendTestEmail = () => {
-	// 	const currentValues = form.getValues();
-	// 	if (!currentValues.sendTestEmailTo) return;
-	// 	sendTestEmail({
-	// 		to: currentValues.sendTestEmailTo,
-	// 		fromId: currentValues.fromId,
-	// 		subject: currentValues.subject,
-	// 		previewText: currentValues.previewText,
-	// 		body: currentValues.body,
-	// 		variables: {}, // Add variables if needed
-	// 	});
-	// };
-
 	const preventDefaultClose = form.formState.isDirty;
 
 	return (
@@ -113,28 +92,13 @@ export const FlowEmailModal = () => {
 			<Form form={form} onSubmit={handleSubmit}>
 				<ModalBody>
 					<div className='mb-4 flex flex-row justify-end'>
-						{/* <Popover open={isTestEmailModalOpen} onOpenChange={setIsTestEmailModalOpen}>
-							<PopoverTrigger asChild>
-								<Button look='outline' size='sm'>
-									Send Test Email
-								</Button>
-							</PopoverTrigger>
-							<PopoverContent className='w-80'>
-								<div className='space-y-4'>
-									<h4 className='font-medium leading-none'>Send Test Email</h4>
-									<TextField
-										control={form.control}
-										label='Recipient'
-										name='sendTestEmailTo'
-										placeholder='Enter email address'
-									/>
-									<Button onClick={handleSendTestEmail} fullWidth>
-										Send
-									</Button>
-								</div>
-							</PopoverContent>
-						</Popover> */}
-						<SendTestEmail values={form.getValues()} />
+						<SendTestEmail
+							values={{
+								...form.getValues(),
+								previewText: form.getValues('previewText') ?? '',
+								replyTo: form.getValues('replyTo') ?? '',
+							}}
+						/>
 					</div>
 
 					<TextField
@@ -178,7 +142,7 @@ export const FlowEmailModal = () => {
 						label='From'
 						name='fromId'
 						control={form.control}
-						options={emailAddressOptions ?? []}
+						options={emailAddressOptions}
 					/>
 					<TextField label='Subject' name='subject' control={form.control} />
 					<TextField label='Preview Text' name='previewText' control={form.control} />

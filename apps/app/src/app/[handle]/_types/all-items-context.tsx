@@ -11,7 +11,7 @@ export interface InfiniteItemsContext<T, P> {
 	setSelection: (selection: Selection) => void;
 
 	// ui
-	gridListRef: React.RefObject<HTMLDivElement>;
+	gridListRef: React.RefObject<HTMLDivElement | null>;
 	focusGridList: () => void;
 
 	// modals

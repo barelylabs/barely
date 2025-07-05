@@ -1,8 +1,7 @@
-import type { AppRouterOutputs } from '@barely/lib/server/api/react';
-import type { DomainStatus } from '@barely/lib/server/routes/domain/domain.schema';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import type { DomainStatus } from '@barely/validators';
 import { useState } from 'react';
-
-import { getSubdomain } from '@barely/utils/domain';
+import { getSubdomain } from '@barely/utils';
 
 export function DomainConfiguration(props: {
 	status: DomainStatus;
@@ -69,14 +68,14 @@ export function DomainConfiguration(props: {
 			<div className='border-t border-gray-200 pt-5'>
 				<div className='flex justify-start space-x-4'>
 					<div className='ease border-b-2 border-black pb-1 text-sm text-black transition-all duration-150'>
-						{configJson?.conflicts.some(x => x.type === 'A') ?
+						{configJson.conflicts.some(x => x.type === 'A') ?
 							'A Record (recommended)'
 						:	'CNAME Record (recommended)'}
 					</div>
 				</div>
 				<DnsRecord
 					instructions='Please remove the following conflicting DNS records from your DNS provider:'
-					records={configJson?.conflicts.map(
+					records={configJson.conflicts.map(
 						({ name, type, value }: { name: string; type: string; value: string }) => ({
 							name,
 							type,

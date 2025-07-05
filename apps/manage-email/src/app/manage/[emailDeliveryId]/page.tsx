@@ -1,10 +1,10 @@
-import { dbPool } from '@barely/lib/server/db/pool';
-import { EmailDeliveries } from '@barely/lib/server/routes/email-delivery/email-delivery.sql';
-import { queryBooleanSchema } from '@barely/lib/utils/zod-helpers';
+import { dbHttp } from '@barely/db/client';
+import { EmailDeliveries } from '@barely/db/sql/email-delivery.sql';
+import { queryBooleanSchema } from '@barely/validators/helpers';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
-import { H } from '@barely/ui/elements/typography';
+import { H } from '@barely/ui/typography';
 
 import { ManageEmailForm } from '~/app/manage/[emailDeliveryId]/manage-email-form';
 
@@ -25,7 +25,7 @@ export default async function ManageEmailDeliveryPage({
 	console.log('emailDeliveryId', emailDeliveryId);
 	console.log('unsubscribed', unsubscribed);
 
-	const emailDelivery = await dbPool.query.EmailDeliveries.findFirst({
+	const emailDelivery = await dbHttp.query.EmailDeliveries.findFirst({
 		where: eq(EmailDeliveries.id, emailDeliveryId),
 		with: {
 			fan: {

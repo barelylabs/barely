@@ -1,0 +1,10 @@
+{
+	"extends": "@barely/tsconfig/internal-package.json",
+	// "extends": "@barely/tsconfig/base.json",
+	"compilerOptions": {
+		"lib": ["ES2022", "DOM"],
+		"jsx": "preserve" // fixme: this is how we're handling email templates bubbling up through packages for now. i guess it makes sense - if a package is handling jsx, ts needs to know what to do with it 🤷‍♂️
+	},
+	"include": ["*.ts", "src"],
+	"exclude": ["node_modules"]
+}

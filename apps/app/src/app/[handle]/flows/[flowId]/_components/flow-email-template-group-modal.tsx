@@ -1,16 +1,17 @@
 'use client';
 
-import type { FlowState } from '@barely/lib/server/routes/flow/flow.ui.types';
+import type { FlowState } from '@barely/validators';
 import type { z } from 'zod/v4';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { useZodForm } from '@barely/lib/hooks/use-zod-form';
-import { api } from '@barely/lib/server/api/react';
-import { flowForm_sendEmailFromTemplateGroupSchema } from '@barely/lib/server/routes/flow/flow.schema';
+import { useWorkspace, useZodForm } from '@barely/hooks';
+import { flowForm_sendEmailFromTemplateGroupSchema } from '@barely/validators';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { useShallow } from 'zustand/react/shallow';
 
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 
 import { useFlowStore } from './flow-store';
 
@@ -36,17 +37,20 @@ export const FlowEmailTemplateGroupModal = () => {
 	const currentEmailTemplateGroupNode =
 		currentNode?.type === 'sendEmailFromTemplateGroup' ? currentNode : null;
 
+	const trpc = useTRPC();
 	const { handle } = useWorkspace();
 
-	const { data: emailTemplateGroupOptions } = api.emailTemplateGroup.byWorkspace.useQuery(
-		{ handle },
-		{
-			select: data =>
-				data.emailTemplateGroups.map(group => ({
-					label: group.name,
-					value: group.id,
-				})),
-		},
+	const { data: emailTemplateGroupOptions } = useSuspenseQuery(
+		trpc.emailTemplateGroup.byWorkspace.queryOptions(
+			{ handle },
+			{
+				select: data =>
+					data.emailTemplateGroups.map(group => ({
+						label: group.name,
+						value: group.id,
+					})),
+			},
+		),
 	);
 
 	const form = useZodForm({
@@ -88,7 +92,7 @@ export const FlowEmailTemplateGroupModal = () => {
 						label='Email Template Group'
 						name='emailTemplateGroupId'
 						control={form.control}
-						options={emailTemplateGroupOptions ?? []}
+						options={emailTemplateGroupOptions}
 					/>
 				</ModalBody>
 				<ModalFooter>

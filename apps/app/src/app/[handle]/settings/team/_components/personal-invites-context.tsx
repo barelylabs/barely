@@ -1,9 +1,11 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import { createContext, useContext, useState } from 'react';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
+import { useWorkspace } from '@barely/hooks';
+import { useQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 interface PersonalInvitesContext {
 	invites: AppRouterOutputs['user']['workspaceInvites'];
@@ -28,14 +30,16 @@ export function PersonalInvitesContextProvider({
 	const [acceptInviteWorkspaceId, setAcceptInviteWorkspaceId] = useState<string | null>(
 		null,
 	);
+	const trpc = useTRPC();
 	const { isPersonal } = useWorkspace();
 
-	const { data: invites, isFetching } = api.user.workspaceInvites.useQuery(undefined, {
+	const { data: invites, isFetching } = useQuery({
+		...trpc.user.workspaceInvites.queryOptions(undefined),
 		enabled: isPersonal,
 	});
 
 	const acceptInviteWorkspaceName =
-		invites?.find(invite => invite.workspace.id === acceptInviteWorkspaceId)?.workspace
+		invites?.find(invite => invite.workspaceId === acceptInviteWorkspaceId)?.workspace
 			.name ?? null;
 
 	const contextValue = {

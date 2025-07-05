@@ -1,10 +1,10 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
+import { GridList, GridListCard } from '@barely/ui/grid-list';
 
 import { CreateFmPageButton } from '~/app/[handle]/fm/_components/create-fm-page-button';
 import { useFmContext } from '~/app/[handle]/fm/_components/fm-context';

@@ -3,19 +3,18 @@
 import { Fragment } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { useTRPC } from '@barely/lib/server/api/react';
+import { useWorkspace } from '@barely/hooks';
+import { campaignTypeDisplay } from '@barely/utils';
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
 import { z } from 'zod/v4';
 
-import { useWorkspace } from '@barely/hooks/use-workspace';
+import { useTRPC } from '@barely/api/app/trpc.react';
 
-import { Badge } from '@barely/ui/elements/badge';
-import { Button } from '@barely/ui/elements/button';
-import { InfoCard } from '@barely/ui/elements/card';
-import { Icon } from '@barely/ui/elements/icon';
-import { H, Text } from '@barely/ui/elements/typography';
-
-import { campaignTypeDisplay } from '@barely/utils/campaign';
+import { Badge } from '@barely/ui/badge';
+import { Button } from '@barely/ui/button';
+import { InfoCard } from '@barely/ui/card';
+import { Icon } from '@barely/ui/icon';
+import { H, Text } from '@barely/ui/typography';
 
 export const AllCampaigns = () => {
 	const trpc = useTRPC();

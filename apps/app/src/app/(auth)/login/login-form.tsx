@@ -3,15 +3,18 @@
 import type { z } from 'zod/v4';
 import { useState } from 'react';
 import Link from 'next/link';
-import { useZodForm } from '@barely/lib/hooks/use-zod-form';
-import { insertUserSchema } from '@barely/lib/server/routes/user/user.schema';
-import { useTRPC } from '@barely/server/api/react';
-import { useMutation } from '@tanstack/react-query';
+import { useZodForm } from '@barely/hooks';
+import { insertUserSchema } from '@barely/validators';
 
-import { Text } from '@barely/ui/elements/typography';
-import { Form, SubmitButton } from '@barely/ui/forms';
+// import { useMutation } from '@tanstack/react-query';
+
+// import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { TextField } from '@barely/ui/forms/text-field';
+import { Text } from '@barely/ui/typography';
 
+import { authClient } from '~/auth/client';
 import { LoginLinkSent } from '../login-success';
 
 const signInSchema = insertUserSchema.pick({ email: true });
@@ -21,7 +24,7 @@ interface RegisterFormProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export const LoginForm = ({ callbackUrl }: RegisterFormProps) => {
-	const trpc = useTRPC();
+	// const trpc = useTRPC();
 
 	const form = useZodForm({
 		schema: signInSchema,
@@ -32,17 +35,26 @@ export const LoginForm = ({ callbackUrl }: RegisterFormProps) => {
 
 	const [loginEmailSent, setLoginEmailSent] = useState(false);
 
-	const { mutateAsync: sendLoginEmail } = useMutation(
-		trpc.auth.sendLoginEmail.mutationOptions({
-			onSuccess: () => {
-				setLoginEmailSent(true);
-			},
-		}),
-	);
+	// const { mutateAsync: sendLoginEmail } = useMutation(
+	// 	trpc.auth.sendLoginEmail.mutationOptions({
+	// 		onSuccess: () => {
+	// 			setLoginEmailSent(true);
+	// 		},
+	// 	}),
+	// );
 
 	const onSubmit = async (user: z.infer<typeof signInSchema>) => {
-		await sendLoginEmail({ email: user.email, callbackUrl });
-		return;
+		const { data, error } = await authClient.signIn.magicLink({
+			email: user.email,
+			callbackURL: callbackUrl,
+		});
+
+		console.log('data', data);
+		console.log('error', error);
+
+		if (data?.status === true) {
+			setLoginEmailSent(true);
+		}
 	};
 
 	return (

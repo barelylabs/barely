@@ -2,8 +2,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import logo from '@static/logo.png';
 
-import { Icon } from '@barely/ui/elements/icon';
-import { H } from '@barely/ui/elements/typography';
+import { Icon } from '@barely/ui/icon';
+import { H } from '@barely/ui/typography';
 
 import { handleLoggedInOnAuthPage } from '~/app/(auth)/handle-logged-in-on-auth-page';
 import { LoginForm } from './login-form';

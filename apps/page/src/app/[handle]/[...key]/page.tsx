@@ -1,19 +1,19 @@
-import type { EventTrackingProps } from '@barely/lib/server/routes/event/event-report.schema';
-import type { LandingPage } from '@barely/lib/server/routes/landing-page/landing-page.schema';
-import type { MdxAssets } from '@barely/lib/utils/mdx';
+import type { EventTrackingProps } from '@barely/validators/schemas';
+import type { LandingPage } from '@barely/validators/schemas';
+import type { MdxAssets } from '@barely/utils';
 import type { Metadata } from 'next';
 import type { z } from 'zod/v4';
-import { eventReportSearchParamsSchema } from '@barely/lib/server/routes/event/event-report.schema';
-import { getLandingPageData } from '@barely/lib/server/routes/landing-page/landing-page.render.fns';
-import { getAssetHref, getLinkHref } from '@barely/lib/utils/mdx';
+import { eventReportSearchParamsSchema } from '@barely/validators/schemas';
+import { getLandingPageData } from '@barely/lib/functions/landing-page.render.fns';
+import { getAssetHref, getLinkHref } from '@barely/utils';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 
-import { mdxCard } from '@barely/ui/elements/mdx-card';
-import { mdxGrid } from '@barely/ui/elements/mdx-grid';
-import { mdxImageFile } from '@barely/ui/elements/mdx-image-file';
-import { mdxLink } from '@barely/ui/elements/mdx-link';
-import { mdxTypography } from '@barely/ui/elements/mdx-typography';
-import { mdxVideoPlayer } from '@barely/ui/elements/mdx-video-player';
+import { mdxCard } from '@barely/ui/mdx-card';
+import { mdxGrid } from '@barely/ui/mdx-grid';
+import { mdxImageFile } from '@barely/ui/mdx-image-file';
+import { mdxLink } from '@barely/ui/mdx-link';
+import { mdxTypography } from '@barely/ui/mdx-typography';
+import { mdxVideoPlayer } from '@barely/ui/mdx-video-player';
 
 import { LandingPageLinkButton } from '~/app/[handle]/[...key]/lp-link-button';
 import { LogVisit } from '~/app/[handle]/[...key]/lp-log-visit';
@@ -77,10 +77,39 @@ export default async function LandingPage({
 		refererId: lp.id,
 	};
 
+	const renderedMarkdown = await MDXRemote({
+		source: lp.content ?? '',
+		components: {
+			...mdxTypography,
+			...mdxVideoPlayer,
+			...mdxLandingPageAssetButton({
+				landingPageId: lp.id,
+				assets: {
+					cartFunnels,
+					links,
+					pressKits,
+					landingPages,
+				},
+				tracking,
+			}),
+			...mdxLink({
+				tracking,
+			}),
+			...mdxLinkButton({
+				landingPageId: lp.id,
+				tracking,
+			}),
+			...mdxImageFile(),
+			...mdxGrid,
+			...mdxCard,
+		},
+	});
+
 	return (
 		<div className='mx-auto flex min-h-screen w-full max-w-[824px] flex-col items-center gap-12 px-4 py-10 sm:gap-[3.25rem] sm:px-6 sm:py-12 md:gap-14'>
-			{cartFunnels?.length > 0 && <WarmupCart />}
-			<MDXRemote
+			{cartFunnels.length > 0 && <WarmupCart />}
+			<>{renderedMarkdown}</>
+			{/* <MDXRemote
 				source={lp.content ?? ''}
 				components={{
 					...mdxTypography,
@@ -106,7 +135,7 @@ export default async function LandingPage({
 					...mdxGrid,
 					...mdxCard,
 				}}
-			/>
+			/> */}
 			<LogVisit landingPageId={lp.id} />
 		</div>
 	);

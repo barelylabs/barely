@@ -1,14 +1,13 @@
 'use client';
 
-import type { IconKey, IconType } from '@barely/ui/elements/icon';
+import type { IconKey, IconType } from '@barely/ui/icon';
 import type { ReactNode } from 'react';
+import { cn } from '@barely/utils';
 
-import { Badge } from '@barely/ui/elements/badge';
-import { Button } from '@barely/ui/elements/button';
-import { Icon } from '@barely/ui/elements/icon';
-import { H, Lead } from '@barely/ui/elements/typography';
-
-import { cn } from '@barely/utils/cn';
+import { Button } from '@barely/ui/button';
+import { Badge } from '@barely/ui/badge';
+import { Icon } from '@barely/ui/icon';
+import { H, Lead } from '@barely/ui/typography';
 
 interface HeroProps {
 	badgeLabel?: ReactNode;

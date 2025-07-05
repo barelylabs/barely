@@ -1,20 +1,18 @@
-import type { FlowState } from '@barely/lib/server/routes/flow/flow.ui.types';
+import type { SelectFieldOption } from '@barely/ui/forms/select-field';
+import type { FlowState } from '@barely/validators';
 import type { z } from 'zod/v4';
 import { useEffect } from 'react';
-import { useCartFunnels } from '@barely/lib/hooks/use-cart-funnels';
-// import { useProducts } from '@barely/lib/hooks/use-products';
-
-import { useZodForm } from '@barely/lib/hooks/use-zod-form';
-import { flowForm_booleanSchema } from '@barely/lib/server/routes/flow/flow.schema';
-import { raise } from '@barely/lib/utils/raise';
+// import { useProducts } from '@barely/hooks';
+import { useCartFunnels, useProducts, useZodForm } from '@barely/hooks';
+import { raise } from '@barely/utils';
+import { flowForm_booleanSchema } from '@barely/validators';
 import { useShallow } from 'zustand/react/shallow';
 
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { NumberField } from '@barely/ui/forms/number-field';
 import { SelectField } from '@barely/ui/forms/select-field';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 
-import { useProducts } from '~/app/_hooks/use-products';
 import { useFlowStore } from './flow-store';
 
 const selector = (state: FlowState) => ({
@@ -24,23 +22,22 @@ const selector = (state: FlowState) => ({
 	setShowBooleanModal: state.setShowBooleanModal,
 });
 
-const conditionOptions: {
-	value: z.infer<typeof flowForm_booleanSchema>['booleanCondition'];
-	label: string;
-}[] = [
+const conditionOptions = [
 	{
-		value: 'hasOrderedProduct',
+		value: 'hasOrderedProduct' as const,
 		label: 'Ordered Product',
 	},
 	{
-		value: 'hasOrderedCart',
+		value: 'hasOrderedCart' as const,
 		label: 'Ordered Cart',
 	},
 	{
-		value: 'hasOrderedAmount',
+		value: 'hasOrderedAmount' as const,
 		label: 'Ordered Amount',
 	},
-];
+] satisfies SelectFieldOption<
+	NonNullable<z.infer<typeof flowForm_booleanSchema>['booleanCondition']>
+>[];
 
 export function FlowBooleanModal() {
 	const { currentNode, updateBooleanNode, showBooleanModal, setShowBooleanModal } =
@@ -56,9 +53,7 @@ export function FlowBooleanModal() {
 	const form = useZodForm({
 		schema: flowForm_booleanSchema,
 		values: currentBooleanNode?.data,
-		resetOptions: {
-			keepDirtyValues: true,
-		},
+		resetOptions: { keepDirtyValues: true },
 	});
 
 	const handleSubmit = (data: z.infer<typeof flowForm_booleanSchema>) => {
@@ -99,14 +94,14 @@ export function FlowBooleanModal() {
 						<SelectField
 							name='productId'
 							label='Product'
-							options={productOptions ?? []}
+							options={productOptions}
 							control={form.control}
 						/>
 					: condition === 'hasOrderedCart' ?
 						<SelectField
 							name='cartFunnelId'
 							label='Cart Funnel'
-							options={cartFunnelOptions ?? []}
+							options={cartFunnelOptions}
 							control={form.control}
 						/>
 					: condition === 'hasOrderedAmount' ?

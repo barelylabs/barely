@@ -1,18 +1,19 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
-import type { EmailDomain } from '@barely/lib/server/routes/email-domain/email-domain.schema';
-import type { IconKey } from '@barely/ui/elements/icon';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import type { IconKey } from '@barely/ui/icon';
+import type { EmailDomain } from '@barely/validators';
 import { useCallback, useState } from 'react';
-import { useCopy } from '@barely/lib/hooks/use-copy';
-import { api } from '@barely/lib/server/api/react';
-import { punycode } from '@barely/lib/utils/punycode';
-import { toTitleCase } from '@barely/lib/utils/text';
+import { useCopy, useWorkspace } from '@barely/hooks';
+import { punycode, toTitleCase } from '@barely/utils';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Badge } from '@barely/ui/badge';
+import { Button } from '@barely/ui/button';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { Badge } from '@barely/ui/elements/badge';
-import { Button } from '@barely/ui/elements/button';
-import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
+import { GridList, GridListCard } from '@barely/ui/grid-list';
 import {
 	Table,
 	TableBody,
@@ -20,20 +21,20 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from '@barely/ui/elements/table';
-import { Text } from '@barely/ui/elements/typography';
+} from '@barely/ui/table';
+import { Text } from '@barely/ui/typography';
 
 import { CreateEmailDomainButton } from '~/app/[handle]/settings/email/domains/_components/create-email-domain-button';
 import { useEmailDomainContext } from '~/app/[handle]/settings/email/domains/_components/email-domain-context';
 
 export function AllEmailDomains() {
 	const {
-		emailDomains,
-		emailDomainSelection,
-		// lastSelectedEmailDomainId,
-		setEmailDomainSelection,
+		items: emailDomains,
+		selection: emailDomainSelection,
+		// lastSelectedItemId,
+		setSelection: setEmailDomainSelection,
 		gridListRef,
-		// setShowUpdateEmailDomainModal,
+		// setShowUpdateModal,
 	} = useEmailDomainContext();
 
 	return (
@@ -71,29 +72,35 @@ function EmailDomainCard({
 }: {
 	emailDomain: AppRouterOutputs['emailDomain']['byWorkspace']['domains'][number];
 }) {
-	const apiUtils = api.useUtils();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
+	const { handle } = useWorkspace();
 	const { name, records } = emailDomain;
 	const [isVerifying, setIsVerifying] = useState(false);
 	const { copyToClipboard } = useCopy();
-	const { setShowUpdateEmailDomainModal, setEmailDomainSelection } =
+	const { setShowUpdateModal, setSelection: setEmailDomainSelection } =
 		useEmailDomainContext();
 
-	const { mutate: verifyDomain } = api.emailDomain.verifyOnResend.useMutation({
-		onMutate: () => {
-			setIsVerifying(true);
-		},
+	const { mutate: verifyDomain } = useMutation({
+		...trpc.emailDomain.verifyOnResend.mutationOptions({
+			onMutate: () => {
+				setIsVerifying(true);
 
-		onSettled: async () => {
-			// Always refetch after error or success
-			await apiUtils.emailDomain.byWorkspace.invalidate();
-			setIsVerifying(false);
-		},
+				return undefined;
+			},
+
+			onSettled: async () => {
+				// Always refetch after error or success
+				await queryClient.invalidateQueries(trpc.emailDomain.byWorkspace.queryFilter());
+				setIsVerifying(false);
+			},
+		}),
 	});
 
 	const handleVerifyDomain = useCallback(() => {
 		setIsVerifying(true);
-		verifyDomain({ id: emailDomain.id });
-	}, [emailDomain.id, verifyDomain]);
+		verifyDomain({ id: emailDomain.id, handle });
+	}, [emailDomain.id, handle, verifyDomain]);
 
 	return (
 		<GridListCard id={emailDomain.id} key={emailDomain.id} textValue={emailDomain.name}>
@@ -121,7 +128,7 @@ function EmailDomainCard({
 							startIcon='dots'
 							onClick={() => {
 								setEmailDomainSelection(new Set([emailDomain.id]));
-								setShowUpdateEmailDomainModal(true);
+								setShowUpdateModal(true);
 							}}
 						/>
 					</div>

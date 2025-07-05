@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
-import { getAbsoluteUrl } from '@barely/lib/utils/url';
+import { getAbsoluteUrl } from '@barely/utils';
 
 // import { ChevronRightIcon } from '@heroicons/react/16/solid';
 
-import { Text } from '@barely/ui/elements/typography';
+import { Text } from '@barely/ui/typography';
 
 import { BentoCard } from '~/components/bento-card';
 import { Button } from '~/components/button';

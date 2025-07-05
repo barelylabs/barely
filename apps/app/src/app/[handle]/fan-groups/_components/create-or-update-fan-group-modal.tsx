@@ -3,36 +3,45 @@
 import type { Control, UseFormWatch } from 'react-hook-form';
 import type { z } from 'zod/v4';
 import { useCallback } from 'react';
-import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
-import { FAN_GROUP_CONDITIONS } from '@barely/lib/server/routes/fan-group/fan-group.constants';
-import { upsertFanGroupSchema } from '@barely/lib/server/routes/fan-group/fan-group.schema';
+import { FAN_GROUP_CONDITIONS } from '@barely/const';
+import { useCreateOrUpdateForm, useWorkspace } from '@barely/hooks';
+import { useTRPC } from '@barely/api/app/trpc.react';
+import { upsertFanGroupSchema } from '@barely/validators';
+import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { useFieldArray } from 'react-hook-form';
 
-import { Button } from '@barely/ui/elements/button';
-import { Icon } from '@barely/ui/elements/icon';
-import { Label } from '@barely/ui/elements/label';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { Button } from '@barely/ui/button';
 import { CurrencyField } from '@barely/ui/forms/currency-field';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { TextField } from '@barely/ui/forms/text-field';
+import { Icon } from '@barely/ui/icon';
+import { Label } from '@barely/ui/label';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 
 import { useFanGroupContext } from '~/app/[handle]/fan-groups/_components/fan-group-context';
 
 const conditionTypeOptions = FAN_GROUP_CONDITIONS.map(c => ({
-	label:
-		c === 'hasOrderedCart' ? '🛒 Ordered cart'
-		: c === 'hasOrderedProduct' ? '📦 Ordered product'
-		: c === 'hasOrderedAmount' ? '💰 Total order amount'
-		: c,
+	label: (() => {
+		switch (c) {
+			case 'hasOrderedCart':
+				return '🛒 Ordered cart';
+			case 'hasOrderedProduct':
+				return '📦 Ordered product';
+			case 'hasOrderedAmount':
+				return '💰 Total order amount';
+			default:
+				return c;
+		}
+	})(),
 	value: c,
 }));
 
 export function CreateOrUpdateFanGroupModal({ mode }: { mode: 'create' | 'update' }) {
-	const apiUtils = api.useUtils();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
 	const { handle } = useWorkspace();
+
 	/* fan group context */
 	const {
 		lastSelectedItemId,
@@ -43,46 +52,25 @@ export function CreateOrUpdateFanGroupModal({ mode }: { mode: 'create' | 'update
 		focusGridList,
 	} = useFanGroupContext();
 
-	const { data: selectedFanGroup } = api.fanGroup.byId.useQuery(
-		{
-			id: lastSelectedItemId ?? '',
-			handle,
-		},
-		{
-			enabled: mode === 'update' && !!lastSelectedItemId,
-		},
+	const { data: selectedFanGroup } = useSuspenseQuery(
+		trpc.fanGroup.byId.queryOptions(
+			{ id: lastSelectedItemId ?? '', handle },
+			{
+				select: data => (mode === 'update' && lastSelectedItemId ? data : undefined),
+			},
+		),
 	);
 
-	// const { data: cartFunnelOptions } = api.cartFunnel.byWorkspace.useQuery(
-	// 	{ handle },
-	// 	{
-	// 		select: data =>
-	// 			data.cartFunnels.map(c => ({
-	// 				label: '🛒 ' + c.name,
-	// 				value: c.id,
-	// 			})),
-	// 	},
-	// );
-
-	// const { data: productOptions } = api.product.byWorkspace.useQuery(
-	// 	{ handle },
-	// 	{
-	// 		select: data =>
-	// 			data.products.map(p => ({
-	// 				label: '📦 ' + p.name,
-	// 				value: p.id,
-	// 			})),
-	// 	},
-	// );
-
 	/* mutations */
-	const { mutateAsync: createFanGroup } = api.fanGroup.create.useMutation({
+	const { mutateAsync: createFanGroup } = useMutation({
+		...trpc.fanGroup.create.mutationOptions(),
 		onSuccess: async () => {
 			await handleCloseModal();
 		},
 	});
 
-	const { mutateAsync: updateFanGroup } = api.fanGroup.update.useMutation({
+	const { mutateAsync: updateFanGroup } = useMutation({
+		...trpc.fanGroup.update.mutationOptions(),
 		onSuccess: async () => {
 			await handleCloseModal();
 		},
@@ -98,10 +86,16 @@ export function CreateOrUpdateFanGroupModal({ mode }: { mode: 'create' | 'update
 			conditions: mode === 'update' ? (selectedFanGroup?.conditions ?? []) : [],
 		},
 		handleCreateItem: async d => {
-			await createFanGroup(d);
+			await createFanGroup({
+				...d,
+				handle,
+			});
 		},
 		handleUpdateItem: async d => {
-			await updateFanGroup(d);
+			await updateFanGroup({
+				...d,
+				handle,
+			});
 		},
 	});
 
@@ -122,16 +116,18 @@ export function CreateOrUpdateFanGroupModal({ mode }: { mode: 'create' | 'update
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
-		await apiUtils.fanGroup.invalidate();
+		await queryClient.invalidateQueries({
+			queryKey: trpc.fanGroup.byWorkspace.queryKey(),
+		});
 		form.reset();
 		setShowModal(false);
-	}, [form, focusGridList, apiUtils.fanGroup, setShowModal]);
+	}, [form, focusGridList, queryClient, trpc, setShowModal]);
 
 	/* form submit */
 	const handleSubmit = useCallback(
 		async (data: z.infer<typeof upsertFanGroupSchema>) => {
 			console.log('data', data);
-			await onSubmit(data);
+			await onSubmit({ ...data, conditions: data.conditions ?? [] });
 		},
 		[onSubmit],
 	);
@@ -211,8 +207,8 @@ export function CreateOrUpdateFanGroupModal({ mode }: { mode: 'create' | 'update
 									<ConditionField
 										key={c.id}
 										index={index}
-										control={form.control}
 										watch={form.watch}
+										control={form.control}
 										remove={removeCondition}
 									/>
 								);
@@ -259,56 +255,61 @@ function ConditionField({
 	watch: UseFormWatch<z.infer<typeof upsertFanGroupSchema>>;
 	remove: (index: number) => void;
 }) {
+	const trpc = useTRPC();
 	const { handle } = useWorkspace();
-	const { data: cartFunnelOptions } = api.cartFunnel.byWorkspace.useQuery(
-		{ handle },
-		{
-			select: data =>
-				data.cartFunnels.map(c => ({
-					label: '🛒 ' + c.name,
-					value: c.id,
-				})),
-		},
+	const { data: cartFunnelOptions } = useSuspenseQuery(
+		trpc.cartFunnel.byWorkspace.queryOptions(
+			{ handle },
+			{
+				select: data =>
+					data.cartFunnels.map(c => ({
+						label: '🛒 ' + c.name,
+						value: c.id,
+					})),
+			},
+		),
 	);
 
-	const { data: productOptions } = api.product.byWorkspace.useQuery(
-		{ handle },
-		{
-			select: data =>
-				data.products.map(p => ({
-					label: '📦 ' + p.name,
-					value: p.id,
-				})),
-		},
+	const { data: productOptions } = useSuspenseQuery(
+		trpc.product.byWorkspace.queryOptions(
+			{ handle },
+			{
+				select: data =>
+					data.products.map(p => ({
+						label: '📦 ' + p.name,
+						value: p.id,
+					})),
+			},
+		),
 	);
 
 	const selectedCartFunnels = watch('conditions')
-		.filter(c => c.type === 'hasOrderedCart')
+		?.filter(c => c.type === 'hasOrderedCart')
 		.map(c => c.cartFunnelId);
-	const notSelectedCartFunnelOptions = cartFunnelOptions?.filter(
-		c => !selectedCartFunnels.includes(c.value),
+	const notSelectedCartFunnelOptions = cartFunnelOptions.filter(
+		c => !selectedCartFunnels?.includes(c.value),
 	);
-	const thisSelectedCartFunnelOption = cartFunnelOptions?.find(
+	const thisSelectedCartFunnelOption = cartFunnelOptions.find(
 		c => c.value === watch(`conditions.${index}.cartFunnelId`),
 	);
 	const availableCartFunnelOptions = [
 		{ label: '🛒 Any', value: 'any' },
-		...(notSelectedCartFunnelOptions ?? []),
+		...notSelectedCartFunnelOptions,
 		...(thisSelectedCartFunnelOption ? [thisSelectedCartFunnelOption] : []),
 	];
 
 	const selectedProducts = watch('conditions')
-		.filter(c => c.type === 'hasOrderedProduct')
+		?.filter(c => c.type === 'hasOrderedProduct')
 		.map(c => c.productId);
-	const notSelectedProductOptions = productOptions?.filter(
-		p => !selectedProducts.includes(p.value),
+	const notSelectedProductOptions = productOptions.filter(
+		p => !selectedProducts?.includes(p.value),
 	);
-	const thisSelectedProductOption = productOptions?.find(
+	const thisSelectedProductOption = productOptions.find(
 		p => p.value === watch(`conditions.${index}.productId`),
 	);
 	const availableProductOptions = [
 		{ label: '📦 Any', value: 'any' },
-		...(notSelectedProductOptions ?? []),
+		...notSelectedProductOptions,
 		...(thisSelectedProductOption ? [thisSelectedProductOption] : []),
 	];
 
@@ -322,15 +323,14 @@ function ConditionField({
 					control={control}
 					name={`conditions.${index}.type`}
 					// @ts-expect-error the SelectField options type currently is only inferred for non-nested properties
-					options={conditionTypeOptions ?? []}
+					options={conditionTypeOptions}
 				/>
 				{watch(`conditions.${index}.type`) === 'hasOrderedCart' ?
 					<SelectField
 						control={control}
 						name={`conditions.${index}.cartFunnelId`}
-						// label='Cart Funnel'
 						// @ts-expect-error the SelectField options type currently is only inferred for non-nested properties
-						options={availableCartFunnelOptions ?? []}
+						options={availableCartFunnelOptions}
 					/>
 				: watch(`conditions.${index}.type`) === 'hasOrderedProduct' ?
 					<SelectField
@@ -338,7 +338,7 @@ function ConditionField({
 						name={`conditions.${index}.productId`}
 						// label='Product'
 						// @ts-expect-error the SelectField options type currently is only inferred for non-nested properties
-						options={availableProductOptions ?? []}
+						options={availableProductOptions}
 					/>
 				: watch(`conditions.${index}.type`) === 'hasOrderedAmount' ?
 					<CurrencyField

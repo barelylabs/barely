@@ -2,18 +2,19 @@
 
 import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
+import { useWorkspaceWithAll } from '@barely/hooks';
+import { useTRPC } from '@barely/api/app/trpc.react';
+import { isProduction } from '@barely/utils';
+import { useMutation } from '@tanstack/react-query';
 
-import { Button } from '@barely/ui/elements/button';
-import { InlineCode, Text } from '@barely/ui/elements/typography';
-
-import { isProduction } from '@barely/utils/environment';
+import { Button } from '@barely/ui/button';
+import { InlineCode, Text } from '@barely/ui/typography';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 
 export default function PayoutsSettingsPage() {
-	const { workspace } = useWorkspace();
+	const trpc = useTRPC();
+	const workspace = useWorkspaceWithAll();
 	const params = useParams();
 
 	const needsOnboarding =
@@ -21,21 +22,22 @@ export default function PayoutsSettingsPage() {
 			!workspace.stripeConnectChargesEnabled
 		:	!workspace.stripeConnectChargesEnabled_devMode;
 
-	const { mutateAsync: startOnboarding } =
-		api.stripeConnect.getOnboardingLink.useMutation({
-			onSuccess: url => {
-				if (!url) return;
-				window.location.href = url;
-			},
-		});
+	const { mutateAsync: startOnboarding } = useMutation({
+		...trpc.stripeConnect.getOnboardingLink.mutationOptions(),
+		onSuccess: url => {
+			if (!url) return;
+			window.location.href = url;
+		},
+	});
 
 	useEffect(() => {
-		if (params?.refreshOnboarding && needsOnboarding) {
+		if (params.refreshOnboarding && needsOnboarding) {
 			startOnboarding({
+				handle: workspace.handle,
 				callbackPath: `${workspace.handle}/settings/payouts`,
 			}).catch(console.error);
 		}
-	}, [workspace.handle, params?.refreshOnboarding, startOnboarding, needsOnboarding]);
+	}, [workspace.handle, params.refreshOnboarding, startOnboarding, needsOnboarding]);
 
 	const stripeConnectAccountId =
 		isProduction() ?
@@ -50,6 +52,7 @@ export default function PayoutsSettingsPage() {
 					<Button
 						onClick={() =>
 							startOnboarding({
+								handle: workspace.handle,
 								callbackPath: `${workspace.handle}/settings/payouts`,
 							})
 						}

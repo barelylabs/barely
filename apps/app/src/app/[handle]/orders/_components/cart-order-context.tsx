@@ -1,46 +1,17 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/react';
-import type { cartOrderFilterParamsSchema } from '@barely/lib/server/routes/cart-order/cart-order.schema';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import type { cartOrderFilterParamsSchema } from '@barely/validators';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod/v4';
-import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
-import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
-import { cartOrderSearchParamsSchema } from '@barely/lib/server/routes/cart-order/cart-order.schema';
+import { createContext, useCallback, useContext, useRef, useState } from 'react';
+import { useTypedOptimisticQuery, useWorkspace } from '@barely/hooks';
+import { cartOrderSearchParamsSchema } from '@barely/validators';
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
-
-// interface CartOrderContext {
-// 	cartOrders: AppRouterOutputs['cartOrder']['byWorkspace']['cartOrders'];
-// 	cartOrderSelection: Selection;
-// 	lastSelectedCartOrderId: string | undefined;
-// 	lastSelectedCartOrder:
-// 		| AppRouterOutputs['cartOrder']['byWorkspace']['cartOrders'][0]
-// 		| undefined;
-// 	setCartOrderSelection: (selection: Selection) => void;
-// 	gridListRef: React.RefObject<HTMLDivElement>;
-// 	focusGridList: () => void;
-// 	showMarkAsFulfilledModal: boolean;
-// 	setShowMarkAsFulfilledModal: (show: boolean) => void;
-// 	showCancelCartOrderModal: boolean;
-// 	setShowCancelCartOrderModal: (show: boolean) => void;
-// 	//infinite
-// 	queryIsPending: boolean;
-// 	hasNextPage: boolean;
-// 	fetchNextPage: (options?: FetchNextPageOptions) => void | Promise<void>;
-// 	isFetchingNextPage: boolean;
-// 	// filters
-// 	filters: z.infer<typeof cartOrderFilterParamsSchema>;
-// 	pendingFiltersTransition: boolean;
-// 	setSearch: (search: string) => void;
-// 	toggleArchived: () => void;
-// 	toggleFulfilled: () => void;
-// 	clearAllFilters: () => void;
-// 	togglePreorders: () => void;
-// 	toggleCanceled: () => void;
-// }
 
 type CartOrderContext = InfiniteItemsContext<
 	AppRouterOutputs['cartOrder']['byWorkspace']['cartOrders'][0],
@@ -57,20 +28,11 @@ type CartOrderContext = InfiniteItemsContext<
 
 const CartOrderContext = createContext<CartOrderContext | undefined>(undefined);
 
-export function CartOrderContextProvider({
-	children,
-	initialInfiniteOrders,
-}: {
-	children: React.ReactNode;
-	initialInfiniteOrders: Promise<AppRouterOutputs['cartOrder']['byWorkspace']>;
-}) {
+export function CartOrderContextProvider({ children }: { children: React.ReactNode }) {
 	const [showMarkAsFulfilledModal, setShowMarkAsFulfilledModal] = useState(false);
 	const [showCancelCartOrderModal, setShowCancelCartOrderModal] = useState(false);
 
-	// const apiUtils = api.useUtils();
-
-	// apiUtils.
-
+	const trpc = useTRPC();
 	const { handle } = useWorkspace();
 
 	const { data, setQuery, removeByKey, removeAllQueryParams, pending } =
@@ -83,8 +45,6 @@ export function CartOrderContextProvider({
 		: selectedOrderCartIds === 'all' ? 'all'
 		: new Set(selectedOrderCartIds);
 
-	const initialData = use(initialInfiniteOrders);
-
 	const {
 		data: infiniteCartOrders,
 		hasNextPage,
@@ -93,25 +53,19 @@ export function CartOrderContextProvider({
 		isFetching,
 		isRefetching,
 		isPending,
-	} = api.cartOrder.byWorkspace.useInfiniteQuery(
-		{
-			handle,
-			...filters,
-		},
-		{
-			initialData: () => {
-				return {
-					pages: [
-						{ cartOrders: initialData.cartOrders, nextCursor: initialData.nextCursor },
-					],
-					pageParams: [], // todo - figure out how to structure this
-				};
+	} = useSuspenseInfiniteQuery({
+		...trpc.cartOrder.byWorkspace.infiniteQueryOptions(
+			{
+				handle,
+				...filters,
 			},
-			getNextPageParam: lastPage => lastPage.nextCursor,
-		},
-	);
+			{
+				getNextPageParam: lastPage => lastPage.nextCursor,
+			},
+		),
+	});
 
-	const cartOrders = infiniteCartOrders?.pages.flatMap(page => page.cartOrders) ?? [];
+	const cartOrders = infiniteCartOrders.pages.flatMap(page => page.cartOrders);
 
 	const gridListRef = useRef<HTMLDivElement>(null);
 
@@ -133,12 +87,12 @@ export function CartOrderContextProvider({
 	}, [removeAllQueryParams]);
 
 	const toggleArchived = useCallback(() => {
-		if (filters.showArchived) {
+		if (data.showArchived) {
 			removeByKey('showArchived');
 		} else {
 			return setQuery('showArchived', true);
 		}
-	}, [filters.showArchived, removeByKey, setQuery]);
+	}, [data.showArchived, removeByKey, setQuery]);
 
 	const toggleFulfilled = useCallback(() => {
 		if (filters.showFulfilled) {
@@ -176,7 +130,7 @@ export function CartOrderContextProvider({
 	);
 
 	const lastSelectedCartOrderId =
-		cartOrderSelection === 'all' || !cartOrderSelection ?
+		cartOrderSelection === 'all' || !cartOrderSelection.size ?
 			undefined
 		:	Array.from(cartOrderSelection).pop()?.toString();
 

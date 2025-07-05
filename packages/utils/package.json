@@ -1,0 +1,37 @@
+{
+	"name": "@barely/utils",
+	"private": true,
+	"version": "0.1.0",
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"license": "MIT",
+	"scripts": {
+		"build": "tsc",
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"dev": "tsc",
+		"format": "prettier --check . --ignore-path ../../.gitignore",
+		"lint": "eslint",
+		"typecheck": "tsc --noEmit --emitDeclarationOnly false"
+	},
+	"dependencies": {
+		"@barely/const": "workspace:*",
+		"node-html-parser": "^6.1.11",
+		"sha.js": "^2.4.11",
+		"typescript": "catalog:",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@barely/auth": "workspace:*",
+		"@barely/eslint-config": "workspace:*",
+		"@barely/prettier-config": "workspace:*",
+		"@barely/tsconfig": "workspace:*",
+		"@barely/validators": "workspace:*",
+		"@types/node": "catalog:",
+		"eslint": "catalog:",
+		"next": "catalog:",
+		"prettier": "catalog:"
+	},
+	"prettier": "@barely/prettier-config"
+}

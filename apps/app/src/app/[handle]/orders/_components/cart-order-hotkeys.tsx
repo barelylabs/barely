@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useModalHotKeys } from '@barely/lib/hooks/use-modal-hot-keys';
+import { useModalHotKeys } from '@barely/hooks';
 
 import { useCartOrderContext } from '~/app/[handle]/orders/_components/cart-order-context';
 

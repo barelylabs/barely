@@ -1,7 +1,7 @@
 import { FeatureCard } from '@barely/ui/components/feature-card';
-import { AnimateOnScroll } from '@barely/ui/elements/animate-on-scroll';
-import { Icon } from '@barely/ui/elements/icon';
-import { H, Lead } from '@barely/ui/elements/typography';
+import { AnimateOnScroll } from '@barely/ui/animate-on-scroll';
+import { Icon } from '@barely/ui/icon';
+import { H, Lead } from '@barely/ui/typography';
 
 const iconClasses = 'h-14 w-14';
 

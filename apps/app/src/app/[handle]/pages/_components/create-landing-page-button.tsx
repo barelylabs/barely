@@ -1,11 +1,11 @@
 'use client';
 
-import { Button } from '@barely/ui/elements/button';
+import { Button } from '@barely/ui/button';
 
-import { useLandingPageContext } from '~/app/[handle]/pages/_components/landing-page-context';
+import { useLandingPageSearchParams } from '~/app/[handle]/pages/_components/landing-page-context';
 
 export function CreateLandingPageButton() {
-	const { setShowCreateModal } = useLandingPageContext();
+	const { setShowCreateModal } = useLandingPageSearchParams();
 
 	return (
 		<Button

@@ -1,14 +1,16 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import { useWorkspace } from '@barely/hooks';
+import { useSuspenseQuery } from '@tanstack/react-query';
 
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Button } from '@barely/ui/button';
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { Button } from '@barely/ui/elements/button';
-import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
-import { Text } from '@barely/ui/elements/typography';
+import { GridList, GridListCard } from '@barely/ui/grid-list';
+import { Text } from '@barely/ui/typography';
 
 import { CreateEmailTemplateGroupButton } from './create-email-template-group-button';
 import { useEmailTemplateGroupContext } from './email-template-group-context';
@@ -85,17 +87,20 @@ function EmailTemplateGroupCard({
 }) {
 	const { setShowUpdateModal, setShowDeleteModal } = useEmailTemplateGroupContext();
 
+	const trpc = useTRPC();
 	const { handle } = useWorkspace();
 
 	// todo: this isn't ideal. maybe add a count to the query in the router instead of this
-	const { data: emailTemplates } = api.emailTemplate.byEmailTemplateGroup.useQuery(
-		{
-			handle: handle,
-			emailTemplateGroupId: emailTemplateGroup.id,
-		},
-		{
-			select: data => data.emailTemplates,
-		},
+	const { data: emailTemplates } = useSuspenseQuery(
+		trpc.emailTemplate.byEmailTemplateGroup.queryOptions(
+			{
+				handle: handle,
+				emailTemplateGroupId: emailTemplateGroup.id,
+			},
+			{
+				select: data => data.emailTemplates,
+			},
+		),
 	);
 
 	return (
@@ -109,7 +114,7 @@ function EmailTemplateGroupCard({
 			<div className='flex flex-grow flex-row items-center gap-4'>
 				<div className='flex flex-col gap-1'>
 					<Text variant='md/medium'>{emailTemplateGroup.name}</Text>
-					<Text variant='sm/normal'>{`${emailTemplates ? emailTemplates.length : 0} templates`}</Text>
+					<Text variant='sm/normal'>{`${emailTemplates.length} templates`}</Text>
 				</div>
 			</div>
 		</GridListCard>

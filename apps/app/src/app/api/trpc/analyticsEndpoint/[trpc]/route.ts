@@ -1,7 +1,5 @@
-import { routeHandler } from '@barely/lib/server/api/route-handler';
-import { analyticsEndpointRouter } from '@barely/lib/server/routes/analytics-endpoint/analytics-endpoint.router';
-import { OPTIONS } from '@barely/lib/utils/trpc-route';
+import { OPTIONS } from '@barely/utils';
 
-const handler = routeHandler('analyticsEndpoint', analyticsEndpointRouter);
+import { analyticsEndpointHandler } from '@barely/api/app/sub/analytics-endpoint.handler';
 
-export { OPTIONS, handler as GET, handler as POST };
+export { OPTIONS, analyticsEndpointHandler as GET, analyticsEndpointHandler as POST };

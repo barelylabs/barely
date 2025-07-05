@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@barely/ui/elements/button';
+import { Button } from '@barely/ui/button';
 
 import { useMixtapesContext } from '~/app/[handle]/mixtapes/_components/mixtape-context';
 

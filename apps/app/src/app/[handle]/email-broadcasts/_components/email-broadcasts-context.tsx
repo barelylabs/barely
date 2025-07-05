@@ -1,14 +1,15 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/react';
-import type { emailBroadcastFilterParamsSchema } from '@barely/lib/server/routes/email-broadcast/email-broadcast-schema';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import type { emailBroadcastFilterParamsSchema } from '@barely/validators';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod/v4';
-import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
-import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
-import { emailBroadcastSearchParamsSchema } from '@barely/lib/server/routes/email-broadcast/email-broadcast-schema';
+import { createContext, useCallback, useContext, useRef, useState } from 'react';
+import { useTypedOptimisticQuery, useWorkspace } from '@barely/hooks';
+import { emailBroadcastSearchParamsSchema } from '@barely/validators';
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
 
@@ -23,13 +24,10 @@ const EmailBroadcastsContext = createContext<EmailBroadcastsContext | undefined>
 
 export function EmailBroadcastsContextProvider({
 	children,
-	initialEmailBroadcastsFirstPage,
 }: {
 	children: React.ReactNode;
-	initialEmailBroadcastsFirstPage: Promise<
-		AppRouterOutputs['emailBroadcast']['byWorkspace']
-	>;
 }) {
+	const trpc = useTRPC();
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [showUpdateModal, setShowUpdateModal] = useState(false);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -46,7 +44,6 @@ export function EmailBroadcastsContextProvider({
 		: selectedEmailBroadcastIds === 'all' ? 'all'
 		: new Set(selectedEmailBroadcastIds);
 
-	const initialData = use(initialEmailBroadcastsFirstPage);
 	const {
 		data: infiniteEmailBroadcasts,
 		hasNextPage,
@@ -55,24 +52,18 @@ export function EmailBroadcastsContextProvider({
 		isRefetching,
 		isFetching,
 		isPending,
-	} = api.emailBroadcast.byWorkspace.useInfiniteQuery(
-		{ handle, ...filters },
-		{
-			initialData: () => ({
-				pages: [
-					{
-						emailBroadcasts: initialData.emailBroadcasts,
-						nextCursor: initialData.nextCursor,
-					},
-				],
-				pageParams: [],
-			}),
-			getNextPageParam: lastPage => lastPage.nextCursor,
-		},
-	);
+	} = useSuspenseInfiniteQuery({
+		...trpc.emailBroadcast.byWorkspace.infiniteQueryOptions(
+			{ handle, ...filters },
+			{
+				getNextPageParam: lastPage => lastPage.nextCursor,
+			},
+		),
+	});
 
-	const emailBroadcasts =
-		infiniteEmailBroadcasts?.pages.flatMap(page => page.emailBroadcasts) ?? [];
+	const emailBroadcasts = infiniteEmailBroadcasts.pages.flatMap(
+		page => page.emailBroadcasts,
+	);
 
 	const gridListRef = useRef<HTMLDivElement>(null);
 
@@ -101,7 +92,7 @@ export function EmailBroadcastsContextProvider({
 	);
 
 	const lastSelectedEmailBroadcastId =
-		emailBroadcastSelection === 'all' || !emailBroadcastSelection ?
+		emailBroadcastSelection === 'all' || !emailBroadcastSelection.size ?
 			undefined
 		:	Array.from(emailBroadcastSelection).pop()?.toString();
 

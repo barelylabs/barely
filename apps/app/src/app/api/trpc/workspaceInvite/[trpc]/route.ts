@@ -1,8 +1,5 @@
-import { routeHandler } from '@barely/lib/server/api/route-handler';
-import { workspaceInviteRouter } from '@barely/lib/server/routes/workspace-invite/workspace-invite.router';
-import { OPTIONS } from '@barely/lib/utils/trpc-route';
+import { OPTIONS } from '@barely/utils';
 
-// export const runtime = 'edge';
-const handler = routeHandler('workspaceInvite', workspaceInviteRouter);
+import { workspaceInviteHandler } from '@barely/api/app/sub/workspace-invite.handler';
 
-export { OPTIONS, handler as GET, handler as POST };
+export { OPTIONS, workspaceInviteHandler as GET, workspaceInviteHandler as POST };

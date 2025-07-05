@@ -1,37 +1,48 @@
-import { api } from '@barely/lib/server/api/server';
+import { Suspense } from 'react';
 
 import { FlowBuilder } from '~/app/[handle]/flows/[flowId]/_components/flow-builder';
 import { FlowStoreProvider } from '~/app/[handle]/flows/[flowId]/_components/flow-store';
 import { FlowUpdateForm } from '~/app/[handle]/flows/[flowId]/_components/flow-update-form';
+import { HydrateClient, trpcCaller } from '~/trpc/server';
 
-export default function FlowsPage({
+export default async function FlowsPage({
 	params,
 }: {
-	params: { handle: string; flowId: string };
+	params: Promise<{ handle: string; flowId: string }>;
 }) {
-	const { handle, flowId } = params;
-	const initialFlow = api({ handle }).flow.byId({ flowId });
-	const defaultEmailAddress = api({ handle }).emailAddress.default();
-	const defaultMailchimpAudienceId = api({ handle }).mailchimp.defaultAudience({
-		handle,
+	const awaitedParams = await params;
+
+	const initialFlow = trpcCaller.flow.byId({
+		handle: awaitedParams.handle,
+		flowId: awaitedParams.flowId,
 	});
-	const defaultEmailTemplateGroup = api({ handle }).emailTemplateGroup.default({
-		handle,
+	const defaultEmailAddress = trpcCaller.emailAddress.default({
+		handle: awaitedParams.handle,
+	});
+	const defaultMailchimpAudienceId = trpcCaller.mailchimp.defaultAudience({
+		handle: awaitedParams.handle,
+	});
+	const defaultEmailTemplateGroup = trpcCaller.emailTemplateGroup.default({
+		handle: awaitedParams.handle,
 	});
 
 	return (
-		<FlowStoreProvider
-			initialFlow={initialFlow}
-			defaultEmailAddress={defaultEmailAddress}
-			initialDefaultMailchimpAudienceId={defaultMailchimpAudienceId}
-			initialDefaultEmailTemplateGroup={defaultEmailTemplateGroup}
-		>
-			<div className='flex flex-col gap-8 xl:flex-row'>
-				<FlowUpdateForm initialFlow={initialFlow} />
-				<div className='flex w-full items-center justify-center rounded-xl border border-border bg-border/25 p-10'>
-					<FlowBuilder />
-				</div>
-			</div>
-		</FlowStoreProvider>
+		<HydrateClient>
+			<Suspense fallback={<div>Loading...</div>}>
+				<FlowStoreProvider
+					initialFlow={initialFlow}
+					defaultEmailAddress={defaultEmailAddress}
+					initialDefaultMailchimpAudienceId={defaultMailchimpAudienceId}
+					initialDefaultEmailTemplateGroup={defaultEmailTemplateGroup}
+				>
+					<div className='flex flex-col gap-8 xl:flex-row'>
+						<FlowUpdateForm initialFlow={initialFlow} />
+						<div className='flex w-full items-center justify-center rounded-xl border border-border bg-border/25 p-10'>
+							<FlowBuilder />
+						</div>
+					</div>
+				</FlowStoreProvider>
+			</Suspense>
+		</HydrateClient>
 	);
 }

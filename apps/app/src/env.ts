@@ -1,8 +1,8 @@
-import { env as libEnv } from '@barely/lib/env';
+import { libEnv } from '@barely/lib/env';
 import { createEnv } from '@t3-oss/env-nextjs';
 import { z } from 'zod/v4';
 
-export const env = createEnv({
+export const appEnv = createEnv({
 	extends: [libEnv],
 	server: {
 		RESEND_WEBHOOK_SECRET: z.string(),

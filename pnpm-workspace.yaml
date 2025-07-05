@@ -3,19 +3,6 @@ packages:
   - packages/*
   - tooling/*
 catalog:
-  drizzle-orm: ^0.44.2
-  drizzle-zod: ^0.8.2
-
-  eslint: ^9.28.0
-  eslint-config-next: ^15.3.4
-  next: ^15.3.4
-  next-mdx-remote: ^5.0.0
-  postcss: ^8.5.4
-  prettier: ^3.5.3
-  sharp: ^0.34.2
-  tailwindcss: ^3.4.15
-  typescript: ^5.8.3
-  zod: ^3.25.49
   '@dagrejs/dagre': ^1.1.5
   '@react-email/components': ^0.1.0
   '@tailwindcss/typography': ^0.5.16
@@ -24,8 +11,32 @@ catalog:
   '@trpc/client': ^11.4.2
   '@trpc/tanstack-react-query': ^11.4.2
   '@trpc/server': ^11.4.2
+  '@types/node': ^20.10.6
   '@typescript-eslint/eslint-plugin': ^8.34.1
   '@typescript-eslint/parser': ^8.34.1
+  '@vercel/functions': ^2.2.2
+  '@xyflow/react': ^12.0.4
+  better-auth: ^1.2.12
+  dotenv-cli: ^8.0.0
+  drizzle-orm: ^0.44.2
+  drizzle-zod: ^0.8.2
+  eslint: ^9.28.0
+  eslint-config-next: ^15.3.4
+  jotai: ^2.6.1
+  next: ^15.3.4
+  next-mdx-remote: ^5.0.0
+  postcss: ^8.5.4
+  prettier: ^3.5.3
+  pusher-js: ^8.3.0
+  react-hook-form: ^7.58.1
+  resend: 4.6.0
+  sharp: ^0.34.2
+  superjson: ^2.2.2
+  tailwindcss: ^3.4.15
+  trpc-navigation-plugin: ^0.3.0
+  typescript: ^5.8.3
+  zod: ^3.25.49
+
 catalogs:
   react19:
     react: 19.0.0

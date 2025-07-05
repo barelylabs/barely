@@ -1,13 +1,15 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import { useWorkspace } from '@barely/hooks';
+import { useSuspenseQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
-import { Text } from '@barely/ui/elements/typography';
+import { GridList, GridListCard } from '@barely/ui/grid-list';
+import { Text } from '@barely/ui/typography';
 
 import { CreateFanGroupButton } from '~/app/[handle]/fan-groups/_components/create-fan-group-button';
 import { useFanGroupContext } from '~/app/[handle]/fan-groups/_components/fan-group-context';
@@ -23,11 +25,14 @@ export function AllFanGroups() {
 		isFetching,
 	} = useFanGroupContext();
 
+	const trpc = useTRPC();
 	const { handle } = useWorkspace();
 
-	const { data: totalFans } = api.fan.totalByWorkspace.useQuery({
-		handle,
-	});
+	const { data: totalFans } = useSuspenseQuery(
+		trpc.fan.totalByWorkspace.queryOptions({
+			handle,
+		}),
+	);
 
 	return (
 		<>
@@ -73,11 +78,14 @@ function FanGroupCard({
 	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } =
 		useFanGroupContext();
 
+	const trpc = useTRPC();
 	const { handle } = useWorkspace();
-	const { data: fanGroupById } = api.fanGroup.byId.useQuery({
-		id: fanGroup.id,
-		handle,
-	});
+	const { data: fanGroupById } = useSuspenseQuery(
+		trpc.fanGroup.byId.queryOptions({
+			id: fanGroup.id,
+			handle,
+		}),
+	);
 
 	return (
 		<GridListCard

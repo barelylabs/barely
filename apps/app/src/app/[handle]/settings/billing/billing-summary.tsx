@@ -1,24 +1,19 @@
 'use client';
 
+import { useWorkspaceWithAll } from '@barely/hooks';
+import { capitalize, nFormatter } from '@barely/utils';
 import { useSetAtom } from 'jotai';
 
-import { useWorkspace } from '@barely/hooks/use-workspace';
-
-import { Badge } from '@barely/ui/elements/badge';
-import { Button } from '@barely/ui/elements/button';
-import { Progress } from '@barely/ui/elements/progress';
-import { InfoTooltip } from '@barely/ui/elements/tooltip';
-import { Text } from '@barely/ui/elements/typography';
-
-import { nFormatter } from '@barely/utils/number';
-import { capitalize } from '@barely/utils/text';
+import { Button } from '@barely/ui/button';
+import { Badge } from '@barely/ui/badge';
+import { Progress } from '@barely/ui/progress';
+import { InfoTooltip } from '@barely/ui/tooltip';
+import { Text } from '@barely/ui/typography';
 
 import { showUpgradeModalAtom } from '~/app/[handle]/settings/billing/upgrade-modal';
 
 export function BillingSummary() {
-	const {
-		workspace: { plan, linkUsage, linkUsageLimit },
-	} = useWorkspace();
+	const { plan, linkUsage, linkUsageLimit } = useWorkspaceWithAll();
 
 	const setShowUpgradeModal = useSetAtom(showUpgradeModalAtom);
 

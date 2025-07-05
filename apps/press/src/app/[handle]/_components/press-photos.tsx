@@ -1,6 +1,6 @@
-import type { PublicImage } from '@barely/lib/server/routes/file/file.schema';
+import type { PublicImage } from '@barely/validators';
 
-import { PhotoGallery } from '@barely/ui/elements/photo-gallery';
+import { PhotoGallery } from '@barely/ui/photo-gallery';
 
 import { Section, SectionDiv } from '~/app/[handle]/_components/press-section';
 

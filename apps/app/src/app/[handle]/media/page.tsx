@@ -1,6 +1,6 @@
 import type { z } from 'zod/v4';
 import { redirect } from 'next/navigation';
-import { fileSearchParamsSchema } from '@barely/lib/server/routes/file/file.schema';
+import { fileSearchParamsSchema } from '@barely/validators';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllMedia } from '~/app/[handle]/media/_components/all-media';
@@ -8,17 +8,18 @@ import { MediaContextProvider } from '~/app/[handle]/media/_components/media-con
 import { UploadMediaButton } from '~/app/[handle]/media/_components/upload-media-button';
 import { UploadMediaModal } from '~/app/[handle]/media/_components/upload-media-modal';
 
-export default function MediaLibraryPage({
+export default async function MediaLibraryPage({
 	params,
 	searchParams,
 }: {
-	params: { handle: string };
-	searchParams: z.infer<typeof fileSearchParamsSchema>;
+	params: Promise<{ handle: string }>;
+	searchParams: Promise<z.infer<typeof fileSearchParamsSchema>>;
 }) {
-	const parsedFilters = fileSearchParamsSchema.safeParse(searchParams);
+	const { handle } = await params;
+	const parsedFilters = fileSearchParamsSchema.safeParse(await searchParams);
 	if (!parsedFilters.success) {
 		console.log('failed to parse filters', parsedFilters.error);
-		redirect(`/${params.handle}/files`);
+		redirect(`/${handle}/files`);
 	}
 
 	return (

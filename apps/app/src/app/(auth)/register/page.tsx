@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import logo from '@static/logo.png';
 
-import { H, Text } from '@barely/ui/elements/typography';
+import { H, Text } from '@barely/ui/typography';
 
 import { handleLoggedInOnAuthPage } from '~/app/(auth)/handle-logged-in-on-auth-page';
 import RegisterUserForm from './register-user-form';

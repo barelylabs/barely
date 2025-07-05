@@ -1,4 +1,4 @@
-import { getPublicPressKit } from '@barely/lib/server/routes/press-kit/press-kit.fns';
+import { getPublicPressKit } from '@barely/lib/functions/press-kit.fns';
 
 import type { SocialStat } from './_components/press-social-stats';
 import { PressBio } from './_components/press-bio';

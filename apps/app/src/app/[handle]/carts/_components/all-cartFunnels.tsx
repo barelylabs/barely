@@ -1,11 +1,11 @@
 'use client';
 
-import type { CartFunnel } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
-import { formatCentsToDollars } from '@barely/lib/utils/currency';
+import type { CartFunnel } from '@barely/validators';
+import { formatCentsToDollars } from '@barely/utils';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
+import { GridList, GridListCard } from '@barely/ui/grid-list';
 
 import { useCartFunnelContext } from '~/app/[handle]/carts/_components/cartFunnel-context';
 import { CreateCartFunnelButton } from '~/app/[handle]/carts/_components/create-cartFunnel-button';

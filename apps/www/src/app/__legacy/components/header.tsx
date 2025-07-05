@@ -3,10 +3,10 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
-import { Button } from '@barely/ui/elements/button';
-import { Container } from '@barely/ui/elements/container';
-import { Icon } from '@barely/ui/elements/icon';
-import { Logo } from '@barely/ui/elements/logo';
+import { Button } from '@barely/ui/button';
+import { Container } from '@barely/ui/container';
+import { Icon } from '@barely/ui/icon';
+import { Logo } from '@barely/ui/logo';
 
 const Header = () => {
 	const [isOpen, setIsOpen] = useState(false);

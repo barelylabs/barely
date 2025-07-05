@@ -1,7 +1,7 @@
 import type { z } from 'zod/v4';
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import { api } from '@barely/lib/server/api/server';
-import { fanGroupSearchParamsSchema } from '@barely/lib/server/routes/fan-group/fan-group.schema';
+import { fanGroupSearchParamsSchema } from '@barely/validators';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllFanGroups } from '~/app/[handle]/fan-groups/_components/all-fan-groups';
@@ -11,38 +11,47 @@ import { CreateOrUpdateFanGroupModal } from '~/app/[handle]/fan-groups/_componen
 import { FanGroupContextProvider } from '~/app/[handle]/fan-groups/_components/fan-group-context';
 import { FanGroupFilters } from '~/app/[handle]/fan-groups/_components/fan-group-filters';
 import { FanGroupHotkeys } from '~/app/[handle]/fan-groups/_components/fan-group-hotkeys';
+import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
-export default function FanGroupsPage({
+export default async function FanGroupsPage({
 	params,
 	searchParams,
 }: {
-	params: { handle: string };
-	searchParams: z.infer<typeof fanGroupSearchParamsSchema>;
+	params: Promise<{ handle: string }>;
+	searchParams: Promise<z.infer<typeof fanGroupSearchParamsSchema>>;
 }) {
-	const parsedFilters = fanGroupSearchParamsSchema.safeParse(searchParams);
+	const awaitedParams = await params;
+	const awaitedSearchParams = await searchParams;
+	const parsedFilters = fanGroupSearchParamsSchema.safeParse(awaitedSearchParams);
 	if (!parsedFilters.success) {
 		console.log('parsedFilters error', parsedFilters.error);
-		redirect(`/${params.handle}/fan-groups`);
+		redirect(`/${awaitedParams.handle}/fan-groups`);
 	}
 
-	const fanGroups = api({ handle: params.handle }).fanGroup.byWorkspace({
-		handle: params.handle,
-		...parsedFilters.data,
-	});
+	prefetch(
+		trpc.fanGroup.byWorkspace.infiniteQueryOptions({
+			handle: awaitedParams.handle,
+			...parsedFilters.data,
+		}),
+	);
 
 	return (
-		<FanGroupContextProvider initialFanGroups={fanGroups}>
-			<DashContentHeader title='Fan Groups' button={<CreateFanGroupButton />} />
-			<FanGroupFilters />
-			<AllFanGroups />
+		<HydrateClient>
+			<Suspense fallback={<div>Loading...</div>}>
+				<FanGroupContextProvider>
+					<DashContentHeader title='Fan Groups' button={<CreateFanGroupButton />} />
+					<FanGroupFilters />
+					<AllFanGroups />
 
-			<CreateOrUpdateFanGroupModal mode='create' />
-			<CreateOrUpdateFanGroupModal mode='update' />
+					<CreateOrUpdateFanGroupModal mode='create' />
+					<CreateOrUpdateFanGroupModal mode='update' />
 
-			<ArchiveOrDeleteFanGroupModal mode='archive' />
-			<ArchiveOrDeleteFanGroupModal mode='delete' />
+					<ArchiveOrDeleteFanGroupModal mode='archive' />
+					<ArchiveOrDeleteFanGroupModal mode='delete' />
 
-			<FanGroupHotkeys />
-		</FanGroupContextProvider>
+					<FanGroupHotkeys />
+				</FanGroupContextProvider>
+			</Suspense>
+		</HydrateClient>
 	);
 }

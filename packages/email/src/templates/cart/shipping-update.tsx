@@ -48,7 +48,7 @@ export interface ShippingUpdateEmailProps {
 	}[];
 }
 
-export default function ShippingUpdateEmail({
+export function ShippingUpdateEmailTemplate({
 	// orderId,
 	// date,
 	sellerName,
@@ -130,7 +130,7 @@ export default function ShippingUpdateEmail({
 								</Text>
 								<Text style={{ ...resetText, marginTop: '10px', marginBottom: '10px' }}>
 									{shippingAddress?.line1},{' '}
-									{shippingAddress?.line2 ? `${shippingAddress?.line2} , ` : ' '}
+									{shippingAddress?.line2 ? `${shippingAddress.line2} , ` : ' '}
 									{shippingAddress?.city}, {shippingAddress?.state},{' '}
 									{shippingAddress?.postalCode}, {shippingAddress?.country}
 								</Text>
@@ -217,7 +217,7 @@ export default function ShippingUpdateEmail({
 	);
 }
 
-ShippingUpdateEmail.PreviewProps = {
+ShippingUpdateEmailTemplate.PreviewProps = {
 	orderId: 'ML4F5L8522',
 	sellerName: 'Proper Youth',
 

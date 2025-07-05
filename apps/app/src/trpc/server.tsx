@@ -1,14 +1,17 @@
 import 'server-only'; // <-- ensure this file cannot be imported from the client
 
-import type { AppRouter } from '@barely/server/api/router';
+import type { AppRouter } from '@barely/api/app/app.router';
+import type { SessionWorkspace } from '@barely/auth';
 import type { TRPCQueryOptions } from '@trpc/tanstack-react-query';
 import { cache } from 'react';
 import { headers } from 'next/headers';
-import { appRouter } from '@barely/server/api/router';
-import { createTRPCContext } from '@barely/server/api/trpc';
-import { auth } from '@barely/server/auth';
+import { createTRPCContext } from '@barely/lib/trpc';
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 import { createTRPCOptionsProxy } from '@trpc/tanstack-react-query';
+
+import { appRouter } from '@barely/api/app/app.router';
+
+import { auth } from '@barely/auth/app.server';
 
 import { makeQueryClient } from '~/trpc/query-client';
 
@@ -20,11 +23,10 @@ const createContext = cache(async () => {
 	const heads = new Headers(await headers());
 	heads.set('x-trpc-source', 'rsc');
 
-	const session = await auth();
-
 	return createTRPCContext({
+		auth,
 		headers: heads,
-		session,
+		pool: null,
 	});
 });
 
@@ -35,6 +37,8 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
 	ctx: createContext,
 	queryClient: getQueryClient,
 });
+
+export const trpcCaller = appRouter.createCaller(createContext);
 
 export function HydrateClient(props: { children: React.ReactNode }) {
 	const queryClient = getQueryClient();
@@ -51,4 +55,12 @@ export function prefetch<T extends ReturnType<TRPCQueryOptions<any>>>(queryOptio
 	} else {
 		void queryClient.prefetchQuery(queryOptions);
 	}
+}
+
+export function primeWorkspace(workspace: SessionWorkspace) {
+	const queryClient = getQueryClient();
+	queryClient.setQueryData(
+		trpc.workspace.byHandle.queryKey({ handle: workspace.handle }),
+		workspace,
+	);
 }

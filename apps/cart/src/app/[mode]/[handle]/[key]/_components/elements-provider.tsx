@@ -1,12 +1,14 @@
 'use client';
 
-import type { CartRouterOutputs } from '@barely/lib/server/routes/cart/cart.api.react';
-import type { InsertCart } from '@barely/lib/server/routes/cart/cart.schema';
+import type { CartRouterOutputs } from '@barely/api/public/cart.router';
+import type { InsertCart } from '@barely/validators';
 import type { StripeElementsOptions } from '@stripe/stripe-js';
 import { useState } from 'react';
-import { isProduction } from '@barely/lib/utils/environment';
+import { isProduction } from '@barely/utils';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
+
+import { cartEnv } from '~/env';
 
 export function ElementsProvider({
 	initialData,
@@ -55,7 +57,7 @@ export function ElementsProvider({
 	};
 
 	const [stripePromise] = useState(() =>
-		loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? '', {
+		loadStripe(cartEnv.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, {
 			stripeAccount,
 		}),
 	);

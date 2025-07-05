@@ -1,12 +1,12 @@
 import { cookies } from 'next/headers';
-import { cartApi } from '@barely/lib/server/routes/cart/cart.api.server';
 
+import { Button } from '@barely/ui/button';
 import { WorkspaceSocialLinks } from '@barely/ui/components/workspace-social-links';
-import { Button } from '@barely/ui/elements/button';
-import { H } from '@barely/ui/elements/typography';
+import { H } from '@barely/ui/typography';
 
 import { CartMDX } from '~/app/[mode]/[handle]/[key]/_components/cart-mdx';
 import { SuccessLog } from '~/app/[mode]/[handle]/[key]/(after-main)/success/success-log';
+import { trpcCaller } from '~/trpc/server';
 
 export default async function CartSuccessPage({
 	params,
@@ -28,13 +28,13 @@ export default async function CartSuccessPage({
 
 	if (!cartId) return null;
 
-	const { publicFunnel } = await cartApi.byIdAndParams({
+	const { publicFunnel } = await trpcCaller.byIdAndParams({
 		id: cartId,
 		handle,
 		key,
 	});
 
-	cartApi
+	trpcCaller
 		.log({
 			cartId,
 			event: 'cart/viewOrderConfirmation',

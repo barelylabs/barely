@@ -1,14 +1,12 @@
 'use client';
 
-import type { SessionUser, SessionWorkspace } from '@barely/server/auth';
+import type { SessionUser, SessionWorkspace } from '@barely/auth';
 import type { ReactNode } from 'react';
-import { WorkspaceContext } from '@barely/lib/context/workspace.context';
-import { useWorkspaceHotkeys } from '@barely/lib/hooks/use-workspace-hotkeys';
+import { workspaceAtom } from '@barely/atoms';
+import { UserContext, useUpdateNavHistory, useWorkspaceHotkeys } from '@barely/hooks';
+import { useHydrateAtoms } from 'jotai/utils';
 
-import { useUpdateNavHistory } from '@barely/hooks/use-nav-history';
-import { UserContext } from '@barely/hooks/use-user';
-
-import { ThemeProvider } from '@barely/ui/elements/next-theme-provider';
+import { ThemeProvider } from '@barely/ui/next-theme-provider';
 
 interface UserContextProviderProps {
 	user: SessionUser;
@@ -22,6 +20,7 @@ export const UserContextProvider = (props: UserContextProviderProps) => {
 interface WorkspaceContextProviderProps {
 	workspace: SessionWorkspace;
 	children: ReactNode | JSX.Element;
+	// setWorkspace: (workspace: SessionWorkspace) => void;
 }
 
 export function WorkspaceContextProvider({
@@ -30,8 +29,14 @@ export function WorkspaceContextProvider({
 }: WorkspaceContextProviderProps) {
 	useWorkspaceHotkeys({ workspace });
 
+	// const wsAtom = useMemo(() => workspaceAtom(workspace), [workspace])
+
+	// we hydrate from the server, and then we update the workspace atom from the client from there.
+	useHydrateAtoms([[workspaceAtom, workspace]]);
+
 	return (
-		<WorkspaceContext.Provider value={workspace}>{children}</WorkspaceContext.Provider>
+		// <WorkspaceContext.Provider value={workspace}>{children}</WorkspaceContext.Provider>
+		<>{children}</>
 	);
 }
 

@@ -2,31 +2,27 @@
 
 import type { z } from 'zod/v4';
 import { useCallback, useEffect, useState } from 'react';
-import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import {
-	defaultCartFunnel,
-	upsertCartFunnelSchema,
-} from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
-import { sanitizeKey } from '@barely/lib/utils/key';
-import { useTRPC } from '@barely/server/api/react';
+import { useCreateOrUpdateForm, useWorkspace } from '@barely/hooks';
+import { useTRPC } from '@barely/api/app/trpc.react';
+import { sanitizeKey } from '@barely/utils';
+import { defaultCartFunnel, upsertCartFunnelSchema } from '@barely/validators';
 import {
 	useMutation,
 	useQueryClient,
 	useSuspenseInfiniteQuery,
 } from '@tanstack/react-query';
 
-import { ProductPrice } from '@barely/ui/components/cart/product-price';
-import { Button } from '@barely/ui/elements/button';
-import { Label } from '@barely/ui/elements/label';
-import { MDXEditor } from '@barely/ui/elements/mdx-editor';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
-import { H } from '@barely/ui/elements/typography';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { Button } from '@barely/ui/button';
+import { ProductPrice } from '@barely/ui/components/product-price';
 import { CurrencyField } from '@barely/ui/forms/currency-field';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { SwitchField } from '@barely/ui/forms/switch-field';
 import { TextField } from '@barely/ui/forms/text-field';
+import { Label } from '@barely/ui/label';
+import { MDXEditor } from '@barely/ui/mdx-editor';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
+import { H } from '@barely/ui/typography';
 
 import { useCartFunnelContext } from '~/app/[handle]/carts/_components/cartFunnel-context';
 
@@ -88,10 +84,16 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 		upsertSchema: upsertCartFunnelSchema,
 		defaultValues: defaultCartFunnel,
 		handleCreateItem: async d => {
-			await createFunnel(d);
+			await createFunnel({
+				...d,
+				handle: workspace.handle,
+			});
 		},
 		handleUpdateItem: async d => {
-			await updateFunnel(d);
+			await updateFunnel({
+				...d,
+				handle: workspace.handle,
+			});
 		},
 	});
 

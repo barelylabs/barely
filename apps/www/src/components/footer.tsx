@@ -1,6 +1,6 @@
-import { getAbsoluteUrl } from '@barely/lib/utils/url';
+import { getAbsoluteUrl } from '@barely/utils';
 
-import { Icon } from '@barely/ui/elements/icon';
+import { Icon } from '@barely/ui/icon';
 
 import { Button } from '~/components/button';
 import { Container } from '~/components/container';

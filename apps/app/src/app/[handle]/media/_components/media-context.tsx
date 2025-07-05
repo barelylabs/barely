@@ -1,13 +1,11 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
-// import type { FileRecord } from '@barely/lib/server/routes/file/file.schema';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod/v4';
 import { createContext, useCallback, useContext, useRef, useState } from 'react';
-import { useFiles } from '@barely/lib/hooks/use-files';
-import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
-import { fileSearchParamsSchema } from '@barely/lib/server/routes/file/file.schema';
+import { useFiles, useTypedOptimisticQuery } from '@barely/hooks';
+import { fileSearchParamsSchema } from '@barely/validators';
 
 import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
 

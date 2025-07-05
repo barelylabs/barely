@@ -1,18 +1,19 @@
 'use client';
 
-import type { TopEventType } from '@barely/lib/server/routes/stat/stat.schema';
+import type { TopEventType } from '@barely/tb/schema';
 import { useState } from 'react';
-import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
-import { useTRPC } from '@barely/lib/server/api/react';
-import { getTopStatValue } from '@barely/lib/server/routes/stat/stat.schema';
+import { useWebEventStatFilters } from '@barely/hooks';
+import { getTopStatValue } from '@barely/tb/schema';
 import { useQuery } from '@tanstack/react-query';
 
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Card } from '@barely/ui/card';
 import { BarList } from '@barely/ui/charts/bar-list';
-import { Card } from '@barely/ui/elements/card';
-import { BrowserIcon, DeviceIcon, OSIcon } from '@barely/ui/elements/icon';
-import { ScrollArea, ScrollBar } from '@barely/ui/elements/scroll-area';
-import { TabButtons } from '@barely/ui/elements/tab-buttons';
-import { H } from '@barely/ui/elements/typography';
+import { BrowserIcon, DeviceIcon, OSIcon } from '@barely/ui/icon';
+import { ScrollArea, ScrollBar } from '@barely/ui/scroll-area';
+import { TabButtons } from '@barely/ui/tab-buttons';
+import { H } from '@barely/ui/typography';
 
 export type DeviceTabs = 'Device' | 'Browser' | 'OS';
 
@@ -48,50 +49,55 @@ export function StatDevices({ eventType }: { eventType: TopEventType }) {
 
 	const { data: devices } = useQuery(
 		trpc.stat.topDevices.queryOptions(
-		{ ...filtersWithHandle, topEventType: eventType },
-		{
-			select: data =>
-				data.map(d => ({
-					name: d.device,
-					value: getTopStatValue(eventType, d),
-					icon: () => <DeviceIcon display={d.device} className='my-auto mr-2 h-4 w-4' />,
-					href: getSetFilterPath('device', d.device),
-					target: '_self',
-				})),
-		}),
+			{ ...filtersWithHandle, topEventType: eventType },
+			{
+				select: data =>
+					data.map(d => ({
+						name: d.device,
+						value: getTopStatValue(eventType, d),
+						icon: () => (
+							<DeviceIcon display={d.device} className='my-auto mr-2 h-4 w-4' />
+						),
+						href: getSetFilterPath('device', d.device),
+						target: '_self',
+					})),
+			},
+		),
 	);
 
 	const { data: browsers } = useQuery(
 		trpc.stat.topBrowsers.queryOptions(
-		{ ...filtersWithHandle, topEventType: eventType },
-		{
-			select: data =>
-				data.map(d => ({
-					name: d.browser,
-					value: getTopStatValue(eventType, d),
+			{ ...filtersWithHandle, topEventType: eventType },
+			{
+				select: data =>
+					data.map(d => ({
+						name: d.browser,
+						value: getTopStatValue(eventType, d),
 
-					icon: () => (
-						<BrowserIcon display={d.browser} className='my-auto mr-2 h-4 w-4' />
-					),
-					href: getSetFilterPath('browser', d.browser),
-					target: '_self',
-				})),
-		}),
+						icon: () => (
+							<BrowserIcon display={d.browser} className='my-auto mr-2 h-4 w-4' />
+						),
+						href: getSetFilterPath('browser', d.browser),
+						target: '_self',
+					})),
+			},
+		),
 	);
 
 	const { data: operatingSystems } = useQuery(
 		trpc.stat.topOperatingSystems.queryOptions(
-		{ ...filtersWithHandle, topEventType: eventType },
-		{
-			select: data =>
-				data.map(d => ({
-					name: d.os,
-					value: getTopStatValue(eventType, d),
-					icon: () => <OSIcon display={d.os} className='my-auto mr-2' />,
-					href: getSetFilterPath('os', d.os),
-					target: '_self',
-				})),
-		}),
+			{ ...filtersWithHandle, topEventType: eventType },
+			{
+				select: data =>
+					data.map(d => ({
+						name: d.os,
+						value: getTopStatValue(eventType, d),
+						icon: () => <OSIcon display={d.os} className='my-auto mr-2' />,
+						href: getSetFilterPath('os', d.os),
+						target: '_self',
+					})),
+			},
+		),
 	);
 
 	const listData =

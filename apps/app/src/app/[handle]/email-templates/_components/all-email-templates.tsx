@@ -1,13 +1,13 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
-import { formatCentsToDollars } from '@barely/lib/utils/currency';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import { formatCentsToDollars } from '@barely/utils';
 
+import { Button } from '@barely/ui/button';
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { Button } from '@barely/ui/elements/button';
-import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
-import { Text } from '@barely/ui/elements/typography';
+import { GridList, GridListCard } from '@barely/ui/grid-list';
+import { Text } from '@barely/ui/typography';
 
 import { CreateEmailTemplateButton } from './create-email-template-button';
 import { useEmailTemplateContext } from './email-template-context';

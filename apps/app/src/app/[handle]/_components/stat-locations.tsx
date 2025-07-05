@@ -1,20 +1,20 @@
 'use client';
 
-import type { TopEventType } from '@barely/lib/server/routes/stat/stat.schema';
+import type { TopEventType } from '@barely/tb/schema';
 import type { BarListBarProps } from '@barely/ui/charts/bar-list';
 import { useState } from 'react';
-import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
-import { useTRPC } from '@barely/lib/server/api/react';
-import { getTopStatValue } from '@barely/lib/server/routes/stat/stat.schema';
+import { COUNTRIES } from '@barely/const';
+import { useWebEventStatFilters } from '@barely/hooks';
+import { getTopStatValue } from '@barely/tb/schema';
 import { useQuery } from '@tanstack/react-query';
 
-import { BarList } from '@barely/ui/charts/bar-list';
-import { Card } from '@barely/ui/elements/card';
-import { ScrollArea, ScrollBar } from '@barely/ui/elements/scroll-area';
-import { TabButtons } from '@barely/ui/elements/tab-buttons';
-import { H } from '@barely/ui/elements/typography';
+import { useTRPC } from '@barely/api/app/trpc.react';
 
-import { COUNTRIES } from '@barely/utils/constants';
+import { Card } from '@barely/ui/card';
+import { BarList } from '@barely/ui/charts/bar-list';
+import { ScrollArea, ScrollBar } from '@barely/ui/scroll-area';
+import { TabButtons } from '@barely/ui/tab-buttons';
+import { H } from '@barely/ui/typography';
 
 export function StatLocations({ eventType }: { eventType: TopEventType }) {
 	const trpc = useTRPC();
@@ -50,7 +50,7 @@ export function StatLocations({ eventType }: { eventType: TopEventType }) {
 		locationData?.map(c => ({
 			name:
 				tab === 'Country' ? (COUNTRIES[c.country] ?? c.country)
-				: tab === 'Region' && 'region' in c ? (c.region ?? '')
+				: tab === 'Region' && 'region' in c ? c.region
 				: c.city,
 			value: getTopStatValue(eventType, c),
 

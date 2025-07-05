@@ -2,18 +2,21 @@
 
 import type { z } from 'zod/v4';
 import { useCallback } from 'react';
-import { useZodForm } from '@barely/lib/hooks/use-zod-form';
-import { api } from '@barely/lib/server/api/react';
-import { cancelCartOrderSchema } from '@barely/lib/server/routes/cart-order/cart-order.schema';
-import { formatCentsToDollars } from '@barely/lib/utils/currency';
+import { useWorkspace, useZodForm } from '@barely/hooks';
+import { useTRPC } from '@barely/api/app/trpc.react';
+import { formatCentsToDollars } from '@barely/utils';
+import { cancelCartOrderSchema } from '@barely/validators';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 
 import { useCartOrderContext } from '~/app/[handle]/orders/_components/cart-order-context';
 
 export function CancelCartOrderModal() {
-	const apiUtils = api.useUtils();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
+	const { handle } = useWorkspace();
 
 	// cart order context
 	const {
@@ -24,11 +27,13 @@ export function CancelCartOrderModal() {
 	} = useCartOrderContext();
 
 	// mutations
-	const { mutateAsync: cancelCartOrder } = api.cartOrder.cancel.useMutation({
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: cancelCartOrder } = useMutation(
+		trpc.cartOrder.cancel.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
 	// form
 	const form = useZodForm({
@@ -47,13 +52,16 @@ export function CancelCartOrderModal() {
 
 		if (
 			!window.confirm(
-				`Are you sure you want to cancel order #${selectedCartOrder.orderId}? ${selectedCartOrder.fullName} will be refunded ${formatCentsToDollars(selectedCartOrder?.orderAmount)}`,
+				`Are you sure you want to cancel order #${selectedCartOrder.orderId}? ${selectedCartOrder.fullName} will be refunded ${formatCentsToDollars(selectedCartOrder.orderAmount)}`,
 			)
 		)
 			return;
 
 		console.log('cancelling order', data);
-		await cancelCartOrder(data);
+		await cancelCartOrder({
+			...data,
+			handle,
+		});
 	};
 
 	// modal
@@ -64,8 +72,10 @@ export function CancelCartOrderModal() {
 		setShowCancelCartOrderModal(false);
 		form.reset();
 
-		await apiUtils.cartOrder.invalidate();
-	}, [focusGridList, setShowCancelCartOrderModal, form, apiUtils]);
+		await queryClient.invalidateQueries({
+			queryKey: trpc.cartOrder.byWorkspace.queryKey(),
+		});
+	}, [focusGridList, setShowCancelCartOrderModal, form, queryClient, trpc]);
 
 	return (
 		<Modal

@@ -1,6 +1,6 @@
 'use client';
 
-import { useModalHotKeys } from '@barely/lib/hooks/use-modal-hot-keys';
+import { useModalHotKeys } from '@barely/hooks';
 
 import { useFanGroupContext } from '~/app/[handle]/fan-groups/_components/fan-group-context';
 

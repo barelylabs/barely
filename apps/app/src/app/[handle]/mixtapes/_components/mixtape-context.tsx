@@ -1,13 +1,14 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/react';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod/v4';
-import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
-import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
-import { mixtapeSearchParamsSchema } from '@barely/lib/server/routes/mixtape/mixtape.schema';
+import { createContext, useCallback, useContext, useRef, useState } from 'react';
+import { useTypedOptimisticQuery, useWorkspace } from '@barely/hooks';
+import { mixtapeSearchParamsSchema } from '@barely/validators';
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
 
@@ -18,13 +19,8 @@ type MixtapeContext = InfiniteItemsContext<
 
 const MixtapeContext = createContext<MixtapeContext | undefined>(undefined);
 
-export function MixtapeContextProvider({
-	children,
-	initialInfiniteMixtapes,
-}: {
-	children: React.ReactNode;
-	initialInfiniteMixtapes: Promise<AppRouterOutputs['mixtape']['byWorkspace']>;
-}) {
+export function MixtapeContextProvider({ children }: { children: React.ReactNode }) {
+	const trpc = useTRPC();
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [showEditModal, setShowEditModal] = useState(false);
 	const [showArchiveModal, setShowArchiveModal] = useState(false);
@@ -42,8 +38,6 @@ export function MixtapeContextProvider({
 		: selectedMixtapeIds === 'all' ? 'all'
 		: new Set(selectedMixtapeIds);
 
-	const initialData = use(initialInfiniteMixtapes);
-
 	const {
 		data: infiniteMixtapes,
 		hasNextPage,
@@ -52,25 +46,16 @@ export function MixtapeContextProvider({
 		isFetching,
 		isRefetching,
 		isPending,
-	} = api.mixtape.byWorkspace.useInfiniteQuery(
-		{ handle, ...filters },
-		{
-			initialData: () => {
-				return {
-					pages: [
-						{
-							mixtapes: initialData.mixtapes,
-							nextCursor: initialData.nextCursor,
-						},
-					],
-					pageParams: [],
-				};
+	} = useSuspenseInfiniteQuery({
+		...trpc.mixtape.byWorkspace.infiniteQueryOptions(
+			{ handle, ...filters },
+			{
+				getNextPageParam: lastPage => lastPage.nextCursor,
 			},
-			getNextPageParam: lastPage => lastPage.nextCursor,
-		},
-	);
+		),
+	});
 
-	const mixtapes = infiniteMixtapes?.pages.flatMap(page => page.mixtapes) ?? [];
+	const mixtapes = infiniteMixtapes.pages.flatMap(page => page.mixtapes);
 
 	// setters
 	const setMixtapeSelection = useCallback(
@@ -90,9 +75,9 @@ export function MixtapeContextProvider({
 	}, [removeAllQueryParams]);
 
 	const toggleArchived = useCallback(() => {
-		if (filters.showArchived) return removeByKey('showArchived');
+		if (data.showArchived) return removeByKey('showArchived');
 		setQuery('showArchived', true);
-	}, [filters.showArchived, removeByKey, setQuery]);
+	}, [data.showArchived, removeByKey, setQuery]);
 
 	const setSearch = useCallback(
 		(search: string) => {
@@ -109,7 +94,7 @@ export function MixtapeContextProvider({
 		mixtape => mixtape.id === lastSelectedMixtapeId,
 	);
 
-	const gridListRef = useRef<HTMLDivElement>(null);
+	const gridListRef = useRef<HTMLDivElement | null>(null);
 
 	const contextValue = {
 		items: mixtapes,

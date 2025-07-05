@@ -1,8 +1,5 @@
-import { routeHandler } from '@barely/lib/server/api/route-handler';
-import { genreRouter } from '@barely/lib/server/routes/genre/genre.router';
+import { OPTIONS } from '@barely/utils';
 
-export { OPTIONS } from '@barely/lib/utils/trpc-route';
+import { genreHandler } from '@barely/api/app/sub/genre.handler';
 
-const handler = routeHandler('genre', genreRouter);
-
-export { handler as GET, handler as POST };
+export { OPTIONS, genreHandler as GET, genreHandler as POST };

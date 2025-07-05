@@ -1,7 +1,7 @@
 import type { z } from 'zod/v4';
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import { api } from '@barely/lib/server/api/server';
-import { emailBroadcastSearchParamsSchema } from '@barely/lib/server/routes/email-broadcast/email-broadcast-schema';
+import { emailBroadcastSearchParamsSchema } from '@barely/validators';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllEmailBroadcasts } from '~/app/[handle]/email-broadcasts/_components/all-email-broadcasts';
@@ -9,39 +9,48 @@ import { CreateOrUpdateEmailBroadcastModal } from '~/app/[handle]/email-broadcas
 import { EmailBroadcastFilters } from '~/app/[handle]/email-broadcasts/_components/email-broadcast-filters';
 import { CreateEmailBroadcastButton } from './_components/create-email-broadcast-button';
 import { EmailBroadcastsContextProvider } from './_components/email-broadcasts-context';
+import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
-export default function EmailBroadcastsPage({
+export default async function EmailBroadcastsPage({
 	params,
 	searchParams,
 }: {
-	params: { handle: string };
-	searchParams: z.infer<typeof emailBroadcastSearchParamsSchema>;
+	params: Promise<{ handle: string }>;
+	searchParams: Promise<z.infer<typeof emailBroadcastSearchParamsSchema>>;
 }) {
-	const parsedFilters = emailBroadcastSearchParamsSchema.safeParse(searchParams);
+	const awaitedParams = await params;
+	const awaitedSearchParams = await searchParams;
+	const parsedFilters = emailBroadcastSearchParamsSchema.safeParse(awaitedSearchParams);
 	if (!parsedFilters.success) {
 		console.log('parsedFilters error', parsedFilters.error);
-		redirect(`/${params.handle}/email-broadcasts`);
+		redirect(`/${awaitedParams.handle}/email-broadcasts`);
 	}
 
-	const emailBroadcasts = api({ handle: params.handle }).emailBroadcast.byWorkspace({
-		handle: params.handle,
-		...parsedFilters.data,
-	});
+	prefetch(
+		trpc.emailBroadcast.byWorkspace.infiniteQueryOptions({
+			handle: awaitedParams.handle,
+			...parsedFilters.data,
+		}),
+	);
 
 	return (
-		<EmailBroadcastsContextProvider initialEmailBroadcastsFirstPage={emailBroadcasts}>
-			<DashContentHeader
-				title='Email Broadcasts'
-				button={<CreateEmailBroadcastButton />}
-			/>
-			<EmailBroadcastFilters />
-			<AllEmailBroadcasts />
+		<HydrateClient>
+			<Suspense fallback={<div>Loading...</div>}>
+				<EmailBroadcastsContextProvider>
+					<DashContentHeader
+						title='Email Broadcasts'
+						button={<CreateEmailBroadcastButton />}
+					/>
+					<EmailBroadcastFilters />
+					<AllEmailBroadcasts />
 
-			<CreateOrUpdateEmailBroadcastModal mode='create' />
-			<CreateOrUpdateEmailBroadcastModal mode='update' />
+					<CreateOrUpdateEmailBroadcastModal mode='create' />
+					<CreateOrUpdateEmailBroadcastModal mode='update' />
 
-			{/* <ArchiveOrDeleteEmailBroadcastModal mode='archive' />
-			<ArchiveOrDeleteEmailBroadcastModal mode='delete' /> */}
-		</EmailBroadcastsContextProvider>
+					{/* <ArchiveOrDeleteEmailBroadcastModal mode='archive' />
+					<ArchiveOrDeleteEmailBroadcastModal mode='delete' /> */}
+				</EmailBroadcastsContextProvider>
+			</Suspense>
+		</HydrateClient>
 	);
 }

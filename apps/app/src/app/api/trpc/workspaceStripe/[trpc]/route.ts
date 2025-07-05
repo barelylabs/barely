@@ -1,9 +1,5 @@
-import { routeHandler } from '@barely/lib/server/api/route-handler';
-import { workspaceStripeRouter } from '@barely/lib/server/routes/workspace-stripe/workspace-stripe.router';
-import { OPTIONS } from '@barely/lib/utils/trpc-route';
+import { OPTIONS } from '@barely/utils';
 
-// export const runtime = 'edge';
+import { workspaceStripeHandler } from '@barely/api/app/sub/workspace-stripe.handler';
 
-const handler = routeHandler('workspaceStripe', workspaceStripeRouter);
-
-export { OPTIONS, handler as GET, handler as POST };
+export { OPTIONS, workspaceStripeHandler as GET, workspaceStripeHandler as POST };

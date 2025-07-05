@@ -1,18 +1,17 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import Link from 'next/link';
-import { cn } from '@barely/lib/utils/cn';
-import { truncate } from '@barely/lib/utils/text';
+import { cn, truncate } from '@barely/utils';
 
+import { Badge } from '@barely/ui/badge';
+import { BlurImage } from '@barely/ui/blur-image';
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { Badge } from '@barely/ui/elements/badge';
-import { BlurImage } from '@barely/ui/elements/blur-image';
-import { CopyButton } from '@barely/ui/elements/copy-button';
-import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
-import { Icon } from '@barely/ui/elements/icon';
-import { Text } from '@barely/ui/elements/typography';
+import { CopyButton } from '@barely/ui/copy-button';
+import { GridList, GridListCard } from '@barely/ui/grid-list';
+import { Icon } from '@barely/ui/icon';
+import { Text } from '@barely/ui/typography';
 
 import { CreateLinkButton } from '~/app/[handle]/links/_components/create-link-button';
 import { useLinkContext } from '~/app/[handle]/links/_components/link-context';

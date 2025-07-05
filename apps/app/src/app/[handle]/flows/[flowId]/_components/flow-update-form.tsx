@@ -1,29 +1,29 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
-import type { FlowState } from '@barely/lib/server/routes/flow/flow.ui.types';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import type { FlowState } from '@barely/lib/functions/flows/flow.ui.types';
 import type { z } from 'zod/v4';
 import { use, useState } from 'react';
-import { useToast } from '@barely/lib/hooks/use-toast';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { useZodForm } from '@barely/lib/hooks/use-zod-form';
-import { api } from '@barely/lib/server/api/react';
-import { updateFlowAndNodesSchema } from '@barely/lib/server/routes/flow/flow.schema';
+import { useWorkspace, useZodForm } from '@barely/hooks';
 import {
 	getFlowActionFromActionNode,
 	getFlowTriggerFromTriggerNode,
-} from '@barely/lib/server/routes/flow/flow.utils';
-import { formatDate } from '@barely/lib/utils/format-date';
-import { raise } from '@barely/lib/utils/raise';
+} from '@barely/lib/functions/flows/flow.utils';
+import { useToast } from '@barely/toast';
+import { formatDate, raise } from '@barely/utils';
+import { updateFlowAndNodesSchema } from '@barely/validators';
+import { useMutation, useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { useShallow } from 'zustand/react/shallow';
 
-import { Button } from '@barely/ui/elements/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/elements/popover';
-import { Separator } from '@barely/ui/elements/separator';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Button } from '@barely/ui/button';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { SwitchField } from '@barely/ui/forms/switch-field';
 import { TextField } from '@barely/ui/forms/text-field';
+import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/popover';
+import { Separator } from '@barely/ui/separator';
 
 import { useFlowStore } from './flow-store';
 
@@ -38,6 +38,7 @@ export function FlowUpdateForm(props: {
 	initialFlow: Promise<AppRouterOutputs['flow']['byId']>;
 }) {
 	const { toast } = useToast();
+	const trpc = useTRPC();
 	const { handle } = useWorkspace();
 
 	const initialFlow = use(props.initialFlow);
@@ -60,32 +61,38 @@ export function FlowUpdateForm(props: {
 
 	const isFormDirty = form.formState.isDirty || isDirty;
 
-	const { data: fanOptions } = api.fan.byWorkspace.useQuery(
-		{ handle, limit: 20 },
-		{
-			select: data =>
-				data.fans.map(fan => ({
-					label: `${fan.fullName} - ${fan.email}`,
-					value: fan.id,
-				})),
-		},
+	const { data: fanOptions } = useSuspenseQuery(
+		trpc.fan.byWorkspace.queryOptions(
+			{ handle, limit: 20 },
+			{
+				select: data =>
+					data.fans.map(fan => ({
+						label: `${fan.fullName} - ${fan.email}`,
+						value: fan.id,
+					})),
+			},
+		),
 	);
 
-	const { data: cartOptions } = api.cartOrder.byWorkspace.useQuery(
-		{ handle, fanId: form.watch('testFanId'), limit: 20 },
-		{
-			enabled: !!form.watch('testFanId'),
-			select: data =>
-				data.cartOrders.map(cart => ({
-					label: `#${cart.orderId} - ${cart.funnel?.name} - ${formatDate(
-						cart.createdAt.toISOString(),
-					)}`,
-					value: cart.id,
-				})),
-		},
-	);
+	const testFanId = form.watch('testFanId');
+	const { data: cartOptions } = useQuery({
+		...trpc.cartOrder.byWorkspace.queryOptions(
+			{ handle, fanId: testFanId, limit: 20 },
+			{
+				select: data =>
+					data.cartOrders.map(cart => ({
+						label: `#${cart.orderId} - ${cart.funnel?.name} - ${formatDate(
+							cart.createdAt.toISOString(),
+						)}`,
+						value: cart.id,
+					})),
+			},
+		),
+		enabled: !!testFanId,
+	});
 
-	const { mutateAsync: updateFlow } = api.flow.update.useMutation({
+	const { mutateAsync: updateFlow } = useMutation({
+		...trpc.flow.update.mutationOptions(),
 		onSuccess: () => {
 			setCurrentAsLastSaved();
 			toast('Flow updated');
@@ -99,26 +106,35 @@ export function FlowUpdateForm(props: {
 
 		const currentTrigger =
 			nodes.find(node => node.type === 'trigger') ?? raise('Flow must have a trigger');
-		const updateTrigger: z.infer<typeof updateFlowAndNodesSchema>['trigger'] =
-			getFlowTriggerFromTriggerNode(currentTrigger, initialFlow.flow.id);
 
-		const updatedActions: z.infer<typeof updateFlowAndNodesSchema>['actions'] = nodes
+		const updateTrigger = getFlowTriggerFromTriggerNode(
+			currentTrigger,
+			initialFlow.flow.id,
+		) satisfies z.infer<typeof updateFlowAndNodesSchema>['trigger'];
+
+		const updatedActions = nodes
 			.filter(node => node.type !== 'trigger')
-			.map(action => getFlowActionFromActionNode(action, initialFlow.flow.id));
+			.map(action =>
+				getFlowActionFromActionNode(action, initialFlow.flow.id),
+			) satisfies z.infer<typeof updateFlowAndNodesSchema>['actions'];
 
-		const updateFlowAndNodesData: z.infer<typeof updateFlowAndNodesSchema> = {
+		const updateFlowAndNodesData = {
 			...data,
 			trigger: updateTrigger,
 			actions: updatedActions,
 			edges,
-		};
+		} satisfies z.infer<typeof updateFlowAndNodesSchema>;
 
-		const res = await updateFlow(updateFlowAndNodesData);
+		const res = await updateFlow({
+			...updateFlowAndNodesData,
+			handle,
+		});
 
 		return console.log('res', res);
 	};
 
-	const { mutate: triggerTestFlow } = api.flow.triggerTestFlow.useMutation({
+	const { mutate: triggerTestFlow } = useMutation({
+		...trpc.flow.triggerTestFlow.mutationOptions(),
 		onSuccess: () => {
 			setTestPopoverOpen(false);
 			toast('Test flow triggered');
@@ -132,7 +148,7 @@ export function FlowUpdateForm(props: {
 	const handleTriggerTestFlow = (data: z.infer<typeof updateFlowAndNodesSchema>) => {
 		if (!data.testFanId) return toast('Please select a fan');
 
-		const fan = fanOptions?.find(fan => fan.value === data.testFanId);
+		const fan = fanOptions.find(fan => fan.value === data.testFanId);
 		const cart = cartOptions?.find(cart => cart.value === data.testCartId);
 
 		if (!fan) return toast('Please select a fan');
@@ -143,14 +159,18 @@ export function FlowUpdateForm(props: {
 			if (!cart) return toast('Please select a cart');
 		}
 
-		window.confirm(
-			`This will initialize a flow run for {${fan?.label} ${cart ? `- ${cart.label}` : ''}}. Are you sure you want to continue?`,
-		) &&
+		if (
+			window.confirm(
+				`This will initialize a flow run for {${fan.label} ${cart ? `- ${cart.label}` : ''}}. Are you sure you want to continue?`,
+			)
+		) {
 			triggerTestFlow({
+				handle,
 				flowId: data.id,
 				fanId: data.testFanId,
 				cartId: data.testCartId,
 			});
+		}
 	};
 
 	return (
@@ -194,7 +214,7 @@ export function FlowUpdateForm(props: {
 										label='Select Fan'
 										name='testFanId'
 										control={form.control}
-										options={fanOptions ?? []}
+										options={fanOptions}
 									/>
 									{form.watch('testFanId') && (
 										<SelectField
@@ -206,7 +226,28 @@ export function FlowUpdateForm(props: {
 									)}
 									<Button
 										onClick={() => {
-											handleTriggerTestFlow(form.getValues());
+											const rawValues = form.getValues();
+											const currentTrigger =
+												nodes.find(node => node.type === 'trigger') ??
+												raise('Flow must have a trigger');
+											const updateTrigger = getFlowTriggerFromTriggerNode(
+												currentTrigger,
+												initialFlow.flow.id,
+											);
+											const updatedActions = nodes
+												.filter(node => node.type !== 'trigger')
+												.map(action =>
+													getFlowActionFromActionNode(action, initialFlow.flow.id),
+												);
+
+											const formValues = {
+												...rawValues,
+												trigger: updateTrigger,
+												actions: updatedActions,
+												edges,
+											} satisfies z.infer<typeof updateFlowAndNodesSchema>;
+
+											handleTriggerTestFlow(formValues);
 										}}
 										fullWidth
 									>

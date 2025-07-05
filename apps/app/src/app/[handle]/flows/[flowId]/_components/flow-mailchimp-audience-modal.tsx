@@ -1,14 +1,15 @@
-import type { FlowState } from '@barely/lib/server/routes/flow/flow.ui.types';
+import type { FlowState } from '@barely/validators';
 import type { z } from 'zod/v4';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { useZodForm } from '@barely/lib/hooks/use-zod-form';
-import { api } from '@barely/lib/server/api/react';
-import { flowForm_addToMailchimpAudienceSchema } from '@barely/lib/server/routes/flow/flow.schema';
+import { useWorkspace, useZodForm } from '@barely/hooks';
+import { flowForm_addToMailchimpAudienceSchema } from '@barely/validators';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { useShallow } from 'zustand/react/shallow';
 
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 
 import { useFlowStore } from '~/app/[handle]/flows/[flowId]/_components/flow-store';
 
@@ -30,17 +31,20 @@ export const FlowMailchimpAudienceModal = () => {
 	const currentMailchimpAudienceNode =
 		currentNode?.type === 'addToMailchimpAudience' ? currentNode : null;
 
+	const trpc = useTRPC();
 	const { handle } = useWorkspace();
 
-	const { data: mailchimpAudienceOptions } = api.mailchimp.audiencesByWorkspace.useQuery(
-		{ handle },
-		{
-			select: data =>
-				data?.map(audience => ({
-					label: audience.name,
-					value: audience.id,
-				})) ?? [],
-		},
+	const { data: mailchimpAudienceOptions } = useSuspenseQuery(
+		trpc.mailchimp.audiencesByWorkspace.queryOptions(
+			{ handle },
+			{
+				select: data =>
+					data?.map(audience => ({
+						label: audience.name,
+						value: audience.id,
+					})) ?? [],
+			},
+		),
 	);
 
 	const form = useZodForm({
@@ -70,8 +74,8 @@ export const FlowMailchimpAudienceModal = () => {
 						control={form.control}
 						name='mailchimpAudienceId'
 						label='Audience'
-						options={mailchimpAudienceOptions ?? []}
-						value={form.watch('mailchimpAudienceId')}
+						options={mailchimpAudienceOptions}
+						value={form.watch('mailchimpAudienceId') ?? undefined}
 					/>
 				</ModalBody>
 				<ModalFooter>

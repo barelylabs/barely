@@ -5,7 +5,7 @@ import '../styles/globals.css';
 
 import type { Metadata } from 'next';
 import { Inter as FontSans } from 'next/font/google';
-import { cn } from '@barely/lib/utils/cn';
+import { cn } from '@barely/utils';
 
 export const metadata: Metadata = {
 	title: {

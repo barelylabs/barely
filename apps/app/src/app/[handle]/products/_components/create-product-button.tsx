@@ -1,7 +1,7 @@
 'use client';
 
-import { Button } from '@barely/ui/elements/button';
-import { CommandShortcut } from '@barely/ui/elements/command';
+import { Button } from '@barely/ui/button';
+import { CommandShortcut } from '@barely/ui/command';
 
 import { useProductContext } from '~/app/[handle]/products/_components/product-context';
 

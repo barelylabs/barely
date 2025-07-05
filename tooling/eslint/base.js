@@ -57,6 +57,7 @@ export default tseslint.config(
 				'error',
 				{
 					allowDefaultCaseForExhaustiveSwitch: true,
+					considerDefaultExhaustiveForUnions: true,
 				},
 			],
 			'@typescript-eslint/no-unused-vars': [

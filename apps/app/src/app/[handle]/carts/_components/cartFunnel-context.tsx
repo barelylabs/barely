@@ -1,15 +1,15 @@
 'use client';
 
-import type { cartFunnelFilterParamsSchema } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
-import type { AppRouterOutputs } from '@barely/server/api/router';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import type { cartFunnelFilterParamsSchema } from '@barely/validators';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod/v4';
 import { createContext, useCallback, useContext, useRef, useState } from 'react';
-import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { useTRPC } from '@barely/lib/server/api/react';
-import { cartFunnelSearchParamsSchema } from '@barely/lib/server/routes/cart-funnel/cart-funnel.schema';
+import { useTypedOptimisticQuery, useWorkspace } from '@barely/hooks';
+import { cartFunnelSearchParamsSchema } from '@barely/validators';
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 interface CartFunnelContext {
 	cartFunnels: AppRouterOutputs['cartFunnel']['byWorkspace']['cartFunnels'];

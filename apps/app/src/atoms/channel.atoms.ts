@@ -1,6 +1,5 @@
+import { pusherAtom } from '@barely/atoms';
 import { atom } from 'jotai';
-
-import { pusherAtom } from '@barely/atoms/pusher.atom';
 
 const campaignChannelAtom = atom(get => {
 	const client = get(pusherAtom);

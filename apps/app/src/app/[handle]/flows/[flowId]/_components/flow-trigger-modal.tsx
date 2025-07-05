@@ -1,15 +1,16 @@
-import type { FlowState } from '@barely/lib/server/routes/flow/flow.ui.types';
+import type { FlowState } from '@barely/validators';
 import type { z } from 'zod/v4';
 import { useMemo } from 'react';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { useZodForm } from '@barely/lib/hooks/use-zod-form';
-import { api } from '@barely/lib/server/api/react';
-import { updateFlowTriggerSchema } from '@barely/lib/server/routes/flow/flow.schema';
+import { useWorkspace, useZodForm } from '@barely/hooks';
+import { updateFlowTriggerSchema } from '@barely/validators';
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
 import { useShallow } from 'zustand/react/shallow';
 
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 
 // import type { FlowState } from '~/app/[handle]/flows/[flowId]/_react-flow/flow-types';
 import { useFlowStore } from '~/app/[handle]/flows/[flowId]/_components/flow-store';
@@ -53,20 +54,22 @@ export function FlowTriggerModal() {
 
 	const currentTriggerNode = currentNode?.type === 'trigger' ? currentNode : null;
 
+	const trpc = useTRPC();
 	const { handle } = useWorkspace();
 
-	const { data: infiniteCartFunnels } = api.cartFunnel.byWorkspace.useInfiniteQuery(
-		{
-			handle,
-		},
-		{
-			getNextPageParam: lastPage => lastPage.nextCursor,
-		},
-	);
+	const { data: infiniteCartFunnels } = useSuspenseInfiniteQuery({
+		...trpc.cartFunnel.byWorkspace.infiniteQueryOptions(
+			{
+				handle,
+			},
+			{
+				getNextPageParam: lastPage => lastPage.nextCursor,
+			},
+		),
+	});
 
 	const cartFunnelOptions = useMemo(() => {
-		const cartFunnels =
-			infiniteCartFunnels?.pages.flatMap(page => page.cartFunnels) ?? [];
+		const cartFunnels = infiniteCartFunnels.pages.flatMap(page => page.cartFunnels);
 		return cartFunnels.map(funnel => ({
 			value: funnel.id,
 			label: funnel.name,
@@ -81,7 +84,7 @@ export function FlowTriggerModal() {
 		},
 	});
 
-	const handleSubmit = async (values: z.infer<typeof triggerFormSchema>) => {
+	const handleSubmit = (values: z.infer<typeof triggerFormSchema>) => {
 		if (!currentTriggerNode) return;
 		updateTriggerNode(currentTriggerNode.id, values);
 		setShowTriggerModal(false);

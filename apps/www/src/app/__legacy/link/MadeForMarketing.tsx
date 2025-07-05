@@ -2,8 +2,8 @@ import { BsClipboardCheck, BsFillPinMapFill } from 'react-icons/bs';
 import { FaLink } from 'react-icons/fa';
 import { MdPrivacyTip } from 'react-icons/md';
 
-import { Tooltip } from '@barely/ui/elements/tooltip';
-import { H, Text } from '@barely/ui/elements/typography';
+import { Tooltip } from '@barely/ui/tooltip';
+import { H, Text } from '@barely/ui/typography';
 
 const features = [
 	{

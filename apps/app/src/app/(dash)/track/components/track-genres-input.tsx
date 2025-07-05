@@ -1,25 +1,24 @@
 'use client';
 
 import type {
-	UpdatePlaylistPitchCampaign_LaunchSchema,
-	UpdatePlaylistPitchCampaign_ScreeningSchema,
-} from '@barely/lib/server/routes/campaign/campaign.schema';
-import type { GenreWithPlaylistStats } from '@barely/lib/server/routes/genre/genre.schema';
-import type { Control } from 'react-hook-form';
-import { useTRPC } from '@barely/server/api/react';
+	GenreWithPlaylistStats,
+	updatePlaylistPitchCampaign_LaunchSchema,
+	updatePlaylistPitchCampaign_ScreeningSchema,
+} from '@barely/validators';
+import type { Control, UseFormReturn } from 'react-hook-form';
+import type { z } from 'zod/v4';
 import {
 	useMutation,
 	useQuery,
 	useQueryClient,
 	useSuspenseQuery,
 } from '@tanstack/react-query';
-// import { useZodForm } from '@barely/lib/hooks/use-zod-form';
-// import { api } from '@barely/lib/server/api/react';
-// import { updatePlaylistPitchCampaign_LaunchSchema } from '@barely/lib/server/routes/campaign/campaign.schema';
 import deepEqual from 'fast-deep-equal';
 
-import { MultiSelect } from '@barely/ui/elements/multiselect';
+import { useTRPC } from '@barely/api/app/trpc.react';
+
 import { MultiSelectField } from '@barely/ui/forms/multiselect-field';
+import { MultiSelect } from '@barely/ui/multiselect';
 
 export function TrackGenresInput(props: { trackId: string }) {
 	const trpc = useTRPC();
@@ -118,11 +117,12 @@ type TrackGenresFieldProps = {
 } & (
 	| {
 			formType: 'playlist-pitch-screening';
-			control: Control<UpdatePlaylistPitchCampaign_ScreeningSchema, unknown>;
+			form: UseFormReturn<z.infer<typeof updatePlaylistPitchCampaign_ScreeningSchema>>;
+			// control: Control<z.infer<typeof updatePlaylistPitchCampaign_ScreeningSchema>, unknown>;
 	  }
 	| {
 			formType: 'playlist-pitch-launch';
-			control: Control<UpdatePlaylistPitchCampaign_LaunchSchema, unknown>;
+			control: Control<z.infer<typeof updatePlaylistPitchCampaign_LaunchSchema>, unknown>;
 	  }
 );
 
@@ -188,7 +188,7 @@ export function TrackGenresField(props: TrackGenresFieldProps) {
 					name='genres'
 					label={label}
 					placeholder='Search for genres...'
-					control={props.control}
+					control={props.form.control}
 					// control={control}
 					options={playlistGenreOptions ?? []}
 					isFetchingOptions={isFetchingOptions}

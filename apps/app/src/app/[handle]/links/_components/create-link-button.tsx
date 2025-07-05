@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@barely/ui/elements/button';
+import { Button } from '@barely/ui/button';
 
 import { useLinkContext } from '~/app/[handle]/links/_components/link-context';
 

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { H } from '@barely/ui/elements/typography';
+import { H } from '@barely/ui/typography';
 
 export default function Component() {
 	return (

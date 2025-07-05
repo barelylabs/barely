@@ -1,14 +1,15 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/react';
-import type { fanFilterParamsSchema } from '@barely/lib/server/routes/fan/fan.schema';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import type { fanFilterParamsSchema } from '@barely/validators';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod/v4';
-import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
-import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
-import { fanSearchParamsSchema } from '@barely/lib/server/routes/fan/fan.schema';
+import { createContext, useCallback, useContext, useRef, useState } from 'react';
+import { useTypedOptimisticQuery, useWorkspace } from '@barely/hooks';
+import { fanSearchParamsSchema } from '@barely/validators';
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
 
@@ -19,18 +20,13 @@ type FanContext = InfiniteItemsContext<
 
 const FanContext = createContext<FanContext | undefined>(undefined);
 
-export function FanContextProvider({
-	children,
-	initialFansFirstPage,
-}: {
-	children: React.ReactNode;
-	initialFansFirstPage: Promise<AppRouterOutputs['fan']['byWorkspace']>;
-}) {
+export function FanContextProvider({ children }: { children: React.ReactNode }) {
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [showUpdateModal, setShowUpdateModal] = useState(false);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const [showArchiveModal, setShowArchiveModal] = useState(false);
 
+	const trpc = useTRPC();
 	const { handle } = useWorkspace();
 
 	const { data, setQuery, removeByKey, removeAllQueryParams, pending } =
@@ -43,7 +39,6 @@ export function FanContextProvider({
 		: selectedFanIds === 'all' ? 'all'
 		: new Set(selectedFanIds);
 
-	const initialData = use(initialFansFirstPage);
 	const {
 		data: infiniteFans,
 		hasNextPage,
@@ -52,22 +47,18 @@ export function FanContextProvider({
 		isFetching,
 		isRefetching,
 		isPending,
-	} = api.fan.byWorkspace.useInfiniteQuery(
-		{ handle, ...filters },
-		{
-			initialData: () => {
-				return {
-					pages: [{ fans: initialData.fans, nextCursor: initialData.nextCursor }],
-					pageParams: [],
-				};
+	} = useSuspenseInfiniteQuery({
+		...trpc.fan.byWorkspace.infiniteQueryOptions(
+			{ handle, ...filters },
+			{
+				getNextPageParam: lastPage => lastPage.nextCursor,
 			},
-			getNextPageParam: lastPage => lastPage.nextCursor,
-		},
-	);
+		),
+	});
 
-	const fans = infiniteFans?.pages.flatMap(page => page.fans) ?? [];
+	const fans = infiniteFans.pages.flatMap(page => page.fans);
 
-	const gridListRef = useRef<HTMLDivElement>(null);
+	const gridListRef = useRef<HTMLDivElement | null>(null);
 
 	const setFanSelection = useCallback(
 		(selection: Selection) => {
@@ -99,7 +90,7 @@ export function FanContextProvider({
 	);
 
 	const lastSelectedFanId =
-		fanSelection === 'all' || !fanSelection ?
+		fanSelection === 'all' || !fanSelection.size ?
 			undefined
 		:	Array.from(fanSelection).pop()?.toString();
 

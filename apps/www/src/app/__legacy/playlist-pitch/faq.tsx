@@ -1,7 +1,7 @@
-import type { AccordionItemProps } from '@barely/ui/elements/accordion';
+import type { AccordionItemProps } from '@barely/ui/accordion';
 
-import { Accordion } from '@barely/ui/elements/accordion';
-import { H, Text } from '@barely/ui/elements/typography';
+import { Accordion } from '@barely/ui/accordion';
+import { H, Text } from '@barely/ui/typography';
 
 const faqItems: AccordionItemProps[] = [
 	{

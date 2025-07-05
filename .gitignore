@@ -29,6 +29,8 @@ build
 # misc
 .DS_Store
 *.pem
+*.tsx-E
+*.ts-E
 
 # debug
 npm-debug.log*

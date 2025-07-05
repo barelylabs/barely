@@ -1,20 +1,21 @@
 import { Suspense } from 'react';
-import { api } from '@barely/lib/server/api/server';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { PressKitForm } from '~/app/[handle]/press/_components/press-kit-form';
+import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
-export default function PressKitPage({ params }: { params: { handle: string } }) {
-	const pressKit = api({ handle: params.handle }).pressKit.byWorkspace({
-		handle: params.handle,
-	});
+export default async function PressKitPage({ params }: { params: Promise<{ handle: string }> }) {
+	const { handle } = await params;
+	prefetch(trpc.pressKit.byWorkspace.queryOptions({ handle }));
 
 	return (
-		<>
-			<DashContentHeader title='Press Kit' />
-			<Suspense fallback={'Loading...'}>
-				<PressKitForm initialPressKit={pressKit} />
+		<HydrateClient>
+			<Suspense fallback={<div>Loading...</div>}>
+				<DashContentHeader title='Press Kit' />
+				<Suspense fallback={'Loading...'}>
+					<PressKitForm />
+				</Suspense>
 			</Suspense>
-		</>
+		</HydrateClient>
 	);
 }

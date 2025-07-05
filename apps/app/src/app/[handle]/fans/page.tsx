@@ -1,7 +1,7 @@
 import type { z } from 'zod/v4';
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import { api } from '@barely/lib/server/api/server';
-import { fanSearchParamsSchema } from '@barely/lib/server/routes/fan/fan.schema';
+import { fanSearchParamsSchema } from '@barely/validators';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllFans } from '~/app/[handle]/fans/_components/all-fans';
@@ -15,6 +15,7 @@ import {
 	ImportFansButton,
 	ImportFansFromCsvModal,
 } from '~/app/[handle]/fans/_components/import-fans-modal';
+import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
 export default async function FansPage({
 	params,
@@ -31,34 +32,40 @@ export default async function FansPage({
 		redirect(`/${awaitedParams.handle}/fans`);
 	}
 
-	const fans = api({ handle: awaitedParams.handle }).fan.byWorkspace({
-		handle: awaitedParams.handle,
-		...parsedFilters.data,
-	});
+	prefetch(
+		trpc.fan.byWorkspace.infiniteQueryOptions({
+			handle: awaitedParams.handle,
+			...parsedFilters.data,
+		}),
+	);
 
 	return (
-		<FanContextProvider initialFansFirstPage={fans}>
-			<DashContentHeader
-				title='Fans'
-				button={
-					<div className='flex flex-row gap-2'>
-						<ImportFansButton />
-						<CreateFanButton />
-					</div>
-				}
-			/>
-			<FanFilters />
-			<AllFans />
+		<HydrateClient>
+			<Suspense fallback={<div>Loading...</div>}>
+				<FanContextProvider>
+					<DashContentHeader
+						title='Fans'
+						button={
+							<div className='flex flex-row gap-2'>
+								<ImportFansButton />
+								<CreateFanButton />
+							</div>
+						}
+					/>
+					<FanFilters />
+					<AllFans />
 
-			<CreateOrUpdateFanModal mode='create' />
-			<CreateOrUpdateFanModal mode='update' />
+					<CreateOrUpdateFanModal mode='create' />
+					<CreateOrUpdateFanModal mode='update' />
 
-			<ArchiveOrDeleteFanModal mode='archive' />
-			<ArchiveOrDeleteFanModal mode='delete' />
+					<ArchiveOrDeleteFanModal mode='archive' />
+					<ArchiveOrDeleteFanModal mode='delete' />
 
-			<ImportFansFromCsvModal />
+					<ImportFansFromCsvModal />
 
-			<FanHotkeys />
-		</FanContextProvider>
+					<FanHotkeys />
+				</FanContextProvider>
+			</Suspense>
+		</HydrateClient>
 	);
 }

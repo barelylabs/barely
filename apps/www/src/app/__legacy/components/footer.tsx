@@ -25,8 +25,8 @@ import Link from 'next/link';
 // 	},
 // ];
 
-import { Separator } from '@barely/ui/elements/separator';
-import { Text } from '@barely/ui/elements/typography';
+import { Separator } from '@barely/ui/separator';
+import { Text } from '@barely/ui/typography';
 
 export default function Footer() {
 	return (

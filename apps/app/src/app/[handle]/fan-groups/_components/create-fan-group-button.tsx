@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@barely/ui/elements/button';
+import { Button } from '@barely/ui/button';
 
 import { useFanGroupContext } from '~/app/[handle]/fan-groups/_components/fan-group-context';
 

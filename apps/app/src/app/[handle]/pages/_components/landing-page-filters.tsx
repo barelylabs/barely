@@ -1,10 +1,11 @@
 'use client';
 
 import { Filters } from '~/app/[handle]/_components/filters';
-import { useLandingPageContext } from '~/app/[handle]/pages/_components/landing-page-context';
+import { useLandingPageSearchParams } from '~/app/[handle]/pages/_components/landing-page-context';
 
 export function LandingPageFilters() {
-	const { filters, setSearch, toggleArchived, clearAllFilters } = useLandingPageContext();
+	const { filters, setSearch, toggleArchived, clearAllFilters } =
+		useLandingPageSearchParams();
 
 	return (
 		<Filters

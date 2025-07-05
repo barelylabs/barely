@@ -1,8 +1,8 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { parseCartUrl, setVisitorCookies } from '@barely/lib/middleware/request-parsing';
 import { log } from '@barely/lib/utils/log';
-import { parseCartUrl, setVisitorCookies } from '@barely/lib/utils/middleware';
-import { getAbsoluteUrl } from '@barely/lib/utils/url';
+import { getAbsoluteUrl } from '@barely/utils';
 
 export async function middleware(req: NextRequest) {
 	const domain = req.headers.get('host');

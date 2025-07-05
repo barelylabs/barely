@@ -1,10 +1,13 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { landingPageApi } from '@barely/lib/server/routes/landing-page-render/landing-page-render.api.react';
+import { useLandingPageRenderTRPC } from '@barely/api/public/landing-page.trpc.react';
+import { useMutation } from '@tanstack/react-query';
 
 export function LogVisit({ landingPageId }: { landingPageId: string }) {
-	const { mutate: logEvent } = landingPageApi.log.useMutation();
+	const trpc = useLandingPageRenderTRPC();
+
+	const { mutate: logEvent } = useMutation(trpc.log.mutationOptions());
 
 	const hasLoggedView = useRef(false);
 

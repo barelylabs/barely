@@ -2,9 +2,9 @@
 
 // import { Label, Slider } from '@barely/ui';
 // import { fieldAtom, useFieldActions } from 'form-atoms';
-import { Label } from '@barely/ui/elements/label';
+import { Label } from '@barely/ui/label';
 
-// import { Slider } from '@barely/ui/elements/slider';
+// import { Slider } from '@barely/ui/slider';
 
 // interface PitchReachInputProps {
 // 	minCurators: number;

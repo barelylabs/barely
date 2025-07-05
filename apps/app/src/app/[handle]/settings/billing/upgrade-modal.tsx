@@ -1,21 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { WORKSPACE_PLANS } from '@barely/lib/server/routes/workspace/workspace.settings';
-import { toTitleCase } from '@barely/lib/utils/text';
-import { api } from '@barely/server/api/react';
+import { atomWithToggle } from '@barely/atoms';
+import { WORKSPACE_PLANS } from '@barely/const';
+import { useWorkspace } from '@barely/hooks';
+import { useTRPC } from '@barely/api/app/trpc.react';
+import { toTitleCase } from '@barely/utils';
+import { useMutation } from '@tanstack/react-query';
 import { useAtom } from 'jotai';
 
-import { atomWithToggle } from '@barely/atoms/atom-with-toggle';
-
-import { useWorkspace } from '@barely/hooks/use-workspace';
-
+import { Button } from '@barely/ui/button';
 import { FeatureChecklist } from '@barely/ui/components/feature-checklist';
-import { Badge } from '@barely/ui/elements/badge';
-import { Button } from '@barely/ui/elements/button';
-import { ConfettiBurst } from '@barely/ui/elements/confetti';
-import { Modal, ModalBody, ModalHeader } from '@barely/ui/elements/modal';
-import { Text } from '@barely/ui/elements/typography';
+import { Badge } from '@barely/ui/badge';
+import { ConfettiBurst } from '@barely/ui/confetti';
+import { Modal, ModalBody, ModalHeader } from '@barely/ui/modal';
+import { Text } from '@barely/ui/typography';
 
 export const showUpgradeModalAtom = atomWithToggle(false);
 
@@ -23,6 +22,7 @@ export function UpgradeModal(props: {
 	checkoutSuccessPath?: string;
 	checkoutCancelPath?: string;
 }) {
+	const trpc = useTRPC();
 	const { workspace } = useWorkspace();
 
 	const [showUpgradeModal, setShowUpgradeModal] = useAtom(showUpgradeModalAtom);
@@ -30,17 +30,18 @@ export function UpgradeModal(props: {
 	const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
 	const [creatingCheckout, setCreatingCheckout] = useState(false);
 
-	const { mutate: createUpgradeCheckoutLink } =
-		api.workspaceStripe.createCheckoutLink.useMutation({
-			onSuccess: checkoutLink => {
-				if (checkoutLink) window.location.replace(checkoutLink);
-			},
-			onError: () => setCreatingCheckout(false),
-		});
+	const { mutate: createUpgradeCheckoutLink } = useMutation({
+		...trpc.workspaceStripe.createCheckoutLink.mutationOptions(),
+		onSuccess: checkoutLink => {
+			if (checkoutLink) window.location.replace(checkoutLink);
+		},
+		onError: () => setCreatingCheckout(false),
+	});
 
 	const triggerUpgradeCheckout = () => {
 		setCreatingCheckout(true);
 		createUpgradeCheckoutLink({
+			handle: workspace.handle,
 			planId: 'pro',
 			billingCycle,
 			successPath:
@@ -58,7 +59,7 @@ export function UpgradeModal(props: {
 	if (!pro) return null;
 
 	const cost =
-		billingCycle === 'monthly' ? pro?.price.monthly.amount : pro?.price.yearly.amount;
+		billingCycle === 'monthly' ? pro.price.monthly.amount : pro.price.yearly.amount;
 
 	return (
 		<Modal

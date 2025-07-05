@@ -1,17 +1,17 @@
 import type { NextRequest } from 'next/server';
-import { handleStripeConnectChargeSuccess } from '@barely/lib/server/routes/stripe-connect/stripe-connect.fns';
+import { handleStripeConnectChargeSuccess } from '@barely/lib/functions/stripe-connect.fns';
 import Stripe from 'stripe';
 
-import { env } from '~/env';
+import { appEnv } from '~/env';
 
 // export const runtime = 'edge';
 
-const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
+const stripe = new Stripe(appEnv.STRIPE_SECRET_KEY, {
 	apiVersion: '2023-10-16',
 	httpClient: Stripe.createFetchHttpClient(),
 });
 
-const webhookSecret = env.STRIPE_CONNECT_WEBHOOK_SECRET;
+const webhookSecret = appEnv.STRIPE_CONNECT_WEBHOOK_SECRET;
 
 export async function POST(req: NextRequest) {
 	const body = await req.text();

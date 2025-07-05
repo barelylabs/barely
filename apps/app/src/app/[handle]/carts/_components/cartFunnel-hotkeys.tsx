@@ -1,6 +1,6 @@
 'use client';
 
-import { useModalHotKeys } from '@barely/lib/hooks/use-modal-hot-keys';
+import { useModalHotKeys } from '@barely/hooks';
 
 import { useCartFunnelContext } from '~/app/[handle]/carts/_components/cartFunnel-context';
 

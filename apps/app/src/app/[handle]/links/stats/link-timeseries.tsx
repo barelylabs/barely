@@ -1,15 +1,16 @@
 'use client';
 
-import { useLinkStatFilters } from '@barely/lib/hooks/use-link-stat-filters';
-// import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-// import { cn } from '@barely/lib/utils/cn';
-import { api } from '@barely/server/api/react';
+import { useLinkStatFilters } from '@barely/hooks';
+// import { useWorkspace } from '@barely/hooks';
+// import { cn } from '@barely/utils';
+import { useTRPC } from '@barely/api/app/trpc.react';
+import { useSuspenseQuery } from '@tanstack/react-query';
 
 import { AreaChart } from '@barely/ui/charts/area-chart';
-import { Card } from '@barely/ui/elements/card';
-import { InfoTabButton } from '@barely/ui/elements/info-tab-button';
+import { Card } from '@barely/ui/card';
+import { InfoTabButton } from '@barely/ui/info-tab-button';
 
-import { nFormatter } from '@barely/utils/number';
+import { nFormatter } from '@barely/utils';
 
 import { WebEventFilterBadges } from '~/app/[handle]/_components/filter-badges';
 
@@ -18,20 +19,23 @@ export function LinkTimeseries() {
 
 	// const {showVisits, showClicks} = filters;
 
-	const { data: timeseries } = api.stat.linkTimeseries.useQuery(
-		{ ...filtersWithHandle },
-		{
-			select: data =>
-				data.map(row => ({
-					...row,
-					date: formatTimestamp(row.start),
-				})),
-		},
+	const trpc = useTRPC();
+	const { data: timeseries } = useSuspenseQuery(
+		trpc.stat.linkTimeseries.queryOptions(
+			{ ...filtersWithHandle },
+			{
+				select: data =>
+					data.map(row => ({
+						...row,
+						date: formatTimestamp(row.start),
+					})),
+			},
+		),
 	);
 
-	const totalClicks = timeseries?.reduce((acc, row) => acc + row.link_clicks, 0);
+	const totalClicks = timeseries.reduce((acc, row) => acc + row.link_clicks, 0);
 
-	const chartData = (timeseries ?? []).map(row => ({
+	const chartData = timeseries.map(row => ({
 		...row,
 		clicks: row.link_clicks,
 	}));
@@ -53,7 +57,7 @@ export function LinkTimeseries() {
 				<InfoTabButton
 					icon='click'
 					label='CLICKS'
-					value={totalClicks ?? 0}
+					value={totalClicks}
 					selected={true}
 					selectedClassName='border-blue-500 bg-blue-100'
 					isLeft

@@ -1,3 +1,4 @@
+import type { IconKey } from '@barely/ui/icon';
 import type {
 	AddToMailchimpAudienceNode,
 	BooleanNode,
@@ -6,22 +7,20 @@ import type {
 	SendEmailNode,
 	TriggerNode,
 	WaitNode,
-} from '@barely/lib/server/routes/flow/flow.ui.types';
-import type { IconKey } from '@barely/ui/elements/icon';
+} from '@barely/validators';
 import { useMemo } from 'react';
-import { useCartFunnels } from '@barely/lib/hooks/use-cart-funnels';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
-import { MERCH_TYPES } from '@barely/lib/server/routes/product/product.constants';
-import { cn } from '@barely/lib/utils/cn';
-import { formatCentsToDollars } from '@barely/lib/utils/currency';
+import { MERCH_TYPES } from '@barely/const';
+import { useCartFunnels, useWorkspace } from '@barely/hooks';
+import { useTRPC } from '@barely/api/app/trpc.react';
+import { cn, formatCentsToDollars } from '@barely/utils';
+import { useSuspenseInfiniteQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { Handle, Position } from '@xyflow/react';
 import { useShallow } from 'zustand/react/shallow';
 
-import { Button } from '@barely/ui/elements/button';
-import { Icon } from '@barely/ui/elements/icon';
-import { Switch } from '@barely/ui/elements/switch';
-import { Text } from '@barely/ui/elements/typography';
+import { Button } from '@barely/ui/button';
+import { Icon } from '@barely/ui/icon';
+import { Switch } from '@barely/ui/switch';
+import { Text } from '@barely/ui/typography';
 
 import { useFlowStore } from './flow-store';
 
@@ -72,9 +71,8 @@ function NodeDiv({
 			<SourceHandle />
 			<div className='flex flex-col items-center gap-2'>
 				<div className='flex flex-row items-center gap-1'>
-					{IconComponent && (
-						<IconComponent className={cn('h-[13px] w-[13px]', iconClassName)} />
-					)}
+					<IconComponent className={cn('h-[13px] w-[13px]', iconClassName)} />
+
 					<Text variant='md/bold'>{title}</Text>
 				</div>
 			</div>
@@ -117,7 +115,7 @@ export function TriggerNodeType({ data, id }: { id: string; data: TriggerNode['d
 
 	const { cartFunnels } = useCartFunnels();
 
-	const cartFunnel = cartFunnels?.find(c => c.id === data.cartFunnelId);
+	const cartFunnel = cartFunnels.find(c => c.id === data.cartFunnelId);
 
 	const TriggerIcon =
 		Icon[
@@ -136,18 +134,16 @@ export function TriggerNodeType({ data, id }: { id: string; data: TriggerNode['d
 			title='Trigger'
 			subtitle={
 				data.type === 'newCartOrder' ?
-					`New cart order${cartFunnel?.name ? `: ${cartFunnel?.name}` : ''}`
+					`New cart order${cartFunnel?.name ? `: ${cartFunnel.name}` : ''}`
 				: data.type === 'callFlow' ?
 					'Trigger from another flow'
-				: data.type === 'newFan' ?
-					'New fan'
-				:	'Choose a trigger'
+				:	'New fan'
 			}
 			iconClassName='h-[16px] w-[16px] text-amber-400'
 			stripeClassName='bg-amber-400'
 			// selected={selected}
 		>
-			{TriggerIcon && <TriggerIcon className='h-[16px] w-[16px]' />}
+			<TriggerIcon className='h-[16px] w-[16px]' />
 			<Switch
 				checked={data.enabled}
 				onCheckedChange={checked => updateNodeEnabled(id, checked)}
@@ -396,12 +392,15 @@ export function SendEmailFromTemplateGroupNodeType({
 
 	const selected = selectedNodes.some(node => node.id === id);
 
+	const trpc = useTRPC();
 	const { handle } = useWorkspace();
 
-	const { data: emailTemplateGroup } = api.emailTemplateGroup.byId.useQuery({
-		id: data.emailTemplateGroupId,
-		handle,
-	});
+	const { data: emailTemplateGroup } = useSuspenseQuery(
+		trpc.emailTemplateGroup.byId.queryOptions({
+			id: data.emailTemplateGroupId,
+			handle,
+		}),
+	);
 
 	return (
 		<NodeDiv
@@ -411,7 +410,7 @@ export function SendEmailFromTemplateGroupNodeType({
 				setShowEmailFromTemplateGroupModal(true);
 			}}
 			title='Email Template Group'
-			subtitle={`Send Email from "${emailTemplateGroup?.name}"`}
+			subtitle={`Send Email from "${emailTemplateGroup.name}"`}
 			iconClassName='h-[16px] w-[16px] text-indigo-400'
 			stripeClassName='bg-indigo-400'
 			selected={selected}
@@ -437,37 +436,41 @@ export function BooleanNodeType({ id, data }: { id: string; data: BooleanNode['d
 		useShallow(booleanStoreSelector),
 	);
 
+	const trpc = useTRPC();
 	const { handle } = useWorkspace();
 
-	const { data: infiniteProducts } = api.product.byWorkspace.useInfiniteQuery(
-		{
-			handle,
-		},
-		{
-			getNextPageParam: lastPage => lastPage.nextCursor,
-		},
-	);
+	const { data: infiniteProducts } = useSuspenseInfiniteQuery({
+		...trpc.product.byWorkspace.infiniteQueryOptions(
+			{
+				handle,
+			},
+			{
+				getNextPageParam: lastPage => lastPage.nextCursor,
+			},
+		),
+	});
 
-	const product = infiniteProducts?.pages[0]?.products.find(p => p.id === data.productId);
+	const product = infiniteProducts.pages[0]?.products.find(p => p.id === data.productId);
 
-	const { data: infiniteCartFunnels } = api.cartFunnel.byWorkspace.useInfiniteQuery(
-		{
-			handle,
-		},
-		{
-			getNextPageParam: lastPage => lastPage.nextCursor,
-		},
-	);
+	const { data: infiniteCartFunnels } = useSuspenseInfiniteQuery({
+		...trpc.cartFunnel.byWorkspace.infiniteQueryOptions(
+			{
+				handle,
+			},
+			{
+				getNextPageParam: lastPage => lastPage.nextCursor,
+			},
+		),
+	});
 
-	const cartFunnel = infiniteCartFunnels?.pages[0]?.cartFunnels.find(
+	const cartFunnel = infiniteCartFunnels.pages[0]?.cartFunnels.find(
 		p => p.id === data.cartFunnelId,
 	);
 
 	const ProductIcon = useMemo(() => {
-		if (!product?.merchType || !MERCH_TYPES.includes(product?.merchType)) return null;
+		if (!product?.merchType || !MERCH_TYPES.includes(product.merchType)) return null;
 
-		const IconComponent = Icon[product?.merchType as keyof typeof Icon];
-		if (!IconComponent) return null;
+		const IconComponent = Icon[product.merchType];
 
 		return IconComponent;
 	}, [product?.merchType]);
@@ -584,10 +587,13 @@ export function MailchimpAudienceNodeType({
 
 	const selected = selectedNodes.some(node => node.id === id);
 
+	const trpc = useTRPC();
 	const { handle } = useWorkspace();
-	const { data: mailchimpAudiences } = api.mailchimp.audiencesByWorkspace.useQuery({
-		handle,
-	});
+	const { data: mailchimpAudiences } = useSuspenseQuery(
+		trpc.mailchimp.audiencesByWorkspace.queryOptions({
+			handle,
+		}),
+	);
 
 	const currentMailchimpAudience = mailchimpAudiences?.find(
 		audience => audience.id === data.mailchimpAudienceId,

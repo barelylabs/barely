@@ -1,18 +1,14 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
-import { formatCentsToDollars } from '@barely/lib/utils/currency';
-import { formatDate } from '@barely/lib/utils/format-date';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import { formatCentsToDollars, formatDate } from '@barely/utils';
 
+import { Button } from '@barely/ui/button';
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
-// import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-// import { api } from '@barely/lib/server/api/react';
-
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { Button } from '@barely/ui/elements/button';
-import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
-import { Icon } from '@barely/ui/elements/icon';
-import { Text } from '@barely/ui/elements/typography';
+import { GridList, GridListCard } from '@barely/ui/grid-list';
+import { Icon } from '@barely/ui/icon';
+import { Text } from '@barely/ui/typography';
 
 import { CreateEmailBroadcastButton } from './create-email-broadcast-button';
 import { useEmailBroadcastsContext } from './email-broadcasts-context';

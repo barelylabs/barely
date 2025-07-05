@@ -1,15 +1,25 @@
-import { api } from '@barely/lib/server/api/server';
+import { Suspense } from 'react';
 
 import { UpdateLandingPageForm } from '~/app/[handle]/pages/[landingPageId]/_components/update-landing-page-form';
+import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
-export default function LandingPagePage({
+export default async function LandingPagePage({
 	params,
 }: {
-	params: { handle: string; landingPageId: string };
+	params: Promise<{ handle: string; landingPageId: string }>;
 }) {
-	const { handle, landingPageId } = params;
+	const { handle, landingPageId } = await params;
 
-	const initialLandingPage = api({ handle }).landingPage.byId({ handle, landingPageId });
+	// Prefetch data (not async - don't await)
+	prefetch(
+		trpc.landingPage.byId.queryOptions({ handle, landingPageId })
+	);
 
-	return <UpdateLandingPageForm initialLandingPage={initialLandingPage} />;
+	return (
+		<HydrateClient>
+			<Suspense fallback={<div>Loading page...</div>}>
+				<UpdateLandingPageForm />
+			</Suspense>
+		</HydrateClient>
+	);
 }

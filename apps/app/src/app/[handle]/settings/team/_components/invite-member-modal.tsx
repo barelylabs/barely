@@ -1,22 +1,23 @@
 'use client';
 
 import type { z } from 'zod/v4';
-import { atomWithToggle } from '@barely/lib/atoms/atom-with-toggle';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { useZodForm } from '@barely/lib/hooks/use-zod-form';
-import { api } from '@barely/lib/server/api/react';
-import { inviteMemberSchema } from '@barely/lib/server/routes/workspace-invite/workspace-invite.schema';
+import { atomWithToggle } from '@barely/atoms';
+import { useWorkspace, useZodForm } from '@barely/hooks';
+import { useTRPC } from '@barely/api/app/trpc.react';
+import { inviteMemberSchema } from '@barely/validators';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAtom } from 'jotai';
 
-import { Modal, ModalBody, ModalHeader } from '@barely/ui/elements/modal';
-import { Form, SubmitButton } from '@barely/ui/forms';
 // import { SelectField } from '@barely/ui/forms/select-field';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { TextField } from '@barely/ui/forms/text-field';
+import { Modal, ModalBody, ModalHeader } from '@barely/ui/modal';
 
 export const showInviteMemberModalAtom = atomWithToggle(false);
 
 export function InviteMemberModal() {
-	const apiUtils = api.useUtils();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
 	const { workspace } = useWorkspace();
 	const [showModal, setShowModal] = useAtom(showInviteMemberModalAtom);
 
@@ -28,16 +29,20 @@ export function InviteMemberModal() {
 		},
 	});
 
-	const { mutateAsync: inviteMember } = api.workspaceInvite.inviteMember.useMutation({
+	const { mutateAsync: inviteMember } = useMutation({
+		...trpc.workspaceInvite.inviteMember.mutationOptions(),
 		onSuccess: async () => {
 			form.reset();
 			setShowModal(false);
-			await apiUtils.workspace.invites.invalidate();
+			await queryClient.invalidateQueries(trpc.workspace.invites.queryFilter());
 		},
 	});
 
 	const handleSubmit = async (data: z.infer<typeof inviteMemberSchema>) => {
-		await inviteMember(data);
+		await inviteMember({
+			...data,
+			handle: workspace.handle,
+		});
 		setShowModal(false);
 	};
 

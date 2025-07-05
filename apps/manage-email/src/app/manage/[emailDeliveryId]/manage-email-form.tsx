@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { emailManageApi } from '@barely/lib/server/routes/email-manage/email-manage.api.react';
+import { useEmailManageTRPC } from '@barely/api/public/email-manage.trpc.react';
+import { useToast } from '@barely/toast';
+import { useMutation } from '@tanstack/react-query';
 
-import { Button } from '@barely/ui/elements/button';
-import { ConfettiBurst } from '@barely/ui/elements/confetti';
-import { Text } from '@barely/ui/elements/typography';
-
-import { useToast } from '../../../../../../packages/toast';
+import { Button } from '@barely/ui/button';
+import { ConfettiBurst } from '@barely/ui/confetti';
+import { Text } from '@barely/ui/typography';
 
 export function ManageEmailForm({
 	emailDeliveryId,
@@ -20,29 +20,23 @@ export function ManageEmailForm({
 }) {
 	const { toast } = useToast();
 
-	// const [justUnsubbed, setJustUnsubbed] = useState(justUnsubscribed);
-
-	// useEffect(() => {
-	// 	if (toast && justUnsubbed) {
-	// 		console.log('justUnsubbed', justUnsubbed);
-	// 		toast.success('You have been unsubscribed from marketing emails');
-	// 		setJustUnsubbed(false);
-	// 	}
-	// }, [justUnsubbed, toast]);
+	const trpc = useEmailManageTRPC();
 
 	const [emailMarketingOptIn, setEmailMarketingOptIn] = useState(
 		initialEmailMarketingOptIn,
 	);
 
-	const { mutate, isPending } = emailManageApi.toggleEmailMarketingOptIn.useMutation({
-		onSuccess: data => {
-			setEmailMarketingOptIn(data.newEmailMarketingOptIn);
-			if (data.newEmailMarketingOptIn) {
-				toast.success('You have been resubscribed to marketing emails');
-			} else {
-				toast.success('You have been unsubscribed from marketing emails');
-			}
-		},
+	const { mutate, isPending } = useMutation({
+		...trpc.toggleEmailMarketingOptIn.mutationOptions({
+			onSuccess: (data) => {
+				setEmailMarketingOptIn(data.newEmailMarketingOptIn);
+				if (data.newEmailMarketingOptIn) {
+					toast.success('You have been resubscribed to marketing emails');
+				} else {
+					toast.success('You have been unsubscribed from marketing emails');
+				}
+			},
+		}),
 	});
 
 	const buttonText =

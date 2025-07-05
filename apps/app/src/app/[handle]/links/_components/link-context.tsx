@@ -1,48 +1,17 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/react';
-import type { linkFilterParamsSchema } from '@barely/lib/server/routes/link/link.schema';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import type { linkFilterParamsSchema } from '@barely/validators';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod/v4';
-import {
-	createContext,
-	use,
-	useCallback,
-	useContext,
-	useMemo,
-	useRef,
-	useState,
-} from 'react';
-import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
-import { linkSearchParamsSchema } from '@barely/lib/server/routes/link/link.schema';
+import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { useTypedOptimisticQuery, useWorkspace } from '@barely/hooks';
+import { linkSearchParamsSchema } from '@barely/validators';
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
-
-// interface LinkContext {
-// 	links: AppRouterOutputs['link']['byWorkspace']['links'];
-// 	linkSelection: Selection;
-// 	lastSelectedLinkId: string | undefined;
-// 	lastSelectedLink: AppRouterOutputs['link']['byWorkspace']['links'][number] | undefined;
-// 	setLinkSelection: (selection: Selection) => void;
-// 	gridListRef: React.RefObject<HTMLDivElement>;
-// 	focusGridList: () => void;
-// 	showCreateLinkModal: boolean;
-// 	setShowCreateLinkModal: (show: boolean) => void;
-// 	showUpdateLinkModal: boolean;
-// 	setShowUpdateLinkModal: (show: boolean) => void;
-// 	showArchiveLinkModal: boolean;
-// 	setShowArchiveLinkModal: (show: boolean) => void;
-// 	showDeleteLinkModal: boolean;
-// 	setShowDeleteLinkModal: (show: boolean) => void;
-// 	// filters
-// 	filters: z.infer<typeof linkFilterParamsSchema>;
-// 	pendingFiltersTransition: boolean;
-// 	setSearch: (search: string) => void;
-// 	toggleArchived: () => void;
-// 	clearAllFilters: () => void;
-// }
 
 type LinkContext = InfiniteItemsContext<
 	AppRouterOutputs['link']['byWorkspace']['links'][0],
@@ -51,13 +20,7 @@ type LinkContext = InfiniteItemsContext<
 
 const LinkContext = createContext<LinkContext | undefined>(undefined);
 
-export function LinkContextProvider({
-	children,
-	initialInfiniteLinks,
-}: {
-	children: React.ReactNode;
-	initialInfiniteLinks: Promise<AppRouterOutputs['link']['byWorkspace']>;
-}) {
+export function LinkContextProvider({ children }: { children: React.ReactNode }) {
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [showUpdateModal, setShowUpdateModal] = useState(false);
 	const [showArchiveModal, setShowArchiveModal] = useState(false);
@@ -75,7 +38,7 @@ export function LinkContextProvider({
 		: selectedLinkIds === 'all' ? 'all'
 		: new Set(selectedLinkIds);
 
-	const initialData = use(initialInfiniteLinks);
+	const trpc = useTRPC();
 
 	const {
 		data: infiniteLinks,
@@ -85,26 +48,17 @@ export function LinkContextProvider({
 		isFetching,
 		isRefetching,
 		isPending,
-	} = api.link.byWorkspace.useInfiniteQuery(
-		{ handle, ...filters },
-		{
-			initialData: () => {
-				return {
-					pages: [
-						{
-							links: initialData.links,
-							nextCursor: initialData.nextCursor,
-						},
-					],
-					pageParams: [], // todo: fix this
-				};
+	} = useSuspenseInfiniteQuery({
+		...trpc.link.byWorkspace.infiniteQueryOptions(
+			{ handle, ...filters },
+			{
+				getNextPageParam: lastPage => lastPage.nextCursor,
 			},
-			getNextPageParam: lastPage => lastPage.nextCursor,
-		},
-	);
+		),
+	});
 
 	const links = useMemo(() => {
-		return infiniteLinks?.pages.flatMap(page => page.links) ?? [];
+		return infiniteLinks.pages.flatMap(page => page.links);
 	}, [infiniteLinks]);
 
 	const setLinkSelection = useCallback(
@@ -137,7 +91,7 @@ export function LinkContextProvider({
 	);
 
 	const lastSelectedLinkId =
-		linkSelection === 'all' || !linkSelection ?
+		linkSelection === 'all' || !linkSelection.size ?
 			undefined
 		:	Array.from(linkSelection).pop()?.toString();
 

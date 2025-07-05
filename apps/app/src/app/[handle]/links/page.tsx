@@ -1,7 +1,7 @@
 import type { z } from 'zod/v4';
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import { api } from '@barely/lib/server/api/server';
-import { linkSearchParamsSchema } from '@barely/server/routes/link/link.schema';
+import { linkSearchParamsSchema } from '@barely/validators';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllLinks } from '~/app/[handle]/links/_components/all-links';
@@ -12,6 +12,7 @@ import { LinkContextProvider } from '~/app/[handle]/links/_components/link-conte
 import { LinkFilters } from '~/app/[handle]/links/_components/link-filters';
 import { LinkHotkeys } from '~/app/[handle]/links/_components/link-hotkeys';
 import { UpgradeModal } from '~/app/[handle]/settings/billing/upgrade-modal';
+import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
 export default async function LinksPage({
 	params,
@@ -27,31 +28,35 @@ export default async function LinksPage({
 		redirect(`/${awaitedParams.handle}/links`);
 	}
 
-	// const { selectedLinkIds, ...filters } = parsedFilters.data;
-	const links = api({ handle: awaitedParams.handle }).link.byWorkspace({
-		handle: awaitedParams.handle,
-		...parsedFilters.data,
-	});
+	// Prefetch data (not async - don't await)
+	prefetch(
+		trpc.link.byWorkspace.infiniteQueryOptions({
+			handle: awaitedParams.handle,
+			...parsedFilters.data,
+		}),
+	);
+
+	prefetch(trpc.webDomain.byWorkspace.queryOptions({ handle: awaitedParams.handle }));
 
 	return (
-		<LinkContextProvider initialInfiniteLinks={links}>
-			<DashContentHeader title='Links' button={<CreateLinkButton />} />
+		<HydrateClient>
+			<LinkContextProvider>
+				<DashContentHeader title='Links' button={<CreateLinkButton />} />
 
-			<div className='flex w-full flex-col gap-4'>
 				<LinkFilters />
-				<AllLinks />
-			</div>
-			{/* <div className='grid grid-cols-1 gap-5 md:grid-cols-[auto,1fr]'>
-			</div> */}
+				<Suspense fallback={<div>Loading...</div>}>
+					<AllLinks />
+				</Suspense>
 
-			<CreateOrUpdateLinkModal mode='create' />
-			<CreateOrUpdateLinkModal mode='update' />
+				<CreateOrUpdateLinkModal mode='create' />
+				<CreateOrUpdateLinkModal mode='update' />
 
-			<ArchiveOrDeleteLinkModal mode='archive' />
-			<ArchiveOrDeleteLinkModal mode='delete' />
+				<ArchiveOrDeleteLinkModal mode='archive' />
+				<ArchiveOrDeleteLinkModal mode='delete' />
 
-			<LinkHotkeys />
-			<UpgradeModal checkoutCancelPath='links' checkoutSuccessPath='links' />
-		</LinkContextProvider>
+				<LinkHotkeys />
+				<UpgradeModal checkoutCancelPath='links' checkoutSuccessPath='links' />
+			</LinkContextProvider>
+		</HydrateClient>
 	);
 }

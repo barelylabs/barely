@@ -1,14 +1,15 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
-import type { fmFilterParamsSchema } from '@barely/lib/server/routes/fm/fm.schema';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import type { fmFilterParamsSchema } from '@barely/validators';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod/v4';
-import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
-import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
-import { fmSearchParamsSchema } from '@barely/lib/server/routes/fm/fm.schema';
+import { createContext, useCallback, useContext, useRef, useState } from 'react';
+import { useTypedOptimisticQuery, useWorkspace } from '@barely/hooks';
+import { fmSearchParamsSchema } from '@barely/validators';
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
 
@@ -19,16 +20,11 @@ type FlowContext = InfiniteItemsContext<
 
 const FlowContext = createContext<FlowContext | undefined>(undefined);
 
-export function FlowContextProvider({
-	children,
-	initialFlows,
-}: {
-	children: React.ReactNode;
-	initialFlows: Promise<AppRouterOutputs['flow']['byWorkspace']>;
-}) {
+export function FlowContextProvider({ children }: { children: React.ReactNode }) {
 	const [showArchiveModal, setShowArchiveModal] = useState(false);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+	const trpc = useTRPC();
 	const { handle } = useWorkspace();
 
 	const { data, setQuery, removeByKey, removeAllQueryParams, pending } =
@@ -41,7 +37,6 @@ export function FlowContextProvider({
 		: selectedFmPageIds === 'all' ? 'all'
 		: new Set(selectedFmPageIds);
 
-	const initialData = use(initialFlows);
 	const {
 		data: infiniteFlows,
 		hasNextPage,
@@ -50,20 +45,16 @@ export function FlowContextProvider({
 		isFetching,
 		isRefetching,
 		isPending,
-	} = api.flow.byWorkspace.useInfiniteQuery(
-		{ handle, ...filters },
-		{
-			initialData: () => {
-				return {
-					pages: [{ flows: initialData.flows, nextCursor: initialData.nextCursor }],
-					pageParams: [], // todo - figure out how to structure this
-				};
+	} = useSuspenseInfiniteQuery({
+		...trpc.flow.byWorkspace.infiniteQueryOptions(
+			{ handle, ...filters },
+			{
+				getNextPageParam: lastPage => lastPage.nextCursor,
 			},
-			getNextPageParam: lastPage => lastPage.nextCursor,
-		},
-	);
+		),
+	});
 
-	const flows = infiniteFlows?.pages.flatMap(page => page.flows) ?? [];
+	const flows = infiniteFlows.pages.flatMap(page => page.flows);
 
 	// const gridListRef = useRef<HTMLDivElement>(null);
 
@@ -99,11 +90,11 @@ export function FlowContextProvider({
 	);
 
 	const lastSelectedFlowId =
-		flowSelection === 'all' || !flowSelection ?
+		flowSelection === 'all' || !flowSelection.size ?
 			undefined
 		:	Array.from(flowSelection).pop()?.toString();
 
-	const gridListRef = useRef<HTMLDivElement>(null);
+	const gridListRef = useRef<HTMLDivElement | null>(null);
 
 	const contextValue = {
 		items: flows,

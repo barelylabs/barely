@@ -3,23 +3,22 @@
 import type { z } from 'zod/v4';
 import { useState } from 'react';
 import Link from 'next/link';
+import { useZodForm } from '@barely/hooks';
 import {
 	emailInUseMessage,
+	isPossiblePhoneNumber,
+	isRealEmail,
 	newUserContactInfoSchema,
 	phoneNumberInUseMessage,
-} from '@barely/lib/server/routes/user/user.schema';
+} from '@barely/validators';
+import { useMutation } from '@tanstack/react-query';
 
-import { api } from '@barely/api/react';
+import { useTRPC } from '@barely/api/app/trpc.react';
 
-import { useZodForm } from '@barely/hooks/use-zod-form';
-
-import { Text } from '@barely/ui/elements/typography';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { PhoneField } from '@barely/ui/forms/phone-field';
 import { TextField } from '@barely/ui/forms/text-field';
-
-import { isRealEmail } from '@barely/utils/email';
-import { isPossiblePhoneNumber } from '@barely/utils/phone-number';
+import { Text } from '@barely/ui/typography';
 
 import { LoginLinkSent } from '../login-success';
 
@@ -28,6 +27,7 @@ interface RegisterFormProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const RegisterUserForm = ({ callbackUrl }: RegisterFormProps) => {
+	const trpc = useTRPC();
 	const [identifier, setIdentifier] = useState('');
 	const [creatingAccount, setCreatingAccount] = useState(false);
 	const [loginEmailSent, setLoginEmailSent] = useState(false);
@@ -41,13 +41,15 @@ const RegisterUserForm = ({ callbackUrl }: RegisterFormProps) => {
 		},
 	});
 
-	const sendLoginEmail = api.auth.sendLoginEmail.useMutation({
+	const sendLoginEmail = useMutation({
+		...trpc.auth.sendLoginEmail.mutationOptions(),
 		onSuccess: () => setLoginEmailSent(true),
 	});
 
-	const createUser = api.user.create.useMutation({
+	const createUser = useMutation({
+		...trpc.user.create.mutationOptions(),
 		onSuccess: newUser => {
-			if (!newUser) throw new Error('No user returned from createUser mutation');
+			// if (!newUser) throw new Error('No user returned from createUser mutation');
 
 			setIdentifier(newUser.email);
 			sendLoginEmail.mutate({ email: newUser.email, callbackUrl });

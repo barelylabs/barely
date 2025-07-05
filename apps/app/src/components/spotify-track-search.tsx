@@ -3,12 +3,12 @@
 // import { FieldAtom, useFieldActions } from 'form-atoms';
 // import { atom, useAtom } from 'jotai';
 
-// import { atomWithDebounce } from '@barely/atoms/debounce.atom';
+// import { atomWithDebounce } from '@barely/atoms';
 // import { SpotifyTrackOption } from '@barely/server/spotify/spotify.schema';
 // import { TrackWithTeamAndGenres } from '@barely/server/track/track.schema';
 
-// import { Combobox } from '@barely/ui/elements/combobox';
-// import { FieldWrapper } from '@barely/ui/elements/field-wrapper';
+// import { Combobox } from '@barely/ui/combobox';
+// import { FieldWrapper } from '@barely/ui/field-wrapper';
 
 // import { api } from '~/utils/api';
 

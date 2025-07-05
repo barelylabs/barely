@@ -2,29 +2,32 @@
 
 import type { z } from 'zod/v4';
 import { useCallback } from 'react';
-import { useZodForm } from '@barely/lib/hooks/use-zod-form';
-import { api } from '@barely/lib/server/api/react';
-import { updateEmailAddressSchema } from '@barely/lib/server/routes/email-address/email-address.schema';
+import { useWorkspace, useZodForm } from '@barely/hooks';
+import { useTRPC } from '@barely/api/app/trpc.react';
+import { updateEmailAddressSchema } from '@barely/validators';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
-import { Text } from '@barely/ui/elements/typography';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SwitchField } from '@barely/ui/forms/switch-field';
 import { TextField } from '@barely/ui/forms/text-field';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
+import { Text } from '@barely/ui/typography';
 
 import { useEmailAddressContext } from './email-address-context';
 
 export function UpdateEmailAddressModal() {
-	const apiUtils = api.useUtils();
-
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
+	const { handle } = useWorkspace();
 	const {
-		showUpdateEmailAddressModal,
-		setShowUpdateEmailAddressModal,
+		showUpdateModal,
+		setShowUpdateModal,
 		focusGridList,
-		lastSelectedEmailAddress,
+		lastSelectedItem: lastSelectedEmailAddress,
 	} = useEmailAddressContext();
 
-	const { mutateAsync: updateEmailAddress } = api.emailAddress.update.useMutation({
+	const { mutateAsync: updateEmailAddress } = useMutation({
+		...trpc.emailAddress.update.mutationOptions(),
 		onSuccess: async () => {
 			await handleCloseModal();
 		},
@@ -49,24 +52,27 @@ export function UpdateEmailAddressModal() {
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
-		await apiUtils.emailAddress.invalidate();
+		await queryClient.invalidateQueries(trpc.emailAddress.byWorkspace.queryFilter());
 		form.reset();
-		setShowUpdateEmailAddressModal(false);
-	}, [focusGridList, apiUtils.emailAddress, form, setShowUpdateEmailAddressModal]);
+		setShowUpdateModal(false);
+	}, [focusGridList, queryClient, trpc, form, setShowUpdateModal]);
 
 	const handleSubmit = useCallback(
 		async (data: z.infer<typeof updateEmailAddressSchema>) => {
-			await updateEmailAddress(data);
+			await updateEmailAddress({
+				...data,
+				handle,
+			});
 		},
-		[updateEmailAddress],
+		[updateEmailAddress, handle],
 	);
 
 	const preventDefaultClose = form.formState.isDirty;
 
 	return (
 		<Modal
-			showModal={showUpdateEmailAddressModal}
-			setShowModal={setShowUpdateEmailAddressModal}
+			showModal={showUpdateModal}
+			setShowModal={setShowUpdateModal}
 			preventDefaultClose={preventDefaultClose}
 			onClose={handleCloseModal}
 			className='max-h-fit max-w-md'

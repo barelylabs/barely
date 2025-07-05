@@ -1,0 +1,39 @@
+{
+	"name": "@barely/tb",
+	"private": true,
+	"version": "0.1.0",
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./constants": "./src/constants/index.ts",
+		"./ingest": "./src/ingest/index.ts",
+		"./schema": "./src/schema/index.ts",
+		"./query": "./src/query/index.ts"
+	},
+	"license": "MIT",
+	"scripts": {
+		"build": "tsc",
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"dev": "tsc",
+		"format": "prettier --check . --ignore-path ../../.gitignore",
+		"lint": "eslint",
+		"typecheck": "tsc --noEmit --emitDeclarationOnly false"
+	},
+	"dependencies": {
+		"@barely/const": "workspace:*",
+		"@barely/db": "workspace:*",
+		"@barely/utils": "workspace:*",
+		"@barely/validators": "workspace:*",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@barely/eslint-config": "workspace:*",
+		"@barely/prettier-config": "workspace:*",
+		"@barely/tsconfig": "workspace:*",
+		"@types/node": "catalog:",
+		"eslint": "catalog:",
+		"prettier": "catalog:",
+		"typescript": "catalog:"
+	},
+	"prettier": "@barely/prettier-config"
+}

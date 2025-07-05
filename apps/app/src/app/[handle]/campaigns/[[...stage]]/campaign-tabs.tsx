@@ -1,15 +1,14 @@
 'use client';
 
-import type { HorizontalTabItemProps } from '@barely/ui/components/navigation/horizontal-tabs';
+import type { HorizontalTabItemProps } from '@barely/ui/components/horizontal-tabs';
 import { useParams } from 'next/navigation';
-import { useTRPC } from '@barely/lib/server/api/react';
+import { useWorkspace } from '@barely/hooks';
+import { useTRPC } from '@barely/api/app/trpc.react';
 import { useQuery } from '@tanstack/react-query';
 
-import { useWorkspace } from '@barely/hooks/use-workspace';
-
-import { HorizontalTabs } from '@barely/ui/components/navigation/horizontal-tabs';
-import { Button } from '@barely/ui/elements/button';
-import { Icon } from '@barely/ui/elements/icon';
+import { Button } from '@barely/ui/button';
+import { HorizontalTabs } from '@barely/ui/components/horizontal-tabs';
+import { Icon } from '@barely/ui/icon';
 
 export function CampaignTabs() {
 	const trpc = useTRPC();

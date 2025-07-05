@@ -1,6 +1,6 @@
 'use client';
 
-import { useWorkspaceIsPersonal } from '@barely/lib/hooks/use-workspace';
+import { useWorkspaceIsPersonal } from '@barely/hooks';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AddMemberButton } from '~/app/[handle]/settings/team/_components/add-member-button';

@@ -1,12 +1,11 @@
 import { Suspense } from 'react';
-import { getCampaignById } from '@barely/lib/server/routes/campaign/campaign.fns';
+import { getCampaignById } from '@barely/lib/functions/campaign.fns';
+import { campaignTypeDisplay } from '@barely/utils';
 
-import { InfoCard } from '@barely/ui/elements/card';
-import { ConfettiRain } from '@barely/ui/elements/confetti';
-import { Icon } from '@barely/ui/elements/icon';
-import { Text } from '@barely/ui/elements/typography';
-
-import { campaignTypeDisplay } from '@barely/utils/campaign';
+import { InfoCard } from '@barely/ui/card';
+import { ConfettiRain } from '@barely/ui/confetti';
+import { Icon } from '@barely/ui/icon';
+import { Text } from '@barely/ui/typography';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { CampaignReviews } from './campaign-reviews';
@@ -14,7 +13,6 @@ import { CampaignReviews } from './campaign-reviews';
 const getCampaign = async (campaignId: string) => {
 	const campaign = await getCampaignById(campaignId);
 
-	if (!campaign) throw new Error('Campaign not found');
 	return campaign;
 };
 

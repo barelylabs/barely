@@ -1,8 +1,5 @@
-import { routeHandler } from '@barely/lib/server/api/route-handler';
-import { cartFunnelRouter } from '@barely/lib/server/routes/cart-funnel/cart-funnel.router';
+import { OPTIONS } from '@barely/utils';
 
-export { OPTIONS } from '@barely/lib/utils/trpc-route';
+import { cartFunnelHandler } from '@barely/api/app/sub/cart-funnel.handler';
 
-const handler = routeHandler('cartFunnel', cartFunnelRouter);
-
-export { handler as GET, handler as POST };
+export { OPTIONS, cartFunnelHandler as GET, cartFunnelHandler as POST };

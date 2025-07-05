@@ -1,10 +1,10 @@
 'use client';
 
 import { useContext, useEffect, useRef, useState } from 'react';
-import { cn } from '@barely/lib/utils/cn';
+import { cn } from '@barely/utils';
 
-import { MusicPlayButton } from '@barely/ui/elements/music-player';
-import { H } from '@barely/ui/elements/typography';
+import { MusicPlayButton } from '@barely/ui/music-player';
+import { H } from '@barely/ui/typography';
 
 import { PressScrollAreaViewportContext } from '~/app/[handle]/_components/press-scroll-area';
 import { Section, SectionDiv } from '~/app/[handle]/_components/press-section';

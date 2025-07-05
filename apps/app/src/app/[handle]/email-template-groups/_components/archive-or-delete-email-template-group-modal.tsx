@@ -1,7 +1,9 @@
 'use client';
 
 import { useCallback } from 'react';
-import { api } from '@barely/lib/server/api/react';
+import { useWorkspace } from '@barely/hooks';
+import { useTRPC } from '@barely/api/app/trpc.react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { ArchiveOrDeleteModal } from '~/app/[handle]/_components/archive-or-delete-modal';
 import { useEmailTemplateGroupContext } from './email-template-group-context';
@@ -20,24 +22,33 @@ export function ArchiveOrDeleteEmailTemplateGroupModal({
 		setShowDeleteModal,
 	} = useEmailTemplateGroupContext();
 
-	const apiUtils = api.useUtils();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
 
 	const showModal = mode === 'archive' ? showArchiveModal : showDeleteModal;
 
 	const setShowModal = mode === 'archive' ? setShowArchiveModal : setShowDeleteModal;
 
+	const { handle } = useWorkspace();
+
 	const onSuccess = useCallback(async () => {
-		await apiUtils.emailTemplateGroup.invalidate();
+		await queryClient.invalidateQueries(
+			trpc.emailTemplateGroup.byWorkspace.queryFilter({ handle }),
+		);
 		setShowModal(false);
-	}, [apiUtils.emailTemplateGroup, setShowModal]);
+	}, [queryClient, trpc.emailTemplateGroup.byWorkspace, handle, setShowModal]);
 
-	const { mutate: archiveEmailTemplateGroups, isPending: isPendingArchive } =
-		api.emailTemplateGroup.archive.useMutation({ onSuccess });
-
-	const { mutate: deleteEmailTemplateGroups, isPending: isPendingDelete } =
-		api.emailTemplateGroup.delete.useMutation({
+	const { mutate: archiveEmailTemplateGroups, isPending: isPendingArchive } = useMutation(
+		{
+			...trpc.emailTemplateGroup.archive.mutationOptions(),
 			onSuccess,
-		});
+		},
+	);
+
+	const { mutate: deleteEmailTemplateGroups, isPending: isPendingDelete } = useMutation({
+		...trpc.emailTemplateGroup.delete.mutationOptions(),
+		onSuccess,
+	});
 
 	if (!lastSelectedItem) return null;
 

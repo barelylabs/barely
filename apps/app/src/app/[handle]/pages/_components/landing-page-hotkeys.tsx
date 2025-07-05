@@ -1,21 +1,24 @@
 'use client';
 
-import { useModalHotKeys } from '@barely/lib/hooks/use-modal-hot-keys';
+import { useModalHotKeys } from '@barely/hooks';
 
-import { useLandingPageContext } from '~/app/[handle]/pages/_components/landing-page-context';
+import {
+	useLandingPage,
+	useLandingPageSearchParams,
+} from '~/app/[handle]/pages/_components/landing-page-context';
 
 export function LandingPageHotkeys() {
+	const { selection } = useLandingPage();
 	const {
-		selection,
 		setShowCreateModal,
-		setShowUpdateModal,
+		// setShowUpdateModal,
 		setShowArchiveModal,
 		setShowDeleteModal,
-	} = useLandingPageContext();
+	} = useLandingPageSearchParams();
 
 	useModalHotKeys({
 		setShowCreateModal: setShowCreateModal,
-		setShowUpdateModal: setShowUpdateModal,
+		// setShowUpdateModal: setShowUpdateModal,
 		setShowArchiveModal: setShowArchiveModal,
 		setShowDeleteModal: setShowDeleteModal,
 		itemSelected: selection !== 'all' && !!selection.size,

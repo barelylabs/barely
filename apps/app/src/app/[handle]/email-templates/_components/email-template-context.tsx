@@ -1,50 +1,17 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/react';
-import type { emailTemplateFilterParamsSchema } from '@barely/lib/server/routes/email-template/email-template.schema';
-// import type { FetchNextPageOptions } from '@tanstack/react-query';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import type { emailTemplateFilterParamsSchema } from '@barely/validators';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod/v4';
-import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
-import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
-import { emailTemplateSearchParamsSchema } from '@barely/lib/server/routes/email-template/email-template.schema';
+import { createContext, useCallback, useContext, useRef, useState } from 'react';
+import { useTypedOptimisticQuery, useWorkspace } from '@barely/hooks';
+import { emailTemplateSearchParamsSchema } from '@barely/validators';
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
-
-// interface EmailTemplateContext {
-// 	// emailTemplates: AppRouterOutputs['emailTemplate']['byWorkspace']['emailTemplates'];
-// 	// emailTemplateSelection: Selection;
-// 	// lastSelectedEmailTemplateId: string | undefined;
-// 	// lastSelectedEmailTemplate:
-// 	// 	| AppRouterOutputs['emailTemplate']['byWorkspace']['emailTemplates'][number]
-// 	// 	| undefined;
-// 	// setEmailTemplateSelection: (selection: Selection) => void;
-// 	// gridListRef: React.RefObject<HTMLDivElement>;
-// 	// focusGridList: () => void;
-// 	// showCreateEmailTemplateModal: boolean;
-// 	// setShowCreateEmailTemplateModal: (show: boolean) => void;
-// 	// showUpdateEmailTemplateModal: boolean;
-// 	// setShowUpdateEmailTemplateModal: (show: boolean) => void;
-// 	// showDeleteEmailTemplateModal: boolean;
-// 	// setShowDeleteEmailTemplateModal: (show: boolean) => void;
-// 	// showArchiveEmailTemplateModal: boolean;
-// 	// setShowArchiveEmailTemplateModal: (show: boolean) => void;
-// 	// filters
-// 	// filters: z.infer<typeof emailTemplateFilterParamsSchema>;
-// 	// pendingFiltersTransition: boolean;
-// 	// setSearch: (search: string) => void;
-// 	// toggleArchived: () => void;
-// 	// clearAllFilters: () => void;
-// 	// infinite
-// 	// hasNextPage: boolean;
-// 	// fetchNextPage: (options?: FetchNextPageOptions) => void | Promise<void>;
-// 	// isFetchingNextPage: boolean;
-// 	// isRefetching: boolean;
-// 	// isFetching: boolean;
-// 	// isPending: boolean;
-// }
 
 type EmailTemplateContext = InfiniteItemsContext<
 	AppRouterOutputs['emailTemplate']['byWorkspace']['emailTemplates'][number],
@@ -55,12 +22,8 @@ const EmailTemplateContext = createContext<EmailTemplateContext | undefined>(und
 
 export function EmailTemplateContextProvider({
 	children,
-	initialEmailTemplatesFirstPage,
 }: {
 	children: React.ReactNode;
-	initialEmailTemplatesFirstPage: Promise<
-		AppRouterOutputs['emailTemplate']['byWorkspace']
-	>;
 }) {
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [showUpdateModal, setShowUpdateModal] = useState(false);
@@ -68,6 +31,7 @@ export function EmailTemplateContextProvider({
 	const [showArchiveModal, setShowArchiveModal] = useState(false);
 	useState(false);
 
+	const trpc = useTRPC();
 	const { handle } = useWorkspace();
 
 	const { data, setQuery, removeByKey, removeAllQueryParams, pending } =
@@ -80,7 +44,6 @@ export function EmailTemplateContextProvider({
 		: selectedEmailTemplateIds === 'all' ? 'all'
 		: new Set(selectedEmailTemplateIds);
 
-	const initialData = use(initialEmailTemplatesFirstPage);
 	const {
 		data: infiniteEmailTemplates,
 		hasNextPage,
@@ -89,28 +52,20 @@ export function EmailTemplateContextProvider({
 		isRefetching,
 		isFetching,
 		isPending,
-	} = api.emailTemplate.byWorkspace.useInfiniteQuery(
-		{ handle, ...filters },
-		{
-			initialData: () => {
-				return {
-					pages: [
-						{
-							emailTemplates: initialData.emailTemplates,
-							nextCursor: initialData.nextCursor,
-						},
-					],
-					pageParams: [],
-				};
+	} = useSuspenseInfiniteQuery({
+		...trpc.emailTemplate.byWorkspace.infiniteQueryOptions(
+			{ handle, ...filters },
+			{
+				getNextPageParam: lastPage => lastPage.nextCursor,
 			},
-			getNextPageParam: lastPage => lastPage.nextCursor,
-		},
+		),
+	});
+
+	const emailTemplates = infiniteEmailTemplates.pages.flatMap(
+		page => page.emailTemplates,
 	);
 
-	const emailTemplates =
-		infiniteEmailTemplates?.pages.flatMap(page => page.emailTemplates) ?? [];
-
-	const gridListRef = useRef<HTMLDivElement>(null);
+	const gridListRef = useRef<HTMLDivElement | null>(null);
 
 	const setEmailTemplateSelection = useCallback(
 		(selection: Selection) => {
@@ -142,7 +97,7 @@ export function EmailTemplateContextProvider({
 	);
 
 	const lastSelectedEmailTemplateId =
-		emailTemplateSelection === 'all' || !emailTemplateSelection ?
+		emailTemplateSelection === 'all' || !emailTemplateSelection.size ?
 			undefined
 		:	Array.from(emailTemplateSelection).pop()?.toString();
 

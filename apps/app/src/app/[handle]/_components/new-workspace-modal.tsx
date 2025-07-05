@@ -3,19 +3,18 @@
 import type { SelectFieldOption } from '@barely/ui/forms/select-field';
 import type { z } from 'zod/v4';
 import { useRouter } from 'next/navigation';
-import { createWorkspaceSchema } from '@barely/lib/server/routes/workspace/workspace.schema';
-import { useTRPC } from '@barely/server/api/react';
+import { atomWithToggle } from '@barely/atoms';
+import { useZodForm } from '@barely/hooks';
+import { createWorkspaceSchema } from '@barely/validators';
 import { useMutation } from '@tanstack/react-query';
 import { useAtom } from 'jotai';
 
-import { atomWithToggle } from '@barely/atoms/atom-with-toggle';
+import { useTRPC } from '@barely/api/app/trpc.react';
 
-import { useZodForm } from '@barely/hooks/use-zod-form';
-
-import { Modal, ModalBody, ModalHeader } from '@barely/ui/elements/modal';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { TextField } from '@barely/ui/forms/text-field';
+import { Modal, ModalBody, ModalHeader } from '@barely/ui/modal';
 
 export const showNewWorkspaceModalAtom = atomWithToggle(false);
 
@@ -35,6 +34,15 @@ export function NewWorkspaceModal() {
 			type: 'creator',
 		},
 	});
+
+	// const formZ4 = useForm({
+	// 	schema: createWorkspaceSchema,
+	// 	defaultValues: {
+	// 		name: '',
+	// 		handle: '',
+	// 		type: 'creator',
+	// 	},
+	// });
 
 	const typeOptions: SelectFieldOption<
 		Exclude<z.infer<typeof createWorkspaceSchema.shape.type>, undefined | 'personal'>
@@ -67,6 +75,8 @@ export function NewWorkspaceModal() {
 			<ModalHeader icon='logo' title='Create a new workspace' />
 
 			<ModalBody>
+				{/* <FormZ4 {...formZ4}>test</FormZ4> */}
+
 				<Form form={form} onSubmit={onSubmit}>
 					<TextField
 						control={form.control}

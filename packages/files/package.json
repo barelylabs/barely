@@ -1,0 +1,68 @@
+{
+	"name": "@barely/files",
+	"private": true,
+	"version": "0.1.0",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./src/index.ts"
+		},
+		"./client": {
+			"types": "./dist/client.d.ts",
+			"default": "./src/client.ts"
+		},
+		"./types": {
+			"types": "./dist/types.d.ts",
+			"default": "./src/types.ts"
+		},
+		"./utils": {
+			"types": "./dist/utils.d.ts",
+			"default": "./src/utils.ts"
+		},
+		"./s3": {
+			"types": "./dist/s3.d.ts",
+			"default": "./src/s3.ts"
+		},
+		"./s3-presign": {
+			"types": "./dist/s3-presign.d.ts",
+			"default": "./src/s3-presign.ts"
+		},
+		"./s3-error-parser": {
+			"types": "./dist/s3-error-parser.d.ts",
+			"default": "./src/s3-error-parser.ts"
+		},
+		"./upload-from-url": {
+			"types": "./dist/upload-from-url.d.ts",
+			"default": "./src/upload-from-url.ts"
+		}
+	},
+	"license": "MIT",
+	"scripts": {
+		"build": "tsc",
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"dev": "tsc",
+		"format": "prettier --check . --ignore-path ../../.gitignore",
+		"lint": "eslint",
+		"typecheck": "tsc --noEmit --emitDeclarationOnly false"
+	},
+	"dependencies": {
+		"@aws-sdk/client-s3": "^3.511.0",
+		"@aws-sdk/s3-presigned-post": "^3.514.0",
+		"@aws-sdk/s3-request-presigner": "^3.511.0",
+		"@barely/validators": "workspace:*",
+		"@t3-oss/env-nextjs": "catalog:",
+		"@uploadthing/mime-types": "0.2.2",
+		"@uploadthing/shared": "6.2.1"
+	},
+	"devDependencies": {
+		"@barely/db": "workspace:*",
+		"@barely/eslint-config": "workspace:*",
+		"@barely/prettier-config": "workspace:*",
+		"@barely/tsconfig": "workspace:*",
+		"eslint": "catalog:",
+		"prettier": "catalog:",
+		"typescript": "catalog:"
+	},
+	"prettier": "@barely/prettier-config"
+}

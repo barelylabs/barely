@@ -1,4 +1,4 @@
-import { env as libEnv } from '@barely/lib/env';
+import { libEnv } from '@barely/lib/env';
 import { createEnv } from '@t3-oss/env-nextjs';
 
 export const env = createEnv({

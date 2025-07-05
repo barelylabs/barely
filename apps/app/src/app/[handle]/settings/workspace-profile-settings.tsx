@@ -1,29 +1,32 @@
 'use client';
 
-import type { OnUploadComplete } from '@barely/lib/files/client';
-import type { UploadQueueItem } from '@barely/lib/hooks/use-upload';
-import type { workspaceTypeSchema } from '@barely/lib/server/routes/workspace/workspace.schema';
-import type { MDXEditorMethods } from '@barely/ui/elements/mdx-editor';
+import type { OnUploadComplete } from '@barely/files';
+import type { UploadQueueItem } from '@barely/hooks';
 import type { SelectFieldOption } from '@barely/ui/forms/select-field';
+import type { MDXEditorMethods } from '@barely/ui/mdx-editor';
+import type { workspaceTypeSchema } from '@barely/validators';
 import type { z } from 'zod/v4';
 import { useCallback, useRef } from 'react';
-import { useUpdateWorkspace } from '@barely/lib/hooks/use-update-workspace';
-import { useUpload } from '@barely/lib/hooks/use-upload';
-import { useZodForm } from '@barely/lib/hooks/use-zod-form';
-import { updateWorkspaceSchema } from '@barely/lib/server/routes/workspace/workspace.schema';
-import { api } from '@barely/server/api/react';
+import {
+	useUpdateWorkspace,
+	useUpload,
+	useWorkspace,
+	useWorkspaceWithAll,
+	useZodForm,
+} from '@barely/hooks';
+import { useTRPC } from '@barely/api/app/trpc.react';
+import { updateWorkspaceSchema } from '@barely/validators';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { atom } from 'jotai';
 import HuePicker from 'simple-hue-picker/react';
 
-import { useWorkspace } from '@barely/hooks/use-workspace';
-
 import { SettingsCard, SettingsCardForm } from '@barely/ui/components/settings-card';
-import { Icon } from '@barely/ui/elements/icon';
-import { MDXEditor } from '@barely/ui/elements/mdx-editor';
-import { Text } from '@barely/ui/elements/typography';
-import { UploadDropzone } from '@barely/ui/elements/upload';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { TextField } from '@barely/ui/forms/text-field';
+import { Icon } from '@barely/ui/icon';
+import { MDXEditor } from '@barely/ui/mdx-editor';
+import { Text } from '@barely/ui/typography';
+import { UploadDropzone } from '@barely/ui/upload';
 
 export function DisplayOrWorkspaceNameForm() {
 	const { workspace, isPersonal } = useWorkspace();
@@ -42,7 +45,10 @@ export function DisplayOrWorkspaceNameForm() {
 	});
 
 	const onSubmit = async (data: z.infer<typeof updateWorkspaceSchema>) => {
-		await updateWorkspace(data);
+		await updateWorkspace({
+			...data,
+			handle: workspace.handle,
+		});
 	};
 
 	return (
@@ -84,7 +90,10 @@ export function HandleForm() {
 	});
 
 	const onSubmit = async (data: z.infer<typeof updateWorkspaceSchema>) => {
-		await updateWorkspace(data);
+		await updateWorkspace({
+			...data,
+			handle: workspace.handle,
+		});
 	};
 
 	return (
@@ -145,7 +154,10 @@ export function WorkspaceTypeForm() {
 	});
 
 	const onSubmit = async (data: z.infer<typeof updateWorkspaceSchema>) => {
-		await updateWorkspace(data);
+		await updateWorkspace({
+			...data,
+			handle: workspace.handle,
+		});
 	};
 
 	if (isPersonal) {
@@ -179,12 +191,15 @@ export function WorkspaceTypeForm() {
 
 const avatarUploadQueueAtom = atom<UploadQueueItem[]>([]);
 export function WorkspaceAvatarForm() {
-	const apiUtils = api.useUtils();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
 
 	const { workspace } = useWorkspace();
 	const isPersonal = workspace.type === 'personal';
 
-	const { mutateAsync: updateWorkspaceAvatar } = api.workspace.updateAvatar.useMutation();
+	const { mutateAsync: updateWorkspaceAvatar } = useMutation({
+		...trpc.workspace.updateAvatar.mutationOptions(),
+	});
 
 	const onUploadComplete: OnUploadComplete = useCallback(
 		async fileRecord => {
@@ -192,10 +207,13 @@ export function WorkspaceAvatarForm() {
 				return;
 			}
 
-			await updateWorkspaceAvatar({ avatarFileId: fileRecord.id });
-			await apiUtils.workspace.invalidate();
+			await updateWorkspaceAvatar({
+				handle: workspace.handle,
+				avatarFileId: fileRecord.id,
+			});
+			await queryClient.invalidateQueries(trpc.workspace.byHandle.queryFilter());
 		},
-		[updateWorkspaceAvatar, apiUtils.workspace],
+		[updateWorkspaceAvatar, queryClient, trpc, workspace.handle],
 	);
 
 	const avatarUploadState = useUpload({
@@ -242,18 +260,24 @@ export function WorkspaceAvatarForm() {
 
 const headerUploadQueueAtom = atom<UploadQueueItem[]>([]);
 export function WorkspaceHeaderForm() {
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
 	const { workspace } = useWorkspace();
 	const isPersonal = workspace.type === 'personal';
-	const apiUtils = api.useUtils();
 
-	const { mutateAsync: updateWorkspaceHeader } = api.workspace.updateHeader.useMutation();
+	const { mutateAsync: updateWorkspaceHeader } = useMutation({
+		...trpc.workspace.updateHeader.mutationOptions(),
+	});
 
 	const onUploadComplete: OnUploadComplete = useCallback(
 		async fileRecord => {
-			await updateWorkspaceHeader({ headerFileId: fileRecord.id });
-			await apiUtils.workspace.invalidate();
+			await updateWorkspaceHeader({
+				handle: workspace.handle,
+				headerFileId: fileRecord.id,
+			});
+			await queryClient.invalidateQueries(trpc.workspace.byHandle.queryFilter());
 		},
-		[updateWorkspaceHeader, apiUtils.workspace],
+		[updateWorkspaceHeader, queryClient, trpc, workspace.handle],
 	);
 
 	const headerUploadState = useUpload({
@@ -299,7 +323,7 @@ export function WorkspaceHeaderForm() {
 }
 
 export function WorkspaceBioForm() {
-	const { workspace } = useWorkspace();
+	const workspace = useWorkspaceWithAll();
 	// const { form, onSubmit, isPersonal } = useWorkspaceUpdateForm({
 	// 	updateKeys: ['bio'],
 	// });
@@ -320,7 +344,10 @@ export function WorkspaceBioForm() {
 	});
 
 	const onSubmit = async (data: z.infer<typeof updateWorkspaceSchema>) => {
-		await updateWorkspace(data);
+		await updateWorkspace({
+			...data,
+			handle: workspace.handle,
+		});
 	};
 
 	return (
@@ -351,7 +378,8 @@ export function WorkspaceBrandHuesForm() {
 	// 	updateKeys: ['brandHue'],
 	// });
 
-	const { workspace, isPersonal } = useWorkspace();
+	const workspace = useWorkspaceWithAll();
+	const isPersonal = workspace.type === 'personal';
 
 	const form = useZodForm({
 		schema: updateWorkspaceSchema,
@@ -367,7 +395,10 @@ export function WorkspaceBrandHuesForm() {
 	});
 
 	const onSubmit = async (data: z.infer<typeof updateWorkspaceSchema>) => {
-		await updateWorkspace(data);
+		await updateWorkspace({
+			...data,
+			handle: workspace.handle,
+		});
 	};
 
 	return (

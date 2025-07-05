@@ -1,14 +1,15 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/react';
-import type { emailTemplateGroupFilterParamsSchema } from '@barely/lib/server/routes/email-template-group/email-template-group.schema';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import type { emailTemplateGroupFilterParamsSchema } from '@barely/validators';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod/v4';
-import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
-import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
-import { emailTemplateGroupSearchParamsSchema } from '@barely/lib/server/routes/email-template-group/email-template-group.schema';
+import { createContext, useCallback, useContext, useRef, useState } from 'react';
+import { useTypedOptimisticQuery, useWorkspace } from '@barely/hooks';
+import { emailTemplateGroupSearchParamsSchema } from '@barely/validators';
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
 
@@ -23,18 +24,15 @@ const EmailTemplateGroupContext = createContext<EmailTemplateGroupContext | unde
 
 export function EmailTemplateGroupContextProvider({
 	children,
-	initialEmailTemplateGroupsFirstPage,
 }: {
 	children: React.ReactNode;
-	initialEmailTemplateGroupsFirstPage: Promise<
-		AppRouterOutputs['emailTemplateGroup']['byWorkspace']
-	>;
 }) {
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [showUpdateModal, setShowUpdateModal] = useState(false);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const [showArchiveModal, setShowArchiveModal] = useState(false);
 
+	const trpc = useTRPC();
 	const { handle } = useWorkspace();
 
 	const { data, setQuery, removeByKey, removeAllQueryParams, pending } =
@@ -47,7 +45,6 @@ export function EmailTemplateGroupContextProvider({
 		: selectedEmailTemplateGroupIds === 'all' ? 'all'
 		: new Set(selectedEmailTemplateGroupIds);
 
-	const initialData = use(initialEmailTemplateGroupsFirstPage);
 	const {
 		data: infiniteEmailTemplateGroups,
 		hasNextPage,
@@ -56,28 +53,20 @@ export function EmailTemplateGroupContextProvider({
 		isRefetching,
 		isFetching,
 		isPending,
-	} = api.emailTemplateGroup.byWorkspace.useInfiniteQuery(
-		{ handle, ...filters },
-		{
-			initialData: () => {
-				return {
-					pages: [
-						{
-							emailTemplateGroups: initialData.emailTemplateGroups,
-							nextCursor: initialData.nextCursor,
-						},
-					],
-					pageParams: [],
-				};
+	} = useSuspenseInfiniteQuery({
+		...trpc.emailTemplateGroup.byWorkspace.infiniteQueryOptions(
+			{ handle, ...filters },
+			{
+				getNextPageParam: lastPage => lastPage.nextCursor,
 			},
-			getNextPageParam: lastPage => lastPage.nextCursor,
-		},
+		),
+	});
+
+	const emailTemplateGroups = infiniteEmailTemplateGroups.pages.flatMap(
+		page => page.emailTemplateGroups,
 	);
 
-	const emailTemplateGroups =
-		infiniteEmailTemplateGroups?.pages.flatMap(page => page.emailTemplateGroups) ?? [];
-
-	const gridListRef = useRef<HTMLDivElement>(null);
+	const gridListRef = useRef<HTMLDivElement | null>(null);
 
 	const setEmailTemplateGroupSelection = useCallback(
 		(selection: Selection) => {
@@ -109,7 +98,7 @@ export function EmailTemplateGroupContextProvider({
 	);
 
 	const lastSelectedEmailTemplateGroupId =
-		emailTemplateGroupSelection === 'all' || !emailTemplateGroupSelection ?
+		emailTemplateGroupSelection === 'all' || !emailTemplateGroupSelection.size ?
 			undefined
 		:	Array.from(emailTemplateGroupSelection).pop()?.toString();
 

@@ -1,0 +1,58 @@
+{
+	"name": "@barely/api",
+	"private": true,
+	"version": "0.1.0",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./src/index.ts"
+		},
+		"./app/trpc.react": {
+			"types": "./dist/src/app/app.trpc.react.d.ts",
+			"default": "./src/app/app.trpc.react.ts"
+		},
+		"./app/*": {
+			"types": "./dist/src/app/*.d.ts",
+			"default": "./src/app/*.ts"
+		},
+		"./app/sub/*": {
+			"types": "./dist/src/app/sub/*.d.ts",
+			"default": "./src/app/sub/*.ts"
+		},
+		"./public/*": {
+			"types": "./dist/src/public/*.d.ts",
+			"default": "./src/public/*.ts"
+		}
+	},
+	"license": "MIT",
+	"scripts": {
+		"build": "tsc",
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"dev": "tsc",
+		"format": "prettier --check . --ignore-path ../../.gitignore",
+		"lint": "eslint",
+		"typecheck": "tsc --noEmit --emitDeclarationOnly false"
+	},
+	"dependencies": {
+		"@barely/auth": "workspace:*",
+		"@barely/const": "workspace:*",
+		"@barely/db": "workspace:*",
+		"@barely/lib": "workspace:*",
+		"@barely/utils": "workspace:*",
+		"@barely/validators": "workspace:*",
+		"@trpc/server": "catalog:",
+		"@vercel/functions": "catalog:",
+		"next": "catalog:",
+		"trpc-navigation-plugin": "catalog:"
+	},
+	"devDependencies": {
+		"@barely/eslint-config": "workspace:*",
+		"@barely/prettier-config": "workspace:*",
+		"@barely/tsconfig": "workspace:*",
+		"eslint": "catalog:",
+		"prettier": "catalog:",
+		"typescript": "catalog:"
+	},
+	"prettier": "@barely/prettier-config"
+}

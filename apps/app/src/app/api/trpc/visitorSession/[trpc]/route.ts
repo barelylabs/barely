@@ -1,8 +1,5 @@
-import { routeHandler } from '@barely/lib/server/api/route-handler';
-import { visitorSessionRouter } from '@barely/lib/server/routes/visitor-session/visitor-session.router';
+import { OPTIONS } from '@barely/utils';
 
-export { OPTIONS } from '@barely/lib/utils/trpc-route';
+import { visitorSessionHandler } from '@barely/api/app/sub/visitor-session.handler';
 
-const handler = routeHandler('visitorSession', visitorSessionRouter);
-
-export { handler as GET, handler as POST };
+export { OPTIONS, visitorSessionHandler as GET, visitorSessionHandler as POST };

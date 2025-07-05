@@ -1,8 +1,5 @@
-import { routeHandler } from '@barely/lib/server/api/route-handler';
-import { pressKitRouter } from '@barely/lib/server/routes/press-kit/press-kit.router';
+import { OPTIONS } from '@barely/utils';
 
-export { OPTIONS } from '@barely/lib/utils/trpc-route';
+import { pressKitHandler } from '@barely/api/app/sub/press-kit.handler';
 
-const handler = routeHandler('pressKit', pressKitRouter);
-
-export { handler as GET, handler as POST };
+export { OPTIONS, pressKitHandler as GET, pressKitHandler as POST };

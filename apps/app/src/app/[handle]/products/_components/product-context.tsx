@@ -1,14 +1,15 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/react';
-import type { productFilterParamsSchema } from '@barely/lib/server/routes/product/product.schema';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import type { productFilterParamsSchema } from '@barely/validators';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod/v4';
-import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
-import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
-import { productSearchParamsSchema } from '@barely/lib/server/routes/product/product.schema';
+import { createContext, useCallback, useContext, useRef, useState } from 'react';
+import { useTypedOptimisticQuery, useWorkspace } from '@barely/hooks';
+import { productSearchParamsSchema } from '@barely/validators';
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
 
@@ -19,13 +20,8 @@ export type ProductContext = InfiniteItemsContext<
 
 const ProductContext = createContext<ProductContext | undefined>(undefined);
 
-export function ProductContextProvider({
-	children,
-	initialInfiniteProducts,
-}: {
-	children: React.ReactNode;
-	initialInfiniteProducts: Promise<AppRouterOutputs['product']['byWorkspace']>;
-}) {
+export function ProductContextProvider({ children }: { children: React.ReactNode }) {
+	const trpc = useTRPC();
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [showUpdateModal, setShowUpdateModal] = useState(false);
 	const [showArchiveModal, setShowArchiveModal] = useState(false);
@@ -48,8 +44,6 @@ export function ProductContextProvider({
 		: selectedProductIds === 'all' ? 'all'
 		: new Set(selectedProductIds);
 
-	const initialData = use(initialInfiniteProducts);
-
 	const {
 		data: infiniteProducts,
 		hasNextPage,
@@ -58,25 +52,16 @@ export function ProductContextProvider({
 		isFetching,
 		isRefetching,
 		isPending,
-	} = api.product.byWorkspace.useInfiniteQuery(
-		{ handle, ...filters },
-		{
-			initialData: () => {
-				return {
-					pages: [
-						{
-							products: initialData.products,
-							nextCursor: initialData.nextCursor,
-						},
-					],
-					pageParams: [], // fixme: add page params
-				};
+	} = useSuspenseInfiniteQuery({
+		...trpc.product.byWorkspace.infiniteQueryOptions(
+			{ handle, ...filters },
+			{
+				getNextPageParam: lastPage => lastPage.nextCursor,
 			},
-			getNextPageParam: lastPage => lastPage.nextCursor,
-		},
-	);
+		),
+	});
 
-	const products = infiniteProducts?.pages.flatMap(page => page.products) ?? [];
+	const products = infiniteProducts.pages.flatMap(page => page.products);
 
 	const setProductSelection = useCallback(
 		(selection: Selection) => {
@@ -95,10 +80,10 @@ export function ProductContextProvider({
 	}, [removeAllQueryParams]);
 
 	const toggleArchived = useCallback(() => {
-		if (filters.showArchived) return removeByKey('showArchived');
+		if (data.showArchived) return removeByKey('showArchived');
 
 		setQuery('showArchived', true);
-	}, [filters.showArchived, removeByKey, setQuery]);
+	}, [data.showArchived, removeByKey, setQuery]);
 
 	const setSearch = useCallback(
 		(search: string) => {
@@ -109,7 +94,7 @@ export function ProductContextProvider({
 	);
 
 	const lastSelectedProductId =
-		!productSelection || productSelection === 'all' ?
+		productSelection === 'all' || !productSelection.size ?
 			undefined
 		:	Array.from(productSelection).pop()?.toString();
 

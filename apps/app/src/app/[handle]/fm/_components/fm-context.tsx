@@ -1,22 +1,15 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/react';
-import type { fmFilterParamsSchema } from '@barely/lib/server/routes/fm/fm.schema';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import type { fmFilterParamsSchema } from '@barely/validators';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod/v4';
-import {
-	createContext,
-	use,
-	useCallback,
-	useContext,
-	useMemo,
-	useRef,
-	useState,
-} from 'react';
-import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
-import { fmSearchParamsSchema } from '@barely/lib/server/routes/fm/fm.schema';
+import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { useTypedOptimisticQuery, useWorkspace } from '@barely/hooks';
+import { fmSearchParamsSchema } from '@barely/validators';
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
 
@@ -27,19 +20,13 @@ type FmContext = InfiniteItemsContext<
 
 const FmContext = createContext<FmContext | undefined>(undefined);
 
-export function FmContextProvider({
-	children,
-	initialFmPages,
-}: {
-	children: React.ReactNode;
-	initialFmPages: Promise<AppRouterOutputs['fm']['byWorkspace']>;
-}) {
+export function FmContextProvider({ children }: { children: React.ReactNode }) {
+	const { handle } = useWorkspace();
+
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [showUpdateModal, setShowUpdateModal] = useState(false);
 	const [showArchiveModal, setShowArchiveModal] = useState(false);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-	const { handle } = useWorkspace();
 
 	const { data, setQuery, removeByKey, removeAllQueryParams, pending } =
 		useTypedOptimisticQuery(fmSearchParamsSchema);
@@ -52,7 +39,7 @@ export function FmContextProvider({
 		return new Set(selectedFmPageIds);
 	}, [selectedFmPageIds]);
 
-	const initialData = use(initialFmPages);
+	const trpc = useTRPC();
 	const {
 		data: infiniteFmPages,
 		hasNextPage,
@@ -61,20 +48,16 @@ export function FmContextProvider({
 		isFetching,
 		isRefetching,
 		isPending,
-	} = api.fm.byWorkspace.useInfiniteQuery(
-		{ handle, ...filters },
-		{
-			initialData: () => {
-				return {
-					pages: [{ fmPages: initialData.fmPages, nextCursor: initialData.nextCursor }],
-					pageParams: [], // todo - figure out how to structure this
-				};
+	} = useSuspenseInfiniteQuery({
+		...trpc.fm.byWorkspace.infiniteQueryOptions(
+			{ handle, ...filters },
+			{
+				getNextPageParam: lastPage => lastPage.nextCursor,
 			},
-			getNextPageParam: lastPage => lastPage.nextCursor,
-		},
-	);
+		),
+	});
 
-	const fmPages = infiniteFmPages?.pages.flatMap(page => page.fmPages) ?? [];
+	const fmPages = infiniteFmPages.pages.flatMap(page => page.fmPages);
 
 	const gridListRef = useRef<HTMLDivElement>(null);
 
@@ -118,7 +101,7 @@ export function FmContextProvider({
 	);
 
 	const lastSelectedFmPageId =
-		fmPageSelection === 'all' || !fmPageSelection ?
+		fmPageSelection === 'all' || !fmPageSelection.size ?
 			undefined
 		:	Array.from(fmPageSelection).pop()?.toString();
 

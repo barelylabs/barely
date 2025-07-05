@@ -4,7 +4,7 @@
 https://tkdodo.eu/blog/zustand-and-react-context
 https://gist.github.com/bryanltobing/e09cb4bb110c4d10cefde665b572d899#file-viewmodelzustand-tsx-L22-L27
 */
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import type {
 	ActionNode,
 	AddToMailchimpAudienceNode,
@@ -19,23 +19,21 @@ import type {
 	SimpleEdge,
 	TriggerNode,
 	WaitNode,
-} from '@barely/lib/server/routes/flow/flow.ui.types';
+} from '@barely/validators';
 import type { Edge, Node } from '@xyflow/react';
 import type { StoreApi } from 'zustand';
 import { createContext, use, useContext, useState } from 'react';
-import { useToast } from '@barely/lib/hooks/use-toast';
-import { getFlowLayout } from '@barely/lib/server/routes/flow/flow.layout';
+import { getFlowLayout } from '@barely/lib/functions/flows/flow.layout';
 import {
 	getDefaultFlowAction,
 	getDefaultFlowAction_empty,
 	hasEdgeLoop,
-} from '@barely/lib/server/routes/flow/flow.utils';
-import { newId } from '@barely/lib/utils/id';
+} from '@barely/lib/functions/flows/flow.utils';
+import { useToast } from '@barely/toast';
+import { newId, raise } from '@barely/utils';
 import { addEdge, applyEdgeChanges, applyNodeChanges, getIncomers } from '@xyflow/react';
 import deepEqual from 'fast-deep-equal';
 import { createStore, useStore } from 'zustand';
-
-import { raise } from '@barely/utils/raise';
 
 const FlowStoreContext = createContext<StoreApi<FlowState> | null>(null);
 
@@ -66,15 +64,15 @@ export const FlowStoreProvider = ({
 
 	const [flowStore] = useState(() =>
 		createStore<FlowState>((set, get) => ({
-			nodes: initialData.uiNodes ?? [],
-			edges: initialData.uiEdges ?? [],
+			nodes: initialData.uiNodes,
+			edges: initialData.uiEdges,
 			currentNode: null,
 
 			// history
 			history: [
 				{
-					nodes: initialData.uiNodes ?? [],
-					edges: initialData.uiEdges ?? [],
+					nodes: initialData.uiNodes,
+					edges: initialData.uiEdges,
 				},
 			],
 			historyIndex: 0,
@@ -284,7 +282,7 @@ export const FlowStoreProvider = ({
 
 				// const targetNode = prevNodes.find(node => node.id === connection.target);
 
-				if (sourceNode?.type === 'empty') {
+				if (sourceNode.type === 'empty') {
 					const edgeAboveEmptySource = prevEdges.find(
 						edge => edge.target === connection.source,
 					);
@@ -430,7 +428,7 @@ export const FlowStoreProvider = ({
 								emailTemplate:
 									defaultFromEmail ?
 										{
-											fromId: defaultFromEmail?.id ?? undefined,
+											fromId: defaultFromEmail.id,
 										}
 									:	undefined,
 							});
@@ -715,7 +713,7 @@ export const FlowStoreProvider = ({
 					emailTemplate:
 						defaultFromEmail ?
 							{
-								fromId: defaultFromEmail?.id ?? undefined,
+								fromId: defaultFromEmail.id,
 							}
 						:	undefined,
 				});

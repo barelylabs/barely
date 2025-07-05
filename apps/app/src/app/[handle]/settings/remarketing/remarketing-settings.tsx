@@ -1,20 +1,23 @@
 'use client';
 
 import type { z } from 'zod/v4';
-import { api } from '@barely/lib/server/api/react';
-import { insertMetaPixelSchema } from '@barely/lib/server/routes/analytics-endpoint/analytics-endpoint-schema';
-
-import { useWorkspace } from '@barely/hooks/use-workspace';
-import { useZodForm } from '@barely/hooks/use-zod-form';
+import { useWorkspace, useZodForm } from '@barely/hooks';
+import { useTRPC } from '@barely/api/app/trpc.react';
+import { insertMetaPixelSchema } from '@barely/validators';
+import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 
 import { SettingsCardForm } from '@barely/ui/components/settings-card';
 import { TextAreaField } from '@barely/ui/forms/text-area-field';
 import { TextField } from '@barely/ui/forms/text-field';
 
 export function RemarketingSettings() {
-	const [endpoints] = api.analyticsEndpoint.byCurrentWorkspace.useSuspenseQuery();
+	const trpc = useTRPC();
+	const { handle } = useWorkspace();
+	const { data: endpoints } = useSuspenseQuery(
+		trpc.analyticsEndpoint.byCurrentWorkspace.queryOptions({ handle }),
+	);
 
-	const apiUtils = api.useUtils();
+	const queryClient = useQueryClient();
 	const { workspace } = useWorkspace();
 
 	const metaPixelForm = useZodForm({
@@ -27,15 +30,21 @@ export function RemarketingSettings() {
 		},
 	});
 
-	const { mutateAsync: updateEndpoint } = api.analyticsEndpoint.update.useMutation({
+	const { mutateAsync: updateEndpoint } = useMutation({
+		...trpc.analyticsEndpoint.update.mutationOptions(),
 		onSuccess: async () => {
-			await apiUtils.analyticsEndpoint.invalidate();
+			await queryClient.invalidateQueries(
+				trpc.analyticsEndpoint.byCurrentWorkspace.queryFilter(),
+			);
 			metaPixelForm.reset();
 		},
 	});
 
 	async function onSubmit(data: z.infer<typeof insertMetaPixelSchema>) {
-		await updateEndpoint(data).catch(e => console.error(e));
+		await updateEndpoint({
+			...data,
+			handle,
+		}).catch(e => console.error(e));
 	}
 
 	return (

@@ -1,8 +1,8 @@
-import type { StdWebEventPipeQueryParams } from '@barely/lib/server/routes/stat/stat.schema';
-import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
-import { capitalize } from '@barely/lib/utils/text';
+import type { StdWebEventPipeQueryParams } from '@barely/tb/schema';
+import { useWebEventStatFilters } from '@barely/hooks';
+import { capitalize } from '@barely/utils';
 
-import { Badge } from '@barely/ui/elements/badge';
+import { Badge } from '@barely/ui/badge';
 
 export function WebEventFilterBadges(props: {
 	filters: [keyof StdWebEventPipeQueryParams, string][];

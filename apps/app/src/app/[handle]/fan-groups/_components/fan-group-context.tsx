@@ -1,42 +1,17 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/react';
-import type { fanGroupFilterParamsSchema } from '@barely/lib/server/routes/fan-group/fan-group.schema';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import type { fanGroupFilterParamsSchema } from '@barely/validators';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod/v4';
-import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
-import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
-import { fanGroupSearchParamsSchema } from '@barely/lib/server/routes/fan-group/fan-group.schema';
+import { createContext, useCallback, useContext, useRef, useState } from 'react';
+import { useTypedOptimisticQuery, useWorkspace } from '@barely/hooks';
+import { fanGroupSearchParamsSchema } from '@barely/validators';
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
-
-// interface FanGroupContext {
-// 	fanGroups: AppRouterOutputs['fanGroup']['byWorkspace']['fanGroups'];
-// 	fanGroupSelection: Selection;
-// 	lastSelectedFanGroupId: string | undefined;
-// 	lastSelectedFanGroup:
-// 		| AppRouterOutputs['fanGroup']['byWorkspace']['fanGroups'][number]
-// 		| undefined;
-// 	setFanGroupSelection: (selection: Selection) => void;
-// 	gridListRef: React.RefObject<HTMLDivElement>;
-// 	focusGridList: () => void;
-// 	showCreateFanGroupModal: boolean;
-// 	setShowCreateFanGroupModal: (show: boolean) => void;
-// 	showUpdateFanGroupModal: boolean;
-// 	setShowUpdateFanGroupModal: (show: boolean) => void;
-// 	showArchiveFanGroupModal: boolean;
-// 	setShowArchiveFanGroupModal: (show: boolean) => void;
-// 	showDeleteFanGroupModal: boolean;
-// 	setShowDeleteFanGroupModal: (show: boolean) => void;
-// 	// filters
-// 	filters: z.infer<typeof fanGroupFilterParamsSchema>;
-// 	pendingFiltersTransition: boolean;
-// 	setSearch: (search: string) => void;
-// 	toggleArchived: () => void;
-// 	clearAllFilters: () => void;
-// }
 
 type FanGroupContext = InfiniteItemsContext<
 	AppRouterOutputs['fanGroup']['byWorkspace']['fanGroups'][number],
@@ -45,18 +20,13 @@ type FanGroupContext = InfiniteItemsContext<
 
 const FanGroupContext = createContext<FanGroupContext | undefined>(undefined);
 
-export function FanGroupContextProvider({
-	children,
-	initialFanGroups,
-}: {
-	children: React.ReactNode;
-	initialFanGroups: Promise<AppRouterOutputs['fanGroup']['byWorkspace']>;
-}) {
+export function FanGroupContextProvider({ children }: { children: React.ReactNode }) {
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [showUpdateModal, setShowUpdateModal] = useState(false);
 	const [showArchiveModal, setShowArchiveModal] = useState(false);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+	const trpc = useTRPC();
 	const { handle } = useWorkspace();
 
 	const { data, setQuery, removeByKey, removeAllQueryParams, pending } =
@@ -69,8 +39,6 @@ export function FanGroupContextProvider({
 		: selectedFanGroupIds === 'all' ? 'all'
 		: new Set(selectedFanGroupIds);
 
-	const initialData = use(initialFanGroups);
-
 	const {
 		data: infiniteFanGroups,
 		hasNextPage,
@@ -78,24 +46,18 @@ export function FanGroupContextProvider({
 		isPending,
 		isFetching,
 		isRefetching,
-	} = api.fanGroup.byWorkspace.useInfiniteQuery(
-		{ handle, ...filters },
-		{
-			initialData: () => {
-				return {
-					pages: [
-						{ fanGroups: initialData.fanGroups, nextCursor: initialData.nextCursor },
-					],
-					pageParams: [], // todo - figure out how to structure this
-				};
+	} = useSuspenseInfiniteQuery({
+		...trpc.fanGroup.byWorkspace.infiniteQueryOptions(
+			{ handle, ...filters },
+			{
+				getNextPageParam: lastPage => lastPage.nextCursor,
 			},
-			getNextPageParam: lastPage => lastPage.nextCursor,
-		},
-	);
+		),
+	});
 
-	const fanGroups = infiniteFanGroups?.pages.flatMap(page => page.fanGroups) ?? [];
+	const fanGroups = infiniteFanGroups.pages.flatMap(page => page.fanGroups);
 
-	const gridListRef = useRef<HTMLDivElement>(null);
+	const gridListRef = useRef<HTMLDivElement | null>(null);
 
 	/* setters */
 	const setFanGroupSelection = useCallback(
@@ -127,7 +89,7 @@ export function FanGroupContextProvider({
 	);
 
 	const lastSelectedFanGroupId =
-		fanGroupSelection === 'all' || !fanGroupSelection ?
+		fanGroupSelection === 'all' || !fanGroupSelection.size ?
 			undefined
 		:	Array.from(fanGroupSelection).pop()?.toString();
 

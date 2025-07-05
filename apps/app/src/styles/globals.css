@@ -2,7 +2,77 @@
 @tailwind components;
 @tailwind utilities;
 
-@import '../../../../tooling/tailwind/shared-styles.css';
+@layer base {
+	:root {
+		--background: 100% 0 0;
+		--foreground: 13.71% 0.036 258.53;
+		--card: 100% 0 0;
+		--card-foreground: 13.71% 0.036 258.53;
+		--popover: 100% 0 0;
+		--popover-foreground: 13.71% 0.036 258.53;
+		--primary: 20.79% 0.04 265.73;
+		--primary-foreground: 98.38% 0.003 247.86;
+		--secondary: 96.84% 0.007 247.9;
+		--secondary-foreground: 20.79% 0.04 265.73;
+		--subtle: 96.84% 0.007 247.9; /* slate-100 */
+		--subtle-foreground: 71.07% 0.035 256.79; /* slate-400 */
+		--muted: 92.9% 0.013 255.53; /* slate-200 */
+		--muted-foreground: 44.55% 0.037 257.29; /* slate-600 */
+		--accent: 86.88% 0.02 252.85; /* slate-300 */
+		--accent-foreground: 28% 0.037 259.97; /* slate-800 */
+		--destructive: 63.68% 0.208 25.33;
+		--destructive-foreground: 98.38% 0.003 247.86;
+		--border: 92.9% 0.013 255.53;
+		--input: 92.9% 0.013 255.53;
+		--ring: 13.71% 0.036 258.53;
+		--radius: 0.5rem;
+
+		--success: 51.13% 0.139 143.2;
+		--success-foreground: 98.06% 0.021 150.52;
+		--warning: 76.97% 0.165 70.61;
+		--warning-foreground: 96.22% 0.057 95.61;
+	}
+
+	.dark {
+		--background: 13.71% 0.036 258.53;
+		--foreground: 98.38% 0.003 247.86;
+		--card: 13.71% 0.036 258.53;
+		--card-foreground: 98.38% 0.003 247.86;
+		--popover: 13.71% 0.036 258.53;
+		--popover-foreground: 98.38% 0.003 247.86;
+		--primary: 98.38% 0.003 247.86;
+		--primary-foreground: 20.79% 0.04 265.73;
+		--secondary: 28% 0.037 259.97;
+		--secondary-foreground: 98.38% 0.003 247.86;
+		--subtle: 20.79% 0.04 265.73; /* slate-900 */
+		--subtle-foreground: 44.55% 0.037 257.29; /* slate-600 */
+		--muted: 28% 0.037 259.97; /* slate-800 */
+		--muted-foreground: 71.07% 0.035 256.79; /* slate-400 */
+		--accent: 37.2% 0.039 257.3; /* slate-700 */
+		--accent-foreground: 92.9% 0.013 255.53; /* slate-200 */
+		--destructive: 39.59% 0.133 25.72;
+		--destructive-foreground: 98.38% 0.003 247.86;
+		--border: 28% 0.037 259.97;
+		--input: 28% 0.037 259.97;
+		--ring: 98.38% 0.003 247.86;
+
+		--success: 98.06% 0.021 150.52;
+		--success-foreground: 51.13% 0.139 143.2;
+		--warning: 76.97% 0.165 70.61;
+		--warning-foreground: 96.22% 0.057 95.61;
+	}
+
+	* {
+		@apply border-border;
+	}
+
+	body {
+		@apply bg-background text-foreground;
+		font-feature-settings:
+			'rlig' 1,
+			'calt' 1;
+	}
+}
 
 @layer components {
 	.my-line-highlight span.token {
@@ -111,11 +181,11 @@
 			position: relative;
 		}
 
-		&
+		/* &
 			:not(pre)
-			> code:matches([class*='language-'], [data-lexical-text]):not(::before, ::after) {
+			> code:is([class*='language-'], [data-lexical-text]):not(::before, ::after) {
 			background: none;
-		}
+		} */
 
 		& :not(pre) > code:not([class*='language-'], [data-lexical-text])::before {
 			content: attr(data-content);
@@ -224,7 +294,7 @@
 		& a {
 			@apply text-accent-foreground;
 
-			& svg {
+			& :global(svg) {
 				@apply inline;
 			}
 		}

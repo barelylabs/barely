@@ -1,76 +1,84 @@
 'use client';
 
-import type { LandingPage } from '@barely/lib/server/routes/landing-page/landing-page.schema';
-import { formatCentsToDollars } from '@barely/lib/utils/currency';
-import { getAbsoluteUrl } from '@barely/lib/utils/url';
-
-import { useWorkspace } from '@barely/hooks/use-workspace';
+import type { LandingPage } from '@barely/validators';
+import { useRouter } from 'next/navigation';
+import { useWorkspace } from '@barely/hooks';
+import { formatCentsToDollars, getAbsoluteUrl } from '@barely/utils';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
+import { GridList, GridListCard } from '@barely/ui/grid-list';
 
 import { CreateLandingPageButton } from '~/app/[handle]/pages/_components/create-landing-page-button';
-import { useLandingPageContext } from '~/app/[handle]/pages/_components/landing-page-context';
+import {
+	useLandingPage,
+	useLandingPageSearchParams,
+} from '~/app/[handle]/pages/_components/landing-page-context';
 
 export function AllLandingPages() {
-	const { items, selection, setSelection, gridListRef, setShowUpdateModal, isFetching } =
-		useLandingPageContext();
+	const router = useRouter();
+	const { handle } = useWorkspace();
+
+	const { items, selection, setSelection, isFetching, lastSelectedItemId } =
+		useLandingPage();
 
 	return (
-		<>
-			<GridList
-				glRef={gridListRef}
-				aria-label='Landing Pages'
-				className='flex flex-col gap-2'
-				// behavior
-				selectionMode='multiple'
-				selectionBehavior='replace'
-				// landingPages
-				items={items}
-				selectedKeys={selection}
-				setSelectedKeys={setSelection}
-				onAction={() => {
-					if (!selection) return;
-					setShowUpdateModal(true);
-				}}
-				// empty
-				renderEmptyState={() =>
-					isFetching ?
-						<GridListSkeleton />
-					:	<NoResultsPlaceholder
-							icon='landingPage'
-							title='No landing pages found.'
-							subtitle='Create your first landing page to get started.'
-							button={<CreateLandingPageButton />}
-						/>
-				}
-			>
-				{item => <LandingPageCard landingPage={item} />}
-			</GridList>
-			{/* <Button look='success'>success</Button> */}
-		</>
+		<GridList
+			data-grid-list='landing-pages'
+			aria-label='Landing Pages'
+			className='flex flex-col gap-2'
+			selectionMode='multiple'
+			selectionBehavior='replace'
+			items={items}
+			selectedKeys={selection}
+			setSelectedKeys={setSelection}
+			onAction={() => {
+				if (!lastSelectedItemId) return;
+				router.push(`/${handle}/pages/${lastSelectedItemId}`);
+			}}
+			renderEmptyState={() =>
+				isFetching ?
+					<GridListSkeleton />
+				:	<NoResultsPlaceholder
+						icon='landingPage'
+						title='No landing pages found.'
+						subtitle='Create your first landing page to get started.'
+						button={<CreateLandingPageButton />}
+					/>
+			}
+		>
+			{item => <LandingPageCard landingPage={item} />}
+		</GridList>
 	);
 }
 
 function LandingPageCard({ landingPage }: { landingPage: LandingPage }) {
-	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } =
-		useLandingPageContext();
+	const { setShowArchiveModal, setShowDeleteModal } = useLandingPageSearchParams();
+	const router = useRouter();
 
 	const { handle } = useWorkspace();
 
 	const href = getAbsoluteUrl('page', `${landingPage.handle}/${landingPage.key}`);
-
 	return (
 		<GridListCard
 			id={landingPage.id}
 			key={landingPage.id}
 			textValue={landingPage.name}
-			setShowUpdateModal={setShowUpdateModal}
+			// setShowUpdateModal={setShowUpdateModal}
 			setShowArchiveModal={setShowArchiveModal}
 			setShowDeleteModal={setShowDeleteModal}
 			title={landingPage.name}
 			subtitle={landingPage.key}
+			commandItems={[
+				{
+					label: 'Edit',
+					icon: 'edit',
+					action: () => {
+						router.push(`/${handle}/pages/${landingPage.id}`);
+					},
+					shortcut: ['Enter'],
+				},
+			]}
 			quickActions={{
 				goToHref: href,
 				copyText: href,

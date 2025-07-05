@@ -1,4 +1,4 @@
-import { Icon } from '@barely/ui/elements/icon';
+import { Icon } from '@barely/ui/icon';
 
 export function CartSteps() {
 	return (

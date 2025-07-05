@@ -1,34 +1,23 @@
 'use client';
 
 // ^-- to make sure we can mount the Provider from a server component
-import type { AppRouter } from '@barely/server/api/router';
+import type { AppRouter } from '@barely/api/app/app.router';
 import type { QueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
-import { usePusherSocketId } from '@barely/lib/hooks/use-pusher';
-import { getAbsoluteUrl } from '@barely/lib/utils/url';
-import { TRPCProvider } from '@barely/server/api/react';
+import { pageSessionAtom } from '@barely/atoms';
+import { usePusherSocketId } from '@barely/hooks';
+import { getAbsoluteUrl, isDevelopment } from '@barely/utils';
 import { isServer, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { createTRPCClient, httpBatchStreamLink, loggerLink } from '@trpc/client';
 import { useAtomValue } from 'jotai';
 import SuperJSON from 'superjson';
 
-import { pageSessionAtom } from '@barely/atoms/session.atom';
-
-import { isDevelopment } from '@barely/utils/environment';
+import { APP_ENDPOINTS } from '@barely/api/app/app.endpoints';
+import { TRPCProvider } from '@barely/api/app/trpc.react';
 
 import { makeQueryClient } from '~/trpc/query-client';
-
-// export function makeQueryClient() {
-// 	return new QueryClient({
-// 		defaultOptions: {
-// 			queries: {
-// 				staleTime: 1000 * 60 * 5,
-// 			},
-// 		},
-// 	});
-// }
 
 let browserQueryClient: QueryClient | undefined = undefined;
 
@@ -68,255 +57,24 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 				}),
 
 				runtime => {
-					const servers = {
-						// combined app router. if it hasn't been split off, it'll default to calling here
-						edge: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/edge'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						// split off routers
-						analyticsEndpoint: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/analyticsEndpoint'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						auth: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/auth'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						bio: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/bio'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						campaign: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/campaign'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						cart: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/cart'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						cartFunnel: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/cartFunnel'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						domain: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/domain'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						event: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/event'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						file: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/file'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						fm: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/fm'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						formResponse: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/formResponse'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						genre: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/genre'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						link: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/link'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						mixtape: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/mixtape'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						playlist: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/playlist'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						playlistPitchReview: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/playlistPitchReview'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						playlistPlacement: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/playlistPlacement'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						pressKit: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/pressKit'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						product: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/product'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						providerAccount: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/providerAccount'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						spotify: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/spotify'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						stat: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/stat'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						stripeConnect: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/stripeConnect'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						track: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/track'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						user: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/user'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						visitorSession: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/visitorSession'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						workspace: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/workspace'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						workspaceInvite: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/workspaceInvite'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-
-						workspaceStripe: httpBatchStreamLink({
-							transformer: SuperJSON,
-							url: getAbsoluteUrl('app', 'api/trpc/workspaceStripe'),
-							headers() {
-								return preparedHeaders;
-							},
-						})(runtime),
-					};
+					const servers = Object.fromEntries(
+						APP_ENDPOINTS.map(endpoint => [
+							endpoint,
+							httpBatchStreamLink({
+								transformer: SuperJSON,
+								url: getAbsoluteUrl('app', `api/trpc/${endpoint}`),
+								headers() {
+									return preparedHeaders;
+								},
+							})(runtime),
+						]),
+					);
 
 					return ctx => {
 						const pathParts = ctx.op.path.split('.');
 
 						let path: string = ctx.op.path;
-						let serverName: keyof typeof servers = 'edge';
+						let serverName: keyof typeof servers = '_app';
 
 						if (pathParts[0] && pathParts[0] in servers) {
 							const firstPart = pathParts.shift() as keyof typeof servers;
@@ -325,6 +83,10 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 						}
 
 						const link = servers[serverName];
+
+						if (!link) {
+							throw new Error(`Unknown endpoint: ${serverName}`);
+						}
 
 						return link({
 							...ctx,
@@ -335,6 +97,290 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 						});
 					};
 				},
+				// runtime => {
+				// 	const servers = {
+				// 		// combined app router. if it hasn't been split off, it'll default to calling here
+				// 		_app: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/_app'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		// split off routers
+				// 		analyticsEndpoint: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/analyticsEndpoint'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		auth: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/auth'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		bio: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/bio'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		campaign: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/campaign'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		cart: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/cart'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		cartFunnel: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/cartFunnel'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		domain: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/domain'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		emailAddress: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/emailAddress'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		event: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/event'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		file: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/file'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		fm: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/fm'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		formResponse: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/formResponse'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		genre: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/genre'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		landingPage: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/landingPage'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		link: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/link'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		mixtape: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/mixtape'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		playlist: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/playlist'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		playlistPitchReview: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/playlistPitchReview'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		playlistPlacement: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/playlistPlacement'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		pressKit: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/pressKit'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		product: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/product'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		providerAccount: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/providerAccount'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		spotify: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/spotify'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		stat: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/stat'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		stripeConnect: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/stripeConnect'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		track: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/track'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		user: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/user'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		visitorSession: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/visitorSession'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		workspace: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/workspace'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		workspaceInvite: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/workspaceInvite'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+
+				// 		workspaceStripe: httpBatchStreamLink({
+				// 			transformer: SuperJSON,
+				// 			url: getAbsoluteUrl('app', 'api/trpc/workspaceStripe'),
+				// 			headers() {
+				// 				return preparedHeaders;
+				// 			},
+				// 		})(runtime),
+				// 	};
+
+				// 	return ctx => {
+				// 		const pathParts = ctx.op.path.split('.');
+
+				// 		let path: string = ctx.op.path;
+				// 		let serverName: keyof typeof servers = '_app';
+
+				// 		if (pathParts[0] && pathParts[0] in servers) {
+				// 			const firstPart = pathParts.shift() as keyof typeof servers;
+				// 			path = pathParts.join('.');
+				// 			serverName = firstPart;
+				// 		}
+
+				// 		const link = servers[serverName];
+
+				// 		return link({
+				// 			...ctx,
+				// 			op: {
+				// 				...ctx.op,
+				// 				path,
+				// 			},
+				// 		});
+				// 	};
+				// },
 			],
 		});
 

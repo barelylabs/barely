@@ -1,13 +1,14 @@
-import type { IconKey } from '@barely/ui/elements/icon';
+import type { IconKey } from '@barely/ui/icon';
 import { useCallback, useEffect, useRef } from 'react';
-import { cn } from '@barely/lib/utils/cn';
+import { cn } from '@barely/utils';
+import { parseAsBoolean, useQueryState } from 'nuqs';
 
-import { Button } from '@barely/ui/elements/button';
-import { Icon } from '@barely/ui/elements/icon';
-import { Input } from '@barely/ui/elements/input';
-import { Label } from '@barely/ui/elements/label';
-import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/elements/popover';
-import { Switch } from '@barely/ui/elements/switch';
+import { Button } from '@barely/ui/button';
+import { Icon } from '@barely/ui/icon';
+import { Input } from '@barely/ui/input';
+import { Label } from '@barely/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/popover';
+import { Switch } from '@barely/ui/switch';
 
 function DisplayShortcutIcon({
 	shortcut,
@@ -76,7 +77,7 @@ export function Filters({
 	toggleFulfilled?: () => void;
 	showDeleted?: boolean;
 	toggleDeleted?: () => void;
-	clearAllFilters: () => void;
+	clearAllFilters: () => Promise<URLSearchParams>;
 }) {
 	const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -137,6 +138,8 @@ export function Filters({
 		window.addEventListener('keydown', onKeydown);
 		return () => window.removeEventListener('keydown', onKeydown);
 	}, [onKeydown]);
+
+	// const [showArchived, setShowArchived] = useQueryState('showArchived', parseAsBoolean.withDefault(false));
 
 	return (
 		<div className='flex flex-row items-center justify-between gap-4'>

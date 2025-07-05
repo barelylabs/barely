@@ -1,15 +1,21 @@
-import { auth } from '@barely/lib/server/auth';
-import { dbHttp } from '@barely/lib/server/db';
-import { providerStateSchema } from '@barely/lib/server/routes/provider-account/provider-account.schema';
-import { ProviderAccounts } from '@barely/lib/server/routes/provider-account/provider-account.sql';
-import { newId } from '@barely/lib/utils/id';
-import { raise } from '@barely/lib/utils/raise';
-import { getAbsoluteUrl } from '@barely/lib/utils/url';
+import type { NextRequest } from 'next/server';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { dbHttp } from '@barely/db/client';
+import { ProviderAccounts } from '@barely/db/sql/provider-account.sql';
+import { getAbsoluteUrl, newId, raise } from '@barely/utils';
+import { providerStateSchema } from '@barely/validators';
 import { z } from 'zod/v4';
 
-import { env } from '~/env';
+import { auth } from '~/auth/server';
+import { appEnv } from '~/env';
 
-export const GET = auth(async req => {
+export async function GET(req: NextRequest) {
+	const session = await auth.api.getSession({ headers: await headers() });
+	if (!session) {
+		return redirect('/login');
+	}
+
 	const params = req.nextUrl.searchParams;
 
 	const code = params.get('code');
@@ -23,12 +29,12 @@ export const GET = auth(async req => {
 	const state = providerStateSchema.parse(JSON.parse(decodedState));
 	console.log('state ', state);
 
-	const userId = req.auth?.user.id;
+	const userId = session.userId;
 	if (!userId) {
 		return new Response('user not found', { status: 400 });
 	}
 
-	const workspace = req.auth?.user.workspaces.find(w => w.id === state.workspaceId);
+	const workspace = session.workspaces.find(w => w.id === state.workspaceId);
 
 	if (!workspace) {
 		return new Response('workspace not found', { status: 400 });
@@ -41,8 +47,8 @@ export const GET = auth(async req => {
 		},
 		body: new URLSearchParams({
 			grant_type: 'authorization_code',
-			client_id: env.MAILCHIMP_CLIENT_ID,
-			client_secret: env.MAILCHIMP_CLIENT_SECRET,
+			client_id: appEnv.MAILCHIMP_CLIENT_ID,
+			client_secret: appEnv.MAILCHIMP_CLIENT_SECRET,
 			redirect_uri: getAbsoluteUrl('app', 'api/apps/callback/mailchimp'),
 			code,
 		}),
@@ -82,7 +88,7 @@ export const GET = auth(async req => {
 	});
 
 	return Response.redirect(state.redirectUrl);
-});
+}
 
 const mailchimpTokenSetSchema = z.object({
 	access_token: z.string(),

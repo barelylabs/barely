@@ -1,11 +1,10 @@
 'use client';
 
 import { useCallback } from 'react';
+import { useWorkspace } from '@barely/hooks';
 // import { api } from '@barely/lib/server/api/react';
-import { useTRPC } from '@barely/lib/server/api/react';
+import { useTRPC } from '@barely/api/app/trpc.react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-
-import { useWorkspace } from '@barely/hooks/use-workspace';
 
 import { ArchiveOrDeleteModal } from '~/app/[handle]/_components/archive-or-delete-modal';
 import { useCartFunnelContext } from '~/app/[handle]/carts/_components/cartFunnel-context';

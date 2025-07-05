@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 
-import { ThemeProvider } from '@barely/ui/elements/next-theme-provider';
+import { ThemeProvider } from '@barely/ui/next-theme-provider';
 
 export default function Providers(props: { children: ReactNode; headers?: Headers }) {
 	return (

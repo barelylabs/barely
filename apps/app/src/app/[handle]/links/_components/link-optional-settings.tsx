@@ -1,14 +1,15 @@
 'use client';
 
-import type { Link, UpsertLink } from '@barely/lib/server/routes/link/link.schema';
-import type { TransparentLinkData } from '@barely/lib/utils/link';
+import type { Link, UpsertLink } from '@barely/validators';
+import type { TransparentLinkData } from '@barely/utils';
 import type { UseFormReturn } from 'react-hook-form';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
+import { useWorkspace } from '@barely/hooks';
+import { useTRPC } from '@barely/api/app/trpc.react';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { useSetAtom } from 'jotai';
 
-import { Alert } from '@barely/ui/elements/alert';
-import { SimpleTooltipContent, TooltipContent } from '@barely/ui/elements/tooltip';
+import { Alert } from '@barely/ui/alert';
+import { SimpleTooltipContent, TooltipContent } from '@barely/ui/tooltip';
 import { SwitchField } from '@barely/ui/forms/switch-field';
 
 import { TransparentLinkDisplay } from '~/app/[handle]/links/_components/create-or-update-link-modal';
@@ -23,11 +24,15 @@ export function LinkOptionalSettings({
 	linkForm: UseFormReturn<UpsertLink>;
 	transparentLinkData: TransparentLinkData;
 }) {
-	const { data: endpoints } = api.analyticsEndpoint.byCurrentWorkspace.useQuery();
+	const trpc = useTRPC();
+	const { handle } = useWorkspace();
+	const { data: endpoints } = useSuspenseQuery(
+		trpc.analyticsEndpoint.byCurrentWorkspace.queryOptions({ handle }),
+	);
 	const setShowUpgradeModal = useSetAtom(showUpgradeModalAtom);
 	const { workspace } = useWorkspace();
 
-	const hasEndpoint = Object.values(endpoints ?? {}).some(endpoint => endpoint !== null);
+	const hasEndpoint = Object.values(endpoints).some(endpoint => endpoint !== null);
 
 	return (
 		<div className='flex flex-col gap-4'>

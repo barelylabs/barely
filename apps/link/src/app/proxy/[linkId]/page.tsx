@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
-import { getLinkById } from '@barely/lib/server/routes/link/link.fns';
-import { GOOGLE_FAVICON_URL } from '@barely/lib/utils/constants';
-import { constructMetadata, getApexDomain } from '@barely/lib/utils/link';
+import { GOOGLE_FAVICON_URL } from '@barely/const';
+import { getLinkById } from '@barely/lib/functions/link.fns';
+import { constructMetadata, getApexDomain } from '@barely/utils';
 import { unescape } from 'html-escaper';
 
 // export const runtime = 'edge';

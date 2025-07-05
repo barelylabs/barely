@@ -1,14 +1,15 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/react';
-import type { trackFilterParamsSchema } from '@barely/lib/server/routes/track/track.schema';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import type { trackFilterParamsSchema } from '@barely/validators';
 import type { Selection } from 'react-aria-components';
 import type { z } from 'zod/v4';
-import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
-import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
-import { trackSearchParamsSchema } from '@barely/lib/server/routes/track/track.schema';
+import { createContext, useCallback, useContext, useRef, useState } from 'react';
+import { useTypedOptimisticQuery, useWorkspace } from '@barely/hooks';
+import { trackSearchParamsSchema } from '@barely/validators';
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
 
@@ -19,13 +20,8 @@ export type TrackContext = InfiniteItemsContext<
 
 const TrackContext = createContext<TrackContext | undefined>(undefined);
 
-export function TrackContextProvider({
-	children,
-	initialInfiniteTracks,
-}: {
-	children: React.ReactNode;
-	initialInfiniteTracks: Promise<AppRouterOutputs['track']['byWorkspace']>;
-}) {
+export function TrackContextProvider({ children }: { children: React.ReactNode }) {
+	const trpc = useTRPC();
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [showUpdateModal, setShowUpdateModal] = useState(false);
 	const [showArchiveModal, setShowArchiveModal] = useState(false);
@@ -48,8 +44,6 @@ export function TrackContextProvider({
 		: selectedTrackIds === 'all' ? 'all'
 		: new Set(selectedTrackIds);
 
-	const initialData = use(initialInfiniteTracks);
-
 	const {
 		data: infiniteTracks,
 		hasNextPage,
@@ -58,28 +52,19 @@ export function TrackContextProvider({
 		isFetching,
 		isRefetching,
 		isPending,
-	} = api.track.byWorkspace.useInfiniteQuery(
-		{
-			handle,
-			...filters,
-		},
-		{
-			initialData: () => {
-				return {
-					pages: [
-						{
-							tracks: initialData.tracks,
-							nextCursor: initialData.nextCursor,
-						},
-					],
-					pageParams: [],
-				};
+	} = useSuspenseInfiniteQuery({
+		...trpc.track.byWorkspace.infiniteQueryOptions(
+			{
+				handle,
+				...filters,
 			},
-			getNextPageParam: lastPage => lastPage.nextCursor,
-		},
-	);
+			{
+				getNextPageParam: lastPage => lastPage.nextCursor,
+			},
+		),
+	});
 
-	const tracks = infiniteTracks?.pages.flatMap(page => page.tracks) ?? [];
+	const tracks = infiniteTracks.pages.flatMap(page => page.tracks);
 
 	const setTrackSelection = useCallback(
 		(selection: Selection) => {
@@ -111,7 +96,7 @@ export function TrackContextProvider({
 	);
 
 	const lastSelectedTrackId =
-		!trackSelection || trackSelection === 'all' ?
+		trackSelection === 'all' || !trackSelection.size ?
 			undefined
 		:	Array.from(trackSelection).pop()?.toString();
 

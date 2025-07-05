@@ -1,25 +1,18 @@
 'use client';
 
 import type { z } from 'zod/v4';
-import { useUpdateWorkspace } from '@barely/lib/hooks/use-update-workspace';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-// import { useWorkspaceUpdateForm } from '@barely/lib/hooks/use-workspace-update-form';
-import { useZodForm } from '@barely/lib/hooks/use-zod-form';
-import { updateWorkspaceSchema } from '@barely/lib/server/routes/workspace/workspace.schema';
-import {
-	isValidUrl,
-	parseInstagramLink,
-	parseTikTokLink,
-	parseYoutubeLink,
-} from '@barely/lib/utils/link';
-import { parseSpotifyUrl } from '@barely/lib/utils/spotify';
+import { useUpdateWorkspace, useWorkspaceWithAll, useZodForm } from '@barely/hooks';
+// TODO: parseInstagramLink, parseTikTokLink, parseYoutubeLink are commented out in utils
+
+import { isValidUrl, parseSpotifyUrl } from '@barely/utils';
+import { updateWorkspaceSchema } from '@barely/validators';
 
 import { SettingsCardForm } from '@barely/ui/components/settings-card';
 import { NumberField } from '@barely/ui/forms/number-field';
 import { TextField } from '@barely/ui/forms/text-field';
 
 export function SocialStatsForm() {
-	const { workspace } = useWorkspace();
+	const workspace = useWorkspaceWithAll();
 
 	const form = useZodForm({
 		schema: updateWorkspaceSchema,
@@ -39,7 +32,10 @@ export function SocialStatsForm() {
 	});
 
 	const onSubmit = async (data: z.infer<typeof updateWorkspaceSchema>) => {
-		await updateWorkspace(data);
+		await updateWorkspace({
+			...data,
+			handle: workspace.handle,
+		});
 	};
 
 	return (
@@ -91,7 +87,7 @@ export function SocialStatsForm() {
 }
 
 export function SocialLinksForm() {
-	const { workspace } = useWorkspace();
+	const workspace = useWorkspaceWithAll();
 
 	const form = useZodForm({
 		schema: updateWorkspaceSchema,
@@ -110,7 +106,10 @@ export function SocialLinksForm() {
 	});
 
 	const onSubmit = async (data: z.infer<typeof updateWorkspaceSchema>) => {
-		await updateWorkspace(data);
+		await updateWorkspace({
+			...data,
+			handle: workspace.handle,
+		});
 	};
 
 	return (
@@ -139,44 +138,47 @@ export function SocialLinksForm() {
 				label='YouTube Channel ID'
 				control={form.control}
 				name='youtubeChannelId'
-				onPaste={e => {
-					const input = e.clipboardData.getData('text');
-					if (!input || !isValidUrl(input)) return;
-					const parsedYoutubeLink = parseYoutubeLink(input);
-					if (!parsedYoutubeLink || parsedYoutubeLink.type !== 'channel') return;
-					e.preventDefault();
-					form.setValue('youtubeChannelId', parsedYoutubeLink.id, { shouldDirty: true });
-				}}
+				// TODO: Uncomment when parseYoutubeLink is available
+				// onPaste={e => {
+				// 	const input = e.clipboardData.getData('text');
+				// 	if (!input || !isValidUrl(input)) return;
+				// 	const parsedYoutubeLink = parseYoutubeLink(input);
+				// 	if (!parsedYoutubeLink || parsedYoutubeLink.type !== 'channel') return;
+				// 	e.preventDefault();
+				// 	form.setValue('youtubeChannelId', parsedYoutubeLink.id, { shouldDirty: true });
+				// }}
 			/>
 			<TextField
 				label='TikTok Username'
 				control={form.control}
 				name='tiktokUsername'
-				onPaste={e => {
-					const input = e.clipboardData.getData('text');
-					if (!input || !isValidUrl(input)) return;
-					const parsedTikTokLink = parseTikTokLink(input);
-					if (!parsedTikTokLink) return;
-					e.preventDefault();
-					form.setValue('tiktokUsername', parsedTikTokLink.username, {
-						shouldDirty: true,
-					});
-				}}
+				// TODO: Uncomment when parseTikTokLink is available
+				// onPaste={e => {
+				// 	const input = e.clipboardData.getData('text');
+				// 	if (!input || !isValidUrl(input)) return;
+				// 	const parsedTikTokLink = parseTikTokLink(input);
+				// 	if (!parsedTikTokLink) return;
+				// 	e.preventDefault();
+				// 	form.setValue('tiktokUsername', parsedTikTokLink.username, {
+				// 		shouldDirty: true,
+				// 	});
+				// }}
 			/>
 			<TextField
 				label='Instagram Username'
 				control={form.control}
 				name='instagramUsername'
-				onPaste={e => {
-					const input = e.clipboardData.getData('text');
-					if (!input || !isValidUrl(input)) return;
-					const parsedInstagramLink = parseInstagramLink(input);
-					if (!parsedInstagramLink) return;
-					e.preventDefault();
-					form.setValue('instagramUsername', parsedInstagramLink.username, {
-						shouldDirty: true,
-					});
-				}}
+				// TODO: Uncomment when parseInstagramLink is available
+				// onPaste={e => {
+				// 	const input = e.clipboardData.getData('text');
+				// 	if (!input || !isValidUrl(input)) return;
+				// 	const parsedInstagramLink = parseInstagramLink(input);
+				// 	if (!parsedInstagramLink) return;
+				// 	e.preventDefault();
+				// 	form.setValue('instagramUsername', parsedInstagramLink.username, {
+				// 		shouldDirty: true,
+				// 	});
+				// }}
 			/>
 			<TextField label='Website' control={form.control} name='website' />
 		</SettingsCardForm>

@@ -1,23 +1,21 @@
 'use client';
 
 import { useState } from 'react';
-import { useTRPC } from '@barely/lib/server/api/react';
-import { updatePlaylistPitchCampaign_LaunchSchema } from '@barely/lib/server/routes/campaign/campaign.schema';
-import { PLAYLIST_PITCH_SETTINGS } from '@barely/lib/server/routes/campaign/campaign.settings';
+import { PLAYLIST_PITCH_SETTINGS } from '@barely/const';
+import { useZodForm } from '@barely/hooks';
+import { useTRPC } from '@barely/api/app/trpc.react';
+import { playlistPitchCostInDollars } from '@barely/utils';
+import { updatePlaylistPitchCampaign_LaunchSchema } from '@barely/validators';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 
+import { Badge } from '@barely/ui/badge';
+import { Button } from '@barely/ui/button';
 // import { api } from '@barely/server/api/react';
 
-import { useZodForm } from '@barely/hooks/use-zod-form';
-
-import { Badge } from '@barely/ui/elements/badge';
-import { Button } from '@barely/ui/elements/button';
-import { Icon } from '@barely/ui/elements/icon';
-import { Text } from '@barely/ui/elements/typography';
-import { Form } from '@barely/ui/forms';
+import { Form } from '@barely/ui/forms/form';
 import { SliderField } from '@barely/ui/forms/slider-field';
-
-import { playlistPitchCostInDollars } from '@barely/utils/campaign';
+import { Icon } from '@barely/ui/icon';
+import { Text } from '@barely/ui/typography';
 
 import { TrackGenresField } from '~/app/(dash)/track/components/track-genres-input';
 

@@ -1,31 +1,29 @@
 'use client';
 
-import type { InsertDomain } from '@barely/server/routes/domain/domain.schema';
+import type { InsertDomain } from '@barely/validators';
 import type { z } from 'zod/v4';
 import { useEffect, useState } from 'react';
-import { api } from '@barely/server/api/react';
-import { insertDomainSchema } from '@barely/server/routes/domain/domain.schema';
+import { atomWithToggle } from '@barely/atoms';
+import { useWebDomains, useWorkspace, useZodForm } from '@barely/hooks';
+import { useTRPC } from '@barely/api/app/trpc.react';
+import { insertDomainSchema } from '@barely/validators';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { atom, useAtom } from 'jotai';
 
-import { atomWithToggle } from '@barely/atoms/atom-with-toggle';
-
-import { useWebDomains } from '@barely/hooks/use-web-domains';
-import { useWorkspace } from '@barely/hooks/use-workspace';
-import { useZodForm } from '@barely/hooks/use-zod-form';
-
-import { Button } from '@barely/ui/elements/button';
-import { Icon } from '@barely/ui/elements/icon';
-import { Modal, ModalBody, ModalHeader } from '@barely/ui/elements/modal';
-import { SimpleTooltipContent } from '@barely/ui/elements/tooltip';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { Button } from '@barely/ui/button';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SwitchField } from '@barely/ui/forms/switch-field';
 import { TextField } from '@barely/ui/forms/text-field';
+import { Icon } from '@barely/ui/icon';
+import { Modal, ModalBody, ModalHeader } from '@barely/ui/modal';
+import { SimpleTooltipContent } from '@barely/ui/tooltip';
 
 export const showDomainModalAtom = atomWithToggle(false);
 export const editDomainAtom = atom<InsertDomain | undefined>(undefined);
 
 export function DomainModal() {
-	const apiUtils = api.useUtils();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
 	const { workspace } = useWorkspace();
 	const { domains } = useWebDomains();
 
@@ -50,25 +48,29 @@ export function DomainModal() {
 		},
 	});
 
-	const { mutateAsync: addDomain } = api.webDomain.add.useMutation({
+	const { mutateAsync: addDomain } = useMutation({
+		...trpc.webDomain.add.mutationOptions(),
 		onSuccess: async () => {
-			await apiUtils.webDomain.byWorkspace.invalidate();
+			await queryClient.invalidateQueries(trpc.webDomain.byWorkspace.queryFilter());
 			setShowDomainModal(false);
 			setEditDomain(undefined);
 			domainForm.reset();
 		},
 	});
-	const { mutateAsync: updateDomain } = api.webDomain.update.useMutation({
+
+	const { mutateAsync: updateDomain } = useMutation({
+		...trpc.webDomain.update.mutationOptions(),
 		onSuccess: async () => {
-			await apiUtils.webDomain.byWorkspace.invalidate();
+			await queryClient.invalidateQueries(trpc.webDomain.byWorkspace.queryFilter());
 			setShowDomainModal(false);
 			setEditDomain(undefined);
 			domainForm.reset();
 		},
 	});
-	const { mutateAsync: deleteDomain } = api.webDomain.delete.useMutation({
+	const { mutateAsync: deleteDomain } = useMutation({
+		...trpc.webDomain.delete.mutationOptions(),
 		onSuccess: async () => {
-			await apiUtils.webDomain.byWorkspace.invalidate();
+			await queryClient.invalidateQueries(trpc.webDomain.byWorkspace.queryFilter());
 			setShowDomainModal(false);
 			setEditDomain(undefined);
 			domainForm.reset();
@@ -76,13 +78,20 @@ export function DomainModal() {
 	});
 
 	const onSubmit = async (data: z.infer<typeof insertDomainSchema>) => {
-		if (editDomain) return await updateDomain(data);
-		return await addDomain(data);
+		if (editDomain)
+			return await updateDomain({
+				...data,
+				handle: workspace.handle,
+			});
+		return await addDomain({
+			...data,
+			handle: workspace.handle,
+		});
 	};
 
 	/** Form logic/effects */
 	const linkType = domainForm.watch('type');
-	const hasLinkDomains = domains?.some(domain => domain.type === 'link');
+	const hasLinkDomains = domains.some(domain => domain.type === 'link');
 
 	// if we're editing a link domain, set isPrimaryBioDomain and isPrimaryPressDomain to false
 	useEffect(() => {
@@ -100,7 +109,9 @@ export function DomainModal() {
 	}, [linkType, hasLinkDomains, domainForm]);
 
 	useEffect(() => {
-		editDomain?.domain && setDomainInputLocked(true);
+		if (editDomain?.domain) {
+			setDomainInputLocked(true);
+		}
 	}, [editDomain?.domain]);
 
 	const isPrimaryLinkDisabledState =
@@ -149,9 +160,13 @@ export function DomainModal() {
 									className='flex flex-row items-center gap-1 text-right'
 									type='button'
 									onClick={() => {
-										window.confirm(
-											`Warning: Changing your link domain will break all short links that use it. Are you sure you want to continue?`,
-										) && setDomainInputLocked(!domainInputLocked);
+										if (
+											window.confirm(
+												`Warning: Changing your link domain will break all short links that use it. Are you sure you want to continue?`,
+											)
+										) {
+											setDomainInputLocked(!domainInputLocked);
+										}
 									}}
 								>
 									<Icon.lock className='h-3 w-3' />
@@ -193,9 +208,16 @@ export function DomainModal() {
 								disabled={deleteDisabled}
 								disabledTooltip={`You can't delete your primary ${linkType} domain`}
 								onClick={async () => {
-									window.confirm(
-										`Warning: Deleting your ${linkType} domain will break all short links that use it. Are you sure you want to continue?`,
-									) && (await deleteDomain(editDomain.domain));
+									if (
+										window.confirm(
+											`Warning: Deleting your ${linkType} domain will break all short links that use it. Are you sure you want to continue?`,
+										)
+									) {
+										await deleteDomain({
+											handle: workspace.handle,
+											domain: editDomain.domain,
+										});
+									}
 								}}
 							>
 								Delete domain

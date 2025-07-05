@@ -2,7 +2,6 @@ import type { Config } from 'tailwindcss';
 import headlessUI from '@headlessui/tailwindcss';
 import forms from '@tailwindcss/forms';
 import typography from '@tailwindcss/typography';
-// @ts-expect-error - CommonJS module without proper types
 import scrollbarHide from 'tailwind-scrollbar-hide';
 import animate from 'tailwindcss-animate';
 import radix from 'tailwindcss-radix';
@@ -111,14 +110,6 @@ export default {
 					DEFAULT: 'oklch(var(--brand) / <alpha-value>)',
 					...dynamicTwClasses('brand', 40),
 				},
-				// brand: {
-				// 	DEFAULT: 'oklch(var(--brand) / <alpha-value>)',
-				// 	foreground: 'oklch(var(--brand-foreground) / <alpha-value>)',
-				// },
-				// 'brand-accent': {
-				// 	DEFAULT: 'oklch(var(--brand-accent) / <alpha-value>)',
-				// 	foreground: 'oklch(var(--brand-accent-foreground) / <alpha-value>)',
-				// },
 				accent: {
 					DEFAULT: 'oklch(var(--accent) / <alpha-value>)',
 					foreground: 'oklch(var(--accent-foreground) / <alpha-value>)',

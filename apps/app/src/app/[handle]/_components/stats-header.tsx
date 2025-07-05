@@ -1,26 +1,23 @@
 'use client';
 
-import type { StatDateRange } from '@barely/lib/server/routes/stat/stat.schema';
+import type { StatDateRange } from '@barely/validators';
 import { Suspense } from 'react';
-import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { useTRPC } from '@barely/lib/server/api/react';
-import { statDateRange } from '@barely/lib/server/routes/stat/stat.schema';
+import { useWebEventStatFilters, useWorkspace } from '@barely/hooks';
+import { useTRPC } from '@barely/api/app/trpc.react';
+import { getFmPageUrlFromFmPage, getShortLinkUrlFromLink } from '@barely/utils';
+import { statDateRange } from '@barely/validators';
 import { useSuspenseQuery } from '@tanstack/react-query';
 
-import { ChevronRightToArrow, Icon } from '@barely/ui/elements/icon';
+import { ChevronRightToArrow, Icon } from '@barely/ui/icon';
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from '@barely/ui/elements/select';
-import { Skeleton } from '@barely/ui/elements/skeleton';
-import { Text } from '@barely/ui/elements/typography';
-
-import { getFmPageUrlFromFmPage } from '@barely/utils/fm';
-import { getShortLinkUrlFromLink } from '@barely/utils/link';
+} from '@barely/ui/select';
+import { Skeleton } from '@barely/ui/skeleton';
+import { Text } from '@barely/ui/typography';
 
 const dateRangeOptions: StatDateRange[] = ['1d', '1w', '28d'];
 
@@ -92,17 +89,16 @@ function AssetLinkLaunch() {
 		);
 	}
 
-	if (asset.type === 'link') {
-		return (
-			<a
-				className='group flex flex-row items-center gap-1'
-				href={getShortLinkUrlFromLink(asset.link)}
-				target='_blank'
-				rel='noreferrer'
-			>
-				<Text variant='xl/semibold'>{`${asset.link.domain}/${asset.link.key}`}</Text>
-				<ChevronRightToArrow />
-			</a>
-		);
-	}
+	// link is the only asset type left
+	return (
+		<a
+			className='group flex flex-row items-center gap-1'
+			href={getShortLinkUrlFromLink(asset.link)}
+			target='_blank'
+			rel='noreferrer'
+		>
+			<Text variant='xl/semibold'>{`${asset.link.domain}/${asset.link.key}`}</Text>
+			<ChevronRightToArrow />
+		</a>
+	);
 }

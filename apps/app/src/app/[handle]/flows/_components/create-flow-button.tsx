@@ -2,18 +2,21 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
+import { useWorkspace } from '@barely/hooks';
+import { useTRPC } from '@barely/api/app/trpc.react';
+import { useMutation } from '@tanstack/react-query';
 
-import { Button } from '@barely/ui/elements/button';
+import { Button } from '@barely/ui/button';
 
 export function CreateFlowButton() {
+	const trpc = useTRPC();
 	const { handle } = useWorkspace();
 	const router = useRouter();
 
 	const [loading, setLoading] = useState(false);
 
-	const { mutateAsync: createFlow } = api.flow.create.useMutation({
+	const { mutateAsync: createFlow } = useMutation({
+		...trpc.flow.create.mutationOptions(),
 		onSuccess: res => {
 			router.push(`/${handle}/flows/${res.flowId}`);
 		},
@@ -23,7 +26,9 @@ export function CreateFlowButton() {
 		<Button
 			onClick={async () => {
 				setLoading(true);
-				await createFlow({});
+				await createFlow({
+					handle,
+				});
 				setLoading(false);
 			}}
 			loading={loading}

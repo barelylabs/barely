@@ -2,19 +2,20 @@
 
 import type { z } from 'zod/v4';
 import { useCallback, useEffect, useMemo } from 'react';
-import { useZodForm } from '@barely/lib/hooks/use-zod-form';
-import { api } from '@barely/lib/server/api/react';
-import { markCartOrderAsFulfilledSchema } from '@barely/lib/server/routes/cart-order/cart-order.schema';
-import { SHIPPING_CARRIERS } from '@barely/lib/server/shipping/shipping.constants';
+import { SHIPPING_CARRIERS } from '@barely/const';
+import { useWorkspace, useZodForm } from '@barely/hooks';
+import { useTRPC } from '@barely/api/app/trpc.react';
+import { markCartOrderAsFulfilledSchema } from '@barely/validators';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useFieldArray } from 'react-hook-form';
 
-import { Icon } from '@barely/ui/elements/icon';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
-import { Text } from '@barely/ui/elements/typography';
-import { Form, SubmitButton } from '@barely/ui/forms';
 import { CheckboxField } from '@barely/ui/forms/checkbox-field';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { TextField } from '@barely/ui/forms/text-field';
+import { Icon } from '@barely/ui/icon';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
+import { Text } from '@barely/ui/typography';
 
 import { useCartOrderContext } from '~/app/[handle]/orders/_components/cart-order-context';
 
@@ -36,7 +37,9 @@ const shippingCarrierOptions = SHIPPING_CARRIERS.map(carrier => ({
 }));
 
 export function MarkCartOrderFulfilledModal() {
-	const apiUtils = api.useUtils();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
+	const { handle } = useWorkspace();
 
 	/* cart order context */
 	const {
@@ -47,11 +50,13 @@ export function MarkCartOrderFulfilledModal() {
 	} = useCartOrderContext();
 
 	/* mutations */
-	const { mutateAsync: markAsFulfilled } = api.cartOrder.markAsFullfilled.useMutation({
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: markAsFulfilled } = useMutation(
+		trpc.cartOrder.markAsFullfilled.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
 	const unfulfilledProducts = useMemo(
 		() => selectedCartOrder?.products.filter(product => !product.fulfilled) ?? [],
@@ -85,7 +90,10 @@ export function MarkCartOrderFulfilledModal() {
 
 	const handleSubmit = async (data: z.infer<typeof markCartOrderAsFulfilledSchema>) => {
 		console.log('marking as fulfilled ', data.products);
-		await markAsFulfilled(data);
+		await markAsFulfilled({
+			...data,
+			handle,
+		});
 	};
 
 	/* modal */
@@ -97,8 +105,17 @@ export function MarkCartOrderFulfilledModal() {
 		removeProducts();
 		form.reset();
 
-		await apiUtils.cartOrder.invalidate();
-	}, [apiUtils, focusGridList, setShowMarkAsFulfilledModal, form, removeProducts]);
+		await queryClient.invalidateQueries({
+			queryKey: trpc.cartOrder.byWorkspace.queryKey(),
+		});
+	}, [
+		queryClient,
+		trpc,
+		focusGridList,
+		setShowMarkAsFulfilledModal,
+		form,
+		removeProducts,
+	]);
 
 	useEffect(() => {
 		// fixme- i don't like updating the products like this, but it seems to work for now

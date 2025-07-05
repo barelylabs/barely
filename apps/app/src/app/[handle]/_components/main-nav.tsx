@@ -3,8 +3,8 @@
 import * as React from 'react';
 import Image from 'next/image';
 
-import { AspectRatio } from '@barely/ui/elements/aspect-ratio';
-import { Text } from '@barely/ui/elements/typography';
+import { AspectRatio } from '@barely/ui/aspect-ratio';
+import { Text } from '@barely/ui/typography';
 
 import { WorkspaceSwitcher } from './workspace-switcher';
 

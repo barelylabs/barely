@@ -1,9 +1,9 @@
 'use client';
 
-import { useWorkspaceIsPersonal } from '@barely/lib/hooks/use-workspace';
+import { useWorkspaceIsPersonal } from '@barely/hooks';
 import { useAtom } from 'jotai';
 
-import { Button } from '@barely/ui/elements/button';
+import { Button } from '@barely/ui/button';
 
 import { showInviteMemberModalAtom } from '~/app/[handle]/settings/team/_components/invite-member-modal';
 

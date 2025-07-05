@@ -1,7 +1,9 @@
 import type { z } from 'zod/v4';
 import { redirect } from 'next/navigation';
-import { api } from '@barely/lib/server/api/server';
-import { mixtapeFilterParamsSchema } from '@barely/lib/server/routes/mixtape/mixtape.schema';
+import { Suspense } from 'react';
+import { mixtapeFilterParamsSchema } from '@barely/validators';
+
+import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllMixtapes } from '~/app/[handle]/mixtapes/_components/all-mixtapes';
@@ -11,33 +13,46 @@ import { CreateOrUpdateMixtapeModal } from '~/app/[handle]/mixtapes/_components/
 import { MixtapeContextProvider } from '~/app/[handle]/mixtapes/_components/mixtape-context';
 import { MixtapeHotkeys } from '~/app/[handle]/mixtapes/_components/mixtape-hotkeys';
 
-export default function MixtapesPage({
+export default async function MixtapesPage({
 	searchParams,
 	params,
 }: {
-	searchParams: z.infer<typeof mixtapeFilterParamsSchema>;
-	params: { handle: string };
+	searchParams: Promise<z.infer<typeof mixtapeFilterParamsSchema>>;
+	params: Promise<{ handle: string }>;
 }) {
-	const parsedFilters = mixtapeFilterParamsSchema.safeParse(searchParams);
-	if (!parsedFilters.success) redirect(`/${params.handle}/mixtapes`);
+	const { handle } = await params;
+	const filters = await searchParams;
 
-	const initialInfiniteMixtapes = api({ handle: params.handle }).mixtape.byWorkspace({
-		handle: params.handle,
-		...parsedFilters.data,
-	});
+	const parsedFilters = mixtapeFilterParamsSchema.safeParse(filters);
+	if (!parsedFilters.success) {
+		console.log('parsedFilters error', parsedFilters.error);
+		redirect(`/${handle}/mixtapes`);
+	}
+
+	// Prefetch data (not async - don't await)
+	prefetch(
+		trpc.mixtape.byWorkspace.infiniteQueryOptions({
+			handle,
+			...parsedFilters.data,
+		})
+	);
 
 	return (
-		<MixtapeContextProvider initialInfiniteMixtapes={initialInfiniteMixtapes}>
-			<DashContentHeader title='Mixtapes' button={<CreateMixtapeButton />} />
-			<AllMixtapes />
+		<HydrateClient>
+			<Suspense fallback={<div>Loading...</div>}>
+				<MixtapeContextProvider>
+					<DashContentHeader title='Mixtapes' button={<CreateMixtapeButton />} />
+					<AllMixtapes />
 
-			<CreateOrUpdateMixtapeModal mode='create' />
-			<CreateOrUpdateMixtapeModal mode='update' />
+					<CreateOrUpdateMixtapeModal mode='create' />
+					<CreateOrUpdateMixtapeModal mode='update' />
 
-			<ArchiveOrDeleteMixtapeModal mode='archive' />
-			<ArchiveOrDeleteMixtapeModal mode='delete' />
+					<ArchiveOrDeleteMixtapeModal mode='archive' />
+					<ArchiveOrDeleteMixtapeModal mode='delete' />
 
-			<MixtapeHotkeys />
-		</MixtapeContextProvider>
+					<MixtapeHotkeys />
+				</MixtapeContextProvider>
+			</Suspense>
+		</HydrateClient>
 	);
 }

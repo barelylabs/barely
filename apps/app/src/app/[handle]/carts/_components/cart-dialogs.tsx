@@ -1,20 +1,18 @@
 'use client';
 
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { isProduction } from '@barely/lib/utils/environment';
+import { useWorkspaceWithAll } from '@barely/hooks';
+import { isProduction } from '@barely/utils';
 
-import { Alert } from '@barely/ui/elements/alert';
+import { Alert } from '@barely/ui/alert';
 
 export function CartDialogs() {
 	const {
-		workspace: {
-			handle,
-			shippingAddressPostalCode,
-			cartSupportEmail,
-			stripeConnectAccountId,
-			stripeConnectAccountId_devMode,
-		},
-	} = useWorkspace();
+		handle,
+		shippingAddressPostalCode,
+		cartSupportEmail,
+		stripeConnectAccountId,
+		stripeConnectAccountId_devMode,
+	} = useWorkspaceWithAll();
 
 	const stripeConnected =
 		isProduction() ? stripeConnectAccountId : stripeConnectAccountId_devMode;

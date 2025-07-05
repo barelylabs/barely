@@ -1,9 +1,8 @@
 'use client';
 
-import type { SessionUser } from '@barely/server/auth';
+import type { SessionUser } from '@barely/auth';
 import type { ReactNode } from 'react';
-
-import { UserContext } from '@barely/hooks/use-user';
+import { UserContext } from '@barely/hooks';
 
 interface UserContextProviderProps {
 	user: SessionUser;

@@ -1,14 +1,14 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import { useRouter } from 'next/navigation';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
+import { useWorkspace } from '@barely/hooks';
 
+import { Button } from '@barely/ui/button';
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { Button } from '@barely/ui/elements/button';
-import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
-import { Text } from '@barely/ui/elements/typography';
+import { GridList, GridListCard } from '@barely/ui/grid-list';
+import { Text } from '@barely/ui/typography';
 
 import { CreateFlowButton } from '~/app/[handle]/flows/_components/create-flow-button';
 import { useFlowContext } from '~/app/[handle]/flows/_components/flow-context';

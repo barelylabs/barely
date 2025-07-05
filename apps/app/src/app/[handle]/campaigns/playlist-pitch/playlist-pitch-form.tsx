@@ -1,31 +1,32 @@
 'use client';
 
-import type { SessionUser } from '@barely/lib/server/auth';
-import type { SpotifyTrackOption } from '@barely/lib/server/routes/spotify/spotify.schema';
-import type { newUserContactInfoSchemaWithRole } from '@barely/lib/server/routes/user/user.schema';
+import type { SessionUser } from '@barely/auth';
+import type { SpotifyTrackOption } from '@barely/lib/trpc/spotify.route';
+import type { newUserContactInfoSchemaWithRole } from '@barely/validators';
 import type { z } from 'zod/v4';
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useDebounce } from '@barely/lib/hooks/use-debounce';
-import { useTRPC } from '@barely/lib/server/api/react';
+import { useDebounce, useWorkspace } from '@barely/hooks';
+import { onPromise } from '@barely/utils';
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
 
-import { AspectRatio } from '@barely/ui/elements/aspect-ratio';
-import { Button } from '@barely/ui/elements/button';
-import { Icon } from '@barely/ui/elements/icon';
-import { LoadingDots } from '@barely/ui/elements/loading';
-import { MultiSelect } from '@barely/ui/elements/multiselect';
-import { H, Text } from '@barely/ui/elements/typography';
+import { useTRPC } from '@barely/api/app/trpc.react';
 
-import { onPromise } from '@barely/utils/on-promise';
+import { AspectRatio } from '@barely/ui/aspect-ratio';
+import { Button } from '@barely/ui/button';
+import { Icon } from '@barely/ui/icon';
+import { LoadingDots } from '@barely/ui/loading';
+import { MultiSelect } from '@barely/ui/multiselect';
+import { H, Text } from '@barely/ui/typography';
 
 import { PlaylistPitchContactInfoForm } from './playlist-pitch-contact-info-form';
 
 export function PlaylistPitchForm(props: { user?: SessionUser }) {
 	const trpc = useTRPC();
 	const router = useRouter();
+	const { handle } = useWorkspace();
 
 	const [submitStatus, setSubmitStatus] = useState<'idle' | 'submitting' | 'success'>(
 		'idle',
@@ -48,7 +49,9 @@ export function PlaylistPitchForm(props: { user?: SessionUser }) {
 	});
 
 	const { data: dbArtist, isFetching: _checkingDbArtist } = useQuery({
-		...trpc.workspace.bySpotifyId.queryOptions(selectedTrack?.workspace.spotifyArtistId ?? ''),
+		...trpc.workspace.bySpotifyId.queryOptions(
+			selectedTrack?.workspace.spotifyArtistId ?? '',
+		),
 		enabled: !!selectedTrack?.workspace.spotifyArtistId,
 		staleTime: 1000 * 60 * 60 * 24 * 7, // 1 week
 	});
@@ -95,7 +98,16 @@ export function PlaylistPitchForm(props: { user?: SessionUser }) {
 
 		await createUserAndPlaylistPitch({
 			user: data,
-			track: selectedTrack,
+			track: {
+				...selectedTrack,
+				appleMusicId: null,
+				deezerId: null,
+				soundcloudId: null,
+				tidalId: null,
+				youtubeId: null,
+				isrc: null,
+				releaseDate: null,
+			},
 			artist: {
 				name: selectedTrack.workspace.name,
 				spotifyArtistId: selectedTrack.workspace.spotifyArtistId,
@@ -114,8 +126,18 @@ export function PlaylistPitchForm(props: { user?: SessionUser }) {
 
 		setSubmitStatus('submitting');
 
-		const campaign = await createPlaylistPitch({
-			track,
+		await createPlaylistPitch({
+			handle,
+			track: {
+				...track,
+				appleMusicId: null,
+				deezerId: null,
+				soundcloudId: null,
+				tidalId: null,
+				youtubeId: null,
+				isrc: null,
+				releaseDate: null,
+			},
 			artist: {
 				id: dbArtist?.id,
 				name: track.workspace.name,
@@ -123,7 +145,7 @@ export function PlaylistPitchForm(props: { user?: SessionUser }) {
 			},
 		});
 
-		if (campaign) router.push(`/campaigns?success=true`);
+		router.push(`/campaigns?success=true`);
 	}
 
 	if (submitStatus === 'idle')
@@ -140,9 +162,9 @@ export function PlaylistPitchForm(props: { user?: SessionUser }) {
 						values={selectedTrack ? [selectedTrack] : []}
 						onValuesChange={track => setSelectedTrack(track[0] ?? null)}
 						optImgSrc={track => track.imageUrl ?? ''}
-						optImgAlt={track => `album cover: ${track?.name ?? ``}`}
-						optTitle={track => track?.name}
-						optSubtitle={track => track?.workspace.name}
+						optImgAlt={track => `album cover: ${track.name}`}
+						optTitle={track => track.name}
+						optSubtitle={track => track.workspace.name}
 						shouldFilter={false}
 						hideOnValueSelect
 					/>
@@ -185,8 +207,7 @@ export function PlaylistPitchForm(props: { user?: SessionUser }) {
 
 				{(_newUserCannotAccessArtist ?? _existingUserCannotAccessArtist) && dbArtist && (
 					<Text variant='sm/normal' className='mt-4'>
-						It looks like {dbArtist.name ?? 'That artist'} is already in our database.
-						Please{' '}
+						It looks like {dbArtist.name} is already in our database. Please{' '}
 						{_newUserCannotAccessArtist && (
 							<span className='underline hover:text-purple'>
 								<Link
@@ -238,24 +259,23 @@ export function PlaylistPitchForm(props: { user?: SessionUser }) {
 			</div>
 		);
 
-	if (submitStatus === 'success')
-		return (
-			<div className={'flex max-w-xl flex-col'}>
-				<H size='2'>🔥 🚀 🎊 🦄</H>
-				<H size='2' className=''>
-					submitted!
-				</H>
+	return (
+		<div className={'flex max-w-xl flex-col'}>
+			<H size='2'>🔥 🚀 🎊 🦄</H>
+			<H size='2' className=''>
+				submitted!
+			</H>
+			<Text variant='sm/normal' className='mt-4'>
+				{`We've received your track. Our A&R team will review (usually within a few hours) and be in touch soon.`}
+			</Text>
+			{!props.user && (
 				<Text variant='sm/normal' className='mt-4'>
-					{`We've received your track. Our A&R team will review (usually within a few hours) and be in touch soon.`}
+					<span className='bg-yellow-50'>
+						In the meantime, check your email for a confirmation and link to check your
+						campaign&apos;s status.
+					</span>
 				</Text>
-				{!props.user && (
-					<Text variant='sm/normal' className='mt-4'>
-						<span className='bg-yellow-50'>
-							In the meantime, check your email for a confirmation and link to check your
-							campaign&apos;s status.
-						</span>
-					</Text>
-				)}
-			</div>
-		);
+			)}
+		</div>
+	);
 }

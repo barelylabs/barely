@@ -1,58 +1,69 @@
 'use client';
 
-import type { SortableFile } from '@barely/lib/server/routes/file/file.schema';
-import type { NormalizedPressKit } from '@barely/lib/server/routes/press-kit/press-kit.schema';
+import type { SortableFile } from '@barely/validators';
+// import type { NormalizedPressKit } from '@barely/validators';
 import type { z } from 'zod/v4';
-import { use, useMemo, useState } from 'react';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { useZodForm } from '@barely/lib/hooks/use-zod-form';
-import { api } from '@barely/lib/server/api/react';
-import { updatePressKitSchema } from '@barely/lib/server/routes/press-kit/press-kit.schema';
+import { useMemo, useState } from 'react';
+import { useWorkspace, useZodForm } from '@barely/hooks';
+import { useTRPC } from '@barely/api/app/trpc.react';
+import { updatePressKitSchema } from '@barely/validators';
+import {
+	useMutation,
+	useSuspenseInfiniteQuery,
+	useSuspenseQuery,
+} from '@tanstack/react-query';
 import { useFieldArray } from 'react-hook-form';
 
-import { Button } from '@barely/ui/elements/button';
-import { MDXEditor } from '@barely/ui/elements/mdx-editor/index';
-import { SelectableMedia } from '@barely/ui/elements/media/selectable-media';
-import { SortableMedia } from '@barely/ui/elements/media/sortable-media';
-import { H } from '@barely/ui/elements/typography';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { Button } from '@barely/ui/button';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { SwitchField } from '@barely/ui/forms/switch-field';
 import { TextField } from '@barely/ui/forms/text-field';
+import { MDXEditor } from '@barely/ui/mdx-editor';
+import { SelectableMedia } from '@barely/ui/selectable-media';
+import { SortableMedia } from '@barely/ui/sortable-media';
+import { H } from '@barely/ui/typography';
 
-export function PressKitForm({
-	initialPressKit,
-}: {
-	initialPressKit: Promise<NormalizedPressKit>;
-}) {
+export function PressKitForm() {
+	const trpc = useTRPC();
 	const {
-		workspace: { handle, bio, bookingEmail, bookingName, bookingTitle },
+		workspace: { handle },
 	} = useWorkspace();
 
-	const initialData = use(initialPressKit);
+	const { data: pressKit } = useSuspenseQuery({
+		...trpc.pressKit.byWorkspace.queryOptions({ handle }),
+	});
 
-	const { data: pressKit } = api.pressKit.byWorkspace.useQuery(
-		{ handle },
-		{ initialData },
+	const { data: infiniteMixtapeOptions } = useSuspenseInfiniteQuery({
+		...trpc.mixtape.byWorkspace.infiniteQueryOptions(
+			{ handle },
+			{ getNextPageParam: lastPage => lastPage.nextCursor },
+		),
+	});
+
+	const mixtapeOptions = infiniteMixtapeOptions.pages
+		.flatMap(page => page.mixtapes)
+		.map(mixtape => ({ label: mixtape.name, value: mixtape.id }));
+
+	const { mutateAsync: updatePressKit } = useMutation(
+		trpc.pressKit.update.mutationOptions(),
 	);
-
-	const { data: infiniteMixtapeOptions } = api.mixtape.byWorkspace.useInfiniteQuery(
-		{ handle },
-		{ getNextPageParam: lastPage => lastPage.nextCursor },
-	);
-
-	const mixtapeOptions =
-		infiniteMixtapeOptions?.pages
-			.flatMap(page => page.mixtapes)
-			.map(mixtape => ({ label: mixtape.name, value: mixtape.id })) ?? [];
-
-	const { mutateAsync: updatePressKit } = api.pressKit.update.useMutation();
 
 	const form = useZodForm({
 		schema: updatePressKitSchema,
 		values: {
 			...pressKit, // pressKit.byWorkspace creates a new pressKit if it doesn't exist, so this will always be defined
-			_workspace: { bio, bookingTitle, bookingName, bookingEmail },
+			videos: pressKit.videos ?? [],
+			pressQuotes: (pressKit.pressQuotes ?? []).map(quote => ({
+				...quote,
+				link: quote.link ?? undefined,
+			})),
+			_workspace: {
+				bio: pressKit._workspace.bio,
+				bookingTitle: pressKit._workspace.bookingTitle,
+				bookingName: pressKit._workspace.bookingName,
+				bookingEmail: pressKit._workspace.bookingEmail,
+			},
 			_pressPhotos: pressKit.pressPhotos.map(photo => ({
 				fileId: photo.file.id,
 				file: photo.file,
@@ -82,7 +93,10 @@ export function PressKitForm({
 			_pressPhotos,
 		};
 
-		await updatePressKit(updateValues);
+		await updatePressKit({
+			...updateValues,
+			handle,
+		});
 	};
 
 	const pressPhotosAreUpdated = useMemo(
@@ -150,7 +164,7 @@ export function PressKitForm({
 						<SelectField
 							control={form.control}
 							name='mixtapeId'
-							options={mixtapeOptions ?? []}
+							options={mixtapeOptions}
 							placeholder='Select a mixtape'
 						/>
 					)}

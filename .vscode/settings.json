@@ -1,42 +1,39 @@
 {
-  "css.lint.unknownAtRules": "ignore",
+	"css.lint.unknownAtRules": "ignore",
 
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
-  },
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnSave": true,
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": "explicit"
+	},
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.formatOnSave": true,
 
-  "eslint.rules.customizations": [{ "rule": "*", "severity": "warn" }],
-  "eslint.workingDirectories": [
-    { "pattern": "apps/*/" },
-    { "pattern": "packages/*/" }
-  ],
+	"eslint.rules.customizations": [{ "rule": "*", "severity": "warn" }],
+	"eslint.workingDirectories": [{ "pattern": "apps/*/" }, { "pattern": "packages/*/" }],
 
-  "files.autoSave": "off",
-  "files.autoSaveDelay": 5000,
+	"files.autoSave": "off",
+	"files.autoSaveDelay": 5000,
 
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "typescript.preferences.importModuleSpecifier": "non-relative",
-  "typescript.preferences.autoImportFileExcludePatterns": [
-    "@paralleldrive/cuid2",
-    "nanoid",
-    "next/router.d.ts",
-    "next/dist/client/router.d.ts",
-    "@barely/email/src/primitives"
-  ],
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"typescript.preferences.importModuleSpecifier": "non-relative",
+	"typescript.preferences.autoImportFileExcludePatterns": [
+		"@paralleldrive/cuid2",
+		"nanoid",
+		"next/router.d.ts",
+		"next/dist/client/router.d.ts",
+		"@barely/email/src/primitives"
+	],
 
-  "tailwindCSS.experimental.classRegex": [
-    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
-    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
-  ],
-  "[python]": {
-    "editor.defaultFormatter": "ms-python.black-formatter"
-  },
-  "tinybird.dataProjectSubdir": "tinybird",
-  "github-actions.workflows.pinned.workflows": [
-    ".github/workflows/preview.yml",
-    ".github/workflows/production.yml",
-    ".github/workflows/ci.yml"
-  ]
+	"tailwindCSS.experimental.classRegex": [
+		["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+		["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+	],
+	"[python]": {
+		"editor.defaultFormatter": "ms-python.black-formatter"
+	},
+	"tinybird.dataProjectSubdir": "tinybird",
+	"github-actions.workflows.pinned.workflows": [
+		".github/workflows/preview.yml",
+		".github/workflows/production.yml",
+		".github/workflows/ci.yml"
+	]
 }

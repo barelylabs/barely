@@ -1,11 +1,12 @@
 import type { z } from 'zod/v4';
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import { api } from '@barely/lib/server/api/server';
-import { emailTemplateSearchParamsSchema } from '@barely/lib/server/routes/email-template/email-template.schema';
+import { emailTemplateSearchParamsSchema } from '@barely/validators';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllEmailTemplates } from '~/app/[handle]/email-templates/_components/all-email-templates';
 import { EmailTemplateFilters } from '~/app/[handle]/email-templates/_components/email-template-filters';
+import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 import { ArchiveOrDeleteEmailTemplateModal } from './_components/archive-or-delete-email-template-modal';
 import { CreateEmailTemplateButton } from './_components/create-email-template-button';
 import { CreateOrUpdateEmailTemplateModal } from './_components/create-or-update-email-template-modal';
@@ -27,25 +28,36 @@ export default async function EmailTemplatesPage({
 		redirect(`/${awaitedParams.handle}/email-templates`);
 	}
 
-	const emailTemplates = api({ handle: awaitedParams.handle }).emailTemplate.byWorkspace({
-		handle: awaitedParams.handle,
-		...parsedFilters.data,
-	});
+	prefetch(
+		trpc.emailTemplate.byWorkspace.infiniteQueryOptions({
+			handle: awaitedParams.handle,
+			...parsedFilters.data,
+		}),
+	);
+
+	prefetch(trpc.emailAddress.byWorkspace.queryOptions({ handle: awaitedParams.handle }));
 
 	return (
-		<EmailTemplateContextProvider initialEmailTemplatesFirstPage={emailTemplates}>
-			<DashContentHeader title='Email Templates' button={<CreateEmailTemplateButton />} />
+		<HydrateClient>
+			<Suspense fallback={<div>Loading...</div>}>
+				<EmailTemplateContextProvider>
+					<DashContentHeader
+						title='Email Templates'
+						button={<CreateEmailTemplateButton />}
+					/>
 
-			<EmailTemplateFilters />
-			<AllEmailTemplates />
+					<EmailTemplateFilters />
+					<AllEmailTemplates />
 
-			<CreateOrUpdateEmailTemplateModal mode='create' />
-			<CreateOrUpdateEmailTemplateModal mode='update' />
+					<CreateOrUpdateEmailTemplateModal mode='create' />
+					<CreateOrUpdateEmailTemplateModal mode='update' />
 
-			<ArchiveOrDeleteEmailTemplateModal mode='archive' />
-			<ArchiveOrDeleteEmailTemplateModal mode='delete' />
+					<ArchiveOrDeleteEmailTemplateModal mode='archive' />
+					<ArchiveOrDeleteEmailTemplateModal mode='delete' />
 
-			<EmailTemplateHotkeys />
-		</EmailTemplateContextProvider>
+					<EmailTemplateHotkeys />
+				</EmailTemplateContextProvider>
+			</Suspense>
+		</HydrateClient>
 	);
 }

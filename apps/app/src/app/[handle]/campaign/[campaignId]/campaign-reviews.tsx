@@ -1,14 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { useTRPC } from '@barely/lib/server/api/react';
+import { useTRPC } from '@barely/api/app/trpc.react';
+import { getFullNameFromFirstAndLast } from '@barely/utils';
 import { useSuspenseInfiniteQuery, useSuspenseQuery } from '@tanstack/react-query';
 
-import { Progress } from '@barely/ui/elements/progress';
-import { Review } from '@barely/ui/elements/review-card';
-import { Text } from '@barely/ui/elements/typography';
-
-import { getFullNameFromFirstAndLast } from '@barely/utils/name';
+import { Progress } from '@barely/ui/progress';
+import { Review } from '@barely/ui/review-card';
+import { Text } from '@barely/ui/typography';
 
 const CampaignReviews = (props: { campaignId: string; reach: number }) => {
 	const trpc = useTRPC();
@@ -50,10 +49,10 @@ const CampaignReviews = (props: { campaignId: string; reach: number }) => {
 
 			{flatPlaylistPitchReviews.map(review => {
 				const reviewerDisplayName =
-					review.reviewer?.handle ??
+					review.reviewer.handle ??
 					getFullNameFromFirstAndLast(
-						review.reviewer?.firstName,
-						review.reviewer?.lastName,
+						review.reviewer.firstName,
+						review.reviewer.lastName,
 					);
 
 				return (

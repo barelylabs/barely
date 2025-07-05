@@ -1,8 +1,5 @@
-import { routeHandler } from '@barely/lib/server/api/route-handler';
-import { playlistPitchReviewRouter } from '@barely/lib/server/routes/playlist-pitch-review/playlist-pitch-review.router';
+import { OPTIONS } from '@barely/utils';
 
-export { OPTIONS } from '@barely/lib/utils/trpc-route';
+import { playlistPitchReviewHandler } from '@barely/api/app/sub/playlist-pitch-review.handler';
 
-const handler = routeHandler('playlistPitchReview', playlistPitchReviewRouter);
-
-export { handler as GET, handler as POST };
+export { OPTIONS, playlistPitchReviewHandler as GET, playlistPitchReviewHandler as POST };

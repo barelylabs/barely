@@ -2,23 +2,21 @@ import type { ReactNode } from 'react';
 import type { z } from 'zod/v4';
 import React from 'react';
 import Link from 'next/link';
+import { useZodForm } from '@barely/hooks';
+import { onPromise } from '@barely/utils';
 import {
 	emailInUseMessage,
+	isPossiblePhoneNumber,
+	isRealEmail,
 	newUserContactInfoSchemaWithRole,
 	phoneNumberInUseMessage,
-} from '@barely/lib/server/routes/user/user.schema';
+} from '@barely/validators';
 import { debounce } from 'perfect-debounce';
 
-import { useZodForm } from '@barely/hooks/use-zod-form';
-
-import { Text } from '@barely/ui/elements/typography';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { PhoneField } from '@barely/ui/forms/phone-field';
 import { TextField } from '@barely/ui/forms/text-field';
-
-import { isRealEmail } from '@barely/utils/email';
-import { onPromise } from '@barely/utils/on-promise';
-import { isPossiblePhoneNumber } from '@barely/utils/phone-number';
+import { Text } from '@barely/ui/typography';
 
 interface UserContactInfoFormProps {
 	onSubmit: (

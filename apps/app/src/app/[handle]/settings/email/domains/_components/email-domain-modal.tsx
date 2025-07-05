@@ -1,26 +1,27 @@
-import type { InsertEmailDomain } from '@barely/lib/server/routes/email-domain/email-domain.schema';
+import type { InsertEmailDomain } from '@barely/validators';
 import type { z } from 'zod/v4';
 import { useEffect, useState } from 'react';
-import { atomWithToggle } from '@barely/lib/atoms/atom-with-toggle';
-// import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { useZodForm } from '@barely/lib/hooks/use-zod-form';
-import { api } from '@barely/lib/server/api/react';
-import { createEmailDomainSchema } from '@barely/lib/server/routes/email-domain/email-domain.schema';
+import { atomWithToggle } from '@barely/atoms';
+import { useWorkspace, useZodForm } from '@barely/hooks';
+import { useTRPC } from '@barely/api/app/trpc.react';
+import { createEmailDomainSchema } from '@barely/validators';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { atom, useAtom } from 'jotai';
 
+import { Form, SubmitButton } from '@barely/ui/forms/form';
+import { TextField } from '@barely/ui/forms/text-field';
 // import { useEmailDomains } from '@barely/hooks/use-email-domains';
 
-import { Icon } from '@barely/ui/elements/icon';
-import { Modal, ModalBody, ModalHeader } from '@barely/ui/elements/modal';
-import { Form, SubmitButton } from '@barely/ui/forms';
-import { TextField } from '@barely/ui/forms/text-field';
+import { Icon } from '@barely/ui/icon';
+import { Modal, ModalBody, ModalHeader } from '@barely/ui/modal';
 
 export const showEmailDomainModalAtom = atomWithToggle(false);
 export const updateEmailDomainAtom = atom<InsertEmailDomain | undefined>(undefined);
 
 export function EmailDomainModal() {
-	const apiUtils = api.useUtils();
-	// const {workspace} = useWorkspace();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
+	const { handle } = useWorkspace();
 
 	// const { domains } = useEmailDomains();
 
@@ -39,18 +40,20 @@ export function EmailDomainModal() {
 		},
 	});
 
-	const { mutateAsync: createEmailDomain } = api.emailDomain.create.useMutation({
+	const { mutateAsync: createEmailDomain } = useMutation({
+		...trpc.emailDomain.create.mutationOptions(),
 		onSuccess: async () => {
-			await apiUtils.emailTemplate.invalidate();
+			await queryClient.invalidateQueries(trpc.emailDomain.byWorkspace.queryFilter());
 			setShowEmailDomainModal(false);
 			setEditEmailDomain(undefined);
 			form.reset();
 		},
 	});
 
-	const { mutateAsync: updateEmailDomain } = api.emailDomain.update.useMutation({
+	const { mutateAsync: updateEmailDomain } = useMutation({
+		...trpc.emailDomain.update.mutationOptions(),
 		onSuccess: async () => {
-			await apiUtils.emailTemplate.invalidate();
+			await queryClient.invalidateQueries(trpc.emailDomain.byWorkspace.queryFilter());
 			setShowEmailDomainModal(false);
 			setEditEmailDomain(undefined);
 			form.reset();
@@ -62,10 +65,14 @@ export function EmailDomainModal() {
 			return await updateEmailDomain({
 				...data,
 				id: editEmailDomain.id,
+				handle,
 			});
 		}
 
-		return await createEmailDomain(data);
+		return await createEmailDomain({
+			...data,
+			handle,
+		});
 	};
 
 	const [domainInputLocked, setDomainInputLocked] = useState(false);
@@ -104,9 +111,13 @@ export function EmailDomainModal() {
 									className='flex flex-row items-center gap-1 text-right'
 									type='button'
 									onClick={() => {
-										window.confirm(
-											`Warning: Changing your email domain means you won't be able to send email from this domain anymore. Are you sure you want to continue?`,
-										) && setDomainInputLocked(!domainInputLocked);
+										if (
+											window.confirm(
+												`Warning: Changing your email domain means you won't be able to send email from this domain anymore. Are you sure you want to continue?`,
+											)
+										) {
+											setDomainInputLocked(!domainInputLocked);
+										}
 									}}
 								>
 									<Icon.lock className='h-3 w-3' />

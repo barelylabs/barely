@@ -1,14 +1,14 @@
 import type { z } from 'zod/v4';
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { cartApi } from '@barely/lib/server/routes/cart/cart.api.server';
-import { cartPageSearchParams } from '@barely/lib/server/routes/cart/cart.schema';
-// import { eventReportSearchParamsSchema } from '@barely/lib/server/routes/event/event-report.schema';
-import { isDevelopment } from '@barely/lib/utils/environment';
 import { log } from '@barely/lib/utils/log';
+import { isDevelopment } from '@barely/utils';
+import { cartPageSearchParams } from '@barely/validators';
 import { getDynamicStyleVariables } from 'node_modules/@barely/tailwind-config/lib/dynamic-tw.runtime';
 
 import { ElementsProvider } from '~/app/[mode]/[handle]/[key]/_components/elements-provider';
+// import { HydrateClient, prefetch, trpc, trpcCaller } from '~/trpc/server'; // todo: take advantage of prefetching/streaming to client (maybe the page starts a certain color or we cache the cart colors so that can stream faster than stripe takes to load)
+import { trpcCaller } from '~/trpc/server';
 import { CheckoutForm } from './checkout-form';
 
 export default async function CartPage({
@@ -23,7 +23,6 @@ export default async function CartPage({
 	searchParams: Promise<z.infer<typeof cartPageSearchParams>>;
 }) {
 	const { mode, handle, key } = await params;
-
 	const cartParams = cartPageSearchParams.safeParse(await searchParams);
 
 	if (!cartParams.success) {
@@ -52,8 +51,8 @@ export default async function CartPage({
 
 	const initialData =
 		cartId ?
-			await cartApi.byIdAndParams({ id: cartId, handle, key })
-		:	await cartApi.create({
+			await trpcCaller.byIdAndParams({ id: cartId, handle, key })
+		:	await trpcCaller.create({
 				handle,
 				key,
 				shipTo,

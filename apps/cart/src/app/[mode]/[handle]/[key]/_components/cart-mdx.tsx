@@ -1,12 +1,12 @@
-import { MDXRemote } from '@barely/ui/elements/mdx';
-import { mdxCard } from '@barely/ui/elements/mdx-card';
-import { mdxGrid } from '@barely/ui/elements/mdx-grid';
-import { mdxImageFile } from '@barely/ui/elements/mdx-image-file';
-import { mdxLink } from '@barely/ui/elements/mdx-link';
-import { mdxTypography } from '@barely/ui/elements/mdx-typography';
-import { mdxVideoPlayer } from '@barely/ui/elements/mdx-video-player';
+import { mdxCard } from '@barely/ui/mdx-card';
+import { mdxGrid } from '@barely/ui/mdx-grid';
+import { mdxImageFile } from '@barely/ui/mdx-image-file';
+import { mdxLink } from '@barely/ui/mdx-link';
+import { MDXRemote } from '@barely/ui/mdx-remote';
+import { mdxTypography } from '@barely/ui/mdx-typography';
+import { mdxVideoPlayer } from '@barely/ui/mdx-video-player';
 
-export function CartMDX({ markdown }: { markdown: string }) {
+export async function CartMDX({ markdown }: { markdown: string }) {
 	const components = {
 		...mdxTypography,
 		...mdxVideoPlayer,
@@ -16,5 +16,7 @@ export function CartMDX({ markdown }: { markdown: string }) {
 		...mdxLink,
 	};
 
-	return <MDXRemote source={markdown} components={components} />;
+	const renderedMarkdown = await MDXRemote({ source: markdown, components });
+
+	return <>{renderedMarkdown}</>;
 }

@@ -1,12 +1,14 @@
 import { redirect } from 'next/navigation';
-import { auth } from '@barely/lib/server/auth';
-import { getDefaultWorkspaceOfCurrentUser } from '@barely/lib/server/auth/auth.fns';
+
+import { getDefaultWorkspaceFromSession } from '@barely/auth/utils';
+
+import { getSession } from '~/auth/server';
 
 export default async function RootPage() {
-	const session = await auth();
+	const session = await getSession();
 
 	if (!session) return redirect('/login');
 
-	const defaultWorkspace = await getDefaultWorkspaceOfCurrentUser();
+	const defaultWorkspace = getDefaultWorkspaceFromSession(session);
 	return redirect(`${defaultWorkspace.handle}/links`);
 }

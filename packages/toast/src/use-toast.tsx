@@ -14,7 +14,7 @@ type ToasterToast = ToastProps & {
 	action?: ToastActionElement;
 };
 
-const actionTypes = {
+export const actionTypes = {
 	ADD_TOAST: 'ADD_TOAST',
 	UPDATE_TOAST: 'UPDATE_TOAST',
 	DISMISS_TOAST: 'DISMISS_TOAST',
@@ -136,9 +136,7 @@ function dispatch(action: Action) {
 	});
 }
 
-interface Toast extends Omit<ToasterToast, 'id'> {}
-
-function plainToast({ ...props }: Toast) {
+function plainToast({ ...props }: Omit<ToasterToast, 'id'>) {
 	const id = genId();
 
 	const update = (props: ToasterToast) =>
@@ -180,15 +178,15 @@ function useToast() {
 		};
 	}, [state]);
 
-	const toast = (title: string, props?: Omit<Toast, 'title'>) =>
+	const toast = (title: string, props?: Omit<Omit<ToasterToast, 'id'>, 'title'>) =>
 		plainToast({ title, ...props });
-	toast.success = (title: string, props?: Omit<Toast, 'title'>) =>
+	toast.success = (title: string, props?: Omit<Omit<ToasterToast, 'id'>, 'title'>) =>
 		plainToast({ icon: 'success', title, ...props });
-	toast.error = (title: string, props?: Omit<Toast, 'title'>) =>
+	toast.error = (title: string, props?: Omit<Omit<ToasterToast, 'id'>, 'title'>) =>
 		plainToast({ icon: 'error', title, ...props });
-	toast.warning = (title: string, props?: Omit<Toast, 'title'>) =>
+	toast.warning = (title: string, props?: Omit<Omit<ToasterToast, 'id'>, 'title'>) =>
 		plainToast({ icon: 'warning', title, ...props });
-	toast.info = (title: string, props?: Omit<Toast, 'title'>) =>
+	toast.info = (title: string, props?: Omit<Omit<ToasterToast, 'id'>, 'title'>) =>
 		plainToast({ icon: 'info', title, ...props });
 
 	return {

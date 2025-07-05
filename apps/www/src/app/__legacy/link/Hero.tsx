@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 
-import { Button } from '@barely/ui/elements/button';
-import { H, Lead } from '@barely/ui/elements/typography';
+import { Button } from '@barely/ui/button';
+import { H, Lead } from '@barely/ui/typography';
 
 const Hero = () => {
 	const [showEmailForm] = useState(false);
