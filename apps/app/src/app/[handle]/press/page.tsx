@@ -4,7 +4,11 @@ import { DashContentHeader } from '~/app/[handle]/_components/dash-content-heade
 import { PressKitForm } from '~/app/[handle]/press/_components/press-kit-form';
 import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
-export default async function PressKitPage({ params }: { params: Promise<{ handle: string }> }) {
+export default async function PressKitPage({
+	params,
+}: {
+	params: Promise<{ handle: string }>;
+}) {
 	const { handle } = await params;
 	prefetch(trpc.pressKit.byWorkspace.queryOptions({ handle }));
 

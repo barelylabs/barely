@@ -12,4 +12,3 @@ export const userHandler = routeHandler({
 	router: userSubRouter,
 	auth,
 });
-

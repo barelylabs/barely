@@ -3,9 +3,10 @@
 import type { z } from 'zod/v4';
 import { useCallback } from 'react';
 import { useWorkspace, useZodForm } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { updateEmailAddressSchema } from '@barely/validators';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SwitchField } from '@barely/ui/forms/switch-field';
@@ -49,7 +50,7 @@ export function UpdateEmailAddressModal() {
 	const handleCloseModal = useCallback(async () => {
 		await queryClient.invalidateQueries(trpc.emailAddress.byWorkspace.queryFilter());
 		form.reset();
-		setShowUpdateModal(false);
+		await setShowUpdateModal(false);
 	}, [queryClient, trpc, form, setShowUpdateModal]);
 
 	const handleSubmit = useCallback(
@@ -67,7 +68,9 @@ export function UpdateEmailAddressModal() {
 	return (
 		<Modal
 			showModal={showUpdateModal}
-			setShowModal={setShowUpdateModal}
+			setShowModal={show => {
+				void setShowUpdateModal(show);
+			}}
 			preventDefaultClose={preventDefaultClose}
 			onClose={handleCloseModal}
 			className='max-h-fit max-w-md'

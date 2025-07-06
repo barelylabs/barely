@@ -17,7 +17,10 @@ export const useEmailAddressSearchParams = createResourceSearchParamsHook();
 // Create a custom data hook for email addresses that properly uses tRPC
 export function useEmailAddress() {
 	const trpc = useTRPC();
-	const baseHook = createResourceDataHook<AppRouterOutputs['emailAddress']['byWorkspace']['emailAddresses'][0], EmailAddressPageData>(
+	const baseHook = createResourceDataHook<
+		AppRouterOutputs['emailAddress']['byWorkspace']['emailAddresses'][0],
+		EmailAddressPageData
+	>(
 		{
 			resourceName: 'email-addresses',
 			getQueryOptions: (handle, filters) =>
@@ -29,7 +32,7 @@ export function useEmailAddress() {
 		},
 		useEmailAddressSearchParams,
 	);
-	
+
 	return baseHook();
 }
 

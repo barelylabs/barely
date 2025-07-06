@@ -6,23 +6,19 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { ArchiveOrDeleteModal } from '~/app/[handle]/_components/archive-or-delete-modal';
-import { useProduct, useProductSearchParams } from '~/app/[handle]/products/_components/product-context';
+import {
+	useProduct,
+	useProductSearchParams,
+} from '~/app/[handle]/products/_components/product-context';
 
 export function ArchiveOrDeleteProductModal({ mode }: { mode: 'archive' | 'delete' }) {
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
 
-	const {
-		selection,
-		lastSelectedItem,
-	} = useProduct();
-	
-	const {
-		showArchiveModal,
-		showDeleteModal,
-		setShowArchiveModal,
-		setShowDeleteModal,
-	} = useProductSearchParams();
+	const { selection, lastSelectedItem } = useProduct();
+
+	const { showArchiveModal, showDeleteModal, setShowArchiveModal, setShowDeleteModal } =
+		useProductSearchParams();
 
 	const showModal = mode === 'archive' ? showArchiveModal : showDeleteModal;
 
@@ -30,7 +26,7 @@ export function ArchiveOrDeleteProductModal({ mode }: { mode: 'archive' | 'delet
 
 	const onSuccess = useCallback(async () => {
 		await queryClient.invalidateQueries(trpc.product.byWorkspace.queryFilter());
-		setShowModal(false);
+		await setShowModal(false);
 	}, [queryClient, setShowModal, trpc.product.byWorkspace]);
 
 	const { mutate: archiveProducts, isPending: isPendingArchive } = useMutation({

@@ -12,4 +12,3 @@ export const stripeConnectHandler = routeHandler({
 	router: stripeConnectSubRouter,
 	auth,
 });
-

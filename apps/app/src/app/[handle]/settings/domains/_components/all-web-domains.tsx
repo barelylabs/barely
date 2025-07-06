@@ -1,8 +1,9 @@
 'use client';
 
 import { useWorkspace } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { useSuspenseQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 

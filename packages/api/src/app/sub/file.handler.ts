@@ -12,4 +12,3 @@ export const fileHandler = routeHandler({
 	router: fileSubRouter,
 	auth,
 });
-

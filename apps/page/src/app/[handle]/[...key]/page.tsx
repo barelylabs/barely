@@ -1,11 +1,10 @@
-import type { EventTrackingProps } from '@barely/validators/schemas';
-import type { LandingPage } from '@barely/validators/schemas';
 import type { MdxAssets } from '@barely/utils';
+import type { EventTrackingProps, LandingPage } from '@barely/validators/schemas';
 import type { Metadata } from 'next';
 import type { z } from 'zod/v4';
-import { eventReportSearchParamsSchema } from '@barely/validators/schemas';
 import { getLandingPageData } from '@barely/lib/functions/landing-page.render.fns';
 import { getAssetHref, getLinkHref } from '@barely/utils';
+import { eventReportSearchParamsSchema } from '@barely/validators/schemas';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 
 import { mdxCard } from '@barely/ui/mdx-card';

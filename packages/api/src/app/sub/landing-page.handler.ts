@@ -12,4 +12,3 @@ export const landingPageHandler = routeHandler({
 	router: landingPageSubRouter,
 	auth,
 });
-

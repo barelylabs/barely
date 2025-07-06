@@ -1,9 +1,12 @@
-import type { CartFunnel } from '@barely/validators/schemas';
-import type { EventTrackingProps } from '@barely/validators/schemas';
-import type { LandingPage } from '@barely/validators/schemas';
-import type { Link } from '@barely/validators/schemas';
-import type { PressKit } from '@barely/validators/schemas';
+import type {
+	CartFunnel,
+	EventTrackingProps,
+	LandingPage,
+	Link,
+	PressKit,
+} from '@barely/validators/schemas';
 import { EventTrackingKeys } from '@barely/validators/schemas';
+
 import { getAbsoluteUrl } from './barely-urls';
 
 export interface MdxAssets {

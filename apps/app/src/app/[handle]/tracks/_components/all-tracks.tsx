@@ -40,7 +40,7 @@ export function AllTracks() {
 			setSelectedKeys={setSelection}
 			onAction={() => {
 				if (!lastSelectedItemId) return;
-				setShowUpdateModal(true);
+				void setShowUpdateModal(true);
 			}}
 			// empty
 			renderEmptyState={() =>

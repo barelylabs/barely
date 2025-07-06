@@ -3,7 +3,6 @@
 import type { z } from 'zod/v4';
 import { useCallback, useEffect, useState } from 'react';
 import { useCreateOrUpdateForm, useWorkspace } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { sanitizeKey } from '@barely/utils';
 import { defaultCartFunnel, upsertCartFunnelSchema } from '@barely/validators';
 import {
@@ -11,6 +10,8 @@ import {
 	useQueryClient,
 	useSuspenseInfiniteQuery,
 } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Button } from '@barely/ui/button';
 import { ProductPrice } from '@barely/ui/components/product-price';
@@ -24,7 +25,10 @@ import { MDXEditor } from '@barely/ui/mdx-editor';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 import { H } from '@barely/ui/typography';
 
-import { useCartFunnel, useCartFunnelSearchParams } from '~/app/[handle]/carts/_components/cartFunnel-context';
+import {
+	useCartFunnel,
+	useCartFunnelSearchParams,
+} from '~/app/[handle]/carts/_components/cartFunnel-context';
 
 export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' }) {
 	const trpc = useTRPC();
@@ -114,7 +118,7 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
-		setShowModal(false);
+		await setShowModal(false);
 
 		await queryClient.invalidateQueries(
 			trpc.cartFunnel.byWorkspace.queryFilter({ handle: workspace.handle }),

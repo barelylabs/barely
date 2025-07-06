@@ -5,10 +5,11 @@ import type { z } from 'zod/v4';
 import { useEffect, useState } from 'react';
 import { atomWithToggle } from '@barely/atoms';
 import { useWebDomains, useWorkspace, useZodForm } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { insertDomainSchema } from '@barely/validators';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { atom, useAtom } from 'jotai';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Button } from '@barely/ui/button';
 import { Form, SubmitButton } from '@barely/ui/forms/form';

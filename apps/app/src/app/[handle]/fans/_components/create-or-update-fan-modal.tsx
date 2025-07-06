@@ -2,9 +2,10 @@
 
 import { useCallback } from 'react';
 import { useCreateOrUpdateForm, useWorkspace } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { upsertFanSchema } from '@barely/validators';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SwitchField } from '@barely/ui/forms/switch-field';
@@ -19,16 +20,9 @@ export function CreateOrUpdateFanModal({ mode }: { mode: 'create' | 'update' }) 
 	const queryClient = useQueryClient();
 	const { handle } = useWorkspace();
 	/* fan context */
-	const {
-		lastSelectedItem: selectedFan,
-		focusGridList,
-	} = useFan();
-	const {
-		showCreateModal,
-		showUpdateModal,
-		setShowCreateModal,
-		setShowUpdateModal,
-	} = useFanSearchParams();
+	const { lastSelectedItem: selectedFan, focusGridList } = useFan();
+	const { showCreateModal, showUpdateModal, setShowCreateModal, setShowUpdateModal } =
+		useFanSearchParams();
 
 	/* mutations */
 	const { mutateAsync: createFan } = useMutation({
@@ -77,7 +71,7 @@ export function CreateOrUpdateFanModal({ mode }: { mode: 'create' | 'update' }) 
 			queryKey: trpc.fan.byWorkspace.queryKey(),
 		});
 		form.reset();
-		setShowModal(false);
+		await setShowModal(false);
 	}, [form, focusGridList, queryClient, trpc, setShowModal]);
 
 	const submitDisabled = mode === 'update' && !form.formState.isDirty;

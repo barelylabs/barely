@@ -22,7 +22,6 @@ export function generateDomainFromName(name: string, ccTLDs: Set<string>) {
 	return `${shortestString}.to`;
 }
 
-
 export function getSubdomain(name: string, apexName: string) {
 	if (name === apexName) return null;
 	return name.slice(0, name.length - apexName.length - 1);

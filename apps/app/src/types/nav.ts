@@ -1,6 +1,5 @@
-import type { User } from '@barely/validators';
-import type { Workspace } from '@barely/validators';
 import type { Icon } from '@barely/ui/icon';
+import type { User, Workspace } from '@barely/validators';
 
 export interface SidebarNavItem {
 	title: string;

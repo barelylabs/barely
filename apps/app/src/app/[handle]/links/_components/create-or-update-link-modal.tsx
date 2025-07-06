@@ -7,7 +7,6 @@ import {
 	useWebDomains,
 	useWorkspace,
 } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import {
 	getTransparentLinkDataFromUrl,
 	getUrlWithoutTrackingParams,
@@ -22,6 +21,8 @@ import {
 	useSuspenseQuery,
 } from '@tanstack/react-query';
 
+import { useTRPC } from '@barely/api/app/trpc.react';
+
 import { BlurImage } from '@barely/ui/blur-image';
 import { Button } from '@barely/ui/button';
 import { Form, SubmitButton } from '@barely/ui/forms/form';
@@ -34,7 +35,10 @@ import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 import { InfoTooltip, TooltipContent } from '@barely/ui/tooltip';
 import { Text } from '@barely/ui/typography';
 
-import { useLink, useLinkSearchParams } from '~/app/[handle]/links/_components/link-context';
+import {
+	useLink,
+	useLinkSearchParams,
+} from '~/app/[handle]/links/_components/link-context';
 import { LinkOptionalSettings } from '~/app/[handle]/links/_components/link-optional-settings';
 import { SocialLinkPreviews } from '~/app/[handle]/links/_components/social-link-previews';
 
@@ -44,12 +48,8 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 
 	/* link context */
 	const { lastSelectedItem: selectedLink, focusGridList } = useLink();
-	const {
-		showCreateModal,
-		setShowCreateModal,
-		showUpdateModal,
-		setShowUpdateModal,
-	} = useLinkSearchParams();
+	const { showCreateModal, setShowCreateModal, showUpdateModal, setShowUpdateModal } =
+		useLinkSearchParams();
 
 	/* modal state */
 	const showLinkModal = mode === 'create' ? showCreateModal : showUpdateModal;
@@ -187,7 +187,7 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 	const handleCloseModal = useCallback(async () => {
 		form.reset();
 		focusGridList();
-		setShowLinkModal(false);
+		await setShowLinkModal(false);
 		await queryClient.invalidateQueries(trpc.link.byWorkspace.queryFilter());
 	}, [focusGridList, form, queryClient, trpc.link.byWorkspace, setShowLinkModal]);
 

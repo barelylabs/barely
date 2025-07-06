@@ -2,7 +2,7 @@
 
 import type { z } from 'zod/v4';
 import { useCallback } from 'react';
-import { useCreateOrUpdateForm, useWorkspace } from '@barely/hooks';
+import { useCreateOrUpdateForm, useFocusGridList, useWorkspace } from '@barely/hooks';
 import { sanitizeKey } from '@barely/utils';
 import { defaultLandingPage, upsertLandingPageSchema } from '@barely/validators';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -16,8 +16,6 @@ import { Label } from '@barely/ui/label';
 import { MDXEditor } from '@barely/ui/mdx-editor';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 
-import { useFocusGridList } from '@barely/hooks';
-
 import {
 	useLandingPage,
 	useLandingPageSearchParams,
@@ -29,12 +27,8 @@ export function CreateOrUpdateLandingPageModal({ mode }: { mode: 'create' | 'upd
 	const { handle } = useWorkspace();
 
 	/* landing page context */
-	const {
-		showCreateModal,
-		setShowCreateModal,
-		showUpdateModal,
-		setShowUpdateModal,
-	} = useLandingPageSearchParams();
+	const { showCreateModal, setShowCreateModal, showUpdateModal, setShowUpdateModal } =
+		useLandingPageSearchParams();
 
 	const { lastSelectedItem: selectedLandingPage } = useLandingPage();
 	const focusGridList = useFocusGridList('landing-pages');
@@ -97,7 +91,7 @@ export function CreateOrUpdateLandingPageModal({ mode }: { mode: 'create' | 'upd
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
-		setShowModal(false);
+		await setShowModal(false);
 		reset();
 
 		await queryClient.invalidateQueries({

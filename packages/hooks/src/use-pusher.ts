@@ -1,9 +1,8 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useAtomValue } from 'jotai';
-
 import { pusherAtom } from '@barely/atoms';
+import { useAtomValue } from 'jotai';
 
 export function usePusher() {
 	const pusher = useAtomValue(pusherAtom);

@@ -6,16 +6,21 @@ import { useModalHotKeys } from '@barely/hooks';
 import { useCartOrder } from '~/app/[handle]/orders/_components/cart-order-context';
 
 export function CartOrderHotkeys() {
-	const { selection, lastSelectedItem, setShowMarkAsFulfilledModal, setShowCancelCartOrderModal } = useCartOrder();
+	const {
+		selection,
+		lastSelectedItem,
+		setShowMarkAsFulfilledModal,
+		setShowCancelCartOrderModal,
+	} = useCartOrder();
 
-	const fulfillAction = useCallback(() => {
+	const fulfillAction = useCallback(async () => {
 		if (!lastSelectedItem || lastSelectedItem.fulfillmentStatus === 'fulfilled') {
 			return;
 		}
-		setShowMarkAsFulfilledModal(true);
+		await setShowMarkAsFulfilledModal(true);
 	}, [lastSelectedItem, setShowMarkAsFulfilledModal]);
 
-	const cancelAction = useCallback(() => {
+	const cancelAction = useCallback(async () => {
 		if (
 			!lastSelectedItem ||
 			!!lastSelectedItem.canceledAt ||
@@ -23,7 +28,7 @@ export function CartOrderHotkeys() {
 		) {
 			return;
 		}
-		setShowCancelCartOrderModal(true);
+		await setShowCancelCartOrderModal(true);
 	}, [lastSelectedItem, setShowCancelCartOrderModal]);
 
 	useModalHotKeys({

@@ -2,23 +2,17 @@
 
 import { useCallback } from 'react';
 import { useWorkspace } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { ArchiveOrDeleteModal } from '~/app/[handle]/_components/archive-or-delete-modal';
 import { useFan, useFanSearchParams } from '~/app/[handle]/fans/_components/fan-context';
 
 export function ArchiveOrDeleteFanModal({ mode }: { mode: 'archive' | 'delete' }) {
-	const {
-		selection,
-		lastSelectedItem,
-	} = useFan();
-	const {
-		showArchiveModal,
-		showDeleteModal,
-		setShowArchiveModal,
-		setShowDeleteModal,
-	} = useFanSearchParams();
+	const { selection, lastSelectedItem } = useFan();
+	const { showArchiveModal, showDeleteModal, setShowArchiveModal, setShowDeleteModal } =
+		useFanSearchParams();
 
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
@@ -30,7 +24,7 @@ export function ArchiveOrDeleteFanModal({ mode }: { mode: 'archive' | 'delete' }
 
 	const onSuccess = useCallback(async () => {
 		await queryClient.invalidateQueries(trpc.fan.byWorkspace.queryFilter({ handle }));
-		setShowModal(false);
+		await setShowModal(false);
 	}, [queryClient, trpc, setShowModal, handle]);
 
 	const { mutate: archiveFans, isPending: isPendingArchive } = useMutation({

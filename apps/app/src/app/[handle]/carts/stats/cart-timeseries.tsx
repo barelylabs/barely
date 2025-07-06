@@ -1,12 +1,13 @@
 'use client';
 
 import { useCartStatFilters } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { calcPercent, formatCentsToDollars } from '@barely/utils';
 import { useSuspenseQuery } from '@tanstack/react-query';
 
-import { AreaChart } from '@barely/ui/charts/area-chart';
+import { useTRPC } from '@barely/api/app/trpc.react';
+
 import { Card } from '@barely/ui/card';
+import { AreaChart } from '@barely/ui/charts/area-chart';
 import { InfoTabButton } from '@barely/ui/info-tab-button';
 
 import { WebEventFilterBadges } from '~/app/[handle]/_components/filter-badges';

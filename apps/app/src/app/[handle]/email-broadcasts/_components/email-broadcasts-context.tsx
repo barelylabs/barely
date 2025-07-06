@@ -17,7 +17,10 @@ export const useEmailBroadcastSearchParams = createResourceSearchParamsHook();
 // Create a custom data hook for email broadcasts that properly uses tRPC
 export function useEmailBroadcast() {
 	const trpc = useTRPC();
-	const baseHook = createResourceDataHook<AppRouterOutputs['emailBroadcast']['byWorkspace']['emailBroadcasts'][0], EmailBroadcastPageData>(
+	const baseHook = createResourceDataHook<
+		AppRouterOutputs['emailBroadcast']['byWorkspace']['emailBroadcasts'][0],
+		EmailBroadcastPageData
+	>(
 		{
 			resourceName: 'email-broadcasts',
 			getQueryOptions: (handle, filters) =>
@@ -29,7 +32,7 @@ export function useEmailBroadcast() {
 		},
 		useEmailBroadcastSearchParams,
 	);
-	
+
 	return baseHook();
 }
 

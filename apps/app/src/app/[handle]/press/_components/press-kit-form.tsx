@@ -5,7 +5,6 @@ import type { SortableFile } from '@barely/validators';
 import type { z } from 'zod/v4';
 import { useMemo, useState } from 'react';
 import { useWorkspace, useZodForm } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { updatePressKitSchema } from '@barely/validators';
 import {
 	useMutation,
@@ -13,6 +12,8 @@ import {
 	useSuspenseQuery,
 } from '@tanstack/react-query';
 import { useFieldArray } from 'react-hook-form';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Button } from '@barely/ui/button';
 import { Form, SubmitButton } from '@barely/ui/forms/form';

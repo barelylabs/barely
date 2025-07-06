@@ -12,4 +12,3 @@ export const playlistHandler = routeHandler({
 	router: playlistSubRouter,
 	auth,
 });
-

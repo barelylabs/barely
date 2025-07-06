@@ -4,8 +4,8 @@ import type { IconKey, IconType } from '@barely/ui/icon';
 import type { ReactNode } from 'react';
 import { cn } from '@barely/utils';
 
-import { Button } from '@barely/ui/button';
 import { Badge } from '@barely/ui/badge';
+import { Button } from '@barely/ui/button';
 import { Icon } from '@barely/ui/icon';
 import { H, Lead } from '@barely/ui/typography';
 

@@ -35,17 +35,26 @@ export interface ResourceSearchParamsReturn<TFilters extends BaseResourceFilters
 
 // Type for setParams function from nuqs
 type SetParamsFunction = (
-	values: Partial<Record<string, unknown>> | ((old: Record<string, unknown>) => Partial<Record<string, unknown>>)
+	values:
+		| Partial<Record<string, unknown>>
+		| ((old: Record<string, unknown>) => Partial<Record<string, unknown>>),
 ) => Promise<URLSearchParams>;
 
 // Configuration for creating a search params hook
-export interface ResourceSearchParamsConfig<_TFilters extends BaseResourceFilters = BaseResourceFilters> {
+export interface ResourceSearchParamsConfig<
+	_TFilters extends BaseResourceFilters = BaseResourceFilters,
+> {
 	// Additional nuqs parsers for resource-specific filters
 	// Using the actual nuqs parser types
 	additionalParsers?: Record<string, unknown>;
 	// Additional actions for resource-specific filters
 	// Each action is a function that receives setParams and returns the actual action function
-	additionalActions?: Record<string, (setParams: SetParamsFunction) => (...args: unknown[]) => Promise<URLSearchParams> | undefined>;
+	additionalActions?: Record<
+		string,
+		(
+			setParams: SetParamsFunction,
+		) => (...args: unknown[]) => Promise<URLSearchParams> | undefined
+	>;
 }
 
 // Return type for data hooks

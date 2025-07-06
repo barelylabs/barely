@@ -1,16 +1,16 @@
+import type { z } from 'zod/v4';
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { linkStatFiltersSchema } from '@barely/hooks';
-import type { z } from 'zod/v4';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { StatBarelyReferers } from '~/app/[handle]/_components/stat-barely-referers';
 import { StatDevices } from '~/app/[handle]/_components/stat-devices';
 import { StatExternalReferers } from '~/app/[handle]/_components/stat-external-referers';
 import { StatLocations } from '~/app/[handle]/_components/stat-locations';
+import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 import { LinkStatHeader } from './link-stat-header';
 import { LinkTimeseries } from './link-timeseries';
-import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
 export default async function LinkStatsPage({
 	params,

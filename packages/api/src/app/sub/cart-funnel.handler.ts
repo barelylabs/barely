@@ -12,4 +12,3 @@ export const cartFunnelHandler = routeHandler({
 	router: cartFunnelSubRouter,
 	auth,
 });
-

@@ -12,4 +12,3 @@ export const bioHandler = routeHandler({
 	router: bioSubRouter,
 	auth,
 });
-

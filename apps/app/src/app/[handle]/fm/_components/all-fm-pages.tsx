@@ -29,9 +29,9 @@ export function AllFmPages() {
 				data-grid-list='fm-pages'
 				selectionMode='multiple'
 				selectionBehavior='replace'
-				onAction={() => {
+				onAction={async () => {
 					if (!lastSelectedItemId) return;
-					setShowUpdateModal(true);
+					await setShowUpdateModal(true);
 				}}
 				items={items}
 				selectedKeys={selection}

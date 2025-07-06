@@ -37,23 +37,23 @@ export default async function LandingPagesPage({
 	return (
 		<HydrateClient>
 			<DashContentHeader
-					title='Landing Pages'
-					settingsHref={`/${handle}/settings/landing-page`}
-					button={<CreateLandingPageButton />}
-				/>
+				title='Landing Pages'
+				settingsHref={`/${handle}/settings/landing-page`}
+				button={<CreateLandingPageButton />}
+			/>
 
-				<LandingPageFilters />
-				<Suspense fallback={<div>Loading pages...</div>}>
-					<AllLandingPages />
+			<LandingPageFilters />
+			<Suspense fallback={<div>Loading pages...</div>}>
+				<AllLandingPages />
 
-					<CreateOrUpdateLandingPageModal mode='create' />
-					<CreateOrUpdateLandingPageModal mode='update' />
+				<CreateOrUpdateLandingPageModal mode='create' />
+				<CreateOrUpdateLandingPageModal mode='update' />
 
-					<ArchiveOrDeleteLandingPageModal mode='archive' />
-					<ArchiveOrDeleteLandingPageModal mode='delete' />
+				<ArchiveOrDeleteLandingPageModal mode='archive' />
+				<ArchiveOrDeleteLandingPageModal mode='delete' />
 
-					<LandingPageHotkeys />
-				</Suspense>
+				<LandingPageHotkeys />
+			</Suspense>
 		</HydrateClient>
 	);
 }

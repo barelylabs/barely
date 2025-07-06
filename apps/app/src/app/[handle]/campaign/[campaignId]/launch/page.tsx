@@ -9,7 +9,11 @@ import { Text } from '@barely/ui/typography';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { LaunchPlaylistPitchForm } from '~/app/[handle]/campaign/[campaignId]/launch/launch-playlist-pitch-form';
 
-const LaunchCampaignPage = async ({ params }: { params: Promise<{ campaignId: string }> }) => {
+const LaunchCampaignPage = async ({
+	params,
+}: {
+	params: Promise<{ campaignId: string }>;
+}) => {
 	const { campaignId } = await params;
 	const campaign = await getCampaignById(campaignId);
 

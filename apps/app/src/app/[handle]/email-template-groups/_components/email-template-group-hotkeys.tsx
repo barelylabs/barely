@@ -2,7 +2,10 @@
 
 import { useModalHotKeys } from '@barely/hooks';
 
-import { useEmailTemplateGroup, useEmailTemplateGroupSearchParams } from './email-template-group-context';
+import {
+	useEmailTemplateGroup,
+	useEmailTemplateGroupSearchParams,
+} from './email-template-group-context';
 
 export function EmailTemplateGroupHotkeys() {
 	const { selection } = useEmailTemplateGroup();

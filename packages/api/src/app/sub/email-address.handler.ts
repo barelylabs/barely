@@ -12,4 +12,3 @@ export const emailAddressHandler = routeHandler({
 	router: emailAddressSubRouter,
 	auth,
 });
-

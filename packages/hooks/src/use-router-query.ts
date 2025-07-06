@@ -1,7 +1,6 @@
 'use client';
 
 // import { useCompatSearchParams } from '@calcom/lib/hooks/useCompatSearchParams';
-
 import { useCompatSearchParams } from './use-compat-search-params';
 
 /**

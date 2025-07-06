@@ -14,11 +14,12 @@ import {
 	useWorkspaceWithAll,
 	useZodForm,
 } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { updateWorkspaceSchema } from '@barely/validators';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { atom } from 'jotai';
 import HuePicker from 'simple-hue-picker/react';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { SettingsCard, SettingsCardForm } from '@barely/ui/components/settings-card';
 import { SelectField } from '@barely/ui/forms/select-field';

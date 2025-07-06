@@ -13,29 +13,27 @@ import { GridList, GridListCard } from '@barely/ui/grid-list';
 import { Text } from '@barely/ui/typography';
 
 import { CreateEmailTemplateGroupButton } from './create-email-template-group-button';
-import { useEmailTemplateGroup, useEmailTemplateGroupSearchParams } from './email-template-group-context';
+import {
+	useEmailTemplateGroup,
+	useEmailTemplateGroupSearchParams,
+} from './email-template-group-context';
 
 export function AllEmailTemplateGroups() {
 	const { setShowUpdateModal } = useEmailTemplateGroupSearchParams();
-	const {
-		items,
-		selection,
-		lastSelectedItemId,
-		setSelection,
-		isFetching,
-	} = useEmailTemplateGroup();
+	const { items, selection, lastSelectedItemId, setSelection, isFetching } =
+		useEmailTemplateGroup();
 
 	return (
 		<div className='flex flex-col gap-4'>
 			<GridList
-				data-grid-list="email-template-groups"
+				data-grid-list='email-template-groups'
 				className='flex flex-col gap-2'
 				aria-label='Email Template Groups'
 				selectionMode='multiple'
 				selectionBehavior='replace'
-				onAction={() => {
+				onAction={async () => {
 					if (!lastSelectedItemId) return;
-					setShowUpdateModal(true);
+					await setShowUpdateModal(true);
 				}}
 				items={items}
 				selectedKeys={selection}
@@ -59,8 +57,7 @@ export function AllEmailTemplateGroups() {
 }
 
 function LoadMoreButton() {
-	const { hasNextPage, fetchNextPage, isFetchingNextPage } =
-		useEmailTemplateGroup();
+	const { hasNextPage, fetchNextPage, isFetchingNextPage } = useEmailTemplateGroup();
 	if (!hasNextPage)
 		return (
 			<div className='flex w-full justify-center'>

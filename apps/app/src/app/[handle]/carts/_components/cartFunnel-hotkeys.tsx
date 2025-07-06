@@ -2,7 +2,10 @@
 
 import { useModalHotKeys } from '@barely/hooks';
 
-import { useCartFunnel, useCartFunnelSearchParams } from '~/app/[handle]/carts/_components/cartFunnel-context';
+import {
+	useCartFunnel,
+	useCartFunnelSearchParams,
+} from '~/app/[handle]/carts/_components/cartFunnel-context';
 
 export function CartFunnelHotkeys() {
 	const { selection: cartFunnelSelection } = useCartFunnel();

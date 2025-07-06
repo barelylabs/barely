@@ -82,7 +82,7 @@ export const UploadDropzone = React.forwardRef<
 						<Icon.upload
 							className={`${
 								props.isDragActive ? 'scale-110' : 'scale-100'
-							} h-5 w-5 text-gray-500 transition-all duration-75 group-active:scale-95 group-hover:scale-110`}
+							} h-5 w-5 text-gray-500 transition-all duration-75 group-hover:scale-110 group-active:scale-95`}
 						/>
 
 						{title && !imagePreviewSrc && (

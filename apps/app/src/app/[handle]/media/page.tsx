@@ -36,7 +36,7 @@ export default async function MediaLibraryPage({
 	return (
 		<HydrateClient>
 			<DashContentHeader title='Media Library' button={<UploadMediaButton />} />
-			
+
 			<Suspense fallback={<GridListSkeleton />}>
 				<AllMedia />
 				<UploadMediaModal />

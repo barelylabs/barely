@@ -12,4 +12,3 @@ export const providerAccountHandler = routeHandler({
 	router: providerAccountSubRouter,
 	auth,
 });
-

@@ -12,4 +12,3 @@ export const formResponseHandler = routeHandler({
 	router: formResponseSubRouter,
 	auth,
 });
-

@@ -3,9 +3,10 @@
 import type { z } from 'zod/v4';
 import { useCallback } from 'react';
 import { useCreateOrUpdateForm, useWorkspace } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { upsertEmailBroadcastSchema } from '@barely/validators';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Button } from '@barely/ui/button';
 import { DatetimeField } from '@barely/ui/forms/datetime-field-new';
@@ -17,7 +18,10 @@ import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 import { Switch } from '@barely/ui/switch';
 import { Text } from '@barely/ui/typography';
 
-import { useEmailBroadcast, useEmailBroadcastSearchParams } from './email-broadcasts-context';
+import {
+	useEmailBroadcast,
+	useEmailBroadcastSearchParams,
+} from './email-broadcasts-context';
 
 export function CreateOrUpdateEmailBroadcastModal({
 	mode,
@@ -27,17 +31,10 @@ export function CreateOrUpdateEmailBroadcastModal({
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
 
-	const {
-		showCreateModal,
-		showUpdateModal,
-		setShowCreateModal,
-		setShowUpdateModal,
-	} = useEmailBroadcastSearchParams();
+	const { showCreateModal, showUpdateModal, setShowCreateModal, setShowUpdateModal } =
+		useEmailBroadcastSearchParams();
 
-	const {
-		lastSelectedItem,
-		focusGridList,
-	} = useEmailBroadcast();
+	const { lastSelectedItem, focusGridList } = useEmailBroadcast();
 
 	const { handle } = useWorkspace();
 
@@ -166,7 +163,7 @@ export function CreateOrUpdateEmailBroadcastModal({
 			trpc.emailBroadcast.byWorkspace.queryFilter({ handle }),
 		);
 		form.reset();
-		setShowEmailBroadcastModal(false);
+		await setShowEmailBroadcastModal(false);
 	}, [
 		form,
 		focusGridList,

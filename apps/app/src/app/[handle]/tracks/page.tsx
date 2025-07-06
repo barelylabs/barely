@@ -1,9 +1,7 @@
 import type { z } from 'zod/v4';
-import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
+import { redirect } from 'next/navigation';
 import { trackFilterParamsSchema } from '@barely/validators';
-
-import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllTracks } from '~/app/[handle]/tracks/_components/all-tracks';
@@ -12,6 +10,7 @@ import { CreateOrUpdateTrackModal } from '~/app/[handle]/tracks/_components/crea
 import { CreateTrackButton } from '~/app/[handle]/tracks/_components/create-track-button';
 import { TrackFilters } from '~/app/[handle]/tracks/_components/track-filters';
 import { TrackHotkeys } from '~/app/[handle]/tracks/_components/track-hotkeys';
+import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
 export default async function TracksPage({
 	params,
@@ -32,7 +31,7 @@ export default async function TracksPage({
 		trpc.track.byWorkspace.infiniteQueryOptions({
 			handle: awaitedParams.handle,
 			...parsedFilters.data,
-		})
+		}),
 	);
 
 	return (

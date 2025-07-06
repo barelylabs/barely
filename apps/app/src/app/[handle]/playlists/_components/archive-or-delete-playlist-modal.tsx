@@ -1,20 +1,20 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { useTRPC } from '@barely/api/app/trpc.react';
+
 import { ArchiveOrDeleteModal } from '~/app/[handle]/_components/archive-or-delete-modal';
-import { usePlaylist, usePlaylistSearchParams } from '~/app/[handle]/playlists/_components/playlist-context';
+import {
+	usePlaylist,
+	usePlaylistSearchParams,
+} from '~/app/[handle]/playlists/_components/playlist-context';
 
 export function ArchiveOrDeletePlaylistModal({ mode }: { mode: 'archive' | 'delete' }) {
 	const { selection, lastSelectedItem } = usePlaylist();
-	const {
-		showArchiveModal,
-		showDeleteModal,
-		setShowArchiveModal,
-		setShowDeleteModal,
-	} = usePlaylistSearchParams();
+	const { showArchiveModal, showDeleteModal, setShowArchiveModal, setShowDeleteModal } =
+		usePlaylistSearchParams();
 
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
@@ -27,7 +27,7 @@ export function ArchiveOrDeletePlaylistModal({ mode }: { mode: 'archive' | 'dele
 		await queryClient.invalidateQueries({
 			queryKey: trpc.playlist.byWorkspace.queryKey(),
 		});
-		setShowModal(false);
+		await setShowModal(false);
 	}, [queryClient, trpc.playlist, setShowModal]);
 
 	const { mutate: archivePlaylists, isPending: isPendingArchive } = useMutation(

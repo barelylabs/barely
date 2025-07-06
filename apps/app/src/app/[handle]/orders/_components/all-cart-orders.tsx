@@ -21,12 +21,7 @@ import { Text } from '@barely/ui/typography';
 import { useCartOrder } from '~/app/[handle]/orders/_components/cart-order-context';
 
 export function AllCartOrders() {
-	const {
-		items,
-		isFetching,
-		selection,
-		setSelection,
-	} = useCartOrder();
+	const { items, isFetching, selection, setSelection } = useCartOrder();
 
 	return (
 		<div className='flex flex-col gap-4'>
@@ -83,7 +78,8 @@ function CartOrderCard({
 }: {
 	cartOrder: AppRouterOutputs['cartOrder']['byWorkspace']['cartOrders'][0];
 }) {
-	const { setSelection, setShowMarkAsFulfilledModal, setShowCancelCartOrderModal } = useCartOrder();
+	const { setSelection, setShowMarkAsFulfilledModal, setShowCancelCartOrderModal } =
+		useCartOrder();
 
 	const { handle } = useWorkspace();
 
@@ -92,8 +88,8 @@ function CartOrderCard({
 		icon: 'fulfillment',
 		shortcut: ['f'],
 		action: () => {
-			setSelection(new Set([cartOrder.id]));
-			setShowMarkAsFulfilledModal(true);
+			void setSelection(new Set([cartOrder.id]));
+			void setShowMarkAsFulfilledModal(true);
 		},
 	};
 
@@ -102,8 +98,8 @@ function CartOrderCard({
 		icon: 'x',
 		shortcut: ['x'],
 		action: () => {
-			setSelection(new Set([cartOrder.id]));
-			setShowCancelCartOrderModal(true);
+			void setSelection(new Set([cartOrder.id]));
+			void setShowCancelCartOrderModal(true);
 		},
 	};
 

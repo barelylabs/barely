@@ -9,7 +9,6 @@ import {
 	Transactions,
 	Workspaces,
 } from '@barely/db/sql';
-import { log } from '../utils/log';
 import { newId, raise } from '@barely/utils';
 import { eq } from 'drizzle-orm';
 
@@ -20,6 +19,7 @@ import {
 	stripeLineItemMetadataSchema,
 	stripeTransactionMetadataSchema,
 } from '../integrations/stripe/stripe.schema';
+import { log } from '../utils/log';
 import { assignPlaylistPitchToReviewers } from './playlist-pitch-review.fns';
 import { totalPlaylistReachByGenres } from './playlist.fns';
 

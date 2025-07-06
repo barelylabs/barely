@@ -66,7 +66,7 @@ export function createResourceSearchParamsHook<
 		const setSearch = (search: string) => setParams({ search });
 		const toggleArchived = () => setParams(p => ({ showArchived: !p.showArchived }));
 		const toggleDeleted = () => setParams(p => ({ showDeleted: !p.showDeleted }));
-		
+
 		// Modal state setters
 		const setShowCreateModal = (show: boolean) => setParams({ showCreateModal: show });
 		const setShowUpdateModal = (show: boolean) => setParams({ showUpdateModal: show });
@@ -74,12 +74,17 @@ export function createResourceSearchParamsHook<
 		const setShowDeleteModal = (show: boolean) => setParams({ showDeleteModal: show });
 
 		// Process additional actions if provided
-		const additionalActions = config?.additionalActions ? 
-			Object.entries(config.additionalActions).reduce<Record<string, unknown>>((acc, [key, actionCreator]) => {
-				// Pass setParams to each action creator
-				acc[key] = actionCreator(setParams);
-				return acc;
-			}, {}) : {};
+		const additionalActions =
+			config?.additionalActions ?
+				Object.entries(config.additionalActions).reduce<Record<string, unknown>>(
+					(acc, [key, actionCreator]) => {
+						// Pass setParams to each action creator
+						acc[key] = actionCreator(setParams);
+						return acc;
+					},
+					{},
+				)
+			:	{};
 
 		return {
 			// URL state

@@ -51,9 +51,9 @@ export default async function FansPage({
 					</div>
 				}
 			/>
-			
+
 			<FanFilters />
-			
+
 			<Suspense fallback={<GridListSkeleton />}>
 				<AllFans />
 

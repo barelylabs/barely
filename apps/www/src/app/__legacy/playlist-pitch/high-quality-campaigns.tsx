@@ -1,7 +1,7 @@
 import Image from 'next/image';
 
-import { Button } from '@barely/ui/button';
 import { AnimateOnScroll } from '@barely/ui/animate-on-scroll';
+import { Button } from '@barely/ui/button';
 import { Card } from '@barely/ui/card';
 import { PhoneFrame } from '@barely/ui/phone-frame';
 import { H, Text } from '@barely/ui/typography';

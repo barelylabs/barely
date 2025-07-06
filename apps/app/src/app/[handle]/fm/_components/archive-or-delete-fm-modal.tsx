@@ -1,23 +1,17 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { ArchiveOrDeleteModal } from '~/app/[handle]/_components/archive-or-delete-modal';
 import { useFm, useFmSearchParams } from '~/app/[handle]/fm/_components/fm-context';
 
 export function ArchiveOrDeleteFmModal({ mode }: { mode: 'archive' | 'delete' }) {
-	const {
-		selection,
-		lastSelectedItem,
-	} = useFm();
-	const {
-		showArchiveModal,
-		showDeleteModal,
-		setShowArchiveModal,
-		setShowDeleteModal,
-	} = useFmSearchParams();
+	const { selection, lastSelectedItem } = useFm();
+	const { showArchiveModal, showDeleteModal, setShowArchiveModal, setShowDeleteModal } =
+		useFmSearchParams();
 
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
@@ -30,7 +24,7 @@ export function ArchiveOrDeleteFmModal({ mode }: { mode: 'archive' | 'delete' })
 		await queryClient.invalidateQueries({
 			queryKey: trpc.fm.byWorkspace.queryKey(),
 		});
-		setShowModal(false);
+		await setShowModal(false);
 	}, [queryClient, trpc.fm, setShowModal]);
 
 	const { mutate: archiveFmPages, isPending: isPendingArchive } = useMutation(

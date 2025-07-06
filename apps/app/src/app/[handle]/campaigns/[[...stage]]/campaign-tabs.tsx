@@ -4,8 +4,9 @@ import type { HorizontalTabItemProps } from '@barely/ui/components/horizontal-ta
 import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useWorkspace } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { useQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Button } from '@barely/ui/button';
 import { HorizontalTabs } from '@barely/ui/components/horizontal-tabs';
@@ -19,14 +20,18 @@ export function CampaignTabs() {
 	const { setStage } = useCampaignSearchParams();
 
 	const params = useParams();
-	
+
 	// Sync route param with search params
 	useEffect(() => {
 		const stageParam = params.stage?.[0];
 		if (stageParam === 'all') {
-			setStage(undefined);
-		} else if (stageParam === 'screening' || stageParam === 'approved' || stageParam === 'active') {
-			setStage(stageParam);
+			void setStage(undefined);
+		} else if (
+			stageParam === 'screening' ||
+			stageParam === 'approved' ||
+			stageParam === 'active'
+		) {
+			void setStage(stageParam);
 		}
 	}, [params.stage, setStage]);
 

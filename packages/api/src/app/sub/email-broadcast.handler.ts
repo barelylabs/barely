@@ -12,4 +12,3 @@ export const emailBroadcastHandler = routeHandler({
 	router: emailBroadcastSubRouter,
 	auth,
 });
-

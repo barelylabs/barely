@@ -18,7 +18,10 @@ export const useFlowSearchParams = createResourceSearchParamsHook();
 // Create a custom data hook for flows that properly uses tRPC
 export function useFlow() {
 	const trpc = useTRPC();
-	const baseHook = createResourceDataHook<AppRouterOutputs['flow']['byWorkspace']['flows'][0], FlowPageData>(
+	const baseHook = createResourceDataHook<
+		AppRouterOutputs['flow']['byWorkspace']['flows'][0],
+		FlowPageData
+	>(
 		{
 			resourceName: 'flows',
 			getQueryOptions: (handle, filters) =>
@@ -30,7 +33,7 @@ export function useFlow() {
 		},
 		useFlowSearchParams,
 	);
-	
+
 	return baseHook();
 }
 

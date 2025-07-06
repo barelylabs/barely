@@ -17,7 +17,10 @@ export const useMixtapeSearchParams = createResourceSearchParamsHook();
 // Create a custom data hook for mixtapes that properly uses tRPC
 export function useMixtape() {
 	const trpc = useTRPC();
-	const baseHook = createResourceDataHook<AppRouterOutputs['mixtape']['byWorkspace']['mixtapes'][0], MixtapePageData>(
+	const baseHook = createResourceDataHook<
+		AppRouterOutputs['mixtape']['byWorkspace']['mixtapes'][0],
+		MixtapePageData
+	>(
 		{
 			resourceName: 'mixtapes',
 			getQueryOptions: (handle, filters) =>
@@ -29,7 +32,7 @@ export function useMixtape() {
 		},
 		useMixtapeSearchParams,
 	);
-	
+
 	return baseHook();
 }
 

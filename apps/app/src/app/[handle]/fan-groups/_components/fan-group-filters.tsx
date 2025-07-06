@@ -4,7 +4,8 @@ import { Filters } from '~/app/[handle]/_components/filters';
 import { useFanGroupSearchParams } from '~/app/[handle]/fan-groups/_components/fan-group-context';
 
 export function FanGroupFilters() {
-	const { filters, setSearch, toggleArchived, clearAllFilters } = useFanGroupSearchParams();
+	const { filters, setSearch, toggleArchived, clearAllFilters } =
+		useFanGroupSearchParams();
 
 	return (
 		<Filters

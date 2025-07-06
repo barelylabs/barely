@@ -1,16 +1,16 @@
 'use client';
 
 import { useLinkStatFilters } from '@barely/hooks';
+import { nFormatter } from '@barely/utils';
+import { useSuspenseQuery } from '@tanstack/react-query';
+
 // import { useWorkspace } from '@barely/hooks';
 // import { cn } from '@barely/utils';
 import { useTRPC } from '@barely/api/app/trpc.react';
-import { useSuspenseQuery } from '@tanstack/react-query';
 
-import { AreaChart } from '@barely/ui/charts/area-chart';
 import { Card } from '@barely/ui/card';
+import { AreaChart } from '@barely/ui/charts/area-chart';
 import { InfoTabButton } from '@barely/ui/info-tab-button';
-
-import { nFormatter } from '@barely/utils';
 
 import { WebEventFilterBadges } from '~/app/[handle]/_components/filter-badges';
 

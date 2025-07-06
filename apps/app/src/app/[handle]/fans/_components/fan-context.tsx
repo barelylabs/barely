@@ -30,11 +30,12 @@ export const useFanSearchParams = createResourceSearchParamsHook({
 		showImportModal: parseAsBoolean.withDefault(false),
 	},
 	additionalActions: {
-		setShowImportModal: setParams => 
-			((...args: unknown[]) => {
+		setShowImportModal:
+			setParams =>
+			(...args: unknown[]) => {
 				const [show] = args as [boolean];
 				return setParams({ showImportModal: show });
-			}),
+			},
 	},
 }) as () => FanSearchParamsReturn;
 

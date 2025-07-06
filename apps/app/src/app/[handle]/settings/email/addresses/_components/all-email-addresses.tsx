@@ -17,19 +17,19 @@ export function AllEmailAddresses() {
 		lastSelectedItemId: lastSelectedEmailAddressId,
 		setSelection: setEmailAddressSelection,
 	} = useEmailAddress();
-	
+
 	const { setShowUpdateModal } = useEmailAddressSearchParams();
 
 	return (
 		<GridList
-			data-grid-list="email-addresses"
+			data-grid-list='email-addresses'
 			className='flex flex-col gap-2'
 			aria-label='Email addresses'
 			selectionMode='multiple'
 			selectionBehavior='replace'
 			onAction={() => {
 				if (!lastSelectedEmailAddressId) return;
-				setShowUpdateModal(true);
+				void setShowUpdateModal(true);
 			}}
 			items={emailAddresses}
 			selectedKeys={emailAddressSelection}

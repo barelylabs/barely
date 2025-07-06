@@ -44,7 +44,8 @@ const _useTrackSearchParams = createResourceSearchParamsHook({
 	},
 });
 
-export const useTrackSearchParams = _useTrackSearchParams as () => TrackSearchParamsReturn;
+export const useTrackSearchParams =
+	_useTrackSearchParams as () => TrackSearchParamsReturn;
 
 // Create a custom data hook for tracks that properly uses tRPC
 export function useTrack() {

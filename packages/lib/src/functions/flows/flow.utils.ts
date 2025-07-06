@@ -1,8 +1,6 @@
 import type { UseToastOutput } from '@barely/toast';
-import type { z } from 'zod/v4';
-
-import type { EmailTemplate } from '@barely/validators/schemas';
 import type {
+	EmailTemplate,
 	FlowAction,
 	flowForm_sendEmailSchema,
 	InsertFlowAction,
@@ -10,6 +8,9 @@ import type {
 	InsertFlowAction_SendEmail,
 	InsertFlowTrigger,
 } from '@barely/validators/schemas';
+import type { z } from 'zod/v4';
+import { newId, raise } from '@barely/utils';
+
 import type {
 	ActionNode,
 	AddToMailchimpAudienceNode,
@@ -20,8 +21,6 @@ import type {
 	TriggerNode,
 	WaitNode,
 } from './flow.ui.types';
-import { newId } from '@barely/utils';
-import { raise } from '@barely/utils';
 
 /* get nodes from flow elements */
 export function getTriggerNodeFromFlowTrigger(

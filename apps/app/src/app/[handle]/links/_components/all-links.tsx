@@ -2,7 +2,7 @@
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import Link from 'next/link';
-import { cn, truncate } from '@barely/utils';
+import { truncate } from '@barely/utils';
 
 import { Badge } from '@barely/ui/badge';
 import { BlurImage } from '@barely/ui/blur-image';
@@ -41,9 +41,9 @@ export function AllLinks() {
 				items={items.map(item => ({ ...item, key: item.id, linkKey: item.key }))}
 				selectedKeys={selection}
 				setSelectedKeys={setSelection}
-				onAction={() => {
+				onAction={async () => {
 					if (!lastSelectedItemId) return;
-					setShowUpdateModal(true);
+					await setShowUpdateModal(true);
 				}}
 				// empty
 				renderEmptyState={() => (
@@ -71,8 +71,7 @@ function LinkCard({
 }: {
 	link: AppRouterOutputs['link']['byWorkspace']['links'][0] & { linkKey: string };
 }) {
-	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } =
-		useLink();
+	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } = useLink();
 
 	return (
 		<GridListCard

@@ -17,7 +17,10 @@ export const useEmailDomainSearchParams = createResourceSearchParamsHook();
 // Create a custom data hook for email domains that properly uses tRPC
 export function useEmailDomain() {
 	const trpc = useTRPC();
-	const baseHook = createResourceDataHook<AppRouterOutputs['emailDomain']['byWorkspace']['domains'][0], EmailDomainPageData>(
+	const baseHook = createResourceDataHook<
+		AppRouterOutputs['emailDomain']['byWorkspace']['domains'][0],
+		EmailDomainPageData
+	>(
 		{
 			resourceName: 'email-domains',
 			getQueryOptions: (handle, filters) =>
@@ -29,7 +32,7 @@ export function useEmailDomain() {
 		},
 		useEmailDomainSearchParams,
 	);
-	
+
 	return baseHook();
 }
 

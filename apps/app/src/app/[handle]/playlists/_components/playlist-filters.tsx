@@ -4,7 +4,8 @@ import { Filters } from '~/app/[handle]/_components/filters';
 import { usePlaylistSearchParams } from './playlist-context';
 
 export function PlaylistFilters() {
-	const { filters, setSearch, toggleArchived, clearAllFilters } = usePlaylistSearchParams();
+	const { filters, setSearch, toggleArchived, clearAllFilters } =
+		usePlaylistSearchParams();
 
 	return (
 		<Filters

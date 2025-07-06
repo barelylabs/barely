@@ -12,4 +12,3 @@ export const fanGroupHandler = routeHandler({
 	router: fanGroupSubRouter,
 	auth,
 });
-

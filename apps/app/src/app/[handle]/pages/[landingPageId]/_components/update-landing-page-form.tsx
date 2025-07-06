@@ -4,9 +4,10 @@ import type { z } from 'zod/v4';
 import { useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { useZodForm } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { updateLandingPageSchema } from '@barely/validators';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { TextField } from '@barely/ui/forms/text-field';

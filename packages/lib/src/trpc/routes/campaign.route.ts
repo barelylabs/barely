@@ -16,7 +16,6 @@ import {
 	PlaylistPitchApprovedEmailTemplate,
 	PlaylistPitchRejectedEmailTemplate,
 } from '@barely/email/templates/playlist-pitch';
-import { sendText } from '../../utils/sms';
 import { convertToHandle, newCuid, newId, raise } from '@barely/utils';
 import {
 	createPlaylistPitchCampaignSchema,
@@ -42,6 +41,7 @@ import { createTrack } from '../../functions/track.fns';
 import { createUser, getSessionUserByUserId } from '../../functions/user.fns';
 import { createWorkspace } from '../../functions/workspace.fns';
 import { pushEvent } from '../../integrations/pusher/pusher-server';
+import { sendText } from '../../utils/sms';
 import { privateProcedure, publicProcedure, workspaceProcedure } from '../trpc';
 
 export const campaignRoute = {

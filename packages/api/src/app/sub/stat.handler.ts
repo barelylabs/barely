@@ -12,4 +12,3 @@ export const statHandler = routeHandler({
 	router: statSubRouter,
 	auth,
 });
-

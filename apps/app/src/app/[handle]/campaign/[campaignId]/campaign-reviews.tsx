@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { getFullNameFromFirstAndLast } from '@barely/utils';
 import { useSuspenseInfiniteQuery, useSuspenseQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Progress } from '@barely/ui/progress';
 import { Review } from '@barely/ui/review-card';

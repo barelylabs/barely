@@ -1,7 +1,7 @@
+import type { z } from 'zod/v4';
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { cartStatFiltersSchema } from '@barely/hooks';
-import type { z } from 'zod/v4';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { StatBarelyReferers } from '~/app/[handle]/_components/stat-barely-referers';
@@ -21,7 +21,7 @@ export default async function CartStatsPage({
 }) {
 	const { handle } = await params;
 	const filters = await searchParams;
-	
+
 	const parsedFilters = cartStatFiltersSchema.safeParse(filters);
 	if (!parsedFilters.success) {
 		console.log('parsedFilters error', parsedFilters.error);

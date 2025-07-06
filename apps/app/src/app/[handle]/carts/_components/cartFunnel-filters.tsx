@@ -4,7 +4,8 @@ import { Filters } from '~/app/[handle]/_components/filters';
 import { useCartFunnelSearchParams } from '~/app/[handle]/carts/_components/cartFunnel-context';
 
 export function CartFunnelFilters() {
-	const { filters, setSearch, clearAllFilters, toggleArchived } = useCartFunnelSearchParams();
+	const { filters, setSearch, clearAllFilters, toggleArchived } =
+		useCartFunnelSearchParams();
 
 	return (
 		<Filters

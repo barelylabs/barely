@@ -1,7 +1,6 @@
 import type { IconKey } from '@barely/ui/icon';
 import { useCallback, useEffect, useRef } from 'react';
 import { cn } from '@barely/utils';
-import { parseAsBoolean, useQueryState } from 'nuqs';
 
 import { Button } from '@barely/ui/button';
 import { Icon } from '@barely/ui/icon';

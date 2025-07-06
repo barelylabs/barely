@@ -12,4 +12,3 @@ export const trackHandler = routeHandler({
 	router: trackSubRouter,
 	auth,
 });
-

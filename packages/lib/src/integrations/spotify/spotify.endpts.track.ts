@@ -1,6 +1,7 @@
-import { log } from '../../utils/log';
 import { zGet } from '@barely/utils';
 import { z } from 'zod/v4';
+
+import { log } from '../../utils/log';
 
 export async function getSpotifyTrack(props: { accessToken: string; spotifyId: string }) {
 	const endpoint = `https://api.spotify.com/v1/tracks/${props.spotifyId}`;

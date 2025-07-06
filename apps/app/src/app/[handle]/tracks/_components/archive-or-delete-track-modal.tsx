@@ -1,8 +1,9 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { ArchiveOrDeleteModal } from '~/app/[handle]/_components/archive-or-delete-modal';
 import { useTrack } from '~/app/[handle]/tracks/_components/track-context';
@@ -26,7 +27,7 @@ export function ArchiveOrDeleteTrackModal({ mode }: { mode: 'archive' | 'delete'
 
 	const onSuccess = useCallback(async () => {
 		await queryClient.invalidateQueries(trpc.track.byWorkspace.queryFilter());
-		setShowModal(false);
+		await setShowModal(false);
 	}, [queryClient, setShowModal, trpc.track.byWorkspace]);
 
 	const { mutate: archiveTracks, isPending: isPendingArchive } = useMutation({

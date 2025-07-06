@@ -30,7 +30,10 @@ async function POST(
 }
 
 /* GET for webcrawlers of POST Header */
-async function GET(request: Request, { params }: { params: Promise<{ emailDeliveryId: string }> }) {
+async function GET(
+	request: Request,
+	{ params }: { params: Promise<{ emailDeliveryId: string }> },
+) {
 	const { emailDeliveryId } = await params;
 
 	return Response.redirect(getAbsoluteUrl('manageEmail', `/manage/${emailDeliveryId}`));

@@ -29,8 +29,8 @@ import {
 import { getPublicWorkspaceFromWorkspace } from '@barely/validators/schemas';
 import { and, count, eq, isNotNull } from 'drizzle-orm';
 
-import type { VisitorInfo } from '../middleware/request-parsing';
 import type { ShippingEstimateProps } from '../integrations/shipping/shipengine.endpts';
+import type { VisitorInfo } from '../middleware/request-parsing';
 import { getShippingEstimates } from '../integrations/shipping/shipengine.endpts';
 import { stripe } from '../integrations/stripe';
 import { getAmountsForCheckout, getFeeAmountForCheckout } from './cart.utils';

@@ -1,9 +1,7 @@
 import type { z } from 'zod/v4';
-import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
+import { redirect } from 'next/navigation';
 import { mixtapeFilterParamsSchema } from '@barely/validators';
-
-import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllMixtapes } from '~/app/[handle]/mixtapes/_components/all-mixtapes';
@@ -11,6 +9,7 @@ import { ArchiveOrDeleteMixtapeModal } from '~/app/[handle]/mixtapes/_components
 import { CreateMixtapeButton } from '~/app/[handle]/mixtapes/_components/create-mixtape-button';
 import { CreateOrUpdateMixtapeModal } from '~/app/[handle]/mixtapes/_components/create-or-update-mixtape-modal';
 import { MixtapeHotkeys } from '~/app/[handle]/mixtapes/_components/mixtape-hotkeys';
+import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
 export default async function MixtapesPage({
 	searchParams,
@@ -33,7 +32,7 @@ export default async function MixtapesPage({
 		trpc.mixtape.byWorkspace.infiniteQueryOptions({
 			handle,
 			...parsedFilters.data,
-		})
+		}),
 	);
 
 	return (

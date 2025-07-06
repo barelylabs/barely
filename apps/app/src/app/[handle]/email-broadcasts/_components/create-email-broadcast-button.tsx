@@ -10,7 +10,7 @@ export function CreateEmailBroadcastButton() {
 	return (
 		<Button
 			onClick={() => {
-				setShowCreateModal(true);
+				void setShowCreateModal(true);
 			}}
 			className='space-x-3'
 		>

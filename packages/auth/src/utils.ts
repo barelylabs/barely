@@ -6,7 +6,6 @@ import { SignInEmailTemplate } from '@barely/email/templates/auth';
 import { createRandomStringGenerator } from '@better-auth/utils/random';
 
 import type { Session, SessionUser } from '.';
-import type { APPS } from '../env';
 import { authEnv } from '../env';
 
 export const generateRandomString = createRandomStringGenerator(

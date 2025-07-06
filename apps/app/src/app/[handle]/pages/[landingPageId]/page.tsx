@@ -11,9 +11,7 @@ export default async function LandingPagePage({
 	const { handle, landingPageId } = await params;
 
 	// Prefetch data (not async - don't await)
-	prefetch(
-		trpc.landingPage.byId.queryOptions({ handle, landingPageId })
-	);
+	prefetch(trpc.landingPage.byId.queryOptions({ handle, landingPageId }));
 
 	return (
 		<HydrateClient>

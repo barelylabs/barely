@@ -12,4 +12,3 @@ export const workspaceHandler = routeHandler({
 	router: workspaceSubRouter,
 	auth,
 });
-

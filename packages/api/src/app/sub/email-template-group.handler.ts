@@ -12,4 +12,3 @@ export const emailTemplateGroupHandler = routeHandler({
 	router: emailTemplateGroupSubRouter,
 	auth,
 });
-

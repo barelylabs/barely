@@ -24,7 +24,10 @@ import {
 import { Text } from '@barely/ui/typography';
 
 import { CreateEmailDomainButton } from '~/app/[handle]/settings/email/domains/_components/create-email-domain-button';
-import { useEmailDomain, useEmailDomainSearchParams } from '~/app/[handle]/settings/email/domains/_components/email-domain-context';
+import {
+	useEmailDomain,
+	useEmailDomainSearchParams,
+} from '~/app/[handle]/settings/email/domains/_components/email-domain-context';
 
 type EmailDomain = AppRouterOutputs['emailDomain']['byWorkspace']['domains'][number];
 
@@ -38,7 +41,7 @@ export function AllEmailDomains() {
 	return (
 		<>
 			<GridList
-				data-grid-list="email-domains"
+				data-grid-list='email-domains'
 				className='flex flex-col gap-2'
 				aria-label='Email domains'
 				selectionMode='none'
@@ -60,11 +63,7 @@ export function AllEmailDomains() {
 	);
 }
 
-function EmailDomainCard({
-	emailDomain,
-}: {
-	emailDomain: EmailDomain;
-}) {
+function EmailDomainCard({ emailDomain }: { emailDomain: EmailDomain }) {
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
 	const { handle } = useWorkspace();
@@ -119,8 +118,8 @@ function EmailDomainCard({
 							size='sm'
 							startIcon='dots'
 							onClick={() => {
-								setSelection(new Set([emailDomain.id]));
-								setShowUpdateModal(true);
+								void setSelection(new Set([emailDomain.id]));
+								void setShowUpdateModal(true);
 							}}
 						/>
 					</div>

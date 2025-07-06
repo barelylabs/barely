@@ -17,7 +17,10 @@ export const useEmailTemplateSearchParams = createResourceSearchParamsHook();
 // Create a custom data hook for email templates that properly uses tRPC
 export function useEmailTemplate() {
 	const trpc = useTRPC();
-	const baseHook = createResourceDataHook<AppRouterOutputs['emailTemplate']['byWorkspace']['emailTemplates'][0], EmailTemplatePageData>(
+	const baseHook = createResourceDataHook<
+		AppRouterOutputs['emailTemplate']['byWorkspace']['emailTemplates'][0],
+		EmailTemplatePageData
+	>(
 		{
 			resourceName: 'email-templates',
 			getQueryOptions: (handle, filters) =>
@@ -29,7 +32,7 @@ export function useEmailTemplate() {
 		},
 		useEmailTemplateSearchParams,
 	);
-	
+
 	return baseHook();
 }
 

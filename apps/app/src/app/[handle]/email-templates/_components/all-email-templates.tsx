@@ -14,25 +14,20 @@ import { useEmailTemplate, useEmailTemplateSearchParams } from './email-template
 
 export function AllEmailTemplates() {
 	const { setShowUpdateModal } = useEmailTemplateSearchParams();
-	const {
-		items,
-		selection,
-		lastSelectedItemId,
-		setSelection,
-		isFetching,
-	} = useEmailTemplate();
+	const { items, selection, lastSelectedItemId, setSelection, isFetching } =
+		useEmailTemplate();
 
 	return (
 		<div className='flex flex-col gap-4'>
 			<GridList
-				data-grid-list="email-templates"
+				data-grid-list='email-templates'
 				className='flex flex-col gap-2'
 				aria-label='Email Templates'
 				selectionMode='multiple'
 				selectionBehavior='replace'
-				onAction={() => {
+				onAction={async () => {
 					if (!lastSelectedItemId) return;
-					setShowUpdateModal(true);
+					await setShowUpdateModal(true);
 				}}
 				items={items}
 				selectedKeys={selection}

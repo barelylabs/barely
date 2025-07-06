@@ -29,7 +29,7 @@ export function useFanGroup() {
 		},
 		useFanGroupSearchParams,
 	);
-	
+
 	return baseHook();
 }
 

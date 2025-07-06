@@ -36,7 +36,7 @@ export function AllCartFunnels() {
 				setSelectedKeys={setCartFunnelSelection}
 				onAction={() => {
 					if (cartFunnelSelection === 'all' || !cartFunnelSelection.size) return;
-					setShowUpdateCartFunnelModal(true);
+					void setShowUpdateCartFunnelModal(true);
 				}}
 				// empty
 				renderEmptyState={() =>

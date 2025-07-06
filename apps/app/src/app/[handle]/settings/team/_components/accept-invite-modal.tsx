@@ -2,10 +2,11 @@
 
 import type { z } from 'zod/v4';
 import { useZodForm } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { useToast } from '@barely/toast';
 import { acceptInviteSchema } from '@barely/validators';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { Modal, ModalBody, ModalHeader } from '@barely/ui/modal';

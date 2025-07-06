@@ -10,8 +10,6 @@ import { createTRPCOptionsProxy } from '@trpc/tanstack-react-query';
 
 import { emailManageRouter } from '@barely/api/public/email-manage.router';
 
-import { getSession } from '@barely/auth/app.server';
-
 import { makeQueryClient } from '~/trpc/query-client';
 
 /**
@@ -22,11 +20,9 @@ const createContext = cache(async () => {
 	const heads = new Headers(await headers());
 	heads.set('x-trpc-source', 'rsc');
 
-	const session = await getSession();
-
 	return createTRPCContext({
 		headers: heads,
-		session,
+		auth: null,
 		pool: null,
 	});
 });

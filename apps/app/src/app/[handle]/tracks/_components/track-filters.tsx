@@ -45,7 +45,7 @@ export function TrackFilters() {
 						<Button look='outline' size='md'>
 							<div className='flex flex-row items-center gap-2'>
 								Genres
-								{filters.genres && filters.genres.length > 0 && (
+								{filters.genres.length > 0 && (
 									<Badge variant='info' size='xs'>
 										{filters.genres.length}
 									</Badge>
@@ -57,7 +57,7 @@ export function TrackFilters() {
 						<div className='flex flex-col gap-2'>
 							<Label>Filter by genres</Label>
 							<MultiSelect
-								values={genreOptions?.filter(g => filters.genres?.includes(g.id)) ?? []}
+								values={genreOptions?.filter(g => filters.genres.includes(g.id)) ?? []}
 								placeholder='Search for genres...'
 								options={genreOptions ?? []}
 								getItemId={item => item.id}
@@ -66,7 +66,7 @@ export function TrackFilters() {
 								optTitle={option => option.name}
 								optSubtitle={option => `${option.totalPlaylists} playlists`}
 								onValuesChange={genres => {
-									setGenres(genres.map(g => g.id));
+									void setGenres(genres.map(g => g.id));
 								}}
 							/>
 						</div>

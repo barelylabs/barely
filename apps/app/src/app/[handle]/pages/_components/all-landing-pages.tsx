@@ -52,7 +52,11 @@ export function AllLandingPages() {
 	);
 }
 
-function LandingPageCard({ landingPage }: { landingPage: AppRouterOutputs['landingPage']['byWorkspace']['landingPages'][0] }) {
+function LandingPageCard({
+	landingPage,
+}: {
+	landingPage: AppRouterOutputs['landingPage']['byWorkspace']['landingPages'][0];
+}) {
 	const { setShowArchiveModal, setShowDeleteModal } = useLandingPageSearchParams();
 	const router = useRouter();
 

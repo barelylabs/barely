@@ -12,4 +12,3 @@ export const linkHandler = routeHandler({
 	router: linkSubRouter,
 	auth,
 });
-

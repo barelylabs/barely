@@ -29,6 +29,6 @@ export function useLandingPage() {
 		},
 		useLandingPageSearchParams,
 	);
-	
+
 	return baseHook();
 }

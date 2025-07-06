@@ -2,10 +2,11 @@
 
 import { useCallback } from 'react';
 import { useCreateOrUpdateForm, useWorkspace } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { upsertEmailTemplateGroupSchema } from '@barely/validators';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { useFieldArray } from 'react-hook-form';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Button } from '@barely/ui/button';
 import { Combobox } from '@barely/ui/combobox';
@@ -15,7 +16,10 @@ import { Label } from '@barely/ui/label';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 import { Text } from '@barely/ui/typography';
 
-import { useEmailTemplateGroup, useEmailTemplateGroupSearchParams } from './email-template-group-context';
+import {
+	useEmailTemplateGroup,
+	useEmailTemplateGroupSearchParams,
+} from './email-template-group-context';
 
 export function CreateOrUpdateEmailTemplateGroupModal({
 	mode,
@@ -26,12 +30,8 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 	const queryClient = useQueryClient();
 
 	const { lastSelectedItem, focusGridList } = useEmailTemplateGroup();
-	const {
-		showCreateModal,
-		showUpdateModal,
-		setShowCreateModal,
-		setShowUpdateModal,
-	} = useEmailTemplateGroupSearchParams();
+	const { showCreateModal, showUpdateModal, setShowCreateModal, setShowUpdateModal } =
+		useEmailTemplateGroupSearchParams();
 
 	const { handle } = useWorkspace();
 
@@ -144,7 +144,7 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 			trpc.emailTemplate.byWorkspace.queryFilter({ handle }),
 		);
 		form.reset();
-		setShowModal(false);
+		await setShowModal(false);
 	}, [
 		form,
 		focusGridList,

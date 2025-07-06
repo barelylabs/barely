@@ -9,7 +9,9 @@ export function CreateEmailTemplateButton() {
 
 	return (
 		<Button
-			onClick={() => void setShowCreateModal(true)}
+			onClick={() => {
+				void setShowCreateModal(true);
+			}}
 			className='space-x-3'
 		>
 			<p>New Email Template</p>

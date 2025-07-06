@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { isProduction } from '@barely/utils';
-import { getAbsoluteUrl } from '@barely/utils';
+import { getAbsoluteUrl, isProduction } from '@barely/utils';
 
 export function WarmupCart() {
 	const hasWarmedUp = useRef(false);

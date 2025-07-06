@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useLandingPageRenderTRPC } from '@barely/api/public/landing-page.trpc.react';
 import { useMutation } from '@tanstack/react-query';
+
+import { useLandingPageRenderTRPC } from '@barely/api/public/landing-page.trpc.react';
 
 export function LogVisit({ landingPageId }: { landingPageId: string }) {
 	const trpc = useLandingPageRenderTRPC();

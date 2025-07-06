@@ -17,7 +17,10 @@ export const usePlaylistSearchParams = createResourceSearchParamsHook();
 // Create a custom data hook for playlists that properly uses tRPC
 export function usePlaylist() {
 	const trpc = useTRPC();
-	const baseHook = createResourceDataHook<AppRouterOutputs['playlist']['byWorkspace']['playlists'][0], PlaylistPageData>(
+	const baseHook = createResourceDataHook<
+		AppRouterOutputs['playlist']['byWorkspace']['playlists'][0],
+		PlaylistPageData
+	>(
 		{
 			resourceName: 'playlists',
 			getQueryOptions: (handle, filters) =>
@@ -29,7 +32,7 @@ export function usePlaylist() {
 		},
 		usePlaylistSearchParams,
 	);
-	
+
 	return baseHook();
 }
 

@@ -29,7 +29,6 @@ export default async function FmPagesPage({
 		redirect(`/${awaitedParams.handle}/fm`);
 	}
 
-
 	// Prefetch data (not async - don't await)
 	prefetch(
 		trpc.fm.byWorkspace.infiniteQueryOptions({

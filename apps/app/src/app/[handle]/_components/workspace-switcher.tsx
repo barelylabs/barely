@@ -11,8 +11,8 @@ import {
 } from '@barely/utils';
 import { useSetAtom } from 'jotai';
 
-import { Button } from '@barely/ui/button';
 import { Avatar } from '@barely/ui/avatar';
+import { Button } from '@barely/ui/button';
 import {
 	Command,
 	CommandGroup,

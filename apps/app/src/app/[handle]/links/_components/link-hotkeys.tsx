@@ -2,7 +2,10 @@
 
 import { useModalHotKeys } from '@barely/hooks';
 
-import { useLink, useLinkSearchParams } from '~/app/[handle]/links/_components/link-context';
+import {
+	useLink,
+	useLinkSearchParams,
+} from '~/app/[handle]/links/_components/link-context';
 
 export function LinkHotkeys() {
 	const { selection } = useLink();

@@ -3,14 +3,12 @@
 import type { z } from 'zod/v4';
 import { useCallback, useEffect, useMemo } from 'react';
 import { SHIPPING_CARRIERS } from '@barely/const';
-import { useWorkspace, useZodForm } from '@barely/hooks';
+import { focusGridList, useWorkspace, useZodForm } from '@barely/hooks';
 import { markCartOrderAsFulfilledSchema } from '@barely/validators';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useFieldArray } from 'react-hook-form';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
-
-import { focusGridList } from '@barely/hooks';
 
 import { CheckboxField } from '@barely/ui/forms/checkbox-field';
 import { Form, SubmitButton } from '@barely/ui/forms/form';
@@ -103,7 +101,7 @@ export function MarkCartOrderFulfilledModal() {
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList('cart-orders');
-		setShowMarkAsFulfilledModal(false);
+		await setShowMarkAsFulfilledModal(false);
 		removeProducts();
 		form.reset();
 

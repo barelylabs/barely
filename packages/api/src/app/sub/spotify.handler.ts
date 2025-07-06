@@ -12,4 +12,3 @@ export const spotifyHandler = routeHandler({
 	router: spotifySubRouter,
 	auth,
 });
-

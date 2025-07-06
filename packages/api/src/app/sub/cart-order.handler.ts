@@ -12,4 +12,3 @@ export const cartOrderHandler = routeHandler({
 	router: cartOrderSubRouter,
 	auth,
 });
-

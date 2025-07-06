@@ -7,8 +7,8 @@ import { DashContentHeader } from '~/app/[handle]/_components/dash-content-heade
 import { AllEmailBroadcasts } from '~/app/[handle]/email-broadcasts/_components/all-email-broadcasts';
 import { CreateOrUpdateEmailBroadcastModal } from '~/app/[handle]/email-broadcasts/_components/create-or-update-email-broadcast-modal';
 import { EmailBroadcastFilters } from '~/app/[handle]/email-broadcasts/_components/email-broadcast-filters';
-import { CreateEmailBroadcastButton } from './_components/create-email-broadcast-button';
 import { HydrateClient, prefetch, trpc } from '~/trpc/server';
+import { CreateEmailBroadcastButton } from './_components/create-email-broadcast-button';
 
 export default async function EmailBroadcastsPage({
 	params,

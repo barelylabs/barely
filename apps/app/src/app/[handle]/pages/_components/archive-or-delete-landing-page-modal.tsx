@@ -32,7 +32,7 @@ export function ArchiveOrDeleteLandingPageModal({
 		await queryClient.invalidateQueries({
 			queryKey: trpc.landingPage.byWorkspace.queryKey(),
 		});
-		setShowModal(false);
+		await setShowModal(false);
 	}, [queryClient, trpc, setShowModal]);
 
 	const { mutate: archiveLandingPages, isPending: isPendingArchive } = useMutation(

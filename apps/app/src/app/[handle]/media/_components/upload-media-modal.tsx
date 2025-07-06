@@ -2,9 +2,10 @@
 
 import type { UploadQueueItem } from '@barely/hooks';
 import { useUpload } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { useQueryClient } from '@tanstack/react-query';
 import { atom } from 'jotai';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Button } from '@barely/ui/button';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
@@ -26,7 +27,7 @@ export function UploadMediaModal() {
 		maxFiles: 50,
 		onUploadComplete: async () => {
 			await queryClient.invalidateQueries(trpc.file.byWorkspace.queryFilter());
-			setShowCreateModal(false);
+			await setShowCreateModal(false);
 		},
 	});
 
@@ -35,7 +36,9 @@ export function UploadMediaModal() {
 	return (
 		<Modal
 			showModal={showCreateModal}
-			setShowModal={setShowCreateModal}
+			setShowModal={show => {
+				void setShowCreateModal(show);
+			}}
 			className='w-full'
 		>
 			<ModalHeader title='Upload Media' icon='media' />

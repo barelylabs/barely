@@ -12,4 +12,3 @@ export const visitorSessionHandler = routeHandler({
 	router: visitorSessionSubRouter,
 	auth,
 });
-

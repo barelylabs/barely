@@ -5,10 +5,11 @@ import type { z } from 'zod/v4';
 import { useCallback } from 'react';
 import { FAN_GROUP_CONDITIONS } from '@barely/const';
 import { useCreateOrUpdateForm, useFocusGridList, useWorkspace } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { upsertFanGroupSchema } from '@barely/validators';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { useFieldArray } from 'react-hook-form';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Button } from '@barely/ui/button';
 import { CurrencyField } from '@barely/ui/forms/currency-field';
@@ -19,7 +20,10 @@ import { Icon } from '@barely/ui/icon';
 import { Label } from '@barely/ui/label';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 
-import { useFanGroup, useFanGroupSearchParams } from '~/app/[handle]/fan-groups/_components/fan-group-context';
+import {
+	useFanGroup,
+	useFanGroupSearchParams,
+} from '~/app/[handle]/fan-groups/_components/fan-group-context';
 
 const conditionTypeOptions = FAN_GROUP_CONDITIONS.map(c => ({
 	label: (() => {
@@ -45,12 +49,8 @@ export function CreateOrUpdateFanGroupModal({ mode }: { mode: 'create' | 'update
 
 	/* fan group hooks */
 	const { lastSelectedItemId } = useFanGroup();
-	const {
-		showCreateModal,
-		showUpdateModal,
-		setShowCreateModal,
-		setShowUpdateModal,
-	} = useFanGroupSearchParams();
+	const { showCreateModal, showUpdateModal, setShowCreateModal, setShowUpdateModal } =
+		useFanGroupSearchParams();
 
 	const { data: selectedFanGroup } = useSuspenseQuery(
 		trpc.fanGroup.byId.queryOptions(
@@ -120,7 +120,7 @@ export function CreateOrUpdateFanGroupModal({ mode }: { mode: 'create' | 'update
 			queryKey: trpc.fanGroup.byWorkspace.queryKey(),
 		});
 		form.reset();
-		setShowModal(false);
+		await setShowModal(false);
 	}, [form, queryClient, trpc, setShowModal, focusGridList]);
 
 	/* form submit */

@@ -12,4 +12,3 @@ export const campaignHandler = routeHandler({
 	router: campaignSubRouter,
 	auth,
 });
-

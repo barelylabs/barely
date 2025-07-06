@@ -3,10 +3,11 @@
 import type { StatDateRange } from '@barely/validators';
 import { Suspense } from 'react';
 import { useWebEventStatFilters, useWorkspace } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { getFmPageUrlFromFmPage, getShortLinkUrlFromLink } from '@barely/utils';
 import { statDateRange } from '@barely/validators';
 import { useSuspenseQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { ChevronRightToArrow, Icon } from '@barely/ui/icon';
 import {

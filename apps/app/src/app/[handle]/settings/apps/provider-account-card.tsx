@@ -3,12 +3,13 @@
 import type { ProviderAccount } from '@barely/validators';
 import { useRouter } from 'next/navigation';
 import { useWorkspace } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { onPromise, toTitleCase } from '@barely/utils';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 
-import { Button } from '@barely/ui/button';
+import { useTRPC } from '@barely/api/app/trpc.react';
+
 import { AlertDialog } from '@barely/ui/alert-dialog';
+import { Button } from '@barely/ui/button';
 import { Card } from '@barely/ui/card';
 import { Icon } from '@barely/ui/icon';
 import { H } from '@barely/ui/typography';

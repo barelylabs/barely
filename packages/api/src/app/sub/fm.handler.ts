@@ -12,4 +12,3 @@ export const fmHandler = routeHandler({
 	router: fmSubRouter,
 	auth,
 });
-

@@ -1,5 +1,5 @@
-import { FeatureCard } from '@barely/ui/components/feature-card';
 import { AnimateOnScroll } from '@barely/ui/animate-on-scroll';
+import { FeatureCard } from '@barely/ui/components/feature-card';
 import { Icon } from '@barely/ui/icon';
 import { H, Lead } from '@barely/ui/typography';
 

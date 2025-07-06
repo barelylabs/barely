@@ -5,14 +5,13 @@ import type { LandingPageRenderRouter } from '@barely/api/public/landing-page-re
 import type { QueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import React, { useState } from 'react';
-import { LandingPageRenderTRPCProvider } from '@barely/api/public/landing-page.trpc.react';
-import { getAbsoluteUrl } from '@barely/utils';
+import { getAbsoluteUrl, isDevelopment } from '@barely/utils';
 import { isServer, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { createTRPCClient, httpBatchLink, loggerLink } from '@trpc/client';
 import SuperJSON from 'superjson';
 
-import { isDevelopment } from '@barely/utils';
+import { LandingPageRenderTRPCProvider } from '@barely/api/public/landing-page.trpc.react';
 
 import { makeQueryClient } from '~/trpc/query-client';
 

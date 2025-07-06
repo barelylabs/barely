@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { useWorkspace } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { useSuspenseQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Skeleton } from '@barely/ui/skeleton';
 import { Text } from '@barely/ui/typography';

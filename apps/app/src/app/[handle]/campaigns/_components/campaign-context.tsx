@@ -3,9 +3,9 @@
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import type { BaseResourceFilters, ResourceSearchParamsReturn } from '@barely/hooks';
 import { useRef } from 'react';
-import { createResourceDataHook, createResourceSearchParamsHook, useWorkspace } from '@barely/hooks';
-import { parseAsStringEnum } from 'nuqs';
+import { createResourceSearchParamsHook, useWorkspace } from '@barely/hooks';
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
+import { parseAsStringEnum } from 'nuqs';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
@@ -22,7 +22,9 @@ interface CampaignFilters extends BaseResourceFilters {
 
 // Define the return type for campaign search params
 interface CampaignSearchParamsReturn extends ResourceSearchParamsReturn<CampaignFilters> {
-	setStage: (stage: 'screening' | 'approved' | 'active' | undefined) => Promise<URLSearchParams> | undefined;
+	setStage: (
+		stage: 'screening' | 'approved' | 'active' | undefined,
+	) => Promise<URLSearchParams> | undefined;
 }
 
 // Create the search params hook for campaigns with custom filters
@@ -31,7 +33,7 @@ const _useCampaignSearchParams = createResourceSearchParamsHook({
 		stage: parseAsStringEnum(['screening', 'approved', 'active']),
 	},
 	additionalActions: {
-		setStage: setParams => 
+		setStage: setParams =>
 			((...args: unknown[]) => {
 				const [stage] = args as ['screening' | 'approved' | 'active' | undefined];
 				return setParams({ stage });
@@ -39,14 +41,15 @@ const _useCampaignSearchParams = createResourceSearchParamsHook({
 	},
 });
 
-export const useCampaignSearchParams = _useCampaignSearchParams as () => CampaignSearchParamsReturn;
+export const useCampaignSearchParams =
+	_useCampaignSearchParams as () => CampaignSearchParamsReturn;
 
 // Create a custom data hook for campaigns that properly uses tRPC
 export function useCampaign() {
 	const trpc = useTRPC();
 	const { workspace } = useWorkspace();
 	const { selection, setSelection, filters } = useCampaignSearchParams();
-	
+
 	// Fetch data with infinite query
 	const {
 		data,
@@ -62,21 +65,21 @@ export function useCampaign() {
 			{ getNextPageParam: (lastPage: CampaignPageData) => lastPage.nextCursor },
 		),
 	});
-	
+
 	// Extract items from paginated data
 	const items = data.pages.flatMap(page => page.campaigns);
-	
+
 	// Get last selected item
 	const lastSelectedItemId =
 		selection === 'all' || !selection.size ?
 			undefined
 		:	Array.from(selection).pop()?.toString();
 	const lastSelectedItem = items.find(item => item.id === lastSelectedItemId);
-	
+
 	// UI refs
 	const gridListRef = useRef<HTMLDivElement>(null);
 	const focusGridList = () => gridListRef.current?.focus();
-	
+
 	return {
 		items,
 		selection,

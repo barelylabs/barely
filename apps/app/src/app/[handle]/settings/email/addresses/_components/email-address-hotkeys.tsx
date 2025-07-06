@@ -6,7 +6,8 @@ import { useEmailAddress, useEmailAddressSearchParams } from './email-address-co
 
 export function EmailAddressHotkeys() {
 	const { selection } = useEmailAddress();
-	const { setShowCreateModal, setShowUpdateModal, setShowDeleteModal } = useEmailAddressSearchParams();
+	const { setShowCreateModal, setShowUpdateModal, setShowDeleteModal } =
+		useEmailAddressSearchParams();
 
 	useModalHotKeys({
 		setShowCreateModal,

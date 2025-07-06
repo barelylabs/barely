@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useEmailManageTRPC } from '@barely/api/public/email-manage.trpc.react';
 import { useToast } from '@barely/toast';
 import { useMutation } from '@tanstack/react-query';
+
+import { useEmailManageTRPC } from '@barely/api/public/email-manage.trpc.react';
 
 import { Button } from '@barely/ui/button';
 import { ConfettiBurst } from '@barely/ui/confetti';
@@ -28,7 +29,7 @@ export function ManageEmailForm({
 
 	const { mutate, isPending } = useMutation({
 		...trpc.toggleEmailMarketingOptIn.mutationOptions({
-			onSuccess: (data) => {
+			onSuccess: data => {
 				setEmailMarketingOptIn(data.newEmailMarketingOptIn);
 				if (data.newEmailMarketingOptIn) {
 					toast.success('You have been resubscribed to marketing emails');

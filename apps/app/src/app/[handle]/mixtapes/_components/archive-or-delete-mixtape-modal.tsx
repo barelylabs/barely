@@ -1,24 +1,21 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { useTRPC } from '@barely/api/app/trpc.react';
+
 import { ArchiveOrDeleteModal } from '~/app/[handle]/_components/archive-or-delete-modal';
-import { useMixtape, useMixtapeSearchParams } from '~/app/[handle]/mixtapes/_components/mixtape-context';
+import {
+	useMixtape,
+	useMixtapeSearchParams,
+} from '~/app/[handle]/mixtapes/_components/mixtape-context';
 
 export function ArchiveOrDeleteMixtapeModal({ mode }: { mode: 'archive' | 'delete' }) {
-	const {
-		selection,
-		lastSelectedItem,
-	} = useMixtape();
-	
-	const {
-		showArchiveModal,
-		showDeleteModal,
-		setShowArchiveModal,
-		setShowDeleteModal,
-	} = useMixtapeSearchParams();
+	const { selection, lastSelectedItem } = useMixtape();
+
+	const { showArchiveModal, showDeleteModal, setShowArchiveModal, setShowDeleteModal } =
+		useMixtapeSearchParams();
 
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
@@ -29,7 +26,7 @@ export function ArchiveOrDeleteMixtapeModal({ mode }: { mode: 'archive' | 'delet
 
 	const onSuccess = useCallback(async () => {
 		await queryClient.invalidateQueries(trpc.mixtape.byWorkspace.queryFilter());
-		setShowModal(false);
+		await setShowModal(false);
 	}, [queryClient, trpc.mixtape.byWorkspace, setShowModal]);
 
 	const { mutate: archiveMixtapes, isPending: isPendingArchive } = useMutation(

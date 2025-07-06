@@ -7,7 +7,10 @@ import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placehold
 import { GridList, GridListCard } from '@barely/ui/grid-list';
 
 import { CreateProductButton } from '~/app/[handle]/products/_components/create-product-button';
-import { useProduct, useProductSearchParams } from '~/app/[handle]/products/_components/product-context';
+import {
+	useProduct,
+	useProductSearchParams,
+} from '~/app/[handle]/products/_components/product-context';
 
 export function AllProducts() {
 	const { setShowUpdateModal } = useProductSearchParams();
@@ -15,7 +18,7 @@ export function AllProducts() {
 
 	return (
 		<GridList
-			data-grid-list="products"
+			data-grid-list='products'
 			aria-label='Products'
 			className='flex flex-col gap-2'
 			// behavior
@@ -26,7 +29,7 @@ export function AllProducts() {
 			selectedKeys={selection}
 			setSelectedKeys={setSelection}
 			onAction={() => {
-				setShowUpdateModal(true);
+				void setShowUpdateModal(true);
 			}}
 			// empty
 			renderEmptyState={() =>

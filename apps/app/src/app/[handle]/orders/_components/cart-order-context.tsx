@@ -23,7 +23,8 @@ interface CartOrderFilters extends BaseResourceFilters {
 }
 
 // Define the return type for cart order search params
-interface CartOrderSearchParamsReturn extends ResourceSearchParamsReturn<CartOrderFilters> {
+interface CartOrderSearchParamsReturn
+	extends ResourceSearchParamsReturn<CartOrderFilters> {
 	toggleFulfilled: () => Promise<URLSearchParams>;
 	togglePreorders: () => Promise<URLSearchParams>;
 	toggleCanceled: () => Promise<URLSearchParams>;
@@ -47,12 +48,12 @@ const _useCartOrderSearchParams = createResourceSearchParamsHook({
 			setParams(prev => ({ showPreorders: !prev.showPreorders })),
 		toggleCanceled: setParams => () =>
 			setParams(prev => ({ showCanceled: !prev.showCanceled })),
-		setShowMarkAsFulfilledModal: setParams => 
+		setShowMarkAsFulfilledModal: setParams =>
 			((...args: unknown[]) => {
 				const [show] = args as [boolean];
 				return setParams({ showMarkAsFulfilledModal: show });
 			}) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
-		setShowCancelCartOrderModal: setParams => 
+		setShowCancelCartOrderModal: setParams =>
 			((...args: unknown[]) => {
 				const [show] = args as [boolean];
 				return setParams({ showCancelCartOrderModal: show });
@@ -60,7 +61,8 @@ const _useCartOrderSearchParams = createResourceSearchParamsHook({
 	},
 });
 
-export const useCartOrderSearchParams = _useCartOrderSearchParams as () => CartOrderSearchParamsReturn;
+export const useCartOrderSearchParams =
+	_useCartOrderSearchParams as () => CartOrderSearchParamsReturn;
 
 // Create a custom data hook for cart orders that properly uses tRPC
 export function useCartOrder() {

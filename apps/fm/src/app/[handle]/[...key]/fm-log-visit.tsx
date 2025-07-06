@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useFmPageTRPC } from '@barely/api/public/fm-page.trpc.react';
 import { useMutation } from '@tanstack/react-query';
+
+import { useFmPageTRPC } from '@barely/api/public/fm-page.trpc.react';
 
 export function LogVisit({ fmId }: { fmId: string }) {
 	const trpc = useFmPageTRPC();

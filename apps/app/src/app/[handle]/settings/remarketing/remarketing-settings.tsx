@@ -2,9 +2,10 @@
 
 import type { z } from 'zod/v4';
 import { useWorkspace, useZodForm } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { insertMetaPixelSchema } from '@barely/validators';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { SettingsCardForm } from '@barely/ui/components/settings-card';
 import { TextAreaField } from '@barely/ui/forms/text-area-field';

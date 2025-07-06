@@ -1,7 +1,8 @@
 'use client';
 
-import { useLandingPageRenderTRPC } from '@barely/api/public/landing-page.trpc.react';
 import { useMutation } from '@tanstack/react-query';
+
+import { useLandingPageRenderTRPC } from '@barely/api/public/landing-page.trpc.react';
 
 import { LoadingLinkButton } from '@barely/ui/button';
 

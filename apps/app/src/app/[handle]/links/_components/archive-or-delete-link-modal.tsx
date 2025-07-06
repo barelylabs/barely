@@ -1,23 +1,20 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { useTRPC } from '@barely/api/app/trpc.react';
+
 import { ArchiveOrDeleteModal } from '~/app/[handle]/_components/archive-or-delete-modal';
-import { useLink, useLinkSearchParams } from '~/app/[handle]/links/_components/link-context';
+import {
+	useLink,
+	useLinkSearchParams,
+} from '~/app/[handle]/links/_components/link-context';
 
 export function ArchiveOrDeleteLinkModal({ mode }: { mode: 'archive' | 'delete' }) {
-	const {
-		selection: linkSelection,
-		lastSelectedItem: lastSelectedLink,
-	} = useLink();
-	const {
-		showArchiveModal,
-		showDeleteModal,
-		setShowArchiveModal,
-		setShowDeleteModal,
-	} = useLinkSearchParams();
+	const { selection: linkSelection, lastSelectedItem: lastSelectedLink } = useLink();
+	const { showArchiveModal, showDeleteModal, setShowArchiveModal, setShowDeleteModal } =
+		useLinkSearchParams();
 
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
@@ -28,7 +25,7 @@ export function ArchiveOrDeleteLinkModal({ mode }: { mode: 'archive' | 'delete' 
 
 	const onSuccess = useCallback(async () => {
 		await queryClient.invalidateQueries(trpc.link.byWorkspace.queryFilter());
-		setShowModal(false);
+		await setShowModal(false);
 	}, [queryClient, trpc.link.byWorkspace, setShowModal]);
 
 	const { mutate: archiveLinks, isPending: isPendingArchive } = useMutation(

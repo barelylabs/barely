@@ -2,14 +2,12 @@
 
 import type { z } from 'zod/v4';
 import { useCallback } from 'react';
-import { useWorkspace, useZodForm } from '@barely/hooks';
+import { focusGridList, useWorkspace, useZodForm } from '@barely/hooks';
 import { formatCentsToDollars } from '@barely/utils';
 import { cancelCartOrderSchema } from '@barely/validators';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
-
-import { focusGridList } from '@barely/hooks';
 
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
@@ -71,7 +69,7 @@ export function CancelCartOrderModal() {
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList('cart-orders');
-		setShowCancelCartOrderModal(false);
+		await setShowCancelCartOrderModal(false);
 		form.reset();
 
 		await queryClient.invalidateQueries({

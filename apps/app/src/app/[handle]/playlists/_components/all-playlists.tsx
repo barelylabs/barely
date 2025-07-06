@@ -16,25 +16,20 @@ import { usePlaylist, usePlaylistSearchParams } from './playlist-context';
 
 export function AllPlaylists() {
 	const { setShowUpdateModal } = usePlaylistSearchParams();
-	const {
-		items,
-		selection,
-		lastSelectedItemId,
-		setSelection,
-		isFetching,
-	} = usePlaylist();
+	const { items, selection, lastSelectedItemId, setSelection, isFetching } =
+		usePlaylist();
 
 	return (
 		<>
 			<GridList
-				data-grid-list="playlists"
+				data-grid-list='playlists'
 				aria-label='Playlists'
 				className='flex flex-col gap-2'
 				selectionMode='multiple'
 				selectionBehavior='replace'
-				onAction={() => {
+				onAction={async () => {
 					if (!lastSelectedItemId) return;
-					setShowUpdateModal(true);
+					await setShowUpdateModal(true);
 				}}
 				items={items}
 				selectedKeys={selection}

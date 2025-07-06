@@ -12,4 +12,3 @@ export const flowHandler = routeHandler({
 	router: flowSubRouter,
 	auth,
 });
-

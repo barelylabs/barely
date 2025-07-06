@@ -4,13 +4,14 @@ import type { Domain } from '@barely/validators';
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { useWorkspace } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { punycode } from '@barely/utils';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { useSetAtom } from 'jotai';
 
-import { Button } from '@barely/ui/button';
+import { useTRPC } from '@barely/api/app/trpc.react';
+
 import { Badge } from '@barely/ui/badge';
+import { Button } from '@barely/ui/button';
 import { Icon } from '@barely/ui/icon';
 import { LoadingSpinner } from '@barely/ui/loading';
 import { Skeleton } from '@barely/ui/skeleton';

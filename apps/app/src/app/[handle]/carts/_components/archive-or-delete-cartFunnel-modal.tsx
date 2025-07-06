@@ -2,20 +2,22 @@
 
 import { useCallback } from 'react';
 import { useWorkspace } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { useTRPC } from '@barely/api/app/trpc.react';
+
 import { ArchiveOrDeleteModal } from '~/app/[handle]/_components/archive-or-delete-modal';
-import { useCartFunnel, useCartFunnelSearchParams } from '~/app/[handle]/carts/_components/cartFunnel-context';
+import {
+	useCartFunnel,
+	useCartFunnelSearchParams,
+} from '~/app/[handle]/carts/_components/cartFunnel-context';
 
 export function ArchiveOrDeleteFunnelModal({ mode }: { mode: 'archive' | 'delete' }) {
 	const trpc = useTRPC();
 	const { handle } = useWorkspace();
 
-	const {
-		selection: cartFunnelSelection,
-		lastSelectedItem: lastSelectedCartFunnel,
-	} = useCartFunnel();
+	const { selection: cartFunnelSelection, lastSelectedItem: lastSelectedCartFunnel } =
+		useCartFunnel();
 	const {
 		showArchiveModal: showArchiveCartFunnelModal,
 		showDeleteModal: showDeleteCartFunnelModal,
@@ -24,7 +26,6 @@ export function ArchiveOrDeleteFunnelModal({ mode }: { mode: 'archive' | 'delete
 	} = useCartFunnelSearchParams();
 
 	const queryClient = useQueryClient();
-
 
 	const showModal =
 		mode === 'archive' ? showArchiveCartFunnelModal : showDeleteCartFunnelModal;
@@ -37,7 +38,7 @@ export function ArchiveOrDeleteFunnelModal({ mode }: { mode: 'archive' | 'delete
 		await queryClient.invalidateQueries(
 			trpc.cartFunnel.byWorkspace.queryFilter({ handle }),
 		);
-		setShowModal(false);
+		await setShowModal(false);
 	}, [queryClient, trpc.cartFunnel.byWorkspace, handle, setShowModal]);
 
 	const { mutate: archiveFunnels, isPending: isPendingArchive } = useMutation(

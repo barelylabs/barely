@@ -183,7 +183,7 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 		setArtworkUploadQueue([]);
 		setAudioUploadQueue([]);
 		await queryClient.invalidateQueries(trpc.track.byWorkspace.queryFilter());
-		setShowModal(false);
+		await setShowModal(false);
 	}, [
 		form,
 		queryClient,

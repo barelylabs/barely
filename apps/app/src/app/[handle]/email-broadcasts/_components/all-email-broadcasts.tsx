@@ -11,29 +11,27 @@ import { Icon } from '@barely/ui/icon';
 import { Text } from '@barely/ui/typography';
 
 import { CreateEmailBroadcastButton } from './create-email-broadcast-button';
-import { useEmailBroadcast, useEmailBroadcastSearchParams } from './email-broadcasts-context';
+import {
+	useEmailBroadcast,
+	useEmailBroadcastSearchParams,
+} from './email-broadcasts-context';
 
 export function AllEmailBroadcasts() {
 	const { setShowUpdateModal } = useEmailBroadcastSearchParams();
-	const {
-		items,
-		selection,
-		lastSelectedItemId,
-		setSelection,
-		isFetching,
-	} = useEmailBroadcast();
+	const { items, selection, lastSelectedItemId, setSelection, isFetching } =
+		useEmailBroadcast();
 
 	return (
 		<div className='flex flex-col gap-4'>
 			<GridList
-				data-grid-list="email-broadcasts"
+				data-grid-list='email-broadcasts'
 				className='flex flex-col gap-2'
 				aria-label='Email Broadcasts'
 				selectionMode='multiple'
 				selectionBehavior='replace'
-				onAction={() => {
+				onAction={async () => {
 					if (!lastSelectedItemId) return;
-					setShowUpdateModal(true);
+					await setShowUpdateModal(true);
 				}}
 				items={items}
 				selectedKeys={selection}

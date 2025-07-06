@@ -12,4 +12,3 @@ export const fanHandler = routeHandler({
 	router: fanSubRouter,
 	auth,
 });
-

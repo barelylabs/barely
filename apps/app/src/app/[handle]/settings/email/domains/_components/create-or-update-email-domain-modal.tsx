@@ -1,6 +1,5 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import type { z } from 'zod/v4';
 import { useCallback, useEffect, useState } from 'react';
 import { useCreateOrUpdateForm, useFocusGridList, useWorkspace } from '@barely/hooks';
@@ -20,8 +19,6 @@ import {
 	useEmailDomain,
 	useEmailDomainSearchParams,
 } from '~/app/[handle]/settings/email/domains/_components/email-domain-context';
-
-type EmailDomain = AppRouterOutputs['emailDomain']['byWorkspace']['domains'][number];
 
 export function CreateOrUpdateEmailDomainModal({ mode }: { mode: 'create' | 'update' }) {
 	const trpc = useTRPC();
@@ -82,7 +79,7 @@ export function CreateOrUpdateEmailDomainModal({ mode }: { mode: 'create' | 'upd
 		focusGridList();
 		await queryClient.invalidateQueries(trpc.emailDomain.byWorkspace.queryFilter());
 		form.reset();
-		setShowModal(false);
+		await setShowModal(false);
 	}, [focusGridList, queryClient, trpc, form, setShowModal]);
 
 	// form submit

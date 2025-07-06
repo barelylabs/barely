@@ -12,17 +12,15 @@ import { GridList, GridListCard } from '@barely/ui/grid-list';
 import { Text } from '@barely/ui/typography';
 
 import { CreateFanGroupButton } from '~/app/[handle]/fan-groups/_components/create-fan-group-button';
-import { useFanGroup, useFanGroupSearchParams } from '~/app/[handle]/fan-groups/_components/fan-group-context';
+import {
+	useFanGroup,
+	useFanGroupSearchParams,
+} from '~/app/[handle]/fan-groups/_components/fan-group-context';
 
 export function AllFanGroups() {
 	const { setShowUpdateModal } = useFanGroupSearchParams();
-	const {
-		items,
-		selection,
-		lastSelectedItemId,
-		setSelection,
-		isFetching,
-	} = useFanGroup();
+	const { items, selection, lastSelectedItemId, setSelection, isFetching } =
+		useFanGroup();
 
 	const trpc = useTRPC();
 	const { handle } = useWorkspace();
@@ -37,14 +35,14 @@ export function AllFanGroups() {
 		<>
 			<Text variant='md/medium'>{totalFans} fans</Text>
 			<GridList
-				data-grid-list="fan-groups"
+				data-grid-list='fan-groups'
 				className='flex flex-col gap-2'
 				aria-label='Fan Groups'
 				selectionMode='multiple'
 				selectionBehavior='replace'
-				onAction={() => {
+				onAction={async () => {
 					if (!lastSelectedItemId) return;
-					setShowUpdateModal(true);
+					await setShowUpdateModal(true);
 				}}
 				items={items}
 				selectedKeys={selection}

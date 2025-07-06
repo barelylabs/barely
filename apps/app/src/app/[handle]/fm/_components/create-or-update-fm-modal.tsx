@@ -36,12 +36,8 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 	const { handle } = useWorkspace();
 	/* fm context */
 	const { lastSelectedItem: selectedFmPage, focusGridList } = useFm();
-	const {
-		showCreateModal,
-		showUpdateModal,
-		setShowCreateModal,
-		setShowUpdateModal,
-	} = useFmSearchParams();
+	const { showCreateModal, showUpdateModal, setShowCreateModal, setShowUpdateModal } =
+		useFmSearchParams();
 
 	/* mutations */
 	const { mutateAsync: createFm } = useMutation(
@@ -127,7 +123,7 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 		setArtworkUploadQueue([]);
 		await queryClient.invalidateQueries(trpc.fm.byWorkspace.queryFilter());
 		form.reset();
-		setShowFmModal(false);
+		await setShowFmModal(false);
 	}, [form, focusGridList, queryClient, trpc.fm, setShowFmModal, setArtworkUploadQueue]);
 
 	/* state */

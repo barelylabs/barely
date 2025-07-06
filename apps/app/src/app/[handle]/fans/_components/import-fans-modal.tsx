@@ -5,13 +5,14 @@ import type { SelectFieldOption } from '@barely/ui/forms/select-field';
 import type { z } from 'zod/v4';
 import { useMemo, useState } from 'react';
 import { useUpload, useZodForm } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { useToast } from '@barely/toast';
 import { raise } from '@barely/utils';
 import { importFansFromCsvSchema } from '@barely/validators';
 import { useMutation } from '@tanstack/react-query';
 import { atom } from 'jotai';
 import Papa from 'papaparse';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Button } from '@barely/ui/button';
 import { Form, SubmitButton } from '@barely/ui/forms/form';
@@ -30,12 +31,13 @@ export function ImportFansFromCsvModal() {
 	const { toast } = useToast();
 
 	const trpc = useTRPC();
-	const { showImportModal: showModal, setShowImportModal: setShowModal } = useFanSearchParams();
+	const { showImportModal: showModal, setShowImportModal: setShowModal } =
+		useFanSearchParams();
 
 	const { mutate: importFansFromCsv } = useMutation({
 		...trpc.fan.importFromCsv.mutationOptions(),
-		onSuccess: () => {
-			handleCloseModal();
+		onSuccess: async () => {
+			await handleCloseModal();
 			toast('Fans importing...check back in a bit');
 		},
 	});
@@ -160,9 +162,9 @@ export function ImportFansFromCsvModal() {
 	const page =
 		columnOptions.length > 0 && !generatingMapping ? 'confirm-import' : 'upload';
 
-	const handleCloseModal = () => {
+	const handleCloseModal = async () => {
 		setUploadQueue([]);
-		setShowModal(false);
+		await setShowModal(false);
 	};
 
 	const preventDefaultClose = isPendingPresigns || uploadQueue.length > 0;
@@ -269,7 +271,9 @@ export function ImportFansButton() {
 			look='secondary'
 			variant='icon'
 			startIcon='import'
-			onClick={() => setShowImportModal(true)}
+			onClick={() => {
+				void setShowImportModal(true);
+			}}
 		/>
 	);
 }

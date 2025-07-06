@@ -5,12 +5,7 @@ import { useIntersectionObserver } from '@barely/hooks';
 import { cn } from '@barely/utils';
 
 import { Button } from '@barely/ui/button';
-import {
-	Command,
-	CommandItem,
-	CommandList,
-	CommandShortcut,
-} from '@barely/ui/command';
+import { Command, CommandItem, CommandList, CommandShortcut } from '@barely/ui/command';
 import { Icon } from '@barely/ui/icon';
 import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/popover';
 

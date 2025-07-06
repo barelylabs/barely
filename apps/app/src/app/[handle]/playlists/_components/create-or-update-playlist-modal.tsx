@@ -2,9 +2,10 @@
 
 import { useCallback } from 'react';
 import { useCreateOrUpdateForm, useWorkspace } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { upsertPlaylistSchema } from '@barely/validators';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SwitchField } from '@barely/ui/forms/switch-field';
@@ -12,7 +13,10 @@ import { TextAreaField } from '@barely/ui/forms/text-area-field';
 import { TextField } from '@barely/ui/forms/text-field';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 
-import { usePlaylist, usePlaylistSearchParams } from '~/app/[handle]/playlists/_components/playlist-context';
+import {
+	usePlaylist,
+	usePlaylistSearchParams,
+} from '~/app/[handle]/playlists/_components/playlist-context';
 
 export function CreateOrUpdatePlaylistModal({ mode }: { mode: 'create' | 'update' }) {
 	const trpc = useTRPC();
@@ -21,12 +25,8 @@ export function CreateOrUpdatePlaylistModal({ mode }: { mode: 'create' | 'update
 
 	/* playlist hooks */
 	const { lastSelectedItem: selectedPlaylist } = usePlaylist();
-	const {
-		showCreateModal,
-		showUpdateModal,
-		setShowCreateModal,
-		setShowUpdateModal,
-	} = usePlaylistSearchParams();
+	const { showCreateModal, showUpdateModal, setShowCreateModal, setShowUpdateModal } =
+		usePlaylistSearchParams();
 
 	/* mutations */
 	const { mutateAsync: createPlaylist } = useMutation(
@@ -81,7 +81,7 @@ export function CreateOrUpdatePlaylistModal({ mode }: { mode: 'create' | 'update
 			trpc.playlist.byWorkspace.queryFilter({ handle }),
 		);
 		form.reset();
-		setShowModal(false);
+		await setShowModal(false);
 	}, [form, queryClient, trpc.playlist, setShowModal, handle]);
 
 	const submitDisabled = mode === 'update' && !form.formState.isDirty;

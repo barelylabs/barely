@@ -12,4 +12,3 @@ export const genreHandler = routeHandler({
 	router: genreSubRouter,
 	auth,
 });
-

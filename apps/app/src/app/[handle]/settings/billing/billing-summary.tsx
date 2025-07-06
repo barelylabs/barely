@@ -4,8 +4,8 @@ import { useWorkspaceWithAll } from '@barely/hooks';
 import { capitalize, nFormatter } from '@barely/utils';
 import { useSetAtom } from 'jotai';
 
-import { Button } from '@barely/ui/button';
 import { Badge } from '@barely/ui/badge';
+import { Button } from '@barely/ui/button';
 import { Progress } from '@barely/ui/progress';
 import { InfoTooltip } from '@barely/ui/tooltip';
 import { Text } from '@barely/ui/typography';

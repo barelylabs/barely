@@ -12,4 +12,3 @@ export const workspaceInviteHandler = routeHandler({
 	router: workspaceInviteSubRouter,
 	auth,
 });
-

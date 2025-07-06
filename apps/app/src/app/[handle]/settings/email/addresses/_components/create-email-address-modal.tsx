@@ -3,9 +3,10 @@
 import type { z } from 'zod/v4';
 import { useCallback } from 'react';
 import { useEmailDomains, useWorkspace, useZodForm } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { createEmailAddressSchema } from '@barely/validators';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
@@ -49,7 +50,7 @@ export function CreateEmailAddressModal() {
 	const handleCloseModal = useCallback(async () => {
 		await queryClient.invalidateQueries(trpc.emailAddress.byWorkspace.queryFilter());
 		form.reset();
-		setShowCreateModal(false);
+		await setShowCreateModal(false);
 	}, [queryClient, trpc, form, setShowCreateModal]);
 
 	const handleSubmit = useCallback(
@@ -67,7 +68,9 @@ export function CreateEmailAddressModal() {
 	return (
 		<Modal
 			showModal={showCreateModal}
-			setShowModal={setShowCreateModal}
+			setShowModal={show => {
+				void setShowCreateModal(show);
+			}}
 			preventDefaultClose={preventDefaultClose}
 			onClose={handleCloseModal}
 			className='max-h-fit max-w-md'

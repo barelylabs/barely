@@ -12,4 +12,3 @@ export const productHandler = routeHandler({
 	router: productSubRouter,
 	auth,
 });
-

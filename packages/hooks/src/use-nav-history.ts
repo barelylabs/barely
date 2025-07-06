@@ -1,11 +1,11 @@
 'use client';
 
+import type { NavHistory } from '@barely/atoms';
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
+import { navHistoryAtom } from '@barely/atoms';
 import { useAtom, useSetAtom } from 'jotai';
 
-import type { NavHistory } from '@barely/atoms';
-import { navHistoryAtom } from '@barely/atoms';
 import { useWorkspace } from './use-workspace';
 import { useWorkspaces } from './use-workspaces';
 

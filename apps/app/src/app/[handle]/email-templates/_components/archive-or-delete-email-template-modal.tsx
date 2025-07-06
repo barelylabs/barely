@@ -1,8 +1,9 @@
 'use client';
 
-import { useCallback } from 'react';
-import { useTRPC } from '@barely/api/app/trpc.react';
+import { useCallback, useMemo } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { ArchiveOrDeleteModal } from '~/app/[handle]/_components/archive-or-delete-modal';
 import { useEmailTemplate, useEmailTemplateSearchParams } from './email-template-context';
@@ -12,26 +13,23 @@ export function ArchiveOrDeleteEmailTemplateModal({
 }: {
 	mode: 'archive' | 'delete';
 }) {
-	const {
-		selection,
-		lastSelectedItem,
-	} = useEmailTemplate();
-	
-	const {
-		showArchiveModal,
-		showDeleteModal,
-		setShowArchiveModal,
-		setShowDeleteModal,
-	} = useEmailTemplateSearchParams();
+	const { selection, lastSelectedItem } = useEmailTemplate();
+
+	const { showArchiveModal, showDeleteModal, setShowArchiveModal, setShowDeleteModal } =
+		useEmailTemplateSearchParams();
 
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
 
 	const showModal = mode === 'archive' ? showArchiveModal : showDeleteModal;
 
-	const setShowModal = mode === 'archive' ? 
-		(value: boolean) => void setShowArchiveModal(value) : 
-		(value: boolean) => void setShowDeleteModal(value);
+	const setShowModal = useMemo(
+		() =>
+			mode === 'archive' ?
+				(value: boolean) => void setShowArchiveModal(value)
+			:	(value: boolean) => void setShowDeleteModal(value),
+		[mode, setShowArchiveModal, setShowDeleteModal],
+	);
 
 	const onSuccess = useCallback(async () => {
 		await queryClient.invalidateQueries({

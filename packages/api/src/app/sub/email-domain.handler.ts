@@ -12,4 +12,3 @@ export const emailDomainHandler = routeHandler({
 	router: emailDomainSubRouter,
 	auth,
 });
-

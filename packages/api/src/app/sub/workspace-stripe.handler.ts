@@ -12,4 +12,3 @@ export const workspaceStripeHandler = routeHandler({
 	router: workspaceStripeSubRouter,
 	auth,
 });
-

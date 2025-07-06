@@ -1,6 +1,6 @@
 /**
  * Example: Using the resource hook factories for different resources
- * 
+ *
  * This file demonstrates how to use the generic hook factories to create
  * hooks for different resources in your application.
  */
@@ -22,15 +22,16 @@ export const useTrackSearchParams = createResourceSearchParamsHook({
 		released: parseAsBoolean.withDefault(false),
 	},
 	additionalActions: {
-		setGenre: (setParams) => ((...args: unknown[]) => {
-			const [genre] = args as [string];
-			return setParams({ genre });
-		}) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
-		toggleReleased: (setParams) => (() => 
-			setParams((p: Record<string, unknown>) => ({ 
-				released: !(p.released as boolean) 
-			}))
-		) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
+		setGenre: setParams =>
+			((...args: unknown[]) => {
+				const [genre] = args as [string];
+				return setParams({ genre });
+			}) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
+		toggleReleased: setParams =>
+			(() =>
+				setParams((p: Record<string, unknown>) => ({
+					released: !(p.released as boolean),
+				}))) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
 	},
 });
 
@@ -119,17 +120,20 @@ export const useCampaignSearchParams = createResourceSearchParamsHook({
 		endDate: parseAsString,
 	},
 	additionalActions: {
-		setStage: (setParams) => ((...args: unknown[]) => {
-			const [stage] = args as [string];
-			return setParams({ stage });
-		}) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
-		setType: (setParams) => ((...args: unknown[]) => {
-			const [type] = args as [string];
-			return setParams({ type });
-		}) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
-		setDateRange: (setParams) => ((...args: unknown[]) => {
-			const [start, end] = args as [string, string];
-			return setParams({ startDate: start, endDate: end });
-		}) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
+		setStage: setParams =>
+			((...args: unknown[]) => {
+				const [stage] = args as [string];
+				return setParams({ stage });
+			}) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
+		setType: setParams =>
+			((...args: unknown[]) => {
+				const [type] = args as [string];
+				return setParams({ type });
+			}) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
+		setDateRange: setParams =>
+			((...args: unknown[]) => {
+				const [start, end] = args as [string, string];
+				return setParams({ startDate: start, endDate: end });
+			}) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
 	},
 });

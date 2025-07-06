@@ -10,8 +10,12 @@ import type {
 import type { z } from 'zod/v4';
 import { useCallback, useEffect, useState } from 'react';
 import { isApparelType } from '@barely/const';
-import { useCreateOrUpdateForm, useUpload, useWorkspace } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
+import {
+	focusGridList,
+	useCreateOrUpdateForm,
+	useUpload,
+	useWorkspace,
+} from '@barely/hooks';
 import { insert } from '@barely/utils';
 import {
 	apparelSizeSchema,
@@ -21,6 +25,8 @@ import {
 } from '@barely/validators';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { atom } from 'jotai';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { CurrencyField } from '@barely/ui/forms/currency-field';
 import { DatetimeField } from '@barely/ui/forms/datetime-field-new';
@@ -37,8 +43,10 @@ import { ToggleGroup, ToggleGroupItem } from '@barely/ui/toggle-group';
 import { Tooltip } from '@barely/ui/tooltip';
 import { UploadDropzone } from '@barely/ui/upload';
 
-import { focusGridList } from '@barely/hooks';
-import { useProduct, useProductSearchParams } from '~/app/[handle]/products/_components/product-context';
+import {
+	useProduct,
+	useProductSearchParams,
+} from '~/app/[handle]/products/_components/product-context';
 
 const productImageUploadQueueAtom = atom<UploadQueueItem[]>([]);
 
@@ -47,15 +55,9 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 	const queryClient = useQueryClient();
 	const { workspace } = useWorkspace();
 	/* product context */
-	const {
-		lastSelectedItem: selectedProduct,
-	} = useProduct();
-	const {
-		showCreateModal,
-		setShowCreateModal,
-		showUpdateModal,
-		setShowUpdateModal,
-	} = useProductSearchParams();
+	const { lastSelectedItem: selectedProduct } = useProduct();
+	const { showCreateModal, setShowCreateModal, showUpdateModal, setShowUpdateModal } =
+		useProductSearchParams();
 
 	/* api */
 	const { mutateAsync: createProduct } = useMutation({
@@ -172,7 +174,7 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 
 	const handleCloseModal = useCallback(async () => {
 		reset();
-		setShowModal(false);
+		await setShowModal(false);
 		focusGridList('products');
 		setProductImageUploadQueue([]);
 		if (mode === 'create') setProductImages([]);

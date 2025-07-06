@@ -4,7 +4,8 @@ import { Filters } from '~/app/[handle]/_components/filters';
 import { useProductSearchParams } from '~/app/[handle]/products/_components/product-context';
 
 export function ProductFilters() {
-	const { filters, setSearch, toggleArchived, clearAllFilters } = useProductSearchParams();
+	const { filters, setSearch, toggleArchived, clearAllFilters } =
+		useProductSearchParams();
 
 	return (
 		<Filters

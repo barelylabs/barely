@@ -16,7 +16,7 @@ interface MediaPageData {
 type MediaFilters = BaseResourceFilters;
 
 // Media doesn't need additional search params return properties
-type MediaSearchParamsReturn = ResourceSearchParamsReturn<MediaFilters>;
+export type MediaSearchParamsReturn = ResourceSearchParamsReturn<MediaFilters>;
 
 // Create the search params hook for media (no additional parsers/actions needed)
 export const useMediaSearchParams = createResourceSearchParamsHook<MediaFilters>();

@@ -12,4 +12,3 @@ export const mailchimpHandler = routeHandler({
 	router: mailchimpSubRouter,
 	auth,
 });
-

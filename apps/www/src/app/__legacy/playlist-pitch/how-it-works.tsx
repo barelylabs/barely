@@ -1,7 +1,7 @@
+import { isEven } from '@barely/utils';
+
 import { AnimateOnScroll } from '@barely/ui/animate-on-scroll';
 import { H, Text } from '@barely/ui/typography';
-
-import { isEven } from '@barely/utils';
 
 const items = [
 	{

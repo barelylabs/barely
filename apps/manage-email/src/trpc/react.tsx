@@ -5,14 +5,13 @@ import type { EmailManageRouter } from '@barely/api/public/email-manage.router';
 import type { QueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import React, { useState } from 'react';
-import { getAbsoluteUrl } from '@barely/utils';
-import { EmailManageTRPCProvider as TRPCProvider } from '@barely/api/public/email-manage.trpc.react';
+import { getAbsoluteUrl, isDevelopment } from '@barely/utils';
 import { isServer, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { createTRPCClient, httpBatchLink, loggerLink } from '@trpc/client';
 import SuperJSON from 'superjson';
 
-import { isDevelopment } from '@barely/utils';
+import { EmailManageTRPCProvider as TRPCProvider } from '@barely/api/public/email-manage.trpc.react';
 
 import { makeQueryClient } from '~/trpc/query-client';
 

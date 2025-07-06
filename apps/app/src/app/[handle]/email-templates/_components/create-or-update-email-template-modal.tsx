@@ -1,11 +1,12 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { EMAIL_TEMPLATE_VARIABLES } from '@barely/const';
 import { useCreateOrUpdateForm, useWorkspace } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { upsertEmailTemplateSchema } from '@barely/validators';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
@@ -31,17 +32,10 @@ export function CreateOrUpdateEmailTemplateModal({
 	const updateMode = mode === 'update';
 	const createMode = mode === 'create';
 
-	const {
-		lastSelectedItem,
-		focusGridList,
-	} = useEmailTemplate();
-	
-	const {
-		showCreateModal,
-		showUpdateModal,
-		setShowCreateModal,
-		setShowUpdateModal,
-	} = useEmailTemplateSearchParams();
+	const { lastSelectedItem, focusGridList } = useEmailTemplate();
+
+	const { showCreateModal, showUpdateModal, setShowCreateModal, setShowUpdateModal } =
+		useEmailTemplateSearchParams();
 
 	const { handle } = useWorkspace();
 
@@ -106,10 +100,13 @@ export function CreateOrUpdateEmailTemplateModal({
 	});
 
 	const showEmailTemplateModal = mode === 'create' ? showCreateModal : showUpdateModal;
-	const setShowEmailTemplateModal =
-		mode === 'create' ? 
-			(value: boolean) => void setShowCreateModal(value) : 
-			(value: boolean) => void setShowUpdateModal(value);
+	const setShowEmailTemplateModal = useMemo(
+		() =>
+			mode === 'create' ?
+				(value: boolean) => void setShowCreateModal(value)
+			:	(value: boolean) => void setShowUpdateModal(value),
+		[mode, setShowCreateModal, setShowUpdateModal],
+	);
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();

@@ -7,7 +7,7 @@ import { gKeyPressedAtom } from './use-workspace-hotkeys';
 
 interface CustomHotkey {
 	condition: (e: KeyboardEvent) => boolean;
-	action: () => void;
+	action: () => void | Promise<unknown>;
 }
 
 export function useModalHotKeys({
@@ -28,16 +28,16 @@ export function useModalHotKeys({
 	// onClose,
 	customHotkeys,
 }: {
-	setShowCreateModal?: (show: boolean) => void;
-	setShowUpdateModal?: (show: boolean) => void;
-	setShowArchiveModal?: (show: boolean) => void;
-	setShowDeleteModal?: (show: boolean) => void;
+	setShowCreateModal?: (show: boolean) => void | Promise<unknown>;
+	setShowUpdateModal?: (show: boolean) => void | Promise<unknown>;
+	setShowArchiveModal?: (show: boolean) => void | Promise<unknown>;
+	setShowDeleteModal?: (show: boolean) => void | Promise<unknown>;
 	createDisabled?: boolean;
 	updateDisabled?: boolean;
 	archiveDisabled?: boolean;
 	deleteDisabled?: boolean;
 	closeModalsDisabled?: boolean;
-	handlePaste?: (str: string) => void;
+	handlePaste?: (str: string) => void | Promise<unknown>;
 	pasteDisabled?: boolean;
 	itemSelected?: boolean;
 	onClose?: () => void;
@@ -69,7 +69,7 @@ export function useModalHotKeys({
 				createDisabled !== true
 			) {
 				e.preventDefault(); // otherwise it'll show up in the input field since that's getting auto-selected
-				setShowCreateModal?.(true);
+				void setShowCreateModal?.(true);
 			}
 
 			// only open edit modal w/ keyboard shortcut if:
@@ -89,7 +89,7 @@ export function useModalHotKeys({
 				updateDisabled !== true
 			) {
 				e.preventDefault(); // otherwise it'll show up in the input field since that's getting auto-selected
-				setShowUpdateModal?.(true);
+				void setShowUpdateModal?.(true);
 			}
 
 			// only open archive-modal w/ keyboard shortcut if:
@@ -109,7 +109,7 @@ export function useModalHotKeys({
 				archiveDisabled !== true
 			) {
 				e.preventDefault(); // otherwise it'll show up in the input field since that's getting auto-selected
-				setShowArchiveModal?.(true);
+				void setShowArchiveModal?.(true);
 			}
 
 			// only open delete-modal w/ keyboard shortcut if:
@@ -128,7 +128,7 @@ export function useModalHotKeys({
 				deleteDisabled !== true
 			) {
 				e.preventDefault(); // otherwise it'll show up in the input field since that's getting auto-selected
-				setShowDeleteModal?.(true);
+				void setShowDeleteModal?.(true);
 			}
 
 			// custom hotkeys
@@ -141,7 +141,7 @@ export function useModalHotKeys({
 						!existingModalBackdrop &&
 						!!itemSelected
 					) {
-						action();
+						void action();
 					}
 				});
 			}
@@ -174,7 +174,7 @@ export function useModalHotKeys({
 				!existingModalBackdrop &&
 				pasteDisabled !== false
 			) {
-				paste?.(pastedContent);
+				void paste?.(pastedContent);
 			}
 		},
 		[paste, pasteDisabled],

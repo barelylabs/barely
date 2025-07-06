@@ -133,7 +133,7 @@ interface GridListCardProps
 	disableDragHandle?: boolean;
 	disableContextMenu?: boolean;
 
-	actionOnCommandMenuOpen?: () => void;
+	actionOnCommandMenuOpen?: () => void | Promise<unknown> | Promise<void>;
 	commandItems?: GridListCommandItemProps[];
 
 	img?: Omit<ImgProps, 'width' | 'height'> | null;
@@ -299,10 +299,10 @@ export const GridListCard = React.forwardRef<
 							{!disableContextMenu && atLeastOnePopoverAction && (
 								<Popover
 									open={showContextMenu}
-									onOpenChange={open => {
+									onOpenChange={async open => {
 										if (open) {
 											if (props.id) addToSelection?.(props.id.toString());
-											actionOnCommandMenuOpen?.();
+											await actionOnCommandMenuOpen?.();
 										}
 										setShowContextMenu(open);
 									}}

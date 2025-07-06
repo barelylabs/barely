@@ -11,11 +11,12 @@ import type {
 import { useMemo } from 'react';
 import { MERCH_TYPES } from '@barely/const';
 import { useCartFunnels, useWorkspace } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { cn, formatCentsToDollars } from '@barely/utils';
 import { useSuspenseInfiniteQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { Handle, Position } from '@xyflow/react';
 import { useShallow } from 'zustand/react/shallow';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Button } from '@barely/ui/button';
 import { Icon } from '@barely/ui/icon';

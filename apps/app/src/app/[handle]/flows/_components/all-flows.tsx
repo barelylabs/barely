@@ -11,17 +11,19 @@ import { GridList, GridListCard } from '@barely/ui/grid-list';
 import { Text } from '@barely/ui/typography';
 
 import { CreateFlowButton } from '~/app/[handle]/flows/_components/create-flow-button';
-import { useFlow, useFlowSearchParams } from '~/app/[handle]/flows/_components/flow-context';
+import {
+	useFlow,
+	useFlowSearchParams,
+} from '~/app/[handle]/flows/_components/flow-context';
 
 export function AllFlows() {
-	const { items, selection, setSelection, lastSelectedItemId, isFetching } =
-		useFlow();
+	const { items, selection, setSelection, lastSelectedItemId, isFetching } = useFlow();
 	const router = useRouter();
 	const { handle } = useWorkspace();
 	return (
 		<div className='flex flex-col gap-4'>
 			<GridList
-				data-grid-list="flows"
+				data-grid-list='flows'
 				aria-label='Flows'
 				className='flex flex-col gap-4'
 				selectionMode='multiple'
@@ -101,11 +103,11 @@ function FlowCard({
 					shortcut: ['Enter'],
 				},
 			]}
-			actionOnCommandMenuOpen={() => {
+			actionOnCommandMenuOpen={async () => {
 				if (selection === 'all' || selection.has(flow.id)) {
 					return;
 				}
-				setSelection(new Set([flow.id]));
+				await setSelection(new Set([flow.id]));
 			}}
 		>
 			<div className='flex w-full flex-col gap-4'>

@@ -12,4 +12,3 @@ export const pressKitHandler = routeHandler({
 	router: pressKitSubRouter,
 	auth,
 });
-

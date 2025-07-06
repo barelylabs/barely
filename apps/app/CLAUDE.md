@@ -61,6 +61,7 @@ Each feature should follow this general directory structure, though not all comp
 The new hook factory pattern separates URL state management from data fetching to prevent React Suspense from blocking optimistic UI updates. Each resource uses two distinct hooks:
 
 1. **`use{Resource}SearchParams`** - Manages URL state only (filters, modals, selection)
+
    - No data fetching
    - Instant optimistic updates
    - Used by filter components, buttons, and hotkeys
@@ -77,14 +78,14 @@ The new hook factory pattern separates URL state management from data fetching t
 ```typescript
 // ✅ CORRECT - Instant optimistic updates
 export function CartOrderFilters() {
-  const { filters, toggleFulfilled } = useCartOrderSearchParams();
-  // UI updates immediately when toggled
+	const { filters, toggleFulfilled } = useCartOrderSearchParams();
+	// UI updates immediately when toggled
 }
 
 // ❌ WRONG - Blocks UI updates until data loads
 export function CartOrderFilters() {
-  const { filters, toggleFulfilled } = useCartOrder();
-  // UI blocked by suspense boundary
+	const { filters, toggleFulfilled } = useCartOrder();
+	// UI blocked by suspense boundary
 }
 ```
 
@@ -92,44 +93,44 @@ export function CartOrderFilters() {
 
 ```typescript
 export function AllCartOrders() {
-  const { items, selection, setSelection } = useCartOrder();
-  // Has access to both data and search params
+	const { items, selection, setSelection } = useCartOrder();
+	// Has access to both data and search params
 }
 ```
 
 ### Component Hook Usage Guide
 
-| Component Type | Hook to Use | Reason |
-|----------------|-------------|--------|
-| Filters | `use{Resource}SearchParams` | Avoids suspense blocking |
-| Create/Update Buttons | `use{Resource}SearchParams` | Only needs modal state |
-| Hotkeys | `use{Resource}SearchParams` | Only needs actions |
-| Grid/List Display | `use{Resource}` | Needs data |
-| Modals | Both (split usage) | Modal state + data |
+| Component Type        | Hook to Use                 | Reason                   |
+| --------------------- | --------------------------- | ------------------------ |
+| Filters               | `use{Resource}SearchParams` | Avoids suspense blocking |
+| Create/Update Buttons | `use{Resource}SearchParams` | Only needs modal state   |
+| Hotkeys               | `use{Resource}SearchParams` | Only needs actions       |
+| Grid/List Display     | `use{Resource}`             | Needs data               |
+| Modals                | Both (split usage)          | Modal state + data       |
 
 ### Implementation Example
 
 ```typescript
 // cart-order-context.tsx
 export const useCartOrderSearchParams = createResourceSearchParamsHook({
-  additionalParsers: {
-    showFulfilled: parseAsBoolean.withDefault(false),
-  },
-  additionalActions: {
-    toggleFulfilled: setParams => () => 
-      setParams(prev => ({ showFulfilled: !prev.showFulfilled })),
-  },
+	additionalParsers: {
+		showFulfilled: parseAsBoolean.withDefault(false),
+	},
+	additionalActions: {
+		toggleFulfilled: setParams => () =>
+			setParams(prev => ({ showFulfilled: !prev.showFulfilled })),
+	},
 });
 
 export function useCartOrder() {
-  const searchParams = useCartOrderSearchParams();
-  const dataHook = createResourceDataHook(/* ... */);
-  
-  // Merge results for convenience
-  return {
-    ...dataHook(),
-    ...searchParams,
-  };
+	const searchParams = useCartOrderSearchParams();
+	const dataHook = createResourceDataHook(/* ... */);
+
+	// Merge results for convenience
+	return {
+		...dataHook(),
+		...searchParams,
+	};
 }
 ```
 

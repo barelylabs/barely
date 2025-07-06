@@ -1,8 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { isDevelopment, isPreview } from '@barely/utils';
 import { parseFmUrl, setVisitorCookies } from '@barely/lib/middleware/request-parsing';
-import { getAbsoluteUrl } from '@barely/utils';
+import { getAbsoluteUrl, isDevelopment, isPreview } from '@barely/utils';
 
 export async function middleware(req: NextRequest) {
 	const pathname = req.nextUrl.pathname;
