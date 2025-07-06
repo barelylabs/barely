@@ -6,11 +6,10 @@ import { useZodForm } from '@barely/hooks';
 import { onPromise } from '@barely/utils';
 import {
 	emailInUseMessage,
-	isPossiblePhoneNumber,
-	isRealEmail,
 	newUserContactInfoSchemaWithRole,
 	phoneNumberInUseMessage,
 } from '@barely/validators';
+import { isPossiblePhoneNumber, isRealEmail } from '@barely/validators/helpers';
 import { debounce } from 'perfect-debounce';
 
 import { Form, SubmitButton } from '@barely/ui/forms/form';

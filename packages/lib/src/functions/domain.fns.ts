@@ -3,7 +3,7 @@ import { dbHttp } from '@barely/db/client';
 import { Domains } from '@barely/db/sql';
 import { sqlStringEndsWith } from '@barely/db/utils';
 import { getApexDomain, getDomainWithoutWWW, zDelete, zGet, zPost } from '@barely/utils';
-import { validDomainRegex } from '@barely/validators';
+import { validDomainRegex } from '@barely/validators/helpers';
 import { eq, or, sql } from 'drizzle-orm';
 import { z } from 'zod/v4';
 

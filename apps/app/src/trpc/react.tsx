@@ -5,7 +5,6 @@ import type { AppRouter } from '@barely/api/app/app.router';
 import type { QueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
-import { pageSessionAtom } from '@barely/atoms';
 import { usePusherSocketId } from '@barely/hooks';
 import { getAbsoluteUrl, isDevelopment } from '@barely/utils';
 import { isServer, QueryClientProvider } from '@tanstack/react-query';
@@ -16,6 +15,8 @@ import SuperJSON from 'superjson';
 
 import { APP_ENDPOINTS } from '@barely/api/app/app.endpoints';
 import { TRPCProvider } from '@barely/api/app/trpc.react';
+
+import { pageSessionAtom } from '@barely/atoms/session';
 
 import { makeQueryClient } from '~/trpc/query-client';
 

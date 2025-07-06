@@ -1,5 +1,5 @@
 import { MDX_IMAGE_SIZES } from '@barely/const';
-import { queryBooleanSchema } from '@barely/validators';
+import { queryBooleanSchema } from '@barely/validators/helpers';
 import { z } from 'zod/v4';
 
 export const mdxVideoSchema = z.object({

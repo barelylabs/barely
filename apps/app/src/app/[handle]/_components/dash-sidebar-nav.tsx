@@ -5,7 +5,6 @@ import type { User } from '@barely/validators';
 import { Fragment, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { navHistoryAtom } from '@barely/atoms';
 import {
 	usePathnameEndsWith,
 	usePathnameMatchesCurrentGroup,
@@ -14,6 +13,8 @@ import {
 } from '@barely/hooks';
 import { cn } from '@barely/utils';
 import { useAtomValue } from 'jotai';
+
+import { navHistoryAtom } from '@barely/atoms/navigation-history';
 
 import { Icon } from '@barely/ui/icon';
 import { ScrollArea } from '@barely/ui/scroll-area';

@@ -2,9 +2,10 @@
 
 import type { AppRouterKeys } from '@barely/api/app/app.router';
 import { useEffect, useRef } from 'react';
-import { pageSessionAtom } from '@barely/atoms';
 import { appEventSchema } from '@barely/lib/integrations/pusher/pusher-client';
 import { useAtomValue } from 'jotai';
+
+import { pageSessionAtom } from '@barely/atoms/session';
 
 import { usePusher } from './use-pusher';
 

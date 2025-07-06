@@ -1,7 +1,7 @@
 import type { FM_LINK_PLATFORMS } from '@barely/const';
 import type { NextGeo } from '@barely/validators/schemas';
 import { isDevelopment, sha256, zPost } from '@barely/utils';
-import { z_optStr_hash, z_optStr_lowerCase_hash } from '@barely/validators';
+import { z_optStr_hash, z_optStr_lowerCase_hash } from '@barely/validators/helpers';
 import { z } from 'zod/v4';
 
 import { libEnv } from '../../../env';

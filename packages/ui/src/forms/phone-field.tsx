@@ -1,6 +1,6 @@
 import type { FieldPath, FieldValues } from 'react-hook-form';
 import { useState } from 'react';
-import { parseIncompletePhoneNumber } from '@barely/validators';
+import { parseIncompletePhoneNumber } from '@barely/validators/helpers';
 import { Controller } from 'react-hook-form';
 
 import type { InputProps } from '../elements/input';

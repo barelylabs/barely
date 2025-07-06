@@ -1,4 +1,5 @@
 import type { RecordClickProps } from '@barely/lib/functions/event.fns';
+import type { LinkAnalyticsProps } from '@barely/validators';
 import type { NextFetchEvent, NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { dbHttp } from '@barely/db/client';
@@ -9,8 +10,6 @@ import { parseLink } from '@barely/lib/middleware';
 import { parseReqForVisitorInfo } from '@barely/lib/middleware/request-parsing';
 import { getAbsoluteUrl } from '@barely/utils';
 import { eq } from 'drizzle-orm';
-
-import type { LinkAnalyticsProps } from '../../../packages/validators/dist/types';
 
 export const config = {
 	matcher: ['/((?!api|mobile|_next|_static|favicon|logos|sitemap|atom|404|500).*)'],
@@ -59,8 +58,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	console.log('link for ', url.href, link);
 
 	//* 🚧 handle route errors 🚧  *//
-	if (!link || !link.url || !link.key)
-		return NextResponse.rewrite(getAbsoluteUrl('link', '404'));
+	if (!link?.url || !link.key) return NextResponse.rewrite(getAbsoluteUrl('link', '404'));
 
 	//* 📈 report event to analytics + remarketing *//
 

@@ -6,11 +6,10 @@ import Link from 'next/link';
 import { useZodForm } from '@barely/hooks';
 import {
 	emailInUseMessage,
-	isPossiblePhoneNumber,
-	isRealEmail,
 	newUserContactInfoSchema,
 	phoneNumberInUseMessage,
 } from '@barely/validators';
+import { isPossiblePhoneNumber, isRealEmail } from '@barely/validators/helpers';
 import { useMutation } from '@tanstack/react-query';
 
 import { useTRPC } from '@barely/api/app/trpc.react';

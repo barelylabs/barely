@@ -16,7 +16,7 @@ import {
 	parseFullName,
 	raise,
 } from '@barely/utils';
-import { parseForDb } from '@barely/validators';
+import { parseForDb } from '@barely/validators/helpers';
 import { and, eq, gt, isNull } from 'drizzle-orm';
 
 import { createStripeWorkspaceCustomer } from './workspace-stripe.fns';

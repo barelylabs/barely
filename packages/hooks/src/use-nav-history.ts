@@ -1,10 +1,11 @@
 'use client';
 
-import type { NavHistory } from '@barely/atoms';
+import type { NavHistory } from '@barely/atoms/navigation-history';
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { navHistoryAtom } from '@barely/atoms';
 import { useAtom, useSetAtom } from 'jotai';
+
+import { navHistoryAtom } from '@barely/atoms/navigation-history';
 
 import { useWorkspace } from './use-workspace';
 import { useWorkspaces } from './use-workspaces';
@@ -16,7 +17,7 @@ export function useUpdateNavHistory() {
 	const setNavHistory = useSetAtom(navHistoryAtom);
 
 	useEffect(() => {
-		setNavHistory(prev => {
+		setNavHistory((prev: NavHistory) => {
 			if (!pathname) return prev;
 
 			const defaultSettingsBackPath = `/${workspace.handle}/links`;

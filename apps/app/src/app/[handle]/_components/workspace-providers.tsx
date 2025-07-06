@@ -2,9 +2,10 @@
 
 import type { SessionUser, SessionWorkspace } from '@barely/auth';
 import type { ReactNode } from 'react';
-import { workspaceAtom } from '@barely/atoms';
 import { UserContext, useUpdateNavHistory, useWorkspaceHotkeys } from '@barely/hooks';
 import { useHydrateAtoms } from 'jotai/utils';
+
+import { workspaceAtom } from '@barely/atoms/workspace';
 
 import { ThemeProvider } from '@barely/ui/next-theme-provider';
 

@@ -4,7 +4,7 @@ import { useCallback, useMemo } from 'react';
 import { useTypedOptimisticQuery } from '@barely/hooks';
 import { stdWebEventPipeQueryParamsSchema } from '@barely/tb/schema';
 import { getDateFromIsoString } from '@barely/utils';
-import { queryBooleanSchema } from '@barely/validators';
+import { queryBooleanSchema } from '@barely/validators/helpers';
 
 import { useWorkspace } from './use-workspace';
 

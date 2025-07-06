@@ -3,8 +3,9 @@
 import type { SessionWorkspace } from '@barely/auth';
 import { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { atomWithToggle } from '@barely/atoms';
 import { useAtom } from 'jotai';
+
+import { atomWithToggle } from '@barely/atoms/atom-with-toggle';
 
 export const gKeyPressedAtom = atomWithToggle(false);
 

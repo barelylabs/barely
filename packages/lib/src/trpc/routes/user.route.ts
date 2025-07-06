@@ -1,7 +1,8 @@
 import type { TRPCRouterRecord } from '@trpc/server';
 import { dbHttp } from '@barely/db/client';
 import { Users, WorkspaceInvites } from '@barely/db/sql';
-import { createUserSchema, parseForDb } from '@barely/validators';
+import { createUserSchema } from '@barely/validators';
+import { parseForDb } from '@barely/validators/helpers';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod/v4';
 

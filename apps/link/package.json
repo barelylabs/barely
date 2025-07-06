@@ -21,6 +21,7 @@
 		"@barely/lib": "workspace:*",
 		"@barely/ui": "workspace:*",
 		"@barely/utils": "workspace:*",
+		"@barely/validators": "workspace:*",
 		"@t3-oss/env-nextjs": "catalog:",
 		"@vercel/edge": "^0.1.2",
 		"follow-redirects": "^1.15.6",

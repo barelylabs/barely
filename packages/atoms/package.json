@@ -7,6 +7,10 @@
 		".": {
 			"types": "./dist/index.d.ts",
 			"default": "./src/index.ts"
+		},
+		"./*": {
+			"types": "./dist/*.atom.d.ts",
+			"default": "./src/*.atom.ts"
 		}
 	},
 	"scripts": {

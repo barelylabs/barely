@@ -1,6 +1,6 @@
 import type { Selection } from 'react-aria-components';
 import { useCallback } from 'react';
-import { querySelectionSchema } from '@barely/validators';
+import { querySelectionSchema } from '@barely/validators/helpers';
 import { parseAsBoolean, parseAsJson, parseAsString, useQueryStates } from 'nuqs';
 
 import type {
