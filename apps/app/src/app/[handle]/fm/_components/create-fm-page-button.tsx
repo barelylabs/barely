@@ -2,10 +2,10 @@
 
 import { Button } from '@barely/ui/button';
 
-import { useFmContext } from '~/app/[handle]/fm/_components/fm-context';
+import { useFmSearchParams } from '~/app/[handle]/fm/_components/fm-context';
 
 export function CreateFmPageButton() {
-	const { setShowCreateModal } = useFmContext();
+	const { setShowCreateModal } = useFmSearchParams();
 
 	return (
 		<Button

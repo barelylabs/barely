@@ -51,7 +51,7 @@ export const cartOrderRoute = {
 				input;
 
 			let searchFanIds: string[] = [];
-			if (search) {
+			if (search && search.length > 0) {
 				const fans = await dbPool(ctx.pool).query.Fans.findMany({
 					where: and(
 						eq(Fans.workspaceId, ctx.workspace.id),
@@ -76,15 +76,15 @@ export const cartOrderRoute = {
 			let preorderProductIds: string[] = [];
 			if (!showPreorders) {
 				preorderProductIds = (
-					await dbPool(ctx.pool).query.Products.findMany({
-						where: and(
-							eq(Products.workspaceId, ctx.workspace.id),
-							eq(Products.preorder, true),
-						),
-						columns: {
-							id: true,
-						},
-					})
+					await dbPool(ctx.pool)
+						.select({ id: Products.id })
+						.from(Products)
+						.where(
+							and(
+								eq(Products.workspaceId, ctx.workspace.id),
+								eq(Products.preorder, true),
+							),
+						)
 				).map(p => p.id);
 			}
 

@@ -1,10 +1,10 @@
 'use client';
 
 import { Filters } from '~/app/[handle]/_components/filters';
-import { useFanContext } from '~/app/[handle]/fans/_components/fan-context';
+import { useFanSearchParams } from '~/app/[handle]/fans/_components/fan-context';
 
 export function FanFilters() {
-	const { filters, setSearch, toggleArchived, clearAllFilters } = useFanContext();
+	const { filters, setSearch, toggleArchived, clearAllFilters } = useFanSearchParams();
 
 	return (
 		<Filters

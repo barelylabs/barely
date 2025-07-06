@@ -62,6 +62,9 @@ export interface ResourceDataReturn<TItem extends { id: string }, TFilters> {
 	isFetching: boolean;
 	isRefetching: boolean;
 	isPending: boolean;
+	// UI refs
+	gridListRef: React.RefObject<HTMLDivElement | null>;
+	focusGridList: () => void;
 }
 
 // Configuration for creating a data hook

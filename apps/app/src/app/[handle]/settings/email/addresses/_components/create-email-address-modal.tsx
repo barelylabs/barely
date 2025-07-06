@@ -14,13 +14,13 @@ import { TextField } from '@barely/ui/forms/text-field';
 import { Icon } from '@barely/ui/icon';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 
-import { useEmailAddressContext } from './email-address-context';
+import { useEmailAddressSearchParams } from './email-address-context';
 
 export function CreateEmailAddressModal() {
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
 	const { handle } = useWorkspace();
-	const { showCreateModal, setShowCreateModal, focusGridList } = useEmailAddressContext();
+	const { showCreateModal, setShowCreateModal } = useEmailAddressSearchParams();
 
 	const { mutateAsync: createEmailAddress } = useMutation({
 		...trpc.emailAddress.create.mutationOptions(),
@@ -47,11 +47,10 @@ export function CreateEmailAddressModal() {
 	const { control } = form;
 
 	const handleCloseModal = useCallback(async () => {
-		focusGridList();
 		await queryClient.invalidateQueries(trpc.emailAddress.byWorkspace.queryFilter());
 		form.reset();
 		setShowCreateModal(false);
-	}, [focusGridList, queryClient, trpc, form, setShowCreateModal]);
+	}, [queryClient, trpc, form, setShowCreateModal]);
 
 	const handleSubmit = useCallback(
 		async (data: z.infer<typeof createEmailAddressSchema>) => {

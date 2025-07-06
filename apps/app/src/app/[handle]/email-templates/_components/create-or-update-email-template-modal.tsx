@@ -19,7 +19,7 @@ import { Switch } from '@barely/ui/switch';
 import { Text } from '@barely/ui/typography';
 
 import { SendTestEmail } from '~/app/[handle]/_components/send-test-email';
-import { useEmailTemplateContext } from './email-template-context';
+import { useEmailTemplate, useEmailTemplateSearchParams } from './email-template-context';
 
 export function CreateOrUpdateEmailTemplateModal({
 	mode,
@@ -33,12 +33,15 @@ export function CreateOrUpdateEmailTemplateModal({
 
 	const {
 		lastSelectedItem,
+		focusGridList,
+	} = useEmailTemplate();
+	
+	const {
 		showCreateModal,
 		showUpdateModal,
 		setShowCreateModal,
 		setShowUpdateModal,
-		focusGridList,
-	} = useEmailTemplateContext();
+	} = useEmailTemplateSearchParams();
 
 	const { handle } = useWorkspace();
 
@@ -104,7 +107,9 @@ export function CreateOrUpdateEmailTemplateModal({
 
 	const showEmailTemplateModal = mode === 'create' ? showCreateModal : showUpdateModal;
 	const setShowEmailTemplateModal =
-		mode === 'create' ? setShowCreateModal : setShowUpdateModal;
+		mode === 'create' ? 
+			(value: boolean) => void setShowCreateModal(value) : 
+			(value: boolean) => void setShowUpdateModal(value);
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();

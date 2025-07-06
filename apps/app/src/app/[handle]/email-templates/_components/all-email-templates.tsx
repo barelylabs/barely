@@ -10,23 +10,22 @@ import { GridList, GridListCard } from '@barely/ui/grid-list';
 import { Text } from '@barely/ui/typography';
 
 import { CreateEmailTemplateButton } from './create-email-template-button';
-import { useEmailTemplateContext } from './email-template-context';
+import { useEmailTemplate, useEmailTemplateSearchParams } from './email-template-context';
 
 export function AllEmailTemplates() {
+	const { setShowUpdateModal } = useEmailTemplateSearchParams();
 	const {
 		items,
 		selection,
 		lastSelectedItemId,
 		setSelection,
-		gridListRef,
-		setShowUpdateModal,
 		isFetching,
-	} = useEmailTemplateContext();
+	} = useEmailTemplate();
 
 	return (
 		<div className='flex flex-col gap-4'>
 			<GridList
-				glRef={gridListRef}
+				data-grid-list="email-templates"
 				className='flex flex-col gap-2'
 				aria-label='Email Templates'
 				selectionMode='multiple'
@@ -57,7 +56,7 @@ export function AllEmailTemplates() {
 }
 
 function LoadMoreButton() {
-	const { hasNextPage, fetchNextPage, isFetchingNextPage } = useEmailTemplateContext();
+	const { hasNextPage, fetchNextPage, isFetchingNextPage } = useEmailTemplate();
 	if (!hasNextPage)
 		return (
 			<div className='flex w-full justify-center'>
@@ -81,7 +80,7 @@ function EmailTemplateCard({
 }: {
 	emailTemplate: AppRouterOutputs['emailTemplate']['byWorkspace']['emailTemplates'][0];
 }) {
-	const { setShowUpdateModal, setShowDeleteModal } = useEmailTemplateContext();
+	const { setShowUpdateModal, setShowDeleteModal } = useEmailTemplateSearchParams();
 
 	const { name, subject, opens, clicks, value } = emailTemplate;
 

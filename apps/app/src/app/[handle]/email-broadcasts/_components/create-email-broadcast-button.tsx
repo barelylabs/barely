@@ -2,10 +2,10 @@
 
 import { Button } from '@barely/ui/button';
 
-import { useEmailBroadcastsContext } from './email-broadcasts-context';
+import { useEmailBroadcastSearchParams } from './email-broadcasts-context';
 
 export function CreateEmailBroadcastButton() {
-	const { setShowCreateModal } = useEmailBroadcastsContext();
+	const { setShowCreateModal } = useEmailBroadcastSearchParams();
 
 	return (
 		<Button

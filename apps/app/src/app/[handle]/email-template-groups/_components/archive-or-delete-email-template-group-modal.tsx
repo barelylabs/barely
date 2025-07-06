@@ -6,21 +6,20 @@ import { useTRPC } from '@barely/api/app/trpc.react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { ArchiveOrDeleteModal } from '~/app/[handle]/_components/archive-or-delete-modal';
-import { useEmailTemplateGroupContext } from './email-template-group-context';
+import { useEmailTemplateGroup, useEmailTemplateGroupSearchParams } from './email-template-group-context';
 
 export function ArchiveOrDeleteEmailTemplateGroupModal({
 	mode,
 }: {
 	mode: 'archive' | 'delete';
 }) {
+	const { selection, lastSelectedItem } = useEmailTemplateGroup();
 	const {
-		selection,
-		lastSelectedItem,
 		showArchiveModal,
 		showDeleteModal,
 		setShowArchiveModal,
 		setShowDeleteModal,
-	} = useEmailTemplateGroupContext();
+	} = useEmailTemplateGroupSearchParams();
 
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();

@@ -8,7 +8,7 @@ import { Icon } from '@barely/ui/icon';
 import { Text } from '@barely/ui/typography';
 
 import { CreateEmailAddressButton } from './create-email-address-button';
-import { useEmailAddressContext } from './email-address-context';
+import { useEmailAddress, useEmailAddressSearchParams } from './email-address-context';
 
 export function AllEmailAddresses() {
 	const {
@@ -16,13 +16,13 @@ export function AllEmailAddresses() {
 		selection: emailAddressSelection,
 		lastSelectedItemId: lastSelectedEmailAddressId,
 		setSelection: setEmailAddressSelection,
-		gridListRef,
-		setShowUpdateModal,
-	} = useEmailAddressContext();
+	} = useEmailAddress();
+	
+	const { setShowUpdateModal } = useEmailAddressSearchParams();
 
 	return (
 		<GridList
-			glRef={gridListRef}
+			data-grid-list="email-addresses"
 			className='flex flex-col gap-2'
 			aria-label='Email addresses'
 			selectionMode='multiple'
@@ -53,7 +53,7 @@ function EmailAddressCard({
 }: {
 	emailAddress: AppRouterOutputs['emailAddress']['byWorkspace']['emailAddresses'][number];
 }) {
-	const { setShowUpdateModal } = useEmailAddressContext();
+	const { setShowUpdateModal } = useEmailAddressSearchParams();
 
 	const status = emailAddress.domain.status;
 

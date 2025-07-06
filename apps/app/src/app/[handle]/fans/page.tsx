@@ -3,12 +3,13 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { fanSearchParamsSchema } from '@barely/validators';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
+
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllFans } from '~/app/[handle]/fans/_components/all-fans';
 import { ArchiveOrDeleteFanModal } from '~/app/[handle]/fans/_components/archive-or-delete-fan-modal';
 import { CreateFanButton } from '~/app/[handle]/fans/_components/create-fan-button';
 import { CreateOrUpdateFanModal } from '~/app/[handle]/fans/_components/create-or-update-fan-modal';
-import { FanContextProvider } from '~/app/[handle]/fans/_components/fan-context';
 import { FanFilters } from '~/app/[handle]/fans/_components/fan-filters';
 import { FanHotkeys } from '~/app/[handle]/fans/_components/fan-hotkeys';
 import {
@@ -41,30 +42,30 @@ export default async function FansPage({
 
 	return (
 		<HydrateClient>
-			<Suspense fallback={<div>Loading...</div>}>
-				<FanContextProvider>
-					<DashContentHeader
-						title='Fans'
-						button={
-							<div className='flex flex-row gap-2'>
-								<ImportFansButton />
-								<CreateFanButton />
-							</div>
-						}
-					/>
-					<FanFilters />
-					<AllFans />
+			<DashContentHeader
+				title='Fans'
+				button={
+					<div className='flex flex-row gap-2'>
+						<ImportFansButton />
+						<CreateFanButton />
+					</div>
+				}
+			/>
+			
+			<FanFilters />
+			
+			<Suspense fallback={<GridListSkeleton />}>
+				<AllFans />
 
-					<CreateOrUpdateFanModal mode='create' />
-					<CreateOrUpdateFanModal mode='update' />
+				<CreateOrUpdateFanModal mode='create' />
+				<CreateOrUpdateFanModal mode='update' />
 
-					<ArchiveOrDeleteFanModal mode='archive' />
-					<ArchiveOrDeleteFanModal mode='delete' />
+				<ArchiveOrDeleteFanModal mode='archive' />
+				<ArchiveOrDeleteFanModal mode='delete' />
 
-					<ImportFansFromCsvModal />
+				<ImportFansFromCsvModal />
 
-					<FanHotkeys />
-				</FanContextProvider>
+				<FanHotkeys />
 			</Suspense>
 		</HydrateClient>
 	);

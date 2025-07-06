@@ -2,10 +2,10 @@
 
 import { Button } from '@barely/ui/button';
 
-import { useEmailDomainContext } from '~/app/[handle]/settings/email/domains/_components/email-domain-context';
+import { useEmailDomainSearchParams } from '~/app/[handle]/settings/email/domains/_components/email-domain-context';
 
 export function CreateEmailDomainButton() {
-	const { setShowCreateModal } = useEmailDomainContext();
+	const { setShowCreateModal } = useEmailDomainSearchParams();
 
 	return (
 		<Button onClick={() => setShowCreateModal(true)} className='space-x-3'>

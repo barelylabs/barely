@@ -10,7 +10,7 @@ import { AllTracks } from '~/app/[handle]/tracks/_components/all-tracks';
 import { ArchiveOrDeleteTrackModal } from '~/app/[handle]/tracks/_components/archive-or-delete-track-modal';
 import { CreateOrUpdateTrackModal } from '~/app/[handle]/tracks/_components/create-or-update-track-modal';
 import { CreateTrackButton } from '~/app/[handle]/tracks/_components/create-track-button';
-import { TrackContextProvider } from '~/app/[handle]/tracks/_components/track-context';
+import { TrackFilters } from '~/app/[handle]/tracks/_components/track-filters';
 import { TrackHotkeys } from '~/app/[handle]/tracks/_components/track-hotkeys';
 
 export default async function TracksPage({
@@ -37,18 +37,18 @@ export default async function TracksPage({
 
 	return (
 		<HydrateClient>
-			<Suspense fallback={<div>Loading...</div>}>
-				<TrackContextProvider>
 			<DashContentHeader title='Tracks' button={<CreateTrackButton />} />
-			<AllTracks />
 
-			<CreateOrUpdateTrackModal mode='create' />
-			<CreateOrUpdateTrackModal mode='update' />
-			<ArchiveOrDeleteTrackModal mode='archive' />
-			<ArchiveOrDeleteTrackModal mode='delete' />
+			<TrackFilters />
+			<Suspense fallback={<div>Loading...</div>}>
+				<AllTracks />
 
-					<TrackHotkeys />
-				</TrackContextProvider>
+				<CreateOrUpdateTrackModal mode='create' />
+				<CreateOrUpdateTrackModal mode='update' />
+				<ArchiveOrDeleteTrackModal mode='archive' />
+				<ArchiveOrDeleteTrackModal mode='delete' />
+
+				<TrackHotkeys />
 			</Suspense>
 		</HydrateClient>
 	);

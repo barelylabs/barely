@@ -2,16 +2,16 @@
 
 import { useModalHotKeys } from '@barely/hooks';
 
-import { useFanGroupContext } from '~/app/[handle]/fan-groups/_components/fan-group-context';
+import { useFanGroup, useFanGroupSearchParams } from '~/app/[handle]/fan-groups/_components/fan-group-context';
 
 export function FanGroupHotkeys() {
+	const { selection } = useFanGroup();
 	const {
-		selection,
 		setShowArchiveModal,
 		setShowDeleteModal,
 		setShowCreateModal,
 		setShowUpdateModal,
-	} = useFanGroupContext();
+	} = useFanGroupSearchParams();
 
 	useModalHotKeys({
 		setShowCreateModal,

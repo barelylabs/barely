@@ -2,16 +2,16 @@
 
 import { useModalHotKeys } from '@barely/hooks';
 
-import { useMixtapesContext } from '~/app/[handle]/mixtapes/_components/mixtape-context';
+import { useMixtape, useMixtapeSearchParams } from '~/app/[handle]/mixtapes/_components/mixtape-context';
 
 export function MixtapeHotkeys() {
+	const { selection } = useMixtape();
 	const {
-		selection,
 		setShowArchiveModal,
 		setShowDeleteModal,
 		setShowCreateModal,
 		setShowUpdateModal,
-	} = useMixtapesContext();
+	} = useMixtapeSearchParams();
 
 	useModalHotKeys({
 		setShowCreateModal,

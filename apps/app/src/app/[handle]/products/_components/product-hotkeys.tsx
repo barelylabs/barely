@@ -2,16 +2,16 @@
 
 import { useModalHotKeys } from '@barely/hooks';
 
-import { useProductContext } from '~/app/[handle]/products/_components/product-context';
+import { useProduct, useProductSearchParams } from '~/app/[handle]/products/_components/product-context';
 
 export function ProductHotkeys() {
+	const { selection } = useProduct();
 	const {
-		selection,
 		setShowCreateModal,
 		setShowUpdateModal,
 		setShowArchiveModal,
 		setShowDeleteModal,
-	} = useProductContext();
+	} = useProductSearchParams();
 
 	useModalHotKeys({
 		setShowCreateModal,

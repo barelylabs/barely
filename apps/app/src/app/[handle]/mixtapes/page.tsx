@@ -10,7 +10,6 @@ import { AllMixtapes } from '~/app/[handle]/mixtapes/_components/all-mixtapes';
 import { ArchiveOrDeleteMixtapeModal } from '~/app/[handle]/mixtapes/_components/archive-or-delete-mixtape-modal';
 import { CreateMixtapeButton } from '~/app/[handle]/mixtapes/_components/create-mixtape-button';
 import { CreateOrUpdateMixtapeModal } from '~/app/[handle]/mixtapes/_components/create-or-update-mixtape-modal';
-import { MixtapeContextProvider } from '~/app/[handle]/mixtapes/_components/mixtape-context';
 import { MixtapeHotkeys } from '~/app/[handle]/mixtapes/_components/mixtape-hotkeys';
 
 export default async function MixtapesPage({
@@ -40,18 +39,16 @@ export default async function MixtapesPage({
 	return (
 		<HydrateClient>
 			<Suspense fallback={<div>Loading...</div>}>
-				<MixtapeContextProvider>
-					<DashContentHeader title='Mixtapes' button={<CreateMixtapeButton />} />
-					<AllMixtapes />
+				<DashContentHeader title='Mixtapes' button={<CreateMixtapeButton />} />
+				<AllMixtapes />
 
-					<CreateOrUpdateMixtapeModal mode='create' />
-					<CreateOrUpdateMixtapeModal mode='update' />
+				<CreateOrUpdateMixtapeModal mode='create' />
+				<CreateOrUpdateMixtapeModal mode='update' />
 
-					<ArchiveOrDeleteMixtapeModal mode='archive' />
-					<ArchiveOrDeleteMixtapeModal mode='delete' />
+				<ArchiveOrDeleteMixtapeModal mode='archive' />
+				<ArchiveOrDeleteMixtapeModal mode='delete' />
 
-					<MixtapeHotkeys />
-				</MixtapeContextProvider>
+				<MixtapeHotkeys />
 			</Suspense>
 		</HydrateClient>
 	);

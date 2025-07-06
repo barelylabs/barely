@@ -143,4 +143,8 @@ export const fileFilterParamsSchema = selectWorkspaceFilesSchema.omit({
 
 export const fileSearchParamsSchema = fileFilterParamsSchema.extend({
 	selectedFileIds: querySelectionSchema.optional(),
+	showCreateModal: z.boolean().optional(),
+	showUpdateModal: z.boolean().optional(),
+	showArchiveModal: z.boolean().optional(),
+	showDeleteModal: z.boolean().optional(),
 });

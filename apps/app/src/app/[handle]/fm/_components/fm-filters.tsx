@@ -1,10 +1,10 @@
 'use client';
 
 import { Filters } from '~/app/[handle]/_components/filters';
-import { useFmContext } from '~/app/[handle]/fm/_components/fm-context';
+import { useFmSearchParams } from '~/app/[handle]/fm/_components/fm-context';
 
 export function FmFilters() {
-	const { filters, setSearch, toggleArchived, clearAllFilters } = useFmContext();
+	const { filters, setSearch, toggleArchived, clearAllFilters } = useFmSearchParams();
 
 	return (
 		<Filters

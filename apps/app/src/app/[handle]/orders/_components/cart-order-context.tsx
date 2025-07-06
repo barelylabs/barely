@@ -1,193 +1,95 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
-import type { cartOrderFilterParamsSchema } from '@barely/validators';
-import type { Selection } from 'react-aria-components';
-import type { z } from 'zod/v4';
-import { createContext, useCallback, useContext, useRef, useState } from 'react';
-import { useTypedOptimisticQuery, useWorkspace } from '@barely/hooks';
-import { cartOrderSearchParamsSchema } from '@barely/validators';
-import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
+import type { BaseResourceFilters, ResourceSearchParamsReturn } from '@barely/hooks';
+import { createResourceDataHook, createResourceSearchParamsHook } from '@barely/hooks';
+import { parseAsBoolean } from 'nuqs';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
-import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
+// Define the page data type for cart orders
+interface CartOrderPageData {
+	cartOrders: AppRouterOutputs['cartOrder']['byWorkspace']['cartOrders'];
+	nextCursor?: { orderId: number; checkoutConvertedAt: Date } | null;
+}
 
-type CartOrderContext = InfiniteItemsContext<
-	AppRouterOutputs['cartOrder']['byWorkspace']['cartOrders'][0],
-	z.infer<typeof cartOrderFilterParamsSchema>
-> & {
+// Define custom filters interface
+interface CartOrderFilters extends BaseResourceFilters {
+	showFulfilled: boolean;
+	showPreorders: boolean;
+	showCanceled: boolean;
 	showMarkAsFulfilledModal: boolean;
-	setShowMarkAsFulfilledModal: (show: boolean) => void;
 	showCancelCartOrderModal: boolean;
-	setShowCancelCartOrderModal: (show: boolean) => void;
-	toggleFulfilled: () => void;
-	togglePreorders: () => void;
-	toggleCanceled: () => void;
-};
+}
 
-const CartOrderContext = createContext<CartOrderContext | undefined>(undefined);
+// Define the return type for cart order search params
+interface CartOrderSearchParamsReturn extends ResourceSearchParamsReturn<CartOrderFilters> {
+	toggleFulfilled: () => Promise<URLSearchParams>;
+	togglePreorders: () => Promise<URLSearchParams>;
+	toggleCanceled: () => Promise<URLSearchParams>;
+	setShowMarkAsFulfilledModal: (show: boolean) => Promise<URLSearchParams> | undefined;
+	setShowCancelCartOrderModal: (show: boolean) => Promise<URLSearchParams> | undefined;
+}
 
-export function CartOrderContextProvider({ children }: { children: React.ReactNode }) {
-	const [showMarkAsFulfilledModal, setShowMarkAsFulfilledModal] = useState(false);
-	const [showCancelCartOrderModal, setShowCancelCartOrderModal] = useState(false);
+// Create the search params hook for cart orders with custom filters and modal states
+const _useCartOrderSearchParams = createResourceSearchParamsHook({
+	additionalParsers: {
+		showFulfilled: parseAsBoolean.withDefault(false),
+		showPreorders: parseAsBoolean.withDefault(false),
+		showCanceled: parseAsBoolean.withDefault(false),
+		showMarkAsFulfilledModal: parseAsBoolean.withDefault(false),
+		showCancelCartOrderModal: parseAsBoolean.withDefault(false),
+	},
+	additionalActions: {
+		toggleFulfilled: setParams => () =>
+			setParams(prev => ({ showFulfilled: !prev.showFulfilled })),
+		togglePreorders: setParams => () =>
+			setParams(prev => ({ showPreorders: !prev.showPreorders })),
+		toggleCanceled: setParams => () =>
+			setParams(prev => ({ showCanceled: !prev.showCanceled })),
+		setShowMarkAsFulfilledModal: setParams => 
+			((...args: unknown[]) => {
+				const [show] = args as [boolean];
+				return setParams({ showMarkAsFulfilledModal: show });
+			}) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
+		setShowCancelCartOrderModal: setParams => 
+			((...args: unknown[]) => {
+				const [show] = args as [boolean];
+				return setParams({ showCancelCartOrderModal: show });
+			}) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
+	},
+});
 
+export const useCartOrderSearchParams = _useCartOrderSearchParams as () => CartOrderSearchParamsReturn;
+
+// Create a custom data hook for cart orders that properly uses tRPC
+export function useCartOrder() {
 	const trpc = useTRPC();
-	const { handle } = useWorkspace();
-
-	const { data, setQuery, removeByKey, removeAllQueryParams, pending } =
-		useTypedOptimisticQuery(cartOrderSearchParamsSchema);
-
-	const { selectedOrderCartIds, ...filters } = data;
-
-	const cartOrderSelection: Selection =
-		!selectedOrderCartIds ? new Set()
-		: selectedOrderCartIds === 'all' ? 'all'
-		: new Set(selectedOrderCartIds);
-
-	const {
-		data: infiniteCartOrders,
-		hasNextPage,
-		fetchNextPage,
-		isFetchingNextPage,
-		isFetching,
-		isRefetching,
-		isPending,
-	} = useSuspenseInfiniteQuery({
-		...trpc.cartOrder.byWorkspace.infiniteQueryOptions(
-			{
-				handle,
-				...filters,
-			},
-			{
-				getNextPageParam: lastPage => lastPage.nextCursor,
-			},
-		),
-	});
-
-	const cartOrders = infiniteCartOrders.pages.flatMap(page => page.cartOrders);
-
-	const gridListRef = useRef<HTMLDivElement>(null);
-
-	const setCartOrderSelection = useCallback(
-		(selection: Selection) => {
-			if (selection === 'all') return;
-			if (selection.size === 0) return removeByKey('selectedOrderCartIds');
-
-			return setQuery(
-				'selectedOrderCartIds',
-				Array.from(selection).map(key => key.toString()),
-			);
+	const searchParams = useCartOrderSearchParams();
+	const baseHook = createResourceDataHook<
+		AppRouterOutputs['cartOrder']['byWorkspace']['cartOrders'][0],
+		CartOrderPageData
+	>(
+		{
+			resourceName: 'cart-orders',
+			getQueryOptions: (handle, filters) =>
+				trpc.cartOrder.byWorkspace.infiniteQueryOptions(
+					{ handle, ...filters },
+					{ getNextPageParam: (lastPage: CartOrderPageData) => lastPage.nextCursor },
+				),
+			getItemsFromPages: pages => pages.flatMap(page => page.cartOrders),
 		},
-		[removeByKey, setQuery],
+		() => searchParams, // Pass the instance directly
 	);
 
-	const clearAllFilters = useCallback(() => {
-		removeAllQueryParams();
-	}, [removeAllQueryParams]);
+	const dataHookResult = baseHook();
 
-	const toggleArchived = useCallback(() => {
-		if (data.showArchived) {
-			removeByKey('showArchived');
-		} else {
-			return setQuery('showArchived', true);
-		}
-	}, [data.showArchived, removeByKey, setQuery]);
-
-	const toggleFulfilled = useCallback(() => {
-		if (filters.showFulfilled) {
-			removeByKey('showFulfilled');
-		} else {
-			return setQuery('showFulfilled', true);
-		}
-	}, [filters.showFulfilled, removeByKey, setQuery]);
-
-	const togglePreorders = useCallback(() => {
-		if (filters.showPreorders) {
-			removeByKey('showPreorders');
-		} else {
-			return setQuery('showPreorders', true);
-		}
-	}, [filters.showPreorders, removeByKey, setQuery]);
-
-	const toggleCanceled = useCallback(() => {
-		if (filters.showCanceled) {
-			removeByKey('showCanceled');
-		} else {
-			return setQuery('showCanceled', true);
-		}
-	}, [filters.showCanceled, removeByKey, setQuery]);
-
-	const setSearch = useCallback(
-		(search: string) => {
-			if (search.length) {
-				return setQuery('search', search);
-			} else {
-				return removeByKey('search');
-			}
-		},
-		[removeByKey, setQuery],
-	);
-
-	const lastSelectedCartOrderId =
-		cartOrderSelection === 'all' || !cartOrderSelection.size ?
-			undefined
-		:	Array.from(cartOrderSelection).pop()?.toString();
-
-	const lastSelectedCartOrder = cartOrders.find(
-		order => order.id === lastSelectedCartOrderId,
-	);
-
-	const contextValue = {
-		items: cartOrders,
-		selection: cartOrderSelection,
-		lastSelectedItemId: lastSelectedCartOrderId,
-		lastSelectedItem: lastSelectedCartOrder,
-		setSelection: setCartOrderSelection,
-		gridListRef,
-		focusGridList: () => gridListRef.current?.focus(),
-		// modals
-		showCreateModal: false,
-		setShowCreateModal: () => void {},
-		showUpdateModal: false,
-		setShowUpdateModal: () => void {},
-		showDeleteModal: false,
-		setShowDeleteModal: () => void {},
-		showArchiveModal: false,
-		setShowArchiveModal: () => void {},
-		showMarkAsFulfilledModal,
-		setShowMarkAsFulfilledModal,
-		showCancelCartOrderModal,
-		setShowCancelCartOrderModal,
-		// filters
-		filters,
-		pendingFiltersTransition: pending,
-		setSearch,
-		toggleArchived,
-		toggleFulfilled,
-		togglePreorders,
-		toggleCanceled,
-		clearAllFilters,
-		// infinite
-		hasNextPage,
-		fetchNextPage: () => void fetchNextPage(),
-		isFetchingNextPage,
-		isFetching,
-		isRefetching,
-		isPending,
-	} satisfies CartOrderContext;
-
-	return (
-		<CartOrderContext.Provider value={contextValue}>{children}</CartOrderContext.Provider>
-	);
+	// Merge search params and data hook results
+	return {
+		...dataHookResult,
+		...searchParams,
+	};
 }
 
-export function useCartOrderContext() {
-	const context = useContext(CartOrderContext);
-
-	if (!context) {
-		throw new Error('useCartOrder must be used within a CartOrderContextProvider');
-	}
-
-	return context;
-}
+// Export the old context hook name for backward compatibility
+export const useCartOrderContext = useCartOrder;

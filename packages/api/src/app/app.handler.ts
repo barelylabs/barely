@@ -1,16 +1,13 @@
 import type { Auth } from '@barely/auth';
 import type { AnyRouter } from '@trpc/server';
-import { makePool } from '@barely/db/pool';
 import { createTRPCContext } from '@barely/lib/trpc';
 import { setCorsHeaders } from '@barely/utils';
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
-import { waitUntil } from '@vercel/functions';
 
 export const routeHandler =
 	({ path, router, auth }: { path: string; router: AnyRouter; auth: Auth | null }) =>
 	async (req: Request) => {
 		console.log('routeHandler called', path);
-		const pool = makePool();
 
 		const response = await fetchRequestHandler({
 			endpoint: '/api/trpc/' + path,
@@ -20,7 +17,7 @@ export const routeHandler =
 				createTRPCContext({
 					auth,
 					headers: req.headers,
-					pool,
+					pool: null, // Let poolMiddleware handle pool creation
 				}),
 			onError({ error, path }) {
 				console.error(`>>> tRPC Error on '${path}'`, error);
@@ -33,7 +30,6 @@ export const routeHandler =
 			});
 		});
 
-		waitUntil(pool.end());
 		setCorsHeaders(response);
 
 		return response;

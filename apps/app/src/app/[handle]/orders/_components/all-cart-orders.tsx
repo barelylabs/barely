@@ -18,17 +18,21 @@ import { Separator } from '@barely/ui/separator';
 import { Skeleton } from '@barely/ui/skeleton';
 import { Text } from '@barely/ui/typography';
 
-import { useCartOrderContext } from '~/app/[handle]/orders/_components/cart-order-context';
+import { useCartOrder } from '~/app/[handle]/orders/_components/cart-order-context';
 
 export function AllCartOrders() {
-	const { items, selection, setSelection, gridListRef, isFetching } =
-		useCartOrderContext();
+	const {
+		items,
+		isFetching,
+		selection,
+		setSelection,
+	} = useCartOrder();
 
 	return (
 		<div className='flex flex-col gap-4'>
 			<GridList
-				glRef={gridListRef}
 				aria-label='Orders'
+				data-grid-list='cart-orders'
 				className='flex flex-col gap-4'
 				selectionMode='multiple'
 				selectionBehavior='replace'
@@ -54,7 +58,7 @@ export function AllCartOrders() {
 }
 
 function LoadMoreButton() {
-	const { hasNextPage, fetchNextPage, isFetchingNextPage } = useCartOrderContext();
+	const { hasNextPage, fetchNextPage, isFetchingNextPage } = useCartOrder();
 	if (!hasNextPage)
 		return (
 			<div className='flex w-full justify-center'>
@@ -79,12 +83,7 @@ function CartOrderCard({
 }: {
 	cartOrder: AppRouterOutputs['cartOrder']['byWorkspace']['cartOrders'][0];
 }) {
-	const {
-		setShowMarkAsFulfilledModal,
-		setShowCancelCartOrderModal,
-		setSelection,
-		selection,
-	} = useCartOrderContext();
+	const { setSelection, setShowMarkAsFulfilledModal, setShowCancelCartOrderModal } = useCartOrder();
 
 	const { handle } = useWorkspace();
 
@@ -125,12 +124,6 @@ function CartOrderCard({
 			key={cartOrder.id}
 			textValue={cartOrder.id}
 			commandItems={commandItems}
-			actionOnCommandMenuOpen={() => {
-				if (selection === 'all' || selection.has(cartOrder.id)) {
-					return;
-				}
-				setSelection(new Set([cartOrder.id]));
-			}}
 		>
 			<div className='flex w-full flex-col gap-4'>
 				<div className='flex w-full flex-row gap-2'>

@@ -12,7 +12,7 @@ import { TextField } from '@barely/ui/forms/text-field';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 import { Separator } from '@barely/ui/separator';
 
-import { useFanContext } from './fan-context';
+import { useFan, useFanSearchParams } from './fan-context';
 
 export function CreateOrUpdateFanModal({ mode }: { mode: 'create' | 'update' }) {
 	const trpc = useTRPC();
@@ -21,12 +21,14 @@ export function CreateOrUpdateFanModal({ mode }: { mode: 'create' | 'update' }) 
 	/* fan context */
 	const {
 		lastSelectedItem: selectedFan,
+		focusGridList,
+	} = useFan();
+	const {
 		showCreateModal,
 		showUpdateModal,
 		setShowCreateModal,
 		setShowUpdateModal,
-		focusGridList,
-	} = useFanContext();
+	} = useFanSearchParams();
 
 	/* mutations */
 	const { mutateAsync: createFan } = useMutation({

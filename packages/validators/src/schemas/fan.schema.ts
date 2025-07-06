@@ -31,6 +31,11 @@ export const fanFilterParamsSchema = z.object({
 });
 export const fanSearchParamsSchema = fanFilterParamsSchema.extend({
 	selectedFanIds: querySelectionSchema.optional(),
+	showCreateModal: z.boolean().optional(),
+	showUpdateModal: z.boolean().optional(),
+	showArchiveModal: z.boolean().optional(),
+	showDeleteModal: z.boolean().optional(),
+	showImportModal: z.boolean().optional(),
 });
 
 export const selectWorkspaceFansSchema = fanFilterParamsSchema.extend({

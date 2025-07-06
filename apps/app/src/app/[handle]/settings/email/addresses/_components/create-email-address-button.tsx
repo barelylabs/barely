@@ -2,10 +2,10 @@
 
 import { Button } from '@barely/ui/button';
 
-import { useEmailAddressContext } from './email-address-context';
+import { useEmailAddressSearchParams } from './email-address-context';
 
 export function CreateEmailAddressButton() {
-	const { setShowCreateModal } = useEmailAddressContext();
+	const { setShowCreateModal } = useEmailAddressSearchParams();
 
 	return (
 		<Button onClick={() => setShowCreateModal(true)} className='space-x-3'>

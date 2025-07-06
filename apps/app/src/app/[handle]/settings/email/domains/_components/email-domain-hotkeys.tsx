@@ -2,16 +2,16 @@
 
 import { useModalHotKeys } from '@barely/hooks';
 
-import { useEmailDomainContext } from './email-domain-context';
+import { useEmailDomainSearchParams } from './email-domain-context';
 
 export function EmailDomainHotkeys() {
+	const { selection } = useEmailDomainSearchParams();
 	const {
-		selection,
 		setShowArchiveModal,
 		setShowDeleteModal,
 		setShowCreateModal,
 		setShowUpdateModal,
-	} = useEmailDomainContext();
+	} = useEmailDomainSearchParams();
 
 	useModalHotKeys({
 		setShowCreateModal,

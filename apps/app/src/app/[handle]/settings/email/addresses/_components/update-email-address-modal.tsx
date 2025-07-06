@@ -13,18 +13,14 @@ import { TextField } from '@barely/ui/forms/text-field';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 import { Text } from '@barely/ui/typography';
 
-import { useEmailAddressContext } from './email-address-context';
+import { useEmailAddress, useEmailAddressSearchParams } from './email-address-context';
 
 export function UpdateEmailAddressModal() {
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
 	const { handle } = useWorkspace();
-	const {
-		showUpdateModal,
-		setShowUpdateModal,
-		focusGridList,
-		lastSelectedItem: lastSelectedEmailAddress,
-	} = useEmailAddressContext();
+	const { showUpdateModal, setShowUpdateModal } = useEmailAddressSearchParams();
+	const { lastSelectedItem: lastSelectedEmailAddress } = useEmailAddress();
 
 	const { mutateAsync: updateEmailAddress } = useMutation({
 		...trpc.emailAddress.update.mutationOptions(),
@@ -51,11 +47,10 @@ export function UpdateEmailAddressModal() {
 	const { control } = form;
 
 	const handleCloseModal = useCallback(async () => {
-		focusGridList();
 		await queryClient.invalidateQueries(trpc.emailAddress.byWorkspace.queryFilter());
 		form.reset();
 		setShowUpdateModal(false);
-	}, [focusGridList, queryClient, trpc, form, setShowUpdateModal]);
+	}, [queryClient, trpc, form, setShowUpdateModal]);
 
 	const handleSubmit = useCallback(
 		async (data: z.infer<typeof updateEmailAddressSchema>) => {

@@ -8,7 +8,6 @@ import { AllProducts } from '~/app/[handle]/products/_components/all-products';
 import { ArchiveOrDeleteProductModal } from '~/app/[handle]/products/_components/archive-or-delete-product-modal';
 import { CreateOrUpdateProductModal } from '~/app/[handle]/products/_components/create-or-update-product-modal';
 import { CreateProductButton } from '~/app/[handle]/products/_components/create-product-button';
-import { ProductContextProvider } from '~/app/[handle]/products/_components/product-context';
 import { ProductFilters } from '~/app/[handle]/products/_components/product-filters';
 import { ProductHotkeys } from '~/app/[handle]/products/_components/product-hotkeys';
 import { getSession } from '~/auth/server';
@@ -42,23 +41,21 @@ export default async function ProductsPage({
 
 	return (
 		<HydrateClient>
-			<ProductContextProvider>
-				<DashContentHeader title='Products' button={<CreateProductButton />} />
+			<DashContentHeader title='Products' button={<CreateProductButton />} />
 
-				<ProductFilters />
-				<Suspense fallback={<div>Loading...</div>}>
-					<AllProducts />
+			<ProductFilters />
+			<Suspense fallback={<div>Loading...</div>}>
+				<AllProducts />
 
-					<CreateOrUpdateProductModal mode='create' />
-					<CreateOrUpdateProductModal mode='update' />
+				<CreateOrUpdateProductModal mode='create' />
+				<CreateOrUpdateProductModal mode='update' />
 
-					<ArchiveOrDeleteProductModal mode='archive' />
-					<ArchiveOrDeleteProductModal mode='delete' />
+				<ArchiveOrDeleteProductModal mode='archive' />
+				<ArchiveOrDeleteProductModal mode='delete' />
 
-					<ProductHotkeys />
-					{/* <UpgradeModal checkoutCancelPath="products" checkoutSuccessPath="products" /> */}
-				</Suspense>
-			</ProductContextProvider>
+				<ProductHotkeys />
+				{/* <UpgradeModal checkoutCancelPath="products" checkoutSuccessPath="products" /> */}
+			</Suspense>
 		</HydrateClient>
 	);
 }

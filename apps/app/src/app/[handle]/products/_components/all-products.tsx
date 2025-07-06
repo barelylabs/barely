@@ -1,20 +1,21 @@
 'use client';
 
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { GridList, GridListCard } from '@barely/ui/grid-list';
 
-import type { ProductContext } from '~/app/[handle]/products/_components/product-context';
 import { CreateProductButton } from '~/app/[handle]/products/_components/create-product-button';
-import { useProductContext } from '~/app/[handle]/products/_components/product-context';
+import { useProduct, useProductSearchParams } from '~/app/[handle]/products/_components/product-context';
 
 export function AllProducts() {
-	const { items, selection, setSelection, gridListRef, setShowUpdateModal, isFetching } =
-		useProductContext();
+	const { setShowUpdateModal } = useProductSearchParams();
+	const { items, selection, setSelection, isFetching } = useProduct();
 
 	return (
 		<GridList
-			glRef={gridListRef}
+			data-grid-list="products"
 			aria-label='Products'
 			className='flex flex-col gap-2'
 			// behavior
@@ -47,10 +48,10 @@ export function AllProducts() {
 function ProductCard({
 	product,
 }: {
-	product: NonNullable<ProductContext['lastSelectedItem']>;
+	product: AppRouterOutputs['product']['byWorkspace']['products'][0];
 }) {
 	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } =
-		useProductContext();
+		useProductSearchParams();
 
 	return (
 		<GridListCard

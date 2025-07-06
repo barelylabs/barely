@@ -10,7 +10,7 @@ import { Button } from '@barely/ui/button';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 import { UploadDropzone, UploadQueue } from '@barely/ui/upload';
 
-import { useMediaContext } from '~/app/[handle]/media/_components/media-context';
+import { useMediaSearchParams } from '~/app/[handle]/media/_components/media-context';
 
 const mediaUploadQueueAtom = atom<UploadQueueItem[]>([]);
 
@@ -18,7 +18,7 @@ export function UploadMediaModal() {
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
 
-	const { showCreateModal, setShowCreateModal } = useMediaContext();
+	const { showCreateModal, setShowCreateModal } = useMediaSearchParams();
 
 	const mediaUploadState = useUpload({
 		uploadQueueAtom: mediaUploadQueueAtom,

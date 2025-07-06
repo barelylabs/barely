@@ -2,10 +2,10 @@
 
 import { Button } from '@barely/ui/button';
 
-import { useMixtapesContext } from '~/app/[handle]/mixtapes/_components/mixtape-context';
+import { useMixtapeSearchParams } from '~/app/[handle]/mixtapes/_components/mixtape-context';
 
 export function CreateMixtapeButton() {
-	const { setShowCreateModal } = useMixtapesContext();
+	const { setShowCreateModal } = useMixtapeSearchParams();
 
 	return (
 		<Button

@@ -5,17 +5,16 @@ import { useTRPC } from '@barely/api/app/trpc.react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { ArchiveOrDeleteModal } from '~/app/[handle]/_components/archive-or-delete-modal';
-import { usePlaylistContext } from '~/app/[handle]/playlists/_components/playlist-context';
+import { usePlaylist, usePlaylistSearchParams } from '~/app/[handle]/playlists/_components/playlist-context';
 
 export function ArchiveOrDeletePlaylistModal({ mode }: { mode: 'archive' | 'delete' }) {
+	const { selection, lastSelectedItem } = usePlaylist();
 	const {
-		selection,
-		lastSelectedItem,
 		showArchiveModal,
 		showDeleteModal,
 		setShowArchiveModal,
 		setShowDeleteModal,
-	} = usePlaylistContext();
+	} = usePlaylistSearchParams();
 
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();

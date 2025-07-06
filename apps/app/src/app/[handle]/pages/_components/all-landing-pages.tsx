@@ -1,6 +1,6 @@
 'use client';
 
-import type { LandingPage } from '@barely/validators';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import { useRouter } from 'next/navigation';
 import { useWorkspace } from '@barely/hooks';
 import { formatCentsToDollars, getAbsoluteUrl } from '@barely/utils';
@@ -52,7 +52,7 @@ export function AllLandingPages() {
 	);
 }
 
-function LandingPageCard({ landingPage }: { landingPage: LandingPage }) {
+function LandingPageCard({ landingPage }: { landingPage: AppRouterOutputs['landingPage']['byWorkspace']['landingPages'][0] }) {
 	const { setShowArchiveModal, setShowDeleteModal } = useLandingPageSearchParams();
 	const router = useRouter();
 

@@ -3,15 +3,15 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { fmSearchParamsSchema } from '@barely/validators';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
+
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllFmPages } from '~/app/[handle]/fm/_components/all-fm-pages';
 import { ArchiveOrDeleteFmModal } from '~/app/[handle]/fm/_components/archive-or-delete-fm-modal';
 import { CreateFmPageButton } from '~/app/[handle]/fm/_components/create-fm-page-button';
 import { CreateOrUpdateFmModal } from '~/app/[handle]/fm/_components/create-or-update-fm-modal';
-import { FmContextProvider } from '~/app/[handle]/fm/_components/fm-context';
 import { FmFilters } from '~/app/[handle]/fm/_components/fm-filters';
 import { FmHotkeys } from '~/app/[handle]/fm/_components/fm-hotkeys';
-import { getSession } from '~/auth/server';
 import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
 export default async function FmPagesPage({
@@ -29,8 +29,6 @@ export default async function FmPagesPage({
 		redirect(`/${awaitedParams.handle}/fm`);
 	}
 
-	const session = await getSession();
-	console.log('session in FmPagesPage => ', session);
 
 	// Prefetch data (not async - don't await)
 	prefetch(
@@ -42,21 +40,19 @@ export default async function FmPagesPage({
 
 	return (
 		<HydrateClient>
-			<FmContextProvider>
-				<DashContentHeader title='FM Pages' button={<CreateFmPageButton />} />
-				<FmFilters />
-				<Suspense fallback={<div>Loading...</div>}>
-					<AllFmPages />
+			<DashContentHeader title='FM Pages' button={<CreateFmPageButton />} />
+			<FmFilters />
+			<Suspense fallback={<GridListSkeleton />}>
+				<AllFmPages />
 
-					<CreateOrUpdateFmModal mode='create' />
-					<CreateOrUpdateFmModal mode='update' />
+				<CreateOrUpdateFmModal mode='create' />
+				<CreateOrUpdateFmModal mode='update' />
 
-					<ArchiveOrDeleteFmModal mode='archive' />
-					<ArchiveOrDeleteFmModal mode='delete' />
+				<ArchiveOrDeleteFmModal mode='archive' />
+				<ArchiveOrDeleteFmModal mode='delete' />
 
-					<FmHotkeys />
-				</Suspense>
-			</FmContextProvider>
+				<FmHotkeys />
+			</Suspense>
 		</HydrateClient>
 	);
 }

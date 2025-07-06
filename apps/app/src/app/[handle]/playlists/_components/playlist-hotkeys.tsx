@@ -2,16 +2,16 @@
 
 import { useModalHotKeys } from '@barely/hooks';
 
-import { usePlaylistContext } from './playlist-context';
+import { usePlaylist, usePlaylistSearchParams } from './playlist-context';
 
 export function PlaylistHotkeys() {
+	const { selection } = usePlaylist();
 	const {
-		selection,
 		setShowArchiveModal,
 		setShowDeleteModal,
 		setShowCreateModal,
 		setShowUpdateModal,
-	} = usePlaylistContext();
+	} = usePlaylistSearchParams();
 
 	useModalHotKeys({
 		setShowCreateModal,

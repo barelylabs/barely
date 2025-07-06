@@ -7,7 +7,6 @@ import { AllPlaylists } from './_components/all-playlists';
 import { ArchiveOrDeletePlaylistModal } from './_components/archive-or-delete-playlist-modal';
 import { CreateOrUpdatePlaylistModal } from './_components/create-or-update-playlist-modal';
 import { CreatePlaylistButton } from './_components/create-playlist-button';
-import { PlaylistContextProvider } from './_components/playlist-context';
 import { PlaylistFilters } from './_components/playlist-filters';
 import { PlaylistHotkeys } from './_components/playlist-hotkeys';
 
@@ -36,24 +35,22 @@ export default async function PlaylistPage({
 
 	return (
 		<HydrateClient>
-			<PlaylistContextProvider>
-				<DashContentHeader
-					title='Playlists'
-					subtitle='Manage your playlists'
-					button={<CreatePlaylistButton />}
-				/>
-				<PlaylistFilters />
-				<Suspense fallback={<div>Loading...</div>}>
-					<AllPlaylists />
-				</Suspense>
+			<DashContentHeader
+				title='Playlists'
+				subtitle='Manage your playlists'
+				button={<CreatePlaylistButton />}
+			/>
+			<PlaylistFilters />
+			<Suspense fallback={<div>Loading...</div>}>
+				<AllPlaylists />
+			</Suspense>
 
-				<CreateOrUpdatePlaylistModal mode='create' />
-				<CreateOrUpdatePlaylistModal mode='update' />
-				<ArchiveOrDeletePlaylistModal mode='archive' />
-				<ArchiveOrDeletePlaylistModal mode='delete' />
+			<CreateOrUpdatePlaylistModal mode='create' />
+			<CreateOrUpdatePlaylistModal mode='update' />
+			<ArchiveOrDeletePlaylistModal mode='archive' />
+			<ArchiveOrDeletePlaylistModal mode='delete' />
 
-				<PlaylistHotkeys />
-			</PlaylistContextProvider>
+			<PlaylistHotkeys />
 		</HydrateClient>
 	);
 }

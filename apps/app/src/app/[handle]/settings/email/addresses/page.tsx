@@ -7,7 +7,6 @@ import { DashContentHeader } from '~/app/[handle]/_components/dash-content-heade
 import { AllEmailAddresses } from '~/app/[handle]/settings/email/addresses/_components/all-email-addresses';
 import { CreateEmailAddressButton } from '~/app/[handle]/settings/email/addresses/_components/create-email-address-button';
 import { CreateEmailAddressModal } from '~/app/[handle]/settings/email/addresses/_components/create-email-address-modal';
-import { EmailAddressContextProvider } from '~/app/[handle]/settings/email/addresses/_components/email-address-context';
 import { EmailAddressHotkeys } from '~/app/[handle]/settings/email/addresses/_components/email-address-hotkeys';
 import { UpdateEmailAddressModal } from '~/app/[handle]/settings/email/addresses/_components/update-email-address-modal';
 import { HydrateClient } from '~/trpc/server';
@@ -31,19 +30,17 @@ export default async function EmailAddressesPage({
 	return (
 		<HydrateClient>
 			<Suspense>
-				<EmailAddressContextProvider>
-					<DashContentHeader
-						title='Email Addresses'
-						subtitle='Manage your email addresses'
-						button={<CreateEmailAddressButton />}
-					/>
-					<AllEmailAddresses />
+				<DashContentHeader
+					title='Email Addresses'
+					subtitle='Manage your email addresses'
+					button={<CreateEmailAddressButton />}
+				/>
+				<AllEmailAddresses />
 
-					<CreateEmailAddressModal />
-					<UpdateEmailAddressModal />
+				<CreateEmailAddressModal />
+				<UpdateEmailAddressModal />
 
-					<EmailAddressHotkeys />
-				</EmailAddressContextProvider>
+				<EmailAddressHotkeys />
 			</Suspense>
 		</HydrateClient>
 	);

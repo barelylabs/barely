@@ -3,10 +3,10 @@
 import { Button } from '@barely/ui/button';
 import { CommandShortcut } from '@barely/ui/command';
 
-import { useProductContext } from '~/app/[handle]/products/_components/product-context';
+import { useProductSearchParams } from '~/app/[handle]/products/_components/product-context';
 
 export function CreateProductButton() {
-	const { setShowCreateModal } = useProductContext();
+	const { setShowCreateModal } = useProductSearchParams();
 
 	return (
 		<Button

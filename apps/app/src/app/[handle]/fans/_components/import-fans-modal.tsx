@@ -4,14 +4,13 @@ import type { UploadQueueItem } from '@barely/hooks';
 import type { SelectFieldOption } from '@barely/ui/forms/select-field';
 import type { z } from 'zod/v4';
 import { useMemo, useState } from 'react';
-import { atomWithToggle } from '@barely/atoms';
 import { useUpload, useZodForm } from '@barely/hooks';
 import { useTRPC } from '@barely/api/app/trpc.react';
 import { useToast } from '@barely/toast';
 import { raise } from '@barely/utils';
 import { importFansFromCsvSchema } from '@barely/validators';
 import { useMutation } from '@tanstack/react-query';
-import { atom, useAtom } from 'jotai';
+import { atom } from 'jotai';
 import Papa from 'papaparse';
 
 import { Button } from '@barely/ui/button';
@@ -23,15 +22,15 @@ import { Modal, ModalBody, ModalHeader } from '@barely/ui/modal';
 import { Text } from '@barely/ui/typography';
 import { UploadDropzone } from '@barely/ui/upload';
 
-const csvUploadQueueAtom = atom<UploadQueueItem[]>([]);
+import { useFanSearchParams } from '~/app/[handle]/fans/_components/fan-context';
 
-const importFansModalAtom = atomWithToggle(false);
+const csvUploadQueueAtom = atom<UploadQueueItem[]>([]);
 
 export function ImportFansFromCsvModal() {
 	const { toast } = useToast();
 
 	const trpc = useTRPC();
-	const [showModal, setShowModal] = useAtom(importFansModalAtom);
+	const { showImportModal: showModal, setShowImportModal: setShowModal } = useFanSearchParams();
 
 	const { mutate: importFansFromCsv } = useMutation({
 		...trpc.fan.importFromCsv.mutationOptions(),
@@ -263,14 +262,14 @@ export function ImportFansFromCsvModal() {
 }
 
 export function ImportFansButton() {
-	const [, setShowModal] = useAtom(importFansModalAtom);
+	const { setShowImportModal } = useFanSearchParams();
 
 	return (
 		<Button
 			look='secondary'
 			variant='icon'
 			startIcon='import'
-			onClick={() => setShowModal(true)}
+			onClick={() => setShowImportModal(true)}
 		/>
 	);
 }

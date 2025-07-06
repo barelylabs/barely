@@ -1,12 +1,14 @@
 'use client';
 
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import type { z } from 'zod/v4';
 import { useCallback, useEffect, useState } from 'react';
-import { useCreateOrUpdateForm, useWorkspace } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
+import { useCreateOrUpdateForm, useFocusGridList, useWorkspace } from '@barely/hooks';
 import { cn } from '@barely/utils';
 import { upsertEmailDomainSchema } from '@barely/validators';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SwitchField } from '@barely/ui/forms/switch-field';
@@ -14,21 +16,23 @@ import { TextField } from '@barely/ui/forms/text-field';
 import { Icon } from '@barely/ui/icon';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 
-import { useEmailDomainContext } from '~/app/[handle]/settings/email/domains/_components/email-domain-context';
+import {
+	useEmailDomain,
+	useEmailDomainSearchParams,
+} from '~/app/[handle]/settings/email/domains/_components/email-domain-context';
+
+type EmailDomain = AppRouterOutputs['emailDomain']['byWorkspace']['domains'][number];
 
 export function CreateOrUpdateEmailDomainModal({ mode }: { mode: 'create' | 'update' }) {
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
 	const { handle } = useWorkspace();
-	/* emailDomain context */
-	const {
-		lastSelectedItem: selectedEmailDomain,
-		showCreateModal,
-		showUpdateModal,
-		setShowCreateModal,
-		setShowUpdateModal,
-		focusGridList,
-	} = useEmailDomainContext();
+	const focusGridList = useFocusGridList('email-domains');
+
+	/* emailDomain hooks */
+	const { lastSelectedItem: selectedEmailDomain } = useEmailDomain();
+	const { showCreateModal, showUpdateModal, setShowCreateModal, setShowUpdateModal } =
+		useEmailDomainSearchParams();
 
 	/* mutations */
 	const { mutateAsync: createEmailDomain } = useMutation({

@@ -5,17 +5,19 @@ import { useTRPC } from '@barely/api/app/trpc.react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { ArchiveOrDeleteModal } from '~/app/[handle]/_components/archive-or-delete-modal';
-import { useFmContext } from '~/app/[handle]/fm/_components/fm-context';
+import { useFm, useFmSearchParams } from '~/app/[handle]/fm/_components/fm-context';
 
 export function ArchiveOrDeleteFmModal({ mode }: { mode: 'archive' | 'delete' }) {
 	const {
 		selection,
 		lastSelectedItem,
+	} = useFm();
+	const {
 		showArchiveModal,
 		showDeleteModal,
 		setShowArchiveModal,
 		setShowDeleteModal,
-	} = useFmContext();
+	} = useFmSearchParams();
 
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();

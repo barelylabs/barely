@@ -2,13 +2,8 @@
 
 import { Fragment } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
 import { useWorkspace } from '@barely/hooks';
 import { campaignTypeDisplay } from '@barely/utils';
-import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
-import { z } from 'zod/v4';
-
-import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Badge } from '@barely/ui/badge';
 import { Button } from '@barely/ui/button';
@@ -16,35 +11,18 @@ import { InfoCard } from '@barely/ui/card';
 import { Icon } from '@barely/ui/icon';
 import { H, Text } from '@barely/ui/typography';
 
+import { useCampaign, useCampaignSearchParams } from '~/app/[handle]/campaigns/_components/campaign-context';
+
 export const AllCampaigns = () => {
-	const trpc = useTRPC();
-	const params = useParams();
 	const { workspace } = useWorkspace();
-
-	const stage = z
-		.enum(['screening', 'approved', 'active'])
-		.optional()
-		.safeParse(params.stage?.[0]);
-
-	const { data: campaignsQuery } = useSuspenseInfiniteQuery({
-		...trpc.campaign.byWorkspaceId.infiniteQueryOptions(
-			{
-				workspaceId: workspace.id,
-				stage: stage.success ? stage.data : undefined,
-			},
-			{
-				getNextPageParam: lastPage => lastPage.nextCursor,
-			},
-		),
-	});
-
-	const campaigns = campaignsQuery.pages.flatMap(page => page.campaigns);
+	const { items: campaigns } = useCampaign();
+	const { filters } = useCampaignSearchParams();
 
 	if (!campaigns.length) {
 		return (
 			<div className='flex h-full flex-col items-center justify-center gap-y-3 rounded-lg border border-dashed px-6 py-16'>
 				<Icon.sun className='h-10 w-10' />
-				<H size='4'>{`No ${stage.success && stage.data ? stage.data : ''} campaigns`}</H>
+				<H size='4'>{`No ${filters.stage ? filters.stage : ''} campaigns`}</H>
 				<Text variant='xs/light'>Create a new campaign to get started.</Text>
 			</div>
 		);

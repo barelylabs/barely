@@ -2,10 +2,10 @@
 
 import { Button } from '@barely/ui/button';
 
-import { useFanGroupContext } from '~/app/[handle]/fan-groups/_components/fan-group-context';
+import { useFanGroupSearchParams } from '~/app/[handle]/fan-groups/_components/fan-group-context';
 
 export function CreateFanGroupButton() {
-	const { setShowCreateModal } = useFanGroupContext();
+	const { setShowCreateModal } = useFanGroupSearchParams();
 
 	return (
 		<Button

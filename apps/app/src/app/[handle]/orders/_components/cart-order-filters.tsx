@@ -1,7 +1,7 @@
 'use client';
 
 import { Filters } from '~/app/[handle]/_components/filters';
-import { useCartOrderContext } from '~/app/[handle]/orders/_components/cart-order-context';
+import { useCartOrderSearchParams } from '~/app/[handle]/orders/_components/cart-order-context';
 
 export function CartOrderFilters() {
 	const {
@@ -11,7 +11,7 @@ export function CartOrderFilters() {
 		toggleFulfilled,
 		togglePreorders,
 		toggleCanceled,
-	} = useCartOrderContext();
+	} = useCartOrderSearchParams();
 
 	return (
 		<Filters

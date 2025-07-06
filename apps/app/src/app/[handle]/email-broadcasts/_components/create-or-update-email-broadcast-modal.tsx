@@ -17,7 +17,7 @@ import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 import { Switch } from '@barely/ui/switch';
 import { Text } from '@barely/ui/typography';
 
-import { useEmailBroadcastsContext } from './email-broadcasts-context';
+import { useEmailBroadcast, useEmailBroadcastSearchParams } from './email-broadcasts-context';
 
 export function CreateOrUpdateEmailBroadcastModal({
 	mode,
@@ -28,13 +28,16 @@ export function CreateOrUpdateEmailBroadcastModal({
 	const queryClient = useQueryClient();
 
 	const {
-		lastSelectedItem,
 		showCreateModal,
 		showUpdateModal,
 		setShowCreateModal,
 		setShowUpdateModal,
+	} = useEmailBroadcastSearchParams();
+
+	const {
+		lastSelectedItem,
 		focusGridList,
-	} = useEmailBroadcastsContext();
+	} = useEmailBroadcast();
 
 	const { handle } = useWorkspace();
 

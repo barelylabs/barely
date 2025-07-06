@@ -8,7 +8,6 @@ import { AllFanGroups } from '~/app/[handle]/fan-groups/_components/all-fan-grou
 import { ArchiveOrDeleteFanGroupModal } from '~/app/[handle]/fan-groups/_components/archive-or-delete-fan-group-modal';
 import { CreateFanGroupButton } from '~/app/[handle]/fan-groups/_components/create-fan-group-button';
 import { CreateOrUpdateFanGroupModal } from '~/app/[handle]/fan-groups/_components/create-or-update-fan-group-modal';
-import { FanGroupContextProvider } from '~/app/[handle]/fan-groups/_components/fan-group-context';
 import { FanGroupFilters } from '~/app/[handle]/fan-groups/_components/fan-group-filters';
 import { FanGroupHotkeys } from '~/app/[handle]/fan-groups/_components/fan-group-hotkeys';
 import { HydrateClient, prefetch, trpc } from '~/trpc/server';
@@ -37,21 +36,19 @@ export default async function FanGroupsPage({
 
 	return (
 		<HydrateClient>
+			<DashContentHeader title='Fan Groups' button={<CreateFanGroupButton />} />
+			<FanGroupFilters />
 			<Suspense fallback={<div>Loading...</div>}>
-				<FanGroupContextProvider>
-					<DashContentHeader title='Fan Groups' button={<CreateFanGroupButton />} />
-					<FanGroupFilters />
-					<AllFanGroups />
-
-					<CreateOrUpdateFanGroupModal mode='create' />
-					<CreateOrUpdateFanGroupModal mode='update' />
-
-					<ArchiveOrDeleteFanGroupModal mode='archive' />
-					<ArchiveOrDeleteFanGroupModal mode='delete' />
-
-					<FanGroupHotkeys />
-				</FanGroupContextProvider>
+				<AllFanGroups />
 			</Suspense>
+
+			<CreateOrUpdateFanGroupModal mode='create' />
+			<CreateOrUpdateFanGroupModal mode='update' />
+
+			<ArchiveOrDeleteFanGroupModal mode='archive' />
+			<ArchiveOrDeleteFanGroupModal mode='delete' />
+
+			<FanGroupHotkeys />
 		</HydrateClient>
 	);
 }

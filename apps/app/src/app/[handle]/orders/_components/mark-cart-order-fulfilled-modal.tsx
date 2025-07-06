@@ -4,10 +4,13 @@ import type { z } from 'zod/v4';
 import { useCallback, useEffect, useMemo } from 'react';
 import { SHIPPING_CARRIERS } from '@barely/const';
 import { useWorkspace, useZodForm } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { markCartOrderAsFulfilledSchema } from '@barely/validators';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useFieldArray } from 'react-hook-form';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { focusGridList } from '@barely/hooks';
 
 import { CheckboxField } from '@barely/ui/forms/checkbox-field';
 import { Form, SubmitButton } from '@barely/ui/forms/form';
@@ -17,7 +20,7 @@ import { Icon } from '@barely/ui/icon';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 import { Text } from '@barely/ui/typography';
 
-import { useCartOrderContext } from '~/app/[handle]/orders/_components/cart-order-context';
+import { useCartOrder } from '~/app/[handle]/orders/_components/cart-order-context';
 
 const shippingCarrierOptions = SHIPPING_CARRIERS.map(carrier => ({
 	label: (
@@ -41,13 +44,12 @@ export function MarkCartOrderFulfilledModal() {
 	const queryClient = useQueryClient();
 	const { handle } = useWorkspace();
 
-	/* cart order context */
+	/* cart order hooks */
 	const {
 		lastSelectedItem: selectedCartOrder,
-		showMarkAsFulfilledModal,
+		filters: { showMarkAsFulfilledModal },
 		setShowMarkAsFulfilledModal,
-		focusGridList,
-	} = useCartOrderContext();
+	} = useCartOrder();
 
 	/* mutations */
 	const { mutateAsync: markAsFulfilled } = useMutation(
@@ -100,7 +102,7 @@ export function MarkCartOrderFulfilledModal() {
 	const showModal = showMarkAsFulfilledModal && !!selectedCartOrder;
 
 	const handleCloseModal = useCallback(async () => {
-		focusGridList();
+		focusGridList('cart-orders');
 		setShowMarkAsFulfilledModal(false);
 		removeProducts();
 		form.reset();
@@ -108,14 +110,7 @@ export function MarkCartOrderFulfilledModal() {
 		await queryClient.invalidateQueries({
 			queryKey: trpc.cartOrder.byWorkspace.queryKey(),
 		});
-	}, [
-		queryClient,
-		trpc,
-		focusGridList,
-		setShowMarkAsFulfilledModal,
-		form,
-		removeProducts,
-	]);
+	}, [queryClient, trpc, setShowMarkAsFulfilledModal, form, removeProducts]);
 
 	useEffect(() => {
 		// fixme- i don't like updating the products like this, but it seems to work for now

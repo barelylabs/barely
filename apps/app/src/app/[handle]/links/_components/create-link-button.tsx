@@ -2,10 +2,10 @@
 
 import { Button } from '@barely/ui/button';
 
-import { useLinkContext } from '~/app/[handle]/links/_components/link-context';
+import { useLinkSearchParams } from '~/app/[handle]/links/_components/link-context';
 
 export function CreateLinkButton() {
-	const { setShowCreateModal } = useLinkContext();
+	const { setShowCreateModal } = useLinkSearchParams();
 
 	return (
 		<Button

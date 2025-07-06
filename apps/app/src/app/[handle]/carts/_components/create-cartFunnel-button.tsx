@@ -2,11 +2,11 @@
 
 import { Button } from '@barely/ui/button';
 
-import { useCartFunnelContext } from '~/app/[handle]/carts/_components/cartFunnel-context';
+import { useCartFunnelSearchParams } from '~/app/[handle]/carts/_components/cartFunnel-context';
 
 export function CreateCartFunnelButton() {
-	const { setShowCreateCartFunnelModal: setShowCreateFunnelModal } =
-		useCartFunnelContext();
+	const { setShowCreateModal: setShowCreateFunnelModal } =
+		useCartFunnelSearchParams();
 
 	return (
 		<Button

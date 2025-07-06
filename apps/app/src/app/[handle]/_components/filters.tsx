@@ -77,7 +77,7 @@ export function Filters({
 	toggleFulfilled?: () => void;
 	showDeleted?: boolean;
 	toggleDeleted?: () => void;
-	clearAllFilters: () => Promise<URLSearchParams>;
+	clearAllFilters: () => void;
 }) {
 	const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -138,8 +138,6 @@ export function Filters({
 		window.addEventListener('keydown', onKeydown);
 		return () => window.removeEventListener('keydown', onKeydown);
 	}, [onKeydown]);
-
-	// const [showArchived, setShowArchived] = useQueryState('showArchived', parseAsBoolean.withDefault(false));
 
 	return (
 		<div className='flex flex-row items-center justify-between gap-4'>

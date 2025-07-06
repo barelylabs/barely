@@ -37,7 +37,8 @@ import { ToggleGroup, ToggleGroupItem } from '@barely/ui/toggle-group';
 import { Tooltip } from '@barely/ui/tooltip';
 import { UploadDropzone } from '@barely/ui/upload';
 
-import { useProductContext } from '~/app/[handle]/products/_components/product-context';
+import { focusGridList } from '@barely/hooks';
+import { useProduct, useProductSearchParams } from '~/app/[handle]/products/_components/product-context';
 
 const productImageUploadQueueAtom = atom<UploadQueueItem[]>([]);
 
@@ -48,12 +49,13 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 	/* product context */
 	const {
 		lastSelectedItem: selectedProduct,
+	} = useProduct();
+	const {
 		showCreateModal,
 		setShowCreateModal,
 		showUpdateModal,
 		setShowUpdateModal,
-		focusGridList,
-	} = useProductContext();
+	} = useProductSearchParams();
 
 	/* api */
 	const { mutateAsync: createProduct } = useMutation({
@@ -171,13 +173,12 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 	const handleCloseModal = useCallback(async () => {
 		reset();
 		setShowModal(false);
-		focusGridList();
+		focusGridList('products');
 		setProductImageUploadQueue([]);
 		if (mode === 'create') setProductImages([]);
 		await queryClient.invalidateQueries(trpc.product.byWorkspace.queryFilter());
 	}, [
 		setShowModal,
-		focusGridList,
 		queryClient,
 		reset,
 		setProductImageUploadQueue,

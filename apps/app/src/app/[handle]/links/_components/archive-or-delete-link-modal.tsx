@@ -5,17 +5,19 @@ import { useTRPC } from '@barely/api/app/trpc.react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { ArchiveOrDeleteModal } from '~/app/[handle]/_components/archive-or-delete-modal';
-import { useLinkContext } from '~/app/[handle]/links/_components/link-context';
+import { useLink, useLinkSearchParams } from '~/app/[handle]/links/_components/link-context';
 
 export function ArchiveOrDeleteLinkModal({ mode }: { mode: 'archive' | 'delete' }) {
 	const {
 		selection: linkSelection,
 		lastSelectedItem: lastSelectedLink,
+	} = useLink();
+	const {
 		showArchiveModal,
 		showDeleteModal,
 		setShowArchiveModal,
 		setShowDeleteModal,
-	} = useLinkContext();
+	} = useLinkSearchParams();
 
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();

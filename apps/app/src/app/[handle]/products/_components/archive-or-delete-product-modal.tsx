@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { ArchiveOrDeleteModal } from '~/app/[handle]/_components/archive-or-delete-modal';
-import { useProductContext } from '~/app/[handle]/products/_components/product-context';
+import { useProduct, useProductSearchParams } from '~/app/[handle]/products/_components/product-context';
 
 export function ArchiveOrDeleteProductModal({ mode }: { mode: 'archive' | 'delete' }) {
 	const trpc = useTRPC();
@@ -15,11 +15,14 @@ export function ArchiveOrDeleteProductModal({ mode }: { mode: 'archive' | 'delet
 	const {
 		selection,
 		lastSelectedItem,
+	} = useProduct();
+	
+	const {
 		showArchiveModal,
 		showDeleteModal,
 		setShowArchiveModal,
 		setShowDeleteModal,
-	} = useProductContext();
+	} = useProductSearchParams();
 
 	const showModal = mode === 'archive' ? showArchiveModal : showDeleteModal;
 

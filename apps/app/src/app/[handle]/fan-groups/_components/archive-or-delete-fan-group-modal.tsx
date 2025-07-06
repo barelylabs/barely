@@ -5,17 +5,16 @@ import { useTRPC } from '@barely/api/app/trpc.react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { ArchiveOrDeleteModal } from '~/app/[handle]/_components/archive-or-delete-modal';
-import { useFanGroupContext } from '~/app/[handle]/fan-groups/_components/fan-group-context';
+import { useFanGroup, useFanGroupSearchParams } from '~/app/[handle]/fan-groups/_components/fan-group-context';
 
 export function ArchiveOrDeleteFanGroupModal({ mode }: { mode: 'archive' | 'delete' }) {
+	const { selection, lastSelectedItem } = useFanGroup();
 	const {
-		selection,
-		lastSelectedItem,
 		showArchiveModal,
 		showDeleteModal,
 		setShowArchiveModal,
 		setShowDeleteModal,
-	} = useFanGroupContext();
+	} = useFanGroupSearchParams();
 
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();

@@ -5,16 +5,17 @@ This document outlines the coding best practices and established patterns for th
 ## Table of Contents
 
 1. [Component Architecture](#component-architecture)
-2. [Context Provider Pattern](#context-provider-pattern)
-3. [Modal Patterns](#modal-patterns)
-4. [Page Structure](#page-structure)
-5. [State Management](#state-management)
-6. [API Integration (tRPC)](#api-integration-trpc)
-7. [TypeScript Best Practices](#typescript-best-practices)
-8. [UI Component Usage](#ui-component-usage)
-9. [File Naming and Organization](#file-naming-and-organization)
-10. [Performance Patterns](#performance-patterns)
-11. [Best Practices](#best-practices)
+2. [Hook Factory Pattern (New Approach)](#hook-factory-pattern-new-approach)
+3. [Context Provider Pattern (Legacy)](#context-provider-pattern-legacy-approach)
+4. [Modal Patterns](#modal-patterns)
+5. [Page Structure](#page-structure)
+6. [State Management](#state-management)
+7. [API Integration (tRPC)](#api-integration-trpc)
+8. [TypeScript Best Practices](#typescript-best-practices)
+9. [UI Component Usage](#ui-component-usage)
+10. [File Naming and Organization](#file-naming-and-organization)
+11. [Performance Patterns](#performance-patterns)
+12. [Best Practices](#best-practices)
 
 ## Component Architecture
 
@@ -53,7 +54,86 @@ Each feature should follow this general directory structure, though not all comp
 4. **Separate concerns**: Data fetching in context, UI in components
 5. **Use composition**: Break down complex components into smaller ones
 
-## Context Provider Pattern
+## Hook Factory Pattern (New Approach)
+
+### Overview
+
+The new hook factory pattern separates URL state management from data fetching to prevent React Suspense from blocking optimistic UI updates. Each resource uses two distinct hooks:
+
+1. **`use{Resource}SearchParams`** - Manages URL state only (filters, modals, selection)
+   - No data fetching
+   - Instant optimistic updates
+   - Used by filter components, buttons, and hotkeys
+
+2. **`use{Resource}`** - Handles data fetching with suspense
+   - Includes all search params functionality
+   - Triggers suspense boundaries
+   - Used by data-consuming components
+
+### Critical Usage Guidelines
+
+**Filter Components**: Must use `use{Resource}SearchParams()` directly to avoid rendering delays:
+
+```typescript
+// ✅ CORRECT - Instant optimistic updates
+export function CartOrderFilters() {
+  const { filters, toggleFulfilled } = useCartOrderSearchParams();
+  // UI updates immediately when toggled
+}
+
+// ❌ WRONG - Blocks UI updates until data loads
+export function CartOrderFilters() {
+  const { filters, toggleFulfilled } = useCartOrder();
+  // UI blocked by suspense boundary
+}
+```
+
+**Data Components**: Use the full `use{Resource}()` hook:
+
+```typescript
+export function AllCartOrders() {
+  const { items, selection, setSelection } = useCartOrder();
+  // Has access to both data and search params
+}
+```
+
+### Component Hook Usage Guide
+
+| Component Type | Hook to Use | Reason |
+|----------------|-------------|--------|
+| Filters | `use{Resource}SearchParams` | Avoids suspense blocking |
+| Create/Update Buttons | `use{Resource}SearchParams` | Only needs modal state |
+| Hotkeys | `use{Resource}SearchParams` | Only needs actions |
+| Grid/List Display | `use{Resource}` | Needs data |
+| Modals | Both (split usage) | Modal state + data |
+
+### Implementation Example
+
+```typescript
+// cart-order-context.tsx
+export const useCartOrderSearchParams = createResourceSearchParamsHook({
+  additionalParsers: {
+    showFulfilled: parseAsBoolean.withDefault(false),
+  },
+  additionalActions: {
+    toggleFulfilled: setParams => () => 
+      setParams(prev => ({ showFulfilled: !prev.showFulfilled })),
+  },
+});
+
+export function useCartOrder() {
+  const searchParams = useCartOrderSearchParams();
+  const dataHook = createResourceDataHook(/* ... */);
+  
+  // Merge results for convenience
+  return {
+    ...dataHook(),
+    ...searchParams,
+  };
+}
+```
+
+## Context Provider Pattern (Legacy Approach)
 
 All context providers should follow this pattern with TanStack Query:
 
@@ -601,6 +681,15 @@ apps/app/src/
 ```
 
 ## Performance Patterns
+
+### Hook Usage and Suspense
+
+To prevent UI blocking, components must use the appropriate hook based on their needs:
+
+- **Components outside suspense boundaries** (filters, buttons): Use `use{Resource}SearchParams()`
+- **Components inside suspense boundaries** (data displays): Use `use{Resource}()`
+
+This separation ensures that user interactions like toggling filters or opening modals happen instantly without waiting for data to load.
 
 ### Suspense Boundaries
 

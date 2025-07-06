@@ -7,25 +7,25 @@ import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { GridList, GridListCard } from '@barely/ui/grid-list';
 
-import { useCartFunnelContext } from '~/app/[handle]/carts/_components/cartFunnel-context';
+import { useCartFunnel } from '~/app/[handle]/carts/_components/cartFunnel-context';
 import { CreateCartFunnelButton } from '~/app/[handle]/carts/_components/create-cartFunnel-button';
 
 export function AllCartFunnels() {
 	const {
-		cartFunnels,
-		cartFunnelSelection,
-		setCartFunnelSelection,
+		items: cartFunnels,
+		selection: cartFunnelSelection,
+		setSelection: setCartFunnelSelection,
 		gridListRef,
-		setShowUpdateCartFunnelModal,
-
+		setShowUpdateModal: setShowUpdateCartFunnelModal,
 		isFetching,
-	} = useCartFunnelContext();
+	} = useCartFunnel();
 
 	return (
 		<>
 			<GridList
 				glRef={gridListRef}
 				aria-label='Carts'
+				data-grid-list='cart-funnels'
 				className='flex flex-col gap-2'
 				// behavior
 				selectionMode='multiple'
@@ -58,10 +58,10 @@ export function AllCartFunnels() {
 
 function CartFunnelCard({ cartFunnel }: { cartFunnel: CartFunnel }) {
 	const {
-		setShowUpdateCartFunnelModal: setShowUpdateCartFunnelModal,
-		setShowArchiveCartFunnelModal: setShowArchiveCartFunnelModal,
-		setShowDeleteCartFunnelModal: setShowDeleteCartFunnelModal,
-	} = useCartFunnelContext();
+		setShowUpdateModal: setShowUpdateCartFunnelModal,
+		setShowArchiveModal: setShowArchiveCartFunnelModal,
+		setShowDeleteModal: setShowDeleteCartFunnelModal,
+	} = useCartFunnel();
 
 	const { handle, key, value } = cartFunnel;
 

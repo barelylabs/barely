@@ -11,16 +11,17 @@ import { GridList, GridListCard } from '@barely/ui/grid-list';
 import { Text } from '@barely/ui/typography';
 
 import { CreateFlowButton } from '~/app/[handle]/flows/_components/create-flow-button';
-import { useFlowContext } from '~/app/[handle]/flows/_components/flow-context';
+import { useFlow, useFlowSearchParams } from '~/app/[handle]/flows/_components/flow-context';
 
 export function AllFlows() {
 	const { items, selection, setSelection, lastSelectedItemId, isFetching } =
-		useFlowContext();
+		useFlow();
 	const router = useRouter();
 	const { handle } = useWorkspace();
 	return (
 		<div className='flex flex-col gap-4'>
 			<GridList
+				data-grid-list="flows"
 				aria-label='Flows'
 				className='flex flex-col gap-4'
 				selectionMode='multiple'
@@ -53,7 +54,7 @@ export function AllFlows() {
 }
 
 function LoadMoreButton() {
-	const { hasNextPage, fetchNextPage, isFetchingNextPage } = useFlowContext();
+	const { hasNextPage, fetchNextPage, isFetchingNextPage } = useFlow();
 
 	if (!hasNextPage)
 		return (
@@ -77,10 +78,10 @@ function LoadMoreButton() {
 function FlowCard({
 	flow,
 }: {
-	flow: AppRouterOutputs['flow']['byWorkspace']['flows'][number];
+	flow: AppRouterOutputs['flow']['byWorkspace']['flows'][0];
 }) {
-	const { setShowArchiveModal, setShowDeleteModal, selection, setSelection } =
-		useFlowContext();
+	const { selection, setSelection } = useFlow();
+	const { setShowArchiveModal, setShowDeleteModal } = useFlowSearchParams();
 
 	const { handle } = useWorkspace();
 	const router = useRouter();

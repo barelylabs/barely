@@ -2,7 +2,6 @@
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import type { IconKey } from '@barely/ui/icon';
-import type { EmailDomain } from '@barely/validators';
 import { useCallback, useState } from 'react';
 import { useCopy, useWorkspace } from '@barely/hooks';
 import { punycode, toTitleCase } from '@barely/utils';
@@ -25,30 +24,24 @@ import {
 import { Text } from '@barely/ui/typography';
 
 import { CreateEmailDomainButton } from '~/app/[handle]/settings/email/domains/_components/create-email-domain-button';
-import { useEmailDomainContext } from '~/app/[handle]/settings/email/domains/_components/email-domain-context';
+import { useEmailDomain, useEmailDomainSearchParams } from '~/app/[handle]/settings/email/domains/_components/email-domain-context';
+
+type EmailDomain = AppRouterOutputs['emailDomain']['byWorkspace']['domains'][number];
 
 export function AllEmailDomains() {
 	const {
 		items: emailDomains,
 		selection: emailDomainSelection,
-		// lastSelectedItemId,
 		setSelection: setEmailDomainSelection,
-		gridListRef,
-		// setShowUpdateModal,
-	} = useEmailDomainContext();
+	} = useEmailDomain();
 
 	return (
 		<>
 			<GridList
-				glRef={gridListRef}
+				data-grid-list="email-domains"
 				className='flex flex-col gap-2'
 				aria-label='Email domains'
 				selectionMode='none'
-				// selectionBehavior='replace'
-				// onAction={() => {
-				// 	if (!lastSelectedEmailDomainId) return;
-				// 	setShowUpdateEmailDomainModal(true);
-				// }}
 				items={emailDomains}
 				selectedKeys={emailDomainSelection}
 				setSelectedKeys={setEmailDomainSelection}
@@ -70,7 +63,7 @@ export function AllEmailDomains() {
 function EmailDomainCard({
 	emailDomain,
 }: {
-	emailDomain: AppRouterOutputs['emailDomain']['byWorkspace']['domains'][number];
+	emailDomain: EmailDomain;
 }) {
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
@@ -78,8 +71,7 @@ function EmailDomainCard({
 	const { name, records } = emailDomain;
 	const [isVerifying, setIsVerifying] = useState(false);
 	const { copyToClipboard } = useCopy();
-	const { setShowUpdateModal, setSelection: setEmailDomainSelection } =
-		useEmailDomainContext();
+	const { setShowUpdateModal, setSelection } = useEmailDomainSearchParams();
 
 	const { mutate: verifyDomain } = useMutation({
 		...trpc.emailDomain.verifyOnResend.mutationOptions({
@@ -127,7 +119,7 @@ function EmailDomainCard({
 							size='sm'
 							startIcon='dots'
 							onClick={() => {
-								setEmailDomainSelection(new Set([emailDomain.id]));
+								setSelection(new Set([emailDomain.id]));
 								setShowUpdateModal(true);
 							}}
 						/>

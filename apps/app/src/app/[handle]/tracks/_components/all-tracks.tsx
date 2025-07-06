@@ -9,7 +9,10 @@ import { Img } from '@barely/ui/img';
 import { Text } from '@barely/ui/typography';
 
 import { CreateTrackButton } from '~/app/[handle]/tracks/_components/create-track-button';
-import { useTrackContext } from '~/app/[handle]/tracks/_components/track-context';
+import {
+	useTrack,
+	useTrackSearchParams,
+} from '~/app/[handle]/tracks/_components/track-context';
 
 export function AllTracks() {
 	const {
@@ -18,15 +21,16 @@ export function AllTracks() {
 		lastSelectedItemId,
 		setSelection,
 		gridListRef,
-		setShowUpdateModal,
 		isFetching,
-	} = useTrackContext();
+		setShowUpdateModal,
+	} = useTrack();
 
 	return (
 		<GridList
 			glRef={gridListRef}
 			aria-label='Tracks'
 			className='flex flex-col gap-2'
+			data-grid-list='tracks'
 			// behavior
 			selectionMode='multiple'
 			selectionBehavior='replace'
@@ -61,7 +65,7 @@ function TrackCard({
 	track: AppRouterOutputs['track']['byWorkspace']['tracks'][number];
 }) {
 	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } =
-		useTrackContext();
+		useTrackSearchParams();
 
 	return (
 		<GridListCard

@@ -12,23 +12,22 @@ import { GridList, GridListCard } from '@barely/ui/grid-list';
 import { Icon } from '@barely/ui/icon';
 
 import { CreatePlaylistButton } from './create-playlist-button';
-import { usePlaylistContext } from './playlist-context';
+import { usePlaylist, usePlaylistSearchParams } from './playlist-context';
 
 export function AllPlaylists() {
+	const { setShowUpdateModal } = usePlaylistSearchParams();
 	const {
 		items,
 		selection,
 		lastSelectedItemId,
 		setSelection,
-		gridListRef,
-		setShowUpdateModal,
 		isFetching,
-	} = usePlaylistContext();
+	} = usePlaylist();
 
 	return (
 		<>
 			<GridList
-				glRef={gridListRef}
+				data-grid-list="playlists"
 				aria-label='Playlists'
 				className='flex flex-col gap-2'
 				selectionMode='multiple'
@@ -67,7 +66,7 @@ function PlaylistCard({
 }) {
 	const { handle } = useWorkspace();
 	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } =
-		usePlaylistContext();
+		usePlaylistSearchParams();
 
 	const href = `/${handle}/playlists/${playlist.id}`;
 

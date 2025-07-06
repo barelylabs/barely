@@ -2,10 +2,10 @@
 
 import { Button } from '@barely/ui/button';
 
-import { usePlaylistContext } from './playlist-context';
+import { usePlaylistSearchParams } from './playlist-context';
 
 export function CreatePlaylistButton() {
-	const { setShowCreateModal } = usePlaylistContext();
+	const { setShowCreateModal } = usePlaylistSearchParams();
 
 	return (
 		<Button onClick={() => setShowCreateModal(true)} className='space-x-3'>

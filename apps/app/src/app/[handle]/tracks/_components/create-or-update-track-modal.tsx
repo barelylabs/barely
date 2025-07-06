@@ -24,7 +24,7 @@ import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 import { Text } from '@barely/ui/typography';
 import { UploadDropzone, UploadQueueList } from '@barely/ui/upload';
 
-import { useTrackContext } from '~/app/[handle]/tracks/_components/track-context';
+import { useTrack } from '~/app/[handle]/tracks/_components/track-context';
 
 const trackArtworkUploadQueueAtom = atom<UploadQueueItem[]>([]);
 const trackAudioUploadQueueAtom = atom<UploadQueueItem[]>([]);
@@ -37,12 +37,12 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 	/* track context */
 	const {
 		lastSelectedItem: selectedTrack,
+		focusGridList,
 		showCreateModal,
 		setShowCreateModal,
 		showUpdateModal,
 		setShowUpdateModal,
-		focusGridList,
-	} = useTrackContext();
+	} = useTrack();
 
 	/* api */
 	const { mutateAsync: createTrack } = useMutation({

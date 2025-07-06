@@ -2,10 +2,10 @@
 
 import { Button } from '@barely/ui/button';
 
-import { useMediaContext } from '~/app/[handle]/media/_components/media-context';
+import { useMediaSearchParams } from '~/app/[handle]/media/_components/media-context';
 
 export function UploadMediaButton() {
-	const { setShowCreateModal } = useMediaContext();
+	const { setShowCreateModal } = useMediaSearchParams();
 
 	return (
 		<Button

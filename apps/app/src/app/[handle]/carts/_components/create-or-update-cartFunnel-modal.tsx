@@ -24,7 +24,7 @@ import { MDXEditor } from '@barely/ui/mdx-editor';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 import { H } from '@barely/ui/typography';
 
-import { useCartFunnelContext } from '~/app/[handle]/carts/_components/cartFunnel-context';
+import { useCartFunnel, useCartFunnelSearchParams } from '~/app/[handle]/carts/_components/cartFunnel-context';
 
 export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' }) {
 	const trpc = useTRPC();
@@ -33,14 +33,16 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 
 	/* funnel context */
 	const {
-		lastSelectedCartFunnel: selectedCartFunnel,
-		lastSelectedCartFunnelId: selectedCartFunnelId,
-		showCreateCartFunnelModal,
-		setShowCreateCartFunnelModal,
-		showUpdateCartFunnelModal,
-		setShowUpdateCartFunnelModal,
+		lastSelectedItem: selectedCartFunnel,
+		lastSelectedItemId: selectedCartFunnelId,
 		focusGridList,
-	} = useCartFunnelContext();
+	} = useCartFunnel();
+	const {
+		showCreateModal: showCreateCartFunnelModal,
+		setShowCreateModal: setShowCreateCartFunnelModal,
+		showUpdateModal: showUpdateCartFunnelModal,
+		setShowUpdateModal: setShowUpdateCartFunnelModal,
+	} = useCartFunnelSearchParams();
 
 	/* products */
 	const { data: productsInfinite } = useSuspenseInfiniteQuery(

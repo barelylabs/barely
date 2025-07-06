@@ -2,16 +2,16 @@
 
 import { useModalHotKeys } from '@barely/hooks';
 
-import { useCartFunnelContext } from '~/app/[handle]/carts/_components/cartFunnel-context';
+import { useCartFunnel, useCartFunnelSearchParams } from '~/app/[handle]/carts/_components/cartFunnel-context';
 
 export function CartFunnelHotkeys() {
+	const { selection: cartFunnelSelection } = useCartFunnel();
 	const {
-		cartFunnelSelection,
-		setShowCreateCartFunnelModal,
-		setShowUpdateCartFunnelModal,
-		setShowArchiveCartFunnelModal,
-		setShowDeleteCartFunnelModal,
-	} = useCartFunnelContext();
+		setShowCreateModal: setShowCreateCartFunnelModal,
+		setShowUpdateModal: setShowUpdateCartFunnelModal,
+		setShowArchiveModal: setShowArchiveCartFunnelModal,
+		setShowDeleteModal: setShowDeleteCartFunnelModal,
+	} = useCartFunnelSearchParams();
 
 	useModalHotKeys({
 		setShowCreateModal: setShowCreateCartFunnelModal,

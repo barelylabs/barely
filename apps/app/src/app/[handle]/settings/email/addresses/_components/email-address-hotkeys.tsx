@@ -2,11 +2,11 @@
 
 import { useModalHotKeys } from '@barely/hooks';
 
-import { useEmailAddressContext } from './email-address-context';
+import { useEmailAddress, useEmailAddressSearchParams } from './email-address-context';
 
 export function EmailAddressHotkeys() {
-	const { selection, setShowCreateModal, setShowUpdateModal, setShowDeleteModal } =
-		useEmailAddressContext();
+	const { selection } = useEmailAddress();
+	const { setShowCreateModal, setShowUpdateModal, setShowDeleteModal } = useEmailAddressSearchParams();
 
 	useModalHotKeys({
 		setShowCreateModal,

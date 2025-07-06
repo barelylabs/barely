@@ -48,6 +48,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
+# cache files
+.cache/
+.eslintcache
+
 # turbo
 .turbo
 

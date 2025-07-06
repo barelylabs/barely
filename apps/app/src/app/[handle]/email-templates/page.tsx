@@ -10,7 +10,6 @@ import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 import { ArchiveOrDeleteEmailTemplateModal } from './_components/archive-or-delete-email-template-modal';
 import { CreateEmailTemplateButton } from './_components/create-email-template-button';
 import { CreateOrUpdateEmailTemplateModal } from './_components/create-or-update-email-template-modal';
-import { EmailTemplateContextProvider } from './_components/email-template-context';
 import { EmailTemplateHotkeys } from './_components/email-template-hotkeys';
 
 export default async function EmailTemplatesPage({
@@ -40,23 +39,21 @@ export default async function EmailTemplatesPage({
 	return (
 		<HydrateClient>
 			<Suspense fallback={<div>Loading...</div>}>
-				<EmailTemplateContextProvider>
-					<DashContentHeader
-						title='Email Templates'
-						button={<CreateEmailTemplateButton />}
-					/>
+				<DashContentHeader
+					title='Email Templates'
+					button={<CreateEmailTemplateButton />}
+				/>
 
-					<EmailTemplateFilters />
-					<AllEmailTemplates />
+				<EmailTemplateFilters />
+				<AllEmailTemplates />
 
-					<CreateOrUpdateEmailTemplateModal mode='create' />
-					<CreateOrUpdateEmailTemplateModal mode='update' />
+				<CreateOrUpdateEmailTemplateModal mode='create' />
+				<CreateOrUpdateEmailTemplateModal mode='update' />
 
-					<ArchiveOrDeleteEmailTemplateModal mode='archive' />
-					<ArchiveOrDeleteEmailTemplateModal mode='delete' />
+				<ArchiveOrDeleteEmailTemplateModal mode='archive' />
+				<ArchiveOrDeleteEmailTemplateModal mode='delete' />
 
-					<EmailTemplateHotkeys />
-				</EmailTemplateContextProvider>
+				<EmailTemplateHotkeys />
 			</Suspense>
 		</HydrateClient>
 	);

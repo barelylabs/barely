@@ -2,10 +2,10 @@
 
 import { Button } from '@barely/ui/button';
 
-import { useTrackContext } from '~/app/[handle]/tracks/_components/track-context';
+import { useTrackSearchParams } from '~/app/[handle]/tracks/_components/track-context';
 
 export function CreateTrackButton() {
-	const { setShowCreateModal } = useTrackContext();
+	const { setShowCreateModal } = useTrackSearchParams();
 
 	return (
 		<Button

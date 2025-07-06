@@ -29,7 +29,7 @@ export const createTRPCContext = async (opts: {
 	rest?: boolean;
 }) => {
 	const session = await opts.auth?.api.getSession({ headers: opts.headers });
-	console.log('session in createTRPCContext => ', session);
+	// console.log('session in createTRPCContext => ', session);
 
 	const source =
 		opts.rest ? 'rest'
@@ -88,7 +88,13 @@ export const mergeRouters = t.mergeRouters;
 // let pool: NeonPool | null = null;
 
 const poolMiddleware = middleware(async ({ next, ctx }) => {
-	//
+	// Note: Currently each procedure in a batch creates its own pool.
+	// Future optimization: For httpBatchStreamLink, we could push pool
+	// management up to the route handler to share a single pool across
+	// all procedures in a batch, closing it only after all responses
+	// have been streamed. This would require tracking active operations
+	// at the handler level.
+
 	const pool = ctx.pool ?? makePool();
 
 	const res = await next({

@@ -5,7 +5,7 @@ import { useTRPC } from '@barely/api/app/trpc.react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { ArchiveOrDeleteModal } from '~/app/[handle]/_components/archive-or-delete-modal';
-import { useTrackContext } from '~/app/[handle]/tracks/_components/track-context';
+import { useTrack } from '~/app/[handle]/tracks/_components/track-context';
 
 export function ArchiveOrDeleteTrackModal({ mode }: { mode: 'archive' | 'delete' }) {
 	const trpc = useTRPC();
@@ -18,7 +18,7 @@ export function ArchiveOrDeleteTrackModal({ mode }: { mode: 'archive' | 'delete'
 		showDeleteModal,
 		setShowArchiveModal,
 		setShowDeleteModal,
-	} = useTrackContext();
+	} = useTrack();
 
 	const showModal = mode === 'archive' ? showArchiveModal : showDeleteModal;
 

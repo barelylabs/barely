@@ -1,4 +1,4 @@
-import type { InsertEmailDomain } from '@barely/validators';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import type { z } from 'zod/v4';
 import { useEffect, useState } from 'react';
 import { atomWithToggle } from '@barely/atoms';
@@ -10,20 +10,18 @@ import { atom, useAtom } from 'jotai';
 
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { TextField } from '@barely/ui/forms/text-field';
-// import { useEmailDomains } from '@barely/hooks/use-email-domains';
-
 import { Icon } from '@barely/ui/icon';
 import { Modal, ModalBody, ModalHeader } from '@barely/ui/modal';
 
+type EmailDomain = AppRouterOutputs['emailDomain']['byWorkspace']['domains'][number];
+
 export const showEmailDomainModalAtom = atomWithToggle(false);
-export const updateEmailDomainAtom = atom<InsertEmailDomain | undefined>(undefined);
+export const updateEmailDomainAtom = atom<EmailDomain | undefined>(undefined);
 
 export function EmailDomainModal() {
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
 	const { handle } = useWorkspace();
-
-	// const { domains } = useEmailDomains();
 
 	const [editEmailDomain, setEditEmailDomain] = useAtom(updateEmailDomainAtom);
 	const [showEmailDomainModal, setShowEmailDomainModal] = useAtom(

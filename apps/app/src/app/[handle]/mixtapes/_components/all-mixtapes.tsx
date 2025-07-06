@@ -7,23 +7,22 @@ import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placehold
 import { GridList, GridListCard } from '@barely/ui/grid-list';
 
 import { CreateMixtapeButton } from '~/app/[handle]/mixtapes/_components/create-mixtape-button';
-import { useMixtapesContext } from '~/app/[handle]/mixtapes/_components/mixtape-context';
+import { useMixtape, useMixtapeSearchParams } from '~/app/[handle]/mixtapes/_components/mixtape-context';
 
 export function AllMixtapes() {
+	const { setShowUpdateModal } = useMixtapeSearchParams();
 	const {
 		items,
 		selection,
 		lastSelectedItemId,
 		setSelection,
-		gridListRef,
-		setShowUpdateModal,
 		isFetching,
-	} = useMixtapesContext();
+	} = useMixtape();
 
 	return (
 		<>
 			<GridList
-				glRef={gridListRef}
+				data-grid-list="mixtapes"
 				className='flex flex-col gap-2'
 				aria-label='Mixtapes'
 				selectionMode='multiple'
@@ -61,7 +60,7 @@ function MixtapeCard({
 	mixtape: AppRouterOutputs['mixtape']['byWorkspace']['mixtapes'][0];
 }) {
 	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } =
-		useMixtapesContext();
+		useMixtapeSearchParams();
 
 	return (
 		<GridListCard

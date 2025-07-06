@@ -15,7 +15,7 @@ import { Label } from '@barely/ui/label';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 import { Text } from '@barely/ui/typography';
 
-import { useEmailTemplateGroupContext } from './email-template-group-context';
+import { useEmailTemplateGroup, useEmailTemplateGroupSearchParams } from './email-template-group-context';
 
 export function CreateOrUpdateEmailTemplateGroupModal({
 	mode,
@@ -25,14 +25,13 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
 
+	const { lastSelectedItem, focusGridList } = useEmailTemplateGroup();
 	const {
-		lastSelectedItem,
 		showCreateModal,
 		showUpdateModal,
 		setShowCreateModal,
 		setShowUpdateModal,
-		focusGridList,
-	} = useEmailTemplateGroupContext();
+	} = useEmailTemplateGroupSearchParams();
 
 	const { handle } = useWorkspace();
 

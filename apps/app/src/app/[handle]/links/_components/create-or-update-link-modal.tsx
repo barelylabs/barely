@@ -34,7 +34,7 @@ import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 import { InfoTooltip, TooltipContent } from '@barely/ui/tooltip';
 import { Text } from '@barely/ui/typography';
 
-import { useLinkContext } from '~/app/[handle]/links/_components/link-context';
+import { useLink, useLinkSearchParams } from '~/app/[handle]/links/_components/link-context';
 import { LinkOptionalSettings } from '~/app/[handle]/links/_components/link-optional-settings';
 import { SocialLinkPreviews } from '~/app/[handle]/links/_components/social-link-previews';
 
@@ -43,14 +43,13 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 	const { handle } = useWorkspace();
 
 	/* link context */
+	const { lastSelectedItem: selectedLink, focusGridList } = useLink();
 	const {
-		lastSelectedItem: selectedLink,
 		showCreateModal,
 		setShowCreateModal,
 		showUpdateModal,
 		setShowUpdateModal,
-		focusGridList,
-	} = useLinkContext();
+	} = useLinkSearchParams();
 
 	/* modal state */
 	const showLinkModal = mode === 'create' ? showCreateModal : showUpdateModal;

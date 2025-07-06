@@ -8,7 +8,6 @@ import { AllEmailBroadcasts } from '~/app/[handle]/email-broadcasts/_components/
 import { CreateOrUpdateEmailBroadcastModal } from '~/app/[handle]/email-broadcasts/_components/create-or-update-email-broadcast-modal';
 import { EmailBroadcastFilters } from '~/app/[handle]/email-broadcasts/_components/email-broadcast-filters';
 import { CreateEmailBroadcastButton } from './_components/create-email-broadcast-button';
-import { EmailBroadcastsContextProvider } from './_components/email-broadcasts-context';
 import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
 export default async function EmailBroadcastsPage({
@@ -36,20 +35,18 @@ export default async function EmailBroadcastsPage({
 	return (
 		<HydrateClient>
 			<Suspense fallback={<div>Loading...</div>}>
-				<EmailBroadcastsContextProvider>
-					<DashContentHeader
-						title='Email Broadcasts'
-						button={<CreateEmailBroadcastButton />}
-					/>
-					<EmailBroadcastFilters />
-					<AllEmailBroadcasts />
+				<DashContentHeader
+					title='Email Broadcasts'
+					button={<CreateEmailBroadcastButton />}
+				/>
+				<EmailBroadcastFilters />
+				<AllEmailBroadcasts />
 
-					<CreateOrUpdateEmailBroadcastModal mode='create' />
-					<CreateOrUpdateEmailBroadcastModal mode='update' />
+				<CreateOrUpdateEmailBroadcastModal mode='create' />
+				<CreateOrUpdateEmailBroadcastModal mode='update' />
 
-					{/* <ArchiveOrDeleteEmailBroadcastModal mode='archive' />
-					<ArchiveOrDeleteEmailBroadcastModal mode='delete' /> */}
-				</EmailBroadcastsContextProvider>
+				{/* <ArchiveOrDeleteEmailBroadcastModal mode='archive' />
+				<ArchiveOrDeleteEmailBroadcastModal mode='delete' /> */}
 			</Suspense>
 		</HydrateClient>
 	);

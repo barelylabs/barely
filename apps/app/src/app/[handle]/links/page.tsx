@@ -3,12 +3,13 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { linkSearchParamsSchema } from '@barely/validators';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
+
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllLinks } from '~/app/[handle]/links/_components/all-links';
 import { ArchiveOrDeleteLinkModal } from '~/app/[handle]/links/_components/archive-or-delete-link-modal';
 import { CreateLinkButton } from '~/app/[handle]/links/_components/create-link-button';
 import { CreateOrUpdateLinkModal } from '~/app/[handle]/links/_components/create-or-update-link-modal';
-import { LinkContextProvider } from '~/app/[handle]/links/_components/link-context';
 import { LinkFilters } from '~/app/[handle]/links/_components/link-filters';
 import { LinkHotkeys } from '~/app/[handle]/links/_components/link-hotkeys';
 import { UpgradeModal } from '~/app/[handle]/settings/billing/upgrade-modal';
@@ -40,23 +41,21 @@ export default async function LinksPage({
 
 	return (
 		<HydrateClient>
-			<LinkContextProvider>
-				<DashContentHeader title='Links' button={<CreateLinkButton />} />
+			<DashContentHeader title='Links' button={<CreateLinkButton />} />
 
-				<LinkFilters />
-				<Suspense fallback={<div>Loading...</div>}>
-					<AllLinks />
-				</Suspense>
+			<LinkFilters />
+			<Suspense fallback={<GridListSkeleton />}>
+				<AllLinks />
+			</Suspense>
 
-				<CreateOrUpdateLinkModal mode='create' />
-				<CreateOrUpdateLinkModal mode='update' />
+			<CreateOrUpdateLinkModal mode='create' />
+			<CreateOrUpdateLinkModal mode='update' />
 
-				<ArchiveOrDeleteLinkModal mode='archive' />
-				<ArchiveOrDeleteLinkModal mode='delete' />
+			<ArchiveOrDeleteLinkModal mode='archive' />
+			<ArchiveOrDeleteLinkModal mode='delete' />
 
-				<LinkHotkeys />
-				<UpgradeModal checkoutCancelPath='links' checkoutSuccessPath='links' />
-			</LinkContextProvider>
+			<LinkHotkeys />
+			<UpgradeModal checkoutCancelPath='links' checkoutSuccessPath='links' />
 		</HydrateClient>
 	);
 }

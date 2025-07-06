@@ -292,6 +292,22 @@ Automated sequences built with:
 6. Update database schema in `packages/db/src/schema/`
 7. Create validators in `packages/validators/src/`
 
+### Adding New tRPC Subrouters
+
+When creating a new subrouter handler in `packages/api/src/app/sub/`, you **must** also create the corresponding API route in the main app:
+
+1. Create handler in `packages/api/src/app/sub/{feature}.handler.ts`
+2. Create corresponding route in `apps/app/src/app/api/trpc/{feature}/[trpc]/route.ts`:
+
+```typescript
+import { OPTIONS } from '@barely/utils';
+import { featureHandler } from '@barely/api/app/sub/feature.handler';
+
+export { OPTIONS, featureHandler as GET, featureHandler as POST };
+```
+
+**Note**: The route folder name should use camelCase (e.g., `emailBroadcast` not `email-broadcast`)
+
 ### Component Development
 
 - Follow existing patterns in `packages/ui/src/components/`

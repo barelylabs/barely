@@ -9,7 +9,6 @@ import { AllEmailTemplateGroups } from './_components/all-email-template-groups'
 import { ArchiveOrDeleteEmailTemplateGroupModal } from './_components/archive-or-delete-email-template-group-modal';
 import { CreateEmailTemplateGroupButton } from './_components/create-email-template-group-button';
 import { CreateOrUpdateEmailTemplateGroupModal } from './_components/create-or-update-email-template-group-modal';
-import { EmailTemplateGroupContextProvider } from './_components/email-template-group-context';
 import { EmailTemplateGroupHotkeys } from './_components/email-template-group-hotkeys';
 import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
@@ -38,23 +37,21 @@ export default async function EmailTemplateGroupsPage({
 	return (
 		<HydrateClient>
 			<Suspense fallback={<div>Loading...</div>}>
-				<EmailTemplateGroupContextProvider>
-					<DashContentHeader
-						title='Email Template Groups'
-						button={<CreateEmailTemplateGroupButton />}
-					/>
+				<DashContentHeader
+					title='Email Template Groups'
+					button={<CreateEmailTemplateGroupButton />}
+				/>
 
-					<EmailTemplateGroupFilters />
-					<AllEmailTemplateGroups />
+				<EmailTemplateGroupFilters />
+				<AllEmailTemplateGroups />
 
-					<CreateOrUpdateEmailTemplateGroupModal mode='create' />
-					<CreateOrUpdateEmailTemplateGroupModal mode='update' />
+				<CreateOrUpdateEmailTemplateGroupModal mode='create' />
+				<CreateOrUpdateEmailTemplateGroupModal mode='update' />
 
-					<ArchiveOrDeleteEmailTemplateGroupModal mode='archive' />
-					<ArchiveOrDeleteEmailTemplateGroupModal mode='delete' />
+				<ArchiveOrDeleteEmailTemplateGroupModal mode='archive' />
+				<ArchiveOrDeleteEmailTemplateGroupModal mode='delete' />
 
-					<EmailTemplateGroupHotkeys />
-				</EmailTemplateGroupContextProvider>
+				<EmailTemplateGroupHotkeys />
 			</Suspense>
 		</HydrateClient>
 	);

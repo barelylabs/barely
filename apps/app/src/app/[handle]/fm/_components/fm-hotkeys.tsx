@@ -2,16 +2,16 @@
 
 import { useModalHotKeys } from '@barely/hooks';
 
-import { useFmContext } from '~/app/[handle]/fm/_components/fm-context';
+import { useFm, useFmSearchParams } from '~/app/[handle]/fm/_components/fm-context';
 
 export function FmHotkeys() {
+	const { selection } = useFm();
 	const {
-		selection,
 		setShowArchiveModal,
 		setShowDeleteModal,
 		setShowCreateModal,
 		setShowUpdateModal,
-	} = useFmContext();
+	} = useFmSearchParams();
 
 	useModalHotKeys({
 		setShowCreateModal,

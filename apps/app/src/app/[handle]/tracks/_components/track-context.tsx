@@ -1,147 +1,80 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
-import type { trackFilterParamsSchema } from '@barely/validators';
-import type { Selection } from 'react-aria-components';
-import type { z } from 'zod/v4';
-import { createContext, useCallback, useContext, useRef, useState } from 'react';
-import { useTypedOptimisticQuery, useWorkspace } from '@barely/hooks';
-import { trackSearchParamsSchema } from '@barely/validators';
-import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
+import type { BaseResourceFilters, ResourceSearchParamsReturn } from '@barely/hooks';
+import { createResourceDataHook, createResourceSearchParamsHook } from '@barely/hooks';
+import { parseAsArrayOf, parseAsBoolean, parseAsString } from 'nuqs';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
-import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
+// Define the page data type for tracks
+interface TrackPageData {
+	tracks: AppRouterOutputs['track']['byWorkspace']['tracks'];
+	nextCursor?: { id: string; createdAt: Date } | null;
+}
 
-export type TrackContext = InfiniteItemsContext<
-	AppRouterOutputs['track']['byWorkspace']['tracks'][number],
-	z.infer<typeof trackFilterParamsSchema>
->;
+// Define custom filters interface
+interface TrackFilters extends BaseResourceFilters {
+	genres: string[];
+	released?: boolean;
+}
 
-const TrackContext = createContext<TrackContext | undefined>(undefined);
+// Define the return type for track search params
+interface TrackSearchParamsReturn extends ResourceSearchParamsReturn<TrackFilters> {
+	setGenres: (genres: string[]) => Promise<URLSearchParams> | undefined;
+	toggleReleased: () => Promise<URLSearchParams>;
+}
 
-export function TrackContextProvider({ children }: { children: React.ReactNode }) {
+// Create the search params hook for tracks with custom filters
+const _useTrackSearchParams = createResourceSearchParamsHook({
+	additionalParsers: {
+		genres: parseAsArrayOf(parseAsString).withDefault([]),
+		released: parseAsBoolean.withDefault(false),
+	},
+	additionalActions: {
+		setGenres: setParams =>
+			((...args: unknown[]) => {
+				const [genres] = args as [string[]];
+				return setParams({ genres });
+			}) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
+		toggleReleased: setParams => () =>
+			setParams(prev => ({
+				released: prev.released === undefined ? true : !prev.released,
+			})),
+	},
+});
+
+export const useTrackSearchParams = _useTrackSearchParams as () => TrackSearchParamsReturn;
+
+// Create a custom data hook for tracks that properly uses tRPC
+export function useTrack() {
 	const trpc = useTRPC();
-	const [showCreateModal, setShowCreateModal] = useState(false);
-	const [showUpdateModal, setShowUpdateModal] = useState(false);
-	const [showArchiveModal, setShowArchiveModal] = useState(false);
-	const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-	const { handle } = useWorkspace();
-
-	const {
-		data,
-		setQuery,
-		removeByKey,
-		removeAllQueryParams,
-		pending: pendingFiltersTransition,
-	} = useTypedOptimisticQuery(trackSearchParamsSchema);
-
-	const { selectedTrackIds, ...filters } = data;
-
-	const trackSelection: Selection =
-		!selectedTrackIds ? new Set()
-		: selectedTrackIds === 'all' ? 'all'
-		: new Set(selectedTrackIds);
-
-	const {
-		data: infiniteTracks,
-		hasNextPage,
-		fetchNextPage,
-		isFetchingNextPage,
-		isFetching,
-		isRefetching,
-		isPending,
-	} = useSuspenseInfiniteQuery({
-		...trpc.track.byWorkspace.infiniteQueryOptions(
-			{
-				handle,
-				...filters,
-			},
-			{
-				getNextPageParam: lastPage => lastPage.nextCursor,
-			},
-		),
-	});
-
-	const tracks = infiniteTracks.pages.flatMap(page => page.tracks);
-
-	const setTrackSelection = useCallback(
-		(selection: Selection) => {
-			if (selection === 'all') return;
-			if (selection.size === 0) return removeByKey('selectedTrackIds');
-			return setQuery(
-				'selectedTrackIds',
-				Array.from(selection).map(key => key.toString()),
-			);
+	const searchParams = useTrackSearchParams();
+	const baseHook = createResourceDataHook<
+		AppRouterOutputs['track']['byWorkspace']['tracks'][0],
+		TrackPageData,
+		TrackFilters
+	>(
+		{
+			resourceName: 'tracks',
+			getQueryOptions: (handle, filters) =>
+				trpc.track.byWorkspace.infiniteQueryOptions(
+					{ handle, ...filters },
+					{ getNextPageParam: (lastPage: TrackPageData) => lastPage.nextCursor },
+				),
+			getItemsFromPages: pages => pages.flatMap(page => page.tracks),
 		},
-		[removeByKey, setQuery],
+		() => searchParams, // Pass the instance directly
 	);
 
-	const clearAllFilters = useCallback(() => {
-		removeAllQueryParams();
-	}, [removeAllQueryParams]);
+	const dataHookResult = baseHook();
 
-	const toggleArchived = useCallback(() => {
-		if (filters.showArchived) return removeByKey('showArchived');
-		return setQuery('showArchived', true);
-	}, [filters.showArchived, removeByKey, setQuery]);
-
-	const setSearch = useCallback(
-		(search: string) => {
-			if (search.length) return setQuery('search', search);
-			return removeByKey('search');
-		},
-		[removeByKey, setQuery],
-	);
-
-	const lastSelectedTrackId =
-		trackSelection === 'all' || !trackSelection.size ?
-			undefined
-		:	Array.from(trackSelection).pop()?.toString();
-
-	const lastSelectedTrack = tracks.find(track => track.id === lastSelectedTrackId);
-
-	const gridListRef = useRef<HTMLDivElement>(null);
-
-	const contextValue = {
-		items: tracks,
-		selection: trackSelection,
-		lastSelectedItemId: lastSelectedTrackId,
-		lastSelectedItem: lastSelectedTrack,
-		setSelection: setTrackSelection,
-		gridListRef,
-		focusGridList: () => gridListRef.current?.focus(),
-		showCreateModal,
-		setShowCreateModal,
-		showUpdateModal,
-		setShowUpdateModal,
-		showArchiveModal,
-		setShowArchiveModal,
-		showDeleteModal,
-		setShowDeleteModal,
-		// filters
-		filters,
-		pendingFiltersTransition,
-		setSearch,
-		toggleArchived,
-		clearAllFilters,
-		// infinite
-		hasNextPage,
-		fetchNextPage: () => void fetchNextPage(),
-		isFetchingNextPage,
-		isFetching,
-		isRefetching,
-		isPending,
-	} satisfies TrackContext;
-
-	return <TrackContext.Provider value={contextValue}>{children}</TrackContext.Provider>;
+	// Merge search params and data hook results
+	return {
+		...dataHookResult,
+		...searchParams,
+	};
 }
 
-export function useTrackContext() {
-	const context = useContext(TrackContext);
-	if (!context) {
-		throw new Error('useTrackContext must be used within a TrackContextProvider');
-	}
-	return context;
-}
+// Export the old context hook name for backward compatibility
+export const useTrackContext = useTrack;

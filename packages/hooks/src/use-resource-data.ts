@@ -1,4 +1,5 @@
 import type { InfiniteData } from '@tanstack/react-query';
+import { useRef } from 'react';
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
 
 import type {
@@ -55,6 +56,10 @@ export function createResourceDataHook<
 			:	Array.from(selection).pop()?.toString();
 		const lastSelectedItem = items.find(item => item.id === lastSelectedItemId);
 
+		// UI refs
+		const gridListRef = useRef<HTMLDivElement>(null);
+		const focusGridList = () => gridListRef.current?.focus();
+
 		return {
 			items,
 			selection,
@@ -68,6 +73,9 @@ export function createResourceDataHook<
 			isFetching,
 			isRefetching,
 			isPending,
+			// UI refs
+			gridListRef,
+			focusGridList,
 		};
 	};
 }

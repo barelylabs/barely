@@ -14,7 +14,7 @@ import { Icon } from '@barely/ui/icon';
 import { Text } from '@barely/ui/typography';
 
 import { CreateLinkButton } from '~/app/[handle]/links/_components/create-link-button';
-import { useLinkContext } from '~/app/[handle]/links/_components/link-context';
+import { useLink } from '~/app/[handle]/links/_components/link-context';
 
 export function AllLinks() {
 	const {
@@ -24,16 +24,16 @@ export function AllLinks() {
 		setSelection,
 		gridListRef,
 		setShowUpdateModal,
-		pendingFiltersTransition,
 		isFetching,
-	} = useLinkContext();
+	} = useLink();
 
 	return (
 		<>
 			<GridList
 				glRef={gridListRef}
 				aria-label='Links'
-				className={cn('flex flex-col gap-2', pendingFiltersTransition && 'animate-pulse')}
+				data-grid-list='links'
+				className='flex flex-col gap-2'
 				// behavior
 				selectionMode='multiple'
 				selectionBehavior='replace'
@@ -72,7 +72,7 @@ function LinkCard({
 	link: AppRouterOutputs['link']['byWorkspace']['links'][0] & { linkKey: string };
 }) {
 	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } =
-		useLinkContext();
+		useLink();
 
 	return (
 		<GridListCard

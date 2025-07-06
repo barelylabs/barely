@@ -7,7 +7,6 @@ import { DashContentHeader } from '~/app/[handle]/_components/dash-content-heade
 import { AllEmailDomains } from '~/app/[handle]/settings/email/domains/_components/all-email-domains';
 import { CreateEmailDomainButton } from '~/app/[handle]/settings/email/domains/_components/create-email-domain-button';
 import { CreateOrUpdateEmailDomainModal } from '~/app/[handle]/settings/email/domains/_components/create-or-update-email-domain-modal';
-import { EmailDomainContextProvider } from '~/app/[handle]/settings/email/domains/_components/email-domain-context';
 import { EmailDomainHotkeys } from '~/app/[handle]/settings/email/domains/_components/email-domain-hotkeys';
 import { HydrateClient } from '~/trpc/server';
 
@@ -30,19 +29,17 @@ export default async function EmailDomainsPage({
 	return (
 		<HydrateClient>
 			<Suspense>
-				<EmailDomainContextProvider>
-					<DashContentHeader
-						title='Email domains'
-						subtitle='Manage your email domains'
-						button={<CreateEmailDomainButton />}
-					/>
-					<AllEmailDomains />
+				<DashContentHeader
+					title='Email domains'
+					subtitle='Manage your email domains'
+					button={<CreateEmailDomainButton />}
+				/>
+				<AllEmailDomains />
 
-					<CreateOrUpdateEmailDomainModal mode='create' />
-					<CreateOrUpdateEmailDomainModal mode='update' />
+				<CreateOrUpdateEmailDomainModal mode='create' />
+				<CreateOrUpdateEmailDomainModal mode='update' />
 
-					<EmailDomainHotkeys />
-				</EmailDomainContextProvider>
+				<EmailDomainHotkeys />
 			</Suspense>
 		</HydrateClient>
 	);

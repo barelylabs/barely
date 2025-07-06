@@ -3,15 +3,10 @@
 import { useCallback } from 'react';
 import { useModalHotKeys } from '@barely/hooks';
 
-import { useCartOrderContext } from '~/app/[handle]/orders/_components/cart-order-context';
+import { useCartOrder } from '~/app/[handle]/orders/_components/cart-order-context';
 
 export function CartOrderHotkeys() {
-	const {
-		selection,
-		setShowMarkAsFulfilledModal,
-		setShowCancelCartOrderModal,
-		lastSelectedItem,
-	} = useCartOrderContext();
+	const { selection, lastSelectedItem, setShowMarkAsFulfilledModal, setShowCancelCartOrderModal } = useCartOrder();
 
 	const fulfillAction = useCallback(() => {
 		if (!lastSelectedItem || lastSelectedItem.fulfillmentStatus === 'fulfilled') {

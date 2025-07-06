@@ -5,17 +5,20 @@ import { useTRPC } from '@barely/api/app/trpc.react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { ArchiveOrDeleteModal } from '~/app/[handle]/_components/archive-or-delete-modal';
-import { useMixtapesContext } from '~/app/[handle]/mixtapes/_components/mixtape-context';
+import { useMixtape, useMixtapeSearchParams } from '~/app/[handle]/mixtapes/_components/mixtape-context';
 
 export function ArchiveOrDeleteMixtapeModal({ mode }: { mode: 'archive' | 'delete' }) {
 	const {
 		selection,
 		lastSelectedItem,
+	} = useMixtape();
+	
+	const {
 		showArchiveModal,
 		showDeleteModal,
 		setShowArchiveModal,
 		setShowDeleteModal,
-	} = useMixtapesContext();
+	} = useMixtapeSearchParams();
 
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();

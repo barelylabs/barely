@@ -1,6 +1,7 @@
 'use client';
 
 import type { HorizontalTabItemProps } from '@barely/ui/components/horizontal-tabs';
+import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useWorkspace } from '@barely/hooks';
 import { useTRPC } from '@barely/api/app/trpc.react';
@@ -10,11 +11,24 @@ import { Button } from '@barely/ui/button';
 import { HorizontalTabs } from '@barely/ui/components/horizontal-tabs';
 import { Icon } from '@barely/ui/icon';
 
+import { useCampaignSearchParams } from '~/app/[handle]/campaigns/_components/campaign-context';
+
 export function CampaignTabs() {
 	const trpc = useTRPC();
 	const { workspace } = useWorkspace();
+	const { setStage } = useCampaignSearchParams();
 
 	const params = useParams();
+	
+	// Sync route param with search params
+	useEffect(() => {
+		const stageParam = params.stage?.[0];
+		if (stageParam === 'all') {
+			setStage(undefined);
+		} else if (stageParam === 'screening' || stageParam === 'approved' || stageParam === 'active') {
+			setStage(stageParam);
+		}
+	}, [params.stage, setStage]);
 
 	const { data: totals } = useQuery(
 		trpc.campaign.countByWorkspaceId.queryOptions({

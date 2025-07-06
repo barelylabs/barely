@@ -3,28 +3,30 @@
 import type { z } from 'zod/v4';
 import { useCallback } from 'react';
 import { useWorkspace, useZodForm } from '@barely/hooks';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { formatCentsToDollars } from '@barely/utils';
 import { cancelCartOrderSchema } from '@barely/validators';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { focusGridList } from '@barely/hooks';
+
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 
-import { useCartOrderContext } from '~/app/[handle]/orders/_components/cart-order-context';
+import { useCartOrder } from '~/app/[handle]/orders/_components/cart-order-context';
 
 export function CancelCartOrderModal() {
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
 	const { handle } = useWorkspace();
 
-	// cart order context
+	// cart order hooks
 	const {
 		lastSelectedItem: selectedCartOrder,
-		showCancelCartOrderModal,
+		filters: { showCancelCartOrderModal },
 		setShowCancelCartOrderModal,
-		focusGridList,
-	} = useCartOrderContext();
+	} = useCartOrder();
 
 	// mutations
 	const { mutateAsync: cancelCartOrder } = useMutation(
@@ -68,14 +70,14 @@ export function CancelCartOrderModal() {
 	const showModal = showCancelCartOrderModal && !!selectedCartOrder;
 
 	const handleCloseModal = useCallback(async () => {
-		focusGridList();
+		focusGridList('cart-orders');
 		setShowCancelCartOrderModal(false);
 		form.reset();
 
 		await queryClient.invalidateQueries({
 			queryKey: trpc.cartOrder.byWorkspace.queryKey(),
 		});
-	}, [focusGridList, setShowCancelCartOrderModal, form, queryClient, trpc]);
+	}, [setShowCancelCartOrderModal, form, queryClient, trpc]);
 
 	return (
 		<Modal

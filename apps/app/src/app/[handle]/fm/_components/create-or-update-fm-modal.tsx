@@ -26,7 +26,7 @@ import { Label } from '@barely/ui/label';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 import { UploadDropzone } from '@barely/ui/upload';
 
-import { useFmContext } from '~/app/[handle]/fm/_components/fm-context';
+import { useFm, useFmSearchParams } from '~/app/[handle]/fm/_components/fm-context';
 
 const artworkUploadQueueAtom = atom<UploadQueueItem[]>([]);
 
@@ -35,14 +35,13 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 	const queryClient = useQueryClient();
 	const { handle } = useWorkspace();
 	/* fm context */
+	const { lastSelectedItem: selectedFmPage, focusGridList } = useFm();
 	const {
-		lastSelectedItem: selectedFmPage,
 		showCreateModal,
 		showUpdateModal,
 		setShowCreateModal,
 		setShowUpdateModal,
-		focusGridList,
-	} = useFmContext();
+	} = useFmSearchParams();
 
 	/* mutations */
 	const { mutateAsync: createFm } = useMutation(

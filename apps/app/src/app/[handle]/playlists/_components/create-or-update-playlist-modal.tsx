@@ -12,22 +12,21 @@ import { TextAreaField } from '@barely/ui/forms/text-area-field';
 import { TextField } from '@barely/ui/forms/text-field';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 
-import { usePlaylistContext } from '~/app/[handle]/playlists/_components/playlist-context';
+import { usePlaylist, usePlaylistSearchParams } from '~/app/[handle]/playlists/_components/playlist-context';
 
 export function CreateOrUpdatePlaylistModal({ mode }: { mode: 'create' | 'update' }) {
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
 	const { handle } = useWorkspace();
 
-	/* playlist context */
+	/* playlist hooks */
+	const { lastSelectedItem: selectedPlaylist } = usePlaylist();
 	const {
-		lastSelectedItem: selectedPlaylist,
 		showCreateModal,
 		showUpdateModal,
 		setShowCreateModal,
 		setShowUpdateModal,
-		focusGridList,
-	} = usePlaylistContext();
+	} = usePlaylistSearchParams();
 
 	/* mutations */
 	const { mutateAsync: createPlaylist } = useMutation(
@@ -77,13 +76,13 @@ export function CreateOrUpdatePlaylistModal({ mode }: { mode: 'create' | 'update
 	const setShowModal = mode === 'create' ? setShowCreateModal : setShowUpdateModal;
 
 	const handleCloseModal = useCallback(async () => {
-		focusGridList();
+		// Focus will be handled by the grid list component
 		await queryClient.invalidateQueries(
 			trpc.playlist.byWorkspace.queryFilter({ handle }),
 		);
 		form.reset();
 		setShowModal(false);
-	}, [form, focusGridList, queryClient, trpc.playlist, setShowModal, handle]);
+	}, [form, queryClient, trpc.playlist, setShowModal, handle]);
 
 	const submitDisabled = mode === 'update' && !form.formState.isDirty;
 

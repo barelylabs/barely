@@ -1,147 +1,48 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
-import type { productFilterParamsSchema } from '@barely/validators';
-import type { Selection } from 'react-aria-components';
-import type { z } from 'zod/v4';
-import { createContext, useCallback, useContext, useRef, useState } from 'react';
-import { useTypedOptimisticQuery, useWorkspace } from '@barely/hooks';
-import { productSearchParamsSchema } from '@barely/validators';
-import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
+import { createResourceDataHook, createResourceSearchParamsHook } from '@barely/hooks';
+import { parseAsBoolean } from 'nuqs';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
-import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
+// Define the page data type for products
+interface ProductPageData {
+	products: AppRouterOutputs['product']['byWorkspace']['products'];
+	nextCursor?: { id: string; createdAt: Date } | null;
+}
 
-export type ProductContext = InfiniteItemsContext<
-	AppRouterOutputs['product']['byWorkspace']['products'][number],
-	z.infer<typeof productFilterParamsSchema>
->;
+// Create the search params hook for products
+export const useProductSearchParams = createResourceSearchParamsHook({
+	additionalParsers: {
+		preorder: parseAsBoolean.withDefault(false),
+	},
+	additionalActions: {
+		togglePreorder: setParams => () => setParams(prev => ({ preorder: !prev.preorder })),
+	},
+});
 
-const ProductContext = createContext<ProductContext | undefined>(undefined);
-
-export function ProductContextProvider({ children }: { children: React.ReactNode }) {
+// Create a custom data hook for products that properly uses tRPC
+export function useProduct() {
 	const trpc = useTRPC();
-	const [showCreateModal, setShowCreateModal] = useState(false);
-	const [showUpdateModal, setShowUpdateModal] = useState(false);
-	const [showArchiveModal, setShowArchiveModal] = useState(false);
-	const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-	const { handle } = useWorkspace();
-
-	const {
-		data,
-		setQuery,
-		removeByKey,
-		removeAllQueryParams,
-		pending: pendingFiltersTransition,
-	} = useTypedOptimisticQuery(productSearchParamsSchema);
-
-	const { selectedProductIds, ...filters } = data;
-
-	const productSelection: Selection =
-		!selectedProductIds ? new Set()
-		: selectedProductIds === 'all' ? 'all'
-		: new Set(selectedProductIds);
-
-	const {
-		data: infiniteProducts,
-		hasNextPage,
-		fetchNextPage,
-		isFetchingNextPage,
-		isFetching,
-		isRefetching,
-		isPending,
-	} = useSuspenseInfiniteQuery({
-		...trpc.product.byWorkspace.infiniteQueryOptions(
-			{ handle, ...filters },
-			{
-				getNextPageParam: lastPage => lastPage.nextCursor,
-			},
-		),
-	});
-
-	const products = infiniteProducts.pages.flatMap(page => page.products);
-
-	const setProductSelection = useCallback(
-		(selection: Selection) => {
-			if (selection === 'all') return;
-			if (selection.size === 0) return removeByKey('selectedProductIds');
-			return setQuery(
-				'selectedProductIds',
-				Array.from(selection).map(key => key.toString()),
-			);
+	const baseHook = createResourceDataHook<
+		AppRouterOutputs['product']['byWorkspace']['products'][0],
+		ProductPageData
+	>(
+		{
+			resourceName: 'products',
+			getQueryOptions: (handle, filters) =>
+				trpc.product.byWorkspace.infiniteQueryOptions(
+					{ handle, ...filters },
+					{ getNextPageParam: (lastPage: ProductPageData) => lastPage.nextCursor },
+				),
+			getItemsFromPages: pages => pages.flatMap(page => page.products),
 		},
-		[removeByKey, setQuery],
+		useProductSearchParams,
 	);
 
-	const clearAllFilters = useCallback(() => {
-		removeAllQueryParams();
-	}, [removeAllQueryParams]);
-
-	const toggleArchived = useCallback(() => {
-		if (data.showArchived) return removeByKey('showArchived');
-
-		setQuery('showArchived', true);
-	}, [data.showArchived, removeByKey, setQuery]);
-
-	const setSearch = useCallback(
-		(search: string) => {
-			if (search.length) return setQuery('search', search);
-			return removeByKey('search');
-		},
-		[removeByKey, setQuery],
-	);
-
-	const lastSelectedProductId =
-		productSelection === 'all' || !productSelection.size ?
-			undefined
-		:	Array.from(productSelection).pop()?.toString();
-
-	const lastSelectedProduct = products.find(p => p.id === lastSelectedProductId);
-
-	const gridListRef = useRef<HTMLDivElement>(null);
-
-	const contextValue = {
-		items: products,
-		selection: productSelection,
-		lastSelectedItemId: lastSelectedProductId,
-		lastSelectedItem: lastSelectedProduct,
-		setSelection: setProductSelection,
-		gridListRef,
-		focusGridList: () => gridListRef.current?.focus(),
-		showCreateModal,
-		setShowCreateModal,
-		showUpdateModal,
-		setShowUpdateModal,
-		showArchiveModal,
-		setShowArchiveModal,
-		showDeleteModal,
-		setShowDeleteModal,
-		// filters
-		filters,
-		pendingFiltersTransition,
-		setSearch,
-		toggleArchived,
-		clearAllFilters,
-		// infinite
-		hasNextPage,
-		fetchNextPage: () => void fetchNextPage(),
-		isFetchingNextPage,
-		isFetching,
-		isRefetching,
-		isPending,
-	} satisfies ProductContext;
-
-	return (
-		<ProductContext.Provider value={contextValue}>{children}</ProductContext.Provider>
-	);
+	return baseHook();
 }
 
-export function useProductContext() {
-	const context = useContext(ProductContext);
-	if (!context) {
-		throw new Error('useProductContext must be used within a ProductContextProvider');
-	}
-	return context;
-}
+// Export the old context hook name for backward compatibility
+export const useProductContext = useProduct;

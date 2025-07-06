@@ -3,11 +3,12 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { cartFunnelSearchParamsSchema } from '@barely/validators';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
+
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllCartFunnels } from '~/app/[handle]/carts/_components/all-cartFunnels';
 import { ArchiveOrDeleteFunnelModal } from '~/app/[handle]/carts/_components/archive-or-delete-cartFunnel-modal';
 import { CartDialogs } from '~/app/[handle]/carts/_components/cart-dialogs';
-import { CartFunnelContextProvider } from '~/app/[handle]/carts/_components/cartFunnel-context';
 import { CartFunnelFilters } from '~/app/[handle]/carts/_components/cartFunnel-filters';
 import { CartFunnelHotkeys } from '~/app/[handle]/carts/_components/cartFunnel-hotkeys';
 import { CreateCartFunnelButton } from '~/app/[handle]/carts/_components/create-cartFunnel-button';
@@ -37,27 +38,25 @@ export default async function CartFunnelsPage({
 
 	return (
 		<HydrateClient>
-			<Suspense fallback={<div>Loading...</div>}>
-				<CartFunnelContextProvider>
-					<DashContentHeader
-						title='Carts'
-						settingsHref={`/${awaitedParams.handle}/settings/cart`}
-						button={<CreateCartFunnelButton />}
-					/>
+			<DashContentHeader
+				title='Carts'
+				settingsHref={`/${awaitedParams.handle}/settings/cart`}
+				button={<CreateCartFunnelButton />}
+			/>
 
-					<CartDialogs />
+			<CartDialogs />
 
-					<CartFunnelFilters />
-					<AllCartFunnels />
+			<CartFunnelFilters />
+			<Suspense fallback={<GridListSkeleton />}>
+				<AllCartFunnels />
 
-					<CreateOrUpdateFunnelModal mode='create' />
-					<CreateOrUpdateFunnelModal mode='update' />
+				<CreateOrUpdateFunnelModal mode='create' />
+				<CreateOrUpdateFunnelModal mode='update' />
 
-					<ArchiveOrDeleteFunnelModal mode='archive' />
-					<ArchiveOrDeleteFunnelModal mode='delete' />
+				<ArchiveOrDeleteFunnelModal mode='archive' />
+				<ArchiveOrDeleteFunnelModal mode='delete' />
 
-					<CartFunnelHotkeys />
-				</CartFunnelContextProvider>
+				<CartFunnelHotkeys />
 			</Suspense>
 		</HydrateClient>
 	);

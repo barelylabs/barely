@@ -9,7 +9,7 @@ import { GridList, GridListCard } from '@barely/ui/grid-list';
 import { Text } from '@barely/ui/typography';
 
 import { CreateFanButton } from '~/app/[handle]/fans/_components/create-fan-button';
-import { useFanContext } from '~/app/[handle]/fans/_components/fan-context';
+import { useFan } from '~/app/[handle]/fans/_components/fan-context';
 
 export function AllFans() {
 	const {
@@ -20,10 +20,10 @@ export function AllFans() {
 		gridListRef,
 		setShowUpdateModal,
 		isFetching,
-	} = useFanContext();
+	} = useFan();
 
 	return (
-		<div className='flex flex-col gap-4'>
+		<div className='flex flex-col gap-4' data-grid-list>
 			{/* <Text variant='md/medium'>{totalFans} fans</Text> */}
 			<GridList
 				glRef={gridListRef}
@@ -60,7 +60,7 @@ export function AllFans() {
 }
 
 function LoadMoreButton() {
-	const { hasNextPage, fetchNextPage, isFetchingNextPage } = useFanContext();
+	const { hasNextPage, fetchNextPage, isFetchingNextPage } = useFan();
 	if (!hasNextPage)
 		return (
 			<div className='flex w-full justify-center'>
@@ -80,7 +80,7 @@ function LoadMoreButton() {
 }
 
 function FanCard({ fan }: { fan: AppRouterOutputs['fan']['byWorkspace']['fans'][0] }) {
-	const { setShowUpdateModal, setShowDeleteModal } = useFanContext();
+	const { setShowUpdateModal, setShowDeleteModal } = useFan();
 
 	return (
 		<GridListCard

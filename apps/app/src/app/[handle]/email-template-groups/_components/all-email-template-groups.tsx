@@ -13,23 +13,22 @@ import { GridList, GridListCard } from '@barely/ui/grid-list';
 import { Text } from '@barely/ui/typography';
 
 import { CreateEmailTemplateGroupButton } from './create-email-template-group-button';
-import { useEmailTemplateGroupContext } from './email-template-group-context';
+import { useEmailTemplateGroup, useEmailTemplateGroupSearchParams } from './email-template-group-context';
 
 export function AllEmailTemplateGroups() {
+	const { setShowUpdateModal } = useEmailTemplateGroupSearchParams();
 	const {
 		items,
 		selection,
 		lastSelectedItemId,
 		setSelection,
-		gridListRef,
-		setShowUpdateModal,
 		isFetching,
-	} = useEmailTemplateGroupContext();
+	} = useEmailTemplateGroup();
 
 	return (
 		<div className='flex flex-col gap-4'>
 			<GridList
-				glRef={gridListRef}
+				data-grid-list="email-template-groups"
 				className='flex flex-col gap-2'
 				aria-label='Email Template Groups'
 				selectionMode='multiple'
@@ -61,7 +60,7 @@ export function AllEmailTemplateGroups() {
 
 function LoadMoreButton() {
 	const { hasNextPage, fetchNextPage, isFetchingNextPage } =
-		useEmailTemplateGroupContext();
+		useEmailTemplateGroup();
 	if (!hasNextPage)
 		return (
 			<div className='flex w-full justify-center'>
@@ -85,7 +84,7 @@ function EmailTemplateGroupCard({
 }: {
 	emailTemplateGroup: AppRouterOutputs['emailTemplateGroup']['byWorkspace']['emailTemplateGroups'][0];
 }) {
-	const { setShowUpdateModal, setShowDeleteModal } = useEmailTemplateGroupContext();
+	const { setShowUpdateModal, setShowDeleteModal } = useEmailTemplateGroupSearchParams();
 
 	const trpc = useTRPC();
 	const { handle } = useWorkspace();

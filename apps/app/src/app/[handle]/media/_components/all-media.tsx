@@ -10,13 +10,13 @@ import { Icon } from '@barely/ui/icon';
 import { Img } from '@barely/ui/img';
 import { Text } from '@barely/ui/typography';
 
-import { useMediaContext } from '~/app/[handle]/media/_components/media-context';
+import { useMedia } from '~/app/[handle]/media/_components/media-context';
 
 export function AllMedia() {
-	const { items, selection, setSelection, gridListRef, isFetching } = useMediaContext();
+	const { items, selection, setSelection, gridListRef, isFetching } = useMedia();
 
 	return (
-		<>
+		<div data-grid-list>
 			<GridList
 				glRef={gridListRef}
 				aria-label='Files'
@@ -47,7 +47,7 @@ export function AllMedia() {
 			>
 				{item => <FileCard file={item} />}
 			</GridList>
-		</>
+		</div>
 	);
 }
 

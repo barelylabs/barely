@@ -2,10 +2,10 @@
 
 import { Button } from '@barely/ui/button';
 
-import { useFanContext } from '~/app/[handle]/fans/_components/fan-context';
+import { useFanSearchParams } from '~/app/[handle]/fans/_components/fan-context';
 
 export function CreateFanButton() {
-	const { setShowCreateModal } = useFanContext();
+	const { setShowCreateModal } = useFanSearchParams();
 
 	return (
 		<Button
