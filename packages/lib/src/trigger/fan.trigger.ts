@@ -46,10 +46,8 @@ export const importFansFromCsv = task({
 			throw new Error('Response body is null');
 		}
 
-		if (!(response.body instanceof ReadableStream)) {
-			throw new Error('Response body is not a ReadableStream');
-		}
-		const nodeStream = Readable.fromWeb(response.body);
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+		const nodeStream = Readable.fromWeb(response.body as any);
 		const parser = nodeStream.pipe(
 			parse({
 				columns: true,
