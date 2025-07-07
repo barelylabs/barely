@@ -72,14 +72,13 @@ jobs:
           pnpm vercel pull --yes --environment=${{ inputs.environment }} $ENV_OPTIONS --token=${{ secrets.VERCEL_TOKEN }}
 
           VERCEL_URL=${{ inputs.app_name }}-git-${{ inputs.git_branch }}-${{ inputs.scope }}.vercel.app
-          if [ -f ".vercel/.env.${{ inputs.environment }}.local" ]; then
-            sed -i '/VERCEL_URL/d' .vercel/.env.${{ inputs.environment }}.local
-            echo "VERCEL_URL=\"$VERCEL_URL\"" >> .vercel/.env.${{ inputs.environment }}.local
-            cp .vercel/.env.${{ inputs.environment }}.local .env
-          fi
+          sed -i '/VERCEL_URL/d' ${{ inputs.working_directory }}/.vercel/.env.${{ inputs.environment }}.local
+          echo "VERCEL_URL=\"$VERCEL_URL\"" >> ${{ inputs.working_directory }}/.vercel/.env.${{ inputs.environment }}.local                    
+          cp ${{ inputs.working_directory }}/.vercel/.env.${{ inputs.environment }}.local .env
 
       - name: build project artifacts
-        run: turbo build:${{ inputs.environment }} --filter=@barely/${{ inputs.app_name }} --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          turbo build:${{ inputs.environment }} -F @barely/${{ inputs.app_name }} --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: deploy to vercel
         id: deploy
@@ -90,7 +89,7 @@ jobs:
             ENV_OPTIONS=""
           fi
 
-          deployment_url=$(pnpm vercel deploy --prebuilt $ENV_OPTIONS ${{ inputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})          
+          deployment_url=$(pnpm vercel deploy --prebuilt ./apps/${{ inputs.app_name }} $ENV_OPTIONS ${{ inputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})          
 
           inspect=$(pnpm vercel inspect $deployment_url --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
           deployment_id=$(echo "$inspect" | grep -m 1 '^    id' | awk '{print $NF}' | cut -d'_' -f 2-)
