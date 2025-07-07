@@ -281,7 +281,8 @@ jobs:
       - name: deploy trigger.dev
         env:
           TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
-        run: pnpm deploy-trigger:staging
+        run: |
+          npx trigger.dev@3.3.17 deploy --env staging
 
   # 👀 DEPLOY PREVIEWS
   deploy-app:
