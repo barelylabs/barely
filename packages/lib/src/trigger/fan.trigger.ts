@@ -46,8 +46,10 @@ export const importFansFromCsv = task({
 			throw new Error('Response body is null');
 		}
 
-		// Convert Web Stream to Node.js stream
-		const nodeStream = Readable.fromWeb(response.body as any);
+		if (!(response.body instanceof ReadableStream)) {
+			throw new Error('Response body is not a ReadableStream');
+		}
+		const nodeStream = Readable.fromWeb(response.body);
 		const parser = nodeStream.pipe(
 			parse({
 				columns: true,
