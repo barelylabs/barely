@@ -5,12 +5,12 @@ import type { z } from 'zod/v4';
 import { getLandingPageData } from '@barely/lib/functions/landing-page.render.fns';
 import { getAssetHref, getLinkHref } from '@barely/utils';
 import { eventReportSearchParamsSchema } from '@barely/validators/schemas';
-import { MDXRemote } from 'next-mdx-remote/rsc';
 
 import { mdxCard } from '@barely/ui/mdx-card';
 import { mdxGrid } from '@barely/ui/mdx-grid';
 import { mdxImageFile } from '@barely/ui/mdx-image-file';
 import { mdxLink } from '@barely/ui/mdx-link';
+import { MDXRemoteRSC } from '@barely/ui/mdx-remote';
 import { mdxTypography } from '@barely/ui/mdx-typography';
 import { mdxVideoPlayer } from '@barely/ui/mdx-video-player';
 
@@ -108,7 +108,7 @@ export default async function LandingPage({
 		<div className='mx-auto flex min-h-screen w-full max-w-[824px] flex-col items-center gap-12 px-4 py-10 sm:gap-[3.25rem] sm:px-6 sm:py-12 md:gap-14'>
 			{cartFunnels.length > 0 && <WarmupCart />}
 			{/* <>{renderedMarkdown}</> */}
-			<MDXRemote
+			<MDXRemoteRSC
 				source={lp.content ?? ''}
 				components={{
 					...mdxTypography,

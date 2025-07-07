@@ -3,7 +3,7 @@ import { mdxGrid } from '@barely/ui/mdx-grid';
 import { mdxImageFile } from '@barely/ui/mdx-image-file';
 import { mdxLink } from '@barely/ui/mdx-link';
 import { mdxLinkButton } from '@barely/ui/mdx-link-button';
-import { MDXRemote } from '@barely/ui/mdx-remote';
+import { MDXRemoteRSC } from '@barely/ui/mdx-remote';
 import { mdxTypography } from '@barely/ui/mdx-typography';
 import { mdxVideoPlayer } from '@barely/ui/mdx-video-player';
 
@@ -23,7 +23,7 @@ export function PressBio({ bio }: { bio: string }) {
 	return (
 		<Section id='bio'>
 			<SectionDiv title='Bio'>
-				<MDXRemote source={bio} components={components} />
+				<MDXRemoteRSC source={bio} components={components} />
 			</SectionDiv>
 		</Section>
 	);
