@@ -11,7 +11,7 @@ import { ThemeProvider } from '@barely/ui/next-theme-provider';
 
 interface UserContextProviderProps {
 	user: SessionUser;
-	children: ReactNode | JSX.Element;
+	children: ReactNode;
 }
 
 export const UserContextProvider = (props: UserContextProviderProps) => {
@@ -20,7 +20,7 @@ export const UserContextProvider = (props: UserContextProviderProps) => {
 
 interface WorkspaceContextProviderProps {
 	workspace: SessionWorkspace;
-	children: ReactNode | JSX.Element;
+	children: ReactNode;
 	// setWorkspace: (workspace: SessionWorkspace) => void;
 }
 

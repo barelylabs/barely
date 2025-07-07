@@ -36,7 +36,7 @@ export const BlockTypeSelect = () => {
 	if (!hasQuote && !hasHeadings) {
 		return null;
 	}
-	const items: { label: string | JSX.Element; value: BlockType }[] = [
+	const items: { label: string | React.JSX.Element; value: BlockType }[] = [
 		{ label: t('toolbar.blockTypes.paragraph', 'Paragraph'), value: 'paragraph' },
 	];
 

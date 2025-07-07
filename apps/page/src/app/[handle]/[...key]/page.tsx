@@ -76,39 +76,39 @@ export default async function LandingPage({
 		refererId: lp.id,
 	};
 
-	const renderedMarkdown = await MDXRemote({
-		source: lp.content ?? '',
-		components: {
-			...mdxTypography,
-			...mdxVideoPlayer,
-			...mdxLandingPageAssetButton({
-				landingPageId: lp.id,
-				assets: {
-					cartFunnels,
-					links,
-					pressKits,
-					landingPages,
-				},
-				tracking,
-			}),
-			...mdxLink({
-				tracking,
-			}),
-			...mdxLinkButton({
-				landingPageId: lp.id,
-				tracking,
-			}),
-			...mdxImageFile(),
-			...mdxGrid,
-			...mdxCard,
-		},
-	});
+	// const renderedMarkdown = await MDXRemote({
+	// 	source: lp.content ?? '',
+	// 	components: {
+	// 		...mdxTypography,
+	// 		...mdxVideoPlayer,
+	// 		...mdxLandingPageAssetButton({
+	// 			landingPageId: lp.id,
+	// 			assets: {
+	// 				cartFunnels,
+	// 				links,
+	// 				pressKits,
+	// 				landingPages,
+	// 			},
+	// 			tracking,
+	// 		}),
+	// 		...mdxLink({
+	// 			tracking,
+	// 		}),
+	// 		...mdxLinkButton({
+	// 			landingPageId: lp.id,
+	// 			tracking,
+	// 		}),
+	// 		...mdxImageFile(),
+	// 		...mdxGrid,
+	// 		...mdxCard,
+	// 	},
+	// });
 
 	return (
 		<div className='mx-auto flex min-h-screen w-full max-w-[824px] flex-col items-center gap-12 px-4 py-10 sm:gap-[3.25rem] sm:px-6 sm:py-12 md:gap-14'>
 			{cartFunnels.length > 0 && <WarmupCart />}
-			<>{renderedMarkdown}</>
-			{/* <MDXRemote
+			{/* <>{renderedMarkdown}</> */}
+			<MDXRemote
 				source={lp.content ?? ''}
 				components={{
 					...mdxTypography,
@@ -134,7 +134,7 @@ export default async function LandingPage({
 					...mdxGrid,
 					...mdxCard,
 				}}
-			/> */}
+			/>
 			<LogVisit landingPageId={lp.id} />
 		</div>
 	);

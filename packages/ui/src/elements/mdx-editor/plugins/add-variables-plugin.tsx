@@ -1,7 +1,7 @@
 'use client';
 
 import type { LexicalEditor } from 'lexical';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EMAIL_TEMPLATE_VARIABLES } from '@barely/const';
 import { useLocale } from '@barely/hooks';
 /**
@@ -97,7 +97,7 @@ interface AddVariablesPluginProps {
 
 export default function AddVariablesPlugin({
 	variables,
-}: AddVariablesPluginProps): JSX.Element | null {
+}: AddVariablesPluginProps): React.JSX.Element | null {
 	const { t } = useLocale();
 	const [editor] = useLexicalComposerContext();
 	useVariablesTransform(editor);
