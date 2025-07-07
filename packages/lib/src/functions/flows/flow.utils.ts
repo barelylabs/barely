@@ -7,7 +7,7 @@ import type {
 	InsertFlowAction_NotStrict,
 	InsertFlowAction_SendEmail,
 	InsertFlowTrigger,
-} from '@barely/validators/schemas';
+} from '@barely/validators';
 import type { z } from 'zod/v4';
 import { newId, raise } from '@barely/utils';
 
@@ -69,9 +69,14 @@ export function getActionNodeFromFlowAction(
 				// deletable: false,
 			} satisfies BooleanNode;
 		case 'sendEmail': {
-			const emailTemplate =
-				node.emailTemplate ??
-				raise(`getActionNodeFromFlowAction // No email found for action ${node.id}`);
+			if (!node.emailTemplate) {
+				// raise(`getActionNodeFromFlowAction // No email found for action ${node.id}`);
+				throw new Error(
+					`getActionNodeFromFlowAction // No email found for action ${node.id}`,
+				);
+			}
+			const emailTemplate = node.emailTemplate;
+
 			return {
 				...node,
 				type: 'sendEmail',
@@ -85,9 +90,13 @@ export function getActionNodeFromFlowAction(
 		}
 
 		case 'sendEmailFromTemplateGroup': {
-			const emailTemplateGroupId =
-				node.emailTemplateGroupId ??
-				raise(`No email template group id found for action ${node.id}`);
+			if (!node.emailTemplateGroupId) {
+				// raise(`No email template group id found for action ${node.id}`);
+				throw new Error(
+					`getActionNodeFromFlowAction // No email template group id found for action ${node.id}`,
+				);
+			}
+			const emailTemplateGroupId = node.emailTemplateGroupId;
 			return {
 				id: node.id,
 				type: 'sendEmailFromTemplateGroup',
@@ -101,9 +110,10 @@ export function getActionNodeFromFlowAction(
 		}
 
 		case 'addToMailchimpAudience': {
-			const mailchimpAudienceId =
-				node.mailchimpAudienceId ??
+			if (!node.mailchimpAudienceId) {
 				raise(`No mailchimp audience id found for action ${node.id}`);
+			}
+			const mailchimpAudienceId = node.mailchimpAudienceId;
 			return {
 				id: node.id,
 				type: 'addToMailchimpAudience',
@@ -253,11 +263,12 @@ export function getInsertableFlowActionsFromFlowActions(
 	const strictFlowActions: InsertFlowAction[] = flowActions.map(fa => {
 		switch (fa.type) {
 			case 'sendEmail': {
-				const emailTemplate =
-					fa.emailTemplate ??
-					raise(
+				if (!fa.emailTemplate) {
+					throw new Error(
 						`getInsertableFlowActionsFromFlowActions // No email template found for action ${fa.id}`,
 					);
+				}
+				const emailTemplate = fa.emailTemplate;
 
 				return {
 					...fa,
@@ -345,13 +356,6 @@ export function getDefaultFlowAction_boolean(props: {
 	} satisfies InsertFlowAction_NotStrict;
 
 	const flowActionNode = getActionNodeFromFlowAction(flowAction, props.position);
-
-	// const flowActionNode: BooleanNode = {
-	// 	id,
-	// 	type: 'boolean',
-	// 	data,
-	// 	position: props.position ?? { x: 0, y: 0 },
-	// } satisfies BooleanNode;
 
 	return { flowAction, flowActionNode };
 }
@@ -457,12 +461,14 @@ interface DefaultFlowActionProps {
 	toast?: UseToastOutput['toast'];
 
 	emailTemplate?: Partial<EmailTemplate> & { fromId: EmailTemplate['fromId'] };
-	// emailFromId?: string;
 	emailTemplateGroupId?: string;
 	mailchimpAudienceId?: string;
 }
 
-export function getDefaultFlowAction(props: DefaultFlowActionProps) {
+export function getDefaultFlowAction(props: DefaultFlowActionProps): {
+	flowAction: InsertFlowAction_NotStrict;
+	flowActionNode: ActionNode;
+} {
 	switch (props.type) {
 		case 'empty':
 			return getDefaultFlowAction_empty(props);
@@ -473,36 +479,37 @@ export function getDefaultFlowAction(props: DefaultFlowActionProps) {
 		case 'sendEmail': {
 			if (!props.emailTemplate?.fromId) {
 				props.toast?.error('No email from id found');
+				throw new Error('No email from id found');
 			}
 
 			return getDefaultFlowAction_sendEmail({
 				...props,
 				emailTemplate: {
 					...props.emailTemplate,
-					fromId: props.emailTemplate?.fromId ?? raise('No email from id found'),
-					flowOnly: props.emailTemplate?.flowOnly ?? true,
+					fromId: props.emailTemplate.fromId,
+					flowOnly: props.emailTemplate.flowOnly ?? true,
 				},
 			});
 		}
 		case 'sendEmailFromTemplateGroup':
 			if (!props.emailTemplateGroupId) {
 				props.toast?.error('No email template group id found');
+				throw new Error('No email template group id found');
 			}
 
 			return getDefaultFlowAction_sendEmailTemplateGroup({
 				...props,
-				emailTemplateGroupId:
-					props.emailTemplateGroupId ?? raise('No email template group id found'),
+				emailTemplateGroupId: props.emailTemplateGroupId,
 			});
 		case 'addToMailchimpAudience':
 			if (!props.mailchimpAudienceId) {
 				props.toast?.error('No mailchimp audience id found');
+				throw new Error('No mailchimp audience id found');
 			}
 
 			return getDefaultFlowAction_addToMailchimpAudience({
 				...props,
-				mailchimpAudienceId:
-					props.mailchimpAudienceId ?? raise('No mailchimp audience id found'),
+				mailchimpAudienceId: props.mailchimpAudienceId,
 			});
 	}
 }

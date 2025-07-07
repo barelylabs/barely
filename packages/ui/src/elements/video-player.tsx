@@ -2,9 +2,10 @@
 
 import type { ReactPlayerProps } from 'react-player';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { atomWithToggle } from '@barely/atoms';
 import { useAtom } from 'jotai';
 import ReactPlayer from 'react-player';
+
+import { atomWithToggle } from '@barely/atoms/atom-with-toggle';
 
 import type { CarouselApi } from './carousel';
 import {

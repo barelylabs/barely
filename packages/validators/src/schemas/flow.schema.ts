@@ -21,7 +21,6 @@ export const createFlowSchema = insertFlowSchema
 		workspaceId: true,
 	});
 export const updateFlowSchema = insertFlowSchema.partial({
-	// id: true,
 	workspaceId: true,
 });
 
@@ -93,6 +92,11 @@ export const flowForm_waitSchema = z.object({
 });
 
 export type InsertFlowAction_Wait = z.infer<typeof insertFlowAction_waitSchema>;
+export interface FlowForm_Wait {
+	waitFor: number;
+	waitForUnits: 'seconds' | 'minutes' | 'hours' | 'days';
+	enabled: boolean;
+}
 
 // send email from template
 const insertFlowAction_sendEmailSchema = insertFlowActionSchema_notStrict
@@ -107,6 +111,8 @@ const insertFlowAction_sendEmailSchema = insertFlowActionSchema_notStrict
 		emailTemplate: insertEmailTemplateSchema.omit({ workspaceId: true }),
 	});
 
+export type InsertFlowAction_SendEmail = z.infer<typeof insertFlowAction_sendEmailSchema>;
+
 export const flowForm_sendEmailSchema = insertEmailTemplateSchema
 	.partial({
 		workspaceId: true,
@@ -115,8 +121,6 @@ export const flowForm_sendEmailSchema = insertEmailTemplateSchema
 		enabled: z.boolean(),
 		sendTestEmailTo: z.email().optional(),
 	});
-
-export type InsertFlowAction_SendEmail = z.infer<typeof insertFlowAction_sendEmailSchema>;
 
 // send email from template group
 const insertFlowAction_sendEmailFromTemplateGroupSchema = insertFlowActionSchema_notStrict
@@ -139,6 +143,10 @@ export const flowForm_sendEmailFromTemplateGroupSchema = z.object({
 export type InsertFlowAction_SendEmailFromTemplateGroup = z.infer<
 	typeof insertFlowAction_sendEmailFromTemplateGroupSchema
 >;
+export interface FlowForm_SendEmailFromTemplateGroup {
+	emailTemplateGroupId: string;
+	enabled: boolean;
+}
 
 // boolean
 const insertFlowAction_booleanSchema = insertFlowActionSchema_notStrict
@@ -161,6 +169,14 @@ export const flowForm_booleanSchema = z.object({
 	enabled: z.boolean(),
 });
 
+export interface FlowForm_Boolean {
+	booleanCondition: boolean;
+	productId: string | undefined;
+	cartFunnelId: string | undefined;
+	totalOrderAmount: number | undefined;
+	enabled: boolean;
+}
+
 // add to mailchimp audience
 const insertFlowAction_addToMailchimpAudienceSchema = insertFlowActionSchema_notStrict
 	.partial()
@@ -180,6 +196,11 @@ export const flowForm_addToMailchimpAudienceSchema = z.object({
 	enabled: z.boolean(),
 });
 
+export interface FlowForm_AddToMailchimpAudience {
+	mailchimpAudienceId: string;
+	enabled: boolean;
+}
+
 // empty
 const insertFlowAction_emptySchema = insertFlowActionSchema_notStrict
 	.partial()
@@ -191,7 +212,14 @@ const insertFlowAction_emptySchema = insertFlowActionSchema_notStrict
 		type: z.literal('empty'),
 	});
 
+export const flowForm_emptySchema = z.object({
+	enabled: z.boolean(),
+});
+
 export type InsertFlowAction_Empty = z.infer<typeof insertFlowAction_emptySchema>;
+export interface FlowForm_Empty {
+	enabled: boolean;
+}
 
 // upsert flow action
 const insertFlowActionSchema = z.union([

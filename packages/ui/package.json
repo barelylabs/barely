@@ -112,7 +112,7 @@
 		"./wrap-balancer": "./src/elements/wrap-balancer.tsx"
 	},
 	"scripts": {
-		"clean": "git clean -xdf .turbo node_modules",
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
 		"format": "prettier --check . --ignore-path ../../.gitignore",
 		"lint": "eslint .",
 		"typecheck": "tsc --noEmit --emitDeclarationOnly false"

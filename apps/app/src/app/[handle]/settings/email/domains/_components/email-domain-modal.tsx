@@ -1,13 +1,14 @@
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import type { z } from 'zod/v4';
 import { useEffect, useState } from 'react';
-import { atomWithToggle } from '@barely/atoms';
 import { useWorkspace, useZodForm } from '@barely/hooks';
 import { createEmailDomainSchema } from '@barely/validators';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { atom, useAtom } from 'jotai';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { atomWithToggle } from '@barely/atoms/atom-with-toggle';
 
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { TextField } from '@barely/ui/forms/text-field';

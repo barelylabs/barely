@@ -1,7 +1,7 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
-import type { FlowState } from '@barely/lib/functions/flows/flow.ui.types';
+import type { FlowState } from '@barely/validators';
 import type { z } from 'zod/v4';
 import { use, useState } from 'react';
 import { useWorkspace, useZodForm } from '@barely/hooks';

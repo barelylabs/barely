@@ -1,9 +1,14 @@
 import type { FlowEdge } from '@barely/db/schema';
 import type {
+	// FlowForm_AddToMailchimpAudience,
 	flowForm_addToMailchimpAudienceSchema,
+	// FlowForm_Boolean,
 	flowForm_booleanSchema,
+	// FlowForm_SendEmail,
+	// FlowForm_SendEmailFromTemplateGroup,
 	flowForm_sendEmailFromTemplateGroupSchema,
 	flowForm_sendEmailSchema,
+	// FlowForm_Wait,
 	flowForm_waitSchema,
 	FlowTrigger,
 } from '@barely/validators/schemas';
@@ -57,18 +62,6 @@ export type ActionNode =
 	| AddToMailchimpAudienceNode;
 
 export type FlowNode = TriggerNode | ActionNode;
-
-// export type SimpleEdge = Edge & {
-// 	type: 'simple';
-// };
-// export type BooleanEdge = Edge & {
-// 	type: 'boolean';
-// 	data: {
-// 		boolean: boolean;
-// 	};
-// };
-
-// export type FlowEdge = SimpleEdge | BooleanEdge;
 
 export interface FlowSnapshot {
 	nodes: FlowNode[];

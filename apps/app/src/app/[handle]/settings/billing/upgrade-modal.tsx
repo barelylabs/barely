@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { atomWithToggle } from '@barely/atoms';
 import { WORKSPACE_PLANS } from '@barely/const';
 import { useWorkspace } from '@barely/hooks';
 import { toTitleCase } from '@barely/utils';
@@ -9,6 +8,8 @@ import { useMutation } from '@tanstack/react-query';
 import { useAtom } from 'jotai';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { atomWithToggle } from '@barely/atoms/atom-with-toggle';
 
 import { Badge } from '@barely/ui/badge';
 import { Button } from '@barely/ui/button';

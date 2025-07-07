@@ -1,6 +1,5 @@
 import type { NeonPool } from '@barely/db/pool';
 import type { Genre, Playlist, ProviderAccount } from '@barely/validators/schemas';
-import type { inferAsyncReturnType } from '@trpc/server';
 import { dbHttp } from '@barely/db/client';
 import { dbPool } from '@barely/db/pool';
 import { _Playlists_To_Genres, Genres } from '@barely/db/sql/genre.sql';
@@ -289,15 +288,15 @@ export async function upsertPlaylistGenres(
 	});
 }
 
-type GetPlaylistsByUserId = inferAsyncReturnType<typeof getPlaylistsByUserId>;
-type UserGetPlaylistById = inferAsyncReturnType<typeof userGetPlaylistById>;
-type TotalPlaylistReach = inferAsyncReturnType<typeof totalPlaylistReachByGenres>;
+// type GetPlaylistsByUserId = Awaited<ReturnType<typeof getPlaylistsByUserId>>;
+// type UserGetPlaylistById = Awaited<ReturnType<typeof userGetPlaylistById>>;
+// type TotalPlaylistReach = Awaited<ReturnType<typeof totalPlaylistReachByGenres>>;
 
 export {
 	getPlaylistsByUserId,
-	type GetPlaylistsByUserId,
+	// type GetPlaylistsByUserId,
 	userGetPlaylistById,
-	type UserGetPlaylistById,
+	// type UserGetPlaylistById,
 	totalPlaylistReachByGenres,
-	type TotalPlaylistReach,
+	// type TotalPlaylistReach,
 };

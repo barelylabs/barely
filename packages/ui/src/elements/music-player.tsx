@@ -2,11 +2,12 @@
 
 import type { PublicTrackWith_Artist_Files } from '@barely/validators';
 import { useCallback } from 'react';
-import { atomWithToggle } from '@barely/atoms';
 import { cn, tFormatter } from '@barely/utils';
 import { atom, useAtom } from 'jotai';
 import { useAtomCallback } from 'jotai/utils';
 import ReactPlayer from 'react-player/lazy';
+
+import { atomWithToggle } from '@barely/atoms/atom-with-toggle';
 
 import type { ButtonProps } from './button';
 import { Button } from './button';

@@ -3,13 +3,14 @@
 import type { SelectFieldOption } from '@barely/ui/forms/select-field';
 import type { z } from 'zod/v4';
 import { useRouter } from 'next/navigation';
-import { atomWithToggle } from '@barely/atoms';
 import { useZodForm } from '@barely/hooks';
 import { createWorkspaceSchema } from '@barely/validators';
 import { useMutation } from '@tanstack/react-query';
 import { useAtom } from 'jotai';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { atomWithToggle } from '@barely/atoms/atom-with-toggle';
 
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';

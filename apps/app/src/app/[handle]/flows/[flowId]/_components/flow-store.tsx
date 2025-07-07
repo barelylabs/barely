@@ -417,7 +417,7 @@ export const FlowStoreProvider = ({
 				const updatedNodes = prevNodes.map((node, index) => {
 					if (index === replacedNodeIndex) {
 						try {
-							const { flowActionNode } = getDefaultFlowAction({
+							const test = getDefaultFlowAction({
 								flowId,
 								id,
 								position: { x: newNodeX, y: emptyNodeY },
@@ -433,7 +433,9 @@ export const FlowStoreProvider = ({
 									:	undefined,
 							});
 
-							return flowActionNode;
+							return test.flowActionNode;
+
+							// return test.flowActionNode satisfies ActionNode;
 						} catch (error) {
 							console.error('Error creating flow action node', error);
 							return node;

@@ -7,7 +7,7 @@
 		"build": "pnpm with-env next build",
 		"build:preview": "pnpm with-env vercel build",
 		"build:production": "pnpm with-env vercel build --prod",
-		"clean": "git clean -xdf .next .turbo node_modules",
+		"clean": "git clean -xdf .cache .next .turbo dist node_modules",
 		"dev": "pnpm with-env next dev --port=3008",
 		"format": "prettier --check . --ignore-path ../../.gitignore",
 		"lint": "eslint",

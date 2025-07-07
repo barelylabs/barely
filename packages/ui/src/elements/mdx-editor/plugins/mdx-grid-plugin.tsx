@@ -6,7 +6,7 @@ import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
 import type { z } from 'zod/v4';
 import { useMemo, useState } from 'react';
 import { useZodForm } from '@barely/hooks';
-import { mdxGridSchema } from '@barely/lib/mdx';
+import { mdxGridSchema } from '@barely/lib/mdx/mdx.schema';
 import {
 	insertJsx$,
 	NestedLexicalEditor,

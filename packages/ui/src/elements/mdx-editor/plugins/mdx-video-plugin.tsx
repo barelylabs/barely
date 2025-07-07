@@ -4,7 +4,7 @@ import type { JsxComponentDescriptor, JsxEditorProps } from '@mdxeditor/editor';
 import type { z } from 'zod/v4';
 import { useMemo, useState } from 'react';
 import { useZodForm } from '@barely/hooks';
-import { mdxVideoSchema } from '@barely/lib/mdx';
+import { mdxVideoSchema } from '@barely/lib/mdx/mdx.schema';
 import {
 	Button as EditorButton,
 	insertJsx$,

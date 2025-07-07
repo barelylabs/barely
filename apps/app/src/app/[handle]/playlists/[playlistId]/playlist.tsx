@@ -2,10 +2,9 @@
 
 import { useParams } from 'next/navigation';
 import { useWorkspace } from '@barely/hooks';
+import { useTRPC } from '@barely/lib/trpc/app.react';
 import { onPromise } from '@barely/utils';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
-
-import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Badge } from '@barely/ui/badge';
 import { Button } from '@barely/ui/button';
@@ -13,18 +12,18 @@ import { Card } from '@barely/ui/card';
 import { Icon } from '@barely/ui/icon';
 import { H, Text } from '@barely/ui/typography';
 
-const Playlist = (props: { id: string }) => {
+const Playlist = () => {
 	const trpc = useTRPC();
 
 	const queryClient = useQueryClient();
-	const params = useParams<{ handle: string }>();
+	const params = useParams<{ handle: string; playlistId: string }>();
 
 	const { handle } = useWorkspace();
 
 	const { data: playlist } = useSuspenseQuery(
 		trpc.playlist.byId.queryOptions({
 			handle: params.handle,
-			playlistId: props.id,
+			playlistId: params.playlistId,
 		}),
 	);
 
@@ -34,13 +33,11 @@ const Playlist = (props: { id: string }) => {
 			await queryClient.invalidateQueries(
 				trpc.playlist.byId.queryFilter({
 					handle: params.handle,
-					playlistId: props.id,
+					playlistId: params.playlistId,
 				}),
 			);
 		},
 	});
-
-	if (!playlist) return null;
 
 	return (
 		<Card>
@@ -54,7 +51,7 @@ const Playlist = (props: { id: string }) => {
 					onClick={onPromise(() =>
 						estimateGenres({
 							handle,
-							playlistId: props.id,
+							playlistId: params.playlistId,
 						}),
 					)}
 					look='ghost'

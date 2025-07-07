@@ -30,7 +30,11 @@
 		},
 		"./functions/flows/*": {
 			"types": "./dist/src/functions/flows/*.d.ts",
-			"default": "./src/functions/flows/*"
+			"default": "./src/functions/flows/*.ts"
+		},
+		"./functions/flows/flow.layout": {
+			"types": "./dist/src/functions/flows/flow.layout.d.ts",
+			"default": "./src/functions/flows/flow.layout.tsx"
 		},
 		"./integrations/*": {
 			"types": "./dist/src/integrations/*.d.ts",
@@ -60,6 +64,10 @@
 			"types": "./dist/src/trpc/trpc.d.ts",
 			"default": "./src/trpc/trpc.ts"
 		},
+		"./trpc/app.react": {
+			"types": "./dist/src/trpc/trpc.app.react.d.ts",
+			"default": "./src/trpc/trpc.app.react.ts"
+		},
 		"./trpc/*.route": {
 			"types": "./dist/src/trpc/routes/*.route.d.ts",
 			"default": "./src/trpc/routes/*.route.ts"
@@ -67,7 +75,7 @@
 	},
 	"scripts": {
 		"build": "tsc",
-		"clean": "git clean -xdf .turbo node_modules",
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
 		"dev": "concurrently --raw --kill-others \"tsc\" \"pnpm dev:trigger\"",
 		"dev:trigger": "pnpm dlx trigger.dev@latest dev",
 		"deploy-trigger:production": "pnpm dlx trigger.dev@latest deploy",

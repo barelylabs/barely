@@ -11,7 +11,6 @@ export default async function PlaylistPage({
 }) {
 	const { handle, playlistId } = await params;
 
-	// Prefetch playlist data
 	prefetch(
 		trpc.playlist.byId.queryOptions({
 			handle,
@@ -24,7 +23,7 @@ export default async function PlaylistPage({
 			<DashContentHeader title='Playlist' subtitle='Manage your playlist' />
 
 			<Suspense fallback={<div>Loading...</div>}>
-				<Playlist id={playlistId} />
+				<Playlist />
 			</Suspense>
 		</HydrateClient>
 	);

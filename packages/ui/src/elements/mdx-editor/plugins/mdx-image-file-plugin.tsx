@@ -7,7 +7,7 @@ import type { z } from 'zod/v4';
 import { useMemo, useState } from 'react';
 import { MDX_IMAGE_SIZES } from '@barely/const';
 import { useUpload, useZodForm } from '@barely/hooks';
-import { mdxImageFileSchema } from '@barely/lib/mdx';
+import { mdxImageFileSchema } from '@barely/lib/mdx/mdx.schema';
 import {
 	insertJsx$,
 	Button as ToolbarButton,

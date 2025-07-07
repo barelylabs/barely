@@ -40,7 +40,7 @@
 	"scripts": {
 		"build": "tsc",
 		"dev": "tsc",
-		"clean": "rm -rf .turbo node_modules",
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
 		"format": "prettier --check . --ignore-path ../../.gitignore",
 		"lint": "eslint .",
 		"studio": "pnpm with-env email dev --port 4000 --dir src/templates",

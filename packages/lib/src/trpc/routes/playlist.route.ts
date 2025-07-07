@@ -1,5 +1,6 @@
 import type { TRPCRouterRecord } from '@trpc/server';
 import { dbHttp } from '@barely/db/client';
+import { dbPool } from '@barely/db/pool';
 import { Playlists } from '@barely/db/sql/playlist.sql';
 import { sqlAnd, sqlStringContains } from '@barely/db/utils';
 import { newId } from '@barely/utils';
@@ -18,7 +19,7 @@ import {
 	getPlaylistsByUserId,
 	totalPlaylistReachByGenres,
 	upsertPlaylistGenres,
-	userGetPlaylistById,
+	// userGetPlaylistById,
 } from '../../functions/playlist.fns';
 import { publicProcedure, workspaceProcedure } from '../trpc';
 
@@ -81,11 +82,47 @@ export const playlistRoute = {
 			}),
 		)
 		.query(async ({ ctx, input: { playlistId } }) => {
-			const playlist = await userGetPlaylistById(ctx.user.id, playlistId, ctx.pool);
+			// const playlist = await userGetPlaylistById(ctx.user.id, playlistId, ctx.pool);
 
-			console.log('playlist => ', playlist);
+			// if (!playlist) {
+			// 	throw new TRPCError({
+			// 		code: 'NOT_FOUND',
+			// 		message: 'Playlist not found',
+			// 	});
+			// }
 
-			return playlist;
+			// return playlist;
+			const playlist = await dbPool(ctx.pool).query.Playlists.findFirst({
+				where: Playlists => eq(Playlists.id, playlistId),
+				with: {
+					_genres: {
+						with: {
+							genre: true,
+						},
+					},
+					_providerAccounts: {
+						with: {
+							providerAccount: true,
+						},
+					},
+				},
+			});
+
+			if (!playlist) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Playlist not found',
+				});
+			}
+
+			const playlistWithProviderAccounts = {
+				...playlist,
+				// tracklist: undefined, // fixme
+				providerAccounts: playlist._providerAccounts.map(_pa => _pa.providerAccount),
+				genres: playlist._genres.map(_g => _g.genre),
+			};
+
+			return playlistWithProviderAccounts;
 		}),
 
 	byCurrentUser: workspaceProcedure
