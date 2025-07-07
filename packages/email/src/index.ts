@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import { Resend } from 'resend';
 import { z } from 'zod/v4';
 
@@ -17,7 +18,7 @@ export type SendEmailProps = {
 	replyTo?: string;
 	bcc?: string | string[];
 	cc?: string | string[];
-	react: JSX.Element;
+	react: ReactElement;
 	text?: string;
 	html?: string;
 } & (

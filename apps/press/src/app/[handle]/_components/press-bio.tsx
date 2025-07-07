@@ -7,12 +7,9 @@ import { MDXRemote } from '@barely/ui/mdx-remote';
 import { mdxTypography } from '@barely/ui/mdx-typography';
 import { mdxVideoPlayer } from '@barely/ui/mdx-video-player';
 
-// import { H } from '@barely/ui/typography';
-// import { VideoPlayer } from '@barely/ui/video-player';
-
 import { Section, SectionDiv } from '~/app/[handle]/_components/press-section';
 
-export async function PressBio({ bio }: { bio: string }) {
+export function PressBio({ bio }: { bio: string }) {
 	const components = {
 		...mdxTypography,
 		...mdxVideoPlayer,
@@ -23,12 +20,10 @@ export async function PressBio({ bio }: { bio: string }) {
 		...mdxGrid,
 	};
 
-	const renderedBio = await MDXRemote({ source: bio, components });
-
 	return (
 		<Section id='bio'>
 			<SectionDiv title='Bio'>
-				<>{renderedBio}</>
+				<MDXRemote source={bio} components={components} />
 			</SectionDiv>
 		</Section>
 	);

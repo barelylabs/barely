@@ -10,7 +10,6 @@ import { insertFanSchema } from '@barely/validators';
 import { task } from '@trigger.dev/sdk/v3';
 import { parse } from 'csv-parse';
 import { eq } from 'drizzle-orm';
-import fetch from 'node-fetch';
 import { z } from 'zod/v4';
 
 export const importFansFromCsv = task({
@@ -43,7 +42,13 @@ export const importFansFromCsv = task({
 			throw new Error('Failed to fetch CSV file');
 		}
 
-		const parser = Readable.from(response.body).pipe(
+		if (!response.body) {
+			throw new Error('Response body is null');
+		}
+
+		// Convert Web Stream to Node.js stream
+		const nodeStream = Readable.fromWeb(response.body as any);
+		const parser = nodeStream.pipe(
 			parse({
 				columns: true,
 				skip_empty_lines: true,

@@ -1,3 +1,3 @@
-import { MDXRemote } from 'next-mdx-remote/rsc';
+import { MDXRemoteRsc as MDXRemote } from 'next-mdx-remote-client/rsc';
 
 export { MDXRemote };
