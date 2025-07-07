@@ -14,7 +14,7 @@ export interface NavTabProps {
 	tabs: HorizontalTabItemProps[];
 	linkShallow?: boolean;
 	linkScroll?: boolean;
-	actions?: JSX.Element;
+	actions?: ReactNode;
 }
 
 export function HorizontalTabs({
