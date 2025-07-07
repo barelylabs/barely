@@ -60,7 +60,7 @@ jobs:
       - name: link vercel
         run: |
           pnpm vercel link --repo --scope=${{ inputs.scope }} --yes --token=${{ secrets.VERCEL_TOKEN }}
-          cd ${{ inputs.working_directory }} && pnpm vercel link --scope=${{ inputs.scope }} --yes --token=${{ secrets.VERCEL_TOKEN }}
+          pnpm vercel link --cwd ${{ inputs.working_directory }} --scope=${{ inputs.scope }} --yes --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: pull vercel
         run: |
@@ -70,7 +70,7 @@ jobs:
             ENV_OPTIONS=""
           fi
 
-          cd ${{ inputs.working_directory }} && pnpm vercel pull --yes --environment=${{ inputs.environment }} $ENV_OPTIONS --token=${{ secrets.VERCEL_TOKEN }}
+          pnpm vercel pull --cwd ${{ inputs.working_directory }} --yes --environment=${{ inputs.environment }} $ENV_OPTIONS --token=${{ secrets.VERCEL_TOKEN }}
 
           VERCEL_URL=${{ inputs.app_name }}-git-${{ inputs.git_branch }}-${{ inputs.scope }}.vercel.app
           sed -i '/VERCEL_URL/d' ${{ inputs.working_directory }}/.vercel/.env.${{ inputs.environment }}.local
@@ -89,7 +89,7 @@ jobs:
             ENV_OPTIONS=""
           fi
 
-          deployment_url=$(cd ${{ inputs.working_directory }} && pnpm vercel deploy --prebuilt $ENV_OPTIONS ${{ inputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})          
+          deployment_url=$(pnpm vercel deploy --cwd ${{ inputs.working_directory }} --prebuilt $ENV_OPTIONS ${{ inputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }})          
 
           inspect=$(pnpm vercel inspect $deployment_url --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
           deployment_id=$(echo "$inspect" | grep -m 1 '^    id' | awk '{print $NF}' | cut -d'_' -f 2-)
