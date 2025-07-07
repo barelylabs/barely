@@ -3,7 +3,7 @@ import { defineConfig } from '@trigger.dev/sdk/v3';
 
 export const config = defineConfig({
 	project: 'proj_qknwxraxikbauwjfqxlr',
-	maxDuration: 60,
+	maxDuration: 60, // 1 minute
 	retries: {
 		enabledInDev: false,
 		default: {
