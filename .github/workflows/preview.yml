@@ -282,7 +282,7 @@ jobs:
         env:
           TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
         run: |
-          pnpm dlx trigger.dev@latest deploy --env staging
+          cd packages/lib && pnpm dlx trigger.dev@latest deploy --env staging
 
   # 👀 DEPLOY PREVIEWS
   deploy-app:
