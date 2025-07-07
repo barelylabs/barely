@@ -27,6 +27,7 @@
 		"dev:enable": "chmod +x ./scripts/dev-qr-codes.sh && chmod +x scripts/dev_kill.sh && chmod +x ./scripts/create-dev-branch.sh && chmod +x ./scripts/reset-dev-branch.sh && chmod +x ./scripts/tunnelto-auth.sh",
 		"dev:pre": "sudo ./scripts/dev_kill.sh && turbo dev:pre",
 		"dev:pull": "pnpm vercel:pull-env && pnpm neon:create-dev-branch && pnpm tunnelto:auth",
+		"dev:trigger": "turbo run dev:trigger -F @barely/lib",
 		"format": "turbo run format --continue -- --cache --cache-location .cache/.prettiercache",
 		"format:fix": "turbo run format --continue -- --write --cache --cache-location .cache/.prettiercache",
 		"lint": "turbo run lint --continue -- --cache --cache-location .cache/.eslintcache",

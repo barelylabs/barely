@@ -1,7 +1,7 @@
-import type { TriggerConfig } from '@trigger.dev/sdk/v3';
 import { additionalPackages } from '@trigger.dev/build/extensions/core';
+import { defineConfig } from '@trigger.dev/sdk/v3';
 
-export const config: TriggerConfig = {
+export const config = defineConfig({
 	project: 'proj_qknwxraxikbauwjfqxlr',
 	maxDuration: 60,
 	retries: {
@@ -17,12 +17,13 @@ export const config: TriggerConfig = {
 	enableConsoleLogging: true,
 	dirs: ['./src/trigger'],
 	build: {
+		jsx: {
+			automatic: true,
+		},
 		extensions: [
 			additionalPackages({
 				packages: ['resend@4.6.0'],
 			}),
 		],
 	},
-
-	// additionalPackages: ['resend@3.2.0'],
-};
+});
