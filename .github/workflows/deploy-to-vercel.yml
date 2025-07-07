@@ -72,9 +72,9 @@ jobs:
           pnpm vercel pull --yes --environment=${{ inputs.environment }} $ENV_OPTIONS --token=${{ secrets.VERCEL_TOKEN }}
 
           VERCEL_URL=${{ inputs.app_name }}-git-${{ inputs.git_branch }}-${{ inputs.scope }}.vercel.app
-          sed -i '/VERCEL_URL/d' ${{ inputs.working_directory }}/.vercel/.env.${{ inputs.environment }}.local
-          echo "VERCEL_URL=\"$VERCEL_URL\"" >> ${{ inputs.working_directory }}/.vercel/.env.${{ inputs.environment }}.local                    
-          cp ${{ inputs.working_directory }}/.vercel/.env.${{ inputs.environment }}.local .env
+          sed -i '/VERCEL_URL/d' .vercel/.env.${{ inputs.environment }}.local
+          echo "VERCEL_URL=\"$VERCEL_URL\"" >> .vercel/.env.${{ inputs.environment }}.local                    
+          cp .vercel/.env.${{ inputs.environment }}.local .env
 
       - name: build project artifacts
         run: |
