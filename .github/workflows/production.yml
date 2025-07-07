@@ -285,7 +285,7 @@ jobs:
       - name: deploy trigger.dev
         env:
           TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
-        run: pnpm deploy-trigger:production
+        run: cd packages/lib && pnpm dlx trigger.dev@latest deploy
 
   # 🔀 MERGE PR BRANCH TO MAIN 🔀
   production--can-merge:
