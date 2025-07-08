@@ -1,6 +1,6 @@
 'use client';
 
-import type { MusicPlayerTracklist } from '@barely/ui/elements/music-player';
+import type { MusicPlayerTracklist } from '@barely/ui/music-player';
 import React from 'react';
 import { useHydrateAtoms } from 'jotai/utils';
 
@@ -9,7 +9,7 @@ import {
 	HeadlessMusicPlayer,
 	MusicPlayerBar,
 	tracklistAtom,
-} from '@barely/ui/elements/music-player';
+} from '@barely/ui/music-player';
 
 export function MusicPlayerBottomBar({
 	tracklist: tracklist,

@@ -1,37 +1,45 @@
 'use client';
 
-import type { TopEventType } from '@barely/lib/server/routes/stat/stat.schema';
+import type { TopEventType } from '@barely/tb/schema';
 import type { BarListBarProps } from '@barely/ui/charts/bar-list';
 import { useState } from 'react';
-import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
-import { getTopStatValue } from '@barely/lib/server/routes/stat/stat.schema';
-import { api } from '@barely/server/api/react';
+import { COUNTRIES } from '@barely/const';
+import { useWebEventStatFilters } from '@barely/hooks';
+import { getTopStatValue } from '@barely/tb/schema';
+import { useQuery } from '@tanstack/react-query';
 
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Card } from '@barely/ui/card';
 import { BarList } from '@barely/ui/charts/bar-list';
-import { Card } from '@barely/ui/elements/card';
-import { ScrollArea, ScrollBar } from '@barely/ui/elements/scroll-area';
-import { TabButtons } from '@barely/ui/elements/tab-buttons';
-import { H } from '@barely/ui/elements/typography';
-
-import { COUNTRIES } from '@barely/utils/constants';
+import { ScrollArea, ScrollBar } from '@barely/ui/scroll-area';
+import { TabButtons } from '@barely/ui/tab-buttons';
+import { H } from '@barely/ui/typography';
 
 export function StatLocations({ eventType }: { eventType: TopEventType }) {
+	const trpc = useTRPC();
 	const [tab, setTab] = useState<'Country' | 'Region' | 'City'>('Country');
 
 	const { filtersWithHandle, getSetFilterPath } = useWebEventStatFilters();
 
-	const { data: countries } = api.stat.topCountries.useQuery({
-		...filtersWithHandle,
-		topEventType: eventType,
-	});
-	const { data: regions } = api.stat.topRegions.useQuery({
-		...filtersWithHandle,
-		topEventType: eventType,
-	});
-	const { data: cities } = api.stat.topCities.useQuery({
-		...filtersWithHandle,
-		topEventType: eventType,
-	});
+	const { data: countries } = useQuery(
+		trpc.stat.topCountries.queryOptions({
+			...filtersWithHandle,
+			topEventType: eventType,
+		}),
+	);
+	const { data: regions } = useQuery(
+		trpc.stat.topRegions.queryOptions({
+			...filtersWithHandle,
+			topEventType: eventType,
+		}),
+	);
+	const { data: cities } = useQuery(
+		trpc.stat.topCities.queryOptions({
+			...filtersWithHandle,
+			topEventType: eventType,
+		}),
+	);
 
 	const locationData =
 		tab === 'Country' ? countries?.map(c => ({ ...c, region: '', city: '' }))
@@ -42,7 +50,7 @@ export function StatLocations({ eventType }: { eventType: TopEventType }) {
 		locationData?.map(c => ({
 			name:
 				tab === 'Country' ? (COUNTRIES[c.country] ?? c.country)
-				: tab === 'Region' && 'region' in c ? (c.region ?? '')
+				: tab === 'Region' && 'region' in c ? c.region
 				: c.city,
 			value: getTopStatValue(eventType, c),
 

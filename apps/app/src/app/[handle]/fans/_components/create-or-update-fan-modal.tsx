@@ -1,39 +1,39 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
-import { api } from '@barely/lib/server/api/react';
-import { upsertFanSchema } from '@barely/lib/server/routes/fan/fan.schema';
+import { useCreateOrUpdateForm, useWorkspace } from '@barely/hooks';
+import { upsertFanSchema } from '@barely/validators';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
-import { Separator } from '@barely/ui/elements/separator';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SwitchField } from '@barely/ui/forms/switch-field';
 import { TextField } from '@barely/ui/forms/text-field';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
+import { Separator } from '@barely/ui/separator';
 
-import { useFanContext } from './fan-context';
+import { useFan, useFanSearchParams } from './fan-context';
 
 export function CreateOrUpdateFanModal({ mode }: { mode: 'create' | 'update' }) {
-	const apiUtils = api.useUtils();
-
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
+	const { handle } = useWorkspace();
 	/* fan context */
-	const {
-		lastSelectedItem: selectedFan,
-		showCreateModal,
-		showUpdateModal,
-		setShowCreateModal,
-		setShowUpdateModal,
-		focusGridList,
-	} = useFanContext();
+	const { lastSelectedItem: selectedFan, focusGridList } = useFan();
+	const { showCreateModal, showUpdateModal, setShowCreateModal, setShowUpdateModal } =
+		useFanSearchParams();
 
 	/* mutations */
-	const { mutateAsync: createFan } = api.fan.create.useMutation({
+	const { mutateAsync: createFan } = useMutation({
+		...trpc.fan.create.mutationOptions(),
 		onSuccess: async () => {
 			await handleCloseModal();
 		},
 	});
 
-	const { mutateAsync: updateFan } = api.fan.update.useMutation({
+	const { mutateAsync: updateFan } = useMutation({
+		...trpc.fan.update.mutationOptions(),
 		onSuccess: async () => {
 			await handleCloseModal();
 		},
@@ -48,10 +48,16 @@ export function CreateOrUpdateFanModal({ mode }: { mode: 'create' | 'update' }) 
 			email: mode === 'update' ? (selectedFan?.email ?? '') : '',
 		},
 		handleCreateItem: async d => {
-			await createFan(d);
+			await createFan({
+				...d,
+				handle,
+			});
 		},
 		handleUpdateItem: async d => {
-			await updateFan(d);
+			await updateFan({
+				...d,
+				handle,
+			});
 		},
 	});
 
@@ -61,10 +67,12 @@ export function CreateOrUpdateFanModal({ mode }: { mode: 'create' | 'update' }) 
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
-		await apiUtils.fan.invalidate();
+		await queryClient.invalidateQueries({
+			queryKey: trpc.fan.byWorkspace.queryKey(),
+		});
 		form.reset();
-		setShowModal(false);
-	}, [form, focusGridList, apiUtils.fan, setShowModal]);
+		await setShowModal(false);
+	}, [form, focusGridList, queryClient, trpc, setShowModal]);
 
 	const submitDisabled = mode === 'update' && !form.formState.isDirty;
 

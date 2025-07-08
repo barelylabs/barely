@@ -3,10 +3,10 @@ import './styles/globals.css';
 import type { Metadata } from 'next';
 import { Inter as FontSans } from 'next/font/google';
 import localFont from 'next/font/local';
-import { cn } from '@barely/lib/utils/cn';
+import { cn } from '@barely/utils';
 
 import { TailwindIndicator } from '@barely/ui/components/tailwind-indicator';
-import { Container } from '@barely/ui/elements/container';
+import { Container } from '@barely/ui/container';
 
 import Footer from '~/app/__legacy/components/footer';
 import { Header } from '~/app/__legacy/components/header';

@@ -1,13 +1,14 @@
 'use client';
 
-import { usePageStatFilters } from '@barely/lib/hooks/use-page-stat-filters';
-import { api } from '@barely/server/api/react';
+import { usePageStatFilters } from '@barely/hooks';
+import { calcPercent } from '@barely/utils';
+import { useSuspenseQuery } from '@tanstack/react-query';
 
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Card } from '@barely/ui/card';
 import { AreaChart } from '@barely/ui/charts/area-chart';
-import { Card } from '@barely/ui/elements/card';
-import { InfoTabButton } from '@barely/ui/elements/info-tab-button';
-
-import { calcPercent } from '@barely/utils/number';
+import { InfoTabButton } from '@barely/ui/info-tab-button';
 
 import { WebEventFilterBadges } from '~/app/[handle]/_components/filter-badges';
 
@@ -48,17 +49,20 @@ export function PageTimeseries() {
 		// showNetSales,
 	} = uiFilters;
 
-	const { data: timeseries } = api.stat.pageTimeseries.useQuery(
-		{ ...filtersWithHandle },
-		{
-			select: data => data.map(row => ({ ...row, date: formatTimestamp(row.start) })),
-		},
+	const trpc = useTRPC();
+	const { data: timeseries } = useSuspenseQuery(
+		trpc.stat.pageTimeseries.queryOptions(
+			{ ...filtersWithHandle },
+			{
+				select: data => data.map(row => ({ ...row, date: formatTimestamp(row.start) })),
+			},
+		),
 	);
 
-	const totalVisits = timeseries?.reduce((acc, row) => acc + row.page_views, 0);
-	const totalClicks = timeseries?.reduce((acc, row) => acc + row.page_linkClicks, 0);
+	const totalVisits = timeseries.reduce((acc, row) => acc + row.page_views, 0);
+	const totalClicks = timeseries.reduce((acc, row) => acc + row.page_linkClicks, 0);
 
-	const chartData = (timeseries ?? [])?.map(row => ({
+	const chartData = timeseries.map(row => ({
 		...row,
 		visits: showVisits ? row.page_views : undefined,
 		clicks: showClicks ? row.page_linkClicks : undefined,
@@ -72,7 +76,7 @@ export function PageTimeseries() {
 						<InfoTabButton
 							icon='view'
 							label='VISITS'
-							value={totalVisits ?? 0}
+							value={totalVisits}
 							onClick={toggleShowVisits}
 							selected={showVisits}
 							selectedClassName='border-slate-500 bg-slate-100'
@@ -82,8 +86,8 @@ export function PageTimeseries() {
 						<InfoTabButton
 							icon='click'
 							label='CLICKS'
-							value={totalClicks ?? 0}
-							subValue={calcPercent(totalClicks ?? 0, totalVisits ?? 0)}
+							value={totalClicks}
+							subValue={calcPercent(totalClicks, totalVisits)}
 							selected={showClicks}
 							onClick={toggleShowClicks}
 							iconBackgroundClassName='bg-blue'

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
-import { Icon } from '@barely/ui/elements/icon';
-import { H, Text } from '@barely/ui/elements/typography';
+import { Icon } from '@barely/ui/icon';
+import { H, Text } from '@barely/ui/typography';
 
 interface DashContentHeaderProps {
 	title: string;

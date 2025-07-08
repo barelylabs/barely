@@ -1,16 +1,16 @@
 'use client';
 
-import { Button } from '@barely/ui/elements/button';
+import { Button } from '@barely/ui/button';
 
-import { useMediaContext } from '~/app/[handle]/media/_components/media-context';
+import { useMediaSearchParams } from '~/app/[handle]/media/_components/media-context';
 
 export function UploadMediaButton() {
-	const { setShowCreateModal } = useMediaContext();
+	const { setShowCreateModal } = useMediaSearchParams();
 
 	return (
 		<Button
 			onClick={() => {
-				setShowCreateModal(true);
+				void setShowCreateModal(true);
 			}}
 			className='space-x-3'
 		>

@@ -1,152 +1,41 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
-import type { fmFilterParamsSchema } from '@barely/lib/server/routes/fm/fm.schema';
-import type { Selection } from 'react-aria-components';
-import type { z } from 'zod';
-import { createContext, use, useCallback, useContext, useRef, useState } from 'react';
-import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
-import { fmSearchParamsSchema } from '@barely/lib/server/routes/fm/fm.schema';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import { createResourceDataHook, createResourceSearchParamsHook } from '@barely/hooks';
 
-import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
+import { useTRPC } from '@barely/api/app/trpc.react';
 
-type FlowContext = InfiniteItemsContext<
-	AppRouterOutputs['flow']['byWorkspace']['flows'][0],
-	z.infer<typeof fmFilterParamsSchema>
->;
+// Define the page data type for flows
+interface FlowPageData {
+	flows: AppRouterOutputs['flow']['byWorkspace']['flows'];
+	nextCursor?: { id: string; createdAt: Date } | null;
+}
 
-const FlowContext = createContext<FlowContext | undefined>(undefined);
+// Create the search params hook for flows
+// Note: Flows don't have create/update modals, only archive/delete
+export const useFlowSearchParams = createResourceSearchParamsHook();
 
-export function FlowContextProvider({
-	children,
-	initialFlows,
-}: {
-	children: React.ReactNode;
-	initialFlows: Promise<AppRouterOutputs['flow']['byWorkspace']>;
-}) {
-	const [showArchiveModal, setShowArchiveModal] = useState(false);
-	const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-	const { handle } = useWorkspace();
-
-	const { data, setQuery, removeByKey, removeAllQueryParams, pending } =
-		useTypedOptimisticQuery(fmSearchParamsSchema);
-
-	const { selectedFmPageIds, ...filters } = data;
-
-	const flowSelection: Selection =
-		!selectedFmPageIds ? new Set()
-		: selectedFmPageIds === 'all' ? 'all'
-		: new Set(selectedFmPageIds);
-
-	const initialData = use(initialFlows);
-	const {
-		data: infiniteFlows,
-		hasNextPage,
-		fetchNextPage,
-		isFetchingNextPage,
-		isFetching,
-		isRefetching,
-		isPending,
-	} = api.flow.byWorkspace.useInfiniteQuery(
-		{ handle, ...filters },
+// Create a custom data hook for flows that properly uses tRPC
+export function useFlow() {
+	const trpc = useTRPC();
+	const baseHook = createResourceDataHook<
+		AppRouterOutputs['flow']['byWorkspace']['flows'][0],
+		FlowPageData
+	>(
 		{
-			initialData: () => {
-				return {
-					pages: [{ flows: initialData.flows, nextCursor: initialData.nextCursor }],
-					pageParams: [], // todo - figure out how to structure this
-				};
-			},
-			getNextPageParam: lastPage => lastPage.nextCursor,
+			resourceName: 'flows',
+			getQueryOptions: (handle, filters) =>
+				trpc.flow.byWorkspace.infiniteQueryOptions(
+					{ handle, ...filters },
+					{ getNextPageParam: (lastPage: FlowPageData) => lastPage.nextCursor },
+				),
+			getItemsFromPages: pages => pages.flatMap(page => page.flows),
 		},
+		useFlowSearchParams,
 	);
 
-	const flows = infiniteFlows?.pages.flatMap(page => page.flows) ?? [];
-
-	// const gridListRef = useRef<HTMLDivElement>(null);
-
-	const setFlowSelection = useCallback(
-		(selection: Selection) => {
-			if (selection === 'all') return;
-			if (selection.size === 0) return removeByKey('selectedFmPageIds');
-
-			return setQuery(
-				'selectedFmPageIds',
-				Array.from(selection).map(key => key.toString()),
-			);
-		},
-		[removeByKey, setQuery],
-	);
-
-	const clearAllFilters = useCallback(() => {
-		removeAllQueryParams();
-	}, [removeAllQueryParams]);
-
-	const toggleArchived = useCallback(() => {
-		if (filters.showArchived) removeByKey('showArchived');
-		return setQuery('showArchived', true);
-	}, [filters.showArchived, removeByKey, setQuery]);
-
-	const setSearch = useCallback(
-		(search: string) => {
-			if (search.length) return setQuery('search', search);
-
-			return removeByKey('search');
-		},
-		[removeByKey, setQuery],
-	);
-
-	const lastSelectedFlowId =
-		flowSelection === 'all' || !flowSelection ?
-			undefined
-		:	Array.from(flowSelection).pop()?.toString();
-
-	const gridListRef = useRef<HTMLDivElement>(null);
-
-	const contextValue = {
-		items: flows,
-		selection: flowSelection,
-		lastSelectedItemId: lastSelectedFlowId,
-		lastSelectedItem: flows.find(flow => flow.id === lastSelectedFlowId),
-		setSelection: setFlowSelection,
-		showCreateModal: false,
-		setShowCreateModal: () => void {},
-		showUpdateModal: false,
-		setShowUpdateModal: () => void {},
-		showArchiveModal,
-		setShowArchiveModal,
-		showDeleteModal,
-		setShowDeleteModal,
-		// infinite
-		hasNextPage,
-		fetchNextPage: () => void fetchNextPage(),
-		isFetchingNextPage,
-		isFetching,
-		isRefetching,
-		isPending,
-		// filters
-		filters,
-		pendingFiltersTransition: pending,
-		setSearch,
-		toggleArchived,
-		clearAllFilters,
-		gridListRef,
-		focusGridList: () => {
-			gridListRef.current?.focus();
-		},
-	} satisfies FlowContext;
-
-	return <FlowContext.Provider value={contextValue}>{children}</FlowContext.Provider>;
+	return baseHook();
 }
 
-export function useFlowContext() {
-	const context = useContext(FlowContext);
-
-	if (!context) {
-		throw new Error('useFlowContext must be used within a FlowContextProvider');
-	}
-
-	return context;
-}
+// Export the old context hook name for backward compatibility
+export const useFlowContext = useFlow;

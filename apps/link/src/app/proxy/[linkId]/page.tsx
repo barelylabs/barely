@@ -1,13 +1,18 @@
 import { notFound, redirect } from 'next/navigation';
-import { getLinkById } from '@barely/lib/server/routes/link/link.fns';
-import { GOOGLE_FAVICON_URL } from '@barely/lib/utils/constants';
-import { constructMetadata, getApexDomain } from '@barely/lib/utils/link';
+import { GOOGLE_FAVICON_URL } from '@barely/const';
+import { getLinkById } from '@barely/lib/functions/link.fns';
+import { constructMetadata, getApexDomain } from '@barely/utils';
 import { unescape } from 'html-escaper';
 
 // export const runtime = 'edge';
 
-export async function generateMetadata({ params }: { params: { linkId: string } }) {
-	const data = await getLinkById(params.linkId);
+export async function generateMetadata({
+	params,
+}: {
+	params: Promise<{ linkId: string }>;
+}) {
+	const { linkId } = await params;
+	const data = await getLinkById(linkId);
 
 	if (!data?.customMetaTags) {
 		return;
@@ -24,8 +29,13 @@ export async function generateMetadata({ params }: { params: { linkId: string } 
 	});
 }
 
-export default async function ProxyPage({ params }: { params: { linkId: string } }) {
-	const data = await getLinkById(params.linkId);
+export default async function ProxyPage({
+	params,
+}: {
+	params: Promise<{ linkId: string }>;
+}) {
+	const { linkId } = await params;
+	const data = await getLinkById(linkId);
 
 	// if the link doesn't exist
 	if (!data) {

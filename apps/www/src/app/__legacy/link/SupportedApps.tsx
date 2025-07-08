@@ -1,5 +1,5 @@
-import { Card } from '@barely/ui/elements/card';
-import { Icon } from '@barely/ui/elements/icon';
+import { Card } from '@barely/ui/card';
+import { Icon } from '@barely/ui/icon';
 
 const SupportedApps = () => {
 	return (

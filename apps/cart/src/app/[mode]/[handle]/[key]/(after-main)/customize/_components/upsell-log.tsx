@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect } from 'react';
-import { cartApi } from '@barely/lib/server/routes/cart/cart.api.react';
+import { useMutation } from '@tanstack/react-query';
+
+import { useCartTRPC } from '@barely/api/public/cart.trpc.react';
 
 import { setCartStageCookie } from '~/app/[mode]/[handle]/[key]/_actions';
 
@@ -14,7 +16,9 @@ export function UpsellLog({
 	handle: string;
 	key: string;
 }) {
-	const { mutate: logEvent } = cartApi.log.useMutation();
+	const trpc = useCartTRPC();
+
+	const { mutate: logEvent } = useMutation(trpc.log.mutationOptions());
 
 	useEffect(() => {
 		setCartStageCookie({

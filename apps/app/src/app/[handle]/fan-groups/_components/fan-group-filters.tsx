@@ -1,10 +1,11 @@
 'use client';
 
 import { Filters } from '~/app/[handle]/_components/filters';
-import { useFanGroupContext } from '~/app/[handle]/fan-groups/_components/fan-group-context';
+import { useFanGroupSearchParams } from '~/app/[handle]/fan-groups/_components/fan-group-context';
 
 export function FanGroupFilters() {
-	const { filters, setSearch, toggleArchived, clearAllFilters } = useFanGroupContext();
+	const { filters, setSearch, toggleArchived, clearAllFilters } =
+		useFanGroupSearchParams();
 
 	return (
 		<Filters

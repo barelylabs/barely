@@ -13,16 +13,10 @@ import { useShallow } from 'zustand/react/shallow';
 
 import '@xyflow/react/dist/style.css';
 
-import type {
-	FlowEdge,
-	FlowNode,
-	FlowState,
-	SimpleEdge,
-} from '@barely/lib/server/routes/flow/flow.ui.types';
+import type { FlowEdge, FlowNode, FlowState, SimpleEdge } from '@barely/validators';
+import { raise } from '@barely/utils';
 
-import { Button } from '@barely/ui/elements/button';
-
-import { raise } from '@barely/utils/raise';
+import { Button } from '@barely/ui/button';
 
 import {
 	BooleanEdgeType,
@@ -128,6 +122,8 @@ export function FlowBuilder() {
 		}: {
 			nodes: FlowNode[];
 			edges: FlowEdge[];
+
+			// eslint-disable-next-line @typescript-eslint/require-await
 		}) => {
 			console.log('onBeforeDelete', nodesToDelete, edgesToDelete);
 			const booleanNodes = nodesToDelete.filter(node => node.type === 'boolean');
@@ -274,7 +270,7 @@ export function FlowBuilder() {
 	const initialLayout = useRef(false);
 
 	useEffect(() => {
-		if (!nodes || !edges || !onLayout) return;
+		if (!nodes.length || !edges.length) return;
 
 		if (!initialLayout.current) {
 			initialLayout.current = true;

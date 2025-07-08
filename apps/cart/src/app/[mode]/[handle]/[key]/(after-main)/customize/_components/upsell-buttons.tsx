@@ -1,11 +1,11 @@
 'use client';
 
-import type { ApparelSize } from '@barely/lib/server/routes/product/product.constants';
+import type { ApparelSize } from '@barely/const';
 import { useState } from 'react';
-import { APPAREL_SIZES } from '@barely/lib/server/routes/product/product.constants';
+import { APPAREL_SIZES } from '@barely/const';
 
-import { Button } from '@barely/ui/elements/button';
-import { ToggleGroup, ToggleGroupItem } from '@barely/ui/elements/toggle-group';
+import { Button } from '@barely/ui/button';
+import { ToggleGroup, ToggleGroupItem } from '@barely/ui/toggle-group';
 
 import { useUpsellCart } from '~/app/[mode]/[handle]/[key]/(after-main)/customize/_components/use-upsell-cart';
 
@@ -34,9 +34,10 @@ export function UpsellButtons({
 		});
 
 	const convertUpsellDisabled =
-		(upsellSizes && upsellSizes.length > 0 && !apparelSize) ??
-		converting ??
-		submitting ??
+		// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+		(upsellSizes && upsellSizes.length > 0 && !apparelSize) ||
+		converting ||
+		submitting ||
 		declining;
 	const declineUpsellDisabled = converting || declining || submitting;
 

@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import logo from '@static/logo.png';
 
-import { Text } from '@barely/ui/elements/typography';
+import { Text } from '@barely/ui/typography';
 
 const PublicHeader = () => {
 	return (

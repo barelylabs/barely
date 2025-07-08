@@ -1,28 +1,30 @@
 'use client';
 
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useCallback } from 'react';
-import { useEmailDomains } from '@barely/lib/hooks/use-email-domains';
-import { useZodForm } from '@barely/lib/hooks/use-zod-form';
-import { api } from '@barely/lib/server/api/react';
-import { createEmailAddressSchema } from '@barely/lib/server/routes/email-address/email-address.schema';
+import { useEmailDomains, useWorkspace, useZodForm } from '@barely/hooks';
+import { createEmailAddressSchema } from '@barely/validators';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { Icon } from '@barely/ui/elements/icon';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { SwitchField } from '@barely/ui/forms/switch-field';
 import { TextField } from '@barely/ui/forms/text-field';
+import { Icon } from '@barely/ui/icon';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 
-import { useEmailAddressContext } from './email-address-context';
+import { useEmailAddressSearchParams } from './email-address-context';
 
 export function CreateEmailAddressModal() {
-	const apiUtils = api.useUtils();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
+	const { handle } = useWorkspace();
+	const { showCreateModal, setShowCreateModal } = useEmailAddressSearchParams();
 
-	const { showCreateEmailAddressModal, setShowCreateEmailAddressModal, focusGridList } =
-		useEmailAddressContext();
-
-	const { mutateAsync: createEmailAddress } = api.emailAddress.create.useMutation({
+	const { mutateAsync: createEmailAddress } = useMutation({
+		...trpc.emailAddress.create.mutationOptions(),
 		onSuccess: async () => {
 			await handleCloseModal();
 		},
@@ -46,25 +48,29 @@ export function CreateEmailAddressModal() {
 	const { control } = form;
 
 	const handleCloseModal = useCallback(async () => {
-		focusGridList();
-		await apiUtils.emailAddress.invalidate();
+		await queryClient.invalidateQueries(trpc.emailAddress.byWorkspace.queryFilter());
 		form.reset();
-		setShowCreateEmailAddressModal(false);
-	}, [focusGridList, apiUtils.emailAddress, form, setShowCreateEmailAddressModal]);
+		await setShowCreateModal(false);
+	}, [queryClient, trpc, form, setShowCreateModal]);
 
 	const handleSubmit = useCallback(
 		async (data: z.infer<typeof createEmailAddressSchema>) => {
-			await createEmailAddress(data);
+			await createEmailAddress({
+				...data,
+				handle,
+			});
 		},
-		[createEmailAddress],
+		[createEmailAddress, handle],
 	);
 
 	const preventDefaultClose = form.formState.isDirty;
 
 	return (
 		<Modal
-			showModal={showCreateEmailAddressModal}
-			setShowModal={setShowCreateEmailAddressModal}
+			showModal={showCreateModal}
+			setShowModal={show => {
+				void setShowCreateModal(show);
+			}}
 			preventDefaultClose={preventDefaultClose}
 			onClose={handleCloseModal}
 			className='max-h-fit max-w-md'

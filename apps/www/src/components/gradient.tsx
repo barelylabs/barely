@@ -1,4 +1,4 @@
-import { cn } from '@barely/lib/utils/cn';
+import { cn } from '@barely/utils';
 import { clsx } from 'clsx';
 
 export function Gradient({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {

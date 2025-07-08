@@ -1,44 +1,37 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
-import { formatCentsToDollars } from '@barely/lib/utils/currency';
-import { formatDate } from '@barely/lib/utils/format-date';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import { formatCentsToDollars, formatDate } from '@barely/utils';
 
+import { Button } from '@barely/ui/button';
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
-// import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-// import { api } from '@barely/lib/server/api/react';
-
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { Button } from '@barely/ui/elements/button';
-import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
-import { Icon } from '@barely/ui/elements/icon';
-import { Text } from '@barely/ui/elements/typography';
+import { GridList, GridListCard } from '@barely/ui/grid-list';
+import { Icon } from '@barely/ui/icon';
+import { Text } from '@barely/ui/typography';
 
 import { CreateEmailBroadcastButton } from './create-email-broadcast-button';
-import { useEmailBroadcastsContext } from './email-broadcasts-context';
+import {
+	useEmailBroadcast,
+	useEmailBroadcastSearchParams,
+} from './email-broadcasts-context';
 
 export function AllEmailBroadcasts() {
-	const {
-		items,
-		selection,
-		lastSelectedItemId,
-		setSelection,
-		gridListRef,
-		setShowUpdateModal,
-		isFetching,
-	} = useEmailBroadcastsContext();
+	const { setShowUpdateModal } = useEmailBroadcastSearchParams();
+	const { items, selection, lastSelectedItemId, setSelection, isFetching } =
+		useEmailBroadcast();
 
 	return (
 		<div className='flex flex-col gap-4'>
 			<GridList
-				glRef={gridListRef}
+				data-grid-list='email-broadcasts'
 				className='flex flex-col gap-2'
 				aria-label='Email Broadcasts'
 				selectionMode='multiple'
 				selectionBehavior='replace'
-				onAction={() => {
+				onAction={async () => {
 					if (!lastSelectedItemId) return;
-					setShowUpdateModal(true);
+					await setShowUpdateModal(true);
 				}}
 				items={items}
 				selectedKeys={selection}
@@ -62,7 +55,7 @@ export function AllEmailBroadcasts() {
 }
 
 function LoadMoreButton() {
-	const { hasNextPage, fetchNextPage, isFetchingNextPage } = useEmailBroadcastsContext();
+	const { hasNextPage, fetchNextPage, isFetchingNextPage } = useEmailBroadcast();
 	if (!hasNextPage)
 		return (
 			<div className='flex w-full justify-center'>
@@ -85,8 +78,10 @@ function LoadMoreButton() {
 function EmailBroadcastCard({
 	emailBroadcast,
 }: {
-	emailBroadcast: AppRouterOutputs['emailBroadcast']['byWorkspace']['emailBroadcasts'][number];
+	emailBroadcast: AppRouterOutputs['emailBroadcast']['byWorkspace']['emailBroadcasts'][0];
 }) {
+	const { setShowUpdateModal, setShowDeleteModal } = useEmailBroadcastSearchParams();
+
 	const {
 		id,
 		status,
@@ -99,14 +94,13 @@ function EmailBroadcastCard({
 		deliveries,
 	} = emailBroadcast;
 
-	const { setShowUpdateModal } = useEmailBroadcastsContext();
-
 	return (
 		<GridListCard
 			id={id}
 			key={id}
 			textValue={emailTemplate.name}
 			setShowUpdateModal={setShowUpdateModal}
+			setShowDeleteModal={setShowDeleteModal}
 			title={emailTemplate.name}
 			subtitle={emailTemplate.name}
 			description={

@@ -1,18 +1,18 @@
-import { emailManageApi } from '@barely/lib/server/routes/email-manage/email-manage.api.server';
-import { OPTIONS } from '@barely/lib/utils/trpc-route';
-import { getAbsoluteUrl } from '@barely/lib/utils/url';
+import { getAbsoluteUrl, OPTIONS } from '@barely/utils';
 import { TRPCError } from '@trpc/server';
+
+import { trpcCaller } from '~/trpc/server';
 
 async function POST(
 	request: Request,
-	{ params }: { params: { emailDeliveryId: string } },
+	{ params }: { params: Promise<{ emailDeliveryId: string }> },
 ) {
-	const { emailDeliveryId } = params;
+	const { emailDeliveryId } = await params;
 
 	console.log('unsubscribing from emailDeliveryId', emailDeliveryId);
 
 	try {
-		await emailManageApi.toggleEmailMarketingOptIn({
+		await trpcCaller.toggleEmailMarketingOptIn({
 			emailDeliveryId,
 			forceUnsubscribe: true,
 		});
@@ -32,13 +32,10 @@ async function POST(
 /* GET for webcrawlers of POST Header */
 async function GET(
 	request: Request,
-	{ params }: { params: { emailDeliveryId: string } },
+	{ params }: { params: Promise<{ emailDeliveryId: string }> },
 ) {
-	const { emailDeliveryId } = params;
+	const { emailDeliveryId } = await params;
 
-	// const domain = new URL(request.url).hostname;
-
-	// return Response.redirect(`https://${domain}/${emailDeliveryId}`);
 	return Response.redirect(getAbsoluteUrl('manageEmail', `/manage/${emailDeliveryId}`));
 }
 

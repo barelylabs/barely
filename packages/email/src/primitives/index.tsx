@@ -1,4 +1,5 @@
 import type { ColumnProps } from '@react-email/column';
+import type { ReactNode } from 'react';
 import React from 'react';
 import {
 	Body as BodyPrimitive,
@@ -101,7 +102,7 @@ export function EmailHeading(props: { children: React.ReactNode }) {
 	return <HeadingPrimitive style={style}>{props.children}</HeadingPrimitive>;
 }
 
-export function EmailLink(props: { children: React.ReactNode; href: string }) {
+export function EmailLink(props: { children: ReactNode; href: string }) {
 	const style = {
 		color: '#3182ce',
 	};
@@ -112,6 +113,8 @@ export function EmailLink(props: { children: React.ReactNode; href: string }) {
 		</LinkPrimitive>
 	);
 }
+
+export { LinkPrimitive as EmailLinkPrimitive };
 
 export function EmailSeparator() {
 	return (

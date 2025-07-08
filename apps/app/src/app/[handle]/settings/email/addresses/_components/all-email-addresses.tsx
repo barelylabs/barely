@@ -1,35 +1,35 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
 
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
-import { Icon } from '@barely/ui/elements/icon';
-import { Text } from '@barely/ui/elements/typography';
+import { GridList, GridListCard } from '@barely/ui/grid-list';
+import { Icon } from '@barely/ui/icon';
+import { Text } from '@barely/ui/typography';
 
 import { CreateEmailAddressButton } from './create-email-address-button';
-import { useEmailAddressContext } from './email-address-context';
+import { useEmailAddress, useEmailAddressSearchParams } from './email-address-context';
 
 export function AllEmailAddresses() {
 	const {
-		emailAddresses,
-		emailAddressSelection,
-		lastSelectedEmailAddressId,
-		setEmailAddressSelection,
-		gridListRef,
-		setShowUpdateEmailAddressModal,
-	} = useEmailAddressContext();
+		items: emailAddresses,
+		selection: emailAddressSelection,
+		lastSelectedItemId: lastSelectedEmailAddressId,
+		setSelection: setEmailAddressSelection,
+	} = useEmailAddress();
+
+	const { setShowUpdateModal } = useEmailAddressSearchParams();
 
 	return (
 		<GridList
-			glRef={gridListRef}
+			data-grid-list='email-addresses'
 			className='flex flex-col gap-2'
 			aria-label='Email addresses'
 			selectionMode='multiple'
 			selectionBehavior='replace'
 			onAction={() => {
 				if (!lastSelectedEmailAddressId) return;
-				setShowUpdateEmailAddressModal(true);
+				void setShowUpdateModal(true);
 			}}
 			items={emailAddresses}
 			selectedKeys={emailAddressSelection}
@@ -53,7 +53,7 @@ function EmailAddressCard({
 }: {
 	emailAddress: AppRouterOutputs['emailAddress']['byWorkspace']['emailAddresses'][number];
 }) {
-	const { setShowUpdateEmailAddressModal } = useEmailAddressContext();
+	const { setShowUpdateModal } = useEmailAddressSearchParams();
 
 	const status = emailAddress.domain.status;
 
@@ -62,7 +62,7 @@ function EmailAddressCard({
 			id={emailAddress.id}
 			key={emailAddress.id}
 			textValue={emailAddress.email}
-			setShowUpdateModal={setShowUpdateEmailAddressModal}
+			setShowUpdateModal={setShowUpdateModal}
 		>
 			<div className='flex flex-grow flex-row items-center gap-2'>
 				<Text variant='md/medium'>{emailAddress.email}</Text>

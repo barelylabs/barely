@@ -1,8 +1,7 @@
-import { routeHandler } from '@barely/lib/server/api/route-handler';
-import { domainRouter } from '@barely/lib/server/routes/domain/domain.router';
+import { OPTIONS } from '@barely/utils';
 
-export { OPTIONS } from '@barely/lib/utils/trpc-route';
+import { webDomainHandler } from '@barely/api/app/sub/web-domain.handler';
 
-const handler = routeHandler('domain', domainRouter);
-
-export { handler as GET, handler as POST };
+// Note: This file exists to satisfy Next.js type generation.
+// The actual domain functionality is split into web-domain and email-domain handlers.
+export { OPTIONS, webDomainHandler as GET, webDomainHandler as POST };

@@ -1,0 +1,158 @@
+import { eq } from '@barely/db';
+import { dbHttp } from '@barely/db/client';
+import { Users, VerificationTokens } from '@barely/db/sql';
+import { sendEmail } from '@barely/email';
+import { SignInEmailTemplate } from '@barely/email/templates/auth';
+import { createRandomStringGenerator } from '@better-auth/utils/random';
+
+import type { Session, SessionUser } from '.';
+import { authEnv } from '../env';
+
+export const generateRandomString = createRandomStringGenerator(
+	'a-z',
+	'0-9',
+	'A-Z',
+	'-_',
+);
+
+export function generateMagicLinkToken() {
+	return generateRandomString(32, 'a-z', 'A-Z');
+}
+
+export async function createMagicLinkToken({
+	email,
+	name,
+	expiresIn = 5 * 60, // 5 minutes
+}: {
+	email: string;
+	expiresIn?: number;
+	name?: string;
+}) {
+	const token = generateMagicLinkToken();
+	const expiresAt = new Date(Date.now() + expiresIn);
+
+	// Store token in verification table
+	await dbHttp.insert(VerificationTokens).values({
+		id: generateRandomString(32, 'a-z', 'A-Z'),
+		identifier: token, // Plain token for Better Auth compatibility
+		value: JSON.stringify({ email, name }),
+		expiresAt: expiresAt,
+	});
+
+	return { token, expiresAt };
+}
+
+export async function createMagicLink({
+	email,
+	callbackPath,
+	token: tokenFromProps,
+	expiresIn,
+}: {
+	email: string;
+	callbackPath?: string;
+	token?: string;
+	expiresIn?: number; // in seconds
+}) {
+	console.log('creating a magic link for', email, callbackPath ?? '/');
+
+	// Check if user exists (optional - Better Auth can create users on first login)
+	const dbUser = await dbHttp.query.Users.findFirst({
+		where: eq(Users.email, email),
+		with: {
+			personalWorkspace: {
+				columns: {
+					handle: true,
+				},
+			},
+			_workspaces: {
+				with: {
+					workspace: true,
+				},
+			},
+		},
+	});
+
+	if (!dbUser) {
+		throw new Error('User not found');
+	}
+
+	console.log('dbUser for magic link', dbUser);
+
+	// Create the magic link token & save to db if not provided
+	const { token } =
+		tokenFromProps ?
+			{ token: tokenFromProps }
+		:	await createMagicLinkToken({
+				email,
+				name: dbUser.fullName ?? dbUser.firstName ?? undefined,
+				expiresIn,
+			});
+
+	// Build the magic link URL using Better Auth's callback pattern
+
+	const vercelEnv = authEnv.NEXT_PUBLIC_VERCEL_ENV;
+
+	const baseUrl =
+		vercelEnv === 'development' ?
+			'https://127.0.0.1:' + authEnv.NEXT_PUBLIC_APP_DEV_PORT
+		:	authEnv.NEXT_PUBLIC_APP_BASE_URL;
+	const callbackUrl = encodeURIComponent(callbackPath ?? '/');
+	const magicLink = `${baseUrl}/api/auth/magic-link/verify?token=${token}&callbackURL=${callbackUrl}`;
+
+	console.log('our generated magic link', magicLink);
+
+	return {
+		magicLink,
+		dbUser,
+	};
+}
+
+export async function sendMagicLink(props: {
+	email: string;
+	callbackPath?: string;
+	token?: string;
+}) {
+	const { magicLink, dbUser } = await createMagicLink(props);
+
+	const SignInEmail = SignInEmailTemplate({
+		firstName: dbUser.firstName ?? dbUser.handle ?? undefined,
+		loginLink: magicLink,
+	});
+
+	const emailRes = await sendEmail({
+		from: 'support@barely.io',
+		fromFriendlyName: 'Barely',
+		to: props.email,
+		subject: 'Barely Login Link',
+		type: 'transactional',
+		react: SignInEmail,
+	});
+
+	return emailRes;
+}
+
+export function getSessionWorkspaceByHandle(session: Session, handle: string) {
+	const workspace = session.workspaces.find(w => w.handle === handle);
+	if (!workspace) {
+		throw new Error('Workspace not found');
+	}
+	return workspace;
+}
+
+export function getUserWorkspaceByHandle(user: SessionUser, handle: string) {
+	const workspace = user.workspaces.find(w => w.handle === handle);
+	if (!workspace) {
+		throw new Error('Workspace not found');
+	}
+	return workspace;
+}
+
+export function getDefaultWorkspaceFromSession(session: Session) {
+	const defaultWorkspace = session.workspaces.find(w => w.type !== 'personal');
+
+	if (!defaultWorkspace) {
+		throw new Error('Default workspace not found');
+	}
+
+	return defaultWorkspace;
+}

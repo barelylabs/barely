@@ -1,17 +1,17 @@
 'use client';
 
 import * as React from 'react';
-import { cn } from '@barely/lib/utils/cn';
+import { cn } from '@barely/utils';
 
-import { buttonVariants } from '@barely/ui/elements/button';
+import { buttonVariants } from '@barely/ui/button';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from '@barely/ui/elements/dropdown-menu';
-import { Icon } from '@barely/ui/elements/icon';
-import { useTheme } from '@barely/ui/elements/next-theme-provider';
+} from '@barely/ui/dropdown-menu';
+import { Icon } from '@barely/ui/icon';
+import { useTheme } from '@barely/ui/next-theme-provider';
 
 export function ModeToggle() {
 	const { setTheme } = useTheme();

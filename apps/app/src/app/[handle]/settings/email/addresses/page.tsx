@@ -1,48 +1,47 @@
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import { api } from '@barely/lib/server/api/server';
-import { emailAddressSearchParamsSchema } from '@barely/lib/server/routes/email-address/email-address.schema';
+import { emailAddressSearchParamsSchema } from '@barely/validators';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllEmailAddresses } from '~/app/[handle]/settings/email/addresses/_components/all-email-addresses';
 import { CreateEmailAddressButton } from '~/app/[handle]/settings/email/addresses/_components/create-email-address-button';
 import { CreateEmailAddressModal } from '~/app/[handle]/settings/email/addresses/_components/create-email-address-modal';
-import { EmailAddressContextProvider } from '~/app/[handle]/settings/email/addresses/_components/email-address-context';
 import { EmailAddressHotkeys } from '~/app/[handle]/settings/email/addresses/_components/email-address-hotkeys';
 import { UpdateEmailAddressModal } from '~/app/[handle]/settings/email/addresses/_components/update-email-address-modal';
+import { HydrateClient } from '~/trpc/server';
 
-export default function EmailAddressesPage({
+export default async function EmailAddressesPage({
 	params,
 	searchParams,
 }: {
-	params: { handle: string };
-	searchParams: z.infer<typeof emailAddressSearchParamsSchema>;
+	params: Promise<{ handle: string }>;
+	searchParams: Promise<z.infer<typeof emailAddressSearchParamsSchema>>;
 }) {
-	const parsedSearchParams = emailAddressSearchParamsSchema.safeParse(searchParams);
+	const { handle } = await params;
+	const filters = await searchParams;
+	const parsedSearchParams = emailAddressSearchParamsSchema.safeParse(filters);
 
 	if (!parsedSearchParams.success) {
 		console.error('parsedSearchParams error', parsedSearchParams.error);
-		redirect(`/${params.handle}/settings/email/addresses`);
+		redirect(`/${handle}/settings/email/addresses`);
 	}
 
-	const emailAddresses = api({ handle: params.handle }).emailAddress.byWorkspace({
-		handle: params.handle,
-		...parsedSearchParams.data,
-	});
-
 	return (
-		<EmailAddressContextProvider initialEmailAddresses={emailAddresses}>
-			<DashContentHeader
-				title='Email Addresses'
-				subtitle='Manage your email addresses'
-				button={<CreateEmailAddressButton />}
-			/>
-			<AllEmailAddresses />
+		<HydrateClient>
+			<Suspense>
+				<DashContentHeader
+					title='Email Addresses'
+					subtitle='Manage your email addresses'
+					button={<CreateEmailAddressButton />}
+				/>
+				<AllEmailAddresses />
 
-			<CreateEmailAddressModal />
-			<UpdateEmailAddressModal />
+				<CreateEmailAddressModal />
+				<UpdateEmailAddressModal />
 
-			<EmailAddressHotkeys />
-		</EmailAddressContextProvider>
+				<EmailAddressHotkeys />
+			</Suspense>
+		</HydrateClient>
 	);
 }

@@ -1,33 +1,33 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
-import type { GridListCommandItemProps } from '@barely/ui/elements/grid-list';
-import { useCopy } from '@barely/lib/hooks/use-copy';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
-import { getTrackingLink } from '@barely/lib/server/shipping/shipping.utils';
-import { formatCentsToDollars } from '@barely/lib/utils/currency';
-import { numToPaddedString } from '@barely/lib/utils/number';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import type { GridListCommandItemProps } from '@barely/ui/grid-list';
+import { Suspense } from 'react';
+import { useCopy, useWorkspace } from '@barely/hooks';
+import { formatCentsToDollars, getTrackingLink, numToPaddedString } from '@barely/utils';
+import { useSuspenseQuery } from '@tanstack/react-query';
 
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Badge } from '@barely/ui/badge';
+import { Button } from '@barely/ui/button';
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { Badge } from '@barely/ui/elements/badge';
-import { Button } from '@barely/ui/elements/button';
-import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
-import { Separator } from '@barely/ui/elements/separator';
-import { Text } from '@barely/ui/elements/typography';
+import { GridList, GridListCard } from '@barely/ui/grid-list';
+import { Separator } from '@barely/ui/separator';
+import { Skeleton } from '@barely/ui/skeleton';
+import { Text } from '@barely/ui/typography';
 
-import { useCartOrderContext } from '~/app/[handle]/orders/_components/cart-order-context';
+import { useCartOrder } from '~/app/[handle]/orders/_components/cart-order-context';
 
 export function AllCartOrders() {
-	const { items, selection, setSelection, gridListRef, isFetching } =
-		useCartOrderContext();
+	const { items, isFetching, selection, setSelection } = useCartOrder();
 
 	return (
 		<div className='flex flex-col gap-4'>
 			<GridList
-				glRef={gridListRef}
 				aria-label='Orders'
+				data-grid-list='cart-orders'
 				className='flex flex-col gap-4'
 				selectionMode='multiple'
 				selectionBehavior='replace'
@@ -35,7 +35,7 @@ export function AllCartOrders() {
 				selectedKeys={selection}
 				setSelectedKeys={setSelection}
 				onAction={() => {
-					if (!selection) return;
+					if (selection === 'all' || !selection.size) return;
 				}}
 				renderEmptyState={() => (
 					<>
@@ -53,7 +53,7 @@ export function AllCartOrders() {
 }
 
 function LoadMoreButton() {
-	const { hasNextPage, fetchNextPage, isFetchingNextPage } = useCartOrderContext();
+	const { hasNextPage, fetchNextPage, isFetchingNextPage } = useCartOrder();
 	if (!hasNextPage)
 		return (
 			<div className='flex w-full justify-center'>
@@ -78,12 +78,8 @@ function CartOrderCard({
 }: {
 	cartOrder: AppRouterOutputs['cartOrder']['byWorkspace']['cartOrders'][0];
 }) {
-	const {
-		setShowMarkAsFulfilledModal,
-		setShowCancelCartOrderModal,
-		setSelection,
-		selection,
-	} = useCartOrderContext();
+	const { setSelection, setShowMarkAsFulfilledModal, setShowCancelCartOrderModal } =
+		useCartOrder();
 
 	const { handle } = useWorkspace();
 
@@ -92,8 +88,8 @@ function CartOrderCard({
 		icon: 'fulfillment',
 		shortcut: ['f'],
 		action: () => {
-			setSelection(new Set([cartOrder.id]));
-			setShowMarkAsFulfilledModal(true);
+			void setSelection(new Set([cartOrder.id]));
+			void setShowMarkAsFulfilledModal(true);
 		},
 	};
 
@@ -102,15 +98,10 @@ function CartOrderCard({
 		icon: 'x',
 		shortcut: ['x'],
 		action: () => {
-			setSelection(new Set([cartOrder.id]));
-			setShowCancelCartOrderModal(true);
+			void setSelection(new Set([cartOrder.id]));
+			void setShowCancelCartOrderModal(true);
 		},
 	};
-
-	const { data: fulfillments } = api.cartOrder.fulfillmentsByCartId.useQuery({
-		handle,
-		cartId: cartOrder.id,
-	});
 
 	const { copyToClipboard } = useCopy();
 
@@ -129,12 +120,6 @@ function CartOrderCard({
 			key={cartOrder.id}
 			textValue={cartOrder.id}
 			commandItems={commandItems}
-			actionOnCommandMenuOpen={() => {
-				if (selection === 'all' || selection.has(cartOrder.id)) {
-					return;
-				}
-				setSelection(new Set([cartOrder.id]));
-			}}
 		>
 			<div className='flex w-full flex-col gap-4'>
 				<div className='flex w-full flex-row gap-2'>
@@ -174,7 +159,7 @@ function CartOrderCard({
 										className='opacity-0 transition-opacity duration-200 group-hover/shippingAddress:opacity-100'
 										onClick={e => {
 											e.stopPropagation();
-											copyToClipboard(fullShippingAddressWithLineBreaks ?? '', {
+											copyToClipboard(fullShippingAddressWithLineBreaks, {
 												successMessage: 'Copied shipping address to clipboard!',
 											});
 										}}
@@ -272,64 +257,99 @@ function CartOrderCard({
 					</div>
 				</div>
 
-				{(fulfillments ?? []).length > 0 && (
-					<>
-						<Separator />
-
-						<div className='group/tracking flex flex-col gap-1'>
-							{(fulfillments ?? []).map(fulfillment => {
-								const carrier = fulfillment.shippingCarrier;
-								const trackingNumber = fulfillment.shippingTrackingNumber;
-								if (!carrier || !trackingNumber) return null;
-								const trackingUrl = getTrackingLink({
-									carrier: carrier,
-									trackingNumber: trackingNumber,
-								});
-								return (
-									<div className='flex flex-row items-center gap-2' key={fulfillment.id}>
-										<Text variant='sm/normal'>
-											{carrier} :: {trackingNumber}
-										</Text>
-										<div className='group/tracking-buttons flex flex-row gap-1 opacity-0 transition-opacity duration-200 group-hover/tracking:opacity-100'>
-											<Button
-												variant='icon'
-												look='ghost'
-												size='xs'
-												startIcon='externalLink'
-												href={trackingUrl}
-												target='_blank'
-												rel='noopener noreferrer'
-											/>
-											<Button
-												variant='icon'
-												look='ghost'
-												size='xs'
-												startIcon='link'
-												onClick={() =>
-													copyToClipboard(trackingUrl, {
-														successMessage: 'Copied tracking url to clipboard!',
-													})
-												}
-											/>
-											<Button
-												variant='icon'
-												look='ghost'
-												size='xs'
-												startIcon='copy'
-												onClick={() =>
-													copyToClipboard(trackingNumber, {
-														successMessage: 'Copied tracking number to clipboard!',
-													})
-												}
-											/>
-										</div>
-									</div>
-								);
-							})}
-						</div>
-					</>
-				)}
+				<Suspense fallback={<CartOrderFulfillmentsSkeleton />}>
+					<CartOrderFulfillments cartOrderId={cartOrder.id} handle={handle} />
+				</Suspense>
 			</div>
 		</GridListCard>
+	);
+}
+
+function CartOrderFulfillments({
+	cartOrderId,
+	handle,
+}: {
+	cartOrderId: string;
+	handle: string;
+}) {
+	const trpc = useTRPC();
+	const { data: fulfillments } = useSuspenseQuery(
+		trpc.cartOrder.fulfillmentsByCartId.queryOptions({
+			handle,
+			cartId: cartOrderId,
+		}),
+	);
+
+	const { copyToClipboard } = useCopy();
+
+	if (fulfillments.length === 0) return null;
+
+	return (
+		<>
+			<Separator />
+
+			<div className='group/tracking flex flex-col gap-1'>
+				{fulfillments.map(fulfillment => {
+					const carrier = fulfillment.shippingCarrier;
+					const trackingNumber = fulfillment.shippingTrackingNumber;
+					if (!carrier || !trackingNumber) return null;
+					const trackingUrl = getTrackingLink({
+						carrier: carrier,
+						trackingNumber: trackingNumber,
+					});
+					return (
+						<div className='flex flex-row items-center gap-2' key={fulfillment.id}>
+							<Text variant='sm/normal'>
+								{carrier} :: {trackingNumber}
+							</Text>
+							<div className='group/tracking-buttons flex flex-row gap-1 opacity-0 transition-opacity duration-200 group-hover/tracking:opacity-100'>
+								<Button
+									variant='icon'
+									look='ghost'
+									size='xs'
+									startIcon='externalLink'
+									href={trackingUrl}
+									target='_blank'
+									rel='noopener noreferrer'
+								/>
+								<Button
+									variant='icon'
+									look='ghost'
+									size='xs'
+									startIcon='link'
+									onClick={() =>
+										copyToClipboard(trackingUrl, {
+											successMessage: 'Copied tracking url to clipboard!',
+										})
+									}
+								/>
+								<Button
+									variant='icon'
+									look='ghost'
+									size='xs'
+									startIcon='copy'
+									onClick={() =>
+										copyToClipboard(trackingNumber, {
+											successMessage: 'Copied tracking number to clipboard!',
+										})
+									}
+								/>
+							</div>
+						</div>
+					);
+				})}
+			</div>
+		</>
+	);
+}
+
+function CartOrderFulfillmentsSkeleton() {
+	return (
+		<>
+			<Separator />
+			<div className='flex flex-col gap-1'>
+				<Skeleton className='h-5 w-48' />
+			</div>
+		</>
 	);
 }

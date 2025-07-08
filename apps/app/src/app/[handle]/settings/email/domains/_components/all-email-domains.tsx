@@ -1,18 +1,18 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
-import type { EmailDomain } from '@barely/lib/server/routes/email-domain/email-domain.schema';
-import type { IconKey } from '@barely/ui/elements/icon';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import type { IconKey } from '@barely/ui/icon';
 import { useCallback, useState } from 'react';
-import { useCopy } from '@barely/lib/hooks/use-copy';
-import { api } from '@barely/lib/server/api/react';
-import { punycode } from '@barely/lib/utils/punycode';
-import { toTitleCase } from '@barely/lib/utils/text';
+import { useCopy, useWorkspace } from '@barely/hooks';
+import { punycode, toTitleCase } from '@barely/utils';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Badge } from '@barely/ui/badge';
+import { Button } from '@barely/ui/button';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { Badge } from '@barely/ui/elements/badge';
-import { Button } from '@barely/ui/elements/button';
-import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
+import { GridList, GridListCard } from '@barely/ui/grid-list';
 import {
 	Table,
 	TableBody,
@@ -20,34 +20,31 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from '@barely/ui/elements/table';
-import { Text } from '@barely/ui/elements/typography';
+} from '@barely/ui/table';
+import { Text } from '@barely/ui/typography';
 
 import { CreateEmailDomainButton } from '~/app/[handle]/settings/email/domains/_components/create-email-domain-button';
-import { useEmailDomainContext } from '~/app/[handle]/settings/email/domains/_components/email-domain-context';
+import {
+	useEmailDomain,
+	useEmailDomainSearchParams,
+} from '~/app/[handle]/settings/email/domains/_components/email-domain-context';
+
+type EmailDomain = AppRouterOutputs['emailDomain']['byWorkspace']['domains'][number];
 
 export function AllEmailDomains() {
 	const {
-		emailDomains,
-		emailDomainSelection,
-		// lastSelectedEmailDomainId,
-		setEmailDomainSelection,
-		gridListRef,
-		// setShowUpdateEmailDomainModal,
-	} = useEmailDomainContext();
+		items: emailDomains,
+		selection: emailDomainSelection,
+		setSelection: setEmailDomainSelection,
+	} = useEmailDomain();
 
 	return (
 		<>
 			<GridList
-				glRef={gridListRef}
+				data-grid-list='email-domains'
 				className='flex flex-col gap-2'
 				aria-label='Email domains'
 				selectionMode='none'
-				// selectionBehavior='replace'
-				// onAction={() => {
-				// 	if (!lastSelectedEmailDomainId) return;
-				// 	setShowUpdateEmailDomainModal(true);
-				// }}
 				items={emailDomains}
 				selectedKeys={emailDomainSelection}
 				setSelectedKeys={setEmailDomainSelection}
@@ -66,34 +63,35 @@ export function AllEmailDomains() {
 	);
 }
 
-function EmailDomainCard({
-	emailDomain,
-}: {
-	emailDomain: AppRouterOutputs['emailDomain']['byWorkspace']['domains'][number];
-}) {
-	const apiUtils = api.useUtils();
+function EmailDomainCard({ emailDomain }: { emailDomain: EmailDomain }) {
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
+	const { handle } = useWorkspace();
 	const { name, records } = emailDomain;
 	const [isVerifying, setIsVerifying] = useState(false);
 	const { copyToClipboard } = useCopy();
-	const { setShowUpdateEmailDomainModal, setEmailDomainSelection } =
-		useEmailDomainContext();
+	const { setShowUpdateModal, setSelection } = useEmailDomainSearchParams();
 
-	const { mutate: verifyDomain } = api.emailDomain.verifyOnResend.useMutation({
-		onMutate: () => {
-			setIsVerifying(true);
-		},
+	const { mutate: verifyDomain } = useMutation({
+		...trpc.emailDomain.verifyOnResend.mutationOptions({
+			onMutate: () => {
+				setIsVerifying(true);
 
-		onSettled: async () => {
-			// Always refetch after error or success
-			await apiUtils.emailDomain.byWorkspace.invalidate();
-			setIsVerifying(false);
-		},
+				return undefined;
+			},
+
+			onSettled: async () => {
+				// Always refetch after error or success
+				await queryClient.invalidateQueries(trpc.emailDomain.byWorkspace.queryFilter());
+				setIsVerifying(false);
+			},
+		}),
 	});
 
 	const handleVerifyDomain = useCallback(() => {
 		setIsVerifying(true);
-		verifyDomain({ id: emailDomain.id });
-	}, [emailDomain.id, verifyDomain]);
+		verifyDomain({ id: emailDomain.id, handle });
+	}, [emailDomain.id, handle, verifyDomain]);
 
 	return (
 		<GridListCard id={emailDomain.id} key={emailDomain.id} textValue={emailDomain.name}>
@@ -120,8 +118,8 @@ function EmailDomainCard({
 							size='sm'
 							startIcon='dots'
 							onClick={() => {
-								setEmailDomainSelection(new Set([emailDomain.id]));
-								setShowUpdateEmailDomainModal(true);
+								void setSelection(new Set([emailDomain.id]));
+								void setShowUpdateModal(true);
 							}}
 						/>
 					</div>

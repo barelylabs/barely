@@ -1,8 +1,5 @@
-import { routeHandler } from '@barely/lib/server/api/route-handler';
-import { trackRouter } from '@barely/lib/server/routes/track/track.router';
+import { OPTIONS } from '@barely/utils';
 
-export { OPTIONS } from '@barely/lib/utils/trpc-route';
+import { trackHandler } from '@barely/api/app/sub/track.handler';
 
-const handler = routeHandler('track', trackRouter);
-
-export { handler as GET, handler as POST };
+export { OPTIONS, trackHandler as GET, trackHandler as POST };

@@ -1,6 +1,6 @@
-import type { PublicPressKit } from '@barely/lib/server/routes/press-kit/press-kit.schema';
+import type { PublicPressKit } from '@barely/validators';
 
-import { VideoCarousel } from '@barely/ui/elements/video-player';
+import { VideoCarousel } from '@barely/ui/video-player';
 
 import { Section, SectionDiv } from '~/app/[handle]/_components/press-section';
 

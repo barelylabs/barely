@@ -1,7 +1,7 @@
 import React from 'react';
-import { cn } from '@barely/lib/utils/cn';
+import { cn } from '@barely/utils';
 
-import { H } from '@barely/ui/elements/typography';
+import { H } from '@barely/ui/typography';
 
 export const Section = React.forwardRef<
 	HTMLDivElement,

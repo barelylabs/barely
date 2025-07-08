@@ -3,10 +3,10 @@ import '~/styles/globals.css';
 import type { Metadata } from 'next';
 import { Inter as FontSans } from 'next/font/google';
 import localFont from 'next/font/local';
-import { cn } from '@barely/lib/utils/cn';
+import { Toaster } from '@barely/toast';
+import { cn } from '@barely/utils';
 
 import { TailwindIndicator } from '@barely/ui/components/tailwind-indicator';
-import { Toaster } from '@barely/ui/elements/toaster';
 
 // import FocusDebugger from '~/components/focus-debugger';
 
@@ -56,7 +56,6 @@ export default function RootLayout({ children }: RootLayoutProps) {
 				<Providers>
 					<Toaster />
 					<div
-						// eslint-disable-next-line
 						vaul-drawer-wrapper=''
 						className='container flex min-h-full w-full max-w-full flex-col justify-center bg-background p-0'
 					>

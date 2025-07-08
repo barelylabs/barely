@@ -4,10 +4,10 @@ import type { Metadata } from 'next';
 import React from 'react';
 import { Inter as FontSans } from 'next/font/google';
 import localFont from 'next/font/local';
-import { cn } from '@barely/lib/utils/cn';
+import { cn } from '@barely/utils';
 
 import { TailwindIndicator } from '@barely/ui/components/tailwind-indicator';
-import { Container } from '@barely/ui/elements/container';
+import { Container } from '@barely/ui/container';
 
 import Providers from '~/app/[handle]/[...key]/providers';
 
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
 	},
 };
 
-export default async function RootLayout({
+export default function RootLayout({
 	children,
 	// params,
 }: {

@@ -1,6 +1,5 @@
-import type { User } from '@barely/lib/server/routes/user/user.schema';
-import type { Workspace } from '@barely/lib/server/routes/workspace/workspace.schema';
-import type { Icon } from '@barely/ui/elements/icon';
+import type { Icon } from '@barely/ui/icon';
+import type { User, Workspace } from '@barely/validators';
 
 export interface SidebarNavItem {
 	title: string;

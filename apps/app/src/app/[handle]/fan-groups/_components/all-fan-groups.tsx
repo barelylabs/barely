@@ -1,46 +1,48 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import { useWorkspace } from '@barely/hooks';
+import { useSuspenseQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
-import { Text } from '@barely/ui/elements/typography';
+import { GridList, GridListCard } from '@barely/ui/grid-list';
+import { Text } from '@barely/ui/typography';
 
 import { CreateFanGroupButton } from '~/app/[handle]/fan-groups/_components/create-fan-group-button';
-import { useFanGroupContext } from '~/app/[handle]/fan-groups/_components/fan-group-context';
+import {
+	useFanGroup,
+	useFanGroupSearchParams,
+} from '~/app/[handle]/fan-groups/_components/fan-group-context';
 
 export function AllFanGroups() {
-	const {
-		items,
-		selection,
-		lastSelectedItemId,
-		setSelection,
-		setShowUpdateModal,
-		gridListRef,
-		isFetching,
-	} = useFanGroupContext();
+	const { setShowUpdateModal } = useFanGroupSearchParams();
+	const { items, selection, lastSelectedItemId, setSelection, isFetching } =
+		useFanGroup();
 
+	const trpc = useTRPC();
 	const { handle } = useWorkspace();
 
-	const { data: totalFans } = api.fan.totalByWorkspace.useQuery({
-		handle,
-	});
+	const { data: totalFans } = useSuspenseQuery(
+		trpc.fan.totalByWorkspace.queryOptions({
+			handle,
+		}),
+	);
 
 	return (
 		<>
 			<Text variant='md/medium'>{totalFans} fans</Text>
 			<GridList
-				glRef={gridListRef}
+				data-grid-list='fan-groups'
 				className='flex flex-col gap-2'
 				aria-label='Fan Groups'
 				selectionMode='multiple'
 				selectionBehavior='replace'
-				onAction={() => {
+				onAction={async () => {
 					if (!lastSelectedItemId) return;
-					setShowUpdateModal(true);
+					await setShowUpdateModal(true);
 				}}
 				items={items}
 				selectedKeys={selection}
@@ -71,13 +73,16 @@ function FanGroupCard({
 	fanGroup: AppRouterOutputs['fanGroup']['byWorkspace']['fanGroups'][0];
 }) {
 	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } =
-		useFanGroupContext();
+		useFanGroupSearchParams();
 
+	const trpc = useTRPC();
 	const { handle } = useWorkspace();
-	const { data: fanGroupById } = api.fanGroup.byId.useQuery({
-		id: fanGroup.id,
-		handle,
-	});
+	const { data: fanGroupById } = useSuspenseQuery(
+		trpc.fanGroup.byId.queryOptions({
+			id: fanGroup.id,
+			handle,
+		}),
+	);
 
 	return (
 		<GridListCard

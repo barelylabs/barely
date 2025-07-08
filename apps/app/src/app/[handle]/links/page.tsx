@@ -1,46 +1,52 @@
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import { api } from '@barely/lib/server/api/server';
-import { linkSearchParamsSchema } from '@barely/server/routes/link/link.schema';
+import { linkSearchParamsSchema } from '@barely/validators';
+
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllLinks } from '~/app/[handle]/links/_components/all-links';
 import { ArchiveOrDeleteLinkModal } from '~/app/[handle]/links/_components/archive-or-delete-link-modal';
 import { CreateLinkButton } from '~/app/[handle]/links/_components/create-link-button';
 import { CreateOrUpdateLinkModal } from '~/app/[handle]/links/_components/create-or-update-link-modal';
-import { LinkContextProvider } from '~/app/[handle]/links/_components/link-context';
 import { LinkFilters } from '~/app/[handle]/links/_components/link-filters';
 import { LinkHotkeys } from '~/app/[handle]/links/_components/link-hotkeys';
 import { UpgradeModal } from '~/app/[handle]/settings/billing/upgrade-modal';
+import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
-export default function LinksPage({
+export default async function LinksPage({
 	params,
 	searchParams,
 }: {
-	params: { handle: string };
-	searchParams: z.infer<typeof linkSearchParamsSchema>;
+	params: Promise<{ handle: string }>;
+	searchParams: Promise<z.infer<typeof linkSearchParamsSchema>>;
 }) {
-	const parsedFilters = linkSearchParamsSchema.safeParse(searchParams);
+	const awaitedParams = await params;
+	const awaitedSearchParams = await searchParams;
+	const parsedFilters = linkSearchParamsSchema.safeParse(awaitedSearchParams);
 	if (!parsedFilters.success) {
-		redirect(`/${params.handle}/links`);
+		redirect(`/${awaitedParams.handle}/links`);
 	}
 
-	// const { selectedLinkIds, ...filters } = parsedFilters.data;
-	const links = api({ handle: params.handle }).link.byWorkspace({
-		handle: params.handle,
-		...parsedFilters.data,
-	});
+	// Prefetch data (not async - don't await)
+	prefetch(
+		trpc.link.byWorkspace.infiniteQueryOptions({
+			handle: awaitedParams.handle,
+			...parsedFilters.data,
+		}),
+	);
+
+	prefetch(trpc.webDomain.byWorkspace.queryOptions({ handle: awaitedParams.handle }));
 
 	return (
-		<LinkContextProvider initialInfiniteLinks={links}>
+		<HydrateClient>
 			<DashContentHeader title='Links' button={<CreateLinkButton />} />
 
-			<div className='flex w-full flex-col gap-4'>
-				<LinkFilters />
+			<LinkFilters />
+			<Suspense fallback={<GridListSkeleton />}>
 				<AllLinks />
-			</div>
-			{/* <div className='grid grid-cols-1 gap-5 md:grid-cols-[auto,1fr]'>
-			</div> */}
+			</Suspense>
 
 			<CreateOrUpdateLinkModal mode='create' />
 			<CreateOrUpdateLinkModal mode='update' />
@@ -50,6 +56,6 @@ export default function LinksPage({
 
 			<LinkHotkeys />
 			<UpgradeModal checkoutCancelPath='links' checkoutSuccessPath='links' />
-		</LinkContextProvider>
+		</HydrateClient>
 	);
 }

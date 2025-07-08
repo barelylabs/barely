@@ -29,6 +29,8 @@ build
 # misc
 .DS_Store
 *.pem
+*.tsx-E
+*.ts-E
 
 # debug
 npm-debug.log*
@@ -45,6 +47,10 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+# cache files
+.cache
+.eslintcache
 
 # turbo
 .turbo

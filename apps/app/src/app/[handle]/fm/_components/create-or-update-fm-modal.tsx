@@ -1,55 +1,60 @@
 'use client';
 
-import type { UploadQueueItem } from '@barely/lib/hooks/use-upload';
-import type { UpsertFmPage } from '@barely/lib/server/routes/fm/fm.schema';
-import type { z } from 'zod';
+import type { UploadQueueItem } from '@barely/hooks';
+import type { UpsertFmPage } from '@barely/validators';
+import type { z } from 'zod/v4';
 import { useCallback, useEffect, useMemo } from 'react';
-import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
-import { useDebounce } from '@barely/lib/hooks/use-debounce';
-import { useUpload } from '@barely/lib/hooks/use-upload';
-import { api } from '@barely/lib/server/api/react';
-import { FM_LINK_PLATFORMS } from '@barely/lib/server/routes/fm/fm.constants';
-import { upsertFmPageSchema } from '@barely/lib/server/routes/fm/fm.schema';
-import { sanitizeKey } from '@barely/lib/utils/key';
+import { FM_LINK_PLATFORMS } from '@barely/const';
+import {
+	useCreateOrUpdateForm,
+	useDebounce,
+	useUpload,
+	useWorkspace,
+} from '@barely/hooks';
+import { sanitizeKey } from '@barely/utils';
+import { upsertFmPageSchema } from '@barely/validators';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { atom } from 'jotai';
 import { useFieldArray } from 'react-hook-form';
 
-import { Button } from '@barely/ui/elements/button';
-import { Label } from '@barely/ui/elements/label';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
-import { UploadDropzone } from '@barely/ui/elements/upload';
-import { Form, SubmitButton } from '@barely/ui/forms';
-import { TextField } from '@barely/ui/forms/text-field';
+import { useTRPC } from '@barely/api/app/trpc.react';
 
-import { useFmContext } from '~/app/[handle]/fm/_components/fm-context';
+import { Button } from '@barely/ui/button';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
+import { TextField } from '@barely/ui/forms/text-field';
+import { Label } from '@barely/ui/label';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
+import { UploadDropzone } from '@barely/ui/upload';
+
+import { useFm, useFmSearchParams } from '~/app/[handle]/fm/_components/fm-context';
 
 const artworkUploadQueueAtom = atom<UploadQueueItem[]>([]);
 
 export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
-	const apiUtils = api.useUtils();
-
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
+	const { handle } = useWorkspace();
 	/* fm context */
-	const {
-		lastSelectedItem: selectedFmPage,
-		showCreateModal,
-		showUpdateModal,
-		setShowCreateModal,
-		setShowUpdateModal,
-		focusGridList,
-	} = useFmContext();
+	const { lastSelectedItem: selectedFmPage, focusGridList } = useFm();
+	const { showCreateModal, showUpdateModal, setShowCreateModal, setShowUpdateModal } =
+		useFmSearchParams();
 
 	/* mutations */
-	const { mutateAsync: createFm } = api.fm.create.useMutation({
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: createFm } = useMutation(
+		trpc.fm.create.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
-	const { mutateAsync: updateFm } = api.fm.update.useMutation({
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: updateFm } = useMutation(
+		trpc.fm.update.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
 	/* form */
 	const { form, onSubmit } = useCreateOrUpdateForm({
@@ -63,10 +68,16 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 			links: mode === 'update' ? (selectedFmPage?.links ?? []) : [],
 		},
 		handleCreateItem: async d => {
-			await createFm(d);
+			await createFm({
+				...d,
+				handle,
+			});
 		},
 		handleUpdateItem: async d => {
-			await updateFm(d);
+			await updateFm({
+				...d,
+				handle,
+			});
 		},
 	});
 
@@ -110,10 +121,10 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
 		setArtworkUploadQueue([]);
-		await apiUtils.fm.invalidate();
+		await queryClient.invalidateQueries(trpc.fm.byWorkspace.queryFilter());
 		form.reset();
-		setShowFmModal(false);
-	}, [form, focusGridList, apiUtils.fm, setShowFmModal, setArtworkUploadQueue]);
+		await setShowFmModal(false);
+	}, [form, focusGridList, queryClient, trpc.fm, setShowFmModal, setArtworkUploadQueue]);
 
 	/* state */
 	const sourceUrl = form.watch('sourceUrl');
@@ -144,13 +155,15 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 
 	/* spotify metadata */
 	const [debouncedSourceUrl] = useDebounce(sourceUrl, 500);
-	const { data: sourceUrlSpotifyMetadata } = api.spotify.getMetadata.useQuery(
-		{
-			query: debouncedSourceUrl,
-		},
-		{
-			enabled: !!sourceUrl && sourceUrl.includes('open.spotify.com'),
-		},
+	const { data: sourceUrlSpotifyMetadata } = useQuery(
+		trpc.spotify.getMetadata.queryOptions(
+			{
+				query: debouncedSourceUrl,
+			},
+			{
+				enabled: !!sourceUrl && sourceUrl.includes('open.spotify.com'),
+			},
+		),
 	);
 
 	const spotifyImageUrl = useMemo(() => {

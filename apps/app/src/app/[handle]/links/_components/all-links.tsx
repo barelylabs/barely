@@ -1,21 +1,20 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import Link from 'next/link';
-import { cn } from '@barely/lib/utils/cn';
-import { truncate } from '@barely/lib/utils/text';
+import { truncate } from '@barely/utils';
 
+import { Badge } from '@barely/ui/badge';
+import { BlurImage } from '@barely/ui/blur-image';
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { Badge } from '@barely/ui/elements/badge';
-import { BlurImage } from '@barely/ui/elements/blur-image';
-import { CopyButton } from '@barely/ui/elements/copy-button';
-import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
-import { Icon } from '@barely/ui/elements/icon';
-import { Text } from '@barely/ui/elements/typography';
+import { CopyButton } from '@barely/ui/copy-button';
+import { GridList, GridListCard } from '@barely/ui/grid-list';
+import { Icon } from '@barely/ui/icon';
+import { Text } from '@barely/ui/typography';
 
 import { CreateLinkButton } from '~/app/[handle]/links/_components/create-link-button';
-import { useLinkContext } from '~/app/[handle]/links/_components/link-context';
+import { useLink } from '~/app/[handle]/links/_components/link-context';
 
 export function AllLinks() {
 	const {
@@ -25,16 +24,16 @@ export function AllLinks() {
 		setSelection,
 		gridListRef,
 		setShowUpdateModal,
-		pendingFiltersTransition,
 		isFetching,
-	} = useLinkContext();
+	} = useLink();
 
 	return (
 		<>
 			<GridList
 				glRef={gridListRef}
 				aria-label='Links'
-				className={cn('flex flex-col gap-2', pendingFiltersTransition && 'animate-pulse')}
+				data-grid-list='links'
+				className='flex flex-col gap-2'
 				// behavior
 				selectionMode='multiple'
 				selectionBehavior='replace'
@@ -42,9 +41,9 @@ export function AllLinks() {
 				items={items.map(item => ({ ...item, key: item.id, linkKey: item.key }))}
 				selectedKeys={selection}
 				setSelectedKeys={setSelection}
-				onAction={() => {
+				onAction={async () => {
 					if (!lastSelectedItemId) return;
-					setShowUpdateModal(true);
+					await setShowUpdateModal(true);
 				}}
 				// empty
 				renderEmptyState={() => (
@@ -72,8 +71,7 @@ function LinkCard({
 }: {
 	link: AppRouterOutputs['link']['byWorkspace']['links'][0] & { linkKey: string };
 }) {
-	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } =
-		useLinkContext();
+	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } = useLink();
 
 	return (
 		<GridListCard

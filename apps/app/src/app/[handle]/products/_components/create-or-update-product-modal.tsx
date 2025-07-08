@@ -1,70 +1,74 @@
 'use client';
 
-import type { UploadQueueItem } from '@barely/lib/hooks/use-upload';
+import type { ApparelSize, MerchType } from '@barely/const';
+import type { UploadQueueItem } from '@barely/hooks';
 import type {
 	SortableFile,
 	SortableFilePendingUpload,
-} from '@barely/lib/server/routes/file/file.schema';
-import type {
-	ApparelSize,
-	MerchType,
-} from '@barely/lib/server/routes/product/product.constants';
-import type { UpsertProduct } from '@barely/lib/server/routes/product/product.schema';
-import type { z } from 'zod';
+	UpsertProduct,
+} from '@barely/validators';
+import type { z } from 'zod/v4';
 import { useCallback, useEffect, useState } from 'react';
-import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
-import { useUpload } from '@barely/lib/hooks/use-upload';
-import { api } from '@barely/lib/server/api/react';
-import { isApparelType } from '@barely/lib/server/routes/product/product.constants';
+import { isApparelType } from '@barely/const';
+import {
+	focusGridList,
+	useCreateOrUpdateForm,
+	useUpload,
+	useWorkspace,
+} from '@barely/hooks';
+import { insert } from '@barely/utils';
 import {
 	apparelSizeSchema,
 	defaultProduct,
 	merchTypeSchema,
 	upsertProductSchema,
-} from '@barely/lib/server/routes/product/product.schema';
-import { insert } from '@barely/lib/utils/collection';
+} from '@barely/validators';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { atom } from 'jotai';
 
-import { Icon } from '@barely/ui/elements/icon';
-import { Label } from '@barely/ui/elements/label';
-import { MDXEditor } from '@barely/ui/elements/mdx-editor';
-import { SortableMedia } from '@barely/ui/elements/media/sortable-media';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
-import { Separator } from '@barely/ui/elements/separator';
-import { ToggleGroup, ToggleGroupItem } from '@barely/ui/elements/toggle-group';
-import { Tooltip } from '@barely/ui/elements/tooltip';
-import { UploadDropzone } from '@barely/ui/elements/upload';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { useTRPC } from '@barely/api/app/trpc.react';
+
 import { CurrencyField } from '@barely/ui/forms/currency-field';
-import { DatetimeField } from '@barely/ui/forms/datetime-field';
+import { DatetimeField } from '@barely/ui/forms/datetime-field-new';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SwitchField } from '@barely/ui/forms/switch-field';
 import { TextField } from '@barely/ui/forms/text-field';
+import { Icon } from '@barely/ui/icon';
+import { Label } from '@barely/ui/label';
+import { MDXEditor } from '@barely/ui/mdx-editor';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
+import { Separator } from '@barely/ui/separator';
+import { SortableMedia } from '@barely/ui/sortable-media';
+import { ToggleGroup, ToggleGroupItem } from '@barely/ui/toggle-group';
+import { Tooltip } from '@barely/ui/tooltip';
+import { UploadDropzone } from '@barely/ui/upload';
 
-import { useProductContext } from '~/app/[handle]/products/_components/product-context';
+import {
+	useProduct,
+	useProductSearchParams,
+} from '~/app/[handle]/products/_components/product-context';
 
 const productImageUploadQueueAtom = atom<UploadQueueItem[]>([]);
 
 export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update' }) {
-	const apiUtils = api.useUtils();
-
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
+	const { workspace } = useWorkspace();
 	/* product context */
-	const {
-		lastSelectedItem: selectedProduct,
-		showCreateModal,
-		setShowCreateModal,
-		showUpdateModal,
-		setShowUpdateModal,
-		focusGridList,
-	} = useProductContext();
+	const { lastSelectedItem: selectedProduct } = useProduct();
+	const { showCreateModal, setShowCreateModal, showUpdateModal, setShowUpdateModal } =
+		useProductSearchParams();
 
 	/* api */
-	const { mutateAsync: createProduct } = api.product.create.useMutation({
+	const { mutateAsync: createProduct } = useMutation({
+		...trpc.product.create.mutationOptions(),
 		onSuccess: async () => {
 			await handleCloseModal();
 		},
 	});
 
-	const { mutateAsync: updateProduct } = api.product.update.useMutation({
+	const { mutateAsync: updateProduct } = useMutation({
+		...trpc.product.update.mutationOptions(),
 		onSuccess: async () => {
 			await handleCloseModal();
 		},
@@ -78,10 +82,16 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 		upsertSchema: upsertProductSchema,
 		defaultValues: defaultProduct,
 		handleCreateItem: async d => {
-			await createProduct(d);
+			await createProduct({
+				...d,
+				handle: workspace.handle,
+			});
 		},
 		handleUpdateItem: async d => {
-			await updateProduct(d);
+			await updateProduct({
+				...d,
+				handle: workspace.handle,
+			});
 		},
 	});
 
@@ -164,18 +174,18 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 
 	const handleCloseModal = useCallback(async () => {
 		reset();
-		setShowModal(false);
-		focusGridList();
+		await setShowModal(false);
+		focusGridList('products');
 		setProductImageUploadQueue([]);
 		if (mode === 'create') setProductImages([]);
-		await apiUtils.product.invalidate();
+		await queryClient.invalidateQueries(trpc.product.byWorkspace.queryFilter());
 	}, [
 		setShowModal,
-		focusGridList,
-		apiUtils.product,
+		queryClient,
 		reset,
 		setProductImageUploadQueue,
 		mode,
+		trpc.product.byWorkspace,
 	]);
 
 	return (

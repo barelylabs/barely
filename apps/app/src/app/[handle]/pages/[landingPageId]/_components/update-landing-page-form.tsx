@@ -1,30 +1,40 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
-import type { z } from 'zod';
-import { use, useCallback } from 'react';
-import { useZodForm } from '@barely/lib/hooks/use-zod-form';
-import { api } from '@barely/lib/server/api/react';
-import { updateLandingPageSchema } from '@barely/lib/server/routes/landing-page/landing-page.schema';
+import type { z } from 'zod/v4';
+import { useCallback } from 'react';
+import { useParams } from 'next/navigation';
+import { useZodForm } from '@barely/hooks';
+import { updateLandingPageSchema } from '@barely/validators';
+import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 
-import { MDXEditor } from '@barely/ui/elements/mdx-editor';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { TextField } from '@barely/ui/forms/text-field';
+import { MDXEditor } from '@barely/ui/mdx-editor';
 
-export function UpdateLandingPageForm({
-	initialLandingPage,
-}: {
-	initialLandingPage: Promise<AppRouterOutputs['landingPage']['byId']>;
-}) {
-	const apiUtils = api.useUtils();
-	const initialPage = use(initialLandingPage);
+export function UpdateLandingPageForm() {
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
+	const params = useParams<{ handle: string; landingPageId: string }>();
+
+	const { data: initialPage } = useSuspenseQuery(
+		trpc.landingPage.byId.queryOptions({
+			handle: params.handle,
+			landingPageId: params.landingPageId,
+		}),
+	);
 
 	/* mutations */
-	const { mutateAsync: updateLandingPage } = api.landingPage.update.useMutation({
-		onSuccess: async () => {
-			await apiUtils.landingPage.invalidate();
-		},
-	});
+	const { mutateAsync: updateLandingPage } = useMutation(
+		trpc.landingPage.update.mutationOptions({
+			onSuccess: async () => {
+				await queryClient.invalidateQueries(
+					trpc.landingPage.byWorkspace.queryFilter({ handle: params.handle }),
+				);
+			},
+		}),
+	);
 
 	/* form */
 	const form = useZodForm({
@@ -34,9 +44,12 @@ export function UpdateLandingPageForm({
 
 	const handleSubmit = useCallback(
 		async (data: z.infer<typeof updateLandingPageSchema>) => {
-			await updateLandingPage(data);
+			await updateLandingPage({
+				...data,
+				handle: params.handle,
+			});
 		},
-		[updateLandingPage],
+		[updateLandingPage, params.handle],
 	);
 
 	const submitDisabled = form.formState.isSubmitting || !form.formState.isDirty;

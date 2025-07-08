@@ -1,4 +1,4 @@
-import { nFormatter } from '@barely/lib/utils/number';
+import { nFormatter } from '@barely/utils';
 
 import { Section, SectionDiv } from '~/app/[handle]/_components/press-section';
 

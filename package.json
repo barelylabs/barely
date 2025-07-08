@@ -2,33 +2,36 @@
 	"name": "barely",
 	"private": true,
 	"engines": {
-		"node": ">=20.11.0"
+		"node": ">=22.14.0",
+		"pnpm": ">=9.6.0"
 	},
-	"packageManager": "pnpm@8.15.1",
+	"packageManager": "pnpm@10.11.1",
 	"scripts": {
 		"build": "turbo build",
 		"build:preview": "turbo build:preview",
 		"build:production": "turbo build:production",
 		"clean": "git clean -xdf node_modules",
-		"clean:all": "turbo clean && pnpm clean",
-		"clean:next": "turbo clean:next",
-		"clean:workspaces": "turbo clean",
-		"db:check": "pnpm --filter=@barely/lib db:check",
-		"db:generate": "pnpm --filter=@barely/lib db:generate",
-		"db:push": "pnpm --filter=@barely/lib db:push",
-		"db:push:force": "--filter=@barely/lib db:push:force",
-		"db:pull": "pnpm --filter=@barely/lib db:pull",
-		"db:studio": "pnpm --filter=@barely/lib db:studio",
+		"clean:all": "turbo run clean && pnpm clean",
+		"clean:next": "turbo run clean:next",
+		"clean:workspaces": "turbo run clean",
+		"db:check": "pnpm -F @barely/db db:check",
+		"db:generate": "pnpm -F @barely/db db:generate",
+		"db:push": "pnpm -F @barely/db db:push",
+		"db:push:force": "pnpm -F @barely/db db:push:force",
+		"db:pull": "pnpm -F @barely/db db:pull",
+		"db:studio": "pnpm -F @barely/db db:studio",
 		"deploy-trigger:staging": "turbo deploy-trigger:staging --filter=@barely/lib",
 		"deploy-trigger:production": "turbo deploy-trigger:production --filter=@barely/lib",
-		"dev": "./scripts/dev-qr-codes.sh && turbo dev --parallel",
+		"dev": "./scripts/dev-qr-codes.sh && turbo watch dev --continue",
+		"dev:app": "turbo watch dev -F @barely/app...",
 		"dev:enable": "chmod +x ./scripts/dev-qr-codes.sh && chmod +x scripts/dev_kill.sh && chmod +x ./scripts/create-dev-branch.sh && chmod +x ./scripts/reset-dev-branch.sh && chmod +x ./scripts/tunnelto-auth.sh",
 		"dev:pre": "sudo ./scripts/dev_kill.sh && turbo dev:pre",
 		"dev:pull": "pnpm vercel:pull-env && pnpm neon:create-dev-branch && pnpm tunnelto:auth",
-		"format": "turbo format --continue -- --cache --cache-location node_modules/.cache/.prettiercache",
-		"format:fix": "turbo format --continue -- --write --cache --cache-location node_modules/.cache/.prettiercache",
-		"lint": "turbo lint --continue -- --cache --cache-location node_modules/.cache/.eslintcache",
-		"lint:fix": "turbo lint --continue -- --fix --cache --cache-location node_modules/.cache/.eslintcache",
+		"dev:trigger": "turbo run dev:trigger -F @barely/lib",
+		"format": "turbo run format --continue -- --cache --cache-location .cache/.prettiercache",
+		"format:fix": "turbo run format --continue -- --write --cache --cache-location .cache/.prettiercache",
+		"lint": "turbo run lint --continue -- --cache --cache-location .cache/.eslintcache",
+		"lint:fix": "turbo run lint --continue -- --fix --cache --cache-location .cache/.eslintcache",
 		"lint:ws": "pnpm dlx sherif@latest",
 		"neon:create-dev-branch": "./scripts/create-dev-branch.sh",
 		"neon:reset-dev-branch": "./scripts/reset-dev-branch.sh",
@@ -36,20 +39,25 @@
 		"start": "turbo start",
 		"tunnelto": "tunnelto --scheme https --port 3000 --subdomain barely",
 		"tunnelto:auth": "./scripts/tunnelto-auth.sh",
-		"typecheck": "turbo typecheck",
-		"vercel:pull-env": "pnpm vercel env pull --cwd apps/app ../../.env"
+		"typecheck": "turbo run typecheck",
+		"vercel:pull-env": "pnpm vercel env pull .env"
 	},
 	"devDependencies": {
 		"@barely/prettier-config": "workspace:^0.1.0",
-		"prettier": "^3.5.3",
-		"turbo": "^1.11.3",
-		"typescript": "^5.5.4",
-		"vercel": "33.2.0"
+		"@turbo/gen": "^2.5.4",
+		"prettier": "catalog:",
+		"turbo": "^2.5.4",
+		"typescript": "catalog:",
+		"vercel": "44.2.1"
 	},
 	"pnpm": {
 		"patchedDependencies": {
 			"@noble/hashes@1.3.0": "patches/@noble__hashes@1.3.0.patch",
 			"@mdxeditor/editor@3.11.3": "patches/@mdxeditor__editor@3.11.3.patch"
+		},
+		"overrides": {
+			"eslint-plugin-turbo": "2.5.4",
+			"eslint-config-turbo": "2.5.4"
 		}
 	},
 	"prettier": "@barely/prettier-config"

@@ -1,11 +1,11 @@
 import type { NextRequest } from 'next/server';
-import { handleEmailEvent } from '@barely/lib/server/routes/email-delivery/email-delivery.event-fns';
+import { handleEmailEvent } from '@barely/lib/functions/email-delivery.event-fns';
 import { log } from '@barely/lib/utils/log';
 import { Webhook } from 'svix';
 
-import { env } from '~/env';
+import { appEnv } from '~/env';
 
-const secret = env.RESEND_WEBHOOK_SECRET;
+const secret = appEnv.RESEND_WEBHOOK_SECRET;
 
 const wh = new Webhook(secret);
 

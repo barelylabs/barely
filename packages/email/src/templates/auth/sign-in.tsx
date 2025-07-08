@@ -20,7 +20,7 @@ interface SignInEmailTemplateProps {
 	loginLink: string;
 }
 
-const SignInEmailTemplate = (props: SignInEmailTemplateProps) => {
+export const SignInEmailTemplate = (props: SignInEmailTemplateProps) => {
 	const previewText = `Sign in to your barely.io account`;
 
 	return (
@@ -51,7 +51,6 @@ const SignInEmailTemplate = (props: SignInEmailTemplateProps) => {
 	);
 };
 
-export { SignInEmailTemplate };
 SignInEmailTemplate.PreviewProps = {
 	firstName: 'John',
 	loginLink: 'https://barely.io/login',

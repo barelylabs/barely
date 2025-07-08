@@ -1,50 +1,61 @@
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import { api } from '@barely/lib/server/api/server';
-import { productSearchParamsSchema } from '@barely/lib/server/routes/product/product.schema';
+import { productSearchParamsSchema } from '@barely/validators';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllProducts } from '~/app/[handle]/products/_components/all-products';
 import { ArchiveOrDeleteProductModal } from '~/app/[handle]/products/_components/archive-or-delete-product-modal';
 import { CreateOrUpdateProductModal } from '~/app/[handle]/products/_components/create-or-update-product-modal';
 import { CreateProductButton } from '~/app/[handle]/products/_components/create-product-button';
-import { ProductContextProvider } from '~/app/[handle]/products/_components/product-context';
 import { ProductFilters } from '~/app/[handle]/products/_components/product-filters';
 import { ProductHotkeys } from '~/app/[handle]/products/_components/product-hotkeys';
+import { getSession } from '~/auth/server';
+import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
-export default function ProductsPage({
+export default async function ProductsPage({
 	params,
 	searchParams,
 }: {
-	params: { handle: string };
-	searchParams: z.infer<typeof productSearchParamsSchema>;
+	params: Promise<{ handle: string }>;
+	searchParams: Promise<z.infer<typeof productSearchParamsSchema>>;
 }) {
-	const parsedFilters = productSearchParamsSchema.safeParse(searchParams);
+	const awaitedParams = await params;
+	const awaitedSearchParams = await searchParams;
+	const parsedFilters = productSearchParamsSchema.safeParse(awaitedSearchParams);
 	if (!parsedFilters.success) {
-		console.log(parsedFilters.error.errors);
-		redirect(`/${params.handle}/products`);
+		console.log(parsedFilters.error.flatten().fieldErrors);
+		redirect(`/${awaitedParams.handle}/products`);
 	}
 
-	const products = api({ handle: params.handle }).product.byWorkspace({
-		handle: params.handle,
-		...parsedFilters.data,
-	});
+	const session = await getSession();
+	console.log('session in ProductsPage => ', session);
+
+	// Prefetch data (not async - don't await)
+	prefetch(
+		trpc.product.byWorkspace.infiniteQueryOptions({
+			handle: awaitedParams.handle,
+			...parsedFilters.data,
+		}),
+	);
 
 	return (
-		<ProductContextProvider initialInfiniteProducts={products}>
+		<HydrateClient>
 			<DashContentHeader title='Products' button={<CreateProductButton />} />
 
 			<ProductFilters />
-			<AllProducts />
+			<Suspense fallback={<div>Loading...</div>}>
+				<AllProducts />
 
-			<CreateOrUpdateProductModal mode='create' />
-			<CreateOrUpdateProductModal mode='update' />
+				<CreateOrUpdateProductModal mode='create' />
+				<CreateOrUpdateProductModal mode='update' />
 
-			<ArchiveOrDeleteProductModal mode='archive' />
-			<ArchiveOrDeleteProductModal mode='delete' />
+				<ArchiveOrDeleteProductModal mode='archive' />
+				<ArchiveOrDeleteProductModal mode='delete' />
 
-			<ProductHotkeys />
-			{/* <UpgradeModal checkoutCancelPath="products" checkoutSuccessPath="products" /> */}
-		</ProductContextProvider>
+				<ProductHotkeys />
+				{/* <UpgradeModal checkoutCancelPath="products" checkoutSuccessPath="products" /> */}
+			</Suspense>
+		</HydrateClient>
 	);
 }

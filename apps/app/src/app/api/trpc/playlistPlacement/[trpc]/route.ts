@@ -1,8 +1,5 @@
-import { routeHandler } from '@barely/lib/server/api/route-handler';
-import { playlistPlacementRouter } from '@barely/lib/server/routes/playlist-placement/playlist-placement.router';
+import { OPTIONS } from '@barely/utils';
 
-export { OPTIONS } from '@barely/lib/utils/trpc-route';
+import { playlistPlacementHandler } from '@barely/api/app/sub/playlist-placement.handler';
 
-const handler = routeHandler('playlistPlacement', playlistPlacementRouter);
-
-export { handler as GET, handler as POST };
+export { OPTIONS, playlistPlacementHandler as GET, playlistPlacementHandler as POST };

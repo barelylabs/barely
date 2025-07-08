@@ -1,11 +1,11 @@
 'use client';
 
-import type { IconKey } from '@barely/ui/elements/icon';
+import type { IconKey } from '@barely/ui/icon';
 import { clsx } from 'clsx';
 import { motion } from 'framer-motion';
 
-import { Badge } from '@barely/ui/elements/badge';
-import { Icon } from '@barely/ui/elements/icon';
+import { Badge } from '@barely/ui/badge';
+import { Icon } from '@barely/ui/icon';
 
 import { Subheading } from './text';
 

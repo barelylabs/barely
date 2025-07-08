@@ -4,11 +4,11 @@ import type { Metadata } from 'next';
 import React from 'react';
 import { Inter as FontSans } from 'next/font/google';
 import localFont from 'next/font/local';
-import { cn } from '@barely/lib/utils/cn';
+import { Toaster } from '@barely/toast';
+import { cn } from '@barely/utils';
 
 import { TailwindIndicator } from '@barely/ui/components/tailwind-indicator';
-import { Container } from '@barely/ui/elements/container';
-import { Toaster } from '@barely/ui/elements/toaster';
+import { Container } from '@barely/ui/container';
 
 import Providers from './providers';
 
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
 	},
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<html lang='en' suppressHydrationWarning>
 			<body

@@ -1,26 +1,26 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/react';
-// import type { MixtapeWith_Tracks } from '@barely/lib/server/routes/mixtape/mixtape.schema';
-import type { TrackWith_Workspace_Genres_Files } from '@barely/lib/server/routes/track/track.schema';
+// import type { MixtapeWith_Tracks } from '@barely/validators';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import type { TrackWith_Workspace_Genres_Files } from '@barely/validators';
 
-// import type { z } from 'zod';
+// import type { z } from 'zod/v4';
 // import { useCallback, useMemo, useState } from 'react';
-// import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
-// import { useWorkspace } from '@barely/lib/hooks/use-workspace';
+// import { useCreateOrUpdateForm } from '@barely/hooks';
+// import { useWorkspace } from '@barely/hooks';
 // import { api } from '@barely/lib/server/api/react';
-// import { upsertMixtapeSchema } from '@barely/lib/server/routes/mixtape/mixtape.schema';
+// import { upsertMixtapeSchema } from '@barely/validators';
 // import { insert } from '@barely/lib/utils/collection';
 // import { DropIndicator, isTextDropItem, useDragAndDrop } from 'react-aria-components';
 
-import { Button } from '@barely/ui/elements/button';
-import { GridListCard } from '@barely/ui/elements/grid-list';
-import { Icon } from '@barely/ui/elements/icon';
+import { Button } from '@barely/ui/button';
+import { GridListCard } from '@barely/ui/grid-list';
+import { Icon } from '@barely/ui/icon';
 
-// import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
-// import { H } from '@barely/ui/elements/typography';
-// import { Form, SubmitButton } from '@barely/ui/forms';
-// import { TextField } from '@barely/ui/forms/text-field';
+// import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
+// import { H } from '@barely/ui/typography';
+// import { Form, SubmitButton } from '@barely/ui/forms/form';
+// import { TextField } from '@barely/ui/forms';
 
 // import { useMixtapesContext } from '~/app/[handle]/mixtapes/_components/mixtape-context';
 

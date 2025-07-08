@@ -1,23 +1,45 @@
 'use client';
 
-import type { HorizontalTabItemProps } from '@barely/ui/components/navigation/horizontal-tabs';
+import type { HorizontalTabItemProps } from '@barely/ui/components/horizontal-tabs';
+import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { api } from '@barely/server/api/react';
+import { useWorkspace } from '@barely/hooks';
+import { useQuery } from '@tanstack/react-query';
 
-import { useWorkspace } from '@barely/hooks/use-workspace';
+import { useTRPC } from '@barely/api/app/trpc.react';
 
-import { HorizontalTabs } from '@barely/ui/components/navigation/horizontal-tabs';
-import { Button } from '@barely/ui/elements/button';
-import { Icon } from '@barely/ui/elements/icon';
+import { Button } from '@barely/ui/button';
+import { HorizontalTabs } from '@barely/ui/components/horizontal-tabs';
+import { Icon } from '@barely/ui/icon';
+
+import { useCampaignSearchParams } from '~/app/[handle]/campaigns/_components/campaign-context';
 
 export function CampaignTabs() {
+	const trpc = useTRPC();
 	const { workspace } = useWorkspace();
+	const { setStage } = useCampaignSearchParams();
 
 	const params = useParams();
 
-	const { data: totals } = api.campaign.countByWorkspaceId.useQuery({
-		workspaceId: workspace.id,
-	});
+	// Sync route param with search params
+	useEffect(() => {
+		const stageParam = params.stage?.[0];
+		if (stageParam === 'all') {
+			void setStage(undefined);
+		} else if (
+			stageParam === 'screening' ||
+			stageParam === 'approved' ||
+			stageParam === 'active'
+		) {
+			void setStage(stageParam);
+		}
+	}, [params.stage, setStage]);
+
+	const { data: totals } = useQuery(
+		trpc.campaign.countByWorkspaceId.queryOptions({
+			workspaceId: workspace.id,
+		}),
+	);
 
 	const tabs: HorizontalTabItemProps[] = [
 		{
@@ -27,7 +49,7 @@ export function CampaignTabs() {
 		{
 			name: 'Approved',
 			href: `/${workspace.handle}/campaigns/approved`,
-			beacon: params?.stage?.[0] !== 'all' && !!totals?.approved,
+			beacon: params.stage?.[0] !== 'all' && !!totals?.approved,
 		},
 		{
 			name: 'Screening',
@@ -55,25 +77,3 @@ export function CampaignTabs() {
 		/>
 	);
 }
-
-// function StageCount(
-// 	workspaceId: string,
-// 	stage: keyof CombinedRouterOutputs['campaign']['countByWorkspaceId'],
-// ) {
-// 	const { data: total, isLoading } = api.campaign.countByWorkspaceId.useQuery(
-// 		{
-// 			workspaceId,
-// 		},
-// 		{
-// 			select: count => count[stage],
-// 		},
-// 	);
-
-// 	if (isLoading) return <Skeleton className='h-4 w-[14px]'></Skeleton>;
-
-// 	return (
-// 		<span className='text-muted-foregroun flex h-4 w-[14px] items-center font-normal text-muted-foreground'>
-// 			{total}
-// 		</span>
-// 	);
-// }

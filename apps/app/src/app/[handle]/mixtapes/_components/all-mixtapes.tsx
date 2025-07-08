@@ -1,36 +1,32 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
+import { GridList, GridListCard } from '@barely/ui/grid-list';
 
 import { CreateMixtapeButton } from '~/app/[handle]/mixtapes/_components/create-mixtape-button';
-import { useMixtapesContext } from '~/app/[handle]/mixtapes/_components/mixtape-context';
+import {
+	useMixtape,
+	useMixtapeSearchParams,
+} from '~/app/[handle]/mixtapes/_components/mixtape-context';
 
 export function AllMixtapes() {
-	const {
-		items,
-		selection,
-		lastSelectedItemId,
-		setSelection,
-		gridListRef,
-		setShowUpdateModal,
-		isFetching,
-	} = useMixtapesContext();
+	const { setShowUpdateModal } = useMixtapeSearchParams();
+	const { items, selection, lastSelectedItemId, setSelection, isFetching } = useMixtape();
 
 	return (
 		<>
 			<GridList
-				glRef={gridListRef}
+				data-grid-list='mixtapes'
 				className='flex flex-col gap-2'
 				aria-label='Mixtapes'
 				selectionMode='multiple'
 				selectionBehavior='replace'
-				onAction={() => {
+				onAction={async () => {
 					if (!lastSelectedItemId) return;
-					setShowUpdateModal(true);
+					await setShowUpdateModal(true);
 				}}
 				items={items}
 				selectedKeys={selection}
@@ -61,7 +57,7 @@ function MixtapeCard({
 	mixtape: AppRouterOutputs['mixtape']['byWorkspace']['mixtapes'][0];
 }) {
 	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } =
-		useMixtapesContext();
+		useMixtapeSearchParams();
 
 	return (
 		<GridListCard

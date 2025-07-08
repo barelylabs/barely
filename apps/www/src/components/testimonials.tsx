@@ -20,7 +20,7 @@ const testimonials = [
 		name: 'Tina Yards',
 		title: 'VP of Sales, Protocol',
 		quote:
-			'Thanks to Radiant, we’re finding new leads that we never would have found with legal methods.',
+			"Thanks to Radiant, we're finding new leads that we never would have found with legal methods.",
 	},
 	{
 		img: '/testimonials/conor-neville.jpg',
@@ -40,7 +40,7 @@ const testimonials = [
 		name: 'Veronica Winton',
 		title: 'CSO, Planeteria',
 		quote:
-			'We’ve managed to put two of our main competitors out of business in 6 months.',
+			"We've managed to put two of our main competitors out of business in 6 months.",
 	},
 	{
 		img: '/testimonials/dillon-lenora.jpg',
@@ -52,7 +52,7 @@ const testimonials = [
 		img: '/testimonials/harriet-arron.jpg',
 		name: 'Harriet Arron',
 		title: 'Account Manager, Commit',
-		quote: 'I’ve smashed all my targets without having to speak to a lead in months.',
+		quote: "I've smashed all my targets without having to speak to a lead in months.",
 	},
 ];
 
@@ -126,11 +126,11 @@ function TestimonialCard({
 				<blockquote>
 					<p className='relative text-xl/7 text-white'>
 						<span aria-hidden='true' className='absolute -translate-x-full'>
-							“
+							"
 						</span>
 						{children}
 						<span aria-hidden='true' className='absolute'>
-							”
+							"
 						</span>
 					</p>
 				</blockquote>
@@ -179,8 +179,9 @@ export function Testimonials() {
 
 	function scrollTo(index: number) {
 		const gap = 32;
-		const width = (scrollRef.current!.children[0] as HTMLElement).offsetWidth;
-		scrollRef.current!.scrollTo({ left: (width + gap) * index });
+		if (!scrollRef.current) return;
+		const width = (scrollRef.current.children[0] as HTMLElement).offsetWidth;
+		scrollRef.current.scrollTo({ left: (width + gap) * index });
 	}
 
 	return (

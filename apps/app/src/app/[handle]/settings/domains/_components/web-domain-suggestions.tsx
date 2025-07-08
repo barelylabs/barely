@@ -1,16 +1,24 @@
-import Link from 'next/link';
-import { api } from '@barely/server/api/react';
+'use client';
 
-import { Skeleton } from '@barely/ui/elements/skeleton';
-import { Text } from '@barely/ui/elements/typography';
+import Link from 'next/link';
+import { useWorkspace } from '@barely/hooks';
+import { useSuspenseQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Skeleton } from '@barely/ui/skeleton';
+import { Text } from '@barely/ui/typography';
 
 export function LinkDomainPurchaseSuggestions() {
-	const [suggestedDomains] =
-		api.webDomain.getSuggestedLinkDomainsToPurchase.useSuspenseQuery('properyouth');
+	const trpc = useTRPC();
+	const { handle } = useWorkspace();
+	const { data: suggestedDomains } = useSuspenseQuery(
+		trpc.webDomain.getSuggestedLinkDomainsToPurchase.queryOptions({ handle }),
+	);
 
 	return (
 		<div className='grid grid-flow-row grid-cols-3 gap-3'>
-			{suggestedDomains && suggestedDomains.length > 0 ?
+			{suggestedDomains.length > 0 ?
 				suggestedDomains.map((d, index) => (
 					<Link
 						href={`/dash/${d.domain}`}

@@ -1,4 +1,11 @@
 import type { Config } from 'tailwindcss';
+import headlessUI from '@headlessui/tailwindcss';
+import forms from '@tailwindcss/forms';
+import typography from '@tailwindcss/typography';
+import scrollbarHide from 'tailwind-scrollbar-hide';
+import animate from 'tailwindcss-animate';
+import radix from 'tailwindcss-radix';
+import reactAriaComponents from 'tailwindcss-react-aria-components';
 import colors from 'tailwindcss/colors';
 import defaultTheme from 'tailwindcss/defaultTheme';
 
@@ -103,14 +110,6 @@ export default {
 					DEFAULT: 'oklch(var(--brand) / <alpha-value>)',
 					...dynamicTwClasses('brand', 40),
 				},
-				// brand: {
-				// 	DEFAULT: 'oklch(var(--brand) / <alpha-value>)',
-				// 	foreground: 'oklch(var(--brand-foreground) / <alpha-value>)',
-				// },
-				// 'brand-accent': {
-				// 	DEFAULT: 'oklch(var(--brand-accent) / <alpha-value>)',
-				// 	foreground: 'oklch(var(--brand-accent-foreground) / <alpha-value>)',
-				// },
 				accent: {
 					DEFAULT: 'oklch(var(--accent) / <alpha-value>)',
 					foreground: 'oklch(var(--accent-foreground) / <alpha-value>)',
@@ -569,12 +568,12 @@ export default {
 		},
 	],
 	plugins: [
-		require('@headlessui/tailwindcss'),
-		require('tailwindcss-animate'),
-		require('@tailwindcss/forms'),
-		require('@tailwindcss/typography'),
-		require('tailwind-scrollbar-hide'),
-		require('tailwindcss-radix'),
-		require('tailwindcss-react-aria-components'),
+		headlessUI,
+		animate,
+		forms,
+		typography,
+		scrollbarHide,
+		radix,
+		reactAriaComponents,
 	],
 } satisfies Config;

@@ -1,19 +1,14 @@
 'use client';
 
-import type { CartRouterOutputs } from '@barely/lib/server/routes/cart/cart.api.react';
 // import type { EventTrackingProps } from '@barely/lib/server/routes/event/event-report.schema';
+import type { CartRouterOutputs } from '@barely/api/public/cart.router';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { cartApi } from '@barely/lib/server/routes/cart/cart.api.react';
-import { updateCheckoutCartFromCheckoutSchema } from '@barely/lib/server/routes/cart/cart.schema';
-import { getAmountsForCheckout } from '@barely/lib/server/routes/cart/cart.utils';
-import {
-	APPAREL_SIZES,
-	isApparelSize,
-} from '@barely/lib/server/routes/product/product.constants';
-import { cn } from '@barely/lib/utils/cn';
-import { formatCentsToDollars } from '@barely/lib/utils/currency';
-import { getAbsoluteUrl } from '@barely/lib/utils/url';
+import { APPAREL_SIZES, isApparelSize } from '@barely/const';
+import { useDebouncedCallback, useZodForm } from '@barely/hooks';
+import { getAmountsForCheckout } from '@barely/lib/functions/cart.utils';
+import { cn, formatCentsToDollars, getAbsoluteUrl } from '@barely/utils';
+import { updateCheckoutCartFromCheckoutSchema } from '@barely/validators';
 import {
 	AddressElement,
 	LinkAuthenticationElement,
@@ -21,26 +16,24 @@ import {
 	useElements,
 	useStripe,
 } from '@stripe/react-stripe-js';
-import { z } from 'zod';
+import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+import { z } from 'zod/v4';
 
-import { useDebouncedCallback } from '@barely/hooks/use-debounced-callback';
-import { useZodForm } from '@barely/hooks/use-zod-form';
+import { useCartTRPC } from '@barely/api/public/cart.trpc.react';
 
-// import { setCartCookie } from '~/app/[mode]/[handle]/[key]/_actions';
-import { ProductPrice } from '@barely/ui/components/cart/product-price';
-import { Button } from '@barely/ui/elements/button';
-import { Icon } from '@barely/ui/elements/icon';
-import { Img } from '@barely/ui/elements/img';
-import { Switch } from '@barely/ui/elements/switch';
-import { ToggleGroup, ToggleGroupItem } from '@barely/ui/elements/toggle-group';
-import { H, Text } from '@barely/ui/elements/typography';
-import { WrapBalancer } from '@barely/ui/elements/wrap-balancer';
-import { Form } from '@barely/ui/forms';
+import { Button } from '@barely/ui/button';
 import { CheckboxField } from '@barely/ui/forms/checkbox-field';
 import { CurrencyField } from '@barely/ui/forms/currency-field';
+import { Form } from '@barely/ui/forms/form';
+import { Icon } from '@barely/ui/icon';
+import { Img } from '@barely/ui/img';
+import { ProductPrice } from '@barely/ui/src/components/cart/product-price';
+import { Switch } from '@barely/ui/switch';
+import { ToggleGroup, ToggleGroupItem } from '@barely/ui/toggle-group';
+import { H, Text } from '@barely/ui/typography';
+import { WrapBalancer } from '@barely/ui/wrap-balancer';
 
 import {
-	// setCartCookie,
 	setCartIdCookie,
 	setCartStageCookie,
 } from '~/app/[mode]/[handle]/[key]/_actions';
@@ -55,30 +48,26 @@ export function CheckoutForm({
 	initialData:
 		| NonNullable<CartRouterOutputs['create']>
 		| NonNullable<CartRouterOutputs['byIdAndParams']>;
-	// shouldWriteToCookie?: boolean;
-	// fbclid: string | null;
-	// tracking: EventTrackingProps;
 }) {
 	const router = useRouter();
-	const { cart: initialCart, publicFunnel: initialFunnel } = initialData;
+	const { cart: initialCart, publicFunnel } = initialData;
 
-	const { mutate: logEvent } = cartApi.log.useMutation();
+	const trpc = useCartTRPC();
+	const queryClient = useQueryClient();
+
+	const { mutate: logEvent } = useMutation(trpc.log.mutationOptions());
 
 	useEffect(() => {
-		if (logEvent && initialCart.id) {
+		if (initialCart.id) {
 			setCartStageCookie({
-				handle: initialFunnel.handle,
-				key: initialFunnel.key,
+				handle: publicFunnel.handle,
+				key: publicFunnel.key,
 				stage: 'checkoutCreated',
 			}).catch(console.error);
-			// setCartCookie({
-			// 	handle: initialFunnel.handle,
-			// 	key: initialFunnel.key,
-			// 	cartId: initialCart.id,
-			// }).catch(console.error);
+
 			setCartIdCookie({
-				handle: initialFunnel.handle,
-				key: initialFunnel.key,
+				handle: publicFunnel.handle,
+				key: publicFunnel.key,
 				cartId: initialCart.id,
 			}).catch(console.error);
 
@@ -91,8 +80,8 @@ export function CheckoutForm({
 		// tracking,
 		initialCart.id,
 
-		initialFunnel.handle,
-		initialFunnel.key,
+		publicFunnel.handle,
+		publicFunnel.key,
 		// shouldWriteToCookie,
 		logEvent,
 	]);
@@ -101,65 +90,94 @@ export function CheckoutForm({
 	const stripe = useStripe();
 	const elements = useElements();
 
-	const apiUtils = cartApi.useUtils();
-
+	// const {
+	// 	data: { cart, publicFunnel },
+	// } = cartApi.byIdAndParams.useQuery(
+	// 	{
+	// 		id: initialCart.id,
+	// 		handle: initialFunnel.handle,
+	// 		key: initialFunnel.key,
+	// 	},
+	// 	{
+	// 		initialData: {
+	// 			cart: initialCart,
+	// 			publicFunnel: {
+	// 				...initialFunnel,
+	// 			},
+	// 		},
+	// 	},
+	// );
 	const {
-		data: { cart, publicFunnel },
-	} = cartApi.byIdAndParams.useQuery(
-		{
+		data: { cart },
+	} = useSuspenseQuery(
+		trpc.byIdAndParams.queryOptions({
 			id: initialCart.id,
-			handle: initialFunnel.handle,
-			key: initialFunnel.key,
-		},
-		{
-			initialData: {
-				cart: initialCart,
-				publicFunnel: {
-					...initialFunnel,
-				},
-			},
-		},
+			handle: publicFunnel.handle,
+			key: publicFunnel.key,
+		}),
 	);
 
-	const { mutate: mutateCart } = cartApi.updateCheckoutFromCheckout.useMutation({
-		onMutate: async data => {
-			await apiUtils.byIdAndParams.cancel();
+	const { mutate: mutateCart } = useMutation(
+		trpc.updateCheckoutFromCheckout.mutationOptions({
+			onMutate: async data => {
+				await queryClient.cancelQueries({
+					queryKey: trpc.byIdAndParams.queryKey({
+						id: initialCart.id,
+						handle: publicFunnel.handle,
+						key: publicFunnel.key,
+					}),
+				});
 
-			const prevCart = apiUtils.byIdAndParams.getData({
-				id: cart.id,
-				handle: publicFunnel.handle,
-				key: publicFunnel.key,
-			});
+				const prevCart = queryClient.getQueryData(
+					trpc.byIdAndParams.queryKey({
+						id: initialCart.id,
+						handle: publicFunnel.handle,
+						key: publicFunnel.key,
+					}),
+				);
 
-			if (!prevCart) return;
+				if (!prevCart) return;
 
-			apiUtils.byIdAndParams.setData(
-				{ id: cart.id, handle: publicFunnel.handle, key: publicFunnel.key },
-				old => {
-					if (!old) return old;
+				queryClient.setQueryData(
+					trpc.byIdAndParams.queryKey({
+						id: initialCart.id,
+						handle: publicFunnel.handle,
+						key: publicFunnel.key,
+					}),
+					old => {
+						if (!old) return old;
 
-					return {
-						...old,
-						cart: {
-							...old.cart,
-							...data,
-						},
-					};
-				},
-			);
-		},
-		onSettled: async () => {
-			await apiUtils.byIdAndParams.invalidate();
-		},
-	});
+						return {
+							...old,
+							cart: {
+								...old.cart,
+								...data,
+							},
+						};
+					},
+				);
+			},
+			onSettled: async () => {
+				await queryClient.invalidateQueries({
+					queryKey: trpc.byIdAndParams.queryKey({
+						id: initialCart.id,
+						handle: publicFunnel.handle,
+						key: publicFunnel.key,
+					}),
+				});
+			},
+		}),
+	);
 
-	const { mutateAsync: syncCart } = cartApi.updateCheckoutFromCheckout.useMutation();
+	const { mutateAsync: syncCart } = useMutation(
+		trpc.updateCheckoutFromCheckout.mutationOptions(),
+	);
 
 	const updateCart = (
 		updateData: Partial<z.infer<typeof updateCheckoutCartFromCheckoutSchema>>,
 	) => {
 		mutateCart({
-			id: cart.id,
+			id: initialCart.id,
 			handle: publicFunnel.handle,
 			key: publicFunnel.key,
 			...updateData,
@@ -172,7 +190,7 @@ export function CheckoutForm({
 			email,
 		});
 		logEvent({
-			cartId: cart.id,
+			cartId: initialCart.id,
 			event: 'cart/addEmail',
 		});
 	};
@@ -184,7 +202,7 @@ export function CheckoutForm({
 	) => {
 		updateCart(data);
 		logEvent({
-			cartId: cart.id,
+			cartId: initialCart.id,
 			event: 'cart/addShippingInfo',
 		});
 	};
@@ -192,18 +210,30 @@ export function CheckoutForm({
 
 	// update pay what you want price
 	const updatePayWhatYouWantPrice = async (value: number) => {
-		await apiUtils.byIdAndParams.cancel();
-
-		const prevCart = apiUtils.byIdAndParams.getData({
-			id: cart.id,
-			handle: publicFunnel.handle,
-			key: publicFunnel.key,
+		await queryClient.cancelQueries({
+			queryKey: trpc.byIdAndParams.queryKey({
+				id: initialCart.id,
+				handle: publicFunnel.handle,
+				key: publicFunnel.key,
+			}),
 		});
+
+		const prevCart = queryClient.getQueryData(
+			trpc.byIdAndParams.queryKey({
+				id: initialCart.id,
+				handle: publicFunnel.handle,
+				key: publicFunnel.key,
+			}),
+		);
 
 		if (!prevCart) return;
 
-		apiUtils.byIdAndParams.setData(
-			{ id: cart.id, handle: publicFunnel.handle, key: publicFunnel.key },
+		queryClient.setQueryData(
+			trpc.byIdAndParams.queryKey({
+				id: initialCart.id,
+				handle: publicFunnel.handle,
+				key: publicFunnel.key,
+			}),
 			old => {
 				if (!old) return old;
 
@@ -222,7 +252,7 @@ export function CheckoutForm({
 		});
 
 		logEvent({
-			cartId: cart.id,
+			cartId: initialCart.id,
 			event: 'cart/updateMainProductPayWhatYouWantPrice',
 		});
 	};
@@ -234,7 +264,7 @@ export function CheckoutForm({
 	const handlePaymentAdded = () => {
 		if (!paymentAdded) {
 			logEvent({
-				cartId: cart.id,
+				cartId: initialCart.id,
 				event: 'cart/addPaymentInfo',
 			});
 			setPaymentAdded(true);
@@ -246,20 +276,11 @@ export function CheckoutForm({
 		schema: updateCheckoutCartFromCheckoutSchema,
 		values: {
 			...cart,
-			handle: publicFunnel.workspace.handle,
+			handle: publicFunnel.handle,
 			key: publicFunnel.key,
 
-			// tracking
-			// emailBroadcastId: tracking.emailBroadcastId,
-			// emailTemplateId: tracking.emailTemplateId,
-			// fanId: 'tracking.fanId',
-			// fbclid: tracking.fbclid,
-			// flowActionId: tracking.flowActionId,
-			// landingPageId: tracking.landingPageId,
-			// refererId: tracking.refererId,
-
 			mainProductPayWhatYouWantPrice: cart.mainProductPayWhatYouWantPrice,
-			mainProductQuantity: cart.mainProductQuantity ?? 1,
+			mainProductQuantity: cart.mainProductQuantity,
 			bumpProductQuantity: cart.bumpProductQuantity ?? 1,
 		},
 		resetOptions: {
@@ -292,17 +313,17 @@ export function CheckoutForm({
 
 	const { mainProduct, bumpProduct } = publicFunnel;
 	// const mainProductImageSrc = mainProduct?._images[0]?.file.src ?? '';
-	const mainProductImageS3Key = mainProduct?._images[0]?.file.s3Key ?? '';
-	const mainProductBlurDataUrl = mainProduct?._images[0]?.file.blurDataUrl ?? '';
+	const mainProductImageS3Key = mainProduct._images[0]?.file.s3Key ?? '';
+	const mainProductBlurDataUrl = mainProduct._images[0]?.file.blurDataUrl ?? '';
 	const bumpProductImageS3Key = bumpProduct?._images[0]?.file.s3Key ?? '';
 	const bumpProductBlurDataUrl = bumpProduct?._images[0]?.file.blurDataUrl ?? '';
 
 	const bumpNormalPrice = bumpProduct?.price ?? 0;
 
-	const bumpHasSizes = !!bumpProduct?._apparelSizes?.length;
+	const bumpHasSizes = !!bumpProduct?._apparelSizes.length;
 	const bumpSizes =
 		bumpProduct?._apparelSizes
-			?.map(size => size.size)
+			.map(size => size.size)
 			.sort((a, b) => {
 				const order = APPAREL_SIZES;
 				return order.indexOf(a) - order.indexOf(b);
@@ -356,9 +377,9 @@ export function CheckoutForm({
 						<div className='flex min-h-[285px] flex-col gap-2'>
 							<H size='5'>Contact Information</H>
 							<LinkAuthenticationElement
-								onChange={async e => {
+								onChange={e => {
 									if (e.complete) {
-										if (z.string().email().safeParse(e.value.email).success) {
+										if (z.email().safeParse(e.value.email).success) {
 											debouncedUpdateEmail({
 												email: e.value.email,
 											});
@@ -369,7 +390,7 @@ export function CheckoutForm({
 
 							<AddressElement
 								options={{ mode: 'shipping' }}
-								onChange={async e => {
+								onChange={e => {
 									if (e.complete) {
 										const address = e.value.address;
 
@@ -395,7 +416,7 @@ export function CheckoutForm({
 								<Img
 									s3Key={bumpProductImageS3Key}
 									blurDataURL={bumpProductBlurDataUrl}
-									alt={bumpProduct?.name}
+									alt={bumpProduct.name}
 									width={208}
 									height={208}
 									className='w-fit rounded-md bg-neutral-600'
@@ -440,7 +461,7 @@ export function CheckoutForm({
 									<Text variant='md/normal'>
 										{publicFunnel.bumpProductDescription?.length ?
 											publicFunnel.bumpProductDescription
-										:	bumpProduct?.description}
+										:	bumpProduct.description}
 									</Text>
 
 									<div className='flex flex-row items-center justify-center gap-2'>

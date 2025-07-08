@@ -1,40 +1,43 @@
 'use client';
 
-import type { UploadQueueItem } from '@barely/lib/hooks/use-upload';
+import type { UploadQueueItem } from '@barely/hooks';
 import type { SelectFieldOption } from '@barely/ui/forms/select-field';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useMemo, useState } from 'react';
-import { atomWithToggle } from '@barely/lib/atoms/atom-with-toggle';
-import { useToast } from '@barely/lib/hooks/use-toast';
-import { useUpload } from '@barely/lib/hooks/use-upload';
-import { useZodForm } from '@barely/lib/hooks/use-zod-form';
-import { api } from '@barely/lib/server/api/react';
-import { importFansFromCsvSchema } from '@barely/lib/server/routes/fan/fan.schema';
-import { raise } from '@barely/lib/utils/raise';
-import { atom, useAtom } from 'jotai';
+import { useUpload, useZodForm } from '@barely/hooks';
+import { useToast } from '@barely/toast';
+import { raise } from '@barely/utils';
+import { importFansFromCsvSchema } from '@barely/validators';
+import { useMutation } from '@tanstack/react-query';
+import { atom } from 'jotai';
 import Papa from 'papaparse';
 
-import { Button } from '@barely/ui/elements/button';
-import { Icon } from '@barely/ui/elements/icon';
-import { LoadingSpinner } from '@barely/ui/elements/loading';
-import { Modal, ModalBody, ModalHeader } from '@barely/ui/elements/modal';
-import { Text } from '@barely/ui/elements/typography';
-import { UploadDropzone } from '@barely/ui/elements/upload';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Button } from '@barely/ui/button';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
+import { Icon } from '@barely/ui/icon';
+import { LoadingSpinner } from '@barely/ui/loading';
+import { Modal, ModalBody, ModalHeader } from '@barely/ui/modal';
+import { Text } from '@barely/ui/typography';
+import { UploadDropzone } from '@barely/ui/upload';
+
+import { useFanSearchParams } from '~/app/[handle]/fans/_components/fan-context';
 
 const csvUploadQueueAtom = atom<UploadQueueItem[]>([]);
-
-const importFansModalAtom = atomWithToggle(false);
 
 export function ImportFansFromCsvModal() {
 	const { toast } = useToast();
 
-	const [showModal, setShowModal] = useAtom(importFansModalAtom);
+	const trpc = useTRPC();
+	const { showImportModal: showModal, setShowImportModal: setShowModal } =
+		useFanSearchParams();
 
-	const { mutate: importFansFromCsv } = api.fan.importFromCsv.useMutation({
-		onSuccess: () => {
-			handleCloseModal();
+	const { mutate: importFansFromCsv } = useMutation({
+		...trpc.fan.importFromCsv.mutationOptions(),
+		onSuccess: async () => {
+			await handleCloseModal();
 			toast('Fans importing...check back in a bit');
 		},
 	});
@@ -52,7 +55,8 @@ export function ImportFansFromCsvModal() {
 
 	const [generatingMapping, setGeneratingMapping] = useState(false);
 
-	const { mutate: generateCsvMapping } = api.fan.generateCsvMapping.useMutation({
+	const { mutate: generateCsvMapping } = useMutation({
+		...trpc.fan.generateCsvMapping.mutationOptions(),
 		onSuccess: data => {
 			const { email, firstName, lastName, fullName, phoneNumber, createdAt } = data;
 			console.log(data);
@@ -101,22 +105,22 @@ export function ImportFansFromCsvModal() {
 						dynamicTyping: true,
 					});
 
-					if (!data || data.length < 2) {
+					if (data.length < 2) {
 						setFileError('CSV file must have at least 2 rows');
 						setFileColumns(null);
 						return setGeneratingMapping(false);
 					}
 
-					if (!meta?.fields || meta.fields.length <= 1) {
+					if (meta.fields?.length && meta.fields.length <= 1) {
 						setFileError('Failed to retrieve CSV column data');
 						setFileColumns(null);
 						return setGeneratingMapping(false);
 					}
 
-					setFileColumns(meta.fields);
+					setFileColumns(meta.fields ?? []);
 
 					generateCsvMapping({
-						fieldColumns: meta.fields,
+						fieldColumns: meta.fields ?? [],
 						firstRows: data,
 					});
 				})
@@ -156,11 +160,11 @@ export function ImportFansFromCsvModal() {
 	const submitDisabled = isPendingPresigns || uploadQueue.length === 0;
 
 	const page =
-		columnOptions?.length > 0 && !generatingMapping ? 'confirm-import' : 'upload';
+		columnOptions.length > 0 && !generatingMapping ? 'confirm-import' : 'upload';
 
-	const handleCloseModal = () => {
+	const handleCloseModal = async () => {
 		setUploadQueue([]);
-		setShowModal(false);
+		await setShowModal(false);
 	};
 
 	const preventDefaultClose = isPendingPresigns || uploadQueue.length > 0;
@@ -260,14 +264,16 @@ export function ImportFansFromCsvModal() {
 }
 
 export function ImportFansButton() {
-	const [, setShowModal] = useAtom(importFansModalAtom);
+	const { setShowImportModal } = useFanSearchParams();
 
 	return (
 		<Button
 			look='secondary'
 			variant='icon'
 			startIcon='import'
-			onClick={() => setShowModal(true)}
+			onClick={() => {
+				void setShowImportModal(true);
+			}}
 		/>
 	);
 }

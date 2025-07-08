@@ -1,32 +1,11 @@
-// import { resolve } from 'path';
-import type {
-	// ResolveEnvironmentVariablesFunction,
-	TriggerConfig,
-} from '@trigger.dev/sdk/v3';
+import { additionalPackages } from '@trigger.dev/build/extensions/core';
+import { defineConfig } from '@trigger.dev/sdk/v3';
 
-// import * as dotenv from 'dotenv';
-
-// dotenv.config({
-// 	path: resolve(__dirname, '../../.env'),
-// });
-
-// export const resolveEnvVars: ResolveEnvironmentVariablesFunction = () => {
-// 	return {
-// 		variables: Object.entries(process.env).map(([key, value]) => ({
-// 			name: key,
-// 			value: value ?? '',
-// 		})),
-// 	};
-// };
-
-export const config: TriggerConfig = {
-	//Your project ref (you can see it on the Project settings page in the dashboard)
+export const config = defineConfig({
 	project: 'proj_qknwxraxikbauwjfqxlr',
-	maxDuration: 60,
+	maxDuration: 60, // 1 minute
 	retries: {
-		//If you want to retry a task in dev mode (when using the CLI)
 		enabledInDev: false,
-		//the default retry settings. Used if you don't specify on a task.
 		default: {
 			maxAttempts: 3,
 			minTimeoutInMs: 1000,
@@ -35,10 +14,16 @@ export const config: TriggerConfig = {
 			randomize: true,
 		},
 	},
-
-	// dependenciesToBundle: [/.*/], // deprecated by trigger.dev
-	enableConsoleLogging: true, // enable console logging with dev cli
-	//The paths for your trigger folders
-	dirs: ['./trigger'],
-	additionalPackages: ['resend@3.2.0'],
-};
+	enableConsoleLogging: true,
+	dirs: ['./src/trigger'],
+	build: {
+		jsx: {
+			automatic: true,
+		},
+		extensions: [
+			additionalPackages({
+				packages: ['resend@4.6.0'],
+			}),
+		],
+	},
+});

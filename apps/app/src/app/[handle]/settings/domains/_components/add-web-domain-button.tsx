@@ -2,7 +2,7 @@
 
 import { useAtom } from 'jotai';
 
-import { Button } from '@barely/ui/elements/button';
+import { Button } from '@barely/ui/button';
 
 import { showDomainModalAtom } from './web-domain-modal';
 

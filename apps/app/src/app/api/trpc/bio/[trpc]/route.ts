@@ -1,7 +1,5 @@
-import { routeHandler } from '@barely/lib/server/api/route-handler';
-import { bioRouter } from '@barely/lib/server/routes/bio/bio.router';
-import { OPTIONS } from '@barely/lib/utils/trpc-route';
+import { OPTIONS } from '@barely/utils';
 
-const handler = routeHandler('bio', bioRouter);
+import { bioHandler } from '@barely/api/app/sub/bio.handler';
 
-export { OPTIONS, handler as GET, handler as POST };
+export { OPTIONS, bioHandler as GET, bioHandler as POST };

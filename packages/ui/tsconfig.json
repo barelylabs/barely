@@ -7,13 +7,13 @@
 		"module": "esnext"
 	},
 	"include": [
-		"./charts/**/*",
-		"./components/**/*",
-		"./elements/**/*",
-		"./forms/**/*",
-		"./hooks/**/*",
-		"./images/**/*",
-		"./utils/**/*",
+		"src/charts/**/*",
+		"src/components/**/*",
+		"src/elements/**/*",
+		"src/forms/**/*",
+		"src/hooks/**/*",
+		"src/images/**/*",
+		"src/utils/**/*",
 		"tailwind.config.ts"
 	],
 	"exclude": ["node_modules"]

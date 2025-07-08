@@ -1,10 +1,11 @@
-import type { api } from '@barely/lib/server/api/react';
-import type { CommonKeys } from '@barely/lib/utils/types';
-import type { Icon } from '@barely/ui/elements/icon';
+import type { AppRouter } from '@barely/api/app/app.router';
+import type { Icon } from '@barely/ui/icon';
+import type { CommonKeys } from '@barely/utils';
 import type { Selection } from 'react-aria-components';
+import { useWorkspace } from '@barely/hooks';
 
-import { Button } from '@barely/ui/elements/button';
-import { Modal, ModalBody, ModalHeader } from '@barely/ui/elements/modal';
+import { Button } from '@barely/ui/button';
+import { Modal, ModalBody, ModalHeader } from '@barely/ui/modal';
 
 export function ArchiveOrDeleteModal<T extends { id: string; name: string }>({
 	mode,
@@ -23,12 +24,13 @@ export function ArchiveOrDeleteModal<T extends { id: string; name: string }>({
 	lastSelected: T | undefined; // Replace 'any' with the appropriate type for your last selected item
 	showModal: boolean;
 	setShowModal: (show: boolean) => void;
-	archiveItems: (selection: string[]) => void; // Replace 'any' with the appropriate mutation type
+	archiveItems: ({ handle, ids }: { handle: string; ids: string[] }) => void; // Replace 'any' with the appropriate mutation type
 	isPendingArchive: boolean;
-	deleteItems: (selection: string[]) => void; // Replace 'any' with the appropriate mutation type
+	deleteItems: ({ handle, ids }: { handle: string; ids: string[] }) => void; // Replace 'any' with the appropriate mutation type
 	isPendingDelete: boolean;
-	itemName: keyof CommonKeys<typeof Icon, typeof api>;
+	itemName: keyof CommonKeys<typeof Icon, AppRouter>;
 }) {
+	const { handle } = useWorkspace();
 	const mutate = mode === 'archive' ? archiveItems : deleteItems;
 	const isPending = mode === 'archive' ? isPendingArchive : isPendingDelete;
 
@@ -38,9 +40,9 @@ export function ArchiveOrDeleteModal<T extends { id: string; name: string }>({
 		mode === 'archive' ?
 			selection === 'all' ?
 				`Archive all ${itemName}s?`
-			:	`Archive "${lastSelected?.name}" ${selection.size > 1 ? `and ${selection.size - 1} other ${itemName}?` : ''}`
+			:	`Archive "${lastSelected.name}" ${selection.size > 1 ? `and ${selection.size - 1} other ${itemName}?` : ''}`
 		: selection === 'all' ? `Delete all ${itemName}s?`
-		: `Delete "${lastSelected?.name}" ${selection.size > 1 ? `and ${selection.size - 1} other ${itemName}?` : ''}`;
+		: `Delete "${lastSelected.name}" ${selection.size > 1 ? `and ${selection.size - 1} other ${itemName}?` : ''}`;
 
 	const subtitle =
 		mode === 'archive' ?
@@ -56,7 +58,7 @@ export function ArchiveOrDeleteModal<T extends { id: string; name: string }>({
 						if (selection === 'all') {
 							// todo: implement action for all items
 						} else {
-							mutate(Array.from(selection).map(id => id.toString()));
+							mutate({ handle, ids: Array.from(selection).map(id => id.toString()) });
 						}
 					}}
 					loading={isPending}

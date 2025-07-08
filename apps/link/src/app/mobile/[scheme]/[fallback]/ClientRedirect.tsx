@@ -9,14 +9,14 @@ interface RedirectProps {
 
 export default function ClientRedirect({ scheme, fallback }: RedirectProps) {
 	useEffect(() => {
-		if (!document) return;
+		// if (!document) return;
 		const appSchemes = [scheme];
 		appSchemes.map((scheme, index) => {
-			if (scheme === null) return;
+			// if (scheme === null) return;
 			setTimeout(() => (document.location = decodeURIComponent(scheme)), index * 300);
 		});
 
-		if (fallback === null) return;
+		// if (fallback === null) return;
 
 		setTimeout(
 			() => (document.location = decodeURIComponent(fallback)),

@@ -1,22 +1,22 @@
 'use client';
 
-import type { FileRecord } from '@barely/lib/server/routes/file/file.schema';
-import { nFormatter } from '@barely/lib/utils/number';
+import type { FileRecord } from '@barely/validators';
+import { nFormatter } from '@barely/utils';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { GridItemCheckbox, GridList, GridListItem } from '@barely/ui/elements/grid-list';
-import { Icon } from '@barely/ui/elements/icon';
-import { Img } from '@barely/ui/elements/img';
-import { Text } from '@barely/ui/elements/typography';
+import { GridItemCheckbox, GridList, GridListItem } from '@barely/ui/grid-list';
+import { Icon } from '@barely/ui/icon';
+import { Img } from '@barely/ui/img';
+import { Text } from '@barely/ui/typography';
 
-import { useMediaContext } from '~/app/[handle]/media/_components/media-context';
+import { useMedia } from '~/app/[handle]/media/_components/media-context';
 
 export function AllMedia() {
-	const { items, selection, setSelection, gridListRef, isFetching } = useMediaContext();
+	const { items, selection, setSelection, gridListRef, isFetching } = useMedia();
 
 	return (
-		<>
+		<div data-grid-list>
 			<GridList
 				glRef={gridListRef}
 				aria-label='Files'
@@ -47,7 +47,7 @@ export function AllMedia() {
 			>
 				{item => <FileCard file={item} />}
 			</GridList>
-		</>
+		</div>
 	);
 }
 
@@ -70,7 +70,7 @@ function FileCard({ file }: { file: FileRecord }) {
 								s3Key={file.s3Key}
 								alt={file.name}
 								placeholder={file.blurDataUrl ? 'blur' : undefined}
-								blurDataURL={file.blurDataUrl ? file.blurDataUrl : ''}
+								blurDataURL={file.blurDataUrl ?? ''}
 								className='rounded-inherit object-contain'
 							/>
 						</div>

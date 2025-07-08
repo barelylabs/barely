@@ -1,43 +1,34 @@
 {
 	"$schema": "https://turbo.build/schema.json",
 	"globalDependencies": ["**/.env"],
-	"pipeline": {
-		"dev:pre": {
-			"cache": false
-		},
-		"dev": {
-			"persistent": true,
-			"cache": false
+	"tasks": {
+		"topo": {
+			"dependsOn": ["^topo"]
 		},
 		"build": {
 			"dependsOn": ["^build"],
-			"outputs": [
-				".next/**",
-				"!.next/cache/**",
-				"next-env.d.ts",
-				".output/**",
-				".vercel/output/**"
-			]
+			"outputs": [".cache/tsbuildinfo.json", "dist/**"]
+		},
+		"dev": {
+			"dependsOn": ["^dev"],
+			"cache": false,
+			"persistent": false
+		},
+		"dev:trigger": {
+			"dependsOn": ["^dev:trigger"],
+			"cache": false,
+			"persistent": false
+		},
+		"dev:pre": {
+			"cache": false
 		},
 		"build:preview": {
 			"dependsOn": ["^build:preview"],
-			"outputs": [
-				".next/**",
-				"!.next/cache/**",
-				"next-env.d.ts",
-				".output/**",
-				".vercel/output/**"
-			]
+			"outputs": [".cache/tsbuildinfo.json", "dist/**"]
 		},
 		"build:production": {
 			"dependsOn": ["^build:production"],
-			"outputs": [
-				".next/**",
-				"!.next/cache/**",
-				"next-env.d.ts",
-				".output/**",
-				".vercel/output/**"
-			]
+			"outputs": [".cache/tsbuildinfo.json", "dist/**"]
 		},
 		"deploy-trigger:staging": {
 			"dependsOn": ["^deploy-trigger:staging"],
@@ -60,17 +51,20 @@
 			]
 		},
 		"format": {
-			"outputs": ["node_modules/.cache/.prettiercache"],
-			"outputMode": "new-only"
+			"outputs": [".cache/.prettiercache"],
+			"outputLogs": "new-only"
 		},
 		"lint": {
-			"outputs": ["node_modules/.cache/.eslintcache"]
+			"dependsOn": ["^topo", "^build"],
+			"outputs": [".cache/.eslintcache"]
 		},
-		"start": {
-			"cache": false
+		"lint:fix": {
+			"dependsOn": ["^topo", "^build"],
+			"outputs": [".cache/.eslintcache"]
 		},
 		"typecheck": {
-			"outputs": ["node_modules/.cache/tsbuildinfo.json"]
+			"dependsOn": ["^topo", "^build"],
+			"outputs": [".cache/tsbuildinfo.json"]
 		},
 		"clean": {
 			"cache": false
@@ -79,6 +73,9 @@
 			"cache": false
 		},
 		"//#clean": {
+			"cache": false
+		},
+		"start": {
 			"cache": false
 		}
 	},
@@ -114,8 +111,10 @@
 		"AWS_S3_REGION",
 		"AWS_S3_ACCESS_KEY_ID",
 		"AWS_S3_SECRET_ACCESS_KEY",
+		"BETTER_AUTH_SECRET",
 		"BOT_SPOTIFY_ACCOUNT_ID",
 		"BOT_THREADS_API_KEY",
+		"CI",
 		"DATABASE_NAME",
 		"DATABASE_URL",
 		"DATABASE_POOL_URL",
@@ -129,6 +128,7 @@
 		"NEXTAUTH_URL",
 		"NEXTAUTH_URL_INTERNAL",
 		"NODE_ENV",
+		"npm_lifecycle_event",
 		"OPENAI_API_KEY",
 		"OPENAI_ORG_ID",
 		"POSTMARK_SERVER_API_TOKEN",
@@ -138,6 +138,7 @@
 		"SCREENING_PHONE_NUMBER",
 		"SENDGRID_API_KEY",
 		"SHIPENGINE_API_KEY",
+		"SKIP_ENV_VALIDATION",
 		"SPOTIFY_CLIENT_ID",
 		"SPOTIFY_CLIENT_SECRET",
 		"STRIPE_SECRET_KEY",
@@ -149,7 +150,6 @@
 		"TWILIO_PHONE_NUMBER",
 		"UPSTASH_REDIS_REST_URL",
 		"UPSTASH_REDIS_REST_TOKEN",
-		"VERCEL_ENV",
 		"VERCEL_LINK_PROJECT_ID",
 		"VERCEL_TEAM_ID",
 		"VERCEL_TOKEN",

@@ -1,23 +1,26 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/react';
-import type { SessionWorkspaceInvite } from '@barely/lib/server/routes/workspace-invite/workspace-invite.schema';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import type { SessionWorkspaceInvite } from '@barely/validators';
 import { useEffect } from 'react';
-import { useWorkspace, useWorkspaceIsPersonal } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
+import { useWorkspace, useWorkspaceIsPersonal } from '@barely/hooks';
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
-import { H } from '@barely/ui/elements/typography';
+import { GridList, GridListCard } from '@barely/ui/grid-list';
+import { H } from '@barely/ui/typography';
 
 import { AddMemberButton } from '~/app/[handle]/settings/team/_components/add-member-button';
 
 export function AllWorkspaceMembers() {
+	const trpc = useTRPC();
 	const { handle, isPersonal } = useWorkspace();
-	const { data: members, isFetching } = api.workspace.members.useQuery({
-		handle,
-	});
+	const { data: members, isFetching } = useSuspenseQuery(
+		trpc.workspace.members.queryOptions({ handle }),
+	);
 
 	useEffect(() => {
 		console.log('handle for members => ', handle);
@@ -66,15 +69,14 @@ function MemberCard({
 }
 
 export function AllWorkspaceInvites() {
+	const trpc = useTRPC();
 	const { handle } = useWorkspace();
 	const isPersonal = useWorkspaceIsPersonal();
 
-	const { data: invites, isFetching } = api.workspace.invites.useQuery(
-		{ handle },
-		{
-			enabled: !isPersonal,
-		},
-	);
+	const { data: invites, isFetching } = useQuery({
+		...trpc.workspace.invites.queryOptions({ handle }),
+		enabled: !isPersonal,
+	});
 
 	if (isPersonal) return null;
 
@@ -86,13 +88,11 @@ export function AllWorkspaceInvites() {
 			</p>
 			<GridList
 				aria-label='Team invites'
-				items={
-					invites?.map(invite => ({
-						...invite,
-						id: invite.email,
-						role: invite.role === 'owner' ? 'admin' : invite.role,
-					})) ?? []
-				}
+				items={(invites ?? []).map(invite => ({
+					...invite,
+					id: invite.email,
+					role: invite.role === 'owner' ? 'admin' : invite.role,
+				}))}
 				renderEmptyState={() =>
 					isFetching ?
 						<GridListSkeleton count={2} />

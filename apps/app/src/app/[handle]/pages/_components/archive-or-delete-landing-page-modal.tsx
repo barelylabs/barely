@@ -1,41 +1,47 @@
 'use client';
 
 import { useCallback } from 'react';
-import { api } from '@barely/lib/server/api/react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { ArchiveOrDeleteModal } from '~/app/[handle]/_components/archive-or-delete-modal';
-import { useLandingPageContext } from '~/app/[handle]/pages/_components/landing-page-context';
+import {
+	useLandingPage,
+	useLandingPageSearchParams,
+} from '~/app/[handle]/pages/_components/landing-page-context';
 
 export function ArchiveOrDeleteLandingPageModal({
 	mode,
 }: {
 	mode: 'archive' | 'delete';
 }) {
-	const {
-		selection,
-		lastSelectedItem,
-		showArchiveModal,
-		showDeleteModal,
-		setShowArchiveModal,
-		setShowDeleteModal,
-	} = useLandingPageContext();
+	const { showArchiveModal, showDeleteModal, setShowArchiveModal, setShowDeleteModal } =
+		useLandingPageSearchParams();
 
-	const apiUtils = api.useUtils();
+	const { selection, lastSelectedItem } = useLandingPage();
+
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
 
 	const showModal = mode === 'archive' ? showArchiveModal : showDeleteModal;
 
 	const setShowModal = mode === 'archive' ? setShowArchiveModal : setShowDeleteModal;
 
 	const onSuccess = useCallback(async () => {
-		await apiUtils.landingPage.invalidate();
-		setShowModal(false);
-	}, [apiUtils.landingPage, setShowModal]);
+		await queryClient.invalidateQueries({
+			queryKey: trpc.landingPage.byWorkspace.queryKey(),
+		});
+		await setShowModal(false);
+	}, [queryClient, trpc, setShowModal]);
 
-	const { mutate: archiveLandingPages, isPending: isPendingArchive } =
-		api.landingPage.archive.useMutation({ onSuccess });
+	const { mutate: archiveLandingPages, isPending: isPendingArchive } = useMutation(
+		trpc.landingPage.archive.mutationOptions({ onSuccess }),
+	);
 
-	const { mutate: deleteLandingPages, isPending: isPendingDelete } =
-		api.landingPage.delete.useMutation({ onSuccess });
+	const { mutate: deleteLandingPages, isPending: isPendingDelete } = useMutation(
+		trpc.landingPage.delete.mutationOptions({ onSuccess }),
+	);
 
 	if (!lastSelectedItem) return null;
 

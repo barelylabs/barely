@@ -1,26 +1,29 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import { useRouter } from 'next/navigation';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
+import { useWorkspace } from '@barely/hooks';
 
+import { Button } from '@barely/ui/button';
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { Button } from '@barely/ui/elements/button';
-import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
-import { Text } from '@barely/ui/elements/typography';
+import { GridList, GridListCard } from '@barely/ui/grid-list';
+import { Text } from '@barely/ui/typography';
 
 import { CreateFlowButton } from '~/app/[handle]/flows/_components/create-flow-button';
-import { useFlowContext } from '~/app/[handle]/flows/_components/flow-context';
+import {
+	useFlow,
+	useFlowSearchParams,
+} from '~/app/[handle]/flows/_components/flow-context';
 
 export function AllFlows() {
-	const { items, selection, setSelection, lastSelectedItemId, isFetching } =
-		useFlowContext();
+	const { items, selection, setSelection, lastSelectedItemId, isFetching } = useFlow();
 	const router = useRouter();
 	const { handle } = useWorkspace();
 	return (
 		<div className='flex flex-col gap-4'>
 			<GridList
+				data-grid-list='flows'
 				aria-label='Flows'
 				className='flex flex-col gap-4'
 				selectionMode='multiple'
@@ -53,7 +56,7 @@ export function AllFlows() {
 }
 
 function LoadMoreButton() {
-	const { hasNextPage, fetchNextPage, isFetchingNextPage } = useFlowContext();
+	const { hasNextPage, fetchNextPage, isFetchingNextPage } = useFlow();
 
 	if (!hasNextPage)
 		return (
@@ -77,10 +80,10 @@ function LoadMoreButton() {
 function FlowCard({
 	flow,
 }: {
-	flow: AppRouterOutputs['flow']['byWorkspace']['flows'][number];
+	flow: AppRouterOutputs['flow']['byWorkspace']['flows'][0];
 }) {
-	const { setShowArchiveModal, setShowDeleteModal, selection, setSelection } =
-		useFlowContext();
+	const { selection, setSelection } = useFlow();
+	const { setShowArchiveModal, setShowDeleteModal } = useFlowSearchParams();
 
 	const { handle } = useWorkspace();
 	const router = useRouter();
@@ -100,11 +103,11 @@ function FlowCard({
 					shortcut: ['Enter'],
 				},
 			]}
-			actionOnCommandMenuOpen={() => {
+			actionOnCommandMenuOpen={async () => {
 				if (selection === 'all' || selection.has(flow.id)) {
 					return;
 				}
-				setSelection(new Set([flow.id]));
+				await setSelection(new Set([flow.id]));
 			}}
 		>
 			<div className='flex w-full flex-col gap-4'>

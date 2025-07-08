@@ -1,58 +1,59 @@
 'use client';
 
-import type { UploadQueueItem } from '@barely/lib/hooks/use-upload';
-import type {
-	InsertTrackAudioFile,
-	UpsertTrack,
-} from '@barely/lib/server/routes/track/track.schema';
-import type { z } from 'zod';
+import type { UploadQueueItem } from '@barely/hooks';
+import type { InsertTrackAudioFile, UpsertTrack } from '@barely/validators';
+import type { z } from 'zod/v4';
 import { useCallback } from 'react';
-import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
-import { useUpload } from '@barely/lib/hooks/use-upload';
-import { api } from '@barely/lib/server/api/react';
+import { useCreateOrUpdateForm, useUpload, useWorkspace } from '@barely/hooks';
+import { parseSpotifyUrl } from '@barely/utils';
 import {
 	defaultTrack,
 	formatWorkspaceTrackToUpsertTrackForm,
 	upsertTrackSchema,
-} from '@barely/lib/server/routes/track/track.schema';
-import { parseSpotifyUrl } from '@barely/lib/utils/spotify';
+} from '@barely/validators';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { atom } from 'jotai';
 
-import { Badge } from '@barely/ui/elements/badge';
-import { Label } from '@barely/ui/elements/label';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
-import { Text } from '@barely/ui/elements/typography';
-import { UploadDropzone, UploadQueueList } from '@barely/ui/elements/upload';
-import { Form, SubmitButton } from '@barely/ui/forms';
-import { TextField } from '@barely/ui/forms/text-field';
+import { useTRPC } from '@barely/api/app/trpc.react';
 
-import { useTrackContext } from '~/app/[handle]/tracks/_components/track-context';
+import { Badge } from '@barely/ui/badge';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
+import { TextField } from '@barely/ui/forms/text-field';
+import { Label } from '@barely/ui/label';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
+import { Text } from '@barely/ui/typography';
+import { UploadDropzone, UploadQueueList } from '@barely/ui/upload';
+
+import { useTrack } from '~/app/[handle]/tracks/_components/track-context';
 
 const trackArtworkUploadQueueAtom = atom<UploadQueueItem[]>([]);
 const trackAudioUploadQueueAtom = atom<UploadQueueItem[]>([]);
 
 export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 	const { mode } = props;
-	const apiUtils = api.useUtils();
-
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
+	const { handle } = useWorkspace();
 	/* track context */
 	const {
 		lastSelectedItem: selectedTrack,
+		focusGridList,
 		showCreateModal,
 		setShowCreateModal,
 		showUpdateModal,
 		setShowUpdateModal,
-		focusGridList,
-	} = useTrackContext();
+	} = useTrack();
 
 	/* api */
-	const { mutateAsync: createTrack } = api.track.create.useMutation({
+	const { mutateAsync: createTrack } = useMutation({
+		...trpc.track.create.mutationOptions(),
 		onSuccess: async () => {
 			await handleCloseModal();
 		},
 	});
 
-	const { mutateAsync: updateTrack } = api.track.update.useMutation({
+	const { mutateAsync: updateTrack } = useMutation({
+		...trpc.track.update.mutationOptions(),
 		onSuccess: async () => {
 			await handleCloseModal();
 		},
@@ -67,10 +68,16 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 		upsertSchema: upsertTrackSchema,
 		defaultValues: defaultTrack,
 		handleCreateItem: async d => {
-			await createTrack(d);
+			await createTrack({
+				...d,
+				handle,
+			});
 		},
 		handleUpdateItem: async d => {
-			await updateTrack(d);
+			await updateTrack({
+				...d,
+				handle,
+			});
 		},
 	});
 
@@ -92,7 +99,7 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 	const artworkImagePreview =
 		artworkUploadQueue[0]?.previewImage ??
 		(mode === 'update' ?
-			(selectedTrack?.artworkFiles?.find(f => f.current)?.src ?? '')
+			(selectedTrack?.artworkFiles.find(f => f.current)?.src ?? '')
 		:	'');
 
 	/* Audio upload */
@@ -161,10 +168,10 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 	// MASTERS
 	const masterCompressed =
 		mode === 'update' ?
-			selectedTrack?.audioFiles?.find(f => f.masterCompressed)
+			selectedTrack?.audioFiles.find(f => f.masterCompressed)
 		:	undefined;
 	const masterWav =
-		mode === 'update' ? selectedTrack?.audioFiles?.find(f => f.masterWav) : undefined;
+		mode === 'update' ? selectedTrack?.audioFiles.find(f => f.masterWav) : undefined;
 
 	/* modal */
 	const showModal = mode === 'create' ? showCreateModal : showUpdateModal;
@@ -175,15 +182,16 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 		focusGridList();
 		setArtworkUploadQueue([]);
 		setAudioUploadQueue([]);
-		await apiUtils.track.invalidate();
-		setShowModal(false);
+		await queryClient.invalidateQueries(trpc.track.byWorkspace.queryFilter());
+		await setShowModal(false);
 	}, [
 		form,
-		apiUtils.track,
+		queryClient,
 		focusGridList,
 		setShowModal,
 		setArtworkUploadQueue,
 		setAudioUploadQueue,
+		trpc.track.byWorkspace,
 	]);
 
 	return (
@@ -198,7 +206,11 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 			}
 			onClose={handleCloseModal}
 			onAutoFocus={() => {
-				mode === 'update' ? form.setFocus('isrc') : form.setFocus('name');
+				if (mode === 'update') {
+					form.setFocus('isrc');
+				} else {
+					form.setFocus('name');
+				}
 			}}
 		>
 			<ModalHeader
@@ -222,9 +234,9 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 						onPaste={e => {
 							const input = e.clipboardData.getData('text');
 							const parsed = parseSpotifyUrl(input);
-							if (!input ?? parsed?.type !== 'track') return;
+							if (parsed?.type !== 'track') return;
 							e.preventDefault();
-							form.setValue('spotifyId', parsed.id);
+							form.setValue('spotifyId', parsed.id ?? null);
 						}}
 					/>
 

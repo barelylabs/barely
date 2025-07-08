@@ -1,8 +1,10 @@
 'use client';
 
-import { landingPageApi } from '@barely/lib/server/routes/landing-page-render/landing-page-render.api.react';
+import { useMutation } from '@tanstack/react-query';
 
-import { LoadingLinkButton } from '@barely/ui/elements/button';
+import { useLandingPageRenderTRPC } from '@barely/api/public/landing-page.trpc.react';
+
+import { LoadingLinkButton } from '@barely/ui/button';
 
 export interface LandingPageLinkButtonProps {
 	landingPageId: string;
@@ -17,7 +19,8 @@ export const LandingPageLinkButton = ({
 	assetId,
 	label,
 }: LandingPageLinkButtonProps) => {
-	const { mutate: logEvent } = landingPageApi.log.useMutation();
+	const trpc = useLandingPageRenderTRPC();
+	const { mutate: logEvent } = useMutation(trpc.log.mutationOptions());
 
 	return (
 		<LoadingLinkButton

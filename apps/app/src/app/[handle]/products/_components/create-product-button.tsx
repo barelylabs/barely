@@ -1,17 +1,17 @@
 'use client';
 
-import { Button } from '@barely/ui/elements/button';
-import { CommandShortcut } from '@barely/ui/elements/command';
+import { Button } from '@barely/ui/button';
+import { CommandShortcut } from '@barely/ui/command';
 
-import { useProductContext } from '~/app/[handle]/products/_components/product-context';
+import { useProductSearchParams } from '~/app/[handle]/products/_components/product-context';
 
 export function CreateProductButton() {
-	const { setShowCreateModal } = useProductContext();
+	const { setShowCreateModal } = useProductSearchParams();
 
 	return (
 		<Button
 			onClick={() => {
-				setShowCreateModal(true);
+				void setShowCreateModal(true);
 			}}
 			className='space-x-3'
 		>

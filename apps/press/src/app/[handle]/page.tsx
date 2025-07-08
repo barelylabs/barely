@@ -1,4 +1,4 @@
-import { getPublicPressKit } from '@barely/lib/server/routes/press-kit/press-kit.fns';
+import { getPublicPressKit } from '@barely/lib/functions/press-kit.fns';
 
 import type { SocialStat } from './_components/press-social-stats';
 import { PressBio } from './_components/press-bio';
@@ -12,8 +12,13 @@ import { SocialStats } from './_components/press-social-stats';
 import { TopPlayerBar } from './_components/press-top-player-bar';
 import { PressVideos } from './_components/press-videos';
 
-export default async function PressPage({ params }: { params: { handle: string } }) {
-	const publicPressKit = await getPublicPressKit({ handle: params.handle });
+export default async function PressPage({
+	params,
+}: {
+	params: Promise<{ handle: string }>;
+}) {
+	const { handle } = await params;
+	const publicPressKit = await getPublicPressKit({ handle });
 
 	if (!publicPressKit) {
 		return null;

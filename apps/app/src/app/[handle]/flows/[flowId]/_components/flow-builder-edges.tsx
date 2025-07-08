@@ -1,16 +1,12 @@
-import type {
-	BooleanEdge,
-	FlowState,
-	SimpleEdge,
-} from '@barely/lib/server/routes/flow/flow.ui.types';
+import type { BooleanEdge, FlowState, SimpleEdge } from '@barely/validators';
 import type { BezierEdgeProps } from '@xyflow/react';
 import { useState } from 'react';
-import { cn } from '@barely/lib/utils/cn';
+import { cn } from '@barely/utils';
 import { BaseEdge, EdgeLabelRenderer, getBezierPath } from '@xyflow/react';
 import { useShallow } from 'zustand/react/shallow';
 
-import { Button } from '@barely/ui/elements/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/elements/popover';
+import { Button } from '@barely/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/popover';
 
 import { useFlowStore } from '~/app/[handle]/flows/[flowId]/_components/flow-store';
 
@@ -151,7 +147,7 @@ export function BooleanEdgeType(booleanEdge: BooleanEdge & BezierEdgeProps) {
 						</div>
 						<div
 							className={cn(
-								'invisible absolute left-1/2 top-full z-10 -translate-x-1/2 scale-0 transition-all hover:visible hover:scale-100 group-hover:visible group-hover:scale-100',
+								'invisible absolute left-1/2 top-full z-10 -translate-x-1/2 scale-0 transition-all group-hover:visible group-hover:scale-100 hover:visible hover:scale-100',
 								insertPopoverOpen && 'visible scale-100',
 								insertPopoverOpen && 'visible scale-100',
 							)}

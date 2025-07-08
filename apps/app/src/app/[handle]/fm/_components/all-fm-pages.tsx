@@ -1,13 +1,13 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
+import { GridList, GridListCard } from '@barely/ui/grid-list';
 
 import { CreateFmPageButton } from '~/app/[handle]/fm/_components/create-fm-page-button';
-import { useFmContext } from '~/app/[handle]/fm/_components/fm-context';
+import { useFm } from '~/app/[handle]/fm/_components/fm-context';
 
 export function AllFmPages() {
 	const {
@@ -18,7 +18,7 @@ export function AllFmPages() {
 		gridListRef,
 		setShowUpdateModal,
 		isFetching,
-	} = useFmContext();
+	} = useFm();
 
 	return (
 		<>
@@ -26,11 +26,12 @@ export function AllFmPages() {
 				glRef={gridListRef}
 				className='flex flex-col gap-2'
 				aria-label='Fm Pages'
+				data-grid-list='fm-pages'
 				selectionMode='multiple'
 				selectionBehavior='replace'
-				onAction={() => {
+				onAction={async () => {
 					if (!lastSelectedItemId) return;
-					setShowUpdateModal(true);
+					await setShowUpdateModal(true);
 				}}
 				items={items}
 				selectedKeys={selection}
@@ -60,7 +61,7 @@ function FmPageCard({
 }: {
 	fmPage: AppRouterOutputs['fm']['byWorkspace']['fmPages'][0];
 }) {
-	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } = useFmContext();
+	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } = useFm();
 
 	const { coverArt } = fmPage;
 

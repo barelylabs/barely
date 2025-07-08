@@ -1,18 +1,17 @@
 'use client';
 
-import type { LinkMetaTags } from '@barely/lib/server/routes/link/link.schema';
+import type { LinkMetaTags } from '@barely/validators';
 import type { ReactNode } from 'react';
 import { useMemo } from 'react';
 import Image from 'next/image';
+import { getDomainWithoutWWW } from '@barely/utils';
 
-import { AspectRatio } from '@barely/ui/elements/aspect-ratio';
-import { BlurImage } from '@barely/ui/elements/blur-image';
-import { Icon } from '@barely/ui/elements/icon';
-import { LoadingSpinner } from '@barely/ui/elements/loading';
-import { ScrollArea } from '@barely/ui/elements/scroll-area';
-import { H } from '@barely/ui/elements/typography';
-
-import { getDomainWithoutWWW } from '@barely/utils/link';
+import { AspectRatio } from '@barely/ui/aspect-ratio';
+import { BlurImage } from '@barely/ui/blur-image';
+import { Icon } from '@barely/ui/icon';
+import { LoadingSpinner } from '@barely/ui/loading';
+import { ScrollArea } from '@barely/ui/scroll-area';
+import { H } from '@barely/ui/typography';
 
 interface SocialPreviewProps {
 	hostname?: string | null;

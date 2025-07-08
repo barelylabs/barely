@@ -1,71 +1,82 @@
 'use client';
 
-import type { TopEventType } from '@barely/lib/server/routes/stat/stat.schema';
+import type { TopEventType } from '@barely/tb/schema';
 import type { BarListBarProps } from '@barely/ui/charts/bar-list';
 import { useState } from 'react';
-import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
-import { getTopStatValue } from '@barely/lib/server/routes/stat/stat.schema';
-import { api } from '@barely/server/api/react';
+import { useWebEventStatFilters } from '@barely/hooks';
+import { getTopStatValue } from '@barely/tb/schema';
+import { useQuery } from '@tanstack/react-query';
 
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Card } from '@barely/ui/card';
 import { BarList } from '@barely/ui/charts/bar-list';
-import { Card } from '@barely/ui/elements/card';
-import { ScrollArea, ScrollBar } from '@barely/ui/elements/scroll-area';
-import { TabButtons } from '@barely/ui/elements/tab-buttons';
-import { H } from '@barely/ui/elements/typography';
+import { ScrollArea, ScrollBar } from '@barely/ui/scroll-area';
+import { TabButtons } from '@barely/ui/tab-buttons';
+import { H } from '@barely/ui/typography';
 
 export function StatExternalReferers({ eventType }: { eventType: TopEventType }) {
+	const trpc = useTRPC();
 	const [tab, setTab] = useState<
 		'referers' | 'metaCampaigns' | 'metaAdSets' | 'metaAds' | 'metaPlacements'
 	>('referers');
 
 	const { filtersWithHandle, getSetFilterPath } = useWebEventStatFilters();
 
-	const { data: referers } = api.stat.topReferers.useQuery(
-		{ ...filtersWithHandle, topEventType: eventType },
-		{
-			select: data =>
-				data.map(d => ({
-					name: d.referer,
-					value: getTopStatValue(eventType, d),
-				})),
-			enabled: tab === 'referers',
-		},
+	const { data: referers } = useQuery(
+		trpc.stat.topReferers.queryOptions(
+			{ ...filtersWithHandle, topEventType: eventType },
+			{
+				select: data =>
+					data.map(d => ({
+						name: d.referer,
+						value: getTopStatValue(eventType, d),
+					})),
+				enabled: tab === 'referers',
+			},
+		),
 	);
 
-	const { data: topMetaCampaigns } = api.stat.topMetaCampaigns.useQuery(
-		{ ...filtersWithHandle, topEventType: eventType },
-		{
-			select: data =>
-				data.map(d => ({
-					name: d.sessionMetaCampaignId,
-					value: getTopStatValue(eventType, d),
-				})),
-			enabled: tab === 'metaCampaigns',
-		},
+	const { data: topMetaCampaigns } = useQuery(
+		trpc.stat.topMetaCampaigns.queryOptions(
+			{ ...filtersWithHandle, topEventType: eventType },
+			{
+				select: data =>
+					data.map(d => ({
+						name: d.sessionMetaCampaignId,
+						value: getTopStatValue(eventType, d),
+					})),
+				enabled: tab === 'metaCampaigns',
+			},
+		),
 	);
 
-	const { data: topMetaAds } = api.stat.topMetaAds.useQuery(
-		{ ...filtersWithHandle, topEventType: eventType },
-		{
-			select: data =>
-				data.map(d => ({
-					name: d.sessionMetaAdId,
-					value: getTopStatValue(eventType, d),
-				})),
-			enabled: tab === 'metaAds',
-		},
+	const { data: topMetaAds } = useQuery(
+		trpc.stat.topMetaAds.queryOptions(
+			{ ...filtersWithHandle, topEventType: eventType },
+			{
+				select: data =>
+					data.map(d => ({
+						name: d.sessionMetaAdId,
+						value: getTopStatValue(eventType, d),
+					})),
+				enabled: tab === 'metaAds',
+			},
+		),
 	);
 
-	const { data: topMetaPlacements } = api.stat.topMetaPlacements.useQuery(
-		{ ...filtersWithHandle, topEventType: eventType },
-		{
-			select: data =>
-				data.map(d => ({
-					name: d.sessionMetaPlacement,
-					value: getTopStatValue(eventType, d),
-				})),
-			enabled: tab === 'metaPlacements',
-		},
+	const { data: topMetaPlacements } = useQuery(
+		trpc.stat.topMetaPlacements.queryOptions(
+			{ ...filtersWithHandle, topEventType: eventType },
+			{
+				select: data =>
+					data.map(d => ({
+						name: d.sessionMetaPlacement,
+						value: getTopStatValue(eventType, d),
+					})),
+				enabled: tab === 'metaPlacements',
+			},
+		),
 	);
 
 	const data =

@@ -4,9 +4,9 @@ import type { Metadata } from 'next';
 import { Inter as FontSans } from 'next/font/google';
 import localFont from 'next/font/local';
 import Head from 'next/head';
-import { cn } from '@barely/lib/utils/cn';
+import { cn } from '@barely/utils';
 
-import { Container } from '@barely/ui/elements/container';
+import { Container } from '@barely/ui/container';
 
 const fontHeading = localFont({
 	src: '../fonts/CalSans-SemiBold.woff2',

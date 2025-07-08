@@ -1,16 +1,16 @@
 'use client';
 
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useState } from 'react';
 import Link from 'next/link';
-import { useZodForm } from '@barely/lib/hooks/use-zod-form';
-import { api } from '@barely/lib/server/api/react';
-import { insertUserSchema } from '@barely/lib/server/routes/user/user.schema';
+import { useZodForm } from '@barely/hooks';
+import { insertUserSchema } from '@barely/validators';
 
-import { Text } from '@barely/ui/elements/typography';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { TextField } from '@barely/ui/forms/text-field';
+import { Text } from '@barely/ui/typography';
 
+import { authClient } from '~/auth/client';
 import { LoginLinkSent } from '../login-success';
 
 const signInSchema = insertUserSchema.pick({ email: true });
@@ -29,15 +29,15 @@ export const LoginForm = ({ callbackUrl }: RegisterFormProps) => {
 
 	const [loginEmailSent, setLoginEmailSent] = useState(false);
 
-	const { mutateAsync: sendLoginEmail } = api.auth.sendLoginEmail.useMutation({
-		onSuccess: () => {
-			setLoginEmailSent(true);
-		},
-	});
-
 	const onSubmit = async (user: z.infer<typeof signInSchema>) => {
-		await sendLoginEmail({ email: user.email, callbackUrl });
-		return;
+		const { data } = await authClient.signIn.magicLink({
+			email: user.email,
+			callbackURL: callbackUrl,
+		});
+
+		if (data?.status === true) {
+			setLoginEmailSent(true);
+		}
 	};
 
 	return (

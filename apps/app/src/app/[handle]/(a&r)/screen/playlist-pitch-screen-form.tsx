@@ -1,38 +1,41 @@
 'use client';
 
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useEffect } from 'react';
-import { api } from '@barely/lib/server/api/react';
-import { updatePlaylistPitchCampaign_ScreeningSchema } from '@barely/lib/server/routes/campaign/campaign.schema';
+import { useSubscribe, useZodForm } from '@barely/hooks';
+import { updatePlaylistPitchCampaign_ScreeningSchema } from '@barely/validators';
+import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 
-import { useSubscribe } from '@barely/hooks/use-subscribe';
-import { useZodForm } from '@barely/hooks/use-zod-form';
+import { useTRPC } from '@barely/api/app/trpc.react';
 
-import { Button } from '@barely/ui/elements/button';
-import { InfoCard } from '@barely/ui/elements/card';
-import { Icon } from '@barely/ui/elements/icon';
-import { Text } from '@barely/ui/elements/typography';
-import { Form } from '@barely/ui/forms';
+import { Button } from '@barely/ui/button';
+import { InfoCard } from '@barely/ui/card';
+import { Form } from '@barely/ui/forms/form';
 import { TextField } from '@barely/ui/forms/text-field';
+import { Icon } from '@barely/ui/icon';
+import { Text } from '@barely/ui/typography';
 
 import { TrackGenresField } from '~/app/(dash)/track/components/track-genres-input';
 
 export function PlaylistPitchScreenForm() {
-	const utils = api.useContext();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
 
-	const [campaigns] = api.campaign.toScreen.useSuspenseQuery(undefined, {
+	const { data: campaigns } = useSuspenseQuery({
+		...trpc.campaign.toScreen.queryOptions(undefined),
 		staleTime: Infinity,
 	});
 
-	const campaign = campaigns?.[0];
+	const campaign = campaigns[0];
 
-	const { data: _genresCount } = api.playlist.countByGenres.useQuery(
-		{ genreIds: campaign?.track.genres.map(g => g.id) ?? [] },
-		{ enabled: !!campaign?.track.genres?.length },
-	);
+	const { data: _genresCount } = useSuspenseQuery({
+		...trpc.playlist.countByGenres.queryOptions({
+			genreIds: campaign?.track.genres.map(g => g.id) ?? [],
+		}),
+	});
 
 	const genresCount =
-		campaign?.track.genres?.length ?
+		campaign?.track.genres.length ?
 			_genresCount
 		:	{
 				totalPlaylists: 0,
@@ -51,7 +54,9 @@ export function PlaylistPitchScreenForm() {
 			},
 		],
 		callback: async () => {
-			await utils.campaign.toScreen.invalidate();
+			await queryClient.invalidateQueries({
+				queryKey: trpc.campaign.toScreen.queryKey(),
+			});
 		},
 	});
 
@@ -59,63 +64,79 @@ export function PlaylistPitchScreenForm() {
 		schema: updatePlaylistPitchCampaign_ScreeningSchema,
 		values: {
 			id: campaign?.id ?? '',
-			stage: 'approved',
+			stage: 'approved' as const,
 			screeningMessage: campaign?.screeningMessage ?? '',
 			genres: !campaign ? [] : campaign.track.genres,
 		},
+		resetOptions: { keepDirtyValues: true },
 	});
 
 	useEffect(() => {
 		if (form.formState.errors.genres?.message) {
 			form.trigger('genres').catch(err => console.error(err));
 		}
-	}, [genresCount?.totalCurators, form]);
+	}, [genresCount.totalCurators, form]);
 
-	const { mutate: updateCampaign } = api.campaign.update.useMutation({
-		onMutate: async updatedCampaign => {
-			await utils.campaign.toScreen.cancel();
+	const { mutate: updateCampaign } = useMutation({
+		...trpc.campaign.update.mutationOptions({
+			onMutate: async updatedCampaign => {
+				await queryClient.cancelQueries({
+					queryKey: trpc.campaign.toScreen.queryKey(),
+				});
 
-			const previousCampaigns = utils.campaign.toScreen.getData();
+				const previousCampaigns = queryClient.getQueryData(
+					trpc.campaign.toScreen.queryKey(),
+				);
 
-			utils.campaign.toScreen.setData(undefined, old => {
-				if (!old?.[0]) return old;
+				queryClient.setQueryData(trpc.campaign.toScreen.queryKey(), old => {
+					if (!old?.[0]) return old;
 
-				const updatedCampaigns = [{ ...old[0], ...updatedCampaign }]; //, old?.[1]];
-				if (old?.[1]) updatedCampaigns.push(old?.[1]);
+					const updatedCampaigns = [{ ...old[0], ...updatedCampaign }]; //, old?.[1]];
+					if (old[1]) updatedCampaigns.push(old[1]);
 
-				return updatedCampaigns;
-			});
+					return updatedCampaigns;
+				});
 
-			return { previousCampaigns };
-		},
+				return { previousCampaigns };
+			},
+		}),
 
 		onError: (err, variables, context) => {
 			if (context?.previousCampaigns) {
-				utils.campaign.toScreen.setData(undefined, context.previousCampaigns);
+				queryClient.setQueryData(
+					trpc.campaign.toScreen.queryKey(),
+					context.previousCampaigns,
+				);
 			}
 		},
 
 		onSettled: async () => {
-			await utils.campaign.toScreen.invalidate();
+			await queryClient.invalidateQueries({
+				queryKey: trpc.campaign.toScreen.queryKey(),
+			});
 		},
 	});
 
-	const { mutate: submitScreening } =
-		api.campaign.submitPlaylistPitchScreening.useMutation({
+	const { mutate: submitScreening } = useMutation({
+		...trpc.campaign.submitPlaylistPitchScreening.mutationOptions({
 			onMutate: async () => {
-				await utils.campaign.toScreen.cancel();
+				await queryClient.cancelQueries({
+					queryKey: trpc.campaign.toScreen.queryKey(),
+				});
 
-				const previousCampaigns = utils.campaign.toScreen.getData();
+				const previousCampaigns = queryClient.getQueryData(
+					trpc.campaign.toScreen.queryKey(),
+				);
 				const firstCampaign = previousCampaigns?.[0];
 
 				// optimistically remove the first campaign from the list
-				utils.campaign.toScreen.setData(undefined, old => {
+				queryClient.setQueryData(trpc.campaign.toScreen.queryKey(), old => {
 					if (!old || !firstCampaign) return old;
 					return old.filter(c => c.id !== firstCampaign.id);
 				});
 
 				if (firstCampaign) {
-					utils.campaign.toScreen.setData(undefined, old => {
+					queryClient.setQueryData(trpc.campaign.toScreen.queryKey(), old => {
 						if (!old) return old;
 						return old.filter(c => c.id !== firstCampaign.id);
 					});
@@ -127,15 +148,27 @@ export function PlaylistPitchScreenForm() {
 			},
 
 			onSuccess: () => {
-				return utils.campaign.toScreen.invalidate();
+				return queryClient.invalidateQueries({
+					queryKey: trpc.campaign.toScreen.queryKey(),
+				});
 			},
 
 			onError: (err, variables, context) => {
 				if (context?.previousCampaigns) {
-					utils.campaign.toScreen.setData(undefined, context.previousCampaigns);
+					queryClient.setQueryData(
+						trpc.campaign.toScreen.queryKey(),
+						context.previousCampaigns,
+					);
 				}
 			},
-		});
+
+			onSettled: async () => {
+				await queryClient.invalidateQueries({
+					queryKey: trpc.campaign.toScreen.queryKey(),
+				});
+			},
+		}),
+	});
 
 	const handleScreenCampaign = (
 		data: z.infer<typeof updatePlaylistPitchCampaign_ScreeningSchema>,
@@ -161,8 +194,8 @@ export function PlaylistPitchScreenForm() {
 					stats={
 						<div className='flex flex-col gap-2'>
 							<Text variant='xs/normal' subtle>
-								{genresCount?.totalPlaylists} curator
-								{genresCount?.totalCurators && genresCount?.totalCurators > 1 && 's'}
+								{genresCount.totalPlaylists} curator
+								{genresCount.totalCurators && genresCount.totalCurators > 1 && 's'}
 							</Text>
 							<Button
 								variant='icon'
@@ -180,9 +213,33 @@ export function PlaylistPitchScreenForm() {
 					<Form form={form} onSubmit={handleScreenCampaign}>
 						<TrackGenresField
 							formType='playlist-pitch-screening'
-							control={form.control}
 							trackId={campaign.track.id}
+							form={form}
 						/>
+
+						{/* <MultiSelectField
+							name='genres'
+							label={<div className='flex flex-row items-center gap-1'>
+								<span>Genres</span>
+							</div>}
+							placeholder='Search for genres...'
+							control={form.control}
+							// control={control}
+							options={playlistGenreOptions ?? []}
+							isFetchingOptions={isFetchingOptions}
+							getItemId={item => item.id}
+							displayValue={item => item.name}
+							optTitle={option => option.name}
+							optSubtitle={option => `${option.totalPlaylists ?? '?'} playlists`}
+							onValuesChangeDebounced={genres => {
+								updateTrackGenres({
+									trackId: campaign.track.id,
+									genres,
+								});
+							}}
+							debounce={500}
+							displayMode={'select'}
+						/> */}
 
 						<TextField
 							control={form.control}

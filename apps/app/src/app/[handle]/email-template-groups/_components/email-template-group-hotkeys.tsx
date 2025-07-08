@@ -1,17 +1,20 @@
 'use client';
 
-import { useModalHotKeys } from '@barely/lib/hooks/use-modal-hot-keys';
+import { useModalHotKeys } from '@barely/hooks';
 
-import { useEmailTemplateGroupContext } from './email-template-group-context';
+import {
+	useEmailTemplateGroup,
+	useEmailTemplateGroupSearchParams,
+} from './email-template-group-context';
 
 export function EmailTemplateGroupHotkeys() {
+	const { selection } = useEmailTemplateGroup();
 	const {
-		selection,
 		setShowCreateModal,
 		setShowUpdateModal,
 		setShowArchiveModal,
 		setShowDeleteModal,
-	} = useEmailTemplateGroupContext();
+	} = useEmailTemplateGroupSearchParams();
 
 	useModalHotKeys({
 		setShowCreateModal,

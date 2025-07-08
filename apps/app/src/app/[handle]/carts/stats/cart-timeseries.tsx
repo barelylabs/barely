@@ -1,18 +1,20 @@
 'use client';
 
-import { useCartStatFilters } from '@barely/lib/hooks/use-cart-stat-filters';
-import { formatCentsToDollars } from '@barely/lib/utils/currency';
-import { api } from '@barely/server/api/react';
+import { useCartStatFilters } from '@barely/hooks';
+import { calcPercent, formatCentsToDollars } from '@barely/utils';
+import { useSuspenseQuery } from '@tanstack/react-query';
 
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Card } from '@barely/ui/card';
 import { AreaChart } from '@barely/ui/charts/area-chart';
-import { Card } from '@barely/ui/elements/card';
-import { InfoTabButton } from '@barely/ui/elements/info-tab-button';
-
-import { calcPercent } from '@barely/utils/number';
+import { InfoTabButton } from '@barely/ui/info-tab-button';
 
 import { WebEventFilterBadges } from '~/app/[handle]/_components/filter-badges';
 
 export function CartTimeseries() {
+	const trpc = useTRPC();
+
 	const {
 		filtersWithHandle,
 		uiFilters,
@@ -45,29 +47,31 @@ export function CartTimeseries() {
 		showProductSales,
 	} = uiFilters;
 
-	const { data: timeseries } = api.stat.cartTimeseries.useQuery(
-		{ ...filtersWithHandle },
-		{
-			select: data => data.map(row => ({ ...row, date: formatTimestamp(row.start) })),
-		},
+	const { data: timeseries } = useSuspenseQuery(
+		trpc.stat.cartTimeseries.queryOptions(
+			{ ...filtersWithHandle },
+			{
+				select: data => data.map(row => ({ ...row, date: formatTimestamp(row.start) })),
+			},
+		),
 	);
 
-	const totalVisits = timeseries?.reduce((acc, row) => acc + row.cart_checkoutViews, 0);
+	const totalVisits = timeseries.reduce((acc, row) => acc + row.cart_checkoutViews, 0);
 	// const totalEmailAdds = timeseries?.reduce((acc, row) => acc + row.cart_emailAdds, 0);
 	// const totalShippingInfoAdds = timeseries?.reduce(
 	// 	(acc, row) => acc + row.cart_shippingInfoAdds,
 	// 	0,
 	// );
-	const totalPaymentInfoAdds = timeseries?.reduce(
+	const totalPaymentInfoAdds = timeseries.reduce(
 		(acc, row) => acc + row.cart_paymentInfoAdds,
 		0,
 	);
 
-	const totalMainWithoutBumpPurchases = timeseries?.reduce(
+	const totalMainWithoutBumpPurchases = timeseries.reduce(
 		(acc, row) => acc + row.cart_mainWithoutBumpPurchases,
 		0,
 	);
-	const totalMainWithBumpPurchases = timeseries?.reduce(
+	const totalMainWithBumpPurchases = timeseries.reduce(
 		(acc, row) => acc + row.cart_mainWithBumpPurchases,
 		0,
 	);
@@ -75,25 +79,24 @@ export function CartTimeseries() {
 	// 	(acc, row) => acc + row.cart_upsellPurchases,
 	// 	0,
 	// );
-	const totalPurchases =
-		(totalMainWithoutBumpPurchases ?? 0) + (totalMainWithBumpPurchases ?? 0);
+	const totalPurchases = totalMainWithoutBumpPurchases + totalMainWithBumpPurchases;
 
-	const totalGrossSales = timeseries?.reduce(
+	const totalGrossSales = timeseries.reduce(
 		(acc, row) => acc + row.cart_checkoutPurchaseGrossAmount,
 		0,
 	);
-	const totalProductSales = timeseries?.reduce(
+	const totalProductSales = timeseries.reduce(
 		(acc, row) => acc + row.cart_checkoutPurchaseProductAmount,
 		0,
 	);
 
-	const salesData = (timeseries ?? [])?.map(row => ({
+	const salesData = timeseries.map(row => ({
 		...row,
 		grossSales: showGrossSales ? row.cart_checkoutPurchaseGrossAmount : undefined,
 		productSales: showProductSales ? row.cart_checkoutPurchaseProductAmount : undefined,
 	}));
 
-	const kpiData = (timeseries ?? [])?.map(row => ({
+	const kpiData = timeseries.map(row => ({
 		...row,
 		visits: showVisits ? row.cart_checkoutViews : undefined,
 		emailAdds: showEmailAdds ? row.cart_emailAdds : undefined,
@@ -118,7 +121,7 @@ export function CartTimeseries() {
 						<InfoTabButton
 							icon='view'
 							label='GROSS SALES'
-							value={formatCentsToDollars(totalGrossSales ?? 0)}
+							value={formatCentsToDollars(totalGrossSales)}
 							onClick={toggleShowGrossSales}
 							selected={showGrossSales}
 							selectedClassName='border-slate-500 bg-slate-100'
@@ -128,7 +131,7 @@ export function CartTimeseries() {
 						<InfoTabButton
 							icon='view'
 							label='PRODUCT SALES'
-							value={formatCentsToDollars(totalProductSales ?? 0)}
+							value={formatCentsToDollars(totalProductSales)}
 							onClick={toggleShowProductSales}
 							selected={showProductSales}
 							iconBackgroundClassName='bg-green'
@@ -153,7 +156,7 @@ export function CartTimeseries() {
 						<InfoTabButton
 							icon='view'
 							label='VISITS'
-							value={totalVisits ?? 0}
+							value={totalVisits}
 							onClick={toggleShowVisits}
 							selected={showVisits}
 							selectedClassName='border-slate-500 bg-slate-100'
@@ -163,8 +166,8 @@ export function CartTimeseries() {
 						<InfoTabButton
 							icon='payment'
 							label='ADDED PAYMENT'
-							value={totalPaymentInfoAdds ?? 0}
-							subValue={calcPercent(totalPaymentInfoAdds ?? 0, totalVisits ?? 0)}
+							value={totalPaymentInfoAdds}
+							subValue={calcPercent(totalPaymentInfoAdds, totalVisits)}
 							selected={showPaymentInfoAdds}
 							onClick={toggleShowPaymentInfoAdds}
 							iconBackgroundClassName='bg-blue'
@@ -174,8 +177,8 @@ export function CartTimeseries() {
 						<InfoTabButton
 							icon='purchase'
 							label='PURCHASES'
-							value={totalPurchases ?? 0}
-							subValue={calcPercent(totalPurchases ?? 0, totalVisits ?? 0)}
+							value={totalPurchases}
+							subValue={calcPercent(totalPurchases, totalVisits)}
 							selected={showPurchases}
 							onClick={toggleShowPurchases}
 							iconBackgroundClassName='bg-green'

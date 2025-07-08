@@ -1,10 +1,13 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { fmPageApi } from '@barely/lib/server/routes/fm-page/fm-page.api.react';
+import { useMutation } from '@tanstack/react-query';
+
+import { useFmPageTRPC } from '@barely/api/public/fm-page.trpc.react';
 
 export function LogVisit({ fmId }: { fmId: string }) {
-	const { mutate: logEvent } = fmPageApi.log.useMutation();
+	const trpc = useFmPageTRPC();
+	const { mutate: logEvent } = useMutation(trpc.log.mutationOptions());
 
 	const hasLoggedView = useRef(false);
 

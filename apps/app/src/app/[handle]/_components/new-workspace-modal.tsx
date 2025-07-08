@@ -1,24 +1,27 @@
 'use client';
 
 import type { SelectFieldOption } from '@barely/ui/forms/select-field';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useRouter } from 'next/navigation';
-import { createWorkspaceSchema } from '@barely/lib/server/routes/workspace/workspace.schema';
-import { api } from '@barely/server/api/react';
+import { useZodForm } from '@barely/hooks';
+import { createWorkspaceSchema } from '@barely/validators';
+import { useMutation } from '@tanstack/react-query';
 import { useAtom } from 'jotai';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { atomWithToggle } from '@barely/atoms/atom-with-toggle';
 
-import { useZodForm } from '@barely/hooks/use-zod-form';
-
-import { Modal, ModalBody, ModalHeader } from '@barely/ui/elements/modal';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { TextField } from '@barely/ui/forms/text-field';
+import { Modal, ModalBody, ModalHeader } from '@barely/ui/modal';
 
 export const showNewWorkspaceModalAtom = atomWithToggle(false);
 
 export function NewWorkspaceModal() {
+	const trpc = useTRPC();
+
 	const [newWorkspaceModalOpen, setNewWorkspaceModalOpen] = useAtom(
 		showNewWorkspaceModalAtom,
 	);
@@ -33,6 +36,15 @@ export function NewWorkspaceModal() {
 		},
 	});
 
+	// const formZ4 = useForm({
+	// 	schema: createWorkspaceSchema,
+	// 	defaultValues: {
+	// 		name: '',
+	// 		handle: '',
+	// 		type: 'creator',
+	// 	},
+	// });
+
 	const typeOptions: SelectFieldOption<
 		Exclude<z.infer<typeof createWorkspaceSchema.shape.type>, undefined | 'personal'>
 	>[] = [
@@ -42,12 +54,14 @@ export function NewWorkspaceModal() {
 		{ label: 'Product', value: 'product' },
 	];
 
-	const { mutateAsync: createWorkspace } = api.workspace.create.useMutation({
-		onSuccess: data => {
-			router.push(`/${data.handle}/settings`);
-			setNewWorkspaceModalOpen(false);
-		},
-	});
+	const { mutateAsync: createWorkspace } = useMutation(
+		trpc.workspace.create.mutationOptions({
+			onSuccess: data => {
+				router.push(`/${data.handle}/settings`);
+				setNewWorkspaceModalOpen(false);
+			},
+		}),
+	);
 
 	const onSubmit = async (data: z.infer<typeof createWorkspaceSchema>) => {
 		await createWorkspace(data);
@@ -62,6 +76,8 @@ export function NewWorkspaceModal() {
 			<ModalHeader icon='logo' title='Create a new workspace' />
 
 			<ModalBody>
+				{/* <FormZ4 {...formZ4}>test</FormZ4> */}
+
 				<Form form={form} onSubmit={onSubmit}>
 					<TextField
 						control={form.control}

@@ -1,41 +1,47 @@
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import { api } from '@barely/lib/server/api/server';
-import { fanSearchParamsSchema } from '@barely/lib/server/routes/fan/fan.schema';
+import { fanSearchParamsSchema } from '@barely/validators';
+
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllFans } from '~/app/[handle]/fans/_components/all-fans';
 import { ArchiveOrDeleteFanModal } from '~/app/[handle]/fans/_components/archive-or-delete-fan-modal';
 import { CreateFanButton } from '~/app/[handle]/fans/_components/create-fan-button';
 import { CreateOrUpdateFanModal } from '~/app/[handle]/fans/_components/create-or-update-fan-modal';
-import { FanContextProvider } from '~/app/[handle]/fans/_components/fan-context';
 import { FanFilters } from '~/app/[handle]/fans/_components/fan-filters';
 import { FanHotkeys } from '~/app/[handle]/fans/_components/fan-hotkeys';
 import {
 	ImportFansButton,
 	ImportFansFromCsvModal,
 } from '~/app/[handle]/fans/_components/import-fans-modal';
+import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
-export default function FansPage({
+export default async function FansPage({
 	params,
 	searchParams,
 }: {
-	params: { handle: string };
-	searchParams: z.infer<typeof fanSearchParamsSchema>;
+	params: Promise<{ handle: string }>;
+	searchParams: Promise<z.infer<typeof fanSearchParamsSchema>>;
 }) {
-	const parsedFilters = fanSearchParamsSchema.safeParse(searchParams);
+	const awaitedParams = await params;
+	const awaitedSearchParams = await searchParams;
+	const parsedFilters = fanSearchParamsSchema.safeParse(awaitedSearchParams);
 	if (!parsedFilters.success) {
 		console.log('parsedFilters error', parsedFilters.error);
-		redirect(`/${params.handle}/fans`);
+		redirect(`/${awaitedParams.handle}/fans`);
 	}
 
-	const fans = api({ handle: params.handle }).fan.byWorkspace({
-		handle: params.handle,
-		...parsedFilters.data,
-	});
+	prefetch(
+		trpc.fan.byWorkspace.infiniteQueryOptions({
+			handle: awaitedParams.handle,
+			...parsedFilters.data,
+		}),
+	);
 
 	return (
-		<FanContextProvider initialFansFirstPage={fans}>
+		<HydrateClient>
 			<DashContentHeader
 				title='Fans'
 				button={
@@ -45,18 +51,22 @@ export default function FansPage({
 					</div>
 				}
 			/>
+
 			<FanFilters />
-			<AllFans />
 
-			<CreateOrUpdateFanModal mode='create' />
-			<CreateOrUpdateFanModal mode='update' />
+			<Suspense fallback={<GridListSkeleton />}>
+				<AllFans />
 
-			<ArchiveOrDeleteFanModal mode='archive' />
-			<ArchiveOrDeleteFanModal mode='delete' />
+				<CreateOrUpdateFanModal mode='create' />
+				<CreateOrUpdateFanModal mode='update' />
 
-			<ImportFansFromCsvModal />
+				<ArchiveOrDeleteFanModal mode='archive' />
+				<ArchiveOrDeleteFanModal mode='delete' />
 
-			<FanHotkeys />
-		</FanContextProvider>
+				<ImportFansFromCsvModal />
+
+				<FanHotkeys />
+			</Suspense>
+		</HydrateClient>
 	);
 }

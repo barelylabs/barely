@@ -1,42 +1,57 @@
-import type { emailTemplateForm_sendEmailSchema } from '@barely/lib/server/routes/email-template/email-template.schema';
-import type { flowForm_sendEmailSchema } from '@barely/lib/server/routes/flow/flow.schema';
+import type {
+	emailTemplateForm_sendEmailSchema,
+	flowForm_sendEmailSchema,
+} from '@barely/validators';
 import { useState } from 'react';
-import { useToast } from '@barely/lib/hooks/use-toast';
-import { api } from '@barely/lib/server/api/react';
-import { z } from 'zod';
+import { useWorkspace } from '@barely/hooks';
+import { useToast } from '@barely/toast';
+import { useMutation } from '@tanstack/react-query';
+import { z } from 'zod/v4';
 
-import { Button } from '@barely/ui/elements/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/elements/popover';
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Button } from '@barely/ui/button';
 import { TextField } from '@barely/ui/forms/text-field';
+import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/popover';
 
 export function SendTestEmail({
 	values,
 }: {
 	values:
-		| z.infer<typeof flowForm_sendEmailSchema>
-		| z.infer<typeof emailTemplateForm_sendEmailSchema>;
+		| Pick<
+				z.infer<typeof flowForm_sendEmailSchema>,
+				'sendTestEmailTo' | 'fromId' | 'subject' | 'previewText' | 'body' | 'replyTo'
+		  >
+		| Pick<
+				z.infer<typeof emailTemplateForm_sendEmailSchema>,
+				'sendTestEmailTo' | 'fromId' | 'subject' | 'previewText' | 'body' | 'replyTo'
+		  >;
 }) {
+	const trpc = useTRPC();
+	const { handle } = useWorkspace();
 	const { toast } = useToast();
 
 	const [isTestEmailModalOpen, setIsTestEmailModalOpen] = useState(false);
 	const [sendTestEmailTo, setSendTestEmailTo] = useState('');
 	const [sending, setSending] = useState(false);
 
-	const { mutate: sendTestEmail } = api.emailTemplate.sendTestEmail.useMutation({
-		onMutate: () => {
-			setSending(true);
-		},
-		onSuccess: () => {
-			toast('Test email sent', {
-				description: `Check ${sendTestEmailTo} for the test email`,
-			});
-			setSending(false);
-			setIsTestEmailModalOpen(false);
-		},
-		onError: () => {
-			setSending(false);
-		},
-	});
+	const { mutate: sendTestEmail } = useMutation(
+		trpc.emailTemplate.sendTestEmail.mutationOptions({
+			onMutate: () => {
+				setSending(true);
+			},
+			onSuccess: () => {
+				toast('Test email sent', {
+					description: `Check ${sendTestEmailTo} for the test email`,
+				});
+				setSending(false);
+				setIsTestEmailModalOpen(false);
+			},
+			onError: () => {
+				setSending(false);
+			},
+		}),
+	);
 
 	const handleSendTestEmail = () => {
 		if (!values.sendTestEmailTo) return;
@@ -44,8 +59,8 @@ export function SendTestEmail({
 		let to: string = sendTestEmailTo;
 
 		try {
-			to = z.string().email().parse(sendTestEmailTo);
-		} catch (error) {
+			to = z.email().parse(sendTestEmailTo);
+		} catch {
 			toast('Invalid email address', {
 				description: 'Please enter a valid email address',
 			});
@@ -53,11 +68,13 @@ export function SendTestEmail({
 		}
 
 		sendTestEmail({
+			handle,
 			to,
 			fromId: values.fromId,
 			subject: values.subject,
 			previewText: values.previewText,
 			body: values.body,
+			replyTo: values.replyTo,
 			variables: {}, // Add variables if needed
 		});
 	};

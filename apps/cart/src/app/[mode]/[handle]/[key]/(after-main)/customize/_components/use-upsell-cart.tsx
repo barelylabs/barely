@@ -1,9 +1,11 @@
 'use client';
 
-import type { ApparelSize } from '@barely/lib/server/routes/product/product.constants';
+import type { ApparelSize } from '@barely/const';
 import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { cartApi } from '@barely/lib/server/routes/cart/cart.api.react';
+import { useMutation } from '@tanstack/react-query';
+
+import { useCartTRPC } from '@barely/api/public/cart.trpc.react';
 
 export function useUpsellCart({
 	mode,
@@ -16,6 +18,7 @@ export function useUpsellCart({
 	handle: string;
 	key: string;
 }) {
+	const trpc = useCartTRPC();
 	const [converting, setConverting] = useState(false);
 	const [declining, setDeclining] = useState(false);
 
@@ -23,11 +26,13 @@ export function useUpsellCart({
 	const pathname = usePathname();
 	const successPath = pathname.replace('/customize', '/success');
 
-	const { mutate: buyUpsell } = cartApi.buyUpsell.useMutation({
-		onSuccess: () => {
-			router.push(successPath);
-		},
-	});
+	const { mutate: buyUpsell } = useMutation(
+		trpc.buyUpsell.mutationOptions({
+			onSuccess: () => {
+				router.push(successPath);
+			},
+		}),
+	);
 
 	const handleBuyUpsell = () => {
 		setConverting(true);
@@ -37,11 +42,13 @@ export function useUpsellCart({
 		buyUpsell({ cartId, apparelSize });
 	};
 
-	const { mutate: cancelUpsell } = cartApi.declineUpsell.useMutation({
-		onSuccess: () => {
-			router.push(successPath);
-		},
-	});
+	const { mutate: cancelUpsell } = useMutation(
+		trpc.declineUpsell.mutationOptions({
+			onSuccess: () => {
+				router.push(successPath);
+			},
+		}),
+	);
 
 	const handleDeclineUpsell = () => {
 		setDeclining(true);

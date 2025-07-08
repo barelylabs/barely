@@ -1,19 +1,21 @@
 import { Suspense } from 'react';
-import { getCampaignById } from '@barely/lib/server/routes/campaign/campaign.fns';
+import { getCampaignById } from '@barely/lib/functions/campaign.fns';
+import { campaignTypeDisplay } from '@barely/utils';
 
-import { InfoCard } from '@barely/ui/elements/card';
-import { Icon } from '@barely/ui/elements/icon';
-import { Text } from '@barely/ui/elements/typography';
-
-import { campaignTypeDisplay } from '@barely/utils/campaign';
+import { InfoCard } from '@barely/ui/card';
+import { Icon } from '@barely/ui/icon';
+import { Text } from '@barely/ui/typography';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { LaunchPlaylistPitchForm } from '~/app/[handle]/campaign/[campaignId]/launch/launch-playlist-pitch-form';
 
-// import { LaunchCampaignForm } from './launch-campaign-form';
-
-const LaunchCampaignPage = async ({ params }: { params: { campaignId: string } }) => {
-	const campaign = await getCampaignById(params.campaignId);
+const LaunchCampaignPage = async ({
+	params,
+}: {
+	params: Promise<{ campaignId: string }>;
+}) => {
+	const { campaignId } = await params;
+	const campaign = await getCampaignById(campaignId);
 
 	return (
 		<>

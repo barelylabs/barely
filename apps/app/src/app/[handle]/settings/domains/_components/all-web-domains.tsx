@@ -1,17 +1,21 @@
 'use client';
 
-import { api } from '@barely/server/api/react';
+import { useWorkspace } from '@barely/hooks';
+import { useSuspenseQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 
 import { AddDomainButton } from '~/app/[handle]/settings/domains/_components/add-web-domain-button';
 import { DomainCard } from '~/app/[handle]/settings/domains/_components/web-domain-card';
 
-// import { AddDomainButton } from '~/app/[handle]/settings/domains/web/_components/add-web-domain-button';
-// import { DomainCard } from '~/app/[handle]/settings/domains/web/_components/web-domain-card';
-
 export function AllDomains() {
-	const [domains] = api.webDomain.byWorkspace.useSuspenseQuery();
+	const trpc = useTRPC();
+	const { handle } = useWorkspace();
+	const { data: domains } = useSuspenseQuery(
+		trpc.webDomain.byWorkspace.queryOptions({ handle }),
+	);
 
 	if (!domains.length)
 		return (

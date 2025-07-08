@@ -1,21 +1,25 @@
 {
 	"extends": "@barely/tsconfig/internal-package.json",
-	"include": ["**/*.ts", "**/*.tsx"],
+	"include": ["src"],
 	"exclude": ["node_modules"],
 	"compilerOptions": {
-		"target": "es5",
-		"lib": ["dom", "dom.iterable", "esnext"],
-		"allowJs": true,
-		"skipLibCheck": true,
-		"strict": true,
-		"forceConsistentCasingInFileNames": true,
-		"esModuleInterop": true,
-		"module": "esnext",
-		"moduleResolution": "Bundler",
-		"resolveJsonModule": true,
-		"isolatedModules": true,
-		"jsx": "preserve",
-		"incremental": true,
-		"baseUrl": "."
+		"lib": ["ES2022", "DOM"],
+		"jsx": "preserve"
 	}
+	// "compilerOptions": {
+	// 	"target": "es5",
+	// 	"lib": ["dom", "dom.iterable", "esnext"],
+	// 	"allowJs": true,
+	// 	"skipLibCheck": true,
+	// 	"strict": true,
+	// 	"forceConsistentCasingInFileNames": true,
+	// 	"esModuleInterop": true,
+	// 	"module": "esnext",
+	// 	"moduleResolution": "Bundler",
+	// 	"resolveJsonModule": true,
+	// 	"isolatedModules": true,
+	// 	"jsx": "preserve",
+	// 	"incremental": true,
+	// 	"baseUrl": "."
+	// }
 }

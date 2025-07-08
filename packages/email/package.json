@@ -2,14 +2,48 @@
 	"name": "@barely/email",
 	"version": "0.1.0",
 	"private": true,
-	"workspaces": [
-		".react-email"
-	],
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./src/index.ts"
+		},
+		"./primitives": {
+			"types": "./dist/primitives/index.d.ts",
+			"default": "./src/primitives/index.tsx"
+		},
+		"./components": {
+			"types": "./dist/components/index.d.ts",
+			"default": "./src/components/index.tsx"
+		},
+		"./templates": {
+			"types": "./dist/templates/index.d.ts",
+			"default": "./src/templates/index.ts"
+		},
+		"./templates/auth": {
+			"types": "./dist/templates/auth/index.d.ts",
+			"default": "./src/templates/auth/index.ts"
+		},
+		"./templates/cart": {
+			"types": "./dist/templates/cart/index.d.ts",
+			"default": "./src/templates/cart/index.ts"
+		},
+		"./templates/playlist-pitch": {
+			"types": "./dist/templates/playlist-pitch/index.d.ts",
+			"default": "./src/templates/playlist-pitch/index.ts"
+		},
+		"./templates/campaign": {
+			"types": "./dist/templates/campaign/index.d.ts",
+			"default": "./src/templates/campaign/index.ts"
+		}
+	},
 	"scripts": {
-		"dev": "pnpm with-env email dev --port 4000 --dir src/templates",
-		"clean": "rm -rf .turbo node_modules",
+		"build": "tsc",
+		"dev": "tsc",
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
 		"format": "prettier --check . --ignore-path ../../.gitignore",
 		"lint": "eslint .",
+		"studio": "pnpm with-env email dev --port 4000 --dir src/templates",
 		"typecheck": "tsc --noEmit --emitDeclarationOnly false",
 		"export": "email export",
 		"with-env": "dotenv -e ../../.env --"
@@ -20,26 +54,26 @@
 		"@barely/tailwind-config": "workspace:*",
 		"@barely/tsconfig": "workspace:*",
 		"@types/html-to-text": "^9.0.1",
-		"@types/node": "^20.10.6",
+		"@types/node": "catalog:",
 		"@types/pretty": "^2.0.1",
-		"@types/react": "^18.2.25",
-		"@types/react-dom": "^18.2.18",
-		"eslint": "^8.57.0",
-		"prettier": "^3.5.3",
-		"tailwindcss": "^3.4.0",
-		"typescript": "^5.5.4",
-		"zod": "^3.23.8"
+		"@types/react": "^19.1.8",
+		"@types/react-dom": "^19.1.6",
+		"eslint": "catalog:",
+		"prettier": "catalog:",
+		"tailwindcss": "catalog:",
+		"typescript": "catalog:",
+		"zod": "catalog:"
 	},
 	"dependencies": {
 		"@neondatabase/serverless": "^0.5.7",
-		"@react-email/components": "^0.0.17",
-		"@t3-oss/env-nextjs": "^0.10.1",
+		"@react-email/components": "catalog:",
+		"@t3-oss/env-nextjs": "catalog:",
 		"html-to-text": "^9.0.5",
 		"pretty": "^2.0.0",
-		"react": "18.2.0",
-		"react-dom": "18.2.0",
-		"react-email": "^2.1.2",
-		"resend": "^3.2.0"
+		"react": "catalog:react19",
+		"react-dom": "catalog:react19",
+		"react-email": "^4.0.16",
+		"resend": "catalog:"
 	},
 	"eslintConfig": {
 		"extends": [

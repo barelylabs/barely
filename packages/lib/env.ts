@@ -1,6 +1,6 @@
-import type { ZodError } from 'zod';
+import { APPS } from '@barely/const';
 import { createEnv } from '@t3-oss/env-nextjs';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 type RateLimitTime =
 	| `${number} ms`
@@ -12,7 +12,8 @@ type RateLimitTime =
 const devPortSchema = z
 	.string()
 	.optional()
-	.refine(v => process.env.VERCEL_ENV !== 'development' || !!v, {
+	.refine(v => process.env.NEXT_PUBLIC_VERCEL_ENV !== 'development' || !!v, {
+		// .refine(v => !isDevelopment() || !!v, {
 		message: 'You need a dev port in order to run the app locally',
 	});
 
@@ -33,13 +34,20 @@ const rateLimitSchema = z
 	.optional()
 	.default('1 h');
 
-export const env = createEnv({
+export const libEnv = createEnv({
 	server: {
 		ANTHROPIC_API_KEY: z.string(),
+		AUTH_SECRET: z.string(),
 		AWS_S3_BUCKET_NAME: z.string(),
 		AWS_S3_REGION: z.string(),
 		AWS_S3_ACCESS_KEY_ID: z.string(),
 		AWS_S3_SECRET_ACCESS_KEY: z.string(),
+		BARELY_SLACK_HOOK_ALERTS: z.url().optional(),
+		BARELY_SLACK_HOOK_ERRORS: z.url().optional(),
+		BARELY_SLACK_HOOK_SALES: z.url().optional(),
+		BARELY_SLACK_HOOK_USERS: z.url().optional(),
+		BARELY_SLACK_HOOK_LOGS: z.url().optional(),
+		BARELY_SLACK_NOTIFY_USER: z.string().optional(),
 		BOT_SPOTIFY_ACCOUNT_ID: z.string(),
 		BOT_THREADS_API_KEY: z.string(),
 		DATABASE_URL: z.string().url(),
@@ -67,10 +75,10 @@ export const env = createEnv({
 		TWILIO_ACCOUNT_SID: z.string(),
 		TWILIO_AUTH_TOKEN: z.string(),
 		TWILIO_PHONE_NUMBER: z.string(),
-		UPSTASH_REDIS_REST_URL: z.string().url(),
+		UPSTASH_REDIS_REST_URL: z.url(),
 		UPSTASH_REDIS_REST_TOKEN: z.string(),
-		VERCEL_ENV: z.enum(['development', 'preview', 'production']),
 		VERCEL_LINK_PROJECT_ID: z.string(),
+		VERCEL_PROJECT_PRODUCTION_URL: z.string().optional(),
 		VERCEL_TEAM_ID: z.string(),
 		VERCEL_TOKEN: z.string(),
 	},
@@ -88,17 +96,7 @@ export const env = createEnv({
 		NEXT_PUBLIC_PAGE_DEV_PORT: devPortSchema,
 		NEXT_PUBLIC_PRESS_BASE_URL: z.string(),
 		NEXT_PUBLIC_PRESS_DEV_PORT: devPortSchema,
-		NEXT_PUBLIC_CURRENT_APP: z.enum([
-			'app',
-			'bio',
-			'cart',
-			'fm',
-			'link',
-			'manageEmail',
-			'page',
-			'press',
-			'www',
-		]),
+		NEXT_PUBLIC_CURRENT_APP: z.enum(APPS),
 		NEXT_PUBLIC_LINK_BASE_URL: z.string(),
 		NEXT_PUBLIC_LINK_DEV_PORT: devPortSchema,
 		NEXT_PUBLIC_MANAGE_EMAIL_DEV_PORT: devPortSchema,
@@ -106,6 +104,7 @@ export const env = createEnv({
 		NEXT_PUBLIC_PUSHER_APP_ID: z.string(),
 		NEXT_PUBLIC_PUSHER_APP_KEY: z.string(),
 		NEXT_PUBLIC_PUSHER_APP_CLUSTER: z.string(),
+		NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string(),
 		NEXT_PUBLIC_VERCEL_ENV: z.enum(['development', 'preview', 'production']),
 		NEXT_PUBLIC_WWW_BASE_URL: z.string(),
 		NEXT_PUBLIC_WWW_DEV_PORT: devPortSchema,
@@ -132,15 +131,14 @@ export const env = createEnv({
 		NEXT_PUBLIC_PUSHER_APP_ID: process.env.NEXT_PUBLIC_PUSHER_APP_ID,
 		NEXT_PUBLIC_PUSHER_APP_KEY: process.env.NEXT_PUBLIC_PUSHER_APP_KEY,
 		NEXT_PUBLIC_PUSHER_APP_CLUSTER: process.env.NEXT_PUBLIC_PUSHER_APP_CLUSTER,
+		NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
 		NEXT_PUBLIC_VERCEL_ENV: process.env.NEXT_PUBLIC_VERCEL_ENV,
 		NEXT_PUBLIC_WWW_BASE_URL: process.env.NEXT_PUBLIC_WWW_BASE_URL,
 		NEXT_PUBLIC_WWW_DEV_PORT: process.env.NEXT_PUBLIC_WWW_DEV_PORT,
 	},
-	onValidationError: (error: ZodError) => {
-		console.error('❌ Invalid environment variables:', error.flatten().fieldErrors);
-		throw new Error(
-			'Invalid environment variables' + JSON.stringify(error.flatten().fieldErrors),
-		);
+	onValidationError: issues => {
+		console.error('❌ Invalid environment variables:', issues);
+		throw new Error('Invalid environment variables');
 	},
 	skipValidation:
 		!!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === 'lint',

@@ -1,16 +1,16 @@
 'use client';
 
-import { Button } from '@barely/ui/elements/button';
+import { Button } from '@barely/ui/button';
 
-import { useMixtapesContext } from '~/app/[handle]/mixtapes/_components/mixtape-context';
+import { useMixtapeSearchParams } from '~/app/[handle]/mixtapes/_components/mixtape-context';
 
 export function CreateMixtapeButton() {
-	const { setShowCreateModal } = useMixtapesContext();
+	const { setShowCreateModal } = useMixtapeSearchParams();
 
 	return (
 		<Button
 			onClick={() => {
-				setShowCreateModal(true);
+				void setShowCreateModal(true);
 			}}
 			className='space-x-3'
 		>

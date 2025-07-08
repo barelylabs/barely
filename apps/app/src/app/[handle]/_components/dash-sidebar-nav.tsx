@@ -1,24 +1,24 @@
 'use client';
 
-import type { User } from '@barely/lib/server/routes/user/user.schema';
-import type { Workspace } from '@barely/lib/server/routes/workspace/workspace.schema';
+import type { SessionWorkspace } from '@barely/auth';
+import type { User } from '@barely/validators';
 import { Fragment, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { usePathnameMatchesCurrentGroup } from '@barely/lib/hooks/use-pathname-matches-current-group';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
+import {
+	usePathnameEndsWith,
+	usePathnameMatchesCurrentGroup,
+	useWorkspace,
+	useWorkspaces,
+} from '@barely/hooks';
+import { cn } from '@barely/utils';
 import { useAtomValue } from 'jotai';
 
-import { navHistoryAtom } from '@barely/atoms/navigation-history.atom';
+import { navHistoryAtom } from '@barely/atoms/navigation-history';
 
-import { usePathnameEndsWith } from '@barely/hooks/use-pathname-matches-current-path';
-import { useWorkspaces } from '@barely/hooks/use-workspaces';
-
-import { Icon } from '@barely/ui/elements/icon';
-import { ScrollArea } from '@barely/ui/elements/scroll-area';
-import { H, Text } from '@barely/ui/elements/typography';
-
-import { cn } from '@barely/utils/cn';
+import { Icon } from '@barely/ui/icon';
+import { ScrollArea } from '@barely/ui/scroll-area';
+import { H, Text } from '@barely/ui/typography';
 
 import { UserAccountNav } from '~/app/[handle]/_components/user-menu';
 import { WorkspaceSwitcher } from '~/app/[handle]/_components/workspace-switcher';
@@ -31,7 +31,7 @@ interface SidebarNavLink {
 	icon?: keyof typeof Icon;
 	label?: string;
 	userFilters?: (keyof User)[];
-	workspaceFilters?: (keyof Workspace)[];
+	workspaceFilters?: (keyof SessionWorkspace)[];
 }
 
 interface SidebarNavGroup {
@@ -39,7 +39,7 @@ interface SidebarNavGroup {
 	icon?: keyof typeof Icon;
 	href?: string;
 	links: SidebarNavLink[];
-	workspaceFilters?: (keyof Workspace)[];
+	workspaceFilters?: (keyof SessionWorkspace)[];
 	hideLinksWhenNotActive?: boolean; // New prop to control visibility of NavLinks
 }
 
@@ -51,9 +51,12 @@ export function SidebarNav() {
 
 	const workspaces = useWorkspaces();
 
-	const allHandles = workspaces.map(workspace => workspace.handle);
+	const allHandles = useMemo(
+		() => workspaces.map(workspace => workspace.handle),
+		[workspaces],
+	);
 
-	const isSettings = pathname?.includes('/settings');
+	const isSettings = pathname.includes('/settings');
 
 	const navHistory = useAtomValue(navHistoryAtom);
 
@@ -164,12 +167,12 @@ export function SidebarNav() {
 	const topLinks = isSettings ? topSettingsLinks : topMainLinks;
 
 	const settingsBackLink = useMemo(() => {
-		let bl = navHistory?.settingsBackPath ?? `/${handle}/links`; // eg. /{handle}/settings/profile
+		let bl = navHistory.settingsBackPath ?? `/${handle}/links`; // eg. /{handle}/settings/profile
 		const blHandle = bl.split('/')[1]; // eg. {handle}
 		if (blHandle && allHandles.includes(blHandle) && blHandle !== handle)
 			bl = bl.replace(`/${blHandle}`, `/${handle}`); // eg. /{handle}/settings/profile
 		return bl;
-	}, [allHandles, handle, navHistory?.settingsBackPath]);
+	}, [allHandles, handle, navHistory.settingsBackPath]);
 
 	return (
 		<aside className='fixed left-0 top-14 hidden h-[100vh] max-h-[100vh] w-14 shrink-0 flex-col overflow-y-auto bg-accent px-3 py-3 md:sticky md:flex md:w-56'>
@@ -184,15 +187,12 @@ export function SidebarNav() {
 				</Link>
 			)}
 
-			<ScrollArea className='h-full items-center py-3' hideScrollbar>
+			{/* <ScrollArea className='h-full items-center py-3' hideScrollbar> */}
+			<ScrollArea className='h-full items-center py-3'>
 				<div className='flex h-full flex-col justify-between'>
 					<div className='flex flex-col gap-1'>
 						{topLinks.map((item, index) => {
-							if (
-								item.workspaceFilters &&
-								item.workspaceFilters.length > 0 &&
-								item.workspaceFilters.map(filter => workspace[filter]).includes(true)
-							) {
+							if (item.workspaceFilters?.some(filter => Boolean(workspace[filter]))) {
 								return null;
 							}
 
@@ -261,10 +261,10 @@ function NavGroup(props: { item: SidebarNavGroup; handle: string }) {
 		<>
 			{props.item.href && !isCurrentGroup ?
 				<Link
-					href={isCurrentGroup ? '#' : (props.item.links[0]?.href ?? '#')}
+					href={props.item.links[0]?.href ?? '#'}
 					className={cn(
 						'group flex w-full items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted',
-						isCurrentGroup && 'bg-muted',
+						'bg-muted',
 					)}
 					passHref
 				>

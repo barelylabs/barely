@@ -2,8 +2,8 @@
 
 import type { ReactNode } from 'react';
 
-import { ThemeProvider } from '@barely/ui/elements/next-theme-provider';
-import { TooltipProvider } from '@barely/ui/elements/tooltip';
+import { ThemeProvider } from '@barely/ui/next-theme-provider';
+import { TooltipProvider } from '@barely/ui/tooltip';
 
 const Providers = ({ children }: { children: ReactNode }) => {
 	return (

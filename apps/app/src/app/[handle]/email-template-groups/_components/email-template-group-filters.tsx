@@ -1,19 +1,23 @@
 'use client';
 
 import { Filters } from '~/app/[handle]/_components/filters';
-import { useEmailTemplateGroupContext } from './email-template-group-context';
+import {
+	useEmailTemplateGroup,
+	useEmailTemplateGroupSearchParams,
+} from './email-template-group-context';
 
 export function EmailTemplateGroupFilters() {
-	const { filters, setSearch, toggleArchived, clearAllFilters } =
-		useEmailTemplateGroupContext();
+	const { filters } = useEmailTemplateGroup();
+	const { setSearch, toggleArchived, clearAllFilters } =
+		useEmailTemplateGroupSearchParams();
 
 	return (
 		<Filters
 			search={filters.search}
-			setSearch={setSearch}
+			setSearch={value => void setSearch(value)}
 			showArchived={filters.showArchived}
-			toggleArchived={toggleArchived}
-			clearAllFilters={clearAllFilters}
+			toggleArchived={() => void toggleArchived()}
+			clearAllFilters={() => void clearAllFilters()}
 		/>
 	);
 }

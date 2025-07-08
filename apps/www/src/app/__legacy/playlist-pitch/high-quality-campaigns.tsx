@@ -1,10 +1,10 @@
 import Image from 'next/image';
 
-import { AnimateOnScroll } from '@barely/ui/elements/animate-on-scroll';
-import { Button } from '@barely/ui/elements/button';
-import { Card } from '@barely/ui/elements/card';
-import { PhoneFrame } from '@barely/ui/elements/phone-frame';
-import { H, Text } from '@barely/ui/elements/typography';
+import { AnimateOnScroll } from '@barely/ui/animate-on-scroll';
+import { Button } from '@barely/ui/button';
+import { Card } from '@barely/ui/card';
+import { PhoneFrame } from '@barely/ui/phone-frame';
+import { H, Text } from '@barely/ui/typography';
 
 const features = [
 	{ emoji: '🤝', text: 'Connect with curators instantly' },

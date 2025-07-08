@@ -1,37 +1,41 @@
 'use client';
 
 import { useCallback } from 'react';
-import { api } from '@barely/lib/server/api/react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { ArchiveOrDeleteModal } from '~/app/[handle]/_components/archive-or-delete-modal';
-import { useMixtapesContext } from '~/app/[handle]/mixtapes/_components/mixtape-context';
+import {
+	useMixtape,
+	useMixtapeSearchParams,
+} from '~/app/[handle]/mixtapes/_components/mixtape-context';
 
 export function ArchiveOrDeleteMixtapeModal({ mode }: { mode: 'archive' | 'delete' }) {
-	const {
-		selection,
-		lastSelectedItem,
-		showArchiveModal,
-		showDeleteModal,
-		setShowArchiveModal,
-		setShowDeleteModal,
-	} = useMixtapesContext();
+	const { selection, lastSelectedItem } = useMixtape();
 
-	const apiUtils = api.useUtils();
+	const { showArchiveModal, showDeleteModal, setShowArchiveModal, setShowDeleteModal } =
+		useMixtapeSearchParams();
+
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
 
 	const showModal = mode === 'archive' ? showArchiveModal : showDeleteModal;
 
 	const setShowModal = mode === 'archive' ? setShowArchiveModal : setShowDeleteModal;
 
 	const onSuccess = useCallback(async () => {
-		await apiUtils.mixtape.invalidate();
-		setShowModal(false);
-	}, [apiUtils.mixtape, setShowModal]);
+		await queryClient.invalidateQueries(trpc.mixtape.byWorkspace.queryFilter());
+		await setShowModal(false);
+	}, [queryClient, trpc.mixtape.byWorkspace, setShowModal]);
 
-	const { mutate: archiveMixtapes, isPending: isPendingArchive } =
-		api.mixtape.archive.useMutation({ onSuccess });
+	const { mutate: archiveMixtapes, isPending: isPendingArchive } = useMutation(
+		trpc.mixtape.archive.mutationOptions({ onSuccess }),
+	);
 
-	const { mutate: deleteMixtapes, isPending: isPendingDelete } =
-		api.mixtape.delete.useMutation({ onSuccess });
+	const { mutate: deleteMixtapes, isPending: isPendingDelete } = useMutation(
+		trpc.mixtape.delete.mutationOptions({ onSuccess }),
+	);
 
 	if (!lastSelectedItem) return null;
 

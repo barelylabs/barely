@@ -1,149 +1,54 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
-// import type { FileRecord } from '@barely/lib/server/routes/file/file.schema';
-import type { Selection } from 'react-aria-components';
-import type { z } from 'zod';
-import { createContext, useCallback, useContext, useRef, useState } from 'react';
-import { useFiles } from '@barely/lib/hooks/use-files';
-import { useTypedOptimisticQuery } from '@barely/lib/hooks/use-typed-optimistic-query';
-import { fileSearchParamsSchema } from '@barely/lib/server/routes/file/file.schema';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import type { BaseResourceFilters, ResourceSearchParamsReturn } from '@barely/hooks';
+import { createResourceDataHook, createResourceSearchParamsHook } from '@barely/hooks';
 
-import type { InfiniteItemsContext } from '~/app/[handle]/_types/all-items-context';
+import { useTRPC } from '@barely/api/app/trpc.react';
 
-type MediaContext = InfiniteItemsContext<
-	AppRouterOutputs['file']['byWorkspace']['files'][number],
-	z.infer<typeof fileSearchParamsSchema>
->;
-
-const MediaContext = createContext<MediaContext | undefined>(undefined);
-
-export function MediaContextProvider({
-	children,
-	//   initialFiles,
-	// filters,
-	// selectedFileIds,
-}: {
-	children: React.ReactNode;
-	//   initialFiles: EdgeRouterOutputs["file"]["byWorkspace"];
-	// filters: z.infer<typeof fileSearchParamsSchema>;
-	// selectedFileIds: z.infer<typeof fileSearchParamsSchema>['selectedFileIds'];
-}) {
-	const gridListRef = useRef<HTMLDivElement>(null);
-
-	const [showCreateModal, setShowCreateModal] = useState(false);
-	const [showUpdateModal, setShowUpdateModal] = useState(false);
-	const [showArchiveModal, setShowArchiveModal] = useState(false);
-	const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-	const { data, setQuery, removeByKey, removeAllQueryParams, pending } =
-		useTypedOptimisticQuery(fileSearchParamsSchema);
-
-	const { selectedFileIds, ...filters } = data;
-
-	const {
-		files,
-		hasMoreFiles,
-		fetchMoreFiles,
-		isFetchingNextPage,
-		isFetching,
-		isRefetching,
-		isPending,
-	} = useFiles({ ...filters });
-
-	// /* selection */
-	// const [optimisticSelection, setOptimisticSelection] = useOptimistic<Selection>(
-	// 	new Set(selectedFileIds),
-	// );
-	// const [, startSelectTransition] = useTransition();
-
-	const fileSelection: Selection =
-		!selectedFileIds ? new Set()
-		: selectedFileIds === 'all' ? 'all'
-		: new Set(selectedFileIds);
-
-	const setFileSelection = useCallback(
-		(selection: Selection) => {
-			if (selection === 'all') return;
-			if (selection.size === 0) return removeByKey('selectedFileIds');
-			return setQuery(
-				'selectedFileIds',
-				Array.from(selection).map(key => key.toString()),
-			);
-		},
-		[setQuery, removeByKey],
-	);
-
-	const clearAllFilters = useCallback(() => {
-		removeAllQueryParams();
-	}, [removeAllQueryParams]);
-
-	const toggleArchived = useCallback(() => {
-		if (data.showArchived) return removeByKey('showArchived');
-		return setQuery('showArchived', true);
-	}, [data.showArchived, removeByKey, setQuery]);
-
-	const setSearch = useCallback(
-		(search: string) => {
-			if (search.length) return setQuery('search', search);
-			return removeByKey('search');
-		},
-		[setQuery, removeByKey],
-	);
-
-	/* last selected */
-	const lastSelectedFileId =
-		fileSelection === 'all' || !fileSelection.size ?
-			undefined
-		:	Array.from(fileSelection).pop()?.toString();
-
-	const lastSelectedFile = files.find(f => f.id === lastSelectedFileId);
-
-	const contextValue = {
-		items: files,
-		selection: fileSelection,
-		lastSelectedItemId: lastSelectedFileId,
-		lastSelectedItem: lastSelectedFile,
-		setSelection: setFileSelection,
-		gridListRef,
-		focusGridList: () => {
-			fetchMoreFiles().catch(e => console.error(e));
-		},
-		showCreateModal,
-		setShowCreateModal,
-		showUpdateModal,
-		setShowUpdateModal,
-		showArchiveModal,
-		setShowArchiveModal,
-		showDeleteModal,
-		setShowDeleteModal,
-
-		// showUploadMediaModal: showCreateFileModal,
-		// setShowUploadMediaModal: setShowCreateFileModal,
-
-		// filters
-		filters,
-		pendingFiltersTransition: pending,
-		setSearch,
-		toggleArchived,
-		clearAllFilters,
-
-		// infinite
-		hasNextPage: hasMoreFiles,
-		fetchNextPage: () => void fetchMoreFiles(),
-		isFetchingNextPage,
-		isFetching,
-		isRefetching,
-		isPending,
-	} satisfies MediaContext;
-
-	return <MediaContext.Provider value={contextValue}>{children}</MediaContext.Provider>;
+// Define the page data type for media
+interface MediaPageData {
+	files: AppRouterOutputs['file']['byWorkspace']['files'];
+	nextCursor?: { id: string; createdAt: Date } | null;
 }
 
-export function useMediaContext() {
-	const context = useContext(MediaContext);
-	if (!context) {
-		throw new Error('useFileContext must be used within a FileContextProvider');
-	}
-	return context;
+// Media uses the same filters as base resources (no custom filters needed)
+type MediaFilters = BaseResourceFilters;
+
+// Media doesn't need additional search params return properties
+export type MediaSearchParamsReturn = ResourceSearchParamsReturn<MediaFilters>;
+
+// Create the search params hook for media (no additional parsers/actions needed)
+export const useMediaSearchParams = createResourceSearchParamsHook<MediaFilters>();
+
+// Create a custom data hook for media that properly uses tRPC
+export function useMedia() {
+	const trpc = useTRPC();
+	const searchParams = useMediaSearchParams();
+	const baseHook = createResourceDataHook<
+		AppRouterOutputs['file']['byWorkspace']['files'][0],
+		MediaPageData
+	>(
+		{
+			resourceName: 'media',
+			getQueryOptions: (handle, filters) =>
+				trpc.file.byWorkspace.infiniteQueryOptions(
+					{ handle, ...filters },
+					{ getNextPageParam: (lastPage: MediaPageData) => lastPage.nextCursor },
+				),
+			getItemsFromPages: pages => pages.flatMap(page => page.files),
+		},
+		() => searchParams,
+	);
+
+	const dataHookResult = baseHook();
+
+	// Merge search params and data hook results
+	return {
+		...dataHookResult,
+		...searchParams,
+	};
 }
+
+// Export the old context hook name for backward compatibility
+export const useMediaContext = useMedia;

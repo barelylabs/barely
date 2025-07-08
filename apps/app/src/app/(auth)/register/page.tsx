@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import logo from '@static/logo.png';
 
-import { H, Text } from '@barely/ui/elements/typography';
+import { H, Text } from '@barely/ui/typography';
 
 import { handleLoggedInOnAuthPage } from '~/app/(auth)/handle-logged-in-on-auth-page';
 import RegisterUserForm from './register-user-form';
@@ -10,9 +10,10 @@ import RegisterUserForm from './register-user-form';
 const RegisterUserPage = async ({
 	searchParams,
 }: {
-	searchParams?: { callbackUrl?: string };
+	searchParams?: Promise<{ callbackUrl?: string }>;
 }) => {
-	const { callbackUrl } = searchParams ?? {};
+	const awaitedSearchParams = await searchParams;
+	const { callbackUrl } = awaitedSearchParams ?? {};
 
 	await handleLoggedInOnAuthPage({ callbackUrl });
 

@@ -1,44 +1,54 @@
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import { api } from '@barely/lib/server/api/server';
-import { trackFilterParamsSchema } from '@barely/lib/server/routes/track/track.schema';
+import { trackFilterParamsSchema } from '@barely/validators';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllTracks } from '~/app/[handle]/tracks/_components/all-tracks';
 import { ArchiveOrDeleteTrackModal } from '~/app/[handle]/tracks/_components/archive-or-delete-track-modal';
 import { CreateOrUpdateTrackModal } from '~/app/[handle]/tracks/_components/create-or-update-track-modal';
 import { CreateTrackButton } from '~/app/[handle]/tracks/_components/create-track-button';
-import { TrackContextProvider } from '~/app/[handle]/tracks/_components/track-context';
+import { TrackFilters } from '~/app/[handle]/tracks/_components/track-filters';
 import { TrackHotkeys } from '~/app/[handle]/tracks/_components/track-hotkeys';
+import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
-export default function TracksPage({
+export default async function TracksPage({
 	params,
 	searchParams,
 }: {
-	params: { handle: string };
-	searchParams: z.infer<typeof trackFilterParamsSchema>;
+	params: Promise<{ handle: string }>;
+	searchParams: Promise<z.infer<typeof trackFilterParamsSchema>>;
 }) {
-	const parsedFilters = trackFilterParamsSchema.safeParse(searchParams);
+	const awaitedParams = await params;
+	const awaitedSearchParams = await searchParams;
+	const parsedFilters = trackFilterParamsSchema.safeParse(awaitedSearchParams);
 	if (!parsedFilters.success) {
-		redirect(`/${params.handle}/tracks`);
+		redirect(`/${awaitedParams.handle}/tracks`);
 	}
 
-	const initialInfiniteTracks = api({ handle: params.handle }).track.byWorkspace({
-		handle: params.handle,
-		...parsedFilters.data,
-	});
+	// Prefetch data (not async - don't await)
+	prefetch(
+		trpc.track.byWorkspace.infiniteQueryOptions({
+			handle: awaitedParams.handle,
+			...parsedFilters.data,
+		}),
+	);
 
 	return (
-		<TrackContextProvider initialInfiniteTracks={initialInfiniteTracks}>
+		<HydrateClient>
 			<DashContentHeader title='Tracks' button={<CreateTrackButton />} />
-			<AllTracks />
 
-			<CreateOrUpdateTrackModal mode='create' />
-			<CreateOrUpdateTrackModal mode='update' />
-			<ArchiveOrDeleteTrackModal mode='archive' />
-			<ArchiveOrDeleteTrackModal mode='delete' />
+			<TrackFilters />
+			<Suspense fallback={<div>Loading...</div>}>
+				<AllTracks />
 
-			<TrackHotkeys />
-		</TrackContextProvider>
+				<CreateOrUpdateTrackModal mode='create' />
+				<CreateOrUpdateTrackModal mode='update' />
+				<ArchiveOrDeleteTrackModal mode='archive' />
+				<ArchiveOrDeleteTrackModal mode='delete' />
+
+				<TrackHotkeys />
+			</Suspense>
+		</HydrateClient>
 	);
 }

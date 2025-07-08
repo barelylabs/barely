@@ -4,6 +4,6 @@
 		"lib": ["dom", "dom.iterable", "ES2022"],
 		"tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
 	},
-	"include": [".", "lib/**/*.ts", "lib/**/*.tsx", "lib/**/*.d.ts"],
-	"exclude": ["node_modules"]
+	"include": ["*.ts", "lib/**/*.ts", "lib/**/*.tsx", "lib/**/*.d.ts"],
+	"exclude": ["node_modules", "../eslint/**/*"]
 }

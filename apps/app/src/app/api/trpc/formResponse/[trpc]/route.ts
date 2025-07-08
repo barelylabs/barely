@@ -1,8 +1,5 @@
-import { routeHandler } from '@barely/lib/server/api/route-handler';
-import { formResponseRouter } from '@barely/lib/server/routes/form/form-response.router';
+import { OPTIONS } from '@barely/utils';
 
-export { OPTIONS } from '@barely/lib/utils/trpc-route';
+import { formResponseHandler } from '@barely/api/app/sub/form-response.handler';
 
-const handler = routeHandler('formResponse', formResponseRouter);
-
-export { handler as GET, handler as POST };
+export { OPTIONS, formResponseHandler as GET, formResponseHandler as POST };

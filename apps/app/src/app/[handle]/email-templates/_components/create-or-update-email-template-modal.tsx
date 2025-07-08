@@ -1,71 +1,81 @@
 'use client';
 
-import { useCallback } from 'react';
-import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
-import { EMAIL_TEMPLATE_VARIABLES } from '@barely/lib/server/routes/email-template/email-template.constants';
-import { upsertEmailTemplateSchema } from '@barely/lib/server/routes/email-template/email-template.schema';
+import { useCallback, useMemo } from 'react';
+import { EMAIL_TEMPLATE_VARIABLES } from '@barely/const';
+import { useCreateOrUpdateForm, useWorkspace } from '@barely/hooks';
+import { upsertEmailTemplateSchema } from '@barely/validators';
+import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 
-import { Icon } from '@barely/ui/elements/icon';
-import { Label } from '@barely/ui/elements/label';
-import { MDXEditor } from '@barely/ui/elements/mdx-editor';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
-import { Separator } from '@barely/ui/elements/separator';
-import { Switch } from '@barely/ui/elements/switch';
-import { Text } from '@barely/ui/elements/typography';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { TextField } from '@barely/ui/forms/text-field';
+import { Icon } from '@barely/ui/icon';
+import { Label } from '@barely/ui/label';
+import { MDXEditor } from '@barely/ui/mdx-editor';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
+import { Separator } from '@barely/ui/separator';
+import { Switch } from '@barely/ui/switch';
+import { Text } from '@barely/ui/typography';
 
 import { SendTestEmail } from '~/app/[handle]/_components/send-test-email';
-import { useEmailTemplateContext } from './email-template-context';
+import { useEmailTemplate, useEmailTemplateSearchParams } from './email-template-context';
 
 export function CreateOrUpdateEmailTemplateModal({
 	mode,
 }: {
 	mode: 'create' | 'update';
 }) {
-	const apiUtils = api.useUtils();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
 	const updateMode = mode === 'update';
 	const createMode = mode === 'create';
 
-	const {
-		lastSelectedItem,
-		showCreateModal,
-		showUpdateModal,
-		setShowCreateModal,
-		setShowUpdateModal,
-		focusGridList,
-	} = useEmailTemplateContext();
+	const { lastSelectedItem, focusGridList } = useEmailTemplate();
+
+	const { showCreateModal, showUpdateModal, setShowCreateModal, setShowUpdateModal } =
+		useEmailTemplateSearchParams();
 
 	const { handle } = useWorkspace();
 
-	const { data: emailAddressOptions } = api.emailAddress.byWorkspace.useQuery(
-		{ handle },
-		{
-			select: data =>
-				data.emailAddresses.map(email => ({
-					label: email.email,
-					value: email.id,
-				})),
-		},
+	const { data: emailAddressOptions } = useSuspenseQuery(
+		trpc.emailAddress.byWorkspace.queryOptions(
+			{ handle },
+			{
+				select: data =>
+					data.emailAddresses.map(email => ({
+						label: email.email,
+						value: email.id,
+					})),
+			},
+		),
 	);
 
-	const { mutateAsync: createEmailTemplate } = api.emailTemplate.create.useMutation({
+	const { mutateAsync: createEmailTemplate } = useMutation({
+		...trpc.emailTemplate.create.mutationOptions(),
 		onSuccess: async () => {
 			await handleCloseModal();
 		},
 	});
 
-	const { mutateAsync: updateEmailTemplate } = api.emailTemplate.update.useMutation({
+	const { mutateAsync: updateEmailTemplate } = useMutation({
+		...trpc.emailTemplate.update.mutationOptions(),
 		onSuccess: async () => {
 			await handleCloseModal();
 		},
 	});
 
 	const { form, onSubmit } = useCreateOrUpdateForm({
-		updateItem: createMode ? null : (lastSelectedItem ?? null),
+		updateItem:
+			createMode ? null
+			: lastSelectedItem ?
+				{
+					...lastSelectedItem,
+					replyTo: lastSelectedItem.replyTo ?? undefined,
+					previewText: lastSelectedItem.previewText ?? undefined,
+				}
+			:	null,
 		upsertSchema: upsertEmailTemplateSchema,
 		defaultValues: {
 			name: createMode ? '' : (lastSelectedItem?.name ?? ''),
@@ -76,23 +86,34 @@ export function CreateOrUpdateEmailTemplateModal({
 			fromId: updateMode ? (lastSelectedItem?.fromId ?? '') : '',
 		},
 		handleCreateItem: async d => {
-			await createEmailTemplate(d);
+			await createEmailTemplate({
+				...d,
+				handle,
+			});
 		},
 		handleUpdateItem: async d => {
-			await updateEmailTemplate(d);
+			await updateEmailTemplate({
+				...d,
+				handle,
+			});
 		},
 	});
 
 	const showEmailTemplateModal = mode === 'create' ? showCreateModal : showUpdateModal;
-	const setShowEmailTemplateModal =
-		mode === 'create' ? setShowCreateModal : setShowUpdateModal;
+	const setShowEmailTemplateModal = useMemo(
+		() =>
+			mode === 'create' ?
+				(value: boolean) => void setShowCreateModal(value)
+			:	(value: boolean) => void setShowUpdateModal(value),
+		[mode, setShowCreateModal, setShowUpdateModal],
+	);
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
-		await apiUtils.emailTemplate.invalidate();
+		await queryClient.invalidateQueries(trpc.emailTemplate.byWorkspace.queryFilter());
 		form.reset();
 		setShowEmailTemplateModal(false);
-	}, [form, focusGridList, apiUtils.emailTemplate, setShowEmailTemplateModal]);
+	}, [form, focusGridList, queryClient, trpc.emailTemplate, setShowEmailTemplateModal]);
 
 	const submitDisabled = mode === 'update' && !form.formState.isDirty;
 
@@ -115,7 +136,13 @@ export function CreateOrUpdateEmailTemplateModal({
 			<Form form={form} onSubmit={onSubmit}>
 				<ModalBody>
 					<div className='mb-4 flex flex-row justify-end'>
-						<SendTestEmail values={form.getValues()} />
+						<SendTestEmail
+							values={{
+								...form.getValues(),
+								previewText: form.getValues('previewText') ?? '',
+								replyTo: form.getValues('replyTo') ?? '',
+							}}
+						/>
 					</div>
 					<TextField
 						label='Name'
@@ -154,7 +181,7 @@ export function CreateOrUpdateEmailTemplateModal({
 						label='From'
 						name='fromId'
 						control={form.control}
-						options={emailAddressOptions ?? []}
+						options={emailAddressOptions}
 					/>
 					<TextField label='Subject' name='subject' control={form.control} />
 					<TextField label='Preview Text' name='previewText' control={form.control} />
@@ -162,7 +189,7 @@ export function CreateOrUpdateEmailTemplateModal({
 					<Label>Body</Label>
 					<MDXEditor
 						variables={EMAIL_TEMPLATE_VARIABLES}
-						markdown={form.getValues('body') ?? ''}
+						markdown={form.getValues('body')}
 						onChange={markdown => {
 							form.setValue('body', markdown, { shouldDirty: true });
 						}}

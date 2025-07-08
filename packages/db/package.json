@@ -1,0 +1,73 @@
+{
+	"name": "@barely/db",
+	"private": true,
+	"version": "0.1.0",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./src/index.ts"
+		},
+		"./client": {
+			"types": "./dist/client.d.ts",
+			"default": "./src/client.ts"
+		},
+		"./sql": {
+			"types": "./dist/sql/index.d.ts",
+			"default": "./src/sql/index.ts"
+		},
+		"./sql/*": {
+			"types": "./dist/sql/*.d.ts",
+			"default": "./src/sql/*.ts"
+		},
+		"./schema": {
+			"types": "./dist/schema/index.d.ts",
+			"default": "./src/schema/index.ts"
+		},
+		"./utils": {
+			"types": "./dist/utils.d.ts",
+			"default": "./src/utils.ts"
+		},
+		"./pool": {
+			"types": "./dist/pool.d.ts",
+			"default": "./src/pool.ts"
+		}
+	},
+	"license": "MIT",
+	"scripts": {
+		"build": "tsc",
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"dev": "tsc",
+		"format": "prettier --check . --ignore-path ../../.gitignore",
+		"lint": "eslint",
+		"typecheck": "tsc --noEmit --emitDeclarationOnly false",
+		"db:check": "pnpm with-env drizzle-kit check:pg --config=drizzle.config.ts",
+		"db:drop": "pnpm with-env drizzle-kit drop --config=drizzle.config.ts",
+		"db:pull": "pnpm with-env drizzle-kit pull --config=drizzle.config.ts",
+		"db:push": "pnpm with-env drizzle-kit push --config=drizzle.config.ts",
+		"db:generate": "pnpm with-env drizzle-kit generate:pg --config=drizzle.config.ts",
+		"dev:db": "pnpm with-env drizzle-kit studio --port=5555 --config=drizzle.config.ts --verbose",
+		"with-env": "dotenv -e ../../.env --"
+	},
+	"dependencies": {
+		"@barely/const": "workspace:*",
+		"@t3-oss/env-nextjs": "catalog:",
+		"@xyflow/react": "catalog:",
+		"drizzle-orm": "catalog:",
+		"resend": "catalog:",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@barely/email": "workspace:*",
+		"@barely/eslint-config": "workspace:*",
+		"@barely/prettier-config": "workspace:*",
+		"@barely/tsconfig": "workspace:*",
+		"@xyflow/react": "catalog:",
+		"dotenv-cli": "catalog:",
+		"drizzle-kit": "^0.31.2",
+		"eslint": "catalog:",
+		"prettier": "catalog:",
+		"typescript": "catalog:"
+	},
+	"prettier": "@barely/prettier-config"
+}

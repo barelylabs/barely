@@ -1,20 +1,25 @@
 'use client';
 
-import type { SessionWorkspace } from '@barely/lib/server/auth';
+import type { SessionWorkspace } from '@barely/auth';
 import type { ReactNode } from 'react';
-import { useWorkspaceIsPersonal } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
+import { useWorkspaceIsPersonal } from '@barely/hooks';
+import { useSuspenseQuery } from '@tanstack/react-query';
 
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Button } from '@barely/ui/button';
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { Button } from '@barely/ui/elements/button';
-import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
-import { H } from '@barely/ui/elements/typography';
+import { GridList, GridListCard } from '@barely/ui/grid-list';
+import { H } from '@barely/ui/typography';
 
 import { usePersonalInvitesContext } from '~/app/[handle]/settings/team/_components/personal-invites-context';
 
 export function AllMyWorkspaces() {
-	const { data: workspaces, isFetching } = api.user.workspaces.useQuery();
+	const trpc = useTRPC();
+	const { data: workspaces, isFetching } = useSuspenseQuery(
+		trpc.user.workspaces.queryOptions(),
+	);
 
 	const isPersonal = useWorkspaceIsPersonal();
 
@@ -27,7 +32,7 @@ export function AllMyWorkspaces() {
 				These are the workspaces you belong to.
 			</p>
 			<GridList
-				items={workspaces?.filter(w => w.type !== 'personal')}
+				items={workspaces.filter(w => w.type !== 'personal')}
 				renderEmptyState={() =>
 					isFetching ?
 						<GridListSkeleton count={2} />
@@ -57,13 +62,11 @@ export function AllMyInvites() {
 				These are the workspace invites you have received.
 			</p>
 			<GridList
-				items={
-					invites?.map(invite => ({
-						...invite,
-						id: invite.workspace.id,
-						workspace: { ...invite.workspace, role: invite.role },
-					})) ?? []
-				}
+				items={invites.map(invite => ({
+					...invite,
+					id: invite.workspace.id,
+					workspace: { ...invite.workspace, role: invite.role },
+				}))}
 				renderEmptyState={() =>
 					isFetching ?
 						<GridListSkeleton count={1} />

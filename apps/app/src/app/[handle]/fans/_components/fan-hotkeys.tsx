@@ -1,17 +1,17 @@
 'use client';
 
-import { useModalHotKeys } from '@barely/lib/hooks/use-modal-hot-keys';
+import { useModalHotKeys } from '@barely/hooks';
 
-import { useFanContext } from '~/app/[handle]/fans/_components/fan-context';
+import { useFan, useFanSearchParams } from '~/app/[handle]/fans/_components/fan-context';
 
 export function FanHotkeys() {
+	const { selection } = useFan();
 	const {
-		selection,
 		setShowArchiveModal,
 		setShowDeleteModal,
 		setShowCreateModal,
 		setShowUpdateModal,
-	} = useFanContext();
+	} = useFanSearchParams();
 
 	useModalHotKeys({
 		setShowCreateModal,

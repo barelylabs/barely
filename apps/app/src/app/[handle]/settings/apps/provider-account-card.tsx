@@ -1,19 +1,18 @@
 'use client';
 
-import type { ProviderAccount } from '@barely/lib/server/routes/provider-account/provider-account.schema';
+import type { ProviderAccount } from '@barely/validators';
 import { useRouter } from 'next/navigation';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
+import { useWorkspace } from '@barely/hooks';
+import { onPromise, toTitleCase } from '@barely/utils';
+import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 
-import { api } from '@barely/api/react';
+import { useTRPC } from '@barely/api/app/trpc.react';
 
-import { AlertDialog } from '@barely/ui/elements/alert-dialog';
-import { Button } from '@barely/ui/elements/button';
-import { Card } from '@barely/ui/elements/card';
-import { Icon } from '@barely/ui/elements/icon';
-import { H } from '@barely/ui/elements/typography';
-
-import { onPromise } from '@barely/utils/on-promise';
-import { toTitleCase } from '@barely/utils/text';
+import { AlertDialog } from '@barely/ui/alert-dialog';
+import { Button } from '@barely/ui/button';
+import { Card } from '@barely/ui/card';
+import { Icon } from '@barely/ui/icon';
+import { H } from '@barely/ui/typography';
 
 interface ExternalAccountCardProps {
 	provider: ProviderAccount['provider'];
@@ -21,15 +20,19 @@ interface ExternalAccountCardProps {
 
 export const ProviderAccountCard = ({ provider }: ExternalAccountCardProps) => {
 	const router = useRouter();
-	const utils = api.useUtils();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
 	const { workspace } = useWorkspace();
 
-	const { data: providerAccounts } = api.providerAccount.byWorkspace.useQuery({
-		handle: workspace.handle,
-		providers: [provider],
-	});
+	const { data: providerAccounts } = useSuspenseQuery(
+		trpc.providerAccount.byWorkspace.queryOptions({
+			handle: workspace.handle,
+			providers: [provider],
+		}),
+	);
 
-	const { mutate: authorize } = api.providerAccount.authorize.useMutation({
+	const { mutate: authorize } = useMutation({
+		...trpc.providerAccount.authorize.mutationOptions(),
 		onSuccess: url => {
 			if (url) {
 				router.push(url);
@@ -37,11 +40,15 @@ export const ProviderAccountCard = ({ provider }: ExternalAccountCardProps) => {
 		},
 	});
 
-	const { mutateAsync: deleteAccount } = api.providerAccount.delete.useMutation();
+	const { mutateAsync: deleteAccount } = useMutation(
+		trpc.providerAccount.delete.mutationOptions(),
+	);
 
 	const addAccount = () => {
-		authorize({ provider });
-		return utils.providerAccount.byCurrentUser.invalidate();
+		authorize({ provider, handle: workspace.handle });
+		return queryClient.invalidateQueries(
+			trpc.providerAccount.byCurrentUser.queryFilter(),
+		);
 	};
 
 	const removeAccount = async (accountId: string) => {
@@ -49,7 +56,12 @@ export const ProviderAccountCard = ({ provider }: ExternalAccountCardProps) => {
 			provider,
 			providerAccountId: accountId,
 		});
-		return utils.providerAccount.invalidate();
+		return queryClient.invalidateQueries(
+			trpc.providerAccount.byWorkspace.queryFilter({
+				handle: workspace.handle,
+				providers: [provider],
+			}),
+		);
 	};
 
 	const platform = toTitleCase(provider);
@@ -58,7 +70,7 @@ export const ProviderAccountCard = ({ provider }: ExternalAccountCardProps) => {
 		<Card>
 			<H size='5'>{platform}</H>
 
-			{!!providerAccounts?.length &&
+			{providerAccounts.length > 0 &&
 				providerAccounts.map(account => {
 					return (
 						<div

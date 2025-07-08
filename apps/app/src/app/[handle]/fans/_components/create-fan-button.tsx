@@ -1,16 +1,16 @@
 'use client';
 
-import { Button } from '@barely/ui/elements/button';
+import { Button } from '@barely/ui/button';
 
-import { useFanContext } from '~/app/[handle]/fans/_components/fan-context';
+import { useFanSearchParams } from '~/app/[handle]/fans/_components/fan-context';
 
 export function CreateFanButton() {
-	const { setShowCreateModal } = useFanContext();
+	const { setShowCreateModal } = useFanSearchParams();
 
 	return (
 		<Button
 			onClick={() => {
-				setShowCreateModal(true);
+				void setShowCreateModal(true);
 			}}
 			className='space-x-3'
 		>

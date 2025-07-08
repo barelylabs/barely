@@ -1,18 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useIntersectionObserver } from '@barely/lib/hooks/use-intersection-observer';
-import { cn } from '@barely/lib/utils/cn';
+import { useIntersectionObserver } from '@barely/hooks';
+import { cn } from '@barely/utils';
 
-import { Button } from '@barely/ui/elements/button';
-import {
-	Command,
-	CommandItem,
-	CommandList,
-	CommandShortcut,
-} from '@barely/ui/elements/command';
-import { Icon } from '@barely/ui/elements/icon';
-import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/elements/popover';
+import { Button } from '@barely/ui/button';
+import { Command, CommandItem, CommandList, CommandShortcut } from '@barely/ui/command';
+import { Icon } from '@barely/ui/icon';
+import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/popover';
 
 interface ItemWithId {
 	id: string;
@@ -70,9 +65,7 @@ export function ListCard<T extends ItemWithId>({
 				return setEditItem(null);
 			}
 
-			if (isListCardClick && !isExcludedElement) {
-				return setEditItem(item);
-			}
+			return setEditItem(item);
 		},
 		[setEditItem, item],
 	);

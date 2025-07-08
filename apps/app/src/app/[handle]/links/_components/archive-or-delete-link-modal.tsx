@@ -1,37 +1,39 @@
 'use client';
 
 import { useCallback } from 'react';
-import { api } from '@barely/lib/server/api/react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { ArchiveOrDeleteModal } from '~/app/[handle]/_components/archive-or-delete-modal';
-import { useLinkContext } from '~/app/[handle]/links/_components/link-context';
+import {
+	useLink,
+	useLinkSearchParams,
+} from '~/app/[handle]/links/_components/link-context';
 
 export function ArchiveOrDeleteLinkModal({ mode }: { mode: 'archive' | 'delete' }) {
-	const {
-		selection: linkSelection,
-		lastSelectedItem: lastSelectedLink,
-		showArchiveModal,
-		showDeleteModal,
-		setShowArchiveModal,
-		setShowDeleteModal,
-	} = useLinkContext();
+	const { selection: linkSelection, lastSelectedItem: lastSelectedLink } = useLink();
+	const { showArchiveModal, showDeleteModal, setShowArchiveModal, setShowDeleteModal } =
+		useLinkSearchParams();
 
-	const apiUtils = api.useUtils();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
 
 	const showModal = mode === 'archive' ? showArchiveModal : showDeleteModal;
 
 	const setShowModal = mode === 'archive' ? setShowArchiveModal : setShowDeleteModal;
 
 	const onSuccess = useCallback(async () => {
-		await apiUtils.link.invalidate();
-		setShowModal(false);
-	}, [apiUtils.link, setShowModal]);
+		await queryClient.invalidateQueries(trpc.link.byWorkspace.queryFilter());
+		await setShowModal(false);
+	}, [queryClient, trpc.link.byWorkspace, setShowModal]);
 
-	const { mutate: archiveLinks, isPending: isPendingArchive } =
-		api.link.archive.useMutation({ onSuccess });
+	const { mutate: archiveLinks, isPending: isPendingArchive } = useMutation(
+		trpc.link.archive.mutationOptions({ onSuccess }),
+	);
 
-	const { mutate: deleteLinks, isPending: isPendingDelete } = api.link.delete.useMutation(
-		{ onSuccess },
+	const { mutate: deleteLinks, isPending: isPendingDelete } = useMutation(
+		trpc.link.delete.mutationOptions({ onSuccess }),
 	);
 
 	if (!lastSelectedLink) return null;

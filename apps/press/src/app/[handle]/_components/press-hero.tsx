@@ -1,12 +1,12 @@
 'use client';
 
-import type { PublicPressKit } from '@barely/lib/server/routes/press-kit/press-kit.schema';
+import type { PublicPressKit } from '@barely/validators';
 import { useContext, useEffect, useRef, useState } from 'react';
 
+import { BackgroundImg } from '@barely/ui/background-image';
 import { WorkspaceSocialLinks } from '@barely/ui/components/workspace-social-links';
-import { BackgroundImg } from '@barely/ui/elements/background-image';
-import { BottomThirdFadeGradient } from '@barely/ui/elements/gradient';
-import { Icon } from '@barely/ui/elements/icon';
+import { BottomThirdFadeGradient } from '@barely/ui/gradient';
+import { Icon } from '@barely/ui/icon';
 
 import { PressScrollAreaViewportContext } from '~/app/[handle]/_components/press-scroll-area';
 import { SectionDiv } from '~/app/[handle]/_components/press-section';

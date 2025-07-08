@@ -1,16 +1,11 @@
-// import type { ReactNode } from 'react';
-
-import { MDXRemote } from '@barely/ui/elements/mdx';
-import { mdxCard } from '@barely/ui/elements/mdx-card';
-import { mdxGrid } from '@barely/ui/elements/mdx-grid';
-import { mdxImageFile } from '@barely/ui/elements/mdx-image-file';
-import { mdxLink } from '@barely/ui/elements/mdx-link';
-import { mdxLinkButton } from '@barely/ui/elements/mdx-link-button';
-import { mdxTypography } from '@barely/ui/elements/mdx-typography';
-import { mdxVideoPlayer } from '@barely/ui/elements/mdx-video-player';
-
-// import { H } from '@barely/ui/elements/typography';
-// import { VideoPlayer } from '@barely/ui/elements/video-player';
+import { mdxCard } from '@barely/ui/mdx-card';
+import { mdxGrid } from '@barely/ui/mdx-grid';
+import { mdxImageFile } from '@barely/ui/mdx-image-file';
+import { mdxLink } from '@barely/ui/mdx-link';
+import { mdxLinkButton } from '@barely/ui/mdx-link-button';
+import { MDXRemoteRSC } from '@barely/ui/mdx-remote';
+import { mdxTypography } from '@barely/ui/mdx-typography';
+import { mdxVideoPlayer } from '@barely/ui/mdx-video-player';
 
 import { Section, SectionDiv } from '~/app/[handle]/_components/press-section';
 
@@ -28,7 +23,7 @@ export function PressBio({ bio }: { bio: string }) {
 	return (
 		<Section id='bio'>
 			<SectionDiv title='Bio'>
-				<MDXRemote source={bio} components={components} />
+				<MDXRemoteRSC source={bio} components={components} />
 			</SectionDiv>
 		</Section>
 	);

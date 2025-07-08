@@ -1,11 +1,11 @@
 'use client';
 
 import { Filters } from '~/app/[handle]/_components/filters';
-import { useEmailTemplateContext } from './email-template-context';
+import { useEmailTemplateSearchParams } from './email-template-context';
 
 export function EmailTemplateFilters() {
 	const { filters, setSearch, toggleArchived, clearAllFilters } =
-		useEmailTemplateContext();
+		useEmailTemplateSearchParams();
 
 	return (
 		<Filters

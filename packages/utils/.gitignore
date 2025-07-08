@@ -1,0 +1,19 @@
+# TypeScript build artifacts
+dist/
+*.tsbuildinfo
+
+# Accidentally generated declaration files in src
+src/**/*.d.ts
+src/**/*.d.ts.map
+
+# Dependencies
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+
+# Temp files
+*.log
+*.tmp
+.DS_Store

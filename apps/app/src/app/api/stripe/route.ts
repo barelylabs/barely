@@ -1,14 +1,14 @@
 import type { NextRequest } from 'next/server';
-import { handleStripeCheckoutSessionComplete } from '@barely/lib/server/routes/workspace-stripe/workspace-stripe.fns';
+import { handleStripeCheckoutSessionComplete } from '@barely/lib/functions/workspace-stripe.fns';
 import Stripe from 'stripe';
 
-import { env } from '~/env';
+import { appEnv } from '~/env';
 
-const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
+const stripe = new Stripe(appEnv.STRIPE_SECRET_KEY, {
 	apiVersion: '2023-10-16',
 });
 
-const webhookSecret = env.STRIPE_WEBHOOK_SECRET;
+const webhookSecret = appEnv.STRIPE_WEBHOOK_SECRET;
 
 export async function POST(req: NextRequest) {
 	const body = await req.text();

@@ -1,76 +1,81 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
-import { upsertEmailTemplateGroupSchema } from '@barely/lib/server/routes/email-template-group/email-template-group.schema';
+import { useCreateOrUpdateForm, useWorkspace } from '@barely/hooks';
+import { upsertEmailTemplateGroupSchema } from '@barely/validators';
+import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { useFieldArray } from 'react-hook-form';
 
-import { Button } from '@barely/ui/elements/button';
-import { Combobox } from '@barely/ui/elements/combobox';
-import { Label } from '@barely/ui/elements/label';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
-import { Text } from '@barely/ui/elements/typography';
-import { Form, SubmitButton } from '@barely/ui/forms';
-import { TextField } from '@barely/ui/forms/text-field';
+import { useTRPC } from '@barely/api/app/trpc.react';
 
-import { useEmailTemplateGroupContext } from './email-template-group-context';
+import { Button } from '@barely/ui/button';
+import { Combobox } from '@barely/ui/combobox';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
+import { TextField } from '@barely/ui/forms/text-field';
+import { Label } from '@barely/ui/label';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
+import { Text } from '@barely/ui/typography';
+
+import {
+	useEmailTemplateGroup,
+	useEmailTemplateGroupSearchParams,
+} from './email-template-group-context';
 
 export function CreateOrUpdateEmailTemplateGroupModal({
 	mode,
 }: {
 	mode: 'create' | 'update';
 }) {
-	const apiUtils = api.useUtils();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
 
-	const {
-		lastSelectedItem,
-		showCreateModal,
-		showUpdateModal,
-		setShowCreateModal,
-		setShowUpdateModal,
-		focusGridList,
-	} = useEmailTemplateGroupContext();
+	const { lastSelectedItem, focusGridList } = useEmailTemplateGroup();
+	const { showCreateModal, showUpdateModal, setShowCreateModal, setShowUpdateModal } =
+		useEmailTemplateGroupSearchParams();
 
 	const { handle } = useWorkspace();
 
-	const { data: selectedEmailTemplates } = api.emailTemplateGroup.byId.useQuery(
-		{
-			handle,
-			id: lastSelectedItem?.id ?? '',
-		},
-		{
-			select: data => data.emailTemplates,
-		},
+	const { data: selectedEmailTemplates } = useSuspenseQuery(
+		trpc.emailTemplateGroup.byId.queryOptions(
+			{
+				handle,
+				id: lastSelectedItem?.id ?? '',
+			},
+			{
+				enabled: mode === 'update' && !!lastSelectedItem,
+				select: data => data.emailTemplates,
+			},
+		),
 	);
 
-	const { data: emailTemplateOptions } = api.emailTemplate.byWorkspace.useQuery(
-		{ handle },
-		{
-			select: data =>
-				data.emailTemplates.map(et => ({
-					id: et.id,
-					name: et.name,
-					description: et.description ?? '',
-					// lexorank: et.lexorank,
-				})) ?? [],
-		},
+	const { data: emailTemplateOptions } = useSuspenseQuery(
+		trpc.emailTemplate.byWorkspace.queryOptions(
+			{ handle },
+			{
+				select: data =>
+					data.emailTemplates.map(et => ({
+						id: et.id,
+						name: et.name,
+						description: et.description ?? '',
+						// lexorank: et.lexorank,
+					})),
+			},
+		),
 	);
 
-	const { mutateAsync: createEmailTemplateGroup } =
-		api.emailTemplateGroup.create.useMutation({
-			onSuccess: async () => {
-				await handleCloseModal();
-			},
-		});
+	const { mutateAsync: createEmailTemplateGroup } = useMutation({
+		...trpc.emailTemplateGroup.create.mutationOptions(),
+		onSuccess: async () => {
+			await handleCloseModal();
+		},
+	});
 
-	const { mutateAsync: updateEmailTemplateGroup } =
-		api.emailTemplateGroup.update.useMutation({
-			onSuccess: async () => {
-				await handleCloseModal();
-			},
-		});
+	const { mutateAsync: updateEmailTemplateGroup } = useMutation({
+		...trpc.emailTemplateGroup.update.mutationOptions(),
+		onSuccess: async () => {
+			await handleCloseModal();
+		},
+	});
 
 	const { form, onSubmit } = useCreateOrUpdateForm({
 		updateItem:
@@ -78,7 +83,7 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 			: lastSelectedItem ?
 				{
 					...lastSelectedItem,
-					emailTemplates: selectedEmailTemplates ?? [],
+					emailTemplates: selectedEmailTemplates,
 				}
 			:	null,
 		upsertSchema: upsertEmailTemplateGroupSchema,
@@ -86,16 +91,21 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 		defaultValues: {
 			name: mode === 'update' ? (lastSelectedItem?.name ?? '') : '',
 			description: mode === 'update' ? (lastSelectedItem?.description ?? '') : '',
-			emailTemplates: mode === 'update' ? (selectedEmailTemplates ?? []) : [],
+			emailTemplates: mode === 'update' ? selectedEmailTemplates : [],
 		},
+
 		handleCreateItem: async d => {
 			await createEmailTemplateGroup({
 				...d,
-				name: d.name ?? '',
+				name: d.name,
+				handle,
 			});
 		},
 		handleUpdateItem: async d => {
-			await updateEmailTemplateGroup(d);
+			await updateEmailTemplateGroup({
+				...d,
+				handle,
+			});
 		},
 	});
 
@@ -112,33 +122,36 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 
 	const handleSelectEmailTemplate = useCallback(
 		(emailTemplate: NonNullable<typeof emailTemplateOptions>[number]) => {
-			if (emailTemplate) {
-				appendEmailTemplate(emailTemplate);
-			}
+			appendEmailTemplate(emailTemplate);
 		},
 		[appendEmailTemplate],
 	);
 
 	const activeEmailTemplates = form.watch('emailTemplates');
-	const availableEmailTemplates =
-		emailTemplateOptions?.filter(
-			eto => !activeEmailTemplates.some(aet => aet.id === eto.id),
-		) ?? [];
+	const availableEmailTemplates = emailTemplateOptions.filter(
+		eto => !activeEmailTemplates.some(aet => aet.id === eto.id),
+	);
 
 	const showModal = mode === 'create' ? showCreateModal : showUpdateModal;
 	const setShowModal = mode === 'create' ? setShowCreateModal : setShowUpdateModal;
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
-		await apiUtils.emailTemplateGroup.invalidate();
-		await apiUtils.emailTemplate.invalidate();
+		await queryClient.invalidateQueries(
+			trpc.emailTemplateGroup.byWorkspace.queryFilter({ handle }),
+		);
+		await queryClient.invalidateQueries(
+			trpc.emailTemplate.byWorkspace.queryFilter({ handle }),
+		);
 		form.reset();
-		setShowModal(false);
+		await setShowModal(false);
 	}, [
 		form,
 		focusGridList,
-		apiUtils.emailTemplateGroup,
-		apiUtils.emailTemplate,
+		queryClient,
+		trpc.emailTemplateGroup.byWorkspace,
+		trpc.emailTemplate.byWorkspace,
+		handle,
 		setShowModal,
 	]);
 
@@ -206,43 +219,9 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 								// onItemRemove={removeEmailTemplate}
 								optTitle={option => option.name}
 								optSubtitle={option => option.description}
-								displayValue={option => option.name ?? option.id}
+								displayValue={option => option.name}
 							/>
-							{/* <Command>
-								<CommandInput />
-
-								<CommandList>
-									{availableEmailTemplates.map(et => (
-										<CommandItem
-											key={et.id}
-											value={et.id}
-											onSelect={() => handleSelectEmailTemplate(et.id)}
-										>
-											{et.name}
-										</CommandItem>
-									))}
-								</CommandList>
-							</Command> */}
-
-							{/* <MultiSelectField
-								name='emailTemplates'
-								control={form.control}
-								options={emailTemplateOptions ?? []}
-								optTitle={option => option.name}
-								optSubtitle={option => option.description}
-								getItemId={option => option.id}
-								displayValue={option => option.name ?? option.id}
-							/> */}
 						</div>
-
-						{/* <Button
-							look='outline'
-							startIcon='plus'
-							onClick={() => appendEmailTemplate('')}
-							className='mt-2'
-						>
-							Add Email Template
-						</Button> */}
 					</div>
 				</ModalBody>
 				<ModalFooter>

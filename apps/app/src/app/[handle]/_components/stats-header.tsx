@@ -1,25 +1,24 @@
 'use client';
 
-import type { StatDateRange } from '@barely/lib/server/routes/stat/stat.schema';
+import type { StatDateRange } from '@barely/validators';
 import { Suspense } from 'react';
-import { useWebEventStatFilters } from '@barely/lib/hooks/use-web-event-stat-filters';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { statDateRange } from '@barely/lib/server/routes/stat/stat.schema';
-import { api } from '@barely/server/api/react';
+import { useWebEventStatFilters, useWorkspace } from '@barely/hooks';
+import { getFmPageUrlFromFmPage, getShortLinkUrlFromLink } from '@barely/utils';
+import { statDateRange } from '@barely/validators';
+import { useSuspenseQuery } from '@tanstack/react-query';
 
-import { ChevronRightToArrow, Icon } from '@barely/ui/elements/icon';
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { ChevronRightToArrow, Icon } from '@barely/ui/icon';
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from '@barely/ui/elements/select';
-import { Skeleton } from '@barely/ui/elements/skeleton';
-import { Text } from '@barely/ui/elements/typography';
-
-import { getFmPageUrlFromFmPage } from '@barely/utils/fm';
-import { getShortLinkUrlFromLink } from '@barely/utils/link';
+} from '@barely/ui/select';
+import { Skeleton } from '@barely/ui/skeleton';
+import { Text } from '@barely/ui/typography';
 
 const dateRangeOptions: StatDateRange[] = ['1d', '1w', '28d'];
 
@@ -62,14 +61,17 @@ export function StatsHeader({
 }
 
 function AssetLinkLaunch() {
+	const trpc = useTRPC();
 	const { filters } = useWebEventStatFilters();
 
 	const { handle } = useWorkspace();
 
-	const [asset] = api.stat.assetById.useSuspenseQuery({
-		handle: handle,
-		assetId: filters.assetId,
-	});
+	const { data: asset } = useSuspenseQuery(
+		trpc.stat.assetById.queryOptions({
+			handle: handle,
+			assetId: filters.assetId,
+		}),
+	);
 
 	if (!asset) return <Text variant='xl/semibold'>All</Text>;
 
@@ -88,17 +90,16 @@ function AssetLinkLaunch() {
 		);
 	}
 
-	if (asset.type === 'link') {
-		return (
-			<a
-				className='group flex flex-row items-center gap-1'
-				href={getShortLinkUrlFromLink(asset.link)}
-				target='_blank'
-				rel='noreferrer'
-			>
-				<Text variant='xl/semibold'>{`${asset.link.domain}/${asset.link.key}`}</Text>
-				<ChevronRightToArrow />
-			</a>
-		);
-	}
+	// link is the only asset type left
+	return (
+		<a
+			className='group flex flex-row items-center gap-1'
+			href={getShortLinkUrlFromLink(asset.link)}
+			target='_blank'
+			rel='noreferrer'
+		>
+			<Text variant='xl/semibold'>{`${asset.link.domain}/${asset.link.key}`}</Text>
+			<ChevronRightToArrow />
+		</a>
+	);
 }

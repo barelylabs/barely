@@ -1,17 +1,20 @@
 'use client';
 
-import { useModalHotKeys } from '@barely/lib/hooks/use-modal-hot-keys';
+import { useModalHotKeys } from '@barely/hooks';
 
-import { useLinkContext } from '~/app/[handle]/links/_components/link-context';
+import {
+	useLink,
+	useLinkSearchParams,
+} from '~/app/[handle]/links/_components/link-context';
 
 export function LinkHotkeys() {
+	const { selection } = useLink();
 	const {
-		selection,
 		setShowCreateModal,
 		setShowUpdateModal,
 		setShowArchiveModal,
 		setShowDeleteModal,
-	} = useLinkContext();
+	} = useLinkSearchParams();
 
 	useModalHotKeys({
 		setShowCreateModal: setShowCreateModal,

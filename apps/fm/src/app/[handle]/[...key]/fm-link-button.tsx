@@ -1,17 +1,19 @@
 'use client';
 
-import type { FmLink } from '@barely/lib/server/routes/fm/fm.schema';
-import { fmPageApi } from '@barely/lib/server/routes/fm-page/fm-page.api.react';
-import { isValidUrl } from '@barely/lib/utils/link';
-import { getSpotifyPlaylistTrackDeeplink } from '@barely/lib/utils/spotify';
+import type { FmLink } from '@barely/validators';
+import { getSpotifyPlaylistTrackDeeplink, isValidUrl } from '@barely/utils';
+import { useMutation } from '@tanstack/react-query';
 
-import { Button } from '@barely/ui/elements/button';
-import { Img } from '@barely/ui/elements/img';
+import { useFmPageTRPC } from '@barely/api/public/fm-page.trpc.react';
+
+import { Button } from '@barely/ui/button';
+import { Img } from '@barely/ui/img';
 
 export const FmLinkButton = ({ link }: { link: FmLink }) => {
 	const theme = 'dark';
 
-	const { mutate: logEvent } = fmPageApi.log.useMutation();
+	const trpc = useFmPageTRPC();
+	const { mutate: logEvent } = useMutation(trpc.log.mutationOptions());
 
 	const label = link.platform === 'itunes' ? 'BUY' : 'PLAY';
 
@@ -20,6 +22,7 @@ export const FmLinkButton = ({ link }: { link: FmLink }) => {
 	const hasSpotifyTrackUrl = !!link.spotifyTrackUrl && isValidUrl(link.spotifyTrackUrl);
 	// set href with a switch statement
 	let href = link.url;
+
 	switch (true) {
 		case isSpotifyPlaylist && hasSpotifyTrackUrl && !!link.spotifyTrackUrl:
 			href =

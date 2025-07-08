@@ -1,8 +1,5 @@
-import { routeHandler } from '@barely/lib/server/api/route-handler';
-import { mixtapeRouter } from '@barely/lib/server/routes/mixtape/mixtape.router';
+import { OPTIONS } from '@barely/utils';
 
-export { OPTIONS } from '@barely/lib/utils/trpc-route';
+import { mixtapeHandler } from '@barely/api/app/sub/mixtape.handler';
 
-const handler = routeHandler('mixtape', mixtapeRouter);
-
-export { handler as GET, handler as POST };
+export { OPTIONS, mixtapeHandler as GET, mixtapeHandler as POST };

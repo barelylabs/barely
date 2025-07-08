@@ -1,30 +1,33 @@
 'use client';
 
-import type { UploadQueueItem } from '@barely/lib/hooks/use-upload';
-import { useUpload } from '@barely/lib/hooks/use-upload';
-import { api } from '@barely/lib/server/api/react';
+import type { UploadQueueItem } from '@barely/hooks';
+import { useUpload } from '@barely/hooks';
+import { useQueryClient } from '@tanstack/react-query';
 import { atom } from 'jotai';
 
-import { Button } from '@barely/ui/elements/button';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
-import { UploadDropzone, UploadQueue } from '@barely/ui/elements/upload';
+import { useTRPC } from '@barely/api/app/trpc.react';
 
-import { useMediaContext } from '~/app/[handle]/media/_components/media-context';
+import { Button } from '@barely/ui/button';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
+import { UploadDropzone, UploadQueue } from '@barely/ui/upload';
+
+import { useMediaSearchParams } from '~/app/[handle]/media/_components/media-context';
 
 const mediaUploadQueueAtom = atom<UploadQueueItem[]>([]);
 
 export function UploadMediaModal() {
-	const apiUtils = api.useUtils();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
 
-	const { showCreateModal, setShowCreateModal } = useMediaContext();
+	const { showCreateModal, setShowCreateModal } = useMediaSearchParams();
 
 	const mediaUploadState = useUpload({
 		uploadQueueAtom: mediaUploadQueueAtom,
 		allowedFileTypes: ['image', 'audio', 'video'],
 		maxFiles: 50,
 		onUploadComplete: async () => {
-			await apiUtils.file.invalidate();
-			setShowCreateModal(false);
+			await queryClient.invalidateQueries(trpc.file.byWorkspace.queryFilter());
+			await setShowCreateModal(false);
 		},
 	});
 
@@ -33,7 +36,9 @@ export function UploadMediaModal() {
 	return (
 		<Modal
 			showModal={showCreateModal}
-			setShowModal={setShowCreateModal}
+			setShowModal={show => {
+				void setShowCreateModal(show);
+			}}
 			className='w-full'
 		>
 			<ModalHeader title='Upload Media' icon='media' />

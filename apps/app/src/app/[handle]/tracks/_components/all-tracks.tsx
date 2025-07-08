@@ -1,15 +1,18 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/server/api/router';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
-import { GridList, GridListCard } from '@barely/ui/elements/grid-list';
-import { Img } from '@barely/ui/elements/img';
-import { Text } from '@barely/ui/elements/typography';
+import { GridList, GridListCard } from '@barely/ui/grid-list';
+import { Img } from '@barely/ui/img';
+import { Text } from '@barely/ui/typography';
 
 import { CreateTrackButton } from '~/app/[handle]/tracks/_components/create-track-button';
-import { useTrackContext } from '~/app/[handle]/tracks/_components/track-context';
+import {
+	useTrack,
+	useTrackSearchParams,
+} from '~/app/[handle]/tracks/_components/track-context';
 
 export function AllTracks() {
 	const {
@@ -18,15 +21,16 @@ export function AllTracks() {
 		lastSelectedItemId,
 		setSelection,
 		gridListRef,
-		setShowUpdateModal,
 		isFetching,
-	} = useTrackContext();
+		setShowUpdateModal,
+	} = useTrack();
 
 	return (
 		<GridList
 			glRef={gridListRef}
 			aria-label='Tracks'
 			className='flex flex-col gap-2'
+			data-grid-list='tracks'
 			// behavior
 			selectionMode='multiple'
 			selectionBehavior='replace'
@@ -36,7 +40,7 @@ export function AllTracks() {
 			setSelectedKeys={setSelection}
 			onAction={() => {
 				if (!lastSelectedItemId) return;
-				setShowUpdateModal(true);
+				void setShowUpdateModal(true);
 			}}
 			// empty
 			renderEmptyState={() =>
@@ -61,7 +65,7 @@ function TrackCard({
 	track: AppRouterOutputs['track']['byWorkspace']['tracks'][number];
 }) {
 	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } =
-		useTrackContext();
+		useTrackSearchParams();
 
 	return (
 		<GridListCard
@@ -76,7 +80,7 @@ function TrackCard({
 				<div className='flex flex-col items-start gap-1'>
 					<div className='flex flex-row items-center gap-2'>
 						<Img
-							src={track.artworkFiles?.find(f => f.current)?.src ?? ''}
+							src={track.artworkFiles.find(f => f.current)?.src ?? ''}
 							alt='Track'
 							className='h-8 w-8 rounded-md bg-gray-100 sm:h-16 sm:w-16'
 							width={40}

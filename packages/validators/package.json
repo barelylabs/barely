@@ -1,0 +1,45 @@
+{
+	"name": "@barely/validators",
+	"private": true,
+	"version": "0.1.0",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/schemas/index.d.ts",
+			"default": "./src/schemas/index.ts"
+		},
+		"./schemas": {
+			"types": "./dist/schemas/index.d.ts",
+			"default": "./src/schemas/index.ts"
+		},
+		"./helpers": "./src/helpers/index.ts"
+	},
+	"license": "MIT",
+	"scripts": {
+		"build": "tsc",
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"dev": "tsc",
+		"format": "prettier --check . --ignore-path ../../.gitignore",
+		"lint": "eslint",
+		"typecheck": "tsc --noEmit --emitDeclarationOnly false"
+	},
+	"dependencies": {
+		"@barely/const": "workspace:*",
+		"@barely/db": "workspace:*",
+		"drizzle-orm": "catalog:",
+		"drizzle-zod": "^0.8.2",
+		"lexorank": "^1.0.5",
+		"libphonenumber-js": "^1.11.19",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@barely/eslint-config": "workspace:*",
+		"@barely/prettier-config": "workspace:*",
+		"@barely/tsconfig": "workspace:*",
+		"@t3-oss/env-nextjs": "catalog:",
+		"eslint": "catalog:",
+		"prettier": "catalog:",
+		"typescript": "catalog:"
+	},
+	"prettier": "@barely/prettier-config"
+}

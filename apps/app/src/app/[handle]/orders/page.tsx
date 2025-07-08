@@ -1,46 +1,53 @@
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import { api } from '@barely/lib/server/api/server';
-import { cartOrderSearchParamsSchema } from '@barely/lib/server/routes/cart-order/cart-order.schema';
+import { cartOrderSearchParamsSchema } from '@barely/validators';
+
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllCartOrders } from '~/app/[handle]/orders/_components/all-cart-orders';
 import { CancelCartOrderModal } from '~/app/[handle]/orders/_components/cancel-cart-order-modal';
-import { CartOrderContextProvider } from '~/app/[handle]/orders/_components/cart-order-context';
 import { CartOrderFilters } from '~/app/[handle]/orders/_components/cart-order-filters';
 import { CartOrderHotkeys } from '~/app/[handle]/orders/_components/cart-order-hotkeys';
 import { MarkCartOrderFulfilledModal } from '~/app/[handle]/orders/_components/mark-cart-order-fulfilled-modal';
+import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
-export default function CartOrdersPage({
+export default async function CartOrdersPage({
 	params,
 	searchParams,
 }: {
-	params: { handle: string };
-	searchParams: z.infer<typeof cartOrderSearchParamsSchema>;
+	params: Promise<{ handle: string }>;
+	searchParams: Promise<z.infer<typeof cartOrderSearchParamsSchema>>;
 }) {
-	const parsedFilters = cartOrderSearchParamsSchema.safeParse(searchParams);
+	const { handle } = await params;
+	const filters = await searchParams;
+
+	const parsedFilters = cartOrderSearchParamsSchema.safeParse(filters);
 	if (!parsedFilters.success) {
 		console.error('Failed to parse search params', parsedFilters.error);
-		redirect(`/${params.handle}/orders`);
+		redirect(`/${handle}/orders`);
 	}
 
-	const initialInfiniteOrders = api({ handle: params.handle }).cartOrder.byWorkspace({
-		handle: params.handle,
-		...parsedFilters.data,
-	});
+	prefetch(
+		trpc.cartOrder.byWorkspace.infiniteQueryOptions({
+			handle,
+			...parsedFilters.data,
+		}),
+	);
 
 	return (
-		<CartOrderContextProvider initialInfiniteOrders={initialInfiniteOrders}>
+		<HydrateClient>
 			<DashContentHeader title='Orders' />
 
 			<CartOrderFilters />
-			<AllCartOrders />
-			{/* <div className='grid grid-cols-1 gap-5 md:grid-cols-[auto,1fr]'>
-			</div> */}
+			<Suspense fallback={<GridListSkeleton />}>
+				<AllCartOrders />
 
-			<MarkCartOrderFulfilledModal />
-			<CancelCartOrderModal />
-			<CartOrderHotkeys />
-		</CartOrderContextProvider>
+				<MarkCartOrderFulfilledModal />
+				<CancelCartOrderModal />
+				<CartOrderHotkeys />
+			</Suspense>
+		</HydrateClient>
 	);
 }

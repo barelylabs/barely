@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { clsx } from 'clsx';
 import { motion } from 'framer-motion';
 
-import { Icon } from '@barely/ui/elements/icon';
+import { Icon } from '@barely/ui/icon';
 
 const transition = {
 	duration: 0.75,

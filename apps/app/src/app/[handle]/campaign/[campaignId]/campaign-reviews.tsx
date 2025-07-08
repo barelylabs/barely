@@ -1,23 +1,27 @@
 'use client';
 
 import Link from 'next/link';
-import { api } from '@barely/server/api/react';
+import { getFullNameFromFirstAndLast } from '@barely/utils';
+import { useSuspenseInfiniteQuery, useSuspenseQuery } from '@tanstack/react-query';
 
-import { Progress } from '@barely/ui/elements/progress';
-import { Review } from '@barely/ui/elements/review-card';
-import { Text } from '@barely/ui/elements/typography';
+import { useTRPC } from '@barely/api/app/trpc.react';
 
-import { getFullNameFromFirstAndLast } from '@barely/utils/name';
+import { Progress } from '@barely/ui/progress';
+import { Review } from '@barely/ui/review-card';
+import { Text } from '@barely/ui/typography';
 
 const CampaignReviews = (props: { campaignId: string; reach: number }) => {
-	const [totalPlaylistPitchReviews] =
-		api.playlistPitchReview.countByCampaignId.useSuspenseQuery({
+	const trpc = useTRPC();
+
+	const { data: totalPlaylistPitchReviews } = useSuspenseQuery(
+		trpc.playlistPitchReview.countByCampaignId.queryOptions({
 			campaignId: props.campaignId,
 			complete: true,
-		});
+		}),
+	);
 
-	const [playlistPitchReviews] =
-		api.playlistPitchReview.byCampaignId.useSuspenseInfiniteQuery(
+	const { data: playlistPitchReviews } = useSuspenseInfiniteQuery({
+		...trpc.playlistPitchReview.byCampaignId.infiniteQueryOptions(
 			{
 				campaignId: props.campaignId,
 				complete: true,
@@ -27,7 +31,8 @@ const CampaignReviews = (props: { campaignId: string; reach: number }) => {
 				refetchOnMount: false,
 				staleTime: Infinity,
 			},
-		);
+		),
+	});
 
 	const flatPlaylistPitchReviews = playlistPitchReviews.pages.flatMap(
 		page => page.reviews,
@@ -45,10 +50,10 @@ const CampaignReviews = (props: { campaignId: string; reach: number }) => {
 
 			{flatPlaylistPitchReviews.map(review => {
 				const reviewerDisplayName =
-					review.reviewer?.handle ??
+					review.reviewer.handle ??
 					getFullNameFromFirstAndLast(
-						review.reviewer?.firstName,
-						review.reviewer?.lastName,
+						review.reviewer.firstName,
+						review.reviewer.lastName,
 					);
 
 				return (

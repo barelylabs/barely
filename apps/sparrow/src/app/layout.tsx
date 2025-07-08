@@ -4,11 +4,11 @@ import type { Metadata } from 'next';
 import { Inter as FontSans } from 'next/font/google';
 import localFont from 'next/font/local';
 import { headers } from 'next/headers';
-import { cn } from '@barely/lib/utils/cn';
+import { Toaster } from '@barely/toast';
+import { cn } from '@barely/utils';
 
 import { TailwindIndicator } from '@barely/ui/components/tailwind-indicator';
-import { Container } from '@barely/ui/elements/container';
-import { Toaster } from '@barely/ui/elements/toaster';
+import { Container } from '@barely/ui/container';
 
 import Providers from './providers';
 
@@ -43,7 +43,7 @@ interface RootLayoutProps {
 	children: React.ReactNode;
 }
 
-export default function RootLayout({ children }: RootLayoutProps) {
+export default async function RootLayout({ children }: RootLayoutProps) {
 	return (
 		<html lang='en' suppressHydrationWarning>
 			<body
@@ -53,7 +53,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
 					fontSans.variable,
 				)}
 			>
-				<Providers headers={headers()}>
+				<Providers headers={await headers()}>
 					<Container className='max-w-full px-0 py-0'>{children}</Container>
 				</Providers>
 				<Toaster />

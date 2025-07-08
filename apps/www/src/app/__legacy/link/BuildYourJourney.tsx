@@ -9,9 +9,9 @@ import {
 } from 'react-icons/md';
 import { RiPagesLine } from 'react-icons/ri';
 
-import { FeatureCard } from '@barely/ui/elements/card';
-import { TimelineVertical } from '@barely/ui/elements/timeline';
-import { H, Text } from '@barely/ui/elements/typography';
+import { FeatureCard } from '@barely/ui/card';
+import { TimelineVertical } from '@barely/ui/timeline';
+import { H, Text } from '@barely/ui/typography';
 
 const Heading = () => {
 	return (

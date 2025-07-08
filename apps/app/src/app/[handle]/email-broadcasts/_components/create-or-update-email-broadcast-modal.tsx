@@ -1,60 +1,64 @@
 'use client';
 
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useCallback } from 'react';
-import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
-import { upsertEmailBroadcastSchema } from '@barely/lib/server/routes/email-broadcast/email-broadcast-schema';
+import { useCreateOrUpdateForm, useWorkspace } from '@barely/hooks';
+import { upsertEmailBroadcastSchema } from '@barely/validators';
+import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 
-import { Button } from '@barely/ui/elements/button';
-import { Icon } from '@barely/ui/elements/icon';
-import { Label } from '@barely/ui/elements/label';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
-import { Switch } from '@barely/ui/elements/switch';
-import { Text } from '@barely/ui/elements/typography';
-import { Form } from '@barely/ui/forms';
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Button } from '@barely/ui/button';
 import { DatetimeField } from '@barely/ui/forms/datetime-field-new';
+import { Form } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
+import { Icon } from '@barely/ui/icon';
+import { Label } from '@barely/ui/label';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
+import { Switch } from '@barely/ui/switch';
+import { Text } from '@barely/ui/typography';
 
-import { useEmailBroadcastsContext } from './email-broadcasts-context';
+import {
+	useEmailBroadcast,
+	useEmailBroadcastSearchParams,
+} from './email-broadcasts-context';
 
 export function CreateOrUpdateEmailBroadcastModal({
 	mode,
 }: {
 	mode: 'create' | 'update';
 }) {
-	const apiUtils = api.useUtils();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
 
-	const {
-		lastSelectedItem,
-		showCreateModal,
-		showUpdateModal,
-		setShowCreateModal,
-		setShowUpdateModal,
-		focusGridList,
-	} = useEmailBroadcastsContext();
+	const { showCreateModal, showUpdateModal, setShowCreateModal, setShowUpdateModal } =
+		useEmailBroadcastSearchParams();
+
+	const { lastSelectedItem, focusGridList } = useEmailBroadcast();
 
 	const { handle } = useWorkspace();
 
-	const { data: emailTemplates } = api.emailTemplate.byWorkspace.useQuery(
-		{ handle },
-		{
-			select: data => data.emailTemplates,
-		},
+	const { data: emailTemplates } = useSuspenseQuery(
+		trpc.emailTemplate.byWorkspace.queryOptions(
+			{ handle },
+			{
+				select: data => data.emailTemplates,
+			},
+		),
 	);
 
-	const emailTemplateOptions =
-		emailTemplates?.map(emailTemplate => ({
-			label: emailTemplate.name,
-			value: emailTemplate.id,
-		})) ?? [];
+	const emailTemplateOptions = emailTemplates.map(emailTemplate => ({
+		label: emailTemplate.name,
+		value: emailTemplate.id,
+	}));
 
-	const { data: fanGroups } = api.fanGroup.byWorkspace.useQuery(
-		{ handle },
-		{
-			select: data => data.fanGroups,
-		},
+	const { data: fanGroups } = useSuspenseQuery(
+		trpc.fanGroup.byWorkspace.queryOptions(
+			{ handle },
+			{
+				select: data => data.fanGroups,
+			},
+		),
 	);
 
 	const allFanGroupOption = {
@@ -64,23 +68,27 @@ export function CreateOrUpdateEmailBroadcastModal({
 
 	const fanGroupOptions = [
 		allFanGroupOption,
-		...(fanGroups?.map(fanGroup => ({
+		...fanGroups.map(fanGroup => ({
 			label: fanGroup.name,
 			value: fanGroup.id,
-		})) ?? [allFanGroupOption]),
+		})),
 	];
 
-	const { mutateAsync: createEmailBroadcast } = api.emailBroadcast.create.useMutation({
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: createEmailBroadcast } = useMutation(
+		trpc.emailBroadcast.create.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
-	const { mutateAsync: updateEmailBroadcast } = api.emailBroadcast.update.useMutation({
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: updateEmailBroadcast } = useMutation(
+		trpc.emailBroadcast.update.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
 	const { form, onSubmit } = useCreateOrUpdateForm({
 		updateItem: mode === 'create' ? null : (lastSelectedItem ?? null),
@@ -93,10 +101,16 @@ export function CreateOrUpdateEmailBroadcastModal({
 			// scheduledAt: mode === 'update' ? selectedEmailBroadcast?.scheduledAt ?? null : null,
 		},
 		handleCreateItem: async d => {
-			await createEmailBroadcast(d);
+			await createEmailBroadcast({
+				...d,
+				handle,
+			});
 		},
 		handleUpdateItem: async d => {
-			await updateEmailBroadcast(d);
+			await updateEmailBroadcast({
+				...d,
+				handle,
+			});
 		},
 	});
 
@@ -145,13 +159,21 @@ export function CreateOrUpdateEmailBroadcastModal({
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
-		await apiUtils.emailBroadcast.invalidate();
+		await queryClient.invalidateQueries(
+			trpc.emailBroadcast.byWorkspace.queryFilter({ handle }),
+		);
 		form.reset();
-		setShowEmailBroadcastModal(false);
-	}, [form, focusGridList, apiUtils.emailBroadcast, setShowEmailBroadcastModal]);
+		await setShowEmailBroadcastModal(false);
+	}, [
+		form,
+		focusGridList,
+		queryClient,
+		trpc.emailBroadcast.byWorkspace,
+		handle,
+		setShowEmailBroadcastModal,
+	]);
 
-	const canEdit =
-		mode === 'create' || (mode === 'update' && form.watch('status') !== 'sent');
+	const canEdit = mode === 'create' || form.watch('status') !== 'sent';
 
 	const submitDisabled = !canEdit || (mode === 'update' && !form.formState.isDirty);
 
@@ -192,14 +214,14 @@ export function CreateOrUpdateEmailBroadcastModal({
 								label='To'
 								name='fanGroupId'
 								control={form.control}
-								options={fanGroupOptions ?? []}
+								options={fanGroupOptions}
 							/>
 
 							<SelectField
 								label='Email Template'
 								name='emailTemplateId'
 								control={form.control}
-								options={emailTemplateOptions ?? []}
+								options={emailTemplateOptions}
 							/>
 
 							<Label>Schedule</Label>

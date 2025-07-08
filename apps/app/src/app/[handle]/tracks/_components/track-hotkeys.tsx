@@ -1,8 +1,8 @@
 'use client';
 
-import { useModalHotKeys } from '@barely/lib/hooks/use-modal-hot-keys';
+import { useModalHotKeys } from '@barely/hooks';
 
-import { useTrackContext } from '~/app/[handle]/tracks/_components/track-context';
+import { useTrack } from '~/app/[handle]/tracks/_components/track-context';
 
 export function TrackHotkeys() {
 	const {
@@ -11,7 +11,7 @@ export function TrackHotkeys() {
 		setShowDeleteModal,
 		setShowCreateModal,
 		setShowUpdateModal,
-	} = useTrackContext();
+	} = useTrack();
 
 	useModalHotKeys({
 		setShowCreateModal,

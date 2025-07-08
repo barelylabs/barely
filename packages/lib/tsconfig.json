@@ -1,20 +1,20 @@
 {
-	"extends": "@barely/tsconfig/base.json",
+	"extends": "@barely/tsconfig/internal-package.json",
 	"compilerOptions": {
-		"jsx": "preserve",
-		"tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
+		"lib": ["ES2022", "DOM"],
+		"jsx": "preserve", // fixme: this is how we're handling email templates bubbling up through packages for now. i guess it makes sense - if a package is handling jsx, ts needs to know what to do with it 🤷‍♂️
+		"rootDir": ".",
+		"outDir": "dist",
+		"plugins": [
+			{
+				"name": "trpc-navigation-plugin",
+				"router": {
+					"filePath": "./src/trpc/routes/app.route.ts",
+					"variableName": "appRouter"
+				}
+			}
+		]
 	},
-	"include": [
-		"trigger.config.ts",
-		"env",
-		"../types/next-auth.d.ts",
-		"./atoms/**/*",
-		"./context/**/*",
-		"./files/**/*",
-		"./hooks/**/*",
-		"./server/**/*",
-		"./trigger/**/*",
-		"./utils/**/*"
-	],
-	"exclude": ["dist", "build", "node_modules"]
+	"include": ["src", "*.ts"],
+	"exclude": ["node_modules", "dist"]
 }

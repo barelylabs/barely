@@ -4,12 +4,12 @@ import type { Metadata } from 'next';
 import React from 'react';
 import { Inter as FontSans } from 'next/font/google';
 import localFont from 'next/font/local';
-import { getLandingPageData } from '@barely/lib/server/routes/landing-page/landing-page.render.fns';
-import { cn } from '@barely/lib/utils/cn';
+import { getLandingPageData } from '@barely/lib/functions/landing-page.render.fns';
+import { cn } from '@barely/utils';
 import { getDynamicStyleVariables } from 'node_modules/@barely/tailwind-config/lib/dynamic-tw.runtime';
 
 import { TailwindIndicator } from '@barely/ui/components/tailwind-indicator';
-import { Container } from '@barely/ui/elements/container';
+import { Container } from '@barely/ui/container';
 
 import Providers from '~/app/providers';
 
@@ -45,13 +45,14 @@ export default async function RootLayout({
 	params,
 }: {
 	children: React.ReactNode;
-	params: { handle: string; key: string[] };
+	params: Promise<{ handle: string; key: string[] }>;
 }) {
-	console.log(params.key.join('/'));
+	const { handle, key } = await params;
+	console.log(key.join('/'));
 
 	const landingPageData = await getLandingPageData({
-		handle: params.handle,
-		key: params.key.join('/'),
+		handle: handle,
+		key: key.join('/'),
 	});
 
 	if (!landingPageData) {

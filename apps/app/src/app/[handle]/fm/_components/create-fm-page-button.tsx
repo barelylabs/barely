@@ -1,16 +1,16 @@
 'use client';
 
-import { Button } from '@barely/ui/elements/button';
+import { Button } from '@barely/ui/button';
 
-import { useFmContext } from '~/app/[handle]/fm/_components/fm-context';
+import { useFmSearchParams } from '~/app/[handle]/fm/_components/fm-context';
 
 export function CreateFmPageButton() {
-	const { setShowCreateModal } = useFmContext();
+	const { setShowCreateModal } = useFmSearchParams();
 
 	return (
 		<Button
 			onClick={() => {
-				setShowCreateModal(true);
+				void setShowCreateModal(true);
 			}}
 			className='space-x-3'
 		>

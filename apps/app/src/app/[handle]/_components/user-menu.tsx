@@ -2,28 +2,19 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useWorkspaces } from '@barely/lib/hooks/use-workspaces';
-import { getAbsoluteUrl } from '@barely/lib/utils/url';
-// import { APP_BASE_URL } from "@barely/utils/constants";
+import { useUser, useWorkspaces } from '@barely/hooks';
+import { getAbsoluteUrl } from '@barely/utils';
 import { signOut } from 'next-auth/react';
 
-// import { signOut } from '@barely/server/auth';
-
-// import { experimental_useFormStatus as useFormStatus } from 'react-dom';
-
-// import { signOut } from 'next-auth/react';
-
-import { useUser } from '@barely/hooks/use-user';
-
-import { Avatar } from '@barely/ui/elements/avatar';
+import { Avatar } from '@barely/ui/avatar';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from '@barely/ui/elements/dropdown-menu';
-import { Icon } from '@barely/ui/elements/icon';
+} from '@barely/ui/dropdown-menu';
+import { Icon } from '@barely/ui/icon';
 
 // export function UserAccountNav({ user }: UserAccountNavProps) {
 export function UserAccountNav() {
@@ -35,10 +26,7 @@ export function UserAccountNav() {
 	);
 
 	const { firstName, lastName } = user;
-	const fullName =
-		firstName && lastName ? `${firstName} ${lastName}`
-		: firstName ? firstName
-		: null;
+	const fullName = firstName && lastName ? `${firstName} ${lastName}` : firstName;
 
 	const [signingOut, setSigningOut] = useState(false);
 
@@ -51,7 +39,7 @@ export function UserAccountNav() {
 					imageHeight={28}
 					imageS3Key={personalAccount?.avatarImageS3Key}
 					priority
-					notification={user.workspaceInvites && user.workspaceInvites.length > 0}
+					notification={user.workspaceInvites.length > 0}
 				/>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align='end'>
@@ -69,7 +57,7 @@ export function UserAccountNav() {
 				</DropdownMenuItem>
 
 				<DropdownMenuSeparator />
-				{user.workspaceInvites && user.workspaceInvites.length > 0 && (
+				{user.workspaceInvites.length > 0 && (
 					<>
 						<DropdownMenuItem asChild>
 							<Link href={`/${user.handle}/settings/team`}>

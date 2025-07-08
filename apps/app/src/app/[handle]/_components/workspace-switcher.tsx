@@ -1,33 +1,28 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { usePusherSocketId } from '@barely/lib/hooks/use-pusher';
+import { usePusherSocketId, useUser, useWorkspace, useWorkspaces } from '@barely/hooks';
+import {
+	capitalize,
+	cn,
+	toTitleCase,
+	truncate,
+	underscoresToSpaces,
+} from '@barely/utils';
 import { useSetAtom } from 'jotai';
 
-import { useUser } from '@barely/hooks/use-user';
-import { useWorkspace } from '@barely/hooks/use-workspace';
-import { useWorkspaces } from '@barely/hooks/use-workspaces';
-
-import { Avatar } from '@barely/ui/elements/avatar';
-import { Button } from '@barely/ui/elements/button';
+import { Avatar } from '@barely/ui/avatar';
+import { Button } from '@barely/ui/button';
 import {
 	Command,
 	CommandGroup,
 	CommandInput,
 	CommandItem,
 	CommandList,
-} from '@barely/ui/elements/command';
-import { Icon } from '@barely/ui/elements/icon';
-import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/elements/popover';
-import { Text } from '@barely/ui/elements/typography';
-
-import { cn } from '@barely/utils/cn';
-import {
-	capitalize,
-	toTitleCase,
-	truncate,
-	underscoresToSpaces,
-} from '@barely/utils/text';
+} from '@barely/ui/command';
+import { Icon } from '@barely/ui/icon';
+import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/popover';
+import { Text } from '@barely/ui/typography';
 
 import { showNewWorkspaceModalAtom } from '~/app/[handle]/_components/new-workspace-modal';
 
@@ -54,7 +49,7 @@ export function WorkspaceSwitcher() {
 
 	const normalizedObject = {
 		id: currentWorkspace.id,
-		name: currentWorkspace.name ?? currentWorkspace.handle,
+		name: currentWorkspace.name,
 		avatarImageS3Key: currentWorkspace.avatarImageS3Key,
 		type: toTitleCase(underscoresToSpaces(currentWorkspace.type)),
 	};
@@ -134,7 +129,7 @@ export function WorkspaceSwitcher() {
 										imageWidth={20}
 										imageHeight={20}
 									/>
-									{personalAccount.name ?? personalAccount.handle}
+									{personalAccount.name}
 									<Icon.check
 										className={cn(
 											'ml-auto h-4 w-4',
@@ -162,7 +157,7 @@ export function WorkspaceSwitcher() {
 										imageHeight={20}
 										priority
 									/>
-									{workspace.name ?? workspace.handle}
+									{workspace.name}
 									<Icon.check
 										className={cn(
 											'ml-auto h-4 w-4',

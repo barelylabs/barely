@@ -60,7 +60,7 @@ export interface ReceiptEmailProps {
 	total: string;
 }
 
-export default function ReceiptEmail({
+export function ReceiptEmailTemplate({
 	orderId,
 	sellerName,
 	supportEmail,
@@ -357,7 +357,7 @@ export default function ReceiptEmail({
 	);
 }
 
-ReceiptEmail.PreviewProps = {
+ReceiptEmailTemplate.PreviewProps = {
 	orderId: 'ML4F5L8522',
 	sellerName: 'Proper Youth',
 	// buyerName: 'Adam Barito',

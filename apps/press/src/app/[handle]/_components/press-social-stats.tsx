@@ -1,6 +1,6 @@
-import { Icon } from '@barely/ui/elements/icon';
+import { nFormatter } from '@barely/utils';
 
-import { nFormatter } from '@barely/utils/number';
+import { Icon } from '@barely/ui/icon';
 
 import { Section, SectionDiv } from '~/app/[handle]/_components/press-section';
 

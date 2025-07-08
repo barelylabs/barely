@@ -1,16 +1,15 @@
 'use client';
 
-import { useFmStatFilters } from '@barely/lib/hooks/use-fm-stat-filters';
-import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { cn } from '@barely/lib/utils/cn';
-import { api } from '@barely/server/api/react';
+import { useFmStatFilters, useWorkspace } from '@barely/hooks';
+import { calcPercent, cn, nFormatter } from '@barely/utils';
+import { useSuspenseQuery } from '@tanstack/react-query';
 
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Card } from '@barely/ui/card';
 import { AreaChart } from '@barely/ui/charts/area-chart';
-import { Card } from '@barely/ui/elements/card';
-import { Icon } from '@barely/ui/elements/icon';
-import { H, Text } from '@barely/ui/elements/typography';
-
-import { calcPercent, nFormatter } from '@barely/utils/number';
+import { Icon } from '@barely/ui/icon';
+import { H, Text } from '@barely/ui/typography';
 
 import { WebEventFilterBadges } from '~/app/[handle]/_components/filter-badges';
 
@@ -39,42 +38,45 @@ export function FmTimeseries() {
 		showYoutubeMusic,
 	} = uiFilters;
 
-	const { data: timeseries } = api.stat.fmTimeseries.useQuery(
-		{ ...filtersWithHandle },
-		{
-			select: data =>
-				data.map(row => ({
-					...row,
-					date: formatTimestamp(row.start),
-				})),
-		},
+	const trpc = useTRPC();
+	const { data: timeseries } = useSuspenseQuery(
+		trpc.stat.fmTimeseries.queryOptions(
+			{ ...filtersWithHandle },
+			{
+				select: data =>
+					data.map(row => ({
+						...row,
+						date: formatTimestamp(row.start),
+					})),
+			},
+		),
 	);
 
-	const totalVisits = timeseries?.reduce((acc, row) => acc + row.fm_views, 0);
-	const totalClicks = timeseries?.reduce((acc, row) => acc + row.fm_linkClicks, 0);
+	const totalVisits = timeseries.reduce((acc, row) => acc + row.fm_views, 0);
+	const totalClicks = timeseries.reduce((acc, row) => acc + row.fm_linkClicks, 0);
 
-	const totalSpotifyClicks = timeseries?.reduce(
+	const totalSpotifyClicks = timeseries.reduce(
 		(acc, row) => acc + row.fm_spotifyClicks,
 		0,
 	);
-	const totalAppleMusicClicks = timeseries?.reduce(
+	const totalAppleMusicClicks = timeseries.reduce(
 		(acc, row) => acc + row.fm_appleMusicClicks,
 		0,
 	);
-	const totalYoutubeClicks = timeseries?.reduce(
+	const totalYoutubeClicks = timeseries.reduce(
 		(acc, row) => acc + row.fm_youtubeClicks,
 		0,
 	);
-	const totalAmazonMusicClicks = timeseries?.reduce(
+	const totalAmazonMusicClicks = timeseries.reduce(
 		(acc, row) => acc + row.fm_amazonMusicClicks,
 		0,
 	);
-	const totalYoutubeMusicClicks = timeseries?.reduce(
+	const totalYoutubeMusicClicks = timeseries.reduce(
 		(acc, row) => acc + row.fm_youtubeMusicClicks,
 		0,
 	);
 
-	const chartData = (timeseries ?? [])?.map(row => ({
+	const chartData = timeseries.map(row => ({
 		...row,
 		visits: showVisits ? row.fm_views : undefined,
 		clicks: showClicks ? row.fm_linkClicks : undefined,
@@ -133,7 +135,7 @@ export function FmTimeseries() {
 								variant='sm/medium'
 								className='uppercase tracking-[-.05em] text-muted-foreground'
 							>
-								({calcPercent(totalClicks ?? 0, totalVisits ?? 0)})
+								({calcPercent(totalClicks, totalVisits)})
 							</Text>
 						</div>
 					</button>
@@ -144,11 +146,11 @@ export function FmTimeseries() {
 					>
 						<PlatformClicks
 							fmId={filtersWithHandle.assetId}
-							totalSpotify={totalSpotifyClicks ?? 0}
-							totalAppleMusic={totalAppleMusicClicks ?? 0}
-							totalYoutube={totalYoutubeClicks ?? 0}
-							totalAmazonMusic={totalAmazonMusicClicks ?? 0}
-							totalYoutubeMusic={totalYoutubeMusicClicks ?? 0}
+							totalSpotify={totalSpotifyClicks}
+							totalAppleMusic={totalAppleMusicClicks}
+							totalYoutube={totalYoutubeClicks}
+							totalAmazonMusic={totalAmazonMusicClicks}
+							totalYoutubeMusic={totalYoutubeMusicClicks}
 							showSpotify={showSpotify}
 							showAppleMusic={showAppleMusic}
 							showYoutube={showYoutube}
@@ -231,12 +233,15 @@ const PlatformClicks = ({
 	toggleYoutubeMusic: () => void;
 }) => {
 	const { handle } = useWorkspace();
-	const { data: platforms } = api.fm.byId.useQuery(
-		{ handle, id: fmId ?? '' },
-		{
-			enabled: !!fmId,
-			select: fm => fm?.links.map(link => link.platform),
-		},
+	const trpc = useTRPC();
+	const { data: platforms } = useSuspenseQuery(
+		trpc.fm.byId.queryOptions(
+			{ handle, id: fmId ?? '' },
+			{
+				enabled: !!fmId,
+				select: fm => fm?.links.map(link => link.platform),
+			},
+		),
 	);
 
 	const toggles = [

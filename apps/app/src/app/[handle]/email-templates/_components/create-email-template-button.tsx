@@ -1,16 +1,16 @@
 'use client';
 
-import { Button } from '@barely/ui/elements/button';
+import { Button } from '@barely/ui/button';
 
-import { useEmailTemplateContext } from './email-template-context';
+import { useEmailTemplateSearchParams } from './email-template-context';
 
 export function CreateEmailTemplateButton() {
-	const { setShowCreateModal } = useEmailTemplateContext();
+	const { setShowCreateModal } = useEmailTemplateSearchParams();
 
 	return (
 		<Button
 			onClick={() => {
-				setShowCreateModal(true);
+				void setShowCreateModal(true);
 			}}
 			className='space-x-3'
 		>

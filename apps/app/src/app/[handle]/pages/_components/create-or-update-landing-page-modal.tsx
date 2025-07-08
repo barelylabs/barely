@@ -1,49 +1,54 @@
 'use client';
 
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import { useCallback } from 'react';
-import { useCreateOrUpdateForm } from '@barely/lib/hooks/use-create-or-update-form';
-// import { useWorkspace } from '@barely/lib/hooks/use-workspace';
-import { api } from '@barely/lib/server/api/react';
-import {
-	defaultLandingPage,
-	upsertLandingPageSchema,
-} from '@barely/lib/server/routes/landing-page/landing-page.schema';
-import { sanitizeKey } from '@barely/lib/utils/key';
+import { useCreateOrUpdateForm, useFocusGridList, useWorkspace } from '@barely/hooks';
+import { sanitizeKey } from '@barely/utils';
+import { defaultLandingPage, upsertLandingPageSchema } from '@barely/validators';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { Label } from '@barely/ui/elements/label';
-import { MDXEditor } from '@barely/ui/elements/mdx-editor';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/elements/modal';
-import { Form, SubmitButton } from '@barely/ui/forms';
+// import { useWorkspace } from '@barely/hooks';
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { TextField } from '@barely/ui/forms/text-field';
+import { Label } from '@barely/ui/label';
+import { MDXEditor } from '@barely/ui/mdx-editor';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 
-import { useLandingPageContext } from '~/app/[handle]/pages/_components/landing-page-context';
+import {
+	useLandingPage,
+	useLandingPageSearchParams,
+} from '~/app/[handle]/pages/_components/landing-page-context';
 
 export function CreateOrUpdateLandingPageModal({ mode }: { mode: 'create' | 'update' }) {
-	const apiUtils = api.useUtils();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
+	const { handle } = useWorkspace();
 
 	/* landing page context */
-	const {
-		lastSelectedItem: selectedLandingPage,
-		showCreateModal,
-		setShowCreateModal,
-		showUpdateModal,
-		setShowUpdateModal,
-		focusGridList,
-	} = useLandingPageContext();
+	const { showCreateModal, setShowCreateModal, showUpdateModal, setShowUpdateModal } =
+		useLandingPageSearchParams();
+
+	const { lastSelectedItem: selectedLandingPage } = useLandingPage();
+	const focusGridList = useFocusGridList('landing-pages');
 
 	/* mutations */
-	const { mutateAsync: createLandingPage } = api.landingPage.create.useMutation({
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: createLandingPage } = useMutation(
+		trpc.landingPage.create.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
-	const { mutateAsync: updateLandingPage } = api.landingPage.update.useMutation({
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: updateLandingPage } = useMutation(
+		trpc.landingPage.update.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
 	/* form */
 	const { form, onSubmit: onSubmitLandingPage } = useCreateOrUpdateForm({
@@ -51,10 +56,16 @@ export function CreateOrUpdateLandingPageModal({ mode }: { mode: 'create' | 'upd
 		upsertSchema: upsertLandingPageSchema,
 		defaultValues: defaultLandingPage,
 		handleCreateItem: async d => {
-			await createLandingPage(d);
+			await createLandingPage({
+				...d,
+				handle,
+			});
 		},
 		handleUpdateItem: async d => {
-			await updateLandingPage(d);
+			await updateLandingPage({
+				...d,
+				handle,
+			});
 		},
 	});
 
@@ -80,11 +91,13 @@ export function CreateOrUpdateLandingPageModal({ mode }: { mode: 'create' | 'upd
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
-		setShowModal(false);
+		await setShowModal(false);
 		reset();
 
-		await apiUtils.landingPage.invalidate();
-	}, [apiUtils.landingPage, focusGridList, setShowModal, reset]);
+		await queryClient.invalidateQueries({
+			queryKey: trpc.landingPage.byWorkspace.queryKey(),
+		});
+	}, [queryClient, trpc, focusGridList, setShowModal, reset]);
 
 	return (
 		<Modal

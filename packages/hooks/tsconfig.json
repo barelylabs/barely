@@ -1,0 +1,20 @@
+{
+	"extends": "@barely/tsconfig/internal-package.json",
+	"compilerOptions": {
+		"lib": ["ES2022", "DOM"],
+		"jsx": "preserve",
+		"rootDir": "src",
+		"outDir": "dist",
+		"plugins": [
+			{
+				"name": "trpc-navigation-plugin",
+				"router": {
+					"filePath": "../lib/src/trpc/routes/app.route.ts",
+					"variableName": "appRouter"
+				}
+			}
+		]
+	},
+	"include": ["src", "*.ts"],
+	"exclude": ["node_modules"]
+}

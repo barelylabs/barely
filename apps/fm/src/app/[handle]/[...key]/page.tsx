@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import { Fragment } from 'react';
-import { getFmPageData } from '@barely/lib/server/routes/fm-page/fm-page.fns';
+import { getFmPageData } from '@barely/lib/functions/fm-page.fns';
 
-import { BackgroundImg } from '@barely/ui/elements/background-image';
-import { Img } from '@barely/ui/elements/img';
-import { Separator } from '@barely/ui/elements/separator';
-import { Text } from '@barely/ui/elements/typography';
+import { BackgroundImg } from '@barely/ui/background-image';
+import { Img } from '@barely/ui/img';
+import { Separator } from '@barely/ui/separator';
+import { Text } from '@barely/ui/typography';
 
 import { FmLinkButton } from '~/app/[handle]/[...key]/fm-link-button';
 import { LogVisit } from '~/app/[handle]/[...key]/fm-log-visit';
@@ -13,18 +13,13 @@ import { LogVisit } from '~/app/[handle]/[...key]/fm-log-visit';
 export async function generateMetadata({
 	params,
 }: {
-	params: { handle: string; key: string[] };
+	params: Promise<{ handle: string; key: string[] }>;
 }): Promise<Metadata> {
+	const awaitedParams = await params;
 	const data = await getFmPageData({
-		handle: params.handle,
-		key: params.key.join('/'),
+		handle: awaitedParams.handle,
+		key: awaitedParams.key.join('/'),
 	});
-
-	if (!data) {
-		return {
-			title: 'barely.fm',
-		};
-	}
 
 	return {
 		title: `${data.title} ${data.workspace?.name ? `by ${data.workspace.name}` : ''}`,
@@ -34,18 +29,15 @@ export async function generateMetadata({
 export default async function LandingPage({
 	params,
 }: {
-	params: { handle: string; key: string[] };
+	params: Promise<{ handle: string; key: string[] }>;
 }) {
-	const key = params.key.join('/');
+	const awaitedParams = await params;
+	const key = awaitedParams.key.join('/');
 
 	const data = await getFmPageData({
-		handle: params.handle,
+		handle: awaitedParams.handle,
 		key: key,
 	});
-
-	if (!data) {
-		return <div>Not found</div>;
-	}
 
 	const { links, ...fm } = data;
 

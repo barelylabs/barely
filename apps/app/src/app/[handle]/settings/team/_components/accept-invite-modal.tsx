@@ -1,18 +1,21 @@
 'use client';
 
-import type { z } from 'zod';
-import { useToast } from '@barely/lib/hooks/use-toast';
-import { useZodForm } from '@barely/lib/hooks/use-zod-form';
-import { api } from '@barely/lib/server/api/react';
-import { acceptInviteSchema } from '@barely/lib/server/routes/workspace-invite/workspace-invite.schema';
+import type { z } from 'zod/v4';
+import { useZodForm } from '@barely/hooks';
+import { useToast } from '@barely/toast';
+import { acceptInviteSchema } from '@barely/validators';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { Modal, ModalBody, ModalHeader } from '@barely/ui/elements/modal';
-import { Form, SubmitButton } from '@barely/ui/forms';
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Form, SubmitButton } from '@barely/ui/forms/form';
+import { Modal, ModalBody, ModalHeader } from '@barely/ui/modal';
 
 import { usePersonalInvitesContext } from '~/app/[handle]/settings/team/_components/personal-invites-context';
 
 export function AcceptInviteModal() {
-	const apiUtils = api.useUtils();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
 	const { toast } = useToast();
 
 	const {
@@ -29,15 +32,17 @@ export function AcceptInviteModal() {
 		},
 	});
 
-	const { mutateAsync: acceptInvite } = api.workspaceInvite.acceptInvite.useMutation();
+	const { mutateAsync: acceptInvite } = useMutation({
+		...trpc.workspaceInvite.acceptInvite.mutationOptions(),
+	});
 
 	const handleSubmit = async (data: z.infer<typeof acceptInviteSchema>) => {
 		await acceptInvite(data).catch(error => {
 			return toast.error(String(error));
 		});
 		setShowAcceptInviteModal(false);
-		await apiUtils.user.workspaceInvites.invalidate();
-		await apiUtils.user.workspaces.invalidate();
+		await queryClient.invalidateQueries(trpc.user.workspaceInvites.queryFilter());
+		await queryClient.invalidateQueries(trpc.user.workspaces.queryFilter());
 	};
 
 	if (!acceptInviteWorkspaceId) return null;

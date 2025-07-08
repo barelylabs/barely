@@ -1,6 +1,6 @@
-import { Button } from '@barely/ui/elements/button';
-import { Card } from '@barely/ui/elements/card';
-import { H, Text } from '@barely/ui/elements/typography';
+import { Button } from '@barely/ui/button';
+import { Card } from '@barely/ui/card';
+import { H, Text } from '@barely/ui/typography';
 
 const LetsGetStarted = () => {
 	return (

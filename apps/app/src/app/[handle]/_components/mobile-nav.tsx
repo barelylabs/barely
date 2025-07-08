@@ -3,20 +3,17 @@
 import * as React from 'react';
 import Link from 'next/link';
 
-import { Button } from '@barely/ui/elements/button';
+import { Button } from '@barely/ui/button';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
-	// DropdownMenuGroup,
 	DropdownMenuItem,
-	// DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from '@barely/ui/elements/dropdown-menu';
-import { Icon } from '@barely/ui/elements/icon';
-import { ScrollArea } from '@barely/ui/elements/scroll-area';
+} from '@barely/ui/dropdown-menu';
+import { Icon } from '@barely/ui/icon';
+import { ScrollArea } from '@barely/ui/scroll-area';
 
-// import { docsConfig } from '@/config/docs';
 import { siteConfig } from '~/config/site';
 
 export function MobileNav() {

@@ -1,0 +1,42 @@
+{
+	"name": "@barely/auth",
+	"private": true,
+	"version": "0.1.0",
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./utils": "./src/utils.ts",
+		"./app.server": "./src/app.server.ts",
+		"./app.client": "./src/app.client.ts",
+		"./get-url": "./src/get-url.ts"
+	},
+	"license": "MIT",
+	"scripts": {
+		"build": "tsc",
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"dev": "tsc",
+		"format": "prettier --check . --ignore-path ../../.gitignore",
+		"lint": "eslint",
+		"typecheck": "tsc --noEmit --emitDeclarationOnly false"
+	},
+	"dependencies": {
+		"@barely/const": "workspace:*",
+		"@barely/db": "workspace:*",
+		"@barely/email": "workspace:*",
+		"@t3-oss/env-nextjs": "catalog:",
+		"better-auth": "catalog:",
+		"next": "catalog:",
+		"react": "catalog:react19",
+		"react-dom": "catalog:react19",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@barely/eslint-config": "workspace:*",
+		"@barely/prettier-config": "workspace:*",
+		"@barely/tsconfig": "workspace:*",
+		"eslint": "catalog:",
+		"prettier": "catalog:",
+		"typescript": "catalog:"
+	},
+	"prettier": "@barely/prettier-config"
+}

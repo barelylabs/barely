@@ -3,13 +3,13 @@ import '~/styles/globals.css';
 import React from 'react';
 import { Inter as FontSans } from 'next/font/google';
 import localFont from 'next/font/local';
-import { getFunnelByParams } from '@barely/lib/server/routes/cart/cart.fns';
-import { cn } from '@barely/lib/utils/cn';
+import { getFunnelByParams } from '@barely/lib/functions/cart.fns';
+import { Toaster } from '@barely/toast';
+import { cn } from '@barely/utils';
 import { getDynamicStyleVariables } from 'node_modules/@barely/tailwind-config/lib/dynamic-tw.runtime';
 
 import { TailwindIndicator } from '@barely/ui/components/tailwind-indicator';
-import { Container } from '@barely/ui/elements/container';
-import { Toaster } from '@barely/ui/elements/toaster';
+import { Container } from '@barely/ui/container';
 
 import Providers from './providers';
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { Countdown } from '@barely/ui/elements/countdown';
+import { Countdown } from '@barely/ui/countdown';
 
 import { useUpsellCart } from '~/app/[mode]/[handle]/[key]/(after-main)/customize/_components/use-upsell-cart';
 
