@@ -79,6 +79,7 @@ jobs:
       - name: build project artifacts
         run: |
           pnpm build:${{ inputs.environment }} --filter=@barely/${{ inputs.app_name }} --token=${{ secrets.VERCEL_TOKEN }}
+          cp -r apps/${{ inputs.app_name }}/.vercel .
 
       - name: deploy to vercel
         id: deploy
@@ -89,7 +90,6 @@ jobs:
             ENV_OPTIONS=""
           fi
 
-          cd apps/${{ inputs.app_name }}
           deployment_url=$(pnpm vercel deploy --prebuilt $ENV_OPTIONS ${{ inputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }} --debug)          
 
           inspect=$(pnpm vercel inspect $deployment_url --token=${{ secrets.VERCEL_TOKEN }} --debug 2>&1)
