@@ -149,10 +149,7 @@ export function CreateOrUpdateFanGroupModal({ mode }: { mode: 'create' | 'update
 						`Update ${selectedFanGroup?.name ?? ''}`
 					:	'Create Fan Group'
 				}
-			>
-				<pre>{JSON.stringify(selectedFanGroup?.count, null, 2)}</pre>
-				{/* <pre>{JSON.stringify(selectedFanGroup?.matchingFans, null, 2)}</pre> */}
-			</ModalHeader>
+			></ModalHeader>
 
 			<Form form={form} onSubmit={handleSubmit}>
 				<ModalBody>

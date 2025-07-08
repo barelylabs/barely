@@ -77,25 +77,3 @@ export function CampaignTabs() {
 		/>
 	);
 }
-
-// function StageCount(
-// 	workspaceId: string,
-// 	stage: keyof CombinedRouterOutputs['campaign']['countByWorkspaceId'],
-// ) {
-// 	const { data: total, isLoading } = api.campaign.countByWorkspaceId.useQuery(
-// 		{
-// 			workspaceId,
-// 		},
-// 		{
-// 			select: count => count[stage],
-// 		},
-// 	);
-
-// 	if (isLoading) return <Skeleton className='h-4 w-[14px]'></Skeleton>;
-
-// 	return (
-// 		<span className='text-muted-foregroun flex h-4 w-[14px] items-center font-normal text-muted-foreground'>
-// 			{total}
-// 		</span>
-// 	);
-// }
