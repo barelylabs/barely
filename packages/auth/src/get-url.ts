@@ -1,4 +1,5 @@
-import type { APPS } from '../env';
+import type { APPS } from '@barely/const';
+
 import { authEnv } from '../env';
 
 const raise = (err: unknown): never => {
@@ -53,6 +54,11 @@ export function getBaseUrl(app: (typeof APPS)[number], absolute = false) {
 					authEnv.NEXT_PUBLIC_PRESS_DEV_PORT ??
 					raise('NEXT_PUBLIC_PRESS_DEV_PORT not found');
 				break;
+			case 'sparrow':
+				devPort =
+					authEnv.NEXT_PUBLIC_SPARROW_DEV_PORT ??
+					raise('NEXT_PUBLIC_SPARROW_DEV_PORT not found');
+				break;
 			case 'www':
 				devPort =
 					authEnv.NEXT_PUBLIC_WWW_DEV_PORT ?? raise('NEXT_PUBLIC_WWW_DEV_PORT not found');
@@ -89,6 +95,9 @@ export function getBaseUrl(app: (typeof APPS)[number], absolute = false) {
 			break;
 		case 'press':
 			baseUrl = authEnv.NEXT_PUBLIC_PRESS_BASE_URL;
+			break;
+		case 'sparrow':
+			baseUrl = authEnv.NEXT_PUBLIC_SPARROW_BASE_URL;
 			break;
 		case 'www':
 			baseUrl = authEnv.NEXT_PUBLIC_WWW_BASE_URL;

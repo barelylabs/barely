@@ -1346,6 +1346,9 @@ importers:
 
   packages/auth:
     dependencies:
+      '@barely/const':
+        specifier: workspace:*
+        version: link:../const
       '@barely/db':
         specifier: workspace:*
         version: link:../db

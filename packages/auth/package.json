@@ -20,6 +20,7 @@
 		"typecheck": "tsc --noEmit --emitDeclarationOnly false"
 	},
 	"dependencies": {
+		"@barely/const": "workspace:*",
 		"@barely/db": "workspace:*",
 		"@barely/email": "workspace:*",
 		"@t3-oss/env-nextjs": "catalog:",

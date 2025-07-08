@@ -7,5 +7,6 @@ export const APPS = [
 	'link',
 	'page',
 	'press',
+	'sparrow',
 	'www',
 ] as const;
