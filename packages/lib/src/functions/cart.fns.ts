@@ -116,7 +116,6 @@ export async function getFunnelByParams(handle: string, key: string) {
 					type: true,
 					brandHue: true,
 					brandAccentHue: true,
-
 					bio: true,
 					bookingTitle: true,
 					bookingName: true,

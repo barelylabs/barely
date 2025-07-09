@@ -45,10 +45,10 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 				httpBatchLink({
 					transformer: SuperJSON,
-					url: getAbsoluteUrl('manageEmail', 'api/trpc/emailManage'),
+					url: getAbsoluteUrl('cart', 'api/trpc/cart'),
 					headers() {
 						const headers = new Headers();
-						headers.set('x-trpc-source', 'nextjs-react-manageEmail');
+						headers.set('x-trpc-source', 'nextjs-react-cart');
 						return headers;
 					},
 				}),
