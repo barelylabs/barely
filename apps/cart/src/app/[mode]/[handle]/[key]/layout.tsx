@@ -27,10 +27,12 @@ export default async function RootLayout({
 	params,
 	children,
 }: {
-	params: { handle: string; key: string };
+	params: Promise<{ handle: string; key: string }>;
 	children: React.ReactNode;
 }) {
-	const cartFunnel = await getFunnelByParams(params.handle, params.key);
+	const { handle, key } = await params;
+	const cartFunnel = await getFunnelByParams(handle, key);
+	// todo: 👆 we should move this to upstash and cache on the server, so we can start rendering some things faster (brandStyles, colors, main product image/pricing, etc.) while we wait for the cart to be initialized.
 
 	if (!cartFunnel) {
 		return (

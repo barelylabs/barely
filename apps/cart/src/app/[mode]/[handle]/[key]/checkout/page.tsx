@@ -7,8 +7,7 @@ import { cartPageSearchParams } from '@barely/validators';
 import { getDynamicStyleVariables } from 'node_modules/@barely/tailwind-config/lib/dynamic-tw.runtime';
 
 import { ElementsProvider } from '~/app/[mode]/[handle]/[key]/_components/elements-provider';
-// import { HydrateClient, prefetch, trpc, trpcCaller } from '~/trpc/server'; // todo: take advantage of prefetching/streaming to client (maybe the page starts a certain color or we cache the cart colors so that can stream faster than stripe takes to load)
-import { trpcCaller } from '~/trpc/server';
+import { HydrateClient, prefetch, trpc, trpcCaller } from '~/trpc/server';
 import { CheckoutForm } from './checkout-form';
 
 export default async function CartPage({
@@ -35,6 +34,7 @@ export default async function CartPage({
 		return redirect('/');
 	}
 
+	/* we have landing pages call warmup to get around cold start */
 	if (cartParams.data.warmup) {
 		return <div>warming up</div>;
 	}
@@ -49,7 +49,7 @@ export default async function CartPage({
 		city: isDevelopment() ? 'New York' : headersList.get('x-vercel-ip-city'),
 	};
 
-	const initialData =
+	const { cart, publicFunnel } =
 		cartId ?
 			await trpcCaller.byIdAndParams({ id: cartId, handle, key })
 		:	await trpcCaller.create({
@@ -57,21 +57,25 @@ export default async function CartPage({
 				key,
 				shipTo,
 			});
+	// todo: 👆 get publicFunnel from upstash cache for faster initial rendering
 
 	const { defaultHex: colorPrimary } = getDynamicStyleVariables({
 		baseName: 'brand',
-		hue: initialData.publicFunnel.workspace.brandHue,
+		hue: publicFunnel.workspace.brandHue,
 	});
 
+	prefetch(trpc.byIdAndParams.queryOptions({ id: cart.id, handle, key }));
+	// todo: 👆 better to just set the data here instead of prefetching. we should already have it.
+
 	return (
-		<>
+		<HydrateClient>
 			<ElementsProvider
 				stage='checkoutCreated'
-				initialData={initialData}
+				initialData={{ cart, publicFunnel }}
 				theme={{ colorPrimary }}
 			>
-				<CheckoutForm mode={mode} initialData={initialData} />
+				<CheckoutForm mode={mode} publicFunnel={publicFunnel} cartId={cart.id} />
 			</ElementsProvider>
-		</>
+		</HydrateClient>
 	);
 }

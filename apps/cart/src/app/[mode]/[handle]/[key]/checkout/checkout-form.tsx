@@ -1,7 +1,6 @@
 'use client';
 
-// import type { EventTrackingProps } from '@barely/lib/server/routes/event/event-report.schema';
-import type { CartRouterOutputs } from '@barely/api/public/cart.router';
+import type { PublicFunnel } from '@barely/lib/functions/cart.fns';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { APPAREL_SIZES, isApparelSize } from '@barely/const';
@@ -40,25 +39,41 @@ import {
 
 export function CheckoutForm({
 	mode,
-	initialData,
-	// shouldWriteToCookie,
-	// tracking,
+	publicFunnel,
+	cartId,
+	// initialData,
 }: {
 	mode: 'preview' | 'live';
-	initialData:
-		| NonNullable<CartRouterOutputs['create']>
-		| NonNullable<CartRouterOutputs['byIdAndParams']>;
+	publicFunnel: PublicFunnel;
+	cartId: string;
+	// initialData:
+	// 	| NonNullable<CartRouterOutputs['create']>
+	// 	| NonNullable<CartRouterOutputs['byIdAndParams']>;
 }) {
 	const router = useRouter();
-	const { cart: initialCart, publicFunnel } = initialData;
+	// const { cart: initialCart, publicFunnel } = initialData;
 
 	const trpc = useCartTRPC();
 	const queryClient = useQueryClient();
 
 	const { mutate: logEvent } = useMutation(trpc.log.mutationOptions());
 
+	/* stripe */
+	const stripe = useStripe();
+	const elements = useElements();
+
+	const {
+		data: { cart },
+	} = useSuspenseQuery(
+		trpc.byIdAndParams.queryOptions({
+			id: cartId,
+			handle: publicFunnel.handle,
+			key: publicFunnel.key,
+		}),
+	);
+
 	useEffect(() => {
-		if (initialCart.id) {
+		if (cartId) {
 			setCartStageCookie({
 				handle: publicFunnel.handle,
 				key: publicFunnel.key,
@@ -68,61 +83,22 @@ export function CheckoutForm({
 			setCartIdCookie({
 				handle: publicFunnel.handle,
 				key: publicFunnel.key,
-				cartId: initialCart.id,
+				cartId,
 			}).catch(console.error);
 
 			logEvent({
-				cartId: initialCart.id,
+				cartId,
 				event: 'cart/viewCheckout',
 			});
 		}
-	}, [
-		// tracking,
-		initialCart.id,
-
-		publicFunnel.handle,
-		publicFunnel.key,
-		// shouldWriteToCookie,
-		logEvent,
-	]);
-
-	/* stripe */
-	const stripe = useStripe();
-	const elements = useElements();
-
-	// const {
-	// 	data: { cart, publicFunnel },
-	// } = cartApi.byIdAndParams.useQuery(
-	// 	{
-	// 		id: initialCart.id,
-	// 		handle: initialFunnel.handle,
-	// 		key: initialFunnel.key,
-	// 	},
-	// 	{
-	// 		initialData: {
-	// 			cart: initialCart,
-	// 			publicFunnel: {
-	// 				...initialFunnel,
-	// 			},
-	// 		},
-	// 	},
-	// );
-	const {
-		data: { cart },
-	} = useSuspenseQuery(
-		trpc.byIdAndParams.queryOptions({
-			id: initialCart.id,
-			handle: publicFunnel.handle,
-			key: publicFunnel.key,
-		}),
-	);
+	}, [cartId, publicFunnel.handle, publicFunnel.key, logEvent]);
 
 	const { mutate: mutateCart } = useMutation(
 		trpc.updateCheckoutFromCheckout.mutationOptions({
 			onMutate: async data => {
 				await queryClient.cancelQueries({
 					queryKey: trpc.byIdAndParams.queryKey({
-						id: initialCart.id,
+						id: cartId,
 						handle: publicFunnel.handle,
 						key: publicFunnel.key,
 					}),
@@ -130,7 +106,7 @@ export function CheckoutForm({
 
 				const prevCart = queryClient.getQueryData(
 					trpc.byIdAndParams.queryKey({
-						id: initialCart.id,
+						id: cartId,
 						handle: publicFunnel.handle,
 						key: publicFunnel.key,
 					}),
@@ -140,7 +116,7 @@ export function CheckoutForm({
 
 				queryClient.setQueryData(
 					trpc.byIdAndParams.queryKey({
-						id: initialCart.id,
+						id: cartId,
 						handle: publicFunnel.handle,
 						key: publicFunnel.key,
 					}),
@@ -160,7 +136,7 @@ export function CheckoutForm({
 			onSettled: async () => {
 				await queryClient.invalidateQueries({
 					queryKey: trpc.byIdAndParams.queryKey({
-						id: initialCart.id,
+						id: cartId,
 						handle: publicFunnel.handle,
 						key: publicFunnel.key,
 					}),
@@ -177,7 +153,7 @@ export function CheckoutForm({
 		updateData: Partial<z.infer<typeof updateCheckoutCartFromCheckoutSchema>>,
 	) => {
 		mutateCart({
-			id: initialCart.id,
+			id: cartId,
 			handle: publicFunnel.handle,
 			key: publicFunnel.key,
 			...updateData,
@@ -190,7 +166,7 @@ export function CheckoutForm({
 			email,
 		});
 		logEvent({
-			cartId: initialCart.id,
+			cartId,
 			event: 'cart/addEmail',
 		});
 	};
@@ -202,7 +178,7 @@ export function CheckoutForm({
 	) => {
 		updateCart(data);
 		logEvent({
-			cartId: initialCart.id,
+			cartId,
 			event: 'cart/addShippingInfo',
 		});
 	};
@@ -212,7 +188,7 @@ export function CheckoutForm({
 	const updatePayWhatYouWantPrice = async (value: number) => {
 		await queryClient.cancelQueries({
 			queryKey: trpc.byIdAndParams.queryKey({
-				id: initialCart.id,
+				id: cartId,
 				handle: publicFunnel.handle,
 				key: publicFunnel.key,
 			}),
@@ -220,7 +196,7 @@ export function CheckoutForm({
 
 		const prevCart = queryClient.getQueryData(
 			trpc.byIdAndParams.queryKey({
-				id: initialCart.id,
+				id: cartId,
 				handle: publicFunnel.handle,
 				key: publicFunnel.key,
 			}),
@@ -230,7 +206,7 @@ export function CheckoutForm({
 
 		queryClient.setQueryData(
 			trpc.byIdAndParams.queryKey({
-				id: initialCart.id,
+				id: cartId,
 				handle: publicFunnel.handle,
 				key: publicFunnel.key,
 			}),
@@ -252,7 +228,7 @@ export function CheckoutForm({
 		});
 
 		logEvent({
-			cartId: initialCart.id,
+			cartId,
 			event: 'cart/updateMainProductPayWhatYouWantPrice',
 		});
 	};
@@ -264,7 +240,7 @@ export function CheckoutForm({
 	const handlePaymentAdded = () => {
 		if (!paymentAdded) {
 			logEvent({
-				cartId: initialCart.id,
+				cartId,
 				event: 'cart/addPaymentInfo',
 			});
 			setPaymentAdded(true);
