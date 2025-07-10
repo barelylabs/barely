@@ -54,25 +54,24 @@
 #### Error: "Cannot modify the node endpoint since it's used in Materialized Nodes"
 
 **Problem**: Trying to push pipes that feed materialized views to a branch
-**Cause**: Tinybird restricts modifications to pipes that feed MVs, even in branches with data copy
+**Cause**: Tinybird restricts modifications to pipes that feed MVs in branches
 **Solutions**:
 
-1. **For CI/CD** (temporary until Git integration):
+1. **With Git Integration** (recommended):
 
-   - Use selective push approach
-   - Push datasources first
-   - Validate pipes without pushing them
-   - Full testing happens on merge to main
+   - Use `tb deploy` instead of `tb push`
+   - Git integration handles MV dependencies automatically
+   - See [GIT_INTEGRATION_SETUP.md](./GIT_INTEGRATION_SETUP.md)
 
 2. **For development branches**:
 
-   - Avoid modifying pipes that feed MVs
-   - Or recreate the MVs after pipe changes
-   - Use `tb deploy` after Git integration is set up
+   - Create branches WITH data copy: `echo "y" | tb branch create branch_name`
+   - Use `tb deploy` if Git integration is set up
+   - Or recreate the MVs after pipe changes if needed
 
-3. **Permanent fix**: Set up Git integration on main branch
-   - Enables `tb deploy` which handles MV dependencies better
-   - See [GIT_INTEGRATION_SETUP.md](./GIT_INTEGRATION_SETUP.md)
+3. **Without Git Integration**:
+   - Avoid modifying pipes that feed MVs in branches
+   - Or drop and recreate the MVs in the branch
 
 #### Error: "Permission denied"
 
@@ -139,6 +138,18 @@
 1. PR was merged to main branch
 2. CI/CD workflow completed successfully
 3. Check GitHub Actions logs for errors
+
+### Git Integration Issues
+
+#### Error: "Error checking relationship between HEAD and Workspace commit"
+
+**Problem**: Trying to use `tb deploy` on a branch that doesn't have the workspace's tracked commit as an ancestor
+**Cause**: Git integration tracks commits, and branches need to be based on the tracked commit
+**Solutions**:
+
+1. **For CI branches**: Use `tb push --force` instead of `tb deploy`
+2. **For feature branches**: Rebase on main to include the tracked commit
+3. **Override commit** (careful): `tb init --override-commit <ancestor-commit>`
 
 ### Development Workflow Issues
 
