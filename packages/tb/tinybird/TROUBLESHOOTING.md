@@ -58,11 +58,13 @@
 **Solutions**:
 
 1. **With Git Integration** (recommended):
+
    - Use `tb deploy` instead of `tb push`
    - Git integration handles MV dependencies automatically
    - See [GIT_INTEGRATION_SETUP.md](./GIT_INTEGRATION_SETUP.md)
 
 2. **For development branches**:
+
    - Create branches WITH data copy: `echo "y" | tb branch create branch_name`
    - Use `tb deploy` if Git integration is set up
    - Or recreate the MVs after pipe changes if needed
