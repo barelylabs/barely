@@ -273,6 +273,56 @@ Each branch has its own tokens. The CLI automatically uses the branch token when
 - Historical data might not be available
 - Check data copy settings when creating branch
 
+## Branch Cleanup
+
+### Automatic Cleanup
+
+Branches are automatically cleaned up in these scenarios:
+
+1. **CI Branches** (`ci_pr_*`): Deleted when PR is closed or merged
+2. **Dev Branches** (`*__dev_*`): Deleted when PR is merged and git branch is deleted
+3. **Scheduled Cleanup**: Daily at 2 AM UTC, removes orphaned branches
+
+### Manual Cleanup
+
+#### Using the Script
+
+```bash
+# Dry run - see what would be deleted
+./scripts/cleanup-tinybird-branches.sh
+
+# Delete all stale branches
+./scripts/cleanup-tinybird-branches.sh --force
+
+# Delete only CI branches
+./scripts/cleanup-tinybird-branches.sh --force --ci-only
+
+# Delete only dev branches
+./scripts/cleanup-tinybird-branches.sh --force --dev-only
+
+# Delete branches matching pattern
+./scripts/cleanup-tinybird-branches.sh --force --pattern 'test_.*'
+
+# Skip confirmation
+./scripts/cleanup-tinybird-branches.sh --force --yes
+```
+
+#### Using GitHub Actions
+
+1. Go to Actions → "Tinybird Branch Cleanup"
+2. Click "Run workflow"
+3. Choose options:
+   - **Dry run**: See what would be deleted without actually deleting
+   - **Pattern**: Optional regex to filter branches
+4. Review the summary report
+
+### Cleanup Rules
+
+- **CI branches** (`ci_pr_123`): Deleted if PR #123 is closed
+- **Dev branches** (`feature_xyz__dev_alice`): Deleted if git branch doesn't exist
+- **Main branch**: Never deleted (protected)
+- **Other branches**: Must be manually deleted
+
 ## Advanced Topics
 
 ### Production-like Testing

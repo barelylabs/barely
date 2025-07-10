@@ -124,6 +124,16 @@ cd packages/tb/tinybird
 - Merges to `main` deploy to production workspace
 - Branches are automatically cleaned up
 
+### Branch Cleanup
+
+Tinybird branches are automatically cleaned up:
+
+- **On PR close/merge**: CI branches (`ci_pr_*`) and dev branches are removed
+- **Daily cleanup**: Scheduled workflow removes orphaned branches
+- **Manual cleanup**: Run `./scripts/cleanup-tinybird-branches.sh`
+
+See [BRANCH_WORKFLOW.md](./BRANCH_WORKFLOW.md#branch-cleanup) for details.
+
 ## Documentation
 
 - [Tinybird CLI Docs](https://www.tinybird.co/docs/cli)

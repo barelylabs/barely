@@ -1,0 +1,243 @@
+name: Tinybird Branch Cleanup
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run mode (show what would be deleted)'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      branch_pattern:
+        description: 'Branch pattern to clean (regex, empty for all stale branches)'
+        required: false
+        default: ''
+
+jobs:
+  cleanup-branches:
+    name: Cleanup Stale Tinybird Branches
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Tinybird CLI
+        run: |
+          pip install tinybird-cli
+          tb --version
+
+      - name: Analyze Branches
+        env:
+          TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
+          TB_HOST: https://api.us-east.tinybird.co
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Establish workspace context
+          tb workspace use barely
+          
+          echo "=== Tinybird Branch Cleanup Analysis ==="
+          echo "Dry run: ${{ github.event.inputs.dry_run || 'true' }}"
+          echo "Pattern: ${{ github.event.inputs.branch_pattern || 'all stale branches' }}"
+          echo
+          
+          # Get all Tinybird branches
+          tb branch ls > all_branches.txt
+          
+          # Initialize arrays for different types of branches
+          > ci_branches_to_delete.txt
+          > dev_branches_to_delete.txt
+          > other_branches.txt
+          
+          # Get list of open PR numbers
+          gh pr list --state open --json number --jq '.[].number' > open_prs.txt || echo "Failed to get open PRs"
+          
+          # Process each branch
+          while IFS= read -r branch_line; do
+            # Skip header line
+            if [[ "$branch_line" == *"Name"* ]] || [[ "$branch_line" == *"──"* ]]; then
+              continue
+            fi
+            
+            # Extract branch name and creation date
+            BRANCH_NAME=$(echo "$branch_line" | awk '{print $1}')
+            
+            # Skip empty lines or main branch
+            if [ -z "$BRANCH_NAME" ] || [ "$BRANCH_NAME" == "main" ]; then
+              continue
+            fi
+            
+            # Apply user pattern filter if provided
+            if [ -n "${{ github.event.inputs.branch_pattern }}" ]; then
+              if ! echo "$BRANCH_NAME" | grep -qE "${{ github.event.inputs.branch_pattern }}"; then
+                continue
+              fi
+            fi
+            
+            # Categorize branches
+            if [[ "$BRANCH_NAME" =~ ^ci_pr_([0-9]+)$ ]]; then
+              PR_NUM="${BASH_REMATCH[1]}"
+              # Check if PR is still open
+              if ! grep -q "^$PR_NUM$" open_prs.txt; then
+                echo "$BRANCH_NAME" >> ci_branches_to_delete.txt
+              fi
+            elif [[ "$BRANCH_NAME" =~ __dev_ ]]; then
+              # Extract the git branch part (everything before __dev_)
+              GIT_BRANCH_PART=$(echo "$BRANCH_NAME" | sed 's/__dev_.*//')
+              
+              # Convert back to potential git branch names (try both / and -)
+              GIT_BRANCH_SLASH=$(echo "$GIT_BRANCH_PART" | tr '_' '/')
+              GIT_BRANCH_HYPHEN=$(echo "$GIT_BRANCH_PART" | tr '_' '-')
+              
+              # Check if corresponding git branch exists
+              BRANCH_EXISTS=false
+              if git ls-remote --heads origin | grep -qE "(${GIT_BRANCH_SLASH}|${GIT_BRANCH_HYPHEN})$"; then
+                BRANCH_EXISTS=true
+              fi
+              
+              if [ "$BRANCH_EXISTS" = "false" ]; then
+                echo "$BRANCH_NAME" >> dev_branches_to_delete.txt
+              fi
+            else
+              echo "$BRANCH_NAME" >> other_branches.txt
+            fi
+          done < all_branches.txt
+          
+          # Report findings
+          echo "=== Branches to Clean ==="
+          echo
+          echo "CI Branches (from closed PRs):"
+          if [ -s ci_branches_to_delete.txt ]; then
+            cat ci_branches_to_delete.txt | sed 's/^/  - /'
+          else
+            echo "  None found"
+          fi
+          echo
+          
+          echo "Dev Branches (orphaned):"
+          if [ -s dev_branches_to_delete.txt ]; then
+            cat dev_branches_to_delete.txt | sed 's/^/  - /'
+          else
+            echo "  None found"
+          fi
+          echo
+          
+          echo "Other Branches (not auto-cleaned):"
+          if [ -s other_branches.txt ]; then
+            cat other_branches.txt | sed 's/^/  - /'
+          else
+            echo "  None found"
+          fi
+          
+          # Count branches
+          CI_COUNT=$(wc -l < ci_branches_to_delete.txt)
+          DEV_COUNT=$(wc -l < dev_branches_to_delete.txt)
+          TOTAL_COUNT=$((CI_COUNT + DEV_COUNT))
+          
+          echo
+          echo "=== Summary ==="
+          echo "Total branches to delete: $TOTAL_COUNT"
+          echo "  - CI branches: $CI_COUNT"
+          echo "  - Dev branches: $DEV_COUNT"
+
+      - name: Delete Branches
+        if: github.event.inputs.dry_run != 'true'
+        env:
+          TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
+          TB_HOST: https://api.us-east.tinybird.co
+        run: |
+          # Establish workspace context
+          tb workspace use barely
+          
+          echo "=== Deleting Branches ==="
+          echo
+          
+          # Delete CI branches
+          if [ -s ci_branches_to_delete.txt ]; then
+            echo "Deleting CI branches..."
+            while IFS= read -r branch; do
+              echo "  Deleting: $branch"
+              tb branch rm "$branch" --yes || echo "  Failed to delete: $branch"
+            done < ci_branches_to_delete.txt
+          fi
+          
+          # Delete dev branches
+          if [ -s dev_branches_to_delete.txt ]; then
+            echo "Deleting dev branches..."
+            while IFS= read -r branch; do
+              echo "  Deleting: $branch"
+              tb branch rm "$branch" --yes || echo "  Failed to delete: $branch"
+            done < dev_branches_to_delete.txt
+          fi
+          
+          echo
+          echo "Cleanup complete!"
+
+      - name: Create Summary
+        run: |
+          # Create job summary
+          {
+            echo "# Tinybird Branch Cleanup Report"
+            echo
+            echo "**Run Type:** ${{ github.event.inputs.dry_run == 'true' && 'Dry Run' || 'Live Deletion' }}"
+            echo "**Pattern Filter:** ${{ github.event.inputs.branch_pattern || 'None (all stale branches)' }}"
+            echo
+            
+            if [ -s ci_branches_to_delete.txt ] || [ -s dev_branches_to_delete.txt ]; then
+              echo "## Branches Processed"
+              echo
+              
+              if [ -s ci_branches_to_delete.txt ]; then
+                echo "### CI Branches (from closed PRs)"
+                echo
+                echo "| Branch Name | Type |"
+                echo "|------------|------|"
+                while IFS= read -r branch; do
+                  echo "| $branch | CI |"
+                done < ci_branches_to_delete.txt
+                echo
+              fi
+              
+              if [ -s dev_branches_to_delete.txt ]; then
+                echo "### Development Branches (orphaned)"
+                echo
+                echo "| Branch Name | Type |"
+                echo "|------------|------|"
+                while IFS= read -r branch; do
+                  echo "| $branch | Dev |"
+                done < dev_branches_to_delete.txt
+                echo
+              fi
+            else
+              echo "## No branches found for cleanup ✨"
+            fi
+            
+            CI_COUNT=$(wc -l < ci_branches_to_delete.txt 2>/dev/null || echo 0)
+            DEV_COUNT=$(wc -l < dev_branches_to_delete.txt 2>/dev/null || echo 0)
+            TOTAL_COUNT=$((CI_COUNT + DEV_COUNT))
+            
+            echo "## Summary"
+            echo
+            echo "- **Total branches:** $TOTAL_COUNT"
+            echo "- **CI branches:** $CI_COUNT"
+            echo "- **Dev branches:** $DEV_COUNT"
+            echo
+            
+            if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
+              echo "ℹ️ This was a dry run. No branches were actually deleted."
+              echo
+              echo "To perform actual deletion, run the workflow again with dry_run set to 'false'."
+            else
+              echo "✅ Branches have been deleted successfully."
+            fi
+          } >> $GITHUB_STEP_SUMMARY

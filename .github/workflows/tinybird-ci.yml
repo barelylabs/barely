@@ -147,18 +147,23 @@ jobs:
           tb diff
 
   cleanup:
-    name: Cleanup CI Branches
+    name: Cleanup Tinybird Branches
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' && (github.event.action == 'closed' || github.event.action == 'merged')
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install Tinybird CLI
+      - name: Install dependencies
         run: |
           pip install tinybird-cli
+          # Install neonctl for getting username
+          curl -fsSL https://neon.tech/install.sh | sh
 
       - name: Remove CI Branch
         env:
@@ -171,3 +176,36 @@ jobs:
           BRANCH_NAME="ci_pr_${{ github.event.pull_request.number }}"
           echo "Removing CI branch: $BRANCH_NAME"
           tb branch rm $BRANCH_NAME --yes || echo "Branch already removed or doesn't exist"
+
+      - name: Remove Dev Branches
+        env:
+          TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
+          TB_HOST: https://api.us-east.tinybird.co
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+        run: |
+          # Establish workspace context
+          tb workspace use barely
+          
+          # Get the PR branch name from the closed PR
+          PR_BRANCH="${{ github.head_ref }}"
+          echo "PR branch was: $PR_BRANCH"
+          
+          # Get list of all Tinybird branches
+          tb branch ls > branches.txt
+          
+          # Convert PR branch to Tinybird format (replace / and - with _)
+          TB_BRANCH_PREFIX=$(echo "$PR_BRANCH" | tr '/' '_' | tr '-' '_')
+          echo "Looking for dev branches matching pattern: ${TB_BRANCH_PREFIX}__dev_*"
+          
+          # Find and remove matching dev branches
+          grep -E "^${TB_BRANCH_PREFIX}__dev_" branches.txt | while read -r branch_line; do
+            # Extract branch name (first column)
+            BRANCH_NAME=$(echo "$branch_line" | awk '{print $1}')
+            if [ ! -z "$BRANCH_NAME" ]; then
+              echo "Removing dev branch: $BRANCH_NAME"
+              tb branch rm "$BRANCH_NAME" --yes || echo "Failed to remove branch: $BRANCH_NAME"
+            fi
+          done
+          
+          # Clean up
+          rm -f branches.txt
