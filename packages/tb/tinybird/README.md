@@ -54,6 +54,7 @@ This enables:
   1. Must be on main Tinybird workspace (`tb branch use main`)
   2. Must be on main Git branch (main/master/develop)
 - This is a one-time setup that needs to be done after merging this PR
+- See [GIT_INTEGRATION_SETUP.md](./GIT_INTEGRATION_SETUP.md) for detailed instructions
 - Development and CI branches will continue to work without this setup
 
 ## Project Structure

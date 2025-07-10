@@ -117,15 +117,23 @@ jobs:
             exit 1
           fi
           
-          echo "Pushing changes to CI branch..."
-          # Note: --force is required for CI branches to replace resources
-          # This handles cases where pipes feed materialized views
-          # Tinybird still runs regression tests even with --force
-          if ! tb push --force --yes; then
-            echo "::error::Failed to push changes to branch"
-            echo "::error::This may be due to materialized view dependencies"
-            echo "::error::Consider using --force or updating materialized views separately"
-            exit 1
+          echo "Deploying changes to CI branch..."
+          # Use tb deploy for better dependency handling in CI/CD
+          # This is the recommended approach for CI workflows
+          if tb deploy --help &>/dev/null; then
+            echo "Using tb deploy (recommended for CI/CD)..."
+            if ! tb deploy --yes; then
+              echo "::error::Failed to deploy changes to branch"
+              echo "::error::Check the logs for dependency or validation errors"
+              exit 1
+            fi
+          else
+            echo "Using tb push (tb deploy not available)..."
+            if ! tb push --force --yes; then
+              echo "::error::Failed to push changes to branch"
+              echo "::error::This may be due to materialized view dependencies"
+              exit 1
+            fi
           fi
 
           # Run diff to show what changed
