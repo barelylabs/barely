@@ -102,7 +102,7 @@ jobs:
           fi
           echo "::notice::Syntax validation passed"
 
-      - name: Push Changes to Branch
+      - name: Deploy Changes to Branch
         if: github.event_name == 'pull_request'
         env:
           TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
@@ -119,31 +119,14 @@ jobs:
           
           echo "Deploying changes to CI branch..."
           
-          # For now, we'll use a selective push approach to handle MV dependencies
-          # This is temporary until Git integration is set up on main
-          echo "::warning::Using selective push approach due to MV dependencies"
-          echo "::warning::Full validation will occur after Git integration is set up"
-          
-          # First, push datasources (including MVs)
-          echo "Pushing datasources..."
-          for file in datasources/*.datasource; do
-            if [ -f "$file" ]; then
-              echo "  - Pushing $(basename "$file")"
-              tb push "$file" --force --yes || {
-                echo "::warning::Failed to push $file (may be MV-related)"
-              }
-            fi
-          done
-          
-          # Then push pipes that don't feed MVs
-          # We'll skip the full pipe push in CI branches to avoid MV conflicts
-          echo "Validating pipes (not pushing to avoid MV conflicts in branches)..."
-          tb check pipes/ || {
-            echo "::error::Pipe syntax validation failed"
+          # Use tb deploy for Git-integrated deployments
+          echo "Using tb deploy to push changes to branch..."
+          if ! tb deploy --yes; then
+            echo "::error::Deployment to CI branch failed"
             exit 1
-          }
+          fi
           
-          echo "::notice::Validated changes in CI branch"
+          echo "::notice::Successfully deployed changes to CI branch"
           echo "::notice::Full deployment testing will occur on merge to main"
 
       - name: Validate Main Branch (Push to main)
@@ -158,7 +141,7 @@ jobs:
           tb workspace use barely
           
           echo "Validating changes for main workspace..."
-          tb push --dry-run --yes
+          tb deploy --dry-run --yes
 
   deploy:
     name: Deploy to Main Workspace
@@ -213,24 +196,11 @@ jobs:
 
           echo "Deploying changes to main workspace..."
           # Use tb deploy for Git-integrated deployments
-          # Falls back to tb push if Git integration not initialized
-          if tb deploy --help &>/dev/null; then
-            echo "Using Git-integrated deployment..."
-            if ! tb deploy --yes; then
-              echo "::error::Deployment failed"
-              echo "::error::To rollback: git revert the merge commit and re-deploy"
-              exit 1
-            fi
-          else
-            echo "Git integration not detected, using standard push..."
-            # Only use --force if absolutely necessary for production
-            if ! tb push --yes; then
-              echo "::warning::Standard push failed, attempting force push..."
-              if ! tb push --force --yes; then
-                echo "::error::Force push also failed"
-                exit 1
-              fi
-            fi
+          echo "Using Git-integrated deployment..."
+          if ! tb deploy --yes; then
+            echo "::error::Deployment failed"
+            echo "::error::To rollback: git revert the merge commit and re-deploy"
+            exit 1
           fi
           
           echo "::notice::Successfully deployed to production"

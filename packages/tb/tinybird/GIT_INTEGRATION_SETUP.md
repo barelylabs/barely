@@ -1,23 +1,42 @@
 # Git Integration Setup Guide
 
-This guide explains how to set up Tinybird's Git integration after this PR is merged.
+This guide explains how Tinybird's Git integration works and how to use it.
 
-## Why Git Integration?
+## Git Integration Status
 
-Currently, our CI uses a workaround for materialized view dependencies. With Git integration:
+✅ **Git integration is now active** on the main workspace.
 
-- `tb deploy` command becomes available (better handles MV dependencies)
-- Deployments track Git commits automatically
-- Rollbacks become easier with Git workflows
-- CI/CD can fully validate all changes
+## Benefits of Git Integration
 
-## Prerequisites
+With Git integration enabled:
 
-- This PR must be merged to main (even with CI warnings about MV validation)
-- You need admin access to the Tinybird workspace
-- You need to be able to push to the main branch
+- `tb deploy` command is available (handles MV dependencies properly)
+- All deployments track Git commits automatically
+- Rollbacks are easier with Git workflows
+- CI/CD can fully validate and deploy all changes
 
-## Setup Process
+## How It Works
+
+Git integration links your Git commits to Tinybird deployments:
+
+1. Each deployment records the Git commit SHA
+2. `tb diff` compares against the last deployed commit
+3. `tb deploy` only pushes changes since the last deployment
+4. Rollbacks can be done via Git revert
+
+## Verifying Git Integration
+
+To check if Git integration is active:
+
+```bash
+cd packages/tb/tinybird
+source .venv/bin/activate
+tb release ls
+```
+
+You should see releases with commit SHAs.
+
+## Setup Process (If Not Already Done)
 
 ### 1. Switch to Main Branch
 

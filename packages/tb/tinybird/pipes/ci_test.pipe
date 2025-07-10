@@ -3,6 +3,7 @@ NODE test_deployment
 DESCRIPTION >
     CI/CD Test Pipe - Verifies deployment pipeline is working
         Created: 2024-06-20
+        Updated: 2025-07-10 - Git integration enabled
         Purpose: Testing Tinybird CI/CD workflow deployment to main workspace
         This pipe is completely safe and does not affect production data.
         It serves as proof that the CI/CD pipeline successfully deploys changes.
