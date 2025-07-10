@@ -2,9 +2,18 @@
 
 This guide explains how to set up Tinybird's Git integration after this PR is merged.
 
+## Why Git Integration?
+
+Currently, our CI uses a workaround for materialized view dependencies. With Git integration:
+
+- `tb deploy` command becomes available (better handles MV dependencies)
+- Deployments track Git commits automatically
+- Rollbacks become easier with Git workflows
+- CI/CD can fully validate all changes
+
 ## Prerequisites
 
-- This PR must be merged to main
+- This PR must be merged to main (even with CI warnings about MV validation)
 - You need admin access to the Tinybird workspace
 - You need to be able to push to the main branch
 
@@ -32,6 +41,7 @@ tb init --git
 ```
 
 This will:
+
 - Create/update `.tinyenv` file
 - Create/update CI/CD scaffolding files
 - Link the current Git commit to the Tinybird workspace
@@ -39,6 +49,7 @@ This will:
 ### 3. Review Generated Files
 
 The command will generate or update:
+
 - `.tinyenv` - Environment configuration
 - `requirements.txt` - Python dependencies
 - Various CI/CD helper scripts

@@ -53,13 +53,26 @@
 
 #### Error: "Cannot modify the node endpoint since it's used in Materialized Nodes"
 
-**Problem**: Trying to push pipes that feed materialized views to an empty branch
-**Cause**: Empty branches don't have the MV relationships, causing conflicts when pushing
+**Problem**: Trying to push pipes that feed materialized views to a branch
+**Cause**: Tinybird restricts modifications to pipes that feed MVs, even in branches with data copy
 **Solutions**:
 
-1. Create branches WITH data copy: `echo "y" | tb branch create branch_name`
-2. Or manually drop and recreate the MVs in the branch
-3. For CI/CD, always create branches with data copy to preserve MV relationships
+1. **For CI/CD** (temporary until Git integration):
+
+   - Use selective push approach
+   - Push datasources first
+   - Validate pipes without pushing them
+   - Full testing happens on merge to main
+
+2. **For development branches**:
+
+   - Avoid modifying pipes that feed MVs
+   - Or recreate the MVs after pipe changes
+   - Use `tb deploy` after Git integration is set up
+
+3. **Permanent fix**: Set up Git integration on main branch
+   - Enables `tb deploy` which handles MV dependencies better
+   - See [GIT_INTEGRATION_SETUP.md](./GIT_INTEGRATION_SETUP.md)
 
 #### Error: "Permission denied"
 
