@@ -27,11 +27,13 @@ Git integration links your Git commits to Tinybird deployments:
 ## Important Note on Branch Ancestry
 
 When Git integration is enabled:
+
 - `tb deploy` requires the workspace's tracked commit to be an ancestor of your branch
 - PRs created before Git integration was enabled will need to use `tb push` instead
 - After merging, all new branches from main will work with `tb deploy`
 
 The CI workflow automatically handles this by:
+
 1. Checking if `tb deploy` is possible
 2. Falling back to `tb push` if needed (with a warning)
 
