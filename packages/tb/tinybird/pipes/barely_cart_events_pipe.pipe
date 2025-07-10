@@ -7,7 +7,6 @@ SQL >
       workspaceId,
       assetId,
       platform,
-  
       city,
       region,
       country,
@@ -15,7 +14,6 @@ SQL >
       browser,
       os,
       referer,
-  
       fanId,
       sessionId,
       sessionReferer,
@@ -27,30 +25,25 @@ SQL >
       sessionMetaAdSetId,
       sessionMetaCampaignId,
       sessionMetaPlacement,
-  
       cart_checkout_mainProductId,
       cart_checkout_mainProductPrice,
       cart_checkout_mainProductPayWhatYouWant,
       cart_checkout_bumpProductId,
       cart_checkout_bumpProductPrice,
-  
       cart_checkoutPurchase_mainProductPrice,
       cart_checkoutPurchase_mainProductQuantity,
       cart_checkoutPurchase_mainProductAmount,
       cart_checkoutPurchase_mainShippingAmount,
       cart_checkoutPurchase_mainHandlingAmount,
-  
       cart_checkoutPurchase_bumpProductPrice,
       cart_checkoutPurchase_bumpProductQuantity,
       cart_checkoutPurchase_bumpProductAmount,
       cart_checkoutPurchase_bumpShippingAmount,
       cart_checkoutPurchase_bumpHandlingAmount,
-  
       cart_checkoutPurchase_productAmount,
       cart_checkoutPurchase_shippingAmount,
       cart_checkoutPurchase_handlingAmount,
       cart_checkoutPurchase_amount,
-  
       cart_upsell_upsellProductId,
       cart_upsellPurchase_upsellProductPrice,
       cart_upsellPurchase_upsellProductQuantity,
@@ -58,8 +51,6 @@ SQL >
       cart_upsellPurchase_upsellShippingAmount,
       cart_upsellPurchase_upsellHandlingAmount,
       cart_upsellPurchase_amount,
-  
-  
     FROM barely_events
     WHERE assetId LIKE 'cart_funnel_%'
 

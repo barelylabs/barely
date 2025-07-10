@@ -1,6 +1,3 @@
-DESCRIPTION >
-    Browser analytics for cart events - tracks checkout views and purchases by browser
-
 TOKEN "v2_cart_browsers_endpoint_read_2811" READ
 
 NODE cart_browsers
