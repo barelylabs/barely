@@ -134,25 +134,12 @@ jobs:
           echo "::notice::Deployed changes to CI branch (MV-feeding pipes skipped)"
           echo "::notice::Full deployment will occur on merge to main"
 
-      - name: Validate Main Branch (Push to main)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        env:
-          TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
-          TB_HOST: https://api.us-east.tinybird.co
-        run: |
-          cd packages/tb/tinybird
-          # Ensure workspace context is set
-          echo "Setting workspace context to 'barely'..."
-          tb workspace use barely
-          
-          echo "Validating changes for main workspace..."
-          tb deploy --dry-run --yes
 
   deploy:
     name: Deploy to Main Workspace
     runs-on: ubuntu-latest
-    needs: validate
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [validate, tinybird--can-merge]
+    if: github.event_name == 'merge_group'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -305,3 +292,19 @@ jobs:
           
           # Clean up
           rm -f branches.txt
+
+  # This job ensures all CI checks pass before allowing merge
+  # Following the same pattern as preview.yml and production.yml
+  tinybird--can-merge:
+    name: Tinybird CI - Can Merge
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [validate]
+    steps:
+      - name: Check all job outcomes
+        env:
+          OUTCOMES: ${{ toJSON(needs.*.result) }}
+        run: |
+          ALL_SUCCESS=$(echo "$OUTCOMES" | jq -r 'to_entries | map([.value.result == "success", .value.result == "skipped"] | any) | all')
+          echo "All jobs successful or skipped: $ALL_SUCCESS"
+          [ $ALL_SUCCESS = true ]
