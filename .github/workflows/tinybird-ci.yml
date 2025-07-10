@@ -119,15 +119,32 @@ jobs:
           
           echo "Deploying changes to CI branch..."
           
-          # Use tb deploy for Git-integrated deployments
-          echo "Using tb deploy to push changes to branch..."
-          if ! tb deploy --yes; then
-            echo "::error::Deployment to CI branch failed"
-            exit 1
+          # Check if Git integration is available and the branch has proper ancestry
+          if tb release ls &>/dev/null 2>&1; then
+            echo "Git integration detected, checking if tb deploy is possible..."
+            if tb deploy --dry-run --yes &>/dev/null 2>&1; then
+              echo "Using tb deploy for branch deployment..."
+              tb deploy --yes || {
+                echo "::error::tb deploy failed"
+                exit 1
+              }
+            else
+              echo "::warning::tb deploy not possible for this branch (likely due to Git ancestry)"
+              echo "::warning::Using tb push instead. This is expected for PRs created before Git integration."
+              tb push --force --yes || {
+                echo "::error::tb push failed"
+                exit 1
+              }
+            fi
+          else
+            echo "No Git integration detected, using tb push..."
+            tb push --force --yes || {
+              echo "::error::tb push failed"
+              exit 1
+            }
           fi
           
           echo "::notice::Successfully deployed changes to CI branch"
-          echo "::notice::Full deployment testing will occur on merge to main"
 
       - name: Validate Main Branch (Push to main)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

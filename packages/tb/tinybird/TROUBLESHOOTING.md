@@ -139,6 +139,18 @@
 2. CI/CD workflow completed successfully
 3. Check GitHub Actions logs for errors
 
+### Git Integration Issues
+
+#### Error: "Error checking relationship between HEAD and Workspace commit"
+
+**Problem**: Trying to use `tb deploy` on a branch that doesn't have the workspace's tracked commit as an ancestor
+**Cause**: Git integration tracks commits, and branches need to be based on the tracked commit
+**Solutions**:
+
+1. **For CI branches**: Use `tb push --force` instead of `tb deploy`
+2. **For feature branches**: Rebase on main to include the tracked commit
+3. **Override commit** (careful): `tb init --override-commit <ancestor-commit>`
+
 ### Development Workflow Issues
 
 #### Can't find resources after `tb pull`

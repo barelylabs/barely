@@ -24,6 +24,17 @@ Git integration links your Git commits to Tinybird deployments:
 3. `tb deploy` only pushes changes since the last deployment
 4. Rollbacks can be done via Git revert
 
+## Important Note on Branch Ancestry
+
+When Git integration is enabled:
+- `tb deploy` requires the workspace's tracked commit to be an ancestor of your branch
+- PRs created before Git integration was enabled will need to use `tb push` instead
+- After merging, all new branches from main will work with `tb deploy`
+
+The CI workflow automatically handles this by:
+1. Checking if `tb deploy` is possible
+2. Falling back to `tb push` if needed (with a warning)
+
 ## Verifying Git Integration
 
 To check if Git integration is active:
