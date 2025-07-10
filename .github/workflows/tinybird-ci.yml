@@ -301,10 +301,11 @@ jobs:
     if: always()
     needs: [validate]
     steps:
-      - name: Check all job outcomes
+      - name: Transform outcomes
         env:
-          OUTCOMES: ${{ toJSON(needs.*.result) }}
+          NEEDS_JSON: '${{ toJson(needs) }}'
         run: |
-          ALL_SUCCESS=$(echo "$OUTCOMES" | jq -r 'to_entries | map([.value.result == "success", .value.result == "skipped"] | any) | all')
-          echo "All jobs successful or skipped: $ALL_SUCCESS"
-          [ $ALL_SUCCESS = true ]
+          echo "ALL_SUCCESS=$(echo "$NEEDS_JSON" | jq '. | to_entries | map([.value.result == "success", .value.result == "skipped"] | any) | all')" >> $GITHUB_ENV
+
+      - name: Check outcomes
+        run: '[ $ALL_SUCCESS = true ]'
