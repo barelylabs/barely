@@ -29,6 +29,25 @@ This directory contains the Tinybird analytics configuration for the barely.io p
    ```
    Enter your Tinybird API token when prompted.
 
+### Git Integration Setup (Recommended for Production)
+
+To enable Git-based deployments and better version control:
+
+```bash
+# One-time setup: Initialize Git integration
+cd packages/tb/tinybird
+source .venv/bin/activate
+tb init --git
+```
+
+This enables:
+- Git as the source of truth for production
+- Automatic deployment tracking (stores Git commit IDs)
+- Safer rollbacks using Git workflows
+- Better diff capabilities
+
+**Note**: This is optional but highly recommended for production environments. Development and CI branches will continue to work without this setup.
+
 ## Project Structure
 
 ```

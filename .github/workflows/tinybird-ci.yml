@@ -48,21 +48,55 @@ jobs:
           TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
           TB_HOST: https://api.us-east.tinybird.co
         run: |
+          set -euo pipefail
           cd packages/tb/tinybird
           BRANCH_NAME="ci_pr_${{ github.event.pull_request.number }}"
 
           # Establish workspace context first
           echo "Setting workspace context to 'barely'..."
-          tb workspace use barely
+          if ! tb workspace use barely; then
+            echo "::error::Failed to set workspace context"
+            exit 1
+          fi
+
+          # Check current branch count (max 3 allowed)
+          BRANCH_COUNT=$(tb branch ls | grep -c "^[[:alnum:]]" || true)
+          if [ "$BRANCH_COUNT" -ge 3 ]; then
+            echo "::warning::Already at maximum branch limit (3). Some branches may need cleanup."
+          fi
 
           # Try to use existing branch, create if it doesn't exist
           if ! tb branch use $BRANCH_NAME 2>/dev/null; then
             echo "Creating new branch: $BRANCH_NAME"
-            tb branch create $BRANCH_NAME
-            tb branch use $BRANCH_NAME
+            if ! tb branch create $BRANCH_NAME; then
+              echo "::error::Failed to create branch $BRANCH_NAME"
+              exit 1
+            fi
+            if ! tb branch use $BRANCH_NAME; then
+              echo "::error::Failed to switch to branch $BRANCH_NAME"
+              exit 1
+            fi
           else
             echo "Using existing branch: $BRANCH_NAME"
           fi
+          
+          echo "::notice::Successfully using branch: $BRANCH_NAME"
+
+      - name: Validate Changes
+        if: github.event_name == 'pull_request'
+        env:
+          TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
+          TB_HOST: https://api.us-east.tinybird.co
+        run: |
+          set -euo pipefail
+          cd packages/tb/tinybird
+          
+          echo "Running syntax validation..."
+          if ! tb check; then
+            echo "::error::Syntax validation failed"
+            exit 1
+          fi
+          echo "::notice::Syntax validation passed"
 
       - name: Push Changes to Branch
         if: github.event_name == 'pull_request'
@@ -70,16 +104,28 @@ jobs:
           TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
           TB_HOST: https://api.us-east.tinybird.co
         run: |
+          set -euo pipefail
           cd packages/tb/tinybird
+          
           # Ensure workspace context is set
-          tb workspace use barely
+          if ! tb workspace use barely; then
+            echo "::error::Failed to set workspace context"
+            exit 1
+          fi
           
           echo "Pushing changes to CI branch..."
-          tb push --force --yes
+          # Note: --force is required for CI branches to replace resources
+          # Tinybird still runs regression tests even with --force
+          if ! tb push --force --yes; then
+            echo "::error::Failed to push changes to branch"
+            exit 1
+          fi
 
           # Run diff to show what changed
-          echo "\nChanges applied:"
-          tb diff
+          echo -e "\nChanges applied:"
+          tb diff || true
+          
+          echo "::notice::Successfully pushed changes to CI branch"
 
       - name: Validate Main Branch (Push to main)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -119,16 +165,56 @@ jobs:
           TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
           TB_HOST: https://api.us-east.tinybird.co
         run: |
+          set -euo pipefail
           cd packages/tb/tinybird
+          
+          # Verify we're deploying from main branch
+          CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          if [ "$CURRENT_BRANCH" != "main" ]; then
+            echo "::error::Attempting to deploy from non-main branch: $CURRENT_BRANCH"
+            exit 1
+          fi
+          
           # Establish workspace context first
           echo "Setting workspace context to 'barely'..."
-          tb workspace use barely
+          if ! tb workspace use barely; then
+            echo "::error::Failed to set workspace context"
+            exit 1
+          fi
           
           echo "Ensuring we're on main branch..."
-          tb branch use main
+          if ! tb branch use main; then
+            echo "::error::Failed to switch to main branch"
+            exit 1
+          fi
+
+          # Show what will be deployed
+          echo "Changes to be deployed:"
+          tb diff || echo "No diff available (may need to run tb init --git)"
 
           echo "Deploying changes to main workspace..."
-          tb push --force --yes
+          # Use tb deploy for Git-integrated deployments
+          # Falls back to tb push if Git integration not initialized
+          if tb deploy --help &>/dev/null; then
+            echo "Using Git-integrated deployment..."
+            if ! tb deploy --yes; then
+              echo "::error::Deployment failed"
+              echo "::error::To rollback: git revert the merge commit and re-deploy"
+              exit 1
+            fi
+          else
+            echo "Git integration not detected, using standard push..."
+            # Only use --force if absolutely necessary for production
+            if ! tb push --yes; then
+              echo "::warning::Standard push failed, attempting force push..."
+              if ! tb push --force --yes; then
+                echo "::error::Force push also failed"
+                exit 1
+              fi
+            fi
+          fi
+          
+          echo "::notice::Successfully deployed to production"
 
       - name: Verify Deployment
         env:
@@ -170,12 +256,28 @@ jobs:
           TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
           TB_HOST: https://api.us-east.tinybird.co
         run: |
+          set -euo pipefail
+          
           # Establish workspace context first
-          tb workspace use barely
+          if ! tb workspace use barely; then
+            echo "::error::Failed to set workspace context for cleanup"
+            exit 1
+          fi
           
           BRANCH_NAME="ci_pr_${{ github.event.pull_request.number }}"
           echo "Removing CI branch: $BRANCH_NAME"
-          tb branch rm $BRANCH_NAME --yes || echo "Branch already removed or doesn't exist"
+          
+          # Check if branch exists before trying to remove
+          if tb branch ls | grep -q "^$BRANCH_NAME"; then
+            if tb branch rm "$BRANCH_NAME" --yes; then
+              echo "::notice::Successfully removed CI branch: $BRANCH_NAME"
+            else
+              echo "::warning::Failed to remove CI branch: $BRANCH_NAME"
+              # Don't fail the job for cleanup errors
+            fi
+          else
+            echo "::notice::CI branch already removed or doesn't exist: $BRANCH_NAME"
+          fi
 
       - name: Remove Dev Branches
         env:
