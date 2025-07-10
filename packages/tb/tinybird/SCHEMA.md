@@ -3,12 +3,14 @@
 ## Core Event Schema (`barely_events`)
 
 ### Identity & Session Fields
+
 - `workspaceId` (String) - Workspace identifier
 - `sessionId` (String) - User session identifier
 - `fanId` (String, Nullable) - Fan/user identifier
 - `timestamp` (DateTime) - Event occurrence time
 
 ### Event Metadata
+
 - `type` (String) - Event type (cart, fm, link, page)
 - `key` (String) - Unique event key
 - `domain` (String) - Domain where event occurred
@@ -16,6 +18,7 @@
 - `assetId` (String) - Asset identifier (product, link, page, etc.)
 
 ### Location Data
+
 - `city` (String) - City name
 - `country` (String) - Country code
 - `latitude` (String) - Geographic latitude
@@ -24,6 +27,7 @@
 - `zip` (String) - Postal code
 
 ### Device & Browser Information
+
 - `ua` (String) - User agent string
 - `browser` (String) - Browser name
 - `browser_version` (String) - Browser version
@@ -38,6 +42,7 @@
 - `bot` (UInt8) - Bot detection flag
 
 ### Traffic Source & Attribution
+
 - `referer` (String) - HTTP referer
 - `referer_url` (String) - Full referer URL
 - `referer_id` (String) - Referer identifier
@@ -46,6 +51,7 @@
 - `sessionRefererUrl` (String, Nullable) - Session referer URL
 
 ### Marketing Attribution
+
 - `fbclid` (String, Nullable) - Facebook click ID
 - `sessionEmailTemplateId` (String, Nullable) - Email template attribution
 - `sessionEmailBroadcastId` (String, Nullable) - Email broadcast attribution
@@ -57,19 +63,23 @@
 - `sessionMetaAdSetId` (String, Nullable) - Meta ad set attribution
 
 ### Reporting Flags
+
 - `reportedToMeta` (String) - Meta pixel reporting status
 - `reportedToTiktok` (String) - TikTok pixel reporting status
 
 ## Event Type Specific Fields
 
 ### Cart Events (`cart_*`)
+
 #### Checkout Purchase Fields
+
 - `cart_checkoutPurchase_amount` (Int16, Nullable) - Total purchase amount
 - `cart_checkoutPurchase_productAmount` (Int16, Nullable) - Product subtotal
 - `cart_checkoutPurchase_shippingAmount` (Int16, Nullable) - Shipping total
 - `cart_checkoutPurchase_handlingAmount` (Int16, Nullable) - Handling fees
 
 #### Main Product Fields
+
 - `cart_checkout_mainProductId` (String, Nullable) - Main product ID
 - `cart_checkout_mainProductPrice` (Int16, Nullable) - Main product price
 - `cart_checkout_mainProductPayWhatYouWant` (UInt8, Nullable) - PWYW flag
@@ -79,6 +89,7 @@
 - `cart_checkoutPurchase_mainHandlingAmount` (Int16, Nullable) - Main handling
 
 #### Bump Product Fields
+
 - `cart_checkout_bumpProductId` (String, Nullable) - Bump product ID
 - `cart_checkout_bumpProductPrice` (Int32, Nullable) - Bump price
 - `cart_checkoutPurchase_bumpProductAmount` (Int16, Nullable) - Bump total
@@ -87,6 +98,7 @@
 - `cart_checkoutPurchase_bumpHandlingAmount` (Int16, Nullable) - Bump handling
 
 #### Upsell Fields
+
 - `cart_upsell_upsellProductId` (String, Nullable) - Upsell product ID
 - `cart_upsellPurchase_amount` (Int16, Nullable) - Upsell total
 - `cart_upsellPurchase_upsellProductAmount` (Int16, Nullable) - Upsell product amount
@@ -96,19 +108,23 @@
 - `cart_upsellPurchase_upsellHandlingAmount` (Int16, Nullable) - Upsell handling
 
 #### Landing Page Fields
+
 - `cart_landingPageId` (String, Nullable) - Landing page ID
 - `cart_landingPage_mainProductId` (String, Nullable) - Landing page product
 
 ### Link Events (`link*`)
+
 - `linkClickDestinationAssetId` (String) - Destination asset ID
 - `linkClickDestinationHref` (String) - Destination URL
 - `linkType` (String) - Type of link
 - `platform` (String) - Platform identifier
 
 ### FM Events (`fm*`)
+
 - `fmLinkPlatform` (String, Nullable) - Music platform (spotify, apple, etc.)
 
 ## Storage Configuration
+
 - **Engine**: MergeTree
 - **Partition Key**: `toYear(timestamp)` - Yearly partitions
 - **Sorting Key**: `timestamp, workspaceId, assetId` - Optimized for time-based queries per workspace
@@ -116,6 +132,7 @@
 ## Event Types
 
 ### Cart Events
+
 - `cart__product_view` - Product page view
 - `cart__add_to_cart` - Item added to cart
 - `cart__checkout_start` - Checkout initiated
@@ -123,17 +140,20 @@
 - `cart__upsell_view` - Upsell page view
 - `cart__upsell_purchase` - Upsell purchased
 
-### FM Events  
+### FM Events
+
 - `fm__page_view` - Artist/music page view
 - `fm__link_click` - Music platform link click
 - `fm__play` - Track played
 - `fm__share` - Content shared
 
 ### Link Events
+
 - `link__click` - Short link clicked
 - `link__redirect` - User redirected
 
 ### Page Events
+
 - `page__view` - Landing page view
 - `page__cta_click` - Call-to-action clicked
 - `page__form_submit` - Form submitted

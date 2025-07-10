@@ -5,17 +5,20 @@ This directory contains the Tinybird analytics configuration for the barely.io p
 ## Setup
 
 ### Prerequisites
+
 - Python 3.8+ (tested with 3.12)
 - Tinybird API token (stored in `TINYBIRD_API_KEY` environment variable)
 
 ### Installation
 
 1. Run the setup script to create a virtual environment and install the Tinybird CLI:
+
    ```bash
    ./setup.sh
    ```
 
 2. Activate the virtual environment:
+
    ```bash
    source .venv/bin/activate
    ```
@@ -68,10 +71,12 @@ tb endpoint ls
 ## Development Workflow
 
 ### ⚠️ IMPORTANT: Always Use Branches
+
 **Never push directly to the main Workspace.** Always create a branch for development to protect production.
 
 ### Quick Start
-1. Create a branch: `pnpm tb:branch:create feature_name` 
+
+1. Create a branch: `pnpm tb:branch:create feature_name`
    - ⚠️ **CRITICAL**: Use underscores (`_`), NOT hyphens (`-`)!
    - ✅ Correct: `feature_user_analytics`
    - ❌ Wrong: `feature-user-analytics`
@@ -82,6 +87,7 @@ tb endpoint ls
 6. Create PR to merge changes
 
 ### Branch Commands
+
 - `pnpm tb:branch:create [name]` - Create a new branch
   - ⚠️ **MUST use underscores**: `feature_analytics` ✅
   - ❌ **NOT hyphens**: `feature-analytics` ❌
@@ -90,24 +96,29 @@ tb endpoint ls
 - `pnpm tb:branch:current` - Show current branch
 - `pnpm tb:branch:rm [name]` - Remove a branch
 
-**⚠️ Critical Note**: 
+**⚠️ Critical Note**:
+
 - Tinybird branch names MUST use underscores (`_`), not hyphens (`-`)
 - This is a hard requirement from Tinybird's API
 - Git branches can still use hyphens, but Tinybird branches cannot
 
 ### Detailed Workflows
+
 - [BRANCH_WORKFLOW.md](./BRANCH_WORKFLOW.md) - Complete branch workflow guide
 - [DEVELOPMENT_WORKFLOW.md](./DEVELOPMENT_WORKFLOW.md) - Development best practices
 - [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md) - Deployment checklist
 
 ### Git Hooks
+
 Install pre-commit hooks for automatic validation:
+
 ```bash
 cd packages/tb/tinybird
 ./scripts/install-hooks.sh
 ```
 
 ### CI/CD
+
 - Pull requests create isolated test branches
 - Changes are validated in the branch
 - Merges to `main` deploy to production workspace

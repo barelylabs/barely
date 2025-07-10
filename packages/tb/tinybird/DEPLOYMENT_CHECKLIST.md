@@ -24,6 +24,7 @@
 ## Deployment Process
 
 ### For Pull Requests
+
 - [ ] Create PR with descriptive title
 - [ ] Include description of changes
 - [ ] List any breaking changes
@@ -31,6 +32,7 @@
 - [ ] Get code review approval
 
 ### For Production Deployment
+
 - [ ] Merge PR to main branch
 - [ ] Monitor GitHub Actions deployment
 - [ ] Verify in Tinybird UI that resources updated
@@ -48,12 +50,14 @@
 If issues arise after deployment:
 
 1. **Quick Rollback**:
+
    ```bash
    git revert HEAD
    git push origin main
    ```
 
 2. **Manual Rollback**:
+
    - Use Tinybird UI to restore previous version
    - Or checkout previous commit and force push
 
@@ -64,16 +68,20 @@ If issues arise after deployment:
 ## Common Issues & Solutions
 
 ### "Resource already exists"
+
 - Solution: Use `tb push --force` or delete in UI first
 
 ### Materialized View Errors
+
 - Solution: May need to drop and recreate the view
 
 ### Performance Degradation
+
 - Check query execution time in Tinybird UI
 - Review recent changes to SQL logic
 - Consider adding indexes or optimizing queries
 
 ### Token Permission Errors
+
 - Ensure API token has correct permissions
 - Admin tokens needed for resource creation/modification
