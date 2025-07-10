@@ -3,12 +3,14 @@
 ## Before Making Changes
 
 ### Environment Setup
+
 - [ ] Pull latest resources from Tinybird: `pnpm tb:pull`
 - [ ] Review current workspace status: `pnpm tb:workspace`
 - [ ] Verify Git integration status: `tb diff` (if using Git integration)
 - [ ] Check current branch count: `tb branch ls` (max 3 allowed)
 
 ### Branch Creation
+
 - [ ] Create a feature branch: `git checkout -b feature/tinybird/your-change`
 - [ ] Create a Tinybird branch: `pnpm tb:branch:create feature_your_change` (use underscores!)
 - [ ] Verify switched to new branch: `pnpm tb:branch:current`
@@ -16,18 +18,21 @@
 ## While Developing
 
 ### Code Quality
+
 - [ ] Follow naming conventions (see README.md)
 - [ ] Add comments to complex SQL logic
 - [ ] Use meaningful node names in pipes
 - [ ] Avoid using `--no-check` flag
 
 ### Testing
+
 - [ ] Run syntax validation: `pnpm tb:check`
 - [ ] Test queries in Tinybird UI for performance
 - [ ] Verify no regression test failures
 - [ ] Check query execution times
 
 ### Documentation
+
 - [ ] Update SCHEMA.md if schema changes
 - [ ] Update relevant README files
 - [ ] Document any new event types
@@ -36,12 +41,14 @@
 ## Before Committing
 
 ### Validation
+
 - [ ] Run dry-run to preview changes: `pnpm tb:validate`
 - [ ] Review diff output: `pnpm tb:diff`
 - [ ] Ensure no breaking changes to existing endpoints
 - [ ] Verify backwards compatibility
 
 ### Code Review Prep
+
 - [ ] Self-review all changes
 - [ ] Check for sensitive data exposure
 - [ ] Ensure proper error handling
@@ -52,12 +59,14 @@
 ### For Pull Requests
 
 1. **Create PR**
+
    - [ ] Use descriptive title
    - [ ] Include detailed description of changes
    - [ ] List any breaking changes
    - [ ] Reference related issues
 
 2. **CI Validation**
+
    - [ ] Wait for CI to create test branch
    - [ ] Review CI logs for any warnings
    - [ ] Verify all checks pass
@@ -72,12 +81,14 @@
 ### For Production Deployment
 
 1. **Pre-Deployment**
+
    - [ ] Ensure on main branch locally
    - [ ] Pull latest changes
    - [ ] Verify no uncommitted changes
    - [ ] Review deployment plan
 
 2. **Deployment**
+
    - [ ] Merge PR to main branch
    - [ ] Monitor GitHub Actions deployment
    - [ ] Watch for deployment errors
@@ -92,18 +103,21 @@
 ## Post-Deployment
 
 ### Immediate Checks (0-5 minutes)
+
 - [ ] Monitor error rates in Tinybird UI
 - [ ] Test a sample of API endpoints
 - [ ] Verify data is flowing correctly
 - [ ] Check for any alerts
 
 ### Short-term Monitoring (5-30 minutes)
+
 - [ ] Monitor query performance metrics
 - [ ] Check resource usage
 - [ ] Verify materialized views updating
 - [ ] Watch for timeout errors
 
 ### Communication
+
 - [ ] Update team about deployment
 - [ ] Document any issues encountered
 - [ ] Note any manual interventions
@@ -114,6 +128,7 @@
 ### Rollback Triggers
 
 Initiate rollback if:
+
 - [ ] API endpoints returning errors (>10% error rate)
 - [ ] Query performance degraded >50%
 - [ ] Materialized views stopped updating
@@ -123,6 +138,7 @@ Initiate rollback if:
 ### Rollback Procedures
 
 1. **Git-Integrated Rollback** (if `tb init --git` was run):
+
    ```bash
    # Quick revert
    git revert HEAD
@@ -131,14 +147,15 @@ Initiate rollback if:
    ```
 
 2. **Manual Rollback**:
+
    ```bash
    # Switch to main workspace
    tb branch use main
-   
+
    # Option 1: Push previous version
    git checkout <last-good-commit> -- .
    tb push --force --yes
-   
+
    # Option 2: Use Tinybird UI version history
    ```
 
@@ -150,6 +167,7 @@ Initiate rollback if:
 ## Special Scenarios
 
 ### Materialized View Changes
+
 - [ ] Review [MATERIALIZED_VIEWS.md](./MATERIALIZED_VIEWS.md)
 - [ ] Plan for potential data backfill
 - [ ] Consider creating new MV instead of updating
@@ -157,6 +175,7 @@ Initiate rollback if:
 - [ ] Have rollback strategy for MV changes
 
 ### Schema Breaking Changes
+
 - [ ] Identify all dependent resources
 - [ ] Create migration plan
 - [ ] Consider phased deployment
@@ -164,6 +183,7 @@ Initiate rollback if:
 - [ ] Document migration steps
 
 ### High-Traffic Endpoints
+
 - [ ] Deploy during low-traffic period
 - [ ] Have scaling plan ready
 - [ ] Monitor closely for first hour
@@ -175,14 +195,17 @@ Initiate rollback if:
 ### Deployment Failures
 
 **"Resource already exists"**
+
 - Solution: Check if using correct branch
 - Use `tb push --force` if intentional replacement
 
 **"Permission denied"**
+
 - Verify token has admin permissions
 - Check workspace access rights
 
 **"Regression test failed"**
+
 - Review changes for unintended modifications
 - Use `--force` only if changes are intentional
 - Never use `--no-check` in production
@@ -190,12 +213,14 @@ Initiate rollback if:
 ### Performance Issues
 
 **Slow Queries**
+
 - Check query execution time in UI
 - Review recent SQL changes
 - Consider adding materialized views
 - Optimize sorting keys
 
 **High Resource Usage**
+
 - Monitor in Tinybird UI
 - Check for inefficient queries
 - Review materialization frequency

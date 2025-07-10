@@ -51,6 +51,16 @@
 2. Then push pipes that depend on them
 3. Or use `pnpm tb:push:force` to push everything at once
 
+#### Error: "Cannot modify the node endpoint since it's used in Materialized Nodes"
+
+**Problem**: Trying to push pipes that feed materialized views to an empty branch
+**Cause**: Empty branches don't have the MV relationships, causing conflicts when pushing
+**Solutions**:
+
+1. Create branches WITH data copy: `echo "y" | tb branch create branch_name`
+2. Or manually drop and recreate the MVs in the branch
+3. For CI/CD, always create branches with data copy to preserve MV relationships
+
 #### Error: "Permission denied"
 
 **Solution**:

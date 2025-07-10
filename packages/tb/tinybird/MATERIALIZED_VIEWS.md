@@ -5,6 +5,7 @@ This document explains how materialized views work in Tinybird and best practice
 ## What are Materialized Views?
 
 Materialized Views (MVs) in Tinybird are special datasources that:
+
 - Pre-compute and store results from a transformation pipe
 - Update automatically as new data arrives
 - Provide fast query performance for aggregated data
@@ -77,11 +78,13 @@ tb push pipes/transform/events_hourly.pipe
 **⚠️ CAUTION**: Changing schemas requires careful coordination
 
 #### Safe Changes
+
 - Adding new columns with defaults
 - Changing column comments
 - Modifying TTL settings
 
 #### Dangerous Changes
+
 - Removing columns
 - Changing column types
 - Modifying sorting keys
@@ -89,6 +92,7 @@ tb push pipes/transform/events_hourly.pipe
 #### How to Handle Schema Changes
 
 1. **For Minor Changes** (new columns):
+
 ```bash
 # Update the pipe and datasource
 git commit -am "Add new column to MV"
@@ -96,6 +100,7 @@ git commit -am "Add new column to MV"
 ```
 
 2. **For Breaking Changes**:
+
 ```bash
 # 1. Stop materialization in UI
 # 2. Create new MV with new schema
@@ -109,16 +114,19 @@ tb push pipes/transform/events_hourly_v2.pipe
 ## Refresh Strategies
 
 ### Continuous Refresh (Default)
+
 - New data is processed as it arrives
 - Best for real-time requirements
 - Higher resource usage
 
 ### Scheduled Refresh
+
 - Process data at specific intervals
 - Better for cost optimization
 - Suitable for historical data
 
 ### Manual Refresh
+
 - Triggered on-demand
 - Useful for debugging
 - Good for one-time historical fills
@@ -126,22 +134,26 @@ tb push pipes/transform/events_hourly_v2.pipe
 ## Best Practices
 
 ### 1. Naming Conventions
+
 - Use `_mv` suffix for materialized view datasources
 - Group in `datasources/materialized/` directory
 - Match pipe name to MV name
 
 ### 2. Data Retention
+
 ```sql
 -- Set TTL to manage storage
 ENGINE_TTL "hour + INTERVAL 90 DAY"
 ```
 
 ### 3. Monitoring
+
 - Check materialization lag in UI
 - Monitor storage usage
 - Set up alerts for failures
 
 ### 4. Testing Changes
+
 ```bash
 # Test in a branch first
 tb branch create test_mv_changes
@@ -172,7 +184,7 @@ NODE backfill
 SQL >
     SELECT * FROM events
     WHERE timestamp < now() - INTERVAL 7 DAY
-    
+
 TYPE copy
 TARGET_DATASOURCE events_by_hour_mv
 ```
@@ -187,13 +199,16 @@ TARGET_DATASOURCE events_by_hour_mv
 ## CI/CD Considerations
 
 ### Deployment Order
+
 Always deploy in dependency order:
+
 1. Source datasources
 2. Transformation pipes
 3. Materialized view datasources
 4. Pipes that query MVs
 
 ### Validation
+
 ```bash
 # Add to CI pipeline
 tb push --dry-run
@@ -210,6 +225,7 @@ See [ROLLBACK_PROCEDURES.md](./ROLLBACK_PROCEDURES.md#materialized-view-rollback
 ## Common Patterns
 
 ### Time-based Aggregations
+
 ```sql
 -- Hourly, daily, monthly rollups
 toStartOfHour(timestamp) as hour
@@ -218,6 +234,7 @@ toStartOfMonth(timestamp) as month
 ```
 
 ### Deduplication
+
 ```sql
 -- Use ReplacingMergeTree for dedup
 ENGINE "ReplacingMergeTree"
@@ -225,6 +242,7 @@ ENGINE_VER "updated_at"
 ```
 
 ### Counter Aggregations
+
 ```sql
 -- Use SummingMergeTree for counters
 ENGINE "SummingMergeTree"
@@ -238,6 +256,7 @@ ENGINE_SUMMING_COLS "views, clicks"
 3. **Query**: Queries on MVs are typically much cheaper
 
 ### Optimization Tips
+
 - Aggregate as much as possible in MVs
 - Use appropriate TTLs
 - Partition by time for easy cleanup

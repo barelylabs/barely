@@ -175,12 +175,14 @@ git checkout <good-commit> -- datasources/specific_ds.datasource
 ## Best Practices
 
 1. **Always backup before rollback**
+
    ```bash
    .venv/bin/tb pull --force
    git stash
    ```
 
 2. **Test rollback in a branch first**
+
    ```bash
    .venv/bin/tb branch create test_rollback
    .venv/bin/tb branch use test_rollback
@@ -188,6 +190,7 @@ git checkout <good-commit> -- datasources/specific_ds.datasource
    ```
 
 3. **Document the issue**
+
    - What broke?
    - When did it break?
    - What was the last working state?

@@ -42,13 +42,17 @@ tb init --git
 ```
 
 This enables:
+
 - Git as the source of truth for production
 - Automatic deployment tracking (stores Git commit IDs)
 - Safer rollbacks using Git workflows
 - Better diff capabilities
 
-**Important**: 
-- Git integration must be initialized from your main Git branch (main/master/develop)
+**Important**:
+
+- Git integration requires TWO conditions:
+  1. Must be on main Tinybird workspace (`tb branch use main`)
+  2. Must be on main Git branch (main/master/develop)
 - This is a one-time setup that needs to be done after merging this PR
 - Development and CI branches will continue to work without this setup
 

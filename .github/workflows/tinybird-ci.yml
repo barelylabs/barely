@@ -68,7 +68,10 @@ jobs:
           # Try to use existing branch, create if it doesn't exist
           if ! tb branch use $BRANCH_NAME 2>/dev/null; then
             echo "Creating new branch: $BRANCH_NAME"
-            if ! tb branch create $BRANCH_NAME; then
+            # Create branch WITH data copying to preserve materialized view relationships
+            # This prevents errors when pushing pipes that feed MVs
+            echo "y" | tb branch create $BRANCH_NAME
+            if [ $? -ne 0 ]; then
               echo "::error::Failed to create branch $BRANCH_NAME"
               exit 1
             fi
@@ -76,6 +79,7 @@ jobs:
               echo "::error::Failed to switch to branch $BRANCH_NAME"
               exit 1
             fi
+            echo "::notice::Created branch with data copy to preserve MV relationships"
           else
             echo "Using existing branch: $BRANCH_NAME"
           fi
@@ -115,9 +119,12 @@ jobs:
           
           echo "Pushing changes to CI branch..."
           # Note: --force is required for CI branches to replace resources
+          # This handles cases where pipes feed materialized views
           # Tinybird still runs regression tests even with --force
           if ! tb push --force --yes; then
             echo "::error::Failed to push changes to branch"
+            echo "::error::This may be due to materialized view dependencies"
+            echo "::error::Consider using --force or updating materialized views separately"
             exit 1
           fi
 
