@@ -42,7 +42,7 @@ jobs:
           pip install tinybird-cli
           tb --version
 
-      - name: Create or Use CI Branch
+      - name: Validate and Deploy to CI Branch
         if: github.event_name == 'pull_request'
         env:
           TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
@@ -86,15 +86,7 @@ jobs:
           
           echo "::notice::Successfully using branch: $BRANCH_NAME"
 
-      - name: Validate Changes
-        if: github.event_name == 'pull_request'
-        env:
-          TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
-          TB_HOST: https://api.us-east.tinybird.co
-        run: |
-          set -euo pipefail
-          cd packages/tb/tinybird
-          
+          # Validate syntax
           echo "Running syntax validation..."
           if ! tb check; then
             echo "::error::Syntax validation failed"
@@ -102,21 +94,7 @@ jobs:
           fi
           echo "::notice::Syntax validation passed"
 
-      - name: Deploy Changes to Branch
-        if: github.event_name == 'pull_request'
-        env:
-          TB_TOKEN: ${{ secrets.TINYBIRD_API_KEY }}
-          TB_HOST: https://api.us-east.tinybird.co
-        run: |
-          set -euo pipefail
-          cd packages/tb/tinybird
-          
-          # Ensure workspace context is set
-          if ! tb workspace use barely; then
-            echo "::error::Failed to set workspace context"
-            exit 1
-          fi
-          
+          # Deploy changes
           echo "Deploying changes to CI branch..."
           
           # Check if Git integration is available and the branch has proper ancestry
