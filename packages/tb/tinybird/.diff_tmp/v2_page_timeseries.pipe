@@ -1,0 +1,160 @@
+DESCRIPTION >
+	Timeseries data
+
+
+TOKEN "v2_page_timeseries_endpoint_read_7298" READ
+
+NODE month_intervals
+SQL >
+
+    %
+    WITH
+        toStartOfMonth(
+            toDateTime64({{ DateTime64(start, '2024-11-01 00:00:00.000') }}, 3),
+            {{ String(timezone, 'UTC') }}
+        ) AS start,
+        toStartOfMonth(
+            toDateTime64({{ DateTime64(end, '2025-01-01 00:00:00.000') }}, 3),
+            {{ String(timezone, 'UTC') }}
+        ) AS end,
+    dateDiff('month', start, end
+    ) + 1 AS months_diff
+    SELECT
+        arrayJoin(
+            arrayMap(
+                x -> toDateTime64(start + toIntervalMonth(x), 3, {{ String(timezone, 'UTC') }}),
+                range(0, months_diff)
+            )
+        ) as interval
+
+
+
+NODE day_intervals
+SQL >
+
+    %
+    WITH
+        toStartOfDay(
+            toDateTime64({{ DateTime64(start, '2024-12-01 00:00:00.000') }}, 3),
+            {{ String(timezone, 'UTC') }}
+        ) AS start,
+        toStartOfDay(
+            toDateTime64({{ DateTime64(end, '2025-01-01 00:00:00.000') }}, 3),
+            {{ String(timezone, 'UTC') }}
+        ) AS
+    end
+    SELECT
+        arrayJoin(
+            arrayMap(
+                x -> toDateTime64(toStartOfDay(toDateTime64(x, 3), {{ String(timezone, 'UTC') }}), 3),
+                range(toUInt32(start + 86400), toUInt32(end + 86400),
+                86400
+            )
+        )
+    ) as interval
+
+
+
+NODE hour_intervals
+SQL >
+
+    %
+    WITH
+        toStartOfHour(
+            toDateTime64({{ DateTime64(start, '2024-12-01 00:00:00.000') }}, 3),
+            {{ String(timezone, 'UTC') }}
+        ) AS start,
+        toStartOfHour(
+            toDateTime64({{ DateTime64(end, '2024-12-02 00:00:00.000') }}, 3),
+            {{ String(timezone, 'UTC') }}
+        ) AS
+    end
+    SELECT
+        arrayJoin(
+            arrayMap(x -> toDateTime64(x, 3), range(toUInt32(start + 3600), toUInt32(end + 3600), 3600)
+        )
+    ) as interval
+
+
+
+NODE timeseries_page_data
+SQL >
+
+    %
+    SELECT
+        {% if granularity == "hour" %} toStartOfHour(timestamp, {{ String(timezone, 'UTC') }})
+        {% elif granularity == "month" %}
+            toDateTime64(
+                toStartOfMonth(timestamp, {{ String(timezone, 'UTC') }}),
+                3,
+                {{ String(timezone, 'UTC') }}
+            )
+        {% else %} toDateTime64(toStartOfDay(timestamp, {{ String(timezone, 'UTC') }}), 3)
+        {% end %} AS interval,
+        uniqIf(sessionId, type = 'page/view') as page_views,
+        uniqIf(sessionId, type = 'page/linkClick') as page_linkClicks
+
+    FROM barely_page_events_mv
+    WHERE
+        workspaceId
+        = {{
+            String(
+                workspaceId,
+                'ws_KvKq8bCN4KySE5Un',
+                description="The ID of the workspace",
+                required=True,
+            )
+        }}
+        {% if defined(assetId) %} and assetId = {{ String(assetId) }} {% end %}
+        {% if defined(types) %} and type IN {{ Array(types, 'String') }} {% end %}
+        {% if defined(city) %} and city = {{ String(city) }} {% end %}
+        {% if defined(region) %} and country = {{ String(region) }} {% end %}
+        {% if defined(country) %} and country = {{ String(country) }} {% end %}
+        {% if defined(device) %} and device = {{ String(device) }} {% end %}
+        {% if defined(browser) %} and browser = {{ String(browser) }} {% end %}
+        {% if defined(os) %} and os = {{ String(os) }} {% end %}
+        {% if defined(referer) %} and referer = {{ String(referer) }} {% end %}
+        {% if defined(sessionReferer) %} and sessionReferer = {{ String(sessionReferer) }} {% end %}
+        {% if defined(sessionEmailTemplateId) %}
+            and sessionEmailTemplateId = {{ String(sessionEmailTemplateId) }}
+        {% end %}
+        {% if defined(sessionEmailBroadcastId) %}
+            and sessionEmailBroadcastId = {{ String(sessionEmailBroadcastId) }}
+        {% end %}
+        {% if defined(sessionLandingPageId) %}
+            and sessionLandingPageId = {{ String(sessionLandingPageId) }}
+        {% end %}
+        {% if defined(sessionFlowActionId) %}
+            and sessionFlowActionId = {{ String(sessionFlowActionId) }}
+        {% end %}
+        {% if defined(sessionMetaCampaignId) %}
+            and sessionMetaCampaignId = {{ String(sessionMetaCampaignId) }}
+        {% end %}
+        {% if defined(sessionMetaAdSetId) %}
+            and sessionMetaAdSetId = {{ String(sessionMetaAdSetId) }}
+        {% end %}
+        {% if defined(sessionMetaAdId) %} and sessionMetaAdId = {{ String(sessionMetaAdId) }} {% end %}
+        {% if defined(sessionMetaPlacement) %}
+            and sessionMetaAdPlacement = {{ String(sessionMetaPlacement) }}
+        {% end %}
+    GROUP BY interval
+    ORDER BY interval DESC
+
+
+
+NODE timeseries_fm
+SQL >
+
+    %
+    SELECT formatDateTime(interval, '%F%T.000%z') as start, page_views, page_linkClicks
+    FROM
+        {% if granularity == "minute" %} minute_intervals
+        {% elif granularity == "hour" %} hour_intervals
+        {% elif granularity == "month" %} month_intervals
+        {% else %} day_intervals
+        {% end %}
+    LEFT JOIN timeseries_page_data USING interval
+
+TYPE endpoint
+
+
