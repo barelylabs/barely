@@ -15,7 +15,8 @@ SQL >
         'main-workspace' as environment,
         'production-deployment' as deployment_type,
         now() as last_deployed_at,
-        'success' as status
+        'success' as status,
+        'Git integration verified!' as git_status
 
 TYPE endpoint
 
