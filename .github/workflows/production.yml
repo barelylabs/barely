@@ -107,10 +107,26 @@ jobs:
           echo DATABASE_URL=$(neonctl cs ${{ secrets.NEON_MAIN_BRANCH_NAME }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }}) >> .env
           echo DIRECT_DATABASE_URL=$(neonctl cs ${{ secrets.NEON_MAIN_BRANCH_NAME }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }}) >> .env
 
-          output=$(pnpm db:push)
+          # Run db:push with timeout to prevent hanging on interactive prompts
+          output=$(timeout 60s bash -c 'echo "n" | pnpm db:push' 2>&1) || {
+            echo "ERROR: db:push timed out or failed - likely requires interactive input"
+            echo "output: $output"
+            echo "Please run 'pnpm db:push' locally to handle any schema ambiguities"
+            exit 1
+          }
+          
           echo "output: $output"
+          
+          # Check for errors in output
           if [[ $output == *"error:"* || $output == *"severity: 'ERROR'"* ]]; then
             echo "Unhandled error: $output" && exit 1
+          fi
+          
+          # Check for interactive prompts that indicate schema ambiguities
+          if [[ $output == *"Is"*"column"*"created or renamed"* || $output == *"create column"* || $output == *"rename column"* ]]; then
+            echo "ERROR: db:push requires manual intervention for schema changes"
+            echo "Detected interactive prompt in output"
+            exit 1
           fi
 
   # 📱 DEPLOY APPS -- PROD (Not Aliasing to Production Yet) #
