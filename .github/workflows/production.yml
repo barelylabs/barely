@@ -117,17 +117,21 @@ jobs:
           
           echo "output: $output"
           
-          # Check for errors in output
-          if [[ $output == *"error:"* || $output == *"severity: 'ERROR'"* ]]; then
-            echo "Unhandled error: $output" && exit 1
-          fi
-          
-          # Check for interactive prompts that indicate schema ambiguities
-          if [[ $output == *"Is"*"column"*"created or renamed"* || $output == *"create column"* || $output == *"rename column"* ]]; then
-            echo "ERROR: db:push requires manual intervention for schema changes"
-            echo "Detected interactive prompt in output"
+          # Check for successful completion
+          if [[ $output != *"[✓] Changes applied"* ]] && [[ $output != *"No changes detected"* ]]; then
+            echo "ERROR: db:push did not complete successfully"
+            echo "Expected to see '[✓] Changes applied' or 'No changes detected' in output"
+            
+            # Check for known interactive prompt patterns
+            if [[ $output == *"?"* ]] || [[ $output == *"›"* ]] || [[ $output == *"❯"* ]]; then
+              echo "Detected interactive prompt - manual intervention required"
+              echo "Please run 'pnpm db:push' locally to handle schema changes"
+            fi
+            
             exit 1
           fi
+          
+          echo "db:push completed successfully"
 
   # 📱 DEPLOY APPS -- PROD (Not Aliasing to Production Yet) #
   deploy-app:

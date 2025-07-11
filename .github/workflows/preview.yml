@@ -118,11 +118,31 @@ jobs:
           echo "DATABASE_URL=$DATABASE_URL" >> .env
           echo "DATABASE_POOL_URL=$DATABASE_POOL_URL" >> .env
 
-          output=$(pnpm db:push)
+          # Run db:push with timeout to prevent hanging on interactive prompts
+          output=$(timeout 60s bash -c 'echo "n" | pnpm db:push' 2>&1) || {
+            echo "ERROR: db:push timed out or failed - likely requires interactive input"
+            echo "output: $output"
+            echo "Please run 'pnpm db:push' locally to handle any schema ambiguities"
+            exit 1
+          }
+          
           echo "output: $output"
-          if [[ $output == *"error:"* || $output == *"severity: 'ERROR'"* ]]; then
-            echo "Unhandled error: $output" && exit 1
+          
+          # Check for successful completion
+          if [[ $output != *"[✓] Changes applied"* ]] && [[ $output != *"No changes detected"* ]]; then
+            echo "ERROR: db:push did not complete successfully"
+            echo "Expected to see '[✓] Changes applied' or 'No changes detected' in output"
+            
+            # Check for known interactive prompt patterns
+            if [[ $output == *"?"* ]] || [[ $output == *"›"* ]] || [[ $output == *"❯"* ]]; then
+              echo "Detected interactive prompt - manual intervention required"
+              echo "Please run 'pnpm db:push' locally to handle schema changes"
+            fi
+            
+            exit 1
           fi
+          
+          echo "db:push completed successfully"
 
       # Using Vercel as our secret store for the DATABASE_URL and DATABASE_POOL_URL
       # -- to my knowledge, using an external store is the only way to pass secrets between Github Actions jobs?
