@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo } from 'react';
-import { stdWebEventPipeQueryParamsSchema } from '@barely/tb/schema';
 import { linkStatFiltersSchema } from '@barely/validators';
 
 import { useFormatTimestamp } from './use-format-timestamp';

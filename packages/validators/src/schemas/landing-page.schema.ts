@@ -6,6 +6,7 @@ import { createInsertSchema } from 'drizzle-zod';
 import {
 	commonFiltersSchema,
 	infiniteQuerySchema,
+	pageFiltersSchema,
 	querySelectionSchema,
 } from '../helpers';
 import { stdWebEventPipeQueryParamsSchema } from './tb.schema';
@@ -53,6 +54,8 @@ export const defaultLandingPage: CreateLandingPage = {
 };
 
 // stat filters
-export const landingPageStatFiltersSchema = stdWebEventPipeQueryParamsSchema;
+export const landingPageStatFiltersSchema = stdWebEventPipeQueryParamsSchema.extend(
+	pageFiltersSchema.shape,
+);
 
 export type LandingPageStatFilters = z.infer<typeof landingPageStatFiltersSchema>;
