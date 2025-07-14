@@ -1030,6 +1030,12 @@ importers:
 
   apps/sparrow:
     dependencies:
+      '@barely/email':
+        specifier: workspace:*
+        version: link:../../packages/email
+      '@barely/hooks':
+        specifier: workspace:*
+        version: link:../../packages/hooks
       '@barely/lib':
         specifier: workspace:*
         version: link:../../packages/lib
@@ -1051,6 +1057,9 @@ importers:
       dotenv-cli:
         specifier: ^7.4.1
         version: 7.4.4
+      gray-matter:
+        specifier: ^4.0.3
+        version: 4.0.3
       jiti:
         specifier: ^1.21.0
         version: 1.21.7
@@ -10575,6 +10584,10 @@ packages:
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
 
+  gray-matter@4.0.3:
+    resolution: {integrity: sha512-5v6yZd4JK3eMI3FqqCouswVqwugaA9r4dNZB1wwcmrD02QkV5H0y7XBQW8QwQqEaZY1pM9aqORSORhJRdNK44Q==}
+    engines: {node: '>=6.0'}
+
   groq-js@1.17.0:
     resolution: {integrity: sha512-aFotRl41jeRY4jg5G+Bjbsn/GmrKYa6amDQc+YiZP7Wg6pNfVtfF8Q/a99VGdT5PCzzQ7wM9YI8CKJaW4SQlKQ==}
     engines: {node: '>= 14'}
@@ -13605,6 +13618,10 @@ packages:
   scrollmirror@1.2.2:
     resolution: {integrity: sha512-pcHl63wuYOoNMgNftK8y73G6eO2uCaN670pWitjSIvvBx8rxLBfKhOA4AGQfWN5fdvCjN3Zmwlsrf3nOwIVDuQ==}
 
+  section-matter@1.0.0:
+    resolution: {integrity: sha512-vfD3pmTzGpufjScBh50YHKzEu2lxBWhVEHsNGoEXmCmn2hKGfeNLYMzCJpe8cD7gqX7TJluOVpBkAequ6dgMmA==}
+    engines: {node: '>=4'}
+
   secure-json-parse@2.7.0:
     resolution: {integrity: sha512-6aU+Rwsezw7VR8/nyvKTx8QpWH9FrcYiXXlqC4z5d5XQBDRqtbfsRjnwGyqbi3gddNtWHuEk9OANUotL26qKUw==}
 
@@ -13970,6 +13987,10 @@ packages:
   strip-ansi@7.1.0:
     resolution: {integrity: sha512-iq6eVVI64nQQTRYq2KtEg2d2uU7LElhTJwsH4YzIHZshxlgZms/wIc4VoDQTlG/IvVIrBKG06CrZnp0qv7hkcQ==}
     engines: {node: '>=12'}
+
+  strip-bom-string@1.0.0:
+    resolution: {integrity: sha512-uCC2VHvQRYu+lMh4My/sFNmF2klFymLX1wHJeXnbEJERpV/ZsVuonzerjfrGpIGF7LBVa1O7i9kjiWvJiFck8g==}
+    engines: {node: '>=0.10.0'}
 
   strip-bom@3.0.0:
     resolution: {integrity: sha512-vavAMRXOgBVNF6nyEEmL3DBK19iRpDcoIwW+swQ+CbGiu7lju6t+JklA1MHweoWtadgt4ISVUsXLyDq34ddcwA==}
@@ -25477,6 +25498,13 @@ snapshots:
 
   graphemer@1.4.0: {}
 
+  gray-matter@4.0.3:
+    dependencies:
+      js-yaml: 3.14.1
+      kind-of: 6.0.3
+      section-matter: 1.0.0
+      strip-bom-string: 1.0.0
+
   groq-js@1.17.0:
     dependencies:
       debug: 4.4.1(supports-color@8.1.1)
@@ -29087,6 +29115,11 @@ snapshots:
 
   scrollmirror@1.2.2: {}
 
+  section-matter@1.0.0:
+    dependencies:
+      extend-shallow: 2.0.1
+      kind-of: 6.0.3
+
   secure-json-parse@2.7.0: {}
 
   seek-bzip@1.0.6:
@@ -29571,6 +29604,8 @@ snapshots:
   strip-ansi@7.1.0:
     dependencies:
       ansi-regex: 6.1.0
+
+  strip-bom-string@1.0.0: {}
 
   strip-bom@3.0.0: {}
 

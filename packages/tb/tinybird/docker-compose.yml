@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  tinybird-local:
+    image: tinybirdco/tinybird-local:latest
+    container_name: tinybird-local
+    platform: linux/amd64
+    ports:
+      - '7181:7181'
+    volumes:
+      # Persist data between container restarts
+      - tinybird-data:/opt/tinybird/data
+      # Mount local project for development
+      - .:/workspace:ro
+    environment:
+      # Optional: Set custom configuration
+      - TINYBIRD_LOG_LEVEL=info
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:7181/api/v0/ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+volumes:
+  tinybird-data:
+    name: barely-tinybird-local-data

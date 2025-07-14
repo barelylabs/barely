@@ -7,8 +7,9 @@
 		"build": "pnpm with-env next build",
 		"build:preview": "pnpm with-env vercel build",
 		"build:production": "pnpm with-env vercel build --prod",
-		"clean": "git clean -xdf .cache .next .turbo dist node_modules",
-		"dev": "pnpm with-env next dev -- -p 3007",
+		"clean": "git clean -xdf .next .turbo node_modules",
+		"clean:rm": "rm -rf node_modules && rm -f pnpm-lock.yaml",
+		"dev": "pnpm with-env next dev -p 3008",
 		"format": "prettier --check . --ignore-path ../../.gitignore",
 		"lint": "eslint",
 		"start": "pnpm with-env next start",
@@ -16,6 +17,8 @@
 		"with-env": "dotenv -e ../../.env --"
 	},
 	"dependencies": {
+		"@barely/email": "workspace:*",
+		"@barely/hooks": "workspace:*",
 		"@barely/lib": "workspace:*",
 		"@barely/toast": "workspace:*",
 		"@barely/ui": "workspace:*",
@@ -23,6 +26,7 @@
 		"@t3-oss/env-nextjs": "catalog:",
 		"@vercel/edge": "^0.1.2",
 		"dotenv-cli": "^7.4.1",
+		"gray-matter": "^4.0.3",
 		"jiti": "^1.21.0",
 		"next": "catalog:",
 		"react": "catalog:react19",
@@ -49,14 +53,6 @@
 		"tailwindcss": "catalog:",
 		"tailwindcss-animate": "^1.0.7",
 		"typescript": "catalog:"
-	},
-	"eslintConfig": {
-		"root": true,
-		"extends": [
-			"@barely/eslint-config/base",
-			"@barely/eslint-config/nextjs",
-			"@barely/eslint-config/react"
-		]
 	},
 	"prettier": "@barely/prettier-config"
 }

@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+.venv/
+
+# Build outputs
+dist/
+build/
+*.pyc
+__pycache__/
+
+# Local data
+tb-local-data/
+.tinyb
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+docs/
+*.md
