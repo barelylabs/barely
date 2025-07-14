@@ -2,15 +2,14 @@
 
 import { useMemo } from 'react';
 import { stdWebEventPipeQueryParamsSchema } from '@barely/tb/schema';
+import { linkStatFiltersSchema } from '@barely/validators';
 
 import { useFormatTimestamp } from './use-format-timestamp';
 import { useTypedOptimisticQuery } from './use-typed-optimistic-query';
 import { useWorkspace } from './use-workspace';
 
-export const linkStatFiltersSchema = stdWebEventPipeQueryParamsSchema;
-
 export function useLinkStatFilters() {
-	const q = useTypedOptimisticQuery(stdWebEventPipeQueryParamsSchema);
+	const q = useTypedOptimisticQuery(linkStatFiltersSchema);
 
 	const { handle } = useWorkspace();
 	const { formatTimestamp } = useFormatTimestamp(q.data.dateRange);

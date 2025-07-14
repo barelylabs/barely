@@ -34,5 +34,6 @@ export const playlistSearchParamsSchema = playlistFilterParamsSchema.extend({
 	selectedPlaylistIds: querySelectionSchema.optional(),
 });
 
-export const selectWorkspacePlaylistsSchema =
-	playlistSearchParamsSchema.merge(infiniteQuerySchema);
+export const selectWorkspacePlaylistsSchema = playlistSearchParamsSchema.extend(
+	infiniteQuerySchema.shape,
+);
