@@ -10,7 +10,6 @@ import { setCorsHeaders } from '@barely/utils';
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 import { waitUntil } from '@vercel/functions';
 
-//
 import { cartRouter } from './cart.router';
 
 export const cartHandler = async function (req: NextRequest) {
