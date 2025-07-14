@@ -55,8 +55,9 @@ export type UpdateCartFunnel = z.infer<typeof updateCartFunnelSchema>;
 export type CartFunnel = InferSelectModel<typeof CartFunnels>;
 
 export const cartFunnelFilterParamsSchema = commonFiltersSchema;
-export const selectWorkspaceCartFunnelsSchema =
-	commonFiltersSchema.merge(infiniteQuerySchema);
+export const selectWorkspaceCartFunnelsSchema = commonFiltersSchema.extend(
+	infiniteQuerySchema.shape,
+);
 
 // forms
 export const cartFunnelSearchParamsSchema = cartFunnelFilterParamsSchema.extend({

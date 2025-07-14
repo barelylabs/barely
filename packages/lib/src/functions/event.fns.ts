@@ -858,7 +858,7 @@ export async function recordFmEvent({
 	// report event to tb
 
 	try {
-		const eventData = webEventIngestSchema.merge(fmEventIngestSchema).parse({
+		const eventData = webEventIngestSchema.extend(fmEventIngestSchema.shape).parse({
 			timestamp,
 			workspaceId: fmPage.workspaceId,
 			assetId: fmPage.id,

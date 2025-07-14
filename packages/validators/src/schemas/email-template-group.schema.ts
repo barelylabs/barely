@@ -58,4 +58,4 @@ export const emailTemplateGroupSearchParamsSchema =
 
 /* select workspace email template groups */
 export const selectWorkspaceEmailTemplateGroupsSchema =
-	emailTemplateGroupFilterParamsSchema.merge(infiniteQuerySchema);
+	emailTemplateGroupFilterParamsSchema.extend(infiniteQuerySchema.shape);

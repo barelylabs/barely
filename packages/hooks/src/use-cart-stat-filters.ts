@@ -1,20 +1,14 @@
 'use client';
 
 import { useCallback, useMemo } from 'react';
-import { stdWebEventPipeQueryParamsSchema } from '@barely/tb/schema';
-import { cartFiltersSchema } from '@barely/validators/helpers';
+import { cartStatFiltersSchema } from '@barely/validators';
 
 import { useFormatTimestamp } from './use-format-timestamp';
 import { useTypedOptimisticQuery } from './use-typed-optimistic-query';
 import { useWorkspace } from './use-workspace';
 
-export const cartStatFiltersSchema =
-	stdWebEventPipeQueryParamsSchema.merge(cartFiltersSchema);
-
 export function useCartStatFilters() {
-	const q = useTypedOptimisticQuery(
-		stdWebEventPipeQueryParamsSchema.merge(cartFiltersSchema),
-	);
+	const q = useTypedOptimisticQuery(cartStatFiltersSchema);
 
 	const { handle } = useWorkspace();
 	const { formatTimestamp } = useFormatTimestamp(q.data.dateRange);

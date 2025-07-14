@@ -11,6 +11,7 @@ import {
 	queryBooleanSchema,
 	querySelectionSchema,
 } from '../helpers';
+import { stdWebEventPipeQueryParamsSchema } from './tb.schema';
 
 export const insertLinkSchema = createInsertSchema(Links, {
 	url: url =>
@@ -56,8 +57,9 @@ export const linkSearchParamsSchema = linkFilterParamsSchema.extend({
 	selectedLinkIds: querySelectionSchema.optional(),
 });
 
-export const selectWorkspaceLinksSchema =
-	linkFilterParamsSchema.merge(infiniteQuerySchema);
+export const selectWorkspaceLinksSchema = linkFilterParamsSchema.extend(
+	infiniteQuerySchema.shape,
+);
 
 export const defaultLink: CreateLink = {
 	transparent: false,
@@ -95,7 +97,7 @@ export const linkEventSchema = z.object({
 
 export type LinkEventProps = z.infer<typeof linkEventSchema>;
 
-export const linkAnalyticsSchema = linkRoutingSchema.merge(linkEventSchema);
+export const linkAnalyticsSchema = linkRoutingSchema.extend(linkEventSchema.shape);
 
 export type LinkAnalyticsProps = z.infer<typeof linkAnalyticsSchema> & {
 	workspace: {
@@ -105,3 +107,8 @@ export type LinkAnalyticsProps = z.infer<typeof linkAnalyticsSchema> & {
 		eventUsageLimitOverride: number | null;
 	};
 };
+
+// stat filters
+export const linkStatFiltersSchema = stdWebEventPipeQueryParamsSchema;
+
+export type LinkStatFilters = z.infer<typeof linkStatFiltersSchema>;

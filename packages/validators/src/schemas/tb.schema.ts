@@ -1,13 +1,10 @@
 import { FM_LINK_PLATFORMS, WEB_EVENT_TYPES, WORKSPACE_TIMEZONES } from '@barely/const';
-import { getIsoDateFromDate, getIsoDateRangeFromDescription } from '@barely/utils';
-import {
-	queryBooleanSchema,
-	queryStringEnumArrayToCommaString,
-} from '@barely/validators/helpers';
 import { z } from 'zod/v4';
 
-export const statDateRange = z.enum(['1d', '1w', '28d', '1y']);
-export type StatDateRange = z.infer<typeof statDateRange>;
+import type { StatDateRange } from './stat.schema';
+import { queryBooleanSchema, queryStringEnumArrayToCommaString } from '../helpers';
+import { getIsoDateFromDate, getIsoDateRangeFromDescription } from '../helpers/date';
+import { statDateRange } from './stat.schema';
 
 // standard pipe params
 export const stdStatPipeParamsSchema = z.object({

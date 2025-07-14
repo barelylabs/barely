@@ -6,8 +6,10 @@ import { createInsertSchema } from 'drizzle-zod';
 import {
 	commonFiltersSchema,
 	infiniteQuerySchema,
+	pageFiltersSchema,
 	querySelectionSchema,
 } from '../helpers';
+import { stdWebEventPipeQueryParamsSchema } from './tb.schema';
 
 export const insertLandingPageSchema = createInsertSchema(LandingPages, {
 	name: name => name.min(1, 'Name is required'),
@@ -41,11 +43,19 @@ export const landingPageSearchParamsSchema = landingPageFilterParamsSchema.exten
 	selectedIds: querySelectionSchema.optional(),
 });
 
-export const selectWorkspaceLandingPagesSchema =
-	commonFiltersSchema.merge(infiniteQuerySchema);
+export const selectWorkspaceLandingPagesSchema = commonFiltersSchema.extend(
+	infiniteQuerySchema.shape,
+);
 
 export const defaultLandingPage: CreateLandingPage = {
 	name: '',
 	key: '',
 	content: '',
 };
+
+// stat filters
+export const landingPageStatFiltersSchema = stdWebEventPipeQueryParamsSchema.extend(
+	pageFiltersSchema.shape,
+);
+
+export type LandingPageStatFilters = z.infer<typeof landingPageStatFiltersSchema>;

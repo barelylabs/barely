@@ -54,8 +54,9 @@ export type UpsertProduct = z.infer<typeof upsertProductSchema>;
 export type UpdateProduct = z.infer<typeof updateProductSchema>;
 export type Product = InferSelectModel<typeof Products>;
 
-export const selectWorkspaceProductsSchema =
-	commonFiltersSchema.merge(infiniteQuerySchema);
+export const selectWorkspaceProductsSchema = commonFiltersSchema.extend(
+	infiniteQuerySchema.shape,
+);
 
 // forms
 export const productFilterParamsSchema = commonFiltersSchema;
