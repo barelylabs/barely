@@ -106,11 +106,11 @@ describe('Contact API Route', () => {
 			expect(response.status).toBe(400);
 			expect(data.errors).toContainEqual({
 				path: 'name',
-				message: 'Name is required',
+				message: 'Invalid input: expected string, received undefined',
 			});
 			expect(data.errors).toContainEqual({
 				path: 'message',
-				message: 'Message must be at least 10 characters',
+				message: 'Invalid input: expected string, received undefined',
 			});
 		});
 

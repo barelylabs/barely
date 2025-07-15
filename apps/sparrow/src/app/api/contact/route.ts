@@ -1,6 +1,7 @@
 import { sendEmail } from '@barely/email';
 import { ContactInquiryEmail } from '@barely/email/templates/sparrow/contact-inquiry';
 import { ratelimit } from '@barely/lib';
+import { isProduction } from '@barely/utils';
 import { ipAddress } from '@vercel/edge';
 import { z } from 'zod/v4';
 
@@ -88,7 +89,10 @@ export async function POST(request: Request) {
 }
 
 function setCorsHeaders(res: Response) {
-	res.headers.set('Access-Control-Allow-Origin', '*'); // Allow all origins
+	res.headers.set(
+		'Access-Control-Allow-Origin',
+		isProduction() ? 'https://barelysparrow.com' : '*',
+	); // Allow all origins
 	res.headers.set('Access-Control-Allow-Methods', 'OPTIONS, POST'); // Allow OPTIONS and POST methods
 	res.headers.set('Access-Control-Allow-Headers', '*'); // Allow all headers
 }

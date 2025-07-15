@@ -13,9 +13,9 @@
 		"format": "prettier --check . --ignore-path ../../.gitignore",
 		"lint": "eslint",
 		"start": "pnpm with-env next start",
-		"test": "vitest",
-		"test:watch": "vitest --watch",
-		"test:coverage": "vitest --coverage",
+		"test": "pnpm with-env vitest",
+		"test:watch": "pnpm with-env vitest --watch",
+		"test:coverage": "pnpm with-env vitest --coverage",
 		"typecheck": "tsc --noEmit",
 		"with-env": "dotenv -e ../../.env --"
 	},

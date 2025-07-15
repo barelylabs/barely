@@ -2,8 +2,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import '../../test/jest-dom';
-
 import { ContactModal } from '../ContactModal';
 
 // Mock fetch
@@ -23,11 +21,11 @@ describe('ContactModal', () => {
 			/>,
 		);
 
-		expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
-		expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-		expect(screen.getByLabelText(/artist name/i)).toBeInTheDocument();
-		expect(screen.getByLabelText(/monthly spotify listeners/i)).toBeInTheDocument();
-		expect(screen.getByLabelText(/message/i)).toBeInTheDocument();
+		expect(screen.getByLabelText(/your name \*/i)).toBeInTheDocument();
+		expect(screen.getByLabelText(/email \*/i)).toBeInTheDocument();
+		expect(screen.getByLabelText(/artist\/band name/i)).toBeInTheDocument();
+		expect(screen.getByLabelText(/monthly listeners/i)).toBeInTheDocument();
+		expect(screen.getByLabelText(/tell me about your goals/i)).toBeInTheDocument();
 		expect(screen.getByRole('button', { name: /send message/i })).toBeInTheDocument();
 	});
 
@@ -63,15 +61,27 @@ describe('ContactModal', () => {
 			/>,
 		);
 
-		const emailInput = screen.getByLabelText(/email/i);
+		// Fill name (required field)
+		await user.type(screen.getByLabelText(/your name \*/i), 'John Doe');
+		
+		// Fill message (required field)
+		await user.type(screen.getByLabelText(/tell me about your goals/i), 'This is a test message with enough characters');
+		
+		// Fill email with invalid value
+		const emailInput = screen.getByLabelText(/email \*/i);
 		await user.type(emailInput, 'invalid-email');
+		
+		// Trigger blur to show validation
+		await user.tab();
 
 		const submitButton = screen.getByRole('button', { name: /send message/i });
 		await user.click(submitButton);
 
+		// Wait for the error message to appear
 		await waitFor(() => {
-			expect(screen.getByText(/invalid email address/i)).toBeInTheDocument();
-		});
+			const errorMessage = screen.queryByText(/invalid email address/i);
+			expect(errorMessage).toBeInTheDocument();
+		}, { timeout: 2000 });
 	});
 
 	it('validates message length', async () => {
@@ -84,7 +94,7 @@ describe('ContactModal', () => {
 			/>,
 		);
 
-		const messageInput = screen.getByLabelText(/message/i);
+		const messageInput = screen.getByLabelText(/tell me about your goals/i);
 		await user.type(messageInput, 'Short');
 
 		const submitButton = screen.getByRole('button', { name: /send message/i });
@@ -115,12 +125,12 @@ describe('ContactModal', () => {
 		);
 
 		// Fill form with valid data
-		await user.type(screen.getByLabelText(/name/i), 'John Doe');
-		await user.type(screen.getByLabelText(/email/i), 'john@example.com');
-		await user.type(screen.getByLabelText(/artist name/i), 'Test Artist');
-		await user.type(screen.getByLabelText(/monthly spotify listeners/i), '10000');
+		await user.type(screen.getByLabelText(/your name \*/i), 'John Doe');
+		await user.type(screen.getByLabelText(/email \*/i), 'john@example.com');
+		await user.type(screen.getByLabelText(/artist\/band name/i), 'Test Artist');
+		await user.type(screen.getByLabelText(/monthly listeners/i), '10000');
 		await user.type(
-			screen.getByLabelText(/message/i),
+			screen.getByLabelText(/tell me about your goals/i),
 			'This is a test message with enough characters',
 		);
 
@@ -143,7 +153,7 @@ describe('ContactModal', () => {
 		});
 
 		await waitFor(() => {
-			expect(screen.getByText(/message sent successfully/i)).toBeInTheDocument();
+			expect(screen.getByText(/message sent!/i)).toBeInTheDocument();
 		});
 
 		// Wait for success message to disappear and modal to close
@@ -161,6 +171,7 @@ describe('ContactModal', () => {
 		vi.mocked(global.fetch).mockResolvedValueOnce({
 			ok: false,
 			status: 500,
+			text: () => Promise.resolve('Internal server error'),
 		} as Response);
 
 		render(
@@ -172,10 +183,10 @@ describe('ContactModal', () => {
 		);
 
 		// Fill form with valid data
-		await user.type(screen.getByLabelText(/name/i), 'John Doe');
-		await user.type(screen.getByLabelText(/email/i), 'john@example.com');
+		await user.type(screen.getByLabelText(/your name \*/i), 'John Doe');
+		await user.type(screen.getByLabelText(/email \*/i), 'john@example.com');
 		await user.type(
-			screen.getByLabelText(/message/i),
+			screen.getByLabelText(/tell me about your goals/i),
 			'This is a test message with enough characters',
 		);
 
@@ -183,7 +194,7 @@ describe('ContactModal', () => {
 		await user.click(submitButton);
 
 		await waitFor(() => {
-			expect(screen.getByText(/failed to send message/i)).toBeInTheDocument();
+			expect(screen.getByText(/internal server error/i)).toBeInTheDocument();
 		});
 	});
 
@@ -193,6 +204,7 @@ describe('ContactModal', () => {
 		vi.mocked(global.fetch).mockResolvedValueOnce({
 			ok: false,
 			status: 429,
+			text: () => Promise.resolve('Too many requests'),
 		} as Response);
 
 		render(
@@ -204,10 +216,10 @@ describe('ContactModal', () => {
 		);
 
 		// Fill form with valid data
-		await user.type(screen.getByLabelText(/name/i), 'John Doe');
-		await user.type(screen.getByLabelText(/email/i), 'john@example.com');
+		await user.type(screen.getByLabelText(/your name \*/i), 'John Doe');
+		await user.type(screen.getByLabelText(/email \*/i), 'john@example.com');
 		await user.type(
-			screen.getByLabelText(/message/i),
+			screen.getByLabelText(/tell me about your goals/i),
 			'This is a test message with enough characters',
 		);
 
@@ -231,7 +243,11 @@ describe('ContactModal', () => {
 			/>,
 		);
 
-		const closeButton = screen.getByRole('button', { name: /close/i });
+		// The modal close button is the X icon button
+		const closeButtons = screen.getAllByRole('button');
+		// Find the button that isn't the submit button
+		const closeButton = closeButtons.find(btn => !btn.textContent?.includes('Send Message'));
+		if (!closeButton) throw new Error('Close button not found');
 		await user.click(closeButton);
 
 		expect(setShowModal).toHaveBeenCalledWith(false);
@@ -262,10 +278,10 @@ describe('ContactModal', () => {
 		);
 
 		// Fill form with valid data
-		await user.type(screen.getByLabelText(/name/i), 'John Doe');
-		await user.type(screen.getByLabelText(/email/i), 'john@example.com');
+		await user.type(screen.getByLabelText(/your name \*/i), 'John Doe');
+		await user.type(screen.getByLabelText(/email \*/i), 'john@example.com');
 		await user.type(
-			screen.getByLabelText(/message/i),
+			screen.getByLabelText(/tell me about your goals/i),
 			'This is a test message with enough characters',
 		);
 
