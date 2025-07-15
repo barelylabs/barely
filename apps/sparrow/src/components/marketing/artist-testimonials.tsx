@@ -8,8 +8,8 @@ import { Img } from '@barely/ui/img';
 import { H } from '@barely/ui/typography';
 
 import { allCaseStudies } from '../../data/case-studies';
-import { AnimatedSection } from './AnimatedSection';
-import { MarketingButton } from './Button';
+import { AnimatedSection } from './animated-section';
+import { MarketingButton } from './button';
 
 // Extract testimonials from case studies
 const testimonials = allCaseStudies.map(study => ({

@@ -3,10 +3,10 @@ import Link from 'next/link';
 
 import { H } from '@barely/ui/typography';
 
-import { AnimatedSection } from '../../../components/marketing/AnimatedSection';
-import { MarketingButton } from '../../../components/marketing/Button';
-import { BarChart, GrowthChart, StatCard } from '../../../components/marketing/DataViz';
-import { PricingCard } from '../../../components/marketing/PricingCard';
+import { AnimatedSection } from '../../../components/marketing/animated-section';
+import { MarketingButton } from '../../../components/marketing/button';
+import { BarChart, GrowthChart, StatCard } from '../../../components/marketing/data-viz';
+import { PricingCard } from '../../../components/marketing/pricing-card';
 
 export const metadata: Metadata = {
 	title: 'Rising+ Service - Professional Campaign Engineering | Barely Sparrow',

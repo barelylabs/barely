@@ -3,7 +3,7 @@ import { mdxLink } from '@barely/ui/mdx-link';
 import { MDXRemoteRSC as MDXRemote } from '@barely/ui/mdx-remote';
 import { mdxVideoPlayer } from '@barely/ui/mdx-video-player';
 
-import { blogTypography } from './BlogTypography';
+import { blogTypography } from './blog-typography';
 
 export function BlogMDX({ markdown }: { markdown: string }) {
 	const components = {

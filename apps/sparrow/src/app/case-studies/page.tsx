@@ -3,8 +3,8 @@ import Link from 'next/link';
 
 import { H } from '@barely/ui/typography';
 
-import { AnimatedSection } from '~/components/marketing/AnimatedSection';
-import { CaseStudyCard } from '~/components/marketing/CaseStudyCard';
+import { AnimatedSection } from '~/components/marketing/animated-section';
+import { CaseStudyCard } from '~/components/marketing/case-study-card';
 
 import { allCaseStudies } from '~/data/case-studies';
 

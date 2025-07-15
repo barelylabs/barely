@@ -6,10 +6,10 @@ import { cn } from '@barely/utils';
 const successStories = [
 	{ metric: '2.3M+', label: 'streams generated', icon: '🎵' },
 	{ metric: '+847%', label: 'avg listener growth', icon: '📈' },
-	{ metric: '$18.2K', label: 'in merch sales', icon: '🛍️' },
+	{ metric: '127', label: 'artists growing', icon: '🎸' },
 	{ metric: '12/15', label: 'tours sold out', icon: '🎤' },
-	{ metric: '487', label: 'artists served', icon: '🎸' },
-	{ metric: '+425%', label: 'avg revenue increase', icon: '💰' },
+	{ metric: '94%', label: 'success rate', icon: '✨' },
+	{ metric: '100%', label: 'transparent reporting', icon: '📊' },
 ];
 
 export function EnhancedSuccessTicker() {

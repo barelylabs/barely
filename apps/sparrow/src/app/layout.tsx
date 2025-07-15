@@ -10,7 +10,8 @@ import { cn } from '@barely/utils';
 import { TailwindIndicator } from '@barely/ui/components/tailwind-indicator';
 import { Container } from '@barely/ui/container';
 
-import { Navigation } from '../components/marketing/Navigation';
+import { Navigation } from '../components/marketing/navigation';
+import { SuccessMetricsBar } from '../components/marketing/success-metrics-bar';
 import Providers from './providers';
 
 const fontHeading = localFont({
@@ -57,6 +58,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
 				)}
 			>
 				<Providers headers={await headers()}>
+					<SuccessMetricsBar />
 					<Navigation />
 					<Container className='max-w-full px-0 py-0'>{children}</Container>
 				</Providers>

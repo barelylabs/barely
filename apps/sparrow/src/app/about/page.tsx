@@ -3,8 +3,9 @@ import Link from 'next/link';
 
 import { H } from '@barely/ui/typography';
 
-import { AnimatedSection } from '../../components/marketing/AnimatedSection';
-import { MarketingButton } from '../../components/marketing/Button';
+import { AnimatedSection } from '../../components/marketing/animated-section';
+import { MarketingButton } from '../../components/marketing/button';
+import { PhDBadge } from '../../components/marketing/trust-badges';
 
 export const metadata: Metadata = {
 	title: 'About - From Lab to Studio | Barely Sparrow',
@@ -27,6 +28,9 @@ export default function AboutPage() {
 						<p className='text-xl text-white/70 md:text-2xl'>
 							Building transparent tools so indie artists can focus on what they do best
 						</p>
+						<div className='mt-6'>
+							<PhDBadge className='mx-auto' />
+						</div>
 					</AnimatedSection>
 				</div>
 			</section>

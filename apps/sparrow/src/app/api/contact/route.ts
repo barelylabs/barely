@@ -65,20 +65,24 @@ export async function POST(request: Request) {
 			return response;
 		}
 
-		return new Response(JSON.stringify({ success: true }), {
+		const successResponse = new Response(JSON.stringify({ success: true }), {
 			status: 200,
 			headers: { 'Content-Type': 'application/json' },
 		});
+		setCorsHeaders(successResponse);
+		return successResponse;
 	} catch (error) {
 		if (error instanceof z.ZodError) {
 			const zodErrors = error.issues.map(issue => ({
 				path: issue.path.join('.'),
 				message: issue.message,
 			}));
-			return new Response(JSON.stringify({ errors: zodErrors }), {
+			const errorResponse = new Response(JSON.stringify({ errors: zodErrors }), {
 				status: 400,
 				headers: { 'Content-Type': 'application/json' },
 			});
+			setCorsHeaders(errorResponse);
+			return errorResponse;
 		}
 
 		console.error('Contact form error:', error);
@@ -89,12 +93,14 @@ export async function POST(request: Request) {
 }
 
 function setCorsHeaders(res: Response) {
-	res.headers.set(
-		'Access-Control-Allow-Origin',
-		isProduction() ? 'https://barelysparrow.com' : '*',
-	); // Allow all origins
-	res.headers.set('Access-Control-Allow-Methods', 'OPTIONS, POST'); // Allow OPTIONS and POST methods
-	res.headers.set('Access-Control-Allow-Headers', '*'); // Allow all headers
+	const origin = isProduction() 
+		? 'https://barelysparrow.com' 
+		: '*';
+		
+	res.headers.set('Access-Control-Allow-Origin', origin);
+	res.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+	res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+	res.headers.set('Access-Control-Max-Age', '86400');
 }
 
 export function OPTIONS() {

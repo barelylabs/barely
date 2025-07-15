@@ -4,7 +4,7 @@ import { cn } from '@barely/utils';
 
 import { H } from '@barely/ui/typography';
 
-import { MarketingButton } from './Button';
+import { MarketingButton } from './button';
 
 interface PricingCardProps {
 	title: string;

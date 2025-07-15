@@ -6,10 +6,10 @@ import { Icon } from '@barely/ui/icon';
 import { Img } from '@barely/ui/img';
 import { H } from '@barely/ui/typography';
 
-import { AnimatedSection } from '~/components/marketing/AnimatedSection';
-import { MarketingButton } from '~/components/marketing/Button';
-import { CaseStudyMetrics } from '~/components/marketing/CaseStudyMetrics';
-import { CaseStudyTimeline } from '~/components/marketing/CaseStudyTimeline';
+import { AnimatedSection } from '~/components/marketing/animated-section';
+import { MarketingButton } from '~/components/marketing/button';
+import { CaseStudyMetrics } from '~/components/marketing/case-study-metrics';
+import { CaseStudyTimeline } from '~/components/marketing/case-study-timeline';
 
 import { getAllCaseStudyIds, getCaseStudyById } from '~/data/case-studies';
 

@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useZodForm } from '@barely/hooks';
-import { cn } from '@barely/utils';
 import { z } from 'zod/v4';
 
 import { Button } from '@barely/ui/button';
@@ -11,7 +10,8 @@ import { Input } from '@barely/ui/input';
 import { Modal, ModalBody, ModalHeader } from '@barely/ui/modal';
 import { Textarea } from '@barely/ui/textarea';
 
-import { MarketingButton } from './Button';
+import { MarketingButton } from './button';
+import { SecurityBadge } from './trust-badges';
 
 interface ContactModalProps {
 	showModal: boolean;
@@ -88,8 +88,8 @@ export function ContactModal({
 			className='max-w-lg border-white/10 bg-[#0A0A0B]'
 		>
 			<ModalHeader
-				title="Let's Talk About Your Music"
-				subtitle={submitSuccess ? '' : 'Tell me about your project and goals'}
+				title={submitSuccess ? 'Message Sent!' : "Let's Grow Your Music"}
+				subtitle={submitSuccess ? '' : "I'll respond within 24 hours"}
 			/>
 
 			<ModalBody className='bg-[#0A0A0B]'>
@@ -133,7 +133,6 @@ export function ContactModal({
 									</label>
 									<Input
 										id='email'
-										type='email'
 										{...form.register('email')}
 										className='border-white/10 bg-white/5 text-white placeholder:text-white/40'
 										placeholder='john@example.com'
@@ -146,82 +145,57 @@ export function ContactModal({
 								</div>
 							</div>
 
-							<div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
-								<div>
-									<label
-										htmlFor='artistName'
-										className='mb-1 block text-sm font-medium text-white/70'
-									>
-										Artist/Band Name
-									</label>
-									<Input
-										id='artistName'
-										{...form.register('artistName')}
-										className='border-white/10 bg-white/5 text-white placeholder:text-white/40'
-										placeholder='Your artist name'
-									/>
-								</div>
+							<details className='group'>
+								<summary className='mb-4 cursor-pointer text-sm text-white/60 hover:text-white/80'>
+									+ Add more details (optional)
+								</summary>
+								<div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
+									<div>
+										<label
+											htmlFor='artistName'
+											className='mb-1 block text-sm font-medium text-white/70'
+										>
+											Artist/Band Name
+										</label>
+										<Input
+											id='artistName'
+											{...form.register('artistName')}
+											className='border-white/10 bg-white/5 text-white placeholder:text-white/40'
+											placeholder='Your artist name'
+										/>
+									</div>
 
-								<div>
-									<label
-										htmlFor='monthlyListeners'
-										className='mb-1 block text-sm font-medium text-white/70'
-									>
-										Monthly Listeners
-									</label>
-									<Input
-										id='monthlyListeners'
-										{...form.register('monthlyListeners')}
-										className='border-white/10 bg-white/5 text-white placeholder:text-white/40'
-										placeholder='e.g., 5000'
-									/>
+									<div>
+										<label
+											htmlFor='monthlyListeners'
+											className='mb-1 block text-sm font-medium text-white/70'
+										>
+											Monthly Listeners
+										</label>
+										<Input
+											id='monthlyListeners'
+											{...form.register('monthlyListeners')}
+											className='border-white/10 bg-white/5 text-white placeholder:text-white/40'
+											placeholder='e.g., 5000'
+										/>
+									</div>
 								</div>
-							</div>
+							</details>
 
-							<div>
-								<label
-									htmlFor='service'
-									className='mb-1 block text-sm font-medium text-white/70'
-								>
-									Service Interest
-								</label>
-								<select
-									id='service'
-									{...form.register('service')}
-									className={cn(
-										'w-full rounded-md px-3 py-2',
-										'border border-white/10 bg-white/5 text-white',
-										'focus:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-500',
-									)}
-								>
-									<option value='' className='bg-[#0A0A0B]'>
-										Select a service
-									</option>
-									<option value='bedroom' className='bg-[#0A0A0B]'>
-										Bedroom+ ($200/month)
-									</option>
-									<option value='rising' className='bg-[#0A0A0B]'>
-										Rising+ ($750/month)
-									</option>
-									<option value='breakout' className='bg-[#0A0A0B]'>
-										Breakout+ ($1,800/month)
-									</option>
-								</select>
-							</div>
 
 							<div>
 								<label
 									htmlFor='message'
 									className='mb-1 block text-sm font-medium text-white/70'
 								>
-									Tell me about your goals
+									What's your biggest music marketing challenge? *
 								</label>
 								<Textarea
 									id='message'
 									rows={4}
 									{...form.register('message')}
 									className='resize-none border-white/10 bg-white/5 text-white placeholder:text-white/40'
-									placeholder="What are you hoping to achieve with your music? Any specific challenges you're facing?"
+									placeholder="e.g., 'I need help growing from 1k to 10k monthly listeners' or 'Looking to launch my new album effectively'"
 								/>
 								{form.formState.errors.message && (
 									<p className='mt-1 text-xs text-red-500'>
@@ -235,6 +209,10 @@ export function ContactModal({
 									<p className='text-sm text-red-500'>{submitError}</p>
 								</div>
 							)}
+
+							<div className='flex justify-center'>
+								<SecurityBadge />
+							</div>
 
 							<div className='flex gap-3 pt-4'>
 								<MarketingButton

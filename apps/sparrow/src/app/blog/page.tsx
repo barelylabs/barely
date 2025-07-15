@@ -1,7 +1,7 @@
 import { H } from '@barely/ui/typography';
 
-import { BlogCard } from '../../components/blog/BlogCard';
-import { AnimatedSection } from '../../components/marketing/AnimatedSection';
+import { BlogCard } from '../../components/blog/blog-card';
+import { AnimatedSection } from '../../components/marketing/animated-section';
 import { getAllPosts } from '../../lib/blog';
 
 export default function BlogPage() {

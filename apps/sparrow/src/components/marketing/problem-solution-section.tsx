@@ -4,12 +4,12 @@ import { cn } from '@barely/utils';
 
 import { H } from '@barely/ui/typography';
 
-import { AnimatedSection } from './AnimatedSection';
+import { AnimatedSection } from './animated-section';
 
 const problems = [
-	'Expensive publicists ($2K+/month for minimal results)',
+	'Expensive services that drain your budget with minimal results',
 	"Risky playlist schemes that violate Spotify's terms",
-	'Black-box services that hide how they actually work',
+	'Black-box agencies that hide how they actually work',
 ];
 
 const solutions = [

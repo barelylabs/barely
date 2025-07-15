@@ -3,8 +3,8 @@ import Link from 'next/link';
 
 import { H } from '@barely/ui/typography';
 
-import { AnimatedSection } from '../../components/marketing/AnimatedSection';
-import { PricingCard } from '../../components/marketing/PricingCard';
+import { AnimatedSection } from '../../components/marketing/animated-section';
+import { PricingCard } from '../../components/marketing/pricing-card';
 
 export const metadata: Metadata = {
 	title: 'Services - Music Marketing That Makes Sense | Barely Sparrow',

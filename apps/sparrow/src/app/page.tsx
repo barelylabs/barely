@@ -2,16 +2,16 @@ import Link from 'next/link';
 
 import { H } from '@barely/ui/typography';
 
-import { AnimatedSection } from '../components/marketing/AnimatedSection';
-import { ArtistTestimonials } from '../components/marketing/ArtistTestimonials';
-import { MarketingButton } from '../components/marketing/Button';
-import { EnhancedSuccessTicker } from '../components/marketing/EnhancedSuccessTicker';
-import { FounderStoryTeaser } from '../components/marketing/FounderStoryTeaser';
-import { Hero } from '../components/marketing/Hero';
-import { ChartIcon, FlaskIcon, MusicIcon } from '../components/marketing/Icons';
-import { ProblemSolutionSection } from '../components/marketing/ProblemSolutionSection';
-import { ResultsDashboard } from '../components/marketing/ResultsDashboard';
-import { ValueCard } from '../components/marketing/ValueCard';
+import { AnimatedSection } from '../components/marketing/animated-section';
+import { ArtistTestimonials } from '../components/marketing/artist-testimonials';
+import { MarketingButton } from '../components/marketing/button';
+import { EnhancedSuccessTicker } from '../components/marketing/enhanced-success-ticker';
+import { FounderStoryTeaser } from '../components/marketing/founder-story-teaser';
+import { Hero } from '../components/marketing/hero';
+import { ChartIcon, FlaskIcon, MusicIcon } from '../components/marketing/icons';
+import { ProblemSolutionSection } from '../components/marketing/problem-solution-section';
+import { ResultsDashboard } from '../components/marketing/results-dashboard';
+import { ValueCard } from '../components/marketing/value-card';
 
 export default function HomePage() {
 	return (
@@ -95,8 +95,7 @@ export default function HomePage() {
 											Bedroom+
 										</H>
 										<p className='mb-6 text-white/70'>
-											Learn the scientific method for music marketing with bi-weekly
-											coaching.
+											Master our exact growth playbook with bi-weekly 1-on-1 coaching.
 										</p>
 										<p className='text-purple-300 transition-colors group-hover:text-purple-300'>
 											Learn more →
@@ -133,8 +132,8 @@ export default function HomePage() {
 											Rising+
 										</H>
 										<p className='mb-6 text-white/70'>
-											Professional campaign execution with full transparency and
-											reporting.
+											We run your campaigns while teaching you the strategy behind
+											every decision.
 										</p>
 										<p className='text-purple-300 transition-colors group-hover:text-purple-300'>
 											Learn more →
@@ -166,7 +165,7 @@ export default function HomePage() {
 											Breakout+
 										</H>
 										<p className='mb-6 text-white/70'>
-											Maximum growth engineering for artists ready to scale aggressively.
+											Full growth team optimizing daily - for artists ready to scale aggressively.
 										</p>
 										<p className='text-purple-300 transition-colors group-hover:text-purple-300'>
 											Learn more →

@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ContactModal } from '../ContactModal';
+import { ContactModal } from '../contact-modal';
 
 // Mock fetch
 global.fetch = vi.fn() as typeof global.fetch;
@@ -23,9 +23,8 @@ describe('ContactModal', () => {
 
 		expect(screen.getByLabelText(/your name \*/i)).toBeInTheDocument();
 		expect(screen.getByLabelText(/email \*/i)).toBeInTheDocument();
-		expect(screen.getByLabelText(/artist\/band name/i)).toBeInTheDocument();
-		expect(screen.getByLabelText(/monthly listeners/i)).toBeInTheDocument();
-		expect(screen.getByLabelText(/tell me about your goals/i)).toBeInTheDocument();
+		expect(screen.getByText(/add more details/i)).toBeInTheDocument();
+		expect(screen.getByLabelText(/what's your biggest music marketing challenge\? \*/i)).toBeInTheDocument();
 		expect(screen.getByRole('button', { name: /send message/i })).toBeInTheDocument();
 	});
 
@@ -66,7 +65,7 @@ describe('ContactModal', () => {
 
 		// Fill message (required field)
 		await user.type(
-			screen.getByLabelText(/tell me about your goals/i),
+			screen.getByLabelText(/what's your biggest music marketing challenge\? \*/i),
 			'This is a test message with enough characters',
 		);
 
@@ -100,7 +99,7 @@ describe('ContactModal', () => {
 			/>,
 		);
 
-		const messageInput = screen.getByLabelText(/tell me about your goals/i);
+		const messageInput = screen.getByLabelText(/what's your biggest music marketing challenge/i);
 		await user.type(messageInput, 'Short');
 
 		const submitButton = screen.getByRole('button', { name: /send message/i });
@@ -133,10 +132,15 @@ describe('ContactModal', () => {
 		// Fill form with valid data
 		await user.type(screen.getByLabelText(/your name \*/i), 'John Doe');
 		await user.type(screen.getByLabelText(/email \*/i), 'john@example.com');
+		// Click on the details section to expand it
+		const detailsSection = screen.getByText(/add more details/i);
+		await user.click(detailsSection);
+		
+		// Now we can fill the optional fields
 		await user.type(screen.getByLabelText(/artist\/band name/i), 'Test Artist');
 		await user.type(screen.getByLabelText(/monthly listeners/i), '10000');
 		await user.type(
-			screen.getByLabelText(/tell me about your goals/i),
+			screen.getByLabelText(/what's your biggest music marketing challenge\? \*/i),
 			'This is a test message with enough characters',
 		);
 
@@ -159,7 +163,8 @@ describe('ContactModal', () => {
 		});
 
 		await waitFor(() => {
-			expect(screen.getByText(/message sent!/i)).toBeInTheDocument();
+			// Check for the success message body text
+			expect(screen.getByText(/I'll get back to you within 24 hours/i)).toBeInTheDocument();
 		});
 
 		// Wait for success message to disappear and modal to close
@@ -192,7 +197,7 @@ describe('ContactModal', () => {
 		await user.type(screen.getByLabelText(/your name \*/i), 'John Doe');
 		await user.type(screen.getByLabelText(/email \*/i), 'john@example.com');
 		await user.type(
-			screen.getByLabelText(/tell me about your goals/i),
+			screen.getByLabelText(/what's your biggest music marketing challenge\? \*/i),
 			'This is a test message with enough characters',
 		);
 
@@ -225,7 +230,7 @@ describe('ContactModal', () => {
 		await user.type(screen.getByLabelText(/your name \*/i), 'John Doe');
 		await user.type(screen.getByLabelText(/email \*/i), 'john@example.com');
 		await user.type(
-			screen.getByLabelText(/tell me about your goals/i),
+			screen.getByLabelText(/what's your biggest music marketing challenge\? \*/i),
 			'This is a test message with enough characters',
 		);
 
@@ -249,14 +254,9 @@ describe('ContactModal', () => {
 			/>,
 		);
 
-		// The modal close button is the X icon button
-		const closeButtons = screen.getAllByRole('button');
-		// Find the button that isn't the submit button
-		const closeButton = closeButtons.find(
-			btn => !btn.textContent?.includes('Send Message'),
-		);
-		if (!closeButton) throw new Error('Close button not found');
-		await user.click(closeButton);
+		// Click the Cancel button
+		const cancelButton = screen.getByRole('button', { name: /cancel/i });
+		await user.click(cancelButton);
 
 		expect(setShowModal).toHaveBeenCalledWith(false);
 	});
@@ -289,7 +289,7 @@ describe('ContactModal', () => {
 		await user.type(screen.getByLabelText(/your name \*/i), 'John Doe');
 		await user.type(screen.getByLabelText(/email \*/i), 'john@example.com');
 		await user.type(
-			screen.getByLabelText(/tell me about your goals/i),
+			screen.getByLabelText(/what's your biggest music marketing challenge\? \*/i),
 			'This is a test message with enough characters',
 		);
 

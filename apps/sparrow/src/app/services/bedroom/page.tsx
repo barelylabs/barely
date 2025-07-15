@@ -3,9 +3,9 @@ import Link from 'next/link';
 
 import { H } from '@barely/ui/typography';
 
-import { AnimatedSection } from '../../../components/marketing/AnimatedSection';
-import { MarketingButton } from '../../../components/marketing/Button';
-import { PricingCard } from '../../../components/marketing/PricingCard';
+import { AnimatedSection } from '../../../components/marketing/animated-section';
+import { MarketingButton } from '../../../components/marketing/button';
+import { PricingCard } from '../../../components/marketing/pricing-card';
 
 export const metadata: Metadata = {
 	title: 'Bedroom+ Service - Learn Scientific Music Marketing | Barely Sparrow',

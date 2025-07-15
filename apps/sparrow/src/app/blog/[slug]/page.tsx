@@ -6,9 +6,9 @@ import { Icon } from '@barely/ui/icon';
 import { Img } from '@barely/ui/img';
 import { H } from '@barely/ui/typography';
 
-import { BlogMDX } from '../../../components/blog/BlogMDX';
-import { AnimatedSection } from '../../../components/marketing/AnimatedSection';
-import { MarketingButton } from '../../../components/marketing/Button';
+import { BlogMDX } from '../../../components/blog/blog-mdx';
+import { AnimatedSection } from '../../../components/marketing/animated-section';
+import { MarketingButton } from '../../../components/marketing/button';
 import { getAllPosts, getPostBySlug } from '../../../lib/blog';
 
 export function generateStaticParams() {

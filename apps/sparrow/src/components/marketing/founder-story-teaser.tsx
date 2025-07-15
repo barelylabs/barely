@@ -3,8 +3,8 @@
 import Link from 'next/link';
 
 import { useIntersection } from '../../hooks/use-intersection';
-import { AnimatedSection } from './AnimatedSection';
-import { MarketingButton } from './Button';
+import { AnimatedSection } from './animated-section';
+import { MarketingButton } from './button';
 
 export function FounderStoryTeaser() {
 	const { ref: parallaxRef, isIntersecting } = useIntersection({

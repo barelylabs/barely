@@ -8,8 +8,8 @@ import { cn } from '@barely/utils';
 import { Icon } from '@barely/ui/icon';
 import { Img } from '@barely/ui/img';
 
-import { MarketingButton } from './Button';
-import { ContactModal } from './ContactModal';
+import { MarketingButton } from './button';
+import { ContactModal } from './contact-modal';
 
 const navItems = [
 	{ href: '/', label: 'Home' },
