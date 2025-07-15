@@ -1,5 +1,5 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useCountUp } from '../use-count-up';
 
@@ -49,8 +49,8 @@ describe('useCountUp', () => {
 	});
 
 	it('respects delay parameter', async () => {
-		const { result } = renderHook(() => 
-			useCountUp({ end: 50, duration: 500, delay: 200 })
+		const { result } = renderHook(() =>
+			useCountUp({ end: 50, duration: 500, delay: 200 }),
 		);
 
 		act(() => {
@@ -74,16 +74,14 @@ describe('useCountUp', () => {
 	});
 
 	it('formats count with decimals', () => {
-		const { result } = renderHook(() => 
-			useCountUp({ end: 100, decimals: 2 })
-		);
+		const { result } = renderHook(() => useCountUp({ end: 100, decimals: 2 }));
 
 		expect(result.current.formattedCount).toBe('0.00');
 	});
 
 	it('includes prefix and suffix in formatted count', async () => {
-		const { result } = renderHook(() => 
-			useCountUp({ end: 100, prefix: '$', suffix: ' USD', decimals: 2 })
+		const { result } = renderHook(() =>
+			useCountUp({ end: 100, prefix: '$', suffix: ' USD', decimals: 2 }),
 		);
 
 		expect(result.current.formattedCount).toBe('$0.00 USD');
@@ -122,8 +120,8 @@ describe('useCountUp', () => {
 		const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
 		const cancelAnimationFrameSpy = vi.spyOn(global, 'cancelAnimationFrame');
 
-		const { result, unmount } = renderHook(() => 
-			useCountUp({ end: 100, duration: 1000 })
+		const { result, unmount } = renderHook(() =>
+			useCountUp({ end: 100, duration: 1000 }),
 		);
 
 		act(() => {
@@ -163,7 +161,7 @@ describe('useCountUp', () => {
 	it('updates when end value changes', async () => {
 		const { result, rerender } = renderHook(
 			({ end }) => useCountUp({ end, duration: 500 }),
-			{ initialProps: { end: 100 } }
+			{ initialProps: { end: 100 } },
 		);
 
 		act(() => {

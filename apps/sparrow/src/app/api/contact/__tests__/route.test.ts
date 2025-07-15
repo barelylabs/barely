@@ -1,5 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST, OPTIONS } from '../route';
+import { sendEmail } from '@barely/email';
+import { ratelimit } from '@barely/lib';
+import { ipAddress } from '@vercel/edge';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { OPTIONS, POST } from '../route';
 
 // Mock dependencies
 vi.mock('@barely/email', () => ({
@@ -15,10 +19,6 @@ vi.mock('@barely/lib', () => ({
 vi.mock('@vercel/edge', () => ({
 	ipAddress: vi.fn(() => '127.0.0.1'),
 }));
-
-import { sendEmail } from '@barely/email';
-import { ratelimit } from '@barely/lib';
-import { ipAddress } from '@vercel/edge';
 
 interface ContactFormData {
 	name: string;
@@ -57,7 +57,7 @@ describe('Contact API Route', () => {
 			});
 
 			const response = await POST(request);
-			const data = await response.json() as ApiResponse;
+			const data = (await response.json()) as ApiResponse;
 
 			expect(response.status).toBe(200);
 			expect(data).toEqual({ success: true });
@@ -83,7 +83,7 @@ describe('Contact API Route', () => {
 			});
 
 			const response = await POST(request);
-			const data = await response.json() as ApiResponse;
+			const data = (await response.json()) as ApiResponse;
 
 			expect(response.status).toBe(400);
 			expect(data.errors).toContainEqual({
@@ -101,7 +101,7 @@ describe('Contact API Route', () => {
 			});
 
 			const response = await POST(request);
-			const data = await response.json() as ApiResponse;
+			const data = (await response.json()) as ApiResponse;
 
 			expect(response.status).toBe(400);
 			expect(data.errors).toContainEqual({
@@ -125,7 +125,7 @@ describe('Contact API Route', () => {
 			});
 
 			const response = await POST(request);
-			const data = await response.json() as ApiResponse;
+			const data = (await response.json()) as ApiResponse;
 
 			expect(response.status).toBe(400);
 			expect(data.errors).toContainEqual({
@@ -233,12 +233,12 @@ describe('Contact API Route', () => {
 			expect(mockSendEmail).toHaveBeenCalledWith(
 				expect.objectContaining({
 					subject: 'New Contact Form Submission - General Inquiry',
-				})
+				}),
 			);
 		});
 
 		it('handles anonymous users when IP is not available', async () => {
-			vi.mocked(ipAddress).mockReturnValueOnce(null);
+			vi.mocked(ipAddress).mockReturnValueOnce(undefined);
 			const mockSendEmail = vi.mocked(sendEmail);
 			mockSendEmail.mockResolvedValueOnce({ resendId: '123' });
 

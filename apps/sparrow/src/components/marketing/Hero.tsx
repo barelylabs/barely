@@ -53,10 +53,10 @@ export function Hero() {
 		// Animation loop
 		let animationId: number;
 		let isVisible = true;
-		
+
 		const animate = () => {
 			if (!isVisible) return;
-			
+
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 			// Update and draw particles
@@ -104,7 +104,7 @@ export function Hero() {
 
 		// Set up intersection observer
 		const observer = new IntersectionObserver(
-			(entries) => {
+			entries => {
 				const entry = entries[0];
 				if (entry) {
 					isVisible = entry.isIntersecting;
@@ -115,7 +115,7 @@ export function Hero() {
 					}
 				}
 			},
-			{ threshold: 0.1 }
+			{ threshold: 0.1 },
 		);
 
 		observer.observe(canvas);
