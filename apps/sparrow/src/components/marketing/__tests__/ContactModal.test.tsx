@@ -1,11 +1,12 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import '../../test/jest-dom';
 
 import { ContactModal } from '../ContactModal';
 
 // Mock fetch
-global.fetch = vi.fn();
+global.fetch = vi.fn() as typeof global.fetch;
 
 describe('ContactModal', () => {
 	beforeEach(() => {
@@ -13,7 +14,7 @@ describe('ContactModal', () => {
 	});
 
 	it('renders the contact form correctly', () => {
-		render(<ContactModal isOpen={true} onClose={vi.fn()} service="bedroom" />);
+		render(<ContactModal showModal={true} setShowModal={vi.fn()} preSelectedService="bedroom" />);
 
 		expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
 		expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
@@ -25,7 +26,7 @@ describe('ContactModal', () => {
 
 	it('validates required fields', async () => {
 		const user = userEvent.setup();
-		render(<ContactModal isOpen={true} onClose={vi.fn()} service="bedroom" />);
+		render(<ContactModal showModal={true} setShowModal={vi.fn()} preSelectedService="bedroom" />);
 
 		const submitButton = screen.getByRole('button', { name: /send message/i });
 		await user.click(submitButton);
@@ -39,7 +40,7 @@ describe('ContactModal', () => {
 
 	it('validates email format', async () => {
 		const user = userEvent.setup();
-		render(<ContactModal isOpen={true} onClose={vi.fn()} service="bedroom" />);
+		render(<ContactModal showModal={true} setShowModal={vi.fn()} preSelectedService="bedroom" />);
 
 		const emailInput = screen.getByLabelText(/email/i);
 		await user.type(emailInput, 'invalid-email');
@@ -54,7 +55,7 @@ describe('ContactModal', () => {
 
 	it('validates message length', async () => {
 		const user = userEvent.setup();
-		render(<ContactModal isOpen={true} onClose={vi.fn()} service="bedroom" />);
+		render(<ContactModal showModal={true} setShowModal={vi.fn()} preSelectedService="bedroom" />);
 
 		const messageInput = screen.getByLabelText(/message/i);
 		await user.type(messageInput, 'Short');
@@ -69,14 +70,14 @@ describe('ContactModal', () => {
 
 	it('submits form with valid data', async () => {
 		const user = userEvent.setup();
-		const onClose = vi.fn();
+		const setShowModal = vi.fn();
 		
-		(global.fetch as any).mockResolvedValueOnce({
+		vi.mocked(global.fetch).mockResolvedValueOnce({
 			ok: true,
-			json: async () => ({ success: true }),
-		});
+			json: () => Promise.resolve({ success: true }),
+		} as Response);
 
-		render(<ContactModal isOpen={true} onClose={onClose} service="bedroom" />);
+		render(<ContactModal showModal={true} setShowModal={setShowModal} preSelectedService="bedroom" />);
 
 		// Fill form with valid data
 		await user.type(screen.getByLabelText(/name/i), 'John Doe');
@@ -109,19 +110,19 @@ describe('ContactModal', () => {
 
 		// Wait for success message to disappear and modal to close
 		await waitFor(() => {
-			expect(onClose).toHaveBeenCalled();
+			expect(setShowModal).toHaveBeenCalledWith(false);
 		}, { timeout: 3500 });
 	});
 
 	it('handles API errors gracefully', async () => {
 		const user = userEvent.setup();
 		
-		(global.fetch as any).mockResolvedValueOnce({
+		vi.mocked(global.fetch).mockResolvedValueOnce({
 			ok: false,
 			status: 500,
-		});
+		} as Response);
 
-		render(<ContactModal isOpen={true} onClose={vi.fn()} service="bedroom" />);
+		render(<ContactModal showModal={true} setShowModal={vi.fn()} preSelectedService="bedroom" />);
 
 		// Fill form with valid data
 		await user.type(screen.getByLabelText(/name/i), 'John Doe');
@@ -139,12 +140,12 @@ describe('ContactModal', () => {
 	it('handles rate limiting', async () => {
 		const user = userEvent.setup();
 		
-		(global.fetch as any).mockResolvedValueOnce({
+		vi.mocked(global.fetch).mockResolvedValueOnce({
 			ok: false,
 			status: 429,
-		});
+		} as Response);
 
-		render(<ContactModal isOpen={true} onClose={vi.fn()} service="bedroom" />);
+		render(<ContactModal showModal={true} setShowModal={vi.fn()} preSelectedService="bedroom" />);
 
 		// Fill form with valid data
 		await user.type(screen.getByLabelText(/name/i), 'John Doe');
@@ -161,32 +162,32 @@ describe('ContactModal', () => {
 
 	it('closes modal when close button is clicked', async () => {
 		const user = userEvent.setup();
-		const onClose = vi.fn();
+		const setShowModal = vi.fn();
 		
-		render(<ContactModal isOpen={true} onClose={onClose} service="bedroom" />);
+		render(<ContactModal showModal={true} setShowModal={setShowModal} preSelectedService="bedroom" />);
 
 		const closeButton = screen.getByRole('button', { name: /close/i });
 		await user.click(closeButton);
 
-		expect(onClose).toHaveBeenCalled();
+		expect(setShowModal).toHaveBeenCalledWith(false);
 	});
 
 	it('disables submit button while loading', async () => {
 		const user = userEvent.setup();
 		
 		// Mock a slow network request
-		(global.fetch as any).mockImplementation(() => 
-			new Promise((resolve) => {
+		vi.mocked(global.fetch).mockImplementation(() => 
+			new Promise<Response>((resolve) => {
 				setTimeout(() => {
 					resolve({
 						ok: true,
-						json: async () => ({ success: true }),
-					});
+						json: () => Promise.resolve({ success: true }),
+					} as Response);
 				}, 1000);
 			})
 		);
 
-		render(<ContactModal isOpen={true} onClose={vi.fn()} service="bedroom" />);
+		render(<ContactModal showModal={true} setShowModal={vi.fn()} preSelectedService="bedroom" />);
 
 		// Fill form with valid data
 		await user.type(screen.getByLabelText(/name/i), 'John Doe');

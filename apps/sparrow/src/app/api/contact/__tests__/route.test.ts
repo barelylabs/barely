@@ -18,6 +18,21 @@ vi.mock('@vercel/edge', () => ({
 
 import { sendEmail } from '@barely/email';
 import { ratelimit } from '@barely/lib';
+import { ipAddress } from '@vercel/edge';
+
+interface ContactFormData {
+	name: string;
+	email: string;
+	artistName?: string;
+	monthlyListeners?: string;
+	service?: string;
+	message: string;
+}
+
+interface ApiResponse {
+	success?: boolean;
+	errors?: { path: string; message: string }[];
+}
 
 describe('Contact API Route', () => {
 	beforeEach(() => {
@@ -27,7 +42,7 @@ describe('Contact API Route', () => {
 	describe('POST /api/contact', () => {
 		it('successfully processes valid contact form submission', async () => {
 			const mockSendEmail = vi.mocked(sendEmail);
-			mockSendEmail.mockResolvedValueOnce({ error: null } as any);
+			mockSendEmail.mockResolvedValueOnce({ resendId: '123' });
 
 			const request = new Request('http://localhost:3000/api/contact', {
 				method: 'POST',
@@ -38,11 +53,11 @@ describe('Contact API Route', () => {
 					monthlyListeners: '10000',
 					service: 'bedroom',
 					message: 'This is a test message with enough characters',
-				}),
+				} satisfies ContactFormData),
 			});
 
 			const response = await POST(request);
-			const data = await response.json();
+			const data = await response.json() as ApiResponse;
 
 			expect(response.status).toBe(200);
 			expect(data).toEqual({ success: true });
@@ -51,7 +66,7 @@ describe('Contact API Route', () => {
 				fromFriendlyName: 'Barely Sparrow',
 				to: 'hello@barelysparrow.com',
 				subject: 'New Contact Form Submission - Bedroom+',
-				react: expect.any(Object),
+				react: expect.any(Object) as unknown,
 				type: 'transactional',
 				replyTo: 'john@example.com',
 			});
@@ -68,7 +83,7 @@ describe('Contact API Route', () => {
 			});
 
 			const response = await POST(request);
-			const data = await response.json();
+			const data = await response.json() as ApiResponse;
 
 			expect(response.status).toBe(400);
 			expect(data.errors).toContainEqual({
@@ -86,7 +101,7 @@ describe('Contact API Route', () => {
 			});
 
 			const response = await POST(request);
-			const data = await response.json();
+			const data = await response.json() as ApiResponse;
 
 			expect(response.status).toBe(400);
 			expect(data.errors).toContainEqual({
@@ -110,7 +125,7 @@ describe('Contact API Route', () => {
 			});
 
 			const response = await POST(request);
-			const data = await response.json();
+			const data = await response.json() as ApiResponse;
 
 			expect(response.status).toBe(400);
 			expect(data.errors).toContainEqual({
@@ -123,7 +138,7 @@ describe('Contact API Route', () => {
 			const mockRatelimit = vi.mocked(ratelimit);
 			mockRatelimit.mockReturnValueOnce({
 				limit: vi.fn().mockResolvedValue({ success: false }),
-			} as any);
+			});
 
 			const request = new Request('http://localhost:3000/api/contact', {
 				method: 'POST',
@@ -145,10 +160,10 @@ describe('Contact API Route', () => {
 			mockRatelimit
 				.mockReturnValueOnce({
 					limit: vi.fn().mockResolvedValue({ success: true }),
-				} as any)
+				})
 				.mockReturnValueOnce({
 					limit: vi.fn().mockResolvedValue({ success: false }),
-				} as any);
+				});
 
 			const request = new Request('http://localhost:3000/api/contact', {
 				method: 'POST',
@@ -168,7 +183,7 @@ describe('Contact API Route', () => {
 
 		it('returns 500 when email sending fails', async () => {
 			const mockSendEmail = vi.mocked(sendEmail);
-			mockSendEmail.mockResolvedValueOnce({ error: new Error('Email service error') } as any);
+			mockSendEmail.mockResolvedValueOnce({ error: 'Email service error' });
 
 			const request = new Request('http://localhost:3000/api/contact', {
 				method: 'POST',
@@ -201,7 +216,7 @@ describe('Contact API Route', () => {
 
 		it('handles general inquiry without service type', async () => {
 			const mockSendEmail = vi.mocked(sendEmail);
-			mockSendEmail.mockResolvedValueOnce({ error: null } as any);
+			mockSendEmail.mockResolvedValueOnce({ resendId: '123' });
 
 			const request = new Request('http://localhost:3000/api/contact', {
 				method: 'POST',
@@ -223,9 +238,9 @@ describe('Contact API Route', () => {
 		});
 
 		it('handles anonymous users when IP is not available', async () => {
-			vi.mocked(require('@vercel/edge').ipAddress).mockReturnValueOnce(null);
+			vi.mocked(ipAddress).mockReturnValueOnce(null);
 			const mockSendEmail = vi.mocked(sendEmail);
-			mockSendEmail.mockResolvedValueOnce({ error: null } as any);
+			mockSendEmail.mockResolvedValueOnce({ resendId: '123' });
 
 			const request = new Request('http://localhost:3000/api/contact', {
 				method: 'POST',

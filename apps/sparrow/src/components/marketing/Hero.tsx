@@ -104,12 +104,15 @@ export function Hero() {
 
 		// Set up intersection observer
 		const observer = new IntersectionObserver(
-			([entry]) => {
-				isVisible = entry.isIntersecting;
-				if (isVisible) {
-					animate();
-				} else {
-					cancelAnimationFrame(animationId);
+			(entries) => {
+				const entry = entries[0];
+				if (entry) {
+					isVisible = entry.isIntersecting;
+					if (isVisible) {
+						animate();
+					} else {
+						cancelAnimationFrame(animationId);
+					}
 				}
 			},
 			{ threshold: 0.1 }
