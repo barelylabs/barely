@@ -3,11 +3,11 @@ import { genreRoute } from '@barely/lib/trpc/genre.route';
 
 import { auth } from '@barely/auth/app.server';
 
-import { routeHandler } from '../app.handler';
+import { appRouteHandler } from '../app.handler';
 
 const genreSubRouter = createTRPCRouter(genreRoute);
 
-export const genreHandler = routeHandler({
+export const genreHandler = appRouteHandler({
 	path: 'genre',
 	router: genreSubRouter,
 	auth,

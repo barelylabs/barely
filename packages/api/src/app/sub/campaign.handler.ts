@@ -3,11 +3,11 @@ import { campaignRoute } from '@barely/lib/trpc/campaign.route';
 
 import { auth } from '@barely/auth/app.server';
 
-import { routeHandler } from '../app.handler';
+import { appRouteHandler } from '../app.handler';
 
 const campaignSubRouter = createTRPCRouter(campaignRoute);
 
-export const campaignHandler = routeHandler({
+export const campaignHandler = appRouteHandler({
 	path: 'campaign',
 	router: campaignSubRouter,
 	auth,

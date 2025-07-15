@@ -8,7 +8,7 @@ import { z } from 'zod/v4';
 
 import { recordFmEvent } from '../../functions/event.fns';
 
-export const fmPageRoute = {
+export const fmRenderRoute = {
 	log: publicProcedure
 		.input(
 			z.object({

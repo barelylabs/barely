@@ -1,4 +1,4 @@
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useCountUp } from '../use-count-up';
@@ -26,7 +26,7 @@ describe('useCountUp', () => {
 		expect(result.current.formattedCount).toBe('0');
 	});
 
-	it('starts counting when start is called', async () => {
+	it('starts counting when start is called', () => {
 		const { result } = renderHook(() => useCountUp({ end: 100, duration: 1000 }));
 
 		act(() => {
@@ -37,7 +37,7 @@ describe('useCountUp', () => {
 		expect(result.current.count).toBe(0);
 
 		// Advance time and run animation frames
-		await act(async () => {
+		act(() => {
 			vi.advanceTimersByTime(500);
 		});
 
@@ -45,14 +45,14 @@ describe('useCountUp', () => {
 		expect(result.current.count).toBeLessThan(100);
 
 		// Complete animation
-		await act(async () => {
+		act(() => {
 			vi.advanceTimersByTime(600);
 		});
 
 		expect(result.current.count).toBeCloseTo(100, 0);
 	});
 
-	it('respects delay parameter', async () => {
+	it('respects delay parameter', () => {
 		const { result } = renderHook(() =>
 			useCountUp({ end: 50, duration: 500, delay: 200 }),
 		);
@@ -62,13 +62,13 @@ describe('useCountUp', () => {
 		});
 
 		// Should still be 0 during delay
-		await act(async () => {
+		act(() => {
 			vi.advanceTimersByTime(100);
 		});
 		expect(result.current.count).toBe(0);
 
 		// Should start counting after delay
-		await act(async () => {
+		act(() => {
 			vi.advanceTimersByTime(150);
 		});
 
@@ -81,7 +81,7 @@ describe('useCountUp', () => {
 		expect(result.current.formattedCount).toBe('0.00');
 	});
 
-	it('includes prefix and suffix in formatted count', async () => {
+	it('includes prefix and suffix in formatted count', () => {
 		const { result } = renderHook(() =>
 			useCountUp({ end: 100, prefix: '$', suffix: ' USD', decimals: 2 }),
 		);
@@ -92,21 +92,21 @@ describe('useCountUp', () => {
 			result.current.start();
 		});
 
-		await act(async () => {
+		act(() => {
 			vi.advanceTimersByTime(2000);
 		});
 
 		expect(result.current.formattedCount).toBe('$100.00 USD');
 	});
 
-	it('resets count when reset is called', async () => {
+	it('resets count when reset is called', () => {
 		const { result } = renderHook(() => useCountUp({ end: 100, duration: 100 }));
 
 		act(() => {
 			result.current.start();
 		});
 
-		await act(async () => {
+		act(() => {
 			vi.advanceTimersByTime(150);
 		});
 
@@ -120,7 +120,7 @@ describe('useCountUp', () => {
 		expect(result.current.formattedCount).toBe('0');
 	});
 
-	it('cleans up timers on unmount', async () => {
+	it('cleans up timers on unmount', () => {
 		const { result, unmount } = renderHook(() =>
 			useCountUp({ end: 100, duration: 1000, delay: 100 }),
 		);
@@ -130,7 +130,7 @@ describe('useCountUp', () => {
 		});
 
 		// Advance timer to start animation
-		await act(async () => {
+		act(() => {
 			vi.advanceTimersByTime(50);
 		});
 
@@ -142,7 +142,7 @@ describe('useCountUp', () => {
 		expect(true).toBe(true);
 	});
 
-	it('handles multiple starts correctly', async () => {
+	it('handles multiple starts correctly', () => {
 		const { result } = renderHook(() => useCountUp({ end: 100, duration: 500 }));
 
 		// Start first animation
@@ -150,7 +150,7 @@ describe('useCountUp', () => {
 			result.current.start();
 		});
 
-		await act(async () => {
+		act(() => {
 			vi.advanceTimersByTime(250);
 		});
 
@@ -163,14 +163,14 @@ describe('useCountUp', () => {
 			result.current.start();
 		});
 
-		await act(async () => {
+		act(() => {
 			vi.advanceTimersByTime(300);
 		});
 
 		expect(result.current.count).toBeCloseTo(100, 0);
 	});
 
-	it('updates when end value changes', async () => {
+	it('updates when end value changes', () => {
 		const { result, rerender } = renderHook(
 			({ end }) => useCountUp({ end, duration: 500 }),
 			{ initialProps: { end: 100 } },
@@ -180,7 +180,7 @@ describe('useCountUp', () => {
 			result.current.start();
 		});
 
-		await act(async () => {
+		act(() => {
 			vi.advanceTimersByTime(600);
 		});
 
@@ -193,7 +193,7 @@ describe('useCountUp', () => {
 			result.current.start();
 		});
 
-		await act(async () => {
+		act(() => {
 			vi.advanceTimersByTime(600);
 		});
 

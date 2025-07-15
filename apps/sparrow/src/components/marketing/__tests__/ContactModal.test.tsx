@@ -63,14 +63,17 @@ describe('ContactModal', () => {
 
 		// Fill name (required field)
 		await user.type(screen.getByLabelText(/your name \*/i), 'John Doe');
-		
+
 		// Fill message (required field)
-		await user.type(screen.getByLabelText(/tell me about your goals/i), 'This is a test message with enough characters');
-		
+		await user.type(
+			screen.getByLabelText(/tell me about your goals/i),
+			'This is a test message with enough characters',
+		);
+
 		// Fill email with invalid value
 		const emailInput = screen.getByLabelText(/email \*/i);
 		await user.type(emailInput, 'invalid-email');
-		
+
 		// Trigger blur to show validation
 		await user.tab();
 
@@ -78,10 +81,13 @@ describe('ContactModal', () => {
 		await user.click(submitButton);
 
 		// Wait for the error message to appear
-		await waitFor(() => {
-			const errorMessage = screen.queryByText(/invalid email address/i);
-			expect(errorMessage).toBeInTheDocument();
-		}, { timeout: 2000 });
+		await waitFor(
+			() => {
+				const errorMessage = screen.queryByText(/invalid email address/i);
+				expect(errorMessage).toBeInTheDocument();
+			},
+			{ timeout: 2000 },
+		);
 	});
 
 	it('validates message length', async () => {
@@ -246,7 +252,9 @@ describe('ContactModal', () => {
 		// The modal close button is the X icon button
 		const closeButtons = screen.getAllByRole('button');
 		// Find the button that isn't the submit button
-		const closeButton = closeButtons.find(btn => !btn.textContent?.includes('Send Message'));
+		const closeButton = closeButtons.find(
+			btn => !btn.textContent?.includes('Send Message'),
+		);
 		if (!closeButton) throw new Error('Close button not found');
 		await user.click(closeButton);
 

@@ -3,11 +3,11 @@ import { statRoute } from '@barely/lib/trpc/stat.route';
 
 import { auth } from '@barely/auth/app.server';
 
-import { routeHandler } from '../app.handler';
+import { appRouteHandler } from '../app.handler';
 
 const statSubRouter = createTRPCRouter(statRoute);
 
-export const statHandler = routeHandler({
+export const statHandler = appRouteHandler({
 	path: 'stat',
 	router: statSubRouter,
 	auth,

@@ -3,11 +3,11 @@ import { workspaceRoute } from '@barely/lib/trpc/workspace.route';
 
 import { auth } from '@barely/auth/app.server';
 
-import { routeHandler } from '../app.handler';
+import { appRouteHandler } from '../app.handler';
 
 const workspaceSubRouter = createTRPCRouter(workspaceRoute);
 
-export const workspaceHandler = routeHandler({
+export const workspaceHandler = appRouteHandler({
 	path: 'workspace',
 	router: workspaceSubRouter,
 	auth,
