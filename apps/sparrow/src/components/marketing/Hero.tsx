@@ -52,7 +52,11 @@ export function Hero() {
 
 		// Animation loop
 		let animationId: number;
+		let isVisible = true;
+		
 		const animate = () => {
+			if (!isVisible) return;
+			
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 			// Update and draw particles
@@ -98,11 +102,26 @@ export function Hero() {
 			animationId = requestAnimationFrame(animate);
 		};
 
+		// Set up intersection observer
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				isVisible = entry.isIntersecting;
+				if (isVisible) {
+					animate();
+				} else {
+					cancelAnimationFrame(animationId);
+				}
+			},
+			{ threshold: 0.1 }
+		);
+
+		observer.observe(canvas);
 		animate();
 
 		return () => {
 			window.removeEventListener('resize', resizeCanvas);
 			cancelAnimationFrame(animationId);
+			observer.disconnect();
 		};
 	}, []);
 

@@ -13,6 +13,9 @@
 		"format": "prettier --check . --ignore-path ../../.gitignore",
 		"lint": "eslint",
 		"start": "pnpm with-env next start",
+		"test": "vitest",
+		"test:watch": "vitest --watch",
+		"test:coverage": "vitest --coverage",
 		"typecheck": "tsc --noEmit",
 		"with-env": "dotenv -e ../../.env --"
 	},
@@ -52,7 +55,13 @@
 		"prettier": "catalog:",
 		"tailwindcss": "catalog:",
 		"tailwindcss-animate": "^1.0.7",
-		"typescript": "catalog:"
+		"typescript": "catalog:",
+		"@testing-library/react": "^16.1.0",
+		"@testing-library/user-event": "^14.5.2",
+		"@vitejs/plugin-react": "^4.3.4",
+		"@vitest/coverage-v8": "^2.1.8",
+		"happy-dom": "^15.11.7",
+		"vitest": "^2.1.8"
 	},
 	"prettier": "@barely/prettier-config"
 }

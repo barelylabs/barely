@@ -25,6 +25,7 @@ export function useCountUp({
 	useEffect(() => {
 		if (!isAnimating) return;
 
+		let animationId: number;
 		const startTime = Date.now();
 		const endValue = end;
 
@@ -40,15 +41,20 @@ export function useCountUp({
 			setCount(currentValue);
 
 			if (progress < 1) {
-				requestAnimationFrame(animate);
+				animationId = requestAnimationFrame(animate);
 			}
 		};
 
 		const timeoutId = setTimeout(() => {
-			requestAnimationFrame(animate);
+			animationId = requestAnimationFrame(animate);
 		}, delay);
 
-		return () => clearTimeout(timeoutId);
+		return () => {
+			clearTimeout(timeoutId);
+			if (animationId) {
+				cancelAnimationFrame(animationId);
+			}
+		};
 	}, [isAnimating, end, duration, delay]);
 
 	const start = () => setIsAnimating(true);

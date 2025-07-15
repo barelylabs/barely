@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { cn } from '@barely/utils';
 
-import { useCountUp } from '../../hooks/useCountUp';
-import { useIntersection } from '../../hooks/useIntersection';
+import { useCountUp } from '../../hooks/use-count-up';
+import { useIntersection } from '../../hooks/use-intersection';
 
 interface BarChartProps {
 	data: { label: string; value: number; color?: string }[];

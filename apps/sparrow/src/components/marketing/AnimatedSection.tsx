@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import { cn } from '@barely/utils';
 
-import { useIntersection } from '../../hooks/useIntersection';
+import { useIntersection } from '../../hooks/use-intersection';
 
 interface AnimatedSectionProps {
 	children: ReactNode;

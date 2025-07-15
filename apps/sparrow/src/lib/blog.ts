@@ -31,7 +31,8 @@ export function getPostSlugs() {
 		return files
 			.filter(file => file.endsWith('.mdx'))
 			.map(file => file.replace(/\.mdx$/, ''));
-	} catch {
+	} catch (error) {
+		console.error(`Failed to read posts directory: ${postsDirectory}`, error);
 		return [];
 	}
 }
@@ -63,7 +64,8 @@ export function getPostBySlug(slug: string): BlogPost | null {
 			excerpt: frontmatter.excerpt ?? '',
 			content,
 		};
-	} catch {
+	} catch (error) {
+		console.error(`Failed to read post with slug: ${slug}`, error);
 		return null;
 	}
 }

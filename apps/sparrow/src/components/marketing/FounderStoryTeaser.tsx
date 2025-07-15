@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 
-import { useIntersection } from '../../hooks/useIntersection';
+import { useIntersection } from '../../hooks/use-intersection';
 import { AnimatedSection } from './AnimatedSection';
 import { MarketingButton } from './Button';
 

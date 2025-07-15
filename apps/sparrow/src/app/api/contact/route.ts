@@ -1,6 +1,7 @@
 import { sendEmail } from '@barely/email';
 import { ContactInquiryEmail } from '@barely/email/templates/sparrow/contact-inquiry';
 import { ratelimit } from '@barely/lib';
+import { ipAddress } from '@vercel/edge';
 import { z } from 'zod/v4';
 
 const contactFormSchema = z.object({
@@ -14,13 +15,11 @@ const contactFormSchema = z.object({
 
 export async function POST(request: Request) {
 	try {
-		const body = (await request.json()) as unknown;
-
 		// Validate input
-		const validatedData = contactFormSchema.parse(body);
+		const validatedData = contactFormSchema.parse(await request.json());
 
 		// Get IP address for rate limiting
-		const ip = request.headers.get('x-forwarded-for') ?? 'anonymous';
+		const ip = ipAddress(request) ?? 'anonymous';
 
 		// Rate limit by IP (10 requests per minute)
 		const ipRateLimit = ratelimit(10, '1 m');
@@ -35,7 +34,9 @@ export async function POST(request: Request) {
 		const { success: emailSuccess } = await emailRateLimit.limit(validatedData.email);
 
 		if (!emailSuccess) {
-			return new Response('Too many requests from this email', { status: 429 });
+			const response = new Response('Too many requests from this email', { status: 429 });
+			setCorsHeaders(response);
+			return response;
 		}
 
 		// Send email
@@ -58,7 +59,9 @@ export async function POST(request: Request) {
 
 		if (emailResult.error) {
 			console.error('Failed to send email:', emailResult.error);
-			return new Response('Failed to send email', { status: 500 });
+			const response = new Response('Failed to send email', { status: 500 });
+			setCorsHeaders(response);
+			return response;
 		}
 
 		return new Response(JSON.stringify({ success: true }), {
@@ -78,6 +81,22 @@ export async function POST(request: Request) {
 		}
 
 		console.error('Contact form error:', error);
-		return new Response('Internal server error', { status: 500 });
+		const response = new Response('Internal server error', { status: 500 });
+		setCorsHeaders(response);
+		return response;
 	}
+}
+
+function setCorsHeaders(res: Response) {
+	res.headers.set('Access-Control-Allow-Origin', '*'); // Allow all origins
+	res.headers.set('Access-Control-Allow-Methods', 'OPTIONS, POST'); // Allow OPTIONS and POST methods
+	res.headers.set('Access-Control-Allow-Headers', '*'); // Allow all headers
+}
+
+export function OPTIONS() {
+	const response = new Response(null, {
+		status: 204,
+	});
+	setCorsHeaders(response);
+	return response;
 }
