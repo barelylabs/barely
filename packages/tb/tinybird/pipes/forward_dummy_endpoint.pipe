@@ -1,0 +1,5 @@
+NODE n
+SQL >
+    SELECT 'forward'
+
+TYPE endpoint

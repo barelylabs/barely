@@ -56,6 +56,10 @@
 		"tb:check": "pnpm -F @barely/tb tb:check",
 		"tb:validate": "pnpm -F @barely/tb tb:validate",
 		"typecheck": "turbo run typecheck",
+		"test": "turbo run test",
+		"test:watch": "turbo run test:watch",
+		"test:coverage": "turbo run test:coverage",
+		"test:ci": "turbo run test:coverage -- --run",
 		"vercel:pull-env": "pnpm vercel env pull .env"
 	},
 	"devDependencies": {

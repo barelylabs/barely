@@ -3,11 +3,11 @@ import { playlistPitchReviewRoute } from '@barely/lib/trpc/playlist-pitch-review
 
 import { auth } from '@barely/auth/app.server';
 
-import { routeHandler } from '../app.handler';
+import { appRouteHandler } from '../app.handler';
 
 const playlistPitchReviewSubRouter = createTRPCRouter(playlistPitchReviewRoute);
 
-export const playlistPitchReviewHandler = routeHandler({
+export const playlistPitchReviewHandler = appRouteHandler({
 	path: 'playlistPitchReview',
 	router: playlistPitchReviewSubRouter,
 	auth,

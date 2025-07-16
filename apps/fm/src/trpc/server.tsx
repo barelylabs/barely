@@ -1,6 +1,6 @@
 import 'server-only'; // <-- ensure this file cannot be imported from the client
 
-import type { FmPageRouter } from '@barely/api/public/fm-page.router';
+import type { FmRenderRouter } from '@barely/api/public/fm-render.router';
 import type { TRPCQueryOptions } from '@trpc/tanstack-react-query';
 import { cache } from 'react';
 import { headers } from 'next/headers';
@@ -8,7 +8,7 @@ import { createTRPCContext } from '@barely/lib/trpc';
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 import { createTRPCOptionsProxy } from '@trpc/tanstack-react-query';
 
-import { fmPageRouter } from '@barely/api/public/fm-page.router';
+import { fmRenderRouter } from '@barely/api/public/fm-render.router';
 
 import { makeQueryClient } from '~/trpc/query-client';
 
@@ -29,13 +29,13 @@ const createContext = cache(async () => {
 
 const getQueryClient = cache(makeQueryClient);
 
-export const trpc = createTRPCOptionsProxy<FmPageRouter>({
-	router: fmPageRouter,
+export const trpc = createTRPCOptionsProxy<FmRenderRouter>({
+	router: fmRenderRouter,
 	ctx: createContext,
 	queryClient: getQueryClient,
 });
 
-export const trpcCaller = fmPageRouter.createCaller(createContext);
+export const trpcCaller = fmRenderRouter.createCaller(createContext);
 
 export function HydrateClient(props: { children: React.ReactNode }) {
 	const queryClient = getQueryClient();

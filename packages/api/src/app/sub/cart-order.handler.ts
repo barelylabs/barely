@@ -3,11 +3,11 @@ import { cartOrderRoute } from '@barely/lib/trpc/cart-order.route';
 
 import { auth } from '@barely/auth/app.server';
 
-import { routeHandler } from '../app.handler';
+import { appRouteHandler } from '../app.handler';
 
 const cartOrderSubRouter = createTRPCRouter(cartOrderRoute);
 
-export const cartOrderHandler = routeHandler({
+export const cartOrderHandler = appRouteHandler({
 	path: 'cartOrder',
 	router: cartOrderSubRouter,
 	auth,

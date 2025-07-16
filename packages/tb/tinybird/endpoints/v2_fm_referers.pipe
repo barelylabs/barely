@@ -1,0 +1,94 @@
+TOKEN "v2_referers_endpoint_read_7948" READ
+
+NODE fm_referer
+SQL >
+
+    %
+        WITH
+            normalized_referers AS (
+                SELECT
+                    CASE
+                        WHEN sessionReferer LIKE '%instagram.com%'
+                        THEN 'instagram.com'
+                        WHEN sessionReferer LIKE '%facebook.com%'
+                        THEN 'facebook.com'
+                        WHEN sessionReferer LIKE '%linkedin.com%'
+                        THEN 'linkedin.com'
+                        -- Add other similar patterns as needed
+                        ELSE sessionReferer
+                    END as referer,
+                    type,
+                    sessionId,
+                    workspaceId
+                FROM barely_fm_events_mv
+                WHERE
+                    sessionReferer != 'Unknown'
+                    and workspaceId
+                    = {{
+                        String(
+                            workspaceId,
+                            'ws_KvKq8bCN4KySE5Un',
+                            description="The ID of the workspace",
+                            required=True,
+                        )
+                    }}
+                    {% if defined(assetId) %} and assetId = {{ String(assetId) }} {% end %}
+                    {% if defined(platforms) %} and platform in {{ Array(platforms, 'String') }} {% end %}
+                    {% if defined(start) %}
+                        and timestamp >= toDateTime64({{ DateTime64(start) }}, 3)
+                    {% end %}
+                    {% if defined(end) %} and timestamp <= toDateTime64({{ DateTime64(end) }}, 3) {% end %}
+                    {% if defined(city) %} and city = {{ String(city) }} {% end %}
+                    {% if defined(region) %} and region = {{ String(region) }} {% end %}
+                    {% if defined(country) %} and country = {{ String(country) }} {% end %}
+                    {% if defined(device) %} and device = {{ String(device) }} {% end %}
+                    {% if defined(browser) %} and browser = {{ String(browser) }} {% end %}
+                    {% if defined(os) %} and os = {{ String(os) }} {% end %}
+                    {% if defined(referer) %} and referer = {{ String(referer) }} {% end %}
+                    {% if defined(sessionReferer) %}
+                        and sessionReferer = {{ String(sessionReferer) }}
+                    {% end %}
+                    {% if defined(sessionEmailTemplateId) %}
+                        and sessionEmailTemplateId = {{ String(sessionEmailTemplateId) }}
+                    {% end %}
+                    {% if defined(sessionEmailBroadcastId) %}
+                        and sessionEmailBroadcastId = {{ String(sessionEmailBroadcastId) }}
+                    {% end %}
+                    {% if defined(sessionLandingPageId) %}
+                        and sessionLandingPageId = {{ String(sessionLandingPageId) }}
+                    {% end %}
+                    {% if defined(sessionFlowActionId) %}
+                        and sessionFlowActionId = {{ String(sessionFlowActionId) }}
+                    {% end %}
+                    {% if defined(sessionMetaCampaignId) %}
+                        and sessionMetaCampaignId = {{ String(sessionMetaCampaignId) }}
+                    {% end %}
+                    {% if defined(sessionMetaAdSetId) %}
+                        and sessionMetaAdSetId = {{ String(sessionMetaAdSetId) }}
+                    {% end %}
+                    {% if defined(sessionMetaAdId) %}
+                        and sessionMetaAdId = {{ String(sessionMetaAdId) }}
+                    {% end %}
+                    {% if defined(sessionMetaPlacement) %}
+                        and sessionMetaAdPlacement = {{ String(sessionMetaPlacement) }}
+                    {% end %}
+            )
+        SELECT
+            referer,
+            uniqIf(sessionId, type = 'fm/view') as fm_views,
+            uniqIf(sessionId, type = 'fm/linkClick') as fm_linkClicks
+        FROM normalized_referers
+        GROUP BY referer
+        ORDER BY fm_views DESC
+
+
+
+NODE endpoint
+SQL >
+
+    SELECT *
+    FROM fm_referer
+
+TYPE endpoint
+
+
