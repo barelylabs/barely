@@ -56,6 +56,6 @@ import { publicRenderHandler } from './public-render.handler';
 
 export const fmRenderHandler = publicRenderHandler({
 	app: 'fm',
-	path: 'fmPage',
+	path: 'fmRender',
 	router: fmRenderRouter,
 });
