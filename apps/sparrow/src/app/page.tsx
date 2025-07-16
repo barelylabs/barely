@@ -132,8 +132,8 @@ export default function HomePage() {
 											Rising+
 										</H>
 										<p className='mb-6 text-white/70'>
-											We run your campaigns while teaching you the strategy behind
-											every decision.
+											We run your campaigns while teaching you the strategy behind every
+											decision.
 										</p>
 										<p className='text-purple-300 transition-colors group-hover:text-purple-300'>
 											Learn more →
@@ -165,7 +165,8 @@ export default function HomePage() {
 											Breakout+
 										</H>
 										<p className='mb-6 text-white/70'>
-											Full growth team optimizing daily - for artists ready to scale aggressively.
+											Full growth team optimizing daily - for artists ready to scale
+											aggressively.
 										</p>
 										<p className='text-purple-300 transition-colors group-hover:text-purple-300'>
 											Learn more →

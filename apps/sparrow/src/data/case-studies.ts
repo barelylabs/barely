@@ -551,10 +551,116 @@ export const violetCase: CaseStudy = {
 	},
 };
 
+export const properYouthCase: CaseStudy = {
+	id: 'indie-rock-335-growth',
+	artistName: 'Proper Youth',
+	genre: 'Indie Rock',
+	serviceTier: 'Rising+',
+	avatarUrl:
+		'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop',
+	startDate: 'April 2024',
+	endDate: 'October 2024',
+	metrics: {
+		before: {
+			monthlyListeners: 5629,
+			streams: 22500,
+			followers: 1850,
+			engagementRate: '3.1%',
+			emailSubscribers: 340,
+			monthlyRevenue: '$112',
+			instagram: 2400,
+			youtube: 650,
+		},
+		after: {
+			monthlyListeners: 24516,
+			streams: 135000,
+			followers: 8200,
+			engagementRate: '6.8%',
+			emailSubscribers: 3400,
+			monthlyRevenue: '$890',
+			instagram: 12800,
+			youtube: 2100,
+		},
+	},
+	investment: {
+		serviceFee: '$1,200',
+		adSpend: '$13,820',
+		total: '$15,020',
+	},
+	challenge: `Proper Youth had spent years and thousands of dollars on playlist pitching services and publicists with nothing to show for it. They were tired of expensive failures and vanity metrics that didn't translate to real growth.`,
+	strategy: [
+		{
+			title: 'Progressive Campaign Building',
+			description:
+				'Started with playlist.spark and spotify.spark campaigns, then layered in ig.spark and retargeting.',
+		},
+		{
+			title: 'Geographic Targeting Mix',
+			description:
+				'40% US, 30% "green light" countries (CA, UK, AU, NZ), 30% lower-cost engaged markets.',
+		},
+		{
+			title: 'iPhone Content Strategy',
+			description:
+				'One monthly shooting day producing 30+ iPhone-shot performance videos - no expensive productions.',
+		},
+		{
+			title: 'Flywheel Effect',
+			description:
+				'Created compound growth: Instagram → Spotify → Email → Merch, with each channel feeding the next.',
+		},
+	],
+	timeline: [
+		{
+			month: 'April',
+			event: 'Foundation with spark campaigns',
+			metric: '5,629 → 8,234 listeners',
+		},
+		{
+			month: 'May-June',
+			event: 'Added Instagram & scaled winners',
+			metric: '8,234 → 11,891 listeners',
+		},
+		{
+			month: 'July-August',
+			event: 'Launched retargeting campaigns',
+			metric: '11,891 → 18,567 listeners',
+		},
+		{
+			month: 'Sept-Oct',
+			event: 'Cart campaigns for merch',
+			metric: '18,567 → 24,516 listeners',
+		},
+	],
+	keyResults: [
+		'335% growth in monthly listeners ($0.73 per new listener)',
+		'Cart campaigns achieved 1.85-2.01x ROAS',
+		'Built email list of 3,400 engaged fans',
+		'Proved iPhone videos outperform expensive productions',
+	],
+	testimonial: {
+		quote:
+			"We spent years throwing money at playlist pitchers and publicists with nothing to show for it. Barely Sparrow's scientific approach - testing what works, ditching what doesn't - took us from 5K to 24K listeners in 6 months. Turns out honest iPhone videos beat expensive productions, and targeting real fans beats playlist schemes every time.",
+		author: 'Proper Youth',
+	},
+	merchRevenue: {
+		before: 572,
+		after: 2510,
+	},
+	summary:
+		"Achieved 335% growth with strategic ad spend and iPhone content, proving expensive productions aren't necessary.",
+	featured: true,
+	socials: {
+		instagram: 'https://instagram.com/properyouth',
+		spotify: 'https://open.spotify.com/artist/properyouth',
+	},
+};
+
 // Export all case studies as an array
 export const allCaseStudies: CaseStudy[] = [
 	lunaCase,
 	velvetGhostsCase,
+	properYouthCase,
 	maraCase,
 	kjCase,
 	violetCase,
@@ -564,6 +670,7 @@ export const allCaseStudies: CaseStudy[] = [
 export const caseStudies: Record<string, CaseStudy> = {
 	[lunaCase.id]: lunaCase,
 	[velvetGhostsCase.id]: velvetGhostsCase,
+	[properYouthCase.id]: properYouthCase,
 	[maraCase.id]: maraCase,
 	[kjCase.id]: kjCase,
 	[violetCase.id]: violetCase,

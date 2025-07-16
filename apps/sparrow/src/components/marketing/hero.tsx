@@ -159,8 +159,8 @@ export function Hero() {
 
 				<AnimatedSection animation='fade-up' delay={200}>
 					<p className='mx-auto mb-8 max-w-3xl text-xl text-white/70 md:text-2xl'>
-						Stop guessing. Start growing. Turn your music into a real business 
-						that pays - with transparent data you can actually understand.
+						Stop guessing. Start growing. Turn your music into a real business that pays -
+						with transparent data you can actually understand.
 					</p>
 					<div className='mb-8 inline-flex items-center gap-2 rounded-full bg-yellow-500/10 px-4 py-2 text-sm text-yellow-500'>
 						<span className='inline-block h-2 w-2 animate-pulse rounded-full bg-yellow-500' />

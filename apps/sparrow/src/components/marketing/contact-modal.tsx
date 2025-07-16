@@ -182,7 +182,6 @@ export function ContactModal({
 								</div>
 							</details>
 
-
 							<div>
 								<label
 									htmlFor='message'

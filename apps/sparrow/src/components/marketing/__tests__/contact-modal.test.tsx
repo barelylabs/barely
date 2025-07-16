@@ -24,7 +24,9 @@ describe('ContactModal', () => {
 		expect(screen.getByLabelText(/your name \*/i)).toBeInTheDocument();
 		expect(screen.getByLabelText(/email \*/i)).toBeInTheDocument();
 		expect(screen.getByText(/add more details/i)).toBeInTheDocument();
-		expect(screen.getByLabelText(/what's your biggest music marketing challenge\? \*/i)).toBeInTheDocument();
+		expect(
+			screen.getByLabelText(/what's your biggest music marketing challenge\? \*/i),
+		).toBeInTheDocument();
 		expect(screen.getByRole('button', { name: /send message/i })).toBeInTheDocument();
 	});
 
@@ -99,7 +101,9 @@ describe('ContactModal', () => {
 			/>,
 		);
 
-		const messageInput = screen.getByLabelText(/what's your biggest music marketing challenge/i);
+		const messageInput = screen.getByLabelText(
+			/what's your biggest music marketing challenge/i,
+		);
 		await user.type(messageInput, 'Short');
 
 		const submitButton = screen.getByRole('button', { name: /send message/i });
@@ -135,7 +139,7 @@ describe('ContactModal', () => {
 		// Click on the details section to expand it
 		const detailsSection = screen.getByText(/add more details/i);
 		await user.click(detailsSection);
-		
+
 		// Now we can fill the optional fields
 		await user.type(screen.getByLabelText(/artist\/band name/i), 'Test Artist');
 		await user.type(screen.getByLabelText(/monthly listeners/i), '10000');
@@ -164,7 +168,9 @@ describe('ContactModal', () => {
 
 		await waitFor(() => {
 			// Check for the success message body text
-			expect(screen.getByText(/I'll get back to you within 24 hours/i)).toBeInTheDocument();
+			expect(
+				screen.getByText(/I'll get back to you within 24 hours/i),
+			).toBeInTheDocument();
 		});
 
 		// Wait for success message to disappear and modal to close

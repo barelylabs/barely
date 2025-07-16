@@ -93,10 +93,8 @@ export async function POST(request: Request) {
 }
 
 function setCorsHeaders(res: Response) {
-	const origin = isProduction() 
-		? 'https://barelysparrow.com' 
-		: '*';
-		
+	const origin = isProduction() ? 'https://barelysparrow.com' : '*';
+
 	res.headers.set('Access-Control-Allow-Origin', origin);
 	res.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
 	res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');

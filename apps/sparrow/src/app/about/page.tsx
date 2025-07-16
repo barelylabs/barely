@@ -45,9 +45,11 @@ export default function AboutPage() {
 							</H>
 							<p className='text-lg leading-relaxed text-white/80'>
 								I spent years in research labs optimizing materials at the molecular
-								level. PhD in Materials Science, degrees in Physics and Mechanical
-								Engineering. I thought I&apos;d spend my career perfecting atomic
-								structures and publishing papers.
+								level. PhD in Materials Science & Engineering from University of Michigan
+								(2015), double major in Physics and Mechanical Engineering from University
+								of Arkansas (2010). Research Fellow at NIST, then VP of Engineering at an
+								organic solar startup. I thought I&apos;d spend my career perfecting
+								atomic structures and building clean energy solutions.
 							</p>
 							<p className='text-lg leading-relaxed text-white/80'>
 								But I had a problem.
@@ -62,9 +64,8 @@ export default function AboutPage() {
 								The Artist Problem
 							</H>
 							<p className='text-lg leading-relaxed text-white/80'>
-								I was also a musician. Spent nights writing songs, weekends recording,
-								months crafting albums that I was genuinely proud of. Released 4-5
-								painstakingly crafted records that got... tens of listeners.
+								I was also a musician. Released albums in 2006, 2012, and 2019 that got...
+								tens of listeners.
 							</p>
 							<p className='my-8 text-center text-4xl font-bold text-white md:text-5xl'>
 								<em>Tens.</em>
@@ -78,20 +79,24 @@ export default function AboutPage() {
 						</div>
 					</AnimatedSection>
 
-					{/* The Connection */}
+					{/* The Turning Point */}
 					<AnimatedSection animation='fade-up' delay={400}>
 						<div className='space-y-6'>
 							<H size='3' className='gradient-text text-3xl md:text-4xl'>
-								The Connection
+								The Turning Point
 							</H>
 							<p className='text-lg leading-relaxed text-white/80'>
-								It hit me: this was the same problem I&apos;d been solving in the lab.
-								Amazing potential - whether it&apos;s a new material or a great song -
-								getting lost because the systems around it weren&apos;t optimized.
+								In 2020, I decided to apply my engineering training to marketing Proper
+								Youth&apos;s debut album, &quot;So Close to Paradise.&quot; The hit single
+								&quot;Off My Mind&quot; has since gained 1.8M streams - not because the
+								music suddenly got better, but because I finally understood how to
+								optimize the system around it.
 							</p>
 							<p className='text-lg leading-relaxed text-white/80'>
-								The difference? In music, no one was applying engineering principles to
-								fix it.
+								Word spread. Every artist who reached out had been burned by the same
+								expensive failures - playlist pitching services, publicists who delivered
+								nothing, pay-for-play schemes, even fake streams. They&apos;d spent
+								thousands with nothing to show for it.
 							</p>
 						</div>
 					</AnimatedSection>
@@ -102,14 +107,20 @@ export default function AboutPage() {
 							<H size='3' className='gradient-text text-3xl md:text-4xl'>
 								The Decision
 							</H>
+							<p className='text-lg leading-relaxed text-white/80'>
+								By 2022, I realized I was more excited about helping musicians market the
+								right way than working on materials. The problem was the same - amazing
+								potential getting lost in inefficient systems. The difference? In music,
+								no one was applying engineering principles to fix it.
+							</p>
 							<p className='mb-6 text-xl font-semibold text-white md:text-2xl'>
-								So I left science to science the hell out of music marketing.
+								So I left my VP role to science the hell out of music marketing.
 							</p>
 							<p className='text-lg leading-relaxed text-white/80'>
 								I built barely.io from scratch - not just another dashboard, but a
-								completely open-source platform where you can see exactly how everything
-								works. Started testing every assumption about how artists grow, treating
-								each campaign like a controlled experiment.
+								completely open-source platform where artists can see exactly how
+								everything works. Started testing every assumption about how artists grow,
+								treating each campaign like a controlled experiment.
 							</p>
 						</div>
 					</AnimatedSection>

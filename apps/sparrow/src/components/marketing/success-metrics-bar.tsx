@@ -33,11 +33,11 @@ export function SuccessMetricsBar() {
 	return (
 		<div
 			className={cn(
-				'fixed top-16 left-0 right-0 z-40 transform transition-transform duration-500',
+				'fixed left-0 right-0 top-16 z-40 transform transition-transform duration-500',
 				isVisible ? 'translate-y-0' : '-translate-y-full',
 			)}
 		>
-			<div className='bg-gradient-to-r from-purple-900/90 to-pink-900/90 backdrop-blur-md border-b border-white/10'>
+			<div className='border-b border-white/10 bg-gradient-to-r from-purple-900/90 to-pink-900/90 backdrop-blur-md'>
 				<div className='mx-auto max-w-7xl px-4 py-2'>
 					<div className='flex flex-wrap items-center justify-center gap-4 text-sm md:gap-8'>
 						<div className='flex items-center gap-2'>
