@@ -35,6 +35,10 @@
 		"./templates/campaign": {
 			"types": "./dist/templates/campaign/index.d.ts",
 			"default": "./src/templates/campaign/index.ts"
+		},
+		"./templates/sparrow/contact-inquiry": {
+			"types": "./dist/templates/sparrow/contact-inquiry.d.ts",
+			"default": "./src/templates/sparrow/contact-inquiry.tsx"
 		}
 	},
 	"scripts": {

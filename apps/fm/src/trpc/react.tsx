@@ -1,7 +1,7 @@
 'use client';
 
 // ^-- to make sure we can mount the Provider from a server component
-import type { FmPageRouter } from '@barely/api/public/fm-page.router';
+import type { FmRenderRouter } from '@barely/api/public/fm-render.router';
 import type { QueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import React, { useState } from 'react';
@@ -35,7 +35,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 	const queryClient = getQueryClient();
 
 	const [trpcClient] = useState(() => {
-		const trpc = createTRPCClient<FmPageRouter>({
+		const trpc = createTRPCClient<FmRenderRouter>({
 			links: [
 				loggerLink({
 					enabled: opts =>
@@ -45,7 +45,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 
 				httpBatchLink({
 					transformer: SuperJSON,
-					url: getAbsoluteUrl('fm', 'api/trpc/fmPage'),
+					url: getAbsoluteUrl('fm', 'api/trpc/fmRender'),
 					headers() {
 						const headers = new Headers();
 						headers.set('x-trpc-source', 'nextjs-react-manageEmail');

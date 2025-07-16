@@ -3,11 +3,11 @@ import { landingPageRoute } from '@barely/lib/trpc/landing-page.route';
 
 import { auth } from '@barely/auth/app.server';
 
-import { routeHandler } from '../app.handler';
+import { appRouteHandler } from '../app.handler';
 
 const landingPageSubRouter = createTRPCRouter(landingPageRoute);
 
-export const landingPageHandler = routeHandler({
+export const landingPageHandler = appRouteHandler({
 	path: 'landingPage',
 	router: landingPageSubRouter,
 	auth,

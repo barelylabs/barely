@@ -3,11 +3,11 @@ import { visitorSessionRoute } from '@barely/lib/trpc/visitor-session.route';
 
 import { auth } from '@barely/auth/app.server';
 
-import { routeHandler } from '../app.handler';
+import { appRouteHandler } from '../app.handler';
 
 const visitorSessionSubRouter = createTRPCRouter(visitorSessionRoute);
 
-export const visitorSessionHandler = routeHandler({
+export const visitorSessionHandler = appRouteHandler({
 	path: 'visitorSession',
 	router: visitorSessionSubRouter,
 	auth,

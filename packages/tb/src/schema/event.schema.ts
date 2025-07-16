@@ -48,8 +48,8 @@ export const visitorSessionTinybirdSchema = z
 			.nullish()
 			.transform(s => s ?? ''), // deprecated
 	})
-	.merge(nextGeoSchema)
-	.merge(formattedUserAgentSchema);
+	.extend(nextGeoSchema.shape)
+	.extend(formattedUserAgentSchema.shape);
 
 export const reportedEventTinybirdSchema = z.object({
 	reportedToMeta: z.string().optional().default(''),
@@ -93,8 +93,8 @@ export const webEventIngestSchema = z
 			...WEB_EVENT_TYPES__PAGE,
 		]),
 	})
-	.merge(visitorSessionTinybirdSchema)
-	.merge(reportedEventTinybirdSchema);
+	.extend(visitorSessionTinybirdSchema.shape)
+	.extend(reportedEventTinybirdSchema.shape);
 
 export const cartEventIngestSchema = webEventIngestSchema.extend({
 	cart_landingPageId: z.string().nullish().default(''),

@@ -20,7 +20,7 @@ export const cartOrderSearchParamsSchema = cartOrderFilterParamsSchema.extend({
 });
 
 export const selectWorkspaceCartOrdersSchema = cartOrderFilterParamsSchema
-	.merge(infiniteQuerySchema)
+	.extend(infiniteQuerySchema.shape)
 	.extend({
 		cursor: z
 			.object({

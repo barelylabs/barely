@@ -1,17 +1,11 @@
 'use client';
 
-import type { z } from 'zod/v4';
 import { useCallback, useMemo } from 'react';
-import { stdWebEventPipeQueryParamsSchema } from '@barely/tb/schema';
-import { platformFiltersSchema } from '@barely/validators/helpers';
+import { fmStatFiltersSchema } from '@barely/validators';
 
 import { useFormatTimestamp } from './use-format-timestamp';
 import { useTypedOptimisticQuery } from './use-typed-optimistic-query';
 import { useWorkspace } from './use-workspace';
-
-export const fmStatFiltersSchema =
-	stdWebEventPipeQueryParamsSchema.merge(platformFiltersSchema);
-export type FmStatFilters = z.infer<typeof fmStatFiltersSchema>;
 
 export function useFmStatFilters() {
 	const q = useTypedOptimisticQuery(fmStatFiltersSchema);

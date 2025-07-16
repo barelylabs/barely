@@ -4,7 +4,9 @@ import { Carts } from '@barely/db/sql';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod/v4';
 
+import { cartFiltersSchema } from '../helpers';
 import { formattedUserAgentSchema, nextGeoSchema } from './next.schema';
+import { stdWebEventPipeQueryParamsSchema } from './tb.schema';
 
 export const insertCartSchema = createInsertSchema(Carts, {
 	visitorGeo: nextGeoSchema.optional(),
@@ -48,7 +50,6 @@ export const cartPageSearchParams = insertCartSchema
 		bumpProductApparelSize: true,
 	})
 	.partial()
-	// .merge(eventReportSearchParamsSchema)
 	.extend({
 		warmup: z.coerce.boolean().optional(),
 	});
@@ -65,3 +66,10 @@ export const updateCheckoutCartFromCheckoutSchema = cartPageSearchParams
 		shippingAddressPostalCode: z.string().nullish(),
 		shippingAddressCountry: z.string().nullish(),
 	});
+
+// stat filters
+export const cartStatFiltersSchema = stdWebEventPipeQueryParamsSchema.extend(
+	cartFiltersSchema.shape,
+);
+
+export type CartStatFilters = z.infer<typeof cartStatFiltersSchema>;

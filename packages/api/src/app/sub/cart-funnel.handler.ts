@@ -3,11 +3,11 @@ import { cartFunnelRoute } from '@barely/lib/trpc/cart-funnel.route';
 
 import { auth } from '@barely/auth/app.server';
 
-import { routeHandler } from '../app.handler';
+import { appRouteHandler } from '../app.handler';
 
 const cartFunnelSubRouter = createTRPCRouter(cartFunnelRoute);
 
-export const cartFunnelHandler = routeHandler({
+export const cartFunnelHandler = appRouteHandler({
 	path: 'cartFunnel',
 	router: cartFunnelSubRouter,
 	auth,

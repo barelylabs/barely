@@ -57,13 +57,11 @@ export const updateFlowTriggerSchema = insertFlowTriggerSchema
 	.required({
 		id: true,
 	})
-	.merge(
-		z.object({
-			data: insertFlowTriggerSchema.partial().required({
-				type: true,
-			}),
+	.extend({
+		data: insertFlowTriggerSchema.partial().required({
+			type: true,
 		}),
-	);
+	});
 
 export type InsertFlowTrigger = z.infer<typeof insertFlowTriggerSchema>;
 export type FlowTrigger = InferSelectModel<typeof Flow_Triggers>;

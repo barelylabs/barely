@@ -1,11 +1,11 @@
 import { OPTIONS } from '@barely/utils';
 
-import { routeHandler } from '@barely/api/app/app.handler';
+import { appRouteHandler } from '@barely/api/app/app.handler';
 import { appRouter } from '@barely/api/app/app.router';
 
 import { auth } from '@barely/auth/app.server';
 
-const appHandler = routeHandler({
+const appHandler = appRouteHandler({
 	path: '_app',
 	router: appRouter,
 	auth,
