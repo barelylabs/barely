@@ -10,6 +10,7 @@ import type {
 	ResourceDataReturn,
 	ResourceSearchParamsReturn,
 } from './resource-hooks.types';
+import { wrapQueryOptions } from './resource-hooks.types';
 import { useWorkspace } from './use-workspace';
 
 /**
@@ -44,8 +45,7 @@ export function createResourceDataHook<
 			unknown[],
 			unknown
 		>(
-			// @ts-expect-error - Query options from tRPC have complex types that are hard to match exactly
-			config.getQueryOptions(handle, filters as Record<string, unknown>),
+			wrapQueryOptions(config.getQueryOptions(handle, filters as Record<string, unknown>)),
 		);
 
 		// Extract items from paginated data - data.pages is now properly typed as TPageData[]
