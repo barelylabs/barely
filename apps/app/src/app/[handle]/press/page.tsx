@@ -11,6 +11,17 @@ export default async function PressKitPage({
 }) {
 	const { handle } = await params;
 	prefetch(trpc.pressKit.byWorkspace.queryOptions({ handle }));
+	prefetch(trpc.mixtape.byWorkspace.infiniteQueryOptions({ handle }));
+
+	// prefetching to match selectable media params
+	prefetch(
+		trpc.file.byWorkspace.infiniteQueryOptions({
+			handle,
+			search: '',
+			limit: 10,
+			types: ['image'],
+		}),
+	);
 
 	return (
 		<HydrateClient>

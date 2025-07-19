@@ -22,7 +22,7 @@ export const cartFunnelRoute = {
 			const funnels = await dbHttp.query.CartFunnels.findMany({
 				where: sqlAnd([
 					eq(CartFunnels.workspaceId, ctx.workspace.id),
-					!!search?.length && sqlStringContains(CartFunnels.name, search),
+					!!search.length && sqlStringContains(CartFunnels.name, search),
 					!!cursor &&
 						or(
 							lt(CartFunnels.createdAt, cursor.createdAt),

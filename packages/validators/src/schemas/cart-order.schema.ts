@@ -10,9 +10,9 @@ import {
 
 export const cartOrderFilterParamsSchema = commonFiltersSchema.extend({
 	fanId: z.string().optional(),
-	showFulfilled: queryBooleanSchema.optional(),
-	showPreorders: queryBooleanSchema.optional(),
-	showCanceled: queryBooleanSchema.optional(),
+	showFulfilled: queryBooleanSchema.optional().default(false),
+	showPreorders: queryBooleanSchema.optional().default(false),
+	showCanceled: queryBooleanSchema.optional().default(false),
 });
 
 export const cartOrderSearchParamsSchema = cartOrderFilterParamsSchema.extend({

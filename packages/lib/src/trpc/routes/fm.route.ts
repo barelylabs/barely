@@ -36,7 +36,7 @@ export const fmRoute = {
 					eq(FmPages.workspaceId, ctx.workspace.id),
 					showArchived ? undefined : isNull(FmPages.archivedAt),
 					showDeleted ? undefined : isNull(FmPages.deletedAt),
-					!!search?.length && sqlStringContains(FmPages.title, search),
+					!!search.length && sqlStringContains(FmPages.title, search),
 					!!cursor &&
 						or(
 							lt(FmPages.createdAt, cursor.createdAt),

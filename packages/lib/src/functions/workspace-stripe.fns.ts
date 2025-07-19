@@ -1,7 +1,8 @@
+import type { PlanType } from '@barely/const';
 import type { InsertTransactionLineItem, Transaction } from '@barely/validators/schemas';
 import type Stripe from 'stripe';
 import { NextResponse } from 'next/server';
-import { WORKSPACE_PLANS } from '@barely/const';
+import { WORKSPACE_PLAN_TYPES, WORKSPACE_PLANS } from '@barely/const';
 import { dbHttp } from '@barely/db/client';
 import {
 	Campaigns,
@@ -9,12 +10,14 @@ import {
 	Transactions,
 	Workspaces,
 } from '@barely/db/sql';
-import { newId, raise } from '@barely/utils';
+import { getAbsoluteUrl, newId, raise } from '@barely/utils';
 import { eq } from 'drizzle-orm';
+import { z } from 'zod/v4';
 
+import type { StripeTransactionMetadata } from '../integrations/stripe/stripe.schema';
 import { libEnv } from '../../env';
 import { pushEvent } from '../integrations/pusher/pusher-server';
-import { stripe } from '../integrations/stripe';
+import { isStripeTestEnvironment, stripe } from '../integrations/stripe';
 import {
 	stripeLineItemMetadataSchema,
 	stripeTransactionMetadataSchema,
@@ -73,7 +76,7 @@ export function getPlanByStripePriceId(priceId: string) {
 	return undefined;
 }
 
-export async function handleStripeCheckoutSessionComplete(
+export async function handleStripePlanCheckoutSessionComplete(
 	session: Stripe.Checkout.Session,
 ) {
 	const transactionMetadata = stripeTransactionMetadataSchema.parse(session.metadata);
@@ -141,7 +144,6 @@ export async function handleStripeCheckoutSessionComplete(
 						.update(Workspaces)
 						.set({
 							plan: plan.id,
-							// linkUsageLimit: plan.link.usageLimit,
 							billingCycleStart: new Date().getDate(),
 						})
 						.where(eq(Workspaces.id, workspace.id));
@@ -260,4 +262,206 @@ export async function handleStripeCheckoutSessionComplete(
 				.where(eq(Campaigns.id, campaignId));
 		}),
 	);
+}
+
+export async function handleStripeSubscriptionUpdated(subscription: Stripe.Subscription) {
+	const priceId = subscription.items.data[0]?.price.id;
+	const newPlan = priceId ? getPlanByStripePriceId(priceId) : undefined;
+
+	console.log('newPlan => ', newPlan);
+
+	if (!newPlan) {
+		console.log('Invalid plan in customer.subscription.updated event');
+		return;
+	}
+
+	const stripeCustomerId = subscription.customer as string;
+
+	const workspace = await dbHttp.query.Workspaces.findFirst({
+		where: eq(
+			isStripeTestEnvironment() ?
+				Workspaces.stripeCustomerId_devMode
+			:	Workspaces.stripeCustomerId,
+			stripeCustomerId,
+		),
+	});
+
+	if (!workspace) {
+		console.log('Workspace not found');
+		return;
+	}
+
+	console.log('raw plan name');
+
+	const newPlanId = z.enum(WORKSPACE_PLAN_TYPES).parse(newPlan.id);
+
+	// handle disabling anything if the plan has been downgraded. nothing for now.
+
+	// update plan in the db
+	if (workspace.plan !== newPlanId) {
+		await dbHttp
+			.update(Workspaces)
+			.set({
+				plan: newPlanId,
+			})
+			.where(eq(Workspaces.id, workspace.id));
+
+		await pushEvent('workspace', 'update', {
+			id: workspace.id,
+		});
+	}
+}
+
+export async function createUpgradeUrl(props: {
+	workspace: {
+		id: string;
+		handle: string;
+		stripeCustomerId?: string | null;
+		stripeCustomerId_devMode?: string | null;
+	};
+	user: {
+		id: string;
+		email: string;
+		fullName?: string | null;
+		firstName?: string | null;
+		lastName?: string | null;
+	};
+	planId: PlanType;
+	billingCycle: 'monthly' | 'yearly';
+}): Promise<string> {
+	const { workspace, user, planId, billingCycle } = props;
+
+	// Determine if we're in test environment
+	// const testEnvironment = isDevelopment() || isPreview() || isStripeTestEnvironment
+
+	// Get the appropriate Stripe customer ID
+	const stripeCustomerId =
+		isStripeTestEnvironment() ?
+			workspace.stripeCustomerId_devMode
+		:	workspace.stripeCustomerId;
+
+	// Get the plan details
+	const plan = WORKSPACE_PLANS.get(planId);
+	if (!plan) {
+		throw new Error('Invalid plan ID');
+	}
+
+	// Get the appropriate price ID
+	const priceId =
+		plan.price[billingCycle].priceIds[isStripeTestEnvironment() ? 'test' : 'production'];
+	if (!priceId) {
+		throw new Error('Invalid price ID');
+	}
+
+	// Check if workspace has an active subscription
+	if (stripeCustomerId) {
+		const activeSubscription = await stripe.subscriptions
+			.list({
+				customer: stripeCustomerId,
+				status: 'active',
+				limit: 1,
+			})
+			.then(res => res.data[0]);
+
+		console.log('activeSubscription => ', activeSubscription);
+
+		// If there's an active subscription, create billing portal session
+		if (activeSubscription) {
+			const portalSession = await stripe.billingPortal.sessions.create({
+				customer: stripeCustomerId,
+				return_url: getAbsoluteUrl(
+					'app',
+					`${workspace.handle}/settings/billing?upgraded=true`,
+				),
+				flow_data: {
+					type: 'subscription_update_confirm',
+					subscription_update_confirm: {
+						subscription: activeSubscription.id,
+						items: [
+							{
+								id: activeSubscription.items.data[0]?.id ?? raise('no items'),
+								quantity: 1,
+								price: priceId,
+							},
+						],
+					},
+					after_completion: {
+						type: 'redirect',
+						redirect: {
+							return_url: getAbsoluteUrl(
+								'app',
+								`${workspace.handle}/settings/billing?upgraded=true`,
+							),
+						},
+					},
+				},
+			});
+
+			return portalSession.url;
+		}
+	}
+
+	// Create or retrieve Stripe customer
+	const workspaceWithCustomer =
+		stripeCustomerId ? workspace : (
+			await createStripeWorkspaceCustomer({
+				workspaceId: workspace.id,
+				email: user.email,
+				name: user.fullName ?? [user.firstName, user.lastName].filter(Boolean).join(' '),
+			})
+		);
+
+	const finalStripeCustomerId =
+		isStripeTestEnvironment() ?
+			workspaceWithCustomer.stripeCustomerId_devMode
+		:	workspaceWithCustomer.stripeCustomerId;
+
+	if (!finalStripeCustomerId) {
+		throw new Error('Failed to create or retrieve Stripe customer');
+	}
+
+	// Prepare metadata
+	const metadata: StripeTransactionMetadata = {
+		createdById: user.id,
+		workspaceId: workspace.id,
+	};
+
+	// Create checkout session
+	const session = await stripe.checkout.sessions.create({
+		customer: finalStripeCustomerId,
+		mode: 'subscription',
+		success_url: getAbsoluteUrl(
+			'app',
+			`${workspace.handle}/settings/billing?upgraded=true`,
+		),
+		cancel_url: getAbsoluteUrl('app', `${workspace.handle}/settings/billing/upgrade`),
+		payment_method_types: ['card'],
+		line_items: [
+			{
+				price: priceId,
+				quantity: 1,
+			},
+		],
+		client_reference_id: workspace.id,
+		metadata,
+		// Additional options from Dub.co
+		allow_promotion_codes: true,
+		automatic_tax: {
+			enabled: true,
+		},
+		tax_id_collection: {
+			enabled: true,
+		},
+		customer_update: {
+			name: 'auto',
+			address: 'auto',
+		},
+		billing_address_collection: 'required',
+	});
+
+	if (!session.url) {
+		throw new Error('Failed to create checkout session');
+	}
+
+	return session.url;
 }

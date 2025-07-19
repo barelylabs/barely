@@ -9,7 +9,7 @@ import { useTRPC } from '@barely/api/app/trpc.react';
 import { useWorkspace } from './use-workspace';
 
 type UseFilesProps = Omit<
-	z.infer<typeof selectWorkspaceFilesSchema>,
+	z.input<typeof selectWorkspaceFilesSchema>,
 	'handle' | 'cursor'
 >;
 

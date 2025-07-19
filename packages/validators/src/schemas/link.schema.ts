@@ -6,9 +6,9 @@ import type { AnalyticsEndpoint } from './analytics-endpoint.schema';
 // import type { AnalyticsEndpoint } from './analytics-endpoint-schema';
 import type { Workspace } from './workspace.schema';
 import {
+	commonFiltersSchema,
 	infiniteQuerySchema,
 	isValidUrl,
-	queryBooleanSchema,
 	querySelectionSchema,
 } from '../helpers';
 import { stdWebEventPipeQueryParamsSchema } from './tb.schema';
@@ -47,10 +47,8 @@ export interface LinkWithAnalyticsEndpoints extends Link {
 }
 
 // forms
-export const linkFilterParamsSchema = z.object({
-	search: z.string().optional(),
+export const linkFilterParamsSchema = commonFiltersSchema.extend({
 	userId: z.string().optional(),
-	showArchived: queryBooleanSchema.optional(),
 });
 
 export const linkSearchParamsSchema = linkFilterParamsSchema.extend({

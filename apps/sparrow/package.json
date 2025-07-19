@@ -20,10 +20,10 @@
 		"with-env": "dotenv -e ../../.env --"
 	},
 	"dependencies": {
+		"@barely/const": "workspace:*",
 		"@barely/email": "workspace:*",
 		"@barely/hooks": "workspace:*",
 		"@barely/lib": "workspace:*",
-		"@barely/toast": "workspace:*",
 		"@barely/ui": "workspace:*",
 		"@barely/utils": "workspace:*",
 		"@t3-oss/env-nextjs": "catalog:",
@@ -36,6 +36,7 @@
 		"react-dom": "catalog:react19",
 		"react-icons": "^4.11.0",
 		"sharp": "catalog:",
+		"sonner": "catalog:",
 		"zod": "catalog:"
 	},
 	"devDependencies": {

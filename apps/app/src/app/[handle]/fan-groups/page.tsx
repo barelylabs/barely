@@ -34,6 +34,10 @@ export default async function FanGroupsPage({
 		}),
 	);
 
+	prefetch(trpc.fanGroup.byId.queryOptions({ handle: awaitedParams.handle, id: '' }));
+
+	prefetch(trpc.fan.totalByWorkspace.queryOptions({ handle: awaitedParams.handle }));
+
 	return (
 		<HydrateClient>
 			<DashContentHeader title='Fan Groups' button={<CreateFanGroupButton />} />

@@ -10,8 +10,6 @@ import { cn } from '@barely/utils';
 import { TailwindIndicator } from '@barely/ui/components/tailwind-indicator';
 import { Container } from '@barely/ui/container';
 
-// import { Toaster } from '@barely/toast';
-
 import Providers from './providers';
 
 const fontHeading = localFont({

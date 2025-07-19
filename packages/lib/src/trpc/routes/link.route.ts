@@ -45,7 +45,7 @@ export const linkRoute = {
 			const links = await dbHttp.query.Links.findMany({
 				where: sqlAnd([
 					eq(Links.workspaceId, ctx.workspace.id),
-					!!search?.length &&
+					!!search.length &&
 						or(
 							sqlStringContains(Links.key, search),
 							sqlStringContains(Links.url, search),

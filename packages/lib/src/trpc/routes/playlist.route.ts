@@ -34,7 +34,7 @@ export const playlistRoute = {
 					eq(Playlists.workspaceId, ctx.workspace.id),
 					showArchived ? undefined : isNull(Playlists.archivedAt),
 					showDeleted ? undefined : isNull(Playlists.deletedAt),
-					!!search?.length && sqlStringContains(Playlists.name, search),
+					!!search.length && sqlStringContains(Playlists.name, search),
 					!!cursor &&
 						or(
 							lt(Playlists.createdAt, cursor.createdAt),

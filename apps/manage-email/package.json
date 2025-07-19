@@ -21,7 +21,6 @@
 		"@barely/auth": "workspace:*",
 		"@barely/db": "workspace:^",
 		"@barely/lib": "workspace:*",
-		"@barely/toast": "workspace:*",
 		"@barely/ui": "workspace:*",
 		"@barely/utils": "workspace:*",
 		"@barely/validators": "workspace:^",
@@ -39,6 +38,7 @@
 		"next": "catalog:",
 		"react": "catalog:react19",
 		"react-dom": "catalog:react19",
+		"sonner": "catalog:",
 		"superjson": "catalog:",
 		"zod": "catalog:"
 	},

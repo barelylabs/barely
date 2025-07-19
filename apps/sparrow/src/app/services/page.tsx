@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { WORKSPACE_PLANS } from '@barely/const';
 
 import { H } from '@barely/ui/typography';
 
@@ -13,6 +14,46 @@ export const metadata: Metadata = {
 };
 
 export default function ServicesPage() {
+	// Get plus plans from constants
+	const bedroomPlusPlan = WORKSPACE_PLANS.get('bedroom.plus');
+	const risingPlusPlan = WORKSPACE_PLANS.get('rising.plus');
+	const breakoutPlusPlan = WORKSPACE_PLANS.get('breakout.plus');
+
+	// Type for plans from constants
+	type PlanFromMap = NonNullable<ReturnType<typeof WORKSPACE_PLANS.get>>;
+
+	// Helper to get monthly price
+	const getMonthlyPrice = (plan: PlanFromMap) => plan.price.monthly.amount;
+
+	// Helper to get yearly price as monthly
+	const getYearlyPriceAsMonthly = (plan: PlanFromMap) =>
+		Math.round(plan.price.yearly.amount / 12);
+
+	// Helper to extract key features
+	const getBedroomPlusFeatures = () => [
+		'Bi-weekly 30-minute coaching calls',
+		'barely.io tools (Bedroom tier)',
+		'Custom monthly campaign blueprints',
+		'Integrated merch platform + strategy coaching',
+		'Direct email support',
+	];
+
+	const getRisingPlusFeatures = () => [
+		'Up to 2 professional campaigns per month',
+		'Management of $1,000-$3,000 monthly ad spend',
+		'barely.io tools (Rising tier)',
+		'Bi-weekly 30-minute coaching calls',
+		'Campaign optimization based on real-time data',
+	];
+
+	const getBreakoutPlusFeatures = () => [
+		'Up to 2 advanced campaigns per month',
+		'Management of $3,000-$6,000 monthly ad spend',
+		'barely.io tools (Breakout tier)',
+		'Bi-weekly 30-minute coaching calls',
+		'Priority support + rapid adjustments',
+	];
+
 	return (
 		<main className='pt-16'>
 			{/* Page Header */}
@@ -33,66 +74,54 @@ export default function ServicesPage() {
 			<section className='px-4 py-24 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-6xl'>
 					<div className='grid grid-cols-1 gap-8 md:grid-cols-3'>
-						<AnimatedSection animation='fade-up' delay={0}>
-							<Link href='/services/bedroom'>
-								<PricingCard
-									title='Bedroom+'
-									price='$100'
-									originalPrice='$200'
-									description='Learn the scientific method'
-									features={[
-										'Bi-weekly 30-min coaching',
-										'barely.io tools (Bedroom tier)',
-										'Campaign blueprints',
-										'Merch platform + strategy',
-										'Direct email support',
-									]}
-									ctaText='Learn More →'
-									spotsLeft={5}
-								/>
-							</Link>
-						</AnimatedSection>
+						{bedroomPlusPlan && (
+							<AnimatedSection animation='fade-up' delay={0}>
+								<Link href='/services/bedroom'>
+									<PricingCard
+										title={bedroomPlusPlan.name}
+										price={`$${getYearlyPriceAsMonthly(bedroomPlusPlan)}`}
+										originalPrice={`$${getMonthlyPrice(bedroomPlusPlan)}`}
+										description='Learn the Scientific Method for Music Marketing'
+										features={getBedroomPlusFeatures()}
+										ctaText='Learn More →'
+										spotsLeft={5}
+									/>
+								</Link>
+							</AnimatedSection>
+						)}
 
-						<AnimatedSection animation='fade-up' delay={200}>
-							<Link href='/services/rising'>
-								<PricingCard
-									title='Rising+'
-									price='$500'
-									originalPrice='$750'
-									description='Professional execution'
-									features={[
-										'Up to 2 campaigns/month',
-										'$1-3K ad spend management',
-										'barely.io tools (Rising tier)',
-										'Monthly strategy calls',
-										'Revenue optimization',
-									]}
-									ctaText='Learn More →'
-									featured
-									spotsLeft={3}
-								/>
-							</Link>
-						</AnimatedSection>
+						{risingPlusPlan && (
+							<AnimatedSection animation='fade-up' delay={200}>
+								<Link href='/services/rising'>
+									<PricingCard
+										title={risingPlusPlan.name}
+										price={`$${getYearlyPriceAsMonthly(risingPlusPlan)}`}
+										originalPrice={`$${getMonthlyPrice(risingPlusPlan)}`}
+										description='Professional Campaign Engineering'
+										features={getRisingPlusFeatures()}
+										ctaText='Learn More →'
+										featured
+										spotsLeft={3}
+									/>
+								</Link>
+							</AnimatedSection>
+						)}
 
-						<AnimatedSection animation='fade-up' delay={400}>
-							<Link href='/services/breakout'>
-								<PricingCard
-									title='Breakout+'
-									price='$1,300'
-									originalPrice='$1,800'
-									description='Maximum growth engineering'
-									features={[
-										'Advanced campaign execution',
-										'$3-6K ad spend management',
-										'barely.io tools (Breakout tier)',
-										'Bi-weekly deep dives',
-										'Priority support',
-									]}
-									ctaText='Learn More →'
-									spotsLeft={2}
-								/>
-							</Link>
-						</AnimatedSection>
+						{breakoutPlusPlan && (
+							<AnimatedSection animation='fade-up' delay={400}>
+								<Link href='/services/breakout'>
+									<PricingCard
+										title={breakoutPlusPlan.name}
+										price={`$${getYearlyPriceAsMonthly(breakoutPlusPlan)}`}
+										originalPrice={`$${getMonthlyPrice(breakoutPlusPlan)}`}
+										description='Maximum Growth Engineering'
+										features={getBreakoutPlusFeatures()}
+										ctaText='Learn More →'
+										spotsLeft={2}
+									/>
+								</Link>
+							</AnimatedSection>
+						)}
 					</div>
 				</div>
 			</section>

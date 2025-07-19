@@ -31,7 +31,7 @@ export const mixtapeRoute = {
 				where: sqlAnd([
 					eq(Mixtapes.workspaceId, ctx.workspace.id),
 					showArchived ? undefined : isNull(Mixtapes.archivedAt),
-					!!search?.length && sqlStringContains(Mixtapes.name, search),
+					!!search.length && sqlStringContains(Mixtapes.name, search),
 					!!cursor &&
 						or(
 							lt(Mixtapes.createdAt, cursor.createdAt),
