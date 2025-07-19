@@ -16,7 +16,16 @@ export const workspaceStripeRoute = {
 	createCheckoutLink: workspaceProcedure
 		.input(
 			z.object({
-				planId: z.enum(['pro']),
+				planId: z.enum([
+					'free',
+					'bedroom',
+					'rising',
+					'breakout',
+					'bedroom.plus',
+					'rising.plus',
+					'breakout.plus',
+					'agency',
+				]),
 				billingCycle: z.enum(['monthly', 'yearly']),
 				successPath: z.string().optional(),
 				cancelPath: z.string().optional(),

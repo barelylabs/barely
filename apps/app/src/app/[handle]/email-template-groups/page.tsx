@@ -3,6 +3,8 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { emailTemplateGroupSearchParamsSchema } from '@barely/validators';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
+
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { EmailTemplateGroupFilters } from '~/app/[handle]/email-template-groups/_components/email-template-group-filters';
 import { HydrateClient, prefetch, trpc } from '~/trpc/server';
@@ -35,15 +37,21 @@ export default async function EmailTemplateGroupsPage({
 		}),
 	);
 
+	prefetch(
+		trpc.emailTemplateGroup.byId.queryOptions({ handle: awaitedParams.handle, id: '' }),
+	);
+
+	prefetch(trpc.emailTemplate.byWorkspace.queryOptions({ handle: awaitedParams.handle }));
+
 	return (
 		<HydrateClient>
-			<Suspense fallback={<div>Loading...</div>}>
-				<DashContentHeader
-					title='Email Template Groups'
-					button={<CreateEmailTemplateGroupButton />}
-				/>
+			<DashContentHeader
+				title='Email Template Groups'
+				button={<CreateEmailTemplateGroupButton />}
+			/>
 
-				<EmailTemplateGroupFilters />
+			<EmailTemplateGroupFilters />
+			<Suspense fallback={<GridListSkeleton />}>
 				<AllEmailTemplateGroups />
 
 				<CreateOrUpdateEmailTemplateGroupModal mode='create' />

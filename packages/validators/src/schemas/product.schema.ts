@@ -7,6 +7,7 @@ import type { SortableFile } from './file.schema';
 import {
 	commonFiltersSchema,
 	infiniteQuerySchema,
+	queryBooleanSchema,
 	querySelectionSchema,
 } from '../helpers';
 
@@ -59,7 +60,9 @@ export const selectWorkspaceProductsSchema = commonFiltersSchema.extend(
 );
 
 // forms
-export const productFilterParamsSchema = commonFiltersSchema;
+export const productFilterParamsSchema = commonFiltersSchema.extend({
+	preorder: queryBooleanSchema.optional().default(false),
+});
 export const productSearchParamsSchema = productFilterParamsSchema.extend({
 	selectedProductIds: querySelectionSchema.optional(),
 });

@@ -48,7 +48,7 @@ export const productRoute = {
 				},
 				where: sqlAnd([
 					eq(Products.workspaceId, ctx.workspace.id),
-					!!search?.length && sqlStringContains(Products.name, search),
+					!!search.length && sqlStringContains(Products.name, search),
 					showArchived ? undefined : isNull(Products.archivedAt),
 					showDeleted ? undefined : isNull(Products.deletedAt),
 					!!cursor &&

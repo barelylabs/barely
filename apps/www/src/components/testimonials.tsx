@@ -17,42 +17,45 @@ import { Heading, Subheading } from './text';
 const testimonials = [
 	{
 		img: '/testimonials/tina-yards.jpg',
-		name: 'Tina Yards',
-		title: 'VP of Sales, Protocol',
+		name: 'Maya Rodriguez',
+		title: 'Electronic Artist',
 		quote:
-			"Thanks to Radiant, we're finding new leads that we never would have found with legal methods.",
+			'barely.io helped me go from 500 to 50K monthly listeners in 6 months. The integrated tools made everything so much easier.',
 	},
 	{
 		img: '/testimonials/conor-neville.jpg',
-		name: 'Conor Neville',
-		title: 'Head of Customer Success, TaxPal',
-		quote: 'Radiant made undercutting all of our competitors an absolute breeze.',
+		name: 'Jake Thompson',
+		title: 'Indie Rock Band',
+		quote:
+			'Switching to barely.io saved us $200/month and doubled our email conversion rates.',
 	},
 	{
 		img: '/testimonials/amy-chase.jpg',
-		name: 'Amy Chase',
-		title: 'Head of GTM, Pocket',
+		name: 'Luna Chen',
+		title: 'Singer-Songwriter',
 		quote:
-			'We closed a deal in literally a few minutes because we knew their exact budget.',
+			'I used to juggle 6 different tools. Now everything is in one place and my fans love the seamless experience.',
 	},
 	{
 		img: '/testimonials/veronica-winton.jpg',
-		name: 'Veronica Winton',
-		title: 'CSO, Planeteria',
+		name: 'Marcus Williams',
+		title: 'Hip-Hop Producer',
 		quote:
-			"We've managed to put two of our main competitors out of business in 6 months.",
+			'The automation workflows are incredible. I can focus on making music while barely.io handles my marketing.',
 	},
 	{
 		img: '/testimonials/dillon-lenora.jpg',
-		name: 'Dillon Lenora',
-		title: 'VP of Sales, Detax',
-		quote: 'I was able to replace 80% of my team with RadiantAI bots.',
+		name: 'Sofia Andersson',
+		title: 'Folk Artist',
+		quote:
+			'My merch sales tripled after switching to barely.io. The fan data integration is a game-changer.',
 	},
 	{
 		img: '/testimonials/harriet-arron.jpg',
-		name: 'Harriet Arron',
-		title: 'Account Manager, Commit',
-		quote: "I've smashed all my targets without having to speak to a lead in months.",
+		name: 'The Night Waves',
+		title: 'Synth-Pop Duo',
+		quote:
+			"We've built a community of 10K engaged fans using barely.io's tools. Best investment we've made.",
 	},
 ];
 
@@ -150,16 +153,16 @@ function TestimonialCard({
 function CallToAction() {
 	return (
 		<div>
-			<p className='max-w-sm text-sm/6 text-gray-600'>
-				Join the best sellers in the business and start using Radiant to hit your targets
-				today.
+			<p className='max-w-sm text-sm/6 text-muted-foreground'>
+				Join thousands of artists who've streamlined their music marketing with barely.io.
+				Start free today.
 			</p>
 			<div className='mt-2'>
 				<Link
-					href='#'
-					className='inline-flex items-center gap-2 text-sm/6 font-medium text-pink-600'
+					href='/pricing'
+					className='inline-flex items-center gap-2 text-sm/6 font-medium text-primary'
 				>
-					Get started
+					Start Free Trial
 					<ArrowLongRightIcon className='size-5' />
 				</Link>
 			</div>
@@ -188,9 +191,9 @@ export function Testimonials() {
 		<div className='overflow-hidden py-32'>
 			<Container>
 				<div ref={setReferenceWindowRef}>
-					<Subheading>What everyone is saying</Subheading>
+					<Subheading>What artists are saying</Subheading>
 					<Heading as='h3' className='mt-2'>
-						Trusted by professionals.
+						Trusted by musicians worldwide.
 					</Heading>
 				</div>
 			</Container>

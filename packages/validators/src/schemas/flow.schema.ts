@@ -9,7 +9,7 @@ import {
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod/v4';
 
-import { querySelectionSchema } from '../helpers';
+import { commonFiltersSchema, querySelectionSchema } from '../helpers';
 import { insertEmailTemplateSchema } from './email-template.schema';
 
 export const insertFlowSchema = createInsertSchema(Flows);
@@ -30,10 +30,7 @@ export type UpdateFlow = z.infer<typeof updateFlowSchema>;
 export type Flow = InferSelectModel<typeof Flows>;
 
 // forms
-export const flowFilterParamsSchema = z.object({
-	search: z.string().optional(),
-	showArchived: z.boolean().optional(),
-});
+export const flowFilterParamsSchema = commonFiltersSchema;
 export const flowSearchParamsSchema = flowFilterParamsSchema.extend({
 	selectedFlowIds: querySelectionSchema.optional(),
 });

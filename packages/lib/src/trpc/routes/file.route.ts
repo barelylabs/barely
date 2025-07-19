@@ -28,9 +28,9 @@ export const fileRoute = {
 	byWorkspace: privateProcedure
 		.input(selectWorkspaceFilesSchema)
 		.query(async ({ input, ctx }) => {
-			const { handle, limit, cursor, types, search, folder, excludeFolders } = input;
+			const { handle, cursor, types, search, folder, excludeFolders } = input;
 
-			console.log('filesByWorkspace input', input);
+			const limit = input.limit ?? 20;
 
 			const workspace = getUserWorkspaceByHandle(ctx.user, handle);
 
@@ -43,7 +43,7 @@ export const fileRoute = {
 					notInArray(Files.folder, ['imports/fans']),
 					// notInArray(Files.folder, ['avatars', 'product-images']),
 					!!types?.length && inArray(Files.type, types),
-					!!search?.length && sqlStringContains(Files.name, search),
+					!!search.length && sqlStringContains(Files.name, search),
 					!!cursor &&
 						or(
 							lt(Files.createdAt, cursor.createdAt),
@@ -53,11 +53,6 @@ export const fileRoute = {
 				orderBy: [desc(Files.createdAt), asc(Files.id)],
 				limit: limit + 1,
 			});
-
-			console.log(
-				'filesByWorkspace output',
-				files.map(f => f.name),
-			);
 
 			let nextCursor: typeof cursor | undefined = undefined;
 

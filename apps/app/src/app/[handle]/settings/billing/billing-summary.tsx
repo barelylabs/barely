@@ -1,8 +1,8 @@
 'use client';
 
-import { useWorkspaceWithAll } from '@barely/hooks';
-import { capitalize, nFormatter } from '@barely/utils';
-import { useSetAtom } from 'jotai';
+import { useRouter } from 'next/navigation';
+import { useUsage, useWorkspaceWithAll } from '@barely/hooks';
+import { getPlanNameFromId, nFormatter } from '@barely/utils';
 
 import { Badge } from '@barely/ui/badge';
 import { Button } from '@barely/ui/button';
@@ -10,12 +10,10 @@ import { Progress } from '@barely/ui/progress';
 import { InfoTooltip } from '@barely/ui/tooltip';
 import { Text } from '@barely/ui/typography';
 
-import { showUpgradeModalAtom } from '~/app/[handle]/settings/billing/upgrade-modal';
-
 export function BillingSummary() {
-	const { plan, linkUsage, linkUsageLimit } = useWorkspaceWithAll();
-
-	const setShowUpgradeModal = useSetAtom(showUpgradeModalAtom);
+	const router = useRouter();
+	const { plan, handle } = useWorkspaceWithAll();
+	const { firstDay, lastDay, linkUsage, usageLimits } = useUsage();
 
 	return (
 		<div className='flex flex-col rounded-lg border'>
@@ -23,8 +21,9 @@ export function BillingSummary() {
 				<Text variant='2xl/semibold'>Plan & Usage</Text>
 
 				<Text variant='sm/normal'>
-					You are currently on the <Badge size='xs'>{capitalize(plan)}</Badge> plan.
-					Current billing cycle:
+					You are currently on the <Badge size='xs'>{getPlanNameFromId(plan)}</Badge>{' '}
+					plan. Current billing cycle: {firstDay.toLocaleDateString()} -{' '}
+					{lastDay.toLocaleDateString()}
 				</Text>
 			</div>
 			<div className='flex flex-col space-y-2 border-b px-6 py-10'>
@@ -34,18 +33,22 @@ export function BillingSummary() {
 				</div>
 
 				<Text variant='sm/normal'>
-					{nFormatter(linkUsage)} / {nFormatter(linkUsageLimit)} clicks (
-					{((linkUsage / linkUsageLimit) * 100).toFixed(1)}%)
+					{nFormatter(linkUsage)} / {nFormatter(usageLimits.linkClicksPerMonth)} clicks (
+					{((linkUsage / usageLimits.linkClicksPerMonth) * 100).toFixed(1)}%)
 				</Text>
-				<Progress size='sm' value={linkUsage} max={linkUsageLimit} />
+				<Progress size='sm' value={linkUsage} max={usageLimits.linkClicksPerMonth} />
 			</div>
 
 			<div className='flex flex-row items-center justify-between px-6 py-5'>
 				<Text variant='sm/normal'>
-					For higher limits and additional marketing tools, upgrade to the Pro plan.
+					For higher limits and additional marketing tools, upgrade your plan.
 				</Text>
-				<Button look='primary' size='md' onClick={() => setShowUpgradeModal(true)}>
-					Upgrade
+				<Button
+					look='primary'
+					size='md'
+					onClick={() => router.push(`/${handle}/settings/billing/upgrade`)}
+				>
+					View Plans
 				</Button>
 			</div>
 		</div>

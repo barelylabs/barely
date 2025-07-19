@@ -3,6 +3,8 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { trackFilterParamsSchema } from '@barely/validators';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
+
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllTracks } from '~/app/[handle]/tracks/_components/all-tracks';
 import { ArchiveOrDeleteTrackModal } from '~/app/[handle]/tracks/_components/archive-or-delete-track-modal';
@@ -39,7 +41,7 @@ export default async function TracksPage({
 			<DashContentHeader title='Tracks' button={<CreateTrackButton />} />
 
 			<TrackFilters />
-			<Suspense fallback={<div>Loading...</div>}>
+			<Suspense fallback={<GridListSkeleton />}>
 				<AllTracks />
 
 				<CreateOrUpdateTrackModal mode='create' />

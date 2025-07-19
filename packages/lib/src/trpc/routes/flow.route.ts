@@ -34,7 +34,7 @@ export const flowRoute = {
 			const flows = await dbHttp.query.Flows.findMany({
 				where: sqlAnd([
 					eq(Flows.workspaceId, ctx.workspace.id),
-					!!search?.length && sqlStringContains(Flows.name, search),
+					!!search.length && sqlStringContains(Flows.name, search),
 					!!cursor &&
 						or(
 							lt(Flows.createdAt, cursor.createdAt),

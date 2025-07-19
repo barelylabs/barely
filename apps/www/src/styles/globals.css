@@ -4,62 +4,92 @@
 
 @layer base {
 	:root {
-		--background: 100% 0 0;
-		--foreground: 13.71% 0.036 258.53;
-		--card: 100% 0 0;
+		/* barely.io brand colors - dark mode by default - updated to match design spec */
+		--background: 13.71% 0.036 258.53; /* #16213E */
+		--foreground: 98.38% 0.003 247.86; /* #F5F5F5 */
+		--card: 20% 0.036 258.53; /* #1A1A2E */
+		--card-foreground: 98.38% 0.003 247.86;
+		--popover: 20% 0.036 258.53;
+		--popover-foreground: 98.38% 0.003 247.86;
+		--primary: 62.06% 0.2074 262.53; /* #3B82F6 - Blue */
+		--primary-foreground: 98.38% 0.003 247.86;
+		--secondary: 63.4% 0.2016 292.62; /* #8B5CF6 - Purple */
+		--secondary-foreground: 98.38% 0.003 247.86;
+		--subtle: 20.79% 0.04 265.73;
+		--subtle-foreground: 71.07% 0.035 256.79;
+		--muted: 28% 0.037 259.97;
+		--muted-foreground: 71.07% 0.035 256.79;
+		--accent: 157.1% 0.195 72.3; /* #10B981 - Green */
+		--accent-foreground: 98.38% 0.003 247.86;
+		--destructive: 63.68% 0.208 25.33;
+		--destructive-foreground: 98.38% 0.003 247.86;
+		--border: 28% 0.037 259.97;
+		--input: 28% 0.037 259.97;
+		--ring: 62.06% 0.2074 262.53;
+		--radius: 0.5rem;
+
+		--success: 59.13% 0.195 163.2; /* #10B981 - Green */
+		--success-foreground: 98.38% 0.003 247.86;
+		--warning: 76.97% 0.165 70.61;
+		--warning-foreground: 96.22% 0.057 95.61;
+
+		/* Gradient definitions - correcting to match design spec */
+		--gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+		--gradient-subtle: linear-gradient(
+			180deg,
+			rgba(59, 130, 246, 0.05) 0%,
+			transparent 100%
+		);
+		--gradient-hover: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
+
+		/* barely.io specific colors */
+		--dark-base: #16213e;
+		--dark-surface: #1a1a2e;
+		--dark-tertiary: #0f3460;
+		--text-primary: #f5f5f5;
+		--text-secondary: #9ca3af;
+
+		/* Glass morphism */
+		--glass-bg: rgba(255, 255, 255, 0.05);
+		--glass-border: rgba(255, 255, 255, 0.1);
+		--glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+	}
+
+	/* Light mode */
+	.light {
+		--background: 100% 0 0; /* #FFFFFF */
+		--foreground: 13.71% 0.036 258.53; /* #1A1A1A */
+		--card: 98% 0 0; /* #FAFAFA */
 		--card-foreground: 13.71% 0.036 258.53;
 		--popover: 100% 0 0;
 		--popover-foreground: 13.71% 0.036 258.53;
-		--primary: 20.79% 0.04 265.73;
+		--primary: 62.06% 0.2074 262.53; /* #3B82F6 */
 		--primary-foreground: 98.38% 0.003 247.86;
-		--secondary: 96.84% 0.007 247.9;
-		--secondary-foreground: 20.79% 0.04 265.73;
-		--subtle: 96.84% 0.007 247.9; /* slate-100 */
-		--subtle-foreground: 71.07% 0.035 256.79; /* slate-400 */
-		--muted: 92.9% 0.013 255.53; /* slate-200 */
-		--muted-foreground: 44.55% 0.037 257.29; /* slate-600 */
-		--accent: 86.88% 0.02 252.85; /* slate-300 */
-		--accent-foreground: 28% 0.037 259.97; /* slate-800 */
+		--secondary: 63.4% 0.2016 292.62; /* #8B5CF6 */
+		--secondary-foreground: 98.38% 0.003 247.86;
+		--subtle: 96.84% 0.007 247.9;
+		--subtle-foreground: 71.07% 0.035 256.79;
+		--muted: 92.9% 0.013 255.53;
+		--muted-foreground: 44.55% 0.037 257.29;
+		--accent: 157.1% 0.126 58.7; /* #059669 - Muted green for light mode */
+		--accent-foreground: 98.38% 0.003 247.86;
 		--destructive: 63.68% 0.208 25.33;
 		--destructive-foreground: 98.38% 0.003 247.86;
 		--border: 92.9% 0.013 255.53;
 		--input: 92.9% 0.013 255.53;
-		--ring: 13.71% 0.036 258.53;
-		--radius: 0.5rem;
+		--ring: 62.06% 0.2074 262.53;
 
-		--success: 51.13% 0.139 143.2;
-		--success-foreground: 98.06% 0.021 150.52;
+		--success: 49.71% 0.126 163.2; /* #059669 - Green for light mode */
+		--success-foreground: 98.38% 0.003 247.86;
 		--warning: 76.97% 0.165 70.61;
-		--warning-foreground: 96.22% 0.057 95.61;
-	}
+		--warning-foreground: 13.71% 0.036 258.53;
 
-	.dark {
-		--background: 13.71% 0.036 258.53;
-		--foreground: 98.38% 0.003 247.86;
-		--card: 13.71% 0.036 258.53;
-		--card-foreground: 98.38% 0.003 247.86;
-		--popover: 13.71% 0.036 258.53;
-		--popover-foreground: 98.38% 0.003 247.86;
-		--primary: 98.38% 0.003 247.86;
-		--primary-foreground: 20.79% 0.04 265.73;
-		--secondary: 28% 0.037 259.97;
-		--secondary-foreground: 98.38% 0.003 247.86;
-		--subtle: 20.79% 0.04 265.73; /* slate-900 */
-		--subtle-foreground: 44.55% 0.037 257.29; /* slate-600 */
-		--muted: 28% 0.037 259.97; /* slate-800 */
-		--muted-foreground: 71.07% 0.035 256.79; /* slate-400 */
-		--accent: 37.2% 0.039 257.3; /* slate-700 */
-		--accent-foreground: 92.9% 0.013 255.53; /* slate-200 */
-		--destructive: 39.59% 0.133 25.72;
-		--destructive-foreground: 98.38% 0.003 247.86;
-		--border: 28% 0.037 259.97;
-		--input: 28% 0.037 259.97;
-		--ring: 98.38% 0.003 247.86;
-
-		--success: 98.06% 0.021 150.52;
-		--success-foreground: 51.13% 0.139 143.2;
-		--warning: 76.97% 0.165 70.61;
-		--warning-foreground: 96.22% 0.057 95.61;
+		/* Light mode specific */
+		--text-primary: #1a1a1a;
+		--text-secondary: #6b7280;
+		--glass-bg: rgba(0, 0, 0, 0.02);
+		--glass-border: rgba(0, 0, 0, 0.1);
+		--glass-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 	}
 
 	* {
@@ -74,16 +104,120 @@
 	}
 }
 
-@keyframes move-x {
-	0% {
-		transform: translateX(var(--move-x-from));
-	}
-	100% {
-		transform: translateX(var(--move-x-to));
-	}
-}
-
+/* Marketing-specific utilities */
 @layer utilities {
+	/* Glass morphism */
+	.glass {
+		@apply border border-white/10 bg-white/5 backdrop-blur-md;
+		box-shadow: var(--glass-shadow);
+	}
+
+	/* Sparrow purple theme for pricing */
+	.pricing-sparrow-theme {
+		--primary: 63.4% 0.2016 292.62; /* #8B5CF6 - Purple */
+		--primary-foreground: 98.38% 0.003 247.86;
+		--ring: 63.4% 0.2016 292.62;
+		--gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+		--gradient-subtle: linear-gradient(
+			180deg,
+			rgba(139, 92, 246, 0.05) 0%,
+			transparent 100%
+		);
+		--gradient-hover: linear-gradient(135deg, #7c3aed 0%, #db2777 100%);
+	}
+
+	/* Gradient text */
+	.gradient-text {
+		@apply bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent;
+		display: inline-block;
+		line-height: 1.2;
+	}
+
+	/* Glow effects */
+	.glow-blue {
+		box-shadow: 0 0 40px rgba(59, 130, 246, 0.3);
+	}
+
+	.glow-purple {
+		box-shadow: 0 0 40px rgba(139, 92, 246, 0.3);
+	}
+
+	.glow-green {
+		box-shadow: 0 0 40px rgba(16, 185, 129, 0.3);
+	}
+
+	/* Noise texture overlay */
+	.noise {
+		position: relative;
+	}
+
+	.noise::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+		opacity: 0.03;
+		pointer-events: none;
+	}
+
+	/* Animation utilities */
+	.animate-float {
+		animation: float 6s ease-in-out infinite;
+	}
+
+	/* Modal close button override - only on hover */
+	[role='dialog'] button.absolute.right-1.top-1:hover {
+		background-color: rgba(237, 183, 80, 0.1);
+		color: #edb750;
+	}
+	/* Target the icon inside the close button on hover */
+	[role='dialog'] button.absolute.right-1.top-1:hover svg {
+		stroke: #edb750;
+	}
+
+	/* Toast positioning - ensure bottom-right positioning */
+	@media (min-width: 640px) {
+		[data-radix-toast-viewport] {
+			bottom: 0 !important;
+			right: 0 !important;
+			top: auto !important;
+			max-width: 420px !important;
+		}
+	}
+
+	/* For smaller screens, position at bottom instead of top */
+	@media (max-width: 639px) {
+		[data-radix-toast-viewport] {
+			bottom: 0 !important;
+			top: auto !important;
+		}
+	}
+
+	@keyframes float {
+		0%,
+		100% {
+			transform: translateY(0px);
+		}
+		50% {
+			transform: translateY(-20px);
+		}
+	}
+
+	.animate-glow-pulse {
+		animation: glow-pulse 2s ease-in-out infinite;
+	}
+
+	@keyframes glow-pulse {
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.7;
+		}
+	}
+
+	/* Device scale utilities */
 	.device-lg {
 		--devices-scale: 1;
 	}
@@ -95,6 +229,15 @@
 	}
 	.device-xs {
 		--devices-scale: 0.2;
+	}
+}
+
+@keyframes move-x {
+	0% {
+		transform: translateX(var(--move-x-from));
+	}
+	100% {
+		transform: translateX(var(--move-x-to));
 	}
 }
 

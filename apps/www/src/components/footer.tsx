@@ -1,46 +1,49 @@
+'use client';
+
+import { useState } from 'react';
 import { getAbsoluteUrl } from '@barely/utils';
 
 import { Icon } from '@barely/ui/icon';
 
-import { Button } from '~/components/button';
+import { ContactModal } from '~/components/contact-modal';
 import { Container } from '~/components/container';
+import { MarketingButton } from '~/components/marketing-button';
 import { PlusGrid, PlusGridItem, PlusGridRow } from '~/components/plus-grid';
 
-import { Gradient } from './gradient';
 import { Link } from './link';
 import { Logo } from './logo';
 import { Subheading } from './text';
 
-function CallToAction() {
+function CallToAction({ onOpenContactModal }: { onOpenContactModal: () => void }) {
 	return (
 		<div className='relative pb-16 pt-20 text-center sm:py-24'>
 			<hgroup>
-				<Subheading>Get started</Subheading>
-				<p className='mt-6 text-3xl font-medium tracking-tight text-gray-950 sm:text-5xl'>
+				<Subheading dark>Get started</Subheading>
+				<p className='mt-6 text-3xl font-medium tracking-tight text-white sm:text-5xl'>
 					Ready to dive in?
 				</p>
 			</hgroup>
-			<p className='mx-auto mt-6 max-w-xs text-sm/6 text-gray-500'>
+			<p className='mx-auto mt-6 max-w-xs text-sm/6 text-muted-foreground'>
 				Find your fans & unlock your music career.
 			</p>
-			<div className='mt-6'>
-				<Button
-					className='w-full sm:w-auto'
-					href={getAbsoluteUrl('app', 'register', {
-						query: {
-							ref: 'www.footer',
-						},
-					})}
+			<div className='mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center'>
+				<MarketingButton
+					variant='hero-primary'
+					href={getAbsoluteUrl('app', 'register?ref=www/footer')}
+					glow
 				>
-					Get started
-				</Button>
+					Start Building Free
+				</MarketingButton>
+				<MarketingButton variant='hero-secondary' onClick={onOpenContactModal}>
+					Book a Demo
+				</MarketingButton>
 			</div>
 		</div>
 	);
 }
 
 function SitemapHeading({ children }: { children: React.ReactNode }) {
-	return <h3 className='text-sm/6 font-medium text-gray-950/50'>{children}</h3>;
+	return <h3 className='text-sm/6 font-medium text-muted-foreground'>{children}</h3>;
 }
 
 function SitemapLinks({ children }: { children: React.ReactNode }) {
@@ -50,10 +53,7 @@ function SitemapLinks({ children }: { children: React.ReactNode }) {
 function SitemapLink(props: React.ComponentPropsWithoutRef<typeof Link>) {
 	return (
 		<li>
-			<Link
-				{...props}
-				className='font-medium text-gray-950 data-[hover]:text-gray-950/75'
-			/>
+			<Link {...props} className='font-medium text-white data-[hover]:text-white/75' />
 		</li>
 	);
 }
@@ -146,7 +146,7 @@ function SocialLinks() {
 				href='https://github.com/barelylabs/barely'
 				target='_blank'
 				aria-label='barely.io is open source & available on GitHub'
-				className='text-gray-950 data-[hover]:text-gray-950/75'
+				className='text-white data-[hover]:text-white/75'
 			>
 				{/* <SocialIconLinkedIn className='size-4' /> */}
 				<Icon.gitHub className='h-[18px] w-[18px]' />
@@ -157,47 +157,67 @@ function SocialLinks() {
 
 function Copyright() {
 	return (
-		<div className='text-sm/6 text-gray-950'>
+		<div className='text-sm/6 text-muted-foreground'>
 			&copy; {new Date().getFullYear()} Barely Sparrow LLC
 		</div>
 	);
 }
 
 export function Footer() {
+	const [showContactModal, setShowContactModal] = useState(false);
+
 	return (
-		<footer>
-			<Gradient className='relative'>
-				<div className='rounded-4xl absolute inset-2 bg-white/80' />
-				<Container>
-					<CallToAction />
-					<PlusGrid className='pb-16'>
-						<PlusGridRow>
-							<div className='grid grid-cols-2 gap-y-10 pb-6 lg:grid-cols-6 lg:gap-8'>
-								<div className='col-span-2 flex'>
-									<PlusGridItem className='pt-6 lg:pb-6'>
-										<Logo className='h-9' />
+		<>
+			<footer className='relative'>
+				<div className='relative m-4 overflow-hidden rounded-2xl border border-white/10 bg-card'>
+					<div className='absolute inset-0 bg-gradient-to-b from-transparent to-background/20' />
+					<Container className='relative'>
+						<CallToAction onOpenContactModal={() => setShowContactModal(true)} />
+						<PlusGrid className='pb-16'>
+							<PlusGridRow>
+								<div className='grid grid-cols-2 gap-y-10 pb-6 lg:grid-cols-6 lg:gap-8'>
+									<div className='col-span-2 flex'>
+										<PlusGridItem className='pt-6 lg:pb-6'>
+											<Logo className='h-9' />
+										</PlusGridItem>
+									</div>
+									<div className='col-span-2 grid grid-cols-2 gap-x-8 gap-y-12 lg:col-span-4 lg:grid-cols-subgrid lg:pt-6'>
+										<Sitemap />
+									</div>
+								</div>
+							</PlusGridRow>
+							<PlusGridRow className='flex justify-between'>
+								<div>
+									<PlusGridItem className='py-3'>
+										<Copyright />
 									</PlusGridItem>
 								</div>
-								<div className='col-span-2 grid grid-cols-2 gap-x-8 gap-y-12 lg:col-span-4 lg:grid-cols-subgrid lg:pt-6'>
-									<Sitemap />
+								<div className='flex items-center gap-8'>
+									<PlusGridItem className='py-3'>
+										<p className='text-sm text-muted-foreground'>
+											Questions?{' '}
+											<Link
+												href='mailto:hello@barely.io'
+												className='font-medium text-white underline'
+											>
+												hello@barely.io
+											</Link>
+										</p>
+									</PlusGridItem>
+									<PlusGridItem className='flex items-center gap-8 py-3'>
+										<SocialLinks />
+									</PlusGridItem>
 								</div>
-							</div>
-						</PlusGridRow>
-						<PlusGridRow className='flex justify-between'>
-							<div>
-								<PlusGridItem className='py-3'>
-									<Copyright />
-								</PlusGridItem>
-							</div>
-							<div className='flex'>
-								<PlusGridItem className='flex items-center gap-8 py-3'>
-									<SocialLinks />
-								</PlusGridItem>
-							</div>
-						</PlusGridRow>
-					</PlusGrid>
-				</Container>
-			</Gradient>
-		</footer>
+							</PlusGridRow>
+						</PlusGrid>
+					</Container>
+				</div>
+			</footer>
+			<ContactModal
+				show={showContactModal}
+				onClose={() => setShowContactModal(false)}
+				variant='demo'
+			/>
+		</>
 	);
 }

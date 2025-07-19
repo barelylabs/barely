@@ -36,7 +36,7 @@ export const emailTemplateGroupRoute = {
 			const emailTemplateGroups = await dbHttp.query.EmailTemplateGroups.findMany({
 				where: sqlAnd([
 					eq(EmailTemplateGroups.workspaceId, ctx.workspace.id),
-					!!search?.length && sqlStringContains(EmailTemplateGroups.name, search),
+					!!search.length && sqlStringContains(EmailTemplateGroups.name, search),
 					!!cursor &&
 						or(
 							lt(EmailTemplateGroups.createdAt, cursor.createdAt),
@@ -87,6 +87,20 @@ export const emailTemplateGroupRoute = {
 	byId: workspaceProcedure
 		.input(z.object({ id: z.string() }))
 		.query(async ({ input: { id }, ctx }) => {
+			if (id === '') {
+				const emptyEmailTemplateGroup = {
+					id: '',
+					name: '',
+					description: '',
+					emailTemplates: [] as {
+						id: string;
+						name: string;
+						description: string | null;
+					}[],
+				};
+				return emptyEmailTemplateGroup;
+			}
+
 			const emailTemplateGroup = await dbHttp.query.EmailTemplateGroups.findFirst({
 				where: and(
 					eq(EmailTemplateGroups.id, id),

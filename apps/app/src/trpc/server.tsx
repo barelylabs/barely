@@ -11,8 +11,7 @@ import { createTRPCOptionsProxy } from '@trpc/tanstack-react-query';
 
 import { appRouter } from '@barely/api/app/app.router';
 
-import { auth } from '@barely/auth/app.server';
-
+import { auth } from '~/auth/server';
 import { makeQueryClient } from '~/trpc/query-client';
 
 /**
@@ -24,8 +23,8 @@ const createContext = cache(async () => {
 	heads.set('x-trpc-source', 'rsc');
 
 	return createTRPCContext({
-		auth,
 		headers: heads,
+		auth,
 		pool: null,
 	});
 });

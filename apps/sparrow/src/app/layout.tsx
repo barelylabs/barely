@@ -4,8 +4,8 @@ import type { Metadata } from 'next';
 import { Inter as FontSans } from 'next/font/google';
 import localFont from 'next/font/local';
 import { headers } from 'next/headers';
-import { Toaster } from '@barely/toast';
 import { cn } from '@barely/utils';
+import { Toaster } from 'sonner';
 
 import { TailwindIndicator } from '@barely/ui/components/tailwind-indicator';
 import { Container } from '@barely/ui/container';

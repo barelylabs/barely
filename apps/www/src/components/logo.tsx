@@ -74,7 +74,7 @@ export function Logo({ className }: { className?: string }) {
 				<span className='-ml-[1px] font-heading text-2xs'>.io</span>
 			</div> */}
 			<text
-				className='font-heading text-[323.3px] opacity-70'
+				className='fill-white font-heading text-[323.3px] opacity-90'
 				transform='translate(377.3 277.5)'
 			>
 				<tspan x='0' y='0'>
@@ -82,7 +82,7 @@ export function Logo({ className }: { className?: string }) {
 				</tspan>
 			</text>
 			<text
-				className='font-heading text-[103.8px] opacity-70'
+				className='fill-white font-heading text-[103.8px] opacity-90'
 				transform='translate(1300.8 283.8)'
 			>
 				<tspan x='0' y='0'>

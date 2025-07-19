@@ -64,3 +64,27 @@ export function getDateFromIsoString(isoString: string) {
 
 	return new Date(fixedDateString);
 }
+
+export function getFirstAndLastDayOfBillingCycle(day: number) {
+	const today = new Date();
+	const currentDay = today.getDate();
+	const currentMonth = today.getMonth();
+	const currentYear = today.getFullYear();
+
+	if (currentDay >= day) {
+		// if the current day is greater than target day, it means we've passed it
+		return {
+			firstDay: new Date(currentYear, currentMonth, day),
+			lastDay: new Date(currentYear, currentMonth + 1, day - 1),
+		};
+	} else {
+		// if the current day is less than target day, we haven't passed it yet
+		const lastYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+		const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+
+		return {
+			firstDay: new Date(lastYear, lastMonth, day),
+			lastDay: new Date(lastYear, lastMonth + 1, day - 1),
+		};
+	}
+}

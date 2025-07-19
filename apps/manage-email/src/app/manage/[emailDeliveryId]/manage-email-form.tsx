@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useToast } from '@barely/toast';
 import { useMutation } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 import { useEmailManageTRPC } from '@barely/api/public/email-manage.trpc.react';
 
@@ -19,8 +19,6 @@ export function ManageEmailForm({
 	initialEmailMarketingOptIn: boolean;
 	justUnsubscribed?: boolean;
 }) {
-	const { toast } = useToast();
-
 	const trpc = useEmailManageTRPC();
 
 	const [emailMarketingOptIn, setEmailMarketingOptIn] = useState(

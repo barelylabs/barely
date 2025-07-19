@@ -4,9 +4,9 @@ import React from 'react';
 import { Inter as FontSans } from 'next/font/google';
 import localFont from 'next/font/local';
 import { getFunnelByParams } from '@barely/lib/functions/cart.fns';
-import { Toaster } from '@barely/toast';
 import { cn } from '@barely/utils';
 import { getDynamicStyleVariables } from 'node_modules/@barely/tailwind-config/lib/dynamic-tw.runtime';
+import { Toaster } from 'sonner';
 
 import { TailwindIndicator } from '@barely/ui/components/tailwind-indicator';
 import { Container } from '@barely/ui/container';
@@ -63,7 +63,7 @@ export default async function RootLayout({
 				<Providers>
 					<Container className='max-w-full px-0 py-0'>{children}</Container>
 				</Providers>
-				<Toaster />
+				<Toaster position='bottom-right' />
 				<TailwindIndicator />
 			</body>
 		</html>

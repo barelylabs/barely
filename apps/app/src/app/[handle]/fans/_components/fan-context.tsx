@@ -20,7 +20,6 @@ interface FanFilters extends BaseResourceFilters {
 
 // Define the return type for fan search params
 interface FanSearchParamsReturn extends ResourceSearchParamsReturn<FanFilters> {
-	showImportModal: boolean;
 	setShowImportModal: (show: boolean) => Promise<URLSearchParams> | undefined;
 }
 
@@ -30,12 +29,11 @@ export const useFanSearchParams = createResourceSearchParamsHook({
 		showImportModal: parseAsBoolean.withDefault(false),
 	},
 	additionalActions: {
-		setShowImportModal:
-			setParams =>
-			(...args: unknown[]) => {
+		setShowImportModal: setParams =>
+			((...args: unknown[]) => {
 				const [show] = args as [boolean];
 				return setParams({ showImportModal: show });
-			},
+			}) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
 	},
 }) as () => FanSearchParamsReturn;
 
@@ -43,6 +41,7 @@ export const useFanSearchParams = createResourceSearchParamsHook({
 export function useFan() {
 	const trpc = useTRPC();
 	const searchParams = useFanSearchParams();
+
 	const baseHook = createResourceDataHook<
 		AppRouterOutputs['fan']['byWorkspace']['fans'][0],
 		FanPageData

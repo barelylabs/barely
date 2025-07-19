@@ -12,7 +12,6 @@ import { CreateLinkButton } from '~/app/[handle]/links/_components/create-link-b
 import { CreateOrUpdateLinkModal } from '~/app/[handle]/links/_components/create-or-update-link-modal';
 import { LinkFilters } from '~/app/[handle]/links/_components/link-filters';
 import { LinkHotkeys } from '~/app/[handle]/links/_components/link-hotkeys';
-import { UpgradeModal } from '~/app/[handle]/settings/billing/upgrade-modal';
 import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
 export default async function LinksPage({
@@ -55,7 +54,6 @@ export default async function LinksPage({
 			<ArchiveOrDeleteLinkModal mode='delete' />
 
 			<LinkHotkeys />
-			<UpgradeModal checkoutCancelPath='links' checkoutSuccessPath='links' />
 		</HydrateClient>
 	);
 }

@@ -3,6 +3,8 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { emailTemplateSearchParamsSchema } from '@barely/validators';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
+
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllEmailTemplates } from '~/app/[handle]/email-templates/_components/all-email-templates';
 import { EmailTemplateFilters } from '~/app/[handle]/email-templates/_components/email-template-filters';
@@ -38,13 +40,10 @@ export default async function EmailTemplatesPage({
 
 	return (
 		<HydrateClient>
-			<Suspense fallback={<div>Loading...</div>}>
-				<DashContentHeader
-					title='Email Templates'
-					button={<CreateEmailTemplateButton />}
-				/>
+			<DashContentHeader title='Email Templates' button={<CreateEmailTemplateButton />} />
 
-				<EmailTemplateFilters />
+			<EmailTemplateFilters />
+			<Suspense fallback={<GridListSkeleton />}>
 				<AllEmailTemplates />
 
 				<CreateOrUpdateEmailTemplateModal mode='create' />

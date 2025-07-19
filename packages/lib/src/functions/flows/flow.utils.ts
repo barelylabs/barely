@@ -1,4 +1,3 @@
-import type { UseToastOutput } from '@barely/toast';
 import type {
 	EmailTemplate,
 	FlowAction,
@@ -10,6 +9,7 @@ import type {
 } from '@barely/validators';
 import type { z } from 'zod/v4';
 import { newId, raise } from '@barely/utils';
+import { toast } from 'sonner';
 
 import type {
 	ActionNode,
@@ -458,7 +458,6 @@ interface DefaultFlowActionProps {
 	id?: string;
 	position?: { x: number; y: number };
 	type: FlowAction['type'];
-	toast?: UseToastOutput['toast'];
 
 	emailTemplate?: Partial<EmailTemplate> & { fromId: EmailTemplate['fromId'] };
 	emailTemplateGroupId?: string;
@@ -478,7 +477,7 @@ export function getDefaultFlowAction(props: DefaultFlowActionProps): {
 			return getDefaultFlowAction_wait(props);
 		case 'sendEmail': {
 			if (!props.emailTemplate?.fromId) {
-				props.toast?.error('No email from id found');
+				toast.error('No email from id found');
 				throw new Error('No email from id found');
 			}
 
@@ -493,7 +492,7 @@ export function getDefaultFlowAction(props: DefaultFlowActionProps): {
 		}
 		case 'sendEmailFromTemplateGroup':
 			if (!props.emailTemplateGroupId) {
-				props.toast?.error('No email template group id found');
+				toast.error('No email template group id found');
 				throw new Error('No email template group id found');
 			}
 
@@ -503,7 +502,7 @@ export function getDefaultFlowAction(props: DefaultFlowActionProps): {
 			});
 		case 'addToMailchimpAudience':
 			if (!props.mailchimpAudienceId) {
-				props.toast?.error('No mailchimp audience id found');
+				toast.error('No mailchimp audience id found');
 				throw new Error('No mailchimp audience id found');
 			}
 

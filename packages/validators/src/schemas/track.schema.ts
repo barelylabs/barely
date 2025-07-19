@@ -141,10 +141,11 @@ export interface PublicTrackWith_Artist_Files extends PublicTrack {
 
 // query params
 export const trackFilterParamsSchema = z.object({
-	search: z.string().optional(),
-	genres: queryStringArraySchema.optional(),
-	showArchived: queryBooleanSchema.optional(),
-	released: queryBooleanSchema.optional(),
+	search: z.string().optional().default(''),
+	genres: queryStringArraySchema.optional().default([]),
+	showArchived: queryBooleanSchema.optional().default(false),
+	showDeleted: queryBooleanSchema.optional().default(false),
+	released: queryBooleanSchema.optional().default(false),
 	// selectedTrackIds: queryStringArraySchema.optional(),
 });
 

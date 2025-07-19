@@ -2,9 +2,9 @@
 
 import type { z } from 'zod/v4';
 import { useZodForm } from '@barely/hooks';
-import { useToast } from '@barely/toast';
 import { acceptInviteSchema } from '@barely/validators';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
@@ -16,7 +16,6 @@ import { usePersonalInvitesContext } from '~/app/[handle]/settings/team/_compone
 export function AcceptInviteModal() {
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
-	const { toast } = useToast();
 
 	const {
 		showAcceptInviteModal,
