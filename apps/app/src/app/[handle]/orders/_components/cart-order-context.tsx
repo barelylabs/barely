@@ -1,7 +1,7 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
-import type { BaseResourceFilters, ResourceSearchParamsReturn } from '@barely/hooks';
+import type { BaseResourceFilters } from '@barely/hooks';
 import {
 	action,
 	createResourceDataHook,
@@ -26,18 +26,8 @@ interface CartOrderFilters extends BaseResourceFilters {
 	showCancelCartOrderModal: boolean;
 }
 
-// Define the return type for cart order search params
-interface CartOrderSearchParamsReturn
-	extends ResourceSearchParamsReturn<CartOrderFilters> {
-	toggleFulfilled: () => Promise<URLSearchParams>;
-	togglePreorders: () => Promise<URLSearchParams>;
-	toggleCanceled: () => Promise<URLSearchParams>;
-	setShowMarkAsFulfilledModal: (show: boolean) => Promise<URLSearchParams> | undefined;
-	setShowCancelCartOrderModal: (show: boolean) => Promise<URLSearchParams> | undefined;
-}
-
 // Create the search params hook for cart orders with custom filters and modal states
-const _useCartOrderSearchParams = createResourceSearchParamsHook({
+export const useCartOrderSearchParams = createResourceSearchParamsHook({
 	additionalParsers: {
 		showFulfilled: parseAsBoolean.withDefault(false),
 		showPreorders: parseAsBoolean.withDefault(false),
@@ -64,9 +54,6 @@ const _useCartOrderSearchParams = createResourceSearchParamsHook({
 	},
 });
 
-export const useCartOrderSearchParams =
-	_useCartOrderSearchParams as () => CartOrderSearchParamsReturn;
-
 // Create a custom data hook for cart orders that properly uses tRPC
 export function useCartOrder() {
 	const trpc = useTRPC();
@@ -74,7 +61,8 @@ export function useCartOrder() {
 
 	const baseHook = createResourceDataHook<
 		AppRouterOutputs['cartOrder']['byWorkspace']['cartOrders'][0],
-		CartOrderPageData
+		CartOrderPageData,
+		CartOrderFilters
 	>(
 		{
 			resourceName: 'cart-orders',

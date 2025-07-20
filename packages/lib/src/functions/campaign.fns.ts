@@ -327,7 +327,7 @@ export async function createPlaylistPitchCampaign(props: {
 	// 📧 send email/text to A&R team for screening
 
 	await sendEmail({
-		from: 'support@barely.io',
+		from: 'support@ship.barely.io',
 		fromFriendlyName: 'Barely',
 		to: 'adam@barelysparrow.com',
 		subject: 'New campaign for screening',
@@ -353,7 +353,7 @@ export async function createPlaylistPitchCampaign(props: {
 		});
 
 		await sendEmail({
-			from: 'support@barely.io',
+			from: 'support@ship.barely.io',
 			fromFriendlyName: 'Barely',
 			to: props.user.email,
 			subject: `Confirm your playlist.pitch submission for ${track.name}`,

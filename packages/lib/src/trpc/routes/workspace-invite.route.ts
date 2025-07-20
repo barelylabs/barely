@@ -73,7 +73,7 @@ export const workspaceInviteRoute = {
 			});
 
 			await sendEmail({
-				from: 'support@barely.io',
+				from: 'support@ship.barely.io',
 				fromFriendlyName: 'Barely',
 				to: input.email,
 				subject: `You've been invited to join ${ctx.workspace.name} on barely.io`,

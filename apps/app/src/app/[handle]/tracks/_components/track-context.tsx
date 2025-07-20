@@ -1,7 +1,7 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
-import type { BaseResourceFilters, ResourceSearchParamsReturn } from '@barely/hooks';
+import type { BaseResourceFilters } from '@barely/hooks';
 import {
 	action,
 	createResourceDataHook,
@@ -23,14 +23,8 @@ interface TrackFilters extends BaseResourceFilters {
 	released?: boolean;
 }
 
-// Define the return type for track search params
-interface TrackSearchParamsReturn extends ResourceSearchParamsReturn<TrackFilters> {
-	setGenres: (genres: string[]) => Promise<URLSearchParams> | undefined;
-	toggleReleased: () => Promise<URLSearchParams>;
-}
-
 // Create the search params hook for tracks with custom filters
-const _useTrackSearchParams = createResourceSearchParamsHook({
+export const useTrackSearchParams = createResourceSearchParamsHook({
 	additionalParsers: {
 		genres: parseAsArrayOf(parseAsString).withDefault([]),
 		released: parseAsBoolean.withDefault(false),
@@ -48,8 +42,8 @@ const _useTrackSearchParams = createResourceSearchParamsHook({
 	},
 });
 
-export const useTrackSearchParams =
-	_useTrackSearchParams as () => TrackSearchParamsReturn;
+// export const useTrackSearchParams =
+// 	_useTrackSearchParams as () => TrackSearchParamsReturn;
 
 // Create a custom data hook for tracks that properly uses tRPC
 export function useTrack() {

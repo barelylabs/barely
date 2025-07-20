@@ -331,10 +331,10 @@ export const campaignRoute = {
 			};
 		}),
 
-	byWorkspaceId: privateProcedure
+	byHandle: privateProcedure
 		.input(
 			z.object({
-				workspaceId: z.string(),
+				handle: z.string(),
 				limit: z.number().min(1).max(50).nullish(),
 				cursor: z.coerce.date().nullish(),
 				type: selectCampaignSchema.shape.type.optional(),
@@ -344,7 +344,15 @@ export const campaignRoute = {
 		.query(async ({ ctx, input }) => {
 			const limit = input.limit ?? 20;
 
-			const campaigns = await getCampaignsByWorkspaceId(input.workspaceId, ctx.pool, {
+			const workspaceId = ctx.workspaces.find(w => w.handle === input.handle)?.id;
+
+			if (!workspaceId)
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Workspace not found',
+				});
+
+			const campaigns = await getCampaignsByWorkspaceId(workspaceId, ctx.pool, {
 				type: input.type,
 				stage: input.stage,
 				limit,
@@ -524,7 +532,7 @@ export const campaignRoute = {
 
 			if (input.stage === 'rejected') {
 				await sendEmail({
-					from: 'support@barely.io',
+					from: 'support@ship.barely.io',
 					to: campaign.createdBy.email,
 					subject: `Your playlist.pitch campaign for ${campaign.track.name} wasn't approved`,
 					react: PlaylistPitchRejectedEmailTemplate({
@@ -560,7 +568,7 @@ export const campaignRoute = {
 
 				console.log('sending pitch approved email');
 				await sendEmail({
-					from: 'support@barely.io',
+					from: 'support@ship.barely.io',
 					to: campaign.createdBy.email,
 					subject: `Your playlist.pitch campaign for ${campaign.track.name} is approved!`,
 					react: PlaylistPitchApprovedEmailTemplate({
