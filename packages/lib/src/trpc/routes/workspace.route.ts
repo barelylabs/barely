@@ -195,6 +195,9 @@ export const workspaceRoute = {
 				.set(input)
 				.where(eq(Workspaces.id, ctx.workspace.id));
 
+			// refresh the current workspace session
+			await ctx.getRefreshedSession();
+
 			await pushEvent('workspace', 'update', {
 				id: ctx.workspace.id,
 				pageSessionId: ctx.pageSessionId,
