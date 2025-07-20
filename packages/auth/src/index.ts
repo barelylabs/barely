@@ -49,6 +49,12 @@ export function initAuth(options: {
 			},
 			// debugLogs: true,™
 		}),
+		session: {
+			cookieCache: {
+				enabled: true,
+				maxAge: 60 * 5, // 5 minutes
+			},
+		},
 		user: {
 			fields: {
 				name: 'fullName', // mapping better-auth user.name to db.Users.fullName

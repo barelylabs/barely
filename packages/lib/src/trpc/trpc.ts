@@ -43,7 +43,20 @@ export const createTRPCContext = async (opts: {
 	const pusherSocketId =
 		opts.rest ? undefined : (opts.headers.get('x-pusher-socket-id') ?? null);
 
+	const getRefreshedSession = async () => {
+		// "If you want to disable returning from the cookie cache when fetching the session, you can pass disableCookieCache:true this will force the server to fetch the session from the database and also refresh the cookie cache."
+		const session = await opts.auth?.api.getSession({
+			headers: opts.headers,
+			query: {
+				disableCookieCache: true,
+			},
+		});
+		return session;
+	};
+
 	const context = {
+		auth: opts.auth,
+		getRefreshedSession,
 		session,
 		user: session?.user,
 		workspaces: session?.workspaces,

@@ -64,6 +64,7 @@ export const ProviderAccounts = pgTable(
 		provider_providerAccountId: uniqueIndex(
 			'ProviderAccounts_provider_providerAccountId_idx',
 		).on(account.provider, account.providerAccountId),
+		user: index('ProviderAccounts_user_idx').on(account.userId),
 		workspace: index('ProviderAccounts_workspace_idx').on(account.workspaceId),
 	}),
 );

@@ -5,7 +5,7 @@ import { dbHttp } from '@barely/db/client';
 import { dbPool } from '@barely/db/pool';
 import { _Users_To_Workspaces, WorkspaceInvites, Workspaces } from '@barely/db/sql';
 import { sqlIncrement } from '@barely/db/utils';
-import { sendEmail } from '@barely/email';
+// import { sendEmail } from '@barely/email';
 import { WorkspaceInviteEmailTemplate } from '@barely/email/templates/auth';
 import { newId } from '@barely/utils';
 import { and, eq } from 'drizzle-orm';
@@ -155,6 +155,7 @@ export async function inviteUserToWorkspace({
 		loginLink: magicLink,
 	});
 
+	const { sendEmail } = await import('@barely/email');
 	await sendEmail({
 		from: 'support@ship.barely.io',
 		fromFriendlyName: 'Barely',

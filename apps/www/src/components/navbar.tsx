@@ -31,6 +31,7 @@ function DesktopNav({ onDemoClick }: { onDemoClick: () => void }) {
 						{...(label === 'Login' ?
 							{ target: '_blank', rel: 'noopener noreferrer' }
 						:	{})}
+						prefetch={true}
 					>
 						{label}
 					</Link>
@@ -82,6 +83,7 @@ function MobileNav() {
 								{...(label === 'Login' ?
 									{ target: '_blank', rel: 'noopener noreferrer' }
 								:	{})}
+								prefetch={true}
 							>
 								{label}
 							</Link>
@@ -112,7 +114,7 @@ export function Navbar({ banner }: { banner?: React.ReactNode }) {
 							<div className='mx-auto flex w-full max-w-2xl justify-between px-6 lg:max-w-7xl lg:px-8'>
 								<div className='relative flex gap-6'>
 									<PlusGridItem className='py-3'>
-										<Link href='/' title='Home'>
+										<Link prefetch={true} href='/' title='Home'>
 											<Logo />
 										</Link>
 									</PlusGridItem>
