@@ -179,7 +179,7 @@ export function SidebarNav() {
 			<WorkspaceSwitcher />
 
 			{isSettings && (
-				<Link href={settingsBackLink} passHref>
+				<Link href={settingsBackLink} passHref prefetch={true}>
 					<div className='flex flex-row items-center pt-3'>
 						<Icon.chevronLeft className='mr-1 h-4 w-4' />
 						<Text variant='md/bold'>Settings</Text>
@@ -236,6 +236,7 @@ function NavLink(props: { item: SidebarNavLink; handle: string }) {
 				isCurrent && 'bg-muted',
 			)}
 			passHref
+			prefetch={true}
 		>
 			{NavIcon && <NavIcon className='h-[15px] w-[15px]' />}
 			<Text variant='sm/medium'>{props.item.title}</Text>
@@ -261,6 +262,7 @@ function NavGroup(props: { item: SidebarNavGroup; handle: string }) {
 		<>
 			{props.item.href && !isCurrentGroup ?
 				<Link
+					prefetch={true}
 					href={props.item.links[0]?.href ?? '#'}
 					className={cn(
 						'group flex w-full items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted',
