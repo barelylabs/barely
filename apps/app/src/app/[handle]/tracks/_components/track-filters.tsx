@@ -79,11 +79,9 @@ export function TrackFilters() {
 						<Button look='outline' size='md'>
 							<div className='flex flex-row items-center gap-2'>
 								Released
-								{filters.released !== undefined && (
-									<Badge variant={filters.released ? 'success' : 'info'} size='xs'>
-										{filters.released ? 'Yes' : 'No'}
-									</Badge>
-								)}
+								<Badge variant={filters.released ? 'success' : 'info'} size='xs'>
+									{filters.released ? 'Yes' : 'No'}
+								</Badge>
 							</div>
 						</Button>
 					</PopoverTrigger>

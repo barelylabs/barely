@@ -4,7 +4,11 @@ import { querySelectionSchema } from '@barely/validators/helpers';
 import { parseAsBoolean, parseAsJson, parseAsString, useQueryStates } from 'nuqs';
 
 import type {
+	ActionBuilder,
 	BaseResourceFilters,
+	InferActions,
+	InferParsers,
+	ParserConfig,
 	ResourceSearchParamsConfig,
 	ResourceSearchParamsReturn,
 } from './resource-hooks.types';
@@ -14,9 +18,15 @@ import type {
  * that manages all state via URL parameters (via nuqs)
  */
 export function createResourceSearchParamsHook<
-	TFilters extends BaseResourceFilters = BaseResourceFilters,
->(config?: ResourceSearchParamsConfig<TFilters>) {
-	return function useResourceSearchParams(): ResourceSearchParamsReturn<TFilters> {
+	TParsers extends ParserConfig = Record<string, never>,
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	TActions extends Record<string, ActionBuilder<any, any>> = Record<string, never>,
+>(config?: ResourceSearchParamsConfig<TParsers, TActions>) {
+	type Filters = BaseResourceFilters & InferParsers<TParsers>;
+	type Actions = InferActions<TActions>;
+
+	return function useResourceSearchParams(): ResourceSearchParamsReturn<Filters> &
+		Actions {
 		// URL state management with nuqs (including modal states)
 		const [params, setParams] = useQueryStates({
 			search: parseAsString.withDefault(''),
@@ -77,18 +87,18 @@ export function createResourceSearchParamsHook<
 		const additionalActions =
 			config?.additionalActions ?
 				Object.entries(config.additionalActions).reduce<Record<string, unknown>>(
-					(acc, [key, actionCreator]) => {
-						// Pass setParams to each action creator
-						acc[key] = actionCreator(setParams);
+					(acc, [key, actionBuilder]) => {
+						// Use the ActionBuilder's build method to create the action
+						acc[key] = actionBuilder.build(setParams);
 						return acc;
 					},
 					{},
 				)
 			:	{};
 
-		return {
+		const result = {
 			// URL state
-			filters: filters as TFilters,
+			filters: filters as Filters,
 			selectedIds: selectedIds ?? null,
 			selection,
 			setSelection,
@@ -110,5 +120,7 @@ export function createResourceSearchParamsHook<
 			// Additional actions from config
 			...additionalActions,
 		};
+
+		return result as ResourceSearchParamsReturn<Filters> & Actions;
 	};
 }

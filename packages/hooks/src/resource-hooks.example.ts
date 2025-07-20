@@ -10,7 +10,8 @@ import { parseAsBoolean, parseAsString } from 'nuqs';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
-import { createResourceDataHook, createResourceSearchParamsHook } from './index';
+import type { SetParamsFunction } from './resource-hooks.types';
+import { action, createResourceDataHook, createResourceSearchParamsHook } from './index';
 
 // Example 1: Simple resource (same as landing pages)
 export const useLandingPageSearchParams = createResourceSearchParamsHook();
@@ -22,16 +23,12 @@ export const useTrackSearchParams = createResourceSearchParamsHook({
 		released: parseAsBoolean.withDefault(false),
 	},
 	additionalActions: {
-		setGenre: setParams =>
-			((...args: unknown[]) => {
-				const [genre] = args as [string];
-				return setParams({ genre });
-			}) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
-		toggleReleased: setParams =>
-			(() =>
-				setParams((p: Record<string, unknown>) => ({
-					released: !(p.released as boolean),
-				}))) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
+		setGenre: action((setParams: SetParamsFunction, genre: string) =>
+			setParams({ genre }),
+		),
+		toggleReleased: action((setParams: SetParamsFunction) =>
+			setParams((p: Record<string, unknown>) => ({ released: !(p.released as boolean) })),
+		),
 	},
 });
 
@@ -120,20 +117,12 @@ export const useCampaignSearchParams = createResourceSearchParamsHook({
 		endDate: parseAsString,
 	},
 	additionalActions: {
-		setStage: setParams =>
-			((...args: unknown[]) => {
-				const [stage] = args as [string];
-				return setParams({ stage });
-			}) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
-		setType: setParams =>
-			((...args: unknown[]) => {
-				const [type] = args as [string];
-				return setParams({ type });
-			}) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
-		setDateRange: setParams =>
-			((...args: unknown[]) => {
-				const [start, end] = args as [string, string];
-				return setParams({ startDate: start, endDate: end });
-			}) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
+		setStage: action((setParams: SetParamsFunction, stage: string) =>
+			setParams({ stage }),
+		),
+		setType: action((setParams: SetParamsFunction, type: string) => setParams({ type })),
+		setDateRange: action((setParams: SetParamsFunction, start: string, end: string) =>
+			setParams({ startDate: start, endDate: end }),
+		),
 	},
 });

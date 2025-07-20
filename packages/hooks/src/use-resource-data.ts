@@ -1,6 +1,5 @@
 'use client';
 
-import type { InfiniteData } from '@tanstack/react-query';
 import { useRef } from 'react';
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
 
@@ -50,15 +49,10 @@ export function createResourceDataHook<
 			isFetching,
 			isRefetching,
 			isPending,
-		} = useSuspenseInfiniteQuery<
-			TPageData,
-			Error,
-			InfiniteData<TPageData>,
-			unknown[],
-			unknown
-		>(
-			// @ts-expect-error - Query options from tRPC have complex types that are hard to match exactly
-			config.getQueryOptions(handle, queryFilters),
+		} = useSuspenseInfiniteQuery(
+			config.getQueryOptions(handle, queryFilters) as Parameters<
+				typeof useSuspenseInfiniteQuery<TPageData>
+			>[0],
 		);
 
 		// Extract items from paginated data - data.pages is now properly typed as TPageData[]

@@ -156,7 +156,7 @@ export async function inviteUserToWorkspace({
 	});
 
 	await sendEmail({
-		from: 'support@barely.io',
+		from: 'support@ship.barely.io',
 		fromFriendlyName: 'Barely',
 		to: email,
 		subject: `You've been invited to join ${workspace.name} on barely.io`,

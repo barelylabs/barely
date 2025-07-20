@@ -19,7 +19,7 @@ type MediaFilters = BaseResourceFilters;
 export type MediaSearchParamsReturn = ResourceSearchParamsReturn<MediaFilters>;
 
 // Create the search params hook for media (no additional parsers/actions needed)
-export const useMediaSearchParams = createResourceSearchParamsHook<MediaFilters>();
+export const useMediaSearchParams = createResourceSearchParamsHook();
 
 // Create a custom data hook for media that properly uses tRPC
 export function useMedia() {

@@ -25,7 +25,7 @@ export const AllCampaigns = () => {
 		return (
 			<div className='flex h-full flex-col items-center justify-center gap-y-3 rounded-lg border border-dashed px-6 py-16'>
 				<Icon.sun className='h-10 w-10' />
-				<H size='4'>{`No ${filters.stage ?? ''} campaigns`}</H>
+				<H size='4'>{`No ${filters.stage} campaigns`}</H>
 				<Text variant='xs/light'>Create a new campaign to get started.</Text>
 			</div>
 		);
