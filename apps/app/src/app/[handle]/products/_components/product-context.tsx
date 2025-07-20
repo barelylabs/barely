@@ -1,7 +1,11 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
-import { createResourceDataHook, createResourceSearchParamsHook } from '@barely/hooks';
+import {
+	action,
+	createResourceDataHook,
+	createResourceSearchParamsHook,
+} from '@barely/hooks';
 import { parseAsBoolean } from 'nuqs';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
@@ -18,7 +22,9 @@ export const useProductSearchParams = createResourceSearchParamsHook({
 		preorder: parseAsBoolean.withDefault(false),
 	},
 	additionalActions: {
-		togglePreorder: setParams => () => setParams(prev => ({ preorder: !prev.preorder })),
+		togglePreorder: action(setParams =>
+			setParams(prev => ({ preorder: !(prev.preorder as boolean) })),
+		),
 	},
 });
 

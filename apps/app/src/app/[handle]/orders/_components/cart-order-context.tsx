@@ -2,7 +2,11 @@
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import type { BaseResourceFilters, ResourceSearchParamsReturn } from '@barely/hooks';
-import { createResourceDataHook, createResourceSearchParamsHook } from '@barely/hooks';
+import {
+	action,
+	createResourceDataHook,
+	createResourceSearchParamsHook,
+} from '@barely/hooks';
 import { parseAsBoolean } from 'nuqs';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
@@ -42,22 +46,21 @@ const _useCartOrderSearchParams = createResourceSearchParamsHook({
 		showCancelCartOrderModal: parseAsBoolean.withDefault(false),
 	},
 	additionalActions: {
-		toggleFulfilled: setParams => () =>
-			setParams(prev => ({ showFulfilled: !prev.showFulfilled })),
-		togglePreorders: setParams => () =>
-			setParams(prev => ({ showPreorders: !prev.showPreorders })),
-		toggleCanceled: setParams => () =>
-			setParams(prev => ({ showCanceled: !prev.showCanceled })),
-		setShowMarkAsFulfilledModal: setParams =>
-			((...args: unknown[]) => {
-				const [show] = args as [boolean];
-				return setParams({ showMarkAsFulfilledModal: show });
-			}) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
-		setShowCancelCartOrderModal: setParams =>
-			((...args: unknown[]) => {
-				const [show] = args as [boolean];
-				return setParams({ showCancelCartOrderModal: show });
-			}) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
+		toggleFulfilled: action(setParams =>
+			setParams(prev => ({ showFulfilled: !(prev.showFulfilled as boolean) })),
+		),
+		togglePreorders: action(setParams =>
+			setParams(prev => ({ showPreorders: !(prev.showPreorders as boolean) })),
+		),
+		toggleCanceled: action(setParams =>
+			setParams(prev => ({ showCanceled: !(prev.showCanceled as boolean) })),
+		),
+		setShowMarkAsFulfilledModal: action((setParams, show: boolean) =>
+			setParams({ showMarkAsFulfilledModal: show }),
+		),
+		setShowCancelCartOrderModal: action((setParams, show: boolean) =>
+			setParams({ showCancelCartOrderModal: show }),
+		),
 	},
 });
 

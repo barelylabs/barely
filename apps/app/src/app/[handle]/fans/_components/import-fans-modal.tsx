@@ -31,8 +31,8 @@ export function ImportFansFromCsvModal() {
 	const { toast } = useToast();
 
 	const trpc = useTRPC();
-	const { showImportModal: showModal, setShowImportModal: setShowModal } =
-		useFanSearchParams();
+	const { filters, setShowImportModal: setShowModal } = useFanSearchParams();
+	const showModal = filters.showImportModal;
 
 	const { mutate: importFansFromCsv } = useMutation({
 		...trpc.fan.importFromCsv.mutationOptions(),

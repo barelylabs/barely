@@ -3,7 +3,7 @@
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import type { BaseResourceFilters, ResourceSearchParamsReturn } from '@barely/hooks';
 import { useRef } from 'react';
-import { createResourceSearchParamsHook, useWorkspace } from '@barely/hooks';
+import { action, createResourceSearchParamsHook, useWorkspace } from '@barely/hooks';
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
 import { parseAsStringEnum } from 'nuqs';
 
@@ -33,11 +33,10 @@ const _useCampaignSearchParams = createResourceSearchParamsHook({
 		stage: parseAsStringEnum(['screening', 'approved', 'active']),
 	},
 	additionalActions: {
-		setStage: setParams =>
-			((...args: unknown[]) => {
-				const [stage] = args as ['screening' | 'approved' | 'active' | undefined];
-				return setParams({ stage });
-			}) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
+		setStage: action(
+			(setParams, stage: 'screening' | 'approved' | 'active' | undefined) =>
+				setParams({ stage }),
+		),
 	},
 });
 

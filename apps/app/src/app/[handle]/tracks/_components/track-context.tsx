@@ -2,7 +2,11 @@
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import type { BaseResourceFilters, ResourceSearchParamsReturn } from '@barely/hooks';
-import { createResourceDataHook, createResourceSearchParamsHook } from '@barely/hooks';
+import {
+	action,
+	createResourceDataHook,
+	createResourceSearchParamsHook,
+} from '@barely/hooks';
 import { parseAsArrayOf, parseAsBoolean, parseAsString } from 'nuqs';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
@@ -32,15 +36,15 @@ const _useTrackSearchParams = createResourceSearchParamsHook({
 		released: parseAsBoolean.withDefault(false),
 	},
 	additionalActions: {
-		setGenres: setParams =>
-			((...args: unknown[]) => {
-				const [genres] = args as [string[]];
-				return setParams({ genres });
-			}) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
-		toggleReleased: setParams => () =>
+		setGenres: action((setParams, genres: string[]) => setParams({ genres })),
+		toggleReleased: action(setParams =>
 			setParams(prev => ({
-				released: prev.released === undefined ? true : !prev.released,
+				released:
+					(prev.released as boolean | undefined) === undefined ?
+						true
+					:	!(prev.released as boolean),
 			})),
+		),
 	},
 });
 

@@ -3,14 +3,14 @@ import type { Parser, ParserBuilder } from 'nuqs';
 import type { Selection } from 'react-aria-components';
 
 // Type utilities for parser inference
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ParserConfig = Record<string, Parser<any> | ParserBuilder<any>>;
 
 // Extract the parsed type from a parser
-export type InferParserType<T> = T extends Parser<infer V>
-	? V
-	: T extends ParserBuilder<infer V>
-		? V
-		: never;
+export type InferParserType<T> =
+	T extends Parser<infer V> ? V
+	: T extends ParserBuilder<infer V> ? V
+	: never;
 
 // Extract all parsed types from a parser config
 export type InferParsers<T extends ParserConfig> = {
@@ -25,6 +25,7 @@ export type SetParamsFunction = (
 ) => Promise<URLSearchParams>;
 
 // Action builder for type-safe action creation
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class ActionBuilder<TArgs extends any[], TReturn> {
 	constructor(
 		private handler: (setParams: SetParamsFunction, ...args: TArgs) => TReturn,
@@ -36,6 +37,7 @@ export class ActionBuilder<TArgs extends any[], TReturn> {
 }
 
 // Helper function to create action builders
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function action<TArgs extends any[], TReturn>(
 	handler: (setParams: SetParamsFunction, ...args: TArgs) => TReturn,
 ): ActionBuilder<TArgs, TReturn> {
@@ -43,13 +45,15 @@ export function action<TArgs extends any[], TReturn>(
 }
 
 // Extract action types from action builders
-export type InferActions<T> = T extends Record<string, ActionBuilder<any, any>>
-	? {
-			[K in keyof T]: T[K] extends ActionBuilder<infer TArgs, infer TReturn>
-				? (...args: TArgs) => TReturn
-				: never;
+export type InferActions<T> =
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	T extends Record<string, ActionBuilder<any, any>> ?
+		{
+			[K in keyof T]: T[K] extends ActionBuilder<infer TArgs, infer TReturn> ?
+				(...args: TArgs) => TReturn
+			:	never;
 		}
-	: {};
+	:	Record<string, never>;
 
 // Base filter types that all resources share
 export interface BaseResourceFilters {
@@ -85,8 +89,9 @@ export interface ResourceSearchParamsReturn<TFilters extends BaseResourceFilters
 
 // Configuration for creating a search params hook
 export interface ResourceSearchParamsConfig<
-	TParsers extends ParserConfig = {},
-	TActions extends Record<string, ActionBuilder<any, any>> = {},
+	TParsers extends ParserConfig = Record<string, never>,
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	TActions extends Record<string, ActionBuilder<any, any>> = Record<string, never>,
 > {
 	// Additional nuqs parsers for resource-specific filters
 	additionalParsers?: TParsers;
@@ -127,17 +132,8 @@ export interface ResourceDataConfig<TItem extends { id: string }, TPageData> {
 // Utility type for extracting page data from infinite query result
 export type ExtractPageData<T> = T extends InfiniteData<infer P> ? P : never;
 
-// Type wrapper for query options to ensure compatibility with React Query
-export interface QueryOptionsWrapper<TData, TPageParam = unknown> {
-	queryKey: unknown[];
-	queryFn: (context: { pageParam?: TPageParam }) => Promise<TData>;
-	getNextPageParam?: (lastPage: TData, allPages: TData[]) => TPageParam | undefined;
-	initialPageParam?: TPageParam;
-}
-
 // Helper to ensure query options type compatibility
-export function wrapQueryOptions<T extends QueryOptionsWrapper<any, any>>(
-	options: T,
-): T {
+// This is now just a passthrough since tRPC already returns compatible types
+export function wrapQueryOptions<T>(options: T): T {
 	return options;
 }

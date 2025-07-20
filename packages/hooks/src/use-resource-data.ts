@@ -1,6 +1,5 @@
 'use client';
 
-import type { InfiniteData } from '@tanstack/react-query';
 import { useRef } from 'react';
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
 
@@ -10,7 +9,6 @@ import type {
 	ResourceDataReturn,
 	ResourceSearchParamsReturn,
 } from './resource-hooks.types';
-import { wrapQueryOptions } from './resource-hooks.types';
 import { useWorkspace } from './use-workspace';
 
 /**
@@ -38,14 +36,10 @@ export function createResourceDataHook<
 			isFetching,
 			isRefetching,
 			isPending,
-		} = useSuspenseInfiniteQuery<
-			TPageData,
-			Error,
-			InfiniteData<TPageData>,
-			unknown[],
-			unknown
-		>(
-			wrapQueryOptions(config.getQueryOptions(handle, filters as Record<string, unknown>)),
+		} = useSuspenseInfiniteQuery(
+			config.getQueryOptions(handle, filters as Record<string, unknown>) as Parameters<
+				typeof useSuspenseInfiniteQuery<TPageData>
+			>[0],
 		);
 
 		// Extract items from paginated data - data.pages is now properly typed as TPageData[]

@@ -18,13 +18,15 @@ import type {
  * that manages all state via URL parameters (via nuqs)
  */
 export function createResourceSearchParamsHook<
-	TParsers extends ParserConfig = {},
-	TActions extends Record<string, ActionBuilder<any, any>> = {},
+	TParsers extends ParserConfig = Record<string, never>,
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	TActions extends Record<string, ActionBuilder<any, any>> = Record<string, never>,
 >(config?: ResourceSearchParamsConfig<TParsers, TActions>) {
 	type Filters = BaseResourceFilters & InferParsers<TParsers>;
 	type Actions = InferActions<TActions>;
-	
-	return function useResourceSearchParams(): ResourceSearchParamsReturn<Filters> & Actions {
+
+	return function useResourceSearchParams(): ResourceSearchParamsReturn<Filters> &
+		Actions {
 		// URL state management with nuqs (including modal states)
 		const [params, setParams] = useQueryStates({
 			search: parseAsString.withDefault(''),

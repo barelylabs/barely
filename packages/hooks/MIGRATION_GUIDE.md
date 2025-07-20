@@ -5,6 +5,7 @@ This guide helps you migrate from the old hook factory pattern (with type castin
 ## Overview
 
 The new pattern eliminates the need for:
+
 - Manual type interfaces for filters and return types
 - Type casting in actions
 - Type assertions on hooks
@@ -17,29 +18,29 @@ The new pattern eliminates the need for:
 ```typescript
 // Define custom filters interface
 interface FanFilters extends BaseResourceFilters {
-  showImportModal: boolean;
+	showImportModal: boolean;
 }
 
 // Define the return type
 interface FanSearchParamsReturn extends ResourceSearchParamsReturn<FanFilters> {
-  showImportModal: boolean;
-  setShowImportModal: (show: boolean) => Promise<URLSearchParams> | undefined;
+	showImportModal: boolean;
+	setShowImportModal: (show: boolean) => Promise<URLSearchParams> | undefined;
 }
 
 // Create hook with type casting
 export const useFanSearchParams = createResourceSearchParamsHook({
-  additionalParsers: {
-    showImportModal: parseAsBoolean.withDefault(false),
-  },
-  additionalActions: {
-    setShowImportModal:
-      setParams =>
-      (...args: unknown[]) => {
-        const [show] = args as [boolean];  // ❌ Type casting required
-        return setParams({ showImportModal: show });
-      },
-  },
-}) as () => FanSearchParamsReturn;  // ❌ Type assertion required
+	additionalParsers: {
+		showImportModal: parseAsBoolean.withDefault(false),
+	},
+	additionalActions: {
+		setShowImportModal:
+			setParams =>
+			(...args: unknown[]) => {
+				const [show] = args as [boolean]; // ❌ Type casting required
+				return setParams({ showImportModal: show });
+			},
+	},
+}) as () => FanSearchParamsReturn; // ❌ Type assertion required
 ```
 
 ### After (12 lines, fully type-safe)
@@ -49,15 +50,15 @@ import { action } from '@barely/hooks';
 
 // Create hook with automatic type inference
 export const useFanSearchParams = createResourceSearchParamsHook({
-  additionalParsers: {
-    showImportModal: parseAsBoolean.withDefault(false),
-  },
-  additionalActions: {
-    setShowImportModal: action((setParams, show: boolean) =>
-      setParams({ showImportModal: show })
-    ),
-  },
-});  // ✅ No type assertion needed!
+	additionalParsers: {
+		showImportModal: parseAsBoolean.withDefault(false),
+	},
+	additionalActions: {
+		setShowImportModal: action((setParams, show: boolean) =>
+			setParams({ showImportModal: show }),
+		),
+	},
+}); // ✅ No type assertion needed!
 ```
 
 ## Migration Steps
@@ -81,11 +82,11 @@ Delete these interfaces - they're no longer needed:
 ```typescript
 // DELETE THESE:
 interface YourFilters extends BaseResourceFilters {
-  // custom filters
+	// custom filters
 }
 
 interface YourSearchParamsReturn extends ResourceSearchParamsReturn<YourFilters> {
-  // custom actions
+	// custom actions
 }
 ```
 
@@ -124,12 +125,12 @@ Remove the type assertion from the hook export:
 ```typescript
 // Before
 export const useYourSearchParams = createResourceSearchParamsHook({
-  // config
+	// config
 }) as () => YourSearchParamsReturn;
 
 // After
 export const useYourSearchParams = createResourceSearchParamsHook({
-  // config
+	// config
 });
 ```
 
@@ -140,13 +141,13 @@ The data hook no longer needs `@ts-expect-error`:
 ```typescript
 // Before
 const query = useSuspenseInfiniteQuery(
-  // @ts-expect-error - Query options from tRPC have complex types
-  config.getQueryOptions(handle, filters)
+	// @ts-expect-error - Query options from tRPC have complex types
+	config.getQueryOptions(handle, filters),
 );
 
 // After (in use-resource-data.ts)
 const query = useSuspenseInfiniteQuery(
-  wrapQueryOptions(config.getQueryOptions(handle, filters))
+	wrapQueryOptions(config.getQueryOptions(handle, filters)),
 );
 ```
 
@@ -212,10 +213,10 @@ Make sure you're using the `action` helper for all custom actions:
 
 ```typescript
 // ❌ Wrong
-setShowModal: setParams => (show: boolean) => setParams({ showModal: show })
+setShowModal: setParams => (show: boolean) => setParams({ showModal: show });
 
 // ✅ Correct
-setShowModal: action((setParams, show: boolean) => setParams({ showModal: show }))
+setShowModal: action((setParams, show: boolean) => setParams({ showModal: show }));
 ```
 
 ### IntelliSense not showing custom properties
@@ -226,7 +227,7 @@ Ensure your parsers are properly typed:
 additionalParsers: {
   // ✅ Parser with .withDefault() returns non-nullable type
   status: parseAsStringEnum(['active', 'inactive']).withDefault('active'),
-  
+
   // ⚠️ Without .withDefault(), type is nullable
   category: parseAsString,  // type is string | null
 }
@@ -238,8 +239,8 @@ Check that actions are defined using the `action` helper:
 
 ```typescript
 additionalActions: {
-  // Must use action() helper
-  myAction: action((setParams, arg: string) => setParams({ value: arg }))
+	// Must use action() helper
+	myAction: action((setParams, arg: string) => setParams({ value: arg }));
 }
 ```
 
@@ -251,28 +252,26 @@ For resources with similar patterns, create a factory:
 
 ```typescript
 function createPaginatedResourceHooks<TItem>(config: {
-  name: string;
-  defaultPageSize?: number;
+	name: string;
+	defaultPageSize?: number;
 }) {
-  const useSearchParams = createResourceSearchParamsHook({
-    additionalParsers: {
-      page: parseAsInteger.withDefault(1),
-      pageSize: parseAsInteger.withDefault(config.defaultPageSize ?? 20),
-    },
-    additionalActions: {
-      nextPage: action(setParams =>
-        setParams(prev => ({ page: prev.page + 1 }))
-      ),
-      prevPage: action(setParams =>
-        setParams(prev => ({ page: Math.max(1, prev.page - 1) }))
-      ),
-      setPageSize: action((setParams, size: number) =>
-        setParams({ pageSize: size, page: 1 })
-      ),
-    },
-  });
+	const useSearchParams = createResourceSearchParamsHook({
+		additionalParsers: {
+			page: parseAsInteger.withDefault(1),
+			pageSize: parseAsInteger.withDefault(config.defaultPageSize ?? 20),
+		},
+		additionalActions: {
+			nextPage: action(setParams => setParams(prev => ({ page: prev.page + 1 }))),
+			prevPage: action(setParams =>
+				setParams(prev => ({ page: Math.max(1, prev.page - 1) })),
+			),
+			setPageSize: action((setParams, size: number) =>
+				setParams({ pageSize: size, page: 1 }),
+			),
+		},
+	});
 
-  return { useSearchParams };
+	return { useSearchParams };
 }
 ```
 
@@ -287,6 +286,7 @@ function createPaginatedResourceHooks<TItem>(config: {
 ## Need Help?
 
 If you encounter issues during migration:
+
 1. Check the type test examples in `__tests__/resource-hooks.type-test.ts`
 2. Refer to the migrated `fan-context.tsx` as an example
 3. Open an issue with your specific use case

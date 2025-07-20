@@ -80,6 +80,7 @@ export type {
 	ResourceDataReturn,
 	ResourceDataConfig,
 } from './resource-hooks.types';
+export { action } from './resource-hooks.types';
 
 // Utility hooks
 
