@@ -1,7 +1,6 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
-import type { BaseResourceFilters } from '@barely/hooks';
 import {
 	action,
 	createResourceDataHook,
@@ -17,15 +16,6 @@ interface CartOrderPageData {
 	nextCursor?: { orderId: number; checkoutConvertedAt: Date } | null;
 }
 
-// Define custom filters interface
-interface CartOrderFilters extends BaseResourceFilters {
-	showFulfilled: boolean;
-	showPreorders: boolean;
-	showCanceled: boolean;
-	showMarkAsFulfilledModal: boolean;
-	showCancelCartOrderModal: boolean;
-}
-
 // Create the search params hook for cart orders with custom filters and modal states
 export const useCartOrderSearchParams = createResourceSearchParamsHook({
 	additionalParsers: {
@@ -37,13 +27,13 @@ export const useCartOrderSearchParams = createResourceSearchParamsHook({
 	},
 	additionalActions: {
 		toggleFulfilled: action(setParams =>
-			setParams(prev => ({ showFulfilled: !(prev.showFulfilled as boolean) })),
+			setParams(prev => ({ showFulfilled: !prev.showFulfilled })),
 		),
 		togglePreorders: action(setParams =>
-			setParams(prev => ({ showPreorders: !(prev.showPreorders as boolean) })),
+			setParams(prev => ({ showPreorders: !prev.showPreorders })),
 		),
 		toggleCanceled: action(setParams =>
-			setParams(prev => ({ showCanceled: !(prev.showCanceled as boolean) })),
+			setParams(prev => ({ showCanceled: !prev.showCanceled })),
 		),
 		setShowMarkAsFulfilledModal: action((setParams, show: boolean) =>
 			setParams({ showMarkAsFulfilledModal: show }),
@@ -61,8 +51,7 @@ export function useCartOrder() {
 
 	const baseHook = createResourceDataHook<
 		AppRouterOutputs['cartOrder']['byWorkspace']['cartOrders'][0],
-		CartOrderPageData,
-		CartOrderFilters
+		CartOrderPageData
 	>(
 		{
 			resourceName: 'cart-orders',
@@ -73,7 +62,7 @@ export function useCartOrder() {
 				),
 			getItemsFromPages: pages => pages.flatMap(page => page.cartOrders),
 		},
-		() => searchParams, // Pass the instance directly
+		() => searchParams,
 	);
 
 	const dataHookResult = baseHook();

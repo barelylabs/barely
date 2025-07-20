@@ -1,7 +1,6 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
-import type { BaseResourceFilters } from '@barely/hooks';
 import {
 	action,
 	createResourceDataHook,
@@ -17,12 +16,6 @@ interface TrackPageData {
 	nextCursor?: { id: string; createdAt: Date } | null;
 }
 
-// Define custom filters interface
-interface TrackFilters extends BaseResourceFilters {
-	genres: string[];
-	released?: boolean;
-}
-
 // Create the search params hook for tracks with custom filters
 export const useTrackSearchParams = createResourceSearchParamsHook({
 	additionalParsers: {
@@ -33,26 +26,20 @@ export const useTrackSearchParams = createResourceSearchParamsHook({
 		setGenres: action((setParams, genres: string[]) => setParams({ genres })),
 		toggleReleased: action(setParams =>
 			setParams(prev => ({
-				released:
-					(prev.released as boolean | undefined) === undefined ?
-						true
-					:	!(prev.released as boolean),
+				released: prev.released === undefined ? true : !prev.released,
 			})),
 		),
 	},
 });
 
-// export const useTrackSearchParams =
-// 	_useTrackSearchParams as () => TrackSearchParamsReturn;
-
 // Create a custom data hook for tracks that properly uses tRPC
 export function useTrack() {
 	const trpc = useTRPC();
 	const searchParams = useTrackSearchParams();
+
 	const baseHook = createResourceDataHook<
 		AppRouterOutputs['track']['byWorkspace']['tracks'][0],
-		TrackPageData,
-		TrackFilters
+		TrackPageData
 	>(
 		{
 			resourceName: 'tracks',
@@ -63,7 +50,7 @@ export function useTrack() {
 				),
 			getItemsFromPages: pages => pages.flatMap(page => page.tracks),
 		},
-		() => searchParams, // Pass the instance directly
+		() => searchParams,
 	);
 
 	const dataHookResult = baseHook();
