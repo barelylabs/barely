@@ -43,7 +43,7 @@ export const trackRoute = {
 				with: trackWith_workspace_genres_files,
 				where: sqlAnd([
 					eq(Tracks.workspaceId, ctx.workspace.id),
-					!!search?.length && or(eq(Tracks.name, search), eq(Tracks.spotifyId, search)),
+					!!search.length && or(eq(Tracks.name, search), eq(Tracks.spotifyId, search)),
 					showArchived ? undefined : isNull(Tracks.archivedAt),
 					!!cursor &&
 						or(

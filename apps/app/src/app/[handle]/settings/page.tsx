@@ -8,10 +8,19 @@ import {
 	WorkspaceHeaderForm,
 	WorkspaceTypeForm,
 } from '~/app/[handle]/settings/workspace-profile-settings';
+import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
-export default function WorkspaceProfileSettingsPage() {
+export default async function WorkspaceProfileSettingsPage({
+	params,
+}: {
+	params: Promise<{ handle: string }>;
+}) {
+	const { handle } = await params;
+
+	prefetch(trpc.workspace.byHandleWithAll.queryOptions({ handle }));
+
 	return (
-		<>
+		<HydrateClient>
 			<DashContentHeader title='Profile' subtitle='Update your workspace profile.' />
 			<DisplayOrWorkspaceNameForm />
 			<HandleForm />
@@ -20,6 +29,6 @@ export default function WorkspaceProfileSettingsPage() {
 			<WorkspaceTypeForm />
 			<WorkspaceBioForm />
 			<WorkspaceBrandHuesForm />
-		</>
+		</HydrateClient>
 	);
 }

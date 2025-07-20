@@ -1,6 +1,6 @@
 import type { z } from 'zod/v4';
 import { redirect } from 'next/navigation';
-import { fmStatFiltersSchema } from '@barely/hooks';
+import { fmStatFiltersSchema } from '@barely/validators';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { StatBarelyReferers } from '~/app/[handle]/_components/stat-barely-referers';
@@ -20,7 +20,9 @@ export default async function FmStatsPage({
 }) {
 	const { handle } = await params;
 	const filters = await searchParams;
+
 	const parsedFilters = fmStatFiltersSchema.safeParse(filters);
+
 	if (!parsedFilters.success) {
 		console.log('parsedFilters error', parsedFilters.error);
 		redirect(`/${handle}/fm/stats`);

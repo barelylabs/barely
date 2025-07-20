@@ -21,5 +21,6 @@ export async function handleLoggedInOnAuthPage(props?: { callbackUrl?: string })
 		return;
 	}
 
-	return redirect('/');
+	// Don't redirect to root if no session - this prevents redirect loops
+	return;
 }

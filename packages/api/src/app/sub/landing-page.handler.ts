@@ -1,14 +1,15 @@
+import type { Auth } from '@barely/auth';
 import { createTRPCRouter } from '@barely/lib/trpc';
 import { landingPageRoute } from '@barely/lib/trpc/landing-page.route';
 
-import { auth } from '@barely/auth/app.server';
+import { appRouteHandler } from '../app.handler';
 
-import { routeHandler } from '../app.handler';
+export const landingPageSubRouter = createTRPCRouter(landingPageRoute);
 
-const landingPageSubRouter = createTRPCRouter(landingPageRoute);
-
-export const landingPageHandler = routeHandler({
-	path: 'landingPage',
-	router: landingPageSubRouter,
-	auth,
-});
+export const landingPageHandler = (opts: { auth: Auth }) => {
+	return appRouteHandler({
+		path: 'landingPage',
+		router: landingPageSubRouter,
+		auth: opts.auth,
+	});
+};

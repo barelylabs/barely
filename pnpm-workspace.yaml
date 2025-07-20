@@ -31,6 +31,7 @@ catalog:
   react-hook-form: ^7.58.1
   resend: 4.6.0
   sharp: ^0.34.2
+  sonner: ^2.0.6
   superjson: ^2.2.2
   tailwindcss: ^3.4.15
   trpc-navigation-plugin: ^0.3.0

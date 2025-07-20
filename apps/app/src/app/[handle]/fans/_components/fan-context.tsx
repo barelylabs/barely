@@ -32,6 +32,7 @@ export const useFanSearchParams = createResourceSearchParamsHook({
 export function useFan() {
 	const trpc = useTRPC();
 	const searchParams = useFanSearchParams();
+
 	const baseHook = createResourceDataHook<
 		AppRouterOutputs['fan']['byWorkspace']['fans'][0],
 		FanPageData

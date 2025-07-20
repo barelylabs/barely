@@ -41,10 +41,7 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 				handle,
 				id: lastSelectedItem?.id ?? '',
 			},
-			{
-				enabled: mode === 'update' && !!lastSelectedItem,
-				select: data => data.emailTemplates,
-			},
+			{ select: data => data.emailTemplates },
 		),
 	);
 

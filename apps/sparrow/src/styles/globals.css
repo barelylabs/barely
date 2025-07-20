@@ -2,74 +2,139 @@
 @tailwind components;
 @tailwind utilities;
 
+@import '../../../../tooling/tailwind/shared-styles.css';
+
+/* Marketing-specific design tokens */
 @layer base {
 	:root {
-		--background: 100% 0 0;
-		--foreground: 13.71% 0.036 258.53;
-		--card: 100% 0 0;
-		--card-foreground: 13.71% 0.036 258.53;
-		--popover: 100% 0 0;
-		--popover-foreground: 13.71% 0.036 258.53;
-		--primary: 20.79% 0.04 265.73;
-		--primary-foreground: 98.38% 0.003 247.86;
-		--secondary: 96.84% 0.007 247.9;
-		--secondary-foreground: 20.79% 0.04 265.73;
-		--subtle: 96.84% 0.007 247.9; /* slate-100 */
-		--subtle-foreground: 71.07% 0.035 256.79; /* slate-400 */
-		--muted: 92.9% 0.013 255.53; /* slate-200 */
-		--muted-foreground: 44.55% 0.037 257.29; /* slate-600 */
-		--accent: 86.88% 0.02 252.85; /* slate-300 */
-		--accent-foreground: 28% 0.037 259.97; /* slate-800 */
-		--destructive: 63.68% 0.208 25.33;
-		--destructive-foreground: 98.38% 0.003 247.86;
-		--border: 92.9% 0.013 255.53;
-		--input: 92.9% 0.013 255.53;
-		--ring: 13.71% 0.036 258.53;
-		--radius: 0.5rem;
+		/* Gradient definitions */
+		--gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+		--gradient-hover: linear-gradient(135deg, #7c3aed 0%, #db2777 100%);
+		--gradient-mesh: linear-gradient(
+			130deg,
+			hsl(280deg 100% 20%) 0%,
+			hsl(290deg 100% 15%) 11%,
+			hsl(300deg 100% 10%) 22%,
+			hsl(310deg 100% 8%) 33%,
+			hsl(320deg 100% 6%) 44%,
+			hsl(330deg 100% 4%) 56%,
+			hsl(340deg 100% 3%) 67%,
+			hsl(350deg 100% 2%) 78%,
+			hsl(360deg 100% 1%) 89%,
+			hsl(0deg 0% 0%) 100%
+		);
 
-		--success: 51.13% 0.139 143.2;
-		--success-foreground: 98.06% 0.021 150.52;
-		--warning: 76.97% 0.165 70.61;
-		--warning-foreground: 96.22% 0.057 95.61;
+		/* Science accent colors */
+		--accent-science: #10b981;
+		--accent-glow: rgba(16, 185, 129, 0.5);
+
+		/* Marketing-specific colors */
+		--dark-base: #0a0a0b;
+		--dark-surface: rgba(255, 255, 255, 0.03);
+		--text-primary: #ffffff;
+		--text-secondary: rgba(255, 255, 255, 0.7);
+
+		/* Glass morphism */
+		--glass-bg: rgba(255, 255, 255, 0.05);
+		--glass-border: rgba(255, 255, 255, 0.1);
+		--glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+	}
+}
+
+/* Marketing-specific utilities */
+@layer utilities {
+	/* Glass morphism */
+	.glass {
+		@apply border border-white/10 bg-white/5 backdrop-blur-md;
+		box-shadow: var(--glass-shadow);
 	}
 
-	.dark {
-		--background: 13.71% 0.036 258.53;
-		--foreground: 98.38% 0.003 247.86;
-		--card: 13.71% 0.036 258.53;
-		--card-foreground: 98.38% 0.003 247.86;
-		--popover: 13.71% 0.036 258.53;
-		--popover-foreground: 98.38% 0.003 247.86;
-		--primary: 98.38% 0.003 247.86;
-		--primary-foreground: 20.79% 0.04 265.73;
-		--secondary: 28% 0.037 259.97;
-		--secondary-foreground: 98.38% 0.003 247.86;
-		--subtle: 20.79% 0.04 265.73; /* slate-900 */
-		--subtle-foreground: 44.55% 0.037 257.29; /* slate-600 */
-		--muted: 28% 0.037 259.97; /* slate-800 */
-		--muted-foreground: 71.07% 0.035 256.79; /* slate-400 */
-		--accent: 37.2% 0.039 257.3; /* slate-700 */
-		--accent-foreground: 92.9% 0.013 255.53; /* slate-200 */
-		--destructive: 39.59% 0.133 25.72;
-		--destructive-foreground: 98.38% 0.003 247.86;
-		--border: 28% 0.037 259.97;
-		--input: 28% 0.037 259.97;
-		--ring: 98.38% 0.003 247.86;
-
-		--success: 98.06% 0.021 150.52;
-		--success-foreground: 51.13% 0.139 143.2;
-		--warning: 76.97% 0.165 70.61;
-		--warning-foreground: 96.22% 0.057 95.61;
+	/* Gradient text */
+	.gradient-text {
+		@apply bg-gradient-to-r from-violet-400 to-pink-500 bg-clip-text text-transparent;
 	}
 
-	* {
-		@apply border-border;
+	/* Glow effects */
+	.glow-purple {
+		box-shadow: 0 0 40px rgba(168, 85, 247, 0.3);
 	}
 
-	body {
-		@apply bg-background text-foreground;
-		font-feature-settings:
-			'rlig' 1,
-			'calt' 1;
+	.glow-green {
+		box-shadow: 0 0 40px var(--accent-glow);
+	}
+
+	/* Performant box-shadow glow effect */
+	.glow-card {
+		@apply relative;
+		transform: translateZ(0);
+		backface-visibility: hidden;
+		will-change: box-shadow, transform;
+	}
+
+	.glow-card-purple {
+		@apply glow-card;
+		box-shadow: 0 0 0 rgba(168, 85, 247, 0);
+		transition:
+			box-shadow 150ms ease-out,
+			transform 150ms ease-out;
+	}
+
+	.glow-card-purple:hover {
+		box-shadow: 0 0 35px rgba(168, 85, 247, 0.2);
+	}
+
+	.glow-card-purple-featured {
+		@apply glow-card;
+		box-shadow: 0 0 20px rgba(168, 85, 247, 0.15);
+		transition:
+			box-shadow 150ms ease-out,
+			transform 150ms ease-out;
+	}
+
+	.glow-card-purple-featured:hover {
+		box-shadow: 0 0 40px rgba(168, 85, 247, 0.3);
+	}
+
+	/* Noise texture overlay */
+	.noise {
+		position: relative;
+	}
+
+	.noise::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+		opacity: 0.03;
+		pointer-events: none;
+	}
+
+	/* Animation utilities */
+	.animate-float {
+		animation: float 6s ease-in-out infinite;
+	}
+
+	@keyframes float {
+		0%,
+		100% {
+			transform: translateY(0px);
+		}
+		50% {
+			transform: translateY(-20px);
+		}
+	}
+
+	.animate-glow-pulse {
+		animation: glow-pulse 2s ease-in-out infinite;
+	}
+
+	@keyframes glow-pulse {
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.7;
+		}
 	}
 }

@@ -4,8 +4,8 @@ import type {
 } from '@barely/validators';
 import { useState } from 'react';
 import { useWorkspace } from '@barely/hooks';
-import { useToast } from '@barely/toast';
 import { useMutation } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { z } from 'zod/v4';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
@@ -29,7 +29,6 @@ export function SendTestEmail({
 }) {
 	const trpc = useTRPC();
 	const { handle } = useWorkspace();
-	const { toast } = useToast();
 
 	const [isTestEmailModalOpen, setIsTestEmailModalOpen] = useState(false);
 	const [sendTestEmailTo, setSendTestEmailTo] = useState('');

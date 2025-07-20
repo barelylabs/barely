@@ -1,0 +1,15 @@
+# Build output
+dist/
+.turbo/
+.cache/
+
+# Dependencies
+node_modules/
+
+# TypeScript
+*.tsbuildinfo
+
+# Tinybird
+tinybird/.venv/
+tinybird/.tinyb
+.diff_tmp/

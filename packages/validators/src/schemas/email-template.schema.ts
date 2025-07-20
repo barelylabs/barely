@@ -56,8 +56,9 @@ export const emailTemplateSearchParamsSchema = emailTemplateFilterParamsSchema.e
 });
 
 /* select workspace email templates */
-export const selectWorkspaceEmailTemplatesSchema =
-	emailTemplateFilterParamsSchema.merge(infiniteQuerySchema);
+export const selectWorkspaceEmailTemplatesSchema = emailTemplateFilterParamsSchema.extend(
+	infiniteQuerySchema.shape,
+);
 
 /* send test email */
 export const sendTestEmailSchema = createEmailTemplateSchema.extend({

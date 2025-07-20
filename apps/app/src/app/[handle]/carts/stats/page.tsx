@@ -1,7 +1,7 @@
 import type { z } from 'zod/v4';
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import { cartStatFiltersSchema } from '@barely/hooks';
+import { cartStatFiltersSchema } from '@barely/validators';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { StatBarelyReferers } from '~/app/[handle]/_components/stat-barely-referers';

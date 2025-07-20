@@ -1,0 +1,47 @@
+TOKEN "web_hits_v2_endpoint_read_7619" READ
+
+NODE endpoint
+SQL >
+
+    %
+    SELECT
+        type,
+        timestamp,
+        workspaceId,
+        assetId,
+        href,
+
+        domain,
+        key,
+        platform,
+    
+        city,
+        region,
+        country,
+        device,
+        browser,
+        os,
+        referer,
+
+        fanId,
+        fbclid,
+        sessionId,
+        sessionReferer,
+        sessionRefererUrl,
+        sessionRefererId,
+        sessionEmailTemplateId,
+        sessionEmailBroadcastId,
+        sessionLandingPageId,
+        sessionFlowActionId
+
+    FROM barely_events
+    where
+        1 = 1
+        {% if defined(types) %} AND type IN {{ Array(types, 'String') }} {% end %}
+        {% if defined(workspaceId) %} AND workspaceId = {{ String(workspaceId) }} {% end %}
+        {% if defined(assetId) %} AND assetId = {{ String(assetId) }} {% end %}
+    ORDER BY timestamp DESC
+
+TYPE endpoint
+
+

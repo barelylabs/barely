@@ -106,6 +106,8 @@ export function initAuth(options: {
 										type: true,
 										timezone: true,
 										spotifyArtistId: true,
+										stripeCustomerId: true,
+										stripeCustomerId_devMode: true,
 										// stripeConnectAccountId: true,
 										// stripeConnectAccountId_devMode: true,
 										// shippingAddressPostalCode: true,

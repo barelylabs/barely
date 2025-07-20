@@ -20,10 +20,11 @@ export const selectWorkspaceFilesSchema = z.object({
 	handle: z.string(),
 	folder: z.string().optional(),
 	types: z.array(z.enum(ALLOWED_FILE_TYPES)).optional(),
-	search: z.string().optional(),
-	showArchived: z.boolean().optional(),
+	search: z.string().optional().default(''),
+	showArchived: z.boolean().optional().default(false),
+	showDeleted: z.boolean().optional().default(false),
 	cursor: z.object({ id: z.string(), createdAt: z.coerce.date() }).optional(),
-	limit: z.coerce.number().min(1).max(100).optional().default(20),
+	limit: z.coerce.number().min(1).max(100).optional(),
 	excludeFolders: z.array(z.enum(['avatars', 'product-images'])).optional(),
 });
 export const selectFileSchema = createSelectSchema(Files);

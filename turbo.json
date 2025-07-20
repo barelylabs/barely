@@ -66,6 +66,20 @@
 			"dependsOn": ["^topo", "^build"],
 			"outputs": [".cache/tsbuildinfo.json"]
 		},
+		"test": {
+			"dependsOn": ["^build"],
+			"outputs": ["coverage/**"],
+			"cache": true
+		},
+		"test:watch": {
+			"cache": false,
+			"persistent": true
+		},
+		"test:coverage": {
+			"dependsOn": ["^build"],
+			"outputs": ["coverage/**"],
+			"cache": true
+		},
 		"clean": {
 			"cache": false
 		},

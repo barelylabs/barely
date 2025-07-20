@@ -1,4 +1,5 @@
 import type { TRPCRouterRecord } from '@trpc/server';
+import { WORKSPACE_PLAN_TYPES } from '@barely/const';
 import { dbHttp } from '@barely/db/client';
 import { dbPool } from '@barely/db/pool';
 import { CartFunnels } from '@barely/db/sql/cart-funnel.sql';
@@ -325,6 +326,27 @@ export const workspaceRoute = {
 			}
 
 			return true;
+		}),
+
+	upgradePlan: workspaceProcedure
+		.input(
+			z.object({
+				planId: z.enum(WORKSPACE_PLAN_TYPES),
+				billingCycle: z.enum(['monthly', 'yearly']),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			// Dynamic import to avoid loading stripe in every request
+			const { createUpgradeUrl } = await import('../../functions/workspace-stripe.fns');
+
+			console.log('workspace => ', ctx.workspace);
+
+			return createUpgradeUrl({
+				workspace: ctx.workspace,
+				user: ctx.user,
+				planId: input.planId,
+				billingCycle: input.billingCycle,
+			});
 		}),
 
 	// these procedures import larger libraries (stripe, react-email)

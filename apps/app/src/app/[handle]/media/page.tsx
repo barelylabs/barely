@@ -20,6 +20,7 @@ export default async function MediaLibraryPage({
 }) {
 	const awaitedParams = await params;
 	const awaitedSearchParams = await searchParams;
+
 	const parsedFilters = fileSearchParamsSchema.safeParse(awaitedSearchParams);
 	if (!parsedFilters.success) {
 		console.log('failed to parse filters', parsedFilters.error);

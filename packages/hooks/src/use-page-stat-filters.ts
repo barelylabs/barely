@@ -8,10 +8,12 @@ import { useFormatTimestamp } from './use-format-timestamp';
 import { useTypedOptimisticQuery } from './use-typed-optimistic-query';
 import { useWorkspace } from './use-workspace';
 
+const landingPageStatFiltersSchema = stdWebEventPipeQueryParamsSchema.extend(
+	pageFiltersSchema.shape,
+);
+
 export function usePageStatFilters() {
-	const q = useTypedOptimisticQuery(
-		stdWebEventPipeQueryParamsSchema.merge(pageFiltersSchema),
-	);
+	const q = useTypedOptimisticQuery(landingPageStatFiltersSchema);
 
 	const { handle } = useWorkspace();
 	const { formatTimestamp } = useFormatTimestamp(q.data.dateRange);

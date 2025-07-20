@@ -103,7 +103,7 @@ export const Workspaces = pgTable(
 
 		billingCycleStart: integer('billingCycleStart'),
 		plan: varchar('plan', {
-			length: 10,
+			length: 20,
 			enum: WORKSPACE_PLAN_TYPES,
 		})
 			.default('free')

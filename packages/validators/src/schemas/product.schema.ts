@@ -7,6 +7,7 @@ import type { SortableFile } from './file.schema';
 import {
 	commonFiltersSchema,
 	infiniteQuerySchema,
+	queryBooleanSchema,
 	querySelectionSchema,
 } from '../helpers';
 
@@ -54,11 +55,14 @@ export type UpsertProduct = z.infer<typeof upsertProductSchema>;
 export type UpdateProduct = z.infer<typeof updateProductSchema>;
 export type Product = InferSelectModel<typeof Products>;
 
-export const selectWorkspaceProductsSchema =
-	commonFiltersSchema.merge(infiniteQuerySchema);
+export const selectWorkspaceProductsSchema = commonFiltersSchema.extend(
+	infiniteQuerySchema.shape,
+);
 
 // forms
-export const productFilterParamsSchema = commonFiltersSchema;
+export const productFilterParamsSchema = commonFiltersSchema.extend({
+	preorder: queryBooleanSchema.optional().default(false),
+});
 export const productSearchParamsSchema = productFilterParamsSchema.extend({
 	selectedProductIds: querySelectionSchema.optional(),
 });

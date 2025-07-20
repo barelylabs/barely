@@ -3,11 +3,11 @@ import { analyticsEndpointRoute } from '@barely/lib/trpc/analytics-endpoint.rout
 
 import { auth } from '@barely/auth/app.server';
 
-import { routeHandler } from '../app.handler';
+import { appRouteHandler } from '../app.handler';
 
 const analyticsEndpointSubRouter = createTRPCRouter(analyticsEndpointRoute);
 
-export const analyticsEndpointHandler = routeHandler({
+export const analyticsEndpointHandler = appRouteHandler({
 	path: 'analyticsEndpoint',
 	router: analyticsEndpointSubRouter,
 	auth,

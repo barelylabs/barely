@@ -3,11 +3,11 @@ import { pressKitRoute } from '@barely/lib/trpc/press-kit.route';
 
 import { auth } from '@barely/auth/app.server';
 
-import { routeHandler } from '../app.handler';
+import { appRouteHandler } from '../app.handler';
 
 const pressKitSubRouter = createTRPCRouter(pressKitRoute);
 
-export const pressKitHandler = routeHandler({
+export const pressKitHandler = appRouteHandler({
 	path: 'pressKit',
 	router: pressKitSubRouter,
 	auth,

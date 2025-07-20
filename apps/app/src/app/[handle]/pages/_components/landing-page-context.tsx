@@ -20,11 +20,12 @@ export function useLandingPage() {
 	const baseHook = createResourceDataHook<LandingPage, LandingPageData>(
 		{
 			resourceName: 'landing-pages',
-			getQueryOptions: (handle, filters) =>
-				trpc.landingPage.byWorkspace.infiniteQueryOptions(
+			getQueryOptions: (handle, filters) => {
+				return trpc.landingPage.byWorkspace.infiniteQueryOptions(
 					{ handle, ...filters },
 					{ getNextPageParam: (lastPage: LandingPageData) => lastPage.nextCursor },
-				),
+				);
+			},
 			getItemsFromPages: pages => pages.flatMap(page => page.landingPages),
 		},
 		useLandingPageSearchParams,

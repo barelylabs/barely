@@ -29,10 +29,10 @@ import {
 	getDefaultFlowAction_empty,
 	hasEdgeLoop,
 } from '@barely/lib/functions/flows/flow.utils';
-import { useToast } from '@barely/toast';
 import { newId, raise } from '@barely/utils';
 import { addEdge, applyEdgeChanges, applyNodeChanges, getIncomers } from '@xyflow/react';
 import deepEqual from 'fast-deep-equal';
+import { toast } from 'sonner';
 import { createStore, useStore } from 'zustand';
 
 const FlowStoreContext = createContext<StoreApi<FlowState> | null>(null);
@@ -59,8 +59,6 @@ export const FlowStoreProvider = ({
 	const defaultMailchimpAudienceId = use(initialDefaultMailchimpAudienceId);
 	const defaultEmailTemplateGroup = use(initialDefaultEmailTemplateGroup);
 	const flowId = initialData.flow.id;
-
-	const { toast } = useToast();
 
 	const [flowStore] = useState(() =>
 		createStore<FlowState>((set, get) => ({
@@ -422,7 +420,7 @@ export const FlowStoreProvider = ({
 								id,
 								position: { x: newNodeX, y: emptyNodeY },
 								type,
-								toast,
+								// toast,
 								mailchimpAudienceId: defaultMailchimpAudienceId ?? undefined,
 								emailTemplateGroupId: defaultEmailTemplateGroup?.id ?? undefined,
 								emailTemplate:
@@ -709,7 +707,7 @@ export const FlowStoreProvider = ({
 					id: newId('flowAction'),
 					position: { x: target.position.x, y: target.position.y + 100 },
 					type,
-					toast,
+					// toast,
 					mailchimpAudienceId: defaultMailchimpAudienceId ?? undefined,
 					emailTemplateGroupId: defaultEmailTemplateGroup?.id ?? undefined,
 					emailTemplate:

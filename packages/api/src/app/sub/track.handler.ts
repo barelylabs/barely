@@ -3,11 +3,11 @@ import { trackRoute } from '@barely/lib/trpc/track.route';
 
 import { auth } from '@barely/auth/app.server';
 
-import { routeHandler } from '../app.handler';
+import { appRouteHandler } from '../app.handler';
 
 const trackSubRouter = createTRPCRouter(trackRoute);
 
-export const trackHandler = routeHandler({
+export const trackHandler = appRouteHandler({
 	path: 'track',
 	router: trackSubRouter,
 	auth,

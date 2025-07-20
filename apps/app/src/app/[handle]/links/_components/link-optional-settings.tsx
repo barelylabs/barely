@@ -3,9 +3,9 @@
 import type { TransparentLinkData } from '@barely/utils';
 import type { Link, UpsertLink } from '@barely/validators';
 import type { UseFormReturn } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
 import { useWorkspace } from '@barely/hooks';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { useSetAtom } from 'jotai';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
@@ -14,7 +14,6 @@ import { SwitchField } from '@barely/ui/forms/switch-field';
 import { SimpleTooltipContent, TooltipContent } from '@barely/ui/tooltip';
 
 import { TransparentLinkDisplay } from '~/app/[handle]/links/_components/create-or-update-link-modal';
-import { showUpgradeModalAtom } from '~/app/[handle]/settings/billing/upgrade-modal';
 
 export function LinkOptionalSettings({
 	linkForm,
@@ -25,12 +24,12 @@ export function LinkOptionalSettings({
 	linkForm: UseFormReturn<UpsertLink>;
 	transparentLinkData: TransparentLinkData;
 }) {
+	const router = useRouter();
 	const trpc = useTRPC();
 	const { handle } = useWorkspace();
 	const { data: endpoints } = useSuspenseQuery(
 		trpc.analyticsEndpoint.byCurrentWorkspace.queryOptions({ handle }),
 	);
-	const setShowUpgradeModal = useSetAtom(showUpgradeModalAtom);
 	const { workspace } = useWorkspace();
 
 	const hasEndpoint = Object.values(endpoints).some(endpoint => endpoint !== null);
@@ -104,9 +103,9 @@ export function LinkOptionalSettings({
 				disabledTooltip={
 					workspace.plan === 'free' ?
 						<TooltipContent
-							title='Upgrade to Pro to enable remarketing.'
-							cta='Upgrade to Pro'
-							onClick={() => setShowUpgradeModal(true)}
+							title='Upgrade to enable remarketing.'
+							cta='View Plans'
+							onClick={() => router.push(`/${workspace.handle}/settings/billing/upgrade`)}
 							closeOnClick
 						/>
 					:	<TooltipContent

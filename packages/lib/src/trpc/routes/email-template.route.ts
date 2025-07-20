@@ -39,7 +39,7 @@ export const emailTemplateRoute = {
 			const emailTemplates = await dbHttp.query.EmailTemplates.findMany({
 				where: sqlAnd([
 					eq(EmailTemplates.workspaceId, ctx.workspace.id),
-					!!search?.length && sqlStringContains(EmailTemplates.name, search),
+					!!search.length && sqlStringContains(EmailTemplates.name, search),
 					!!cursor &&
 						or(
 							lt(EmailTemplates.createdAt, cursor.createdAt),

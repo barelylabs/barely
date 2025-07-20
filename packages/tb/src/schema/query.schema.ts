@@ -4,10 +4,6 @@ import {
 	queryBooleanSchema,
 	queryStringEnumArrayToCommaString,
 } from '@barely/validators/helpers';
-// import {
-// 	queryBooleanSchema,
-// 	queryStringEnumArrayToCommaString,
-// } from '@barely/validators';
 import { z } from 'zod/v4';
 
 export const statDateRange = z.enum(['1d', '1w', '28d', '1y']);
@@ -59,9 +55,9 @@ export const statReferrersPipeParamsSchema = z.object({
 
 // pipe schema :: for use in calls to tinybird pipes
 export const stdWebEventPipeParamsSchema = stdStatPipeParamsSchema
-	.merge(statGeoPipeParamsSchema)
-	.merge(statDevicePipeParamsSchema)
-	.merge(statReferrersPipeParamsSchema);
+	.extend(statGeoPipeParamsSchema.shape)
+	.extend(statDevicePipeParamsSchema.shape)
+	.extend(statReferrersPipeParamsSchema.shape);
 
 // query schema :: for use on client
 export const stdWebEventPipeQueryParamsSchema = stdWebEventPipeParamsSchema
@@ -69,30 +65,28 @@ export const stdWebEventPipeQueryParamsSchema = stdWebEventPipeParamsSchema
 		start: true,
 		end: true,
 	})
-	.merge(
-		z.object({
-			dateRange: statDateRange.optional(),
-			start: z.string().optional(),
-			end: z.string().optional(),
-			showVisits: queryBooleanSchema.optional().default(true),
-			showClicks: queryBooleanSchema.optional().default(true),
-			topEventType: z
-				.enum([
-					'cart/viewCheckout',
-					'cart/checkoutPurchase',
-					'cart/upsellPurchase',
+	.extend({
+		dateRange: statDateRange.optional(),
+		start: z.string().optional(),
+		end: z.string().optional(),
+		showVisits: queryBooleanSchema.optional().default(true),
+		showClicks: queryBooleanSchema.optional().default(true),
+		topEventType: z
+			.enum([
+				'cart/viewCheckout',
+				'cart/checkoutPurchase',
+				'cart/upsellPurchase',
 
-					'fm/view',
-					'fm/linkClick',
+				'fm/view',
+				'fm/linkClick',
 
-					'link/click',
+				'link/click',
 
-					'page/view',
-					'page/linkClick',
-				])
-				.optional(),
-		}),
-	);
+				'page/view',
+				'page/linkClick',
+			])
+			.optional(),
+	});
 export type StdWebEventPipeQueryParams = z.infer<typeof stdWebEventPipeQueryParamsSchema>;
 export type TopEventType = z.infer<
 	typeof stdWebEventPipeQueryParamsSchema
@@ -192,10 +186,6 @@ export const topBrowsersPipeDataSchema = sharedSourcePipeDataSchema.extend({
 });
 
 // device
-
-// export const topDevicesPipeDataSchema = sharedSourcePipeDataSchema.merge(
-// 	z.object({ device: z.string() }),
-// );
 
 export const topDevicesPipeDataSchema = sharedSourcePipeDataSchema.extend({
 	device: z.string(),

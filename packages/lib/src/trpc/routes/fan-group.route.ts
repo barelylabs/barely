@@ -24,7 +24,7 @@ export const fanGroupRoute = {
 			const fanGroups = await dbHttp.query.FanGroups.findMany({
 				where: sqlAnd([
 					eq(FanGroups.workspaceId, ctx.workspace.id),
-					!!search?.length && sqlStringContains(FanGroups.name, search),
+					!!search.length && sqlStringContains(FanGroups.name, search),
 					!!cursor &&
 						or(
 							lt(FanGroups.createdAt, cursor.createdAt),

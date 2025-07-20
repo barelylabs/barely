@@ -71,6 +71,7 @@ export const useCartOrderSearchParams =
 export function useCartOrder() {
 	const trpc = useTRPC();
 	const searchParams = useCartOrderSearchParams();
+
 	const baseHook = createResourceDataHook<
 		AppRouterOutputs['cartOrder']['byWorkspace']['cartOrders'][0],
 		CartOrderPageData

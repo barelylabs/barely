@@ -27,6 +27,19 @@ export function createResourceDataHook<
 		const { handle } = useWorkspace();
 		const { selection, setSelection, filters } = useSearchParams();
 
+		// Filter out modal states and setter functions before passing to query
+		// Modal states (showCreateModal, showMarkAsFulfilledModal, etc.) should not be sent to the API
+		const queryFilters = Object.entries(filters as Record<string, unknown>).reduce(
+			(acc, [key, value]) => {
+				// Exclude any params that match modal state pattern or setter functions
+				if (!/^show.*Modal$/.test(key) && typeof value !== 'function') {
+					acc[key] = value;
+				}
+				return acc;
+			},
+			{} as Record<string, unknown>,
+		);
+
 		// Fetch data with infinite query
 		const {
 			data,
@@ -37,7 +50,7 @@ export function createResourceDataHook<
 			isRefetching,
 			isPending,
 		} = useSuspenseInfiniteQuery(
-			config.getQueryOptions(handle, filters as Record<string, unknown>) as Parameters<
+			config.getQueryOptions(handle, queryFilters) as Parameters<
 				typeof useSuspenseInfiniteQuery<TPageData>
 			>[0],
 		);

@@ -35,6 +35,14 @@
 		"./templates/campaign": {
 			"types": "./dist/templates/campaign/index.d.ts",
 			"default": "./src/templates/campaign/index.ts"
+		},
+		"./templates/sparrow/contact-inquiry": {
+			"types": "./dist/templates/sparrow/contact-inquiry.d.ts",
+			"default": "./src/templates/sparrow/contact-inquiry.tsx"
+		},
+		"./templates/www/contact-inquiry": {
+			"types": "./dist/templates/www/contact-inquiry.d.ts",
+			"default": "./src/templates/www/contact-inquiry.tsx"
 		}
 	},
 	"scripts": {
