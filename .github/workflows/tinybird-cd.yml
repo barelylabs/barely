@@ -1,13 +1,9 @@
-
 name: Tinybird - CD Workflow
 
 on:
-  push:
-    branches:
-      - main
-      - master
-
-concurrency: ${{ github.workflow }}-${{ github.event.ref }}
+  pull_request:
+  merge_group:
+    types: [checks_requested]
 
 env:
   TINYBIRD_HOST: ${{ secrets.TINYBIRD_HOST }}
@@ -16,9 +12,12 @@ env:
 jobs:
   cd:
     runs-on: ubuntu-latest
+    if: always() && github.event_name == 'merge_group'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
       - name: Install Tinybird CLI
         run: curl https://tinybird.co | sh
+
       - name: Deploy project
-        run: tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deploy
+        run: cd packages/tb/tinybird && tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deploy

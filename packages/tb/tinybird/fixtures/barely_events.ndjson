@@ -1,3 +1,0 @@
-{"timestamp":"2024-01-10T10:00:00Z","workspaceId":"test-workspace","assetId":"test-asset","eventType":"pageView","visitorId":"visitor-1","sessionId":"session-1","properties":{"url":"https://example.com","title":"Test Page"}}
-{"timestamp":"2024-01-10T10:01:00Z","workspaceId":"test-workspace","assetId":"test-asset","eventType":"click","visitorId":"visitor-1","sessionId":"session-1","properties":{"selector":"button.cta","text":"Get Started"}}
-{"timestamp":"2024-01-10T10:02:00Z","workspaceId":"test-workspace","assetId":"test-asset-2","eventType":"pageView","visitorId":"visitor-2","sessionId":"session-2","properties":{"url":"https://example.com/about","title":"About Us"}}
