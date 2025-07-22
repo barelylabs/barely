@@ -3,9 +3,9 @@ import { z } from 'zod/v4';
 import { queryBooleanSchema } from './zod-helpers';
 
 export const commonFiltersSchema = z.object({
-	search: z.string().optional(),
-	showArchived: queryBooleanSchema.optional(),
-	showDeleted: queryBooleanSchema.optional(),
+	search: z.string().optional().default(''),
+	showArchived: queryBooleanSchema.optional().default(false),
+	showDeleted: queryBooleanSchema.optional().default(false),
 });
 
 export const infiniteQuerySchema = z.object({

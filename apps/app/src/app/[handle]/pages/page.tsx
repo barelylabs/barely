@@ -3,6 +3,8 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { landingPageSearchParamsSchema } from '@barely/validators';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
+
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllLandingPages } from '~/app/[handle]/pages/_components/all-landing-pages';
 import { ArchiveOrDeleteLandingPageModal } from '~/app/[handle]/pages/_components/archive-or-delete-landing-page-modal';
@@ -28,10 +30,15 @@ export default async function LandingPagesPage({
 	}
 
 	prefetch(
-		trpc.landingPage.byWorkspace.infiniteQueryOptions({
-			handle,
-			...parsedFilters.data,
-		}),
+		trpc.landingPage.byWorkspace.infiniteQueryOptions(
+			{
+				handle,
+				...parsedFilters.data,
+			},
+			{
+				getNextPageParam: lastPage => lastPage.nextCursor,
+			},
+		),
 	);
 
 	return (
@@ -43,7 +50,7 @@ export default async function LandingPagesPage({
 			/>
 
 			<LandingPageFilters />
-			<Suspense fallback={<div>Loading pages...</div>}>
+			<Suspense fallback={<GridListSkeleton />}>
 				<AllLandingPages />
 
 				<CreateOrUpdateLandingPageModal mode='create' />

@@ -3,11 +3,11 @@ import { emailBroadcastRoute } from '@barely/lib/trpc/email-broadcast.route';
 
 import { auth } from '@barely/auth/app.server';
 
-import { routeHandler } from '../app.handler';
+import { appRouteHandler } from '../app.handler';
 
 const emailBroadcastSubRouter = createTRPCRouter(emailBroadcastRoute);
 
-export const emailBroadcastHandler = routeHandler({
+export const emailBroadcastHandler = appRouteHandler({
 	path: 'emailBroadcast',
 	router: emailBroadcastSubRouter,
 	auth,

@@ -3,11 +3,11 @@ import { emailDomainRoute } from '@barely/lib/trpc/email-domain.route';
 
 import { auth } from '@barely/auth/app.server';
 
-import { routeHandler } from '../app.handler';
+import { appRouteHandler } from '../app.handler';
 
 const emailDomainSubRouter = createTRPCRouter(emailDomainRoute);
 
-export const emailDomainHandler = routeHandler({
+export const emailDomainHandler = appRouteHandler({
 	path: 'emailDomain',
 	router: emailDomainSubRouter,
 	auth,

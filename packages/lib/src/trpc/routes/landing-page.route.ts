@@ -29,7 +29,7 @@ export const landingPageRoute = {
 			const landingPages = await dbHttp.query.LandingPages.findMany({
 				where: sqlAnd([
 					eq(LandingPages.workspaceId, ctx.workspace.id),
-					!!search?.length && sqlStringContains(LandingPages.name, search),
+					!!search.length && sqlStringContains(LandingPages.name, search),
 					showArchived ? undefined : isNull(LandingPages.archivedAt),
 					showDeleted ? undefined : isNull(LandingPages.deletedAt),
 					!!cursor &&

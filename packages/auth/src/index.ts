@@ -49,6 +49,12 @@ export function initAuth(options: {
 			},
 			// debugLogs: true,™
 		}),
+		session: {
+			cookieCache: {
+				enabled: true,
+				maxAge: 60 * 5, // 5 minutes
+			},
+		},
 		user: {
 			fields: {
 				name: 'fullName', // mapping better-auth user.name to db.Users.fullName
@@ -106,6 +112,8 @@ export function initAuth(options: {
 										type: true,
 										timezone: true,
 										spotifyArtistId: true,
+										stripeCustomerId: true,
+										stripeCustomerId_devMode: true,
 										// stripeConnectAccountId: true,
 										// stripeConnectAccountId_devMode: true,
 										// shippingAddressPostalCode: true,

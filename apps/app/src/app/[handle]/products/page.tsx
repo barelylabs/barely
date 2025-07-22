@@ -10,7 +10,6 @@ import { CreateOrUpdateProductModal } from '~/app/[handle]/products/_components/
 import { CreateProductButton } from '~/app/[handle]/products/_components/create-product-button';
 import { ProductFilters } from '~/app/[handle]/products/_components/product-filters';
 import { ProductHotkeys } from '~/app/[handle]/products/_components/product-hotkeys';
-import { getSession } from '~/auth/server';
 import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
 export default async function ProductsPage({
@@ -27,9 +26,6 @@ export default async function ProductsPage({
 		console.log(parsedFilters.error.flatten().fieldErrors);
 		redirect(`/${awaitedParams.handle}/products`);
 	}
-
-	const session = await getSession();
-	console.log('session in ProductsPage => ', session);
 
 	// Prefetch data (not async - don't await)
 	prefetch(

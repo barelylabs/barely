@@ -3,11 +3,11 @@ import { emailTemplateGroupRoute } from '@barely/lib/trpc/email-template-group.r
 
 import { auth } from '@barely/auth/app.server';
 
-import { routeHandler } from '../app.handler';
+import { appRouteHandler } from '../app.handler';
 
 const emailTemplateGroupSubRouter = createTRPCRouter(emailTemplateGroupRoute);
 
-export const emailTemplateGroupHandler = routeHandler({
+export const emailTemplateGroupHandler = appRouteHandler({
 	path: 'emailTemplateGroup',
 	router: emailTemplateGroupSubRouter,
 	auth,

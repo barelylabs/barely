@@ -82,8 +82,9 @@ export const fanGroupSearchParamsSchema = fanGroupFilterParamsSchema.extend({
 	selectedFanGroupIds: querySelectionSchema.optional(),
 });
 
-export const selectWorkspaceFanGroupsSchema =
-	fanGroupFilterParamsSchema.merge(infiniteQuerySchema);
+export const selectWorkspaceFanGroupsSchema = fanGroupFilterParamsSchema.extend(
+	infiniteQuerySchema.shape,
+);
 
 export const defaultFanGroup: CreateFanGroup = {
 	name: '',

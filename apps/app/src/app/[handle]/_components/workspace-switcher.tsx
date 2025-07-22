@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { usePusherSocketId, useUser, useWorkspace, useWorkspaces } from '@barely/hooks';
 import {
-	capitalize,
 	cn,
+	getPlanNameFromId,
 	toTitleCase,
 	truncate,
 	underscoresToSpaces,
@@ -104,7 +104,7 @@ export function WorkspaceSwitcher() {
 							{truncate(normalizedObject.name, 20)}
 						</Text>
 						<Text variant='2xs/normal' className='leading-tight text-muted-foreground'>
-							{capitalize(currentWorkspace.plan)}
+							{getPlanNameFromId(currentWorkspace.plan)}
 						</Text>
 					</div>
 					<Icon.chevronsUpDown className='ml-auto h-4 w-4 shrink-0 opacity-50' />

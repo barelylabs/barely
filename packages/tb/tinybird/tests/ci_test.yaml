@@ -1,0 +1,11 @@
+- name: ci_test_basic
+  description: Basic CI test to verify setup
+  parameters: ''
+  expected_result: |
+    {"message":"CI test successful"}
+
+- name: ci_test_with_params
+  description: CI test with parameters
+  parameters: test_param=hello
+  expected_result: |
+    {"message":"CI test successful","param":"hello"}

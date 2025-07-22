@@ -3,11 +3,11 @@ import { fanGroupRoute } from '@barely/lib/trpc/fan-group.route';
 
 import { auth } from '@barely/auth/app.server';
 
-import { routeHandler } from '../app.handler';
+import { appRouteHandler } from '../app.handler';
 
 const fanGroupSubRouter = createTRPCRouter(fanGroupRoute);
 
-export const fanGroupHandler = routeHandler({
+export const fanGroupHandler = appRouteHandler({
 	path: 'fanGroup',
 	router: fanGroupSubRouter,
 	auth,

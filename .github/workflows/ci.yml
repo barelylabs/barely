@@ -57,8 +57,23 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup
+        uses: ./tooling/github/setup
+
+      - name: Copy env
+        shell: bash
+        run: cp .env.example .env
+
+      - name: Run tests
+        run: pnpm test:ci
+
   ci--can-merge:
-    needs: [lint, format, typecheck]
+    needs: [lint, format, typecheck, test]
     permissions:
       actions: read
     runs-on: ubuntu-latest

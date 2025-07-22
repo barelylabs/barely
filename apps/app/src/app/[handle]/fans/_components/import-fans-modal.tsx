@@ -5,12 +5,12 @@ import type { SelectFieldOption } from '@barely/ui/forms/select-field';
 import type { z } from 'zod/v4';
 import { useMemo, useState } from 'react';
 import { useUpload, useZodForm } from '@barely/hooks';
-import { useToast } from '@barely/toast';
 import { raise } from '@barely/utils';
 import { importFansFromCsvSchema } from '@barely/validators';
 import { useMutation } from '@tanstack/react-query';
 import { atom } from 'jotai';
 import Papa from 'papaparse';
+import { toast } from 'sonner';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
@@ -28,11 +28,9 @@ import { useFanSearchParams } from '~/app/[handle]/fans/_components/fan-context'
 const csvUploadQueueAtom = atom<UploadQueueItem[]>([]);
 
 export function ImportFansFromCsvModal() {
-	const { toast } = useToast();
-
 	const trpc = useTRPC();
-	const { showImportModal: showModal, setShowImportModal: setShowModal } =
-		useFanSearchParams();
+	const { filters, setShowImportModal } = useFanSearchParams();
+	const showImportModal = filters.showImportModal;
 
 	const { mutate: importFansFromCsv } = useMutation({
 		...trpc.fan.importFromCsv.mutationOptions(),
@@ -45,7 +43,6 @@ export function ImportFansFromCsvModal() {
 	const form = useZodForm({
 		schema: importFansFromCsvSchema,
 		defaultValues: {
-			// csvFileId: '',
 			// fixme: make these form fields
 			optIntoEmailMarketing: true,
 			optIntoSmsMarketing: false,
@@ -164,15 +161,15 @@ export function ImportFansFromCsvModal() {
 
 	const handleCloseModal = async () => {
 		setUploadQueue([]);
-		await setShowModal(false);
+		await setShowImportModal(false);
 	};
 
 	const preventDefaultClose = isPendingPresigns || uploadQueue.length > 0;
 
 	return (
 		<Modal
-			showModal={showModal}
-			setShowModal={setShowModal}
+			showModal={showImportModal}
+			setShowModal={setShowImportModal}
 			preventDefaultClose={preventDefaultClose}
 			onClose={handleCloseModal}
 			className='max-w-lg'

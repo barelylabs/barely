@@ -1,9 +1,9 @@
 import { auth } from '@barely/auth/app.server';
 
-import { routeHandler } from '../app/app.handler';
+import { appRouteHandler } from '../app/app.handler';
 import { emailManageRouter } from './email-manage.router';
 
-export const emailManageHandler = routeHandler({
+export const emailManageHandler = appRouteHandler({
 	path: 'emailManage',
 	router: emailManageRouter,
 	auth,

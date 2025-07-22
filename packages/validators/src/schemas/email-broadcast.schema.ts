@@ -50,4 +50,4 @@ export const emailBroadcastSearchParamsSchema = emailBroadcastFilterParamsSchema
 });
 
 export const selectWorkspaceEmailBroadcastsSchema =
-	emailBroadcastSearchParamsSchema.merge(infiniteQuerySchema);
+	emailBroadcastSearchParamsSchema.extend(infiniteQuerySchema.shape);

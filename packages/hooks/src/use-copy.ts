@@ -1,11 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useToast } from '@barely/toast';
+import { toast } from 'sonner';
 
 export function useCopy() {
 	const [isCopied, setIsCopied] = useState(false);
-	const { toast } = useToast();
 
 	const copyToClipboard = (
 		text: string,

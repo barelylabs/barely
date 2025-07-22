@@ -9,10 +9,10 @@ import {
 	getFlowActionFromActionNode,
 	getFlowTriggerFromTriggerNode,
 } from '@barely/lib/functions/flows/flow.utils';
-import { useToast } from '@barely/toast';
 import { formatDate, raise } from '@barely/utils';
 import { updateFlowAndNodesSchema } from '@barely/validators';
 import { useMutation, useQuery, useSuspenseQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { useShallow } from 'zustand/react/shallow';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
@@ -37,7 +37,6 @@ const selector = (state: FlowState) => ({
 export function FlowUpdateForm(props: {
 	initialFlow: Promise<AppRouterOutputs['flow']['byId']>;
 }) {
-	const { toast } = useToast();
 	const trpc = useTRPC();
 	const { handle } = useWorkspace();
 

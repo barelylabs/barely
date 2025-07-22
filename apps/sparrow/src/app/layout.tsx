@@ -4,12 +4,14 @@ import type { Metadata } from 'next';
 import { Inter as FontSans } from 'next/font/google';
 import localFont from 'next/font/local';
 import { headers } from 'next/headers';
-import { Toaster } from '@barely/toast';
 import { cn } from '@barely/utils';
+import { Toaster } from 'sonner';
 
 import { TailwindIndicator } from '@barely/ui/components/tailwind-indicator';
 import { Container } from '@barely/ui/container';
 
+import { Navigation } from '../components/marketing/navigation';
+import { SuccessMetricsBar } from '../components/marketing/success-metrics-bar';
 import Providers from './providers';
 
 const fontHeading = localFont({
@@ -23,7 +25,9 @@ const fontSans = FontSans({
 });
 
 export const metadata: Metadata = {
-	title: 'EPK - Proper Youth',
+	title: 'Barely Sparrow - Music Marketing That Makes Sense',
+	description:
+		'Transparent, data-driven music marketing from a PhD scientist turned engineer. No BS, just results.',
 	icons: {
 		icon: [
 			{ url: '/_static/favicons/favicon-32x32.png', sizes: '32x32' },
@@ -48,12 +52,14 @@ export default async function RootLayout({ children }: RootLayoutProps) {
 		<html lang='en' suppressHydrationWarning>
 			<body
 				className={cn(
-					'min-h-screen bg-background font-sans text-foreground antialiased',
+					'min-h-screen bg-[#0A0A0B] font-sans text-white antialiased',
 					fontHeading.variable,
 					fontSans.variable,
 				)}
 			>
 				<Providers headers={await headers()}>
+					<SuccessMetricsBar />
+					<Navigation />
 					<Container className='max-w-full px-0 py-0'>{children}</Container>
 				</Providers>
 				<Toaster />

@@ -1,5 +1,8 @@
 import type { NextRequest } from 'next/server';
-import { handleStripeCheckoutSessionComplete } from '@barely/lib/functions/workspace-stripe.fns';
+import {
+	handleStripePlanCheckoutSessionComplete,
+	handleStripeSubscriptionUpdated,
+} from '@barely/lib/functions/workspace-stripe.fns';
 import Stripe from 'stripe';
 
 import { appEnv } from '~/env';
@@ -41,7 +44,16 @@ export async function POST(req: NextRequest) {
 				expand: ['line_items.data.price.product'],
 			});
 
-			await handleStripeCheckoutSessionComplete(sessionWithLineItems);
+			await handleStripePlanCheckoutSessionComplete(sessionWithLineItems);
+
+			break;
+		}
+
+		case 'customer.subscription.updated': {
+			const subscription = event.data.object;
+			console.log('subscription => ', subscription);
+
+			await handleStripeSubscriptionUpdated(subscription);
 
 			break;
 		}

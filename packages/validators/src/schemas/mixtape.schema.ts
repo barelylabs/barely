@@ -62,8 +62,9 @@ export const formatEditMixtapeToUpsertMixtapeForm = (
 
 // query params
 export const mixtapeFilterParamsSchema = z.object({
-	search: z.string().optional(),
-	showArchived: queryBooleanSchema.optional(),
+	search: z.string().optional().default(''),
+	showArchived: queryBooleanSchema.optional().default(false),
+	showDeleted: queryBooleanSchema.optional().default(false),
 	// selectedMixtapeIds: queryStringArraySchema.optional(),
 });
 

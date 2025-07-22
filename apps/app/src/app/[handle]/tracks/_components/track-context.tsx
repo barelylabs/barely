@@ -1,8 +1,11 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
-import type { BaseResourceFilters, ResourceSearchParamsReturn } from '@barely/hooks';
-import { createResourceDataHook, createResourceSearchParamsHook } from '@barely/hooks';
+import {
+	action,
+	createResourceDataHook,
+	createResourceSearchParamsHook,
+} from '@barely/hooks';
 import { parseAsArrayOf, parseAsBoolean, parseAsString } from 'nuqs';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
@@ -13,48 +16,30 @@ interface TrackPageData {
 	nextCursor?: { id: string; createdAt: Date } | null;
 }
 
-// Define custom filters interface
-interface TrackFilters extends BaseResourceFilters {
-	genres: string[];
-	released?: boolean;
-}
-
-// Define the return type for track search params
-interface TrackSearchParamsReturn extends ResourceSearchParamsReturn<TrackFilters> {
-	setGenres: (genres: string[]) => Promise<URLSearchParams> | undefined;
-	toggleReleased: () => Promise<URLSearchParams>;
-}
-
 // Create the search params hook for tracks with custom filters
-const _useTrackSearchParams = createResourceSearchParamsHook({
+export const useTrackSearchParams = createResourceSearchParamsHook({
 	additionalParsers: {
 		genres: parseAsArrayOf(parseAsString).withDefault([]),
 		released: parseAsBoolean.withDefault(false),
 	},
 	additionalActions: {
-		setGenres: setParams =>
-			((...args: unknown[]) => {
-				const [genres] = args as [string[]];
-				return setParams({ genres });
-			}) as (...args: unknown[]) => Promise<URLSearchParams> | undefined,
-		toggleReleased: setParams => () =>
+		setGenres: action((setParams, genres: string[]) => setParams({ genres })),
+		toggleReleased: action(setParams =>
 			setParams(prev => ({
 				released: prev.released === undefined ? true : !prev.released,
 			})),
+		),
 	},
 });
-
-export const useTrackSearchParams =
-	_useTrackSearchParams as () => TrackSearchParamsReturn;
 
 // Create a custom data hook for tracks that properly uses tRPC
 export function useTrack() {
 	const trpc = useTRPC();
 	const searchParams = useTrackSearchParams();
+
 	const baseHook = createResourceDataHook<
 		AppRouterOutputs['track']['byWorkspace']['tracks'][0],
-		TrackPageData,
-		TrackFilters
+		TrackPageData
 	>(
 		{
 			resourceName: 'tracks',
@@ -65,7 +50,7 @@ export function useTrack() {
 				),
 			getItemsFromPages: pages => pages.flatMap(page => page.tracks),
 		},
-		() => searchParams, // Pass the instance directly
+		() => searchParams,
 	);
 
 	const dataHookResult = baseHook();

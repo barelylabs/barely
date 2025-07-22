@@ -46,4 +46,4 @@ export * from './time.constants';
 export * from './trigger.constants';
 
 // Workspace
-export * from './workspace.settings';
+export * from './workspace-plans.constants';

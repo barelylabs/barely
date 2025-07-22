@@ -40,6 +40,7 @@ export { useWorkspaceAssets } from './use-workspace-assets';
 export { useWorkspaceHotkeys, gKeyPressedAtom } from './use-workspace-hotkeys';
 export { useWorkspaceUpdateForm } from './use-workspace-update-form';
 export { useUpdateWorkspace } from './use-update-workspace';
+export { useUsage } from './use-usage';
 
 // Real-time hooks
 export { usePusher, usePusherSocketId } from './use-pusher';
@@ -80,6 +81,7 @@ export type {
 	ResourceDataReturn,
 	ResourceDataConfig,
 } from './resource-hooks.types';
+export { action } from './resource-hooks.types';
 
 // Utility hooks
 

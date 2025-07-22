@@ -3,11 +3,11 @@ import { playlistPlacementRoute } from '@barely/lib/trpc/playlist-placement.rout
 
 import { auth } from '@barely/auth/app.server';
 
-import { routeHandler } from '../app.handler';
+import { appRouteHandler } from '../app.handler';
 
 const playlistPlacementSubRouter = createTRPCRouter(playlistPlacementRoute);
 
-export const playlistPlacementHandler = routeHandler({
+export const playlistPlacementHandler = appRouteHandler({
 	path: 'playlistPlacement',
 	router: playlistPlacementSubRouter,
 	auth,

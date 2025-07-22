@@ -2,7 +2,7 @@
  * 🎬 INITIALIZATION
  */
 
-import type { Auth } from '@barely/auth';
+import type { Auth, Session } from '@barely/auth';
 import type { NeonPool } from '@barely/db/pool';
 import { makePool } from '@barely/db/pool';
 import { initTRPC, TRPCError } from '@trpc/server';
@@ -27,15 +27,15 @@ export const createTRPCContext = async (opts: {
 	pool: NeonPool | null;
 	visitor?: VisitorInfo;
 	rest?: boolean;
+	session?: Session;
 }) => {
-	const session = await opts.auth?.api.getSession({ headers: opts.headers });
-	// console.log('session in createTRPCContext => ', session);
-
 	const source =
 		opts.rest ? 'rest'
 		: trpcSources.includes(opts.headers.get('x-trpc-source') as TRPCSource) ?
 			(opts.headers.get('x-trpc-source') as TRPCSource)
 		:	'unknown';
+
+	const session = await opts.auth?.api.getSession({ headers: opts.headers });
 
 	const pageSessionId =
 		opts.rest ? undefined : (opts.headers.get('x-page-session-id') ?? null);
@@ -43,7 +43,20 @@ export const createTRPCContext = async (opts: {
 	const pusherSocketId =
 		opts.rest ? undefined : (opts.headers.get('x-pusher-socket-id') ?? null);
 
+	const getRefreshedSession = async () => {
+		// "If you want to disable returning from the cookie cache when fetching the session, you can pass disableCookieCache:true this will force the server to fetch the session from the database and also refresh the cookie cache."
+		const session = await opts.auth?.api.getSession({
+			headers: opts.headers,
+			query: {
+				disableCookieCache: true,
+			},
+		});
+		return session;
+	};
+
 	const context = {
+		auth: opts.auth,
+		getRefreshedSession,
 		session,
 		user: session?.user,
 		workspaces: session?.workspaces,

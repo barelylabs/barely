@@ -1,7 +1,7 @@
 import { eq } from '@barely/db';
 import { dbHttp } from '@barely/db/client';
 import { Users, VerificationTokens } from '@barely/db/sql';
-import { sendEmail } from '@barely/email';
+// import { sendEmail } from '@barely/email';
 import { SignInEmailTemplate } from '@barely/email/templates/auth';
 import { createRandomStringGenerator } from '@better-auth/utils/random';
 
@@ -119,8 +119,9 @@ export async function sendMagicLink(props: {
 		loginLink: magicLink,
 	});
 
+	const { sendEmail } = await import('@barely/email');
 	const emailRes = await sendEmail({
-		from: 'support@barely.io',
+		from: 'support@ship.barely.io',
 		fromFriendlyName: 'Barely',
 		to: props.email,
 		subject: 'Barely Login Link',

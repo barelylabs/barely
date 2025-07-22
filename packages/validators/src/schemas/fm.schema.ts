@@ -6,8 +6,11 @@ import { z } from 'zod/v4';
 import {
 	commonFiltersSchema,
 	infiniteQuerySchema,
+	platformFiltersSchema,
+	// platformFiltersSchema,
 	querySelectionSchema,
 } from '../helpers';
+import { stdWebEventPipeQueryParamsSchema } from './tb.schema';
 
 // FmLinks
 export const insertFmLinkSchema = createInsertSchema(FmLinks);
@@ -30,7 +33,6 @@ export type CreateFmLink = z.infer<typeof createFmLinkSchema>;
 export type UpsertFmLink = z.infer<typeof upsertFmLinkSchema>;
 export type FmLink = InferSelectModel<typeof FmLinks>;
 
-// export const insertFmPageSchema = createxInsertSchema
 export const insertFmPageSchema = createInsertSchema(FmPages, {
 	key: key => key.min(4, 'Key is required'),
 	title: title => title.min(1, 'Title is required'),
@@ -83,8 +85,9 @@ export const fmSearchParamsSchema = fmFilterParamsSchema.extend({
 	selectedFmPageIds: querySelectionSchema.optional(),
 });
 
-export const selectWorkspaceFmPagesSchema =
-	fmFilterParamsSchema.merge(infiniteQuerySchema);
+export const selectWorkspaceFmPagesSchema = fmFilterParamsSchema.extend(
+	infiniteQuerySchema.shape,
+);
 
 export const defaultFmPage: CreateFmPage = {
 	key: '',
@@ -95,3 +98,10 @@ export const defaultFmPage: CreateFmPage = {
 	remarketing: false,
 	links: [],
 };
+
+// stat filters
+export const fmStatFiltersSchema = stdWebEventPipeQueryParamsSchema.extend(
+	platformFiltersSchema.shape,
+);
+
+export type FmStatFilters = z.infer<typeof fmStatFiltersSchema>;
