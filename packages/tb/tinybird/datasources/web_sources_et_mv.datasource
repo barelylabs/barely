@@ -1,4 +1,4 @@
-# Data Source created from Pipe 'web_sources_et'
+# Data Source created from Pipe 't_3d5d8cc194c244a3912f5a22ca312c71'
 
 SCHEMA >
     `date` Date,
