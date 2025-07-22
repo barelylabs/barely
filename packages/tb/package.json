@@ -21,7 +21,7 @@
 		"tb:login": "cd tinybird && tb login",
 		"tb:build": "cd tinybird && tb build",
 		"tb:test": "cd tinybird && tb test run",
-		"tb:check": "cd tinybird && uvx --from tinybird@latest tb --cloud deploy --check"
+		"tb:check": "cd tinybird && tb deploy --check"
 	},
 	"dependencies": {
 		"@barely/const": "workspace:*",
