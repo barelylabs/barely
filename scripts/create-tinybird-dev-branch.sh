@@ -114,3 +114,23 @@ fi
 log "✅ Tinybird dev branch ready: $tinybirdBranch"
 log "   Current branch: $CURRENT_BRANCH"
 log "   To return to main: tb branch use main"
+
+# Copy admin token to .env file
+log "Copying Tinybird admin token..."
+if TINYBIRD_TOKEN=$(.venv/bin/tb token copy "admin token" 2>/dev/null); then
+    # Navigate back to project root
+    cd ../../..
+    
+    # Check if TINYBIRD_API_KEY exists in the file
+    if grep -q "TINYBIRD_API_KEY" .env; then
+        # If it exists, replace it    
+        sed -i "" "s#^TINYBIRD_API_KEY=.*#TINYBIRD_API_KEY=$TINYBIRD_TOKEN#" .env
+        log "✅ Updated TINYBIRD_API_KEY in .env"
+    else
+        # If it doesn't exist, append it
+        echo "TINYBIRD_API_KEY=$TINYBIRD_TOKEN" >> .env
+        log "✅ Added TINYBIRD_API_KEY to .env"
+    fi
+else
+    log "⚠️  Warning: Failed to copy Tinybird admin token. You may need to set TINYBIRD_API_KEY manually."
+fi

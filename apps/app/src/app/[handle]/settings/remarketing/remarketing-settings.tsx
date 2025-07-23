@@ -35,7 +35,7 @@ export function RemarketingSettings() {
 		...trpc.analyticsEndpoint.update.mutationOptions(),
 		onSuccess: async () => {
 			await queryClient.invalidateQueries(
-				trpc.analyticsEndpoint.byCurrentWorkspace.queryFilter(),
+				trpc.analyticsEndpoint.byCurrentWorkspace.pathFilter(),
 			);
 			metaPixelForm.reset();
 		},

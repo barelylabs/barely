@@ -178,7 +178,9 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 		focusGridList('products');
 		setProductImageUploadQueue([]);
 		if (mode === 'create') setProductImages([]);
-		await queryClient.invalidateQueries(trpc.product.byWorkspace.queryFilter());
+		await queryClient.invalidateQueries({
+			queryKey: trpc.product.byWorkspace.queryKey(),
+		});
 	}, [
 		setShowModal,
 		queryClient,

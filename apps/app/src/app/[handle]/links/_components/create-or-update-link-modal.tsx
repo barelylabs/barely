@@ -188,7 +188,9 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 		form.reset();
 		focusGridList();
 		await setShowLinkModal(false);
-		await queryClient.invalidateQueries(trpc.link.byWorkspace.queryFilter());
+		await queryClient.invalidateQueries({
+			queryKey: trpc.link.byWorkspace.queryKey(),
+		});
 	}, [focusGridList, form, queryClient, trpc.link.byWorkspace, setShowLinkModal]);
 
 	const LinkIconOrFavicon = useMemo(() => {
@@ -381,7 +383,9 @@ export function AddWorkspaceSpotifyArtistId(props: { spotifyArtistId?: string })
 			handle: workspace.handle,
 			spotifyArtistId: props.spotifyArtistId,
 		});
-		await queryClient.invalidateQueries(trpc.workspace.byHandle.queryFilter());
+		await queryClient.invalidateQueries({
+			queryKey: trpc.workspace.byHandle.queryKey(),
+		});
 	};
 
 	if (

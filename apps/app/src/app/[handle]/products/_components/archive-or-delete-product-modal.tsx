@@ -25,7 +25,9 @@ export function ArchiveOrDeleteProductModal({ mode }: { mode: 'archive' | 'delet
 	const setShowModal = mode === 'archive' ? setShowArchiveModal : setShowDeleteModal;
 
 	const onSuccess = useCallback(async () => {
-		await queryClient.invalidateQueries(trpc.product.byWorkspace.queryFilter());
+		await queryClient.invalidateQueries({
+			queryKey: trpc.product.byWorkspace.queryKey(),
+		});
 		await setShowModal(false);
 	}, [queryClient, setShowModal, trpc.product.byWorkspace]);
 

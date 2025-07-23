@@ -36,7 +36,7 @@ export function InviteMemberModal() {
 		onSuccess: async () => {
 			form.reset();
 			setShowModal(false);
-			await queryClient.invalidateQueries(trpc.workspace.invites.queryFilter());
+			await queryClient.invalidateQueries(trpc.workspace.invites.pathFilter());
 		},
 	});
 

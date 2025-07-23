@@ -261,7 +261,7 @@ export const GridListCard = React.forwardRef<
 													look='ghost'
 													startIcon='copy'
 													size='2xs'
-													onPress={() => {
+													onClick={() => {
 														copyToClipboard(copyText);
 													}}
 												/>

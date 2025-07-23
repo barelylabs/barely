@@ -43,7 +43,9 @@ export function EmailDomainModal() {
 	const { mutateAsync: createEmailDomain } = useMutation({
 		...trpc.emailDomain.create.mutationOptions(),
 		onSuccess: async () => {
-			await queryClient.invalidateQueries(trpc.emailDomain.byWorkspace.queryFilter());
+			await queryClient.invalidateQueries({
+				queryKey: trpc.emailDomain.byWorkspace.queryKey(),
+			});
 			setShowEmailDomainModal(false);
 			setEditEmailDomain(undefined);
 			form.reset();
@@ -53,7 +55,9 @@ export function EmailDomainModal() {
 	const { mutateAsync: updateEmailDomain } = useMutation({
 		...trpc.emailDomain.update.mutationOptions(),
 		onSuccess: async () => {
-			await queryClient.invalidateQueries(trpc.emailDomain.byWorkspace.queryFilter());
+			await queryClient.invalidateQueries({
+				queryKey: trpc.emailDomain.byWorkspace.queryKey(),
+			});
 			setShowEmailDomainModal(false);
 			setEditEmailDomain(undefined);
 			form.reset();

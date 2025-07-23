@@ -5,6 +5,7 @@
 import type { Auth, Session } from '@barely/auth';
 import type { NeonPool } from '@barely/db/pool';
 import { makePool } from '@barely/db/pool';
+import { isDevelopment } from '@barely/utils';
 import { initTRPC, TRPCError } from '@trpc/server';
 import { waitUntil } from '@vercel/functions';
 import superjson from 'superjson';
@@ -122,40 +123,66 @@ const poolMiddleware = middleware(async ({ next, ctx }) => {
 	return res;
 });
 
-export const publicProcedure = t.procedure.use(poolMiddleware);
+/**
+ * Middleware for timing procedure execution and adding an articifial delay in development.
+ *
+ * You can remove this if you don't like it, but it can help catch unwanted waterfalls by simulating
+ * network latency that would occur in production but not in local development.
+ */
+const timingMiddleware = t.middleware(async ({ next, path }) => {
+	const start = Date.now();
+
+	if (t._config.isDev) {
+		// artificial delay in dev 100-500ms
+		const waitMs = Math.floor(Math.random() * 400) + 100;
+		await new Promise(resolve => setTimeout(resolve, waitMs));
+	}
+
+	const result = await next();
+
+	const end = Date.now();
+	console.log(`[TRPC] ${path} took ${end - start}ms to execute`);
+
+	return result;
+});
+
+export const publicProcedure = t.procedure.use(timingMiddleware).use(poolMiddleware);
 // export const publicProcedure = t.procedure;
 
-export const privateProcedure = t.procedure.use(poolMiddleware).use(async opts => {
-	if (!opts.ctx.session) {
-		throw new TRPCError({
-			code: 'UNAUTHORIZED',
-			message: "privateProcedure: Can't find that session in our database.",
-		});
-	}
+export const privateProcedure = t.procedure
+	.use(timingMiddleware)
+	.use(poolMiddleware)
+	.use(async opts => {
+		if (!opts.ctx.session) {
+			throw new TRPCError({
+				code: 'UNAUTHORIZED',
+				message: "privateProcedure: Can't find that session in our database.",
+			});
+		}
 
-	if (!opts.ctx.user) {
-		throw new TRPCError({
-			code: 'UNAUTHORIZED',
-			message: "privateProcedure: Can't find that user in our database.",
-		});
-	}
+		if (!opts.ctx.user) {
+			throw new TRPCError({
+				code: 'UNAUTHORIZED',
+				message: "privateProcedure: Can't find that user in our database.",
+			});
+		}
 
-	if (!opts.ctx.workspaces) {
-		throw new TRPCError({
-			code: 'UNAUTHORIZED',
-			message: "privateProcedure: Can't find that user's workspaces in our database.",
-		});
-	}
+		if (!opts.ctx.workspaces) {
+			throw new TRPCError({
+				code: 'UNAUTHORIZED',
+				message: "privateProcedure: Can't find that user's workspaces in our database.",
+			});
+		}
 
-	return opts.next({
-		ctx: {
-			...opts.ctx,
-			session: opts.ctx.session,
-			user: opts.ctx.user,
-			workspaces: opts.ctx.workspaces,
-		},
+		return opts.next({
+			ctx: {
+				...opts.ctx,
+				session: opts.ctx.session,
+				user: opts.ctx.user,
+				workspaces: opts.ctx.workspaces,
+			},
+		});
 	});
-});
 
 /* I believe this was implemented to differentiate workspace queries between different workspaces
     On the server it's not a problem, because the workspace is well defined, 
@@ -167,6 +194,8 @@ export const privateProcedure = t.procedure.use(poolMiddleware).use(async opts =
 */
 export const workspaceProcedure = publicProcedure
 	.input(z.object({ handle: z.string() }))
+	.use(timingMiddleware)
+	.use(poolMiddleware)
 	.use(async opts => {
 		const { ctx } = opts;
 		const rawInput = await opts.getRawInput();
@@ -206,6 +235,8 @@ export const workspaceProcedure = publicProcedure
 				ctx.session,
 				parsedHandle.data.handle,
 			);
+
+			if (isDevelopment()) console.log('ws: ', workspace.id);
 			return opts.next({
 				ctx: {
 					...opts.ctx,

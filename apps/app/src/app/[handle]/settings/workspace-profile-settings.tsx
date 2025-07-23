@@ -212,7 +212,9 @@ export function WorkspaceAvatarForm() {
 				handle: workspace.handle,
 				avatarFileId: fileRecord.id,
 			});
-			await queryClient.invalidateQueries(trpc.workspace.byHandle.queryFilter());
+			await queryClient.invalidateQueries({
+				queryKey: trpc.workspace.byHandle.queryKey(),
+			});
 		},
 		[updateWorkspaceAvatar, queryClient, trpc, workspace.handle],
 	);
@@ -276,7 +278,9 @@ export function WorkspaceHeaderForm() {
 				handle: workspace.handle,
 				headerFileId: fileRecord.id,
 			});
-			await queryClient.invalidateQueries(trpc.workspace.byHandle.queryFilter());
+			await queryClient.invalidateQueries({
+				queryKey: trpc.workspace.byHandle.queryKey(),
+			});
 		},
 		[updateWorkspaceHeader, queryClient, trpc, workspace.handle],
 	);
