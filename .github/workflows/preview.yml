@@ -416,6 +416,7 @@ jobs:
           fi
 
       - name: Get staging deployment ID
+        id: get-deployment-id
         run: |
           cd packages/tb/tinybird
           
@@ -434,6 +435,7 @@ jobs:
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
         run: |
+          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
           echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
 
           branch_name=${{ needs.git-meta.outputs.git_branch_name }}
@@ -448,6 +450,7 @@ jobs:
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_CART_PROJECT_ID }}
         run: |
+          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
           echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
           branch_name=${{ needs.git-meta.outputs.git_branch_name }}
 
@@ -461,6 +464,7 @@ jobs:
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
         run: |
+          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
           echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
           branch_name=${{ needs.git-meta.outputs.git_branch_name }}
 
@@ -474,6 +478,7 @@ jobs:
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_FM_PROJECT_ID }}
         run: |
+          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
           echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
           branch_name=${{ needs.git-meta.outputs.git_branch_name }}
 
@@ -487,6 +492,7 @@ jobs:
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_MANAGE_EMAIL_PROJECT_ID }}
         run: |
+          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
           echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
           branch_name=${{ needs.git-meta.outputs.git_branch_name }}
 
@@ -500,6 +506,7 @@ jobs:
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PAGE_PROJECT_ID }}
         run: |
+          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
           echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
           branch_name=${{ needs.git-meta.outputs.git_branch_name }}
 
@@ -513,8 +520,13 @@ jobs:
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PRESS_PROJECT_ID }}
         run: |
+          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
           echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
           branch_name=${{ needs.git-meta.outputs.git_branch_name }}
+
+          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q TINYBIRD_STAGING_DEPLOYMENT_ID; then
+            pnpm vercel env rm TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
 
           echo $TINYBIRD_STAGING_DEPLOYMENT_ID | pnpm vercel env add TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
 
@@ -522,8 +534,13 @@ jobs:
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SPARROW_PROJECT_ID }}
         run: |
+          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
           echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
           branch_name=${{ needs.git-meta.outputs.git_branch_name }}
+
+          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q TINYBIRD_STAGING_DEPLOYMENT_ID; then
+            pnpm vercel env rm TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
 
           echo $TINYBIRD_STAGING_DEPLOYMENT_ID | pnpm vercel env add TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
 
@@ -531,8 +548,15 @@ jobs:
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_WWW_PROJECT_ID }}
         run: |
+          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
           echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
           branch_name=${{ needs.git-meta.outputs.git_branch_name }}
+
+          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q TINYBIRD_STAGING_DEPLOYMENT_ID; then
+            pnpm vercel env rm TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+          echo $TINYBIRD_STAGING_DEPLOYMENT_ID | pnpm vercel env add TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
 
   # 🔄 TRIGGER PREVIEW #
   trigger-preview:
@@ -584,7 +608,7 @@ jobs:
 
   deploy-link:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [neon-preview, git-meta]
+    needs: [git-meta, neon-preview, tinybird-preview]
     with:
       app_name: link
       working_directory: apps/link
@@ -599,7 +623,7 @@ jobs:
 
   deploy-fm:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [neon-preview, git-meta]
+    needs: [git-meta, neon-preview, tinybird-preview]
     with:
       app_name: fm
       working_directory: apps/fm
@@ -629,7 +653,7 @@ jobs:
 
   deploy-page:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [neon-preview, git-meta]
+    needs: [git-meta, neon-preview, tinybird-preview]
     with:
       app_name: page
       working_directory: apps/page
@@ -644,7 +668,7 @@ jobs:
 
   deploy-press:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [neon-preview, git-meta]
+    needs: [git-meta, neon-preview, tinybird-preview]
     with:
       app_name: press
       working_directory: apps/press
@@ -674,7 +698,7 @@ jobs:
 
   deploy-www:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [neon-preview, git-meta]
+    needs: [git-meta, neon-preview, tinybird-preview]
     with:
       app_name: www
       working_directory: apps/www

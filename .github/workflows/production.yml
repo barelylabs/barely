@@ -274,7 +274,8 @@ jobs:
     if: |
       always() && 
       needs.git-meta.result == 'success' && 
-      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped')
+      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
+      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: manage-email
       working_directory: apps/manage-email
@@ -333,7 +334,8 @@ jobs:
     if: |
       always() && 
       needs.git-meta.result == 'success' && 
-      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped')
+      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
+      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: sparrow
       working_directory: apps/sparrow
