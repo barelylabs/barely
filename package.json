@@ -41,7 +41,6 @@
 		"tunnelto:auth": "./scripts/tunnelto-auth.sh",
 		"tb:login": "pnpm -F @barely/tb tb:login",
 		"tb:check": "pnpm -F @barely/tb tb:check",
-<<<<<<< HEAD
 		"tb:start": "pnpm -F @barely/tb tb:start",
 		"tb:build": "pnpm -F @barely/tb tb:build",
 		"tb:test": "pnpm -F @barely/tb tb:test",
