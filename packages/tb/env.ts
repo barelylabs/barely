@@ -8,10 +8,9 @@ export const tbEnv = createEnv({
 		TINYBIRD_STAGING_DEPLOYMENT_ID: z.preprocess(v => {
 			if (!isPreview()) return undefined;
 
-			if (typeof v !== 'string')
-				throw new Error(
-					'TINYBIRD_STAGING_DEPLOYMENT_ID must be a string for preview deployments',
-				);
+			if (typeof v !== 'string' || v === '') return null;
+
+			return v;
 		}, z.string().optional()),
 	},
 	experimental__runtimeEnv: {},

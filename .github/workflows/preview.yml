@@ -359,6 +359,9 @@ jobs:
     env:
       TINYBIRD_HOST: ${{ secrets.TINYBIRD_HOST }}
       TINYBIRD_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
+      VERCEL_ACCESS_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
     services:
       tinybird:
         image: tinybirdco/tinybird-local:latest
