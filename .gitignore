@@ -21,6 +21,7 @@ expo-env.d.ts
 # tinybird
 .tinyb
 .sql
+packages/tb/tinybird/fixtures/
 
 # production
 build
