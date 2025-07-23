@@ -101,7 +101,6 @@ jobs:
     name: neon preview
     if: always() && github.event_name == 'pull_request'
     needs: [git-meta]
-    permissions: write-all
     runs-on: ubuntu-latest
     env:
       VERCEL_ACCESS_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -357,7 +356,6 @@ jobs:
     name: tinybird preview
     if: always() && github.event_name == 'pull_request'
     needs: [git-meta]
-    permissions: write-all
     runs-on: ubuntu-latest
     env:
       TINYBIRD_HOST: ${{ secrets.TINYBIRD_HOST }}
@@ -571,7 +569,7 @@ jobs:
 
   deploy-cart:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [neon-preview, git-meta]
+    needs: [git-meta, neon-preview, tinybird-preview]
     with:
       app_name: cart
       working_directory: apps/cart
@@ -616,7 +614,7 @@ jobs:
 
   deploy-manage-email:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [neon-preview, git-meta]
+    needs: [git-meta, neon-preview, tinybird-preview]
     with:
       app_name: manage-email
       working_directory: apps/manage-email
@@ -661,7 +659,7 @@ jobs:
 
   deploy-sparrow:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [neon-preview, git-meta]
+    needs: [git-meta, neon-preview, tinybird-preview]
     with:
       app_name: sparrow
       working_directory: apps/sparrow
@@ -706,6 +704,8 @@ jobs:
         deploy-www,
       ]
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
       - name: checkout
         uses: actions/checkout@v4

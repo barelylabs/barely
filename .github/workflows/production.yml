@@ -39,13 +39,13 @@ jobs:
           github_repo=${{ github.repository }}
           github_commit_org=${{ github.repository_owner }}
           github_commit_repo=${{ github.repository }}
-          github_commit_message=$(git show -s --format=%)          
+          github_commit_message=$(git show -s --format=%s)          
 
           commit_ref=${{ github.ref }}
           echo "commit_ref: $commit_ref"          
 
           pr_number=$(echo $commit_ref | awk -F'/' '{print $5}' | awk -F'-' '{print $2}')          
-          pr_info=$(curl -s H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/pulls/$pr_number)
+          pr_info=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/pulls/$pr_number)
 
           github_commit_ref=$(echo $pr_info | jq -r '.head.ref')
           echo "github_commit_ref: $github_commit_ref"
@@ -57,8 +57,11 @@ jobs:
             echo "Error: Cannot proceed with 'main' branch."
             exit 1
           fi
+          
+          # Escape quotes in commit message for shell safety
+          escaped_commit_message=$(echo "$github_commit_message" | sed 's/"/\\"/g')
 
-          vercel_git_metadata="-m githubCommitSha=$github_commit_sha -m githubCommitAuthorName=$github_commit_author_login -m githubCommitAuthorLogin=$github_commit_author_login -m githubDeployment=$github_deployment -m githubOrg=$github_org -m githubRepo=$github_repo -m githubCommitOrg=$github_commit_org -m githubCommitRepo=$github_commit_repo -m githubCommitMessage=\"$github_commit_message\" -m githubCommitRef=$github_commit_ref"                 
+          vercel_git_metadata="-m githubCommitSha=$github_commit_sha -m githubCommitAuthorName=$github_commit_author_login -m githubCommitAuthorLogin=$github_commit_author_login -m githubDeployment=$github_deployment -m githubOrg=$github_org -m githubRepo=$github_repo -m githubCommitOrg=$github_commit_org -m githubCommitRepo=$github_commit_repo -m githubCommitMessage=\"$escaped_commit_message\" -m githubCommitRef=$github_commit_ref"                 
 
           echo "github_commit_sha=$github_commit_sha" >> $GITHUB_OUTPUT
           echo "github_commit_author_name=$github_commit_author_name" >> $GITHUB_OUTPUT
@@ -110,7 +113,6 @@ jobs:
     name: db:push
     needs: [git-meta]
     if: always() && github.event_name == 'merge_group' && needs.git-meta.result == 'success' && needs.git-meta.outputs.db_changed == 'true'
-    permissions: write-all
     runs-on: ubuntu-latest
     outputs:
       neon_branch_id: ${{ steps.get-neon-branch.outputs.branch_id }}
@@ -268,7 +270,7 @@ jobs:
 
   deploy-manage-email:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, db-push]
+    needs: [git-meta, db-push, tb-push]
     if: |
       always() && 
       needs.git-meta.result == 'success' && 
