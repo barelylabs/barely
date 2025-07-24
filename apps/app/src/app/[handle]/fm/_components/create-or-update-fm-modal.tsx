@@ -155,7 +155,7 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 
 	/* spotify metadata */
 	const [debouncedSourceUrl] = useDebounce(sourceUrl, 500);
-	const { data: sourceUrlSpotifyMetadata } = useQuery(
+	const { data: sourceUrlSpotifyMetadata, isLoading: isLoadingSpotifyMetadata } = useQuery(
 		trpc.spotify.getMetadata.queryOptions(
 			{
 				query: debouncedSourceUrl,
@@ -255,18 +255,26 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 			<Form form={form} onSubmit={handleSubmit}>
 				<ModalBody>
 					<TextField label='Source URL' control={form.control} name='sourceUrl' />
-					<TextField label='Title' control={form.control} name='title' />
+					<TextField 
+						label='Title' 
+						control={form.control} 
+						name='title' 
+						disabled={isLoadingSpotifyMetadata}
+						className={isLoadingSpotifyMetadata ? 'animate-pulse' : ''}
+					/>
 					<TextField
 						label='Key'
 						control={form.control}
 						name='key'
+						disabled={isLoadingSpotifyMetadata}
+						className={isLoadingSpotifyMetadata ? 'animate-pulse' : ''}
 						onChange={e => {
 							form.setValue('key', sanitizeKey(e.target.value), { shouldDirty: true });
 						}}
 					/>
 
-					<div className='flex flex-col items-start gap-1'>
-						<Label>Artwork</Label>
+					<div className={`flex flex-col items-start gap-1 ${isLoadingSpotifyMetadata ? 'animate-pulse' : ''}`}>
+						<Label>Artwork {isLoadingSpotifyMetadata && <span className="text-muted-foreground text-sm">(loading...)</span>}</Label>
 						<UploadDropzone
 							{...artworkUploadState}
 							title='Upload cover art'
