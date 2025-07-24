@@ -48,7 +48,9 @@ export function CreateEmailAddressModal() {
 	const { control } = form;
 
 	const handleCloseModal = useCallback(async () => {
-		await queryClient.invalidateQueries(trpc.emailAddress.byWorkspace.queryFilter());
+		await queryClient.invalidateQueries({
+			queryKey: trpc.emailAddress.byWorkspace.queryKey(),
+		});
 		form.reset();
 		await setShowCreateModal(false);
 	}, [queryClient, trpc, form, setShowCreateModal]);

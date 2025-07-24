@@ -121,7 +121,7 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
 		setArtworkUploadQueue([]);
-		await queryClient.invalidateQueries(trpc.fm.byWorkspace.queryFilter());
+		await queryClient.invalidateQueries(trpc.fm.byWorkspace.pathFilter());
 		form.reset();
 		await setShowFmModal(false);
 	}, [form, focusGridList, queryClient, trpc.fm, setShowFmModal, setArtworkUploadQueue]);

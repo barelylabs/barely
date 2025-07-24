@@ -26,7 +26,7 @@ export function ArchiveOrDeleteTrackModal({ mode }: { mode: 'archive' | 'delete'
 	const setShowModal = mode === 'archive' ? setShowArchiveModal : setShowDeleteModal;
 
 	const onSuccess = useCallback(async () => {
-		await queryClient.invalidateQueries(trpc.track.byWorkspace.queryFilter());
+		await queryClient.invalidateQueries(trpc.track.byWorkspace.pathFilter());
 		await setShowModal(false);
 	}, [queryClient, setShowModal, trpc.track.byWorkspace]);
 

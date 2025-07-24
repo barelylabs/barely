@@ -1,6 +1,7 @@
 import { z } from 'zod/v4';
 
 import type { PipeErrorResponse } from './utils';
+import { tbEnv } from '../env';
 import { eventIngestReponseData, pipeResponseWithoutData } from './utils';
 
 // Type for Next.js extended fetch
@@ -20,7 +21,7 @@ export class Tinybird {
 	private readonly token: string;
 
 	constructor(opts: { token: string; baseUrl?: string }) {
-		this.baseUrl = opts.baseUrl ?? 'https://api.us-east.tinybird.co';
+		this.baseUrl = opts.baseUrl ?? tbEnv.TINYBIRD_HOST;
 		this.token = opts.token;
 	}
 
@@ -30,6 +31,10 @@ export class Tinybird {
 		opts?: { cache?: RequestCache; revalidate?: number },
 	): Promise<unknown> {
 		const url = new URL(`/v0/pipes/${pipe}.json`, this.baseUrl);
+		if (tbEnv.TINYBIRD_STAGING_DEPLOYMENT_ID) {
+			// this forces read from staging deployment
+			url.searchParams.set('__tb__deployment', tbEnv.TINYBIRD_STAGING_DEPLOYMENT_ID);
+		}
 		for (const [key, value] of Object.entries(parameters)) {
 			if (typeof value === 'undefined' || value === null) {
 				continue;
@@ -123,6 +128,11 @@ export class Tinybird {
 
 			const url = new URL('/v0/events', this.baseUrl);
 			url.searchParams.set('name', req.datasource);
+
+			if (tbEnv.TINYBIRD_STAGING_DEPLOYMENT_ID) {
+				// this forces write to staging deployment
+				url.searchParams.set('__tb__deployment', tbEnv.TINYBIRD_STAGING_DEPLOYMENT_ID);
+			}
 
 			const body = (Array.isArray(validatedEvents) ? validatedEvents : [validatedEvents])
 				.map(p => JSON.stringify(p))

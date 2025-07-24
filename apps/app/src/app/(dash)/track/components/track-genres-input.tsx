@@ -137,7 +137,9 @@ export function TrackGenresField(props: TrackGenresFieldProps) {
 	const { mutate: updateTrackGenres } = useMutation(
 		trpc.track.updateGenres.mutationOptions({
 			onMutate: async updatedTrack => {
-				await queryClient.cancelQueries(trpc.campaign.toScreen.queryFilter());
+				await queryClient.cancelQueries({
+					queryKey: trpc.campaign.toScreen.queryKey(),
+				});
 
 				const previousCampaigns = queryClient.getQueryData(
 					trpc.campaign.toScreen.queryKey(),

@@ -26,7 +26,9 @@ export function UploadMediaModal() {
 		allowedFileTypes: ['image', 'audio', 'video'],
 		maxFiles: 50,
 		onUploadComplete: async () => {
-			await queryClient.invalidateQueries(trpc.file.byWorkspace.queryFilter());
+			await queryClient.invalidateQueries({
+				queryKey: trpc.file.byWorkspace.queryKey(),
+			});
 			await setShowCreateModal(false);
 		},
 	});

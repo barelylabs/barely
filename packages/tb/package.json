@@ -14,20 +14,24 @@
 	"scripts": {
 		"build": "tsc",
 		"clean": "git clean -xdf .cache .turbo dist node_modules",
-		"dev": "tsc",
+		"dev": "concurrently \"tb dev\" \"tsc\"",
 		"format": "prettier --check . --ignore-path ../../.gitignore",
 		"lint": "eslint",
 		"typecheck": "tsc --noEmit --emitDeclarationOnly false",
 		"tb:login": "cd tinybird && tb login",
+		"tb:start": "cd tinybird && tb local start",
 		"tb:build": "cd tinybird && tb build",
 		"tb:test": "cd tinybird && tb test run",
-		"tb:check": "cd tinybird && tb deploy --check"
+		"tb:check": "cd tinybird && tb deploy --check",
+		"tb:mock": "cd tinybird && tb mock",
+		"tb:pull-data": "cd tinybird && ./scripts/tb-dev-pull.sh"
 	},
 	"dependencies": {
 		"@barely/const": "workspace:*",
 		"@barely/db": "workspace:*",
 		"@barely/utils": "workspace:*",
 		"@barely/validators": "workspace:*",
+		"@t3-oss/env-nextjs": "catalog:",
 		"zod": "catalog:"
 	},
 	"devDependencies": {

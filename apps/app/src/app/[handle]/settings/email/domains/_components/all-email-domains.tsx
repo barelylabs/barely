@@ -82,7 +82,9 @@ function EmailDomainCard({ emailDomain }: { emailDomain: EmailDomain }) {
 
 			onSettled: async () => {
 				// Always refetch after error or success
-				await queryClient.invalidateQueries(trpc.emailDomain.byWorkspace.queryFilter());
+				await queryClient.invalidateQueries({
+					queryKey: trpc.emailDomain.byWorkspace.queryKey(),
+				});
 				setIsVerifying(false);
 			},
 		}),
