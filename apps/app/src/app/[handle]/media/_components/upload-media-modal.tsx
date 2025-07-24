@@ -33,13 +33,22 @@ export function UploadMediaModal() {
 		},
 	});
 
-	const { isPendingPresigns, uploadQueue, uploading, handleSubmit } = mediaUploadState;
+	const { isPendingPresigns, uploadQueue, uploading, handleSubmit, clearUploadQueue } = mediaUploadState;
+
+	const handleCloseModal = () => {
+		clearUploadQueue();
+		void setShowCreateModal(false);
+	};
 
 	return (
 		<Modal
 			showModal={showCreateModal}
 			setShowModal={show => {
-				void setShowCreateModal(show);
+				if (!show) {
+					handleCloseModal();
+				} else {
+					void setShowCreateModal(show);
+				}
 			}}
 			className='w-full'
 		>

@@ -245,6 +245,23 @@ export function useUpload({
 					return p;
 				}),
 			);
+
+			// Auto-clear completed items after a short delay
+			setTimeout(() => {
+				setUploadQueue(prev => {
+					const updatedQueue = prev.filter(p => {
+						if (fileRecord.id === p.presigned?.fileRecord.id) {
+							// Clean up the preview image URL to prevent memory leaks
+							if (p.previewImage?.startsWith('blob:')) {
+								URL.revokeObjectURL(p.previewImage);
+							}
+							return false;
+						}
+						return true;
+					});
+					return updatedQueue;
+				});
+			}, 1000);
 		},
 		[onUploadComplete, setUploadQueue],
 	);
@@ -299,13 +316,27 @@ export function useUpload({
 
 	const removeFromUploadQueue = useCallback(
 		(file: File) => {
-			setUploadQueue(prev => prev.filter(q => q.file !== file));
+			setUploadQueue(prev => {
+				const itemToRemove = prev.find(q => q.file === file);
+				if (itemToRemove?.previewImage?.startsWith('blob:')) {
+					URL.revokeObjectURL(itemToRemove.previewImage);
+				}
+				return prev.filter(q => q.file !== file);
+			});
 		},
 		[setUploadQueue],
 	);
 
 	const clearUploadQueue = useCallback(() => {
-		setUploadQueue([]);
+		setUploadQueue(prev => {
+			// Clean up blob URLs to prevent memory leaks
+			prev.forEach(item => {
+				if (item.previewImage?.startsWith('blob:')) {
+					URL.revokeObjectURL(item.previewImage);
+				}
+			});
+			return [];
+		});
 	}, [setUploadQueue]);
 
 	return {
