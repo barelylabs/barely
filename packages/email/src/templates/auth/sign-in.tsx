@@ -21,7 +21,7 @@ interface SignInEmailTemplateProps {
 }
 
 export const SignInEmailTemplate = (props: SignInEmailTemplateProps) => {
-	const previewText = `Sign in to your barely.io account`;
+	const previewText = `Sign in to your barely.ai account`;
 
 	return (
 		<Html>
@@ -36,11 +36,11 @@ export const SignInEmailTemplate = (props: SignInEmailTemplateProps) => {
 					<Text>
 						Please click the button below to sign in to your{' '}
 						<span>
-							<EmailLink href='https://barely.io'>barely.io</EmailLink>
+							<EmailLink href='https://barely.ai'>barely.ai</EmailLink>
 						</span>{' '}
 						account.
 					</Text>
-					<EmailButton href={props.loginLink}>Login to barely.io</EmailButton>
+					<EmailButton href={props.loginLink}>Login to barely.ai</EmailButton>
 
 					<EmailSeparator />
 
@@ -53,7 +53,7 @@ export const SignInEmailTemplate = (props: SignInEmailTemplateProps) => {
 
 SignInEmailTemplate.PreviewProps = {
 	firstName: 'John',
-	loginLink: 'https://barely.io/login',
+	loginLink: 'https://app.barely.ai/login',
 } satisfies SignInEmailTemplateProps;
 
 export default SignInEmailTemplate;

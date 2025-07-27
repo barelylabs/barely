@@ -30,7 +30,7 @@ function ValuePropsSection() {
 				<AnimatedSection animation='fade-up' className='mb-16 text-center'>
 					<h2 className='mb-4 text-3xl font-bold tracking-tight text-white sm:text-4xl'>
 						Why musicians choose{' '}
-						<span className='gradient-text inline-block'>barely.io</span>
+						<span className='gradient-text inline-block'>barely.ai</span>
 					</h2>
 				</AnimatedSection>
 
@@ -389,7 +389,7 @@ function BuiltByBarelySection() {
 						</span>
 					</Heading>
 					<p className='mt-6 text-lg text-muted-foreground'>
-						barely.io powers the marketing campaigns at Barely, where we've helped indie
+						barely.ai powers the marketing campaigns at Barely, where we've helped indie
 						artists grow from 0 to 30K+ monthly listeners. Every feature was built to
 						solve real problems we encountered in professional music marketing.
 					</p>

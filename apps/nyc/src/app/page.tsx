@@ -36,7 +36,7 @@ export default function HomePage() {
 							<ValueCard
 								icon={<FlaskIcon className='h-8 w-8' />}
 								title='Your Music Deserves Better'
-								description="While others rent software, I built barely.io from scratch. It's open-source, which means you can see exactly how everything works. No black boxes."
+								description="While others rent software, I built barely.ai from scratch. It's open-source, which means you can see exactly how everything works. No black boxes."
 							/>
 						</AnimatedSection>
 
@@ -220,13 +220,13 @@ export default function HomePage() {
 									See Our Services
 								</MarketingButton>
 							</Link>
-							<a href='https://barely.io' target='_blank' rel='noopener noreferrer'>
+							<a href='https://barely.ai' target='_blank' rel='noopener noreferrer'>
 								<MarketingButton
 									marketingLook='scientific'
 									size='lg'
 									className='min-w-[200px]'
 								>
-									Try barely.io Tools
+									Try barely.ai Tools
 								</MarketingButton>
 							</a>
 						</div>

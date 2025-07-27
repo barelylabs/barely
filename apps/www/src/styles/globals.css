@@ -4,7 +4,7 @@
 
 @layer base {
 	:root {
-		/* barely.io brand colors - dark mode by default - updated to match design spec */
+		/* barely.ai brand colors - dark mode by default - updated to match design spec */
 		--background: 13.71% 0.036 258.53; /* #16213E */
 		--foreground: 98.38% 0.003 247.86; /* #F5F5F5 */
 		--card: 20% 0.036 258.53; /* #1A1A2E */
@@ -42,7 +42,7 @@
 		);
 		--gradient-hover: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
 
-		/* barely.io specific colors */
+		/* barely.ai specific colors */
 		--dark-base: #16213e;
 		--dark-surface: #1a1a2e;
 		--dark-tertiary: #0f3460;

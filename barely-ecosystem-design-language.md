@@ -66,7 +66,7 @@ Small/Meta: Inter, Regular, 0.01em tracking
 
 ---
 
-## 2. barely.io SaaS Marketing Website
+## 2. barely.ai SaaS Marketing Website
 
 ### Visual Identity
 
@@ -126,7 +126,7 @@ Code/Technical: JetBrains Mono, Regular, 0em tracking
 
 ---
 
-## 3. barely.io App Interface
+## 3.barely.ai App Interface
 
 ### Visual Identity
 

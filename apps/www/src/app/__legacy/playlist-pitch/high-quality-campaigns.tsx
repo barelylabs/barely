@@ -66,7 +66,7 @@ const Features = () => {
 							className='mb-1'
 							size='lg'
 							pill
-							href='https://app.barely.io/playlist-pitch'
+							href='https://app.barely.ai/playlist-pitch'
 						>
 							Start campaign
 						</Button>

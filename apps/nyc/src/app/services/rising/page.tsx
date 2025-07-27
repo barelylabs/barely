@@ -11,7 +11,7 @@ import { PricingCard } from '../../../components/marketing/pricing-card';
 export const metadata: Metadata = {
 	title: 'Rising+ Service - Professional Campaign Engineering | Barely',
 	description:
-		'Perfect for artists with 10-50K monthly listeners (or ready to jumpstart from smaller numbers). We design and execute your campaigns + transparent reporting + barely.io tools.',
+		'Perfect for artists with 10-50K monthly listeners (or ready to jumpstart from smaller numbers). We design and execute your campaigns + transparent reporting + barely.ai tools.',
 };
 
 export default function RisingPlusPage() {
@@ -135,7 +135,7 @@ export default function RisingPlusPage() {
 									<span className='text-3xl'>🛠️</span>
 									<div>
 										<H size='5' className='mb-2'>
-											Full Access to barely.io Tools (Rising Tier Included)
+											Full Access to barely.ai Tools (Rising Tier Included)
 										</H>
 										<p className='text-white/70'>
 											Advanced marketing automation, detailed analytics, and campaign
@@ -429,7 +429,7 @@ export default function RisingPlusPage() {
 							features={[
 								'Up to 2 professional campaigns per month',
 								'Management of $1-3K monthly ad spend',
-								'Full access to barely.io tools (Rising tier)',
+								'Full access to barely.ai tools (Rising tier)',
 								'Monthly strategy calls with analysis',
 								'Merch strategy + revenue optimization',
 								'Real-time campaign optimization',
@@ -492,7 +492,7 @@ export default function RisingPlusPage() {
 										description='Learn the scientific method'
 										features={[
 											'Bi-weekly 30-min coaching',
-											'barely.io tools (Bedroom tier)',
+											'barely.ai tools (Bedroom tier)',
 											'Campaign blueprints',
 											'Merch platform + strategy',
 											'Direct email support',
@@ -510,7 +510,7 @@ export default function RisingPlusPage() {
 								features={[
 									'Up to 2 campaigns/month',
 									'$1-3K ad spend management',
-									'barely.io tools (Rising tier)',
+									'barely.ai tools (Rising tier)',
 									'Monthly strategy calls',
 									'Revenue optimization',
 								]}
@@ -528,7 +528,7 @@ export default function RisingPlusPage() {
 										features={[
 											'Advanced campaign execution',
 											'$3-6K ad spend management',
-											'barely.io tools (Breakout tier)',
+											'barely.ai tools (Breakout tier)',
 											'Bi-weekly deep dives',
 											'Priority support',
 										]}

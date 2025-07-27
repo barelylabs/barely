@@ -23,7 +23,7 @@ const fontSans = FontSans({
 });
 
 export const metadata: Metadata = {
-	title: 'barely.io',
+	title: 'barely.ai',
 	icons: {
 		icon: [
 			{ url: '/static/favicon-32x32', sizes: '32x32' },

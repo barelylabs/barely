@@ -20,7 +20,7 @@ const stats = [
 		value: 25000,
 		suffix: '+',
 		label: 'Active Artists',
-		description: 'Musicians trust barely.io',
+		description: 'Musicians trust barely.ai',
 	},
 	{
 		icon: <MusicalNoteIcon className='h-6 w-6' />,
@@ -55,7 +55,7 @@ const successStories = [
 		metric: '+4900%',
 		metricLabel: 'Growth',
 		quote:
-			"barely.io's automation let me focus on music while my audience grew exponentially.",
+			"barely.ai's automation let me focus on music while my audience grew exponentially.",
 	},
 	{
 		artist: 'Luna Park',
@@ -107,7 +107,7 @@ export function SocialProof() {
 					</h2>
 					<p className='mx-auto max-w-2xl text-lg text-muted-foreground'>
 						Join thousands of artists who've transformed their music marketing with
-						barely.io
+						barely.ai
 					</p>
 				</AnimatedSection>
 
@@ -173,7 +173,7 @@ export function SocialProof() {
 				<AnimatedSection animation='fade-up'>
 					<div className='glass rounded-3xl border border-white/10 p-8'>
 						<h3 className='mb-8 text-center text-2xl font-bold text-white'>
-							Why Artists Choose barely.io
+							Why Artists Choose barely.ai
 						</h3>
 
 						<div className='mb-8 grid gap-8 md:grid-cols-3'>

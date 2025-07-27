@@ -42,10 +42,10 @@ export default function Footer() {
 				</div>
 				<div className='mx-auto mt-8 flex flex-col gap-2 text-center md:order-1 md:mt-0'>
 					<Text variant='sm/light' muted className='text-center'>
-						&copy; Barely Labs, LLC. All rights reserved.
+						&copy; Barely Sparrow, LLC. All rights reserved.
 					</Text>
 					<Text variant='xs/light' muted className='text-center'>
-						barely.io is not affiliated with or funded by Spotify.
+						barely.ai is not affiliated with or funded by Spotify.
 					</Text>
 				</div>
 			</div>

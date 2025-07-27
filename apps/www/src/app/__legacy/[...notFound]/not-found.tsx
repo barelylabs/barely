@@ -7,11 +7,11 @@ export default function NotFound() {
 			<main className='mx-auto flex w-full max-w-7xl flex-grow flex-col justify-center px-4 sm:px-2 lg:px-8'>
 				<div className='flex flex-shrink-0 justify-center'>
 					<Link href='/' className='mb-3 inline-flex'>
-						<span className='sr-only'>barely.io</span>
+						<span className='sr-only'>barely.ai</span>
 						{/* <img
               src="/logos/barely-io-logo.svg"
               className="w-20 h-20"
-              alt="barely.io logo"
+              alt="barely.ai logo"
             /> */}
 					</Link>
 					<div className='w-'></div>
@@ -27,7 +27,7 @@ export default function NotFound() {
 						</p>
 						<div className='mt-6'>
 							<a
-								href='https://barely.io/link'
+								href='https://barely.ai/link'
 								className='text-base font-medium text-purple-400 hover:text-purple-500 sm:text-2xl md:text-lg'
 							>
 								go home

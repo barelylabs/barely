@@ -32,7 +32,7 @@ export default function ServicesPage() {
 	// Helper to extract key features
 	const getBedroomPlusFeatures = () => [
 		'Bi-weekly 30-minute coaching calls',
-		'barely.io tools (Bedroom tier)',
+		'barely.ai tools (Bedroom tier)',
 		'Custom monthly campaign blueprints',
 		'Integrated merch platform + strategy coaching',
 		'Direct email support',
@@ -41,7 +41,7 @@ export default function ServicesPage() {
 	const getRisingPlusFeatures = () => [
 		'Up to 2 professional campaigns per month',
 		'Management of $1,000-$3,000 monthly ad spend',
-		'barely.io tools (Rising tier)',
+		'barely.ai tools (Rising tier)',
 		'Bi-weekly 30-minute coaching calls',
 		'Campaign optimization based on real-time data',
 	];
@@ -49,7 +49,7 @@ export default function ServicesPage() {
 	const getBreakoutPlusFeatures = () => [
 		'Up to 2 advanced campaigns per month',
 		'Management of $3,000-$6,000 monthly ad spend',
-		'barely.io tools (Breakout tier)',
+		'barely.ai tools (Breakout tier)',
 		'Bi-weekly 30-minute coaching calls',
 		'Priority support + rapid adjustments',
 	];

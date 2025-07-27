@@ -84,7 +84,7 @@ export default function Header() {
 										{/* <img
 											className='h-9 w-auto'
 											src='/logos/barely-io-logo.svg'
-											alt='barely.io'
+											alt='barely.ai'
 										/> */}
 									</div>
 									<div className='-mr-2'>

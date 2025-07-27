@@ -10,7 +10,7 @@ import { PricingCard } from '../../../components/marketing/pricing-card';
 export const metadata: Metadata = {
 	title: 'Bedroom+ Service - Learn Scientific Music Marketing | Barely',
 	description:
-		'Perfect for artists with 0-10K monthly listeners. Bi-weekly coaching + barely.io tools + transparent strategies.',
+		'Perfect for artists with 0-10K monthly listeners. Bi-weekly coaching + barely.ai tools + transparent strategies.',
 };
 
 export default function BedroomPlusPage() {
@@ -36,7 +36,7 @@ export default function BedroomPlusPage() {
 						</p>
 						<p className='text-lg text-white/70'>
 							Perfect for artists with 0-10K monthly listeners • Bi-weekly coaching +
-							barely.io tools
+							barely.ai tools
 						</p>
 					</AnimatedSection>
 				</div>
@@ -95,7 +95,7 @@ export default function BedroomPlusPage() {
 									<span className='text-3xl'>🛠️</span>
 									<div>
 										<H size='5' className='mb-2'>
-											Full Access to barely.io Tools (Bedroom Tier Included)
+											Full Access to barely.ai Tools (Bedroom Tier Included)
 										</H>
 										<p className='text-white/70'>
 											Smart links, landing pages, email automation, and analytics - all
@@ -116,7 +116,7 @@ export default function BedroomPlusPage() {
 											Integrated Merch Platform + Strategy
 										</H>
 										<p className='text-white/70'>
-											Direct-to-fan sales through barely.io&apos;s built-in store.
+											Direct-to-fan sales through barely.ai&apos;s built-in store.
 											We&apos;ll coach you on optimizing physical sales that can return
 											50-90% immediately (vs. 2% for streaming campaigns).
 										</p>
@@ -338,7 +338,7 @@ export default function BedroomPlusPage() {
 							description='Learn the scientific method for music marketing'
 							features={[
 								'Bi-weekly 30-minute strategy sessions',
-								'Full access to barely.io tools (Bedroom tier)',
+								'Full access to barely.ai tools (Bedroom tier)',
 								'Custom monthly campaign blueprints',
 								'Integrated merch platform + strategy',
 								'Direct email support',
@@ -357,7 +357,7 @@ export default function BedroomPlusPage() {
 										View All Services
 									</MarketingButton>
 								</Link>
-								<a href='https://barely.io' target='_blank' rel='noopener noreferrer'>
+								<a href='https://barely.ai' target='_blank' rel='noopener noreferrer'>
 									<MarketingButton marketingLook='scientific' size='sm'>
 										Try Tools First
 									</MarketingButton>
@@ -399,7 +399,7 @@ export default function BedroomPlusPage() {
 								description='Learn the scientific method'
 								features={[
 									'Bi-weekly 30-min coaching',
-									'barely.io tools (Bedroom tier)',
+									'barely.ai tools (Bedroom tier)',
 									'Campaign blueprints',
 									'Merch platform + strategy',
 									'Direct email support',
@@ -418,7 +418,7 @@ export default function BedroomPlusPage() {
 										features={[
 											'Up to 2 campaigns/month',
 											'$1-3K ad spend management',
-											'barely.io tools (Rising tier)',
+											'barely.ai tools (Rising tier)',
 											'Monthly strategy calls',
 											'Revenue optimization',
 										]}
@@ -437,7 +437,7 @@ export default function BedroomPlusPage() {
 										features={[
 											'Advanced campaign execution',
 											'$3-6K ad spend management',
-											'barely.io tools (Breakout tier)',
+											'barely.ai tools (Breakout tier)',
 											'Bi-weekly deep dives',
 											'Priority support',
 										]}

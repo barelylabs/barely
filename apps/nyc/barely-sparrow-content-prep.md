@@ -22,7 +22,7 @@ By 2022, I realized I was more excited about helping musicians market the right 
 
 So I left my VP role to science the hell out of music marketing.
 
-I built barely.io from scratch - not just another dashboard, but a completely open-source platform where artists can see exactly how everything works. Started testing every assumption about how artists grow, treating each campaign like a controlled experiment.
+I built barely.ai from scratch - not just another dashboard, but a completely open-source platform where artists can see exactly how everything works. Started testing every assumption about how artists grow, treating each campaign like a controlled experiment.
 
 My job isn't to be the star of your story. I'm the engineer who builds the stage, tunes the sound system, and optimizes the lighting so you can focus on what you do best: creating art that matters.
 
@@ -105,7 +105,7 @@ My job isn't to be the star of your story. I'm the engineer who builds the stage
 
 ## 3. Tools & Tech Stack Documentation
 
-### barely.io Complete Feature Set
+### barely.ai Complete Feature Set
 
 **Content Management:**
 
@@ -143,10 +143,11 @@ My job isn't to be the star of your story. I'm the engineer who builds the stage
 - **Built-in analytics** - Track performance across all tools in one dashboard
 - **Attribution tracking** - See which campaigns drive which outcomes
 
-### Key Value Propositions for barely.io
+### Key Value Propositions for barely.ai
 
 **Primary Message: Integration & Efficiency**
-"Stop wasting 2+ hours/week managing 10 different platforms. barely.io brings everything together in one place where every tool talks to every other tool."
+
+"Stop wasting 2+ hours/week managing 10 different platforms. barely.ai brings everything together in one place where every tool talks to every other tool."
 
 **Core Benefits:**
 
@@ -189,7 +190,7 @@ My job isn't to be the star of your story. I'm the engineer who builds the stage
 - **Breakout ($149/month):** Premium tools for professional operations
 
 **Bottom Line Messaging:**
-"Whether you're tired of juggling multiple subscriptions or just starting your marketing journey, barely.io gives you professional tools that actually work together - built specifically for how musicians create, release, and promote their art."
+"Whether you're tired of juggling multiple subscriptions or just starting your marketing journey, barely.ai gives you professional tools that actually work together - built specifically for how musicians create, release, and promote their art."
 
 ---
 
@@ -265,7 +266,7 @@ My job isn't to be the star of your story. I'm the engineer who builds the stage
 
 2. **Important (Needed for differentiation):**
 
-   - Full barely.io feature list and screenshots
+   - Full barely.ai feature list and screenshots
    - Specific campaign strategies and results
    - Total success metrics across all clients
 
@@ -280,7 +281,7 @@ My job isn't to be the star of your story. I'm the engineer who builds the stage
 
 While gathering this data, you could immediately:
 
-1. Screenshot your barely.io dashboard/tools
+1. Screenshot your barely.ai dashboard/tools
 2. Export anonymized growth charts from past campaigns
 3. Reach out to current 6 clients for testimonial permission
 4. Document one detailed case study from your best success story

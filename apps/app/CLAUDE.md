@@ -1,6 +1,6 @@
 # CLAUDE.md - Coding Best Practices for @barely/app
 
-This document outlines the coding best practices and established patterns for the barely.io dashboard application. These patterns have been identified through comprehensive analysis of the codebase and represent the most widely used and modern approaches in the app.
+This document outlines the coding best practices and established patterns for the barely.ai dashboard application. These patterns have been identified through comprehensive analysis of the codebase and represent the most widely used and modern approaches in the app.
 
 ## Table of Contents
 
@@ -806,4 +806,4 @@ When refactoring existing code, update import paths:
 
 ## Conclusion
 
-These patterns represent the established best practices in the barely.io dashboard application. When adding new features or refactoring existing code, follow these patterns to maintain consistency and code quality throughout the application. The codebase has been recently modernized with React 19, better-auth, and improved package organization for better developer experience.
+These patterns represent the established best practices in the barely.ai dashboard application. When adding new features or refactoring existing code, follow these patterns to maintain consistency and code quality throughout the application. The codebase has been recently modernized with React 19, better-auth, and improved package organization for better developer experience.

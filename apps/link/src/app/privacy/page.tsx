@@ -52,7 +52,7 @@ const PrivacyPage = () => {
 			<h2 className='text-bold text-2xl'>Contact Us</h2>
 			<p>
 				If you have any questions about this privacy policy, please contact us at{' '}
-				<a href='mailto:support@barely.io'>support@barely.io</a>
+				<a href='mailto:support@barely.ai'>support@barely.ai</a>
 			</p>
 
 			<Link href='/'>

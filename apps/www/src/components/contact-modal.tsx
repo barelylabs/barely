@@ -101,7 +101,7 @@ export function ContactModal({ show, onClose, variant = 'demo' }: ContactModalPr
 	const title = variant === 'demo' ? 'Book a Demo' : 'Get in Touch';
 	const description =
 		variant === 'demo' ?
-			"Let's show you how barely.io can transform your music marketing workflow."
+			"Let's show you how barely.ai can transform your music marketing workflow."
 		:	"Have a question or need help? We're here for you.";
 
 	return (

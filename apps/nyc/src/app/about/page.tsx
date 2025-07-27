@@ -117,7 +117,7 @@ export default function AboutPage() {
 								So I left my VP role to science the hell out of music marketing.
 							</p>
 							<p className='text-lg leading-relaxed text-white/80'>
-								I built barely.io from scratch - not just another dashboard, but a
+								I built barely.ai from scratch - not just another dashboard, but a
 								completely open-source platform where artists can see exactly how
 								everything works. Started testing every assumption about how artists grow,
 								treating each campaign like a controlled experiment.
@@ -181,13 +181,13 @@ export default function AboutPage() {
 									See Our Services
 								</MarketingButton>
 							</Link>
-							<a href='https://barely.io' target='_blank' rel='noopener noreferrer'>
+							<a href='https://barely.ai' target='_blank' rel='noopener noreferrer'>
 								<MarketingButton
 									marketingLook='scientific'
 									size='lg'
 									className='min-w-[200px]'
 								>
-									Try barely.io Tools
+									Try barely.ai Tools
 								</MarketingButton>
 							</a>
 						</div>

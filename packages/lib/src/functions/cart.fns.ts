@@ -461,7 +461,7 @@ export async function sendCartReceiptEmail(cart: ReceiptCart) {
 		from: 'orders@barelycart.email',
 		fromFriendlyName: cart.funnel.workspace.name,
 		to: cart.fan.email,
-		bcc: ['adam@barely.io', cart.funnel.workspace.cartSupportEmail ?? ''].filter(
+		bcc: ['adam@barely.ai', cart.funnel.workspace.cartSupportEmail ?? ''].filter(
 			s => s.length > 0,
 		),
 		subject: `${cart.funnel.workspace.name}: Invoice ${orderId}`,

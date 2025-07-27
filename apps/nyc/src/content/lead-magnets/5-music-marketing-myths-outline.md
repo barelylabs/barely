@@ -170,7 +170,7 @@ Independent artists who have:
 ### Call to Action
 
 - Free strategy session offer
-- Link to barely.io tools
+- Link to barely.ai tools
 - Join the email list for weekly tips
 
 ## Design Notes

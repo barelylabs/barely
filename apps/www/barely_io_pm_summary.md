@@ -1,8 +1,8 @@
-# barely.io Website Update - PM Summary
+# barely.ai Website Update - PM Summary
 
 ## Overview
 
-Create/update the barely.io marketing site to position as the open-source, musician-built alternative to expensive tool stacks with clear tier progression and integration messaging.
+Create/update the barely.ai marketing site to position as the open-source, musician-built alternative to expensive tool stacks with clear tier progression and integration messaging.
 
 ## Key Changes Required
 
@@ -76,17 +76,17 @@ Here's what you actually deserve:
 - Basic Analytics: $20/month
 - **Total: $133/month**
 
-barely.io Rising: $79/month
+barely.ai Rising: $79/month
 **You Save: $54/month ($648/year)**
 
-### 6. Connection to Barely Sparrow
+### 6. Connection to Barely NYC
 
 **"Built by Barely NYC" Section:**
 
 ```
 "The Same Tools We Use for Professional Music Marketing"
 
-barely.io powers the marketing campaigns at Barely NYC, where we've helped indie artists grow from 0 to 30K+ monthly listeners. Every feature was built to solve real problems we encountered in professional music marketing.
+barely.ai powers the marketing campaigns at Barely NYC, where we've helped indie artists grow from 0 to 30K+ monthly listeners. Every feature was built to solve real problems we encountered in professional music marketing.
 
 Now you get the exact same tools we use for agency clients - transparent, integrated, and engineered specifically for how music careers actually grow.
 ```
@@ -134,16 +134,16 @@ Most artists use 6-8 separate tools. Here's what happens:
 - A few buy merch through Big Cartel, some join your ConvertKit list
 - You have no idea which ad drove which result
 
-With barely.io:
-- Same Facebook ad drives traffic to your barely.io smart link
+With barely.ai:
+- Same Facebook ad drives traffic to your barely.ai smart link
 - Fan behavior tracked across pre-saves, website visits, purchases, and email signups
 - You see exactly which $5 ad spend generated which $50 merch sale
 ```
 
 ### Cross-Site Integration
 
-- Clear upgrade path to Barely Sparrow agency services
-- "Need full-service marketing?" CTAs linking to barelysparrow.com
+- Clear upgrade path to Barely NYC agency services
+- "Need full-service marketing?" CTAs linking to barely.nyc
 - Consistent branding and founder story
 - Shared testimonials and case studies
 
@@ -156,9 +156,9 @@ With barely.io:
 
 **Meta Tags:**
 
-- Homepage: "Open Source Music Marketing Platform | barely.io"
-- Pricing: "Transparent Pricing for Music Marketing Tools | barely.io"
-- Features: "Integrated Marketing Tools for Musicians | barely.io"
+- Homepage: "Open Source Music Marketing Platform | barely.ai"
+- Pricing: "Transparent Pricing for Music Marketing Tools | barely.ai"
+- Features: "Integrated Marketing Tools for Musicians | barely.ai"
 
 ## Future AI Features Positioning
 
@@ -171,12 +171,13 @@ With barely.io:
 - Free to paid conversion rate (target 15-25% within 6 months)
 - Tool stack calculator completions
 - Time spent on pricing page
-- Cross-conversion to Barely Sparrow agency inquiries
+- Cross-conversion to Barely NYC agency inquiries
 - Tier upgrade velocity (quarterly upgrades)
 
 ## Priority Implementation Order
 
-1. Homepage with hero, value props, and Barely Sparrow connection
+    1. Homepage with hero, value props, and Barely NYC connection
+
 2. Pricing page with new tier structure and calculator
 3. Features page with integration messaging
 4. Competitor comparison pages (vs. Linkfire, ConvertKit, Squarespace)

@@ -1,6 +1,6 @@
-# barely.io Marketing Site Content Strategy
+# barely.ai Marketing Site Content Strategy
 
-## Homepage (barely.io)
+## Homepage (barely.ai)
 
 ### Hero Section
 
@@ -45,14 +45,14 @@ Most platforms force you to choose between:
 
 **The Same Tools We Use for Professional Music Marketing**
 
-barely.io powers the marketing campaigns at Barely, where we've helped indie artists grow from 0 to 30K+ monthly listeners. Every feature was built to solve real problems we encountered in professional music marketing.
+barely.ai powers the marketing campaigns at Barely, where we've helped indie artists grow from 0 to 30K+ monthly listeners. Every feature was built to solve real problems we encountered in professional music marketing.
 
 _Now you get the exact same tools we use for agency clients - transparent, integrated, and engineered specifically for how music careers actually grow._
 
 ### Tool Stack Cost Calculator
 
 **See How Much You're Overpaying**
-_Interactive calculator showing current tools vs. barely.io savings_
+_Interactive calculator showing current tools vs. barely.ai savings_
 
 Common Tool Stack:
 
@@ -62,7 +62,7 @@ Common Tool Stack:
 - Basic Analytics: $20/month
 - **Total: $133/month**
 
-barely.io Rising Tier: $79/month
+barely.ai Rising Tier: $79/month
 **You Save: $54/month ($648/year)**
 
 ### Career Progression Story
@@ -151,9 +151,9 @@ Most artists use 6-8 separate tools. Here's what happens:
 - A few buy merch through Big Cartel, some join your ConvertKit list
 - You have **no idea which ad drove which result**
 
-With barely.io:
+With barely.ai:
 
-- Same Facebook ad drives traffic to your barely.io smart link
+- Same Facebook ad drives traffic to your barely.ai smart link
 - Fan behavior tracked across pre-saves, website visits, purchases, and email signups
 - **You see exactly which $5 ad spend generated which $50 merch sale**
 
@@ -165,7 +165,7 @@ With barely.io:
 
 **The Tools Behind the Strategy**
 
-barely.io powers the marketing campaigns at Barely, our music marketing agency. Every feature was built to solve real problems we encountered helping indie artists grow from 0-30K monthly listeners.
+barely.ai powers the marketing campaigns at Barely, our music marketing agency. Every feature was built to solve real problems we encountered helping indie artists grow from 0-30K monthly listeners.
 
 **Why We Built This:**
 
@@ -178,7 +178,7 @@ barely.io powers the marketing campaigns at Barely, our music marketing agency. 
 
 **Transparency in Tools and Methods**
 
-Unlike other platforms, barely.io is open source. You can see exactly how everything works, contribute features, or even self-host if you prefer. No black boxes, no vendor lock-in.
+Unlike other platforms, barely.ai is open source. You can see exactly how everything works, contribute features, or even self-host if you prefer. No black boxes, no vendor lock-in.
 
 [View on GitHub] [Self-Hosting Guide]
 
@@ -192,25 +192,25 @@ Brief profiles emphasizing technical expertise and music industry understanding.
 
 ### Detailed Comparison Pages
 
-**barely.io vs. Linkfire**
+**barely.ai vs. Linkfire**
 
 - Feature comparison
 - Pricing analysis
 - Migration guide
 
-**barely.io vs. ConvertKit + Mailchimp**
+**barely.ai vs. ConvertKit + Mailchimp**
 
 - Email marketing capabilities
 - Music-specific automation
 - Cost savings breakdown
 
-**barely.io vs. Squarespace + Bandzoogle**
+**barely.ai vs. Squarespace + Bandzoogle**
 
 - Landing page performance
 - Music industry templates
 - SEO and conversion optimization
 
-**barely.io vs. Shopify + Big Cartel**
+**barely.ai vs. Shopify + Big Cartel**
 
 - Merch integration benefits
 - Fan behavior tracking
@@ -224,7 +224,7 @@ Brief profiles emphasizing technical expertise and music industry understanding.
 
 **Real Artists, Real Results**
 
-_"I was paying $180/month for Linkfire Pro, ConvertKit, and Squarespace. barely.io gives me everything for $79 and I actually understand which campaigns work."_
+_"I was paying $180/month for Linkfire Pro, ConvertKit, and Squarespace. barely.ai gives me everything for $79 and I actually understand which campaigns work."_
 
 - Sarah Chen, Indie Folk Artist
 
@@ -273,8 +273,8 @@ Step-by-step guides for moving from each major competitor, emphasizing data pres
 
 ### Competitive Content
 
-- "barely.io vs [Competitor]" comparison pages
-- "Why We Left [Tool] for barely.io" migration stories
+- "barely.ai vs [Competitor]" comparison pages
+- "Why We Left [Tool] for barely.ai" migration stories
 - "Hidden Costs of Music Marketing Tools"
 
 ---

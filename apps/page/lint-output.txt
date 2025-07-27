@@ -1,8 +1,0 @@
-
-> @barely/page@0.1.0 lint /Users/barely/Web/barely.io/worktrees/update-nextjs-react/apps/page
-> eslint
-
-(node:14977) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/barely/Web/barely.io/worktrees/update-nextjs-react/apps/page/eslint.config.js?mtime=1750449963010 is not specified and it doesn't parse as CommonJS.
-Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to /Users/barely/Web/barely.io/worktrees/update-nextjs-react/apps/page/package.json.
-(Use `node --trace-warnings ...` to show where the warning was created)

@@ -100,7 +100,7 @@ export function ShippingUpdateEmailTemplate({
 						}}
 					>
 						<Img
-							src={'https://app.barely.io/_static/logo.png'}
+							src={'https://app.barely.ai/_static/logo.png'}
 							width='42'
 							height='42'
 							alt='Logo'

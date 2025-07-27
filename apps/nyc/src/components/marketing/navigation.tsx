@@ -34,7 +34,7 @@ export function Navigation() {
 						{/* Logo */}
 						<Link href='/' className='flex items-center space-x-2'>
 							<Img
-								src='/_static/barely_sparrow_logo_2-tone.svg'
+								src='/_static/barely_nyc_logo.svg'
 								alt='Barely'
 								width={32}
 								height={32}
@@ -107,7 +107,7 @@ export function Navigation() {
 					<div className='flex items-center justify-between'>
 						<Link href='/' className='flex items-center space-x-2'>
 							<Img
-								src='/_static/barely_sparrow_logo_2-tone.svg'
+								src='/_static/barely_nyc_logo.svg'
 								alt='Barely'
 								width={32}
 								height={32}
