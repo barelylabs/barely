@@ -55,33 +55,60 @@ export async function getSpotifyArtistAlbums(props: {
 	accessToken: string;
 	spotifyId: string;
 	needPopularity?: boolean;
+	limit?: number;
 }) {
-	const endpoint = `https://api.spotify.com/v1/artists/${props.spotifyId}/albums`;
-
 	const auth = `Bearer ${props.accessToken}`;
+	const allItems = [];
+	let nextUrl: string | null =
+		`https://api.spotify.com/v1/artists/${props.spotifyId}/albums?limit=${props.limit ?? 20}`;
+	let responseData: z.infer<typeof spotifyArtistAlbumsResponseSchema> | null = null;
 
-	const res = await zGet(endpoint, spotifyArtistAlbumsResponseSchema, { auth });
+	// Fetch all pages of albums
+	while (nextUrl) {
+		const res = (await zGet(nextUrl, spotifyArtistAlbumsResponseSchema, { auth })) as {
+			success: boolean;
+			parsed: boolean;
+			data: z.infer<typeof spotifyArtistAlbumsResponseSchema>;
+		};
 
-	if (!res.success || !res.parsed) {
-		await log({
-			message: 'Failed to get Spotify artist albums' + JSON.stringify(res),
-			type: 'errors',
-			location: 'getSpotifyArtistAlbums',
-			mention: true,
-		});
+		if (!res.success || !res.parsed) {
+			await log({
+				message: 'Failed to get Spotify artist albums' + JSON.stringify(res),
+				type: 'errors',
+				location: 'getSpotifyArtistAlbums',
+				mention: true,
+			});
+			return null;
+		}
+
+		responseData = res.data;
+		allItems.push(...res.data.items);
+		nextUrl = res.data.next;
+	}
+
+	if (!responseData) {
 		return null;
 	}
 
 	if (!props.needPopularity) {
-		return res.data;
+		return {
+			...responseData,
+			items: allItems,
+			next: null,
+			total: allItems.length,
+		};
 	}
+
+	console.log('number of artist albums => ', allItems.length);
 
 	const albumsWithPopularity = await getSeveralSpotifyAlbums({
 		accessToken: props.accessToken,
-		albumIds: res.data.items.map(album => album.id),
+		albumIds: allItems.map(album => album.id),
 	});
 
-	const items = res.data.items.map(album => {
+	console.log('number of albums with popularity => ', albumsWithPopularity?.length);
+
+	const items = allItems.map(album => {
 		const albumWithPopularity = albumsWithPopularity?.find(a => a.id === album.id);
 		return {
 			...album,
@@ -90,8 +117,10 @@ export async function getSpotifyArtistAlbums(props: {
 	});
 
 	return {
-		...res.data,
+		...responseData,
 		items,
+		next: null,
+		total: items.length,
 	};
 }
 

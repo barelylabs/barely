@@ -6,6 +6,8 @@ import type { Link } from '../link/link.schema';
 import { createTRPCRouter, workspaceQueryProcedure } from '../../api/trpc';
 import { FmPages } from '../fm/fm.sql';
 import { Links } from '../link/link.sql';
+import { Tracks, SpotifyLinkedTracks } from '../track/track.sql';
+import { getIsoDateRangeFromDescription } from '../../../utils/format-date';
 import {
 	pipe_cartTimeseries,
 	pipe_cartTopBrowsers,
@@ -74,6 +76,13 @@ import {
 	pipe_webHitsTimeseries,
 	stdWebEventQueryToPipeParamsSchema,
 } from './stat.schema';
+import {
+	pipe_spotifyArtistTimeseries,
+	pipe_spotifyTrackTimeseries,
+	pipe_spotifyAlbumTimeseries,
+	pipe_spotifyTrackComparison,
+	spotifyStatQuerySchema,
+} from './stat.spotify.schema';
 
 type AssetByIdResult =
 	| {
@@ -993,5 +1002,98 @@ export const statRouter = createTRPCRouter({
 			}
 
 			throw new Error('Invalid topEventType');
+		}),
+
+	// Spotify stats endpoints
+	spotifyArtistTimeseries: workspaceQueryProcedure
+		.input(spotifyStatQuerySchema)
+		.query(async ({ ctx, input }) => {
+			const dateRange = input.start && input.end
+				? { start: input.start, end: input.end }
+				: getIsoDateRangeFromDescription(input.dateRange ?? '28d');
+
+			const timeseries = await pipe_spotifyArtistTimeseries({
+				workspaceId: ctx.workspace.id,
+				...dateRange,
+			});
+
+			return timeseries.data;
+		}),
+
+	spotifyTrackTimeseries: workspaceQueryProcedure
+		.input(spotifyStatQuerySchema.extend({ trackId: z.string().optional() }))
+		.query(async ({ ctx, input }) => {
+			const dateRange = input.start && input.end
+				? { start: input.start, end: input.end }
+				: getIsoDateRangeFromDescription(input.dateRange ?? '28d');
+
+			// If specific track ID provided, get all its Spotify IDs
+			let spotifyIds: string[] = [];
+			if (input.trackId) {
+				const track = await ctx.db.http.query.Tracks.findFirst({
+					where: and(
+						eq(Tracks.id, input.trackId),
+						eq(Tracks.workspaceId, ctx.workspace.id),
+					),
+					with: {
+						spotifyLinkedTracks: {
+							columns: {
+								spotifyLinkedTrackId: true,
+							},
+						},
+					},
+				});
+
+				if (track) {
+					spotifyIds = track.spotifyLinkedTracks.map(lt => lt.spotifyLinkedTrackId);
+				}
+			}
+
+			const timeseries = await pipe_spotifyTrackTimeseries({
+				workspaceId: ctx.workspace.id,
+				...dateRange,
+				spotifyId: input.spotifyId || (spotifyIds.length > 0 ? spotifyIds.join(',') : undefined),
+			});
+
+			return timeseries.data;
+		}),
+
+	spotifyAlbumTimeseries: workspaceQueryProcedure
+		.input(spotifyStatQuerySchema)
+		.query(async ({ ctx, input }) => {
+			const dateRange = input.start && input.end
+				? { start: input.start, end: input.end }
+				: getIsoDateRangeFromDescription(input.dateRange ?? '28d');
+
+			const timeseries = await pipe_spotifyAlbumTimeseries({
+				workspaceId: ctx.workspace.id,
+				...dateRange,
+				spotifyId: input.spotifyId,
+			});
+
+			return timeseries.data;
+		}),
+
+	spotifyTrackComparison: workspaceQueryProcedure
+		.input(
+			z.object({
+				trackId: z.string(),
+				dateRange: z.enum(['1d', '1w', '28d', '1y']).optional().default('28d'),
+				start: z.string().optional(),
+				end: z.string().optional(),
+			}),
+		)
+		.query(async ({ ctx, input }) => {
+			const dateRange = input.start && input.end
+				? { start: input.start, end: input.end }
+				: getIsoDateRangeFromDescription(input.dateRange);
+
+			const comparison = await pipe_spotifyTrackComparison({
+				workspaceId: ctx.workspace.id,
+				trackId: input.trackId,
+				...dateRange,
+			});
+
+			return comparison.data;
 		}),
 });

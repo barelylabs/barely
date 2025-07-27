@@ -66,9 +66,17 @@ export const Tracks = pgTable(
 	},
 	track => ({
 		workspace: index('Tracks_workspaceId_key').on(track.workspaceId),
-		workspace_trackName: uniqueIndex('Tracks_workspace_trackName_key').on(
+		workspace_trackName: index('Tracks_workspace_trackName_key').on(
 			track.workspaceId,
 			track.name,
+		),
+		workspace_isrc: uniqueIndex('Tracks_workspace_isrc_key').on(
+			track.workspaceId,
+			track.isrc,
+		),
+		workspace_spotifyId: uniqueIndex('Tracks_workspace_spotifyId_key').on(
+			track.workspaceId,
+			track.spotifyId,
 		),
 	}),
 );
@@ -82,6 +90,7 @@ export const Track_Relations = relations(Tracks, ({ one, many }) => ({
 	// many-to-one
 	campaigns: many(Campaigns),
 	playlistPlacements: many(PlaylistPlacements),
+	spotifyLinkedTracks: many(SpotifyLinkedTracks),
 	stats: many(Stats),
 	trackRenders: many(TrackRenders),
 	_audioFiles: many(_Files_To_Tracks__Audio),
@@ -93,3 +102,25 @@ export const Track_Relations = relations(Tracks, ({ one, many }) => ({
 	_genres: many(_Tracks_To_Genres),
 	_albums: many(_Albums_To_Tracks),
 }));
+
+export const SpotifyLinkedTracks = pgTable('SpotifyLinkedTracks', {
+	trackId: dbId('trackId')
+		.notNull()
+		.references(() => Tracks.id, {
+			onDelete: 'cascade',
+		}),
+	spotifyLinkedTrackId: varchar('spotifyLinkedTrackId', { length: 255 }).primaryKey(),
+	isDefault: boolean('isDefault').notNull().default(false),
+	spotifyPopularity: integer('spotifyPopularity'),
+	...timestamps,
+});
+
+export const SpotifyLinkedTracks_Relations = relations(
+	SpotifyLinkedTracks,
+	({ one }) => ({
+		track: one(Tracks, {
+			fields: [SpotifyLinkedTracks.trackId],
+			references: [Tracks.id],
+		}),
+	}),
+);

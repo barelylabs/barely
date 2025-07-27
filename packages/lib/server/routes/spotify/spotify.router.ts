@@ -5,6 +5,7 @@ import { z } from 'zod';
 
 import type { SpotifyTrackOption } from './spotify.schema';
 import { env } from '../../../env';
+import { isDevelopment } from '../../../utils/environment';
 import { newId } from '../../../utils/id';
 import { parseSpotifyUrl } from '../../../utils/spotify';
 import { ratelimit } from '../../../utils/upstash';
@@ -382,7 +383,7 @@ const spotifyRouter = createTRPCRouter({
 
 	syncWorkspaceArtist: workspaceQueryProcedure.mutation(async ({ ctx }) => {
 		// Rate limit to once per minute
-		const limiter = ratelimit(1, '600 s');
+		const limiter = ratelimit(1, isDevelopment() ? '10 s' : '600 s');
 		const { success } = await limiter.limit(
 			ctx.workspace.id + 'syncWorkspaceSpotifyArtist',
 		);
@@ -420,6 +421,8 @@ const spotifyRouter = createTRPCRouter({
 			needPopularity: true,
 		});
 
+		// throw new Error('test');
+
 		if (!albums?.items) {
 			throw new Error('Failed to fetch artist albums');
 		}
@@ -456,7 +459,7 @@ const spotifyRouter = createTRPCRouter({
 				// Process each track
 				for (const track of tracks.items) {
 					await syncSpotifyTrack({
-						track,
+						spotifyTrack: track,
 						albumId: existingAlbum.id,
 						workspaceId: ctx.workspace.id,
 						dbPool: ctx.db.pool,
@@ -490,7 +493,7 @@ const spotifyRouter = createTRPCRouter({
 				// Process each track
 				for (const track of tracks.items) {
 					await syncSpotifyTrack({
-						track,
+						spotifyTrack: track,
 						albumId: newAlbum.id,
 						workspaceId: ctx.workspace.id,
 						dbPool: ctx.db.pool,

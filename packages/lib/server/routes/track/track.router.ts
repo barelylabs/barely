@@ -9,6 +9,7 @@ import {
 	lt,
 	notInArray,
 	or,
+	sql,
 } from 'drizzle-orm';
 import { z } from 'zod';
 
@@ -46,8 +47,7 @@ export const trackRouter = createTRPCRouter({
 				with: trackWith_workspace_genres_files,
 				where: sqlAnd([
 					eq(Tracks.workspaceId, ctx.workspace.id),
-					!!search?.length &&
-						or(ilike(Tracks.name, `%${search}%`), ilike(Tracks.spotifyId, `%${search}%`)),
+					!!search?.length && ilike(Tracks.name, `%${search}%`),
 					showArchived ? undefined : isNull(Tracks.archivedAt),
 					!!cursor &&
 						or(
@@ -72,8 +72,9 @@ export const trackRouter = createTRPCRouter({
 					: (
 						sortOrder === 'asc' // default to popularity
 					) ?
-						asc(Tracks.spotifyPopularity)
-					:	desc(Tracks.spotifyPopularity),
+						// asc(Tracks.spotifyPopularity)
+						sql`${Tracks.spotifyPopularity} asc nulls last`
+					:	sql`${Tracks.spotifyPopularity} desc nulls last`,
 					desc(Tracks.createdAt),
 					desc(Tracks.id),
 				],
@@ -109,16 +110,16 @@ export const trackRouter = createTRPCRouter({
 		return await getTrackBySpotifyId(input, ctx.db);
 	}),
 
-	existsBySpotifyId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
-		const track = await ctx.db.http.query.Tracks.findFirst({
-			where: eq(Tracks.spotifyId, input),
-			columns: {
-				id: true,
-			},
-		});
+	// existsBySpotifyId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
+	// 	const track = await ctx.db.http.query.Tracks.findFirst({
+	// 		where: eq(Tracks.spotifyId, input),
+	// 		columns: {
+	// 			id: true,
+	// 		},
+	// 	});
 
-		return !!track;
-	}),
+	// 	return !!track;
+	// }),
 
 	// create
 	create: privateProcedure.input(createTrackSchema).mutation(async ({ ctx, input }) => {

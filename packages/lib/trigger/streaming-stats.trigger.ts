@@ -5,14 +5,15 @@ import { env } from '../env';
 import { dbHttp } from '../server/db';
 import { Albums } from '../server/routes/album/album.sql';
 import { ProviderAccounts } from '../server/routes/provider-account/provider-account.sql';
-import { getSpotifyAccessToken } from '../server/routes/spotify/spotify.fns';
+import { getSpotifyAccessToken, updateDefaultSpotifyId } from '../server/routes/spotify/spotify.fns';
 import { ingestStreamingStat } from '../server/routes/stat/stat.streaming.tb';
-import { Tracks } from '../server/routes/track/track.sql';
+import { SpotifyLinkedTracks, Tracks } from '../server/routes/track/track.sql';
 import { Workspaces } from '../server/routes/workspace/workspace.sql';
 import { getSeveralSpotifyAlbums } from '../server/spotify/spotify.endpts.album';
 import { getSpotifyArtist } from '../server/spotify/spotify.endpts.artist';
 import { getSeveralSpotifyTracks } from '../server/spotify/spotify.endpts.track';
 import { log } from '../utils/log';
+import { raise } from '../utils/raise';
 
 export const streamingStatsTrigger = schedules.task({
 	id: 'daily-streaming-stats',
@@ -37,9 +38,19 @@ export const streamingStatsTrigger = schedules.task({
 				},
 				tracks: {
 					columns: {
+						id: true,
 						spotifyId: true,
 						spotifyPopularity: true,
 						spotifyStreams: true,
+					},
+					with: {
+						spotifyLinkedTracks: {
+							columns: {
+								spotifyLinkedTrackId: true,
+								isDefault: true,
+								spotifyPopularity: true,
+							},
+						},
 					},
 				},
 			},
@@ -119,14 +130,22 @@ export const streamingStatsTrigger = schedules.task({
 				}
 
 				// Get all tracks for the artist
-				const tracks = await getSeveralSpotifyTracks({
+
+				const mainTrackIds = workspace.tracks
+					.map(track => track.spotifyId)
+					.filter(id => id !== null);
+
+				const linkedTracks = workspace.tracks.flatMap(track => track.spotifyLinkedTracks);
+				const linkedTrackIds = linkedTracks.map(
+					linkedTrack => linkedTrack.spotifyLinkedTrackId,
+				);
+
+				const spotifyTracks = await getSeveralSpotifyTracks({
 					accessToken,
-					trackIds: workspace.tracks
-						.map(track => track.spotifyId)
-						.filter(id => id !== null),
+					trackIds: [...mainTrackIds, ...linkedTrackIds],
 				});
 
-				if (!tracks) {
+				if (!spotifyTracks) {
 					await log({
 						message: `Failed to get Spotify tracks for workspace ${workspace.id}`,
 						type: 'errors',
@@ -134,6 +153,58 @@ export const streamingStatsTrigger = schedules.task({
 					});
 					continue;
 				}
+
+				// Update SpotifyLinkedTracks with latest popularity data
+				for (const track of workspace.tracks) {
+					for (const linkedTrack of track.spotifyLinkedTracks) {
+						const spotifyTrack = spotifyTracks.find(
+							st => st.id === linkedTrack.spotifyLinkedTrackId,
+						);
+						if (spotifyTrack) {
+							// Update the linked track popularity
+							await dbHttp
+								.update(SpotifyLinkedTracks)
+								.set({
+									spotifyPopularity: spotifyTrack.popularity,
+								})
+								.where(
+									eq(
+										SpotifyLinkedTracks.spotifyLinkedTrackId,
+										linkedTrack.spotifyLinkedTrackId,
+									),
+								);
+						}
+					}
+
+					// Update default Spotify ID based on popularity
+					await updateDefaultSpotifyId(track.id, dbHttp);
+				}
+
+				const trackStats = await Promise.all(
+					workspace.tracks.map(async mainTrack => {
+						// Get all Spotify IDs for this track
+						const allSpotifyIds = mainTrack.spotifyLinkedTracks.map(
+							t => t.spotifyLinkedTrackId,
+						);
+
+						// Get popularity for all linked tracks
+						const allPopularities = spotifyTracks
+							.filter(st => allSpotifyIds.includes(st.id))
+							.map(st => st.popularity);
+
+						const highestPopularity = Math.max(...allPopularities, 0);
+
+						// Get the default Spotify ID (most popular)
+						const defaultLink = mainTrack.spotifyLinkedTracks.find(l => l.isDefault);
+						const defaultSpotifyId = defaultLink?.spotifyLinkedTrackId ?? mainTrack.spotifyId;
+
+						return {
+							spotifyId: defaultSpotifyId ?? raise('No default Spotify ID found'),
+							prevSpotifyPopularity: mainTrack.spotifyPopularity,
+							spotifyPopularity: highestPopularity,
+						};
+					}),
+				);
 
 				// Record stats to Tinybird
 				await recordSpotifyStats({
@@ -152,12 +223,7 @@ export const streamingStatsTrigger = schedules.task({
 						prevSpotifyPopularity: workspace.albums.find(a => a.spotifyId === album.id)
 							?.spotifyPopularity,
 					})),
-					trackStats: tracks.map(track => ({
-						spotifyId: track.id,
-						spotifyPopularity: track.popularity,
-						prevSpotifyPopularity: workspace.tracks.find(t => t.spotifyId === track.id)
-							?.spotifyPopularity,
-					})),
+					trackStats,
 				});
 			} catch (error) {
 				await log({

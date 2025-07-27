@@ -99,49 +99,76 @@ export { spotifyTrackResponseSchema };
 export async function getSpotifyTracksByAlbum(props: {
 	accessToken: string;
 	albumId: string;
-	// needPopularity?: boolean;
+	limit?: number;
 }) {
-	const endpoint = `https://api.spotify.com/v1/albums/${props.albumId}/tracks`;
-
 	const auth = `Bearer ${props.accessToken}`;
+	const allItems = [];
+	let nextUrl: string | null =
+		`https://api.spotify.com/v1/albums/${props.albumId}/tracks?limit=${props.limit ?? 25}`;
 
-	const res = await zGet(endpoint, spotifyAlbumTracksResponseSchema, { auth });
+	// Fetch all pages of tracks
+	while (nextUrl) {
+		const res = (await zGet(nextUrl, spotifyAlbumTracksResponseSchema, { auth })) as {
+			success: boolean;
+			parsed: boolean;
+			data: z.infer<typeof spotifyAlbumTracksResponseSchema>;
+		};
 
-	if (!res.success || !res.parsed) {
-		await log({
-			message: 'Failed to get Spotify album tracks' + JSON.stringify(res),
-			type: 'errors',
-			location: 'getSpotifyTracksByAlbum',
-			mention: true,
-		});
+		if (!res.success || !res.parsed) {
+			await log({
+				message: 'Failed to get Spotify album tracks' + JSON.stringify(res),
+				type: 'errors',
+				location: 'getSpotifyTracksByAlbum',
+				mention: true,
+			});
+			return null;
+		}
+
+		allItems.push(...res.data.items);
+		nextUrl = res.data.next;
+	}
+
+	// Get full track details for all tracks in chunks of 20
+	const tracks = [];
+	for (let i = 0; i < allItems.length; i += 20) {
+		const chunk = allItems.slice(i, i + 20);
+		const trackIds = chunk.map(track => track.id);
+		const tracksEndpoint = `https://api.spotify.com/v1/tracks?ids=${trackIds.join(',')}`;
+
+		const tracksRes = await zGet(
+			tracksEndpoint,
+			z.object({
+				tracks: z.array(spotifyTrackResponseSchema),
+			}),
+			{ auth },
+		);
+
+		if (!tracksRes.success || !tracksRes.parsed) {
+			await log({
+				message: 'Failed to get full Spotify track details' + JSON.stringify(tracksRes),
+				type: 'errors',
+				location: 'getSpotifyTracksByAlbum',
+				mention: true,
+			});
+			continue;
+		}
+
+		tracks.push(...tracksRes.data.tracks);
+	}
+
+	if (tracks.length === 0) {
 		return null;
 	}
 
-	// Get full track details for all tracks
-	const trackIds = res.data.items.map(track => track.id);
-	const tracksEndpoint = `https://api.spotify.com/v1/tracks?ids=${trackIds.join(',')}`;
-
-	const tracksRes = await zGet(
-		tracksEndpoint,
-		z.object({
-			tracks: z.array(spotifyTrackResponseSchema),
-		}),
-		{ auth },
-	);
-
-	if (!tracksRes.success || !tracksRes.parsed) {
-		await log({
-			message: 'Failed to get full Spotify track details' + JSON.stringify(tracksRes),
-			type: 'errors',
-			location: 'getSpotifyTracksByAlbum',
-			mention: true,
-		});
-		return null;
-	}
-
+	// Return in the same format as before
 	return {
-		...res.data,
-		items: tracksRes.data.tracks,
+		href: `https://api.spotify.com/v1/albums/${props.albumId}/tracks`,
+		items: tracks,
+		limit: props.limit ?? 20,
+		next: null,
+		offset: 0,
+		previous: null,
+		total: tracks.length,
 	};
 }
 
@@ -189,27 +216,34 @@ export async function getSeveralSpotifyTracks(props: {
 	accessToken: string;
 	trackIds: string[];
 }) {
-	const endpoint = `https://api.spotify.com/v1/tracks?ids=${props.trackIds.join(',')}`;
-
 	const auth = `Bearer ${props.accessToken}`;
+	const tracks = [];
 
-	const res = await zGet(
-		endpoint,
-		z.object({
-			tracks: z.array(spotifyTrackResponseSchema),
-		}),
-		{ auth },
-	);
+	// Process trackIds in chunks of 50
+	for (let i = 0; i < props.trackIds.length; i += 50) {
+		const chunk = props.trackIds.slice(i, i + 50);
+		const endpoint = `https://api.spotify.com/v1/tracks?ids=${chunk.join(',')}`;
 
-	if (!res.success || !res.parsed) {
-		await log({
-			message: 'Failed to get several Spotify tracks' + JSON.stringify(res),
-			type: 'errors',
-			location: 'getSeveralSpotifyTracks',
-			mention: true,
-		});
-		return null;
+		const res = await zGet(
+			endpoint,
+			z.object({
+				tracks: z.array(spotifyTrackResponseSchema),
+			}),
+			{ auth },
+		);
+
+		if (!res.success || !res.parsed) {
+			await log({
+				message: `Failed to get Spotify tracks chunk ${i / 50 + 1}: ${JSON.stringify(res)}`,
+				type: 'errors',
+				location: 'getSeveralSpotifyTracks',
+				mention: true,
+			});
+			continue;
+		}
+
+		tracks.push(...res.data.tracks);
 	}
 
-	return res.data.tracks;
+	return tracks.length > 0 ? tracks : null;
 }

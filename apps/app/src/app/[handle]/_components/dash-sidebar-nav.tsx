@@ -67,6 +67,7 @@ export function SidebarNav() {
 		{ title: 'media', icon: 'media', href: `/${handle}/media` },
 		{ title: 'tracks', icon: 'music', href: `/${handle}/tracks` },
 		{ title: 'mixtapes', icon: 'mixtape', href: `/${handle}/mixtapes` },
+		{ title: 'spotify stats', icon: 'spotify', href: `/${handle}/spotify/stats` },
 	];
 
 	const pageLinks: SidebarNavLink[] = [

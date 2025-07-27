@@ -79,6 +79,7 @@ export function getTrackWith_Workspace_Genres_Files__fromRawTrack(
 
 	return {
 		...trackData,
+		spotifyPopularity: trackData.spotifyPopularity ?? 0,
 		genres: _genres.map(_g => _g.genre),
 		artworkFiles: _artworkFiles.map(_f => ({
 			..._f.file,

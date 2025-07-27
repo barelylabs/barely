@@ -1,5 +1,5 @@
 import { TRPCError } from '@trpc/server';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 
 import type { Db } from '../../db';
 import type { DbPool } from '../../db/pool';
@@ -18,7 +18,7 @@ import {
 } from '../playlist/playlist.fns';
 import { _Playlists_To_ProviderAccounts, Playlists } from '../playlist/playlist.sql';
 import { ProviderAccounts } from '../provider-account/provider-account.sql';
-import { Tracks } from '../track/track.sql';
+import { SpotifyLinkedTracks, Tracks } from '../track/track.sql';
 
 const getSpotifyAccessToken = async (spotifyAccount: ProviderAccount) => {
 	const { access_token, refresh_token, expires_at } = spotifyAccount;
@@ -237,12 +237,12 @@ const syncSpotifyAccountPlaylists = async (spotifyAccoundId: string, db: Db) => 
 };
 
 async function syncSpotifyTrack({
-	track,
+	spotifyTrack,
 	albumId,
 	workspaceId,
 	dbPool,
 }: {
-	track: {
+	spotifyTrack: {
 		id: string;
 		name: string;
 		album: {
@@ -257,197 +257,203 @@ async function syncSpotifyTrack({
 	workspaceId: string;
 	dbPool: DbPool;
 }) {
-	// First check if track exists by both spotifyId and ISRC
-	console.log('syncing track => ', track.name);
+	console.log('syncing track => ', spotifyTrack.name);
 
-	const existingTrackBySpotifyIdAndIsrc = await dbHttp.query.Tracks.findFirst({
-		where: and(eq(Tracks.spotifyId, track.id), eq(Tracks.isrc, track.external_ids.isrc)),
-		columns: {
-			id: true,
-			spotifyPopularity: true,
+	// Find existing track by ISRC in the workspace
+	const existingTrackByIsrc = await dbHttp.query.Tracks.findFirst({
+		where: and(
+			eq(Tracks.workspaceId, workspaceId),
+			eq(Tracks.isrc, spotifyTrack.external_ids.isrc),
+		),
+		with: {
+			spotifyLinkedTracks: true,
 		},
 	});
 
-	if (existingTrackBySpotifyIdAndIsrc) {
-		// Update existing track
-		await dbPool
-			.update(Tracks)
-			.set({
-				name: track.name,
-				released: true,
-				imageUrl: track.album.images[0]?.url,
-				spotifyPopularity: chooseMax(
-					existingTrackBySpotifyIdAndIsrc.spotifyPopularity,
-					track.popularity,
-				),
-				releaseDate: track.album.release_date,
-			})
-			.where(eq(Tracks.id, existingTrackBySpotifyIdAndIsrc.id));
+	if (existingTrackByIsrc) {
+		// Track exists - add/update Spotify link
+		const existingSpotifyLink = existingTrackByIsrc.spotifyLinkedTracks.find(
+			link => link.spotifyLinkedTrackId === spotifyTrack.id,
+		);
 
-		// Add track to album-track join table if not already linked
-		const existingLink = await dbPool.query._Albums_To_Tracks.findFirst({
-			where: and(
-				eq(_Albums_To_Tracks.albumId, albumId),
-				eq(_Albums_To_Tracks.trackId, existingTrackBySpotifyIdAndIsrc.id),
-			),
-		});
-
-		if (!existingLink) {
-			await dbPool.insert(_Albums_To_Tracks).values({
-				albumId,
-				trackId: existingTrackBySpotifyIdAndIsrc.id,
-				trackNumber: track.track_number ?? 1,
+		if (existingSpotifyLink) {
+			// Update existing link
+			await dbPool
+				.update(SpotifyLinkedTracks)
+				.set({
+					spotifyPopularity: spotifyTrack.popularity,
+					updatedAt: new Date().toISOString(),
+				})
+				.where(eq(SpotifyLinkedTracks.spotifyLinkedTrackId, spotifyTrack.id));
+		} else {
+			// Add new Spotify link
+			await dbPool.insert(SpotifyLinkedTracks).values({
+				trackId: existingTrackByIsrc.id,
+				spotifyLinkedTrackId: spotifyTrack.id,
+				spotifyPopularity: spotifyTrack.popularity,
+				isDefault: false, // Will be updated later if needed
 			});
 		}
-		return;
-	}
 
-	// Check for existing track by ISRC
-	const existingTrackByIsrc = await dbPool.query.Tracks.findFirst({
-		where: and(
-			eq(Tracks.workspaceId, workspaceId),
-			eq(Tracks.isrc, track.external_ids.isrc),
-		),
-	});
+		// Update default based on popularity
+		await updateDefaultSpotifyId(existingTrackByIsrc.id, dbPool);
 
-	if (existingTrackByIsrc) {
-		// Update the existing track with spotifyId
+		// Update track info with latest data
+		const highestPopularity = await getHighestPopularityForTrack(existingTrackByIsrc.id, dbPool);
 		await dbPool
 			.update(Tracks)
 			.set({
-				spotifyId: track.id,
+				name: spotifyTrack.name,
 				released: true,
-				imageUrl: track.album.images[0]?.url,
-				spotifyPopularity: chooseMax(
-					existingTrackByIsrc.spotifyPopularity,
-					track.popularity,
-				),
-				releaseDate: track.album.release_date,
+				imageUrl: spotifyTrack.album.images[0]?.url,
+				spotifyPopularity: highestPopularity,
+				releaseDate: spotifyTrack.album.release_date,
 			})
 			.where(eq(Tracks.id, existingTrackByIsrc.id));
 
-		// Add track to album-track join table if not already linked
-		const existingLink = await dbPool.query._Albums_To_Tracks.findFirst({
-			where: and(
-				eq(_Albums_To_Tracks.albumId, albumId),
-				eq(_Albums_To_Tracks.trackId, existingTrackByIsrc.id),
-			),
-		});
-
-		if (!existingLink) {
-			await dbPool.insert(_Albums_To_Tracks).values({
-				albumId,
-				trackId: existingTrackByIsrc.id,
-				trackNumber: track.track_number ?? 1,
-			});
-		}
+		// Add to album if not already linked
+		await linkTrackToAlbum(existingTrackByIsrc.id, albumId, spotifyTrack.track_number, dbPool);
 		return;
 	}
 
-	// Check for existing track by spotifyId
-	const existingTrackBySpotifyId = await dbPool.query.Tracks.findFirst({
-		where: eq(Tracks.spotifyId, track.id),
-	});
-
-	if (existingTrackBySpotifyId) {
-		// Update existing track
-		await dbPool
-			.update(Tracks)
-			.set({
-				name: track.name,
-				isrc: track.external_ids.isrc,
-				released: true,
-				imageUrl: track.album.images[0]?.url,
-				spotifyPopularity: chooseMax(
-					existingTrackBySpotifyId.spotifyPopularity,
-					track.popularity,
-				),
-				releaseDate: track.album.release_date,
-			})
-			.where(eq(Tracks.id, existingTrackBySpotifyId.id));
-
-		// Add track to album-track join table if not already linked
-		const existingLink = await dbPool.query._Albums_To_Tracks.findFirst({
-			where: and(
-				eq(_Albums_To_Tracks.albumId, albumId),
-				eq(_Albums_To_Tracks.trackId, existingTrackBySpotifyId.id),
-			),
-		});
-
-		if (!existingLink) {
-			await dbPool.insert(_Albums_To_Tracks).values({
-				albumId,
-				trackId: existingTrackBySpotifyId.id,
-				trackNumber: track.track_number ?? 1,
-			});
-		}
-		return;
-	}
-
-	// Check for existing track by name in the workspace
-	const existingTrackByName = await dbPool.query.Tracks.findFirst({
-		where: and(eq(Tracks.workspaceId, workspaceId), eq(Tracks.name, track.name)),
+	// Check for existing track by name (no ISRC)
+	const existingTrackByName = await dbHttp.query.Tracks.findFirst({
+		where: and(
+			eq(Tracks.workspaceId, workspaceId),
+			eq(Tracks.name, spotifyTrack.name),
+			isNull(Tracks.isrc),
+		),
 	});
 
 	if (existingTrackByName) {
-		// Update the existing track with spotifyId and ISRC
+		// Update track with ISRC and add Spotify link
 		await dbPool
 			.update(Tracks)
 			.set({
-				spotifyId: track.id,
-				isrc: track.external_ids.isrc,
+				isrc: spotifyTrack.external_ids.isrc,
 				released: true,
-				imageUrl: track.album.images[0]?.url,
-				spotifyPopularity: chooseMax(
-					existingTrackByName.spotifyPopularity,
-					track.popularity,
-				),
-				releaseDate: track.album.release_date,
+				imageUrl: spotifyTrack.album.images[0]?.url,
+				spotifyPopularity: spotifyTrack.popularity,
+				releaseDate: spotifyTrack.album.release_date,
+				spotifyId: spotifyTrack.id, // Set initial spotifyId
 			})
 			.where(eq(Tracks.id, existingTrackByName.id));
 
-		// Add track to album-track join table if not already linked
-		const existingLink = await dbPool.query._Albums_To_Tracks.findFirst({
-			where: and(
-				eq(_Albums_To_Tracks.albumId, albumId),
-				eq(_Albums_To_Tracks.trackId, existingTrackByName.id),
-			),
+		// Add Spotify link
+		await dbPool.insert(SpotifyLinkedTracks).values({
+			trackId: existingTrackByName.id,
+			spotifyLinkedTrackId: spotifyTrack.id,
+			spotifyPopularity: spotifyTrack.popularity,
+			isDefault: true, // First Spotify ID is default
 		});
 
-		if (!existingLink) {
-			await dbPool.insert(_Albums_To_Tracks).values({
-				albumId,
-				trackId: existingTrackByName.id,
-				trackNumber: track.track_number ?? 1,
-			});
-		}
+		await linkTrackToAlbum(existingTrackByName.id, albumId, spotifyTrack.track_number, dbPool);
 		return;
 	}
 
 	// Create new track
+	console.log(
+		'creating new track => ',
+		spotifyTrack.name,
+		'ISRC => ',
+		spotifyTrack.external_ids.isrc,
+		'Spotify ID => ',
+		spotifyTrack.id,
+	);
+
 	const [newTrack] = await dbPool
 		.insert(Tracks)
 		.values({
 			id: newId('track'),
 			workspaceId,
-			name: track.name,
-			spotifyId: track.id,
-			isrc: track.external_ids.isrc,
+			name: spotifyTrack.name,
+			spotifyId: spotifyTrack.id, // Set initial spotifyId
+			isrc: spotifyTrack.external_ids.isrc,
 			released: true,
-			imageUrl: track.album.images[0]?.url,
-			spotifyPopularity: track.popularity,
-			releaseDate: track.album.release_date,
+			imageUrl: spotifyTrack.album.images[0]?.url,
+			spotifyPopularity: spotifyTrack.popularity,
+			releaseDate: spotifyTrack.album.release_date,
 		})
 		.returning();
 
 	if (!newTrack) return;
 
-	// Add track to album-track join table
-	await dbPool.insert(_Albums_To_Tracks).values({
-		albumId,
+	// Add Spotify link
+	await dbPool.insert(SpotifyLinkedTracks).values({
 		trackId: newTrack.id,
-		trackNumber: track.track_number ?? 1,
+		spotifyLinkedTrackId: spotifyTrack.id,
+		spotifyPopularity: spotifyTrack.popularity,
+		isDefault: true, // First Spotify ID is default
 	});
+
+	// Add to album
+	await linkTrackToAlbum(newTrack.id, albumId, spotifyTrack.track_number, dbPool);
+}
+
+// Helper function to update default Spotify ID based on popularity
+async function updateDefaultSpotifyId(trackId: string, db: any) {
+	// Get all Spotify links for this track
+	const spotifyLinks = await db.query.SpotifyLinkedTracks.findMany({
+		where: eq(SpotifyLinkedTracks.trackId, trackId),
+		orderBy: (links: any, { desc }: any) => [desc(links.spotifyPopularity)],
+	});
+
+	if (spotifyLinks.length === 0) return;
+
+	// Set the most popular as default
+	const mostPopularId = spotifyLinks[0]?.spotifyLinkedTrackId;
+	if (!mostPopularId) return;
+
+	// Update all to not default
+	await db
+		.update(SpotifyLinkedTracks)
+		.set({ isDefault: false })
+		.where(eq(SpotifyLinkedTracks.trackId, trackId));
+
+	// Set the most popular as default
+	await db
+		.update(SpotifyLinkedTracks)
+		.set({ isDefault: true })
+		.where(eq(SpotifyLinkedTracks.spotifyLinkedTrackId, mostPopularId));
+
+	// Update the track's spotifyId to point to the default
+	await db
+		.update(Tracks)
+		.set({ spotifyId: mostPopularId })
+		.where(eq(Tracks.id, trackId));
+}
+
+// Helper function to get highest popularity for a track
+async function getHighestPopularityForTrack(trackId: string, dbPool: DbPool) {
+	const spotifyLinks = await dbPool.query.SpotifyLinkedTracks.findMany({
+		where: eq(SpotifyLinkedTracks.trackId, trackId),
+		columns: { spotifyPopularity: true },
+	});
+
+	return Math.max(...spotifyLinks.map(link => link.spotifyPopularity ?? 0));
+}
+
+// Helper function to link track to album
+async function linkTrackToAlbum(
+	trackId: string,
+	albumId: string,
+	trackNumber: number | null | undefined,
+	dbPool: DbPool,
+) {
+	const existingLink = await dbPool.query._Albums_To_Tracks.findFirst({
+		where: and(
+			eq(_Albums_To_Tracks.albumId, albumId),
+			eq(_Albums_To_Tracks.trackId, trackId),
+		),
+	});
+
+	if (!existingLink) {
+		await dbPool.insert(_Albums_To_Tracks).values({
+			albumId,
+			trackId,
+			trackNumber: trackNumber ?? 1,
+		});
+	}
 }
 
 export {
@@ -455,4 +461,5 @@ export {
 	syncSpotifyAccountUser,
 	syncSpotifyAccountPlaylists,
 	syncSpotifyTrack,
+	updateDefaultSpotifyId,
 };

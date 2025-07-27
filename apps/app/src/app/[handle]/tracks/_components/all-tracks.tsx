@@ -2,6 +2,8 @@
 
 import type { AppRouterOutputs } from '@barely/lib/server/api/router';
 
+import { useRouter } from 'next/navigation';
+import { useWorkspace } from '@barely/lib/hooks/use-workspace';
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { Button } from '@barely/ui/elements/button';
@@ -124,6 +126,16 @@ function TrackCard({
 }) {
 	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } =
 		useTrackContext();
+	const router = useRouter();
+	const { handle } = useWorkspace();
+
+	const commandItems = track.spotifyId ? [
+		{
+			label: 'Spotify Stats',
+			icon: 'spotify' as const,
+			action: () => router.push(`/${handle}/tracks/${track.id}/spotify-stats`),
+		},
+	] : [];
 
 	return (
 		<GridListCard
@@ -133,6 +145,7 @@ function TrackCard({
 			setShowUpdateModal={setShowUpdateModal}
 			setShowArchiveModal={setShowArchiveModal}
 			setShowDeleteModal={setShowDeleteModal}
+			commandItems={commandItems}
 		>
 			<div className='flex flex-grow flex-row items-center gap-4'>
 				<div className='flex flex-col items-start gap-1'>
@@ -153,8 +166,20 @@ function TrackCard({
 									Track {track._albums?.[0]?.trackNumber ?? '?'}
 								</Text>
 								{track.spotifyPopularity !== null && (
+									<>
+										<Text variant='sm/normal' className='text-muted-foreground'>
+											• Popularity: {track.spotifyPopularity}
+										</Text>
+										{track.spotifyLinkedTracks && track.spotifyLinkedTracks.length > 1 && (
+											<Text variant='sm/normal' className='text-muted-foreground'>
+												• {track.spotifyLinkedTracks.length} Spotify IDs
+											</Text>
+										)}
+									</>
+								)}
+								{track.isrc && (
 									<Text variant='sm/normal' className='text-muted-foreground'>
-										• Popularity: {track.spotifyPopularity}
+										• ISRC: {track.isrc}
 									</Text>
 								)}
 							</div>

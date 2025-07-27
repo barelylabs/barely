@@ -27,29 +27,36 @@ export async function getSeveralSpotifyAlbums(props: {
 	accessToken: string;
 	albumIds: string[];
 }) {
-	const endpoint = `https://api.spotify.com/v1/albums?ids=${props.albumIds.join(',')}`;
-
 	const auth = `Bearer ${props.accessToken}`;
+	const albums = [];
 
-	const res = await zGet(
-		endpoint,
-		z.object({
-			albums: z.array(spotifyAlbumResponseSchema),
-		}),
-		{ auth },
-	);
+	// Process albumIds in chunks of 20
+	for (let i = 0; i < props.albumIds.length; i += 20) {
+		const chunk = props.albumIds.slice(i, i + 20);
+		const endpoint = `https://api.spotify.com/v1/albums?ids=${chunk.join(',')}`;
 
-	if (!res.success || !res.parsed) {
-		await log({
-			message: 'Failed to get several Spotify albums' + JSON.stringify(res),
-			type: 'errors',
-			location: 'getSeveralSpotifyAlbums',
-			mention: true,
-		});
-		return null;
+		const res = await zGet(
+			endpoint,
+			z.object({
+				albums: z.array(spotifyAlbumResponseSchema),
+			}),
+			{ auth },
+		);
+
+		if (!res.success || !res.parsed) {
+			await log({
+				message: `Failed to get Spotify albums chunk ${i / 20 + 1}: ${JSON.stringify(res)}`,
+				type: 'errors',
+				location: 'getSeveralSpotifyAlbums',
+				mention: true,
+			});
+			continue;
+		}
+
+		albums.push(...res.data.albums);
 	}
 
-	return res.data.albums;
+	return albums.length > 0 ? albums : null;
 }
 
 export const spotifyAlbumResponseSchema = z.object({
