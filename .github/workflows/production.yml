@@ -57,7 +57,7 @@ jobs:
             echo "Error: Cannot proceed with 'main' branch."
             exit 1
           fi
-          
+
           # Escape quotes in commit message for shell safety
           escaped_commit_message=$(echo "$github_commit_message" | sed 's/"/\\"/g')
 
@@ -444,7 +444,7 @@ jobs:
   promote-app:
     name: promote app to production
     needs: [production--can-merge, deploy-app]
-    if: always() && github.event_name == 'merge_group' && ${{ needs.production--can-merge.result }} == 'success'
+    if: always() && github.event_name == 'merge_group' && needs.production--can-merge.result == 'success'
     runs-on: ubuntu-latest
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -460,7 +460,7 @@ jobs:
   promote-cart:
     name: promote cart to production
     needs: [production--can-merge, deploy-cart]
-    if: always() && github.event_name == 'merge_group' && ${{ needs.production--can-merge.result }} == 'success'
+    if: always() && github.event_name == 'merge_group' && needs.production--can-merge.result == 'success'
     runs-on: ubuntu-latest
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -476,7 +476,7 @@ jobs:
   promote-fm:
     name: promote fm to production
     needs: [production--can-merge, deploy-fm]
-    if: always() && github.event_name == 'merge_group' && ${{ needs.production--can-merge.result }} == 'success'
+    if: always() && github.event_name == 'merge_group' && needs.production--can-merge.result == 'success'
     runs-on: ubuntu-latest
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -492,7 +492,7 @@ jobs:
   promote-link:
     name: promote link to production
     needs: [production--can-merge, deploy-link]
-    if: always() && github.event_name == 'merge_group' && ${{ needs.production--can-merge.result }} == 'success'
+    if: always() && github.event_name == 'merge_group' && needs.production--can-merge.result == 'success'
     runs-on: ubuntu-latest
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -508,7 +508,7 @@ jobs:
   promote-manage-email:
     name: promote manage-email to production
     needs: [production--can-merge, deploy-manage-email]
-    if: always() && github.event_name == 'merge_group' && ${{ needs.production--can-merge.result }} == 'success'
+    if: always() && github.event_name == 'merge_group' && needs.production--can-merge.result == 'success'
     runs-on: ubuntu-latest
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -524,7 +524,7 @@ jobs:
   promote-page:
     name: promote page to production
     needs: [production--can-merge, deploy-page]
-    if: always() && github.event_name == 'merge_group' && ${{ needs.production--can-merge.result }} == 'success'
+    if: always() && github.event_name == 'merge_group' && needs.production--can-merge.result == 'success'
     runs-on: ubuntu-latest
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -540,7 +540,7 @@ jobs:
   promote-press:
     name: promote press to production
     needs: [production--can-merge, deploy-press]
-    if: always() && github.event_name == 'merge_group' && ${{ needs.production--can-merge.result }} == 'success'
+    if: always() && github.event_name == 'merge_group' && needs.production--can-merge.result == 'success'
     runs-on: ubuntu-latest
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -556,7 +556,7 @@ jobs:
   promote-nyc:
     name: promote nyc to production
     needs: [production--can-merge, deploy-nyc]
-    if: always() && github.event_name == 'merge_group' && ${{ needs.production--can-merge.result }} == 'success'
+    if: always() && github.event_name == 'merge_group' && needs.production--can-merge.result == 'success'
     runs-on: ubuntu-latest
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -572,7 +572,7 @@ jobs:
   promote-www:
     name: promote www to production
     needs: [production--can-merge, deploy-www]
-    if: always() && github.event_name == 'merge_group' && ${{ needs.production--can-merge.result }} == 'success'
+    if: always() && github.event_name == 'merge_group' && needs.production--can-merge.result == 'success'
     runs-on: ubuntu-latest
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
