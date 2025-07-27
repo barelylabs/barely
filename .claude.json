@@ -1,5 +1,0 @@
-{
-  "hooks": {
-    "post-edit": "pnpm format:fix"
-  }
-}
