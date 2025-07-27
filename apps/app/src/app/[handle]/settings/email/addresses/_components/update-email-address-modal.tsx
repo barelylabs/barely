@@ -48,7 +48,9 @@ export function UpdateEmailAddressModal() {
 	const { control } = form;
 
 	const handleCloseModal = useCallback(async () => {
-		await queryClient.invalidateQueries(trpc.emailAddress.byWorkspace.queryFilter());
+		await queryClient.invalidateQueries({
+			queryKey: trpc.emailAddress.byWorkspace.queryKey(),
+		});
 		form.reset();
 		await setShowUpdateModal(false);
 	}, [queryClient, trpc, form, setShowUpdateModal]);

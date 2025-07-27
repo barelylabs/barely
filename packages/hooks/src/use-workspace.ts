@@ -42,7 +42,7 @@ export function useWorkspace({ onBeginSet }: { onBeginSet?: () => void } = {}) {
 			onBeginSet?.();
 
 			// Cancel any in-flight queries
-			await queryClient.cancelQueries(trpc.workspace.byHandle.queryFilter());
+			await queryClient.cancelQueries(trpc.workspace.byHandle.pathFilter());
 
 			// Set the new workspace data in the query cache
 			queryClient.setQueryData(

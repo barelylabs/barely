@@ -46,9 +46,9 @@ export const ProviderAccountCard = ({ provider }: ExternalAccountCardProps) => {
 
 	const addAccount = () => {
 		authorize({ provider, handle: workspace.handle });
-		return queryClient.invalidateQueries(
-			trpc.providerAccount.byCurrentUser.queryFilter(),
-		);
+		return queryClient.invalidateQueries({
+			queryKey: trpc.providerAccount.byCurrentUser.queryKey(),
+		});
 	};
 
 	const removeAccount = async (accountId: string) => {

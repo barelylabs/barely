@@ -24,7 +24,9 @@ export function ArchiveOrDeleteLinkModal({ mode }: { mode: 'archive' | 'delete' 
 	const setShowModal = mode === 'archive' ? setShowArchiveModal : setShowDeleteModal;
 
 	const onSuccess = useCallback(async () => {
-		await queryClient.invalidateQueries(trpc.link.byWorkspace.queryFilter());
+		await queryClient.invalidateQueries({
+			queryKey: trpc.link.byWorkspace.queryKey(),
+		});
 		await setShowModal(false);
 	}, [queryClient, trpc.link.byWorkspace, setShowModal]);
 

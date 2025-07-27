@@ -110,7 +110,9 @@ export function CreateOrUpdateEmailTemplateModal({
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
-		await queryClient.invalidateQueries(trpc.emailTemplate.byWorkspace.queryFilter());
+		await queryClient.invalidateQueries({
+			queryKey: trpc.emailTemplate.byWorkspace.queryKey(),
+		});
 		form.reset();
 		setShowEmailTemplateModal(false);
 	}, [form, focusGridList, queryClient, trpc.emailTemplate, setShowEmailTemplateModal]);

@@ -40,8 +40,8 @@ export function AcceptInviteModal() {
 			return toast.error(String(error));
 		});
 		setShowAcceptInviteModal(false);
-		await queryClient.invalidateQueries(trpc.user.workspaceInvites.queryFilter());
-		await queryClient.invalidateQueries(trpc.user.workspaces.queryFilter());
+		await queryClient.invalidateQueries(trpc.user.workspaceInvites.pathFilter());
+		await queryClient.invalidateQueries(trpc.user.workspaces.pathFilter());
 	};
 
 	if (!acceptInviteWorkspaceId) return null;

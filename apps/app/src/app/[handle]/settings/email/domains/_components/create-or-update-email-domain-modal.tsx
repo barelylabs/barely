@@ -77,7 +77,9 @@ export function CreateOrUpdateEmailDomainModal({ mode }: { mode: 'create' | 'upd
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
-		await queryClient.invalidateQueries(trpc.emailDomain.byWorkspace.queryFilter());
+		await queryClient.invalidateQueries({
+			queryKey: trpc.emailDomain.byWorkspace.queryKey(),
+		});
 		form.reset();
 		await setShowModal(false);
 	}, [focusGridList, queryClient, trpc, form, setShowModal]);

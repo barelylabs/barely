@@ -7,7 +7,6 @@ on:
 
 jobs:
   # 👾 GIT METADATA 👾 #
-
   git-meta:
     runs-on: ubuntu-latest
     if: always() && github.event_name == 'merge_group'
@@ -24,11 +23,13 @@ jobs:
       github_commit_message: ${{ steps.git-meta.outputs.github_commit_message }}
       github_commit_ref: ${{ steps.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ steps.git-meta.outputs.vercel_git_metadata }}
+      db_changed: ${{ steps.db-changes.outputs.db_changed }}
+      tb_changed: ${{ steps.tb-changes.outputs.tb_changed }}
     steps:
       - name: checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - id: git-meta
         run: |
@@ -38,13 +39,13 @@ jobs:
           github_repo=${{ github.repository }}
           github_commit_org=${{ github.repository_owner }}
           github_commit_repo=${{ github.repository }}
-          github_commit_message=$(git show -s --format=%)          
+          github_commit_message=$(git show -s --format=%s)          
 
           commit_ref=${{ github.ref }}
           echo "commit_ref: $commit_ref"          
 
           pr_number=$(echo $commit_ref | awk -F'/' '{print $5}' | awk -F'-' '{print $2}')          
-          pr_info=$(curl -s H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/pulls/$pr_number)
+          pr_info=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/pulls/$pr_number)
 
           github_commit_ref=$(echo $pr_info | jq -r '.head.ref')
           echo "github_commit_ref: $github_commit_ref"
@@ -56,8 +57,11 @@ jobs:
             echo "Error: Cannot proceed with 'main' branch."
             exit 1
           fi
+          
+          # Escape quotes in commit message for shell safety
+          escaped_commit_message=$(echo "$github_commit_message" | sed 's/"/\\"/g')
 
-          vercel_git_metadata="-m githubCommitSha=$github_commit_sha -m githubCommitAuthorName=$github_commit_author_login -m githubCommitAuthorLogin=$github_commit_author_login -m githubDeployment=$github_deployment -m githubOrg=$github_org -m githubRepo=$github_repo -m githubCommitOrg=$github_commit_org -m githubCommitRepo=$github_commit_repo -m githubCommitMessage=\"$github_commit_message\" -m githubCommitRef=$github_commit_ref"                 
+          vercel_git_metadata="-m githubCommitSha=$github_commit_sha -m githubCommitAuthorName=$github_commit_author_login -m githubCommitAuthorLogin=$github_commit_author_login -m githubDeployment=$github_deployment -m githubOrg=$github_org -m githubRepo=$github_repo -m githubCommitOrg=$github_commit_org -m githubCommitRepo=$github_commit_repo -m githubCommitMessage=\"$escaped_commit_message\" -m githubCommitRef=$github_commit_ref"                 
 
           echo "github_commit_sha=$github_commit_sha" >> $GITHUB_OUTPUT
           echo "github_commit_author_name=$github_commit_author_name" >> $GITHUB_OUTPUT
@@ -71,13 +75,44 @@ jobs:
           echo "github_commit_ref=$github_commit_ref" >> $GITHUB_OUTPUT
           echo "vercel_git_metadata=$vercel_git_metadata" >> $GITHUB_OUTPUT
 
-  # 🐘 NEON DB:PUSH 🐘 #
+      - name: check for db/const changes
+        id: db-changes
+        run: |
+          # For merge groups, compare against main branch
+          base_branch="main"
 
+          # Fetch the base branch to ensure we have it locally
+          git fetch origin $base_branch
+
+          # Check if there are changes in packages/db or packages/const
+          if git diff --name-only origin/$base_branch...HEAD | grep -E "^packages/(db|const)/" > /dev/null; then
+            echo "db_changed=true" >> $GITHUB_OUTPUT
+            echo "Changes detected in packages/db or packages/const"
+          else
+            echo "db_changed=false" >> $GITHUB_OUTPUT
+            echo "No changes detected in packages/db or packages/const"
+          fi
+
+      - name: check for tinybird changes
+        id: tb-changes
+        run: |
+          # For merge groups, compare against main branch
+          base_branch="main"
+
+          # Check if there are changes in packages/tb/tinybird
+          if git diff --name-only origin/$base_branch...HEAD | grep -E "^packages/tb/tinybird/" > /dev/null; then
+            echo "tb_changed=true" >> $GITHUB_OUTPUT
+            echo "Changes detected in packages/tb/tinybird"
+          else
+            echo "tb_changed=false" >> $GITHUB_OUTPUT
+            echo "No changes detected in packages/tb/tinybird"
+          fi
+
+  # 🐘 NEON DB:PUSH 🐘 #
   db-push:
     name: db:push
     needs: [git-meta]
-    if: always() && github.event_name == 'merge_group' && needs.git-meta.result == 'success'
-    permissions: write-all
+    if: always() && github.event_name == 'merge_group' && needs.git-meta.result == 'success' && needs.git-meta.outputs.db_changed == 'true'
     runs-on: ubuntu-latest
     outputs:
       neon_branch_id: ${{ steps.get-neon-branch.outputs.branch_id }}
@@ -133,10 +168,34 @@ jobs:
 
           echo "db:push completed successfully"
 
+  # 🐘 TINYBIRD:PUSH 🐘 #
+  tb-push:
+    name: tb:push
+    needs: [git-meta]
+    if: always() && github.event_name == 'merge_group' && needs.git-meta.result == 'success' && needs.git-meta.outputs.tb_changed == 'true'
+    env:
+      TINYBIRD_HOST: ${{ secrets.TINYBIRD_HOST }}
+      TINYBIRD_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Tinybird CLI
+        run: curl https://tinybird.co | sh
+
+      - name: Deploy project
+        run: cd packages/tb/tinybird && tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deploy
+
   # 📱 DEPLOY APPS -- PROD (Not Aliasing to Production Yet) #
   deploy-app:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, db-push]
+    needs: [git-meta, db-push, tb-push]
+    if: |
+      always() && 
+      needs.git-meta.result == 'success' && 
+      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
+      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: app
       working_directory: apps/app
@@ -151,7 +210,12 @@ jobs:
 
   deploy-cart:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, db-push]
+    needs: [git-meta, db-push, tb-push]
+    if: |
+      always() && 
+      needs.git-meta.result == 'success' && 
+      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
+      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: cart
       working_directory: apps/cart
@@ -166,7 +230,12 @@ jobs:
 
   deploy-fm:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, db-push]
+    needs: [git-meta, db-push, tb-push]
+    if: |
+      always() && 
+      needs.git-meta.result == 'success' && 
+      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
+      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: fm
       working_directory: apps/fm
@@ -181,7 +250,12 @@ jobs:
 
   deploy-link:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, db-push]
+    needs: [git-meta, db-push, tb-push]
+    if: |
+      always() && 
+      needs.git-meta.result == 'success' && 
+      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
+      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: link
       working_directory: apps/link
@@ -196,7 +270,12 @@ jobs:
 
   deploy-manage-email:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, db-push]
+    needs: [git-meta, db-push, tb-push]
+    if: |
+      always() && 
+      needs.git-meta.result == 'success' && 
+      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
+      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: manage-email
       working_directory: apps/manage-email
@@ -211,7 +290,12 @@ jobs:
 
   deploy-page:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, db-push]
+    needs: [git-meta, db-push, tb-push]
+    if: |
+      always() && 
+      needs.git-meta.result == 'success' && 
+      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
+      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: page
       working_directory: apps/page
@@ -226,7 +310,12 @@ jobs:
 
   deploy-press:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, db-push]
+    needs: [git-meta, db-push, tb-push]
+    if: |
+      always() && 
+      needs.git-meta.result == 'success' && 
+      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
+      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: press
       working_directory: apps/press
@@ -241,7 +330,12 @@ jobs:
 
   deploy-nyc:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, db-push]
+    needs: [git-meta, db-push, tb-push]
+    if: |
+      always() && 
+      needs.git-meta.result == 'success' && 
+      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
+      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: nyc
       working_directory: apps/nyc
@@ -256,7 +350,12 @@ jobs:
 
   deploy-www:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, db-push]
+    needs: [git-meta, db-push, tb-push]
+    if: |
+      always() && 
+      needs.git-meta.result == 'success' && 
+      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
+      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: www
       working_directory: apps/www
@@ -276,6 +375,7 @@ jobs:
       [
         git-meta,
         db-push,
+        tb-push,
         deploy-app,
         deploy-cart,
         deploy-link,
@@ -313,6 +413,7 @@ jobs:
       [
         git-meta,
         db-push,
+        tb-push,
         deploy-app,
         deploy-cart,
         deploy-fm,
