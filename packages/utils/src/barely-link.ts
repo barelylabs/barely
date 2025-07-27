@@ -136,7 +136,7 @@ export async function getMetaTags(url: string): Promise<LinkMetaTags> {
 // export function constructMetadata({
 // 	title = `barely.link - Link Management for Modern Marketing Teams`,
 // 	description = `barely.link is the open-source link management infrastructure for modern marketing teams to create, share, and track short links.`,
-// 	image = 'https://app.barely.io/_static/thumbnail.png',
+// 	image = 'https://app.barely.ai/_static/thumbnail.png',
 // 	icons = [
 // 		{
 // 			rel: 'apple-touch-icon',

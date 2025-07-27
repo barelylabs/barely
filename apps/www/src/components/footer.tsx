@@ -80,7 +80,7 @@ function Sitemap() {
 			<div>
 				<SitemapHeading>Support</SitemapHeading>
 				<SitemapLinks>
-					<SitemapLink href='mailto:support@barely.io'>Help</SitemapLink>
+					<SitemapLink href='mailto:support@barely.ai'>Help</SitemapLink>
 					{/* <SitemapLink href='#'>Community</SitemapLink> */}
 				</SitemapLinks>
 			</div>
@@ -145,7 +145,7 @@ function SocialLinks() {
 			<Link
 				href='https://github.com/barelylabs/barely'
 				target='_blank'
-				aria-label='barely.io is open source & available on GitHub'
+				aria-label='barely.ai is open source & available on GitHub'
 				className='text-white data-[hover]:text-white/75'
 			>
 				{/* <SocialIconLinkedIn className='size-4' /> */}
@@ -158,7 +158,7 @@ function SocialLinks() {
 function Copyright() {
 	return (
 		<div className='text-sm/6 text-muted-foreground'>
-			&copy; {new Date().getFullYear()} Barely Sparrow LLC
+			&copy; {new Date().getFullYear()} Barely LLC
 		</div>
 	);
 }
@@ -197,10 +197,10 @@ export function Footer() {
 										<p className='text-sm text-muted-foreground'>
 											Questions?{' '}
 											<Link
-												href='mailto:hello@barely.io'
+												href='mailto:hello@barely.ai'
 												className='font-medium text-white underline'
 											>
-												hello@barely.io
+												hello@barely.ai
 											</Link>
 										</p>
 									</PlusGridItem>

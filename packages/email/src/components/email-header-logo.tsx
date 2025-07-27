@@ -20,8 +20,8 @@ const EmailHeaderLogo = () => {
 	return (
 		<div className='flex flex-col'>
 			<Img
-				src={'https://app.barely.io/_static/logo.png'}
-				alt='barely.io logo'
+				src={'https://app.barely.ai/_static/logo.png'}
+				alt='barely.ai logo'
 				style={{
 					paddingTop: '0.5rem',
 					paddingBottom: '0.5rem',

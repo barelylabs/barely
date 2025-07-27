@@ -13,7 +13,7 @@ const faqs = [
 			'Your data is always yours. You can export all your data, including fan lists, analytics, and content at any time. We provide standard formats (CSV, JSON) that work with other platforms. No lock-in, ever.',
 	},
 	{
-		question: 'How much does barely.io cost?',
+		question: 'How much does barely.ai cost?',
 		answer:
 			'We offer a generous free tier for bedroom producers just starting out. Paid plans start at $19/month and scale with your career. Check our pricing page for detailed breakdowns and ROI calculations.',
 	},
@@ -28,7 +28,7 @@ const faqs = [
 			'Free tier users get community support and comprehensive documentation. Paid plans include priority email support, with response times under 24 hours. Enterprise plans get dedicated support channels.',
 	},
 	{
-		question: 'Is barely.io right for labels or just individual artists?',
+		question: 'Is barely.ai right for labels or just individual artists?',
 		answer:
 			'Both! Our platform scales from bedroom producers to full labels. The Label tier includes team management, multi-artist analytics, and white-label options for agencies.',
 	},
@@ -85,7 +85,7 @@ export function FAQSection() {
 							Frequently Asked Questions
 						</h2>
 						<p className='mt-4 text-lg text-gray-400'>
-							Everything you need to know about barely.io
+							Everything you need to know about barely.ai
 						</p>
 					</div>
 				</AnimatedSection>
@@ -103,7 +103,7 @@ export function FAQSection() {
 						<p className='text-gray-400'>
 							Still have questions?{' '}
 							<a
-								href='mailto:hello@barely.io'
+								href='mailto:hello@barely.ai'
 								className='font-medium text-white underline hover:text-gray-300'
 							>
 								Contact our team

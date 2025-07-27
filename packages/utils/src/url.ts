@@ -95,7 +95,7 @@ export function getSpotifyPlaylistTrackDeeplink({
 export function constructMetadata({
 	title = `barely.link - Link Management for Modern Marketing Teams`,
 	description = `barely.link is the open-source link management infrastructure for modern marketing teams to create, share, and track short links.`,
-	image = 'https://app.barely.io/_static/thumbnail.png',
+	image = 'https://app.barely.ai/_static/thumbnail.png',
 	icons = [
 		{
 			rel: 'apple-touch-icon',
@@ -319,9 +319,9 @@ export function getApexDomain(url: string) {
 			return parts.slice(-3).join('.');
 		}
 
-		// otherwise, it's a subdomain (app.barely.io), so return the last 2 parts
+		// otherwise, it's a subdomain (app.barely.ai), so return the last 2 parts
 		return parts.slice(-2).join('.');
 	}
-	// if it's a normal domain (e.g. barely.io), we return the full domain
+	// if it's a normal domain (e.g. barely.ai), we return the full domain
 	return domain;
 }

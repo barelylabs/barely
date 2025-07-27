@@ -328,7 +328,7 @@ jobs:
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PRESS_PROJECT_ID }}
 
-  deploy-sparrow:
+  deploy-nyc:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
     if: |
@@ -337,8 +337,8 @@ jobs:
       (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
       (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
-      app_name: sparrow
-      working_directory: apps/sparrow
+      app_name: nyc
+      working_directory: apps/nyc
       scope: barely
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
@@ -346,7 +346,7 @@ jobs:
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SPARROW_PROJECT_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_NYC_PROJECT_ID }}
 
   deploy-www:
     uses: ./.github/workflows/deploy-to-vercel.yml
@@ -382,7 +382,7 @@ jobs:
         deploy-manage-email,
         deploy-page,
         deploy-press,
-        deploy-sparrow,
+        deploy-nyc,
         deploy-www,
       ]
     if: always() && github.event_name == 'merge_group' # skip if pull request, which allows entry into merge queue
@@ -421,7 +421,7 @@ jobs:
         deploy-manage-email,
         deploy-page,
         deploy-press,
-        deploy-sparrow,
+        deploy-nyc,
         deploy-www,
         trigger-production,
       ]
@@ -553,21 +553,21 @@ jobs:
       - name: Promote press to production
         run: vercel promote dpl_${{ needs.deploy-press.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
-  promote-sparrow:
-    name: promote sparrow to production
-    needs: [production--can-merge, deploy-sparrow]
+  promote-nyc:
+    name: promote nyc to production
+    needs: [production--can-merge, deploy-nyc]
     if: always() && github.event_name == 'merge_group' && ${{ needs.production--can-merge.result }} == 'success'
     runs-on: ubuntu-latest
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SPARROW_PROJECT_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_NYC_PROJECT_ID }}
     steps:
       - name: Install Vercel CLI
         run: npm i -g vercel@latest
 
-      - name: Promote sparrow to production
-        run: vercel promote dpl_${{ needs.deploy-sparrow.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Promote nyc to production
+        run: vercel promote dpl_${{ needs.deploy-nyc.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
   promote-www:
     name: promote www to production
@@ -598,7 +598,7 @@ jobs:
         promote-manage-email,
         promote-page,
         promote-press,
-        promote-sparrow,
+        promote-nyc,
         promote-www,
       ]
     if: ${{ failure() && needs.promote-app.result == 'success' }}
@@ -627,7 +627,7 @@ jobs:
         promote-manage-email,
         promote-page,
         promote-press,
-        promote-sparrow,
+        promote-nyc,
         promote-www,
       ]
     if: ${{ failure() && needs.promote-cart.result == 'success' }}
@@ -657,7 +657,7 @@ jobs:
         promote-manage-email,
         promote-page,
         promote-press,
-        promote-sparrow,
+        promote-nyc,
         promote-www,
       ]
     if: ${{ failure() && needs.promote-fm.result == 'success' }}
@@ -686,7 +686,7 @@ jobs:
         promote-manage-email,
         promote-page,
         promote-press,
-        promote-sparrow,
+        promote-nyc,
         promote-www,
       ]
     if: ${{ failure() && needs.promote-link.result == 'success' }}
@@ -715,7 +715,7 @@ jobs:
         promote-manage-email,
         promote-page,
         promote-press,
-        promote-sparrow,
+        promote-nyc,
         promote-www,
       ]
     if: ${{ failure() && needs.promote-manage-email.result == 'success' }}
@@ -744,7 +744,7 @@ jobs:
         promote-manage-email,
         promote-page,
         promote-press,
-        promote-sparrow,
+        promote-nyc,
         promote-www,
       ]
     if: ${{ failure() && needs.promote-page.result == 'success' }}
@@ -773,7 +773,7 @@ jobs:
         promote-manage-email,
         promote-page,
         promote-press,
-        promote-sparrow,
+        promote-nyc,
         promote-www,
       ]
     if: ${{ failure() && needs.promote-press.result == 'success' }}
@@ -792,8 +792,8 @@ jobs:
           echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
           vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
-  rollback-sparrow:
-    name: rollback sparrow if any deployments fail
+  rollback-nyc:
+    name: rollback nyc if any deployments fail
     needs:
       [
         promote-app,
@@ -802,22 +802,22 @@ jobs:
         promote-manage-email,
         promote-page,
         promote-press,
-        promote-sparrow,
+        promote-nyc,
         promote-www,
       ]
-    if: ${{ failure() && needs.promote-sparrow.result == 'success' }}
+    if: ${{ failure() && needs.promote-nyc.result == 'success' }}
     runs-on: ubuntu-latest
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SPARROW_PROJECT_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_NYC_PROJECT_ID }}
     steps:
       - name: Install Vercel CLI
         run: npm i -g vercel@latest
 
-      - name: Rollback sparrow
+      - name: Rollback nyc
         run: |
-          ROLLBACK_DEPLOYMENT_ID=$(curl -s "https://api.vercel.com/v6/deployments?teamId=${{ secrets.VERCEL_TEAM_ID }}&projectId=${{ secrets.VERCEL_SPARROW_PROJECT_ID}}&limit=2&rollbackCandidate=true&state=READY&target=production" -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | jq -r '.deployments[1].uid')
+          ROLLBACK_DEPLOYMENT_ID=$(curl -s "https://api.vercel.com/v6/deployments?teamId=${{ secrets.VERCEL_TEAM_ID }}&projectId=${{ secrets.VERCEL_NYC_PROJECT_ID}}&limit=2&rollbackCandidate=true&state=READY&target=production" -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | jq -r '.deployments[1].uid')
           echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
           vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
@@ -831,7 +831,7 @@ jobs:
         promote-manage-email,
         promote-page,
         promote-press,
-        promote-sparrow,
+        promote-nyc,
         promote-www,
       ]
     if: ${{ failure() && needs.promote-www.result == 'success' }}
@@ -865,7 +865,7 @@ jobs:
         promote-manage-email,
         promote-page,
         promote-press,
-        promote-sparrow,
+        promote-nyc,
         promote-www,
       ]
     if:
@@ -878,7 +878,7 @@ jobs:
       needs.promote-manage-email.result == 'success' &&
       needs.promote-page.result == 'success' &&
       needs.promote-press.result == 'success' &&
-      needs.promote-sparrow.result == 'success' &&
+      needs.promote-nyc.result == 'success' &&
       needs.promote-www.result == 'success'
     runs-on: ubuntu-latest
     steps:

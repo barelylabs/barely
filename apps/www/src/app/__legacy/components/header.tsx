@@ -37,10 +37,10 @@ const Header = () => {
 					</div>
 				</Link>
 				<div className='ml-auto flex h-full items-center space-x-1 sm:space-x-6'>
-					<Button href='https://app.barely.io/login' look='muted'>
+					<Button href='https://app.barely.ai/login' look='muted'>
 						Log in
 					</Button>
-					<Button href='https://app.barely.io/register' pill look='secondary'>
+					<Button href='https://app.barely.ai/register' pill look='secondary'>
 						Sign up
 					</Button>
 				</div>

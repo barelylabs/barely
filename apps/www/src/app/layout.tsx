@@ -14,8 +14,8 @@ import { Navbar } from '~/components/navbar';
 
 export const metadata: Metadata = {
 	title: {
-		template: '%s - barely.io',
-		default: 'barely.io - Open-Source Marketing Platform for Musicians',
+		template: '%s - barely.ai',
+		default: 'barely.ai - Open-Source Marketing Platform for Musicians',
 	},
 	description:
 		'The open-source marketing platform built specifically for musicians. Smart links, email marketing, landing pages, merch sales, and unified analytics - all integrated, all transparent.',

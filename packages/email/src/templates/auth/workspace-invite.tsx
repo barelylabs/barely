@@ -23,7 +23,7 @@ export const WorkspaceInviteEmailTemplate = ({
 	workspaceName,
 	loginLink,
 }: WorkspaceInviteEmailProps) => {
-	const previewText = `You've been invited to barely.io`;
+	const previewText = `You've been invited to barely.ai`;
 
 	return (
 		<Html>
@@ -33,14 +33,14 @@ export const WorkspaceInviteEmailTemplate = ({
 			<Body>
 				<EmailContainer>
 					<EmailHeaderLogo />
-					<EmailHeading>You've been invited to a workspace on barely.io</EmailHeading>
+					<EmailHeading>You've been invited to a workspace on barely.ai</EmailHeading>
 
 					<Text>
 						{inviterName} has invited you to join the workspace{' '}
-						<strong>{workspaceName}</strong> on barely.io. Please click the button below
+						<strong>{workspaceName}</strong> on barely.ai. Please click the button below
 						to sign in to your{' '}
 						<span>
-							<EmailLink href='https://barely.io'>barely.io</EmailLink>
+							<EmailLink href='https://barely.ai'>barely.ai</EmailLink>
 						</span>{' '}
 						account.
 					</Text>
@@ -60,7 +60,7 @@ export const WorkspaceInviteEmailTemplate = ({
 WorkspaceInviteEmailTemplate.PreviewProps = {
 	inviterName: 'Paul',
 	workspaceName: 'The Beatles',
-	loginLink: 'https://barely.io/login',
+	loginLink: 'https://app.barely.ai/login',
 } satisfies WorkspaceInviteEmailProps;
 
 export default WorkspaceInviteEmailTemplate;

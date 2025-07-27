@@ -8,7 +8,7 @@ import { Heading, Lead, Subheading } from '~/components/text';
 import { ValueCard } from '~/components/value-card';
 
 export const metadata: Metadata = {
-	title: 'About barely.io',
+	title: 'About barely.ai',
 	description:
 		'Learn about the team building open-source marketing tools for musicians. From materials science to music tech.',
 };
@@ -53,7 +53,7 @@ function Story() {
 								music technology.
 							</p>
 							<p>
-								That's how barely.io was born - as an open-source alternative to
+								That's how barely.ai was born - as an open-source alternative to
 								expensive, disconnected tools that keep artists in the dark about their
 								own data.
 							</p>
@@ -148,21 +148,21 @@ function BarelyParrowConnection() {
 			<Container>
 				<AnimatedSection animation='fade-up' className='mx-auto max-w-4xl'>
 					<div className='glass rounded-2xl p-12 text-center'>
-						<Subheading>The Barely Sparrow Connection</Subheading>
+						<Subheading>The Barely Connection</Subheading>
 						<Heading as='h2' className='mb-6 mt-2 text-white'>
 							Battle-tested in the real world
 						</Heading>
 						<p className='mb-8 text-lg text-muted-foreground'>
-							barely.io powers all marketing campaigns at Barely Sparrow, our music
-							marketing agency. We've used these exact tools to help indie artists grow
-							from 0 to 30K+ monthly listeners.
+							barely.ai powers all marketing campaigns at Barely NYC, our music marketing
+							agency. We've used these exact tools to help indie artists grow from 0 to
+							30K+ monthly listeners.
 						</p>
 						<p className='mb-8 text-lg text-muted-foreground'>
 							Every feature was built to solve real problems we encountered working with
 							artists. No theoretical features - just practical tools that get results.
 						</p>
-						<MarketingButton href='https://barelysparrow.com' variant='hero-secondary'>
-							Learn about Barely Sparrow
+						<MarketingButton href='https://barely.nyc' variant='hero-secondary'>
+							Learn about Barely
 						</MarketingButton>
 					</div>
 				</AnimatedSection>
@@ -186,7 +186,7 @@ function Stats() {
 					<AnimatedSection animation='fade-up' delay={100}>
 						<div className='text-center'>
 							<div className='mb-2 text-5xl font-bold text-white'>5,000+</div>
-							<p className='text-muted-foreground'>Artists using barely.io</p>
+							<p className='text-muted-foreground'>Artists using barely.ai</p>
 						</div>
 					</AnimatedSection>
 
@@ -226,7 +226,7 @@ function OpenSourceCommitment() {
 						Transparency is not just a feature
 					</Heading>
 					<p className='mb-8 text-lg text-muted-foreground'>
-						Unlike other platforms, barely.io is fully open source. You can see exactly
+						Unlike other platforms, barely.ai is fully open source. You can see exactly
 						how everything works, contribute features, or even self-host if you prefer. No
 						black boxes, no vendor lock-in, no surprises.
 					</p>

@@ -463,8 +463,8 @@ export const cartOrderRoute = {
 					date: new Date(),
 					sellerName: cart.funnel?.workspace.name ?? 'Barely',
 					supportEmail:
-						isDevelopment() ? 'adam@barely.io' : (
-							(cart.funnel?.workspace.cartSupportEmail ?? 'support@barely.io')
+						isDevelopment() ? 'adam@barely.ai' : (
+							(cart.funnel?.workspace.cartSupportEmail ?? 'support@barely.ai')
 						),
 					trackingNumber: shippingTrackingNumber,
 					trackingLink: getTrackingLink({
@@ -487,9 +487,9 @@ export const cartOrderRoute = {
 				await sendEmail({
 					from: 'orders@barelycart.email',
 					fromFriendlyName: ctx.workspace.name,
-					to: isDevelopment() ? `adam+order-${orderId}@barely.io` : fan.email,
+					to: isDevelopment() ? `adam+order-${orderId}@barely.ai` : fan.email,
 					bcc: [
-						'adam@barely.io',
+						'adam@barely.ai',
 						...(isDevelopment() ?
 							[]
 						:	[cart.funnel?.workspace.cartSupportEmail ?? ''].filter(s => s.length > 0)),

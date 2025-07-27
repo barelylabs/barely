@@ -44,7 +44,7 @@ const Hero = (props: HeroProps) => {
 				</H>
 				<Lead className={cn(className, 'delay-500')}>{props.subtitle}</Lead>
 				<Button
-					href='https://app.barely.io/playlist-pitch'
+					href='https://app.barely.ai/playlist-pitch'
 					size='lg'
 					className={cn(className, 'mt-14 delay-700')}
 					pill

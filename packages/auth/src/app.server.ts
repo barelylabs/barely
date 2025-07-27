@@ -12,7 +12,7 @@ const baseUrl = getBaseUrl('app');
 export const auth = initAuth({
 	baseUrl,
 	secret: authEnv.AUTH_SECRET,
-	productionUrl: `https://${authEnv.VERCEL_PROJECT_PRODUCTION_URL ?? 'app.barely.io'}`,
+	productionUrl: `https://${authEnv.VERCEL_PROJECT_PRODUCTION_URL ?? 'app.barely.ai'}`,
 });
 
 export const getSession = cache(async () =>

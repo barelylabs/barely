@@ -191,7 +191,7 @@ export default function FeaturesPage() {
 							Ready to Simplify Your Music Marketing?
 						</h2>
 						<p className='mx-auto mb-8 max-w-2xl text-lg text-muted-foreground'>
-							Join thousands of artists who've replaced their tool stack with barely.io.
+							Join thousands of artists who've replaced their tool stack with barely.ai.
 							Start free and see the difference integration makes.
 						</p>
 						<div className='flex flex-col justify-center gap-4 sm:flex-row'>

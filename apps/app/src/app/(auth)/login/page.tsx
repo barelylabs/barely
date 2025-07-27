@@ -36,7 +36,7 @@ const SignInPage = async ({
 			<div className='mx-auto flex w-full flex-col justify-center space-y-4 text-center sm:w-[350px]'>
 				<div className='flex flex-col space-y-1 text-center'>
 					<div className='relative mx-auto mb-2 h-12 w-12'>
-						<Image src={logo} alt='barely.io' fill sizes='w-48 h-48' priority />
+						<Image src={logo} alt='barely.ai' fill sizes='w-48 h-48' priority />
 					</div>
 					<H size='4' className='font-bold'>
 						Welcome back

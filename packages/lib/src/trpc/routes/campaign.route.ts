@@ -532,7 +532,7 @@ export const campaignRoute = {
 
 			if (input.stage === 'rejected') {
 				await sendEmail({
-					from: 'support@ship.barely.io',
+					from: 'support@ship.barely.ai',
 					to: campaign.createdBy.email,
 					subject: `Your playlist.pitch campaign for ${campaign.track.name} wasn't approved`,
 					react: PlaylistPitchRejectedEmailTemplate({
@@ -568,7 +568,7 @@ export const campaignRoute = {
 
 				console.log('sending pitch approved email');
 				await sendEmail({
-					from: 'support@ship.barely.io',
+					from: 'support@ship.barely.ai',
 					to: campaign.createdBy.email,
 					subject: `Your playlist.pitch campaign for ${campaign.track.name} is approved!`,
 					react: PlaylistPitchApprovedEmailTemplate({
@@ -593,7 +593,7 @@ export const campaignRoute = {
 					// 	callbackPath: `${campaign.workspace.handle}/campaigns/${campaign.id}/launch`,
 					// });
 
-					const phoneLoginLink = 'app.barely.io'; // fixme when we start using sms
+					const phoneLoginLink = 'app.barely.ai'; // fixme when we start using sms
 
 					console.log('phoneLoginLink', phoneLoginLink);
 

@@ -217,13 +217,13 @@ async function getEmailDataForBatch({
 	});
 
 	const toEmail =
-		isDevelopment() ? `adam+broadcast-${fan.email.split('@')[0]}@barely.io` : fan.email;
+		isDevelopment() ? `adam+broadcast-${fan.email.split('@')[0]}@barely.ai` : fan.email;
 
 	return {
 		emailDeliveryId,
 		fanId: fan.id,
 		to: toEmail,
-		// bcc: 'adam+broadcast-monitoring@barely.io',
+		// bcc: 'adam+broadcast-monitoring@barely.ai',
 		from: getEmailAddressFromEmailAddress(emailTemplate.from),
 		fromFriendlyName: emailTemplate.from.defaultFriendlyName ?? undefined,
 		replyTo: emailTemplate.from.replyTo ?? undefined,

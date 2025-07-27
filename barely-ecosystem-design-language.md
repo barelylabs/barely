@@ -1,17 +1,20 @@
 # Barely Ecosystem - Complete Design Language Guide
 
 ## Core Design Philosophy
+
 **"Studio to Stage"** - The journey from creative chaos to polished performance, reflected in every interface.
 
 ---
 
-## 1. Barely Sparrow Agency Website
+## 1. Barely Agency Website
 
 ### Visual Identity
+
 **Mood**: Midnight studio session - creative energy meets technical precision
 **Personality**: Bold, confident, slightly rebellious but professional
 
 ### Color Palette
+
 ```
 Primary Background: #0A0A0A (Rich black)
 Secondary Background: #111111 (Elevated surfaces)
@@ -29,6 +32,7 @@ Gradient Overlay: linear-gradient(180deg, rgba(167, 139, 250, 0.1) 0%, transpare
 ```
 
 ### Typography
+
 ```
 Headlines: Inter Display, Bold, -0.02em tracking
 Subheadlines: Inter Display, Medium, -0.01em tracking
@@ -37,6 +41,7 @@ Small/Meta: Inter, Regular, 0.01em tracking
 ```
 
 ### Layout Principles
+
 - Full-bleed hero sections with gradient overlays
 - Asymmetric grid breaking (60/40, 70/30 splits)
 - Large typography (48-64px headlines on desktop)
@@ -44,6 +49,7 @@ Small/Meta: Inter, Regular, 0.01em tracking
 - Card-based case studies with hover transformations
 
 ### Animation & Interactions
+
 - Scroll-triggered fade-ins with slight Y translation (20px)
 - Hover states: Scale(1.02) with box-shadow glow
 - Gradient shifts on interactive elements
@@ -51,6 +57,7 @@ Small/Meta: Inter, Regular, 0.01em tracking
 - Page transitions: 500ms crossfade with slight zoom
 
 ### Unique Elements
+
 - Waveform decorative elements
 - Particle effects on CTA hover (subtle)
 - Client logos in grayscale, colorize on hover
@@ -59,13 +66,15 @@ Small/Meta: Inter, Regular, 0.01em tracking
 
 ---
 
-## 2. barely.io SaaS Marketing Website
+## 2. barely.ai SaaS Marketing Website
 
 ### Visual Identity
+
 **Mood**: Dawn breaking - transitioning from creative to productive
 **Personality**: Professional, innovative, trustworthy, approachable
 
 ### Color Palette
+
 ```
 Primary Background: #FFFFFF (Light) / #16213E (Dark default)
 Secondary Background: #FAFAFA (Light) / #1A1A2E (Dark)
@@ -83,6 +92,7 @@ Gradient Subtle: linear-gradient(180deg, rgba(59, 130, 246, 0.05) 0%, transparen
 ```
 
 ### Typography
+
 ```
 Headlines: Inter Display, Semibold, -0.01em tracking
 Subheadlines: Inter, Medium, 0em tracking
@@ -91,6 +101,7 @@ Code/Technical: JetBrains Mono, Regular, 0em tracking
 ```
 
 ### Layout Principles
+
 - Clean, centered hero with breathing room
 - Feature grid with 3-column layout
 - Comparison tables with hover row highlights
@@ -98,6 +109,7 @@ Code/Technical: JetBrains Mono, Regular, 0em tracking
 - Z-pattern reading flow on landing sections
 
 ### Animation & Interactions
+
 - Smooth scroll with 60fps target
 - Feature cards: Subtle shadow lift on hover
 - Pricing toggle: Spring animation
@@ -105,6 +117,7 @@ Code/Technical: JetBrains Mono, Regular, 0em tracking
 - Accordion animations for FAQs
 
 ### Unique Elements
+
 - Interactive product demo (simplified)
 - Before/after sliders for comparisons
 - Animated workflow diagrams
@@ -113,18 +126,20 @@ Code/Technical: JetBrains Mono, Regular, 0em tracking
 
 ---
 
-## 3. barely.io App Interface
+## 3.barely.ai App Interface
 
 ### Visual Identity
+
 **Mood**: Adaptive workspace - business by day, creative by night
 **Personality**: Powerful yet approachable, Arc browser-inspired delight
 
 ### Color Palette
 
 #### Light Mode (Business Mode)
+
 ```
 Background Primary: #FFFFFF
-Background Secondary: #FAFAFA  
+Background Secondary: #FAFAFA
 Background Tertiary: #F5F5F5
 Surface: #FFFFFF with 0 1px 3px rgba(0,0,0,0.1)
 
@@ -138,6 +153,7 @@ Accent Green: #059669 (Success - muted for light mode)
 ```
 
 #### Dark Mode (Creative Mode)
+
 ```
 Background Primary: #0A0A0A
 Background Secondary: #111111
@@ -154,6 +170,7 @@ Accent Green: #10B981 (Success - full intensity)
 ```
 
 ### Typography
+
 ```
 UI Text: SF Pro Display or Inter, Regular/Medium
 Data/Numbers: SF Mono or JetBrains Mono
@@ -161,6 +178,7 @@ Labels: Inter, Medium, 0.05em tracking, uppercase for tiny labels
 ```
 
 ### Layout Principles
+
 - Left sidebar (240px) with collapsible sections
 - Command bar at top (⌘K activation)
 - Main content area with max-width constraints
@@ -168,10 +186,11 @@ Labels: Inter, Medium, 0.05em tracking, uppercase for tiny labels
 - Split-view capability for power users
 
 ### Component Patterns
+
 ```
 Buttons:
 - Primary: Filled with accent color, 8px radius
-- Secondary: Outlined, 8px radius  
+- Secondary: Outlined, 8px radius
 - Ghost: No border, bg on hover
 - Icon: 32x32px hit targets minimum
 
@@ -194,6 +213,7 @@ Data Viz:
 ```
 
 ### Animation & Interactions
+
 - Mode switch: 500ms crossfade with particle effect
 - Sidebar: Slide + fade for menu items
 - Command bar: Bounce entrance
@@ -201,6 +221,7 @@ Data Viz:
 - Micro-interactions: 200-300ms spring animations
 
 ### Unique Elements
+
 - "Spaces" for different artists/campaigns (Arc-inspired)
 - Command palette with fuzzy search
 - Real-time collaboration indicators
@@ -212,15 +233,17 @@ Data Viz:
 ## 4. Destination Pages Framework
 
 ### Visual Identity
+
 **Mood**: Showtime - artist personality within system constraints
 **Personality**: Flexible but cohesive, fan-optimized
 
 ### Base Design System (All Destinations)
 
 #### Grid & Spacing
+
 ```
 Grid: 12-column responsive
-Breakpoints: 
+Breakpoints:
 - Mobile: 320-768px (1 column)
 - Tablet: 769-1024px (2 column)
 - Desktop: 1025px+ (12 column)
@@ -231,6 +254,7 @@ Spacing Scale: 4, 8, 12, 16, 24, 32, 48, 64, 96px
 #### Theme Options
 
 **1. Midnight Session** (Dark/Alternative)
+
 ```
 Background: #0A0A0A
 Surface: #1A1A1A
@@ -239,6 +263,7 @@ Accent: Artist choice from palette
 ```
 
 **2. Daylight** (Light/Clean)
+
 ```
 Background: #FFFFFF
 Surface: #F5F5F5
@@ -247,6 +272,7 @@ Accent: Artist choice from palette
 ```
 
 **3. Festival** (Vibrant/Energetic)
+
 ```
 Background: Gradient possibilities
 Surface: White with transparency
@@ -255,6 +281,7 @@ Accent: High saturation colors
 ```
 
 **4. Intimate** (Warm/Minimal)
+
 ```
 Background: #FAF9F7
 Surface: #FFFFFF
@@ -263,6 +290,7 @@ Accent: Muted, warm tones
 ```
 
 **5. Industry** (Professional/Press)
+
 ```
 Background: #F8F8F8
 Surface: #FFFFFF
@@ -273,6 +301,7 @@ Accent: Single brand color
 ### Page-Specific Patterns
 
 #### Link-in-Bio
+
 - Single column, mobile-first
 - 48px minimum button height
 - 16px gap between links
@@ -280,12 +309,14 @@ Accent: Single brand color
 - Optional background blur effect
 
 #### Smart Links (Streaming)
+
 - Hero album art: 300x300px min
 - Platform buttons: 48px height, full width mobile
 - Pre-save form: Inline or modal
 - Analytics overlay: Glass morphism effect
 
 #### Landing Pages
+
 - Modular sections with 80px spacing
 - Hero: Full viewport height option
 - Gallery: Masonry or grid layout
@@ -293,6 +324,7 @@ Accent: Single brand color
 - Email capture: Sticky or inline
 
 #### Cart/Checkout
+
 - Single column, 640px max width
 - Progress indicator: 3 steps max
 - Trust badges: Below CTA
@@ -300,6 +332,7 @@ Accent: Single brand color
 - Real-time validation
 
 #### EPK
+
 - Sidebar navigation on desktop
 - Stats bar: Sticky on scroll
 - Image gallery: Lightbox enabled
@@ -311,6 +344,7 @@ Accent: Single brand color
 ## Global Design Tokens
 
 ### Border Radius Scale
+
 ```
 Tiny: 4px (badges, pills)
 Small: 8px (buttons, inputs)
@@ -320,6 +354,7 @@ XL: 24px (hero sections)
 ```
 
 ### Shadow Scale
+
 ```
 XS: 0 1px 2px rgba(0,0,0,0.05)
 SM: 0 1px 3px rgba(0,0,0,0.1)
@@ -329,6 +364,7 @@ XL: 0 20px 25px rgba(0,0,0,0.1)
 ```
 
 ### Animation Curves
+
 ```
 Ease Default: cubic-bezier(0.4, 0, 0.2, 1)
 Ease Bounce: cubic-bezier(0.34, 1.56, 0.64, 1)
@@ -336,6 +372,7 @@ Ease Smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94)
 ```
 
 ### Z-Index Scale
+
 ```
 Base: 0
 Dropdown: 10
@@ -356,6 +393,7 @@ Notification: 50
 5. **Browser Support**: Modern browsers, graceful degradation for older ones
 
 ## Success Metrics
+
 - Page Load: <2s on 3G
 - Animation: Consistent 60fps
 - Accessibility: 100% keyboard navigable

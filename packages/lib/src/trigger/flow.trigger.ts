@@ -750,7 +750,7 @@ async function handleSendEmailFromTemplateToFan({
 
 	const res = await sendEmail({
 		to: fan.email,
-		// bcc: 'adam+flow-monitoring@barely.io',
+		// bcc: 'adam+flow-monitoring@barely.ai',
 		from: getEmailAddressFromEmailAddress(emailTemplate.from),
 		fromFriendlyName: emailTemplate.from.defaultFriendlyName ?? undefined,
 		replyTo: emailTemplate.from.replyTo ?? undefined,

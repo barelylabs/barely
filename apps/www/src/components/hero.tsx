@@ -132,8 +132,8 @@ export function Hero() {
 
 						<AnimatedSection animation='fade-up' delay={300}>
 							<p className='mt-8 text-sm text-muted-foreground'>
-								From the team at Barely Sparrow, who've helped indie artists grow from
-								bedroom producers to breakout successes.
+								From the team at Barely NYC, who've helped indie artists grow from bedroom
+								producers to breakout successes.
 							</p>
 						</AnimatedSection>
 					</div>

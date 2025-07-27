@@ -11,7 +11,7 @@ interface SiteConfig {
 }
 
 export const siteConfig: SiteConfig = {
-	name: 'barely.io',
+	name: 'barely.ai',
 	description: 'Tools for artists.',
 	links: {
 		twitter: 'https://twitter.com/shadcn',

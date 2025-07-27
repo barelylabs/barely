@@ -28,7 +28,7 @@ const RegisterUserPage = async ({
 			<div className='mx-auto flex w-[350px] max-w-full flex-col justify-center space-y-4 text-center'>
 				<div className='flex flex-col space-y-1 text-center'>
 					<div className='relative mx-auto mb-2 h-11 w-11'>
-						<Image src={logo} alt='barely.io' fill priority sizes='44px' />
+						<Image src={logo} alt='barely.ai' fill priority sizes='44px' />
 					</div>
 					<H size='4'>Create an account</H>
 				</div>

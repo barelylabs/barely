@@ -21,11 +21,11 @@ const PublicMainNav = () => {
 	return (
 		<div className='flex flex-row items-center gap-2'>
 			<div className='relative mx-auto h-[22px] w-[22px] items-center'>
-				<Image src={logo} alt='barely.io logo' fill />
+				<Image src={logo} alt='barely.ai logo' fill />
 			</div>
 			<Text variant='xl/medium' className='hidden font-heading md:block'>
 				barely
-				<span className='font-sans text-2xs'>.io</span>
+				<span className='font-sans text-2xs'>.ai</span>
 			</Text>
 			{/* <span className='hidden font-bold sm:inline-block'>{siteConfig.name}</span> */}
 		</div>

@@ -121,7 +121,7 @@ export async function sendMagicLink(props: {
 
 	const { sendEmail } = await import('@barely/email');
 	const emailRes = await sendEmail({
-		from: 'support@ship.barely.io',
+		from: 'support@ship.barely.ai',
 		fromFriendlyName: 'Barely',
 		to: props.email,
 		subject: 'Barely Login Link',

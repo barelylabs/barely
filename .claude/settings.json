@@ -1,0 +1,37 @@
+{
+	"hooks": {
+		"post-edit": [
+			{
+				"matcher": "*",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "pnpm format:fix"
+					}
+				]
+			}
+		],
+		"notification": [
+			{
+				"matcher": "*",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "afplay /System/Library/Sounds/Glass.aiff"
+					}
+				]
+			}
+		],
+		"stop": [
+			{
+				"matcher": "*",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "afplay /System/Library/Sounds/Glass.aiff"
+					}
+				]
+			}
+		]
+	}
+}

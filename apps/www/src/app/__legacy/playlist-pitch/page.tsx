@@ -61,7 +61,7 @@ const PlaylistPitchPage = () => {
 
 // 	{
 // 		trigger: 'What if I have more questions?',
-// 		content: 'You can always reach out to us at support@barely.io',
+// 		content: 'You can always reach out to us at support@barely.ai',
 // 		value: 'more-questions',
 // 	},
 // ];

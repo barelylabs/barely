@@ -31,11 +31,11 @@ export function ContactInquiryEmail({
 	return (
 		<Html>
 			<Head />
-			<Preview>New {subject} from barely.io</Preview>
+			<Preview>New {subject} from barely.ai</Preview>
 			<Body style={{ fontFamily: 'Arial, sans-serif', backgroundColor: '#f6f6f6' }}>
 				<Container style={{ margin: '0 auto', padding: '20px', maxWidth: '600px' }}>
 					<Heading style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px' }}>
-						New {subject} from barely.io
+						New {subject} from barely.ai
 					</Heading>
 
 					<Hr style={{ border: 'none', borderTop: '1px solid #eee', margin: '20px 0' }} />
@@ -66,7 +66,7 @@ export function ContactInquiryEmail({
 					<Hr style={{ border: 'none', borderTop: '1px solid #eee', margin: '20px 0' }} />
 
 					<Text style={{ fontSize: '12px', color: '#666' }}>
-						This email was sent from the barely.io contact form.
+						This email was sent from the barely.ai contact form.
 					</Text>
 				</Container>
 			</Body>
@@ -79,7 +79,7 @@ ContactInquiryEmail.PreviewProps = {
 	email: 'john@example.com',
 	artistName: 'Test Artist',
 	message:
-		"I'm interested in learning more about barely.io and how it can help me grow my music career.",
+		"I'm interested in learning more about barely.ai and how it can help me grow my music career.",
 	variant: 'demo' as const,
 } satisfies ContactInquiryEmailProps;
 

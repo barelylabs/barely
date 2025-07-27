@@ -9,7 +9,7 @@ link_qr=http://$ip_address:3004
 manage_email_qr=http://$ip_address:3005
 page_qr=http://$ip_address:3006
 press_qr=http://$ip_address:3007
-sparrow_qr=http://$ip_address:3008
+nyc_qr=http://$ip_address:3008
 www_qr=http://$ip_address:3009
 
 echo "app::3000"
@@ -33,8 +33,8 @@ qrencode -t ansiutf8 -o - $page_qr
 echo "press::3006"
 qrencode -t ansiutf8 -o - $press_qr
 
-echo "sparrow::3007"
-qrencode -t ansiutf8 -o - $sparrow_qr
+echo "nyc::3008"
+qrencode -t ansiutf8 -o - $nyc_qr
 
 echo "www::3008"
 qrencode -t ansiutf8 -o - $www_qr
