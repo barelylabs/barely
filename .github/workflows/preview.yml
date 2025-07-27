@@ -45,7 +45,7 @@ jobs:
           github_commit_repo=${{ github.repository }}
           github_commit_message=$(git show -s --format=%s $github_commit_sha)
           github_commit_ref=${{ github.event.pull_request.head.ref }}
-          
+
           # Escape quotes in commit message for shell safety
           escaped_commit_message=$(echo "$github_commit_message" | sed 's/"/\\"/g')
 
@@ -407,7 +407,7 @@ jobs:
           cd packages/tb/tinybird
           output=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment create 2>&1) || true
           echo "$output"
-          
+
           # Check if deployment was skipped due to no changes
           if [[ $output == *"Not deploying. No changes."* ]]; then
             echo "no_changes=true" >> $GITHUB_OUTPUT
@@ -419,7 +419,7 @@ jobs:
         id: get-deployment-id
         run: |
           cd packages/tb/tinybird
-          
+
           # Use Live deployment ID if no tb changes or if deployment had no changes
           if [[ "${{ needs.git-meta.outputs.tb_changed }}" == "false" ]] || [[ "${{ steps.deploy-staging.outputs.no_changes }}" == "true" ]]; then
             DEPLOYMENT_ID=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment ls | awk '/Live/ { print $2 }')
@@ -428,7 +428,7 @@ jobs:
             DEPLOYMENT_ID=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment ls | awk '/Staging/ { print $2 }')
             echo "Using Staging deployment ID"
           fi
-          
+
           echo "TINYBIRD_STAGING_DEPLOYMENT_ID=$DEPLOYMENT_ID" >> $GITHUB_OUTPUT
 
       - name: Update vercel env - app/preview/branch
@@ -530,9 +530,9 @@ jobs:
 
           echo $TINYBIRD_STAGING_DEPLOYMENT_ID | pnpm vercel env add TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Update vercel env - sparrow/preview/branch
+      - name: Update vercel env - nyc/preview/branch
         env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SPARROW_PROJECT_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_NYC_PROJECT_ID }}
         run: |
           TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
           echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
