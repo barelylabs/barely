@@ -10,7 +10,7 @@ export function LogoCloud({ className }: React.ComponentPropsWithoutRef<'div'>) 
 			)}
 		>
 			<Image
-				alt='Barely Sparrow'
+				alt='Barely NYC'
 				src='/logo-cloud/barely-sparrow.svg'
 				className='h-9 max-sm:mx-auto sm:h-8 lg:h-12'
 				width={80}

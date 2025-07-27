@@ -148,21 +148,21 @@ function BarelyParrowConnection() {
 			<Container>
 				<AnimatedSection animation='fade-up' className='mx-auto max-w-4xl'>
 					<div className='glass rounded-2xl p-12 text-center'>
-						<Subheading>The Barely Sparrow Connection</Subheading>
+						<Subheading>The Barely Connection</Subheading>
 						<Heading as='h2' className='mb-6 mt-2 text-white'>
 							Battle-tested in the real world
 						</Heading>
 						<p className='mb-8 text-lg text-muted-foreground'>
-							barely.io powers all marketing campaigns at Barely Sparrow, our music
-							marketing agency. We've used these exact tools to help indie artists grow
-							from 0 to 30K+ monthly listeners.
+							barely.io powers all marketing campaigns at Barely NYC, our music marketing
+							agency. We've used these exact tools to help indie artists grow from 0 to
+							30K+ monthly listeners.
 						</p>
 						<p className='mb-8 text-lg text-muted-foreground'>
 							Every feature was built to solve real problems we encountered working with
 							artists. No theoretical features - just practical tools that get results.
 						</p>
-						<MarketingButton href='https://barelysparrow.com' variant='hero-secondary'>
-							Learn about Barely Sparrow
+						<MarketingButton href='https://barely.nyc' variant='hero-secondary'>
+							Learn about Barely
 						</MarketingButton>
 					</div>
 				</AnimatedSection>

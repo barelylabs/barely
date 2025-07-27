@@ -125,9 +125,9 @@ jobs:
             echo "Please run 'pnpm db:push' locally to handle any schema ambiguities"
             exit 1
           }
-          
+
           echo "output: $output"
-          
+
           # Check for successful completion
           if [[ $output != *"[✓] Changes applied"* ]] && [[ $output != *"No changes detected"* ]]; then
             echo "ERROR: db:push did not complete successfully"
@@ -141,7 +141,7 @@ jobs:
             
             exit 1
           fi
-          
+
           echo "db:push completed successfully"
 
       # Using Vercel as our secret store for the DATABASE_URL and DATABASE_POOL_URL
@@ -268,9 +268,9 @@ jobs:
           echo $DATABASE_URL | pnpm vercel env add DATABASE_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
           echo $DATABASE_POOL_URL | pnpm vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: update vercel env - sparrow/preview/branch
+      - name: update vercel env - nyc/preview/branch
         env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SPARROW_PROJECT_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_NYC_PROJECT_ID }}
         run: |
           branch_name=${{ needs.git-meta.outputs.git_branch_name }}
 
@@ -427,12 +427,12 @@ jobs:
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PRESS_PROJECT_ID }}
 
-  deploy-sparrow:
+  deploy-nyc:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [neon-preview, git-meta]
     with:
-      app_name: sparrow
-      working_directory: apps/sparrow
+      app_name: nyc
+      working_directory: apps/nyc
       scope: barely
       environment: preview
       git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
@@ -440,7 +440,7 @@ jobs:
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SPARROW_PROJECT_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_NYC_PROJECT_ID }}
 
   deploy-www:
     uses: ./.github/workflows/deploy-to-vercel.yml
@@ -470,7 +470,7 @@ jobs:
         deploy-fm,
         deploy-page,
         deploy-press,
-        deploy-sparrow,
+        deploy-nyc,
         deploy-www,
       ]
     runs-on: ubuntu-latest
@@ -490,7 +490,7 @@ jobs:
             | :link: link | [preview](${{ needs.deploy-link.outputs.deployment_url }}) | [inspect](${{ needs.deploy-link.outputs.inspect_url }}) |
             | :radio: fm | [preview](${{ needs.deploy-fm.outputs.deployment_url }}) | [inspect](${{ needs.deploy-fm.outputs.inspect_url }}) |
             | :newspaper: press | [preview](${{ needs.deploy-press.outputs.deployment_url }}) | [inspect](${{ needs.deploy-press.outputs.inspect_url }}) |
-            | :bird: sparrow | [preview](${{ needs.deploy-sparrow.outputs.deployment_url }}) | [inspect](${{ needs.deploy-sparrow.outputs.inspect_url }}) |
+            | :city_sunset: nyc | [preview](${{ needs.deploy-nyc.outputs.deployment_url }}) | [inspect](${{ needs.deploy-nyc.outputs.inspect_url }}) |
             | :globe_with_meridians: www | [preview](${{ needs.deploy-www.outputs.deployment_url }}) | [inspect](${{ needs.deploy-www.outputs.inspect_url }}) |
             | :page_facing_up: page | [preview](${{ needs.deploy-page.outputs.deployment_url }}) | [inspect](${{ needs.deploy-page.outputs.inspect_url }}) |
 
@@ -511,7 +511,7 @@ jobs:
         deploy-manage-email,
         deploy-page,
         deploy-press,
-        deploy-sparrow,
+        deploy-nyc,
         deploy-www,
       ]
     if: always() && github.event_name == 'pull_request'

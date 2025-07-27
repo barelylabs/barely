@@ -8,7 +8,7 @@
 
 Finally, a complete tech stack engineered from the ground up for how music careers actually work. Smart links, email marketing, landing pages, merch sales, and unified analytics - all integrated, all transparent, all designed to help you build your own musical empire.
 
-_From the team at Barely Sparrow, who've helped indie artists grow from bedroom producers to breakout successes._
+_From the team at Barely, who've helped indie artists grow from bedroom producers to breakout successes._
 
 [Start Building Free] [See How It Works]
 
@@ -41,11 +41,11 @@ Most platforms force you to choose between:
 - ✅ Open-source transparency so you understand exactly how everything works
 - ✅ A platform that scales from bedroom to label-level operations
 
-### Built by Barely Sparrow
+### Built by Barely
 
 **The Same Tools We Use for Professional Music Marketing**
 
-barely.io powers the marketing campaigns at Barely Sparrow, where we've helped indie artists grow from 0 to 30K+ monthly listeners. Every feature was built to solve real problems we encountered in professional music marketing.
+barely.io powers the marketing campaigns at Barely, where we've helped indie artists grow from 0 to 30K+ monthly listeners. Every feature was built to solve real problems we encountered in professional music marketing.
 
 _Now you get the exact same tools we use for agency clients - transparent, integrated, and engineered specifically for how music careers actually grow._
 
@@ -79,7 +79,7 @@ barely.io Rising Tier: $79/month
 
 _"I spent years optimizing materials at the molecular level in research labs, then realized indie musicians faced the same problem - incredible potential buried under inefficient systems. So I built the integrated platform I wish I'd had when releasing music to 'tens of listeners.'"_
 
-[Read the Full Story] → Links to Barely Sparrow about page
+[Read the Full Story] → Links to Barely about page
 
 ---
 
@@ -161,11 +161,11 @@ With barely.io:
 
 ## About Page
 
-### Connection to Barely Sparrow
+### Connection to Barely
 
 **The Tools Behind the Strategy**
 
-barely.io powers the marketing campaigns at Barely Sparrow, our music marketing agency. Every feature was built to solve real problems we encountered helping indie artists grow from 0-30K monthly listeners.
+barely.io powers the marketing campaigns at Barely, our music marketing agency. Every feature was built to solve real problems we encountered helping indie artists grow from 0-30K monthly listeners.
 
 **Why We Built This:**
 

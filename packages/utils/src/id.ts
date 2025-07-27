@@ -11,6 +11,8 @@ const prefixes = {
 	user: 'user',
 	workspace: 'ws',
 	providerAccount: 'app',
+	// nyc
+	nycSession: 'nycs',
 	// web
 	landingPage: 'lp',
 	link: 'link',

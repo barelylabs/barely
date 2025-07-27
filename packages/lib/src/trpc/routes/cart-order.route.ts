@@ -463,8 +463,8 @@ export const cartOrderRoute = {
 					date: new Date(),
 					sellerName: cart.funnel?.workspace.name ?? 'Barely',
 					supportEmail:
-						isDevelopment() ? 'adam@barely.io' : (
-							(cart.funnel?.workspace.cartSupportEmail ?? 'support@barely.io')
+						isDevelopment() ? 'adam@barely.ai' : (
+							(cart.funnel?.workspace.cartSupportEmail ?? 'support@barely.ai')
 						),
 					trackingNumber: shippingTrackingNumber,
 					trackingLink: getTrackingLink({

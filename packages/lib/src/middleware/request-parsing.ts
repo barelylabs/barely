@@ -361,7 +361,7 @@ export async function setVisitorCookies({
 	res: NextResponse;
 	handle: string | null;
 	key: string | null;
-	app: 'cart' | 'link' | 'fm' | 'page' | 'press' | 'sparrow' | 'www';
+	app: 'cart' | 'link' | 'fm' | 'page' | 'press' | 'nyc' | 'www';
 }) {
 	const handle = handleAndKey.handle ?? '_';
 	const key = handleAndKey.key ?? '_';
@@ -379,6 +379,7 @@ export async function setVisitorCookies({
 			: app === 'fm' ? newId('fmSession')
 			: app === 'page' ? newId('landingPageSession')
 			: app === 'www' ? newId('wwwSession')
+			: app === 'nyc' ? newId('nycSession')
 			: newId('barelySession'),
 			{
 				httpOnly: true,

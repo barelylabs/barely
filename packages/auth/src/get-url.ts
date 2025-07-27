@@ -54,10 +54,9 @@ export function getBaseUrl(app: (typeof APPS)[number], absolute = false) {
 					authEnv.NEXT_PUBLIC_PRESS_DEV_PORT ??
 					raise('NEXT_PUBLIC_PRESS_DEV_PORT not found');
 				break;
-			case 'sparrow':
+			case 'nyc':
 				devPort =
-					authEnv.NEXT_PUBLIC_SPARROW_DEV_PORT ??
-					raise('NEXT_PUBLIC_SPARROW_DEV_PORT not found');
+					authEnv.NEXT_PUBLIC_NYC_DEV_PORT ?? raise('NEXT_PUBLIC_NYC_DEV_PORT not found');
 				break;
 			case 'www':
 				devPort =
@@ -96,8 +95,8 @@ export function getBaseUrl(app: (typeof APPS)[number], absolute = false) {
 		case 'press':
 			baseUrl = authEnv.NEXT_PUBLIC_PRESS_BASE_URL;
 			break;
-		case 'sparrow':
-			baseUrl = authEnv.NEXT_PUBLIC_SPARROW_BASE_URL;
+		case 'nyc':
+			baseUrl = authEnv.NEXT_PUBLIC_NYC_BASE_URL;
 			break;
 		case 'www':
 			baseUrl = authEnv.NEXT_PUBLIC_WWW_BASE_URL;

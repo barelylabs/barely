@@ -70,7 +70,7 @@ export type WorkspaceTimezone = (typeof WORKSPACE_TIMEZONES)[number];
 const FREE_PLAN: Plan = {
 	id: 'free',
 	name: 'Free',
-	description: 'For artists just discovering barely.io who want to explore the platform.',
+	description: 'For artists just discovering barely.ai who want to explore the platform.',
 	productId: {
 		test: 'prod_free_test',
 		production: 'prod_free_production',
@@ -121,7 +121,7 @@ const FREE_PLAN: Plan = {
 		{
 			description: '15% merch transaction fee',
 			tooltip:
-				'+ Stripe fees. barely.io does not take fees from shipping or handling costs.',
+				'+ Stripe fees. barely.ai does not take fees from shipping or handling costs.',
 		},
 	],
 	features: [],
@@ -185,7 +185,7 @@ const BEDROOM_PLAN: Plan = {
 		{
 			description: '10% merch transaction fee',
 			tooltip:
-				'+ Stripe fees. barely.io does not take fees from shipping or handling costs.',
+				'+ Stripe fees. barely.ai does not take fees from shipping or handling costs.',
 		},
 	],
 	features: [],
@@ -249,7 +249,7 @@ const RISING_PLAN: Plan = {
 		{
 			description: '8% merch transaction fee',
 			tooltip:
-				'+ Stripe fees. barely.io does not take fees from shipping or handling costs.',
+				'+ Stripe fees. barely.ai does not take fees from shipping or handling costs.',
 		},
 	],
 	features: [],
@@ -314,7 +314,7 @@ const BREAKOUT_PLAN: Plan = {
 		{
 			description: '6% merch transaction fee',
 			tooltip:
-				'+ Stripe fees. barely.io does not take fees from shipping or handling costs.',
+				'+ Stripe fees. barely.ai does not take fees from shipping or handling costs.',
 		},
 		{ description: 'Priority support' },
 	],
@@ -367,7 +367,7 @@ const BEDROOM_PLUS_PLAN: Plan = {
 		},
 	},
 	highlights: [
-		{ description: 'Everything in barely.io Bedroom (included free)' },
+		{ description: 'Everything in barely.ai Bedroom (included free)' },
 		{ description: 'Bi-weekly 30-minute coaching calls' },
 		{ description: 'Custom monthly campaign blueprints' },
 		{ description: 'Integrated merch platform + strategy coaching' },
@@ -423,7 +423,7 @@ const RISING_PLUS_PLAN: Plan = {
 		},
 	},
 	highlights: [
-		{ description: 'Everything in barely.io Rising (included free)' },
+		{ description: 'Everything in barely.ai Rising (included free)' },
 		{ description: 'Everything in Bedroom+ PLUS:' },
 		{ description: 'Up to 2 professional campaigns per month' },
 		{ description: 'Management of $1,000-$3,000 monthly ad spend' },
@@ -480,7 +480,7 @@ const BREAKOUT_PLUS_PLAN: Plan = {
 		},
 	},
 	highlights: [
-		{ description: 'Everything in barely.io Breakout (included free)' },
+		{ description: 'Everything in barely.ai Breakout (included free)' },
 		{ description: 'Up to 2 advanced campaigns per month' },
 		{ description: 'Management of $3,000-$6,000 monthly ad spend' },
 		{ description: 'Complete merch revenue optimization' },

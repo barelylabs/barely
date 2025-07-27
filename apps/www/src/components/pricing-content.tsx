@@ -149,7 +149,7 @@ function Header({
 				</Heading>
 				<Lead className='mx-auto mt-6 max-w-3xl text-muted-foreground'>
 					{showPlusPlans ?
-						'Combine barely.io tools with expert coaching and campaign management from Barely Sparrow. Let us handle the growth while you focus on the music.'
+						'Combine barely.io tools with expert coaching and campaign management from Barely NYC. Let us handle the growth while you focus on the music.'
 					:	'All features included at every tier. Just pay for the capacity you need.'}
 				</Lead>
 
@@ -632,7 +632,7 @@ export function PricingContent() {
 	const [showPlusPlans, setShowPlusPlans] = useState(false);
 
 	// Apply purple theme for Agency mode
-	const themeClass = showPlusPlans ? 'pricing-sparrow-theme' : '';
+	const themeClass = showPlusPlans ? 'pricing-nyc-theme' : '';
 
 	return (
 		<main className={cn('overflow-hidden transition-colors duration-300', themeClass)}>

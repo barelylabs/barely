@@ -15,7 +15,7 @@ Create/update the barely.io marketing site to position as the open-source, music
 
 Finally, a complete tech stack engineered from the ground up for how music careers actually work. Smart links, email marketing, landing pages, merch sales, and unified analytics - all integrated, all transparent, all designed to help you build your own musical empire.
 
-From the team at Barely Sparrow, who've helped indie artists grow from bedroom producers to breakout successes.
+From the team at Barely NYC, who've helped indie artists grow from bedroom producers to breakout successes.
 
 [Start Building Free] [See How It Works]
 ```
@@ -81,12 +81,12 @@ barely.io Rising: $79/month
 
 ### 6. Connection to Barely Sparrow
 
-**"Built by Barely Sparrow" Section:**
+**"Built by Barely NYC" Section:**
 
 ```
 "The Same Tools We Use for Professional Music Marketing"
 
-barely.io powers the marketing campaigns at Barely Sparrow, where we've helped indie artists grow from 0 to 30K+ monthly listeners. Every feature was built to solve real problems we encountered in professional music marketing.
+barely.io powers the marketing campaigns at Barely NYC, where we've helped indie artists grow from 0 to 30K+ monthly listeners. Every feature was built to solve real problems we encountered in professional music marketing.
 
 Now you get the exact same tools we use for agency clients - transparent, integrated, and engineered specifically for how music careers actually grow.
 ```

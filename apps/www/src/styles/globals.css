@@ -112,8 +112,8 @@
 		box-shadow: var(--glass-shadow);
 	}
 
-	/* Sparrow purple theme for pricing */
-	.pricing-sparrow-theme {
+	/* NYC purple theme for pricing */
+	.pricing-nyc-theme {
 		--primary: 63.4% 0.2016 292.62; /* #8B5CF6 - Purple */
 		--primary-foreground: 98.38% 0.003 247.86;
 		--ring: 63.4% 0.2016 292.62;

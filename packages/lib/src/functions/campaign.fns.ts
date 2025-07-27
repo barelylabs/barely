@@ -329,7 +329,7 @@ export async function createPlaylistPitchCampaign(props: {
 	await sendEmail({
 		from: 'support@ship.barely.io',
 		fromFriendlyName: 'Barely',
-		to: 'adam@barelysparrow.com',
+		to: 'adam@barely.nyc',
 		subject: 'New campaign for screening',
 		type: 'transactional',
 		react: PlaylistPitchToScreenEmailTemplate({
