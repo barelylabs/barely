@@ -1,0 +1,151 @@
+name: ✨ Feature Request
+description: Suggest a new feature for barely.ly
+title: "[Feature]: "
+labels: ["type: feature", "needs: triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a new feature! Please provide as much detail as possible to help us understand your request.
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Feature Description
+      description: A clear and concise description of the feature you'd like to see.
+      placeholder: Describe the feature you want to see implemented.
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-statement
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve? What need does it address?
+      placeholder: |
+        Is your feature request related to a problem? Please describe.
+        Example: "I'm always frustrated when..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the solution you'd like to see implemented.
+      placeholder: A clear and concise description of what you want to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any alternative solutions or features?
+      placeholder: A clear and concise description of any alternative solutions or features you've considered.
+
+  - type: dropdown
+    id: feature-area
+    attributes:
+      label: Feature Area
+      description: Which area of barely.ly does this feature relate to?
+      options:
+        - Link Pages
+        - Cart & E-commerce
+        - Press Kits
+        - Email Marketing
+        - Analytics & Insights
+        - Fan Management
+        - Social Media Integration
+        - API & Integrations
+        - Mobile Experience
+        - Dashboard & Admin
+        - Payment Processing
+        - Content Management
+        - SEO & Discovery
+        - Other (please specify in additional context)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: creator-type
+    attributes:
+      label: Creator Type
+      description: What type of creator would benefit from this feature?
+      multiple: true
+      options:
+        - Musicians & Bands
+        - Podcasters
+        - Content Creators & Influencers
+        - Artists & Designers
+        - Writers & Authors
+        - Coaches & Educators
+        - Businesses & Brands
+        - Event Organizers
+        - All Creator Types
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority Level
+      description: How important is this feature to your workflow?
+      options:
+        - Critical - Blocking my workflow
+        - High - Significantly improves my workflow
+        - Medium - Nice to have improvement
+        - Low - Minor enhancement
+    validations:
+      required: true
+
+  - type: textarea
+    id: user-stories
+    attributes:
+      label: User Stories
+      description: Provide specific user stories or use cases for this feature.
+      placeholder: |
+        As a [type of user], I want [feature] so that [benefit].
+        
+        Example:
+        - As a musician, I want to embed Spotify previews on my link page so that fans can listen before purchasing.
+        - As a podcaster, I want to collect email subscribers through my link page so that I can grow my audience.
+
+  - type: textarea
+    id: success-metrics
+    attributes:
+      label: Success Metrics
+      description: How would you measure the success of this feature?
+      placeholder: |
+        What metrics would indicate this feature is working well?
+        Examples: increased conversion rates, reduced support tickets, improved user engagement, etc.
+
+  - type: textarea
+    id: technical-considerations
+    attributes:
+      label: Technical Considerations
+      description: Any technical considerations, integrations, or constraints you're aware of?
+      placeholder: |
+        Are there specific platforms, APIs, or technical requirements this feature would need?
+        Examples: Stripe integration, Spotify API, social platform APIs, etc.
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: Mockups or Examples
+      description: If you have mockups, wireframes, or examples from other platforms, please share them here.
+      placeholder: You can drag and drop images here or paste links to examples.
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any other context, research, or information about the feature request here.
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our Code of Conduct.
+      options:
+        - label: I agree to follow barely.ly's Code of Conduct
+          required: true

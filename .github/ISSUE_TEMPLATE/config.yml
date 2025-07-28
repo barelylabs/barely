@@ -1,0 +1,17 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 Security Vulnerability
+    url: mailto:security@barely.ly
+    about: Please report security vulnerabilities privately via email
+  - name: 📚 Documentation & Guides
+    url: https://docs.barely.ly
+    about: Check our documentation for answers to common questions
+  - name: 💬 Community Discord
+    url: https://discord.gg/barely
+    about: Join our Discord community for general discussions and support
+  - name: ❓ General Support
+    url: mailto:support@barely.ly
+    about: Get help with your barely.ly account or general questions
+  - name: 💡 Feature Ideas Discussion
+    url: https://github.com/barelylabs/barely/discussions
+    about: Discuss and vote on feature ideas with the community before creating formal requests

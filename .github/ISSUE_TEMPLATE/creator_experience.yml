@@ -1,0 +1,162 @@
+name: 🎨 Creator Experience Issue
+description: Report issues specific to creator workflows and experiences
+title: "[Creator]: "
+labels: ["type: creator-experience", "needs: triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Help us improve the creator experience on barely.ly! This template is specifically for issues related to creator workflows, usability, and experience.
+
+  - type: dropdown
+    id: creator-type
+    attributes:
+      label: Creator Type
+      description: What type of creator are you?
+      options:
+        - Musician/Band
+        - Podcaster
+        - Content Creator/Influencer
+        - Artist/Designer
+        - Writer/Author
+        - Coach/Educator
+        - Business/Brand
+        - Event Organizer
+        - Other (please specify below)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: experience-level
+    attributes:
+      label: Experience Level with barely.ly
+      description: How long have you been using barely.ly?
+      options:
+        - Just started (less than 1 week)
+        - New user (1 week to 1 month)
+        - Regular user (1-6 months)
+        - Experienced user (6+ months)
+        - Power user (1+ years)
+    validations:
+      required: true
+
+  - type: textarea
+    id: workflow-description
+    attributes:
+      label: Workflow Description
+      description: Describe the creator workflow you were trying to complete.
+      placeholder: |
+        Example: "I was trying to set up a link page for my new album release, including streaming links, merch, and email signup."
+    validations:
+      required: true
+
+  - type: textarea
+    id: pain-point
+    attributes:
+      label: Pain Point or Issue
+      description: What specific pain point or issue did you encounter?
+      placeholder: |
+        Describe what made your workflow difficult, confusing, or impossible to complete.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-experience
+    attributes:
+      label: Expected Creator Experience
+      description: What did you expect to happen or how did you expect the workflow to work?
+      placeholder: |
+        Describe the ideal experience you were expecting.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: feature-area
+    attributes:
+      label: Feature Area
+      description: Which area of barely.ly was involved in this experience issue?
+      multiple: true
+      options:
+        - Link Page Setup/Customization
+        - Cart & Product Management
+        - Press Kit Creation
+        - Email List Management
+        - Analytics & Insights
+        - Fan Engagement Tools
+        - Social Media Integration
+        - Mobile Experience
+        - Dashboard Navigation
+        - Payment/Monetization Setup
+        - Content Upload/Management
+        - Branding/Customization
+        - Other (please specify below)
+
+  - type: dropdown
+    id: impact-level
+    attributes:
+      label: Impact on Your Creator Goals
+      description: How much did this issue impact your ability to connect with fans or achieve your creator goals?
+      options:
+        - Critical - Completely blocked me from my goals
+        - High - Significantly hindered my progress
+        - Medium - Made things more difficult but manageable
+        - Low - Minor inconvenience
+    validations:
+      required: true
+
+  - type: textarea
+    id: audience-context
+    attributes:
+      label: Audience Context
+      description: Tell us about your audience and how this relates to serving them better.
+      placeholder: |
+        - Audience size: [e.g., 500 email subscribers, 5K Instagram followers]
+        - Primary platforms: [e.g., Instagram, TikTok, Spotify]
+        - Fan engagement goals: [e.g., sell merch, grow email list, promote shows]
+
+  - type: textarea
+    id: workarounds-tried
+    attributes:
+      label: Workarounds Attempted
+      description: What workarounds or alternative approaches did you try?
+      placeholder: |
+        List any workarounds you attempted and whether they worked.
+
+  - type: textarea
+    id: suggestions
+    attributes:
+      label: Suggestions for Improvement
+      description: How do you think this experience could be improved for creators?
+      placeholder: |
+        Share your ideas for making this workflow more creator-friendly.
+
+  - type: textarea
+    id: comparison
+    attributes:
+      label: Comparison with Other Tools
+      description: Have you used other creator tools that handle this workflow better? (No need to name competitors, just describe the better experience)
+      placeholder: |
+        Describe better experiences you've had with similar workflows on other platforms.
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or Examples
+      description: If applicable, add screenshots to help illustrate the experience issue.
+      placeholder: You can drag and drop images here or paste them directly.
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other context about your creator journey or this specific issue.
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our Code of Conduct.
+      options:
+        - label: I agree to follow barely.ly's Code of Conduct
+          required: true

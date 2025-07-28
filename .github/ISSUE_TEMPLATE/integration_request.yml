@@ -1,0 +1,179 @@
+name: 🔗 Integration Request
+description: Request integration with a third-party service or platform
+title: "[Integration]: "
+labels: ["type: integration", "needs: triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Request an integration with a third-party service or platform that would benefit creators using barely.ly.
+
+  - type: input
+    id: service-name
+    attributes:
+      label: Service/Platform Name
+      description: What service or platform would you like to see integrated?
+      placeholder: e.g., Shopify, Mailchimp, Discord, Twitch, etc.
+    validations:
+      required: true
+
+  - type: input
+    id: service-url
+    attributes:
+      label: Service Website/Documentation
+      description: Please provide the URL to the service's website or API documentation.
+      placeholder: https://...
+
+  - type: dropdown
+    id: integration-type
+    attributes:
+      label: Integration Type
+      description: What type of integration would this be?
+      options:
+        - E-commerce/Payment Processing
+        - Email Marketing/Newsletter
+        - Social Media Platform
+        - Streaming/Media Platform
+        - Analytics/Tracking
+        - Communication/Community
+        - Content Management
+        - Design/Creative Tools
+        - Productivity/Workflow
+        - Event Management
+        - Fan Engagement
+        - Other (please specify below)
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case Description
+      description: Describe how creators would use this integration with barely.ly.
+      placeholder: |
+        Explain the specific workflow or use case this integration would enable.
+        Example: "Creators could sync their Shopify products to their barely.ly cart, automatically updating inventory and pricing."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: creator-types
+    attributes:
+      label: Creator Types Who Would Benefit
+      description: Which types of creators would benefit most from this integration?
+      multiple: true
+      options:
+        - Musicians & Bands
+        - Podcasters
+        - Content Creators & Influencers
+        - Artists & Designers
+        - Writers & Authors
+        - Coaches & Educators
+        - Businesses & Brands
+        - Event Organizers
+        - E-commerce Sellers
+        - All Creator Types
+
+  - type: dropdown
+    id: demand-level
+    attributes:
+      label: Demand Level
+      description: How many creators do you think would use this integration?
+      options:
+        - Very High - Most creators would use this
+        - High - Many creators in specific niches would use this
+        - Medium - Some creators would find this useful
+        - Low - Niche use case but valuable for specific creators
+        - Unknown - Need to research demand
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-workarounds
+    attributes:
+      label: Current Workarounds
+      description: How are creators currently handling this without the integration?
+      placeholder: |
+        Describe manual processes or workarounds creators currently use.
+
+  - type: textarea
+    id: api-availability
+    attributes:
+      label: API Availability
+      description: Does this service have a public API? Please provide details if known.
+      placeholder: |
+        - API documentation URL
+        - Authentication method
+        - Rate limits
+        - Key features available via API
+        - Any known limitations
+
+  - type: dropdown
+    id: priority-level
+    attributes:
+      label: Priority Level
+      description: How important is this integration for creator success?
+      options:
+        - Critical - Essential for creator workflows
+        - High - Significantly improves creator capabilities
+        - Medium - Nice enhancement for creator experience
+        - Low - Minor convenience improvement
+    validations:
+      required: true
+
+  - type: textarea
+    id: competitive-analysis
+    attributes:
+      label: Competitive Analysis
+      description: Do other creator platforms offer this integration? How do they implement it?
+      placeholder: |
+        Share any knowledge about how other platforms handle this integration (no need to name competitors directly).
+
+  - type: textarea
+    id: technical-considerations
+    attributes:
+      label: Technical Considerations
+      description: Any technical requirements, limitations, or considerations you're aware of?
+      placeholder: |
+        - Webhook support
+        - Real-time vs batch sync requirements
+        - Data privacy considerations
+        - Compliance requirements (GDPR, etc.)
+        - Pricing/cost implications
+
+  - type: textarea
+    id: success-metrics
+    attributes:
+      label: Success Metrics
+      description: How would you measure the success of this integration?
+      placeholder: |
+        What would indicate this integration is working well for creators?
+        Examples: adoption rate, creator retention, workflow efficiency improvements, etc.
+
+  - type: textarea
+    id: example-workflow
+    attributes:
+      label: Example Workflow
+      description: Provide a step-by-step example of how a creator would use this integration.
+      placeholder: |
+        Walk through a specific example from a creator's perspective:
+        1. Creator connects their [service] account to barely.ly
+        2. [Next step]
+        3. [Next step]
+        etc.
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other relevant information about this integration request.
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our Code of Conduct.
+      options:
+        - label: I agree to follow barely.ly's Code of Conduct
+          required: true

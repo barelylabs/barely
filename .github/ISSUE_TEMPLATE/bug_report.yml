@@ -1,0 +1,115 @@
+name: 🐛 Bug Report
+description: Report a bug in barely.ly
+title: "[Bug]: "
+labels: ["type: bug", "needs: triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report! Please provide as much detail as possible to help us fix the issue.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear and concise description of what the bug is.
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+      placeholder: What should have happened instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Please provide step-by-step instructions to reproduce the issue.
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Scroll down to '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: dropdown
+    id: browsers
+    attributes:
+      label: What browsers are you seeing the problem on?
+      multiple: true
+      options:
+        - Firefox
+        - Chrome
+        - Safari
+        - Microsoft Edge
+        - Other (please specify in additional context)
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: What environment are you using?
+      options:
+        - Production (barely.ly)
+        - Local development
+        - Staging/Preview
+        - Other (please specify in additional context)
+    validations:
+      required: true
+
+  - type: textarea
+    id: device-info
+    attributes:
+      label: Device & OS Information
+      description: Please provide details about your device and operating system.
+      placeholder: |
+        - OS: [e.g. iOS 16.1, macOS 13.0, Windows 11]
+        - Device: [e.g. iPhone 14, MacBook Pro, Desktop]
+        - Browser version: [e.g. Chrome 108.0.5359.124]
+
+  - type: textarea
+    id: creator-context
+    attributes:
+      label: Creator Context (if applicable)
+      description: If you're a creator using barely.ly, please provide context about your use case.
+      placeholder: |
+        - Creator type: [e.g. musician, podcaster, content creator]
+        - Feature being used: [e.g. link page, cart, press kit]
+        - Audience size: [e.g. <1k, 1k-10k, 10k+]
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console Logs or Error Messages
+      description: If applicable, please paste any console logs or error messages here.
+      render: shell
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or Videos
+      description: If applicable, add screenshots or videos to help explain your problem.
+      placeholder: You can drag and drop images here or paste them directly.
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here, including workarounds you've tried.
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our Code of Conduct.
+      options:
+        - label: I agree to follow barely.ly's Code of Conduct
+          required: true
