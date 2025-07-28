@@ -29,6 +29,12 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Setup
+        uses: ./tooling/github/setup
+
+      - name: Install dependencies
+        run: pnpm i
+
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@beta
@@ -46,7 +52,6 @@ jobs:
 
           # Optional: Allow Claude to run specific commands
           allowed_tools: |
-            Bash(pnpm i)
             Bash(pnpm format:fix)
             Bash(pnpm typecheck)
             Bash(pnpm test)
@@ -56,8 +61,7 @@ jobs:
           # Optional: Add custom instructions for Claude to customize its behavior for your project
           custom_instructions: |
             New branches from issues should have the naming convention of {type}/{description}_{issue-number}. type can be {feature | fix | chore | refactor | test | docs | style | perf | ci | build | revert | hotfix | security }
-            Follow-up work on the same issue should be done in the same branch (don't create a new branch for follow-up work).
-            Always run 'pnpm i' to enable lint, typecheck, and format:fix.
+            Follow-up work on the same issue should be done in the same branch (don't create a new branch for follow-up work).            
             Always run 'pnpm typecheck' to check for type errors and fix any errors.                        
             Always run 'pnpm lint' to run lint - fix any errors.
             Always run 'pnpm format:fix' before committing!
