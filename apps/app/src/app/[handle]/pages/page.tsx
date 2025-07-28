@@ -43,10 +43,7 @@ export default async function LandingPagesPage({
 
 	return (
 		<HydrateClient>
-			<DashContentHeader
-				title='Landing Pages'
-				button={<CreateLandingPageButton />}
-			/>
+			<DashContentHeader title='Landing Pages' button={<CreateLandingPageButton />} />
 
 			<LandingPageFilters />
 			<Suspense fallback={<GridListSkeleton />}>

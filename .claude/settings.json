@@ -1,6 +1,6 @@
 {
 	"hooks": {
-		"post-edit": [
+		"PostToolUse": [
 			{
 				"matcher": "*",
 				"hooks": [
@@ -11,7 +11,7 @@
 				]
 			}
 		],
-		"notification": [
+		"Notification": [
 			{
 				"matcher": "*",
 				"hooks": [
@@ -22,7 +22,7 @@
 				]
 			}
 		],
-		"stop": [
+		"Stop": [
 			{
 				"matcher": "*",
 				"hooks": [
