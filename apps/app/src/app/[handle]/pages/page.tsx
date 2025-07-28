@@ -45,7 +45,6 @@ export default async function LandingPagesPage({
 		<HydrateClient>
 			<DashContentHeader
 				title='Landing Pages'
-				settingsHref={`/${handle}/settings/landing-page`}
 				button={<CreateLandingPageButton />}
 			/>
 

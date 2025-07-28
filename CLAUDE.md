@@ -1,10 +1,10 @@
 ## TypeScript Best Practices
 
 - **Type Safety Principle**:
-  - NEVER cast something to `any` or `unknown` if you're running into type errors. That is the kind of decision that only a human engineer can make, and only if we've exhausted all other proper methods for resolving a type issue.
-  - NEVER use `as any` to bypass TypeScript errors. This is absolutely forbidden. Always find the proper type solution.
-  - never use type annotations, never type cast or assert. always check for what the type should be and if an error is being thrown, figure out how to properly meet the type requirements!
-  - nope nope nope, we never fucking cast something as any without asking my permission to do so.
+  - NEVER cast to `any` or `unknown` when encountering type errors. Type casting decisions require explicit human approval after exhausting all proper type solutions.
+  - NEVER use `as any` to bypass TypeScript errors. This practice is strictly prohibited. Always implement proper type solutions.
+  - Avoid type assertions and unnecessary type annotations. Instead, analyze what the correct type should be and properly satisfy the type requirements.
+  - Type casting to `any` is absolutely forbidden without explicit permission from the user.
 
 ## Preferred Workflow for Feature Development
 
