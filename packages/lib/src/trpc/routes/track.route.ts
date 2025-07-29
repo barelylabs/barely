@@ -14,7 +14,19 @@ import {
 	selectWorkspaceTracksSchema,
 	updateTrackSchema,
 } from '@barely/validators';
-import { and, desc, eq, inArray, isNull, lt, notInArray, or } from 'drizzle-orm';
+import {
+	and,
+	asc,
+	desc,
+	eq,
+	ilike,
+	inArray,
+	isNull,
+	lt,
+	notInArray,
+	or,
+	sql,
+} from 'drizzle-orm';
 import { z } from 'zod/v4';
 
 import {
@@ -37,13 +49,13 @@ export const trackRoute = {
 	byWorkspace: workspaceProcedure
 		.input(selectWorkspaceTracksSchema)
 		.query(async ({ ctx, input }) => {
-			const { limit, cursor, search, showArchived } = input;
+			const { limit, cursor, search, showArchived, sortBy, sortOrder } = input;
 
 			const rawTracks = await dbHttp.query.Tracks.findMany({
 				with: trackWith_workspace_genres_files,
 				where: sqlAnd([
 					eq(Tracks.workspaceId, ctx.workspace.id),
-					!!search.length && or(eq(Tracks.name, search), eq(Tracks.spotifyId, search)),
+					!!search?.length && ilike(Tracks.name, `%${search}%`),
 					showArchived ? undefined : isNull(Tracks.archivedAt),
 					!!cursor &&
 						or(
@@ -52,7 +64,28 @@ export const trackRoute = {
 						),
 				]),
 
-				orderBy: [desc(Tracks.createdAt), desc(Tracks.id)],
+				orderBy: [
+					sortBy === 'name' ?
+						sortOrder === 'asc' ?
+							asc(Tracks.name)
+						:	desc(Tracks.name)
+					: sortBy === 'releaseDate' ?
+						sortOrder === 'asc' ?
+							asc(Tracks.releaseDate)
+						:	desc(Tracks.releaseDate)
+					: sortBy === 'spotifyPopularity' ?
+						sortOrder === 'asc' ?
+							asc(Tracks.spotifyPopularity)
+						:	desc(Tracks.spotifyPopularity)
+					: (
+						sortOrder === 'asc' // default to popularity
+					) ?
+						// asc(Tracks.spotifyPopularity)
+						sql`${Tracks.spotifyPopularity} asc nulls last`
+					:	sql`${Tracks.spotifyPopularity} desc nulls last`,
+					desc(Tracks.createdAt),
+					desc(Tracks.id),
+				],
 				limit: limit + 1,
 			});
 

@@ -1,7 +1,16 @@
 import { relations } from 'drizzle-orm';
-import { boolean, date, index, pgTable, uniqueIndex, varchar } from 'drizzle-orm/pg-core';
+import {
+	boolean,
+	date,
+	index,
+	integer,
+	pgTable,
+	uniqueIndex,
+	varchar,
+} from 'drizzle-orm/pg-core';
 
 import { dbId, primaryId, timestamps } from '../utils';
+import { _Albums_To_Tracks } from './album.sql';
 import { Campaigns } from './campaign.sql';
 import { _Files_To_Tracks__Artwork, _Files_To_Tracks__Audio } from './file.sql';
 import { _Tracks_To_Genres } from './genre.sql';
@@ -35,6 +44,9 @@ export const Tracks = pgTable(
 		youtubeId: varchar('youtubeId', { length: 255 }).unique(),
 		released: boolean('released').notNull(),
 
+		spotifyPopularity: integer('spotifyPopularity'),
+		spotifyStreams: integer('spotifyStreams'),
+
 		releaseDate: date('releaseDate', { mode: 'string' }),
 		imageUrl: varchar('imageUrl', { length: 255 }),
 
@@ -53,9 +65,17 @@ export const Tracks = pgTable(
 	},
 	track => ({
 		workspace: index('Tracks_workspaceId_key').on(track.workspaceId),
-		workspace_trackName: uniqueIndex('Tracks_workspace_trackName_key').on(
+		workspace_trackName: index('Tracks_workspace_trackName_key').on(
 			track.workspaceId,
 			track.name,
+		),
+		workspace_isrc: uniqueIndex('Tracks_workspace_isrc_key').on(
+			track.workspaceId,
+			track.isrc,
+		),
+		workspace_spotifyId: uniqueIndex('Tracks_workspace_spotifyId_key').on(
+			track.workspaceId,
+			track.spotifyId,
 		),
 	}),
 );
@@ -69,6 +89,7 @@ export const Track_Relations = relations(Tracks, ({ one, many }) => ({
 	// many-to-one
 	campaigns: many(Campaigns),
 	playlistPlacements: many(PlaylistPlacements),
+	spotifyLinkedTracks: many(SpotifyLinkedTracks),
 	stats: many(Stats),
 	trackRenders: many(TrackRenders),
 	_audioFiles: many(_Files_To_Tracks__Audio),
@@ -78,4 +99,27 @@ export const Track_Relations = relations(Tracks, ({ one, many }) => ({
 	playlists: many(_Playlists_To_Tracks),
 	_mixtapes: many(_Mixtapes_To_Tracks),
 	_genres: many(_Tracks_To_Genres),
+	_albums: many(_Albums_To_Tracks),
 }));
+
+export const SpotifyLinkedTracks = pgTable('SpotifyLinkedTracks', {
+	trackId: dbId('trackId')
+		.notNull()
+		.references(() => Tracks.id, {
+			onDelete: 'cascade',
+		}),
+	spotifyLinkedTrackId: varchar('spotifyLinkedTrackId', { length: 255 }).primaryKey(),
+	isDefault: boolean('isDefault').notNull().default(false),
+	spotifyPopularity: integer('spotifyPopularity'),
+	...timestamps,
+});
+
+export const SpotifyLinkedTracks_Relations = relations(
+	SpotifyLinkedTracks,
+	({ one }) => ({
+		track: one(Tracks, {
+			fields: [SpotifyLinkedTracks.trackId],
+			references: [Tracks.id],
+		}),
+	}),
+);

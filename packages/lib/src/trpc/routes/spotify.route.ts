@@ -2,7 +2,8 @@ import type { TrackWith_Workspace_Genres_Files } from '@barely/validators';
 import type { TRPCRouterRecord } from '@trpc/server';
 import { dbHttp } from '@barely/db/client';
 import { ProviderAccounts } from '@barely/db/sql';
-import { parseSpotifyUrl } from '@barely/utils';
+import { _Albums_To_Tracks, Albums } from '@barely/db/sql/album.sql';
+import { newId, parseSpotifyUrl } from '@barely/utils';
 import { TRPCError } from '@trpc/server';
 import { and, eq } from 'drizzle-orm';
 import * as r from 'remeda';
@@ -13,13 +14,21 @@ import {
 	getSpotifyAccessToken,
 	syncSpotifyAccountPlaylists,
 	syncSpotifyAccountUser,
+	syncSpotifyTrack,
 } from '../../functions/spotify.fns';
 import { getSpotifyAlbum } from '../../integrations/spotify/spotify.endpts.album';
-import { getSpotifyArtist } from '../../integrations/spotify/spotify.endpts.artist';
+import {
+	getSpotifyArtist,
+	getSpotifyArtistAlbums,
+} from '../../integrations/spotify/spotify.endpts.artist';
 import { getSpotifyPlaylist } from '../../integrations/spotify/spotify.endpts.playlist';
 import { searchSpotify } from '../../integrations/spotify/spotify.endpts.search';
-import { getSpotifyTrack } from '../../integrations/spotify/spotify.endpts.track';
-import { privateProcedure, publicProcedure } from '../trpc';
+import {
+	getSpotifyTrack,
+	getSpotifyTracksByAlbum,
+} from '../../integrations/spotify/spotify.endpts.track';
+import { ratelimit } from '../../integrations/upstash';
+import { privateProcedure, publicProcedure, workspaceProcedure } from '../trpc';
 
 interface SpotifyTrackOptionArtist
 	extends Pick<TrackWith_Workspace_Genres_Files['workspace'], 'name'> {
@@ -129,6 +138,46 @@ export const spotifyRoute = {
 			}
 
 			return null;
+		}),
+
+	getArtist: publicProcedure
+		.input(
+			z.object({
+				spotifyId: z.string(),
+			}),
+		)
+		.query(async ({ input }) => {
+			const botSpotifyAccount = await dbHttp.query.ProviderAccounts.findFirst({
+				where: and(
+					eq(ProviderAccounts.provider, 'spotify'),
+					eq(ProviderAccounts.providerAccountId, libEnv.BOT_SPOTIFY_ACCOUNT_ID),
+				),
+			});
+
+			if (!botSpotifyAccount) {
+				throw new TRPCError({
+					code: 'INTERNAL_SERVER_ERROR',
+					message: "We're having trouble with the Spotify API right now. Bear with us.",
+					cause: 'No bot Spotify account found.',
+				});
+			}
+
+			const accessToken = await getSpotifyAccessToken(botSpotifyAccount);
+
+			if (!accessToken) {
+				throw new TRPCError({
+					code: 'INTERNAL_SERVER_ERROR',
+					message: "We're having trouble with the Spotify API right now. Bear with us.",
+					cause: 'No Spotify access token found for bot.',
+				});
+			}
+
+			const artist = await getSpotifyArtist({
+				accessToken,
+				spotifyId: input.spotifyId,
+			});
+
+			return artist;
 		}),
 
 	// getAppleMusic: publicProcedure
@@ -297,6 +346,170 @@ export const spotifyRoute = {
 
 		// console.log('uniqueTracks => ', uniqueTracks);
 		return uniqueTracks;
+	}),
+
+	findArtist: publicProcedure
+		.input(
+			z.object({
+				query: z.string(),
+			}),
+		)
+		.query(async ({ input }) => {
+			const botSpotifyAccount = await dbHttp.query.ProviderAccounts.findFirst({
+				where: and(
+					eq(ProviderAccounts.provider, 'spotify'),
+					eq(ProviderAccounts.providerAccountId, libEnv.BOT_SPOTIFY_ACCOUNT_ID),
+				),
+			});
+
+			if (!botSpotifyAccount) {
+				throw new TRPCError({
+					code: 'INTERNAL_SERVER_ERROR',
+					message: "We're having trouble with the Spotify API right now. Bear with us.",
+					cause: 'No bot Spotify account found.',
+				});
+			}
+
+			const accessToken = await getSpotifyAccessToken(botSpotifyAccount);
+
+			if (!accessToken) {
+				throw new TRPCError({
+					code: 'INTERNAL_SERVER_ERROR',
+					message: "We're having trouble with the Spotify API right now. Bear with us.",
+					cause: 'No Spotify access token found for bot.',
+				});
+			}
+
+			const searchResults = await searchSpotify({
+				accessToken,
+				query: input.query,
+				types: ['artist'],
+			});
+
+			return searchResults.artists?.items ?? [];
+		}),
+
+	syncWorkspaceArtist: workspaceProcedure.mutation(async ({ ctx }) => {
+		// Rate limit to once per minute
+		const limiter = ratelimit(1, '600 s');
+		const { success } = await limiter.limit(
+			ctx.workspace.id + 'syncWorkspaceSpotifyArtist',
+		);
+
+		if (!success) {
+			throw new Error('Rate limit exceeded. Please try again in a few minutes.');
+		}
+
+		if (!ctx.workspace.spotifyArtistId) {
+			throw new Error('No Spotify artist ID found for this workspace.');
+		}
+
+		// Fetch albums from Spotify
+		const botSpotifyAccount = await dbHttp.query.ProviderAccounts.findFirst({
+			where: and(
+				eq(ProviderAccounts.provider, 'spotify'),
+				eq(ProviderAccounts.providerAccountId, libEnv.BOT_SPOTIFY_ACCOUNT_ID),
+			),
+		});
+
+		if (!botSpotifyAccount) {
+			throw new TRPCError({
+				code: 'INTERNAL_SERVER_ERROR',
+				message: "We're having trouble with the Spotify API right now. Bear with us.",
+				cause: 'No bot Spotify account found.',
+			});
+		}
+
+		const accessToken = await getSpotifyAccessToken(botSpotifyAccount);
+
+		const albums = await getSpotifyArtistAlbums({
+			accessToken,
+			spotifyId: ctx.workspace.spotifyArtistId,
+			needPopularity: true,
+		});
+
+		// throw new Error('test');
+
+		if (!albums?.items) {
+			throw new Error('Failed to fetch artist albums');
+		}
+
+		// Process each album
+		for (const album of albums.items) {
+			console.log('syncing album => ', album.name);
+			// Check if album exists
+			const existingAlbum = await dbHttp.query.Albums.findFirst({
+				where: eq(Albums.spotifyId, album.id),
+			});
+
+			if (existingAlbum) {
+				// Update existing album
+				await dbHttp
+					.update(Albums)
+					.set({
+						name: album.name,
+						imageUrl: album.images[0]?.url,
+						releaseDate: album.release_date,
+						totalTracks: album.total_tracks,
+					})
+					.where(eq(Albums.id, existingAlbum.id))
+					.returning();
+
+				// Fetch tracks for this album
+				const tracks = await getSpotifyTracksByAlbum({
+					accessToken,
+					albumId: album.id,
+				});
+
+				if (!tracks?.items) continue;
+
+				// Process each track
+				for (const track of tracks.items) {
+					await syncSpotifyTrack({
+						spotifyTrack: track,
+						albumId: existingAlbum.id,
+						workspaceId: ctx.workspace.id,
+						pool: ctx.pool,
+					});
+				}
+			} else {
+				// Create new album
+				const [newAlbum] = await dbHttp
+					.insert(Albums)
+					.values({
+						id: newId('album'),
+						workspaceId: ctx.workspace.id,
+						name: album.name,
+						imageUrl: album.images[0]?.url,
+						releaseDate: album.release_date,
+						totalTracks: album.total_tracks,
+						spotifyId: album.id,
+					})
+					.returning();
+
+				if (!newAlbum) continue;
+
+				// Fetch tracks for this album
+				const tracks = await getSpotifyTracksByAlbum({
+					accessToken,
+					albumId: album.id,
+				});
+
+				if (!tracks?.items) continue;
+
+				// Process each track
+				for (const track of tracks.items) {
+					await syncSpotifyTrack({
+						spotifyTrack: track,
+						albumId: newAlbum.id,
+						workspaceId: ctx.workspace.id,
+						pool: ctx.pool,
+					});
+				}
+			}
+		}
+
+		return { success: true };
 	}),
 
 	syncSpotifyAccount: privateProcedure

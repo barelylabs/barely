@@ -33,6 +33,11 @@ export const trackWith_workspace_genres_files = {
 			file: true,
 		},
 	},
+	_albums: {
+		with: {
+			album: true,
+		},
+	},
 } as const;
 
 export async function getRawTrackById(id: string) {
@@ -51,10 +56,11 @@ type RawTrackWith_Workspace_Genres_Files = NonNullable<
 export function getTrackWith_Workspace_Genres_Files__fromRawTrack(
 	rawTrack: RawTrackWith_Workspace_Genres_Files,
 ) {
-	const { _genres, _artworkFiles, _audioFiles, ...trackData } = rawTrack;
+	const { _genres, _artworkFiles, _audioFiles, _albums, ...trackData } = rawTrack;
 
 	return {
 		...trackData,
+		spotifyPopularity: trackData.spotifyPopularity ?? 0,
 		genres: _genres.map(_g => _g.genre),
 		artworkFiles: _artworkFiles.map(_f => ({
 			..._f.file,
@@ -67,6 +73,10 @@ export function getTrackWith_Workspace_Genres_Files__fromRawTrack(
 			instrumentalCompressed: _f.instrumentalCompressed,
 			instrumentalWav: _f.instrumentalWav,
 			stem: _f.stem,
+		})),
+		_albums: _albums.map(_a => ({
+			album: _a.album,
+			trackNumber: _a.trackNumber,
 		})),
 	} satisfies TrackWith_Workspace_Genres_Files;
 }

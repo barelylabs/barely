@@ -3,6 +3,7 @@ import type { TRPCRouterRecord } from '@trpc/server';
 import { dbHttp } from '@barely/db/client';
 import { FmPages } from '@barely/db/sql/fm.sql';
 import { Links } from '@barely/db/sql/link.sql';
+import { Tracks } from '@barely/db/sql/track.sql';
 import {
 	pipe_cartTimeseries,
 	pipe_cartTopBrowsers,
@@ -69,8 +70,16 @@ import {
 	pipe_pageTopReferers,
 	pipe_pageTopRegions,
 	pipe_webHitsTimeseries,
+	querySpotifyAlbumStats,
+	querySpotifyArtistStats,
+	querySpotifyTrackComparison,
+	querySpotifyTrackStats,
 } from '@barely/tb/query';
-import { stdWebEventQueryToPipeParamsSchema } from '@barely/tb/schema';
+import {
+	spotifyStatQuerySchema,
+	stdWebEventQueryToPipeParamsSchema,
+} from '@barely/tb/schema';
+import { getIsoDateRangeFromDescription } from '@barely/utils';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
@@ -994,5 +1003,102 @@ export const statRoute = {
 			}
 
 			throw new Error('Invalid topEventType');
+		}),
+
+	spotifyArtistTimeseries: workspaceProcedure
+		.input(spotifyStatQuerySchema)
+		.query(async ({ ctx, input }) => {
+			const dateRange =
+				input.start && input.end ?
+					{ start: input.start, end: input.end }
+				:	getIsoDateRangeFromDescription(input.dateRange ?? '28d');
+
+			const timeseries = await querySpotifyArtistStats({
+				workspaceId: ctx.workspace.id,
+				...dateRange,
+			});
+
+			return timeseries.data;
+		}),
+
+	spotifyTrackTimeseries: workspaceProcedure
+		.input(spotifyStatQuerySchema.extend({ trackId: z.string().optional() }))
+		.query(async ({ ctx, input }) => {
+			const dateRange =
+				input.start && input.end ?
+					{ start: input.start, end: input.end }
+				:	getIsoDateRangeFromDescription(input.dateRange ?? '28d');
+
+			// If specific track ID provided, get all its Spotify IDs
+			let spotifyIds: string[] = [];
+			if (input.trackId) {
+				const track = await dbHttp.query.Tracks.findFirst({
+					where: and(
+						eq(Tracks.id, input.trackId),
+						eq(Tracks.workspaceId, ctx.workspace.id),
+					),
+					with: {
+						spotifyLinkedTracks: {
+							columns: {
+								spotifyLinkedTrackId: true,
+							},
+						},
+					},
+				});
+
+				if (track) {
+					spotifyIds = track.spotifyLinkedTracks.map(lt => lt.spotifyLinkedTrackId);
+				}
+			}
+
+			const timeseries = await querySpotifyTrackStats({
+				workspaceId: ctx.workspace.id,
+				...dateRange,
+				spotifyId:
+					input.spotifyId ?? (spotifyIds.length > 0 ? spotifyIds.join(',') : undefined),
+			});
+
+			return timeseries.data;
+		}),
+
+	spotifyAlbumTimeseries: workspaceProcedure
+		.input(spotifyStatQuerySchema)
+		.query(async ({ ctx, input }) => {
+			const dateRange =
+				input.start && input.end ?
+					{ start: input.start, end: input.end }
+				:	getIsoDateRangeFromDescription(input.dateRange ?? '28d');
+
+			const timeseries = await querySpotifyAlbumStats({
+				workspaceId: ctx.workspace.id,
+				...dateRange,
+				spotifyId: input.spotifyId,
+			});
+
+			return timeseries.data;
+		}),
+
+	spotifyTrackComparison: workspaceProcedure
+		.input(
+			z.object({
+				trackId: z.string(),
+				dateRange: z.enum(['1d', '1w', '28d', '1y']).optional().default('28d'),
+				start: z.string().optional(),
+				end: z.string().optional(),
+			}),
+		)
+		.query(async ({ ctx, input }) => {
+			const dateRange =
+				input.start && input.end ?
+					{ start: input.start, end: input.end }
+				:	getIsoDateRangeFromDescription(input.dateRange);
+
+			const comparison = await querySpotifyTrackComparison({
+				workspaceId: ctx.workspace.id,
+				spotifyId: input.trackId,
+				...dateRange,
+			});
+
+			return comparison.data;
 		}),
 } satisfies TRPCRouterRecord;
