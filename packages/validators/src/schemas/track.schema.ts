@@ -1,4 +1,8 @@
-import type { _Files_To_Tracks__Artwork, _Files_To_Tracks__Audio } from '@barely/db/sql';
+import type {
+	_Files_To_Tracks__Artwork,
+	_Files_To_Tracks__Audio,
+	SpotifyLinkedTracks,
+} from '@barely/db/sql';
 import type { InferSelectModel } from 'drizzle-orm';
 import { Tracks } from '@barely/db/sql';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
@@ -12,6 +16,7 @@ import {
 	queryBooleanSchema,
 	querySelectionSchema,
 	queryStringArraySchema,
+	sortOrderSchema,
 } from '../helpers';
 import { genreIdSchema } from './genre.schema';
 
@@ -121,11 +126,15 @@ type TrackAudioFile = Omit<
 > &
 	FileRecord;
 
+export type SpotifyLinkedTrack = InferSelectModel<typeof SpotifyLinkedTracks>;
+
 export interface TrackWith_Workspace_Genres_Files extends Track {
 	workspace: Workspace;
 	genres: Genre[];
+
 	artworkFiles?: TrackArtworkFile[];
 	audioFiles?: TrackAudioFile[];
+	spotifyLinkedTracks?: SpotifyLinkedTrack[];
 	_albums?: { album: Album; trackNumber: number }[];
 }
 
@@ -166,8 +175,7 @@ export const trackFilterParamsSchema = z.object({
 	showDeleted: queryBooleanSchema.optional().default(false),
 	released: queryBooleanSchema.optional().default(false),
 	sortBy: z.enum(sortByValues).optional(),
-	sortOrder: z.enum(['asc', 'desc']).optional(),
-	// selectedTrackIds: queryStringArraySchema.optional(),
+	sortOrder: sortOrderSchema.optional(),
 });
 
 export const trackSearchParamsSchema = trackFilterParamsSchema.extend({

@@ -18,6 +18,7 @@ import { eq } from 'drizzle-orm';
 
 export const trackWith_workspace_genres_files = {
 	workspace: true,
+	spotifyLinkedTracks: true,
 	_genres: {
 		with: {
 			genre: true,
@@ -61,6 +62,8 @@ export function getTrackWith_Workspace_Genres_Files__fromRawTrack(
 	return {
 		...trackData,
 		spotifyPopularity: trackData.spotifyPopularity ?? 0,
+		spotifyLinkedTracks: trackData.spotifyLinkedTracks,
+
 		genres: _genres.map(_g => _g.genre),
 		artworkFiles: _artworkFiles.map(_f => ({
 			..._f.file,

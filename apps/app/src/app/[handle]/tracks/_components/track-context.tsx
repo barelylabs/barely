@@ -1,12 +1,15 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import type { TrackSortBy } from '@barely/validators';
+import * as React from 'react';
 import {
 	action,
 	createResourceDataHook,
 	createResourceSearchParamsHook,
 } from '@barely/hooks';
-import { parseAsArrayOf, parseAsBoolean, parseAsString } from 'nuqs';
+import { SortOrder } from '@barely/validators/helpers';
+import { parseAsArrayOf, parseAsBoolean, parseAsString, parseAsStringEnum } from 'nuqs';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
@@ -21,6 +24,10 @@ export const useTrackSearchParams = createResourceSearchParamsHook({
 	additionalParsers: {
 		genres: parseAsArrayOf(parseAsString).withDefault([]),
 		released: parseAsBoolean.withDefault(false),
+		sortBy: parseAsStringEnum<TrackSortBy>(['name', 'spotifyPopularity']).withDefault(
+			'name',
+		),
+		sortOrder: parseAsStringEnum<SortOrder>(['asc', 'desc']).withDefault('asc'),
 	},
 	additionalActions: {
 		setGenres: action((setParams, genres: string[]) => setParams({ genres })),
@@ -29,6 +36,8 @@ export const useTrackSearchParams = createResourceSearchParamsHook({
 				released: prev.released === undefined ? true : !prev.released,
 			})),
 		),
+		setSortBy: action((setParams, sortBy: TrackSortBy) => setParams({ sortBy })),
+		setSortOrder: action((setParams, sortOrder: SortOrder) => setParams({ sortOrder })),
 	},
 });
 
@@ -36,6 +45,7 @@ export const useTrackSearchParams = createResourceSearchParamsHook({
 export function useTrack() {
 	const trpc = useTRPC();
 	const searchParams = useTrackSearchParams();
+	const [groupByAlbum, setGroupByAlbum] = React.useState(false);
 
 	const baseHook = createResourceDataHook<
 		AppRouterOutputs['track']['byWorkspace']['tracks'][0],
@@ -55,10 +65,16 @@ export function useTrack() {
 
 	const dataHookResult = baseHook();
 
+	const toggleGroupByAlbum = React.useCallback(() => {
+		setGroupByAlbum(prev => !prev);
+	}, []);
+
 	// Merge search params and data hook results
 	return {
 		...dataHookResult,
 		...searchParams,
+		groupByAlbum,
+		toggleGroupByAlbum,
 	};
 }
 
