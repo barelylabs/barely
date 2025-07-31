@@ -1,6 +1,16 @@
+---
+description: Load project context, analyze progress, and start implementing the next tasks
+allowed-tools:
+  - Read
+  - Grep
+  - LS
+  - TodoWrite
+  - mcp__time__get_current_time
+---
+
 # cook
 
-Get Claude up to speed on the current project and start implementing the next tasks. This command automatically discovers project context, determines progress, and begins work on the next feature.
+Get up to speed on the current project and start implementing. This command loads project context, analyzes task progress, and begins work on the next uncompleted items.
 
 ## Usage
 
@@ -8,58 +18,78 @@ Get Claude up to speed on the current project and start implementing the next ta
 /cook
 ```
 
-## Process
+## What This Command Does
 
-When you run this command, I will:
+I'll automatically:
+1. Load project context from CLAUDE_PROJECT.md and plan files
+2. Analyze which tasks are completed vs pending
+3. Present a clear progress summary with deadline awareness
+4. Begin implementing the next uncompleted tasks after confirmation
 
-1. **Load Project Context**
-   - Read CLAUDE_PROJECT.md for immediate context
-   - Read START_HERE.md for workflow guidance  
-   - Load .claude/project/plan-organized.md for tasks
+## Implementation Process
 
-2. **Analyze Current Progress**
-   - Parse plan-organized.md to count completed vs pending tasks
-   - Check recent git commits to understand what's been implemented
-   - Identify which feature is currently being worked on
+### 1. Load Project Context
 
-3. **Present Status**
-   ```
-   🍳 VIP MVP Project Status
-   ⏰ Deadline: August 9th (X days remaining)
-   
-   📊 Progress Overview:
-   - Feature 1 (Core Infrastructure): 2/14 tasks ✓
-   - Feature 2 (VIP Page Creation): 0/16 tasks ⬜
-   [... etc ...]
-   
-   🎯 Current Focus: Feature 1 - Core Infrastructure
-   
-   Next tasks:
-   1. Create database migration for vipReleases table
-   2. Create database migration for vipAccessLogs table
-   3. Add indexes for query performance
-   
-   Ready to start implementing? (y/n)
-   ```
+First, I'll check for and read the following files:
+- `CLAUDE_PROJECT.md` - Primary project context
+- `START_HERE.md` - Workflow guidance (if exists)
+- `.claude/project/plan-organized.md` - Implementation plan with tasks
 
-4. **Begin Implementation** (if confirmed)
-   - Use TodoWrite to track the next tasks
-   - Start with the first uncompleted task
-   - Follow existing code patterns and conventions
-   - Run tests and linting after changes
-   - Provide clear progress updates
+!pwd
+
+!test -f CLAUDE_PROJECT.md && echo "✓ Found CLAUDE_PROJECT.md" || echo "✗ CLAUDE_PROJECT.md not found"
+!test -f START_HERE.md && echo "✓ Found START_HERE.md" || echo "✗ START_HERE.md not found"
+!test -f .claude/project/plan-organized.md && echo "✓ Found plan-organized.md" || echo "✗ plan-organized.md not found"
+
+### 2. Read Project Files
+
+@CLAUDE_PROJECT.md
+
+@.claude/project/plan-organized.md
+
+### 3. Analyze Progress
+
+I'll parse the implementation plan to:
+- Count completed (✓) vs pending tasks per feature
+- Calculate overall project progress
+- Identify the current feature being worked on
+- Extract the next 3-5 uncompleted tasks
+
+### 4. Check Recent Activity
+
+!git log --oneline -10
+
+### 5. Present Status Summary
+
+Based on my analysis, I'll show:
+- Project name and deadline (with days remaining)
+- Progress overview for each feature
+- Current focus area
+- Next tasks to implement
+- Request confirmation before proceeding
+
+### 6. Begin Implementation
+
+If you confirm, I'll:
+- Create a todo list with TodoWrite for the next tasks
+- Mark the first task as in_progress
+- Start implementing following existing patterns
+- Run tests and linting after changes
+- Provide clear progress updates
 
 ## Error Handling
 
-- **No project context found**: Inform user to run from a project worktree
-- **No plan-organized.md**: Check for other planning documents
-- **All tasks complete**: Suggest next steps (testing, PR creation)
+- **Missing project files**: I'll inform you which files are missing and suggest running from a project worktree with proper setup
+- **No plan-organized.md**: I'll check for alternative planning documents in `.claude/project/`
+- **All tasks complete**: I'll suggest next steps like running full test suite, creating PR, or updating documentation
+- **Parse errors**: If the plan format is unexpected, I'll show what I found and ask for guidance
 
-## Benefits
+## Command Benefits
 
-- **Zero friction startup**: Just run `/cook` to get productive immediately
-- **Context-aware**: Automatically understands project state
-- **Progress tracking**: Never lose track of what's been done
-- **Git-integrated**: Lives in the repo, evolves with the project
+This command provides:
+- **Instant context loading** - No need to explain the project
+- **Accurate progress tracking** - Always know what's done and what's next
+- **Deadline awareness** - Stay on track with time-boxed projects
+- **Consistent workflow** - Same process every time you return to work
 
-This command turns Claude into a focused implementation assistant that immediately understands where you left off and continues the work.
+Just run `/cook` and I'll immediately understand where we left off and continue the implementation!
