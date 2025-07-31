@@ -2,14 +2,14 @@ import type { NeonPool } from '@barely/db/pool';
 import type { ProviderAccount } from '@barely/validators/schemas';
 import { dbHttp } from '@barely/db/client';
 import { dbPool } from '@barely/db/pool';
-import { _Albums_To_Tracks, Albums } from '@barely/db/sql/album.sql';
+import { _Albums_To_Tracks } from '@barely/db/sql/album.sql';
 import { _Playlists_To_Genres } from '@barely/db/sql/genre.sql';
 import { _Playlists_To_ProviderAccounts, Playlists } from '@barely/db/sql/playlist.sql';
 import { ProviderAccounts } from '@barely/db/sql/provider-account.sql';
 import { SpotifyLinkedTracks, Tracks } from '@barely/db/sql/track.sql';
 import { newId } from '@barely/utils';
 import { TRPCError } from '@trpc/server';
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, desc, eq, isNull } from 'drizzle-orm';
 
 import { getSpotifyUserPlaylists } from '../integrations/spotify/spotify.endpts.playlist';
 import { refreshSpotifyAccessToken } from '../integrations/spotify/spotify.endpts.token';
@@ -399,7 +399,7 @@ async function updateDefaultSpotifyId(trackId: string, pool: NeonPool) {
 	// Get all Spotify links for this track
 	const spotifyLinks = await dbPool(pool).query.SpotifyLinkedTracks.findMany({
 		where: eq(SpotifyLinkedTracks.trackId, trackId),
-		orderBy: (links: any, { desc }: any) => [desc(links.spotifyPopularity)],
+		orderBy: [desc(SpotifyLinkedTracks.spotifyPopularity)],
 	});
 
 	if (spotifyLinks.length === 0) return;

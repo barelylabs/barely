@@ -13,7 +13,7 @@ export const ingestStreamingStat = tinybird.buildIngestEndpoint<
 	z.output<typeof streamingStatSchema>,
 	z.input<typeof streamingStatSchema>
 >({
-	datasource: 'spotify_stats',
+	datasource: 'barely_streaming_stats',
 	event: streamingStatSchema,
 });
 
@@ -22,7 +22,7 @@ export const ingestArtistStreamingStat = tinybird.buildIngestEndpoint<
 	z.output<typeof artistStreamingStatSchema>,
 	z.input<typeof artistStreamingStatSchema>
 >({
-	datasource: 'spotify_stats',
+	datasource: 'barely_streaming_stats',
 	event: artistStreamingStatSchema,
 });
 
@@ -30,7 +30,7 @@ export const ingestTrackStreamingStat = tinybird.buildIngestEndpoint<
 	z.output<typeof trackStreamingStatSchema>,
 	z.input<typeof trackStreamingStatSchema>
 >({
-	datasource: 'spotify_stats',
+	datasource: 'barely_streaming_stats',
 	event: trackStreamingStatSchema,
 });
 
@@ -38,6 +38,6 @@ export const ingestAlbumStreamingStat = tinybird.buildIngestEndpoint<
 	z.output<typeof albumStreamingStatSchema>,
 	z.input<typeof albumStreamingStatSchema>
 >({
-	datasource: 'spotify_stats',
+	datasource: 'barely_streaming_stats',
 	event: albumStreamingStatSchema,
 });

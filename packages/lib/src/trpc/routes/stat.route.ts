@@ -80,7 +80,7 @@ import {
 	stdWebEventQueryToPipeParamsSchema,
 } from '@barely/tb/schema';
 import { getIsoDateRangeFromDescription } from '@barely/utils';
-import { and, eq } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNotNull } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
 import { workspaceProcedure } from '../trpc';
@@ -1011,54 +1011,97 @@ export const statRoute = {
 			const dateRange =
 				input.start && input.end ?
 					{ start: input.start, end: input.end }
-				:	getIsoDateRangeFromDescription(input.dateRange ?? '28d');
+				:	getIsoDateRangeFromDescription(input.dateRange);
 
 			const timeseries = await querySpotifyArtistStats({
 				workspaceId: ctx.workspace.id,
-				...dateRange,
+				start: dateRange.start,
+				end: dateRange.end,
+				timezone: ctx.workspace.timezone,
 			});
 
 			return timeseries.data;
 		}),
 
 	spotifyTrackTimeseries: workspaceProcedure
-		.input(spotifyStatQuerySchema.extend({ trackId: z.string().optional() }))
+		.input(
+			spotifyStatQuerySchema.extend({
+				trackId: z.string().optional(), // Keep for backward compatibility
+				trackIds: z.array(z.string()).optional(), // New array support
+			}),
+		)
 		.query(async ({ ctx, input }) => {
 			const dateRange =
 				input.start && input.end ?
 					{ start: input.start, end: input.end }
-				:	getIsoDateRangeFromDescription(input.dateRange ?? '28d');
+				:	getIsoDateRangeFromDescription(input.dateRange);
 
-			// If specific track ID provided, get all its Spotify IDs
-			let spotifyIds: string[] = [];
-			if (input.trackId) {
-				const track = await dbHttp.query.Tracks.findFirst({
+			// Handle both single trackId and multiple trackIds
+			let trackIds: string[] = [];
+			if (input.trackIds && input.trackIds.length > 0) {
+				trackIds = input.trackIds;
+			} else if (input.trackId) {
+				trackIds = [input.trackId];
+			}
+
+			// If no track IDs provided, get the track with highest popularity
+			if (trackIds.length === 0) {
+				const topTrack = await dbHttp.query.Tracks.findFirst({
 					where: and(
-						eq(Tracks.id, input.trackId),
 						eq(Tracks.workspaceId, ctx.workspace.id),
+						isNotNull(Tracks.spotifyId),
 					),
-					with: {
-						spotifyLinkedTracks: {
-							columns: {
-								spotifyLinkedTrackId: true,
-							},
-						},
+					orderBy: desc(Tracks.spotifyPopularity),
+					columns: {
+						id: true,
+						name: true,
+						spotifyId: true,
 					},
 				});
 
-				if (track) {
-					spotifyIds = track.spotifyLinkedTracks.map(lt => lt.spotifyLinkedTrackId);
+				if (topTrack) {
+					trackIds = [topTrack.id];
 				}
 			}
 
-			const timeseries = await querySpotifyTrackStats({
-				workspaceId: ctx.workspace.id,
-				...dateRange,
-				spotifyId:
-					input.spotifyId ?? (spotifyIds.length > 0 ? spotifyIds.join(',') : undefined),
+			// Get Spotify IDs for all selected tracks
+			const tracks = await dbHttp.query.Tracks.findMany({
+				where: and(
+					inArray(Tracks.id, trackIds),
+					eq(Tracks.workspaceId, ctx.workspace.id),
+					isNotNull(Tracks.spotifyId),
+				),
+				columns: {
+					id: true,
+					name: true,
+					spotifyId: true,
+				},
 			});
 
-			return timeseries.data;
+			// Query stats for each track
+			const allTimeseries = [];
+			for (const track of tracks) {
+				if (!track.spotifyId) continue;
+
+				const timeseries = await querySpotifyTrackStats({
+					workspaceId: ctx.workspace.id,
+					...dateRange,
+					spotifyId: track.spotifyId,
+					granularity: 'day',
+					timezone: ctx.workspace.timezone,
+				});
+
+				// Add track metadata to each result
+				allTimeseries.push(
+					...timeseries.data.map(row => ({
+						...row,
+						trackId: track.id,
+						trackName: track.name,
+					})),
+				);
+			}
+
+			return allTimeseries;
 		}),
 
 	spotifyAlbumTimeseries: workspaceProcedure
@@ -1067,12 +1110,14 @@ export const statRoute = {
 			const dateRange =
 				input.start && input.end ?
 					{ start: input.start, end: input.end }
-				:	getIsoDateRangeFromDescription(input.dateRange ?? '28d');
+				:	getIsoDateRangeFromDescription(input.dateRange);
 
 			const timeseries = await querySpotifyAlbumStats({
 				workspaceId: ctx.workspace.id,
-				...dateRange,
+				start: dateRange.start,
+				end: dateRange.end,
 				spotifyId: input.spotifyId,
+				timezone: ctx.workspace.timezone,
 			});
 
 			return timeseries.data;
@@ -1096,7 +1141,9 @@ export const statRoute = {
 			const comparison = await querySpotifyTrackComparison({
 				workspaceId: ctx.workspace.id,
 				spotifyId: input.trackId,
-				...dateRange,
+				start: dateRange.start,
+				end: dateRange.end,
+				timezone: ctx.workspace.timezone,
 			});
 
 			return comparison.data;

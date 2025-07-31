@@ -1,0 +1,235 @@
+DESCRIPTION >
+    Timeseries data for Spotify artist statistics
+
+TOKEN "spotify_artist_timeseries" READ
+
+NODE month_intervals
+SQL >
+    %
+    WITH
+        toStartOfMonth(
+            toDateTime64({{ DateTime64(start, '2024-01-01 00:00:00.000') }}, 3, {{ String(timezone, 'UTC') }})
+        ) AS start,
+        toStartOfMonth(
+            toDateTime64({{ DateTime64(end, '2024-12-31 23:59:59.000') }}, 3, {{ String(timezone, 'UTC') }})
+        ) AS end,
+        dateDiff('month', start, end) + 1 AS months_diff
+    SELECT
+        arrayJoin(
+            arrayMap(
+                x -> toDateTime64(start + toIntervalMonth(x), 3, {{ String(timezone, 'UTC') }}),
+                range(0, months_diff)
+            )
+        ) as interval
+
+NODE week_intervals
+SQL >
+    %
+    WITH
+        toStartOfWeek(
+            toDateTime64({{ DateTime64(start, '2024-01-01 00:00:00.000') }}, 3, {{ String(timezone, 'UTC') }})
+        ) AS start,
+        toStartOfWeek(
+            toDateTime64({{ DateTime64(end, '2024-12-31 23:59:59.000') }}, 3, {{ String(timezone, 'UTC') }})
+        ) AS end
+    SELECT
+        arrayJoin(
+            arrayMap(
+                x -> toDateTime64(toStartOfWeek(toDateTime64(x, 3, {{ String(timezone, 'UTC') }})), 3, {{ String(timezone, 'UTC') }}),
+                range(toUInt32(start) + 604800, toUInt32(end) + 604800, 604800)
+            )
+        ) as interval
+
+NODE day_intervals
+SQL >
+    %
+    WITH
+        toStartOfDay(
+            toDateTime64({{ DateTime64(start, '2024-01-01 00:00:00.000') }}, 3, {{ String(timezone, 'UTC') }})
+        ) AS start,
+        toStartOfDay(
+            toDateTime64({{ DateTime64(end, '2024-12-31 23:59:59.000') }}, 3, {{ String(timezone, 'UTC') }})
+        ) AS end
+    SELECT
+        arrayJoin(
+            arrayMap(
+                x -> toDateTime64(toStartOfDay(toDateTime64(x, 3, {{ String(timezone, 'UTC') }})), 3, {{ String(timezone, 'UTC') }}),
+                range(toUInt32(start) + 86400, toUInt32(end) + 86400, 86400)
+            )
+        ) as interval
+
+NODE timeseries_artist_data
+SQL >
+    %
+    SELECT
+        {% if granularity == "month" %}
+            toDateTime64(
+                toStartOfMonth(toTimezone(timestamp, {{ String(timezone, 'UTC') }})),
+                3,
+                {{ String(timezone, 'UTC') }}
+            )
+        {% elif granularity == "week" %}
+            toDateTime64(
+                toStartOfWeek(toTimezone(timestamp, {{ String(timezone, 'UTC') }})),
+                3,
+                {{ String(timezone, 'UTC') }}
+            )
+        {% else %}
+            toDateTime64(
+                toStartOfDay(toTimezone(timestamp, {{ String(timezone, 'UTC') }})),
+                3,
+                {{ String(timezone, 'UTC') }}
+            )
+        {% end %} AS interval,
+        spotifyId,
+        avgOrNull(spotifyFollowers) as spotifyFollowers,
+        avgOrNull(spotifyPopularity) as spotifyPopularity,
+        avgOrNull(spotifyMonthlyListeners) as spotifyMonthlyListeners,
+        avgOrNull(spotifyTotalListeners) as spotifyTotalListeners,
+        avgOrNull(spotifyDailyListeners) as spotifyDailyListeners,
+        avgOrNull(spotifyMonthlyStreams) as spotifyMonthlyStreams,
+        avgOrNull(spotifyTotalStreams) as spotifyTotalStreams,
+        avgOrNull(spotifyDailyStreams) as spotifyDailyStreams
+    FROM barely_streaming_stats
+    WHERE 
+        workspaceId = {{ String(workspaceId) }}
+        AND type = 'artist'
+        AND toTimezone(timestamp, {{ String(timezone, 'UTC') }}) >= toDateTime64({{ DateTime64(start, '2024-01-01 00:00:00.000') }}, 3, {{ String(timezone, 'UTC') }})
+        AND toTimezone(timestamp, {{ String(timezone, 'UTC') }}) <= toDateTime64({{ DateTime64(end, '2024-12-31 23:59:59.000') }}, 3, {{ String(timezone, 'UTC') }})
+        {% if defined(spotifyId) %}
+            AND spotifyId = {{ String(spotifyId) }}
+        {% end %}
+    GROUP BY interval, spotifyId
+    ORDER BY interval DESC, spotifyId
+
+NODE previous_period_stats
+SQL >
+    %
+    WITH
+        toDateTime64({{ DateTime64(start, '2024-01-01 00:00:00.000') }}, 3, {{ String(timezone, 'UTC') }}) AS current_start,
+        toDateTime64({{ DateTime64(end, '2024-12-31 23:59:59.000') }}, 3, {{ String(timezone, 'UTC') }}) AS current_end,
+        dateDiff('second', current_start, current_end) AS period_duration_seconds,
+        subtractSeconds(current_start, period_duration_seconds) AS prev_start,
+        subtractSeconds(current_start, 1) AS prev_end
+    SELECT
+        spotifyId,
+        avgOrNull(spotifyFollowers) as avgSpotifyFollowers,
+        max(spotifyFollowers) as maxSpotifyFollowers,
+        avgOrNull(spotifyPopularity) as avgSpotifyPopularity,
+        max(spotifyPopularity) as maxSpotifyPopularity,
+        avgOrNull(spotifyMonthlyListeners) as avgSpotifyMonthlyListeners,
+        max(spotifyMonthlyListeners) as maxSpotifyMonthlyListeners,
+        avgOrNull(spotifyTotalListeners) as avgSpotifyTotalListeners,
+        max(spotifyTotalListeners) as maxSpotifyTotalListeners,
+        avgOrNull(spotifyDailyListeners) as avgSpotifyDailyListeners,
+        max(spotifyDailyListeners) as maxSpotifyDailyListeners,
+        avgOrNull(spotifyMonthlyStreams) as avgSpotifyMonthlyStreams,
+        max(spotifyMonthlyStreams) as maxSpotifyMonthlyStreams,
+        avgOrNull(spotifyTotalStreams) as avgSpotifyTotalStreams,
+        max(spotifyTotalStreams) as maxSpotifyTotalStreams,
+        avgOrNull(spotifyDailyStreams) as avgSpotifyDailyStreams,
+        max(spotifyDailyStreams) as maxSpotifyDailyStreams
+    FROM barely_streaming_stats
+    WHERE 
+        workspaceId = {{ String(workspaceId) }}
+        AND type = 'artist'
+        AND toTimezone(timestamp, {{ String(timezone, 'UTC') }}) >= prev_start
+        AND toTimezone(timestamp, {{ String(timezone, 'UTC') }}) <= prev_end
+        {% if defined(spotifyId) %}
+            AND spotifyId = {{ String(spotifyId) }}
+        {% end %}
+    GROUP BY spotifyId
+
+
+NODE timeseries_with_intervals
+SQL >
+    %
+    SELECT 
+        formatDateTime(interval, '%FT%T.%f') as timestamp,
+        spotifyId,
+        artistName,
+        spotifyFollowers,
+        spotifyPopularity,
+        spotifyMonthlyListeners,
+        spotifyTotalListeners,
+        spotifyDailyListeners,
+        spotifyMonthlyStreams,
+        spotifyTotalStreams,
+        spotifyDailyStreams
+    FROM
+        {% if granularity == "month" %} month_intervals
+        {% elif granularity == "week" %} week_intervals
+        {% else %} day_intervals
+        {% end %}
+    LEFT JOIN timeseries_artist_data USING interval
+
+NODE endpoint
+SQL >
+    %
+    SELECT 
+        'timeseries' as resultType,
+        timestamp,
+        spotifyId,
+        artistName,
+        spotifyFollowers,
+        spotifyPopularity,
+        spotifyMonthlyListeners,
+        spotifyTotalListeners,
+        spotifyDailyListeners,
+        spotifyMonthlyStreams,
+        spotifyTotalStreams,
+        spotifyDailyStreams,
+        NULL as avgSpotifyFollowers,
+        NULL as maxSpotifyFollowers,
+        NULL as avgSpotifyPopularity,
+        NULL as maxSpotifyPopularity,
+        NULL as avgSpotifyMonthlyListeners,
+        NULL as maxSpotifyMonthlyListeners,
+        NULL as avgSpotifyTotalListeners,
+        NULL as maxSpotifyTotalListeners,
+        NULL as avgSpotifyDailyListeners,
+        NULL as maxSpotifyDailyListeners,
+        NULL as avgSpotifyMonthlyStreams,
+        NULL as maxSpotifyMonthlyStreams,
+        NULL as avgSpotifyTotalStreams,
+        NULL as maxSpotifyTotalStreams,
+        NULL as avgSpotifyDailyStreams,
+        NULL as maxSpotifyDailyStreams
+    FROM timeseries_with_intervals
+    
+    UNION ALL
+    
+    SELECT 
+        'previousPeriod' as resultType,
+        NULL as timestamp,
+        spotifyId,
+        'artist' as artistName,
+        NULL as spotifyFollowers,
+        NULL as spotifyPopularity,
+        NULL as spotifyMonthlyListeners,
+        NULL as spotifyTotalListeners,
+        NULL as spotifyDailyListeners,
+        NULL as spotifyMonthlyStreams,
+        NULL as spotifyTotalStreams,
+        NULL as spotifyDailyStreams,
+        avgSpotifyFollowers,
+        maxSpotifyFollowers,
+        avgSpotifyPopularity,
+        maxSpotifyPopularity,
+        avgSpotifyMonthlyListeners,
+        maxSpotifyMonthlyListeners,
+        avgSpotifyTotalListeners,
+        maxSpotifyTotalListeners,
+        avgSpotifyDailyListeners,
+        maxSpotifyDailyListeners,
+        avgSpotifyMonthlyStreams,
+        maxSpotifyMonthlyStreams,
+        avgSpotifyTotalStreams,
+        maxSpotifyTotalStreams,
+        avgSpotifyDailyStreams,
+        maxSpotifyDailyStreams
+    FROM previous_period_stats
+    
+    ORDER BY resultType DESC, timestamp DESC
+
+TYPE endpoint

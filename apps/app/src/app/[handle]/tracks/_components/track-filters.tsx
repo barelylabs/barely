@@ -29,9 +29,9 @@ export function TrackFilters() {
 			groupByLabel='Group by Album'
 			// groupByOptions={[{ label: 'Album', value: 'album' }]}
 			clearAllFilters={clearAllFilters}
-			sortBy={filters.sortBy ?? 'name'}
+			sortBy={filters.sortBy}
 			setSortBy={setSortBy}
-			sortOrder={filters.sortOrder ?? 'asc'}
+			sortOrder={filters.sortOrder}
 			setSortOrder={setSortOrder}
 			sortByOptions={sortByOptions}
 		/>

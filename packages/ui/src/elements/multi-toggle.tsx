@@ -31,12 +31,17 @@ export function MultiToggle<T extends string>({
 	}
 
 	const currentIndex = options.findIndex(option => option.value === value);
-	const currentOption = options[currentIndex] ?? options[0]!;
+	const firstOption = options[0];
+	if (!firstOption) return null; // This should never happen due to the check above, but satisfies TypeScript
+	const currentOption = options[currentIndex] ?? firstOption;
 	const IconComponent = Icon[currentOption.icon];
 
 	const handleClick = () => {
 		const nextIndex = (currentIndex + 1) % options.length;
-		onValueChange(options[nextIndex]!.value);
+		const nextOption = options[nextIndex];
+		if (nextOption) {
+			onValueChange(nextOption.value);
+		}
 	};
 
 	return (

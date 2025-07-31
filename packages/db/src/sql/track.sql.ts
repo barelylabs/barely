@@ -77,6 +77,7 @@ export const Tracks = pgTable(
 			track.workspaceId,
 			track.spotifyId,
 		),
+		// spotifyPopularity: index('Tracks_spotifyPopularity_key').on(track.spotifyPopularity),
 	}),
 );
 

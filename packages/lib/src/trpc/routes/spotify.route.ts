@@ -3,6 +3,8 @@ import type { TRPCRouterRecord } from '@trpc/server';
 import { dbHttp } from '@barely/db/client';
 import { ProviderAccounts } from '@barely/db/sql';
 import { _Albums_To_Tracks, Albums } from '@barely/db/sql/album.sql';
+import { Tracks } from '@barely/db/sql/track.sql';
+import { ingestStreamingStat } from '@barely/tb/ingest';
 import { newId, parseSpotifyUrl } from '@barely/utils';
 import { TRPCError } from '@trpc/server';
 import { and, eq } from 'drizzle-orm';
@@ -506,6 +508,67 @@ export const spotifyRoute = {
 						pool: ctx.pool,
 					});
 				}
+			}
+		}
+
+		// Fetch artist stats and ingest to Tinybird
+		const artist = await getSpotifyArtist({
+			accessToken,
+			spotifyId: ctx.workspace.spotifyArtistId,
+		});
+
+		if (artist) {
+			const timestamp = new Date().toISOString();
+			const events = [];
+
+			// Add artist stats
+			events.push({
+				timestamp,
+				workspaceId: ctx.workspace.id,
+				type: 'artist' as const,
+				spotifyId: artist.id,
+				spotifyFollowers: artist.followers.total,
+				spotifyPopularity: artist.popularity,
+			});
+
+			// Add album stats
+			for (const album of albums.items) {
+				if (album.popularity !== undefined && album.popularity !== null) {
+					events.push({
+						timestamp,
+						workspaceId: ctx.workspace.id,
+						type: 'album' as const,
+						spotifyId: album.id,
+						spotifyPopularity: album.popularity,
+					});
+				}
+			}
+
+			// Get all tracks that were synced to add their popularity
+			const allTracks = await dbHttp.query.Tracks.findMany({
+				where: eq(Tracks.workspaceId, ctx.workspace.id),
+				columns: {
+					spotifyId: true,
+					spotifyPopularity: true,
+				},
+			});
+
+			// Add track stats
+			for (const track of allTracks) {
+				if (track.spotifyId && track.spotifyPopularity !== null) {
+					events.push({
+						timestamp,
+						workspaceId: ctx.workspace.id,
+						type: 'track' as const,
+						spotifyId: track.spotifyId,
+						spotifyPopularity: track.spotifyPopularity,
+					});
+				}
+			}
+
+			// Ingest all events to Tinybird
+			if (events.length > 0) {
+				await ingestStreamingStat(events);
 			}
 		}
 

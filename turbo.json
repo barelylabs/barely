@@ -22,6 +22,11 @@
 		"dev:pre": {
 			"cache": false
 		},
+		"tb:dev": {
+			"dependsOn": ["^tb:dev"],
+			"cache": false,
+			"persistent": false
+		},
 		"build:preview": {
 			"dependsOn": ["^build:preview"],
 			"outputs": [".cache/tsbuildinfo.json", "dist/**"]

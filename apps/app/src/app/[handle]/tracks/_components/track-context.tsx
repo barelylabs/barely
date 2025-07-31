@@ -2,13 +2,13 @@
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import type { TrackSortBy } from '@barely/validators';
+import type { SortOrder } from '@barely/validators/helpers';
 import * as React from 'react';
 import {
 	action,
 	createResourceDataHook,
 	createResourceSearchParamsHook,
 } from '@barely/hooks';
-import { SortOrder } from '@barely/validators/helpers';
 import { parseAsArrayOf, parseAsBoolean, parseAsString, parseAsStringEnum } from 'nuqs';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
@@ -16,7 +16,7 @@ import { useTRPC } from '@barely/api/app/trpc.react';
 // Define the page data type for tracks
 interface TrackPageData {
 	tracks: AppRouterOutputs['track']['byWorkspace']['tracks'];
-	nextCursor?: { id: string; createdAt: Date } | null;
+	nextCursor?: { id: string; createdAt: Date; spotifyPopularity: number | null } | null;
 }
 
 // Create the search params hook for tracks with custom filters
@@ -25,9 +25,9 @@ export const useTrackSearchParams = createResourceSearchParamsHook({
 		genres: parseAsArrayOf(parseAsString).withDefault([]),
 		released: parseAsBoolean.withDefault(false),
 		sortBy: parseAsStringEnum<TrackSortBy>(['name', 'spotifyPopularity']).withDefault(
-			'name',
+			'spotifyPopularity',
 		),
-		sortOrder: parseAsStringEnum<SortOrder>(['asc', 'desc']).withDefault('asc'),
+		sortOrder: parseAsStringEnum<SortOrder>(['asc', 'desc']).withDefault('desc'),
 	},
 	additionalActions: {
 		setGenres: action((setParams, genres: string[]) => setParams({ genres })),

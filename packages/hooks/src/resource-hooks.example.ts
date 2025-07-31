@@ -36,7 +36,7 @@ export const useTrackSearchParams = createResourceSearchParamsHook({
 // Define the page data type for tracks
 interface TrackPageData {
 	tracks: Track[];
-	nextCursor?: { id: string; createdAt: Date } | null;
+	nextCursor?: { id: string; createdAt: Date; spotifyPopularity: number | null } | null;
 }
 
 export function useTrack() {

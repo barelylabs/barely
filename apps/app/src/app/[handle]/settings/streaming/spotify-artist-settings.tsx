@@ -32,7 +32,7 @@ export function SpotifyArtistSettings() {
 
 	const formSpotifyArtistId = form.watch('spotifyArtistId');
 
-	const { updateWorkspace } = useUpdateWorkspace({
+	const { updateWorkspace, isUpdatingWorkspace } = useUpdateWorkspace({
 		onSuccess: () => form.reset(),
 	});
 
@@ -76,7 +76,9 @@ export function SpotifyArtistSettings() {
 	);
 
 	const handleResetArtist = useCallback(() => {
-		const confirmed = window.confirm('Are you sure you want to reset the artist?');
+		const confirmed = window.confirm(
+			'Are you sure you want to remove the artist connection?',
+		);
 		if (!confirmed) return;
 		form.setValue('spotifyArtistId', undefined, { shouldDirty: true });
 	}, [form]);
@@ -88,15 +90,27 @@ export function SpotifyArtistSettings() {
 		});
 	}, [workspace.handle, workspace.spotifyArtistId, syncArtist]);
 
+	const handleRemoveArtist = useCallback(async () => {
+		const confirmed = window.confirm(
+			'Are you sure you want to remove the artist connection?',
+		);
+		if (!confirmed) return;
+
+		await updateWorkspace({
+			handle: workspace.handle,
+			spotifyArtistId: null,
+		});
+	}, [workspace.handle, updateWorkspace]);
+
 	if (workspace.spotifyArtistId && formSpotifyArtistId === workspace.spotifyArtistId) {
 		return (
-			<SettingsCardForm
-				form={form}
-				onSubmit={onSubmit}
-				title='Spotify Artist'
-				subtitle='Connect your Spotify artist profile to your workspace.'
-				disableSubmit={!form.formState.isDirty}
-			>
+			<div className='rounded-lg border p-6'>
+				<div className='mb-4'>
+					<h3 className='text-lg font-medium'>Spotify Artist</h3>
+					<p className='text-sm text-muted-foreground'>
+						Connect your Spotify artist profile to your workspace.
+					</p>
+				</div>
 				<div className='flex flex-col gap-4'>
 					{currentArtist && (
 						<div className='flex items-center gap-4 rounded-lg border p-4'>
@@ -128,19 +142,24 @@ export function SpotifyArtistSettings() {
 								<Button
 									look='outline'
 									onClick={handleSync}
-									disabled={isSyncing}
+									disabled={isSyncing || isUpdatingWorkspace}
 									className='ml-auto'
 								>
 									{isSyncing ? 'Syncing...' : 'Sync'}
 								</Button>
-								<Button look='outline' onClick={handleResetArtist} className='ml-auto'>
-									Swap Artist
+								<Button
+									look='outline'
+									onClick={handleRemoveArtist}
+									disabled={isSyncing || isUpdatingWorkspace}
+									className='ml-auto'
+								>
+									{isUpdatingWorkspace ? 'Removing...' : 'Remove Artist'}
 								</Button>
 							</div>
 						</div>
 					)}
 				</div>
-			</SettingsCardForm>
+			</div>
 		);
 	}
 
@@ -155,7 +174,7 @@ export function SpotifyArtistSettings() {
 				disableSubmit={!form.formState.isDirty}
 			>
 				<div className='flex flex-col gap-4'>
-					{selectedArtist?.images?.[0] && (
+					{selectedArtist?.images[0] && (
 						<div className='flex items-center gap-4 rounded-lg border p-4'>
 							{/* eslint-disable-next-line @next/next/no-img-element */}
 							<img
@@ -179,8 +198,14 @@ export function SpotifyArtistSettings() {
 									{selectedArtist.followers.total.toLocaleString()} followers
 								</p>
 							</div>
-							<Button look='outline' onClick={handleResetArtist} className='ml-auto'>
-								Reset
+							<Button
+								look='ghost'
+								size='sm'
+								onClick={handleResetArtist}
+								className='ml-auto'
+								type='button'
+							>
+								Change
 							</Button>
 						</div>
 					)}

@@ -81,6 +81,7 @@
 		"./modal": "./src/elements/modal.tsx",
 		"./multi-toggle": "./src/elements/multi-toggle.tsx",
 		"./multiselect": "./src/elements/multiselect.tsx",
+		"./multi-select-new": "./src/elements/multi-select-new.tsx",
 		"./music-player": "./src/elements/music-player.tsx",
 		"./navigation-menu": "./src/elements/navigation-menu.tsx",
 		"./next-theme-provider": "./src/elements/next-theme-provider.tsx",

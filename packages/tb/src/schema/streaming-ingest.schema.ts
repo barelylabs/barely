@@ -12,8 +12,12 @@ export const artistStreamingStatSchema = baseStreamingStatSchema.extend({
 	spotifyId: z.string(),
 	spotifyFollowers: z.number().optional(),
 	spotifyPopularity: z.number().optional(),
-	spotifyListeners: z.number().optional(),
-	spotifyStreams: z.number().optional(),
+	spotifyMonthlyListeners: z.number().optional(),
+	spotifyTotalListeners: z.number().optional(),
+	spotifyDailyListeners: z.number().optional(),
+	spotifyMonthlyStreams: z.number().optional(),
+	spotifyTotalStreams: z.number().optional(),
+	spotifyDailyStreams: z.number().optional(),
 });
 
 // Track stats schema
@@ -21,8 +25,12 @@ export const trackStreamingStatSchema = baseStreamingStatSchema.extend({
 	type: z.literal('track'),
 	spotifyId: z.string(),
 	spotifyPopularity: z.number().optional(),
-	spotifyListeners: z.number().optional(),
-	spotifyStreams: z.number().optional(),
+	spotifyMonthlyListeners: z.number().optional(),
+	spotifyTotalListeners: z.number().optional(),
+	spotifyDailyListeners: z.number().optional(),
+	spotifyMonthlyStreams: z.number().optional(),
+	spotifyTotalStreams: z.number().optional(),
+	spotifyDailyStreams: z.number().optional(),
 });
 
 // Album stats schema
@@ -30,8 +38,12 @@ export const albumStreamingStatSchema = baseStreamingStatSchema.extend({
 	type: z.literal('album'),
 	spotifyId: z.string(),
 	spotifyPopularity: z.number().optional(),
-	spotifyListeners: z.number().optional(),
-	spotifyStreams: z.number().optional(),
+	spotifyMonthlyListeners: z.number().optional(),
+	spotifyTotalListeners: z.number().optional(),
+	spotifyDailyListeners: z.number().optional(),
+	spotifyMonthlyStreams: z.number().optional(),
+	spotifyTotalStreams: z.number().optional(),
+	spotifyDailyStreams: z.number().optional(),
 });
 
 // Union type for all streaming stats

@@ -6,6 +6,7 @@
   - Avoid type assertions and unnecessary type annotations. Instead, analyze what the correct type should be and properly satisfy the type requirements.
   - Type casting to `any` is absolutely forbidden without explicit permission from the user.
   - Always import from 'zod/v4' instead of 'zod'
+  - You can't use 'enabled' as a prop in useSuspenseQuery (it's only available on useQuery)
 
 ## Preferred Workflow for Feature Development
 

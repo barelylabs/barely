@@ -38,7 +38,11 @@ export default async function TracksPage({
 
 	return (
 		<HydrateClient>
-			<DashContentHeader title='Tracks' button={<CreateTrackButton />} />
+			<DashContentHeader
+				title='Tracks'
+				button={<CreateTrackButton />}
+				settingsHref={`/${awaitedParams.handle}/settings/streaming`}
+			/>
 
 			<TrackFilters />
 			<Suspense fallback={<GridListSkeleton />}>

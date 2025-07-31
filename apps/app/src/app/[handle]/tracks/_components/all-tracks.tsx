@@ -16,7 +16,6 @@ import {
 	useTrack,
 	useTrackSearchParams,
 } from '~/app/[handle]/tracks/_components/track-context';
-import { TrackFilters } from '~/app/[handle]/tracks/_components/track-filters';
 
 export function AllTracks() {
 	const {
@@ -28,19 +27,17 @@ export function AllTracks() {
 		isFetching,
 		setShowUpdateModal,
 		groupByAlbum,
-		hasNextPage,
-		fetchNextPage,
-		isFetchingNextPage,
+		// hasNextPage,
+		// fetchNextPage,
+		// isFetchingNextPage,
 	} = useTrack();
 
 	const groupedTracks =
 		groupByAlbum ?
 			items.reduce(
 				(acc, track) => {
-					const albumName = track._albums?.[0]?.album.name ?? 'No Album';
-					if (!acc[albumName]) {
-						acc[albumName] = [];
-					}
+					const albumName = track._albums[0]?.album.name ?? 'No Album';
+					acc[albumName] ??= [];
 					acc[albumName].push(track);
 					return acc;
 				},
@@ -52,8 +49,8 @@ export function AllTracks() {
 	if (groupByAlbum) {
 		Object.keys(groupedTracks).forEach(albumName => {
 			groupedTracks[albumName]?.sort((a, b) => {
-				const aTrackNumber = a._albums?.[0]?.trackNumber ?? 0;
-				const bTrackNumber = b._albums?.[0]?.trackNumber ?? 0;
+				const aTrackNumber = a._albums[0]?.trackNumber ?? 0;
+				const bTrackNumber = b._albums[0]?.trackNumber ?? 0;
 				return aTrackNumber - bTrackNumber;
 			});
 		});
@@ -61,7 +58,6 @@ export function AllTracks() {
 
 	return (
 		<div className='flex flex-col gap-4'>
-			<TrackFilters />
 			{Object.entries(groupedTracks).map(([albumName, tracks]) => (
 				<div key={albumName} className='flex flex-col gap-2'>
 					{groupByAlbum && (
@@ -142,7 +138,8 @@ function TrackCard({
 				{
 					label: 'Spotify Stats',
 					icon: 'spotify' as const,
-					action: () => router.push(`/${handle}/tracks/${track.id}/spotify-stats`),
+					action: () =>
+						router.push(`/${handle}/tracks/stats?selectedIds=["${track.id}"]`),
 				},
 			]
 		:	[];
@@ -156,6 +153,11 @@ function TrackCard({
 			setShowArchiveModal={setShowArchiveModal}
 			setShowDeleteModal={setShowDeleteModal}
 			commandItems={commandItems}
+			statsHref={
+				track.spotifyId ?
+					`/${handle}/tracks/stats?selectedIds=["${track.id}"]`
+				:	undefined
+			}
 		>
 			<div className='flex flex-grow flex-row items-center gap-4'>
 				<div className='flex flex-col items-start gap-1'>
@@ -173,19 +175,18 @@ function TrackCard({
 							</Text>
 							<div className='flex flex-row items-center gap-2'>
 								<Text variant='sm/normal' className='text-muted-foreground'>
-									Track {track._albums?.[0]?.trackNumber ?? '?'}
+									Track {track._albums[0]?.trackNumber ?? '?'}
 								</Text>
-								{track.spotifyPopularity !== null && (
+								{track.spotifyPopularity && (
 									<>
 										<Text variant='sm/normal' className='text-muted-foreground'>
 											• Popularity: {track.spotifyPopularity}
 										</Text>
-										{track.spotifyLinkedTracks &&
-											track.spotifyLinkedTracks.length > 1 && (
-												<Text variant='sm/normal' className='text-muted-foreground'>
-													• {track.spotifyLinkedTracks.length} Spotify IDs
-												</Text>
-											)}
+										{track.spotifyLinkedTracks.length > 1 && (
+											<Text variant='sm/normal' className='text-muted-foreground'>
+												• {track.spotifyLinkedTracks.length} Spotify IDs
+											</Text>
+										)}
 									</>
 								)}
 								{track.isrc && (

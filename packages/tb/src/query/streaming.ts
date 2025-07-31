@@ -1,40 +1,32 @@
 import type { z } from 'zod/v4';
 
+import type { spotifyStatQuerySchema } from '../schema/streaming-query.schema';
 import { tinybird } from '../index';
 import {
 	spotifyAlbumTimeseriesDataSchema,
 	spotifyArtistTimeseriesDataSchema,
 	spotifyStatPipeParamsSchema,
-	spotifyStatQuerySchema,
-	spotifyTrackComparisonDataSchema,
 	spotifyTrackTimeseriesDataSchema,
 } from '../schema/streaming-query.schema';
 
 // Artist stats timeseries query
-export const querySpotifyArtistStats = tinybird.buildPipe({
-	pipe: 'spotify_artist_stats__v0',
+export const pipe_spotifyArtistTimeseries = tinybird.buildPipe({
+	pipe: 'spotify_artist_timeseries',
 	data: spotifyArtistTimeseriesDataSchema,
 	parameters: spotifyStatPipeParamsSchema,
 });
 
 // Track stats timeseries query
-export const querySpotifyTrackStats = tinybird.buildPipe({
-	pipe: 'spotify_track_stats__v0',
+export const pipe_spotifyTrackTimeseries = tinybird.buildPipe({
+	pipe: 'spotify_track_timeseries',
 	data: spotifyTrackTimeseriesDataSchema,
 	parameters: spotifyStatPipeParamsSchema,
 });
 
 // Album stats timeseries query
-export const querySpotifyAlbumStats = tinybird.buildPipe({
-	pipe: 'spotify_album_stats__v0',
+export const pipe_spotifyAlbumTimeseries = tinybird.buildPipe({
+	pipe: 'spotify_album_timeseries',
 	data: spotifyAlbumTimeseriesDataSchema,
-	parameters: spotifyStatPipeParamsSchema,
-});
-
-// Track comparison query (for comparing multiple track versions)
-export const querySpotifyTrackComparison = tinybird.buildPipe({
-	pipe: 'spotify_track_comparison__v0',
-	data: spotifyTrackComparisonDataSchema,
 	parameters: spotifyStatPipeParamsSchema,
 });
 
@@ -48,7 +40,7 @@ export function buildSpotifyStatQueryParams(
 
 	// Calculate start/end based on dateRange if not provided
 	let startDate = start;
-	let endDate = end ?? now.toISOString();
+	const endDate = end ?? now.toISOString();
 
 	if (!startDate) {
 		const startTimestamp = new Date(now);
@@ -73,6 +65,64 @@ export function buildSpotifyStatQueryParams(
 		workspaceId,
 		start: startDate,
 		end: endDate,
+		timezone: 'America/New_York' as const,
 		...rest,
 	};
+}
+
+// Query wrapper functions for convenience
+export async function querySpotifyArtistStats(params: {
+	workspaceId: string;
+	start: string;
+	end: string;
+	granularity?: 'month' | 'week' | 'day';
+	timezone?: z.infer<typeof spotifyStatPipeParamsSchema>['timezone'];
+}) {
+	return pipe_spotifyArtistTimeseries({
+		...params,
+		timezone: params.timezone ?? 'America/New_York',
+	});
+}
+
+export async function querySpotifyTrackStats(params: {
+	workspaceId: string;
+	start: string;
+	end: string;
+	spotifyId?: string;
+	granularity?: 'month' | 'week' | 'day';
+	timezone?: z.infer<typeof spotifyStatPipeParamsSchema>['timezone'];
+}) {
+	return pipe_spotifyTrackTimeseries({
+		...params,
+		timezone: params.timezone ?? 'America/New_York',
+	});
+}
+
+export async function querySpotifyAlbumStats(params: {
+	workspaceId: string;
+	start: string;
+	end: string;
+	spotifyId?: string;
+	granularity?: 'month' | 'week' | 'day';
+	timezone?: z.infer<typeof spotifyStatPipeParamsSchema>['timezone'];
+}) {
+	return pipe_spotifyAlbumTimeseries({
+		...params,
+		timezone: params.timezone ?? 'America/New_York',
+	});
+}
+
+export async function querySpotifyTrackComparison(params: {
+	workspaceId: string;
+	start: string;
+	end: string;
+	spotifyId: string;
+	granularity?: 'month' | 'week' | 'day';
+	timezone?: z.infer<typeof spotifyStatPipeParamsSchema>['timezone'];
+}) {
+	// For now, just return track stats (comparison functionality can be added later)
+	return pipe_spotifyTrackTimeseries({
+		...params,
+		timezone: params.timezone ?? 'America/New_York',
+	});
 }

@@ -76,7 +76,7 @@
 	"scripts": {
 		"build": "tsc",
 		"clean": "git clean -xdf .cache .turbo dist node_modules",
-		"dev": "concurrently --raw --kill-others \"tsc\" \"pnpm dev:trigger\"",
+		"dev": "tsc",
 		"dev:trigger": "pnpm dlx trigger.dev@latest dev",
 		"deploy-trigger:production": "pnpm dlx trigger.dev@latest deploy",
 		"deploy-trigger:staging": "pnpm dlx trigger.dev@latest deploy --env staging",
