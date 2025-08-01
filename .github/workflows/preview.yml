@@ -405,12 +405,19 @@ jobs:
         id: deploy-staging
         run: |
           cd packages/tb/tinybird
-          output=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment create 2>&1) || true
+          set +e  # Temporarily disable exit on error to capture output
+          output=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment create 2>&1)
+          exit_code=$?
+          set -e  # Re-enable exit on error
+          
           echo "$output"
 
           # Check if deployment was skipped due to no changes
           if [[ $output == *"Not deploying. No changes."* ]]; then
             echo "no_changes=true" >> $GITHUB_OUTPUT
+          elif [[ $exit_code -ne 0 ]]; then
+            echo "Deployment failed with exit code $exit_code"
+            exit 1
           else
             echo "no_changes=false" >> $GITHUB_OUTPUT
           fi
