@@ -47,9 +47,6 @@ export function AllMyWorkspaces() {
 
 export function AllMyInvites() {
 	const isPersonal = useWorkspaceIsPersonal();
-	// const { data: invites, isFetching } = api.user.workspaceInvites.useQuery(undefined, {
-	// 	enabled: isPersonal,
-	// });
 
 	const { invites, isFetching, setAcceptInviteWorkspaceId, setShowAcceptInviteModal } =
 		usePersonalInvitesContext();

@@ -6,6 +6,7 @@ import { env } from '../env';
 import * as adCreativeSql from './sql/ad-creative.sql';
 import * as adSetSql from './sql/ad-set.sql';
 import * as adSql from './sql/ad.sql';
+import * as albumSql from './sql/album.sql';
 import * as analyticsEndpointSql from './sql/analytics-endpoint.sql';
 import * as audienceDemoSql from './sql/audience-demo.sql';
 import * as audienceGeoSql from './sql/audience-geo.sql';
@@ -61,6 +62,7 @@ export const dbSchema = {
 	...adSql,
 	...adCreativeSql,
 	...adSetSql,
+	...albumSql,
 	...analyticsEndpointSql,
 	...audienceSql,
 	...audienceDemoSql,

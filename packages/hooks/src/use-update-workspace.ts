@@ -14,7 +14,7 @@ export function useUpdateWorkspace({ onSuccess }: { onSuccess?: () => void } = {
 	const router = useRouter();
 	const currentPath = usePathname();
 
-	const { mutateAsync: updateWorkspace } = useMutation(
+	const { mutateAsync: updateWorkspace, isPending } = useMutation(
 		trpc.workspace.update.mutationOptions({
 			onMutate: async data => {
 				console.log('onMutate', data);
@@ -51,5 +51,5 @@ export function useUpdateWorkspace({ onSuccess }: { onSuccess?: () => void } = {
 		}),
 	);
 
-	return { updateWorkspace };
+	return { updateWorkspace, isUpdatingWorkspace: isPending };
 }

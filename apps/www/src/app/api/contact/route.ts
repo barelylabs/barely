@@ -3,7 +3,7 @@ import { ContactInquiryEmail } from '@barely/email/templates/www/contact-inquiry
 import { ratelimit } from '@barely/lib';
 import { isProduction } from '@barely/utils';
 import { ipAddress } from '@vercel/edge';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 const contactFormSchema = z.object({
 	name: z.string().min(1, 'Name is required'),

@@ -38,6 +38,7 @@ const config = {
 		'**/*.config.js',
 		'**/*.config.cjs',
 		'packages/config/**',
+		'**/vitest-env-setup.js',
 	],
 };
 

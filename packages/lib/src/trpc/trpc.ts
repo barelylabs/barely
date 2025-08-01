@@ -236,7 +236,12 @@ export const workspaceProcedure = publicProcedure
 				parsedHandle.data.handle,
 			);
 
-			if (isDevelopment()) console.log('ws: ', workspace.id);
+			if (isDevelopment()) {
+				console.log('ws: ', workspace.id);
+				console.log('ws: ', workspace.handle);
+				console.log('ws: ', workspace.timezone);
+			}
+
 			return opts.next({
 				ctx: {
 					...opts.ctx,

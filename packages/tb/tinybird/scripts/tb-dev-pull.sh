@@ -27,7 +27,7 @@ echo "🔍 Using workspace ID: $TEST_WORKSPACE_ID"
 DATASOURCES=(
   "barely_events"
 #   "email_events"
-#   "barely_streaming_stats"
+  "barely_streaming_stats"
 )
 
 # Number of rows to export per datasource
