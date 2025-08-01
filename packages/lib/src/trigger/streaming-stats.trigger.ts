@@ -125,6 +125,11 @@ export const streamingStatsTrigger = schedules.task({
 			const startTime = Date.now();
 
 			// Process each workspace
+			// TODO: Consider parallel processing for better performance:
+			// - Use Promise.allSettled() to process multiple workspaces concurrently
+			// - Implement batching (e.g., process 5-10 workspaces at a time)
+			// - Be mindful of Spotify API rate limits when parallelizing
+			// - Consider using a queue system for better control over concurrency
 			for (const workspace of workspaces) {
 				try {
 					// Validate and get artist stats
@@ -153,6 +158,8 @@ export const streamingStatsTrigger = schedules.task({
 					}
 
 					// Get album stats
+					// Note: We're only fetching stats for albums that are already in the database
+					// New albums should be added through a separate sync process
 					const albumIds = workspace.albums
 						.map(album => album.spotifyId)
 						.filter((id): id is string => id !== null && isValidSpotifyId(id));
@@ -359,7 +366,17 @@ export const streamingStatsTrigger = schedules.task({
 			throw error; // Re-throw to mark the job as failed
 		} finally {
 			// Clean up database pool to prevent memory leak
-			await cleanUpDbPool();
+			try {
+				await cleanUpDbPool();
+			} catch (cleanupError) {
+				// Log cleanup errors but don't throw - the job result is more important
+				await log({
+					message: `Failed to clean up database pool: ${String(cleanupError)}`,
+					type: 'errors',
+					location: 'streamingStatsTrigger.poolCleanup',
+					mention: false, // Don't alert on cleanup failures
+				});
+			}
 		}
 	},
 });

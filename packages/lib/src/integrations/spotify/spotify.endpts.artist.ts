@@ -1,7 +1,7 @@
-import { zGet } from '@barely/utils';
 import { z } from 'zod/v4';
 
 import { log } from '../../utils/log';
+import { spotifyGet } from './spotify-fetch';
 import { getSeveralSpotifyAlbums } from './spotify.endpts.album';
 import { spotifyRateLimiter } from './spotify.rate-limiter';
 
@@ -15,7 +15,7 @@ export async function getSpotifyArtist(props: {
 
 	const auth = `Bearer ${props.accessToken}`;
 
-	const res = await zGet(endpoint, spotifyArtistResponseSchema, { auth });
+	const res = await spotifyGet(endpoint, spotifyArtistResponseSchema, { auth });
 
 	if (!res.success || !res.parsed) {
 		await log({
@@ -61,17 +61,21 @@ export async function getSpotifyArtistAlbums(props: {
 	spotifyId: string;
 	needPopularity?: boolean;
 	limit?: number;
+	maxAlbums?: number; // Maximum total albums to fetch (default 100)
 }) {
 	const auth = `Bearer ${props.accessToken}`;
 	const allItems = [];
+	const maxAlbums = props.maxAlbums ?? 100; // Limit to 100 albums by default
 	let nextUrl: string | null =
 		`https://api.spotify.com/v1/artists/${props.spotifyId}/albums?limit=${props.limit ?? 20}`;
 	let responseData: z.infer<typeof spotifyArtistAlbumsResponseSchema> | null = null;
 
-	// Fetch all pages of albums
-	while (nextUrl) {
+	// Fetch pages of albums up to maxAlbums limit
+	while (nextUrl && allItems.length < maxAlbums) {
 		await spotifyRateLimiter.checkLimit();
-		const res = (await zGet(nextUrl, spotifyArtistAlbumsResponseSchema, { auth })) as {
+		const res = (await spotifyGet(nextUrl, spotifyArtistAlbumsResponseSchema, {
+			auth,
+		})) as {
 			success: boolean;
 			parsed: boolean;
 			data: z.infer<typeof spotifyArtistAlbumsResponseSchema>;
@@ -88,7 +92,17 @@ export async function getSpotifyArtistAlbums(props: {
 		}
 
 		responseData = res.data;
-		allItems.push(...res.data.items);
+
+		// Add items up to the maxAlbums limit
+		const remainingSpace = maxAlbums - allItems.length;
+		const itemsToAdd = res.data.items.slice(0, remainingSpace);
+		allItems.push(...itemsToAdd);
+
+		// Stop if we've reached the limit
+		if (allItems.length >= maxAlbums) {
+			break;
+		}
+
 		nextUrl = res.data.next;
 	}
 

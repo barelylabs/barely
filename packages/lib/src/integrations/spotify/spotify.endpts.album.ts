@@ -1,7 +1,7 @@
-import { zGet } from '@barely/utils';
 import { z } from 'zod/v4';
 
 import { log } from '../../utils/log';
+import { spotifyGet } from './spotify-fetch';
 import { spotifyRateLimiter } from './spotify.rate-limiter';
 
 export async function getSpotifyAlbum(props: { accessToken: string; spotifyId: string }) {
@@ -11,7 +11,7 @@ export async function getSpotifyAlbum(props: { accessToken: string; spotifyId: s
 
 	const auth = `Bearer ${props.accessToken}`;
 
-	const res = await zGet(endpoint, spotifyAlbumResponseSchema, { auth });
+	const res = await spotifyGet(endpoint, spotifyAlbumResponseSchema, { auth });
 
 	if (!res.success || !res.parsed) {
 		await log({
@@ -41,7 +41,7 @@ export async function getSeveralSpotifyAlbums(props: {
 
 		const endpoint = `https://api.spotify.com/v1/albums?ids=${chunk.join(',')}`;
 
-		const res = await zGet(
+		const res = await spotifyGet(
 			endpoint,
 			z.object({
 				albums: z.array(spotifyAlbumResponseSchema),

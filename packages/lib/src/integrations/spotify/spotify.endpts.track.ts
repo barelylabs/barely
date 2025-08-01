@@ -1,7 +1,7 @@
-import { zGet } from '@barely/utils';
 import { z } from 'zod/v4';
 
 import { log } from '../../utils/log';
+import { spotifyGet } from './spotify-fetch';
 import { spotifyRateLimiter } from './spotify.rate-limiter';
 
 export async function getSpotifyTrack(props: { accessToken: string; spotifyId: string }) {
@@ -11,7 +11,7 @@ export async function getSpotifyTrack(props: { accessToken: string; spotifyId: s
 
 	const auth = `Bearer ${props.accessToken}`;
 
-	const res = await zGet(endpoint, spotifyTrackResponseSchema, {
+	const res = await spotifyGet(endpoint, spotifyTrackResponseSchema, {
 		auth,
 		logResponse: true,
 	});
@@ -112,7 +112,9 @@ export async function getSpotifyTracksByAlbum(props: {
 	// Fetch all pages of tracks
 	while (nextUrl) {
 		await spotifyRateLimiter.checkLimit();
-		const res = (await zGet(nextUrl, spotifyAlbumTracksResponseSchema, { auth })) as {
+		const res = (await spotifyGet(nextUrl, spotifyAlbumTracksResponseSchema, {
+			auth,
+		})) as {
 			success: boolean;
 			parsed: boolean;
 			data: z.infer<typeof spotifyAlbumTracksResponseSchema>;
@@ -141,7 +143,7 @@ export async function getSpotifyTracksByAlbum(props: {
 		await spotifyRateLimiter.checkLimit();
 		const tracksEndpoint = `https://api.spotify.com/v1/tracks?ids=${trackIds.join(',')}`;
 
-		const tracksRes = await zGet(
+		const tracksRes = await spotifyGet(
 			tracksEndpoint,
 			z.object({
 				tracks: z.array(spotifyTrackResponseSchema),
@@ -234,7 +236,7 @@ export async function getSeveralSpotifyTracks(props: {
 
 		const endpoint = `https://api.spotify.com/v1/tracks?ids=${chunk.join(',')}`;
 
-		const res = await zGet(
+		const res = await spotifyGet(
 			endpoint,
 			z.object({
 				tracks: z.array(spotifyTrackResponseSchema),
