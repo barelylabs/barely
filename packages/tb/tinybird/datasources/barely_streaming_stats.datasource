@@ -20,14 +20,14 @@ ENGINE_SORTING_KEY "timestamp, type, workspaceId, spotifyId"
 FORWARD_QUERY >
     SELECT 
         spotifyId,
-        CAST(spotifyPopularity, 'Nullable(Int32)') as spotifyPopularity,
+        CAST(spotifyPopularity, 'Nullable(Int32)') AS spotifyPopularity,
         timestamp,
         type,
         workspaceId,
         spotifyFollowers,
-        NULL as spotifyMonthlyListeners,
-        NULL as spotifyTotalListeners,
-        NULL as spotifyDailyListeners,
-        NULL as spotifyMonthlyStreams,
-        NULL as spotifyTotalStreams,
-        NULL as spotifyDailyStreams
+        defaultValueOfTypeName('Nullable(Int64)') AS spotifyMonthlyListeners,
+        defaultValueOfTypeName('Nullable(Int64)') AS spotifyTotalListeners,
+        defaultValueOfTypeName('Nullable(Int64)') AS spotifyDailyListeners,
+        defaultValueOfTypeName('Nullable(Int64)') AS spotifyMonthlyStreams,
+        defaultValueOfTypeName('Nullable(Int64)') AS spotifyTotalStreams,
+        defaultValueOfTypeName('Nullable(Int64)') AS spotifyDailyStreams
