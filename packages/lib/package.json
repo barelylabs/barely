@@ -82,6 +82,9 @@
 		"deploy-trigger:staging": "pnpm dlx trigger.dev@latest deploy --env staging",
 		"format": "prettier --check . --ignore-path ../../.gitignore",
 		"lint": "eslint",
+		"test": "pnpm with-env vitest",
+		"test:watch": "pnpm with-env vitest --watch",
+		"test:coverage": "pnpm with-env vitest --coverage",
 		"typecheck": "tsc --noEmit --emitDeclarationOnly false",
 		"with-env": "dotenv -e ../../.env --"
 	},
@@ -170,6 +173,7 @@
 		"@barely/tailwind-config": "workspace:*",
 		"@barely/tsconfig": "workspace:*",
 		"@polyscale/serverless-js": "^1.4.0",
+		"@trigger.dev/testing": "3.3.12",
 		"@types/follow-redirects": "1.14.4",
 		"@types/html-escaper": "^3.0.1",
 		"@types/markdown-it": "^13.0.7",
@@ -187,13 +191,16 @@
 		"drizzle-kit": "^0.31.2",
 		"encoding": "^0.1.13",
 		"eslint": "catalog:",
+		"msw": "^2.10.4",
+		"msw-trpc": "^2.0.1",
 		"pg": "^8.11.1",
 		"prettier": "catalog:",
 		"react": "catalog:react19",
 		"react-dom": "catalog:react19",
 		"react-hook-form": "catalog:",
 		"trigger.dev": "3.3.17",
-		"typescript": "catalog:"
+		"typescript": "catalog:",
+		"vitest": "catalog:"
 	},
 	"peerDependencies": {
 		"react": "catalog:react19",

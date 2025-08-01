@@ -105,14 +105,10 @@ export async function getSpotifyArtistAlbums(props: {
 		};
 	}
 
-	console.log('number of artist albums => ', allItems.length);
-
 	const albumsWithPopularity = await getSeveralSpotifyAlbums({
 		accessToken: props.accessToken,
 		albumIds: allItems.map(album => album.id),
 	});
-
-	console.log('number of albums with popularity => ', albumsWithPopularity?.length);
 
 	const items = allItems.map(album => {
 		const albumWithPopularity = albumsWithPopularity?.find(a => a.id === album.id);

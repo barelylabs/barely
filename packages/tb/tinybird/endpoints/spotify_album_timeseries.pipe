@@ -144,7 +144,6 @@ SQL >
     SELECT 
         formatDateTime(interval, '%FT%T.%f') as timestamp,
         spotifyId,
-        albumName,
         spotifyPopularity,
         spotifyMonthlyListeners,
         spotifyTotalListeners,
@@ -166,7 +165,7 @@ SQL >
         'timeseries' as resultType,
         timestamp,
         spotifyId,
-        albumName,
+        NULL as albumName,
         spotifyPopularity,
         spotifyMonthlyListeners,
         spotifyTotalListeners,

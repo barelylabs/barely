@@ -5,7 +5,7 @@ import { ProviderAccounts } from '@barely/db/sql';
 import { _Albums_To_Tracks, Albums } from '@barely/db/sql/album.sql';
 import { Tracks } from '@barely/db/sql/track.sql';
 import { ingestStreamingStat } from '@barely/tb/ingest';
-import { newId, parseSpotifyUrl } from '@barely/utils';
+import { isValidSpotifyId, newId, parseSpotifyUrl } from '@barely/utils';
 import { TRPCError } from '@trpc/server';
 import { and, eq } from 'drizzle-orm';
 import * as r from 'remeda';
@@ -32,6 +32,19 @@ import {
 import { ratelimit } from '../../integrations/upstash';
 import { privateProcedure, publicProcedure, workspaceProcedure } from '../trpc';
 
+// Rate limiting constants
+const RATE_LIMITS = {
+	SEARCH: { requests: 10, window: '1 m' },
+	FIND_TRACK: { requests: 20, window: '1 m' },
+	SYNC_ARTIST: { requests: 1, window: '10 m' },
+} as const;
+
+// Spotify API constants
+const SPOTIFY_LIMITS = {
+	ALBUMS_PER_REQUEST: 50,
+	ALBUM_BATCH_SIZE: 10,
+} as const;
+
 interface SpotifyTrackOptionArtist
 	extends Pick<TrackWith_Workspace_Genres_Files['workspace'], 'name'> {
 	id?: string;
@@ -47,6 +60,11 @@ export type SpotifyTrackOption = Pick<
 };
 
 export const spotifyRoute = {
+	/**
+	 * Get metadata for a Spotify URL (track, album, artist, or playlist)
+	 * Validates the Spotify ID before making API calls
+	 * @returns metadata object with title and imageUrl, or null if invalid
+	 */
 	getMetadata: publicProcedure
 		.input(
 			z.object({
@@ -55,14 +73,10 @@ export const spotifyRoute = {
 		)
 		.query(async ({ input }) => {
 			const parsedItem = parseSpotifyUrl(input.query);
-			console.log('parsedItem => ', parsedItem);
 			if (!parsedItem) return null;
 			const { type, id } = parsedItem;
 
-			console.log('type => ', type);
-			console.log('id => ', id);
-
-			if (!type || !id) return null;
+			if (!type || !id || !isValidSpotifyId(id)) return null;
 
 			const botSpotifyAccount = await dbHttp.query.ProviderAccounts.findFirst({
 				where: and(
@@ -95,8 +109,6 @@ export const spotifyRoute = {
 					spotifyId: id,
 				});
 
-				console.log('playlist => ', playlist);
-
 				return {
 					title: playlist?.name,
 					imageUrl: playlist?.images[0]?.url ?? null,
@@ -106,8 +118,6 @@ export const spotifyRoute = {
 					accessToken,
 					spotifyId: id,
 				});
-
-				console.log('track => ', track);
 
 				return {
 					title: track?.name,
@@ -119,8 +129,6 @@ export const spotifyRoute = {
 					spotifyId: id,
 				});
 
-				console.log('album => ', album);
-
 				return {
 					title: album?.name,
 					imageUrl: album?.images[0]?.url ?? null,
@@ -131,8 +139,6 @@ export const spotifyRoute = {
 					spotifyId: id,
 				});
 
-				console.log('artist => ', artist);
-
 				return {
 					title: artist?.name,
 					imageUrl: artist?.images[0]?.url ?? null,
@@ -142,6 +148,11 @@ export const spotifyRoute = {
 			return null;
 		}),
 
+	/**
+	 * Get artist details from Spotify API
+	 * Validates Spotify ID format before making request
+	 * @throws TRPCError with BAD_REQUEST if invalid ID
+	 */
 	getArtist: publicProcedure
 		.input(
 			z.object({
@@ -149,6 +160,13 @@ export const spotifyRoute = {
 			}),
 		)
 		.query(async ({ input }) => {
+			if (!isValidSpotifyId(input.spotifyId)) {
+				throw new TRPCError({
+					code: 'BAD_REQUEST',
+					message: 'Invalid Spotify ID',
+				});
+			}
+
 			const botSpotifyAccount = await dbHttp.query.ProviderAccounts.findFirst({
 				where: and(
 					eq(ProviderAccounts.provider, 'spotify'),
@@ -182,69 +200,10 @@ export const spotifyRoute = {
 			return artist;
 		}),
 
-	// getAppleMusic: publicProcedure
-	// 	.input(z.string().url())
-	// 	.query(async ({ ctx, input }) => {
-	// 		const botSpotifyAccount = await dbHttp.query.ProviderAccounts.findFirst({
-	// 			where: and(
-	// 				eq(ProviderAccounts.provider, 'spotify'),
-	// 				eq(ProviderAccounts.providerAccountId, env.BOT_SPOTIFY_ACCOUNT_ID),
-	// 			),
-	// 		});
-
-	// 		if (!botSpotifyAccount) {
-	// 			throw new TRPCError({
-	// 				code: 'INTERNAL_SERVER_ERROR',
-	// 				message: "We're having trouble with the Spotify API right now. Bear with us.",
-	// 				cause: 'No bot Spotify account found.',
-	// 			});
-	// 		}
-
-	// 		const accessToken = await getSpotifyAccessToken(botSpotifyAccount);
-
-	// 		if (!accessToken) {
-	// 			throw new TRPCError({
-	// 				code: 'INTERNAL_SERVER_ERROR',
-	// 				message: "We're having trouble with the Spotify API right now. Bear with us.",
-	// 				cause: 'No Spotify access token found for bot.',
-	// 			});
-	// 		}
-
-	// 		// Extract Spotify track ID from the input URL
-	// 		const parsed = parseSpotifyUrl(input);
-
-	// 		if (!parsed || parsed.type !== 'track' || !parsed.id) {
-	// 			throw new TRPCError({
-	// 				code: 'BAD_REQUEST',
-	// 				message: 'Invalid Spotify track URL',
-	// 			});
-	// 		}
-
-	// 		// Get track details from Spotify
-	// 		const track = await getSpotifyTrack({
-	// 			accessToken,
-	// 			spotifyId: parsed.id,
-	// 		});
-
-	// 		if (!track) {
-	// 			throw new TRPCError({
-	// 				code: 'NOT_FOUND',
-	// 				message: 'Spotify track not found',
-	// 			});
-	// 		}
-
-	// 		// Search for the track on Apple Music
-	// 		const searchQuery = `${track.name} ${track.artists[0].name}`;
-	// 		const appleMusicResults = await searchAppleMusic(searchQuery);
-
-	// 		if (!appleMusicResults || appleMusicResults.length === 0) {
-	// 			return null; // No matching track found on Apple Music
-	// 		}
-
-	// 		// Return the URL of the first matching track on Apple Music
-	// 		return appleMusicResults[0].url;
-	// 	}),
-
+	/**
+	 * Search Spotify for tracks, artists, albums, or playlists
+	 * Rate limited to prevent abuse
+	 */
 	search: publicProcedure
 		.input(
 			z.object({
@@ -252,7 +211,18 @@ export const spotifyRoute = {
 				limit: z.number().optional(),
 			}),
 		)
-		.query(async ({ input }) => {
+		.query(async ({ input, ctx }) => {
+			// Rate limit: 10 requests per minute per session/anonymous user
+			const limiter = ratelimit(RATE_LIMITS.SEARCH.requests, RATE_LIMITS.SEARCH.window);
+			const identifier = ctx.pageSessionId ?? ctx.session?.user.id ?? 'anonymous';
+			const { success } = await limiter.limit(`search:${identifier}`);
+
+			if (!success) {
+				throw new TRPCError({
+					code: 'TOO_MANY_REQUESTS',
+					message: 'Too many search requests. Please try again in a minute.',
+				});
+			}
 			const botSpotifyAccount = await dbHttp.query.ProviderAccounts.findFirst({
 				where: and(
 					eq(ProviderAccounts.provider, 'spotify'),
@@ -287,8 +257,28 @@ export const spotifyRoute = {
 			return searchResults;
 		}),
 
-	findTrack: publicProcedure.input(z.string()).query(async ({ input }) => {
+	/**
+	 * Find tracks on Spotify by search query
+	 * Returns array of track options with artist info
+	 * Rate limited to 20 requests per minute
+	 */
+	findTrack: publicProcedure.input(z.string()).query(async ({ input, ctx }) => {
 		if (input.length === 0) return [];
+
+		// Rate limit: 20 requests per minute per session/anonymous user
+		const limiter = ratelimit(
+			RATE_LIMITS.FIND_TRACK.requests,
+			RATE_LIMITS.FIND_TRACK.window,
+		);
+		const identifier = ctx.pageSessionId ?? ctx.session?.user.id ?? 'anonymous';
+		const { success } = await limiter.limit(`findTrack:${identifier}`);
+
+		if (!success) {
+			throw new TRPCError({
+				code: 'TOO_MANY_REQUESTS',
+				message: 'Too many search requests. Please try again in a minute.',
+			});
+		}
 
 		const botSpotifyAccount = await dbHttp.query.ProviderAccounts.findFirst({
 			where: and(
@@ -342,11 +332,8 @@ export const spotifyRoute = {
 			return track;
 		});
 
-		// console.log('tracks => ', tracks);
-
 		const uniqueTracks = r.uniqBy(tracks, t => t.spotifyId);
 
-		// console.log('uniqueTracks => ', uniqueTracks);
 		return uniqueTracks;
 	}),
 
@@ -391,19 +378,35 @@ export const spotifyRoute = {
 			return searchResults.artists?.items ?? [];
 		}),
 
+	/**
+	 * Sync all albums and tracks for a workspace's Spotify artist
+	 * Processes albums in batches to avoid memory issues
+	 * Rate limited to once per 10 minutes per workspace
+	 * @throws Error if invalid Spotify artist ID or sync fails
+	 */
 	syncWorkspaceArtist: workspaceProcedure.mutation(async ({ ctx }) => {
-		// Rate limit to once per minute
-		const limiter = ratelimit(1, '600 s');
-		const { success } = await limiter.limit(
-			ctx.workspace.id + 'syncWorkspaceSpotifyArtist',
+		// Rate limit: 1 request per 10 minutes per workspace
+		const limiter = ratelimit(
+			RATE_LIMITS.SYNC_ARTIST.requests,
+			RATE_LIMITS.SYNC_ARTIST.window,
 		);
+		const identifier = `workspace:${ctx.workspace.id}:syncSpotifyArtist`;
+		const { success, reset } = await limiter.limit(identifier);
 
 		if (!success) {
-			throw new Error('Rate limit exceeded. Please try again in a few minutes.');
+			const minutesUntilReset = Math.ceil((reset - Date.now()) / 1000 / 60);
+			throw new TRPCError({
+				code: 'TOO_MANY_REQUESTS',
+				message: `Rate limit exceeded. You can sync again in ${minutesUntilReset} minutes.`,
+			});
 		}
 
 		if (!ctx.workspace.spotifyArtistId) {
 			throw new Error('No Spotify artist ID found for this workspace.');
+		}
+
+		if (!isValidSpotifyId(ctx.workspace.spotifyArtistId)) {
+			throw new Error('Invalid Spotify artist ID for this workspace.');
 		}
 
 		// Fetch albums from Spotify
@@ -424,89 +427,94 @@ export const spotifyRoute = {
 
 		const accessToken = await getSpotifyAccessToken(botSpotifyAccount);
 
+		// Fetch albums with a reasonable limit to avoid overwhelming the API
 		const albums = await getSpotifyArtistAlbums({
 			accessToken,
 			spotifyId: ctx.workspace.spotifyArtistId,
 			needPopularity: true,
+			limit: SPOTIFY_LIMITS.ALBUMS_PER_REQUEST,
 		});
-
-		// throw new Error('test');
 
 		if (!albums?.items) {
 			throw new Error('Failed to fetch artist albums');
 		}
 
-		// Process each album
-		for (const album of albums.items) {
-			console.log('syncing album => ', album.name);
-			// Check if album exists
-			const existingAlbum = await dbHttp.query.Albums.findFirst({
-				where: eq(Albums.spotifyId, album.id),
-			});
+		// Process albums in batches to avoid memory issues
+		const BATCH_SIZE = SPOTIFY_LIMITS.ALBUM_BATCH_SIZE;
+		for (let i = 0; i < albums.items.length; i += BATCH_SIZE) {
+			const albumBatch = albums.items.slice(i, i + BATCH_SIZE);
 
-			if (existingAlbum) {
-				// Update existing album
-				await dbHttp
-					.update(Albums)
-					.set({
-						name: album.name,
-						imageUrl: album.images[0]?.url,
-						releaseDate: album.release_date,
-						totalTracks: album.total_tracks,
-					})
-					.where(eq(Albums.id, existingAlbum.id))
-					.returning();
-
-				// Fetch tracks for this album
-				const tracks = await getSpotifyTracksByAlbum({
-					accessToken,
-					albumId: album.id,
+			// Process each album in the batch
+			for (const album of albumBatch) {
+				// Check if album exists
+				const existingAlbum = await dbHttp.query.Albums.findFirst({
+					where: eq(Albums.spotifyId, album.id),
 				});
 
-				if (!tracks?.items) continue;
+				if (existingAlbum) {
+					// Update existing album
+					await dbHttp
+						.update(Albums)
+						.set({
+							name: album.name,
+							imageUrl: album.images[0]?.url,
+							releaseDate: album.release_date,
+							totalTracks: album.total_tracks,
+						})
+						.where(eq(Albums.id, existingAlbum.id))
+						.returning();
 
-				// Process each track
-				for (const track of tracks.items) {
-					await syncSpotifyTrack({
-						spotifyTrack: track,
-						albumId: existingAlbum.id,
-						workspaceId: ctx.workspace.id,
-						pool: ctx.pool,
+					// Fetch tracks for this album
+					const tracks = await getSpotifyTracksByAlbum({
+						accessToken,
+						albumId: album.id,
 					});
-				}
-			} else {
-				// Create new album
-				const [newAlbum] = await dbHttp
-					.insert(Albums)
-					.values({
-						id: newId('album'),
-						workspaceId: ctx.workspace.id,
-						name: album.name,
-						imageUrl: album.images[0]?.url,
-						releaseDate: album.release_date,
-						totalTracks: album.total_tracks,
-						spotifyId: album.id,
-					})
-					.returning();
 
-				if (!newAlbum) continue;
+					if (!tracks?.items) continue;
 
-				// Fetch tracks for this album
-				const tracks = await getSpotifyTracksByAlbum({
-					accessToken,
-					albumId: album.id,
-				});
+					// Process each track
+					for (const track of tracks.items) {
+						await syncSpotifyTrack({
+							spotifyTrack: track,
+							albumId: existingAlbum.id,
+							workspaceId: ctx.workspace.id,
+							pool: ctx.pool,
+						});
+					}
+				} else {
+					// Create new album
+					const [newAlbum] = await dbHttp
+						.insert(Albums)
+						.values({
+							id: newId('album'),
+							workspaceId: ctx.workspace.id,
+							name: album.name,
+							imageUrl: album.images[0]?.url,
+							releaseDate: album.release_date,
+							totalTracks: album.total_tracks,
+							spotifyId: album.id,
+						})
+						.returning();
 
-				if (!tracks?.items) continue;
+					if (!newAlbum) continue;
 
-				// Process each track
-				for (const track of tracks.items) {
-					await syncSpotifyTrack({
-						spotifyTrack: track,
-						albumId: newAlbum.id,
-						workspaceId: ctx.workspace.id,
-						pool: ctx.pool,
+					// Fetch tracks for this album
+					const tracks = await getSpotifyTracksByAlbum({
+						accessToken,
+						albumId: album.id,
 					});
+
+					if (!tracks?.items) continue;
+
+					// Process each track
+					for (const track of tracks.items) {
+						await syncSpotifyTrack({
+							spotifyTrack: track,
+							albumId: newAlbum.id,
+							workspaceId: ctx.workspace.id,
+							pool: ctx.pool,
+						});
+					}
 				}
 			}
 		}
@@ -609,7 +617,6 @@ export const spotifyRoute = {
 		.input(z.object({ accountSpotifyId: z.string() }))
 		.output(z.boolean())
 		.mutation(async ({ input, ctx }) => {
-			console.log('syncing spotify playlists from open endpoint', input.accountSpotifyId);
 			await syncSpotifyAccountPlaylists(input.accountSpotifyId, ctx.pool);
 			return true;
 		}),

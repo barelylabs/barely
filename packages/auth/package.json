@@ -8,7 +8,8 @@
 		"./utils": "./src/utils.ts",
 		"./app.server": "./src/app.server.ts",
 		"./app.client": "./src/app.client.ts",
-		"./get-url": "./src/get-url.ts"
+		"./get-url": "./src/get-url.ts",
+		"./test-helpers": "./src/__tests__/helpers.ts"
 	},
 	"license": "MIT",
 	"scripts": {
@@ -34,6 +35,7 @@
 		"@barely/eslint-config": "workspace:*",
 		"@barely/prettier-config": "workspace:*",
 		"@barely/tsconfig": "workspace:*",
+		"@better-auth-kit/tests": "0.2.0",
 		"eslint": "catalog:",
 		"prettier": "catalog:",
 		"typescript": "catalog:"
