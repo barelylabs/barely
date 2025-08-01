@@ -11,3 +11,7 @@ export function isPreview() {
 export function isProduction() {
 	return utilsEnv.NEXT_PUBLIC_VERCEL_ENV === 'production';
 }
+
+export function isStaging() {
+	return utilsEnv.NEXT_PUBLIC_VERCEL_ENV === 'staging';
+}

@@ -42,6 +42,14 @@ export function parseYoutubeLink(link: string) {
 	};
 }
 
+/**
+ * Validates a Spotify ID (alphanumeric, 22 characters)
+ */
+export function isValidSpotifyId(id: string): boolean {
+	// Spotify IDs are typically 22 characters long and contain only alphanumeric characters
+	return /^[a-zA-Z0-9]{22}$/.test(id);
+}
+
 export function parseSpotifyUrl(url: string) {
 	const match =
 		/https?:\/\/open\.spotify\.com\/(artist|track|album|playlist)\/([a-zA-Z0-9]+)/.exec(

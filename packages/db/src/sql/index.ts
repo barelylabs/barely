@@ -2,6 +2,7 @@ export * from './ad-campaign.sql';
 export * from './ad-creative.sql';
 export * from './ad-set.sql';
 export * from './ad.sql';
+export * from './album.sql';
 export * from './analytics-endpoint.sql';
 export * from './audience-demo.sql';
 export * from './audience-geo.sql';

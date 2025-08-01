@@ -1,9 +1,13 @@
 import { wait, zDelete, zGet, zPost } from '@barely/utils';
 import { z } from 'zod/v4';
 
+import { spotifyRateLimiter } from './spotify.rate-limiter';
+
 //* ✨ ENDPOINTS ✨ *//
 
 const getSpotifyPlaylist = async (props: { accessToken: string; spotifyId: string }) => {
+	await spotifyRateLimiter.checkLimit();
+
 	const endpoint = `https://api.spotify.com/v1/playlists/${props.spotifyId}`;
 	const auth = `Bearer ${props.accessToken}`;
 	const response = await zGet(endpoint, getPlaylistResponseSchema, { auth });
@@ -29,6 +33,7 @@ const getSpotifyUserPlaylists = async (props: {
 	let offset = 0;
 	let total = 0;
 	do {
+		await spotifyRateLimiter.checkLimit();
 		const res = await zGet(
 			`${endpoint}&offset=${offset}`,
 			getUserPlaylistsResponseSchema,
@@ -63,6 +68,7 @@ const getSpotifyPlaylistTracks = async (props: {
 	let offset = 0;
 	let total = 0;
 	do {
+		await spotifyRateLimiter.checkLimit();
 		const res = await zGet(
 			`${endpoint}&offset=${offset}`,
 			getPlaylistTracksResponseSchema,
@@ -95,6 +101,7 @@ const getSpotifyPlaylistTrackIds = async (props: {
 	let offset = 0;
 	let total = 0;
 	do {
+		await spotifyRateLimiter.checkLimit();
 		const response = await zGet(
 			`${endpoint}&offset=${offset}`,
 			getPlaylistTrackIdsResponseSchema,
@@ -118,6 +125,8 @@ const addTrackToSpotifyPlaylist = async (props: {
 	playlistSpotifyId: string;
 	position: number;
 }) => {
+	await spotifyRateLimiter.checkLimit();
+
 	const endpoint = `https://api.spotify.com/v1/playlists/${props.playlistSpotifyId}/tracks?position=${props.position}`;
 	const auth = `Bearer ${props.accessToken}`;
 	const response = await zPost(endpoint, addTrackToPlaylistResponseSchema, {
@@ -135,6 +144,8 @@ const removeTrackFromSpotifyPlaylist = async (props: {
 	trackSpotifyId: string;
 	playlistSpotifyId: string;
 }) => {
+	await spotifyRateLimiter.checkLimit();
+
 	const endpoint = `https://api.spotify.com/v1/playlists/${props.playlistSpotifyId}/tracks`;
 	const auth = `Bearer ${props.accessToken}`;
 	const response = await zDelete(endpoint, removeTrackFromPlaylistResponseSchema, {

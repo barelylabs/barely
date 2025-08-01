@@ -36,6 +36,7 @@ catalog:
   tailwindcss: ^3.4.15
   trpc-navigation-plugin: ^0.3.0
   typescript: ^5.8.3
+  vitest: ^3.2.4
   zod: ^3.25.49
 
 catalogs:

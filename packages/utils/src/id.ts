@@ -42,6 +42,7 @@ const prefixes = {
 	file: 'file',
 	playlist: 'pl',
 	track: 'tr',
+	album: 'al',
 	// email
 	emailBroadcast: 'email_bc',
 	emailTemplate: 'email_temp',

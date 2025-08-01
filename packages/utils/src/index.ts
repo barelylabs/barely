@@ -25,6 +25,7 @@ export * from './number';
 export * from './on-promise';
 export * from './punycode';
 export * from './raise';
+export * from './rate-limiter';
 export * from './plans';
 export * from './shipping';
 export * from './trpc-route';
