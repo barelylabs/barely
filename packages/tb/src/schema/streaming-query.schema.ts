@@ -34,7 +34,7 @@ export const spotifyTrackTimeseriesDataSchema = z.object({
 	resultType: z.enum(['timeseries', 'previousPeriod']),
 	timestamp: z.string().nullable(), // Changed to string since it comes as formatted string
 	spotifyId: z.string(),
-	trackName: z.string(),
+	trackName: z.string().nullable(), // Nullable because Tinybird returns NULL for timeseries results
 	spotifyPopularity: z.number().nullable(),
 	spotifyMonthlyListeners: z.number().nullable(),
 	spotifyTotalListeners: z.number().nullable(),
