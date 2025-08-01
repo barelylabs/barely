@@ -159,7 +159,7 @@ jobs:
           echo "DATABASE_POOL_URL=$DATABASE_POOL_URL" >> .env
 
           # Run db:push with timeout to prevent hanging on interactive prompts
-          output=$(timeout 60s bash -c 'echo "n" | pnpm db:push' 2>&1) || {
+          output=$(timeout 180s bash -c 'echo "n" | pnpm db:push' 2>&1) || {
             echo "ERROR: db:push timed out or failed - likely requires interactive input"
             echo "output: $output"
             echo "Please run 'pnpm db:push' locally to handle any schema ambiguities"
