@@ -410,7 +410,7 @@ jobs:
           branch_name=${{ needs.git-meta.outputs.git_branch_name }}
           
           # Get current staging deployment if it exists
-          CURRENT_STAGING_ID=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment ls --format json | jq -r 'map(select(.environment == "staging" and .status == "deployed"))[0].id // empty')
+          CURRENT_STAGING_ID=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment ls | awk '/Staging.*deployed/ { print $2 }' | head -1)
           
           if [ -n "$CURRENT_STAGING_ID" ]; then
             echo "Found existing staging deployment: $CURRENT_STAGING_ID"
@@ -471,15 +471,15 @@ jobs:
 
           # Use Live deployment ID if no tb changes or if deployment had no changes
           if [[ "${{ needs.git-meta.outputs.tb_changed }}" == "false" ]] || [[ "${{ steps.deploy-staging.outputs.no_changes }}" == "true" ]]; then
-            DEPLOYMENT_ID=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment ls --format json | jq -r 'map(select(.environment == "live" and .status == "deployed"))[0].id // empty')
+            DEPLOYMENT_ID=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment ls | awk '/Live.*deployed/ { print $2 }' | head -1)
             echo "Using Live deployment ID"
           else
             # Get the staging deployment ID (whether new or existing)
-            DEPLOYMENT_ID=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment ls --format json | jq -r 'map(select(.environment == "staging" and .status == "deployed"))[0].id // empty')
+            DEPLOYMENT_ID=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment ls | awk '/Staging.*deployed/ { print $2 }' | head -1)
             
             if [ -z "$DEPLOYMENT_ID" ]; then
               # If no staging deployment, use live
-              DEPLOYMENT_ID=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment ls --format json | jq -r 'map(select(.environment == "live" and .status == "deployed"))[0].id // empty')
+              DEPLOYMENT_ID=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment ls | awk '/Live.*deployed/ { print $2 }' | head -1)
               echo "Using Live deployment ID (no staging deployment found)"
             else
               echo "Using Staging deployment ID: $DEPLOYMENT_ID"
