@@ -36,7 +36,7 @@ import { privateProcedure, publicProcedure, workspaceProcedure } from '../trpc';
 const RATE_LIMITS = {
 	SEARCH: { requests: 10, window: '1 m' },
 	FIND_TRACK: { requests: 20, window: '1 m' },
-	SYNC_ARTIST: { requests: 1, window: '10 m' },
+	SYNC_ARTIST: { requests: 1, window: '1 h' },
 } as const;
 
 // Spotify API constants

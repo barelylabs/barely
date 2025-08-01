@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
+import { Alert } from '@barely/ui/alert';
 import { Button } from '@barely/ui/button';
 import { Combobox } from '@barely/ui/combobox';
 import { SettingsCardForm } from '@barely/ui/components/settings-card';
@@ -112,6 +113,20 @@ export function SpotifyArtistSettings() {
 					</p>
 				</div>
 				<div className='flex flex-col gap-4'>
+					{workspace.plan === 'free' && (
+						<div className='flex flex-col gap-3'>
+							<Alert
+								variant='info'
+								title='Free Plan Sync Limits'
+								description='On the free plan, you can manually sync your Spotify stats once per day. Upgrade to a paid plan for automatic daily syncing.'
+								actionLabel='Upgrade to a paid plan'
+								actionHref={`/${workspace.handle}/settings/billing/upgrade`}
+							/>
+							<Button look='brand' href={`/${workspace.handle}/settings/billing/upgrade`}>
+								Upgrade
+							</Button>
+						</div>
+					)}
 					{currentArtist && (
 						<div className='flex items-center gap-4 rounded-lg border p-4'>
 							{currentArtist.images[0] && (

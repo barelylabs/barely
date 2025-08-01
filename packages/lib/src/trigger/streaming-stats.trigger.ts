@@ -7,7 +7,7 @@ import { Workspaces } from '@barely/db/sql/workspace.sql';
 import { ingestStreamingStat } from '@barely/tb/ingest';
 import { isValidSpotifyId, raise } from '@barely/utils';
 import { schedules } from '@trigger.dev/sdk/v3';
-import { and, eq, isNotNull } from 'drizzle-orm';
+import { and, eq, isNotNull, ne } from 'drizzle-orm';
 
 import { libEnv } from '../../env';
 import { getSpotifyAccessToken, updateDefaultSpotifyId } from '../functions/spotify.fns';
@@ -46,7 +46,7 @@ export const streamingStatsTrigger = schedules.task({
 			// Get all workspaces with spotifyArtistId
 			const db = dbPool(pool);
 			const workspaces = await db.query.Workspaces.findMany({
-				where: isNotNull(Workspaces.spotifyArtistId),
+				where: and(isNotNull(Workspaces.spotifyArtistId), ne(Workspaces.plan, 'free')),
 				columns: {
 					id: true,
 					spotifyArtistId: true,

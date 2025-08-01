@@ -173,7 +173,6 @@
 		"@barely/tailwind-config": "workspace:*",
 		"@barely/tsconfig": "workspace:*",
 		"@polyscale/serverless-js": "^1.4.0",
-		"@trigger.dev/testing": "3.3.12",
 		"@types/follow-redirects": "1.14.4",
 		"@types/html-escaper": "^3.0.1",
 		"@types/markdown-it": "^13.0.7",
