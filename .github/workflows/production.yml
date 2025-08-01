@@ -184,8 +184,13 @@ jobs:
       - name: Install Tinybird CLI
         run: curl https://tinybird.co | sh
 
-      - name: Deploy project
-        run: cd packages/tb/tinybird && tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deploy
+      - name: Deploy to Production
+        run: |
+          cd packages/tb/tinybird
+          
+          # Since preview workflow ensures only the merged PR owns staging, we can safely promote
+          echo "Promoting staging deployment to production..."
+          tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment promote --wait
 
   # 📱 DEPLOY APPS -- PROD (Not Aliasing to Production Yet) #
   deploy-app:

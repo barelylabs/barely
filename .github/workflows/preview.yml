@@ -400,13 +400,55 @@ jobs:
         if: needs.git-meta.outputs.tb_changed == 'true'
         run: pnpm tb:test
 
+      - name: Check Tinybird deployment ownership
+        if: needs.git-meta.outputs.tb_changed == 'true'
+        id: check-ownership
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
+        run: |
+          cd packages/tb/tinybird
+          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
+          
+          # Get current staging deployment if it exists
+          CURRENT_STAGING_ID=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment ls --format json | jq -r 'map(select(.environment == "staging" and .status == "deployed"))[0].id // empty')
+          
+          if [ -n "$CURRENT_STAGING_ID" ]; then
+            echo "Found existing staging deployment: $CURRENT_STAGING_ID"
+            
+            # Get the deployment ID stored in Vercel for this branch
+            BRANCH_DEPLOYMENT_ID=$(pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep TINYBIRD_STAGING_DEPLOYMENT_ID | awk '{print $2}' || echo "")
+            
+            if [ "$CURRENT_STAGING_ID" = "$BRANCH_DEPLOYMENT_ID" ]; then
+              echo "✅ This branch owns the current staging deployment. Proceeding with update."
+              echo "owns_staging=true" >> $GITHUB_OUTPUT
+            else
+              echo "❌ ERROR: Another PR owns the staging deployment!"
+              echo "Current staging ID: $CURRENT_STAGING_ID"
+              echo "This branch's ID: $BRANCH_DEPLOYMENT_ID"
+              echo ""
+              echo "Only one PR with Tinybird changes allowed at a time."
+              echo "Please wait for the other PR to merge or close."
+              exit 1
+            fi
+          else
+            echo "No existing staging deployment found. Proceeding with new deployment."
+            echo "owns_staging=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Deploy to staging
         if: needs.git-meta.outputs.tb_changed == 'true'
         id: deploy-staging
         run: |
           cd packages/tb/tinybird
           set +e  # Temporarily disable exit on error to capture output
-          output=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment create 2>&1)
+          
+          # If we own the staging deployment, we might need to discard it first to avoid "deployment in progress" errors
+          if [ "${{ steps.check-ownership.outputs.owns_staging }}" = "true" ]; then
+            echo "Discarding our existing staging deployment to create a fresh one..."
+            tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment discard --wait || true
+          fi
+          
+          output=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment create --description "PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}" 2>&1)
           exit_code=$?
           set -e  # Re-enable exit on error
           
@@ -429,11 +471,19 @@ jobs:
 
           # Use Live deployment ID if no tb changes or if deployment had no changes
           if [[ "${{ needs.git-meta.outputs.tb_changed }}" == "false" ]] || [[ "${{ steps.deploy-staging.outputs.no_changes }}" == "true" ]]; then
-            DEPLOYMENT_ID=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment ls | awk '/Live/ { print $2 }')
+            DEPLOYMENT_ID=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment ls --format json | jq -r 'map(select(.environment == "live" and .status == "deployed"))[0].id // empty')
             echo "Using Live deployment ID"
           else
-            DEPLOYMENT_ID=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment ls | awk '/Staging/ { print $2 }')
-            echo "Using Staging deployment ID"
+            # Get the staging deployment ID (whether new or existing)
+            DEPLOYMENT_ID=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment ls --format json | jq -r 'map(select(.environment == "staging" and .status == "deployed"))[0].id // empty')
+            
+            if [ -z "$DEPLOYMENT_ID" ]; then
+              # If no staging deployment, use live
+              DEPLOYMENT_ID=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment ls --format json | jq -r 'map(select(.environment == "live" and .status == "deployed"))[0].id // empty')
+              echo "Using Live deployment ID (no staging deployment found)"
+            else
+              echo "Using Staging deployment ID: $DEPLOYMENT_ID"
+            fi
           fi
 
           echo "TINYBIRD_STAGING_DEPLOYMENT_ID=$DEPLOYMENT_ID" >> $GITHUB_OUTPUT
