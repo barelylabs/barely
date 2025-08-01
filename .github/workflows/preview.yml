@@ -448,7 +448,7 @@ jobs:
             tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment discard --wait || true
           fi
           
-          output=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment create --description "PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}" 2>&1)
+          output=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment create 2>&1)
           exit_code=$?
           set -e  # Re-enable exit on error
           
