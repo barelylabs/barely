@@ -1,4 +1,4 @@
-import { isPreview } from '@barely/utils';
+import { isStaging } from '@barely/utils';
 import { createEnv } from '@t3-oss/env-nextjs';
 import { z } from 'zod/v4';
 
@@ -6,7 +6,7 @@ export const tbEnv = createEnv({
 	server: {
 		TINYBIRD_HOST: z.string(),
 		TINYBIRD_STAGING_DEPLOYMENT_ID: z.preprocess(v => {
-			if (!isPreview()) return undefined;
+			if (!isStaging()) return undefined;
 
 			if (typeof v !== 'string' || v === '') return null;
 

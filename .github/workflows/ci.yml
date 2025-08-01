@@ -16,6 +16,40 @@ env:
   TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
 jobs:
+  # Check for changes in specific directories
+  git-meta:
+    runs-on: ubuntu-latest
+    outputs:
+      tb_changed: ${{ steps.tb-changes.outputs.tb_changed }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: check for tinybird changes
+        id: tb-changes
+        run: |
+          # Get the base branch
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base_branch=${{ github.event.pull_request.base.ref }}
+          else
+            # For merge_group events, compare against main
+            base_branch="main"
+          fi
+
+          # Fetch the base branch to ensure we have it locally
+          git fetch origin $base_branch
+
+          # Check if there are changes in packages/tb/tinybird
+          if git diff --name-only origin/$base_branch...HEAD | grep -E "^packages/tb/tinybird/" > /dev/null; then
+            echo "tb_changed=true" >> $GITHUB_OUTPUT
+            echo "Changes detected in packages/tb/tinybird"
+          else
+            echo "tb_changed=false" >> $GITHUB_OUTPUT
+            echo "No changes detected in packages/tb/tinybird"
+          fi
+
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -72,8 +106,38 @@ jobs:
       - name: Run tests
         run: pnpm test:ci
 
+  tinybird:
+    name: tinybird CI check
+    if: needs.git-meta.outputs.tb_changed == 'true'
+    needs: [git-meta]
+    runs-on: ubuntu-latest
+    env:
+      TINYBIRD_HOST: ${{ secrets.TINYBIRD_HOST }}
+      TINYBIRD_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Tinybird CLI
+        run: curl https://tinybird.co | sh
+
+      - name: Build project
+        run: |
+          cd packages/tb/tinybird
+          tb build
+
+      - name: Test project
+        run: |
+          cd packages/tb/tinybird
+          tb test run
+
+      - name: Deployment check
+        run: |
+          cd packages/tb/tinybird
+          tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deploy --check
+
   ci--can-merge:
-    needs: [lint, format, typecheck, test]
+    needs: [lint, format, typecheck, test, tinybird]
+    if: always()
     permissions:
       actions: read
     runs-on: ubuntu-latest

@@ -187,10 +187,7 @@ jobs:
       - name: Deploy to Production
         run: |
           cd packages/tb/tinybird
-          
-          # Since preview workflow ensures only the merged PR owns staging, we can safely promote
-          echo "Promoting staging deployment to production..."
-          tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment promote --wait
+          tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deploy
 
   # 📱 DEPLOY APPS -- PROD (Not Aliasing to Production Yet) #
   deploy-app:

@@ -351,270 +351,6 @@ jobs:
     outputs:
       neon_branch_id: ${{ steps.get-neon-branch.outputs.branch_id }}
 
-  # 🐦 TINYBIRD:PUSH #
-  tinybird-preview:
-    name: tinybird preview
-    if: always() && github.event_name == 'pull_request'
-    needs: [git-meta]
-    runs-on: ubuntu-latest
-    env:
-      TINYBIRD_HOST: ${{ secrets.TINYBIRD_HOST }}
-      TINYBIRD_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
-      VERCEL_ACCESS_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
-    services:
-      tinybird:
-        image: tinybirdco/tinybird-local:latest
-        ports:
-          - 7181:7181
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-
-      - name: Install Tinybird CLI
-        run: curl https://tinybird.co | sh
-
-      - name: Setup
-        uses: ./tooling/github/setup
-
-        # if tb_changed is false, we want to
-        # 1. get the live deployment ID using tb CLI.
-        # 2. update the vercel env variable TINYBIRD_LIVE_DEPLOYMENT_ID with the live deployment ID
-
-      - name: skip tb staging deployment
-        if: needs.git-meta.outputs.tb_changed == 'false'
-        run: |
-          echo "Skipping tb:deploy - no changes detected in packages/tb/tinybird"
-          echo "Using existing Tinybird deployment"
-
-        # if tb_changed is true, we want to
-        # 1. build, test, and deploy to staging (only one staging deployment at a time, so can't have multiple PRs with tb changes at one time)
-        # 2. get staging deployment ID using tb CLI.
-        # 3. update the vercel env variable TINYBIRD_STAGING_DEPLOYMENT_ID with the staging deployment ID
-
-      - name: Build project
-        if: needs.git-meta.outputs.tb_changed == 'true'
-        run: pnpm tb:build
-
-      - name: Test project
-        if: needs.git-meta.outputs.tb_changed == 'true'
-        run: pnpm tb:test
-
-      - name: Check Tinybird deployment ownership
-        if: needs.git-meta.outputs.tb_changed == 'true'
-        id: check-ownership
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
-        run: |
-          cd packages/tb/tinybird
-          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
-          
-          # Get current staging deployment if it exists
-          CURRENT_STAGING_ID=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment ls | awk '/Staging.*deployed/ { print $2 }' | head -1)
-          
-          if [ -n "$CURRENT_STAGING_ID" ]; then
-            echo "Found existing staging deployment: $CURRENT_STAGING_ID"
-            
-            # Get the deployment ID stored in Vercel for this branch
-            BRANCH_DEPLOYMENT_ID=$(pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep TINYBIRD_STAGING_DEPLOYMENT_ID | awk '{print $2}' || echo "")
-            
-            if [ "$CURRENT_STAGING_ID" = "$BRANCH_DEPLOYMENT_ID" ]; then
-              echo "✅ This branch owns the current staging deployment. Proceeding with update."
-              echo "owns_staging=true" >> $GITHUB_OUTPUT
-            else
-              echo "❌ ERROR: Another PR owns the staging deployment!"
-              echo "Current staging ID: $CURRENT_STAGING_ID"
-              echo "This branch's ID: $BRANCH_DEPLOYMENT_ID"
-              echo ""
-              echo "Only one PR with Tinybird changes allowed at a time."
-              echo "Please wait for the other PR to merge or close."
-              exit 1
-            fi
-          else
-            echo "No existing staging deployment found. Proceeding with new deployment."
-            echo "owns_staging=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Deploy to staging
-        if: needs.git-meta.outputs.tb_changed == 'true'
-        id: deploy-staging
-        run: |
-          cd packages/tb/tinybird
-          set +e  # Temporarily disable exit on error to capture output
-          
-          # If we own the staging deployment, we might need to discard it first to avoid "deployment in progress" errors
-          if [ "${{ steps.check-ownership.outputs.owns_staging }}" = "true" ]; then
-            echo "Discarding our existing staging deployment to create a fresh one..."
-            tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment discard --wait || true
-          fi
-          
-          output=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment create 2>&1)
-          exit_code=$?
-          set -e  # Re-enable exit on error
-          
-          echo "$output"
-
-          # Check if deployment was skipped due to no changes
-          if [[ $output == *"Not deploying. No changes."* ]]; then
-            echo "no_changes=true" >> $GITHUB_OUTPUT
-          elif [[ $exit_code -ne 0 ]]; then
-            echo "Deployment failed with exit code $exit_code"
-            exit 1
-          else
-            echo "no_changes=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Get staging deployment ID
-        id: get-deployment-id
-        run: |
-          cd packages/tb/tinybird
-
-          # Use Live deployment ID if no tb changes or if deployment had no changes
-          if [[ "${{ needs.git-meta.outputs.tb_changed }}" == "false" ]] || [[ "${{ steps.deploy-staging.outputs.no_changes }}" == "true" ]]; then
-            DEPLOYMENT_ID=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment ls | awk '/Live.*deployed/ { print $2 }' | head -1)
-            echo "Using Live deployment ID"
-          else
-            # Get the staging deployment ID (whether new or existing)
-            DEPLOYMENT_ID=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment ls | awk '/Staging.*deployed/ { print $2 }' | head -1)
-            
-            if [ -z "$DEPLOYMENT_ID" ]; then
-              # If no staging deployment, use live
-              DEPLOYMENT_ID=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment ls | awk '/Live.*deployed/ { print $2 }' | head -1)
-              echo "Using Live deployment ID (no staging deployment found)"
-            else
-              echo "Using Staging deployment ID: $DEPLOYMENT_ID"
-            fi
-          fi
-
-          echo "TINYBIRD_STAGING_DEPLOYMENT_ID=$DEPLOYMENT_ID" >> $GITHUB_OUTPUT
-
-      - name: Update vercel env - app/preview/branch
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
-        run: |
-          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
-          echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
-
-          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
-
-          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q TINYBIRD_STAGING_DEPLOYMENT_ID; then
-            pnpm vercel env rm TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
-
-          echo $TINYBIRD_STAGING_DEPLOYMENT_ID | pnpm vercel env add TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Update vercel env - cart/preview/branch
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_CART_PROJECT_ID }}
-        run: |
-          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
-          echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
-          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
-
-          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q TINYBIRD_STAGING_DEPLOYMENT_ID; then
-            pnpm vercel env rm TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
-
-          echo $TINYBIRD_STAGING_DEPLOYMENT_ID | pnpm vercel env add TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Update vercel env - link/preview/branch
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
-        run: |
-          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
-          echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
-          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
-
-          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q TINYBIRD_STAGING_DEPLOYMENT_ID; then
-            pnpm vercel env rm TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
-
-          echo $TINYBIRD_STAGING_DEPLOYMENT_ID | pnpm vercel env add TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Update vercel env - fm/preview/branch
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_FM_PROJECT_ID }}
-        run: |
-          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
-          echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
-          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
-
-          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q TINYBIRD_STAGING_DEPLOYMENT_ID; then
-            pnpm vercel env rm TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
-
-          echo $TINYBIRD_STAGING_DEPLOYMENT_ID | pnpm vercel env add TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Update vercel env - manage-email/preview/branch
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_MANAGE_EMAIL_PROJECT_ID }}
-        run: |
-          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
-          echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
-          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
-
-          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q TINYBIRD_STAGING_DEPLOYMENT_ID; then
-            pnpm vercel env rm TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
-
-          echo $TINYBIRD_STAGING_DEPLOYMENT_ID | pnpm vercel env add TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Update vercel env - page/preview/branch
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PAGE_PROJECT_ID }}
-        run: |
-          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
-          echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
-          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
-
-          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q TINYBIRD_STAGING_DEPLOYMENT_ID; then
-            pnpm vercel env rm TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
-
-          echo $TINYBIRD_STAGING_DEPLOYMENT_ID | pnpm vercel env add TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Update vercel env - press/preview/branch
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PRESS_PROJECT_ID }}
-        run: |
-          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
-          echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
-          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
-
-          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q TINYBIRD_STAGING_DEPLOYMENT_ID; then
-            pnpm vercel env rm TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
-
-          echo $TINYBIRD_STAGING_DEPLOYMENT_ID | pnpm vercel env add TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Update vercel env - nyc/preview/branch
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_NYC_PROJECT_ID }}
-        run: |
-          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
-          echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
-          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
-
-          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q TINYBIRD_STAGING_DEPLOYMENT_ID; then
-            pnpm vercel env rm TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
-
-          echo $TINYBIRD_STAGING_DEPLOYMENT_ID | pnpm vercel env add TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Update vercel env - www/preview/branch
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_WWW_PROJECT_ID }}
-        run: |
-          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
-          echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
-          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
-
-          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q TINYBIRD_STAGING_DEPLOYMENT_ID; then
-            pnpm vercel env rm TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
-
-          echo $TINYBIRD_STAGING_DEPLOYMENT_ID | pnpm vercel env add TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
-
   # 🔄 TRIGGER PREVIEW #
   trigger-preview:
     name: trigger staging
@@ -635,7 +371,7 @@ jobs:
   # 👀 DEPLOY PREVIEWS
   deploy-app:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, neon-preview, tinybird-preview]
+    needs: [git-meta, neon-preview]
     with:
       app_name: app
       working_directory: apps/app
@@ -650,7 +386,7 @@ jobs:
 
   deploy-cart:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, neon-preview, tinybird-preview]
+    needs: [git-meta, neon-preview]
     with:
       app_name: cart
       working_directory: apps/cart
@@ -665,7 +401,7 @@ jobs:
 
   deploy-link:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, neon-preview, tinybird-preview]
+    needs: [git-meta, neon-preview]
     with:
       app_name: link
       working_directory: apps/link
@@ -680,7 +416,7 @@ jobs:
 
   deploy-fm:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, neon-preview, tinybird-preview]
+    needs: [git-meta, neon-preview]
     with:
       app_name: fm
       working_directory: apps/fm
@@ -695,7 +431,7 @@ jobs:
 
   deploy-manage-email:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, neon-preview, tinybird-preview]
+    needs: [git-meta, neon-preview]
     with:
       app_name: manage-email
       working_directory: apps/manage-email
@@ -710,7 +446,7 @@ jobs:
 
   deploy-page:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, neon-preview, tinybird-preview]
+    needs: [git-meta, neon-preview]
     with:
       app_name: page
       working_directory: apps/page
@@ -725,7 +461,7 @@ jobs:
 
   deploy-press:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, neon-preview, tinybird-preview]
+    needs: [git-meta, neon-preview]
     with:
       app_name: press
       working_directory: apps/press
@@ -740,7 +476,7 @@ jobs:
 
   deploy-nyc:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, neon-preview, tinybird-preview]
+    needs: [git-meta, neon-preview]
     with:
       app_name: nyc
       working_directory: apps/nyc
@@ -755,7 +491,7 @@ jobs:
 
   deploy-www:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, neon-preview, tinybird-preview]
+    needs: [git-meta, neon-preview]
     with:
       app_name: www
       working_directory: apps/www
@@ -816,7 +552,6 @@ jobs:
     needs:
       [
         neon-preview,
-        tinybird-preview,
         trigger-preview,
         deploy-app,
         deploy-cart,
