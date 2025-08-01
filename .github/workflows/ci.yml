@@ -114,6 +114,11 @@ jobs:
     env:
       TINYBIRD_HOST: ${{ secrets.TINYBIRD_HOST }}
       TINYBIRD_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
+    services:
+      tinybird:
+        image: tinybirdco/tinybird-local:latest
+        ports:
+          - 7181:7181
     steps:
       - uses: actions/checkout@v4
 
