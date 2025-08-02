@@ -8,9 +8,9 @@ import { MarketingButton } from '../../components/marketing/button';
 import { PhDBadge } from '../../components/marketing/trust-badges';
 
 export const metadata: Metadata = {
-	title: 'About - From Lab to Studio | Barely',
+	title: 'About - From Lab to Brooklyn Studio | Barely NYC',
 	description:
-		'The PhD who left science to fix music marketing. Building transparent tools so indie artists can focus on what they do best.',
+		'The PhD scientist who became a Music Marketing Engineer in Brooklyn. Building transparent growth systems for indie artists worldwide.',
 };
 
 export default function AboutPage() {
@@ -23,10 +23,11 @@ export default function AboutPage() {
 				<div className='mx-auto max-w-4xl text-center'>
 					<AnimatedSection animation='fade-up'>
 						<H size='1' className='mb-6 font-heading text-5xl md:text-6xl lg:text-7xl'>
-							The PhD Who Left Science to Fix Music Marketing
+							I Brought My PhD to Music Marketing
 						</H>
 						<p className='text-xl text-white/70 md:text-2xl'>
-							Building transparent tools so indie artists can focus on what they do best
+							Brooklyn-based music marketing engineers building data-driven growth systems
+							for indie artists worldwide
 						</p>
 						<div className='mt-6'>
 							<PhDBadge className='mx-auto' />
@@ -125,6 +126,26 @@ export default function AboutPage() {
 						</div>
 					</AnimatedSection>
 
+					{/* Brooklyn Base */}
+					<AnimatedSection animation='fade-up' delay={700}>
+						<div className='space-y-6'>
+							<H size='3' className='gradient-text text-3xl md:text-4xl'>
+								Building From Brooklyn
+							</H>
+							<p className='text-lg leading-relaxed text-white/80'>
+								In 2023, I moved to Brooklyn to set up Barely NYC. It made sense - this is
+								where music and technology collide, where the indie spirit drives
+								innovation.
+							</p>
+							<p className='text-lg leading-relaxed text-white/80'>
+								While our agency is based in Brooklyn, the artists we work with are
+								everywhere. We've engineered growth for bands in LA, Nashville, Cleveland,
+								South Wales, and Paris. Our data-driven approach translates across time
+								zones and genres - because good science is universal.
+							</p>
+						</div>
+					</AnimatedSection>
+
 					{/* The Mission */}
 					<AnimatedSection animation='fade-up' delay={800}>
 						<div className='space-y-6'>
@@ -132,14 +153,14 @@ export default function AboutPage() {
 								The Mission
 							</H>
 							<p className='text-lg leading-relaxed text-white/80'>
-								My job isn&apos;t to be the star of your story. I&apos;m the engineer who
-								builds the stage, tunes the sound system, and optimizes the lighting so
-								you can focus on what you do best: creating art that matters.
+								As music marketing engineers, we apply scientific methods to grow your
+								fanbase. We run controlled experiments, analyze the data, and optimize
+								based on results - not hunches or industry myths.
 							</p>
 							<p className='text-lg leading-relaxed text-white/80'>
-								You handle the music, the fan connections, the creative vision. I handle
-								the algorithms, the data analysis, and all the technical stuff that makes
-								sure your music finds the people who&apos;ll love it.
+								You focus on the creative. We handle the engineering - attribution
+								modeling, conversion optimization, algorithmic distribution. It's a
+								partnership where art meets science.
 							</p>
 						</div>
 					</AnimatedSection>

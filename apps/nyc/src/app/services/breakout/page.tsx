@@ -8,9 +8,9 @@ import { MarketingButton } from '../../../components/marketing/button';
 import { PricingCard } from '../../../components/marketing/pricing-card';
 
 export const metadata: Metadata = {
-	title: 'Breakout+ Service - Maximum Growth Engineering | Barely',
+	title: 'Breakout+ Service - Maximum Growth Engineering | Barely NYC',
 	description:
-		'Perfect for artists with 50K+ monthly listeners ready to scale aggressively. Full campaign execution + content optimization + complete revenue strategy.',
+		'Brooklyn-based music marketing engineers for artists with 50K+ monthly listeners ready to scale aggressively. Full campaign execution with scientific optimization.',
 };
 
 export default function BreakoutPlusPage() {
