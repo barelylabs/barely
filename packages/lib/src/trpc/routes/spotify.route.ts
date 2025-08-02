@@ -2,33 +2,25 @@ import type { TrackWith_Workspace_Genres_Files } from '@barely/validators';
 import type { TRPCRouterRecord } from '@trpc/server';
 import { dbHttp } from '@barely/db/client';
 import { ProviderAccounts } from '@barely/db/sql';
-import { _Albums_To_Tracks, Albums } from '@barely/db/sql/album.sql';
-import { Tracks } from '@barely/db/sql/track.sql';
-import { ingestStreamingStat } from '@barely/tb/ingest';
-import { isValidSpotifyId, newId, parseSpotifyUrl } from '@barely/utils';
+import { isValidSpotifyId, parseSpotifyUrl } from '@barely/utils';
+import { tasks } from '@trigger.dev/sdk/v3';
 import { TRPCError } from '@trpc/server';
 import { and, eq } from 'drizzle-orm';
 import * as r from 'remeda';
 import { z } from 'zod/v4';
 
+import type { syncSpotifyArtist } from '../../trigger';
 import { libEnv } from '../../../env';
 import {
 	getSpotifyAccessToken,
 	syncSpotifyAccountPlaylists,
 	syncSpotifyAccountUser,
-	syncSpotifyTrack,
 } from '../../functions/spotify.fns';
 import { getSpotifyAlbum } from '../../integrations/spotify/spotify.endpts.album';
-import {
-	getSpotifyArtist,
-	getSpotifyArtistAlbums,
-} from '../../integrations/spotify/spotify.endpts.artist';
+import { getSpotifyArtist } from '../../integrations/spotify/spotify.endpts.artist';
 import { getSpotifyPlaylist } from '../../integrations/spotify/spotify.endpts.playlist';
 import { searchSpotify } from '../../integrations/spotify/spotify.endpts.search';
-import {
-	getSpotifyTrack,
-	getSpotifyTracksByAlbum,
-} from '../../integrations/spotify/spotify.endpts.track';
+import { getSpotifyTrack } from '../../integrations/spotify/spotify.endpts.track';
 import { ratelimit } from '../../integrations/upstash';
 import { privateProcedure, publicProcedure, workspaceProcedure } from '../trpc';
 
@@ -37,12 +29,6 @@ const RATE_LIMITS = {
 	SEARCH: { requests: 10, window: '1 m' },
 	FIND_TRACK: { requests: 20, window: '1 m' },
 	SYNC_ARTIST: { requests: 1, window: '1 h' },
-} as const;
-
-// Spotify API constants
-const SPOTIFY_LIMITS = {
-	ALBUMS_PER_REQUEST: 50,
-	ALBUM_BATCH_SIZE: 10,
 } as const;
 
 interface SpotifyTrackOptionArtist
@@ -385,7 +371,7 @@ export const spotifyRoute = {
 	 * @throws Error if invalid Spotify artist ID or sync fails
 	 */
 	syncWorkspaceArtist: workspaceProcedure.mutation(async ({ ctx }) => {
-		// Rate limit: 1 request per 10 minutes per workspace
+		// Rate limit: 1 request per hour per workspace
 		const limiter = ratelimit(
 			RATE_LIMITS.SYNC_ARTIST.requests,
 			RATE_LIMITS.SYNC_ARTIST.window,
@@ -409,178 +395,12 @@ export const spotifyRoute = {
 			throw new Error('Invalid Spotify artist ID for this workspace.');
 		}
 
-		// Fetch albums from Spotify
-		const botSpotifyAccount = await dbHttp.query.ProviderAccounts.findFirst({
-			where: and(
-				eq(ProviderAccounts.provider, 'spotify'),
-				eq(ProviderAccounts.providerAccountId, libEnv.BOT_SPOTIFY_ACCOUNT_ID),
-			),
+		// Trigger the sync task
+		await tasks.trigger<typeof syncSpotifyArtist>('sync-spotify-artist', {
+			workspaceId: ctx.workspace.id,
 		});
 
-		if (!botSpotifyAccount) {
-			throw new TRPCError({
-				code: 'INTERNAL_SERVER_ERROR',
-				message: "We're having trouble with the Spotify API right now. Bear with us.",
-				cause: 'No bot Spotify account found.',
-			});
-		}
-
-		const accessToken = await getSpotifyAccessToken(botSpotifyAccount);
-
-		// Fetch albums with a reasonable limit to avoid overwhelming the API
-		const albums = await getSpotifyArtistAlbums({
-			accessToken,
-			spotifyId: ctx.workspace.spotifyArtistId,
-			needPopularity: true,
-			limit: SPOTIFY_LIMITS.ALBUMS_PER_REQUEST,
-		});
-
-		if (!albums?.items) {
-			throw new Error('Failed to fetch artist albums');
-		}
-
-		// Process albums in batches to avoid memory issues
-		const BATCH_SIZE = SPOTIFY_LIMITS.ALBUM_BATCH_SIZE;
-		for (let i = 0; i < albums.items.length; i += BATCH_SIZE) {
-			const albumBatch = albums.items.slice(i, i + BATCH_SIZE);
-
-			// Process each album in the batch
-			for (const album of albumBatch) {
-				// Check if album exists
-				const existingAlbum = await dbHttp.query.Albums.findFirst({
-					where: eq(Albums.spotifyId, album.id),
-				});
-
-				if (existingAlbum) {
-					// Update existing album
-					await dbHttp
-						.update(Albums)
-						.set({
-							name: album.name,
-							imageUrl: album.images[0]?.url,
-							releaseDate: album.release_date,
-							totalTracks: album.total_tracks,
-						})
-						.where(eq(Albums.id, existingAlbum.id))
-						.returning();
-
-					// Fetch tracks for this album
-					const tracks = await getSpotifyTracksByAlbum({
-						accessToken,
-						albumId: album.id,
-					});
-
-					if (!tracks?.items) continue;
-
-					// Process each track
-					for (const track of tracks.items) {
-						await syncSpotifyTrack({
-							spotifyTrack: track,
-							albumId: existingAlbum.id,
-							workspaceId: ctx.workspace.id,
-							pool: ctx.pool,
-						});
-					}
-				} else {
-					// Create new album
-					const [newAlbum] = await dbHttp
-						.insert(Albums)
-						.values({
-							id: newId('album'),
-							workspaceId: ctx.workspace.id,
-							name: album.name,
-							imageUrl: album.images[0]?.url,
-							releaseDate: album.release_date,
-							totalTracks: album.total_tracks,
-							spotifyId: album.id,
-						})
-						.returning();
-
-					if (!newAlbum) continue;
-
-					// Fetch tracks for this album
-					const tracks = await getSpotifyTracksByAlbum({
-						accessToken,
-						albumId: album.id,
-					});
-
-					if (!tracks?.items) continue;
-
-					// Process each track
-					for (const track of tracks.items) {
-						await syncSpotifyTrack({
-							spotifyTrack: track,
-							albumId: newAlbum.id,
-							workspaceId: ctx.workspace.id,
-							pool: ctx.pool,
-						});
-					}
-				}
-			}
-		}
-
-		// Fetch artist stats and ingest to Tinybird
-		const artist = await getSpotifyArtist({
-			accessToken,
-			spotifyId: ctx.workspace.spotifyArtistId,
-		});
-
-		if (artist) {
-			const timestamp = new Date().toISOString();
-			const events = [];
-
-			// Add artist stats
-			events.push({
-				timestamp,
-				workspaceId: ctx.workspace.id,
-				type: 'artist' as const,
-				spotifyId: artist.id,
-				spotifyFollowers: artist.followers.total,
-				spotifyPopularity: artist.popularity,
-			});
-
-			// Add album stats
-			for (const album of albums.items) {
-				if (album.popularity !== undefined && album.popularity !== null) {
-					events.push({
-						timestamp,
-						workspaceId: ctx.workspace.id,
-						type: 'album' as const,
-						spotifyId: album.id,
-						spotifyPopularity: album.popularity,
-					});
-				}
-			}
-
-			// Get all tracks that were synced to add their popularity
-			const allTracks = await dbHttp.query.Tracks.findMany({
-				where: eq(Tracks.workspaceId, ctx.workspace.id),
-				columns: {
-					spotifyId: true,
-					spotifyPopularity: true,
-				},
-			});
-
-			// Add track stats
-			for (const track of allTracks) {
-				if (track.spotifyId && track.spotifyPopularity !== null) {
-					events.push({
-						timestamp,
-						workspaceId: ctx.workspace.id,
-						type: 'track' as const,
-						spotifyId: track.spotifyId,
-						spotifyPopularity: track.spotifyPopularity,
-					});
-				}
-			}
-
-			// Ingest all events to Tinybird
-			if (events.length > 0) {
-				await ingestStreamingStat(events);
-			}
-		}
-
-		return { success: true };
+		return { success: true, message: 'Sync initiated successfully' };
 	}),
 
 	syncSpotifyAccount: privateProcedure

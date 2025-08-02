@@ -158,6 +158,29 @@ export async function getSpotifyTracksByAlbum(props: {
 				location: 'getSpotifyTracksByAlbum',
 				mention: true,
 			});
+			// Retry once after a short delay
+			await new Promise(resolve => setTimeout(resolve, 1000));
+
+			const retryRes = await spotifyGet(
+				tracksEndpoint,
+				z.object({
+					tracks: z.array(spotifyTrackResponseSchema),
+				}),
+				{ auth },
+			);
+
+			if (!retryRes.success || !retryRes.parsed) {
+				// Log the failed track IDs for debugging
+				await log({
+					message: `Failed to get tracks after retry. Track IDs: ${trackIds.join(', ')}`,
+					type: 'errors',
+					location: 'getSpotifyTracksByAlbum',
+					mention: true,
+				});
+				continue; // Skip this batch if retry also fails
+			}
+
+			tracks.push(...retryRes.data.tracks);
 			continue;
 		}
 

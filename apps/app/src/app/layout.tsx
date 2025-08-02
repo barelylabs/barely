@@ -54,7 +54,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
 				)}
 			>
 				<Providers>
-					<Toaster />
+					<Toaster richColors />
 					<div
 						vaul-drawer-wrapper=''
 						className='container flex min-h-full w-full max-w-full flex-col justify-center bg-background p-0'

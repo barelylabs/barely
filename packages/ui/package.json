@@ -143,7 +143,6 @@
 		"@barely/files": "workspace:*",
 		"@barely/hooks": "workspace:*",
 		"@barely/lib": "workspace:*",
-		"@barely/toast": "workspace:*",
 		"@barely/utils": "workspace:*",
 		"@barely/validators": "workspace:*",
 		"@dagrejs/dagre": "catalog:",

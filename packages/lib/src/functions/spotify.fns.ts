@@ -14,6 +14,7 @@ import { and, desc, eq, isNull } from 'drizzle-orm';
 import { getSpotifyUserPlaylists } from '../integrations/spotify/spotify.endpts.playlist';
 import { refreshSpotifyAccessToken } from '../integrations/spotify/spotify.endpts.token';
 import { getSpotifyUser } from '../integrations/spotify/spotify.endpts.user';
+import { normalizeSpotifyDate } from '../utils/spotify-date';
 import { estimateGenresByPlaylistId, upsertPlaylistGenres } from './playlist.fns';
 
 const getSpotifyAccessToken = async (spotifyAccount: ProviderAccount) => {
@@ -301,7 +302,7 @@ async function syncSpotifyTrack({
 				released: true,
 				imageUrl: spotifyTrack.album.images[0]?.url,
 				spotifyPopularity: highestPopularity,
-				releaseDate: spotifyTrack.album.release_date,
+				releaseDate: normalizeSpotifyDate(spotifyTrack.album.release_date),
 			})
 			.where(eq(Tracks.id, existingTrackByIsrc.id));
 
@@ -333,7 +334,7 @@ async function syncSpotifyTrack({
 				released: true,
 				imageUrl: spotifyTrack.album.images[0]?.url,
 				spotifyPopularity: spotifyTrack.popularity,
-				releaseDate: spotifyTrack.album.release_date,
+				releaseDate: normalizeSpotifyDate(spotifyTrack.album.release_date),
 				spotifyId: spotifyTrack.id, // Set initial spotifyId
 			})
 			.where(eq(Tracks.id, existingTrackByName.id));
@@ -376,7 +377,7 @@ async function syncSpotifyTrack({
 			released: true,
 			imageUrl: spotifyTrack.album.images[0]?.url,
 			spotifyPopularity: spotifyTrack.popularity,
-			releaseDate: spotifyTrack.album.release_date,
+			releaseDate: normalizeSpotifyDate(spotifyTrack.album.release_date),
 		})
 		.returning();
 

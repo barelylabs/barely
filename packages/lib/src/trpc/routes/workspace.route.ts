@@ -17,8 +17,11 @@ import { newId, raise } from '@barely/utils';
 import {
 	createWorkspaceSchema,
 	updateCurrentWorkspaceSchema,
+	updateWorkspaceSpotifyArtistIdSchema,
 	workspaceAssetsSchema,
 } from '@barely/validators';
+import { NeonDbError } from '@neondatabase/serverless';
+import { TRPCError } from '@trpc/server';
 import { and, eq, gt, isNull } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
@@ -26,25 +29,7 @@ import { pushEvent } from '../../integrations/pusher/pusher-server';
 import { privateProcedure, publicProcedure, workspaceProcedure } from '../trpc';
 
 export const workspaceRoute = {
-	// byHandle: privateProcedure
-	// 	.input(z.object({ handle: z.string() }))
-	// 	.query(async ({ input, ctx }) => {
-	// 		const workspace = await dbHttp.query.Workspaces.findFirst({
-	// 			where: and(
-	// 				eq(Workspaces.handle, input.handle),
-	// 				inArray(
-	// 					Workspaces.id,
-	// 					ctx.user.workspaces.map(w => w.id),
-	// 				),ππ
-	// 			),
-	// 		});
-
-	// 		return workspace;
-	// 	}),
-	byHandle: workspaceProcedure.query(({ ctx }) => {
-		// if (!ctx.workspace) return null;
-		return ctx.workspace;
-	}),
+	byHandle: workspaceProcedure.query(({ ctx }) => ctx.workspace),
 
 	byHandleWithAll: workspaceProcedure.query(async ({ ctx }) => {
 		const workspace = await dbHttp.query.Workspaces.findFirst({
@@ -190,21 +175,62 @@ export const workspaceRoute = {
 	update: workspaceProcedure
 		.input(updateCurrentWorkspaceSchema)
 		.mutation(async ({ ctx, input }) => {
-			const updatedWorkspace = await dbHttp
-				.update(Workspaces)
-				.set(input)
-				.where(eq(Workspaces.id, ctx.workspace.id));
+			try {
+				const updatedWorkspace = await dbHttp
+					.update(Workspaces)
+					.set(input)
+					.where(eq(Workspaces.id, ctx.workspace.id));
 
-			// refresh the current workspace session
-			await ctx.getRefreshedSession();
+				// refresh the current workspace session
+				// await ctx.getRefreshedSession();
 
-			await pushEvent('workspace', 'update', {
-				id: ctx.workspace.id,
-				pageSessionId: ctx.pageSessionId,
-				socketId: ctx.pusherSocketId,
-			});
+				await pushEvent('workspace', 'update', {
+					id: ctx.workspace.id,
+					pageSessionId: ctx.pageSessionId,
+					socketId: ctx.pusherSocketId,
+				});
 
-			return updatedWorkspace;
+				return updatedWorkspace;
+			} catch (err) {
+				console.log('update ws error => ', err);
+
+				if (err instanceof NeonDbError) {
+					console.log('NeonDbError => ', err);
+				}
+			}
+		}),
+
+	updateSpotifyArtistId: workspaceProcedure
+		.input(updateWorkspaceSpotifyArtistIdSchema)
+		.mutation(async ({ ctx, input }) => {
+			try {
+				const updatedWorkspace = await dbHttp
+					.update(Workspaces)
+					.set({ spotifyArtistId: input.spotifyArtistId })
+					.where(eq(Workspaces.id, ctx.workspace.id));
+
+				return updatedWorkspace;
+			} catch {
+				// check if the spotifyArtistId is already taken (only if not null)
+				if (input.spotifyArtistId) {
+					const isTaken = await dbHttp.query.Workspaces.findFirst({
+						where: eq(Workspaces.spotifyArtistId, input.spotifyArtistId),
+					});
+
+					if (isTaken) {
+						throw new TRPCError({
+							code: 'CONFLICT',
+							message: 'This Spotify artist is already connected to another workspace.',
+						});
+					}
+				}
+
+				throw new TRPCError({
+					code: 'INTERNAL_SERVER_ERROR',
+					message:
+						'An error occurred while adding the Spotify artist. Please try again later or reach out to support.',
+				});
+			}
 		}),
 
 	updateAvatar: workspaceProcedure
@@ -351,36 +377,4 @@ export const workspaceRoute = {
 				billingCycle: input.billingCycle,
 			});
 		}),
-
-	// these procedures import larger libraries (stripe, react-email)
-	// createCheckoutLink: privateProcedure
-	// 	.input(
-	// 		z.object({
-	// 			planId: z.enum(['pro']),
-	// 			billingCycle: z.enum(['monthly', 'yearly']),
-	// 			successPath: z.string().optional(),
-	// 			cancelPath: z.string().optional(),
-	// 		}),
-	// 	)
-	// 	.mutation(async ({ ctx, input }) => {
-	// 		const checkoutLink = await createPlanCheckoutLink({
-	// 			user: ctx.user,
-	// 			workspace: ctx.workspace,
-	// 			db: ctx.db,
-	// 			...input,
-	// 		});
-
-	// 		return checkoutLink;
-	// 	}),
-
-	// inviteMember: privateProcedure
-	// 	.input(inviteMemberSchema)
-	// 	.mutation(async ({ ctx, input }) => {
-	// 		await inviteUserToWorkspace({
-	// 			email: input.email,
-	// 			workspace: ctx.workspace,
-	// 			inviter: ctx.user,
-	// 			role: input.role,
-	// 		});
-	// 	}),
 } satisfies TRPCRouterRecord;

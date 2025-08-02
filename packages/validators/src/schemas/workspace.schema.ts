@@ -43,6 +43,10 @@ export type UpdateWorkspace = z.infer<typeof updateWorkspaceSchema>;
 export type UpsertWorkspace = z.infer<typeof upsertWorkspaceSchema>;
 export type SelectWorkspace = z.infer<typeof selectWorkspaceSchema>;
 
+export const updateWorkspaceSpotifyArtistIdSchema = z.object({
+	spotifyArtistId: z.string().nullable(),
+});
+
 // forms
 export const workspaceTypeSchema = insertWorkspaceSchema.shape.type.unwrap();
 

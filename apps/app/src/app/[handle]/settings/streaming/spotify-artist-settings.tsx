@@ -2,8 +2,8 @@
 
 import type { z } from 'zod/v4';
 import { useCallback, useState } from 'react';
-import { useDebounce, useUpdateWorkspace, useWorkspace, useZodForm } from '@barely/hooks';
-import { updateWorkspaceSchema } from '@barely/validators';
+import { useDebounce, useWorkspace, useZodForm } from '@barely/hooks';
+import { updateWorkspaceSpotifyArtistIdSchema } from '@barely/validators';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
@@ -23,18 +23,24 @@ export function SpotifyArtistSettings() {
 	const trpc = useTRPC();
 
 	const form = useZodForm({
-		schema: updateWorkspaceSchema,
-		values: {
-			id: workspace.id,
-			spotifyArtistId: workspace.spotifyArtistId,
-		},
+		schema: updateWorkspaceSpotifyArtistIdSchema,
+		values: { spotifyArtistId: workspace.spotifyArtistId },
 		resetOptions: { keepDirtyValues: true },
 	});
 
 	const formSpotifyArtistId = form.watch('spotifyArtistId');
 
-	const { updateWorkspace, isUpdatingWorkspace } = useUpdateWorkspace({
-		onSuccess: () => form.reset(),
+	const { mutateAsync: updateWorkspace, isPending: isUpdatingWorkspace } = useMutation({
+		...trpc.workspace.updateSpotifyArtistId.mutationOptions({
+			onSuccess: async () => {
+				form.reset();
+				toast.success('Artist added successfully. Syncing stats...');
+				await syncArtist({ handle: workspace.handle });
+			},
+			onError: error => {
+				toast.error(error.message);
+			},
+		}),
 	});
 
 	const { data: artists, isLoading } = useQuery({
@@ -55,15 +61,20 @@ export function SpotifyArtistSettings() {
 	const { mutateAsync: syncArtist, isPending: isSyncing } = useMutation({
 		...trpc.spotify.syncWorkspaceArtist.mutationOptions({
 			onSuccess: () => {
-				toast.success('Artist synced successfully');
+				toast.success(
+					"We're syncing your stats. This may take a few minutes. Leaving this page is totally fine. ",
+				);
+			},
+			onError: error => {
+				toast.error(error.message);
 			},
 		}),
 	});
 
-	const onSubmit = async (data: z.infer<typeof updateWorkspaceSchema>) => {
-		await updateWorkspace({ ...data, handle: workspace.handle });
-		await syncArtist({
+	const onSubmit = async (data: z.infer<typeof updateWorkspaceSpotifyArtistIdSchema>) => {
+		await updateWorkspace({
 			handle: workspace.handle,
+			spotifyArtistId: data.spotifyArtistId,
 		});
 	};
 
@@ -84,7 +95,7 @@ export function SpotifyArtistSettings() {
 			'Are you sure you want to remove the artist connection?',
 		);
 		if (!confirmed) return;
-		form.setValue('spotifyArtistId', undefined, { shouldDirty: true });
+		form.setValue('spotifyArtistId', null, { shouldDirty: true });
 	}, [form]);
 
 	const handleSync = useCallback(async () => {
