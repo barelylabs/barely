@@ -64,11 +64,8 @@ export const dailyStreamingStatsTrigger = schedules.task({
 			let failureCount = 0;
 			const startTime = Date.now();
 
-			// Process each workspace by triggering sync-spotify-artist
-			// TODO: Consider parallel processing for better performance:
-			// - Use Promise.allSettled() to process multiple workspaces concurrently
-			// - Implement batching (e.g., process 5-10 workspaces at a time)
-			// - Be mindful of Spotify API rate limits when parallelizing
+			// Process each workspace sequentially to avoid Spotify rate limits
+			// Each sync task will complete before moving to the next workspace
 			for (const workspace of workspaces) {
 				try {
 					await log({
@@ -77,8 +74,8 @@ export const dailyStreamingStatsTrigger = schedules.task({
 						location: 'streamingStatsTrigger',
 					});
 
-					// Trigger the sync task
-					await tasks.trigger<typeof syncSpotifyArtist>('sync-spotify-artist', {
+					// Trigger and wait for the sync task to complete
+					await tasks.triggerAndWait<typeof syncSpotifyArtist>('sync-spotify-artist', {
 						workspaceId: workspace.id,
 						timestamp,
 					});
