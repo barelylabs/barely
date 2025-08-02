@@ -8,9 +8,9 @@ import { AnimatedSection } from '../../components/marketing/animated-section';
 import { PricingCard } from '../../components/marketing/pricing-card';
 
 export const metadata: Metadata = {
-	title: 'Services - Music Marketing That Makes Sense | Barely',
+	title: 'Services - Music Marketing Engineers | Barely NYC',
 	description:
-		'Choose the service that fits your needs and budget. From DIY coaching to full campaign execution, all with complete transparency.',
+		'Brooklyn-based music marketing engineers. Choose the service that fits your needs and budget. From DIY coaching to full campaign execution, all with data-driven transparency.',
 };
 
 export default function ServicesPage() {
@@ -64,7 +64,8 @@ export default function ServicesPage() {
 							Choose Your Growth Path
 						</H>
 						<p className='text-xl text-white/70 md:text-2xl'>
-							From DIY coaching to full campaign execution, all with complete transparency
+							Brooklyn-based music marketing engineers helping indie artists worldwide.
+							From DIY coaching to full campaign execution, all with scientific precision.
 						</p>
 					</AnimatedSection>
 				</div>
@@ -212,10 +213,9 @@ export default function ServicesPage() {
 									What makes you different from other agencies?
 								</H>
 								<p className='text-white/70'>
-									Complete transparency. I built the tools from scratch (open-source),
+									We're music marketing engineers. We built the tools from scratch (open-source),
 									show you exactly how campaigns work, and report on everything. No black
-									boxes, no fake guarantees, just data-driven strategies that actually
-									work.
+									boxes, no fake guarantees, just scientific methods applied to artist growth.
 								</p>
 							</div>
 						</AnimatedSection>
