@@ -1,6 +1,6 @@
 'use client';
 
-import { usePageStatFilters } from '@barely/hooks';
+import { useFormatTimestamp, usePageStatSearchParams, useWorkspace } from '@barely/hooks';
 import { calcPercent } from '@barely/utils';
 import { useSuspenseQuery } from '@tanstack/react-query';
 
@@ -13,11 +13,9 @@ import { InfoTabButton } from '@barely/ui/info-tab-button';
 import { WebEventFilterBadges } from '~/app/[handle]/_components/filter-badges';
 
 export function PageTimeseries() {
+	const { handle } = useWorkspace();
 	const {
-		filtersWithHandle,
-		uiFilters,
-		formatTimestamp,
-		badgeFilters,
+		filters,
 		toggleShowVisits,
 		toggleShowClicks,
 		// toggleShowEmailAdds,
@@ -31,7 +29,9 @@ export function PageTimeseries() {
 		// toggleShowGrossSales,
 		// toggleShowProductSales,
 		// toggleShowNetSales,
-	} = usePageStatFilters();
+	} = usePageStatSearchParams();
+
+	const { formatTimestamp } = useFormatTimestamp(filters.dateRange);
 
 	const {
 		showVisits,
@@ -47,7 +47,17 @@ export function PageTimeseries() {
 		// showGrossSales,
 		// showProductSales,
 		// showNetSales,
-	} = uiFilters;
+		dateRange,
+		selectedIds,
+		start,
+		end,
+		...otherFilters
+	} = filters;
+
+	const filtersWithHandle = { handle, ...filters };
+	const badgeFilters = Object.entries(otherFilters).filter(
+		([key]) => key !== 'assetId',
+	) as [keyof typeof otherFilters, string][];
 
 	const trpc = useTRPC();
 	const { data: timeseries } = useSuspenseQuery(

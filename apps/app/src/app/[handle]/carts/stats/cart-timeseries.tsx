@@ -1,6 +1,6 @@
 'use client';
 
-import { useCartStatFilters } from '@barely/hooks';
+import { useCartStatSearchParams, useFormatTimestamp, useWorkspace } from '@barely/hooks';
 import { calcPercent, formatCentsToDollars } from '@barely/utils';
 import { useSuspenseQuery } from '@tanstack/react-query';
 
@@ -14,12 +14,9 @@ import { WebEventFilterBadges } from '~/app/[handle]/_components/filter-badges';
 
 export function CartTimeseries() {
 	const trpc = useTRPC();
-
+	const { handle } = useWorkspace();
 	const {
-		filtersWithHandle,
-		uiFilters,
-		formatTimestamp,
-		badgeFilters,
+		filters,
 		toggleShowVisits,
 		// toggleShowEmailAdds,
 		// toggleShowShippingInfoAdds,
@@ -31,7 +28,9 @@ export function CartTimeseries() {
 		toggleShowPurchases,
 		toggleShowGrossSales,
 		toggleShowProductSales,
-	} = useCartStatFilters();
+	} = useCartStatSearchParams();
+
+	const { formatTimestamp } = useFormatTimestamp(filters.dateRange);
 
 	const {
 		showVisits,
@@ -42,10 +41,19 @@ export function CartTimeseries() {
 		showMainWithBumpPurchases,
 		showUpsellPurchases,
 		showPurchases,
-
 		showGrossSales,
 		showProductSales,
-	} = uiFilters;
+		dateRange,
+		selectedIds,
+		start,
+		end,
+		...otherFilters
+	} = filters;
+
+	const filtersWithHandle = { handle, ...filters };
+	const badgeFilters = Object.entries(otherFilters).filter(
+		([key]) => key !== 'assetId',
+	) as [keyof typeof otherFilters, string][];
 
 	const { data: timeseries } = useSuspenseQuery(
 		trpc.stat.cartTimeseries.queryOptions(

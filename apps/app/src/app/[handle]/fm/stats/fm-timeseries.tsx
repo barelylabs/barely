@@ -1,6 +1,6 @@
 'use client';
 
-import { useFmStatFilters, useWorkspace } from '@barely/hooks';
+import { useFmStatSearchParams, useFormatTimestamp, useWorkspace } from '@barely/hooks';
 import { calcPercent, cn, nFormatter } from '@barely/utils';
 import { useSuspenseQuery } from '@tanstack/react-query';
 
@@ -14,19 +14,19 @@ import { H, Text } from '@barely/ui/typography';
 import { WebEventFilterBadges } from '~/app/[handle]/_components/filter-badges';
 
 export function FmTimeseries() {
+	const { handle } = useWorkspace();
 	const {
-		filtersWithHandle,
-		uiFilters,
-		formatTimestamp,
-		badgeFilters,
+		filters,
 		toggleShowVisits,
 		toggleShowClicks,
-		toggleSpotify,
-		toggleAppleMusic,
-		toggleYoutube,
-		toggleAmazonMusic,
-		toggleYoutubeMusic,
-	} = useFmStatFilters();
+		toggleShowSpotify,
+		toggleShowAppleMusic,
+		toggleShowYoutube,
+		toggleShowAmazonMusic,
+		toggleShowYoutubeMusic,
+	} = useFmStatSearchParams();
+
+	const { formatTimestamp } = useFormatTimestamp(filters.dateRange);
 
 	const {
 		showVisits,
@@ -36,7 +36,13 @@ export function FmTimeseries() {
 		showYoutube,
 		showAmazonMusic,
 		showYoutubeMusic,
-	} = uiFilters;
+		...otherFilters
+	} = filters;
+
+	const filtersWithHandle = { handle, ...filters };
+	const badgeFilters = Object.entries(otherFilters).filter(
+		([key]) => key !== 'assetId' && key !== 'dateRange',
+	) as [keyof typeof otherFilters, string][];
 
 	const trpc = useTRPC();
 	const { data: timeseries } = useSuspenseQuery(

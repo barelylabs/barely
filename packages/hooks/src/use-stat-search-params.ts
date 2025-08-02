@@ -235,3 +235,149 @@ export const useFmStatSearchParams = createStatSearchParamsHook({
 		),
 	},
 });
+
+/**
+ * Hook for Link stats search params
+ */
+export const useLinkStatSearchParams = createStatSearchParamsHook({
+	additionalParsers: {
+		showVisits: parseAsBoolean.withDefault(true),
+		showClicks: parseAsBoolean.withDefault(true),
+	},
+	additionalActions: {
+		toggleShowVisits: action(setParams =>
+			setParams(prev => ({ showVisits: !prev.showVisits })),
+		),
+		toggleShowClicks: action(setParams =>
+			setParams(prev => ({ showClicks: !prev.showClicks })),
+		),
+	},
+});
+
+/**
+ * Hook for Page stats search params
+ */
+export const usePageStatSearchParams = createStatSearchParamsHook({
+	additionalParsers: {
+		showVisits: parseAsBoolean.withDefault(true),
+		showClicks: parseAsBoolean.withDefault(true),
+		showEmailAdds: parseAsBoolean.withDefault(false),
+		showShippingInfoAdds: parseAsBoolean.withDefault(false),
+		showPaymentInfoAdds: parseAsBoolean.withDefault(false),
+		showMainWithoutBumpPurchases: parseAsBoolean.withDefault(false),
+		showMainWithBumpPurchases: parseAsBoolean.withDefault(false),
+		showUpsellPurchases: parseAsBoolean.withDefault(false),
+		showUpsellDeclines: parseAsBoolean.withDefault(false),
+		showPurchases: parseAsBoolean.withDefault(false),
+		showGrossSales: parseAsBoolean.withDefault(false),
+		showProductSales: parseAsBoolean.withDefault(false),
+		showNetSales: parseAsBoolean.withDefault(false),
+	},
+	additionalActions: {
+		toggleShowVisits: action(setParams =>
+			setParams(prev => ({ showVisits: !prev.showVisits })),
+		),
+		toggleShowClicks: action(setParams =>
+			setParams(prev => ({ showClicks: !prev.showClicks })),
+		),
+		toggleShowEmailAdds: action(setParams =>
+			setParams(prev => ({ showEmailAdds: !prev.showEmailAdds })),
+		),
+		toggleShowShippingInfoAdds: action(setParams =>
+			setParams(prev => ({ showShippingInfoAdds: !prev.showShippingInfoAdds })),
+		),
+		toggleShowPaymentInfoAdds: action(setParams =>
+			setParams(prev => ({ showPaymentInfoAdds: !prev.showPaymentInfoAdds })),
+		),
+		toggleShowMainWithoutBumpPurchases: action(setParams =>
+			setParams(prev => ({
+				showMainWithoutBumpPurchases: !prev.showMainWithoutBumpPurchases,
+			})),
+		),
+		toggleShowMainWithBumpPurchases: action(setParams =>
+			setParams(prev => ({ showMainWithBumpPurchases: !prev.showMainWithBumpPurchases })),
+		),
+		toggleShowUpsellPurchases: action(setParams =>
+			setParams(prev => ({ showUpsellPurchases: !prev.showUpsellPurchases })),
+		),
+		toggleShowUpsellDeclines: action(setParams =>
+			setParams(prev => ({ showUpsellDeclines: !prev.showUpsellDeclines })),
+		),
+		toggleShowPurchases: action(setParams =>
+			setParams(prev => ({ showPurchases: !prev.showPurchases })),
+		),
+		toggleShowGrossSales: action(setParams =>
+			setParams(prev => ({ showGrossSales: !prev.showGrossSales })),
+		),
+		toggleShowProductSales: action(setParams =>
+			setParams(prev => ({ showProductSales: !prev.showProductSales })),
+		),
+		toggleShowNetSales: action(setParams =>
+			setParams(prev => ({ showNetSales: !prev.showNetSales })),
+		),
+	},
+});
+
+/**
+ * Hook for Cart stats search params
+ */
+export const useCartStatSearchParams = createStatSearchParamsHook({
+	additionalParsers: {
+		showVisits: parseAsBoolean.withDefault(true),
+		showClicks: parseAsBoolean.withDefault(true),
+		showEmailAdds: parseAsBoolean.withDefault(true),
+		showShippingInfoAdds: parseAsBoolean.withDefault(true),
+		showPaymentInfoAdds: parseAsBoolean.withDefault(true),
+		showMainWithoutBumpPurchases: parseAsBoolean.withDefault(true),
+		showMainWithBumpPurchases: parseAsBoolean.withDefault(true),
+		showUpsellPurchases: parseAsBoolean.withDefault(false),
+		showUpsellDeclines: parseAsBoolean.withDefault(false),
+		showPurchases: parseAsBoolean.withDefault(false),
+		showGrossSales: parseAsBoolean.withDefault(false),
+		showProductSales: parseAsBoolean.withDefault(false),
+		showNetSales: parseAsBoolean.withDefault(false),
+	},
+	additionalActions: {
+		toggleShowVisits: action(setParams =>
+			setParams(prev => ({ showVisits: !prev.showVisits })),
+		),
+		toggleShowClicks: action(setParams =>
+			setParams(prev => ({ showClicks: !prev.showClicks })),
+		),
+		toggleShowEmailAdds: action(setParams =>
+			setParams(prev => ({ showEmailAdds: !prev.showEmailAdds })),
+		),
+		toggleShowShippingInfoAdds: action(setParams =>
+			setParams(prev => ({ showShippingInfoAdds: !prev.showShippingInfoAdds })),
+		),
+		toggleShowPaymentInfoAdds: action(setParams =>
+			setParams(prev => ({ showPaymentInfoAdds: !prev.showPaymentInfoAdds })),
+		),
+		toggleShowMainWithoutBumpPurchases: action(setParams =>
+			setParams(prev => ({
+				showMainWithoutBumpPurchases: !prev.showMainWithoutBumpPurchases,
+			})),
+		),
+		toggleShowMainWithBumpPurchases: action(setParams =>
+			setParams(prev => ({ showMainWithBumpPurchases: !prev.showMainWithBumpPurchases })),
+		),
+		toggleShowUpsellPurchases: action(setParams =>
+			setParams(prev => ({ showUpsellPurchases: !prev.showUpsellPurchases })),
+		),
+		toggleShowUpsellDeclines: action(setParams =>
+			setParams(prev => ({ showUpsellDeclines: !prev.showUpsellDeclines })),
+		),
+		toggleShowPurchases: action(setParams =>
+			setParams(prev => ({ showPurchases: !prev.showPurchases })),
+		),
+		toggleShowGrossSales: action(setParams =>
+			setParams(prev => ({ showGrossSales: !prev.showGrossSales })),
+		),
+		toggleShowProductSales: action(setParams =>
+			setParams(prev => ({ showProductSales: !prev.showProductSales })),
+		),
+		toggleShowNetSales: action(setParams =>
+			setParams(prev => ({ showNetSales: !prev.showNetSales })),
+		),
+	},
+});

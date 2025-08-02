@@ -63,10 +63,10 @@ export { useProducts } from './use-products';
 export { useWebDomains } from './use-web-domains';
 
 // Stat filter hooks
-export * from './use-cart-stat-filters';
-export * from './use-fm-stat-filters';
-export * from './use-link-stat-filters';
-export * from './use-page-stat-filters';
+// export * from './use-cart-stat-filters'; // Deprecated - use use-stat-search-params
+// export * from './use-fm-stat-filters'; // Deprecated - use use-stat-search-params
+// export * from './use-link-stat-filters'; // Deprecated - use use-stat-search-params
+// export * from './use-page-stat-filters'; // Deprecated - use use-stat-search-params
 // export * from './use-track-stat-filters'; // Deprecated - use use-stat-search-params
 export * from './use-web-event-stat-filters';
 export * from './use-stat-search-params';

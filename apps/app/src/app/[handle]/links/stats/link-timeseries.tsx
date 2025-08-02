@@ -1,6 +1,6 @@
 'use client';
 
-import { useLinkStatFilters } from '@barely/hooks';
+import { useFormatTimestamp, useLinkStatSearchParams, useWorkspace } from '@barely/hooks';
 import { nFormatter } from '@barely/utils';
 import { useSuspenseQuery } from '@tanstack/react-query';
 
@@ -15,7 +15,15 @@ import { InfoTabButton } from '@barely/ui/info-tab-button';
 import { WebEventFilterBadges } from '~/app/[handle]/_components/filter-badges';
 
 export function LinkTimeseries() {
-	const { filtersWithHandle, formatTimestamp, badgeFilters } = useLinkStatFilters();
+	const { handle } = useWorkspace();
+	const { filters } = useLinkStatSearchParams();
+	const { formatTimestamp } = useFormatTimestamp(filters.dateRange);
+
+	const filtersWithHandle = { handle, ...filters };
+	const { dateRange, selectedIds, start, end, ...otherFilters } = filters;
+	const badgeFilters = Object.entries(otherFilters).filter(
+		([key]) => key !== 'assetId',
+	) as [keyof typeof otherFilters, string][];
 
 	// const {showVisits, showClicks} = filters;
 
