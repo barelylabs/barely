@@ -14,6 +14,9 @@ export const infiniteQuerySchema = z.object({
 	limit: z.coerce.number().min(1).max(100).optional().default(20),
 });
 
+export const sortOrderSchema = z.enum(['asc', 'desc'] as const);
+export type SortOrder = z.infer<typeof sortOrderSchema>;
+
 export const platformFiltersSchema = z.object({
 	showSpotify: queryBooleanSchema.optional(),
 	showAppleMusic: queryBooleanSchema.optional(),

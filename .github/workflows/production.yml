@@ -143,7 +143,7 @@ jobs:
           echo DIRECT_DATABASE_URL=$(neonctl cs ${{ secrets.NEON_MAIN_BRANCH_NAME }} --project-id ${{ secrets.NEON_PROJECT_ID }} --role-name ${{ secrets.PG_USERNAME }} --database-name ${{ secrets.PG_DATABASE }} --api-key ${{ secrets.NEON_API_KEY }}) >> .env
 
           # Run db:push with timeout to prevent hanging on interactive prompts
-          output=$(timeout 60s bash -c 'echo "n" | pnpm db:push' 2>&1) || {
+          output=$(timeout 180s bash -c 'echo "n" | pnpm db:push' 2>&1) || {
             echo "ERROR: db:push timed out or failed - likely requires interactive input"
             echo "output: $output"
             echo "Please run 'pnpm db:push' locally to handle any schema ambiguities"
@@ -184,8 +184,10 @@ jobs:
       - name: Install Tinybird CLI
         run: curl https://tinybird.co | sh
 
-      - name: Deploy project
-        run: cd packages/tb/tinybird && tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deploy
+      - name: Deploy to Production
+        run: |
+          cd packages/tb/tinybird
+          tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deploy
 
   # 📱 DEPLOY APPS -- PROD (Not Aliasing to Production Yet) #
   deploy-app:

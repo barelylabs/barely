@@ -567,7 +567,7 @@ import type { Selection } from 'react-aria-components';
 Use zod's type inference for form data:
 
 ```typescript
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 const createFeatureSchema = z.object({
 	name: z.string().min(1),

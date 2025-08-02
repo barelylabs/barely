@@ -63,5 +63,8 @@ export const authEnv = createEnv({
 		NEXT_PUBLIC_NYC_DEV_PORT: process.env.NEXT_PUBLIC_NYC_DEV_PORT,
 		NEXT_PUBLIC_WWW_DEV_PORT: process.env.NEXT_PUBLIC_WWW_DEV_PORT,
 	},
-	skipValidation: !!process.env.CI || process.env.npm_lifecycle_event === 'lint',
+	skipValidation:
+		!!process.env.CI ||
+		process.env.npm_lifecycle_event === 'lint' ||
+		process.env.npm_lifecycle_event === 'test',
 });
