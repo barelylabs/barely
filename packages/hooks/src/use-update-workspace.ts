@@ -2,6 +2,8 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { TRPCError } from '@trpc/server';
+import { toast } from 'sonner';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
@@ -47,6 +49,10 @@ export function useUpdateWorkspace({ onSuccess }: { onSuccess?: () => void } = {
 			},
 			onError: (error, variables, context) => {
 				console.error('onError', error, variables, context);
+
+				if (error instanceof TRPCError) {
+					toast.error(error.message);
+				}
 			},
 		}),
 	);

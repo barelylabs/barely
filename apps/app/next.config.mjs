@@ -51,7 +51,6 @@ const config = {
 		'@barely/lib',
 		'@barely/ui',
 		'@barely/files',
-		'@barely/toast',
 	],
 	serverExternalPackages: ['langchain', '@langchain/openai'],
 
