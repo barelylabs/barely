@@ -213,9 +213,10 @@ export default function ServicesPage() {
 									What makes you different from other agencies?
 								</H>
 								<p className='text-white/70'>
-									We're music marketing engineers. We built the tools from scratch (open-source),
-									show you exactly how campaigns work, and report on everything. No black
-									boxes, no fake guarantees, just scientific methods applied to artist growth.
+									We're music marketing engineers. We built the tools from scratch
+									(open-source), show you exactly how campaigns work, and report on
+									everything. No black boxes, no fake guarantees, just scientific methods
+									applied to artist growth.
 								</p>
 							</div>
 						</AnimatedSection>

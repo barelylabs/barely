@@ -80,9 +80,10 @@ export default function BedroomPlusPage() {
 											Bi-Weekly Strategy Sessions (30 minutes)
 										</H>
 										<p className='text-white/70'>
-											Direct access to music marketing engineers who treat your career like a
-											research project. From our Brooklyn HQ, we work with artists globally - 
-											forming hypotheses, designing tests, and measuring results scientifically.
+											Direct access to music marketing engineers who treat your career
+											like a research project. From our Brooklyn HQ, we work with artists
+											globally - forming hypotheses, designing tests, and measuring
+											results scientifically.
 										</p>
 									</div>
 								</div>

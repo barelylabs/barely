@@ -12,7 +12,8 @@ export function StructuredData() {
 		'@id': 'https://barely.nyc',
 		name: 'Barely NYC',
 		alternateName: 'Barely',
-		description: 'Brooklyn-based music marketing engineers helping independent artists worldwide with data-driven growth strategies.',
+		description:
+			'Brooklyn-based music marketing engineers helping independent artists worldwide with data-driven growth strategies.',
 		url: 'https://barely.nyc',
 		priceRange: '$$',
 		address: {
@@ -35,9 +36,7 @@ export function StructuredData() {
 			},
 			geoRadius: '12500000', // Worldwide service
 		},
-		sameAs: [
-			'https://barely.ai',
-		],
+		sameAs: ['https://barely.ai'],
 		founder: {
 			'@type': 'Person',
 			name: 'Adam Barito',
@@ -112,7 +111,7 @@ export function StructuredData() {
 
 	return (
 		<script
-			type="application/ld+json"
+			type='application/ld+json'
 			dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
 		/>
 	);

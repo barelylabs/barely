@@ -26,7 +26,8 @@ export default function AboutPage() {
 							I Brought My PhD to Music Marketing
 						</H>
 						<p className='text-xl text-white/70 md:text-2xl'>
-							Brooklyn-based music marketing engineers building data-driven growth systems for indie artists worldwide
+							Brooklyn-based music marketing engineers building data-driven growth systems
+							for indie artists worldwide
 						</p>
 						<div className='mt-6'>
 							<PhDBadge className='mx-auto' />
@@ -132,14 +133,15 @@ export default function AboutPage() {
 								Building From Brooklyn
 							</H>
 							<p className='text-lg leading-relaxed text-white/80'>
-								In 2023, I moved to Brooklyn to set up Barely NYC. It made sense - this is 
-								where music and technology collide, where the indie spirit drives innovation.
+								In 2023, I moved to Brooklyn to set up Barely NYC. It made sense - this is
+								where music and technology collide, where the indie spirit drives
+								innovation.
 							</p>
 							<p className='text-lg leading-relaxed text-white/80'>
-								While our agency is based in Brooklyn, the artists we work with are everywhere. 
-								We've engineered growth for bands in LA, Nashville, Cleveland, South Wales, and 
-								Paris. Our data-driven approach translates across time zones and genres - because 
-								good science is universal.
+								While our agency is based in Brooklyn, the artists we work with are
+								everywhere. We've engineered growth for bands in LA, Nashville, Cleveland,
+								South Wales, and Paris. Our data-driven approach translates across time
+								zones and genres - because good science is universal.
 							</p>
 						</div>
 					</AnimatedSection>
@@ -151,14 +153,14 @@ export default function AboutPage() {
 								The Mission
 							</H>
 							<p className='text-lg leading-relaxed text-white/80'>
-								As music marketing engineers, we apply scientific methods to grow your fanbase. 
-								We run controlled experiments, analyze the data, and optimize based on results - 
-								not hunches or industry myths.
+								As music marketing engineers, we apply scientific methods to grow your
+								fanbase. We run controlled experiments, analyze the data, and optimize
+								based on results - not hunches or industry myths.
 							</p>
 							<p className='text-lg leading-relaxed text-white/80'>
-								You focus on the creative. We handle the engineering - attribution modeling, 
-								conversion optimization, algorithmic distribution. It's a partnership where 
-								art meets science.
+								You focus on the creative. We handle the engineering - attribution
+								modeling, conversion optimization, algorithmic distribution. It's a
+								partnership where art meets science.
 							</p>
 						</div>
 					</AnimatedSection>

@@ -10,7 +10,7 @@ import { ValueCard } from '~/components/value-card';
 export const metadata: Metadata = {
 	title: 'About barely.ai',
 	description:
-		'Built by Brooklyn-based engineers who\'ve grown real artist careers. Learn about the team behind the open-source marketing platform for indie artists.',
+		"Built by Brooklyn-based engineers who've grown real artist careers. Learn about the team behind the open-source marketing platform for indie artists.",
 };
 
 function Header() {

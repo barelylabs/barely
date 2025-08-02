@@ -132,7 +132,7 @@ export function Hero() {
 
 						<AnimatedSection animation='fade-up' delay={300}>
 							<p className='mt-8 text-sm text-muted-foreground'>
-								Built in Brooklyn by music marketing engineers who've helped indie artists 
+								Built in Brooklyn by music marketing engineers who've helped indie artists
 								grow from bedroom producers to breakout successes.
 							</p>
 						</AnimatedSection>

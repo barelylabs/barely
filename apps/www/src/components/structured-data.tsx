@@ -7,7 +7,8 @@ export function StructuredData() {
 		alternateName: 'Barely Platform',
 		applicationCategory: 'BusinessApplication',
 		operatingSystem: 'Web',
-		description: 'Open-source marketing platform for indie artists. Smart links, email marketing, landing pages, merch sales, and unified analytics.',
+		description:
+			'Open-source marketing platform for indie artists. Smart links, email marketing, landing pages, merch sales, and unified analytics.',
 		url: 'https://barely.ai',
 		author: {
 			'@type': 'Organization',
@@ -19,9 +20,7 @@ export function StructuredData() {
 				addressRegion: 'NY',
 				addressCountry: 'US',
 			},
-			sameAs: [
-				'https://github.com/barelylabs/barely',
-			],
+			sameAs: ['https://github.com/barelylabs/barely'],
 		},
 		offers: {
 			'@type': 'Offer',
@@ -52,7 +51,7 @@ export function StructuredData() {
 
 	return (
 		<script
-			type="application/ld+json"
+			type='application/ld+json'
 			dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
 		/>
 	);
