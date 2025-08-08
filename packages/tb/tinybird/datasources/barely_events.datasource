@@ -171,7 +171,6 @@ FORWARD_QUERY >
         defaultValueOfTypeName('Nullable(String)') AS vipSwapType,
         defaultValueOfTypeName('Nullable(String)') AS vipDownloadToken,
         defaultValueOfTypeName('Nullable(String)') AS vipEmailCaptured
-    FROM barely_events
 
 ENGINE "MergeTree"
 ENGINE_PARTITION_KEY "toYear(timestamp)"
