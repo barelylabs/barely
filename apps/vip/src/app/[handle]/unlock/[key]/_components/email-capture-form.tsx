@@ -1,11 +1,20 @@
 'use client';
 
-import { useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { useZodForm } from '@barely/hooks';
+import { z } from 'zod/v4';
 
-import { Button } from '@barely/ui/button';
-import { Checkbox } from '@barely/ui/checkbox';
-import { Input } from '@barely/ui/input';
+import { CheckboxField } from '@barely/ui/forms/checkbox-field';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
+import { TextField } from '@barely/ui/forms/text-field';
+
+const emailCaptureSchema = z.object({
+	email: z.email('Please enter a valid email address'),
+	marketingConsent: z
+		.boolean()
+		.refine(val => val === true, 'Please consent to receive marketing communications'),
+});
+
+type EmailCaptureFormData = z.infer<typeof emailCaptureSchema>;
 
 interface EmailCaptureFormProps {
 	onSubmit: (email: string) => void;
@@ -20,111 +29,69 @@ export function EmailCaptureForm({
 	error,
 	workspaceName = 'the artist',
 }: EmailCaptureFormProps) {
-	const [email, setEmail] = useState('');
-	const [emailError, setEmailError] = useState('');
-	const [marketingConsent, setMarketingConsent] = useState(false);
-	const [consentError, setConsentError] = useState('');
+	const form = useZodForm({
+		schema: emailCaptureSchema,
+		defaultValues: {
+			email: '',
+			marketingConsent: false,
+		},
+	});
 
-	const validateEmail = (email: string) => {
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		return emailRegex.test(email);
-	};
-
-	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
-		setEmailError('');
-		setConsentError('');
-
-		if (!email) {
-			setEmailError('Email is required');
-			return;
-		}
-
-		if (!validateEmail(email)) {
-			setEmailError('Please enter a valid email address');
-			return;
-		}
-
-		if (!marketingConsent) {
-			setConsentError('Please consent to receive marketing communications');
-			return;
-		}
-
-		onSubmit(email);
+	const handleSubmit = (data: EmailCaptureFormData) => {
+		onSubmit(data.email);
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className='space-y-6'>
-			<div>
-				<label htmlFor='email' className='sr-only'>
-					Email address
-				</label>
-				<Input
-					id='email'
-					type='email'
-					placeholder='Enter your email'
-					startIcon='email'
-					value={email}
-					onChange={e => setEmail(e.target.value)}
-					disabled={isLoading}
-					className='w-full'
-					autoComplete='email'
-					required
-				/>
-				{(emailError || error) && (
-					<p className='mt-2 text-sm text-destructive'>{emailError || error}</p>
-				)}
-			</div>
-
-			<div className='space-y-2'>
-				<div className='flex items-start space-x-2'>
-					<Checkbox
-						id='consent'
-						checked={marketingConsent}
-						onCheckedChange={checked => setMarketingConsent(checked as boolean)}
+		<Form form={form} onSubmit={handleSubmit}>
+			<div className='space-y-6'>
+				<div>
+					<TextField
+						control={form.control}
+						name='email'
+						type='email'
+						placeholder='Enter your email'
+						startIcon='email'
 						disabled={isLoading}
-						className='mt-1'
+						className='w-full'
+						autoComplete='email'
+						// label='Email address'
+						// hideLabel
 					/>
-					<label
-						htmlFor='consent'
-						className='cursor-pointer text-left text-sm text-muted-foreground'
-					>
-						I consent to {workspaceName} sending me marketing communications by email.
-					</label>
+					{error && <p className='mt-2 text-sm text-destructive'>{error}</p>}
 				</div>
-				{consentError && (
-					<p className='text-left text-sm text-destructive'>{consentError}</p>
-				)}
-			</div>
 
-			<Button
-				type='submit'
-				disabled={!!isLoading || !marketingConsent}
-				className='w-full text-white'
-				size='lg'
-			>
-				{isLoading ?
-					<>
-						<Loader2 className='mr-2 h-4 w-4 animate-spin' />
-						Processing...
-					</>
-				:	'Sign Up & Unlock'}
-			</Button>
+				<CheckboxField
+					control={form.control}
+					name='marketingConsent'
+					disabled={isLoading}
+					label={`I consent to ${workspaceName} sending me marketing communications by email.`}
+					className='items-start'
+				/>
 
-			{/* Legal Notice Card */}
-			<div className='rounded-lg border border-border/50 bg-muted/30 p-4 text-center'>
-				<p className='text-xs text-muted-foreground'>
-					By submitting your information, you agree to the{' '}
-					<span className='cursor-pointer underline hover:text-foreground'>
-						Privacy Notice
-					</span>{' '}
-					and{' '}
-					<span className='cursor-pointer underline hover:text-foreground'>
-						Terms & Conditions
-					</span>
-					. Under 18? Please make sure you have parental permission.
-				</p>
+				<SubmitButton
+					disabled={!form.formState.isValid}
+					loading={isLoading}
+					className='w-full text-white'
+					size='lg'
+				>
+					Sign Up & Unlock
+				</SubmitButton>
+
+				{/* Legal Notice Card */}
+				<div className='rounded-lg border border-border/50 bg-muted/30 p-4 text-center'>
+					<p className='text-xs text-muted-foreground'>
+						By submitting your information, you agree to the{' '}
+						<span className='cursor-pointer underline hover:text-foreground'>
+							Privacy Notice
+						</span>{' '}
+						and{' '}
+						<span className='cursor-pointer underline hover:text-foreground'>
+							Terms & Conditions
+						</span>
+						. Under 18? Please make sure you have parental permission.
+					</p>
+				</div>
 			</div>
-		</form>
+		</Form>
 	);
 }

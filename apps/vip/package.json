@@ -20,6 +20,7 @@
 		"@barely/api": "workspace:*",
 		"@barely/auth": "workspace:*",
 		"@barely/files": "workspace:*",
+		"@barely/hooks": "workspace:*",
 		"@barely/lib": "workspace:*",
 		"@barely/ui": "workspace:*",
 		"@barely/utils": "workspace:*",

@@ -15,6 +15,7 @@ import { and, eq, isNull } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
 import { recordVipEvent } from '../../functions/event.fns';
+import { ratelimit } from '../../integrations/upstash';
 import { generateUniqueDownloadToken } from '../../utils/token';
 
 export const vipSwapRenderRoute = {
@@ -53,6 +54,17 @@ export const vipSwapRenderRoute = {
 		.mutation(async ({ ctx, input }) => {
 			const { handle, key, email, ...utmParams } = input;
 
+			const { success } = await ratelimit(5, '5 m').limit(
+				`vip.swap.${handle}.${key}.${ctx.visitor?.ip ?? '127.0.0.1'}`,
+			);
+
+			if (!success) {
+				throw new TRPCError({
+					code: 'TOO_MANY_REQUESTS',
+					message: 'Too many requests',
+				});
+			}
+
 			// Get the VIP swap
 			const vipSwap = await dbHttp.query.VipSwaps.findFirst({
 				where: and(
@@ -69,7 +81,7 @@ export const vipSwapRenderRoute = {
 			if (!vipSwap?.workspace) {
 				throw new TRPCError({
 					code: 'NOT_FOUND',
-					message: 'VIP swap not found',
+					message: 'This content is no longer available, or the link is invalid.',
 				});
 			}
 

@@ -191,6 +191,86 @@ pnpm tb:get-local-token       # Get local Tinybird token
 
 ## Common Patterns
 
+### Form Handling Best Practices
+
+**ALWAYS use our established form patterns when creating forms:**
+
+1. **Use `useZodForm` hook** from `@barely/hooks` for form state management
+2. **Use form components** from `@barely/ui/forms/` instead of raw UI elements
+3. **Define Zod schemas** for all form validation
+4. **Use the Form wrapper** component for proper form context
+
+#### Correct Form Pattern Example:
+```typescript
+'use client';
+
+import { useZodForm } from '@barely/hooks';
+import { z } from 'zod/v4';
+
+import { CheckboxField } from '@barely/ui/forms/checkbox-field';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
+import { TextField } from '@barely/ui/forms/text-field';
+
+// Define schema with Zod
+const myFormSchema = z.object({
+  email: z.string().email('Invalid email'),
+  name: z.string().min(1, 'Name is required'),
+  consent: z.boolean().refine(val => val === true, 'Consent required'),
+});
+
+type MyFormData = z.infer<typeof myFormSchema>;
+
+export function MyForm({ onSubmit }: { onSubmit: (data: MyFormData) => void }) {
+  const form = useZodForm({
+    schema: myFormSchema,
+    defaultValues: {
+      email: '',
+      name: '',
+      consent: false,
+    },
+  });
+
+  return (
+    <Form form={form} onSubmit={onSubmit}>
+      <TextField
+        control={form.control}
+        name="name"
+        label="Name"
+        placeholder="Enter your name"
+      />
+      
+      <TextField
+        control={form.control}
+        name="email"
+        type="email"
+        placeholder="Enter your email"
+        startIcon="email"
+      />
+      
+      <CheckboxField
+        control={form.control}
+        name="consent"
+        label="I agree to terms"
+      />
+      
+      <SubmitButton loading={isLoading}>
+        Submit
+      </SubmitButton>
+    </Form>
+  );
+}
+```
+
+#### Key Points:
+- **NEVER** use raw `Input`, `Checkbox`, or `Button` components in forms
+- **ALWAYS** use `TextField`, `CheckboxField`, `SubmitButton` etc. from `@barely/ui/forms/`
+- **ALWAYS** pass `control={form.control}` to form field components
+- **ALWAYS** wrap form content in `<Form>` component
+- **NEVER** manage form state with `useState` - use `useZodForm` instead
+- **ALWAYS** define validation with Zod schemas
+- Import Zod as `z` from `zod/v4` (not zod/lib/v4)
+- For email validation, use `z.email()` - NOTE: `z.string().email()` is deprecated in Zod v4 in favor of the simpler `z.email()` syntax
+
 ### Creating New tRPC Routes
 
 1. Define schema in `packages/validators/src/`

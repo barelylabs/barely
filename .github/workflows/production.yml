@@ -290,6 +290,26 @@ jobs:
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_MANAGE_EMAIL_PROJECT_ID }}
 
+  deploy-nyc:
+    uses: ./.github/workflows/deploy-to-vercel.yml
+    needs: [git-meta, db-push, tb-push]
+    if: |
+      always() && 
+      needs.git-meta.result == 'success' && 
+      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
+      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    with:
+      app_name: nyc
+      working_directory: apps/nyc
+      scope: barely
+      environment: production
+      git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
+      vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_NYC_PROJECT_ID }}
+
   deploy-page:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
@@ -330,7 +350,7 @@ jobs:
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PRESS_PROJECT_ID }}
 
-  deploy-nyc:
+  deploy-vip:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
     if: |
@@ -339,8 +359,8 @@ jobs:
       (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
       (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
-      app_name: nyc
-      working_directory: apps/nyc
+      app_name: vip
+      working_directory: apps/vip
       scope: barely
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
@@ -348,7 +368,7 @@ jobs:
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_NYC_PROJECT_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_VIP_PROJECT_ID }}
 
   deploy-www:
     uses: ./.github/workflows/deploy-to-vercel.yml
@@ -382,9 +402,10 @@ jobs:
         deploy-cart,
         deploy-link,
         deploy-manage-email,
+        deploy-nyc,
         deploy-page,
         deploy-press,
-        deploy-nyc,
+        deploy-vip,
         deploy-www,
       ]
     if: always() && github.event_name == 'merge_group' # skip if pull request, which allows entry into merge queue
@@ -421,9 +442,10 @@ jobs:
         deploy-fm,
         deploy-link,
         deploy-manage-email,
+        deploy-nyc,
         deploy-page,
         deploy-press,
-        deploy-nyc,
+        deploy-vip,
         deploy-www,
         trigger-production,
       ]
@@ -523,6 +545,22 @@ jobs:
       - name: Promote manage-email to production
         run: vercel promote dpl_${{ needs.deploy-manage-email.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
+  promote-nyc:
+    name: promote nyc to production
+    needs: [production--can-merge, deploy-nyc]
+    if: always() && github.event_name == 'merge_group' && needs.production--can-merge.result == 'success'
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_NYC_PROJECT_ID }}
+    steps:
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Promote nyc to production
+        run: vercel promote dpl_${{ needs.deploy-nyc.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+
   promote-page:
     name: promote page to production
     needs: [production--can-merge, deploy-page]
@@ -555,21 +593,21 @@ jobs:
       - name: Promote press to production
         run: vercel promote dpl_${{ needs.deploy-press.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
-  promote-nyc:
-    name: promote nyc to production
-    needs: [production--can-merge, deploy-nyc]
+  promote-vip:
+    name: promote vip to production
+    needs: [production--can-merge, deploy-vip]
     if: always() && github.event_name == 'merge_group' && needs.production--can-merge.result == 'success'
     runs-on: ubuntu-latest
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_NYC_PROJECT_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_VIP_PROJECT_ID }}
     steps:
       - name: Install Vercel CLI
         run: npm i -g vercel@latest
 
-      - name: Promote nyc to production
-        run: vercel promote dpl_${{ needs.deploy-nyc.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Promote vip to production
+        run: vercel promote dpl_${{ needs.deploy-vip.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
   promote-www:
     name: promote www to production
@@ -601,6 +639,7 @@ jobs:
         promote-page,
         promote-press,
         promote-nyc,
+        promote-vip,
         promote-www,
       ]
     if: ${{ failure() && needs.promote-app.result == 'success' }}
@@ -660,6 +699,7 @@ jobs:
         promote-page,
         promote-press,
         promote-nyc,
+        promote-vip,
         promote-www,
       ]
     if: ${{ failure() && needs.promote-fm.result == 'success' }}
@@ -823,6 +863,37 @@ jobs:
           echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
           vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
+  rollback-vip:
+    name: rollback vip if any deployments fail
+    needs:
+      [
+        promote-app,
+        promote-cart,
+        promote-fm,
+        promote-link,
+        promote-manage-email,
+        promote-page,
+        promote-press,
+        promote-nyc,
+        promote-vip,
+        promote-www,
+      ]
+    if: ${{ failure() && needs.promote-vip.result == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_VIP_PROJECT_ID }}
+    steps:
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Rollback vip
+        run: |
+          ROLLBACK_DEPLOYMENT_ID=$(curl -s "https://api.vercel.com/v6/deployments?teamId=${{ secrets.VERCEL_TEAM_ID }}&projectId=${{ secrets.VERCEL_VIP_PROJECT_ID}}&limit=2&rollbackCandidate=true&state=READY&target=production" -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | jq -r '.deployments[1].uid')
+          echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
+          vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+
   rollback-www:
     name: rollback www if any deployments fail
     needs:
@@ -865,9 +936,10 @@ jobs:
         promote-fm,
         promote-link,
         promote-manage-email,
+        promote-nyc,
         promote-page,
         promote-press,
-        promote-nyc,
+        promote-vip,
         promote-www,
       ]
     if:
@@ -878,9 +950,10 @@ jobs:
       needs.promote-fm.result == 'success' &&
       needs.promote-link.result == 'success' &&
       needs.promote-manage-email.result == 'success' &&
+      needs.promote-nyc.result == 'success' &&
       needs.promote-page.result == 'success' &&
       needs.promote-press.result == 'success' &&
-      needs.promote-nyc.result == 'success' &&
+      needs.promote-vip.result == 'success' &&
       needs.promote-www.result == 'success'
     runs-on: ubuntu-latest
     steps:

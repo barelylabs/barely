@@ -1,6 +1,5 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/lib/trpc/app.route';
 import { useState } from 'react';
 import { useVipStatFilters } from '@barely/hooks';
 import { cn, nFormatter } from '@barely/utils';
@@ -10,8 +9,6 @@ import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Card } from '@barely/ui/card';
 import { AreaChart } from '@barely/ui/charts/area-chart';
-
-type VipTimeseriesRow = AppRouterOutputs['stat']['vipTimeseries'][number];
 
 export function VipTimeseries() {
 	const { filtersWithHandle, formatTimestamp } = useVipStatFilters();
@@ -28,18 +25,12 @@ export function VipTimeseries() {
 		...trpc.stat.vipTimeseries.queryOptions(filtersWithHandle),
 	});
 
-	const totalViews = timeseries.reduce(
-		(acc: number, d: VipTimeseriesRow) => acc + d.vip_views,
-		0,
-	);
+	const totalViews = timeseries.reduce((acc: number, d) => acc + d.vip_views, 0);
 	const totalEmailCaptures = timeseries.reduce(
-		(acc: number, d: VipTimeseriesRow) => acc + d.vip_emailCaptures,
+		(acc: number, d) => acc + d.vip_emailCaptures,
 		0,
 	);
-	const totalDownloads = timeseries.reduce(
-		(acc: number, d: VipTimeseriesRow) => acc + d.vip_downloads,
-		0,
-	);
+	const totalDownloads = timeseries.reduce((acc: number, d) => acc + d.vip_downloads, 0);
 
 	const conversionRate =
 		totalViews > 0 ? ((totalEmailCaptures / totalViews) * 100).toFixed(1) : '0';

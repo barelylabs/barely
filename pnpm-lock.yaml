@@ -1172,6 +1172,9 @@ importers:
       '@barely/files':
         specifier: workspace:*
         version: link:../../packages/files
+      '@barely/hooks':
+        specifier: workspace:*
+        version: link:../../packages/hooks
       '@barely/lib':
         specifier: workspace:*
         version: link:../../packages/lib
