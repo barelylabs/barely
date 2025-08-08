@@ -14,11 +14,9 @@ export default async function VipDownloadPage({
 	const { handle, key } = await params;
 
 	// Fetch the swap data server-side to get the ID
-	const swap = await trpcCaller.swap.byHandleAndKey({ handle, key });
-
-	if (!swap) {
-		notFound();
-	}
+	const swap = await trpcCaller.swap.byHandleAndKey({ handle, key }).catch(() => {
+		return notFound();
+	});
 
 	// Prefetch for client-side hydration
 	prefetch(trpc.swap.byHandleAndKey.queryOptions({ handle, key }));
