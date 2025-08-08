@@ -26,7 +26,7 @@ export function VipDownloadContent({
 	);
 
 	// Get workspace name from the properly typed swap response
-	const workspaceName = swap.workspace.name || 'Artist';
+	const workspaceName = swap.workspace.name;
 
 	const {
 		mutate: requestDownload,
