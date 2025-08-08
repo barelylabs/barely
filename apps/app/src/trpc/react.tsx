@@ -81,10 +81,16 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 							serverName = firstPart;
 						}
 
+						if (serverName === '_app') {
+							console.log('you need to add the endpoint to the APP_ENDPOINTS array');
+						}
+
 						const link = servers[serverName];
 
 						if (!link) {
-							throw new Error(`Unknown endpoint: ${serverName}`);
+							throw new Error(
+								`Unknown endpoint: ${serverName}. Make sure the endpoint is defined in the appRouter`,
+							);
 						}
 
 						return link({

@@ -1,7 +1,8 @@
 'use client';
 
 import type { StatDateRange } from '@barely/validators';
-import { Suspense } from 'react';
+import type { ReactNode } from 'react';
+// import { Suspense } from 'react';
 import { useWebEventStatFilters, useWorkspace } from '@barely/hooks';
 import { getFmPageUrlFromFmPage, getShortLinkUrlFromLink } from '@barely/utils';
 import { statDateRange } from '@barely/validators';
@@ -9,6 +10,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
+import { Card } from '@barely/ui/card';
 import { ChevronRightToArrow, Icon } from '@barely/ui/icon';
 import {
 	Select,
@@ -17,7 +19,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@barely/ui/select';
-import { Skeleton } from '@barely/ui/skeleton';
+// import { Skeleton } from '@barely/ui/skeleton';
 import { Text } from '@barely/ui/typography';
 
 const dateRangeOptions: StatDateRange[] = ['1d', '1w', '28d'];
@@ -25,42 +27,53 @@ const dateRangeOptions: StatDateRange[] = ['1d', '1w', '28d'];
 export function StatsHeader({
 	dateRange,
 	setDateRange,
+	selector,
 }: {
 	dateRange?: StatDateRange;
 	setDateRange: (dateRange: StatDateRange) => void;
+	showAssetLink?: boolean;
+	selector?: ReactNode;
 }) {
 	return (
-		<div className='flex flex-row items-center justify-between'>
-			<Suspense fallback={<Skeleton className='h-5 w-32' />}>
-				<AssetLinkLaunch />
-			</Suspense>
+		<Card className='p-4'>
+			<div className='flex flex-row items-center justify-between gap-3'>
+				<div className='flex flex-col'>
+					{selector}
+					{/* 
+					{showAssetLink && (
+						<Suspense fallback={<Skeleton className='h-5 w-32' />}>
+							<AssetLinkLaunch />
+						</Suspense>
+					)} */}
+				</div>
 
-			<Select
-				defaultValue={dateRange ?? '1w'}
-				onValueChange={v => {
-					const value = statDateRange.safeParse(v);
-					if (value.success) setDateRange(value.data);
-				}}
-			>
-				<SelectTrigger icon='calendar' className='w-[180px]'>
-					<SelectValue />
-				</SelectTrigger>
+				<Select
+					defaultValue={dateRange ?? '1w'}
+					onValueChange={v => {
+						const value = statDateRange.safeParse(v);
+						if (value.success) setDateRange(value.data);
+					}}
+				>
+					<SelectTrigger icon='calendar' className='w-[180px]'>
+						<SelectValue />
+					</SelectTrigger>
 
-				<SelectContent>
-					{dateRangeOptions.map(r => {
-						return (
-							<SelectItem value={r} key={r}>
-								{r}
-							</SelectItem>
-						);
-					})}
-				</SelectContent>
-			</Select>
-		</div>
+					<SelectContent>
+						{dateRangeOptions.map(r => {
+							return (
+								<SelectItem value={r} key={r}>
+									{r}
+								</SelectItem>
+							);
+						})}
+					</SelectContent>
+				</Select>
+			</div>
+		</Card>
 	);
 }
 
-function AssetLinkLaunch() {
+export function AssetLinkLaunch() {
 	const trpc = useTRPC();
 	const { filters } = useWebEventStatFilters();
 

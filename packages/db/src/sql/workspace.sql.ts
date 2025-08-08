@@ -138,6 +138,9 @@ export const Workspaces = pgTable(
 		cartSupportEmail: varchar('cartSupportEmail', { length: 255 }),
 		cartFeePercentageOverride: integer('cartFeePercentageOverride'),
 
+		/* vip */
+		vipSupportEmail: varchar('vipSupportEmail', { length: 255 }),
+
 		/* for shipping */
 		shippingAddressLine1: varchar('shippingAddressLine1', { length: 255 }),
 		shippingAddressLine2: varchar('shippingAddressLine2', { length: 255 }),

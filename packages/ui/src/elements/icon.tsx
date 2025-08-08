@@ -28,7 +28,7 @@ import {
 	Plugs,
 	ShoppingCart,
 	Swap,
-	TShirt,
+	TShirtIcon,
 	UsersThree,
 	Video,
 	VinylRecord,
@@ -494,7 +494,7 @@ export const Icon = {
 	trash: Trash,
 	triangle: Triangle,
 	trigger: Zap,
-	tshirt: TShirt,
+	tshirt: TShirtIcon,
 	tv: Tv,
 
 	undo: Undo,
@@ -511,6 +511,8 @@ export const Icon = {
 	video: Video,
 	view: View,
 	vinyl: VinylRecord,
+	vip: Star,
+	vipSwap: Star,
 
 	wait: Clock,
 	wand: Wand2,

@@ -4,6 +4,7 @@ import {
 	WEB_EVENT_TYPES__FM,
 	WEB_EVENT_TYPES__LINK,
 	WEB_EVENT_TYPES__PAGE,
+	WEB_EVENT_TYPES__VIP,
 } from '@barely/const';
 import { formattedUserAgentSchema, nextGeoSchema } from '@barely/db/schema';
 import { z } from 'zod/v4';
@@ -91,6 +92,7 @@ export const webEventIngestSchema = z
 			...WEB_EVENT_TYPES__FM,
 			...WEB_EVENT_TYPES__LINK,
 			...WEB_EVENT_TYPES__PAGE,
+			...WEB_EVENT_TYPES__VIP,
 		]),
 	})
 	.extend(visitorSessionTinybirdSchema.shape)
@@ -146,6 +148,15 @@ export const fmEventIngestSchema = webEventIngestSchema.extend({
 });
 
 export const pageEventIngestSchema = webEventIngestSchema;
+
+export const vipEventIngestSchema = webEventIngestSchema.extend({
+	vipSwapType: z
+		.enum(['contact', 'presave', 'presave-forever', ''])
+		.optional()
+		.default(''),
+	vipDownloadToken: z.string().optional().default(''),
+	vipEmailCaptured: z.string().optional().default(''),
+});
 
 export const emailEventIngestSchema = webEventIngestSchema.extend({
 	timestamp: z.string().datetime(),

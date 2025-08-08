@@ -6,3 +6,6 @@ export * from './cart';
 
 // Export all playlist pitch templates
 export * from './playlist-pitch';
+
+// Export all VIP templates
+export * from './vip';

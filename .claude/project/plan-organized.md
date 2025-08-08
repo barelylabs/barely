@@ -44,11 +44,11 @@ The VIP feature will be implemented as a new Next.js app at `apps/vip` following
 Foundation needed before any other features can be built.
 
 **Database & Types**
-- [ ] Create database migration for `vipReleases` table with fields: id, workspaceId, title, key, description, artworkUrl, audioFileUrl, emailGateEnabled, allowDownload, createdAt, updatedAt, stats
-- [ ] Create database migration for `vipAccessLogs` table with fields: id, vipReleaseId, email, workspaceId, accessedAt, downloadedAt, userAgent, ipAddress, utmParams
-- [ ] Add indexes on vipReleases.key and vipReleases.workspaceId for query performance
-- [ ] Create Zod schemas for VIP release validation in `@barely/validators`
-- [ ] Add VIP-related types to `@barely/db` exports
+- [x] Create database migration for `vipReleases` table with fields: id, workspaceId, title, key, description, artworkUrl, audioFileUrl, emailGateEnabled, allowDownload, createdAt, updatedAt, stats
+- [x] Create database migration for `vipAccessLogs` table with fields: id, vipReleaseId, email, workspaceId, accessedAt, downloadedAt, userAgent, ipAddress, utmParams
+- [x] Add indexes on vipReleases.key and vipReleases.workspaceId for query performance
+- [x] Create Zod schemas for VIP release validation in `@barely/validators`
+- [x] Add VIP-related types to `@barely/db` exports
 
 **File Storage Setup**
 - [ ] Extend `@barely/files` to support audio file validation (format, size limits)
@@ -57,7 +57,7 @@ Foundation needed before any other features can be built.
 - [ ] Configure Cloudflare caching rules for audio files
 
 **App Initialization**
-- [ ] Initialize new Next.js app at `apps/vip`
+- [x] Initialize new Next.js app at `apps/vip`
 - [ ] Configure subdomain routing for barely.vip
 - [ ] Set up Sentry error tracking for both apps
 - [ ] Configure CORS for audio streaming from S3
@@ -71,11 +71,11 @@ Foundation needed before any other features can be built.
 Enable artists/agencies to create and manage exclusive content releases.
 
 **Backend - Release Management**
-- [ ] Create tRPC router for VIP operations in `packages/api/src/app/vip`
-- [ ] Implement `createRelease` procedure with file upload handling
-- [ ] Implement `updateRelease` procedure for editing releases
-- [ ] Implement `deleteRelease` procedure with proper cleanup
-- [ ] Add workspace-scoped permissions checks to all procedures
+- [x] Create tRPC router for VIP operations in `packages/lib/src/trpc/routes/vip.route.ts`
+- [x] Implement `createRelease` procedure with file upload handling
+- [x] Implement `updateRelease` procedure for editing releases
+- [x] Implement `deleteRelease` procedure with proper cleanup
+- [x] Add workspace-scoped permissions checks to all procedures
 - [ ] Handle S3 upload failures with retry mechanism
 
 **Frontend - Admin Dashboard**
@@ -102,21 +102,21 @@ Enable artists/agencies to create and manage exclusive content releases.
 Core value exchange - fans trade email for exclusive content.
 
 **Backend - Email Capture**
-- [ ] Implement `getRelease` procedure with public access
-- [ ] Implement `captureEmail` procedure with validation and deduplication
-- [ ] Implement `trackDownload` procedure for secure URL generation
-- [ ] Implement presigned URL generation with 24-hour expiration
+- [x] Implement `getRelease` procedure with public access
+- [x] Implement `captureEmail` procedure with validation and deduplication
+- [x] Implement `trackDownload` procedure for secure URL generation
+- [x] Implement presigned URL generation with 24-hour expiration
 - [ ] Add rate limiting for email captures (max 5 per IP per minute)
 - [ ] Handle duplicate email submissions gracefully
 
 **Frontend - Public VIP Pages**
-- [ ] Create dynamic route structure: `/[handle]/[key]`
-- [ ] Build mobile-first release page with locked/unlocked states
+- [x] Create dynamic route structure: `/[slug]` (simplified from handle/key)
+- [x] Build mobile-first release page with locked/unlocked states
 - [ ] Integrate audio player component from `@barely/press`
-- [ ] Implement inline email capture form with validation
-- [ ] Add download button with progress indicator
-- [ ] Create success state after email submission
-- [ ] Implement error states and retry mechanisms
+- [x] Implement inline email capture form with validation
+- [x] Add download button with progress indicator
+- [x] Create success state after email submission
+- [x] Implement error states and retry mechanisms
 - [ ] Add email delivery fallback for download failures
 
 **Email Infrastructure**

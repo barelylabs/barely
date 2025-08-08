@@ -3,7 +3,7 @@
 import type { TopEventType } from '@barely/tb/schema';
 import type { BarListBarProps } from '@barely/ui/charts/bar-list';
 import { useState } from 'react';
-import { useWebEventStatFilters } from '@barely/hooks';
+import { useVipStatFilters, useWebEventStatFilters } from '@barely/hooks';
 import { getTopStatValue } from '@barely/tb/schema';
 import { useQuery } from '@tanstack/react-query';
 
@@ -21,7 +21,18 @@ export function StatExternalReferers({ eventType }: { eventType: TopEventType })
 		'referers' | 'metaCampaigns' | 'metaAdSets' | 'metaAds' | 'metaPlacements'
 	>('referers');
 
-	const { filtersWithHandle, getSetFilterPath } = useWebEventStatFilters();
+	const isVipEvent =
+		eventType === 'vip/view' ||
+		eventType === 'vip/emailCapture' ||
+		eventType === 'vip/download';
+
+	const vipFilters = useVipStatFilters();
+	const webFilters = useWebEventStatFilters();
+
+	const filtersWithHandle =
+		isVipEvent ? vipFilters.filtersWithHandle : webFilters.filtersWithHandle;
+	const getSetFilterPath =
+		isVipEvent ? vipFilters.getSetFilterPath : webFilters.getSetFilterPath;
 
 	const { data: referers } = useQuery(
 		trpc.stat.topReferers.queryOptions(
@@ -80,24 +91,23 @@ export function StatExternalReferers({ eventType }: { eventType: TopEventType })
 	);
 
 	const data =
-		tab === 'referers' ? referers
-		: tab === 'metaCampaigns' ? topMetaCampaigns
-		: tab === 'metaAds' ? topMetaAds
-		: tab === 'metaPlacements' ? topMetaPlacements
+		tab === 'referers' ? (referers ?? [])
+		: tab === 'metaCampaigns' ? (topMetaCampaigns ?? [])
+		: tab === 'metaAds' ? (topMetaAds ?? [])
+		: tab === 'metaPlacements' ? (topMetaPlacements ?? [])
 		: [];
 
-	const plotData: BarListBarProps[] =
-		data?.map(d => ({
-			name: d.name,
-			value: d.value,
-			href:
-				tab === 'referers' ? getSetFilterPath('referer', d.name)
-				: tab === 'metaCampaigns' ? getSetFilterPath('sessionMetaCampaignId', d.name)
-				: tab === 'metaAds' ? getSetFilterPath('sessionMetaAdId', d.name)
-				: tab === 'metaPlacements' ? getSetFilterPath('sessionMetaPlacementId', d.name)
-				: '#',
-			target: '_self',
-		})) ?? [];
+	const plotData: BarListBarProps[] = data.map(d => ({
+		name: d.name,
+		value: d.value,
+		href:
+			tab === 'referers' ? getSetFilterPath('referer', d.name)
+			: tab === 'metaCampaigns' ? getSetFilterPath('sessionMetaCampaignId', d.name)
+			: tab === 'metaAds' ? getSetFilterPath('sessionMetaAdId', d.name)
+			: tab === 'metaPlacements' ? getSetFilterPath('sessionMetaPlacementId', d.name)
+			: '#',
+		target: '_self',
+	}));
 
 	const barList = (limit?: number) => {
 		return <BarList color='red' data={limit ? plotData.slice(0, limit) : plotData} />;
@@ -107,7 +117,7 @@ export function StatExternalReferers({ eventType }: { eventType: TopEventType })
 		<Card className='h-[400px]'>
 			<div className='flex flex-row items-center justify-between gap-6'>
 				<H size='4'>External</H>
-				<ScrollArea>
+				<ScrollArea className='max-w-[calc(100%-120px)] overflow-hidden'>
 					<div className='p-2'>
 						<TabButtons
 							tabs={[
@@ -120,7 +130,7 @@ export function StatExternalReferers({ eventType }: { eventType: TopEventType })
 							setSelectedTab={setTab}
 						/>
 					</div>
-					<ScrollBar hidden orientation='horizontal' />
+					<ScrollBar orientation='horizontal' hidden />
 				</ScrollArea>
 			</div>
 			{barList(9)}

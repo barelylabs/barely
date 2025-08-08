@@ -7,6 +7,7 @@ import {
 	parseFmReqForHandleAndKey,
 	parseLandingPageReqForHandleAndKey,
 	parseReqForVisitorInfo,
+	parseVipReqForHandleAndKey,
 } from '@barely/lib/middleware/request-parsing';
 import { createTRPCContext } from '@barely/lib/trpc';
 import { log } from '@barely/lib/utils/log';
@@ -26,6 +27,9 @@ export const publicRenderHandler =
 	}) =>
 	async (req: NextRequest) => {
 		const { handle, key } = getHandleAndKey(app, req);
+
+		// Debug: Log all cookies available in the request
+		console.log('API request cookies:', req.cookies.getAll());
 
 		if (!handle || !key) {
 			await log({
@@ -85,6 +89,8 @@ function getHandleAndKey(app: (typeof APPS)[number], req: NextRequest) {
 			return parseFmReqForHandleAndKey(req);
 		case 'page':
 			return parseLandingPageReqForHandleAndKey(req);
+		case 'vip':
+			return parseVipReqForHandleAndKey(req);
 		default:
 			return { handle: null, key: null };
 	}

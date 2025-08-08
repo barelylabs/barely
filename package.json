@@ -22,7 +22,8 @@
 		"db:studio": "pnpm -F @barely/db db:studio",
 		"deploy-trigger:staging": "turbo deploy-trigger:staging --filter=@barely/lib",
 		"deploy-trigger:production": "turbo deploy-trigger:production --filter=@barely/lib",
-		"dev": "./scripts/dev-qr-codes.sh && concurrently \"turbo watch dev --continue\" \"turbo run dev:trigger -F @barely/lib\" \"turbo run tb:dev -F @barely/tb\"",
+		"dev": "./scripts/dev-qr-codes.sh && turbo watch dev",
+		"dev:tt": "concurrently \"turbo run dev:trigger -F @barely/lib\" \"turbo run tb:dev -F @barely/tb\"",
 		"dev:app": "turbo watch dev -F @barely/app...",
 		"dev:enable": "chmod +x ./scripts/dev-qr-codes.sh && chmod +x scripts/dev_kill.sh && chmod +x ./scripts/create-dev-branch.sh && chmod +x ./scripts/reset-dev-branch.sh && chmod +x ./scripts/tunnelto-auth.sh && chmod +x ./scripts/get-local-tinybird-token.sh",
 		"dev:pre": "sudo ./scripts/dev_kill.sh && turbo dev:pre",
@@ -58,6 +59,7 @@
 		"@barely/prettier-config": "workspace:^0.1.0",
 		"@turbo/gen": "^2.5.4",
 		"prettier": "catalog:",
+		"tsx": "^4.20.3",
 		"turbo": "^2.5.4",
 		"typescript": "catalog:",
 		"vercel": "44.2.1"

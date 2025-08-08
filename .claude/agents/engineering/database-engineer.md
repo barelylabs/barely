@@ -1,5 +1,5 @@
 ---
-name: database-engineering-wizard
+name: database-engineer
 description: Use proactively for database schema design, Drizzle ORM modifications, Neon Database optimization, and any work involving packages/db/src/schema/ or SQL files. Specialist for database migrations, type-safe schema definitions, and PostgreSQL best practices.
 tools: Read, Write, Edit, MultiEdit, Grep, Glob, LS
 color: Purple

@@ -39,6 +39,7 @@ export * from './transaction-line-item.schema';
 export * from './user-session.schema';
 export * from './user.schema';
 export * from './verification-token.schema';
+export * from './vip-swap.schema';
 export * from './visitor-session.schema';
 export * from './workspace-invite.schema';
 export * from './workspace.schema';

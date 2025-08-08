@@ -235,3 +235,5 @@ export const useFmStatSearchParams = createStatSearchParamsHook({
 		),
 	},
 });
+
+export const useVipStatSearchParams = createStatSearchParamsHook();

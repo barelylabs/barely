@@ -80,7 +80,10 @@ SCHEMA >
     `sessionMetaAdId` Nullable(String) `json:$.sessionMetaAdId`,
     `sessionMetaCampaignId` Nullable(String) `json:$.sessionMetaCampaignId`,
     `sessionMetaPlacement` Nullable(String) `json:$.sessionMetaPlacement`,
-    `sessionMetaAdSetId` Nullable(String) `json:$.sessionMetaAdSetId`
+    `sessionMetaAdSetId` Nullable(String) `json:$.sessionMetaAdSetId`,
+    `vipSwapType` Nullable(String) `json:$.vipSwapType`,
+    `vipDownloadToken` Nullable(String) `json:$.vipDownloadToken`,
+    `vipEmailCaptured` Nullable(String) `json:$.vipEmailCaptured`
 
 ENGINE "MergeTree"
 ENGINE_PARTITION_KEY "toYear(timestamp)"

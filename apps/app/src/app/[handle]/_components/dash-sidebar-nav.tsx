@@ -78,6 +78,7 @@ export function SidebarNav() {
 		{ title: 'fm', icon: 'fm', href: `/${handle}/fm` },
 		{ title: 'pages', icon: 'landingPage', href: `/${handle}/pages` },
 		{ title: 'press', icon: 'press', href: `/${handle}/press` },
+		{ title: 'vip', icon: 'vip', href: `/${handle}/vip/swaps` },
 	];
 
 	const emailLinks: SidebarNavLink[] = [
@@ -161,6 +162,7 @@ export function SidebarNav() {
 			icon: 'remarketing',
 			href: `/${handle}/settings/remarketing`,
 		},
+		{ title: 'vip', icon: 'vip', href: `/${handle}/settings/vip` },
 		{ title: 'cart', icon: 'cart', href: `/${handle}/settings/cart` },
 		{ title: 'payouts', icon: 'payouts', href: `/${handle}/settings/payouts` },
 		{ title: 'billing', icon: 'billing', href: `/${handle}/settings/billing` },

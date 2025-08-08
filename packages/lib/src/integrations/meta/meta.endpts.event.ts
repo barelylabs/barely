@@ -34,6 +34,11 @@ export interface MetaEventCustomData {
 	pageId?: string;
 	linkClickDestinationAssetId?: string;
 	linkClickDestinationHref?: string;
+
+	// vip
+	vipSwapId?: string;
+	vipSwapType?: string;
+	email?: string;
 }
 
 export const META_EVENT_NAMES = [
@@ -80,6 +85,11 @@ export const META_EVENT_NAMES = [
 	// page
 	'barely.page/view',
 	'barely.page/linkClick',
+
+	// vip
+	'barely.vip/view',
+	'barely.vip/emailCapture',
+	'barely.vip/download',
 ] as const;
 
 export type MetaEventName = (typeof META_EVENT_NAMES)[number];

@@ -6,6 +6,7 @@ import {
 	emailEventIngestSchema,
 	fmEventIngestSchema,
 	pageEventIngestSchema,
+	vipEventIngestSchema,
 	webEventIngestSchema,
 } from '../schema/event-ingest.schema';
 
@@ -41,6 +42,16 @@ export const ingestPageEvent = tinybird.buildIngestEndpoint<
 >({
 	datasource: 'barely_events',
 	event: pageEventIngestSchema,
+});
+
+/* vip */
+
+export const ingestVipEvent = tinybird.buildIngestEndpoint<
+	z.output<typeof vipEventIngestSchema>,
+	z.input<typeof vipEventIngestSchema>
+>({
+	datasource: 'barely_events',
+	event: vipEventIngestSchema,
 });
 
 // publish email events
