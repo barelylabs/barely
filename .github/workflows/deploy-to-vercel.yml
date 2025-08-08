@@ -57,15 +57,15 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: setup node/pnpm/turbo/vercel
+        uses: ./tooling/github/setup
+
       - name: create symlink for app variant
         if: ${{ inputs.current_app_override != '' }}
         run: |
           ln -s app apps/app-${{ inputs.current_app_override }}
           echo "Created symlink: apps/app-${{ inputs.current_app_override }} -> apps/app"
           ls -la apps/
-
-      - name: setup node/pnpm/turbo/vercel
-        uses: ./tooling/github/setup
 
       - name: link vercel
         run: |
