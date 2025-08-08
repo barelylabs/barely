@@ -11,14 +11,15 @@ import { Toaster } from 'sonner';
 import { EarlyAccessBanner } from '~/components/early-access-banner';
 import { Footer } from '~/components/footer';
 import { Navbar } from '~/components/navbar';
+import { StructuredData } from '~/components/structured-data';
 
 export const metadata: Metadata = {
 	title: {
 		template: '%s - barely.ai',
-		default: 'barely.ai - Open-Source Marketing Platform for Musicians',
+		default: 'barely.ai - Open-Source Marketing Platform for Indie Artists',
 	},
 	description:
-		'The open-source marketing platform built specifically for musicians. Smart links, email marketing, landing pages, merch sales, and unified analytics - all integrated, all transparent.',
+		'Built by Brooklyn-based music marketing engineers. The open-source marketing platform for indie artists. Smart links, email marketing, landing pages, merch sales, and unified analytics - all integrated, all transparent.',
 	icons: {
 		icon: [
 			{ url: '/_static/favicons/favicon-32x32.png', sizes: '32x32' },
@@ -46,6 +47,9 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang='en' className='dark'>
+			<head>
+				<StructuredData />
+			</head>
 			<body
 				className={cn(
 					'bg-background font-sans text-foreground antialiased',

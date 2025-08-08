@@ -105,7 +105,6 @@
 		"@barely/email": "workspace:*",
 		"@barely/files": "workspace:*",
 		"@barely/tb": "workspace:*",
-		"@barely/toast": "workspace:*",
 		"@barely/utils": "workspace:*",
 		"@barely/validators": "workspace:*",
 		"@fast-csv/parse": "^5.0.0",

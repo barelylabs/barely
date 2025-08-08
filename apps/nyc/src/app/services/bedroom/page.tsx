@@ -8,9 +8,9 @@ import { MarketingButton } from '../../../components/marketing/button';
 import { PricingCard } from '../../../components/marketing/pricing-card';
 
 export const metadata: Metadata = {
-	title: 'Bedroom+ Service - Learn Scientific Music Marketing | Barely',
+	title: 'Bedroom+ Service - Learn Music Marketing Engineering | Barely NYC',
 	description:
-		'Perfect for artists with 0-10K monthly listeners. Bi-weekly coaching + barely.ai tools + transparent strategies.',
+		'Perfect for artists with 0-10K monthly listeners. Bi-weekly coaching with Brooklyn-based music marketing engineers + barely.ai tools.',
 };
 
 export default function BedroomPlusPage() {
@@ -80,9 +80,10 @@ export default function BedroomPlusPage() {
 											Bi-Weekly Strategy Sessions (30 minutes)
 										</H>
 										<p className='text-white/70'>
-											Direct access to a PhD scientist who treats your music career like a
-											research project. We&apos;ll form hypotheses about what will work
-											for your specific situation, design tests, and measure results.
+											Direct access to music marketing engineers who treat your career
+											like a research project. From our Brooklyn HQ, we work with artists
+											globally - forming hypotheses, designing tests, and measuring
+											results scientifically.
 										</p>
 									</div>
 								</div>

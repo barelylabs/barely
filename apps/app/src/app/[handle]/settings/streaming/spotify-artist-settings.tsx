@@ -2,9 +2,9 @@
 
 import type { z } from 'zod/v4';
 import { useCallback, useState } from 'react';
-import { useDebounce, useUpdateWorkspace, useWorkspace, useZodForm } from '@barely/hooks';
-import { updateWorkspaceSchema } from '@barely/validators';
-import { useMutation, useQuery, useSuspenseQuery } from '@tanstack/react-query';
+import { useDebounce, useWorkspace, useZodForm } from '@barely/hooks';
+import { updateWorkspaceSpotifyArtistIdSchema } from '@barely/validators';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
@@ -23,18 +23,24 @@ export function SpotifyArtistSettings() {
 	const trpc = useTRPC();
 
 	const form = useZodForm({
-		schema: updateWorkspaceSchema,
-		values: {
-			id: workspace.id,
-			spotifyArtistId: workspace.spotifyArtistId,
-		},
+		schema: updateWorkspaceSpotifyArtistIdSchema,
+		values: { spotifyArtistId: workspace.spotifyArtistId },
 		resetOptions: { keepDirtyValues: true },
 	});
 
 	const formSpotifyArtistId = form.watch('spotifyArtistId');
 
-	const { updateWorkspace, isUpdatingWorkspace } = useUpdateWorkspace({
-		onSuccess: () => form.reset(),
+	const { mutateAsync: updateWorkspace, isPending: isUpdatingWorkspace } = useMutation({
+		...trpc.workspace.updateSpotifyArtistId.mutationOptions({
+			onSuccess: async () => {
+				form.reset();
+				toast.success('Artist added successfully. Syncing stats...');
+				await syncArtist({ handle: workspace.handle });
+			},
+			onError: error => {
+				toast.error(error.message);
+			},
+		}),
 	});
 
 	const { data: artists, isLoading } = useQuery({
@@ -42,25 +48,33 @@ export function SpotifyArtistSettings() {
 		enabled: debouncedSearch.length > 0,
 	});
 
-	const { data: currentArtist } = useSuspenseQuery({
+	// Only fetch current artist if we have a spotifyArtistId
+	const shouldFetchArtist =
+		!!workspace.spotifyArtistId && workspace.spotifyArtistId.length > 0;
+	const { data: currentArtist, isLoading: isLoadingCurrentArtist } = useQuery({
 		...trpc.spotify.getArtist.queryOptions({
 			spotifyId: workspace.spotifyArtistId ?? '',
 		}),
-		// enabled: !!workspace.spotifyArtistId && workspace.spotifyArtistId.length > 0,
+		enabled: shouldFetchArtist,
 	});
 
 	const { mutateAsync: syncArtist, isPending: isSyncing } = useMutation({
 		...trpc.spotify.syncWorkspaceArtist.mutationOptions({
 			onSuccess: () => {
-				toast.success('Artist synced successfully');
+				toast.success(
+					"We're syncing your stats. This may take a few minutes. Leaving this page is totally fine. ",
+				);
+			},
+			onError: error => {
+				toast.error(error.message);
 			},
 		}),
 	});
 
-	const onSubmit = async (data: z.infer<typeof updateWorkspaceSchema>) => {
-		await updateWorkspace({ ...data, handle: workspace.handle });
-		await syncArtist({
+	const onSubmit = async (data: z.infer<typeof updateWorkspaceSpotifyArtistIdSchema>) => {
+		await updateWorkspace({
 			handle: workspace.handle,
+			spotifyArtistId: data.spotifyArtistId,
 		});
 	};
 
@@ -81,7 +95,7 @@ export function SpotifyArtistSettings() {
 			'Are you sure you want to remove the artist connection?',
 		);
 		if (!confirmed) return;
-		form.setValue('spotifyArtistId', undefined, { shouldDirty: true });
+		form.setValue('spotifyArtistId', null, { shouldDirty: true });
 	}, [form]);
 
 	const handleSync = useCallback(async () => {
@@ -127,7 +141,19 @@ export function SpotifyArtistSettings() {
 							</Button>
 						</div>
 					)}
-					{currentArtist && (
+					{isLoadingCurrentArtist ?
+						<div className='flex items-center gap-4 rounded-lg border p-4'>
+							<div className='h-16 w-16 animate-pulse rounded-full bg-muted' />
+							<div className='flex-1 space-y-2'>
+								<div className='h-5 w-32 animate-pulse rounded bg-muted' />
+								<div className='h-4 w-24 animate-pulse rounded bg-muted' />
+							</div>
+							<div className='flex gap-2'>
+								<div className='h-9 w-16 animate-pulse rounded bg-muted' />
+								<div className='h-9 w-28 animate-pulse rounded bg-muted' />
+							</div>
+						</div>
+					: currentArtist ?
 						<div className='flex items-center gap-4 rounded-lg border p-4'>
 							{currentArtist.images[0] && (
 								// eslint-disable-next-line @next/next/no-img-element
@@ -172,7 +198,7 @@ export function SpotifyArtistSettings() {
 								</Button>
 							</div>
 						</div>
-					)}
+					:	null}
 				</div>
 			</div>
 		);
