@@ -54,6 +54,7 @@ import * as userSessionSql from './sql/user-session.sql';
 import * as userSql from './sql/user.sql';
 import * as verificationTokenSql from './sql/verification-token.sql';
 import * as vidRenderSql from './sql/vid-render.sql';
+import * as vipSwapSql from './sql/vip-swap.sql';
 import * as visitorSessionSql from './sql/visitor-session.sql';
 import * as workspaceInviteSql from './sql/workspace-invite.sql';
 import * as workspaceSql from './sql/workspace.sql';
@@ -110,6 +111,7 @@ export const dbSchema = {
 	...userSessionSql,
 	...verificationTokenSql,
 	...vidRenderSql,
+	...vipSwapSql,
 	...visitorSessionSql,
 	...workspaceSql,
 	...workspaceInviteSql,

@@ -52,6 +52,7 @@ export * from './user-session.sql';
 export * from './user.sql';
 export * from './verification-token.sql';
 export * from './vid-render.sql';
+export * from './vip-swap.sql';
 export * from './visitor-session.sql';
 
 export * from './workspace-invite.sql';

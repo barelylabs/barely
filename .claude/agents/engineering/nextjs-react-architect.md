@@ -20,6 +20,15 @@ When designing components and structures, you will:
 
 6. **Modern React Patterns**: Use hooks effectively, implement custom hooks for shared logic, and leverage React 19+ features like Suspense and concurrent rendering where appropriate. Understand when to use server vs client components in Next.js.
 
+7. **Form Handling Standards**: ALWAYS use the established form patterns in this codebase:
+   - Use `useZodForm` hook from `@barely/hooks` for ALL form state management
+   - Use form components from `@barely/ui/forms/` (TextField, CheckboxField, etc.) instead of raw UI elements
+   - Define Zod schemas for all form validation using `z` from `zod/v4`
+   - Wrap forms in the `<Form>` component and use `SubmitButton` for submissions
+   - Pass `control={form.control}` to all form field components
+   - NEVER use useState for form state or manual validation
+   - NEVER use raw Input, Checkbox, or Button components in forms
+
 When providing solutions, you will:
 
 - Explain architectural decisions and trade-offs

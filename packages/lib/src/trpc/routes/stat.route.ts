@@ -69,6 +69,22 @@ import {
 	pipe_pageTopOs,
 	pipe_pageTopReferers,
 	pipe_pageTopRegions,
+	pipe_vipTimeseries,
+	pipe_vipTopBrowsers,
+	pipe_vipTopCities,
+	pipe_vipTopCountries,
+	pipe_vipTopDevices,
+	pipe_vipTopEmailBroadcasts,
+	pipe_vipTopEmailTemplates,
+	pipe_vipTopFlowActions,
+	pipe_vipTopLandingPages,
+	pipe_vipTopMetaAds,
+	pipe_vipTopMetaAdSets,
+	pipe_vipTopMetaCampaigns,
+	pipe_vipTopMetaPlacements,
+	pipe_vipTopOs,
+	pipe_vipTopReferers,
+	pipe_vipTopRegions,
 	pipe_webHitsTimeseries,
 	querySpotifyAlbumStats,
 	querySpotifyArtistStats,
@@ -206,6 +222,20 @@ export const statRoute = {
 			return pageTimeseries.data;
 		}),
 
+	vipTimeseries: workspaceProcedure
+		.input(stdWebEventQueryToPipeParamsSchema)
+		.query(async ({ ctx, input }) => {
+			const { dateRange, granularity } = input;
+			console.log('vipTimeseries input => ', input);
+			const vipTimeseries = await pipe_vipTimeseries({
+				...input,
+				workspaceId: ctx.workspace.id,
+				timezone: ctx.workspace.timezone,
+				granularity: granularity ?? (dateRange === '1d' ? 'hour' : 'day'),
+			});
+			return vipTimeseries.data;
+		}),
+
 	webEventTimeseries: workspaceProcedure
 		.input(stdWebEventQueryToPipeParamsSchema)
 		.query(async ({ ctx, input }) => {
@@ -268,6 +298,20 @@ export const statRoute = {
 				return topBrowsers.data;
 			}
 
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topBrowsers = await pipe_vipTopBrowsers({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topBrowsers.data;
+			}
+
 			throw new Error('Invalid topEventType');
 		}),
 
@@ -319,6 +363,20 @@ export const statRoute = {
 				return topDevices.data;
 			}
 
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topDevices = await pipe_vipTopDevices({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topDevices.data;
+			}
+
 			throw new Error('Invalid topEventType');
 		}),
 
@@ -362,6 +420,20 @@ export const statRoute = {
 
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topOperatingSystems = await pipe_pageTopOs({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topOperatingSystems.data;
+			}
+
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topOperatingSystems = await pipe_vipTopOs({
 					...input,
 					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
@@ -424,6 +496,20 @@ export const statRoute = {
 				return topCities.data;
 			}
 
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topCities = await pipe_vipTopCities({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topCities.data;
+			}
+
 			throw new Error('Invalid topEventType');
 		}),
 
@@ -465,6 +551,20 @@ export const statRoute = {
 
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topRegions = await pipe_pageTopRegions({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topRegions.data;
+			}
+
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topRegions = await pipe_vipTopRegions({
 					...input,
 					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
@@ -524,6 +624,20 @@ export const statRoute = {
 				return topCountries.data;
 			}
 
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topCountries = await pipe_vipTopCountries({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topCountries.data;
+			}
+
 			throw new Error('Invalid topEventType');
 		}),
 
@@ -570,6 +684,20 @@ export const statRoute = {
 
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topReferers = await pipe_pageTopReferers({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topReferers.data;
+			}
+
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topReferers = await pipe_vipTopReferers({
 					...input,
 					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
@@ -631,6 +759,20 @@ export const statRoute = {
 				return topMetaCampaigns.data;
 			}
 
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topMetaCampaigns = await pipe_vipTopMetaCampaigns({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topMetaCampaigns.data;
+			}
+
 			throw new Error('Invalid topEventType');
 		}),
 
@@ -676,6 +818,20 @@ export const statRoute = {
 
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topMetaAdSets = await pipe_pageTopMetaAdSets({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topMetaAdSets.data;
+			}
+
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topMetaAdSets = await pipe_vipTopMetaAdSets({
 					...input,
 					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
@@ -737,6 +893,20 @@ export const statRoute = {
 				return topMetaAds.data;
 			}
 
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topMetaAds = await pipe_vipTopMetaAds({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topMetaAds.data;
+			}
+
 			throw new Error('Invalid topEventType');
 		}),
 
@@ -782,6 +952,20 @@ export const statRoute = {
 
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topMetaPlacements = await pipe_pageTopMetaPlacements({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topMetaPlacements.data;
+			}
+
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topMetaPlacements = await pipe_vipTopMetaPlacements({
 					...input,
 					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
@@ -843,6 +1027,20 @@ export const statRoute = {
 				return topLandingPages.data;
 			}
 
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topLandingPages = await pipe_vipTopLandingPages({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topLandingPages.data;
+			}
+
 			throw new Error('Invalid topEventType');
 		}),
 
@@ -888,6 +1086,20 @@ export const statRoute = {
 
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topEmailBroadcasts = await pipe_pageTopEmailBroadcasts({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topEmailBroadcasts.data;
+			}
+
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topEmailBroadcasts = await pipe_vipTopEmailBroadcasts({
 					...input,
 					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
@@ -949,6 +1161,20 @@ export const statRoute = {
 				return topEmailTemplates.data;
 			}
 
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topEmailTemplates = await pipe_vipTopEmailTemplates({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topEmailTemplates.data;
+			}
+
 			throw new Error('Invalid topEventType');
 		}),
 
@@ -994,6 +1220,20 @@ export const statRoute = {
 
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topFlowActions = await pipe_pageTopFlowActions({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topFlowActions.data;
+			}
+
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topFlowActions = await pipe_vipTopFlowActions({
 					...input,
 					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,

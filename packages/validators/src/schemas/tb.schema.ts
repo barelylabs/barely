@@ -81,6 +81,10 @@ export const stdWebEventPipeQueryParamsSchema = stdWebEventPipeParamsSchema
 
 				'page/view',
 				'page/linkClick',
+
+				'vip/view',
+				'vip/emailCapture',
+				'vip/download',
 			])
 			.optional(),
 	});
@@ -100,6 +104,9 @@ export function getTopStatValue(
 		link_clicks?: number;
 		page_views?: number;
 		page_linkClicks?: number;
+		vip_views?: number;
+		vip_emailCaptures?: number;
+		vip_downloads?: number;
 	},
 ) {
 	if (eventType === 'fm/linkClick') return d.fm_linkClicks ?? 0;
@@ -110,6 +117,9 @@ export function getTopStatValue(
 	if (eventType === 'link/click') return d.link_clicks ?? 0;
 	if (eventType === 'page/view') return d.page_views ?? 0;
 	if (eventType === 'page/linkClick') return d.page_linkClicks ?? 0;
+	if (eventType === 'vip/view') return d.vip_views ?? 0;
+	if (eventType === 'vip/emailCapture') return d.vip_emailCaptures ?? 0;
+	if (eventType === 'vip/download') return d.vip_downloads ?? 0;
 	return 0;
 }
 

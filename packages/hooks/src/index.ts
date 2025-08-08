@@ -68,6 +68,7 @@ export * from './use-fm-stat-filters';
 export * from './use-link-stat-filters';
 export * from './use-page-stat-filters';
 // export * from './use-track-stat-filters'; // Deprecated - use use-stat-search-params
+export * from './use-vip-stat-filters';
 export * from './use-web-event-stat-filters';
 export * from './use-stat-search-params';
 

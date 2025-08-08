@@ -72,6 +72,10 @@ const prefixes = {
 	workflowAction: 'wfa',
 	workflowRun: 'wfr',
 	workflowRunAction: 'wfra',
+	// vip
+	vipSwap: 'vip_swap',
+	vipSwapAccessLog: 'vip_sal',
+	vipSession: 'vips',
 } as const;
 
 export function newId(prefix: keyof typeof prefixes) {

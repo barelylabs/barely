@@ -71,6 +71,10 @@
 		"./trpc/*.route": {
 			"types": "./dist/src/trpc/routes/*.route.d.ts",
 			"default": "./src/trpc/routes/*.route.ts"
+		},
+		"./trpc/routes/*.route": {
+			"types": "./dist/src/trpc/routes/*.route.d.ts",
+			"default": "./src/trpc/routes/*.route.ts"
 		}
 	},
 	"scripts": {

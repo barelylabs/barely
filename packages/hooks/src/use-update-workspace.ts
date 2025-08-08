@@ -45,6 +45,7 @@ export function useUpdateWorkspace({ onSuccess }: { onSuccess?: () => void } = {
 				}
 
 				await queryClient.invalidateQueries(trpc.workspace.byHandle.pathFilter());
+				await queryClient.invalidateQueries(trpc.workspace.byHandleWithAll.pathFilter());
 				onSuccess?.();
 			},
 			onError: (error, variables, context) => {

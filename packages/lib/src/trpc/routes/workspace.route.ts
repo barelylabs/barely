@@ -184,11 +184,15 @@ export const workspaceRoute = {
 				// refresh the current workspace session
 				// await ctx.getRefreshedSession();
 
-				await pushEvent('workspace', 'update', {
-					id: ctx.workspace.id,
-					pageSessionId: ctx.pageSessionId,
-					socketId: ctx.pusherSocketId,
-				});
+				try {
+					await pushEvent('workspace', 'update', {
+						id: ctx.workspace.id,
+						pageSessionId: ctx.pageSessionId,
+						socketId: ctx.pusherSocketId,
+					});
+				} catch (error) {
+					console.error('error pushing workspace update event => ', error);
+				}
 
 				return updatedWorkspace;
 			} catch (err) {

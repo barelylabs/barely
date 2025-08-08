@@ -14,7 +14,6 @@ import { toast } from 'sonner';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
-import { Button } from '@barely/ui/button';
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { Icon } from '@barely/ui/icon';
@@ -257,21 +256,6 @@ export function ImportFansFromCsvModal() {
 				)}
 			</ModalBody>
 		</Modal>
-	);
-}
-
-export function ImportFansButton() {
-	const { setShowImportModal } = useFanSearchParams();
-
-	return (
-		<Button
-			look='secondary'
-			variant='icon'
-			startIcon='import'
-			onClick={() => {
-				void setShowImportModal(true);
-			}}
-		/>
 	);
 }
 

@@ -191,12 +191,105 @@ pnpm tb:get-local-token       # Get local Tinybird token
 
 ## Common Patterns
 
+### Form Handling Best Practices
+
+**ALWAYS use our established form patterns when creating forms:**
+
+1. **Use `useZodForm` hook** from `@barely/hooks` for form state management
+2. **Use form components** from `@barely/ui/forms/` instead of raw UI elements
+3. **Define Zod schemas** for all form validation
+4. **Use the Form wrapper** component for proper form context
+
+#### Correct Form Pattern Example:
+```typescript
+'use client';
+
+import { useZodForm } from '@barely/hooks';
+import { z } from 'zod/v4';
+
+import { CheckboxField } from '@barely/ui/forms/checkbox-field';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
+import { TextField } from '@barely/ui/forms/text-field';
+
+// Define schema with Zod
+const myFormSchema = z.object({
+  email: z.string().email('Invalid email'),
+  name: z.string().min(1, 'Name is required'),
+  consent: z.boolean().refine(val => val === true, 'Consent required'),
+});
+
+type MyFormData = z.infer<typeof myFormSchema>;
+
+export function MyForm({ onSubmit }: { onSubmit: (data: MyFormData) => void }) {
+  const form = useZodForm({
+    schema: myFormSchema,
+    defaultValues: {
+      email: '',
+      name: '',
+      consent: false,
+    },
+  });
+
+  return (
+    <Form form={form} onSubmit={onSubmit}>
+      <TextField
+        control={form.control}
+        name="name"
+        label="Name"
+        placeholder="Enter your name"
+      />
+      
+      <TextField
+        control={form.control}
+        name="email"
+        type="email"
+        placeholder="Enter your email"
+        startIcon="email"
+      />
+      
+      <CheckboxField
+        control={form.control}
+        name="consent"
+        label="I agree to terms"
+      />
+      
+      <SubmitButton loading={isLoading}>
+        Submit
+      </SubmitButton>
+    </Form>
+  );
+}
+```
+
+#### Key Points:
+- **NEVER** use raw `Input`, `Checkbox`, or `Button` components in forms
+- **ALWAYS** use `TextField`, `CheckboxField`, `SubmitButton` etc. from `@barely/ui/forms/`
+- **ALWAYS** pass `control={form.control}` to form field components
+- **ALWAYS** wrap form content in `<Form>` component
+- **NEVER** manage form state with `useState` - use `useZodForm` instead
+- **ALWAYS** define validation with Zod schemas
+- Import Zod as `z` from `zod/v4` (not zod/lib/v4)
+- For email validation, use `z.email()` - NOTE: `z.string().email()` is deprecated in Zod v4 in favor of the simpler `z.email()` syntax
+
 ### Creating New tRPC Routes
 
 1. Define schema in `packages/validators/src/`
 2. Create route in `packages/lib/src/trpc/routes/`
 3. Add to router in `packages/lib/src/trpc/trpc.ts`
-4. Use in client with `trpc.routeName.procedureName.useQuery()`
+4. Use in client with React Query:
+   ```typescript
+   import { useQuery, useMutation } from '@tanstack/react-query';
+   
+   // For queries
+   const { data } = useQuery({
+     ...trpc.routeName.procedureName.queryOptions({ input }),
+   });
+   
+   // For mutations
+   const { mutate } = useMutation({
+     ...trpc.routeName.procedureName.mutationOptions(),
+   });
+   ```
 
 ### Adding Database Tables
 
@@ -209,3 +302,108 @@ pnpm tb:get-local-token       # Get local Tinybird token
 1. Create job in `packages/lib/src/trigger/`
 2. Import in `packages/lib/src/trigger/index.ts`
 3. Deploy with `pnpm deploy-trigger:staging`
+
+## Creating New Public-Facing Apps with tRPC
+
+### Lessons Learned from VIP App Implementation
+
+When creating a new public-facing app (like `apps/vip`, `apps/fm`, `apps/page`), there are specific patterns and gotchas to avoid:
+
+#### 1. tRPC Router Structure
+Public-facing apps need **separate routers** from admin routes:
+- **Admin routes**: Located in `packages/lib/src/trpc/routes/` (e.g., `vip.route.ts`) - for workspace management
+- **Public routes**: Located in `packages/api/src/public/` (e.g., `vip-render.route.ts`, `vip-render.router.ts`) - for public endpoints
+
+#### 2. Required Files for tRPC Setup
+Each public-facing app needs these files in specific order:
+
+**Step 1: Create the public router files**
+- `packages/api/src/public/[app-name]-render.route.ts` - Contains the actual tRPC procedures
+- `packages/api/src/public/[app-name]-render.router.ts` - Exports the router type and creates router
+- `packages/api/src/public/[app-name]-render.trpc.react.ts` - Creates tRPC context hooks using `createTRPCContext`
+
+**Step 2: Create the app-specific API route**
+- `apps/[app-name]/src/app/api/trpc/[routerName]/route.ts` - Next.js API route handler
+
+**Step 3: Set up client-side tRPC**
+- `apps/[app-name]/src/trpc/query-client.tsx` - QueryClient configuration (copy from existing apps)
+- `apps/[app-name]/src/trpc/react.tsx` - TRPCReactProvider setup
+- `apps/[app-name]/src/trpc/server.tsx` - Server-side tRPC client
+
+#### 3. Critical Dependencies in package.json
+Public apps need these specific dependencies (check `apps/app/package.json` for versions):
+```json
+{
+  "@tanstack/react-query": "catalog:",
+  "@tanstack/react-query-devtools": "^5.80.10",
+  "@trpc/client": "catalog:",
+  "@trpc/server": "catalog:",
+  "superjson": "^2.2.1",
+  "lucide-react": "^0.348.0"
+}
+```
+
+**CRITICAL**: Do NOT add `@trpc/react-query` to package.json - it's not in the catalog and will cause installation failures.
+
+#### 4. Component Usage Pattern
+In React components, use this pattern:
+```typescript
+import { useVipRenderTRPC } from '@barely/api/public/vip-render.trpc.react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+
+function MyComponent() {
+  const trpc = useVipRenderTRPC();
+  
+  // For queries
+  const { data } = useQuery({
+    ...trpc.procedureName.queryOptions({ input }),
+    enabled: !!someCondition,
+  });
+  
+  // For mutations
+  const { mutate } = useMutation({
+    ...trpc.procedureName.mutationOptions(),
+    onSuccess: (data) => { /* handle success */ },
+  });
+}
+```
+
+#### 5. Configuration Updates Required
+When adding a new app, update these files:
+- `packages/const/src/app.constants.ts` - Add app name to APPS array
+- `packages/auth/src/get-url.ts` - Add URL handling for new app
+- `packages/auth/env.ts` - Add environment variables for base URL and dev port
+- `packages/utils/src/id.ts` - Add ID prefixes if creating new entities
+- `scripts/dev-qr-codes.sh` - Add QR code generation for new app
+- `packages/db/src/client.ts` - Import and include new SQL files if adding database tables
+
+#### 6. Database Integration
+If creating new database tables:
+- Create SQL file in `packages/db/src/sql/[table-name].sql.ts`
+- Export type definitions: `export type TableName = typeof TableNames.$inferSelect;`
+- Import in `packages/db/src/client.ts` and add to dbSchema
+- Create Zod schemas in `packages/validators/src/schemas/`
+- Export from `packages/validators/src/schemas/index.ts`
+
+#### 7. Common TypeScript Issues
+- **Control flow narrowing**: Use `TRPCError` instead of `raise()` for better type narrowing
+- **UI imports**: Use `@barely/ui/button` not `@barely/ui/elements/button`
+- **Visitor context**: Check property names - use `ctx.visitor?.ip` not `ctx.visitor?.ipAddress`
+- **User agent**: Visitor userAgent might be object or string: `typeof ctx.visitor?.userAgent === 'string' ? ctx.visitor.userAgent : ctx.visitor?.userAgent?.ua ?? null`
+
+#### 8. Port Management
+Each app needs a unique port:
+- app: 3000, cart: 3001, fm: 3002, link: 3003, page: 3004, press: 3005, www: 3006, nyc: 3010, vip: 3009
+- Update `scripts/dev-qr-codes.sh` with correct port mappings
+
+#### 9. Essential Checklist for New Public Apps
+- [ ] Create public router files in correct order
+- [ ] Add all required dependencies to package.json
+- [ ] Set up API route handler
+- [ ] Configure client-side tRPC with proper provider
+- [ ] Update configuration files (constants, auth, utils)
+- [ ] Add database integration if needed
+- [ ] Update development scripts
+- [ ] Test end-to-end functionality before adding complexity
+
+This checklist should prevent the common issues encountered during VIP app setup and significantly speed up future app creation.

@@ -39,6 +39,7 @@ import { statRoute } from './stat.route';
 import { stripeConnectRoute } from './stripe-connect.route';
 import { trackRoute } from './track.route';
 import { userRoute } from './user.route';
+import { vipSwapRoute } from './vip-swap.route';
 import { visitorSessionRoute } from './visitor-session.route';
 import { workspaceInviteRoute } from './workspace-invite.route';
 import { workspaceStripeRoute } from './workspace-stripe.route';
@@ -83,6 +84,7 @@ export const appRouter = createTRPCRouter({
 	track: trackRoute,
 	user: userRoute,
 	visitorSession: visitorSessionRoute,
+	vipSwap: vipSwapRoute,
 });
 
 export type AppRouter = typeof appRouter;

@@ -102,6 +102,188 @@ export const pipe_pageTopOs = tinybird.buildPipe({
 	data: topOsPipeDataSchema,
 });
 
+export const pipe_vipTimeseries = tinybird.buildPipe({
+	pipe: 'vip_timeseries',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		start: z.string(),
+		vip_views: z.number(),
+		vip_emailCaptures: z.number(),
+		vip_downloads: z.number(),
+		vip_contactViews: z.number(),
+		vip_presaveViews: z.number(),
+		vip_presaveForeverViews: z.number(),
+	}),
+});
+
+export const pipe_vipTopBrowsers = tinybird.buildPipe({
+	pipe: 'vip_browsers',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		browser: z.string(),
+		vip_views: z.number(),
+		vip_emailCaptures: z.number(),
+		vip_downloads: z.number(),
+	}),
+});
+
+export const pipe_vipTopDevices = tinybird.buildPipe({
+	pipe: 'vip_devices',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		device: z.string(),
+		vip_views: z.number(),
+		vip_emailCaptures: z.number(),
+		vip_downloads: z.number(),
+	}),
+});
+
+export const pipe_vipTopOs = tinybird.buildPipe({
+	pipe: 'vip_os',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		os: z.string(),
+		vip_views: z.number(),
+		vip_emailCaptures: z.number(),
+		vip_downloads: z.number(),
+	}),
+});
+
+export const pipe_vipTopCities = tinybird.buildPipe({
+	pipe: 'vip_cities',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		city: z.string(),
+		region: z.string(),
+		country: z.string(),
+		vip_views: z.number(),
+		vip_emailCaptures: z.number(),
+		vip_downloads: z.number(),
+	}),
+});
+
+export const pipe_vipTopCountries = tinybird.buildPipe({
+	pipe: 'vip_countries',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		country: z.string(),
+		vip_views: z.number(),
+		vip_emailCaptures: z.number(),
+		vip_downloads: z.number(),
+	}),
+});
+
+export const pipe_vipTopRegions = tinybird.buildPipe({
+	pipe: 'vip_regions',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		region: z.string(),
+		country: z.string(),
+		vip_views: z.number(),
+		vip_emailCaptures: z.number(),
+		vip_downloads: z.number(),
+	}),
+});
+
+export const pipe_vipTopReferers = tinybird.buildPipe({
+	pipe: 'vip_referers',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		referer: z.string(),
+		vip_views: z.number(),
+		vip_emailCaptures: z.number(),
+		vip_downloads: z.number(),
+	}),
+});
+
+export const pipe_vipTopMetaCampaigns = tinybird.buildPipe({
+	pipe: 'vip_metaCampaigns',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		sessionMetaCampaignId: z.string(),
+		vip_views: z.number(),
+		vip_emailCaptures: z.number(),
+		vip_downloads: z.number(),
+	}),
+});
+
+export const pipe_vipTopMetaAdSets = tinybird.buildPipe({
+	pipe: 'vip_metaAdSets',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		sessionMetaAdSetId: z.string(),
+		vip_views: z.number(),
+		vip_emailCaptures: z.number(),
+		vip_downloads: z.number(),
+	}),
+});
+
+export const pipe_vipTopMetaAds = tinybird.buildPipe({
+	pipe: 'vip_metaAds',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		sessionMetaAdId: z.string(),
+		vip_views: z.number(),
+		vip_emailCaptures: z.number(),
+		vip_downloads: z.number(),
+	}),
+});
+
+export const pipe_vipTopMetaPlacements = tinybird.buildPipe({
+	pipe: 'vip_metaPlacements',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		sessionMetaPlacement: z.string(),
+		vip_views: z.number(),
+		vip_emailCaptures: z.number(),
+		vip_downloads: z.number(),
+	}),
+});
+
+export const pipe_vipTopLandingPages = tinybird.buildPipe({
+	pipe: 'vip_landingPages',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		sessionLandingPageId: z.string(),
+		vip_views: z.number(),
+		vip_emailCaptures: z.number(),
+		vip_downloads: z.number(),
+	}),
+});
+
+export const pipe_vipTopEmailBroadcasts = tinybird.buildPipe({
+	pipe: 'vip_emailBroadcasts',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		sessionEmailBroadcastId: z.string(),
+		vip_views: z.number(),
+		vip_emailCaptures: z.number(),
+		vip_downloads: z.number(),
+	}),
+});
+
+export const pipe_vipTopEmailTemplates = tinybird.buildPipe({
+	pipe: 'vip_emailTemplates',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		sessionEmailTemplateId: z.string(),
+		vip_views: z.number(),
+		vip_emailCaptures: z.number(),
+		vip_downloads: z.number(),
+	}),
+});
+
+export const pipe_vipTopFlowActions = tinybird.buildPipe({
+	pipe: 'vip_flowActions',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		sessionFlowActionId: z.string(),
+		vip_views: z.number(),
+		vip_emailCaptures: z.number(),
+		vip_downloads: z.number(),
+	}),
+});
+
 export const pipe_fmTopCities = tinybird.buildPipe({
 	pipe: 'v2_fm_cities',
 	parameters: stdWebEventPipeParamsSchema,

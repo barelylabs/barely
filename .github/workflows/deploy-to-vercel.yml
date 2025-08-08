@@ -21,6 +21,9 @@ on:
       vercel_git_metadata:
         required: true
         type: string
+      current_app_override:
+        required: false
+        type: string
     outputs:
       deployment_id:
         value: ${{ jobs.deploy-to-vercel.outputs.deployment_id }}
@@ -57,6 +60,18 @@ jobs:
       - name: setup node/pnpm/turbo/vercel
         uses: ./tooling/github/setup
 
+      - name: copy and prepare app variant
+        if: ${{ inputs.current_app_override != '' }}
+        run: |
+          cp -r apps/app apps/app-${{ inputs.current_app_override }}
+          echo "Copied apps/app to apps/app-${{ inputs.current_app_override }}"
+          
+          # Update package.json name to match the new directory
+          sed -i 's/"name": "@barely\/app"/"name": "@barely\/app-${{ inputs.current_app_override }}"/' apps/app-${{ inputs.current_app_override }}/package.json
+          echo "Updated package.json name to @barely/app-${{ inputs.current_app_override }}"
+          
+          ls -la apps/
+
       - name: link vercel
         run: |
           pnpm vercel link --repo --scope=${{ inputs.scope }} --yes --token=${{ secrets.VERCEL_TOKEN }} --debug
@@ -69,7 +84,14 @@ jobs:
             ENV_OPTIONS=""
           fi
 
-          cd apps/${{ inputs.app_name }} && pnpm vercel pull --yes --environment=${{ inputs.environment }} $ENV_OPTIONS --token=${{ secrets.VERCEL_TOKEN }} --debug
+          # Use copied directory if current_app_override is set
+          if [ -n "${{ inputs.current_app_override }}" ]; then
+            WORKING_DIR="apps/app-${{ inputs.current_app_override }}"
+          else
+            WORKING_DIR="apps/${{ inputs.app_name }}"
+          fi
+
+          cd $WORKING_DIR && pnpm vercel pull --yes --environment=${{ inputs.environment }} $ENV_OPTIONS --token=${{ secrets.VERCEL_TOKEN }} --debug
 
           VERCEL_URL=${{ inputs.app_name }}-git-${{ inputs.git_branch }}-${{ inputs.scope }}.vercel.app
           sed -i '/VERCEL_URL/d' .vercel/.env.${{ inputs.environment }}.local
@@ -78,8 +100,22 @@ jobs:
 
       - name: build project artifacts
         run: |
-          pnpm build:${{ inputs.environment }} --filter=@barely/${{ inputs.app_name }} --token=${{ secrets.VERCEL_TOKEN }}
-          cp -r apps/${{ inputs.app_name }}/.vercel .
+          # For app variants, build the renamed package
+          if [ -n "${{ inputs.current_app_override }}" ]; then
+            BUILD_PACKAGE="@barely/app-${{ inputs.current_app_override }}"
+          else
+            BUILD_PACKAGE="@barely/${{ inputs.app_name }}"
+          fi
+          
+          pnpm build:${{ inputs.environment }} --filter=$BUILD_PACKAGE --token=${{ secrets.VERCEL_TOKEN }}
+          
+          # Copy .vercel to root for deployment
+          # For app variants, copy from the copied directory
+          if [ -n "${{ inputs.current_app_override }}" ]; then
+            cp -r apps/app-${{ inputs.current_app_override }}/.vercel .
+          else
+            cp -r apps/${{ inputs.app_name }}/.vercel .
+          fi
 
       - name: deploy to vercel
         id: deploy
@@ -90,11 +126,18 @@ jobs:
             ENV_OPTIONS=""
           fi
 
+          # Deploy from root with the copied .vercel directory
           deployment_url=$(pnpm vercel deploy --prebuilt $ENV_OPTIONS ${{ inputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }} --debug)          
 
           inspect=$(pnpm vercel inspect $deployment_url --token=${{ secrets.VERCEL_TOKEN }} --debug 2>&1)
           deployment_id=$(echo "$inspect" | grep -m 1 '^    id' | awk '{print $NF}' | cut -d'_' -f 2-)
-          inspect_url="https://vercel.com/${{ inputs.scope }}/${{ inputs.app_name }}/$deployment_id"
+          
+          # For app variants, use the override name in the inspect URL
+          if [ -n "${{ inputs.current_app_override }}" ]; then
+            inspect_url="https://vercel.com/${{ inputs.scope }}/${{ inputs.app_name }}-${{ inputs.current_app_override }}/$deployment_id"
+          else
+            inspect_url="https://vercel.com/${{ inputs.scope }}/${{ inputs.app_name }}/$deployment_id"
+          fi
 
           echo "deployment_id=$deployment_id" >> $GITHUB_OUTPUT
           echo "deployment_url=$deployment_url" >> $GITHUB_OUTPUT          
