@@ -97,12 +97,9 @@ jobs:
         run: |
           pnpm build:${{ inputs.environment }} --filter=@barely/${{ inputs.app_name }} --token=${{ secrets.VERCEL_TOKEN }}
           
-          # Copy .vercel from the correct directory
-          if [ -n "${{ inputs.current_app_override }}" ]; then
-            cp -r apps/app-${{ inputs.current_app_override }}/.vercel .
-          else
-            cp -r apps/${{ inputs.app_name }}/.vercel .
-          fi
+          # For app variants, the build output is in apps/app/.vercel, not the symlink
+          # Always copy from the actual app directory, not the symlink
+          cp -r apps/${{ inputs.app_name }}/.vercel .
 
       - name: deploy to vercel
         id: deploy
