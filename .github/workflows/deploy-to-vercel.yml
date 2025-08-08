@@ -57,6 +57,13 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: create symlink for app variant
+        if: ${{ inputs.current_app_override != '' }}
+        run: |
+          ln -s app apps/app-${{ inputs.current_app_override }}
+          echo "Created symlink: apps/app-${{ inputs.current_app_override }} -> apps/app"
+          ls -la apps/
+
       - name: setup node/pnpm/turbo/vercel
         uses: ./tooling/github/setup
 
@@ -72,24 +79,30 @@ jobs:
             ENV_OPTIONS=""
           fi
 
-          cd apps/${{ inputs.app_name }} && pnpm vercel pull --yes --environment=${{ inputs.environment }} $ENV_OPTIONS --token=${{ secrets.VERCEL_TOKEN }} --debug
+          # Use symlinked directory if current_app_override is set
+          if [ -n "${{ inputs.current_app_override }}" ]; then
+            WORKING_DIR="apps/app-${{ inputs.current_app_override }}"
+          else
+            WORKING_DIR="apps/${{ inputs.app_name }}"
+          fi
+
+          cd $WORKING_DIR && pnpm vercel pull --yes --environment=${{ inputs.environment }} $ENV_OPTIONS --token=${{ secrets.VERCEL_TOKEN }} --debug
 
           VERCEL_URL=${{ inputs.app_name }}-git-${{ inputs.git_branch }}-${{ inputs.scope }}.vercel.app
           sed -i '/VERCEL_URL/d' .vercel/.env.${{ inputs.environment }}.local
           echo "VERCEL_URL=\"$VERCEL_URL\"" >> .vercel/.env.${{ inputs.environment }}.local                    
           cp .vercel/.env.${{ inputs.environment }}.local ../../.env
-          
-          # Override NEXT_PUBLIC_CURRENT_APP if specified
-          if [ -n "${{ inputs.current_app_override }}" ]; then
-            sed -i '/NEXT_PUBLIC_CURRENT_APP/d' ../../.env
-            echo "NEXT_PUBLIC_CURRENT_APP=\"${{ inputs.current_app_override }}\"" >> ../../.env
-            echo "Overrode NEXT_PUBLIC_CURRENT_APP to: ${{ inputs.current_app_override }}"
-          fi
 
       - name: build project artifacts
         run: |
           pnpm build:${{ inputs.environment }} --filter=@barely/${{ inputs.app_name }} --token=${{ secrets.VERCEL_TOKEN }}
-          cp -r apps/${{ inputs.app_name }}/.vercel .
+          
+          # Copy .vercel from the correct directory
+          if [ -n "${{ inputs.current_app_override }}" ]; then
+            cp -r apps/app-${{ inputs.current_app_override }}/.vercel .
+          else
+            cp -r apps/${{ inputs.app_name }}/.vercel .
+          fi
 
       - name: deploy to vercel
         id: deploy
