@@ -13,6 +13,7 @@ export const authEnv = createEnv({
 	},
 	client: {
 		NEXT_PUBLIC_APP_BASE_URL: z.string().optional(),
+		NEXT_PUBLIC_APP_FM_BASE_URL: z.string().optional(),
 		NEXT_PUBLIC_BIO_BASE_URL: z.string().optional(),
 		NEXT_PUBLIC_CART_BASE_URL: z.string().optional(),
 		NEXT_PUBLIC_FM_BASE_URL: z.string().optional(),
@@ -41,6 +42,7 @@ export const authEnv = createEnv({
 	},
 	experimental__runtimeEnv: {
 		NEXT_PUBLIC_APP_BASE_URL: process.env.NEXT_PUBLIC_APP_BASE_URL,
+		NEXT_PUBLIC_APP_FM_BASE_URL: process.env.NEXT_PUBLIC_APP_FM_BASE_URL,
 		NEXT_PUBLIC_BIO_BASE_URL: process.env.NEXT_PUBLIC_BIO_BASE_URL,
 		NEXT_PUBLIC_CART_BASE_URL: process.env.NEXT_PUBLIC_CART_BASE_URL,
 		NEXT_PUBLIC_FM_BASE_URL: process.env.NEXT_PUBLIC_FM_BASE_URL,
