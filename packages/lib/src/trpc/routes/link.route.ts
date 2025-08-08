@@ -40,6 +40,8 @@ export const linkRoute = {
 	byWorkspace: workspaceProcedure
 		.input(selectWorkspaceLinksSchema)
 		.query(async ({ input, ctx }) => {
+			console.log('current app', libEnv.NEXT_PUBLIC_CURRENT_APP);
+
 			const { limit, cursor, search, showArchived } = input;
 
 			const links = await dbHttp.query.Links.findMany({

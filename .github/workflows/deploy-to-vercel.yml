@@ -21,6 +21,9 @@ on:
       vercel_git_metadata:
         required: true
         type: string
+      current_app_override:
+        required: false
+        type: string
     outputs:
       deployment_id:
         value: ${{ jobs.deploy-to-vercel.outputs.deployment_id }}
@@ -75,6 +78,13 @@ jobs:
           sed -i '/VERCEL_URL/d' .vercel/.env.${{ inputs.environment }}.local
           echo "VERCEL_URL=\"$VERCEL_URL\"" >> .vercel/.env.${{ inputs.environment }}.local                    
           cp .vercel/.env.${{ inputs.environment }}.local ../../.env
+          
+          # Override NEXT_PUBLIC_CURRENT_APP if specified
+          if [ -n "${{ inputs.current_app_override }}" ]; then
+            sed -i '/NEXT_PUBLIC_CURRENT_APP/d' ../../.env
+            echo "NEXT_PUBLIC_CURRENT_APP=\"${{ inputs.current_app_override }}\"" >> ../../.env
+            echo "Overrode NEXT_PUBLIC_CURRENT_APP to: ${{ inputs.current_app_override }}"
+          fi
 
       - name: build project artifacts
         run: |
