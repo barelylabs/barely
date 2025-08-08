@@ -60,11 +60,11 @@ jobs:
       - name: setup node/pnpm/turbo/vercel
         uses: ./tooling/github/setup
 
-      - name: create symlink for app variant
+      - name: copy app directory for app variant
         if: ${{ inputs.current_app_override != '' }}
         run: |
-          ln -s app apps/app-${{ inputs.current_app_override }}
-          echo "Created symlink: apps/app-${{ inputs.current_app_override }} -> apps/app"
+          cp -r apps/app apps/app-${{ inputs.current_app_override }}
+          echo "Copied apps/app to apps/app-${{ inputs.current_app_override }}"
           ls -la apps/
 
       - name: link vercel
@@ -79,7 +79,7 @@ jobs:
             ENV_OPTIONS=""
           fi
 
-          # Use symlinked directory if current_app_override is set
+          # Use copied directory if current_app_override is set
           if [ -n "${{ inputs.current_app_override }}" ]; then
             WORKING_DIR="apps/app-${{ inputs.current_app_override }}"
           else
@@ -97,9 +97,11 @@ jobs:
         run: |
           pnpm build:${{ inputs.environment }} --filter=@barely/${{ inputs.app_name }} --token=${{ secrets.VERCEL_TOKEN }}
           
-          # Only copy .vercel to root for non-variant apps
-          # App variants will deploy from within their symlinked directory
-          if [ -z "${{ inputs.current_app_override }}" ]; then
+          # Copy .vercel to root for deployment
+          # For app variants, copy from the copied directory
+          if [ -n "${{ inputs.current_app_override }}" ]; then
+            cp -r apps/app-${{ inputs.current_app_override }}/.vercel .
+          else
             cp -r apps/${{ inputs.app_name }}/.vercel .
           fi
 
@@ -112,14 +114,8 @@ jobs:
             ENV_OPTIONS=""
           fi
 
-          # For app variants, deploy from within the symlinked directory
-          # For regular apps, deploy from root with copied .vercel
-          if [ -n "${{ inputs.current_app_override }}" ]; then
-            cd apps/app-${{ inputs.current_app_override }}
-            deployment_url=$(pnpm vercel deploy --prebuilt $ENV_OPTIONS ${{ inputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }} --debug)
-          else
-            deployment_url=$(pnpm vercel deploy --prebuilt $ENV_OPTIONS ${{ inputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }} --debug)
-          fi
+          # Deploy from root with the copied .vercel directory
+          deployment_url=$(pnpm vercel deploy --prebuilt $ENV_OPTIONS ${{ inputs.vercel_git_metadata }} --token=${{ secrets.VERCEL_TOKEN }} --debug)          
 
           inspect=$(pnpm vercel inspect $deployment_url --token=${{ secrets.VERCEL_TOKEN }} --debug 2>&1)
           deployment_id=$(echo "$inspect" | grep -m 1 '^    id' | awk '{print $NF}' | cut -d'_' -f 2-)
