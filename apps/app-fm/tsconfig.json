@@ -1,0 +1,17 @@
+{
+	"extends": "@barely/tsconfig/base.json",
+	"compilerOptions": {
+		"lib": ["es2022", "dom", "dom.iterable"],
+		"jsx": "preserve",
+		"baseUrl": ".",
+		"paths": {
+			"~/*": ["./src/*"],
+			"@public/*": ["./public/*"],
+			"@static/*": ["./public/_static/*"]
+		},
+		"plugins": [{ "name": "next" }],
+		"module": "esnext"
+	},
+	"include": [".", ".next/types/**/*.ts"],
+	"exclude": ["node_modules"]
+}

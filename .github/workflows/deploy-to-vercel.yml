@@ -60,11 +60,16 @@ jobs:
       - name: setup node/pnpm/turbo/vercel
         uses: ./tooling/github/setup
 
-      - name: copy app directory for app variant
+      - name: copy and prepare app variant
         if: ${{ inputs.current_app_override != '' }}
         run: |
           cp -r apps/app apps/app-${{ inputs.current_app_override }}
           echo "Copied apps/app to apps/app-${{ inputs.current_app_override }}"
+          
+          # Update package.json name to match the new directory
+          sed -i 's/"name": "@barely\/app"/"name": "@barely\/app-${{ inputs.current_app_override }}"/' apps/app-${{ inputs.current_app_override }}/package.json
+          echo "Updated package.json name to @barely/app-${{ inputs.current_app_override }}"
+          
           ls -la apps/
 
       - name: link vercel
@@ -95,7 +100,14 @@ jobs:
 
       - name: build project artifacts
         run: |
-          pnpm build:${{ inputs.environment }} --filter=@barely/${{ inputs.app_name }} --token=${{ secrets.VERCEL_TOKEN }}
+          # For app variants, build the renamed package
+          if [ -n "${{ inputs.current_app_override }}" ]; then
+            BUILD_PACKAGE="@barely/app-${{ inputs.current_app_override }}"
+          else
+            BUILD_PACKAGE="@barely/${{ inputs.app_name }}"
+          fi
+          
+          pnpm build:${{ inputs.environment }} --filter=$BUILD_PACKAGE --token=${{ secrets.VERCEL_TOKEN }}
           
           # Copy .vercel to root for deployment
           # For app variants, copy from the copied directory
