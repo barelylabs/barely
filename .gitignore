@@ -57,6 +57,9 @@ yarn-error.log*
 # turbo
 .turbo
 
+# App variant copies (created during CI/CD)
+apps/app-*
+
 # aws
 .cdk.staging
 cdk.out
