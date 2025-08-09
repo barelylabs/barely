@@ -55,6 +55,7 @@ export const publicFileSchema = selectFileSchema.pick({
 	height: true,
 	fps: true,
 	duration: true,
+	blurDataUrl: true,
 });
 
 export type PublicFile = z.infer<typeof publicFileSchema>;
@@ -66,6 +67,7 @@ export const publicImageSchema = publicFileSchema
 		// src: true,
 		s3Key: true,
 		size: true,
+		blurDataUrl: true,
 	})
 	.extend({
 		width: publicFileSchema.shape.width.unwrap(),

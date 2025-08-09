@@ -18,7 +18,7 @@ import { videoPlayerGlobalCurrentAtom } from './video-player';
 export type MusicPlayerTrack = Pick<PublicTrackWith_Artist_Files, 'id' | 'name'> & {
 	workspace: { name: string };
 	audioFiles: { src: string }[];
-	artwork?: { s3Key: string };
+	artwork?: { s3Key: string; blurDataUrl: string | null };
 };
 export type MusicPlayerTracklist = MusicPlayerTrack[];
 

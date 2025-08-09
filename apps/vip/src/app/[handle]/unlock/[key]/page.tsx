@@ -1,6 +1,8 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 
+import { PoweredByBarelyFooter } from '~/components/powered-by-barely-footer';
+
 import { HydrateClient, prefetch, trpc, trpcCaller } from '~/trpc/server';
 import { VipDownloadContent } from './_components/vip-download-content';
 import { VipDownloadSkeleton } from './_components/vip-download-skeleton';
@@ -31,21 +33,7 @@ export default async function VipDownloadPage({
 							<VipDownloadContent handle={handle} swapKey={key} />
 						</Suspense>
 
-						{/* Powered by Barely */}
-						<div className='mt-16'>
-							<p className='text-center text-xs text-muted-foreground'>
-								Powered by{' '}
-								<a
-									href='https://barely.io'
-									target='_blank'
-									rel='noopener noreferrer'
-									className='transition-colors hover:text-foreground'
-								>
-									Barely
-								</a>{' '}
-								© 2025
-							</p>
-						</div>
+						<PoweredByBarelyFooter />
 					</div>
 				</main>
 			</div>

@@ -164,6 +164,9 @@ function TrackCard({
 					<div className='flex flex-row items-center gap-2'>
 						<Img
 							src={track.artworkFiles.find(f => f.current)?.src ?? track.imageUrl ?? ''}
+							blurDataURL={
+								track.artworkFiles.find(f => f.current)?.blurDataUrl ?? undefined
+							}
 							alt='Track'
 							className='h-8 w-8 rounded-md bg-gray-100 sm:h-16 sm:w-16'
 							width={40}

@@ -3,6 +3,7 @@ export * from './daily-streaming-stats.trigger';
 export * from './email-broadcast.trigger';
 export * from './email-domain.trigger';
 export * from './fan.trigger';
+export * from './file-blurhash.trigger';
 export * from './flow.trigger';
 export * from './sync-spotify-artist.trigger';
 export * from './workspace-usage';

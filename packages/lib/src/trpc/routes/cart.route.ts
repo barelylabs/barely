@@ -4,14 +4,16 @@ import { APPAREL_SIZES, WEB_EVENT_TYPES__CART } from '@barely/const';
 import { dbPool } from '@barely/db/pool';
 import { CartFunnels } from '@barely/db/sql/cart-funnel.sql';
 import { Carts } from '@barely/db/sql/cart.sql';
-import { Files } from '@barely/db/sql/file.sql';
 import { publicProcedure } from '@barely/lib/trpc';
 import { getAbsoluteUrl, isProduction, newId, raise, wait } from '@barely/utils';
 import { updateCheckoutCartFromCheckoutSchema } from '@barely/validators';
+import { tasks } from '@trigger.dev/sdk/v3';
 import { TRPCError } from '@trpc/server';
+import { waitUntil } from '@vercel/functions';
 import { and, eq, notInArray } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
+import type { generateFileBlurHash } from '../../trigger/file-blurhash.trigger';
 import {
 	createMainCartFromFunnel,
 	funnelWith,
@@ -94,50 +96,65 @@ export const cartRoute = {
 
 			if (!funnel) throw new Error('funnel not found');
 
-			// check if product images have blurDataURLs. if not, generate them
+			// Trigger blur hash generation if missing (non-blocking)
 			if (
 				!funnel.mainProduct._images[0]?.file.blurDataUrl &&
 				funnel.mainProduct._images[0]?.file.s3Key
 			) {
-				const { getBlurHash } = await import('../../functions/file.blurhash');
-				const { blurHash, blurDataUrl } = await getBlurHash(
-					funnel.mainProduct._images[0].file.s3Key,
+				// Fire and forget - don't await
+				waitUntil(
+					tasks
+						.trigger<typeof generateFileBlurHash>('generate-file-blur-hash', {
+							fileId: funnel.mainProduct._images[0].file.id,
+							s3Key: funnel.mainProduct._images[0].file.s3Key,
+						})
+						.catch(error => {
+							console.error(
+								'Failed to trigger blur hash generation for main product:',
+								error,
+							);
+						}),
 				);
-
-				await dbPool(ctx.pool)
-					.update(Files)
-					.set({ blurHash, blurDataUrl })
-					.where(eq(Files.id, funnel.mainProduct._images[0].file.id));
 			}
 
 			if (
 				!funnel.bumpProduct?._images[0]?.file.blurDataUrl &&
 				funnel.bumpProduct?._images[0]?.file.s3Key
 			) {
-				const { getBlurHash } = await import('../../functions/file.blurhash');
-				const { blurHash, blurDataUrl } = await getBlurHash(
-					funnel.bumpProduct._images[0].file.s3Key,
+				// Fire and forget - don't await
+				waitUntil(
+					tasks
+						.trigger<typeof generateFileBlurHash>('generate-file-blur-hash', {
+							fileId: funnel.bumpProduct._images[0].file.id,
+							s3Key: funnel.bumpProduct._images[0].file.s3Key,
+						})
+						.catch(error => {
+							console.error(
+								'Failed to trigger blur hash generation for bump product:',
+								error,
+							);
+						}),
 				);
-
-				await dbPool(ctx.pool)
-					.update(Files)
-					.set({ blurHash, blurDataUrl })
-					.where(eq(Files.id, funnel.bumpProduct._images[0].file.id));
 			}
 
 			if (
 				!funnel.upsellProduct?._images[0]?.file.blurDataUrl &&
 				funnel.upsellProduct?._images[0]?.file.s3Key
 			) {
-				const { getBlurHash } = await import('../../functions/file.blurhash');
-				const { blurHash, blurDataUrl } = await getBlurHash(
-					funnel.upsellProduct._images[0].file.s3Key,
+				// Fire and forget - don't await
+				waitUntil(
+					tasks
+						.trigger<typeof generateFileBlurHash>('generate-file-blur-hash', {
+							fileId: funnel.upsellProduct._images[0].file.id,
+							s3Key: funnel.upsellProduct._images[0].file.s3Key,
+						})
+						.catch(error => {
+							console.error(
+								'Failed to trigger blur hash generation for upsell product:',
+								error,
+							);
+						}),
 				);
-
-				await dbPool(ctx.pool)
-					.update(Files)
-					.set({ blurHash, blurDataUrl })
-					.where(eq(Files.id, funnel.upsellProduct._images[0].file.id));
 			}
 
 			const cart =

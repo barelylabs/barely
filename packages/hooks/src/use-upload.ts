@@ -16,6 +16,7 @@ import {
 import { useMutation } from '@tanstack/react-query';
 import { atom, useAtom } from 'jotai';
 import { useDropzone } from 'react-dropzone';
+import { toast } from 'sonner';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
@@ -78,7 +79,15 @@ export function useUpload({
 		multiple: maxFiles === 0 || maxFiles > 1,
 		accept: generateClientDropzoneAccept(allowedFileTypes),
 		...props,
-		onDrop: (acceptedFiles, _fileRejections, _event) => {
+		onDrop: (acceptedFiles, fileRejections, _event) => {
+			// Handle file rejections
+			if (fileRejections.length > 0) {
+				fileRejections.forEach(rejection => {
+					const errors = rejection.errors.map(e => e.message).join(', ');
+					toast.error(`${rejection.file.name}: ${errors}`);
+				});
+			}
+
 			const handleDrop = async () => {
 				const fileData: z.infer<typeof uploadFileSchema>[] = await Promise.all(
 					acceptedFiles.map((f): Promise<z.infer<typeof uploadFileSchema>> => {
@@ -173,9 +182,9 @@ export function useUpload({
 					});
 
 					const updatedQueue = [...newQueue, ...prevQueue];
-					if (maxFiles === 0) return updatedQueue;
 
-					return updatedQueue.slice(0, maxFiles);
+					// Apply maxFiles limit before returning to prevent race condition
+					return maxFiles === 0 ? updatedQueue : updatedQueue.slice(0, maxFiles);
 				});
 
 				getPresigned(
@@ -212,7 +221,7 @@ export function useUpload({
 					},
 				);
 
-				props.onDrop?.(acceptedFiles, _fileRejections, _event);
+				props.onDrop?.(acceptedFiles, fileRejections, _event);
 			};
 
 			handleDrop().catch(err => console.error(err));

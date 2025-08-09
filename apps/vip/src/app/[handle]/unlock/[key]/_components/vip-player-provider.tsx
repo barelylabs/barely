@@ -12,6 +12,7 @@ interface VipPlayerProviderProps {
 	artistName: string;
 	coverImage?: {
 		s3Key: string;
+		blurDataUrl: string | null;
 	} | null;
 	swapId: string;
 }
@@ -33,7 +34,10 @@ export function VipPlayerProvider({
 				name: artistName,
 			},
 			audioFiles: [{ src: audioUrl }],
-			artwork: coverImage ? { s3Key: coverImage.s3Key } : undefined,
+			artwork:
+				coverImage ?
+					{ s3Key: coverImage.s3Key, blurDataUrl: coverImage.blurDataUrl }
+				:	undefined,
 		},
 	];
 

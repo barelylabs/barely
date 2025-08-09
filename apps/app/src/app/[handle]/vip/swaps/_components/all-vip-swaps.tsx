@@ -2,9 +2,9 @@
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import { useWorkspace } from '@barely/hooks';
+import { getAbsoluteUrl } from '@barely/utils';
 
 import { Badge } from '@barely/ui/badge';
-import { Button } from '@barely/ui/button';
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { GridList, GridListCard } from '@barely/ui/grid-list';
@@ -57,42 +57,64 @@ function VipSwapCard({
 	vipSwap: AppRouterOutputs['vipSwap']['byWorkspace']['vipSwaps'][0];
 }) {
 	const { handle } = useWorkspace();
+	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } = useVipSwaps();
 
+	// const swapUrl = `https://barely.vip/${handle}/unlock/${vipSwap.key}`;
+	const swapUrl = getAbsoluteUrl('vip', `${handle}/unlock/${vipSwap.key}`);
 	return (
-		<GridListCard id={vipSwap.id} key={vipSwap.id} textValue={vipSwap.name}>
-			{vipSwap.archivedAt && <Badge variant='subtle'>Archived</Badge>}
-			<div className='flex w-full items-center justify-between'>
-				<div className='flex flex-col gap-1'>
-					<div className='flex items-center gap-2'>
-						<Text variant='md/semibold'>{vipSwap.name}</Text>
-						{!vipSwap.isActive && <Badge variant='subtle'>Inactive</Badge>}
-						{vipSwap.passwordProtected && (
-							<Icon.lock name='lock' className='h-4 w-4 text-muted-foreground' />
-						)}
-					</div>
-					<div className='flex items-center gap-4 text-sm text-muted-foreground'>
-						<span className='font-mono'>{vipSwap.key}</span>
-						{vipSwap.downloadLimit && (
-							<span>Limit: {vipSwap.downloadLimit} downloads</span>
-						)}
-						{vipSwap.file.name && <span>{vipSwap.file.name}</span>}
-					</div>
+		<GridListCard
+			id={vipSwap.id}
+			key={vipSwap.id}
+			textValue={vipSwap.name}
+			setShowUpdateModal={setShowUpdateModal}
+			setShowArchiveModal={setShowArchiveModal}
+			setShowDeleteModal={setShowDeleteModal}
+			img={
+				vipSwap.coverImage ?
+					{
+						src: vipSwap.coverImage.src,
+						s3Key: vipSwap.coverImage.s3Key,
+						blurDataURL: vipSwap.coverImage.blurDataUrl ?? undefined,
+						alt: `${vipSwap.name} cover art`,
+					}
+				:	undefined
+			}
+			title={vipSwap.name}
+			metadata={
+				<div className='flex items-center gap-4'>
+					<span className='font-mono text-sm'>{vipSwap.key}</span>
+					{!vipSwap.isActive && (
+						<Badge variant='subtle' size='sm'>
+							Inactive
+						</Badge>
+					)}
+					{vipSwap.passwordProtected && <Icon.lock name='lock' className='h-3 w-3' />}
 				</div>
-				<Button
-					look='ghost'
-					size='sm'
-					href={`/${handle}/vip/swaps/stats?vipSwapId=${vipSwap.id}`}
-					className='flex h-auto flex-col items-end gap-1 py-1'
-				>
-					<div className='flex items-center gap-2'>
-						<Icon.download name='download' className='h-4 w-4' />
-						<Text variant='sm/normal'>{vipSwap.downloadCount}</Text>
-					</div>
-					<Text variant='xs/normal' className='text-muted-foreground'>
-						{vipSwap.emailCount} emails
-					</Text>
-				</Button>
-			</div>
+			}
+			quickActions={{
+				goToHref: swapUrl,
+				copyText: swapUrl,
+			}}
+			statsHref={`/${handle}/vip/swaps/stats?vipSwapId=${vipSwap.id}`}
+			stats={[
+				{
+					icon: 'download',
+					name: 'Downloads',
+					value: vipSwap.downloadCount,
+				},
+				{
+					icon: 'email',
+					name: 'Emails',
+					value: vipSwap.emailCount,
+				},
+			]}
+		>
+			{vipSwap.archivedAt && <Badge variant='subtle'>Archived</Badge>}
+			{vipSwap.downloadLimit && (
+				<Text variant='xs/normal' className='text-muted-foreground'>
+					Limit: {vipSwap.downloadLimit} downloads
+				</Text>
+			)}
 		</GridListCard>
 	);
 }

@@ -11,9 +11,11 @@ import {
 	selectWorkspaceVipSwapsSchema,
 	updateVipSwapSchema,
 } from '@barely/validators';
+import { tasks, waitUntil } from '@trigger.dev/sdk/v3';
 import { and, asc, desc, eq, gt, inArray, isNull, lt, or } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
+import type { generateFileBlurHash } from '../../trigger';
 import { workspaceProcedure } from '../trpc';
 
 export const vipSwapRoute = {
@@ -56,6 +58,18 @@ export const vipSwapRoute = {
 						id: nextSwap.id,
 						createdAt: nextSwap.createdAt,
 					};
+				}
+			}
+
+			// check if cover image has blur hash
+			for (const vipSwap of vipSwaps) {
+				if (vipSwap.coverImage && !vipSwap.coverImage.blurDataUrl) {
+					waitUntil(
+						tasks.trigger<typeof generateFileBlurHash>('generate-file-blur-hash', {
+							fileId: vipSwap.coverImage.id,
+							s3Key: vipSwap.coverImage.s3Key,
+						}),
+					);
 				}
 			}
 

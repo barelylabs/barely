@@ -7,7 +7,6 @@ import type {
 	Selection,
 } from 'react-aria-components';
 import React, { useCallback, useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useCopy } from '@barely/hooks';
 import { cn } from '@barely/utils';
 import { cva } from 'class-variance-authority';
@@ -139,6 +138,7 @@ interface GridListCardProps
 	img?: Omit<ImgProps, 'width' | 'height'> | null;
 	title?: string;
 	subtitle?: string;
+	metadata?: ReactNode;
 	description?: ReactNode;
 	quickActions?: {
 		goToHref?: string;
@@ -173,6 +173,7 @@ export const GridListCard = React.forwardRef<
 			img,
 			title,
 			subtitle,
+			metadata,
 			description,
 			quickActions = {},
 			statsRight,
@@ -242,6 +243,7 @@ export const GridListCard = React.forwardRef<
 										<div className='flex flex-col gap-1'>
 											{title && <Text variant='md/semibold'>{title}</Text>}
 											{subtitle && <Text variant='xs/normal'>{subtitle}</Text>}
+											{metadata && <div className='text-xs'>{metadata}</div>}
 										</div>
 										<div className='flex flex-row gap-1'>
 											{description && <Text variant='2xs/normal'>{description}</Text>}
@@ -273,8 +275,12 @@ export const GridListCard = React.forwardRef<
 									{typeof children === 'function' ? null : children}
 									<div className='ml-auto mr-2'>
 										{stats && stats.length > 0 && (
-											<Link href={statsHref ?? '#'}>
-												<div className='items-left flex flex-col'>
+											<Button
+												look='ghost'
+												href={statsHref ?? '#'}
+												className='h-fit p-1 px-3'
+											>
+												<div className='items-left my-2 flex flex-col'>
 													{stats.map((stat, i) => {
 														const StatIcon = stat.icon ? Icon[stat.icon] : Icon.stat;
 														return (
@@ -290,7 +296,7 @@ export const GridListCard = React.forwardRef<
 														);
 													})}
 												</div>
-											</Link>
+											</Button>
 										)}
 										{statsRight && <div className='ml-auto mr-2'>{statsRight}</div>}
 									</div>

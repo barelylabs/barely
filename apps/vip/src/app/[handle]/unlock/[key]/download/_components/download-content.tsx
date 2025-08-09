@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle2, Music, Sparkles } from 'lucide-react';
 
-import { getAbsoluteUrl } from '@barely/auth/get-url';
-
 import { Img } from '@barely/ui/img';
+
+import { PoweredByBarelyFooter } from '~/components/powered-by-barely-footer';
 
 import { VipAudioPlayer } from '../../_components/vip-audio-player';
 import { VipAudioPlayerMobile } from '../../_components/vip-audio-player-mobile';
@@ -24,6 +24,7 @@ interface DownloadData {
 		coverImage?: {
 			id: string;
 			s3Key: string;
+			blurDataUrl: string | null;
 			width?: number | null;
 			height?: number | null;
 		} | null;
@@ -155,6 +156,7 @@ export function DownloadContent({
 										<div className='absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100' />
 										<Img
 											s3Key={swap.coverImage.s3Key}
+											blurDataURL={swap.coverImage.blurDataUrl ?? undefined}
 											alt={swap.name}
 											fill
 											className='object-cover transition-transform group-hover:scale-105'
@@ -235,18 +237,8 @@ export function DownloadContent({
 								Contact Support
 							</a>
 						</p>
-						<div className='flex items-center justify-center gap-1.5'>
-							<span>Powered by</span>
-							<a
-								href={getAbsoluteUrl('vip')}
-								target='_blank'
-								rel='noopener noreferrer'
-								className='font-heading font-semibold underline transition-colors hover:text-secondary'
-							>
-								Barely
-							</a>
-						</div>
 					</div>
+					<PoweredByBarelyFooter />
 				</div>
 			</div>
 		);
@@ -380,18 +372,8 @@ export function DownloadContent({
 								Contact Support
 							</a>
 						</p>
-						<div className='flex items-center justify-center gap-1.5'>
-							<span>Powered by</span>
-							<a
-								href={getAbsoluteUrl('vip')}
-								target='_blank'
-								rel='noopener noreferrer'
-								className='font-heading font-semibold underline transition-colors hover:text-secondary'
-							>
-								Barely
-							</a>
-						</div>
 					</div>
+					<PoweredByBarelyFooter />
 				</div>
 
 				{/* Mobile Audio Player - Sticky Bottom */}

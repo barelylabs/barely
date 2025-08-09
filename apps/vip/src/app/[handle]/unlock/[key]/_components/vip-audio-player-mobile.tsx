@@ -10,6 +10,7 @@ import { useMusicPlayer } from '@barely/ui/music-player';
 interface VipAudioPlayerMobileProps {
 	coverImage?: {
 		s3Key: string;
+		blurDataUrl: string | null;
 	} | null;
 	trackName: string;
 	artistName?: string;
@@ -67,6 +68,7 @@ export function VipAudioPlayerMobile({
 								<Img
 									s3Key={coverImage.s3Key}
 									alt={trackName}
+									blurDataURL={coverImage.blurDataUrl ?? undefined}
 									fill
 									className='object-cover'
 								/>
