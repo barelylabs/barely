@@ -71,17 +71,24 @@
 		"./trpc/*.route": {
 			"types": "./dist/src/trpc/routes/*.route.d.ts",
 			"default": "./src/trpc/routes/*.route.ts"
+		},
+		"./trpc/routes/*.route": {
+			"types": "./dist/src/trpc/routes/*.route.d.ts",
+			"default": "./src/trpc/routes/*.route.ts"
 		}
 	},
 	"scripts": {
 		"build": "tsc",
 		"clean": "git clean -xdf .cache .turbo dist node_modules",
-		"dev": "concurrently --raw --kill-others \"tsc\" \"pnpm dev:trigger\"",
+		"dev": "tsc",
 		"dev:trigger": "pnpm dlx trigger.dev@latest dev",
 		"deploy-trigger:production": "pnpm dlx trigger.dev@latest deploy",
 		"deploy-trigger:staging": "pnpm dlx trigger.dev@latest deploy --env staging",
 		"format": "prettier --check . --ignore-path ../../.gitignore",
 		"lint": "eslint",
+		"test": "pnpm with-env vitest",
+		"test:watch": "pnpm with-env vitest --watch",
+		"test:coverage": "pnpm with-env vitest --coverage",
 		"typecheck": "tsc --noEmit --emitDeclarationOnly false",
 		"with-env": "dotenv -e ../../.env --"
 	},
@@ -98,7 +105,6 @@
 		"@barely/email": "workspace:*",
 		"@barely/files": "workspace:*",
 		"@barely/tb": "workspace:*",
-		"@barely/toast": "workspace:*",
 		"@barely/utils": "workspace:*",
 		"@barely/validators": "workspace:*",
 		"@fast-csv/parse": "^5.0.0",
@@ -187,13 +193,16 @@
 		"drizzle-kit": "^0.31.2",
 		"encoding": "^0.1.13",
 		"eslint": "catalog:",
+		"msw": "^2.10.4",
+		"msw-trpc": "^2.0.1",
 		"pg": "^8.11.1",
 		"prettier": "catalog:",
 		"react": "catalog:react19",
 		"react-dom": "catalog:react19",
 		"react-hook-form": "catalog:",
 		"trigger.dev": "3.3.17",
-		"typescript": "catalog:"
+		"typescript": "catalog:",
+		"vitest": "catalog:"
 	},
 	"peerDependencies": {
 		"react": "catalog:react19",

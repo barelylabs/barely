@@ -36,6 +36,7 @@ export const fanSearchParamsSchema = fanFilterParamsSchema.extend({
 	showArchiveModal: z.boolean().optional(),
 	showDeleteModal: z.boolean().optional(),
 	showImportModal: z.boolean().optional(),
+	showExportModal: z.boolean().optional(),
 });
 
 export const selectWorkspaceFansSchema = fanFilterParamsSchema.extend({
@@ -80,4 +81,20 @@ export const importFansFromCsvSchema = importFansFromCsvColumnMappingsSchema.ext
 	// columnMappings: importFansFromCsvColumnMappingsSchema,
 	optIntoEmailMarketing: z.boolean(),
 	optIntoSmsMarketing: z.boolean(),
+});
+
+// export fans to CSV
+export const exportFansSchema = z.object({
+	format: z
+		.enum(['mailchimp', 'klaviyo', 'constantcontact', 'generic'])
+		.default('generic'),
+	filters: fanFilterParamsSchema.optional(),
+	includeArchived: z.boolean().default(false),
+	fields: z.array(z.string()).optional(), // Allow custom field selection
+});
+
+export const exportFansResponseSchema = z.object({
+	csvContent: z.string(),
+	filename: z.string(),
+	totalRecords: z.number(),
 });

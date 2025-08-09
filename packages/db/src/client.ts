@@ -6,6 +6,7 @@ import { env } from '../env';
 import * as adCreativeSql from './sql/ad-creative.sql';
 import * as adSetSql from './sql/ad-set.sql';
 import * as adSql from './sql/ad.sql';
+import * as albumSql from './sql/album.sql';
 import * as analyticsEndpointSql from './sql/analytics-endpoint.sql';
 import * as audienceDemoSql from './sql/audience-demo.sql';
 import * as audienceGeoSql from './sql/audience-geo.sql';
@@ -53,6 +54,7 @@ import * as userSessionSql from './sql/user-session.sql';
 import * as userSql from './sql/user.sql';
 import * as verificationTokenSql from './sql/verification-token.sql';
 import * as vidRenderSql from './sql/vid-render.sql';
+import * as vipSwapSql from './sql/vip-swap.sql';
 import * as visitorSessionSql from './sql/visitor-session.sql';
 import * as workspaceInviteSql from './sql/workspace-invite.sql';
 import * as workspaceSql from './sql/workspace.sql';
@@ -61,6 +63,7 @@ export const dbSchema = {
 	...adSql,
 	...adCreativeSql,
 	...adSetSql,
+	...albumSql,
 	...analyticsEndpointSql,
 	...audienceSql,
 	...audienceDemoSql,
@@ -108,6 +111,7 @@ export const dbSchema = {
 	...userSessionSql,
 	...verificationTokenSql,
 	...vidRenderSql,
+	...vipSwapSql,
 	...visitorSessionSql,
 	...workspaceSql,
 	...workspaceInviteSql,

@@ -1,12 +1,33 @@
 
 SCHEMA >
     `spotifyId` String `json:$.spotifyId`,
-    `spotifyPopularity` Int16 `json:$.spotifyPopularity`,
+    `spotifyPopularity` Nullable(Int32) `json:$.spotifyPopularity`,
     `timestamp` DateTime64(3) `json:$.timestamp`,
     `type` String `json:$.type`,
     `workspaceId` String `json:$.workspaceId`,
-    `spotifyFollowers` Nullable(Int32) `json:$.spotifyFollowers`
+    `spotifyFollowers` Nullable(Int32) `json:$.spotifyFollowers`,
+    `spotifyMonthlyListeners` Nullable(Int64) `json:$.spotifyMonthlyListeners`,
+    `spotifyTotalListeners` Nullable(Int64) `json:$.spotifyTotalListeners`,
+    `spotifyDailyListeners` Nullable(Int64) `json:$.spotifyDailyListeners`,
+    `spotifyMonthlyStreams` Nullable(Int64) `json:$.spotifyMonthlyStreams`,
+    `spotifyTotalStreams` Nullable(Int64) `json:$.spotifyTotalStreams`,
+    `spotifyDailyStreams` Nullable(Int64) `json:$.spotifyDailyStreams`
 
 ENGINE "MergeTree"
 ENGINE_PARTITION_KEY "toYear(timestamp)"
-ENGINE_SORTING_KEY "timestamp, spotifyPopularity, type, workspaceId"
+ENGINE_SORTING_KEY "timestamp, type, workspaceId, spotifyId"
+
+FORWARD_QUERY >
+    SELECT 
+        spotifyId,
+        CAST(spotifyPopularity, 'Nullable(Int32)') AS spotifyPopularity,
+        timestamp,
+        type,
+        workspaceId,
+        spotifyFollowers,
+        defaultValueOfTypeName('Nullable(Int64)') AS spotifyMonthlyListeners,
+        defaultValueOfTypeName('Nullable(Int64)') AS spotifyTotalListeners,
+        defaultValueOfTypeName('Nullable(Int64)') AS spotifyDailyListeners,
+        defaultValueOfTypeName('Nullable(Int64)') AS spotifyMonthlyStreams,
+        defaultValueOfTypeName('Nullable(Int64)') AS spotifyTotalStreams,
+        defaultValueOfTypeName('Nullable(Int64)') AS spotifyDailyStreams

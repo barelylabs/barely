@@ -11,6 +11,7 @@ import {
 
 import { dbId, primaryId, timestamps } from '../utils';
 import { AdCreatives } from './ad-creative.sql';
+import { Albums } from './album.sql';
 import { AnalyticsEndpoints } from './analytics-endpoint.sql';
 import { Bios } from './bio.sql';
 import { Campaigns } from './campaign.sql';
@@ -74,6 +75,7 @@ export const Workspaces = pgTable(
 		instagramUsername: varchar('instagramUsername', { length: 255 }),
 		website: varchar('website', { length: 255 }),
 
+		spotifyPopularity: integer('spotifyPopularity'),
 		spotifyFollowers: integer('spotifyFollowers'),
 		spotifyMonthlyListeners: integer('spotifyMonthlyListeners'),
 		youtubeSubscribers: integer('youtubeSubscribers'),
@@ -136,6 +138,9 @@ export const Workspaces = pgTable(
 		cartSupportEmail: varchar('cartSupportEmail', { length: 255 }),
 		cartFeePercentageOverride: integer('cartFeePercentageOverride'),
 
+		/* vip */
+		vipSupportEmail: varchar('vipSupportEmail', { length: 255 }),
+
 		/* for shipping */
 		shippingAddressLine1: varchar('shippingAddressLine1', { length: 255 }),
 		shippingAddressLine2: varchar('shippingAddressLine2', { length: 255 }),
@@ -179,6 +184,7 @@ export const WorkspaceRelations = relations(Workspaces, ({ one, many }) => ({
 
 	// many-to-one
 	adCreatives: many(AdCreatives),
+	albums: many(Albums),
 	analyticsEndpoints: many(AnalyticsEndpoints),
 	_avatarImages: many(_Files_To_Workspaces__AvatarImage),
 	_headerImages: many(_Files_To_Workspaces__HeaderImage),

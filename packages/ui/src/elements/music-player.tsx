@@ -4,7 +4,7 @@ import type { PublicTrackWith_Artist_Files } from '@barely/validators';
 import { useCallback } from 'react';
 import { cn, tFormatter } from '@barely/utils';
 import { atom, useAtom } from 'jotai';
-import { useAtomCallback } from 'jotai/utils';
+import { useAtomCallback, useHydrateAtoms } from 'jotai/utils';
 import ReactPlayer from 'react-player/lazy';
 
 import { atomWithToggle } from '@barely/atoms/atom-with-toggle';
@@ -15,10 +15,11 @@ import { Img } from './img';
 import { Slider } from './slider';
 import { videoPlayerGlobalCurrentAtom } from './video-player';
 
-export type MusicPlayerTrack = Pick<
-	PublicTrackWith_Artist_Files,
-	'id' | 'name' | 'workspace' | 'audioFiles' | 'artwork'
->;
+export type MusicPlayerTrack = Pick<PublicTrackWith_Artist_Files, 'id' | 'name'> & {
+	workspace: { name: string };
+	audioFiles: { src: string }[];
+	artwork?: { s3Key: string };
+};
 export type MusicPlayerTracklist = MusicPlayerTrack[];
 
 interface Progress {
@@ -41,6 +42,16 @@ const durationMusicAtom = atom<number | undefined>(undefined);
 
 export const tracklistAtom = atom<MusicPlayerTracklist>([]);
 export const currentTrackAtom = atom<MusicPlayerTrack | undefined>(undefined);
+
+export function useHydrateMusicPlayer(
+	tracklist: MusicPlayerTracklist,
+	currentTrack?: MusicPlayerTrack,
+) {
+	useHydrateAtoms([
+		[tracklistAtom, tracklist],
+		[currentTrackAtom, currentTrack ?? tracklist[0]],
+	]);
+}
 
 export function useMusicPlayer() {
 	const [player, setPlayer] = useAtom(playerAtom);

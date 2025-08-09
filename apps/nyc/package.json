@@ -9,7 +9,7 @@
 		"build:production": "pnpm with-env vercel build --prod",
 		"clean": "git clean -xdf .next .turbo node_modules",
 		"clean:rm": "rm -rf node_modules && rm -f pnpm-lock.yaml",
-		"dev": "pnpm with-env next dev -p 3008",
+		"dev": "pnpm with-env next dev -p 3006",
 		"format": "prettier --check . --ignore-path ../../.gitignore",
 		"lint": "eslint",
 		"start": "pnpm with-env next start",

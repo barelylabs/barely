@@ -157,8 +157,10 @@ function SocialLinks() {
 
 function Copyright() {
 	return (
-		<div className='text-sm/6 text-muted-foreground'>
-			&copy; {new Date().getFullYear()} Barely LLC
+		<div className='flex items-center gap-2 text-sm/6 text-muted-foreground'>
+			<span>&copy; {new Date().getFullYear()} Barely</span>
+			<span className='text-muted-foreground/50'>•</span>
+			<span>Made in Brooklyn</span>
 		</div>
 	);
 }

@@ -10,7 +10,9 @@ import { Toaster } from 'sonner';
 import { TailwindIndicator } from '@barely/ui/components/tailwind-indicator';
 import { Container } from '@barely/ui/container';
 
+import { Footer } from '../components/marketing/footer';
 import { Navigation } from '../components/marketing/navigation';
+import { StructuredData } from '../components/marketing/structured-data';
 import { SuccessMetricsBar } from '../components/marketing/success-metrics-bar';
 import Providers from './providers';
 
@@ -25,9 +27,9 @@ const fontSans = FontSans({
 });
 
 export const metadata: Metadata = {
-	title: 'Barely - Music Marketing That Makes Sense',
+	title: 'Barely NYC - Music Marketing Engineers',
 	description:
-		'Transparent, data-driven music marketing from a PhD scientist turned engineer. No BS, just results.',
+		'Brooklyn-based music marketing engineers. We apply PhD-level data science to grow independent artists worldwide. Transparent strategies, measurable results.',
 	icons: {
 		icon: [
 			{ url: '/_static/favicons/favicon-32x32.png', sizes: '32x32' },
@@ -50,6 +52,9 @@ interface RootLayoutProps {
 export default async function RootLayout({ children }: RootLayoutProps) {
 	return (
 		<html lang='en' suppressHydrationWarning>
+			<head>
+				<StructuredData />
+			</head>
 			<body
 				className={cn(
 					'min-h-screen bg-[#0A0A0B] font-sans text-white antialiased',
@@ -61,6 +66,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
 					<SuccessMetricsBar />
 					<Navigation />
 					<Container className='max-w-full px-0 py-0'>{children}</Container>
+					<Footer />
 				</Providers>
 				<Toaster />
 				<TailwindIndicator />

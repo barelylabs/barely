@@ -29,6 +29,12 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Setup
+        uses: ./tooling/github/setup
+
+      - name: Install dependencies
+        run: pnpm i
+
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@beta
@@ -36,7 +42,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
           # Optional: Specify model (defaults to Claude Sonnet 4, uncomment for Claude Opus 4)
-          # model: "claude-opus-4-20250514"
+          model: 'claude-opus-4-20250514'
 
           # Optional: Customize the trigger phrase (default: @claude)
           # trigger_phrase: "/claude"
@@ -45,13 +51,20 @@ jobs:
           # assignee_trigger: "claude-bot"
 
           # Optional: Allow Claude to run specific commands
-          # allowed_tools: "Bash(npm install),Bash(npm run build),Bash(npm run test:*),Bash(npm run lint:*)"
+          allowed_tools: |
+            Bash(pnpm format:fix)
+            Bash(pnpm typecheck)
+            Bash(pnpm test)
+            Bash(pnpm build)
+            Bash(pnpm lint)
 
           # Optional: Add custom instructions for Claude to customize its behavior for your project
-          # custom_instructions: |
-          #   Follow our coding standards
-          #   Ensure all new code has tests
-          #   Use TypeScript for new files
+          custom_instructions: |
+            New branches from issues should have the naming convention of {type}/{description}_{issue-number}. type can be {feature | fix | chore | refactor | test | docs | style | perf | ci | build | revert | hotfix | security }
+            Follow-up work on the same issue should be done in the same branch (don't create a new branch for follow-up work).            
+            Always run 'pnpm typecheck' to check for type errors and fix any errors.                        
+            Always run 'pnpm lint' to run lint - fix any errors.
+            Always run 'pnpm format:fix' before committing!
 
           # Optional: Custom environment variables for Claude
           # claude_env: |

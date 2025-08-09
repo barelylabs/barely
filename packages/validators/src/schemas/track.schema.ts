@@ -1,9 +1,15 @@
-import type { _Files_To_Tracks__Artwork, _Files_To_Tracks__Audio } from '@barely/db/sql';
+import type {
+	_Files_To_Tracks__Artwork,
+	_Files_To_Tracks__Audio,
+	SpotifyLinkedTracks,
+} from '@barely/db/sql';
 import type { InferSelectModel } from 'drizzle-orm';
+import { WORKSPACE_TIMEZONES } from '@barely/const';
 import { Tracks } from '@barely/db/sql';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod/v4';
 
+import type { Album } from './album.schema';
 import type { FileRecord, PublicAudio, PublicImage } from './file.schema';
 import type { Genre } from './genre.schema';
 import type { PublicWorkspace, Workspace } from './workspace.schema';
@@ -11,8 +17,10 @@ import {
 	queryBooleanSchema,
 	querySelectionSchema,
 	queryStringArraySchema,
+	sortOrderSchema,
 } from '../helpers';
 import { genreIdSchema } from './genre.schema';
+import { statDateRange } from './stat.schema';
 
 const insertTrackAudioFilesSchema = z.array(
 	z.object({
@@ -40,14 +48,14 @@ export type InsertTrackArtworkFile = z.infer<
 
 export const insertTrackSchema = createInsertSchema(Tracks, {
 	name: name => name.min(1, 'Name is required').max(255, 'Name is too long'),
-	isrc: isrc => isrc.transform(v => (v.length ? v : null)),
-	appleMusicId: appleMusicId => appleMusicId.transform(v => (v.length ? v : null)),
-	deezerId: deezerId => deezerId.transform(v => (v.length ? v : null)),
-	soundcloudId: soundcloudId => soundcloudId.transform(v => (v.length ? v : null)),
-	spotifyId: spotifyId => spotifyId.transform(v => (v.length ? v : null)),
-	tidalId: tidalId => tidalId.transform(v => (v.length ? v : null)),
-	youtubeId: youtubeId => youtubeId.transform(v => (v.length ? v : null)),
-	releaseDate: releaseDate => releaseDate.transform(v => (v.length ? v : null)),
+	isrc: isrc => isrc.transform(v => (!v.length ? null : v)),
+	appleMusicId: appleMusicId => appleMusicId.transform(v => (!v.length ? null : v)),
+	deezerId: deezerId => deezerId.transform(v => (!v.length ? null : v)),
+	soundcloudId: soundcloudId => soundcloudId.transform(v => (!v.length ? null : v)),
+	// spotifyId: spotifyId => spotifyId.transform(v => (!v?.length ? null : v)),
+	tidalId: tidalId => tidalId.transform(v => (!v.length ? null : v)),
+	youtubeId: youtubeId => youtubeId.transform(v => (!v.length ? null : v)),
+	releaseDate: releaseDate => releaseDate.transform(v => (!v.length ? null : v)),
 }).extend({
 	_genres: z.array(genreIdSchema).optional(),
 	_artworkFiles: insertTrackArtworkFilesSchema.optional(),
@@ -80,7 +88,7 @@ export const defaultTrack: UpsertTrack = {
 	appleMusicId: '',
 	deezerId: '',
 	soundcloudId: '',
-	spotifyId: '',
+	// spotifyId: '',
 	tidalId: '',
 	youtubeId: '',
 
@@ -101,7 +109,7 @@ export const formatWorkspaceTrackToUpsertTrackForm = (
 		appleMusicId: track.appleMusicId ?? '',
 		deezerId: track.deezerId ?? '',
 		soundcloudId: track.soundcloudId ?? '',
-		spotifyId: track.spotifyId ?? '',
+		// spotifyId: track.spotifyId ?? '',
 		tidalId: track.tidalId ?? '',
 		youtubeId: track.youtubeId ?? '',
 		releaseDate: track.releaseDate ?? '',
@@ -120,11 +128,16 @@ type TrackAudioFile = Omit<
 > &
 	FileRecord;
 
+export type SpotifyLinkedTrack = InferSelectModel<typeof SpotifyLinkedTracks>;
+
 export interface TrackWith_Workspace_Genres_Files extends Track {
 	workspace: Workspace;
 	genres: Genre[];
+
 	artworkFiles?: TrackArtworkFile[];
 	audioFiles?: TrackAudioFile[];
+	spotifyLinkedTracks?: SpotifyLinkedTrack[];
+	_albums?: { album: Album; trackNumber: number }[];
 }
 
 // public
@@ -140,13 +153,31 @@ export interface PublicTrackWith_Artist_Files extends PublicTrack {
 }
 
 // query params
+const sortByValues = ['name', 'spotifyPopularity', 'releaseDate'] as const;
+export type TrackSortBy = (typeof sortByValues)[number];
+
+export const sortByOptions = [
+	{ label: 'Name', value: 'name' as TrackSortBy, icon: 'sortAscending' as const },
+	{
+		label: 'Spotify Popularity',
+		value: 'spotifyPopularity' as TrackSortBy,
+		icon: 'sortDescending' as const,
+	},
+	{
+		label: 'Release Date',
+		value: 'releaseDate' as TrackSortBy,
+		icon: 'sortDescending' as const,
+	},
+];
+
 export const trackFilterParamsSchema = z.object({
 	search: z.string().optional().default(''),
 	genres: queryStringArraySchema.optional().default([]),
 	showArchived: queryBooleanSchema.optional().default(false),
 	showDeleted: queryBooleanSchema.optional().default(false),
 	released: queryBooleanSchema.optional().default(false),
-	// selectedTrackIds: queryStringArraySchema.optional(),
+	sortBy: z.enum(sortByValues).optional(),
+	sortOrder: sortOrderSchema.optional(),
 });
 
 export const trackSearchParamsSchema = trackFilterParamsSchema.extend({
@@ -155,6 +186,25 @@ export const trackSearchParamsSchema = trackFilterParamsSchema.extend({
 
 export const selectWorkspaceTracksSchema = trackFilterParamsSchema.extend({
 	handle: z.string(),
-	cursor: z.object({ id: z.string(), createdAt: z.coerce.date() }).optional(),
-	limit: z.coerce.number().min(1).max(100).optional().default(10),
+	cursor: z
+		.object({
+			id: z.string(),
+			createdAt: z.coerce.date(),
+			spotifyPopularity: z.number().nullable(),
+		})
+		.optional(),
+	limit: z.coerce.number().min(1).max(100).optional().default(20),
 });
+
+// stat filters
+export const trackStatFiltersSchema = z.object({
+	trackId: z.string().optional(), // Keep for backward compatibility
+	trackIds: z.array(z.string()).optional(), // New array support
+	dateRange: statDateRange.optional(),
+	start: z.string().optional(),
+	end: z.string().optional(),
+	timezone: z.enum(WORKSPACE_TIMEZONES).optional(),
+	showPopularity: queryBooleanSchema.optional().default(true),
+});
+
+export type TrackStatFilters = z.infer<typeof trackStatFiltersSchema>;

@@ -9,9 +9,9 @@ import { BarChart, GrowthChart, StatCard } from '../../../components/marketing/d
 import { PricingCard } from '../../../components/marketing/pricing-card';
 
 export const metadata: Metadata = {
-	title: 'Rising+ Service - Professional Campaign Engineering | Barely',
+	title: 'Rising+ Service - Professional Campaign Engineering | Barely NYC',
 	description:
-		'Perfect for artists with 10-50K monthly listeners (or ready to jumpstart from smaller numbers). We design and execute your campaigns + transparent reporting + barely.ai tools.',
+		'Brooklyn-based music marketing engineers for artists with 10-50K monthly listeners (or ready to jumpstart). We design and execute your campaigns with scientific precision.',
 };
 
 export default function RisingPlusPage() {

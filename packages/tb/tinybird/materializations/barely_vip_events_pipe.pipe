@@ -1,0 +1,34 @@
+NODE mv
+SQL >
+
+    SELECT 
+      timestamp,
+      type,
+      workspaceId,
+      assetId,
+      city,
+      region,
+      country,
+      device,
+      browser,
+      os,
+      referer,
+      fanId,
+      sessionId,
+      sessionReferer,
+      sessionEmailTemplateId,
+      sessionEmailBroadcastId,
+      sessionLandingPageId,
+      sessionFlowActionId,
+      sessionMetaCampaignId,
+      sessionMetaAdSetId,
+      sessionMetaAdId,
+      sessionMetaPlacement,
+      vipSwapType,
+      vipDownloadToken,
+      vipEmailCaptured
+    FROM barely_events
+    WHERE assetId LIKE 'vips_%'
+
+TYPE materialized
+DATASOURCE barely_vip_events_mv

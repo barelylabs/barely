@@ -159,7 +159,7 @@ jobs:
           echo "DATABASE_POOL_URL=$DATABASE_POOL_URL" >> .env
 
           # Run db:push with timeout to prevent hanging on interactive prompts
-          output=$(timeout 60s bash -c 'echo "n" | pnpm db:push' 2>&1) || {
+          output=$(timeout 180s bash -c 'echo "n" | pnpm db:push' 2>&1) || {
             echo "ERROR: db:push timed out or failed - likely requires interactive input"
             echo "output: $output"
             echo "Please run 'pnpm db:push' locally to handle any schema ambiguities"
@@ -331,6 +331,23 @@ jobs:
           echo $DATABASE_URL | pnpm vercel env add DATABASE_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
           echo $DATABASE_POOL_URL | pnpm vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
 
+      - name: update vercel env - vip/preview/branch
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_VIP_PROJECT_ID }}
+        run: |
+          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
+
+          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
+            pnpm vercel env rm DATABASE_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
+            pnpm vercel env rm DATABASE_POOL_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+          echo $DATABASE_URL | pnpm vercel env add DATABASE_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
+          echo $DATABASE_POOL_URL | pnpm vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
+
       - name: update vercel env - www/preview/branch
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_WWW_PROJECT_ID }}
@@ -348,215 +365,25 @@ jobs:
           echo $DATABASE_URL | pnpm vercel env add DATABASE_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
           echo $DATABASE_POOL_URL | pnpm vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
 
+      - name: update vercel env - app-fm/preview/branch
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_FM_PROJECT_ID }}
+        run: |
+          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
+
+          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
+            pnpm vercel env rm DATABASE_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
+            pnpm vercel env rm DATABASE_POOL_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+          echo $DATABASE_URL | pnpm vercel env add DATABASE_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
+          echo $DATABASE_POOL_URL | pnpm vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
+
     outputs:
       neon_branch_id: ${{ steps.get-neon-branch.outputs.branch_id }}
-
-  # 🐦 TINYBIRD:PUSH #
-  tinybird-preview:
-    name: tinybird preview
-    if: always() && github.event_name == 'pull_request'
-    needs: [git-meta]
-    runs-on: ubuntu-latest
-    env:
-      TINYBIRD_HOST: ${{ secrets.TINYBIRD_HOST }}
-      TINYBIRD_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
-      VERCEL_ACCESS_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
-    services:
-      tinybird:
-        image: tinybirdco/tinybird-local:latest
-        ports:
-          - 7181:7181
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-
-      - name: Install Tinybird CLI
-        run: curl https://tinybird.co | sh
-
-      - name: Setup
-        uses: ./tooling/github/setup
-
-        # if tb_changed is false, we want to
-        # 1. get the live deployment ID using tb CLI.
-        # 2. update the vercel env variable TINYBIRD_LIVE_DEPLOYMENT_ID with the live deployment ID
-
-      - name: skip tb staging deployment
-        if: needs.git-meta.outputs.tb_changed == 'false'
-        run: |
-          echo "Skipping tb:deploy - no changes detected in packages/tb/tinybird"
-          echo "Using existing Tinybird deployment"
-
-        # if tb_changed is true, we want to
-        # 1. build, test, and deploy to staging (only one staging deployment at a time, so can't have multiple PRs with tb changes at one time)
-        # 2. get staging deployment ID using tb CLI.
-        # 3. update the vercel env variable TINYBIRD_STAGING_DEPLOYMENT_ID with the staging deployment ID
-
-      - name: Build project
-        if: needs.git-meta.outputs.tb_changed == 'true'
-        run: pnpm tb:build
-
-      - name: Test project
-        if: needs.git-meta.outputs.tb_changed == 'true'
-        run: pnpm tb:test
-
-      - name: Deploy to staging
-        if: needs.git-meta.outputs.tb_changed == 'true'
-        id: deploy-staging
-        run: |
-          cd packages/tb/tinybird
-          output=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment create 2>&1) || true
-          echo "$output"
-
-          # Check if deployment was skipped due to no changes
-          if [[ $output == *"Not deploying. No changes."* ]]; then
-            echo "no_changes=true" >> $GITHUB_OUTPUT
-          else
-            echo "no_changes=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Get staging deployment ID
-        id: get-deployment-id
-        run: |
-          cd packages/tb/tinybird
-
-          # Use Live deployment ID if no tb changes or if deployment had no changes
-          if [[ "${{ needs.git-meta.outputs.tb_changed }}" == "false" ]] || [[ "${{ steps.deploy-staging.outputs.no_changes }}" == "true" ]]; then
-            DEPLOYMENT_ID=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment ls | awk '/Live/ { print $2 }')
-            echo "Using Live deployment ID"
-          else
-            DEPLOYMENT_ID=$(tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deployment ls | awk '/Staging/ { print $2 }')
-            echo "Using Staging deployment ID"
-          fi
-
-          echo "TINYBIRD_STAGING_DEPLOYMENT_ID=$DEPLOYMENT_ID" >> $GITHUB_OUTPUT
-
-      - name: Update vercel env - app/preview/branch
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
-        run: |
-          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
-          echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
-
-          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
-
-          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q TINYBIRD_STAGING_DEPLOYMENT_ID; then
-            pnpm vercel env rm TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
-
-          echo $TINYBIRD_STAGING_DEPLOYMENT_ID | pnpm vercel env add TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Update vercel env - cart/preview/branch
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_CART_PROJECT_ID }}
-        run: |
-          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
-          echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
-          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
-
-          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q TINYBIRD_STAGING_DEPLOYMENT_ID; then
-            pnpm vercel env rm TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
-
-          echo $TINYBIRD_STAGING_DEPLOYMENT_ID | pnpm vercel env add TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Update vercel env - link/preview/branch
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LINK_PROJECT_ID }}
-        run: |
-          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
-          echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
-          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
-
-          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q TINYBIRD_STAGING_DEPLOYMENT_ID; then
-            pnpm vercel env rm TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
-
-          echo $TINYBIRD_STAGING_DEPLOYMENT_ID | pnpm vercel env add TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Update vercel env - fm/preview/branch
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_FM_PROJECT_ID }}
-        run: |
-          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
-          echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
-          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
-
-          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q TINYBIRD_STAGING_DEPLOYMENT_ID; then
-            pnpm vercel env rm TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
-
-          echo $TINYBIRD_STAGING_DEPLOYMENT_ID | pnpm vercel env add TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Update vercel env - manage-email/preview/branch
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_MANAGE_EMAIL_PROJECT_ID }}
-        run: |
-          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
-          echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
-          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
-
-          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q TINYBIRD_STAGING_DEPLOYMENT_ID; then
-            pnpm vercel env rm TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
-
-          echo $TINYBIRD_STAGING_DEPLOYMENT_ID | pnpm vercel env add TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Update vercel env - page/preview/branch
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PAGE_PROJECT_ID }}
-        run: |
-          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
-          echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
-          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
-
-          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q TINYBIRD_STAGING_DEPLOYMENT_ID; then
-            pnpm vercel env rm TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
-
-          echo $TINYBIRD_STAGING_DEPLOYMENT_ID | pnpm vercel env add TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Update vercel env - press/preview/branch
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PRESS_PROJECT_ID }}
-        run: |
-          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
-          echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
-          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
-
-          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q TINYBIRD_STAGING_DEPLOYMENT_ID; then
-            pnpm vercel env rm TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
-
-          echo $TINYBIRD_STAGING_DEPLOYMENT_ID | pnpm vercel env add TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Update vercel env - nyc/preview/branch
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_NYC_PROJECT_ID }}
-        run: |
-          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
-          echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
-          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
-
-          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q TINYBIRD_STAGING_DEPLOYMENT_ID; then
-            pnpm vercel env rm TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
-
-          echo $TINYBIRD_STAGING_DEPLOYMENT_ID | pnpm vercel env add TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Update vercel env - www/preview/branch
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_WWW_PROJECT_ID }}
-        run: |
-          TINYBIRD_STAGING_DEPLOYMENT_ID="${{ steps.get-deployment-id.outputs.TINYBIRD_STAGING_DEPLOYMENT_ID }}"
-          echo "TINYBIRD_STAGING_DEPLOYMENT_ID: $TINYBIRD_STAGING_DEPLOYMENT_ID"
-          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
-
-          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q TINYBIRD_STAGING_DEPLOYMENT_ID; then
-            pnpm vercel env rm TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
-
-          echo $TINYBIRD_STAGING_DEPLOYMENT_ID | pnpm vercel env add TINYBIRD_STAGING_DEPLOYMENT_ID preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
 
   # 🔄 TRIGGER PREVIEW #
   trigger-preview:
@@ -578,7 +405,7 @@ jobs:
   # 👀 DEPLOY PREVIEWS
   deploy-app:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, neon-preview, tinybird-preview]
+    needs: [git-meta, neon-preview]
     with:
       app_name: app
       working_directory: apps/app
@@ -593,7 +420,7 @@ jobs:
 
   deploy-cart:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, neon-preview, tinybird-preview]
+    needs: [git-meta, neon-preview]
     with:
       app_name: cart
       working_directory: apps/cart
@@ -608,7 +435,7 @@ jobs:
 
   deploy-link:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, neon-preview, tinybird-preview]
+    needs: [git-meta, neon-preview]
     with:
       app_name: link
       working_directory: apps/link
@@ -623,7 +450,7 @@ jobs:
 
   deploy-fm:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, neon-preview, tinybird-preview]
+    needs: [git-meta, neon-preview]
     with:
       app_name: fm
       working_directory: apps/fm
@@ -638,7 +465,7 @@ jobs:
 
   deploy-manage-email:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, neon-preview, tinybird-preview]
+    needs: [git-meta, neon-preview]
     with:
       app_name: manage-email
       working_directory: apps/manage-email
@@ -651,9 +478,24 @@ jobs:
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_MANAGE_EMAIL_PROJECT_ID }}
 
+  deploy-nyc:
+    uses: ./.github/workflows/deploy-to-vercel.yml
+    needs: [git-meta, neon-preview]
+    with:
+      app_name: nyc
+      working_directory: apps/nyc
+      scope: barely
+      environment: preview
+      git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
+      vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_NYC_PROJECT_ID }}
+
   deploy-page:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, neon-preview, tinybird-preview]
+    needs: [git-meta, neon-preview]
     with:
       app_name: page
       working_directory: apps/page
@@ -668,7 +510,7 @@ jobs:
 
   deploy-press:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, neon-preview, tinybird-preview]
+    needs: [git-meta, neon-preview]
     with:
       app_name: press
       working_directory: apps/press
@@ -681,12 +523,12 @@ jobs:
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PRESS_PROJECT_ID }}
 
-  deploy-nyc:
+  deploy-vip:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, neon-preview, tinybird-preview]
+    needs: [git-meta, neon-preview]
     with:
-      app_name: nyc
-      working_directory: apps/nyc
+      app_name: vip
+      working_directory: apps/vip
       scope: barely
       environment: preview
       git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
@@ -694,11 +536,11 @@ jobs:
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_NYC_PROJECT_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_VIP_PROJECT_ID }}
 
   deploy-www:
     uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, neon-preview, tinybird-preview]
+    needs: [git-meta, neon-preview]
     with:
       app_name: www
       working_directory: apps/www
@@ -711,6 +553,22 @@ jobs:
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_WWW_PROJECT_ID }}
 
+  deploy-app-fm:
+    uses: ./.github/workflows/deploy-to-vercel.yml
+    needs: [git-meta, neon-preview]
+    with:
+      app_name: app
+      working_directory: apps/app
+      current_app_override: fm
+      scope: barely
+      environment: preview
+      git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
+      vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_FM_PROJECT_ID }}
+
   # 💬 COMMENT ON PR #
 
   comment:
@@ -719,12 +577,15 @@ jobs:
       [
         neon-preview,
         deploy-app,
+        deploy-app-fm,
         deploy-cart,
         deploy-link,
         deploy-fm,
+        deploy-manage-email,
+        deploy-nyc,
         deploy-page,
         deploy-press,
-        deploy-nyc,
+        deploy-vip,
         deploy-www,
       ]
     runs-on: ubuntu-latest
@@ -745,10 +606,13 @@ jobs:
             | :shopping_cart: cart | [preview](${{ needs.deploy-cart.outputs.deployment_url }}) | [inspect](${{ needs.deploy-cart.outputs.inspect_url }}) |
             | :link: link | [preview](${{ needs.deploy-link.outputs.deployment_url }}) | [inspect](${{ needs.deploy-link.outputs.inspect_url }}) |
             | :radio: fm | [preview](${{ needs.deploy-fm.outputs.deployment_url }}) | [inspect](${{ needs.deploy-fm.outputs.inspect_url }}) |
+            | :radio: app-fm | [preview](${{ needs.deploy-app-fm.outputs.deployment_url }}) | [inspect](${{ needs.deploy-app-fm.outputs.inspect_url }}) |
             | :newspaper: press | [preview](${{ needs.deploy-press.outputs.deployment_url }}) | [inspect](${{ needs.deploy-press.outputs.inspect_url }}) |
             | :city_sunset: nyc | [preview](${{ needs.deploy-nyc.outputs.deployment_url }}) | [inspect](${{ needs.deploy-nyc.outputs.inspect_url }}) |
             | :globe_with_meridians: www | [preview](${{ needs.deploy-www.outputs.deployment_url }}) | [inspect](${{ needs.deploy-www.outputs.inspect_url }}) |
             | :page_facing_up: page | [preview](${{ needs.deploy-page.outputs.deployment_url }}) | [inspect](${{ needs.deploy-page.outputs.inspect_url }}) |
+            | :email: manage-email | [preview](${{ needs.deploy-manage-email.outputs.deployment_url }}) | [inspect](${{ needs.deploy-manage-email.outputs.inspect_url }}) |
+            | :star: vip | [preview](${{ needs.deploy-vip.outputs.deployment_url }}) | [inspect](${{ needs.deploy-vip.outputs.inspect_url }}) |
 
             ## db
             | :floppy_disk: db | :mag: inspect |
@@ -759,16 +623,17 @@ jobs:
     needs:
       [
         neon-preview,
-        tinybird-preview,
         trigger-preview,
         deploy-app,
+        deploy-app-fm,
         deploy-cart,
         deploy-fm,
         deploy-link,
         deploy-manage-email,
+        deploy-nyc,
         deploy-page,
         deploy-press,
-        deploy-nyc,
+        deploy-vip,
         deploy-www,
       ]
     if: always() && github.event_name == 'pull_request'

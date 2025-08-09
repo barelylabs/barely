@@ -26,6 +26,7 @@ export const createWorkspaceSchema = insertWorkspaceSchema.omit({ id: true });
 export const updateWorkspaceSchema = insertWorkspaceSchema
 	.partial()
 	.required({ id: true });
+
 export const updateCurrentWorkspaceSchema = updateWorkspaceSchema.omit({
 	id: true,
 });
@@ -41,6 +42,10 @@ export type CreateWorkspace = z.infer<typeof createWorkspaceSchema>;
 export type UpdateWorkspace = z.infer<typeof updateWorkspaceSchema>;
 export type UpsertWorkspace = z.infer<typeof upsertWorkspaceSchema>;
 export type SelectWorkspace = z.infer<typeof selectWorkspaceSchema>;
+
+export const updateWorkspaceSpotifyArtistIdSchema = z.object({
+	spotifyArtistId: z.string().nullable(),
+});
 
 // forms
 export const workspaceTypeSchema = insertWorkspaceSchema.shape.type.unwrap();

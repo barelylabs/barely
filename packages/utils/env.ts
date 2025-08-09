@@ -47,7 +47,7 @@ export const utilsEnv = createEnv({
 		NEXT_PUBLIC_PUSHER_APP_KEY: z.string(),
 		NEXT_PUBLIC_PUSHER_APP_CLUSTER: z.string(),
 		NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string(),
-		NEXT_PUBLIC_VERCEL_ENV: z.enum(['development', 'preview', 'production']),
+		NEXT_PUBLIC_VERCEL_ENV: z.enum(['development', 'preview', 'production', 'staging']),
 		NEXT_PUBLIC_WWW_BASE_URL: z.string(),
 		NEXT_PUBLIC_WWW_DEV_PORT: devPortSchema,
 	},

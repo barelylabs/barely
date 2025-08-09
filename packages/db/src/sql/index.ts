@@ -2,6 +2,7 @@ export * from './ad-campaign.sql';
 export * from './ad-creative.sql';
 export * from './ad-set.sql';
 export * from './ad.sql';
+export * from './album.sql';
 export * from './analytics-endpoint.sql';
 export * from './audience-demo.sql';
 export * from './audience-geo.sql';
@@ -51,6 +52,7 @@ export * from './user-session.sql';
 export * from './user.sql';
 export * from './verification-token.sql';
 export * from './vid-render.sql';
+export * from './vip-swap.sql';
 export * from './visitor-session.sql';
 
 export * from './workspace-invite.sql';

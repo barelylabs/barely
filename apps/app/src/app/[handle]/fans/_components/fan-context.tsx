@@ -16,14 +16,18 @@ interface FanPageData {
 	nextCursor?: { id: string; createdAt: Date } | null;
 }
 
-// Create the search params hook for fans with import modal state
+// Create the search params hook for fans with import/export modal state
 export const useFanSearchParams = createResourceSearchParamsHook({
 	additionalParsers: {
 		showImportModal: parseAsBoolean.withDefault(false),
+		showExportModal: parseAsBoolean.withDefault(false),
 	},
 	additionalActions: {
 		setShowImportModal: action((setParams, show: boolean) =>
 			setParams({ showImportModal: show }),
+		),
+		setShowExportModal: action((setParams, show: boolean) =>
+			setParams({ showExportModal: show }),
 		),
 	},
 });

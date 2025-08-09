@@ -13,22 +13,25 @@ import type {
 	FmPage,
 	LandingPage,
 	LinkAnalyticsProps,
+	VipSwap,
 	Workspace,
 } from '@barely/validators/schemas';
 import type { z } from 'zod/v4';
 import { cookies } from 'next/headers';
-import { WORKSPACE_PLANS } from '@barely/const';
+import { WEB_EVENT_TYPES__VIP, WORKSPACE_PLANS } from '@barely/const';
 import { dbHttp } from '@barely/db/client';
 import { AnalyticsEndpoints } from '@barely/db/sql/analytics-endpoint.sql';
 import { FmLinks, FmPages } from '@barely/db/sql/fm.sql';
 import { LandingPages } from '@barely/db/sql/landing-page.sql';
 import { Links } from '@barely/db/sql/link.sql';
+import { VipSwaps } from '@barely/db/sql/vip-swap.sql';
 import { Workspaces } from '@barely/db/sql/workspace.sql';
 import { sqlIncrement } from '@barely/db/utils';
 import {
 	ingestCartEvent,
 	ingestFmEvent,
 	ingestPageEvent,
+	ingestVipEvent,
 	ingestWebEvent,
 } from '@barely/tb/ingest';
 import { fmEventIngestSchema, webEventIngestSchema } from '@barely/tb/schema';
@@ -1168,6 +1171,283 @@ function getMetaEventFromPageEvent({
 						pageId: page.id,
 						linkClickDestinationAssetId,
 						linkClickDestinationHref,
+					},
+				},
+			];
+		default:
+			return null;
+	}
+}
+
+/* VIP */
+
+export async function recordVipEvent({
+	vipSwap,
+	type,
+	visitor,
+	workspace,
+	emailCaptured,
+	downloadToken,
+	email: _email,
+	fanId: _fanId,
+}: {
+	vipSwap: VipSwap;
+	type: (typeof WEB_EVENT_TYPES__VIP)[number];
+	visitor?: VisitorInfo;
+	workspace: Pick<Workspace, 'id' | 'plan' | 'eventUsage' | 'eventUsageLimitOverride'>;
+	emailCaptured?: string;
+	downloadToken?: string;
+	email?: string;
+	fanId?: string | null;
+}) {
+	if (visitor?.isBot) return null;
+
+	// Validate required fields
+	if (!vipSwap.id || !vipSwap.workspaceId) {
+		await log({
+			type: 'errors',
+			location: 'recordVipEvent',
+			message: 'Missing required vipSwap fields',
+		});
+		return null;
+	}
+
+	if (!WEB_EVENT_TYPES__VIP.includes(type)) {
+		await log({
+			type: 'errors',
+			location: 'recordVipEvent',
+			message: `Invalid event type: ${type}`,
+		});
+		return null;
+	}
+
+	// Validate email format if provided
+	if (emailCaptured && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailCaptured)) {
+		await log({
+			type: 'errors',
+			location: 'recordVipEvent',
+			message: 'Invalid email format for emailCaptured',
+		});
+		return null;
+	}
+
+	// Validate download token format if provided
+	if (downloadToken && downloadToken.length < 20) {
+		await log({
+			type: 'errors',
+			location: 'recordVipEvent',
+			message: 'Invalid download token format',
+		});
+		return null;
+	}
+
+	// Use sessionId for rate limiting when available, fallback to IP
+	const rateLimitKey = visitor?.sessionId ?? visitor?.ip ?? 'unknown';
+
+	// Apply rate limiting based on event type
+	if (type === 'vip/view') {
+		// Allow 1 view per session per swap per hour
+		const { success } = await ratelimit(1, isDevelopment() ? '1 s' : '1 h').limit(
+			`recordVipEvent:${type}:${rateLimitKey}:${vipSwap.id}`,
+		);
+		if (!success) {
+			await log({
+				type: 'alerts',
+				location: 'recordVipEvent',
+				message: `rate limit exceeded for ${rateLimitKey} ${vipSwap.id} ${type}`,
+			});
+			return null;
+		}
+	} else if (type === 'vip/emailCapture') {
+		// Allow 1 email capture per session per swap (24 hours to prevent abuse)
+		const { success } = await ratelimit(1, isDevelopment() ? '1 s' : '24 h').limit(
+			`recordVipEvent:${type}:${rateLimitKey}:${vipSwap.id}`,
+		);
+		if (!success) {
+			await log({
+				type: 'alerts',
+				location: 'recordVipEvent',
+				message: `rate limit exceeded for ${rateLimitKey} ${vipSwap.id} ${type}`,
+			});
+			return null;
+		}
+	} else {
+		// type === 'vip/download'
+		// For downloads, don't apply additional rate limiting here
+		// The download limit is already enforced in the getDownloadUrl procedure
+		// based on vipSwap.downloadLimit setting
+		// We just want to prevent rapid-fire duplicate events from the same session
+		const { success } = await ratelimit(1, isDevelopment() ? '1 s' : '10 s').limit(
+			`recordVipEvent:${type}:${rateLimitKey}:${vipSwap.id}`,
+		);
+		if (!success) {
+			// This is likely a duplicate click, silently ignore
+			return null;
+		}
+	}
+
+	// check if the workspace is above the event usage limit.
+	const isAboveEventUsageLimit = await checkIfWorkspaceIsAboveEventUsageLimit({
+		workspace,
+	});
+
+	if (isAboveEventUsageLimit) {
+		await log({
+			type: 'alerts',
+			location: 'recordVipEvent',
+			message: `workspace ${vipSwap.workspaceId} is above the event usage limit`,
+		});
+		return;
+	}
+
+	const timestamp = new Date(Date.now()).toISOString();
+
+	const analyticsEndpoints = await dbHttp.query.AnalyticsEndpoints.findMany({
+		where: eq(AnalyticsEndpoints.workspaceId, vipSwap.workspaceId),
+	});
+
+	const metaPixel = analyticsEndpoints.find(endpoint => endpoint.platform === 'meta');
+	const metaEvents = getMetaEventFromVipEvent({
+		vipSwap,
+		eventType: type,
+		emailCaptured,
+	});
+
+	// this is being logged from an api route in preview/production, so the sourceUrl is the referer_url
+	const sourceUrl = (isDevelopment() ? visitor?.href : visitor?.referer_url) ?? '';
+
+	const metaRes =
+		metaPixel?.accessToken && metaEvents ?
+			await reportEventsToMeta({
+				pixelId: metaPixel.id,
+				accessToken: metaPixel.accessToken,
+				sourceUrl,
+				ip: visitor?.ip,
+				ua: visitor?.userAgent.ua,
+				geo: visitor?.geo,
+				events: metaEvents,
+				fbclid: visitor?.fbclid ?? null,
+			}).catch(async err => {
+				await log({
+					type: 'errors',
+					location: 'recordVipEvent',
+					message: `err reporting vip event to meta => ${err}`,
+				});
+				return { reported: false };
+			})
+		:	{ reported: false };
+
+	// report event to tinybird
+	try {
+		await ingestVipEvent({
+			timestamp,
+			type,
+			workspaceId: vipSwap.workspaceId,
+			assetId: vipSwap.id,
+			sessionId: visitor?.sessionId ?? newId('barelySession'),
+			...flattenVisitorForIngest(visitor),
+			href: sourceUrl,
+			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : '',
+			vipSwapType: vipSwap.type,
+			vipDownloadToken: downloadToken ?? '',
+			vipEmailCaptured: emailCaptured ?? '',
+		});
+	} catch (error) {
+		await log({
+			type: 'errors',
+			location: 'recordVipEvent',
+			message: `error ingesting vip event => ${String(error)}`,
+		});
+	}
+
+	// increment stats on VipSwap
+	switch (type) {
+		case 'vip/view':
+			await dbHttp
+				.update(VipSwaps)
+				.set({ pageViewCount: sqlIncrement(VipSwaps.pageViewCount) })
+				.where(eq(VipSwaps.id, vipSwap.id));
+			break;
+		case 'vip/emailCapture':
+			await dbHttp
+				.update(VipSwaps)
+				.set({ emailCount: sqlIncrement(VipSwaps.emailCount) })
+				.where(eq(VipSwaps.id, vipSwap.id));
+			break;
+		case 'vip/download':
+			await dbHttp
+				.update(VipSwaps)
+				.set({ downloadCount: sqlIncrement(VipSwaps.downloadCount) })
+				.where(eq(VipSwaps.id, vipSwap.id));
+			break;
+	}
+
+	// increment the workspace event usage count in db
+	await dbHttp
+		.update(Workspaces)
+		.set({ eventUsage: sqlIncrement(Workspaces.eventUsage) })
+		.where(eq(Workspaces.id, vipSwap.workspaceId));
+}
+
+function getMetaEventFromVipEvent({
+	vipSwap,
+	eventType,
+	emailCaptured,
+}: {
+	vipSwap: VipSwap;
+	eventType: (typeof WEB_EVENT_TYPES__VIP)[number];
+	emailCaptured?: string;
+}): MetaEvent[] | null {
+	switch (eventType) {
+		case 'vip/view':
+			return [
+				{
+					eventName: 'barely.vip/view',
+					customData: {
+						vipSwapId: vipSwap.id,
+						vipSwapType: vipSwap.type,
+					},
+				},
+				{
+					eventName: 'ViewContent',
+					customData: {
+						content_type: 'barely.vip/view',
+						vipSwapId: vipSwap.id,
+					},
+				},
+			];
+		case 'vip/emailCapture':
+			return [
+				{
+					eventName: 'barely.vip/emailCapture',
+					customData: {
+						vipSwapId: vipSwap.id,
+						vipSwapType: vipSwap.type,
+						email: emailCaptured,
+					},
+				},
+				{
+					eventName: 'Lead',
+					customData: {
+						content_type: 'barely.vip/emailCapture',
+						vipSwapId: vipSwap.id,
+					},
+				},
+			];
+		case 'vip/download':
+			return [
+				{
+					eventName: 'barely.vip/download',
+					customData: {
+						vipSwapId: vipSwap.id,
+						vipSwapType: vipSwap.type,
+					},
+				},
+				{
+					eventName: 'CompleteRegistration',
+					customData: {
+						content_type: 'barely.vip/download',
+						vipSwapId: vipSwap.id,
 					},
 				},
 			];
