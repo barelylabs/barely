@@ -6,6 +6,7 @@ import { sqlAnd, sqlCount, sqlStringContains } from '@barely/db/utils';
 import { newId, raise } from '@barely/utils';
 import {
 	createFanSchema,
+	exportFansSchema,
 	importFansFromCsvSchema,
 	selectWorkspaceFansSchema,
 	updateFanSchema,
@@ -147,5 +148,48 @@ export const fanRoute = {
 				.returning();
 
 			return updatedFans[0] ?? raise('Failed to delete fans');
+		}),
+
+	exportToCsv: workspaceProcedure
+		.input(exportFansSchema)
+		.mutation(async ({ input, ctx }) => {
+			const { format, filters, includeArchived, fields } = input;
+
+			const MAX_EXPORT_RECORDS = 10000;
+
+			// Fetch all fans with optional filters
+			const fans = await dbHttp.query.Fans.findMany({
+				where: sqlAnd([
+					eq(Fans.workspaceId, ctx.workspace.id),
+					!!filters?.search?.length && sqlStringContains(Fans.fullName, filters.search),
+					!includeArchived ? isNull(Fans.archivedAt) : undefined,
+				]),
+				orderBy: [desc(Fans.createdAt), asc(Fans.id)],
+				limit: MAX_EXPORT_RECORDS + 1, // Fetch one extra to check if we hit the limit
+			});
+
+			// Check if we exceeded the limit
+			if (fans.length > MAX_EXPORT_RECORDS) {
+				const { TRPCError } = await import('@trpc/server');
+				throw new TRPCError({
+					code: 'PAYLOAD_TOO_LARGE',
+					message: `Export limited to ${MAX_EXPORT_RECORDS.toLocaleString()} fans. Please use filters to reduce the number of fans or contact support for bulk exports.`,
+				});
+			}
+
+			// Import the CSV generation utility
+			const { generateFansCSV, generateExportFilename } = await import(
+				'../../utils/fan-export'
+			);
+
+			// Generate CSV content
+			const csvContent = generateFansCSV(fans, format, fields);
+			const filename = generateExportFilename(format, ctx.workspace.name);
+
+			return {
+				csvContent,
+				filename,
+				totalRecords: fans.length,
+			};
 		}),
 } satisfies TRPCRouterRecord;

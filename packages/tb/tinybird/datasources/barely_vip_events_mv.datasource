@@ -1,0 +1,30 @@
+SCHEMA >
+    `timestamp` DateTime,
+    `type` String,
+    `workspaceId` String,
+    `assetId` String,
+    `city` String,
+    `region` String,
+    `country` String,
+    `device` String,
+    `browser` String,
+    `os` String,
+    `referer` String,
+    `fanId` Nullable(String),
+    `sessionId` String,
+    `sessionReferer` Nullable(String),
+    `sessionEmailTemplateId` Nullable(String),
+    `sessionEmailBroadcastId` Nullable(String),
+    `sessionLandingPageId` Nullable(String),
+    `sessionFlowActionId` Nullable(String),
+    `sessionMetaCampaignId` Nullable(String),
+    `sessionMetaAdSetId` Nullable(String),
+    `sessionMetaAdId` Nullable(String),
+    `sessionMetaPlacement` Nullable(String),
+    `vipSwapType` Nullable(String),
+    `vipDownloadToken` Nullable(String),
+    `vipEmailCaptured` Nullable(String)
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "toYear(timestamp)"
+ENGINE_SORTING_KEY "timestamp, workspaceId, assetId"

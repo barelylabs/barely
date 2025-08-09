@@ -34,6 +34,7 @@ export const APP_ENDPOINTS: AppRouterKeys[] = [
 	'stripeConnect',
 	'track',
 	'user',
+	'vipSwap',
 	'visitorSession',
 	'webDomain',
 	'workspace',

@@ -20,14 +20,14 @@ const testimonials = [
 		name: 'Maya Rodriguez',
 		title: 'Electronic Artist',
 		quote:
-			'barely.io helped me go from 500 to 50K monthly listeners in 6 months. The integrated tools made everything so much easier.',
+			'barely.ai helped me go from 500 to 50K monthly listeners in 6 months. The integrated tools made everything so much easier.',
 	},
 	{
 		img: '/testimonials/conor-neville.jpg',
 		name: 'Jake Thompson',
 		title: 'Indie Rock Band',
 		quote:
-			'Switching to barely.io saved us $200/month and doubled our email conversion rates.',
+			'Switching to barely.ai saved us $200/month and doubled our email conversion rates.',
 	},
 	{
 		img: '/testimonials/amy-chase.jpg',
@@ -41,21 +41,21 @@ const testimonials = [
 		name: 'Marcus Williams',
 		title: 'Hip-Hop Producer',
 		quote:
-			'The automation workflows are incredible. I can focus on making music while barely.io handles my marketing.',
+			'The automation workflows are incredible. I can focus on making music while barely.ai handles my marketing.',
 	},
 	{
 		img: '/testimonials/dillon-lenora.jpg',
 		name: 'Sofia Andersson',
 		title: 'Folk Artist',
 		quote:
-			'My merch sales tripled after switching to barely.io. The fan data integration is a game-changer.',
+			'My merch sales tripled after switching to barely.ai. The fan data integration is a game-changer.',
 	},
 	{
 		img: '/testimonials/harriet-arron.jpg',
 		name: 'The Night Waves',
 		title: 'Synth-Pop Duo',
 		quote:
-			"We've built a community of 10K engaged fans using barely.io's tools. Best investment we've made.",
+			"We've built a community of 10K engaged fans using barely.ai's tools. Best investment we've made.",
 	},
 ];
 
@@ -154,7 +154,7 @@ function CallToAction() {
 	return (
 		<div>
 			<p className='max-w-sm text-sm/6 text-muted-foreground'>
-				Join thousands of artists who've streamlined their music marketing with barely.io.
+				Join thousands of artists who've streamlined their music marketing with barely.ai.
 				Start free today.
 			</p>
 			<div className='mt-2'>

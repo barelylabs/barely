@@ -15,7 +15,7 @@ const LetsGetStarted = () => {
 				</div>
 
 				<div className='w-full flex-grow-0 pt-4 sm:w-fit sm:pl-20 sm:pt-0'>
-					<Button size='lg' pill fullWidth href='https://app.barely.io/playlist-pitch'>
+					<Button size='lg' pill fullWidth href='https://app.barely.ai/playlist-pitch'>
 						Create my campaign 🚀
 					</Button>
 				</div>
@@ -33,7 +33,7 @@ const GetStartedToday = () => {
 			</Text>
 
 			<div className='w-full sm:w-fit'>
-				<Button size='lg' pill fullWidth href='https://app.barely.io/playlist-pitch'>
+				<Button size='lg' pill fullWidth href='https://app.barely.ai/playlist-pitch'>
 					Start campaign 🚀
 				</Button>
 			</div>

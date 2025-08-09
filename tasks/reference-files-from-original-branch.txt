@@ -1,0 +1,40 @@
+✅ apps/app/src/app/[handle]/_components/dash-sidebar-nav.tsx
+✅ apps/app/src/app/[handle]/_components/filters.tsx
+✅ apps/app/src/app/[handle]/settings/streaming/page.tsx
+✅ apps/app/src/app/[handle]/settings/streaming/spotify-artist-settings.tsx
+❌ apps/app/src/app/[handle]/settings/streaming/spotify-settings.tsx (empty file in original)
+✅ apps/app/src/app/[handle]/settings/streaming/streaming-settings.tsx
+❌ apps/app/src/app/[handle]/spotify/stats/page.tsx (skipped - needs rewrite)
+❌ apps/app/src/app/[handle]/spotify/stats/spotify-albums-overview.tsx (skipped - needs rewrite)
+❌ apps/app/src/app/[handle]/spotify/stats/spotify-artist-stats.tsx (skipped - needs rewrite)
+❌ apps/app/src/app/[handle]/spotify/stats/spotify-tracks-overview.tsx (skipped - needs rewrite)
+✅ apps/app/src/app/[handle]/tracks/_components/all-tracks.tsx
+✅ apps/app/src/app/[handle]/tracks/_components/track-context.tsx
+✅ apps/app/src/app/[handle]/tracks/_components/track-filters.tsx
+❌ apps/app/src/app/[handle]/tracks/[trackId]/spotify-stats/linked-spotify-tracks.tsx (skipped - needs rewrite)
+❌ apps/app/src/app/[handle]/tracks/[trackId]/spotify-stats/page.tsx (skipped - needs rewrite)
+❌ apps/app/src/app/[handle]/tracks/[trackId]/spotify-stats/spotify-stat-header.tsx (skipped - needs rewrite)
+❌ apps/app/src/app/[handle]/tracks/[trackId]/spotify-stats/spotify-timeseries.tsx (skipped - needs rewrite)
+✅ packages/lib/server/db/index.ts
+packages/lib/server/db/migrations/migrate-spotify-ids-to-linked-tracks.ts
+✅ packages/lib/server/routes/album/album.schema.ts
+✅ packages/lib/server/routes/album/album.sql.ts
+✅ packages/lib/server/routes/event/event.tb.ts
+✅ packages/lib/server/routes/spotify/spotify.fns.ts
+✅ packages/lib/server/routes/spotify/spotify.router.ts
+✅ packages/lib/server/routes/stat/stat.router.ts
+✅ packages/lib/server/routes/stat/stat.spotify.schema.ts
+✅ packages/lib/server/routes/stat/stat.streaming.tb.ts
+✅ packages/lib/server/routes/track/track.fns.ts
+✅ packages/lib/server/routes/track/track.router.ts
+✅ packages/lib/server/routes/track/track.schema.ts
+✅ packages/lib/server/routes/track/track.sql.ts
+✅ packages/lib/server/routes/workspace/workspace.router.ts
+✅ packages/lib/server/routes/workspace/workspace.sql.ts
+✅ packages/lib/server/spotify/spotify.endpts.album.ts
+✅ packages/lib/server/spotify/spotify.endpts.artist.ts
+✅ packages/lib/server/spotify/spotify.endpts.search.ts
+✅ packages/lib/server/spotify/spotify.endpts.track.ts
+✅ packages/lib/trigger/streaming-stats.trigger.ts
+✅ packages/ui/elements/icon.tsx
+✅ packages/ui/elements/multi-toggle.tsx

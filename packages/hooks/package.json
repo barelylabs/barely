@@ -22,7 +22,6 @@
 		"@barely/files": "workspace:*",
 		"@barely/lib": "workspace:*",
 		"@barely/tb": "workspace:*",
-		"@barely/toast": "workspace:*",
 		"@barely/utils": "workspace:*",
 		"@barely/validators": "workspace:*",
 		"jotai": "catalog:",

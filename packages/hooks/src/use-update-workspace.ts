@@ -2,6 +2,8 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { TRPCError } from '@trpc/server';
+import { toast } from 'sonner';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
@@ -14,7 +16,7 @@ export function useUpdateWorkspace({ onSuccess }: { onSuccess?: () => void } = {
 	const router = useRouter();
 	const currentPath = usePathname();
 
-	const { mutateAsync: updateWorkspace } = useMutation(
+	const { mutateAsync: updateWorkspace, isPending } = useMutation(
 		trpc.workspace.update.mutationOptions({
 			onMutate: async data => {
 				console.log('onMutate', data);
@@ -43,13 +45,18 @@ export function useUpdateWorkspace({ onSuccess }: { onSuccess?: () => void } = {
 				}
 
 				await queryClient.invalidateQueries(trpc.workspace.byHandle.pathFilter());
+				await queryClient.invalidateQueries(trpc.workspace.byHandleWithAll.pathFilter());
 				onSuccess?.();
 			},
 			onError: (error, variables, context) => {
 				console.error('onError', error, variables, context);
+
+				if (error instanceof TRPCError) {
+					toast.error(error.message);
+				}
 			},
 		}),
 	);
 
-	return { updateWorkspace };
+	return { updateWorkspace, isUpdatingWorkspace: isPending };
 }

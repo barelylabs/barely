@@ -242,33 +242,65 @@ function UploadQueueGridCard({
 
 export function UploadQueueList({ uploadQueue }: { uploadQueue: UploadQueueItem[] }) {
 	const FilesList = useMemo(() => {
-		return uploadQueue.map(item => (
-			<li key={item.file.name}>
-				<div className='flex flex-row items-center justify-between'>
-					{item.file.name} - {item.file.size} bytes{' '}
-					<Progress
-						value={item.progress}
-						max={100}
-						className='ml-2 w-1/2'
-						aria-label='progress'
-					/>
-					{item.status === 'pendingPresign' ?
-						<LoadingSpinner />
-					: item.status === 'readyToUpload' ?
-						<Icon.upload />
-					: item.status === 'uploading' ?
-						<Icon.rocket />
-					: item.status === 'complete' ?
-						<Icon.check />
-					:	<Icon.xCircleFilled />}
-				</div>
-			</li>
-		));
+		return uploadQueue.map(item => {
+			const fileType = getFileTypeFromFileName(item.file.name, [
+				'image',
+				'audio',
+				'video',
+			]);
+			const fileSizeFormatted = nFormatter(item.file.size, { digits: 1 });
+
+			return (
+				<li key={item.file.name} className='list-none'>
+					<div className='flex flex-col gap-2 rounded-md border border-border bg-background p-3'>
+						<div className='flex flex-row items-start justify-between gap-2'>
+							<div className='flex flex-1 flex-col gap-1'>
+								<Text variant='sm/medium' className='break-all'>
+									{item.file.name}
+								</Text>
+								<div className='flex flex-row items-center gap-2'>
+									<Text variant='xs/normal' className='text-muted-foreground'>
+										{fileType.toUpperCase()}
+									</Text>
+									<Text variant='xs/normal' className='text-muted-foreground'>
+										{fileSizeFormatted}B
+									</Text>
+								</div>
+							</div>
+							<div className='flex items-center'>
+								{item.status === 'pendingPresign' ?
+									<LoadingSpinner className='h-4 w-4' />
+								: item.status === 'readyToUpload' ?
+									<Icon.upload className='h-4 w-4 text-muted-foreground' />
+								: item.status === 'uploading' ?
+									<Icon.rocket className='h-4 w-4 text-blue-500' />
+								: item.status === 'complete' ?
+									<Icon.check className='h-4 w-4 text-green-500' />
+								:	<Icon.xCircleFilled className='h-4 w-4 text-red-500' />}
+							</div>
+						</div>
+						{item.status === 'uploading' && (
+							<Progress
+								value={item.progress}
+								max={100}
+								size='xs'
+								className='w-full'
+								aria-label='Upload progress'
+							/>
+						)}
+					</div>
+				</li>
+			);
+		});
 	}, [uploadQueue]);
 
+	if (uploadQueue.length === 0) {
+		return null;
+	}
+
 	return (
-		<aside className='my-2'>
-			<ul>{FilesList}</ul>
+		<aside className='flex flex-col gap-2'>
+			<ul className='flex flex-col gap-2'>{FilesList}</ul>
 		</aside>
 	);
 }

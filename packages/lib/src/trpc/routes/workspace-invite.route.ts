@@ -73,10 +73,10 @@ export const workspaceInviteRoute = {
 			});
 
 			await sendEmail({
-				from: 'support@ship.barely.io',
+				from: 'support@ship.barely.ai',
 				fromFriendlyName: 'Barely',
 				to: input.email,
-				subject: `You've been invited to join ${ctx.workspace.name} on barely.io`,
+				subject: `You've been invited to join ${ctx.workspace.name} on barely.ai`,
 				type: 'transactional',
 				react: WorkspaceInviteEmail,
 			});

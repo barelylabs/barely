@@ -67,7 +67,7 @@ describe('/api/contact', () => {
 					name: 'John Doe',
 					email: 'john@example.com',
 					artistName: 'Test Artist',
-					message: 'I would like to learn more about barely.io',
+					message: 'I would like to learn more about barely.ai',
 					variant: 'demo',
 				}),
 			});
@@ -79,8 +79,8 @@ describe('/api/contact', () => {
 			expect(data).toEqual({ success: true });
 			expect(mockedSendEmail).toHaveBeenCalledWith(
 				expect.objectContaining({
-					from: 'noreply@mail.barely.io',
-					to: 'hello@barely.io',
+					from: 'noreply@mail.barely.ai',
+					to: 'hello@barely.ai',
 					subject: 'New Demo Request - John Doe',
 					type: 'transactional',
 					replyTo: 'john@example.com',

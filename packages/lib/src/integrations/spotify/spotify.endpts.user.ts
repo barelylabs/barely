@@ -1,9 +1,13 @@
 import { zGet } from '@barely/utils';
 import { z } from 'zod/v4';
 
+import { spotifyRateLimiter } from './spotify.rate-limiter';
+
 //* ✨ ENDPOINTS ✨ *//
 
 const getSpotifyUser = async (props: { accessToken: string }) => {
+	await spotifyRateLimiter.checkLimit();
+
 	const endpoint = 'https://api.spotify.com/v1/me';
 	const auth = `Bearer ${props.accessToken}`;
 	const userRes = await zGet(endpoint, spotifyUserResponseSchema, { auth });

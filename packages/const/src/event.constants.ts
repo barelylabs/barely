@@ -21,11 +21,18 @@ export const WEB_EVENT_TYPES__LINK = ['link/click'] as const;
 
 export const WEB_EVENT_TYPES__PAGE = ['page/view', 'page/linkClick'] as const;
 
+export const WEB_EVENT_TYPES__VIP = [
+	'vip/view',
+	'vip/emailCapture',
+	'vip/download',
+] as const;
+
 export const WEB_EVENT_TYPES = [
 	...WEB_EVENT_TYPES__CART,
 	...WEB_EVENT_TYPES__FM,
 	...WEB_EVENT_TYPES__LINK,
 	...WEB_EVENT_TYPES__PAGE,
+	...WEB_EVENT_TYPES__VIP,
 ] as const;
 
 export type WebEventType = (typeof WEB_EVENT_TYPES)[number];

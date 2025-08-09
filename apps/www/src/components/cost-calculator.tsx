@@ -132,7 +132,7 @@ export function CostCalculator() {
 					Calculate Your Savings
 				</h2>
 				<p className='text-lg text-muted-foreground'>
-					See how much you could save by switching to barely.io
+					See how much you could save by switching to barely.ai
 				</p>
 			</div>
 
@@ -212,7 +212,7 @@ export function CostCalculator() {
 				{/* Results */}
 				<div>
 					<h3 className='mb-4 text-xl font-semibold text-white'>
-						Choose Your barely.io Plan
+						Choose Your barely.ai Plan
 					</h3>
 					<div className='mb-6 space-y-3'>
 						{barelyPlans.map((plan, index) => (
@@ -264,7 +264,7 @@ export function CostCalculator() {
 								{billingPeriod === 'monthly' ? '/month' : '/year'}
 							</div>
 
-							<div className='mb-2 text-sm text-muted-foreground'>barely.io Cost</div>
+							<div className='mb-2 text-sm text-muted-foreground'>barely.ai Cost</div>
 							<div className='mb-4 text-2xl font-bold text-secondary'>
 								${barelyPlanCost.toFixed(2)}
 								{billingPeriod === 'monthly' ? '/month' : '/year'}

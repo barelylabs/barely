@@ -14,9 +14,24 @@ import {
 	selectWorkspaceTracksSchema,
 	updateTrackSchema,
 } from '@barely/validators';
-import { and, desc, eq, inArray, isNull, lt, notInArray, or } from 'drizzle-orm';
+import { tasks, waitUntil } from '@trigger.dev/sdk/v3';
+import {
+	and,
+	asc,
+	desc,
+	eq,
+	gt,
+	ilike,
+	inArray,
+	isNull,
+	lt,
+	notInArray,
+	or,
+	sql,
+} from 'drizzle-orm';
 import { z } from 'zod/v4';
 
+import type { generateFileBlurHash } from '../../trigger';
 import {
 	createTrack,
 	getTrackById,
@@ -26,6 +41,67 @@ import {
 } from '../../functions/track.fns';
 import { pushEvent } from '../../integrations/pusher/pusher-server';
 import { privateProcedure, publicProcedure, workspaceProcedure } from '../trpc';
+
+// Helper function to build cursor WHERE clause based on sort order
+function getCursorWhereClause(
+	cursor: { id: string; createdAt: Date; spotifyPopularity: number | null },
+	sortBy: 'name' | 'spotifyPopularity' | 'releaseDate' | undefined,
+	sortOrder: 'asc' | 'desc' | undefined,
+) {
+	const isDesc = sortOrder !== 'asc';
+
+	// For name and releaseDate sorting, we only use createdAt and id for cursor
+	if (sortBy === 'name' || sortBy === 'releaseDate') {
+		return or(
+			isDesc ?
+				lt(Tracks.createdAt, cursor.createdAt)
+			:	gt(Tracks.createdAt, cursor.createdAt),
+			and(
+				eq(Tracks.createdAt, cursor.createdAt),
+				isDesc ? lt(Tracks.id, cursor.id) : gt(Tracks.id, cursor.id),
+			),
+		);
+	}
+
+	// For spotifyPopularity sorting (or default), we need to handle popularity, createdAt, and id
+	if (isDesc) {
+		// Descending: we want tracks with lower popularity, or same popularity with earlier createdAt/id
+		return or(
+			// Case 1: Current track has lower popularity than cursor
+			cursor.spotifyPopularity === null ?
+				sql`${Tracks.spotifyPopularity} IS NOT NULL` // All non-null values come after null in DESC NULLS LAST
+			:	sql`${Tracks.spotifyPopularity} < ${cursor.spotifyPopularity}`,
+			// Case 2: Same popularity (including both NULL), check secondary sort
+			and(
+				cursor.spotifyPopularity === null ?
+					sql`${Tracks.spotifyPopularity} IS NULL`
+				:	sql`${Tracks.spotifyPopularity} = ${cursor.spotifyPopularity}`,
+				or(
+					lt(Tracks.createdAt, cursor.createdAt),
+					and(eq(Tracks.createdAt, cursor.createdAt), lt(Tracks.id, cursor.id)),
+				),
+			),
+		);
+	} else {
+		// Ascending: we want tracks with higher popularity, or same popularity with earlier createdAt/id
+		return or(
+			// Case 1: Current track has higher popularity than cursor
+			cursor.spotifyPopularity === null ?
+				sql`${Tracks.spotifyPopularity} IS NOT NULL`
+			:	sql`${Tracks.spotifyPopularity} > ${cursor.spotifyPopularity} OR (${Tracks.spotifyPopularity} IS NULL AND ${cursor.spotifyPopularity} IS NOT NULL)`,
+			// Case 2: Same popularity (including both NULL), check secondary sort
+			and(
+				cursor.spotifyPopularity === null ?
+					sql`${Tracks.spotifyPopularity} IS NULL`
+				:	sql`${Tracks.spotifyPopularity} = ${cursor.spotifyPopularity}`,
+				or(
+					lt(Tracks.createdAt, cursor.createdAt),
+					and(eq(Tracks.createdAt, cursor.createdAt), lt(Tracks.id, cursor.id)),
+				),
+			),
+		);
+	}
+}
 
 export const trackRoute = {
 	byId: privateProcedure
@@ -37,22 +113,63 @@ export const trackRoute = {
 	byWorkspace: workspaceProcedure
 		.input(selectWorkspaceTracksSchema)
 		.query(async ({ ctx, input }) => {
-			const { limit, cursor, search, showArchived } = input;
+			const { limit, cursor, search, showArchived, sortBy, sortOrder } = input;
+
+			// const sortBy = input.sortBy ?? 'spotifyPopularity';
+			// const sortOrder = input.sortOrder ?? 'desc';
 
 			const rawTracks = await dbHttp.query.Tracks.findMany({
 				with: trackWith_workspace_genres_files,
 				where: sqlAnd([
 					eq(Tracks.workspaceId, ctx.workspace.id),
-					!!search.length && or(eq(Tracks.name, search), eq(Tracks.spotifyId, search)),
+					!!search.length && ilike(Tracks.name, `%${search}%`),
 					showArchived ? undefined : isNull(Tracks.archivedAt),
-					!!cursor &&
-						or(
-							lt(Tracks.createdAt, cursor.createdAt),
-							and(eq(Tracks.createdAt, cursor.createdAt), lt(Tracks.id, cursor.id)),
-						),
+					!!cursor && getCursorWhereClause(cursor, sortBy, sortOrder),
 				]),
+				orderBy: [
+					sortBy === 'name' ?
+						sortOrder === 'asc' ?
+							asc(Tracks.name)
+						:	desc(Tracks.name)
+					: sortBy === 'releaseDate' ?
+						sortOrder === 'asc' ?
+							asc(Tracks.releaseDate)
+						:	desc(Tracks.releaseDate)
+					: sortOrder === 'asc' ?
+						// default to popularity
+						sql`${Tracks.spotifyPopularity} asc nulls last`
+					:	sql`${Tracks.spotifyPopularity} desc nulls last`,
 
-				orderBy: [desc(Tracks.createdAt), desc(Tracks.id)],
+					// sql`${Tracks.spotifyPopularity} desc nulls last`,
+					desc(Tracks.createdAt),
+					desc(Tracks.id),
+				],
+
+				// orderBy: [
+				// 	sortBy === 'name' ?
+				// 		sortOrder === 'asc' ?
+				// 			asc(Tracks.name)
+				// 		:	desc(Tracks.name)
+				// 	: sortBy === 'releaseDate' ?
+				// 		sortOrder === 'asc' ?
+				// 			asc(Tracks.releaseDate)
+				// 		:	desc(Tracks.releaseDate)
+				// 	: sortBy === 'spotifyPopularity' ?
+				// 		sortOrder === 'asc' ?
+				// 			// 	sql`${Tracks.spotifyPopularity} asc nulls last`
+				// 			// :	sql`${Tracks.spotifyPopularity} desc nulls last`
+				// 			asc(Tracks.spotifyPopularity)
+				// 		:	desc(Tracks.spotifyPopularity)
+				// 	: sortOrder === 'asc' ?
+				// 		// default to popularity
+				// 		asc(Tracks.spotifyPopularity)
+				// 	:	desc(Tracks.spotifyPopularity),
+				// 	// 	sql`${Tracks.spotifyPopularity} asc nulls last`
+				// 	// :	sql`${Tracks.spotifyPopularity} desc nulls last`,
+				// 	desc(Tracks.createdAt),
+				// 	desc(Tracks.id),
+				// 	// sql`nulls last`,
+				// ],
 				limit: limit + 1,
 			});
 
@@ -69,8 +186,22 @@ export const trackRoute = {
 						{
 							id: nextTrack.id,
 							createdAt: nextTrack.createdAt,
+							spotifyPopularity: nextTrack.spotifyPopularity,
 						}
 					:	undefined;
+			}
+
+			// check if artwork files have blur hash
+			for (const track of tracks) {
+				const currentArtwork = track.artworkFiles.find(f => f.current);
+				if (currentArtwork && !currentArtwork.blurDataUrl) {
+					waitUntil(
+						tasks.trigger<typeof generateFileBlurHash>('generate-file-blur-hash', {
+							fileId: currentArtwork.id,
+							s3Key: currentArtwork.s3Key,
+						}),
+					);
+				}
 			}
 
 			return {

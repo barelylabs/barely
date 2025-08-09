@@ -3,7 +3,7 @@
 import type { TopEventType } from '@barely/tb/schema';
 import type { BarListBarProps } from '@barely/ui/charts/bar-list';
 import { useState } from 'react';
-import { useWebEventStatFilters } from '@barely/hooks';
+import { useVipStatFilters, useWebEventStatFilters } from '@barely/hooks';
 import { getTopStatValue } from '@barely/tb/schema';
 import { useQuery } from '@tanstack/react-query';
 
@@ -21,7 +21,18 @@ export function StatBarelyReferers({ eventType }: { eventType: TopEventType }) {
 		'landingPages' | 'emailBroadcasts' | 'emailTemplates' | 'flowActions'
 	>('landingPages');
 
-	const { filtersWithHandle, getSetFilterPath } = useWebEventStatFilters();
+	const isVipEvent =
+		eventType === 'vip/view' ||
+		eventType === 'vip/emailCapture' ||
+		eventType === 'vip/download';
+
+	const vipFilters = useVipStatFilters();
+	const webFilters = useWebEventStatFilters();
+
+	const filtersWithHandle =
+		isVipEvent ? vipFilters.filtersWithHandle : webFilters.filtersWithHandle;
+	const getSetFilterPath =
+		isVipEvent ? vipFilters.getSetFilterPath : webFilters.getSetFilterPath;
 
 	const { data: topLandingPages } = useQuery(
 		trpc.stat.topLandingPages.queryOptions(
@@ -135,7 +146,7 @@ export function StatBarelyReferers({ eventType }: { eventType: TopEventType }) {
 		<Card className='h-[400px]'>
 			<div className='flex flex-row items-center justify-between gap-6'>
 				<H size='4'>Barely</H>
-				<ScrollArea>
+				<ScrollArea className='max-w-[calc(100%-120px)] overflow-hidden'>
 					<div className='p-2'>
 						<TabButtons
 							tabs={[
@@ -148,7 +159,7 @@ export function StatBarelyReferers({ eventType }: { eventType: TopEventType }) {
 							setSelectedTab={setTab}
 						/>
 					</div>
-					<ScrollBar hidden orientation='horizontal' />
+					<ScrollBar orientation='horizontal' />
 				</ScrollArea>
 			</div>
 			{barList(9)}

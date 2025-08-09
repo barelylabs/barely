@@ -11,6 +11,8 @@ const prefixes = {
 	user: 'user',
 	workspace: 'ws',
 	providerAccount: 'app',
+	// nyc
+	nycSession: 'nycs',
 	// web
 	landingPage: 'lp',
 	link: 'link',
@@ -40,6 +42,7 @@ const prefixes = {
 	file: 'file',
 	playlist: 'pl',
 	track: 'tr',
+	album: 'al',
 	// email
 	emailBroadcast: 'email_bc',
 	emailTemplate: 'email_temp',
@@ -69,6 +72,10 @@ const prefixes = {
 	workflowAction: 'wfa',
 	workflowRun: 'wfr',
 	workflowRunAction: 'wfra',
+	// vip
+	vipSwap: 'vip_swap',
+	vipSwapAccessLog: 'vip_sal',
+	vipSession: 'vips',
 } as const;
 
 export function newId(prefix: keyof typeof prefixes) {

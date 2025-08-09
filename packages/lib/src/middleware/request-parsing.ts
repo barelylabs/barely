@@ -144,6 +144,48 @@ export const parseLandingPageUrl = (url: string) => {
 	return { handle, key };
 };
 
+// vip
+export const parseVipReqForHandleAndKey = (req: NextRequest) => {
+	const { handle: handleFromHeaders, key: keyFromHeaders } = parseHeadersForHandleAndKey(
+		req.headers,
+	);
+
+	console.log('parseVipReq - headers:', handleFromHeaders, keyFromHeaders);
+
+	if (handleFromHeaders && keyFromHeaders)
+		return { handle: handleFromHeaders, key: keyFromHeaders };
+
+	const referer = req.headers.get('referer') ?? '';
+	console.log('parseVipReq - referer:', referer);
+
+	const { handle: handleFromReferer, key: keyFromReferer } = parseVipUrl(referer);
+	console.log('parseVipReq - parsed from referer:', handleFromReferer, keyFromReferer);
+
+	return {
+		handle: handleFromHeaders ?? handleFromReferer,
+		key: keyFromHeaders ?? keyFromReferer,
+	};
+};
+
+export const parseVipUrl = (url: string) => {
+	const parsed = new URL(url);
+	const parts = parsed.pathname.split('/').filter(Boolean);
+
+	console.log('parseVipUrl - url:', url);
+	console.log('parseVipUrl - pathname:', parsed.pathname);
+	console.log('parseVipUrl - parts:', parts);
+
+	// VIP URLs are structured as /[handle]/unlock/[key]
+	const handle = parts[0] ?? null;
+	const key = parts[2] ?? null; // parts[1] is 'unlock'
+
+	if (!handle || !key) {
+		console.log('parseVipUrl - missing handle or key', handle, key);
+	}
+
+	return { handle, key };
+};
+
 // common
 export function parseGeo(req: NextRequest) {
 	const geo = geolocation(req);
@@ -201,15 +243,25 @@ export function parseSession({
 	key: string | null;
 }) {
 	const handleAndKeyExist = handle && key;
+	const params = req.nextUrl.searchParams;
 
+	// Check for fanId in query params first, then cookies
+	const fanIdFromQuery = params.get('fid');
 	const fanId =
+		fanIdFromQuery ??
 		(handleAndKeyExist ?
 			req.cookies.get(`${handle}.${key}.fanId`)?.value
-		:	req.cookies.getAll().find(cookie => cookie.name.endsWith('.fanId'))?.value) ?? null;
+		:	req.cookies.getAll().find(cookie => cookie.name.endsWith('.fanId'))?.value) ??
+		null;
+
+	// Check for sessionId in query params first, then cookies
+	const sessionIdFromQuery = params.get('sid');
 	const sessionId =
+		sessionIdFromQuery ??
 		(handleAndKeyExist ?
 			req.cookies.get(`${handle}.${key}.bsid`)?.value
-		:	req.cookies.getAll().find(cookie => cookie.name.endsWith('.bsid'))?.value) ?? null;
+		:	req.cookies.getAll().find(cookie => cookie.name.endsWith('.bsid'))?.value) ??
+		null;
 	const sessionReferer =
 		(handleAndKeyExist ?
 			req.cookies.get(`${handle}.${key}.sessionReferer`)?.value
@@ -361,7 +413,7 @@ export async function setVisitorCookies({
 	res: NextResponse;
 	handle: string | null;
 	key: string | null;
-	app: 'cart' | 'link' | 'fm' | 'page' | 'press' | 'sparrow' | 'www';
+	app: 'cart' | 'link' | 'fm' | 'page' | 'press' | 'nyc' | 'www' | 'vip';
 }) {
 	const handle = handleAndKey.handle ?? '_';
 	const key = handleAndKey.key ?? '_';
@@ -371,7 +423,15 @@ export async function setVisitorCookies({
 
 	await Promise.resolve(1); // fixme
 
-	if (!req.cookies.get(`${handle}.${key}.bsid`)) {
+	// Check for sessionId in query params - if present, use it to override/set cookie
+	const sessionIdFromQuery = params.get('sid');
+	if (sessionIdFromQuery) {
+		res.cookies.set(`${handle}.${key}.bsid`, sessionIdFromQuery, {
+			httpOnly: true,
+			maxAge: 60 * 60 * 24,
+		});
+	} else if (!req.cookies.get(`${handle}.${key}.bsid`)) {
+		// Only generate new sessionId if not in query params and not in cookies
 		res.cookies.set(
 			`${handle}.${key}.bsid`,
 			app === 'cart' ? newId('cart')
@@ -379,6 +439,8 @@ export async function setVisitorCookies({
 			: app === 'fm' ? newId('fmSession')
 			: app === 'page' ? newId('landingPageSession')
 			: app === 'www' ? newId('wwwSession')
+			: app === 'nyc' ? newId('nycSession')
+			: app === 'vip' ? newId('vipSession')
 			: newId('barelySession'),
 			{
 				httpOnly: true,
@@ -420,11 +482,14 @@ export async function setVisitorCookies({
 			},
 		);
 
-	if (params.has('fanId'))
-		res.cookies.set(`${handle}.${key}.fanId`, params.get('fanId') ?? '', {
+	// Handle fanId from query params - using 'fid' for consistency with sessionId 'sid'
+	const fanIdFromQuery = params.get('fid') ?? params.get('fanId');
+	if (fanIdFromQuery) {
+		res.cookies.set(`${handle}.${key}.fanId`, fanIdFromQuery, {
 			httpOnly: true,
 			maxAge: 60 * 60 * 24,
 		});
+	}
 
 	if (params.has('fbclid'))
 		res.cookies.set(`${handle}.${key}.fbclid`, params.get('fbclid') ?? '', {

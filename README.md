@@ -1,8 +1,8 @@
-![logo.png](https://app.barely.io/_static/logo_70px.png)
+![logo.png](https://app.barely.ai/_static/logo_70px.png)
 
-# barely.io
+# barely.ai
 
-[barely.io](https://barely.io) is the open-source marketing stack for creators.
+[barely.ai](https://barely.ai) is the open-source marketing stack for creators.
 
 # Our Mission
 
@@ -14,15 +14,15 @@ Life as an independent creator can sometimes feel exhausting or even futile. As 
 
 Although my band eventually learned [methods](https://indepreneur.io) that significantly increased our following, we found it easier to boost 'vanity' metrics (such as followers and monthly listeners) rather than building a sustainable business. The challenge lies in the accumulating costs of different tools needed for these tasks. Mailchimp for emails, ThriveCart for sales funnels, SquareSpace for website, and Shopify for an online store can add up to hundreds of dollars each month. While these expenses may be manageable for creators generating significant revenue, they can be prohibitive for beginners. It’s also just daunting to determine the best way to start generating income.
 
-That’s why I’m building [barely.io](https://barely.io), an open-source toolset designed to help creators like myself build a following and start generating revenue as early as possible. It offers no marketing gimmicks or shortcuts, just simple, opinionated tools designed to help creators grow a fanbase and convert that fanbase into revenue.
+That’s why I’m building [barely.ai](https://barely.ai), an open-source toolset designed to help creators like myself build a following and start generating revenue as early as possible. It offers no marketing gimmicks or shortcuts, just simple, opinionated tools designed to help creators grow a fanbase and convert that fanbase into revenue.
 
-These are the tools that I wanted (and still want!) for growing a creator-based business. Users have the option to either self-host or choose to host on [barely.io](https://barely.io/). Self-hosting will always remain free, while the pricing for our paid plans will primarily depend on usage, closely related to earnings. Our aim is to provide tools that are affordable to get started with and can quickly generate momentum.
+These are the tools that I wanted (and still want!) for growing a creator-based business. Users have the option to either self-host or choose to host on [barely.ai](https://barely.ai/). Self-hosting will always remain free, while the pricing for our paid plans will primarily depend on usage, closely related to earnings. Our aim is to provide tools that are affordable to get started with and can quickly generate momentum.
 
 # Features
 
 ## WIP
 
-These are features that are currently used by Barely Sparrow, our marketing agency.
+These are features that are currently used by Barely, our marketing agency.
 
 On the make-it-work / make-it-nice / make-it-fast spectrum, these are pushing towards ‘make-it-nice’. The UI is buggy, performance can be improved, but the features generally work. The goal is to clean these up in Q2 2024.
 
@@ -94,9 +94,9 @@ We have referenced and heavily borrowed ideas + code from [cal.com](https://cal.
 
 # OSS
 
-Each month, we pledge to disburse 5% of barely.io revenue to OSS libraries and/or contributors that have enabled our product.
+Each month, we pledge to disburse 5% of barely.ai revenue to OSS libraries and/or contributors that have enabled our product.
 
 # License
 
-Inspired by [cal.com](https://cal.com), [barely.io](https://barely.io) is licensed under
-[AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0.html). We believe in the power of open-source and the importance of giving back to the community. If you have any questions or concerns about the license, please reach out to us at [adam@barely.io](mailto:adam@barely.io).
+Inspired by [cal.com](https://cal.com), [barely.ai](https://barely.ai) is licensed under
+[AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0.html). We believe in the power of open-source and the importance of giving back to the community. If you have any questions or concerns about the license, please reach out to us at [adam@barely.ai](mailto:adam@barely.ai).

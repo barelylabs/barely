@@ -50,7 +50,7 @@ const PlaylistPitchToScreenEmailTemplate = (props: {
 						<Text className='text-md'>
 							Best,
 							<br />
-							The barely.io team
+							The barely.ai team
 						</Text> */}
 					<Hr className='my-5 w-full border border-slate-200' />
 					<EmailFooter />

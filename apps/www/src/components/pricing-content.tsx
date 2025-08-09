@@ -149,7 +149,7 @@ function Header({
 				</Heading>
 				<Lead className='mx-auto mt-6 max-w-3xl text-muted-foreground'>
 					{showPlusPlans ?
-						'Combine barely.io tools with expert coaching and campaign management from Barely Sparrow. Let us handle the growth while you focus on the music.'
+						'Combine barely.ai tools with expert coaching and campaign management from Barely NYC. Let us handle the growth while you focus on the music.'
 					:	'All features included at every tier. Just pay for the capacity you need.'}
 				</Lead>
 
@@ -513,7 +513,7 @@ function CostCalculator() {
 
 							<div className='text-left'>
 								<h3 className='mb-4 text-lg font-semibold text-white'>
-									barely.io Rising Tier:
+									barely.ai Rising Tier:
 								</h3>
 								<ul className='space-y-2 text-muted-foreground'>
 									<li className='flex justify-between'>
@@ -571,9 +571,9 @@ function FAQs() {
 				'Yes! We offer 30% off for registered nonprofit organizations supporting musicians. Contact us for details.',
 		},
 		{
-			question: 'Can I self-host barely.io?',
+			question: 'Can I self-host barely.ai?',
 			answer:
-				'Yes! As an open-source platform, you can self-host barely.io. Check our documentation for setup guides.',
+				'Yes! As an open-source platform, you can self-host barely.ai. Check our documentation for setup guides.',
 		},
 	];
 
@@ -632,7 +632,7 @@ export function PricingContent() {
 	const [showPlusPlans, setShowPlusPlans] = useState(false);
 
 	// Apply purple theme for Agency mode
-	const themeClass = showPlusPlans ? 'pricing-sparrow-theme' : '';
+	const themeClass = showPlusPlans ? 'pricing-nyc-theme' : '';
 
 	return (
 		<main className={cn('overflow-hidden transition-colors duration-300', themeClass)}>

@@ -182,7 +182,7 @@ export function DomainModal() {
 							<SimpleTooltipContent
 								title='This is the domain that your short links will be hosted on. E.g. yourbrand.com/link'
 								cta='Learn more'
-								href='https://help.barely.io/en/articles/5236716-what-is-a-shortlink-domain'
+								href='https://help.barely.ai/en/articles/5236716-what-is-a-shortlink-domain'
 							/>
 						}
 					/>

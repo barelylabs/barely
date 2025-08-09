@@ -23,7 +23,7 @@ const fontSans = FontSans({
 });
 
 export const metadata: Metadata = {
-	title: 'barely.io',
+	title: 'barely.ai',
 	icons: {
 		icon: [
 			{ url: '/_static/favicons/favicon-32x32.png', sizes: '32x32' },
@@ -54,7 +54,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
 				)}
 			>
 				<Providers>
-					<Toaster />
+					<Toaster richColors />
 					<div
 						vaul-drawer-wrapper=''
 						className='container flex min-h-full w-full max-w-full flex-col justify-center bg-background p-0'

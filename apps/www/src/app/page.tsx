@@ -30,7 +30,7 @@ function ValuePropsSection() {
 				<AnimatedSection animation='fade-up' className='mb-16 text-center'>
 					<h2 className='mb-4 text-3xl font-bold tracking-tight text-white sm:text-4xl'>
 						Why musicians choose{' '}
-						<span className='gradient-text inline-block'>barely.io</span>
+						<span className='gradient-text inline-block'>barely.ai</span>
 					</h2>
 				</AnimatedSection>
 
@@ -376,12 +376,12 @@ function CartBentoSection() {
 	);
 }
 
-function BarelyParrowSection() {
+function BuiltByBarelySection() {
 	return (
 		<section className='py-24'>
 			<Container>
 				<AnimatedSection animation='fade-up' className='mx-auto max-w-3xl text-center'>
-					<Subheading>Built by Barely Sparrow</Subheading>
+					<Subheading>Built by Barely</Subheading>
 					<Heading as='h2' className='mt-2 text-white'>
 						The Same Tools We Use for{' '}
 						<span className='gradient-text inline-block'>
@@ -389,9 +389,9 @@ function BarelyParrowSection() {
 						</span>
 					</Heading>
 					<p className='mt-6 text-lg text-muted-foreground'>
-						barely.io powers the marketing campaigns at Barely Sparrow, where we've helped
-						indie artists grow from 0 to 30K+ monthly listeners. Every feature was built
-						to solve real problems we encountered in professional music marketing.
+						barely.ai powers the marketing campaigns at Barely, where we've helped indie
+						artists grow from 0 to 30K+ monthly listeners. Every feature was built to
+						solve real problems we encountered in professional music marketing.
 					</p>
 					<p className='mt-4 text-lg text-muted-foreground'>
 						Now you get the exact same tools we use for agency clients - transparent,
@@ -446,8 +446,8 @@ export default function Home() {
 				{/* Social Proof - Commented out until we have real data */}
 				{/* <SocialProof /> */}
 
-				{/* Barely Sparrow Connection */}
-				<BarelyParrowSection />
+				{/* Built by Barely */}
+				<BuiltByBarelySection />
 
 				{/* FAQ Section */}
 				<FAQSection />

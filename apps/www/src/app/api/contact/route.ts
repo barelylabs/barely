@@ -3,7 +3,7 @@ import { ContactInquiryEmail } from '@barely/email/templates/www/contact-inquiry
 import { ratelimit } from '@barely/lib';
 import { isProduction } from '@barely/utils';
 import { ipAddress } from '@vercel/edge';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 const contactFormSchema = z.object({
 	name: z.string().min(1, 'Name is required'),
@@ -41,9 +41,9 @@ export async function POST(request: Request) {
 
 		// Send email
 		const emailResult = await sendEmail({
-			from: 'noreply@mail.barely.io',
-			fromFriendlyName: 'barely.io',
-			to: 'hello@barely.io',
+			from: 'noreply@mail.barely.ai',
+			fromFriendlyName: 'barely.ai',
+			to: 'hello@barely.ai',
 			subject: `New ${variant === 'demo' ? 'Demo Request' : 'Contact'} - ${validatedData.name}`,
 			react: ContactInquiryEmail({
 				...validatedData,
@@ -88,7 +88,7 @@ export async function POST(request: Request) {
 }
 
 function setCorsHeaders(res: Response) {
-	const origin = isProduction() ? 'https://barely.io' : '*';
+	const origin = isProduction() ? 'https://barely.ai' : '*';
 
 	res.headers.set('Access-Control-Allow-Origin', origin);
 	res.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');

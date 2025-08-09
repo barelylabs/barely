@@ -100,7 +100,7 @@ export function Hero() {
 							</div>
 							<h1 className='mb-6 text-4xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl'>
 								The Open-Source Marketing Platform{' '}
-								<span className='gradient-text'>Built for Musicians</span>
+								<span className='gradient-text'>Built for Indie Artists</span>
 							</h1>
 						</AnimatedSection>
 
@@ -132,8 +132,8 @@ export function Hero() {
 
 						<AnimatedSection animation='fade-up' delay={300}>
 							<p className='mt-8 text-sm text-muted-foreground'>
-								From the team at Barely Sparrow, who've helped indie artists grow from
-								bedroom producers to breakout successes.
+								Built in Brooklyn by music marketing engineers who've helped indie artists
+								grow from bedroom producers to breakout successes.
 							</p>
 						</AnimatedSection>
 					</div>

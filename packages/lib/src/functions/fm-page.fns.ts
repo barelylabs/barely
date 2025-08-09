@@ -1,6 +1,10 @@
 import { dbHttp } from '@barely/db/client';
-import { Files, FmLinks, FmPages } from '@barely/db/sql';
+import { FmLinks, FmPages } from '@barely/db/sql';
+import { tasks } from '@trigger.dev/sdk/v3';
+import { waitUntil } from '@vercel/functions';
 import { and, asc, eq } from 'drizzle-orm';
+
+import type { generateFileBlurHash } from '../trigger/file-blurhash.trigger';
 
 export async function getFmPageData({ handle, key }: { handle: string; key: string }) {
 	const fmPageRaw = await dbHttp.query.FmPages.findFirst({
@@ -21,20 +25,19 @@ export async function getFmPageData({ handle, key }: { handle: string; key: stri
 		},
 	});
 
-	// const coverArt = fmPageRaw?.coverArt;
-
+	// Trigger blur hash generation if missing (non-blocking)
 	if (fmPageRaw?.coverArt && !fmPageRaw.coverArt.blurDataUrl) {
-		const { getBlurHash } = await import('./file.blurhash');
-		const { blurHash, blurDataUrl } = await getBlurHash(fmPageRaw.coverArt.s3Key);
-
-		if (blurHash && blurDataUrl) {
-			fmPageRaw.coverArt.blurHash = blurHash;
-			fmPageRaw.coverArt.blurDataUrl = blurDataUrl;
-			await dbHttp
-				.update(Files)
-				.set({ blurHash, blurDataUrl })
-				.where(eq(Files.id, fmPageRaw.coverArt.id));
-		}
+		// Fire and forget
+		waitUntil(
+			tasks
+				.trigger<typeof generateFileBlurHash>('generate-file-blur-hash', {
+					fileId: fmPageRaw.coverArt.id,
+					s3Key: fmPageRaw.coverArt.s3Key,
+				})
+				.catch(error => {
+					console.error('Failed to trigger blur hash generation:', error);
+				}),
+		);
 	}
 
 	return {

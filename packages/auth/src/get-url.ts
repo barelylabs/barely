@@ -18,6 +18,7 @@ export function getBaseUrl(app: (typeof APPS)[number], absolute = false) {
 		let devPort;
 		switch (app) {
 			case 'app':
+			case 'appFm':
 				devPort =
 					authEnv.NEXT_PUBLIC_APP_DEV_PORT ?? raise('NEXT_PUBLIC_APP_DEV_PORT not found');
 				break;
@@ -54,10 +55,13 @@ export function getBaseUrl(app: (typeof APPS)[number], absolute = false) {
 					authEnv.NEXT_PUBLIC_PRESS_DEV_PORT ??
 					raise('NEXT_PUBLIC_PRESS_DEV_PORT not found');
 				break;
-			case 'sparrow':
+			case 'nyc':
 				devPort =
-					authEnv.NEXT_PUBLIC_SPARROW_DEV_PORT ??
-					raise('NEXT_PUBLIC_SPARROW_DEV_PORT not found');
+					authEnv.NEXT_PUBLIC_NYC_DEV_PORT ?? raise('NEXT_PUBLIC_NYC_DEV_PORT not found');
+				break;
+			case 'vip':
+				devPort =
+					authEnv.NEXT_PUBLIC_VIP_DEV_PORT ?? raise('NEXT_PUBLIC_VIP_DEV_PORT not found');
 				break;
 			case 'www':
 				devPort =
@@ -67,13 +71,16 @@ export function getBaseUrl(app: (typeof APPS)[number], absolute = false) {
 				raise('Invalid app');
 		}
 
-		return `https://${app === 'app' || app === 'cart' ? '127.0.0.1' : 'localhost'}:${devPort}`; // dev SSR should use localhost
+		return `https://${app === 'app' || app === 'appFm' || app === 'cart' ? '127.0.0.1' : 'localhost'}:${devPort}`; // dev SSR should use localhost
 	}
 
 	let baseUrl;
 	switch (app) {
 		case 'app':
 			baseUrl = authEnv.NEXT_PUBLIC_APP_BASE_URL;
+			break;
+		case 'appFm':
+			baseUrl = authEnv.NEXT_PUBLIC_APP_FM_BASE_URL;
 			break;
 		case 'bio':
 			baseUrl = authEnv.NEXT_PUBLIC_BIO_BASE_URL;
@@ -96,8 +103,11 @@ export function getBaseUrl(app: (typeof APPS)[number], absolute = false) {
 		case 'press':
 			baseUrl = authEnv.NEXT_PUBLIC_PRESS_BASE_URL;
 			break;
-		case 'sparrow':
-			baseUrl = authEnv.NEXT_PUBLIC_SPARROW_BASE_URL;
+		case 'nyc':
+			baseUrl = authEnv.NEXT_PUBLIC_NYC_BASE_URL;
+			break;
+		case 'vip':
+			baseUrl = authEnv.NEXT_PUBLIC_VIP_BASE_URL;
 			break;
 		case 'www':
 			baseUrl = authEnv.NEXT_PUBLIC_WWW_BASE_URL;

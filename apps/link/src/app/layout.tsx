@@ -19,7 +19,7 @@ const fontSans = FontSans({
 });
 
 export const metadata: Metadata = {
-	title: 'barely.io',
+	title: 'barely.ai',
 	icons: {
 		icon: [
 			{ url: '/_static/favicons/favicon-32x32.png', sizes: '32x32' },
@@ -39,7 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 	return (
 		<html lang='en' className='h-full scroll-smooth bg-gray-50'>
 			<Head>
-				<title>barely.io</title>
+				<title>barely.ai</title>
 			</Head>
 
 			<head />

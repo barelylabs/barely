@@ -17,6 +17,7 @@
 	},
 	"dependencies": {
 		"@barely/const": "workspace:*",
+		"limiter": "3.0.0",
 		"node-html-parser": "^6.1.11",
 		"sha.js": "^2.4.11",
 		"typescript": "catalog:",

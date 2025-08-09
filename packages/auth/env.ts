@@ -13,6 +13,7 @@ export const authEnv = createEnv({
 	},
 	client: {
 		NEXT_PUBLIC_APP_BASE_URL: z.string().optional(),
+		NEXT_PUBLIC_APP_FM_BASE_URL: z.string().optional(),
 		NEXT_PUBLIC_BIO_BASE_URL: z.string().optional(),
 		NEXT_PUBLIC_CART_BASE_URL: z.string().optional(),
 		NEXT_PUBLIC_FM_BASE_URL: z.string().optional(),
@@ -20,7 +21,8 @@ export const authEnv = createEnv({
 		NEXT_PUBLIC_MANAGE_EMAIL_BASE_URL: z.string().optional(),
 		NEXT_PUBLIC_PAGE_BASE_URL: z.string().optional(),
 		NEXT_PUBLIC_PRESS_BASE_URL: z.string().optional(),
-		NEXT_PUBLIC_SPARROW_BASE_URL: z.string().optional(),
+		NEXT_PUBLIC_NYC_BASE_URL: z.string().optional(),
+		NEXT_PUBLIC_VIP_BASE_URL: z.string().optional(),
 		NEXT_PUBLIC_WWW_BASE_URL: z.string().optional(),
 
 		NEXT_PUBLIC_VERCEL_ENV: z.enum(['development', 'production', 'preview']).optional(),
@@ -34,11 +36,13 @@ export const authEnv = createEnv({
 		NEXT_PUBLIC_MANAGE_EMAIL_DEV_PORT: z.string().optional(),
 		NEXT_PUBLIC_PAGE_DEV_PORT: z.string().optional(),
 		NEXT_PUBLIC_PRESS_DEV_PORT: z.string().optional(),
-		NEXT_PUBLIC_SPARROW_DEV_PORT: z.string().optional(),
+		NEXT_PUBLIC_NYC_DEV_PORT: z.string().optional(),
+		NEXT_PUBLIC_VIP_DEV_PORT: z.string().optional(),
 		NEXT_PUBLIC_WWW_DEV_PORT: z.string().optional(),
 	},
 	experimental__runtimeEnv: {
 		NEXT_PUBLIC_APP_BASE_URL: process.env.NEXT_PUBLIC_APP_BASE_URL,
+		NEXT_PUBLIC_APP_FM_BASE_URL: process.env.NEXT_PUBLIC_APP_FM_BASE_URL,
 		NEXT_PUBLIC_BIO_BASE_URL: process.env.NEXT_PUBLIC_BIO_BASE_URL,
 		NEXT_PUBLIC_CART_BASE_URL: process.env.NEXT_PUBLIC_CART_BASE_URL,
 		NEXT_PUBLIC_FM_BASE_URL: process.env.NEXT_PUBLIC_FM_BASE_URL,
@@ -46,7 +50,8 @@ export const authEnv = createEnv({
 		NEXT_PUBLIC_MANAGE_EMAIL_BASE_URL: process.env.NEXT_PUBLIC_MANAGE_EMAIL_BASE_URL,
 		NEXT_PUBLIC_PAGE_BASE_URL: process.env.NEXT_PUBLIC_PAGE_BASE_URL,
 		NEXT_PUBLIC_PRESS_BASE_URL: process.env.NEXT_PUBLIC_PRESS_BASE_URL,
-		NEXT_PUBLIC_SPARROW_BASE_URL: process.env.NEXT_PUBLIC_SPARROW_BASE_URL,
+		NEXT_PUBLIC_NYC_BASE_URL: process.env.NEXT_PUBLIC_NYC_BASE_URL,
+		NEXT_PUBLIC_VIP_BASE_URL: process.env.NEXT_PUBLIC_VIP_BASE_URL,
 		NEXT_PUBLIC_WWW_BASE_URL: process.env.NEXT_PUBLIC_WWW_BASE_URL,
 
 		NEXT_PUBLIC_VERCEL_ENV: process.env.NEXT_PUBLIC_VERCEL_ENV,
@@ -60,8 +65,12 @@ export const authEnv = createEnv({
 		NEXT_PUBLIC_MANAGE_EMAIL_DEV_PORT: process.env.NEXT_PUBLIC_MANAGE_EMAIL_DEV_PORT,
 		NEXT_PUBLIC_PAGE_DEV_PORT: process.env.NEXT_PUBLIC_PAGE_DEV_PORT,
 		NEXT_PUBLIC_PRESS_DEV_PORT: process.env.NEXT_PUBLIC_PRESS_DEV_PORT,
-		NEXT_PUBLIC_SPARROW_DEV_PORT: process.env.NEXT_PUBLIC_SPARROW_DEV_PORT,
+		NEXT_PUBLIC_NYC_DEV_PORT: process.env.NEXT_PUBLIC_NYC_DEV_PORT,
+		NEXT_PUBLIC_VIP_DEV_PORT: process.env.NEXT_PUBLIC_VIP_DEV_PORT,
 		NEXT_PUBLIC_WWW_DEV_PORT: process.env.NEXT_PUBLIC_WWW_DEV_PORT,
 	},
-	skipValidation: !!process.env.CI || process.env.npm_lifecycle_event === 'lint',
+	skipValidation:
+		!!process.env.CI ||
+		process.env.npm_lifecycle_event === 'lint' ||
+		process.env.npm_lifecycle_event === 'test',
 });

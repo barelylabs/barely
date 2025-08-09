@@ -70,6 +70,7 @@ export function SidebarNav() {
 		{ title: 'media', icon: 'media', href: `/${handle}/media` },
 		{ title: 'tracks', icon: 'music', href: `/${handle}/tracks` },
 		{ title: 'mixtapes', icon: 'mixtape', href: `/${handle}/mixtapes` },
+		// { title: 'spotify stats', icon: 'spotify', href: `/${handle}/spotify/stats` },
 	];
 
 	const pageLinks: SidebarNavLink[] = [
@@ -77,6 +78,7 @@ export function SidebarNav() {
 		{ title: 'fm', icon: 'fm', href: `/${handle}/fm` },
 		{ title: 'pages', icon: 'landingPage', href: `/${handle}/pages` },
 		{ title: 'press', icon: 'press', href: `/${handle}/press` },
+		{ title: 'vip', icon: 'vip', href: `/${handle}/vip/swaps` },
 	];
 
 	const emailLinks: SidebarNavLink[] = [
@@ -135,6 +137,7 @@ export function SidebarNav() {
 			href: `/${handle}/settings/team`,
 		},
 		{ title: 'socials', icon: 'socials', href: `/${handle}/settings/socials` },
+		{ title: 'streaming', icon: 'music', href: `/${handle}/settings/streaming` },
 		{ title: 'apps', icon: 'apps', href: `/${handle}/settings/apps` },
 		{
 			title: 'email',
@@ -159,6 +162,7 @@ export function SidebarNav() {
 			icon: 'remarketing',
 			href: `/${handle}/settings/remarketing`,
 		},
+		{ title: 'vip', icon: 'vip', href: `/${handle}/settings/vip` },
 		{ title: 'cart', icon: 'cart', href: `/${handle}/settings/cart` },
 		{ title: 'payouts', icon: 'payouts', href: `/${handle}/settings/payouts` },
 		{ title: 'billing', icon: 'billing', href: `/${handle}/settings/billing` },

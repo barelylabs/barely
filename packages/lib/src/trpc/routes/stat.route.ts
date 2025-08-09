@@ -3,6 +3,7 @@ import type { TRPCRouterRecord } from '@trpc/server';
 import { dbHttp } from '@barely/db/client';
 import { FmPages } from '@barely/db/sql/fm.sql';
 import { Links } from '@barely/db/sql/link.sql';
+import { Tracks } from '@barely/db/sql/track.sql';
 import {
 	pipe_cartTimeseries,
 	pipe_cartTopBrowsers,
@@ -68,10 +69,34 @@ import {
 	pipe_pageTopOs,
 	pipe_pageTopReferers,
 	pipe_pageTopRegions,
+	pipe_vipTimeseries,
+	pipe_vipTopBrowsers,
+	pipe_vipTopCities,
+	pipe_vipTopCountries,
+	pipe_vipTopDevices,
+	pipe_vipTopEmailBroadcasts,
+	pipe_vipTopEmailTemplates,
+	pipe_vipTopFlowActions,
+	pipe_vipTopLandingPages,
+	pipe_vipTopMetaAds,
+	pipe_vipTopMetaAdSets,
+	pipe_vipTopMetaCampaigns,
+	pipe_vipTopMetaPlacements,
+	pipe_vipTopOs,
+	pipe_vipTopReferers,
+	pipe_vipTopRegions,
 	pipe_webHitsTimeseries,
+	querySpotifyAlbumStats,
+	querySpotifyArtistStats,
+	querySpotifyTrackComparison,
+	querySpotifyTrackStats,
 } from '@barely/tb/query';
-import { stdWebEventQueryToPipeParamsSchema } from '@barely/tb/schema';
-import { and, eq } from 'drizzle-orm';
+import {
+	spotifyStatQuerySchema,
+	stdWebEventQueryToPipeParamsSchema,
+} from '@barely/tb/schema';
+import { getIsoDateRangeFromDescription } from '@barely/utils';
+import { and, desc, eq, inArray, isNotNull } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
 import { workspaceProcedure } from '../trpc';
@@ -197,6 +222,20 @@ export const statRoute = {
 			return pageTimeseries.data;
 		}),
 
+	vipTimeseries: workspaceProcedure
+		.input(stdWebEventQueryToPipeParamsSchema)
+		.query(async ({ ctx, input }) => {
+			const { dateRange, granularity } = input;
+			console.log('vipTimeseries input => ', input);
+			const vipTimeseries = await pipe_vipTimeseries({
+				...input,
+				workspaceId: ctx.workspace.id,
+				timezone: ctx.workspace.timezone,
+				granularity: granularity ?? (dateRange === '1d' ? 'hour' : 'day'),
+			});
+			return vipTimeseries.data;
+		}),
+
 	webEventTimeseries: workspaceProcedure
 		.input(stdWebEventQueryToPipeParamsSchema)
 		.query(async ({ ctx, input }) => {
@@ -259,6 +298,20 @@ export const statRoute = {
 				return topBrowsers.data;
 			}
 
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topBrowsers = await pipe_vipTopBrowsers({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topBrowsers.data;
+			}
+
 			throw new Error('Invalid topEventType');
 		}),
 
@@ -310,6 +363,20 @@ export const statRoute = {
 				return topDevices.data;
 			}
 
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topDevices = await pipe_vipTopDevices({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topDevices.data;
+			}
+
 			throw new Error('Invalid topEventType');
 		}),
 
@@ -353,6 +420,20 @@ export const statRoute = {
 
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topOperatingSystems = await pipe_pageTopOs({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topOperatingSystems.data;
+			}
+
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topOperatingSystems = await pipe_vipTopOs({
 					...input,
 					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
@@ -415,6 +496,20 @@ export const statRoute = {
 				return topCities.data;
 			}
 
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topCities = await pipe_vipTopCities({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topCities.data;
+			}
+
 			throw new Error('Invalid topEventType');
 		}),
 
@@ -456,6 +551,20 @@ export const statRoute = {
 
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topRegions = await pipe_pageTopRegions({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topRegions.data;
+			}
+
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topRegions = await pipe_vipTopRegions({
 					...input,
 					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
@@ -515,6 +624,20 @@ export const statRoute = {
 				return topCountries.data;
 			}
 
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topCountries = await pipe_vipTopCountries({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topCountries.data;
+			}
+
 			throw new Error('Invalid topEventType');
 		}),
 
@@ -561,6 +684,20 @@ export const statRoute = {
 
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topReferers = await pipe_pageTopReferers({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topReferers.data;
+			}
+
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topReferers = await pipe_vipTopReferers({
 					...input,
 					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
@@ -622,6 +759,20 @@ export const statRoute = {
 				return topMetaCampaigns.data;
 			}
 
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topMetaCampaigns = await pipe_vipTopMetaCampaigns({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topMetaCampaigns.data;
+			}
+
 			throw new Error('Invalid topEventType');
 		}),
 
@@ -667,6 +818,20 @@ export const statRoute = {
 
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topMetaAdSets = await pipe_pageTopMetaAdSets({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topMetaAdSets.data;
+			}
+
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topMetaAdSets = await pipe_vipTopMetaAdSets({
 					...input,
 					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
@@ -728,6 +893,20 @@ export const statRoute = {
 				return topMetaAds.data;
 			}
 
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topMetaAds = await pipe_vipTopMetaAds({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topMetaAds.data;
+			}
+
 			throw new Error('Invalid topEventType');
 		}),
 
@@ -773,6 +952,20 @@ export const statRoute = {
 
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topMetaPlacements = await pipe_pageTopMetaPlacements({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topMetaPlacements.data;
+			}
+
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topMetaPlacements = await pipe_vipTopMetaPlacements({
 					...input,
 					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
@@ -834,6 +1027,20 @@ export const statRoute = {
 				return topLandingPages.data;
 			}
 
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topLandingPages = await pipe_vipTopLandingPages({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topLandingPages.data;
+			}
+
 			throw new Error('Invalid topEventType');
 		}),
 
@@ -879,6 +1086,20 @@ export const statRoute = {
 
 			if (input.topEventType === 'page/view' || input.topEventType === 'page/linkClick') {
 				const topEmailBroadcasts = await pipe_pageTopEmailBroadcasts({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topEmailBroadcasts.data;
+			}
+
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topEmailBroadcasts = await pipe_vipTopEmailBroadcasts({
 					...input,
 					workspaceId: ctx.workspace.id,
 					timezone: ctx.workspace.timezone,
@@ -940,6 +1161,20 @@ export const statRoute = {
 				return topEmailTemplates.data;
 			}
 
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topEmailTemplates = await pipe_vipTopEmailTemplates({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topEmailTemplates.data;
+			}
+
 			throw new Error('Invalid topEventType');
 		}),
 
@@ -993,6 +1228,164 @@ export const statRoute = {
 				return topFlowActions.data;
 			}
 
+			if (
+				input.topEventType === 'vip/view' ||
+				input.topEventType === 'vip/emailCapture' ||
+				input.topEventType === 'vip/download'
+			) {
+				const topFlowActions = await pipe_vipTopFlowActions({
+					...input,
+					workspaceId: ctx.workspace.id,
+					timezone: ctx.workspace.timezone,
+				});
+
+				return topFlowActions.data;
+			}
+
 			throw new Error('Invalid topEventType');
+		}),
+
+	spotifyArtistTimeseries: workspaceProcedure
+		.input(spotifyStatQuerySchema)
+		.query(async ({ ctx, input }) => {
+			const dateRange =
+				input.start && input.end ?
+					{ start: input.start, end: input.end }
+				:	getIsoDateRangeFromDescription(input.dateRange);
+
+			const timeseries = await querySpotifyArtistStats({
+				workspaceId: ctx.workspace.id,
+				start: dateRange.start,
+				end: dateRange.end,
+				timezone: ctx.workspace.timezone,
+			});
+
+			return timeseries.data;
+		}),
+
+	spotifyTrackTimeseries: workspaceProcedure
+		.input(
+			spotifyStatQuerySchema.extend({
+				trackId: z.string().optional(), // Keep for backward compatibility
+				trackIds: z.array(z.string()).optional(), // New array support
+			}),
+		)
+		.query(async ({ ctx, input }) => {
+			const dateRange =
+				input.start && input.end ?
+					{ start: input.start, end: input.end }
+				:	getIsoDateRangeFromDescription(input.dateRange);
+
+			// Handle both single trackId and multiple trackIds
+			let trackIds: string[] = [];
+			if (input.trackIds && input.trackIds.length > 0) {
+				trackIds = input.trackIds;
+			} else if (input.trackId) {
+				trackIds = [input.trackId];
+			}
+
+			// If no track IDs provided, get the track with highest popularity
+			if (trackIds.length === 0) {
+				const topTrack = await dbHttp.query.Tracks.findFirst({
+					where: and(
+						eq(Tracks.workspaceId, ctx.workspace.id),
+						isNotNull(Tracks.spotifyId),
+					),
+					orderBy: desc(Tracks.spotifyPopularity),
+					columns: {
+						id: true,
+						name: true,
+						spotifyId: true,
+					},
+				});
+
+				if (topTrack) {
+					trackIds = [topTrack.id];
+				}
+			}
+
+			// Get Spotify IDs for all selected tracks
+			const tracks = await dbHttp.query.Tracks.findMany({
+				where: and(
+					inArray(Tracks.id, trackIds),
+					eq(Tracks.workspaceId, ctx.workspace.id),
+					isNotNull(Tracks.spotifyId),
+				),
+				columns: {
+					id: true,
+					name: true,
+					spotifyId: true,
+				},
+			});
+
+			// Query stats for each track
+			const allTimeseries = [];
+			for (const track of tracks) {
+				if (!track.spotifyId) continue;
+
+				const timeseries = await querySpotifyTrackStats({
+					workspaceId: ctx.workspace.id,
+					...dateRange,
+					spotifyId: track.spotifyId,
+					granularity: 'day',
+					timezone: ctx.workspace.timezone,
+				});
+
+				// Add track metadata to each result
+				allTimeseries.push(
+					...timeseries.data.map(row => ({
+						...row,
+						trackId: track.id,
+						trackName: track.name,
+					})),
+				);
+			}
+
+			return allTimeseries;
+		}),
+
+	spotifyAlbumTimeseries: workspaceProcedure
+		.input(spotifyStatQuerySchema)
+		.query(async ({ ctx, input }) => {
+			const dateRange =
+				input.start && input.end ?
+					{ start: input.start, end: input.end }
+				:	getIsoDateRangeFromDescription(input.dateRange);
+
+			const timeseries = await querySpotifyAlbumStats({
+				workspaceId: ctx.workspace.id,
+				start: dateRange.start,
+				end: dateRange.end,
+				spotifyId: input.spotifyId,
+				timezone: ctx.workspace.timezone,
+			});
+
+			return timeseries.data;
+		}),
+
+	spotifyTrackComparison: workspaceProcedure
+		.input(
+			z.object({
+				trackId: z.string(),
+				dateRange: z.enum(['1d', '1w', '28d', '1y']).optional().default('28d'),
+				start: z.string().optional(),
+				end: z.string().optional(),
+			}),
+		)
+		.query(async ({ ctx, input }) => {
+			const dateRange =
+				input.start && input.end ?
+					{ start: input.start, end: input.end }
+				:	getIsoDateRangeFromDescription(input.dateRange);
+
+			const comparison = await querySpotifyTrackComparison({
+				workspaceId: ctx.workspace.id,
+				spotifyId: input.trackId,
+				start: dateRange.start,
+				end: dateRange.end,
+				timezone: ctx.workspace.timezone,
+			});
+
+			return comparison.data;
 		}),
 } satisfies TRPCRouterRecord;

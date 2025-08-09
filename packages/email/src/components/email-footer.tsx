@@ -13,14 +13,14 @@ export function EmailFooter() {
 				}}
 			>
 				<Link
-					href='https://barely.io'
+					href='https://barely.ai'
 					target='_blank'
 					style={{
 						color: '#3182ce',
 						textDecoration: 'underline',
 					}}
 				>
-					barely.io
+					barely.ai
 				</Link>
 				, marketing tools for creators.
 			</Text>

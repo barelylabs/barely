@@ -51,6 +51,47 @@ export function ratelimit(requests = 10, seconds: RateLimitTime = '10 s') {
 }
 
 /**
+ * Session-based rate limiting for more accurate user tracking
+ * Uses sessionId as primary key, falls back to IP if no session
+ */
+export function sessionRatelimit(
+	requests = 1,
+	window: RateLimitTime = '1 h',
+	sessionId?: string | null,
+	ipAddress?: string | null,
+) {
+	// Use sessionId if available, otherwise fall back to IP
+	const identifier = sessionId ?? ipAddress ?? 'unknown';
+
+	if (!libEnv.UPSTASH_REDIS_REST_URL || !libEnv.UPSTASH_REDIS_REST_TOKEN) {
+		console.log('no redis url or token, returning dummy session ratelimiter');
+
+		return {
+			limit: () => ({
+				success: true,
+				limit: requests,
+				remaining: requests,
+				reset: 0,
+				retryAfter: 0,
+			}),
+			identifier,
+		};
+	}
+
+	const limiter = new Ratelimit({
+		redis: Redis.fromEnv(),
+		limiter: Ratelimit.slidingWindow(requests, window),
+		analytics: true,
+		prefix: '@upstash/session-ratelimit',
+	});
+
+	return {
+		limit: (key: string) => limiter.limit(`${key}:${identifier}`),
+		identifier,
+	};
+}
+
+/**
  * Recording metatags that were generated via link.getMetaTags
  * If there's an error, it will be logged to a separate redist list for debugging
  */

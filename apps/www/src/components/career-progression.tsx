@@ -142,11 +142,11 @@ export function CareerProgression() {
 					<h2 className='mb-4 text-3xl font-bold text-white md:text-4xl'>
 						Your Career Journey with{' '}
 						<span className='bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent'>
-							barely.io
+							barely.ai
 						</span>
 					</h2>
 					<p className='mx-auto max-w-2xl text-lg text-muted-foreground'>
-						From bedroom producer to touring artist, barely.io scales with your career.
+						From bedroom producer to touring artist, barely.ai scales with your career.
 						See how each stage unlocks new possibilities.
 					</p>
 				</AnimatedSection>
@@ -236,11 +236,11 @@ export function CareerProgression() {
 							</div>
 						</div>
 
-						{/* barely.io Solution */}
+						{/* barely.ai Solution */}
 						<div>
 							<div className='glass mb-6 rounded-xl border border-white/10 p-6'>
 								<h4 className='mb-4 text-lg font-semibold text-white'>
-									How barely.io Helps You Succeed
+									How barely.ai Helps You Succeed
 								</h4>
 								<ul className='space-y-3'>
 									{careerStages[activeStage]?.barelyFeatures.map((feature, index) => (
