@@ -155,16 +155,17 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 
 	/* spotify metadata */
 	const [debouncedSourceUrl] = useDebounce(sourceUrl, 500);
-	const { data: sourceUrlSpotifyMetadata, isLoading: isLoadingSpotifyMetadata } = useQuery(
-		trpc.spotify.getMetadata.queryOptions(
-			{
-				query: debouncedSourceUrl,
-			},
-			{
-				enabled: !!sourceUrl && sourceUrl.includes('open.spotify.com'),
-			},
-		),
-	);
+	const { data: sourceUrlSpotifyMetadata, isLoading: isLoadingSpotifyMetadata } =
+		useQuery(
+			trpc.spotify.getMetadata.queryOptions(
+				{
+					query: debouncedSourceUrl,
+				},
+				{
+					enabled: !!sourceUrl && sourceUrl.includes('open.spotify.com'),
+				},
+			),
+		);
 
 	const spotifyImageUrl = useMemo(() => {
 		return sourceUrlSpotifyMetadata?.imageUrl ?? undefined;
@@ -255,10 +256,10 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 			<Form form={form} onSubmit={handleSubmit}>
 				<ModalBody>
 					<TextField label='Source URL' control={form.control} name='sourceUrl' />
-					<TextField 
-						label='Title' 
-						control={form.control} 
-						name='title' 
+					<TextField
+						label='Title'
+						control={form.control}
+						name='title'
 						disabled={isLoadingSpotifyMetadata}
 						className={isLoadingSpotifyMetadata ? 'animate-pulse' : ''}
 					/>
@@ -273,8 +274,15 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 						}}
 					/>
 
-					<div className={`flex flex-col items-start gap-1 ${isLoadingSpotifyMetadata ? 'animate-pulse' : ''}`}>
-						<Label>Artwork {isLoadingSpotifyMetadata && <span className="text-muted-foreground text-sm">(loading...)</span>}</Label>
+					<div
+						className={`flex flex-col items-start gap-1 ${isLoadingSpotifyMetadata ? 'animate-pulse' : ''}`}
+					>
+						<Label>
+							Artwork{' '}
+							{isLoadingSpotifyMetadata && (
+								<span className='text-sm text-muted-foreground'>(loading...)</span>
+							)}
+						</Label>
 						<UploadDropzone
 							{...artworkUploadState}
 							title='Upload cover art'
