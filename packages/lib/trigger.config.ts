@@ -20,6 +20,7 @@ export const config = defineConfig({
 		jsx: {
 			automatic: true,
 		},
+		external: ['sharp'],
 		extensions: [
 			additionalPackages({
 				packages: ['resend@4.6.0'],

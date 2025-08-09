@@ -63,6 +63,10 @@ export function useWorkspaceHotkeys({ workspace }: { workspace: SessionWorkspace
 				router.push(`/${workspace.handle}/tracks`);
 				setGKeyPressed(false);
 			}
+			if (e.key === 'v' && gKeyPressed && noMetaKey && notInInput) {
+				router.push(`/${workspace.handle}/vip/swaps`);
+				setGKeyPressed(false);
+			}
 			if (e.key === 'w' && gKeyPressed && noMetaKey && notInInput) {
 				router.push(`/${workspace.handle}/flows`);
 				setGKeyPressed(false);
