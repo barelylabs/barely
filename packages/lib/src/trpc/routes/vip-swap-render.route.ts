@@ -45,22 +45,20 @@ export const vipSwapRenderRoute = {
 				});
 			}
 
-			// Generate blur hash if missing
+			// Trigger blur hash generation if missing (non-blocking)
 			if (vipSwap.coverImage && !vipSwap.coverImage.blurDataUrl) {
-				const { getBlurHash } = await import('../../functions/file.blurhash');
-				const { blurHash, blurDataUrl } = await getBlurHash(vipSwap.coverImage.s3Key);
-
-				if (blurHash && blurDataUrl) {
-					vipSwap.coverImage.blurHash = blurHash;
-					vipSwap.coverImage.blurDataUrl = blurDataUrl;
-
-					// Update the database with the blur hash
-					const { Files } = await import('@barely/db/sql/file.sql');
-					await dbHttp
-						.update(Files)
-						.set({ blurHash, blurDataUrl })
-						.where(eq(Files.id, vipSwap.coverImage.id));
-				}
+				const { generateFileBlurHash } = await import(
+					'../../trigger/file-blurhash.trigger'
+				);
+				// Fire and forget - don't await
+				generateFileBlurHash
+					.trigger({
+						fileId: vipSwap.coverImage.id,
+						s3Key: vipSwap.coverImage.s3Key,
+					})
+					.catch(error => {
+						console.error('Failed to trigger blur hash generation:', error);
+					});
 			}
 
 			return vipSwap;
