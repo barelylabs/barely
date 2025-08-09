@@ -24,6 +24,7 @@ interface DownloadData {
 		coverImage?: {
 			id: string;
 			s3Key: string;
+			blurDataUrl: string | null;
 			width?: number | null;
 			height?: number | null;
 		} | null;
@@ -155,6 +156,7 @@ export function DownloadContent({
 										<div className='absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100' />
 										<Img
 											s3Key={swap.coverImage.s3Key}
+											blurDataURL={swap.coverImage.blurDataUrl ?? undefined}
 											alt={swap.name}
 											fill
 											className='object-cover transition-transform group-hover:scale-105'

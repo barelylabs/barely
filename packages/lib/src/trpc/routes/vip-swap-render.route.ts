@@ -10,10 +10,12 @@ import {
 	vipSwapDownloadRequestSchema,
 	vipSwapDownloadTokenSchema,
 } from '@barely/validators';
+import { tasks, waitUntil } from '@trigger.dev/sdk/v3';
 import { TRPCError } from '@trpc/server';
 import { and, eq, isNull } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
+import type { generateFileBlurHash } from '../../trigger';
 import { recordVipEvent } from '../../functions/event.fns';
 import { ratelimit } from '../../integrations/upstash';
 import { generateUniqueDownloadToken } from '../../utils/token';
@@ -47,18 +49,17 @@ export const vipSwapRenderRoute = {
 
 			// Trigger blur hash generation if missing (non-blocking)
 			if (vipSwap.coverImage && !vipSwap.coverImage.blurDataUrl) {
-				const { generateFileBlurHash } = await import(
-					'../../trigger/file-blurhash.trigger'
-				);
 				// Fire and forget - don't await
-				generateFileBlurHash
-					.trigger({
-						fileId: vipSwap.coverImage.id,
-						s3Key: vipSwap.coverImage.s3Key,
-					})
-					.catch(error => {
-						console.error('Failed to trigger blur hash generation:', error);
-					});
+				waitUntil(
+					tasks
+						.trigger<typeof generateFileBlurHash>('generate-file-blur-hash', {
+							fileId: vipSwap.coverImage.id,
+							s3Key: vipSwap.coverImage.s3Key,
+						})
+						.catch(error => {
+							console.error('Failed to trigger blur hash generation:', error);
+						}),
+				);
 			}
 
 			return vipSwap;

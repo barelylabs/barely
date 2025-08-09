@@ -9,6 +9,7 @@ import { useMusicPlayer } from '@barely/ui/music-player';
 interface VipAudioPlayerProps {
 	coverImage?: {
 		s3Key: string;
+		blurDataUrl: string | null;
 	} | null;
 	trackName: string;
 	artistName?: string;
@@ -51,7 +52,13 @@ export function VipAudioPlayer({
 				{/* Album Art */}
 				{coverImage?.s3Key && (
 					<div className='relative h-16 w-16 overflow-hidden rounded-lg shadow-md'>
-						<Img s3Key={coverImage.s3Key} alt={trackName} fill className='object-cover' />
+						<Img
+							s3Key={coverImage.s3Key}
+							blurDataURL={coverImage.blurDataUrl ?? undefined}
+							alt={trackName}
+							fill
+							className='object-cover'
+						/>
 					</div>
 				)}
 

@@ -182,9 +182,9 @@ export function useUpload({
 					});
 
 					const updatedQueue = [...newQueue, ...prevQueue];
-					if (maxFiles === 0) return updatedQueue;
 
-					return updatedQueue.slice(0, maxFiles);
+					// Apply maxFiles limit before returning to prevent race condition
+					return maxFiles === 0 ? updatedQueue : updatedQueue.slice(0, maxFiles);
 				});
 
 				getPresigned(

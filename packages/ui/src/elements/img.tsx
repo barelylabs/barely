@@ -51,6 +51,7 @@ export function Img({
 				quality={quality}
 				priority={priority}
 				loader={({ src, width, quality }) => s3Loader({ s3Key: src, width, quality })}
+				placeholder={(props.placeholder ?? props.blurDataURL) ? 'blur' : undefined}
 			/>
 		);
 	}

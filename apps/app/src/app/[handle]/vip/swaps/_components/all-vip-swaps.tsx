@@ -2,9 +2,9 @@
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import { useWorkspace } from '@barely/hooks';
+import { getAbsoluteUrl } from '@barely/utils';
 
 import { Badge } from '@barely/ui/badge';
-import { Button } from '@barely/ui/button';
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { GridList, GridListCard } from '@barely/ui/grid-list';
@@ -59,8 +59,8 @@ function VipSwapCard({
 	const { handle } = useWorkspace();
 	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } = useVipSwaps();
 
-	const swapUrl = `https://${handle}.barely.vip/unlock/${vipSwap.key}`;
-
+	// const swapUrl = `https://barely.vip/${handle}/unlock/${vipSwap.key}`;
+	const swapUrl = getAbsoluteUrl('vip', `${handle}/unlock/${vipSwap.key}`);
 	return (
 		<GridListCard
 			id={vipSwap.id}
@@ -74,13 +74,13 @@ function VipSwapCard({
 					{
 						src: vipSwap.coverImage.src,
 						s3Key: vipSwap.coverImage.s3Key,
-						blurDataUrl: vipSwap.coverImage.blurDataUrl,
+						blurDataURL: vipSwap.coverImage.blurDataUrl ?? undefined,
 						alt: `${vipSwap.name} cover art`,
 					}
 				:	undefined
 			}
 			title={vipSwap.name}
-			subtitle={
+			metadata={
 				<div className='flex items-center gap-4'>
 					<span className='font-mono text-sm'>{vipSwap.key}</span>
 					{!vipSwap.isActive && (
@@ -103,7 +103,7 @@ function VipSwapCard({
 					value: vipSwap.downloadCount,
 				},
 				{
-					icon: 'mail',
+					icon: 'email',
 					name: 'Emails',
 					value: vipSwap.emailCount,
 				},
@@ -113,11 +113,6 @@ function VipSwapCard({
 			{vipSwap.downloadLimit && (
 				<Text variant='xs/normal' className='text-muted-foreground'>
 					Limit: {vipSwap.downloadLimit} downloads
-				</Text>
-			)}
-			{vipSwap.file.name && (
-				<Text variant='xs/normal' className='truncate text-muted-foreground'>
-					{vipSwap.file.name}
 				</Text>
 			)}
 		</GridListCard>

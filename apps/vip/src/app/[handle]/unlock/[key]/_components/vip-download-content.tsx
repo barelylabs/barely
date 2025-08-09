@@ -9,6 +9,7 @@ import { Img } from '@barely/ui/img';
 
 import { EmailCaptureForm } from './email-capture-form';
 import { VipAudioPlayer } from './vip-audio-player';
+import { VipAudioPlayerErrorBoundary } from './vip-audio-player-error-boundary';
 import { VipPlayerProvider } from './vip-player-provider';
 
 export function VipDownloadContent({
@@ -57,6 +58,8 @@ export function VipDownloadContent({
 				<div className='relative mx-auto mb-8 h-64 w-64 overflow-hidden rounded-lg border-4 border-border/50 shadow-xl sm:h-80 sm:w-80'>
 					<Img
 						s3Key={swap.coverImage.s3Key}
+						// placeholder={swap.coverImage.blurDataUrl ? 'blur' : undefined}
+						blurDataURL={swap.coverImage.blurDataUrl ?? undefined}
 						alt={swap.name}
 						fill
 						className='object-cover'
@@ -105,20 +108,22 @@ export function VipDownloadContent({
 				:	<div className='space-y-6'>
 						{/* Show audio player if file is audio */}
 						{isAudioFile(swap.file.type) && (
-							<VipPlayerProvider
-								audioUrl={swap.file.src}
-								trackName={swap.name}
-								artistName={workspaceName}
-								coverImage={swap.coverImage}
-								swapId={swap.id}
-							>
-								<VipAudioPlayer
-									coverImage={swap.coverImage}
+							<VipAudioPlayerErrorBoundary>
+								<VipPlayerProvider
+									audioUrl={swap.file.src}
 									trackName={swap.name}
 									artistName={workspaceName}
-									pulse={true}
-								/>
-							</VipPlayerProvider>
+									coverImage={swap.coverImage}
+									swapId={swap.id}
+								>
+									<VipAudioPlayer
+										coverImage={swap.coverImage}
+										trackName={swap.name}
+										artistName={workspaceName}
+										pulse={true}
+									/>
+								</VipPlayerProvider>
+							</VipAudioPlayerErrorBoundary>
 						)}
 
 						{/* Email confirmation */}
