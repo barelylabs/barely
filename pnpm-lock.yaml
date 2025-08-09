@@ -2024,6 +2024,9 @@ importers:
       sha.js:
         specifier: ^2.4.11
         version: 2.4.11
+      sharp:
+        specifier: 'catalog:'
+        version: 0.34.2
       std-env:
         specifier: 3.7.0
         version: 3.7.0
