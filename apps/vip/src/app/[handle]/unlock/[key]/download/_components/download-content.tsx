@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle2, Music, Sparkles } from 'lucide-react';
 
-import { getAbsoluteUrl } from '@barely/auth/get-url';
-
 import { Img } from '@barely/ui/img';
+
+import { PoweredByBarelyFooter } from '~/components/powered-by-barely-footer';
 
 import { VipAudioPlayer } from '../../_components/vip-audio-player';
 import { VipAudioPlayerMobile } from '../../_components/vip-audio-player-mobile';
@@ -235,18 +235,8 @@ export function DownloadContent({
 								Contact Support
 							</a>
 						</p>
-						<div className='flex items-center justify-center gap-1.5'>
-							<span>Powered by</span>
-							<a
-								href={getAbsoluteUrl('vip')}
-								target='_blank'
-								rel='noopener noreferrer'
-								className='font-heading font-semibold underline transition-colors hover:text-secondary'
-							>
-								Barely
-							</a>
-						</div>
 					</div>
+					<PoweredByBarelyFooter />
 				</div>
 			</div>
 		);
@@ -380,18 +370,8 @@ export function DownloadContent({
 								Contact Support
 							</a>
 						</p>
-						<div className='flex items-center justify-center gap-1.5'>
-							<span>Powered by</span>
-							<a
-								href={getAbsoluteUrl('vip')}
-								target='_blank'
-								rel='noopener noreferrer'
-								className='font-heading font-semibold underline transition-colors hover:text-secondary'
-							>
-								Barely
-							</a>
-						</div>
 					</div>
+					<PoweredByBarelyFooter />
 				</div>
 
 				{/* Mobile Audio Player - Sticky Bottom */}

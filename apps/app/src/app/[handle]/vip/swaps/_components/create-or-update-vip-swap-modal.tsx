@@ -8,6 +8,7 @@ import { sanitizeKey } from '@barely/utils';
 import { upsertVipSwapSchema } from '@barely/validators';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { atom } from 'jotai';
+import { toast } from 'sonner';
 import { z } from 'zod/v4';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
@@ -42,6 +43,9 @@ export function CreateOrUpdateVipSwapModal({ mode }: { mode: 'create' | 'update'
 			onSuccess: async () => {
 				await handleCloseModal();
 			},
+			onError: error => {
+				toast.error('Failed to create VIP swap: ' + error.message);
+			},
 		}),
 	);
 
@@ -49,6 +53,9 @@ export function CreateOrUpdateVipSwapModal({ mode }: { mode: 'create' | 'update'
 		trpc.vipSwap.update.mutationOptions({
 			onSuccess: async () => {
 				await handleCloseModal();
+			},
+			onError: error => {
+				toast.error('Failed to update VIP swap: ' + error.message);
 			},
 		}),
 	);
@@ -355,7 +362,6 @@ export function CreateOrUpdateVipSwapModal({ mode }: { mode: 'create' | 'update'
 							/>
 						)}
 						<SwitchField control={form.control} name='isActive' label='Active' />
-						{<pre>{JSON.stringify(form.formState.errors, null, 2)}</pre>}
 					</div>
 				</ModalBody>
 				<ModalFooter>

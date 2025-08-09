@@ -9,6 +9,7 @@ import { Img } from '@barely/ui/img';
 
 import { EmailCaptureForm } from './email-capture-form';
 import { VipAudioPlayer } from './vip-audio-player';
+import { VipPlayerProvider } from './vip-player-provider';
 
 export function VipDownloadContent({
 	handle,
@@ -104,13 +105,20 @@ export function VipDownloadContent({
 				:	<div className='space-y-6'>
 						{/* Show audio player if file is audio */}
 						{isAudioFile(swap.file.type) && (
-							<VipAudioPlayer
-								// audioUrl={swap.file.src}
-								coverImage={swap.coverImage}
+							<VipPlayerProvider
+								audioUrl={swap.file.src}
 								trackName={swap.name}
 								artistName={workspaceName}
-								pulse={true}
-							/>
+								coverImage={swap.coverImage}
+								swapId={swap.id}
+							>
+								<VipAudioPlayer
+									coverImage={swap.coverImage}
+									trackName={swap.name}
+									artistName={workspaceName}
+									pulse={true}
+								/>
+							</VipPlayerProvider>
 						)}
 
 						{/* Email confirmation */}

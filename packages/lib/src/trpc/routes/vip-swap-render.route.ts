@@ -45,6 +45,24 @@ export const vipSwapRenderRoute = {
 				});
 			}
 
+			// Generate blur hash if missing
+			if (vipSwap.coverImage && !vipSwap.coverImage.blurDataUrl) {
+				const { getBlurHash } = await import('../../functions/file.blurhash');
+				const { blurHash, blurDataUrl } = await getBlurHash(vipSwap.coverImage.s3Key);
+
+				if (blurHash && blurDataUrl) {
+					vipSwap.coverImage.blurHash = blurHash;
+					vipSwap.coverImage.blurDataUrl = blurDataUrl;
+
+					// Update the database with the blur hash
+					const { Files } = await import('@barely/db/sql/file.sql');
+					await dbHttp
+						.update(Files)
+						.set({ blurHash, blurDataUrl })
+						.where(eq(Files.id, vipSwap.coverImage.id));
+				}
+			}
+
 			return vipSwap;
 		}),
 
