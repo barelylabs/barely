@@ -325,3 +325,12 @@
 		}
 	}
 }
+
+/* Navigation transition styles */
+body.navigating {
+	cursor: wait;
+}
+
+body.navigating * {
+	pointer-events: none !important;
+}

@@ -1,19 +1,19 @@
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { checkIfWorkspaceHasPendingInviteForUser } from '@barely/lib/functions/workspace.fns';
 
 import { getDefaultWorkspaceFromSession } from '@barely/auth/utils';
 
-import { SidebarNav } from '~/app/[handle]/_components/dash-sidebar-nav';
-import { NewWorkspaceModal } from '~/app/[handle]/_components/new-workspace-modal';
-import { WorkspaceProviders } from '~/app/[handle]/_components/workspace-providers';
+import { DashboardSkeleton } from '~/app/[handle]/_components/dashboard-skeleton';
+import { LayoutContent } from '~/app/[handle]/layout-content';
 import { getSession } from '~/auth/server';
 import { HydrateClient, prefetch, primeWorkspace, trpc } from '~/trpc/server';
 
-export default async function DashboardLayout({
+async function DashboardContent({
 	params,
 	children,
 }: {
-	params: Promise<{ handle: string }>;
+	params: { handle: string };
 	children: React.ReactElement;
 }) {
 	const session = await getSession();
@@ -25,13 +25,12 @@ export default async function DashboardLayout({
 
 	if (userWorkspace) user.avatarImageS3Key = userWorkspace.avatarImageS3Key;
 
-	const awaitedParams = await params;
-	const currentWorkspace = user.workspaces.find(w => w.handle === awaitedParams.handle);
+	const currentWorkspace = user.workspaces.find(w => w.handle === params.handle);
 
 	if (!currentWorkspace) {
 		const addedToWorkspace = await checkIfWorkspaceHasPendingInviteForUser({
 			user,
-			workspaceHandle: awaitedParams.handle,
+			workspaceHandle: params.handle,
 		});
 
 		if (addedToWorkspace.success) {
@@ -43,27 +42,29 @@ export default async function DashboardLayout({
 	}
 
 	primeWorkspace(currentWorkspace);
-	prefetch(trpc.workspace.byHandleWithAll.queryOptions({ handle: awaitedParams.handle }));
+	prefetch(trpc.workspace.byHandleWithAll.queryOptions({ handle: params.handle }));
+
+	return (
+		<LayoutContent user={user} workspace={currentWorkspace}>
+			{children}
+		</LayoutContent>
+	);
+}
+
+export default async function DashboardLayout({
+	params,
+	children,
+}: {
+	params: Promise<{ handle: string }>;
+	children: React.ReactElement;
+}) {
+	const awaitedParams = await params;
 
 	return (
 		<HydrateClient>
-			<WorkspaceProviders user={user} workspace={currentWorkspace}>
-				<div className='mx-auto flex w-full flex-1 flex-row'>
-					<SidebarNav />
-					<NewWorkspaceModal />
-
-					<div className='flex h-[100vh] w-full flex-col bg-accent md:pt-2'>
-						{/* <DashboardHeader /> */}
-						<div className='flex h-full w-full border-l border-t border-subtle-foreground/70 bg-background md:rounded-tl-2xl'>
-							<div className='flex h-full w-full flex-col overflow-clip'>
-								<div className='grid h-fit grid-cols-1 gap-6 overflow-y-scroll p-6 lg:py-8'>
-									{children}
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</WorkspaceProviders>
+			<Suspense fallback={<DashboardSkeleton />}>
+				<DashboardContent params={awaitedParams}>{children}</DashboardContent>
+			</Suspense>
 		</HydrateClient>
 	);
 }
