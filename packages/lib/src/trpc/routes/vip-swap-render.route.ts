@@ -271,7 +271,10 @@ export const vipSwapRenderRoute = {
 			// Send email first - if it fails, we won't create the access log
 			await sendEmail({
 				from: 'downloads@hello.barely.vip',
-				fromFriendlyName: vipSwap.emailFromName ?? workspace?.name ?? 'Barely.vip',
+				fromFriendlyName:
+					workspace?.name && workspace.name.length > 0 ?
+						workspace.name
+					:	(workspace?.handle ?? 'Barely.vip'),
 				replyTo: workspace?.vipSupportEmail ?? undefined,
 				to: email,
 				subject:
