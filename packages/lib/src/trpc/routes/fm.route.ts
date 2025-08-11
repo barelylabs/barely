@@ -13,9 +13,11 @@ import {
 	selectWorkspaceFmPagesSchema,
 	updateFmPageSchema,
 } from '@barely/validators';
+import { tasks, waitUntil } from '@trigger.dev/sdk/v3';
 import { and, asc, desc, eq, gt, inArray, isNull, lt, notInArray, or } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
+import type { generateFileBlurHash } from '../../trigger';
 import { libEnv } from '../../../env';
 import { workspaceProcedure } from '../trpc';
 
@@ -59,6 +61,18 @@ export const fmRoute = {
 							createdAt: nextFmPage.createdAt,
 						}
 					:	undefined;
+			}
+
+			// check if cover art has blur hash
+			for (const fmPage of fmPages) {
+				if (fmPage.coverArt && !fmPage.coverArt.blurDataUrl) {
+					waitUntil(
+						tasks.trigger<typeof generateFileBlurHash>('generate-file-blur-hash', {
+							fileId: fmPage.coverArt.id,
+							s3Key: fmPage.coverArt.s3Key,
+						}),
+					);
+				}
 			}
 
 			return {
