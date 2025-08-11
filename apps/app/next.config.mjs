@@ -7,6 +7,9 @@ createJITI(fileURLToPath(import.meta.url))('./src/env');
 /** @type {import("next").NextConfig} */
 const config = {
 	reactStrictMode: true,
+	devIndicators: {
+		appIsrStatus: false,
+	},
 	images: {
 		minimumCacheTTL: 60,
 		remotePatterns: [

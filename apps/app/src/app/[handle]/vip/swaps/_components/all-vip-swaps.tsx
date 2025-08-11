@@ -40,8 +40,8 @@ export function AllVipSwaps() {
 					<GridListSkeleton />
 				:	<NoResultsPlaceholder
 						icon='vip'
-						title='No VIP swaps found'
-						subtitle='Create your first VIP swap'
+						title='No swaps found'
+						subtitle='Create your first swap'
 						button={<CreateVipSwapButton />}
 					/>
 			}

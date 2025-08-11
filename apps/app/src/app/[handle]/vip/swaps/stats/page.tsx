@@ -6,6 +6,7 @@ import { vipStatFiltersSchema } from '@barely/validators';
 import { StatsCardsSkeleton } from '@barely/ui/components/stats-cards-skeleton';
 import { TimeseriesSkeleton } from '@barely/ui/components/timeseries-skeleton';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { StatBarelyReferers } from '~/app/[handle]/_components/stat-barely-referers';
 import { StatDevices } from '~/app/[handle]/_components/stat-devices';
@@ -43,26 +44,28 @@ export default async function VipStatsPage({
 	return (
 		<HydrateClient>
 			<DashContentHeader title='VIP Stats' />
-			{/* Unified filter bar */}
-			{/* <Card className='p-4'>
-				<div className='flex flex-row items-center gap-4'>
-					<VipSwapSelector />
-				</div>
-			</Card> */}
-			<VipStatHeader />
+			<DashContent>
+				{/* Unified filter bar */}
+				{/* <Card className='p-4'>
+					<div className='flex flex-row items-center gap-4'>
+						<VipSwapSelector />
+					</div>
+				</Card> */}
+				<VipStatHeader />
 
-			<Suspense fallback={<TimeseriesSkeleton />}>
-				<VipTimeseries />
-			</Suspense>
-
-			<div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-				<Suspense fallback={<StatsCardsSkeleton />}>
-					<StatLocations eventType='vip/view' />
-					<StatDevices eventType='vip/view' />
-					<StatExternalReferers eventType='vip/view' />
-					<StatBarelyReferers eventType='vip/view' />
+				<Suspense fallback={<TimeseriesSkeleton />}>
+					<VipTimeseries />
 				</Suspense>
-			</div>
+
+				<div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+					<Suspense fallback={<StatsCardsSkeleton />}>
+						<StatLocations eventType='vip/view' />
+						<StatDevices eventType='vip/view' />
+						<StatExternalReferers eventType='vip/view' />
+						<StatBarelyReferers eventType='vip/view' />
+					</Suspense>
+				</div>
+			</DashContent>
 		</HydrateClient>
 	);
 }

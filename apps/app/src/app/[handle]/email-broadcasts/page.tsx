@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { emailBroadcastSearchParamsSchema } from '@barely/validators';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllEmailBroadcasts } from '~/app/[handle]/email-broadcasts/_components/all-email-broadcasts';
 import { CreateOrUpdateEmailBroadcastModal } from '~/app/[handle]/email-broadcasts/_components/create-or-update-email-broadcast-modal';
@@ -34,20 +35,22 @@ export default async function EmailBroadcastsPage({
 
 	return (
 		<HydrateClient>
-			<Suspense fallback={<div>Loading...</div>}>
-				<DashContentHeader
-					title='Email Broadcasts'
-					button={<CreateEmailBroadcastButton />}
-				/>
-				<EmailBroadcastFilters />
-				<AllEmailBroadcasts />
+			<DashContentHeader
+				title='Email Broadcasts'
+				button={<CreateEmailBroadcastButton />}
+			/>
+			<DashContent>
+				<Suspense fallback={<div>Loading...</div>}>
+					<EmailBroadcastFilters />
+					<AllEmailBroadcasts />
 
-				<CreateOrUpdateEmailBroadcastModal mode='create' />
-				<CreateOrUpdateEmailBroadcastModal mode='update' />
+					<CreateOrUpdateEmailBroadcastModal mode='create' />
+					<CreateOrUpdateEmailBroadcastModal mode='update' />
 
-				{/* <ArchiveOrDeleteEmailBroadcastModal mode='archive' />
-				<ArchiveOrDeleteEmailBroadcastModal mode='delete' /> */}
-			</Suspense>
+					{/* <ArchiveOrDeleteEmailBroadcastModal mode='archive' />
+					<ArchiveOrDeleteEmailBroadcastModal mode='delete' /> */}
+				</Suspense>
+			</DashContent>
 		</HydrateClient>
 	);
 }

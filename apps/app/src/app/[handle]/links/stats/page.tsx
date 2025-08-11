@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { linkStatFiltersSchema } from '@barely/validators';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { StatBarelyReferers } from '~/app/[handle]/_components/stat-barely-referers';
 import { StatDevices } from '~/app/[handle]/_components/stat-devices';
@@ -38,17 +39,19 @@ export default async function LinkStatsPage({
 	return (
 		<HydrateClient>
 			<DashContentHeader title='Link Stats' />
-			<LinkStatHeader />
-			<LinkTimeseries />
+			<DashContent>
+				<LinkStatHeader />
+				<LinkTimeseries />
 
-			<div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-				<Suspense fallback={<div>Loading...</div>}>
-					<StatLocations eventType='link/click' />
-					<StatDevices eventType='link/click' />
-					<StatExternalReferers eventType='link/click' />
-					<StatBarelyReferers eventType='link/click' />
-				</Suspense>
-			</div>
+				<div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+					<Suspense fallback={<div>Loading...</div>}>
+						<StatLocations eventType='link/click' />
+						<StatDevices eventType='link/click' />
+						<StatExternalReferers eventType='link/click' />
+						<StatBarelyReferers eventType='link/click' />
+					</Suspense>
+				</div>
+			</DashContent>
 		</HydrateClient>
 	);
 }

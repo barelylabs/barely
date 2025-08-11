@@ -5,6 +5,7 @@ import { cartFunnelSearchParamsSchema } from '@barely/validators';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllCartFunnels } from '~/app/[handle]/carts/_components/all-cartFunnels';
 import { ArchiveOrDeleteFunnelModal } from '~/app/[handle]/carts/_components/archive-or-delete-cartFunnel-modal';
@@ -43,21 +44,22 @@ export default async function CartFunnelsPage({
 				settingsHref={`/${awaitedParams.handle}/settings/cart`}
 				button={<CreateCartFunnelButton />}
 			/>
+			<DashContent>
+				<CartDialogs />
 
-			<CartDialogs />
+				<CartFunnelFilters />
+				<Suspense fallback={<GridListSkeleton />}>
+					<AllCartFunnels />
 
-			<CartFunnelFilters />
-			<Suspense fallback={<GridListSkeleton />}>
-				<AllCartFunnels />
+					<CreateOrUpdateFunnelModal mode='create' />
+					<CreateOrUpdateFunnelModal mode='update' />
 
-				<CreateOrUpdateFunnelModal mode='create' />
-				<CreateOrUpdateFunnelModal mode='update' />
+					<ArchiveOrDeleteFunnelModal mode='archive' />
+					<ArchiveOrDeleteFunnelModal mode='delete' />
 
-				<ArchiveOrDeleteFunnelModal mode='archive' />
-				<ArchiveOrDeleteFunnelModal mode='delete' />
-
-				<CartFunnelHotkeys />
-			</Suspense>
+					<CartFunnelHotkeys />
+				</Suspense>
+			</DashContent>
 		</HydrateClient>
 	);
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { usePusherSocketId, useUser, useWorkspace, useWorkspaces } from '@barely/hooks';
 import {
 	cn,
@@ -12,13 +13,13 @@ import {
 import { useSetAtom } from 'jotai';
 
 import { Avatar } from '@barely/ui/avatar';
-import { Button } from '@barely/ui/button';
 import {
 	Command,
 	CommandGroup,
 	CommandInput,
 	CommandItem,
 	CommandList,
+	CommandSeparator,
 } from '@barely/ui/command';
 import { Icon } from '@barely/ui/icon';
 import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/popover';
@@ -26,7 +27,11 @@ import { Text } from '@barely/ui/typography';
 
 import { showNewWorkspaceModalAtom } from '~/app/[handle]/_components/new-workspace-modal';
 
-export function WorkspaceSwitcher() {
+interface WorkspaceSwitcherProps {
+	collapsed?: boolean;
+}
+
+export function WorkspaceSwitcher({ collapsed = false }: WorkspaceSwitcherProps) {
 	usePusherSocketId();
 
 	const [switcherOpen, setSwitcherOpen] = useState(false);
@@ -42,9 +47,9 @@ export function WorkspaceSwitcher() {
 	);
 	const allWorkspaces = useWorkspaces();
 
-	const personalAccount = allWorkspaces.find(
-		workspace => workspace.handle === user.handle,
-	);
+	// const personalAccount = allWorkspaces.find(
+	// 	workspace => workspace.handle === user.handle,
+	// );
 	const workspaces = allWorkspaces.filter(workspace => workspace.handle !== user.handle);
 
 	const normalizedObject = {
@@ -83,124 +88,128 @@ export function WorkspaceSwitcher() {
 	return (
 		<Popover open={switcherOpen} onOpenChange={setSwitcherOpen}>
 			<PopoverTrigger asChild>
-				<Button
-					look='ghost'
-					size='sm'
+				<button
 					role='combobox'
 					aria-expanded={switcherOpen}
 					aria-label='Select a workspace'
-					className='flex h-fit w-full max-w-full flex-row gap-2 px-2 py-2'
-					fullWidth
+					className={cn(
+						'flex items-center justify-center rounded-lg transition-all duration-150',
+						'outline-none focus-visible:ring-2 focus-visible:ring-black/20',
+						'active:bg-subtle-foreground/50 hover:bg-subtle-foreground/50',
+						switcherOpen && 'bg-subtle-foreground/50',
+						collapsed ? 'h-11 w-11 p-1.5' : 'h-12 w-full gap-2 px-3 py-2',
+					)}
 				>
 					<Avatar
-						className='mr-[1px] h-7 w-7'
-						imageWidth={28}
-						imageHeight={28}
+						className='h-8 w-8 flex-shrink-0'
+						imageWidth={32}
+						imageHeight={32}
 						imageS3Key={normalizedObject.avatarImageS3Key}
 						priority
 					/>
-					<div className='my-auto flex h-full flex-col items-start justify-center gap-0.5'>
-						<Text variant='xs/bold' className='leading-tight text-accent-foreground'>
-							{truncate(normalizedObject.name, 20)}
-						</Text>
-						<Text variant='2xs/normal' className='leading-tight text-muted-foreground'>
-							{getPlanNameFromId(currentWorkspace.plan)}
-						</Text>
-					</div>
-					<Icon.chevronsUpDown className='ml-auto h-4 w-4 shrink-0 opacity-50' />
-				</Button>
+					{!collapsed && (
+						<>
+							<div className='flex flex-1 flex-col items-start justify-center'>
+								<Text variant='sm/semibold' className='truncate text-neutral-900'>
+									{truncate(normalizedObject.name, 16)}
+								</Text>
+								<Text variant='xs/normal' className='text-neutral-500'>
+									{getPlanNameFromId(currentWorkspace.plan)}
+								</Text>
+							</div>
+							<Icon.chevronsUpDown className='h-4 w-4 shrink-0 text-neutral-400' />
+						</>
+					)}
+				</button>
 			</PopoverTrigger>
 
-			<PopoverContent align='start' className='w-52 p-0'>
+			<PopoverContent side='right' align='start' className='ml-2 w-64 p-0'>
+				{/* Current Workspace Header */}
+				<div className='border-b p-4'>
+					<div className='flex items-center gap-3'>
+						<Avatar
+							className='h-10 w-10'
+							imageWidth={40}
+							imageHeight={40}
+							imageS3Key={currentWorkspace.avatarImageS3Key}
+							priority
+						/>
+						<div className='flex-1'>
+							<Text variant='sm/semibold' className='text-neutral-900'>
+								{currentWorkspace.name}
+							</Text>
+							<Text variant='xs/normal' className='text-neutral-500'>
+								{getPlanNameFromId(currentWorkspace.plan)}
+							</Text>
+						</div>
+					</div>
+				</div>
+
+				{/* Settings and Invite Links */}
+				<div className='border-b p-2'>
+					<Link
+						href={`/${currentWorkspace.handle}/settings`}
+						onClick={() => setSwitcherOpen(false)}
+						className='flex items-center gap-3 rounded-md px-3 py-2 text-sm text-neutral-700 transition-colors hover:bg-neutral-100'
+					>
+						<Icon.settings className='h-4 w-4 text-neutral-500' />
+						Settings
+					</Link>
+					<Link
+						href={`/${currentWorkspace.handle}/settings/team`}
+						onClick={() => setSwitcherOpen(false)}
+						className='flex items-center gap-3 rounded-md px-3 py-2 text-sm text-neutral-700 transition-colors hover:bg-neutral-100'
+					>
+						<Icon.userPlus className='h-4 w-4 text-neutral-500' />
+						Invite members
+					</Link>
+				</div>
+
+				{/* Workspace List */}
 				<Command>
 					<CommandList>
-						<CommandInput placeholder='Find workspace...' />
-
-						{personalAccount && (
-							<CommandGroup heading='Personal Account'>
-								<CommandItem
-									onSelect={() => setCurrentWorkspace(personalAccount)}
-									isSelected={currentWorkspace.handle === personalAccount.handle}
-								>
-									<Avatar
-										priority
-										className='mr-2 h-5 w-5'
-										imageS3Key={personalAccount.avatarImageS3Key}
-										imageWidth={20}
-										imageHeight={20}
-									/>
-									{personalAccount.name}
-									<Icon.check
-										className={cn(
-											'ml-auto h-4 w-4',
-											currentWorkspace.handle === personalAccount.handle ?
-												'opacity-100'
-											:	'opacity-0',
-										)}
-									/>
-								</CommandItem>
-							</CommandGroup>
-						)}
+						<CommandInput placeholder='Find workspace...' className='h-9' />
 
 						<CommandGroup heading='Workspaces'>
 							{workspaces.map(workspace => (
 								<CommandItem
 									key={workspace.id}
 									onSelect={() => setCurrentWorkspace(workspace)}
-									className='cursor-pointer text-sm'
+									className='cursor-pointer gap-3 text-sm'
 									isSelected={currentWorkspace.handle === workspace.handle}
 								>
 									<Avatar
-										className='mr-2 h-5 w-5'
+										className='h-6 w-6'
 										imageS3Key={workspace.avatarImageS3Key}
-										imageWidth={20}
-										imageHeight={20}
+										imageWidth={24}
+										imageHeight={24}
 										priority
 									/>
-									{workspace.name}
-									<Icon.check
-										className={cn(
-											'ml-auto h-4 w-4',
-											currentWorkspace.handle === workspace.handle ?
-												'opacity-100'
-											:	'opacity-0',
-										)}
-									/>
+									<span className='flex-1'>{workspace.name}</span>
+									{currentWorkspace.handle === workspace.handle && (
+										<Icon.check className='h-4 w-4 text-neutral-500' />
+									)}
 								</CommandItem>
 							))}
+						</CommandGroup>
 
+						<CommandSeparator />
+
+						<CommandGroup>
 							<CommandItem
 								onSelect={() => {
 									setSwitcherOpen(false);
 									setNewWorkspaceModalOpen(true);
-									// setNewWorkspaceDialogOpen(true);
 								}}
-								className='cursor-pointer'
+								className='cursor-pointer gap-3'
 							>
-								<Icon.plusCircle className='mr-2 h-4 w-4' />
-								Create workspace
+								<div className='flex h-6 w-6 items-center justify-center'>
+									<Icon.plus className='h-4 w-4 text-neutral-500' />
+								</div>
+								<span>Create new workspace</span>
 							</CommandItem>
 						</CommandGroup>
 					</CommandList>
-
-					{/* <CommandSeparator /> */}
-
-					{/* <CommandList>
-							<CommandGroup>
-								<DialogTrigger asChild>
-									<CommandItem
-										onSelect={() => {
-											setSwitcherOpen(false);
-											setNewWorkspaceDialogOpen(true);
-										}}
-										className='cursor-pointer '
-									>
-										<Icon.plusCircle className='mr-2 h-4 w-4' />
-										Create workspace
-									</CommandItem>
-								</DialogTrigger>
-							</CommandGroup>
-						</CommandList> */}
 				</Command>
 			</PopoverContent>
 		</Popover>
