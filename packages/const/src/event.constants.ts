@@ -27,12 +27,19 @@ export const WEB_EVENT_TYPES__VIP = [
 	'vip/download',
 ] as const;
 
+export const WEB_EVENT_TYPES__BIO = [
+	'bio/view',
+	'bio/buttonClick',
+	'bio/emailCapture',
+] as const;
+
 export const WEB_EVENT_TYPES = [
 	...WEB_EVENT_TYPES__CART,
 	...WEB_EVENT_TYPES__FM,
 	...WEB_EVENT_TYPES__LINK,
 	...WEB_EVENT_TYPES__PAGE,
 	...WEB_EVENT_TYPES__VIP,
+	...WEB_EVENT_TYPES__BIO,
 ] as const;
 
 export type WebEventType = (typeof WEB_EVENT_TYPES)[number];

@@ -51,6 +51,10 @@ export const Bios = pgTable(
 			.default('light')
 			.notNull(),
 		barelyBranding: boolean('barelyBranding').default(true).notNull(),
+
+		// email capture settings
+		emailCaptureEnabled: boolean('emailCaptureEnabled').default(false).notNull(),
+		emailCaptureIncentiveText: varchar('emailCaptureIncentiveText', { length: 255 }),
 	},
 	bio => ({
 		workspace: index('Bios_workspace_idx').on(bio.workspaceId),

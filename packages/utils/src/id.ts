@@ -18,6 +18,7 @@ const prefixes = {
 	link: 'link',
 	linkClick: 'lc',
 	bio: 'bio',
+	bioButton: 'bb',
 	landingPageSession: 'lps',
 	pressKit: 'pk',
 	// webSession: 'web_session',

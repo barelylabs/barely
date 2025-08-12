@@ -1,0 +1,32 @@
+NODE mv
+SQL >
+
+    SELECT 
+      timestamp,
+      type,
+      workspaceId,
+      assetId,
+      city,
+      region,
+      country,
+      device,
+      browser,
+      os,
+      referer,
+      fanId,
+      sessionId,
+      sessionReferer,
+      sessionEmailTemplateId,
+      sessionEmailBroadcastId,
+      sessionLandingPageId,
+      sessionFlowActionId,
+      sessionMetaCampaignId,
+      sessionMetaAdSetId,
+      sessionMetaAdId,
+      sessionMetaPlacement,
+      linkClickDestinationHref
+    FROM barely_events
+    WHERE assetId LIKE 'bio_%'
+
+TYPE materialized
+DATASOURCE barely_bio_events_mv
