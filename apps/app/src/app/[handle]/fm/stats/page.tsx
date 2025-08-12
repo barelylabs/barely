@@ -2,6 +2,7 @@ import type { z } from 'zod/v4';
 import { redirect } from 'next/navigation';
 import { fmStatFiltersSchema } from '@barely/validators';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { StatBarelyReferers } from '~/app/[handle]/_components/stat-barely-referers';
 import { StatDevices } from '~/app/[handle]/_components/stat-devices';
@@ -33,15 +34,17 @@ export default async function FmStatsPage({
 	return (
 		<HydrateClient>
 			<DashContentHeader title='FM Stats' />
-			<FmStatHeader />
-			<FmTimeseries />
+			<DashContent>
+				<FmStatHeader />
+				<FmTimeseries />
 
-			<div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-				<StatLocations eventType='fm/view' />
-				<StatDevices eventType='fm/view' />
-				<StatExternalReferers eventType='fm/view' />
-				<StatBarelyReferers eventType='fm/view' />
-			</div>
+				<div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+					<StatLocations eventType='fm/view' />
+					<StatDevices eventType='fm/view' />
+					<StatExternalReferers eventType='fm/view' />
+					<StatBarelyReferers eventType='fm/view' />
+				</div>
+			</DashContent>
 		</HydrateClient>
 	);
 }

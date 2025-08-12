@@ -1,84 +1,149 @@
-# Feature: Link-in-Bio (barely.bio)
+# Feature: App Modularization for Focused User Experiences
+
+## Context & Background
+
+### Related Work
+- **Builds On**: Current barely.ai unified platform architecture
+- **Differs From**: Single-app approach - creates focused variants of the main application
+- **Integrates With**: Existing GitHub Actions CI/CD pipeline and environment configuration
+
+### Historical Context
+- **Previous Attempts**: None - this is the first implementation of app modularization
+- **Lessons Applied**: Leveraging existing infrastructure to minimize complexity
+- **Success Factors**: Simple environment-based feature flagging with existing deployment pipeline
 
 ## Problem Statement
-Independent artists waste money on separate link-in-bio services while losing valuable fan data and conversion opportunities because their bio links don't integrate with their marketing stack, resulting in fractured analytics and missed fan relationships.
+
+Independent artists need focused, distraction-free experiences for specific workflows, but the current unified dashboard shows all features regardless of the user's primary intent or use case.
+
+### Evidence of Need
+- Users often use barely.ai for single-purpose workflows (e.g., only FM pages)
+- Full navigation can be overwhelming for focused tasks
+- Different user segments need different feature sets
 
 ## Target Users
-Less tech-savvy independent artists (1K-100K monthly listeners) who need a simple way to consolidate their online presence and capture fan data without managing multiple services.
+
+Independent artists who want focused experiences for specific barely.ai products (starting with FM users).
+
+### Differentiation from Existing Users
+- Users who primarily use one product (e.g., FM) but get distracted by full navigation
+- New users who want to start with one focused workflow
+- Power users who want specialized environments for different tasks
 
 ## Current State & Pain Points
-- Artists pay $5-20/month for Linktree Pro just to get basic analytics and pixel tracking
-- 50% of barely.nyc agency artists struggle with setting up multiple services
-- Bio page visitors aren't captured into email lists (lost fan relationships)
-- Analytics are fractured across Linktree, barely.ai, and social platforms
-- Manual copy-pasting of links between services with no automation
-- No intelligent optimization of link ordering or content based on user behavior
+
+### How Users Handle This Today
+- Navigate through full dashboard regardless of intended workflow
+- Must ignore irrelevant navigation items
+- No way to customize interface for specific use cases
+
+### Validated Pain Points
+- Cognitive overhead from seeing all features when only using one
+- Navigation complexity for single-purpose users
+- No personalization based on primary use case
 
 ## Recommended Solution
-A conversion-optimized link-in-bio page that acts as an intelligent fan acquisition engine, not just a static link list. Core differentiator: "The bio page that actually builds your fanbase."
 
-## Why This Approach
-- Solves real pain (fractured analytics, paid pixel tax) not just feature parity
-- Creates platform lock-in through genuine value, not artificial barriers
-- Leverages barely's existing strengths (email, analytics, remarketing)
-- Positions as fundamentally different from Linktree (conversion vs. navigation)
+Create app variants that show filtered navigation and features based on the `NEXT_PUBLIC_CURRENT_APP` environment variable, starting with an FM-focused variant.
+
+### Why This Approach
+- Leverages existing environment configuration system
+- Uses established GitHub Actions deployment pipeline
+- Maintains single codebase for easier maintenance
+- Allows gradual feature expansion per variant
 
 ## Success Criteria
-- 50%+ of agency artists migrate from Linktree within 3 months
-- 20%+ email capture rate from bio page visitors
-- 10%+ increase in downstream conversions (purchases, streams) vs. Linktree users
-- $50K+ ARR from eliminated Linktree subscriptions across agency clients
+
+### Differentiated Metrics
+- Reduced navigation complexity (fewer menu items for FM variant)
+- Focused user experience (only FM-relevant features shown)
+- Deployment flexibility (multiple app variants from single codebase)
+
+### Learning from Previous Attempts
+- Focus on simplicity first - minimal viable feature set
+- Use existing infrastructure rather than building new systems
 
 ## Core Functionality (MVP)
-- Customizable link list with drag-and-drop ordering
-- Built-in email capture widget connected to barely.email
-- Automatic remarketing pixel installation
-- Basic click analytics integrated with barely.fm dashboard
-- Mobile-optimized responsive themes
-- Smart link suggestions from barely ecosystem (latest release, tour dates, etc.)
+
+### Must Have (Validated through context)
+- Environment-based navigation filtering using `NEXT_PUBLIC_CURRENT_APP`
+- FM variant showing only: FM pages, basic settings, minimal media management
+- Default behavior unchanged (full navigation when env var not set)
+
+### Reusable Components
+- Existing navigation structure in `dash-sidebar-nav.tsx`
+- Current environment configuration system
+- GitHub Actions deployment pipeline with `current_app_override`
 
 ## Out of Scope for MVP
-- A/B testing different link orders
-- AI-powered link optimization
-- Advanced personalization based on visitor source
-- Custom CSS/HTML editing
-- Integrated checkout within bio page
-- QR code generation
 
-## Constraints & Assumptions
-- Artists will trust barely with their primary bio link (validated through agency experience)
-- Simple themes are sufficient for MVP (no custom design needed)
-- Artists want conversion over customization
-- Mobile-first usage (90%+ traffic from mobile)
+### Learned from Previous Attempts
+- No new deployment infrastructure needed
+- No database changes required
+
+### Available in Existing Solutions
+- Full feature set available in default app variant
+- All functionality remains accessible in standard deployment
+
+## Integration Points
+
+### With Existing Features
+- Navigation system: Filter existing nav arrays conditionally
+- Environment config: Use existing `NEXT_PUBLIC_CURRENT_APP` variable
+- Deployment: Leverage existing `deploy-app-fm` GitHub Action
+
+### Technical Integration
+- Extends: Current sidebar navigation component
+- Reuses: Environment configuration system
+- New requirements: Simple conditional rendering logic
 
 ## Complexity Assessment
-**Overall Complexity**: Medium
 
-Factors:
-- Reuse existing theme system from @barely/page (reduces complexity)
-- Email capture already exists in barely.email (simple integration)
-- Analytics foundation exists in barely.fm (extend vs. build new)
-- Main complexity: responsive design and cross-device testing
+**Overall Complexity**: Simple
+
+**Reduced Complexity Through:**
+- Reusing existing deployment infrastructure
+- Leveraging current environment variable system
+- Building on established navigation patterns
+
+**Remaining Complexity:**
+- Conditional navigation logic implementation
+- Testing across different app variants
 
 ## Human Review Required
-- [ ] Assumption: 50%+ migration rate realistic given existing Linktree investment?
-- [ ] Success criteria: Is 20% email capture rate achievable/industry standard?
-- [ ] Technical: Can we auto-populate links from artist's Spotify/social profiles?
+
+- [ ] Assumption: FM users want minimal navigation (needs user validation)
+- [ ] Differentiation: Confirm this provides meaningful value over current approach
+- [ ] Priority: Should this come before other navigation improvements?
 
 ## Technical Considerations
-- Must work flawlessly on all mobile browsers (Instagram, TikTok in-app)
-- Page load speed critical (<2s on 3G)
-- SEO optimization for artist name searches
-- Subdomain structure (artist.barely.bio vs barely.bio/artist)
+
+**High-level only - informed by existing architecture**
+- Fits within current React component patterns
+- Extends existing environment variable usage
+- Leverages established GitHub Actions workflow
+
+## Migration Path
+
+### From Existing Solutions
+- Default app behavior remains unchanged
+- FM deployment creates focused variant automatically
+- No user migration needed - environment-determined
+
+### Deprecation Considerations
+- No deprecation needed - additive feature
+- Coexistence strategy: Variants complement full app
 
 ## Future Possibilities
-- Smart link ordering based on visitor behavior
-- Integrated store/checkout without leaving page
-- Personalized content based on traffic source
-- Collaborative bio pages for bands/labels
-- API for updating links programmatically
+
+### Based on Historical Patterns
+- If successful, could enable: app-press, app-link, app-merch variants
+- Watch for: Feature creep - keep variants focused
+- Natural evolution toward: User-customizable dashboard experiences
 
 ---
-*Created: 2025-07-31*
-*Status: Draft*
-*Author: Critical evaluation by Claude*
+
+*Created: 2025-08-09*
+*Status: Ready for Implementation*
+*Complexity: Simple*
+*Next Command: `/product-development:02_create-jtbd`*

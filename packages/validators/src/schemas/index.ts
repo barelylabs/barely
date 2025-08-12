@@ -1,4 +1,5 @@
 export * from './analytics-endpoint.schema';
+export * from './app-variant.schema';
 export * from './bio.schema';
 export * from './campaign.schema';
 export * from './cart-funnel.schema';

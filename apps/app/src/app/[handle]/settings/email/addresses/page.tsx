@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { emailAddressSearchParamsSchema } from '@barely/validators';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllEmailAddresses } from '~/app/[handle]/settings/email/addresses/_components/all-email-addresses';
 import { CreateEmailAddressButton } from '~/app/[handle]/settings/email/addresses/_components/create-email-address-button';
@@ -29,19 +30,21 @@ export default async function EmailAddressesPage({
 
 	return (
 		<HydrateClient>
-			<Suspense>
-				<DashContentHeader
-					title='Email Addresses'
-					subtitle='Manage your email addresses'
-					button={<CreateEmailAddressButton />}
-				/>
-				<AllEmailAddresses />
+			<DashContentHeader
+				title='Email Addresses'
+				subtitle='Manage your email addresses'
+				button={<CreateEmailAddressButton />}
+			/>
+			<DashContent>
+				<Suspense>
+					<AllEmailAddresses />
 
-				<CreateEmailAddressModal />
-				<UpdateEmailAddressModal />
+					<CreateEmailAddressModal />
+					<UpdateEmailAddressModal />
 
-				<EmailAddressHotkeys />
-			</Suspense>
+					<EmailAddressHotkeys />
+				</Suspense>
+			</DashContent>
 		</HydrateClient>
 	);
 }

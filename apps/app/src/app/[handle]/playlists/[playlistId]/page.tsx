@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 
 import { HydrateClient, prefetch, trpc } from '~/trpc/server';
+import { DashContent } from '../../_components/dash-content';
 import { DashContentHeader } from '../../_components/dash-content-header';
 import { Playlist } from './playlist';
 
@@ -21,10 +22,11 @@ export default async function PlaylistPage({
 	return (
 		<HydrateClient>
 			<DashContentHeader title='Playlist' subtitle='Manage your playlist' />
-
-			<Suspense fallback={<div>Loading...</div>}>
-				<Playlist />
-			</Suspense>
+			<DashContent>
+				<Suspense fallback={<div>Loading...</div>}>
+					<Playlist />
+				</Suspense>
+			</DashContent>
 		</HydrateClient>
 	);
 }

@@ -1,213 +1,223 @@
-# Jobs To Be Done (JTBD) - Link-in-Bio (barely.bio)
-
-## Overview
-
-This document captures the core jobs independent artists are trying to accomplish with a link-in-bio solution, the problems they face with current alternatives, and what success looks like from their perspective. These insights are based on real artist pain points and agency experience.
+# Jobs To Be Done (JTBD) - App Modularization for Focused User Experiences
 
 ---
 
-## Primary Jobs
+## Primary Jobs (High Priority)
 
-### JTBD #1: Central Hub Management
+### JTBD 1: Focus on Single Workflow Without Distraction
 
 **Job Statement**  
-As an independent artist, I want to maintain one central link that showcases all my important content, so that I can direct fans from any platform to everything I offer without constantly updating multiple bio links.
+As an independent artist focused on streaming analytics, I want to access only FM-related features when working on my streaming data, so that I can stay focused on analyzing my music performance without getting distracted by unrelated features.
 
 **Context**
-- When posting on Instagram, TikTok, YouTube, or Twitter
-- When releasing new music, announcing shows, or launching merch
-- During interviews or podcast appearances
+
+- When I'm specifically working on understanding my streaming metrics
+- When I've dedicated time to analyze my Spotify/Apple Music performance
+- Triggered by checking streaming stats or preparing for release strategy
 
 **Motivation (Why this matters)**
-- Social platforms limit bio links (usually just one)
-- Content changes frequently (new releases, tour dates, merch drops)
-- Managing multiple links across platforms is time-consuming and error-prone
 
-**Current Alternatives**
-- Linktree or similar services (requires separate paid account)
-- Direct link to one thing (misses other opportunities)
-- Constantly changing the single bio link (confuses fans)
+- Cognitive overload from seeing 15+ navigation items when I only need 2-3
+- Getting distracted by other features (email, merch, press) when trying to focus on streaming data
+- Wanting a "streaming analytics mode" that eliminates decision fatigue
+
+**Current Alternatives (if any)**
+
+- Manually ignoring irrelevant navigation items
+- Bookmarking specific FM pages to avoid the main dashboard
+- Using separate analytics tools outside of barely.ai
 
 **Desired Outcome / Success Criteria**
-- One link that never changes but always shows current content
-- Fans can easily find what they're looking for
-- Updates propagate instantly without touching social profiles
+
+- Clean, minimal interface showing only FM pages, basic settings, and media management
+- Faster task completion without navigation overwhelm
+- Reduced cognitive load during focused work sessions
 
 **Priority Level**
+
 - High
 
 ---
 
-### JTBD #2: Fan Data Capture
+### JTBD 2: Onboard New Users with Simplified Experience
 
 **Job Statement**  
-As an independent artist, I want to convert bio visitors into email subscribers, so that I can build direct relationships with fans instead of relying on social media algorithms.
+As a new independent artist exploring barely.ai's streaming analytics, I want to see only the features relevant to my immediate goal, so that I can learn the platform without being overwhelmed by all available tools.
 
 **Context**
-- When fans click bio link from social discovery
-- After viral moments or playlist additions
-- During promotional campaigns
+
+- During initial platform exploration after signing up
+- When evaluating whether barely.ai meets my specific needs
+- Triggered by wanting to understand streaming performance capabilities
 
 **Motivation (Why this matters)**
-- Social media reach is declining (2-5% organic reach)
-- Can't export followers from social platforms
-- Email lists are the only "owned" fan relationships
-- Current bio tools don't capture visitor information
 
-**Current Alternatives**
-- Separate email signup forms (extra clicks, lower conversion)
-- Losing these potential fans forever
-- Paying for Linktree + email service integration
+- Intimidated by platforms with too many features visible at once
+- Want to focus on one core benefit before exploring additional tools
+- Need to quickly understand value proposition for my specific use case
+
+**Current Alternatives (if any)**
+
+- Trying to navigate full dashboard and getting confused
+- Leaving the platform due to complexity
+- Using separate single-purpose tools
 
 **Desired Outcome / Success Criteria**
-- Seamless email capture without leaving bio page
-- 20%+ visitor-to-subscriber conversion rate
-- Automatic welcome sequences triggered
-- Fans feel they're getting value, not being spammed
+
+- Quick understanding of FM capabilities without feature overwhelm
+- Successful completion of first streaming analytics task
+- Clear path to expand into other features later if desired
 
 **Priority Level**
+
 - High
 
 ---
 
-### JTBD #3: Understanding Fan Behavior
+### JTBD 3: Work Efficiently in Specialized Contexts
 
 **Job Statement**  
-As an independent artist, I want to see which content my fans engage with most, so that I can make informed decisions about what to promote and create.
+As a power user managing multiple aspects of my music career, I want to switch between focused work environments, so that I can be more productive when working on specific types of tasks.
 
 **Context**
-- After posting new content or announcements
-- When planning release strategies
-- During campaign performance reviews
-- When deciding what merch to produce
+
+- When doing deep work on streaming strategy vs. email campaigns vs. merchandise
+- During dedicated time blocks for different business activities
+- Triggered by context switching between different work sessions
 
 **Motivation (Why this matters)**
-- Currently flying blind with Linktree basic analytics
-- Can't connect bio clicks to actual conversions (streams, sales)
-- Missing insights about which traffic sources convert best
-- Paying extra for basic analytics that should be free
 
-**Current Alternatives**
-- Linktree Pro ($5-20/month) for basic analytics
-- Google Analytics (too complex for most artists)
-- Guessing based on social media engagement
+- Each type of work requires different mental models and feature sets
+- Context switching costs when seeing irrelevant features during focused work
+- Wanting professional, specialized interfaces for different business functions
+
+**Current Alternatives (if any)**
+
+- Using multiple browser tabs or windows
+- Manually hiding/ignoring irrelevant sections
+- Using completely separate tools for different functions
 
 **Desired Outcome / Success Criteria**
-- Clear view of click-through rates by link
-- Understanding of traffic sources and conversion paths
-- Integrated with other barely.ai analytics
-- Actionable insights, not just numbers
+
+- Specialized work environments tailored to specific task types
+- Faster context switching with appropriate feature sets
+- Professional interface that matches the work being done
 
 **Priority Level**
+
 - High
 
 ---
 
-## Secondary Jobs
+## Secondary Jobs (Medium Priority)
 
-### JTBD #4: Quick Setup and Maintenance
+### JTBD 4: Reduce Interface Complexity for Team Members
 
 **Job Statement**  
-As a less tech-savvy artist, I want to set up my bio page quickly without design skills, so that I can focus on making music instead of wrestling with technology.
+As an artist manager working with multiple clients, I want team members to access only the features they need for their role, so that they don't get confused by unrelated functionality.
 
 **Context**
-- During initial artist onboarding
-- When working with managers/agencies
-- Before major releases or campaigns
+
+- When onboarding team members to barely.ai
+- When delegating specific tasks (streaming analysis, press kit updates)
+- Triggered by need for role-based access patterns
 
 **Motivation (Why this matters)**
-- 50% of artists struggle with tech setup
-- Time spent on tech is time away from music
-- Fear of "doing it wrong" prevents getting started
 
-**Current Alternatives**
-- Hiring someone to set it up
-- Using basic/ugly default templates
-- Avoiding bio links altogether
+- Team members get confused by seeing features outside their expertise
+- Want to prevent accidental changes in unrelated areas
+- Need clear, focused interfaces for delegated tasks
+
+**Current Alternatives (if any)**
+
+- Training team members to ignore certain navigation sections
+- Creating detailed documentation about which features to use
+- Using separate accounts or tools for different functions
 
 **Desired Outcome / Success Criteria**
-- Setup complete in under 5 minutes
-- Professional look without customization
-- Confidence that it "just works"
+
+- Team members can complete assigned tasks without confusion
+- Reduced training time for new collaborators
+- Clear boundaries between different functional areas
 
 **Priority Level**
+
 - Medium
 
 ---
 
-### JTBD #5: Remarketing Enablement
+### JTBD 5: Customize Platform Experience to Usage Patterns
 
 **Job Statement**  
-As an artist running paid ads, I want to retarget bio visitors with relevant ads, so that I can maximize ROI on my advertising spend.
+As an independent artist with specific barely.ai usage patterns, I want my dashboard to reflect how I actually use the platform, so that my most important workflows are easily accessible.
 
 **Context**
-- Running Facebook/Instagram ad campaigns
-- Promoting new releases or tours
-- Building audiences for future campaigns
+
+- After using barely.ai for several months and establishing usage patterns
+- When returning to the platform for regular work sessions
+- Triggered by recognizing that some features are never used
 
 **Motivation (Why this matters)**
-- Bio visitors are high-intent fans
-- Retargeting converts 10x better than cold traffic
-- Currently paying Linktree just for pixel access
 
-**Current Alternatives**
-- Paying for Linktree Pro + manual pixel setup
-- Missing retargeting opportunities entirely
-- Complex manual pixel installation
+- Want interface efficiency based on actual usage, not feature completeness
+- Frustrated by navigating past unused features to reach frequently used ones
+- Desire for personalization that reflects individual workflow preferences
+
+**Current Alternatives (if any)**
+
+- Creating bookmarks to frequently used pages
+- Mentally filtering out unused navigation items
+- Using browser history to find commonly used features
 
 **Desired Outcome / Success Criteria**
-- Automatic pixel firing on all bio visits
-- Segmented audiences based on link clicks
-- Integration with ad platforms
+
+- Interface that prioritizes frequently used features
+- Reduced clicks to reach primary workflows
+- Sense of personalization and platform adaptation to individual needs
 
 **Priority Level**
+
 - Medium
 
 ---
 
-### JTBD #6: Brand Consistency
+## Lower Priority Jobs
+
+### JTBD 6: Maintain Professional Appearance for Client Work
 
 **Job Statement**  
-As an artist building my brand, I want my bio page to match my aesthetic, so that fans have a cohesive experience across all touchpoints.
+As an artist manager or consultant, I want to present a clean, professional interface when working with clients, so that the platform appears focused and credible for their specific needs.
 
 **Context**
-- Part of overall brand/visual identity
-- During rebrand or aesthetic shifts
-- When working with designers/creative teams
+
+- During client meetings or screen sharing sessions
+- When demonstrating barely.ai capabilities to potential users
+- Triggered by need to present professional, focused interface
 
 **Motivation (Why this matters)**
-- First impression for many new fans
-- Linktree pages look generic
-- Brand consistency builds recognition
 
-**Current Alternatives**
-- Linktree themes (limited options)
-- Custom website (too complex/expensive)
-- Accepting generic look
+- Full feature dashboards can appear cluttered or unprofessional
+- Want to show only relevant capabilities for client's use case
+- Need credible presentation of platform specialization
+
+**Current Alternatives (if any)**
+
+- Using prepared screenshots instead of live interface
+- Explaining which features to ignore during demonstrations
+- Using separate tools for client-facing work
 
 **Desired Outcome / Success Criteria**
-- Themes that match artist vibe
-- Consistent with other barely.ai pages
-- Professional without custom design
+
+- Clean, professional interface appropriate for client context
+- Focused demonstration of relevant capabilities
+- Enhanced credibility through specialized presentation
 
 **Priority Level**
-- Low (for MVP)
+
+- Low
 
 ---
 
-## Summary of Core Jobs
-
-1. **Centralize** - One link to rule them all
-2. **Capture** - Turn visitors into email subscribers  
-3. **Understand** - See what fans actually want
-4. **Simplify** - Get set up without the headache
-5. **Retarget** - Reach fans again with ads
-6. **Brand** - Look professional and on-brand
-
-The most critical jobs focus on fan relationship building and data capture - the unique value propositions that differentiate barely.bio from simple link aggregators like Linktree.
-
----
-
-*Created: 2025-07-31*  
-*Feature: barely.bio (Link-in-Bio)*  
-*Status: Complete*
+*Created: 2025-08-09*
+*Feature: App Modularization for Focused User Experiences*
+*Total Jobs Identified: 6 (3 High Priority, 2 Medium Priority, 1 Low Priority)*

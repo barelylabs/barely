@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { flowSearchParamsSchema } from '@barely/validators';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllFlows } from '~/app/[handle]/flows/_components/all-flows';
 import { CreateFlowButton } from '~/app/[handle]/flows/_components/create-flow-button';
@@ -33,9 +34,11 @@ export default async function FlowsPage({
 	return (
 		<HydrateClient>
 			<DashContentHeader title='Flows' button={<CreateFlowButton />} />
-			<Suspense fallback={<div>Loading...</div>}>
-				<AllFlows />
-			</Suspense>
+			<DashContent>
+				<Suspense fallback={<div>Loading...</div>}>
+					<AllFlows />
+				</Suspense>
+			</DashContent>
 		</HydrateClient>
 	);
 }

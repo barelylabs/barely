@@ -5,6 +5,7 @@ import { trackFilterParamsSchema } from '@barely/validators';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllTracks } from '~/app/[handle]/tracks/_components/all-tracks';
 import { ArchiveOrDeleteTrackModal } from '~/app/[handle]/tracks/_components/archive-or-delete-track-modal';
@@ -43,18 +44,19 @@ export default async function TracksPage({
 				button={<CreateTrackButton />}
 				settingsHref={`/${awaitedParams.handle}/settings/streaming`}
 			/>
+			<DashContent>
+				<TrackFilters />
+				<Suspense fallback={<GridListSkeleton />}>
+					<AllTracks />
 
-			<TrackFilters />
-			<Suspense fallback={<GridListSkeleton />}>
-				<AllTracks />
+					<CreateOrUpdateTrackModal mode='create' />
+					<CreateOrUpdateTrackModal mode='update' />
+					<ArchiveOrDeleteTrackModal mode='archive' />
+					<ArchiveOrDeleteTrackModal mode='delete' />
 
-				<CreateOrUpdateTrackModal mode='create' />
-				<CreateOrUpdateTrackModal mode='update' />
-				<ArchiveOrDeleteTrackModal mode='archive' />
-				<ArchiveOrDeleteTrackModal mode='delete' />
-
-				<TrackHotkeys />
-			</Suspense>
+					<TrackHotkeys />
+				</Suspense>
+			</DashContent>
 		</HydrateClient>
 	);
 }

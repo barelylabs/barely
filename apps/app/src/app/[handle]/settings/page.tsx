@@ -1,3 +1,4 @@
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import {
 	DisplayOrWorkspaceNameForm,
@@ -22,13 +23,15 @@ export default async function WorkspaceProfileSettingsPage({
 	return (
 		<HydrateClient>
 			<DashContentHeader title='Profile' subtitle='Update your workspace profile.' />
-			<DisplayOrWorkspaceNameForm />
-			<HandleForm />
-			<WorkspaceAvatarForm />
-			<WorkspaceHeaderForm />
-			<WorkspaceTypeForm />
-			<WorkspaceBioForm />
-			<WorkspaceBrandHuesForm />
+			<DashContent>
+				<DisplayOrWorkspaceNameForm />
+				<HandleForm />
+				<WorkspaceAvatarForm />
+				<WorkspaceHeaderForm />
+				<WorkspaceTypeForm />
+				<WorkspaceBioForm />
+				<WorkspaceBrandHuesForm />
+			</DashContent>
 		</HydrateClient>
 	);
 }

@@ -4,6 +4,7 @@ import { vipSwapSearchParamsSchema } from '@barely/validators';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { ArchiveOrDeleteVipSwapModal } from '~/app/[handle]/vip/swaps/_components/archive-or-delete-vip-swap-modal';
 import { CreateOrUpdateVipSwapModal } from '~/app/[handle]/vip/swaps/_components/create-or-update-vip-swap-modal';
@@ -37,20 +38,22 @@ export default async function VipPage({
 
 	return (
 		<HydrateClient>
-			<DashContentHeader title='VIP Swaps' button={<CreateVipSwapButton />} />
-			<VipDialogs />
-			<VipFilters />
+			<DashContentHeader title='Swaps' button={<CreateVipSwapButton />} />
+			<DashContent>
+				<VipDialogs />
+				<VipFilters />
 
-			<Suspense fallback={<GridListSkeleton />}>
-				<AllVipSwaps />
+				<Suspense fallback={<GridListSkeleton />}>
+					<AllVipSwaps />
 
-				<CreateOrUpdateVipSwapModal mode='create' />
-				<CreateOrUpdateVipSwapModal mode='update' />
-				<ArchiveOrDeleteVipSwapModal mode='archive' />
-				<ArchiveOrDeleteVipSwapModal mode='delete' />
+					<CreateOrUpdateVipSwapModal mode='create' />
+					<CreateOrUpdateVipSwapModal mode='update' />
+					<ArchiveOrDeleteVipSwapModal mode='archive' />
+					<ArchiveOrDeleteVipSwapModal mode='delete' />
 
-				<VipHotkeys />
-			</Suspense>
+					<VipHotkeys />
+				</Suspense>
+			</DashContent>
 		</HydrateClient>
 	);
 }

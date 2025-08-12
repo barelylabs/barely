@@ -5,6 +5,7 @@ import { fmSearchParamsSchema } from '@barely/validators';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllFmPages } from '~/app/[handle]/fm/_components/all-fm-pages';
 import { ArchiveOrDeleteFmModal } from '~/app/[handle]/fm/_components/archive-or-delete-fm-modal';
@@ -40,18 +41,20 @@ export default async function FmPagesPage({
 	return (
 		<HydrateClient>
 			<DashContentHeader title='FM Pages' button={<CreateFmPageButton />} />
-			<FmFilters />
-			<Suspense fallback={<GridListSkeleton />}>
-				<AllFmPages />
+			<DashContent>
+				<FmFilters />
+				<Suspense fallback={<GridListSkeleton />}>
+					<AllFmPages />
 
-				<CreateOrUpdateFmModal mode='create' />
-				<CreateOrUpdateFmModal mode='update' />
+					<CreateOrUpdateFmModal mode='create' />
+					<CreateOrUpdateFmModal mode='update' />
 
-				<ArchiveOrDeleteFmModal mode='archive' />
-				<ArchiveOrDeleteFmModal mode='delete' />
+					<ArchiveOrDeleteFmModal mode='archive' />
+					<ArchiveOrDeleteFmModal mode='delete' />
 
-				<FmHotkeys />
-			</Suspense>
+					<FmHotkeys />
+				</Suspense>
+			</DashContent>
 		</HydrateClient>
 	);
 }

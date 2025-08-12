@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AddDomainButton } from '~/app/[handle]/settings/domains/_components/add-web-domain-button';
 import { AllDomains } from '~/app/[handle]/settings/domains/_components/all-web-domains';
@@ -29,11 +30,13 @@ export default async function DomainsPage({
 				subtitle='Custom domains for destinations.'
 				button={<AddDomainButton />}
 			/>
-			<DomainsHotKeys />
-			<DomainModal />
-			<Suspense fallback={<p>Loading...</p>}>
-				<AllDomains />
-			</Suspense>
+			<DashContent>
+				<DomainsHotKeys />
+				<DomainModal />
+				<Suspense fallback={<p>Loading...</p>}>
+					<AllDomains />
+				</Suspense>
+			</DashContent>
 		</HydrateClient>
 	);
 }

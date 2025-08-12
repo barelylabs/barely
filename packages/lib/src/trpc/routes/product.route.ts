@@ -11,6 +11,7 @@ import {
 	selectWorkspaceProductsSchema,
 	updateProductSchema,
 } from '@barely/validators';
+import { tasks, waitUntil } from '@trigger.dev/sdk/v3';
 import {
 	and,
 	asc,
@@ -26,6 +27,7 @@ import {
 } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
+import type { generateFileBlurHash } from '../../trigger';
 import { workspaceProcedure } from '../trpc';
 
 export const productRoute = {
@@ -82,6 +84,18 @@ export const productRoute = {
 					images: _images.map(_i => ({ ..._i.file, lexorank: _i.lexorank })),
 				};
 			}) satisfies NormalizedProductWith_Images[];
+
+			// check if product images have blur hash
+			for (const product of normalizedProducts) {
+				if (product.images[0] && !product.images[0].blurDataUrl) {
+					waitUntil(
+						tasks.trigger<typeof generateFileBlurHash>('generate-file-blur-hash', {
+							fileId: product.images[0].id,
+							s3Key: product.images[0].s3Key,
+						}),
+					);
+				}
+			}
 
 			return {
 				products: normalizedProducts.slice(0, limit),

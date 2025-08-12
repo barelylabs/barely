@@ -5,6 +5,7 @@ import { emailTemplateSearchParamsSchema } from '@barely/validators';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllEmailTemplates } from '~/app/[handle]/email-templates/_components/all-email-templates';
 import { EmailTemplateFilters } from '~/app/[handle]/email-templates/_components/email-template-filters';
@@ -41,19 +42,20 @@ export default async function EmailTemplatesPage({
 	return (
 		<HydrateClient>
 			<DashContentHeader title='Email Templates' button={<CreateEmailTemplateButton />} />
+			<DashContent>
+				<EmailTemplateFilters />
+				<Suspense fallback={<GridListSkeleton />}>
+					<AllEmailTemplates />
 
-			<EmailTemplateFilters />
-			<Suspense fallback={<GridListSkeleton />}>
-				<AllEmailTemplates />
+					<CreateOrUpdateEmailTemplateModal mode='create' />
+					<CreateOrUpdateEmailTemplateModal mode='update' />
 
-				<CreateOrUpdateEmailTemplateModal mode='create' />
-				<CreateOrUpdateEmailTemplateModal mode='update' />
+					<ArchiveOrDeleteEmailTemplateModal mode='archive' />
+					<ArchiveOrDeleteEmailTemplateModal mode='delete' />
 
-				<ArchiveOrDeleteEmailTemplateModal mode='archive' />
-				<ArchiveOrDeleteEmailTemplateModal mode='delete' />
-
-				<EmailTemplateHotkeys />
-			</Suspense>
+					<EmailTemplateHotkeys />
+				</Suspense>
+			</DashContent>
 		</HydrateClient>
 	);
 }

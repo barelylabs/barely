@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { mixtapeFilterParamsSchema } from '@barely/validators';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllMixtapes } from '~/app/[handle]/mixtapes/_components/all-mixtapes';
 import { ArchiveOrDeleteMixtapeModal } from '~/app/[handle]/mixtapes/_components/archive-or-delete-mixtape-modal';
@@ -37,18 +38,20 @@ export default async function MixtapesPage({
 
 	return (
 		<HydrateClient>
-			<Suspense fallback={<div>Loading...</div>}>
-				<DashContentHeader title='Mixtapes' button={<CreateMixtapeButton />} />
-				<AllMixtapes />
+			<DashContentHeader title='Mixtapes' button={<CreateMixtapeButton />} />
+			<DashContent>
+				<Suspense fallback={<div>Loading...</div>}>
+					<AllMixtapes />
 
-				<CreateOrUpdateMixtapeModal mode='create' />
-				<CreateOrUpdateMixtapeModal mode='update' />
+					<CreateOrUpdateMixtapeModal mode='create' />
+					<CreateOrUpdateMixtapeModal mode='update' />
 
-				<ArchiveOrDeleteMixtapeModal mode='archive' />
-				<ArchiveOrDeleteMixtapeModal mode='delete' />
+					<ArchiveOrDeleteMixtapeModal mode='archive' />
+					<ArchiveOrDeleteMixtapeModal mode='delete' />
 
-				<MixtapeHotkeys />
-			</Suspense>
+					<MixtapeHotkeys />
+				</Suspense>
+			</DashContent>
 		</HydrateClient>
 	);
 }

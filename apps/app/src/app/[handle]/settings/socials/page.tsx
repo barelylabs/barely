@@ -1,3 +1,4 @@
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import {
 	SocialLinksForm,
@@ -8,8 +9,10 @@ export default function SocialsPage() {
 	return (
 		<>
 			<DashContentHeader title='Socials' subtitle='Update your socials.' />
-			<SocialLinksForm />
-			<SocialStatsForm />
+			<DashContent>
+				<SocialLinksForm />
+				<SocialStatsForm />
+			</DashContent>
 		</>
 	);
 }

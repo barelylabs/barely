@@ -1,5 +1,6 @@
 // Utility hooks
 export { useCopy } from './use-copy';
+export { useCurrentApp } from './use-current-app';
 export { useDebounce } from './use-debounce';
 export { useDebounceValue } from './use-debounce-value';
 export { useDebouncedCallback } from './use-debounced-callback';

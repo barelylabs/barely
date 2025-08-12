@@ -1,8 +1,8 @@
-# barely.bio (Link-in-Bio) – Product Requirements Document
+# App Modularization for Focused User Experiences – PRD
 
 ### TL;DR
 
-barely.bio is a conversion-optimized link-in-bio solution for independent artists that transforms a simple link list into an intelligent fan acquisition engine. Unlike generic bio link tools, barely.bio integrates seamlessly with the barely.ai ecosystem to capture email subscribers, track analytics across the entire fan journey, and enable automatic remarketing—all while providing a simple, mobile-first experience that artists can set up in minutes.
+App Modularization creates focused, distraction-free variants of the barely.ai dashboard tailored to specific workflows. Starting with an FM-focused variant, users will see only streaming analytics features, settings, and media management—eliminating cognitive overhead from unused navigation items. The feature leverages existing environment-based deployment infrastructure to deliver specialized user experiences without code duplication.
 
 ---
 
@@ -10,89 +10,70 @@ barely.bio is a conversion-optimized link-in-bio solution for independent artist
 
 ### Business Goals
 
-- **Increase Platform Adoption**: Attract new artists by offering a compelling entry point that competitors use as their primary product
-- **Drive Cross-Product Usage**: Convert bio page users into email marketing and analytics customers (50%+ multi-product adoption)
-- **Reduce Customer Churn**: Create ecosystem lock-in through integrated value that standalone tools can't match
-- **Capture Market Share**: Convert 50%+ of agency artists from paid Linktree subscriptions within 3 months
+- **Increase user engagement** by reducing interface complexity and improving task focus
+- **Improve new user onboarding** with simplified, purpose-driven entry points
+- **Expand market reach** by creating specialized products (barely.fm) that appeal to niche segments
+- **Demonstrate technical flexibility** to support future product variants and personalization
 
 ### User Goals
 
-- **Simplify Online Presence**: Manage all important links from one place without technical complexity
-- **Build Fan Relationships**: Convert anonymous social media followers into owned email contacts
-- **Understand Fan Behavior**: See what content resonates to make better promotional decisions
-- **Save Money**: Eliminate need for separate paid bio link services ($5-20/month savings)
+- **Complete streaming analytics tasks** without distraction from unrelated features
+- **Learn barely.ai capabilities** through focused, simplified interfaces
+- **Work efficiently** in specialized contexts with appropriate tool sets
+- **Maintain professional appearance** when collaborating or presenting to clients
 
 ### Non-Goals
 
-- Complex customization options (custom CSS/HTML)
-- E-commerce functionality within the bio page (v1)
-- Advanced A/B testing or AI optimization (v1)
-- QR code generation
-- Team collaboration features for bio pages
+- **User-customizable dashboards** (future consideration, not MVP)
+- **Database-driven feature flags** (using environment-based approach instead)
+- **Role-based permissions** (addressed through deployment variants, not access control)
+- **Complete feature redesign** (leveraging existing navigation structure)
 
 ---
 
 ## User Stories
 
-### Primary Persona – "Independent Artist (1K-100K monthly listeners)"
+### Primary Persona – "Analytics-Focused Independent Artist"
 
-- As an independent artist, I want to create a professional bio page in minutes, so that I can focus on making music instead of learning technology
-- As an independent artist, I want one link that showcases all my content, so that I don't have to update multiple social media bios when I release new music
-- As an independent artist, I want to capture fan emails automatically, so that I can build direct relationships without relying on social algorithms
-- As an independent artist, I want to see which links fans click most, so that I can promote the right content at the right time
-- As an independent artist, I want my bio page to work perfectly on mobile, so that fans have a great experience when clicking from Instagram/TikTok
+- As an independent artist tracking streaming performance, I want to see only FM-related navigation, so that I can focus on analyzing my music data without getting distracted by email marketing or merchandise features.
 
-### Secondary Persona – "Artist Manager/Agency"
+- As a new user evaluating barely.ai's streaming analytics, I want a simplified interface showing only FM capabilities, so that I can quickly understand the value proposition without being overwhelmed by the full platform.
 
-- As an artist manager, I want to quickly set up bio pages for multiple artists, so that I can onboard new clients efficiently
-- As an agency, I want integrated analytics across all tools, so that I can demonstrate ROI to my artists
-- As an agency, I want automatic remarketing pixels, so that I can run effective ad campaigns without technical setup
+- As a power user working on streaming strategy, I want a specialized FM environment, so that I can be more productive during dedicated analytics sessions.
+
+- As an artist manager collaborating on streaming data, I want team members to see only FM features, so that they don't get confused by irrelevant functionality outside their expertise.
+
+- As a consultant presenting barely.ai to streaming-focused clients, I want a clean FM-only interface, so that I can demonstrate relevant capabilities professionally without explaining unrelated features.
 
 ---
 
 ## Functional Requirements
 
-- **Page Creation & Management** (Priority: High)
-  - One-click bio page creation with artist name as subdomain
-  - Drag-and-drop link reordering
-  - Smart link suggestions from barely ecosystem (latest release, upcoming shows)
-  - Automatic social media icon detection and display
-  - Preview mode before publishing
+- **Environment-Based Navigation Filtering** (Priority: High)
+  - Navigation renders conditionally based on `NEXT_PUBLIC_CURRENT_APP` environment variable
+  - When `NEXT_PUBLIC_CURRENT_APP === 'fm'`, show only FM-specific navigation items
+  - When undefined or `'app'`, show full navigation (default behavior unchanged)
 
-- **Email Capture Integration** (Priority: High)
-  - Native email capture widget (not popup)
-  - Automatic sync with barely.email lists
-  - Customizable incentive text
-  - GDPR-compliant consent handling
-  - Welcome email automation trigger
+- **FM-Focused Navigation** (Priority: High)
+  - FM pages (`/{handle}/fm`) prominently featured
+  - Basic settings access (profile, domains)
+  - Minimal media management for FM content uploads
+  - Workspace switcher remains available
 
-- **Analytics & Tracking** (Priority: High)
-  - Real-time click tracking per link
-  - Traffic source attribution
-  - Conversion tracking (email signups, downstream actions)
-  - Integration with barely.fm analytics dashboard
-  - Automatic remarketing pixel installation
+- **Default Experience Preservation** (Priority: High)
+  - Full navigation available when environment variable not set
+  - No breaking changes to existing user workflows
+  - Seamless operation for current users
 
-- **Mobile Optimization** (Priority: High)
-  - Sub-2-second load time on 3G
-  - Perfect rendering in Instagram/TikTok in-app browsers
-  - Touch-optimized link buttons
-  - Responsive image handling
-  - Offline-capable with service worker
+- **Deployment Infrastructure** (Priority: High)
+  - Leverage existing GitHub Actions `deploy-app-fm` workflow
+  - Automatic environment variable configuration during deployment
+  - Support for future variant deployments (app-press, app-link)
 
-- **Theming & Branding** (Priority: Medium)
-  - 5-10 professional themes at launch
-  - Color customization within themes
-  - Artist photo/logo upload
-  - Font selection (3-5 options)
-  - barely branding on free tier
-
-- **Link Types Support** (Priority: Medium)
-  - Standard URL links
-  - barely.link smart links (with analytics)
-  - Embedded music players (Spotify, Apple Music)
-  - Social media profile links
-  - Email/SMS contact links
+- **Visual Consistency** (Priority: Medium)
+  - FM variant maintains barely.ai branding and design system
+  - Navigation structure follows existing patterns
+  - Responsive behavior preserved across devices
 
 ---
 
@@ -100,60 +81,41 @@ barely.bio is a conversion-optimized link-in-bio solution for independent artist
 
 ### Entry Point & Onboarding
 
-- Artists discover barely.bio through:
-  - Agency recommendation during onboarding
-  - In-app prompts within barely.ai dashboard
-  - SEO/content marketing
-  - Social proof from other artists
-
-- First-time setup flow:
-  1. Click "Create Bio Page" from dashboard
-  2. Auto-populate artist name and photo from Spotify connection
-  3. Select theme (preview on mobile device mockup)
-  4. Add first 3-5 links with smart suggestions
-  5. Configure email capture (optional but encouraged)
-  6. Preview and publish
+- Users access FM variant through specialized URL (e.g., fm.barely.ai)
+- First-time users see streamlined onboarding focused on streaming analytics setup
+- Clear visual indication of focused environment without confusion
 
 ### Core Experience
 
-- **Step 1:** Artist shares their barely.bio URL in all social media bios
-- **Step 2:** Fan clicks link from Instagram/TikTok/YouTube
-- **Step 3:** Bio page loads instantly with artist branding
-- **Step 4:** Fan browses available links (music, merch, tour dates)
-- **Step 5:** Email capture widget offers exclusive content/updates
-- **Step 6:** Fan signs up and receives welcome email
-- **Step 7:** Artist sees real-time analytics in dashboard
-- **Step 8:** Remarketing pixel fires for future ad targeting
+- **Step 1:** User lands on simplified dashboard showing FM navigation
+- **Step 2:** User navigates to FM analytics without distraction from other features
+- **Step 3:** User completes streaming data analysis tasks efficiently
+- **Step 4:** User accesses basic settings for configuration needs
+- **Step 5:** User returns to focused workflow for regular analytics sessions
 
 ### Advanced Features & Edge Cases
 
-- Link scheduling (publish/unpublish at specific times)
-- Geographic link variations (different content by country)
-- Link click limits (for exclusive content)
-- Custom domain support (Pro tier)
-- API access for programmatic updates
+- Workspace switching maintains navigation filtering per variant
+- Team collaboration preserves focused experience for each member
+- Error states and loading conditions respect the simplified interface
+- Mobile experience maintains focus benefits with appropriate responsive behavior
 
 ### UI/UX Highlights
 
-- Mobile-first design (90% of traffic is mobile)
-- Accessibility: WCAG 2.1 AA compliant
-- Progressive enhancement for slow connections
-- Smooth animations that don't impact performance
-- Clear visual hierarchy with artist content as hero
+- **Minimal cognitive load** through reduced navigation options
+- **Visual clarity** with cleaner, less cluttered sidebar
+- **Accessibility maintained** through consistent design patterns
+- **Professional appearance** suitable for client presentations
 
 ---
 
 ## Narrative
 
-Sarah is an indie pop artist with 15K monthly Spotify listeners. She just released a new single and wants to promote it across her social channels. Previously, she paid $9/month for Linktree Pro just to track clicks and install a Facebook pixel.
+Sarah, an independent artist with 15K monthly Spotify listeners, opens her laptop for her weekly streaming analytics review. Instead of navigating through barely.ai's full dashboard with 15+ navigation options (email campaigns, merchandise, press kits, fan management), she accesses the FM variant showing only 4 focused items: FM analytics, media management, basic settings, and workspace switching.
 
-She signs up for barely.ai (free tier) and creates her bio page in 3 minutes. The setup auto-imported her Spotify profile pic and suggested links to her new single, previous EP, and upcoming tour dates. She picks the "Sunset Vibes" theme that matches her aesthetic.
+She immediately clicks into her streaming data, analyzes her latest single's performance across platforms, and identifies which playlists are driving the most engagement—all without the mental distraction of seeing email template notifications or merchandise inventory alerts. The simplified interface helps her complete her analytics review 30% faster and with better focus on the streaming-specific insights she needs for her upcoming release strategy.
 
-When she posts on Instagram stories about the new release, she includes her barely.bio link. Fans click through and see all her important links in one place. The email capture widget offers exclusive acoustic versions to subscribers—30% sign up on their first visit.
-
-In her barely.ai dashboard, Sarah sees that 65% of visitors clicked the new single link, while 20% checked tour dates. She notices Denver shows high engagement, so she adds an extra show there. The integrated Facebook pixel automatically built a custom audience of her bio visitors, which her manager uses to run a targeted ad campaign that converts at 3x the rate of cold traffic.
-
-After one month, Sarah has grown her email list by 500 subscribers and increased her streaming numbers by 15%. She's cancelled her Linktree subscription and upgraded to barely.ai Pro to remove branding and access advanced analytics. The $19/month pays for itself through better fan insights and higher conversion rates.
+When her manager joins the call to review the data together, the clean FM interface presents professionally without requiring explanations about irrelevant features, making their collaboration more efficient and focused.
 
 ---
 
@@ -161,39 +123,31 @@ After one month, Sarah has grown her email list by 500 subscribers and increased
 
 ### User-Centric Metrics
 
-- Bio page creation to publish time: <5 minutes average
-- Mobile page load speed: <2 seconds on 3G
-- Email capture conversion rate: 20%+ of visitors
-- Weekly active bio pages: 70%+ of created pages
-- Link click-through rate: 40%+ of visitors click at least one link
+- **Task completion time** for FM-specific workflows (target: 20% reduction)
+- **User engagement depth** in FM features (target: increased session duration on FM pages)
+- **New user activation** for FM-focused onboarding (target: improved completion rates)
+- **Navigation efficiency** measured by clicks to reach FM functionality
 
 ### Business Metrics
 
-- New artist acquisition via bio product: 500+ monthly
-- Free to paid conversion: 15%+ within 90 days
-- Multi-product adoption: 50%+ use email or analytics
-- Churn reduction: 20% lower for multi-product users
-- Revenue from saved Linktree subscriptions: $50K+ ARR
+- **FM feature adoption** rates in focused vs. full dashboard environments
+- **User retention** for artists who start with FM-only experience
+- **Expansion revenue** from FM-focused users upgrading to full platform
+- **Customer satisfaction** scores for focused experience users
 
 ### Technical Metrics
 
-- Uptime: 99.9%+ availability
-- Page load performance: p95 < 2 seconds
-- API response time: p95 < 200ms
-- Error rate: <0.1% of page loads
-- Mobile rendering success: 99%+ across all browsers
+- **Deployment success rate** for app variants
+- **Page load performance** maintained across variants
+- **Error rates** consistent between focused and full experiences
+- **Mobile responsiveness** performance parity
 
 ### Tracking Plan
 
-- Page created
-- Link added/removed/reordered
-- Theme selected/changed
-- Email capture enabled/configured
-- Page published
-- Page viewed (with source)
-- Link clicked (with position)
-- Email captured
-- Downstream conversion events
+- **Navigation interactions** tracked per app variant
+- **Feature usage patterns** compared between environments
+- **User journey mapping** from FM-focused to full platform expansion
+- **Time-to-value metrics** for streaming analytics workflows
 
 ---
 
@@ -201,51 +155,42 @@ After one month, Sarah has grown her email list by 500 subscribers and increased
 
 ### Technical Needs
 
-- Next.js for bio pages (SSG/ISR for performance)
-- Shared component library with other barely products
-- PostgreSQL for link/page data
-- Redis for caching and real-time analytics
-- CDN for global performance
-- Service worker for offline capability
+- **Environment variable configuration** using existing `NEXT_PUBLIC_CURRENT_APP` system
+- **Conditional rendering logic** in React navigation components
+- **GitHub Actions workflow** leveraging current `deploy-app-fm` pipeline
+- **Build optimization** to maintain performance across variants
 
 ### Integration Points
 
-- barely.email API for list management
-- barely.fm analytics pipeline
-- Facebook/Google ad platform pixels
-- Spotify/Apple Music APIs for embedded players
-- Social platform APIs for profile data
-- Webhook system for external integrations
+- **Existing navigation component** (`dash-sidebar-nav.tsx`) modified for conditional rendering
+- **Environment configuration system** extended for variant-specific settings
+- **Vercel deployment pipeline** supporting multiple app variants
+- **Analytics tracking** maintained across all variants
 
 ### Data Storage & Privacy
 
-- GDPR/CCPA compliant data handling
-- Email consent tracked and honored
-- Analytics data anonymized after 90 days
-- Artist owns all fan data
-- Export functionality for data portability
-- Encryption at rest and in transit
+- **No additional data collection** required for basic variant functionality
+- **User preferences** stored client-side through environment-based deployment
+- **Privacy compliance** maintained through existing barely.ai data practices
+- **Workspace data** remains consistent across all variants
 
 ### Scalability & Performance
 
-- Static generation for bio pages (regenerate on change)
-- Edge caching for global performance
-- Lazy loading for below-fold content
-- Image optimization pipeline
-- Database read replicas for analytics
-- Queue system for batch operations
+- **Single codebase** prevents duplication and maintenance overhead
+- **Environment-based scaling** allows easy addition of future variants
+- **Bundle size optimization** through conditional loading where appropriate
+- **CDN performance** maintained through existing Vercel infrastructure
 
 ### Potential Challenges
 
-- **In-app browser compatibility**: Extensive testing needed across Instagram, TikTok, etc.
-- **Analytics accuracy**: Some browsers block tracking; need fallback methods
-- **Theme flexibility**: Balance customization with performance
-- **Migration friction**: Artists invested in existing Linktree URLs
-- **Spam prevention**: Email capture could attract bots; need protection
+- **User confusion** between variants - mitigated through clear branding and URL differentiation
+- **Feature discoverability** for FM users who might benefit from other tools - addressed through progressive disclosure strategies
+- **Development complexity** for testing multiple variants - managed through environment-specific testing protocols
+- **Support complexity** for multiple app experiences - handled through variant-aware documentation
 
 ---
 
-*Created: 2025-07-31*  
-*Version: 1.0*  
-*Status: Ready for Review*  
-*Author: Product Team*
+*Created: 2025-08-09*  
+*Feature: App Modularization for Focused User Experiences*  
+*Target Release: Q1 2025*  
+*Product Owner: [To be assigned]*

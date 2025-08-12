@@ -14,6 +14,7 @@ import {
 	selectWorkspaceTracksSchema,
 	updateTrackSchema,
 } from '@barely/validators';
+import { tasks, waitUntil } from '@trigger.dev/sdk/v3';
 import {
 	and,
 	asc,
@@ -30,6 +31,7 @@ import {
 } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
+import type { generateFileBlurHash } from '../../trigger';
 import {
 	createTrack,
 	getTrackById,
@@ -187,6 +189,19 @@ export const trackRoute = {
 							spotifyPopularity: nextTrack.spotifyPopularity,
 						}
 					:	undefined;
+			}
+
+			// check if artwork files have blur hash
+			for (const track of tracks) {
+				const currentArtwork = track.artworkFiles.find(f => f.current);
+				if (currentArtwork && !currentArtwork.blurDataUrl) {
+					waitUntil(
+						tasks.trigger<typeof generateFileBlurHash>('generate-file-blur-hash', {
+							fileId: currentArtwork.id,
+							s3Key: currentArtwork.s3Key,
+						}),
+					);
+				}
 			}
 
 			return {

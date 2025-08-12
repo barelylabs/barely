@@ -1,309 +1,174 @@
-# barely.bio Technical Implementation Plan (Feature-Organized)
+# Technical Implementation Plan - App Modularization for Focused User Experiences
+## Organized by Feature
 
 ## Feature Summary
 
-Implement a conversion-optimized link-in-bio solution that integrates seamlessly with the barely.ai ecosystem, enabling artists to create mobile-first bio pages with built-in email capture, analytics tracking, and remarketing capabilities.
+Implement environment-based navigation filtering and variant-specific pricing to create focused app variants (starting with FM) that display only relevant features and offer lower price points for simplified feature sets, leveraging existing deployment infrastructure and conditional rendering to deliver specialized user experiences without code duplication.
 
 ## Architecture Overview
 
-### High-Level Integration
+The feature extends the existing navigation system by introducing conditional rendering logic based on the `NEXT_PUBLIC_CURRENT_APP` environment variable. The GitHub Actions deployment pipeline already supports app variants through `current_app_override`, requiring only the addition of environment variable configuration and navigation filtering logic within the React components.
 
-The feature will be implemented as a new Next.js app (`apps/bio`) following the existing monorepo patterns, with shared backend infrastructure and new public-facing rendering endpoints. Key integration points:
-
-- **New App**: `apps/bio` - Public-facing bio pages with SSG/ISR (Port: 3011)
-- **Database**: Extend existing `Bios` and `BioButtons` schemas with email capture settings
-- **API Layer**: Dual router architecture with admin and public routes following tRPC patterns
-- **Shared Packages**: Leverage existing `@barely/ui`, `@barely/email`, `@barely/tb` for consistency
-- **Analytics Pipeline**: Integrate with Tinybird for real-time click tracking
-- **Email System**: Connect to `@barely/email` for capture and automation
-
-### Component Architecture
-
-```
-apps/bio/
-├── src/app/
-│   ├── [handle]/          # Dynamic artist bio pages
-│   │   ├── page.tsx       # Bio page render
-│   │   └── layout.tsx     # SEO & meta tags
-│   ├── api/
-│   │   └── trpc/bioRender/[trpc]/route.ts
-│   ├── trpc/
-│   │   ├── react.tsx      # tRPC React provider
-│   │   ├── server.tsx     # Server-side tRPC
-│   │   └── query-client.tsx # TanStack Query setup
-│   └── styles/
-│       └── globals.css    # Tailwind styles
-│
-packages/
-├── api/src/public/
-│   ├── bio-render.router.ts      # Public router definition
-│   ├── bio-render.trpc.react.ts  # React hooks
-│   └── bio-render.handler.ts     # API handler
-├── lib/src/trpc/routes/
-│   ├── bio.route.ts              # Admin CRUD operations
-│   └── bio-render.route.ts       # Public render routes
-├── db/src/sql/bio.sql.ts         # Schema definitions
-└── validators/src/schemas/bio.schema.ts # Validation schemas
-```
+**Components/Services Affected:**
+- `apps/app/src/app/[handle]/_components/dash-sidebar-nav.tsx` (primary navigation filtering)
+- `apps/app/src/app/[handle]/settings/billing/upgrade/page.tsx` (pricing component filtering)
+- `packages/const/src/workspace-plans.constants.ts` (app variant pricing structure)
+- `.github/workflows/deploy-to-vercel.yml` (environment variable configuration)
+- New utility functions for app variant detection, navigation filtering, and pricing
+- Environment configuration validation
 
 ## Key Technical Decisions
 
-1. **Static Generation with ISR**: Use Next.js ISR (Incremental Static Regeneration) for bio pages to achieve sub-2s load times while maintaining fresh content. Revalidate on-demand when bio is updated.
+1. **Environment-based filtering over database flags**: Leverages existing deployment infrastructure and maintains performance without additional database queries or complexity.
 
-2. **Email Capture as Native Component**: Implement email capture as a built-in bio component rather than external form to minimize API calls and maximize conversion rates.
+2. **Conditional rendering in existing component**: Modifies the current navigation component rather than creating new components, maintaining consistency and reducing maintenance overhead.
 
-3. **Edge Analytics**: Use Tinybird edge functions for analytics to avoid blocking page render and ensure accurate tracking even with ad blockers.
+3. **Utility functions for variant detection**: Creates reusable functions that can be extended for future app variants (press, link, merch) without duplicating logic.
 
-4. **Theme System Extension**: Extend existing `@barely/ui` theme system rather than building new one, ensuring consistency across all barely products.
+4. **Backward compatibility preserved**: Default behavior remains unchanged when environment variable is not set, ensuring no breaking changes for existing deployments.
 
-5. **Subdomain Routing**: Use `[handle].barely.bio` pattern matching existing workspace handle system for clean URLs and easy migration.
-
-6. **Mobile-First Responsive Images**: Implement responsive image optimization with Next.js Image component and Cloudinary integration for fast mobile loading.
-
-7. **Database Client Strategy**: Use `dbHttp` for single-shot operations (fetching bio), `dbPool` for multi-shot operations (email capture with fan creation transactions).
-
-8. **Type-Safe tRPC**: All routes use `satisfies TRPCRouterRecord` for compile-time type safety.
-
-9. **Naming Conventions**: Follow established patterns (byWorkspace, byId, create, update) for consistency across the monorepo.
+5. **App-specific pricing structure**: Creates separate Stripe price IDs for app variants with lower price points while maintaining the same tier names (Bedroom, Rising, Breakout) to avoid confusion.
 
 ## Dependencies & Assumptions
 
-### Dependencies
-- Existing workspace handle system for URL routing
-- `@barely/email` package for email capture and automation
-- `@barely/tb` (Tinybird) for analytics pipeline
-- `@barely/files` for image upload and optimization
-- Cloudinary or similar CDN for image serving
+**Dependencies:**
+- Existing GitHub Actions workflow with `current_app_override` support
+- Current environment variable system (`@t3-oss/env-nextjs`)
+- Existing navigation component structure and patterns
+- Current workspace plans structure and Stripe integration
+- App constants definition in `packages/const/src/app.constants.ts`
+- Existing billing/upgrade page component
 
-### Assumptions
-- Bio database schema exists and is sufficient for MVP (confirmed)
-- Workspace handles are unique and suitable for subdomains
-- Email capture can reuse existing fan/email infrastructure
-- Analytics events follow existing event schema patterns
-- Mobile browsers support service workers for offline capability
+**Assumptions:**
+- FM variant users primarily need: FM pages, basic settings, minimal media management, workspace switching
+- Navigation filtering at the component level provides sufficient performance
+- Future app variants will follow similar patterns of feature subset filtering and pricing tiers
+- Environment variable approach scales to additional variants without significant refactoring
+- App variant pricing will be 20-40% lower than full platform pricing to reflect simplified feature sets
+- Cross-grading from app variants to full platform will be implemented later (out of scope for MVP)
 
-## Required Configuration Updates
+## Implementation Checklist - Organized by Feature
 
-Before implementing any features, these configuration updates must be completed:
+### Feature 1: Core App Variant Detection and Infrastructure
 
-### Package.json Dependencies
-```json
-{
-  "name": "@barely/bio",
-  "version": "0.1.0",
-  "scripts": {
-    "dev": "pnpm with-env next dev --experimental-https --port=3011"
-  },
-  "dependencies": {
-    "@barely/api": "workspace:*",
-    "@barely/validators": "workspace:*",
-    "@tanstack/react-query": "catalog:",
-    "@trpc/client": "catalog:",
-    "@trpc/server": "catalog:",
-    "superjson": "^2.2.1"
-    // Note: NO @trpc/react-query
-  }
-}
-```
+**User Value:** Foundation for all app variant functionality - enables system to detect and respond to different app contexts
 
-### Configuration Files
-- **App Constants**: Add 'bio' to `packages/const/src/app.constants.ts`
-- **URL Configuration**: Update `packages/auth/src/get-url.ts` with port 3011
-- **Environment Variables**: Add to `packages/auth/env.ts`
-- **ID Prefixes**: Add bio, bb, bec to `packages/utils/src/id.ts`
-- **Database Client**: Register schemas in `packages/db/src/client.ts`
-- **Scripts**: Update `scripts/dev-qr-codes.sh` with bio:3011
+**Dependencies:** This feature has no dependencies and must be implemented first
 
-## Implementation Checklist (Organized by Feature)
+#### Foundation Tasks
+- [ ] Add environment variable validation for `NEXT_PUBLIC_CURRENT_APP` in app env configuration
+- [ ] Create `appVariants.ts` utility module with variant detection and validation functions
+- [ ] Create `useCurrentApp` hook in `packages/hooks` to detect current app variant from environment
+- [ ] Add TypeScript definitions for app variants and navigation filtering in `packages/validators`
+- [ ] Create TypeScript types for app variant configurations and navigation structures
 
-### 🏗️ Feature 1: MVP Foundation - Basic Bio Page Creation & Viewing
+#### Testing and Validation
+- [ ] Add unit tests for `useCurrentApp` hook with different environment variable values
+- [ ] Test environment variable detection and fallback behavior
+- [ ] Verify that app variant detection works correctly in all deployment environments
 
-This foundational feature enables artists to create a bio page and fans to view it. Must be completed first as all other features depend on it.
-
-**Infrastructure & Setup**
-- [ ] Create new Next.js app at `apps/bio` with TypeScript config (Port 3011)
-- [ ] Configure subdomain routing for `[handle].barely.bio` pattern
-- [ ] Configure CDN and edge caching rules for performance
-- [ ] Set up tRPC client with TanStack Query and SuperJSON
-- [ ] Create bio-render router, handler, and React hooks in `packages/api/src/public/`
-
-**Data Layer & Validation**
-- [ ] Create `bio.schema.ts` using drizzle-zod for auto-generated validation
-- [ ] Define insertBioSchema, createBioSchema, updateBioSchema, publicBioSchema
-- [ ] Extend bio schema with email capture settings (enabled, incentiveText)
-- [ ] Create database migration for bio schema updates
-- [ ] Register schemas in database client and validator exports
-
-**API Development**
-- [ ] Create bio.route.ts with standard naming (byWorkspace, byId, create, update)
-- [ ] Create bio-render.route.ts for public access (byHandle, log, captureEmail)
-- [ ] Use `satisfies TRPCRouterRecord` for type safety
-- [ ] Use dbHttp for single operations, dbPool for transactions
-- [ ] Add workspace-scoped bio creation with handle validation
-- [ ] Add bio publish/unpublish state management
-- [ ] Implement bio deletion with cascade handling
-- [ ] Add Upstash rate limiting for public endpoints
-
-**Frontend Implementation**
-- [ ] Create bio page component with dynamic handle routing
-- [ ] Implement ISR with on-demand revalidation API endpoint
-- [ ] Implement SEO meta tags and OpenGraph image generation
-- [ ] Create bio section in workspace settings
-- [ ] Implement bio preview within admin panel
-
-**Testing**
-- [ ] Write unit tests for bio validation schemas
-- [ ] Create integration tests for bio CRUD operations
-- [ ] Implement E2E tests for bio page rendering
-- [ ] Security test public endpoints and email capture
-
-### 🔗 Feature 2: Link & Button Management
-
-Enables artists to add, edit, reorder, and customize links on their bio page.
-
-**Data & API**
-- [ ] Implement bio.reorderButtons route with lexoRank
-- [ ] Add link type detection (URL, email, phone, social)
-- [ ] Create smart link suggestions from workspace data
-- [ ] Use proper TRPCError for client errors, raise for server errors
-
-**UI Components**
-- [ ] Create bio button creation/editing UI
-- [ ] Implement drag-and-drop reordering interface
-- [ ] Add button color customization per link
-- [ ] Implement embedded music player support
-
-**Analytics Integration**
-- [ ] Create link click tracking with position data
-- [ ] Add link click tracking with position and context
-
-**Future Enhancements**
-- [ ] Add link scheduling functionality (future)
-
-**Testing**
-- [ ] Test drag-and-drop functionality across devices
-- [ ] Verify link type detection accuracy
-
-### 📧 Feature 3: Email Capture & Fan Relationships
-
-Core differentiator that converts bio visitors into email subscribers.
-
-**Backend Integration**
-- [ ] Integrate with `@barely/email` fan creation flow
-- [ ] Use dbPool for email capture transaction (fan creation + email record)
-- [ ] Add email validation and duplicate checking
-- [ ] Create welcome email automation trigger
-- [ ] Implement GDPR-compliant consent handling
-- [ ] Rate limit by IP (3 attempts per hour) using Upstash
-
-**Frontend Components**
-- [ ] Create email capture widget component
-- [ ] Add spam protection (honeypot, rate limiting)
-
-**Analytics**
-- [ ] Track email capture conversion events
-- [ ] Create email capture conversion tracking
-
-**Testing**
-- [ ] Test email capture flow end-to-end
-- [ ] Verify GDPR compliance
-
-### 📊 Feature 4: Analytics & Behavior Tracking
-
-Provides insights into fan engagement and content performance.
-
-**Analytics Infrastructure**
-- [ ] Create Tinybird schemas for bio events
-- [ ] Implement page view tracking with source attribution
-- [ ] Implement scroll depth and engagement metrics
-- [ ] Add UTM parameter preservation through bio flow
-- [ ] Set up remarketing pixel auto-installation
-
-**Dashboard Integration**
-- [ ] Create real-time analytics dashboard integration
-- [ ] Add bio analytics widget to main dashboard
-- [ ] Add bio performance insights
-
-**Testing**
-- [ ] Verify analytics accuracy with test events
-- [ ] Test remarketing pixel firing
-
-### 🎨 Feature 5: Theme Customization & Branding
-
-Allows artists to customize the look and feel of their bio page.
-
-**Theme System**
-- [ ] Define 5-10 professional bio themes
-- [ ] Create color customization within theme constraints
-- [ ] Add font selection system (3-5 options)
-- [ ] Implement image shape options (square, circle, rounded)
-- [ ] Create social icon color customization
-- [ ] Add barely branding toggle for paid tiers
-
-**Editor Experience**
-- [ ] Implement theme preview in bio editor
-- [ ] Create bio duplication/template functionality
-- [ ] Create bio quick-edit actions
-
-**Quality Assurance**
-- [ ] Ensure all themes are WCAG AA compliant
-- [ ] Add visual regression tests for themes
-
-### 📱 Feature 6: Mobile Optimization & Performance
-
-Ensures excellent experience on mobile devices where 90% of traffic originates.
-
-**Performance Optimization**
-- [ ] Implement responsive design for all screen sizes
-- [ ] Optimize for Instagram/TikTok in-app browsers
-- [ ] Implement lazy loading for below-fold content
-- [ ] Optimize images with responsive srcset
-
-**Progressive Web App**
-- [ ] Add service worker for offline capability and PWA features
-- [ ] Create offline mode with cached content
-- [ ] Add install prompt for PWA functionality
-
-**Interaction Enhancement**
-- [ ] Add touch gesture support for link interactions
-
-**Testing**
-- [ ] Test on iOS and Android WebView implementations
-- [ ] Load test bio pages for performance targets
-
-### 🛠️ Feature 7: Admin Tools & Management
-
-Provides workspace admins with tools to manage and monitor bio pages.
-
-**Management Tools**
-- [ ] Implement bio status indicators
-- [ ] Add bio QR code generation
-- [ ] Create bio sharing tools
-
-**Import/Export**
-- [ ] Implement bio import tool from competitors
-- [ ] Add bio export functionality
-- [ ] Create bio backup/restore system
-
-**Monitoring & Operations**
-- [ ] Set up bio page monitoring and alerts
-- [ ] Configure auto-scaling for bio app
-- [ ] Create deployment rollback procedures
-- [ ] Document bio API for future extensions
-
-## Implementation Order Recommendation
-
-1. **Feature 1 (MVP Foundation)** - Must be completed first
-2. **Feature 2 (Link Management)** - Core functionality needed for useful bio pages
-3. **Feature 6 (Mobile Optimization)** - Critical for 90% of users
-4. **Feature 3 (Email Capture)** - Key differentiator and value prop
-5. **Feature 4 (Analytics)** - Provides value insights
-6. **Feature 5 (Themes)** - Enhanced customization
-7. **Feature 7 (Admin Tools)** - Management and scaling features
+#### Documentation
+- [ ] Document app variant configuration process for future variants
+- [ ] Add development setup instructions for testing different app variants locally
+- [ ] Create troubleshooting guide for environment variable configuration issues
 
 ---
 
-*Created: 2025-07-31*  
-*Updated: 2025-08-09*  
-*Version: 2.0 (Aligned with NEW_APP_GUIDELINES)*  
-*Feature: barely.bio Link-in-Bio*
+### Feature 2: FM-focused Navigation Experience  
+
+**User Value:** Users see only FM-relevant navigation items, eliminating cognitive overhead and distraction from unrelated features
+
+**Dependencies:** Requires Feature 1 (Core App Variant Detection)
+
+#### Navigation Filtering Implementation
+- [ ] Create `getNavigationForApp` utility function in `packages/utils` to filter navigation items based on app variant
+- [ ] Add navigation filtering helpers that return appropriate link arrays for each variant
+- [ ] Implement navigation group filtering logic that preserves existing component interfaces
+- [ ] Create FM-specific navigation configuration with only essential links (FM, basic settings, media)
+- [ ] Update `dash-sidebar-nav.tsx` to use conditional navigation filtering logic
+- [ ] Implement fallback behavior when environment variable is undefined (show full navigation)
+
+#### Testing and Quality Assurance  
+- [ ] Create component tests for `dash-sidebar-nav.tsx` with FM variant configuration
+- [ ] Add integration tests for navigation filtering logic across different app variants
+- [ ] Verify navigation accessibility and responsive behavior in FM variant
+- [ ] Test workspace switching maintains proper navigation filtering
+
+#### Security and Performance
+- [ ] Validate that navigation filtering doesn't expose unintended routes or data
+- [ ] Ensure navigation filtering performance doesn't impact page load times
+- [ ] Test that workspace data access remains properly scoped regardless of navigation variant
+
+#### Documentation
+- [ ] Update component documentation for navigation filtering behavior
+
+---
+
+### Feature 3: App Variant-specific Pricing
+
+**User Value:** Users see appropriate pricing plans for their app variant with lower price points reflecting simplified feature sets
+
+**Dependencies:** Requires Feature 1 (Core App Variant Detection)
+
+#### Pricing Structure Implementation
+- [ ] Extend `WORKSPACE_PLAN_TYPES` to include app variant plan types (e.g., 'fm.bedroom', 'fm.rising', 'fm.breakout')
+- [ ] Create FM-specific plan configurations with lower pricing (20-40% reduction from standard plans)
+- [ ] Add FM variant Stripe product IDs and price IDs for both test and production environments
+- [ ] Update plan descriptions to reflect FM-focused feature sets and limitations
+- [ ] Modify usage limits and highlights to reflect FM-specific feature constraints
+- [ ] Add TypeScript types for app variant pricing structures
+
+#### Pricing Component Integration
+- [ ] Create `getPlansForApp` utility function to return appropriate plans based on current app variant
+- [ ] Create pricing plan filtering utilities for app variant-specific plan display
+- [ ] Add app variant detection helpers for pricing and billing components
+- [ ] Implement plan feature filtering to show only FM-relevant capabilities
+
+#### Testing and Validation
+- [ ] Add unit tests for FM-specific pricing plan configurations and calculations
+- [ ] Create component tests for billing/upgrade page with FM variant pricing display
+- [ ] Test pricing plan filtering logic and Stripe integration with variant-specific price IDs
+- [ ] Verify app variant pricing displays correctly across different billing periods (monthly/yearly)
+
+#### Security and Payment Processing
+- [ ] Ensure pricing plan filtering doesn't expose inappropriate upgrade options for app variants
+- [ ] Validate that FM variant users can only access FM-appropriate billing plans
+- [ ] Verify Stripe webhook handling works correctly with app variant-specific price IDs
+- [ ] Test billing component performance with additional plan filtering logic
+
+#### Documentation
+- [ ] Document app variant pricing structure and Stripe configuration process
+- [ ] Add guidance for setting up FM-specific pricing in test and production environments
+
+---
+
+### Feature 4: Deployment and Production Infrastructure
+
+**User Value:** Enables app variants to be deployed and accessed by users in production environments
+
+**Dependencies:** Requires Features 1-3 to be implemented for meaningful deployment
+
+#### Deployment Configuration
+- [ ] Modify GitHub Actions `deploy-to-vercel.yml` to set `NEXT_PUBLIC_CURRENT_APP` environment variable based on `current_app_override`
+- [ ] Add environment variable injection step during app variant copying process
+- [ ] Update Vercel environment configuration to include `NEXT_PUBLIC_CURRENT_APP` for app-fm deployments
+- [ ] Verify environment variable propagation through build and runtime processes
+
+#### End-to-End Validation
+- [ ] Test complete user journey in FM variant from deployment to navigation to pricing
+- [ ] Verify all app variant functionality works correctly in production-like environment
+- [ ] Validate that existing full app deployments remain unaffected
+
+---
+
+*Created: 2025-08-09*
+*Feature: App Modularization for Focused User Experiences* 
+*Implementation Complexity: Simple*
+*Estimated Components: 6 new utility functions, 2 major component modifications, 1 deployment workflow update, pricing structure extensions*
+
+## Implementation Order Summary
+
+1. **Feature 1** must be implemented first as it provides the foundation
+2. **Features 2 and 3** can be implemented in parallel after Feature 1 is complete
+3. **Feature 4** should be implemented last as it requires Features 1-3 to be meaningful
+4. Each feature includes its own testing, security, and documentation requirements for completeness

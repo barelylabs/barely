@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { playlistFilterParamsSchema } from '@barely/validators';
 
 import { HydrateClient, prefetch, trpc } from '~/trpc/server';
+import { DashContent } from '../_components/dash-content';
 import { DashContentHeader } from '../_components/dash-content-header';
 import { AllPlaylists } from './_components/all-playlists';
 import { ArchiveOrDeletePlaylistModal } from './_components/archive-or-delete-playlist-modal';
@@ -40,17 +41,19 @@ export default async function PlaylistPage({
 				subtitle='Manage your playlists'
 				button={<CreatePlaylistButton />}
 			/>
-			<PlaylistFilters />
-			<Suspense fallback={<div>Loading...</div>}>
-				<AllPlaylists />
-			</Suspense>
+			<DashContent>
+				<PlaylistFilters />
+				<Suspense fallback={<div>Loading...</div>}>
+					<AllPlaylists />
+				</Suspense>
 
-			<CreateOrUpdatePlaylistModal mode='create' />
-			<CreateOrUpdatePlaylistModal mode='update' />
-			<ArchiveOrDeletePlaylistModal mode='archive' />
-			<ArchiveOrDeletePlaylistModal mode='delete' />
+				<CreateOrUpdatePlaylistModal mode='create' />
+				<CreateOrUpdatePlaylistModal mode='update' />
+				<ArchiveOrDeletePlaylistModal mode='archive' />
+				<ArchiveOrDeletePlaylistModal mode='delete' />
 
-			<PlaylistHotkeys />
+				<PlaylistHotkeys />
+			</DashContent>
 		</HydrateClient>
 	);
 }
