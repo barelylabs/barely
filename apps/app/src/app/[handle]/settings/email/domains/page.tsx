@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { emailDomainSearchParamsSchema } from '@barely/validators';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllEmailDomains } from '~/app/[handle]/settings/email/domains/_components/all-email-domains';
 import { CreateEmailDomainButton } from '~/app/[handle]/settings/email/domains/_components/create-email-domain-button';
@@ -28,19 +29,21 @@ export default async function EmailDomainsPage({
 
 	return (
 		<HydrateClient>
-			<Suspense>
-				<DashContentHeader
-					title='Email domains'
-					subtitle='Manage your email domains'
-					button={<CreateEmailDomainButton />}
-				/>
-				<AllEmailDomains />
+			<DashContentHeader
+				title='Email domains'
+				subtitle='Manage your email domains'
+				button={<CreateEmailDomainButton />}
+			/>
+			<DashContent>
+				<Suspense>
+					<AllEmailDomains />
 
-				<CreateOrUpdateEmailDomainModal mode='create' />
-				<CreateOrUpdateEmailDomainModal mode='update' />
+					<CreateOrUpdateEmailDomainModal mode='create' />
+					<CreateOrUpdateEmailDomainModal mode='update' />
 
-				<EmailDomainHotkeys />
-			</Suspense>
+					<EmailDomainHotkeys />
+				</Suspense>
+			</DashContent>
 		</HydrateClient>
 	);
 }

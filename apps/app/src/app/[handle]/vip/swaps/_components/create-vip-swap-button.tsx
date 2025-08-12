@@ -9,7 +9,7 @@ export function CreateVipSwapButton() {
 
 	return (
 		<Button onClick={() => setShowCreateModal(true)} look='primary'>
-			Create VIP Swap
+			Create Swap
 		</Button>
 	);
 }

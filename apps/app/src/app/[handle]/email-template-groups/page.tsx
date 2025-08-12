@@ -5,6 +5,7 @@ import { emailTemplateGroupSearchParamsSchema } from '@barely/validators';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { EmailTemplateGroupFilters } from '~/app/[handle]/email-template-groups/_components/email-template-group-filters';
 import { HydrateClient, prefetch, trpc } from '~/trpc/server';
@@ -49,19 +50,20 @@ export default async function EmailTemplateGroupsPage({
 				title='Email Template Groups'
 				button={<CreateEmailTemplateGroupButton />}
 			/>
+			<DashContent>
+				<EmailTemplateGroupFilters />
+				<Suspense fallback={<GridListSkeleton />}>
+					<AllEmailTemplateGroups />
 
-			<EmailTemplateGroupFilters />
-			<Suspense fallback={<GridListSkeleton />}>
-				<AllEmailTemplateGroups />
+					<CreateOrUpdateEmailTemplateGroupModal mode='create' />
+					<CreateOrUpdateEmailTemplateGroupModal mode='update' />
 
-				<CreateOrUpdateEmailTemplateGroupModal mode='create' />
-				<CreateOrUpdateEmailTemplateGroupModal mode='update' />
+					<ArchiveOrDeleteEmailTemplateGroupModal mode='archive' />
+					<ArchiveOrDeleteEmailTemplateGroupModal mode='delete' />
 
-				<ArchiveOrDeleteEmailTemplateGroupModal mode='archive' />
-				<ArchiveOrDeleteEmailTemplateGroupModal mode='delete' />
-
-				<EmailTemplateGroupHotkeys />
-			</Suspense>
+					<EmailTemplateGroupHotkeys />
+				</Suspense>
+			</DashContent>
 		</HydrateClient>
 	);
 }

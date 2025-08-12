@@ -130,6 +130,7 @@ import {
 	ListMusic,
 	Loader2,
 	Lock,
+	LogOut,
 	Magnet,
 	Mail,
 	Mails,
@@ -393,6 +394,7 @@ export const Icon = {
 	loader: Loader2,
 	lock: Lock,
 	logo: Logo,
+	logOut: LogOut,
 
 	magic: SparklesIcon,
 	magnet: Magnet,
@@ -460,6 +462,7 @@ export const Icon = {
 	shield: ShieldCheck,
 	shift: ArrowBigUp,
 	shuffle: Shuffle,
+	sidebar: PanelLeft,
 	// slash:
 	skipBackward: SkipBack,
 	skipForward: SkipForward,

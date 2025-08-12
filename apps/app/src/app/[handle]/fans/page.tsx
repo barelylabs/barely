@@ -5,6 +5,7 @@ import { fanSearchParamsSchema } from '@barely/validators';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllFans } from '~/app/[handle]/fans/_components/all-fans';
 import { ArchiveOrDeleteFanModal } from '~/app/[handle]/fans/_components/archive-or-delete-fan-modal';
@@ -50,23 +51,24 @@ export default async function FansPage({
 					</div>
 				}
 			/>
+			<DashContent>
+				<FanFilters />
 
-			<FanFilters />
+				<Suspense fallback={<GridListSkeleton />}>
+					<AllFans />
 
-			<Suspense fallback={<GridListSkeleton />}>
-				<AllFans />
+					<CreateOrUpdateFanModal mode='create' />
+					<CreateOrUpdateFanModal mode='update' />
 
-				<CreateOrUpdateFanModal mode='create' />
-				<CreateOrUpdateFanModal mode='update' />
+					<ArchiveOrDeleteFanModal mode='archive' />
+					<ArchiveOrDeleteFanModal mode='delete' />
 
-				<ArchiveOrDeleteFanModal mode='archive' />
-				<ArchiveOrDeleteFanModal mode='delete' />
+					<ImportFansFromCsvModal />
+					<ExportFansModal />
 
-				<ImportFansFromCsvModal />
-				<ExportFansModal />
-
-				<FanHotkeys />
-			</Suspense>
+					<FanHotkeys />
+				</Suspense>
+			</DashContent>
 		</HydrateClient>
 	);
 }

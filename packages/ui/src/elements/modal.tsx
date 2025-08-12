@@ -75,11 +75,11 @@ function Modal({
 				dismissible={dismissable}
 				shouldScaleBackground
 			>
-				<Drawer.Overlay className='fixed inset-0 z-40 bg-muted bg-opacity-10 backdrop-blur' />
+				<Drawer.Overlay className='fixed inset-0 z-50 bg-muted bg-opacity-10 backdrop-blur' />
 				<Drawer.Portal>
 					<Drawer.Content
 						className={cn(
-							'fixed bottom-0 left-0 right-0 z-50 mt-24 h-fit rounded-t-[10-px] border-t border-border bg-background',
+							'fixed bottom-0 left-0 right-0 z-[60] mt-24 h-fit rounded-t-[10-px] border-t border-border bg-background',
 							props.className,
 						)}
 					>
@@ -112,12 +112,12 @@ function Modal({
 			<Dialog.Portal>
 				<Dialog.Overlay
 					id='modal-backdrop' // for detecting when there's an active opened modal
-					className='animate-fade-in fixed inset-0 z-40 bg-slate-100 bg-opacity-20 backdrop-blur-md dark:bg-slate-800 dark:bg-opacity-80'
+					className='animate-fade-in fixed inset-0 z-50 bg-slate-100 bg-opacity-20 backdrop-blur-md dark:bg-slate-800 dark:bg-opacity-80'
 				/>
 
 				<Dialog.Content
 					className={cn(
-						'animate-scale-in fixed inset-0 z-40 m-auto flex h-fit max-h-[90vh] w-full max-w-screen-lg flex-col overflow-auto border border-border bg-inherit p-0 shadow-xl sm:rounded-2xl md:overflow-hidden',
+						'animate-scale-in fixed inset-0 z-[60] m-auto flex h-fit max-h-[90vh] w-full max-w-screen-md flex-col overflow-auto border border-border bg-inherit p-0 shadow-xl sm:rounded-2xl md:overflow-hidden',
 						'focus:outline-none',
 						props.className,
 					)}
@@ -167,12 +167,12 @@ function ModalHeader(props: ModalHeaderProps) {
 	const IconComponent = props.icon ? Icon[props.icon] : null;
 
 	return (
-		<div className='z-10 flex flex-col items-center justify-center gap-3 border-b border-border bg-background px-6 py-6 text-center sm:px-10 md:sticky md:top-0'>
+		<div className='z-10 flex flex-row items-center justify-start gap-3 border-b border-border bg-background px-6 py-6 text-center sm:px-10 md:sticky md:top-0'>
 			{/* <div className='flex flex-row items-center justify-center gap-3'></div> */}
-			{props.iconOverride ?? (IconComponent && <IconComponent className='h-10 w-10' />)}
+			{props.iconOverride ?? (IconComponent && <IconComponent className='h-8 w-8' />)}
 
 			{props.title ?
-				<H size='4'>{props.title}</H>
+				<H size='5'>{props.title}</H>
 			:	null}
 			{props.subtitle ?
 				<Text variant='sm/normal'>{props.subtitle}</Text>

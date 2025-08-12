@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { cartStatFiltersSchema } from '@barely/validators';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { StatBarelyReferers } from '~/app/[handle]/_components/stat-barely-referers';
 import { StatDevices } from '~/app/[handle]/_components/stat-devices';
@@ -38,17 +39,19 @@ export default async function CartStatsPage({
 	return (
 		<HydrateClient>
 			<DashContentHeader title='Cart Stats' />
-			<CartStatHeader />
-			<CartTimeseries />
+			<DashContent>
+				<CartStatHeader />
+				<CartTimeseries />
 
-			<div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-				<Suspense fallback={<div>Loading...</div>}>
-					<StatLocations eventType='cart/viewCheckout' />
-					<StatDevices eventType='cart/viewCheckout' />
-					<StatExternalReferers eventType='cart/viewCheckout' />
-					<StatBarelyReferers eventType='cart/viewCheckout' />
-				</Suspense>
-			</div>
+				<div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+					<Suspense fallback={<div>Loading...</div>}>
+						<StatLocations eventType='cart/viewCheckout' />
+						<StatDevices eventType='cart/viewCheckout' />
+						<StatExternalReferers eventType='cart/viewCheckout' />
+						<StatBarelyReferers eventType='cart/viewCheckout' />
+					</Suspense>
+				</div>
+			</DashContent>
 		</HydrateClient>
 	);
 }

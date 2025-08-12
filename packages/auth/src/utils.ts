@@ -133,7 +133,10 @@ export async function sendMagicLink(props: {
 }
 
 export function getSessionWorkspaceByHandle(session: Session, handle: string) {
-	const workspace = session.workspaces.find(w => w.handle === handle);
+	const workspace =
+		handle === 'account' ?
+			session.workspaces.find(w => w.type === 'personal')
+		:	session.workspaces.find(w => w.handle === handle);
 	if (!workspace) {
 		throw new Error('Workspace not found');
 	}

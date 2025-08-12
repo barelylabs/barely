@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { PressKitForm } from '~/app/[handle]/press/_components/press-kit-form';
 import { HydrateClient, prefetch, trpc } from '~/trpc/server';
@@ -25,12 +26,14 @@ export default async function PressKitPage({
 
 	return (
 		<HydrateClient>
-			<Suspense fallback={<div>Loading...</div>}>
-				<DashContentHeader title='Press Kit' />
-				<Suspense fallback={'Loading...'}>
-					<PressKitForm />
+			<DashContentHeader title='Press Kit' />
+			<DashContent>
+				<Suspense fallback={<div>Loading...</div>}>
+					<Suspense fallback={'Loading...'}>
+						<PressKitForm />
+					</Suspense>
 				</Suspense>
-			</Suspense>
+			</DashContent>
 		</HydrateClient>
 	);
 }

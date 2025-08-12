@@ -5,6 +5,7 @@ import { linkSearchParamsSchema } from '@barely/validators';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllLinks } from '~/app/[handle]/links/_components/all-links';
 import { ArchiveOrDeleteLinkModal } from '~/app/[handle]/links/_components/archive-or-delete-link-modal';
@@ -41,19 +42,20 @@ export default async function LinksPage({
 	return (
 		<HydrateClient>
 			<DashContentHeader title='Links' button={<CreateLinkButton />} />
+			<DashContent>
+				<LinkFilters />
+				<Suspense fallback={<GridListSkeleton />}>
+					<AllLinks />
+				</Suspense>
 
-			<LinkFilters />
-			<Suspense fallback={<GridListSkeleton />}>
-				<AllLinks />
-			</Suspense>
+				<CreateOrUpdateLinkModal mode='create' />
+				<CreateOrUpdateLinkModal mode='update' />
 
-			<CreateOrUpdateLinkModal mode='create' />
-			<CreateOrUpdateLinkModal mode='update' />
+				<ArchiveOrDeleteLinkModal mode='archive' />
+				<ArchiveOrDeleteLinkModal mode='delete' />
 
-			<ArchiveOrDeleteLinkModal mode='archive' />
-			<ArchiveOrDeleteLinkModal mode='delete' />
-
-			<LinkHotkeys />
+				<LinkHotkeys />
+			</DashContent>
 		</HydrateClient>
 	);
 }

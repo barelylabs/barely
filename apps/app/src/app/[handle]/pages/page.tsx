@@ -5,6 +5,7 @@ import { landingPageSearchParamsSchema } from '@barely/validators';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllLandingPages } from '~/app/[handle]/pages/_components/all-landing-pages';
 import { ArchiveOrDeleteLandingPageModal } from '~/app/[handle]/pages/_components/archive-or-delete-landing-page-modal';
@@ -44,19 +45,20 @@ export default async function LandingPagesPage({
 	return (
 		<HydrateClient>
 			<DashContentHeader title='Landing Pages' button={<CreateLandingPageButton />} />
+			<DashContent>
+				<LandingPageFilters />
+				<Suspense fallback={<GridListSkeleton />}>
+					<AllLandingPages />
 
-			<LandingPageFilters />
-			<Suspense fallback={<GridListSkeleton />}>
-				<AllLandingPages />
+					<CreateOrUpdateLandingPageModal mode='create' />
+					<CreateOrUpdateLandingPageModal mode='update' />
 
-				<CreateOrUpdateLandingPageModal mode='create' />
-				<CreateOrUpdateLandingPageModal mode='update' />
+					<ArchiveOrDeleteLandingPageModal mode='archive' />
+					<ArchiveOrDeleteLandingPageModal mode='delete' />
 
-				<ArchiveOrDeleteLandingPageModal mode='archive' />
-				<ArchiveOrDeleteLandingPageModal mode='delete' />
-
-				<LandingPageHotkeys />
-			</Suspense>
+					<LandingPageHotkeys />
+				</Suspense>
+			</DashContent>
 		</HydrateClient>
 	);
 }

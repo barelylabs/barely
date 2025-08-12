@@ -1,3 +1,4 @@
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { AcceptInviteModal } from '~/app/[handle]/settings/team/_components/accept-invite-modal';
 import {
 	AllMyInvites,
@@ -15,17 +16,18 @@ export default function TeamPage() {
 	return (
 		<>
 			<TeamDashContentHeader />
+			<DashContent>
+				<AllMyWorkspaces />
 
-			<AllMyWorkspaces />
+				<PersonalInvitesContextProvider>
+					<AllMyInvites />
+					<AcceptInviteModal />
+				</PersonalInvitesContextProvider>
 
-			<PersonalInvitesContextProvider>
-				<AllMyInvites />
-				<AcceptInviteModal />
-			</PersonalInvitesContextProvider>
-
-			<AllWorkspaceMembers />
-			<AllWorkspaceInvites />
-			<InviteMemberModal />
+				<AllWorkspaceMembers />
+				<AllWorkspaceInvites />
+				<InviteMemberModal />
+			</DashContent>
 		</>
 	);
 }

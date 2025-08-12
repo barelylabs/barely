@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { Icon } from '@barely/ui/icon';
 import { H, Text } from '@barely/ui/typography';
 
+import { NavButton } from '~/app/[handle]/_components/nav-button';
+
 interface DashContentHeaderProps {
 	title: string;
 	subtitle?: string;
@@ -12,10 +14,14 @@ interface DashContentHeaderProps {
 
 const DashContentHeader = (props: DashContentHeaderProps) => {
 	return (
-		<div className='flex flex-row items-center justify-between'>
+		<div className='flex flex-row items-center justify-between border-b border-subtle-foreground/70 bg-accent p-3 md:border-0 md:bg-transparent md:p-6 md:pb-0 lg:pt-8'>
 			<div className='flex flex-col space-y-2'>
-				<div className='group flex flex-row items-baseline gap-3'>
-					<H size='4'>{props.title}</H>
+				<div className='group flex flex-row items-center gap-2 md:items-baseline md:gap-3'>
+					<div className='md:hidden'>
+						<NavButton />
+					</div>
+
+					<H size='5'>{props.title}</H>
 					{props.settingsHref && (
 						<Link
 							href={props.settingsHref}

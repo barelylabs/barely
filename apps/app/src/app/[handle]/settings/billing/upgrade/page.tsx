@@ -125,339 +125,344 @@ export default function UpgradePage() {
 	};
 
 	return (
-		<div className='container mx-auto py-8'>
-			{/* Header */}
-			<div className='mb-12 text-center'>
-				<H size='2' className='mb-4'>
-					Flexible plans that grow with you
-				</H>
-				<Text variant='lg/normal' className='text-muted-foreground'>
-					{params.type === 'agency' ?
-						'Start for free, no credit card required. Upgrade for expert coaching and campaign management.'
-					:	'Start for free, no credit card required. Upgrade when you need more capacity.'
-					}
-				</Text>
-			</div>
-
-			{/* Toggle Container */}
-			<div className='mb-8 flex flex-col items-center gap-6 md:items-center lg:flex-row lg:items-end lg:justify-between'>
-				{/* Plan Type Toggle */}
-				<div className='flex items-center rounded-lg border bg-background p-1'>
-					<button
-						onClick={() => setParams({ type: 'diy' })}
-						className={cn(
-							'relative rounded-md px-8 py-3 text-sm font-medium transition-all',
-							params.type === 'diy' ?
-								'bg-primary text-primary-foreground shadow-sm'
-							:	'text-muted-foreground hover:text-foreground',
-						)}
-					>
-						<div className='flex flex-col items-center gap-1'>
-							<span className='text-base font-semibold'>DIY</span>
-							<span className='text-xs'>Access to tools</span>
-						</div>
-					</button>
-					<button
-						onClick={() => setParams({ type: 'agency' })}
-						className={cn(
-							'relative rounded-md px-8 py-3 text-sm font-medium transition-all',
-							params.type === 'agency' ?
-								'bg-primary text-primary-foreground shadow-sm'
-							:	'text-muted-foreground hover:text-foreground',
-						)}
-					>
-						<div className='flex flex-col items-center gap-1'>
-							<span className='text-base font-semibold'>Agency</span>
-							<span className='text-xs'>Tools + coaching</span>
-						</div>
-					</button>
+		<div className='flex-1 overflow-y-auto'>
+			<div className='container mx-auto py-8'>
+				{/* Header */}
+				<div className='mb-12 text-center'>
+					<H size='2' className='mb-4'>
+						Flexible plans that grow with you
+					</H>
+					<Text variant='lg/normal' className='text-muted-foreground'>
+						{params.type === 'agency' ?
+							'Start for free, no credit card required. Upgrade for expert coaching and campaign management.'
+						:	'Start for free, no credit card required. Upgrade when you need more capacity.'
+						}
+					</Text>
 				</div>
 
-				{/* Billing Toggle */}
-				<div className='flex items-center rounded-lg border bg-background p-1'>
-					<button
-						onClick={() => setParams({ billing: 'monthly' })}
-						className={cn(
-							'rounded-md px-4 py-2 text-sm font-medium transition-all',
-							params.billing === 'monthly' ?
-								'bg-primary text-primary-foreground shadow-sm'
-							:	'text-muted-foreground hover:text-foreground',
-						)}
-					>
-						Monthly
-					</button>
-					<button
-						onClick={() => setParams({ billing: 'yearly' })}
-						className={cn(
-							'rounded-md px-4 py-2 text-sm font-medium transition-all',
-							params.billing === 'yearly' ?
-								'bg-primary text-primary-foreground shadow-sm'
-							:	'text-muted-foreground hover:text-foreground',
-						)}
-					>
-						Yearly
-						<span className='ml-1 text-xs'>(2 months free)</span>
-					</button>
-				</div>
-			</div>
-
-			{/* Pricing Cards */}
-			<div className='mb-12 grid gap-6 lg:grid-cols-3'>
-				{displayPlans.map(plan => {
-					if (!plan) return null;
-
-					const featuredPlanId = getFeaturedPlan();
-					const isFeatured = plan.id === featuredPlanId;
-					const isCurrent = isCurrentPlan(plan.id);
-					// Only show "Most Popular" if it's not a downgrade from current plan
-					const showFeaturedBadge =
-						isFeatured && getPlanComparisonText(featuredPlanId) !== 'Downgrade';
-
-					return (
-						<motion.div
-							key={plan.id}
-							initial={{ opacity: 0, y: 20 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.3 }}
+				{/* Toggle Container */}
+				<div className='mb-8 flex flex-col items-center gap-6 md:items-center lg:flex-row lg:items-end lg:justify-between'>
+					{/* Plan Type Toggle */}
+					<div className='flex items-center rounded-lg border bg-background p-1'>
+						<button
+							onClick={() => setParams({ type: 'diy' })}
+							className={cn(
+								'relative rounded-md px-8 py-3 text-sm font-medium transition-all',
+								params.type === 'diy' ?
+									'bg-primary text-primary-foreground shadow-sm'
+								:	'text-muted-foreground hover:text-foreground',
+							)}
 						>
-							<Card
-								className={cn(
-									'relative flex h-full flex-col p-6',
-									showFeaturedBadge && 'border-primary shadow-lg',
-									isCurrent && 'border-black',
-								)}
+							<div className='flex flex-col items-center gap-1'>
+								<span className='text-base font-semibold'>DIY</span>
+								<span className='text-xs'>Access to tools</span>
+							</div>
+						</button>
+						<button
+							onClick={() => setParams({ type: 'agency' })}
+							className={cn(
+								'relative rounded-md px-8 py-3 text-sm font-medium transition-all',
+								params.type === 'agency' ?
+									'bg-primary text-primary-foreground shadow-sm'
+								:	'text-muted-foreground hover:text-foreground',
+							)}
+						>
+							<div className='flex flex-col items-center gap-1'>
+								<span className='text-base font-semibold'>Agency</span>
+								<span className='text-xs'>Tools + coaching</span>
+							</div>
+						</button>
+					</div>
+
+					{/* Billing Toggle */}
+					<div className='flex items-center rounded-lg border bg-background p-1'>
+						<button
+							onClick={() => setParams({ billing: 'monthly' })}
+							className={cn(
+								'rounded-md px-4 py-2 text-sm font-medium transition-all',
+								params.billing === 'monthly' ?
+									'bg-primary text-primary-foreground shadow-sm'
+								:	'text-muted-foreground hover:text-foreground',
+							)}
+						>
+							Monthly
+						</button>
+						<button
+							onClick={() => setParams({ billing: 'yearly' })}
+							className={cn(
+								'rounded-md px-4 py-2 text-sm font-medium transition-all',
+								params.billing === 'yearly' ?
+									'bg-primary text-primary-foreground shadow-sm'
+								:	'text-muted-foreground hover:text-foreground',
+							)}
+						>
+							Yearly
+							<span className='ml-1 text-xs'>(2 months free)</span>
+						</button>
+					</div>
+				</div>
+
+				{/* Pricing Cards */}
+				<div className='mb-12 grid gap-6 lg:grid-cols-3'>
+					{displayPlans.map(plan => {
+						if (!plan) return null;
+
+						const featuredPlanId = getFeaturedPlan();
+						const isFeatured = plan.id === featuredPlanId;
+						const isCurrent = isCurrentPlan(plan.id);
+						// Only show "Most Popular" if it's not a downgrade from current plan
+						const showFeaturedBadge =
+							isFeatured && getPlanComparisonText(featuredPlanId) !== 'Downgrade';
+
+						return (
+							<motion.div
+								key={plan.id}
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ duration: 0.3 }}
 							>
-								{isCurrent ?
-									<div className='absolute -top-3 left-1/2 -translate-x-1/2'>
-										<span className='rounded-full bg-black px-3 py-1 text-xs font-medium text-white'>
-											Current Plan
-										</span>
-									</div>
-								:	showFeaturedBadge && (
-										<div className='absolute -top-3 left-1/2 -translate-x-1/2'>
-											<span className='flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground'>
-												<Sparkles className='h-3 w-3' />
-												Most Popular
-											</span>
-										</div>
-									)
-								}
-
-								{/* Plan Name & Price */}
-								<div className='mb-6 text-center'>
-									<H size='4' className='mb-2'>
-										{plan.name}
-									</H>
-									<div className='mb-2'>
-										<span className='text-2xl font-bold'>${getPriceDisplay(plan)}</span>
-										<span className='text-muted-foreground'>/mo</span>
-									</div>
-									{billingPeriod === 'yearly' && (
-										<Text variant='sm/normal' className='text-muted-foreground'>
-											billed yearly
-										</Text>
+								<Card
+									className={cn(
+										'relative flex h-full flex-col p-6',
+										showFeaturedBadge && 'border-primary shadow-lg',
+										isCurrent && 'border-black',
 									)}
-								</div>
-
-								{/* Description */}
-								<Text
-									variant='sm/normal'
-									className='mb-6 text-center text-muted-foreground'
-								>
-									{plan.description}
-								</Text>
-
-								{/* CTA Button */}
-								<Button
-									onClick={() => handleUpgradeClick(plan.id)}
-									look={showFeaturedBadge ? 'primary' : 'secondary'}
-									className='mb-6 w-full'
-									disabled={isCurrent || isPending}
 								>
 									{isCurrent ?
-										'Current'
+										<div className='absolute -top-3 left-1/2 -translate-x-1/2'>
+											<span className='rounded-full bg-black px-3 py-1 text-xs font-medium text-white'>
+												Current Plan
+											</span>
+										</div>
+									:	showFeaturedBadge && (
+											<div className='absolute -top-3 left-1/2 -translate-x-1/2'>
+												<span className='flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground'>
+													<Sparkles className='h-3 w-3' />
+													Most Popular
+												</span>
+											</div>
+										)
+									}
+
+									{/* Plan Name & Price */}
+									<div className='mb-6 text-center'>
+										<H size='4' className='mb-2'>
+											{plan.name}
+										</H>
+										<div className='mb-2'>
+											<span className='text-2xl font-bold'>${getPriceDisplay(plan)}</span>
+											<span className='text-muted-foreground'>/mo</span>
+										</div>
+										{billingPeriod === 'yearly' && (
+											<Text variant='sm/normal' className='text-muted-foreground'>
+												billed yearly
+											</Text>
+										)}
+									</div>
+
+									{/* Description */}
+									<Text
+										variant='sm/normal'
+										className='mb-6 text-center text-muted-foreground'
+									>
+										{plan.description}
+									</Text>
+
+									{/* CTA Button */}
+									<Button
+										onClick={() => handleUpgradeClick(plan.id)}
+										look={showFeaturedBadge ? 'primary' : 'secondary'}
+										className='mb-6 w-full'
+										disabled={isCurrent || isPending}
+									>
+										{isCurrent ?
+											'Current'
+										: isPending ?
+											'Processing...'
+										:	getPlanComparisonText(plan.id)}
+									</Button>
+
+									{/* Features */}
+									<div className='space-y-3'>
+										{plan.highlights.map((highlight, idx) => (
+											<div key={idx} className='flex items-start gap-2'>
+												{highlight.disabled ?
+													<X className='mt-0.5 h-4 w-4 flex-shrink-0 text-muted-foreground' />
+												:	<Check className='mt-0.5 h-4 w-4 flex-shrink-0 text-green-500' />
+												}
+												<Text
+													variant='sm/normal'
+													className={cn(
+														highlight.disabled && 'text-muted-foreground line-through',
+													)}
+												>
+													{highlight.description}
+												</Text>
+											</div>
+										))}
+									</div>
+								</Card>
+							</motion.div>
+						);
+					})}
+				</div>
+
+				{/* Free Plan */}
+				{freePlan && !showPlusPlans && (
+					<Card className='mb-12 p-6'>
+						<div className='flex flex-col items-center justify-between gap-4 lg:flex-row'>
+							<div>
+								<H size='3' className='mb-2'>
+									{freePlan.name} Plan
+								</H>
+								<Text variant='md/normal' className='text-muted-foreground'>
+									{freePlan.description}
+								</Text>
+							</div>
+							<div className='flex items-center gap-4'>
+								<Text variant='lg/semibold'>$0 forever</Text>
+								<Button
+									look='secondary'
+									onClick={() => handleUpgradeClick('free')}
+									disabled={isCurrentPlan('free') || isPending}
+								>
+									{isCurrentPlan('free') ?
+										'Current Plan'
 									: isPending ?
 										'Processing...'
-									:	getPlanComparisonText(plan.id)}
+									:	getPlanComparisonText('free')}
 								</Button>
-
-								{/* Features */}
-								<div className='space-y-3'>
-									{plan.highlights.map((highlight, idx) => (
-										<div key={idx} className='flex items-start gap-2'>
-											{highlight.disabled ?
-												<X className='mt-0.5 h-4 w-4 flex-shrink-0 text-muted-foreground' />
-											:	<Check className='mt-0.5 h-4 w-4 flex-shrink-0 text-green-500' />}
-											<Text
-												variant='sm/normal'
-												className={cn(
-													highlight.disabled && 'text-muted-foreground line-through',
-												)}
-											>
-												{highlight.description}
-											</Text>
-										</div>
-									))}
-								</div>
-							</Card>
-						</motion.div>
-					);
-				})}
-			</div>
-
-			{/* Free Plan */}
-			{freePlan && !showPlusPlans && (
-				<Card className='mb-12 p-6'>
-					<div className='flex flex-col items-center justify-between gap-4 lg:flex-row'>
-						<div>
-							<H size='3' className='mb-2'>
-								{freePlan.name} Plan
-							</H>
-							<Text variant='md/normal' className='text-muted-foreground'>
-								{freePlan.description}
-							</Text>
+							</div>
 						</div>
-						<div className='flex items-center gap-4'>
-							<Text variant='lg/semibold'>$0 forever</Text>
-							<Button
-								look='secondary'
-								onClick={() => handleUpgradeClick('free')}
-								disabled={isCurrentPlan('free') || isPending}
-							>
-								{isCurrentPlan('free') ?
-									'Current Plan'
-								: isPending ?
-									'Processing...'
-								:	getPlanComparisonText('free')}
-							</Button>
-						</div>
+					</Card>
+				)}
+
+				{/* Comparison Section */}
+				<div className='mt-16'>
+					<H size='2' className='mb-8 text-center'>
+						Detailed Comparison
+					</H>
+
+					<div className='overflow-x-auto rounded-lg border'>
+						<table className='w-full'>
+							<thead>
+								<tr className='border-b bg-muted/50'>
+									<th className='p-4 text-left font-medium'>Feature</th>
+									{displayPlans.map(plan => {
+										if (!plan) return null;
+										return (
+											<th key={plan.id} className='p-4 text-center font-medium'>
+												{plan.name}
+											</th>
+										);
+									})}
+									{!showPlusPlans && freePlan && (
+										<th className='p-4 text-center font-medium'>Free</th>
+									)}
+								</tr>
+							</thead>
+							<tbody>
+								<tr className='border-b'>
+									<td className='p-4 font-medium'>Team Members</td>
+									{displayPlans.map(plan => {
+										if (!plan) return null;
+										return (
+											<td key={plan.id} className='p-4 text-center'>
+												{plan.usageLimits.members === Number.MAX_SAFE_INTEGER ?
+													'Unlimited'
+												:	plan.usageLimits.members}
+											</td>
+										);
+									})}
+									{!showPlusPlans && freePlan && (
+										<td className='p-4 text-center'>{freePlan.usageLimits.members}</td>
+									)}
+								</tr>
+								<tr className='border-b'>
+									<td className='p-4 font-medium'>Fan Database</td>
+									{displayPlans.map(plan => {
+										if (!plan) return null;
+										return (
+											<td key={plan.id} className='p-4 text-center'>
+												{plan.usageLimits.fans === Number.MAX_SAFE_INTEGER ?
+													'Unlimited'
+												:	plan.usageLimits.fans.toLocaleString()}
+											</td>
+										);
+									})}
+									{!showPlusPlans && freePlan && (
+										<td className='p-4 text-center'>
+											{freePlan.usageLimits.fans.toLocaleString()}
+										</td>
+									)}
+								</tr>
+								<tr className='border-b'>
+									<td className='p-4 font-medium'>Links/Month</td>
+									{displayPlans.map(plan => {
+										if (!plan) return null;
+										return (
+											<td key={plan.id} className='p-4 text-center'>
+												{plan.usageLimits.newLinksPerMonth.toLocaleString()}
+											</td>
+										);
+									})}
+									{!showPlusPlans && freePlan && (
+										<td className='p-4 text-center'>
+											{freePlan.usageLimits.newLinksPerMonth}
+										</td>
+									)}
+								</tr>
+								<tr className='border-b'>
+									<td className='p-4 font-medium'>Analytics Retention</td>
+									{displayPlans.map(plan => {
+										if (!plan) return null;
+										return (
+											<td key={plan.id} className='p-4 text-center'>
+												{plan.analyticsRetentionDays === Number.MAX_SAFE_INTEGER ?
+													'Lifetime'
+												: plan.analyticsRetentionDays === 365 ?
+													'1 year'
+												: plan.analyticsRetentionDays === 365 * 3 ?
+													'3 years'
+												:	`${plan.analyticsRetentionDays} days`}
+											</td>
+										);
+									})}
+									{!showPlusPlans && freePlan && (
+										<td className='p-4 text-center'>30 days</td>
+									)}
+								</tr>
+								<tr className='border-b'>
+									<td className='p-4 font-medium'>Merch Transaction Fee</td>
+									{displayPlans.map(plan => {
+										if (!plan) return null;
+										return (
+											<td key={plan.id} className='p-4 text-center'>
+												{plan.cartFeePercentage}%
+											</td>
+										);
+									})}
+									{!showPlusPlans && freePlan && (
+										<td className='p-4 text-center'>{freePlan.cartFeePercentage}%</td>
+									)}
+								</tr>
+								<tr className='border-b'>
+									<td className='p-4 font-medium'>Support</td>
+									{displayPlans.map(plan => {
+										if (!plan) return null;
+										return (
+											<td key={plan.id} className='p-4 text-center'>
+												{plan.supportLevel === 'priority' ? 'Priority' : 'Basic'}
+											</td>
+										);
+									})}
+									{!showPlusPlans && freePlan && (
+										<td className='p-4 text-center'>Basic</td>
+									)}
+								</tr>
+							</tbody>
+						</table>
 					</div>
-				</Card>
-			)}
-
-			{/* Comparison Section */}
-			<div className='mt-16'>
-				<H size='2' className='mb-8 text-center'>
-					Detailed Comparison
-				</H>
-
-				<div className='overflow-x-auto rounded-lg border'>
-					<table className='w-full'>
-						<thead>
-							<tr className='border-b bg-muted/50'>
-								<th className='p-4 text-left font-medium'>Feature</th>
-								{displayPlans.map(plan => {
-									if (!plan) return null;
-									return (
-										<th key={plan.id} className='p-4 text-center font-medium'>
-											{plan.name}
-										</th>
-									);
-								})}
-								{!showPlusPlans && freePlan && (
-									<th className='p-4 text-center font-medium'>Free</th>
-								)}
-							</tr>
-						</thead>
-						<tbody>
-							<tr className='border-b'>
-								<td className='p-4 font-medium'>Team Members</td>
-								{displayPlans.map(plan => {
-									if (!plan) return null;
-									return (
-										<td key={plan.id} className='p-4 text-center'>
-											{plan.usageLimits.members === Number.MAX_SAFE_INTEGER ?
-												'Unlimited'
-											:	plan.usageLimits.members}
-										</td>
-									);
-								})}
-								{!showPlusPlans && freePlan && (
-									<td className='p-4 text-center'>{freePlan.usageLimits.members}</td>
-								)}
-							</tr>
-							<tr className='border-b'>
-								<td className='p-4 font-medium'>Fan Database</td>
-								{displayPlans.map(plan => {
-									if (!plan) return null;
-									return (
-										<td key={plan.id} className='p-4 text-center'>
-											{plan.usageLimits.fans === Number.MAX_SAFE_INTEGER ?
-												'Unlimited'
-											:	plan.usageLimits.fans.toLocaleString()}
-										</td>
-									);
-								})}
-								{!showPlusPlans && freePlan && (
-									<td className='p-4 text-center'>
-										{freePlan.usageLimits.fans.toLocaleString()}
-									</td>
-								)}
-							</tr>
-							<tr className='border-b'>
-								<td className='p-4 font-medium'>Links/Month</td>
-								{displayPlans.map(plan => {
-									if (!plan) return null;
-									return (
-										<td key={plan.id} className='p-4 text-center'>
-											{plan.usageLimits.newLinksPerMonth.toLocaleString()}
-										</td>
-									);
-								})}
-								{!showPlusPlans && freePlan && (
-									<td className='p-4 text-center'>
-										{freePlan.usageLimits.newLinksPerMonth}
-									</td>
-								)}
-							</tr>
-							<tr className='border-b'>
-								<td className='p-4 font-medium'>Analytics Retention</td>
-								{displayPlans.map(plan => {
-									if (!plan) return null;
-									return (
-										<td key={plan.id} className='p-4 text-center'>
-											{plan.analyticsRetentionDays === Number.MAX_SAFE_INTEGER ?
-												'Lifetime'
-											: plan.analyticsRetentionDays === 365 ?
-												'1 year'
-											: plan.analyticsRetentionDays === 365 * 3 ?
-												'3 years'
-											:	`${plan.analyticsRetentionDays} days`}
-										</td>
-									);
-								})}
-								{!showPlusPlans && freePlan && (
-									<td className='p-4 text-center'>30 days</td>
-								)}
-							</tr>
-							<tr className='border-b'>
-								<td className='p-4 font-medium'>Merch Transaction Fee</td>
-								{displayPlans.map(plan => {
-									if (!plan) return null;
-									return (
-										<td key={plan.id} className='p-4 text-center'>
-											{plan.cartFeePercentage}%
-										</td>
-									);
-								})}
-								{!showPlusPlans && freePlan && (
-									<td className='p-4 text-center'>{freePlan.cartFeePercentage}%</td>
-								)}
-							</tr>
-							<tr className='border-b'>
-								<td className='p-4 font-medium'>Support</td>
-								{displayPlans.map(plan => {
-									if (!plan) return null;
-									return (
-										<td key={plan.id} className='p-4 text-center'>
-											{plan.supportLevel === 'priority' ? 'Priority' : 'Basic'}
-										</td>
-									);
-								})}
-								{!showPlusPlans && freePlan && <td className='p-4 text-center'>Basic</td>}
-							</tr>
-						</tbody>
-					</table>
 				</div>
 			</div>
 		</div>
