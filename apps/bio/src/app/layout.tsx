@@ -1,9 +1,13 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
+import { cn } from '@barely/utils';
 
 import '../styles/globals.css';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({
+	subsets: ['latin'],
+	variable: '--font-inter',
+});
 
 export const metadata: Metadata = {
 	title: 'barely.bio - Link in Bio',
@@ -20,7 +24,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<html lang='en'>
-			<body className={inter.className}>{children}</body>
+			<body className={cn(inter.className, inter.variable)}>{children}</body>
 		</html>
 	);
 }

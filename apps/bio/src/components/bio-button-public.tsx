@@ -1,8 +1,8 @@
 'use client';
 
-import type { BioTheme } from '@barely/lib/functions/bio-themes';
+import type { ColorScheme } from '@barely/lib/functions/bio-themes-v2';
 import type { BioButtonWithLink } from '@barely/validators';
-import { getButtonStyles } from '@barely/lib/functions/bio-themes';
+import { getComputedStyles } from '@barely/lib/functions/bio-themes-v2';
 import { detectLinkType, getLinkTypeInfo } from '@barely/lib/functions/link-type.fns';
 import { cn } from '@barely/utils';
 import { useMutation } from '@tanstack/react-query';
@@ -14,7 +14,7 @@ import { Icon } from '@barely/ui/icon';
 interface BioButtonPublicProps {
 	button: BioButtonWithLink & { lexoRank: string };
 	bioId: string;
-	theme: BioTheme;
+	colorScheme?: ColorScheme | null;
 	position: number;
 	usePlatformColors?: boolean;
 }
@@ -22,7 +22,7 @@ interface BioButtonPublicProps {
 export function BioButtonPublic({
 	button,
 	bioId,
-	theme,
+	colorScheme,
 	position,
 	usePlatformColors = true,
 }: BioButtonPublicProps) {
@@ -31,7 +31,14 @@ export function BioButtonPublic({
 
 	const linkType = button.link ? detectLinkType(button.link.url) : 'url';
 	const linkInfo = getLinkTypeInfo(linkType);
-	const styles = getButtonStyles({ theme, linkType, usePlatformColors });
+	const computedStyles = getComputedStyles({ colorScheme });
+
+	// Use computed styles for button appearance
+	const buttonStyles = {
+		background: computedStyles.colors.button,
+		color: computedStyles.colors.buttonText,
+		border: `2px solid ${computedStyles.colors.buttonOutline}`,
+	};
 
 	const handleClick = () => {
 		// Log the button click event
@@ -43,7 +50,12 @@ export function BioButtonPublic({
 		});
 	};
 
-	const isGradient = styles.background.includes('gradient');
+	// For V2, we don't use gradients in the same way, so simplified hover handling
+	const hoverStyles = {
+		backgroundColor: computedStyles.colors.button,
+		borderColor: computedStyles.colors.buttonOutline,
+		color: computedStyles.colors.buttonText,
+	};
 
 	return (
 		<a
@@ -56,27 +68,16 @@ export function BioButtonPublic({
 				'transition-all duration-200 hover:scale-[1.02] hover:shadow-lg',
 				'active:scale-[0.98]',
 			)}
-			style={{
-				background: isGradient ? styles.background : undefined,
-				backgroundColor: !isGradient ? styles.background : undefined,
-				color: styles.text,
-				border: `2px solid ${styles.border}`,
-			}}
+			style={buttonStyles}
 			onMouseEnter={e => {
-				if (!isGradient) {
-					e.currentTarget.style.backgroundColor = styles.hoverBackground;
-					e.currentTarget.style.borderColor = styles.hoverBorder;
-					if (theme === 'minimal') {
-						e.currentTarget.style.color = styles.hoverText;
-					}
-				}
+				e.currentTarget.style.backgroundColor = hoverStyles.backgroundColor;
+				e.currentTarget.style.borderColor = hoverStyles.borderColor;
+				e.currentTarget.style.color = hoverStyles.color;
 			}}
 			onMouseLeave={e => {
-				if (!isGradient) {
-					e.currentTarget.style.backgroundColor = styles.background;
-					e.currentTarget.style.borderColor = styles.border;
-					e.currentTarget.style.color = styles.text;
-				}
+				e.currentTarget.style.backgroundColor = buttonStyles.background;
+				e.currentTarget.style.borderColor = computedStyles.colors.buttonOutline;
+				e.currentTarget.style.color = buttonStyles.color;
 			}}
 		>
 			{/* Icon */}
@@ -86,7 +87,7 @@ export function BioButtonPublic({
 					return (
 						<IconComponent
 							className='h-5 w-5 flex-shrink-0'
-							style={{ color: styles.text }}
+							style={{ color: computedStyles.colors.buttonText }}
 						/>
 					);
 				})()}
@@ -97,7 +98,7 @@ export function BioButtonPublic({
 			{/* Arrow on hover */}
 			<Icon.arrowRight
 				className='h-4 w-4 flex-shrink-0 opacity-0 transition-opacity group-hover:opacity-100'
-				style={{ color: styles.text }}
+				style={{ color: computedStyles.colors.buttonText }}
 			/>
 		</a>
 	);

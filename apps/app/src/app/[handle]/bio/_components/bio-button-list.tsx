@@ -1,6 +1,6 @@
 'use client';
 
-import type { BioButtonWithLink } from '@barely/validators';
+import type { BioButtonWithLink, BioWithButtons } from '@barely/validators';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { useState } from 'react';
 import {
@@ -64,13 +64,58 @@ export function BioButtonList({
 
 	const reorderMutation = useMutation({
 		...trpc.bio.reorderButtons.mutationOptions(),
-		onSuccess: () => {
+		onMutate: async ({ buttonIds }) => {
+			// Cancel any outgoing refetches
+			await queryClient.cancelQueries({
+				queryKey: trpc.bio.byHandle.queryKey({ handle }),
+			});
+
+			// Snapshot the previous value
+			const previousBio = queryClient.getQueryData(
+				trpc.bio.byHandle.queryKey({ handle }),
+			);
+
+			// Optimistically update to the new value
+			queryClient.setQueryData(
+				trpc.bio.byHandle.queryKey({ handle }),
+				(old: BioWithButtons | undefined) => {
+					if (!old) return old;
+
+					// Create a mapping of buttonId to new index
+					const newOrder = new Map(buttonIds.map((id, index) => [id, index]));
+
+					// Sort buttons based on the new order
+					const reorderedButtons = [...(old.buttons ?? [])].sort((a, b) => {
+						const aIndex = newOrder.get(a.id) ?? 999;
+						const bIndex = newOrder.get(b.id) ?? 999;
+						return aIndex - bIndex;
+					});
+
+					return {
+						...old,
+						buttons: reorderedButtons,
+					};
+				},
+			);
+
+			// Return a context with the previous value
+			return { previousBio };
+		},
+		onError: (error, _variables, context) => {
+			// If the mutation fails, use the context to roll back
+			if (context?.previousBio) {
+				queryClient.setQueryData(
+					trpc.bio.byHandle.queryKey({ handle }),
+					context.previousBio,
+				);
+			}
+			toast.error(error.message ?? 'Failed to reorder buttons');
+		},
+		onSettled: () => {
+			// Always refetch after error or success
 			void queryClient.invalidateQueries({
 				queryKey: trpc.bio.byHandle.queryKey({ handle }),
 			});
-		},
-		onError: error => {
-			toast.error(error.message ?? 'Failed to reorder buttons');
 		},
 	});
 
@@ -134,9 +179,9 @@ export function BioButtonList({
 		<>
 			<div className='flex flex-col gap-4'>
 				<div className='flex items-center justify-between'>
-					<Text variant='lg/semibold'>Bio Buttons</Text>
+					<Text variant='lg/semibold'>Bio Links</Text>
 					<Button size='sm' startIcon='add' onClick={handleAddButton}>
-						Add Button
+						Add Link
 					</Button>
 				</div>
 

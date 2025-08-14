@@ -45,9 +45,11 @@ export function BioButtonModal({
 
 	const form = useZodForm({
 		schema: formSchema,
+		// Key the form to force recreation when button changes
+		key: button?.id ?? 'new',
 		defaultValues: {
-			text: isEditing ? button.text : '',
-			url: isEditing ? (button.link?.url ?? button.email ?? button.phone ?? '') : '',
+			text: button?.text ?? '',
+			url: button?.link?.url ?? button?.email ?? button?.phone ?? '',
 		},
 	});
 

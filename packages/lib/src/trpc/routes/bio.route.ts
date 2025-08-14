@@ -2,8 +2,12 @@ import type { TRPCRouterRecord } from '@trpc/server';
 import { dbHttp } from '@barely/db/client';
 import { dbPool } from '@barely/db/pool';
 import {
+	_BioBlocks_To_Bios,
 	_BioButtons_To_Bios,
+	_BioLinks_To_BioBlocks,
+	BioBlocks,
 	BioButtons,
+	BioLinks,
 	Bios,
 	Links,
 	Tracks,
@@ -12,11 +16,17 @@ import {
 import { sqlAnd, sqlStringContains } from '@barely/db/utils';
 import { newId, raise } from '@barely/utils';
 import {
+	createBioBlockSchema,
 	createBioButtonSchema,
+	createBioLinkSchema,
 	createBioSchema,
+	reorderBioBlocksSchema,
 	reorderBioButtonsSchema,
+	reorderBioLinksSchema,
 	selectInfiniteBiosSchema,
+	updateBioBlockSchema,
 	updateBioButtonSchema,
+	updateBioLinkSchema,
 	updateBioSchema,
 } from '@barely/validators';
 import { TRPCError } from '@trpc/server';
@@ -30,11 +40,20 @@ import { workspaceProcedure } from '../trpc';
 
 export const bioRoute = {
 	byHandle: workspaceProcedure
-		.input(z.object({ handle: z.string() }))
-		.query(async ({ ctx }) => {
+		.input(
+			z.object({
+				handle: z.string(),
+				key: z.string().default('home'),
+			}),
+		)
+		.query(async ({ ctx, input }) => {
 			// Find existing bio or create one if it doesn't exist
 			let bio = await dbHttp.query.Bios.findFirst({
-				where: and(eq(Bios.workspaceId, ctx.workspace.id), isNull(Bios.deletedAt)),
+				where: and(
+					eq(Bios.workspaceId, ctx.workspace.id),
+					eq(Bios.key, input.key),
+					isNull(Bios.deletedAt),
+				),
 				with: {
 					workspace: {
 						columns: {
@@ -42,6 +61,15 @@ export const bioRoute = {
 							name: true,
 							handle: true,
 							imageUrl: true,
+						},
+						with: {
+							_avatarImages: {
+								where: (avatarImage, { eq }) => eq(avatarImage.current, true),
+								with: {
+									file: true,
+								},
+							},
+							brandKit: true,
 						},
 					},
 					bioButtons: {
@@ -66,9 +94,7 @@ export const bioRoute = {
 					id: bioId,
 					workspaceId: ctx.workspace.id,
 					handle: ctx.workspace.handle,
-					title: ctx.workspace.name,
-					subtitle: '',
-					theme: 'light',
+					key: input.key,
 					socialDisplay: false,
 					barelyBranding: true,
 					emailCaptureEnabled: false,
@@ -83,6 +109,15 @@ export const bioRoute = {
 								name: true,
 								handle: true,
 								imageUrl: true,
+							},
+							with: {
+								_avatarImages: {
+									where: (avatarImage, { eq }) => eq(avatarImage.current, true),
+									with: {
+										file: true,
+									},
+								},
+								brandKit: true,
 							},
 						},
 						bioButtons: {
@@ -127,6 +162,171 @@ export const bioRoute = {
 			};
 		}),
 
+	byHandleWithBlocks: workspaceProcedure
+		.input(
+			z.object({
+				handle: z.string(),
+				key: z.string().default('home'),
+			}),
+		)
+		.query(async ({ ctx, input }) => {
+			// Find existing bio or create one if it doesn't exist
+			let bio = await dbHttp.query.Bios.findFirst({
+				where: and(
+					eq(Bios.workspaceId, ctx.workspace.id),
+					eq(Bios.key, input.key),
+					isNull(Bios.deletedAt),
+				),
+				with: {
+					workspace: {
+						columns: {
+							id: true,
+							name: true,
+							handle: true,
+							imageUrl: true,
+						},
+						with: {
+							_avatarImages: {
+								where: (avatarImage, { eq }) => eq(avatarImage.current, true),
+								with: {
+									file: true,
+								},
+							},
+							brandKit: true,
+						},
+					},
+					bioBlocks: {
+						with: {
+							bioBlock: {
+								with: {
+									bioLinks: {
+										with: {
+											bioLink: {
+												with: {
+													link: true,
+													form: true,
+												},
+											},
+										},
+										orderBy: [asc(_BioLinks_To_BioBlocks.lexoRank)],
+									},
+								},
+							},
+						},
+						orderBy: [asc(_BioBlocks_To_Bios.lexoRank)],
+					},
+				},
+			});
+
+			// If no bio exists, create one with defaults and a default links block
+			if (!bio) {
+				const bioId = newId('bio');
+				const blockId = newId('bio');
+
+				// Create bio
+				await dbPool(ctx.pool).insert(Bios).values({
+					id: bioId,
+					workspaceId: ctx.workspace.id,
+					handle: ctx.workspace.handle,
+					key: input.key,
+					socialDisplay: false,
+					barelyBranding: true,
+					emailCaptureEnabled: false,
+				});
+
+				// Create default links block
+				await dbPool(ctx.pool).insert(BioBlocks).values({
+					id: blockId,
+					workspaceId: ctx.workspace.id,
+					type: 'links',
+					enabled: true,
+				});
+
+				// Connect block to bio
+				const firstLexoRank = generateLexoRank({ prev: null, next: null });
+				await dbPool(ctx.pool).insert(_BioBlocks_To_Bios).values({
+					bioId,
+					bioBlockId: blockId,
+					lexoRank: firstLexoRank,
+				});
+
+				bio = await dbHttp.query.Bios.findFirst({
+					where: eq(Bios.id, bioId),
+					with: {
+						workspace: {
+							columns: {
+								id: true,
+								name: true,
+								handle: true,
+								imageUrl: true,
+							},
+							with: {
+								_avatarImages: {
+									where: (avatarImage, { eq }) => eq(avatarImage.current, true),
+									with: {
+										file: true,
+									},
+								},
+								brandKit: true,
+							},
+						},
+						bioBlocks: {
+							with: {
+								bioBlock: {
+									with: {
+										bioLinks: {
+											with: {
+												bioLink: {
+													with: {
+														link: true,
+														form: true,
+													},
+												},
+											},
+											orderBy: [asc(_BioLinks_To_BioBlocks.lexoRank)],
+										},
+									},
+								},
+							},
+							orderBy: [asc(_BioBlocks_To_Bios.lexoRank)],
+						},
+					},
+				});
+
+				if (!bio) {
+					throw new TRPCError({
+						code: 'INTERNAL_SERVER_ERROR',
+						message: 'Failed to create bio',
+					});
+				}
+			}
+
+			// Transform to flatten block structure
+			return {
+				...bio,
+				blocks: bio.bioBlocks
+					.map(bb => ({
+						...bb.bioBlock,
+						lexoRank: bb.lexoRank,
+						links: bb.bioBlock.bioLinks
+							.map(bl => ({
+								...bl.bioLink,
+								lexoRank: bl.lexoRank,
+								link:
+									bl.bioLink.link ?
+										{
+											id: bl.bioLink.link.id,
+											url: bl.bioLink.link.url,
+											domain: bl.bioLink.link.domain ?? '',
+										}
+									:	undefined,
+							}))
+							.sort((a, b) => a.lexoRank.localeCompare(b.lexoRank)),
+					}))
+					.sort((a, b) => a.lexoRank.localeCompare(b.lexoRank)),
+			};
+		}),
+
 	byWorkspace: workspaceProcedure
 		.input(selectInfiniteBiosSchema)
 		.query(async ({ input, ctx }) => {
@@ -150,7 +350,7 @@ export const bioRoute = {
 					eq(Bios.workspaceId, ctx.workspace.id),
 					showArchived ? undefined : isNull(Bios.archivedAt),
 					isNull(Bios.deletedAt),
-					!!search && sqlStringContains(Bios.title, search),
+					!!search && sqlStringContains(Bios.handle, search),
 					!!cursor &&
 						or(
 							lt(Bios.createdAt, cursor.createdAt),
@@ -423,15 +623,52 @@ export const bioRoute = {
 
 			if (!bio) raise('Bio not found');
 
-			// Generate new lexoRanks for the ordered buttons
-			const updates = buttonIds.map((buttonId, index) => {
-				const prev = index > 0 ? `a${index}` : null;
-				const next = index < buttonIds.length - 1 ? `a${index + 2}` : null;
-				const lexoRank = generateLexoRank({ prev, next });
+			// Get current buttons with their lexoRanks to maintain valid ordering
+			const currentButtons = await dbHttp.query._BioButtons_To_Bios.findMany({
+				where: eq(_BioButtons_To_Bios.bioId, bioId),
+				orderBy: [asc(_BioButtons_To_Bios.lexoRank)],
+			});
 
+			// Create a map of current lexoRanks for reference
+			const currentRankMap = new Map(
+				currentButtons.map(b => [b.bioButtonId, b.lexoRank]),
+			);
+
+			// Generate new lexoRanks for the ordered buttons
+			const newRanks: string[] = [];
+			for (let i = 0; i < buttonIds.length; i++) {
+				let lexoRank: string;
+
+				if (i === 0) {
+					// First item
+					const nextButtonId = buttonIds[i + 1];
+					const nextRank =
+						nextButtonId ? (currentRankMap.get(nextButtonId) ?? null) : null;
+					lexoRank = generateLexoRank({ prev: null, next: nextRank });
+				} else if (i === buttonIds.length - 1) {
+					// Last item
+					const prevRank = newRanks[i - 1] ?? null;
+					lexoRank = generateLexoRank({ prev: prevRank, next: null });
+				} else {
+					// Middle item - between previous new rank and next current rank
+					const nextButtonId = buttonIds[i + 1];
+					const nextRank =
+						nextButtonId ? (currentRankMap.get(nextButtonId) ?? null) : null;
+					const prevRank = newRanks[i - 1] ?? null;
+					lexoRank = generateLexoRank({
+						prev: prevRank,
+						next: nextRank,
+					});
+				}
+
+				newRanks.push(lexoRank);
+			}
+
+			// Update all buttons with their new ranks
+			const updates = buttonIds.map((buttonId, index) => {
 				return dbPool(ctx.pool)
 					.update(_BioButtons_To_Bios)
-					.set({ lexoRank })
+					.set({ lexoRank: newRanks[index] })
 					.where(
 						and(
 							eq(_BioButtons_To_Bios.bioId, bioId),
@@ -496,5 +733,353 @@ export const bioRoute = {
 				formattedUrl,
 				originalUrl: input.url,
 			};
+		}),
+
+	// Bio Block operations
+	createBlock: workspaceProcedure
+		.input(
+			createBioBlockSchema.extend({
+				bioId: z.string(),
+			}),
+		)
+		.mutation(async ({ input, ctx }) => {
+			const { bioId, ...blockData } = input;
+
+			// Verify bio belongs to workspace
+			const bio = await dbHttp.query.Bios.findFirst({
+				where: and(eq(Bios.id, bioId), eq(Bios.workspaceId, ctx.workspace.id)),
+			});
+
+			if (!bio) raise('Bio not found');
+
+			// Get the last block's lexoRank to generate next rank
+			const lastBlock = await dbHttp.query._BioBlocks_To_Bios.findFirst({
+				where: eq(_BioBlocks_To_Bios.bioId, bioId),
+				orderBy: [desc(_BioBlocks_To_Bios.lexoRank)],
+			});
+
+			const lexoRank = generateLexoRank({
+				prev: lastBlock?.lexoRank ?? null,
+				next: null,
+			});
+
+			const blockId = newId('bioBlock');
+
+			// Create the block
+			const [block] = await dbPool(ctx.pool)
+				.insert(BioBlocks)
+				.values({
+					...blockData,
+					id: blockId,
+					workspaceId: ctx.workspace.id,
+				})
+				.returning();
+
+			if (!block) raise('Failed to create block');
+
+			// Create the relationship
+			await dbPool(ctx.pool).insert(_BioBlocks_To_Bios).values({
+				bioId,
+				bioBlockId: blockId,
+				lexoRank,
+			});
+
+			return block;
+		}),
+
+	updateBlock: workspaceProcedure
+		.input(updateBioBlockSchema)
+		.mutation(async ({ input, ctx }) => {
+			const { id, ...data } = input;
+
+			const [updatedBlock] = await dbPool(ctx.pool)
+				.update(BioBlocks)
+				.set(data)
+				.where(and(eq(BioBlocks.id, id), eq(BioBlocks.workspaceId, ctx.workspace.id)))
+				.returning();
+
+			return updatedBlock ?? raise('Failed to update block');
+		}),
+
+	deleteBlock: workspaceProcedure
+		.input(
+			z.object({
+				bioId: z.string(),
+				blockId: z.string(),
+			}),
+		)
+		.mutation(async ({ input, ctx }) => {
+			// Verify bio belongs to workspace
+			const bio = await dbHttp.query.Bios.findFirst({
+				where: and(eq(Bios.id, input.bioId), eq(Bios.workspaceId, ctx.workspace.id)),
+			});
+
+			if (!bio) raise('Bio not found');
+
+			// Remove the relationship
+			await dbPool(ctx.pool)
+				.delete(_BioBlocks_To_Bios)
+				.where(
+					and(
+						eq(_BioBlocks_To_Bios.bioId, input.bioId),
+						eq(_BioBlocks_To_Bios.bioBlockId, input.blockId),
+					),
+				);
+
+			// Delete the block itself (this will cascade delete associated links)
+			await dbPool(ctx.pool)
+				.delete(BioBlocks)
+				.where(
+					and(
+						eq(BioBlocks.id, input.blockId),
+						eq(BioBlocks.workspaceId, ctx.workspace.id),
+					),
+				);
+
+			return { success: true };
+		}),
+
+	reorderBlocks: workspaceProcedure
+		.input(reorderBioBlocksSchema)
+		.mutation(async ({ input, ctx }) => {
+			const { bioId, blockIds } = input;
+
+			// Verify bio belongs to workspace
+			const bio = await dbHttp.query.Bios.findFirst({
+				where: and(eq(Bios.id, bioId), eq(Bios.workspaceId, ctx.workspace.id)),
+			});
+
+			if (!bio) raise('Bio not found');
+
+			// Get current blocks with their lexoRanks to maintain valid ordering
+			const currentBlocks = await dbHttp.query._BioBlocks_To_Bios.findMany({
+				where: eq(_BioBlocks_To_Bios.bioId, bioId),
+				orderBy: [asc(_BioBlocks_To_Bios.lexoRank)],
+			});
+
+			// Create a map of current lexoRanks for reference
+			const currentRankMap = new Map(currentBlocks.map(b => [b.bioBlockId, b.lexoRank]));
+
+			// Generate new lexoRanks for the ordered blocks
+			const newRanks: string[] = [];
+			for (let i = 0; i < blockIds.length; i++) {
+				let lexoRank: string;
+
+				if (i === 0) {
+					// First item
+					const nextBlockId = blockIds[i + 1];
+					const nextRank = nextBlockId ? (currentRankMap.get(nextBlockId) ?? null) : null;
+					lexoRank = generateLexoRank({ prev: null, next: nextRank });
+				} else if (i === blockIds.length - 1) {
+					// Last item
+					const prevRank = newRanks[i - 1] ?? null;
+					lexoRank = generateLexoRank({ prev: prevRank, next: null });
+				} else {
+					// Middle item - between previous new rank and next current rank
+					const nextBlockId = blockIds[i + 1];
+					const nextRank = nextBlockId ? (currentRankMap.get(nextBlockId) ?? null) : null;
+					const prevRank = newRanks[i - 1] ?? null;
+					lexoRank = generateLexoRank({
+						prev: prevRank,
+						next: nextRank,
+					});
+				}
+
+				newRanks.push(lexoRank);
+			}
+
+			// Update all blocks with their new ranks
+			const updates = blockIds.map((blockId, index) => {
+				return dbPool(ctx.pool)
+					.update(_BioBlocks_To_Bios)
+					.set({ lexoRank: newRanks[index] })
+					.where(
+						and(
+							eq(_BioBlocks_To_Bios.bioId, bioId),
+							eq(_BioBlocks_To_Bios.bioBlockId, blockId),
+						),
+					);
+			});
+
+			await Promise.all(updates);
+
+			return { success: true };
+		}),
+
+	// Bio Link operations (links within blocks)
+	createLink: workspaceProcedure
+		.input(
+			createBioLinkSchema.extend({
+				blockId: z.string(),
+			}),
+		)
+		.mutation(async ({ input, ctx }) => {
+			const { blockId, ...linkData } = input;
+
+			// Verify block belongs to workspace
+			const block = await dbHttp.query.BioBlocks.findFirst({
+				where: and(
+					eq(BioBlocks.id, blockId),
+					eq(BioBlocks.workspaceId, ctx.workspace.id),
+				),
+			});
+
+			if (!block) raise('Block not found');
+
+			// Get the last link's lexoRank to generate next rank
+			const lastLink = await dbHttp.query._BioLinks_To_BioBlocks.findFirst({
+				where: eq(_BioLinks_To_BioBlocks.bioBlockId, blockId),
+				orderBy: [desc(_BioLinks_To_BioBlocks.lexoRank)],
+			});
+
+			const lexoRank = generateLexoRank({
+				prev: lastLink?.lexoRank ?? null,
+				next: null,
+			});
+
+			const linkId = newId('bioLink');
+
+			// Create the link
+			const [link] = await dbPool(ctx.pool)
+				.insert(BioLinks)
+				.values({
+					...linkData,
+					id: linkId,
+					workspaceId: ctx.workspace.id,
+				})
+				.returning();
+
+			if (!link) raise('Failed to create link');
+
+			// Create the relationship
+			await dbPool(ctx.pool).insert(_BioLinks_To_BioBlocks).values({
+				bioBlockId: blockId,
+				bioLinkId: linkId,
+				lexoRank,
+			});
+
+			return link;
+		}),
+
+	updateLink: workspaceProcedure
+		.input(updateBioLinkSchema)
+		.mutation(async ({ input, ctx }) => {
+			const { id, ...data } = input;
+
+			const [updatedLink] = await dbPool(ctx.pool)
+				.update(BioLinks)
+				.set(data)
+				.where(and(eq(BioLinks.id, id), eq(BioLinks.workspaceId, ctx.workspace.id)))
+				.returning();
+
+			return updatedLink ?? raise('Failed to update link');
+		}),
+
+	deleteLink: workspaceProcedure
+		.input(
+			z.object({
+				blockId: z.string(),
+				linkId: z.string(),
+			}),
+		)
+		.mutation(async ({ input, ctx }) => {
+			// Verify block belongs to workspace
+			const block = await dbHttp.query.BioBlocks.findFirst({
+				where: and(
+					eq(BioBlocks.id, input.blockId),
+					eq(BioBlocks.workspaceId, ctx.workspace.id),
+				),
+			});
+
+			if (!block) raise('Block not found');
+
+			// Remove the relationship
+			await dbPool(ctx.pool)
+				.delete(_BioLinks_To_BioBlocks)
+				.where(
+					and(
+						eq(_BioLinks_To_BioBlocks.bioBlockId, input.blockId),
+						eq(_BioLinks_To_BioBlocks.bioLinkId, input.linkId),
+					),
+				);
+
+			// Delete the link itself
+			await dbPool(ctx.pool)
+				.delete(BioLinks)
+				.where(
+					and(eq(BioLinks.id, input.linkId), eq(BioLinks.workspaceId, ctx.workspace.id)),
+				);
+
+			return { success: true };
+		}),
+
+	reorderLinks: workspaceProcedure
+		.input(reorderBioLinksSchema)
+		.mutation(async ({ input, ctx }) => {
+			const { blockId, linkIds } = input;
+
+			// Verify block belongs to workspace
+			const block = await dbHttp.query.BioBlocks.findFirst({
+				where: and(
+					eq(BioBlocks.id, blockId),
+					eq(BioBlocks.workspaceId, ctx.workspace.id),
+				),
+			});
+
+			if (!block) raise('Block not found');
+
+			// Get current links with their lexoRanks to maintain valid ordering
+			const currentLinks = await dbHttp.query._BioLinks_To_BioBlocks.findMany({
+				where: eq(_BioLinks_To_BioBlocks.bioBlockId, blockId),
+				orderBy: [asc(_BioLinks_To_BioBlocks.lexoRank)],
+			});
+
+			// Create a map of current lexoRanks for reference
+			const currentRankMap = new Map(currentLinks.map(l => [l.bioLinkId, l.lexoRank]));
+
+			// Generate new lexoRanks for the ordered links
+			const newRanks: string[] = [];
+			for (let i = 0; i < linkIds.length; i++) {
+				let lexoRank: string;
+
+				if (i === 0) {
+					// First item
+					const nextLinkId = linkIds[i + 1];
+					const nextRank = nextLinkId ? (currentRankMap.get(nextLinkId) ?? null) : null;
+					lexoRank = generateLexoRank({ prev: null, next: nextRank });
+				} else if (i === linkIds.length - 1) {
+					// Last item
+					const prevRank = newRanks[i - 1] ?? null;
+					lexoRank = generateLexoRank({ prev: prevRank, next: null });
+				} else {
+					// Middle item - between previous new rank and next current rank
+					const nextLinkId = linkIds[i + 1];
+					const nextRank = nextLinkId ? (currentRankMap.get(nextLinkId) ?? null) : null;
+					const prevRank = newRanks[i - 1] ?? null;
+					lexoRank = generateLexoRank({
+						prev: prevRank,
+						next: nextRank,
+					});
+				}
+
+				newRanks.push(lexoRank);
+			}
+
+			// Update all links with their new ranks
+			const updates = linkIds.map((linkId, index) => {
+				return dbPool(ctx.pool)
+					.update(_BioLinks_To_BioBlocks)
+					.set({ lexoRank: newRanks[index] })
+					.where(
+						and(
+							eq(_BioLinks_To_BioBlocks.bioBlockId, blockId),
+							eq(_BioLinks_To_BioBlocks.bioLinkId, linkId),
+						),
+					);
+			});
+
+			await Promise.all(updates);
+
+			return { success: true };
 		}),
 } satisfies TRPCRouterRecord;

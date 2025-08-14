@@ -8,6 +8,7 @@ import { createTRPCRouter } from '../trpc';
 import { analyticsEndpointRoute } from './analytics-endpoint.route';
 import { authRoute } from './auth.route';
 import { bioRoute } from './bio.route';
+import { brandKitRouter } from './brand-kit.route';
 import { campaignRoute } from './campaign.route';
 import { cartFunnelRoute } from './cart-funnel.route';
 import { cartOrderRoute } from './cart-order.route';
@@ -49,6 +50,7 @@ export const appRouter = createTRPCRouter({
 	analyticsEndpoint: analyticsEndpointRoute,
 	auth: authRoute,
 	bio: bioRoute,
+	brandKit: brandKitRouter,
 	campaign: campaignRoute,
 	cartFunnel: cartFunnelRoute,
 	cartOrder: cartOrderRoute,

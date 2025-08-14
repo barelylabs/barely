@@ -385,6 +385,10 @@ const DateTimePicker = React.forwardRef<
 			const date = parseDateTime(state.value.toString()).toDate(getLocalTimeZone());
 			setJsDatetime(date);
 			onJsDateChangeRef.current?.(date);
+		} else if (state.value === null) {
+			// Handle explicit null values (e.g., when clearing)
+			setJsDatetime(null);
+			onJsDateChangeRef.current?.(null);
 		}
 	}, [state.value]);
 	return (
@@ -433,7 +437,11 @@ const DateTimePicker = React.forwardRef<
 						'h-5 w-5 cursor-pointer text-primary/30',
 						!jsDatetime && 'hidden',
 					)}
-					onClick={() => setJsDatetime(null)}
+					onClick={() => {
+						state.setValue(null);
+						setJsDatetime(null);
+						onJsDateChange?.(null);
+					}}
 				/>
 			</div>
 		</div>

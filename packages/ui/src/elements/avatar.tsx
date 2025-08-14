@@ -54,6 +54,7 @@ const Avatar = (props: {
 	size?: string;
 	imageWidth: number;
 	imageHeight: number;
+	imageBlurDataUrl?: string;
 	imageS3Key?: string;
 	imageUrl?: string;
 	displayName?: string;
@@ -79,6 +80,7 @@ const Avatar = (props: {
 							priority={props.priority}
 							width={props.imageWidth}
 							height={props.imageHeight}
+							blurDataURL={props.imageBlurDataUrl}
 							// fill
 						/>
 					</>

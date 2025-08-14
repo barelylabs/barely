@@ -187,7 +187,7 @@ function getMetaEventFromBioEvent({
 					customData: {
 						content_type: 'bio',
 						content_ids: [bio.id],
-						content_name: bio.title ?? bio.handle,
+						content_name: bio.handle,
 					},
 				},
 			];
@@ -212,7 +212,7 @@ function getMetaEventFromBioEvent({
 					customData: {
 						content_type: 'bio',
 						content_ids: [bio.id],
-						content_name: bio.title ?? bio.handle,
+						content_name: bio.handle,
 					},
 				},
 			];

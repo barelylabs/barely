@@ -1,7 +1,8 @@
 'use client';
 
-import type { BioTheme } from '@barely/lib/functions/bio-themes';
+import type { AppearancePreset, ColorScheme } from '@barely/lib/functions/bio-themes-v2';
 import type { BioButtonWithLink } from '@barely/validators';
+import { APPEARANCE_PRESETS } from '@barely/lib/functions/bio-themes-v2';
 
 import { BioButtonPublic } from '../../components/bio-button-public';
 
@@ -15,17 +16,17 @@ interface BioButtonProps {
 	defaultIconColor?: string | null;
 }
 
-// Map bio page theme to bio button theme
-const mapTheme = (theme: 'light' | 'dark' | 'app'): BioTheme => {
+// Map bio page theme to color scheme
+const mapThemeToColorScheme = (theme: 'light' | 'dark' | 'app'): ColorScheme => {
 	switch (theme) {
 		case 'light':
-			return 'minimal';
+			return APPEARANCE_PRESETS['shuffle-random'].colorScheme;
 		case 'dark':
-			return 'monochrome';
+			return APPEARANCE_PRESETS['monochrome-accent'].colorScheme;
 		case 'app':
-			return 'default';
+			return APPEARANCE_PRESETS['shuffle-random'].colorScheme;
 		default:
-			return 'default';
+			return APPEARANCE_PRESETS['shuffle-random'].colorScheme;
 	}
 };
 
@@ -34,7 +35,7 @@ export function BioButton({ button, bioId, position, theme }: BioButtonProps) {
 		<BioButtonPublic
 			button={button}
 			bioId={bioId}
-			theme={mapTheme(theme)}
+			colorScheme={mapThemeToColorScheme(theme)}
 			position={position}
 			usePlatformColors={true}
 		/>

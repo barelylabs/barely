@@ -27,6 +27,7 @@ const buttonVariants = cva(
 				ghost: 'bg-transparent hover:bg-accent hover:text-accent-foreground',
 
 				link: '!focus-visible:ring-transparent !m-0 !h-fit bg-transparent !p-0 text-foreground underline-offset-4 ring-transparent ring-offset-transparent hover:underline',
+				text: '!focus-visible:ring-transparent !m-0 !h-fit bg-transparent !p-0 text-foreground underline-offset-4 ring-transparent ring-offset-transparent',
 				tab: '!focus-visible:ring-transparent',
 			},
 

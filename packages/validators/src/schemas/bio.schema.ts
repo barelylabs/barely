@@ -1,5 +1,13 @@
 import type { InferSelectModel } from 'drizzle-orm';
-import { _BioButtons_To_Bios, BioButtons, Bios } from '@barely/db/sql';
+import {
+	_BioBlocks_To_Bios,
+	_BioButtons_To_Bios,
+	_BioLinks_To_BioBlocks,
+	BioBlocks,
+	BioButtons,
+	BioLinks,
+	Bios,
+} from '@barely/db/sql';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod/v4';
 
@@ -13,11 +21,19 @@ import { stdWebEventPipeQueryParamsSchema } from './tb.schema';
 // Bios
 export const insertBioSchema = createInsertSchema(Bios, {
 	handle: handle => handle.min(1, 'Handle is required'),
-	title: title => title.min(1, 'Title must be at least 1 character'),
-	subtitle: subtitle => subtitle.min(1, 'Subtitle must be at least 1 character'),
+	key: key => key.min(1, 'Key is required'),
 }).extend({
 	emailCaptureEnabled: z.boolean().default(false),
 	emailCaptureIncentiveText: z.string().optional(),
+	// Bio-specific settings
+	imgShape: z.enum(['square', 'circle', 'rounded']).optional(),
+	socialDisplay: z.boolean().default(true),
+	showLocation: z.boolean().default(false),
+	showHeader: z.boolean().default(true),
+	headerStyle: z.enum(['minimal', 'banner', 'portrait', 'shapes']).default('minimal'),
+	blockShadow: z.boolean().default(false),
+	showShareButton: z.boolean().default(false),
+	showSubscribeButton: z.boolean().default(false),
 });
 
 export const createBioSchema = insertBioSchema.omit({
@@ -37,20 +53,15 @@ export const updateBioSchema = insertBioSchema.partial().required({ id: true }).
 
 export const publicBioSchema = z.object({
 	handle: z.string(),
-	route: z.string().nullable(),
-	slug: z.string().nullable(),
-	img: z.string().nullable(),
+	key: z.string(),
 	imgShape: z.enum(['square', 'circle', 'rounded']).nullable(),
-	title: z.string().nullable(),
-	subtitle: z.string().nullable(),
-	titleColor: z.string().nullable(),
-	buttonColor: z.string().nullable(),
-	iconColor: z.string().nullable(),
-	textColor: z.string().nullable(),
 	socialDisplay: z.boolean(),
-	socialButtonColor: z.string().nullable(),
-	socialIconColor: z.string().nullable(),
-	theme: z.enum(['light', 'dark', 'app']),
+	showLocation: z.boolean(),
+	showHeader: z.boolean(),
+	headerStyle: z.enum(['minimal', 'banner', 'portrait', 'shapes']),
+	blockShadow: z.boolean(),
+	showShareButton: z.boolean(),
+	showSubscribeButton: z.boolean(),
 	barelyBranding: z.boolean(),
 	emailCaptureEnabled: z.boolean(),
 	emailCaptureIncentiveText: z.string().nullable(),
@@ -100,6 +111,74 @@ export const bioButtonRelationSchema = createInsertSchema(_BioButtons_To_Bios);
 
 export type BioButtonRelation = InferSelectModel<typeof _BioButtons_To_Bios>;
 
+// BioBlocks (New block-based system)
+export const insertBioBlockSchema = createInsertSchema(BioBlocks);
+
+export const createBioBlockSchema = insertBioBlockSchema.omit({
+	id: true,
+	workspaceId: true,
+	createdAt: true,
+	updatedAt: true,
+	deletedAt: true,
+});
+
+export const updateBioBlockSchema = insertBioBlockSchema
+	.partial()
+	.required({ id: true })
+	.omit({
+		workspaceId: true,
+		createdAt: true,
+		updatedAt: true,
+		deletedAt: true,
+	});
+
+export const reorderBioBlocksSchema = z.object({
+	bioId: z.string(),
+	blockIds: z.array(z.string()),
+});
+
+export type InsertBioBlock = z.infer<typeof insertBioBlockSchema>;
+export type CreateBioBlock = z.infer<typeof createBioBlockSchema>;
+export type UpdateBioBlock = z.infer<typeof updateBioBlockSchema>;
+export type BioBlock = InferSelectModel<typeof BioBlocks>;
+
+// BioLinks (Links within blocks)
+export const insertBioLinkSchema = createInsertSchema(BioLinks, {
+	text: text => text.min(1, 'Link text is required'),
+});
+
+export const createBioLinkSchema = insertBioLinkSchema.omit({
+	id: true,
+	workspaceId: true,
+	createdAt: true,
+	updatedAt: true,
+	deletedAt: true,
+});
+
+export const updateBioLinkSchema = insertBioLinkSchema
+	.partial()
+	.required({ id: true })
+	.omit({
+		workspaceId: true,
+		createdAt: true,
+		updatedAt: true,
+		deletedAt: true,
+	});
+
+export const reorderBioLinksSchema = z.object({
+	blockId: z.string(),
+	linkIds: z.array(z.string()),
+});
+
+export type InsertBioLink = z.infer<typeof insertBioLinkSchema>;
+export type CreateBioLink = z.infer<typeof createBioLinkSchema>;
+export type UpdateBioLink = z.infer<typeof updateBioLinkSchema>;
+export type BioLink = InferSelectModel<typeof BioLinks>;
+
+// Relationship types
+export type BioBlockRelation = InferSelectModel<typeof _BioBlocks_To_Bios>;
+export type BioLinkRelation = InferSelectModel<typeof _BioLinks_To_BioBlocks>;
+
 // Complex types
 export interface BioButtonWithLink extends BioButton {
 	link?: {
@@ -113,24 +192,116 @@ export interface BioButtonWithLink extends BioButton {
 	};
 }
 
+export interface BioLinkWithTarget extends BioLink {
+	link?: {
+		id: string;
+		url: string;
+		domain: string;
+	};
+	form?: {
+		id: string;
+		name: string;
+	};
+}
+
+export interface BioBlockWithLinks extends BioBlock {
+	links: (BioLinkWithTarget & { lexoRank: string })[];
+}
+
+export interface BioWithBlocks extends Bio {
+	blocks: (BioBlockWithLinks & { lexoRank: string })[];
+	workspace?: {
+		id: string;
+		name: string;
+		imageUrl: string | null;
+		_avatarImages?: {
+			file: {
+				id: string;
+				s3Key: string;
+				blurDataUrl: string | null;
+			};
+		}[];
+		brandKit?: {
+			id: string;
+			shortBio: string | null;
+			longBio: string | null;
+			colorScheme: {
+				colors: [string, string, string];
+				mapping: {
+					backgroundColor: 0 | 1 | 2;
+					textColor: 0 | 1 | 2;
+					buttonColor: 0 | 1 | 2;
+					buttonTextColor: 0 | 1 | 2;
+					buttonOutlineColor: 0 | 1 | 2;
+					blockColor: 0 | 1 | 2;
+					blockTextColor: 0 | 1 | 2;
+					bannerColor: 0 | 1 | 2;
+				};
+			} | null;
+			fontPreset: string;
+			headingFont: string | null;
+			bodyFont: string | null;
+			blockStyle: string;
+			blockOutline: boolean;
+			themeKey: string | null;
+			appearancePreset: string | null;
+		};
+	};
+}
+
+// Legacy - kept for migration
 export interface BioWithButtons extends Bio {
 	buttons: (BioButtonWithLink & { lexoRank: string })[];
 	workspace?: {
 		id: string;
 		name: string;
 		imageUrl: string | null;
+		_avatarImages?: {
+			file: {
+				id: string;
+				s3Key: string;
+				blurDataUrl: string | null;
+			};
+		}[];
+		brandKit?: {
+			id: string;
+			shortBio: string | null;
+			longBio: string | null;
+			colorScheme: {
+				colors: [string, string, string];
+				mapping: {
+					backgroundColor: 0 | 1 | 2;
+					textColor: 0 | 1 | 2;
+					buttonColor: 0 | 1 | 2;
+					buttonTextColor: 0 | 1 | 2;
+					buttonOutlineColor: 0 | 1 | 2;
+					blockColor: 0 | 1 | 2;
+					blockTextColor: 0 | 1 | 2;
+					bannerColor: 0 | 1 | 2;
+				};
+			} | null;
+			fontPreset: string;
+			headingFont: string | null;
+			bodyFont: string | null;
+			blockStyle: string;
+			blockOutline: boolean;
+			themeKey: string | null;
+			appearancePreset: string | null;
+		};
 	};
 }
 
 // Query schemas
 export const selectBiosSchema = z.object({
 	handle: z.string().optional(),
+	key: z.string().optional(),
 	showArchived: z.boolean().optional(),
 	workspaceId: z.string().optional(),
 });
 
 export const selectBioByHandleSchema = z.object({
 	handle: z.string(),
+	key: z.string().default('home'),
 });
 
 export const selectBioByIdSchema = z.object({

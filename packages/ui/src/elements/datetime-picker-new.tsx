@@ -266,15 +266,9 @@ function Calendar({
 				month: 'flex flex-col items-center space-y-4',
 				month_caption: 'flex justify-center pt-1 relative items-center',
 				caption_label: 'text-sm font-medium',
-				nav: 'space-x-1 flex items-center ',
-				button_previous: cn(
-					buttonVariants({ look: 'outline' }),
-					'absolute left-5 top-5 h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100',
-				),
-				button_next: cn(
-					buttonVariants({ look: 'outline' }),
-					'absolute right-5 top-5 h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100',
-				),
+				nav: 'hidden', // Hide default navigation
+				button_previous: 'hidden',
+				button_next: 'hidden',
 				month_grid: 'w-full border-collapse space-y-1',
 				weekdays: cn('flex', props.showWeekNumber && 'justify-end'),
 				weekday: 'text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]',
@@ -302,45 +296,78 @@ function Calendar({
 					:	<ChevronRight className='h-4 w-4' />,
 				MonthCaption: ({ calendarMonth }) => {
 					return (
-						<div className='inline-flex gap-2'>
-							<Select
-								defaultValue={calendarMonth.date.getMonth().toString()}
-								onValueChange={value => {
+						<div className='flex w-full items-center justify-between pb-2'>
+							{/* Left arrow */}
+							<Button
+								look='outline'
+								size='sm'
+								variant='icon'
+								className='h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100'
+								onClick={() => {
 									const newDate = new Date(calendarMonth.date);
-									newDate.setMonth(Number.parseInt(value, 10));
+									newDate.setMonth(newDate.getMonth() - 1);
 									props.onMonthChange?.(newDate);
 								}}
 							>
-								<SelectTrigger className='w-fit gap-1 border-none p-0 focus:bg-accent focus:text-accent-foreground'>
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent>
-									{MONTHS.map(month => (
-										<SelectItem key={month.value} value={month.value.toString()}>
-											{month.label}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							<Select
-								defaultValue={calendarMonth.date.getFullYear().toString()}
-								onValueChange={value => {
+								<ChevronLeft className='h-4 w-4' />
+							</Button>
+
+							{/* Month/Year selects in center */}
+							<div className='inline-flex gap-2'>
+								<Select
+									value={calendarMonth.date.getMonth().toString()}
+									onValueChange={value => {
+										const newDate = new Date(calendarMonth.date);
+										newDate.setMonth(Number.parseInt(value, 10));
+										props.onMonthChange?.(newDate);
+									}}
+								>
+									<SelectTrigger className='w-fit gap-1 border-none p-0 focus:bg-accent focus:text-accent-foreground'>
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										{MONTHS.map(month => (
+											<SelectItem key={month.value} value={month.value.toString()}>
+												{month.label}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+								<Select
+									value={calendarMonth.date.getFullYear().toString()}
+									onValueChange={value => {
+										const newDate = new Date(calendarMonth.date);
+										newDate.setFullYear(Number.parseInt(value, 10));
+										props.onMonthChange?.(newDate);
+									}}
+								>
+									<SelectTrigger className='w-fit gap-1 border-none p-0 focus:bg-accent focus:text-accent-foreground'>
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										{YEARS.map(year => (
+											<SelectItem key={year.value} value={year.value.toString()}>
+												{year.label}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+
+							{/* Right arrow */}
+							<Button
+								look='outline'
+								size='sm'
+								variant='icon'
+								className='h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100'
+								onClick={() => {
 									const newDate = new Date(calendarMonth.date);
-									newDate.setFullYear(Number.parseInt(value, 10));
+									newDate.setMonth(newDate.getMonth() + 1);
 									props.onMonthChange?.(newDate);
 								}}
 							>
-								<SelectTrigger className='w-fit gap-1 border-none p-0 focus:bg-accent focus:text-accent-foreground'>
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent>
-									{YEARS.map(year => (
-										<SelectItem key={year.value} value={year.value.toString()}>
-											{year.label}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
+								<ChevronRight className='h-4 w-4' />
+							</Button>
 						</div>
 					);
 				},
@@ -571,10 +598,6 @@ const TimePicker = React.forwardRef<TimePickerRef, TimePickerProps>(
 					<Clock className='mr-2 h-4 w-4' aria-hidden='true' />
 					<span className='sr-only'>Time picker</span>
 				</label>
-				<input
-					id='datetime-picker-hour-input'
-					// ... other input props
-				/>
 				<TimePickerInput
 					picker={hourCycle === 24 ? 'hours' : '12hours'}
 					date={date}
@@ -693,6 +716,15 @@ const DateTimePicker = React.forwardRef<Partial<DateTimePickerRef>, DateTimePick
 		 */
 		const handleSelect = (newDay: Date | undefined) => {
 			if (!newDay) return;
+
+			// For day-only granularity, just use the selected date directly
+			if (granularity === 'day') {
+				onChange?.(newDay);
+				setMonth(newDay);
+				return;
+			}
+
+			// For time-based granularity, preserve the current time when selecting a new day
 			if (!value) {
 				onChange?.(newDay);
 				setMonth(newDay);

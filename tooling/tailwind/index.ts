@@ -1,9 +1,11 @@
 import type { Config } from 'tailwindcss';
 import headlessUI from '@headlessui/tailwindcss';
+// import animations from '@midudev/tailwind-animations';
 import forms from '@tailwindcss/forms';
 import typography from '@tailwindcss/typography';
 import scrollbarHide from 'tailwind-scrollbar-hide';
 import animate from 'tailwindcss-animate';
+import animated from 'tailwindcss-animated';
 import radix from 'tailwindcss-radix';
 import reactAriaComponents from 'tailwindcss-react-aria-components';
 import colors from 'tailwindcss/colors';
@@ -49,6 +51,13 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'bounce-slow': 'bounce 2s ease-in-out infinite',
+				// Bio button animations with rest periods
+				'bio-bounce': 'bio-bounce 4s ease-in-out infinite',
+				'bio-wiggle': 'bio-wiggle 4s ease-in-out infinite',
+				'bio-pulse': 'bio-pulse 3s ease-in-out infinite',
+				'bio-shake': 'bio-shake 3s ease-in-out infinite',
+				'bio-tada': 'bio-tada 4s ease-in-out infinite',
+				'bio-jello': 'bio-jello 4s ease-in-out infinite',
 			},
 			keyframes: {
 				'accordion-down': {
@@ -68,6 +77,63 @@ export default {
 						'background-size': '200% 200%',
 						'background-position': 'right center',
 					},
+				},
+				// Bio button animations - designed to loop with rest periods
+				'bio-bounce': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'10%': { transform: 'translateY(-8px)' },
+					'20%': { transform: 'translateY(0)' },
+					'30%': { transform: 'translateY(-4px)' },
+					'40%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-2px)' },
+					'60%': { transform: 'translateY(0)' },
+					// Rest from 60% to 100%
+				},
+				'bio-wiggle': {
+					'0%, 100%': { transform: 'rotate(0deg)' },
+					'10%': { transform: 'rotate(3deg)' },
+					'20%': { transform: 'rotate(-3deg)' },
+					'30%': { transform: 'rotate(2deg)' },
+					'40%': { transform: 'rotate(-2deg)' },
+					'50%': { transform: 'rotate(1deg)' },
+					'60%': { transform: 'rotate(0deg)' },
+					// Rest from 60% to 100%
+				},
+				'bio-pulse': {
+					'0%, 100%': { transform: 'scale(1)', opacity: '1' },
+					'25%': { transform: 'scale(1.05)', opacity: '0.9' },
+					'50%': { transform: 'scale(1)', opacity: '1' },
+					// Rest from 50% to 100%
+				},
+				'bio-shake': {
+					'0%, 100%': { transform: 'translateX(0)' },
+					'10%': { transform: 'translateX(-4px)' },
+					'20%': { transform: 'translateX(4px)' },
+					'30%': { transform: 'translateX(-3px)' },
+					'40%': { transform: 'translateX(3px)' },
+					'50%': { transform: 'translateX(-1px)' },
+					'60%': { transform: 'translateX(0)' },
+					// Rest from 60% to 100%
+				},
+				'bio-tada': {
+					'0%, 100%': { transform: 'scale(1) rotate(0deg)' },
+					'10%': { transform: 'scale(0.9) rotate(-3deg)' },
+					'20%': { transform: 'scale(1.1) rotate(3deg)' },
+					'30%': { transform: 'scale(1.1) rotate(-3deg)' },
+					'40%': { transform: 'scale(1.1) rotate(3deg)' },
+					'50%': { transform: 'scale(1.1) rotate(-3deg)' },
+					'60%': { transform: 'scale(1) rotate(0deg)' },
+					// Rest from 60% to 100%
+				},
+				'bio-jello': {
+					'0%, 100%': { transform: 'skewX(0deg) skewY(0deg)' },
+					'15%': { transform: 'skewX(-6deg) skewY(-6deg)' },
+					'30%': { transform: 'skewX(3deg) skewY(3deg)' },
+					'45%': { transform: 'skewX(-1.5deg) skewY(-1.5deg)' },
+					'60%': { transform: 'skewX(0.75deg) skewY(0.75deg)' },
+					'75%': { transform: 'skewX(-0.375deg) skewY(-0.375deg)' },
+					'90%': { transform: 'skewX(0deg) skewY(0deg)' },
+					// Rest from 90% to 100%
 				},
 			},
 			transitionDelay: {
@@ -569,7 +635,9 @@ export default {
 	],
 	plugins: [
 		headlessUI,
+		// animations,
 		animate,
+		animated,
 		forms,
 		typography,
 		scrollbarHide,
