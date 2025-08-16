@@ -2,7 +2,7 @@ import { FM_LINK_PLATFORMS, WEB_EVENT_TYPES__FM } from '@barely/const';
 import { dbHttp } from '@barely/db/client';
 import { FmLinks, FmPages } from '@barely/db/sql/fm.sql';
 import { publicProcedure } from '@barely/lib/trpc';
-import { raise } from '@barely/utils';
+import { raiseTRPCError } from '@barely/utils';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
@@ -39,7 +39,7 @@ export const fmRenderRoute = {
 							},
 						},
 					},
-				})) ?? raise('fmPage not found');
+				})) ?? raiseTRPCError({ message: 'fmPage not found' });
 
 			const fmLink =
 				!fmLinkParams ? undefined : (
@@ -48,7 +48,7 @@ export const fmRenderRoute = {
 							eq(FmLinks.fmPageId, fmId),
 							eq(FmLinks.platform, fmLinkParams.platform),
 						),
-					})) ?? raise('fmLink not found'))
+					})) ?? raiseTRPCError({ message: 'fmLink not found' }))
 				);
 
 			await recordFmEvent({

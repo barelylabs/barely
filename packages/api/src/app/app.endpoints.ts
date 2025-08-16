@@ -4,6 +4,7 @@ export const APP_ENDPOINTS: AppRouterKeys[] = [
 	'analyticsEndpoint',
 	'auth',
 	'bio',
+	'brandKit',
 	'campaign',
 	'cartFunnel',
 	'cartOrder',

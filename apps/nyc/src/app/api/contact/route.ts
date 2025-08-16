@@ -7,7 +7,7 @@ import { z } from 'zod/v4';
 
 const contactFormSchema = z.object({
 	name: z.string().min(1, 'Name is required'),
-	email: z.string().email('Invalid email address'),
+	email: z.email('Invalid email address'),
 	artistName: z.string().optional(),
 	monthlyListeners: z.string().optional(),
 	service: z.enum(['bedroom', 'rising', 'breakout', '']).optional(),

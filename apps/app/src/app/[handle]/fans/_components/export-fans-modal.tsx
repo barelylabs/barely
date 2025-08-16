@@ -31,42 +31,43 @@ export function ExportFansModal() {
 	const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('generic');
 	const trpc = useTRPC();
 
-	const exportMutation = useMutation({
-		...trpc.fan.exportToCsv.mutationOptions(),
-		onSuccess: data => {
-			// Create a blob from the CSV content
-			const blob = new Blob([data.csvContent], {
-				type: 'text/csv;charset=utf-8;',
-			});
+	const exportMutation = useMutation(
+		trpc.fan.exportToCsv.mutationOptions({
+			onSuccess: data => {
+				// Create a blob from the CSV content
+				const blob = new Blob([data.csvContent], {
+					type: 'text/csv;charset=utf-8;',
+				});
 
-			// Create a temporary download link
-			const url = window.URL.createObjectURL(blob);
-			const link = document.createElement('a');
-			link.href = url;
-			link.download = data.filename;
+				// Create a temporary download link
+				const url = window.URL.createObjectURL(blob);
+				const link = document.createElement('a');
+				link.href = url;
+				link.download = data.filename;
 
-			// Trigger the download
-			document.body.appendChild(link);
-			link.click();
+				// Trigger the download
+				document.body.appendChild(link);
+				link.click();
 
-			// Clean up
-			document.body.removeChild(link);
-			window.URL.revokeObjectURL(url);
+				// Clean up
+				document.body.removeChild(link);
+				window.URL.revokeObjectURL(url);
 
-			toast.success(`Exported ${data.totalRecords.toLocaleString()} fans successfully`);
-			void searchParams.setShowExportModal(false);
-		},
-		onError: error => {
-			console.error('Export failed:', error);
+				toast.success(`Exported ${data.totalRecords.toLocaleString()} fans successfully`);
+				void searchParams.setShowExportModal(false);
+			},
+			onError: error => {
+				console.error('Export failed:', error);
 
-			// Check if it's a too many fans error
-			if (error.message.includes('Export limited to')) {
-				toast.error(error.message);
-			} else {
-				toast.error('Failed to export fans. Please try again.');
-			}
-		},
-	});
+				// Check if it's a too many fans error
+				if (error.message.includes('Export limited to')) {
+					toast.error(error.message);
+				} else {
+					toast.error('Failed to export fans. Please try again.');
+				}
+			},
+		}),
+	);
 
 	const handleExport = () => {
 		exportMutation.mutate({

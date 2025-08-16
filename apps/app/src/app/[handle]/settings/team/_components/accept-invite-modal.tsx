@@ -31,9 +31,13 @@ export function AcceptInviteModal() {
 		},
 	});
 
-	const { mutateAsync: acceptInvite } = useMutation({
-		...trpc.workspaceInvite.acceptInvite.mutationOptions(),
-	});
+	const { mutateAsync: acceptInvite } = useMutation(
+		trpc.workspaceInvite.acceptInvite.mutationOptions({
+			onSuccess: () => {
+				toast.success('Invite accepted');
+			},
+		}),
+	);
 
 	const handleSubmit = async (data: z.infer<typeof acceptInviteSchema>) => {
 		await acceptInvite(data).catch(error => {

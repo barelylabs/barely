@@ -73,6 +73,10 @@ export const stdWebEventPipeQueryParamsSchema = stdWebEventPipeParamsSchema
 		showClicks: queryBooleanSchema.optional().default(true),
 		topEventType: z
 			.enum([
+				'bio/view',
+				'bio/buttonClick',
+				'bio/emailCapture',
+
 				'cart/viewCheckout',
 				'cart/checkoutPurchase',
 				'cart/upsellPurchase',
@@ -99,6 +103,9 @@ export type TopEventType = z.infer<
 export function getTopStatValue(
 	eventType: TopEventType,
 	d: {
+		bio_views?: number;
+		bio_buttonClicks?: number;
+		bio_emailCaptures?: number;
 		fm_linkClicks?: number;
 		fm_views?: number;
 		cart_checkoutViews?: number;
@@ -112,6 +119,9 @@ export function getTopStatValue(
 		vip_downloads?: number;
 	},
 ) {
+	if (eventType === 'bio/view') return d.bio_views ?? 0;
+	if (eventType === 'bio/buttonClick') return d.bio_buttonClicks ?? 0;
+	if (eventType === 'bio/emailCapture') return d.bio_emailCaptures ?? 0;
 	if (eventType === 'fm/linkClick') return d.fm_linkClicks ?? 0;
 	if (eventType === 'fm/view') return d.fm_views ?? 0;
 	if (eventType === 'cart/viewCheckout') return d.cart_checkoutViews ?? 0;

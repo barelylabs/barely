@@ -50,34 +50,37 @@ export function DomainModal() {
 		},
 	});
 
-	const { mutateAsync: addDomain } = useMutation({
-		...trpc.webDomain.add.mutationOptions(),
-		onSuccess: async () => {
-			await queryClient.invalidateQueries(trpc.webDomain.byWorkspace.pathFilter());
-			setShowDomainModal(false);
-			setEditDomain(undefined);
-			domainForm.reset();
-		},
-	});
+	const { mutateAsync: addDomain } = useMutation(
+		trpc.webDomain.add.mutationOptions({
+			onSuccess: async () => {
+				await queryClient.invalidateQueries(trpc.webDomain.byWorkspace.pathFilter());
+				setShowDomainModal(false);
+				setEditDomain(undefined);
+				domainForm.reset();
+			},
+		}),
+	);
 
-	const { mutateAsync: updateDomain } = useMutation({
-		...trpc.webDomain.update.mutationOptions(),
-		onSuccess: async () => {
-			await queryClient.invalidateQueries(trpc.webDomain.byWorkspace.pathFilter());
-			setShowDomainModal(false);
-			setEditDomain(undefined);
-			domainForm.reset();
-		},
-	});
-	const { mutateAsync: deleteDomain } = useMutation({
-		...trpc.webDomain.delete.mutationOptions(),
-		onSuccess: async () => {
-			await queryClient.invalidateQueries(trpc.webDomain.byWorkspace.pathFilter());
-			setShowDomainModal(false);
-			setEditDomain(undefined);
-			domainForm.reset();
-		},
-	});
+	const { mutateAsync: updateDomain } = useMutation(
+		trpc.webDomain.update.mutationOptions({
+			onSuccess: async () => {
+				await queryClient.invalidateQueries(trpc.webDomain.byWorkspace.pathFilter());
+				setShowDomainModal(false);
+				setEditDomain(undefined);
+				domainForm.reset();
+			},
+		}),
+	);
+	const { mutateAsync: deleteDomain } = useMutation(
+		trpc.webDomain.delete.mutationOptions({
+			onSuccess: async () => {
+				await queryClient.invalidateQueries(trpc.webDomain.byWorkspace.pathFilter());
+				setShowDomainModal(false);
+				setEditDomain(undefined);
+				domainForm.reset();
+			},
+		}),
+	);
 
 	const onSubmit = async (data: z.infer<typeof insertDomainSchema>) => {
 		if (editDomain)

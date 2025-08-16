@@ -16,12 +16,13 @@ export function CreateFlowButton() {
 
 	const [loading, setLoading] = useState(false);
 
-	const { mutateAsync: createFlow } = useMutation({
-		...trpc.flow.create.mutationOptions(),
-		onSuccess: res => {
-			router.push(`/${handle}/flows/${res.flowId}`);
-		},
-	});
+	const { mutateAsync: createFlow } = useMutation(
+		trpc.flow.create.mutationOptions({
+			onSuccess: res => {
+				router.push(`/${handle}/flows/${res.flowId}`);
+			},
+		}),
+	);
 
 	return (
 		<Button

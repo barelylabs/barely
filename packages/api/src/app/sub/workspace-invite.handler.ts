@@ -5,10 +5,8 @@ import { auth } from '@barely/auth/app.server';
 
 import { appRouteHandler } from '../app.handler';
 
-const workspaceInviteSubRouter = createTRPCRouter(workspaceInviteRoute);
-
 export const workspaceInviteHandler = appRouteHandler({
 	path: 'workspaceInvite',
-	router: workspaceInviteSubRouter,
+	router: createTRPCRouter(workspaceInviteRoute),
 	auth,
 });

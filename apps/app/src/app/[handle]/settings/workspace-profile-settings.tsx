@@ -18,6 +18,7 @@ import { updateWorkspaceSchema } from '@barely/validators';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { atom } from 'jotai';
 import HuePicker from 'simple-hue-picker/react';
+import { toast } from 'sonner';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
@@ -198,9 +199,13 @@ export function WorkspaceAvatarForm() {
 	const { workspace } = useWorkspace();
 	const isPersonal = workspace.type === 'personal';
 
-	const { mutateAsync: updateWorkspaceAvatar } = useMutation({
-		...trpc.workspace.updateAvatar.mutationOptions(),
-	});
+	const { mutateAsync: updateWorkspaceAvatar } = useMutation(
+		trpc.workspace.updateAvatar.mutationOptions({
+			onSuccess: () => {
+				toast.success('Workspace avatar updated');
+			},
+		}),
+	);
 
 	const onUploadComplete: OnUploadComplete = useCallback(
 		async fileRecord => {
@@ -268,9 +273,13 @@ export function WorkspaceHeaderForm() {
 	const { workspace } = useWorkspace();
 	const isPersonal = workspace.type === 'personal';
 
-	const { mutateAsync: updateWorkspaceHeader } = useMutation({
-		...trpc.workspace.updateHeader.mutationOptions(),
-	});
+	const { mutateAsync: updateWorkspaceHeader } = useMutation(
+		trpc.workspace.updateHeader.mutationOptions({
+			onSuccess: () => {
+				toast.success('Workspace header updated');
+			},
+		}),
+	);
 
 	const onUploadComplete: OnUploadComplete = useCallback(
 		async fileRecord => {

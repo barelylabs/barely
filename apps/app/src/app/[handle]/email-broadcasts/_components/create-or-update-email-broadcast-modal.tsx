@@ -9,7 +9,7 @@ import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-q
 import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Button } from '@barely/ui/button';
-import { DatetimeField } from '@barely/ui/forms/datetime-field-new';
+import { DatetimeField } from '@barely/ui/forms/datetime-field';
 import { Form } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { Icon } from '@barely/ui/icon';

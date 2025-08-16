@@ -24,10 +24,10 @@ export const DatetimeField = <
 								<FieldControl>
 									<DateTimePicker
 										{...props}
-										jsDate={field.value}
-										onJsDateChange={v => {
+										value={field.value}
+										onChange={v => {
 											field.onChange(v);
-											props.onJsDateChange?.(v);
+											props.onChange?.(v);
 										}}
 									/>
 								</FieldControl>

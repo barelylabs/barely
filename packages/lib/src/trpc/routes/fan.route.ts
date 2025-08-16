@@ -3,7 +3,7 @@ import { dbHttp } from '@barely/db/client';
 import { dbPool } from '@barely/db/pool';
 import { Fans } from '@barely/db/sql';
 import { sqlAnd, sqlCount, sqlStringContains } from '@barely/db/utils';
-import { newId, raise } from '@barely/utils';
+import { newId, raiseTRPCError } from '@barely/utils';
 import {
 	createFanSchema,
 	exportFansSchema,
@@ -109,7 +109,7 @@ export const fanRoute = {
 		};
 
 		const fans = await dbPool(ctx.pool).insert(Fans).values(fanData).returning();
-		const fan = fans[0] ?? raise('Failed to create fan');
+		const fan = fans[0] ?? raiseTRPCError({ message: 'Failed to create fan' });
 
 		return fan;
 	}),
@@ -123,7 +123,7 @@ export const fanRoute = {
 			.where(eq(Fans.id, id))
 			.returning();
 
-		return updatedFans[0] ?? raise('Failed to update fan');
+		return updatedFans[0] ?? raiseTRPCError({ message: 'Failed to update fan' });
 	}),
 
 	archive: workspaceProcedure
@@ -135,7 +135,7 @@ export const fanRoute = {
 				.where(and(eq(Fans.workspaceId, ctx.workspace.id), inArray(Fans.id, input.ids)))
 				.returning();
 
-			return updatedFans[0] ?? raise('Failed to archive fans');
+			return updatedFans[0] ?? raiseTRPCError({ message: 'Failed to archive fans' });
 		}),
 
 	delete: workspaceProcedure
@@ -147,7 +147,7 @@ export const fanRoute = {
 				.where(and(eq(Fans.workspaceId, ctx.workspace.id), inArray(Fans.id, input.ids)))
 				.returning();
 
-			return updatedFans[0] ?? raise('Failed to delete fans');
+			return updatedFans[0] ?? raiseTRPCError({ message: 'Failed to delete fans' });
 		}),
 
 	exportToCsv: workspaceProcedure

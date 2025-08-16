@@ -72,8 +72,8 @@ function EmailDomainCard({ emailDomain }: { emailDomain: EmailDomain }) {
 	const { copyToClipboard } = useCopy();
 	const { setShowUpdateModal, setSelection } = useEmailDomainSearchParams();
 
-	const { mutate: verifyDomain } = useMutation({
-		...trpc.emailDomain.verifyOnResend.mutationOptions({
+	const { mutate: verifyDomain } = useMutation(
+		trpc.emailDomain.verifyOnResend.mutationOptions({
 			onMutate: () => {
 				setIsVerifying(true);
 
@@ -88,7 +88,7 @@ function EmailDomainCard({ emailDomain }: { emailDomain: EmailDomain }) {
 				setIsVerifying(false);
 			},
 		}),
-	});
+	);
 
 	const handleVerifyDomain = useCallback(() => {
 		setIsVerifying(true);

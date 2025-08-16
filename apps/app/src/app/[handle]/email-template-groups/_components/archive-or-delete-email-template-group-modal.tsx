@@ -44,10 +44,11 @@ export function ArchiveOrDeleteEmailTemplateGroupModal({
 		},
 	);
 
-	const { mutate: deleteEmailTemplateGroups, isPending: isPendingDelete } = useMutation({
-		...trpc.emailTemplateGroup.delete.mutationOptions(),
-		onSuccess,
-	});
+	const { mutate: deleteEmailTemplateGroups, isPending: isPendingDelete } = useMutation(
+		trpc.emailTemplateGroup.delete.mutationOptions({
+			onSuccess,
+		}),
+	);
 
 	if (!lastSelectedItem) return null;
 

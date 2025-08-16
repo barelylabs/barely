@@ -1,0 +1,56 @@
+/* MDXEditor toolbar width constraints */
+/* Following the pattern from the discussion - prefix with .mdxeditor for proper specificity */
+.mdxeditor [class*='_toolbarRoot_'] {
+	width: 100% !important; /* Override 'width: inherit' from module styles */
+	max-width: 100% !important;
+	overflow-x: auto !important; /* Allow horizontal scroll within toolbar */
+	overflow-y: hidden !important;
+	flex-wrap: nowrap !important;
+	box-sizing: border-box !important;
+}
+
+/* Ensure toolbar children don't shrink or wrap */
+.mdxeditor [class*='_toolbarRoot_'] > * {
+	flex-shrink: 0 !important;
+	white-space: nowrap !important;
+}
+
+/* Force the toolbar groups to stay in a row */
+.mdxeditor [class*='_toolbarGroupOfGroups_'] {
+	display: inline-flex !important;
+	flex-shrink: 0 !important;
+}
+
+/* Ensure the editor container doesn't overflow */
+/* The mdxeditor root element itself needs constraints */
+.mdxeditor {
+	max-width: 100% !important;
+	width: 100% !important;
+	box-sizing: border-box !important;
+	overflow-x: hidden !important; /* Clip any content that tries to overflow */
+}
+
+/* Additional constraint for our wrapper */
+.mdx-editor-wrapper {
+	overflow-x: hidden !important;
+	max-width: 100% !important;
+	width: 100% !important;
+}
+
+.mdx-editor-wrapper .mdxeditor-root-contenteditable {
+	max-width: 100% !important;
+}
+
+/* Ensure CodeMirror editor respects container width */
+.mdx-editor-wrapper .cm-editor {
+	max-width: 100% !important;
+}
+
+.mdx-editor-wrapper .cm-content {
+	max-width: 100% !important;
+}
+
+.mdx-editor-wrapper .cm-scroller {
+	max-width: 100% !important;
+	overflow-x: auto !important;
+}

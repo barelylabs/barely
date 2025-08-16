@@ -8,6 +8,7 @@
 		"rootDir": "./src"
 	},
 	"include": [
+		"src/bio/**/*",
 		"src/charts/**/*",
 		"src/components/**/*",
 		"src/elements/**/*",

@@ -796,3 +796,90 @@ export const pipe_pageTopMetaPlacements = tinybird.buildPipe({
 		sessionMetaPlacement: z.string(),
 	}),
 });
+
+// Bio analytics pipes
+export const pipe_bioTimeseries = tinybird.buildPipe({
+	pipe: 'v2_bio_timeseries',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		start: z.string(),
+		bio_views: z.number(),
+		bio_buttonClicks: z.number(),
+		bio_emailCaptures: z.number(),
+	}),
+});
+
+export const pipe_bioButtonStats = tinybird.buildPipe({
+	pipe: 'v2_bio_buttonStats',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		buttonUrl: z.string().nullable(),
+		clicks: z.number(),
+		totalEvents: z.number(),
+	}),
+});
+
+export const pipe_bioTopBrowsers = tinybird.buildPipe({
+	pipe: 'v2_bio_browsers',
+	parameters: stdWebEventPipeParamsSchema,
+	data: topBrowsersPipeDataSchema,
+});
+
+export const pipe_bioTopDevices = tinybird.buildPipe({
+	pipe: 'v2_bio_devices',
+	parameters: stdWebEventPipeParamsSchema,
+	data: topDevicesPipeDataSchema,
+});
+
+export const pipe_bioTopOs = tinybird.buildPipe({
+	pipe: 'v2_bio_os',
+	parameters: stdWebEventPipeParamsSchema,
+	data: topOsPipeDataSchema,
+});
+
+export const pipe_bioTopCities = tinybird.buildPipe({
+	pipe: 'v2_bio_cities',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		bio_views: z.number(),
+		bio_buttonClicks: z.number(),
+		bio_emailCaptures: z.number(),
+		city: z.string(),
+		region: z.string(),
+		country: z.string(),
+	}),
+});
+
+export const pipe_bioTopCountries = tinybird.buildPipe({
+	pipe: 'v2_bio_countries',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		bio_views: z.number(),
+		bio_buttonClicks: z.number(),
+		bio_emailCaptures: z.number(),
+		country: z.string(),
+	}),
+});
+
+export const pipe_bioTopReferers = tinybird.buildPipe({
+	pipe: 'v2_bio_referers',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		bio_views: z.number(),
+		bio_buttonClicks: z.number(),
+		bio_emailCaptures: z.number(),
+		referer: z.string(),
+	}),
+});
+
+export const pipe_bioTopRegions = tinybird.buildPipe({
+	pipe: 'v2_bio_regions',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		bio_views: z.number(),
+		bio_buttonClicks: z.number(),
+		bio_emailCaptures: z.number(),
+		region: z.string(),
+		country: z.string(),
+	}),
+});

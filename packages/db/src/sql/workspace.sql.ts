@@ -14,6 +14,7 @@ import { AdCreatives } from './ad-creative.sql';
 import { Albums } from './album.sql';
 import { AnalyticsEndpoints } from './analytics-endpoint.sql';
 import { Bios } from './bio.sql';
+import { BrandKits } from './brand-kit.sql';
 import { Campaigns } from './campaign.sql';
 import { ExternalWebsites } from './external-website.sql';
 import {
@@ -173,6 +174,7 @@ export const WorkspaceRelations = relations(Workspaces, ({ one, many }) => ({
 		fields: [Workspaces.bioRootId],
 		references: [Bios.id],
 	}),
+	brandKit: one(BrandKits),
 	defaultMetaAdAccount: one(ProviderAccounts, {
 		fields: [Workspaces.defaultMetaAdAccountId],
 		references: [ProviderAccounts.providerAccountId],

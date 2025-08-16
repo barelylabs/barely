@@ -11,7 +11,7 @@ import { dbHttp } from '@barely/db/client';
 import { dbPool } from '@barely/db/pool';
 import { EmailTemplates, Flow_Triggers, FlowActions, Flows } from '@barely/db/sql';
 import { sqlAnd, sqlCount, sqlStringContains } from '@barely/db/utils';
-import { newId, raise } from '@barely/utils';
+import { newId, raiseTRPCError } from '@barely/utils';
 import { selectWorkspaceFlowsSchema, updateFlowAndNodesSchema } from '@barely/validators';
 import { tasks } from '@trigger.dev/sdk/v3';
 import { TRPCError } from '@trpc/server';
@@ -87,7 +87,8 @@ export const flowRoute = {
 			}
 
 			const trigger: InsertFlowTrigger =
-				flow.triggers[0] ?? raise(`No trigger found for flow ${flowId}`);
+				flow.triggers[0] ??
+				raiseTRPCError({ message: `No trigger found for flow ${flowId}` });
 			const triggerNode = getTriggerNodeFromFlowTrigger(trigger, { x: 400, y: 25 });
 
 			const actions: InsertFlowAction[] = getInsertableFlowActionsFromFlowActions(
@@ -186,7 +187,8 @@ export const flowRoute = {
 							type: 'boolean',
 							data: {
 								boolean:
-									edge.data?.boolean ?? raise(`No boolean found for edge ${edge.id}`),
+									edge.data?.boolean ??
+									raiseTRPCError({ message: `No boolean found for edge ${edge.id}` }),
 							},
 						} satisfies BooleanEdge;
 					case 'simple':

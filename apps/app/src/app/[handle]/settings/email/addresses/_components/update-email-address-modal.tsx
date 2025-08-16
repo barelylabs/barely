@@ -23,12 +23,13 @@ export function UpdateEmailAddressModal() {
 	const { showUpdateModal, setShowUpdateModal } = useEmailAddressSearchParams();
 	const { lastSelectedItem: lastSelectedEmailAddress } = useEmailAddress();
 
-	const { mutateAsync: updateEmailAddress } = useMutation({
-		...trpc.emailAddress.update.mutationOptions(),
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: updateEmailAddress } = useMutation(
+		trpc.emailAddress.update.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
 	const form = useZodForm({
 		schema: updateEmailAddressSchema,

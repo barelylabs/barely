@@ -31,15 +31,17 @@ export function ArchiveOrDeleteProductModal({ mode }: { mode: 'archive' | 'delet
 		await setShowModal(false);
 	}, [queryClient, setShowModal, trpc.product.byWorkspace]);
 
-	const { mutate: archiveProducts, isPending: isPendingArchive } = useMutation({
-		...trpc.product.archive.mutationOptions(),
-		onSuccess,
-	});
+	const { mutate: archiveProducts, isPending: isPendingArchive } = useMutation(
+		trpc.product.archive.mutationOptions({
+			onSuccess,
+		}),
+	);
 
-	const { mutate: deleteProducts, isPending: isPendingDelete } = useMutation({
-		...trpc.product.delete.mutationOptions(),
-		onSuccess,
-	});
+	const { mutate: deleteProducts, isPending: isPendingDelete } = useMutation(
+		trpc.product.delete.mutationOptions({
+			onSuccess,
+		}),
+	);
 
 	if (!lastSelectedItem) return null;
 

@@ -30,8 +30,8 @@ export function SpotifyArtistSettings() {
 
 	const formSpotifyArtistId = form.watch('spotifyArtistId');
 
-	const { mutateAsync: updateWorkspace, isPending: isUpdatingWorkspace } = useMutation({
-		...trpc.workspace.updateSpotifyArtistId.mutationOptions({
+	const { mutateAsync: updateWorkspace, isPending: isUpdatingWorkspace } = useMutation(
+		trpc.workspace.updateSpotifyArtistId.mutationOptions({
 			onSuccess: async () => {
 				form.reset();
 				toast.success('Artist added successfully. Syncing stats...');
@@ -41,7 +41,7 @@ export function SpotifyArtistSettings() {
 				toast.error(error.message);
 			},
 		}),
-	});
+	);
 
 	const { data: artists, isLoading } = useQuery({
 		...trpc.spotify.findArtist.queryOptions({ query: debouncedSearch }),
@@ -58,8 +58,8 @@ export function SpotifyArtistSettings() {
 		enabled: shouldFetchArtist,
 	});
 
-	const { mutateAsync: syncArtist, isPending: isSyncing } = useMutation({
-		...trpc.spotify.syncWorkspaceArtist.mutationOptions({
+	const { mutateAsync: syncArtist, isPending: isSyncing } = useMutation(
+		trpc.spotify.syncWorkspaceArtist.mutationOptions({
 			onSuccess: () => {
 				toast.success(
 					"We're syncing your stats. This may take a few minutes. Leaving this page is totally fine. ",
@@ -69,7 +69,7 @@ export function SpotifyArtistSettings() {
 				toast.error(error.message);
 			},
 		}),
-	});
+	);
 
 	const onSubmit = async (data: z.infer<typeof updateWorkspaceSpotifyArtistIdSchema>) => {
 		await updateWorkspace({

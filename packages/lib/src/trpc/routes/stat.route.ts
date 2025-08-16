@@ -5,6 +5,8 @@ import { FmPages } from '@barely/db/sql/fm.sql';
 import { Links } from '@barely/db/sql/link.sql';
 import { Tracks } from '@barely/db/sql/track.sql';
 import {
+	pipe_bioButtonStats,
+	pipe_bioTimeseries,
 	pipe_cartTimeseries,
 	pipe_cartTopBrowsers,
 	pipe_cartTopCities,
@@ -234,6 +236,32 @@ export const statRoute = {
 				granularity: granularity ?? (dateRange === '1d' ? 'hour' : 'day'),
 			});
 			return vipTimeseries.data;
+		}),
+
+	bioTimeseries: workspaceProcedure
+		.input(stdWebEventQueryToPipeParamsSchema)
+		.query(async ({ ctx, input }) => {
+			const { dateRange, granularity } = input;
+			console.log('bioTimeseries input => ', input);
+			const bioTimeseries = await pipe_bioTimeseries({
+				...input,
+				workspaceId: ctx.workspace.id,
+				timezone: ctx.workspace.timezone,
+				granularity: granularity ?? (dateRange === '1d' ? 'hour' : 'day'),
+			});
+			return bioTimeseries.data;
+		}),
+
+	bioButtonStats: workspaceProcedure
+		.input(stdWebEventQueryToPipeParamsSchema)
+		.query(async ({ ctx, input }) => {
+			console.log('bioButtonStats input => ', input);
+			const buttonStats = await pipe_bioButtonStats({
+				...input,
+				workspaceId: ctx.workspace.id,
+				timezone: ctx.workspace.timezone,
+			});
+			return buttonStats.data;
 		}),
 
 	webEventTimeseries: workspaceProcedure

@@ -24,13 +24,14 @@ export default function PayoutsSettingsPage() {
 			!workspace.stripeConnectChargesEnabled
 		:	!workspace.stripeConnectChargesEnabled_devMode;
 
-	const { mutateAsync: startOnboarding } = useMutation({
-		...trpc.stripeConnect.getOnboardingLink.mutationOptions(),
-		onSuccess: url => {
-			if (!url) return;
-			window.location.href = url;
-		},
-	});
+	const { mutateAsync: startOnboarding } = useMutation(
+		trpc.stripeConnect.getOnboardingLink.mutationOptions({
+			onSuccess: url => {
+				if (!url) return;
+				window.location.href = url;
+			},
+		}),
+	);
 
 	useEffect(() => {
 		if (params.refreshOnboarding && needsOnboarding) {

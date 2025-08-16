@@ -3,7 +3,7 @@ import type { TRPCRouterRecord } from '@trpc/server';
 import { dbHttp } from '@barely/db/client';
 import { CartFunnels } from '@barely/db/sql/cart-funnel.sql';
 import { sqlAnd, sqlStringContains } from '@barely/db/utils';
-import { newId, raise, sanitizeKey } from '@barely/utils';
+import { newId, raiseTRPCError, sanitizeKey } from '@barely/utils';
 import {
 	createCartFunnelSchema,
 	selectWorkspaceCartFunnelsSchema,
@@ -70,7 +70,7 @@ export const cartFunnelRoute = {
 
 			const funnel = await dbHttp.insert(CartFunnels).values(funnelData).returning();
 
-			return funnel[0] ?? raise('Error creating funnel');
+			return funnel[0] ?? raiseTRPCError({ message: 'Error creating funnel' });
 		}),
 
 	update: workspaceProcedure
@@ -90,7 +90,7 @@ export const cartFunnelRoute = {
 				)
 				.returning();
 
-			return updatedFunnel[0] ?? raise('Error updating funnel');
+			return updatedFunnel[0] ?? raiseTRPCError({ message: 'Error updating funnel' });
 		}),
 
 	archive: workspaceProcedure
@@ -107,7 +107,7 @@ export const cartFunnelRoute = {
 				)
 				.returning();
 
-			return updatedFunnel[0] ?? raise('Error archiving funnel');
+			return updatedFunnel[0] ?? raiseTRPCError({ message: 'Error archiving funnel' });
 		}),
 
 	delete: workspaceProcedure
@@ -124,6 +124,6 @@ export const cartFunnelRoute = {
 				)
 				.returning();
 
-			return updatedFunnel[0] ?? raise('Error deleting funnel');
+			return updatedFunnel[0] ?? raiseTRPCError({ message: 'Error deleting funnel' });
 		}),
 } satisfies TRPCRouterRecord;

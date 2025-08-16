@@ -23,12 +23,13 @@ export function CreateEmailAddressModal() {
 	const { handle } = useWorkspace();
 	const { showCreateModal, setShowCreateModal } = useEmailAddressSearchParams();
 
-	const { mutateAsync: createEmailAddress } = useMutation({
-		...trpc.emailAddress.create.mutationOptions(),
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: createEmailAddress } = useMutation(
+		trpc.emailAddress.create.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
 	const { domains } = useEmailDomains();
 

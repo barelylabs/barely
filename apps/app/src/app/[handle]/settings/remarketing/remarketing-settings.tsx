@@ -31,15 +31,16 @@ export function RemarketingSettings() {
 		},
 	});
 
-	const { mutateAsync: updateEndpoint } = useMutation({
-		...trpc.analyticsEndpoint.update.mutationOptions(),
-		onSuccess: async () => {
-			await queryClient.invalidateQueries(
-				trpc.analyticsEndpoint.byCurrentWorkspace.pathFilter(),
-			);
-			metaPixelForm.reset();
-		},
-	});
+	const { mutateAsync: updateEndpoint } = useMutation(
+		trpc.analyticsEndpoint.update.mutationOptions({
+			onSuccess: async () => {
+				await queryClient.invalidateQueries(
+					trpc.analyticsEndpoint.byCurrentWorkspace.pathFilter(),
+				);
+				metaPixelForm.reset();
+			},
+		}),
+	);
 
 	async function onSubmit(data: z.infer<typeof insertMetaPixelSchema>) {
 		await updateEndpoint({

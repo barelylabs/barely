@@ -16,7 +16,7 @@ import {
 	PlaylistPitchApprovedEmailTemplate,
 	PlaylistPitchRejectedEmailTemplate,
 } from '@barely/email/templates/playlist-pitch';
-import { convertToHandle, newCuid, newId, raise } from '@barely/utils';
+import { convertToHandle, newCuid, newId, raiseTRPCError } from '@barely/utils';
 import {
 	createPlaylistPitchCampaignSchema,
 	createUserAndPlaylistPitchCampaignSchema,
@@ -250,7 +250,8 @@ export const campaignRoute = {
 			// };
 
 			const newSessionUser =
-				(await getSessionUserByUserId(newUser.id)) ?? raise('no user found');
+				(await getSessionUserByUserId(newUser.id)) ??
+				raiseTRPCError({ message: 'no user found' });
 
 			const newCampaign = createPlaylistPitchCampaign({
 				user: newSessionUser,
@@ -557,7 +558,7 @@ export const campaignRoute = {
 				// send email to the user that created the campaign
 				// const user =
 				// 	(await getSessionUserByUserId(campaign.createdBy.id)) ??
-				// 	raise('no user found for that campaign');
+				// 	raiseTRPCError({ message: 'no user found for that campaign' });
 				const { magicLink } = await createMagicLink({
 					// user,
 					// provider: 'email',

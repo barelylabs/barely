@@ -31,13 +31,14 @@ export function ImportFansFromCsvModal() {
 	const { filters, setShowImportModal } = useFanSearchParams();
 	const showImportModal = filters.showImportModal;
 
-	const { mutate: importFansFromCsv } = useMutation({
-		...trpc.fan.importFromCsv.mutationOptions(),
-		onSuccess: async () => {
-			await handleCloseModal();
-			toast('Fans importing...check back in a bit');
-		},
-	});
+	const { mutate: importFansFromCsv } = useMutation(
+		trpc.fan.importFromCsv.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+				toast('Fans importing...check back in a bit');
+			},
+		}),
+	);
 
 	const form = useZodForm({
 		schema: importFansFromCsvSchema,
@@ -51,20 +52,21 @@ export function ImportFansFromCsvModal() {
 
 	const [generatingMapping, setGeneratingMapping] = useState(false);
 
-	const { mutate: generateCsvMapping } = useMutation({
-		...trpc.fan.generateCsvMapping.mutationOptions(),
-		onSuccess: data => {
-			const { email, firstName, lastName, fullName, phoneNumber, createdAt } = data;
-			console.log(data);
-			setValue('email', email);
-			setValue('firstName', firstName);
-			setValue('lastName', lastName);
-			setValue('fullName', fullName);
-			setValue('phoneNumber', phoneNumber);
-			setValue('createdAt', createdAt);
-			setGeneratingMapping(false);
-		},
-	});
+	const { mutate: generateCsvMapping } = useMutation(
+		trpc.fan.generateCsvMapping.mutationOptions({
+			onSuccess: data => {
+				const { email, firstName, lastName, fullName, phoneNumber, createdAt } = data;
+				console.log(data);
+				setValue('email', email);
+				setValue('firstName', firstName);
+				setValue('lastName', lastName);
+				setValue('fullName', fullName);
+				setValue('phoneNumber', phoneNumber);
+				setValue('createdAt', createdAt);
+				setGeneratingMapping(false);
+			},
+		}),
+	);
 
 	const [fileColumns, setFileColumns] = useState<string[] | null>(null);
 	const columnOptions = useMemo(() => {

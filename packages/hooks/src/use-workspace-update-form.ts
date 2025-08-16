@@ -27,8 +27,8 @@ export function useWorkspaceUpdateForm() {
 	const router = useRouter();
 	const currentPath = usePathname();
 
-	const { mutate: updateWorkspace } = useMutation({
-		...trpc.workspace.update.mutationOptions({
+	const { mutate: updateWorkspace } = useMutation(
+		trpc.workspace.update.mutationOptions({
 			onMutate: async data => {
 				console.log('onMutate', data);
 				await queryClient.cancelQueries(trpc.workspace.byHandle.pathFilter());
@@ -59,7 +59,7 @@ export function useWorkspaceUpdateForm() {
 				form.reset();
 			},
 		}),
-	});
+	);
 
 	const onSubmit = (data: z.infer<typeof updateWorkspaceSchema>) => {
 		updateWorkspace({

@@ -96,7 +96,7 @@ export function DashboardLayout({ children }: PropsWithChildren) {
 			<div className='flex min-h-screen w-full flex-col bg-accent md:ml-[300px] md:w-[calc(100vw-300px)]'>
 				{/* Main content area - responsive styling */}
 				<div className='flex h-screen flex-col bg-accent md:p-0 md:pt-2'>
-					<div className='flex flex-1 flex-col overflow-hidden rounded-tl-xl md:rounded-tl-2xl md:border-l md:border-t md:border-subtle-foreground/70 md:bg-background'>
+					<div className='flex flex-1 flex-col overflow-x-hidden rounded-tl-xl md:rounded-tl-2xl md:border-l md:border-t md:border-subtle-foreground/70 md:bg-background'>
 						{children}
 					</div>
 				</div>

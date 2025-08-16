@@ -27,17 +27,18 @@ const Playlist = () => {
 		}),
 	);
 
-	const { mutateAsync: estimateGenres, isPending } = useMutation({
-		...trpc.playlist.estimateGenresById.mutationOptions(),
-		onSuccess: async () => {
-			await queryClient.invalidateQueries(
-				trpc.playlist.byId.queryFilter({
-					handle: params.handle,
-					playlistId: params.playlistId,
-				}),
-			);
-		},
-	});
+	const { mutateAsync: estimateGenres, isPending } = useMutation(
+		trpc.playlist.estimateGenresById.mutationOptions({
+			onSuccess: async () => {
+				await queryClient.invalidateQueries(
+					trpc.playlist.byId.queryFilter({
+						handle: params.handle,
+						playlistId: params.playlistId,
+					}),
+				);
+			},
+		}),
+	);
 
 	return (
 		<Card>

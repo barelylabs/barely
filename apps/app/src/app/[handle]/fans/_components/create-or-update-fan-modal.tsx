@@ -25,19 +25,21 @@ export function CreateOrUpdateFanModal({ mode }: { mode: 'create' | 'update' }) 
 		useFanSearchParams();
 
 	/* mutations */
-	const { mutateAsync: createFan } = useMutation({
-		...trpc.fan.create.mutationOptions(),
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: createFan } = useMutation(
+		trpc.fan.create.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
-	const { mutateAsync: updateFan } = useMutation({
-		...trpc.fan.update.mutationOptions(),
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: updateFan } = useMutation(
+		trpc.fan.update.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
 	/* form */
 	const { form, onSubmit } = useCreateOrUpdateForm({

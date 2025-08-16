@@ -35,12 +35,13 @@ export function VipDownloadContent({
 		isPending,
 		isError,
 		error,
-	} = useMutation({
-		...trpc.swap.requestDownload.mutationOptions(),
-		onSuccess: () => {
-			setEmailSent(true);
-		},
-	});
+	} = useMutation(
+		trpc.swap.requestDownload.mutationOptions({
+			onSuccess: () => {
+				setEmailSent(true);
+			},
+		}),
+	);
 
 	const handleEmailSubmit = (submittedEmail: string) => {
 		setEmail(submittedEmail);
