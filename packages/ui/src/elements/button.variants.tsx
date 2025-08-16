@@ -119,6 +119,7 @@ const buttonIconVariants = cva('', {
 			muted: 'text-muted-foreground',
 			ghost: 'text-muted-foreground',
 			link: 'text-foreground underline-offset-4',
+			text: 'text-foreground',
 			tab: '',
 		},
 		position: {

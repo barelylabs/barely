@@ -1,6 +1,6 @@
 'use client';
 
-import type { HeaderStyle } from '@barely/lib/functions/bio-themes-v2';
+import type { HeaderStyle } from '@barely/lib/functions/bio-themes.fns';
 import { cn } from '@barely/utils';
 
 import { Badge } from '@barely/ui/badge';
@@ -8,14 +8,14 @@ import { Icon } from '@barely/ui/icon';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@barely/ui/tabs';
 
 interface HeaderStyleSelectorProps {
-	value: HeaderStyle;
+	value: string; // e.g., 'minimal-centered', 'minimal-left', 'minimal-hero'
 	onChange: (style: HeaderStyle) => void;
 }
 
 const HEADER_LAYOUTS = {
 	minimal: [
 		{
-			key: 'centered',
+			key: 'minimal-centered',
 			name: 'Centered Classic',
 			description: 'Traditional centered layout with avatar above title',
 			preview: (
@@ -31,7 +31,7 @@ const HEADER_LAYOUTS = {
 			),
 		},
 		{
-			key: 'left-aligned',
+			key: 'minimal-left',
 			name: 'Left Aligned',
 			description: 'Avatar on left with title and socials inline',
 			preview: (
@@ -49,7 +49,7 @@ const HEADER_LAYOUTS = {
 			),
 		},
 		{
-			key: 'hero-fade',
+			key: 'minimal-hero',
 			name: 'Hero Fade',
 			description: 'Large avatar that fades into the background',
 			preview: (
@@ -62,63 +62,23 @@ const HEADER_LAYOUTS = {
 			),
 		},
 	],
-	banner: [
-		{
-			key: 'banner-overlay',
-			name: 'Banner with Overlay',
-			description: 'Full-width banner image with text overlay',
-			preview: (
-				<div className='relative h-full w-full bg-gray-200'>
-					<div className='absolute bottom-2 left-2'>
-						<div className='h-2 w-16 rounded bg-white' />
-					</div>
-				</div>
-			),
-			comingSoon: true,
-		},
-	],
-	portrait: [
-		{
-			key: 'side-portrait',
-			name: 'Side Portrait',
-			description: 'Large portrait image on the side',
-			preview: (
-				<div className='flex h-full'>
-					<div className='w-1/3 bg-gray-300' />
-					<div className='flex flex-1 flex-col justify-center gap-1 p-2'>
-						<div className='h-2 w-16 rounded bg-gray-400' />
-						<div className='h-1 w-12 rounded bg-gray-300' />
-					</div>
-				</div>
-			),
-			comingSoon: true,
-		},
-	],
-	shapes: [
-		{
-			key: 'geometric',
-			name: 'Geometric Shapes',
-			description: 'Abstract shapes and patterns in header',
-			preview: (
-				<div className='relative h-full w-full'>
-					<div className='absolute right-2 top-2 h-8 w-8 rotate-45 bg-gray-200' />
-					<div className='absolute left-3 top-3 h-6 w-6 rounded-full bg-gray-300' />
-					<div className='flex h-full flex-col items-center justify-center gap-1'>
-						<div className='h-8 w-8 rounded-full bg-gray-300' />
-						<div className='h-2 w-16 rounded bg-gray-400' />
-					</div>
-				</div>
-			),
-			comingSoon: true,
-		},
-	],
+	banner: [],
+	portrait: [],
+	shapes: [],
 };
 
 export function HeaderStyleSelector({ value, onChange }: HeaderStyleSelectorProps) {
+	// Determine active tab from value (e.g., 'minimal-centered' -> 'minimal')
+	const activeTab = value.split('-')[0] ?? 'minimal';
 	const headerStyles: HeaderStyle[] = ['minimal', 'banner', 'portrait', 'shapes'];
 
 	return (
-		<Tabs value={value} onValueChange={val => onChange(val as HeaderStyle)}>
+		<Tabs
+			value={activeTab}
+			onValueChange={() => {
+				/* Tab is read-only based on selection */
+			}}
+		>
 			<TabsList className='grid w-full grid-cols-4'>
 				{headerStyles.map(style => (
 					<TabsTrigger key={style} value={style} className='capitalize'>
@@ -135,45 +95,43 @@ export function HeaderStyleSelector({ value, onChange }: HeaderStyleSelectorProp
 			{headerStyles.map(style => (
 				<TabsContent key={style} value={style} className='mt-4'>
 					{style === 'minimal' ?
-						<div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
-							{HEADER_LAYOUTS[style].map(layout => (
-								<button
-									key={layout.key}
-									type='button'
-									onClick={() => onChange(style)}
-									className={cn(
-										'group relative h-32 overflow-hidden rounded-lg border-2 p-4',
-										'transition-all hover:shadow-md',
-										value === style && 'border-brand ring-2 ring-brand/20',
-										value !== style && 'border-border hover:border-muted-foreground',
-									)}
-									disabled={layout.comingSoon}
-								>
-									{/* Preview */}
-									<div className='h-full w-full'>{layout.preview}</div>
+						<div className='grid gap-4 sm:grid-cols-3'>
+							{HEADER_LAYOUTS[style].map(layout => {
+								const isSelected = value === layout.key;
 
-									{/* Label */}
-									<div className='absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background to-transparent p-2'>
-										<p className='text-xs font-medium'>{layout.name}</p>
-									</div>
+								return (
+									<button
+										key={layout.key}
+										type='button'
+										onClick={() => {
+											if (layout.key in HEADER_LAYOUTS) {
+												onChange(layout.key as HeaderStyle); // fixme
+											}
+										}}
+										className={cn(
+											'group relative h-32 overflow-hidden rounded-lg border-2 p-4',
+											'transition-all hover:shadow-md',
+											isSelected && 'border-brand ring-2 ring-brand/20',
+											!isSelected && 'border-border hover:border-muted-foreground',
+										)}
+									>
+										{/* Preview */}
+										<div className='h-full w-full'>{layout.preview}</div>
 
-									{/* Selected indicator */}
-									{value === style && !layout.comingSoon && (
-										<div className='absolute right-2 top-2'>
-											<Icon.checkCircle className='h-4 w-4 text-brand' />
+										{/* Label */}
+										<div className='absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background to-transparent p-2'>
+											<p className='text-xs font-medium'>{layout.name}</p>
 										</div>
-									)}
 
-									{/* Coming soon badge */}
-									{layout.comingSoon && (
-										<div className='absolute left-2 top-2'>
-											<Badge variant='secondary' className='text-xs'>
-												Coming Soon
-											</Badge>
-										</div>
-									)}
-								</button>
-							))}
+										{/* Selected indicator */}
+										{isSelected && (
+											<div className='absolute right-2 top-2'>
+												<Icon.checkCircle className='h-4 w-4 text-brand' />
+											</div>
+										)}
+									</button>
+								);
+							})}
 						</div>
 					:	<div className='rounded-lg border-2 border-dashed border-muted-foreground/25 p-8 text-center'>
 							<Icon.wrench className='mx-auto mb-3 h-12 w-12 text-muted-foreground/50' />

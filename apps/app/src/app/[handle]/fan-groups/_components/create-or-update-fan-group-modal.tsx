@@ -62,19 +62,21 @@ export function CreateOrUpdateFanGroupModal({ mode }: { mode: 'create' | 'update
 	);
 
 	/* mutations */
-	const { mutateAsync: createFanGroup } = useMutation({
-		...trpc.fanGroup.create.mutationOptions(),
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: createFanGroup } = useMutation(
+		trpc.fanGroup.create.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
-	const { mutateAsync: updateFanGroup } = useMutation({
-		...trpc.fanGroup.update.mutationOptions(),
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: updateFanGroup } = useMutation(
+		trpc.fanGroup.update.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
 	/* form */
 	const { form, onSubmit } = useCreateOrUpdateForm({

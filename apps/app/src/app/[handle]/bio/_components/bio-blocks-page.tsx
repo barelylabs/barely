@@ -1,5 +1,6 @@
 'use client';
 
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { useState } from 'react';
 import { useWorkspace } from '@barely/hooks';
@@ -37,9 +38,9 @@ import { Text } from '@barely/ui/typography';
 
 import { AddBlockModal } from './add-block-modal';
 
-interface BioBlocksPageProps {
-	handle: string;
-}
+// Type the bio data from tRPC
+type BioWithBlocksData = AppRouterOutputs['bio']['byKey'];
+type BioBlockData = BioWithBlocksData['blocks'][number];
 
 // Sortable Block Component
 function SortableBlock({
@@ -49,7 +50,7 @@ function SortableBlock({
 	onDelete,
 	onRename,
 }: {
-	block: any;
+	block: BioBlockData;
 	handle: string;
 	onToggle: (id: string, enabled: boolean) => void;
 	onDelete: (id: string) => void;
@@ -60,9 +61,7 @@ function SortableBlock({
 	const [showContextMenu, setShowContextMenu] = useState(false);
 	const [showRenamePopover, setShowRenamePopover] = useState(false);
 	const [editName, setEditName] = useState(
-		block.settings?.name ||
-			block.name ||
-			(block.type === 'links' ? 'Links' : 'Contact Form'),
+		block.name ?? (block.type === 'links' ? 'Links' : 'Contact Form'),
 	);
 
 	const style = {
@@ -98,10 +97,10 @@ function SortableBlock({
 									look='text'
 									className='h-auto p-0 text-left font-medium'
 								>
-									{block.settings?.name || block.name || 'Links'}
+									{block.name ?? 'Links'}
 								</Button>
 							:	<Text variant='md/medium' className='font-medium'>
-									{block.settings?.name || block.name || 'Contact Form'}
+									{block.name ?? 'Contact Form'}
 								</Text>
 							}
 							{block.type === 'links' && (
@@ -245,13 +244,13 @@ export function BioBlocksPage() {
 		}),
 	);
 
-	const queryKey = trpc.bio.byHandleWithBlocks.queryOptions({
+	const queryKey = trpc.bio.byKey.queryOptions({
 		handle,
 		key: 'home',
 	}).queryKey;
 
 	const { data: bio } = useSuspenseQuery({
-		...trpc.bio.byHandleWithBlocks.queryOptions({
+		...trpc.bio.byKey.queryOptions({
 			handle,
 			key: 'home',
 		}),
@@ -259,210 +258,53 @@ export function BioBlocksPage() {
 	});
 
 	// Mutations
-	const { mutate: createBlock } = useMutation({
-		...trpc.bio.createBlock.mutationOptions(),
-		onMutate: async (newData: any) => {
-			// Cancel any outgoing refetches
-			await queryClient.cancelQueries({ queryKey });
+	const createBlockMutation = useMutation(
+		trpc.bio.createBlock.mutationOptions({
+			onSettled: async () => {
+				// Invalidate and refetch to get the real data with proper ID and lexoRank
+				await queryClient.invalidateQueries({ queryKey });
+			},
+		}),
+	);
 
-			// Snapshot the previous value
-			const previousBio = queryClient.getQueryData(queryKey);
+	const updateBioMutation = useMutation(
+		trpc.bio.update.mutationOptions({
+			onSettled: async () => {
+				// Invalidate and refetch
+				await queryClient.invalidateQueries({ queryKey });
+			},
+		}),
+	);
 
-			// Create a temporary block with optimistic data
-			const tempBlock = {
-				id: `temp-${Date.now()}`, // Temporary ID
-				type: newData.type,
-				enabled: newData.enabled,
-				workspaceId: bio.workspace.id,
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				deletedAt: null,
-				archivedAt: null,
-				settings: null,
-				lexoRank: 'zzzzz', // Put at end temporarily
-				links: [],
-			};
+	const updateBlockMutation = useMutation(
+		trpc.bio.updateBlock.mutationOptions({
+			onSettled: async () => {
+				// Invalidate and refetch
+				await queryClient.invalidateQueries({ queryKey });
+			},
+		}),
+	);
 
-			// Optimistically add the new block
-			queryClient.setQueryData(queryKey, (old: any) => {
-				if (!old) return old;
-				return {
-					...old,
-					blocks: [...(old.blocks || []), tempBlock],
-				};
-			});
+	const deleteBlockMutation = useMutation(
+		trpc.bio.deleteBlock.mutationOptions({
+			onSettled: async () => {
+				// Invalidate and refetch
+				await queryClient.invalidateQueries({ queryKey });
+			},
+		}),
+	);
 
-			// Return a context object with the snapshotted value
-			return { previousBio };
-		},
-		onError: (_err: any, _newData: any, context: any) => {
-			// If the mutation fails, use the context returned from onMutate to roll back
-			if (context?.previousBio) {
-				queryClient.setQueryData(queryKey, context.previousBio);
-			}
-		},
-		onSuccess: () => {
-			// Invalidate and refetch to get the real data with proper ID and lexoRank
-			queryClient.invalidateQueries({ queryKey });
-		},
-	});
-
-	const { mutate: updateBio } = useMutation({
-		...trpc.bio.update.mutationOptions(),
-		onMutate: async (newData: any) => {
-			// Cancel any outgoing refetches
-			await queryClient.cancelQueries({ queryKey });
-
-			// Snapshot the previous value
-			const previousBio = queryClient.getQueryData(queryKey);
-
-			// Optimistically update to the new value
-			queryClient.setQueryData(queryKey, (old: any) => ({
-				...old,
-				showHeader: newData.showHeader ?? old?.showHeader,
-			}));
-
-			// Return a context object with the snapshotted value
-			return { previousBio };
-		},
-		onError: (_err: any, _newData: any, context: any) => {
-			// If the mutation fails, use the context returned from onMutate to roll back
-			if (context?.previousBio) {
-				queryClient.setQueryData(queryKey, context.previousBio);
-			}
-		},
-		onSuccess: () => {
-			// Invalidate and refetch
-			queryClient.invalidateQueries({ queryKey });
-		},
-	});
-
-	const { mutate: updateBlock } = useMutation({
-		...trpc.bio.updateBlock.mutationOptions(),
-		onMutate: async (newData: any) => {
-			// Cancel any outgoing refetches
-			await queryClient.cancelQueries({ queryKey });
-
-			// Snapshot the previous value
-			const previousBio = queryClient.getQueryData(queryKey);
-
-			// Optimistically update the specific block
-			queryClient.setQueryData(queryKey, (old: any) => {
-				if (!old) return old;
-				return {
-					...old,
-					blocks: old.blocks.map((block: any) =>
-						block.id === newData.id ?
-							{
-								...block,
-								enabled: newData.enabled !== undefined ? newData.enabled : block.enabled,
-								settings:
-									newData.settings !== undefined ? newData.settings : block.settings,
-								title: newData.title !== undefined ? newData.title : block.title,
-								subtitle:
-									newData.subtitle !== undefined ? newData.subtitle : block.subtitle,
-							}
-						:	block,
-					),
-				};
-			});
-
-			// Return a context object with the snapshotted value
-			return { previousBio };
-		},
-		onError: (_err: any, _newData: any, context: any) => {
-			// If the mutation fails, use the context returned from onMutate to roll back
-			if (context?.previousBio) {
-				queryClient.setQueryData(queryKey, context.previousBio);
-			}
-		},
-		onSettled: () => {
-			// Always invalidate after error or success to sync with server
-			queryClient.invalidateQueries({ queryKey });
-		},
-	});
-
-	const { mutate: deleteBlock } = useMutation({
-		...trpc.bio.deleteBlock.mutationOptions(),
-		onMutate: async (newData: any) => {
-			// Cancel any outgoing refetches
-			await queryClient.cancelQueries({ queryKey });
-
-			// Snapshot the previous value
-			const previousBio = queryClient.getQueryData(queryKey);
-
-			// Optimistically remove the block
-			queryClient.setQueryData(queryKey, (old: any) => {
-				if (!old) return old;
-				return {
-					...old,
-					blocks: old.blocks.filter((block: any) => block.id !== newData.blockId),
-				};
-			});
-
-			// Return a context object with the snapshotted value
-			return { previousBio };
-		},
-		onError: (_err: any, _newData: any, context: any) => {
-			// If the mutation fails, use the context returned from onMutate to roll back
-			if (context?.previousBio) {
-				queryClient.setQueryData(queryKey, context.previousBio);
-			}
-		},
-		onSuccess: () => {
-			// Invalidate and refetch
-			queryClient.invalidateQueries({ queryKey });
-		},
-	});
-
-	const { mutate: reorderBlocks } = useMutation({
-		...trpc.bio.reorderBlocks.mutationOptions(),
-		onMutate: async (newData: any) => {
-			// Cancel any outgoing refetches
-			await queryClient.cancelQueries({ queryKey });
-
-			// Snapshot the previous value
-			const previousBio = queryClient.getQueryData(queryKey);
-
-			// Optimistically reorder blocks
-			queryClient.setQueryData(queryKey, (old: any) => {
-				if (!old) return old;
-
-				// Create a mapping of blockId to new index
-				const newOrder = new Map(
-					newData.blockIds.map((id: string, index: number) => [id, index]),
-				);
-
-				// Sort blocks based on the new order
-				const reorderedBlocks = [...(old.blocks || [])].sort((a, b) => {
-					const aIndex = newOrder.get(a.id) ?? 999;
-					const bIndex = newOrder.get(b.id) ?? 999;
-					return aIndex - bIndex;
-				});
-
-				return {
-					...old,
-					blocks: reorderedBlocks,
-				};
-			});
-
-			// Return a context with the previous value
-			return { previousBio };
-		},
-		onError: (_err: any, _newData: any, context: any) => {
-			// If the mutation fails, use the context to roll back
-			if (context?.previousBio) {
-				queryClient.setQueryData(queryKey, context.previousBio);
-			}
-		},
-		onSuccess: () => {
-			// Invalidate and refetch
-			queryClient.invalidateQueries({ queryKey });
-		},
-	});
+	const reorderBlocksMutation = useMutation(
+		trpc.bio.reorderBlocks.mutationOptions({
+			onSettled: async () => {
+				// Invalidate and refetch
+				await queryClient.invalidateQueries({ queryKey });
+			},
+		}),
+	);
 
 	const handleAddBlock = (type: 'links' | 'contactForm') => {
-		createBlock({
+		createBlockMutation.mutate({
 			handle,
 			bioId: bio.id,
 			type,
@@ -472,7 +314,7 @@ export function BioBlocksPage() {
 	};
 
 	const handleToggleHeader = (checked: boolean) => {
-		updateBio({
+		updateBioMutation.mutate({
 			handle,
 			id: bio.id,
 			showHeader: checked,
@@ -480,7 +322,7 @@ export function BioBlocksPage() {
 	};
 
 	const handleToggleBlock = (blockId: string, enabled: boolean) => {
-		updateBlock({
+		updateBlockMutation.mutate({
 			handle,
 			id: blockId,
 			enabled,
@@ -489,16 +331,16 @@ export function BioBlocksPage() {
 
 	const handleRenameBlock = (blockId: string, name: string) => {
 		// Since name field is not in the updateBlock schema, we'll store it in settings
-		updateBlock({
+		updateBlockMutation.mutate({
 			handle,
 			id: blockId,
-			settings: { name: name || null },
+			name,
 		});
 	};
 
 	const handleDeleteBlock = (blockId: string) => {
 		if (confirm('Are you sure you want to delete this block?')) {
-			deleteBlock({
+			deleteBlockMutation.mutate({
 				handle,
 				bioId: bio.id,
 				blockId,
@@ -517,7 +359,7 @@ export function BioBlocksPage() {
 				const reordered = arrayMove([...bio.blocks], oldIndex, newIndex);
 
 				// Submit reorder to backend
-				reorderBlocks({
+				reorderBlocksMutation.mutate({
 					handle,
 					bioId: bio.id,
 					blockIds: reordered.map(block => block.id),

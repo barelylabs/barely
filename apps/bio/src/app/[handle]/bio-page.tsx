@@ -1,51 +1,52 @@
 'use client';
 
-import type { BioWithBlocks } from '@barely/validators';
-import React from 'react';
-import { useMutation } from '@tanstack/react-query';
+import type { BioLink } from '@barely/validators/schemas';
+import { useCallback } from 'react';
+import { useMutation, useSuspenseQuery } from '@tanstack/react-query';
 
 import { useBioRenderTRPC } from '@barely/api/public/bio-render.trpc.react';
 
-import { BioRenderV2 } from '@barely/ui/bio';
+import { BioRender } from '@barely/ui/bio';
 
-interface BioPageProps {
-	bio: BioWithBlocks;
-}
-
-export function BioPage({ bio }: BioPageProps) {
+export function BioPageRender() {
 	const trpc = useBioRenderTRPC();
 
-	// Record page view mutation
-	const { mutate: recordView } = useMutation(trpc.bio.log.mutationOptions());
+	// get bio
+	const { data: bio } = useSuspenseQuery(
+		trpc.bio.byHandle.queryOptions({
+			handle: 'test',
+		}),
+	);
 
-	// Log button click mutation
-	const { mutate: logButtonClick } = useMutation(trpc.bio.log.mutationOptions());
+	const { mutate: log } = useMutation(trpc.bio.log.mutationOptions());
 
 	// Email capture mutation
-	const { mutateAsync: captureEmail } = useMutation({
-		...trpc.bio.captureEmail.mutationOptions(),
-	});
+	const { mutateAsync: captureEmail } = useMutation(
+		trpc.bio.captureEmail.mutationOptions(),
+	);
 
 	// Handle page view
-	const handlePageView = React.useCallback(() => {
-		recordView({ bioId: bio.id, type: 'bio/view' as const });
-	}, [recordView, bio.id]);
+	const handlePageView = useCallback(() => {
+		log({
+			bioId: bio.id,
+			type: 'bio/view',
+		});
+	}, [log, bio.id]);
 
 	// Handle link click
-	const handleLinkClick = React.useCallback(
-		(link: BioWithBlocks['blocks'][0]['links'][0], position: number, blockId: string) => {
-			logButtonClick({
+	const handleLinkClick = useCallback(
+		(link: BioLink) => {
+			log({
 				bioId: bio.id,
-				type: 'bio/buttonClick' as const,
-				buttonId: link.id,
-				buttonPosition: position,
+				type: 'bio/linkClick',
+				linkId: link.id,
 			});
 		},
-		[logButtonClick, bio.id],
+		[log, bio.id],
 	);
 
 	// Handle email capture
-	const handleEmailCapture = React.useCallback(
+	const handleEmailCapture = useCallback(
 		async (email: string, marketingConsent: boolean) => {
 			const result = await captureEmail({
 				bioId: bio.id,
@@ -58,7 +59,7 @@ export function BioPage({ bio }: BioPageProps) {
 	);
 
 	return (
-		<BioRenderV2
+		<BioRender
 			bio={bio}
 			isPreview={false}
 			enableAnalytics={true}

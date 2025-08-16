@@ -1,9 +1,9 @@
 'use client';
 
-import type { ColorScheme } from '@barely/lib/functions/bio-themes-v2';
+import type { PublicBrandKit } from '@barely/validators';
 import { useState } from 'react';
 import { useZodForm } from '@barely/hooks';
-import { getComputedStyles } from '@barely/lib/functions/bio-themes-v2';
+import { getComputedStyles } from '@barely/lib/functions/bio-themes.fns';
 import { z } from 'zod/v4';
 
 import { CheckboxField } from '../forms/checkbox-field';
@@ -26,7 +26,7 @@ interface BioEmailCaptureRenderProps {
 		marketingConsent: boolean,
 	) => Promise<{ success: boolean; message: string }>;
 	isPreview?: boolean;
-	colorScheme?: ColorScheme | null;
+	brandKit: PublicBrandKit | null;
 }
 
 export function BioEmailCaptureRender({
@@ -34,9 +34,9 @@ export function BioEmailCaptureRender({
 	workspaceName,
 	onSubmit,
 	isPreview = false,
-	colorScheme,
+	brandKit,
 }: BioEmailCaptureRenderProps) {
-	const computedStyles = getComputedStyles({ colorScheme });
+	const computedStyles = getComputedStyles(brandKit);
 	const [isSubmitted, setIsSubmitted] = useState(false);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 	const [error, setError] = useState<string | null>(null);

@@ -3,7 +3,13 @@ import { WEB_EVENT_TYPES__BIO } from '@barely/const';
 import { dbHttp } from '@barely/db/client';
 import { dbPool, makePool } from '@barely/db/pool';
 import { _Fans_To_Workspaces, Fans } from '@barely/db/sql';
-import { _BioButtons_To_Bios, BioButtons, Bios } from '@barely/db/sql/bio.sql';
+import {
+	_BioBlocks_To_Bios,
+	_BioButtons_To_Bios,
+	_BioLinks_To_BioBlocks,
+	BioLinks,
+	Bios,
+} from '@barely/db/sql/bio.sql';
 import { publicProcedure } from '@barely/lib/trpc';
 import { newId, raise } from '@barely/utils';
 import { TRPCError } from '@trpc/server';
@@ -11,72 +17,26 @@ import { and, eq, isNull } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
 import { recordBioEvent } from '../../functions/bio-event.fns';
+import { getBioByHandleAndKey } from '../../functions/bio.fns';
 import { ratelimit } from '../../integrations/upstash';
 
 export const bioRenderRoute = {
 	byHandle: publicProcedure
 		.input(z.object({ handle: z.string() }))
 		.query(async ({ input }) => {
-			const bio =
-				(await dbHttp.query.Bios.findFirst({
-					where: eq(Bios.handle, input.handle),
-					with: {
-						workspace: {
-							columns: {
-								id: true,
-								name: true,
-								imageUrl: true,
-							},
-						},
-						bioButtons: {
-							with: {
-								bioButton: {
-									with: {
-										link: true,
-										form: true,
-									},
-								},
-							},
-							orderBy: _BioButtons_To_Bios.lexoRank,
-						},
-					},
-				})) ?? raise('Bio not found');
+			const bio = await getBioByHandleAndKey({
+				handle: input.handle,
+				key: 'home',
+			});
 
-			// Transform the data to flatten the button structure
-			const buttons = bio.bioButtons
-				.map(bb => {
-					const { link, form, ...buttonData } = bb.bioButton;
-					return {
-						...buttonData,
-						lexoRank: bb.lexoRank,
-						// Transform link to match BioButtonWithLink interface
-						link:
-							link ?
-								{
-									id: link.id,
-									url: link.url,
-									domain: link.domain,
-								}
-							:	undefined,
-						// Keep form as is
-						form:
-							form ?
-								{
-									id: form.id,
-									name: form.title ?? 'Form',
-								}
-							:	undefined,
-					};
-				})
-				.sort((a, b) => a.lexoRank.localeCompare(b.lexoRank));
+			if (!bio) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Bio not found',
+				});
+			}
 
-			return {
-				...bio,
-				buttons,
-				// Ensure email capture fields are included
-				emailCaptureEnabled: bio.emailCaptureEnabled,
-				emailCaptureIncentiveText: bio.emailCaptureIncentiveText,
-			};
+			return bio;
 		}),
 
 	log: publicProcedure
@@ -84,13 +44,13 @@ export const bioRenderRoute = {
 			z.object({
 				bioId: z.string(),
 				type: z.enum(WEB_EVENT_TYPES__BIO),
-				buttonId: z.string().optional(),
-				buttonPosition: z.number().optional(),
+				linkId: z.string().optional(),
+				blockId: z.string().optional(),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
 			const { visitor } = ctx;
-			const { bioId, buttonId, buttonPosition } = input;
+			const { bioId, linkId } = input;
 
 			const bio =
 				(await dbHttp.query.Bios.findFirst({
@@ -107,13 +67,10 @@ export const bioRenderRoute = {
 					},
 				})) ?? raise('Bio not found');
 
-			let bioButton = undefined;
-			if (buttonId) {
-				bioButton = await dbHttp.query.BioButtons.findFirst({
-					where: and(
-						eq(BioButtons.id, buttonId),
-						eq(BioButtons.workspaceId, bio.workspaceId),
-					),
+			let bioLink = undefined;
+			if (linkId) {
+				bioLink = await dbHttp.query.BioLinks.findFirst({
+					where: and(eq(BioLinks.id, linkId), eq(BioLinks.workspaceId, bio.workspaceId)),
 					with: {
 						link: true,
 					},
@@ -122,9 +79,8 @@ export const bioRenderRoute = {
 
 			await recordBioEvent({
 				bio,
-				bioButton,
+				bioLink,
 				type: input.type,
-				buttonPosition,
 				visitor,
 				workspace: bio.workspace,
 			});

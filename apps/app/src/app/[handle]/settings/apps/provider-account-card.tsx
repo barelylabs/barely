@@ -31,14 +31,15 @@ export const ProviderAccountCard = ({ provider }: ExternalAccountCardProps) => {
 		}),
 	);
 
-	const { mutate: authorize } = useMutation({
-		...trpc.providerAccount.authorize.mutationOptions(),
-		onSuccess: url => {
-			if (url) {
-				router.push(url);
-			}
-		},
-	});
+	const { mutate: authorize } = useMutation(
+		trpc.providerAccount.authorize.mutationOptions({
+			onSuccess: url => {
+				if (url) {
+					router.push(url);
+				}
+			},
+		}),
+	);
 
 	const { mutateAsync: deleteAccount } = useMutation(
 		trpc.providerAccount.delete.mutationOptions(),

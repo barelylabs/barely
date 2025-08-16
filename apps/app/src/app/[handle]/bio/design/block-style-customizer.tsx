@@ -1,6 +1,6 @@
 'use client';
 
-import type { BlockStyle } from '@barely/lib/functions/bio-themes-v2';
+import type { BlockStyle } from '@barely/lib/functions/bio-themes.fns';
 import { cn } from '@barely/utils';
 
 import { Icon } from '@barely/ui/icon';

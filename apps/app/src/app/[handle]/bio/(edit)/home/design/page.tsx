@@ -36,7 +36,7 @@ export default async function DesignPage({
 
 	// Prefetch bio data with blocks
 	prefetch(
-		trpc.bio.byHandleWithBlocks.queryOptions({
+		trpc.bio.byKey.queryOptions({
 			handle: awaitedParams.handle,
 			key: 'home',
 		}),

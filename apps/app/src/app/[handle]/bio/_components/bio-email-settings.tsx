@@ -36,23 +36,26 @@ export function BioEmailSettings({ bio, handle }: BioEmailSettingsProps) {
 		defaultValues: {
 			id: bio.id,
 			handle,
-			emailCaptureEnabled: bio.emailCaptureEnabled ?? false,
+			emailCaptureEnabled: bio.emailCaptureEnabled,
 			emailCaptureIncentiveText: bio.emailCaptureIncentiveText ?? '',
 		},
 	});
 
-	const updateMutation = useMutation({
-		...trpc.bio.update.mutationOptions(),
-		onSuccess: () => {
-			toast.success('Email settings updated');
-			void queryClient.invalidateQueries({
-				queryKey: trpc.bio.byHandle.queryKey({ handle }),
-			});
-		},
-		onError: error => {
-			toast.error(error.message ?? 'Failed to update email settings');
-		},
-	});
+	const updateMutation = useMutation(
+		trpc.bio.update.mutationOptions({
+			onSuccess: () => {
+				toast.success('Email settings updated');
+			},
+			onError: error => {
+				toast.error(error.message);
+			},
+			onSettled: async () => {
+				await queryClient.invalidateQueries({
+					queryKey: trpc.bio.byKey.queryKey({ handle }),
+				});
+			},
+		}),
+	);
 
 	const handleSubmit = (data: z.infer<typeof formSchema>) => {
 		updateMutation.mutate(data);

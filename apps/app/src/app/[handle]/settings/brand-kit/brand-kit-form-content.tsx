@@ -1,6 +1,7 @@
 'use client';
 
 import type { MDXEditorMethods } from '@barely/ui/mdx-editor';
+import type { UpdateBrandKit } from '@barely/validators';
 import type { UseFormReturn } from 'react-hook-form';
 import React, { useState } from 'react';
 
@@ -11,13 +12,13 @@ import { MDXEditor } from '@barely/ui/mdx-editor';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@barely/ui/tabs';
 import { Text } from '@barely/ui/typography';
 
-// Import design components from bio
-import { AppearanceCustomizerV2 } from '../../bio/design/appearance-customizer-v2';
 import { BlockStyleCustomizer } from '../../bio/design/block-style-customizer';
+// Import design components from bio
+import { ColorCustomizer } from '../../bio/design/color-customizer';
 import { FontSelector } from '../../bio/design/font-selector';
 
 interface BrandKitFormContentProps {
-	form: UseFormReturn<any>;
+	form: UseFormReturn<UpdateBrandKit>;
 	mdxEditorRef: React.RefObject<MDXEditorMethods>;
 }
 
@@ -64,7 +65,7 @@ export function BrandKitFormContent({ form, mdxEditorRef }: BrandKitFormContentP
 							<div className='w-full'>
 								<MDXEditor
 									ref={mdxEditorRef}
-									markdown={form.watch('longBio')}
+									markdown={form.watch('longBio') ?? ''}
 									onChange={v => {
 										form.setValue('longBio', v, { shouldDirty: true });
 									}}
@@ -95,11 +96,11 @@ export function BrandKitFormContent({ form, mdxEditorRef }: BrandKitFormContentP
 								Select and customize your brand colors
 							</Text>
 						</div>
-						<AppearanceCustomizerV2
-							appearancePreset={form.watch('appearancePreset')}
+						<ColorCustomizer
+							colorPreset={form.watch('colorPreset')}
 							colorScheme={form.watch('colorScheme')}
-							onAppearanceChange={preset =>
-								form.setValue('appearancePreset', preset, { shouldDirty: true })
+							onColorPresetChange={preset =>
+								form.setValue('colorPreset', preset, { shouldDirty: true })
 							}
 							onColorSchemeChange={scheme => {
 								form.setValue('colorScheme', scheme, {
@@ -145,9 +146,9 @@ export function BrandKitFormContent({ form, mdxEditorRef }: BrandKitFormContentP
 							</Text>
 						</div>
 						<BlockStyleCustomizer
-							blockStyle={form.watch('blockStyle')}
-							blockShadow={form.watch('blockShadow')}
-							blockOutline={form.watch('blockOutline')}
+							blockStyle={form.watch('blockStyle') ?? 'rounded'}
+							blockShadow={form.watch('blockShadow') ?? false}
+							blockOutline={form.watch('blockOutline') ?? false}
 							onBlockStyleChange={style =>
 								form.setValue('blockStyle', style, { shouldDirty: true })
 							}

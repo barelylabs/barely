@@ -2,7 +2,6 @@ import { relations } from 'drizzle-orm';
 import {
 	boolean,
 	index,
-	json,
 	pgTable,
 	primaryKey,
 	timestamp,
@@ -199,7 +198,7 @@ export const BioBlocks = pgTable(
 		subtitle: varchar('subtitle', { length: 255 }), // for rendering a subtitle below the block
 
 		// Block-specific settings stored as JSON
-		settings: json('settings').$type<Record<string, unknown>>(),
+		// settings: json('settings').$type<Record<string, unknown>>(),
 	},
 	bioBlock => ({
 		workspace: index('BioBlocks_workspace_idx').on(bioBlock.workspaceId),

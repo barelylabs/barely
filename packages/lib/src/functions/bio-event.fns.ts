@@ -1,5 +1,5 @@
 import type { WEB_EVENT_TYPES__BIO } from '@barely/const';
-import type { Bio, BioButton, Workspace } from '@barely/validators/schemas';
+import type { Bio, BioLink, Workspace } from '@barely/validators/schemas';
 import { WORKSPACE_PLANS } from '@barely/const';
 import { dbHttp } from '@barely/db/client';
 import { AnalyticsEndpoints } from '@barely/db/sql/analytics-endpoint.sql';
@@ -46,7 +46,7 @@ async function checkIfWorkspaceIsAboveEventUsageLimit({
 
 export async function recordBioEvent({
 	bio,
-	bioButton,
+	bioLink,
 	type,
 	visitor,
 	workspace,
@@ -54,7 +54,7 @@ export async function recordBioEvent({
 }: {
 	bio: Bio;
 	type: (typeof WEB_EVENT_TYPES__BIO)[number];
-	bioButton?: BioButton;
+	bioLink?: BioLink;
 	buttonPosition?: number;
 	visitor?: VisitorInfo;
 	workspace: Pick<Workspace, 'id' | 'plan' | 'eventUsage' | 'eventUsageLimitOverride'>;
@@ -66,14 +66,14 @@ export async function recordBioEvent({
 	const rateLimitPeriod = isDevelopment() ? '1 s' : '1 h';
 
 	const { success } = await ratelimit(1, rateLimitPeriod).limit(
-		`recordBioEvent:${visitor?.ip}:${bio.id}:${type}:${bioButton?.id}`,
+		`recordBioEvent:${visitor?.ip}:${bio.id}:${type}:${bioLink?.id}`,
 	);
 
 	if (!success) {
 		await log({
 			type: 'alerts',
 			location: 'recordBioEvent',
-			message: `rate limit exceeded for ${visitor?.ip} ${bio.id} ${type} ${bioButton?.id}`,
+			message: `rate limit exceeded for ${visitor?.ip} ${bio.id} ${type} ${bioLink?.id}`,
 		});
 		return null;
 	}
@@ -101,7 +101,7 @@ export async function recordBioEvent({
 	const metaPixel = analyticsEndpoints.find(endpoint => endpoint.platform === 'meta');
 	const metaEvents = getMetaEventFromBioEvent({
 		bio,
-		bioButton,
+		bioLink,
 		eventType: type,
 	});
 
@@ -172,11 +172,11 @@ export async function recordBioEvent({
 
 function getMetaEventFromBioEvent({
 	bio,
-	bioButton,
+	bioLink,
 	eventType,
 }: {
 	bio: Bio;
-	bioButton?: BioButton;
+	bioLink?: BioLink;
 	eventType: (typeof WEB_EVENT_TYPES__BIO)[number];
 }): MetaEvent[] | null {
 	switch (eventType) {
@@ -191,15 +191,15 @@ function getMetaEventFromBioEvent({
 					},
 				},
 			];
-		case 'bio/buttonClick':
-			return bioButton ?
+		case 'bio/linkClick':
+			return bioLink ?
 					[
 						{
 							eventName: 'ViewContent',
 							customData: {
-								content_type: 'bio_button',
-								content_ids: [bioButton.id],
-								content_name: bioButton.text,
+								content_type: 'bio_link',
+								content_ids: [bioLink.id],
+								content_name: bioLink.text,
 								content_category: 'link_click',
 							},
 						},

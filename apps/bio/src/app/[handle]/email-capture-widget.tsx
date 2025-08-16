@@ -45,14 +45,15 @@ export function EmailCaptureWidget({
 		mutate: captureEmail,
 		isPending,
 		error,
-	} = useMutation({
-		...trpc.bio.captureEmail.mutationOptions(),
-		onSuccess: (result: { success: boolean; message: string }) => {
-			setIsSubmitted(true);
-			setSuccessMessage(result.message);
-			form.reset();
-		},
-	});
+	} = useMutation(
+		trpc.bio.captureEmail.mutationOptions({
+			onSuccess: (result: { success: boolean; message: string }) => {
+				setIsSubmitted(true);
+				setSuccessMessage(result.message);
+				form.reset();
+			},
+		}),
+	);
 
 	const handleSubmit = (data: EmailCaptureFormData) => {
 		captureEmail({

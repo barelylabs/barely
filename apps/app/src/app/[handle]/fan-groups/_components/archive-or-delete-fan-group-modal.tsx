@@ -30,15 +30,17 @@ export function ArchiveOrDeleteFanGroupModal({ mode }: { mode: 'archive' | 'dele
 		await setShowModal(false);
 	}, [queryClient, trpc, setShowModal]);
 
-	const { mutate: archiveFanGroups, isPending: isPendingArchive } = useMutation({
-		...trpc.fanGroup.archive.mutationOptions(),
-		onSuccess,
-	});
+	const { mutate: archiveFanGroups, isPending: isPendingArchive } = useMutation(
+		trpc.fanGroup.archive.mutationOptions({
+			onSuccess,
+		}),
+	);
 
-	const { mutate: deleteFanGroups, isPending: isPendingDelete } = useMutation({
-		...trpc.fanGroup.delete.mutationOptions(),
-		onSuccess,
-	});
+	const { mutate: deleteFanGroups, isPending: isPendingDelete } = useMutation(
+		trpc.fanGroup.delete.mutationOptions({
+			onSuccess,
+		}),
+	);
 
 	if (!lastSelectedItem) return null;
 

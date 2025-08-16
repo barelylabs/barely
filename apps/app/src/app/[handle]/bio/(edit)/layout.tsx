@@ -18,7 +18,7 @@ export default async function BioEditLayout({
 	// Load all fonts for bio editing pages where users can preview different fonts
 	const allFontClasses = getAllFontClassNames();
 
-	prefetch(trpc.bio.byHandleWithBlocks.queryOptions({ handle, key: 'home' }));
+	prefetch(trpc.bio.byKey.queryOptions({ handle, key: 'home' }));
 
 	return (
 		<div className={`flex h-full ${allFontClasses}`}>

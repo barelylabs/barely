@@ -1,10 +1,10 @@
 'use client';
 
 import type { MDXEditorMethods } from '@barely/ui/mdx-editor';
-import type { BrandKit } from '@barely/validators';
+import type { BrandKit, UpdateBrandKit } from '@barely/validators';
 import type { z } from 'zod/v4';
 import React, { useRef, useState } from 'react';
-import { useZodForm } from '@barely/hooks';
+import { useWorkspace, useZodForm } from '@barely/hooks';
 import { updateBrandKitSchema } from '@barely/validators';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -18,19 +18,20 @@ import { MDXEditor } from '@barely/ui/mdx-editor';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@barely/ui/tabs';
 import { Text } from '@barely/ui/typography';
 
-// Import design components from bio
-import { AppearanceCustomizerV2 } from '../../bio/design/appearance-customizer-v2';
 import { BlockStyleCustomizer } from '../../bio/design/block-style-customizer';
+// Import design components from bio
+import { ColorCustomizer } from '../../bio/design/color-customizer';
 import { FontSelector } from '../../bio/design/font-selector';
 
 interface BrandKitFormProps {
 	brandKit: BrandKit;
-	onFormDataChange?: (data: any) => void;
+	onFormDataChange?: (data: UpdateBrandKit) => void;
 }
 
 export function BrandKitForm({ brandKit, onFormDataChange }: BrandKitFormProps) {
 	const queryClient = useQueryClient();
 	const trpc = useTRPC();
+	const { handle } = useWorkspace();
 	const [activeTab, setActiveTab] = useState('content');
 	const mdxEditorRef = useRef<MDXEditorMethods>(null);
 
@@ -42,14 +43,14 @@ export function BrandKitForm({ brandKit, onFormDataChange }: BrandKitFormProps) 
 			id: brandKit.id,
 			longBio: brandKit.longBio ?? '',
 			shortBio: brandKit.shortBio ?? '',
-			appearancePreset: brandKit.appearancePreset ?? undefined,
-			colorScheme: brandKit.colorScheme ?? undefined,
-			fontPreset: brandKit.fontPreset ?? 'modern.cal',
-			headingFont: brandKit.headingFont ?? undefined,
-			bodyFont: brandKit.bodyFont ?? undefined,
-			blockStyle: brandKit.blockStyle ?? 'rounded',
-			blockShadow: brandKit.blockShadow ?? false,
-			blockOutline: brandKit.blockOutline ?? false,
+			colorPreset: brandKit.colorPreset,
+			colorScheme: brandKit.colorScheme,
+			fontPreset: brandKit.fontPreset,
+			headingFont: brandKit.headingFont,
+			bodyFont: brandKit.bodyFont,
+			blockStyle: brandKit.blockStyle,
+			blockShadow: brandKit.blockShadow,
+			blockOutline: brandKit.blockOutline,
 		},
 	});
 
@@ -57,27 +58,28 @@ export function BrandKitForm({ brandKit, onFormDataChange }: BrandKitFormProps) 
 	React.useEffect(() => {
 		const subscription = form.watch(value => {
 			if (onFormDataChange) {
-				onFormDataChange(value);
+				onFormDataChange(value as UpdateBrandKit);
 			}
 		});
 		return () => subscription.unsubscribe();
 	}, [form, onFormDataChange]);
 
-	const updateMutation = useMutation({
-		...trpc.brandKit.update.mutationOptions(),
-		onSuccess: () => {
-			toast.success('Brand kit updated successfully');
-			void queryClient.invalidateQueries({
-				queryKey: trpc.brandKit.current.queryKey(),
-			});
-		},
-		onError: error => {
-			toast.error(error.message ?? 'Failed to update brand kit');
-		},
-	});
+	const updateMutation = useMutation(
+		trpc.brandKit.update.mutationOptions({
+			onSuccess: () => {
+				toast.success('Brand kit updated successfully');
+				void queryClient.invalidateQueries({
+					queryKey: trpc.brandKit.current.queryKey(),
+				});
+			},
+			onError: error => {
+				toast.error(error.message);
+			},
+		}),
+	);
 
 	const handleSubmit = (data: z.infer<typeof formSchema>) => {
-		updateMutation.mutate(data);
+		updateMutation.mutate({ ...data, handle });
 	};
 
 	return (
@@ -148,10 +150,10 @@ export function BrandKitForm({ brandKit, onFormDataChange }: BrandKitFormProps) 
 										Select and customize your brand colors
 									</Text>
 								</div>
-								<AppearanceCustomizerV2
-									appearancePreset={form.watch('appearancePreset')}
+								<ColorCustomizer
+									colorPreset={form.watch('colorPreset')}
 									colorScheme={form.watch('colorScheme')}
-									onAppearanceChange={preset => form.setValue('appearancePreset', preset)}
+									onColorPresetChange={preset => form.setValue('colorPreset', preset)}
 									onColorSchemeChange={scheme => form.setValue('colorScheme', scheme)}
 								/>
 							</div>
@@ -185,9 +187,9 @@ export function BrandKitForm({ brandKit, onFormDataChange }: BrandKitFormProps) 
 									</Text>
 								</div>
 								<BlockStyleCustomizer
-									blockStyle={form.watch('blockStyle')}
-									blockShadow={form.watch('blockShadow')}
-									blockOutline={form.watch('blockOutline')}
+									blockStyle={form.watch('blockStyle') ?? 'rounded'}
+									blockShadow={form.watch('blockShadow') ?? false}
+									blockOutline={form.watch('blockOutline') ?? false}
 									onBlockStyleChange={style => form.setValue('blockStyle', style)}
 									onBlockShadowChange={shadow => form.setValue('blockShadow', shadow)}
 									onBlockOutlineChange={outline => form.setValue('blockOutline', outline)}

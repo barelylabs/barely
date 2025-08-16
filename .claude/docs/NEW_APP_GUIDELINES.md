@@ -42,6 +42,7 @@ graph TD
 Every feature with public access requires TWO separate router implementations:
 
 1. **Admin Router** (`packages/lib/src/trpc/routes/[feature].route.ts`)
+
    - Workspace-scoped operations
    - Full CRUD capabilities
    - Protected by authentication
@@ -89,45 +90,53 @@ Before writing any code, determine:
 ```typescript
 // packages/db/src/sql/[entity-name].sql.ts
 import { relations } from 'drizzle-orm';
-import { boolean, index, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
+import {
+	boolean,
+	index,
+	pgTable,
+	text,
+	timestamp,
+	uniqueIndex,
+} from 'drizzle-orm/pg-core';
+
 import { dbId, primaryId } from '../utils/sql';
 import { Workspaces } from './workspace.sql';
 
 export const YourEntities = pgTable(
-  'YourEntities',
-  {
-    ...primaryId,
-    
-    // Workspace association (required for admin features)
-    workspaceId: dbId('workspaceId')
-      .notNull()
-      .references(() => Workspaces.id, { onDelete: 'cascade' }),
-    
-    // Your fields
-    name: text('name').notNull(),
-    slug: text('slug').notNull(),
-    isPublic: boolean('isPublic').notNull().default(false),
-    
-    // Metadata
-    metadata: text('metadata').$type<Record<string, unknown>>(),
-    
-    // Soft delete
-    deletedAt: timestamp('deletedAt'),
-    
-    // Add your custom fields here
-  },
-  table => ({
-    workspace: index('YourEntities_workspace_idx').on(table.workspaceId),
-    slug: uniqueIndex('YourEntities_slug_idx').on(table.slug),
-  }),
+	'YourEntities',
+	{
+		...primaryId,
+
+		// Workspace association (required for admin features)
+		workspaceId: dbId('workspaceId')
+			.notNull()
+			.references(() => Workspaces.id, { onDelete: 'cascade' }),
+
+		// Your fields
+		name: text('name').notNull(),
+		slug: text('slug').notNull(),
+		isPublic: boolean('isPublic').notNull().default(false),
+
+		// Metadata
+		metadata: text('metadata').$type<Record<string, unknown>>(),
+
+		// Soft delete
+		deletedAt: timestamp('deletedAt'),
+
+		// Add your custom fields here
+	},
+	table => ({
+		workspace: index('YourEntities_workspace_idx').on(table.workspaceId),
+		slug: uniqueIndex('YourEntities_slug_idx').on(table.slug),
+	}),
 );
 
 // Relations
 export const YourEntities_Relations = relations(YourEntities, ({ one, many }) => ({
-  workspace: one(Workspaces, {
-    fields: [YourEntities.workspaceId],
-    references: [Workspaces.id],
-  }),
+	workspace: one(Workspaces, {
+		fields: [YourEntities.workspaceId],
+		references: [Workspaces.id],
+	}),
 }));
 
 // Type exports
@@ -142,9 +151,9 @@ export type InsertYourEntity = typeof YourEntities.$inferInsert;
 import { YourEntities, YourEntities_Relations } from './sql/your-entity.sql';
 
 export const dbSchema = {
-  // ... existing schemas
-  YourEntities,
-  YourEntities_Relations,
+	// ... existing schemas
+	YourEntities,
+	YourEntities_Relations,
 };
 ```
 
@@ -160,32 +169,33 @@ import { YourEntities } from '@barely/db/sql';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 
 import {
-  commonFiltersSchema,
-  infiniteQuerySchema,
-  querySelectionSchema,
+	commonFiltersSchema,
+	infiniteQuerySchema,
+	querySelectionSchema,
 } from '../helpers';
 
 // Generate schemas from Drizzle table definition
 export const insertYourEntitySchema = createInsertSchema(YourEntities, {
-  // Add custom validation for specific fields
-  name: name => name.min(1, 'Name is required'),
-  slug: slug => slug.min(1, 'Slug is required').regex(/^[a-z0-9-]+$/, 'Invalid slug format'),
+	// Add custom validation for specific fields
+	name: name => name.min(1, 'Name is required'),
+	slug: slug =>
+		slug.min(1, 'Slug is required').regex(/^[a-z0-9-]+$/, 'Invalid slug format'),
 });
 
 // Standard CRUD schemas
 export const createYourEntitySchema = insertYourEntitySchema.omit({
-  id: true,
-  workspaceId: true,
+	id: true,
+	workspaceId: true,
 });
 
 export const upsertYourEntitySchema = insertYourEntitySchema.partial({
-  id: true,
-  workspaceId: true,
+	id: true,
+	workspaceId: true,
 });
 
 export const updateYourEntitySchema = insertYourEntitySchema
-  .partial()
-  .required({ id: true });
+	.partial()
+	.required({ id: true });
 
 // Select schema (rarely needed, types are usually inferred)
 export const selectYourEntitySchema = createSelectSchema(YourEntities);
@@ -199,37 +209,37 @@ export type UpdateYourEntity = z.infer<typeof updateYourEntitySchema>;
 
 // Filter and query schemas
 export const yourEntityFilterSchema = commonFiltersSchema.extend({
-  // Add entity-specific filters here
-  status: z.enum(['draft', 'published', 'archived']).optional(),
+	// Add entity-specific filters here
+	status: z.enum(['draft', 'published', 'archived']).optional(),
 });
 
 export const yourEntitySearchParamsSchema = yourEntityFilterSchema.extend({
-  selectedIds: querySelectionSchema.optional(),
+	selectedIds: querySelectionSchema.optional(),
 });
 
 export const selectWorkspaceYourEntitiesSchema = yourEntitySearchParamsSchema.extend(
-  infiniteQuerySchema.shape,
+	infiniteQuerySchema.shape,
 );
 
 // Public schemas (for public-facing apps)
 export const publicYourEntitySchema = selectYourEntitySchema
-  .pick({
-    name: true,
-    slug: true,
-    // Only expose necessary public fields
-  })
-  .extend({
-    // Add computed/transformed fields if needed
-    displayName: z.string().optional(),
-  });
+	.pick({
+		name: true,
+		slug: true,
+		// Only expose necessary public fields
+	})
+	.extend({
+		// Add computed/transformed fields if needed
+		displayName: z.string().optional(),
+	});
 
 export type PublicYourEntity = z.infer<typeof publicYourEntitySchema>;
 
 // Default values for forms
 export const defaultYourEntity: CreateYourEntity = {
-  name: '',
-  slug: '',
-  isPublic: false,
+	name: '',
+	slug: '',
+	isPublic: false,
 };
 ```
 
@@ -275,13 +285,13 @@ The tRPC routes follow strict patterns for consistency, type safety, and perform
 import type { TRPCRouterRecord } from '@trpc/server';
 import { dbHttp } from '@barely/db/client';
 import { dbPool } from '@barely/db/pool';
-import { YourEntities, RelatedTable } from '@barely/db/sql';
+import { RelatedTable, YourEntities } from '@barely/db/sql';
 import { sqlAnd, sqlCount, sqlStringContains } from '@barely/db/utils';
 import { newId, raise } from '@barely/utils';
-import { 
-  createYourEntitySchema,
-  selectWorkspaceYourEntitiesSchema,
-  updateYourEntitySchema,
+import {
+	createYourEntitySchema,
+	selectWorkspaceYourEntitiesSchema,
+	updateYourEntitySchema,
 } from '@barely/validators';
 import { TRPCError } from '@trpc/server';
 import { and, asc, desc, eq, gt, inArray, isNull, lt, or } from 'drizzle-orm';
@@ -290,224 +300,221 @@ import { z } from 'zod/v4';
 import { workspaceProcedure } from '../trpc';
 
 export const yourEntityRoute = {
-  // Paginated list with cursor-based pagination
-  byWorkspace: workspaceProcedure
-    .input(selectWorkspaceYourEntitiesSchema)
-    .query(async ({ input, ctx }) => {
-      const { limit, cursor, search, showArchived, showDeleted } = input;
-      
-      // Use dbHttp for single read operation
-      const entities = await dbHttp.query.YourEntities.findMany({
-        with: {
-          // Load relations if needed
-          relatedItems: true,
-        },
-        where: sqlAnd([
-          eq(YourEntities.workspaceId, ctx.workspace.id),
-          showArchived ? undefined : isNull(YourEntities.archivedAt),
-          showDeleted ? undefined : isNull(YourEntities.deletedAt),
-          !!search?.length && sqlStringContains(YourEntities.name, search),
-          // Cursor pagination
-          !!cursor &&
-            or(
-              lt(YourEntities.createdAt, cursor.createdAt),
-              and(eq(YourEntities.createdAt, cursor.createdAt), gt(YourEntities.id, cursor.id)),
-            ),
-        ]),
-        orderBy: [desc(YourEntities.createdAt), asc(YourEntities.id)],
-        limit: limit + 1, // Fetch one extra to check for next page
-      });
-      
-      let nextCursor: typeof cursor | undefined = undefined;
-      
-      if (entities.length > limit) {
-        const nextEntity = entities.pop();
-        if (nextEntity) {
-          nextCursor = {
-            id: nextEntity.id,
-            createdAt: nextEntity.createdAt,
-          };
-        }
-      }
-      
-      return {
-        entities,
-        nextCursor,
-      };
-    }),
+	// Paginated list with cursor-based pagination
+	byWorkspace: workspaceProcedure
+		.input(selectWorkspaceYourEntitiesSchema)
+		.query(async ({ input, ctx }) => {
+			const { limit, cursor, search, showArchived, showDeleted } = input;
 
-  // Get total count
-  totalByWorkspace: workspaceProcedure.query(async ({ ctx }) => {
-    // Single read - use dbHttp
-    const res = await dbHttp
-      .select({ count: sqlCount })
-      .from(YourEntities)
-      .where(eq(YourEntities.workspaceId, ctx.workspace.id));
-    
-    return res[0]?.count ?? 0;
-  }),
+			// Use dbHttp for single read operation
+			const entities = await dbHttp.query.YourEntities.findMany({
+				with: {
+					// Load relations if needed
+					relatedItems: true,
+				},
+				where: sqlAnd([
+					eq(YourEntities.workspaceId, ctx.workspace.id),
+					showArchived ? undefined : isNull(YourEntities.archivedAt),
+					showDeleted ? undefined : isNull(YourEntities.deletedAt),
+					!!search?.length && sqlStringContains(YourEntities.name, search),
+					// Cursor pagination
+					!!cursor &&
+						or(
+							lt(YourEntities.createdAt, cursor.createdAt),
+							and(
+								eq(YourEntities.createdAt, cursor.createdAt),
+								gt(YourEntities.id, cursor.id),
+							),
+						),
+				]),
+				orderBy: [desc(YourEntities.createdAt), asc(YourEntities.id)],
+				limit: limit + 1, // Fetch one extra to check for next page
+			});
 
-  // Get single entity by ID
-  byId: workspaceProcedure
-    .input(z.object({ id: z.string() }))
-    .query(async ({ input, ctx }) => {
-      // Single read - use dbHttp
-      const entity = await dbHttp.query.YourEntities.findFirst({
-        where: and(
-          eq(YourEntities.id, input.id),
-          eq(YourEntities.workspaceId, ctx.workspace.id),
-          isNull(YourEntities.deletedAt),
-        ),
-        with: {
-          relatedItems: true,
-        },
-      });
-      
-      if (!entity) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Entity not found',
-        });
-      }
-      
-      return entity;
-    }),
+			let nextCursor: typeof cursor | undefined = undefined;
 
-  // Create with validation
-  create: workspaceProcedure
-    .input(createYourEntitySchema)
-    .mutation(async ({ input, ctx }) => {
-      const { relatedIds, ...data } = input;
-      
-      // Multiple operations - use dbPool
-      const pool = dbPool(ctx.pool);
-      
-      // Check for duplicates
-      const existing = await pool.query.YourEntities.findFirst({
-        where: and(
-          eq(YourEntities.workspaceId, ctx.workspace.id),
-          eq(YourEntities.slug, data.slug),
-          isNull(YourEntities.deletedAt),
-        ),
-      });
-      
-      if (existing) {
-        raise('An entity with this slug already exists');
-      }
-      
-      const entityData = {
-        ...data,
-        id: newId('yourEntity'),
-        workspaceId: ctx.workspace.id,
-      };
-      
-      // Transaction for multiple writes
-      const result = await pool.transaction(async tx => {
-        const [entity] = await tx
-          .insert(YourEntities)
-          .values(entityData)
-          .returning();
-        
-        // Handle many-to-many relations
-        if (relatedIds?.length) {
-          await tx.insert(YourEntities_To_RelatedItems).values(
-            relatedIds.map(relatedId => ({
-              yourEntityId: entity.id,
-              relatedId,
-            })),
-          );
-        }
-        
-        return entity;
-      });
-      
-      return result ?? raise('Failed to create entity');
-    }),
+			if (entities.length > limit) {
+				const nextEntity = entities.pop();
+				if (nextEntity) {
+					nextCursor = {
+						id: nextEntity.id,
+						createdAt: nextEntity.createdAt,
+					};
+				}
+			}
 
-  // Update with complex logic
-  update: workspaceProcedure
-    .input(updateYourEntitySchema)
-    .mutation(async ({ input, ctx }) => {
-      const { id, relatedIds, ...data } = input;
-      
-      // Multiple operations - use dbPool
-      const pool = dbPool(ctx.pool);
-      
-      await pool.transaction(async tx => {
-        // Update main entity
-        const [updated] = await tx
-          .update(YourEntities)
-          .set(data)
-          .where(
-            and(
-              eq(YourEntities.id, id),
-              eq(YourEntities.workspaceId, ctx.workspace.id),
-            ),
-          )
-          .returning();
-        
-        if (!updated) {
-          throw new TRPCError({ code: 'NOT_FOUND' });
-        }
-        
-        // Update relations if provided
-        if (relatedIds) {
-          // Remove old relations
-          await tx
-            .delete(YourEntities_To_RelatedItems)
-            .where(eq(YourEntities_To_RelatedItems.yourEntityId, id));
-          
-          // Add new relations
-          if (relatedIds.length > 0) {
-            await tx.insert(YourEntities_To_RelatedItems).values(
-              relatedIds.map(relatedId => ({
-                yourEntityId: id,
-                relatedId,
-              })),
-            );
-          }
-        }
-        
-        return updated;
-      });
-    }),
+			return {
+				entities,
+				nextCursor,
+			};
+		}),
 
-  // Batch operations
-  archive: workspaceProcedure
-    .input(z.object({ ids: z.array(z.string()) }))
-    .mutation(async ({ input, ctx }) => {
-      // Single write - use dbHttp
-      const updated = await dbHttp
-        .update(YourEntities)
-        .set({ archivedAt: new Date() })
-        .where(
-          and(
-            eq(YourEntities.workspaceId, ctx.workspace.id),
-            inArray(YourEntities.id, input.ids),
-          ),
-        )
-        .returning();
-      
-      return updated[0] ?? raise('Failed to archive entities');
-    }),
+	// Get total count
+	totalByWorkspace: workspaceProcedure.query(async ({ ctx }) => {
+		// Single read - use dbHttp
+		const res = await dbHttp
+			.select({ count: sqlCount })
+			.from(YourEntities)
+			.where(eq(YourEntities.workspaceId, ctx.workspace.id));
 
-  delete: workspaceProcedure
-    .input(z.object({ ids: z.array(z.string()) }))
-    .mutation(async ({ input, ctx }) => {
-      // Single write - use dbHttp
-      const updated = await dbHttp
-        .update(YourEntities)
-        .set({ deletedAt: new Date() })
-        .where(
-          and(
-            eq(YourEntities.workspaceId, ctx.workspace.id),
-            inArray(YourEntities.id, input.ids),
-          ),
-        )
-        .returning();
-      
-      return updated[0] ?? raise('Failed to delete entities');
-    }),
+		return res[0]?.count ?? 0;
+	}),
+
+	// Get single entity by ID
+	byId: workspaceProcedure
+		.input(z.object({ id: z.string() }))
+		.query(async ({ input, ctx }) => {
+			// Single read - use dbHttp
+			const entity = await dbHttp.query.YourEntities.findFirst({
+				where: and(
+					eq(YourEntities.id, input.id),
+					eq(YourEntities.workspaceId, ctx.workspace.id),
+					isNull(YourEntities.deletedAt),
+				),
+				with: {
+					relatedItems: true,
+				},
+			});
+
+			if (!entity) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Entity not found',
+				});
+			}
+
+			return entity;
+		}),
+
+	// Create with validation
+	create: workspaceProcedure
+		.input(createYourEntitySchema)
+		.mutation(async ({ input, ctx }) => {
+			const { relatedIds, ...data } = input;
+
+			// Multiple operations - use dbPool
+			const pool = dbPool(ctx.pool);
+
+			// Check for duplicates
+			const existing = await pool.query.YourEntities.findFirst({
+				where: and(
+					eq(YourEntities.workspaceId, ctx.workspace.id),
+					eq(YourEntities.slug, data.slug),
+					isNull(YourEntities.deletedAt),
+				),
+			});
+
+			if (existing) {
+				raise('An entity with this slug already exists');
+			}
+
+			const entityData = {
+				...data,
+				id: newId('yourEntity'),
+				workspaceId: ctx.workspace.id,
+			};
+
+			// Transaction for multiple writes
+			const result = await pool.transaction(async tx => {
+				const [entity] = await tx.insert(YourEntities).values(entityData).returning();
+
+				// Handle many-to-many relations
+				if (relatedIds?.length) {
+					await tx.insert(YourEntities_To_RelatedItems).values(
+						relatedIds.map(relatedId => ({
+							yourEntityId: entity.id,
+							relatedId,
+						})),
+					);
+				}
+
+				return entity;
+			});
+
+			return result ?? raise('Failed to create entity');
+		}),
+
+	// Update with complex logic
+	update: workspaceProcedure
+		.input(updateYourEntitySchema)
+		.mutation(async ({ input, ctx }) => {
+			const { id, relatedIds, ...data } = input;
+
+			// Multiple operations - use dbPool
+			const pool = dbPool(ctx.pool);
+
+			await pool.transaction(async tx => {
+				// Update main entity
+				const [updated] = await tx
+					.update(YourEntities)
+					.set(data)
+					.where(
+						and(eq(YourEntities.id, id), eq(YourEntities.workspaceId, ctx.workspace.id)),
+					)
+					.returning();
+
+				if (!updated) {
+					throw new TRPCError({ code: 'NOT_FOUND' });
+				}
+
+				// Update relations if provided
+				if (relatedIds) {
+					// Remove old relations
+					await tx
+						.delete(YourEntities_To_RelatedItems)
+						.where(eq(YourEntities_To_RelatedItems.yourEntityId, id));
+
+					// Add new relations
+					if (relatedIds.length > 0) {
+						await tx.insert(YourEntities_To_RelatedItems).values(
+							relatedIds.map(relatedId => ({
+								yourEntityId: id,
+								relatedId,
+							})),
+						);
+					}
+				}
+
+				return updated;
+			});
+		}),
+
+	// Batch operations
+	archive: workspaceProcedure
+		.input(z.object({ ids: z.array(z.string()) }))
+		.mutation(async ({ input, ctx }) => {
+			// Single write - use dbHttp
+			const updated = await dbHttp
+				.update(YourEntities)
+				.set({ archivedAt: new Date() })
+				.where(
+					and(
+						eq(YourEntities.workspaceId, ctx.workspace.id),
+						inArray(YourEntities.id, input.ids),
+					),
+				)
+				.returning();
+
+			return updated[0] ?? raise('Failed to archive entities');
+		}),
+
+	delete: workspaceProcedure
+		.input(z.object({ ids: z.array(z.string()) }))
+		.mutation(async ({ input, ctx }) => {
+			// Single write - use dbHttp
+			const updated = await dbHttp
+				.update(YourEntities)
+				.set({ deletedAt: new Date() })
+				.where(
+					and(
+						eq(YourEntities.workspaceId, ctx.workspace.id),
+						inArray(YourEntities.id, input.ids),
+					),
+				)
+				.returning();
+
+			return updated[0] ?? raise('Failed to delete entities');
+		}),
 } satisfies TRPCRouterRecord;
 ```
 
@@ -533,43 +540,46 @@ import { z } from 'zod/v4';
 import { recordPageEvent } from '../../functions/event.fns';
 
 export const yourEntityRenderRoute = {
-  // Primary purpose: log events for analytics
-  log: publicProcedure
-    .input(
-      z.object({
-        entityId: z.string(),
-        type: z.enum(WEB_EVENT_TYPES__PAGE),
-        linkClickParams: z.object({
-          platform: z.string(),
-        }).optional(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const { visitor } = ctx;
-      const { entityId, type } = input;
-      
-      // Single read - use dbHttp
-      const entity = await dbHttp.query.YourEntities.findFirst({
-        where: eq(YourEntities.id, entityId),
-        with: {
-          workspace: {
-            columns: {
-              id: true,
-              plan: true,
-              eventUsage: true,
-              eventUsageLimitOverride: true,
-            },
-          },
-        },
-      }) ?? raise('Entity not found');
-      
-      await recordPageEvent({
-        page: entity,
-        type,
-        visitor,
-        workspace: entity.workspace,
-      });
-    }),
+	// Primary purpose: log events for analytics
+	log: publicProcedure
+		.input(
+			z.object({
+				entityId: z.string(),
+				type: z.enum(WEB_EVENT_TYPES__PAGE),
+				linkClickParams: z
+					.object({
+						platform: z.string(),
+					})
+					.optional(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const { visitor } = ctx;
+			const { entityId, type } = input;
+
+			// Single read - use dbHttp
+			const entity =
+				(await dbHttp.query.YourEntities.findFirst({
+					where: eq(YourEntities.id, entityId),
+					with: {
+						workspace: {
+							columns: {
+								id: true,
+								plan: true,
+								eventUsage: true,
+								eventUsageLimitOverride: true,
+							},
+						},
+					},
+				})) ?? raise('Entity not found');
+
+			await recordPageEvent({
+				page: entity,
+				type,
+				visitor,
+				workspace: entity.workspace,
+			});
+		}),
 } satisfies TRPCRouterRecord;
 ```
 
@@ -592,156 +602,157 @@ import { z } from 'zod/v4';
 import { ratelimit } from '../../integrations/upstash';
 
 export const yourEntityRoute = {
-  // Public data access by handle and key
-  byHandleAndKey: publicProcedure
-    .input(z.object({ 
-      handle: z.string(),
-      key: z.string(),
-    }))
-    .query(async ({ input }) => {
-      const { handle, key } = input;
-      
-      // Single read - use dbHttp
-      const entity = await dbHttp.query.YourEntities.findFirst({
-        where: and(
-          eq(YourEntities.handle, handle),
-          eq(YourEntities.key, key),
-          eq(YourEntities.isActive, true),
-          isNull(YourEntities.deletedAt),
-        ),
-        with: {
-          coverImage: true,
-          file: true,
-          workspace: true,
-        },
-      });
-      
-      if (!entity) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Content not found',
-        });
-      }
-      
-      return entity;
-    }),
+	// Public data access by handle and key
+	byHandleAndKey: publicProcedure
+		.input(
+			z.object({
+				handle: z.string(),
+				key: z.string(),
+			}),
+		)
+		.query(async ({ input }) => {
+			const { handle, key } = input;
 
-  // Alternative: access by ID and params
-  byIdAndParams: publicProcedure
-    .input(z.object({ 
-      id: z.string(),
-      handle: z.string(),
-      key: z.string(),
-    }))
-    .query(async ({ input, ctx }) => {
-      // Multiple reads - use dbPool
-      const pool = dbPool(ctx.pool);
-      
-      const entity = await pool.query.YourEntities.findFirst({
-        where: and(
-          eq(YourEntities.handle, input.handle),
-          eq(YourEntities.key, input.key),
-        ),
-        with: {
-          workspace: true,
-          relatedItems: {
-            where: eq(RelatedItems.id, input.id),
-            limit: 1,
-          },
-        },
-      });
-      
-      if (!entity) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Not found',
-        });
-      }
-      
-      return entity;
-    }),
+			// Single read - use dbHttp
+			const entity = await dbHttp.query.YourEntities.findFirst({
+				where: and(
+					eq(YourEntities.handle, handle),
+					eq(YourEntities.key, key),
+					eq(YourEntities.isActive, true),
+					isNull(YourEntities.deletedAt),
+				),
+				with: {
+					coverImage: true,
+					file: true,
+					workspace: true,
+				},
+			});
 
-  // Public mutation with email capture
-  submitForm: publicProcedure
-    .input(
-      z.object({
-        entityId: z.string(),
-        email: z.email(),
-        data: z.record(z.string()).optional(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const { entityId, email, data } = input;
-      
-      // Rate limit by IP
-      const { success } = await ratelimit(3, '1 h').limit(
-        `form.${entityId}.${ctx.visitor?.ip ?? '127.0.0.1'}`,
-      );
-      
-      if (!success) {
-        throw new TRPCError({
-          code: 'TOO_MANY_REQUESTS',
-          message: 'Too many submissions. Please try again later.',
-        });
-      }
-      
-      // Multiple operations - use dbPool
-      const pool = dbPool(ctx.pool);
-      
-      // Get entity and workspace
-      const entity = await pool.query.YourEntities.findFirst({
-        where: and(
-          eq(YourEntities.id, entityId),
-          eq(YourEntities.isPublic, true),
-        ),
-        with: { workspace: true },
-      });
-      
-      if (!entity) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Form not found.',
-        });
-      }
-      
-      // Create or update fan
-      const fanId = newId('fan');
-      await pool
-        .insert(Fans)
-        .values({
-          id: fanId,
-          workspaceId: entity.workspaceId,
-          email,
-          emailMarketingOptIn: true,
-          appReferer: 'yourapp',
-          metadata: data,
-        })
-        .onConflictDoUpdate({
-          target: [Fans.email, Fans.workspaceId],
-          set: {
-            emailMarketingOptIn: true,
-            updatedAt: new Date(),
-          },
-        });
-      
-      // Log submission event
-      await pool.insert(FormSubmissions).values({
-        id: newId('formSubmission'),
-        entityId,
-        fanId,
-        data,
-        visitorId: ctx.visitor?.id,
-      });
-      
-      // Send confirmation email
-      await sendEmail({
-        to: email,
-        subject: 'Thank you for your submission',
-        // ... email template
-      });
-      
-      return { success: true };
-    }),
+			if (!entity) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Content not found',
+				});
+			}
+
+			return entity;
+		}),
+
+	// Alternative: access by ID and params
+	byIdAndParams: publicProcedure
+		.input(
+			z.object({
+				id: z.string(),
+				handle: z.string(),
+				key: z.string(),
+			}),
+		)
+		.query(async ({ input, ctx }) => {
+			// Multiple reads - use dbPool
+			const pool = dbPool(ctx.pool);
+
+			const entity = await pool.query.YourEntities.findFirst({
+				where: and(
+					eq(YourEntities.handle, input.handle),
+					eq(YourEntities.key, input.key),
+				),
+				with: {
+					workspace: true,
+					relatedItems: {
+						where: eq(RelatedItems.id, input.id),
+						limit: 1,
+					},
+				},
+			});
+
+			if (!entity) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Not found',
+				});
+			}
+
+			return entity;
+		}),
+
+	// Public mutation with email capture
+	submitForm: publicProcedure
+		.input(
+			z.object({
+				entityId: z.string(),
+				email: z.email(),
+				data: z.record(z.string()).optional(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const { entityId, email, data } = input;
+
+			// Rate limit by IP
+			const { success } = await ratelimit(3, '1 h').limit(
+				`form.${entityId}.${ctx.visitor?.ip ?? '127.0.0.1'}`,
+			);
+
+			if (!success) {
+				throw new TRPCError({
+					code: 'TOO_MANY_REQUESTS',
+					message: 'Too many submissions. Please try again later.',
+				});
+			}
+
+			// Multiple operations - use dbPool
+			const pool = dbPool(ctx.pool);
+
+			// Get entity and workspace
+			const entity = await pool.query.YourEntities.findFirst({
+				where: and(eq(YourEntities.id, entityId), eq(YourEntities.isPublic, true)),
+				with: { workspace: true },
+			});
+
+			if (!entity) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Form not found.',
+				});
+			}
+
+			// Create or update fan
+			const fanId = newId('fan');
+			await pool
+				.insert(Fans)
+				.values({
+					id: fanId,
+					workspaceId: entity.workspaceId,
+					email,
+					emailMarketingOptIn: true,
+					appReferer: 'yourapp',
+					metadata: data,
+				})
+				.onConflictDoUpdate({
+					target: [Fans.email, Fans.workspaceId],
+					set: {
+						emailMarketingOptIn: true,
+						updatedAt: new Date(),
+					},
+				});
+
+			// Log submission event
+			await pool.insert(FormSubmissions).values({
+				id: newId('formSubmission'),
+				entityId,
+				fanId,
+				data,
+				visitorId: ctx.visitor?.id,
+			});
+
+			// Send confirmation email
+			await sendEmail({
+				to: email,
+				subject: 'Thank you for your submission',
+				// ... email template
+			});
+
+			return { success: true };
+		}),
 } satisfies TRPCRouterRecord;
 ```
 
@@ -752,8 +763,8 @@ export const yourEntityRoute = {
 import { yourEntityRoute } from './routes/your-entity.route';
 
 export const appRouter = createTRPCRouter({
-  // ... existing routes
-  yourEntity: yourEntityRoute,
+	// ... existing routes
+	yourEntity: yourEntityRoute,
 });
 ```
 
@@ -766,37 +777,40 @@ When implementing sorting by fields other than createdAt, you need complex curso
 ```typescript
 // Helper for building cursor WHERE clauses
 function getCursorWhereClause(
-  cursor: { id: string; createdAt: Date; sortField: number | null },
-  sortBy: 'name' | 'popularity' | 'date',
-  sortOrder: 'asc' | 'desc',
+	cursor: { id: string; createdAt: Date; sortField: number | null },
+	sortBy: 'name' | 'popularity' | 'date',
+	sortOrder: 'asc' | 'desc',
 ) {
-  const isDesc = sortOrder === 'desc';
-  
-  if (sortBy === 'popularity' && cursor.sortField !== null) {
-    return or(
-      isDesc 
-        ? lt(YourEntities.popularity, cursor.sortField)
-        : gt(YourEntities.popularity, cursor.sortField),
-      and(
-        eq(YourEntities.popularity, cursor.sortField),
-        or(
-          lt(YourEntities.createdAt, cursor.createdAt),
-          and(eq(YourEntities.createdAt, cursor.createdAt), lt(YourEntities.id, cursor.id)),
-        ),
-      ),
-    );
-  }
-  
-  // Default cursor logic for other sort types
-  return or(
-    isDesc 
-      ? lt(YourEntities.createdAt, cursor.createdAt)
-      : gt(YourEntities.createdAt, cursor.createdAt),
-    and(
-      eq(YourEntities.createdAt, cursor.createdAt),
-      isDesc ? lt(YourEntities.id, cursor.id) : gt(YourEntities.id, cursor.id),
-    ),
-  );
+	const isDesc = sortOrder === 'desc';
+
+	if (sortBy === 'popularity' && cursor.sortField !== null) {
+		return or(
+			isDesc ?
+				lt(YourEntities.popularity, cursor.sortField)
+			:	gt(YourEntities.popularity, cursor.sortField),
+			and(
+				eq(YourEntities.popularity, cursor.sortField),
+				or(
+					lt(YourEntities.createdAt, cursor.createdAt),
+					and(
+						eq(YourEntities.createdAt, cursor.createdAt),
+						lt(YourEntities.id, cursor.id),
+					),
+				),
+			),
+		);
+	}
+
+	// Default cursor logic for other sort types
+	return or(
+		isDesc ?
+			lt(YourEntities.createdAt, cursor.createdAt)
+		:	gt(YourEntities.createdAt, cursor.createdAt),
+		and(
+			eq(YourEntities.createdAt, cursor.createdAt),
+			isDesc ? lt(YourEntities.id, cursor.id) : gt(YourEntities.id, cursor.id),
+		),
+	);
 }
 ```
 
@@ -809,49 +823,52 @@ Create helper functions in `packages/lib/src/functions/[entity].fns.ts`:
 import type { YourEntityWith_Relations } from '@barely/validators';
 
 export async function getYourEntityById(id: string) {
-  const entity = await dbHttp.query.YourEntities.findFirst({
-    where: eq(YourEntities.id, id),
-    with: {
-      workspace: true,
-      relatedItems: {
-        with: {
-          item: true,
-        },
-      },
-    },
-  });
-  
-  return entity ? formatYourEntity(entity) : null;
+	const entity = await dbHttp.query.YourEntities.findFirst({
+		where: eq(YourEntities.id, id),
+		with: {
+			workspace: true,
+			relatedItems: {
+				with: {
+					item: true,
+				},
+			},
+		},
+	});
+
+	return entity ? formatYourEntity(entity) : null;
 }
 
 export function formatYourEntity(
-  rawEntity: RawYourEntityWith_Relations,
+	rawEntity: RawYourEntityWith_Relations,
 ): YourEntityWith_Relations {
-  return {
-    ...rawEntity,
-    relatedItems: rawEntity.relatedItems.map(r => r.item),
-    // Transform nested data as needed
-  };
+	return {
+		...rawEntity,
+		relatedItems: rawEntity.relatedItems.map(r => r.item),
+		// Transform nested data as needed
+	};
 }
 
 export async function createYourEntity(
-  data: CreateYourEntity,
-  workspaceId: string,
-  pool: DbPool,
+	data: CreateYourEntity,
+	workspaceId: string,
+	pool: DbPool,
 ) {
-  return await pool.transaction(async tx => {
-    // Complex creation logic
-    const entity = await tx.insert(YourEntities).values({
-      id: newId('yourEntity'),
-      workspaceId,
-      ...data,
-    }).returning();
-    
-    // Handle related data
-    // ...
-    
-    return entity[0];
-  });
+	return await pool.transaction(async tx => {
+		// Complex creation logic
+		const entity = await tx
+			.insert(YourEntities)
+			.values({
+				id: newId('yourEntity'),
+				workspaceId,
+				...data,
+			})
+			.returning();
+
+		// Handle related data
+		// ...
+
+		return entity[0];
+	});
 }
 ```
 
@@ -862,9 +879,9 @@ import { pushEvent } from '../../integrations/pusher/pusher-server';
 
 // In your mutation
 await pushEvent('yourEntity', 'update', {
-  id: entity.id,
-  pageSessionId: ctx.pageSessionId,
-  socketId: ctx.pusherSocketId,
+	id: entity.id,
+	pageSessionId: ctx.pageSessionId,
+	socketId: ctx.pusherSocketId,
 });
 ```
 
@@ -875,8 +892,8 @@ import { tasks } from '@trigger.dev/sdk/v3';
 
 // Trigger a background job
 await tasks.trigger<typeof processYourEntity>('process-your-entity', {
-  entityId: entity.id,
-  workspaceId: ctx.workspace.id,
+	entityId: entity.id,
+	workspaceId: ctx.workspace.id,
 });
 ```
 
@@ -886,18 +903,18 @@ await tasks.trigger<typeof processYourEntity>('process-your-entity', {
 import { privateProcedure } from '../trpc';
 
 export const yourEntityRoute = {
-  // Internal procedure not exposed to workspace users
-  _internal_cleanup: privateProcedure
-    .input(z.object({ days: z.number() }))
-    .mutation(async ({ input, ctx }) => {
-      // Cleanup logic that shouldn't be workspace-scoped
-      const cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - input.days);
-      
-      await dbPool(ctx.pool)
-        .delete(YourEntities)
-        .where(lt(YourEntities.deletedAt, cutoffDate));
-    }),
+	// Internal procedure not exposed to workspace users
+	_internal_cleanup: privateProcedure
+		.input(z.object({ days: z.number() }))
+		.mutation(async ({ input, ctx }) => {
+			// Cleanup logic that shouldn't be workspace-scoped
+			const cutoffDate = new Date();
+			cutoffDate.setDate(cutoffDate.getDate() - input.days);
+
+			await dbPool(ctx.pool)
+				.delete(YourEntities)
+				.where(lt(YourEntities.deletedAt, cutoffDate));
+		}),
 };
 ```
 
@@ -923,12 +940,12 @@ Always follow these naming patterns for consistency:
 
 ```typescript
 // packages/api/src/public/[app-name]-render.router.ts
-import { yourEntityRenderRoute } from '@barely/lib/trpc/routes/your-entity-render.route';
 import { createTRPCRouter } from '@barely/lib/trpc/api/trpc';
+import { yourEntityRenderRoute } from '@barely/lib/trpc/routes/your-entity-render.route';
 
 export const yourAppRenderRouter = createTRPCRouter({
-  entity: yourEntityRenderRoute,
-  // Add other public routes here
+	entity: yourEntityRenderRoute,
+	// Add other public routes here
 });
 
 export type YourAppRenderRouter = typeof yourAppRenderRouter;
@@ -938,13 +955,12 @@ export type YourAppRenderRouter = typeof yourAppRenderRouter;
 
 ```typescript
 // packages/api/src/public/[app-name]-render.trpc.react.ts
-import type { YourAppRenderRouter } from './your-app-render.router';
 import { createTRPCContext } from '@barely/lib/trpc/context/createTRPCContext.react';
 
-export const {
-  Provider: YourAppTRPCProvider,
-  useTRPC: useYourAppRenderTRPC,
-} = createTRPCContext<YourAppRenderRouter>();
+import type { YourAppRenderRouter } from './your-app-render.router';
+
+export const { Provider: YourAppTRPCProvider, useTRPC: useYourAppRenderTRPC } =
+	createTRPCContext<YourAppRenderRouter>();
 ```
 
 #### 5.3 Create API handler
@@ -952,12 +968,13 @@ export const {
 ```typescript
 // packages/api/src/public/[app-name]-render.handler.ts
 import { publicRenderHandler } from '@barely/lib/server/api/public-render-handler';
+
 import { yourAppRenderRouter } from './your-app-render.router';
 
 export const yourAppRenderHandler = publicRenderHandler({
-  app: 'yourapp',
-  path: 'yourAppRender',
-  router: yourAppRenderRouter,
+	app: 'yourapp',
+	path: 'yourAppRender',
+	router: yourAppRenderRouter,
 });
 ```
 
@@ -979,52 +996,52 @@ cp -r apps/vip/{package.json,tsconfig.json,tailwind.config.ts,postcss.config.cjs
 
 ```json
 {
-  "name": "@barely/yourapp",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "pnpm with-env next dev --experimental-https --port=3011",
-    "build": "pnpm with-env next build",
-    "build:preview": "pnpm with-env vercel build",
-    "build:production": "pnpm with-env vercel build --prod",
-    "preview": "pnpm with-env next start",
-    "type-check": "tsc --noEmit",
-    "with-env": "dotenv -e ../../.env --"
-  },
-  "dependencies": {
-    "@barely/api": "workspace:*",
-    "@barely/auth": "workspace:*",
-    "@barely/db": "workspace:*",
-    "@barely/email": "workspace:*",
-    "@barely/hooks": "workspace:*",
-    "@barely/lib": "workspace:*",
-    "@barely/ui": "workspace:*",
-    "@barely/utils": "workspace:*",
-    "@barely/validators": "workspace:*",
-    "@tanstack/react-query": "catalog:",
-    "@tanstack/react-query-devtools": "^5.80.10",
-    "@trpc/client": "catalog:",
-    "@trpc/server": "catalog:",
-    "lucide-react": "^0.441.0",
-    "next": "^15.3.4",
-    "react": "catalog:react19",
-    "react-dom": "catalog:react19",
-    "superjson": "^2.2.1",
-    "tailwindcss": "catalog:",
-    "zod": "catalog:"
-  },
-  "devDependencies": {
-    "@barely/tailwind-config": "workspace:*",
-    "@next/eslint-plugin-next": "^15.3.4",
-    "@types/node": "catalog:",
-    "@types/react": "catalog:react19",
-    "@types/react-dom": "catalog:react19",
-    "dotenv-cli": "^8.0.0",
-    "eslint": "catalog:",
-    "postcss": "catalog:",
-    "typescript": "catalog:"
-  }
+	"name": "@barely/yourapp",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "pnpm with-env next dev --experimental-https --port=3011",
+		"build": "pnpm with-env next build",
+		"build:preview": "pnpm with-env vercel build",
+		"build:production": "pnpm with-env vercel build --prod",
+		"preview": "pnpm with-env next start",
+		"type-check": "tsc --noEmit",
+		"with-env": "dotenv -e ../../.env --"
+	},
+	"dependencies": {
+		"@barely/api": "workspace:*",
+		"@barely/auth": "workspace:*",
+		"@barely/db": "workspace:*",
+		"@barely/email": "workspace:*",
+		"@barely/hooks": "workspace:*",
+		"@barely/lib": "workspace:*",
+		"@barely/ui": "workspace:*",
+		"@barely/utils": "workspace:*",
+		"@barely/validators": "workspace:*",
+		"@tanstack/react-query": "catalog:",
+		"@tanstack/react-query-devtools": "^5.80.10",
+		"@trpc/client": "catalog:",
+		"@trpc/server": "catalog:",
+		"lucide-react": "^0.441.0",
+		"next": "^15.3.4",
+		"react": "catalog:react19",
+		"react-dom": "catalog:react19",
+		"superjson": "^2.2.1",
+		"tailwindcss": "catalog:",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@barely/tailwind-config": "workspace:*",
+		"@next/eslint-plugin-next": "^15.3.4",
+		"@types/node": "catalog:",
+		"@types/react": "catalog:react19",
+		"@types/react-dom": "catalog:react19",
+		"dotenv-cli": "^8.0.0",
+		"eslint": "catalog:",
+		"postcss": "catalog:",
+		"typescript": "catalog:"
+	}
 }
 ```
 
@@ -1037,25 +1054,25 @@ cp -r apps/vip/{package.json,tsconfig.json,tailwind.config.ts,postcss.config.cjs
 import { QueryClient } from '@tanstack/react-query';
 
 function makeQueryClient() {
-  return new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 60 * 1000, // 1 minute
-        refetchOnWindowFocus: false,
-      },
-    },
-  });
+	return new QueryClient({
+		defaultOptions: {
+			queries: {
+				staleTime: 60 * 1000, // 1 minute
+				refetchOnWindowFocus: false,
+			},
+		},
+	});
 }
 
 let browserQueryClient: QueryClient | undefined = undefined;
 
 export function getQueryClient() {
-  if (typeof window === 'undefined') {
-    return makeQueryClient();
-  } else {
-    if (!browserQueryClient) browserQueryClient = makeQueryClient();
-    return browserQueryClient;
-  }
+	if (typeof window === 'undefined') {
+		return makeQueryClient();
+	} else {
+		if (!browserQueryClient) browserQueryClient = makeQueryClient();
+		return browserQueryClient;
+	}
 }
 ```
 
@@ -1076,7 +1093,7 @@ export { useYourAppRenderTRPC };
 
 export function TRPCReactProvider({ children }: { children: ReactNode }) {
   const queryClient = getQueryClient();
-  
+
   const [trpcClient] = useState(() =>
     useYourAppRenderTRPC.createClient({
       links: [
@@ -1103,26 +1120,27 @@ export function TRPCReactProvider({ children }: { children: ReactNode }) {
 // apps/yourapp/src/trpc/server.tsx
 import { cache } from 'react';
 import { headers } from 'next/headers';
-import { useYourAppRenderTRPC } from '@barely/api/public/your-app-render.trpc.react';
 import { httpBatchLink } from '@trpc/client';
 import SuperJSON from 'superjson';
 
+import { useYourAppRenderTRPC } from '@barely/api/public/your-app-render.trpc.react';
+
 export const getServerTRPC = cache(async () => {
-  const heads = await headers();
-  
-  return useYourAppRenderTRPC.createCaller({
-    links: [
-      httpBatchLink({
-        url: `${process.env.NEXT_PUBLIC_YOURAPP_BASE_URL}/api/trpc/yourAppRender`,
-        headers() {
-          const newHeaders = new Map(heads);
-          newHeaders.set('x-trpc-source', 'rsc');
-          return Object.fromEntries(newHeaders);
-        },
-        transformer: SuperJSON,
-      }),
-    ],
-  });
+	const heads = await headers();
+
+	return useYourAppRenderTRPC.createCaller({
+		links: [
+			httpBatchLink({
+				url: `${process.env.NEXT_PUBLIC_YOURAPP_BASE_URL}/api/trpc/yourAppRender`,
+				headers() {
+					const newHeaders = new Map(heads);
+					newHeaders.set('x-trpc-source', 'rsc');
+					return Object.fromEntries(newHeaders);
+				},
+				transformer: SuperJSON,
+			}),
+		],
+	});
 });
 ```
 
@@ -1178,16 +1196,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 ```typescript
 // packages/const/src/app.constants.ts
 export const APPS = [
-  'app',
-  'cart',
-  'fm',
-  'link',
-  'page',
-  'press',
-  'www',
-  'nyc',
-  'vip',
-  'yourapp', // Add your app here
+	'app',
+	'cart',
+	'fm',
+	'link',
+	'page',
+	'press',
+	'www',
+	'nyc',
+	'vip',
+	'yourapp', // Add your app here
 ] as const;
 ```
 
@@ -1196,24 +1214,24 @@ export const APPS = [
 ```typescript
 // packages/auth/src/get-url.ts
 export function getBaseUrl(app: App, opts?: { absolute?: boolean }) {
-  // ... existing code
-  
-  if (isDevelopment()) {
-    const portMap = {
-      app: process.env.NEXT_PUBLIC_APP_DEV_PORT ?? '3000',
-      // ... other apps
-      yourapp: process.env.NEXT_PUBLIC_YOURAPP_DEV_PORT ?? '3011',
-    };
-    // ... rest of function
-  }
-  
-  // Production URLs
-  const urlMap = {
-    app: process.env.NEXT_PUBLIC_APP_BASE_URL ?? 'https://app.barely.ai',
-    // ... other apps
-    yourapp: process.env.NEXT_PUBLIC_YOURAPP_BASE_URL ?? 'https://yourapp.barely.ai',
-  };
-  // ...
+	// ... existing code
+
+	if (isDevelopment()) {
+		const portMap = {
+			app: process.env.NEXT_PUBLIC_APP_DEV_PORT ?? '3000',
+			// ... other apps
+			yourapp: process.env.NEXT_PUBLIC_YOURAPP_DEV_PORT ?? '3011',
+		};
+		// ... rest of function
+	}
+
+	// Production URLs
+	const urlMap = {
+		app: process.env.NEXT_PUBLIC_APP_BASE_URL ?? 'https://app.barely.ai',
+		// ... other apps
+		yourapp: process.env.NEXT_PUBLIC_YOURAPP_BASE_URL ?? 'https://yourapp.barely.ai',
+	};
+	// ...
 }
 ```
 
@@ -1222,18 +1240,18 @@ export function getBaseUrl(app: App, opts?: { absolute?: boolean }) {
 ```typescript
 // packages/auth/env.ts
 const client = z.object({
-  // ... existing vars
-  NEXT_PUBLIC_YOURAPP_BASE_URL: z.string().min(1).optional(),
-  NEXT_PUBLIC_YOURAPP_DEV_PORT: z.string().min(1).optional(),
+	// ... existing vars
+	NEXT_PUBLIC_YOURAPP_BASE_URL: z.string().min(1).optional(),
+	NEXT_PUBLIC_YOURAPP_DEV_PORT: z.string().min(1).optional(),
 });
 
 export const env = createEnv({
-  // ... existing config
-  experimental__runtimeEnv: {
-    // ... existing vars
-    NEXT_PUBLIC_YOURAPP_BASE_URL: process.env.NEXT_PUBLIC_YOURAPP_BASE_URL,
-    NEXT_PUBLIC_YOURAPP_DEV_PORT: process.env.NEXT_PUBLIC_YOURAPP_DEV_PORT,
-  },
+	// ... existing config
+	experimental__runtimeEnv: {
+		// ... existing vars
+		NEXT_PUBLIC_YOURAPP_BASE_URL: process.env.NEXT_PUBLIC_YOURAPP_BASE_URL,
+		NEXT_PUBLIC_YOURAPP_DEV_PORT: process.env.NEXT_PUBLIC_YOURAPP_DEV_PORT,
+	},
 });
 ```
 
@@ -1250,8 +1268,8 @@ APPS=("app:3000" "cart:3002" "fm:3003" "link:3004" "page:3007" "press:3008" "vip
 ```typescript
 // packages/utils/src/id.ts
 const prefixes = {
-  // ... existing prefixes
-  yourEntity: 'ye',
+	// ... existing prefixes
+	yourEntity: 'ye',
 } as const;
 ```
 
@@ -1269,12 +1287,12 @@ import { trpc } from '~/trpc/react';
 
 export default function YourEntitiesPage() {
   const { workspace } = useWorkspace();
-  
+
   const { data: entities } = useQuery({
     ...trpc.yourEntity.list.queryOptions({ limit: 50 }),
     enabled: !!workspace,
   });
-  
+
   return (
     <div>
       <h1>Your Entities</h1>
@@ -1289,12 +1307,15 @@ export default function YourEntitiesPage() {
 For features that only need admin access (no public app):
 
 ### Step 1: Database & Validation
+
 Follow steps 2-3 from "Creating a Public-Facing App"
 
 ### Step 2: Create Admin Routes Only
+
 Create only the admin routes in `packages/lib/src/trpc/routes/[feature].route.ts`
 
 ### Step 3: Add to Admin App
+
 Create pages in `apps/app/src/app/[handle]/[feature]/`
 
 ## Database Integration
@@ -1302,6 +1323,7 @@ Create pages in `apps/app/src/app/[handle]/[feature]/`
 ### Migration Strategy
 
 #### Development
+
 ```bash
 # After creating/modifying schemas
 pnpm db:push        # Push schema to dev database
@@ -1309,6 +1331,7 @@ pnpm db:studio      # Open Drizzle Studio to verify
 ```
 
 #### Production
+
 ```bash
 # Generate migration files
 pnpm db:generate
@@ -1322,23 +1345,27 @@ pnpm db:generate
 ```typescript
 // One-to-many
 export const Parent_Relations = relations(Parents, ({ many }) => ({
-  children: many(Children),
+	children: many(Children),
 }));
 
 export const Child_Relations = relations(Children, ({ one }) => ({
-  parent: one(Parents, {
-    fields: [Children.parentId],
-    references: [Parents.id],
-  }),
+	parent: one(Parents, {
+		fields: [Children.parentId],
+		references: [Parents.id],
+	}),
 }));
 
 // Many-to-many (via junction table)
-export const ItemTags = pgTable('ItemTags', {
-  itemId: dbId('itemId').references(() => Items.id),
-  tagId: dbId('tagId').references(() => Tags.id),
-}, table => ({
-  pk: primaryKey(table.itemId, table.tagId),
-}));
+export const ItemTags = pgTable(
+	'ItemTags',
+	{
+		itemId: dbId('itemId').references(() => Items.id),
+		tagId: dbId('tagId').references(() => Tags.id),
+	},
+	table => ({
+		pk: primaryKey(table.itemId, table.tagId),
+	}),
+);
 ```
 
 ## tRPC Implementation Guide
@@ -1360,25 +1387,26 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 
 export function YourComponent() {
   const trpc = useYourAppRenderTRPC();
-  
+
   // Query
   const { data, isLoading, error } = useQuery({
     ...trpc.entity.bySlug.queryOptions({ slug: 'example' }),
     enabled: !!slug, // Conditional fetching
   });
-  
+
   // Mutation
-  const { mutate, isPending } = useMutation({
-    ...trpc.entity.create.mutationOptions(),
-    onSuccess: (data) => {
-      console.log('Created:', data);
-      // Invalidate queries if needed
-    },
-    onError: (error) => {
-      console.error('Error:', error);
-    },
-  });
-  
+  const { mutate, isPending } = useMutation(
+    trpc.entity.create.mutationOptions({
+        onSuccess: (data) => {
+        console.log('Created:', data);
+        // Invalidate queries if needed
+        },
+        onError: (error) => {
+        console.error('Error:', error);
+        },
+    }),
+  );
+
   return <div>{/* Your UI */}</div>;
 }
 ```
@@ -1392,7 +1420,7 @@ import { getServerTRPC } from '~/trpc/server';
 export default async function Page({ params }) {
   const trpc = await getServerTRPC();
   const data = await trpc.entity.bySlug({ slug: params.slug });
-  
+
   return <div>{/* Use data */}</div>;
 }
 ```
@@ -1402,6 +1430,7 @@ export default async function Page({ params }) {
 Before considering your app complete, verify:
 
 ### Required Files
+
 - [ ] Database schema in `packages/db/src/sql/`
 - [ ] Validation schemas in `packages/validators/src/schemas/`
 - [ ] Admin routes in `packages/lib/src/trpc/routes/` (if needed)
@@ -1412,6 +1441,7 @@ Before considering your app complete, verify:
 - [ ] App structure in `apps/[yourapp]/`
 
 ### Configuration Updates
+
 - [ ] Added to `APPS` in `packages/const/src/app.constants.ts`
 - [ ] URL handling in `packages/auth/src/get-url.ts`
 - [ ] Environment variables in `packages/auth/env.ts`
@@ -1421,7 +1451,8 @@ Before considering your app complete, verify:
 - [ ] Validator export in `packages/validators/src/schemas/index.ts`
 
 ### Package.json Dependencies
-- [ ] Core packages (@barely/*)
+
+- [ ] Core packages (@barely/\*)
 - [ ] TanStack Query
 - [ ] tRPC packages (client, server, NOT react-query)
 - [ ] SuperJSON
@@ -1432,28 +1463,34 @@ Before considering your app complete, verify:
 ### TypeScript Issues
 
 #### Problem: Type assertions and `any`
+
 **NEVER DO THIS:**
+
 ```typescript
 const data = response as any; // ❌ FORBIDDEN
 ```
 
 **DO THIS INSTEAD:**
+
 ```typescript
 // Define proper types
 const data = yourSchema.parse(response); // ✅
 ```
 
 #### Problem: User agent can be string or object
+
 ```typescript
 // Handle both cases
-const userAgent = typeof ctx.visitor?.userAgent === 'string' 
-  ? ctx.visitor.userAgent 
-  : ctx.visitor?.userAgent?.ua ?? null;
+const userAgent =
+	typeof ctx.visitor?.userAgent === 'string' ?
+		ctx.visitor.userAgent
+	:	(ctx.visitor?.userAgent?.ua ?? null);
 ```
 
 ### Import Issues
 
 #### Problem: Wrong UI import paths
+
 ```typescript
 // ❌ WRONG
 import { Button } from '@barely/ui/elements/button';
@@ -1463,6 +1500,7 @@ import { Button } from '@barely/ui/button';
 ```
 
 #### Problem: Missing tRPC package
+
 ```typescript
 // ❌ NEVER add this to package.json
 "@trpc/react-query": "^11.0.0"
@@ -1475,24 +1513,23 @@ import { Button } from '@barely/ui/button';
 ### Database Issues
 
 #### Problem: Forgetting workspace scope
+
 ```typescript
 // ❌ WRONG - No workspace check
 const item = await db.query.Items.findFirst({
-  where: eq(Items.id, input.id),
+	where: eq(Items.id, input.id),
 });
 
 // ✅ CORRECT - Workspace scoped
 const item = await db.query.Items.findFirst({
-  where: and(
-    eq(Items.id, input.id),
-    eq(Items.workspaceId, ctx.workspace.id),
-  ),
+	where: and(eq(Items.id, input.id), eq(Items.workspaceId, ctx.workspace.id)),
 });
 ```
 
 ### Build Issues
 
 #### Problem: Environment variables not available
+
 ```typescript
 // Ensure all env vars are in:
 // 1. packages/auth/env.ts (schema)
@@ -1511,23 +1548,23 @@ const item = await db.query.Items.findFirst({
 import { useYourAppRenderTRPC } from '@barely/api/public/your-app-render.trpc.react';
 import { useQuery } from '@tanstack/react-query';
 
-export default function FeaturePage({ 
-  params 
-}: { 
-  params: { handle: string; key: string } 
+export default function FeaturePage({
+  params
+}: {
+  params: { handle: string; key: string }
 }) {
   const trpc = useYourAppRenderTRPC();
-  
+
   const { data, isLoading } = useQuery({
-    ...trpc.entity.bySlug.queryOptions({ 
+    ...trpc.entity.bySlug.queryOptions({
       slug: params.handle,
       key: params.key,
     }),
   });
-  
+
   if (isLoading) return <div>Loading...</div>;
   if (!data) return <div>Not found</div>;
-  
+
   return (
     <div>
       <h1>{data.name}</h1>
@@ -1559,15 +1596,19 @@ export function CreateEntityForm() {
       isPublic: false,
     },
   });
-  
-  const { mutate, isPending } = useMutation({
-    ...trpc.yourEntity.create.mutationOptions(),
-    onSuccess: () => {
-      form.reset();
-      // Handle success
-    },
-  });
-  
+
+  const { mutate, isPending } = useMutation(
+    trpc.yourEntity.create.mutationOptions({
+        onSuccess: () => {
+            form.reset();
+            // Handle success
+            },
+        onError: (error) => {
+            console.error('Error:', error);
+            },
+    }),
+  );
+
   return (
     <Form form={form} onSubmit={mutate}>
       <TextField
@@ -1576,20 +1617,20 @@ export function CreateEntityForm() {
         label="Name"
         placeholder="Enter name"
       />
-      
+
       <TextField
         control={form.control}
         name="slug"
         label="URL Slug"
         placeholder="url-slug"
       />
-      
+
       <CheckboxField
         control={form.control}
         name="isPublic"
         label="Make publicly accessible"
       />
-      
+
       <SubmitButton loading={isPending}>
         Create
       </SubmitButton>
@@ -1616,13 +1657,16 @@ pnpm dev
 ### Testing Checklist
 
 #### Unit Tests
+
 ```typescript
 // packages/lib/src/trpc/routes/__tests__/your-entity.route.test.ts
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 // Test your routes
 ```
 
 #### Integration Tests
+
 - [ ] Create entity via admin
 - [ ] View entity publicly
 - [ ] Update entity
@@ -1661,15 +1705,15 @@ git push origin feature/your-app
 ```typescript
 // In public routes
 await ctx.tb.events.logEvent({
-  workspaceId: item.workspaceId,
-  type: 'yourEntity__view',
-  entityId: item.id,
-  visitorId: ctx.visitor?.id,
-  // Metadata
-  properties: {
-    source: ctx.visitor?.referer,
-    device: ctx.visitor?.device,
-  },
+	workspaceId: item.workspaceId,
+	type: 'yourEntity__view',
+	entityId: item.id,
+	visitorId: ctx.visitor?.id,
+	// Metadata
+	properties: {
+		source: ctx.visitor?.referer,
+		device: ctx.visitor?.device,
+	},
 });
 ```
 
@@ -1687,10 +1731,10 @@ await ctx.tb.events.logEvent({
 import { task } from '@trigger.dev/sdk/v3';
 
 export const yourBackgroundJob = task({
-  id: 'your-background-job',
-  run: async (payload: { entityId: string }) => {
-    // Process in background
-  },
+	id: 'your-background-job',
+	run: async (payload: { entityId: string }) => {
+		// Process in background
+	},
 });
 
 // Trigger from route
@@ -1711,21 +1755,25 @@ const workspace = await getWorkspace(entity.workspaceId);
 ## Troubleshooting Guide
 
 ### "Module not found" errors
+
 1. Check package.json dependencies
 2. Run `pnpm install`
 3. Verify imports use correct paths
 
 ### "Type error" in tRPC
+
 1. Ensure schemas match between client and server
 2. Run `pnpm typecheck` to identify issues
 3. Never use type assertions
 
 ### "Workspace not found"
+
 1. Verify authentication is working
 2. Check workspaceProcedure is used
 3. Ensure workspace exists in database
 
 ### Build failures
+
 1. Check all environment variables
 2. Verify no circular dependencies
 3. Run `pnpm build` locally first
@@ -1735,30 +1783,35 @@ const workspace = await getWorkspace(entity.workspaceId);
 Before marking your app as complete:
 
 ### Functionality
+
 - [ ] All CRUD operations work
 - [ ] Public routes are accessible
 - [ ] Admin routes are protected
 - [ ] Data is properly scoped by workspace
 
 ### Code Quality
+
 - [ ] No TypeScript errors
 - [ ] No ESLint warnings
 - [ ] Tests pass
 - [ ] Build succeeds
 
 ### Security
+
 - [ ] Input validation on all endpoints
 - [ ] Rate limiting on public routes
 - [ ] Proper error messages (no data leaks)
 - [ ] Environment variables secured
 
 ### Performance
+
 - [ ] Database queries optimized
 - [ ] Proper caching implemented
 - [ ] Loading states handled
 - [ ] Error boundaries in place
 
 ### Documentation
+
 - [ ] README in app folder
 - [ ] API documentation
 - [ ] Deployment notes
@@ -1769,6 +1822,7 @@ Before marking your app as complete:
 ## Quick Reference Card
 
 ### Commands
+
 ```bash
 pnpm dev:yourapp          # Run your app
 pnpm db:push             # Update database
@@ -1779,6 +1833,7 @@ pnpm build               # Build app
 ```
 
 ### File Locations
+
 - Database: `packages/db/src/sql/`
 - Validators: `packages/validators/src/schemas/`
 - Admin Routes: `packages/lib/src/trpc/routes/`
@@ -1787,6 +1842,7 @@ pnpm build               # Build app
 - App Code: `apps/[yourapp]/src/`
 
 ### Port Assignments
+
 - 3000: app
 - 3002: cart
 - 3003: fm

@@ -30,15 +30,17 @@ export function ArchiveOrDeleteTrackModal({ mode }: { mode: 'archive' | 'delete'
 		await setShowModal(false);
 	}, [queryClient, setShowModal, trpc.track.byWorkspace]);
 
-	const { mutate: archiveTracks, isPending: isPendingArchive } = useMutation({
-		...trpc.track.archive.mutationOptions(),
-		onSuccess,
-	});
+	const { mutate: archiveTracks, isPending: isPendingArchive } = useMutation(
+		trpc.track.archive.mutationOptions({
+			onSuccess,
+		}),
+	);
 
-	const { mutate: deleteTracks, isPending: isPendingDelete } = useMutation({
-		...trpc.track.delete.mutationOptions(),
-		onSuccess,
-	});
+	const { mutate: deleteTracks, isPending: isPendingDelete } = useMutation(
+		trpc.track.delete.mutationOptions({
+			onSuccess,
+		}),
+	);
 
 	if (!lastSelectedItem) return null;
 

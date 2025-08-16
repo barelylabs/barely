@@ -9,14 +9,19 @@ import {
 	varchar,
 } from 'drizzle-orm/pg-core';
 
-import { id, timestamps } from '../utils';
+import { dbId, id, timestamps } from '../utils';
 import { Workspaces } from './workspace.sql';
 
 export const BrandKits = pgTable(
 	'BrandKits',
 	{
 		...id,
-		workspaceId: varchar('workspaceId', { length: 255 }).notNull(),
+		workspaceId: dbId('workspaceId')
+			.notNull()
+			.references(() => Workspaces.id, {
+				onUpdate: 'cascade',
+				onDelete: 'cascade',
+			}),
 
 		// Bio content
 		longBio: text('longBio'),
@@ -24,36 +29,28 @@ export const BrandKits = pgTable(
 		location: varchar('location', { length: 255 }), // Location like "Brooklyn, NY"
 
 		// Theme & Design System
-		themeKey: varchar('themeKey', { length: 255 }),
 		themeCategory: varchar('themeCategory', {
 			length: 255,
-			enum: ['classic', 'vibrant', 'cozy', 'bold'],
-		}),
-
-		// Header/Layout
-		// this shouldn't be here. it belongs in bio.sql
-		// headerStyle: varchar('headerStyle', {
-		// 	length: 255,
-		// 	enum: ['minimal-centered', 'minimal-left', 'minimal-hero'],
-		// })
-		// 	.default('minimal-centered')
-		// 	.notNull(),
+			enum: ['classic', 'vibrant', 'cozy', 'bold', 'custom'],
+		}).notNull(),
 
 		// Appearance/Colors
-		appearancePreset: varchar('appearancePreset', { length: 255 }),
-		colorScheme: jsonb('colorScheme').$type<{
-			colors: [string, string, string];
-			mapping: {
-				backgroundColor: 0 | 1 | 2;
-				textColor: 0 | 1 | 2;
-				buttonColor: 0 | 1 | 2;
-				buttonTextColor: 0 | 1 | 2;
-				buttonOutlineColor: 0 | 1 | 2;
-				blockColor: 0 | 1 | 2;
-				blockTextColor: 0 | 1 | 2;
-				bannerColor: 0 | 1 | 2;
-			};
-		}>(), // JSON for color mapping
+		colorPreset: varchar('colorPreset', { length: 255 }).notNull(),
+		colorScheme: jsonb('colorScheme')
+			.$type<{
+				colors: [string, string, string];
+				mapping: {
+					backgroundColor: 0 | 1 | 2;
+					textColor: 0 | 1 | 2;
+					buttonColor: 0 | 1 | 2;
+					buttonTextColor: 0 | 1 | 2;
+					buttonOutlineColor: 0 | 1 | 2;
+					blockColor: 0 | 1 | 2;
+					blockTextColor: 0 | 1 | 2;
+					bannerColor: 0 | 1 | 2;
+				};
+			}>()
+			.notNull(), // JSON for color mapping
 
 		// Typography
 		fontPreset: varchar('fontPreset', {
@@ -90,8 +87,8 @@ export const BrandKits = pgTable(
 		})
 			.default('modern.cal')
 			.notNull(),
-		headingFont: text('headingFont'),
-		bodyFont: text('bodyFont'),
+		headingFont: text('headingFont').notNull(),
+		bodyFont: text('bodyFont').notNull(),
 
 		// Block/Button Styling
 		blockStyle: varchar('blockStyle', {
@@ -100,13 +97,8 @@ export const BrandKits = pgTable(
 		})
 			.default('rounded')
 			.notNull(),
-		blockShadow: boolean('blockShadow').default(false).notNull(),
+		blockShadow: boolean('blockShadow').notNull(),
 		blockOutline: boolean('blockOutline').default(false).notNull(),
-
-		// Future: Product-specific overrides
-		// bioOverrides: text('bioOverrides'), // JSON
-		// cartOverrides: text('cartOverrides'), // JSON
-		// pageOverrides: text('pageOverrides'), // JSON
 
 		...timestamps,
 	},

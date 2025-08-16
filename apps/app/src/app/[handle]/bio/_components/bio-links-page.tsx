@@ -1,7 +1,9 @@
 'use client';
 
+import type { AppRouterOutputs } from '@barely/lib/trpc/routes/app.route';
 import type { DragEndEvent } from '@dnd-kit/core';
 import React, { useState } from 'react';
+import { useZodForm } from '@barely/hooks';
 import { cn } from '@barely/utils';
 import {
 	closestCenter,
@@ -21,9 +23,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
-import { format } from 'date-fns';
 import {
-	ArrowLeft,
 	Clock,
 	GripVertical,
 	Image,
@@ -34,12 +34,15 @@ import {
 	Trash2,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { z } from 'zod/v4';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Button } from '@barely/ui/button';
 import { Card } from '@barely/ui/card';
-import { DateTimePicker } from '@barely/ui/datetime-picker-new';
+import { DateTimePicker } from '@barely/ui/datetime-picker';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
+import { TextField } from '@barely/ui/forms/text-field';
 import { Input } from '@barely/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/popover';
 import { Switch } from '@barely/ui/switch';
@@ -51,6 +54,11 @@ interface BioLinksPageProps {
 	handle: string;
 	blockId: string;
 }
+
+// Type definitions
+type BioWithBlocks = AppRouterOutputs['bio']['byKey'];
+type BioBlock = BioWithBlocks['blocks'][number];
+type BioLink = BioBlock['links'][number];
 
 // Animation options
 const ANIMATION_OPTIONS = [
@@ -68,24 +76,20 @@ function SortableLink({
 	link,
 	onUpdate,
 	onDelete,
-	queryKey,
 }: {
-	link: any;
-	onUpdate: (id: string, data: any) => void;
+	link: BioLink;
+	onUpdate: (id: string, data: Partial<BioLink>) => void;
 	onDelete: (id: string) => void;
-	queryKey: any;
 }) {
-	const queryClient = useQueryClient();
 	const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
 		useSortable({ id: link.id });
 
-	const [localTitle, setLocalTitle] = useState(link.text || '');
-	const [localUrl, setLocalUrl] = useState(link.url || '');
-	const [originalTitle, setOriginalTitle] = useState(link.text || '');
-	const [originalUrl, setOriginalUrl] = useState(link.url || '');
+	const [localTitle, setLocalTitle] = useState(link.text);
+	const [localUrl, setLocalUrl] = useState(link.url ?? '');
+	const [originalTitle, setOriginalTitle] = useState(link.text);
+	const [originalUrl, setOriginalUrl] = useState(link.url);
 	const [showAnimationPopover, setShowAnimationPopover] = useState(false);
 	const [showSchedulePopover, setShowSchedulePopover] = useState(false);
-	const [isTitleFocused, setIsTitleFocused] = useState(false);
 	const [isUrlFocused, setIsUrlFocused] = useState(false);
 	const [startDate, setStartDate] = useState<Date | null>(
 		link.startShowingAt ? new Date(link.startShowingAt) : null,
@@ -100,53 +104,23 @@ function SortableLink({
 		opacity: isDragging ? 0.5 : 1,
 	};
 
-	// Handle title change with optimistic update
+	// Handle title change
 	const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const newTitle = e.target.value;
-		setLocalTitle(newTitle);
-
-		// Optimistically update the query data
-		queryClient.setQueryData(queryKey, (old: any) => {
-			if (!old) return old;
-			return {
-				...old,
-				blocks: old.blocks.map((b: any) => ({
-					...b,
-					links:
-						b.links?.map((l: any) => (l.id === link.id ? { ...l, text: newTitle } : l)) ||
-						[],
-				})),
-			};
-		});
+		setLocalTitle(e.target.value);
 	};
 
-	// Handle URL change with optimistic update
-	const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const newUrl = e.target.value;
-		setLocalUrl(newUrl);
-
-		// Optimistically update the query data
-		queryClient.setQueryData(queryKey, old => {
-			if (!old) return old;
-			return {
-				...old,
-				blocks: old.blocks.map((b: any) => ({
-					...b,
-					links:
-						b.links?.map((l: any) => (l.id === link.id ? { ...l, url: newUrl } : l)) ||
-						[],
-				})),
-			};
-		});
+	// Handle URL change
+	const handleUrlChange = (
+		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+	) => {
+		setLocalUrl(e.target.value);
 	};
 
 	// Handle blur to trigger mutation
 	const handleTitleBlur = () => {
-		console.log('handleTitleBlur', localTitle, originalTitle);
-		setIsTitleFocused(false);
 		if (localTitle !== originalTitle) {
 			onUpdate(link.id, { text: localTitle });
-			setOriginalTitle(localTitle); // Update the original value after successful update
+			setOriginalTitle(localTitle);
 			toast.success('Link title updated');
 		}
 	};
@@ -155,20 +129,20 @@ function SortableLink({
 		setIsUrlFocused(false);
 		if (localUrl !== originalUrl) {
 			onUpdate(link.id, { url: localUrl });
-			setOriginalUrl(localUrl); // Update the original value after successful update
+			setOriginalUrl(localUrl);
 			toast.success('Link URL updated');
 		}
 	};
 
 	const handleAnimationSelect = (animation: string) => {
-		onUpdate(link.id, { animate: animation });
+		onUpdate(link.id, { animate: animation as BioLink['animate'] });
 		setShowAnimationPopover(false);
 	};
 
 	const handleScheduleSave = () => {
 		onUpdate(link.id, {
-			startShowingAt: startDate?.toISOString() || null,
-			stopShowingAt: endDate?.toISOString() || null,
+			startShowingAt: startDate,
+			stopShowingAt: endDate,
 		});
 		setShowSchedulePopover(false);
 	};
@@ -178,7 +152,9 @@ function SortableLink({
 		// For now, just use a simple URL prompt
 		const imageUrl = prompt('Enter image URL:');
 		if (imageUrl) {
-			onUpdate(link.id, { imageUrl });
+			// Note: imageUrl is not in the BioLinks schema yet
+			// This will need to be added to the database schema
+			console.log('Image URL selected:', imageUrl);
 		}
 	};
 
@@ -186,7 +162,7 @@ function SortableLink({
 		<div ref={setNodeRef} style={style}>
 			<Card className='overflow-hidden p-4'>
 				<div className='flex items-center gap-4'>
-					{/* Drag handle - now vertically centered */}
+					{/* Drag handle */}
 					<div className='cursor-move' {...attributes} {...listeners}>
 						<GripVertical className='h-5 w-5 text-gray-400' />
 					</div>
@@ -194,7 +170,7 @@ function SortableLink({
 					{/* Main content */}
 					<div className='flex w-full flex-1 flex-col'>
 						<div className='flex flex-row justify-between gap-2'>
-							{/* Link content - now inline editable */}
+							{/* Link content */}
 							<div className='flex-1 space-y-1'>
 								<Input
 									value={localTitle}
@@ -215,7 +191,7 @@ function SortableLink({
 									/>
 								:	<Textarea
 										value={localUrl}
-										onChange={e => handleUrlChange(e as any)}
+										onChange={handleUrlChange}
 										onFocus={() => setIsUrlFocused(true)}
 										onBlur={handleUrlBlur}
 										placeholder='https://example.com'
@@ -225,18 +201,13 @@ function SortableLink({
 									/>
 								}
 							</div>
-							{/* Image slot - now on the right side */}
+							{/* Image slot */}
 							<button
 								onClick={handleImageClick}
 								className='flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 transition-colors hover:border-gray-400 hover:bg-gray-100'
 							>
-								{link.imageUrl ?
-									<img
-										src={link.imageUrl}
-										alt={link.text}
-										className='h-full w-full rounded-lg object-cover'
-									/>
-								:	<Image className='h-6 w-6 text-gray-400' />}
+								{/* TODO: Add imageUrl to BioLinks schema */}
+								<Image className='h-6 w-6 text-gray-400' />
 							</button>
 						</div>
 
@@ -308,7 +279,7 @@ function SortableLink({
 											look='ghost'
 											size='sm'
 											className={cn(
-												(link.startShowingAt || link.stopShowingAt) && 'text-primary',
+												(link.startShowingAt ?? link.stopShowingAt) && 'text-primary',
 											)}
 										>
 											<Clock className='h-4 w-4' />
@@ -328,7 +299,9 @@ function SortableLink({
 												</label>
 												<DateTimePicker
 													value={startDate ?? undefined}
-													onChange={date => setStartDate(date ?? null)}
+													onChange={(date: Date | undefined) =>
+														setStartDate(date ?? null)
+													}
 													granularity='minute'
 													placeholder='Select start date'
 													yearRange={5}
@@ -340,7 +313,7 @@ function SortableLink({
 												</label>
 												<DateTimePicker
 													value={endDate ?? undefined}
-													onChange={date => setEndDate(date ?? null)}
+													onChange={(date: Date | undefined) => setEndDate(date ?? null)}
 													granularity='day'
 													placeholder='Select end date'
 													yearRange={5}
@@ -354,7 +327,7 @@ function SortableLink({
 								</Popover>
 							</div>
 
-							{/* Right side: Enable toggle and Delete button grouped */}
+							{/* Right side: Enable toggle and Delete button */}
 							<div className='flex flex-col items-end gap-2'>
 								<div className='flex items-center gap-2'>
 									<Switch
@@ -377,51 +350,60 @@ function SortableLink({
 	);
 }
 
+// Schema for add link form
+const addLinkSchema = z.object({
+	text: z.string().min(1, 'Title is required'),
+	url: z.url('Please enter a valid URL'),
+});
+
+type AddLinkData = z.infer<typeof addLinkSchema>;
+
 // Add Link Form Component
 function AddLinkForm({
 	onAdd,
 	onCancel,
 }: {
-	onAdd: (data: { text: string; url: string }) => void;
+	onAdd: (data: AddLinkData) => void;
 	onCancel: () => void;
 }) {
-	const [title, setTitle] = useState('');
-	const [url, setUrl] = useState('');
+	const form = useZodForm({
+		schema: addLinkSchema,
+		defaultValues: {
+			text: '',
+			url: '',
+		},
+	});
 
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		if (title && url) {
-			onAdd({ text: title, url });
-			setTitle('');
-			setUrl('');
-		}
+	const handleSubmit = (data: AddLinkData) => {
+		onAdd(data);
+		form.reset();
 	};
 
 	return (
 		<Card className='overflow-hidden'>
-			<form onSubmit={handleSubmit} className='space-y-3 p-4'>
-				<Input
-					value={title}
-					onChange={e => setTitle(e.target.value)}
-					placeholder='Link title'
-					className='font-medium'
-					autoFocus
-				/>
-				<Input
-					value={url}
-					onChange={e => setUrl(e.target.value)}
-					placeholder='https://example.com'
-					type='url'
-				/>
-				<div className='flex gap-2'>
-					<Button type='submit' size='sm' disabled={!title || !url}>
-						Add Link
-					</Button>
-					<Button type='button' size='sm' look='outline' onClick={onCancel}>
-						Cancel
-					</Button>
+			<Form form={form} onSubmit={handleSubmit}>
+				<div className='space-y-3 p-4'>
+					<TextField
+						control={form.control}
+						name='text'
+						placeholder='Link title'
+						className='font-medium'
+						autoFocus
+					/>
+					<TextField
+						control={form.control}
+						name='url'
+						type='url'
+						placeholder='https://example.com'
+					/>
+					<div className='flex gap-2'>
+						<SubmitButton size='sm'>Add Link</SubmitButton>
+						<Button type='button' size='sm' look='outline' onClick={onCancel}>
+							Cancel
+						</Button>
+					</div>
 				</div>
-			</form>
+			</Form>
 		</Card>
 	);
 }
@@ -447,13 +429,13 @@ export function BioLinksPage({ handle, blockId }: BioLinksPageProps) {
 		}),
 	);
 
-	const queryKey = trpc.bio.byHandleWithBlocks.queryOptions({
+	const queryKey = trpc.bio.byKey.queryOptions({
 		handle,
 		key: 'home',
 	}).queryKey;
 
 	const { data: bio } = useSuspenseQuery({
-		...trpc.bio.byHandleWithBlocks.queryOptions({
+		...trpc.bio.byKey.queryOptions({
 			handle,
 			key: 'home',
 		}),
@@ -466,206 +448,60 @@ export function BioLinksPage({ handle, blockId }: BioLinksPageProps) {
 	// Initialize form values when block loads
 	React.useEffect(() => {
 		if (block) {
-			setEditTitle(block.title || '');
-			setEditSubtitle(block.subtitle || '');
-			setBlockName(block.name || 'Links Block');
+			setEditTitle(block.title ?? '');
+			setEditSubtitle(block.subtitle ?? '');
+			setBlockName(block.name ?? 'Links Block');
 		}
 	}, [block]);
 
 	// Mutations
-	const { mutate: createLink } = useMutation({
-		...trpc.bio.createLink.mutationOptions(),
-		onMutate: async newData => {
-			await queryClient.cancelQueries({ queryKey });
-			const previousBio = queryClient.getQueryData(queryKey);
+	const { mutate: createLink } = useMutation(
+		trpc.bio.createLink.mutationOptions({
+			onSettled: async () => {
+				await queryClient.invalidateQueries({ queryKey });
+			},
+		}),
+	);
 
-			// Create temporary link
-			const tempLink = {
-				id: `temp-${Date.now()}`,
-				text: newData.text,
-				url: newData.url,
-				enabled: true,
-				lexoRank: 'zzzzz',
-			};
+	const { mutate: updateBlock } = useMutation(
+		trpc.bio.updateBlock.mutationOptions({
+			onSettled: async () => {
+				await queryClient.invalidateQueries({ queryKey });
+			},
+		}),
+	);
 
-			// Optimistically add link to the block
-			queryClient.setQueryData(queryKey, (old: any) => {
-				if (!old) return old;
-				return {
-					...old,
-					blocks: old.blocks.map((b: any) =>
-						b.id === blockId ? { ...b, links: [...(b.links || []), tempLink] } : b,
-					),
-				};
-			});
+	const { mutate: deleteBlock } = useMutation(
+		trpc.bio.deleteBlock.mutationOptions({
+			onSettled: async () => {
+				await queryClient.invalidateQueries({ queryKey });
+			},
+		}),
+	);
 
-			return { previousBio };
-		},
-		onError: (_err: any, _newData: any, context: any) => {
-			if (context?.previousBio) {
-				queryClient.setQueryData(queryKey, context.previousBio);
-			}
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey });
-		},
-	});
+	const { mutate: updateLink } = useMutation(
+		trpc.bio.updateLink.mutationOptions({
+			onSettled: async () => {
+				await queryClient.invalidateQueries({ queryKey });
+			},
+		}),
+	);
 
-	const { mutate: updateBlock } = useMutation({
-		...trpc.bio.updateBlock.mutationOptions(),
-		onMutate: async (newData: any) => {
-			await queryClient.cancelQueries({ queryKey });
-			const previousBio = queryClient.getQueryData(queryKey);
+	const { mutate: deleteLink } = useMutation(
+		trpc.bio.deleteLink.mutationOptions({
+			onSettled: async () => {
+				await queryClient.invalidateQueries({ queryKey });
+			},
+		}),
+	);
 
-			// Optimistically update block
-			queryClient.setQueryData(queryKey, (old: any) => {
-				if (!old) return old;
-				return {
-					...old,
-					blocks: old.blocks.map((b: any) =>
-						b.id === blockId ? { ...b, ...newData } : b,
-					),
-				};
-			});
-
-			return { previousBio };
-		},
-		onError: (_err: any, _newData: any, context: any) => {
-			if (context?.previousBio) {
-				queryClient.setQueryData(queryKey, context.previousBio);
-			}
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey });
-		},
-	});
-
-	const { mutate: deleteBlock } = useMutation({
-		...trpc.bio.deleteBlock.mutationOptions(),
-		onSuccess: () => {
-			// Redirect back to blocks page after deletion
-			window.location.href = `/${handle}/bio/home/blocks`;
-		},
-	});
-
-	const { mutate: updateLink } = useMutation({
-		...trpc.bio.updateLink.mutationOptions(),
-		onMutate: async (newData: any) => {
-			await queryClient.cancelQueries({ queryKey });
-			const previousBio = queryClient.getQueryData(queryKey);
-
-			// Optimistically update link
-			queryClient.setQueryData(queryKey, (old: any) => {
-				if (!old) return old;
-				return {
-					...old,
-					blocks: old.blocks.map((b: any) =>
-						b.id === blockId ?
-							{
-								...b,
-								links: b.links.map((l: any) =>
-									l.id === newData.id ?
-										{
-											...l,
-											...newData,
-										}
-									:	l,
-								),
-							}
-						:	b,
-					),
-				};
-			});
-
-			return { previousBio };
-		},
-		onError: (_err: any, _newData: any, context: any) => {
-			if (context?.previousBio) {
-				queryClient.setQueryData(queryKey, context.previousBio);
-			}
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey });
-		},
-	});
-
-	const { mutate: deleteLink } = useMutation({
-		...trpc.bio.deleteLink.mutationOptions(),
-		onMutate: async (newData: any) => {
-			await queryClient.cancelQueries({ queryKey });
-			const previousBio = queryClient.getQueryData(queryKey);
-
-			// Optimistically remove link
-			queryClient.setQueryData(queryKey, (old: any) => {
-				if (!old) return old;
-				return {
-					...old,
-					blocks: old.blocks.map((b: any) =>
-						b.id === blockId ?
-							{
-								...b,
-								links: b.links.filter((l: any) => l.id !== newData.linkId),
-							}
-						:	b,
-					),
-				};
-			});
-
-			return { previousBio };
-		},
-		onError: (_err: any, _newData: any, context: any) => {
-			if (context?.previousBio) {
-				queryClient.setQueryData(queryKey, context.previousBio);
-			}
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey });
-		},
-	});
-
-	const { mutate: reorderLinks } = useMutation({
-		...trpc.bio.reorderLinks.mutationOptions(),
-		onMutate: async newData => {
-			await queryClient.cancelQueries({ queryKey });
-			const previousBio = queryClient.getQueryData(queryKey);
-
-			// Optimistically reorder links
-			queryClient.setQueryData(queryKey, (old: any) => {
-				if (!old) return old;
-
-				// Create a mapping of linkId to new index
-				const newOrder = new Map(
-					newData.linkIds.map((id: string, index: number) => [id, index]),
-				);
-
-				return {
-					...old,
-					blocks: old.blocks.map((b: any) =>
-						b.id === blockId ?
-							{
-								...b,
-								links: [...(b.links || [])].sort((a, b) => {
-									const aIndex = newOrder.get(a.id) ?? 999;
-									const bIndex = newOrder.get(b.id) ?? 999;
-									return aIndex - bIndex;
-								}),
-							}
-						:	b,
-					),
-				};
-			});
-
-			return { previousBio };
-		},
-		onError: (_err: any, _newData: any, context: any) => {
-			if (context?.previousBio) {
-				queryClient.setQueryData(queryKey, context.previousBio);
-			}
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey });
-		},
-	});
+	const { mutate: reorderLinks } = useMutation(
+		trpc.bio.reorderLinks.mutationOptions({
+			onSettled: async () => {
+				await queryClient.invalidateQueries({ queryKey });
+			},
+		}),
+	);
 
 	const handleAddLink = (data: { text: string; url: string }) => {
 		createLink({
@@ -677,7 +513,7 @@ export function BioLinksPage({ handle, blockId }: BioLinksPageProps) {
 		setShowAddForm(false);
 	};
 
-	const handleUpdateLink = (linkId: string, data: any) => {
+	const handleUpdateLink = (linkId: string, data: Partial<BioLink>) => {
 		updateLink({
 			handle,
 			id: linkId,
@@ -797,13 +633,7 @@ export function BioLinksPage({ handle, blockId }: BioLinksPageProps) {
 							updateBlock({ handle, id: blockId, enabled: checked })
 						}
 					/>
-					<Button
-						variant='icon'
-						look='ghost'
-						size='sm'
-						onClick={handleDeleteBlock}
-						// className='hover:bg-red-50'
-					>
+					<Button variant='icon' look='ghost' size='sm' onClick={handleDeleteBlock}>
 						<Trash2 className='h-4 w-4' />
 					</Button>
 				</div>
@@ -858,7 +688,6 @@ export function BioLinksPage({ handle, blockId }: BioLinksPageProps) {
 										link={link}
 										onUpdate={handleUpdateLink}
 										onDelete={handleDeleteLink}
-										queryKey={queryKey}
 									/>
 								))}
 							</SortableContext>

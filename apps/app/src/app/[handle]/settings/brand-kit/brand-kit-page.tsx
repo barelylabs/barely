@@ -1,6 +1,8 @@
 'use client';
 
-import type { BioWithBlocks, BrandKit } from '@barely/validators';
+import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import type { MDXEditorMethods } from '@barely/ui/mdx-editor';
+import type { PublicBrandKit } from '@barely/validators';
 import type { z } from 'zod/v4';
 import { Suspense, useRef, useState } from 'react';
 import { useWorkspace, useZodForm } from '@barely/hooks';
@@ -11,7 +13,7 @@ import { toast } from 'sonner';
 
 import { useTRPC } from '@barely/api/app/app.trpc.react';
 
-import { BioRenderV2 } from '@barely/ui/bio';
+import { BioRender } from '@barely/ui/bio';
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { LoadingSpinner } from '@barely/ui/loading';
 import { Tabs, TabsList, TabsTrigger } from '@barely/ui/tabs';
@@ -42,58 +44,59 @@ function BrandKitPageInner() {
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
 	const { handle } = useWorkspace();
-	const { brandKit } = useBrandKit(); // Now brandKit is guaranteed to be defined
+	const { brandKit } = useBrandKit(); // brandKit is guaranteed to be defined with suspense
+
+	// Type assertion to ensure TypeScript knows brandKit is not undefined
+	if (!brandKit) {
+		throw new Error('BrandKit should be defined with suspense');
+	}
 	const [previewTab, setPreviewTab] = useState('bio');
-	const mdxEditorRef = useRef<any>(null);
+	const mdxEditorRef = useRef<MDXEditorMethods>(null);
 
 	// Initialize form with brand kit data (brandKit is guaranteed to be defined with suspense)
 	const formSchema = updateBrandKitSchema;
 	const form = useZodForm({
 		schema: formSchema,
 		defaultValues: {
-			id: brandKit.id,
+			...brandKit,
 			longBio: brandKit.longBio ?? '',
 			shortBio: brandKit.shortBio ?? '',
 			location: brandKit.location ?? '',
-			appearancePreset: brandKit.appearancePreset || undefined,
-			colorScheme: brandKit.colorScheme || undefined,
-			fontPreset: brandKit.fontPreset || 'modern.cal',
-			headingFont: brandKit.headingFont || undefined,
-			bodyFont: brandKit.bodyFont || undefined,
-			blockStyle: brandKit.blockStyle || 'rounded',
-			blockShadow: brandKit.blockShadow ?? false,
-			blockOutline: brandKit.blockOutline ?? false,
 		},
 	});
 
 	// Set up mutation
-	const updateMutation = useMutation({
-		...trpc.brandKit.update.mutationOptions(),
-		onSuccess: data => {
-			toast.success('Brand kit updated successfully');
-			void queryClient.invalidateQueries({
-				queryKey: trpc.brandKit.current.queryKey(),
-			});
-			// Reset form with the updated values to clear dirty state
-			form.reset({
-				id: data.id,
-				longBio: data.longBio ?? '',
-				shortBio: data.shortBio ?? '',
-				location: data.location ?? '',
-				appearancePreset: data.appearancePreset || undefined,
-				colorScheme: data.colorScheme || undefined,
-				fontPreset: data.fontPreset || 'modern.cal',
-				headingFont: data.headingFont || undefined,
-				bodyFont: data.bodyFont || undefined,
-				blockStyle: data.blockStyle || 'rounded',
-				blockShadow: data.blockShadow ?? false,
-				blockOutline: data.blockOutline ?? false,
-			});
-		},
-		onError: error => {
-			toast.error(error.message ?? 'Failed to update brand kit');
-		},
-	});
+	const updateMutation = useMutation(
+		trpc.brandKit.update.mutationOptions({
+			onSuccess: (data: AppRouterOutputs['brandKit']['update']) => {
+				toast.success('Brand kit updated successfully');
+
+				// Reset form with the updated values to clear dirty state
+				form.reset({
+					...data,
+					longBio: data.longBio ?? '',
+					shortBio: data.shortBio ?? '',
+					location: data.location ?? '',
+					// colorPreset: data.colorPreset,
+					// colorScheme: data.colorScheme ?? undefined,
+					// fontPreset: data.fontPreset,
+					// headingFont: data.headingFont ?? undefined,
+					// bodyFont: data.bodyFont ?? undefined,
+					// blockStyle: data.blockStyle,
+					// blockShadow: data.blockShadow,
+					// blockOutline: data.blockOutline,
+				});
+			},
+			onError: error => {
+				toast.error(error.message);
+			},
+			onSettled: async () => {
+				await queryClient.invalidateQueries({
+					queryKey: trpc.brandKit.current.queryKey(),
+				});
+			},
+		}),
+	);
 
 	const handleSubmit = (data: z.infer<typeof formSchema>) => {
 		console.log('Submitting brand kit data:', data);
@@ -111,18 +114,36 @@ function BrandKitPageInner() {
 	});
 
 	// Fetch the actual bio for this workspace (also using suspense)
-	const { data: bio } = useSuspenseQuery({
-		...trpc.bio.byHandleWithBlocks.queryOptions({ handle }),
-		staleTime: 1000 * 60 * 5, // 5 minutes
-	}) as { data: BioWithBlocks | undefined };
+	const { data: bio } = useSuspenseQuery(
+		trpc.bio.byKey.queryOptions(
+			{ handle },
+			{
+				staleTime: 1000 * 60 * 5, // 5 minutes
+			},
+		),
+	);
 
 	// Watch form values for live preview
 	const formValues = form.watch();
-	// Also specifically watch colorScheme to ensure updates trigger re-render
-	const colorScheme = form.watch('colorScheme');
 
 	// Merge brand kit data with live form data for preview
-	const previewData = { ...brandKit, ...formValues, colorScheme };
+	const previewData: PublicBrandKit = {
+		...brandKit,
+		...formValues,
+		// Also specifically watch colorScheme to ensure updates trigger re-render
+		colorScheme: form.watch('colorScheme') ?? brandKit.colorScheme,
+		// Override with specific colorScheme value
+		// colorScheme,
+		// Ensure required properties are never undefined
+		// id: brandKit.id,
+		// workspaceId: brandKit.workspaceId,
+		// fontPreset: formValues.fontPreset ?? brandKit.fontPreset,
+		// blockStyle: formValues.blockStyle ?? brandKit.blockStyle,
+		// blockShadow: formValues.blockShadow ?? brandKit.blockShadow,
+		// blockOutline: formValues.blockOutline ?? brandKit.blockOutline,
+		// createdAt: brandKit.createdAt,
+		// updatedAt: brandKit.updatedAt,
+	};
 
 	const submitDisabled = !form.formState.isDirty;
 	return (
@@ -141,7 +162,10 @@ function BrandKitPageInner() {
 				<div className='flex h-full flex-col gap-6 lg:flex-row'>
 					{/* Main content - Left side on large screens */}
 					<div className='order-1 h-full flex-1 space-y-6 overflow-y-auto'>
-						<BrandKitFormContent form={form} mdxEditorRef={mdxEditorRef} />
+						<BrandKitFormContent
+							form={form}
+							mdxEditorRef={mdxEditorRef as React.RefObject<MDXEditorMethods>}
+						/>
 						<div className='flex max-w-20 flex-col gap-2'>
 							<pre>{JSON.stringify(form.formState.errors, null, 2)}</pre>
 						</div>
@@ -169,13 +193,7 @@ function BrandKitPageInner() {
 							</div>
 
 							<div className='relative overflow-hidden rounded-lg'>
-								{previewTab === 'bio' && (
-									<BioPreview
-										brandKit={previewData}
-										bio={bio}
-										shortBio={formValues.shortBio}
-									/>
-								)}
+								{previewTab === 'bio' && <BioPreview brandKit={previewData} bio={bio} />}
 								{previewTab === 'page' && (
 									<div className='flex h-[600px] items-center justify-center bg-muted'>
 										<Text variant='sm/normal' className='text-muted-foreground'>
@@ -207,138 +225,29 @@ function BrandKitPageInner() {
 }
 
 // Preview component for bio using brand kit
-function BioPreview({
-	brandKit,
-	bio,
-	shortBio,
-}: {
-	brandKit: BrandKit;
-	bio?: BioWithBlocks;
-	shortBio?: string | null;
+function BioPreview(props: {
+	bio: AppRouterOutputs['bio']['byKey'];
+	brandKit: PublicBrandKit;
 }) {
-	// Use actual bio data if available, otherwise use mock data
-	const bioData: BioWithBlocks =
-		bio ??
-		({
-			id: 'preview',
-			handle: 'preview',
-			key: 'home',
-			workspaceId: 'preview',
-			deletedAt: null,
-			archivedAt: null,
-			imgShape: null,
-			socialDisplay: true,
-			showLocation: false,
-			headerStyle: 'minimal',
-			blockShadow: false,
-			showHeader: true,
-			workspace: {
-				id: 'preview',
-				name: 'Your Brand',
-				imageUrl: null,
-				brandKit: {
-					...brandKit,
-					shortBio: shortBio ?? brandKit.shortBio,
-				},
-			},
-			blocks: [
-				{
-					id: 'block-1',
-					workspaceId: 'preview',
-					type: 'links' as const,
-					name: null,
-					title: null,
-					subtitle: null,
-					enabled: true,
-					lexoRank: 'a',
-					deletedAt: null,
-					archivedAt: null,
-					settings: null,
-					createdAt: new Date(),
-					updatedAt: new Date(),
-					links: [
-						{
-							id: 'link-1',
-							blockId: 'block-1',
-							text: 'Latest Release',
-							url: '#',
-							enabled: true,
-							target: null,
-							lexoRank: 'a',
-						},
-						{
-							id: 'link-2',
-							blockId: 'block-1',
-							text: 'Tour Dates',
-							url: '#',
-							enabled: true,
-							target: null,
-							lexoRank: 'b',
-						},
-						{
-							id: 'link-3',
-							blockId: 'block-1',
-							text: 'Merch Store',
-							url: '#',
-							enabled: true,
-							target: null,
-							lexoRank: 'c',
-						},
-					],
-				},
-			],
-			barelyBranding: true,
-			showShareButton: true,
-			showSubscribeButton: false,
-			emailCaptureEnabled: false,
-			emailCaptureIncentiveText: null,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		} as unknown as BioWithBlocks);
-
-	// Override shortBio in workspace.brandKit if provided
-	const bioWithShortBio: BioWithBlocks =
-		bio && bio.workspace ?
-			({
-				...bio,
-				workspace: {
-					...bio.workspace,
-					brandKit: {
-						...bio.workspace.brandKit,
-						...brandKit,
-						shortBio: shortBio ?? brandKit.shortBio,
-					},
-				},
-			} as unknown as BioWithBlocks)
-		:	bioData;
+	const bio = {
+		...props.bio,
+		brandKit: {
+			...props.brandKit,
+			longBio: props.brandKit.longBio ?? null,
+			shortBio: props.brandKit.shortBio ?? null,
+			location: props.brandKit.location ?? null,
+		},
+	};
 
 	return (
 		<div className='flex flex-col items-center gap-4'>
-			<span className='text-sm text-muted-foreground'>barely.bio/{bio?.handle}</span>
-			<BioRenderV2
-				bio={bioWithShortBio}
-				// Pass brand kit properties as separate props
-				themeKey={brandKit.themeKey}
-				headerStyle={bio?.headerStyle ?? 'minimal'}
-				appearancePreset={brandKit.appearancePreset}
-				colorScheme={
-					typeof brandKit.colorScheme === 'string' ? brandKit.colorScheme
-					: brandKit.colorScheme ?
-						JSON.stringify(brandKit.colorScheme)
-					:	null
-				}
-				fontPreset={brandKit.fontPreset}
-				headingFont={brandKit.headingFont}
-				bodyFont={brandKit.bodyFont}
-				blockStyle={brandKit.blockStyle}
-				blockShadow={brandKit.blockShadow}
-				blockOutline={brandKit.blockOutline}
+			<span className='text-sm text-muted-foreground'>barely.bio/{bio.handle}</span>
+			<BioRender
+				bio={bio}
 				// Preview settings
 				isPreview={true}
 				enableAnalytics={false}
 				showPhoneFrame={true}
-				showShareButton={false}
-				showSubscribeButton={false}
 				// No callbacks in preview mode - links are not interactive
 				onLinkClick={undefined}
 				onEmailCapture={undefined}

@@ -32,19 +32,21 @@ export function CreateOrUpdateEmailDomainModal({ mode }: { mode: 'create' | 'upd
 		useEmailDomainSearchParams();
 
 	/* mutations */
-	const { mutateAsync: createEmailDomain } = useMutation({
-		...trpc.emailDomain.create.mutationOptions(),
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: createEmailDomain } = useMutation(
+		trpc.emailDomain.create.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
-	const { mutateAsync: updateEmailDomain } = useMutation({
-		...trpc.emailDomain.update.mutationOptions(),
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: updateEmailDomain } = useMutation(
+		trpc.emailDomain.update.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
 	/* form  */
 	const { form, onSubmit } = useCreateOrUpdateForm({

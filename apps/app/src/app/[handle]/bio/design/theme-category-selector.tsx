@@ -1,7 +1,7 @@
 'use client';
 
-import type { ThemeCategory } from '@barely/lib/functions/bio-themes-v2';
-import { getThemesByCategory, THEMES } from '@barely/lib/functions/bio-themes-v2';
+import type { ThemeCategory } from '@barely/lib/functions/bio-themes.fns';
+import { getThemesByCategory } from '@barely/lib/functions/bio-themes.fns';
 import { cn } from '@barely/utils';
 
 import { Badge } from '@barely/ui/badge';

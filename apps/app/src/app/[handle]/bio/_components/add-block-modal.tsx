@@ -27,7 +27,7 @@ export function AddBlockModal({ open, onOpenChange, onAddBlock }: AddBlockModalP
 			<ModalBody>
 				<div className='grid gap-3'>
 					<Button
-						variant='outline'
+						look='outline'
 						size='lg'
 						onClick={() => handleAddBlock('links')}
 						className='flex h-auto items-center justify-start gap-3 p-4'
@@ -46,7 +46,7 @@ export function AddBlockModal({ open, onOpenChange, onAddBlock }: AddBlockModalP
 					</Button>
 
 					<Button
-						variant='outline'
+						look='outline'
 						size='lg'
 						onClick={() => handleAddBlock('contactForm')}
 						className='flex h-auto items-center justify-start gap-3 p-4'

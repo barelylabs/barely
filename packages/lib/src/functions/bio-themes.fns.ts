@@ -1,5 +1,7 @@
 // Bio Design System V2 - Beacons.ai Inspired
 
+import type { BrandKit } from '@barely/validators';
+
 export type ThemeCategory = 'classic' | 'vibrant' | 'cozy' | 'bold';
 export type HeaderStyle = 'minimal' | 'banner' | 'portrait' | 'shapes';
 export type FontPreset =
@@ -47,8 +49,8 @@ export interface ColorScheme {
 	};
 }
 
-// Appearance preset with name and color scheme
-export interface AppearancePreset {
+// Color preset with name and color scheme
+export interface ColorPreset {
 	name: string;
 	type: 'neutral' | 'bold' | 'playful' | 'brand-kit' | 'custom';
 	colorScheme: ColorScheme;
@@ -66,7 +68,7 @@ export interface ThemeConfig {
 	category: ThemeCategory;
 	name: string;
 	description: string;
-	defaultAppearance: string; // appearance preset key
+	defaultColorPreset: string; // color preset key
 	defaultFont: FontPreset;
 	defaultBlockStyle: BlockStyle;
 }
@@ -78,7 +80,7 @@ export const THEMES: Record<string, ThemeConfig> = {
 		category: 'classic',
 		name: 'Timeless',
 		description: 'Clean and professional with a traditional aesthetic',
-		defaultAppearance: 'shuffle-random',
+		defaultColorPreset: 'shuffle-random',
 		defaultFont: 'classic.playfairDisplay',
 		defaultBlockStyle: 'rounded',
 	},
@@ -86,7 +88,7 @@ export const THEMES: Record<string, ThemeConfig> = {
 		category: 'classic',
 		name: 'Elegant',
 		description: 'Sophisticated and refined with subtle details',
-		defaultAppearance: 'twilight-blue',
+		defaultColorPreset: 'twilight-blue',
 		defaultFont: 'classic.playfairDisplay',
 		defaultBlockStyle: 'oval',
 	},
@@ -96,7 +98,7 @@ export const THEMES: Record<string, ThemeConfig> = {
 		category: 'vibrant',
 		name: 'Electric',
 		description: 'Bold neon colors with high energy',
-		defaultAppearance: 'neon-nights',
+		defaultColorPreset: 'neon-nights',
 		defaultFont: 'futuristic.audiowide',
 		defaultBlockStyle: 'square',
 	},
@@ -104,7 +106,7 @@ export const THEMES: Record<string, ThemeConfig> = {
 		category: 'vibrant',
 		name: 'Sunset',
 		description: 'Warm gradients and vibrant hues',
-		defaultAppearance: 'golden-sand',
+		defaultColorPreset: 'golden-sand',
 		defaultFont: 'modern.cal',
 		defaultBlockStyle: 'rounded',
 	},
@@ -114,7 +116,7 @@ export const THEMES: Record<string, ThemeConfig> = {
 		category: 'cozy',
 		name: 'Warm',
 		description: 'Comfortable and inviting with soft colors',
-		defaultAppearance: 'earthy-elegance',
+		defaultColorPreset: 'earthy-elegance',
 		defaultFont: 'creative.fredokaOne',
 		defaultBlockStyle: 'rounded',
 	},
@@ -122,7 +124,7 @@ export const THEMES: Record<string, ThemeConfig> = {
 		category: 'cozy',
 		name: 'Soft',
 		description: 'Gentle pastels and calming tones',
-		defaultAppearance: 'misty-harbor',
+		defaultColorPreset: 'misty-harbor',
 		defaultFont: 'modern.cal',
 		defaultBlockStyle: 'oval',
 	},
@@ -132,7 +134,7 @@ export const THEMES: Record<string, ThemeConfig> = {
 		category: 'bold',
 		name: 'Impact',
 		description: 'Strong contrasts and powerful presence',
-		defaultAppearance: 'high-contrast',
+		defaultColorPreset: 'high-contrast',
 		defaultFont: 'logo.gravitasOne',
 		defaultBlockStyle: 'square',
 	},
@@ -140,14 +142,14 @@ export const THEMES: Record<string, ThemeConfig> = {
 		category: 'bold',
 		name: 'Contrast',
 		description: 'Dramatic black and white with accent colors',
-		defaultAppearance: 'monochrome-accent',
+		defaultColorPreset: 'monochrome-accent',
 		defaultFont: 'modern.cal',
 		defaultBlockStyle: 'full-width',
 	},
 };
 
-// Appearance presets
-export const APPEARANCE_PRESETS: Record<string, AppearancePreset> = {
+// Color presets
+export const COLOR_PRESETS: Record<string, ColorPreset> = {
 	// Neutral presets
 	'basic-grayscale': {
 		name: 'Basic Grayscale',
@@ -602,12 +604,16 @@ export function shuffleColorMapping(colorScheme: ColorScheme): ColorScheme {
 	const getRandomIndex = (exclude: (0 | 1 | 2)[] = []): 0 | 1 | 2 => {
 		const available = indices.filter(i => !exclude.includes(i));
 		if (available.length === 0) {
-			// Fallback if no options available (shouldn't happen with 3 colors and our rules)
-			// Just pick a different index than the first excluded one
-			const fallback = indices.find(i => i !== exclude[0]) ?? 0;
-			return fallback;
+			// This should theoretically never happen with 3 colors and our constraint rules
+			// but we handle it defensively
+			throw new Error('No available color indices for mapping');
 		}
-		return available[Math.floor(Math.random() * available.length)] ?? 0;
+		const randomIndex = available[Math.floor(Math.random() * available.length)];
+		if (randomIndex === undefined) {
+			// Additional safety check for array access
+			throw new Error('Failed to select random color index');
+		}
+		return randomIndex;
 	};
 
 	// Pick colors sequentially with constraints
@@ -650,35 +656,37 @@ export function shuffleColorMapping(colorScheme: ColorScheme): ColorScheme {
 }
 
 // Helper function to get computed styles from config
-export function getComputedStyles(config: {
-	colorScheme?: ColorScheme | null;
-	fontPreset?: FontPreset;
-	blockStyle?: BlockStyle;
-	blockShadow?: boolean;
-	blockOutline?: boolean;
-}) {
-	const {
-		colorScheme,
-		fontPreset = 'modern.cal',
-		blockStyle = 'rounded',
-		blockShadow,
-		blockOutline,
-	} = config;
 
-	// Get colors from scheme or use defaults
-	const colors =
-		colorScheme ?
-			{
-				background: colorScheme.colors[colorScheme.mapping.backgroundColor],
-				text: colorScheme.colors[colorScheme.mapping.textColor],
-				button: colorScheme.colors[colorScheme.mapping.buttonColor],
-				buttonText: colorScheme.colors[colorScheme.mapping.buttonTextColor],
-				buttonOutline: colorScheme.colors[colorScheme.mapping.buttonOutlineColor],
-				block: colorScheme.colors[colorScheme.mapping.blockColor],
-				blockText: colorScheme.colors[colorScheme.mapping.blockTextColor],
-				banner: colorScheme.colors[colorScheme.mapping.bannerColor],
-			}
-		:	{
+export interface ComputedStyles {
+	colors: {
+		background: string;
+		text: string;
+		button: string;
+		buttonText: string;
+		buttonOutline: string;
+		block: string;
+		blockText: string;
+		banner: string;
+	};
+	fonts: FontConfig;
+	block: {
+		radius: string;
+		padding: string;
+		width: string;
+		shadow: string;
+		outline: string;
+	};
+}
+
+export function getComputedStyles(
+	brandKit: Omit<
+		BrandKit,
+		'id' | 'createdAt' | 'updatedAt' | 'archivedAt' | 'deletedAt'
+	> | null,
+): ComputedStyles {
+	if (!brandKit) {
+		return {
+			colors: {
 				background: 'oklch(100% 0 0)',
 				text: 'oklch(0% 0 0)',
 				button: 'oklch(96% 0.005 260)',
@@ -687,10 +695,34 @@ export function getComputedStyles(config: {
 				block: 'oklch(96% 0.005 260)',
 				blockText: 'oklch(25% 0.01 260)',
 				banner: 'oklch(96% 0.005 260)',
-			};
+			},
+			fonts: FONT_PRESETS['modern.cal'],
+			block: {
+				radius: '12px',
+				padding: '12px 24px',
+				width: 'auto',
+				shadow: 'none',
+				outline: 'none',
+			},
+		};
+	}
+
+	const { colorScheme, fontPreset, blockStyle, blockShadow, blockOutline } = brandKit;
+
+	// Get colors from scheme or use defaults
+	const colors = {
+		background: colorScheme.colors[colorScheme.mapping.backgroundColor],
+		text: colorScheme.colors[colorScheme.mapping.textColor],
+		button: colorScheme.colors[colorScheme.mapping.buttonColor],
+		buttonText: colorScheme.colors[colorScheme.mapping.buttonTextColor],
+		buttonOutline: colorScheme.colors[colorScheme.mapping.buttonOutlineColor],
+		block: colorScheme.colors[colorScheme.mapping.blockColor],
+		blockText: colorScheme.colors[colorScheme.mapping.blockTextColor],
+		banner: colorScheme.colors[colorScheme.mapping.bannerColor],
+	};
 
 	// Get fonts with fallback
-	const fonts = FONT_PRESETS[fontPreset] ?? FONT_PRESETS['modern.cal'];
+	const fonts = FONT_PRESETS[fontPreset];
 
 	// Get block styles
 	const blockRadius = {
@@ -727,8 +759,8 @@ export function getThemesByCategory(category: ThemeCategory) {
 }
 
 // Get appearance presets by type
-export function getAppearancesByType(type: AppearancePreset['type']) {
-	return Object.entries(APPEARANCE_PRESETS)
+export function getAppearancesByType(type: ColorPreset['type']) {
+	return Object.entries(COLOR_PRESETS)
 		.filter(([_, preset]) => preset.type === type)
 		.map(([key, preset]) => ({ key, ...preset }));
 }

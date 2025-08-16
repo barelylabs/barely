@@ -1,12 +1,11 @@
 'use client';
 
-import type { FontPreset } from '@barely/lib/functions/bio-themes-v2';
+import type { FontPreset } from '@barely/lib/functions/bio-themes.fns';
 import { useState } from 'react';
-import { FONT_PRESETS } from '@barely/lib/functions/bio-themes-v2';
+import { FONT_PRESETS } from '@barely/lib/functions/bio-themes.fns';
 import { cn } from '@barely/utils';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@barely/ui/tabs';
-import { Text } from '@barely/ui/typography';
 
 interface FontSelectorProps {
 	fontPreset: FontPreset | undefined | null;
@@ -67,8 +66,6 @@ const FONT_CATEGORIES = {
 
 export function FontSelector({
 	fontPreset = 'modern.cal',
-	headingFont,
-	bodyFont,
 	onFontPresetChange,
 	onHeadingFontChange,
 	onBodyFontChange,
@@ -87,15 +84,12 @@ export function FontSelector({
 	const handlePresetSelect = (preset: FontPreset) => {
 		onFontPresetChange(preset);
 		const config = FONT_PRESETS[preset];
-		if (config) {
-			onHeadingFontChange(config.headingFont);
-			onBodyFontChange(config.bodyFont);
-		}
+		onHeadingFontChange(config.headingFont);
+		onBodyFontChange(config.bodyFont);
 	};
 
 	const FontPresetCard = ({ preset }: { preset: FontPreset }) => {
 		const config = FONT_PRESETS[preset];
-		if (!config) return null;
 
 		const isSelected = activePreset === preset;
 

@@ -7,7 +7,7 @@ import {
 } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { useTRPC } from '@barely/api/app/trpc.react';
+import { useTRPC } from '@barely/api/app/app.trpc.react';
 
 export function useBrandKit() {
 	const trpc = useTRPC();
@@ -21,39 +21,24 @@ export function useBrandKit() {
 	});
 
 	// Update brand kit mutation
-	const updateMutation = useMutation({
-		...trpc.brandKit.update.mutationOptions(),
-		onSuccess: () => {
-			toast.success('Brand kit updated successfully');
-			void queryClient.invalidateQueries({
-				queryKey: trpc.brandKit.current.queryKey({ handle: workspace.handle }),
-			});
-		},
-		onError: error => {
-			toast.error(error.message ?? 'Failed to update brand kit');
-		},
-	});
-
-	// Migrate from bio settings
-	const migrateMutation = useMutation({
-		...trpc.brandKit.migrateFromBio.mutationOptions(),
-		onSuccess: () => {
-			toast.success('Successfully migrated bio settings to brand kit');
-			void queryClient.invalidateQueries({
-				queryKey: trpc.brandKit.current.queryKey({ handle: workspace.handle }),
-			});
-		},
-		onError: error => {
-			toast.error(error.message ?? 'Failed to migrate bio settings');
-		},
-	});
+	const updateMutation = useMutation(
+		trpc.brandKit.update.mutationOptions({
+			onSuccess: () => {
+				toast.success('Brand kit updated successfully');
+				void queryClient.invalidateQueries({
+					queryKey: trpc.brandKit.current.queryKey({ handle: workspace.handle }),
+				});
+			},
+			onError: error => {
+				toast.error(error.message);
+			},
+		}),
+	);
 
 	return {
 		brandKit,
 		updateBrandKit: updateMutation.mutate,
 		isUpdating: updateMutation.isPending,
-		migrateFromBio: migrateMutation.mutate,
-		isMigrating: migrateMutation.isPending,
 	};
 }
 
@@ -70,39 +55,24 @@ export function useBrandKitLegacy() {
 	});
 
 	// Update brand kit mutation
-	const updateMutation = useMutation({
-		...trpc.brandKit.update.mutationOptions(),
-		onSuccess: () => {
-			toast.success('Brand kit updated successfully');
-			void queryClient.invalidateQueries({
-				queryKey: trpc.brandKit.current.queryKey({ handle: workspace.handle }),
-			});
-		},
-		onError: error => {
-			toast.error(error.message ?? 'Failed to update brand kit');
-		},
-	});
-
-	// Migrate from bio settings
-	const migrateMutation = useMutation({
-		...trpc.brandKit.migrateFromBio.mutationOptions(),
-		onSuccess: () => {
-			toast.success('Successfully migrated bio settings to brand kit');
-			void queryClient.invalidateQueries({
-				queryKey: trpc.brandKit.current.queryKey({ handle: workspace.handle }),
-			});
-		},
-		onError: error => {
-			toast.error(error.message ?? 'Failed to migrate bio settings');
-		},
-	});
+	const updateMutation = useMutation(
+		trpc.brandKit.update.mutationOptions({
+			onSuccess: () => {
+				toast.success('Brand kit updated successfully');
+				void queryClient.invalidateQueries({
+					queryKey: trpc.brandKit.current.queryKey({ handle: workspace.handle }),
+				});
+			},
+			onError: error => {
+				toast.error(error.message);
+			},
+		}),
+	);
 
 	return {
 		brandKit,
 		isLoading,
 		updateBrandKit: updateMutation.mutate,
 		isUpdating: updateMutation.isPending,
-		migrateFromBio: migrateMutation.mutate,
-		isMigrating: migrateMutation.isPending,
 	};
 }

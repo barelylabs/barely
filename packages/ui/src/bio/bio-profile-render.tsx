@@ -1,33 +1,34 @@
 'use client';
 
-import type { BioWithButtons } from '@barely/validators';
+import type { ComputedStyles } from '@barely/lib/functions/bio-themes.fns';
+import type { AppRouterOutputs } from '@barely/lib/trpc/app.route';
 import { useMemo } from 'react';
 import { cn } from '@barely/utils';
 
 import { Img } from '../elements/img';
 
-interface BioProfileRenderV2Props {
-	bio: BioWithButtons;
+interface BioProfileRenderProps {
+	bio: AppRouterOutputs['bio']['byKey'];
+	computedStyles: ComputedStyles;
 	headerStyle: string;
-	computedStyles: any;
 	headingFont: string;
 }
 
-export function BioProfileRenderV2({
+export function BioProfileRender({
 	bio,
 	headerStyle,
 	computedStyles,
 	headingFont,
-}: BioProfileRenderV2Props) {
-	const avatarImage = bio.workspace?._avatarImages?.[0]?.file;
-	const hasAvatar = avatarImage?.s3Key || bio.workspace?.imageUrl;
+}: BioProfileRenderProps) {
+	const avatarImage = bio.avatarImage;
+	const hasAvatar = !!avatarImage?.s3Key;
 	const isHeroStyle = headerStyle === 'minimal-hero';
 	const isLeftStyle = headerStyle === 'minimal-left';
 	const isCenteredStyle = !isHeroStyle && !isLeftStyle;
 
 	// Memoized avatar image component
 	const AvatarImage = useMemo(() => {
-		if (!avatarImage?.s3Key && !bio.workspace?.imageUrl) return null;
+		if (!avatarImage?.s3Key) return null;
 
 		const imageSize =
 			isLeftStyle ? 64
@@ -36,30 +37,20 @@ export function BioProfileRenderV2({
 		const imageHeight = isHeroStyle ? 192 : imageSize;
 
 		return (
-			avatarImage?.s3Key ?
-				<Img
-					s3Key={avatarImage.s3Key}
-					alt={bio.workspace?.name ?? bio.handle}
-					placeholder={avatarImage.blurDataUrl ? 'blur' : undefined}
-					blurDataURL={avatarImage.blurDataUrl ?? ''}
-					className='h-full w-full object-cover'
-					width={imageSize}
-					height={imageHeight}
-				/>
-			: bio.workspace?.imageUrl ?
-				<img
-					src={bio.workspace.imageUrl}
-					alt={bio.workspace.name}
-					className='h-full w-full object-cover'
-				/>
-			:	null
+			<Img
+				s3Key={avatarImage.s3Key}
+				alt={bio.workspace.name}
+				placeholder={avatarImage.blurDataUrl ? 'blur' : undefined}
+				blurDataURL={avatarImage.blurDataUrl ?? ''}
+				className='h-full w-full object-cover'
+				width={imageSize}
+				height={imageHeight}
+			/>
 		);
 	}, [
 		avatarImage?.s3Key,
 		avatarImage?.blurDataUrl,
-		bio.workspace?.imageUrl,
-		bio.workspace?.name,
-		bio.handle,
+		bio.workspace.name,
 		isLeftStyle,
 		isCenteredStyle,
 		isHeroStyle,
@@ -104,15 +95,15 @@ export function BioProfileRenderV2({
 						fontWeight: 700,
 					}}
 				>
-					{bio.workspace?.name ?? bio.handle}
+					{bio.workspace.name}
 				</h1>
 
-				{bio.workspace?.brandKit?.shortBio && (
+				{bio.brandKit?.shortBio && (
 					<p
 						className='text-sm'
 						style={{ color: computedStyles.colors.text, fontWeight: 400 }}
 					>
-						{bio.workspace.brandKit.shortBio}
+						{bio.brandKit.shortBio}
 					</p>
 				)}
 			</div>

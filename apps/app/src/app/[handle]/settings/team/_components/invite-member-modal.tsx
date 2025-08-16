@@ -31,14 +31,15 @@ export function InviteMemberModal() {
 		},
 	});
 
-	const { mutateAsync: inviteMember } = useMutation({
-		...trpc.workspaceInvite.inviteMember.mutationOptions(),
-		onSuccess: async () => {
-			form.reset();
-			setShowModal(false);
-			await queryClient.invalidateQueries(trpc.workspace.invites.pathFilter());
-		},
-	});
+	const { mutateAsync: inviteMember } = useMutation(
+		trpc.workspaceInvite.inviteMember.mutationOptions({
+			onSuccess: async () => {
+				form.reset();
+				setShowModal(false);
+				await queryClient.invalidateQueries(trpc.workspace.invites.pathFilter());
+			},
+		}),
+	);
 
 	const handleSubmit = async (data: z.infer<typeof inviteMemberSchema>) => {
 		await inviteMember({

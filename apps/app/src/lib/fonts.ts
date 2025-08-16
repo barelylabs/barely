@@ -332,7 +332,7 @@ export function getFonts(fontNames: FontName[]) {
 // Get font className for a specific font
 export function getFontClassName(fontName: FontName) {
 	const font = fonts[fontName];
-	return font?.variable || '';
+	return font.variable || '';
 }
 
 // Get font classNames for multiple fonts

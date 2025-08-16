@@ -34,188 +34,23 @@ import { and, asc, desc, eq, gt, isNull, lt, or } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
 import { generateBioButtonSuggestions } from '../../functions/bio-suggestions.fns';
+import { getBioByHandleAndKey } from '../../functions/bio.fns';
 import { generateLexoRank } from '../../functions/lexo-rank.fns';
 import { detectLinkType, formatLinkUrl } from '../../functions/link-type.fns';
 import { workspaceProcedure } from '../trpc';
 
 export const bioRoute = {
-	byHandle: workspaceProcedure
+	byKey: workspaceProcedure
 		.input(
 			z.object({
-				handle: z.string(),
 				key: z.string().default('home'),
 			}),
 		)
 		.query(async ({ ctx, input }) => {
 			// Find existing bio or create one if it doesn't exist
-			let bio = await dbHttp.query.Bios.findFirst({
-				where: and(
-					eq(Bios.workspaceId, ctx.workspace.id),
-					eq(Bios.key, input.key),
-					isNull(Bios.deletedAt),
-				),
-				with: {
-					workspace: {
-						columns: {
-							id: true,
-							name: true,
-							handle: true,
-							imageUrl: true,
-						},
-						with: {
-							_avatarImages: {
-								where: (avatarImage, { eq }) => eq(avatarImage.current, true),
-								with: {
-									file: true,
-								},
-							},
-							brandKit: true,
-						},
-					},
-					bioButtons: {
-						with: {
-							bioButton: {
-								with: {
-									link: true,
-									form: true,
-								},
-							},
-						},
-						orderBy: [asc(_BioButtons_To_Bios.lexoRank)],
-					},
-				},
-			});
-
-			// If no bio exists, create one with defaults
-			if (!bio) {
-				const bioId = newId('bio');
-
-				await dbPool(ctx.pool).insert(Bios).values({
-					id: bioId,
-					workspaceId: ctx.workspace.id,
-					handle: ctx.workspace.handle,
-					key: input.key,
-					socialDisplay: false,
-					barelyBranding: true,
-					emailCaptureEnabled: false,
-				});
-
-				bio = await dbHttp.query.Bios.findFirst({
-					where: eq(Bios.id, bioId),
-					with: {
-						workspace: {
-							columns: {
-								id: true,
-								name: true,
-								handle: true,
-								imageUrl: true,
-							},
-							with: {
-								_avatarImages: {
-									where: (avatarImage, { eq }) => eq(avatarImage.current, true),
-									with: {
-										file: true,
-									},
-								},
-								brandKit: true,
-							},
-						},
-						bioButtons: {
-							with: {
-								bioButton: {
-									with: {
-										link: true,
-										form: true,
-									},
-								},
-							},
-							orderBy: [asc(_BioButtons_To_Bios.lexoRank)],
-						},
-					},
-				});
-
-				if (!bio) {
-					throw new TRPCError({
-						code: 'INTERNAL_SERVER_ERROR',
-						message: 'Failed to create bio',
-					});
-				}
-			}
-
-			// Transform to flatten button structure
-			return {
-				...bio,
-				buttons: bio.bioButtons
-					.map(bb => ({
-						...bb.bioButton,
-						lexoRank: bb.lexoRank,
-						link:
-							bb.bioButton.link ?
-								{
-									id: bb.bioButton.link.id,
-									url: bb.bioButton.link.url,
-									domain: bb.bioButton.link.domain ?? '',
-								}
-							:	undefined,
-					}))
-					.sort((a, b) => a.lexoRank.localeCompare(b.lexoRank)),
-			};
-		}),
-
-	byHandleWithBlocks: workspaceProcedure
-		.input(
-			z.object({
-				handle: z.string(),
-				key: z.string().default('home'),
-			}),
-		)
-		.query(async ({ ctx, input }) => {
-			// Find existing bio or create one if it doesn't exist
-			let bio = await dbHttp.query.Bios.findFirst({
-				where: and(
-					eq(Bios.workspaceId, ctx.workspace.id),
-					eq(Bios.key, input.key),
-					isNull(Bios.deletedAt),
-				),
-				with: {
-					workspace: {
-						columns: {
-							id: true,
-							name: true,
-							handle: true,
-							imageUrl: true,
-						},
-						with: {
-							_avatarImages: {
-								where: (avatarImage, { eq }) => eq(avatarImage.current, true),
-								with: {
-									file: true,
-								},
-							},
-							brandKit: true,
-						},
-					},
-					bioBlocks: {
-						with: {
-							bioBlock: {
-								with: {
-									bioLinks: {
-										with: {
-											bioLink: {
-												with: {
-													link: true,
-													form: true,
-												},
-											},
-										},
-										orderBy: [asc(_BioLinks_To_BioBlocks.lexoRank)],
-									},
-								},
-							},
-						},
-						orderBy: [asc(_BioBlocks_To_Bios.lexoRank)],
-					},
-				},
+			let bio = await getBioByHandleAndKey({
+				handle: ctx.workspace.handle,
+				key: input.key,
 			});
 
 			// If no bio exists, create one with defaults and a default links block
@@ -223,108 +58,55 @@ export const bioRoute = {
 				const bioId = newId('bio');
 				const blockId = newId('bio');
 
-				// Create bio
-				await dbPool(ctx.pool).insert(Bios).values({
-					id: bioId,
-					workspaceId: ctx.workspace.id,
+				// Create bio with transaction-like error handling
+				try {
+					await dbPool(ctx.pool).insert(Bios).values({
+						id: bioId,
+						workspaceId: ctx.workspace.id,
+						handle: ctx.workspace.handle,
+						key: input.key,
+						socialDisplay: false,
+						barelyBranding: true,
+						emailCaptureEnabled: false,
+					});
+
+					// Create default links block
+					await dbPool(ctx.pool).insert(BioBlocks).values({
+						id: blockId,
+						workspaceId: ctx.workspace.id,
+						type: 'links',
+						enabled: true,
+					});
+
+					// Connect block to bio
+					const firstLexoRank = generateLexoRank({ prev: null, next: null });
+					await dbPool(ctx.pool).insert(_BioBlocks_To_Bios).values({
+						bioId,
+						bioBlockId: blockId,
+						lexoRank: firstLexoRank,
+					});
+				} catch (error) {
+					throw new TRPCError({
+						code: 'INTERNAL_SERVER_ERROR',
+						message: 'Failed to create bio with default block',
+						cause: error,
+					});
+				}
+
+				bio = await getBioByHandleAndKey({
 					handle: ctx.workspace.handle,
 					key: input.key,
-					socialDisplay: false,
-					barelyBranding: true,
-					emailCaptureEnabled: false,
-				});
-
-				// Create default links block
-				await dbPool(ctx.pool).insert(BioBlocks).values({
-					id: blockId,
-					workspaceId: ctx.workspace.id,
-					type: 'links',
-					enabled: true,
-				});
-
-				// Connect block to bio
-				const firstLexoRank = generateLexoRank({ prev: null, next: null });
-				await dbPool(ctx.pool).insert(_BioBlocks_To_Bios).values({
-					bioId,
-					bioBlockId: blockId,
-					lexoRank: firstLexoRank,
-				});
-
-				bio = await dbHttp.query.Bios.findFirst({
-					where: eq(Bios.id, bioId),
-					with: {
-						workspace: {
-							columns: {
-								id: true,
-								name: true,
-								handle: true,
-								imageUrl: true,
-							},
-							with: {
-								_avatarImages: {
-									where: (avatarImage, { eq }) => eq(avatarImage.current, true),
-									with: {
-										file: true,
-									},
-								},
-								brandKit: true,
-							},
-						},
-						bioBlocks: {
-							with: {
-								bioBlock: {
-									with: {
-										bioLinks: {
-											with: {
-												bioLink: {
-													with: {
-														link: true,
-														form: true,
-													},
-												},
-											},
-											orderBy: [asc(_BioLinks_To_BioBlocks.lexoRank)],
-										},
-									},
-								},
-							},
-							orderBy: [asc(_BioBlocks_To_Bios.lexoRank)],
-						},
-					},
 				});
 
 				if (!bio) {
 					throw new TRPCError({
 						code: 'INTERNAL_SERVER_ERROR',
-						message: 'Failed to create bio',
+						message: 'Failed to retrieve bio after creation',
 					});
 				}
 			}
 
-			// Transform to flatten block structure
-			return {
-				...bio,
-				blocks: bio.bioBlocks
-					.map(bb => ({
-						...bb.bioBlock,
-						lexoRank: bb.lexoRank,
-						links: bb.bioBlock.bioLinks
-							.map(bl => ({
-								...bl.bioLink,
-								lexoRank: bl.lexoRank,
-								link:
-									bl.bioLink.link ?
-										{
-											id: bl.bioLink.link.id,
-											url: bl.bioLink.link.url,
-											domain: bl.bioLink.link.domain ?? '',
-										}
-									:	undefined,
-							}))
-							.sort((a, b) => a.lexoRank.localeCompare(b.lexoRank)),
-					}))
-					.sort((a, b) => a.lexoRank.localeCompare(b.lexoRank)),
-			};
+			return bio;
 		}),
 
 	byWorkspace: workspaceProcedure
@@ -386,7 +168,7 @@ export const bioRoute = {
 								{
 									id: bb.bioButton.link.id,
 									url: bb.bioButton.link.url,
-									domain: bb.bioButton.link.domain ?? '',
+									domain: bb.bioButton.link.domain,
 								}
 							:	undefined,
 					}))
@@ -433,7 +215,7 @@ export const bioRoute = {
 								{
 									id: bb.bioButton.link.id,
 									url: bb.bioButton.link.url,
-									domain: bb.bioButton.link.domain ?? '',
+									domain: bb.bioButton.link.domain,
 								}
 							:	undefined,
 					}))

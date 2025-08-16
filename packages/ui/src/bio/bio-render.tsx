@@ -1,40 +1,25 @@
 'use client';
 
-import type { ColorScheme } from '@barely/lib/functions/bio-themes-v2';
-import type { BioWithBlocks } from '@barely/validators';
-import React from 'react';
-import { getComputedStyles } from '@barely/lib/functions/bio-themes-v2';
+import type { AppRouterOutputs } from '@barely/lib/trpc/app.route';
+import type { BioLink } from '@barely/validators';
+import React, { useEffect, useRef } from 'react';
+import { getComputedStyles } from '@barely/lib/functions/bio-themes.fns';
 import { cn } from '@barely/utils';
 
 import { Button } from '../elements/button';
 import { Icon } from '../elements/icon';
 import { Text } from '../elements/typography';
-import { BioButtonRender } from './bio-button-render';
 import { BioEmailCaptureRender } from './bio-email-capture-render';
-import { BioProfileRenderV2 } from './bio-profile-render-v2';
+import { BioProfileRender } from './bio-profile-render';
 
-export interface BioRenderV2Props {
-	bio: BioWithBlocks;
-
-	// New design system fields
-	themeKey?: string | null;
-	headerStyle?: string | null;
-	appearancePreset?: string | null;
-	colorScheme?: string | null;
-	fontPreset?: string | null;
-	headingFont?: string | null;
-	bodyFont?: string | null;
-	blockStyle?: string | null;
-	blockShadow?: boolean;
-	blockOutline?: boolean;
-	showShareButton?: boolean;
-	showSubscribeButton?: boolean;
+// Make the component generic so it can accept the proper tRPC output type
+// from the consuming application without creating a dependency
+export interface BioRenderProps {
+	bio: AppRouterOutputs['bio']['byKey'];
 
 	// Callbacks for app-specific behavior
 	onLinkClick?: (
-		link: BioWithBlocks['blocks'][0]['links'][0],
-		position: number,
-		blockId: string,
+		link: BioLink & { blockId: string; lexoRank: string },
 	) => void | Promise<void>;
 	onEmailCapture?: (
 		email: string,
@@ -45,80 +30,43 @@ export interface BioRenderV2Props {
 	// Feature flags
 	isPreview?: boolean;
 	enableAnalytics?: boolean;
-	className?: string;
 	showPhoneFrame?: boolean;
+	className?: string;
 }
 
-export function BioRenderV2({
+export function BioRender({
 	bio,
-	themeKey: themeKeyProp,
-	headerStyle: headerStyleProp,
-	appearancePreset: appearancePresetProp,
-	colorScheme: colorSchemeProp,
-	fontPreset: fontPresetProp,
-	headingFont: headingFontProp,
-	bodyFont: bodyFontProp,
-	blockStyle: blockStyleProp,
-	blockShadow: blockShadowProp,
-	blockOutline: blockOutlineProp,
-	showShareButton,
-	showSubscribeButton,
 	onLinkClick,
 	onEmailCapture,
 	onPageView,
 	isPreview = false,
 	enableAnalytics = true,
-	className,
 	showPhoneFrame = false,
-}: BioRenderV2Props) {
+	className,
+}: BioRenderProps) {
 	// Get data from workspace.brandKit with fallback to props or bio fields
-	const brandKit = bio.workspace?.brandKit;
-	const themeKey = themeKeyProp ?? brandKit?.themeKey;
-	const headerStyle = headerStyleProp ?? bio.headerStyle;
-	const appearancePreset = appearancePresetProp ?? brandKit?.appearancePreset;
-	const colorScheme =
-		colorSchemeProp ??
-		(brandKit?.colorScheme ? JSON.stringify(brandKit.colorScheme) : null);
-	const fontPreset = fontPresetProp ?? brandKit?.fontPreset;
-	const headingFont = headingFontProp ?? brandKit?.headingFont;
-	const bodyFont = bodyFontProp ?? brandKit?.bodyFont;
-	const blockStyle = blockStyleProp ?? brandKit?.blockStyle;
-	const blockShadow = blockShadowProp ?? bio.blockShadow;
-	const blockOutline = blockOutlineProp ?? brandKit?.blockOutline;
-	// Record page view on mount
-	React.useEffect(() => {
+	const { brandKit, headerStyle, showShareButton, showSubscribeButton } = bio;
+
+	const onPageViewTriggered = useRef(false);
+
+	useEffect(() => {
+		if (onPageViewTriggered.current) return;
+
 		if (!isPreview && enableAnalytics && onPageView) {
 			onPageView();
+			onPageViewTriggered.current = true;
 		}
 	}, [isPreview, enableAnalytics, onPageView]);
 
-	// Parse color scheme
-	const parsedColorScheme: ColorScheme | null =
-		colorScheme ?
-			(() => {
-				try {
-					return JSON.parse(colorScheme) as ColorScheme;
-				} catch {
-					return null;
-				}
-			})()
-		:	null;
-
 	// Get computed styles from the new design system
-	const computedStyles = getComputedStyles({
-		colorScheme: parsedColorScheme,
-		fontPreset: (fontPreset as any) || 'modern.cal',
-		blockStyle: (blockStyle as any) || 'rounded',
-		blockShadow: blockShadow ?? false,
-		blockOutline: blockOutline ?? false,
-	});
+	const computedStyles = getComputedStyles(bio.brandKit);
 
 	// Determine background color/gradient
-	const isGradientBg = computedStyles.colors.background?.includes('gradient');
+	const isGradientBg = computedStyles.colors.background.includes('gradient');
 	const backgroundColor = computedStyles.colors.background || '#ffffff';
 
 	// Check if buttons should be full width
-	const isFullWidthButtons = blockStyle === 'full-width';
+	const isFullWidthButtons = brandKit?.blockStyle === 'full-width';
 
 	const content = (
 		<div
@@ -131,20 +79,18 @@ export function BioRenderV2({
 			style={{
 				background: isGradientBg ? backgroundColor : undefined,
 				backgroundColor: !isGradientBg ? backgroundColor : undefined,
-				fontFamily: bodyFont ?? (computedStyles.fonts.bodyFont || "'Inter', sans-serif"),
+				fontFamily: computedStyles.fonts.bodyFont || "'Inter', sans-serif",
 			}}
 		>
 			{/* Share Button */}
 			{showShareButton && !isPreview && (
 				<button
 					className='fixed right-4 top-4 rounded-full bg-black/10 p-3 backdrop-blur'
-					onClick={() => {
-						if (navigator.share) {
-							navigator.share({
-								title: bio.handle,
-								url: window.location.href,
-							});
-						}
+					onClick={async () => {
+						await navigator.share({
+							title: bio.handle,
+							url: window.location.href,
+						});
 					}}
 				>
 					<Icon.share className='h-5 w-5' />
@@ -154,13 +100,11 @@ export function BioRenderV2({
 			{/* Profile Section */}
 			{bio.showHeader !== false && (
 				<div className={cn(!isFullWidthButtons && '', isFullWidthButtons && 'px-6')}>
-					<BioProfileRenderV2
+					<BioProfileRender
 						bio={bio}
-						headerStyle={headerStyle || 'minimal-centered'}
+						headerStyle={headerStyle}
 						computedStyles={computedStyles}
-						headingFont={
-							headingFont || computedStyles.fonts?.headingFont || "'Cal Sans', sans-serif"
-						}
+						headingFont={computedStyles.fonts.headingFont}
 					/>
 				</div>
 			)}
@@ -195,12 +139,11 @@ export function BioRenderV2({
 				<div className={cn('mb-8', isFullWidthButtons && 'px-6')}>
 					<BioEmailCaptureRender
 						bioId={bio.id}
+						brandKit={bio.brandKit}
 						incentiveText={bio.emailCaptureIncentiveText}
-						workspaceName={bio.workspace?.name ?? bio.handle}
+						workspaceName={bio.workspace.name}
 						onSubmit={onEmailCapture}
 						isPreview={isPreview}
-						// theme='default'
-						// themeConfig={{} as any}
 					/>
 				</div>
 			)}
@@ -213,7 +156,7 @@ export function BioRenderV2({
 					isFullWidthButtons && '', // No horizontal padding for full-width buttons
 				)}
 			>
-				{bio.blocks?.map(block => {
+				{bio.blocks.map(block => {
 					// Only render enabled blocks
 					if (!block.enabled) return null;
 
@@ -236,7 +179,7 @@ export function BioRenderV2({
 											variant='md/semibold'
 											style={{
 												color: computedStyles.colors.text,
-												fontFamily: headingFont ?? computedStyles.fonts.headingFont,
+												fontFamily: computedStyles.fonts.headingFont,
 											}}
 										>
 											{block.title}
@@ -257,7 +200,7 @@ export function BioRenderV2({
 							)}
 
 							{/* Render links */}
-							{block.links.map((link, index) => {
+							{block.links.map(link => {
 								// Skip disabled links
 								if (link.enabled === false) return null;
 
@@ -315,7 +258,7 @@ export function BioRenderV2({
 											onLinkClick && !isPreview ?
 												(e: React.MouseEvent) => {
 													e.preventDefault();
-													onLinkClick(link, index, block.id);
+													void onLinkClick(link);
 												}
 											:	undefined
 										}
@@ -330,9 +273,7 @@ export function BioRenderV2({
 
 				{/* Add Link Placeholder */}
 				{isPreview &&
-					(!bio.blocks ||
-						bio.blocks.length === 0 ||
-						bio.blocks.every(b => !b.links || b.links.length === 0)) && (
+					(bio.blocks.length === 0 || bio.blocks.every(b => b.links.length === 0)) && (
 						<div
 							className={cn(
 								'border-2 border-dashed px-4 py-3 text-center text-sm',

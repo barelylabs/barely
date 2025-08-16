@@ -1,12 +1,12 @@
 'use client';
 
-import type { AppearancePreset, ColorScheme } from '@barely/lib/functions/bio-themes-v2';
+import type { ColorPreset, ColorScheme } from '@barely/lib/functions/bio-themes.fns';
 import { useEffect, useState } from 'react';
 import {
-	APPEARANCE_PRESETS,
+	COLOR_PRESETS,
 	getAppearancesByType,
 	shuffleColorMapping,
-} from '@barely/lib/functions/bio-themes-v2';
+} from '@barely/lib/functions/bio-themes.fns';
 import { cn } from '@barely/utils';
 import { converter, formatHex } from 'culori';
 import { HexColorPicker } from 'react-colorful';
@@ -17,26 +17,26 @@ import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/popover';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@barely/ui/tabs';
 import { Text } from '@barely/ui/typography';
 
-interface AppearanceCustomizerV2Props {
-	appearancePreset?: string | null;
+interface ColorCustomizerProps {
+	colorPreset?: string | null;
 	colorScheme?: ColorScheme | string | null;
-	onAppearanceChange: (preset: string) => void;
+	onColorPresetChange: (preset: string) => void;
 	onColorSchemeChange: (scheme: ColorScheme) => void;
 }
 
-export function AppearanceCustomizerV2({
-	appearancePreset,
+export function ColorCustomizer({
+	colorPreset,
 	colorScheme,
-	onAppearanceChange,
+	onColorPresetChange,
 	onColorSchemeChange,
-}: AppearanceCustomizerV2Props) {
+}: ColorCustomizerProps) {
 	// Determine active tab based on current preset
-	const [activeTab, setActiveTab] = useState<AppearancePreset['type']>(() => {
-		if (appearancePreset === 'custom') {
+	const [activeTab, setActiveTab] = useState<ColorPreset['type']>(() => {
+		if (colorPreset === 'custom') {
 			return 'custom';
 		}
-		if (appearancePreset) {
-			const preset = APPEARANCE_PRESETS[appearancePreset];
+		if (colorPreset && colorPreset in COLOR_PRESETS) {
+			const preset = COLOR_PRESETS[colorPreset];
 			if (preset) return preset.type;
 		}
 		return 'neutral';
@@ -44,15 +44,15 @@ export function AppearanceCustomizerV2({
 
 	// Update active tab when appearancePreset changes
 	useEffect(() => {
-		if (appearancePreset === 'custom') {
+		if (colorPreset === 'custom') {
 			setActiveTab('custom');
-		} else if (appearancePreset) {
-			const preset = APPEARANCE_PRESETS[appearancePreset];
+		} else if (colorPreset && colorPreset in COLOR_PRESETS) {
+			const preset = COLOR_PRESETS[colorPreset];
 			if (preset) {
 				setActiveTab(preset.type);
 			}
 		}
-	}, [appearancePreset]);
+	}, [colorPreset]);
 
 	// Parse color scheme from JSON string or use object directly
 	const currentScheme: ColorScheme | null =
@@ -68,30 +68,30 @@ export function AppearanceCustomizerV2({
 			:	colorScheme
 		:	null;
 
-	const handlePresetSelect = (presetKey: string) => {
-		const preset = APPEARANCE_PRESETS[presetKey];
-		if (preset) {
+	const handlePresetSelect = (presetKey: keyof typeof COLOR_PRESETS) => {
+		if (presetKey in COLOR_PRESETS) {
+			const preset = COLOR_PRESETS[presetKey];
+			if (!preset) return; // Guard against undefined preset
+
 			// If clicking the already selected preset, shuffle the colors
-			if (appearancePreset === presetKey && currentScheme) {
-				const shuffled = shuffleColorMapping(currentScheme);
-				onColorSchemeChange(shuffled);
+			if (colorPreset === presetKey && currentScheme) {
+				try {
+					const shuffled = shuffleColorMapping(currentScheme);
+					onColorSchemeChange(shuffled);
+				} catch (error) {
+					console.error('Failed to shuffle color mapping:', error);
+					// Fallback: keep the current scheme
+				}
 			} else {
 				// Otherwise, select the preset
-				onAppearanceChange(presetKey);
+				onColorPresetChange(presetKey);
 				onColorSchemeChange(preset.colorScheme);
 			}
 		}
 	};
 
-	const handleShuffle = () => {
-		if (currentScheme) {
-			const shuffled = shuffleColorMapping(currentScheme);
-			onColorSchemeChange(shuffled);
-		}
-	};
-
-	const renderColorCard = (preset: { key: string } & AppearancePreset) => {
-		const isSelected = appearancePreset === preset.key;
+	const renderColorCard = (preset: { key: string } & ColorPreset) => {
+		const isSelected = colorPreset === preset.key;
 		const { colors } = preset.colorScheme;
 
 		return (
@@ -155,7 +155,7 @@ export function AppearanceCustomizerV2({
 		<div className='space-y-4'>
 			<Tabs
 				value={activeTab}
-				onValueChange={val => setActiveTab(val as AppearancePreset['type'])}
+				onValueChange={val => setActiveTab(val as ColorPreset['type'])}
 			>
 				<TabsList className='grid w-full grid-cols-4'>
 					<TabsTrigger value='neutral'>Neutral</TabsTrigger>
@@ -184,10 +184,10 @@ export function AppearanceCustomizerV2({
 
 				<TabsContent value='custom' className='mt-4'>
 					<CustomColorPicker
-						appearancePreset={appearancePreset}
+						colorPreset={colorPreset}
 						colorScheme={currentScheme}
 						onColorSchemeChange={scheme => {
-							onAppearanceChange('custom');
+							onColorPresetChange('custom');
 							onColorSchemeChange(scheme);
 						}}
 					/>
@@ -195,7 +195,7 @@ export function AppearanceCustomizerV2({
 			</Tabs>
 
 			{/* Info about clicking to shuffle */}
-			{appearancePreset && (
+			{colorPreset && (
 				<div className='rounded-lg bg-muted/50 p-3'>
 					<Text variant='xs/normal' className='text-muted-foreground'>
 						💡 Click the selected color scheme again to shuffle how colors map to elements
@@ -208,13 +208,13 @@ export function AppearanceCustomizerV2({
 
 // Custom Color Picker Component
 interface CustomColorPickerProps {
-	appearancePreset?: string | null;
+	colorPreset?: string | null;
 	colorScheme: ColorScheme | null;
 	onColorSchemeChange: (scheme: ColorScheme) => void;
 }
 
 function CustomColorPicker({
-	appearancePreset,
+	colorPreset,
 	colorScheme,
 	onColorSchemeChange,
 }: CustomColorPickerProps) {
@@ -226,7 +226,7 @@ function CustomColorPicker({
 			// Handle CSS oklch() format: "oklch(0.5 0.1 0)" or "oklch(50% 0.1 0)"
 			if (oklchString.startsWith('oklch(')) {
 				const match = /oklch\(([\d.%]+)\s+([\d.]+)\s+([\d.]+)\)/.exec(oklchString);
-				if (match) {
+				if (match?.[1] && match[2] && match[3]) {
 					const lValue =
 						match[1].endsWith('%') ? parseFloat(match[1]) / 100 : parseFloat(match[1]);
 					const color = {
@@ -235,19 +235,19 @@ function CustomColorPicker({
 						c: parseFloat(match[2]),
 						h: parseFloat(match[3]),
 					};
-					return formatHex(color) ?? '#000000';
+					return formatHex(color);
 				}
 			}
 			// Handle raw format: "0.5 0.1 0"
 			const parts = oklchString.split(' ');
-			if (parts.length === 3) {
+			if (parts.length === 3 && parts[0] && parts[1] && parts[2]) {
 				const color = {
 					mode: 'oklch' as const,
 					l: parseFloat(parts[0]),
 					c: parseFloat(parts[1]),
 					h: parseFloat(parts[2]),
 				};
-				return formatHex(color) ?? '#000000';
+				return formatHex(color);
 			}
 		} catch (e) {
 			console.error('Error parsing OKLCH:', e);
@@ -278,7 +278,7 @@ function CustomColorPicker({
 	// Convert OKLCH colors to hex for the color picker
 	// Only use colorScheme if appearancePreset is 'custom', otherwise use defaults
 	const initialColors =
-		appearancePreset === 'custom' && colorScheme ?
+		colorPreset === 'custom' && colorScheme ?
 			(colorScheme.colors.map(c => oklchToHex(c)) as [string, string, string])
 		:	(['#F97316', '#8B5CF6', '#06B6D4'] as [string, string, string]); // Default brand colors
 
@@ -291,8 +291,8 @@ function CustomColorPicker({
 			const color = oklch(hex);
 			if (color) {
 				// Format as CSS oklch() function: "oklch(L C H)"
-				const l = (color.l ?? 0).toFixed(2);
-				const c = (color.c ?? 0).toFixed(3);
+				const l = color.l.toFixed(2);
+				const c = color.c.toFixed(3);
 				const h = (color.h ?? 0).toFixed(0);
 				return `oklch(${l} ${c} ${h})`;
 			}
@@ -316,14 +316,19 @@ function CustomColorPicker({
 	};
 
 	const handleShuffle = () => {
-		// Always use the current colors and create a new shuffled mapping
-		const oklchColors = colors.map(hexToOklch) as [string, string, string];
-		const currentScheme: ColorScheme = {
-			colors: oklchColors,
-			mapping: colorScheme?.mapping ?? defaultScheme.mapping,
-		};
-		const shuffled = shuffleColorMapping(currentScheme);
-		onColorSchemeChange(shuffled);
+		try {
+			// Always use the current colors and create a new shuffled mapping
+			const oklchColors = colors.map(hexToOklch) as [string, string, string];
+			const currentScheme: ColorScheme = {
+				colors: oklchColors,
+				mapping: colorScheme?.mapping ?? defaultScheme.mapping,
+			};
+			const shuffled = shuffleColorMapping(currentScheme);
+			onColorSchemeChange(shuffled);
+		} catch (error) {
+			console.error('Failed to shuffle color mapping:', error);
+			// Fallback: keep the current scheme
+		}
 	};
 
 	return (
@@ -404,9 +409,7 @@ function CustomColorPicker({
 			<div className='flex justify-center'>
 				<Button type='button' size='sm' onClick={handleShuffle} className='gap-2'>
 					<Icon.shuffle className='h-4 w-4' />
-					{appearancePreset === 'custom' ?
-						'Shuffle Custom Colors'
-					:	'Apply Custom Colors'}
+					{colorPreset === 'custom' ? 'Shuffle Custom Colors' : 'Apply Custom Colors'}
 				</Button>
 			</div>
 
