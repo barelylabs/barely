@@ -17,7 +17,7 @@ import {
 	isDevelopment,
 	newId,
 	numToPaddedString,
-	raise,
+	raiseTRPCError,
 } from '@barely/utils';
 import {
 	markCartOrderAsFulfilledSchema,
@@ -213,10 +213,12 @@ export const cartOrderRoute = {
 				nextCursor =
 					nextOrder ?
 						{
-							orderId: nextOrder.orderId ?? raise('orderId should be defined'),
+							orderId:
+								nextOrder.orderId ??
+								raiseTRPCError({ message: 'orderId should be defined' }),
 							checkoutConvertedAt:
 								nextOrder.checkoutConvertedAt ??
-								raise('checkoutConvertedAt should be defined'),
+								raiseTRPCError({ message: 'checkoutConvertedAt should be defined' }),
 						}
 					:	undefined;
 			}
@@ -294,20 +296,21 @@ export const cartOrderRoute = {
 					with: {
 						workspace: true,
 					},
-				})) ?? raise('Cart not found to cancel');
+				})) ?? raiseTRPCError({ message: 'Cart not found to cancel' });
 
 			await stripe.refunds
 				.create(
 					{
 						charge:
-							cart.checkoutStripeChargeId ?? raise('checkoutStripeChargeId not found'),
+							cart.checkoutStripeChargeId ??
+							raiseTRPCError({ message: 'checkoutStripeChargeId not found' }),
 						reason: input.reason,
 						// reverse_transfer: true,
 					},
 					{
 						stripeAccount:
 							getStripeConnectAccountId(cart.workspace) ??
-							raise('stripeAccount not found'),
+							raiseTRPCError({ message: 'stripeAccount not found' }),
 					},
 				)
 				.catch(error => {
@@ -328,7 +331,7 @@ export const cartOrderRoute = {
 						{
 							stripeAccount:
 								getStripeConnectAccountId(cart.workspace) ??
-								raise('stripeAccount not found'),
+								raiseTRPCError({ message: 'stripeAccount not found' }),
 						},
 					)
 					.catch(error => {
@@ -367,9 +370,9 @@ export const cartOrderRoute = {
 							},
 						},
 					},
-				})) ?? raise('Cart not found to fulfill');
+				})) ?? raiseTRPCError({ message: 'Cart not found to fulfill' });
 
-			const fan = cart.fan ?? raise('Fan not found');
+			const fan = cart.fan ?? raiseTRPCError({ message: 'Fan not found' });
 
 			// console.log('cart to mark as fulfilled', cart);
 

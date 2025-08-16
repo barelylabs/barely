@@ -1,12 +1,25 @@
 'use client';
 
 import { useState } from 'react';
+import { useZodForm } from '@barely/hooks';
 import { toast } from 'sonner';
+import { z } from 'zod/v4';
 
 import { Button } from '@barely/ui/button';
-import { Input } from '@barely/ui/input';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
+import { TextField } from '@barely/ui/forms/text-field';
+import { TextareaField } from '@barely/ui/forms/textarea-field';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
-import { Textarea } from '@barely/ui/textarea';
+
+// Define the contact form schema
+const contactFormSchema = z.object({
+	name: z.string().min(1, 'Name is required'),
+	email: z.email('Invalid email address'),
+	artistName: z.string().optional(),
+	message: z.string().min(10, 'Please provide more details about your needs'),
+});
+
+type ContactFormData = z.infer<typeof contactFormSchema>;
 
 interface ContactModalProps {
 	show: boolean;
@@ -16,50 +29,25 @@ interface ContactModalProps {
 
 export function ContactModal({ show, onClose, variant = 'demo' }: ContactModalProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [formData, setFormData] = useState({
-		name: '',
-		email: '',
-		artistName: '',
-		message: '',
+
+	const form = useZodForm({
+		schema: contactFormSchema,
+		defaultValues: {
+			name: '',
+			email: '',
+			artistName: '',
+			message: '',
+		},
 	});
-	const [errors, setErrors] = useState<Record<string, string>>({});
 
-	const validateForm = () => {
-		const newErrors: Record<string, string> = {};
-
-		if (!formData.name.trim()) {
-			newErrors.name = 'Name is required';
-		}
-
-		if (!formData.email.trim()) {
-			newErrors.email = 'Email is required';
-		} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-			newErrors.email = 'Invalid email address';
-		}
-
-		if (!formData.message.trim()) {
-			newErrors.message = 'Message is required';
-		} else if (formData.message.trim().length < 10) {
-			newErrors.message = 'Please provide more details about your needs';
-		}
-
-		setErrors(newErrors);
-		return Object.keys(newErrors).length === 0;
-	};
-
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-
-		if (!validateForm()) {
-			return;
-		}
+	const handleSubmit = async (data: ContactFormData) => {
 		setIsSubmitting(true);
 
 		try {
 			const response = await fetch('/api/contact', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ ...formData, variant }),
+				body: JSON.stringify({ ...data, variant }),
 			});
 
 			if (!response.ok) {
@@ -73,7 +61,7 @@ export function ContactModal({ show, onClose, variant = 'demo' }: ContactModalPr
 				toast.success("Message sent! We'll get back to you soon.");
 			}
 
-			setFormData({ name: '', email: '', artistName: '', message: '' });
+			form.reset();
 			onClose();
 		} catch (error) {
 			console.error('Form submission error:', error);
@@ -87,17 +75,6 @@ export function ContactModal({ show, onClose, variant = 'demo' }: ContactModalPr
 		}
 	};
 
-	const handleInputChange = (
-		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-	) => {
-		const { name, value } = e.target;
-		setFormData(prev => ({ ...prev, [name]: value }));
-		// Clear error when user starts typing
-		if (errors[name]) {
-			setErrors(prev => ({ ...prev, [name]: '' }));
-		}
-	};
-
 	const title = variant === 'demo' ? 'Book a Demo' : 'Get in Touch';
 	const description =
 		variant === 'demo' ?
@@ -107,87 +84,44 @@ export function ContactModal({ show, onClose, variant = 'demo' }: ContactModalPr
 	return (
 		<Modal showModal={show} setShowModal={onClose} className='sm:max-w-lg'>
 			<ModalHeader icon='email' title={title} />
-			<form onSubmit={handleSubmit}>
+			<Form form={form} onSubmit={handleSubmit}>
 				<ModalBody>
 					<div className='space-y-4'>
 						<p className='text-sm text-gray-400'>{description}</p>
 
-						<div>
-							<label htmlFor='name' className='mb-1 block text-sm font-medium text-white'>
-								Name
-							</label>
-							<Input
-								id='name'
-								name='name'
-								value={formData.name}
-								onChange={handleInputChange}
-								placeholder='Your name'
-								isError={!!errors.name}
-							/>
-							{errors.name && <p className='mt-1 text-xs text-red-500'>{errors.name}</p>}
-						</div>
+						<TextField
+							control={form.control}
+							name='name'
+							label='Name'
+							placeholder='Your name'
+						/>
 
-						<div>
-							<label
-								htmlFor='email'
-								className='mb-1 block text-sm font-medium text-white'
-							>
-								Email
-							</label>
-							<Input
-								id='email'
-								name='email'
-								type='email'
-								value={formData.email}
-								onChange={handleInputChange}
-								placeholder='your@email.com'
-								isError={!!errors.email}
-							/>
-							{errors.email && (
-								<p className='mt-1 text-xs text-red-500'>{errors.email}</p>
-							)}
-						</div>
+						<TextField
+							control={form.control}
+							name='email'
+							type='email'
+							label='Email'
+							placeholder='your@email.com'
+						/>
 
-						<div>
-							<label
-								htmlFor='artistName'
-								className='mb-1 block text-sm font-medium text-white'
-							>
-								Artist/Label Name (Optional)
-							</label>
-							<Input
-								id='artistName'
-								name='artistName'
-								value={formData.artistName}
-								onChange={handleInputChange}
-								placeholder='Your artist or label name'
-							/>
-						</div>
+						<TextField
+							control={form.control}
+							name='artistName'
+							label='Artist/Label Name (Optional)'
+							placeholder='Your artist or label name'
+						/>
 
-						<div>
-							<label
-								htmlFor='message'
-								className='mb-1 block text-sm font-medium text-white'
-							>
-								Message
-							</label>
-							<Textarea
-								id='message'
-								name='message'
-								value={formData.message}
-								onChange={handleInputChange}
-								placeholder={
-									variant === 'demo' ?
-										'Tell us about your music marketing needs and current challenges...'
-									:	'How can we help you?'
-								}
-								rows={4}
-								isError={!!errors.message}
-							/>
-							{errors.message && (
-								<p className='mt-1 text-xs text-red-500'>{errors.message}</p>
-							)}
-						</div>
+						<TextareaField
+							control={form.control}
+							name='message'
+							label='Message'
+							placeholder={
+								variant === 'demo' ?
+									'Tell us about your music marketing needs and current challenges...'
+								:	'How can we help you?'
+							}
+							rows={4}
+						/>
 					</div>
 				</ModalBody>
 
@@ -201,12 +135,12 @@ export function ContactModal({ show, onClose, variant = 'demo' }: ContactModalPr
 						>
 							Cancel
 						</Button>
-						<Button type='submit' disabled={isSubmitting} loading={isSubmitting}>
+						<SubmitButton loading={isSubmitting}>
 							{variant === 'demo' ? 'Request Demo' : 'Send Message'}
-						</Button>
+						</SubmitButton>
 					</div>
 				</ModalFooter>
-			</form>
+			</Form>
 		</Modal>
 	);
 }

@@ -11,7 +11,7 @@ import {
 	Bios,
 } from '@barely/db/sql/bio.sql';
 import { publicProcedure } from '@barely/lib/trpc';
-import { newId, raise } from '@barely/utils';
+import { newId, raiseTRPCError } from '@barely/utils';
 import { TRPCError } from '@trpc/server';
 import { and, eq, isNull } from 'drizzle-orm';
 import { z } from 'zod/v4';
@@ -65,7 +65,7 @@ export const bioRenderRoute = {
 							},
 						},
 					},
-				})) ?? raise('Bio not found');
+				})) ?? raiseTRPCError({ message: 'Bio not found' });
 
 			let bioLink = undefined;
 			if (linkId) {
@@ -126,7 +126,7 @@ export const bioRenderRoute = {
 							},
 						},
 					},
-				})) ?? raise('Bio not found');
+				})) ?? raiseTRPCError({ message: 'Bio not found' });
 
 			// Check if email capture is enabled for this bio
 			if (!bio.emailCaptureEnabled) {

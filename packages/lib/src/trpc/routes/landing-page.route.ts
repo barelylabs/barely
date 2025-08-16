@@ -9,7 +9,7 @@ import {
 	LandingPages,
 } from '@barely/db/sql/landing-page.sql';
 import { sqlAnd, sqlStringContains } from '@barely/db/utils';
-import { newId, raise, sanitizeKey } from '@barely/utils';
+import { newId, raiseTRPCError, sanitizeKey } from '@barely/utils';
 import {
 	createLandingPageSchema,
 	selectWorkspaceLandingPagesSchema,
@@ -79,7 +79,7 @@ export const landingPageRoute = {
 				),
 			});
 
-			return landingPage ?? raise('Landing page not found');
+			return landingPage ?? raiseTRPCError({ message: 'Landing page not found' });
 		}),
 
 	create: workspaceProcedure
@@ -101,7 +101,7 @@ export const landingPageRoute = {
 				.values(landingPageData)
 				.returning();
 
-			const landingPage = landingPages[0] ?? raise('Failed to create landing page');
+			const landingPage = landingPages[0] ?? raiseTRPCError({ message: 'Failed to create landing page' });
 
 			const { cartFunnelJoins, linkJoins, pressKitJoins, landingPageJoins } =
 				getLandingPageAssetJoins({
@@ -145,7 +145,7 @@ export const landingPageRoute = {
 				.returning();
 
 			const updatedLandingPage =
-				updatedLandingPages[0] ?? raise('Failed to update landing page');
+				updatedLandingPages[0] ?? raiseTRPCError({ message: 'Failed to update landing page' });
 
 			if (!input.content) return updatedLandingPage;
 
@@ -243,7 +243,7 @@ export const landingPageRoute = {
 				)
 				.returning();
 
-			return updatedLandingPage[0] ?? raise('Failed to archive landing page');
+			return updatedLandingPage[0] ?? raiseTRPCError({ message: 'Failed to archive landing page' });
 		}),
 
 	delete: workspaceProcedure
@@ -260,6 +260,6 @@ export const landingPageRoute = {
 				)
 				.returning();
 
-			return updatedLandingPage[0] ?? raise('Failed to delete landing page');
+			return updatedLandingPage[0] ?? raiseTRPCError({ message: 'Failed to delete landing page' });
 		}),
 } satisfies TRPCRouterRecord;

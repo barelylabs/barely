@@ -14,7 +14,7 @@ import {
 	Workspaces,
 } from '@barely/db/sql';
 import { sqlAnd, sqlStringContains } from '@barely/db/utils';
-import { newId, raise } from '@barely/utils';
+import { newId, raiseTRPCError } from '@barely/utils';
 import {
 	createBioBlockSchema,
 	createBioButtonSchema,
@@ -236,7 +236,7 @@ export const bioRoute = {
 			})
 			.returning();
 
-		return bio ?? raise('Failed to create bio');
+		return bio ?? raiseTRPCError({ message: 'Failed to create bio' });
 	}),
 
 	update: workspaceProcedure
@@ -250,7 +250,7 @@ export const bioRoute = {
 				.where(and(eq(Bios.id, id), eq(Bios.workspaceId, ctx.workspace.id)))
 				.returning();
 
-			return updatedBio ?? raise('Failed to update bio');
+			return updatedBio ?? raiseTRPCError({ message: 'Failed to update bio' });
 		}),
 
 	archive: workspaceProcedure
@@ -262,7 +262,7 @@ export const bioRoute = {
 				.where(and(eq(Bios.id, input.id), eq(Bios.workspaceId, ctx.workspace.id)))
 				.returning();
 
-			return archivedBio ?? raise('Failed to archive bio');
+			return archivedBio ?? raiseTRPCError({ message: 'Failed to archive bio' });
 		}),
 
 	unarchive: workspaceProcedure
@@ -274,7 +274,7 @@ export const bioRoute = {
 				.where(and(eq(Bios.id, input.id), eq(Bios.workspaceId, ctx.workspace.id)))
 				.returning();
 
-			return unarchivedBio ?? raise('Failed to unarchive bio');
+			return unarchivedBio ?? raiseTRPCError({ message: 'Failed to unarchive bio' });
 		}),
 
 	delete: workspaceProcedure
@@ -286,7 +286,7 @@ export const bioRoute = {
 				.where(and(eq(Bios.id, input.id), eq(Bios.workspaceId, ctx.workspace.id)))
 				.returning();
 
-			return deletedBio ?? raise('Failed to delete bio');
+			return deletedBio ?? raiseTRPCError({ message: 'Failed to delete bio' });
 		}),
 
 	// Bio Button operations
@@ -304,7 +304,7 @@ export const bioRoute = {
 				where: and(eq(Bios.id, bioId), eq(Bios.workspaceId, ctx.workspace.id)),
 			});
 
-			if (!bio) raise('Bio not found');
+			if (!bio) raiseTRPCError({ message: 'Bio not found' });
 
 			// Get the last button's lexoRank to generate next rank
 			const lastButton = await dbHttp.query._BioButtons_To_Bios.findFirst({
@@ -329,7 +329,7 @@ export const bioRoute = {
 				})
 				.returning();
 
-			if (!button) raise('Failed to create button');
+			if (!button) raiseTRPCError({ message: 'Failed to create button' });
 
 			// Create the relationship
 			await dbPool(ctx.pool).insert(_BioButtons_To_Bios).values({
@@ -352,7 +352,7 @@ export const bioRoute = {
 				.where(and(eq(BioButtons.id, id), eq(BioButtons.workspaceId, ctx.workspace.id)))
 				.returning();
 
-			return updatedButton ?? raise('Failed to update button');
+			return updatedButton ?? raiseTRPCError({ message: 'Failed to update button' });
 		}),
 
 	removeButton: workspaceProcedure
@@ -368,7 +368,7 @@ export const bioRoute = {
 				where: and(eq(Bios.id, input.bioId), eq(Bios.workspaceId, ctx.workspace.id)),
 			});
 
-			if (!bio) raise('Bio not found');
+			if (!bio) raiseTRPCError({ message: 'Bio not found' });
 
 			// Remove the relationship
 			await dbPool(ctx.pool)
@@ -403,7 +403,7 @@ export const bioRoute = {
 				where: and(eq(Bios.id, bioId), eq(Bios.workspaceId, ctx.workspace.id)),
 			});
 
-			if (!bio) raise('Bio not found');
+			if (!bio) raiseTRPCError({ message: 'Bio not found' });
 
 			// Get current buttons with their lexoRanks to maintain valid ordering
 			const currentButtons = await dbHttp.query._BioButtons_To_Bios.findMany({
@@ -532,7 +532,7 @@ export const bioRoute = {
 				where: and(eq(Bios.id, bioId), eq(Bios.workspaceId, ctx.workspace.id)),
 			});
 
-			if (!bio) raise('Bio not found');
+			if (!bio) raiseTRPCError({ message: 'Bio not found' });
 
 			// Get the last block's lexoRank to generate next rank
 			const lastBlock = await dbHttp.query._BioBlocks_To_Bios.findFirst({
@@ -557,7 +557,7 @@ export const bioRoute = {
 				})
 				.returning();
 
-			if (!block) raise('Failed to create block');
+			if (!block) raiseTRPCError({ message: 'Failed to create block' });
 
 			// Create the relationship
 			await dbPool(ctx.pool).insert(_BioBlocks_To_Bios).values({
@@ -580,7 +580,7 @@ export const bioRoute = {
 				.where(and(eq(BioBlocks.id, id), eq(BioBlocks.workspaceId, ctx.workspace.id)))
 				.returning();
 
-			return updatedBlock ?? raise('Failed to update block');
+			return updatedBlock ?? raiseTRPCError({ message: 'Failed to update block' });
 		}),
 
 	deleteBlock: workspaceProcedure
@@ -596,7 +596,7 @@ export const bioRoute = {
 				where: and(eq(Bios.id, input.bioId), eq(Bios.workspaceId, ctx.workspace.id)),
 			});
 
-			if (!bio) raise('Bio not found');
+			if (!bio) raiseTRPCError({ message: 'Bio not found' });
 
 			// Remove the relationship
 			await dbPool(ctx.pool)
@@ -631,7 +631,7 @@ export const bioRoute = {
 				where: and(eq(Bios.id, bioId), eq(Bios.workspaceId, ctx.workspace.id)),
 			});
 
-			if (!bio) raise('Bio not found');
+			if (!bio) raiseTRPCError({ message: 'Bio not found' });
 
 			// Get current blocks with their lexoRanks to maintain valid ordering
 			const currentBlocks = await dbHttp.query._BioBlocks_To_Bios.findMany({
@@ -706,7 +706,7 @@ export const bioRoute = {
 				),
 			});
 
-			if (!block) raise('Block not found');
+			if (!block) raiseTRPCError({ message: 'Block not found' });
 
 			// Get the last link's lexoRank to generate next rank
 			const lastLink = await dbHttp.query._BioLinks_To_BioBlocks.findFirst({
@@ -731,7 +731,7 @@ export const bioRoute = {
 				})
 				.returning();
 
-			if (!link) raise('Failed to create link');
+			if (!link) raiseTRPCError({ message: 'Failed to create link' });
 
 			// Create the relationship
 			await dbPool(ctx.pool).insert(_BioLinks_To_BioBlocks).values({
@@ -754,7 +754,7 @@ export const bioRoute = {
 				.where(and(eq(BioLinks.id, id), eq(BioLinks.workspaceId, ctx.workspace.id)))
 				.returning();
 
-			return updatedLink ?? raise('Failed to update link');
+			return updatedLink ?? raiseTRPCError({ message: 'Failed to update link' });
 		}),
 
 	deleteLink: workspaceProcedure
@@ -773,7 +773,7 @@ export const bioRoute = {
 				),
 			});
 
-			if (!block) raise('Block not found');
+			if (!block) raiseTRPCError({ message: 'Block not found' });
 
 			// Remove the relationship
 			await dbPool(ctx.pool)
@@ -808,7 +808,7 @@ export const bioRoute = {
 				),
 			});
 
-			if (!block) raise('Block not found');
+			if (!block) raiseTRPCError({ message: 'Block not found' });
 
 			// Get current links with their lexoRanks to maintain valid ordering
 			const currentLinks = await dbHttp.query._BioLinks_To_BioBlocks.findMany({

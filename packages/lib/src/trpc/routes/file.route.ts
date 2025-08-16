@@ -11,7 +11,7 @@ import {
 	getPresigned,
 	getTotalUploadSize,
 } from '@barely/files';
-import { newId, raise } from '@barely/utils';
+import { newId, raiseTRPCError } from '@barely/utils';
 import { selectWorkspaceFilesSchema, uploadFileSchema } from '@barely/validators';
 import { lookup } from '@uploadthing/mime-types';
 import { ALLOWED_FILE_TYPES, getTypeFromFileName } from '@uploadthing/shared';
@@ -179,7 +179,7 @@ export const fileRoute = {
 				ctx.pool,
 			);
 
-			return uploadedFiles[0] ?? raise('File not found');
+			return uploadedFiles[0] ?? raiseTRPCError({ message: 'File not found' });
 		}),
 
 	completeMultiPartUpload: workspaceProcedure
@@ -211,7 +211,7 @@ export const fileRoute = {
 				ctx.pool,
 			);
 
-			return uploadedFiles[0] ?? raise('File not found');
+			return uploadedFiles[0] ?? raiseTRPCError({ message: 'File not found' });
 		}),
 } satisfies TRPCRouterRecord;
 

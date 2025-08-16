@@ -4,7 +4,7 @@ import { EmailAddresses } from '@barely/db/sql/email-address.sql';
 import { EmailTemplateGroups, EmailTemplates } from '@barely/db/sql/email-template.sql';
 import { sqlAnd, sqlStringContains } from '@barely/db/utils';
 import { sendEmail } from '@barely/email';
-import { raise } from '@barely/utils';
+import { raiseTRPCError } from '@barely/utils';
 import {
 	createEmailTemplateSchema,
 	selectWorkspaceEmailTemplatesSchema,
@@ -141,7 +141,7 @@ export const emailTemplateRoute = {
 				)
 				.returning();
 
-			return updatedEmailTemplates[0] ?? raise('Failed to archive email templates');
+			return updatedEmailTemplates[0] ?? raiseTRPCError({ message: 'Failed to archive email templates' });
 		}),
 
 	delete: workspaceProcedure
@@ -158,7 +158,7 @@ export const emailTemplateRoute = {
 				)
 				.returning();
 
-			return updatedEmailTemplates[0] ?? raise('Failed to delete email templates');
+			return updatedEmailTemplates[0] ?? raiseTRPCError({ message: 'Failed to delete email templates' });
 		}),
 
 	sendTestEmail: workspaceProcedure

@@ -5,7 +5,7 @@ import {
 	EmailTemplateGroups,
 } from '@barely/db/sql/email-template.sql';
 import { sqlAnd, sqlStringContains } from '@barely/db/utils';
-import { newId, raise } from '@barely/utils';
+import { newId, raiseTRPCError } from '@barely/utils';
 import {
 	createEmailTemplateGroupSchema,
 	selectWorkspaceEmailTemplateGroupsSchema,
@@ -235,7 +235,7 @@ export const emailTemplateGroupRoute = {
 				.returning();
 
 			return (
-				updatedEmailTemplateGroups[0] ?? raise('Failed to archive email template groups')
+				updatedEmailTemplateGroups[0] ?? raiseTRPCError({ message: 'Failed to archive email template groups' })
 			);
 		}),
 
@@ -254,7 +254,7 @@ export const emailTemplateGroupRoute = {
 				.returning();
 
 			return (
-				updatedEmailTemplateGroups[0] ?? raise('Failed to delete email template groups')
+				updatedEmailTemplateGroups[0] ?? raiseTRPCError({ message: 'Failed to delete email template groups' })
 			);
 		}),
 } satisfies TRPCRouterRecord;

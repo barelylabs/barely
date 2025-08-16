@@ -24,7 +24,7 @@ Review checklist:
 - Good test coverage
 - Performance considerations addressed
 
-Provide feedback organized by priority:
+Create a comprhensive markdown list (CODE-REVIEW.md) of issues that you've found. Create or modify the CODE-REVIEW.md file if it doesn't exist. Provide feedback organized by priority:
 
 - Critical issues (must fix)
 - Warnings (should fix)

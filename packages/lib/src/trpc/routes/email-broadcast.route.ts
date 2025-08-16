@@ -2,7 +2,7 @@ import type { TRPCRouterRecord } from '@trpc/server';
 import { dbHttp } from '@barely/db/client';
 import { EmailBroadcasts } from '@barely/db/sql/email-broadcast.sql';
 import { sqlAnd } from '@barely/db/utils';
-import { newId, raise } from '@barely/utils';
+import { newId, raiseTRPCError } from '@barely/utils';
 import {
 	createEmailBroadcastSchema,
 	selectWorkspaceEmailBroadcastsSchema,
@@ -137,7 +137,7 @@ export const emailBroadcastRoute = {
 			) {
 				// cancel the scheduled broadcast
 				await runs.cancel(
-					oldEmailBroadcast.triggerRunId ?? raise('No trigger run id found.'),
+					oldEmailBroadcast.triggerRunId ?? raiseTRPCError({ message: 'No trigger run id found.' }),
 				);
 			} else if (
 				updatedEmailBroadcast.status === 'scheduled' &&
@@ -153,7 +153,7 @@ export const emailBroadcastRoute = {
 			) {
 				// cancel the old scheduled broadcast
 				await runs.cancel(
-					oldEmailBroadcast.triggerRunId ?? raise('No trigger run id found.'),
+					oldEmailBroadcast.triggerRunId ?? raiseTRPCError({ message: 'No trigger run id found.' }),
 				);
 				// trigger the new scheduled broadcast
 				await tasks.trigger<typeof handleEmailBroadcast>('handle-email-broadcast', {

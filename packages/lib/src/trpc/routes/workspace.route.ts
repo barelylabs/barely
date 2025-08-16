@@ -13,7 +13,7 @@ import { _Users_To_Workspaces } from '@barely/db/sql/user.sql';
 import { WorkspaceInvites } from '@barely/db/sql/workspace-invite.sql';
 import { Workspaces } from '@barely/db/sql/workspace.sql';
 import { sqlAnd, sqlStringContains } from '@barely/db/utils';
-import { newId, raise } from '@barely/utils';
+import { newId, raiseTRPCError } from '@barely/utils';
 import {
 	createWorkspaceSchema,
 	updateCurrentWorkspaceSchema,
@@ -36,7 +36,7 @@ export const workspaceRoute = {
 			where: eq(Workspaces.handle, ctx.workspace.handle),
 		});
 
-		if (!workspace) raise('Workspace not found');
+		if (!workspace) raiseTRPCError({ message: 'Workspace not found' });
 
 		return workspace;
 	}),
