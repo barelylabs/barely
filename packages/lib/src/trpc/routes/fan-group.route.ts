@@ -149,7 +149,8 @@ export const fanGroupRoute = {
 				.insert(FanGroups)
 				.values(fanGroupData)
 				.returning();
-			const fanGroup = fanGroups[0] ?? raiseTRPCError({ message: 'Failed to create fan group' });
+			const fanGroup =
+				fanGroups[0] ?? raiseTRPCError({ message: 'Failed to create fan group' });
 
 			if (!!conditions && conditions.length > 0) {
 				const fanGroupConditions = conditions.map((condition, index) => ({
@@ -255,6 +256,8 @@ export const fanGroupRoute = {
 				.where(inArray(FanGroups.id, input.ids))
 				.returning();
 
-			return updatedFanGroup[0] ?? raiseTRPCError({ message: 'Failed to delete fan group' });
+			return (
+				updatedFanGroup[0] ?? raiseTRPCError({ message: 'Failed to delete fan group' })
+			);
 		}),
 } satisfies TRPCRouterRecord;

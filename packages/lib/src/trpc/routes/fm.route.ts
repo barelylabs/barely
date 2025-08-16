@@ -153,7 +153,8 @@ export const fmRoute = {
 				.insert(FmPages)
 				.values(fmPageData)
 				.returning();
-			const fmPage = fmPages[0] ?? raiseTRPCError({ message: 'Failed to create fm page' });
+			const fmPage =
+				fmPages[0] ?? raiseTRPCError({ message: 'Failed to create fm page' });
 
 			const fmLinks = input.links.map((link, index) => ({
 				...link,

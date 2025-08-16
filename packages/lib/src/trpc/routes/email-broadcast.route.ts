@@ -137,7 +137,8 @@ export const emailBroadcastRoute = {
 			) {
 				// cancel the scheduled broadcast
 				await runs.cancel(
-					oldEmailBroadcast.triggerRunId ?? raiseTRPCError({ message: 'No trigger run id found.' }),
+					oldEmailBroadcast.triggerRunId ??
+						raiseTRPCError({ message: 'No trigger run id found.' }),
 				);
 			} else if (
 				updatedEmailBroadcast.status === 'scheduled' &&
@@ -153,7 +154,8 @@ export const emailBroadcastRoute = {
 			) {
 				// cancel the old scheduled broadcast
 				await runs.cancel(
-					oldEmailBroadcast.triggerRunId ?? raiseTRPCError({ message: 'No trigger run id found.' }),
+					oldEmailBroadcast.triggerRunId ??
+						raiseTRPCError({ message: 'No trigger run id found.' }),
 				);
 				// trigger the new scheduled broadcast
 				await tasks.trigger<typeof handleEmailBroadcast>('handle-email-broadcast', {

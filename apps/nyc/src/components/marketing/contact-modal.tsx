@@ -5,9 +5,9 @@ import { useZodForm } from '@barely/hooks';
 import { z } from 'zod/v4';
 
 import { Button } from '@barely/ui/button';
-import { Form, SubmitButton } from '@barely/ui/forms/form';
+import { Form } from '@barely/ui/forms/form';
+import { TextAreaField } from '@barely/ui/forms/text-area-field';
 import { TextField } from '@barely/ui/forms/text-field';
-import { TextareaField } from '@barely/ui/forms/textarea-field';
 import { Icon } from '@barely/ui/icon';
 import { Modal, ModalBody, ModalHeader } from '@barely/ui/modal';
 
@@ -146,7 +146,7 @@ export function ContactModal({
 								</div>
 							</details>
 
-							<TextareaField
+							<TextAreaField
 								control={form.control}
 								name='message'
 								label="What's your biggest music marketing challenge? *"

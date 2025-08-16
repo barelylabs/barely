@@ -235,7 +235,9 @@ export const productRoute = {
 					),
 				)
 				.returning();
-			return archivedProduct[0] ?? raiseTRPCError({ message: 'Failed to archive product' });
+			return (
+				archivedProduct[0] ?? raiseTRPCError({ message: 'Failed to archive product' })
+			);
 		}),
 
 	delete: workspaceProcedure

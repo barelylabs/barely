@@ -87,7 +87,8 @@ export const flowRoute = {
 			}
 
 			const trigger: InsertFlowTrigger =
-				flow.triggers[0] ?? raiseTRPCError({ message: `No trigger found for flow ${flowId}` });
+				flow.triggers[0] ??
+				raiseTRPCError({ message: `No trigger found for flow ${flowId}` });
 			const triggerNode = getTriggerNodeFromFlowTrigger(trigger, { x: 400, y: 25 });
 
 			const actions: InsertFlowAction[] = getInsertableFlowActionsFromFlowActions(
@@ -186,7 +187,8 @@ export const flowRoute = {
 							type: 'boolean',
 							data: {
 								boolean:
-									edge.data?.boolean ?? raiseTRPCError({ message: `No boolean found for edge ${edge.id}` }),
+									edge.data?.boolean ??
+									raiseTRPCError({ message: `No boolean found for edge ${edge.id}` }),
 							},
 						} satisfies BooleanEdge;
 					case 'simple':

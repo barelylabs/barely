@@ -7,8 +7,8 @@ import { z } from 'zod/v4';
 
 import { Button } from '@barely/ui/button';
 import { Form, SubmitButton } from '@barely/ui/forms/form';
+import { TextAreaField } from '@barely/ui/forms/text-area-field';
 import { TextField } from '@barely/ui/forms/text-field';
-import { TextareaField } from '@barely/ui/forms/textarea-field';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 
 // Define the contact form schema
@@ -111,7 +111,7 @@ export function ContactModal({ show, onClose, variant = 'demo' }: ContactModalPr
 							placeholder='Your artist or label name'
 						/>
 
-						<TextareaField
+						<TextAreaField
 							control={form.control}
 							name='message'
 							label='Message'

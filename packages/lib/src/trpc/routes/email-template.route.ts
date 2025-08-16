@@ -141,7 +141,10 @@ export const emailTemplateRoute = {
 				)
 				.returning();
 
-			return updatedEmailTemplates[0] ?? raiseTRPCError({ message: 'Failed to archive email templates' });
+			return (
+				updatedEmailTemplates[0] ??
+				raiseTRPCError({ message: 'Failed to archive email templates' })
+			);
 		}),
 
 	delete: workspaceProcedure
@@ -158,7 +161,10 @@ export const emailTemplateRoute = {
 				)
 				.returning();
 
-			return updatedEmailTemplates[0] ?? raiseTRPCError({ message: 'Failed to delete email templates' });
+			return (
+				updatedEmailTemplates[0] ??
+				raiseTRPCError({ message: 'Failed to delete email templates' })
+			);
 		}),
 
 	sendTestEmail: workspaceProcedure

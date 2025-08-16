@@ -250,7 +250,8 @@ export const campaignRoute = {
 			// };
 
 			const newSessionUser =
-				(await getSessionUserByUserId(newUser.id)) ?? raiseTRPCError({ message: 'no user found' });
+				(await getSessionUserByUserId(newUser.id)) ??
+				raiseTRPCError({ message: 'no user found' });
 
 			const newCampaign = createPlaylistPitchCampaign({
 				user: newSessionUser,

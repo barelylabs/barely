@@ -235,7 +235,8 @@ export const emailTemplateGroupRoute = {
 				.returning();
 
 			return (
-				updatedEmailTemplateGroups[0] ?? raiseTRPCError({ message: 'Failed to archive email template groups' })
+				updatedEmailTemplateGroups[0] ??
+				raiseTRPCError({ message: 'Failed to archive email template groups' })
 			);
 		}),
 
@@ -254,7 +255,8 @@ export const emailTemplateGroupRoute = {
 				.returning();
 
 			return (
-				updatedEmailTemplateGroups[0] ?? raiseTRPCError({ message: 'Failed to delete email template groups' })
+				updatedEmailTemplateGroups[0] ??
+				raiseTRPCError({ message: 'Failed to delete email template groups' })
 			);
 		}),
 } satisfies TRPCRouterRecord;
