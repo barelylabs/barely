@@ -169,7 +169,7 @@ export const bioRenderRoute = {
 
 			// Use database transaction for fan creation and email capture
 			const pool = makePool();
-			const result = await dbPool(pool).transaction(async tx => {
+			await dbPool(pool).transaction(async tx => {
 				// Check if fan already exists globally
 				const existingFan = await tx.query.Fans.findFirst({
 					where: and(eq(Fans.email, email), isNull(Fans.deletedAt)),
@@ -247,7 +247,7 @@ export const bioRenderRoute = {
 						});
 					} catch (error) {
 						// Ignore if already exists (race condition)
-						console.log('Fan-workspace link might already exist:', error);
+						// Fan-workspace link might already exist due to race condition
 					}
 				}
 
@@ -263,13 +263,8 @@ export const bioRenderRoute = {
 			});
 
 			// TODO: Trigger welcome email automation
-			console.log('Email captured successfully:', {
-				bioId,
-				email,
-				marketingConsent,
-				fanId: result.fanId,
-				workspaceName: bio.workspace.name,
-			});
+			// This should integrate with the email automation system once available
+			// For now, fans are created and can be managed through the admin panel
 
 			return {
 				success: true,

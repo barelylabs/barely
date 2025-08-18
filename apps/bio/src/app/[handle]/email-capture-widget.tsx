@@ -148,7 +148,7 @@ export function EmailCaptureWidget({
 					onChange={e => {
 						// If this field gets filled, it's likely spam
 						if (e.target.value) {
-							console.log('Potential spam detected');
+							// Spam detected - field is filled
 						}
 					}}
 				/>
