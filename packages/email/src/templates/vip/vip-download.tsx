@@ -34,7 +34,7 @@ export function VipDownloadEmailTemplate({
 	emailBody,
 	expiresIn = '24 hours',
 }: VipDownloadEmailProps) {
-	const previewText = `Download ${swapName} from ${artistName}`;
+	const previewText = "Here's your download!";
 
 	return (
 		<Html>
