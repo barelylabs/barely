@@ -48,6 +48,7 @@ export const Users = pgTable(
 		handle: varchar('handle', { length: 255 }).references(() => Workspaces.handle, {
 			onUpdate: 'cascade',
 		}),
+		// image: varchar('image', { length: 1000 }),
 		// image: varchar('image', { length: 1000 }).references(() => Workspaces.imageUrl, {
 		// 	onUpdate: 'cascade',
 		// }),

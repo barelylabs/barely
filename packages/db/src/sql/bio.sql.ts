@@ -6,6 +6,7 @@ import {
 	pgTable,
 	primaryKey,
 	timestamp,
+	uniqueIndex,
 	varchar,
 } from 'drizzle-orm/pg-core';
 
@@ -66,7 +67,7 @@ export const Bios = pgTable(
 	bio => ({
 		workspace: index('Bios_workspace_idx').on(bio.workspaceId),
 		handle: index('Bios_handle_idx').on(bio.handle),
-		workspaceKey: index('Bios_workspace_key_idx').on(bio.workspaceId, bio.key),
+		workspaceKey: uniqueIndex('Bios_workspace_key_idx').on(bio.workspaceId, bio.key),
 	}),
 );
 
@@ -180,24 +181,6 @@ export const BioBlocks = pgTable(
 				onDelete: 'cascade',
 			}),
 
-		// bioId: dbId('bioId')
-		// 	.notNull()
-		// 	.references(() => Bios.id, {
-		// 		onUpdate: 'cascade',
-		// 		onDelete: 'cascade',
-		// 	}),
-
-		// handle: varchar('handle', { length: 255 })
-		// 	.notNull()
-		// 	.references(() => Workspaces.handle, {
-		// 		onUpdate: 'cascade',
-		// 	}),
-		// key: varchar('key', { length: 255 })
-		// 	.notNull()
-		// 	.references(() => Bios.key, {
-		// 		onUpdate: 'cascade',
-		// 	}),
-
 		type: varchar('type', {
 			length: 50,
 			enum: ['links', 'contactForm', 'cart'],
@@ -208,9 +191,6 @@ export const BioBlocks = pgTable(
 		name: varchar('name', { length: 255 }), // for internal user user
 		title: varchar('title', { length: 255 }), // for rendering a title above the block
 		subtitle: varchar('subtitle', { length: 255 }), // for rendering a subtitle below the block
-
-		// Block-specific settings stored as JSON
-		// settings: json('settings').$type<Record<string, unknown>>(),
 	},
 	bioBlock => ({
 		workspace: index('BioBlocks_workspace_idx').on(bioBlock.workspaceId),
@@ -301,17 +281,14 @@ export const BioLinkRelations = relations(BioLinks, ({ one, many }) => ({
 export const _BioBlocks_To_Bios = pgTable(
 	'_BioBlocks_To_Bios',
 	{
-		bioId: dbId('bioId').notNull(),
-		handle: varchar('handle', { length: 255 })
+		bioId: dbId('bioId')
 			.notNull()
-			.references(() => Workspaces.handle, {
+			.references(() => Bios.id, {
 				onUpdate: 'cascade',
+				onDelete: 'cascade',
 			}),
-		key: varchar('key', { length: 255 })
-			.notNull()
-			.references(() => Bios.key, {
-				onUpdate: 'cascade',
-			}),
+		// handle: varchar('handle', { length: 255 }).notNull(),
+		// key: varchar('key', { length: 255 }).notNull(),
 
 		bioBlockId: dbId('bioBlockId').notNull(),
 		lexoRank: varchar('lexoRank', { length: 255 }).notNull(),

@@ -85,8 +85,6 @@ export const bioRoute = {
 					const firstLexoRank = generateLexoRank({ prev: null, next: null });
 					await dbPool(ctx.pool).insert(_BioBlocks_To_Bios).values({
 						bioId,
-						handle: ctx.workspace.handle,
-						key: input.key,
 						bioBlockId: blockId,
 						lexoRank: firstLexoRank,
 					});
@@ -592,20 +590,18 @@ export const bioRoute = {
 			if (!block) raiseTRPCError({ message: 'Failed to create block' });
 
 			// Create the relationship
-			await dbPool(ctx.pool)
-				.insert(_BioBlocks_To_Bios)
-				.values({
-					bioId,
-					handle: ctx.workspace.handle,
-					key:
-						bio?.key ??
-						raiseTRPCError({
-							code: 'INTERNAL_SERVER_ERROR',
-							message: 'Bio key not found',
-						}),
-					bioBlockId: blockId,
-					lexoRank,
-				});
+			await dbPool(ctx.pool).insert(_BioBlocks_To_Bios).values({
+				bioId,
+				// handle: ctx.workspace.handle,
+				// key:
+				// 	bio?.key ??
+				// 	raiseTRPCError({
+				// 		code: 'INTERNAL_SERVER_ERROR',
+				// 		message: 'Bio key not found',
+				// 	}),
+				bioBlockId: blockId,
+				lexoRank,
+			});
 
 			return block;
 		}),

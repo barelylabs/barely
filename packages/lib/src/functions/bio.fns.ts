@@ -23,38 +23,46 @@ export async function getBioBlocksByHandleAndKey({
 	handle: string;
 	key: string;
 }) {
-	const _bioBlocks = await dbHttp.query._BioBlocks_To_Bios.findMany({
-		where: and(eq(_BioBlocks_To_Bios.handle, handle), eq(_BioBlocks_To_Bios.key, key)),
+	const bioWithBlocks = await dbHttp.query.Bios.findFirst({
+		where: and(eq(Bios.handle, handle), eq(Bios.key, key)),
+		columns: {
+			id: true,
+		},
 		with: {
-			bioBlock: {
+			bioBlocks: {
 				with: {
-					bioLinks: {
+					bioBlock: {
 						with: {
-							bioLink: {
+							bioLinks: {
 								with: {
-									link: true,
-									form: true,
+									bioLink: {
+										with: {
+											link: true,
+											form: true,
+										},
+									},
 								},
+								orderBy: [asc(_BioLinks_To_BioBlocks.lexoRank)],
 							},
 						},
-						orderBy: [asc(_BioLinks_To_BioBlocks.lexoRank)],
 					},
 				},
+				orderBy: [asc(_BioBlocks_To_Bios.lexoRank)],
 			},
 		},
-		orderBy: [asc(_BioBlocks_To_Bios.lexoRank)],
 	});
 
-	const blocks = _bioBlocks.map(bb => ({
-		...bb.bioBlock,
-		lexoRank: bb.lexoRank,
-		links: bb.bioBlock.bioLinks.map(bl => ({
-			...bl.bioLink,
-			lexoRank: bl.lexoRank,
-			blockId: bl.bioBlockId,
-			link: bl.bioLink.link,
-		})),
-	}));
+	const blocks =
+		bioWithBlocks?.bioBlocks.map(bb => ({
+			...bb.bioBlock,
+			lexoRank: bb.lexoRank,
+			links: bb.bioBlock.bioLinks.map(bl => ({
+				...bl.bioLink,
+				lexoRank: bl.lexoRank,
+				blockId: bl.bioBlockId,
+				link: bl.bioLink.link,
+			})),
+		})) ?? [];
 
 	return blocks;
 }
