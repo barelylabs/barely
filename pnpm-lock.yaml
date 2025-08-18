@@ -2357,6 +2357,9 @@ importers:
 
   packages/ui:
     dependencies:
+      '@barely/api':
+        specifier: workspace:*
+        version: link:../api
       '@barely/atoms':
         specifier: workspace:*
         version: link:../atoms

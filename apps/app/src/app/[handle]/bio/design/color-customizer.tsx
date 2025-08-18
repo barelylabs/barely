@@ -1,13 +1,10 @@
 'use client';
 
-import type { ColorPreset, ColorScheme } from '@barely/lib/functions/bio-themes.fns';
+import type { BrandKitColorPreset, BrandKitColorPresetKey } from '@barely/const';
+import type { ColorScheme } from '@barely/validators';
 import { useEffect, useState } from 'react';
-import {
-	COLOR_PRESETS,
-	getAppearancesByType,
-	shuffleColorMapping,
-} from '@barely/lib/functions/bio-themes.fns';
-import { cn } from '@barely/utils';
+import { BRAND_KIT_COLOR_PRESETS } from '@barely/const';
+import { cn, getAppearancesByType, shuffleColorMapping } from '@barely/utils';
 import { converter, formatHex } from 'culori';
 import { HexColorPicker } from 'react-colorful';
 
@@ -16,6 +13,16 @@ import { Icon } from '@barely/ui/icon';
 import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/popover';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@barely/ui/tabs';
 import { Text } from '@barely/ui/typography';
+
+// import type {
+// 	ColorPreset,
+// 	ColorScheme,
+// } from '../../../../../../../packages/lib/utils/src/bio-themes.fns';
+// import {
+// 	COLOR_PRESETS,
+// 	getAppearancesByType,
+// 	shuffleColorMapping,
+// } from '../../../../../../../packages/lib/utils/src/bio-themes.fns';
 
 interface ColorCustomizerProps {
 	colorPreset?: string | null;
@@ -31,13 +38,13 @@ export function ColorCustomizer({
 	onColorSchemeChange,
 }: ColorCustomizerProps) {
 	// Determine active tab based on current preset
-	const [activeTab, setActiveTab] = useState<ColorPreset['type']>(() => {
+	const [activeTab, setActiveTab] = useState<BrandKitColorPreset['type']>(() => {
 		if (colorPreset === 'custom') {
 			return 'custom';
 		}
-		if (colorPreset && colorPreset in COLOR_PRESETS) {
-			const preset = COLOR_PRESETS[colorPreset];
-			if (preset) return preset.type;
+		if (colorPreset && colorPreset in BRAND_KIT_COLOR_PRESETS) {
+			const preset = BRAND_KIT_COLOR_PRESETS[colorPreset as BrandKitColorPresetKey];
+			return preset.type;
 		}
 		return 'neutral';
 	});
@@ -46,11 +53,9 @@ export function ColorCustomizer({
 	useEffect(() => {
 		if (colorPreset === 'custom') {
 			setActiveTab('custom');
-		} else if (colorPreset && colorPreset in COLOR_PRESETS) {
-			const preset = COLOR_PRESETS[colorPreset];
-			if (preset) {
-				setActiveTab(preset.type);
-			}
+		} else if (colorPreset && colorPreset in BRAND_KIT_COLOR_PRESETS) {
+			const preset = BRAND_KIT_COLOR_PRESETS[colorPreset as BrandKitColorPresetKey];
+			setActiveTab(preset.type);
 		}
 	}, [colorPreset]);
 
@@ -68,10 +73,10 @@ export function ColorCustomizer({
 			:	colorScheme
 		:	null;
 
-	const handlePresetSelect = (presetKey: keyof typeof COLOR_PRESETS) => {
-		if (presetKey in COLOR_PRESETS) {
-			const preset = COLOR_PRESETS[presetKey];
-			if (!preset) return; // Guard against undefined preset
+	const handlePresetSelect = (presetKey: keyof typeof BRAND_KIT_COLOR_PRESETS) => {
+		if (presetKey in BRAND_KIT_COLOR_PRESETS) {
+			const preset = BRAND_KIT_COLOR_PRESETS[presetKey];
+			// if (!preset) return; // Guard against undefined preset
 
 			// If clicking the already selected preset, shuffle the colors
 			if (colorPreset === presetKey && currentScheme) {
@@ -90,7 +95,9 @@ export function ColorCustomizer({
 		}
 	};
 
-	const renderColorCard = (preset: { key: string } & ColorPreset) => {
+	const renderColorCard = (
+		preset: { key: BrandKitColorPresetKey } & BrandKitColorPreset,
+	) => {
 		const isSelected = colorPreset === preset.key;
 		const { colors } = preset.colorScheme;
 
@@ -155,7 +162,7 @@ export function ColorCustomizer({
 		<div className='space-y-4'>
 			<Tabs
 				value={activeTab}
-				onValueChange={val => setActiveTab(val as ColorPreset['type'])}
+				onValueChange={val => setActiveTab(val as BrandKitColorPreset['type'])}
 			>
 				<TabsList className='grid w-full grid-cols-4'>
 					<TabsTrigger value='neutral'>Neutral</TabsTrigger>

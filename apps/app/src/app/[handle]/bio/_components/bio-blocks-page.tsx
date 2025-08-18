@@ -39,8 +39,8 @@ import { Text } from '@barely/ui/typography';
 import { AddBlockModal } from './add-block-modal';
 
 // Type the bio data from tRPC
-type BioWithBlocksData = AppRouterOutputs['bio']['byKey'];
-type BioBlockData = BioWithBlocksData['blocks'][number];
+type BlocksData = AppRouterOutputs['bio']['blocksByHandleAndKey'];
+type BioBlockData = BlocksData[number];
 
 // Sortable Block Component
 function SortableBlock({
@@ -249,13 +249,26 @@ export function BioBlocksPage() {
 		key: 'home',
 	}).queryKey;
 
-	const { data: bio } = useSuspenseQuery({
-		...trpc.bio.byKey.queryOptions({
-			handle,
-			key: 'home',
-		}),
-		staleTime: 1000 * 60 * 5, // 5 minutes
-	});
+	const { data: bio } = useSuspenseQuery(
+		trpc.bio.byKey.queryOptions(
+			{
+				handle,
+				key: 'home',
+			},
+			{
+				staleTime: 1000 * 60 * 5, // 5 minutes
+			},
+		),
+	);
+
+	const { data: blocks } = useSuspenseQuery(
+		trpc.bio.blocksByHandleAndKey.queryOptions(
+			{ handle, key: 'home' },
+			{
+				staleTime: 1000 * 60 * 5, // 5 minutes
+			},
+		),
+	);
 
 	// Mutations
 	const createBlockMutation = useMutation(
@@ -352,11 +365,11 @@ export function BioBlocksPage() {
 		const { active, over } = event;
 
 		if (over && active.id !== over.id) {
-			const oldIndex = bio.blocks.findIndex(block => block.id === String(active.id));
-			const newIndex = bio.blocks.findIndex(block => block.id === String(over.id));
+			const oldIndex = blocks.findIndex(block => block.id === String(active.id));
+			const newIndex = blocks.findIndex(block => block.id === String(over.id));
 
 			if (oldIndex !== -1 && newIndex !== -1) {
-				const reordered = arrayMove([...bio.blocks], oldIndex, newIndex);
+				const reordered = arrayMove([...blocks], oldIndex, newIndex);
 
 				// Submit reorder to backend
 				reorderBlocksMutation.mutate({
@@ -426,10 +439,10 @@ export function BioBlocksPage() {
 				modifiers={[restrictToVerticalAxis]}
 			>
 				<SortableContext
-					items={bio.blocks.map(b => b.id)}
+					items={blocks.map(b => b.id)}
 					strategy={verticalListSortingStrategy}
 				>
-					{bio.blocks.map(block => (
+					{blocks.map(block => (
 						<SortableBlock
 							key={block.id}
 							block={block}

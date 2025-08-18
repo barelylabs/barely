@@ -1,19 +1,18 @@
 'use client';
 
-import type { ThemeCategory } from '@barely/lib/functions/bio-themes.fns';
-import { getThemesByCategory } from '@barely/lib/functions/bio-themes.fns';
-import { cn } from '@barely/utils';
+import type { BrandKitThemeCategory } from '@barely/const';
+import { cn, getThemesByCategory } from '@barely/utils';
 
 import { Badge } from '@barely/ui/badge';
 import { Icon } from '@barely/ui/icon';
 
 interface ThemeCategorySelectorProps {
-	value?: ThemeCategory | null;
-	onChange: (category: ThemeCategory) => void;
+	value?: BrandKitThemeCategory | null;
+	onChange: (category: BrandKitThemeCategory) => void;
 }
 
 const CATEGORY_STYLES: Record<
-	ThemeCategory,
+	BrandKitThemeCategory,
 	{
 		gradient: string;
 		icon: keyof typeof Icon;
@@ -43,7 +42,7 @@ const CATEGORY_STYLES: Record<
 };
 
 export function ThemeCategorySelector({ value, onChange }: ThemeCategorySelectorProps) {
-	const categories: ThemeCategory[] = ['classic', 'vibrant', 'cozy', 'bold'];
+	const categories: BrandKitThemeCategory[] = ['classic', 'vibrant', 'cozy', 'bold'];
 
 	return (
 		<div className='grid grid-cols-2 gap-4'>

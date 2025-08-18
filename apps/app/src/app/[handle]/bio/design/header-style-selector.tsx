@@ -1,6 +1,6 @@
 'use client';
 
-import type { HeaderStyle } from '@barely/lib/functions/bio-themes.fns';
+import type { BioHeaderStyle, BioHeaderStyleCategory } from '@barely/const';
 import { cn } from '@barely/utils';
 
 import { Badge } from '@barely/ui/badge';
@@ -9,13 +9,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@barely/ui/tabs';
 
 interface HeaderStyleSelectorProps {
 	value: string; // e.g., 'minimal-centered', 'minimal-left', 'minimal-hero'
-	onChange: (style: HeaderStyle) => void;
+	onChange: (style: BioHeaderStyle) => void;
 }
 
-const HEADER_LAYOUTS = {
+const HEADER_LAYOUTS: Record<
+	BioHeaderStyleCategory,
+	{
+		key: BioHeaderStyle;
+		name: string;
+		description: string;
+		preview: React.ReactNode;
+	}[]
+> = {
 	minimal: [
 		{
-			key: 'minimal-centered',
+			key: 'minimal.centered',
 			name: 'Centered Classic',
 			description: 'Traditional centered layout with avatar above title',
 			preview: (
@@ -31,7 +39,7 @@ const HEADER_LAYOUTS = {
 			),
 		},
 		{
-			key: 'minimal-left',
+			key: 'minimal.left',
 			name: 'Left Aligned',
 			description: 'Avatar on left with title and socials inline',
 			preview: (
@@ -49,7 +57,7 @@ const HEADER_LAYOUTS = {
 			),
 		},
 		{
-			key: 'minimal-hero',
+			key: 'minimal.hero',
 			name: 'Hero Fade',
 			description: 'Large avatar that fades into the background',
 			preview: (
@@ -70,7 +78,12 @@ const HEADER_LAYOUTS = {
 export function HeaderStyleSelector({ value, onChange }: HeaderStyleSelectorProps) {
 	// Determine active tab from value (e.g., 'minimal-centered' -> 'minimal')
 	const activeTab = value.split('-')[0] ?? 'minimal';
-	const headerStyles: HeaderStyle[] = ['minimal', 'banner', 'portrait', 'shapes'];
+	const headerStyles: BioHeaderStyleCategory[] = [
+		'minimal',
+		'banner',
+		'portrait',
+		'shapes',
+	];
 
 	return (
 		<Tabs
@@ -105,7 +118,7 @@ export function HeaderStyleSelector({ value, onChange }: HeaderStyleSelectorProp
 										type='button'
 										onClick={() => {
 											if (layout.key in HEADER_LAYOUTS) {
-												onChange(layout.key as HeaderStyle); // fixme
+												onChange(layout.key);
 											}
 										}}
 										className={cn(

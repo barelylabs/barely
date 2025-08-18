@@ -22,10 +22,18 @@ export const BrandKits = pgTable(
 				onUpdate: 'cascade',
 				onDelete: 'cascade',
 			}),
+		handle: varchar('handle', { length: 255 }).references(() => Workspaces.handle, {
+			onUpdate: 'cascade',
+		}),
+
+		avatarS3Key: varchar('avatarS3Key', { length: 255 }),
+		avatarBlurDataUrl: varchar('avatarBlurDataUrl', { length: 255 }),
+		headerS3Key: varchar('headerS3Key', { length: 255 }),
+		headerBlurDataUrl: varchar('headerBlurDataUrl', { length: 255 }),
 
 		// Bio content
-		longBio: text('longBio'),
 		shortBio: text('shortBio'), // For social contexts like barely.bio
+		longBio: text('longBio'),
 		location: varchar('location', { length: 255 }), // Location like "Brooklyn, NY"
 
 		// Theme & Design System

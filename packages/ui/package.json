@@ -142,6 +142,7 @@
 		"typescript": "catalog:"
 	},
 	"dependencies": {
+		"@barely/api": "workspace:*",
 		"@barely/atoms": "workspace:*",
 		"@barely/const": "workspace:*",
 		"@barely/files": "workspace:*",

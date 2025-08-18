@@ -29,7 +29,7 @@ export const WEB_EVENT_TYPES__VIP = [
 
 export const WEB_EVENT_TYPES__BIO = [
 	'bio/view',
-	'bio/linkClick',
+	'bio/buttonClick',
 	'bio/emailCapture',
 ] as const;
 

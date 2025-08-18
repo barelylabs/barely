@@ -50,3 +50,41 @@ export type InsertBrandKit = z.infer<typeof insertBrandKitSchema>;
 export type UpdateBrandKit = z.infer<typeof updateBrandKitSchema>;
 export type CreateBrandKit = z.infer<typeof createBrandKitSchema>;
 export type ColorScheme = z.infer<typeof colorSchemeSchema>;
+
+export const defaultBrandKit: BrandKit = {
+	id: 'default',
+	createdAt: new Date(),
+	updatedAt: new Date(),
+	archivedAt: null,
+	deletedAt: null,
+	workspaceId: 'default',
+	handle: 'default',
+	avatarS3Key: null,
+	avatarBlurDataUrl: null,
+	headerS3Key: null,
+	headerBlurDataUrl: null,
+	themeCategory: 'custom',
+	colorPreset: 'default',
+	colorScheme: {
+		colors: ['#000000', '#000000', '#000000'],
+		mapping: {
+			backgroundColor: 0,
+			textColor: 0,
+			buttonColor: 0,
+			buttonTextColor: 0,
+			buttonOutlineColor: 0,
+			blockColor: 0,
+			blockTextColor: 0,
+			bannerColor: 0,
+		},
+	},
+	fontPreset: 'modern.cal',
+	headingFont: 'modern.cal',
+	bodyFont: 'modern.cal',
+	blockStyle: 'full-width',
+	shortBio: null,
+	longBio: null,
+	location: null,
+	blockShadow: false,
+	blockOutline: false,
+};

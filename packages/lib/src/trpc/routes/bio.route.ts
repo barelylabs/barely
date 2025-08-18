@@ -34,7 +34,10 @@ import { and, asc, desc, eq, gt, isNull, lt, or } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
 import { generateBioButtonSuggestions } from '../../functions/bio-suggestions.fns';
-import { getBioByHandleAndKey } from '../../functions/bio.fns';
+import {
+	getBioBlocksByHandleAndKey,
+	getBioByHandleAndKey,
+} from '../../functions/bio.fns';
 import { generateLexoRank } from '../../functions/lexo-rank.fns';
 import { detectLinkType, formatLinkUrl } from '../../functions/link-type.fns';
 import { workspaceProcedure } from '../trpc';
@@ -56,7 +59,7 @@ export const bioRoute = {
 			// If no bio exists, create one with defaults and a default links block
 			if (!bio) {
 				const bioId = newId('bio');
-				const blockId = newId('bio');
+				const blockId = newId('bioBlock');
 
 				// Create bio with transaction-like error handling
 				try {
@@ -82,6 +85,8 @@ export const bioRoute = {
 					const firstLexoRank = generateLexoRank({ prev: null, next: null });
 					await dbPool(ctx.pool).insert(_BioBlocks_To_Bios).values({
 						bioId,
+						handle: ctx.workspace.handle,
+						key: input.key,
 						bioBlockId: blockId,
 						lexoRank: firstLexoRank,
 					});
@@ -179,6 +184,33 @@ export const bioRoute = {
 				bios: transformedBios,
 				nextCursor,
 			};
+		}),
+
+	blocksByHandleAndKey: workspaceProcedure
+		.input(z.object({ handle: z.string(), key: z.string() }))
+		.query(async ({ input, ctx }) => {
+			const blocks = await getBioBlocksByHandleAndKey({
+				handle: ctx.workspace.handle,
+				key: input.key,
+			});
+
+			if (!blocks.length) {
+				const bio = await getBioByHandleAndKey({
+					handle: ctx.workspace.handle,
+					key: input.key,
+				});
+
+				if (!bio) {
+					throw new TRPCError({
+						code: 'NOT_FOUND',
+						message: 'Bio not found',
+					});
+				}
+
+				return []; // todo initialize with default block(s)
+			}
+
+			return blocks;
 		}),
 
 	byId: workspaceProcedure
@@ -560,11 +592,20 @@ export const bioRoute = {
 			if (!block) raiseTRPCError({ message: 'Failed to create block' });
 
 			// Create the relationship
-			await dbPool(ctx.pool).insert(_BioBlocks_To_Bios).values({
-				bioId,
-				bioBlockId: blockId,
-				lexoRank,
-			});
+			await dbPool(ctx.pool)
+				.insert(_BioBlocks_To_Bios)
+				.values({
+					bioId,
+					handle: ctx.workspace.handle,
+					key:
+						bio?.key ??
+						raiseTRPCError({
+							code: 'INTERNAL_SERVER_ERROR',
+							message: 'Bio key not found',
+						}),
+					bioBlockId: blockId,
+					lexoRank,
+				});
 
 			return block;
 		}),

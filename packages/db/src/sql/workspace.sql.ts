@@ -45,7 +45,7 @@ export const Workspaces = pgTable(
 		name: varchar('name', { length: 255 }).notNull(),
 		handle: varchar('handle', { length: 255 }).notNull(),
 
-		imageUrl: varchar('imageUrl', { length: 1000 }).unique(), // deprecated in favor of avatarImages - remove in future
+		// imageUrl: varchar('imageUrl', { length: 1000 }).unique(), // deprecated in favor of avatarImages - remove in future
 
 		type: varchar('type', {
 			length: 255,

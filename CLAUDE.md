@@ -167,6 +167,23 @@ pnpm tb:get-local-token       # Get local Tinybird token
 - **NEVER use non-null assertions (`!`)** - Handle null/undefined properly
 - **NO TYPE SHORTCUTS** - If types don't match, FIX THE ROOT CAUSE
 
+### APPROVED EXCEPTIONS (ONLY THESE SPECIFIC PATTERNS)
+
+#### 1. tRPC Server Prefetch Pattern
+
+**Location**: `apps/*/src/trpc/server.tsx` - `prefetch` function only
+**Pattern**: `queryClient.prefetchInfiniteQuery(queryOptions as any)`
+**Reason**: Known type incompatibility between @tanstack/react-query and tRPC type systems
+**Status**: Approved by Senior Engineering - DO NOT REFACTOR
+
+When implementing this in new apps, copy the exact pattern including:
+
+- The comprehensive JSDoc comment explaining the exception
+- The eslint-disable comments
+- The exact implementation structure
+
+This is the ONLY approved use of `as any` in the entire codebase.
+
 ### Required Practices
 
 - Use strict mode TypeScript configuration
@@ -224,7 +241,7 @@ import { TextField } from '@barely/ui/forms/text-field';
 
 // Define schema with Zod
 const myFormSchema = z.object({
-  email: z.string().email('Invalid email'),
+  email: z.email('Invalid email'),
   name: z.string().min(1, 'Name is required'),
   consent: z.boolean().refine(val => val === true, 'Consent required'),
 });
@@ -288,6 +305,7 @@ export function MyForm({ onSubmit }: { onSubmit: (data: MyFormData) => void }) {
 **CRITICAL**: Not all user inputs require forms. Understand the distinction:
 
 #### When to Use Form Patterns (with useZodForm + Form component):
+
 - Creating new entities (e.g., Add Link, Create Block, New Product)
 - Multiple fields that must be validated together before saving
 - User explicitly submits via a "Save" or "Submit" button
@@ -295,6 +313,7 @@ export function MyForm({ onSubmit }: { onSubmit: (data: MyFormData) => void }) {
 - Any use of `<form>` element (lowercase) - replace with `<Form>` component
 
 #### When to Use Instantaneous Updates (direct mutations):
+
 - Inline editing of single fields (contentEditable style)
 - Toggle switches for boolean states
 - Dropdown/select changes for enum values
@@ -305,6 +324,7 @@ export function MyForm({ onSubmit }: { onSubmit: (data: MyFormData) => void }) {
 #### Implementation Examples:
 
 **✅ CORRECT - Instantaneous inline edit with onBlur:**
+
 ```typescript
 // Single field that saves on blur
 <Input
@@ -320,16 +340,18 @@ export function MyForm({ onSubmit }: { onSubmit: (data: MyFormData) => void }) {
 ```
 
 **✅ CORRECT - Toggle with immediate save:**
+
 ```typescript
 <Switch
   checked={item.enabled}
-  onCheckedChange={checked => 
+  onCheckedChange={checked =>
     updateMutation.mutate({ id: item.id, enabled: checked })
   }
 />
 ```
 
 **❌ WRONG - Using <form> for multi-field entity creation:**
+
 ```typescript
 // DO NOT DO THIS
 <form onSubmit={handleSubmit}>
@@ -340,6 +362,7 @@ export function MyForm({ onSubmit }: { onSubmit: (data: MyFormData) => void }) {
 ```
 
 **✅ CORRECT - Using Form pattern for entity creation:**
+
 ```typescript
 const form = useZodForm({
   schema: createLinkSchema,

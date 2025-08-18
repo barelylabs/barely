@@ -3,10 +3,12 @@
 import type { SessionUser, SessionWorkspace } from '@barely/auth';
 import type { ReactNode } from 'react';
 import { UserContext, useUpdateNavHistory, useWorkspaceHotkeys } from '@barely/hooks';
+import { defaultBrandKit } from '@barely/validators';
 import { useHydrateAtoms } from 'jotai/utils';
 
 import { workspaceAtom } from '@barely/atoms/workspace';
 
+import { BrandKitProvider } from '@barely/ui/bio';
 import { ThemeProvider } from '@barely/ui/next-theme-provider';
 
 interface UserContextProviderProps {
@@ -21,7 +23,6 @@ export const UserContextProvider = (props: UserContextProviderProps) => {
 interface WorkspaceContextProviderProps {
 	workspace: SessionWorkspace;
 	children: ReactNode;
-	// setWorkspace: (workspace: SessionWorkspace) => void;
 }
 
 export function WorkspaceContextProvider({
@@ -29,8 +30,6 @@ export function WorkspaceContextProvider({
 	children,
 }: WorkspaceContextProviderProps) {
 	useWorkspaceHotkeys({ workspace });
-
-	// const wsAtom = useMemo(() => workspaceAtom(workspace), [workspace])
 
 	// we hydrate from the server, and then we update the workspace atom from the client from there.
 	useHydrateAtoms([[workspaceAtom, workspace]]);
@@ -50,12 +49,14 @@ export function WorkspaceProviders(
 	props: UserContextProviderProps & WorkspaceContextProviderProps,
 ) {
 	return (
-		<ThemeProvider attribute='class' defaultTheme='system' enableSystem>
-			<UserContextProvider user={props.user}>
-				<WorkspaceContextProvider workspace={props.workspace}>
-					<WorkspaceUpdateNavHistory>{props.children}</WorkspaceUpdateNavHistory>
-				</WorkspaceContextProvider>
-			</UserContextProvider>
-		</ThemeProvider>
+		<BrandKitProvider brandKit={props.workspace.brandKit ?? defaultBrandKit}>
+			<ThemeProvider attribute='class' defaultTheme='system' enableSystem>
+				<UserContextProvider user={props.user}>
+					<WorkspaceContextProvider workspace={props.workspace}>
+						<WorkspaceUpdateNavHistory>{props.children}</WorkspaceUpdateNavHistory>
+					</WorkspaceContextProvider>
+				</UserContextProvider>
+			</ThemeProvider>
+		</BrandKitProvider>
 	);
 }

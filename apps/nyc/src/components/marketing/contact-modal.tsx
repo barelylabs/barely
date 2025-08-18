@@ -91,6 +91,7 @@ export function ContactModal({
 			<ModalHeader
 				title={submitSuccess ? 'Message Sent!' : "Let's Grow Your Music"}
 				subtitle={submitSuccess ? '' : "I'll respond within 24 hours"}
+				justify='left'
 			/>
 
 			<ModalBody className='bg-[#0A0A0B]'>
@@ -103,7 +104,7 @@ export function ContactModal({
 						<p className='text-white/60'>I&apos;ll get back to you within 24 hours.</p>
 					</div>
 				:	<>
-						<Form form={form} onSubmit={handleSubmit} className='space-y-4'>
+						<Form form={form} onSubmit={handleSubmit} className='space-y-4' noValidate>
 							<div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
 								<TextField
 									control={form.control}

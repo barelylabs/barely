@@ -1,8 +1,8 @@
+import type { _BioBlocks_To_Bios, _BioLinks_To_BioBlocks } from '@barely/db/sql';
 import type { InferSelectModel } from 'drizzle-orm';
+import { BIO_HEADER_STYLES } from '@barely/const';
 import {
-	_BioBlocks_To_Bios,
 	_BioButtons_To_Bios,
-	_BioLinks_To_BioBlocks,
 	BioBlocks,
 	BioButtons,
 	BioLinks,
@@ -22,18 +22,6 @@ import { stdWebEventPipeQueryParamsSchema } from './tb.schema';
 export const insertBioSchema = createInsertSchema(Bios, {
 	handle: handle => handle.min(1, 'Handle is required'),
 	key: key => key.min(1, 'Key is required'),
-}).extend({
-	emailCaptureEnabled: z.boolean().default(false),
-	emailCaptureIncentiveText: z.string().optional(),
-	// Bio-specific settings
-	imgShape: z.enum(['square', 'circle', 'rounded']).optional(),
-	socialDisplay: z.boolean().default(true),
-	showLocation: z.boolean().default(false),
-	showHeader: z.boolean().default(true),
-	headerStyle: z.enum(['minimal', 'banner', 'portrait', 'shapes']).default('minimal'),
-	blockShadow: z.boolean().default(false),
-	showShareButton: z.boolean().default(false),
-	showSubscribeButton: z.boolean().default(false),
 });
 
 export const createBioSchema = insertBioSchema.omit({
@@ -58,7 +46,7 @@ export const publicBioSchema = z.object({
 	socialDisplay: z.boolean(),
 	showLocation: z.boolean(),
 	showHeader: z.boolean(),
-	headerStyle: z.enum(['minimal', 'banner', 'portrait', 'shapes']),
+	headerStyle: z.enum(BIO_HEADER_STYLES),
 	blockShadow: z.boolean(),
 	showShareButton: z.boolean(),
 	showSubscribeButton: z.boolean(),
@@ -141,6 +129,10 @@ export type InsertBioBlock = z.infer<typeof insertBioBlockSchema>;
 export type CreateBioBlock = z.infer<typeof createBioBlockSchema>;
 export type UpdateBioBlock = z.infer<typeof updateBioBlockSchema>;
 export type BioBlock = InferSelectModel<typeof BioBlocks>;
+// export type PublicBioBlock = Omit<
+// 	BioBlock,
+// 	'workspaceId' | 'createdAt' | 'updatedAt' | 'deletedAt'
+// >;
 
 // BioLinks (Links within blocks)
 export const insertBioLinkSchema = createInsertSchema(BioLinks, {

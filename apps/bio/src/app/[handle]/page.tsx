@@ -1,7 +1,9 @@
 import { Suspense } from 'react';
 
+import { s3Loader } from '@barely/ui/img';
+
 import { prefetch, trpc, trpcCaller } from '../../trpc/server';
-import { BioPageRender } from './bio-page';
+import { BioBioRender } from './bio-bio-render';
 
 interface BioRouteProps {
 	params: { handle: string };
@@ -10,31 +12,33 @@ interface BioRouteProps {
 export const revalidate = 60; // ISR: revalidate every 60 seconds
 export const dynamic = 'force-static';
 
-export default function BioRoute({ params }: BioRouteProps) {
-	prefetch(trpc.bio.byHandle.queryOptions({ handle: params.handle }));
+export default async function BioPage({
+	params,
+}: {
+	params: Promise<{ handle: string }>;
+}) {
+	const { handle } = await params;
+
+	const brandKit = await trpcCaller.bio.brandKitByHandle({ handle });
+
+	prefetch(trpc.bio.byHandleAndKey.queryOptions({ handle, key: 'home' }));
 
 	return (
 		<Suspense fallback={<div>Loading...</div>}>
-			<BioPageRender />
+			<BioBioRender handle={handle} bioKey={'home'} brandKit={brandKit} />
 		</Suspense>
 	);
-	// try {
-	// 	const bio = await api.bio.byHandle({ handle: params.handle });
-
-	// 	return <BioPageRender bio={bio} />;
-	// } catch (error) {
-	// 	console.error('Bio not found:', params.handle, error);
-	// 	notFound();
-	// }
 }
 
 export async function generateMetadata({ params }: BioRouteProps) {
 	try {
-		const bio = await trpcCaller.bio.byHandle({ handle: params.handle });
+		const bio = await trpcCaller.bio.byHandleAndKey({ handle: params.handle });
+		const brandKit = await trpcCaller.bio.brandKitByHandle({ handle: params.handle });
 
-		const title = `${bio.workspace.name || bio.handle} - Bio`;
-
-		const description = `Links and content from ${bio.workspace.name || bio.handle}`;
+		const title = `${bio.handle} - Bio`;
+		const description = `Links and content from ${bio.handle}`;
+		const imageUrl =
+			brandKit.avatarS3Key ? s3Loader({ s3Key: brandKit.avatarS3Key, width: 400 }) : null;
 
 		return {
 			title,
@@ -42,13 +46,13 @@ export async function generateMetadata({ params }: BioRouteProps) {
 			openGraph: {
 				title,
 				description,
-				...(bio.workspace.imageUrl && {
+				...(imageUrl && {
 					images: [
 						{
-							url: bio.workspace.imageUrl,
+							url: imageUrl,
 							width: 400,
 							height: 400,
-							alt: `${bio.workspace.name || bio.handle} profile picture`,
+							alt: `${bio.handle} profile picture`,
 						},
 					],
 				}),
@@ -57,8 +61,8 @@ export async function generateMetadata({ params }: BioRouteProps) {
 				card: 'summary',
 				title,
 				description,
-				...(bio.workspace.imageUrl && {
-					images: [bio.workspace.imageUrl],
+				...(imageUrl && {
+					images: [imageUrl],
 				}),
 			},
 		};

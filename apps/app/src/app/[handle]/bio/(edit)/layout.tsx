@@ -1,6 +1,4 @@
-import { Suspense } from 'react';
-
-import { BioPreview } from '~/app/[handle]/bio/_components/bio-preview';
+import { AppBioRender } from '~/app/[handle]/bio/_components/app-bio-render';
 import { getAllFontClassNames } from '~/lib/fonts';
 import { prefetch, trpc } from '~/trpc/server';
 
@@ -28,9 +26,7 @@ export default async function BioEditLayout({
 			{/* Right side: Preview */}
 			<div className='hidden w-[400px] border-l border-gray-200 bg-gray-50 lg:block'>
 				<div className='sticky top-0 flex h-full items-center justify-center p-8'>
-					<Suspense fallback={<div>Loading...</div>}>
-						<BioPreview />
-					</Suspense>
+					<AppBioRender bioKey='home' />
 				</div>
 			</div>
 		</div>

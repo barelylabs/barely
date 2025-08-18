@@ -1,6 +1,7 @@
 export * from './app-variants';
 export * from './barely-link';
 export * from './barely-urls';
+export * from './brand-kit';
 export * from './navigation';
 export * from './products';
 export * from './campaign';

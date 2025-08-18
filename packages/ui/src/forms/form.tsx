@@ -7,7 +7,7 @@ import type {
 	UseFormReturn,
 } from 'react-hook-form';
 import * as React from 'react';
-import { cn, onPromise } from '@barely/utils';
+import { cn } from '@barely/utils';
 import { Slot } from '@radix-ui/react-slot';
 import { Controller, FormProvider, useFormContext, useFormState } from 'react-hook-form';
 
@@ -36,8 +36,9 @@ const Form = <TOut extends FieldValues, TIn extends FieldValues>({
 			<form
 				{...props}
 				className='w-full'
-				onSubmit={e => {
-					onPromise(form.handleSubmit(onSubmit))(e);
+				onSubmit={async e => {
+					// onPromise(form.handleSubmit(onSubmit))(e);
+					await form.handleSubmit(onSubmit)(e);
 					e.stopPropagation();
 					e.preventDefault();
 					if (form.formState.errors.length) {

@@ -1,17 +1,20 @@
 'use client';
 
-import type { FontPreset } from '@barely/lib/functions/bio-themes.fns';
+import type { BrandKitFontPresetKey } from '@barely/const';
 import { useState } from 'react';
-import { FONT_PRESETS } from '@barely/lib/functions/bio-themes.fns';
+import { BRAND_KIT_FONT_PRESETS } from '@barely/const';
 import { cn } from '@barely/utils';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@barely/ui/tabs';
 
+// import type { BrandKitFontPreset } from '@barely/const';
+// import { BRAND_KIT_FONT_PRESETS } from '@barely/const';
+
 interface FontSelectorProps {
-	fontPreset: FontPreset | undefined | null;
+	fontPreset: BrandKitFontPresetKey | undefined | null;
 	headingFont?: string | null;
 	bodyFont?: string | null;
-	onFontPresetChange: (preset: FontPreset) => void;
+	onFontPresetChange: (preset: BrandKitFontPresetKey) => void;
 	onHeadingFontChange: (font: string) => void;
 	onBodyFontChange: (font: string) => void;
 }
@@ -24,7 +27,7 @@ const FONT_CATEGORIES = {
 			'modern.montserrat',
 			'modern.bowlbyOne',
 			'modern.anton',
-		] as FontPreset[],
+		] as const,
 	},
 	classic: {
 		label: 'Classic',
@@ -33,7 +36,7 @@ const FONT_CATEGORIES = {
 			'classic.playfairDisplaySc',
 			'classic.cutive',
 			'classic.libreBaskerville',
-		] as FontPreset[],
+		] as const,
 	},
 	creative: {
 		label: 'Creative',
@@ -42,7 +45,7 @@ const FONT_CATEGORIES = {
 			'creative.yellowtail',
 			'creative.permanentMarker',
 			'creative.pacifico',
-		] as FontPreset[],
+		] as const,
 	},
 	logo: {
 		label: 'Logo',
@@ -51,7 +54,7 @@ const FONT_CATEGORIES = {
 			'logo.miriamLibre',
 			'logo.rammettoOne',
 			'logo.gravitasOne',
-		] as FontPreset[],
+		] as const,
 	},
 	futuristic: {
 		label: 'Futuristic',
@@ -60,7 +63,7 @@ const FONT_CATEGORIES = {
 			'futuristic.audiowide',
 			'futuristic.lexendZetta',
 			'futuristic.unicaOne',
-		] as FontPreset[],
+		] as const,
 	},
 };
 
@@ -73,23 +76,24 @@ export function FontSelector({
 	// Determine which tab should be active based on current font preset
 	const activePreset = fontPreset ?? 'modern.cal';
 	const getActiveTab = () => {
+		if (activePreset === 'custom') return 'modern';
 		const category = Object.entries(FONT_CATEGORIES).find(([_, cat]) =>
-			cat.presets.includes(activePreset),
+			(cat.presets as readonly string[]).includes(activePreset),
 		);
 		return category?.[0] ?? 'modern';
 	};
 
 	const [activeTab, setActiveTab] = useState(getActiveTab());
 
-	const handlePresetSelect = (preset: FontPreset) => {
+	const handlePresetSelect = (preset: BrandKitFontPresetKey) => {
 		onFontPresetChange(preset);
-		const config = FONT_PRESETS[preset];
+		const config = BRAND_KIT_FONT_PRESETS[preset];
 		onHeadingFontChange(config.headingFont);
 		onBodyFontChange(config.bodyFont);
 	};
 
-	const FontPresetCard = ({ preset }: { preset: FontPreset }) => {
-		const config = FONT_PRESETS[preset];
+	const FontPresetCard = ({ preset }: { preset: BrandKitFontPresetKey }) => {
+		const config = BRAND_KIT_FONT_PRESETS[preset];
 
 		const isSelected = activePreset === preset;
 

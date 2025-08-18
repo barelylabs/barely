@@ -139,7 +139,7 @@ export async function recordBioEvent({
 			sessionId: visitor?.sessionId ?? newId('barelySession'),
 			type,
 			href: sourceUrl,
-			linkClickDestinationHref: null, // TODO: implement link URL extraction when relation is available
+			linkClickDestinationHref: bioLink?.url ?? null,
 			buttonPosition: buttonPosition ?? null,
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : undefined,
 		});
@@ -191,7 +191,7 @@ function getMetaEventFromBioEvent({
 					},
 				},
 			];
-		case 'bio/linkClick':
+		case 'bio/buttonClick':
 			return bioLink ?
 					[
 						{

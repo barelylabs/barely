@@ -56,8 +56,8 @@ interface BioLinksPageProps {
 }
 
 // Type definitions
-type BioWithBlocks = AppRouterOutputs['bio']['byKey'];
-type BioBlock = BioWithBlocks['blocks'][number];
+// type BioWithBlocks = AppRouterOutputs['bio']['byKey'];
+type BioBlock = AppRouterOutputs['bio']['blocksByHandleAndKey'][number];
 type BioLink = BioBlock['links'][number];
 
 // Animation options
@@ -434,16 +434,25 @@ export function BioLinksPage({ handle, blockId }: BioLinksPageProps) {
 		key: 'home',
 	}).queryKey;
 
-	const { data: bio } = useSuspenseQuery({
-		...trpc.bio.byKey.queryOptions({
-			handle,
-			key: 'home',
-		}),
-		staleTime: 1000 * 60 * 5, // 5 minutes
-	});
+	const { data: bio } = useSuspenseQuery(
+		trpc.bio.byKey.queryOptions(
+			{
+				handle,
+				key: 'home',
+			},
+			{ staleTime: 1000 * 60 * 5 }, // 5 minutes
+		),
+	);
+
+	const { data: blocks } = useSuspenseQuery(
+		trpc.bio.blocksByHandleAndKey.queryOptions(
+			{ handle, key: 'home' },
+			{ staleTime: 1000 * 60 * 5 }, // 5 minutes
+		),
+	);
 
 	// Find the specific block
-	const block = bio.blocks.find(b => b.id === blockId);
+	const block = blocks.find(b => b.id === blockId);
 
 	// Initialize form values when block loads
 	React.useEffect(() => {

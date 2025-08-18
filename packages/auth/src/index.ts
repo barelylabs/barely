@@ -114,14 +114,9 @@ export function initAuth(options: {
 										spotifyArtistId: true,
 										stripeCustomerId: true,
 										stripeCustomerId_devMode: true,
-										// stripeConnectAccountId: true,
-										// stripeConnectAccountId_devMode: true,
-										// shippingAddressPostalCode: true,
-										// cartSupportEmail: true,
-										// linkUsage: true,
-										// linkUsageLimit: true,
 									},
 									with: {
+										brandKit: true,
 										_avatarImages: {
 											where: () => eq(_Files_To_Workspaces__AvatarImage.current, true),
 											with: {

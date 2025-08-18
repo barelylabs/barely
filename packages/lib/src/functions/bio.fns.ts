@@ -9,86 +9,54 @@ export async function getBioByHandleAndKey({
 	handle: string;
 	key: string;
 }) {
-	const bioRaw = await dbHttp.query.Bios.findFirst({
+	const bio = await dbHttp.query.Bios.findFirst({
 		where: and(eq(Bios.handle, handle), eq(Bios.key, key), isNull(Bios.deletedAt)),
-		with: {
-			workspace: {
-				columns: {
-					id: true,
-					name: true,
-					handle: true,
-					imageUrl: true,
-				},
-				with: {
-					_avatarImages: {
-						where: (avatarImage, { eq }) => eq(avatarImage.current, true),
-						with: {
-							file: true,
-						},
-					},
-					brandKit: {
-						columns: {
-							id: false,
-							createdAt: false,
-							updatedAt: false,
-							archivedAt: false,
-							deletedAt: false,
-						},
-					},
-				},
-			},
-			bioBlocks: {
-				with: {
-					bioBlock: {
-						with: {
-							bioLinks: {
-								with: {
-									bioLink: {
-										with: {
-											link: true,
-											form: true,
-										},
-									},
-								},
-								orderBy: [asc(_BioLinks_To_BioBlocks.lexoRank)],
-							},
-						},
-					},
-				},
-				orderBy: [asc(_BioBlocks_To_Bios.lexoRank)],
-			},
-		},
 	});
 
-	if (!bioRaw) {
-		return null;
-	}
-
-	const { bioBlocks, workspace: workspaceRaw, ...bio } = bioRaw;
-
-	const blocks = bioBlocks
-		.map(bb => ({
-			...bb.bioBlock,
-			lexoRank: bb.lexoRank,
-			links: bb.bioBlock.bioLinks
-				.map(bl => ({
-					...bl.bioLink,
-					lexoRank: bl.lexoRank,
-					blockId: bl.bioBlockId,
-					link: bl.bioLink.link,
-				}))
-				.sort((a, b) => a.lexoRank.localeCompare(b.lexoRank)),
-		}))
-		.sort((a, b) => a.lexoRank.localeCompare(b.lexoRank));
-
-	const { brandKit, _avatarImages, ...workspace } = workspaceRaw;
-	const avatarImage = _avatarImages[0]?.file;
-
-	return {
-		...bio,
-		blocks,
-		brandKit,
-		workspace,
-		avatarImage,
-	};
+	return bio ?? null;
 }
+
+export async function getBioBlocksByHandleAndKey({
+	handle,
+	key,
+}: {
+	handle: string;
+	key: string;
+}) {
+	const _bioBlocks = await dbHttp.query._BioBlocks_To_Bios.findMany({
+		where: and(eq(_BioBlocks_To_Bios.handle, handle), eq(_BioBlocks_To_Bios.key, key)),
+		with: {
+			bioBlock: {
+				with: {
+					bioLinks: {
+						with: {
+							bioLink: {
+								with: {
+									link: true,
+									form: true,
+								},
+							},
+						},
+						orderBy: [asc(_BioLinks_To_BioBlocks.lexoRank)],
+					},
+				},
+			},
+		},
+		orderBy: [asc(_BioBlocks_To_Bios.lexoRank)],
+	});
+
+	const blocks = _bioBlocks.map(bb => ({
+		...bb.bioBlock,
+		lexoRank: bb.lexoRank,
+		links: bb.bioBlock.bioLinks.map(bl => ({
+			...bl.bioLink,
+			lexoRank: bl.lexoRank,
+			blockId: bl.bioBlockId,
+			link: bl.bioLink.link,
+		})),
+	}));
+
+	return blocks;
+}
+
+export type PublicBioBlock = Awaited<ReturnType<typeof getBioBlocksByHandleAndKey>>;

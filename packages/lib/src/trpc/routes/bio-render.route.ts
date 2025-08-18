@@ -17,17 +17,18 @@ import { and, eq, isNull } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
 import { recordBioEvent } from '../../functions/bio-event.fns';
-import { getBioByHandleAndKey } from '../../functions/bio.fns';
+import {
+	getBioBlocksByHandleAndKey,
+	getBioByHandleAndKey,
+} from '../../functions/bio.fns';
+import { getBrandKit } from '../../functions/brand-kit.fns';
 import { ratelimit } from '../../integrations/upstash';
 
 export const bioRenderRoute = {
-	byHandle: publicProcedure
-		.input(z.object({ handle: z.string() }))
+	byHandleAndKey: publicProcedure
+		.input(z.object({ handle: z.string(), key: z.string().optional().default('home') }))
 		.query(async ({ input }) => {
-			const bio = await getBioByHandleAndKey({
-				handle: input.handle,
-				key: 'home',
-			});
+			const bio = await getBioByHandleAndKey(input);
 
 			if (!bio) {
 				throw new TRPCError({
@@ -37,6 +38,36 @@ export const bioRenderRoute = {
 			}
 
 			return bio;
+		}),
+
+	brandKitByHandle: publicProcedure
+		.input(z.object({ handle: z.string() }))
+		.query(async ({ input }) => {
+			const brandKit = await getBrandKit({
+				handle: input.handle,
+			});
+
+			if (!brandKit) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Brand kit not found',
+				});
+			}
+
+			return brandKit;
+		}),
+
+	blocksByHandleAndKey: publicProcedure
+		.input(z.object({ handle: z.string(), key: z.string() }))
+		.query(async ({ input }) => {
+			const blocks = await getBioBlocksByHandleAndKey({
+				handle: input.handle,
+				key: input.key,
+			});
+
+			// this is a public route, so if blocks is empty, we don't throw an error. we just return an empty array.
+
+			return blocks;
 		}),
 
 	log: publicProcedure

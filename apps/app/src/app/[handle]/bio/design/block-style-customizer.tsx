@@ -1,6 +1,7 @@
 'use client';
 
-import type { BlockStyle } from '@barely/lib/functions/bio-themes.fns';
+import type { BrandKitBlockStyle } from '@barely/const';
+import { BRAND_KIT_BLOCK_STYLES } from '@barely/const';
 import { cn } from '@barely/utils';
 
 import { Icon } from '@barely/ui/icon';
@@ -9,16 +10,16 @@ import { Switch } from '@barely/ui/switch';
 import { Text } from '@barely/ui/typography';
 
 interface BlockStyleCustomizerProps {
-	blockStyle: BlockStyle;
+	blockStyle: BrandKitBlockStyle;
 	blockShadow: boolean;
 	blockOutline: boolean;
-	onBlockStyleChange: (style: BlockStyle) => void;
+	onBlockStyleChange: (style: BrandKitBlockStyle) => void;
 	onBlockShadowChange: (enabled: boolean) => void;
 	onBlockOutlineChange: (enabled: boolean) => void;
 }
 
 const BLOCK_STYLES: Record<
-	BlockStyle,
+	BrandKitBlockStyle,
 	{
 		name: string;
 		description: string;
@@ -59,7 +60,7 @@ export function BlockStyleCustomizer({
 	onBlockShadowChange,
 	onBlockOutlineChange,
 }: BlockStyleCustomizerProps) {
-	const styles: BlockStyle[] = ['rounded', 'oval', 'square', 'full-width'];
+	// const styles: BlockStyle[] = ['rounded', 'oval', 'square', 'full-width'];
 
 	return (
 		<div className='space-y-6'>
@@ -69,7 +70,7 @@ export function BlockStyleCustomizer({
 					Button Shape
 				</Text>
 				<div className='grid gap-4 sm:grid-cols-2'>
-					{styles.map(style => {
+					{BRAND_KIT_BLOCK_STYLES.map(style => {
 						const config = BLOCK_STYLES[style];
 						const isSelected = blockStyle === style;
 

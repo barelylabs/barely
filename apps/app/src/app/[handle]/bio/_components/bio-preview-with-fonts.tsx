@@ -1,15 +1,15 @@
 'use client';
 
+import { AppBioRender } from '~/app/[handle]/bio/_components/app-bio-render';
 import { getAllFontClassNames } from '~/lib/fonts';
-import { BioPreview } from './bio-preview';
 
 // Wrapper component that loads all fonts for bio preview
-export function BioPreviewWithFonts() {
+export function BioPreviewWithFonts({ bioKey }: { bioKey: string }) {
 	const allFontClasses = getAllFontClassNames();
 
 	return (
 		<div className={allFontClasses}>
-			<BioPreview />
+			<AppBioRender bioKey={bioKey} />
 		</div>
 	);
 }

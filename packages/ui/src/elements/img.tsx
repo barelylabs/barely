@@ -24,7 +24,6 @@ export const s3Loader = ({
 }: Omit<ImageLoaderProps, 'src'> & { s3Key: string }) => {
 	const url = new URL(`${libEnv.NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN}/${s3Key}`);
 	url.searchParams.set('format', 'webp');
-	// console.log(`width for ${s3Key}`, width);
 	url.searchParams.set('width', width ? width.toString() : 'auto');
 	url.searchParams.set('quality', quality ? quality.toString() : '75');
 	return url.toString();

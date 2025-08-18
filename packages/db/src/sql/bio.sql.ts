@@ -1,3 +1,4 @@
+import { BIO_HEADER_STYLES } from '@barely/const';
 import { relations } from 'drizzle-orm';
 import {
 	boolean,
@@ -10,7 +11,7 @@ import {
 
 import { dbId, primaryId, timestamps } from '../utils';
 import { Events } from './event.sql';
-import { Files } from './file.sql';
+// import { Files } from './file.sql';
 import { Forms } from './form.sql';
 import { Links } from './link.sql';
 import { Workspaces } from './workspace.sql';
@@ -20,7 +21,6 @@ import { Workspaces } from './workspace.sql';
 export const Bios = pgTable(
 	'Bios',
 	{
-		// id: cuid('id').notNull(),
 		...primaryId,
 
 		workspaceId: dbId('workspaceId')
@@ -29,22 +29,16 @@ export const Bios = pgTable(
 				onUpdate: 'cascade',
 				onDelete: 'cascade',
 			}),
-
-		...timestamps,
-
-		// link structure
 		handle: varchar('handle', { length: 255 })
 			.notNull()
 			.references(() => Workspaces.handle, {
 				onUpdate: 'cascade',
 			}),
 
-		key: varchar('key', { length: 255 }).notNull().default('home'),
+		...timestamps,
 
-		imageFileId: dbId('imageFileId').references(() => Files.id, {
-			onUpdate: 'cascade',
-			onDelete: 'cascade',
-		}),
+		// link structure
+		key: varchar('key', { length: 255 }).notNull().default('home'),
 
 		// Bio-specific settings (not moving to BrandKit)
 		imgShape: varchar('imgShape', {
@@ -56,11 +50,11 @@ export const Bios = pgTable(
 		showHeader: boolean('showHeader').default(true).notNull(),
 		headerStyle: varchar('headerStyle', {
 			length: 255,
-			enum: ['minimal', 'banner', 'portrait', 'shapes'],
+			enum: BIO_HEADER_STYLES,
 		})
-			.default('minimal')
+			.default('minimal.centered')
 			.notNull(),
-		blockShadow: boolean('blockShadow').default(false).notNull(),
+		// blockShadow: boolean('blockShadow').default(false).notNull(),
 		showShareButton: boolean('showShareButton').default(false).notNull(),
 		showSubscribeButton: boolean('showSubscribeButton').default(false).notNull(),
 		barelyBranding: boolean('barelyBranding').default(true).notNull(),
@@ -186,6 +180,24 @@ export const BioBlocks = pgTable(
 				onDelete: 'cascade',
 			}),
 
+		// bioId: dbId('bioId')
+		// 	.notNull()
+		// 	.references(() => Bios.id, {
+		// 		onUpdate: 'cascade',
+		// 		onDelete: 'cascade',
+		// 	}),
+
+		// handle: varchar('handle', { length: 255 })
+		// 	.notNull()
+		// 	.references(() => Workspaces.handle, {
+		// 		onUpdate: 'cascade',
+		// 	}),
+		// key: varchar('key', { length: 255 })
+		// 	.notNull()
+		// 	.references(() => Bios.key, {
+		// 		onUpdate: 'cascade',
+		// 	}),
+
 		type: varchar('type', {
 			length: 50,
 			enum: ['links', 'contactForm', 'cart'],
@@ -290,6 +302,17 @@ export const _BioBlocks_To_Bios = pgTable(
 	'_BioBlocks_To_Bios',
 	{
 		bioId: dbId('bioId').notNull(),
+		handle: varchar('handle', { length: 255 })
+			.notNull()
+			.references(() => Workspaces.handle, {
+				onUpdate: 'cascade',
+			}),
+		key: varchar('key', { length: 255 })
+			.notNull()
+			.references(() => Bios.key, {
+				onUpdate: 'cascade',
+			}),
+
 		bioBlockId: dbId('bioBlockId').notNull(),
 		lexoRank: varchar('lexoRank', { length: 255 }).notNull(),
 	},
@@ -303,6 +326,7 @@ export const _BioBlocks_To_Bios_Relations = relations(_BioBlocks_To_Bios, ({ one
 		fields: [_BioBlocks_To_Bios.bioId],
 		references: [Bios.id],
 	}),
+
 	bioBlock: one(BioBlocks, {
 		fields: [_BioBlocks_To_Bios.bioBlockId],
 		references: [BioBlocks.id],

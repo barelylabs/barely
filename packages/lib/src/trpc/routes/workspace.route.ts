@@ -2,6 +2,7 @@ import type { TRPCRouterRecord } from '@trpc/server';
 import { WORKSPACE_PLAN_TYPES } from '@barely/const';
 import { dbHttp } from '@barely/db/client';
 import { dbPool } from '@barely/db/pool';
+import { BrandKits } from '@barely/db/sql/brand-kit.sql';
 import { CartFunnels } from '@barely/db/sql/cart-funnel.sql';
 import {
 	_Files_To_Workspaces__AvatarImage,
@@ -21,10 +22,12 @@ import {
 	workspaceAssetsSchema,
 } from '@barely/validators';
 import { NeonDbError } from '@neondatabase/serverless';
+import { tasks } from '@trigger.dev/sdk/v3';
 import { TRPCError } from '@trpc/server';
 import { and, eq, gt, isNull } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
+import type { generateFileBlurHash } from '../../trigger';
 import { pushEvent } from '../../integrations/pusher/pusher-server';
 import { privateProcedure, publicProcedure, workspaceProcedure } from '../trpc';
 
@@ -299,6 +302,19 @@ export const workspaceRoute = {
 				console.error('error pushing workspace update event => ', e);
 			}
 
+			// update the brand kit avatar s3 key
+			await dbPool(ctx.pool)
+				.update(BrandKits)
+				.set({ avatarS3Key: input.avatarFileId })
+				.where(eq(BrandKits.workspaceId, ctx.workspace.id));
+
+			// trigger the blur hash generation
+			await tasks.trigger<typeof generateFileBlurHash>('generate-file-blur-hash', {
+				fileId: input.avatarFileId,
+				s3Key: input.avatarFileId,
+				avatarWorkspaceId: ctx.workspace.id,
+			});
+
 			return true;
 		}),
 
@@ -346,6 +362,19 @@ export const workspaceRoute = {
 					],
 					set: { current: true },
 				});
+
+			// update the brand kit header s3 key
+			await dbPool(ctx.pool)
+				.update(BrandKits)
+				.set({ headerS3Key: input.headerFileId })
+				.where(eq(BrandKits.workspaceId, ctx.workspace.id));
+
+			// trigger the blur hash generation
+			await tasks.trigger<typeof generateFileBlurHash>('generate-file-blur-hash', {
+				fileId: input.headerFileId,
+				s3Key: input.headerFileId,
+				headerWorkspaceId: ctx.workspace.id,
+			});
 
 			try {
 				const pushRes = await pushEvent('workspace', 'update', {

@@ -1,5 +1,5 @@
 import { dbHttp } from '@barely/db/client';
-import { Files } from '@barely/db/sql';
+import { BrandKits, Files } from '@barely/db/sql';
 import { logger, task } from '@trigger.dev/sdk/v3';
 import { eq } from 'drizzle-orm';
 
@@ -7,7 +7,12 @@ import { getBlurHash } from '../functions/file.blurhash';
 
 export const generateFileBlurHash = task({
 	id: 'generate-file-blur-hash',
-	run: async (payload: { fileId: string; s3Key: string }) => {
+	run: async (payload: {
+		fileId: string;
+		s3Key: string;
+		avatarWorkspaceId?: string; // provide if you want to update the avatar blur hash
+		headerWorkspaceId?: string; // provide if you want to update the header blur hash
+	}) => {
 		logger.log(
 			`Generating blur hash for file ${payload.fileId} with key ${payload.s3Key}`,
 		);
@@ -41,6 +46,20 @@ export const generateFileBlurHash = task({
 				.update(Files)
 				.set({ blurHash, blurDataUrl })
 				.where(eq(Files.id, payload.fileId));
+
+			if (payload.avatarWorkspaceId) {
+				await dbHttp
+					.update(BrandKits)
+					.set({ avatarBlurDataUrl: blurDataUrl })
+					.where(eq(BrandKits.workspaceId, payload.avatarWorkspaceId));
+			}
+
+			if (payload.headerWorkspaceId) {
+				await dbHttp
+					.update(BrandKits)
+					.set({ headerBlurDataUrl: blurDataUrl })
+					.where(eq(BrandKits.workspaceId, payload.headerWorkspaceId));
+			}
 
 			logger.log(`Successfully generated blur hash for file ${payload.fileId}`);
 			return { success: true, blurHash, blurDataUrl };

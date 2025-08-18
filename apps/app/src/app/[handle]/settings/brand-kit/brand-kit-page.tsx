@@ -13,7 +13,6 @@ import { toast } from 'sonner';
 
 import { useTRPC } from '@barely/api/app/app.trpc.react';
 
-import { BioRender } from '@barely/ui/bio';
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { LoadingSpinner } from '@barely/ui/loading';
 import { Tabs, TabsList, TabsTrigger } from '@barely/ui/tabs';
@@ -21,6 +20,7 @@ import { Text } from '@barely/ui/typography';
 
 import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
+import { AppBioRender } from '~/app/[handle]/bio/_components/app-bio-render';
 import { useBrandKit } from '~/hooks/use-brand-kit';
 import { BrandKitFormContent } from './brand-kit-form-content';
 
@@ -242,7 +242,8 @@ function BioPreview(props: {
 	return (
 		<div className='flex flex-col items-center gap-4'>
 			<span className='text-sm text-muted-foreground'>barely.bio/{bio.handle}</span>
-			<BioRender
+			<AppBioRender bioKey={'home'} />
+			{/* <BioRender
 				bio={bio}
 				// Preview settings
 				isPreview={true}
@@ -252,7 +253,7 @@ function BioPreview(props: {
 				onLinkClick={undefined}
 				onEmailCapture={undefined}
 				onPageView={undefined}
-			/>
+			/> */}
 		</div>
 	);
 }
