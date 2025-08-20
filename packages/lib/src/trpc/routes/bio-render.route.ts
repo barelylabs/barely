@@ -23,6 +23,7 @@ import {
 } from '../../functions/bio.fns';
 import { getBrandKit } from '../../functions/brand-kit.fns';
 import { ratelimit } from '../../integrations/upstash';
+import { log } from '../../utils/log';
 
 export const bioRenderRoute = {
 	byHandleAndKey: publicProcedure
@@ -245,9 +246,14 @@ export const bioRenderRoute = {
 							fanId,
 							workspaceId: bio.workspaceId,
 						});
-					} catch (error) {
+					} catch {
 						// Ignore if already exists (race condition)
 						// Fan-workspace link might already exist due to race condition
+						await log({
+							message: 'Fan-workspace link might already exist',
+							location: 'bio-render.captureEmail',
+							type: 'logs',
+						});
 					}
 				}
 
