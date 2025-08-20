@@ -276,6 +276,7 @@ export const Icon = {
 	bold: Bold,
 	bot: Bot,
 	branch: Split,
+	brand: Palette,
 	broadcast: Radio,
 	bump: PlusCircle,
 

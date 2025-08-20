@@ -59,7 +59,7 @@ export function ContextSidebar({ productId }: ContextSidebarProps) {
 
 		if (hasFeature('settings')) {
 			allSettingsRoutes.push(
-				{ path: '/settings/brand', label: 'brand', icon: 'palette' },
+				{ path: '/settings/brand', label: 'brand', icon: 'brand' },
 				{ path: '/settings/socials', label: 'socials', icon: 'socials' },
 				{ path: '/settings/streaming', label: 'streaming', icon: 'music' },
 				{ path: '/settings/apps', label: 'apps', icon: 'apps' },
