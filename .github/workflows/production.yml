@@ -734,6 +734,7 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-bio,
         promote-cart,
         promote-fm,
         promote-link,
@@ -766,6 +767,7 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-bio,
         promote-cart,
         promote-fm,
         promote-link,
@@ -948,6 +950,7 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-bio,
         promote-cart,
         promote-fm,
         promote-link,
@@ -1004,6 +1007,39 @@ jobs:
           echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
           vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
+  rollback-bio:
+    name: rollback bio if any deployments fail
+    needs:
+      [
+        promote-app,
+        promote-app-fm,
+        promote-bio,
+        promote-cart,
+        promote-fm,
+        promote-link,
+        promote-manage-email,
+        promote-page,
+        promote-press,
+        promote-nyc,
+        promote-vip,
+        promote-www,
+      ]
+    if: ${{ failure() && needs.promote-bio.result == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_BIO_PROJECT_ID }}
+    steps:
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Rollback bio
+        run: |
+          ROLLBACK_DEPLOYMENT_ID=$(curl -s "https://api.vercel.com/v6/deployments?teamId=${{ secrets.VERCEL_TEAM_ID }}&projectId=${{ secrets.VERCEL_BIO_PROJECT_ID}}&limit=2&rollbackCandidate=true&state=READY&target=production" -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | jq -r '.deployments[1].uid')
+          echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
+          vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+
   # 🧹 CLEAN UP 🧹 #
 
   delete-neon-branch:
@@ -1014,6 +1050,7 @@ jobs:
         production--can-merge,
         promote-app,
         promote-app-fm,
+        promote-bio,
         promote-cart,
         promote-fm,
         promote-link,
@@ -1029,6 +1066,7 @@ jobs:
       needs.production--can-merge.result == 'success' &&
       needs.promote-app.result == 'success' &&
       needs.promote-app-fm.result == 'success' &&
+      needs.promote-bio.result == 'success' &&
       needs.promote-cart.result == 'success' &&
       needs.promote-fm.result == 'success' &&
       needs.promote-link.result == 'success' &&
