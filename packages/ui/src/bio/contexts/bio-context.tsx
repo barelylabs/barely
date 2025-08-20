@@ -34,7 +34,7 @@ export function BioProvider(v: {
 	return <BioContext.Provider value={value}>{children}</BioContext.Provider>;
 }
 
-export function useBio() {
+export function useBioContext() {
 	const context = useContext(BioContext);
 	if (!context) {
 		throw new Error('useBio must be used within a BioProvider');

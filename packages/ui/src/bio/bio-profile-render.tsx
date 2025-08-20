@@ -2,11 +2,11 @@ import { useMemo } from 'react';
 import { cn, getComputedStyles } from '@barely/utils';
 
 import { Img } from '../elements/img';
-import { useBio } from './contexts/bio-context';
+import { useBioContext } from './contexts/bio-context';
 import { useBrandKit } from './contexts/brand-kit-context';
 
 export function BioProfileRender() {
-	const { bio } = useBio();
+	const { bio } = useBioContext();
 	const brandKit = useBrandKit();
 	const computedStyles = getComputedStyles(brandKit);
 	const isFullWidthButtons = brandKit.blockStyle === 'full-width';
@@ -31,6 +31,13 @@ export function BioProfileRender() {
 				className='h-full w-full object-cover'
 				width={imageSize}
 				height={imageHeight}
+				priority
+				sizes={
+					isLeftStyle ? '64px'
+					: isCenteredStyle ?
+						'96px'
+					:	'(max-width: 640px) 100vw, 400px'
+				}
 			/>
 		);
 	}, [
@@ -90,7 +97,11 @@ export function BioProfileRender() {
 					{brandKit.shortBio && (
 						<p
 							className='text-sm'
-							style={{ color: computedStyles.colors.text, fontWeight: 400 }}
+							style={{
+								color: computedStyles.colors.text,
+								fontFamily: computedStyles.fonts.bodyFont,
+								fontWeight: 400,
+							}}
 						>
 							{brandKit.shortBio}
 						</p>

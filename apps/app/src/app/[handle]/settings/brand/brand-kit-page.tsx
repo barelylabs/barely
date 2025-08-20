@@ -2,7 +2,6 @@
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import type { MDXEditorMethods } from '@barely/ui/mdx-editor';
-import type { PublicBrandKit } from '@barely/validators';
 import type { z } from 'zod/v4';
 import { Suspense, useRef, useState } from 'react';
 import { useWorkspace, useZodForm } from '@barely/hooks';
@@ -77,14 +76,6 @@ function BrandKitPageInner() {
 					longBio: data.longBio ?? '',
 					shortBio: data.shortBio ?? '',
 					location: data.location ?? '',
-					// colorPreset: data.colorPreset,
-					// colorScheme: data.colorScheme ?? undefined,
-					// fontPreset: data.fontPreset,
-					// headingFont: data.headingFont ?? undefined,
-					// bodyFont: data.bodyFont ?? undefined,
-					// blockStyle: data.blockStyle,
-					// blockShadow: data.blockShadow,
-					// blockOutline: data.blockOutline,
 				});
 			},
 			onError: error => {
@@ -123,28 +114,6 @@ function BrandKitPageInner() {
 		),
 	);
 
-	// Watch form values for live preview
-	const formValues = form.watch();
-
-	// Merge brand kit data with live form data for preview
-	const previewData: PublicBrandKit = {
-		...brandKit,
-		...formValues,
-		// Also specifically watch colorScheme to ensure updates trigger re-render
-		colorScheme: form.watch('colorScheme') ?? brandKit.colorScheme,
-		// Override with specific colorScheme value
-		// colorScheme,
-		// Ensure required properties are never undefined
-		// id: brandKit.id,
-		// workspaceId: brandKit.workspaceId,
-		// fontPreset: formValues.fontPreset ?? brandKit.fontPreset,
-		// blockStyle: formValues.blockStyle ?? brandKit.blockStyle,
-		// blockShadow: formValues.blockShadow ?? brandKit.blockShadow,
-		// blockOutline: formValues.blockOutline ?? brandKit.blockOutline,
-		// createdAt: brandKit.createdAt,
-		// updatedAt: brandKit.updatedAt,
-	};
-
 	const submitDisabled = !form.formState.isDirty;
 	return (
 		<Form form={form} onSubmit={handleSubmit}>
@@ -158,7 +127,6 @@ function BrandKitPageInner() {
 				}
 			/>
 			<DashContent>
-				{/* <SubmitButton loading={updateMutation.isPending}>Save Changes</SubmitButton> */}
 				<div className='flex h-full flex-col gap-6 lg:flex-row'>
 					{/* Main content - Left side on large screens */}
 					<div className='order-1 h-full flex-1 space-y-6 overflow-y-auto'>
@@ -193,7 +161,7 @@ function BrandKitPageInner() {
 							</div>
 
 							<div className='relative overflow-hidden rounded-lg'>
-								{previewTab === 'bio' && <BioPreview brandKit={previewData} bio={bio} />}
+								{previewTab === 'bio' && <BioPreview bio={bio} />}
 								{previewTab === 'page' && (
 									<div className='flex h-[600px] items-center justify-center bg-muted'>
 										<Text variant='sm/normal' className='text-muted-foreground'>
@@ -225,35 +193,11 @@ function BrandKitPageInner() {
 }
 
 // Preview component for bio using brand kit
-function BioPreview(props: {
-	bio: AppRouterOutputs['bio']['byKey'];
-	brandKit: PublicBrandKit;
-}) {
-	const bio = {
-		...props.bio,
-		brandKit: {
-			...props.brandKit,
-			longBio: props.brandKit.longBio ?? null,
-			shortBio: props.brandKit.shortBio ?? null,
-			location: props.brandKit.location ?? null,
-		},
-	};
-
+function BioPreview({ bio }: { bio: AppRouterOutputs['bio']['byKey'] }) {
 	return (
 		<div className='flex flex-col items-center gap-4'>
 			<span className='text-sm text-muted-foreground'>barely.bio/{bio.handle}</span>
 			<AppBioRender bioKey={'home'} />
-			{/* <BioRender
-				bio={bio}
-				// Preview settings
-				isPreview={true}
-				enableAnalytics={false}
-				showPhoneFrame={true}
-				// No callbacks in preview mode - links are not interactive
-				onLinkClick={undefined}
-				onEmailCapture={undefined}
-				onPageView={undefined}
-			/> */}
 		</div>
 	);
 }

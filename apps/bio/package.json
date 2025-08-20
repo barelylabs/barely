@@ -19,6 +19,7 @@
 	"dependencies": {
 		"@barely/api": "workspace:*",
 		"@barely/auth": "workspace:*",
+		"@barely/const": "workspace:*",
 		"@barely/files": "workspace:*",
 		"@barely/hooks": "workspace:*",
 		"@barely/lib": "workspace:*",

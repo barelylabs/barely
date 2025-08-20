@@ -5,13 +5,12 @@ import {
 	_BioBlocks_To_Bios,
 	_BioButtons_To_Bios,
 	_BioLinks_To_BioBlocks,
+	_Files_To_BioLinks__Images,
 	BioBlocks,
 	BioButtons,
 	BioLinks,
 	Bios,
-	Links,
-	Tracks,
-	Workspaces,
+	Files,
 } from '@barely/db/sql';
 import { sqlAnd, sqlStringContains } from '@barely/db/utils';
 import { newId, raiseTRPCError } from '@barely/utils';
@@ -21,7 +20,6 @@ import {
 	createBioLinkSchema,
 	createBioSchema,
 	reorderBioBlocksSchema,
-	reorderBioButtonsSchema,
 	reorderBioLinksSchema,
 	selectInfiniteBiosSchema,
 	updateBioBlockSchema,
@@ -29,11 +27,13 @@ import {
 	updateBioLinkSchema,
 	updateBioSchema,
 } from '@barely/validators';
+import { tasks } from '@trigger.dev/sdk/v3';
 import { TRPCError } from '@trpc/server';
+import { waitUntil } from '@vercel/functions';
 import { and, asc, desc, eq, gt, isNull, lt, or } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
-import { generateBioButtonSuggestions } from '../../functions/bio-suggestions.fns';
+import type { generateFileBlurHash } from '../../trigger/file-blurhash.trigger';
 import {
 	getBioBlocksByHandleAndKey,
 	getBioByHandleAndKey,
@@ -423,115 +423,115 @@ export const bioRoute = {
 			return { success: true };
 		}),
 
-	reorderButtons: workspaceProcedure
-		.input(reorderBioButtonsSchema)
-		.mutation(async ({ input, ctx }) => {
-			const { bioId, buttonIds } = input;
+	// reorderButtons: workspaceProcedure
+	// 	.input(reorderBioButtonsSchema)
+	// 	.mutation(async ({ input, ctx }) => {
+	// 		const { bioId, buttonIds } = input;
 
-			// Verify bio belongs to workspace
-			const bio = await dbHttp.query.Bios.findFirst({
-				where: and(eq(Bios.id, bioId), eq(Bios.workspaceId, ctx.workspace.id)),
-			});
+	// 		// Verify bio belongs to workspace
+	// 		const bio = await dbHttp.query.Bios.findFirst({
+	// 			where: and(eq(Bios.id, bioId), eq(Bios.workspaceId, ctx.workspace.id)),
+	// 		});
 
-			if (!bio) raiseTRPCError({ message: 'Bio not found' });
+	// 		if (!bio) raiseTRPCError({ message: 'Bio not found' });
 
-			// Get current buttons with their lexoRanks to maintain valid ordering
-			const currentButtons = await dbHttp.query._BioButtons_To_Bios.findMany({
-				where: eq(_BioButtons_To_Bios.bioId, bioId),
-				orderBy: [asc(_BioButtons_To_Bios.lexoRank)],
-			});
+	// 		// Get current buttons with their lexoRanks to maintain valid ordering
+	// 		const currentButtons = await dbHttp.query._BioButtons_To_Bios.findMany({
+	// 			where: eq(_BioButtons_To_Bios.bioId, bioId),
+	// 			orderBy: [asc(_BioButtons_To_Bios.lexoRank)],
+	// 		});
 
-			// Create a map of current lexoRanks for reference
-			const currentRankMap = new Map(
-				currentButtons.map(b => [b.bioButtonId, b.lexoRank]),
-			);
+	// 		// Create a map of current lexoRanks for reference
+	// 		const currentRankMap = new Map(
+	// 			currentButtons.map(b => [b.bioButtonId, b.lexoRank]),
+	// 		);
 
-			// Generate new lexoRanks for the ordered buttons
-			const newRanks: string[] = [];
-			for (let i = 0; i < buttonIds.length; i++) {
-				let lexoRank: string;
+	// 		// Generate new lexoRanks for the ordered buttons
+	// 		const newRanks: string[] = [];
+	// 		for (let i = 0; i < buttonIds.length; i++) {
+	// 			let lexoRank: string;
 
-				if (i === 0) {
-					// First item
-					const nextButtonId = buttonIds[i + 1];
-					const nextRank =
-						nextButtonId ? (currentRankMap.get(nextButtonId) ?? null) : null;
-					lexoRank = generateLexoRank({ prev: null, next: nextRank });
-				} else if (i === buttonIds.length - 1) {
-					// Last item
-					const prevRank = newRanks[i - 1] ?? null;
-					lexoRank = generateLexoRank({ prev: prevRank, next: null });
-				} else {
-					// Middle item - between previous new rank and next current rank
-					const nextButtonId = buttonIds[i + 1];
-					const nextRank =
-						nextButtonId ? (currentRankMap.get(nextButtonId) ?? null) : null;
-					const prevRank = newRanks[i - 1] ?? null;
-					lexoRank = generateLexoRank({
-						prev: prevRank,
-						next: nextRank,
-					});
-				}
+	// 			if (i === 0) {
+	// 				// First item
+	// 				const nextButtonId = buttonIds[i + 1];
+	// 				const nextRank =
+	// 					nextButtonId ? (currentRankMap.get(nextButtonId) ?? null) : null;
+	// 				lexoRank = generateLexoRank({ prev: null, next: nextRank });
+	// 			} else if (i === buttonIds.length - 1) {
+	// 				// Last item
+	// 				const prevRank = newRanks[i - 1] ?? null;
+	// 				lexoRank = generateLexoRank({ prev: prevRank, next: null });
+	// 			} else {
+	// 				// Middle item - between previous new rank and next current rank
+	// 				const nextButtonId = buttonIds[i + 1];
+	// 				const nextRank =
+	// 					nextButtonId ? (currentRankMap.get(nextButtonId) ?? null) : null;
+	// 				const prevRank = newRanks[i - 1] ?? null;
+	// 				lexoRank = generateLexoRank({
+	// 					prev: prevRank,
+	// 					next: nextRank,
+	// 				});
+	// 			}
 
-				newRanks.push(lexoRank);
-			}
+	// 			newRanks.push(lexoRank);
+	// 		}
 
-			// Update all buttons with their new ranks
-			const updates = buttonIds.map((buttonId, index) => {
-				return dbPool(ctx.pool)
-					.update(_BioButtons_To_Bios)
-					.set({ lexoRank: newRanks[index] })
-					.where(
-						and(
-							eq(_BioButtons_To_Bios.bioId, bioId),
-							eq(_BioButtons_To_Bios.bioButtonId, buttonId),
-						),
-					);
-			});
+	// 		// Update all buttons with their new ranks
+	// 		const updates = buttonIds.map((buttonId, index) => {
+	// 			return dbPool(ctx.pool)
+	// 				.update(_BioButtons_To_Bios)
+	// 				.set({ lexoRank: newRanks[index] })
+	// 				.where(
+	// 					and(
+	// 						eq(_BioButtons_To_Bios.bioId, bioId),
+	// 						eq(_BioButtons_To_Bios.bioButtonId, buttonId),
+	// 					),
+	// 				);
+	// 		});
 
-			await Promise.all(updates);
+	// 		await Promise.all(updates);
 
-			return { success: true };
-		}),
+	// 		return { success: true };
+	// 	}),
 
 	// Get button suggestions based on workspace data
-	getButtonSuggestions: workspaceProcedure
-		.input(z.object({ bioId: z.string().optional() }))
-		.query(async ({ ctx }) => {
-			// Fetch workspace data for suggestions
-			const [links, tracks, workspace] = await Promise.all([
-				dbHttp.query.Links.findMany({
-					where: eq(Links.workspaceId, ctx.workspace.id),
-					orderBy: [desc(Links.clicks)],
-					limit: 10,
-				}),
-				dbHttp.query.Tracks.findMany({
-					where: eq(Tracks.workspaceId, ctx.workspace.id),
-					orderBy: [desc(Tracks.createdAt)],
-					limit: 5,
-				}),
-				dbHttp.query.Workspaces.findFirst({
-					where: eq(Workspaces.id, ctx.workspace.id),
-					columns: {
-						spotifyArtistId: true,
-						instagramUsername: true,
-						tiktokUsername: true,
-						youtubeChannelId: true,
-					},
-				}),
-			]);
+	// getButtonSuggestions: workspaceProcedure
+	// 	.input(z.object({ bioId: z.string().optional() }))
+	// 	.query(async ({ ctx }) => {
+	// 		// Fetch workspace data for suggestions
+	// 		const [links, tracks, workspace] = await Promise.all([
+	// 			dbHttp.query.Links.findMany({
+	// 				where: eq(Links.workspaceId, ctx.workspace.id),
+	// 				orderBy: [desc(Links.clicks)],
+	// 				limit: 10,
+	// 			}),
+	// 			dbHttp.query.Tracks.findMany({
+	// 				where: eq(Tracks.workspaceId, ctx.workspace.id),
+	// 				orderBy: [desc(Tracks.createdAt)],
+	// 				limit: 5,
+	// 			}),
+	// 			dbHttp.query.Workspaces.findFirst({
+	// 				where: eq(Workspaces.id, ctx.workspace.id),
+	// 				columns: {
+	// 					spotifyArtistId: true,
+	// 					instagramUsername: true,
+	// 					tiktokUsername: true,
+	// 					youtubeChannelId: true,
+	// 				},
+	// 			}),
+	// 		]);
 
-			const suggestions = generateBioButtonSuggestions({
-				links,
-				tracks,
-				spotifyArtistId: workspace?.spotifyArtistId,
-				instagramUsername: workspace?.instagramUsername,
-				tiktokUsername: workspace?.tiktokUsername,
-				youtubeChannelId: workspace?.youtubeChannelId,
-			});
+	// 		const suggestions = generateBioButtonSuggestions({
+	// 			links,
+	// 			tracks,
+	// 			spotifyArtistId: workspace?.spotifyArtistId,
+	// 			instagramUsername: workspace?.instagramUsername,
+	// 			tiktokUsername: workspace?.tiktokUsername,
+	// 			youtubeChannelId: workspace?.youtubeChannelId,
+	// 		});
 
-			return suggestions;
-		}),
+	// 		return suggestions;
+	// 	}),
 
 	// Detect link type from URL
 	detectLinkType: workspaceProcedure
@@ -835,7 +835,7 @@ export const bioRoute = {
 	reorderLinks: workspaceProcedure
 		.input(reorderBioLinksSchema)
 		.mutation(async ({ input, ctx }) => {
-			const { blockId, linkIds } = input;
+			const { blockId, beforeLinkId, afterLinkId, links } = input;
 
 			// Verify block belongs to workspace
 			const block = await dbHttp.query.BioBlocks.findFirst({
@@ -847,57 +847,159 @@ export const bioRoute = {
 
 			if (!block) raiseTRPCError({ message: 'Block not found' });
 
-			// Get current links with their lexoRanks to maintain valid ordering
-			const currentLinks = await dbHttp.query._BioLinks_To_BioBlocks.findMany({
-				where: eq(_BioLinks_To_BioBlocks.bioBlockId, blockId),
-				orderBy: [asc(_BioLinks_To_BioBlocks.lexoRank)],
-			});
+			// Validate the lexoRank calculation server-side
+			// Get the before and after links if they exist
+			let beforeLexoRank: string | null = null;
+			let afterLexoRank: string | null = null;
 
-			// Create a map of current lexoRanks for reference
-			const currentRankMap = new Map(currentLinks.map(l => [l.bioLinkId, l.lexoRank]));
-
-			// Generate new lexoRanks for the ordered links
-			const newRanks: string[] = [];
-			for (let i = 0; i < linkIds.length; i++) {
-				let lexoRank: string;
-
-				if (i === 0) {
-					// First item
-					const nextLinkId = linkIds[i + 1];
-					const nextRank = nextLinkId ? (currentRankMap.get(nextLinkId) ?? null) : null;
-					lexoRank = generateLexoRank({ prev: null, next: nextRank });
-				} else if (i === linkIds.length - 1) {
-					// Last item
-					const prevRank = newRanks[i - 1] ?? null;
-					lexoRank = generateLexoRank({ prev: prevRank, next: null });
-				} else {
-					// Middle item - between previous new rank and next current rank
-					const nextLinkId = linkIds[i + 1];
-					const nextRank = nextLinkId ? (currentRankMap.get(nextLinkId) ?? null) : null;
-					const prevRank = newRanks[i - 1] ?? null;
-					lexoRank = generateLexoRank({
-						prev: prevRank,
-						next: nextRank,
-					});
-				}
-
-				newRanks.push(lexoRank);
+			if (beforeLinkId) {
+				const beforeLink = await dbHttp.query._BioLinks_To_BioBlocks.findFirst({
+					where: and(
+						eq(_BioLinks_To_BioBlocks.bioBlockId, blockId),
+						eq(_BioLinks_To_BioBlocks.bioLinkId, beforeLinkId),
+					),
+				});
+				beforeLexoRank = beforeLink?.lexoRank ?? null;
 			}
 
-			// Update all links with their new ranks
-			const updates = linkIds.map((linkId, index) => {
+			if (afterLinkId) {
+				const afterLink = await dbHttp.query._BioLinks_To_BioBlocks.findFirst({
+					where: and(
+						eq(_BioLinks_To_BioBlocks.bioBlockId, blockId),
+						eq(_BioLinks_To_BioBlocks.bioLinkId, afterLinkId),
+					),
+				});
+				afterLexoRank = afterLink?.lexoRank ?? null;
+			}
+
+			// Validate and potentially recalculate lexoRank for each moved link
+			// This must be done sequentially since each link's rank depends on the previous one
+			const validatedLinks: { id: string; lexoRank: string }[] = [];
+
+			for (let i = 0; i < links.length; i++) {
+				const link = links[i] ?? raiseTRPCError({ message: 'Link not found' });
+				const prevRank =
+					i === 0 ? beforeLexoRank : (
+						(validatedLinks[i - 1]?.lexoRank ??
+						raiseTRPCError({ message: 'Previous link not found' }))
+					);
+				const nextRank =
+					i === links.length - 1 ?
+						afterLexoRank
+					:	(validatedLinks[i + 1]?.lexoRank ??
+						raiseTRPCError({ message: 'Next link not found' }));
+				const lexoRank = generateLexoRank({ prev: prevRank, next: nextRank });
+
+				validatedLinks.push({
+					id: link.id,
+					lexoRank,
+				});
+			}
+
+			// Update only the moved links with their new ranks
+			const updates = validatedLinks.map(link => {
 				return dbPool(ctx.pool)
 					.update(_BioLinks_To_BioBlocks)
-					.set({ lexoRank: newRanks[index] })
+					.set({ lexoRank: link.lexoRank })
 					.where(
 						and(
 							eq(_BioLinks_To_BioBlocks.bioBlockId, blockId),
-							eq(_BioLinks_To_BioBlocks.bioLinkId, linkId),
+							eq(_BioLinks_To_BioBlocks.bioLinkId, link.id),
 						),
 					);
 			});
 
 			await Promise.all(updates);
+
+			return { success: true };
+		}),
+
+	updateLinkImage: workspaceProcedure
+		.input(
+			z.object({
+				linkId: z.string(),
+				fileId: z.string(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			// Verify the link belongs to the workspace
+			const link = await dbPool(ctx.pool).query.BioLinks.findFirst({
+				where: and(
+					eq(BioLinks.id, input.linkId),
+					eq(BioLinks.workspaceId, ctx.workspace.id),
+				),
+			});
+
+			if (!link) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Link not found',
+				});
+			}
+
+			// Verify the file belongs to the workspace
+			const file = await dbPool(ctx.pool).query.Files.findFirst({
+				where: and(eq(Files.id, input.fileId), eq(Files.workspaceId, ctx.workspace.id)),
+			});
+
+			if (!file) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'File not found',
+				});
+			}
+
+			// Check if file needs blur hash generation
+			if (!file.blurDataUrl && file.s3Key) {
+				// Import dynamically to avoid circular dependencies
+				waitUntil(
+					tasks.trigger<typeof generateFileBlurHash>('generate-file-blur-hash', {
+						fileId: file.id,
+						s3Key: file.s3Key,
+					}),
+				);
+			}
+
+			// Delete any existing image relation for this link
+			await dbPool(ctx.pool)
+				.delete(_Files_To_BioLinks__Images)
+				.where(eq(_Files_To_BioLinks__Images.bioLinkId, input.linkId));
+
+			// Create new image relation
+			await dbPool(ctx.pool).insert(_Files_To_BioLinks__Images).values({
+				fileId: input.fileId,
+				bioLinkId: input.linkId,
+			});
+
+			return { success: true };
+		}),
+
+	removeLinkImage: workspaceProcedure
+		.input(
+			z.object({
+				linkId: z.string(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			// Verify the link belongs to the workspace
+			const link = await dbPool(ctx.pool).query.BioLinks.findFirst({
+				where: and(
+					eq(BioLinks.id, input.linkId),
+					eq(BioLinks.workspaceId, ctx.workspace.id),
+				),
+			});
+
+			if (!link) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Link not found',
+				});
+			}
+
+			// Delete the image relation
+			await dbPool(ctx.pool)
+				.delete(_Files_To_BioLinks__Images)
+				.where(eq(_Files_To_BioLinks__Images.bioLinkId, input.linkId));
 
 			return { success: true };
 		}),

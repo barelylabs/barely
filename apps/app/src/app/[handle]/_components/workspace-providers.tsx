@@ -2,9 +2,17 @@
 
 import type { SessionUser, SessionWorkspace } from '@barely/auth';
 import type { ReactNode } from 'react';
-import { UserContext, useUpdateNavHistory, useWorkspaceHotkeys } from '@barely/hooks';
+import {
+	UserContext,
+	useUpdateNavHistory,
+	useWorkspace,
+	useWorkspaceHotkeys,
+} from '@barely/hooks';
 import { defaultBrandKit } from '@barely/validators';
+import { useQuery } from '@tanstack/react-query';
 import { useHydrateAtoms } from 'jotai/utils';
+
+import { useTRPC } from '@barely/api/app/app.trpc.react';
 
 import { workspaceAtom } from '@barely/atoms/workspace';
 
@@ -45,18 +53,36 @@ function WorkspaceUpdateNavHistory({ children }: { children: ReactNode }) {
 	return <>{children}</>;
 }
 
+function BrandKitContextProvider({ children }: { children: ReactNode }) {
+	const trpc = useTRPC();
+	const { workspace } = useWorkspace();
+	const { data: brandKit } = useQuery(
+		trpc.brandKit.current.queryOptions(
+			{ handle: workspace.handle },
+			{
+				initialData: workspace.brandKit ?? defaultBrandKit,
+				refetchOnWindowFocus: false,
+			},
+		),
+	);
+
+	return (
+		<BrandKitProvider brandKit={brandKit ?? defaultBrandKit}>{children}</BrandKitProvider>
+	);
+}
+
 export function WorkspaceProviders(
 	props: UserContextProviderProps & WorkspaceContextProviderProps,
 ) {
 	return (
-		<BrandKitProvider brandKit={props.workspace.brandKit ?? defaultBrandKit}>
-			<ThemeProvider attribute='class' defaultTheme='system' enableSystem>
-				<UserContextProvider user={props.user}>
-					<WorkspaceContextProvider workspace={props.workspace}>
+		<ThemeProvider attribute='class' defaultTheme='system' enableSystem>
+			<UserContextProvider user={props.user}>
+				<WorkspaceContextProvider workspace={props.workspace}>
+					<BrandKitContextProvider>
 						<WorkspaceUpdateNavHistory>{props.children}</WorkspaceUpdateNavHistory>
-					</WorkspaceContextProvider>
-				</UserContextProvider>
-			</ThemeProvider>
-		</BrandKitProvider>
+					</BrandKitContextProvider>
+				</WorkspaceContextProvider>
+			</UserContextProvider>
+		</ThemeProvider>
 	);
 }

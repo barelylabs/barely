@@ -391,6 +391,9 @@ importers:
       '@barely/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@barely/const':
+        specifier: workspace:*
+        version: link:../../packages/const
       '@barely/files':
         specifier: workspace:*
         version: link:../../packages/files

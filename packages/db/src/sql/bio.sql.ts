@@ -12,7 +12,7 @@ import {
 
 import { dbId, primaryId, timestamps } from '../utils';
 import { Events } from './event.sql';
-// import { Files } from './file.sql';
+import { Files } from './file.sql';
 import { Forms } from './form.sql';
 import { Links } from './link.sql';
 import { Workspaces } from './workspace.sql';
@@ -274,6 +274,9 @@ export const BioLinkRelations = relations(BioLinks, ({ one, many }) => ({
 
 	// many-to-many
 	bioBlocks: many(_BioLinks_To_BioBlocks),
+	_image: many(_Files_To_BioLinks__Images, {
+		relationName: '_bioLink_image',
+	}),
 }));
 
 // Join tables
@@ -332,6 +335,38 @@ export const _BioLinks_To_BioBlocks_Relations = relations(
 		bioLink: one(BioLinks, {
 			fields: [_BioLinks_To_BioBlocks.bioLinkId],
 			references: [BioLinks.id],
+		}),
+	}),
+);
+
+// Join table for BioLink images
+export const _Files_To_BioLinks__Images = pgTable(
+	'_Files_To_BioLinks__Images',
+	{
+		fileId: dbId('fileId')
+			.notNull()
+			.references(() => Files.id, { onDelete: 'cascade' }),
+		bioLinkId: dbId('bioLinkId')
+			.notNull()
+			.references(() => BioLinks.id, { onDelete: 'cascade' }),
+	},
+	table => ({
+		pk: primaryKey({ columns: [table.fileId, table.bioLinkId] }),
+	}),
+);
+
+export const _Files_To_BioLinks__Images_Relations = relations(
+	_Files_To_BioLinks__Images,
+	({ one }) => ({
+		file: one(Files, {
+			fields: [_Files_To_BioLinks__Images.fileId],
+			references: [Files.id],
+			relationName: '_image_bioLink',
+		}),
+		bioLink: one(BioLinks, {
+			fields: [_Files_To_BioLinks__Images.bioLinkId],
+			references: [BioLinks.id],
+			relationName: '_bioLink_image',
 		}),
 	}),
 );

@@ -159,12 +159,30 @@ export const updateBioLinkSchema = insertBioLinkSchema
 
 export const reorderBioLinksSchema = z.object({
 	blockId: z.string(),
-	linkIds: z.array(z.string()),
+	beforeLinkId: z.string().nullable(),
+	afterLinkId: z.string().nullable(),
+	links: z.array(
+		z.object({
+			id: z.string(),
+			lexoRank: z.string(),
+		}),
+	),
+});
+
+export const updateBioLinkImageSchema = z.object({
+	linkId: z.string(),
+	fileId: z.string(),
+});
+
+export const removeBioLinkImageSchema = z.object({
+	linkId: z.string(),
 });
 
 export type InsertBioLink = z.infer<typeof insertBioLinkSchema>;
 export type CreateBioLink = z.infer<typeof createBioLinkSchema>;
 export type UpdateBioLink = z.infer<typeof updateBioLinkSchema>;
+export type UpdateBioLinkImage = z.infer<typeof updateBioLinkImageSchema>;
+export type RemoveBioLinkImage = z.infer<typeof removeBioLinkImageSchema>;
 export type BioLink = InferSelectModel<typeof BioLinks>;
 
 // Relationship types

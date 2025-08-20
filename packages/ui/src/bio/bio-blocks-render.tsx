@@ -6,8 +6,9 @@ import React from 'react';
 import { cn, getComputedStyles } from '@barely/utils';
 
 import { Button } from '../elements/button';
+import { Img } from '../elements/img';
 import { Text } from '../elements/typography';
-import { useBio } from './contexts/bio-context';
+import { useBioContext } from './contexts/bio-context';
 import { useBrandKit } from './contexts/brand-kit-context';
 
 interface BioBlocksRenderProps {
@@ -15,7 +16,7 @@ interface BioBlocksRenderProps {
 }
 
 export function BioBlocksRender({ blocks }: BioBlocksRenderProps) {
-	const { bio, onLinkClick, isPreview } = useBio();
+	const { bio, onLinkClick, isPreview } = useBioContext();
 	const brandKit = useBrandKit();
 
 	const computedStyles = getComputedStyles(brandKit);
@@ -64,6 +65,7 @@ export function BioBlocksRender({ blocks }: BioBlocksRenderProps) {
 										variant='xs/normal'
 										style={{
 											color: computedStyles.colors.text,
+											fontFamily: computedStyles.fonts.bodyFont,
 											opacity: 0.8,
 										}}
 									>
@@ -79,7 +81,7 @@ export function BioBlocksRender({ blocks }: BioBlocksRenderProps) {
 							if (link.enabled === false) return null;
 
 							const linkHref = link.url ?? '#';
-							const linkTarget = '_self';
+							const linkTarget = '_blank';
 
 							// Map link.animate to our custom looping animations
 							const animationClass = (() => {
@@ -114,7 +116,8 @@ export function BioBlocksRender({ blocks }: BioBlocksRenderProps) {
 									look='primary'
 									fullWidth={true}
 									className={cn(
-										isFullWidthButtons ? 'px-6 py-4' : 'px-6 py-3',
+										'h-fit min-h-[61px] text-sm leading-none',
+										isFullWidthButtons ? 'px-4 py-4' : 'px-4 py-3',
 										isFullWidthButtons ? 'rounded-none'
 										: computedStyles.block.radius === '9999px' ? 'rounded-full'
 										: computedStyles.block.radius === '12px' ? 'rounded-xl'
@@ -124,19 +127,46 @@ export function BioBlocksRender({ blocks }: BioBlocksRenderProps) {
 									style={{
 										backgroundColor: computedStyles.colors.button,
 										color: computedStyles.colors.buttonText,
+										fontFamily: computedStyles.fonts.bodyFont,
 										boxShadow: computedStyles.block.shadow,
 										border: computedStyles.block.outline,
 									}}
 									onClick={
 										onLinkClick && !isPreview ?
-											(e: React.MouseEvent) => {
-												e.preventDefault();
+											() => {
 												void onLinkClick(link);
 											}
 										:	undefined
 									}
 								>
-									{link.text}
+									<div className='flex w-full items-center gap-3'>
+										{/* Image on the left if present */}
+										{link.image?.s3Key && (
+											<div
+												className={cn(
+													'h-[45px] w-[45px] flex-shrink-0 overflow-hidden',
+													computedStyles.block.radius === '9999px' ? 'rounded-full'
+													: computedStyles.block.radius === '12px' ? 'rounded-lg'
+													: 'rounded-none',
+												)}
+											>
+												<Img
+													s3Key={link.image.s3Key}
+													blurDataURL={link.image.blurDataUrl ?? undefined}
+													alt={link.text}
+													width={45}
+													height={45}
+													className='h-full w-full object-cover'
+												/>
+											</div>
+										)}
+										{/* Text content */}
+										<span className='flex-1 whitespace-normal break-words text-center'>
+											{link.text}
+										</span>
+										{/* Spacer to balance when image is present */}
+										{link.image?.s3Key && <div className='w-[45px]' />}
+									</div>
 								</Button>
 							);
 						})}
@@ -157,6 +187,7 @@ export function BioBlocksRender({ blocks }: BioBlocksRenderProps) {
 					style={{
 						borderColor: computedStyles.colors.button,
 						color: computedStyles.colors.text,
+						fontFamily: computedStyles.fonts.bodyFont,
 					}}
 				>
 					Add your first link

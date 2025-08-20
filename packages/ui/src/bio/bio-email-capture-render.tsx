@@ -8,7 +8,7 @@ import { z } from 'zod/v4';
 import { CheckboxField } from '../forms/checkbox-field';
 import { Form, SubmitButton } from '../forms/form';
 import { TextField } from '../forms/text-field';
-import { useBio } from './contexts/bio-context';
+import { useBioContext } from './contexts/bio-context';
 import { useBrandKit } from './contexts/brand-kit-context';
 
 const emailCaptureSchema = z.object({
@@ -19,7 +19,7 @@ const emailCaptureSchema = z.object({
 type EmailCaptureFormData = z.infer<typeof emailCaptureSchema>;
 
 export function BioEmailCaptureRender() {
-	const { bio, onEmailCapture, isPreview } = useBio();
+	const { bio, onEmailCapture, isPreview } = useBioContext();
 	const brandKit = useBrandKit();
 
 	const computedStyles = getComputedStyles(brandKit);

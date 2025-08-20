@@ -12,6 +12,7 @@ import { MDXEditor } from '@barely/ui/mdx-editor';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@barely/ui/tabs';
 import { Text } from '@barely/ui/typography';
 
+import { useBrandKit } from '~/hooks/use-brand-kit';
 import { BlockStyleCustomizer } from '../../bio/design/block-style-customizer';
 // Import design components from bio
 import { ColorCustomizer } from '../../bio/design/color-customizer';
@@ -24,6 +25,8 @@ interface BrandKitFormContentProps {
 
 export function BrandKitFormContent({ form, mdxEditorRef }: BrandKitFormContentProps) {
 	const [activeTab, setActiveTab] = useState('content');
+
+	const { updateBrandKitPreview } = useBrandKit();
 
 	return (
 		<Tabs value={activeTab} onValueChange={setActiveTab} className='w-full'>
@@ -50,6 +53,11 @@ export function BrandKitFormContent({ form, mdxEditorRef }: BrandKitFormContentP
 							label='Short Bio'
 							placeholder='A brief description for social media and quick introductions.'
 							rows={3}
+							onChange={async v => {
+								await updateBrandKitPreview({
+									shortBio: v.target.value,
+								});
+							}}
 						/>
 
 						<TextField
@@ -58,6 +66,11 @@ export function BrandKitFormContent({ form, mdxEditorRef }: BrandKitFormContentP
 							label='Location'
 							placeholder='Brooklyn, NY'
 							startIcon='mapPin'
+							onChange={async v => {
+								await updateBrandKitPreview({
+									location: v.target.value,
+								});
+							}}
 						/>
 
 						<div className='space-y-2'>
@@ -66,8 +79,9 @@ export function BrandKitFormContent({ form, mdxEditorRef }: BrandKitFormContentP
 								<MDXEditor
 									ref={mdxEditorRef}
 									markdown={form.watch('longBio') ?? ''}
-									onChange={v => {
+									onChange={async v => {
 										form.setValue('longBio', v, { shouldDirty: true });
+										await updateBrandKitPreview({ longBio: v });
 									}}
 									className='w-full'
 									toolbarOptions={{
@@ -99,13 +113,19 @@ export function BrandKitFormContent({ form, mdxEditorRef }: BrandKitFormContentP
 						<ColorCustomizer
 							colorPreset={form.watch('colorPreset')}
 							colorScheme={form.watch('colorScheme')}
-							onColorPresetChange={preset =>
-								form.setValue('colorPreset', preset, { shouldDirty: true })
-							}
-							onColorSchemeChange={scheme => {
+							onColorPresetChange={async preset => {
+								form.setValue('colorPreset', preset, { shouldDirty: true });
+								await updateBrandKitPreview({
+									colorPreset: preset,
+								});
+							}}
+							onColorSchemeChange={async scheme => {
 								form.setValue('colorScheme', scheme, {
 									shouldDirty: true,
 									shouldValidate: true,
+								});
+								await updateBrandKitPreview({
+									colorScheme: scheme,
 								});
 							}}
 						/>
@@ -124,15 +144,18 @@ export function BrandKitFormContent({ form, mdxEditorRef }: BrandKitFormContentP
 							fontPreset={form.watch('fontPreset')}
 							headingFont={form.watch('headingFont')}
 							bodyFont={form.watch('bodyFont')}
-							onFontPresetChange={preset =>
-								form.setValue('fontPreset', preset, { shouldDirty: true })
-							}
-							onHeadingFontChange={font =>
-								form.setValue('headingFont', font, { shouldDirty: true })
-							}
-							onBodyFontChange={font =>
-								form.setValue('bodyFont', font, { shouldDirty: true })
-							}
+							onFontPresetChange={async preset => {
+								form.setValue('fontPreset', preset, { shouldDirty: true });
+								await updateBrandKitPreview({ fontPreset: preset });
+							}}
+							onHeadingFontChange={async font => {
+								form.setValue('headingFont', font, { shouldDirty: true });
+								await updateBrandKitPreview({ headingFont: font });
+							}}
+							onBodyFontChange={async font => {
+								form.setValue('bodyFont', font, { shouldDirty: true });
+								await updateBrandKitPreview({ bodyFont: font });
+							}}
 						/>
 					</div>
 				</TabsContent>
@@ -149,15 +172,18 @@ export function BrandKitFormContent({ form, mdxEditorRef }: BrandKitFormContentP
 							blockStyle={form.watch('blockStyle') ?? 'rounded'}
 							blockShadow={form.watch('blockShadow') ?? false}
 							blockOutline={form.watch('blockOutline') ?? false}
-							onBlockStyleChange={style =>
-								form.setValue('blockStyle', style, { shouldDirty: true })
-							}
-							onBlockShadowChange={shadow =>
-								form.setValue('blockShadow', shadow, { shouldDirty: true })
-							}
-							onBlockOutlineChange={outline =>
-								form.setValue('blockOutline', outline, { shouldDirty: true })
-							}
+							onBlockStyleChange={async style => {
+								form.setValue('blockStyle', style, { shouldDirty: true });
+								await updateBrandKitPreview({ blockStyle: style });
+							}}
+							onBlockShadowChange={async shadow => {
+								form.setValue('blockShadow', shadow, { shouldDirty: true });
+								await updateBrandKitPreview({ blockShadow: shadow });
+							}}
+							onBlockOutlineChange={async outline => {
+								form.setValue('blockOutline', outline, { shouldDirty: true });
+								await updateBrandKitPreview({ blockOutline: outline });
+							}}
 						/>
 					</div>
 				</TabsContent>

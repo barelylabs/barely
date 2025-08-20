@@ -2,9 +2,9 @@
 
 import type { AppRouterOutputs } from '@barely/lib/trpc/routes/app.route';
 import type { DragEndEvent } from '@dnd-kit/core';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useZodForm } from '@barely/hooks';
-import { cn } from '@barely/utils';
+import { between, cn } from '@barely/utils';
 import {
 	closestCenter,
 	DndContext,
@@ -15,7 +15,6 @@ import {
 } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import {
-	arrayMove,
 	SortableContext,
 	sortableKeyboardCoordinates,
 	useSortable,
@@ -43,12 +42,15 @@ import { Card } from '@barely/ui/card';
 import { DateTimePicker } from '@barely/ui/datetime-picker';
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { TextField } from '@barely/ui/forms/text-field';
+import { Img } from '@barely/ui/img';
 import { Input } from '@barely/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/popover';
 import { Switch } from '@barely/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@barely/ui/tabs';
 import { Textarea } from '@barely/ui/textarea';
 import { Text } from '@barely/ui/typography';
+
+import { BioLinkImageModal } from './bio-link-image-modal';
 
 interface BioLinksPageProps {
 	handle: string;
@@ -59,6 +61,140 @@ interface BioLinksPageProps {
 // type BioWithBlocks = AppRouterOutputs['bio']['byKey'];
 type BioBlock = AppRouterOutputs['bio']['blocksByHandleAndKey'][number];
 type BioLink = BioBlock['links'][number];
+
+// Custom hook for drag and drop reordering with proper animation handling
+function useDragReorderLinks({
+	handle,
+	blockId,
+	links,
+	blocksQueryKey,
+}: {
+	handle: string;
+	blockId: string;
+	links: BioLink[];
+	blocksQueryKey: unknown[];
+}) {
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
+	const [tempLinks, setTempLinks] = useState<BioLink[] | null>(null);
+
+	const { mutate: reorderLinks } = useMutation(
+		trpc.bio.reorderLinks.mutationOptions({
+			onMutate: async data => {
+				// Cancel any outgoing refetches
+				await queryClient.cancelQueries({ queryKey: blocksQueryKey });
+
+				// Get the previous data
+				const previousBlocks = queryClient.getQueryData<BioBlock[]>(blocksQueryKey);
+
+				// Optimistically update the cache
+				if (previousBlocks) {
+					const updatedBlocks = previousBlocks.map(block => {
+						if (block.id !== blockId) return block;
+
+						// Update the lexoRank for the moved link(s)
+						const updatedLinks = block.links.map(link => {
+							const movedLink = data.links.find(l => l.id === link.id);
+							if (movedLink) {
+								return { ...link, lexoRank: movedLink.lexoRank };
+							}
+							return link;
+						});
+
+						// Sort by lexoRank
+						updatedLinks.sort((a, b) => a.lexoRank.localeCompare(b.lexoRank));
+
+						return { ...block, links: updatedLinks };
+					});
+
+					queryClient.setQueryData(blocksQueryKey, updatedBlocks);
+				}
+
+				return { previousBlocks };
+			},
+			onError: (_error, _variables, context) => {
+				// Revert the optimistic update on error
+				if (context?.previousBlocks) {
+					queryClient.setQueryData(blocksQueryKey, context.previousBlocks);
+				}
+			},
+			onSettled: async () => {
+				// Always refetch after error or success to ensure we have the latest data
+				await queryClient.invalidateQueries({ queryKey: blocksQueryKey });
+				// Clear temporary state after mutation settles
+				setTempLinks(null);
+			},
+		}),
+	);
+
+	const handleDragEnd = useCallback(
+		(event: DragEndEvent) => {
+			const { active, over } = event;
+
+			if (!over || active.id === over.id) {
+				return;
+			}
+
+			const activeId = String(active.id);
+			const overId = String(over.id);
+
+			const oldIndex = links.findIndex(link => link.id === activeId);
+			const newIndex = links.findIndex(link => link.id === overId);
+
+			if (oldIndex === -1 || newIndex === -1) return;
+
+			const movedLink = links[oldIndex];
+			if (!movedLink) return;
+
+			// Create a new array with the item removed from old position
+			const linksWithoutMoved = links.filter(link => link.id !== activeId);
+
+			// Calculate where to insert based on drag direction
+			const insertIndex = oldIndex < newIndex ? newIndex - 1 : newIndex;
+
+			// Find the links that will be before and after the insertion point
+			const beforeLink = insertIndex > 0 ? linksWithoutMoved[insertIndex - 1] : null;
+			const afterLink =
+				insertIndex < linksWithoutMoved.length ? linksWithoutMoved[insertIndex] : null;
+
+			// Calculate new lexoRank
+			const newLexoRank = between(
+				beforeLink?.lexoRank ?? undefined,
+				afterLink?.lexoRank ?? undefined,
+			);
+
+			// Create the reordered array for temporary display
+			const reorderedLinks = links.map(link =>
+				link.id === movedLink.id ? { ...link, lexoRank: newLexoRank } : link,
+			);
+			reorderedLinks.sort((a, b) => a.lexoRank.localeCompare(b.lexoRank));
+
+			// Set temporary state for immediate visual feedback
+			setTempLinks(reorderedLinks);
+
+			// Send update to server
+			reorderLinks({
+				handle,
+				blockId,
+				beforeLinkId: beforeLink?.id ?? null,
+				afterLinkId: afterLink?.id ?? null,
+				links: [
+					{
+						id: movedLink.id,
+						lexoRank: newLexoRank,
+					},
+				],
+			});
+		},
+		[links, handle, blockId, reorderLinks],
+	);
+
+	// Return the temporary links if they exist, otherwise the real links
+	return {
+		handleDragEnd,
+		displayLinks: tempLinks ?? links,
+	};
+}
 
 // Animation options
 const ANIMATION_OPTIONS = [
@@ -74,15 +210,24 @@ const ANIMATION_OPTIONS = [
 // Sortable Link Component
 function SortableLink({
 	link,
+	onChange,
 	onUpdate,
 	onDelete,
+	handle,
+	blockId,
 }: {
 	link: BioLink;
+	onChange: (id: string, data: Partial<BioLink>) => void;
 	onUpdate: (id: string, data: Partial<BioLink>) => void;
 	onDelete: (id: string) => void;
+	handle: string;
+	blockId: string;
 }) {
 	const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-		useSortable({ id: link.id });
+		useSortable({
+			id: link.id,
+			animateLayoutChanges: () => false,
+		});
 
 	const [localTitle, setLocalTitle] = useState(link.text);
 	const [localUrl, setLocalUrl] = useState(link.url ?? '');
@@ -90,6 +235,7 @@ function SortableLink({
 	const [originalUrl, setOriginalUrl] = useState(link.url);
 	const [showAnimationPopover, setShowAnimationPopover] = useState(false);
 	const [showSchedulePopover, setShowSchedulePopover] = useState(false);
+	const [showImageModal, setShowImageModal] = useState(false);
 	const [isUrlFocused, setIsUrlFocused] = useState(false);
 	const [startDate, setStartDate] = useState<Date | null>(
 		link.startShowingAt ? new Date(link.startShowingAt) : null,
@@ -102,11 +248,13 @@ function SortableLink({
 		transform: CSS.Transform.toString(transform),
 		transition,
 		opacity: isDragging ? 0.5 : 1,
+		zIndex: isDragging ? 1000 : undefined,
 	};
 
 	// Handle title change
 	const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setLocalTitle(e.target.value);
+		onChange(link.id, { text: e.target.value });
 	};
 
 	// Handle URL change
@@ -148,14 +296,7 @@ function SortableLink({
 	};
 
 	const handleImageClick = () => {
-		// TODO: Open media library modal
-		// For now, just use a simple URL prompt
-		const imageUrl = prompt('Enter image URL:');
-		if (imageUrl) {
-			// Note: imageUrl is not in the BioLinks schema yet
-			// This will need to be added to the database schema
-			console.log('Image URL selected:', imageUrl);
-		}
+		setShowImageModal(true);
 	};
 
 	return (
@@ -204,10 +345,23 @@ function SortableLink({
 							{/* Image slot */}
 							<button
 								onClick={handleImageClick}
-								className='flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 transition-colors hover:border-gray-400 hover:bg-gray-100'
+								className={cn(
+									'flex h-20 w-20 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border-2 transition-colors',
+									link.image?.s3Key ?
+										'border-gray-200 hover:border-gray-300'
+									:	'border-dashed border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100',
+								)}
 							>
-								{/* TODO: Add imageUrl to BioLinks schema */}
-								<Image className='h-6 w-6 text-gray-400' />
+								{link.image?.s3Key ?
+									<Img
+										s3Key={link.image.s3Key}
+										blurDataURL={link.image.blurDataUrl ?? undefined}
+										alt={link.text}
+										width={80}
+										height={80}
+										className='h-full w-full object-cover'
+									/>
+								:	<Image className='h-6 w-6 text-gray-400' />}
 							</button>
 						</div>
 
@@ -346,6 +500,16 @@ function SortableLink({
 					</div>
 				</div>
 			</Card>
+
+			{/* Image Modal */}
+			<BioLinkImageModal
+				showModal={showImageModal}
+				setShowModal={setShowImageModal}
+				linkId={link.id}
+				currentImage={link.image}
+				handle={handle}
+				blockId={blockId}
+			/>
 		</div>
 	);
 }
@@ -429,7 +593,12 @@ export function BioLinksPage({ handle, blockId }: BioLinksPageProps) {
 		}),
 	);
 
-	const queryKey = trpc.bio.byKey.queryOptions({
+	const bioQueryKey = trpc.bio.byKey.queryOptions({
+		handle,
+		key: 'home',
+	}).queryKey;
+
+	const blocksQueryKey = trpc.bio.blocksByHandleAndKey.queryOptions({
 		handle,
 		key: 'home',
 	}).queryKey;
@@ -466,16 +635,77 @@ export function BioLinksPage({ handle, blockId }: BioLinksPageProps) {
 	// Mutations
 	const { mutate: createLink } = useMutation(
 		trpc.bio.createLink.mutationOptions({
+			onMutate: async data => {
+				await queryClient.cancelQueries({ queryKey: blocksQueryKey });
+				const previousBlocks = queryClient.getQueryData(blocksQueryKey);
+				if (!previousBlocks) return;
+
+				const updatedBlocks = previousBlocks.map(block => {
+					if (block.id !== blockId) return block;
+
+					// Create a new link with the minimal structure needed for display
+					// The server will replace this with the full structure
+					const newLink = {
+						// Core fields that we display
+						id: `temp-${Date.now()}`,
+						text: data.text,
+						url: data.url,
+						enabled: true,
+						animate: null as BioLink['animate'],
+						startShowingAt: null,
+						stopShowingAt: null,
+
+						// Required for sorting/positioning
+						lexoRank: '0|hzzzzz:',
+						blockId,
+
+						// Relations (will be populated by server if needed)
+						link: null,
+						form: null,
+					} as BioLink;
+
+					return {
+						...block,
+						links: [...block.links, newLink],
+					};
+				});
+
+				queryClient.setQueryData(blocksQueryKey, updatedBlocks);
+				return { previousBlocks };
+			},
+			onError: (_error, _variables, context) => {
+				queryClient.setQueryData(blocksQueryKey, context?.previousBlocks);
+			},
 			onSettled: async () => {
-				await queryClient.invalidateQueries({ queryKey });
+				await queryClient.invalidateQueries({ queryKey: bioQueryKey });
 			},
 		}),
 	);
 
 	const { mutate: updateBlock } = useMutation(
 		trpc.bio.updateBlock.mutationOptions({
+			onMutate: async data => {
+				await queryClient.cancelQueries({ queryKey: blocksQueryKey });
+				const previousBlocks = queryClient.getQueryData(blocksQueryKey);
+				if (!previousBlocks) return;
+
+				const updatedBlocks = previousBlocks.map(block => {
+					if (block.id !== blockId) return block;
+
+					return {
+						...block,
+						...data,
+					};
+				});
+
+				queryClient.setQueryData(blocksQueryKey, updatedBlocks);
+				return { previousBlocks };
+			},
+			onError: (_error, _variables, context) => {
+				queryClient.setQueryData(blocksQueryKey, context?.previousBlocks);
+			},
 			onSettled: async () => {
-				await queryClient.invalidateQueries({ queryKey });
+				await queryClient.invalidateQueries({ queryKey: bioQueryKey });
 			},
 		}),
 	);
@@ -483,31 +713,67 @@ export function BioLinksPage({ handle, blockId }: BioLinksPageProps) {
 	const { mutate: deleteBlock } = useMutation(
 		trpc.bio.deleteBlock.mutationOptions({
 			onSettled: async () => {
-				await queryClient.invalidateQueries({ queryKey });
+				await queryClient.invalidateQueries({ queryKey: bioQueryKey });
 			},
 		}),
 	);
 
+	// update
+	const handleOptimisticUpdateLink = async (linkId: string, data: Partial<BioLink>) => {
+		await queryClient.cancelQueries({ queryKey: blocksQueryKey });
+		const previousBlocks = queryClient.getQueryData(blocksQueryKey);
+		if (!previousBlocks) return;
+
+		const updatedBlocks = previousBlocks.map(block => {
+			if (block.id !== blockId) return block;
+
+			return {
+				...block,
+				links: block.links.map(link =>
+					link.id === linkId ? { ...link, ...data } : link,
+				),
+			};
+		});
+
+		queryClient.setQueryData(blocksQueryKey, updatedBlocks);
+		return { previousBlocks };
+	};
+
 	const { mutate: updateLink } = useMutation(
 		trpc.bio.updateLink.mutationOptions({
+			onMutate: async data => {
+				await handleOptimisticUpdateLink(data.id, data);
+			},
 			onSettled: async () => {
-				await queryClient.invalidateQueries({ queryKey });
+				await queryClient.invalidateQueries({ queryKey: bioQueryKey });
 			},
 		}),
 	);
 
 	const { mutate: deleteLink } = useMutation(
 		trpc.bio.deleteLink.mutationOptions({
-			onSettled: async () => {
-				await queryClient.invalidateQueries({ queryKey });
-			},
-		}),
-	);
+			onMutate: async data => {
+				await queryClient.cancelQueries({ queryKey: blocksQueryKey });
+				const previousBlocks = queryClient.getQueryData(blocksQueryKey);
+				if (!previousBlocks) return;
 
-	const { mutate: reorderLinks } = useMutation(
-		trpc.bio.reorderLinks.mutationOptions({
+				const updatedBlocks = previousBlocks.map(block => {
+					if (block.id !== blockId) return block;
+
+					return {
+						...block,
+						links: block.links.filter(link => link.id !== data.linkId),
+					};
+				});
+
+				queryClient.setQueryData(blocksQueryKey, updatedBlocks);
+				return { previousBlocks };
+			},
+			onError: (_error, _variables, context) => {
+				queryClient.setQueryData(blocksQueryKey, context?.previousBlocks);
+			},
 			onSettled: async () => {
-				await queryClient.invalidateQueries({ queryKey });
+				await queryClient.invalidateQueries({ queryKey: bioQueryKey });
 			},
 		}),
 	);
@@ -560,25 +826,13 @@ export function BioLinksPage({ handle, blockId }: BioLinksPageProps) {
 		});
 	};
 
-	const handleDragEnd = (event: DragEndEvent) => {
-		const { active, over } = event;
-
-		if (over && active.id !== over.id && block) {
-			const oldIndex = block.links.findIndex(link => link.id === String(active.id));
-			const newIndex = block.links.findIndex(link => link.id === String(over.id));
-
-			if (oldIndex !== -1 && newIndex !== -1) {
-				const reordered = arrayMove([...block.links], oldIndex, newIndex);
-
-				// Submit reorder to backend
-				reorderLinks({
-					handle,
-					blockId,
-					linkIds: reordered.map(link => link.id),
-				});
-			}
-		}
-	};
+	// Use the drag reorder hook with proper animation handling
+	const { handleDragEnd, displayLinks } = useDragReorderLinks({
+		handle,
+		blockId,
+		links: block?.links ?? [],
+		blocksQueryKey,
+	});
 
 	// Handle missing block case
 	if (!block) {
@@ -629,7 +883,7 @@ export function BioLinksPage({ handle, blockId }: BioLinksPageProps) {
 							placeholder='Links Block'
 						/>
 						<Text variant='sm/normal' className='text-gray-500'>
-							{block.links.length} {block.links.length === 1 ? 'link' : 'links'}
+							{displayLinks.length} {displayLinks.length === 1 ? 'link' : 'links'}
 						</Text>
 					</div>
 				</div>
@@ -680,7 +934,7 @@ export function BioLinksPage({ handle, blockId }: BioLinksPageProps) {
 					}
 
 					{/* Links list with drag and drop */}
-					{block.links.length > 0 ?
+					{displayLinks.length > 0 ?
 						<DndContext
 							sensors={sensors}
 							collisionDetection={closestCenter}
@@ -688,15 +942,18 @@ export function BioLinksPage({ handle, blockId }: BioLinksPageProps) {
 							modifiers={[restrictToVerticalAxis]}
 						>
 							<SortableContext
-								items={block.links.map(l => l.id)}
+								items={displayLinks.map(l => l.id)}
 								strategy={verticalListSortingStrategy}
 							>
-								{block.links.map(link => (
+								{displayLinks.map(link => (
 									<SortableLink
 										key={link.id}
 										link={link}
+										onChange={handleOptimisticUpdateLink}
 										onUpdate={handleUpdateLink}
 										onDelete={handleDeleteLink}
+										handle={handle}
+										blockId={blockId}
 									/>
 								))}
 							</SortableContext>

@@ -2,38 +2,37 @@ import { Suspense } from 'react';
 
 import { s3Loader } from '@barely/ui/img';
 
-import { prefetch, trpc, trpcCaller } from '../../trpc/server';
+import { fetchBio, fetchBrandKit } from '../../trpc/server';
 import { BioBioRender } from './bio-bio-render';
 
 interface BioRouteProps {
-	params: { handle: string };
+	params: Promise<{ handle: string }>;
 }
 
 export const revalidate = 60; // ISR: revalidate every 60 seconds
 export const dynamic = 'force-static';
 
-export default async function BioPage({
-	params,
-}: {
-	params: Promise<{ handle: string }>;
-}) {
+export default async function BioPage({ params }: BioRouteProps) {
 	const { handle } = await params;
 
-	const brandKit = await trpcCaller.bio.brandKitByHandle({ handle });
+	// Fetch brandKit - this will be cached if already fetched in layout
+	const brandKit = await fetchBrandKit(handle);
+	const bio = await fetchBio({ handle, key: 'home' });
 
-	prefetch(trpc.bio.byHandleAndKey.queryOptions({ handle, key: 'home' }));
+	// prefetch(trpc.bio.byHandleAndKey.queryOptions({ handle, key: 'home' }));
 
 	return (
 		<Suspense fallback={<div>Loading...</div>}>
-			<BioBioRender handle={handle} bioKey={'home'} brandKit={brandKit} />
+			<BioBioRender bio={bio} brandKit={brandKit} />
 		</Suspense>
 	);
 }
 
 export async function generateMetadata({ params }: BioRouteProps) {
 	try {
-		const bio = await trpcCaller.bio.byHandleAndKey({ handle: params.handle });
-		const brandKit = await trpcCaller.bio.brandKitByHandle({ handle: params.handle });
+		const { handle } = await params;
+		const bio = await fetchBio({ handle, key: 'home' });
+		const brandKit = await fetchBrandKit(handle);
 
 		const title = `${bio.handle} - Bio`;
 		const description = `Links and content from ${bio.handle}`;

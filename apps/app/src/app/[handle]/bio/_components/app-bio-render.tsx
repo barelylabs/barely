@@ -9,7 +9,7 @@ import { BioContentAroundBlocks } from 'node_modules/@barely/ui/src/bio/bio-cont
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
-import { BioBlocksRender, BioProvider, useBio } from '@barely/ui/bio';
+import { BioBlocksRender, BioProvider, useBioContext } from '@barely/ui/bio';
 
 function AppBioProvider({
 	bioKey,
@@ -45,7 +45,7 @@ function AppBioProvider({
 
 function AppBioBlocks() {
 	const trpc = useTRPC();
-	const { bio } = useBio();
+	const { bio } = useBioContext();
 
 	const { data: blocks } = useSuspenseQuery(
 		trpc.bio.blocksByHandleAndKey.queryOptions({ handle: bio.handle, key: bio.key }),
@@ -59,13 +59,11 @@ export function AppBioRender({ bioKey }: { bioKey: string }) {
 	return (
 		<div
 			className={
-				'relative mx-auto w-[300px] overflow-hidden rounded-lg border-2 border-black shadow-md'
+				'relative mx-auto h-[700px] w-[380px] overflow-hidden rounded-2xl border-4 border-black shadow-md'
 			}
 		>
-			<div className='max-w-sm'>
-				<Suspense
-					fallback={<div className='min-h-screen w-full animate-pulse bg-gray-100' />}
-				>
+			<div className='h-full max-w-sm overflow-y-auto'>
+				<Suspense fallback={<div className='h-full w-full animate-pulse bg-gray-100' />}>
 					<AppBioProvider bioKey={bioKey}>
 						<BioContentAroundBlocks>
 							<AppBioBlocks />

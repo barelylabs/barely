@@ -74,3 +74,13 @@ export function prefetch<T extends ReturnType<TRPCQueryOptions<any>>>(queryOptio
 		void queryClient.prefetchQuery(queryOptions);
 	}
 }
+
+export const fetchBrandKit = cache(async (handle: string) => {
+	return await trpcCaller.bio.brandKitByHandle({ handle });
+});
+
+export const fetchBio = cache(
+	async ({ handle, key }: { handle: string; key: string }) => {
+		return await trpcCaller.bio.byHandleAndKey({ handle, key });
+	},
+);

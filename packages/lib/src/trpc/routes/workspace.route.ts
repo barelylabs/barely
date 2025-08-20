@@ -7,6 +7,7 @@ import { CartFunnels } from '@barely/db/sql/cart-funnel.sql';
 import {
 	_Files_To_Workspaces__AvatarImage,
 	_Files_To_Workspaces__HeaderImage,
+	Files,
 } from '@barely/db/sql/file.sql';
 import { LandingPages } from '@barely/db/sql/landing-page.sql';
 import { PressKits } from '@barely/db/sql/press-kit.sql';
@@ -274,12 +275,23 @@ export const workspaceRoute = {
 				console.log('set the current default avatar to false 👍');
 			}
 
+			const avatarFile = await dbPool(ctx.pool).query.Files.findFirst({
+				where: eq(Files.id, input.avatarFileId),
+			});
+
+			if (!avatarFile) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Avatar file not found',
+				});
+			}
+
 			// set the new avatar as the default
 			await dbPool(ctx.pool)
 				.insert(_Files_To_Workspaces__AvatarImage)
 				.values({
 					workspaceId: ctx.workspace.id,
-					fileId: input.avatarFileId,
+					fileId: avatarFile.id,
 					current: true,
 				})
 				.onConflictDoUpdate({
@@ -291,6 +303,19 @@ export const workspaceRoute = {
 				})
 				.catch(console.error);
 
+			// update the brand kit avatar s3 key
+			await dbPool(ctx.pool)
+				.update(BrandKits)
+				.set({ avatarS3Key: avatarFile.s3Key })
+				.where(eq(BrandKits.workspaceId, ctx.workspace.id));
+
+			// trigger the blur hash generation
+			await tasks.trigger<typeof generateFileBlurHash>('generate-file-blur-hash', {
+				fileId: avatarFile.id,
+				s3Key: avatarFile.s3Key,
+				avatarWorkspaceId: ctx.workspace.id,
+			});
+
 			try {
 				await pushEvent('workspace', 'update', {
 					id: ctx.workspace.id,
@@ -301,19 +326,6 @@ export const workspaceRoute = {
 			} catch (e) {
 				console.error('error pushing workspace update event => ', e);
 			}
-
-			// update the brand kit avatar s3 key
-			await dbPool(ctx.pool)
-				.update(BrandKits)
-				.set({ avatarS3Key: input.avatarFileId })
-				.where(eq(BrandKits.workspaceId, ctx.workspace.id));
-
-			// trigger the blur hash generation
-			await tasks.trigger<typeof generateFileBlurHash>('generate-file-blur-hash', {
-				fileId: input.avatarFileId,
-				s3Key: input.avatarFileId,
-				avatarWorkspaceId: ctx.workspace.id,
-			});
 
 			return true;
 		}),
@@ -347,12 +359,23 @@ export const workspaceRoute = {
 					);
 			}
 
+			const headerFile = await dbPool(ctx.pool).query.Files.findFirst({
+				where: eq(Files.id, input.headerFileId),
+			});
+
+			if (!headerFile) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Header file not found',
+				});
+			}
+
 			// set the new header as the default
 			await dbPool(ctx.pool)
 				.insert(_Files_To_Workspaces__HeaderImage)
 				.values({
 					workspaceId: ctx.workspace.id,
-					fileId: input.headerFileId,
+					fileId: headerFile.id,
 					current: true,
 				})
 				.onConflictDoUpdate({
@@ -366,13 +389,13 @@ export const workspaceRoute = {
 			// update the brand kit header s3 key
 			await dbPool(ctx.pool)
 				.update(BrandKits)
-				.set({ headerS3Key: input.headerFileId })
+				.set({ headerS3Key: headerFile.s3Key })
 				.where(eq(BrandKits.workspaceId, ctx.workspace.id));
 
 			// trigger the blur hash generation
 			await tasks.trigger<typeof generateFileBlurHash>('generate-file-blur-hash', {
-				fileId: input.headerFileId,
-				s3Key: input.headerFileId,
+				fileId: headerFile.id,
+				s3Key: headerFile.s3Key,
 				headerWorkspaceId: ctx.workspace.id,
 			});
 

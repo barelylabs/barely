@@ -26,6 +26,7 @@ export const brandKitRouter = {
 			const newBrandKit: InsertBrandKit = {
 				id: newId('brandKit'),
 				workspaceId,
+				handle: workspace?.handle ?? undefined,
 				fontPreset: 'modern.cal',
 				blockStyle: 'rounded',
 				blockShadow: false,

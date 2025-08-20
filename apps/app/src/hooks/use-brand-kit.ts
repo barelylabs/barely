@@ -1,3 +1,4 @@
+import type { UpdateBrandKit } from '@barely/validators';
 import { useWorkspace } from '@barely/hooks';
 import {
 	useMutation,
@@ -20,17 +21,43 @@ export function useBrandKit() {
 		staleTime: 1000 * 60 * 5, // 5 minutes
 	});
 
+	const updateBrandKitPreview = async (data: Omit<UpdateBrandKit, 'id'>) => {
+		console.log('updating brand kit preview', data);
+		await queryClient.cancelQueries({
+			queryKey: trpc.brandKit.current.queryKey({ handle: workspace.handle }),
+		});
+		const previousBrandKit = queryClient.getQueryData(
+			trpc.brandKit.current.queryKey({ handle: workspace.handle }),
+		);
+		if (!previousBrandKit) {
+			throw new Error('Previous brand kit not found');
+		}
+		const updatedBrandKit = {
+			...previousBrandKit,
+			...data,
+		};
+		console.log('updated brand kit', updatedBrandKit);
+		queryClient.setQueryData(
+			trpc.brandKit.current.queryKey({ handle: workspace.handle }),
+			updatedBrandKit,
+		);
+		return { previousBrandKit };
+	};
+
 	// Update brand kit mutation
 	const updateMutation = useMutation(
 		trpc.brandKit.update.mutationOptions({
+			onMutate: updateBrandKitPreview,
 			onSuccess: () => {
 				toast.success('Brand kit updated successfully');
-				void queryClient.invalidateQueries({
-					queryKey: trpc.brandKit.current.queryKey({ handle: workspace.handle }),
-				});
 			},
 			onError: error => {
 				toast.error(error.message);
+			},
+			onSettled: () => {
+				void queryClient.invalidateQueries({
+					queryKey: trpc.brandKit.current.queryKey({ handle: workspace.handle }),
+				});
 			},
 		}),
 	);
@@ -38,6 +65,7 @@ export function useBrandKit() {
 	return {
 		brandKit,
 		updateBrandKit: updateMutation.mutate,
+		updateBrandKitPreview,
 		isUpdating: updateMutation.isPending,
 	};
 }

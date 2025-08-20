@@ -33,18 +33,23 @@ export const CORE_PRODUCTS: Product[] = [
 		type: 'core',
 		description: 'Link-in-bio pages',
 		requiredFeatures: ['bio-pages'],
-		defaultRoute: '/bio/buttons',
+		defaultRoute: '/bio/home/blocks',
 		routes: [
 			{
-				path: '/bio/buttons',
-				label: 'Links',
-				icon: 'link',
+				path: '/bio/home/blocks',
+				label: 'Blocks',
+				icon: 'blocks',
 			},
-			{
-				path: '/bio/design',
-				label: 'Design',
-				icon: 'palette',
-			},
+			// {
+			// 	path: '/bio/home/links',
+			// 	label: 'Buttons',
+			// 	icon: 'button',
+			// },
+			// {
+			// 	path: '/bio/design',
+			// 	label: 'Design',
+			// 	icon: 'palette',
+			// },
 			{
 				path: '/bio/stats',
 				label: 'Analytics',

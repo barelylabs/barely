@@ -2,7 +2,7 @@
 export { BrandKitProvider, useBrandKit } from './contexts/brand-kit-context';
 export {
 	BioProvider,
-	useBio,
+	useBioContext,
 	type BioOnLinkClick,
 	type BioOnEmailCapture,
 	type BioOnPageView,

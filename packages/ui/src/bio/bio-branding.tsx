@@ -1,10 +1,10 @@
 import { cn, getComputedStyles } from '@barely/utils';
 
-import { useBio } from './contexts/bio-context';
+import { useBioContext } from './contexts/bio-context';
 import { useBrandKit } from './contexts/brand-kit-context';
 
 export function BioBranding({ isPreview }: { isPreview?: boolean }) {
-	const { bio } = useBio();
+	const { bio } = useBioContext();
 	const brandKit = useBrandKit();
 	const computedStyles = getComputedStyles(brandKit);
 

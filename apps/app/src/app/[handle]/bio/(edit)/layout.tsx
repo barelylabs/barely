@@ -24,7 +24,7 @@ export default async function BioEditLayout({
 			<div className='flex-1 overflow-y-auto'>{children}</div>
 
 			{/* Right side: Preview */}
-			<div className='hidden w-[400px] border-l border-gray-200 bg-gray-50 lg:block'>
+			<div className='hidden w-[420px] border-l border-gray-200 bg-gray-50 lg:block'>
 				<div className='sticky top-0 flex h-full items-center justify-center p-8'>
 					<AppBioRender bioKey='home' />
 				</div>

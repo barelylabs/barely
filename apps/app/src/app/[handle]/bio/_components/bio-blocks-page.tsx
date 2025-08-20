@@ -244,7 +244,12 @@ export function BioBlocksPage() {
 		}),
 	);
 
-	const queryKey = trpc.bio.byKey.queryOptions({
+	const bioQueryKey = trpc.bio.byKey.queryOptions({
+		handle,
+		key: 'home',
+	}).queryKey;
+
+	const blocksQueryKey = trpc.bio.blocksByHandleAndKey.queryOptions({
 		handle,
 		key: 'home',
 	}).queryKey;
@@ -275,25 +280,48 @@ export function BioBlocksPage() {
 		trpc.bio.createBlock.mutationOptions({
 			onSettled: async () => {
 				// Invalidate and refetch to get the real data with proper ID and lexoRank
-				await queryClient.invalidateQueries({ queryKey });
+				await queryClient.invalidateQueries({ queryKey: bioQueryKey });
 			},
 		}),
 	);
 
-	const updateBioMutation = useMutation(
-		trpc.bio.update.mutationOptions({
-			onSettled: async () => {
-				// Invalidate and refetch
-				await queryClient.invalidateQueries({ queryKey });
-			},
-		}),
-	);
+	// const trpcMutateBio = trpc.bio.update.mutationOptions({
+	// 	onSettled: async () => {
+	// 		// Invalidate and refetch
+	// 		await queryClient.invalidateQueries({ queryKey });
+	// 	},
+	// });
+
+	// const updateBioMutation = useMutation(
+	// 	trpc.bio.update.mutationOptions({
+	// 		onSettled: async () => {
+	// 			// Invalidate and refetch
+	// 			await queryClient.invalidateQueries({ queryKey });
+	// 		},
+	// 	}),
+	// );
 
 	const updateBlockMutation = useMutation(
 		trpc.bio.updateBlock.mutationOptions({
+			onMutate: async data => {
+				await queryClient.cancelQueries({ queryKey: blocksQueryKey });
+				const previousBlocks = queryClient.getQueryData(blocksQueryKey);
+				if (!previousBlocks) return;
+
+				queryClient.setQueryData(
+					blocksQueryKey,
+					previousBlocks.map(block =>
+						block.id === data.id ? { ...block, ...data } : block,
+					),
+				);
+				return { previousBlocks };
+			},
+			onError: (error, variables, context) => {
+				queryClient.setQueryData(blocksQueryKey, context?.previousBlocks);
+			},
 			onSettled: async () => {
 				// Invalidate and refetch
-				await queryClient.invalidateQueries({ queryKey });
+				await queryClient.invalidateQueries({ queryKey: blocksQueryKey });
 			},
 		}),
 	);
@@ -302,7 +330,7 @@ export function BioBlocksPage() {
 		trpc.bio.deleteBlock.mutationOptions({
 			onSettled: async () => {
 				// Invalidate and refetch
-				await queryClient.invalidateQueries({ queryKey });
+				await queryClient.invalidateQueries({ queryKey: bioQueryKey });
 			},
 		}),
 	);
@@ -311,7 +339,7 @@ export function BioBlocksPage() {
 		trpc.bio.reorderBlocks.mutationOptions({
 			onSettled: async () => {
 				// Invalidate and refetch
-				await queryClient.invalidateQueries({ queryKey });
+				await queryClient.invalidateQueries({ queryKey: bioQueryKey });
 			},
 		}),
 	);
@@ -326,20 +354,44 @@ export function BioBlocksPage() {
 		setAddBlockModalOpen(false);
 	};
 
+	const { mutate: mutateShowHeader } = useMutation(
+		trpc.bio.update.mutationOptions({
+			onMutate: async data => {
+				await queryClient.cancelQueries({ queryKey: bioQueryKey });
+				const previousBio = queryClient.getQueryData(bioQueryKey);
+				if (!previousBio) return;
+
+				queryClient.setQueryData(bioQueryKey, {
+					...previousBio,
+					showHeader: data.showHeader ?? false,
+				});
+				return { previousBio };
+			},
+			onError: (error, variables, context) => {
+				queryClient.setQueryData(bioQueryKey, context?.previousBio);
+			},
+			onSettled: async () => {
+				// Invalidate and refetch
+				await queryClient.invalidateQueries({ queryKey: bioQueryKey });
+			},
+		}),
+	);
+
 	const handleToggleHeader = (checked: boolean) => {
-		updateBioMutation.mutate({
+		mutateShowHeader({
 			handle,
 			id: bio.id,
 			showHeader: checked,
 		});
 	};
 
-	const handleToggleBlock = (blockId: string, enabled: boolean) => {
-		updateBlockMutation.mutate({
+	const handleToggleBlock = async (blockId: string, enabled: boolean) => {
+		await updateBlockMutation.mutateAsync({
 			handle,
 			id: blockId,
 			enabled,
 		});
+		// toast.success('Block updated');
 	};
 
 	const handleRenameBlock = (blockId: string, name: string) => {

@@ -38,6 +38,11 @@ const config = {
 				hostname: 'barely-ugc.s3.amazonaws.com',
 				pathname: '/**',
 			},
+			{
+				protocol: 'https',
+				hostname: 'd1a1q5eibbdlen.cloudfront.net',
+				pathname: '/**',
+			},
 		],
 	},
 
