@@ -27,6 +27,37 @@ export interface Product {
 // Core products that can be standalone apps
 export const CORE_PRODUCTS: Product[] = [
 	{
+		id: 'bio',
+		name: 'Bio',
+		icon: 'bio',
+		type: 'core',
+		description: 'Link-in-bio pages',
+		requiredFeatures: ['bio-pages'],
+		defaultRoute: '/bio/home/blocks',
+		routes: [
+			{
+				path: '/bio/home/blocks',
+				label: 'Blocks',
+				icon: 'blocks',
+			},
+			// {
+			// 	path: '/bio/home/links',
+			// 	label: 'Buttons',
+			// 	icon: 'button',
+			// },
+			// {
+			// 	path: '/bio/design',
+			// 	label: 'Design',
+			// 	icon: 'palette',
+			// },
+			{
+				path: '/bio/stats',
+				label: 'Analytics',
+				icon: 'stat',
+			},
+		],
+	},
+	{
 		id: 'fm',
 		name: 'FM',
 		icon: 'fm',

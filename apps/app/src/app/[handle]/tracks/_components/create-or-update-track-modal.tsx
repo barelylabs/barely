@@ -45,19 +45,21 @@ export function CreateOrUpdateTrackModal(props: { mode: 'create' | 'update' }) {
 	} = useTrack();
 
 	/* api */
-	const { mutateAsync: createTrack } = useMutation({
-		...trpc.track.create.mutationOptions(),
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: createTrack } = useMutation(
+		trpc.track.create.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
-	const { mutateAsync: updateTrack } = useMutation({
-		...trpc.track.update.mutationOptions(),
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: updateTrack } = useMutation(
+		trpc.track.update.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
 	/* form */
 	const { form, onSubmit: onSubmitTrack } = useCreateOrUpdateForm({

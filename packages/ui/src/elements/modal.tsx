@@ -127,6 +127,57 @@ function Modal({
 							onAutoFocus();
 						}
 					}}
+					onPointerDownOutside={e => {
+						// Prevent closing when clicking on password manager overlays
+						const target = e.target as HTMLElement;
+
+						// Check if the click target is a password manager extension element
+						// Common selectors for popular password managers
+						if (
+							target.closest('[data-lastpass-icon-root]') || // LastPass
+							target.closest('[data-1password]') || // 1Password
+							target.closest('[data-bitwarden-watching]') || // Bitwarden
+							target.closest('[data-dashlane-label]') || // Dashlane
+							target.closest('com-1password-button') || // 1Password button element
+							target.closest('div[style*="z-index: 2147483"]') || // Common high z-index for extensions
+							target.tagName === 'COM-1PASSWORD-BUTTON' || // 1Password custom element
+							target.id.includes('com-1password') || // 1Password elements
+							target.className.includes('password-manager') // Generic class some extensions use
+						) {
+							e.preventDefault();
+							return;
+						}
+
+						// Also prevent closing if preventDefaultClose is set and not a close button click
+						if (props.preventDefaultClose) {
+							e.preventDefault();
+							return;
+						}
+					}}
+					onInteractOutside={e => {
+						// Additional check for interact events
+						const target = e.target as HTMLElement;
+
+						if (
+							target.closest('[data-lastpass-icon-root]') ||
+							target.closest('[data-1password]') ||
+							target.closest('[data-bitwarden-watching]') ||
+							target.closest('[data-dashlane-label]') ||
+							target.closest('com-1password-button') ||
+							target.closest('div[style*="z-index: 2147483"]') ||
+							target.tagName === 'COM-1PASSWORD-BUTTON' ||
+							target.id.includes('com-1password') ||
+							target.className.includes('password-manager')
+						) {
+							e.preventDefault();
+							return;
+						}
+
+						if (props.preventDefaultClose) {
+							e.preventDefault();
+							return;
+						}
+					}}
 					tabIndex={undefined} // fixme: when tabIndex was set to -1 (default by radix), the modal would focus between every input on tab. This is a temporary fix
 				>
 					<Button
@@ -161,19 +212,32 @@ interface ModalHeaderProps {
 	title?: ReactNode;
 	subtitle?: ReactNode;
 	children?: ReactNode;
+	justify?: 'center' | 'left';
 }
 
 function ModalHeader(props: ModalHeaderProps) {
 	const IconComponent = props.icon ? Icon[props.icon] : null;
 
 	return (
-		<div className='z-10 flex flex-row items-center justify-start gap-3 border-b border-border bg-background px-6 py-6 text-center sm:px-10 md:sticky md:top-0'>
+		<div
+			className={cn(
+				'z-10 flex flex-col items-center justify-start gap-3 border-b border-border bg-background px-6 py-6 text-center sm:px-10 md:sticky md:top-0',
+				props.justify === 'left' && 'items-start',
+			)}
+		>
 			{/* <div className='flex flex-row items-center justify-center gap-3'></div> */}
-			{props.iconOverride ?? (IconComponent && <IconComponent className='h-8 w-8' />)}
+			<div
+				className={cn(
+					'flex',
+					props.justify === 'left' ? 'flex-row items-center gap-3' : 'flex-col',
+				)}
+			>
+				{props.iconOverride ?? (IconComponent && <IconComponent className='h-8 w-8' />)}
 
-			{props.title ?
-				<H size='5'>{props.title}</H>
-			:	null}
+				{props.title ?
+					<H size='5'>{props.title}</H>
+				:	null}
+			</div>
 			{props.subtitle ?
 				<Text variant='sm/normal'>{props.subtitle}</Text>
 			:	null}

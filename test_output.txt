@@ -1,0 +1,588 @@
+
+> barely@ test /Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp
+> turbo run test
+
+turbo 2.5.4
+
+• Packages in scope: @barely/api, @barely/app, @barely/atoms, @barely/auth, @barely/bio, @barely/cart, @barely/const, @barely/db, @barely/email, @barely/eslint-config, @barely/files, @barely/fm, @barely/github, @barely/hooks, @barely/lib, @barely/link, @barely/manage-email, @barely/nyc, @barely/page, @barely/press, @barely/prettier-config, @barely/tailwind-config, @barely/tb, @barely/tsconfig, @barely/ui, @barely/utils, @barely/validators, @barely/vip, @barely/www
+• Running test in 29 packages
+• Remote caching disabled
+@barely/const:build: cache hit, replaying logs df5a2f40cdb996e4
+@barely/const:build: 
+@barely/const:build: > @barely/const@0.1.0 build /Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/packages/const
+@barely/const:build: > tsc
+@barely/const:build: 
+@barely/email:build: cache hit, replaying logs 91848972ed741888
+@barely/email:build: 
+@barely/email:build: > @barely/email@0.1.0 build /Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/packages/email
+@barely/email:build: > tsc
+@barely/email:build: 
+@barely/db:build: cache hit, replaying logs 77b3bdc43326221d
+@barely/db:build: 
+@barely/db:build: > @barely/db@0.1.0 build /Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/packages/db
+@barely/db:build: > tsc
+@barely/db:build: 
+@barely/auth:build: cache hit, replaying logs f04e7e19899c3885
+@barely/auth:build: 
+@barely/auth:build: 
+@barely/auth:build: > @barely/auth@0.1.0 build /Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/packages/auth
+@barely/auth:build: > tsc
+@barely/auth:build: 
+@barely/validators:build: cache hit, replaying logs e24ffa442559f141
+@barely/validators:build: 
+@barely/validators:build: > @barely/validators@0.1.0 build /Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/packages/validators
+@barely/validators:build: > tsc
+@barely/validators:build: 
+@barely/files:build: cache hit, replaying logs a2214dafd2b5c0b6
+@barely/files:build: 
+@barely/files:build: 
+@barely/files:build: > @barely/files@0.1.0 build /Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/packages/files
+@barely/files:build: > tsc
+@barely/files:build: 
+@barely/utils:build: cache hit, replaying logs 5f73a0180c92b81b
+@barely/utils:build: 
+@barely/utils:build: 
+@barely/utils:build: > @barely/utils@0.1.0 build /Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/packages/utils
+@barely/utils:build: > tsc
+@barely/utils:build: 
+@barely/tb:build: cache hit, replaying logs 96abf731453551b4
+@barely/tb:build: 
+@barely/tb:build: 
+@barely/tb:build: > @barely/tb@0.1.0 build /Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/packages/tb
+@barely/tb:build: > tsc
+@barely/tb:build: 
+@barely/lib:test: cache hit, replaying logs 0415cee6f60f6ae4
+@barely/lib:test: 
+@barely/lib:test: > @barely/lib@0.1.0 test /Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/packages/lib
+@barely/lib:test: > pnpm with-env vitest
+@barely/lib:test: 
+@barely/lib:test: 
+@barely/lib:test: > @barely/lib@0.1.0 with-env /Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/packages/lib
+@barely/lib:test: > dotenv -e ../../.env -- vitest
+@barely/lib:test: 
+@barely/lib:test: 
+@barely/lib:test:  RUN  v3.2.4 /Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/packages/lib
+@barely/lib:test: 
+@barely/lib:test: stderr | src/trpc/routes/__tests__/spotify.route.test.ts
+@barely/lib:test: [Upstash Redis] The 'url' property is missing or undefined in your Redis config.
+@barely/lib:test: [Upstash Redis] The 'token' property is missing or undefined in your Redis config.
+@barely/lib:test: 
+@barely/lib:test: stdout | src/trpc/routes/__tests__/spotify.route.test.ts > spotify.route > getMetadata > should return null for invalid Spotify URLs
+@barely/lib:test: [TRPC] spotify.getMetadata took 229ms to execute
+@barely/lib:test: 
+@barely/lib:test: stdout | src/trpc/routes/__tests__/spotify.route.test.ts > spotify.route > getMetadata > should return null for non-Spotify URLs
+@barely/lib:test: [TRPC] spotify.getMetadata took 251ms to execute
+@barely/lib:test: 
+@barely/lib:test: stdout | src/trpc/routes/__tests__/spotify.route.test.ts > spotify.route > getArtist > should throw error for invalid Spotify ID
+@barely/lib:test: [TRPC] spotify.getArtist took 267ms to execute
+@barely/lib:test: 
+@barely/lib:test: stdout | src/trpc/routes/__tests__/spotify.route.test.ts > spotify.route > search > should validate input query
+@barely/lib:test: [TRPC] spotify.findTrack took 238ms to execute
+@barely/lib:test: 
+@barely/lib:test: stdout | src/trpc/routes/__tests__/spotify.route.test.ts > spotify.route > syncWorkspaceArtist > should validate workspace has Spotify artist ID
+@barely/lib:test: ws:  workspace-123
+@barely/lib:test: ws:  test-workspace
+@barely/lib:test: ws:  America/New_York
+@barely/lib:test: no redis url or token, returning dummy ratelimiter
+@barely/lib:test: 
+@barely/lib:test: stdout | src/trpc/routes/__tests__/spotify.route.test.ts > spotify.route > syncWorkspaceArtist > should validate workspace has Spotify artist ID
+@barely/lib:test: [TRPC] spotify.syncWorkspaceArtist took 466ms to execute
+@barely/lib:test: 
+@barely/lib:test: stdout | src/trpc/routes/__tests__/spotify.route.test.ts > spotify.route > syncWorkspaceArtist > should validate workspace has Spotify artist ID
+@barely/lib:test: [TRPC] spotify.syncWorkspaceArtist took 652ms to execute
+@barely/lib:test: 
+@barely/lib:test: stdout | src/trpc/routes/__tests__/spotify.route.test.ts > spotify.route > syncWorkspaceArtist > should validate Spotify artist ID format
+@barely/lib:test: ws:  workspace-123
+@barely/lib:test: ws:  test-workspace
+@barely/lib:test: ws:  America/New_York
+@barely/lib:test: no redis url or token, returning dummy ratelimiter
+@barely/lib:test: 
+@barely/lib:test: stdout | src/trpc/routes/__tests__/spotify.route.test.ts > spotify.route > syncWorkspaceArtist > should validate Spotify artist ID format
+@barely/lib:test: [TRPC] spotify.syncWorkspaceArtist took 340ms to execute
+@barely/lib:test: 
+@barely/lib:test: stdout | src/trpc/routes/__tests__/spotify.route.test.ts > spotify.route > syncWorkspaceArtist > should validate Spotify artist ID format
+@barely/lib:test: [TRPC] spotify.syncWorkspaceArtist took 814ms to execute
+@barely/lib:test: 
+@barely/lib:test:  ✓ src/trpc/routes/__tests__/spotify.route.test.ts (6 tests) 2461ms
+@barely/lib:test:    ✓ spotify.route > syncWorkspaceArtist > should validate workspace has Spotify artist ID  654ms
+@barely/lib:test:    ✓ spotify.route > syncWorkspaceArtist > should validate Spotify artist ID format  815ms
+@barely/lib:test: 
+@barely/lib:test:  Test Files  1 passed (1)
+@barely/lib:test:       Tests  6 passed (6)
+@barely/lib:test:    Start at  23:12:46
+@barely/lib:test:    Duration  4.95s (transform 697ms, setup 28ms, collect 2.15s, tests 2.46s, environment 0ms, prepare 77ms)
+@barely/lib:test: 
+@barely/lib:build: cache hit, replaying logs 2f917051da7f81e9
+@barely/lib:build: 
+@barely/lib:build: 
+@barely/lib:build: > @barely/lib@0.1.0 build /Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/packages/lib
+@barely/lib:build: > tsc
+@barely/lib:build: 
+@barely/api:build: cache hit, replaying logs 8233694148301f29
+@barely/api:build: 
+@barely/api:build: 
+@barely/api:build: > @barely/api@0.1.0 build /Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/packages/api
+@barely/api:build: > tsc
+@barely/api:build: 
+@barely/atoms:build: cache hit, replaying logs 217c5048481c7db8
+@barely/atoms:build: 
+@barely/atoms:build: 
+@barely/atoms:build: > @barely/atoms@0.1.0 build /Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/packages/atoms
+@barely/atoms:build: > tsc
+@barely/atoms:build: 
+@barely/hooks:build: cache hit, replaying logs 4d23ee8ff205e857
+@barely/hooks:build: 
+@barely/hooks:build: 
+@barely/hooks:build: > @barely/hooks@0.1.0 build /Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/packages/hooks
+@barely/hooks:build: > tsc
+@barely/hooks:build: 
+@barely/nyc:test: cache miss, executing 24d79c5b77da9952
+@barely/www:test: cache miss, executing 9a0996f42d056216
+@barely/nyc:test: 
+@barely/nyc:test: > @barely/nyc@0.1.0 test /Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/apps/nyc
+@barely/nyc:test: > pnpm with-env vitest
+@barely/nyc:test: 
+@barely/www:test: 
+@barely/www:test: > @barely/www@0.1.0 test /Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/apps/www
+@barely/www:test: > pnpm with-env vitest
+@barely/www:test: 
+@barely/www:test: 
+@barely/www:test: > @barely/www@0.1.0 with-env /Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/apps/www
+@barely/www:test: > dotenv -e ../../.env -- vitest
+@barely/www:test: 
+@barely/nyc:test: 
+@barely/nyc:test: > @barely/nyc@0.1.0 with-env /Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/apps/nyc
+@barely/nyc:test: > dotenv -e ../../.env -- vitest
+@barely/nyc:test: 
+@barely/nyc:test: 
+@barely/nyc:test:  DEV  v2.1.9 /Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/apps/nyc
+@barely/nyc:test: 
+@barely/www:test: 
+@barely/www:test:  DEV  v2.1.9 /Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/apps/www
+@barely/www:test: 
+@barely/nyc:test:  ✓ src/hooks/__tests__/use-count-up.test.ts (9 tests) 17ms
+@barely/nyc:test: stderr | src/app/api/contact/__tests__/route.test.ts > Contact API Route > POST /api/contact > returns 500 when email sending fails
+@barely/nyc:test: Failed to send email: Email service error
+@barely/nyc:test: 
+@barely/nyc:test: stderr | src/app/api/contact/__tests__/route.test.ts > Contact API Route > POST /api/contact > returns 500 for unexpected errors
+@barely/nyc:test: Contact form error: SyntaxError: Unexpected token 'i', "invalid json" is not valid JSON
+@barely/nyc:test:     at JSON.parse (<anonymous>)
+@barely/nyc:test:     at Request.json (file:///Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/node_modules/happy-dom/src/fetch/Request.ts:316:15)
+@barely/nyc:test:     at processTicksAndRejections (node:internal/process/task_queues:105:5)
+@barely/nyc:test:     at Module.POST (/Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/apps/nyc/src/app/api/contact/route.ts:20:49)
+@barely/nyc:test:     at /Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/apps/nyc/src/app/api/contact/__tests__/route.test.ts:210:21
+@barely/nyc:test:     at file:///Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/node_modules/@vitest/runner/dist/index.js:533:5
+@barely/nyc:test:     at runTest (file:///Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/node_modules/@vitest/runner/dist/index.js:1056:11)
+@barely/nyc:test:     at runSuite (file:///Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/node_modules/@vitest/runner/dist/index.js:1205:15)
+@barely/nyc:test:     at runSuite (file:///Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/node_modules/@vitest/runner/dist/index.js:1205:15)
+@barely/nyc:test:     at runSuite (file:///Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/node_modules/@vitest/runner/dist/index.js:1205:15)
+@barely/nyc:test: 
+@barely/nyc:test:  ✓ src/app/api/contact/__tests__/route.test.ts (11 tests) 14ms
+@barely/www:test: stderr | src/app/api/contact/__tests__/route.test.ts > /api/contact > POST > should handle email sending errors
+@barely/www:test: Failed to send email: Failed to send email
+@barely/www:test: 
+@barely/www:test: stderr | src/app/api/contact/__tests__/route.test.ts > /api/contact > POST > should handle unexpected errors
+@barely/www:test: Contact form error: Error: Unexpected error
+@barely/www:test:     at /Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/apps/www/src/app/api/contact/__tests__/route.test.ts:243:38
+@barely/www:test:     at file:///Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/node_modules/@vitest/runner/dist/index.js:146:14
+@barely/www:test:     at file:///Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/node_modules/@vitest/runner/dist/index.js:533:11
+@barely/www:test:     at runWithTimeout (file:///Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/node_modules/@vitest/runner/dist/index.js:39:7)
+@barely/www:test:     at runTest (file:///Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/node_modules/@vitest/runner/dist/index.js:1056:17)
+@barely/www:test:     at processTicksAndRejections (node:internal/process/task_queues:105:5)
+@barely/www:test:     at runSuite (file:///Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/node_modules/@vitest/runner/dist/index.js:1205:15)
+@barely/www:test:     at runSuite (file:///Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/node_modules/@vitest/runner/dist/index.js:1205:15)
+@barely/www:test:     at runSuite (file:///Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/node_modules/@vitest/runner/dist/index.js:1205:15)
+@barely/www:test:     at runFiles (file:///Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/node_modules/@vitest/runner/dist/index.js:1262:5)
+@barely/www:test: 
+@barely/www:test:  ✓ src/app/api/contact/__tests__/route.test.ts (8 tests) 12ms
+@barely/www:test: 
+@barely/www:test:  Test Files  1 passed (1)
+@barely/www:test:       Tests  8 passed (8)
+@barely/www:test:    Start at  23:15:01
+@barely/www:test:    Duration  2.09s (transform 470ms, setup 156ms, collect 1.24s, tests 12ms, environment 148ms, prepare 54ms)
+@barely/www:test: 
+@barely/www:test:  PASS  Waiting for file changes...
+@barely/www:test:        press h to show help, press q to quit
+@barely/nyc:test: stderr | src/components/marketing/__tests__/contact-modal.test.tsx > ContactModal > renders the contact form correctly
+@barely/nyc:test: `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+@barely/nyc:test: 
+@barely/nyc:test: If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+@barely/nyc:test: 
+@barely/nyc:test: For more information, see https://radix-ui.com/primitives/docs/components/dialog
+@barely/nyc:test: Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+@barely/nyc:test: 
+@barely/nyc:test: stderr | src/components/marketing/__tests__/contact-modal.test.tsx > ContactModal > validates required fields
+@barely/nyc:test: `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+@barely/nyc:test: 
+@barely/nyc:test: If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+@barely/nyc:test: 
+@barely/nyc:test: For more information, see https://radix-ui.com/primitives/docs/components/dialog
+@barely/nyc:test: Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+@barely/nyc:test: 
+@barely/nyc:test: stderr | src/components/marketing/__tests__/contact-modal.test.tsx > ContactModal > validates email format
+@barely/nyc:test: `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+@barely/nyc:test: 
+@barely/nyc:test: If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+@barely/nyc:test: 
+@barely/nyc:test: For more information, see https://radix-ui.com/primitives/docs/components/dialog
+@barely/nyc:test: Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+@barely/nyc:test: 
+@barely/nyc:test: stderr | src/components/marketing/__tests__/contact-modal.test.tsx > ContactModal > validates message length
+@barely/nyc:test: `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+@barely/nyc:test: 
+@barely/nyc:test: If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+@barely/nyc:test: 
+@barely/nyc:test: For more information, see https://radix-ui.com/primitives/docs/components/dialog
+@barely/nyc:test: Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+@barely/nyc:test: 
+@barely/nyc:test: stderr | src/components/marketing/__tests__/contact-modal.test.tsx > ContactModal > submits form with valid data
+@barely/nyc:test: `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+@barely/nyc:test: 
+@barely/nyc:test: If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+@barely/nyc:test: 
+@barely/nyc:test: For more information, see https://radix-ui.com/primitives/docs/components/dialog
+@barely/nyc:test: Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+@barely/nyc:test: 
+@barely/nyc:test: stderr | src/components/marketing/__tests__/contact-modal.test.tsx > ContactModal > handles API errors gracefully
+@barely/nyc:test: `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+@barely/nyc:test: 
+@barely/nyc:test: If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+@barely/nyc:test: 
+@barely/nyc:test: For more information, see https://radix-ui.com/primitives/docs/components/dialog
+@barely/nyc:test: Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+@barely/nyc:test: 
+@barely/nyc:test: stderr | src/components/marketing/__tests__/contact-modal.test.tsx > ContactModal > handles API errors gracefully
+@barely/nyc:test: Form submission error: Error: Internal server error
+@barely/nyc:test:     at handleSubmit (/Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/apps/nyc/src/components/marketing/contact-modal.tsx:68:11)
+@barely/nyc:test:     at file:///Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/node_modules/react-hook-form/src/logic/createFormControl.ts:1254:11
+@barely/nyc:test: 
+@barely/nyc:test: stderr | src/components/marketing/__tests__/contact-modal.test.tsx > ContactModal > handles rate limiting
+@barely/nyc:test: `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+@barely/nyc:test: 
+@barely/nyc:test: If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+@barely/nyc:test: 
+@barely/nyc:test: For more information, see https://radix-ui.com/primitives/docs/components/dialog
+@barely/nyc:test: Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+@barely/nyc:test: 
+@barely/nyc:test: stderr | src/components/marketing/__tests__/contact-modal.test.tsx > ContactModal > handles rate limiting
+@barely/nyc:test: Form submission error: Error: Too many requests
+@barely/nyc:test:     at handleSubmit (/Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/apps/nyc/src/components/marketing/contact-modal.tsx:68:11)
+@barely/nyc:test:     at file:///Users/barely/hub/.repos/barely/worktrees/feature/bio-mvp/node_modules/react-hook-form/src/logic/createFormControl.ts:1254:11
+@barely/nyc:test: 
+@barely/nyc:test: stderr | src/components/marketing/__tests__/contact-modal.test.tsx > ContactModal > closes modal when close button is clicked
+@barely/nyc:test: `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+@barely/nyc:test: 
+@barely/nyc:test: If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+@barely/nyc:test: 
+@barely/nyc:test: For more information, see https://radix-ui.com/primitives/docs/components/dialog
+@barely/nyc:test: Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+@barely/nyc:test: 
+@barely/nyc:test: stderr | src/components/marketing/__tests__/contact-modal.test.tsx > ContactModal > disables submit button while loading
+@barely/nyc:test: `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+@barely/nyc:test: 
+@barely/nyc:test: If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+@barely/nyc:test: 
+@barely/nyc:test: For more information, see https://radix-ui.com/primitives/docs/components/dialog
+@barely/nyc:test: Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+@barely/nyc:test: 
+@barely/nyc:test:  ❯ src/components/marketing/__tests__/contact-modal.test.tsx (9 tests | 1 failed) 5257ms
+@barely/nyc:test:    × ContactModal > validates email format 2234ms
+@barely/nyc:test:      → expect(received).toBeInTheDocument()
+@barely/nyc:test: 
+@barely/nyc:test: received value must be an HTMLElement or an SVGElement.
+@barely/nyc:test: 
+@barely/nyc:test: 
+@barely/nyc:test: Ignored nodes: comments, script, style
+@barely/nyc:test: [36m<html>[39m
+@barely/nyc:test:   [36m<head />[39m
+@barely/nyc:test:   [36m<body[39m
+@barely/nyc:test:     [33mdata-scroll-locked[39m=[32m"1"[39m
+@barely/nyc:test:     [33mstyle[39m=[32m"pointer-events: none;"[39m
+@barely/nyc:test:   [36m>[39m
+@barely/nyc:test:     [36m<span[39m
+@barely/nyc:test:       [33maria-hidden[39m=[32m"true"[39m
+@barely/nyc:test:       [33mdata-aria-hidden[39m=[32m"true"[39m
+@barely/nyc:test:       [33mdata-radix-focus-guard[39m=[32m""[39m
+@barely/nyc:test:       [33mstyle[39m=[32m"opacity: 0; position: fixed; pointer-events: none; outline-color: none; outline-style: none; outline-width: initial;"[39m
+@barely/nyc:test:       [33mtabindex[39m=[32m"0"[39m
+@barely/nyc:test:     [36m/>[39m
+@barely/nyc:test:     [36m<div[39m
+@barely/nyc:test:       [33maria-hidden[39m=[32m"true"[39m
+@barely/nyc:test:       [33mdata-aria-hidden[39m=[32m"true"[39m
+@barely/nyc:test:     [36m/>[39m
+@barely/nyc:test:     [36m<div[39m
+@barely/nyc:test:       [33maria-hidden[39m=[32m"true"[39m
+@barely/nyc:test:       [33mclass[39m=[32m"animate-fade-in fixed inset-0 z-50 bg-slate-100 bg-opacity-20 backdrop-blur-md dark:bg-slate-800 dark:bg-opacity-80"[39m
+@barely/nyc:test:       [33mdata-aria-hidden[39m=[32m"true"[39m
+@barely/nyc:test:       [33mdata-state[39m=[32m"open"[39m
+@barely/nyc:test:       [33mid[39m=[32m"modal-backdrop"[39m
+@barely/nyc:test:       [33mstyle[39m=[32m"pointer-events: auto;"[39m
+@barely/nyc:test:     [36m/>[39m
+@barely/nyc:test:     [36m<div[39m
+@barely/nyc:test:       [33maria-describedby[39m=[32m"radix-:rk:"[39m
+@barely/nyc:test:       [33maria-labelledby[39m=[32m"radix-:rj:"[39m
+@barely/nyc:test:       [33mclass[39m=[32m"animate-scale-in fixed inset-0 z-[60] m-auto flex h-fit max-h-[90vh] w-full flex-col overflow-auto border p-0 shadow-xl sm:rounded-2xl md:overflow-hidden focus:outline-none max-w-lg border-white/10 bg-[#0A0A0B]"[39m
+@barely/nyc:test:       [33mdata-state[39m=[32m"open"[39m
+@barely/nyc:test:       [33mid[39m=[32m"radix-:ri:"[39m
+@barely/nyc:test:       [33mrole[39m=[32m"dialog"[39m
+@barely/nyc:test:       [33mstyle[39m=[32m"pointer-events: auto;"[39m
+@barely/nyc:test:     [36m>[39m
+@barely/nyc:test:       [36m<span[39m
+@barely/nyc:test:         [33mclass[39m=[32m"flex items-center justify-center"[39m
+@barely/nyc:test:       [36m>[39m
+@barely/nyc:test:         [36m<button[39m
+@barely/nyc:test:           [33mclass[39m=[32m"items-center gap-1 whitespace-nowrap font-medium ring-offset-background transition-colors active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 flex justify-center bg-transparent hover:bg-accent hover:text-accent-foreground rounded-md px-2 py-1 text-sm !rounded-full h-6 w-6 !p-1 absolute right-1 top-1 z-20"[39m
+@barely/nyc:test:           [33mdata-react-aria-pressable[39m=[32m"true"[39m
+@barely/nyc:test:           [33mtabindex[39m=[32m"0"[39m
+@barely/nyc:test:           [33mtype[39m=[32m"button"[39m
+@barely/nyc:test:         [36m>[39m
+@barely/nyc:test:           [36m<svg[39m
+@barely/nyc:test:             [33mclass[39m=[32m"lucide lucide-x text-muted-foreground h-4 w-4"[39m
+@barely/nyc:test:             [33mfill[39m=[32m"none"[39m
+@barely/nyc:test:             [33mheight[39m=[32m"24"[39m
+@barely/nyc:test:             [33mstroke[39m=[32m"currentColor"[39m
+@barely/nyc:test:             [33mstroke-linecap[39m=[32m"round"[39m
+@barely/nyc:test:             [33mstroke-linejoin[39m=[32m"round"[39m
+@barely/nyc:test:             [33mstroke-width[39m=[32m"2"[39m
+@barely/nyc:test:             [33mviewBox[39m=[32m"0 0 24 24"[39m
+@barely/nyc:test:             [33mwidth[39m=[32m"24"[39m
+@barely/nyc:test:             [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+@barely/nyc:test:           [36m>[39m
+@barely/nyc:test:             [36m<path[39m
+@barely/nyc:test:               [33md[39m=[32m"M18 6 6 18"[39m
+@barely/nyc:test:             [36m/>[39m
+@barely/nyc:test:             [36m<path[39m
+@barely/nyc:test:               [33md[39m=[32m"m6 6 12 12"[39m
+@barely/nyc:test:             [36m/>[39m
+@barely/nyc:test:           [36m</svg>[39m
+@barely/nyc:test:         [36m</button>[39m
+@barely/nyc:test:       [36m</span>[39m
+@barely/nyc:test:       [36m<div[39m
+@barely/nyc:test:         [33mclass[39m=[32m"grid w-full max-w-full"[39m
+@barely/nyc:test:       [36m>[39m
+@barely/nyc:test:         [36m<div[39m
+@barely/nyc:test:           [33mclass[39m=[32m"relative md:max-h-[90vh]"[39m
+@barely/nyc:test:           [33mdata-slot[39m=[32m"scroll-area"[39m
+@barely/nyc:test:           [33mdir[39m=[32m"ltr"[39m
+@barely/nyc:test:           [33mstyle[39m=[32m"position: relative; --radix-scroll-area-corner-width: 0px; --radix-scroll-area-corner-height: 0px;"[39m
+@barely/nyc:test:         [36m>[39m
+@barely/nyc:test:           [36m<div[39m
+@barely/nyc:test:             [33mclass[39m=[32m"size-full rounded-[inherit] outline-none transition-[color,box-shadow] focus-visible:outline-1 focus-visible:ring-[3px] focus-visible:ring-ring/50"[39m
+@barely/nyc:test:             [33mdata-radix-scroll-area-viewport[39m=[32m""[39m
+@barely/nyc:test:             [33mdata-slot[39m=[32m"scroll-area-viewport"[39m
+@barely/nyc:test:             [33mstyle[39m=[32m"overflow-x: hidden; overflow-y: scroll;"[39m
+@barely/nyc:test:           [36m>[39m
+@barely/nyc:test:             [36m<div[39m
+@barely/nyc:test:               [33mstyle[39m=[32m"min-width: 100%; display: table;"[39m
+@barely/nyc:test:             [36m>[39m
+@barely/nyc:test:               [36m<div[39m
+@barely/nyc:test:                 [33mclass[39m=[32m"flex w-full max-w-full flex-col"[39m
+@barely/nyc:test:               [36m>[39m
+@barely/nyc:test:                 [36m<div[39m
+@barely/nyc:test:                   [33mclass[39m=[32m"z-10 flex flex-row items-center justify-start gap-3 border-b border-border bg-background px-6 py-6 text-center sm:px-10 md:sticky md:top-0"[39m
+@barely/nyc:test:                 [36m>[39m
+@barely/nyc:test:                   [36m<h5[39m
+@barely/nyc:test:                     [33mclass[39m=[32m"scroll-m-20 font-heading text-2xl lg:text-3xl"[39m
+@barely/nyc:test:                   [36m>[39m
+@barely/nyc:test:                     [36m<span[39m
+@barely/nyc:test:                       [33mdata-br[39m=[32m":rl:"[39m
+@barely/nyc:test:                       [33mdata-brr[39m=[32m"1"[39m
+@barely/nyc:test:                       [33mstyle[39m=[32m"display: inline-block; vertical-align: top; text-decoration: inherit;"[39m
+@barely/nyc:test:                     [36m>[39m
+@barely/nyc:test:                       [0mLet's Grow Your Music[0m
+@barely/nyc:test:                     [36m</span>[39m
+@barely/nyc:test:                   [36m</h5>[39m
+@barely/nyc:test:                   [36m<p[39m
+@barely/nyc:test:                     [33mclass[39m=[32m"align-text-bottom text-xs sm:text-sm font-normal"[39m
+@barely/nyc:test:                   [36m>[39m
+@barely/nyc:test:                     [0mI'll respond within 24 hours[0m
+@barely/nyc:test:                   [36m</p>[39m
+@barely/nyc:test:                 [36m</div>[39m
+@barely/nyc:test:                 [36m<div[39m
+@barely/nyc:test:                   [33mclass[39m=[32m"flex max-w-full flex-col gap-3 p-6 bg-[#0A0A0B]"[39m
+@barely/nyc:test:                 [36m>[39m
+@barely/nyc:test:                   bound HTMLFormElement {
+@barely/nyc:test:                     "0": [36m<fieldset[39m
+@barely/nyc:test:                       [33mclass[39m=[32m"flex w-full max-w-full flex-col space-y-4"[39m
+@barely/nyc:test:                     [36m>[39m
+@barely/nyc:test:                       [36m<div[39m
+@barely/nyc:test:                         [33mclass[39m=[32m"grid grid-cols-1 gap-4 sm:grid-cols-2"[39m
+@barely/nyc:test:                       [36m>[39m
+@barely/nyc:test:                         [36m<div[39m
+@barely/nyc:test:                           [33mclass[39m=[32m"space-y-1 text-left flex-grow"[39m
+@barely/nyc:test:                         [36m>[39m
+@barely/nyc:test:                           [36m<div[39m
+@barely/nyc:test:                             [33mclass[39m=[32m"flex flex-row items-center justify-between"[39m
+@barely/nyc:test:                           [36m>[39m
+@barely/nyc:test:                             [36m<div[39m
+@barely/nyc:test:                               [33mclass[39m=[32m"flex flex-row items-center gap-1"[39m
+@barely/nyc:test:                             [36m>[39m
+@barely/nyc:test:                               [36m<label[39m
+@barely/nyc:test:                                 [33mclass[39m=[32m"py-1 font-medium text-muted-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-xs sm:text-sm w-full"[39m
+@barely/nyc:test:                                 [33mfor[39m=[32m":rm:-field"[39m
+@barely/nyc:test:                               [36m>[39m
+@barely/nyc:test:                                 [0mYour Name *[0m
+@barely/nyc:test:           ...
+@barely/nyc:test:    ✓ ContactModal > submits form with valid data 2266ms
+@barely/nyc:test: 
+@barely/nyc:test: ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+@barely/nyc:test: 
+@barely/nyc:test:  FAIL  src/components/marketing/__tests__/contact-modal.test.tsx > ContactModal > validates email format
+@barely/nyc:test: Error: expect(received).toBeInTheDocument()
+@barely/nyc:test: 
+@barely/nyc:test: received value must be an HTMLElement or an SVGElement.
+@barely/nyc:test: 
+@barely/nyc:test: 
+@barely/nyc:test: Ignored nodes: comments, script, style
+@barely/nyc:test: [36m<html>[39m
+@barely/nyc:test:   [36m<head />[39m
+@barely/nyc:test:   [36m<body[39m
+@barely/nyc:test:     [33mdata-scroll-locked[39m=[32m"1"[39m
+@barely/nyc:test:     [33mstyle[39m=[32m"pointer-events: none;"[39m
+@barely/nyc:test:   [36m>[39m
+@barely/nyc:test:     [36m<span[39m
+@barely/nyc:test:       [33maria-hidden[39m=[32m"true"[39m
+@barely/nyc:test:       [33mdata-aria-hidden[39m=[32m"true"[39m
+@barely/nyc:test:       [33mdata-radix-focus-guard[39m=[32m""[39m
+@barely/nyc:test:       [33mstyle[39m=[32m"opacity: 0; position: fixed; pointer-events: none; outline-color: none; outline-style: none; outline-width: initial;"[39m
+@barely/nyc:test:       [33mtabindex[39m=[32m"0"[39m
+@barely/nyc:test:     [36m/>[39m
+@barely/nyc:test:     [36m<div[39m
+@barely/nyc:test:       [33maria-hidden[39m=[32m"true"[39m
+@barely/nyc:test:       [33mdata-aria-hidden[39m=[32m"true"[39m
+@barely/nyc:test:     [36m/>[39m
+@barely/nyc:test:     [36m<div[39m
+@barely/nyc:test:       [33maria-hidden[39m=[32m"true"[39m
+@barely/nyc:test:       [33mclass[39m=[32m"animate-fade-in fixed inset-0 z-50 bg-slate-100 bg-opacity-20 backdrop-blur-md dark:bg-slate-800 dark:bg-opacity-80"[39m
+@barely/nyc:test:       [33mdata-aria-hidden[39m=[32m"true"[39m
+@barely/nyc:test:       [33mdata-state[39m=[32m"open"[39m
+@barely/nyc:test:       [33mid[39m=[32m"modal-backdrop"[39m
+@barely/nyc:test:       [33mstyle[39m=[32m"pointer-events: auto;"[39m
+@barely/nyc:test:     [36m/>[39m
+@barely/nyc:test:     [36m<div[39m
+@barely/nyc:test:       [33maria-describedby[39m=[32m"radix-:rk:"[39m
+@barely/nyc:test:       [33maria-labelledby[39m=[32m"radix-:rj:"[39m
+@barely/nyc:test:       [33mclass[39m=[32m"animate-scale-in fixed inset-0 z-[60] m-auto flex h-fit max-h-[90vh] w-full flex-col overflow-auto border p-0 shadow-xl sm:rounded-2xl md:overflow-hidden focus:outline-none max-w-lg border-white/10 bg-[#0A0A0B]"[39m
+@barely/nyc:test:       [33mdata-state[39m=[32m"open"[39m
+@barely/nyc:test:       [33mid[39m=[32m"radix-:ri:"[39m
+@barely/nyc:test:       [33mrole[39m=[32m"dialog"[39m
+@barely/nyc:test:       [33mstyle[39m=[32m"pointer-events: auto;"[39m
+@barely/nyc:test:     [36m>[39m
+@barely/nyc:test:       [36m<span[39m
+@barely/nyc:test:         [33mclass[39m=[32m"flex items-center justify-center"[39m
+@barely/nyc:test:       [36m>[39m
+@barely/nyc:test:         [36m<button[39m
+@barely/nyc:test:           [33mclass[39m=[32m"items-center gap-1 whitespace-nowrap font-medium ring-offset-background transition-colors active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 flex justify-center bg-transparent hover:bg-accent hover:text-accent-foreground rounded-md px-2 py-1 text-sm !rounded-full h-6 w-6 !p-1 absolute right-1 top-1 z-20"[39m
+@barely/nyc:test:           [33mdata-react-aria-pressable[39m=[32m"true"[39m
+@barely/nyc:test:           [33mtabindex[39m=[32m"0"[39m
+@barely/nyc:test:           [33mtype[39m=[32m"button"[39m
+@barely/nyc:test:         [36m>[39m
+@barely/nyc:test:           [36m<svg[39m
+@barely/nyc:test:             [33mclass[39m=[32m"lucide lucide-x text-muted-foreground h-4 w-4"[39m
+@barely/nyc:test:             [33mfill[39m=[32m"none"[39m
+@barely/nyc:test:             [33mheight[39m=[32m"24"[39m
+@barely/nyc:test:             [33mstroke[39m=[32m"currentColor"[39m
+@barely/nyc:test:             [33mstroke-linecap[39m=[32m"round"[39m
+@barely/nyc:test:             [33mstroke-linejoin[39m=[32m"round"[39m
+@barely/nyc:test:             [33mstroke-width[39m=[32m"2"[39m
+@barely/nyc:test:             [33mviewBox[39m=[32m"0 0 24 24"[39m
+@barely/nyc:test:             [33mwidth[39m=[32m"24"[39m
+@barely/nyc:test:             [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+@barely/nyc:test:           [36m>[39m
+@barely/nyc:test:             [36m<path[39m
+@barely/nyc:test:               [33md[39m=[32m"M18 6 6 18"[39m
+@barely/nyc:test:             [36m/>[39m
+@barely/nyc:test:             [36m<path[39m
+@barely/nyc:test:               [33md[39m=[32m"m6 6 12 12"[39m
+@barely/nyc:test:             [36m/>[39m
+@barely/nyc:test:           [36m</svg>[39m
+@barely/nyc:test:         [36m</button>[39m
+@barely/nyc:test:       [36m</span>[39m
+@barely/nyc:test:       [36m<div[39m
+@barely/nyc:test:         [33mclass[39m=[32m"grid w-full max-w-full"[39m
+@barely/nyc:test:       [36m>[39m
+@barely/nyc:test:         [36m<div[39m
+@barely/nyc:test:           [33mclass[39m=[32m"relative md:max-h-[90vh]"[39m
+@barely/nyc:test:           [33mdata-slot[39m=[32m"scroll-area"[39m
+@barely/nyc:test:           [33mdir[39m=[32m"ltr"[39m
+@barely/nyc:test:           [33mstyle[39m=[32m"position: relative; --radix-scroll-area-corner-width: 0px; --radix-scroll-area-corner-height: 0px;"[39m
+@barely/nyc:test:         [36m>[39m
+@barely/nyc:test:           [36m<div[39m
+@barely/nyc:test:             [33mclass[39m=[32m"size-full rounded-[inherit] outline-none transition-[color,box-shadow] focus-visible:outline-1 focus-visible:ring-[3px] focus-visible:ring-ring/50"[39m
+@barely/nyc:test:             [33mdata-radix-scroll-area-viewport[39m=[32m""[39m
+@barely/nyc:test:             [33mdata-slot[39m=[32m"scroll-area-viewport"[39m
+@barely/nyc:test:             [33mstyle[39m=[32m"overflow-x: hidden; overflow-y: scroll;"[39m
+@barely/nyc:test:           [36m>[39m
+@barely/nyc:test:             [36m<div[39m
+@barely/nyc:test:               [33mstyle[39m=[32m"min-width: 100%; display: table;"[39m
+@barely/nyc:test:             [36m>[39m
+@barely/nyc:test:               [36m<div[39m
+@barely/nyc:test:                 [33mclass[39m=[32m"flex w-full max-w-full flex-col"[39m
+@barely/nyc:test:               [36m>[39m
+@barely/nyc:test:                 [36m<div[39m
+@barely/nyc:test:                   [33mclass[39m=[32m"z-10 flex flex-row items-center justify-start gap-3 border-b border-border bg-background px-6 py-6 text-center sm:px-10 md:sticky md:top-0"[39m
+@barely/nyc:test:                 [36m>[39m
+@barely/nyc:test:                   [36m<h5[39m
+@barely/nyc:test:                     [33mclass[39m=[32m"scroll-m-20 font-heading text-2xl lg:text-3xl"[39m
+@barely/nyc:test:                   [36m>[39m
+@barely/nyc:test:                     [36m<span[39m
+@barely/nyc:test:                       [33mdata-br[39m=[32m":rl:"[39m
+@barely/nyc:test:                       [33mdata-brr[39m=[32m"1"[39m
+@barely/nyc:test:                       [33mstyle[39m=[32m"display: inline-block; vertical-align: top; text-decoration: inherit;"[39m
+@barely/nyc:test:                     [36m>[39m
+@barely/nyc:test:                       [0mLet's Grow Your Music[0m
+@barely/nyc:test:                     [36m</span>[39m
+@barely/nyc:test:                   [36m</h5>[39m
+@barely/nyc:test:                   [36m<p[39m
+@barely/nyc:test:                     [33mclass[39m=[32m"align-text-bottom text-xs sm:text-sm font-normal"[39m
+@barely/nyc:test:                   [36m>[39m
+@barely/nyc:test:                     [0mI'll respond within 24 hours[0m
+@barely/nyc:test:                   [36m</p>[39m
+@barely/nyc:test:                 [36m</div>[39m
+@barely/nyc:test:                 [36m<div[39m
+@barely/nyc:test:                   [33mclass[39m=[32m"flex max-w-full flex-col gap-3 p-6 bg-[#0A0A0B]"[39m
+@barely/nyc:test:                 [36m>[39m
+@barely/nyc:test:                   bound HTMLFormElement {
+@barely/nyc:test:                     "0": [36m<fieldset[39m
+@barely/nyc:test:                       [33mclass[39m=[32m"flex w-full max-w-full flex-col space-y-4"[39m
+@barely/nyc:test:                     [36m>[39m
+@barely/nyc:test:                       [36m<div[39m
+@barely/nyc:test:                         [33mclass[39m=[32m"grid grid-cols-1 gap-4 sm:grid-cols-2"[39m
+@barely/nyc:test:                       [36m>[39m
+@barely/nyc:test:                         [36m<div[39m
+@barely/nyc:test:                           [33mclass[39m=[32m"space-y-1 text-left flex-grow"[39m
+@barely/nyc:test:                         [36m>[39m
+@barely/nyc:test:                           [36m<div[39m
+@barely/nyc:test:                             [33mclass[39m=[32m"flex flex-row items-center justify-between"[39m
+@barely/nyc:test:                           [36m>[39m
+@barely/nyc:test:                             [36m<div[39m
+@barely/nyc:test:                               [33mclass[39m=[32m"flex flex-row items-center gap-1"[39m
+@barely/nyc:test:                             [36m>[39m
+@barely/nyc:test:                               [36m<label[39m
+@barely/nyc:test:                                 [33mclass[39m=[32m"py-1 font-medium text-muted-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-xs sm:text-sm w-full"[39m
+@barely/nyc:test:                                 [33mfor[39m=[32m":rm:-field"[39m
+@barely/nyc:test:                               [36m>[39m
+@barely/nyc:test:                                 [0mYour Name *[0m
+@barely/nyc:test:           ...
+@barely/nyc:test:  ❯ waitFor.timeout src/components/marketing/__tests__/contact-modal.test.tsx:88:26
+@barely/nyc:test:      86|    () => {
+@barely/nyc:test:      87|     const errorMessage = screen.queryByText(/invalid email address/i);
+@barely/nyc:test:      88|     expect(errorMessage).toBeInTheDocument();
+@barely/nyc:test:        |                          ^
+@barely/nyc:test:      89|    },
+@barely/nyc:test:      90|    { timeout: 2000 },
+@barely/nyc:test:  ❯ runWithExpensiveErrorDiagnosticsDisabled ../../node_modules/@testing-library/dom/dist/config.js:47:12
+@barely/nyc:test:  ❯ checkCallback ../../node_modules/@testing-library/dom/dist/wait-for.js:124:77
+@barely/nyc:test:  ❯ Timeout.checkRealTimersCallback ../../node_modules/@testing-library/dom/dist/wait-for.js:118:16
+@barely/nyc:test: 
+@barely/nyc:test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+@barely/nyc:test: 
+@barely/nyc:test:  Test Files  1 failed | 2 passed (3)
+@barely/nyc:test:       Tests  1 failed | 28 passed (29)
+@barely/nyc:test:    Start at  23:15:01
+@barely/nyc:test:    Duration  9.27s (transform 762ms, setup 706ms, collect 4.36s, tests 5.29s, environment 598ms, prepare 221ms)
+@barely/nyc:test: 
+@barely/nyc:test:  FAIL  Tests failed. Watching for file changes...
+@barely/nyc:test:        press h to show help, press q to quit
+@barely/nyc:test: c[3J RERUN  src/components/marketing/__tests__/contact-modal.test.tsx x1 
+@barely/nyc:test: 

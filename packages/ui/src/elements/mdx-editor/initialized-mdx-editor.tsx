@@ -1,6 +1,7 @@
 'use client';
 
 import '@mdxeditor/editor/style.css';
+import './mdx-editor-overrides.css';
 
 import type { MDXEditorMethods } from '@mdxeditor/editor';
 import type { ForwardedRef } from 'react';
@@ -41,68 +42,108 @@ import {
 	videoJsxComponentDescriptors,
 } from './plugins/mdx-video-plugin';
 
+interface ToolbarOptions {
+	lists?: boolean; // Bulleted, numbered, checkbox lists
+	formatting?: boolean; // Bold, italic, underline
+	divs?: boolean; // Grids and cards
+	links?: boolean; // Video and link buttons
+	barely?: boolean; // Image file and asset buttons
+	headings?: boolean; // Heading selector
+	undoRedo?: boolean; // Undo/redo buttons
+}
+
 // Only import this to the next file
 export function InitializedMDXEditor({
 	editorRef,
 	className,
+	toolbarOptions = {
+		lists: true,
+		formatting: true,
+		divs: true,
+		links: true,
+		barely: true,
+		headings: true,
+		undoRedo: true,
+	},
 	...props
-}: { editorRef: ForwardedRef<MDXEditorMethods> | null } & MDXEditorProps) {
+}: {
+	editorRef: ForwardedRef<MDXEditorMethods> | null;
+	toolbarOptions?: ToolbarOptions;
+} & MDXEditorProps) {
 	return (
-		<div className='relative rounded-lg border border-border bg-background p-4'>
-			<div className='max-h-[70vh] overflow-y-auto'>
-				<MDXEditor
-					ref={editorRef}
-					plugins={[
-						headingsPlugin(),
-						listsPlugin(),
-						quotePlugin(),
-						variablePlugin(),
-						addVariablesPlugin(),
-						linkPlugin(),
-						linkDialogPlugin({
-							LinkDialog: () => <LinkDialog />,
-						}),
-						thematicBreakPlugin(),
-						markdownShortcutPlugin(),
-						jsxPlugin({
-							jsxComponentDescriptors: [
-								...videoJsxComponentDescriptors,
-								...buttonComponentDescriptors,
-								...imageFileJsxComponentDescriptors,
-								...mdxGridPlugin,
-							],
-						}),
+		<div className='relative w-full max-w-full overflow-hidden rounded-lg border border-border bg-background p-4'>
+			<div
+				className='mdx-editor-wrapper max-h-[70vh] w-full max-w-full overflow-y-auto overflow-x-hidden'
+				style={
+					{
+						'--mdx-toolbar-max-width': '100%',
+					} as React.CSSProperties
+				}
+			>
+				<div className='w-full overflow-x-hidden'>
+					<MDXEditor
+						ref={editorRef}
+						plugins={[
+							headingsPlugin(),
+							listsPlugin(),
+							quotePlugin(),
+							variablePlugin(),
+							addVariablesPlugin(),
+							linkPlugin(),
+							linkDialogPlugin({
+								LinkDialog: () => <LinkDialog />,
+							}),
+							thematicBreakPlugin(),
+							markdownShortcutPlugin(),
+							jsxPlugin({
+								jsxComponentDescriptors: [
+									...videoJsxComponentDescriptors,
+									...buttonComponentDescriptors,
+									...imageFileJsxComponentDescriptors,
+									...mdxGridPlugin,
+								],
+							}),
 
-						toolbarPlugin({
-							toolbarContents: () => (
-								<>
-									<UndoRedo />
-									<BlockTypeSelect />
-									<ListsToggle />
-									<BoldItalicUnderlineToggles />
+							toolbarPlugin({
+								toolbarContents: () => (
+									<>
+										{toolbarOptions.undoRedo && <UndoRedo />}
+										{toolbarOptions.headings && <BlockTypeSelect />}
+										{toolbarOptions.lists && <ListsToggle />}
+										{toolbarOptions.formatting && <BoldItalicUnderlineToggles />}
 
-									<div className='mx-2 flex flex-row items-center'>
-										<InsertGrid />
-										<InsertCard />
-									</div>
+										{toolbarOptions.divs && (
+											<div className='mx-2 flex flex-shrink-0 flex-row items-center'>
+												<InsertGrid />
+												<InsertCard />
+											</div>
+										)}
 
-									<div className='mx-2 flex flex-row items-center'>
-										<InsertVideoButton />
-										<InsertLinkButtonButton />
-									</div>
+										{toolbarOptions.links && (
+											<div className='mx-2 flex flex-shrink-0 flex-row items-center'>
+												<InsertVideoButton />
+												<InsertLinkButtonButton />
+											</div>
+										)}
 
-									<div className='mx-2 flex flex-row items-center'>
-										<InsertImageFileButton />
-										<InsertAssetButtonButton />
-									</div>
-								</>
-							),
-						}),
-					]}
-					{...props}
-					contentEditableClassName='prose'
-					className={cn(className)}
-				/>
+										{toolbarOptions.barely && (
+											<div className='mx-2 flex flex-shrink-0 flex-row items-center'>
+												<InsertImageFileButton />
+												<InsertAssetButtonButton />
+											</div>
+										)}
+									</>
+								),
+							}),
+						]}
+						{...props}
+						contentEditableClassName='prose prose-sm max-w-none w-full [&>*]:max-w-full'
+						className={cn(
+							'w-full max-w-full [&_.cm-content]:max-w-full [&_.cm-scroller]:max-w-full',
+							className,
+						)}
+					/>
+				</div>
 			</div>
 		</div>
 	);

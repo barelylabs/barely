@@ -330,14 +330,6 @@ export const ImageFileEditor: React.FC<JsxEditorProps> = ({ mdastNode }) => {
 					</ModalBody>
 				</Form>
 			</Modal>
-			{/* <Popover open={showEditModal} onOpenChange={handleOpenChange}>
-				<PopoverTrigger asChild>
-					
-				</PopoverTrigger>
-				<PopoverContent className='w-full p-2 sm:w-96'>
-
-				</PopoverContent>
-			</Popover> */}
 		</div>
 	);
 };

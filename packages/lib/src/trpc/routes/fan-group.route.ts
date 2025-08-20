@@ -4,7 +4,7 @@ import { dbHttp } from '@barely/db/client';
 import { dbPool } from '@barely/db/pool';
 import { FanGroupConditions, FanGroups } from '@barely/db/sql/fan-group.sql';
 import { sqlAnd, sqlStringContains } from '@barely/db/utils';
-import { newId, raise } from '@barely/utils';
+import { newId, raiseTRPCError } from '@barely/utils';
 import {
 	createFanGroupSchema,
 	selectWorkspaceFanGroupsSchema,
@@ -149,7 +149,8 @@ export const fanGroupRoute = {
 				.insert(FanGroups)
 				.values(fanGroupData)
 				.returning();
-			const fanGroup = fanGroups[0] ?? raise('Failed to create fan group');
+			const fanGroup =
+				fanGroups[0] ?? raiseTRPCError({ message: 'Failed to create fan group' });
 
 			if (!!conditions && conditions.length > 0) {
 				const fanGroupConditions = conditions.map((condition, index) => ({
@@ -255,6 +256,8 @@ export const fanGroupRoute = {
 				.where(inArray(FanGroups.id, input.ids))
 				.returning();
 
-			return updatedFanGroup[0] ?? raise('Failed to delete fan group');
+			return (
+				updatedFanGroup[0] ?? raiseTRPCError({ message: 'Failed to delete fan group' })
+			);
 		}),
 } satisfies TRPCRouterRecord;

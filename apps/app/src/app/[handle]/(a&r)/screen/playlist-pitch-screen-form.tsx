@@ -77,8 +77,8 @@ export function PlaylistPitchScreenForm() {
 		}
 	}, [genresCount.totalCurators, form]);
 
-	const { mutate: updateCampaign } = useMutation({
-		...trpc.campaign.update.mutationOptions({
+	const { mutate: updateCampaign } = useMutation(
+		trpc.campaign.update.mutationOptions({
 			onMutate: async updatedCampaign => {
 				await queryClient.cancelQueries({
 					queryKey: trpc.campaign.toScreen.queryKey(),
@@ -99,26 +99,25 @@ export function PlaylistPitchScreenForm() {
 
 				return { previousCampaigns };
 			},
+			onError: (err, variables, context) => {
+				if (context?.previousCampaigns) {
+					queryClient.setQueryData(
+						trpc.campaign.toScreen.queryKey(),
+						context.previousCampaigns,
+					);
+				}
+			},
+
+			onSettled: async () => {
+				await queryClient.invalidateQueries({
+					queryKey: trpc.campaign.toScreen.queryKey(),
+				});
+			},
 		}),
+	);
 
-		onError: (err, variables, context) => {
-			if (context?.previousCampaigns) {
-				queryClient.setQueryData(
-					trpc.campaign.toScreen.queryKey(),
-					context.previousCampaigns,
-				);
-			}
-		},
-
-		onSettled: async () => {
-			await queryClient.invalidateQueries({
-				queryKey: trpc.campaign.toScreen.queryKey(),
-			});
-		},
-	});
-
-	const { mutate: submitScreening } = useMutation({
-		...trpc.campaign.submitPlaylistPitchScreening.mutationOptions({
+	const { mutate: submitScreening } = useMutation(
+		trpc.campaign.submitPlaylistPitchScreening.mutationOptions({
 			onMutate: async () => {
 				await queryClient.cancelQueries({
 					queryKey: trpc.campaign.toScreen.queryKey(),
@@ -168,7 +167,7 @@ export function PlaylistPitchScreenForm() {
 				});
 			},
 		}),
-	});
+	);
 
 	const handleScreenCampaign = (
 		data: z.infer<typeof updatePlaylistPitchCampaign_ScreeningSchema>,

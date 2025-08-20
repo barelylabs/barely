@@ -1,7 +1,7 @@
 export * from './calendar-field';
 export * from './checkbox-field';
 export * from './currency-field';
-export * from './datetime-field-new';
+export * from './datetime-field';
 // export * from './datetime-field';
 export * from './field-wrapper';
 export * from './form';

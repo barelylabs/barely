@@ -27,6 +27,7 @@ const buttonVariants = cva(
 				ghost: 'bg-transparent hover:bg-accent hover:text-accent-foreground',
 
 				link: '!focus-visible:ring-transparent !m-0 !h-fit bg-transparent !p-0 text-foreground underline-offset-4 ring-transparent ring-offset-transparent hover:underline',
+				text: '!focus-visible:ring-transparent !m-0 !h-fit bg-transparent !p-0 text-foreground underline-offset-4 ring-transparent ring-offset-transparent',
 				tab: '!focus-visible:ring-transparent',
 			},
 
@@ -118,6 +119,7 @@ const buttonIconVariants = cva('', {
 			muted: 'text-muted-foreground',
 			ghost: 'text-muted-foreground',
 			link: 'text-foreground underline-offset-4',
+			text: 'text-foreground',
 			tab: '',
 		},
 		position: {
@@ -128,9 +130,9 @@ const buttonIconVariants = cva('', {
 			'2xs': 'h-[10px] w-[10px]',
 			xs: 'h-3 w-3',
 			sm: 'h-4 w-4',
-			md: 'h-6 w-6',
-			lg: 'h-10 w-10',
-			xl: 'h-12 w-12',
+			md: 'h-5 w-5',
+			lg: 'h-5 w-5',
+			xl: 'h-6 w-6',
 		},
 	},
 	compoundVariants: [

@@ -210,6 +210,26 @@ jobs:
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
 
+  deploy-bio:
+    uses: ./.github/workflows/deploy-to-vercel.yml
+    needs: [git-meta, db-push, tb-push]
+    if: |
+      always() && 
+      needs.git-meta.result == 'success' && 
+      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
+      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    with:
+      app_name: bio
+      working_directory: apps/bio
+      scope: barely
+      environment: production
+      git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
+      vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_BIO_PROJECT_ID }}
+
   deploy-cart:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
@@ -421,6 +441,7 @@ jobs:
         tb-push,
         deploy-app,
         deploy-app-fm,
+        deploy-bio,
         deploy-cart,
         deploy-link,
         deploy-manage-email,
@@ -450,7 +471,7 @@ jobs:
       - name: deploy trigger.dev
         env:
           TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
-        run: cd packages/lib && pnpm dlx trigger.dev@latest deploy
+        run: cd packages/lib && pnpm dlx trigger.dev@3.3.17 deploy
 
   # 🔀 MERGE PR BRANCH TO MAIN 🔀
   production--can-merge:
@@ -461,6 +482,7 @@ jobs:
         tb-push,
         deploy-app,
         deploy-app-fm,
+        deploy-bio,
         deploy-cart,
         deploy-fm,
         deploy-link,
@@ -503,6 +525,22 @@ jobs:
 
       - name: Promote app to production
         run: vercel promote dpl_${{ needs.deploy-app.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+
+  promote-bio:
+    name: promote bio to production
+    needs: [production--can-merge, deploy-bio]
+    if: always() && github.event_name == 'merge_group' && needs.production--can-merge.result == 'success'
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_BIO_PROJECT_ID }}
+    steps:
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Promote bio to production
+        run: vercel promote dpl_${{ needs.deploy-bio.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
   promote-cart:
     name: promote cart to production
@@ -673,6 +711,7 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-bio,
         promote-cart,
         promote-link,
         promote-manage-email,
@@ -704,6 +743,7 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-bio,
         promote-cart,
         promote-link,
         promote-manage-email,
@@ -734,6 +774,7 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-bio,
         promote-cart,
         promote-fm,
         promote-link,
@@ -766,6 +807,7 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-bio,
         promote-cart,
         promote-fm,
         promote-link,
@@ -798,12 +840,14 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-bio,
         promote-cart,
         promote-link,
         promote-manage-email,
         promote-page,
         promote-press,
         promote-nyc,
+        promote-vip,
         promote-www,
       ]
     if: ${{ failure() && needs.promote-link.result == 'success' }}
@@ -828,12 +872,14 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-bio,
         promote-cart,
         promote-link,
         promote-manage-email,
         promote-page,
         promote-press,
         promote-nyc,
+        promote-vip,
         promote-www,
       ]
     if: ${{ failure() && needs.promote-manage-email.result == 'success' }}
@@ -858,6 +904,7 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-bio,
         promote-cart,
         promote-link,
         promote-manage-email,
@@ -888,6 +935,7 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-bio,
         promote-cart,
         promote-link,
         promote-manage-email,
@@ -918,6 +966,7 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-bio,
         promote-cart,
         promote-link,
         promote-manage-email,
@@ -948,6 +997,7 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-bio,
         promote-cart,
         promote-fm,
         promote-link,
@@ -980,7 +1030,9 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-bio,
         promote-cart,
+        promote-fm,
         promote-link,
         promote-manage-email,
         promote-page,
@@ -1004,6 +1056,39 @@ jobs:
           echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
           vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
+  rollback-bio:
+    name: rollback bio if any deployments fail
+    needs:
+      [
+        promote-app,
+        promote-app-fm,
+        promote-bio,
+        promote-cart,
+        promote-fm,
+        promote-link,
+        promote-manage-email,
+        promote-page,
+        promote-press,
+        promote-nyc,
+        promote-vip,
+        promote-www,
+      ]
+    if: ${{ failure() && needs.promote-bio.result == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_BIO_PROJECT_ID }}
+    steps:
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Rollback bio
+        run: |
+          ROLLBACK_DEPLOYMENT_ID=$(curl -s "https://api.vercel.com/v6/deployments?teamId=${{ secrets.VERCEL_TEAM_ID }}&projectId=${{ secrets.VERCEL_BIO_PROJECT_ID}}&limit=2&rollbackCandidate=true&state=READY&target=production" -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | jq -r '.deployments[1].uid')
+          echo "Rolling back to the previous deployment ID: $ROLLBACK_DEPLOYMENT_ID"
+          vercel rollback $ROLLBACK_DEPLOYMENT_ID --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+
   # 🧹 CLEAN UP 🧹 #
 
   delete-neon-branch:
@@ -1014,6 +1099,7 @@ jobs:
         production--can-merge,
         promote-app,
         promote-app-fm,
+        promote-bio,
         promote-cart,
         promote-fm,
         promote-link,
@@ -1029,6 +1115,7 @@ jobs:
       needs.production--can-merge.result == 'success' &&
       needs.promote-app.result == 'success' &&
       needs.promote-app-fm.result == 'success' &&
+      needs.promote-bio.result == 'success' &&
       needs.promote-cart.result == 'success' &&
       needs.promote-fm.result == 'success' &&
       needs.promote-link.result == 'success' &&

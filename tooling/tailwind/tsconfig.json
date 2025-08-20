@@ -5,5 +5,5 @@
 		"tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
 	},
 	"include": ["*.ts", "lib/**/*.ts", "lib/**/*.tsx", "lib/**/*.d.ts"],
-	"exclude": ["node_modules", "../eslint/**/*"]
+	"exclude": ["node_modules", "../eslint/**/*", "coverage"]
 }

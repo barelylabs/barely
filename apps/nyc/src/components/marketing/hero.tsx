@@ -147,6 +147,11 @@ export function Hero() {
 			{/* Content */}
 			<div className='relative z-10 mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8'>
 				<AnimatedSection animation='fade-up'>
+					<div className='mb-4 inline-flex items-center gap-2 rounded-full bg-yellow-500/10 px-4 py-2 text-sm text-yellow-500'>
+						<span className='inline-block h-2 w-2 animate-pulse rounded-full bg-yellow-500' />
+						Limited spots available for{' '}
+						{new Date().toLocaleDateString('en-US', { month: 'long' })}
+					</div>
 					<H
 						size='1'
 						className='mb-6 font-heading text-5xl leading-tight md:text-7xl lg:text-8xl'
@@ -184,11 +189,6 @@ export function Hero() {
 								/>
 							</svg>
 							Made in Brooklyn • For indie artists everywhere
-						</div>
-						<div className='inline-flex items-center gap-2 rounded-full bg-yellow-500/10 px-4 py-2 text-sm text-yellow-500'>
-							<span className='inline-block h-2 w-2 animate-pulse rounded-full bg-yellow-500' />
-							Limited spots available for{' '}
-							{new Date().toLocaleDateString('en-US', { month: 'long' })}
 						</div>
 					</div>
 				</AnimatedSection>

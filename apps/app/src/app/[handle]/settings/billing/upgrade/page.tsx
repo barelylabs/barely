@@ -99,8 +99,8 @@ export default function UpgradePage() {
 	};
 
 	// Upgrade mutation
-	const { mutate: upgradePlan, isPending } = useMutation({
-		...trpc.workspace.upgradePlan.mutationOptions({
+	const { mutate: upgradePlan, isPending } = useMutation(
+		trpc.workspace.upgradePlan.mutationOptions({
 			onSuccess: url => {
 				if (url) {
 					window.location.href = url;
@@ -111,7 +111,7 @@ export default function UpgradePage() {
 				// You could add a toast notification here
 			},
 		}),
-	});
+	);
 
 	// Handle upgrade click
 	const handleUpgradeClick = (planId: PlanType) => {

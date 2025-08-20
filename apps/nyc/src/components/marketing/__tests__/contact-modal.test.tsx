@@ -62,33 +62,20 @@ describe('ContactModal', () => {
 			/>,
 		);
 
-		// Fill name (required field)
-		await user.type(screen.getByLabelText(/your name \*/i), 'John Doe');
-
-		// Fill message (required field)
-		await user.type(
-			screen.getByLabelText(/what's your biggest music marketing challenge\? \*/i),
-			'This is a test message with enough characters',
-		);
-
-		// Fill email with invalid value
+		// Don't fill in other fields, just email with invalid value
 		const emailInput = screen.getByLabelText(/email \*/i);
 		await user.type(emailInput, 'invalid-email');
-
-		// Trigger blur to show validation
-		await user.tab();
 
 		const submitButton = screen.getByRole('button', { name: /send message/i });
 		await user.click(submitButton);
 
-		// Wait for the error message to appear
-		await waitFor(
-			() => {
-				const errorMessage = screen.queryByText(/invalid email address/i);
-				expect(errorMessage).toBeInTheDocument();
-			},
-			{ timeout: 2000 },
-		);
+		await waitFor(() => {
+			expect(screen.getByText(/name is required/i)).toBeInTheDocument();
+			expect(screen.getByText(/invalid email address/i)).toBeInTheDocument();
+			expect(
+				screen.getByText(/message must be at least 10 characters/i),
+			).toBeInTheDocument();
+		});
 	});
 
 	it('validates message length', async () => {

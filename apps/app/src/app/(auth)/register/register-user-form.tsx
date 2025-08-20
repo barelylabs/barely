@@ -11,6 +11,7 @@ import {
 } from '@barely/validators';
 import { isPossiblePhoneNumber, isRealEmail } from '@barely/validators/helpers';
 import { useMutation } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
@@ -40,20 +41,25 @@ const RegisterUserForm = ({ callbackUrl }: RegisterFormProps) => {
 		},
 	});
 
-	const sendLoginEmail = useMutation({
-		...trpc.auth.sendLoginEmail.mutationOptions(),
-		onSuccess: () => setLoginEmailSent(true),
-	});
+	const sendLoginEmail = useMutation(
+		trpc.auth.sendLoginEmail.mutationOptions({
+			onSuccess: () => setLoginEmailSent(true),
+		}),
+	);
 
-	const createUser = useMutation({
-		...trpc.user.create.mutationOptions(),
-		onSuccess: newUser => {
-			// if (!newUser) throw new Error('No user returned from createUser mutation');
+	const createUser = useMutation(
+		trpc.user.create.mutationOptions({
+			onSuccess: newUser => {
+				// if (!newUser) throw new Error('No user returned from createUser mutation');
 
-			setIdentifier(newUser.email);
-			sendLoginEmail.mutate({ email: newUser.email, callbackUrl });
-		},
-	});
+				setIdentifier(newUser.email);
+				sendLoginEmail.mutate({ email: newUser.email, callbackUrl });
+			},
+			onError: error => {
+				toast.error(error.message);
+			},
+		}),
+	);
 
 	const onSubmit = async (user: z.infer<typeof newUserContactInfoSchema>) => {
 		setCreatingAccount(true);

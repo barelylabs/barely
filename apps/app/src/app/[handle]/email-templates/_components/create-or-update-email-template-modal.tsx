@@ -52,19 +52,21 @@ export function CreateOrUpdateEmailTemplateModal({
 		),
 	);
 
-	const { mutateAsync: createEmailTemplate } = useMutation({
-		...trpc.emailTemplate.create.mutationOptions(),
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: createEmailTemplate } = useMutation(
+		trpc.emailTemplate.create.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
-	const { mutateAsync: updateEmailTemplate } = useMutation({
-		...trpc.emailTemplate.update.mutationOptions(),
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: updateEmailTemplate } = useMutation(
+		trpc.emailTemplate.update.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
 	const { form, onSubmit } = useCreateOrUpdateForm({
 		updateItem:

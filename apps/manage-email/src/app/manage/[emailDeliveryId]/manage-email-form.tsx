@@ -25,8 +25,8 @@ export function ManageEmailForm({
 		initialEmailMarketingOptIn,
 	);
 
-	const { mutate, isPending } = useMutation({
-		...trpc.toggleEmailMarketingOptIn.mutationOptions({
+	const { mutate, isPending } = useMutation(
+		trpc.toggleEmailMarketingOptIn.mutationOptions({
 			onSuccess: data => {
 				setEmailMarketingOptIn(data.newEmailMarketingOptIn);
 				if (data.newEmailMarketingOptIn) {
@@ -36,7 +36,7 @@ export function ManageEmailForm({
 				}
 			},
 		}),
-	});
+	);
 
 	const buttonText =
 		emailMarketingOptIn && !isPending ? 'Unsubscribe From Marketing Emails'

@@ -2,10 +2,12 @@ import type { TRPCRouterRecord } from '@trpc/server';
 import { WORKSPACE_PLAN_TYPES } from '@barely/const';
 import { dbHttp } from '@barely/db/client';
 import { dbPool } from '@barely/db/pool';
+import { BrandKits } from '@barely/db/sql/brand-kit.sql';
 import { CartFunnels } from '@barely/db/sql/cart-funnel.sql';
 import {
 	_Files_To_Workspaces__AvatarImage,
 	_Files_To_Workspaces__HeaderImage,
+	Files,
 } from '@barely/db/sql/file.sql';
 import { LandingPages } from '@barely/db/sql/landing-page.sql';
 import { PressKits } from '@barely/db/sql/press-kit.sql';
@@ -13,7 +15,7 @@ import { _Users_To_Workspaces } from '@barely/db/sql/user.sql';
 import { WorkspaceInvites } from '@barely/db/sql/workspace-invite.sql';
 import { Workspaces } from '@barely/db/sql/workspace.sql';
 import { sqlAnd, sqlStringContains } from '@barely/db/utils';
-import { newId, raise } from '@barely/utils';
+import { newId, raiseTRPCError } from '@barely/utils';
 import {
 	createWorkspaceSchema,
 	updateCurrentWorkspaceSchema,
@@ -21,10 +23,12 @@ import {
 	workspaceAssetsSchema,
 } from '@barely/validators';
 import { NeonDbError } from '@neondatabase/serverless';
+import { tasks } from '@trigger.dev/sdk/v3';
 import { TRPCError } from '@trpc/server';
 import { and, eq, gt, isNull } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
+import type { generateFileBlurHash } from '../../trigger';
 import { pushEvent } from '../../integrations/pusher/pusher-server';
 import { privateProcedure, publicProcedure, workspaceProcedure } from '../trpc';
 
@@ -36,7 +40,7 @@ export const workspaceRoute = {
 			where: eq(Workspaces.handle, ctx.workspace.handle),
 		});
 
-		if (!workspace) raise('Workspace not found');
+		if (!workspace) raiseTRPCError({ message: 'Workspace not found' });
 
 		return workspace;
 	}),
@@ -271,12 +275,23 @@ export const workspaceRoute = {
 				console.log('set the current default avatar to false 👍');
 			}
 
+			const avatarFile = await dbPool(ctx.pool).query.Files.findFirst({
+				where: eq(Files.id, input.avatarFileId),
+			});
+
+			if (!avatarFile) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Avatar file not found',
+				});
+			}
+
 			// set the new avatar as the default
 			await dbPool(ctx.pool)
 				.insert(_Files_To_Workspaces__AvatarImage)
 				.values({
 					workspaceId: ctx.workspace.id,
-					fileId: input.avatarFileId,
+					fileId: avatarFile.id,
 					current: true,
 				})
 				.onConflictDoUpdate({
@@ -287,6 +302,19 @@ export const workspaceRoute = {
 					set: { current: true },
 				})
 				.catch(console.error);
+
+			// update the brand kit avatar s3 key
+			await dbPool(ctx.pool)
+				.update(BrandKits)
+				.set({ avatarS3Key: avatarFile.s3Key })
+				.where(eq(BrandKits.workspaceId, ctx.workspace.id));
+
+			// trigger the blur hash generation
+			await tasks.trigger<typeof generateFileBlurHash>('generate-file-blur-hash', {
+				fileId: avatarFile.id,
+				s3Key: avatarFile.s3Key,
+				avatarWorkspaceId: ctx.workspace.id,
+			});
 
 			try {
 				await pushEvent('workspace', 'update', {
@@ -331,12 +359,23 @@ export const workspaceRoute = {
 					);
 			}
 
+			const headerFile = await dbPool(ctx.pool).query.Files.findFirst({
+				where: eq(Files.id, input.headerFileId),
+			});
+
+			if (!headerFile) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Header file not found',
+				});
+			}
+
 			// set the new header as the default
 			await dbPool(ctx.pool)
 				.insert(_Files_To_Workspaces__HeaderImage)
 				.values({
 					workspaceId: ctx.workspace.id,
-					fileId: input.headerFileId,
+					fileId: headerFile.id,
 					current: true,
 				})
 				.onConflictDoUpdate({
@@ -346,6 +385,19 @@ export const workspaceRoute = {
 					],
 					set: { current: true },
 				});
+
+			// update the brand kit header s3 key
+			await dbPool(ctx.pool)
+				.update(BrandKits)
+				.set({ headerS3Key: headerFile.s3Key })
+				.where(eq(BrandKits.workspaceId, ctx.workspace.id));
+
+			// trigger the blur hash generation
+			await tasks.trigger<typeof generateFileBlurHash>('generate-file-blur-hash', {
+				fileId: headerFile.id,
+				s3Key: headerFile.s3Key,
+				headerWorkspaceId: ctx.workspace.id,
+			});
 
 			try {
 				const pushRes = await pushEvent('workspace', 'update', {

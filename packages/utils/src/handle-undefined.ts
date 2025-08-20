@@ -1,3 +1,1 @@
-const undefinedToNull = <T>(value: T) => value ?? null;
-
-export { undefinedToNull };
+export const undefinedToNull = <T>(value: T) => value ?? null;

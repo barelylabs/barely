@@ -5,7 +5,7 @@ import { dbPool } from '@barely/db/pool';
 import { _Files_To_PressKits_PressPhotos } from '@barely/db/sql/file.sql';
 import { PressKits } from '@barely/db/sql/press-kit.sql';
 import { Workspaces } from '@barely/db/sql/workspace.sql';
-import { newId, raise } from '@barely/utils';
+import { newId, raiseTRPCError } from '@barely/utils';
 import { defaultPressKit, updatePressKitSchema } from '@barely/validators';
 import { and, eq, notInArray, sql } from 'drizzle-orm';
 import { z } from 'zod/v4';
@@ -89,10 +89,10 @@ export const pressKitRoute = {
 						bookingName: true,
 						bookingEmail: true,
 					},
-				})) ?? raise('Workspace not found');
+				})) ?? raiseTRPCError({ message: 'Workspace not found' });
 
 			const normalizedPressKit: NormalizedPressKit = {
-				...(newPressKit ?? raise('Press kit not found')),
+				...(newPressKit ?? raiseTRPCError({ message: 'Press kit not found' })),
 				pressPhotos: [],
 				_workspace: {
 					bio: workspace.bio,

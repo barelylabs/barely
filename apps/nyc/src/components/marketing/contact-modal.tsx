@@ -5,10 +5,11 @@ import { useZodForm } from '@barely/hooks';
 import { z } from 'zod/v4';
 
 import { Button } from '@barely/ui/button';
+import { Form } from '@barely/ui/forms/form';
+import { TextAreaField } from '@barely/ui/forms/text-area-field';
+import { TextField } from '@barely/ui/forms/text-field';
 import { Icon } from '@barely/ui/icon';
-import { Input } from '@barely/ui/input';
 import { Modal, ModalBody, ModalHeader } from '@barely/ui/modal';
-import { Textarea } from '@barely/ui/textarea';
 
 import { MarketingButton } from './button';
 import { SecurityBadge } from './trust-badges';
@@ -21,7 +22,7 @@ interface ContactModalProps {
 
 const contactFormSchema = z.object({
 	name: z.string().min(1, 'Name is required'),
-	email: z.string().email('Invalid email address'),
+	email: z.email('Invalid email address'),
 	artistName: z.string().optional(),
 	monthlyListeners: z.string().optional(),
 	service: z.enum(['bedroom', 'rising', 'breakout', '']).optional(),
@@ -90,6 +91,7 @@ export function ContactModal({
 			<ModalHeader
 				title={submitSuccess ? 'Message Sent!' : "Let's Grow Your Music"}
 				subtitle={submitSuccess ? '' : "I'll respond within 24 hours"}
+				justify='left'
 			/>
 
 			<ModalBody className='bg-[#0A0A0B]'>
@@ -102,47 +104,24 @@ export function ContactModal({
 						<p className='text-white/60'>I&apos;ll get back to you within 24 hours.</p>
 					</div>
 				:	<>
-						<form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-4'>
+						<Form form={form} onSubmit={handleSubmit} className='space-y-4' noValidate>
 							<div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
-								<div>
-									<label
-										htmlFor='name'
-										className='mb-1 block text-sm font-medium text-white/70'
-									>
-										Your Name *
-									</label>
-									<Input
-										id='name'
-										{...form.register('name')}
-										className='border-white/10 bg-white/5 text-white placeholder:text-white/40'
-										placeholder='John Doe'
-									/>
-									{form.formState.errors.name && (
-										<p className='mt-1 text-xs text-red-500'>
-											{form.formState.errors.name.message}
-										</p>
-									)}
-								</div>
+								<TextField
+									control={form.control}
+									name='name'
+									label='Your Name *'
+									placeholder='John Doe'
+									className='border-white/10 bg-white/5 text-white placeholder:text-white/40'
+								/>
 
-								<div>
-									<label
-										htmlFor='email'
-										className='mb-1 block text-sm font-medium text-white/70'
-									>
-										Email *
-									</label>
-									<Input
-										id='email'
-										{...form.register('email')}
-										className='border-white/10 bg-white/5 text-white placeholder:text-white/40'
-										placeholder='john@example.com'
-									/>
-									{form.formState.errors.email && (
-										<p className='mt-1 text-xs text-red-500'>
-											{form.formState.errors.email.message}
-										</p>
-									)}
-								</div>
+								<TextField
+									control={form.control}
+									name='email'
+									type='email'
+									label='Email *'
+									placeholder='john@example.com'
+									className='border-white/10 bg-white/5 text-white placeholder:text-white/40'
+								/>
 							</div>
 
 							<details className='group'>
@@ -150,58 +129,32 @@ export function ContactModal({
 									+ Add more details (optional)
 								</summary>
 								<div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
-									<div>
-										<label
-											htmlFor='artistName'
-											className='mb-1 block text-sm font-medium text-white/70'
-										>
-											Artist/Band Name
-										</label>
-										<Input
-											id='artistName'
-											{...form.register('artistName')}
-											className='border-white/10 bg-white/5 text-white placeholder:text-white/40'
-											placeholder='Your artist name'
-										/>
-									</div>
+									<TextField
+										control={form.control}
+										name='artistName'
+										label='Artist/Band Name'
+										placeholder='Your artist name'
+										className='border-white/10 bg-white/5 text-white placeholder:text-white/40'
+									/>
 
-									<div>
-										<label
-											htmlFor='monthlyListeners'
-											className='mb-1 block text-sm font-medium text-white/70'
-										>
-											Monthly Listeners
-										</label>
-										<Input
-											id='monthlyListeners'
-											{...form.register('monthlyListeners')}
-											className='border-white/10 bg-white/5 text-white placeholder:text-white/40'
-											placeholder='e.g., 5000'
-										/>
-									</div>
+									<TextField
+										control={form.control}
+										name='monthlyListeners'
+										label='Monthly Listeners'
+										placeholder='e.g., 5000'
+										className='border-white/10 bg-white/5 text-white placeholder:text-white/40'
+									/>
 								</div>
 							</details>
 
-							<div>
-								<label
-									htmlFor='message'
-									className='mb-1 block text-sm font-medium text-white/70'
-								>
-									What's your biggest music marketing challenge? *
-								</label>
-								<Textarea
-									id='message'
-									rows={4}
-									{...form.register('message')}
-									className='resize-none border-white/10 bg-white/5 text-white placeholder:text-white/40'
-									placeholder="e.g., 'I need help growing from 1k to 10k monthly listeners' or 'Looking to launch my new album effectively'"
-								/>
-								{form.formState.errors.message && (
-									<p className='mt-1 text-xs text-red-500'>
-										{form.formState.errors.message.message}
-									</p>
-								)}
-							</div>
+							<TextAreaField
+								control={form.control}
+								name='message'
+								label="What's your biggest music marketing challenge? *"
+								placeholder="e.g., 'I need help growing from 1k to 10k monthly listeners' or 'Looking to launch my new album effectively'"
+								rows={4}
+								className='resize-none border-white/10 bg-white/5 text-white placeholder:text-white/40'
+							/>
 
 							{submitError && (
 								<div className='rounded-md border border-red-500/20 bg-red-500/10 p-3'>
@@ -232,7 +185,7 @@ export function ContactModal({
 									Cancel
 								</Button>
 							</div>
-						</form>
+						</Form>
 
 						<div className='mt-6 border-t border-white/10 pt-6'>
 							<p className='mb-4 text-center text-white/70'>

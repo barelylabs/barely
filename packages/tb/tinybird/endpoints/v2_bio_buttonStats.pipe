@@ -1,0 +1,40 @@
+DESCRIPTION >
+	Statistics for individual bio buttons
+
+
+TOKEN "v2_bio_buttonStats_endpoint_read_1531" READ
+
+NODE bio_button_stats
+SQL >
+
+    %
+        SELECT
+            linkClickDestinationHref as buttonUrl,
+            uniq(sessionId) as clicks,
+            count() as totalEvents
+        FROM barely_bio_events_mv
+        WHERE
+            workspaceId
+            = {{
+                String(
+                    workspaceId,
+                    'ws_KvKq8bCN4KySE5Un',
+                    description="The ID of the workspace",
+                    required=True,
+                )
+            }}
+            AND type = 'bio/buttonClick'
+            {% if defined(assetId) %} and assetId = {{ String(assetId) }} {% end %}
+            AND timestamp >= toDateTime64({{ DateTime64(start, '2024-12-01 00:00:00.000') }}, 3)
+            AND timestamp <= toDateTime64({{ DateTime64(end, '2025-01-01 00:00:00.000') }}, 3)
+            {% if defined(city) %} and city = {{ String(city) }} {% end %}
+            {% if defined(region) %} and country = {{ String(region) }} {% end %}
+            {% if defined(country) %} and country = {{ String(country) }} {% end %}
+            {% if defined(device) %} and device = {{ String(device) }} {% end %}
+            {% if defined(browser) %} and browser = {{ String(browser) }} {% end %}
+            {% if defined(os) %} and os = {{ String(os) }} {% end %}
+            {% if defined(referer) %} and referer = {{ String(referer) }} {% end %}
+        GROUP BY buttonUrl
+        ORDER BY clicks DESC
+
+TYPE endpoint

@@ -47,6 +47,7 @@ export interface TextProps extends Omit<TextStylesProps, 'size' | 'weight'> {
 	>}`;
 	children: ReactNode;
 	className?: string;
+	style?: React.CSSProperties;
 }
 
 const Text = ({ variant, children, className, ...props }: TextProps) => {

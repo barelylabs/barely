@@ -159,11 +159,38 @@ pnpm tb:get-local-token       # Get local Tinybird token
 
 ## TypeScript Best Practices
 
-- **NEVER use `any` or type assertions** - Always find proper type solutions
+### ABSOLUTELY FORBIDDEN - NO EXCEPTIONS
+
+- **NEVER use `any`** - Find the proper type or fix the underlying issue
+- **NEVER use type assertions (`as`)** - Fix the actual type mismatch
+- **NEVER use type casting (`as unknown as`)** - This is even worse than `as`
+- **NEVER use non-null assertions (`!`)** - Handle null/undefined properly
+- **NO TYPE SHORTCUTS** - If types don't match, FIX THE ROOT CAUSE
+
+### APPROVED EXCEPTIONS (ONLY THESE SPECIFIC PATTERNS)
+
+#### 1. tRPC Server Prefetch Pattern
+
+**Location**: `apps/*/src/trpc/server.tsx` - `prefetch` function only
+**Pattern**: `queryClient.prefetchInfiniteQuery(queryOptions as any)`
+**Reason**: Known type incompatibility between @tanstack/react-query and tRPC type systems
+**Status**: Approved by Senior Engineering - DO NOT REFACTOR
+
+When implementing this in new apps, copy the exact pattern including:
+
+- The comprehensive JSDoc comment explaining the exception
+- The eslint-disable comments
+- The exact implementation structure
+
+This is the ONLY approved use of `as any` in the entire codebase.
+
+### Required Practices
+
 - Use strict mode TypeScript configuration
 - Prefer type inference over explicit types where possible
 - Use Zod (v4) for runtime validation and type generation
 - All API responses must be typed
+- Handle all possible null/undefined cases explicitly
 
 ## Code Style Guidelines
 
@@ -201,6 +228,7 @@ pnpm tb:get-local-token       # Get local Tinybird token
 4. **Use the Form wrapper** component for proper form context
 
 #### Correct Form Pattern Example:
+
 ```typescript
 'use client';
 
@@ -213,7 +241,7 @@ import { TextField } from '@barely/ui/forms/text-field';
 
 // Define schema with Zod
 const myFormSchema = z.object({
-  email: z.string().email('Invalid email'),
+  email: z.email('Invalid email'),
   name: z.string().min(1, 'Name is required'),
   consent: z.boolean().refine(val => val === true, 'Consent required'),
 });
@@ -238,7 +266,7 @@ export function MyForm({ onSubmit }: { onSubmit: (data: MyFormData) => void }) {
         label="Name"
         placeholder="Enter your name"
       />
-      
+
       <TextField
         control={form.control}
         name="email"
@@ -246,13 +274,13 @@ export function MyForm({ onSubmit }: { onSubmit: (data: MyFormData) => void }) {
         placeholder="Enter your email"
         startIcon="email"
       />
-      
+
       <CheckboxField
         control={form.control}
         name="consent"
         label="I agree to terms"
       />
-      
+
       <SubmitButton loading={isLoading}>
         Submit
       </SubmitButton>
@@ -262,6 +290,7 @@ export function MyForm({ onSubmit }: { onSubmit: (data: MyFormData) => void }) {
 ```
 
 #### Key Points:
+
 - **NEVER** use raw `Input`, `Checkbox`, or `Button` components in forms
 - **ALWAYS** use `TextField`, `CheckboxField`, `SubmitButton` etc. from `@barely/ui/forms/`
 - **ALWAYS** pass `control={form.control}` to form field components
@@ -271,24 +300,110 @@ export function MyForm({ onSubmit }: { onSubmit: (data: MyFormData) => void }) {
 - Import Zod as `z` from `zod/v4` (not zod/lib/v4)
 - For email validation, use `z.email()` - NOTE: `z.string().email()` is deprecated in Zod v4 in favor of the simpler `z.email()` syntax
 
+### Form vs Instantaneous Update Patterns
+
+**CRITICAL**: Not all user inputs require forms. Understand the distinction:
+
+#### When to Use Form Patterns (with useZodForm + Form component):
+
+- Creating new entities (e.g., Add Link, Create Block, New Product)
+- Multiple fields that must be validated together before saving
+- User explicitly submits via a "Save" or "Submit" button
+- Complex validation rules that depend on multiple fields
+- Any use of `<form>` element (lowercase) - replace with `<Form>` component
+
+#### When to Use Instantaneous Updates (direct mutations):
+
+- Inline editing of single fields (contentEditable style)
+- Toggle switches for boolean states
+- Dropdown/select changes for enum values
+- Drag-and-drop reordering
+- Each field change can be saved independently
+- Changes save automatically without explicit submission
+
+#### Implementation Examples:
+
+**✅ CORRECT - Instantaneous inline edit with onBlur:**
+
+```typescript
+// Single field that saves on blur
+<Input
+  value={localTitle}
+  onChange={e => setLocalTitle(e.target.value)}  // Local state only
+  onBlur={() => {
+    if (localTitle !== original) {
+      updateMutation.mutate({ id, title: localTitle });
+    }
+  }}
+  variant='contentEditable'
+/>
+```
+
+**✅ CORRECT - Toggle with immediate save:**
+
+```typescript
+<Switch
+  checked={item.enabled}
+  onCheckedChange={checked =>
+    updateMutation.mutate({ id: item.id, enabled: checked })
+  }
+/>
+```
+
+**❌ WRONG - Using <form> for multi-field entity creation:**
+
+```typescript
+// DO NOT DO THIS
+<form onSubmit={handleSubmit}>
+  <Input value={title} onChange={e => setTitle(e.target.value)} />
+  <Input value={url} onChange={e => setUrl(e.target.value)} />
+  <Button type='submit'>Add</Button>
+</form>
+```
+
+**✅ CORRECT - Using Form pattern for entity creation:**
+
+```typescript
+const form = useZodForm({
+  schema: createLinkSchema,
+  defaultValues: { title: '', url: '' }
+});
+
+return (
+  <Form form={form} onSubmit={data => createMutation.mutate(data)}>
+    <TextField control={form.control} name="title" />
+    <TextField control={form.control} name="url" type="url" />
+    <SubmitButton>Add Link</SubmitButton>
+  </Form>
+);
+```
+
 ### Creating New tRPC Routes
 
 1. Define schema in `packages/validators/src/`
 2. Create route in `packages/lib/src/trpc/routes/`
 3. Add to router in `packages/lib/src/trpc/trpc.ts`
 4. Use in client with React Query:
+
    ```typescript
-   import { useQuery, useMutation } from '@tanstack/react-query';
-   
+   import { useMutation, useQuery } from '@tanstack/react-query';
+
    // For queries
    const { data } = useQuery({
-     ...trpc.routeName.procedureName.queryOptions({ input }),
+   	...trpc.routeName.procedureName.queryOptions({ input }),
    });
-   
+
    // For mutations
-   const { mutate } = useMutation({
-     ...trpc.routeName.procedureName.mutationOptions(),
-   });
+   const { mutate } = useMutation(
+   	trpc.routeName.procedureName.mutationOptions({
+   		onSuccess: () => {
+   			// do something
+   		},
+   		onError: error => {
+   			// do something
+   		},
+   	}),
+   );
    ```
 
 ### Adding Database Tables
@@ -310,66 +425,85 @@ export function MyForm({ onSubmit }: { onSubmit: (data: MyFormData) => void }) {
 When creating a new public-facing app (like `apps/vip`, `apps/fm`, `apps/page`), there are specific patterns and gotchas to avoid:
 
 #### 1. tRPC Router Structure
+
 Public-facing apps need **separate routers** from admin routes:
+
 - **Admin routes**: Located in `packages/lib/src/trpc/routes/` (e.g., `vip.route.ts`) - for workspace management
 - **Public routes**: Located in `packages/api/src/public/` (e.g., `vip-render.route.ts`, `vip-render.router.ts`) - for public endpoints
 
 #### 2. Required Files for tRPC Setup
+
 Each public-facing app needs these files in specific order:
 
 **Step 1: Create the public router files**
+
 - `packages/api/src/public/[app-name]-render.route.ts` - Contains the actual tRPC procedures
 - `packages/api/src/public/[app-name]-render.router.ts` - Exports the router type and creates router
 - `packages/api/src/public/[app-name]-render.trpc.react.ts` - Creates tRPC context hooks using `createTRPCContext`
 
 **Step 2: Create the app-specific API route**
+
 - `apps/[app-name]/src/app/api/trpc/[routerName]/route.ts` - Next.js API route handler
 
 **Step 3: Set up client-side tRPC**
+
 - `apps/[app-name]/src/trpc/query-client.tsx` - QueryClient configuration (copy from existing apps)
 - `apps/[app-name]/src/trpc/react.tsx` - TRPCReactProvider setup
 - `apps/[app-name]/src/trpc/server.tsx` - Server-side tRPC client
 
 #### 3. Critical Dependencies in package.json
+
 Public apps need these specific dependencies (check `apps/app/package.json` for versions):
+
 ```json
 {
-  "@tanstack/react-query": "catalog:",
-  "@tanstack/react-query-devtools": "^5.80.10",
-  "@trpc/client": "catalog:",
-  "@trpc/server": "catalog:",
-  "superjson": "^2.2.1",
-  "lucide-react": "^0.348.0"
+	"@tanstack/react-query": "catalog:",
+	"@tanstack/react-query-devtools": "^5.80.10",
+	"@trpc/client": "catalog:",
+	"@trpc/server": "catalog:",
+	"superjson": "^2.2.1",
+	"lucide-react": "^0.348.0"
 }
 ```
 
 **CRITICAL**: Do NOT add `@trpc/react-query` to package.json - it's not in the catalog and will cause installation failures.
 
 #### 4. Component Usage Pattern
+
 In React components, use this pattern:
+
 ```typescript
+import { useMutation, useQuery } from '@tanstack/react-query';
+
 import { useVipRenderTRPC } from '@barely/api/public/vip-render.trpc.react';
-import { useQuery, useMutation } from '@tanstack/react-query';
 
 function MyComponent() {
-  const trpc = useVipRenderTRPC();
-  
-  // For queries
-  const { data } = useQuery({
-    ...trpc.procedureName.queryOptions({ input }),
-    enabled: !!someCondition,
-  });
-  
-  // For mutations
-  const { mutate } = useMutation({
-    ...trpc.procedureName.mutationOptions(),
-    onSuccess: (data) => { /* handle success */ },
-  });
+	const trpc = useVipRenderTRPC();
+
+	// For queries
+	const { data } = useQuery({
+		...trpc.procedureName.queryOptions({ input }),
+		enabled: !!someCondition,
+	});
+
+	// For mutations
+	const { mutate } = useMutation(
+		trpc.procedureName.mutationOptions({
+			onSuccess: data => {
+				/* handle success */
+			},
+			onError: error => {
+				/* handle error */
+			},
+		}),
+	);
 }
 ```
 
 #### 5. Configuration Updates Required
+
 When adding a new app, update these files:
+
 - `packages/const/src/app.constants.ts` - Add app name to APPS array
 - `packages/auth/src/get-url.ts` - Add URL handling for new app
 - `packages/auth/env.ts` - Add environment variables for base URL and dev port
@@ -378,7 +512,9 @@ When adding a new app, update these files:
 - `packages/db/src/client.ts` - Import and include new SQL files if adding database tables
 
 #### 6. Database Integration
+
 If creating new database tables:
+
 - Create SQL file in `packages/db/src/sql/[table-name].sql.ts`
 - Export type definitions: `export type TableName = typeof TableNames.$inferSelect;`
 - Import in `packages/db/src/client.ts` and add to dbSchema
@@ -386,17 +522,21 @@ If creating new database tables:
 - Export from `packages/validators/src/schemas/index.ts`
 
 #### 7. Common TypeScript Issues
+
 - **Control flow narrowing**: Use `TRPCError` instead of `raise()` for better type narrowing
 - **UI imports**: Use `@barely/ui/button` not `@barely/ui/elements/button`
 - **Visitor context**: Check property names - use `ctx.visitor?.ip` not `ctx.visitor?.ipAddress`
 - **User agent**: Visitor userAgent might be object or string: `typeof ctx.visitor?.userAgent === 'string' ? ctx.visitor.userAgent : ctx.visitor?.userAgent?.ua ?? null`
 
 #### 8. Port Management
+
 Each app needs a unique port:
+
 - app: 3000, cart: 3001, fm: 3002, link: 3003, page: 3004, press: 3005, www: 3006, nyc: 3010, vip: 3009
 - Update `scripts/dev-qr-codes.sh` with correct port mappings
 
 #### 9. Essential Checklist for New Public Apps
+
 - [ ] Create public router files in correct order
 - [ ] Add all required dependencies to package.json
 - [ ] Set up API route handler

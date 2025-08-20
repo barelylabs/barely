@@ -134,6 +134,7 @@ import {
 	Magnet,
 	Mail,
 	Mails,
+	MapPin,
 	Megaphone,
 	Menu,
 	MessageSquare,
@@ -275,6 +276,7 @@ export const Icon = {
 	bold: Bold,
 	bot: Bot,
 	branch: Split,
+	brand: Palette,
 	broadcast: Radio,
 	bump: PlusCircle,
 
@@ -399,6 +401,7 @@ export const Icon = {
 	magic: SparklesIcon,
 	magnet: Magnet,
 	mailchimp: FaMailchimp,
+	mapPin: MapPin,
 	marketing: Megaphone,
 	media: FileVideo,
 	megaphone: Megaphone,

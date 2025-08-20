@@ -5,6 +5,7 @@
 	"type": "module",
 	"exports": {
 		".": "./src/index.ts",
+		"./bio": "./src/bio/index.ts",
 		"./forms/*": "./src/forms/*.tsx",
 		"./charts/area-chart": "./src/charts/area-chart.tsx",
 		"./charts/bar-list": "./src/charts/bar-list.tsx",
@@ -141,6 +142,7 @@
 		"typescript": "catalog:"
 	},
 	"dependencies": {
+		"@barely/api": "workspace:*",
 		"@barely/atoms": "workspace:*",
 		"@barely/const": "workspace:*",
 		"@barely/files": "workspace:*",
@@ -198,6 +200,7 @@
 		"react": "catalog:react19",
 		"react-aria": "^3.32.1",
 		"react-aria-components": "^1.1.1",
+		"react-colorful": "^5.6.1",
 		"react-confetti": "^6.1.0",
 		"react-confetti-explosion": "^3.0.3",
 		"react-countdown": "^2.3.5",

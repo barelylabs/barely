@@ -24,7 +24,6 @@ export const s3Loader = ({
 }: Omit<ImageLoaderProps, 'src'> & { s3Key: string }) => {
 	const url = new URL(`${libEnv.NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN}/${s3Key}`);
 	url.searchParams.set('format', 'webp');
-	// console.log(`width for ${s3Key}`, width);
 	url.searchParams.set('width', width ? width.toString() : 'auto');
 	url.searchParams.set('quality', quality ? quality.toString() : '75');
 	return url.toString();
@@ -38,8 +37,9 @@ export function Img({
 	src,
 	s3Key,
 	priority,
+	sizes,
 	...props
-}: ImgProps) {
+}: ImgProps & { sizes?: string }) {
 	if (s3Key) {
 		return (
 			<Image
@@ -50,6 +50,7 @@ export function Img({
 				alt={alt}
 				quality={quality}
 				priority={priority}
+				sizes={sizes}
 				loader={({ src, width, quality }) => s3Loader({ s3Key: src, width, quality })}
 				placeholder={(props.placeholder ?? props.blurDataURL) ? 'blur' : undefined}
 			/>
