@@ -27,9 +27,9 @@ SQL >
                 when bio_linkIndex <= 4 then 'middle'
                 else 'bottom'
             end as position_in_block,
-            -- Time-based analysis
-            toHour(timestamp) as click_hour,
-            toDayOfWeek(timestamp) as click_day_of_week,
+            -- Time-based analysis (aggregated)
+            avg(toHour(timestamp)) as avg_click_hour,
+            avg(toDayOfWeek(timestamp)) as avg_click_day_of_week,
             -- Device breakdown
             countIf(device = 'Mobile') as mobile_clicks,
             countIf(device = 'Desktop') as desktop_clicks,
