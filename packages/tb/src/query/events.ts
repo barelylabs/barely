@@ -980,8 +980,6 @@ export const pipe_bioLinkPerformance = tinybird.buildPipe({
 		total_clicks: z.number(),
 		unique_sessions: z.number(),
 		position_in_block: z.string(),
-		avg_click_hour: z.number(),
-		avg_click_day_of_week: z.number(),
 		mobile_clicks: z.number(),
 		desktop_clicks: z.number(),
 		tablet_clicks: z.number(),
