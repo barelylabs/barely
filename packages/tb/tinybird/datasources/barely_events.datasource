@@ -83,7 +83,15 @@ SCHEMA >
     `sessionMetaAdSetId` Nullable(String) `json:$.sessionMetaAdSetId`,
     `vipSwapType` Nullable(String) `json:$.vipSwapType`,
     `vipDownloadToken` Nullable(String) `json:$.vipDownloadToken`,
-    `vipEmailCaptured` Nullable(String) `json:$.vipEmailCaptured`
+    `vipEmailCaptured` Nullable(String) `json:$.vipEmailCaptured`,
+    `bio_blockId` Nullable(String) `json:$.bio_blockId`,
+    `bio_blockType` Nullable(String) `json:$.bio_blockType`,
+    `bio_blockIndex` Nullable(Int16) `json:$.bio_blockIndex`,
+    `bio_linkId` Nullable(String) `json:$.bio_linkId`,
+    `bio_linkIndex` Nullable(Int16) `json:$.bio_linkIndex`,
+    `bio_linkText` Nullable(String) `json:$.bio_linkText`,
+    `bio_linkAnimation` Nullable(String) `json:$.bio_linkAnimation`,
+    `bio_emailMarketingOptIn` Nullable(UInt8) `json:$.bio_emailMarketingOptIn`
 
 FORWARD_QUERY >
     SELECT
@@ -170,7 +178,15 @@ FORWARD_QUERY >
         sessionMetaAdSetId,
         defaultValueOfTypeName('Nullable(String)') AS vipSwapType,
         defaultValueOfTypeName('Nullable(String)') AS vipDownloadToken,
-        defaultValueOfTypeName('Nullable(String)') AS vipEmailCaptured
+        defaultValueOfTypeName('Nullable(String)') AS vipEmailCaptured,
+        defaultValueOfTypeName('Nullable(String)') AS bio_blockId,
+        defaultValueOfTypeName('Nullable(String)') AS bio_blockType,
+        defaultValueOfTypeName('Nullable(Int16)') AS bio_blockIndex,
+        defaultValueOfTypeName('Nullable(String)') AS bio_linkId,
+        defaultValueOfTypeName('Nullable(Int16)') AS bio_linkIndex,
+        defaultValueOfTypeName('Nullable(String)') AS bio_linkText,
+        defaultValueOfTypeName('Nullable(String)') AS bio_linkAnimation,
+        defaultValueOfTypeName('Nullable(UInt8)') AS bio_emailMarketingOptIn
 
 ENGINE "MergeTree"
 ENGINE_PARTITION_KEY "toYear(timestamp)"

@@ -78,11 +78,18 @@ export const bioRenderRoute = {
 				type: z.enum(WEB_EVENT_TYPES__BIO),
 				linkId: z.string().optional(),
 				blockId: z.string().optional(),
+				blockType: z.enum(['links', 'contactForm', 'cart']).optional(),
+				blockIndex: z.number().optional(),
+				linkIndex: z.number().optional(),
+				linkAnimation: z
+					.enum(['none', 'bounce', 'wobble', 'jello', 'pulse', 'shake', 'tada'])
+					.optional(),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
 			const { visitor } = ctx;
-			const { bioId, linkId } = input;
+			const { bioId, linkId, blockId, blockType, blockIndex, linkIndex, linkAnimation } =
+				input;
 
 			const bio =
 				(await dbHttp.query.Bios.findFirst({
@@ -115,6 +122,11 @@ export const bioRenderRoute = {
 				type: input.type,
 				visitor,
 				workspace: bio.workspace,
+				blockId,
+				blockType,
+				blockIndex,
+				linkIndex,
+				linkAnimation,
 			});
 
 			return { success: true };
@@ -266,6 +278,7 @@ export const bioRenderRoute = {
 				type: 'bio/emailCapture',
 				visitor,
 				workspace: bio.workspace,
+				emailMarketingOptIn: marketingConsent,
 			});
 
 			// TODO: Trigger welcome email automation
