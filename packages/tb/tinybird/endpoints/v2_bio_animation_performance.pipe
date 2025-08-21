@@ -102,33 +102,24 @@ SQL >
             count() as total_clicks,
             uniq(sessionId) as unique_sessions,
             count(distinct bio_linkId) as unique_links,
-            avg(total_clicks) as avg_clicks
-        FROM (
-            SELECT
-                bio_linkAnimation,
-                bio_linkIndex,
-                bio_linkId,
-                count() as total_clicks,
-                sessionId
-            FROM barely_bio_events_mv
-            WHERE
-                workspaceId
-                = {{
-                    String(
-                        workspaceId,
-                        'ws_KvKq8bCN4KySE5Un',
-                        description="The ID of the workspace",
-                        required=True,
-                    )
-                }}
-                AND type = 'bio/buttonClick'
-                AND bio_linkAnimation IS NOT NULL
-                AND bio_linkIndex IS NOT NULL
-                {% if defined(assetId) %} and assetId = {{ String(assetId) }} {% end %}
-                {% if defined(start) %} and timestamp >= toDateTime64({{ DateTime64(start, '2024-12-01 00:00:00.000') }}, 3) {% end %}
-                {% if defined(end) %} and timestamp <= toDateTime64({{ DateTime64(end, '2025-01-01 00:00:00.000') }}, 3) {% end %}
-            GROUP BY bio_linkAnimation, bio_linkIndex, bio_linkId, sessionId
-        )
+            count() / count(distinct bio_linkId) as avg_clicks_per_link
+        FROM barely_bio_events_mv
+        WHERE
+            workspaceId
+            = {{
+                String(
+                    workspaceId,
+                    'ws_KvKq8bCN4KySE5Un',
+                    description="The ID of the workspace",
+                    required=True,
+                )
+            }}
+            AND type = 'bio/buttonClick'
+            AND bio_linkAnimation IS NOT NULL
+            AND bio_linkIndex IS NOT NULL
+            {% if defined(assetId) %} and assetId = {{ String(assetId) }} {% end %}
+            {% if defined(start) %} and timestamp >= toDateTime64({{ DateTime64(start, '2024-12-01 00:00:00.000') }}, 3) {% end %}
+            {% if defined(end) %} and timestamp <= toDateTime64({{ DateTime64(end, '2025-01-01 00:00:00.000') }}, 3) {% end %}
         GROUP BY bio_linkAnimation, bio_linkIndex
         ORDER BY bio_linkIndex ASC, total_clicks DESC
 
@@ -143,38 +134,29 @@ SQL >
             uniq(sessionId) as unique_sessions,
             count(distinct bio_linkId) as unique_links,
             -- Device-specific performance
-            avg(total_clicks) as avg_clicks_per_link,
+            count() / count(distinct bio_linkId) as avg_clicks_per_link,
             -- Mobile vs Desktop effectiveness
             case
                 when device = 'Mobile' then 'mobile_optimized'
                 when device = 'Desktop' then 'desktop_optimized'
                 else 'tablet_optimized'
             end as optimization_target
-        FROM (
-            SELECT
-                bio_linkAnimation,
-                device,
-                bio_linkId,
-                count() as total_clicks,
-                sessionId
-            FROM barely_bio_events_mv
-            WHERE
-                workspaceId
-                = {{
-                    String(
-                        workspaceId,
-                        'ws_KvKq8bCN4KySE5Un',
-                        description="The ID of the workspace",
-                        required=True,
-                    )
-                }}
-                AND type = 'bio/buttonClick'
-                AND bio_linkAnimation IS NOT NULL
-                {% if defined(assetId) %} and assetId = {{ String(assetId) }} {% end %}
-                {% if defined(start) %} and timestamp >= toDateTime64({{ DateTime64(start, '2024-12-01 00:00:00.000') }}, 3) {% end %}
-                {% if defined(end) %} and timestamp <= toDateTime64({{ DateTime64(end, '2025-01-01 00:00:00.000') }}, 3) {% end %}
-            GROUP BY bio_linkAnimation, device, bio_linkId, sessionId
-        )
+        FROM barely_bio_events_mv
+        WHERE
+            workspaceId
+            = {{
+                String(
+                    workspaceId,
+                    'ws_KvKq8bCN4KySE5Un',
+                    description="The ID of the workspace",
+                    required=True,
+                )
+            }}
+            AND type = 'bio/buttonClick'
+            AND bio_linkAnimation IS NOT NULL
+            {% if defined(assetId) %} and assetId = {{ String(assetId) }} {% end %}
+            {% if defined(start) %} and timestamp >= toDateTime64({{ DateTime64(start, '2024-12-01 00:00:00.000') }}, 3) {% end %}
+            {% if defined(end) %} and timestamp <= toDateTime64({{ DateTime64(end, '2025-01-01 00:00:00.000') }}, 3) {% end %}
         GROUP BY bio_linkAnimation, device
         ORDER BY animation ASC, total_clicks DESC
 
