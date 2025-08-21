@@ -7,8 +7,8 @@ export async function getBrandKit({ handle }: { handle: string }) {
 		.select()
 		.from(BrandKits)
 		.where(eq(BrandKits.handle, handle))
-		.limit(1);
-	// TODO: add drizzle cache
+		.limit(1)
+		.$withCache();
 
 	return brandKit ?? null;
 }

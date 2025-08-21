@@ -1,8 +1,9 @@
 import { neon, neonConfig } from '@neondatabase/serverless';
+import { upstashCache } from 'drizzle-orm/cache/upstash';
 import { drizzle as drizzleHttp } from 'drizzle-orm/neon-http';
 
 import type { dbPool } from './pool';
-import { env } from '../env';
+import { dbEnv } from '../env';
 import * as adCreativeSql from './sql/ad-creative.sql';
 import * as adSetSql from './sql/ad-set.sql';
 import * as adSql from './sql/ad.sql';
@@ -121,10 +122,14 @@ export const dbSchema = {
 
 neonConfig.fetchConnectionCache = true;
 
-const http = neon(env.DATABASE_URL);
+const http = neon(dbEnv.DATABASE_URL);
 export const dbHttp = drizzleHttp({
 	client: http,
 	schema: dbSchema,
+	cache: upstashCache({
+		url: dbEnv.UPSTASH_REDIS_REST_URL,
+		token: dbEnv.UPSTASH_REDIS_REST_TOKEN,
+	}),
 	// casing: 'snake_case',
 });
 

@@ -79,8 +79,12 @@ export const fetchBrandKit = cache(async (handle: string) => {
 	return await trpcCaller.bio.brandKitByHandle({ handle });
 });
 
-export const fetchBio = cache(
-	async ({ handle, key }: { handle: string; key: string }) => {
-		return await trpcCaller.bio.byHandleAndKey({ handle, key });
-	},
-);
+// export const fetchBio = cache(
+// 	async ({ handle, key }: { handle: string; key: string }) => {
+// 		return await trpcCaller.bio.byHandleAndKey({ handle, key });
+// 	},
+// );
+
+export const fetchBio = cache(async (handle: string, key: string) => {
+	return await trpcCaller.bio.byHandleAndKey({ handle, key });
+});
