@@ -3,6 +3,7 @@ import type { AnyRouter } from '@trpc/server';
 import type { NextRequest } from 'next/server';
 import { makePool } from '@barely/db/pool';
 import {
+	parseBioReqForHandleAndKey,
 	parseCartReqForHandleAndKey,
 	parseFmReqForHandleAndKey,
 	parseLandingPageReqForHandleAndKey,
@@ -83,6 +84,8 @@ export const publicRenderHandler =
 
 function getHandleAndKey(app: (typeof APPS)[number], req: NextRequest) {
 	switch (app) {
+		case 'bio':
+			return parseBioReqForHandleAndKey(req);
 		case 'cart':
 			return parseCartReqForHandleAndKey(req);
 		case 'fm':

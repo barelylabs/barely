@@ -78,6 +78,40 @@ export const parseCartUrl = (url: string) => {
 	return { handle, key };
 };
 
+// bio
+export const parseBioReqForHandleAndKey = (req: NextRequest) => {
+	const { handle: handleFromHeaders, key: keyFromHeaders } = parseHeadersForHandleAndKey(
+		req.headers,
+	);
+
+	if (handleFromHeaders && keyFromHeaders)
+		return { handle: handleFromHeaders, key: keyFromHeaders };
+
+	const referer = req.headers.get('referer') ?? '';
+	const { handle: handleFromReferer, key: keyFromReferer } = parseBioUrl(referer);
+
+	return {
+		handle: handleFromHeaders ?? handleFromReferer,
+		key: keyFromHeaders ?? keyFromReferer,
+	};
+};
+
+export const parseBioUrl = (url: string) => {
+	const parsed = new URL(url);
+	const parts = parsed.pathname.split('/').filter(Boolean);
+
+	const handle = parts[0] ?? null;
+	// Bio always uses 'home' as the key
+	const key = handle ? 'home' : null;
+
+	if (!handle || !key) {
+		console.log('parseBioUrl', url);
+		console.log('missing handle or key', handle, key);
+	}
+
+	return { handle, key };
+};
+
 // fm
 export const parseFmReqForHandleAndKey = (req: NextRequest) => {
 	const { handle: handleFromHeaders, key: keyFromHeaders } = parseHeadersForHandleAndKey(
