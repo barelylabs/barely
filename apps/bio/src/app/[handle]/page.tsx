@@ -1,7 +1,6 @@
-import { Suspense } from 'react';
-
 import { s3Loader } from '@barely/ui/img';
 
+import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 import { fetchBio, fetchBrandKit } from '../../trpc/server';
 import { BioBioRender } from './bio-bio-render';
 
@@ -16,24 +15,23 @@ export const revalidate = 60; // ISR: revalidate every 60 seconds
 export default async function BioPage({ params }: BioRouteProps) {
 	const { handle } = await params;
 
-	// Fetch brandKit - this will be cached if already fetched in layout
 	const brandKit = await fetchBrandKit(handle);
-	const bio = await fetchBio({ handle, key: 'home' });
+	const bio = await fetchBio(handle, 'home');
 
-	// prefetch(trpc.bio.byHandleAndKey.queryOptions({ handle, key: 'home' }));
+	prefetch(trpc.bio.blocksByHandleAndKey.queryOptions({ handle, key: 'home' }));
 
 	return (
-		<Suspense fallback={<div>Loading...</div>}>
+		<HydrateClient>
 			<BioBioRender bio={bio} brandKit={brandKit} />
-		</Suspense>
+		</HydrateClient>
 	);
 }
 
 export async function generateMetadata({ params }: BioRouteProps) {
 	try {
 		const { handle } = await params;
-		const bio = await fetchBio({ handle, key: 'home' });
 		const brandKit = await fetchBrandKit(handle);
+		const bio = await fetchBio(handle, 'home');
 
 		const title = `${bio.handle} - Bio`;
 		const description = `Links and content from ${bio.handle}`;

@@ -69,7 +69,7 @@ export async function recordBioEvent({
 	visitor?: VisitorInfo;
 	workspace: Pick<Workspace, 'id' | 'plan' | 'eventUsage' | 'eventUsageLimitOverride'>;
 }) {
-	console.log('recordBioEvent visitor >>', visitor);
+	// console.log('recordBioEvent visitor >>', visitor);
 
 	if (visitor?.isBot) return null;
 

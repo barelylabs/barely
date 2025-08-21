@@ -109,7 +109,12 @@ function BioBioBlocks() {
 	const { bio } = useBioContext();
 
 	const { data: blocks } = useSuspenseQuery(
-		trpc.bio.blocksByHandleAndKey.queryOptions({ handle: bio.handle, key: bio.key }),
+		trpc.bio.blocksByHandleAndKey.queryOptions(
+			{ handle: bio.handle, key: bio.key },
+			{
+				staleTime: Infinity,
+			},
+		),
 	);
 
 	return <BioBlocksRender blocks={blocks} />;

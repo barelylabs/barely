@@ -54,8 +54,9 @@ export const parseCartReqForHandleAndKey = (req: NextRequest) => {
 	if (handleFromHeaders && keyFromHeaders)
 		return { handle: handleFromHeaders, key: keyFromHeaders };
 
-	const referer = req.headers.get('referer') ?? '';
-	const { handle: handleFromReferer, key: keyFromReferer } = parseCartUrl(referer);
+	const referer = req.headers.get('referer');
+	const { handle: handleFromReferer, key: keyFromReferer } =
+		referer ? parseCartUrl(referer) : { handle: null, key: null };
 
 	return {
 		handle: handleFromHeaders ?? handleFromReferer,
@@ -87,8 +88,11 @@ export const parseBioReqForHandleAndKey = (req: NextRequest) => {
 	if (handleFromHeaders && keyFromHeaders)
 		return { handle: handleFromHeaders, key: keyFromHeaders };
 
-	const referer = req.headers.get('referer') ?? '';
-	const { handle: handleFromReferer, key: keyFromReferer } = parseBioUrl(referer);
+	const referer = req.headers.get('referer');
+	console.log('parseBioReqForHandleAndKey - referer:', referer);
+
+	const { handle: handleFromReferer, key: keyFromReferer } =
+		referer ? parseBioUrl(referer) : { handle: null, key: null };
 
 	return {
 		handle: handleFromHeaders ?? handleFromReferer,
