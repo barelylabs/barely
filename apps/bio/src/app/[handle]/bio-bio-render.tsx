@@ -15,6 +15,8 @@ import {
 } from '@barely/ui/src/bio';
 import { BioContentAroundBlocks } from '@barely/ui/src/bio/bio-content-around-blocks';
 
+import { BioLogVisit } from '~/app/[handle]/bio-log-visit';
+
 function BioBrandKitProvider({
 	children,
 	brandKit,
@@ -37,35 +39,41 @@ function BioBioProvider({
 	children: React.ReactNode;
 }) {
 	const trpc = useBioRenderTRPC();
-	// const { data: bio } = useSuspenseQuery(
-	// 	trpc.bio.byHandleAndKey.queryOptions(
-	// 		{ handle, key: bioKey },
-	// 		{
-	// 			staleTime: 1000 * 60 * 5, // 5 minutes
-	// 		},
-	// 	),
-	// );
 
 	const { mutate: log } = useMutation(trpc.bio.log.mutationOptions());
 
 	const { mutateAsync: captureEmail } = useMutation(
 		trpc.bio.captureEmail.mutationOptions(),
 	);
-	// Handle page view
-	const handlePageView = useCallback(() => {
-		log({
-			bioId: bio.id,
-			type: 'bio/view',
-		});
-	}, [log, bio.id]);
 
-	// Handle link click
+	// Handle page view
+	// const handlePageView = useCallback(() => {
+	// 	log({
+	// 		bioId: bio.id,
+	// 		type: 'bio/view',
+	// 	});
+	// }, [log, bio.id]);
+
+	// Handle link click with tracking parameters
 	const handleLinkClick = useCallback(
-		(link: BioLink) => {
+		(
+			link: BioLink & { blockId: string; lexoRank: string },
+			context?: {
+				blockId?: string;
+				blockType?: 'links' | 'contactForm' | 'cart';
+				blockIndex?: number;
+				linkIndex?: number;
+			},
+		) => {
 			log({
 				bioId: bio.id,
 				type: 'bio/buttonClick',
 				linkId: link.id,
+				blockId: context?.blockId ?? link.blockId,
+				blockType: context?.blockType,
+				blockIndex: context?.blockIndex,
+				linkIndex: context?.linkIndex,
+				linkAnimation: link.animate ?? undefined,
 			});
 		},
 		[log, bio.id],
@@ -90,7 +98,6 @@ function BioBioProvider({
 			isPreview={false}
 			onLinkClick={handleLinkClick}
 			onEmailCapture={handleEmailCapture}
-			onPageView={handlePageView}
 		>
 			{children}
 		</BioProvider>
@@ -147,6 +154,7 @@ export function BioBioRender({
 						}
 					> */}
 					<BioBioProvider bio={bio}>
+						<BioLogVisit />
 						<BioContentAroundBlocks>
 							<BioBioBlocks />
 						</BioContentAroundBlocks>

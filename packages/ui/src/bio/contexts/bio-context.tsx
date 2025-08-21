@@ -5,6 +5,12 @@ import React, { createContext, useContext } from 'react';
 
 export type BioOnLinkClick = (
 	link: BioLink & { blockId: string; lexoRank: string },
+	context?: {
+		blockId?: string;
+		blockType?: 'links' | 'contactForm' | 'cart';
+		blockIndex?: number;
+		linkIndex?: number;
+	},
 ) => void | Promise<void>;
 export type BioOnEmailCapture = (
 	email: string,
@@ -17,7 +23,6 @@ interface BioContextValue {
 	isPreview?: boolean;
 	onLinkClick: null | BioOnLinkClick;
 	onEmailCapture: null | BioOnEmailCapture;
-	onPageView: null | BioOnPageView;
 }
 
 const BioContext = createContext<BioContextValue | undefined>(undefined);
@@ -28,7 +33,6 @@ export function BioProvider(v: {
 	isPreview: boolean;
 	onLinkClick: null | BioOnLinkClick;
 	onEmailCapture: null | BioOnEmailCapture;
-	onPageView: null | BioOnPageView;
 }) {
 	const { children, ...value } = v;
 	return <BioContext.Provider value={value}>{children}</BioContext.Provider>;
