@@ -12,6 +12,7 @@ page_qr=http://$ip_address:3007
 press_qr=http://$ip_address:3008
 vip_qr=http://$ip_address:3009
 www_qr=http://$ip_address:3010
+invoice_qr=http://$ip_address:3011
 
 echo "app::3000"
 qrencode -t ansiutf8 -o - $app_qr
@@ -42,5 +43,8 @@ qrencode -t ansiutf8 -o - $vip_qr
 
 echo "nyc::3010"
 qrencode -t ansiutf8 -o - $nyc_qr
+
+echo "invoice::3011"
+qrencode -t ansiutf8 -o - $invoice_qr
 
 echo "email::4000"

@@ -9,3 +9,6 @@ export * from './playlist-pitch';
 
 // Export all VIP templates
 export * from './vip';
+
+// Export all invoice templates
+export * from './invoice';

@@ -3,7 +3,8 @@
 	// "extends": "@barely/tsconfig/base.json",
 	"compilerOptions": {
 		"lib": ["ES2022", "DOM"],
-		"jsx": "preserve" // fixme: this is how we're handling email templates bubbling up through packages for now. i guess it makes sense - if a package is handling jsx, ts needs to know what to do with it 🤷‍♂️
+		"jsx": "preserve", // fixme: this is how we're handling email templates bubbling up through packages for now. i guess it makes sense - if a package is handling jsx, ts needs to know what to do with it 🤷‍♂️
+		"tsBuildInfoFile": "./.cache/tb.tsbuildinfo" // Use package-specific tsbuildinfo file to avoid conflicts
 	},
 	"include": ["*.ts", "src"],
 	"exclude": ["node_modules"]

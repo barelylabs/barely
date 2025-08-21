@@ -21,6 +21,7 @@ Get up to speed on the current project and start implementing. This command load
 ## What This Command Does
 
 I'll automatically:
+
 1. Load project context from CLAUDE_PROJECT.md and plan files
 2. Analyze which tasks are completed vs pending
 3. Present a clear progress summary with deadline awareness
@@ -31,15 +32,18 @@ I'll automatically:
 ### 1. Load Project Context
 
 First, I'll check for and read the following files:
+
 - `CLAUDE_PROJECT.md` - Primary project context
 - `START_HERE.md` - Workflow guidance (if exists)
 - `.claude/project/plan-organized.md` - Implementation plan with tasks
+- `.claude/project/checkpoint.md` - Checkpoint summary
 
 !pwd
 
 !test -f CLAUDE_PROJECT.md && echo "✓ Found CLAUDE_PROJECT.md" || echo "✗ CLAUDE_PROJECT.md not found"
 !test -f START_HERE.md && echo "✓ Found START_HERE.md" || echo "✗ START_HERE.md not found"
 !test -f .claude/project/plan-organized.md && echo "✓ Found plan-organized.md" || echo "✗ plan-organized.md not found"
+!test -f .claude/project/checkpoint.md && echo "✓ Found checkpoint.md" || echo "✗ checkpoint.md not found"
 
 ### 2. Read Project Files
 
@@ -50,9 +54,11 @@ First, I'll check for and read the following files:
 ### 3. Analyze Progress
 
 I'll parse the implementation plan to:
+
 - Count completed (✓) vs pending tasks per feature
 - Calculate overall project progress
 - Identify the current feature being worked on
+- Review the checkpoint summary - this will help us understand the specific details of the last task we worked on/where we left off
 - Extract the next 3-5 uncompleted tasks
 
 ### 4. Check Recent Activity
@@ -62,6 +68,7 @@ I'll parse the implementation plan to:
 ### 5. Present Status Summary
 
 Based on my analysis, I'll show:
+
 - Project name and deadline (with days remaining)
 - Progress overview for each feature
 - Current focus area
@@ -71,6 +78,7 @@ Based on my analysis, I'll show:
 ### 6. Begin Implementation
 
 If you confirm, I'll:
+
 - Create a todo list with TodoWrite for the next tasks
 - Mark the first task as in_progress
 - Start implementing following existing patterns
@@ -87,6 +95,7 @@ If you confirm, I'll:
 ## Command Benefits
 
 This command provides:
+
 - **Instant context loading** - No need to explain the project
 - **Accurate progress tracking** - Always know what's done and what's next
 - **Deadline awareness** - Stay on track with time-boxed projects

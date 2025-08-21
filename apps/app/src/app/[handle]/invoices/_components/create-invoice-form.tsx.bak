@@ -1,0 +1,326 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useZodForm } from '@barely/hooks';
+import { formatCentsToDollars } from '@barely/utils';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { z } from 'zod/v4';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
+
+import { Button } from '@barely/ui/button';
+import { Card } from '@barely/ui/card';
+import { Form, SubmitButton } from '@barely/ui/forms/form';
+import { SelectField } from '@barely/ui/forms/select-field';
+import { TextField } from '@barely/ui/forms/text-field';
+import { Icon } from '@barely/ui/icon';
+import { Input } from '@barely/ui/input';
+import { Label } from '@barely/ui/label';
+import { Separator } from '@barely/ui/separator';
+
+// Line item schema
+const lineItemSchema = z.object({
+	description: z.string().min(1, 'Description is required'),
+	quantity: z.number().min(1, 'Quantity must be at least 1'),
+	unitPrice: z.number().min(0, 'Price must be positive'),
+	amount: z.number(),
+});
+
+// Invoice form schema
+const invoiceFormSchema = z.object({
+	clientId: z.string().min(1, 'Client is required'),
+	lineItems: z.array(lineItemSchema).min(1, 'At least one line item is required'),
+	tax: z.number().min(0).max(100).default(0),
+	dueDate: z.string().optional(),
+});
+
+type InvoiceFormData = z.infer<typeof invoiceFormSchema>;
+
+interface CreateInvoiceFormProps {
+	handle: string;
+}
+
+export function CreateInvoiceForm({ handle }: CreateInvoiceFormProps) {
+	const router = useRouter();
+	const trpc = useTRPC();
+	const utils = trpc.useUtils();
+
+	// Load clients for dropdown
+	const { data: clientsData } = useQuery({
+		...trpc.invoiceClient.list.queryOptions({ handle }),
+	});
+
+	// Line items state
+	const [lineItems, setLineItems] = useState([
+		{ description: '', quantity: 1, unitPrice: 0, amount: 0 },
+	]);
+
+	const form = useZodForm({
+		schema: invoiceFormSchema,
+		defaultValues: {
+			clientId: '',
+			lineItems: lineItems,
+			tax: 0,
+			dueDate: '',
+		},
+	});
+
+	const { mutate: createInvoice, isPending: isCreating } = useMutation({
+		...trpc.invoice.create.mutationOptions(),
+		onSuccess: data => {
+			toast.success('Invoice created successfully');
+			utils.invoice.byWorkspace.invalidate();
+			router.push(`/${handle}/invoices/${data.id}`);
+		},
+		onError: error => {
+			toast.error(error.message || 'Failed to create invoice');
+		},
+	});
+
+	// Calculate totals
+	const calculateTotals = () => {
+		const subtotal = lineItems.reduce((sum, item) => sum + item.amount, 0);
+		const taxAmount = (subtotal * form.watch('tax')) / 10000; // tax is stored as percentage * 100
+		const total = subtotal + taxAmount;
+		return { subtotal, taxAmount, total };
+	};
+
+	const { subtotal, taxAmount, total } = calculateTotals();
+
+	// Line item handlers
+	const addLineItem = () => {
+		const newItems = [
+			...lineItems,
+			{ description: '', quantity: 1, unitPrice: 0, amount: 0 },
+		];
+		setLineItems(newItems);
+		form.setValue('lineItems', newItems);
+	};
+
+	const removeLineItem = (index: number) => {
+		const newItems = lineItems.filter((_, i) => i !== index);
+		setLineItems(newItems);
+		form.setValue('lineItems', newItems);
+	};
+
+	const updateLineItem = (
+		index: number,
+		field: keyof (typeof lineItems)[0],
+		value: string | number,
+	) => {
+		const newItems = [...lineItems];
+		const item = newItems[index];
+		if (!item) return;
+
+		if (field === 'description') {
+			item.description = value as string;
+		} else if (field === 'quantity' || field === 'unitPrice') {
+			const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
+			item[field] = numValue;
+			// Recalculate amount
+			item.amount = Math.round(item.quantity * item.unitPrice * 100); // Store in cents
+		}
+
+		setLineItems(newItems);
+		form.setValue('lineItems', newItems);
+	};
+
+	const handleSubmit = (data: InvoiceFormData) => {
+		// Convert line item amounts to cents and prepare data
+		const processedData = {
+			...data,
+			lineItems: lineItems.map(item => ({
+				...item,
+				unitPrice: Math.round(item.unitPrice * 100), // Convert to cents
+				amount: Math.round(item.quantity * item.unitPrice * 100), // Convert to cents
+			})),
+			tax: Math.round(data.tax * 100), // Store as percentage * 100
+			dueDate: data.dueDate ?? null,
+		};
+
+		createInvoice({ handle, ...processedData });
+	};
+
+	const clientOptions =
+		clientsData?.clients?.map(client => ({
+			label: client.name,
+			value: client.id,
+		})) ?? [];
+
+	return (
+		<Form form={form} onSubmit={handleSubmit}>
+			<div className='grid gap-6 lg:grid-cols-3'>
+				{/* Main Content */}
+				<div className='space-y-6 lg:col-span-2'>
+					{/* Client Selection */}
+					<Card>
+						<CardHeader>
+							<CardTitle>Client Information</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<SelectField
+								control={form.control}
+								name='clientId'
+								label='Select Client'
+								placeholder='Choose a client'
+								options={clientOptions}
+								required
+							/>
+						</CardContent>
+					</Card>
+
+					{/* Line Items */}
+					<Card>
+						<CardHeader>
+							<CardTitle>Line Items</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<div className='space-y-4'>
+								{lineItems.map((item, index) => (
+									<div key={index} className='space-y-2'>
+										{index > 0 && <Separator />}
+										<div className='grid gap-4 md:grid-cols-12'>
+											<div className='md:col-span-5'>
+												<Label>Description</Label>
+												<Input
+													placeholder='Item description'
+													value={item.description}
+													onChange={e =>
+														updateLineItem(index, 'description', e.target.value)
+													}
+												/>
+											</div>
+											<div className='md:col-span-2'>
+												<Label>Quantity</Label>
+												<Input
+													type='number'
+													min='1'
+													step='1'
+													value={item.quantity}
+													onChange={e =>
+														updateLineItem(index, 'quantity', e.target.value)
+													}
+												/>
+											</div>
+											<div className='md:col-span-2'>
+												<Label>Price ($)</Label>
+												<Input
+													type='number'
+													min='0'
+													step='0.01'
+													value={item.unitPrice}
+													onChange={e =>
+														updateLineItem(index, 'unitPrice', e.target.value)
+													}
+												/>
+											</div>
+											<div className='md:col-span-2'>
+												<Label>Amount</Label>
+												<div className='pt-2 font-medium'>
+													{formatCentsToDollars(item.amount)}
+												</div>
+											</div>
+											<div className='flex items-end md:col-span-1'>
+												{lineItems.length > 1 && (
+													<Button
+														type='button'
+														variant='ghost'
+														size='icon-sm'
+														onClick={() => removeLineItem(index)}
+													>
+														<Icon.trash className='h-4 w-4' />
+													</Button>
+												)}
+											</div>
+										</div>
+									</div>
+								))}
+							</div>
+
+							<Button
+								type='button'
+								variant='outline'
+								onClick={addLineItem}
+								className='mt-4'
+							>
+								<Icon.plus className='mr-2 h-4 w-4' />
+								Add Line Item
+							</Button>
+						</CardContent>
+					</Card>
+
+					{/* Invoice Details */}
+					<Card>
+						<CardHeader>
+							<CardTitle>Invoice Details</CardTitle>
+						</CardHeader>
+						<CardContent className='space-y-4'>
+							<TextField
+								control={form.control}
+								name='tax'
+								type='number'
+								label='Tax Rate (%)'
+								placeholder='0'
+								min={0}
+								max={100}
+								step={0.01}
+							/>
+
+							<TextField
+								control={form.control}
+								name='dueDate'
+								type='date'
+								label='Due Date'
+								placeholder='Select due date'
+							/>
+						</CardContent>
+					</Card>
+				</div>
+
+				{/* Sidebar - Invoice Summary */}
+				<div className='lg:col-span-1'>
+					<Card className='sticky top-4'>
+						<CardHeader>
+							<CardTitle>Invoice Summary</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<div className='space-y-2'>
+								<div className='flex justify-between text-sm'>
+									<span>Subtotal</span>
+									<span>{formatCentsToDollars(subtotal)}</span>
+								</div>
+								{taxAmount > 0 && (
+									<div className='flex justify-between text-sm'>
+										<span>Tax ({form.watch('tax')}%)</span>
+										<span>{formatCentsToDollars(taxAmount)}</span>
+									</div>
+								)}
+								<Separator />
+								<div className='flex justify-between font-bold'>
+									<span>Total</span>
+									<span>{formatCentsToDollars(total)}</span>
+								</div>
+							</div>
+
+							<div className='mt-6 space-y-2'>
+								<SubmitButton loading={isCreating} className='w-full'>
+									Create Invoice
+								</SubmitButton>
+								<Button
+									type='button'
+									variant='outline'
+									className='w-full'
+									onClick={() => router.push(`/${handle}/invoices`)}
+								>
+									Cancel
+								</Button>
+							</div>
+						</CardContent>
+					</Card>
+				</div>
+			</div>
+		</Form>
+	);
+}

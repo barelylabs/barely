@@ -24,6 +24,8 @@ import { flowRoute } from './flow.route';
 import { fmRoute } from './fm.route';
 import { formResponseRoute } from './form-response.route';
 import { genreRoute } from './genre.route';
+import { invoiceClientRoute } from './invoice-client.route';
+import { invoiceRoute } from './invoice.route';
 import { landingPageRoute } from './landing-page.route';
 import { linkRoute } from './link.route';
 import { mailchimpRoute } from './mailchimp.route';
@@ -64,6 +66,8 @@ export const appRouter = createTRPCRouter({
 	fm: fmRoute,
 	formResponse: formResponseRoute,
 	genre: genreRoute,
+	invoiceClient: invoiceClientRoute,
+	invoice: invoiceRoute,
 	landingPage: landingPageRoute,
 	link: linkRoute,
 	mixtape: mixtapeRoute,

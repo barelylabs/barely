@@ -60,6 +60,7 @@ export const libEnv = createEnv({
 		NEXTAUTH_SECRET: z.string(),
 		OPENAI_API_KEY: z.string(),
 		OPENAI_ORG_ID: z.string(),
+		PLATFORM_FEE_PERCENTAGE: z.coerce.number().min(0).max(1).default(0.005), // Default 0.5%
 		PUSHER_APP_SECRET: z.string(),
 		RATE_LIMIT_RECORD_CART_EVENT: rateLimitSchema,
 		RATE_LIMIT_RECORD_LINK_CLICK: rateLimitSchema,

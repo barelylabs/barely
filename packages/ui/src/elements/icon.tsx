@@ -159,6 +159,7 @@ import {
 	QrCode,
 	Radio,
 	RadioTower,
+	Receipt,
 	RectangleHorizontal,
 	RectangleVertical,
 	Redo,
@@ -301,6 +302,7 @@ export const Icon = {
 	click: MousePointerClick,
 	clipboard: Clipboard,
 	clipboardCopied: ClipboardCheck,
+	clock: Clock,
 	close: X,
 	code: Code,
 	codeClosed: Code2,
@@ -443,6 +445,7 @@ export const Icon = {
 	qr: QrCode,
 
 	radio: Radio,
+	receipt: Receipt,
 	rectangleHorizontal: RectangleHorizontal,
 	rectangleVertical: RectangleVertical,
 	redo: Redo,

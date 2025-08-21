@@ -336,6 +336,7 @@ export const cartRoute = {
 					),
 					confirm: true, // this will immediately attempt to charge the customer
 					metadata: {
+						paymentType: 'cart',
 						cartId: cart.id,
 						preChargeCartStage: 'upsellCreated',
 					},

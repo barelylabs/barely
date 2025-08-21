@@ -35,6 +35,11 @@ export function getBaseUrl(app: (typeof APPS)[number], absolute = false) {
 				devPort =
 					authEnv.NEXT_PUBLIC_FM_DEV_PORT ?? raise('NEXT_PUBLIC_FM_DEV_PORT not found');
 				break;
+			case 'invoice':
+				devPort =
+					authEnv.NEXT_PUBLIC_INVOICE_DEV_PORT ??
+					raise('NEXT_PUBLIC_INVOICE_DEV_PORT not found');
+				break;
 			case 'link':
 				devPort =
 					authEnv.NEXT_PUBLIC_LINK_DEV_PORT ??
@@ -90,6 +95,9 @@ export function getBaseUrl(app: (typeof APPS)[number], absolute = false) {
 			break;
 		case 'fm':
 			baseUrl = authEnv.NEXT_PUBLIC_FM_BASE_URL;
+			break;
+		case 'invoice':
+			baseUrl = authEnv.NEXT_PUBLIC_INVOICE_BASE_URL;
 			break;
 		case 'link':
 			baseUrl = authEnv.NEXT_PUBLIC_LINK_BASE_URL;

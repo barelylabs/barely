@@ -40,8 +40,83 @@ export async function POST(req: NextRequest) {
 		case 'charge.succeeded': {
 			const charge = event.data.object;
 
-			await handleStripeConnectChargeSuccess(charge);
+			// Import the metadata schema and route based on payment type
+			const { stripeConnectChargeMetadataSchema } = await import(
+				'@barely/validators/schemas'
+			);
 
+			try {
+				const metadata = stripeConnectChargeMetadataSchema.parse(charge.metadata);
+
+				switch (metadata.paymentType) {
+					case 'cart': {
+						await handleStripeConnectChargeSuccess(charge, metadata);
+						break;
+					}
+					case 'invoice': {
+						const { handleStripeInvoiceChargeSuccess } = await import(
+							'@barely/lib/functions/stripe-connect.fns'
+						);
+						await handleStripeInvoiceChargeSuccess(charge, metadata);
+						break;
+					}
+					default:
+						console.log('Unknown payment type in metadata:', metadata);
+				}
+			} catch (error) {
+				console.log('Error parsing charge metadata:', error);
+				console.log('Charge metadata:', charge.metadata);
+				// For backward compatibility, try the old format
+				await handleStripeConnectChargeSuccess(charge);
+			}
+
+			break;
+		}
+
+		case 'account.updated': {
+			const account = event.data.object;
+			console.log('🔔 Stripe Connect account updated:', account.id);
+
+			const { handleStripeConnectAccountUpdated } = await import(
+				'@barely/lib/functions/stripe-connect.fns'
+			);
+			await handleStripeConnectAccountUpdated(account);
+			break;
+		}
+
+		case 'account.application.deauthorized': {
+			const account = event.data.object;
+			console.log('🔔 Stripe Connect account deauthorized:', account.id);
+
+			const { handleStripeConnectAccountDeauthorized } = await import(
+				'@barely/lib/functions/stripe-connect.fns'
+			);
+			await handleStripeConnectAccountDeauthorized(account);
+			break;
+		}
+
+		case 'payment_intent.succeeded': {
+			const paymentIntent = event.data.object;
+			console.log('🔔 Payment intent succeeded:', paymentIntent.id);
+
+			// Check if this payment intent has metadata indicating it's from our platform
+			if (paymentIntent.metadata && 'paymentType' in paymentIntent.metadata) {
+				const { handleStripePaymentIntentSuccess } = await import(
+					'@barely/lib/functions/stripe-connect.fns'
+				);
+				await handleStripePaymentIntentSuccess(paymentIntent);
+			}
+			break;
+		}
+
+		case 'payout.failed': {
+			const payout = event.data.object;
+			console.log('🔔 Payout failed:', payout.id);
+
+			const { handleStripePayoutFailed } = await import(
+				'@barely/lib/functions/stripe-connect.fns'
+			);
+			await handleStripePayoutFailed(payout);
 			break;
 		}
 

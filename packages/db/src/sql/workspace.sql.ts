@@ -5,6 +5,7 @@ import {
 	integer,
 	pgTable,
 	text,
+	timestamp,
 	uniqueIndex,
 	varchar,
 } from 'drizzle-orm/pg-core';
@@ -102,6 +103,20 @@ export const Workspaces = pgTable(
 		stripeConnectChargesEnabled_devMode: boolean(
 			'stripeConnectChargesEnabled_devMode',
 		).default(false),
+
+		// Stripe Connect status tracking
+		stripeConnectOnboardingStartedAt: timestamp('stripeConnectOnboardingStartedAt'),
+		stripeConnectDetailsSubmitted: boolean('stripeConnectDetailsSubmitted').default(
+			false,
+		),
+		stripeConnectDetailsSubmitted_devMode: boolean(
+			'stripeConnectDetailsSubmitted_devMode',
+		).default(false),
+		stripeConnectPayoutsEnabled: boolean('stripeConnectPayoutsEnabled').default(false),
+		stripeConnectPayoutsEnabled_devMode: boolean(
+			'stripeConnectPayoutsEnabled_devMode',
+		).default(false),
+		stripeConnectLastStatusCheck: timestamp('stripeConnectLastStatusCheck'),
 
 		billingCycleStart: integer('billingCycleStart'),
 		plan: varchar('plan', {
