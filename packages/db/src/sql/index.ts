@@ -10,6 +10,7 @@ export * from './audience-interest.sql';
 export * from './audience-vid-views.sql';
 export * from './audience.sql';
 export * from './bio.sql';
+export * from './brand-kit.sql';
 export * from './campaign.sql';
 export * from './cart-funnel.sql';
 export * from './cart.sql';

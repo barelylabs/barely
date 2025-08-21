@@ -7,15 +7,17 @@ import { FmLinks, FmPages } from '@barely/db/sql/fm.sql';
 import { sqlAnd, sqlStringContains } from '@barely/db/utils';
 import { uploadFileFromUrl } from '@barely/files/upload-from-url';
 import { getFileKey } from '@barely/files/utils';
-import { newId, raise, sanitizeKey } from '@barely/utils';
+import { newId, raiseTRPCError, sanitizeKey } from '@barely/utils';
 import {
 	createFmPageSchema,
 	selectWorkspaceFmPagesSchema,
 	updateFmPageSchema,
 } from '@barely/validators';
+import { tasks, waitUntil } from '@trigger.dev/sdk/v3';
 import { and, asc, desc, eq, gt, inArray, isNull, lt, notInArray, or } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
+import type { generateFileBlurHash } from '../../trigger';
 import { libEnv } from '../../../env';
 import { workspaceProcedure } from '../trpc';
 
@@ -59,6 +61,18 @@ export const fmRoute = {
 							createdAt: nextFmPage.createdAt,
 						}
 					:	undefined;
+			}
+
+			// check if cover art has blur hash
+			for (const fmPage of fmPages) {
+				if (fmPage.coverArt && !fmPage.coverArt.blurDataUrl) {
+					waitUntil(
+						tasks.trigger<typeof generateFileBlurHash>('generate-file-blur-hash', {
+							fileId: fmPage.coverArt.id,
+							s3Key: fmPage.coverArt.s3Key,
+						}),
+					);
+				}
 			}
 
 			return {
@@ -139,7 +153,8 @@ export const fmRoute = {
 				.insert(FmPages)
 				.values(fmPageData)
 				.returning();
-			const fmPage = fmPages[0] ?? raise('Failed to create fm page');
+			const fmPage =
+				fmPages[0] ?? raiseTRPCError({ message: 'Failed to create fm page' });
 
 			const fmLinks = input.links.map((link, index) => ({
 				...link,
@@ -210,7 +225,7 @@ export const fmRoute = {
 				)
 				.returning();
 
-			return updatedFmPage[0] ?? raise('Failed to archive fm page');
+			return updatedFmPage[0] ?? raiseTRPCError({ message: 'Failed to archive fm page' });
 		}),
 
 	delete: workspaceProcedure
@@ -224,6 +239,6 @@ export const fmRoute = {
 				)
 				.returning();
 
-			return updatedFmPage[0] ?? raise('Failed to delete fm page');
+			return updatedFmPage[0] ?? raiseTRPCError({ message: 'Failed to delete fm page' });
 		}),
 } satisfies TRPCRouterRecord;

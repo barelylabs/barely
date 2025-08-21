@@ -5,6 +5,7 @@ import { fileSearchParamsSchema } from '@barely/validators';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllMedia } from '~/app/[handle]/media/_components/all-media';
 import { UploadMediaButton } from '~/app/[handle]/media/_components/upload-media-button';
@@ -37,11 +38,12 @@ export default async function MediaLibraryPage({
 	return (
 		<HydrateClient>
 			<DashContentHeader title='Media Library' button={<UploadMediaButton />} />
-
-			<Suspense fallback={<GridListSkeleton />}>
-				<AllMedia />
-				<UploadMediaModal />
-			</Suspense>
+			<DashContent>
+				<Suspense fallback={<GridListSkeleton />}>
+					<AllMedia />
+					<UploadMediaModal />
+				</Suspense>
+			</DashContent>
 		</HydrateClient>
 	);
 }

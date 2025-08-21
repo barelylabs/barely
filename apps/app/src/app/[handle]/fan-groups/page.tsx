@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { fanGroupSearchParamsSchema } from '@barely/validators';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllFanGroups } from '~/app/[handle]/fan-groups/_components/all-fan-groups';
 import { ArchiveOrDeleteFanGroupModal } from '~/app/[handle]/fan-groups/_components/archive-or-delete-fan-group-modal';
@@ -41,18 +42,20 @@ export default async function FanGroupsPage({
 	return (
 		<HydrateClient>
 			<DashContentHeader title='Fan Groups' button={<CreateFanGroupButton />} />
-			<FanGroupFilters />
-			<Suspense fallback={<div>Loading...</div>}>
-				<AllFanGroups />
-			</Suspense>
+			<DashContent>
+				<FanGroupFilters />
+				<Suspense fallback={<div>Loading...</div>}>
+					<AllFanGroups />
+				</Suspense>
 
-			<CreateOrUpdateFanGroupModal mode='create' />
-			<CreateOrUpdateFanGroupModal mode='update' />
+				<CreateOrUpdateFanGroupModal mode='create' />
+				<CreateOrUpdateFanGroupModal mode='update' />
 
-			<ArchiveOrDeleteFanGroupModal mode='archive' />
-			<ArchiveOrDeleteFanGroupModal mode='delete' />
+				<ArchiveOrDeleteFanGroupModal mode='archive' />
+				<ArchiveOrDeleteFanGroupModal mode='delete' />
 
-			<FanGroupHotkeys />
+				<FanGroupHotkeys />
+			</DashContent>
 		</HydrateClient>
 	);
 }

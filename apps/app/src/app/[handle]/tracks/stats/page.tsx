@@ -7,6 +7,7 @@ import { ComparisonTableSkeleton } from '@barely/ui/components/comparison-table-
 import { StatsCardsSkeleton } from '@barely/ui/components/stats-cards-skeleton';
 import { TimeseriesSkeleton } from '@barely/ui/components/timeseries-skeleton';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { TrackComparisonTable } from '~/app/[handle]/tracks/stats/track-comparison-table';
 import { TrackStatHeader } from '~/app/[handle]/tracks/stats/track-stat-header';
@@ -64,32 +65,34 @@ export default async function TrackStatsPage({
 	return (
 		<HydrateClient>
 			<DashContentHeader title='Track Stats' />
-			<div className='flex flex-col gap-6'>
-				{/* Unified filter bar */}
-				{/* <Card className='p-4'>
-					<div className='flex flex-row items-center gap-4'>
-						<div className='flex-1'>
-							<TrackSelector />
+			<DashContent>
+				<div className='flex flex-col gap-6'>
+					{/* Unified filter bar */}
+					{/* <Card className='p-4'>
+						<div className='flex flex-row items-center gap-4'>
+							<div className='flex-1'>
+								<TrackSelector />
+							</div>
 						</div>
-					</div>
-				</Card> */}
-				<TrackStatHeader />
+					</Card> */}
+					<TrackStatHeader />
 
-				{/* Stats cards - always visible */}
-				<Suspense fallback={<StatsCardsSkeleton />}>
-					<TrackStatsCards />
-				</Suspense>
+					{/* Stats cards - always visible */}
+					<Suspense fallback={<StatsCardsSkeleton />}>
+						<TrackStatsCards />
+					</Suspense>
 
-				{/* Chart area */}
-				<Suspense fallback={<TimeseriesSkeleton />}>
-					<TrackTimeseries />
-				</Suspense>
+					{/* Chart area */}
+					<Suspense fallback={<TimeseriesSkeleton />}>
+						<TrackTimeseries />
+					</Suspense>
 
-				{/* Comparison table - visible for multiple tracks */}
-				<Suspense fallback={<ComparisonTableSkeleton />}>
-					<TrackComparisonTable />
-				</Suspense>
-			</div>
+					{/* Comparison table - visible for multiple tracks */}
+					<Suspense fallback={<ComparisonTableSkeleton />}>
+						<TrackComparisonTable />
+					</Suspense>
+				</div>
+			</DashContent>
 		</HydrateClient>
 	);
 }

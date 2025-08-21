@@ -75,11 +75,11 @@ function Modal({
 				dismissible={dismissable}
 				shouldScaleBackground
 			>
-				<Drawer.Overlay className='fixed inset-0 z-40 bg-muted bg-opacity-10 backdrop-blur' />
+				<Drawer.Overlay className='fixed inset-0 z-50 bg-muted bg-opacity-10 backdrop-blur' />
 				<Drawer.Portal>
 					<Drawer.Content
 						className={cn(
-							'fixed bottom-0 left-0 right-0 z-50 mt-24 h-fit rounded-t-[10-px] border-t border-border bg-background',
+							'fixed bottom-0 left-0 right-0 z-[60] mt-24 h-fit rounded-t-[10-px] border-t border-border bg-background',
 							props.className,
 						)}
 					>
@@ -112,12 +112,12 @@ function Modal({
 			<Dialog.Portal>
 				<Dialog.Overlay
 					id='modal-backdrop' // for detecting when there's an active opened modal
-					className='animate-fade-in fixed inset-0 z-40 bg-slate-100 bg-opacity-20 backdrop-blur-md dark:bg-slate-800 dark:bg-opacity-80'
+					className='animate-fade-in fixed inset-0 z-50 bg-slate-100 bg-opacity-20 backdrop-blur-md dark:bg-slate-800 dark:bg-opacity-80'
 				/>
 
 				<Dialog.Content
 					className={cn(
-						'animate-scale-in fixed inset-0 z-40 m-auto flex h-fit max-h-[90vh] w-full max-w-screen-lg flex-col overflow-auto border border-border bg-inherit p-0 shadow-xl sm:rounded-2xl md:overflow-hidden',
+						'animate-scale-in fixed inset-0 z-[60] m-auto flex h-fit max-h-[90vh] w-full max-w-screen-md flex-col overflow-auto border border-border bg-inherit p-0 shadow-xl sm:rounded-2xl md:overflow-hidden',
 						'focus:outline-none',
 						props.className,
 					)}
@@ -125,6 +125,57 @@ function Modal({
 						if (onAutoFocus) {
 							e.preventDefault();
 							onAutoFocus();
+						}
+					}}
+					onPointerDownOutside={e => {
+						// Prevent closing when clicking on password manager overlays
+						const target = e.target as HTMLElement;
+
+						// Check if the click target is a password manager extension element
+						// Common selectors for popular password managers
+						if (
+							target.closest('[data-lastpass-icon-root]') || // LastPass
+							target.closest('[data-1password]') || // 1Password
+							target.closest('[data-bitwarden-watching]') || // Bitwarden
+							target.closest('[data-dashlane-label]') || // Dashlane
+							target.closest('com-1password-button') || // 1Password button element
+							target.closest('div[style*="z-index: 2147483"]') || // Common high z-index for extensions
+							target.tagName === 'COM-1PASSWORD-BUTTON' || // 1Password custom element
+							target.id.includes('com-1password') || // 1Password elements
+							target.className.includes('password-manager') // Generic class some extensions use
+						) {
+							e.preventDefault();
+							return;
+						}
+
+						// Also prevent closing if preventDefaultClose is set and not a close button click
+						if (props.preventDefaultClose) {
+							e.preventDefault();
+							return;
+						}
+					}}
+					onInteractOutside={e => {
+						// Additional check for interact events
+						const target = e.target as HTMLElement;
+
+						if (
+							target.closest('[data-lastpass-icon-root]') ||
+							target.closest('[data-1password]') ||
+							target.closest('[data-bitwarden-watching]') ||
+							target.closest('[data-dashlane-label]') ||
+							target.closest('com-1password-button') ||
+							target.closest('div[style*="z-index: 2147483"]') ||
+							target.tagName === 'COM-1PASSWORD-BUTTON' ||
+							target.id.includes('com-1password') ||
+							target.className.includes('password-manager')
+						) {
+							e.preventDefault();
+							return;
+						}
+
+						if (props.preventDefaultClose) {
+							e.preventDefault();
+							return;
 						}
 					}}
 					tabIndex={undefined} // fixme: when tabIndex was set to -1 (default by radix), the modal would focus between every input on tab. This is a temporary fix
@@ -161,19 +212,32 @@ interface ModalHeaderProps {
 	title?: ReactNode;
 	subtitle?: ReactNode;
 	children?: ReactNode;
+	justify?: 'center' | 'left';
 }
 
 function ModalHeader(props: ModalHeaderProps) {
 	const IconComponent = props.icon ? Icon[props.icon] : null;
 
 	return (
-		<div className='z-10 flex flex-col items-center justify-center gap-3 border-b border-border bg-background px-6 py-6 text-center sm:px-10 md:sticky md:top-0'>
+		<div
+			className={cn(
+				'z-10 flex flex-col items-center justify-start gap-3 border-b border-border bg-background px-6 py-6 text-center sm:px-10 md:sticky md:top-0',
+				props.justify === 'left' && 'items-start',
+			)}
+		>
 			{/* <div className='flex flex-row items-center justify-center gap-3'></div> */}
-			{props.iconOverride ?? (IconComponent && <IconComponent className='h-10 w-10' />)}
+			<div
+				className={cn(
+					'flex',
+					props.justify === 'left' ? 'flex-row items-center gap-3' : 'flex-col',
+				)}
+			>
+				{props.iconOverride ?? (IconComponent && <IconComponent className='h-8 w-8' />)}
 
-			{props.title ?
-				<H size='4'>{props.title}</H>
-			:	null}
+				{props.title ?
+					<H size='5'>{props.title}</H>
+				:	null}
+			</div>
 			{props.subtitle ?
 				<Text variant='sm/normal'>{props.subtitle}</Text>
 			:	null}

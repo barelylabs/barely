@@ -38,15 +38,17 @@ export function ArchiveOrDeleteEmailTemplateModal({
 		setShowModal(false);
 	}, [queryClient, trpc, setShowModal]);
 
-	const { mutate: archiveEmailTemplates, isPending: isPendingArchive } = useMutation({
-		...trpc.emailTemplate.archive.mutationOptions(),
-		onSuccess,
-	});
+	const { mutate: archiveEmailTemplates, isPending: isPendingArchive } = useMutation(
+		trpc.emailTemplate.archive.mutationOptions({
+			onSuccess,
+		}),
+	);
 
-	const { mutate: deleteEmailTemplates, isPending: isPendingDelete } = useMutation({
-		...trpc.emailTemplate.delete.mutationOptions(),
-		onSuccess,
-	});
+	const { mutate: deleteEmailTemplates, isPending: isPendingDelete } = useMutation(
+		trpc.emailTemplate.delete.mutationOptions({
+			onSuccess,
+		}),
+	);
 
 	if (!lastSelectedItem) return null;
 

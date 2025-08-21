@@ -1,6 +1,12 @@
 // Apps
 export * from './app.constants';
 
+// Bio
+export * from './bio.constants';
+
+// Brand Kit
+export * from './brand-kit.constants';
+
 // Campaign
 export * from './campaign.settings';
 

@@ -796,3 +796,211 @@ export const pipe_pageTopMetaPlacements = tinybird.buildPipe({
 		sessionMetaPlacement: z.string(),
 	}),
 });
+
+// Bio analytics pipes
+export const pipe_bioTimeseries = tinybird.buildPipe({
+	pipe: 'v2_bio_timeseries',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		start: z.string(),
+		bio_views: z.number(),
+		bio_buttonClicks: z.number(),
+		bio_emailCaptures: z.number(),
+		ctr: z.number(),
+		email_conversion_rate: z.number(),
+		unique_sessions: z.number(),
+		total_events: z.number(),
+	}),
+});
+
+export const pipe_bioButtonStats = tinybird.buildPipe({
+	pipe: 'v2_bio_buttonStats',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		buttonUrl: z.string().nullable(),
+		clicks: z.number(),
+		totalEvents: z.number(),
+	}),
+});
+
+export const pipe_bioTopBrowsers = tinybird.buildPipe({
+	pipe: 'v2_bio_browsers',
+	parameters: stdWebEventPipeParamsSchema,
+	data: topBrowsersPipeDataSchema,
+});
+
+export const pipe_bioTopDevices = tinybird.buildPipe({
+	pipe: 'v2_bio_devices',
+	parameters: stdWebEventPipeParamsSchema,
+	data: topDevicesPipeDataSchema,
+});
+
+export const pipe_bioTopOs = tinybird.buildPipe({
+	pipe: 'v2_bio_os',
+	parameters: stdWebEventPipeParamsSchema,
+	data: topOsPipeDataSchema,
+});
+
+export const pipe_bioTopCities = tinybird.buildPipe({
+	pipe: 'v2_bio_cities',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		bio_views: z.number(),
+		bio_buttonClicks: z.number(),
+		bio_emailCaptures: z.number(),
+		city: z.string(),
+		region: z.string(),
+		country: z.string(),
+	}),
+});
+
+export const pipe_bioTopCountries = tinybird.buildPipe({
+	pipe: 'v2_bio_countries',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		bio_views: z.number(),
+		bio_buttonClicks: z.number(),
+		bio_emailCaptures: z.number(),
+		country: z.string(),
+	}),
+});
+
+export const pipe_bioTopReferers = tinybird.buildPipe({
+	pipe: 'v2_bio_referers',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		bio_views: z.number(),
+		bio_buttonClicks: z.number(),
+		bio_emailCaptures: z.number(),
+		referer: z.string(),
+	}),
+});
+
+export const pipe_bioTopRegions = tinybird.buildPipe({
+	pipe: 'v2_bio_regions',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		bio_views: z.number(),
+		bio_buttonClicks: z.number(),
+		bio_emailCaptures: z.number(),
+		region: z.string(),
+		country: z.string(),
+	}),
+});
+
+// New bio analytics pipes for production dashboards
+export const pipe_bioConversionFunnel = tinybird.buildPipe({
+	pipe: 'v2_bio_conversion_funnel',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		total_sessions: z.number(),
+		sessions_with_views: z.number(),
+		sessions_with_clicks: z.number(),
+		sessions_with_emails: z.number(),
+		total_views: z.number(),
+		total_clicks: z.number(),
+		total_email_captures: z.number(),
+		view_to_click_rate: z.number(),
+		view_to_email_rate: z.number(),
+		click_to_email_rate: z.number(),
+		clicks_per_view: z.number(),
+		avg_views_per_session: z.number(),
+		avg_clicks_per_session: z.number(),
+		bounced_sessions: z.number(),
+		bounce_rate: z.number(),
+	}),
+});
+
+export const pipe_bioEngagementMetrics = tinybird.buildPipe({
+	pipe: 'v2_bio_engagement_metrics',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		total_sessions: z.number(),
+		avg_session_duration: z.number(),
+		median_session_duration: z.number(),
+		max_session_duration: z.number(),
+		avg_clicks_per_session: z.number(),
+		overall_ctr: z.number(),
+		session_click_rate: z.number(),
+		avg_emails_per_session: z.number(),
+		session_email_rate: z.number(),
+		engagement_score: z.number(),
+		avg_events_per_session: z.number(),
+		quick_bounces: z.number(),
+		sessions_without_clicks: z.number(),
+		quick_bounce_rate: z.number(),
+		no_click_rate: z.number(),
+		sessions_0_10s: z.number(),
+		sessions_10_30s: z.number(),
+		sessions_30_60s: z.number(),
+		sessions_1_3m: z.number(),
+		sessions_over_3m: z.number(),
+	}),
+});
+
+export const pipe_bioBlockPerformance = tinybird.buildPipe({
+	pipe: 'v2_bio_block_performance',
+	parameters: stdWebEventPipeParamsSchema.extend({
+		blockType: z.string().optional(),
+	}),
+	data: z.object({
+		block_type: z.string().nullable(),
+		block_position: z.number().nullable(),
+		block_id: z.string().nullable(),
+		unique_sessions: z.number(),
+		total_interactions: z.number(),
+		total_clicks: z.number(),
+		sessions_with_clicks: z.number(),
+		block_click_rate: z.number(),
+		total_email_captures: z.number(),
+		sessions_with_emails: z.number(),
+		marketing_opt_ins: z.number(),
+		marketing_opt_in_rate: z.number(),
+		avg_position: z.number(),
+		position_category: z.string(),
+	}),
+});
+
+export const pipe_bioLinkPerformance = tinybird.buildPipe({
+	pipe: 'v2_bio_link_performance',
+	parameters: stdWebEventPipeParamsSchema.extend({
+		linkId: z.string().optional(),
+		blockId: z.string().optional(),
+		animation: z.string().optional(),
+	}),
+	data: z.object({
+		link_id: z.string().nullable(),
+		link_text: z.string().nullable(),
+		destination_url: z.string().nullable(),
+		link_position: z.number().nullable(),
+		animation_type: z.string().nullable(),
+		block_id: z.string().nullable(),
+		block_type: z.string().nullable(),
+		block_position: z.number().nullable(),
+		total_clicks: z.number(),
+		unique_sessions: z.number(),
+		position_in_block: z.string(),
+		mobile_clicks: z.number(),
+		desktop_clicks: z.number(),
+		tablet_clicks: z.number(),
+		mobile_click_share: z.number(),
+	}),
+});
+
+export const pipe_bioAnimationPerformance = tinybird.buildPipe({
+	pipe: 'v2_bio_animation_performance',
+	parameters: stdWebEventPipeParamsSchema,
+	data: z.object({
+		animation: z.string().nullable(),
+		links_with_animation: z.number(),
+		total_clicks: z.number(),
+		total_unique_sessions: z.number(),
+		avg_clicks_per_link: z.number(),
+		avg_sessions_per_link: z.number(),
+		improvement_over_baseline_percent: z.number(),
+		click_variance: z.number(),
+		click_std_dev: z.number(),
+		statistical_confidence: z.string(),
+		performance_rank: z.number(),
+	}),
+});

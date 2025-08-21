@@ -90,13 +90,14 @@ export function FlowUpdateForm(props: {
 		enabled: !!testFanId,
 	});
 
-	const { mutateAsync: updateFlow } = useMutation({
-		...trpc.flow.update.mutationOptions(),
-		onSuccess: () => {
-			setCurrentAsLastSaved();
-			toast('Flow updated');
-		},
-	});
+	const { mutateAsync: updateFlow } = useMutation(
+		trpc.flow.update.mutationOptions({
+			onSuccess: () => {
+				setCurrentAsLastSaved();
+				toast('Flow updated');
+			},
+		}),
+	);
 
 	const handleSubmit = async (data: z.infer<typeof updateFlowAndNodesSchema>) => {
 		console.log('metadata', data);
@@ -132,16 +133,17 @@ export function FlowUpdateForm(props: {
 		return console.log('res', res);
 	};
 
-	const { mutate: triggerTestFlow } = useMutation({
-		...trpc.flow.triggerTestFlow.mutationOptions(),
-		onSuccess: () => {
-			setTestPopoverOpen(false);
-			toast('Test flow triggered');
-		},
-		onError: error => {
-			toast(error.message);
-		},
-	});
+	const { mutate: triggerTestFlow } = useMutation(
+		trpc.flow.triggerTestFlow.mutationOptions({
+			onSuccess: () => {
+				setTestPopoverOpen(false);
+				toast('Test flow triggered');
+			},
+			onError: error => {
+				toast(error.message);
+			},
+		}),
+	);
 	const [testPopoverOpen, setTestPopoverOpen] = useState(false);
 
 	const handleTriggerTestFlow = (data: z.infer<typeof updateFlowAndNodesSchema>) => {

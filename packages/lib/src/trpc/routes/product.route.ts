@@ -5,12 +5,13 @@ import { dbPool } from '@barely/db/pool';
 import { _Files_To_Products__Images } from '@barely/db/sql/file.sql';
 import { ApparelSizes, Products } from '@barely/db/sql/product.sql';
 import { sqlAnd, sqlStringContains } from '@barely/db/utils';
-import { newId, raise } from '@barely/utils';
+import { newId, raiseTRPCError } from '@barely/utils';
 import {
 	createProductSchema,
 	selectWorkspaceProductsSchema,
 	updateProductSchema,
 } from '@barely/validators';
+import { tasks, waitUntil } from '@trigger.dev/sdk/v3';
 import {
 	and,
 	asc,
@@ -26,6 +27,7 @@ import {
 } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
+import type { generateFileBlurHash } from '../../trigger';
 import { workspaceProcedure } from '../trpc';
 
 export const productRoute = {
@@ -83,6 +85,18 @@ export const productRoute = {
 				};
 			}) satisfies NormalizedProductWith_Images[];
 
+			// check if product images have blur hash
+			for (const product of normalizedProducts) {
+				if (product.images[0] && !product.images[0].blurDataUrl) {
+					waitUntil(
+						tasks.trigger<typeof generateFileBlurHash>('generate-file-blur-hash', {
+							fileId: product.images[0].id,
+							s3Key: product.images[0].s3Key,
+						}),
+					);
+				}
+			}
+
 			return {
 				products: normalizedProducts.slice(0, limit),
 				nextCursor,
@@ -126,7 +140,7 @@ export const productRoute = {
 				);
 			}
 
-			return product[0] ?? raise('Failed to create product');
+			return product[0] ?? raiseTRPCError({ message: 'Failed to create product' });
 		}),
 
 	update: workspaceProcedure
@@ -205,7 +219,7 @@ export const productRoute = {
 					});
 			}
 
-			return updatedProduct[0] ?? raise('Failed to update product');
+			return updatedProduct[0] ?? raiseTRPCError({ message: 'Failed to update product' });
 		}),
 
 	archive: workspaceProcedure
@@ -221,7 +235,9 @@ export const productRoute = {
 					),
 				)
 				.returning();
-			return archivedProduct[0] ?? raise('Failed to archive product');
+			return (
+				archivedProduct[0] ?? raiseTRPCError({ message: 'Failed to archive product' })
+			);
 		}),
 
 	delete: workspaceProcedure
@@ -237,6 +253,6 @@ export const productRoute = {
 					),
 				)
 				.returning();
-			return updatedProduct[0] ?? raise('Failed to delete product');
+			return updatedProduct[0] ?? raiseTRPCError({ message: 'Failed to delete product' });
 		}),
 } satisfies TRPCRouterRecord;

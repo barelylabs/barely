@@ -1,5 +1,6 @@
 // Utility hooks
 export { useCopy } from './use-copy';
+export { useCurrentApp } from './use-current-app';
 export { useDebounce } from './use-debounce';
 export { useDebounceValue } from './use-debounce-value';
 export { useDebouncedCallback } from './use-debounced-callback';
@@ -63,6 +64,7 @@ export { useProducts } from './use-products';
 export { useWebDomains } from './use-web-domains';
 
 // Stat filter hooks
+export * from './use-bio-stat-filters';
 export * from './use-cart-stat-filters';
 export * from './use-fm-stat-filters';
 export * from './use-link-stat-filters';

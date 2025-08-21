@@ -14,6 +14,7 @@ import * as audienceInterestSql from './sql/audience-interest.sql';
 import * as audienceVidViewsSql from './sql/audience-vid-views.sql';
 import * as audienceSql from './sql/audience.sql';
 import * as bioSql from './sql/bio.sql';
+import * as brandKitSql from './sql/brand-kit.sql';
 import * as campaignSql from './sql/campaign.sql';
 import * as funnelSql from './sql/cart-funnel.sql';
 import * as cartSql from './sql/cart.sql';
@@ -74,6 +75,7 @@ export const dbSchema = {
 	...audienceInterestSql,
 	...audienceVidViewsSql,
 	...bioSql,
+	...brandKitSql,
 	...campaignSql,
 	...cartSql,
 	...domainSql,

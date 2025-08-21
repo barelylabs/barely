@@ -9,7 +9,7 @@ import {
 	getTransparentLinkDataFromUrl,
 	isValidUrl,
 	newId,
-	raise,
+	raiseTRPCError,
 	sanitizeKey,
 } from '@barely/utils';
 import {
@@ -135,7 +135,7 @@ export const linkRoute = {
 		const existingLink =
 			(await dbPool(ctx.pool).query.Links.findFirst({
 				where: and(eq(Links.workspaceId, ctx.workspace.id), eq(Links.id, input.id)),
-			})) ?? raise('Link not found');
+			})) ?? raiseTRPCError({ message: 'Link not found' });
 
 		if (existingLink.transparent === true && input.transparent === false) {
 			throw new TRPCError({

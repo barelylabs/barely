@@ -1,0 +1,85 @@
+DESCRIPTION >
+	Engagement metrics for bio pages including CTR, session duration, and engagement score
+
+TOKEN "v2_bio_engagement_metrics_endpoint_read_1531" READ
+
+NODE bio_engagement_metrics
+SQL >
+
+    %
+        WITH sessions_data AS (
+            SELECT
+                sessionId,
+                min(timestamp) as session_start,
+                max(timestamp) as session_end,
+                dateDiff('second', session_start, session_end) as session_duration_seconds,
+                countIf(type = 'bio/view') as views_in_session,
+                countIf(type = 'bio/buttonClick') as clicks_in_session,
+                countIf(type = 'bio/emailCapture') as emails_in_session,
+                count() as total_events_in_session,
+                -- Engagement score components
+                if(clicks_in_session > 0, 1, 0) as had_click,
+                if(emails_in_session > 0, 1, 0) as had_email,
+                if(session_duration_seconds > 30, 1, 0) as stayed_30s,
+                if(session_duration_seconds > 60, 1, 0) as stayed_60s,
+                if(clicks_in_session >= 3, 1, 0) as multiple_clicks
+            FROM barely_bio_events_mv
+            WHERE
+                workspaceId
+                = {{
+                    String(
+                        workspaceId,
+                        'ws_KvKq8bCN4KySE5Un',
+                        description="The ID of the workspace",
+                        required=True,
+                    )
+                }}
+                {% if defined(assetId) %} and assetId = {{ String(assetId) }} {% end %}
+                {% if defined(start) %} and timestamp >= toDateTime64({{ DateTime64(start, '2024-12-01 00:00:00.000') }}, 3) {% end %}
+                {% if defined(end) %} and timestamp <= toDateTime64({{ DateTime64(end, '2025-01-01 00:00:00.000') }}, 3) {% end %}
+                {% if defined(city) %} and city = {{ String(city) }} {% end %}
+                {% if defined(region) %} and region = {{ String(region) }} {% end %}
+                {% if defined(country) %} and country = {{ String(country) }} {% end %}
+                {% if defined(device) %} and device = {{ String(device) }} {% end %}
+                {% if defined(browser) %} and browser = {{ String(browser) }} {% end %}
+                {% if defined(os) %} and os = {{ String(os) }} {% end %}
+                {% if defined(referer) %} and referer = {{ String(referer) }} {% end %}
+                {% if defined(sessionReferer) %} and sessionReferer = {{ String(sessionReferer) }} {% end %}
+            GROUP BY sessionId
+        )
+        SELECT
+            count() as total_sessions,
+            avg(session_duration_seconds) as avg_session_duration,
+            median(session_duration_seconds) as median_session_duration,
+            max(session_duration_seconds) as max_session_duration,
+            -- Click-through metrics
+            avg(clicks_in_session) as avg_clicks_per_session,
+            sum(clicks_in_session) / sum(views_in_session) as overall_ctr,
+            countIf(clicks_in_session > 0) / count() as session_click_rate,
+            -- Email capture metrics
+            avg(emails_in_session) as avg_emails_per_session,
+            countIf(emails_in_session > 0) / count() as session_email_rate,
+            -- Engagement score (0-100)
+            avg(
+                (had_click * 20 + 
+                 had_email * 30 + 
+                 stayed_30s * 15 + 
+                 stayed_60s * 20 + 
+                 multiple_clicks * 15)
+            ) as engagement_score,
+            -- Session depth
+            avg(total_events_in_session) as avg_events_per_session,
+            -- Bounce metrics
+            countIf(views_in_session = 1 AND clicks_in_session = 0 AND session_duration_seconds < 10) as quick_bounces,
+            countIf(clicks_in_session = 0) as sessions_without_clicks,
+            quick_bounces / count() as quick_bounce_rate,
+            sessions_without_clicks / count() as no_click_rate,
+            -- Distribution metrics
+            countIf(session_duration_seconds <= 10) as sessions_0_10s,
+            countIf(session_duration_seconds > 10 AND session_duration_seconds <= 30) as sessions_10_30s,
+            countIf(session_duration_seconds > 30 AND session_duration_seconds <= 60) as sessions_30_60s,
+            countIf(session_duration_seconds > 60 AND session_duration_seconds <= 180) as sessions_1_3m,
+            countIf(session_duration_seconds > 180) as sessions_over_3m
+        FROM sessions_data
+
+TYPE endpoint

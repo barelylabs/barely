@@ -1,3 +1,4 @@
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import {
 	CartShippingAddress,
@@ -8,8 +9,10 @@ export default function CartSettingsPage() {
 	return (
 		<>
 			<DashContentHeader title='Cart' subtitle='Manage your cart settings.' />
-			<CartSupportEmail />
-			<CartShippingAddress />
+			<DashContent>
+				<CartSupportEmail />
+				<CartShippingAddress />
+			</DashContent>
 		</>
 	);
 }

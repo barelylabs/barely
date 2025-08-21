@@ -6,6 +6,7 @@ import { Fragment, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
+	useCurrentApp,
 	usePathnameEndsWith,
 	usePathnameMatchesCurrentGroup,
 	useWorkspace,
@@ -48,6 +49,7 @@ type SidebarNavItem = SidebarNavLink | SidebarNavGroup;
 export function SidebarNav() {
 	const pathname = usePathname();
 	const { workspace, handle, isPersonal } = useWorkspace();
+	const { isFmVariant, hasFeature } = useCurrentApp();
 
 	const workspaces = useWorkspaces();
 
@@ -60,113 +62,250 @@ export function SidebarNav() {
 
 	const navHistory = useAtomValue(navHistoryAtom);
 
-	const merchLinks: SidebarNavLink[] = [
-		{ title: 'products', icon: 'product', href: `/${handle}/products` },
-		{ title: 'carts', icon: 'cartFunnel', href: `/${handle}/carts` },
-		{ title: 'orders', icon: 'order', href: `/${handle}/orders` },
-	];
+	const merchLinks = useMemo<SidebarNavLink[]>(
+		() => [
+			{ title: 'products', icon: 'product', href: `/${handle}/products` },
+			{ title: 'carts', icon: 'cartFunnel', href: `/${handle}/carts` },
+			{ title: 'orders', icon: 'order', href: `/${handle}/orders` },
+		],
+		[handle],
+	);
 
-	const mediaLinks: SidebarNavLink[] = [
-		{ title: 'media', icon: 'media', href: `/${handle}/media` },
-		{ title: 'tracks', icon: 'music', href: `/${handle}/tracks` },
-		{ title: 'mixtapes', icon: 'mixtape', href: `/${handle}/mixtapes` },
-		// { title: 'spotify stats', icon: 'spotify', href: `/${handle}/spotify/stats` },
-	];
+	const mediaLinks = useMemo<SidebarNavLink[]>(
+		() => [
+			{ title: 'media', icon: 'media', href: `/${handle}/media` },
+			{ title: 'tracks', icon: 'music', href: `/${handle}/tracks` },
+			{ title: 'mixtapes', icon: 'mixtape', href: `/${handle}/mixtapes` },
+			// { title: 'spotify stats', icon: 'spotify', href: `/${handle}/spotify/stats` },
+		],
+		[handle],
+	);
 
-	const pageLinks: SidebarNavLink[] = [
-		{ title: 'links', icon: 'link', href: `/${handle}/links` },
-		{ title: 'fm', icon: 'fm', href: `/${handle}/fm` },
-		{ title: 'pages', icon: 'landingPage', href: `/${handle}/pages` },
-		{ title: 'press', icon: 'press', href: `/${handle}/press` },
-		{ title: 'vip', icon: 'vip', href: `/${handle}/vip/swaps` },
-	];
+	const pageLinks = useMemo<SidebarNavLink[]>(
+		() => [
+			{ title: 'links', icon: 'link', href: `/${handle}/links` },
+			{ title: 'fm', icon: 'fm', href: `/${handle}/fm` },
+			{ title: 'pages', icon: 'landingPage', href: `/${handle}/pages` },
+			{ title: 'press', icon: 'press', href: `/${handle}/press` },
+			{ title: 'vip', icon: 'vip', href: `/${handle}/vip/swaps` },
+		],
+		[handle],
+	);
 
-	const emailLinks: SidebarNavLink[] = [
-		{ title: 'templates', icon: 'email', href: `/${handle}/email-templates` },
-		{
-			title: 'template groups',
-			icon: 'emailTemplateGroup',
-			href: `/${handle}/email-template-groups`,
-		},
-	];
+	const emailLinks = useMemo<SidebarNavLink[]>(
+		() => [
+			{ title: 'templates', icon: 'email', href: `/${handle}/email-templates` },
+			{
+				title: 'template groups',
+				icon: 'emailTemplateGroup',
+				href: `/${handle}/email-template-groups`,
+			},
+		],
+		[handle],
+	);
 
-	const fanLinks: SidebarNavLink[] = [
-		{ title: 'fans', icon: 'fans', href: `/${handle}/fans` },
-		{ title: 'fan groups', icon: 'fanGroup', href: `/${handle}/fan-groups` },
-	];
+	const fanLinks = useMemo<SidebarNavLink[]>(
+		() => [
+			{ title: 'fans', icon: 'fans', href: `/${handle}/fans` },
+			{ title: 'fan groups', icon: 'fanGroup', href: `/${handle}/fan-groups` },
+		],
+		[handle],
+	);
 
-	const otherLinks: SidebarNavLink[] = [
-		{ title: 'flows', icon: 'flow', href: `/${handle}/flows` },
-		{ title: 'settings', icon: 'settings', href: `/${handle}/settings` },
-	];
+	const otherLinks = useMemo<SidebarNavLink[]>(
+		() => [
+			{ title: 'flows', icon: 'flow', href: `/${handle}/flows` },
+			{ title: 'settings', icon: 'settings', href: `/${handle}/settings` },
+		],
+		[handle],
+	);
 
-	const topMainLinks: SidebarNavItem[] = [
-		{
-			title: 'content',
-			links: mediaLinks,
-		},
-
-		{
-			title: 'destinations',
-			links: pageLinks,
-		},
-
-		{
-			title: 'merch',
-			links: merchLinks,
-		},
-		{
-			title: 'email',
-			links: emailLinks,
-		},
-		{
-			title: 'fans',
-			links: fanLinks,
-		},
-		{
-			title: 'other',
-			links: otherLinks,
-		},
-	];
-
-	const topSettingsLinks: SidebarNavItem[] = [
-		{ title: 'profile', icon: 'profile', href: `/${handle}/settings` },
-		{
-			title: isPersonal ? 'teams' : 'team',
-			icon: 'users',
-			href: `/${handle}/settings/team`,
-		},
-		{ title: 'socials', icon: 'socials', href: `/${handle}/settings/socials` },
-		{ title: 'streaming', icon: 'music', href: `/${handle}/settings/streaming` },
-		{ title: 'apps', icon: 'apps', href: `/${handle}/settings/apps` },
-		{
-			title: 'email',
-			icon: 'email',
-			href: `/${handle}/settings/email/domains`,
-			links: [
-				{ title: 'domains', href: `/${handle}/settings/email/domains` },
+	// Build navigation based on app variant
+	const topMainLinks: SidebarNavItem[] = useMemo(() => {
+		// For FM variant, show only FM-relevant navigation
+		if (isFmVariant) {
+			return [
 				{
-					title: 'addresses',
-					href: `/${handle}/settings/email/addresses`,
+					title: 'fm',
+					links: [{ title: 'fm', icon: 'fm', href: `/${handle}/fm` }],
 				},
-			],
-			hideLinksWhenNotActive: true,
-		},
-		{
-			title: 'domains',
-			icon: 'domain',
-			href: `/${handle}/settings/domains`,
-		},
-		{
-			title: 'remarketing',
-			icon: 'remarketing',
-			href: `/${handle}/settings/remarketing`,
-		},
-		{ title: 'vip', icon: 'vip', href: `/${handle}/settings/vip` },
-		{ title: 'cart', icon: 'cart', href: `/${handle}/settings/cart` },
-		{ title: 'payouts', icon: 'payouts', href: `/${handle}/settings/payouts` },
-		{ title: 'billing', icon: 'billing', href: `/${handle}/settings/billing` },
-	];
+				{
+					title: 'content',
+					links: [{ title: 'media', icon: 'media', href: `/${handle}/media` }],
+				},
+				{
+					title: 'other',
+					links: [{ title: 'settings', icon: 'settings', href: `/${handle}/settings` }],
+				},
+			];
+		}
+
+		// For full app, show everything
+		const allLinks: SidebarNavItem[] = [];
+
+		// Only add groups if they have features enabled
+		if (hasFeature('media') || hasFeature('tracks') || hasFeature('mixtapes')) {
+			allLinks.push({
+				title: 'content',
+				links: mediaLinks.filter(link => {
+					if (link.title === 'media') return hasFeature('media');
+					if (link.title === 'tracks') return hasFeature('tracks');
+					if (link.title === 'mixtapes') return hasFeature('mixtapes');
+					return true;
+				}),
+			});
+		}
+
+		if (
+			hasFeature('links') ||
+			hasFeature('fm') ||
+			hasFeature('bio-pages') ||
+			hasFeature('press-kits') ||
+			hasFeature('campaigns')
+		) {
+			allLinks.push({
+				title: 'destinations',
+				links: pageLinks.filter(link => {
+					if (link.title === 'links') return hasFeature('links');
+					if (link.title === 'fm') return hasFeature('fm');
+					if (link.title === 'pages') return hasFeature('bio-pages');
+					if (link.title === 'press') return hasFeature('press-kits');
+					if (link.title === 'vip') return hasFeature('campaigns');
+					return true;
+				}),
+			});
+		}
+
+		if (hasFeature('products')) {
+			allLinks.push({
+				title: 'merch',
+				links: merchLinks,
+			});
+		}
+
+		if (hasFeature('forms')) {
+			allLinks.push({
+				title: 'email',
+				links: emailLinks,
+			});
+		}
+
+		if (hasFeature('fans') || hasFeature('fan-group')) {
+			allLinks.push({
+				title: 'fans',
+				links: fanLinks.filter(link => {
+					if (link.title === 'fans') return hasFeature('fans');
+					if (link.title === 'fan groups') return hasFeature('fan-group');
+					return true;
+				}),
+			});
+		}
+
+		// Always show 'other' section with available items
+		const otherFilteredLinks = otherLinks.filter(link => {
+			if (link.title === 'flows') return hasFeature('analytics');
+			if (link.title === 'settings') return hasFeature('settings');
+			return true;
+		});
+
+		if (otherFilteredLinks.length > 0) {
+			allLinks.push({
+				title: 'other',
+				links: otherFilteredLinks,
+			});
+		}
+
+		return allLinks;
+	}, [
+		handle,
+		isFmVariant,
+		hasFeature,
+		mediaLinks,
+		pageLinks,
+		merchLinks,
+		emailLinks,
+		fanLinks,
+		otherLinks,
+	]);
+
+	const topSettingsLinks: SidebarNavItem[] = useMemo(() => {
+		// For FM variant, only show essential settings
+		if (isFmVariant) {
+			return [
+				{ title: 'profile', icon: 'profile', href: `/${handle}/settings` },
+				{ title: 'billing', icon: 'billing', href: `/${handle}/settings/billing` },
+			];
+		}
+
+		// For full app, show all settings based on features
+		const allSettingsLinks: SidebarNavItem[] = [
+			{ title: 'profile', icon: 'profile', href: `/${handle}/settings` },
+		];
+
+		if (hasFeature('team')) {
+			allSettingsLinks.push({
+				title: isPersonal ? 'teams' : 'team',
+				icon: 'users',
+				href: `/${handle}/settings/team`,
+			});
+		}
+
+		if (hasFeature('settings')) {
+			allSettingsLinks.push(
+				{ title: 'socials', icon: 'socials', href: `/${handle}/settings/socials` },
+				{ title: 'streaming', icon: 'music', href: `/${handle}/settings/streaming` },
+				{ title: 'apps', icon: 'apps', href: `/${handle}/settings/apps` },
+				{
+					title: 'email',
+					icon: 'email',
+					href: `/${handle}/settings/email/domains`,
+					links: [
+						{ title: 'domains', href: `/${handle}/settings/email/domains` },
+						{
+							title: 'addresses',
+							href: `/${handle}/settings/email/addresses`,
+						},
+					],
+					hideLinksWhenNotActive: true,
+				},
+				{
+					title: 'domains',
+					icon: 'domain',
+					href: `/${handle}/settings/domains`,
+				},
+				{
+					title: 'remarketing',
+					icon: 'remarketing',
+					href: `/${handle}/settings/remarketing`,
+				},
+			);
+		}
+
+		if (hasFeature('campaigns')) {
+			allSettingsLinks.push({
+				title: 'vip',
+				icon: 'vip',
+				href: `/${handle}/settings/vip`,
+			});
+		}
+
+		if (hasFeature('products')) {
+			allSettingsLinks.push({
+				title: 'cart',
+				icon: 'cart',
+				href: `/${handle}/settings/cart`,
+			});
+		}
+
+		if (hasFeature('settings')) {
+			allSettingsLinks.push(
+				{ title: 'payouts', icon: 'payouts', href: `/${handle}/settings/payouts` },
+				{ title: 'billing', icon: 'billing', href: `/${handle}/settings/billing` },
+			);
+		}
+
+		return allSettingsLinks;
+	}, [handle, isFmVariant, hasFeature, isPersonal]);
 
 	const topLinks = isSettings ? topSettingsLinks : topMainLinks;
 

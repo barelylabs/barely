@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { productSearchParamsSchema } from '@barely/validators';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllProducts } from '~/app/[handle]/products/_components/all-products';
 import { ArchiveOrDeleteProductModal } from '~/app/[handle]/products/_components/archive-or-delete-product-modal';
@@ -38,20 +39,21 @@ export default async function ProductsPage({
 	return (
 		<HydrateClient>
 			<DashContentHeader title='Products' button={<CreateProductButton />} />
+			<DashContent>
+				<ProductFilters />
+				<Suspense fallback={<div>Loading...</div>}>
+					<AllProducts />
 
-			<ProductFilters />
-			<Suspense fallback={<div>Loading...</div>}>
-				<AllProducts />
+					<CreateOrUpdateProductModal mode='create' />
+					<CreateOrUpdateProductModal mode='update' />
 
-				<CreateOrUpdateProductModal mode='create' />
-				<CreateOrUpdateProductModal mode='update' />
+					<ArchiveOrDeleteProductModal mode='archive' />
+					<ArchiveOrDeleteProductModal mode='delete' />
 
-				<ArchiveOrDeleteProductModal mode='archive' />
-				<ArchiveOrDeleteProductModal mode='delete' />
-
-				<ProductHotkeys />
-				{/* <UpgradeModal checkoutCancelPath="products" checkoutSuccessPath="products" /> */}
-			</Suspense>
+					<ProductHotkeys />
+					{/* <UpgradeModal checkoutCancelPath="products" checkoutSuccessPath="products" /> */}
+				</Suspense>
+			</DashContent>
 		</HydrateClient>
 	);
 }

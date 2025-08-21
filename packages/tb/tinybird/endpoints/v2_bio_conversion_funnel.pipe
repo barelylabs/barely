@@ -1,0 +1,62 @@
+DESCRIPTION >
+	Conversion funnel metrics for bio pages showing view → click → email capture progression
+
+TOKEN "v2_bio_conversion_funnel_endpoint_read_1531" READ
+
+NODE bio_conversion_funnel
+SQL >
+
+    %
+        WITH
+            uniq(sessionId) as total_sessions,
+            uniqIf(sessionId, type = 'bio/view') as sessions_with_views,
+            uniqIf(sessionId, type = 'bio/buttonClick') as sessions_with_clicks,
+            uniqIf(sessionId, type = 'bio/emailCapture') as sessions_with_emails,
+            countIf(type = 'bio/view') as total_views,
+            countIf(type = 'bio/buttonClick') as total_clicks,
+            countIf(type = 'bio/emailCapture') as total_email_captures
+        SELECT
+            total_sessions,
+            sessions_with_views,
+            sessions_with_clicks,
+            sessions_with_emails,
+            total_views,
+            total_clicks,
+            total_email_captures,
+            -- Conversion rates (session-based)
+            if(sessions_with_views > 0, sessions_with_clicks / sessions_with_views, 0) as view_to_click_rate,
+            if(sessions_with_views > 0, sessions_with_emails / sessions_with_views, 0) as view_to_email_rate,
+            if(sessions_with_clicks > 0, sessions_with_emails / sessions_with_clicks, 0) as click_to_email_rate,
+            -- Event-based metrics
+            if(total_views > 0, total_clicks / total_views, 0) as clicks_per_view,
+            if(sessions_with_views > 0, total_views / sessions_with_views, 0) as avg_views_per_session,
+            if(sessions_with_clicks > 0, total_clicks / sessions_with_clicks, 0) as avg_clicks_per_session,
+            -- Bounce rate (sessions with only one view and no other actions)
+            uniqIf(sessionId, type = 'bio/view') - uniqIf(sessionId, type = 'bio/buttonClick' OR type = 'bio/emailCapture') as bounced_sessions,
+            if(sessions_with_views > 0, bounced_sessions / sessions_with_views, 0) as bounce_rate
+        FROM barely_bio_events_mv
+        WHERE
+            workspaceId
+            = {{
+                String(
+                    workspaceId,
+                    'ws_KvKq8bCN4KySE5Un',
+                    description="The ID of the workspace",
+                    required=True,
+                )
+            }}
+            {% if defined(assetId) %} and assetId = {{ String(assetId) }} {% end %}
+            {% if defined(start) %} and timestamp >= toDateTime64({{ DateTime64(start, '2024-12-01 00:00:00.000') }}, 3) {% end %}
+            {% if defined(end) %} and timestamp <= toDateTime64({{ DateTime64(end, '2025-01-01 00:00:00.000') }}, 3) {% end %}
+            {% if defined(city) %} and city = {{ String(city) }} {% end %}
+            {% if defined(region) %} and region = {{ String(region) }} {% end %}
+            {% if defined(country) %} and country = {{ String(country) }} {% end %}
+            {% if defined(device) %} and device = {{ String(device) }} {% end %}
+            {% if defined(browser) %} and browser = {{ String(browser) }} {% end %}
+            {% if defined(os) %} and os = {{ String(os) }} {% end %}
+            {% if defined(referer) %} and referer = {{ String(referer) }} {% end %}
+            {% if defined(sessionReferer) %} and sessionReferer = {{ String(sessionReferer) }} {% end %}
+            {% if defined(sessionEmailTemplateId) %} and sessionEmailTemplateId = {{ String(sessionEmailTemplateId) }} {% end %}
+            {% if defined(sessionMetaCampaignId) %} and sessionMetaCampaignId = {{ String(sessionMetaCampaignId) }} {% end %}
+
+TYPE endpoint

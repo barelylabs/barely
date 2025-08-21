@@ -97,7 +97,7 @@ export const libEnv = createEnv({
 		NEXT_PUBLIC_PAGE_DEV_PORT: devPortSchema,
 		NEXT_PUBLIC_PRESS_BASE_URL: z.string(),
 		NEXT_PUBLIC_PRESS_DEV_PORT: devPortSchema,
-		NEXT_PUBLIC_CURRENT_APP: z.enum(APPS),
+		NEXT_PUBLIC_CURRENT_APP: z.enum(APPS).optional(),
 		NEXT_PUBLIC_LINK_BASE_URL: z.string(),
 		NEXT_PUBLIC_LINK_DEV_PORT: devPortSchema,
 		NEXT_PUBLIC_MANAGE_EMAIL_DEV_PORT: devPortSchema,

@@ -1,11 +1,4 @@
-import {
-	FM_LINK_PLATFORMS,
-	WEB_EVENT_TYPES__CART,
-	WEB_EVENT_TYPES__FM,
-	WEB_EVENT_TYPES__LINK,
-	WEB_EVENT_TYPES__PAGE,
-	WEB_EVENT_TYPES__VIP,
-} from '@barely/const';
+import { FM_LINK_PLATFORMS, WEB_EVENT_TYPES } from '@barely/const';
 import { formattedUserAgentSchema, nextGeoSchema } from '@barely/db/schema';
 import { z } from 'zod/v4';
 
@@ -87,16 +80,23 @@ export const webEventIngestSchema = z
 
 		// event data
 		timestamp: z.string().datetime(),
-		type: z.enum([
-			...WEB_EVENT_TYPES__CART,
-			...WEB_EVENT_TYPES__FM,
-			...WEB_EVENT_TYPES__LINK,
-			...WEB_EVENT_TYPES__PAGE,
-			...WEB_EVENT_TYPES__VIP,
-		]),
+		type: z.enum(WEB_EVENT_TYPES),
 	})
 	.extend(visitorSessionTinybirdSchema.shape)
 	.extend(reportedEventTinybirdSchema.shape);
+
+export const bioEventIngestSchema = webEventIngestSchema.extend({
+	bio_blockId: z.string().nullish(),
+	bio_blockType: z.enum(['links', 'contactForm', 'cart', '']).nullish(),
+	bio_blockIndex: z.number().nullish(),
+	bio_linkId: z.string().nullish(),
+	bio_linkIndex: z.number().nullish(),
+	bio_linkText: z.string().nullish(),
+	bio_linkAnimation: z
+		.enum(['none', 'bounce', 'wobble', 'jello', 'pulse', 'shake', 'tada', ''])
+		.nullish(),
+	bio_emailMarketingOptIn: z.boolean().nullish(),
+});
 
 export const cartEventIngestSchema = webEventIngestSchema.extend({
 	cart_landingPageId: z.string().nullish().default(''),

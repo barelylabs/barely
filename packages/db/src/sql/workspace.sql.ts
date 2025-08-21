@@ -15,6 +15,7 @@ import { AdCreatives } from './ad-creative.sql';
 import { Albums } from './album.sql';
 import { AnalyticsEndpoints } from './analytics-endpoint.sql';
 import { Bios } from './bio.sql';
+import { BrandKits } from './brand-kit.sql';
 import { Campaigns } from './campaign.sql';
 import { ExternalWebsites } from './external-website.sql';
 import {
@@ -45,7 +46,7 @@ export const Workspaces = pgTable(
 		name: varchar('name', { length: 255 }).notNull(),
 		handle: varchar('handle', { length: 255 }).notNull(),
 
-		imageUrl: varchar('imageUrl', { length: 1000 }).unique(), // deprecated in favor of avatarImages - remove in future
+		// imageUrl: varchar('imageUrl', { length: 1000 }).unique(), // deprecated in favor of avatarImages - remove in future
 
 		type: varchar('type', {
 			length: 255,
@@ -188,6 +189,7 @@ export const WorkspaceRelations = relations(Workspaces, ({ one, many }) => ({
 		fields: [Workspaces.bioRootId],
 		references: [Bios.id],
 	}),
+	brandKit: one(BrandKits),
 	defaultMetaAdAccount: one(ProviderAccounts, {
 		fields: [Workspaces.defaultMetaAdAccountId],
 		references: [ProviderAccounts.providerAccountId],

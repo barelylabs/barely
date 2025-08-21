@@ -2,17 +2,17 @@ ip_address=$(ipconfig getifaddr en0)
 echo "IP Address: $ip_address"
 
 app_qr=http://$ip_address:3000
-# bio_qr=http://$ip_address:3001  # Bio app (in development on another branch)
-cart_qr=http://$ip_address:3002
-fm_qr=http://$ip_address:3003
-link_qr=http://$ip_address:3004
-manage_email_qr=http://$ip_address:3005
-nyc_qr=http://$ip_address:3006
-page_qr=http://$ip_address:3007
-press_qr=http://$ip_address:3008
+cart_qr=http://$ip_address:3001
+fm_qr=http://$ip_address:3002
+link_qr=http://$ip_address:3003
+page_qr=http://$ip_address:3004
+press_qr=http://$ip_address:3005
+www_qr=http://$ip_address:3006
+manage_email_qr=http://$ip_address:3008
 vip_qr=http://$ip_address:3009
-www_qr=http://$ip_address:3010
-invoice_qr=http://$ip_address:3011
+nyc_qr=http://$ip_address:3010
+bio_qr=http://$ip_address:3011
+invoice_qr=http://$ip_address:3012
 
 echo "app::3000"
 qrencode -t ansiutf8 -o - $app_qr
@@ -44,7 +44,10 @@ qrencode -t ansiutf8 -o - $vip_qr
 echo "nyc::3010"
 qrencode -t ansiutf8 -o - $nyc_qr
 
-echo "invoice::3011"
+echo "bio::3011"
+qrencode -t ansiutf8 -o - $bio_qr
+
+echo "invoice::3012"
 qrencode -t ansiutf8 -o - $invoice_qr
 
 echo "email::4000"

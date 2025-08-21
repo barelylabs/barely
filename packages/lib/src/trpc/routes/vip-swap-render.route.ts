@@ -10,10 +10,12 @@ import {
 	vipSwapDownloadRequestSchema,
 	vipSwapDownloadTokenSchema,
 } from '@barely/validators';
+import { tasks, waitUntil } from '@trigger.dev/sdk/v3';
 import { TRPCError } from '@trpc/server';
 import { and, eq, isNull } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
+import type { generateFileBlurHash } from '../../trigger';
 import { recordVipEvent } from '../../functions/event.fns';
 import { ratelimit } from '../../integrations/upstash';
 import { generateUniqueDownloadToken } from '../../utils/token';
@@ -43,6 +45,21 @@ export const vipSwapRenderRoute = {
 					code: 'NOT_FOUND',
 					message: 'VIP swap not found',
 				});
+			}
+
+			// Trigger blur hash generation if missing (non-blocking)
+			if (vipSwap.coverImage && !vipSwap.coverImage.blurDataUrl) {
+				// Fire and forget - don't await
+				waitUntil(
+					tasks
+						.trigger<typeof generateFileBlurHash>('generate-file-blur-hash', {
+							fileId: vipSwap.coverImage.id,
+							s3Key: vipSwap.coverImage.s3Key,
+						})
+						.catch(error => {
+							console.error('Failed to trigger blur hash generation:', error);
+						}),
+				);
 			}
 
 			return vipSwap;
@@ -254,7 +271,10 @@ export const vipSwapRenderRoute = {
 			// Send email first - if it fails, we won't create the access log
 			await sendEmail({
 				from: 'downloads@hello.barely.vip',
-				fromFriendlyName: vipSwap.emailFromName ?? workspace?.name ?? 'Barely.vip',
+				fromFriendlyName:
+					workspace?.name && workspace.name.length > 0 ?
+						workspace.name
+					:	(workspace?.handle ?? 'Barely.vip'),
 				replyTo: workspace?.vipSupportEmail ?? undefined,
 				to: email,
 				subject:

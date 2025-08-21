@@ -27,15 +27,17 @@ export function ArchiveOrDeleteFanModal({ mode }: { mode: 'archive' | 'delete' }
 		await setShowModal(false);
 	}, [queryClient, trpc, setShowModal, handle]);
 
-	const { mutate: archiveFans, isPending: isPendingArchive } = useMutation({
-		...trpc.fan.archive.mutationOptions(),
-		onSuccess,
-	});
+	const { mutate: archiveFans, isPending: isPendingArchive } = useMutation(
+		trpc.fan.archive.mutationOptions({
+			onSuccess,
+		}),
+	);
 
-	const { mutate: deleteFans, isPending: isPendingDelete } = useMutation({
-		...trpc.fan.delete.mutationOptions(),
-		onSuccess,
-	});
+	const { mutate: deleteFans, isPending: isPendingDelete } = useMutation(
+		trpc.fan.delete.mutationOptions({
+			onSuccess,
+		}),
+	);
 
 	if (!lastSelectedItem) return null;
 

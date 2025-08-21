@@ -29,7 +29,7 @@ import { atom } from 'jotai';
 import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { CurrencyField } from '@barely/ui/forms/currency-field';
-import { DatetimeField } from '@barely/ui/forms/datetime-field-new';
+import { DatetimeField } from '@barely/ui/forms/datetime-field';
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SwitchField } from '@barely/ui/forms/switch-field';
 import { TextField } from '@barely/ui/forms/text-field';
@@ -60,19 +60,21 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 		useProductSearchParams();
 
 	/* api */
-	const { mutateAsync: createProduct } = useMutation({
-		...trpc.product.create.mutationOptions(),
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: createProduct } = useMutation(
+		trpc.product.create.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
-	const { mutateAsync: updateProduct } = useMutation({
-		...trpc.product.update.mutationOptions(),
-		onSuccess: async () => {
-			await handleCloseModal();
-		},
-	});
+	const { mutateAsync: updateProduct } = useMutation(
+		trpc.product.update.mutationOptions({
+			onSuccess: async () => {
+				await handleCloseModal();
+			},
+		}),
+	);
 
 	// upsertProductSchema.shape.preorderDeliveryEstimate;
 

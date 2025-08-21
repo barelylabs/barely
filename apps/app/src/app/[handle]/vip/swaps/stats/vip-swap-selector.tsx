@@ -35,7 +35,7 @@ export function VipSwapSelector() {
 		<MultiSelectNew
 			className='w-full'
 			options={options}
-			placeholder='Select VIP Swaps to compare...'
+			placeholder='Select swaps to compare...'
 			defaultValue={selectedVipSwapIds}
 			maxCount={3}
 			variant='inverted'

@@ -3,7 +3,7 @@ import { WEB_EVENT_TYPES__PAGE } from '@barely/const';
 import { dbHttp } from '@barely/db/client';
 import { LandingPages } from '@barely/db/sql/landing-page.sql';
 import { publicProcedure } from '@barely/lib/trpc';
-import { raise } from '@barely/utils';
+import { raiseTRPCError } from '@barely/utils';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
@@ -43,7 +43,7 @@ export const landingPageRenderRoute = {
 							},
 						},
 					},
-				})) ?? raise('Landing page not found');
+				})) ?? raiseTRPCError({ message: 'Landing page not found' });
 
 			await recordPageEvent({
 				page: lp,

@@ -5,15 +5,17 @@ import { dbPool } from '@barely/db/pool';
 import { VipSwapAccessLogs, VipSwaps } from '@barely/db/sql';
 import { Files } from '@barely/db/sql/file.sql';
 import { sqlAnd, sqlStringContains } from '@barely/db/utils';
-import { newId, raise, sanitizeKey } from '@barely/utils';
+import { newId, raiseTRPCError, sanitizeKey } from '@barely/utils';
 import {
 	createVipSwapSchema,
 	selectWorkspaceVipSwapsSchema,
 	updateVipSwapSchema,
 } from '@barely/validators';
+import { tasks, waitUntil } from '@trigger.dev/sdk/v3';
 import { and, asc, desc, eq, gt, inArray, isNull, lt, or } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
+import type { generateFileBlurHash } from '../../trigger';
 import { workspaceProcedure } from '../trpc';
 
 export const vipSwapRoute = {
@@ -59,6 +61,18 @@ export const vipSwapRoute = {
 				}
 			}
 
+			// check if cover image has blur hash
+			for (const vipSwap of vipSwaps) {
+				if (vipSwap.coverImage && !vipSwap.coverImage.blurDataUrl) {
+					waitUntil(
+						tasks.trigger<typeof generateFileBlurHash>('generate-file-blur-hash', {
+							fileId: vipSwap.coverImage.id,
+							s3Key: vipSwap.coverImage.s3Key,
+						}),
+					);
+				}
+			}
+
 			return {
 				vipSwaps,
 				nextCursor,
@@ -101,7 +115,7 @@ export const vipSwapRoute = {
 			});
 
 			if (existingSwap) {
-				raise('A swap with this slug already exists');
+				raiseTRPCError({ message: 'A swap with this slug already exists' });
 			}
 
 			// Verify file exists and belongs to workspace
@@ -110,7 +124,9 @@ export const vipSwapRoute = {
 			});
 
 			if (!file) {
-				raise('File not found or does not belong to this workspace');
+				raiseTRPCError({
+					message: 'File not found or does not belong to this workspace',
+				});
 			}
 
 			// Verify cover image if provided
@@ -120,7 +136,9 @@ export const vipSwapRoute = {
 				});
 
 				if (!coverImage) {
-					raise('Cover image not found or does not belong to this workspace');
+					raiseTRPCError({
+						message: 'Cover image not found or does not belong to this workspace',
+					});
 				}
 			}
 
@@ -139,7 +157,8 @@ export const vipSwapRoute = {
 				.values(vipSwapData)
 				.returning();
 
-			const vipSwap = vipSwaps[0] ?? raise('Failed to create VIP swap');
+			const vipSwap =
+				vipSwaps[0] ?? raiseTRPCError({ message: 'Failed to create VIP swap' });
 
 			return vipSwap;
 		}),
@@ -150,7 +169,7 @@ export const vipSwapRoute = {
 			const { id, fileId, coverImageId, key, ...data } = input;
 
 			if (!id) {
-				raise('VIP swap ID is required');
+				raiseTRPCError({ message: 'VIP swap ID is required' });
 			}
 
 			// Check if changing slug and if new slug exists
@@ -164,7 +183,7 @@ export const vipSwapRoute = {
 				});
 
 				if (existingSwap && existingSwap.id !== id) {
-					raise('A swap with this key already exists');
+					raiseTRPCError({ message: 'A swap with this key already exists' });
 				}
 			}
 
@@ -175,7 +194,9 @@ export const vipSwapRoute = {
 				});
 
 				if (!file) {
-					raise('File not found or does not belong to this workspace');
+					raiseTRPCError({
+						message: 'File not found or does not belong to this workspace',
+					});
 				}
 			}
 
@@ -186,7 +207,9 @@ export const vipSwapRoute = {
 				});
 
 				if (!coverImage) {
-					raise('Cover image not found or does not belong to this workspace');
+					raiseTRPCError({
+						message: 'Cover image not found or does not belong to this workspace',
+					});
 				}
 			}
 
@@ -214,7 +237,8 @@ export const vipSwapRoute = {
 				.where(and(eq(VipSwaps.id, id), eq(VipSwaps.workspaceId, ctx.workspace.id)))
 				.returning();
 
-			const updatedSwap = updatedSwaps[0] ?? raise('Failed to update VIP swap');
+			const updatedSwap =
+				updatedSwaps[0] ?? raiseTRPCError({ message: 'Failed to update VIP swap' });
 
 			return updatedSwap;
 		}),
@@ -233,7 +257,7 @@ export const vipSwapRoute = {
 				)
 				.returning();
 
-			return updatedSwaps[0] ?? raise('Failed to archive VIP swap');
+			return updatedSwaps[0] ?? raiseTRPCError({ message: 'Failed to archive VIP swap' });
 		}),
 
 	delete: workspaceProcedure
@@ -265,7 +289,8 @@ export const vipSwapRoute = {
 				.where(and(eq(VipSwaps.id, input.id), eq(VipSwaps.workspaceId, ctx.workspace.id)))
 				.returning();
 
-			const updatedSwap = updatedSwaps[0] ?? raise('Failed to update VIP swap');
+			const updatedSwap =
+				updatedSwaps[0] ?? raiseTRPCError({ message: 'Failed to update VIP swap' });
 
 			return updatedSwap;
 		}),
@@ -295,7 +320,7 @@ export const vipSwapRoute = {
 			});
 
 			if (!swap) {
-				raise('VIP swap not found');
+				raiseTRPCError({ message: 'VIP swap not found' });
 			}
 
 			const accessLogs = await dbHttp.query.VipSwapAccessLogs.findMany({

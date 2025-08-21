@@ -11,6 +11,7 @@ import {
 } from 'drizzle-orm/pg-core';
 
 import { dbId, lexorank, primaryId, timestamps } from '../utils';
+import { _Files_To_BioLinks__Images } from './bio.sql';
 import { FileFolders } from './file-folder.sql';
 import { FmPages } from './fm.sql';
 import { PressKits } from './press-kit.sql';
@@ -126,6 +127,9 @@ export const File_Relations = relations(Files, ({ one, many }) => ({
 	}),
 	_products: many(_Files_To_Products__Images, {
 		relationName: '_image_product',
+	}),
+	_bioLinks: many(_Files_To_BioLinks__Images, {
+		relationName: '_image_bioLink',
 	}),
 }));
 

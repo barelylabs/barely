@@ -5,6 +5,7 @@ import { cartOrderSearchParamsSchema } from '@barely/validators';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllCartOrders } from '~/app/[handle]/orders/_components/all-cart-orders';
 import { CancelCartOrderModal } from '~/app/[handle]/orders/_components/cancel-cart-order-modal';
@@ -39,15 +40,16 @@ export default async function CartOrdersPage({
 	return (
 		<HydrateClient>
 			<DashContentHeader title='Orders' />
+			<DashContent>
+				<CartOrderFilters />
+				<Suspense fallback={<GridListSkeleton />}>
+					<AllCartOrders />
 
-			<CartOrderFilters />
-			<Suspense fallback={<GridListSkeleton />}>
-				<AllCartOrders />
-
-				<MarkCartOrderFulfilledModal />
-				<CancelCartOrderModal />
-				<CartOrderHotkeys />
-			</Suspense>
+					<MarkCartOrderFulfilledModal />
+					<CancelCartOrderModal />
+					<CartOrderHotkeys />
+				</Suspense>
+			</DashContent>
 		</HydrateClient>
 	);
 }
