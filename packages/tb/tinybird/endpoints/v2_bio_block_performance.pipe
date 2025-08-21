@@ -1,0 +1,89 @@
+DESCRIPTION >
+	Performance metrics for bio blocks by type and position
+
+TOKEN "v2_bio_block_performance_endpoint_read_1531" READ
+
+NODE bio_block_performance
+SQL >
+
+    %
+        SELECT
+            bio_blockType as block_type,
+            bio_blockIndex as block_position,
+            bio_blockId as block_id,
+            -- Basic metrics
+            uniq(sessionId) as unique_sessions,
+            count() as total_interactions,
+            -- Click metrics for link blocks
+            countIf(type = 'bio/buttonClick') as total_clicks,
+            uniqIf(sessionId, type = 'bio/buttonClick') as sessions_with_clicks,
+            if(unique_sessions > 0, sessions_with_clicks / unique_sessions, 0) as block_click_rate,
+            -- Email capture metrics for contact form blocks
+            countIf(type = 'bio/emailCapture') as total_email_captures,
+            uniqIf(sessionId, type = 'bio/emailCapture') as sessions_with_emails,
+            countIf(type = 'bio/emailCapture' AND bio_emailMarketingOptIn = 1) as marketing_opt_ins,
+            if(total_email_captures > 0, marketing_opt_ins / total_email_captures, 0) as marketing_opt_in_rate,
+            -- Average position on page (lower is better)
+            avg(bio_blockIndex) as avg_position,
+            -- Performance by position
+            case
+                when bio_blockIndex = 0 then 'top'
+                when bio_blockIndex <= 2 then 'above_fold'
+                when bio_blockIndex <= 5 then 'middle'
+                else 'below_fold'
+            end as position_category
+        FROM barely_bio_events_mv
+        WHERE
+            workspaceId
+            = {{
+                String(
+                    workspaceId,
+                    'ws_KvKq8bCN4KySE5Un',
+                    description="The ID of the workspace",
+                    required=True,
+                )
+            }}
+            AND bio_blockType IS NOT NULL
+            AND bio_blockIndex IS NOT NULL
+            {% if defined(assetId) %} and assetId = {{ String(assetId) }} {% end %}
+            {% if defined(start) %} and timestamp >= toDateTime64({{ DateTime64(start, '2024-12-01 00:00:00.000') }}, 3) {% end %}
+            {% if defined(end) %} and timestamp <= toDateTime64({{ DateTime64(end, '2025-01-01 00:00:00.000') }}, 3) {% end %}
+            {% if defined(blockType) %} and bio_blockType = {{ String(blockType) }} {% end %}
+            {% if defined(city) %} and city = {{ String(city) }} {% end %}
+            {% if defined(region) %} and region = {{ String(region) }} {% end %}
+            {% if defined(country) %} and country = {{ String(country) }} {% end %}
+            {% if defined(device) %} and device = {{ String(device) }} {% end %}
+            {% if defined(browser) %} and browser = {{ String(browser) }} {% end %}
+            {% if defined(os) %} and os = {{ String(os) }} {% end %}
+        GROUP BY bio_blockType, bio_blockIndex, bio_blockId
+        ORDER BY bio_blockIndex ASC, total_interactions DESC
+
+NODE bio_block_summary
+SQL >
+
+    %
+        SELECT
+            block_type,
+            count() as total_blocks,
+            sum(unique_sessions) as total_unique_sessions,
+            sum(total_interactions) as total_interactions,
+            avg(block_click_rate) as avg_click_rate,
+            -- Position analysis
+            avgIf(block_click_rate, position_category = 'top') as top_position_ctr,
+            avgIf(block_click_rate, position_category = 'above_fold') as above_fold_ctr,
+            avgIf(block_click_rate, position_category = 'middle') as middle_ctr,
+            avgIf(block_click_rate, position_category = 'below_fold') as below_fold_ctr,
+            -- Best performing position
+            argMax(block_position, block_click_rate) as best_performing_position,
+            max(block_click_rate) as best_ctr,
+            -- Worst performing position
+            argMin(block_position, block_click_rate) as worst_performing_position,
+            min(block_click_rate) as worst_ctr
+        FROM bio_block_performance
+        {% if defined(blockType) %}
+        WHERE block_type = {{ String(blockType) }}
+        {% end %}
+        GROUP BY block_type
+        ORDER BY total_interactions DESC
+
+TYPE endpoint

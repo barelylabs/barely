@@ -8,7 +8,7 @@ import { AnalyticsEndpoints } from '@barely/db/sql/analytics-endpoint.sql';
 import { Workspaces } from '@barely/db/sql/workspace.sql';
 import { sqlIncrement } from '@barely/db/utils';
 import { ingestWebEvent } from '@barely/tb/ingest';
-import { webEventIngestSchema } from '@barely/tb/schema';
+import { bioEventIngestSchema } from '@barely/tb/schema';
 import { isDevelopment, newId } from '@barely/utils';
 import { eq } from 'drizzle-orm';
 
@@ -50,12 +50,22 @@ export async function recordBioEvent({
 	type,
 	visitor,
 	workspace,
-	buttonPosition,
+	blockId,
+	blockType,
+	blockIndex,
+	linkIndex,
+	linkAnimation,
+	emailMarketingOptIn,
 }: {
 	bio: Bio;
 	type: (typeof WEB_EVENT_TYPES__BIO)[number];
 	bioLink?: BioLink;
-	buttonPosition?: number;
+	blockId?: string;
+	blockType?: 'links' | 'contactForm' | 'cart';
+	blockIndex?: number;
+	linkIndex?: number;
+	linkAnimation?: 'none' | 'bounce' | 'wobble' | 'jello' | 'pulse' | 'shake' | 'tada';
+	emailMarketingOptIn?: boolean;
 	visitor?: VisitorInfo;
 	workspace: Pick<Workspace, 'id' | 'plan' | 'eventUsage' | 'eventUsageLimitOverride'>;
 }) {
@@ -131,7 +141,7 @@ export async function recordBioEvent({
 
 	// report event to tinybird
 	try {
-		const eventData = webEventIngestSchema.parse({
+		const eventData = bioEventIngestSchema.parse({
 			timestamp,
 			workspaceId: bio.workspaceId,
 			assetId: bio.id,
@@ -140,7 +150,14 @@ export async function recordBioEvent({
 			type,
 			href: sourceUrl,
 			linkClickDestinationHref: bioLink?.url ?? null,
-			buttonPosition: buttonPosition ?? null,
+			bio_blockId: blockId ?? null,
+			bio_blockType: blockType ?? null,
+			bio_blockIndex: blockIndex ?? null,
+			bio_linkId: bioLink?.id ?? null,
+			bio_linkIndex: linkIndex ?? null,
+			bio_linkText: bioLink?.text ?? null,
+			bio_linkAnimation: linkAnimation ?? null,
+			bio_emailMarketingOptIn: emailMarketingOptIn ?? null,
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : undefined,
 		});
 

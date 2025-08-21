@@ -10,7 +10,8 @@ interface BioRouteProps {
 }
 
 export const revalidate = 60; // ISR: revalidate every 60 seconds
-export const dynamic = 'force-static';
+// Remove force-static to allow cookie handling for visitor tracking
+// export const dynamic = 'force-static';
 
 export default async function BioPage({ params }: BioRouteProps) {
 	const { handle } = await params;

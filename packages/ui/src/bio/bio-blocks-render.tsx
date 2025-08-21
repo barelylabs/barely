@@ -30,7 +30,7 @@ export function BioBlocksRender({ blocks }: BioBlocksRenderProps) {
 				isFullWidthButtons && '', // No horizontal padding for full-width buttons
 			)}
 		>
-			{blocks.map(block => {
+			{blocks.map((block, blockIndex) => {
 				// Only render enabled blocks
 
 				if (!block.enabled) return null;
@@ -76,7 +76,7 @@ export function BioBlocksRender({ blocks }: BioBlocksRenderProps) {
 						)}
 
 						{/* Render links */}
-						{block.links.map(link => {
+						{block.links.map((link, linkIndex) => {
 							// Skip disabled links
 							if (link.enabled === false) return null;
 
@@ -134,7 +134,12 @@ export function BioBlocksRender({ blocks }: BioBlocksRenderProps) {
 									onClick={
 										onLinkClick && !isPreview ?
 											() => {
-												void onLinkClick(link);
+												void onLinkClick(link, {
+													blockId: block.id,
+													blockType: block.type,
+													blockIndex,
+													linkIndex,
+												});
 											}
 										:	undefined
 									}

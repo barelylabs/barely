@@ -24,7 +24,15 @@ SQL >
       sessionMetaAdSetId,
       sessionMetaAdId,
       sessionMetaPlacement,
-      linkClickDestinationHref
+      linkClickDestinationHref,
+      bio_blockId,
+      bio_blockType,
+      bio_blockIndex,
+      bio_linkId,
+      bio_linkIndex,
+      bio_linkText,
+      bio_linkAnimation,
+      bio_emailMarketingOptIn
     FROM barely_events
     WHERE assetId LIKE 'bio_%'
 

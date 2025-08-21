@@ -93,7 +93,13 @@ SQL >
             {% end %} AS interval,
             uniqIf(sessionId, type = 'bio/view') as bio_views,
             uniqIf(sessionId, type = 'bio/buttonClick') as bio_buttonClicks,
-            uniqIf(sessionId, type = 'bio/emailCapture') as bio_emailCaptures
+            uniqIf(sessionId, type = 'bio/emailCapture') as bio_emailCaptures,
+            -- Conversion metrics
+            if(bio_views > 0, bio_buttonClicks / bio_views, 0) as ctr,
+            if(bio_views > 0, bio_emailCaptures / bio_views, 0) as email_conversion_rate,
+            -- Engagement metrics
+            uniq(sessionId) as unique_sessions,
+            count() as total_events
         FROM barely_bio_events_mv
         WHERE
             workspaceId
@@ -146,7 +152,15 @@ NODE timeseries_bio
 SQL >
 
     %
-        SELECT formatDateTime(interval, '%F%T.000%z') as start, bio_views, bio_buttonClicks, bio_emailCaptures
+        SELECT 
+            formatDateTime(interval, '%F%T.000%z') as start, 
+            bio_views, 
+            bio_buttonClicks, 
+            bio_emailCaptures,
+            ctr,
+            email_conversion_rate,
+            unique_sessions,
+            total_events
         FROM
             {% if granularity == "minute" %} minute_intervals
             {% elif granularity == "hour" %} hour_intervals

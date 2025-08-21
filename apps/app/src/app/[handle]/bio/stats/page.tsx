@@ -12,6 +12,8 @@ import { StatDevices } from '~/app/[handle]/_components/stat-devices';
 import { StatExternalReferers } from '~/app/[handle]/_components/stat-external-referers';
 import { StatLocations } from '~/app/[handle]/_components/stat-locations';
 import { BioButtonStats } from '~/app/[handle]/bio/stats/bio-button-stats';
+import { BioConversionFunnel } from '~/app/[handle]/bio/stats/bio-conversion-funnel';
+import { BioEngagementScore } from '~/app/[handle]/bio/stats/bio-engagement-score';
 import { BioStatHeader } from '~/app/[handle]/bio/stats/bio-stat-header';
 import { BioTimeseries } from '~/app/[handle]/bio/stats/bio-timeseries';
 import { HydrateClient, prefetch, trpc } from '~/trpc/server';
@@ -35,6 +37,10 @@ export default async function BioStatsPage({
 
 	prefetch(trpc.stat.bioTimeseries.queryOptions({ handle, ...parsedFilters.data }));
 	prefetch(trpc.stat.bioButtonStats.queryOptions({ handle, ...parsedFilters.data }));
+	prefetch(trpc.stat.bioConversionFunnel.queryOptions({ handle, ...parsedFilters.data }));
+	prefetch(
+		trpc.stat.bioEngagementMetrics.queryOptions({ handle, ...parsedFilters.data }),
+	);
 	prefetch(
 		trpc.bio.byWorkspace.queryOptions({
 			handle,
@@ -49,6 +55,14 @@ export default async function BioStatsPage({
 
 			<Suspense fallback={<TimeseriesSkeleton />}>
 				<BioTimeseries />
+			</Suspense>
+
+			<Suspense fallback={<StatsCardsSkeleton />}>
+				<BioConversionFunnel />
+			</Suspense>
+
+			<Suspense fallback={<StatsCardsSkeleton />}>
+				<BioEngagementScore />
 			</Suspense>
 
 			<Suspense fallback={<StatsCardsSkeleton />}>
