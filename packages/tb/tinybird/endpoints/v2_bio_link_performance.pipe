@@ -94,45 +94,76 @@ SQL >
             GROUP BY bio_blockId
         )
         SELECT
-            l.link_position,
-            l.position_in_block,
-            count(distinct l.link_id) as total_links,
-            sum(l.total_clicks) as total_clicks,
-            avg(l.total_clicks) as avg_clicks_per_link,
-            sum(l.unique_sessions) as total_unique_sessions,
+            bio_linkIndex as link_position,
+            case
+                when bio_linkIndex = 0 then 'first'
+                when bio_linkIndex = 1 then 'second'
+                when bio_linkIndex = 2 then 'third'
+                when bio_linkIndex <= 4 then 'middle'
+                else 'bottom'
+            end as position_in_block,
+            count(distinct bio_linkId) as total_links,
+            count() as total_clicks,
+            count() / count(distinct bio_linkId) as avg_clicks_per_link,
+            uniq(sessionId) as total_unique_sessions,
             -- CTR calculation with views
-            avgIf(l.unique_sessions / v.block_views, v.block_views > 0) as avg_ctr,
-            -- Performance metrics
-            max(l.total_clicks) as max_clicks,
-            min(l.total_clicks) as min_clicks,
-            -- Best performing links at this position
-            argMax(l.link_text, l.total_clicks) as best_performing_link,
-            argMax(l.destination_url, l.total_clicks) as best_performing_url
-        FROM bio_link_performance l
-        LEFT JOIN view_counts v ON l.block_id = v.bio_blockId
-        GROUP BY l.link_position, l.position_in_block
-        ORDER BY l.link_position ASC
+            avgIf(uniq(sessionId) / v.block_views, v.block_views > 0) as avg_ctr,
+            -- Best performing link at this position
+            any(bio_linkText) as sample_link_text,
+            any(linkClickDestinationHref) as sample_destination_url
+        FROM barely_bio_events_mv e
+        LEFT JOIN view_counts v ON e.bio_blockId = v.bio_blockId
+        WHERE
+            e.workspaceId
+            = {{
+                String(
+                    workspaceId,
+                    'ws_KvKq8bCN4KySE5Un',
+                    description="The ID of the workspace",
+                    required=True,
+                )
+            }}
+            AND e.type = 'bio/buttonClick'
+            AND e.bio_linkId IS NOT NULL
+            {% if defined(assetId) %} and e.assetId = {{ String(assetId) }} {% end %}
+            {% if defined(start) %} and e.timestamp >= toDateTime64({{ DateTime64(start, '2024-12-01 00:00:00.000') }}, 3) {% end %}
+            {% if defined(end) %} and e.timestamp <= toDateTime64({{ DateTime64(end, '2025-01-01 00:00:00.000') }}, 3) {% end %}
+        GROUP BY bio_linkIndex
+        ORDER BY bio_linkIndex ASC
 
 NODE bio_link_animation_analysis
 SQL >
 
     %
         SELECT
-            animation_type,
-            count(distinct link_id) as total_links,
-            sum(total_clicks) as total_clicks,
-            avg(total_clicks) as avg_clicks_per_link,
-            sum(unique_sessions) as total_unique_sessions,
+            bio_linkAnimation as animation_type,
+            count(distinct bio_linkId) as total_links,
+            count() as total_clicks,
+            count() / count(distinct bio_linkId) as avg_clicks_per_link,
+            uniq(sessionId) as total_unique_sessions,
             -- Performance comparison
-            avg(mobile_click_share) as avg_mobile_share,
+            countIf(device = 'Mobile') / count() as avg_mobile_share,
             -- Statistical significance helper
-            if(total_links >= 10, 'sufficient_data', 'needs_more_data') as data_quality,
-            -- Best performing links with this animation
-            argMax(link_text, total_clicks) as top_link,
-            max(total_clicks) as top_link_clicks
-        FROM bio_link_performance
-        WHERE animation_type IS NOT NULL
-        GROUP BY animation_type
+            if(count(distinct bio_linkId) >= 10, 'sufficient_data', 'needs_more_data') as data_quality,
+            -- Best performing link with this animation (requires subquery approach)
+            any(bio_linkText) as sample_link_text
+        FROM barely_bio_events_mv
+        WHERE
+            workspaceId
+            = {{
+                String(
+                    workspaceId,
+                    'ws_KvKq8bCN4KySE5Un',
+                    description="The ID of the workspace",
+                    required=True,
+                )
+            }}
+            AND type = 'bio/buttonClick'
+            AND bio_linkAnimation IS NOT NULL
+            {% if defined(assetId) %} and assetId = {{ String(assetId) }} {% end %}
+            {% if defined(start) %} and timestamp >= toDateTime64({{ DateTime64(start, '2024-12-01 00:00:00.000') }}, 3) {% end %}
+            {% if defined(end) %} and timestamp <= toDateTime64({{ DateTime64(end, '2025-01-01 00:00:00.000') }}, 3) {% end %}
+        GROUP BY bio_linkAnimation
         ORDER BY avg_clicks_per_link DESC
 
 TYPE endpoint
