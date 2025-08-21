@@ -67,8 +67,8 @@ SQL >
             avg(clicks) as avg_clicks_per_link,
             avg(unique_sessions) as avg_sessions_per_link,
             -- Comparison to baseline (no animation)
-            if(baseline.baseline_clicks > 0, 
-               (avg(clicks) - baseline.baseline_clicks) / baseline.baseline_clicks * 100, 
+            if(any(baseline.baseline_clicks) > 0, 
+               (avg(clicks) - any(baseline.baseline_clicks)) / any(baseline.baseline_clicks) * 100, 
                0) as improvement_over_baseline_percent,
             -- Statistical metrics
             varPop(clicks) as click_variance,
