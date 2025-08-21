@@ -5,7 +5,12 @@ import { FmPages } from '@barely/db/sql/fm.sql';
 import { Links } from '@barely/db/sql/link.sql';
 import { Tracks } from '@barely/db/sql/track.sql';
 import {
+	pipe_bioAnimationPerformance,
+	pipe_bioBlockPerformance,
 	pipe_bioButtonStats,
+	pipe_bioConversionFunnel,
+	pipe_bioEngagementMetrics,
+	pipe_bioLinkPerformance,
 	pipe_bioTimeseries,
 	pipe_cartTimeseries,
 	pipe_cartTopBrowsers,
@@ -95,6 +100,7 @@ import {
 } from '@barely/tb/query';
 import {
 	spotifyStatQuerySchema,
+	stdWebEventPipeQueryParamsSchema,
 	stdWebEventQueryToPipeParamsSchema,
 } from '@barely/tb/schema';
 import { getIsoDateRangeFromDescription } from '@barely/utils';
@@ -262,6 +268,120 @@ export const statRoute = {
 				timezone: ctx.workspace.timezone,
 			});
 			return buttonStats.data;
+		}),
+
+	bioConversionFunnel: workspaceProcedure
+		.input(stdWebEventQueryToPipeParamsSchema)
+		.query(async ({ ctx, input }) => {
+			const conversionFunnel = await pipe_bioConversionFunnel({
+				...input,
+				workspaceId: ctx.workspace.id,
+				timezone: ctx.workspace.timezone,
+			});
+			// Return first item or default values if empty
+			return (
+				conversionFunnel.data[0] ?? {
+					total_sessions: 0,
+					sessions_with_views: 0,
+					sessions_with_clicks: 0,
+					sessions_with_emails: 0,
+					total_views: 0,
+					total_clicks: 0,
+					total_email_captures: 0,
+					view_to_click_rate: 0,
+					view_to_email_rate: 0,
+					click_to_email_rate: 0,
+					clicks_per_view: 0,
+					avg_views_per_session: 0,
+					avg_clicks_per_session: 0,
+					bounced_sessions: 0,
+					bounce_rate: 0,
+				}
+			);
+		}),
+
+	bioEngagementMetrics: workspaceProcedure
+		.input(stdWebEventQueryToPipeParamsSchema)
+		.query(async ({ ctx, input }) => {
+			const engagementMetrics = await pipe_bioEngagementMetrics({
+				...input,
+				workspaceId: ctx.workspace.id,
+				timezone: ctx.workspace.timezone,
+			});
+			// Return first item or default values if empty
+			return (
+				engagementMetrics.data[0] ?? {
+					total_sessions: 0,
+					avg_session_duration: 0,
+					median_session_duration: 0,
+					max_session_duration: 0,
+					avg_clicks_per_session: 0,
+					overall_ctr: 0,
+					session_click_rate: 0,
+					avg_emails_per_session: 0,
+					session_email_rate: 0,
+					engagement_score: 0,
+					avg_events_per_session: 0,
+					quick_bounces: 0,
+					sessions_without_clicks: 0,
+					quick_bounce_rate: 0,
+					no_click_rate: 0,
+					sessions_0_10s: 0,
+					sessions_10_30s: 0,
+					sessions_30_60s: 0,
+					sessions_1_3m: 0,
+					sessions_over_3m: 0,
+				}
+			);
+		}),
+
+	bioBlockPerformance: workspaceProcedure
+		.input(
+			stdWebEventPipeQueryParamsSchema.extend({
+				blockType: z.string().optional(),
+			}),
+		)
+		.query(async ({ ctx, input }) => {
+			const transformedInput = stdWebEventQueryToPipeParamsSchema.parse(input);
+			const blockPerformance = await pipe_bioBlockPerformance({
+				...transformedInput,
+				blockType: input.blockType,
+				workspaceId: ctx.workspace.id,
+				timezone: ctx.workspace.timezone,
+			});
+			return blockPerformance.data;
+		}),
+
+	bioLinkPerformance: workspaceProcedure
+		.input(
+			stdWebEventPipeQueryParamsSchema.extend({
+				linkId: z.string().optional(),
+				blockId: z.string().optional(),
+				animation: z.string().optional(),
+			}),
+		)
+		.query(async ({ ctx, input }) => {
+			const transformedInput = stdWebEventQueryToPipeParamsSchema.parse(input);
+			const linkPerformance = await pipe_bioLinkPerformance({
+				...transformedInput,
+				linkId: input.linkId,
+				blockId: input.blockId,
+				animation: input.animation,
+				workspaceId: ctx.workspace.id,
+				timezone: ctx.workspace.timezone,
+			});
+			return linkPerformance.data;
+		}),
+
+	bioAnimationPerformance: workspaceProcedure
+		.input(stdWebEventQueryToPipeParamsSchema)
+		.query(async ({ ctx, input }) => {
+			const animationPerformance = await pipe_bioAnimationPerformance({
+				...input,
+				workspaceId: ctx.workspace.id,
+				timezone: ctx.workspace.timezone,
+			});
+			return animationPerformance.data;
 		}),
 
 	webEventTimeseries: workspaceProcedure

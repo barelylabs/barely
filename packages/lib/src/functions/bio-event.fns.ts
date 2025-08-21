@@ -8,7 +8,7 @@ import { AnalyticsEndpoints } from '@barely/db/sql/analytics-endpoint.sql';
 import { Workspaces } from '@barely/db/sql/workspace.sql';
 import { sqlIncrement } from '@barely/db/utils';
 import { ingestWebEvent } from '@barely/tb/ingest';
-import { bioEventIngestSchema, webEventIngestSchema } from '@barely/tb/schema';
+import { bioEventIngestSchema } from '@barely/tb/schema';
 import { isDevelopment, newId } from '@barely/utils';
 import { eq } from 'drizzle-orm';
 

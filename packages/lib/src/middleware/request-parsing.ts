@@ -103,7 +103,10 @@ export const parseBioUrl = (url: string) => {
 	const handle = parts[0] ?? null;
 	// If we have more than one part, use the rest as the key (like FM)
 	// Otherwise, if we have a handle but no key, default to 'home'
-	const key = parts.slice(1).length ? parts.slice(1).join('/') : (handle ? 'home' : null);
+	const key =
+		parts.slice(1).length ? parts.slice(1).join('/')
+		: handle ? 'home'
+		: null;
 
 	if (!handle || !key) {
 		console.log('parseBioUrl', url);

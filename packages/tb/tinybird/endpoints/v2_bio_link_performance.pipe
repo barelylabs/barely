@@ -1,0 +1,141 @@
+DESCRIPTION >
+	Performance metrics for individual bio links including position and animation effectiveness
+
+TOKEN "v2_bio_link_performance_endpoint_read_1531" READ
+
+NODE bio_link_performance
+SQL >
+
+    %
+        SELECT
+            bio_linkId as link_id,
+            bio_linkText as link_text,
+            linkClickDestinationHref as destination_url,
+            bio_linkIndex as link_position,
+            bio_linkAnimation as animation_type,
+            bio_blockId as block_id,
+            bio_blockType as block_type,
+            bio_blockIndex as block_position,
+            -- Click metrics
+            count() as total_clicks,
+            uniq(sessionId) as unique_sessions,
+            -- Performance by position within block
+            case
+                when bio_linkIndex = 0 then 'first'
+                when bio_linkIndex = 1 then 'second'
+                when bio_linkIndex = 2 then 'third'
+                when bio_linkIndex <= 4 then 'middle'
+                else 'bottom'
+            end as position_in_block,
+            -- Time-based analysis
+            toHour(timestamp) as click_hour,
+            toDayOfWeek(timestamp) as click_day_of_week,
+            -- Device breakdown
+            countIf(device = 'Mobile') as mobile_clicks,
+            countIf(device = 'Desktop') as desktop_clicks,
+            countIf(device = 'Tablet') as tablet_clicks,
+            if(total_clicks > 0, mobile_clicks / total_clicks, 0) as mobile_click_share
+        FROM barely_bio_events_mv
+        WHERE
+            workspaceId
+            = {{
+                String(
+                    workspaceId,
+                    'ws_KvKq8bCN4KySE5Un',
+                    description="The ID of the workspace",
+                    required=True,
+                )
+            }}
+            AND type = 'bio/buttonClick'
+            AND bio_linkId IS NOT NULL
+            {% if defined(assetId) %} and assetId = {{ String(assetId) }} {% end %}
+            {% if defined(start) %} and timestamp >= toDateTime64({{ DateTime64(start, '2024-12-01 00:00:00.000') }}, 3) {% end %}
+            {% if defined(end) %} and timestamp <= toDateTime64({{ DateTime64(end, '2025-01-01 00:00:00.000') }}, 3) {% end %}
+            {% if defined(linkId) %} and bio_linkId = {{ String(linkId) }} {% end %}
+            {% if defined(blockId) %} and bio_blockId = {{ String(blockId) }} {% end %}
+            {% if defined(animation) %} and bio_linkAnimation = {{ String(animation) }} {% end %}
+            {% if defined(city) %} and city = {{ String(city) }} {% end %}
+            {% if defined(region) %} and region = {{ String(region) }} {% end %}
+            {% if defined(country) %} and country = {{ String(country) }} {% end %}
+            {% if defined(device) %} and device = {{ String(device) }} {% end %}
+            {% if defined(browser) %} and browser = {{ String(browser) }} {% end %}
+            {% if defined(os) %} and os = {{ String(os) }} {% end %}
+        GROUP BY 
+            bio_linkId,
+            bio_linkText,
+            linkClickDestinationHref,
+            bio_linkIndex,
+            bio_linkAnimation,
+            bio_blockId,
+            bio_blockType,
+            bio_blockIndex
+        ORDER BY total_clicks DESC
+
+NODE bio_link_position_analysis
+SQL >
+
+    %
+        WITH view_counts AS (
+            SELECT
+                bio_blockId,
+                uniq(sessionId) as block_views
+            FROM barely_bio_events_mv
+            WHERE
+                workspaceId
+                = {{
+                    String(
+                        workspaceId,
+                        'ws_KvKq8bCN4KySE5Un',
+                        description="The ID of the workspace",
+                        required=True,
+                    )
+                }}
+                AND type = 'bio/view'
+                {% if defined(assetId) %} and assetId = {{ String(assetId) }} {% end %}
+                {% if defined(start) %} and timestamp >= toDateTime64({{ DateTime64(start, '2024-12-01 00:00:00.000') }}, 3) {% end %}
+                {% if defined(end) %} and timestamp <= toDateTime64({{ DateTime64(end, '2025-01-01 00:00:00.000') }}, 3) {% end %}
+            GROUP BY bio_blockId
+        )
+        SELECT
+            l.link_position,
+            l.position_in_block,
+            count(distinct l.link_id) as total_links,
+            sum(l.total_clicks) as total_clicks,
+            avg(l.total_clicks) as avg_clicks_per_link,
+            sum(l.unique_sessions) as total_unique_sessions,
+            -- CTR calculation with views
+            avgIf(l.unique_sessions / v.block_views, v.block_views > 0) as avg_ctr,
+            -- Performance metrics
+            max(l.total_clicks) as max_clicks,
+            min(l.total_clicks) as min_clicks,
+            -- Best performing links at this position
+            argMax(l.link_text, l.total_clicks) as best_performing_link,
+            argMax(l.destination_url, l.total_clicks) as best_performing_url
+        FROM bio_link_performance l
+        LEFT JOIN view_counts v ON l.block_id = v.bio_blockId
+        GROUP BY l.link_position, l.position_in_block
+        ORDER BY l.link_position ASC
+
+NODE bio_link_animation_analysis
+SQL >
+
+    %
+        SELECT
+            animation_type,
+            count(distinct link_id) as total_links,
+            sum(total_clicks) as total_clicks,
+            avg(total_clicks) as avg_clicks_per_link,
+            sum(unique_sessions) as total_unique_sessions,
+            -- Performance comparison
+            avg(mobile_click_share) as avg_mobile_share,
+            -- Statistical significance helper
+            if(total_links >= 10, 'sufficient_data', 'needs_more_data') as data_quality,
+            -- Best performing links with this animation
+            argMax(link_text, total_clicks) as top_link,
+            max(total_clicks) as top_link_clicks
+        FROM bio_link_performance
+        WHERE animation_type IS NOT NULL
+        GROUP BY animation_type
+        ORDER BY avg_clicks_per_link DESC
+
+TYPE endpoint

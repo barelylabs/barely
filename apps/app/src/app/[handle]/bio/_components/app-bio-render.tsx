@@ -36,7 +36,6 @@ function AppBioProvider({
 			isPreview={true}
 			onLinkClick={handleLinkClick}
 			onEmailCapture={null}
-			onPageView={null}
 		>
 			{children}
 		</BioProvider>
