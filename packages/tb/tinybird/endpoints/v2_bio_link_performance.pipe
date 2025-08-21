@@ -107,7 +107,7 @@ SQL >
             count() / count(distinct bio_linkId) as avg_clicks_per_link,
             uniq(sessionId) as total_unique_sessions,
             -- CTR calculation with views
-            avgIf(uniq(sessionId) / v.block_views, v.block_views > 0) as avg_ctr,
+            avg(v.block_views) as avg_block_views,
             -- Best performing link at this position
             any(bio_linkText) as sample_link_text,
             any(linkClickDestinationHref) as sample_destination_url
