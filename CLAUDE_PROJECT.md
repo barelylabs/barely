@@ -1,54 +1,49 @@
-# Project Context: barely.fm Module - Focused Smart Link Experience
+# Project Context: Cart Performance Optimization
 
 ## Current Development
-Working on: App modularization for focused user experiences, starting with barely.fm variant
-Deadline: 2025-09-30 (7 weeks from project start)
+Working on: Critical performance fix to reduce cart load time from 9.3s to under 2.5s
+Deadline: 2025-09-21
 
 ## Key Files in This Worktree
-- `.claude/project/PRD.md` - Comprehensive technical requirements and functional specifications
-- `.claude/project/plan-organized.md` - Feature-based implementation roadmap with dependencies
-- `.claude/project/JTBD.md` - User-focused jobs to be done analysis (6 jobs identified)
-- `.claude/project/feature.md` - Detailed app modularization technical approach
-- `.claude/project/plan.md` - Complete technical implementation checklist
-- `.claude/project/integration-summary.md` - Technical enhancement integration details
+- `.claude/project/PRD.md` - Full product requirements
+- `.claude/project/plan-organized.md` - Implementation checklist by feature
+- `.claude/project/JTBD.md` - Jobs to be done analysis
+- `.claude/project/feature.md` - Feature overview and rationale
 
 ## Current Focus
-**Feature 1: Core App Variant Detection and Infrastructure**
-- Foundation for all app variant functionality
-- No dependencies - must be implemented first
-- Environment variable validation for `NEXT_PUBLIC_CURRENT_APP`
-- Create utility functions for variant detection
+**Feature 0: Core Infrastructure Setup** - Prerequisites that enable all other features
+- Extract workspace query from getFunnelByParams
+- Create cart-specific BrandKit API route
+- Add BrandKit data validation
+- Write unit tests for cache functions
+
+Then proceed to **Feature 1: Eliminate Render-Blocking Query** (the critical fix)
 
 ## Key Technical Decisions
-- **Environment-based filtering** using `NEXT_PUBLIC_CURRENT_APP` over database flags
-- **Conditional rendering** in existing components vs creating new components
-- **Utility functions** for variant detection that scale to future variants
-- **Backward compatibility** preserved when environment variable unset
-- **Separate Stripe price IDs** for app variants with 20-40% lower pricing
+1. Use React's `cache()` function for request deduplication
+2. Split data fetching: BrandKit (cacheable) vs cart data (real-time)
+3. Implement at layout level in layout.tsx
+4. Reuse BrandKitProvider from UI package
+5. Progressive enhancement with Suspense boundaries
+6. Edge caching: BrandKit 5-min TTL, products 1-min TTL
 
 ## Success Criteria
+**Performance Metrics:**
+- Lighthouse Score: >70 (from 37)
+- Largest Contentful Paint: <2.5s (from 9.3s)
+- Total Blocking Time: <200ms (from 3,700ms)
+- Speed Index: <3s (from 6.2s)
 
-### Technical Milestones
-- Environment-based navigation filtering implemented using `NEXT_PUBLIC_CURRENT_APP`
-- FM variant pricing structure with 20-40% lower price points than full platform
-- Deployment infrastructure supporting app variants through GitHub Actions
-- Task completion time reduction of 20% for FM-specific workflows
-
-### Business Objectives
-- Launch app.barely.fm with environment-based configuration by September 30
-- Achieve 5%+ conversion of free tool users (Hypeddit/Toneden) to paid subscribers
-- Enable 20% upgrade rate from FM to full barely.ai suite within 6 months
-- Maintain sub-2-second page load times on 3G networks
-- Reduce customer acquisition cost by 40% vs selling full suite
-
-## Implementation Roadmap
-1. **Core App Variant Detection** (Foundation - no dependencies)
-2. **FM Navigation Experience** (Parallel development possible)
-3. **App Variant Pricing** (Parallel development possible)  
-4. **Deployment Infrastructure** (Requires 1-3 complete)
+**Business Metrics:**
+- Cart abandonment: Reduce by 30%+
+- Conversion rate: Increase by 20%+
+- Mobile conversion: Increase by 40%+
 
 ## Quick Start
-1. This worktree is focused on implementing barely.fm module functionality
+1. This worktree is focused on implementing cart performance optimization
 2. All project artifacts are in .claude/project/
-3. Start with Feature 1 in plan-organized.md
-4. Original project docs: 0_Projects/barely-fm-module/
+3. Start with the organized plan in plan-organized.md
+4. Original project docs: 0_Projects/cart-performance-optimization/
+
+## Critical Issue
+The entire cart page render is blocked waiting for a workspace query to fetch a single brand color. This synchronous blocking query is causing catastrophic performance issues (9.3s load time, 37 Lighthouse score).

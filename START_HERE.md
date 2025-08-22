@@ -1,4 +1,4 @@
-# barely.fm Module Development
+# Cart Performance Optimization Development
 
 ## For New Claude Code Instance
 1. Open Claude Code in this directory
@@ -7,28 +7,21 @@
 4. All project artifacts are available in .claude/project/
 
 ## Development Flow
-- This branch is focused solely on barely-fm-module
-- Use organized plan to track progress through 4 features
-- Original project: 0_Projects/barely-fm-module/
+- This branch is focused solely on cart-performance-optimization
+- Use organized plan to track progress
+- Original project: 0_Projects/cart-performance-optimization/
 
 ## Key Commands After Starting Claude Code
 - Review implementation plan: Read .claude/project/plan-organized.md
 - Check requirements: Read .claude/project/PRD.md
 - Understand user needs: Read .claude/project/JTBD.md
 
-## Project Goal
-Launch barely.fm as a focused, affordable smart link platform targeting price-sensitive musicians, implementing modular architecture strategy to capture the $15-29/month market segment currently using free/limited tools.
+## Critical Performance Issue
+- Current: 9.3s load time, 37 Lighthouse score
+- Target: <2.5s load time, >70 Lighthouse score
+- Root cause: Render-blocking workspace query for brand color
 
-## Technical Approach
-- Environment-based configuration using `NEXT_PUBLIC_CURRENT_APP`
-- Navigation filtering through conditional rendering
-- Variant-specific pricing with separate Stripe IDs
-- Shared codebase with environment-based feature flagging
-
-## Ready to Start
-✓ Dependencies installed
-✓ Project artifacts copied
-✓ Development environment ready
-✓ Feature-based implementation plan available
-
-Begin with Feature 1: Core App Variant Detection and Infrastructure
+## First Steps
+1. Start with Feature 0: Core Infrastructure Setup
+2. Then Feature 1: Eliminate Render-Blocking Query (critical fix)
+3. Follow the organized plan for remaining features
