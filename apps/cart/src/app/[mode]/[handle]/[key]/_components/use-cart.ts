@@ -36,7 +36,6 @@ export function useCart({
 	const { mutate: syncCart } = useMutation(
 		trpc.updateCheckoutFromCheckout.mutationOptions({
 			onMutate: async updateData => {
-				console.log('syncCart mutate');
 				await queryClient.cancelQueries({
 					queryKey: trpc.byIdAndParams.queryKey({ id, handle, key }),
 				});
@@ -61,17 +60,10 @@ export function useCart({
 				return { previousCart };
 			},
 			onSettled: async () => {
-				console.log('syncCart settled');
 				await queryClient.invalidateQueries({
 					queryKey: trpc.byIdAndParams.queryKey({ id, handle, key }),
 				});
 			},
-			// onSuccess: async () => {
-			// 	console.log('syncCart success');
-			// 	await queryClient.invalidateQueries({
-			// 		queryKey: trpc.byIdAndParams.queryKey({ id, handle, key }),
-			// 	});
-			// },
 		}),
 	);
 

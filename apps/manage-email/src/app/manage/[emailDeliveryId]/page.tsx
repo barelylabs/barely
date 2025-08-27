@@ -22,9 +22,6 @@ export default async function ManageEmailDeliveryPage({
 	const { emailDeliveryId } = await params;
 	const { unsubscribed } = searchParamsSchema.parse(await searchParams);
 
-	console.log('emailDeliveryId', emailDeliveryId);
-	console.log('unsubscribed', unsubscribed);
-
 	const emailDelivery = await dbHttp.query.EmailDeliveries.findFirst({
 		where: eq(EmailDeliveries.id, emailDeliveryId),
 		with: {
@@ -53,8 +50,6 @@ export default async function ManageEmailDeliveryPage({
 		emailDelivery.workspace.name.length > 0 ?
 			emailDelivery.workspace.name
 		:	emailDelivery.workspace.handle;
-
-	console.log('workspaceDisplayName', workspaceDisplayName);
 
 	return (
 		<div className='mx-auto flex max-w-lg flex-col items-center gap-10'>

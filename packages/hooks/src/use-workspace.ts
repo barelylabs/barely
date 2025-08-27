@@ -38,7 +38,6 @@ export function useWorkspace({ onBeginSet }: { onBeginSet?: () => void } = {}) {
 
 	const setWorkspace = useCallback(
 		async function (newWorkspace: SessionWorkspace) {
-			console.log('setting workspace to ', newWorkspace, 'from', currentWorkspace);
 			onBeginSet?.();
 
 			// Cancel any in-flight queries

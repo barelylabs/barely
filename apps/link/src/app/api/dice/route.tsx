@@ -6,8 +6,6 @@ export async function POST(req: NextRequest) {
 	const searchParams = getSearchParams(req.url);
 	const { url, linkId } = searchParams;
 
-	console.log('dice url to check for redirects', url);
-
 	if (!url) {
 		return new Response('No URL found in query params', { status: 400 });
 	}

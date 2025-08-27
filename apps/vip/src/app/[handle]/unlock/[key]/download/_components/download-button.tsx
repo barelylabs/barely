@@ -6,6 +6,7 @@ import { cn } from '@barely/utils';
 import { AlertCircle, Check, Download, Loader2 } from 'lucide-react';
 
 import { Button } from '@barely/ui/button';
+import { log } from '@barely/lib/utils/log';
 
 interface DownloadButtonProps {
 	fileUrl: string;
@@ -39,7 +40,14 @@ export function DownloadButton({
 				// The session context will be available from cookies
 				fetch(
 					`/api/trpc/vipRender/swap.getDownloadUrl?input=${encodeURIComponent(JSON.stringify({ token }))}`,
-				).catch(err => console.log('Failed to log download:', err));
+				).catch(err => {
+					await log({
+						message: `Failed to log download: ${err}`,
+						type: 'errors',
+						location:
+							'vip/app/[handle]/unlock/[key]/download/_components/download-button.tsx',
+					});
+				});
 			}
 
 			// Fetch the file as a blob to prevent redirects

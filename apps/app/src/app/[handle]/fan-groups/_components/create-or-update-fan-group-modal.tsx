@@ -128,7 +128,6 @@ export function CreateOrUpdateFanGroupModal({ mode }: { mode: 'create' | 'update
 	/* form submit */
 	const handleSubmit = useCallback(
 		async (data: z.infer<typeof upsertFanGroupSchema>) => {
-			console.log('data', data);
 			await onSubmit({ ...data, conditions: data.conditions ?? [] });
 		},
 		[onSubmit],

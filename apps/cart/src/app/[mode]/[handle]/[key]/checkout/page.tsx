@@ -24,7 +24,6 @@ export default async function CartPage({
 	const cartParams = cartPageSearchParams.safeParse(await searchParams);
 
 	if (!cartParams.success) {
-		console.log('cartParams error', cartParams.error);
 		await log({
 			location: 'cart/app/[mode]/[handle]/[key]/checkout/page.tsx',
 			message: `cartParams error: ${cartParams.error.message}`,

@@ -206,7 +206,6 @@ export function CheckoutForm({
 		if (!stripe || !elements) {
 			return;
 		}
-		// console.log('data', data);
 		await syncCart(data);
 
 		await stripe.confirmPayment({
@@ -217,69 +216,9 @@ export function CheckoutForm({
 		});
 	};
 
-	/* derived state */
-	// const amounts = getAmountsForCheckout(publicFunnel, cart);
-
-	// const { mainProduct, bumpProduct } = publicFunnel;
-	// const mainProductImageSrc = mainProduct?._images[0]?.file.src ?? '';
-	// const mainProductImageS3Key = mainProduct._images[0]?.file.s3Key ?? '';
-	// const mainProductBlurDataUrl = mainProduct._images[0]?.file.blurDataUrl ?? '';
-	// const bumpProductImageS3Key = bumpProduct?._images[0]?.file.s3Key ?? '';
-	// const bumpProductBlurDataUrl = bumpProduct?._images[0]?.file.blurDataUrl ?? '';
-
-	// const bumpNormalPrice = bumpProduct?.price ?? 0;
-
-	// const bumpHasSizes = !!bumpProduct?._apparelSizes.length;
-	// const bumpSizes =
-	// 	bumpProduct?._apparelSizes
-	// 		.map(size => size.size)
-	// 		.sort((a, b) => {
-	// 			const order = APPAREL_SIZES;
-	// 			return order.indexOf(a) - order.indexOf(b);
-	// 		}) ?? [];
-
 	return (
 		<Form form={form} onSubmit={handleSubmit}>
 			<div className='flex w-full max-w-[500px] flex-col gap-8'>
-				{/* <div className='flex flex-col gap-2'>
-							<div className='mb-4 flex w-full flex-col gap-6 sm:flex-row'>
-								<Img
-									alt={mainProduct.name}
-									s3Key={mainProductImageS3Key}
-									blurDataURL={mainProductBlurDataUrl}
-									width={208}
-									height={208}
-									className='h-auto w-[208px] rounded-md bg-neutral-600'
-									priority
-								/>
-								<div className='flex flex-col gap-2'>
-									<Text variant='lg/bold' className='text-brandKit-block'>
-										<WrapBalancer>{mainProduct.name}</WrapBalancer>
-									</Text>
-									<ProductPrice
-										variant='lg/normal'
-										price={amounts.mainProductPrice}
-										normalPrice={mainProduct.price}
-									/>
-								</div>
-							</div>
-
-							{publicFunnel.mainProductPayWhatYouWant && (
-								<div className='flex flex-col gap-2'>
-									<Text variant='md/semibold'>Choose your price!</Text>
-									<CurrencyField
-										control={form.control}
-										name='mainProductPayWhatYouWantPrice'
-										outputUnits='cents'
-										onValueChange={async v => {
-											console.log('paywhatyouwant v', v);
-											await updatePayWhatYouWantPrice(v);
-										}}
-										className='h-12 w-[80px] bg-white text-black'
-									/>
-								</div>
-							)}
-						</div> */}
 				<Suspense fallback={<div>Loading...</div>}>
 					<MainProduct cartId={cartId} handle={handle} cartKey={cartKey} />
 				</Suspense>
@@ -314,204 +253,14 @@ export function CheckoutForm({
 					/>
 				</Suspense>
 
-				{/* <div className='flex min-h-[285px] flex-col gap-2'>
-							<H size='5'>Contact Information</H>
-							<LinkAuthenticationElement
-								onChange={e => {
-									if (e.complete) {
-										if (z.email().safeParse(e.value.email).success) {
-											debouncedUpdateEmail({
-												email: e.value.email,
-											});
-										}
-									}
-								}}
-							/>
-
-							<AddressElement
-								options={{ mode: 'shipping' }}
-								onChange={e => {
-									if (e.complete) {
-										const address = e.value.address;
-
-										debouncedUpdateAddress({
-											firstName: e.value.firstName,
-											lastName: e.value.lastName,
-											fullName: e.value.name,
-											phone: e.value.phone,
-											shippingAddressLine1: address.line1,
-											shippingAddressLine2: address.line2,
-											shippingAddressCity: address.city,
-											shippingAddressState: address.state,
-											shippingAddressPostalCode: address.postal_code,
-											shippingAddressCountry: address.country,
-										});
-									}
-								}}
-							/>
-						</div> */}
-
-				{/* {bumpProduct && (
-							<div className='border-brandKit-block bg-brandKit-bg grid grid-cols-1 gap-4 rounded-md border-3 border-dashed p-6 sm:grid-cols-[4fr_5fr]'>
-								<Img
-									s3Key={bumpProductImageS3Key}
-									blurDataURL={bumpProductBlurDataUrl}
-									alt={bumpProduct.name}
-									width={208}
-									height={208}
-									className='w-fit rounded-md bg-neutral-600'
-								/>
-								<div className='flex flex-col gap-3'>
-									<div>
-										{!bumpHasSizes && (
-											<div className='float-right flex flex-row items-center gap-2 pb-[2px] pl-2'>
-												<Icon.arrowBigRight
-													className={cn(
-														'text-brandKit-block h-[26px] w-[26px]',
-														!cart.addedBump && 'animate-pulse',
-													)}
-													weight='fill'
-												/>
-												<Switch
-													name='addedBump'
-													size='lg'
-													checked={cart.addedBump ?? false}
-													onCheckedChange={c => {
-														updateCart({
-															addedBump: c,
-														});
-
-														logEvent({
-															cartId: cart.id,
-															event: c ? 'cart/addBump' : 'cart/removeBump',
-														});
-													}}
-													className='radix-state-checked:bg-brandKit-block-text radix-state-unchecked:bg-brandKit-block radix-state-checked:border-brandKit-block'
-													toggleClassName='bg-brandKit-block-text radix-state-checked:bg-brandKit-block'
-												/>
-											</div>
-										)}
-										<Text
-											variant='2xl/bold'
-											className='text-brandKit-block -mt-1 align-top !leading-normal'
-										>
-											{publicFunnel.bumpProductHeadline}
-										</Text>
-									</div>
-
-									<Text variant='md/normal'>
-										{publicFunnel.bumpProductDescription?.length ?
-											publicFunnel.bumpProductDescription
-										:	bumpProduct.description}
-									</Text>
-
-									<div className='flex flex-row items-center justify-center gap-2'>
-										{bumpHasSizes && (
-											<Icon.arrowBigDown
-												className={cn(
-													'text-brandKit-block h-4 w-4',
-													!cart.addedBump && 'animate-pulse',
-												)}
-												weight='fill'
-											/>
-										)}
-										<ProductPrice
-											price={bumpProduct.price - (publicFunnel.bumpProductDiscount ?? 0)}
-											normalPrice={bumpNormalPrice}
-										/>
-									</div>
-
-									{bumpHasSizes && (
-										<div className='flex flex-col gap-2'>
-											<ToggleGroup
-												type='single'
-												size='md'
-												className='grid grid-cols-3'
-												value={cart.bumpProductApparelSize ?? ''}
-												onValueChange={size => {
-													const addedBump = size.length > 0 ? true : false;
-													updateCart({
-														addedBump,
-														...(isApparelSize(size) ?
-															{ bumpProductApparelSize: size }
-														:	{ bumpProductApparelSize: null }),
-													});
-													logEvent({
-														cartId: cart.id,
-														event: addedBump ? 'cart/addBump' : 'cart/removeBump',
-													});
-												}}
-											>
-												{bumpSizes.map(size => (
-													<ToggleGroupItem
-														variant='outline'
-														value={size}
-														key={size}
-														aria-label={`Toggle ${size}`}
-														className='hover:bg-brandKit-block/90 data-[state=on]:bg-brandKit-block data-[state=on]:text-brandKit-block-text'
-													>
-														{size}
-													</ToggleGroupItem>
-												))}
-											</ToggleGroup>
-										</div>
-									)}
-								</div>
-							</div>
-						)} */}
-
 				<Suspense fallback={<div>Loading...</div>}>
 					<BumpProduct cartId={cartId} handle={handle} cartKey={cartKey} />
 				</Suspense>
 
-				{/* <div className='flex flex-col gap-2'>
-							<H size='5'>Payment Information</H>
-							<PaymentElement
-								onChange={e => {
-									if (e.complete) {
-										handlePaymentAdded();
-									}
-									// if (e.complete && !paymentAdded) {
-									// 	logEvent({
-									// 		cartId: cart.id,
-									// 		event: 'cart_addPaymentInfo',
-									// 	});
-									// 	setPaymentAdded(true);
-									// }
-								}}
-							/>
-							<CheckboxField
-								className='radix-state-checked:bg-brandKit-block border-border bg-white radix-state-checked:text-white'
-								control={form.control}
-								name='emailMarketingOptIn'
-								label='Yes, I want to receive exclusive offers and updates via email.'
-								labelClassName='text-brandKit-text'
-								onCheckedChange={c => {
-									if (typeof c === 'boolean')
-										updateCart({
-											emailMarketingOptIn: c,
-										});
-								}}
-							/>
-						</div> */}
 				<Suspense fallback={<div>Loading...</div>}>
 					<StripePaymentElement cartId={cartId} handle={handle} cartKey={cartKey} />
 				</Suspense>
-				{/* <Button
-							type={mode === 'live' ? 'submit' : 'button'}
-							fullWidth
-							size='xl'
-							className='hover:bg-brandKit-block/90 bg-brandKit-block text-brandKit-block-text'
-							loading={mode === 'live' && form.formState.isSubmitting}
-							loadingText='Completing order...'
-							onClick={() => {
-								if (mode === 'preview') {
-									router.push(`customize`);
-								}
-							}}
-						>
-							Complete Order
-						</Button> */}
+
 				<SubmitButton mode={mode} />
 			</div>
 		</Form>
@@ -594,62 +343,6 @@ function MainProductPrice({
 		</div>
 	);
 }
-
-// function useUpdatePayWhatYouWantPrice({ cartId, handle, key }: { cartId: string }) {
-// 	const { cart, logEvent, updateCart } = useCart({ id: cartId, handle, key });
-// 	const { publicFunnel } = usePublicFunnel({ handle, key });
-
-// 	const updatePayWhatYouWantPrice = async (value: number) => {
-// 		const queryClient = useQueryClient();
-// 		const trpc = useCartTRPC();
-
-// 		await queryClient.cancelQueries({
-// 			queryKey: trpc.byIdAndParams.queryKey({
-// 				id: cartId,
-// 				handle,
-// 				key,
-// 			}),
-// 		});
-
-// 		const prevCart = queryClient.getQueryData(
-// 			trpc.byIdAndParams.queryKey({
-// 				id: cartId,
-// 				handle,
-// 				key,
-// 			}),
-// 		);
-
-// 		if (!prevCart) return;
-
-// 		queryClient.setQueryData(
-// 			trpc.byIdAndParams.queryKey({
-// 				id: cartId,
-// 				handle,
-// 				key,
-// 			}),
-// 			old => {
-// 				if (!old) return old;
-
-// 				return {
-// 					...old,
-// 					cart: {
-// 						...old.cart,
-// 						mainProductPayWhatYouWantPrice: value,
-// 					},
-// 				};
-// 			},
-// 		);
-
-// 		debouncedUpdatePayWhatYouWantPrice({
-// 			mainProductPayWhatYouWantPrice: value,
-// 		});
-
-// 		logEvent({
-// 			cartId: cart.id,
-// 			event: 'cart/updateMainProductPayWhatYouWantPrice',
-// 		});
-// 	};
-// }
 
 function UpdateMainProductPayWhatYouWantPrice({
 	cartId,

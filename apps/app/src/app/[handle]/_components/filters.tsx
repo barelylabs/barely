@@ -111,7 +111,6 @@ export function Filters<SortBy extends string = string>({
 			const target = e.target as HTMLElement;
 			const existingModalBackdrop = document.getElementById('modal-backdrop');
 			const existingPopoverBackdrop = document.querySelector('.z-50[role="dialog"]');
-			// console.log('existingPopoverBackdrop', existingPopoverBackdrop);
 
 			const hotkeysEnabled =
 				target.tagName !== 'INPUT' &&
@@ -122,24 +121,19 @@ export function Filters<SortBy extends string = string>({
 			const metaOrCtrl = e.metaKey || e.ctrlKey;
 
 			if (e.shiftKey && e.key === 'A' && hotkeysEnabled && !metaOrCtrl) {
-				console.log('toggleArchived');
 				toggleArchived?.();
 			}
 
 			if (e.shiftKey && e.key === 'D' && hotkeysEnabled && !metaOrCtrl) {
-				console.log('toggleDeleted');
 				toggleDeleted?.();
 			}
 			if (e.shiftKey && e.key === 'F' && hotkeysEnabled && !metaOrCtrl) {
-				console.log('toggleFulfilled');
 				toggleFulfilled?.();
 			}
 			if (e.shiftKey && e.key === 'P' && hotkeysEnabled && !metaOrCtrl) {
-				console.log('togglePreorders');
 				togglePreorders?.();
 			}
 			if (e.shiftKey && e.key === 'X' && hotkeysEnabled && !metaOrCtrl) {
-				console.log('toggleCanceled');
 				toggleCanceled?.();
 			}
 			if (e.key === 'Escape' && hotkeysEnabled && !metaOrCtrl) {

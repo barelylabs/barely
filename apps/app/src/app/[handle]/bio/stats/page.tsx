@@ -31,7 +31,6 @@ export default async function BioStatsPage({
 	const parsedFilters = bioStatFiltersSchema.safeParse(filters);
 
 	if (!parsedFilters.success) {
-		console.log('parsedFilters error', parsedFilters.error);
 		redirect(`/${handle}/bio/stats`);
 	}
 

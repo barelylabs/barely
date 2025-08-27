@@ -8,7 +8,6 @@ export const appRouteHandler =
 	({ path, router, auth }: { path: string; router: AnyRouter; auth: Auth | null }) =>
 	async (req: Request) => {
 		const session = await auth?.api.getSession({ headers: req.headers });
-		console.log(`username in appRouteHandler/${path} => `, session?.user.name);
 
 		const response = await fetchRequestHandler({
 			endpoint: '/api/trpc/' + path,

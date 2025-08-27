@@ -53,8 +53,6 @@ export async function createMagicLink({
 	token?: string;
 	expiresIn?: number; // in seconds
 }) {
-	console.log('creating a magic link for', email, callbackPath ?? '/');
-
 	// Check if user exists (optional - Better Auth can create users on first login)
 	const dbUser = await dbHttp.query.Users.findFirst({
 		where: eq(Users.email, email),
@@ -76,8 +74,6 @@ export async function createMagicLink({
 		throw new Error('User not found');
 	}
 
-	console.log('dbUser for magic link', dbUser);
-
 	// Create the magic link token & save to db if not provided
 	const { token } =
 		tokenFromProps ?
@@ -98,8 +94,6 @@ export async function createMagicLink({
 		:	authEnv.NEXT_PUBLIC_APP_BASE_URL;
 	const callbackUrl = encodeURIComponent(callbackPath ?? '/');
 	const magicLink = `${baseUrl}/api/auth/magic-link/verify?token=${token}&callbackURL=${callbackUrl}`;
-
-	console.log('our generated magic link', magicLink);
 
 	return {
 		magicLink,

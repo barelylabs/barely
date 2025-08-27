@@ -1,6 +1,7 @@
 import type { z } from 'zod/v4';
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
+import { log } from '@barely/lib/utils/log';
 import { cartStatFiltersSchema } from '@barely/validators';
 
 import { DashContent } from '~/app/[handle]/_components/dash-content';
@@ -25,7 +26,11 @@ export default async function CartStatsPage({
 
 	const parsedFilters = cartStatFiltersSchema.safeParse(filters);
 	if (!parsedFilters.success) {
-		console.log('parsedFilters error', parsedFilters.error);
+		await log({
+			message: `parsedFilters error, ${JSON.stringify(parsedFilters.error)}`,
+			type: 'errors',
+			location: 'CartStatsPage',
+		});
 		redirect(`/${handle}/carts/stats`);
 	}
 

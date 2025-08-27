@@ -78,7 +78,6 @@ export function initAuth(options: {
 		plugins: [
 			magicLink({
 				sendMagicLink: async ({ email, token, url }) => {
-					console.log('sendMagicLink', email, token, url);
 					await sendMagicLink({ email, token });
 				},
 			}),

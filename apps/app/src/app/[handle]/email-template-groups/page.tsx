@@ -27,7 +27,6 @@ export default async function EmailTemplateGroupsPage({
 	const parsedFilters =
 		emailTemplateGroupSearchParamsSchema.safeParse(awaitedSearchParams);
 	if (!parsedFilters.success) {
-		console.log('parsedFilters error', parsedFilters.error);
 		redirect(`/${awaitedParams.handle}/email-template-groups`);
 	}
 

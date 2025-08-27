@@ -28,10 +28,6 @@ export const publicRenderHandler =
 	}) =>
 	async (req: NextRequest) => {
 		const { handle, key } = getHandleAndKey(app, req);
-		console.log('handle', handle);
-		console.log('key', key);
-		// Debug: Log all cookies available in the request
-		// console.log('API request cookies:', req.cookies.getAll());
 
 		if (!handle || !key) {
 			await log({

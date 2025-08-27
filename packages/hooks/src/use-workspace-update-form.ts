@@ -30,7 +30,6 @@ export function useWorkspaceUpdateForm() {
 	const { mutate: updateWorkspace } = useMutation(
 		trpc.workspace.update.mutationOptions({
 			onMutate: async data => {
-				console.log('onMutate', data);
 				await queryClient.cancelQueries(trpc.workspace.byHandle.pathFilter());
 
 				const handleChanged = data.handle !== workspace.handle;
@@ -48,10 +47,6 @@ export function useWorkspaceUpdateForm() {
 					context.newHandle &&
 					currentPath
 				) {
-					console.log(
-						'pushing to',
-						currentPath.replace(context.oldHandle, context.newHandle),
-					);
 					return router.push(currentPath.replace(context.oldHandle, context.newHandle));
 				}
 

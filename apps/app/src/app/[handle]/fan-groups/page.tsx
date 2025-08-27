@@ -1,6 +1,7 @@
 import type { z } from 'zod/v4';
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
+import { log } from '@barely/lib/utils/log';
 import { fanGroupSearchParamsSchema } from '@barely/validators';
 
 import { DashContent } from '~/app/[handle]/_components/dash-content';
@@ -24,7 +25,11 @@ export default async function FanGroupsPage({
 	const awaitedSearchParams = await searchParams;
 	const parsedFilters = fanGroupSearchParamsSchema.safeParse(awaitedSearchParams);
 	if (!parsedFilters.success) {
-		console.log('parsedFilters error', parsedFilters.error);
+		await log({
+			message: `parsedFilters error, ${JSON.stringify(parsedFilters.error)}`,
+			type: 'errors',
+			location: 'FanGroupsPage',
+		});
 		redirect(`/${awaitedParams.handle}/fan-groups`);
 	}
 

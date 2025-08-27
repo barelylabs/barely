@@ -34,7 +34,6 @@ export function getFileExtension(
 	const index = path.lastIndexOf('.');
 	const ext = index < 0 ? '' : path.substring(index);
 
-	console.log('ext => ', ext);
 	if (allowedFileExtensions.includes(ext as AllowedFileExtension)) {
 		return ext as AllowedFileExtension;
 	}

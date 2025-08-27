@@ -44,7 +44,6 @@ export function FlowBooleanModal() {
 		useFlowStore(useShallow(selector));
 
 	const { productOptions } = useProducts();
-	console.log('productOptions', productOptions);
 
 	const { cartFunnelOptions } = useCartFunnels();
 
@@ -57,10 +56,8 @@ export function FlowBooleanModal() {
 	});
 
 	const handleSubmit = (data: z.infer<typeof flowForm_booleanSchema>) => {
-		console.log(data);
 		setShowBooleanModal(false);
 		updateBooleanNode(currentBooleanNode?.id ?? raise('No boolean node found'), data);
-		// form.reset();
 	};
 
 	useEffect(() => {
