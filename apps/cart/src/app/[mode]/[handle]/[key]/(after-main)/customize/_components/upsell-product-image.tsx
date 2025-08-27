@@ -1,3 +1,5 @@
+'use client';
+
 import { Img } from '@barely/ui/src/elements/img';
 
 import { usePublicFunnel } from '~/app/[mode]/[handle]/[key]/_components/use-public-funnel';

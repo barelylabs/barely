@@ -1,3 +1,5 @@
+'use client';
+
 import type { PublicFunnel } from '@barely/lib/functions/cart.fns';
 import { getAmountsForUpsell } from '@barely/lib/functions/cart.utils';
 
