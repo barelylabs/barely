@@ -3,14 +3,13 @@ import '~/styles/globals.css';
 import React from 'react';
 import { Inter as FontSans } from 'next/font/google';
 import localFont from 'next/font/local';
-import { getFunnelByParams } from '@barely/lib/functions/cart.fns';
 import { cn } from '@barely/utils';
-import { getDynamicStyleVariables } from 'node_modules/@barely/tailwind-config/lib/dynamic-tw.runtime';
 import { Toaster } from 'sonner';
 
 import { TailwindIndicator } from '@barely/ui/components/tailwind-indicator';
 import { Container } from '@barely/ui/container';
 
+import { fetchBrandKitByHandle } from '~/trpc/server';
 import Providers from './providers';
 
 const fontHeading = localFont({
@@ -30,41 +29,34 @@ export default async function RootLayout({
 	params: Promise<{ handle: string; key: string }>;
 	children: React.ReactNode;
 }) {
-	const { handle, key } = await params;
-	const cartFunnel = await getFunnelByParams(handle, key);
-	// todo: 👆 we should move this to upstash and cache on the server, so we can start rendering some things faster (brandStyles, colors, main product image/pricing, etc.) while we wait for the cart to be initialized.
+	const { handle } = await params;
 
-	if (!cartFunnel) {
-		return (
-			<html lang='en' suppressHydrationWarning>
-				<body className='max-h-dvh bg-background font-sans text-foreground antialiased'>
-					<div>Not found</div>
-				</body>
-			</html>
-		);
-	}
+	// const cartId = (await cookies()).get(`${handle}.${key}.cartId`)?.value;
 
-	const { variables: brandStyles } = getDynamicStyleVariables({
-		baseName: 'brand',
-		hue: cartFunnel.workspace.brandHue,
-	});
+	// if (cartId) {
+	// 	console.log('prefetching');
+	// 	prefetch(trpc.publicFunnelByHandleAndKey.queryOptions({ handle, key }));
+	// 	prefetch(trpc.byIdAndParams.queryOptions({ id: cartId, handle, key }));
+	// }
 
-	const style = Object.fromEntries([...brandStyles]);
+	const brandKitPromise = fetchBrandKitByHandle(handle);
 
 	return (
-		<html lang='en' suppressHydrationWarning style={style}>
+		<html lang='en' suppressHydrationWarning>
 			<body
 				className={cn(
-					'max-h-dvh bg-background font-sans text-foreground antialiased',
+					'max-h-dvh font-sans antialiased',
 					fontHeading.variable,
 					fontSans.variable,
 				)}
 			>
-				<Providers>
-					<Container className='max-w-full px-0 py-0'>{children}</Container>
+				<Providers brandKitPromise={brandKitPromise}>
+					<Container className='max-w-full bg-brandKit-bg px-0 py-0 text-brandKit-text'>
+						{children}
+					</Container>
+					<Toaster position='bottom-right' />
+					<TailwindIndicator />
 				</Providers>
-				<Toaster position='bottom-right' />
-				<TailwindIndicator />
 			</body>
 		</html>
 	);

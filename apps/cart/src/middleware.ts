@@ -1,38 +1,85 @@
-import type { NextRequest } from 'next/server';
+import type { NextFetchEvent, NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import {
+	createMainCartFromFunnel,
+	getFunnelByParams,
+} from '@barely/lib/functions/cart.fns';
 import { parseCartUrl, setVisitorCookies } from '@barely/lib/middleware/request-parsing';
 import { log } from '@barely/lib/utils/log';
-import { getAbsoluteUrl } from '@barely/utils';
+import { getAbsoluteUrl, isDevelopment, newId } from '@barely/utils';
 
-export async function middleware(req: NextRequest) {
+// import { trpcCaller } from './trpc/server';
+
+export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	const domain = req.headers.get('host');
 	const pathname = req.nextUrl.pathname;
 
-	// console.log('middleware domain', domain);
-	// console.log('middleware path', pathname);
-	// console.log('middleware query', req.nextUrl.search);
+	const modeAlreadySet =
+		pathname.startsWith('/live/') || pathname.startsWith('/preview/');
+	const { handle, key } =
+		modeAlreadySet ?
+			parseCartUrl(req.url.replace('/live', '').replace('/preview', ''))
+		:	parseCartUrl(req.url);
+
+	let cartId = req.cookies.get(`${handle}.${key}.cartId`)?.value;
+
+	if (pathname.includes('/checkout') && !cartId && handle && key) {
+		// generate optimistic ID
+		cartId = newId('cart');
+
+		const shipTo = {
+			country: isDevelopment() ? 'US' : req.headers.get('x-vercel-ip-country'),
+			state: isDevelopment() ? 'NY' : req.headers.get('x-vercel-ip-country-region'),
+			city: isDevelopment() ? 'New York' : req.headers.get('x-vercel-ip-city'),
+		};
+
+		ev.waitUntil(
+			getFunnelByParams(handle, key)
+				.then(async funnel => {
+					if (!funnel) {
+						throw new Error('Funnel not found');
+					}
+					if (!cartId) {
+						throw new Error('Cart ID not found'); // this should never happen
+					}
+
+					await createMainCartFromFunnel({
+						funnel,
+						visitor: null,
+						shipTo,
+						cartId,
+					});
+				})
+				.catch(async err => {
+					await log({
+						location: 'cart/middleware.ts',
+						message: `error creating cart: ${String(err)}`,
+						type: 'errors',
+					});
+				}),
+		);
+	}
+
+	// trpcCaller
+	// 	.create({
+	// 		handle,
+	// 		key,
+	// 		shipTo,
+	// 		cartId,
+	// 	})
+	// 	.catch(async err => {
+	// 		await log({
+	// 			location: 'cart/middleware.ts',
+	// 			message: `error creating cart: ${String(err)}`,
+	// 			type: 'errors',
+	// 		});
+	// 	}),
 
 	/* the mode is already set in the URL */
-	if (
-		pathname.startsWith('/live/') ||
-		pathname.startsWith('/preview/') ||
-		pathname === '/'
-	) {
+	if (modeAlreadySet || pathname === '/') {
 		const res = NextResponse.next();
 
-		const { handle, key } = parseCartUrl(
-			req.url.replace('/live', '').replace('/preview', ''),
-		);
-
-		if (!handle || !key) {
-			// console.log('missing handle or key for /live or /preview', handle, key);
-			return res;
-		}
-
-		if (!handle || !key) {
-			console.log('missing handle or key for /live or /preview', handle, key);
-			// return res;
-		}
+		if (!handle || !key) return res;
 
 		await setVisitorCookies({ req, res, handle, key, app: 'cart' });
 
@@ -40,10 +87,9 @@ export async function middleware(req: NextRequest) {
 	}
 
 	/* the mode is set in the subdomain. set the mode in the URL */
-
-	const { handle, key } = parseCartUrl(req.url);
-
 	if (!handle || !key) {
+		// todo: it'd be great to block people here based on trolling attempts. return a "stop trolling" 404 response
+
 		await log({
 			location: 'cart/middleware.ts',
 			message: `missing handle or key for ${req.url}`,
@@ -55,7 +101,6 @@ export async function middleware(req: NextRequest) {
 		const previewUrl =
 			getAbsoluteUrl('cart', `preview${pathname}`).replace('www.', 'preview.') +
 			req.nextUrl.search;
-		console.log('pushing to preview', previewUrl);
 
 		const res = NextResponse.rewrite(previewUrl);
 

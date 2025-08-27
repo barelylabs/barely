@@ -28,8 +28,7 @@ export default async function CartSuccessPage({
 
 	if (!cartId) return null;
 
-	const { publicFunnel } = await trpcCaller.byIdAndParams({
-		id: cartId,
+	const publicFunnel = await trpcCaller.publicFunnelByHandleAndKey({
 		handle,
 		key,
 	});
@@ -49,19 +48,26 @@ export default async function CartSuccessPage({
 				currentCartStage={currentCartStage ?? 'checkoutCreated'}
 			/>
 
-			<H size='1' className='mt-4 text-center text-brand'>
+			<H size='1' className='mt-4 text-center text-brandKit-block'>
 				{publicFunnel.successPageHeadline ?? 'Thank you!'}
 			</H>
 
 			<CartMDX markdown={publicFunnel.successPageContent ?? ''} />
 
 			{publicFunnel.successPageCTA && publicFunnel.successPageCTALink && (
-				<Button size='xl' look='brand' href={publicFunnel.successPageCTALink}>
+				<Button
+					size='xl'
+					className='hover:bg-brandKit-block/90 bg-brandKit-block text-brandKit-block-text'
+					href={publicFunnel.successPageCTALink}
+				>
 					{publicFunnel.successPageCTA}
 				</Button>
 			)}
 
-			<WorkspaceSocialLinks workspace={publicFunnel.workspace} />
+			<WorkspaceSocialLinks
+				workspace={publicFunnel.workspace}
+				className='text-brandKit-text'
+			/>
 		</>
 	);
 }

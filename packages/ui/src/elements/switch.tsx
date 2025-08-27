@@ -45,40 +45,52 @@ const switchThumbVariants = cva(
 export interface SwitchAddonProps extends VariantProps<typeof switchVariants> {
 	disabled?: boolean;
 	disabledTooltip?: string | React.ReactNode;
+	toggleClassName?: string;
 }
 
 export const Switch = React.forwardRef<
 	React.ElementRef<typeof SwitchPrimitives.Root>,
 	React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root> & SwitchAddonProps
->(({ className, size, disabled = false, disabledTooltip, ...props }, ref) => {
-	if (disabled && disabledTooltip) {
-		return (
-			<Tooltip content={disabledTooltip}>
-				<div
-					className={cn(
-						switchVariants({ size }),
-						'relative cursor-not-allowed bg-slate-200 radix-state-checked:bg-primary radix-state-unchecked:bg-slate-200',
-					)}
-					data-state='delayed-open'
-				>
+>(
+	(
+		{ className, size, disabled = false, disabledTooltip, toggleClassName, ...props },
+		ref,
+	) => {
+		if (disabled && disabledTooltip) {
+			return (
+				<Tooltip content={disabledTooltip}>
 					<div
-						className={cn(switchThumbVariants({ size }), 'rounded-full bg-background')}
-						data-state={props.checked ? 'checked' : 'unchecked'}
-					/>
-				</div>
-			</Tooltip>
-		);
-	}
+						className={cn(
+							switchVariants({ size }),
+							'relative cursor-not-allowed bg-slate-200 radix-state-checked:bg-primary radix-state-unchecked:bg-slate-200',
+						)}
+						data-state='delayed-open'
+					>
+						<div
+							className={cn(
+								switchThumbVariants({ size }),
+								'rounded-full',
+								toggleClassName,
+							)}
+							data-state={props.checked ? 'checked' : 'unchecked'}
+						/>
+					</div>
+				</Tooltip>
+			);
+		}
 
-	return (
-		<SwitchPrimitives.Root
-			className={cn(switchVariants({ size }), className)}
-			disabled={disabled}
-			{...props}
-			ref={ref}
-		>
-			<SwitchPrimitives.Thumb className={cn(switchThumbVariants({ size }))} />
-		</SwitchPrimitives.Root>
-	);
-});
+		return (
+			<SwitchPrimitives.Root
+				{...props}
+				disabled={disabled}
+				className={cn(switchVariants({ size }), className)}
+				ref={ref}
+			>
+				<SwitchPrimitives.Thumb
+					className={cn(switchThumbVariants({ size }), toggleClassName)}
+				/>
+			</SwitchPrimitives.Root>
+		);
+	},
+);
 Switch.displayName = SwitchPrimitives.Root.displayName;

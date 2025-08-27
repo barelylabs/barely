@@ -1,8 +1,8 @@
 import type { UpdateCart } from '@barely/validators';
 import { cookies } from 'next/headers';
 import { APPAREL_SIZES, WEB_EVENT_TYPES__CART } from '@barely/const';
+import { dbHttp } from '@barely/db/client';
 import { dbPool } from '@barely/db/pool';
-import { CartFunnels } from '@barely/db/sql/cart-funnel.sql';
 import { Carts } from '@barely/db/sql/cart.sql';
 import { publicProcedure } from '@barely/lib/trpc';
 import { getAbsoluteUrl, isProduction, newId, raiseTRPCError, wait } from '@barely/utils';
@@ -14,9 +14,9 @@ import { and, eq, notInArray } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
 import type { generateFileBlurHash } from '../../trigger/file-blurhash.trigger';
+import { getBrandKit } from '../../functions/brand-kit.fns';
 import {
 	createMainCartFromFunnel,
-	funnelWith,
 	getCartById,
 	getFunnelByParams,
 	getProductsShippingRateEstimate,
@@ -34,67 +34,29 @@ import { getStripeConnectAccountId } from '../../functions/stripe-connect.fns';
 import { stripe } from '../../integrations/stripe';
 
 export const cartRoute = {
-	create: publicProcedure
-		.input(
-			z.object({
-				handle: z.string(),
-				key: z.string(),
-				shipTo: z
-					.object({
-						country: z.string().nullable(),
-						state: z.string().nullable(),
-						city: z.string().nullable(),
-					})
-					.optional(),
-			}),
-		)
-		.mutation(async ({ input, ctx }) => {
-			const { handle, key, ...cartParams } = input;
-			const funnel = await getFunnelByParams(handle, key);
-
-			if (!funnel) throw new Error('funnel not found');
-
-			// const cartId = input.cartId ?? newId('cart');
-			const cart = await createMainCartFromFunnel({
-				funnel,
-				...cartParams,
-				cartId: newId('cart'),
-				visitor: ctx.visitor ?? null,
+	brandKitByHandle: publicProcedure
+		.input(z.object({ handle: z.string() }))
+		.query(async ({ input }) => {
+			const brandKit = await getBrandKit({
+				handle: input.handle,
 			});
 
-			return {
-				cart,
-				publicFunnel: getPublicFunnelFromServerFunnel(funnel),
-			};
+			if (!brandKit) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Brand kit not found',
+				});
+			}
+
+			return brandKit;
 		}),
 
-	byIdAndParams: publicProcedure
-		.input(z.object({ id: z.string(), handle: z.string(), key: z.string() }))
-		.query(async ({ input, ctx }) => {
-			console.log('byIdAndParams', input);
-
-			const funnel = await dbPool(ctx.pool).query.CartFunnels.findFirst({
-				where: and(eq(CartFunnels.handle, input.handle), eq(CartFunnels.key, input.key)),
-				with: {
-					...funnelWith,
-
-					_carts: {
-						where: eq(Carts.id, input.id),
-						limit: 1,
-						columns: {
-							fulfillmentStatus: false,
-							fulfilledAt: false,
-							shippingTrackingNumber: false,
-							shippedAt: false,
-							canceledAt: false,
-							refundedAt: false,
-							refundedAmount: false,
-						},
-					},
-				},
-			});
-
-			if (!funnel) throw new Error('funnel not found');
+	publicFunnelByHandleAndKey: publicProcedure
+		.input(z.object({ handle: z.string(), key: z.string() }))
+		.query(async ({ input }) => {
+			const funnel =
+				(await getFunnelByParams(input.handle, input.key)) ??
+				raiseTRPCError({ code: 'NOT_FOUND', message: 'funnel not found' });
 
 			// Trigger blur hash generation if missing (non-blocking)
 			if (
@@ -156,18 +118,124 @@ export const cartRoute = {
 						}),
 				);
 			}
+			return getPublicFunnelFromServerFunnel(funnel);
+		}),
 
-			const cart =
-				funnel._carts[0] ??
-				(await createMainCartFromFunnel({
-					funnel,
-					cartId: input.id,
-					visitor: ctx.visitor ?? null,
-				}));
+	create: publicProcedure
+		.input(
+			z.object({
+				cartId: z.string().optional(),
+				handle: z.string(),
+				key: z.string(),
+				shipTo: z
+					.object({
+						country: z.string().nullable(),
+						state: z.string().nullable(),
+						city: z.string().nullable(),
+					})
+					.optional(),
+			}),
+		)
+		.mutation(async ({ input, ctx }) => {
+			const { handle, key, ...cartParams } = input;
+			const funnel = await getFunnelByParams(handle, key);
+
+			if (!funnel) throw new Error('funnel not found');
+
+			const cart = await createMainCartFromFunnel({
+				funnel,
+				...cartParams,
+				cartId: newId('cart'),
+				visitor: ctx.visitor ?? null,
+			});
 
 			return {
 				cart,
 				publicFunnel: getPublicFunnelFromServerFunnel(funnel),
+			};
+		}),
+
+	byIdAndParams: publicProcedure
+		.input(
+			z.object({
+				id: z.string(),
+				handle: z.string(),
+				key: z.string(),
+				waitForCart: z.boolean().optional().default(true),
+			}),
+		)
+		.query(async ({ input }) => {
+			let cart = await dbHttp.query.Carts.findFirst({
+				where: eq(Carts.id, input.id),
+				columns: {
+					fulfillmentStatus: false,
+					fulfilledAt: false,
+					shippingTrackingNumber: false,
+					shippedAt: false,
+					canceledAt: false,
+					refundedAt: false,
+					refundedAmount: false,
+				},
+			});
+
+			if (!cart && input.waitForCart) {
+				const maxAttempts = 10;
+				const baseDelay = 100;
+				for (let attempt = 0; attempt < maxAttempts; attempt++) {
+					// exponential backoff 100ms, 200ms, 400ms, 800ms, 1600ms, 3200ms, 6400ms, 12800ms, 25600ms, 51200ms
+					const delay = baseDelay * Math.pow(2, attempt);
+					await wait(delay);
+					cart = await dbHttp.query.Carts.findFirst({
+						where: eq(Carts.id, input.id),
+						columns: {
+							fulfillmentStatus: false,
+							fulfilledAt: false,
+							shippingTrackingNumber: false,
+							shippedAt: false,
+							canceledAt: false,
+							refundedAt: false,
+							refundedAmount: false,
+						},
+					});
+					if (cart) break;
+				}
+			}
+			if (!cart) throw new TRPCError({ code: 'NOT_FOUND', message: 'cart not found' });
+
+			// const funnel = await dbPool(ctx.pool).query.CartFunnels.findFirst({
+			// 	where: and(eq(CartFunnels.handle, input.handle), eq(CartFunnels.key, input.key)),
+			// 	with: {
+			// 		...funnelWith,
+
+			// 		_carts: {
+			// 			where: eq(Carts.id, input.id),
+			// 			limit: 1,
+			// 			columns: {
+			// 				fulfillmentStatus: false,
+			// 				fulfilledAt: false,
+			// 				shippingTrackingNumber: false,
+			// 				shippedAt: false,
+			// 				canceledAt: false,
+			// 				refundedAt: false,
+			// 				refundedAmount: false,
+			// 			},
+			// 		},
+			// 	},
+			// });
+
+			// if (!funnel) throw new Error('funnel not found');
+
+			// const cart =
+			// 	funnel._carts[0] ??
+			// 	(await createMainCartFromFunnel({
+			// 		funnel,
+			// 		cartId: input.id,
+			// 		visitor: ctx.visitor ?? null,
+			// 	}));
+
+			return {
+				cart,
+				// publicFunnel: getPublicFunnelFromServerFunnel(funnel),
 			};
 		}),
 

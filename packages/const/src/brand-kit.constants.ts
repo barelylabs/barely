@@ -194,7 +194,24 @@ export const BRAND_KIT_COLOR_PRESET_KEYS = [
 
 export type BrandKitColorPresetKey = (typeof BRAND_KIT_COLOR_PRESET_KEYS)[number];
 
-// Color scheme interface - 3 colors map to style variables
+// Bio-specific color mapping
+export interface BioColorMapping {
+	bgColor: 0 | 1 | 2;
+	textColor: 0 | 1 | 2;
+	blockColor: 0 | 1 | 2;
+	blockTextColor: 0 | 1 | 2;
+	bannerColor: 0 | 1 | 2;
+}
+
+// Cart-specific color mapping
+export interface CartColorMapping {
+	bgColor: 0 | 1 | 2;
+	textColor: 0 | 1 | 2;
+	blockColor: 0 | 1 | 2;
+	blockTextColor: 0 | 1 | 2;
+}
+
+// Legacy color scheme interface (for backwards compatibility)
 export interface BrandKitColorScheme {
 	colors: [string, string, string]; // 3 base colors
 	mapping: {
@@ -209,10 +226,14 @@ export interface BrandKitColorScheme {
 	};
 }
 
-// Color preset with name and color scheme
+// New color preset structure
 export interface BrandKitColorPreset {
 	name: string;
 	type: 'neutral' | 'bold' | 'playful' | 'brand-kit' | 'custom';
+	colors: [string, string, string]; // 3 OKLCH colors
+	bioMapping: BioColorMapping;
+	cartMapping: CartColorMapping;
+	// Legacy field for backwards compatibility
 	colorScheme: BrandKitColorScheme;
 }
 
@@ -224,102 +245,196 @@ export const BRAND_KIT_COLOR_PRESETS: Record<
 	'basic-grayscale': {
 		name: 'Basic Grayscale',
 		type: 'neutral',
+		colors: ['oklch(0.00 0.000 0)', 'oklch(0.60 0.000 0)', 'oklch(1.00 0.000 0)'] as [
+			string,
+			string,
+			string,
+		],
+		bioMapping: {
+			bgColor: 2, // White background
+			textColor: 0, // Black text
+			blockColor: 2, // White blocks
+			blockTextColor: 0, // Black text on blocks
+			bannerColor: 1, // Gray banner
+		},
+		cartMapping: {
+			bgColor: 2, // White background
+			textColor: 0, // Black text
+			blockColor: 0, // Black accents
+			blockTextColor: 2, // White text on blocks
+		},
+		// Legacy field for backwards compatibility
 		colorScheme: {
-			colors: ['#000000', '#808080', '#FFFFFF'],
+			colors: ['oklch(0.00 0.000 0)', 'oklch(0.60 0.000 0)', 'oklch(1.00 0.000 0)'],
 			mapping: {
-				backgroundColor: 2, // White background
-				textColor: 0, // Black text
-				buttonColor: 2, // White buttons
-				buttonTextColor: 0, // Black button text
-				buttonOutlineColor: 0, // Black outline
-				blockColor: 2, // White blocks
-				blockTextColor: 0, // Black block text
-				bannerColor: 1, // Gray banner
+				backgroundColor: 2,
+				textColor: 0,
+				buttonColor: 2,
+				buttonTextColor: 0,
+				buttonOutlineColor: 0,
+				blockColor: 2,
+				blockTextColor: 0,
+				bannerColor: 1,
 			},
 		},
 	},
 	'emerald-sea': {
 		name: 'Emerald Sea',
 		type: 'neutral',
+		colors: ['oklch(0.32 0.052 203)', 'oklch(0.78 0.112 189)', 'oklch(0.99 0.013 145)'],
+		bioMapping: {
+			bgColor: 2, // Light background for bio
+			textColor: 0, // Dark text
+			blockColor: 0, // Dark blocks for impact
+			blockTextColor: 2, // Light text on blocks
+			bannerColor: 1, // Medium accent banner
+		},
+		cartMapping: {
+			bgColor: 2, // Light background for cart
+			textColor: 0, // Dark text
+			blockColor: 1, // Accent color for CTAs
+			blockTextColor: 2, // Light text on accents
+		},
+		// Legacy for backwards compatibility
 		colorScheme: {
-			colors: ['#053B3F', '#4ECDC4', '#F7FFF7'],
+			colors: ['oklch(0.32 0.052 203)', 'oklch(0.78 0.112 189)', 'oklch(0.99 0.013 145)'],
 			mapping: {
-				backgroundColor: 2, // Light mint background
-				textColor: 0, // Dark emerald text
-				buttonColor: 1, // Medium emerald buttons
-				buttonTextColor: 2, // Light mint button text
-				buttonOutlineColor: 0, // Dark emerald outline
-				blockColor: 0, // Dark emerald blocks
-				blockTextColor: 2, // Light mint block text
-				bannerColor: 1, // Medium emerald banner
+				backgroundColor: 2,
+				textColor: 0,
+				buttonColor: 1,
+				buttonTextColor: 2,
+				buttonOutlineColor: 0,
+				blockColor: 0,
+				blockTextColor: 2,
+				bannerColor: 1,
 			},
 		},
 	},
 	'golden-sand': {
 		name: 'Golden Sand',
 		type: 'neutral',
+		colors: ['oklch(0.97 0.009 68)', 'oklch(0.58 0.060 84)', 'oklch(0.16 0.058 269)'],
+		bioMapping: {
+			bgColor: 0, // Light golden background
+			textColor: 2, // Dark blue text
+			blockColor: 0, // Light golden blocks
+			blockTextColor: 2, // Dark blue block text
+			bannerColor: 1, // Golden banner
+		},
+		cartMapping: {
+			bgColor: 0, // Light golden background
+			textColor: 2, // Dark blue text
+			blockColor: 1, // Golden accents for CTAs
+			blockTextColor: 0, // Light text on golden accents
+		},
+		// Legacy for backwards compatibility
 		colorScheme: {
-			colors: ['#F9F4EF', '#8B7750', '#050A26'],
+			colors: ['oklch(0.97 0.009 68)', 'oklch(0.58 0.060 84)', 'oklch(0.16 0.058 269)'],
 			mapping: {
-				backgroundColor: 0, // Light golden background
-				textColor: 2, // Dark blue text
-				buttonColor: 1, // Golden buttons
-				buttonTextColor: 0, // Light golden button text
-				buttonOutlineColor: 2, // Dark blue outline
-				blockColor: 0, // Light golden blocks
-				blockTextColor: 2, // Dark blue block text
-				bannerColor: 1, // Golden banner
+				backgroundColor: 0,
+				textColor: 2,
+				buttonColor: 1,
+				buttonTextColor: 0,
+				buttonOutlineColor: 2,
+				blockColor: 0,
+				blockTextColor: 2,
+				bannerColor: 1,
 			},
 		},
 	},
 	'misty-harbor': {
 		name: 'Misty Harbor',
 		type: 'neutral',
+		colors: ['oklch(0.97 0.000 0)', 'oklch(0.71 0.076 196)', 'oklch(0.36 0.039 249)'],
+		bioMapping: {
+			bgColor: 0, // Light gray background
+			textColor: 2, // Dark gray text
+			blockColor: 0, // Light gray blocks
+			blockTextColor: 2, // Dark gray block text
+			bannerColor: 1, // Teal banner
+		},
+		cartMapping: {
+			bgColor: 0, // Light gray background
+			textColor: 2, // Dark gray text
+			blockColor: 1, // Teal accents for CTAs
+			blockTextColor: 0, // Light text on teal
+		},
+		// Legacy for backwards compatibility
 		colorScheme: {
-			colors: ['#F5F5F5', '#66B2B2', '#2C3E50'],
+			colors: ['oklch(0.97 0.000 0)', 'oklch(0.71 0.076 196)', 'oklch(0.36 0.039 249)'],
 			mapping: {
-				backgroundColor: 0, // Light gray background
-				textColor: 2, // Dark gray text
-				buttonColor: 1, // Teal buttons
-				buttonTextColor: 0, // Light gray button text
-				buttonOutlineColor: 2, // Dark gray outline
-				blockColor: 0, // Light gray blocks
-				blockTextColor: 2, // Dark gray block text
-				bannerColor: 1, // Teal banner
+				backgroundColor: 0,
+				textColor: 2,
+				buttonColor: 1,
+				buttonTextColor: 0,
+				buttonOutlineColor: 2,
+				blockColor: 0,
+				blockTextColor: 2,
+				bannerColor: 1,
 			},
 		},
 	},
 	'twilight-blue': {
 		name: 'Twilight Blue',
 		type: 'neutral',
+		colors: ['oklch(0.29 0.055 277)', 'oklch(0.45 0.063 270)', 'oklch(0.99 0.001 106)'],
+		bioMapping: {
+			bgColor: 2, // Light background
+			textColor: 0, // Dark blue text
+			blockColor: 0, // Dark blue blocks
+			blockTextColor: 2, // Light block text
+			bannerColor: 1, // Medium blue banner
+		},
+		cartMapping: {
+			bgColor: 2, // Light background
+			textColor: 0, // Dark blue text
+			blockColor: 1, // Medium blue accents
+			blockTextColor: 2, // Light text on blue
+		},
+		// Legacy for backwards compatibility
 		colorScheme: {
-			colors: ['#242846', '#475378', '#FBFBFA'],
+			colors: ['oklch(0.29 0.055 277)', 'oklch(0.45 0.063 270)', 'oklch(0.99 0.001 106)'],
 			mapping: {
-				backgroundColor: 2, // Light background
-				textColor: 0, // Dark blue text
-				buttonColor: 1, // Medium blue buttons
-				buttonTextColor: 2, // Light button text
-				buttonOutlineColor: 0, // Dark blue outline
-				blockColor: 0, // Dark blue blocks
-				blockTextColor: 2, // Light block text
-				bannerColor: 1, // Medium blue banner
+				backgroundColor: 2,
+				textColor: 0,
+				buttonColor: 1,
+				buttonTextColor: 2,
+				buttonOutlineColor: 0,
+				blockColor: 0,
+				blockTextColor: 2,
+				bannerColor: 1,
 			},
 		},
 	},
 	'earthy-elegance': {
 		name: 'Earthy Elegance',
 		type: 'neutral',
+		colors: ['oklch(0.40 0.045 46)', 'oklch(0.71 0.076 76)', 'oklch(0.93 0.030 74)'],
+		bioMapping: {
+			bgColor: 2, // Light cream background
+			textColor: 0, // Dark brown text
+			blockColor: 2, // Light cream blocks
+			blockTextColor: 0, // Dark brown block text
+			bannerColor: 1, // Orange banner
+		},
+		cartMapping: {
+			bgColor: 2, // Light cream background
+			textColor: 0, // Dark brown text
+			blockColor: 1, // Orange accents
+			blockTextColor: 2, // Light text on orange
+		},
+		// Legacy for backwards compatibility
 		colorScheme: {
-			colors: ['#5C4033', '#BC9A6A', '#F5E6D3'],
+			colors: ['oklch(0.40 0.045 46)', 'oklch(0.71 0.076 76)', 'oklch(0.93 0.030 74)'],
 			mapping: {
-				backgroundColor: 2, // Light cream background
-				textColor: 0, // Dark brown text
-				buttonColor: 1, // Orange buttons
-				buttonTextColor: 2, // Light cream button text
-				buttonOutlineColor: 0, // Dark brown outline
-				blockColor: 2, // Light cream blocks
-				blockTextColor: 0, // Dark brown block text
-				bannerColor: 1, // Orange banner
+				backgroundColor: 2,
+				textColor: 0,
+				buttonColor: 1,
+				buttonTextColor: 2,
+				buttonOutlineColor: 0,
+				blockColor: 2,
+				blockTextColor: 0,
+				bannerColor: 1,
 			},
 		},
 	},
@@ -328,102 +443,192 @@ export const BRAND_KIT_COLOR_PRESETS: Record<
 	'galaxy-night': {
 		name: 'Galaxy Night',
 		type: 'bold',
+		colors: ['oklch(0.20 0.010 285)', 'oklch(0.58 0.213 290)', 'oklch(1.00 0.001 106)'],
+		bioMapping: {
+			bgColor: 0, // Dark background
+			textColor: 2, // Light text
+			blockColor: 0, // Dark blocks
+			blockTextColor: 2, // Light block text
+			bannerColor: 1, // Purple banner
+		},
+		cartMapping: {
+			bgColor: 2, // Light background for cart
+			textColor: 0, // Dark text
+			blockColor: 1, // Purple accents
+			blockTextColor: 2, // Light text on purple
+		},
+		// Legacy for backwards compatibility
 		colorScheme: {
-			colors: ['#16161B', '#7E59EE', '#FEFEFD'],
+			colors: ['oklch(0.20 0.010 285)', 'oklch(0.58 0.213 290)', 'oklch(1.00 0.001 106)'],
 			mapping: {
-				backgroundColor: 0, // Dark background
-				textColor: 2, // Light text
-				buttonColor: 1, // Purple buttons
-				buttonTextColor: 2, // Light button text
-				buttonOutlineColor: 1, // Purple outline
-				blockColor: 0, // Dark blocks
-				blockTextColor: 2, // Light block text
-				bannerColor: 1, // Purple banner
+				backgroundColor: 0,
+				textColor: 2,
+				buttonColor: 1,
+				buttonTextColor: 2,
+				buttonOutlineColor: 1,
+				blockColor: 0,
+				blockTextColor: 2,
+				bannerColor: 1,
 			},
 		},
 	},
 	'urban-chic': {
 		name: 'Urban Chic',
 		type: 'bold',
+		colors: ['oklch(1.00 0.001 106)', 'oklch(0.76 0.105 204)', 'oklch(0.21 0.000 0)'],
+		bioMapping: {
+			bgColor: 0, // White background
+			textColor: 2, // Black text
+			blockColor: 0, // White blocks
+			blockTextColor: 2, // Black block text
+			bannerColor: 1, // Cyan banner
+		},
+		cartMapping: {
+			bgColor: 0, // White background
+			textColor: 2, // Black text
+			blockColor: 1, // Cyan accents
+			blockTextColor: 0, // White text on cyan
+		},
+		// Legacy for backwards compatibility
 		colorScheme: {
-			colors: ['#FFFFFE', '#4EC3CE', '#181818'],
+			colors: ['oklch(1.00 0.001 106)', 'oklch(0.76 0.105 204)', 'oklch(0.21 0.000 0)'],
 			mapping: {
-				backgroundColor: 0, // White background
-				textColor: 2, // Black text
-				buttonColor: 1, // Cyan buttons
-				buttonTextColor: 0, // White button text
-				buttonOutlineColor: 2, // Black outline
-				blockColor: 0, // White blocks
-				blockTextColor: 2, // Black block text
-				bannerColor: 1, // Cyan banner
+				backgroundColor: 0,
+				textColor: 2,
+				buttonColor: 1,
+				buttonTextColor: 0,
+				buttonOutlineColor: 2,
+				blockColor: 0,
+				blockTextColor: 2,
+				bannerColor: 1,
 			},
 		},
 	},
 	'midnight-sun': {
 		name: 'Midnight Sun',
 		type: 'bold',
+		colors: ['oklch(0.17 0.019 295)', 'oklch(0.74 0.179 57)', 'oklch(1.00 0.001 106)'],
+		bioMapping: {
+			bgColor: 0, // Dark background
+			textColor: 2, // Light text
+			blockColor: 0, // Dark blocks
+			blockTextColor: 2, // Light block text
+			bannerColor: 1, // Orange banner
+		},
+		cartMapping: {
+			bgColor: 2, // Light background for cart
+			textColor: 0, // Dark text
+			blockColor: 1, // Orange accents
+			blockTextColor: 0, // Dark text on orange
+		},
+		// Legacy for backwards compatibility
 		colorScheme: {
-			colors: ['#100E17', '#FD8808', '#FFFFFE'],
+			colors: ['oklch(0.17 0.019 295)', 'oklch(0.74 0.179 57)', 'oklch(1.00 0.001 106)'],
 			mapping: {
-				backgroundColor: 0, // Dark background
-				textColor: 2, // Light text
-				buttonColor: 1, // Orange buttons
-				buttonTextColor: 0, // Dark button text
-				buttonOutlineColor: 1, // Orange outline
-				blockColor: 0, // Dark blocks
-				blockTextColor: 2, // Light block text
-				bannerColor: 1, // Orange banner
+				backgroundColor: 0,
+				textColor: 2,
+				buttonColor: 1,
+				buttonTextColor: 0,
+				buttonOutlineColor: 1,
+				blockColor: 0,
+				blockTextColor: 2,
+				bannerColor: 1,
 			},
 		},
 	},
 	'classic-contrast': {
 		name: 'Classic Contrast',
 		type: 'bold',
+		colors: ['oklch(1.00 0.001 106)', 'oklch(0.87 0.178 96)', 'oklch(0.27 0.060 289)'],
+		bioMapping: {
+			bgColor: 0, // White background
+			textColor: 2, // Dark purple text
+			blockColor: 0, // White blocks
+			blockTextColor: 2, // Dark block text
+			bannerColor: 1, // Yellow banner
+		},
+		cartMapping: {
+			bgColor: 0, // White background
+			textColor: 2, // Dark purple text
+			blockColor: 1, // Yellow accents
+			blockTextColor: 2, // Dark text on yellow
+		},
+		// Legacy for backwards compatibility
 		colorScheme: {
-			colors: ['#FFFFFE', '#F7D100', '#262142'],
+			colors: ['oklch(1.00 0.001 106)', 'oklch(0.87 0.178 96)', 'oklch(0.27 0.060 289)'],
 			mapping: {
-				backgroundColor: 0, // White background
-				textColor: 2, // Dark purple text
-				buttonColor: 1, // Yellow buttons
-				buttonTextColor: 2, // Dark button text
-				buttonOutlineColor: 2, // Dark purple outline
-				blockColor: 0, // White blocks
-				blockTextColor: 2, // Dark block text
-				bannerColor: 1, // Yellow banner
+				backgroundColor: 0,
+				textColor: 2,
+				buttonColor: 1,
+				buttonTextColor: 2,
+				buttonOutlineColor: 2,
+				blockColor: 0,
+				blockTextColor: 2,
+				bannerColor: 1,
 			},
 		},
 	},
 	'silver-dawn': {
 		name: 'Silver Dawn',
 		type: 'bold',
+		colors: ['oklch(0.96 0.004 271)', 'oklch(0.75 0.165 53)', 'oklch(0.16 0.000 0)'],
+		bioMapping: {
+			bgColor: 0, // Light gray background
+			textColor: 2, // Black text
+			blockColor: 0, // Light gray blocks
+			blockTextColor: 2, // Black block text
+			bannerColor: 1, // Orange banner
+		},
+		cartMapping: {
+			bgColor: 0, // Light gray background
+			textColor: 2, // Black text
+			blockColor: 1, // Orange accents
+			blockTextColor: 2, // Black text on orange
+		},
+		// Legacy for backwards compatibility
 		colorScheme: {
-			colors: ['#EFF0F3', '#FD8C3A', '#0D0D0D'],
+			colors: ['oklch(0.96 0.004 271)', 'oklch(0.75 0.165 53)', 'oklch(0.16 0.000 0)'],
 			mapping: {
-				backgroundColor: 0, // Light gray background
-				textColor: 2, // Black text
-				buttonColor: 1, // Orange buttons
-				buttonTextColor: 2, // Black button text
-				buttonOutlineColor: 2, // Black outline
-				blockColor: 0, // Light gray blocks
-				blockTextColor: 2, // Black block text
-				bannerColor: 1, // Orange banner
+				backgroundColor: 0,
+				textColor: 2,
+				buttonColor: 1,
+				buttonTextColor: 2,
+				buttonOutlineColor: 2,
+				blockColor: 0,
+				blockTextColor: 2,
+				bannerColor: 1,
 			},
 		},
 	},
 	'monochrome-accent': {
 		name: 'Monochrome Accent',
 		type: 'bold',
+		colors: ['oklch(0.00 0.000 0)', 'oklch(1.00 0.000 0)', 'oklch(0.65 0.155 262)'],
+		bioMapping: {
+			bgColor: 1, // White background
+			textColor: 0, // Black text
+			blockColor: 1, // White blocks
+			blockTextColor: 0, // Black block text
+			bannerColor: 2, // Blue banner
+		},
+		cartMapping: {
+			bgColor: 1, // White background
+			textColor: 0, // Black text
+			blockColor: 2, // Blue accents
+			blockTextColor: 1, // White text on blue
+		},
+		// Legacy for backwards compatibility
 		colorScheme: {
-			colors: ['#000000', '#FFFFFF', '#5B8DEE'],
+			colors: ['oklch(0.00 0.000 0)', 'oklch(1.00 0.000 0)', 'oklch(0.65 0.155 262)'],
 			mapping: {
-				backgroundColor: 1, // White background
-				textColor: 0, // Black text
-				buttonColor: 2, // Blue buttons
-				buttonTextColor: 1, // White button text
-				buttonOutlineColor: 0, // Black outline
-				blockColor: 1, // White blocks
-				blockTextColor: 0, // Black block text
-				bannerColor: 2, // Blue banner
+				backgroundColor: 1,
+				textColor: 0,
+				buttonColor: 2,
+				buttonTextColor: 1,
+				buttonOutlineColor: 0,
+				blockColor: 1,
+				blockTextColor: 0,
+				bannerColor: 2,
 			},
 		},
 	},
@@ -432,119 +637,224 @@ export const BRAND_KIT_COLOR_PRESETS: Record<
 	'blue-skies': {
 		name: 'Blue Skies',
 		type: 'playful',
+		colors: ['oklch(0.35 0.120 260)', 'oklch(0.60 0.180 250)', 'oklch(0.93 0.050 240)'],
+		bioMapping: {
+			bgColor: 2, // Light blue background
+			textColor: 0, // Dark blue text
+			blockColor: 0, // Dark blue blocks
+			blockTextColor: 2, // Light blue block text
+			bannerColor: 1, // Medium blue banner
+		},
+		cartMapping: {
+			bgColor: 2, // Light blue background
+			textColor: 0, // Dark blue text
+			blockColor: 1, // Medium blue accents
+			blockTextColor: 2, // Light text on blue
+		},
+		// Legacy for backwards compatibility
 		colorScheme: {
-			colors: ['oklch(35% 0.12 260)', 'oklch(60% 0.18 250)', 'oklch(93% 0.05 240)'],
+			colors: ['oklch(0.35 0.120 260)', 'oklch(0.60 0.180 250)', 'oklch(0.93 0.050 240)'],
 			mapping: {
-				backgroundColor: 2, // Light blue background
-				textColor: 0, // Dark blue text
-				buttonColor: 1, // Medium blue buttons
-				buttonTextColor: 2, // Light blue button text
-				buttonOutlineColor: 0, // Dark blue outline
-				blockColor: 0, // Dark blue blocks
-				blockTextColor: 2, // Light blue block text
-				bannerColor: 1, // Medium blue banner
+				backgroundColor: 2,
+				textColor: 0,
+				buttonColor: 1,
+				buttonTextColor: 2,
+				buttonOutlineColor: 0,
+				blockColor: 0,
+				blockTextColor: 2,
+				bannerColor: 1,
 			},
 		},
 	},
 	'neon-nights': {
 		name: 'Neon Nights',
 		type: 'playful',
+		colors: ['oklch(0.22 0.000 0)', 'oklch(0.88 0.228 153)', 'oklch(0.70 0.322 328)'],
+		bioMapping: {
+			bgColor: 0, // Black background
+			textColor: 1, // Neon green text
+			blockColor: 2, // Magenta blocks
+			blockTextColor: 0, // Black block text
+			bannerColor: 1, // Neon green banner
+		},
+		cartMapping: {
+			bgColor: 0, // Black background for bold cart
+			textColor: 1, // Neon green text
+			blockColor: 2, // Magenta accents
+			blockTextColor: 0, // Black text on magenta
+		},
+		// Legacy for backwards compatibility
 		colorScheme: {
-			colors: ['#1A1A1A', '#00FF88', '#FF00FF'],
+			colors: ['oklch(0.22 0.000 0)', 'oklch(0.88 0.228 153)', 'oklch(0.70 0.322 328)'],
 			mapping: {
-				backgroundColor: 0, // Black background
-				textColor: 1, // Neon green text
-				buttonColor: 2, // Magenta buttons
-				buttonTextColor: 0, // Black button text
-				buttonOutlineColor: 1, // Neon green outline
-				blockColor: 2, // Magenta blocks
-				blockTextColor: 0, // Black block text
-				bannerColor: 1, // Neon green banner
+				backgroundColor: 0,
+				textColor: 1,
+				buttonColor: 2,
+				buttonTextColor: 0,
+				buttonOutlineColor: 1,
+				blockColor: 2,
+				blockTextColor: 0,
+				bannerColor: 1,
 			},
 		},
 	},
 	'sunny-pastel': {
 		name: 'Sunny Pastel',
 		type: 'playful',
+		colors: ['oklch(0.97 0.025 87)', 'oklch(0.74 0.147 357)', 'oklch(0.25 0.116 264)'],
+		bioMapping: {
+			bgColor: 0, // Light cream background
+			textColor: 2, // Dark blue text
+			blockColor: 0, // Light cream blocks
+			blockTextColor: 2, // Dark block text
+			bannerColor: 1, // Pink banner
+		},
+		cartMapping: {
+			bgColor: 0, // Light cream background
+			textColor: 2, // Dark blue text
+			blockColor: 1, // Pink accents
+			blockTextColor: 2, // Dark text on pink
+		},
+		// Legacy for backwards compatibility
 		colorScheme: {
-			colors: ['#FEF6E4', '#F280AB', '#031857'],
+			colors: ['oklch(0.97 0.025 87)', 'oklch(0.74 0.147 357)', 'oklch(0.25 0.116 264)'],
 			mapping: {
-				backgroundColor: 0, // Light cream background
-				textColor: 2, // Dark blue text
-				buttonColor: 1, // Pink buttons
-				buttonTextColor: 2, // Dark button text
-				buttonOutlineColor: 2, // Dark blue outline
-				blockColor: 0, // Light cream blocks
-				blockTextColor: 2, // Dark block text
-				bannerColor: 1, // Pink banner
+				backgroundColor: 0,
+				textColor: 2,
+				buttonColor: 1,
+				buttonTextColor: 2,
+				buttonOutlineColor: 2,
+				blockColor: 0,
+				blockTextColor: 2,
+				bannerColor: 1,
 			},
 		},
 	},
 	'tropical-green': {
 		name: 'Tropical Green',
 		type: 'playful',
+		colors: ['oklch(0.97 0.006 170)', 'oklch(0.79 0.156 75)', 'oklch(0.36 0.064 182)'],
+		bioMapping: {
+			bgColor: 0, // Light mint background
+			textColor: 2, // Dark green text
+			blockColor: 0, // Light mint blocks
+			blockTextColor: 2, // Dark green block text
+			bannerColor: 1, // Yellow banner
+		},
+		cartMapping: {
+			bgColor: 0, // Light mint background
+			textColor: 2, // Dark green text
+			blockColor: 1, // Yellow accents
+			blockTextColor: 2, // Dark text on yellow
+		},
+		// Legacy for backwards compatibility
 		colorScheme: {
-			colors: ['#F2F7F5', '#F5AB2B', '#00473F'],
+			colors: ['oklch(0.97 0.006 170)', 'oklch(0.79 0.156 75)', 'oklch(0.36 0.064 182)'],
 			mapping: {
-				backgroundColor: 0, // Light mint background
-				textColor: 2, // Dark green text
-				buttonColor: 1, // Yellow buttons
-				buttonTextColor: 2, // Dark button text
-				buttonOutlineColor: 2, // Dark green outline
-				blockColor: 0, // Light mint blocks
-				blockTextColor: 2, // Dark green block text
-				bannerColor: 1, // Yellow banner
+				backgroundColor: 0,
+				textColor: 2,
+				buttonColor: 1,
+				buttonTextColor: 2,
+				buttonOutlineColor: 2,
+				blockColor: 0,
+				blockTextColor: 2,
+				bannerColor: 1,
 			},
 		},
 	},
 	'oceanic-wave': {
 		name: 'Oceanic Wave',
 		type: 'playful',
+		colors: ['oklch(1.00 0.001 106)', 'oklch(0.83 0.156 176)', 'oklch(0.25 0.089 258)'],
+		bioMapping: {
+			bgColor: 0, // White background
+			textColor: 2, // Dark blue text
+			blockColor: 0, // White blocks
+			blockTextColor: 2, // Dark blue block text
+			bannerColor: 1, // Cyan banner
+		},
+		cartMapping: {
+			bgColor: 0, // White background
+			textColor: 2, // Dark blue text
+			blockColor: 1, // Cyan accents
+			blockTextColor: 2, // Dark text on cyan
+		},
+		// Legacy for backwards compatibility
 		colorScheme: {
-			colors: ['#FFFFFE', '#00E9C5', '#02204C'],
+			colors: ['oklch(1.00 0.001 106)', 'oklch(0.83 0.156 176)', 'oklch(0.25 0.089 258)'],
 			mapping: {
-				backgroundColor: 0, // White background
-				textColor: 2, // Dark blue text
-				buttonColor: 1, // Cyan buttons
-				buttonTextColor: 2, // Dark button text
-				buttonOutlineColor: 2, // Dark blue outline
-				blockColor: 0, // White blocks
-				blockTextColor: 2, // Dark blue block text
-				bannerColor: 1, // Cyan banner
+				backgroundColor: 0,
+				textColor: 2,
+				buttonColor: 1,
+				buttonTextColor: 2,
+				buttonOutlineColor: 2,
+				blockColor: 0,
+				blockTextColor: 2,
+				bannerColor: 1,
 			},
 		},
 	},
 	'royal-purple': {
 		name: 'Royal Purple',
 		type: 'playful',
+		colors: ['oklch(1.00 0.001 106)', 'oklch(0.69 0.103 291)', 'oklch(0.29 0.013 273)'],
+		bioMapping: {
+			bgColor: 0, // White background
+			textColor: 2, // Dark text
+			blockColor: 0, // White blocks
+			blockTextColor: 2, // Dark block text
+			bannerColor: 1, // Purple banner
+		},
+		cartMapping: {
+			bgColor: 0, // White background
+			textColor: 2, // Dark text
+			blockColor: 1, // Purple accents
+			blockTextColor: 2, // Dark text on purple
+		},
+		// Legacy for backwards compatibility
 		colorScheme: {
-			colors: ['#FFFFFE', '#9D91D8', '#292B32'],
+			colors: ['oklch(1.00 0.001 106)', 'oklch(0.69 0.103 291)', 'oklch(0.29 0.013 273)'],
 			mapping: {
-				backgroundColor: 0, // White background
-				textColor: 2, // Dark text
-				buttonColor: 1, // Purple buttons
-				buttonTextColor: 2, // Dark button text
-				buttonOutlineColor: 2, // Dark outline
-				blockColor: 0, // White blocks
-				blockTextColor: 2, // Dark block text
-				bannerColor: 1, // Purple banner
+				backgroundColor: 0,
+				textColor: 2,
+				buttonColor: 1,
+				buttonTextColor: 2,
+				buttonOutlineColor: 2,
+				blockColor: 0,
+				blockTextColor: 2,
+				bannerColor: 1,
 			},
 		},
 	},
 	'blossom-pink': {
 		name: 'Blossom Pink',
 		type: 'playful',
+		colors: ['oklch(0.88 0.066 359)', 'oklch(0.73 0.146 357)', 'oklch(0.21 0.044 265)'],
+		bioMapping: {
+			bgColor: 0, // Light pink background
+			textColor: 2, // Dark text
+			blockColor: 0, // Light pink blocks
+			blockTextColor: 2, // Dark block text
+			bannerColor: 1, // Pink banner
+		},
+		cartMapping: {
+			bgColor: 0, // Light pink background
+			textColor: 2, // Dark text
+			blockColor: 1, // Pink accents
+			blockTextColor: 2, // Dark text on pink
+		},
+		// Legacy for backwards compatibility
 		colorScheme: {
-			colors: ['#FEC7D7', '#EF7EA9', '#0E172C'],
+			colors: ['oklch(0.88 0.066 359)', 'oklch(0.73 0.146 357)', 'oklch(0.21 0.044 265)'],
 			mapping: {
-				backgroundColor: 0, // Light pink background
-				textColor: 2, // Dark text
-				buttonColor: 1, // Pink buttons
-				buttonTextColor: 2, // Dark button text
-				buttonOutlineColor: 2, // Dark outline
-				blockColor: 0, // Light pink blocks
-				blockTextColor: 2, // Dark block text
-				bannerColor: 1, // Pink banner
+				backgroundColor: 0,
+				textColor: 2,
+				buttonColor: 1,
+				buttonTextColor: 2,
+				buttonOutlineColor: 2,
+				blockColor: 0,
+				blockTextColor: 2,
+				bannerColor: 1,
 			},
 		},
 	},

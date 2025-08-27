@@ -2,23 +2,56 @@ import { BrandKits } from '@barely/db/sql';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod/v4';
 
-// Import color scheme type from bio-themes-v2
+// Color index type for cleaner schema definitions
+const colorIndexSchema = z.union([z.literal(0), z.literal(1), z.literal(2)]);
+
+// Bio-specific color mapping
+export const bioColorSchemeSchema = z.object({
+	bgColor: colorIndexSchema,
+	textColor: colorIndexSchema,
+	blockColor: colorIndexSchema,
+	blockTextColor: colorIndexSchema,
+	bannerColor: colorIndexSchema,
+});
+
+// Cart-specific color mapping
+export const cartColorSchemeSchema = z.object({
+	bgColor: colorIndexSchema,
+	textColor: colorIndexSchema,
+	blockColor: colorIndexSchema,
+	blockTextColor: colorIndexSchema,
+});
+
+// Legacy color scheme (for backwards compatibility)
 export const colorSchemeSchema = z.object({
 	colors: z.tuple([z.string(), z.string(), z.string()]),
 	mapping: z.object({
-		backgroundColor: z.union([z.literal(0), z.literal(1), z.literal(2)]),
-		textColor: z.union([z.literal(0), z.literal(1), z.literal(2)]),
-		buttonColor: z.union([z.literal(0), z.literal(1), z.literal(2)]),
-		buttonTextColor: z.union([z.literal(0), z.literal(1), z.literal(2)]),
-		buttonOutlineColor: z.union([z.literal(0), z.literal(1), z.literal(2)]),
-		blockColor: z.union([z.literal(0), z.literal(1), z.literal(2)]),
-		blockTextColor: z.union([z.literal(0), z.literal(1), z.literal(2)]),
-		bannerColor: z.union([z.literal(0), z.literal(1), z.literal(2)]),
+		backgroundColor: colorIndexSchema,
+		textColor: colorIndexSchema,
+		buttonColor: colorIndexSchema,
+		buttonTextColor: colorIndexSchema,
+		buttonOutlineColor: colorIndexSchema,
+		blockColor: colorIndexSchema,
+		blockTextColor: colorIndexSchema,
+		bannerColor: colorIndexSchema,
 	}),
 });
 
+// OKLCH color string validation
+const oklchColorSchema = z
+	.string()
+	.regex(
+		/^oklch\(\s*[\d.]+%?\s+[\d.]+\s+[\d.]+\s*\)$/,
+		'Must be a valid OKLCH color string like "oklch(0.55 0.224 28)"',
+	);
+
 export const insertBrandKitSchema = createInsertSchema(BrandKits, {
-	colorScheme: colorSchemeSchema,
+	color1: oklchColorSchema,
+	color2: oklchColorSchema,
+	color3: oklchColorSchema,
+	bioColorScheme: bioColorSchemeSchema,
+	cartColorScheme: cartColorSchemeSchema,
+	colorScheme: colorSchemeSchema, // Legacy field
 	themeCategory: z
 		.enum(['classic', 'vibrant', 'cozy', 'bold', 'custom'])
 		.optional()
@@ -37,10 +70,18 @@ export const upsertBrandKitSchema = insertBrandKitSchema.partial({
 });
 
 export const selectBrandKitSchema = createSelectSchema(BrandKits, {
-	colorScheme: colorSchemeSchema,
+	color1: oklchColorSchema,
+	color2: oklchColorSchema,
+	color3: oklchColorSchema,
+	bioColorScheme: bioColorSchemeSchema,
+	cartColorScheme: cartColorSchemeSchema,
+	colorScheme: colorSchemeSchema, // Legacy field
 });
 
 // Type exports
+export type BioColorScheme = z.infer<typeof bioColorSchemeSchema>;
+export type CartColorScheme = z.infer<typeof cartColorSchemeSchema>;
+export type ColorScheme = z.infer<typeof colorSchemeSchema>; // Legacy
 export type BrandKit = z.infer<typeof selectBrandKitSchema>;
 export type PublicBrandKit = Omit<
 	BrandKit,
@@ -49,7 +90,6 @@ export type PublicBrandKit = Omit<
 export type InsertBrandKit = z.infer<typeof insertBrandKitSchema>;
 export type UpdateBrandKit = z.infer<typeof updateBrandKitSchema>;
 export type CreateBrandKit = z.infer<typeof createBrandKitSchema>;
-export type ColorScheme = z.infer<typeof colorSchemeSchema>;
 
 export const defaultBrandKit: BrandKit = {
 	id: 'default',
@@ -65,17 +105,35 @@ export const defaultBrandKit: BrandKit = {
 	headerBlurDataUrl: null,
 	themeCategory: 'custom',
 	colorPreset: 'default',
+	// New color fields
+	color1: 'oklch(0.95 0.02 90)', // Light neutral
+	color2: 'oklch(0.55 0.18 260)', // Brand blue
+	color3: 'oklch(0.20 0.02 90)', // Dark neutral
+	bioColorScheme: {
+		bgColor: 0, // Light background
+		textColor: 2, // Dark text
+		blockColor: 1, // Brand blocks
+		blockTextColor: 0, // Light text on blocks
+		bannerColor: 1, // Brand banner
+	},
+	cartColorScheme: {
+		bgColor: 0, // Light background
+		textColor: 2, // Dark text
+		blockColor: 1, // Brand accents
+		blockTextColor: 0, // Light text on blocks
+	},
+	// Legacy field for backwards compatibility
 	colorScheme: {
-		colors: ['#000000', '#000000', '#000000'],
+		colors: ['oklch(0.95 0.02 90)', 'oklch(0.55 0.18 260)', 'oklch(0.20 0.02 90)'],
 		mapping: {
 			backgroundColor: 0,
-			textColor: 0,
-			buttonColor: 0,
+			textColor: 2,
+			buttonColor: 1,
 			buttonTextColor: 0,
-			buttonOutlineColor: 0,
-			blockColor: 0,
+			buttonOutlineColor: 2,
+			blockColor: 1,
 			blockTextColor: 0,
-			bannerColor: 0,
+			bannerColor: 1,
 		},
 	},
 	fontPreset: 'modern.cal',

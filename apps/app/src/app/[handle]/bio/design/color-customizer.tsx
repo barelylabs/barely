@@ -4,7 +4,12 @@ import type { BrandKitColorPreset, BrandKitColorPresetKey } from '@barely/const'
 import type { ColorScheme } from '@barely/validators';
 import { useEffect, useState } from 'react';
 import { BRAND_KIT_COLOR_PRESETS } from '@barely/const';
-import { cn, getAppearancesByType, shuffleColorMapping } from '@barely/utils';
+import {
+	cn,
+	getAppearancesByType,
+	shuffleBioColorMapping,
+	shuffleCartColorMapping,
+} from '@barely/utils';
 import { converter, formatHex } from 'culori';
 import { HexColorPicker } from 'react-colorful';
 
@@ -14,28 +19,54 @@ import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/popover';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@barely/ui/tabs';
 import { Text } from '@barely/ui/typography';
 
-// import type {
-// 	ColorPreset,
-// 	ColorScheme,
-// } from '../../../../../../../packages/lib/utils/src/bio-themes.fns';
-// import {
-// 	COLOR_PRESETS,
-// 	getAppearancesByType,
-// 	shuffleColorMapping,
-// } from '../../../../../../../packages/lib/utils/src/bio-themes.fns';
-
 interface ColorCustomizerProps {
 	colorPreset?: string | null;
 	colorScheme?: ColorScheme | string | null;
+	color1?: string | null;
+	color2?: string | null;
+	color3?: string | null;
+	bioColorScheme?: {
+		bgColor: 0 | 1 | 2;
+		textColor: 0 | 1 | 2;
+		blockColor: 0 | 1 | 2;
+		blockTextColor: 0 | 1 | 2;
+		bannerColor: 0 | 1 | 2;
+	} | null;
+	cartColorScheme?: {
+		bgColor: 0 | 1 | 2;
+		textColor: 0 | 1 | 2;
+		blockColor: 0 | 1 | 2;
+		blockTextColor: 0 | 1 | 2;
+	} | null;
 	onColorPresetChange: (preset: string) => void;
 	onColorSchemeChange: (scheme: ColorScheme) => void;
+	onColorsChange?: (colors: [string, string, string]) => void;
+	onBioColorSchemeChange?: (bioScheme: {
+		bgColor: 0 | 1 | 2;
+		textColor: 0 | 1 | 2;
+		blockColor: 0 | 1 | 2;
+		blockTextColor: 0 | 1 | 2;
+		bannerColor: 0 | 1 | 2;
+	}) => void;
+	onCartColorSchemeChange?: (cartScheme: {
+		bgColor: 0 | 1 | 2;
+		textColor: 0 | 1 | 2;
+		blockColor: 0 | 1 | 2;
+		blockTextColor: 0 | 1 | 2;
+	}) => void;
 }
 
 export function ColorCustomizer({
 	colorPreset,
 	colorScheme,
+	color1,
+	color2,
+	color3,
 	onColorPresetChange,
 	onColorSchemeChange,
+	onColorsChange,
+	onBioColorSchemeChange,
+	onCartColorSchemeChange,
 }: ColorCustomizerProps) {
 	// Determine active tab based on current preset
 	const [activeTab, setActiveTab] = useState<BrandKitColorPreset['type']>(() => {
@@ -76,21 +107,50 @@ export function ColorCustomizer({
 	const handlePresetSelect = (presetKey: keyof typeof BRAND_KIT_COLOR_PRESETS) => {
 		if (presetKey in BRAND_KIT_COLOR_PRESETS) {
 			const preset = BRAND_KIT_COLOR_PRESETS[presetKey];
-			// if (!preset) return; // Guard against undefined preset
 
-			// If clicking the already selected preset, shuffle the colors
-			if (colorPreset === presetKey && currentScheme) {
-				try {
-					const shuffled = shuffleColorMapping(currentScheme);
-					onColorSchemeChange(shuffled);
-				} catch (error) {
-					console.error('Failed to shuffle color mapping:', error);
-					// Fallback: keep the current scheme
-				}
+			// If clicking the already selected preset, shuffle both bio and cart mappings
+			if (colorPreset === presetKey) {
+				// Shuffle bio mapping
+				const newBioMapping = shuffleBioColorMapping();
+				// Shuffle cart mapping
+				const newCartMapping = shuffleCartColorMapping();
+
+				// Create scheme with shuffled mappings but same colors
+				const fullScheme: ColorScheme = {
+					colors: preset.colors,
+					mapping: {
+						// Combine both shuffled mappings
+						backgroundColor: newBioMapping.bgColor,
+						textColor: newBioMapping.textColor,
+						buttonColor: newCartMapping.blockColor, // Cart's blockColor maps to buttonColor
+						buttonTextColor: newCartMapping.blockTextColor,
+						buttonOutlineColor: newBioMapping.textColor,
+						blockColor: newBioMapping.blockColor,
+						blockTextColor: newBioMapping.blockTextColor,
+						bannerColor: newBioMapping.bannerColor,
+					},
+				};
+				onColorSchemeChange(fullScheme);
 			} else {
-				// Otherwise, select the preset
+				// Otherwise, select the preset with its default mappings
 				onColorPresetChange(presetKey);
-				onColorSchemeChange(preset.colorScheme);
+
+				// Create a ColorScheme that includes BOTH bio and cart mappings from the preset
+				const fullScheme: ColorScheme = {
+					colors: preset.colors,
+					mapping: {
+						// Use the preset's predefined bio and cart mappings
+						backgroundColor: preset.bioMapping.bgColor,
+						textColor: preset.bioMapping.textColor,
+						buttonColor: preset.cartMapping.blockColor, // Cart's blockColor maps to buttonColor
+						buttonTextColor: preset.cartMapping.blockTextColor,
+						buttonOutlineColor: preset.bioMapping.textColor,
+						blockColor: preset.bioMapping.blockColor,
+						blockTextColor: preset.bioMapping.blockTextColor,
+						bannerColor: preset.bioMapping.bannerColor,
+					},
+				};
+				onColorSchemeChange(fullScheme);
 			}
 		}
 	};
@@ -99,7 +159,7 @@ export function ColorCustomizer({
 		preset: { key: BrandKitColorPresetKey } & BrandKitColorPreset,
 	) => {
 		const isSelected = colorPreset === preset.key;
-		const { colors } = preset.colorScheme;
+		const { colors } = preset; // Use colors directly from preset
 
 		return (
 			<button
@@ -158,6 +218,19 @@ export function ColorCustomizer({
 		);
 	};
 
+	// Handle shuffle all
+	const handleShuffleAll = () => {
+		if (onBioColorSchemeChange && onCartColorSchemeChange) {
+			// Shuffle bio mapping
+			const bioMapping = shuffleBioColorMapping();
+			onBioColorSchemeChange(bioMapping);
+
+			// Shuffle cart mapping
+			const cartMapping = shuffleCartColorMapping();
+			onCartColorSchemeChange(cartMapping);
+		}
+	};
+
 	return (
 		<div className='space-y-4'>
 			<Tabs
@@ -193,16 +266,69 @@ export function ColorCustomizer({
 					<CustomColorPicker
 						colorPreset={colorPreset}
 						colorScheme={currentScheme}
-						onColorSchemeChange={scheme => {
-							onColorPresetChange('custom');
-							onColorSchemeChange(scheme);
-						}}
+						color1={color1}
+						color2={color2}
+						color3={color3}
+						onColorsChange={onColorsChange}
+						onColorPresetChange={onColorPresetChange}
 					/>
 				</TabsContent>
 			</Tabs>
 
+			{/* Shuffle Buttons - Outside tabs, apply to all presets */}
+			<div className='flex flex-col gap-2'>
+				<Text variant='sm/semibold' className='mb-1'>
+					Shuffle Color Mappings
+				</Text>
+				<Text variant='xs/normal' className='mb-2 text-muted-foreground'>
+					Rearrange how your colors are applied to different elements
+				</Text>
+				<div className='flex flex-wrap gap-2'>
+					<Button
+						type='button'
+						size='sm'
+						onClick={handleShuffleAll}
+						className='gap-2'
+						disabled={!onBioColorSchemeChange || !onCartColorSchemeChange}
+					>
+						<Icon.shuffle className='h-4 w-4' />
+						Shuffle All
+					</Button>
+					<Button
+						type='button'
+						size='sm'
+						onClick={() => {
+							if (onBioColorSchemeChange) {
+								const bioMapping = shuffleBioColorMapping();
+								onBioColorSchemeChange(bioMapping);
+							}
+						}}
+						className='gap-2 border border-border bg-background text-foreground hover:bg-accent'
+						disabled={!onBioColorSchemeChange}
+					>
+						<Icon.shuffle className='h-4 w-4' />
+						Shuffle Bio
+					</Button>
+					<Button
+						type='button'
+						size='sm'
+						onClick={() => {
+							if (onCartColorSchemeChange) {
+								const cartMapping = shuffleCartColorMapping();
+								onCartColorSchemeChange(cartMapping);
+							}
+						}}
+						className='gap-2 border border-border bg-background text-foreground hover:bg-accent'
+						disabled={!onCartColorSchemeChange}
+					>
+						<Icon.shuffle className='h-4 w-4' />
+						Shuffle Cart
+					</Button>
+				</div>
+			</div>
+
 			{/* Info about clicking to shuffle */}
-			{colorPreset && (
+			{colorPreset && colorPreset !== 'custom' && (
 				<div className='rounded-lg bg-muted/50 p-3'>
 					<Text variant='xs/normal' className='text-muted-foreground'>
 						💡 Click the selected color scheme again to shuffle how colors map to elements
@@ -217,13 +343,21 @@ export function ColorCustomizer({
 interface CustomColorPickerProps {
 	colorPreset?: string | null;
 	colorScheme: ColorScheme | null;
-	onColorSchemeChange: (scheme: ColorScheme) => void;
+	color1?: string | null;
+	color2?: string | null;
+	color3?: string | null;
+	onColorsChange?: (colors: [string, string, string]) => void;
+	onColorPresetChange: (preset: string) => void;
 }
 
 function CustomColorPicker({
 	colorPreset,
 	colorScheme,
-	onColorSchemeChange,
+	color1,
+	color2,
+	color3,
+	onColorsChange,
+	onColorPresetChange,
 }: CustomColorPickerProps) {
 	const oklch = converter('oklch');
 
@@ -263,25 +397,6 @@ function CustomColorPicker({
 		return oklchString.startsWith('#') ? oklchString : '#000000';
 	};
 
-	// Initialize with default colors or existing scheme
-	const defaultScheme: ColorScheme = colorScheme ?? {
-		colors: ['oklch(0.77 0.141 91)', 'oklch(0.73 0.151 65)', 'oklch(0.69 0.172 48)'] as [
-			string,
-			string,
-			string,
-		],
-		mapping: {
-			backgroundColor: 0,
-			textColor: 2,
-			buttonColor: 1,
-			buttonTextColor: 0,
-			buttonOutlineColor: 2,
-			blockColor: 0,
-			blockTextColor: 2,
-			bannerColor: 1,
-		},
-	};
-
 	// Convert OKLCH colors to hex for the color picker
 	// Only use colorScheme if appearancePreset is 'custom', otherwise use defaults
 	const initialColors =
@@ -313,28 +428,26 @@ function CustomColorPicker({
 		const newColors = [...colors] as [string, string, string];
 		newColors[index] = color;
 		setColors(newColors);
-
-		// Convert to OKLCH and update immediately (real-time preview)
-		const oklchColors = newColors.map(hexToOklch) as [string, string, string];
-		onColorSchemeChange({
-			colors: oklchColors,
-			mapping: defaultScheme.mapping,
-		});
 	};
 
-	const handleShuffle = () => {
-		try {
-			// Always use the current colors and create a new shuffled mapping
+	const handleApplyColors = () => {
+		if (onColorsChange) {
+			// Convert hex colors to OKLCH and apply
 			const oklchColors = colors.map(hexToOklch) as [string, string, string];
-			const currentScheme: ColorScheme = {
-				colors: oklchColors,
-				mapping: colorScheme?.mapping ?? defaultScheme.mapping,
-			};
-			const shuffled = shuffleColorMapping(currentScheme);
-			onColorSchemeChange(shuffled);
-		} catch (error) {
-			console.error('Failed to shuffle color mapping:', error);
-			// Fallback: keep the current scheme
+			onColorsChange(oklchColors);
+			onColorPresetChange('custom');
+		}
+	};
+
+	const handleSyncFromPreset = () => {
+		// Pull the current preset colors into the custom color pickers
+		if (color1 && color2 && color3) {
+			const newColors: [string, string, string] = [
+				oklchToHex(color1),
+				oklchToHex(color2),
+				oklchToHex(color3),
+			];
+			setColors(newColors);
 		}
 	};
 
@@ -412,20 +525,34 @@ function CustomColorPicker({
 				</div>
 			</div>
 
-			{/* Shuffle Button */}
-			<div className='flex justify-center'>
-				<Button type='button' size='sm' onClick={handleShuffle} className='gap-2'>
-					<Icon.shuffle className='h-4 w-4' />
-					{colorPreset === 'custom' ? 'Shuffle Custom Colors' : 'Apply Custom Colors'}
+			{/* Custom Color Action Buttons */}
+			<div className='flex justify-center gap-2'>
+				<Button
+					type='button'
+					size='sm'
+					onClick={handleSyncFromPreset}
+					className='gap-2 border border-border bg-background text-foreground hover:bg-accent'
+					disabled={!color1 || !color2 || !color3 || colorPreset === 'custom'}
+					title={
+						colorPreset === 'custom' ?
+							'Already using custom colors'
+						:	'Pull colors from current preset'
+					}
+				>
+					<Icon.download className='h-4 w-4' />
+					Sync from Preset
+				</Button>
+				<Button
+					type='button'
+					size='sm'
+					onClick={handleApplyColors}
+					className='gap-2'
+					disabled={!onColorsChange}
+				>
+					<Icon.check className='h-4 w-4' />
+					Apply Custom Colors
 				</Button>
 			</div>
-
-			{/* <div className='rounded-lg bg-muted/50 p-3'>
-				<Text variant='xs/normal' className='text-muted-foreground'>
-					💡 Your custom colors will be converted to OKLCH format for better color
-					consistency across devices
-				</Text>
-			</div> */}
 		</div>
 	);
 }
