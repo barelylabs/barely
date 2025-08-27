@@ -1,9 +1,5 @@
 import type { NextFetchEvent, NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import {
-	createMainCartFromFunnel,
-	getFunnelByParams,
-} from '@barely/lib/functions/cart.fns';
 import { parseCartUrl, setVisitorCookies } from '@barely/lib/middleware/request-parsing';
 import { log } from '@barely/lib/utils/log';
 import { getAbsoluteUrl, isDevelopment, newId } from '@barely/utils';
@@ -33,30 +29,26 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 			city: isDevelopment() ? 'New York' : req.headers.get('x-vercel-ip-city'),
 		};
 
+		// Call the API route to create the cart
 		ev.waitUntil(
-			getFunnelByParams(handle, key)
-				.then(async funnel => {
-					if (!funnel) {
-						throw new Error('Funnel not found');
-					}
-					if (!cartId) {
-						throw new Error('Cart ID not found'); // this should never happen
-					}
-
-					await createMainCartFromFunnel({
-						funnel,
-						visitor: null,
-						shipTo,
-						cartId,
-					});
-				})
-				.catch(async err => {
-					await log({
-						location: 'cart/middleware.ts',
-						message: `error creating cart: ${String(err)}`,
-						type: 'errors',
-					});
+			fetch(`${req.nextUrl.origin}/api/cart/create`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					handle,
+					key,
+					cartId,
+					shipTo,
 				}),
+			}).catch(async err => {
+				await log({
+					location: 'cart/middleware.ts',
+					message: `error calling cart creation API: ${String(err)}`,
+					type: 'errors',
+				});
+			}),
 		);
 	}
 
@@ -81,7 +73,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 
 		if (!handle || !key) return res;
 
-		await setVisitorCookies({ req, res, handle, key, app: 'cart' });
+		await setVisitorCookies({ req, res, handle, key, app: 'cart', cartId });
 
 		return res;
 	}
@@ -104,7 +96,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 
 		const res = NextResponse.rewrite(previewUrl);
 
-		await setVisitorCookies({ req, res, handle, key, app: 'cart' });
+		await setVisitorCookies({ req, res, handle, key, app: 'cart', cartId });
 
 		return res;
 	}
@@ -114,7 +106,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 
 	const res = NextResponse.rewrite(liveUrl);
 
-	await setVisitorCookies({ req, res, handle, key, app: 'cart' });
+	await setVisitorCookies({ req, res, handle, key, app: 'cart', cartId });
 
 	return res;
 }

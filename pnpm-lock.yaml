@@ -81,6 +81,9 @@ catalogs:
     sonner:
       specifier: ^2.0.6
       version: 2.0.6
+    stripe:
+      specifier: ^18.4.0
+      version: 18.4.0
     superjson:
       specifier: ^2.2.2
       version: 2.2.2
@@ -570,8 +573,8 @@ importers:
         specifier: 'catalog:'
         version: 2.0.6(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       stripe:
-        specifier: ^14.21.0
-        version: 14.25.0
+        specifier: 'catalog:'
+        version: 18.4.0(@types/node@20.19.1)
       zod:
         specifier: 'catalog:'
         version: 3.25.67
@@ -2182,8 +2185,8 @@ importers:
         specifier: 3.7.0
         version: 3.7.0
       stripe:
-        specifier: ^14.21.0
-        version: 14.25.0
+        specifier: 'catalog:'
+        version: 18.4.0(@types/node@20.19.1)
       superjson:
         specifier: 'catalog:'
         version: 2.2.2
@@ -14694,9 +14697,14 @@ packages:
   strip-literal@3.0.0:
     resolution: {integrity: sha512-TcccoMhJOM3OebGhSBEmp3UZ2SfDMZUEBdRA/9ynfLi8yYajyWX3JiXArcJt4Umh4vISpspkQIY8ZZoCqjbviA==}
 
-  stripe@14.25.0:
-    resolution: {integrity: sha512-wQS3GNMofCXwH8TSje8E1SE8zr6ODiGtHQgPtO95p9Mb4FhKC9jvXR2NUTpZ9ZINlckJcFidCmaTFV4P6vsb9g==}
+  stripe@18.4.0:
+    resolution: {integrity: sha512-LKFeDnDYo4U/YzNgx2Lc9PT9XgKN0JNF1iQwZxgkS4lOw5NunWCnzyH5RhTlD3clIZnf54h7nyMWkS8VXPmtTQ==}
     engines: {node: '>=12.*'}
+    peerDependencies:
+      '@types/node': '>=12.x.x'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
 
   strnum@1.1.2:
     resolution: {integrity: sha512-vrN+B7DBIoTTZjnPNewwhx6cBA/H+IS7rfW68n7XxC1y7uoiGQBxaKzqucGUgavX15dJgiGztLJ8vxuEzwqBdA==}
@@ -30866,10 +30874,11 @@ snapshots:
     dependencies:
       js-tokens: 9.0.1
 
-  stripe@14.25.0:
+  stripe@18.4.0(@types/node@20.19.1):
     dependencies:
-      '@types/node': 22.15.32
       qs: 6.14.0
+    optionalDependencies:
+      '@types/node': 20.19.1
 
   strnum@1.1.2: {}
 
