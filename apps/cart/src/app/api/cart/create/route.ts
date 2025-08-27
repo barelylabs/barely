@@ -23,8 +23,8 @@ export interface CreateCartBody {
 }
 
 // Rate limiters for different scenarios
-const ipRateLimiter = ratelimit(10, '1 m'); // 20 requests per minute per IP
-const funnelRateLimiter = ratelimit(1000, '1 h'); // 100 carts per hour per funnel
+const ipRateLimiter = ratelimit(10, '1 m'); // 10 requests per minute per IP
+const funnelRateLimiter = ratelimit(1000, '1 h'); // 1000 carts per hour per funnel
 
 export async function POST(request: Request) {
 	try {
