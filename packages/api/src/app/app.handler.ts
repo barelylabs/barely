@@ -7,7 +7,7 @@ import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 export const appRouteHandler =
 	({ path, router, auth }: { path: string; router: AnyRouter; auth: Auth | null }) =>
 	async (req: Request) => {
-		const session = await auth?.api.getSession({ headers: req.headers });
+		// const session = await auth?.api.getSession({ headers: req.headers });
 
 		const response = await fetchRequestHandler({
 			endpoint: '/api/trpc/' + path,

@@ -159,7 +159,7 @@ export async function recordBioEvent({
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : undefined,
 		});
 
-		const tinybirdRes = await ingestWebEvent(eventData);
+		await ingestWebEvent(eventData);
 	} catch (error) {
 		await log({
 			type: 'errors',
