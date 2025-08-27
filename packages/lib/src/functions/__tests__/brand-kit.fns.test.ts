@@ -7,7 +7,7 @@ import { getBrandKit, getValidatedCartBrandKit } from '../brand-kit.fns';
 const mockSelect = vi.fn();
 vi.mock('@barely/db/client', () => ({
 	dbHttp: {
-		select: mockSelect,
+		select: () => mockSelect() as unknown,
 	},
 }));
 
