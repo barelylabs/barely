@@ -1,9 +1,14 @@
 import { libEnv } from '@barely/lib/env';
 import { createEnv } from '@t3-oss/env-nextjs';
+import { z } from 'zod/v4';
 
 export const cartEnv = createEnv({
 	extends: [libEnv],
+	server: {
+		CART_INTERNAL_API_SECRET: z.string().optional().default('cart-internal-secret-dev'),
+	},
 	experimental__runtimeEnv: {
+		CART_INTERNAL_API_SECRET: process.env.CART_INTERNAL_API_SECRET,
 		NEXT_PUBLIC_APP_BASE_URL: process.env.NEXT_PUBLIC_APP_BASE_URL,
 		NEXT_PUBLIC_APP_DEV_PORT: process.env.NEXT_PUBLIC_APP_DEV_PORT,
 		NEXT_PUBLIC_BIO_BASE_URL: process.env.NEXT_PUBLIC_BIO_BASE_URL,

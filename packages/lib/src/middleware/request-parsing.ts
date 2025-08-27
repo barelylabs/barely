@@ -449,6 +449,7 @@ export async function setVisitorCookies({
 	req,
 	res,
 	app,
+	cartId,
 	...handleAndKey
 }: {
 	req: NextRequest;
@@ -456,6 +457,7 @@ export async function setVisitorCookies({
 	handle: string | null;
 	key: string | null;
 	app: 'cart' | 'link' | 'fm' | 'page' | 'press' | 'nyc' | 'www' | 'vip';
+	cartId?: string;
 }) {
 	const handle = handleAndKey.handle ?? '_';
 	const key = handleAndKey.key ?? '_';
@@ -474,21 +476,29 @@ export async function setVisitorCookies({
 		});
 	} else if (!req.cookies.get(`${handle}.${key}.bsid`)) {
 		// Only generate new sessionId if not in query params and not in cookies
-		res.cookies.set(
-			`${handle}.${key}.bsid`,
-			app === 'cart' ? newId('cart')
+		// For cart app, use provided cartId if available, otherwise generate new ID
+		const sessionId =
+			app === 'cart' ? (cartId ?? newId('cart'))
 			: app === 'link' ? newId('linkClick')
 			: app === 'fm' ? newId('fmSession')
 			: app === 'page' ? newId('landingPageSession')
 			: app === 'www' ? newId('wwwSession')
 			: app === 'nyc' ? newId('nycSession')
 			: app === 'vip' ? newId('vipSession')
-			: newId('barelySession'),
-			{
-				httpOnly: true,
-				maxAge: 60 * 60 * 24,
-			},
-		);
+			: newId('barelySession');
+
+		res.cookies.set(`${handle}.${key}.bsid`, sessionId, {
+			httpOnly: true,
+			maxAge: 60 * 60 * 24,
+		});
+	}
+
+	// For cart app, also set the cartId cookie if provided
+	if (app === 'cart' && cartId && !req.cookies.get(`${handle}.${key}.cartId`)) {
+		res.cookies.set(`${handle}.${key}.cartId`, cartId, {
+			httpOnly: true,
+			maxAge: 60 * 60 * 24,
+		});
 	}
 
 	if (referer && !req.cookies.get(`${handle}.${key}.sessionReferer`))

@@ -1,0 +1,14 @@
+{
+  "current_feature": "cart-performance-brandkit",
+  "stage": "feature-defined",
+  "context_used": false,
+  "related_projects": ["bio-mvp"],
+  "differentiation": "applying-proven-pattern-to-critical-performance-issue",
+  "validation_data": {
+    "lighthouse_score": 37,
+    "lcp_seconds": 9.3,
+    "tbt_ms": 3700,
+    "speed_index_seconds": 6.2
+  },
+  "next_command": "product-development:02_create-jtbd"
+}

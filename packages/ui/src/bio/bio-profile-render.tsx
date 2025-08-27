@@ -84,11 +84,12 @@ export function BioProfileRender() {
 				{/* Title and subtitle container */}
 				<div className={cn(isHeroStyle && 'text-center')}>
 					<h1
-						className={cn('text-3xl', (isHeroStyle || isCenteredStyle) && 'mb-2')}
+						className={cn(
+							'text-3xl font-bold text-brandKit-text',
+							(isHeroStyle || isCenteredStyle) && 'mb-2',
+						)}
 						style={{
-							color: computedStyles.colors.text,
 							fontFamily: computedStyles.fonts.headingFont,
-							fontWeight: 700,
 						}}
 					>
 						{bio.handle}
@@ -96,11 +97,9 @@ export function BioProfileRender() {
 
 					{brandKit.shortBio && (
 						<p
-							className='text-sm'
+							className='text-sm font-normal text-brandKit-text'
 							style={{
-								color: computedStyles.colors.text,
 								fontFamily: computedStyles.fonts.bodyFont,
-								fontWeight: 400,
 							}}
 						>
 							{brandKit.shortBio}

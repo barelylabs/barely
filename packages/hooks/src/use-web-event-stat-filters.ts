@@ -20,7 +20,6 @@ export function useWebEventStatFilters() {
 
 	const formatTimestamp = useCallback(
 		(d: string) => {
-			// console.log('d => ', d);
 			const date = getDateFromIsoString(d);
 
 			switch (q.data.dateRange) {

@@ -56,7 +56,7 @@ export function ImportFansFromCsvModal() {
 		trpc.fan.generateCsvMapping.mutationOptions({
 			onSuccess: data => {
 				const { email, firstName, lastName, fullName, phoneNumber, createdAt } = data;
-				console.log(data);
+
 				setValue('email', email);
 				setValue('firstName', firstName);
 				setValue('lastName', lastName);

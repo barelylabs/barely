@@ -16,6 +16,7 @@ export type FieldProps<
 	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 > = Omit<ControllerProps<TFieldValues, TName>, 'render'> & {
 	label?: ReactNode;
+	labelClassName?: string;
 	disabled?: boolean;
 	allowEnable?: boolean;
 	allowEnableConfirmMessage?: string;

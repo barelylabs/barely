@@ -1,28 +1,37 @@
 'use client';
 
-import type { CartRouterOutputs } from '@barely/api/public/cart.router';
 import type { InsertCart } from '@barely/validators';
 import type { StripeElementsOptions } from '@stripe/stripe-js';
 import { useState } from 'react';
-import { isProduction } from '@barely/utils';
+import { getComputedStyles, isProduction, oklchToHex } from '@barely/utils';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 
+import { useBrandKit } from '@barely/ui/src/bio';
+
 import { cartEnv } from '~/env';
+import { useCart } from './use-cart';
+import { usePublicFunnel } from './use-public-funnel';
 
 export function ElementsProvider({
-	initialData,
+	// stage,
+	cartId,
+	handle,
+	cartKey,
 	children,
-	theme,
 }: {
 	stage: InsertCart['stage'];
-	initialData: CartRouterOutputs['create'] | CartRouterOutputs['byIdAndParams'];
+	cartId: string;
+	handle: string;
+	cartKey: string;
+
 	children: React.ReactNode;
-	theme?: {
-		colorPrimary?: string;
-	};
 }) {
-	const { cart, publicFunnel } = initialData;
+	const brandKit = useBrandKit();
+	const computedStyles = getComputedStyles(brandKit, 'cart');
+
+	const { cart } = useCart({ id: cartId, handle, key: cartKey });
+	const { publicFunnel } = usePublicFunnel({ handle, key: cartKey });
 
 	const stripeAccount =
 		isProduction() ?
@@ -36,16 +45,17 @@ export function ElementsProvider({
 		appearance: {
 			theme: 'stripe',
 			variables: {
-				colorPrimary: theme?.colorPrimary ?? '',
 				colorBackground: '#ffffff',
-
+				colorPrimary: oklchToHex(computedStyles.colors.block),
+				colorTextSecondary: oklchToHex(computedStyles.colors.text),
+				colorDanger: oklchToHex(computedStyles.colors.block),
 				spacingUnit: '4px',
 				fontSizeBase: '14px',
 				fontFamily: 'Inter, sans-serif',
 			},
 			rules: {
-				'.Label': { color: '#ffffff' },
-				'.CheckboxLabel': { color: '#ffffff' },
+				'.Label': { color: oklchToHex(computedStyles.colors.text) },
+				'.CheckboxLabel': { color: oklchToHex(computedStyles.colors.text) },
 			},
 		},
 		fonts: [

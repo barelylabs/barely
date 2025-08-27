@@ -3,7 +3,12 @@
 // import type { PublicBioBlock } from '@barely/lib/functions/bio.fns';
 import type { AppRouterOutputs } from '@barely/lib/trpc/app.route';
 import React from 'react';
-import { cn, getComputedStyles } from '@barely/utils';
+import {
+	cn,
+	getBrandKitOutlineClass,
+	getBrandKitRadiusClass,
+	getComputedStyles,
+} from '@barely/utils';
 
 import { Button } from '../elements/button';
 import { Img } from '../elements/img';
@@ -52,8 +57,8 @@ export function BioBlocksRender({ blocks }: BioBlocksRenderProps) {
 								{block.title && (
 									<Text
 										variant='md/semibold'
+										className='text-brandKit-text'
 										style={{
-											color: computedStyles.colors.text,
 											fontFamily: computedStyles.fonts.headingFont,
 										}}
 									>
@@ -63,10 +68,9 @@ export function BioBlocksRender({ blocks }: BioBlocksRenderProps) {
 								{block.subtitle && (
 									<Text
 										variant='xs/normal'
+										className='text-brandKit-text opacity-80'
 										style={{
-											color: computedStyles.colors.text,
 											fontFamily: computedStyles.fonts.bodyFont,
-											opacity: 0.8,
 										}}
 									>
 										{block.subtitle}
@@ -117,19 +121,17 @@ export function BioBlocksRender({ blocks }: BioBlocksRenderProps) {
 									fullWidth={true}
 									className={cn(
 										'h-fit min-h-[61px] text-sm leading-none',
+										'bg-brandKit-block text-brandKit-block-text',
+										getBrandKitOutlineClass(computedStyles.block.outline),
 										isFullWidthButtons ? 'px-4 py-4' : 'px-4 py-3',
-										isFullWidthButtons ? 'rounded-none'
-										: computedStyles.block.radius === '9999px' ? 'rounded-full'
-										: computedStyles.block.radius === '12px' ? 'rounded-xl'
-										: 'rounded-none',
+										isFullWidthButtons ? 'rounded-none' : (
+											getBrandKitRadiusClass(computedStyles.block.radius)
+										),
 										animationClass, // Add the animation class
 									)}
 									style={{
-										backgroundColor: computedStyles.colors.button,
-										color: computedStyles.colors.buttonText,
 										fontFamily: computedStyles.fonts.bodyFont,
 										boxShadow: computedStyles.block.shadow,
-										border: computedStyles.block.outline,
 									}}
 									onClick={
 										onLinkClick && !isPreview ?
@@ -184,14 +186,12 @@ export function BioBlocksRender({ blocks }: BioBlocksRenderProps) {
 				<div
 					className={cn(
 						'border-2 border-dashed px-4 py-3 text-center text-sm',
-						isFullWidthButtons ? 'rounded-none'
-						: computedStyles.block.radius === '9999px' ? 'rounded-full'
-						: computedStyles.block.radius === '12px' ? 'rounded-xl'
-						: 'rounded-none',
+						'border-brandKit-block text-brandKit-text',
+						isFullWidthButtons ? 'rounded-none' : (
+							getBrandKitRadiusClass(computedStyles.block.radius)
+						),
 					)}
 					style={{
-						borderColor: computedStyles.colors.button,
-						color: computedStyles.colors.text,
 						fontFamily: computedStyles.fonts.bodyFont,
 					}}
 				>

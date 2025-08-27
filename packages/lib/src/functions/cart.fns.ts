@@ -1,3 +1,5 @@
+import 'server-only'; // <-- ensure this file cannot be imported from the client
+
 import type { ReceiptEmailProps } from '@barely/email/templates/cart';
 import type {
 	Cart,
@@ -43,9 +45,9 @@ export const funnelWith = {
 			name: true,
 			handle: true,
 			type: true,
+
 			brandHue: true,
 			brandAccentHue: true,
-
 			bio: true,
 			bookingTitle: true,
 			bookingName: true,
@@ -190,6 +192,50 @@ export function getPublicFunnelFromServerFunnel(funnel: ServerFunnel) {
 
 export type PublicFunnel = ReturnType<typeof getPublicFunnelFromServerFunnel>;
 
+/* get funnel without workspace - lightweight query for performance */
+export async function getFunnelWithoutWorkspace(handle: string, key: string) {
+	const funnel = await dbHttp.query.CartFunnels.findFirst({
+		where: and(eq(CartFunnels.handle, handle), eq(CartFunnels.key, key)),
+		with: {
+			mainProduct: {
+				with: {
+					_images: {
+						with: {
+							file: true,
+						},
+					},
+				},
+			},
+			bumpProduct: {
+				with: {
+					_images: {
+						with: {
+							file: true,
+						},
+					},
+					_apparelSizes: true,
+				},
+			},
+			upsellProduct: {
+				with: {
+					_images: {
+						with: {
+							file: true,
+						},
+					},
+					_apparelSizes: true,
+				},
+			},
+		},
+	});
+
+	return funnel;
+}
+
+export type FunnelWithoutWorkspace = Awaited<
+	ReturnType<typeof getFunnelWithoutWorkspace>
+>;
+
 /* create cart */
 export async function createMainCartFromFunnel({
 	funnel,
@@ -304,8 +350,6 @@ export async function createMainCartFromFunnel({
 	}
 
 	await dbHttp.insert(Carts).values(cart);
-
-	// cookies().set(`${funnel.handle}.${funnel.key}.cartStage`, 'checkoutCreated');
 
 	return cart;
 }

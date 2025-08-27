@@ -1,15 +1,13 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { parseFmUrl, setVisitorCookies } from '@barely/lib/middleware/request-parsing';
+import { log } from '@barely/lib/utils/log';
 import { getAbsoluteUrl, isDevelopment, isPreview } from '@barely/utils';
 
 export async function middleware(req: NextRequest) {
 	const pathname = req.nextUrl.pathname;
 	const domain = req.headers.get('host');
 	const params = req.nextUrl.searchParams;
-
-	const referer = req.headers.get('referer');
-	console.log('fm middleware referer', referer);
 
 	const domainParts = domain?.split('.');
 	// if barely is the first part of the domain, we assume it's structured as www.barely.fm/[handle]/[key]. Skip the rest of the middleware.
@@ -18,13 +16,15 @@ export async function middleware(req: NextRequest) {
 		const res = NextResponse.next();
 
 		if (!handle || !key) {
-			console.log('missing handle or key for barely', handle, key);
-			// return res;
+			await log({
+				message: `missing handle or key for barely, ${handle}, ${key}`,
+				type: 'errors',
+				location: 'fm/middleware.tsx',
+			});
 		}
 
 		await setVisitorCookies({ req, res, handle, key, app: 'fm' });
 
-		console.log('fm cookies (barely) >>', res.cookies.getAll());
 		return res;
 	}
 
@@ -44,16 +44,11 @@ export async function middleware(req: NextRequest) {
 		const res = NextResponse.rewrite(url);
 		await setVisitorCookies({ req, res, handle, key, app: 'fm' });
 
-		console.log('fm cookies (rewrite) >>', res.cookies.getAll());
-		console.log('rewriting to', url);
 		return res;
 	}
 
 	const res = NextResponse.next();
-	// setVisitorCookies({ req, res, handle, key });
 
-	console.log('fm cookies (no rewrite) >>', res.cookies.getAll());
-	// console.log('fm cookies (no rewrite) >>', res.cookies.getAll());
 	return res;
 }
 

@@ -62,7 +62,7 @@
 		"tsx": "^4.20.3",
 		"turbo": "^2.5.4",
 		"typescript": "catalog:",
-		"vercel": "44.7.3"
+		"vercel": "46.0.5"
 	},
 	"pnpm": {
 		"patchedDependencies": {

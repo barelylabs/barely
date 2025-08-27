@@ -34,7 +34,7 @@
 		"react-icons": "^4.11.0",
 		"sharp": "catalog:",
 		"sonner": "catalog:",
-		"stripe": "^14.21.0",
+		"stripe": "catalog:",
 		"zod": "catalog:"
 	},
 	"devDependencies": {

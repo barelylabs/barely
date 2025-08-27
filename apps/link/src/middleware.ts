@@ -55,8 +55,6 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 		},
 	});
 
-	console.log('link for ', url.href, link);
-
 	//* 🚧 handle route errors 🚧  *//
 	if (!link?.url || !link.key) return NextResponse.rewrite(getAbsoluteUrl('link', '404'));
 
@@ -94,19 +92,17 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 		const spotifyUrl = new URL(link.url);
 		spotifyUrl.searchParams.set('si', ''); // this seems to make a difference in terms of opening the app on desktop
 		link.url = spotifyUrl.href;
-		console.log('spotify url + blank si', link.url);
 	}
 
 	if (visitorInfo.userAgent.device === 'mobile') {
 		switch (true) {
 			case link.url.includes('open.spotify.com'): {
-				console.log('Spotify link detected on mobile');
 				const spotifyAppLink = new URL('https://spotify.app.link');
 				spotifyAppLink.searchParams.set('product', 'open');
 				spotifyAppLink.searchParams.set('$full_url', link.url);
 				spotifyAppLink.searchParams.set('$fallback_url', link.url);
 				spotifyAppLink.searchParams.set('$android_redirect_timeout', '3000');
-				console.log('redirecting to mobile spotify', spotifyAppLink.href);
+
 				return NextResponse.redirect(spotifyAppLink.href);
 			}
 

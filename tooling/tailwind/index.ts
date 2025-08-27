@@ -176,6 +176,17 @@ export default {
 					DEFAULT: 'oklch(var(--brand) / <alpha-value>)',
 					...dynamicTwClasses('brand', 40),
 				},
+				brandKit: {
+					bg: 'var(--brandKit-bg)',
+					text: 'var(--brandKit-text)',
+					block: 'var(--brandKit-block)',
+					'block-text': 'var(--brandKit-block-text)',
+					banner: 'var(--brandKit-banner)',
+					// Raw colors for flexibility
+					'color-0': 'var(--brandKit-color-0)',
+					'color-1': 'var(--brandKit-color-1)',
+					'color-2': 'var(--brandKit-color-2)',
+				},
 				accent: {
 					DEFAULT: 'oklch(var(--accent) / <alpha-value>)',
 					foreground: 'oklch(var(--accent-foreground) / <alpha-value>)',

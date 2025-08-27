@@ -45,6 +45,13 @@ export function BrandKitForm({ brandKit, onFormDataChange }: BrandKitFormProps) 
 			shortBio: brandKit.shortBio ?? '',
 			colorPreset: brandKit.colorPreset,
 			colorScheme: brandKit.colorScheme,
+			// New color fields
+			color1: brandKit.color1,
+			color2: brandKit.color2,
+			color3: brandKit.color3,
+			bioColorScheme: brandKit.bioColorScheme,
+			cartColorScheme: brandKit.cartColorScheme,
+			// Font and style fields
 			fontPreset: brandKit.fontPreset,
 			headingFont: brandKit.headingFont,
 			bodyFont: brandKit.bodyFont,

@@ -1,6 +1,7 @@
 'use client';
 
 import type { ApparelSize } from '@barely/const';
+import type { PublicFunnel } from '@barely/lib/functions/cart.fns';
 import { useState } from 'react';
 import { APPAREL_SIZES } from '@barely/const';
 
@@ -14,14 +15,19 @@ export function UpsellButtons({
 	handle,
 	key,
 	cartId,
-	upsellSizes,
+	publicFunnel,
+	// upsellSizes,
 }: {
 	mode: 'preview' | 'live';
 	handle: string;
 	key: string;
 	cartId: string;
-	upsellSizes?: ApparelSize[];
+	publicFunnel: PublicFunnel;
+	// upsellSizes?: ApparelSize[];
 }) {
+	// const { publicFunnel } = usePublicFunnel({ handle, key });
+	const upsellSizes = publicFunnel.upsellProduct?._apparelSizes.map(size => size.size);
+
 	const [apparelSize, setApparelSize] = useState<ApparelSize | undefined>(undefined);
 
 	const { converting, declining, submitting, handleBuyUpsell, handleDeclineUpsell } =
@@ -65,7 +71,7 @@ export function UpsellButtons({
 								value={size}
 								key={size}
 								aria-label={`Toggle ${size}`}
-								className='data-[state=on]:bg-brand hover:bg-brand/90'
+								className='hover:bg-brandKit-block/90 data-[state=on]:bg-brandKit-block data-[state=on]:text-brandKit-block-text'
 							>
 								{size}
 							</ToggleGroupItem>
@@ -79,7 +85,7 @@ export function UpsellButtons({
 				loading={converting}
 				disabled={convertUpsellDisabled}
 				loadingText='Using same payment method...'
-				look='brand'
+				className='hover:bg-brandKit-block/90 bg-brandKit-block text-brandKit-block-text'
 				fullWidth
 			>
 				{upsellSizes && upsellSizes.length > 0 && !apparelSize ?
@@ -91,6 +97,7 @@ export function UpsellButtons({
 				onClick={handleDeclineUpsell}
 				disabled={declineUpsellDisabled}
 				loading={declining}
+				className='text-brandKit-text'
 			>
 				No thanks
 			</Button>

@@ -48,7 +48,6 @@ export default async function RootLayout({
 	params: Promise<{ handle: string; key: string[] }>;
 }) {
 	const { handle, key } = await params;
-	console.log(key.join('/'));
 
 	const landingPageData = await getLandingPageData({
 		handle: handle,

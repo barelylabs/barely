@@ -9,22 +9,24 @@ export function UpsellCountdown({
 	handle,
 	key,
 	cartId,
-	expiresAt,
 }: {
 	mode: 'preview' | 'live';
 	handle: string;
 	key: string;
 	cartId: string;
-	expiresAt: number;
 }) {
-	const { handleDeclineUpsell } = useUpsellCart({ mode, handle, key, cartId });
+	const { cart, handleDeclineUpsell } = useUpsellCart({ mode, handle, key, cartId });
+
+	const expiresAt =
+		(cart.checkoutConvertedAt ? cart.checkoutConvertedAt.getTime() : Date.now()) +
+		5 * 60 * 1000; // 5 minutes from now
 
 	return (
 		<Countdown
 			date={expiresAt}
 			onComplete={handleDeclineUpsell}
 			showZeroMinutes
-			className='text-brand'
+			className='text-brandKit-block'
 			timesUpMessage='Offer expired!'
 		/>
 	);

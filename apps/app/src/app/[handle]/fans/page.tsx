@@ -1,6 +1,7 @@
 import type { z } from 'zod/v4';
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
+import { log } from '@barely/lib/utils/log';
 import { fanSearchParamsSchema } from '@barely/validators';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
@@ -29,7 +30,11 @@ export default async function FansPage({
 	const awaitedSearchParams = await searchParams;
 	const parsedFilters = fanSearchParamsSchema.safeParse(awaitedSearchParams);
 	if (!parsedFilters.success) {
-		console.log('parsedFilters error', parsedFilters.error);
+		await log({
+			message: `parsedFilters error, ${JSON.stringify(parsedFilters.error)}`,
+			type: 'errors',
+			location: 'FansPage',
+		});
 		redirect(`/${awaitedParams.handle}/fans`);
 	}
 

@@ -69,8 +69,6 @@ export async function recordBioEvent({
 	visitor?: VisitorInfo;
 	workspace: Pick<Workspace, 'id' | 'plan' | 'eventUsage' | 'eventUsageLimitOverride'>;
 }) {
-	// console.log('recordBioEvent visitor >>', visitor);
-
 	if (visitor?.isBot) return null;
 
 	const rateLimitPeriod = isDevelopment() ? '1 s' : '1 h';
@@ -161,9 +159,7 @@ export async function recordBioEvent({
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : undefined,
 		});
 
-		console.log('bioEventData => ', eventData);
-		const tinybirdRes = await ingestWebEvent(eventData);
-		console.log('tinybirdRes => ', tinybirdRes);
+		await ingestWebEvent(eventData);
 	} catch (error) {
 		await log({
 			type: 'errors',
