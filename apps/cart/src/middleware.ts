@@ -1,8 +1,15 @@
 import type { NextFetchEvent, NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { parseCartUrl, setVisitorCookies } from '@barely/lib/middleware/request-parsing';
+import {
+	parseCartUrl,
+	parseReqForVisitorInfo,
+	setVisitorCookies,
+} from '@barely/lib/middleware/request-parsing';
 import { log } from '@barely/lib/utils/log';
 import { getAbsoluteUrl, isDevelopment, newId } from '@barely/utils';
+
+import type { CreateCartBody } from '~/app/api/cart/create/route';
+import { cartEnv } from '~/env';
 
 // import { trpcCaller } from './trpc/server';
 
@@ -29,19 +36,24 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 			city: isDevelopment() ? 'New York' : req.headers.get('x-vercel-ip-city'),
 		};
 
+		const visitor = parseReqForVisitorInfo({ req, handle, key });
+
 		// Call the API route to create the cart
 		ev.waitUntil(
 			fetch(`${req.nextUrl.origin}/api/cart/create`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
+					// Pass internal token to authenticate middleware requests
+					'x-cart-internal-token': cartEnv.CART_INTERNAL_API_SECRET,
 				},
 				body: JSON.stringify({
 					handle,
 					key,
 					cartId,
 					shipTo,
-				}),
+					visitor,
+				} satisfies CreateCartBody),
 			}).catch(async err => {
 				await log({
 					location: 'cart/middleware.ts',

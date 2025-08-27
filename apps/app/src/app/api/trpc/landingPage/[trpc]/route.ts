@@ -1,17 +1,6 @@
 import { headers } from 'next/headers';
 import { createTRPCContext } from '@barely/lib/trpc';
 import { OPTIONS, setCorsHeaders } from '@barely/utils';
-// const handler = async () => {
-// 	const preHandlerSession = await getSession();
-// 	console.log(
-// 		`preHandlerSession in landingPage/[trpc]/route => `,
-// 		preHandlerSession?.user.name,
-// 	);
-
-// 	return landingPageHandler({ auth: auth });
-// };
-
-// const handler = landingPageHandler({ auth: auth });
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 
 import { landingPageSubRouter } from '@barely/api/app/sub/landing-page.handler';
