@@ -1,49 +1,53 @@
-# Project Context: Cart Performance Optimization
+# Project Context: Bio Landing Page Blocks
 
 ## Current Development
-Working on: Critical performance fix to reduce cart load time from 9.3s to under 2.5s
-Deadline: 2025-09-21
+Working on: Extending bio platform with 4 new block types for landing page creation
+Deadline: 2025-09-15 (aligns with agency client campaign launch)
 
 ## Key Files in This Worktree
 - `.claude/project/PRD.md` - Full product requirements
-- `.claude/project/plan-organized.md` - Implementation checklist by feature
+- `.claude/project/plan.md` - Implementation checklist by feature
 - `.claude/project/JTBD.md` - Jobs to be done analysis
 - `.claude/project/feature.md` - Feature overview and rationale
 
 ## Current Focus
-**Feature 0: Core Infrastructure Setup** - Prerequisites that enable all other features
-- Extract workspace query from getFunnelByParams
-- Create cart-specific BrandKit API route
-- Add BrandKit data validation
-- Write unit tests for cache functions
+Start with Phase 1: Infrastructure Setup
+- Database migration for new block types
+- Update block registry and type definitions
+- Security headers and validation utilities
+- Performance foundation (caching, lazy loading)
 
-Then proceed to **Feature 1: Eliminate Render-Blocking Query** (the critical fix)
+Then implement blocks in order:
+1. Markdown Block (3-4 hours)
+2. Image Block (2-3 hours)
+3. Two-Panel Block (3-4 hours)
+4. Cart Block (2-3 hours)
 
 ## Key Technical Decisions
-1. Use React's `cache()` function for request deduplication
-2. Split data fetching: BrandKit (cacheable) vs cart data (real-time)
-3. Implement at layout level in layout.tsx
-4. Reuse BrandKitProvider from UI package
-5. Progressive enhancement with Suspense boundaries
-6. Edge caching: BrandKit 5-min TTL, products 1-min TTL
+- Extend existing `BioBlockType` enum (not separate system)
+- Reuse modal editor patterns from Links block
+- Leverage existing markdown editor from `@barely/ui`
+- Store block data in JSONB with zod validation
+- Use CSS Grid with container queries for Two-Panel block
+- Direct cart checkout links (no embedded iframe)
 
 ## Success Criteria
-**Performance Metrics:**
-- Lighthouse Score: >70 (from 37)
-- Largest Contentful Paint: <2.5s (from 9.3s)
-- Total Blocking Time: <200ms (from 3,700ms)
-- Speed Index: <3s (from 6.2s)
-
-**Business Metrics:**
-- Cart abandonment: Reduce by 30%+
-- Conversion rate: Increase by 20%+
-- Mobile conversion: Increase by 40%+
+- 80% of landing page users migrate from MDX editor within 30 days
+- 0 support tickets for basic landing page edits
+- <30 minutes from start to published landing page
+- Major agency client successfully launches merch campaign
+- Maintain <2s page load on 3G networks
+- All blocks render consistently across devices
 
 ## Quick Start
-1. This worktree is focused on implementing cart performance optimization
+1. This worktree is focused on implementing bio landing page blocks
 2. All project artifacts are in .claude/project/
-3. Start with the organized plan in plan-organized.md
-4. Original project docs: 0_Projects/cart-performance-optimization/
+3. Start with the organized plan in plan.md
+4. Original project docs: 0_Projects/bio-landing-page-blocks/
 
-## Critical Issue
-The entire cart page render is blocked waiting for a workspace query to fetch a single brand color. This synchronous blocking query is causing catastrophic performance issues (9.3s load time, 37 Lighthouse score).
+## Implementation Notes
+- Building on completed bio-mvp platform (now in production)
+- 10+ agency clients struggling with current MDX editor
+- Major agency client ready to launch merch campaign (immediate need)
+- Estimated implementation: 1-2 days total
+- Reuse everything: patterns, components, infrastructure from bio platform
