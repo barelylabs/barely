@@ -15,11 +15,14 @@ export async function middleware(req: NextRequest) {
 	const res = NextResponse.next();
 
 	if (!handle || !key) {
-		await log({
-			message: `missing handle or key for vip, ${handle}, ${key}`,
-			type: 'errors',
-			location: 'vip/middleware.tsx',
-		});
+		// Don't log errors for root path - it's expected to not have handle/key
+		if (pathname !== '/') {
+			await log({
+				message: `missing handle or key for vip, ${handle}, ${key}`,
+				type: 'errors',
+				location: 'vip/middleware.tsx',
+			});
+		}
 		// Still set visitor cookies even if handle/key missing to track anonymous visits
 		await setVisitorCookies({ req, res, handle: null, key: null, app: 'vip' });
 		return res;

@@ -21,11 +21,14 @@ export async function middleware(req: NextRequest) {
 		const res = NextResponse.next();
 
 		if (!handle || !key) {
-			await log({
-				message: `missing handle or key for barely, ${handle}, ${key}`,
-				type: 'errors',
-				location: 'page/middleware.tsx',
-			});
+			// Don't log errors for root path - it's expected to not have handle/key
+			if (pathname !== '/') {
+				await log({
+					message: `missing handle or key for barely, ${handle}, ${key}`,
+					type: 'errors',
+					location: 'page/middleware.tsx',
+				});
+			}
 		}
 
 		await setVisitorCookies({ req, res, handle, key, app: 'page' });
