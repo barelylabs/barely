@@ -65,6 +65,6 @@ export const config = {
 		 * - sitemap (sitemap file)
 		 * - site.webmanifest (site.webmanifest file)
 		 */
-		'/((?!api|_next|_static|.well-known|favicon|logos|sitemap|site.webmanifest).*)',
+		'/((?!api|_next|_static|.well-known|favicon|logos|sitemap|site.webmanifest|robots.txt|$).*)',
 	],
 };
