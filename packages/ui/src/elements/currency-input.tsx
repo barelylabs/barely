@@ -12,7 +12,8 @@ export interface CurrencyInputProps
 	extends Omit<CurrencyInputPrimitiveProps, 'onValueChange'>,
 		InputAddonProps {
 	name: string;
-	outputUnits: 'cents' | 'dollars';
+	outputUnit: 'minor' | 'major';
+	currency: 'usd' | 'gbp';
 	initialValue?: number;
 	value: number | undefined;
 	onValueChange?: (value: number) => void | Promise<void>;
@@ -23,11 +24,12 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
 	(
 		{
 			name,
-			outputUnits,
+			outputUnit,
 			initialValue = 0,
 			value,
 			onValueChange,
-			prefix = '$',
+			currency,
+			// prefix = '$',
 			allowNegativeValue = false,
 			placeholder = '$0',
 			className,
@@ -38,7 +40,7 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
 	) => {
 		const initialFocusedValue =
 			initialValue === 0 ? ''
-			: outputUnits === 'cents' ? initialValue / 100
+			: outputUnit === 'minor' ? initialValue / 100
 			: initialValue.toString();
 		const [focusedValue, setFocusedValue] = useState(initialFocusedValue);
 		const [isFocused, setIsFocused] = useState(false);
@@ -54,12 +56,12 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
 
 			const valueInUnits =
 				!values?.float ? 0
-				: outputUnits === 'cents' ? values.float * 100
+				: outputUnit === 'minor' ? values.float * 100
 				: values.float;
 
 			if (!isNaN(valueInUnits)) {
 				await onValueChange?.(
-					outputUnits === 'cents' ? Math.floor(valueInUnits) : valueInUnits,
+					outputUnit === 'minor' ? Math.floor(valueInUnits) : valueInUnits,
 				);
 			}
 		};
@@ -79,12 +81,14 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
 			setIsFocused(false);
 		};
 
-		const valueInDollars = outputUnits === 'cents' ? (value ?? 0) / 100 : (value ?? 0);
+		const valueInDollars = outputUnit === 'minor' ? (value ?? 0) / 100 : (value ?? 0);
 
 		const inputValue =
 			isFocused ? focusedValue
 			: Number.isInteger(valueInDollars) ? valueInDollars
 			: valueInDollars.toFixed(2);
+
+		const prefix = currency === 'usd' ? '$' : '£';
 
 		return (
 			<>

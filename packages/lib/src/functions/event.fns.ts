@@ -36,7 +36,7 @@ import {
 } from '@barely/tb/ingest';
 import { fmEventIngestSchema, webEventIngestSchema } from '@barely/tb/schema';
 import {
-	formatCentsToDollars,
+	formatMinorToMajorCurrency,
 	getFirstAndLastName,
 	isDevelopment,
 	newId,
@@ -248,11 +248,12 @@ export async function recordCartEvent({
 	cartFunnel,
 	type,
 	visitor,
+	currency,
 }: {
 	cart: Cart;
 	cartFunnel: CartFunnel;
 	type: (typeof WEB_EVENT_TYPES__CART)[number];
-
+	currency: 'usd' | 'gbp';
 	visitor?: VisitorInfo;
 }) {
 	const visitorInfo: VisitorInfo = {
@@ -338,7 +339,7 @@ export async function recordCartEvent({
 	);
 
 	if (!success) {
-		console.log('rate limit exceeded for ', visitorInfo.ip, cart.id, type);
+		console.log('log rate limit exceeded for ', visitorInfo.ip, cart.id, type);
 		return null;
 	}
 
@@ -436,7 +437,7 @@ export async function recordCartEvent({
 		await log({
 			type: 'sales',
 			location: 'recordCartEvent',
-			message: `${cartFunnel.handle} checkout [${cart.id}] :: ${formatCentsToDollars(cart.checkoutAmount)}`,
+			message: `${cartFunnel.handle} checkout [${cart.id}] :: ${formatMinorToMajorCurrency(cart.checkoutAmount, currency)}`,
 		});
 	}
 
@@ -444,7 +445,7 @@ export async function recordCartEvent({
 		await log({
 			type: 'sales',
 			location: 'recordCartEvent',
-			message: `${cartFunnel.handle} upsell [${cart.id}] :: ${formatCentsToDollars(cart.upsellProductAmount ?? 0)}`,
+			message: `${cartFunnel.handle} upsell [${cart.id}] :: ${formatMinorToMajorCurrency(cart.upsellProductAmount ?? 0, currency)}`,
 		});
 	}
 

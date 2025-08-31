@@ -79,6 +79,8 @@ export const publicWorkspaceSchema = selectWorkspaceSchema
 		// stripe
 		stripeConnectAccountId: true,
 		stripeConnectAccountId_devMode: true,
+		currency: true,
+		shippingAddressCountry: true,
 	})
 	.extend({
 		// avatarImageUrl: z.string().nullish(),
@@ -125,8 +127,10 @@ export function getPublicWorkspaceFromWorkspace(
 		twitterFollowers: workspace.twitterFollowers,
 		facebookFollowers: workspace.facebookFollowers,
 
+		shippingAddressCountry: workspace.shippingAddressCountry,
 		stripeConnectAccountId: workspace.stripeConnectAccountId,
 		stripeConnectAccountId_devMode: workspace.stripeConnectAccountId_devMode,
+		currency: workspace.currency,
 	};
 }
 

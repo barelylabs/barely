@@ -3,7 +3,7 @@
 import type { z } from 'zod/v4';
 import { useCallback } from 'react';
 import { focusGridList, useWorkspace, useZodForm } from '@barely/hooks';
-import { formatCentsToDollars } from '@barely/utils';
+import { formatMinorToMajorCurrency } from '@barely/utils';
 import { cancelCartOrderSchema } from '@barely/validators';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -17,7 +17,7 @@ import { useCartOrder } from '~/app/[handle]/orders/_components/cart-order-conte
 export function CancelCartOrderModal() {
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
-	const { handle } = useWorkspace();
+	const { handle, workspace } = useWorkspace();
 
 	// cart order hooks
 	const {
@@ -52,7 +52,7 @@ export function CancelCartOrderModal() {
 
 		if (
 			!window.confirm(
-				`Are you sure you want to cancel order #${selectedCartOrder.orderId}? ${selectedCartOrder.fullName} will be refunded ${formatCentsToDollars(selectedCartOrder.orderAmount)}`,
+				`Are you sure you want to cancel order #${selectedCartOrder.orderId}? ${selectedCartOrder.fullName} will be refunded ${formatMinorToMajorCurrency(selectedCartOrder.orderAmount, workspace.currency)}`,
 			)
 		)
 			return;

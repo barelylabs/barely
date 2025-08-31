@@ -11,8 +11,6 @@ import { getAbsoluteUrl, isDevelopment, newId } from '@barely/utils';
 import type { CreateCartBody } from '~/app/api/cart/create/route';
 import { cartEnv } from '~/env';
 
-// import { trpcCaller } from './trpc/server';
-
 export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	const domain = req.headers.get('host');
 	const pathname = req.nextUrl.pathname;
@@ -29,11 +27,10 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	if (pathname.includes('/checkout') && !cartId && handle && key) {
 		// generate optimistic ID
 		cartId = newId('cart');
-
 		const shipTo = {
-			country: isDevelopment() ? 'US' : req.headers.get('x-vercel-ip-country'),
-			state: isDevelopment() ? 'NY' : req.headers.get('x-vercel-ip-country-region'),
-			city: isDevelopment() ? 'New York' : req.headers.get('x-vercel-ip-city'),
+			country: isDevelopment() ? 'UK' : req.headers.get('x-vercel-ip-country'),
+			state: isDevelopment() ? 'England' : req.headers.get('x-vercel-ip-country-region'),
+			city: isDevelopment() ? 'London' : req.headers.get('x-vercel-ip-city'),
 		};
 
 		const visitor = parseReqForVisitorInfo({ req, handle, key });

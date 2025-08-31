@@ -18,6 +18,7 @@
 	},
 	"dependencies": {
 		"@barely/api": "workspace:*",
+		"@barely/atoms": "workspace:*",
 		"@barely/const": "workspace:*",
 		"@barely/hooks": "workspace:*",
 		"@barely/lib": "workspace:*",
@@ -27,6 +28,7 @@
 		"@t3-oss/env-nextjs": "catalog:",
 		"@vercel/edge": "^0.1.2",
 		"dotenv-cli": "^7.4.1",
+		"jotai": "catalog:",
 		"next": "catalog:",
 		"react": "catalog:react19",
 		"react-currency-input-field": "^3.8.0",

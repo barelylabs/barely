@@ -41,6 +41,7 @@ export const handleAbandonedUpsell = task({
 				mainProduct: cart.funnel.mainProduct,
 				bumpProduct: cart.funnel.bumpProduct,
 				upsellProduct: cart.funnel.upsellProduct,
+				currency: cart.funnel.workspace.currency,
 			});
 			updateCartData.orderReceiptSent = true;
 		}
@@ -87,6 +88,7 @@ export const handleAbandonedUpsells = schedules.task({
 						mainProduct: cart.funnel.mainProduct,
 						bumpProduct: cart.funnel.bumpProduct,
 						upsellProduct: cart.funnel.upsellProduct,
+						currency: cart.funnel.workspace.currency,
 					});
 					updateCartData.orderReceiptSent = true;
 				}

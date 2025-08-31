@@ -254,7 +254,7 @@ function ConditionField({
 	remove: (index: number) => void;
 }) {
 	const trpc = useTRPC();
-	const { handle } = useWorkspace();
+	const { handle, workspace } = useWorkspace();
 	const { data: cartFunnelOptions } = useSuspenseQuery(
 		trpc.cartFunnel.byWorkspace.queryOptions(
 			{ handle },
@@ -343,7 +343,8 @@ function ConditionField({
 						control={control}
 						name={`conditions.${index}.totalOrderAmount`}
 						// label='Total Order Amount'
-						outputUnits='cents'
+						outputUnit='minor'
+						currency={workspace.currency}
 					/>
 				:	null}
 			</div>

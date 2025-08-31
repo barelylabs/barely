@@ -3,7 +3,13 @@
 import type { InsertCart } from '@barely/validators';
 import type { StripeElementsOptions } from '@stripe/stripe-js';
 import { useState } from 'react';
-import { getComputedStyles, isProduction, oklchToHex } from '@barely/utils';
+import {
+	getComputedStyles,
+	isProduction,
+	modifyOklch,
+	oklchToHex,
+	oklchToRgba,
+} from '@barely/utils';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 
@@ -45,17 +51,48 @@ export function ElementsProvider({
 		appearance: {
 			theme: 'stripe',
 			variables: {
-				colorBackground: '#ffffff',
+				// colorBackground: '#ffffff',
 				colorPrimary: oklchToHex(computedStyles.colors.block),
-				colorTextSecondary: oklchToHex(computedStyles.colors.text),
+				colorPrimaryText: '#000000',
+				colorText: oklchToHex(computedStyles.colors.text),
+				// Use rgba for colors that need transparency
+				colorTextSecondary: oklchToRgba(
+					modifyOklch(computedStyles.colors.text, { alpha: 0.7 }),
+				),
+				colorTextPlaceholder: 'rgba(0, 0, 0, 0.7)',
 				colorDanger: oklchToHex(computedStyles.colors.block),
 				spacingUnit: '4px',
 				fontSizeBase: '14px',
 				fontFamily: 'Inter, sans-serif',
 			},
 			rules: {
-				'.Label': { color: oklchToHex(computedStyles.colors.text) },
-				'.CheckboxLabel': { color: oklchToHex(computedStyles.colors.text) },
+				// '.Input': {
+				// 	backgroundColor: '#ffffff',
+				// },
+				// Use rgba for label colors with transparency
+				'.Dropdown': {
+					backgroundColor: '#ffffff',
+					color: '#000000',
+				},
+				'.DropdownItem': {
+					color: '#000000',
+				},
+				'.MenuAction': {
+					color: '#000000',
+				},
+				'.Input': {
+					backgroundColor: '#ffffff',
+					color: '#000000',
+				},
+				'.Label': {
+					color: oklchToRgba(modifyOklch(computedStyles.colors.text, { alpha: 0.7 })),
+				},
+				'.Checkbox': {
+					color: oklchToHex(computedStyles.colors.text),
+				},
+				'.CheckboxLabel': {
+					color: oklchToRgba(modifyOklch(computedStyles.colors.text, { alpha: 0.7 })),
+				},
 			},
 		},
 		fonts: [
@@ -65,6 +102,8 @@ export function ElementsProvider({
 		],
 		loader: 'always',
 	};
+
+	console.log(oklchToHex(computedStyles.colors.text));
 
 	const [stripePromise] = useState(() =>
 		loadStripe(cartEnv.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, {

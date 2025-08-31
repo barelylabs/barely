@@ -48,6 +48,8 @@ export async function getPublicPressKit({
 					instagramFollowers: true,
 					twitterFollowers: true,
 					facebookFollowers: true,
+					currency: true,
+					shippingAddressCountry: true,
 				},
 				with: {
 					_avatarImages: {
@@ -188,6 +190,7 @@ export async function getPublicPressKit({
 		headerImageS3Key: publicPressKitData.workspace._headerImages[0]?.file.s3Key,
 		avatarImageBlurHash: publicPressKitData.workspace._avatarImages[0]?.file.blurHash,
 		headerImageBlurHash: publicPressKitData.workspace._headerImages[0]?.file.blurHash,
+		currency: publicPressKitData.workspace.currency,
 	};
 
 	// normalize mixtape

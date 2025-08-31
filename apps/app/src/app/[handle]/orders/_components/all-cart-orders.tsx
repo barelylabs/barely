@@ -4,7 +4,11 @@ import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import type { GridListCommandItemProps } from '@barely/ui/grid-list';
 import { Suspense } from 'react';
 import { useCopy, useWorkspace } from '@barely/hooks';
-import { formatCentsToDollars, getTrackingLink, numToPaddedString } from '@barely/utils';
+import {
+	formatMinorToMajorCurrency,
+	getTrackingLink,
+	numToPaddedString,
+} from '@barely/utils';
 import { useSuspenseQuery } from '@tanstack/react-query';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
@@ -81,7 +85,7 @@ function CartOrderCard({
 	const { setSelection, setShowMarkAsFulfilledModal, setShowCancelCartOrderModal } =
 		useCartOrder();
 
-	const { handle } = useWorkspace();
+	const { handle, workspace } = useWorkspace();
 
 	const markAsFulfilledCommandItem: GridListCommandItemProps = {
 		label: 'Mark as fulfilled',
@@ -145,7 +149,8 @@ function CartOrderCard({
 									</div>
 								))}
 								<Text variant='sm/medium'>
-									Total: {formatCentsToDollars(cartOrder.orderAmount)}
+									Total:{' '}
+									{formatMinorToMajorCurrency(cartOrder.orderAmount, workspace.currency)}
 								</Text>
 							</div>
 							<div className='flex flex-col'>

@@ -65,6 +65,11 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 			onSuccess: async () => {
 				await handleCloseModal();
 			},
+			onSettled: () => {
+				void queryClient.invalidateQueries({
+					queryKey: trpc.product.byWorkspace.queryKey(),
+				});
+			},
 		}),
 	);
 
@@ -73,10 +78,13 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 			onSuccess: async () => {
 				await handleCloseModal();
 			},
+			onSettled: () => {
+				void queryClient.invalidateQueries({
+					queryKey: trpc.product.byWorkspace.queryKey(),
+				});
+			},
 		}),
 	);
-
-	// upsertProductSchema.shape.preorderDeliveryEstimate;
 
 	/* form */
 	const { form, onSubmit: onSubmitProduct } = useCreateOrUpdateForm({
@@ -213,7 +221,8 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 						control={form.control}
 						name='price'
 						label='Price'
-						outputUnits='cents'
+						outputUnit='minor'
+						currency={workspace.currency}
 					/>
 
 					<Label htmlFor='product-type-toggle-group'>Product Type</Label>

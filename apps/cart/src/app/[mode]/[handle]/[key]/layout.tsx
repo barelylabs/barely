@@ -31,14 +31,6 @@ export default async function RootLayout({
 }) {
 	const { handle } = await params;
 
-	// const cartId = (await cookies()).get(`${handle}.${key}.cartId`)?.value;
-
-	// if (cartId) {
-	// 	console.log('prefetching');
-	// 	prefetch(trpc.publicFunnelByHandleAndKey.queryOptions({ handle, key }));
-	// 	prefetch(trpc.byIdAndParams.queryOptions({ id: cartId, handle, key }));
-	// }
-
 	const brandKitPromise = fetchBrandKitByHandle(handle);
 
 	return (

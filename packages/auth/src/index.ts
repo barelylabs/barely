@@ -113,6 +113,7 @@ export function initAuth(options: {
 										spotifyArtistId: true,
 										stripeCustomerId: true,
 										stripeCustomerId_devMode: true,
+										currency: true,
 									},
 									with: {
 										brandKit: true,
@@ -178,7 +179,6 @@ export function initAuth(options: {
 						workspaceInvites: dbUser.workspaceInvites,
 						phone: dbUser.phone,
 					},
-
 					workspaces,
 				};
 			}, options), // <- i think include options here is for custom session type reference
