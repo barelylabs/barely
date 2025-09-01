@@ -4,10 +4,8 @@ import Stripe from 'stripe';
 
 import { appEnv } from '~/env';
 
-// export const runtime = 'edge';
-
 const stripe = new Stripe(appEnv.STRIPE_SECRET_KEY, {
-	apiVersion: '2023-10-16',
+	apiVersion: '2025-07-30.basil',
 	httpClient: Stripe.createFetchHttpClient(),
 });
 

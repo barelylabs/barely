@@ -1,5 +1,10 @@
 import { dbHttp } from '@barely/db/client';
-import { _BioBlocks_To_Bios, _BioLinks_To_BioBlocks, Bios } from '@barely/db/sql/bio.sql';
+import {
+	_BioBlocks_To_Bios,
+	_BioLinks_To_BioBlocks,
+	_Files_To_BioLinks__Images,
+	Bios,
+} from '@barely/db/sql/bio.sql';
 import { and, asc, eq, isNull } from 'drizzle-orm';
 
 export async function getBioByHandleAndKey({
@@ -9,9 +14,12 @@ export async function getBioByHandleAndKey({
 	handle: string;
 	key: string;
 }) {
-	const bio = await dbHttp.query.Bios.findFirst({
-		where: and(eq(Bios.handle, handle), eq(Bios.key, key), isNull(Bios.deletedAt)),
-	});
+	const [bio] = await dbHttp
+		.select()
+		.from(Bios)
+		.where(and(eq(Bios.handle, handle), eq(Bios.key, key), isNull(Bios.deletedAt)))
+		.limit(1)
+		.$withCache();
 
 	return bio ?? null;
 }
@@ -80,6 +88,7 @@ export async function getBioBlocksByHandleAndKey({
 					lexoRank: bl.lexoRank,
 					blockId: bl.bioBlockId,
 					link: bl.bioLink.link,
+					form: bl.bioLink.form, // Include form explicitly for clarity
 					image:
 						imageFile ?
 							{

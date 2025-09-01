@@ -77,8 +77,7 @@ export function initAuth(options: {
 		secret: options.secret,
 		plugins: [
 			magicLink({
-				sendMagicLink: async ({ email, token, url }) => {
-					console.log('sendMagicLink', email, token, url);
+				sendMagicLink: async ({ email, token }) => {
 					await sendMagicLink({ email, token });
 				},
 			}),
@@ -114,6 +113,7 @@ export function initAuth(options: {
 										spotifyArtistId: true,
 										stripeCustomerId: true,
 										stripeCustomerId_devMode: true,
+										currency: true,
 									},
 									with: {
 										brandKit: true,
@@ -179,7 +179,6 @@ export function initAuth(options: {
 						workspaceInvites: dbUser.workspaceInvites,
 						phone: dbUser.phone,
 					},
-
 					workspaces,
 				};
 			}, options), // <- i think include options here is for custom session type reference

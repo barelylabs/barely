@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useZodForm } from '@barely/hooks';
-import { cn, getComputedStyles } from '@barely/utils';
+import { cn } from '@barely/utils';
 import { z } from 'zod/v4';
 
 import { CheckboxField } from '../forms/checkbox-field';
@@ -22,7 +22,6 @@ export function BioEmailCaptureRender() {
 	const { bio, onEmailCapture, isPreview } = useBioContext();
 	const brandKit = useBrandKit();
 
-	const computedStyles = getComputedStyles(brandKit);
 	const [isSubmitted, setIsSubmitted] = useState(false);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 	const [error, setError] = useState<string | null>(null);
@@ -73,22 +72,17 @@ export function BioEmailCaptureRender() {
 		return (
 			<div className={cn('mb-8', brandKit.blockStyle === 'full-width' && 'px-6')}>
 				<div
-					className='rounded-lg p-4 text-center'
-					style={{
-						backgroundColor: computedStyles.colors.block,
-						border: `1px solid ${computedStyles.colors.buttonOutline}`,
-					}}
+					className={cn(
+						'rounded-lg p-4 text-center',
+						'border-brandKit-text/20 border bg-brandKit-block',
+					)}
 				>
-					<div
-						className='mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full'
-						style={{ backgroundColor: computedStyles.colors.button }}
-					>
+					<div className='mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-brandKit-block'>
 						<svg
-							className='h-5 w-5'
+							className='h-5 w-5 text-brandKit-block-text'
 							fill='none'
 							stroke='currentColor'
 							viewBox='0 0 24 24'
-							style={{ color: computedStyles.colors.buttonText }}
 						>
 							<path
 								strokeLinecap='round'
@@ -98,12 +92,7 @@ export function BioEmailCaptureRender() {
 							/>
 						</svg>
 					</div>
-					<p
-						className='text-sm font-medium'
-						style={{ color: computedStyles.colors.buttonText }}
-					>
-						{successMessage}
-					</p>
+					<p className='text-sm font-medium text-brandKit-block-text'>{successMessage}</p>
 				</div>
 			</div>
 		);
@@ -112,17 +101,8 @@ export function BioEmailCaptureRender() {
 	// Form state
 	return (
 		<div className={cn('mb-8', brandKit.blockStyle === 'full-width' && 'px-6')}>
-			<div
-				className='rounded-lg p-4'
-				style={{
-					backgroundColor: computedStyles.colors.block,
-					border: `1px solid ${computedStyles.colors.buttonOutline}`,
-				}}
-			>
-				<p
-					className='mb-3 text-sm font-medium'
-					style={{ color: computedStyles.colors.blockText }}
-				>
+			<div className='border-brandKit-text/20 rounded-lg border bg-brandKit-block p-4'>
+				<p className='mb-3 text-sm font-medium text-brandKit-block-text'>
 					{bio.emailCaptureIncentiveText ?? 'Stay connected'}
 				</p>
 
@@ -133,19 +113,11 @@ export function BioEmailCaptureRender() {
 							<input
 								type='email'
 								placeholder='Enter your email'
-								className='flex-1 rounded-md border bg-transparent px-3 py-2 text-sm'
-								style={{
-									borderColor: computedStyles.colors.buttonOutline,
-									color: computedStyles.colors.blockText,
-								}}
+								className='border-brandKit-text/20 flex-1 rounded-md border bg-transparent px-3 py-2 text-sm text-brandKit-block-text'
 								disabled
 							/>
 							<button
-								className='rounded-md px-4 py-2 text-sm font-medium'
-								style={{
-									backgroundColor: computedStyles.colors.button,
-									color: computedStyles.colors.buttonText,
-								}}
+								className='rounded-md bg-brandKit-block px-4 py-2 text-sm font-medium text-brandKit-block-text'
 								disabled
 							>
 								Subscribe

@@ -1,7 +1,7 @@
 'use client';
 
-import { useCartStatFilters } from '@barely/hooks';
-import { calcPercent, formatCentsToDollars } from '@barely/utils';
+import { useCartStatFilters, useWorkspace } from '@barely/hooks';
+import { calcPercent, formatMinorToMajorCurrency } from '@barely/utils';
 import { useSuspenseQuery } from '@tanstack/react-query';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
@@ -14,6 +14,7 @@ import { WebEventFilterBadges } from '~/app/[handle]/_components/filter-badges';
 
 export function CartTimeseries() {
 	const trpc = useTRPC();
+	const { workspace } = useWorkspace();
 
 	const {
 		filtersWithHandle,
@@ -121,7 +122,7 @@ export function CartTimeseries() {
 						<InfoTabButton
 							icon='view'
 							label='GROSS SALES'
-							value={formatCentsToDollars(totalGrossSales)}
+							value={formatMinorToMajorCurrency(totalGrossSales, workspace.currency)}
 							onClick={toggleShowGrossSales}
 							selected={showGrossSales}
 							selectedClassName='border-slate-500 bg-slate-100'
@@ -131,7 +132,7 @@ export function CartTimeseries() {
 						<InfoTabButton
 							icon='view'
 							label='PRODUCT SALES'
-							value={formatCentsToDollars(totalProductSales)}
+							value={formatMinorToMajorCurrency(totalProductSales, workspace.currency)}
 							onClick={toggleShowProductSales}
 							selected={showProductSales}
 							iconBackgroundClassName='bg-green'
@@ -147,7 +148,7 @@ export function CartTimeseries() {
 					showLegend={false}
 					categories={['grossSales', 'productSales']}
 					colors={['gray', 'green']}
-					valueFormatter={value => formatCentsToDollars(value)}
+					valueFormatter={value => formatMinorToMajorCurrency(value, workspace.currency)}
 				/>
 			</div>
 			<div className='flex flex-col gap-4'>

@@ -10,11 +10,75 @@ const BrandKitContext = createContext<BrandKitContextValue | undefined>(undefine
 export function BrandKitProvider({
 	brandKit,
 	children,
+	context = 'bio',
 }: {
 	brandKit: PublicBrandKit;
 	children: React.ReactNode;
+	context?: 'bio' | 'cart';
 }) {
-	return <BrandKitContext.Provider value={brandKit}>{children}</BrandKitContext.Provider>;
+	// Determine which color scheme to use based on context
+	let brandKitStyles: React.CSSProperties;
+
+	if (context === 'bio' && brandKit.color1 && brandKit.color2 && brandKit.color3) {
+		// Use new bio color scheme if available
+		const colorArray = [brandKit.color1, brandKit.color2, brandKit.color3];
+		brandKitStyles = {
+			'--brandKit-bg': colorArray[brandKit.bioColorScheme.bgColor],
+			'--brandKit-text': colorArray[brandKit.bioColorScheme.textColor],
+			'--brandKit-block': colorArray[brandKit.bioColorScheme.blockColor],
+			'--brandKit-block-text': colorArray[brandKit.bioColorScheme.blockTextColor],
+			'--brandKit-banner': colorArray[brandKit.bioColorScheme.bannerColor],
+			// Also expose raw colors for flexibility
+			'--brandKit-color-0': colorArray[0],
+			'--brandKit-color-1': colorArray[1],
+			'--brandKit-color-2': colorArray[2],
+			// Use display: contents to make this div invisible to layout
+			display: 'contents',
+		} as React.CSSProperties;
+	} else if (
+		context === 'cart' &&
+		brandKit.color1 &&
+		brandKit.color2 &&
+		brandKit.color3
+	) {
+		// Use new cart color scheme if available
+		const colorArray = [brandKit.color1, brandKit.color2, brandKit.color3];
+		brandKitStyles = {
+			'--brandKit-bg': colorArray[brandKit.cartColorScheme.bgColor],
+			'--brandKit-text': colorArray[brandKit.cartColorScheme.textColor],
+			'--brandKit-block': colorArray[brandKit.cartColorScheme.blockColor],
+			'--brandKit-block-text': colorArray[brandKit.cartColorScheme.blockTextColor],
+			'--brandKit-banner': colorArray[brandKit.cartColorScheme.blockColor], // Cart doesn't have banner, use block color
+			// Also expose raw colors for flexibility
+			'--brandKit-color-0': colorArray[0],
+			'--brandKit-color-1': colorArray[1],
+			'--brandKit-color-2': colorArray[2],
+			// Use display: contents to make this div invisible to layout
+			display: 'contents',
+		} as React.CSSProperties;
+	} else {
+		// Fall back to legacy colorScheme
+		const { colors, mapping } = brandKit.colorScheme;
+		brandKitStyles = {
+			'--brandKit-bg': colors[mapping.backgroundColor],
+			'--brandKit-text': colors[mapping.textColor],
+			'--brandKit-block': colors[mapping.blockColor],
+			'--brandKit-block-text': colors[mapping.blockTextColor],
+			'--brandKit-banner': colors[mapping.bannerColor],
+			// Also expose raw colors for flexibility
+			'--brandKit-color-0': colors[0],
+			'--brandKit-color-1': colors[1],
+			'--brandKit-color-2': colors[2],
+			// Use display: contents to make this div invisible to layout
+			display: 'contents',
+		} as React.CSSProperties;
+	}
+
+	return (
+		<BrandKitContext.Provider value={brandKit}>
+			<div style={brandKitStyles}>{children}</div>
+		</BrandKitContext.Provider>
+	);
 }
 
 export function useBrandKit() {

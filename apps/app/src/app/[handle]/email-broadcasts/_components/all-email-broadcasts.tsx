@@ -1,7 +1,8 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
-import { formatCentsToDollars, formatDate } from '@barely/utils';
+import { useWorkspace } from '@barely/hooks';
+import { formatDate, formatMinorToMajorCurrency } from '@barely/utils';
 
 import { Button } from '@barely/ui/button';
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
@@ -80,6 +81,7 @@ function EmailBroadcastCard({
 }: {
 	emailBroadcast: AppRouterOutputs['emailBroadcast']['byWorkspace']['emailBroadcasts'][0];
 }) {
+	const { workspace } = useWorkspace();
 	const { setShowUpdateModal, setShowDeleteModal } = useEmailBroadcastSearchParams();
 
 	const {
@@ -143,7 +145,7 @@ function EmailBroadcastCard({
 				{
 					icon: 'value',
 					name: 'value',
-					value: formatCentsToDollars(value ?? 0),
+					value: formatMinorToMajorCurrency(value ?? 0, workspace.currency),
 				},
 			]}
 		/>

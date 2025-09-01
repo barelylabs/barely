@@ -164,7 +164,7 @@ export const META_PRODUCTS: Product[] = [
 	{
 		id: 'merch',
 		name: 'Merch',
-		icon: 'product',
+		icon: 'cart',
 		type: 'meta',
 		description: 'Sell products to your fans',
 		requiredFeatures: ['products'],

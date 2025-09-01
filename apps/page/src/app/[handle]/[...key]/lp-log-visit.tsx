@@ -15,8 +15,6 @@ export function LogVisit({ landingPageId }: { landingPageId: string }) {
 	useEffect(() => {
 		if (hasLoggedView.current) return;
 
-		console.log('logging lp visit');
-
 		logEvent({
 			landingPageId,
 			type: 'page/view',

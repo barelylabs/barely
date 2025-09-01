@@ -141,7 +141,7 @@ const FieldLabel = React.forwardRef<
 	const { fieldId: formItemId } = useFormField();
 
 	return (
-		<div className='flex flex-row items-center justify-between'>
+		<div className='flex flex-row items-center justify-between hover:cursor-pointer'>
 			<div className='flex flex-row items-center gap-1'>
 				<Label ref={ref} className={className} htmlFor={formItemId} {...props} />
 				{infoTooltip && <InfoTooltip content={infoTooltip} />}

@@ -18,7 +18,5 @@ export async function checkPhoneNumberExistsServerAction(phone: string) {
 		where: Users => eq(Users.phone, phone),
 	}).then(u => !!u);
 
-	console.log('phone exists (server action) => ', phoneExists);
-
 	return phoneExists;
 }

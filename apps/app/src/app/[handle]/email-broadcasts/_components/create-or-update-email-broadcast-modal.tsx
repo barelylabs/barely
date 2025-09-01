@@ -127,7 +127,7 @@ export function CreateOrUpdateEmailBroadcastModal({
 			fanGroupId: data.fanGroupId === 'all' ? null : data.fanGroupId,
 			status: 'draft' as const,
 		};
-		// return console.log('handleSaveDraft', d);
+
 		return onSubmit(d);
 	};
 
@@ -149,7 +149,6 @@ export function CreateOrUpdateEmailBroadcastModal({
 			return;
 		}
 
-		// console.log('scheduling');
 		return onSubmit(d);
 	};
 

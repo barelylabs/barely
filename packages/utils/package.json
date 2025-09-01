@@ -17,6 +17,7 @@
 	},
 	"dependencies": {
 		"@barely/const": "workspace:*",
+		"culori": "^4.0.1",
 		"limiter": "3.0.0",
 		"next": "catalog:",
 		"node-html-parser": "^6.1.11",

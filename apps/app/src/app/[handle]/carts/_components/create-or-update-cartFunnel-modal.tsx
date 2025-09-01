@@ -224,6 +224,7 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 								<ProductPrice
 									price={mainProductDiscountedPrice}
 									normalPrice={mainProduct.price}
+									currency={workspace.currency}
 									className={
 										(
 											mainProductDiscountedPrice === 0 &&
@@ -254,7 +255,8 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 							control={form.control}
 							name='mainProductPayWhatYouWantMin'
 							label='Minimum Price'
-							outputUnits='cents'
+							outputUnit='minor'
+							currency={workspace.currency}
 							// value={mainProductPayWhatYouWantMin}
 							onValueChange={v => {
 								setMainProductPayWhatYouWantMin(v);
@@ -267,7 +269,8 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 							control={form.control}
 							name='mainProductDiscount'
 							label='Discount'
-							outputUnits='cents'
+							outputUnit='minor'
+							currency={workspace.currency}
 							// max={mainProduct?.price ?? 0}
 
 							onValueChange={v => {
@@ -280,7 +283,8 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 						control={form.control}
 						name='mainProductHandling'
 						label='Handling'
-						outputUnits='cents'
+						outputUnit='minor'
+						currency={workspace.currency}
 					/>
 
 					{/* BUMP */}
@@ -292,6 +296,7 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 									price={bumpProductDiscountedPrice}
 									normalPrice={bumpProduct.price}
 									className={bumpProductDiscountedPrice === 0 ? 'text-red-500' : ''}
+									currency={workspace.currency}
 								/>
 							</div>
 						)}
@@ -306,8 +311,9 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 					<CurrencyField
 						control={form.control}
 						name='bumpProductDiscount'
+						currency={workspace.currency}
 						label='Discount'
-						outputUnits='cents'
+						outputUnit='minor'
 						onValueChange={v => {
 							setBumpProductDiscount(v);
 						}}
@@ -332,6 +338,7 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 									price={upsellProductDiscountedPrice}
 									normalPrice={upsellProduct.price}
 									className={upsellProductDiscountedPrice === 0 ? 'text-red-500' : ''}
+									currency={workspace.currency}
 								/>
 							</div>
 						)}
@@ -367,7 +374,8 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 						control={form.control}
 						name='upsellProductDiscount'
 						label='Discount'
-						outputUnits='cents'
+						outputUnit='minor'
+						currency={workspace.currency}
 						onValueChange={v => {
 							setUpsellProductDiscount(v);
 						}}

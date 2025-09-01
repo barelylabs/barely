@@ -51,7 +51,6 @@ export function useModalHotKeys({
 			const target = e.target as HTMLElement;
 			const existingModalBackdrop = document.getElementById('modal-backdrop');
 
-			// console.log('gKeyPressed in modal hotkeys', gKeyPressed);
 			/* create */
 			// only open add--modal w/ keyboard shortcut if:
 			// - c is pressed

@@ -44,6 +44,46 @@ export const BrandKits = pgTable(
 
 		// Appearance/Colors
 		colorPreset: varchar('colorPreset', { length: 255 }).notNull(),
+
+		// Base colors (OKLCH format strings like "oklch(0.55 0.224 28)")
+		color1: varchar('color1', { length: 255 }).notNull().default('oklch(0.00 0.000 0)'),
+		color2: varchar('color2', { length: 255 }).notNull().default('oklch(0.60 0.000 0)'),
+		color3: varchar('color3', { length: 255 }).notNull().default('oklch(1.00 0.000 0)'),
+
+		// App-specific color mappings (index references to color1/2/3)
+		bioColorScheme: jsonb('bioColorScheme')
+			.$type<{
+				bgColor: 0 | 1 | 2;
+				textColor: 0 | 1 | 2;
+				blockColor: 0 | 1 | 2;
+				blockTextColor: 0 | 1 | 2;
+				bannerColor: 0 | 1 | 2;
+			}>()
+			.notNull()
+			.default({
+				bgColor: 0,
+				textColor: 1,
+				blockColor: 2,
+				blockTextColor: 0,
+				bannerColor: 1,
+			}),
+
+		cartColorScheme: jsonb('cartColorScheme')
+			.$type<{
+				bgColor: 0 | 1 | 2;
+				textColor: 0 | 1 | 2;
+				blockColor: 0 | 1 | 2;
+				blockTextColor: 0 | 1 | 2;
+			}>()
+			.notNull()
+			.default({
+				bgColor: 0,
+				textColor: 1,
+				blockColor: 2,
+				blockTextColor: 0,
+			}),
+
+		// Legacy field for backwards compatibility (will be removed later)
 		colorScheme: jsonb('colorScheme')
 			.$type<{
 				colors: [string, string, string];
@@ -58,7 +98,7 @@ export const BrandKits = pgTable(
 					bannerColor: 0 | 1 | 2;
 				};
 			}>()
-			.notNull(), // JSON for color mapping
+			.notNull(), // Deprecated - kept for migration
 
 		// Typography
 		fontPreset: varchar('fontPreset', {

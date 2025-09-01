@@ -4,6 +4,7 @@ import {
 	parseLandingPageUrl,
 	setVisitorCookies,
 } from '@barely/lib/middleware/request-parsing';
+import { log } from '@barely/lib/utils/log';
 import { getAbsoluteUrl, isDevelopment, isPreview } from '@barely/utils';
 
 export async function middleware(req: NextRequest) {
@@ -11,12 +12,7 @@ export async function middleware(req: NextRequest) {
 	const domain = req.headers.get('host');
 	const params = req.nextUrl.searchParams;
 
-	console.log('pathname >', pathname);
-	console.log('domain >', domain);
-
 	const domainParts = domain?.split('.');
-	console.log('domainParts >', domainParts);
-	console.log('domainParts.length >', domainParts?.length);
 
 	// if www is the first part of the domain, we assume it's structured as barely.page/[handle]/[key]. Skip the rest of the middleware.
 	if (isDevelopment() || domainParts?.[0] === 'barely') {
@@ -25,8 +21,11 @@ export async function middleware(req: NextRequest) {
 		const res = NextResponse.next();
 
 		if (!handle || !key) {
-			console.log('missing handle or key for barely', handle, key);
-			// return res;
+			await log({
+				message: `missing handle or key for barely, ${handle}, ${key}`,
+				type: 'errors',
+				location: 'page/middleware.tsx',
+			});
 		}
 
 		await setVisitorCookies({ req, res, handle, key, app: 'page' });
@@ -67,6 +66,6 @@ export const config = {
 		 * - sitemap (sitemap file)
 		 * - site.webmanifest (site.webmanifest file)
 		 */
-		'/((?!api|_next|_static|.well-known|favicon|logos|sitemap|site.webmanifest).*)',
+		'/((?!api|_next|_static|.well-known|favicon|logos|sitemap|site.webmanifest|robots.txt|$).*)',
 	],
 };

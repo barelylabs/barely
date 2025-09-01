@@ -109,23 +109,19 @@ function BioBioBlocks() {
 	const { bio } = useBioContext();
 
 	const { data: blocks } = useSuspenseQuery(
-		trpc.bio.blocksByHandleAndKey.queryOptions({ handle: bio.handle, key: bio.key }),
+		trpc.bio.blocksByHandleAndKey.queryOptions(
+			{ handle: bio.handle, key: bio.key },
+			{
+				staleTime: Infinity,
+			},
+		),
 	);
 
 	return <BioBlocksRender blocks={blocks} />;
 }
 
-// Helper function to convert hex to oklch and reduce lightness
-function hexToOklchDarker(hex: string, lightnessReduction = 0.2): string {
-	// This is a simplified approach - in production you might want to use a proper color library
-	// For now, we'll use CSS's relative color syntax which is supported in modern browsers
-	return `oklch(from ${hex} calc(l - ${lightnessReduction}) c h)`;
-}
-
 export function BioBioRender({
-	// handle,
 	bio,
-	// bioKey = 'home',
 	brandKit,
 }: {
 	// handle: string;
@@ -133,35 +129,27 @@ export function BioBioRender({
 	bio: BioRenderRouterOutputs['bio']['byHandleAndKey'];
 	brandKit: PublicBrandKit;
 }) {
-	// Get the background color from brandKit
+	// Get the background color from brandKit for oklch calculation
 	const bgColor =
 		brandKit.colorScheme.colors[brandKit.colorScheme.mapping.backgroundColor];
 
 	return (
 		<div
-			className={'min-h-screen'}
+			className='min-h-screen'
 			style={{
-				// Use oklch to reduce the lightness of the background color for desktop margins
-				backgroundColor: hexToOklchDarker(bgColor, 0.3),
+				// Use oklch relative color syntax to darken the background
+				backgroundColor: `oklch(from ${bgColor} calc(l - 0.3) c h)`,
 			}}
 		>
 			<div className='mx-auto max-w-xl px-0 py-0 sm:px-4 sm:py-12'>
-				{/* <div className='flex min-h-screen flex-col overflow-hidden sm:min-h-[calc(100vh-96px)] sm:rounded-2xl sm:shadow-2xl'> */}
 				<BioBrandKitProvider brandKit={brandKit}>
-					{/* <Suspense
-						fallback={
-							<div className='h-full min-h-screen animate-pulse bg-gray-100 sm:min-h-full' />
-						}
-					> */}
 					<BioBioProvider bio={bio}>
 						<BioLogVisit />
 						<BioContentAroundBlocks>
 							<BioBioBlocks />
 						</BioContentAroundBlocks>
 					</BioBioProvider>
-					{/* </Suspense> */}
 				</BioBrandKitProvider>
-				{/* </div> */}
 			</div>
 		</div>
 	);

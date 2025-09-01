@@ -113,19 +113,97 @@ export function BrandKitFormContent({ form, mdxEditorRef }: BrandKitFormContentP
 						<ColorCustomizer
 							colorPreset={form.watch('colorPreset')}
 							colorScheme={form.watch('colorScheme')}
+							color1={form.watch('color1')}
+							color2={form.watch('color2')}
+							color3={form.watch('color3')}
+							bioColorScheme={form.watch('bioColorScheme')}
+							cartColorScheme={form.watch('cartColorScheme')}
 							onColorPresetChange={async preset => {
 								form.setValue('colorPreset', preset, { shouldDirty: true });
 								await updateBrandKitPreview({
 									colorPreset: preset,
 								});
 							}}
+							onBioColorSchemeChange={async bioScheme => {
+								// ONLY update bio color scheme
+								form.setValue('bioColorScheme', bioScheme, { shouldDirty: true });
+								await updateBrandKitPreview({
+									bioColorScheme: bioScheme,
+								});
+							}}
+							onCartColorSchemeChange={async cartScheme => {
+								// ONLY update cart color scheme
+								form.setValue('cartColorScheme', cartScheme, { shouldDirty: true });
+								await updateBrandKitPreview({
+									cartColorScheme: cartScheme,
+								});
+							}}
+							onColorsChange={async colors => {
+								// Update the three base colors
+								form.setValue('color1', colors[0], { shouldDirty: true });
+								form.setValue('color2', colors[1], { shouldDirty: true });
+								form.setValue('color3', colors[2], { shouldDirty: true });
+								await updateBrandKitPreview({
+									color1: colors[0],
+									color2: colors[1],
+									color3: colors[2],
+								});
+							}}
 							onColorSchemeChange={async scheme => {
+								// Update legacy colorScheme for backwards compatibility
 								form.setValue('colorScheme', scheme, {
 									shouldDirty: true,
 									shouldValidate: true,
 								});
+
+								// Extract colors from the scheme
+								form.setValue('color1', scheme.colors[0], { shouldDirty: true });
+								form.setValue('color2', scheme.colors[1], { shouldDirty: true });
+								form.setValue('color3', scheme.colors[2], { shouldDirty: true });
+
+								// Update bio color scheme based on the mapping
+								form.setValue(
+									'bioColorScheme',
+									{
+										bgColor: scheme.mapping.backgroundColor,
+										textColor: scheme.mapping.textColor,
+										blockColor: scheme.mapping.blockColor,
+										blockTextColor: scheme.mapping.blockTextColor,
+										bannerColor: scheme.mapping.bannerColor,
+									},
+									{ shouldDirty: true },
+								);
+
+								// Update cart color scheme (cart doesn't have banner)
+								form.setValue(
+									'cartColorScheme',
+									{
+										bgColor: scheme.mapping.backgroundColor,
+										textColor: scheme.mapping.textColor,
+										blockColor: scheme.mapping.buttonColor, // Use button color for cart CTAs
+										blockTextColor: scheme.mapping.buttonTextColor,
+									},
+									{ shouldDirty: true },
+								);
+
 								await updateBrandKitPreview({
 									colorScheme: scheme,
+									color1: scheme.colors[0],
+									color2: scheme.colors[1],
+									color3: scheme.colors[2],
+									bioColorScheme: {
+										bgColor: scheme.mapping.backgroundColor,
+										textColor: scheme.mapping.textColor,
+										blockColor: scheme.mapping.blockColor,
+										blockTextColor: scheme.mapping.blockTextColor,
+										bannerColor: scheme.mapping.bannerColor,
+									},
+									cartColorScheme: {
+										bgColor: scheme.mapping.backgroundColor,
+										textColor: scheme.mapping.textColor,
+										blockColor: scheme.mapping.buttonColor,
+										blockTextColor: scheme.mapping.buttonTextColor,
+									},
 								});
 							}}
 						/>

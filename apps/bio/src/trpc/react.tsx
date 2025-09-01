@@ -7,6 +7,7 @@ import type { ReactNode } from 'react';
 import React, { useState } from 'react';
 import { getAbsoluteUrl, isDevelopment } from '@barely/utils';
 import { isServer, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { createTRPCClient, httpBatchLink, loggerLink } from '@trpc/client';
 import SuperJSON from 'superjson';
 
@@ -50,6 +51,12 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 						headers.set('x-trpc-source', 'nextjs-react-bio');
 						return headers;
 					},
+					// fetch(url, options) {
+					// 	return fetch(url, {
+					// 		...options,
+					// 		credentials: 'same-origin',
+					// 	});
+					// },
 				}),
 			],
 		});
@@ -61,7 +68,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 		<QueryClientProvider client={queryClient}>
 			<BioRenderTRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
 				{props.children}
-				{/* <ReactQueryDevtools buttonPosition='bottom-right' initialIsOpen={false} /> */}
+				<ReactQueryDevtools buttonPosition='bottom-right' initialIsOpen={false} />
 			</BioRenderTRPCProvider>
 		</QueryClientProvider>
 	);

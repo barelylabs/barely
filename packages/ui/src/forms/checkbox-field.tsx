@@ -11,6 +11,7 @@ export const CheckboxField = <
 	TFieldValues extends FieldValues = FieldValues,
 	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
+	labelClassName,
 	...props
 }: FieldProps<TFieldValues, TName> & CheckboxProps) => {
 	return (
@@ -31,7 +32,7 @@ export const CheckboxField = <
 							/>
 						</FieldControl>
 						<div className='space-y-1 pb-[2px] leading-none'>
-							<FieldLabel>{props.label}</FieldLabel>
+							<FieldLabel className={labelClassName}>{props.label}</FieldLabel>
 							<FieldMessages {...{ description: props.description, hint: props.hint }} />
 						</div>
 					</FormItem>

@@ -1,4 +1,10 @@
-import { cn, getComputedStyles } from '@barely/utils';
+import {
+	cn,
+	getBrandKitOutlineClass,
+	getBrandKitRadiusClass,
+	getBrandKitShadowClass,
+	getComputedStyles,
+} from '@barely/utils';
 
 import { Icon } from '../elements/icon';
 import { useBioContext } from './contexts/bio-context';
@@ -38,17 +44,12 @@ export function BioHeaderRender() {
 				<button
 					className={cn(
 						'px-6 py-3',
-						computedStyles.block.radius === '9999px' && 'rounded-full',
-						computedStyles.block.radius === '12px' && 'rounded-xl',
-						computedStyles.block.radius === '0px' && 'rounded-none',
+						'bg-brandKit-block text-brandKit-block-text',
+						getBrandKitRadiusClass(computedStyles.block.radius),
+						getBrandKitShadowClass(computedStyles.block.shadow),
+						getBrandKitOutlineClass(computedStyles.block.outline),
 						!bio.showSubscribeButton && 'hidden',
 					)}
-					style={{
-						backgroundColor: computedStyles.colors.button,
-						color: computedStyles.colors.buttonText,
-						boxShadow: computedStyles.block.shadow,
-						border: computedStyles.block.outline,
-					}}
 				>
 					Subscribe
 				</button>

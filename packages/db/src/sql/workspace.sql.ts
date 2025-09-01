@@ -173,6 +173,9 @@ export const Workspaces = pgTable(
 		}),
 
 		orders: integer('orders').default(0).notNull(),
+		currency: varchar('currency', { length: 4, enum: ['usd', 'gbp'] })
+			.default('usd')
+			.notNull(),
 	},
 
 	workspace => ({

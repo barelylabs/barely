@@ -39,7 +39,9 @@ export function DownloadButton({
 				// The session context will be available from cookies
 				fetch(
 					`/api/trpc/vipRender/swap.getDownloadUrl?input=${encodeURIComponent(JSON.stringify({ token }))}`,
-				).catch(err => console.log('Failed to log download:', err));
+				).catch(err => {
+					console.error('Failed to log download:', err);
+				});
 			}
 
 			// Fetch the file as a blob to prevent redirects

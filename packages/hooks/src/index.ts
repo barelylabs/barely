@@ -55,7 +55,7 @@ export type { UseUploadProps, UploadQueueItem } from './use-upload';
 // Form & UI hooks
 export { useCreateOrUpdateForm } from './use-create-or-update-form';
 export { useModalHotKeys } from './use-modal-hot-keys';
-export { useZodForm } from './use-zod-form';
+export * from './use-zod-form';
 
 // Domain-specific hooks
 export { useCartFunnels } from './use-cart-funnels';

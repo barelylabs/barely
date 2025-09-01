@@ -12,7 +12,7 @@ type ShipToEstimate = {
 );
 
 export interface ShippingEstimateProps {
-	carriers?: ('usps' | 'ups' | 'dhl')[];
+	carriers?: ('usps' | 'ups' | 'dhl' | 'evri' | 'dpd')[];
 	shipFrom: {
 		postalCode: string;
 		countryCode: string;
@@ -30,9 +30,8 @@ export interface ShippingEstimateProps {
 	limit?: number;
 }
 
-export async function getShippingEstimates(props: ShippingEstimateProps) {
+export async function getShipStationRateEstimates(props: ShippingEstimateProps) {
 	const {
-		carriers = ['usps'],
 		shipFrom,
 		shipTo,
 		deliveryConfirmation = 'none',
@@ -41,14 +40,28 @@ export async function getShippingEstimates(props: ShippingEstimateProps) {
 		limit = 1,
 	} = props;
 
+	const isUS = shipFrom.countryCode === 'US';
+	const isUK = shipFrom.countryCode === 'GB';
+
+	const carriers =
+		(props.carriers ?? isUS) ? ['usps', 'ups']
+		: isUK ? ['evri', 'dpd']
+		: ['ups'];
+
 	const carrier_ids = carriers.map(carrier => {
 		switch (carrier) {
+			// US
 			case 'usps':
 				return 'se-6337733';
 			case 'ups':
 				return 'se-6337734';
 			case 'dhl':
 				return 'se-6341012';
+			// UK
+			case 'evri':
+				return 'se-333604';
+			case 'dpd':
+				return 'se-333605';
 			default:
 				throw new Error('Invalid carrier');
 		}
@@ -122,7 +135,7 @@ export async function getShippingEstimates(props: ShippingEstimateProps) {
 
 	const response = await zPost(endpoint, successSchema, {
 		headers: {
-			'API-Key': libEnv.SHIPENGINE_API_KEY,
+			'API-Key': isUS ? libEnv.SHIPSTATION_API_KEY_US : libEnv.SHIPSTATION_API_KEY_UK,
 		},
 		body: {
 			carrier_ids,
@@ -171,7 +184,7 @@ export async function getShippingEstimates(props: ShippingEstimateProps) {
 			})
 			.sort((a, b) => a.shipping_amount.amount - b.shipping_amount.amount);
 
-		// console.log('sorted rates', sortedRates);
+		console.log('sorted rates', sortedRates);
 		return sortedRates.slice(0, limit);
 	}
 

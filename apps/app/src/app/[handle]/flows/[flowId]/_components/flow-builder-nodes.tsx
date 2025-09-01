@@ -11,7 +11,7 @@ import type {
 import { useMemo } from 'react';
 import { MERCH_TYPES } from '@barely/const';
 import { useCartFunnels, useWorkspace } from '@barely/hooks';
-import { cn, formatCentsToDollars } from '@barely/utils';
+import { cn, formatMinorToMajorCurrency } from '@barely/utils';
 import { useSuspenseInfiniteQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { Handle, Position } from '@xyflow/react';
 import { useShallow } from 'zustand/react/shallow';
@@ -336,6 +336,7 @@ export function SendEmailNodeType({
 	id: string;
 	data: SendEmailNode['data'];
 }) {
+	const { workspace } = useWorkspace();
 	const { selectedNodes, setCurrentNode, setShowEmailModal, updateNodeEnabled } =
 		useFlowStore(useShallow(sendEmailStoreSelector));
 
@@ -362,7 +363,9 @@ export function SendEmailNodeType({
 			/>
 			<div className='flex flex-row items-center gap-1 text-muted-foreground'>
 				<Icon.value className='h-2.5 w-2.5' />
-				<Text variant='xs/normal'>{formatCentsToDollars(data.value ?? 0)}</Text>
+				<Text variant='xs/normal'>
+					{formatMinorToMajorCurrency(data.value ?? 0, workspace.currency)}
+				</Text>
 			</div>
 		</NodeDiv>
 	);

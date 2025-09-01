@@ -163,6 +163,7 @@ export async function handleStripeConnectChargeSuccess(
 				updatedCart.addedBump ?
 					'cart/purchaseMainWithBump'
 				:	'cart/purchaseMainWithoutBump',
+			currency: cartFunnel.workspace.currency,
 		}).catch(err => {
 			console.log('error recording cart event:', err);
 		});
@@ -188,6 +189,7 @@ export async function handleStripeConnectChargeSuccess(
 				mainProduct: cartFunnel.mainProduct,
 				bumpProduct: cartFunnel.bumpProduct,
 				upsellProduct: cartFunnel.upsellProduct,
+				currency: cartFunnel.workspace.currency,
 			});
 		}
 

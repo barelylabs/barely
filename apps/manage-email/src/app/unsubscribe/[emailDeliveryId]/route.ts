@@ -9,8 +9,6 @@ async function POST(
 ) {
 	const { emailDeliveryId } = await params;
 
-	console.log('unsubscribing from emailDeliveryId', emailDeliveryId);
-
 	try {
 		await trpcCaller.toggleEmailMarketingOptIn({
 			emailDeliveryId,

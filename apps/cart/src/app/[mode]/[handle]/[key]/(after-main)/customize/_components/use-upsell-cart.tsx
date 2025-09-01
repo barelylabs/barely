@@ -7,9 +7,13 @@ import { useMutation } from '@tanstack/react-query';
 
 import { useCartTRPC } from '@barely/api/public/cart.trpc.react';
 
+import { useCart } from '~/app/[mode]/[handle]/[key]/_components/use-cart';
+
 export function useUpsellCart({
 	mode,
 	cartId,
+	handle,
+	key,
 	apparelSize,
 }: {
 	mode: 'preview' | 'live';
@@ -25,6 +29,12 @@ export function useUpsellCart({
 	const router = useRouter();
 	const pathname = usePathname();
 	const successPath = pathname.replace('/customize', '/success');
+
+	const { cart } = useCart({
+		id: cartId,
+		handle,
+		key,
+	});
 
 	const { mutate: buyUpsell } = useMutation(
 		trpc.buyUpsell.mutationOptions({
@@ -59,6 +69,7 @@ export function useUpsellCart({
 	};
 
 	return {
+		cart,
 		submitting: converting || declining,
 		converting,
 		declining,
