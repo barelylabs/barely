@@ -425,7 +425,13 @@ export const cartRoute = {
 	updateShippingAddressFromCheckout: publicProcedure
 		.input(updateShippingAddressFromCheckoutSchema)
 		.mutation(async ({ input, ctx }) => {
-			console.log('updateShippingAddressFromCheckout >>>', input);
+			// rate limit this route to prevent abuse of shipping estimate recalculations
+			const rateLimit = ratelimit(30, '1 m');
+			const { success } = await rateLimit.limit(input.cartId);
+			if (!success) {
+				throw new TRPCError({ code: 'TOO_MANY_REQUESTS', message: 'Too many requests' });
+			}
+
 			const { cartId, ...updatedAddress } = input;
 			const cart = await getCartById(cartId);
 			if (!cart) throw new TRPCError({ code: 'NOT_FOUND', message: 'Cart not found' });
@@ -435,7 +441,6 @@ export const cartRoute = {
 			const updateCart: UpdateCart = { id: cart.id, ...updatedAddress };
 
 			// if the postal code is the same, we don't need to recalculate shipping rates
-
 			console.log(
 				'updatedAddress.shippingAddressPostalCode',
 				updatedAddress.shippingAddressPostalCode,
