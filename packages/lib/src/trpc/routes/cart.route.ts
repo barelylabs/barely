@@ -30,6 +30,7 @@ import {
 import { recordCartEvent } from '../../functions/event.fns';
 import { getStripeConnectAccountId } from '../../functions/stripe-connect.fns';
 import { stripe } from '../../integrations/stripe';
+import { ratelimit } from '../../integrations/upstash';
 import {
 	getAmountsForCheckout,
 	getAmountsForUpsell,
@@ -407,7 +408,9 @@ export const cartRoute = {
 				{
 					amount: amounts.orderAmount,
 					application_fee_amount: getFeeAmountForCheckout({
-						amount: amounts.orderProductAmount,
+						productAmount: amounts.orderProductAmount,
+						vatAmount: amounts.orderVatAmount,
+						shippingAndHandlingAmount: 0, // not supported yet. in the future we take a shipping fee if they want to ship through the app.
 						workspace: funnel.workspace,
 					}),
 				},
@@ -583,7 +586,9 @@ export const cartRoute = {
 				{
 					amount: amounts.upsellAmount,
 					application_fee_amount: getFeeAmountForCheckout({
-						amount: amounts.upsellProductAmount,
+						productAmount: amounts.upsellProductAmount,
+						vatAmount: amounts.upsellVatAmount,
+						shippingAndHandlingAmount: 0, // not supported yet. in the future we take a shipping fee if they want to ship through the app.
 						workspace: funnel.workspace,
 					}),
 					currency: cart.workspace.currency,

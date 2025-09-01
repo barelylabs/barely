@@ -177,12 +177,19 @@ export function getAmountsForUpsell(
 }
 
 export function getFeeAmountForCheckout({
-	amount,
+	productAmount,
+	vatAmount,
+	shippingAndHandlingAmount,
 	workspace,
 }: {
-	amount: number;
+	productAmount: number;
+	vatAmount: number;
+	shippingAndHandlingAmount: number;
 	workspace: Pick<Workspace, 'plan' | 'cartFeePercentageOverride'>;
 }) {
 	const feePercentage = getFeePercentageForCheckout(workspace);
-	return Math.round(amount * (feePercentage / 100));
+
+	const barelyFee = Math.round(productAmount * (feePercentage / 100));
+
+	return barelyFee + vatAmount + shippingAndHandlingAmount;
 }

@@ -290,7 +290,9 @@ export async function createMainCartFromFunnel({
 		{
 			amount: amounts.checkoutAmount,
 			application_fee_amount: getFeeAmountForCheckout({
-				amount: amounts.orderProductAmount, // we just take fees on product sales, not shipping or tax
+				productAmount: amounts.orderProductAmount, // we just take fees on product sales, not shipping or tax
+				vatAmount: amounts.orderVatAmount,
+				shippingAndHandlingAmount: 0, // not supported yet. in the future we take a shipping fee if they want to ship through the app.
 				workspace: funnel.workspace,
 			}),
 			currency: funnel.workspace.currency,
