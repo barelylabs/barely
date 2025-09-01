@@ -107,6 +107,7 @@
 		"@barely/tb": "workspace:*",
 		"@barely/utils": "workspace:*",
 		"@barely/validators": "workspace:*",
+		"@easypost/api": "^8.2.0",
 		"@fast-csv/parse": "^5.0.0",
 		"@hookform/resolvers": "^5.1.1",
 		"@langchain/core": "^0.3.61",

@@ -57,6 +57,7 @@ export interface ReceiptEmailProps {
 		shipping?: string;
 	}[];
 	shippingTotal?: string;
+	vatTotal: string | null;
 	total: string;
 }
 
@@ -69,6 +70,7 @@ export function ReceiptEmailTemplate({
 	date,
 	products,
 	shippingTotal,
+	vatTotal,
 	total,
 }: ReceiptEmailProps) {
 	const previewText = `Your receipt from ${sellerName}`;
@@ -188,6 +190,9 @@ export function ReceiptEmailTemplate({
 						<Row>
 							<Column align='right'>
 								<Text style={{ ...resetText, marginTop: '20px' }}>Total (USD)</Text>
+								{vatTotal && (
+									<Text style={{ ...resetText, marginTop: 0 }}>VAT: {vatTotal}</Text>
+								)}
 								<Text style={{ ...heading, marginTop: 0 }}>{total}</Text>
 							</Column>
 						</Row>
@@ -393,4 +398,5 @@ ReceiptEmailTemplate.PreviewProps = {
 			price: '$10.00',
 		},
 	],
+	vatTotal: '£20.00',
 } satisfies ReceiptEmailProps;

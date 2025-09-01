@@ -1,7 +1,8 @@
 'use client';
 
 import type { CartFunnel } from '@barely/validators';
-import { formatCentsToDollars } from '@barely/utils';
+import { useWorkspace } from '@barely/hooks';
+import { formatMinorToMajorCurrency } from '@barely/utils';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
@@ -57,6 +58,7 @@ export function AllCartFunnels() {
 }
 
 function CartFunnelCard({ cartFunnel }: { cartFunnel: CartFunnel }) {
+	const { workspace } = useWorkspace();
 	const {
 		setShowUpdateModal: setShowUpdateCartFunnelModal,
 		setShowArchiveModal: setShowArchiveCartFunnelModal,
@@ -85,7 +87,7 @@ function CartFunnelCard({ cartFunnel }: { cartFunnel: CartFunnel }) {
 				{
 					icon: 'value',
 					name: 'value',
-					value: formatCentsToDollars(value ?? 0),
+					value: formatMinorToMajorCurrency(value ?? 0, workspace.currency),
 				},
 			]}
 			statsHref={`/${handle}/carts/stats?assetId=${cartFunnel.id}`}

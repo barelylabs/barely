@@ -1,6 +1,9 @@
-export function formatCentsToDollars(amountInCents: number, currency = 'usd') {
+export function formatMinorToMajorCurrency(
+	amountInCents: number,
+	currency: 'usd' | 'gbp',
+) {
 	const amount = amountInCents / 100;
-	const formattedAmount = new Intl.NumberFormat('en-US', {
+	const formattedAmount = new Intl.NumberFormat(currency === 'usd' ? 'en-US' : 'en-GB', {
 		style: 'currency',
 		currency,
 	}).format(amount);

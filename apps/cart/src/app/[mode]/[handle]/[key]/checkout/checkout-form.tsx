@@ -1,5 +1,6 @@
 'use client';
 
+import type { updateShippingAddressFromCheckoutSchema } from '@barely/validators';
 import type {
 	StripeAddressElementChangeEvent,
 	StripeLinkAuthenticationElementChangeEvent,
@@ -9,8 +10,8 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { APPAREL_SIZES, isApparelSize } from '@barely/const';
 import { useDebouncedCallback, useZodForm } from '@barely/hooks';
-import { getAmountsForCheckout } from '@barely/lib/functions/cart.utils';
-import { cn, formatCentsToDollars, getAbsoluteUrl } from '@barely/utils';
+import { getAmountsForCheckout } from '@barely/lib/utils/cart';
+import { cn, formatMinorToMajorCurrency, getAbsoluteUrl } from '@barely/utils';
 import { updateCheckoutCartFromCheckoutSchema } from '@barely/validators';
 import {
 	AddressElement,
@@ -20,9 +21,12 @@ import {
 	useStripe,
 } from '@stripe/react-stripe-js';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { atom, useAtom } from 'jotai';
 import { useFormContext } from 'react-hook-form';
 
 import { useCartTRPC } from '@barely/api/public/cart.trpc.react';
+
+import { atomWithToggle } from '@barely/atoms/atom-with-toggle';
 
 import { Button } from '@barely/ui/button';
 import { CheckboxField } from '@barely/ui/forms/checkbox-field';
@@ -42,6 +46,9 @@ import {
 } from '~/app/[mode]/[handle]/[key]/_actions';
 import { useCart } from '../_components/use-cart';
 import { usePublicFunnel } from '../_components/use-public-funnel';
+
+const isFetchingRatesAtom = atomWithToggle(false);
+const vatAtom = atom(0);
 
 export function CheckoutForm({
 	mode,
@@ -172,10 +179,71 @@ export function CheckoutForm({
 	const debouncedUpdateEmail = useDebouncedCallback(updateEmail, 500);
 
 	// update address
+
+	// const [isFetchingRates, setIsFetchingRates] = useState(false);
+	const [, setIsFetchingRates] = useAtom(isFetchingRatesAtom);
+	const { mutateAsync: mutateAddress } = useMutation(
+		trpc.updateShippingAddressFromCheckout.mutationOptions({
+			onMutate: async data => {
+				await queryClient.cancelQueries({
+					queryKey: trpc.byIdAndParams.queryKey({
+						id: cartId,
+						handle,
+						key: cartKey,
+					}),
+				});
+
+				const prevCart = queryClient.getQueryData(
+					trpc.byIdAndParams.queryKey({
+						id: cartId,
+						handle,
+						key: cartKey,
+					}),
+				);
+
+				if (!prevCart) return;
+
+				if (prevCart.cart.shippingAddressPostalCode !== data.shippingAddressPostalCode) {
+					setIsFetchingRates(true);
+				}
+
+				queryClient.setQueryData(
+					trpc.byIdAndParams.queryKey({
+						id: cartId,
+						handle,
+						key: cartKey,
+					}),
+					old => {
+						if (!old) return old;
+
+						return {
+							...old,
+							cart: {
+								...old.cart,
+								...data,
+							},
+						};
+					},
+				);
+			},
+			onSettled: async () => {
+				await queryClient.invalidateQueries({
+					queryKey: trpc.byIdAndParams.queryKey({
+						id: cartId,
+						handle,
+						key: cartKey,
+					}),
+				});
+
+				setIsFetchingRates(false);
+			},
+		}),
+	);
+
 	const updateAddress = (
-		data: Partial<z.infer<typeof updateCheckoutCartFromCheckoutSchema>>,
+		data: z.infer<typeof updateShippingAddressFromCheckoutSchema>,
 	) => {
-		updateCart(data);
+		void mutateAddress(data);
 		logEvent({
 			cartId,
 			event: 'cart/addShippingInfo',
@@ -218,7 +286,7 @@ export function CheckoutForm({
 
 	return (
 		<Form form={form} onSubmit={handleSubmit}>
-			<div className='flex w-full max-w-[500px] flex-col gap-8'>
+			<div className='flex w-full max-w-[500px] flex-col gap-8 sm:ml-auto'>
 				<Suspense fallback={<div>Loading...</div>}>
 					<MainProduct cartId={cartId} handle={handle} cartKey={cartKey} />
 				</Suspense>
@@ -233,10 +301,12 @@ export function CheckoutForm({
 							}
 						}}
 						onAddressChange={e => {
+							console.log('address change', e);
 							if (e.complete) {
 								const address = e.value.address;
 
 								debouncedUpdateAddress({
+									cartId,
 									firstName: e.value.firstName,
 									lastName: e.value.lastName,
 									fullName: e.value.name,
@@ -328,7 +398,8 @@ function MainProductPrice({
 	const { cart } = useCart({ id: cartId, handle, key: cartKey });
 	const { publicFunnel } = usePublicFunnel({ handle, key: cartKey });
 	const { mainProduct } = publicFunnel;
-	const amounts = getAmountsForCheckout(publicFunnel, cart);
+	const [vat] = useAtom(vatAtom);
+	const amounts = getAmountsForCheckout(publicFunnel, cart, vat);
 
 	return (
 		<div className='flex flex-col gap-2'>
@@ -339,6 +410,7 @@ function MainProductPrice({
 				variant='lg/normal'
 				price={amounts.mainProductPrice}
 				normalPrice={mainProduct.price}
+				currency={publicFunnel.workspace.currency}
 			/>
 		</div>
 	);
@@ -354,7 +426,7 @@ function UpdateMainProductPayWhatYouWantPrice({
 	cartKey: string;
 }) {
 	const { cart, logEvent, updateCart } = useCart({ id: cartId, handle, key: cartKey });
-
+	const { publicFunnel } = usePublicFunnel({ handle, key: cartKey });
 	const { control } =
 		useFormContext<z.infer<typeof updateCheckoutCartFromCheckoutSchema>>();
 
@@ -415,7 +487,8 @@ function UpdateMainProductPayWhatYouWantPrice({
 			<CurrencyField
 				control={control}
 				name='mainProductPayWhatYouWantPrice'
-				outputUnits='cents'
+				outputUnit='minor'
+				currency={publicFunnel.workspace.currency}
 				onValueChange={async v => {
 					await updatePayWhatYouWantPrice(v);
 				}}
@@ -572,6 +645,7 @@ function BumpProduct({
 					<ProductPrice
 						price={bumpProduct.price - (publicFunnel.bumpProductDiscount ?? 0)}
 						normalPrice={bumpNormalPrice}
+						currency={publicFunnel.workspace.currency}
 					/>
 				</div>
 
@@ -848,9 +922,11 @@ function StripePaymentElement({
 // SUBMIT BUTTON
 function SubmitButton({ mode }: { mode: 'preview' | 'live' }) {
 	const router = useRouter();
+	const [isFetchingRates] = useAtom(isFetchingRatesAtom);
 
 	const form = useFormContext<z.infer<typeof updateCheckoutCartFromCheckoutSchema>>();
 
+	const isDisabled = mode === 'live' && isFetchingRates;
 	return (
 		<Button
 			type={mode === 'live' ? 'submit' : 'button'}
@@ -859,6 +935,7 @@ function SubmitButton({ mode }: { mode: 'preview' | 'live' }) {
 			className='hover:bg-brandKit-block/90 bg-brandKit-block text-brandKit-block-text'
 			loading={mode === 'live' && form.formState.isSubmitting}
 			loadingText='Completing order...'
+			disabled={isDisabled}
 			onClick={() => {
 				if (mode === 'preview') {
 					router.push(`customize`);
@@ -883,17 +960,22 @@ export function OrderSummary({
 	const { cart } = useCart({ id: cartId, handle, key: cartKey });
 	const { publicFunnel } = usePublicFunnel({ handle, key: cartKey });
 	const { mainProduct, bumpProduct } = publicFunnel;
-	const amounts = getAmountsForCheckout(publicFunnel, cart);
+	const [vat] = useAtom(vatAtom);
+	const amounts = getAmountsForCheckout(publicFunnel, cart, vat);
+	const [isFetchingRates] = useAtom(isFetchingRatesAtom);
 
 	return (
 		<div className='flex max-w-sm flex-col gap-2'>
-			<Text variant='md/normal'>Total payment</Text>
+			<Text variant='md/medium'>Total payment</Text>
 			<div className='flex flex-row justify-between'>
-				<Text variant='sm/light' className='opacity-90'>
+				<Text variant='sm/normal' className='opacity-90'>
 					{mainProduct.name}
 				</Text>
-				<Text variant='sm/light' className='opacity-90'>
-					{formatCentsToDollars(amounts.mainProductPrice)}
+				<Text variant='sm/normal' className='opacity-90'>
+					{formatMinorToMajorCurrency(
+						amounts.mainProductPrice,
+						publicFunnel.workspace.currency,
+					)}
 				</Text>
 			</div>
 
@@ -903,25 +985,52 @@ export function OrderSummary({
 						{bumpProduct.name}
 					</Text>
 					<Text variant='sm/light' className='opacity-90'>
-						{formatCentsToDollars(amounts.bumpProductPrice)}
+						{formatMinorToMajorCurrency(
+							amounts.bumpProductPrice,
+							publicFunnel.workspace.currency,
+						)}
 					</Text>
 				</div>
 			)}
 
 			<div className='flex flex-row justify-between'>
-				<Text variant='md/normal'>Shipping</Text>
-				<Text variant='md/normal'>
-					{formatCentsToDollars(amounts.checkoutShippingAndHandlingAmount)}
+				<Text variant='md/medium'>Shipping</Text>
+
+				{isFetchingRates ?
+					<div className='flex flex-row items-center gap-2'>
+						<div className='h-4 w-10 animate-pulse rounded bg-brandKit-block-text' />
+					</div>
+				:	<Text variant='md/medium'>
+						{formatMinorToMajorCurrency(
+							amounts.checkoutShippingAndHandlingAmount,
+							publicFunnel.workspace.currency,
+						)}
+					</Text>
+				}
+			</div>
+
+			<div className='flex flex-row justify-between'>
+				<Text variant='md/medium'>VAT</Text>
+				<Text variant='md/medium'>
+					{formatMinorToMajorCurrency(
+						amounts.checkoutVatAmount,
+						publicFunnel.workspace.currency,
+					)}
 				</Text>
 			</div>
 
 			<div className='flex flex-row justify-between'>
-				<Text variant='xl/semibold'>Total</Text>
-				<Text variant='xl/semibold'>{formatCentsToDollars(amounts.checkoutAmount)}</Text>
+				<Text variant='xl/bold'>Total</Text>
+				<Text variant='xl/bold'>
+					{formatMinorToMajorCurrency(
+						amounts.checkoutAmount,
+						publicFunnel.workspace.currency,
+					)}
+				</Text>
 			</div>
 
-			<Text variant='2xs/normal' className='ml-auto opacity-90'>
-				All prices in USD
+			<Text variant='xs/normal' className='ml-auto opacity-90'>
+				All prices in {publicFunnel.workspace.currency === 'usd' ? 'USD' : 'GBP'}
 			</Text>
 		</div>
 	);

@@ -67,6 +67,19 @@ export const updateCheckoutCartFromCheckoutSchema = cartPageSearchParams
 		shippingAddressCountry: z.string().nullish(),
 	});
 
+export const updateShippingAddressFromCheckoutSchema = z.object({
+	cartId: z.string(),
+	firstName: z.string().optional(),
+	lastName: z.string().optional(),
+	fullName: z.string(),
+	phone: z.string().optional(),
+	shippingAddressLine1: z.string(),
+	shippingAddressLine2: z.string().nullable(),
+	shippingAddressCountry: z.string(),
+	shippingAddressState: z.string(),
+	shippingAddressCity: z.string(),
+	shippingAddressPostalCode: z.string(),
+});
 // stat filters
 export const cartStatFiltersSchema = stdWebEventPipeQueryParamsSchema.extend(
 	cartFiltersSchema.shape,

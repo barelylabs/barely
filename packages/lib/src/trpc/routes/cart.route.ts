@@ -6,7 +6,10 @@ import { dbPool } from '@barely/db/pool';
 import { Carts } from '@barely/db/sql/cart.sql';
 import { publicProcedure } from '@barely/lib/trpc';
 import { getAbsoluteUrl, isProduction, newId, raiseTRPCError, wait } from '@barely/utils';
-import { updateCheckoutCartFromCheckoutSchema } from '@barely/validators';
+import {
+	updateCheckoutCartFromCheckoutSchema,
+	updateShippingAddressFromCheckoutSchema,
+} from '@barely/validators';
 import { tasks } from '@trigger.dev/sdk/v3';
 import { TRPCError } from '@trpc/server';
 import { waitUntil } from '@vercel/functions';
@@ -24,19 +27,30 @@ import {
 	incrementAssetValuesOnCartPurchase,
 	sendCartReceiptEmail,
 } from '../../functions/cart.fns';
+import { recordCartEvent } from '../../functions/event.fns';
+import { getStripeConnectAccountId } from '../../functions/stripe-connect.fns';
+import { stripe } from '../../integrations/stripe';
+import { ratelimit } from '../../integrations/upstash';
 import {
 	getAmountsForCheckout,
 	getAmountsForUpsell,
 	getFeeAmountForCheckout,
-} from '../../functions/cart.utils';
-import { recordCartEvent } from '../../functions/event.fns';
-import { getStripeConnectAccountId } from '../../functions/stripe-connect.fns';
-import { stripe } from '../../integrations/stripe';
+	getVatRateForCheckout,
+} from '../../utils/cart';
 
 export const cartRoute = {
 	brandKitByHandle: publicProcedure
 		.input(z.object({ handle: z.string() }))
 		.query(async ({ input }) => {
+			// Handle system paths that might get caught by dynamic routes
+			const systemPaths = ['.well-known', 'appspecific', '_next', 'api'];
+			if (systemPaths.includes(input.handle)) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'System path requested',
+				});
+			}
+
 			const brandKit = await getBrandKit({
 				handle: input.handle,
 			});
@@ -44,7 +58,7 @@ export const cartRoute = {
 			if (!brandKit) {
 				throw new TRPCError({
 					code: 'NOT_FOUND',
-					message: 'Brand kit not found',
+					message: `Brand kit not found for handle @${input.handle}`,
 				});
 			}
 
@@ -54,6 +68,15 @@ export const cartRoute = {
 	publicFunnelByHandleAndKey: publicProcedure
 		.input(z.object({ handle: z.string(), key: z.string() }))
 		.query(async ({ input }) => {
+			// Handle system paths that might get caught by dynamic routes
+			const systemPaths = ['.well-known', 'appspecific', '_next', 'api'];
+			if (systemPaths.includes(input.handle)) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'System path requested',
+				});
+			}
+
 			const funnel =
 				(await getFunnelByParams(input.handle, input.key)) ??
 				raiseTRPCError({ code: 'NOT_FOUND', message: 'funnel not found' });
@@ -179,10 +202,11 @@ export const cartRoute = {
 			});
 
 			if (!cart && input.waitForCart) {
-				const maxAttempts = 10;
+				// Wait for cart creation with reasonable timeout (max ~10 seconds)
+				const maxAttempts = 8;
 				const baseDelay = 100;
 				for (let attempt = 0; attempt < maxAttempts; attempt++) {
-					// exponential backoff 100ms, 200ms, 400ms, 800ms, 1600ms, 3200ms, 6400ms, 12800ms, 25600ms, 51200ms
+					// exponential backoff: 100ms, 200ms, 400ms, 800ms, 1600ms, 3200ms, 6400ms,  (total ~12.7 seconds)
 					const delay = baseDelay * Math.pow(2, attempt);
 					await wait(delay);
 					cart = await dbHttp.query.Carts.findFirst({
@@ -199,7 +223,27 @@ export const cartRoute = {
 					});
 					if (cart) break;
 				}
+
+				// If cart still doesn't exist after waiting, try to create it
+				// if (!cart) {
+				// 	const funnel = await getFunnelByParams(input.handle, input.key);
+				// 	if (funnel) {
+				// 		// Create cart with the existing cart ID from the cookie
+				// 		cart = await createMainCartFromFunnel({
+				// 			funnel,
+				// 			cartId: input.id,
+				// 			shipTo: {
+				// 				country: cart.shippingAddressCountry,
+				// 				state: cart.shippingAddressState,
+				// 				city: cart.shippingAddressCity,
+				// 			},
+				// 			// We don't have visitor info here, but that's okay for recovery
+				// 			visitor: null,
+				// 		});
+				// 	}
+				// }
 			}
+
 			if (!cart) throw new TRPCError({ code: 'NOT_FOUND', message: 'cart not found' });
 
 			// const funnel = await dbPool(ctx.pool).query.CartFunnels.findFirst({
@@ -256,6 +300,7 @@ export const cartRoute = {
 			};
 
 			if (update.shippingAddressPostalCode) {
+				console.log('updating shipping address');
 				const toCountry = update.shippingAddressCountry ?? cart.shippingAddressCountry;
 				const toState = update.shippingAddressState ?? cart.shippingAddressState;
 				const toCity = update.shippingAddressCity ?? cart.shippingAddressCity;
@@ -275,6 +320,7 @@ export const cartRoute = {
 								{ product: funnel.mainProduct, quantity: cart.mainProductQuantity },
 							],
 							shipFrom: {
+								state: funnel.workspace.shippingAddressState ?? '',
 								postalCode: funnel.workspace.shippingAddressPostalCode ?? '',
 								countryCode: funnel.workspace.shippingAddressCountry ?? '',
 							},
@@ -302,6 +348,7 @@ export const cartRoute = {
 									},
 								],
 								shipFrom: {
+									state: funnel.workspace.shippingAddressState ?? '',
 									postalCode: funnel.workspace.shippingAddressPostalCode ?? '',
 									countryCode: funnel.workspace.shippingAddressCountry ?? '',
 								},
@@ -318,10 +365,21 @@ export const cartRoute = {
 				}
 			}
 
-			const amounts = getAmountsForCheckout(funnel, {
-				...cart,
-				...updateCart,
-			});
+			const shipFromCountry = funnel.workspace.shippingAddressCountry;
+			const shipToCountry = update.shippingAddressCountry;
+			const vat =
+				shipFromCountry && shipToCountry ?
+					getVatRateForCheckout(shipFromCountry, shipToCountry)
+				:	0;
+
+			const amounts = getAmountsForCheckout(
+				funnel,
+				{
+					...cart,
+					...updateCart,
+				},
+				vat,
+			);
 
 			const carts = await dbPool(ctx.pool)
 				.update(Carts)
@@ -350,7 +408,9 @@ export const cartRoute = {
 				{
 					amount: amounts.orderAmount,
 					application_fee_amount: getFeeAmountForCheckout({
-						amount: amounts.orderProductAmount,
+						productAmount: amounts.orderProductAmount,
+						vatAmount: amounts.orderVatAmount,
+						shippingAndHandlingAmount: 0, // not supported yet. in the future we take a shipping fee if they want to ship through the app.
 						workspace: funnel.workspace,
 					}),
 				},
@@ -362,6 +422,112 @@ export const cartRoute = {
 
 			return {
 				cart: carts[0],
+			};
+		}),
+
+	updateShippingAddressFromCheckout: publicProcedure
+		.input(updateShippingAddressFromCheckoutSchema)
+		.mutation(async ({ input, ctx }) => {
+			// rate limit this route to prevent abuse of shipping estimate recalculations
+			const rateLimit = ratelimit(30, '1 m');
+			const { success } = await rateLimit.limit(input.cartId);
+			if (!success) {
+				throw new TRPCError({ code: 'TOO_MANY_REQUESTS', message: 'Too many requests' });
+			}
+
+			const { cartId, ...updatedAddress } = input;
+			const cart = await getCartById(cartId);
+			if (!cart) throw new TRPCError({ code: 'NOT_FOUND', message: 'Cart not found' });
+
+			const funnel = cart.funnel ?? raiseTRPCError({ message: 'funnel not found' });
+
+			const updateCart: UpdateCart = { id: cart.id, ...updatedAddress };
+
+			// if the postal code is the same, we don't need to recalculate shipping rates
+			console.log(
+				'updatedAddress.shippingAddressPostalCode',
+				updatedAddress.shippingAddressPostalCode,
+			);
+			console.log('cart.shippingAddressPostalCode', cart.shippingAddressPostalCode);
+
+			if (updatedAddress.shippingAddressPostalCode === cart.shippingAddressPostalCode) {
+				await dbPool(ctx.pool)
+					.update(Carts)
+					.set({
+						...updateCart,
+					})
+					.where(eq(Carts.id, cartId))
+					.returning();
+
+				return {
+					success: true,
+				};
+			}
+
+			// if the postal code is different, we need to recalculate shipping rates
+			const shipFrom = {
+				state: funnel.workspace.shippingAddressState ?? '',
+				postalCode: funnel.workspace.shippingAddressPostalCode ?? '',
+				countryCode: funnel.workspace.shippingAddressCountry ?? '',
+			};
+
+			const shipTo = {
+				country: updatedAddress.shippingAddressCountry,
+				state: updatedAddress.shippingAddressState,
+				city: updatedAddress.shippingAddressCity,
+				postalCode: updatedAddress.shippingAddressPostalCode,
+			};
+
+			const [mainShippingResult, mainPlusBumpShippingResult] = await Promise.all([
+				getProductsShippingRateEstimate({
+					products: [{ product: funnel.mainProduct, quantity: cart.mainProductQuantity }],
+					shipFrom,
+					shipTo,
+				}),
+				!funnel.bumpProduct ?
+					Promise.resolve(null)
+				:	getProductsShippingRateEstimate({
+						products: [
+							{ product: funnel.mainProduct, quantity: cart.mainProductQuantity },
+							{ product: funnel.bumpProduct, quantity: cart.bumpProductQuantity ?? 1 },
+						],
+						shipFrom,
+						shipTo,
+					}),
+			]);
+
+			const mainShippingAmount = mainShippingResult.lowestShippingPrice;
+			const mainPlusBumpShippingPrice =
+				!funnel.bumpProduct || !mainPlusBumpShippingResult ?
+					mainShippingAmount
+				:	mainPlusBumpShippingResult.lowestShippingPrice;
+
+			updateCart.mainShippingAmount = mainShippingAmount;
+			updateCart.bumpShippingPrice = mainPlusBumpShippingPrice - mainShippingAmount;
+
+			const amounts = getAmountsForCheckout(
+				funnel,
+				{
+					...cart,
+					...updateCart,
+				},
+				getVatRateForCheckout(
+					funnel.workspace.shippingAddressCountry,
+					updatedAddress.shippingAddressCountry,
+				),
+			);
+
+			await dbPool(ctx.pool)
+				.update(Carts)
+				.set({
+					...updateCart,
+					...amounts,
+				})
+				.where(eq(Carts.id, cartId))
+				.returning();
+
+			return {
+				success: true,
 			};
 		}),
 
@@ -404,7 +570,11 @@ export const cartRoute = {
 			const upsellProduct =
 				funnel.upsellProduct ?? raiseTRPCError({ message: 'upsell product not found' });
 
-			const amounts = getAmountsForUpsell(funnel, cart);
+			const vat = getVatRateForCheckout(
+				funnel.workspace.shippingAddressCountry,
+				cart.shippingAddressCountry,
+			);
+			const amounts = getAmountsForUpsell(funnel, cart, vat);
 
 			const fan = cart.fan;
 
@@ -416,10 +586,12 @@ export const cartRoute = {
 				{
 					amount: amounts.upsellAmount,
 					application_fee_amount: getFeeAmountForCheckout({
-						amount: amounts.upsellProductAmount,
+						productAmount: amounts.upsellProductAmount,
+						vatAmount: amounts.upsellVatAmount,
+						shippingAndHandlingAmount: 0, // not supported yet. in the future we take a shipping fee if they want to ship through the app.
 						workspace: funnel.workspace,
 					}),
-					currency: 'usd',
+					currency: cart.workspace.currency,
 					customer: cart.fan.stripeCustomerId ?? undefined,
 					payment_method: stripePaymentMethodId,
 					return_url: getAbsoluteUrl(
@@ -485,6 +657,7 @@ export const cartRoute = {
 					cartFunnel: funnel,
 					type: 'cart/purchaseUpsell',
 					visitor: ctx.visitor,
+					currency: funnel.workspace.currency,
 				}).catch(err => {
 					console.log('error recording upsellcart event:', err);
 				});
@@ -498,6 +671,7 @@ export const cartRoute = {
 				mainProduct: funnel.mainProduct,
 				bumpProduct: funnel.bumpProduct,
 				upsellProduct: funnel.upsellProduct,
+				currency: funnel.workspace.currency,
 			}).then(() => {
 				updateCart.orderReceiptSent = true;
 			});
@@ -557,6 +731,7 @@ export const cartRoute = {
 				cartFunnel: funnel,
 				type: 'cart/declineUpsell',
 				visitor: ctx.visitor,
+				currency: funnel.workspace.currency,
 			}).catch(err => {
 				console.log('error recording upsellcart event:', err);
 			});
@@ -570,6 +745,7 @@ export const cartRoute = {
 				mainProduct: funnel.mainProduct,
 				bumpProduct: funnel.bumpProduct,
 				upsellProduct: funnel.upsellProduct,
+				currency: funnel.workspace.currency,
 			}).then(() => {
 				cart.orderReceiptSent = true;
 			});
@@ -603,7 +779,15 @@ export const cartRoute = {
 				(await dbPool(ctx.pool).query.Carts.findFirst({
 					where: eq(Carts.id, cartId),
 					with: {
-						funnel: true,
+						funnel: {
+							with: {
+								workspace: {
+									columns: {
+										currency: true,
+									},
+								},
+							},
+						},
 					},
 				})) ?? raiseTRPCError({ message: 'cart not found' });
 
@@ -644,6 +828,7 @@ export const cartRoute = {
 				cartFunnel,
 				type: event,
 				visitor,
+				currency: cartFunnel.workspace.currency,
 			}).catch(err => {
 				console.log('error recording cart event in cart.router.log:', err);
 			});

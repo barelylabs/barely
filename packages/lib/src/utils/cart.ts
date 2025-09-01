@@ -1,11 +1,34 @@
 import type { InsertCart, Workspace } from '@barely/validators/schemas';
 import { WORKSPACE_PLANS } from '@barely/const';
 
-import type { PublicFunnel } from './cart.fns';
+import type { PublicFunnel } from '../functions/cart.fns';
 
 /* this can be used on the server (where we create or update the payment intent) 
 or client (where we optimistically update the cart) 
 */
+
+export function getFeePercentageForCheckout(
+	workspace: Pick<Workspace, 'plan' | 'cartFeePercentageOverride'>,
+) {
+	const workspacePlan = workspace.plan;
+	const feePercentage =
+		typeof workspace.cartFeePercentageOverride === 'number' ?
+			workspace.cartFeePercentageOverride
+		:	(WORKSPACE_PLANS.get(workspacePlan)?.cartFeePercentage ?? 0);
+
+	return feePercentage;
+}
+
+export function getVatRateForCheckout(
+	shipFromCountry?: string | null,
+	shipToCountry?: string | null,
+) {
+	if (shipFromCountry === 'GB' && shipToCountry === 'GB') {
+		return 0.2;
+	}
+
+	return 0;
+}
 
 export function getAmountsForCheckout(
 	funnel: Pick<
@@ -31,6 +54,7 @@ export function getAmountsForCheckout(
 			| 'bumpShippingPrice'
 		>
 	>,
+	vat: number,
 ) {
 	// main product
 	let mainProductPrice = 0;
@@ -80,17 +104,13 @@ export function getAmountsForCheckout(
 	const checkoutHandlingAmount = mainHandlingAmount + bumpHandlingAmount;
 	const checkoutShippingAndHandlingAmount =
 		checkoutShippingAmount + checkoutHandlingAmount;
-	const checkoutAmount =
+	const checkoutSubtotalAmount =
 		checkoutProductAmount + checkoutShippingAmount + checkoutHandlingAmount;
 
-	return {
-		// formatted inputs
-		// mainProductPayWhatYouWantPrice, // this is the entered amount, unless it's less than the minimum, then it's the minimum
-		// mainProductQuantity,
-		// addedBump,
-		// bumpProductQuantity,
-		// bumpShippingPrice,
+	const checkoutVatAmount = checkoutSubtotalAmount * vat;
+	const checkoutAmount = checkoutSubtotalAmount + checkoutVatAmount;
 
+	return {
 		// calculated amounts
 		mainProductPrice,
 		mainProductAmount,
@@ -109,15 +129,15 @@ export function getAmountsForCheckout(
 		checkoutShippingAmount,
 		checkoutHandlingAmount,
 		checkoutShippingAndHandlingAmount,
+		checkoutVatAmount,
 		checkoutAmount,
 
 		orderProductAmount: checkoutProductAmount,
 		orderShippingAmount: checkoutShippingAmount,
 		orderHandlingAmount: checkoutHandlingAmount,
 		orderShippingAndHandlingAmount: checkoutShippingAndHandlingAmount,
+		orderVatAmount: checkoutVatAmount,
 		orderAmount: checkoutAmount,
-
-		// shippingAndHandlingAmount: mainPlusBumpShippingAndHandlingAmount,
 	} satisfies Partial<InsertCart>;
 }
 
@@ -127,6 +147,7 @@ export function getAmountsForUpsell(
 		InsertCart,
 		'upsellProductId' | 'upsellProductQuantity' | 'upsellShippingPrice'
 	>,
+	vat: number,
 ) {
 	const upsellProductPrice = Math.max(
 		0,
@@ -139,7 +160,10 @@ export function getAmountsForUpsell(
 	const upsellShippingAmount = cart.upsellShippingPrice ?? 0; // todo - get shipping delta for upsell product
 	const upsellHandlingAmount = 0;
 	const upsellShippingAndHandlingAmount = upsellShippingAmount + upsellHandlingAmount;
-	const upsellAmount = upsellProductAmount + upsellShippingAmount + upsellHandlingAmount;
+	const upsellSubtotalAmount =
+		upsellProductAmount + upsellShippingAmount + upsellHandlingAmount;
+	const upsellVatAmount = upsellSubtotalAmount * vat;
+	const upsellAmount = upsellSubtotalAmount + upsellVatAmount;
 
 	return {
 		upsellProductPrice,
@@ -147,22 +171,25 @@ export function getAmountsForUpsell(
 		upsellShippingAmount,
 		upsellHandlingAmount,
 		upsellShippingAndHandlingAmount,
+		upsellVatAmount,
 		upsellAmount,
 	};
 }
 
 export function getFeeAmountForCheckout({
-	amount,
+	productAmount,
+	vatAmount,
+	shippingAndHandlingAmount,
 	workspace,
 }: {
-	amount: number;
+	productAmount: number;
+	vatAmount: number;
+	shippingAndHandlingAmount: number;
 	workspace: Pick<Workspace, 'plan' | 'cartFeePercentageOverride'>;
 }) {
-	const workspacePlan = workspace.plan;
-	const feePercentage =
-		typeof workspace.cartFeePercentageOverride === 'number' ?
-			workspace.cartFeePercentageOverride
-		:	(WORKSPACE_PLANS.get(workspacePlan)?.cartFeePercentage ?? 0);
+	const feePercentage = getFeePercentageForCheckout(workspace);
 
-	return Math.round(amount * (feePercentage / 100));
+	const barelyFee = Math.round(productAmount * (feePercentage / 100));
+
+	return barelyFee + vatAmount + shippingAndHandlingAmount;
 }

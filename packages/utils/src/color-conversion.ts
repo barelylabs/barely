@@ -1,61 +1,178 @@
+import { formatHex, formatRgb } from 'culori';
+
+/**
+ * Convert oklch color string to rgba format
+ * This is useful for Stripe Elements and other places that need alpha support
+ */
+export function oklchToRgba(oklchString: string): string {
+	try {
+		// Parse OKLCH with or without alpha
+		const regex = /oklch\(\s*([\d.%]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.%]+))?\s*\)/;
+		const match = regex.exec(oklchString);
+
+		if (!match) return 'rgba(0, 0, 0, 1)';
+
+		const lValue =
+			match[1]?.endsWith('%') ? parseFloat(match[1]) / 100 : parseFloat(match[1] ?? '0');
+		const color = {
+			mode: 'oklch' as const,
+			l: lValue,
+			c: parseFloat(match[2] ?? '0'),
+			h: parseFloat(match[3] ?? '0'),
+		};
+
+		// Get RGB string
+		const rgbString = formatRgb(color);
+		if (!rgbString) return 'rgba(0, 0, 0, 1)';
+
+		// Extract alpha if present
+		let alpha = 1;
+		if (match[4]) {
+			alpha = match[4].endsWith('%') ? parseFloat(match[4]) / 100 : parseFloat(match[4]);
+		}
+
+		// Convert rgb() to rgba() with alpha
+		// formatRgb returns "rgb(r, g, b)" so we need to convert it
+		const rgbMatch = /rgb\(([^)]+)\)/.exec(rgbString);
+		if (rgbMatch?.[1]) {
+			return `rgba(${rgbMatch[1]}, ${alpha})`;
+		}
+
+		return `rgba(0, 0, 0, ${alpha})`;
+	} catch (e) {
+		console.error('Error converting OKLCH to RGBA:', e);
+		return 'rgba(0, 0, 0, 1)';
+	}
+}
+
 /**
  * Convert oklch color string to hex format
  * This is needed for Stripe Elements which requires hex colors
+ * Note: Alpha channel is ignored as hex colors for CSS don't support alpha
  */
 export function oklchToHex(oklchString: string): string {
-	// Parse oklch values from string like "oklch(96% 0.005 260)"
-	const regex = /oklch\(([^)]+)\)/;
-	const match = regex.exec(oklchString);
-	if (!match?.[1]) return '#000000'; // fallback to black
-
-	const parts = match[1].split(/\s+/);
-	if (parts.length < 3) return '#000000';
-
-	// Extract L, C, H values
-	const l = parseFloat(parts[0]?.replace('%', '') ?? '0') / 100; // Convert percentage to 0-1
-	const c = parseFloat(parts[1] ?? '0');
-	const h = parseFloat(parts[2] ?? '0');
-
-	// Convert oklch to linear RGB using the OKLab color space math
-	// First convert to OKLab
-	const hRad = (h * Math.PI) / 180;
-	const a = c * Math.cos(hRad);
-	const b = c * Math.sin(hRad);
-
-	// OKLab to linear RGB conversion matrix
-	const lms_l = l + 0.3963377774 * a + 0.2158037573 * b;
-	const lms_m = l - 0.1055613458 * a - 0.0638541728 * b;
-	const lms_s = l - 0.0894841775 * a - 1.291485548 * b;
-
-	// Cube the LMS values
-	const lms_l3 = lms_l * lms_l * lms_l;
-	const lms_m3 = lms_m * lms_m * lms_m;
-	const lms_s3 = lms_s * lms_s * lms_s;
-
-	// Convert to linear RGB
-	let r = 4.0767416621 * lms_l3 - 3.3077115913 * lms_m3 + 0.2309699292 * lms_s3;
-	let g = -1.2684380046 * lms_l3 + 2.6097574011 * lms_m3 - 0.3413193965 * lms_s3;
-	let b_rgb = -0.0041960863 * lms_l3 - 0.7034186147 * lms_m3 + 1.707614701 * lms_s3;
-
-	// Apply gamma correction (linear to sRGB)
-	r = gammaCorrect(r);
-	g = gammaCorrect(g);
-	b_rgb = gammaCorrect(b_rgb);
-
-	// Clamp values to 0-255 range
-	r = Math.max(0, Math.min(255, Math.round(r * 255)));
-	g = Math.max(0, Math.min(255, Math.round(g * 255)));
-	b_rgb = Math.max(0, Math.min(255, Math.round(b_rgb * 255)));
-
-	// Convert to hex
-	const toHex = (n: number) => n.toString(16).padStart(2, '0');
-	return `#${toHex(r)}${toHex(g)}${toHex(b_rgb)}`;
+	try {
+		// Handle CSS oklch() format with or without alpha
+		// "oklch(0.5 0.1 0)" or "oklch(50% 0.1 0)" or "oklch(0.5 0.1 0 / 50%)"
+		if (oklchString.startsWith('oklch(')) {
+			// Updated regex to handle optional alpha channel
+			const match =
+				/oklch\(\s*([\d.%]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*[\d.%]+)?\s*\)/.exec(
+					oklchString,
+				);
+			if (match?.[1] && match[2] && match[3]) {
+				const lValue =
+					match[1].endsWith('%') ? parseFloat(match[1]) / 100 : parseFloat(match[1]);
+				const color = {
+					mode: 'oklch' as const,
+					l: lValue,
+					c: parseFloat(match[2]),
+					h: parseFloat(match[3]),
+				};
+				return formatHex(color) || '#000000';
+			}
+		}
+		// Handle raw format: "0.5 0.1 0"
+		const parts = oklchString.split(' ');
+		if (parts.length === 3 && parts[0] && parts[1] && parts[2]) {
+			const color = {
+				mode: 'oklch' as const,
+				l: parseFloat(parts[0]),
+				c: parseFloat(parts[1]),
+				h: parseFloat(parts[2]),
+			};
+			return formatHex(color) || '#000000';
+		}
+	} catch (e) {
+		console.error('Error parsing OKLCH:', e);
+	}
+	// If it's already hex or can't parse, return as is or fallback
+	return oklchString.startsWith('#') ? oklchString : '#000000';
 }
 
-function gammaCorrect(channel: number): number {
-	// sRGB gamma correction
-	if (channel <= 0.0031308) {
-		return 12.92 * channel;
+/**
+ * Modify OKLCH color components
+ * @param oklchString - The OKLCH color string e.g. "oklch(0.7 0.1 192)" or "oklch(70% 0.1 192 / 50%)"
+ * @param modifications - Object with optional lightness, chroma, hue, and alpha values to replace
+ * @returns Modified OKLCH color string
+ *
+ * @example
+ * modifyOklch("oklch(0.7 0.1 192)", { alpha: 0.5 })
+ * // => "oklch(0.7 0.1 192 / 50%)"
+ *
+ * modifyOklch("oklch(0.7 0.1 192)", { lightness: 0.9, chroma: 0.2 })
+ * // => "oklch(0.9 0.2 192)"
+ *
+ * modifyOklch("oklch(70% 0.1 192 / 80%)", { alpha: 0.3 })
+ * // => "oklch(70% 0.1 192 / 30%)"
+ */
+export function modifyOklch(
+	oklchString: string,
+	modifications: {
+		lightness?: number | string;
+		chroma?: number;
+		hue?: number;
+		alpha?: number;
+	},
+): string {
+	// Parse the OKLCH string - supports with or without alpha
+	// oklch(L C H) or oklch(L C H / A)
+	const regex = /oklch\(\s*([\d.%]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.%]+))?\s*\)/;
+	const match = regex.exec(oklchString);
+
+	if (!match) {
+		console.error('Invalid OKLCH format:', oklchString);
+		return oklchString;
 	}
-	return 1.055 * Math.pow(channel, 1 / 2.4) - 0.055;
+
+	// Extract current values
+	let l = match[1] ?? '0';
+	let c = match[2] ?? '0';
+	let h = match[3] ?? '0';
+	const a = match[4]; // May be undefined if no alpha
+
+	// Apply modifications
+	if (modifications.lightness !== undefined) {
+		// Handle both decimal (0-1) and percentage formats
+		if (typeof modifications.lightness === 'string') {
+			l = modifications.lightness;
+		} else if (modifications.lightness <= 1) {
+			// If original was percentage, keep as percentage
+			l =
+				l.endsWith('%') ?
+					`${(modifications.lightness * 100).toFixed(0)}%`
+				:	modifications.lightness.toString();
+		} else {
+			// Value > 1, treat as percentage
+			l = `${modifications.lightness}%`;
+		}
+	}
+
+	if (modifications.chroma !== undefined) {
+		c = modifications.chroma.toString();
+	}
+
+	if (modifications.hue !== undefined) {
+		h = modifications.hue.toString();
+	}
+
+	// Build the result string
+	let result = `oklch(${l} ${c} ${h}`;
+
+	// Handle alpha
+	if (modifications.alpha !== undefined) {
+		// Convert to percentage format
+		const alphaPercent =
+			modifications.alpha <= 1 ?
+				`${(modifications.alpha * 100).toFixed(0)}%`
+			:	`${modifications.alpha}%`;
+		result += ` / ${alphaPercent}`;
+	} else if (a !== undefined) {
+		// Preserve existing alpha if not modifying
+		result += ` / ${a}`;
+	}
+
+	result += ')';
+
+	return result;
 }

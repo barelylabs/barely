@@ -23,7 +23,7 @@ import { sqlIncrement } from '@barely/db/utils';
 import { sendEmail } from '@barely/email';
 import { ReceiptEmailTemplate } from '@barely/email/templates/cart';
 import {
-	formatCentsToDollars,
+	formatMinorToMajorCurrency,
 	isProduction,
 	numToPaddedString,
 	raise,
@@ -31,11 +31,17 @@ import {
 import { getPublicWorkspaceFromWorkspace } from '@barely/validators/schemas';
 import { and, count, eq, isNotNull } from 'drizzle-orm';
 
-import type { ShippingEstimateProps } from '../integrations/shipping/shipengine.endpts';
+import type { ShippingEstimateProps } from '../integrations/shipping/easy-post';
+// import type { ShippingEstimateProps } from '../integrations/shipping/shipengine.endpts';
 import type { VisitorInfo } from '../middleware/request-parsing';
-import { getShippingEstimates } from '../integrations/shipping/shipengine.endpts';
+import { getShipStationRateEstimates } from '../integrations/shipping/shipengine.endpts';
+// import { getShippingEstimates } from '../integrations/shipping/shipengine.endpts';
 import { stripe } from '../integrations/stripe';
-import { getAmountsForCheckout, getFeeAmountForCheckout } from './cart.utils';
+import {
+	getAmountsForCheckout,
+	getFeeAmountForCheckout,
+	getVatRateForCheckout,
+} from '../utils/cart';
 
 /* get funnel */
 export const funnelWith = {
@@ -46,8 +52,8 @@ export const funnelWith = {
 			handle: true,
 			type: true,
 
-			brandHue: true,
-			brandAccentHue: true,
+			brandHue: true, // deprecated
+			brandAccentHue: true, // deprecated
 			bio: true,
 			bookingTitle: true,
 			bookingName: true,
@@ -68,9 +74,11 @@ export const funnelWith = {
 			cartFeePercentageOverride: true,
 			cartSupportEmail: true,
 			shippingAddressPostalCode: true,
+			shippingAddressState: true,
 			shippingAddressCountry: true,
 			stripeConnectAccountId: true,
 			stripeConnectAccountId_devMode: true,
+			currency: true,
 		},
 	},
 	mainProduct: {
@@ -138,9 +146,11 @@ export async function getFunnelByParams(handle: string, key: string) {
 					cartFeePercentageOverride: true,
 					cartSupportEmail: true,
 					shippingAddressPostalCode: true,
+					shippingAddressState: true,
 					shippingAddressCountry: true,
 					stripeConnectAccountId: true,
 					stripeConnectAccountId_devMode: true,
+					currency: true,
 				},
 			},
 			// key: true,
@@ -252,16 +262,24 @@ export async function createMainCartFromFunnel({
 	};
 	cartId: string;
 }) {
+	console.log('creating cart from funnel', funnel.workspace.name);
 	const stripeAccount =
 		isProduction() ?
 			funnel.workspace.stripeConnectAccountId
 		:	funnel.workspace.stripeConnectAccountId_devMode;
 
 	if (!stripeAccount) throw new Error('Stripe account not found');
-
-	const amounts = getAmountsForCheckout(funnel, {
-		mainProductQuantity: 1,
-	});
+	const vat = getVatRateForCheckout(
+		funnel.workspace.shippingAddressCountry,
+		shipTo?.country ?? '',
+	);
+	const amounts = getAmountsForCheckout(
+		funnel,
+		{
+			mainProductQuantity: 1,
+		},
+		vat,
+	);
 
 	const metadata: z.infer<typeof stripeConnectChargeMetadataSchema> = {
 		cartId,
@@ -272,10 +290,12 @@ export async function createMainCartFromFunnel({
 		{
 			amount: amounts.checkoutAmount,
 			application_fee_amount: getFeeAmountForCheckout({
-				amount: amounts.orderProductAmount,
+				productAmount: amounts.orderProductAmount, // we just take fees on product sales, not shipping or tax
+				vatAmount: amounts.orderVatAmount,
+				shippingAndHandlingAmount: 0, // not supported yet. in the future we take a shipping fee if they want to ship through the app.
 				workspace: funnel.workspace,
 			}),
-			currency: 'usd',
+			currency: funnel.workspace.currency,
 			setup_future_usage: 'off_session',
 			metadata,
 		},
@@ -315,6 +335,7 @@ export async function createMainCartFromFunnel({
 			await getProductsShippingRateEstimate({
 				products: [{ product: funnel.mainProduct, quantity: 1 }],
 				shipFrom: {
+					state: funnel.workspace.shippingAddressState ?? '',
 					postalCode: funnel.workspace.shippingAddressPostalCode ?? '',
 					countryCode: funnel.workspace.shippingAddressCountry ?? '',
 				},
@@ -335,6 +356,7 @@ export async function createMainCartFromFunnel({
 						{ product: funnel.bumpProduct, quantity: 1 },
 					],
 					shipFrom: {
+						state: funnel.workspace.shippingAddressState ?? '',
 						postalCode: funnel.workspace.shippingAddressPostalCode ?? '',
 						countryCode: funnel.workspace.shippingAddressCountry ?? '',
 					},
@@ -379,6 +401,7 @@ export async function getProductsShippingRateEstimate(props: {
 	shipFrom: ShippingEstimateProps['shipFrom'];
 	shipTo: ShippingEstimateProps['shipTo'];
 }) {
+	console.log('getProductsShippingRateEstimate >>>', props);
 	const { shipFrom, shipTo, products } = props;
 	// estimate dimensions and weight based on product types
 	let totalWeightInOunces = 0;
@@ -407,9 +430,9 @@ export async function getProductsShippingRateEstimate(props: {
 		MEDIAMAIL_TYPES.includes(p.product.merchType),
 	);
 
-	// console.log('eligibleForMediaMail', eligibleForMediaMail);
+	console.log('eligibleForMediaMail', eligibleForMediaMail);
 
-	const rates = await getShippingEstimates({
+	const rates = await getShipStationRateEstimates({
 		shipFrom,
 		shipTo,
 		package: {
@@ -434,6 +457,7 @@ interface ReceiptCart extends Cart {
 	upsellProduct: Product | null;
 	fan: Fan;
 	funnel: ServerFunnel;
+	currency: 'usd' | 'gbp';
 }
 
 export async function sendCartReceiptEmail(cart: ReceiptCart) {
@@ -441,11 +465,17 @@ export async function sendCartReceiptEmail(cart: ReceiptCart) {
 		// main product
 		{
 			name: cart.mainProduct.name,
-			price: formatCentsToDollars(cart.mainProductAmount),
-			shipping: formatCentsToDollars(cart.mainShippingAndHandlingAmount ?? 0),
+			price: formatMinorToMajorCurrency(cart.mainProductAmount, cart.currency),
+			shipping: formatMinorToMajorCurrency(
+				cart.mainShippingAndHandlingAmount ?? 0,
+				cart.currency,
+			),
 			payWhatYouWantPrice:
 				cart.funnel.mainProductPayWhatYouWant ?
-					formatCentsToDollars(cart.mainProductPayWhatYouWantPrice ?? 0)
+					formatMinorToMajorCurrency(
+						cart.mainProductPayWhatYouWantPrice ?? 0,
+						cart.currency,
+					)
 				:	undefined,
 		},
 
@@ -454,8 +484,11 @@ export async function sendCartReceiptEmail(cart: ReceiptCart) {
 			[
 				{
 					name: cart.bumpProduct.name,
-					price: formatCentsToDollars(cart.bumpProductAmount ?? 0),
-					shipping: formatCentsToDollars(cart.bumpShippingAndHandlingAmount ?? 0),
+					price: formatMinorToMajorCurrency(cart.bumpProductAmount ?? 0, cart.currency),
+					shipping: formatMinorToMajorCurrency(
+						cart.bumpShippingAndHandlingAmount ?? 0,
+						cart.currency,
+					),
 				},
 			]
 		:	[]),
@@ -465,8 +498,11 @@ export async function sendCartReceiptEmail(cart: ReceiptCart) {
 			[
 				{
 					name: cart.upsellProduct.name,
-					price: formatCentsToDollars(cart.upsellProductAmount ?? 0),
-					shipping: formatCentsToDollars(cart.upsellShippingAndHandlingAmount ?? 0),
+					price: formatMinorToMajorCurrency(cart.upsellProductAmount ?? 0, cart.currency),
+					shipping: formatMinorToMajorCurrency(
+						cart.upsellShippingAndHandlingAmount ?? 0,
+						cart.currency,
+					),
 				},
 			]
 		:	[]),
@@ -497,8 +533,12 @@ export async function sendCartReceiptEmail(cart: ReceiptCart) {
 			country: cart.shippingAddressCountry,
 		},
 		products,
-		shippingTotal: formatCentsToDollars(cart.orderShippingAndHandlingAmount ?? 0),
-		total: formatCentsToDollars(cart.orderAmount),
+		shippingTotal: formatMinorToMajorCurrency(
+			cart.orderShippingAndHandlingAmount ?? 0,
+			cart.currency,
+		),
+		vatTotal: formatMinorToMajorCurrency(cart.orderVatAmount ?? 0, cart.currency),
+		total: formatMinorToMajorCurrency(cart.orderAmount, cart.currency),
 	});
 
 	await sendEmail({
