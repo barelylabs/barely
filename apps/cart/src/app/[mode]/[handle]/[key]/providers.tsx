@@ -3,6 +3,7 @@
 import type { PublicBrandKit } from '@barely/validators/schemas';
 import type { ReactNode } from 'react';
 import { Suspense, use } from 'react';
+import { Provider as JotaiProvider } from 'jotai/react';
 
 import { BrandKitProvider } from '@barely/ui/bio';
 import { ThemeProvider } from '@barely/ui/next-theme-provider';
@@ -21,13 +22,15 @@ export default function Providers({ children, brandKitPromise }: ProvidersProps)
 	return (
 		<ThemeProvider attribute='class' defaultTheme='dark'>
 			<WrapBalancerProvider>
-				<TRPCReactProvider>
-					<Suspense fallback={null}>
-						<AsyncBrandKitProvider brandKitPromise={brandKitPromise}>
-							{children}
-						</AsyncBrandKitProvider>
-					</Suspense>
-				</TRPCReactProvider>
+				<JotaiProvider>
+					<TRPCReactProvider>
+						<Suspense fallback={null}>
+							<AsyncBrandKitProvider brandKitPromise={brandKitPromise}>
+								{children}
+							</AsyncBrandKitProvider>
+						</Suspense>
+					</TRPCReactProvider>
+				</JotaiProvider>
 			</WrapBalancerProvider>
 		</ThemeProvider>
 	);

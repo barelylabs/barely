@@ -130,7 +130,6 @@ export const dbHttp = drizzleHttp({
 		url: dbEnv.UPSTASH_REDIS_REST_URL,
 		token: dbEnv.UPSTASH_REDIS_REST_TOKEN,
 	}),
-	// casing: 'snake_case',
 });
 
 export type DbHttp = typeof dbHttp;

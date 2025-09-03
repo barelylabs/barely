@@ -18,7 +18,7 @@ export async function middleware(req: NextRequest) {
 		await log({
 			message: `missing handle or key for vip, ${handle}, ${key}`,
 			type: 'errors',
-			location: 'vip/middleware.tsx',
+			location: 'vip/middleware.ts',
 		});
 		// Still set visitor cookies even if handle/key missing to track anonymous visits
 		await setVisitorCookies({ req, res, handle: null, key: null, app: 'vip' });
@@ -44,6 +44,6 @@ export const config = {
 		 * - sitemap (sitemap file)
 		 * - site.webmanifest (site.webmanifest file)
 		 */
-		'/((?!api|_next|_static|.well-known|favicon|logos|sitemap|site.webmanifest).*)',
+		'/((?!api|_next|_static|.well-known|favicon|logos|sitemap|site.webmanifest|robots.txt|$).*)',
 	],
 };

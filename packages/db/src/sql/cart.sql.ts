@@ -118,6 +118,7 @@ export const Carts = pgTable(
 		checkoutShippingAmount: integer('checkoutShippingAmount'),
 		checkoutHandlingAmount: integer('checkoutHandlingAmount'),
 		checkoutShippingAndHandlingAmount: integer('checkoutShippingAndHandlingAmount'),
+		checkoutVatAmount: integer('checkoutVatAmount'),
 		checkoutAmount: integer('checkoutAmount').notNull(),
 
 		// fan
@@ -165,6 +166,7 @@ export const Carts = pgTable(
 		upsellShippingAmount: integer('upsellShippingAmount'),
 		upsellHandlingAmount: integer('upsellHandlingAmount'),
 		upsellShippingAndHandlingAmount: integer('upsellShippingAndHandlingAmount'),
+		upsellVatAmount: integer('upsellVatAmount'),
 		upsellAmount: integer('upsellAmount'),
 		upsellConvertedAt: timestamp('upsellConvertedAt'),
 
@@ -179,6 +181,7 @@ export const Carts = pgTable(
 		orderShippingAmount: integer('orderShippingAmount'),
 		orderHandlingAmount: integer('orderHandlingAmount'),
 		orderShippingAndHandlingAmount: integer('orderShippingAndHandlingAmount'),
+		orderVatAmount: integer('orderVatAmount'),
 		orderAmount: integer('orderAmount').notNull(),
 
 		orderReceiptSent: boolean('orderReceiptSent').default(false),

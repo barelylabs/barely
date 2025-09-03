@@ -27,7 +27,7 @@ export function SettingsCard(props: SettingsCardProps) {
 			<div className='flex flex-col gap-4 p-4'>
 				<div className='flex flex-row items-center gap-2'>
 					{TitleIcon && <TitleIcon className='h-[25px] w-[25px]' />}
-					<H size='4'>{props.title}</H>
+					<H size='5'>{props.title}</H>
 				</div>
 				<Text variant='sm/normal'>{props.subtitle}</Text>
 				{props.children}

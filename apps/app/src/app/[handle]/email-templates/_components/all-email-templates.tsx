@@ -1,7 +1,8 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
-import { formatCentsToDollars } from '@barely/utils';
+import { useWorkspace } from '@barely/hooks';
+import { formatMinorToMajorCurrency } from '@barely/utils';
 
 import { Button } from '@barely/ui/button';
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
@@ -75,6 +76,7 @@ function EmailTemplateCard({
 }: {
 	emailTemplate: AppRouterOutputs['emailTemplate']['byWorkspace']['emailTemplates'][0];
 }) {
+	const { workspace } = useWorkspace();
 	const { setShowUpdateModal, setShowDeleteModal } = useEmailTemplateSearchParams();
 
 	const { name, subject, opens, clicks, value } = emailTemplate;
@@ -102,7 +104,7 @@ function EmailTemplateCard({
 				{
 					icon: 'value',
 					name: 'value',
-					value: formatCentsToDollars(value ?? 0),
+					value: formatMinorToMajorCurrency(value ?? 0, workspace.currency),
 				},
 			]}
 		/>

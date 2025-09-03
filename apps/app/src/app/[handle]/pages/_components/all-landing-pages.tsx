@@ -3,7 +3,7 @@
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import { useRouter } from 'next/navigation';
 import { useWorkspace } from '@barely/hooks';
-import { formatCentsToDollars, getAbsoluteUrl } from '@barely/utils';
+import { formatMinorToMajorCurrency, getAbsoluteUrl } from '@barely/utils';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
@@ -60,7 +60,7 @@ function LandingPageCard({
 	const { setShowArchiveModal, setShowDeleteModal } = useLandingPageSearchParams();
 	const router = useRouter();
 
-	const { handle } = useWorkspace();
+	const { handle, workspace } = useWorkspace();
 
 	const href = getAbsoluteUrl('page', `${landingPage.handle}/${landingPage.key}`);
 	return (
@@ -101,7 +101,7 @@ function LandingPageCard({
 				{
 					icon: 'value',
 					name: 'value',
-					value: formatCentsToDollars(landingPage.value ?? 0),
+					value: formatMinorToMajorCurrency(landingPage.value ?? 0, workspace.currency),
 				},
 			]}
 			statsHref={`/${handle}/pages/stats?assetId=${landingPage.id}`}

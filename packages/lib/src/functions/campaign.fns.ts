@@ -106,7 +106,7 @@ export async function createPitchCheckoutLink(props: {
 			{
 				quantity: 1,
 				price_data: {
-					currency: 'usd',
+					currency: workspace.currency,
 					unit_amount: 100 * costInDollars,
 					product_data: {
 						name: `${props.campaign.track.name}`,

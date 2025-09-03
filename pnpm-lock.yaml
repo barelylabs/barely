@@ -524,6 +524,9 @@ importers:
       '@barely/api':
         specifier: workspace:*
         version: link:../../packages/api
+      '@barely/atoms':
+        specifier: workspace:*
+        version: link:../../packages/atoms
       '@barely/const':
         specifier: workspace:*
         version: link:../../packages/const
@@ -551,6 +554,9 @@ importers:
       dotenv-cli:
         specifier: ^7.4.1
         version: 7.4.4
+      jotai:
+        specifier: 'catalog:'
+        version: 2.12.5(@types/react@19.1.8)(react@19.0.0)
       next:
         specifier: 'catalog:'
         version: 15.3.4(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -2031,6 +2037,9 @@ importers:
       '@barely/validators':
         specifier: workspace:*
         version: link:../validators
+      '@easypost/api':
+        specifier: ^8.2.0
+        version: 8.2.0
       '@fast-csv/parse':
         specifier: ^5.0.0
         version: 5.0.2
@@ -2655,6 +2664,9 @@ importers:
       '@barely/const':
         specifier: workspace:*
         version: link:../const
+      culori:
+        specifier: ^4.0.1
+        version: 4.0.1
       limiter:
         specifier: 3.0.0
         version: 3.0.0
@@ -3984,6 +3996,10 @@ packages:
 
   '@drizzle-team/brocli@0.10.2':
     resolution: {integrity: sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w==}
+
+  '@easypost/api@8.2.0':
+    resolution: {integrity: sha512-Cwr2nBB7OMt8/CALPmzWU8nWqi4dj2wqj2oGqqKAAy49oTDdJ7304yi9UFaflBdDA+0D6NUeAMQZi8nZf6t3DQ==}
+    engines: {node: '>= 16.0'}
 
   '@edge-runtime/format@2.2.1':
     resolution: {integrity: sha512-JQTRVuiusQLNNLe2W9tnzBlV/GvSVcozLl4XZHk5swnRZ/v6jp8TqR8P7sqmJsQqblDZ3EztcWmLDbhRje/+8g==}
@@ -9625,6 +9641,9 @@ packages:
   core-js-pure@3.43.0:
     resolution: {integrity: sha512-i/AgxU2+A+BbJdMxh3v7/vxi2SbFqxiFmg6VsDwYB4jkucrd1BZNA9a9gphC0fYMG5IBSgQcbQnk865VCLe7xA==}
 
+  core-js@3.41.0:
+    resolution: {integrity: sha512-SJ4/EHwS36QMJd6h/Rg+GyR4A5xE0FSI3eZ+iBVpfqf1x0eTSg1smWLHrA+2jQThZSh97fmSgFSU8B61nxosxA==}
+
   core-js@3.43.0:
     resolution: {integrity: sha512-N6wEbTTZSYOY2rYAn85CuvWWkCK6QweMn7/4Nr3w+gDBeBhk/x4EJeY6FPo4QzDoJZxVTv8U7CMvgWk6pOHHqA==}
 
@@ -10016,6 +10035,9 @@ packages:
 
   devlop@1.1.0:
     resolution: {integrity: sha512-RWmIqhcFf1lRYBvNmr7qTNuyCt/7/ns2jbpp1+PalgE/rDQcBT0fioSMUpJ93irlUhC5hrg4cYqe6U+0ImW0rA==}
+
+  dezalgo@1.0.4:
+    resolution: {integrity: sha512-rXSP0bf+5n0Qonsb+SVVfNfIsimO4HEtmnIpPHY8Q1UCzKlQrDMfdobr8nJOOsRgWCyMRqeSBQzmWUMq7zvVig==}
 
   didyoumean@1.2.2:
     resolution: {integrity: sha512-gxtyfqMg7GKyhQmb056K7M3xszy/myH8w+B4RT+QXBQsvAOdc3XymqDDPHx1BgPgsdAA5SIifona89YtRATDzw==}
@@ -10835,6 +10857,9 @@ packages:
   fast-npm-meta@0.2.2:
     resolution: {integrity: sha512-E+fdxeaOQGo/CMWc9f4uHFfgUPJRAu7N3uB8GBvB3SDPAIWJK4GKyYhkAGFq+GYrcbKNfQIz5VVQyJnDuPPCrg==}
 
+  fast-safe-stringify@2.1.1:
+    resolution: {integrity: sha512-W+KJc2dmILlPplD/H4K9l9LcAHAfPtP6BY84uVLXQ6Evcz9Lcg33Y2z1IVblT6xdY54PXYVHEv+0Wpq8Io6zkA==}
+
   fast-sha256@1.3.0:
     resolution: {integrity: sha512-n11RGP/lrWEFI/bWdygLxhI+pVeo1ZYIVwvvPkW7azl/rOy+F3HYRZ2K5zeE9mmkhQppyv9sQFx0JM9UabnpPQ==}
 
@@ -10981,6 +11006,10 @@ packages:
   formidable@1.2.6:
     resolution: {integrity: sha512-KcpbcpuLNOwrEjnbpMC0gS+X8ciDoZE1kkqzat4a8vrprf+s9pKNQ/QIwWfbfs4ltgmFl3MD177SNTkve3BwGQ==}
     deprecated: 'Please upgrade to latest, formidable@v2 or formidable@v3! Check these notes: https://bit.ly/2ZEqIau'
+
+  formidable@3.5.4:
+    resolution: {integrity: sha512-YikH+7CUTOtP44ZTnUhR7Ic2UASBPOqmaRkRKxRbywPTe5VxF7RRCck4af9wutiZ/QKM5nME9Bie2fFaPz5Gug==}
+    engines: {node: '>=14.0.0'}
 
   fraction.js@4.3.7:
     resolution: {integrity: sha512-ZsDfxO51wGAXREY55a7la9LScWpwv9RxIrYABrlvOFBlH/ShPnrtsXeuUIfXKKOVicNxQ+o8JTbJvjS4M89yew==}
@@ -12588,6 +12617,11 @@ packages:
     engines: {node: '>=4'}
     hasBin: true
 
+  mime@2.6.0:
+    resolution: {integrity: sha512-USPkMeET31rOMiarsBNIHZKLGgvKc/LrjofAnBlOttf5ajRvqiRA8QsenbcooctK6d6Ts6aqZXBA+XbkKthiQg==}
+    engines: {node: '>=4.0.0'}
+    hasBin: true
+
   mimic-fn@2.1.0:
     resolution: {integrity: sha512-OqbOk5oEQeAZ8WXWydlu9HJjz9WVdEIvamMCcXmuqUYjTknH/sqsWvhQ3vgwKFRR1HpjvNBKQ37nbJgYzGqGcg==}
     engines: {node: '>=6'}
@@ -12925,6 +12959,9 @@ packages:
 
   node-releases@2.0.19:
     resolution: {integrity: sha512-xxOWJsBKtzAq7DY0J+DTzuz58K8e7sJbdgwkbMWQe8UYB6ekmsQ45q0M/tJDsGaZmbC+l7n57UV8Hl5tHxO9uw==}
+
+  nodent-runtime@3.2.1:
+    resolution: {integrity: sha512-7Ws63oC+215smeKJQCxzrK21VFVlCFBkwl0MOObt0HOpVQXs3u483sAmtkF33nNqZ5rSOQjB76fgyPBmAUrtCA==}
 
   nopt@7.2.1:
     resolution: {integrity: sha512-taM24ViiimT/XntxbPyJQzCG+p4EKOpgD3mxFwW38mGjVUrfERQOeY4EDHjdnptttfHuHQXFx+lTP08Q+mLa/w==}
@@ -14113,6 +14150,9 @@ packages:
   regenerate@1.4.2:
     resolution: {integrity: sha512-zrceR/XhGYU/d/opr2EKO7aRHUeiBI8qjtfHqADTwZd6Szfy16la6kqD0MIUs5z5hx6AaKa+PixpPrR289+I0A==}
 
+  regenerator-runtime@0.14.1:
+    resolution: {integrity: sha512-dYnhHh0nJoMfnkZs6GmmhFknAGRrLznOu5nc9ML+EJxGvrx6H7teuevqVqCuPcPK//3eDrrjQhehXVx9cnkGdw==}
+
   regexp.prototype.flags@1.5.4:
     resolution: {integrity: sha512-dYqgNSZbDwkaJ2ceRd9ojCGjBq+mOm9LmtXnAnEGyHhN/5R7iDW2TRw3h+o/jCFxus3P2LfWIIiwowAjANm7IA==}
     engines: {node: '>= 0.4'}
@@ -14820,6 +14860,11 @@ packages:
     resolution: {integrity: sha512-8EbVDiu9iN/nESwxeSxDKe0dunta1GOlHufmSSXxMD2z2/tMZpDMpvXQGsc+ajGo8y2uYUmixaSRUc/QPoQ0GA==}
     engines: {node: '>=16 || 14 >=14.17'}
     hasBin: true
+
+  superagent@10.1.1:
+    resolution: {integrity: sha512-9pIwrHrOj3uAnqg9gDlW7EA2xv+N5au/dSM0kM22HTqmUu8jBxNT+8uA7tA3UoCnmiqzpSbu8rasIUZvbyamMQ==}
+    engines: {node: '>=14.18.0'}
+    deprecated: Please upgrade to superagent v10.2.2+, see release notes at https://github.com/forwardemail/superagent/releases/tag/v10.2.2 - maintenance is supported by Forward Email @ https://forwardemail.net
 
   superagent@3.8.1:
     resolution: {integrity: sha512-VMBFLYgFuRdfeNQSMLbxGSLfmXL/xc+OO+BZp41Za/NRDBet/BNbkRJrYzCUu0u4GU0i/ml2dtT8b9qgkw9z6Q==}
@@ -17956,6 +18001,19 @@ snapshots:
       tslib: 2.8.1
 
   '@drizzle-team/brocli@0.10.2': {}
+
+  '@easypost/api@8.2.0':
+    dependencies:
+      core-js: 3.41.0
+      nodent-runtime: 3.2.1
+      regenerator-runtime: 0.14.1
+      source-map-support: 0.5.21
+      superagent: 10.1.1
+      uuid: 11.1.0
+      yargs: 17.7.2
+      yargs-parser: 21.1.1
+    transitivePeerDependencies:
+      - supports-color
 
   '@edge-runtime/format@2.2.1': {}
 
@@ -24850,6 +24908,8 @@ snapshots:
 
   core-js-pure@3.43.0: {}
 
+  core-js@3.41.0: {}
+
   core-js@3.43.0: {}
 
   core-util-is@1.0.3: {}
@@ -25217,6 +25277,11 @@ snapshots:
   devlop@1.1.0:
     dependencies:
       dequal: 2.0.3
+
+  dezalgo@1.0.4:
+    dependencies:
+      asap: 2.0.6
+      wrappy: 1.0.2
 
   didyoumean@1.2.2: {}
 
@@ -26345,6 +26410,8 @@ snapshots:
 
   fast-npm-meta@0.2.2: {}
 
+  fast-safe-stringify@2.1.1: {}
+
   fast-sha256@1.3.0: {}
 
   fast-xml-parser@4.4.1:
@@ -26492,6 +26559,12 @@ snapshots:
   format@0.2.2: {}
 
   formidable@1.2.6: {}
+
+  formidable@3.5.4:
+    dependencies:
+      '@paralleldrive/cuid2': 2.2.2
+      dezalgo: 1.0.4
+      once: 1.4.0
 
   fraction.js@4.3.7: {}
 
@@ -28458,6 +28531,8 @@ snapshots:
 
   mime@1.6.0: {}
 
+  mime@2.6.0: {}
+
   mimic-fn@2.1.0: {}
 
   mimic-fn@4.0.0: {}
@@ -28818,6 +28893,8 @@ snapshots:
       resolve: 1.22.10
 
   node-releases@2.0.19: {}
+
+  nodent-runtime@3.2.1: {}
 
   nopt@7.2.1:
     dependencies:
@@ -30157,6 +30234,8 @@ snapshots:
 
   regenerate@1.4.2: {}
 
+  regenerator-runtime@0.14.1: {}
+
   regexp.prototype.flags@1.5.4:
     dependencies:
       call-bind: 1.0.8
@@ -31188,6 +31267,20 @@ snapshots:
       mz: 2.7.0
       pirates: 4.0.7
       ts-interface-checker: 0.1.13
+
+  superagent@10.1.1:
+    dependencies:
+      component-emitter: 1.3.1
+      cookiejar: 2.1.4
+      debug: 4.4.1(supports-color@8.1.1)
+      fast-safe-stringify: 2.1.1
+      form-data: 4.0.3
+      formidable: 3.5.4
+      methods: 1.1.2
+      mime: 2.6.0
+      qs: 6.14.0
+    transitivePeerDependencies:
+      - supports-color
 
   superagent@3.8.1:
     dependencies:
