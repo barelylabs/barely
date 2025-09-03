@@ -96,7 +96,7 @@ SCHEMA >
     `journeyOrigin` String `json:$.journeyOrigin`,
     `journeySource` String `json:$.journeySource`,
     `journeyStep` UInt16 `json:$.journeyStep`,
-    `journeyPath` Array(String) `json:$.journeyPath`,
+    `journeyPath` Array(String) `json:$.journeyPath[:]`,
     `cartSessionId` Nullable(String) `json:$.cartSessionId`
 
 FORWARD_QUERY >
