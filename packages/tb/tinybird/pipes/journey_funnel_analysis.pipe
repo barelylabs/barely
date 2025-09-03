@@ -4,6 +4,7 @@ SQL >
     SELECT
         journeyId,
         journeyOrigin,
+        journeyPath,
         journeyPath[1] as entry_point,
         journeyPath[length(journeyPath)] as exit_point,
         max(journeyStep) as total_steps,
