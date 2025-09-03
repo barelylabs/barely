@@ -47,6 +47,7 @@ import {
 } from '../../functions/bio.fns';
 import { generateLexoRank } from '../../functions/lexo-rank.fns';
 import { detectLinkType, formatLinkUrl } from '../../functions/link-type.fns';
+import { sanitizeBlockMarkdown } from '../../utils/sanitize-markdown';
 import { workspaceProcedure } from '../trpc';
 
 export const bioRoute = {
@@ -577,6 +578,14 @@ export const bioRoute = {
 		.mutation(async ({ input, ctx }) => {
 			const { bioId, ...blockData } = input;
 
+			// Sanitize markdown content for blocks that contain it
+			let sanitizedBlockData = blockData;
+			if (blockData.type === 'markdown') {
+				sanitizedBlockData = await sanitizeBlockMarkdown(blockData, ['markdown']);
+			} else if (blockData.type === 'twoPanel') {
+				sanitizedBlockData = await sanitizeBlockMarkdown(blockData, ['markdown']);
+			}
+
 			// Map the CTA fields to the generic database columns
 			// const blockData = {
 			// 	...restBlockData,
@@ -596,11 +605,11 @@ export const bioRoute = {
 			if (!bio) raiseTRPCError({ message: 'Bio not found' });
 
 			// Validate foreign key references based on block type
-			if (blockData.type === 'image' || blockData.type === 'twoPanel') {
-				if (blockData.imageFileId) {
+			if (sanitizedBlockData.type === 'image' || sanitizedBlockData.type === 'twoPanel') {
+				if (sanitizedBlockData.imageFileId) {
 					const file = await dbHttp.query.Files.findFirst({
 						where: and(
-							eq(Files.id, blockData.imageFileId),
+							eq(Files.id, sanitizedBlockData.imageFileId),
 							eq(Files.workspaceId, ctx.workspace.id),
 						),
 					});
@@ -609,21 +618,21 @@ export const bioRoute = {
 			}
 
 			// Validate CTA target references for twoPanel blocks
-			if (blockData.type === 'twoPanel') {
-				if (blockData.targetLinkId) {
+			if (sanitizedBlockData.type === 'twoPanel') {
+				if (sanitizedBlockData.targetLinkId) {
 					const link = await dbHttp.query.Links.findFirst({
 						where: and(
-							eq(Links.id, blockData.targetLinkId),
+							eq(Links.id, sanitizedBlockData.targetLinkId),
 							eq(Links.workspaceId, ctx.workspace.id),
 						),
 					});
 					if (!link) raiseTRPCError({ message: 'CTA link not found' });
 				}
 
-				if (blockData.targetBioId) {
+				if (sanitizedBlockData.targetBioId) {
 					const targetBio = await dbHttp.query.Bios.findFirst({
 						where: and(
-							eq(Bios.id, blockData.targetBioId),
+							eq(Bios.id, sanitizedBlockData.targetBioId),
 							eq(Bios.workspaceId, ctx.workspace.id),
 						),
 					});
@@ -633,10 +642,10 @@ export const bioRoute = {
 				// Note: fmId validation would go here once FM table is available
 			}
 
-			if (blockData.type === 'cart' && blockData.targetCartFunnelId) {
+			if (sanitizedBlockData.type === 'cart' && sanitizedBlockData.targetCartFunnelId) {
 				const cartFunnel = await dbHttp.query.CartFunnels.findFirst({
 					where: and(
-						eq(CartFunnels.id, blockData.targetCartFunnelId),
+						eq(CartFunnels.id, sanitizedBlockData.targetCartFunnelId),
 						eq(CartFunnels.workspaceId, ctx.workspace.id),
 					),
 				});
@@ -660,7 +669,7 @@ export const bioRoute = {
 			const [block] = await dbPool(ctx.pool)
 				.insert(BioBlocks)
 				.values({
-					...blockData,
+					...sanitizedBlockData,
 					id: blockId,
 					workspaceId: ctx.workspace.id,
 				})
@@ -697,35 +706,50 @@ export const bioRoute = {
 
 			if (!existingBlock) raiseTRPCError({ message: 'Block not found' });
 
+			// Sanitize markdown content if being updated
+			let sanitizedData = data;
+			if (data.markdown && typeof data.markdown === 'string' && existingBlock) {
+				// For both markdown and twoPanel blocks that might contain markdown
+				if (existingBlock.type === 'markdown' || existingBlock.type === 'twoPanel') {
+					sanitizedData = await sanitizeBlockMarkdown(data, ['markdown']);
+				}
+			}
+
 			// Validate foreign key references if they're being updated
-			if (data.imageFileId) {
+			if (sanitizedData.imageFileId) {
 				const file = await dbHttp.query.Files.findFirst({
 					where: and(
-						eq(Files.id, data.imageFileId),
+						eq(Files.id, sanitizedData.imageFileId),
 						eq(Files.workspaceId, ctx.workspace.id),
 					),
 				});
 				if (!file) raiseTRPCError({ message: 'Image file not found' });
 			}
 
-			if (data.linkId) {
+			if (sanitizedData.linkId) {
 				const link = await dbHttp.query.Links.findFirst({
-					where: and(eq(Links.id, data.linkId), eq(Links.workspaceId, ctx.workspace.id)),
+					where: and(
+						eq(Links.id, sanitizedData.linkId),
+						eq(Links.workspaceId, ctx.workspace.id),
+					),
 				});
 				if (!link) raiseTRPCError({ message: 'Link not found' });
 			}
 
-			if (data.bioId) {
+			if (sanitizedData.bioId) {
 				const targetBio = await dbHttp.query.Bios.findFirst({
-					where: and(eq(Bios.id, data.bioId), eq(Bios.workspaceId, ctx.workspace.id)),
+					where: and(
+						eq(Bios.id, sanitizedData.bioId),
+						eq(Bios.workspaceId, ctx.workspace.id),
+					),
 				});
 				if (!targetBio) raiseTRPCError({ message: 'Target bio not found' });
 			}
 
-			if (data.targetCartFunnelId) {
+			if (sanitizedData.targetCartFunnelId) {
 				const cartFunnel = await dbHttp.query.CartFunnels.findFirst({
 					where: and(
-						eq(CartFunnels.id, data.targetCartFunnelId),
+						eq(CartFunnels.id, sanitizedData.targetCartFunnelId),
 						eq(CartFunnels.workspaceId, ctx.workspace.id),
 					),
 				});
@@ -734,7 +758,7 @@ export const bioRoute = {
 
 			const [updatedBlock] = await dbPool(ctx.pool)
 				.update(BioBlocks)
-				.set(data)
+				.set(sanitizedData)
 				.where(and(eq(BioBlocks.id, id), eq(BioBlocks.workspaceId, ctx.workspace.id)))
 				.returning();
 
