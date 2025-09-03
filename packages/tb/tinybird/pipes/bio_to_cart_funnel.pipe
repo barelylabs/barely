@@ -1,0 +1,124 @@
+TOKEN "bio_to_cart_funnel_endpoint" READ
+
+NODE bio_to_cart_events
+SQL >
+    SELECT
+        journeyId,
+        workspaceId,
+        timestamp,
+        type,
+        assetId,
+        bio_blockId,
+        bio_linkId,
+        cart_checkout_mainProductId,
+        cart_checkoutPurchase_amount,
+        journeyOrigin,
+        journeyStep,
+        sessionRefererId
+    FROM barely_events
+    WHERE 
+        workspaceId = {{String(workspace_id, 'test_workspace')}}
+        AND timestamp >= {{DateTime(start_date, '2024-01-01 00:00:00')}}
+        AND timestamp <= {{DateTime(end_date, '2024-12-31 23:59:59')}}
+        AND (type LIKE 'bio/%' OR type LIKE 'cart/%')
+        AND journeyId != ''
+
+NODE funnel_by_journey
+SQL >
+    SELECT
+        journeyId,
+        workspaceId,
+        journeyOrigin,
+        
+        -- Bio events
+        countIf(type = 'bio/view') as bio_page_views,
+        countIf(type = 'bio/buttonClick') as bio_link_clicks,
+        countDistinctIf(bio_blockId, type = 'bio/buttonClick') as unique_blocks_clicked,
+        countDistinctIf(bio_linkId, type = 'bio/buttonClick') as unique_links_clicked,
+        
+        -- Cart events
+        countIf(type = 'cart/view') as cart_page_views,
+        countIf(type = 'cart/checkout') as cart_checkout_views,
+        countIf(type = 'cart/purchaseMainWithBump' OR type = 'cart/purchaseMainWithoutBump') as cart_purchases,
+        sumIf(cart_checkoutPurchase_amount, type = 'cart/purchaseMainWithBump' OR type = 'cart/purchaseMainWithoutBump') as total_revenue,
+        
+        -- Journey metrics
+        min(timestamp) as journey_start,
+        max(timestamp) as journey_end,
+        dateDiff('minute', journey_start, journey_end) as journey_duration_minutes,
+        max(journeyStep) as max_journey_step
+        
+    FROM bio_to_cart_events
+    GROUP BY journeyId, workspaceId, journeyOrigin
+
+NODE summary_metrics
+SQL >
+    SELECT
+        count() as total_journeys,
+        
+        -- Bio metrics
+        countIf(bio_page_views > 0) as journeys_with_bio_view,
+        countIf(bio_link_clicks > 0) as journeys_with_bio_click,
+        sum(bio_link_clicks) as total_bio_clicks,
+        
+        -- Cart metrics
+        countIf(cart_page_views > 0) as journeys_reaching_cart,
+        countIf(cart_checkout_views > 0) as journeys_reaching_checkout,
+        countIf(cart_purchases > 0) as journeys_with_purchase,
+        sum(cart_purchases) as total_purchases,
+        sum(total_revenue) as total_revenue_cents,
+        
+        -- Conversion rates
+        round(journeys_with_bio_click * 100.0 / journeys_with_bio_view, 2) as bio_engagement_rate,
+        round(journeys_reaching_cart * 100.0 / journeys_with_bio_click, 2) as bio_to_cart_rate,
+        round(journeys_reaching_checkout * 100.0 / journeys_reaching_cart, 2) as cart_to_checkout_rate,
+        round(journeys_with_purchase * 100.0 / journeys_reaching_checkout, 2) as checkout_conversion_rate,
+        round(journeys_with_purchase * 100.0 / journeys_with_bio_view, 2) as end_to_end_conversion_rate,
+        
+        -- Average metrics
+        avg(journey_duration_minutes) as avg_journey_minutes,
+        avg(bio_link_clicks) as avg_bio_clicks_per_journey,
+        avgIf(total_revenue, cart_purchases > 0) as avg_order_value_cents
+        
+    FROM funnel_by_journey
+    WHERE bio_page_views > 0  -- Only journeys that started with bio
+
+NODE funnel_by_origin
+SQL >
+    SELECT
+        journeyOrigin,
+        count() as journeys,
+        
+        -- Funnel stages
+        countIf(bio_page_views > 0) as stage_1_bio_view,
+        countIf(bio_link_clicks > 0) as stage_2_bio_click,
+        countIf(cart_page_views > 0) as stage_3_cart_view,
+        countIf(cart_checkout_views > 0) as stage_4_checkout_view,
+        countIf(cart_purchases > 0) as stage_5_purchase,
+        
+        -- Drop-off rates
+        round((stage_1_bio_view - stage_2_bio_click) * 100.0 / stage_1_bio_view, 2) as dropoff_bio_view_to_click,
+        round((stage_2_bio_click - stage_3_cart_view) * 100.0 / stage_2_bio_click, 2) as dropoff_bio_click_to_cart,
+        round((stage_3_cart_view - stage_4_checkout_view) * 100.0 / stage_3_cart_view, 2) as dropoff_cart_to_checkout,
+        round((stage_4_checkout_view - stage_5_purchase) * 100.0 / stage_4_checkout_view, 2) as dropoff_checkout_to_purchase,
+        
+        -- Revenue metrics
+        sum(total_revenue) as total_revenue_cents,
+        avgIf(total_revenue, cart_purchases > 0) as avg_order_value_cents
+        
+    FROM funnel_by_journey
+    GROUP BY journeyOrigin
+    ORDER BY journeys DESC
+
+NODE hourly_pattern
+SQL >
+    SELECT
+        toHour(journey_start) as hour_of_day,
+        count() as journeys,
+        countIf(cart_purchases > 0) as conversions,
+        round(conversions * 100.0 / journeys, 2) as conversion_rate,
+        avg(journey_duration_minutes) as avg_duration_minutes
+    FROM funnel_by_journey
+    WHERE bio_page_views > 0
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day

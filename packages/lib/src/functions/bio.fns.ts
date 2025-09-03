@@ -41,6 +41,16 @@ export async function getBioBlocksByHandleAndKey({
 				with: {
 					bioBlock: {
 						with: {
+							imageFile: {
+								columns: {
+									id: true,
+									s3Key: true,
+									blurDataUrl: true,
+									name: true,
+									width: true,
+									height: true,
+								},
+							},
 							bioLinks: {
 								with: {
 									bioLink: {
@@ -66,6 +76,32 @@ export async function getBioBlocksByHandleAndKey({
 								},
 								orderBy: [asc(_BioLinks_To_BioBlocks.lexoRank)],
 							},
+							targetCartFunnel: {
+								with: {
+									mainProduct: {
+										with: {
+											_images: {
+												with: {
+													file: {
+														columns: {
+															id: true,
+															s3Key: true,
+															blurDataUrl: true,
+															name: true,
+															width: true,
+															height: true,
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+							targetLink: true,
+							targetBio: true,
+							targetFm: true,
+							learnMoreBio: true,
 						},
 					},
 				},
@@ -102,6 +138,12 @@ export async function getBioBlocksByHandleAndKey({
 						:	null,
 				};
 			}),
+			imageFile: bb.bioBlock.imageFile,
+			targetCartFunnel: bb.bioBlock.targetCartFunnel,
+			targetLink: bb.bioBlock.targetLink,
+			targetBio: bb.bioBlock.targetBio,
+			targetFm: bb.bioBlock.targetFm,
+			learnMoreBio: bb.bioBlock.learnMoreBio,
 		})) ?? [];
 
 	return blocks;

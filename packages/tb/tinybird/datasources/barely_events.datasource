@@ -91,7 +91,13 @@ SCHEMA >
     `bio_linkIndex` Nullable(Int16) `json:$.bio_linkIndex`,
     `bio_linkText` Nullable(String) `json:$.bio_linkText`,
     `bio_linkAnimation` Nullable(String) `json:$.bio_linkAnimation`,
-    `bio_emailMarketingOptIn` Nullable(UInt8) `json:$.bio_emailMarketingOptIn`
+    `bio_emailMarketingOptIn` Nullable(UInt8) `json:$.bio_emailMarketingOptIn`,
+    `journeyId` String `json:$.journeyId`,
+    `journeyOrigin` String `json:$.journeyOrigin`,
+    `journeySource` String `json:$.journeySource`,
+    `journeyStep` UInt16 `json:$.journeyStep`,
+    `journeyPath` Array(String) `json:$.journeyPath`,
+    `cartSessionId` Nullable(String) `json:$.cartSessionId`
 
 FORWARD_QUERY >
     SELECT
@@ -186,7 +192,13 @@ FORWARD_QUERY >
         defaultValueOfTypeName('Nullable(Int16)') AS bio_linkIndex,
         defaultValueOfTypeName('Nullable(String)') AS bio_linkText,
         defaultValueOfTypeName('Nullable(String)') AS bio_linkAnimation,
-        defaultValueOfTypeName('Nullable(UInt8)') AS bio_emailMarketingOptIn
+        defaultValueOfTypeName('Nullable(UInt8)') AS bio_emailMarketingOptIn,
+        sessionId AS journeyId,
+        splitByChar('_', sessionId)[1] AS journeyOrigin,
+        '' AS journeySource,
+        CAST(1 AS UInt16) AS journeyStep,
+        CAST([] AS Array(String)) AS journeyPath,
+        defaultValueOfTypeName('Nullable(String)') AS cartSessionId
 
 ENGINE "MergeTree"
 ENGINE_PARTITION_KEY "toYear(timestamp)"

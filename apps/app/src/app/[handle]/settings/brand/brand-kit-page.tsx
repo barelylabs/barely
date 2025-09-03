@@ -19,7 +19,7 @@ import { Text } from '@barely/ui/typography';
 
 import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
-import { AppBioRender } from '~/app/[handle]/bio/_components/app-bio-render';
+import { AppBioRender } from '~/app/[handle]/bios/_components/app-bio-render';
 import { useBrandKit } from '~/hooks/use-brand-kit';
 import { BrandKitFormContent } from './brand-kit-form-content';
 

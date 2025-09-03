@@ -1,4 +1,4 @@
-import type { WEB_EVENT_TYPES__BIO } from '@barely/const';
+import type { BioBlockType, WEB_EVENT_TYPES__BIO } from '@barely/const';
 import type { Bio, BioLink, Workspace } from '@barely/validators/schemas';
 import { WORKSPACE_PLANS } from '@barely/const';
 import { dbHttp } from '@barely/db/client';
@@ -7,7 +7,7 @@ import { AnalyticsEndpoints } from '@barely/db/sql/analytics-endpoint.sql';
 // import { BioButtons, Bios } from '@barely/db/sql/bio.sql';
 import { Workspaces } from '@barely/db/sql/workspace.sql';
 import { sqlIncrement } from '@barely/db/utils';
-import { ingestWebEvent } from '@barely/tb/ingest';
+import { ingestBioEvent } from '@barely/tb/ingest';
 import { bioEventIngestSchema } from '@barely/tb/schema';
 import { isDevelopment, newId } from '@barely/utils';
 import { eq } from 'drizzle-orm';
@@ -44,6 +44,67 @@ async function checkIfWorkspaceIsAboveEventUsageLimit({
 	return false;
 }
 
+/**
+ * Records bio events to Tinybird with comprehensive journey tracking.
+ *
+ * This function handles all bio-related events (views, clicks, email captures) and ensures
+ * they're properly attributed to the user's journey across domains. The journey context
+ * allows us to track conversion funnels from initial touchpoint through final purchase.
+ *
+ * ## Journey Integration
+ * - Uses journeyId as the primary session identifier
+ * - Preserves journey origin and path for funnel analysis
+ * - Maintains referrer chain for multi-touch attribution
+ *
+ * ## Event Types
+ * - `bio/view`: Initial page load (typically journey step 1 or 2)
+ * - `bio/buttonClick`: Link interaction (progresses journey)
+ * - `bio/emailCapture`: Lead generation event
+ *
+ * ## Rate Limiting
+ * - Development: 1 event per second per IP/bio/type
+ * - Production: 1 event per hour per IP/bio/type
+ *
+ * @param bio - Bio object containing workspace and identifying information
+ * @param type - Type of bio event being recorded
+ * @param bioLink - Optional link that was clicked (for buttonClick events)
+ * @param visitor - Visitor information including journey tracking data
+ * @param workspace - Workspace information for usage limits
+ * @param blockId - ID of the block containing the clicked element
+ * @param blockType - Type of block (links, cart, contactForm, etc.)
+ * @param blockIndex - Position of block on the page
+ * @param linkIndex - Position of link within the block
+ * @param linkAnimation - Animation style applied to the link
+ * @param emailMarketingOptIn - Whether user consented to marketing (for email capture)
+ *
+ * @example
+ * // Recording a bio view with journey context
+ * await recordBioEvent({
+ *   bio,
+ *   type: 'bio/view',
+ *   visitor: {
+ *     journeyId: 'email_1736954400000_abc',
+ *     journeyOrigin: 'email',
+ *     journeyStep: '2',
+ *     // ... other visitor data
+ *   },
+ *   workspace
+ * });
+ *
+ * @example
+ * // Recording a link click that will navigate to cart
+ * await recordBioEvent({
+ *   bio,
+ *   type: 'bio/buttonClick',
+ *   bioLink: clickedLink,
+ *   blockId: 'blk_123',
+ *   blockType: 'links',
+ *   blockIndex: 0,
+ *   linkIndex: 2,
+ *   visitor,
+ *   workspace
+ * });
+ */
 export async function recordBioEvent({
 	bio,
 	bioLink,
@@ -61,7 +122,7 @@ export async function recordBioEvent({
 	type: (typeof WEB_EVENT_TYPES__BIO)[number];
 	bioLink?: BioLink;
 	blockId?: string;
-	blockType?: 'links' | 'contactForm' | 'cart';
+	blockType?: BioBlockType;
 	blockIndex?: number;
 	linkIndex?: number;
 	linkAnimation?: 'none' | 'bounce' | 'wobble' | 'jello' | 'pulse' | 'shake' | 'tada';
@@ -137,14 +198,21 @@ export async function recordBioEvent({
 			})
 		:	{ reported: false };
 
-	// report event to tinybird
+	// report event to tinybird with journey tracking
 	try {
+		// Extract journey info from visitor
+		const journeyId = visitor?.journeyId ?? visitor?.sessionId ?? newId('barelySession');
+		const journeyOrigin = visitor?.journeyOrigin ?? journeyId.split('_')[0] ?? 'bio';
+		const journeySource = visitor?.journeySource ?? `bio:${bio.handle}:${bio.key}`;
+		const journeyStep = visitor?.journeyStep ?? '1';
+		const journeyPath = visitor?.journeyPath ?? [`bio:${bio.handle}:${bio.key}`];
+
 		const eventData = bioEventIngestSchema.parse({
 			timestamp,
 			workspaceId: bio.workspaceId,
 			assetId: bio.id,
 			...flattenVisitorForIngest(visitor),
-			sessionId: visitor?.sessionId ?? newId('barelySession'),
+			sessionId: journeyId, // Use journey ID as session ID
 			type,
 			href: sourceUrl,
 			linkClickDestinationHref: bioLink?.url ?? null,
@@ -157,9 +225,15 @@ export async function recordBioEvent({
 			bio_linkAnimation: linkAnimation ?? null,
 			bio_emailMarketingOptIn: emailMarketingOptIn ?? null,
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : undefined,
+			// Journey tracking fields (if supported by schema)
+			journeyId,
+			journeyOrigin,
+			journeySource,
+			journeyStep: parseInt(journeyStep),
+			journeyPath,
 		});
 
-		await ingestWebEvent(eventData);
+		await ingestBioEvent(eventData);
 	} catch (error) {
 		await log({
 			type: 'errors',

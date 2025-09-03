@@ -1,6 +1,7 @@
 export * from './analytics-endpoint.schema';
 export * from './app-variant.schema';
 export * from './bio.schema';
+export * from './bio-tracking.schema';
 export * from './brand-kit.schema';
 export * from './campaign.schema';
 export * from './cart-funnel.schema';
@@ -39,6 +40,7 @@ export * from './stripe-connect.schema';
 export * from './track.schema';
 export * from './transaction.schema';
 export * from './transaction-line-item.schema';
+export * from './upload.schema';
 export * from './user-session.schema';
 export * from './user.schema';
 export * from './verification-token.schema';

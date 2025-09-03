@@ -28,15 +28,24 @@ export const EventTrackingKeys = [
 	'flowActionId',
 	'landingPageId',
 	'refererId',
+	'sessionId',
 	'metaCampaignId',
 	'metaAdSetId',
 	'metaAdId',
 	'metaPlacementId',
+	// Journey tracking fields
+	'journeyId',
+	'journeyOrigin',
+	'journeySource',
+	'journeyStep',
+	'originalReferrerId',
 ] as const;
 
 export type EventTrackingProps = Partial<
 	Record<(typeof EventTrackingKeys)[number], string>
->;
+> & {
+	journeyPath?: string[]; // Array needs special handling
+};
 
 export const eventReportSearchParamsSchema = z.object({
 	emailBroadcastId: z.string().optional(),
@@ -46,8 +55,17 @@ export const eventReportSearchParamsSchema = z.object({
 	flowActionId: z.string().optional(),
 	landingPageId: z.string().optional(),
 	refererId: z.string().optional(),
+	sessionId: z.string().optional(),
+	sid: z.string().optional(), // alias for sessionId in query params
+	fid: z.string().optional(), // alias for fanId in query params
 	metaCampaignId: z.string().optional(),
 	metaAdSetId: z.string().optional(),
 	metaAdId: z.string().optional(),
 	metaPlacementId: z.string().optional(),
+	// Journey tracking params
+	jid: z.string().optional(), // journey ID
+	jsrc: z.string().optional(), // journey source
+	jstep: z.string().optional(), // journey step
+	rid: z.string().optional(), // referrer ID (current)
+	orid: z.string().optional(), // original referrer ID
 });
