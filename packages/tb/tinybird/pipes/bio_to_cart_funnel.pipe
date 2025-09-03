@@ -2,6 +2,7 @@ TOKEN "bio_to_cart_funnel_endpoint" READ
 
 NODE bio_to_cart_events
 SQL >
+%
     SELECT
         journeyId,
         workspaceId,

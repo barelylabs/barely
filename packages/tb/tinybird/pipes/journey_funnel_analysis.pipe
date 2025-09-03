@@ -1,5 +1,6 @@
 NODE journey_funnel
 SQL >
+%
     SELECT
         journeyId,
         journeyOrigin,
