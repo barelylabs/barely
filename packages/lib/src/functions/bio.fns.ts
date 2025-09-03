@@ -78,6 +78,13 @@ export async function getBioBlocksByHandleAndKey({
 							},
 							targetCartFunnel: {
 								with: {
+									workspace: {
+										columns: {
+											name: true,
+											handle: true,
+											currency: true,
+										},
+									},
 									mainProduct: {
 										with: {
 											_images: {

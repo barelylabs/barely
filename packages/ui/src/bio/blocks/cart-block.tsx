@@ -178,6 +178,7 @@ export function CartBlock({ block, blockIndex }: CartBlockProps) {
 								normalPrice={originalPrice}
 								variant='lg/semibold'
 								className='text-brandKit-block'
+								currency={targetCartFunnel.workspace.currency}
 							/>
 						</div>
 					</div>
