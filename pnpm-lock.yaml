@@ -2136,6 +2136,9 @@ importers:
       follow-redirects:
         specifier: ^1.15.6
         version: 1.15.9(debug@4.4.1)
+      isomorphic-dompurify:
+        specifier: ^2.15.0
+        version: 2.25.0(bufferutil@4.0.8)
       jotai:
         specifier: 'catalog:'
         version: 2.12.5(@types/react@19.1.8)(react@19.0.0)
