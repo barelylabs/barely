@@ -204,7 +204,7 @@ export async function recordBioEvent({
 		const journeyId = visitor?.journeyId ?? visitor?.sessionId ?? newId('barelySession');
 		const journeyOrigin = visitor?.journeyOrigin ?? journeyId.split('_')[0] ?? 'bio';
 		const journeySource = visitor?.journeySource ?? `bio:${bio.handle}:${bio.key}`;
-		const journeyStep = visitor?.journeyStep ?? '1';
+		const journeyStep = visitor?.journeyStep ? parseInt(visitor.journeyStep, 10) : 1;
 		const journeyPath = visitor?.journeyPath ?? [`bio:${bio.handle}:${bio.key}`];
 
 		const eventData = bioEventIngestSchema.parse({
@@ -229,7 +229,7 @@ export async function recordBioEvent({
 			journeyId,
 			journeyOrigin,
 			journeySource,
-			journeyStep: parseInt(journeyStep),
+			journeyStep,
 			journeyPath,
 		});
 
