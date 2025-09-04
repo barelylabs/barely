@@ -168,6 +168,7 @@ import {
 	RectangleVertical,
 	Redo,
 	RefreshCcw,
+	Repeat,
 	Rocket,
 	Save,
 	ScanBarcode,
@@ -388,6 +389,7 @@ export const Icon = {
 	info: InformationCircleIcon,
 	infinity: InfinityIcon,
 	integrations: Blocks,
+	invoice: Receipt,
 	italic: Italic,
 
 	joystick: Joystick,
@@ -457,6 +459,7 @@ export const Icon = {
 	receipt: Receipt,
 	rectangleHorizontal: RectangleHorizontal,
 	rectangleVertical: RectangleVertical,
+	repeat: Repeat,
 	redo: Redo,
 	remarketing: BracketsAngle,
 	refresh: RefreshCcw,

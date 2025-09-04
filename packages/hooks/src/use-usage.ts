@@ -4,7 +4,12 @@ import { getFirstAndLastDayOfBillingCycle } from '@barely/utils';
 import { useWorkspaceWithAll } from './use-workspace';
 
 export function useUsage() {
-	const { plan: planId, billingCycleStart, linkUsage } = useWorkspaceWithAll();
+	const {
+		plan: planId,
+		billingCycleStart,
+		linkUsage,
+		invoiceUsage,
+	} = useWorkspaceWithAll();
 
 	const plan = WORKSPACE_PLANS.get(planId);
 	if (!plan) {
@@ -28,6 +33,9 @@ export function useUsage() {
 		tasksPerDay: plan.usageLimits.tasksPerDay,
 		tasksPerMonth: plan.usageLimits.tasksPerMonth,
 
+		invoicesPerMonth: plan.usageLimits.invoicesPerMonth,
+		invoiceClients: plan.usageLimits.invoiceClients,
+
 		analyticsRetentionDays: plan.analyticsRetentionDays,
 	};
 
@@ -37,6 +45,7 @@ export function useUsage() {
 		firstDay,
 		lastDay,
 		linkUsage,
+		invoiceUsage,
 		usageLimits,
 	};
 }

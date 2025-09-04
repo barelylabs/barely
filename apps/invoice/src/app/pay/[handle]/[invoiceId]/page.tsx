@@ -1,28 +1,16 @@
 'use client';
 
-import type { InvoiceLineItem } from '@barely/validators';
 import { useState } from 'react';
 import { notFound } from 'next/navigation';
-import { formatCentsToDollars } from '@barely/utils';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { format } from 'date-fns';
 
 import { useInvoiceRenderTRPC } from '@barely/api/public/invoice-render.trpc.react';
 
-import { Badge } from '@barely/ui/badge';
 import { Button } from '@barely/ui/button';
 import { Card } from '@barely/ui/card';
 import { Icon } from '@barely/ui/icon';
+import { InvoiceRender } from '@barely/ui/invoice';
 import { LoadingSpinner } from '@barely/ui/loading';
-import { Separator } from '@barely/ui/separator';
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from '@barely/ui/table';
 import { Text } from '@barely/ui/typography';
 
 interface PageProps {
@@ -64,6 +52,26 @@ export default function InvoicePaymentPage({ params }: PageProps) {
 		},
 	});
 
+	// Download PDF mutation
+	const downloadPdf = useMutation(
+		trpc.downloadInvoicePdf.mutationOptions({
+			onSuccess: data => {
+				// Create download link
+				const blob = new Blob([Buffer.from(data.pdf, 'base64')], {
+					type: 'application/pdf',
+				});
+				const url = window.URL.createObjectURL(blob);
+				const link = document.createElement('a');
+				link.href = url;
+				link.download = `invoice-${invoice?.invoiceNumber ?? 'download'}.pdf`;
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+				window.URL.revokeObjectURL(url);
+			},
+		}),
+	);
+
 	const handlePayment = () => {
 		setIsProcessing(true);
 		createPaymentSession.mutate({
@@ -72,9 +80,16 @@ export default function InvoicePaymentPage({ params }: PageProps) {
 		});
 	};
 
+	const handleDownload = () => {
+		downloadPdf.mutate({
+			handle: params.handle,
+			invoiceId: params.invoiceId,
+		});
+	};
+
 	if (isLoading) {
 		return (
-			<div className='flex min-h-screen items-center justify-center'>
+			<div className='flex min-h-screen items-center justify-center bg-gray-50'>
 				<div className='text-center'>
 					<LoadingSpinner />
 					<Text variant='sm/normal' muted className='mt-2'>
@@ -89,168 +104,84 @@ export default function InvoicePaymentPage({ params }: PageProps) {
 		return notFound();
 	}
 
-	const lineItems = (
-		Array.isArray(invoice.lineItems) ?
-			invoice.lineItems
-		:	[]) as InvoiceLineItem[];
-
-	const getStatusColor = (status: string) => {
-		switch (status) {
-			case 'draft':
-				return 'secondary';
-			case 'sent':
-				return 'info';
-			case 'viewed':
-				return 'warning';
-			case 'paid':
-				return 'success';
-			case 'overdue':
-				return 'danger';
-			case 'voided':
-				return 'outline';
-			default:
-				return 'secondary';
-		}
-	};
+	// Invoice is already paid
+	const isPaid = invoice.status === 'paid';
+	const isVoided = invoice.status === 'voided';
 
 	return (
-		<div className='min-h-screen bg-gradient-to-b from-background to-muted py-8'>
-			<div className='mx-auto max-w-3xl px-4'>
-				{/* Header */}
-				<div className='mb-8'>
+		<div className='min-h-screen bg-gray-50'>
+			{/* Header */}
+			<div className='border-b bg-white'>
+				<div className='mx-auto max-w-5xl px-4 py-6'>
 					<div className='flex items-center justify-between'>
-						<div>
-							<h1 className='text-3xl font-bold'>{invoice.workspace.name}</h1>
-							<Text variant='md/normal' muted className='mt-1'>
-								Invoice #{invoice.invoiceNumber}
+						<div className='flex items-center gap-3'>
+							<Text variant='xl/semibold' className='text-gray-900'>
+								{invoice.workspace.name} sent you an invoice
 							</Text>
 						</div>
-						<Badge variant={getStatusColor(invoice.status)} className='text-sm'>
-							{invoice.status.toUpperCase()}
-						</Badge>
+						<Button
+							size='sm'
+							look='outline'
+							startIcon='download'
+							onClick={handleDownload}
+							disabled={downloadPdf.isPending}
+						>
+							{downloadPdf.isPending ? 'Downloading...' : 'Download Invoice'}
+						</Button>
 					</div>
 				</div>
+			</div>
 
-				{/* Invoice Details */}
-				<div className='grid gap-6 lg:grid-cols-3'>
-					<div className='space-y-6 lg:col-span-2'>
-						{/* Client Information */}
-						<Card>
-							<Text variant='lg/semibold' className='mb-4'>
-								Bill To
-							</Text>
-							<div className='space-y-1'>
-								<Text variant='md/medium'>{invoice.client.name}</Text>
-								{invoice.client.company && (
-									<Text variant='sm/normal' muted>
-										{invoice.client.company}
-									</Text>
-								)}
-								<Text variant='sm/normal' muted>
-									{invoice.client.email}
-								</Text>
-								{invoice.client.address && (
-									<Text variant='sm/normal' muted className='whitespace-pre-line'>
-										{invoice.client.address}
-									</Text>
-								)}
-							</div>
-						</Card>
-
-						{/* Line Items */}
-						<Card>
-							<Text variant='lg/semibold' className='mb-4'>
-								Items
-							</Text>
-							<Table>
-								<TableHeader>
-									<TableRow>
-										<TableHead>Description</TableHead>
-										<TableHead className='text-center'>Qty</TableHead>
-										<TableHead className='text-right'>Rate</TableHead>
-										<TableHead className='text-right'>Amount</TableHead>
-									</TableRow>
-								</TableHeader>
-								<TableBody>
-									{lineItems.map((item, index) => (
-										<TableRow key={index}>
-											<TableCell>{item.description}</TableCell>
-											<TableCell className='text-center'>{item.quantity}</TableCell>
-											<TableCell className='text-right'>
-												{formatCentsToDollars(item.rate)}
-											</TableCell>
-											<TableCell className='text-right font-medium'>
-												{formatCentsToDollars(item.amount)}
-											</TableCell>
-										</TableRow>
-									))}
-								</TableBody>
-							</Table>
-						</Card>
-
-						{/* Invoice Dates */}
-						<Card>
-							<Text variant='lg/semibold' className='mb-4'>
-								Invoice Details
-							</Text>
-							<div className='grid gap-4 sm:grid-cols-2'>
-								<div>
-									<Text variant='sm/normal' muted>
-										Issue Date
-									</Text>
-									<Text variant='md/medium'>
-										{format(new Date(invoice.createdAt), 'MMM dd, yyyy')}
-									</Text>
-								</div>
-								<div>
-									<Text variant='sm/normal' muted>
-										Due Date
-									</Text>
-									<Text variant='md/medium'>
-										{format(new Date(invoice.dueDate), 'MMM dd, yyyy')}
-									</Text>
-								</div>
-							</div>
+			{/* Main Content */}
+			<div className='mx-auto max-w-5xl px-4 py-8'>
+				<div className='grid gap-8 lg:grid-cols-3'>
+					{/* Invoice Preview */}
+					<div className='lg:col-span-2'>
+						<Card className='overflow-hidden p-0'>
+							<InvoiceRender
+								invoice={invoice}
+								workspace={invoice.workspace}
+								client={invoice.client}
+								isPreview={false}
+							/>
 						</Card>
 					</div>
 
-					{/* Payment Summary */}
+					{/* Payment Section */}
 					<div className='lg:col-span-1'>
 						<Card className='sticky top-4'>
-							<Text variant='lg/semibold' className='mb-4'>
-								Payment Summary
-							</Text>
-							<div className='space-y-2'>
-								<div className='flex justify-between'>
-									<Text variant='sm/normal' muted>
-										Subtotal
-									</Text>
-									<Text variant='sm/normal'>
-										{formatCentsToDollars(invoice.subtotal)}
-									</Text>
-								</div>
-								{invoice.tax > 0 && (
-									<div className='flex justify-between'>
-										<Text variant='sm/normal' muted>
-											Tax ({(invoice.tax / 100).toFixed(2)}%)
+							<div className='p-6'>
+								<Text variant='lg/semibold' className='mb-6 text-gray-900'>
+									Payment Details
+								</Text>
+
+								{/* Amount Display */}
+								<div className='mb-6 rounded-lg bg-gray-50 p-4'>
+									<div className='flex items-center justify-between'>
+										<Text variant='2xl/semibold' className='text-gray-900'>
+											{new Intl.NumberFormat('en-US', {
+												style: 'currency',
+												currency: invoice.workspace.currency.toUpperCase(),
+												minimumFractionDigits: 0,
+												maximumFractionDigits: 2,
+											}).format(invoice.total / 100)}
 										</Text>
-										<Text variant='sm/normal'>
-											{formatCentsToDollars(
-												Math.round((invoice.subtotal * invoice.tax) / 10000),
-											)}
+										<Text variant='sm/normal' className='text-gray-500'>
+											INV-{invoice.invoiceNumber}
 										</Text>
 									</div>
-								)}
-								<Separator />
-								<div className='flex justify-between'>
-									<Text variant='md/semibold'>Total Due</Text>
-									<Text variant='md/semibold'>{formatCentsToDollars(invoice.total)}</Text>
+									<Text variant='sm/normal' className='mt-2 text-gray-600'>
+										Due on{' '}
+										{new Date(invoice.dueDate).toLocaleDateString('en-US', {
+											month: 'long',
+											day: 'numeric',
+											year: 'numeric',
+										})}
+									</Text>
 								</div>
-							</div>
 
-							{/* Payment Actions */}
-							<div className='mt-6'>
-								{invoice.status === 'paid' ?
+								{/* Payment Status/Actions */}
+								{isPaid ?
 									<div className='text-center'>
 										<div className='mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-green-100'>
 											<Icon.check className='h-6 w-6 text-green-600' />
@@ -262,7 +193,7 @@ export default function InvoicePaymentPage({ params }: PageProps) {
 											This invoice has been paid in full
 										</Text>
 									</div>
-								: invoice.status === 'voided' ?
+								: isVoided ?
 									<div className='text-center'>
 										<div className='mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100'>
 											<Icon.x className='h-6 w-6 text-gray-600' />
@@ -274,7 +205,7 @@ export default function InvoicePaymentPage({ params }: PageProps) {
 											This invoice has been cancelled
 										</Text>
 									</div>
-								:	<div className='space-y-3'>
+								:	<div className='space-y-4'>
 										<Button
 											className='w-full'
 											size='lg'
@@ -288,25 +219,57 @@ export default function InvoicePaymentPage({ params }: PageProps) {
 												</>
 											:	<>
 													<Icon.creditCard className='mr-2 h-4 w-4' />
-													Pay {formatCentsToDollars(invoice.total)}
+													Pay Now
 												</>
 											}
 										</Button>
+
 										<Text variant='xs/normal' muted className='text-center'>
 											Powered by Stripe • Secure payment
 										</Text>
 									</div>
 								}
+
+								{/* Additional Info */}
+								<div className='mt-6 border-t pt-6'>
+									<Text variant='sm/semibold' className='mb-3 text-gray-700'>
+										Payment methods
+									</Text>
+									<div className='space-y-2'>
+										<div className='flex items-center gap-2 text-gray-600'>
+											<Icon.creditCard className='h-4 w-4' />
+											<Text variant='sm/normal'>Card</Text>
+										</div>
+										<div className='flex items-center gap-2 text-gray-600'>
+											<Icon.billing className='h-4 w-4' />
+											<Text variant='sm/normal'>ACH Bank Transfer</Text>
+										</div>
+									</div>
+								</div>
+
+								{/* Contact Info */}
+								<div className='mt-6 border-t pt-6'>
+									<Text variant='xs/normal' className='text-center text-gray-500'>
+										Questions? Contact {invoice.workspace.name}
+										{(invoice.workspace.invoiceSupportEmail ??
+											invoice.workspace.supportEmail) && (
+											<>
+												{' '}
+												at{' '}
+												<a
+													href={`mailto:${invoice.workspace.invoiceSupportEmail ?? invoice.workspace.supportEmail}`}
+													className='text-blue-600 hover:underline'
+												>
+													{invoice.workspace.invoiceSupportEmail ??
+														invoice.workspace.supportEmail}
+												</a>
+											</>
+										)}
+									</Text>
+								</div>
 							</div>
 						</Card>
 					</div>
-				</div>
-
-				{/* Footer */}
-				<div className='mt-12 text-center'>
-					<Text variant='sm/normal' muted>
-						Questions about this invoice? Contact {invoice.workspace.name}
-					</Text>
 				</div>
 			</div>
 		</div>

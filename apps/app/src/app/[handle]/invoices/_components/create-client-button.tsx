@@ -9,9 +9,9 @@ export function CreateClientButton() {
 	const { setShowCreateModal } = useClientSearchParams();
 
 	return (
-		<Button size='sm' onClick={() => setShowCreateModal(true)}>
+		<Button onClick={() => setShowCreateModal(true)}>
 			<Icon.plus className='mr-2 h-4 w-4' />
-			Add Client
+			New Client
 		</Button>
 	);
 }

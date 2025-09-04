@@ -1,9 +1,9 @@
 import type { TRPCRouterRecord } from '@trpc/server';
 import { dbHttp } from '@barely/db/client';
 import { dbPool } from '@barely/db/pool';
-import { Invoices } from '@barely/db/sql';
+import { Invoices, Workspaces } from '@barely/db/sql';
 import { sqlAnd, sqlCount, sqlStringContains } from '@barely/db/utils';
-import { newId, raise } from '@barely/utils';
+import { newId, raise, raiseTRPCError } from '@barely/utils';
 import {
 	createInvoiceSchema,
 	duplicateInvoiceSchema,
@@ -12,7 +12,7 @@ import {
 	sendInvoiceSchema,
 	updateInvoiceSchema,
 } from '@barely/validators';
-import { and, asc, desc, eq, gt, inArray, isNull, lt, or } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, gte, inArray, isNull, lt, or } from 'drizzle-orm';
 import DOMPurify from 'isomorphic-dompurify';
 import { z } from 'zod/v4';
 
@@ -20,6 +20,7 @@ import { sendEmailWithRetry } from '../../functions/email-retry.fns';
 import { sendInvoiceEmail } from '../../functions/invoice-email.fns';
 import {
 	calculateInvoiceTotal,
+	checkInvoiceUsageAndIncrement,
 	generateInvoiceNumber,
 } from '../../functions/invoice.fns';
 import { workspaceProcedure } from '../trpc';
@@ -62,24 +63,6 @@ export const invoiceRoute = {
 					:	undefined;
 			}
 
-			// Check for overdue invoices and update status
-			const now = new Date();
-			for (const invoice of invoices) {
-				if (
-					invoice.status !== 'paid' &&
-					invoice.status !== 'voided' &&
-					invoice.dueDate < now &&
-					invoice.status !== 'overdue'
-				) {
-					// Update status to overdue
-					await dbHttp
-						.update(Invoices)
-						.set({ status: 'overdue' })
-						.where(eq(Invoices.id, invoice.id));
-					invoice.status = 'overdue';
-				}
-			}
-
 			return {
 				invoices,
 				nextCursor,
@@ -96,66 +79,105 @@ export const invoiceRoute = {
 				},
 			});
 
-			if (!invoice) {
-				raise('Invoice not found');
-			}
-
-			return invoice;
+			return (
+				invoice ??
+				raiseTRPCError({
+					message: 'Invoice not found',
+					code: 'NOT_FOUND',
+				})
+			);
 		}),
 
 	stats: workspaceProcedure.query(async ({ ctx }) => {
-		const [totalCount, paidCount, overdueCount, draftCount] = await Promise.all([
-			// Total invoices
-			dbHttp
-				.select({ count: sqlCount })
-				.from(Invoices)
-				.where(
-					and(eq(Invoices.workspaceId, ctx.workspace.id), isNull(Invoices.deletedAt)),
-				)
-				.then(res => res[0]?.count ?? 0),
+		// Get current month start date
+		const now = new Date();
+		const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-			// Paid invoices
-			dbHttp
-				.select({ count: sqlCount })
-				.from(Invoices)
-				.where(
-					and(
-						eq(Invoices.workspaceId, ctx.workspace.id),
-						eq(Invoices.status, 'paid'),
-						isNull(Invoices.deletedAt),
-					),
-				)
-				.then(res => res[0]?.count ?? 0),
+		const [totalCount, paidCount, overdueCount, draftCount, sentCount, viewedCount] =
+			await Promise.all([
+				// Total invoices
+				dbHttp
+					.select({ count: sqlCount })
+					.from(Invoices)
+					.where(
+						and(eq(Invoices.workspaceId, ctx.workspace.id), isNull(Invoices.deletedAt)),
+					)
+					.then(res => res[0]?.count ?? 0),
 
-			// Overdue invoices
-			dbHttp
-				.select({ count: sqlCount })
-				.from(Invoices)
-				.where(
-					and(
-						eq(Invoices.workspaceId, ctx.workspace.id),
-						eq(Invoices.status, 'overdue'),
-						isNull(Invoices.deletedAt),
-					),
-				)
-				.then(res => res[0]?.count ?? 0),
+				// Paid invoices
+				dbHttp
+					.select({ count: sqlCount })
+					.from(Invoices)
+					.where(
+						and(
+							eq(Invoices.workspaceId, ctx.workspace.id),
+							eq(Invoices.status, 'paid'),
+							isNull(Invoices.deletedAt),
+						),
+					)
+					.then(res => res[0]?.count ?? 0),
 
-			// Draft invoices
-			dbHttp
-				.select({ count: sqlCount })
-				.from(Invoices)
-				.where(
-					and(
-						eq(Invoices.workspaceId, ctx.workspace.id),
-						eq(Invoices.status, 'draft'),
-						isNull(Invoices.deletedAt),
-					),
-				)
-				.then(res => res[0]?.count ?? 0),
-		]);
+				// Overdue invoices
+				dbHttp
+					.select({ count: sqlCount })
+					.from(Invoices)
+					.where(
+						and(
+							eq(Invoices.workspaceId, ctx.workspace.id),
+							gt(Invoices.dueDate, new Date()),
+							isNull(Invoices.deletedAt),
+						),
+					)
+					.then(res => res[0]?.count ?? 0),
 
-		// Calculate totals
-		const [totalRevenue, outstandingAmount] = await Promise.all([
+				// Unsent invoices
+				dbHttp
+					.select({ count: sqlCount })
+					.from(Invoices)
+					.where(
+						and(
+							eq(Invoices.workspaceId, ctx.workspace.id),
+							eq(Invoices.status, 'created'),
+							isNull(Invoices.deletedAt),
+						),
+					)
+					.then(res => res[0]?.count ?? 0),
+
+				// Sent invoices
+				dbHttp
+					.select({ count: sqlCount })
+					.from(Invoices)
+					.where(
+						and(
+							eq(Invoices.workspaceId, ctx.workspace.id),
+							eq(Invoices.status, 'sent'),
+							isNull(Invoices.deletedAt),
+						),
+					)
+					.then(res => res[0]?.count ?? 0),
+
+				// Viewed invoices
+				dbHttp
+					.select({ count: sqlCount })
+					.from(Invoices)
+					.where(
+						and(
+							eq(Invoices.workspaceId, ctx.workspace.id),
+							eq(Invoices.status, 'viewed'),
+							isNull(Invoices.deletedAt),
+						),
+					)
+					.then(res => res[0]?.count ?? 0),
+			]);
+
+		// Calculate totals and averages
+		const [
+			totalRevenue,
+			outstandingAmount,
+			overdueAmount,
+			thisMonthRevenue,
+			averageData,
+		] = await Promise.all([
 			// Total revenue (paid invoices)
 			dbHttp
 				.select({ total: Invoices.total })
@@ -179,12 +201,79 @@ export const invoiceRoute = {
 						or(
 							eq(Invoices.status, 'sent'),
 							eq(Invoices.status, 'viewed'),
-							eq(Invoices.status, 'overdue'),
+							gt(Invoices.dueDate, new Date()),
 						),
 						isNull(Invoices.deletedAt),
 					),
 				)
 				.then(res => res.reduce((sum, inv) => sum + inv.total, 0)),
+
+			// Overdue amount
+			dbHttp
+				.select({ total: Invoices.total })
+				.from(Invoices)
+				.where(
+					and(
+						eq(Invoices.workspaceId, ctx.workspace.id),
+						gt(Invoices.dueDate, new Date()),
+						isNull(Invoices.deletedAt),
+					),
+				)
+				.then(res => res.reduce((sum, inv) => sum + inv.total, 0)),
+
+			// This month's revenue
+			dbHttp
+				.select({ total: Invoices.total })
+				.from(Invoices)
+				.where(
+					and(
+						eq(Invoices.workspaceId, ctx.workspace.id),
+						eq(Invoices.status, 'paid'),
+						isNull(Invoices.deletedAt),
+						gte(Invoices.paidAt, startOfMonth),
+					),
+				)
+				.then(res => res.reduce((sum, inv) => sum + inv.total, 0)),
+
+			// Get data for averages
+			dbHttp
+				.select({
+					total: Invoices.total,
+					createdAt: Invoices.createdAt,
+					paidAt: Invoices.paidAt,
+					status: Invoices.status,
+				})
+				.from(Invoices)
+				.where(
+					and(eq(Invoices.workspaceId, ctx.workspace.id), isNull(Invoices.deletedAt)),
+				)
+				.then(invoices => {
+					// Calculate average invoice value
+					const averageInvoiceValue =
+						totalCount > 0 ?
+							Math.round(invoices.reduce((sum, inv) => sum + inv.total, 0) / totalCount)
+						:	0;
+
+					// Calculate average payment days (only for paid invoices)
+					const paidInvoices = invoices.filter(
+						inv => inv.status === 'paid' && inv.paidAt,
+					);
+					let averagePaymentDays = 0;
+
+					if (paidInvoices.length > 0) {
+						const totalDays = paidInvoices.reduce((sum, inv) => {
+							if (!inv.paidAt) return sum; // Safety check
+							const daysDiff = Math.floor(
+								(new Date(inv.paidAt).getTime() - new Date(inv.createdAt).getTime()) /
+									(1000 * 60 * 60 * 24),
+							);
+							return sum + daysDiff;
+						}, 0);
+						averagePaymentDays = Math.round(totalDays / paidInvoices.length);
+					}
+
+					return { averageInvoiceValue, averagePaymentDays };
+				}),
 		]);
 
 		return {
@@ -192,25 +281,43 @@ export const invoiceRoute = {
 			paidCount,
 			overdueCount,
 			draftCount,
+			sentCount,
+			viewedCount,
 			totalRevenue,
 			outstandingAmount,
+			overdueAmount,
+			thisMonthRevenue,
+			averageInvoiceValue: averageData.averageInvoiceValue,
+			averagePaymentDays: averageData.averagePaymentDays,
 		};
 	}),
 
 	create: workspaceProcedure
 		.input(createInvoiceSchema)
 		.mutation(async ({ input, ctx }) => {
+			// Check invoice usage limits first
+			await checkInvoiceUsageAndIncrement(ctx.workspace.id);
+
 			// Check if Stripe Connect is properly set up
 			const { verifyStripeConnectStatus } = await import(
 				'../../functions/stripe-connect.fns'
 			);
 			const { isProduction } = await import('@barely/utils');
 
-			// First check if workspace has charges enabled
+			// First fetch the full workspace with stripeConnect fields
+			const fullWorkspace = await dbHttp.query.Workspaces.findFirst({
+				where: eq(Workspaces.id, ctx.workspace.id),
+			});
+
+			if (!fullWorkspace) {
+				throw new Error('Workspace not found');
+			}
+
+			// Check if workspace has charges enabled
 			const chargesEnabled =
 				isProduction() ?
-					ctx.workspace.stripeConnectChargesEnabled
-				:	ctx.workspace.stripeConnectChargesEnabled_devMode;
+					fullWorkspace.stripeConnectChargesEnabled
+				:	fullWorkspace.stripeConnectChargesEnabled_devMode;
 
 			if (!chargesEnabled) {
 				// Try to verify current status with Stripe
@@ -249,16 +356,37 @@ export const invoiceRoute = {
 				invoiceNumber,
 				subtotal,
 				total,
-				status: 'draft' as const,
+				status: 'created' as const,
 			};
 
 			const invoices = await dbPool(ctx.pool)
 				.insert(Invoices)
 				.values(invoiceData)
 				.returning();
-			const invoice = invoices[0] ?? raise('Failed to create invoice');
+			const invoice =
+				invoices[0] ?? raiseTRPCError({ message: 'Failed to create invoice' });
 
 			return invoice;
+		}),
+
+	archive: workspaceProcedure
+		.input(z.object({ ids: z.array(z.string()) }))
+		.mutation(async ({ input, ctx }) => {
+			const invoices = await dbHttp.query.Invoices.findMany({
+				where: and(
+					eq(Invoices.workspaceId, ctx.workspace.id),
+					inArray(Invoices.id, input.ids),
+				),
+			});
+
+			if (invoices.length !== input.ids.length) {
+				raise('Some invoices not found');
+			}
+
+			await dbHttp
+				.update(Invoices)
+				.set({ archivedAt: new Date() })
+				.where(inArray(Invoices.id, input.ids));
 		}),
 
 	update: workspaceProcedure
@@ -270,11 +398,11 @@ export const invoiceRoute = {
 			const existingInvoice =
 				(await dbHttp.query.Invoices.findFirst({
 					where: and(eq(Invoices.id, id), eq(Invoices.workspaceId, ctx.workspace.id)),
-				})) ?? raise('Invoice not found');
+				})) ?? raiseTRPCError({ message: 'Invoice not found' });
 
 			// Only allow updates to draft invoices
-			if (existingInvoice.status !== 'draft') {
-				raise('Can only edit draft invoices');
+			if (existingInvoice.status !== 'created') {
+				raiseTRPCError({ message: 'Can only edit draft invoices' });
 			}
 
 			// Sanitize line items if provided
@@ -317,6 +445,9 @@ export const invoiceRoute = {
 	duplicate: workspaceProcedure
 		.input(duplicateInvoiceSchema)
 		.mutation(async ({ input, ctx }) => {
+			// Check invoice usage limits first
+			await checkInvoiceUsageAndIncrement(ctx.workspace.id);
+
 			const existingInvoice =
 				(await dbHttp.query.Invoices.findFirst({
 					where: and(
@@ -342,7 +473,7 @@ export const invoiceRoute = {
 				subtotal: existingInvoice.subtotal,
 				total: existingInvoice.total,
 				dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-				status: 'draft' as const,
+				status: 'created' as const,
 			};
 
 			const invoices = await dbPool(ctx.pool)
@@ -360,11 +491,20 @@ export const invoiceRoute = {
 		);
 		const { isProduction } = await import('@barely/utils');
 
-		// First check if workspace has charges enabled
+		// First fetch the full workspace with stripeConnect fields
+		const fullWorkspace = await dbHttp.query.Workspaces.findFirst({
+			where: eq(Workspaces.id, ctx.workspace.id),
+		});
+
+		if (!fullWorkspace) {
+			throw new Error('Workspace not found');
+		}
+
+		// Check if workspace has charges enabled
 		const chargesEnabled =
 			isProduction() ?
-				ctx.workspace.stripeConnectChargesEnabled
-			:	ctx.workspace.stripeConnectChargesEnabled_devMode;
+				fullWorkspace.stripeConnectChargesEnabled
+			:	fullWorkspace.stripeConnectChargesEnabled_devMode;
 
 		if (!chargesEnabled) {
 			// Try to verify current status with Stripe
@@ -383,10 +523,10 @@ export const invoiceRoute = {
 					client: true,
 					workspace: true,
 				},
-			})) ?? raise('Invoice not found');
+			})) ?? raiseTRPCError({ message: 'Invoice not found' });
 
-		if (invoice.status !== 'draft' && invoice.status !== 'sent') {
-			raise('Cannot send invoice with status: ' + invoice.status);
+		if (invoice.status !== 'created' && invoice.status !== 'sent') {
+			raiseTRPCError({ message: 'Cannot send invoice with status: ' + invoice.status });
 		}
 
 		// Send the invoice email with retry mechanism
@@ -412,12 +552,16 @@ export const invoiceRoute = {
 				.where(eq(Invoices.id, input.id))
 				.returning();
 
-			return updatedInvoices[0] ?? raise('Failed to update invoice status');
+			return (
+				updatedInvoices[0] ??
+				raiseTRPCError({ message: 'Failed to update invoice status' })
+			);
 		} catch (error) {
 			console.error('Failed to send invoice email after retries:', error);
-			raise(
-				'Failed to send invoice email after multiple attempts. Please try again later.',
-			);
+			raiseTRPCError({
+				message:
+					'Failed to send invoice email after multiple attempts. Please try again later.',
+			});
 		}
 	}),
 
@@ -430,10 +574,10 @@ export const invoiceRoute = {
 						eq(Invoices.id, input.id),
 						eq(Invoices.workspaceId, ctx.workspace.id),
 					),
-				})) ?? raise('Invoice not found');
+				})) ?? raiseTRPCError({ message: 'Invoice not found' });
 
 			if (invoice.status === 'paid') {
-				raise('Invoice is already marked as paid');
+				raiseTRPCError({ message: 'Invoice is already marked as paid' });
 			}
 
 			const updatedInvoices = await dbPool(ctx.pool)
@@ -445,7 +589,10 @@ export const invoiceRoute = {
 				.where(eq(Invoices.id, input.id))
 				.returning();
 
-			return updatedInvoices[0] ?? raise('Failed to mark invoice as paid');
+			return (
+				updatedInvoices[0] ??
+				raiseTRPCError({ message: 'Failed to mark invoice as paid' })
+			);
 		}),
 
 	delete: workspaceProcedure
@@ -459,9 +606,9 @@ export const invoiceRoute = {
 				),
 			});
 
-			const nonDraftInvoices = invoices.filter(i => i.status !== 'draft');
+			const nonDraftInvoices = invoices.filter(i => i.status !== 'created');
 			if (nonDraftInvoices.length > 0) {
-				raise('Can only delete draft invoices');
+				raiseTRPCError({ message: 'Can only delete draft invoices' });
 			}
 
 			const updatedInvoices = await dbHttp

@@ -12,7 +12,7 @@ import {
 	InvoiceEmailTemplate,
 	PaymentReceivedEmailTemplate,
 } from '@barely/email/templates';
-import { formatCentsToDollars, getAbsoluteUrl } from '@barely/utils';
+import { formatMinorToMajorCurrency, getAbsoluteUrl, newId } from '@barely/utils';
 import { invoiceLineItemSchema } from '@barely/validators/schemas';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod/v4';
@@ -39,44 +39,42 @@ export async function sendInvoiceEmail({
 	const paymentUrl = getAbsoluteUrl('invoice', `/pay/${workspace.handle}/${invoice.id}`);
 
 	// Parse and validate line items
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 	const parsedLineItems: InvoiceLineItem[] = z
 		.array(invoiceLineItemSchema)
 		.parse(invoice.lineItems);
 
 	const lineItems = parsedLineItems.map(item => ({
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
 		description: item.description,
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
 		quantity: item.quantity,
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-		rate: formatCentsToDollars(item.rate),
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-		amount: formatCentsToDollars(item.amount),
+		rate: formatMinorToMajorCurrency(item.rate, workspace.currency),
+		amount: formatMinorToMajorCurrency(item.amount, workspace.currency),
 	}));
 
 	// Format tax percentage for display
 	const taxPercentage = invoice.tax > 0 ? invoice.tax : undefined;
 	const taxAmount =
 		invoice.tax && invoice.subtotal ?
-			formatCentsToDollars(Math.round((invoice.subtotal * invoice.tax) / 10000))
+			formatMinorToMajorCurrency(
+				Math.round((invoice.subtotal * invoice.tax) / 10000),
+				workspace.currency,
+			)
 		:	undefined;
 
 	// Create email template
 	const emailTemplate = InvoiceEmailTemplate({
 		invoiceNumber: invoice.invoiceNumber,
 		workspaceName: workspace.name,
-		workspaceLogo: workspace.imageUrl ?? undefined,
+		// workspaceLogo is optional - would need to fetch from _avatarImages relation
 		dueDate: invoice.dueDate,
 		clientName: client.name,
 		clientEmail: client.email,
 		clientCompany: client.company ?? undefined,
 		clientAddress: client.address ?? undefined,
 		lineItems,
-		subtotal: formatCentsToDollars(invoice.subtotal),
+		subtotal: formatMinorToMajorCurrency(invoice.subtotal, workspace.currency),
 		taxPercentage,
 		taxAmount,
-		total: formatCentsToDollars(invoice.total),
+		total: formatMinorToMajorCurrency(invoice.total, workspace.currency),
 		paymentUrl,
 		supportEmail: workspace.cartSupportEmail ?? 'support@barely.ai',
 		notes: invoice.notes ?? undefined,
@@ -104,6 +102,7 @@ export async function sendInvoiceEmail({
 	// Track the email in InvoiceEmails table
 	if (result.resendId) {
 		await dbHttp.insert(InvoiceEmails).values({
+			id: newId('invoiceEmail'),
 			invoiceId: invoice.id,
 			resendId: result.resendId,
 			emailType: 'initial',
@@ -143,42 +142,40 @@ export async function sendInvoiceReminderEmail({
 	const paymentUrl = getAbsoluteUrl('invoice', `/pay/${workspace.handle}/${invoice.id}`);
 
 	// Parse and validate line items
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 	const parsedLineItems: InvoiceLineItem[] = z
 		.array(invoiceLineItemSchema)
 		.parse(invoice.lineItems);
 
 	const lineItems = parsedLineItems.map(item => ({
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
 		description: item.description,
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
 		quantity: item.quantity,
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-		rate: formatCentsToDollars(item.rate),
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-		amount: formatCentsToDollars(item.amount),
+		rate: formatMinorToMajorCurrency(item.rate, workspace.currency),
+		amount: formatMinorToMajorCurrency(item.amount, workspace.currency),
 	}));
 
 	const taxPercentage = invoice.tax > 0 ? invoice.tax : undefined;
 	const taxAmount =
 		invoice.tax && invoice.subtotal ?
-			formatCentsToDollars(Math.round((invoice.subtotal * invoice.tax) / 10000))
+			formatMinorToMajorCurrency(
+				Math.round((invoice.subtotal * invoice.tax) / 10000),
+				workspace.currency,
+			)
 		:	undefined;
 
 	const emailTemplate = InvoiceEmailTemplate({
 		invoiceNumber: invoice.invoiceNumber,
 		workspaceName: workspace.name,
-		workspaceLogo: workspace.imageUrl ?? undefined,
+		// workspaceLogo is optional - would need to fetch from _avatarImages relation
 		dueDate: invoice.dueDate,
 		clientName: client.name,
 		clientEmail: client.email,
 		clientCompany: client.company ?? undefined,
 		clientAddress: client.address ?? undefined,
 		lineItems,
-		subtotal: formatCentsToDollars(invoice.subtotal),
+		subtotal: formatMinorToMajorCurrency(invoice.subtotal, workspace.currency),
 		taxPercentage,
 		taxAmount,
-		total: formatCentsToDollars(invoice.total),
+		total: formatMinorToMajorCurrency(invoice.total, workspace.currency),
 		paymentUrl,
 		supportEmail: workspace.cartSupportEmail ?? 'support@barely.ai',
 		notes: `REMINDER: This invoice is now overdue. ${invoice.notes ?? ''}`,
@@ -215,9 +212,10 @@ export async function sendInvoiceReminderEmail({
 		}
 
 		await dbHttp.insert(InvoiceEmails).values({
+			id: newId('invoiceEmail'),
 			invoiceId: invoice.id,
 			resendId: result.resendId,
-			emailType: invoice.status === 'overdue' ? 'overdue' : 'reminder',
+			emailType: invoice.dueDate < new Date() ? 'overdue' : 'reminder',
 			sendIndex: actualSendIndex,
 			status: 'sent',
 			sentAt: new Date(),
@@ -259,11 +257,11 @@ export async function sendInvoicePaymentReceivedEmail({
 	const emailTemplate = PaymentReceivedEmailTemplate({
 		invoiceNumber: invoice.invoiceNumber,
 		workspaceName: workspace.name,
-		workspaceLogo: workspace.imageUrl ?? undefined,
+		// workspaceLogo is optional - would need to fetch from _avatarImages relation
 		clientName: client.name,
 		clientEmail: client.email,
 		clientCompany: client.company ?? undefined,
-		amountPaid: formatCentsToDollars(invoice.total),
+		amountPaid: formatMinorToMajorCurrency(invoice.total, workspace.currency),
 		paymentDate: invoice.paidAt ?? new Date(),
 		paymentMethod: paymentDetails?.paymentMethod,
 		transactionId: paymentDetails?.transactionId,
@@ -296,6 +294,7 @@ export async function sendInvoicePaymentReceivedEmail({
 		});
 
 		await dbHttp.insert(InvoiceEmails).values({
+			id: newId('invoiceEmail'),
 			invoiceId: invoice.id,
 			resendId: result.resendId,
 			emailType: 'payment_confirmation',

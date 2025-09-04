@@ -415,7 +415,6 @@ InvoiceEmailTemplate.PreviewProps = {
 	taxAmount: '$288.75',
 	total: '$3,588.75',
 	paymentUrl: 'https://invoice.barely.ai/pay/test-workspace/test-invoice',
-	trackingPixelUrl: 'https://app.barely.ai/api/invoice/track/test-invoice',
 	supportEmail: 'support@barely.ai',
 	notes: 'Payment is due within 7 days. Thank you for your business!',
 } satisfies InvoiceEmailProps;

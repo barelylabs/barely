@@ -58,23 +58,20 @@ export const overdueInvoicesTrigger = schedules.task({
 			for (const invoice of overdueInvoices) {
 				try {
 					// Update status to overdue
-					await db
-						.update(Invoices)
-						.set({
-							status: 'overdue',
-							updatedAt: new Date(),
-						})
-						.where(eq(Invoices.id, invoice.id));
+					// await db
+					// 	.update(Invoices)
+					// 	.set({
+					// 		status: 'overdue',
+					// 		updatedAt: new Date(),
+					// 	})
+					// 	.where(eq(Invoices.id, invoice.id));
 
 					// Send reminder email with retry mechanism (non-blocking)
 					// Use queueEmailRetry for background processing so we don't block the trigger
 					queueEmailRetry(
 						() =>
 							sendInvoiceReminderEmail({
-								invoice: {
-									...invoice,
-									status: 'overdue',
-								},
+								invoice,
 							}),
 						`Overdue reminder for invoice ${invoice.invoiceNumber}`,
 						{

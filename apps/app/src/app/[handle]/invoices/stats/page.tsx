@@ -1,4 +1,4 @@
-import { formatCentsToDollars } from '@barely/utils';
+import { formatMinorToMajorCurrency } from '@barely/utils';
 import { format } from 'date-fns';
 
 import { Card } from '@barely/ui/card';
@@ -6,7 +6,7 @@ import { Icon } from '@barely/ui/icon';
 import { Text } from '@barely/ui/typography';
 
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
-import { HydrateClient, trpc } from '~/trpc/server';
+import { HydrateClient, trpcCaller } from '~/trpc/server';
 
 export default async function InvoiceStatsPage({
 	params,
@@ -15,8 +15,12 @@ export default async function InvoiceStatsPage({
 }) {
 	const awaitedParams = await params;
 
-	// Fetch stats data
-	const stats = await trpc.invoice.stats({ handle: awaitedParams.handle });
+	// Fetch stats data and workspace
+	const [stats, workspace] = await Promise.all([
+		trpcCaller.invoice.stats({ handle: awaitedParams.handle }),
+		trpcCaller.workspace.byHandleWithAll({ handle: awaitedParams.handle }),
+	]);
+	const currency = workspace?.currency ?? 'usd';
 
 	return (
 		<HydrateClient>
@@ -32,12 +36,12 @@ export default async function InvoiceStatsPage({
 						<div className='p-6 pb-2'>
 							<div className='flex flex-row items-center justify-between'>
 								<h3 className='text-sm font-medium'>Total Revenue</h3>
-								<Icon.dollarSign className='h-4 w-4 text-muted-foreground' />
+								<Icon.dollar className='h-4 w-4 text-muted-foreground' />
 							</div>
 						</div>
 						<div className='px-6 pb-6'>
 							<div className='text-2xl font-bold'>
-								{formatCentsToDollars(stats.totalRevenue)}
+								{formatMinorToMajorCurrency(stats.totalRevenue, currency)}
 							</div>
 							<p className='text-xs text-muted-foreground'>
 								From {stats.paidCount} paid invoices
@@ -54,10 +58,10 @@ export default async function InvoiceStatsPage({
 						</div>
 						<div className='px-6 pb-6'>
 							<div className='text-2xl font-bold'>
-								{formatCentsToDollars(stats.outstanding)}
+								{formatMinorToMajorCurrency(stats.outstandingAmount, currency)}
 							</div>
 							<p className='text-xs text-muted-foreground'>
-								{stats.outstandingCount} unpaid invoices
+								{stats.totalCount - stats.paidCount} unpaid invoices
 							</p>
 						</div>
 					</Card>
@@ -66,12 +70,12 @@ export default async function InvoiceStatsPage({
 						<div className='p-6 pb-2'>
 							<div className='flex flex-row items-center justify-between'>
 								<h3 className='text-sm font-medium'>Overdue</h3>
-								<Icon.alertCircle className='h-4 w-4 text-red-500' />
+								<Icon.alert className='h-4 w-4 text-destructive' />
 							</div>
 						</div>
 						<div className='px-6 pb-6'>
 							<div className='text-2xl font-bold text-red-600'>
-								{formatCentsToDollars(stats.overdue)}
+								{formatMinorToMajorCurrency(stats.overdueAmount, currency)}
 							</div>
 							<p className='text-xs text-muted-foreground'>
 								{stats.overdueCount} overdue invoices
@@ -88,7 +92,7 @@ export default async function InvoiceStatsPage({
 						</div>
 						<div className='px-6 pb-6'>
 							<div className='text-2xl font-bold'>
-								{formatCentsToDollars(stats.thisMonthRevenue)}
+								{formatMinorToMajorCurrency(stats.thisMonthRevenue, currency)}
 							</div>
 							<p className='text-xs text-muted-foreground'>
 								{format(new Date(), 'MMMM yyyy')}
@@ -155,7 +159,7 @@ export default async function InvoiceStatsPage({
 						</div>
 						<div className='px-6 pb-6'>
 							<div className='text-3xl font-bold'>
-								{formatCentsToDollars(stats.averageInvoiceValue)}
+								{formatMinorToMajorCurrency(stats.averageInvoiceValue, currency)}
 							</div>
 							<Text variant='sm/normal' muted>
 								Based on {stats.totalCount} total invoices

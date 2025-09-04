@@ -9,6 +9,7 @@
 		"./forms/*": "./src/forms/*.tsx",
 		"./charts/area-chart": "./src/charts/area-chart.tsx",
 		"./charts/bar-list": "./src/charts/bar-list.tsx",
+		"./invoice": "./src/invoice/index.ts",
 		"./components/product-price": "./src/components/cart/product-price.tsx",
 		"./components/feature-card": "./src/components/feature-card.tsx",
 		"./components/feature-checklist": "./src/components/feature-checklist.tsx",

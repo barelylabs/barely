@@ -1,4 +1,4 @@
-import type { InvoiceEmails } from '@barely/db/sql';
+import { InvoiceEmails } from '@barely/db/sql';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod/v4';
 

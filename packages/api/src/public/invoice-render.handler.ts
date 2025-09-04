@@ -3,6 +3,6 @@ import { publicRenderHandler } from './public-render.handler';
 
 export const invoiceRenderHandler = publicRenderHandler({
 	app: 'invoice',
-	path: 'invoice-render',
+	path: 'invoiceRender',
 	router: invoiceRenderRouter,
 });

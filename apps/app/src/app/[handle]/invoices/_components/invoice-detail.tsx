@@ -1,9 +1,11 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
+import type { BadgeProps } from '@barely/ui/badge';
 import { useRouter } from 'next/navigation';
-import { formatCentsToDollars, getAbsoluteUrl } from '@barely/utils';
-import { useMutation } from '@tanstack/react-query';
+import { useCopy, useWorkspace } from '@barely/hooks';
+import { formatMinorToMajorCurrency, getAbsoluteUrl } from '@barely/utils';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -26,20 +28,24 @@ interface InvoiceDetailProps {
 export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 	const router = useRouter();
 	const trpc = useTRPC();
-	const utils = trpc.useUtils();
+	const queryClient = useQueryClient();
+	const { copyToClipboard } = useCopy();
+	const { currency } = useWorkspace();
 
-	const getStatusColor = (status: string) => {
+	const getStatusColor = (
+		status: Invoice['status'] | 'overdue',
+	): BadgeProps['variant'] => {
 		switch (status) {
-			case 'draft':
+			case 'created':
 				return 'secondary';
 			case 'sent':
-				return 'blue';
+				return 'info';
 			case 'viewed':
-				return 'yellow';
+				return 'warning';
 			case 'paid':
-				return 'green';
+				return 'success';
 			case 'overdue':
-				return 'red';
+				return 'danger';
 			case 'voided':
 				return 'outline';
 			default:
@@ -48,29 +54,37 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 	};
 
 	// Mutations
-	const { mutate: sendInvoice, isPending: isSending } = useMutation({
-		...trpc.invoice.send.mutationOptions(),
-		onSuccess: () => {
-			toast.success('Invoice sent successfully');
-			utils.invoice.byId.invalidate({ id: invoice.id });
-			router.refresh();
-		},
-		onError: error => {
-			toast.error(error.message || 'Failed to send invoice');
-		},
-	});
+	const { mutate: sendInvoice, isPending: isSending } = useMutation(
+		trpc.invoice.send.mutationOptions({
+			onSuccess: () => {
+				toast.success('Invoice sent successfully');
+			},
+			onError: error => {
+				toast.error(error.message || 'Failed to send invoice');
+			},
+			onSettled: async () => {
+				await queryClient.invalidateQueries({
+					queryKey: trpc.invoice.byId.queryKey(),
+				});
+			},
+		}),
+	);
 
-	const { mutate: markPaid, isPending: isMarkingPaid } = useMutation({
-		...trpc.invoice.markPaid.mutationOptions(),
-		onSuccess: () => {
-			toast.success('Invoice marked as paid');
-			utils.invoice.byId.invalidate({ id: invoice.id });
-			router.refresh();
-		},
-		onError: error => {
-			toast.error(error.message || 'Failed to mark invoice as paid');
-		},
-	});
+	const { mutate: markPaid, isPending: isMarkingPaid } = useMutation(
+		trpc.invoice.markPaid.mutationOptions({
+			onSuccess: () => {
+				toast.success('Invoice marked as paid');
+			},
+			onError: error => {
+				toast.error(error.message || 'Failed to mark invoice as paid');
+			},
+			onSettled: async () => {
+				await queryClient.invalidateQueries({
+					queryKey: trpc.invoice.byId.queryKey(),
+				});
+			},
+		}),
+	);
 
 	const { mutate: duplicateInvoice, isPending: isDuplicating } = useMutation({
 		...trpc.invoice.duplicate.mutationOptions(),
@@ -101,8 +115,9 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 	};
 
 	const copyPaymentLink = () => {
-		navigator.clipboard.writeText(getPaymentUrl());
-		toast.success('Payment link copied to clipboard');
+		copyToClipboard(getPaymentUrl(), {
+			successMessage: 'Payment link copied to clipboard',
+		});
 	};
 
 	return (
@@ -115,43 +130,61 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 					</Badge>
 
 					<div className='flex flex-wrap gap-2'>
-						{invoice.status === 'draft' && (
-							<>
-								<Button
-									size='sm'
-									onClick={() => sendInvoice({ handle, id: invoice.id })}
-									disabled={isSending}
-								>
-									<Icon.send className='mr-2 h-4 w-4' />
-									Send Invoice
-								</Button>
-								<Button
-									size='sm'
-									look='outline'
-									onClick={() => router.push(`/${handle}/invoices/${invoice.id}/edit`)}
-								>
-									<Icon.edit className='mr-2 h-4 w-4' />
-									Edit
-								</Button>
-							</>
-						)}
+						<Button
+							size='sm'
+							look='outline'
+							onClick={async () => {
+								const response = await fetch('/api/invoice/pdf', {
+									method: 'POST',
+									headers: { 'Content-Type': 'application/json' },
+									body: JSON.stringify({ handle, invoiceId: invoice.id }),
+								});
+								const data = (await response.json()) as {
+									pdf?: string;
+									filename?: string;
+									error?: string;
+								};
+								if (data.pdf) {
+									const blob = new Blob([Buffer.from(data.pdf, 'base64')], {
+										type: 'application/pdf',
+									});
+									const url = window.URL.createObjectURL(blob);
+									const link = document.createElement('a');
+									link.href = url;
+									link.download = data.filename ?? `invoice-${invoice.invoiceNumber}.pdf`;
+									document.body.appendChild(link);
+									link.click();
+									document.body.removeChild(link);
+									window.URL.revokeObjectURL(url);
+								}
+							}}
+							startIcon='download'
+						>
+							Download PDF
+						</Button>
+
+						<Button
+							size='sm'
+							onClick={() => sendInvoice({ handle, id: invoice.id })}
+							disabled={isSending}
+							startIcon='send'
+						>
+							Send Invoice
+						</Button>
 
 						{(invoice.status === 'sent' || invoice.status === 'viewed') && (
 							<Button
 								size='sm'
 								look='outline'
-								onClick={() =>
-									markPaid({ handle, id: invoice.id, paidAt: new Date().toISOString() })
-								}
+								onClick={() => markPaid({ handle, id: invoice.id, paidAt: new Date() })}
 								disabled={isMarkingPaid}
+								startIcon='check'
 							>
-								<Icon.check className='mr-2 h-4 w-4' />
 								Mark as Paid
 							</Button>
 						)}
 
-						<Button size='sm' look='outline' onClick={copyPaymentLink}>
-							<Icon.link className='mr-2 h-4 w-4' />
+						<Button size='sm' look='outline' onClick={copyPaymentLink} startIcon='link'>
 							Copy Payment Link
 						</Button>
 
@@ -165,11 +198,11 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 							Duplicate
 						</Button>
 
-						{invoice.status === 'draft' && (
+						{invoice.status !== 'paid' && invoice.status !== 'voided' && (
 							<Button
 								size='sm'
 								look='destructive'
-								onClick={() => deleteInvoice({ ids: [invoice.id] })}
+								onClick={() => deleteInvoice({ handle, ids: [invoice.id] })}
 								disabled={isDeleting}
 							>
 								<Icon.trash className='mr-2 h-4 w-4' />
@@ -180,6 +213,7 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 				</div>
 			</Card>
 
+			<pre>{JSON.stringify(invoice, null, 2)}</pre>
 			{/* Invoice Content */}
 			<div className='grid gap-6 lg:grid-cols-3'>
 				{/* Main Invoice Details */}
@@ -195,13 +229,13 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 									<Text variant='sm/normal' muted>
 										Invoice Number
 									</Text>
-									<Text variant='base/medium'>{invoice.invoiceNumber}</Text>
+									<Text variant='md/medium'>{invoice.invoiceNumber}</Text>
 								</div>
 								<div>
 									<Text variant='sm/normal' muted>
 										Issue Date
 									</Text>
-									<Text variant='base/medium'>
+									<Text variant='md/medium'>
 										{format(new Date(invoice.createdAt), 'MMM dd, yyyy')}
 									</Text>
 								</div>
@@ -209,10 +243,8 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 									<Text variant='sm/normal' muted>
 										Due Date
 									</Text>
-									<Text variant='base/medium'>
-										{invoice.dueDate ?
-											format(new Date(invoice.dueDate), 'MMM dd, yyyy')
-										:	'No due date'}
+									<Text variant='md/medium'>
+										format(new Date(invoice.dueDate), 'MMM dd, yyyy')
 									</Text>
 								</div>
 								{invoice.paidAt && (
@@ -220,7 +252,7 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 										<Text variant='sm/normal' muted>
 											Paid Date
 										</Text>
-										<Text variant='base/medium'>
+										<Text variant='md/medium'>
 											{format(new Date(invoice.paidAt), 'MMM dd, yyyy')}
 										</Text>
 									</div>
@@ -235,27 +267,22 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 							<h3 className='text-lg font-semibold'>Client Information</h3>
 						</div>
 						<div className='px-6 pb-6'>
-							{invoice.client ?
-								<div className='space-y-2'>
-									<Text variant='base/medium'>{invoice.client.name}</Text>
-									{invoice.client.company && (
-										<Text variant='sm/normal' muted>
-											{invoice.client.company}
-										</Text>
-									)}
+							<div className='space-y-2'>
+								<Text variant='md/medium'>{invoice.client.name}</Text>
+								{invoice.client.company && (
 									<Text variant='sm/normal' muted>
-										{invoice.client.email}
+										{invoice.client.company}
 									</Text>
-									{invoice.client.address && (
-										<Text variant='sm/normal' muted className='whitespace-pre-line'>
-											{invoice.client.address}
-										</Text>
-									)}
-								</div>
-							:	<Text variant='sm/normal' muted>
-									No client information
+								)}
+								<Text variant='sm/normal' muted>
+									{invoice.client.email}
 								</Text>
-							}
+								{invoice.client.address && (
+									<Text variant='sm/normal' muted className='whitespace-pre-line'>
+										{invoice.client.address}
+									</Text>
+								)}
+							</div>
 						</div>
 					</Card>
 
@@ -266,18 +293,19 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 						</div>
 						<div className='px-6 pb-6'>
 							<div className='space-y-4'>
-								{invoice.lineItems?.map((item, index) => (
+								{invoice.lineItems.map((item, index) => (
 									<div key={index}>
 										{index > 0 && <Separator className='my-4' />}
 										<div className='flex justify-between'>
 											<div className='flex-1'>
-												<Text variant='base/medium'>{item.description}</Text>
+												<Text variant='md/medium'>{item.description}</Text>
 												<Text variant='sm/normal' muted>
-													{item.quantity} × {formatCentsToDollars(item.unitPrice)}
+													{item.quantity} ×{' '}
+													{formatMinorToMajorCurrency(item.rate, currency)}
 												</Text>
 											</div>
-											<Text variant='base/medium'>
-												{formatCentsToDollars(item.amount)}
+											<Text variant='md/medium'>
+												{formatMinorToMajorCurrency(item.amount, currency)}
 											</Text>
 										</div>
 									</div>
@@ -300,7 +328,7 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 										Subtotal
 									</Text>
 									<Text variant='sm/normal'>
-										{formatCentsToDollars(invoice.subtotal)}
+										{formatMinorToMajorCurrency(invoice.subtotal, currency)}
 									</Text>
 								</div>
 								{invoice.tax > 0 && (
@@ -309,27 +337,28 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 											Tax ({(invoice.tax / 100).toFixed(2)}%)
 										</Text>
 										<Text variant='sm/normal'>
-											{formatCentsToDollars(
+											{formatMinorToMajorCurrency(
 												Math.round((invoice.subtotal * invoice.tax) / 10000),
+												currency,
 											)}
 										</Text>
 									</div>
 								)}
 								<Separator />
 								<div className='flex justify-between'>
-									<Text variant='base/semibold'>Total</Text>
-									<Text variant='base/semibold'>
-										{formatCentsToDollars(invoice.total)}
+									<Text variant='md/semibold'>Total</Text>
+									<Text variant='md/semibold'>
+										{formatMinorToMajorCurrency(invoice.total, currency)}
 									</Text>
 								</div>
 
-								{invoice.status === 'paid' && invoice.paidAmount && (
+								{invoice.status === 'paid' && (
 									<>
 										<Separator />
 										<div className='flex justify-between text-green-600'>
 											<Text variant='sm/normal'>Paid</Text>
 											<Text variant='sm/normal'>
-												{formatCentsToDollars(invoice.paidAmount)}
+												{formatMinorToMajorCurrency(invoice.total, currency)}
 											</Text>
 										</div>
 									</>

@@ -89,7 +89,7 @@ export async function handleInvoiceEmailEvent(event: InvoiceEmailEvent) {
 				emailUpdateData.deliveredAt = now;
 
 				// Update invoice status if this is the initial email
-				if (invoice.status === 'draft' && invoiceEmail.sendIndex === 0) {
+				if (invoice.status === 'created' && invoiceEmail.sendIndex === 0) {
 					await dbHttp
 						.update(Invoices)
 						.set({

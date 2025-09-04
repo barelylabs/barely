@@ -2,7 +2,8 @@
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import { useParams } from 'next/navigation';
-import { formatCentsToDollars } from '@barely/utils';
+import { useWorkspaceCurrency } from '@barely/hooks';
+import { formatMinorToMajorCurrency } from '@barely/utils';
 import { format } from 'date-fns';
 
 import { Badge } from '@barely/ui/badge';
@@ -16,8 +17,15 @@ import { useInvoice } from '~/app/[handle]/invoices/_components/invoice-context'
 export function AllInvoices() {
 	const params = useParams();
 	const handle = params.handle as string;
-	const { items, selection, lastSelectedItemId, setSelection, gridListRef, isFetching } =
-		useInvoice();
+	const {
+		items,
+		selection,
+		lastSelectedItemId,
+		setSelection,
+		gridListRef,
+		setShowUpdateModal,
+		isFetching,
+	} = useInvoice();
 
 	return (
 		<>
@@ -28,10 +36,9 @@ export function AllInvoices() {
 				data-grid-list='invoices'
 				selectionMode='multiple'
 				selectionBehavior='replace'
-				onAction={() => {
+				onAction={async () => {
 					if (!lastSelectedItemId) return;
-					// Navigate to invoice detail page
-					window.location.href = `/${handle}/invoices/${lastSelectedItemId}`;
+					await setShowUpdateModal(true);
 				}}
 				items={items}
 				selectedKeys={selection}
@@ -63,6 +70,9 @@ function InvoiceCard({
 	invoice: AppRouterOutputs['invoice']['byWorkspace']['invoices'][0];
 	handle: string;
 }) {
+	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } = useInvoice();
+	const currency = useWorkspaceCurrency();
+
 	const getStatusColor = (status: string) => {
 		switch (status) {
 			case 'draft':
@@ -84,15 +94,16 @@ function InvoiceCard({
 
 	const href = `/${handle}/invoices/${invoice.id}`;
 
-	const subtitleText = `${invoice.client?.name ?? 'No client'} • ${
-		invoice.dueDate ? format(new Date(invoice.dueDate), 'MMM dd') : 'No due date'
-	}`;
+	const subtitleText = `${invoice.client.name} • ${format(new Date(invoice.dueDate), 'MMM dd')}`;
 
 	return (
 		<GridListCard
 			id={invoice.id}
 			key={invoice.id}
 			textValue={invoice.invoiceNumber}
+			setShowUpdateModal={setShowUpdateModal}
+			setShowArchiveModal={setShowArchiveModal}
+			setShowDeleteModal={setShowDeleteModal}
 			title={invoice.invoiceNumber}
 			subtitle={subtitleText}
 			quickActions={{
@@ -102,7 +113,7 @@ function InvoiceCard({
 				{
 					icon: 'value',
 					name: 'Amount',
-					value: formatCentsToDollars(invoice.total),
+					value: formatMinorToMajorCurrency(invoice.total, currency),
 				},
 			]}
 			statsHref={href}

@@ -140,6 +140,11 @@ export const Workspaces = pgTable(
 		linkUsageLimit: integer('linkUsageLimit').default(1000).notNull(),
 		linkUsageLimitOverride: integer('linkUsageLimitOverride'),
 
+		/* invoice usage */
+		invoiceUsage: integer('invoiceUsage').default(0).notNull(),
+		invoiceUsageLimit: integer('invoiceUsageLimit').default(3).notNull(),
+		invoiceUsageLimitOverride: integer('invoiceUsageLimitOverride'),
+
 		/* file storage */
 		fileUsage_total: integer('fileUsage_total').default(0).notNull(),
 		fileUsage_billingCycle: integer('fileUsage_billingCycle').default(0).notNull(),
@@ -149,6 +154,12 @@ export const Workspaces = pgTable(
 		fileUsageLimit_billingCycle: integer('fileUsageLimit_billingCycle')
 			.default(200000000) // 200MB
 			.notNull(),
+
+		/* general support email */
+		supportEmail: varchar('supportEmail', { length: 255 }), // this can be set once and used as a fallback for all other support emails
+
+		/* invoice */
+		invoiceSupportEmail: varchar('invoiceSupportEmail', { length: 255 }),
 
 		/* cart */
 		cartSupportEmail: varchar('cartSupportEmail', { length: 255 }),

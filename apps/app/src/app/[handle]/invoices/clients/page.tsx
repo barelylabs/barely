@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { invoiceClientSearchParamsSchema } from '@barely/validators';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllClients } from '~/app/[handle]/invoices/_components/all-clients';
 import { ClientFilters } from '~/app/[handle]/invoices/_components/client-filters';
@@ -40,14 +41,15 @@ export default async function ClientsPage({
 				subtitle='Manage your invoice clients'
 				button={<CreateClientButton />}
 			/>
+			<DashContent>
+				<ClientFilters />
+				<Suspense fallback={<div>Loading...</div>}>
+					<AllClients />
 
-			<ClientFilters />
-			<Suspense fallback={<div>Loading...</div>}>
-				<AllClients />
-
-				<CreateOrUpdateClientModal mode='create' />
-				<CreateOrUpdateClientModal mode='update' />
-			</Suspense>
+					<CreateOrUpdateClientModal mode='create' />
+					<CreateOrUpdateClientModal mode='update' />
+				</Suspense>
+			</DashContent>
 		</HydrateClient>
 	);
 }

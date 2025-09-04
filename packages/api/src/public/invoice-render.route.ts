@@ -34,10 +34,13 @@ export const invoiceRenderRoute = createTRPCRouter({
 						columns: {
 							handle: true,
 							name: true,
+							currency: true,
 							stripeConnectAccountId: true,
 							stripeConnectAccountId_devMode: true,
 							stripeConnectChargesEnabled: true,
 							stripeConnectChargesEnabled_devMode: true,
+							supportEmail: true,
+							invoiceSupportEmail: true,
 						},
 					},
 					client: {
@@ -58,11 +61,6 @@ export const invoiceRenderRoute = createTRPCRouter({
 			// Verify the handle matches the workspace
 			if (invoice.workspace.handle !== input.handle) {
 				throw new Error('Invalid handle for invoice');
-			}
-
-			// Only return invoices that have been sent (not drafts)
-			if (invoice.status === 'draft') {
-				throw new Error('Invoice not available for payment');
 			}
 
 			return invoice;
@@ -105,6 +103,7 @@ export const invoiceRenderRoute = createTRPCRouter({
 						columns: {
 							id: true,
 							handle: true,
+							currency: true,
 							stripeConnectAccountId: true,
 							stripeConnectAccountId_devMode: true,
 							stripeConnectChargesEnabled: true,
@@ -121,11 +120,6 @@ export const invoiceRenderRoute = createTRPCRouter({
 			// Verify the handle matches the workspace
 			if (invoice.workspace.handle !== input.handle) {
 				throw new Error('Invalid handle for invoice');
-			}
-
-			// Only allow payment for sent/viewed invoices (not draft or already paid)
-			if (invoice.status === 'draft') {
-				throw new Error('Invoice not available for payment');
 			}
 
 			if (invoice.status === 'paid') {
@@ -185,6 +179,7 @@ export const invoiceRenderRoute = createTRPCRouter({
 						columns: {
 							id: true,
 							handle: true,
+							currency: true,
 							stripeConnectAccountId: true,
 							stripeConnectAccountId_devMode: true,
 							stripeConnectChargesEnabled: true,
@@ -210,10 +205,6 @@ export const invoiceRenderRoute = createTRPCRouter({
 			}
 
 			// Only allow payment for sent/viewed invoices (not draft or already paid)
-			if (invoice.status === 'draft') {
-				throw new Error('Invoice not available for payment');
-			}
-
 			if (invoice.status === 'paid') {
 				throw new Error('Invoice has already been paid');
 			}
@@ -236,5 +227,72 @@ export const invoiceRenderRoute = createTRPCRouter({
 			});
 
 			return session;
+		}),
+
+	downloadInvoicePdf: publicProcedure
+		.input(
+			z.object({
+				handle: z.string(),
+				invoiceId: z.string(),
+			}),
+		)
+		.mutation(async ({ input }) => {
+			const { dbHttp } = await import('@barely/db/client');
+			const { Invoices } = await import('@barely/db/sql/invoice.sql');
+			const { eq, and, isNull } = await import('drizzle-orm');
+			const { generateInvoicePDFBase64 } = await import(
+				'@barely/lib/functions/invoice-pdf.fns'
+			);
+
+			// Get invoice with workspace and client data
+			const invoice = await dbHttp.query.Invoices.findFirst({
+				where: and(eq(Invoices.id, input.invoiceId), isNull(Invoices.deletedAt)),
+				with: {
+					workspace: {
+						columns: {
+							name: true,
+							handle: true,
+							shippingAddressLine1: true,
+							shippingAddressLine2: true,
+							shippingAddressCity: true,
+							shippingAddressState: true,
+							shippingAddressPostalCode: true,
+							shippingAddressCountry: true,
+							currency: true,
+							supportEmail: true,
+							invoiceSupportEmail: true,
+						},
+					},
+					client: {
+						columns: {
+							name: true,
+							email: true,
+							company: true,
+							address: true,
+						},
+					},
+				},
+			});
+
+			if (!invoice) {
+				throw new Error('Invoice not found');
+			}
+
+			// Verify the handle matches the workspace
+			if (invoice.workspace.handle !== input.handle) {
+				throw new Error('Invalid handle for invoice');
+			}
+
+			// Generate PDF
+			const pdfBase64 = await generateInvoicePDFBase64({
+				invoice,
+				workspace: invoice.workspace,
+				client: invoice.client,
+			});
+
+			return {
+				pdf: pdfBase64,
+				filename: `invoice-${invoice.invoiceNumber}.pdf`,
+			};
 		}),
 });

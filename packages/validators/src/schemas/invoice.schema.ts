@@ -1,5 +1,5 @@
 import type { InferSelectModel } from 'drizzle-orm';
-import { INVOICE_STATUS, Invoices } from '@barely/db/sql';
+import { INVOICE_STATUSES, Invoices } from '@barely/db/sql';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod/v4';
 
@@ -51,7 +51,7 @@ export type Invoice = InferSelectModel<typeof Invoices>;
 // Filter and search schemas
 export const invoiceFilterParamsSchema = z.object({
 	search: z.string().optional(),
-	status: z.enum(INVOICE_STATUS).optional(),
+	status: z.enum(INVOICE_STATUSES).optional(),
 	clientId: z.string().optional(),
 	showArchived: z.boolean().optional(),
 });

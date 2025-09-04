@@ -43,8 +43,8 @@
 		--card-foreground: 98.38% 0.003 247.86;
 		--popover: 13.71% 0.036 258.53;
 		--popover-foreground: 98.38% 0.003 247.86;
-		--primary: 0.4698 0.2453 287.87; /* #5f21d8 */
-		--primary-foreground: 20.79% 0.04 265.73;
+		--primary: 0.62 0.22 287.87; /* Lighter, brighter purple */
+		--primary-foreground: 1 0 0;
 		--secondary: 0.5437 0.2544 305.07; /* #8b5cf6 */
 		--secondary-foreground: 98.38% 0.003 247.86;
 		--subtle: 20.79% 0.04 265.73; /* slate-900 */
@@ -59,7 +59,7 @@
 		--input: 28% 0.037 259.97;
 		--ring: 98.38% 0.003 247.86;
 
-		--brand: 0.4698 0.2453 287.87;
+		--brand: 0.62 0.22 287.87;
 		--brand-foreground: 98.38% 0.003 247.86; /* white in OKLCH */
 
 		--success: 0.7312 0.1777 150.33; /* #39c669 */

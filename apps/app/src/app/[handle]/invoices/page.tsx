@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { invoiceSearchParamsSchema } from '@barely/validators';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllInvoices } from '~/app/[handle]/invoices/_components/all-invoices';
 import { ArchiveOrDeleteInvoiceModal } from '~/app/[handle]/invoices/_components/archive-or-delete-invoice-modal';
@@ -41,16 +42,17 @@ export default async function InvoicesPage({
 				button={<CreateInvoiceButton />}
 				settingsHref={`/${awaitedParams.handle}/invoices/clients`}
 			/>
+			<DashContent>
+				<InvoiceFilters />
+				<Suspense fallback={<div>Loading...</div>}>
+					<AllInvoices />
 
-			<InvoiceFilters />
-			<Suspense fallback={<div>Loading...</div>}>
-				<AllInvoices />
+					<ArchiveOrDeleteInvoiceModal mode='archive' />
+					<ArchiveOrDeleteInvoiceModal mode='delete' />
 
-				<ArchiveOrDeleteInvoiceModal mode='archive' />
-				<ArchiveOrDeleteInvoiceModal mode='delete' />
-
-				<InvoiceHotkeys />
-			</Suspense>
+					<InvoiceHotkeys />
+				</Suspense>
+			</DashContent>
 		</HydrateClient>
 	);
 }

@@ -18,6 +18,7 @@ export type AppFeature =
 	| 'files'
 	| 'fm'
 	| 'forms'
+	| 'invoices'
 	| 'link'
 	| 'links'
 	| 'mailchimp'
@@ -47,6 +48,7 @@ export const APP_VARIANT_CONFIGS: Record<string, AppVariantConfig> = {
 			'files',
 			'fm',
 			'forms',
+			'invoices',
 			'link',
 			'links',
 			'mailchimp',
@@ -67,6 +69,12 @@ export const APP_VARIANT_CONFIGS: Record<string, AppVariantConfig> = {
 		displayName: 'barely.fm',
 		baseUrl: 'app.barely.fm',
 		features: ['fm', 'media', 'settings', 'workspace'],
+	},
+	appInvoice: {
+		name: 'appInvoice',
+		displayName: 'barely.invoice',
+		baseUrl: 'app.barely.invoice',
+		features: ['invoices', 'settings', 'workspace'],
 	},
 };
 
@@ -139,6 +147,13 @@ export function isAppVariant(variant: AppVariant): boolean {
  */
 export function isFmVariant(): boolean {
 	return isAppVariant('appFm');
+}
+
+/**
+ * Check if we're running the invoice-focused variant
+ */
+export function isInvoiceVariant(): boolean {
+	return isAppVariant('appInvoice');
 }
 
 /**

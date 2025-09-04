@@ -36,12 +36,14 @@ export { useNavHistory, useUpdateNavHistory } from './use-nav-history';
 // Auth & Workspace hooks
 export { useUser, UserContext } from './use-user';
 export * from './use-workspace';
+export { useWorkspaceCurrency } from './use-workspace-currency';
 export { useWorkspaces } from './use-workspaces';
 export { useWorkspaceAssets } from './use-workspace-assets';
 export { useWorkspaceHotkeys, gKeyPressedAtom } from './use-workspace-hotkeys';
 export { useWorkspaceUpdateForm } from './use-workspace-update-form';
 export { useUpdateWorkspace } from './use-update-workspace';
 export { useUsage } from './use-usage';
+export { useInvoiceFeatures } from './use-invoice-features';
 
 // Real-time hooks
 export { usePusher, usePusherSocketId } from './use-pusher';

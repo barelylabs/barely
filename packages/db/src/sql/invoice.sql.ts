@@ -14,12 +14,12 @@ import { dbId, primaryId, timestamps } from '../utils';
 import { InvoiceClients } from './invoice-client.sql';
 import { Workspaces } from './workspace.sql';
 
-export const INVOICE_STATUS = [
-	'draft',
+export const INVOICE_STATUSES = [
+	'created',
 	'sent',
 	'viewed',
 	'paid',
-	'overdue',
+	// 'overdue',
 	'voided',
 ] as const;
 
@@ -60,15 +60,17 @@ export const Invoices = pgTable(
 		tax: integer('tax').default(0).notNull(), // Stored as percentage * 100 (e.g., 750 = 7.5%)
 		subtotal: integer('subtotal').notNull(), // Stored in cents
 		total: integer('total').notNull(), // Stored in cents
+		poNumber: text('poNumber'), // Optional purchase order number
+		payerMemo: text('payerMemo'), // Optional notes to display on invoice
 		notes: text('notes'), // Optional notes to display on invoice
 
 		// Dates and status
 		dueDate: timestamp('dueDate').notNull(),
 		status: varchar('status', {
 			length: 255,
-			enum: INVOICE_STATUS,
+			enum: INVOICE_STATUSES,
 		})
-			.default('draft')
+			.default('created')
 			.notNull(),
 
 		// Payment tracking

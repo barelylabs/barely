@@ -27,7 +27,6 @@ export function TrackFilters() {
 			groupBy={groupByAlbum}
 			toggleGroupBy={toggleGroupByAlbum}
 			groupByLabel='Group by Album'
-			// groupByOptions={[{ label: 'Album', value: 'album' }]}
 			clearAllFilters={clearAllFilters}
 			sortBy={filters.sortBy}
 			setSortBy={setSortBy}

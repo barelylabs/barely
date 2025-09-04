@@ -6,6 +6,7 @@ export const WORKSPACE_PLAN_TYPES = [
 	'bedroom.plus',
 	'rising.plus',
 	'breakout.plus',
+	'invoice.pro',
 	// deprecated
 	'agency',
 	'pro',
@@ -52,8 +53,22 @@ export interface Plan {
 
 		tasksPerDay: number;
 		tasksPerMonth: number;
+
+		invoicesPerMonth: number;
+		invoiceClients: number;
 	};
 	cartFeePercentage: number;
+
+	// Invoice-specific features
+	invoiceTransactionFeePercentage: number;
+	invoiceRecurringBilling: boolean;
+	invoiceAutomatedReminders: boolean;
+	invoicePremiumTemplates: boolean;
+	invoicePaymentTrackingDays: number;
+
+	// General branding
+	customBranding: boolean; // Remove "Powered by Barely" across all products
+
 	analyticsRetentionDays: number;
 	supportLevel: 'basic' | 'priority';
 	highlights: { description: string; disabled?: boolean; tooltip?: string }[];
@@ -86,9 +101,21 @@ const FREE_PLAN: Plan = {
 		trackedEventsPerMonth: 5000,
 		tasksPerDay: 100,
 		tasksPerMonth: 100,
+		invoicesPerMonth: 3,
+		invoiceClients: 10,
 	},
-
 	cartFeePercentage: 15,
+
+	// Invoice features for free plan
+	invoiceTransactionFeePercentage: 0, // No fee on free plan (limited invoices)
+	invoiceRecurringBilling: false,
+	invoiceAutomatedReminders: false,
+	invoicePremiumTemplates: false,
+	invoicePaymentTrackingDays: 7,
+
+	// General branding
+	customBranding: false,
+
 	analyticsRetentionDays: 30,
 	supportLevel: 'basic',
 	price: {
@@ -151,8 +178,22 @@ const BEDROOM_PLAN: Plan = {
 
 		tasksPerDay: 2500,
 		tasksPerMonth: 2500,
+
+		invoicesPerMonth: 50,
+		invoiceClients: 100,
 	},
 	cartFeePercentage: 12,
+
+	// Invoice features for bedroom plan
+	invoiceTransactionFeePercentage: 0.5,
+	invoiceRecurringBilling: false,
+	invoiceAutomatedReminders: false,
+	invoicePremiumTemplates: false,
+	invoicePaymentTrackingDays: 14,
+
+	// General branding
+	customBranding: false,
+
 	analyticsRetentionDays: 365,
 	supportLevel: 'basic',
 	price: {
@@ -214,8 +255,22 @@ const RISING_PLAN: Plan = {
 
 		tasksPerDay: 5000,
 		tasksPerMonth: 5000,
+
+		invoicesPerMonth: 200,
+		invoiceClients: 500,
 	},
 	cartFeePercentage: 10,
+
+	// Invoice features for rising plan
+	invoiceTransactionFeePercentage: 0.5,
+	invoiceRecurringBilling: true,
+	invoiceAutomatedReminders: true,
+	invoicePremiumTemplates: false,
+	invoicePaymentTrackingDays: 30,
+
+	// General branding
+	customBranding: true,
+
 	analyticsRetentionDays: 365 * 3,
 	supportLevel: 'priority',
 
@@ -279,8 +334,22 @@ const BREAKOUT_PLAN: Plan = {
 
 		tasksPerDay: 10000,
 		tasksPerMonth: 10000,
+
+		invoicesPerMonth: Number.MAX_SAFE_INTEGER,
+		invoiceClients: Number.MAX_SAFE_INTEGER,
 	},
 	cartFeePercentage: 6,
+
+	// Invoice features for breakout plan
+	invoiceTransactionFeePercentage: 0.5,
+	invoiceRecurringBilling: true,
+	invoiceAutomatedReminders: true,
+	invoicePremiumTemplates: true,
+	invoicePaymentTrackingDays: 90,
+
+	// General branding
+	customBranding: true,
+
 	analyticsRetentionDays: Number.MAX_SAFE_INTEGER,
 	supportLevel: 'priority',
 
@@ -345,8 +414,22 @@ const BEDROOM_PLUS_PLAN: Plan = {
 
 		tasksPerDay: 2500,
 		tasksPerMonth: 2500,
+
+		invoicesPerMonth: 50,
+		invoiceClients: 100,
 	},
 	cartFeePercentage: 10,
+
+	// Invoice features for bedroom+ plan
+	invoiceTransactionFeePercentage: 0.5,
+	invoiceRecurringBilling: false,
+	invoiceAutomatedReminders: false,
+	invoicePremiumTemplates: false,
+	invoicePaymentTrackingDays: 14,
+
+	// General branding
+	customBranding: false,
+
 	analyticsRetentionDays: 365,
 	supportLevel: 'priority',
 
@@ -401,8 +484,22 @@ const RISING_PLUS_PLAN: Plan = {
 
 		tasksPerDay: 5000,
 		tasksPerMonth: 5000,
+
+		invoicesPerMonth: 200,
+		invoiceClients: 500,
 	},
 	cartFeePercentage: 8,
+
+	// Invoice features for rising+ plan
+	invoiceTransactionFeePercentage: 0.5,
+	invoiceRecurringBilling: true,
+	invoiceAutomatedReminders: true,
+	invoicePremiumTemplates: false,
+	invoicePaymentTrackingDays: 30,
+
+	// General branding
+	customBranding: true,
+
 	analyticsRetentionDays: 365 * 3,
 	supportLevel: 'priority',
 
@@ -458,8 +555,22 @@ const BREAKOUT_PLUS_PLAN: Plan = {
 
 		tasksPerDay: 10000,
 		tasksPerMonth: 10000,
+
+		invoicesPerMonth: Number.MAX_SAFE_INTEGER,
+		invoiceClients: Number.MAX_SAFE_INTEGER,
 	},
 	cartFeePercentage: 6,
+
+	// Invoice features for breakout+ plan
+	invoiceTransactionFeePercentage: 0.5,
+	invoiceRecurringBilling: true,
+	invoiceAutomatedReminders: true,
+	invoicePremiumTemplates: true,
+	invoicePaymentTrackingDays: 90,
+
+	// General branding
+	customBranding: true,
+
 	analyticsRetentionDays: Number.MAX_SAFE_INTEGER,
 	supportLevel: 'priority',
 
@@ -491,6 +602,77 @@ const BREAKOUT_PLUS_PLAN: Plan = {
 	features: [],
 };
 
+const INVOICE_PRO_PLAN: Plan = {
+	id: 'invoice.pro',
+	name: 'Invoice Pro',
+	description: 'Professional invoicing with recurring billing and automation',
+	productId: {
+		test: 'prod_invoice_pro_test',
+		production: 'fixme',
+	},
+	usageLimits: {
+		fans: 100, // minimal for invoice-only plan
+		members: 5,
+		retargetingPixels: 0,
+
+		newLinksPerMonth: 10, // minimal for invoice-only plan
+		linkClicksPerMonth: 1000, // minimal for invoice-only plan
+
+		emailsPerDay: 10000, // keep email for invoice notifications
+		emailsPerMonth: 10000,
+
+		trackedEventsPerMonth: 10000, // minimal tracking
+
+		tasksPerDay: 100, // minimal tasks
+		tasksPerMonth: 100,
+
+		invoicesPerMonth: Number.MAX_SAFE_INTEGER,
+		invoiceClients: Number.MAX_SAFE_INTEGER,
+	},
+	cartFeePercentage: 15, // not applicable for invoice-only
+
+	// Invoice features for invoice.pro plan
+	invoiceTransactionFeePercentage: 0.5,
+	invoiceRecurringBilling: true,
+	invoiceAutomatedReminders: true,
+	invoicePremiumTemplates: true,
+	invoicePaymentTrackingDays: 30,
+
+	// General branding
+	customBranding: true,
+
+	analyticsRetentionDays: 365,
+	supportLevel: 'priority',
+	price: {
+		monthly: {
+			amount: 9,
+			priceIds: {
+				test: 'price_invoice_pro_monthly_test',
+				production: 'fixme',
+			},
+		},
+		yearly: {
+			amount: 90, // $7.50/month when billed yearly
+			priceIds: {
+				test: 'price_invoice_pro_yearly_test',
+				production: 'fixme',
+			},
+		},
+	},
+	highlights: [
+		{ description: 'Unlimited invoices' },
+		{ description: 'Unlimited clients' },
+		{ description: 'Recurring billing' },
+		{ description: 'Custom branding' },
+		{ description: 'Premium templates' },
+		{ description: 'Automated payment reminders' },
+		{ description: '30-day payment tracking' },
+		{ description: '0.5% transaction fee' },
+		{ description: 'Priority support' },
+	],
+	features: [],
+};
+
 export const WORKSPACE_PLANS = new Map<PlanType, Plan>([
 	['free', FREE_PLAN],
 	['bedroom', BEDROOM_PLAN],
@@ -499,6 +681,7 @@ export const WORKSPACE_PLANS = new Map<PlanType, Plan>([
 	['bedroom.plus', BEDROOM_PLUS_PLAN],
 	['rising.plus', RISING_PLUS_PLAN],
 	['breakout.plus', BREAKOUT_PLUS_PLAN],
+	['invoice.pro', INVOICE_PRO_PLAN],
 	// deprecated
 	[
 		'agency',

@@ -408,24 +408,35 @@ export async function handleStripeConnectAccountUpdated(account: Stripe.Account)
 	}
 }
 
-export async function handleStripeConnectAccountDeauthorized(account: Stripe.Account) {
-	console.log('🔌 Processing Connect account deauthorization:', account.id);
+export async function handleStripeConnectAccountDeauthorized(
+	application: Stripe.Application,
+) {
+	console.log('🔌 Processing Connect account deauthorization:', application.id);
+
+	// The application object doesn't contain the account ID directly
+	// We need to extract it from the application name which follows the pattern: Account acct_xxx
+	const accountId = application.name?.match(/Account (acct_[A-Za-z0-9]+)/)?.[1];
+
+	if (!accountId) {
+		console.log('Could not extract account ID from application:', application.name);
+		return;
+	}
 
 	// Find workspace by Stripe account ID
 	const workspace = await dbHttp.query.Workspaces.findFirst({
 		where: or(
-			eq(Workspaces.stripeConnectAccountId, account.id),
-			eq(Workspaces.stripeConnectAccountId_devMode, account.id),
+			eq(Workspaces.stripeConnectAccountId, accountId),
+			eq(Workspaces.stripeConnectAccountId_devMode, accountId),
 		),
 	});
 
 	if (!workspace) {
-		console.log('No workspace found for Stripe account:', account.id);
+		console.log('No workspace found for Stripe account:', accountId);
 		return;
 	}
 
 	// Determine which fields to clear based on environment
-	const isDevMode = workspace.stripeConnectAccountId_devMode === account.id;
+	const isDevMode = workspace.stripeConnectAccountId_devMode === accountId;
 	const updateData: Partial<typeof Workspaces.$inferInsert> = {};
 
 	if (isDevMode) {
@@ -445,9 +456,7 @@ export async function handleStripeConnectAccountDeauthorized(account: Stripe.Acc
 	console.log('TODO: Send disconnection notification to workspace:', workspace.handle);
 }
 
-export async function handleStripePaymentIntentSuccess(
-	paymentIntent: Stripe.PaymentIntent,
-) {
+export function handleStripePaymentIntentSuccess(paymentIntent: Stripe.PaymentIntent) {
 	console.log('💳 Processing payment intent:', paymentIntent.id);
 
 	// Parse metadata to route to appropriate handler
@@ -468,13 +477,14 @@ export async function handleStripePaymentIntentSuccess(
 export async function handleStripePayoutFailed(payout: Stripe.Payout) {
 	console.log('❌ Processing failed payout:', payout.id);
 
-	// Find workspace by Stripe account ID (payout includes the account)
-	const accountId =
-		typeof payout.account === 'string' ? payout.account : payout.account?.id;
-	if (!accountId) {
-		console.error('No account ID in payout:', payout.id);
+	// Find workspace by Stripe account ID (payout includes the destination)
+	// In Stripe Connect, payouts are associated with the connected account via the destination
+	const destination = payout.destination;
+	if (!destination || typeof destination !== 'string') {
+		console.error('No destination account ID in payout:', payout.id);
 		return;
 	}
+	const accountId: string = destination;
 
 	const workspace = await dbHttp.query.Workspaces.findFirst({
 		where: or(

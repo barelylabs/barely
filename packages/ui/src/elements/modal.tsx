@@ -228,8 +228,8 @@ function ModalHeader(props: ModalHeaderProps) {
 			{/* <div className='flex flex-row items-center justify-center gap-3'></div> */}
 			<div
 				className={cn(
-					'flex',
-					props.justify === 'left' ? 'flex-row items-center gap-3' : 'flex-col',
+					'flex items-center',
+					props.justify === 'left' ? 'flex-row gap-3' : 'flex-col gap-2',
 				)}
 			>
 				{props.iconOverride ?? (IconComponent && <IconComponent className='h-8 w-8' />)}

@@ -20,6 +20,7 @@ export async function createInvoicePaymentSession({
 	workspace: Pick<
 		Workspace,
 		| 'handle'
+		| 'currency'
 		| 'stripeConnectAccountId'
 		| 'stripeConnectAccountId_devMode'
 		| 'stripeConnectChargesEnabled'
@@ -73,7 +74,7 @@ export async function createInvoicePaymentSession({
 			line_items: [
 				{
 					price_data: {
-						currency: 'usd',
+						currency: workspace.currency,
 						product_data: {
 							name: `Invoice ${invoice.invoiceNumber}`,
 							description:
@@ -118,6 +119,7 @@ export async function createInvoicePaymentIntent({
 	invoice: Invoice;
 	workspace: Pick<
 		Workspace,
+		| 'currency'
 		| 'stripeConnectAccountId'
 		| 'stripeConnectAccountId_devMode'
 		| 'stripeConnectChargesEnabled'
@@ -155,7 +157,7 @@ export async function createInvoicePaymentIntent({
 	const paymentIntent = await stripe.paymentIntents.create(
 		{
 			amount: invoice.total, // amount in cents
-			currency: 'usd',
+			currency: workspace.currency,
 			application_fee_amount: platformFeeAmount,
 			metadata,
 			on_behalf_of: stripeConnectAccountId,

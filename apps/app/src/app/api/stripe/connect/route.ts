@@ -83,13 +83,13 @@ export async function POST(req: NextRequest) {
 		}
 
 		case 'account.application.deauthorized': {
-			const account = event.data.object;
-			console.log('🔔 Stripe Connect account deauthorized:', account.id);
+			const application = event.data.object;
+			console.log('🔔 Stripe Connect application deauthorized:', application.id);
 
 			const { handleStripeConnectAccountDeauthorized } = await import(
 				'@barely/lib/functions/stripe-connect.fns'
 			);
-			await handleStripeConnectAccountDeauthorized(account);
+			await handleStripeConnectAccountDeauthorized(application);
 			break;
 		}
 
@@ -98,11 +98,11 @@ export async function POST(req: NextRequest) {
 			console.log('🔔 Payment intent succeeded:', paymentIntent.id);
 
 			// Check if this payment intent has metadata indicating it's from our platform
-			if (paymentIntent.metadata && 'paymentType' in paymentIntent.metadata) {
+			if ('paymentType' in paymentIntent.metadata) {
 				const { handleStripePaymentIntentSuccess } = await import(
 					'@barely/lib/functions/stripe-connect.fns'
 				);
-				await handleStripePaymentIntentSuccess(paymentIntent);
+				handleStripePaymentIntentSuccess(paymentIntent);
 			}
 			break;
 		}

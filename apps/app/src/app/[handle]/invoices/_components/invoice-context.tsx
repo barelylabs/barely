@@ -6,7 +6,7 @@ import {
 	createResourceDataHook,
 	createResourceSearchParamsHook,
 } from '@barely/hooks';
-import { parseAsStringEnum } from 'nuqs';
+import { parseAsString, parseAsStringEnum } from 'nuqs';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
@@ -19,25 +19,21 @@ interface InvoicePageData {
 // Create the search params hook for invoices
 export const useInvoiceSearchParams = createResourceSearchParamsHook({
 	additionalParsers: {
-		status: parseAsStringEnum([
-			'draft',
-			'sent',
-			'viewed',
-			'paid',
-			'overdue',
-			'voided',
-		]).withDefault('all'),
-		clientId: parseAsStringEnum([]).withDefault('all'),
+		status: parseAsStringEnum(['draft', 'sent', 'viewed', 'paid', 'overdue', 'voided']),
+		clientId: parseAsString,
 	},
 	additionalActions: {
-		setStatus: action((setParams, status: string) => setParams({ status })),
-		setClientId: action((setParams, clientId: string) => setParams({ clientId })),
+		setStatus: action((setParams, status: string | undefined) => setParams({ status })),
+		setClientId: action((setParams, clientId: string | undefined) =>
+			setParams({ clientId }),
+		),
 	},
 });
 
 // Create a custom data hook for invoices that properly uses tRPC
 export function useInvoice() {
 	const trpc = useTRPC();
+	const searchParams = useInvoiceSearchParams();
 	const baseHook = createResourceDataHook<
 		AppRouterOutputs['invoice']['byWorkspace']['invoices'][0],
 		InvoicePageData
@@ -51,10 +47,16 @@ export function useInvoice() {
 				),
 			getItemsFromPages: pages => pages.flatMap(page => page.invoices),
 		},
-		useInvoiceSearchParams,
+		() => searchParams,
 	);
 
-	return baseHook();
+	const dataHookResult = baseHook();
+
+	// Merge search params and data hook results
+	return {
+		...dataHookResult,
+		...searchParams,
+	};
 }
 
 // Export the old context hook name for backward compatibility
