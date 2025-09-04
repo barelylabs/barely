@@ -205,6 +205,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -225,6 +226,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 10
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -245,6 +247,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 20
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -265,6 +268,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 30
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -285,6 +289,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 40
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -305,6 +310,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 50
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -325,6 +331,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 60
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -345,6 +352,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 70
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -365,6 +373,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 80
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -385,6 +394,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 90
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -405,6 +415,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 100
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -426,6 +437,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 110
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
