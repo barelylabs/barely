@@ -44,5 +44,8 @@
 				]
 			}
 		]
+	},
+	"env": {
+		"USE_BUILTIN_RIPGREP": 0
 	}
 }

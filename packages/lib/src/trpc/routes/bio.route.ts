@@ -10,15 +10,22 @@ import {
 	BioButtons,
 	BioLinks,
 	Bios,
+	CartFunnels,
 	Files,
+	Links,
 } from '@barely/db/sql';
 import { sqlAnd, sqlStringContains } from '@barely/db/utils';
 import { newId, raiseTRPCError } from '@barely/utils';
 import {
-	createBioBlockSchema,
 	createBioButtonSchema,
 	createBioLinkSchema,
 	createBioSchema,
+	createCartBlockDataSchema,
+	createContactFormBlockDataSchema,
+	createImageBlockDataSchema,
+	createLinksBlockDataSchema,
+	createMarkdownBlockDataSchema,
+	createTwoPanelBlockDataSchema,
 	reorderBioBlocksSchema,
 	reorderBioLinksSchema,
 	selectInfiniteBiosSchema,
@@ -30,7 +37,7 @@ import {
 import { tasks } from '@trigger.dev/sdk/v3';
 import { TRPCError } from '@trpc/server';
 import { waitUntil } from '@vercel/functions';
-import { and, asc, desc, eq, gt, isNull, lt, or } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, inArray, isNull, lt, or } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
 import type { generateFileBlurHash } from '../../trigger/file-blurhash.trigger';
@@ -40,6 +47,7 @@ import {
 } from '../../functions/bio.fns';
 import { generateLexoRank } from '../../functions/lexo-rank.fns';
 import { detectLinkType, formatLinkUrl } from '../../functions/link-type.fns';
+import { sanitizeBlockMarkdown } from '../../utils/sanitize-markdown';
 import { workspaceProcedure } from '../trpc';
 
 export const bioRoute = {
@@ -50,14 +58,15 @@ export const bioRoute = {
 			}),
 		)
 		.query(async ({ ctx, input }) => {
+			const { key } = input;
 			// Find existing bio or create one if it doesn't exist
 			let bio = await getBioByHandleAndKey({
 				handle: ctx.workspace.handle,
-				key: input.key,
+				key,
 			});
 
 			// If no bio exists, create one with defaults and a default links block
-			if (!bio) {
+			if (!bio && key === 'home') {
 				const bioId = newId('bio');
 				const blockId = newId('bioBlock');
 
@@ -67,7 +76,7 @@ export const bioRoute = {
 						id: bioId,
 						workspaceId: ctx.workspace.id,
 						handle: ctx.workspace.handle,
-						key: input.key,
+						key,
 						socialDisplay: false,
 						barelyBranding: true,
 						emailCaptureEnabled: false,
@@ -107,6 +116,13 @@ export const bioRoute = {
 						message: 'Failed to retrieve bio after creation',
 					});
 				}
+			}
+
+			if (!bio) {
+				throw new TRPCError({
+					code: 'INTERNAL_SERVER_ERROR',
+					message: 'Bio not found',
+				});
 			}
 
 			return bio;
@@ -550,12 +566,36 @@ export const bioRoute = {
 	// Bio Block operations
 	createBlock: workspaceProcedure
 		.input(
-			createBioBlockSchema.extend({
-				bioId: z.string(),
-			}),
+			z.discriminatedUnion('type', [
+				createLinksBlockDataSchema,
+				createContactFormBlockDataSchema,
+				createMarkdownBlockDataSchema,
+				createImageBlockDataSchema,
+				createTwoPanelBlockDataSchema,
+				createCartBlockDataSchema,
+			]),
 		)
 		.mutation(async ({ input, ctx }) => {
 			const { bioId, ...blockData } = input;
+
+			// Sanitize markdown content for blocks that contain it
+			let sanitizedBlockData = blockData;
+			if (blockData.type === 'markdown') {
+				sanitizedBlockData = await sanitizeBlockMarkdown(blockData, ['markdown']);
+			} else if (blockData.type === 'twoPanel') {
+				sanitizedBlockData = await sanitizeBlockMarkdown(blockData, ['markdown']);
+			}
+
+			// Map the CTA fields to the generic database columns
+			// const blockData = {
+			// 	...restBlockData,
+			// 	// For twoPanel blocks, map CTA targets to generic columns
+			// 	...(input.type === 'twoPanel' && {
+			// 		bioRefId, // Maps CTA bio target to bioId column
+			// 		cartFunnelId, // Maps CTA cart target to cartFunnelId column
+			// 		// linkId and fmId are already named correctly
+			// 	}),
+			// };
 
 			// Verify bio belongs to workspace
 			const bio = await dbHttp.query.Bios.findFirst({
@@ -563,6 +603,54 @@ export const bioRoute = {
 			});
 
 			if (!bio) raiseTRPCError({ message: 'Bio not found' });
+
+			// Validate foreign key references based on block type
+			if (sanitizedBlockData.type === 'image' || sanitizedBlockData.type === 'twoPanel') {
+				if (sanitizedBlockData.imageFileId) {
+					const file = await dbHttp.query.Files.findFirst({
+						where: and(
+							eq(Files.id, sanitizedBlockData.imageFileId),
+							eq(Files.workspaceId, ctx.workspace.id),
+						),
+					});
+					if (!file) raiseTRPCError({ message: 'Image file not found' });
+				}
+			}
+
+			// Validate CTA target references for twoPanel blocks
+			if (sanitizedBlockData.type === 'twoPanel') {
+				if (sanitizedBlockData.targetLinkId) {
+					const link = await dbHttp.query.Links.findFirst({
+						where: and(
+							eq(Links.id, sanitizedBlockData.targetLinkId),
+							eq(Links.workspaceId, ctx.workspace.id),
+						),
+					});
+					if (!link) raiseTRPCError({ message: 'CTA link not found' });
+				}
+
+				if (sanitizedBlockData.targetBioId) {
+					const targetBio = await dbHttp.query.Bios.findFirst({
+						where: and(
+							eq(Bios.id, sanitizedBlockData.targetBioId),
+							eq(Bios.workspaceId, ctx.workspace.id),
+						),
+					});
+					if (!targetBio) raiseTRPCError({ message: 'Target bio not found' });
+				}
+
+				// Note: fmId validation would go here once FM table is available
+			}
+
+			if (sanitizedBlockData.type === 'cart' && sanitizedBlockData.targetCartFunnelId) {
+				const cartFunnel = await dbHttp.query.CartFunnels.findFirst({
+					where: and(
+						eq(CartFunnels.id, sanitizedBlockData.targetCartFunnelId),
+						eq(CartFunnels.workspaceId, ctx.workspace.id),
+					),
+				});
+				if (!cartFunnel) raiseTRPCError({ message: 'Cart funnel not found' });
+			}
 
 			// Get the last block's lexoRank to generate next rank
 			const lastBlock = await dbHttp.query._BioBlocks_To_Bios.findFirst({
@@ -581,7 +669,7 @@ export const bioRoute = {
 			const [block] = await dbPool(ctx.pool)
 				.insert(BioBlocks)
 				.values({
-					...blockData,
+					...sanitizedBlockData,
 					id: blockId,
 					workspaceId: ctx.workspace.id,
 				})
@@ -611,9 +699,66 @@ export const bioRoute = {
 		.mutation(async ({ input, ctx }) => {
 			const { id, ...data } = input;
 
+			// Get the existing block to check its type
+			const existingBlock = await dbHttp.query.BioBlocks.findFirst({
+				where: and(eq(BioBlocks.id, id), eq(BioBlocks.workspaceId, ctx.workspace.id)),
+			});
+
+			if (!existingBlock) raiseTRPCError({ message: 'Block not found' });
+
+			// Sanitize markdown content if being updated
+			let sanitizedData = data;
+			if (data.markdown && typeof data.markdown === 'string' && existingBlock) {
+				// For both markdown and twoPanel blocks that might contain markdown
+				if (existingBlock.type === 'markdown' || existingBlock.type === 'twoPanel') {
+					sanitizedData = await sanitizeBlockMarkdown(data, ['markdown']);
+				}
+			}
+
+			// Validate foreign key references if they're being updated
+			if (sanitizedData.imageFileId) {
+				const file = await dbHttp.query.Files.findFirst({
+					where: and(
+						eq(Files.id, sanitizedData.imageFileId),
+						eq(Files.workspaceId, ctx.workspace.id),
+					),
+				});
+				if (!file) raiseTRPCError({ message: 'Image file not found' });
+			}
+
+			if (sanitizedData.linkId) {
+				const link = await dbHttp.query.Links.findFirst({
+					where: and(
+						eq(Links.id, sanitizedData.linkId),
+						eq(Links.workspaceId, ctx.workspace.id),
+					),
+				});
+				if (!link) raiseTRPCError({ message: 'Link not found' });
+			}
+
+			if (sanitizedData.bioId) {
+				const targetBio = await dbHttp.query.Bios.findFirst({
+					where: and(
+						eq(Bios.id, sanitizedData.bioId),
+						eq(Bios.workspaceId, ctx.workspace.id),
+					),
+				});
+				if (!targetBio) raiseTRPCError({ message: 'Target bio not found' });
+			}
+
+			if (sanitizedData.targetCartFunnelId) {
+				const cartFunnel = await dbHttp.query.CartFunnels.findFirst({
+					where: and(
+						eq(CartFunnels.id, sanitizedData.targetCartFunnelId),
+						eq(CartFunnels.workspaceId, ctx.workspace.id),
+					),
+				});
+				if (!cartFunnel) raiseTRPCError({ message: 'Cart funnel not found' });
+			}
+
 			const [updatedBlock] = await dbPool(ctx.pool)
 				.update(BioBlocks)
-				.set(data)
+				.set(sanitizedData)
 				.where(and(eq(BioBlocks.id, id), eq(BioBlocks.workspaceId, ctx.workspace.id)))
 				.returning();
 
@@ -1002,5 +1147,205 @@ export const bioRoute = {
 				.where(eq(_Files_To_BioLinks__Images.bioLinkId, input.linkId));
 
 			return { success: true };
+		}),
+
+	// New route to update bio key
+	updateKey: workspaceProcedure
+		.input(
+			z.object({
+				id: z.string(),
+				key: z
+					.string()
+					.min(1)
+					.max(50)
+					.regex(/^[a-z0-9-]+$/, {
+						message: 'Key must be lowercase alphanumeric with hyphens only',
+					}),
+			}),
+		)
+		.mutation(async ({ input, ctx }) => {
+			const { id, key } = input;
+
+			// Check if bio exists
+			const existingBio = await dbHttp.query.Bios.findFirst({
+				where: and(eq(Bios.id, id), eq(Bios.workspaceId, ctx.workspace.id)),
+			});
+
+			if (!existingBio) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Bio not found',
+				});
+			}
+
+			// Prevent changing the home bio key
+			if (existingBio.key === 'home') {
+				throw new TRPCError({
+					code: 'BAD_REQUEST',
+					message: 'Cannot change the key of the home bio',
+				});
+			}
+
+			// Check if new key already exists for this workspace
+			const keyExists = await dbHttp.query.Bios.findFirst({
+				where: and(
+					eq(Bios.workspaceId, ctx.workspace.id),
+					eq(Bios.key, key),
+					isNull(Bios.deletedAt),
+				),
+			});
+
+			if (keyExists && keyExists.id !== id) {
+				throw new TRPCError({
+					code: 'CONFLICT',
+					message: 'A bio with this key already exists',
+				});
+			}
+
+			// Update the key
+			const [updatedBio] = await dbPool(ctx.pool)
+				.update(Bios)
+				.set({ key })
+				.where(and(eq(Bios.id, id), eq(Bios.workspaceId, ctx.workspace.id)))
+				.returning();
+
+			return updatedBio ?? raiseTRPCError({ message: 'Failed to update bio key' });
+		}),
+
+	// Create a new bio with a custom key
+	createBio: workspaceProcedure
+		.input(
+			z.object({
+				key: z
+					.string()
+					.min(1)
+					.max(50)
+					.regex(/^[a-z0-9-]+$/, {
+						message: 'Key must be lowercase alphanumeric with hyphens only',
+					}),
+			}),
+		)
+		.mutation(async ({ input, ctx }) => {
+			const { key } = input;
+
+			// Check if key already exists
+			const keyExists = await dbHttp.query.Bios.findFirst({
+				where: and(
+					eq(Bios.workspaceId, ctx.workspace.id),
+					eq(Bios.key, key),
+					isNull(Bios.deletedAt),
+				),
+			});
+
+			if (keyExists) {
+				throw new TRPCError({
+					code: 'CONFLICT',
+					message: 'A bio with this key already exists',
+				});
+			}
+
+			const bioId = newId('bio');
+			const blockId = newId('bioBlock');
+
+			// Create bio with transaction-like error handling
+			try {
+				await dbPool(ctx.pool).insert(Bios).values({
+					id: bioId,
+					workspaceId: ctx.workspace.id,
+					handle: ctx.workspace.handle,
+					key,
+					socialDisplay: false,
+					barelyBranding: true,
+					emailCaptureEnabled: false,
+				});
+
+				// Create default links block
+				await dbPool(ctx.pool).insert(BioBlocks).values({
+					id: blockId,
+					workspaceId: ctx.workspace.id,
+					type: 'links',
+					enabled: true,
+				});
+
+				// Connect block to bio
+				const firstLexoRank = generateLexoRank({ prev: null, next: null });
+				await dbPool(ctx.pool).insert(_BioBlocks_To_Bios).values({
+					bioId,
+					bioBlockId: blockId,
+					lexoRank: firstLexoRank,
+				});
+			} catch (error) {
+				throw new TRPCError({
+					code: 'INTERNAL_SERVER_ERROR',
+					message: 'Failed to create bio with default block',
+					cause: error,
+				});
+			}
+
+			const bio = await getBioByHandleAndKey({
+				handle: ctx.workspace.handle,
+				key,
+			});
+
+			if (!bio) {
+				throw new TRPCError({
+					code: 'INTERNAL_SERVER_ERROR',
+					message: 'Failed to retrieve bio after creation',
+				});
+			}
+
+			return bio;
+		}),
+
+	// Archive bio (soft delete)
+	archiveBio: workspaceProcedure
+		.input(z.object({ ids: z.array(z.string()) }))
+		.mutation(async ({ input, ctx }) => {
+			// Check if any of the bios are the home bio
+			const bios = await dbHttp.query.Bios.findMany({
+				where: and(eq(Bios.workspaceId, ctx.workspace.id), inArray(Bios.id, input.ids)),
+			});
+
+			const homeBio = bios.find(bio => bio.key === 'home');
+			if (homeBio) {
+				throw new TRPCError({
+					code: 'BAD_REQUEST',
+					message: 'Cannot archive the home bio',
+				});
+			}
+
+			const archivedBios = await dbPool(ctx.pool)
+				.update(Bios)
+				.set({ archivedAt: new Date() })
+				.where(and(eq(Bios.workspaceId, ctx.workspace.id), inArray(Bios.id, input.ids)))
+				.returning();
+
+			return archivedBios[0] ?? raiseTRPCError({ message: 'Failed to archive bio' });
+		}),
+
+	// Delete bio (hard delete)
+	deleteBio: workspaceProcedure
+		.input(z.object({ ids: z.array(z.string()) }))
+		.mutation(async ({ input, ctx }) => {
+			// Check if any of the bios are the home bio
+			const bios = await dbHttp.query.Bios.findMany({
+				where: and(eq(Bios.workspaceId, ctx.workspace.id), inArray(Bios.id, input.ids)),
+			});
+
+			const homeBio = bios.find(bio => bio.key === 'home');
+			if (homeBio) {
+				throw new TRPCError({
+					code: 'BAD_REQUEST',
+					message: 'Cannot delete the home bio',
+				});
+			}
+
+			const deletedBios = await dbPool(ctx.pool)
+				.update(Bios)
+				.set({ deletedAt: new Date() })
+				.where(and(eq(Bios.workspaceId, ctx.workspace.id), inArray(Bios.id, input.ids)))
+				.returning();
+
+			return deletedBios[0] ?? raiseTRPCError({ message: 'Failed to delete bio' });
 		}),
 } satisfies TRPCRouterRecord;

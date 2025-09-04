@@ -1,5 +1,5 @@
 import type { TRPCRouterRecord } from '@trpc/server';
-import { WEB_EVENT_TYPES__BIO } from '@barely/const';
+import { BIO_BLOCK_TYPES, WEB_EVENT_TYPES__BIO } from '@barely/const';
 import { dbHttp } from '@barely/db/client';
 import { dbPool, makePool } from '@barely/db/pool';
 import { _Fans_To_Workspaces, Fans } from '@barely/db/sql';
@@ -78,7 +78,7 @@ export const bioRenderRoute = {
 				type: z.enum(WEB_EVENT_TYPES__BIO),
 				linkId: z.string().optional(),
 				blockId: z.string().optional(),
-				blockType: z.enum(['links', 'contactForm', 'cart']).optional(),
+				blockType: z.enum(BIO_BLOCK_TYPES).optional(),
 				blockIndex: z.number().optional(),
 				linkIndex: z.number().optional(),
 				linkAnimation: z

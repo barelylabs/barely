@@ -34,6 +34,9 @@ export const cartFunnelRoute = {
 					showArchived ? undefined : isNull(CartFunnels.archivedAt),
 					showDeleted ? undefined : isNull(CartFunnels.deletedAt),
 				]),
+				with: {
+					mainProduct: true,
+				},
 				orderBy: [desc(CartFunnels.createdAt), asc(CartFunnels.id)],
 				limit: limit + 1,
 			});

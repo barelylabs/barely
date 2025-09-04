@@ -1,248 +1,187 @@
-# Jobs To Be Done (JTBD) - Cart Performance & BrandKit Optimization
+# Jobs to be Done: Bio Engine Block Extensions for Landing Pages
 
 ## Overview
 
-This document captures the core jobs that fans and artists are trying to accomplish when using barely.cart, focusing on the checkout experience and how performance impacts their ability to complete purchases successfully.
+This document identifies the core jobs that agency clients and independent artists are trying to accomplish when creating and managing landing pages for their music campaigns. The focus is on understanding *why* users need these capabilities, not just *what* features they want.
+
+## Primary Actor
+
+**Music Industry Professionals** - Agency clients managing multiple artist campaigns and independent artists (1K-100K monthly listeners) running their own marketing efforts.
+
+## Core Job Statement
 
----
+**When I** am launching a new music campaign (merch, album, tour)  
+**I want to** create a compelling sales page that tells my story and converts visitors  
+**So I can** generate revenue and build deeper fan connections without technical friction
 
-## Primary Jobs (High Priority)
+## Jobs Hierarchy
+
+### 🎯 Primary Jobs (High Priority)
 
-### JTBD 1: Complete Purchase Without Doubt
+#### Job 1: Tell My Story to Convert Visitors
+**When I** have limited time to capture a visitor's attention  
+**I want to** craft a narrative that flows from introduction to action  
+**So I can** guide visitors through an emotional journey that ends in a purchase decision
 
-**Job Statement**  
-As a fan ready to buy merchandise or content, I want to complete my checkout quickly and smoothly, so that I can secure my purchase before second-guessing my decision or getting distracted.
+**Current Friction:**
+- MDX editor requires technical knowledge to format narrative content
+- Can't preview how the story flows on mobile devices
+- Editing requires multiple unintuitive steps
 
-**Context**
-- When I've decided to buy and clicked the checkout link
-- Often happens impulsively after seeing content I love
-- Frequently on mobile devices with varying connection speeds
+#### Job 2: Launch Campaigns Without Dependency
+**When I** need to launch a time-sensitive campaign (limited merch drop, tour announcement)  
+**I want to** create and edit the landing page myself immediately  
+**So I can** capitalize on momentum without waiting for technical support
+
+**Current Friction:**
+- Must request help for every edit, causing delays
+- Can't make quick copy adjustments based on early feedback
+- Miss optimal launch windows waiting for support
+
+#### Job 3: Showcase Visual Content Alongside Copy
+**When I** have compelling band photos, album art, or product images  
+**I want to** integrate them seamlessly with my sales copy  
+**So I can** create an immersive brand experience that reinforces my message
 
-**Motivation (Why this matters)**
-- Purchase decisions are often emotional and time-sensitive
-- Every second of delay increases buyer's remorse or distraction
-- Slow loads feel like the site is broken or untrustworthy
+**Current Friction:**
+- Image placement requires markdown knowledge
+- Can't easily create side-by-side layouts
+- No control over mobile vs desktop presentation
+
+#### Job 4: Convert Interest into Direct Sales
+**When I** have successfully engaged a visitor with my content  
+**I want to** provide a frictionless path to purchase  
+**So I can** maximize conversion while enthusiasm is high
+
+**Current Friction:**
+- Multiple clicks required to reach checkout
+- Cart integration requires technical setup
+- Lose momentum with external redirects
+
+### 📋 Secondary Jobs (Medium Priority)
+
+#### Job 5: Maintain Brand Consistency
+**When I** create multiple landing pages for different campaigns  
+**I want to** ensure visual and tonal consistency  
+**So I can** build a recognizable brand across all touchpoints
 
-**Current Alternatives**
-- Waiting through the 9.3+ second load time (often abandoning)
-- Refreshing the page multiple times thinking it's stuck
-- Coming back later (but often forgetting or losing interest)
+**Current Friction:**
+- Each page requires manual recreation of elements
+- No shared components or patterns
+- Inconsistent rendering between pages
 
-**Desired Outcome / Success Criteria**
-- Cart loads in under 2.5 seconds
-- Immediate visual feedback that the page is loading
-- Smooth transition from decision to purchase confirmation
+#### Job 6: Test and Iterate Quickly
+**When I** see how visitors interact with my page  
+**I want to** make rapid adjustments to improve performance  
+**So I can** optimize conversions throughout the campaign
 
-**Priority Level**
-- High
+**Current Friction:**
+- Edits require technical intervention
+- Can't A/B test different approaches
+- Changes take too long to implement
+
+#### Job 7: Reuse Successful Patterns
+**When I** find a landing page structure that converts well  
+**I want to** replicate it for future campaigns  
+**So I can** build on proven success without starting from scratch
 
----
+**Current Friction:**
+- No template system
+- Must manually recreate each time
+- Risk introducing errors in recreation
 
-### JTBD 2: Trust the Purchase Process
+### 🔮 Future Jobs (Low Priority - Post MVP)
 
-**Job Statement**  
-As a fan making an online purchase, I want to see immediate response and professional presentation, so that I feel confident my payment information is safe and my order will be fulfilled.
+#### Job 8: Understand Visitor Behavior
+**When I** invest in creating landing pages  
+**I want to** see detailed analytics on how visitors interact with each section  
+**So I can** make data-driven improvements
 
-**Context**
-- First-time purchase from an artist's store
-- Entering payment information
-- Often comparing to experiences with major e-commerce sites
+#### Job 9: Personalize for Different Audiences
+**When I** target different fan segments (new vs loyal, local vs touring)  
+**I want to** customize content for each audience  
+**So I can** maximize relevance and conversion
 
-**Motivation**
-- Slow, unresponsive sites feel unprofessional or potentially fraudulent
-- 3.7 seconds of frozen UI creates anxiety about site security
-- Need confidence that the artist's store is legitimate
+#### Job 10: Integrate with Marketing Stack
+**When I** run multi-channel campaigns  
+**I want to** connect landing pages with email, social, and advertising tools  
+**So I can** create cohesive customer journeys
 
-**Current Alternatives**
-- Abandoning cart and looking for artist products on trusted platforms (Shopify, Bandcamp)
-- Messaging the artist directly to verify the store is real
-- Taking screenshots before purchase in case something goes wrong
+## Emotional & Social Dimensions
 
-**Desired Outcome**
-- Professional, responsive checkout matching mainstream e-commerce
-- Clear visual indicators of security and legitimacy
-- No frozen or unresponsive states during interaction
+### Emotional Jobs
 
-**Priority Level**
-- High
+- **Feel Professional**: "I want to feel confident that my landing pages look as good as major label artists"
+- **Feel Empowered**: "I want to feel in control of my marketing without being held back by technology"
+- **Feel Efficient**: "I want to feel like I'm maximizing my limited time and budget"
+- **Feel Current**: "I want to feel like I'm using modern tools that my competitors use"
 
----
+### Social Jobs
 
-### JTBD 3: Purchase on Limited Connection
+- **Look Competent**: "I want clients/fans to see me as professional and established"
+- **Be Responsive**: "I want to be seen as agile and responsive to market opportunities"
+- **Demonstrate Value**: "I want to show clients that I can deliver results without external dependencies"
 
-**Job Statement**  
-As a fan often on mobile data or weak WiFi, I want to complete purchases even with poor connectivity, so that I don't miss limited releases or tour merchandise.
+## Job Prioritization Matrix
 
-**Context**
-- At concerts/venues with poor cellular coverage
-- On public transit or traveling
-- International fans with slower internet infrastructure
+| Job | Frequency | Importance | Current Pain | Priority |
+|-----|-----------|------------|--------------|----------|
+| Tell story to convert | Every campaign | Critical | Very High | P0 |
+| Launch without dependency | Every campaign | Critical | Very High | P0 |
+| Showcase visual content | Every campaign | High | High | P0 |
+| Convert to direct sales | Every campaign | Critical | High | P0 |
+| Maintain consistency | Multiple times | Medium | Medium | P1 |
+| Test and iterate | Weekly | High | High | P1 |
+| Reuse patterns | Per campaign | Medium | Medium | P1 |
+| Understand behavior | Ongoing | Medium | Low | P2 |
+| Personalize audiences | Advanced use | Low | Low | P2 |
+| Integrate stack | Advanced use | Low | Low | P2 |
 
-**Motivation**
-- Limited edition items sell out quickly
-- Tour merchandise only available at specific times
-- Don't want to wait until better connection is available
+## Success Metrics by Job
 
-**Current Alternatives**
-- Asking friends with better connections to purchase
-- Missing out on limited releases
-- Using venue WiFi (often unreliable)
+### Job Success Indicators
 
-**Desired Outcome**
-- Progressive loading that shows content as available
-- Cached assets that reduce data requirements
-- Ability to complete purchase even on 3G/slow connections
+1. **Tell Story**: Time to create narrative content (target: <30 min)
+2. **Launch Independently**: Support tickets for edits (target: 0)
+3. **Showcase Visuals**: Image blocks per page (target: 3-5)
+4. **Direct Sales**: Clicks to checkout (target: 1)
+5. **Brand Consistency**: Time to replicate layout (target: <10 min)
+6. **Test & Iterate**: Time to make changes (target: <5 min)
+7. **Reuse Patterns**: Pages created from patterns (target: 50%+)
 
-**Priority Level**
-- High
+## Key Insights
 
----
+### What This Is Really About
 
-## Secondary Jobs (Medium Priority)
+Users aren't trying to "build landing pages" - they're trying to:
+- **Tell compelling stories** that connect with fans emotionally
+- **Maintain creative control** over their marketing narrative  
+- **React quickly** to market opportunities
+- **Remove friction** from the fan-to-customer journey
 
-### JTBD 4: Recognize Artist Brand
+### Critical Realization
 
-**Job Statement**  
-As a fan, I want to see the artist's branding immediately when I load the cart, so that I feel connected to the artist and confident I'm in the right place.
+The job isn't about having a page builder - it's about having **creative autonomy** and **marketing agility**. The current MDX editor fails not because it lacks features, but because it creates dependency where users need independence.
 
-**Context**
-- Clicking from social media or email links
-- Multiple tabs open while browsing different artists
-- Returning to complete an abandoned cart
+### Competitive Context
 
-**Motivation**
-- Want to feel connected to the artist during purchase
-- Need confirmation I'm buying from the right artist
-- Brand consistency reinforces authenticity
+When users hire Beacons.ai or Carrd for this job, they're not hiring them for advanced features - they're hiring them for:
+- **Immediate usability** without training
+- **Visual confidence** in the output
+- **Speed of iteration** during campaigns
+- **Independence** from technical support
 
-**Current Alternatives**
-- Waiting for full page load to see any branding
-- Checking the URL to confirm correct artist
-- Going back to the link source to verify
+## Job Stories Mapped to Solution
 
-**Desired Outcome**
-- Instant brand colors/identity while page loads
-- Clear artist identification even during loading states
-- Consistent branding with other artist touchpoints
+| Job | Current Approach | New Solution | Outcome |
+|-----|-----------------|--------------|---------|
+| Tell story | Fight with MDX formatting | Markdown block with familiar editor | Stories flow naturally |
+| Launch independently | Wait for support | Self-service block editor | Launch on your timeline |
+| Showcase visuals | Markdown image syntax | Visual image & 2-panel blocks | Professional layouts instantly |
+| Direct sales | External cart links | Native cart block | Seamless checkout flow |
 
-**Priority Level**
-- Medium
+## Conclusion
 
----
+The core job isn't "create landing pages" - it's **"maintain creative and operational control over campaign narratives while removing every point of friction between fan interest and fan action."**
 
-### JTBD 5: Return to Complete Purchase
-
-**Job Statement**  
-As a fan who got interrupted or needed to think about a purchase, I want to quickly return to my cart without re-loading everything, so that I can complete my purchase when ready.
-
-**Context**
-- Returning after checking bank balance
-- Coming back after discussing with friends/partner
-- Resuming after connection loss or interruption
-
-**Motivation**
-- Don't want to lose cart contents
-- Expect faster load on return visit
-- May have limited time window to complete
-
-**Current Alternatives**
-- Starting over from scratch
-- Keeping tab open and hoping it doesn't timeout
-- Taking photos of cart contents to remember
-
-**Desired Outcome**
-- Near-instant load when returning to cart
-- Cart contents preserved and quickly accessible
-- No need to re-enter any information
-
-**Priority Level**
-- Medium
-
----
-
-### JTBD 6: Share Purchase Experience
-
-**Job Statement**  
-As a fan excited about my purchase, I want the checkout to load fast enough that I can share it live with friends, so that we can buy together or I can show my support for the artist.
-
-**Context**
-- Group chats discussing new releases
-- Social media stories showing support
-- Coordinating group purchases for shipping savings
-
-**Motivation**
-- Want to share excitement in the moment
-- Group purchases need coordination
-- Social proof helps artist sales
-
-**Current Alternatives**
-- Sharing screenshots instead of live experience
-- Warning friends about slow load times
-- Purchasing separately and losing group shipping benefits
-
-**Desired Outcome**
-- Fast loads that don't interrupt social sharing flow
-- Smooth experience when multiple people access simultaneously
-- Professional appearance that reflects well on artist
-
-**Priority Level**
-- Medium
-
----
-
-## Low Priority Jobs
-
-### JTBD 7: Compare Purchase Options
-
-**Job Statement**  
-As a fan considering multiple items or variants, I want to quickly move between product options, so that I can make the best purchase decision.
-
-**Context**
-- Choosing between merch sizes or colors
-- Comparing bundle options
-- Budget-conscious decision making
-
-**Motivation**
-- Need to see options without long waits
-- Want to adjust cart without losing progress
-- Time-sensitive for limited releases
-
-**Current Alternatives**
-- Opening multiple tabs (each taking 9+ seconds)
-- Making quick decisions without proper comparison
-- Purchasing wrong variant due to time pressure
-
-**Desired Outcome**
-- Quick navigation between options
-- Cart updates without full page reloads
-- Ability to compare without performance penalty
-
-**Priority Level**
-- Low
-
----
-
-## Success Metrics Aligned to Jobs
-
-### Quantitative
-- **Load Time**: <2.5s LCP (from 9.3s) - directly impacts Jobs 1, 2, 3
-- **Interactivity**: <200ms TBT (from 3,700ms) - critical for Job 2
-- **Cart Abandonment**: Reduce by 30%+ - validates Job 1 completion
-- **Mobile Conversion**: Increase by 40%+ - proves Job 3 success
-
-### Qualitative
-- User feedback about trust and professionalism (Job 2)
-- Social sharing of purchase process (Job 6)
-- Artist feedback on fan satisfaction (Jobs 1, 4)
-- Support ticket reduction for "broken" checkout (Jobs 1, 2)
-
----
-
-## Notes on Implementation Priority
-
-While all jobs matter, the performance optimization directly addresses the three highest priority jobs:
-1. **Speed enables purchase completion** (Job 1)
-2. **Responsiveness builds trust** (Job 2)  
-3. **Optimization enables mobile/slow connection purchases** (Job 3)
-
-The BrandKit caching additionally serves Job 4 (brand recognition) as a valuable secondary benefit of the optimization work.
+The bio engine block extensions directly address this by transforming a technical task (editing MDX) into a creative task (crafting compelling content), enabling users to focus on what they do best - connecting with fans and driving sales.

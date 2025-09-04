@@ -13,7 +13,7 @@ import {
 	EmailImage,
 	EmailLink,
 } from '@barely/email/primitives';
-import { getAssetHref, getLinkHref } from '@barely/utils';
+import { getAssetHref, getTrackingEnrichedHref } from '@barely/utils';
 import { Heading, Html, Preview, Text } from '@react-email/components';
 import { MDXRemote } from 'next-mdx-remote-client/rsc';
 
@@ -99,7 +99,7 @@ export async function renderMarkdownToReactEmail({
 function mdxEmailLink({ tracking }: { tracking: EventTrackingProps }) {
 	const MdxEmailLink = (props: { href?: string; children?: any }) => {
 		const hrefWithQueryParams =
-			props.href ? getLinkHref({ href: props.href, tracking }) : '';
+			props.href ? getTrackingEnrichedHref({ href: props.href, tracking }) : '';
 		// return <a href={hrefWithQueryParams}>{props.children}</a>;
 		return <EmailLink href={hrefWithQueryParams}>{props.children}</EmailLink>;
 	};
@@ -149,7 +149,7 @@ function mdxEmailImageFile() {
 
 function mdxLinkButton({ tracking }: { tracking: EventTrackingProps }) {
 	const LinkButton = ({ href, label }: { href: string; label: string }) => {
-		const hrefWithQueryParams = getLinkHref({ href, tracking });
+		const hrefWithQueryParams = getTrackingEnrichedHref({ href, tracking });
 
 		return <EmailButton href={hrefWithQueryParams}>{label}</EmailButton>;
 	};

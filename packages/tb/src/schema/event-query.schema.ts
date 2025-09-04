@@ -216,3 +216,98 @@ export const topDevicesPipeDataSchema = sharedSourcePipeDataSchema.extend({
 export const topOsPipeDataSchema = sharedSourcePipeDataSchema.extend({
 	os: z.string(),
 });
+
+// journey funnel schemas
+
+export const journeyFunnelParamsSchema = z.object({
+	workspace_id: z.string(),
+	start_date: z.string().optional(),
+	end_date: z.string().optional(),
+});
+
+export const bioToCartFunnelSummarySchema = z.object({
+	total_journeys: z.number(),
+	journeys_with_bio_view: z.number(),
+	journeys_with_bio_click: z.number(),
+	total_bio_clicks: z.number(),
+	journeys_reaching_cart: z.number(),
+	journeys_reaching_checkout: z.number(),
+	journeys_with_purchase: z.number(),
+	total_purchases: z.number(),
+	total_revenue_cents: z.number(),
+	bio_engagement_rate: z.number().nullable(),
+	bio_to_cart_rate: z.number().nullable(),
+	cart_to_checkout_rate: z.number().nullable(),
+	checkout_conversion_rate: z.number().nullable(),
+	end_to_end_conversion_rate: z.number().nullable(),
+	avg_journey_minutes: z.number().nullable(),
+	avg_bio_clicks_per_journey: z.number().nullable(),
+	avg_order_value_cents: z.number().nullable(),
+});
+
+export const funnelByOriginSchema = z.object({
+	journeyOrigin: z.string(),
+	journeys: z.number(),
+	stage_1_bio_view: z.number(),
+	stage_2_bio_click: z.number(),
+	stage_3_cart_view: z.number(),
+	stage_4_checkout_view: z.number(),
+	stage_5_purchase: z.number(),
+	dropoff_bio_view_to_click: z.number().nullable(),
+	dropoff_bio_click_to_cart: z.number().nullable(),
+	dropoff_cart_to_checkout: z.number().nullable(),
+	dropoff_checkout_to_purchase: z.number().nullable(),
+	total_revenue_cents: z.number(),
+	avg_order_value_cents: z.number().nullable(),
+});
+
+export const hourlyPatternSchema = z.object({
+	hour_of_day: z.number(),
+	journeys: z.number(),
+	conversions: z.number(),
+	conversion_rate: z.number().nullable(),
+	avg_duration_minutes: z.number().nullable(),
+});
+
+export const conversionByOriginSchema = z.object({
+	journeyOrigin: z.string(),
+	total_journeys: z.number(),
+	journeys_with_bio_view: z.number(),
+	journeys_with_bio_click: z.number(),
+	journeys_with_cart_view: z.number(),
+	journeys_with_purchase: z.number(),
+	bio_click_rate: z.number().nullable(),
+	bio_to_cart_rate: z.number().nullable(),
+	cart_conversion_rate: z.number().nullable(),
+	overall_conversion_rate: z.number().nullable(),
+	avg_journey_duration: z.number().nullable(),
+});
+
+export const pathAnalysisSchema = z.object({
+	path: z.string(),
+	journey_count: z.number(),
+	converted_journeys: z.number(),
+	conversion_rate: z.number().nullable(),
+	avg_duration: z.number().nullable(),
+	avg_steps: z.number().nullable(),
+});
+
+export const dailyFunnelMetricsSchema = z.object({
+	date: z.string(),
+	bio_views: z.number(),
+	bio_clicks: z.number(),
+	cart_views: z.number(),
+	purchases: z.number(),
+	bio_ctr: z.number().nullable(),
+	bio_to_cart_rate: z.number().nullable(),
+	cart_conversion_rate: z.number().nullable(),
+});
+
+export const attributionAnalysisSchema = z.object({
+	referrer_asset_id: z.string(),
+	journeyOrigin: z.string(),
+	attributed_journeys: z.number(),
+	attributed_purchases: z.number(),
+	conversion_rate: z.number().nullable(),
+	avg_time_to_convert: z.number().nullable(),
+});

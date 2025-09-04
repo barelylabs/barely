@@ -57,7 +57,7 @@ const Text = ({ variant, children, className, ...props }: TextProps) => {
 		:	(variant.split('/') as [TextStylesProps['size'], TextStylesProps['weight']]);
 
 	return (
-		<p className={cn(textStyles({ size: size, weight, ...props }), className)}>
+		<p className={cn(textStyles({ size: size, weight, ...props }), className)} {...props}>
 			{children}
 		</p>
 	);

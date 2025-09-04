@@ -547,3 +547,4 @@ Each app needs a unique port:
 - [ ] Test end-to-end functionality before adding complexity
 
 This checklist should prevent the common issues encountered during VIP app setup and significantly speed up future app creation.
+- if adding a new package, always make sure to run 'pnpm install' before pushing any changes to origin. otherwise, the pnpm-lock.yaml will be off

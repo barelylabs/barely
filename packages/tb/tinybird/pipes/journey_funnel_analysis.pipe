@@ -1,0 +1,88 @@
+NODE journey_funnel
+SQL >
+%
+    SELECT
+        journeyId,
+        journeyOrigin,
+        journeyPath,
+        journeyPath[1] as entry_point,
+        journeyPath[length(journeyPath)] as exit_point,
+        max(journeyStep) as total_steps,
+        countIf(type = 'bio/view') as bio_views,
+        countIf(type = 'bio/buttonClick') as bio_clicks,
+        countIf(type = 'cart/view') as cart_views,
+        countIf(type = 'cart/checkout') as cart_checkouts,
+        countIf(type = 'cart/purchaseMainWithBump' OR type = 'cart/purchaseMainWithoutBump') as purchases,
+        min(timestamp) as journey_start,
+        max(timestamp) as journey_end,
+        dateDiff('second', journey_start, journey_end) as journey_duration_seconds
+    FROM barely_events
+    WHERE 
+        workspaceId = {{String(workspace_id, 'test_workspace')}}
+        AND timestamp >= {{DateTime(start_date, '2024-01-01 00:00:00')}}
+        AND timestamp <= {{DateTime(end_date, '2024-12-31 23:59:59')}}
+        AND journeyId != ''
+    GROUP BY journeyId, journeyOrigin, journeyPath
+
+NODE conversion_by_origin
+SQL >
+    SELECT
+        journeyOrigin,
+        count() as total_journeys,
+        countIf(bio_views > 0) as journeys_with_bio_view,
+        countIf(bio_clicks > 0) as journeys_with_bio_click,
+        countIf(cart_views > 0) as journeys_with_cart_view,
+        countIf(purchases > 0) as journeys_with_purchase,
+        round(journeys_with_bio_click * 100.0 / journeys_with_bio_view, 2) as bio_click_rate,
+        round(journeys_with_cart_view * 100.0 / journeys_with_bio_click, 2) as bio_to_cart_rate,
+        round(journeys_with_purchase * 100.0 / journeys_with_cart_view, 2) as cart_conversion_rate,
+        round(journeys_with_purchase * 100.0 / total_journeys, 2) as overall_conversion_rate,
+        avg(journey_duration_seconds) as avg_journey_duration
+    FROM journey_funnel
+    GROUP BY journeyOrigin
+    ORDER BY total_journeys DESC
+
+NODE path_analysis
+SQL >
+    SELECT
+        arrayStringConcat(journeyPath, ' → ') as path,
+        count() as journey_count,
+        countIf(purchases > 0) as converted_journeys,
+        round(converted_journeys * 100.0 / journey_count, 2) as conversion_rate,
+        avg(journey_duration_seconds) as avg_duration,
+        avg(total_steps) as avg_steps
+    FROM journey_funnel
+    GROUP BY journeyPath
+    ORDER BY journey_count DESC
+    LIMIT 100
+
+NODE daily_funnel_metrics
+SQL >
+    SELECT
+        toDate(journey_start) as date,
+        countIf(bio_views > 0) as bio_views,
+        countIf(bio_clicks > 0) as bio_clicks,
+        countIf(cart_views > 0) as cart_views,
+        countIf(purchases > 0) as purchases,
+        round(bio_clicks * 100.0 / bio_views, 2) as bio_ctr,
+        round(cart_views * 100.0 / bio_clicks, 2) as bio_to_cart_rate,
+        round(purchases * 100.0 / cart_views, 2) as cart_conversion_rate
+    FROM journey_funnel
+    GROUP BY date
+    ORDER BY date DESC
+
+NODE attribution_analysis
+SQL >
+    SELECT
+        sessionRefererId as referrer_asset_id,
+        journeyOrigin,
+        count() as attributed_journeys,
+        countIf(purchases > 0) as attributed_purchases,
+        round(attributed_purchases * 100.0 / attributed_journeys, 2) as conversion_rate,
+        avg(journey_duration_seconds) as avg_time_to_convert
+    FROM journey_funnel
+    INNER JOIN barely_events USING (journeyId)
+    WHERE sessionRefererId IS NOT NULL
+    GROUP BY referrer_asset_id, journeyOrigin
+    ORDER BY attributed_purchases DESC
+    LIMIT 50

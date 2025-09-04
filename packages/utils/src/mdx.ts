@@ -5,9 +5,9 @@ import type {
 	Link,
 	PressKit,
 } from '@barely/validators/schemas';
-import { EventTrackingKeys } from '@barely/validators/schemas';
 
 import { getAbsoluteUrl } from './barely-urls';
+import { getTrackingEnrichedHref } from './tracking';
 
 export interface MdxAssets {
 	cartFunnels: CartFunnel[];
@@ -51,27 +51,12 @@ export function getAssetHref({
 		});
 	}
 
-	const url = getLinkHref({ href, tracking });
-	return url.toString();
+	const url = getTrackingEnrichedHref({ href, tracking });
+	return url;
 }
 
-export function getLinkHref({
-	href,
-	tracking,
-}: {
-	href: string;
-	tracking: EventTrackingProps;
-}): string {
-	const url = new URL(href);
-
-	for (const key of EventTrackingKeys) {
-		const value = tracking[key];
-		if (value) {
-			url.searchParams.set(key, value);
-		}
-	}
-	return url.toString();
-}
+// Maintain backwards compatibility by re-exporting from tracking.ts
+export { getTrackingEnrichedHref as getLinkHref } from './tracking';
 
 export function getAssetIdsFromMdx(content: string) {
 	const assetIdRegex = /assetId="([^"]+)"/g;

@@ -1,18 +1,26 @@
-import { BIO_HEADER_STYLES } from '@barely/const';
+import {
+	BIO_BLOCK_ANIMATION_TYPES,
+	BIO_BLOCK_ICON_TYPES,
+	BIO_BLOCK_TYPES,
+	BIO_HEADER_STYLES,
+} from '@barely/const';
 import { relations } from 'drizzle-orm';
 import {
 	boolean,
 	index,
 	pgTable,
 	primaryKey,
+	text,
 	timestamp,
 	uniqueIndex,
 	varchar,
 } from 'drizzle-orm/pg-core';
 
 import { dbId, primaryId, timestamps } from '../utils';
+import { CartFunnels } from './cart-funnel.sql';
 import { Events } from './event.sql';
 import { Files } from './file.sql';
+import { FmPages } from './fm.sql';
 import { Forms } from './form.sql';
 import { Links } from './link.sql';
 import { Workspaces } from './workspace.sql';
@@ -55,7 +63,6 @@ export const Bios = pgTable(
 		})
 			.default('minimal.centered')
 			.notNull(),
-		// blockShadow: boolean('blockShadow').default(false).notNull(),
 		showShareButton: boolean('showShareButton').default(false).notNull(),
 		showSubscribeButton: boolean('showSubscribeButton').default(false).notNull(),
 		barelyBranding: boolean('barelyBranding').default(true).notNull(),
@@ -183,7 +190,7 @@ export const BioBlocks = pgTable(
 
 		type: varchar('type', {
 			length: 50,
-			enum: ['links', 'contactForm', 'cart'],
+			enum: BIO_BLOCK_TYPES,
 		}).notNull(),
 
 		enabled: boolean('enabled').default(true).notNull(),
@@ -191,10 +198,70 @@ export const BioBlocks = pgTable(
 		name: varchar('name', { length: 255 }), // for internal user user
 		title: varchar('title', { length: 255 }), // for rendering a title above the block
 		subtitle: varchar('subtitle', { length: 255 }), // for rendering a subtitle below the block
+
+		// Markdown block fields
+		markdown: text('markdown'), // markdown content for markdown and twoPanel blocks
+
+		// Image block fields
+		imageFileId: dbId('imageFileId').references(() => Files.id, {
+			onUpdate: 'cascade',
+			onDelete: 'set null',
+		}),
+		imageCaption: varchar('imageCaption', { length: 200 }),
+		imageAltText: varchar('imageAltText', { length: 255 }),
+
+		// Two-panel block fields
+		imageMobileSide: varchar('imageMobileSide', {
+			length: 10,
+			enum: ['top', 'bottom'],
+		}),
+		imageDesktopSide: varchar('imageDesktopSide', {
+			length: 10,
+			enum: ['left', 'right'],
+		}),
+		ctaText: varchar('ctaText', { length: 100 }),
+		ctaAnimation: varchar('ctaAnimation', {
+			length: 20,
+			enum: BIO_BLOCK_ANIMATION_TYPES,
+		}),
+		ctaIcon: varchar('ctaIcon', {
+			length: 20,
+			enum: BIO_BLOCK_ICON_TYPES,
+		}),
+		// ctaShowIcon: boolean('ctaShowIcon').default(false),
+		targetUrl: varchar('targetUrl', { length: 500 }), // Direct URL for CTA
+
+		// Learn More link fields
+		learnMoreText: varchar('learnMoreText', { length: 100 }), // Text for learn more link
+		learnMoreUrl: varchar('learnMoreUrl', { length: 500 }), // Direct URL for learn more
+		learnMoreBioId: dbId('learnMoreBioId').references(() => Bios.id, {
+			onUpdate: 'cascade',
+			onDelete: 'set null',
+		}),
+
+		// Multi-purpose asset references
+		// For twoPanel blocks: these are CTA targets (only one should be set)
+		// For cart blocks: cartFunnelId is the main reference
+		// For future fm blocks: fmId would be the main reference
+		targetLinkId: dbId('targetLinkId').references(() => Links.id, {
+			onUpdate: 'cascade',
+			onDelete: 'set null',
+		}),
+		targetBioId: dbId('targetBioId').references(() => Bios.id, {
+			onUpdate: 'cascade',
+			onDelete: 'set null',
+		}),
+		targetFmId: dbId('targetFmId'), // FM table reference (not imported yet)
+		targetCartFunnelId: dbId('targetCartFunnelId').references(() => CartFunnels.id, {
+			onUpdate: 'cascade',
+			onDelete: 'set null',
+		}),
 	},
 	bioBlock => ({
 		workspace: index('BioBlocks_workspace_idx').on(bioBlock.workspaceId),
 		type: index('BioBlocks_type_idx').on(bioBlock.type),
+		imageFile: index('BioBlocks_imageFile_idx').on(bioBlock.imageFileId),
+		cartFunnel: index('BioBlocks_cartFunnel_idx').on(bioBlock.targetCartFunnelId),
 	}),
 );
 
@@ -202,6 +269,52 @@ export const BioBlockRelations = relations(BioBlocks, ({ one, many }) => ({
 	workspace: one(Workspaces, {
 		fields: [BioBlocks.workspaceId],
 		references: [Workspaces.id],
+	}),
+
+	// For image and two-panel blocks
+	imageFile: one(Files, {
+		fields: [BioBlocks.imageFileId],
+		references: [Files.id],
+	}),
+
+	// Multi-purpose link reference (for twoPanel CTA or other uses)
+	link: one(Links, {
+		fields: [BioBlocks.targetLinkId],
+		references: [Links.id],
+	}),
+
+	// Bio reference (for twoPanel CTA or future bio-to-bio links)
+	linkedBio: one(Bios, {
+		fields: [BioBlocks.targetBioId],
+		references: [Bios.id],
+	}),
+
+	// Learn more bio reference
+	learnMoreBio: one(Bios, {
+		fields: [BioBlocks.learnMoreBioId],
+		references: [Bios.id],
+		relationName: 'learnMoreBio',
+	}),
+
+	// For cart block
+	targetCartFunnel: one(CartFunnels, {
+		fields: [BioBlocks.targetCartFunnelId],
+		references: [CartFunnels.id],
+	}),
+
+	targetLink: one(Links, {
+		fields: [BioBlocks.targetLinkId],
+		references: [Links.id],
+	}),
+
+	targetBio: one(Bios, {
+		fields: [BioBlocks.targetBioId],
+		references: [Bios.id],
+	}),
+
+	targetFm: one(FmPages, {
+		fields: [BioBlocks.targetFmId],
+		references: [FmPages.id],
 	}),
 
 	// many-to-many

@@ -193,11 +193,7 @@ jobs:
   deploy-app:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
-    if: |
-      always() && 
-      needs.git-meta.result == 'success' && 
-      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
-      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: app
       working_directory: apps/app
@@ -205,6 +201,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -213,11 +210,7 @@ jobs:
   deploy-bio:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
-    if: |
-      always() && 
-      needs.git-meta.result == 'success' && 
-      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
-      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: bio
       working_directory: apps/bio
@@ -225,6 +218,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 10
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -233,11 +227,7 @@ jobs:
   deploy-cart:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
-    if: |
-      always() && 
-      needs.git-meta.result == 'success' && 
-      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
-      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: cart
       working_directory: apps/cart
@@ -245,6 +235,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 20
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -253,11 +244,7 @@ jobs:
   deploy-fm:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
-    if: |
-      always() && 
-      needs.git-meta.result == 'success' && 
-      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
-      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: fm
       working_directory: apps/fm
@@ -265,6 +252,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 30
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -273,11 +261,7 @@ jobs:
   deploy-link:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
-    if: |
-      always() && 
-      needs.git-meta.result == 'success' && 
-      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
-      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: link
       working_directory: apps/link
@@ -285,6 +269,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 40
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -293,11 +278,7 @@ jobs:
   deploy-manage-email:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
-    if: |
-      always() && 
-      needs.git-meta.result == 'success' && 
-      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
-      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: manage-email
       working_directory: apps/manage-email
@@ -305,6 +286,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 50
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -313,11 +295,7 @@ jobs:
   deploy-nyc:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
-    if: |
-      always() && 
-      needs.git-meta.result == 'success' && 
-      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
-      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: nyc
       working_directory: apps/nyc
@@ -325,6 +303,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 60
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -345,6 +324,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 70
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -353,11 +333,7 @@ jobs:
   deploy-press:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
-    if: |
-      always() && 
-      needs.git-meta.result == 'success' && 
-      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
-      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: press
       working_directory: apps/press
@@ -365,6 +341,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 80
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -373,11 +350,7 @@ jobs:
   deploy-vip:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
-    if: |
-      always() && 
-      needs.git-meta.result == 'success' && 
-      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
-      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: vip
       working_directory: apps/vip
@@ -385,6 +358,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 90
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -393,11 +367,7 @@ jobs:
   deploy-www:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
-    if: |
-      always() && 
-      needs.git-meta.result == 'success' && 
-      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
-      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: www
       working_directory: apps/www
@@ -405,6 +375,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 100
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -413,11 +384,7 @@ jobs:
   deploy-app-fm:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
-    if: |
-      always() && 
-      needs.git-meta.result == 'success' && 
-      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
-      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: app
       working_directory: apps/app
@@ -426,6 +393,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 110
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}

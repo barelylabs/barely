@@ -1,3 +1,4 @@
+export * from './asset-selector';
 export * from './cart/product-price';
 export * from './feature-card';
 export * from './feature-checklist';
