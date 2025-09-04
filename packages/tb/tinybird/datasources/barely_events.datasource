@@ -193,10 +193,10 @@ FORWARD_QUERY >
         defaultValueOfTypeName('Nullable(String)') AS bio_linkText,
         defaultValueOfTypeName('Nullable(String)') AS bio_linkAnimation,
         defaultValueOfTypeName('Nullable(UInt8)') AS bio_emailMarketingOptIn,
-        COALESCE(sessionId, '') AS journeyId,
-        COALESCE(splitByChar('_', sessionId)[1], '') AS journeyOrigin,
-        '' AS journeySource,
-        CAST(1 AS UInt16) AS journeyStep,
+        CAST(COALESCE(sessionId, ''), 'Nullable(String)') AS journeyId,
+        CAST(COALESCE(splitByChar('_', sessionId)[1], ''), 'Nullable(String)') AS journeyOrigin,
+        CAST('', 'Nullable(String)') AS journeySource,
+        CAST(1, 'Nullable(UInt16)') AS journeyStep,
         CAST([] AS Array(String)) AS journeyPath,
         defaultValueOfTypeName('Nullable(String)') AS cartSessionId
 
