@@ -24,6 +24,10 @@ on:
       current_app_override:
         required: false
         type: string
+      delay_seconds:
+        required: false
+        type: number
+        default: 0
     outputs:
       deployment_id:
         value: ${{ jobs.deploy-to-vercel.outputs.deployment_id }}
@@ -71,6 +75,12 @@ jobs:
           echo "Updated package.json name to @barely/app-${{ inputs.current_app_override }}"
           
           ls -la apps/
+
+      - name: delay to prevent rate limiting
+        if: ${{ inputs.delay_seconds > 0 }}
+        run: |
+          echo "Waiting ${{ inputs.delay_seconds }} seconds to prevent rate limiting..."
+          sleep ${{ inputs.delay_seconds }}
 
       - name: link vercel
         run: |

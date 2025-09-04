@@ -193,11 +193,7 @@ jobs:
   deploy-app:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
-    if: |
-      always() && 
-      needs.git-meta.result == 'success' && 
-      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
-      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: app
       working_directory: apps/app
@@ -214,11 +210,7 @@ jobs:
   deploy-bio:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
-    if: |
-      always() && 
-      needs.git-meta.result == 'success' && 
-      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
-      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: bio
       working_directory: apps/bio
@@ -235,11 +227,7 @@ jobs:
   deploy-cart:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
-    if: |
-      always() && 
-      needs.git-meta.result == 'success' && 
-      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
-      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: cart
       working_directory: apps/cart
@@ -256,11 +244,7 @@ jobs:
   deploy-fm:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
-    if: |
-      always() && 
-      needs.git-meta.result == 'success' && 
-      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
-      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: fm
       working_directory: apps/fm
@@ -277,11 +261,7 @@ jobs:
   deploy-link:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
-    if: |
-      always() && 
-      needs.git-meta.result == 'success' && 
-      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
-      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: link
       working_directory: apps/link
@@ -298,11 +278,7 @@ jobs:
   deploy-manage-email:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
-    if: |
-      always() && 
-      needs.git-meta.result == 'success' && 
-      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
-      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: manage-email
       working_directory: apps/manage-email
@@ -319,11 +295,7 @@ jobs:
   deploy-nyc:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
-    if: |
-      always() && 
-      needs.git-meta.result == 'success' && 
-      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
-      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: nyc
       working_directory: apps/nyc
@@ -361,11 +333,7 @@ jobs:
   deploy-press:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
-    if: |
-      always() && 
-      needs.git-meta.result == 'success' && 
-      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
-      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: press
       working_directory: apps/press
@@ -382,11 +350,7 @@ jobs:
   deploy-vip:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
-    if: |
-      always() && 
-      needs.git-meta.result == 'success' && 
-      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
-      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: vip
       working_directory: apps/vip
@@ -403,11 +367,7 @@ jobs:
   deploy-www:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
-    if: |
-      always() && 
-      needs.git-meta.result == 'success' && 
-      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
-      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: www
       working_directory: apps/www
@@ -424,11 +384,7 @@ jobs:
   deploy-app-fm:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
-    if: |
-      always() && 
-      needs.git-meta.result == 'success' && 
-      (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') &&
-      (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
     with:
       app_name: app
       working_directory: apps/app
