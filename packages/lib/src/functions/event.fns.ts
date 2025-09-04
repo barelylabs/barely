@@ -319,6 +319,15 @@ export async function recordCartEvent({
 		sessionFlowActionId: cart.flowActionId ?? visitor?.sessionFlowActionId ?? null,
 		sessionLandingPageId: cart.landingPageId ?? visitor?.sessionLandingPageId ?? null,
 
+		// Journey tracking fields
+		journeyId: visitor?.journeyId ?? cart.id,
+		journeyOrigin: visitor?.journeyOrigin ?? null,
+		journeySource: visitor?.journeySource ?? null,
+		journeyStep: visitor?.journeyStep ?? '1',
+		journeyPath: visitor?.journeyPath ?? [],
+		referrerId: visitor?.referrerId ?? null,
+		originalReferrerId: visitor?.originalReferrerId ?? null,
+
 		isBot: visitor?.isBot ?? false,
 
 		href:
@@ -400,21 +409,35 @@ export async function recordCartEvent({
 
 	// ♪ TikTok ♪
 
-	// 🐦 report event to tinybird
+	// 🐦 report event to tinybird with journey tracking
 	try {
 		const cartEventData = getCartEventData({ cart, eventType: type });
+
+		// Extract journey info - preserve journey from visitor or use cart session
+		const journeyId = visitor?.journeyId ?? cart.id;
+		const journeyOrigin = visitor?.journeyOrigin ?? journeyId.split('_')[0] ?? 'cart';
+		const journeySource = visitor?.journeySource ?? 'unknown';
+		const journeyStep = visitor?.journeyStep ?? '1';
+
 		const tinybirdRes = await ingestCartEvent({
 			timestamp,
 			workspaceId: cart.workspaceId,
 			assetId: cartFunnel.id,
-			sessionId: cart.id,
+			sessionId: journeyId, // Use journey ID as primary session
 			href: visitorInfo.href,
 			type,
 			key: cartFunnel.key,
 			// analytics
-			...flattenVisitorForIngest(visitor),
+			...flattenVisitorForIngest(visitorInfo),
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : '',
 			...cartEventData,
+			// Journey tracking (if supported by schema)
+			journeyId,
+			journeyOrigin,
+			journeySource,
+			journeyStep: parseInt(journeyStep),
+			// Cart-specific session for backward compatibility
+			cartSessionId: cart.id,
 		});
 
 		if (tinybirdRes.quarantined_rows) {

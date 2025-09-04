@@ -13,10 +13,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@barely/ui/tabs';
 import { Text } from '@barely/ui/typography';
 
 import { useBrandKit } from '~/hooks/use-brand-kit';
-import { BlockStyleCustomizer } from '../../bio/design/block-style-customizer';
+import { BlockStyleCustomizer } from '../../bios/design/block-style-customizer';
 // Import design components from bio
-import { ColorCustomizer } from '../../bio/design/color-customizer';
-import { FontSelector } from '../../bio/design/font-selector';
+import { ColorCustomizer } from '../../bios/design/color-customizer';
+import { FontSelector } from '../../bios/design/font-selector';
 
 interface BrandKitFormContentProps {
 	form: UseFormReturn<UpdateBrandKit>;

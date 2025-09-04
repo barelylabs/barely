@@ -118,12 +118,195 @@ export const updateBioBlockSchema = insertBioBlockSchema
 		createdAt: true,
 		updatedAt: true,
 		deletedAt: true,
+	})
+	.extend({
+		// Add the new flexible CTA fields that aren't in the base schema yet
+		linkId: z.string().optional(),
+		bioId: z.string().optional(),
+		fmId: z.string().optional(),
 	});
 
 export const reorderBioBlocksSchema = z.object({
 	bioId: z.string(),
 	blockIds: z.array(z.string()),
 });
+
+// Block-specific schemas for validation
+// export const markdownBlockDataSchema = z.object({
+// 	markdown: z.string().max(5000, 'Markdown content must be less than 5000 characters'),
+// });
+
+export const createLinksBlockDataSchema = createInsertSchema(BioBlocks, {
+	type: () => z.literal('links'),
+	targetLinkId: linkId => linkId.min(1, 'Link is required').optional(),
+})
+	.extend({
+		bioId: z.string(), // we need this to join the block to the bio
+	})
+	.omit({
+		id: true,
+		workspaceId: true,
+		createdAt: true,
+		updatedAt: true,
+		deletedAt: true,
+	});
+
+export const updateLinksBlockDataSchema = createLinksBlockDataSchema.partial().extend({
+	id: z.string(),
+});
+
+export const createContactFormBlockDataSchema = createInsertSchema(BioBlocks, {
+	type: () => z.literal('contactForm'),
+})
+	.extend({
+		bioId: z.string(), // we need this to join the block to the bio
+	})
+	.omit({
+		id: true,
+		workspaceId: true,
+		createdAt: true,
+		updatedAt: true,
+		deletedAt: true,
+	});
+
+export const updateContactFormBlockDataSchema = createContactFormBlockDataSchema
+	.partial()
+	.extend({
+		id: z.string(),
+	});
+
+export const createMarkdownBlockDataSchema = createInsertSchema(BioBlocks, {
+	type: () => z.literal('markdown'),
+	markdown: markdown =>
+		markdown.max(5000, 'Markdown content must be less than 5000 characters'),
+})
+	.extend({
+		bioId: z.string(), // we need this to join the block to the bio
+	})
+	.omit({
+		id: true,
+		workspaceId: true,
+		createdAt: true,
+		updatedAt: true,
+		deletedAt: true,
+	});
+
+export const updateMarkdownBlockDataSchema = createMarkdownBlockDataSchema
+	.partial()
+	.extend({
+		id: z.string(),
+	});
+
+export const createImageBlockDataSchema = createInsertSchema(BioBlocks, {
+	type: () => z.literal('image'),
+	imageFileId: imageFileId => imageFileId.min(1, 'Image file is required'),
+	imageCaption: imageCaption =>
+		imageCaption.max(200, 'Image caption must be less than 200 characters'),
+	imageAltText: imageAltText =>
+		imageAltText.max(255, 'Image alt text must be less than 255 characters'),
+})
+	.extend({
+		bioId: z.string(), // we need this to join the block to the bio
+	})
+	.omit({
+		id: true,
+		workspaceId: true,
+		createdAt: true,
+		updatedAt: true,
+		deletedAt: true,
+	});
+
+export const updateImageBlockDataSchema = createImageBlockDataSchema.partial().extend({
+	id: z.string(),
+});
+
+export const createTwoPanelBlockDataSchema = createInsertSchema(BioBlocks, {
+	type: () => z.literal('twoPanel'),
+	title: title => title.max(255, 'Title must be less than 255 characters'),
+	markdown: markdown =>
+		markdown.max(1000, 'Text content must be less than 1000 characters'),
+	imageFileId: imageFileId => imageFileId.min(1, 'Image file is required'),
+	imageMobileSide: () => z.enum(['top', 'bottom']).default('top'),
+	imageDesktopSide: () => z.enum(['left', 'right']).default('left'),
+})
+	.extend({
+		bioId: z.string(), // we need this to join the block to the bio
+	})
+	.omit({
+		id: true,
+		workspaceId: true,
+		createdAt: true,
+		updatedAt: true,
+		deletedAt: true,
+	})
+	.refine(
+		data => {
+			// If CTA text is provided, at least one link target must be set
+			if (data.ctaText) {
+				return !!(
+					data.targetUrl ??
+					data.targetLinkId ??
+					data.targetBioId ??
+					data.targetFmId ??
+					data.targetCartFunnelId
+				);
+			}
+			return true;
+		},
+		{ message: 'CTA requires a link target when CTA text is provided' },
+	)
+	.refine(
+		data => {
+			// Only one CTA target should be set
+			const targets = [
+				data.targetUrl,
+				data.targetLinkId,
+				data.targetBioId,
+				data.targetFmId,
+				data.targetCartFunnelId,
+			].filter(Boolean);
+			return targets.length <= 1;
+		},
+		{ message: 'Only one CTA target can be set' },
+	);
+
+export const createCartBlockDataSchema = createInsertSchema(BioBlocks, {
+	type: () => z.literal('cart'),
+	targetCartFunnelId: targetCartFunnelId =>
+		targetCartFunnelId.min(1, 'Cart funnel is required'),
+	title: title => title.max(255, 'Title must be less than 255 characters'),
+	subtitle: subtitle => subtitle.max(255, 'Subtitle must be less than 255 characters'),
+})
+	.extend({
+		bioId: z.string(), // we need this to join the block to the bio
+	})
+	.omit({
+		id: true,
+		workspaceId: true,
+		createdAt: true,
+		updatedAt: true,
+		deletedAt: true,
+	});
+
+// Helper to validate block data based on type
+export const validateBioBlockData = (type: string, data: unknown) => {
+	switch (type) {
+		case 'markdown':
+			return createMarkdownBlockDataSchema.parse(data);
+		case 'image':
+			return createImageBlockDataSchema.parse(data);
+		case 'twoPanel':
+			return createTwoPanelBlockDataSchema.parse(data);
+		case 'cart':
+			return createCartBlockDataSchema.parse(data);
+		case 'links':
+		case 'contactForm':
+			// These existing types don't need additional data
+			return {};
+		default:
+			throw new Error(`Unknown block type: ${type}`);
+	}
+};
 
 export type InsertBioBlock = z.infer<typeof insertBioBlockSchema>;
 export type CreateBioBlock = z.infer<typeof createBioBlockSchema>;

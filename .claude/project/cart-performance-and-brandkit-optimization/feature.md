@@ -1,156 +1,180 @@
-# Feature: Cart Performance & BrandKit Optimization
+# Feature: Bio Engine Block Extensions for Landing Pages
 
 ## Context & Background
 
 ### Related Work
-- **Builds On**: [[0_Projects/bio-mvp]] - Successfully implemented BrandKit caching pattern
-- **Integrates With**: [[barely.cart]] - Existing checkout system needing optimization
-- **References**: [[1_Areas/business/strategy/barely-platform-strategy-2025]] - Cart as core platform service
+- **Builds On**: [[0_Projects/bio-mvp]] - Leverages existing bio engine architecture and UX patterns
+- **Replaces**: MDX-based landing page editor - Current solution is too complex and brittle for clients
+- **Competes With**: Beacons.ai landing page builder - Market expectation for basic page building
 
-### Performance Crisis
-- **Current State**: 37 Lighthouse score, 9.3s LCP, 3.7s blocking time
-- **Root Cause**: Entire page render blocked on uncached workspace query for single brand color
-- **Business Impact**: ~50% cart abandonment due to performance (industry standard)
+### Historical Context
+- **Current State**: 10+ landing pages built with MDX editor, but clients can't self-serve edits
+- **Pain Points**: MDX editor deletion bugs, non-intuitive interface, requires deep Lexical knowledge
+- **Opportunity**: Bio MVP has established clean block patterns and intuitive UX
 
 ## Problem Statement
 
-barely.cart has catastrophic performance metrics (9.3s LCP, 37 Lighthouse score) caused by render-blocking workspace queries for brand data, resulting in significant cart abandonment and lost revenue.
+Agency clients need to create and edit sales-focused landing pages but the current MDX editor is too difficult to use, forcing manual intervention for every edit and preventing self-service SaaS scaling.
 
 ### Evidence of Need
-- **Lighthouse Performance Score**: 37/100 (failing)
-- **Largest Contentful Paint**: 9.3s (370% over "poor" threshold of 2.5s)
-- **Total Blocking Time**: 3,700ms (1,850% over target of 200ms)
-- **Speed Index**: 6.2s (3x slower than acceptable)
-- **Cold starts**: "Many seconds slower" than warm boots
-- **Industry impact**: 7% conversion loss per second of delay = ~50% lost sales at current speeds
+- 10 existing clients couldn't use MDX editor independently
+- Competitors (Beacons.ai) offer landing page builders as standard
+- Immediate revenue opportunity: Major agency client ready to launch merch campaign
+- Current editor blocks productization of landing page feature
 
 ## Target Users
 
-Artists and their fans attempting to complete purchases through barely.cart checkout flows.
+Agency clients and independent artists (1K-100K monthly listeners) who need sales-focused landing pages for:
+- Merch/CD campaigns
+- Tour announcements
+- Album launches
+- Fan acquisition funnels
 
-### User Impact
-- **Fans**: Abandon carts due to perceived site failure/freeze
-- **Artists**: Lose sales and damage brand perception
-- **Platform**: Reduced transaction fees and reputation damage
+### Differentiation from Bio Links
+- Bio links: Quick navigation to multiple destinations
+- Landing pages: Narrative sales pages with conversion focus
+- Both use same rendering engine but different content blocks
 
 ## Current State & Pain Points
 
-### How It Works Today
-1. User clicks checkout link
-2. Cart page initiates render
-3. **BLOCKS** entire page waiting for workspace query
-4. Fetches single brand color value
-5. Finally renders page after 9.3+ seconds
-6. Cold starts are even worse
+### How Users Handle This Today
+- Request manual edits from agency team (not scalable)
+- Use external tools like Carrd or Beacons.ai
+- Attempt MDX editor and give up due to complexity
 
 ### Validated Pain Points
-- **9.3 second wait** before seeing cart content
-- **3.7 seconds of frozen UI** (Total Blocking Time)
-- **No progressive loading** - white screen until fully loaded
-- **Cold starts catastrophic** - likely 15-20s wait times
+- MDX deletion bug: Must add space, delete block, delete space
+- Asset links don't update (stored as markdown text)
+- No visual preview of complex blocks
+- Requires technical knowledge of MDX/Lexical
 
 ## Recommended Solution
 
-Implement the proven BrandKit caching pattern from barely.bio to eliminate render-blocking queries and add progressive loading capabilities.
+Extend the bio engine with 4 additional block types that enable full landing page creation while maintaining the intuitive UX patterns already established in the bio MVP.
 
 ### Why This Approach
-- **Proven pattern**: Already successful in barely.bio (sub-2s loads)
-- **Immediate impact**: Removes primary blocking query
-- **Progressive enhancement**: Suspense boundaries improve perceived speed
-- **Coherent ecosystem**: Consistent caching across Barely platform
+- Leverages existing bio MVP patterns (1-2 days vs weeks)
+- Unified rendering engine for both bio links and landing pages
+- Avoids deep Lexical/MDX refactoring
+- Immediately enables client self-service
 
 ## Success Criteria
 
-### Performance Metrics (Primary)
-- **Lighthouse Score**: >70 (from 37)
-- **LCP**: <2.5s (from 9.3s)
-- **TBT**: <200ms (from 3,700ms)
-- **Speed Index**: <3s (from 6.2s)
+### Near-term (1 week)
+- Major agency client launches merch campaign using bio engine
+- Zero manual edits required after initial setup
+- Page renders existing landing page content correctly
 
-### Business Metrics (Secondary)
-- **Cart abandonment**: Reduce by 30%+
-- **Conversion rate**: Increase by 20%+
-- **Cold start time**: <5s (from "many seconds")
+### Medium-term (1 month)
+- 5+ clients migrate from MDX editor to bio engine
+- 90% reduction in support requests for landing page edits
+- Landing pages achieve same conversion rates as MDX versions
 
 ## Core Functionality (MVP)
 
-### Must Have (Performance Critical)
-- **Cached BrandKit Provider**: Eliminate render-blocking workspace queries
-- **Cart Data Caching**: Cache products, pricing, inventory checks where safe
-- **Suspense Boundaries**: Progressive loading with skeleton states
-- **Edge Caching**: Static assets served from edge
+### Must Have - 4 New Block Types
 
-### Implementation Pattern
-```
-1. Pre-fetch and cache workspace BrandKit on cart initialization
-2. Render immediately with cached data or defaults
-3. Progressive enhancement as data loads
-4. Background refresh for real-time data (inventory, pricing)
-```
+1. **Markdown Block**
+   - Rich text editing (headings, bold/italic/underline, lists)
+   - Uses existing app markdown editor component
+   - Renders with existing markdown rendering pattern
+
+2. **Image Block**
+   - Single image with optional caption
+   - Uses same asset picker as link blocks
+   - Responsive sizing for mobile/desktop
+
+3. **Two-Panel Block**
+   - Image on one side, content on other
+   - Title, text, and CTA button (URL or Barely asset)
+   - Mobile/desktop layout toggles (image position)
+
+4. **Cart Block**
+   - Select cartFunnel from workspace
+   - Title and subtitle (like BioLink buttons)
+   - Direct link to checkout page
+
+### Consistent Pattern
+- All blocks use same edit modal pattern as Links block
+- Click-to-edit in bio preview
+- Same save/cancel flow
 
 ## Out of Scope for MVP
 
-### Not Performance Critical
-- Visual brand customization beyond colors
-- Advanced theming options
-- Cart template variations
-- Animation improvements
+### Not Needed Initially
+- Video blocks (no current client use case)
+- Form blocks beyond cart (email capture exists)
+- Custom HTML/embed blocks
+- Multi-column layouts beyond 2-panel
+- Animation or transition effects
 
-### Available Later
-- A/B testing different loading strategies
-- Predictive prefetching based on user behavior
-- Advanced CDN optimizations
+### Available Through Existing Blocks
+- Email capture (already in bio MVP)
+- Social links (Links block)
+- Basic CTAs (Links block with URLs)
 
 ## Integration Points
 
-### With Existing Features
-- **barely.bio BrandKit**: Reuse caching infrastructure and providers
-- **Workspace System**: Leverage existing workspace data structure
-- **Cart API**: Maintain compatibility with existing checkout flow
+### With Bio MVP
+- Extends existing block registry
+- Uses same editor modal patterns
+- Shares rendering pipeline
+- Same preview system
 
 ### Technical Integration
-- Extends: BrandKit provider from bio app
-- Reuses: Workspace caching infrastructure
-- New requirements: Cart-specific cache invalidation strategies
+- Extends: `@barely/ui` components
+- Reuses: Bio block editor framework
+- Database: Extends `BioBlocks` schema
+- No new infrastructure required
 
 ## Complexity Assessment
 
-**Overall Complexity**: Medium
+**Overall Complexity**: Simple
 
 **Reduced Complexity Through:**
-- Reusing proven BrandKit pattern from bio
-- Existing caching infrastructure
-- Clear performance targets
+- Reusing bio MVP patterns
+- No MDX/Lexical deep dive required
+- Established component library
+- Existing asset management system
 
 **Remaining Complexity:**
-- Cache invalidation for transactional data
-- Balancing real-time inventory with performance
-- Testing across connection speeds
+- Two-panel responsive layout logic
+- Cart block integration with cartFunnel system
 
 ## Human Review Required
 
-- [ ] Validate cold start measurement methodology
-- [ ] Confirm cart abandonment correlation with performance
-- [ ] Review cache invalidation strategy for inventory/pricing
+- [ ] Validate 1-2 day timeline is realistic
+- [ ] Confirm these 4 blocks cover 90% of landing page needs
+- [ ] Check if cart block needs any special checkout handling
 
 ## Technical Considerations
 
-- Fits within existing Next.js RSC architecture
-- Leverages React Suspense for progressive loading
-- Cache-Control headers for edge caching
-- Consider Redis for session-based cart caching
+- Fits within bio app architecture
+- Extends existing block types enum
+- Uses same tRPC patterns for CRUD
+- Database migration for new block types
 
 ## Migration Path
 
-### Zero-Downtime Deployment
-1. Deploy caching layer without changing rendering
-2. A/B test cached vs. uncached performance
-3. Progressive rollout based on metrics
-4. Full migration once stable
+### From MDX Editor
+- Export existing content as markdown
+- Manual recreation in bio engine (one-time)
+- Deprecate MDX editor after migration
+
+### Future State
+- Bio links and landing pages in same system
+- Unified analytics and performance monitoring
+- Single codebase to maintain
 
 ## Future Possibilities
 
-### Based on Performance Gains
-- Sub-second cart loads with predictive prefetching
-- Offline-capable checkout with service workers
-- Real-time collaborative carts for group purchases
+### Natural Extensions
+- A/B testing different block arrangements
+- Template library for common landing page types
+- Advanced analytics per block type
+- AI-assisted copy generation for blocks
+
+### Scope Control
+- Resist adding complex layout systems
+- Keep blocks atomic and composable
+- Don't recreate full page builders (Webflow, etc.)

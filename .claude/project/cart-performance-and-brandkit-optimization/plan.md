@@ -1,317 +1,341 @@
-# Technical Implementation Plan - Cart Performance & BrandKit Optimization
+# Technical Implementation Plan: Bio Engine Block Extensions (Feature-Organized)
 
 ## Feature Summary
 
-Implement BrandKit caching pattern from apps/bio in apps/cart to eliminate render-blocking workspace queries, reducing cart load time from 9.3s to under 2.5s through cached brand data, progressive loading with React Suspense, and edge optimization.
+Extend the existing bio engine with four new block types (Markdown, Image, Two-Panel, Cart) to enable landing page creation capabilities while leveraging the established block editor infrastructure, rendering pipeline, and UI patterns from the bio MVP.
 
 ## Architecture Overview
 
-The solution integrates the existing BrandKit provider from the UI package into the cart application, replacing the synchronous `getFunnelByParams` call with cached workspace data. This involves:
+### System Integration
 
-- **Server Components**: Implementing cached BrandKit fetching at layout level
-- **Client Components**: Using BrandKitProvider for brand context throughout cart UI
-- **API Layer**: Creating cart-specific tRPC routes with caching strategies  
-- **Edge Layer**: Implementing CDN caching for static assets and API responses
-- **Database Layer**: Optimizing queries and implementing cache invalidation
+The feature extends the existing bio engine architecture without requiring new infrastructure:
+
+- **Block Registry**: Extend existing `BioBlockType` enum with new block types
+- **Database Schema**: Add new block type variants to existing `bio_blocks` table
+- **Editor Framework**: Reuse modal-based editing pattern from Links block
+- **Rendering Pipeline**: Extend existing bio page renderer with new block components
+- **API Layer**: Extend existing bio CRUD routes with new block validations
+- **Component Library**: Leverage `@barely/ui` components and patterns
+
+### Component Structure
+
+```
+packages/
+├── validators/src/schemas/
+│   └── bio-blocks.schema.ts      # Extended block type definitions
+├── ui/src/components/bio-blocks/
+│   ├── markdown-block.tsx        # New block component
+│   ├── image-block.tsx          # New block component
+│   ├── two-panel-block.tsx     # New block component
+│   └── cart-block.tsx          # New block component
+├── lib/src/trpc/routes/
+│   └── bio-blocks.route.ts     # Extended CRUD operations
+└── db/src/sql/
+    └── bio-blocks.sql.ts       # Schema migrations
+
+apps/bio/
+├── src/components/blocks/
+│   ├── markdown/
+│   │   ├── editor.tsx          # Markdown editor modal
+│   │   └── renderer.tsx        # Public render component
+│   ├── image/
+│   │   ├── editor.tsx          # Image picker modal
+│   │   └── renderer.tsx        # Responsive image render
+│   ├── two-panel/
+│   │   ├── editor.tsx          # Layout configuration modal
+│   │   └── renderer.tsx        # Responsive panel render
+│   └── cart/
+│       ├── editor.tsx          # Cart funnel selector
+│       └── renderer.tsx        # Checkout button render
+```
 
 ## Key Technical Decisions
 
-1. **Use React's `cache()` function**: Leverage Next.js 15's built-in request deduplication for BrandKit data
-2. **Split data fetching**: Separate BrandKit (cacheable) from cart data (real-time) to enable parallel loading
-3. **Implement at layout level**: Fetch BrandKit in layout.tsx to share across all cart pages
-4. **Use existing UI patterns**: Reuse BrandKitProvider from UI package rather than creating cart-specific solution
-5. **Progressive enhancement**: Use Suspense boundaries with skeleton states for perceived performance
-6. **Edge caching strategy**: Cache BrandKit data at edge with 5-minute TTL, cart products with 1-minute TTL
+1. **Block Type Extension Strategy**: Add new types to existing enum rather than creating separate landing page blocks table to maintain unified rendering pipeline and avoid data migration complexity.
+
+2. **Markdown Editor Reuse**: Leverage existing markdown editor component from app rather than implementing new editor to ensure consistency and reduce bundle size.
+
+3. **Asset Management Integration**: Use existing asset picker from Links block for image selection to maintain consistent UX and avoid duplicating asset management logic.
+
+4. **Responsive Layout Approach**: Implement CSS Grid with container queries for Two-Panel block rather than JavaScript-based layout to improve performance and reduce layout shift.
+
+5. **Cart Integration Pattern**: Direct link to cart checkout rather than embedded iframe to avoid PCI compliance complexity and maintain page performance.
+
+6. **Block Data Storage**: Store block-specific data in JSONB column with zod validation rather than separate tables per block type to simplify queries and maintain flexibility.
+
+7. **Editor Modal Reuse**: Extend existing modal component system rather than creating new editor UI to maintain consistency and reduce code duplication.
+
+8. **Preview Update Strategy**: Use optimistic updates with rollback on error rather than blocking saves to improve perceived performance.
 
 ## Dependencies & Assumptions
 
-**Dependencies:**
-- `@barely/ui` package with BrandKitProvider component
-- `@barely/api` for tRPC route definitions
-- `@barely/lib` for workspace and cart functions
-- React 18+ with Suspense support
-- Next.js 15 with App Router and RSC
+### Internal Dependencies
+- `@barely/ui` markdown editor component exists and is exportable
+- `@barely/files` asset picker supports image selection
+- Bio block editor framework supports extensible block types
+- Cart funnel system exposes checkout URL generation
+- Existing bio page ISR infrastructure handles new block types
 
-**Assumptions:**
-- BrandKit data changes infrequently (safe to cache aggressively)
-- Inventory/pricing requires real-time accuracy (limited caching)
-- Users primarily access cart on mobile devices
-- Cold starts are acceptable trade-off for reduced server load
+### External Dependencies
+- Next.js Image component for responsive image optimization
+- Markdown parsing library (likely remark/rehype already in use)
+- CSS container queries browser support (>95% coverage)
 
-## Implementation Checklist
+### Technical Assumptions
+- Current `bio_blocks` schema uses JSONB for block data storage
+- Block type enum can be extended without breaking existing blocks
+- Modal editor pattern scales to handle new block configurations
+- Asset CDN handles image optimization and delivery
+- Cart funnel IDs are workspace-scoped and validated server-side
 
-### Feature 1: BrandKit Caching Implementation
+## Implementation Checklist (Organized by Feature)
 
-- [ ] Create cached BrandKit fetcher in apps/cart/src/trpc/server.tsx
-  - Copy pattern from apps/bio/src/trpc/server.tsx
-  - Implement `fetchBrandKitByHandle` using React cache()
-  - Add prefetch capability for BrandKit data
+### 🏗️ Prerequisites: Shared Infrastructure Setup
 
-- [ ] Refactor cart layout to use cached BrandKit
-  - Update apps/cart/src/app/[mode]/[handle]/[key]/layout.tsx
-  - Fetch BrandKit separately from cart funnel data
-  - Pass BrandKit to providers for context usage
+These foundational updates must be completed first as all block types depend on them:
 
-- [ ] Implement BrandKitProvider in cart providers
-  - Update apps/cart/src/app/[mode]/[handle]/[key]/providers.tsx
-  - Import BrandKitProvider from @barely/ui/bio
-  - Wrap children with BrandKitProvider using fetched data
+**Database Foundation**
+- [ ] Create comprehensive migration script for new block types in `bio-blocks.sql.ts`
+- [ ] Add indexes for block type queries
+- [ ] Implement block data validation triggers
+- [ ] Create migration rollback procedures
 
-- [ ] Extract workspace query from getFunnelByParams
-  - Create new `getFunnelWithoutWorkspace` function in cart.fns.ts
-  - Remove workspace join from main query
-  - Return lightweight funnel data only
+**Core Block System Updates**
+- [ ] Update block type selector UI to include new blocks
+- [ ] Extend block reordering to handle new block types
+- [ ] Add block type icons for visual identification
+- [ ] Implement block duplication functionality
+- [ ] Create block template system for common patterns
 
-- [ ] Create cart-specific BrandKit API route
-  - Add brandKitByHandle procedure to cart tRPC router
-  - Implement caching headers (Cache-Control: max-age=300)
-  - Add stale-while-revalidate strategy
+**Security & Performance Foundation**
+- [ ] Implement CSP headers for user-generated content
+- [ ] Add rate limiting for block operations
+- [ ] Create input sanitization utilities for all text fields
+- [ ] Implement file type validation for uploads
+- [ ] Add CSRF protection for block mutations
+- [ ] Implement block-level caching strategy
+- [ ] Create block lazy loading for initial page load
+- [ ] Implement CSS containment for layout performance
 
-- [ ] Update cart page components to use BrandKit context
-  - Replace direct workspace property access with useBrandKit hook
-  - Update color and font references throughout cart UI
-  - Ensure brand styles apply during loading states
+**Analytics Foundation**
+- [ ] Add block interaction tracking events infrastructure
+- [ ] Create block render performance metrics system
+- [ ] Implement error boundary for block failures
+- [ ] Set up block usage analytics pipeline
 
-- [ ] Add BrandKit data validation
-  - Create Zod schema for cart-specific BrandKit subset
-  - Validate cached data before usage
-  - Implement fallback for invalid cache entries
+### 📝 Feature 1: Markdown Block (Complete Implementation)
 
-- [ ] Set up cache invalidation strategy
-  - Implement workspace update webhook handler
-  - Clear BrandKit cache on workspace changes
-  - Add manual cache purge capability
+**Step 1: Data Layer**
+- [ ] Add `MARKDOWN` to `BioBlockType` enum in validators package
+- [ ] Define `markdownBlockSchema` with content field (max 5000 chars) using zod
+- [ ] Create `insertMarkdownBlockSchema` and `updateMarkdownBlockSchema` validators
+- [ ] Add markdown block type to database migration
 
-### Feature 2: Progressive Loading with Suspense
+**Step 2: Backend API**
+- [ ] Extend `bio-blocks.route.ts` create method to handle markdown block type
+- [ ] Add markdown content sanitization using DOMPurify or similar
+- [ ] Implement markdown validation to prevent XSS attacks
+- [ ] Add content length validation in tRPC route
+- [ ] Create markdown preview generation for admin panel
 
-- [ ] Create cart skeleton components
-  - Build CartSkeleton component matching final layout
-  - Create ProductSkeleton for product cards
-  - Design CheckoutFormSkeleton for form sections
+**Step 3: UI Component Package**
+- [ ] Create `markdown-block.tsx` in `@barely/ui` package
+- [ ] Export markdown editor component for reuse
+- [ ] Add markdown parsing utilities
 
-- [ ] Implement Suspense boundaries in cart pages
-  - Wrap cart content in Suspense with skeleton fallback
-  - Add nested Suspense for product sections
-  - Create loading.tsx files for route segments
+**Step 4: Frontend Editor**
+- [ ] Create `apps/bio/src/components/blocks/markdown/editor.tsx`
+- [ ] Integrate with existing markdown editor from `@barely/ui`
+- [ ] Add real-time preview in editor modal
+- [ ] Implement auto-save on blur with debounce
+- [ ] Add character count indicator
+- [ ] Create mobile-optimized editor layout
 
-- [ ] Split data fetching for parallel loading
-  - Fetch BrandKit in parallel with cart data
-  - Load product images asynchronously
-  - Defer non-critical data (recommendations, reviews)
+**Step 5: Frontend Renderer**
+- [ ] Create `apps/bio/src/components/blocks/markdown/renderer.tsx`
+- [ ] Implement markdown rendering with remark/rehype pipeline
+- [ ] Add proper styling for all markdown elements
+- [ ] Ensure responsive typography
 
-- [ ] Optimize component lazy loading
-  - Lazy load checkout form components
-  - Defer upsell components until main content loads
-  - Code-split payment provider SDKs
+**Step 6: Integration**
+- [ ] Register markdown block in block type registry
+- [ ] Add markdown block to block selector UI
+- [ ] Implement markdown block reordering support
+- [ ] Wire up create/edit/delete operations
 
-- [ ] Add streaming SSR configuration
-  - Enable streaming in Next.js config
-  - Configure React 18 streaming features
-  - Set appropriate chunk sizes for mobile
+**Step 7: Testing**
+- [ ] Write unit tests for markdown sanitization
+- [ ] Create E2E test for markdown block CRUD operations
+- [ ] Test markdown rendering consistency across devices
+- [ ] Verify XSS protection
 
-- [ ] Implement error boundaries
-  - Add error boundary around cart content
-  - Create fallback UI for loading failures
-  - Log errors to monitoring service
+### 🖼️ Feature 2: Image Block (Complete Implementation)
 
-- [ ] Create progressive image loading
-  - Use blur placeholders for product images
-  - Implement lazy loading with intersection observer
-  - Optimize image formats and sizes
+**Step 1: Data Layer**
+- [ ] Add `IMAGE` to `BioBlockType` enum
+- [ ] Define `imageBlockSchema` with assetId, caption (optional, 200 chars), altText fields
+- [ ] Create insert/update schemas with proper validation
+- [ ] Add image block migration to database schema
 
-### Feature 3: Cart Data Caching Strategy
+**Step 2: Backend API**
+- [ ] Extend bio-blocks route to handle image block creation
+- [ ] Integrate with `@barely/files` for asset validation
+- [ ] Implement image dimension validation (max 10MB)
+- [ ] Add CDN URL generation for different sizes
+- [ ] Create image metadata extraction for alt text suggestions
 
-- [ ] Implement Redis session caching
-  - Set up Redis connection in cart app
-  - Create cart session storage adapter
-  - Implement session-based cart retrieval
+**Step 3: UI Component Package**
+- [ ] Create `image-block.tsx` in `@barely/ui` package
+- [ ] Export reusable image display component
+- [ ] Add responsive image utilities
 
-- [ ] Cache product catalog data
-  - Store product details with 1-minute TTL
-  - Implement cache warming for popular products
-  - Add cache tags for targeted invalidation
+**Step 4: Frontend Editor**
+- [ ] Create `apps/bio/src/components/blocks/image/editor.tsx`
+- [ ] Integrate with asset picker from `@barely/files`
+- [ ] Add caption editing with character limit
+- [ ] Implement alt text field with accessibility hints
+- [ ] Add drag-and-drop image upload support
 
-- [ ] Create smart inventory checking
-  - Batch inventory checks per request
-  - Cache inventory status for 30 seconds
-  - Implement optimistic UI updates
+**Step 5: Frontend Renderer**
+- [ ] Create `apps/bio/src/components/blocks/image/renderer.tsx`
+- [ ] Implement with Next.js Image component
+- [ ] Create responsive image sizing with srcset
+- [ ] Add lazy loading with blur placeholder
+- [ ] Implement image zoom on click (lightbox)
 
-- [ ] Build cart persistence layer
-  - Store cart state in Redis
-  - Implement cart recovery after session timeout
-  - Add cross-device cart sync capability
+**Step 6: Integration**
+- [ ] Register image block in block registry
+- [ ] Add image format validation (JPG, PNG, WebP)
+- [ ] Wire up image upload flow
+- [ ] Connect to CDN for image delivery
 
-- [ ] Optimize database queries
-  - Add appropriate indexes for cart queries
-  - Implement query result caching
-  - Use database connection pooling
+**Step 7: Testing**
+- [ ] Write tests for image upload and validation
+- [ ] Test responsive image loading performance
+- [ ] Verify accessibility with screen readers
+- [ ] Test drag-and-drop functionality
 
-- [ ] Set up background data refresh
-  - Create background job for cache warming
-  - Implement stale-while-revalidate for products
-  - Add predictive prefetching for related items
+### 🎛️ Feature 3: Two-Panel Block (Complete Implementation)
 
-- [ ] Add cache monitoring
-  - Track cache hit/miss rates
-  - Monitor cache memory usage
-  - Alert on cache performance degradation
+**Step 1: Data Layer**
+- [ ] Add `TWO_PANEL` to `BioBlockType` enum
+- [ ] Define `twoPanelBlockSchema` with image, title, text, ctaButton, layoutOptions
+- [ ] Create layout options schema (imagePosition, mobileStack order)
+- [ ] Add CTA validation for URL or Barely asset links
+- [ ] Create database migration for two-panel blocks
 
-### Feature 4: Edge Optimization
+**Step 2: Backend API**
+- [ ] Extend bio-blocks route for two-panel block CRUD
+- [ ] Implement asset validation for panel image
+- [ ] Add CTA link validation and sanitization
+- [ ] Create layout configuration validation
+- [ ] Implement text content length limits (title: 100, text: 500)
 
-- [ ] Configure CDN caching headers
-  - Set Cache-Control for static assets (max-age=31536000)
-  - Configure s-maxage for dynamic content
-  - Implement Vary headers for proper caching
+**Step 3: UI Component Package**
+- [ ] Create `two-panel-block.tsx` in `@barely/ui` package
+- [ ] Export reusable two-panel layout component
+- [ ] Add responsive layout utilities
 
-- [ ] Optimize bundle splitting
-  - Analyze current bundle with webpack-bundle-analyzer
-  - Split vendor chunks appropriately
-  - Implement route-based code splitting
+**Step 4: Frontend Editor**
+- [ ] Create `apps/bio/src/components/blocks/two-panel/editor.tsx`
+- [ ] Add layout toggle controls (image position)
+- [ ] Implement mobile stack order toggle
+- [ ] Create CTA button with link picker (URL or asset)
+- [ ] Add visual layout preview in editor
 
-- [ ] Compress static assets
-  - Enable Brotli compression for text assets
-  - Optimize images with next/image
-  - Minify CSS and JavaScript
+**Step 5: Frontend Renderer**
+- [ ] Create `apps/bio/src/components/blocks/two-panel/renderer.tsx`
+- [ ] Implement with CSS Grid layout
+- [ ] Add responsive breakpoint handling
+- [ ] Implement container queries for adaptive layouts
+- [ ] Ensure proper mobile stacking
 
-- [ ] Implement edge functions
-  - Move BrandKit resolution to edge
-  - Cache API responses at edge locations
-  - Add geolocation-based optimization
+**Step 6: Integration**
+- [ ] Register two-panel block in block registry
+- [ ] Add layout preview icons in editor
+- [ ] Implement responsive preview modes
+- [ ] Wire up all layout configurations
 
-- [ ] Configure preloading strategies
-  - Preload critical fonts and CSS
-  - Use resource hints (dns-prefetch, preconnect)
-  - Implement link prefetching for likely navigation
+**Step 7: Testing**
+- [ ] Write tests for layout configurations
+- [ ] Test responsive behavior across breakpoints
+- [ ] Verify CTA link functionality
+- [ ] Test image/text combinations
 
-- [ ] Set up service worker
-  - Cache static assets offline
-  - Implement network-first strategy for API calls
-  - Add offline fallback page
+### 🛒 Feature 4: Cart Block (Complete Implementation)
 
-- [ ] Optimize third-party scripts
-  - Load payment SDKs asynchronously
-  - Defer analytics scripts
-  - Use web workers for heavy computations
+**Step 1: Data Layer**
+- [ ] Add `CART` to `BioBlockType` enum
+- [ ] Define `cartBlockSchema` with cartFunnelId, title, subtitle fields
+- [ ] Create cart funnel validation against workspace funnels
+- [ ] Add text length limits (title: 100, subtitle: 200)
+- [ ] Create database migration for cart blocks
 
-### Feature 5: Cart Preview in App
+**Step 2: Backend API**
+- [ ] Extend bio-blocks route for cart block operations
+- [ ] Implement cart funnel existence validation
+- [ ] Add workspace-scoped funnel access control
+- [ ] Create checkout URL generation logic
+- [ ] Add cart funnel preview data fetching
+- [ ] Implement cart availability checking
 
-- [ ] Create CartPreview component
-  - Copy pattern from bio preview in settings
-  - Build iframe-based preview container
-  - Add preview controls (device size, themes)
+**Step 3: UI Component Package**
+- [ ] Create `cart-block.tsx` in `@barely/ui` package
+- [ ] Export reusable cart button component
+- [ ] Add checkout flow utilities
 
-- [ ] Integrate preview in brand settings
-  - Add cart tab to settings/brand page
-  - Implement live preview updates
-  - Connect to BrandKit changes
+**Step 4: Frontend Editor**
+- [ ] Create `apps/bio/src/components/blocks/cart/editor.tsx`
+- [ ] Implement funnel dropdown selector
+- [ ] Add cart funnel preview in editor
+- [ ] Create custom button text editing
+- [ ] Show funnel details (price, availability)
 
-- [ ] Build preview data mocking
-  - Create sample cart data for preview
-  - Generate realistic product listings
-  - Mock checkout flow states
+**Step 5: Frontend Renderer**
+- [ ] Create `apps/bio/src/components/blocks/cart/renderer.tsx`
+- [ ] Implement checkout button with proper styling
+- [ ] Add loading state for checkout redirect
+- [ ] Implement sold out/unavailable state handling
+- [ ] Create conversion tracking integration
 
-- [ ] Add preview synchronization
-  - Sync BrandKit changes to preview
-  - Update preview on setting changes
-  - Implement debounced updates
+**Step 6: Integration**
+- [ ] Register cart block in block registry
+- [ ] Integrate with existing cart funnel system
+- [ ] Wire up checkout URL generation
+- [ ] Connect conversion tracking
 
-- [ ] Create preview API endpoint
-  - Build preview-specific data fetcher
-  - Add authentication for preview access
-  - Cache preview data appropriately
+**Step 7: Testing**
+- [ ] Write tests for cart funnel validation
+- [ ] Test checkout flow integration
+- [ ] Verify conversion tracking
+- [ ] Test edge cases (sold out, invalid funnel)
 
-### Feature 6: Performance Monitoring
+### 🚀 Feature 5: Final Integration & Polish
 
-- [ ] Implement Web Vitals tracking
-  - Add LCP, FID, CLS monitoring
-  - Track TTFB and FCP metrics
-  - Send metrics to analytics service
+**Performance Optimization**
+- [ ] Add virtual scrolling for long landing pages
+- [ ] Optimize image loading with priority hints
+- [ ] Implement progressive enhancement
 
-- [ ] Set up Real User Monitoring
-  - Track performance by user segment
-  - Monitor performance by geography
-  - Analyze device and connection impact
+**Documentation**
+- [ ] Create block type documentation for developers
+- [ ] Write user guides for each block type
+- [ ] Document API changes
 
-- [ ] Create performance dashboards
-  - Build Lighthouse CI integration
-  - Set up performance budgets
-  - Create alerting for regressions
+**End-to-End Testing**
+- [ ] Implement comprehensive E2E test suite
+- [ ] Add visual regression tests for block rendering
+- [ ] Create load testing for landing pages with many blocks
+- [ ] Test complete user journey for each block type
 
-- [ ] Add synthetic monitoring
-  - Set up Checkly or similar service
-  - Monitor critical user paths
-  - Test from multiple locations
+**Analytics & Monitoring**
+- [ ] Verify block interaction tracking
+- [ ] Test block render performance metrics
+- [ ] Validate error boundaries
+- [ ] Confirm conversion funnel tracking per block type
 
-- [ ] Implement custom performance marks
-  - Track cart initialization time
-  - Measure time to interactive
-  - Monitor API response times
-
-- [ ] Configure error tracking
-  - Set up Sentry for error monitoring
-  - Track performance-related errors
-  - Create error rate dashboards
-
-### Feature 7: Testing & Validation
-
-- [ ] Write unit tests for cache functions
-  - Test cache hit/miss scenarios
-  - Validate cache invalidation logic
-  - Test error handling paths
-
-- [ ] Create integration tests
-  - Test BrandKit provider integration
-  - Validate cart data flow
-  - Test cache warming processes
-
-- [ ] Build performance test suite
-  - Create Lighthouse CI tests
-  - Add load testing with k6
-  - Test on throttled connections
-
-- [ ] Implement E2E tests
-  - Test critical checkout paths
-  - Validate progressive loading
-  - Test error recovery flows
-
-- [ ] Add visual regression tests
-  - Capture skeleton state screenshots
-  - Test brand styling application
-  - Validate responsive layouts
-
-- [ ] Create cache testing utilities
-  - Build cache inspection tools
-  - Add cache debugging endpoints
-  - Create cache performance benchmarks
-
-### Feature 8: Migration & Rollout
-
-- [ ] Create feature flags
-  - Add flag for BrandKit caching
-  - Control progressive loading rollout
-  - Enable gradual user migration
-
-- [ ] Build rollback capabilities
-  - Create instant rollback switch
-  - Maintain backward compatibility
-  - Test rollback procedures
-
-- [ ] Set up A/B testing
-  - Compare old vs new performance
-  - Track conversion impact
-  - Monitor error rates
-
-- [ ] Create migration scripts
-  - Migrate existing cart sessions
-  - Warm caches before cutover
-  - Validate data integrity
-
-- [ ] Document deployment process
-  - Write runbook for deployment
-  - Document rollback procedures
-  - Create monitoring checklist
-
-- [ ] Plan staged rollout
-  - Start with 5% of traffic
-  - Monitor metrics at each stage
-  - Full rollout after validation
+**Launch Preparation**
+- [ ] Feature flag setup for gradual rollout
+- [ ] Migration guide for existing landing pages
+- [ ] Performance benchmarking
+- [ ] Security audit of all new endpoints

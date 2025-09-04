@@ -1,39 +1,83 @@
 'use client';
 
-import type { Bio, BioLink } from '@barely/validators';
+import type { BioBlockType } from '@barely/const';
+import type {
+	Bio,
+	BioLink,
+	BioTrackingData,
+	CartFunnel,
+	FmPage,
+	Link,
+} from '@barely/validators';
 import React, { createContext, useContext } from 'react';
 
+export interface BioBlockContext {
+	blockId: string;
+	blockType: BioBlockType;
+	blockIndex: number;
+	linkIndex: number;
+	// targets
+	targetLinkId?: string;
+	targetCartFunnelId?: string;
+	targetFmId?: string;
+	targetUrl?: string;
+	targetBioId?: string;
+}
+
 export type BioOnLinkClick = (
-	link: BioLink & { blockId: string; lexoRank: string },
-	context?: {
-		blockId?: string;
-		blockType?: 'links' | 'contactForm' | 'cart';
-		blockIndex?: number;
-		linkIndex?: number;
-	},
+	link: BioLink,
+	context?: BioBlockContext,
 ) => void | Promise<void>;
-export type BioOnEmailCapture = (
-	email: string,
-	marketingConsent: boolean,
-) => Promise<{ success: boolean; message: string }>;
+
+export type BioOnEmailCapture = (data: {
+	bioId: string;
+	email: string;
+	marketingConsent: boolean;
+}) => Promise<{ success: boolean; message: string }>;
+
 export type BioOnPageView = () => void | Promise<void>;
+
+export type BioOnTargetCartFunnelClick = (
+	cartFunnel: CartFunnel,
+	context?: BioBlockContext,
+) => void | Promise<void>;
+
+export type BioOnTargetFmClick = (
+	fm: FmPage,
+	context?: BioBlockContext,
+) => void | Promise<void>;
+
+export type BioOnTargetLinkClick = (
+	link: Link,
+	context?: BioBlockContext,
+) => void | Promise<void>;
+
+export type BioOnTargetBioClick = (
+	bio: Bio,
+	context?: BioBlockContext,
+) => void | Promise<void>;
+
+export type BioOnTargetUrlClick = (
+	url: string,
+	context?: BioBlockContext,
+) => void | Promise<void>;
 
 interface BioContextValue {
 	bio: Bio;
 	isPreview?: boolean;
+	tracking?: BioTrackingData;
 	onLinkClick: null | BioOnLinkClick;
+	onTargetBioClick: null | BioOnTargetBioClick;
+	onTargetLinkClick: null | BioOnTargetLinkClick;
+	onTargetCartFunnelClick: null | BioOnTargetCartFunnelClick;
+	onTargetFmClick: null | BioOnTargetFmClick;
+	onTargetUrlClick: null | BioOnTargetUrlClick;
 	onEmailCapture: null | BioOnEmailCapture;
 }
 
 const BioContext = createContext<BioContextValue | undefined>(undefined);
 
-export function BioProvider(v: {
-	bio: Bio;
-	children: React.ReactNode;
-	isPreview: boolean;
-	onLinkClick: null | BioOnLinkClick;
-	onEmailCapture: null | BioOnEmailCapture;
-}) {
+export function BioProvider(v: BioContextValue & { children: React.ReactNode }) {
 	const { children, ...value } = v;
 	return <BioContext.Provider value={value}>{children}</BioContext.Provider>;
 }

@@ -309,6 +309,65 @@ export function parseReferer(req: NextRequest) {
 	return { referer, referer_url };
 }
 
+/**
+ * Parses journey tracking information from incoming request URL parameters.
+ *
+ * Journey tracking enables cross-domain analytics for user flows across barely.io services.
+ * Each journey has a unique ID that persists across domain boundaries, allowing us to track
+ * complete conversion funnels from initial touchpoint through final conversion.
+ *
+ * @param req - Next.js request object containing URL parameters
+ *
+ * @returns Journey tracking information including:
+ * - journeyId: Unique identifier format: `{origin}_{timestamp}_{uniqueId}` (e.g., `bio_1736954400000_abc123`)
+ * - journeyOrigin: Where the journey started (extracted from journeyId prefix)
+ * - journeySource: Last touchpoint in format `{app}:{handle}:{key}` (e.g., `bio:baresky:home`)
+ * - journeyStep: Current step number in the journey (increments with each cross-domain navigation)
+ * - journeyPath: Array of touchpoints parsed from journeySource
+ * - referrerId: ID of the referring asset (e.g., bio.id when coming from a bio page)
+ * - originalReferrerId: ID of the first asset in the attribution chain
+ *
+ * @example
+ * // URL: https://barelycart.com/checkout?jid=bio_1736954400000_abc&jsrc=bio:baresky:home&jstep=2
+ * const journey = parseJourneyInfo(req);
+ * // Returns:
+ * // {
+ * //   journeyId: 'bio_1736954400000_abc',
+ * //   journeyOrigin: 'bio',
+ * //   journeySource: 'bio:baresky:home',
+ * //   journeyStep: '2',
+ * //   journeyPath: ['bio', 'baresky', 'home'],
+ * //   referrerId: null,
+ * //   originalReferrerId: null
+ * // }
+ */
+export function parseJourneyInfo(req: NextRequest) {
+	const params = req.nextUrl.searchParams;
+
+	// Extract journey params from URL
+	const journeyId = params.get('jid');
+	const journeySource = params.get('jsrc');
+	const journeyStep = params.get('jstep');
+	const referrerId = params.get('rid');
+	const originalReferrerId = params.get('orid');
+
+	// Parse journey origin from ID
+	const journeyOrigin = journeyId?.split('_')[0] ?? null;
+
+	// Build journey path from source parameter
+	const journeyPath = journeySource ? journeySource.split(':') : [];
+
+	return {
+		journeyId,
+		journeyOrigin,
+		journeySource,
+		journeyStep: journeyStep ?? '1',
+		journeyPath,
+		referrerId,
+		originalReferrerId,
+	};
+}
+
 // session
 export function parseSession({
 	req,
@@ -322,8 +381,11 @@ export function parseSession({
 	const handleAndKeyExist = handle && key;
 	const params = req.nextUrl.searchParams;
 
+	// Parse journey info
+	const journeyInfo = parseJourneyInfo(req);
+
 	// Check for fanId in query params first, then cookies
-	const fanIdFromQuery = params.get('fid');
+	const fanIdFromQuery = params.get('fid') ?? params.get('fanId');
 	const fanId =
 		fanIdFromQuery ??
 		(handleAndKeyExist ?
@@ -332,8 +394,10 @@ export function parseSession({
 		null;
 
 	// Check for sessionId in query params first, then cookies
-	const sessionIdFromQuery = params.get('sid');
+	// Use journey ID as session ID if available
+	const sessionIdFromQuery = params.get('sid') ?? params.get('sessionId');
 	const sessionId =
+		journeyInfo.journeyId ??
 		sessionIdFromQuery ??
 		(handleAndKeyExist ?
 			req.cookies.get(`${handle}.${key}.bsid`)?.value
@@ -348,11 +412,6 @@ export function parseSession({
 		(handleAndKeyExist ?
 			req.cookies.get(`${handle}.${key}.sessionRefererUrl`)?.value
 		:	req.cookies.getAll().find(cookie => cookie.name.endsWith('.sessionRefererUrl'))
-				?.value) ?? null;
-	const sessionRefererId =
-		(handleAndKeyExist ?
-			req.cookies.get(`${handle}.${key}.sessionRefererId`)?.value
-		:	req.cookies.getAll().find(cookie => cookie.name.endsWith('.sessionRefererId'))
 				?.value) ?? null;
 
 	const sessionEmailBroadcastId =
@@ -415,11 +474,19 @@ export function parseSession({
 		sessionMetaPlacement,
 		sessionReferer,
 		sessionRefererUrl,
-		sessionRefererId,
+		sessionRefererId:
+			journeyInfo.referrerId ??
+			(handleAndKeyExist ?
+				req.cookies.get(`${handle}.${key}.sessionRefererId`)?.value
+			:	req.cookies.getAll().find(cookie => cookie.name.endsWith('.sessionRefererId'))
+					?.value) ??
+			null,
 		sessionEmailBroadcastId,
 		sessionEmailTemplateId,
 		sessionFlowActionId,
 		sessionLandingPageId,
+		// Journey tracking fields
+		...journeyInfo,
 	};
 }
 
@@ -447,6 +514,14 @@ export const visitorInfoSchema = z.object({
 	sessionEmailTemplateId: z.string().nullable(),
 	sessionFlowActionId: z.string().nullable(),
 	sessionLandingPageId: z.string().nullable(),
+	// journey tracking
+	journeyId: z.string().nullable(),
+	journeyOrigin: z.string().nullable(),
+	journeySource: z.string().nullable(),
+	journeyStep: z.string(),
+	journeyPath: z.array(z.string()),
+	referrerId: z.string().nullable(),
+	originalReferrerId: z.string().nullable(),
 });
 export type VisitorInfo = z.input<typeof visitorInfoSchema>;
 
@@ -480,6 +555,52 @@ export function parseReqForVisitorInfo({
 	} satisfies VisitorInfo;
 }
 
+/**
+ * Sets visitor tracking cookies including journey tracking for cross-domain analytics.
+ *
+ * This function is called by middleware on every request to maintain user journey state.
+ * It handles both incoming journey data from URL parameters and creates new journeys
+ * when users arrive without tracking parameters.
+ *
+ * ## Cookie Strategy
+ * Cookies are namespaced by `{handle}.{key}` to support multiple workspaces/assets:
+ * - Journey cookies: 7-day expiry for long-term funnel analysis
+ * - Session cookies: 24-hour expiry for short-term behavior tracking
+ * - Attribution cookies: Preserved from URL parameters (fbclid, meta campaigns, etc.)
+ *
+ * ## Journey Lifecycle
+ * 1. **New Journey**: If no journey ID exists, creates one with current app as origin
+ * 2. **Continuing Journey**: If journey ID in URL, updates path and increments step
+ * 3. **Attribution Preservation**: Maintains referrer chain through cookies
+ *
+ * @param req - Incoming Next.js request with URL parameters and cookies
+ * @param res - Next.js response to set cookies on
+ * @param app - Current application identifier (bio, cart, fm, etc.)
+ * @param handle - Workspace/artist handle
+ * @param key - Asset key (e.g., 'home' for bio, 'checkout' for cart)
+ * @param cartId - Optional cart ID for cart app session tracking
+ *
+ * @example
+ * // In bio middleware
+ * await setVisitorCookies({
+ *   req,
+ *   res,
+ *   app: 'bio',
+ *   handle: 'baresky',
+ *   key: 'home'
+ * });
+ *
+ * @example
+ * // In cart middleware with cart ID
+ * await setVisitorCookies({
+ *   req,
+ *   res,
+ *   app: 'cart',
+ *   handle: 'baresky',
+ *   key: 'checkout',
+ *   cartId: 'cart_xyz789'
+ * });
+ */
 export async function setVisitorCookies({
 	req,
 	res,
@@ -491,7 +612,7 @@ export async function setVisitorCookies({
 	res: NextResponse;
 	handle: string | null;
 	key: string | null;
-	app: 'cart' | 'link' | 'fm' | 'page' | 'press' | 'nyc' | 'www' | 'vip';
+	app: 'bio' | 'cart' | 'link' | 'fm' | 'page' | 'press' | 'nyc' | 'www' | 'vip';
 	cartId?: string;
 }) {
 	const handle = handleAndKey.handle ?? '_';
@@ -499,11 +620,66 @@ export async function setVisitorCookies({
 
 	const params = req.nextUrl.searchParams;
 	const { referer, referer_url } = parseReferer(req);
+	const journeyInfo = parseJourneyInfo(req);
 
 	await Promise.resolve(1); // fixme
 
+	// Handle journey tracking
+	if (journeyInfo.journeyId) {
+		// Store journey ID from URL params
+		res.cookies.set(`${handle}.${key}.journeyId`, journeyInfo.journeyId, {
+			httpOnly: true,
+			maxAge: 60 * 60 * 24 * 7, // 7 days for journey tracking
+		});
+
+		// Store journey origin
+		if (journeyInfo.journeyOrigin) {
+			res.cookies.set(`${handle}.${key}.journeyOrigin`, journeyInfo.journeyOrigin, {
+				httpOnly: true,
+				maxAge: 60 * 60 * 24 * 7,
+			});
+		}
+
+		// Update journey path
+		const currentPath = [...journeyInfo.journeyPath, `${app}:${handle}:${key}`];
+		res.cookies.set(`${handle}.${key}.journeyPath`, JSON.stringify(currentPath), {
+			httpOnly: true,
+			maxAge: 60 * 60 * 24 * 7,
+		});
+
+		// Store journey step
+		res.cookies.set(`${handle}.${key}.journeyStep`, journeyInfo.journeyStep, {
+			httpOnly: true,
+			maxAge: 60 * 60 * 24 * 7,
+		});
+	} else if (!req.cookies.get(`${handle}.${key}.journeyId`)) {
+		// No journey ID from URL or cookies - start new journey
+		const newJourneyId = `${app}_${Date.now()}_${newId('journey')}`;
+		res.cookies.set(`${handle}.${key}.journeyId`, newJourneyId, {
+			httpOnly: true,
+			maxAge: 60 * 60 * 24 * 7,
+		});
+		res.cookies.set(`${handle}.${key}.journeyOrigin`, app, {
+			httpOnly: true,
+			maxAge: 60 * 60 * 24 * 7,
+		});
+		res.cookies.set(
+			`${handle}.${key}.journeyPath`,
+			JSON.stringify([`${app}:${handle}:${key}`]),
+			{
+				httpOnly: true,
+				maxAge: 60 * 60 * 24 * 7,
+			},
+		);
+		res.cookies.set(`${handle}.${key}.journeyStep`, '1', {
+			httpOnly: true,
+			maxAge: 60 * 60 * 24 * 7,
+		});
+	}
+
 	// Check for sessionId in query params - if present, use it to override/set cookie
-	const sessionIdFromQuery = params.get('sid');
+	// Now also check for journey ID as potential session ID
+	const sessionIdFromQuery = params.get('sid') ?? journeyInfo.journeyId;
 	if (sessionIdFromQuery) {
 		res.cookies.set(`${handle}.${key}.bsid`, sessionIdFromQuery, {
 			httpOnly: true,
@@ -515,6 +691,7 @@ export async function setVisitorCookies({
 		const sessionId =
 			app === 'cart' ? (cartId ?? newId('cart'))
 			: app === 'link' ? newId('linkClick')
+			: app === 'bio' ? newId('bioSession')
 			: app === 'fm' ? newId('fmSession')
 			: app === 'page' ? newId('landingPageSession')
 			: app === 'www' ? newId('wwwSession')
@@ -640,11 +817,33 @@ export async function setVisitorCookies({
 			},
 		);
 
-	if (params.has('refererId') && !res.cookies.get(`${handle}.${key}.sessionRefererId`))
+	// Handle referrer ID tracking from journey params
+	if (journeyInfo.referrerId && !res.cookies.get(`${handle}.${key}.sessionRefererId`)) {
+		res.cookies.set(`${handle}.${key}.sessionRefererId`, journeyInfo.referrerId, {
+			httpOnly: true,
+			maxAge: 60 * 60 * 24,
+		});
+	} else if (
+		params.has('refererId') &&
+		!res.cookies.get(`${handle}.${key}.sessionRefererId`)
+	) {
 		res.cookies.set(`${handle}.${key}.sessionRefererId`, params.get('refererId') ?? '', {
 			httpOnly: true,
 			maxAge: 60 * 60 * 24,
 		});
+	}
+
+	// Handle original referrer ID tracking
+	if (journeyInfo.originalReferrerId) {
+		res.cookies.set(
+			`${handle}.${key}.originalReferrerId`,
+			journeyInfo.originalReferrerId,
+			{
+				httpOnly: true,
+				maxAge: 60 * 60 * 24 * 7,
+			},
+		);
+	}
 
 	return;
 }
@@ -684,4 +883,12 @@ export const DEFAULT_VISITOR_INFO: VisitorInfo = {
 	sessionEmailTemplateId: null,
 	sessionFlowActionId: null,
 	sessionLandingPageId: null,
+	// journey tracking
+	journeyId: null,
+	journeyOrigin: null,
+	journeySource: null,
+	journeyStep: '1',
+	journeyPath: [],
+	referrerId: null,
+	originalReferrerId: null,
 };

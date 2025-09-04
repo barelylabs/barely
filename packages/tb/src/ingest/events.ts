@@ -2,6 +2,7 @@ import type { z } from 'zod/v4';
 
 import { tinybird } from '../index';
 import {
+	bioEventIngestSchema,
 	cartEventIngestSchema,
 	emailEventIngestSchema,
 	fmEventIngestSchema,
@@ -42,6 +43,16 @@ export const ingestPageEvent = tinybird.buildIngestEndpoint<
 >({
 	datasource: 'barely_events',
 	event: pageEventIngestSchema,
+});
+
+/* bio */
+
+export const ingestBioEvent = tinybird.buildIngestEndpoint<
+	z.output<typeof bioEventIngestSchema>,
+	z.input<typeof bioEventIngestSchema>
+>({
+	datasource: 'barely_events',
+	event: bioEventIngestSchema,
 });
 
 /* vip */

@@ -12,21 +12,23 @@ const prefixes = {
 	workspace: 'ws',
 	providerAccount: 'app',
 	// nyc
-	nycSession: 'nycs',
+	nycSession: 'nyc_sid',
 	// web
 	landingPage: 'lp',
 	link: 'link',
 	linkClick: 'lc',
 	bio: 'bio',
+	bioSession: 'bio_sid',
 	bioButton: 'bb',
 	bioBlock: 'blk',
 	bioLink: 'bl',
 	brandKit: 'bk',
-	landingPageSession: 'lps',
+	landingPageSession: 'lp_sid',
 	pressKit: 'pk',
 	// webSession: 'web_session',
-	wwwSession: 'wwws',
-	barelySession: 'bs',
+	wwwSession: 'www_sid',
+	barelySession: 'bsid',
+	journey: 'jid',
 	// flow
 	flow: 'flow',
 	flowTrigger: 'flow_trigger',
@@ -60,7 +62,7 @@ const prefixes = {
 	// fm
 	fmPage: 'fm',
 	fmLink: 'fml',
-	fmSession: 'fms',
+	fmSession: 'fm_sid',
 	fmCoverArt: 'fmca',
 	// forms
 	form: 'form',
@@ -79,7 +81,7 @@ const prefixes = {
 	// vip
 	vipSwap: 'vip_swap',
 	vipSwapAccessLog: 'vip_sal',
-	vipSession: 'vips',
+	vipSession: 'vip_sid',
 	// invoice
 	invoice: 'inv',
 	invoiceClient: 'invc',

@@ -81,6 +81,13 @@ export const webEventIngestSchema = z
 		// event data
 		timestamp: z.string().datetime(),
 		type: z.enum(WEB_EVENT_TYPES),
+
+		// journey tracking
+		journeyId: z.string().optional().default(''),
+		journeyOrigin: z.string().optional().default(''),
+		journeySource: z.string().optional().default(''),
+		journeyStep: z.number().optional().default(1),
+		journeyPath: z.array(z.string()).optional().default([]),
 	})
 	.extend(visitorSessionTinybirdSchema.shape)
 	.extend(reportedEventTinybirdSchema.shape);
@@ -99,6 +106,9 @@ export const bioEventIngestSchema = webEventIngestSchema.extend({
 });
 
 export const cartEventIngestSchema = webEventIngestSchema.extend({
+	// Cart-specific session for backward compatibility
+	cartSessionId: z.string().optional().default(''),
+
 	cart_landingPageId: z.string().nullish().default(''),
 	cart_landingPage_mainProductId: z.string().nullish().default(''),
 

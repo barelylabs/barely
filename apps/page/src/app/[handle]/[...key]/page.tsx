@@ -3,7 +3,7 @@ import type { EventTrackingProps, LandingPage } from '@barely/validators/schemas
 import type { Metadata } from 'next';
 import type { z } from 'zod/v4';
 import { getLandingPageData } from '@barely/lib/functions/landing-page.render.fns';
-import { getAssetHref, getLinkHref } from '@barely/utils';
+import { getAssetHref, getTrackingEnrichedHref } from '@barely/utils';
 import { eventReportSearchParamsSchema } from '@barely/validators/schemas';
 
 import { mdxCard } from '@barely/ui/mdx-card';
@@ -148,7 +148,7 @@ function mdxLinkButton({
 	tracking: EventTrackingProps;
 }) {
 	const LinkButton = (props: { href: string; label: string }) => {
-		const href = getLinkHref({
+		const href = getTrackingEnrichedHref({
 			href: props.href,
 			tracking,
 		});

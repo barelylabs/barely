@@ -48,7 +48,11 @@ export function BioEmailCaptureRender() {
 
 		try {
 			if (onEmailCapture) {
-				const result = await onEmailCapture(data.email, data.marketingConsent);
+				const result = await onEmailCapture({
+					bioId: bio.id,
+					email: data.email,
+					marketingConsent: data.marketingConsent,
+				});
 				setIsSubmitted(true);
 				setSuccessMessage(result.message);
 			} else {

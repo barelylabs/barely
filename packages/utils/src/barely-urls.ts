@@ -11,3 +11,12 @@ export const getSearchParams = (url: string) => {
 
 	return params;
 };
+
+export const parseHandleAndKey = (handleAndKey: string[], keyDefault = 'home') => {
+	const handle = handleAndKey[0] ?? null;
+	const key = handleAndKey.slice(1).join('/');
+
+	console.log('typeof key', typeof key);
+
+	return { handle, key: key.length ? key : keyDefault };
+};
