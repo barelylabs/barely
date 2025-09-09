@@ -382,6 +382,23 @@ jobs:
           echo $DATABASE_URL | pnpm vercel env add DATABASE_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
           echo $DATABASE_POOL_URL | pnpm vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
 
+      - name: update vercel env - app-invoice/preview/branch
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_INVOICE_PROJECT_ID }}
+        run: |
+          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
+
+          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
+            pnpm vercel env rm DATABASE_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
+            pnpm vercel env rm DATABASE_POOL_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+          echo $DATABASE_URL | pnpm vercel env add DATABASE_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
+          echo $DATABASE_POOL_URL | pnpm vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
+
       - name: update vercel env - bio/preview/branch
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_BIO_PROJECT_ID }}
@@ -447,7 +464,7 @@ jobs:
       environment: preview
       git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 110
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -464,7 +481,7 @@ jobs:
       environment: preview
       git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 120
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -480,7 +497,7 @@ jobs:
       environment: preview
       git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 10
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -496,7 +513,7 @@ jobs:
       environment: preview
       git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 20
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -512,7 +529,7 @@ jobs:
       environment: preview
       git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 30
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -528,7 +545,7 @@ jobs:
       environment: preview
       git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 40
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -544,7 +561,7 @@ jobs:
       environment: preview
       git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 130
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -560,7 +577,7 @@ jobs:
       environment: preview
       git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 50
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -576,7 +593,7 @@ jobs:
       environment: preview
       git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 60
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -592,7 +609,7 @@ jobs:
       environment: preview
       git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 70
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -608,7 +625,7 @@ jobs:
       environment: preview
       git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 80
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -624,7 +641,7 @@ jobs:
       environment: preview
       git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 90
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -640,7 +657,7 @@ jobs:
       environment: preview
       git_branch: ${{ needs.git-meta.outputs.git_branch_name }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 100
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -655,10 +672,12 @@ jobs:
         neon-preview,
         deploy-app,
         deploy-app-fm,
+        deploy-app-invoice,
         deploy-bio,
         deploy-cart,
         deploy-link,
         deploy-fm,
+        deploy-invoice,
         deploy-manage-email,
         deploy-nyc,
         deploy-page,
@@ -681,17 +700,19 @@ jobs:
             | :iphone: app | :rocket: preview | :mag: inspect |
             | ------------ | ---------------- | ------------- |
             | :iphone: app | [preview](${{ needs.deploy-app.outputs.deployment_url }}) | [inspect](${{ needs.deploy-app.outputs.inspect_url }}) |
-            | :shopping_cart: cart | [preview](${{ needs.deploy-cart.outputs.deployment_url }}) | [inspect](${{ needs.deploy-cart.outputs.inspect_url }}) |
-            | :link: link | [preview](${{ needs.deploy-link.outputs.deployment_url }}) | [inspect](${{ needs.deploy-link.outputs.inspect_url }}) |
-            | :seedling: bio | [preview](${{ needs.deploy-bio.outputs.deployment_url }}) | [inspect](${{ needs.deploy-bio.outputs.inspect_url }}) |
-            | :radio: fm | [preview](${{ needs.deploy-fm.outputs.deployment_url }}) | [inspect](${{ needs.deploy-fm.outputs.inspect_url }}) |
             | :radio: app-fm | [preview](${{ needs.deploy-app-fm.outputs.deployment_url }}) | [inspect](${{ needs.deploy-app-fm.outputs.inspect_url }}) |
-            | :newspaper: press | [preview](${{ needs.deploy-press.outputs.deployment_url }}) | [inspect](${{ needs.deploy-press.outputs.inspect_url }}) |
-            | :city_sunset: nyc | [preview](${{ needs.deploy-nyc.outputs.deployment_url }}) | [inspect](${{ needs.deploy-nyc.outputs.inspect_url }}) |
-            | :globe_with_meridians: www | [preview](${{ needs.deploy-www.outputs.deployment_url }}) | [inspect](${{ needs.deploy-www.outputs.inspect_url }}) |
-            | :page_facing_up: page | [preview](${{ needs.deploy-page.outputs.deployment_url }}) | [inspect](${{ needs.deploy-page.outputs.inspect_url }}) |
+            | :receipt: app-invoice | [preview](${{ needs.deploy-app-invoice.outputs.deployment_url }}) | [inspect](${{ needs.deploy-app-invoice.outputs.inspect_url }}) |
+            | :seedling: bio | [preview](${{ needs.deploy-bio.outputs.deployment_url }}) | [inspect](${{ needs.deploy-bio.outputs.inspect_url }}) |
+            | :shopping_cart: cart | [preview](${{ needs.deploy-cart.outputs.deployment_url }}) | [inspect](${{ needs.deploy-cart.outputs.inspect_url }}) |
+            | :radio: fm | [preview](${{ needs.deploy-fm.outputs.deployment_url }}) | [inspect](${{ needs.deploy-fm.outputs.inspect_url }}) |
+            | :receipt: invoice | [preview](${{ needs.deploy-invoice.outputs.deployment_url }}) | [inspect](${{ needs.deploy-invoice.outputs.inspect_url }}) |
+            | :link: link | [preview](${{ needs.deploy-link.outputs.deployment_url }}) | [inspect](${{ needs.deploy-link.outputs.inspect_url }}) |
             | :email: manage-email | [preview](${{ needs.deploy-manage-email.outputs.deployment_url }}) | [inspect](${{ needs.deploy-manage-email.outputs.inspect_url }}) |
+            | :city_sunset: nyc | [preview](${{ needs.deploy-nyc.outputs.deployment_url }}) | [inspect](${{ needs.deploy-nyc.outputs.inspect_url }}) |
+            | :page_facing_up: page | [preview](${{ needs.deploy-page.outputs.deployment_url }}) | [inspect](${{ needs.deploy-page.outputs.inspect_url }}) |
+            | :newspaper: press | [preview](${{ needs.deploy-press.outputs.deployment_url }}) | [inspect](${{ needs.deploy-press.outputs.inspect_url }}) |
             | :star: vip | [preview](${{ needs.deploy-vip.outputs.deployment_url }}) | [inspect](${{ needs.deploy-vip.outputs.inspect_url }}) |
+            | :globe_with_meridians: www | [preview](${{ needs.deploy-www.outputs.deployment_url }}) | [inspect](${{ needs.deploy-www.outputs.inspect_url }}) |
 
             ## db
             | :floppy_disk: db | :mag: inspect |
@@ -705,9 +726,11 @@ jobs:
         trigger-preview,
         deploy-app,
         deploy-app-fm,
+        deploy-app-invoice,
         deploy-bio,
         deploy-cart,
         deploy-fm,
+        deploy-invoice,
         deploy-link,
         deploy-manage-email,
         deploy-nyc,

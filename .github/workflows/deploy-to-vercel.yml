@@ -117,7 +117,37 @@ jobs:
             BUILD_PACKAGE="@barely/${{ inputs.app_name }}"
           fi
           
-          pnpm build:${{ inputs.environment }} --filter=$BUILD_PACKAGE --token=${{ secrets.VERCEL_TOKEN }}
+          # Run build and capture output for error detection
+          if ! BUILD_OUTPUT=$(pnpm build:${{ inputs.environment }} --filter=$BUILD_PACKAGE --token=${{ secrets.VERCEL_TOKEN }} 2>&1); then
+            echo "$BUILD_OUTPUT"
+            
+            # Check for the specific lockfile mismatch error
+            if echo "$BUILD_OUTPUT" | grep -q "specifiers in the lockfile.*don't match specs in package.json" || \
+               echo "$BUILD_OUTPUT" | grep -q "Cannot install with \"frozen-lockfile\"" || \
+               echo "$BUILD_OUTPUT" | grep -q "ERR_PNPM_OUTDATED_LOCKFILE"; then
+              echo ""
+              echo "========================================="
+              echo "❌ ERROR: Lockfile mismatch detected for app variant"
+              echo "========================================="
+              echo ""
+              echo "This error occurs because the app variant '${{ inputs.current_app_override }}' is created"
+              echo "dynamically during CI/CD and doesn't exist in the pnpm-lock.yaml file."
+              echo ""
+              echo "TO FIX THIS:"
+              echo "1. Go to the Vercel dashboard: https://vercel.com/${{ inputs.scope }}"
+              echo "2. Find the project: app-${{ inputs.current_app_override }}"
+              echo "3. Go to Settings → General → Build & Development Settings"
+              echo "4. Override the 'Install Command' field with: echo 'Skipping install'"
+              echo "5. Save the changes and re-run this workflow"
+              echo ""
+              echo "This is a one-time configuration that tells Vercel to skip the"
+              echo "dependency installation step since we're building in CI/CD."
+              echo "========================================="
+            fi
+            exit 1
+          fi
+          
+          echo "$BUILD_OUTPUT"
           
           # Copy .vercel to root for deployment
           # For app variants, copy from the copied directory

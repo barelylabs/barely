@@ -219,7 +219,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 110
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -237,7 +237,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 120
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -254,7 +254,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 10
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -271,7 +271,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 20
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -288,7 +288,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 30
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -305,7 +305,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 130
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -322,7 +322,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 40
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -339,7 +339,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 50
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -356,7 +356,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 60
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -377,7 +377,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 70
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -394,7 +394,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 80
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -411,7 +411,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 90
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -428,7 +428,7 @@ jobs:
       environment: production
       git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
       vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 100
+      delay_seconds: 0
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
