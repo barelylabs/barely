@@ -2,6 +2,8 @@ import { APPS } from '@barely/const';
 import { createEnv } from '@t3-oss/env-nextjs';
 import { z } from 'zod/v4';
 
+import { authEnv } from '@barely/auth/env';
+
 type RateLimitTime =
 	| `${number} ms`
 	| `${number} s`
@@ -35,6 +37,7 @@ const rateLimitSchema = z
 	.default('1 h');
 
 export const libEnv = createEnv({
+	extends: [authEnv],
 	server: {
 		ANTHROPIC_API_KEY: z.string(),
 		AUTH_SECRET: z.string(),
