@@ -6,12 +6,13 @@ import type { EventTrackingProps } from './event-report.schema';
  * Bio-specific tracking interface that properly handles both string search params
  * and parsed/processed values like journeyPath array
  */
-export interface BioTrackingData extends Omit<EventTrackingProps, 'journeyPath'> {
+export interface BioTrackingData
+	extends Omit<EventTrackingProps, 'journeyPath' | 'journeyStep'> {
 	// Journey tracking - processed values
 	journeyId?: string;
 	journeyOrigin?: string;
 	journeySource?: string;
-	journeyStep?: string;
+	journeyStep?: number;
 	journeyPath?: string[]; // Always an array when processed
 	originalReferrerId?: string;
 
@@ -50,7 +51,7 @@ export const bioTrackingSchema = z.object({
 	journeyId: z.string().optional(),
 	journeyOrigin: z.string().optional(),
 	journeySource: z.string().optional(),
-	journeyStep: z.string().optional(),
+	journeyStep: z.number().optional(),
 	journeyPath: z.array(z.string()).optional(),
 	originalReferrerId: z.string().optional(),
 

@@ -92,10 +92,10 @@ SCHEMA >
     `bio_linkText` Nullable(String) `json:$.bio_linkText`,
     `bio_linkAnimation` Nullable(String) `json:$.bio_linkAnimation`,
     `bio_emailMarketingOptIn` Nullable(UInt8) `json:$.bio_emailMarketingOptIn`,
-    `journeyId` String `json:$.journeyId`,
-    `journeyOrigin` String `json:$.journeyOrigin`,
-    `journeySource` String `json:$.journeySource`,
-    `journeyStep` UInt16 `json:$.journeyStep`,
+    `journeyId` Nullable(String) `json:$.journeyId`,
+    `journeyOrigin` Nullable(String) `json:$.journeyOrigin`,
+    `journeySource` Nullable(String) `json:$.journeySource`,
+    `journeyStep` Nullable(UInt16) `json:$.journeyStep`,
     `journeyPath` Array(String) `json:$.journeyPath[:]`,
     `cartSessionId` Nullable(String) `json:$.cartSessionId`
 
@@ -193,10 +193,10 @@ FORWARD_QUERY >
         defaultValueOfTypeName('Nullable(String)') AS bio_linkText,
         defaultValueOfTypeName('Nullable(String)') AS bio_linkAnimation,
         defaultValueOfTypeName('Nullable(UInt8)') AS bio_emailMarketingOptIn,
-        sessionId AS journeyId,
-        splitByChar('_', sessionId)[1] AS journeyOrigin,
-        '' AS journeySource,
-        CAST(1 AS UInt16) AS journeyStep,
+        CAST(COALESCE(sessionId, ''), 'Nullable(String)') AS journeyId,
+        CAST(COALESCE(splitByChar('_', sessionId)[1], ''), 'Nullable(String)') AS journeyOrigin,
+        CAST('', 'Nullable(String)') AS journeySource,
+        CAST(1, 'Nullable(UInt16)') AS journeyStep,
         CAST([] AS Array(String)) AS journeyPath,
         defaultValueOfTypeName('Nullable(String)') AS cartSessionId
 

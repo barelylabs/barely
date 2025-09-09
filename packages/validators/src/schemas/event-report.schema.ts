@@ -41,11 +41,34 @@ export const EventTrackingKeys = [
 	'originalReferrerId',
 ] as const;
 
-export type EventTrackingProps = Partial<
-	Record<(typeof EventTrackingKeys)[number], string>
-> & {
-	journeyPath?: string[]; // Array needs special handling
-};
+// export type EventTrackingProps = Partial<
+// 	Record<(typeof EventTrackingKeys)[number], string | number>
+// > & {
+// 	journeyPath?: string[]; // Array needs special handling
+// };
+
+export interface EventTrackingProps {
+	emailBroadcastId?: string;
+	emailTemplateId?: string;
+	fanId?: string;
+	fbclid?: string;
+	flowActionId?: string;
+	landingPageId?: string;
+	refererId?: string;
+	sessionId?: string;
+	sid?: string; // alias for sessionId in query params
+	fid?: string; // alias for fanId in query params
+	metaCampaignId?: string;
+	metaAdSetId?: string;
+	metaAdId?: string;
+	metaPlacementId?: string;
+	journeyId?: string;
+	journeyOrigin?: string;
+	journeySource?: string;
+	journeyStep?: number;
+	originalReferrerId?: string;
+	journeyPath?: string[];
+}
 
 export const eventReportSearchParamsSchema = z.object({
 	emailBroadcastId: z.string().optional(),

@@ -86,7 +86,7 @@ export function getTrackingEnrichedHref({
 	}
 
 	// Journey step (increment from current)
-	const currentStep = parseInt(tracking.journeyStep ?? '1');
+	const currentStep = tracking.journeyStep ?? 1;
 	url.searchParams.set('jstep', String(isCrossDomain ? currentStep + 1 : currentStep));
 
 	// Referrer chain
@@ -95,7 +95,7 @@ export function getTrackingEnrichedHref({
 	}
 
 	// Original referrer ID (first in chain)
-	if (!tracking.originalReferrerId && tracking.journeyStep === '1' && currentAssetId) {
+	if (!tracking.originalReferrerId && tracking.journeyStep === 1 && currentAssetId) {
 		url.searchParams.set('orid', currentAssetId);
 	} else if (tracking.originalReferrerId) {
 		url.searchParams.set('orid', tracking.originalReferrerId);

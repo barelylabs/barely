@@ -885,17 +885,30 @@ export async function recordFmEvent({
 	// report event to tb
 
 	try {
+		// Extract journey info from visitor with proper defaults for FM events
+		const journeyId = visitor?.journeyId ?? visitor?.sessionId ?? newId('barelySession');
+		const journeyOrigin = visitor?.journeyOrigin ?? journeyId.split('_')[0] ?? 'fm';
+		const journeySource = visitor?.journeySource ?? `fm:${fmPage.handle}:${fmPage.key}`;
+		const journeyStep = visitor?.journeyStep ? parseInt(visitor.journeyStep, 10) : 1;
+		const journeyPath = visitor?.journeyPath ?? [`fm:${fmPage.handle}:${fmPage.key}`];
+
 		const eventData = webEventIngestSchema.extend(fmEventIngestSchema.shape).parse({
 			timestamp,
 			workspaceId: fmPage.workspaceId,
 			assetId: fmPage.id,
 			...flattenVisitorForIngest(visitor),
-			sessionId: visitor?.sessionId ?? newId('barelySession'),
+			sessionId: journeyId,
 			type,
 			href: sourceUrl,
 			linkClickDestinationHref: fmLink?.url ?? null,
 			platform: fmLink?.platform ?? '',
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : undefined,
+			// Journey tracking fields with proper defaults
+			journeyId,
+			journeyOrigin,
+			journeySource,
+			journeyStep,
+			journeyPath,
 		});
 
 		console.log('fmeventData => ', eventData);
@@ -904,12 +917,18 @@ export async function recordFmEvent({
 			type,
 			workspaceId: fmPage.workspaceId,
 			assetId: fmPage.id,
-			sessionId: visitor?.sessionId ?? newId('fmSession'),
+			sessionId: journeyId,
 			...flattenVisitorForIngest(visitor),
 			href: sourceUrl,
 			linkClickDestinationHref: fmLink?.url ?? '',
 			fmLinkPlatform: fmLink?.platform ?? '',
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : '',
+			// Journey tracking fields with proper defaults
+			journeyId,
+			journeyOrigin,
+			journeySource,
+			journeyStep,
+			journeyPath,
 		});
 
 		console.log('fmEventRes => ', fmEventRes);
