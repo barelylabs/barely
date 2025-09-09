@@ -1,7 +1,8 @@
-import { authEnv } from '@barely/auth';
 import { APPS } from '@barely/const';
 import { createEnv } from '@t3-oss/env-nextjs';
 import { z } from 'zod/v4';
+
+import { authEnv } from '@barely/auth/env';
 
 type RateLimitTime =
 	| `${number} ms`
