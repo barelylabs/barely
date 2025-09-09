@@ -3,16 +3,18 @@ import { dbHttp } from '@barely/db/client';
 import { dbPool } from '@barely/db/pool';
 import { InvoiceClients } from '@barely/db/sql';
 import { sqlAnd, sqlCount, sqlStringContains } from '@barely/db/utils';
-import { newId, raise } from '@barely/utils';
+import { newId, raise, raiseTRPCError } from '@barely/utils';
 import {
 	createInvoiceClientSchema,
 	selectWorkspaceInvoiceClientsSchema,
 	updateInvoiceClientSchema,
 } from '@barely/validators';
+import { TRPCError } from '@trpc/server';
 import { and, asc, desc, eq, gt, inArray, isNull, lt, or } from 'drizzle-orm';
-import DOMPurify from 'isomorphic-dompurify';
 import { z } from 'zod/v4';
 
+import { getStripeConnectAccountId } from '../../functions/stripe-connect.fns';
+import { stripe } from '../../integrations/stripe';
 import { workspaceProcedure } from '../trpc';
 
 export const invoiceClientRoute = {
@@ -110,21 +112,51 @@ export const invoiceClientRoute = {
 	create: workspaceProcedure
 		.input(createInvoiceClientSchema)
 		.mutation(async ({ input, ctx }) => {
-			// Sanitize string inputs
+			const stripeConnectAccountId = getStripeConnectAccountId(ctx.workspace);
+
+			if (!stripeConnectAccountId) {
+				throw new TRPCError({
+					code: 'BAD_REQUEST',
+					message: 'Stripe account not configured for this workspace',
+				});
+			}
+
+			const stripeCustomer = await stripe.customers.create(
+				{
+					email: input.email,
+					name: input.name,
+					address: {
+						line1: input.addressLine1 ?? undefined,
+						line2: input.addressLine2 ?? undefined,
+						city: input.city ?? undefined,
+						state: input.state ?? undefined,
+						postal_code: input.postalCode ?? undefined,
+						country: input.country ?? undefined,
+					},
+				},
+				{
+					stripeAccount: stripeConnectAccountId,
+				},
+			);
+
 			const clientData = {
 				...input,
-				name: DOMPurify.sanitize(input.name.trim()),
-				email: input.email.trim().toLowerCase(),
-				company: input.company ? DOMPurify.sanitize(input.company.trim()) : undefined,
-				address: input.address ? DOMPurify.sanitize(input.address.trim()) : undefined,
 				id: newId('invoiceClient'),
+				name: input.name.trim(),
+				email: input.email.trim().toLowerCase(),
+				company: input.company ? input.company.trim() : undefined,
+				address: input.address ? input.address.trim() : undefined,
+				addressLine1: input.addressLine1 ? input.addressLine1.trim() : undefined,
+				addressLine2: input.addressLine2 ? input.addressLine2.trim() : undefined,
+				city: input.city ? input.city.trim() : undefined,
+				state: input.state ? input.state.trim() : undefined,
+				country: input.country ? input.country.trim() : undefined,
+				postalCode: input.postalCode ? input.postalCode.trim() : undefined,
 				workspaceId: ctx.workspace.id,
+				stripeCustomerId: stripeCustomer.id,
 			};
 
-			const clients = await dbPool(ctx.pool)
-				.insert(InvoiceClients)
-				.values(clientData)
-				.returning();
+			const clients = await dbHttp.insert(InvoiceClients).values(clientData).returning();
 			const client = clients[0] ?? raise('Failed to create client');
 
 			return client;
@@ -133,33 +165,18 @@ export const invoiceClientRoute = {
 	update: workspaceProcedure
 		.input(updateInvoiceClientSchema)
 		.mutation(async ({ input, ctx }) => {
-			const { id, ...data } = input;
-
-			// Sanitize string inputs
-			const sanitizedData = {
-				...data,
-				...(data.name !== undefined && { name: DOMPurify.sanitize(data.name.trim()) }),
-				...(data.email !== undefined && { email: data.email.trim().toLowerCase() }),
-				...(data.company !== undefined && {
-					company: data.company ? DOMPurify.sanitize(data.company.trim()) : undefined,
-				}),
-				...(data.address !== undefined && {
-					address: data.address ? DOMPurify.sanitize(data.address.trim()) : undefined,
-				}),
-			};
-
 			const updatedClients = await dbPool(ctx.pool)
 				.update(InvoiceClients)
-				.set(sanitizedData)
+				.set(input)
 				.where(
 					and(
-						eq(InvoiceClients.id, id),
+						eq(InvoiceClients.id, input.id),
 						eq(InvoiceClients.workspaceId, ctx.workspace.id),
 					),
 				)
 				.returning();
 
-			return updatedClients[0] ?? raise('Failed to update client');
+			return updatedClients[0] ?? raiseTRPCError({ message: 'Failed to update client' });
 		}),
 
 	archive: workspaceProcedure

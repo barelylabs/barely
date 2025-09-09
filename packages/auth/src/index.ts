@@ -113,6 +113,10 @@ export function initAuth(options: {
 										spotifyArtistId: true,
 										stripeCustomerId: true,
 										stripeCustomerId_devMode: true,
+										stripeConnectAccountId: true,
+										stripeConnectAccountId_devMode: true,
+										stripeConnectChargesEnabled: true,
+										stripeConnectChargesEnabled_devMode: true,
 										currency: true,
 									},
 									with: {

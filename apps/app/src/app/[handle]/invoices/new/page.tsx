@@ -1,3 +1,4 @@
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { CreateInvoiceMultiStepForm } from '~/app/[handle]/invoices/_components/create-invoice-multi-step-form';
 import { HydrateClient } from '~/trpc/server';
 
@@ -10,9 +11,9 @@ export default async function NewInvoicePage({
 
 	return (
 		<HydrateClient>
-			<div className='mt-6'>
+			<DashContent>
 				<CreateInvoiceMultiStepForm />
-			</div>
+			</DashContent>
 		</HydrateClient>
 	);
 }

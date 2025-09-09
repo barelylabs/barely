@@ -1,4 +1,5 @@
 import type { ReactElement } from 'react';
+import type { Attachment } from 'resend';
 import { Resend } from 'resend';
 import { z } from 'zod/v4';
 
@@ -21,6 +22,7 @@ export type SendEmailProps = {
 	react: ReactElement;
 	text?: string;
 	html?: string;
+	attachments?: Attachment[];
 } & (
 	| {
 			type: 'transactional';
@@ -56,6 +58,7 @@ export async function sendEmail(props: SendEmailProps) {
 					'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
 				}
 			:	undefined,
+		attachments: props.attachments,
 	});
 
 	if (res.error) {

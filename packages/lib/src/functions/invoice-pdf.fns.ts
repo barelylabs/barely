@@ -6,34 +6,17 @@ import type {
 } from '@barely/validators';
 import type { DocumentProps } from '@react-pdf/renderer';
 import React from 'react';
-import { formatMinorToMajorCurrency, raise } from '@barely/utils';
-import { Document, Font, Page, pdf, StyleSheet, Text, View } from '@react-pdf/renderer';
+import { formatMinorToMajorCurrency } from '@barely/utils';
+import { Document, Page, pdf, StyleSheet, Text, View } from '@react-pdf/renderer';
 import { format } from 'date-fns';
 
-// Register default fonts
-Font.register({
-	family: 'Inter',
-	fonts: [
-		{
-			src: 'https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hiA.woff2',
-			fontWeight: 400,
-		},
-		{
-			src: 'https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuGKYAZ9hiA.woff2',
-			fontWeight: 600,
-		},
-		{
-			src: 'https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYAZ9hiA.woff2',
-			fontWeight: 700,
-		},
-	],
-});
+// Font registration will happen in the PDF generation function
 
 // PDF Styles
 const styles = StyleSheet.create({
 	page: {
 		padding: 40,
-		fontFamily: 'Inter',
+		fontFamily: 'Helvetica',
 		fontSize: 10,
 		color: '#111827',
 	},
@@ -284,23 +267,18 @@ function createInvoicePDFDocument({
 		}
 	};
 
-	const supportEmail =
-		workspace.invoiceSupportEmail ??
-		workspace.supportEmail ??
-		raise('supportEmail not found');
+	const supportEmail = workspace.invoiceSupportEmail ?? workspace.supportEmail;
 
-	const address =
-		workspace.shippingAddressLine1 +
-		'\n' +
-		workspace.shippingAddressLine2 +
-		'\n' +
-		workspace.shippingAddressCity +
-		'\n' +
-		workspace.shippingAddressState +
-		'\n' +
-		workspace.shippingAddressPostalCode +
-		'\n' +
-		workspace.shippingAddressCountry;
+	const addressParts = [
+		workspace.shippingAddressLine1,
+		workspace.shippingAddressLine2,
+		workspace.shippingAddressCity,
+		workspace.shippingAddressState,
+		workspace.shippingAddressPostalCode,
+		workspace.shippingAddressCountry,
+	].filter(Boolean);
+
+	const address = addressParts.length > 0 ? addressParts.join('\n') : null;
 
 	// Use React.createElement to avoid JSX syntax issues
 	return React.createElement(
@@ -542,11 +520,7 @@ function createInvoicePDFDocument({
 			React.createElement(
 				View,
 				{ style: styles.footer },
-				React.createElement(
-					Text,
-					{ style: styles.footerText },
-					'Payment via Manual transfer (ACH/Wire), Pay by Mercury',
-				),
+				React.createElement(Text, { style: styles.footerText }, 'Payment via Stripe'),
 			),
 		),
 	);

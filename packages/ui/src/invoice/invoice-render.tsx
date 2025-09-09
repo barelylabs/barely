@@ -1,6 +1,11 @@
 'use client';
 
-import type { InvoiceLineItem } from '@barely/validators';
+import type {
+	Invoice,
+	InvoiceClient,
+	InvoiceLineItem,
+	Workspace,
+} from '@barely/validators';
 import React from 'react';
 import { cn, formatMinorToMajorCurrency } from '@barely/utils';
 import { format } from 'date-fns';
@@ -9,36 +14,57 @@ import { Badge } from '../elements/badge';
 import { Text } from '../elements/typography';
 
 export interface InvoiceRenderProps {
-	invoice: {
-		id: string;
-		invoiceNumber: string;
-		poNumber?: string | null;
-		status: 'created' | 'sent' | 'viewed' | 'paid' | 'voided';
-		subtotal: number;
-		tax: number;
-		total: number;
-		dueDate: string | Date;
-		createdAt: string | Date;
-		lineItems?: InvoiceLineItem[] | string;
-		notes?: string | null;
-		payerMemo?: string | null;
-	};
-	workspace: {
-		name: string;
-		handle?: string;
-		email?: string;
-		address?: string;
-		currency?: string;
-		logo?: string;
-	};
-	client: {
-		name: string;
-		email: string;
-		company?: string | null;
-		address?: string | null;
-		phone?: string | null;
-	};
+	invoice: Pick<
+		Invoice,
+		| 'id'
+		| 'invoiceNumber'
+		| 'poNumber'
+		| 'status'
+		| 'subtotal'
+		| 'tax'
+		| 'total'
+		| 'dueDate'
+		| 'createdAt'
+		| 'lineItems'
+		| 'notes'
+		| 'payerMemo'
+	>;
+
+	workspace: Pick<
+		Workspace,
+		| 'name'
+		| 'handle'
+		| 'shippingAddressLine1'
+		| 'shippingAddressLine2'
+		| 'shippingAddressCity'
+		| 'shippingAddressState'
+		| 'shippingAddressPostalCode'
+		| 'shippingAddressCountry'
+		| 'currency'
+		| 'supportEmail'
+		| 'invoiceSupportEmail'
+		| 'invoiceAddressLine1'
+		| 'invoiceAddressLine2'
+		| 'invoiceAddressCity'
+		| 'invoiceAddressState'
+		| 'invoiceAddressPostalCode'
+		| 'invoiceAddressCountry'
+	>;
+
+	client: Pick<
+		InvoiceClient,
+		| 'name'
+		| 'email'
+		| 'company'
+		| 'addressLine1'
+		| 'addressLine2'
+		| 'city'
+		| 'state'
+		| 'postalCode'
+		| 'country'
+	>;
 	isPreview?: boolean;
+	isPdfMode?: boolean; // New prop for PDF-specific optimizations
 	className?: string;
 }
 
@@ -46,7 +72,8 @@ export function InvoiceRender({
 	invoice,
 	workspace,
 	client,
-	isPreview: _isPreview = false,
+	isPreview = false,
+	isPdfMode = false,
 	className,
 }: InvoiceRenderProps) {
 	// Parse line items if they're a string
@@ -55,19 +82,15 @@ export function InvoiceRender({
 		: Array.isArray(invoice.lineItems) ? invoice.lineItems
 		: []) as InvoiceLineItem[];
 
-	const currency = (workspace.currency ?? 'usd') as 'usd' | 'gbp';
+	const currency = workspace.currency;
 
 	// Calculate tax amount
 	const taxAmount = Math.round((invoice.subtotal * invoice.tax) / 10000);
 
 	const getStatusColor = (status: string) => {
 		switch (status) {
-			case 'created':
-				return 'secondary';
-			case 'sent':
-				return 'info';
-			case 'viewed':
-				return 'warning';
+			case 'overdue':
+				return 'danger';
 			case 'paid':
 				return 'success';
 			case 'voided':
@@ -85,36 +108,54 @@ export function InvoiceRender({
 	const dueDate =
 		typeof invoice.dueDate === 'string' ? new Date(invoice.dueDate) : invoice.dueDate;
 
+	const addressLine1 = workspace.invoiceAddressLine1 ?? workspace.shippingAddressLine1;
+	const addressLine2 = workspace.invoiceAddressLine2 ?? workspace.shippingAddressLine2;
+	const addressCity = workspace.invoiceAddressCity ?? workspace.shippingAddressCity;
+	const addressState = workspace.invoiceAddressState ?? workspace.shippingAddressState;
+	const addressPostalCode =
+		workspace.invoiceAddressPostalCode ?? workspace.shippingAddressPostalCode;
+	const addressCountry =
+		workspace.invoiceAddressCountry ?? workspace.shippingAddressCountry;
+
 	return (
-		<div className={cn('bg-white', className)}>
+		<div
+			className={cn(
+				'flex min-h-screen flex-col',
+				isPdfMode ? 'px-0 py-0' : 'px-10',
+				className,
+			)}
+		>
 			{/* Header */}
-			<div className='border-b px-8 py-6'>
-				<div className='flex items-start justify-between'>
-					<div>
-						<Text variant='2xl/semibold' className='text-gray-900'>
-							Invoice
-						</Text>
-						<div className='mt-1 flex items-center gap-3'>
-							<Text variant='lg/normal' className='text-gray-600'>
-								{invoice.invoiceNumber}
+			<div className={isPdfMode ? 'py-0' : 'py-6'}>
+				<div className='border-b pb-6'>
+					<div className='flex items-start justify-between'>
+						<div>
+							<Text variant='2xl/semibold' className='text-gray-900'>
+								Invoice
 							</Text>
-							<Badge variant={getStatusColor(invoice.status)} className='text-xs'>
-								{invoice.status.toUpperCase()}
-							</Badge>
+							<div className='mt-1 flex items-center gap-3'>
+								<Text variant='lg/normal' className='text-gray-600'>
+									{invoice.invoiceNumber}
+								</Text>
+								{!isPdfMode && ['overdue', 'paid', 'voided'].includes(invoice.status) && (
+									<Badge variant={getStatusColor(invoice.status)} className='text-xs'>
+										{invoice.status.toUpperCase()}
+									</Badge>
+								)}
+								{/* For PDF mode, show status as text instead of badge */}
+								{isPdfMode && ['overdue', 'paid', 'voided'].includes(invoice.status) && (
+									<Text variant='sm/medium' className='text-gray-700'>
+										[{invoice.status.toUpperCase()}]
+									</Text>
+								)}
+							</div>
 						</div>
 					</div>
-					{workspace.logo && (
-						<img
-							src={workspace.logo}
-							alt={workspace.name}
-							className='h-12 w-auto object-contain'
-						/>
-					)}
 				</div>
 			</div>
 
 			{/* From/To Section */}
-			<div className='grid grid-cols-2 gap-8 px-8 py-6'>
+			<div className='grid grid-cols-2 gap-8 py-6'>
 				<div>
 					<Text variant='xs/semibold' className='uppercase tracking-wide text-gray-500'>
 						From
@@ -123,15 +164,38 @@ export function InvoiceRender({
 						<Text variant='md/semibold' className='text-gray-900'>
 							{workspace.name}
 						</Text>
-						{workspace.email && (
+						{workspace.supportEmail && (
 							<Text variant='sm/normal' className='text-gray-600'>
-								{workspace.email}
+								{workspace.supportEmail}
 							</Text>
 						)}
-						{workspace.address && (
-							<Text variant='sm/normal' className='whitespace-pre-line text-gray-600'>
-								{workspace.address}
-							</Text>
+						{/* Use invoice address with fallback to shipping address */}
+						{addressLine1 && (
+							<div className='space-y-1'>
+								<Text variant='sm/normal' className='text-gray-600'>
+									{addressLine1}
+									{addressLine2 && (
+										<Text variant='sm/normal' className='text-gray-600'>
+											{addressLine2}
+										</Text>
+									)}
+								</Text>
+								{addressLine2 && (
+									<Text variant='sm/normal' className='text-gray-600'>
+										{addressLine2}
+									</Text>
+								)}
+								{addressCity && (
+									<Text variant='sm/normal' className='text-gray-600'>
+										{addressCity}, {addressState} {addressPostalCode}
+									</Text>
+								)}
+								{addressCountry && (
+									<Text variant='sm/normal' className='text-gray-600'>
+										{addressCountry}
+									</Text>
+								)}
+							</div>
 						)}
 					</div>
 				</div>
@@ -141,33 +205,63 @@ export function InvoiceRender({
 						To
 					</Text>
 					<div className='mt-3 space-y-1'>
-						<Text variant='md/semibold' className='text-gray-900'>
-							{client.name}
-						</Text>
+						{client.name ?
+							<Text variant='md/semibold' className='text-gray-900'>
+								{client.name}
+							</Text>
+						: isPreview ?
+							<div className='h-5 w-32 rounded bg-gray-200'></div>
+						:	null}
 						{client.company && (
 							<Text variant='sm/normal' className='text-gray-600'>
 								{client.company}
 							</Text>
 						)}
-						<Text variant='sm/normal' className='text-gray-600'>
-							{client.email}
-						</Text>
-						{client.phone && (
+						{client.email ?
 							<Text variant='sm/normal' className='text-gray-600'>
-								{client.phone}
+								{client.email}
 							</Text>
-						)}
-						{client.address && (
-							<Text variant='sm/normal' className='whitespace-pre-line text-gray-600'>
-								{client.address}
-							</Text>
-						)}
+						: isPreview ?
+							<div className='h-4 w-40 rounded bg-gray-200'></div>
+						:	null}
+						{/* Use individual address fields with fallback to deprecated address field */}
+						{client.addressLine1 ?
+							<div className='space-y-1'>
+								<>
+									<Text variant='sm/normal' className='text-gray-600'>
+										{client.addressLine1}
+									</Text>
+									{client.addressLine2 && (
+										<Text variant='sm/normal' className='text-gray-600'>
+											{client.addressLine2}
+										</Text>
+									)}
+									{client.city && (
+										<Text variant='sm/normal' className='text-gray-600'>
+											{client.city}
+											{client.state && `, ${client.state}`}
+											{client.postalCode && ` ${client.postalCode}`}
+										</Text>
+									)}
+									{client.country && (
+										<Text variant='sm/normal' className='text-gray-600'>
+											{client.country}
+										</Text>
+									)}
+								</>
+							</div>
+						: isPreview ?
+							<div className='space-y-1'>
+								<div className='h-4 w-36 rounded bg-gray-200'></div>
+								<div className='h-4 w-28 rounded bg-gray-200'></div>
+							</div>
+						:	null}
 					</div>
 				</div>
 			</div>
 
 			{/* Invoice Details */}
-			<div className='px-8 py-6'>
+			<div className='py-6'>
 				<div className='grid grid-cols-2 gap-4 md:grid-cols-4'>
 					<div>
 						<Text variant='xs/semibold' className='uppercase tracking-wide text-gray-500'>
@@ -210,9 +304,15 @@ export function InvoiceRender({
 			</div>
 
 			{/* Line Items */}
-			<div className='px-8'>
+			<div className=''>
 				<div className='overflow-hidden rounded-lg border'>
-					<table className='w-full'>
+					<table className='w-full table-fixed'>
+						<colgroup>
+							<col className='w-auto' />
+							<col className='w-20' />
+							<col className='w-24' />
+							<col className='w-24' />
+						</colgroup>
 						<thead className='bg-gray-50'>
 							<tr>
 								<th className='px-4 py-3 text-left'>
@@ -220,17 +320,17 @@ export function InvoiceRender({
 										Item
 									</Text>
 								</th>
-								<th className='px-4 py-3 text-center'>
+								<th className='w-20 px-4 py-3 text-right'>
 									<Text variant='xs/semibold' className='uppercase text-gray-600'>
 										Quantity
 									</Text>
 								</th>
-								<th className='px-4 py-3 text-right'>
+								<th className='w-24 px-4 py-3 text-right'>
 									<Text variant='xs/semibold' className='uppercase text-gray-600'>
 										Unit Price
 									</Text>
 								</th>
-								<th className='px-4 py-3 text-right'>
+								<th className='w-24 px-4 py-3 text-right'>
 									<Text variant='xs/semibold' className='uppercase text-gray-600'>
 										Total
 									</Text>
@@ -241,24 +341,36 @@ export function InvoiceRender({
 							{lineItems.map((item, index) => (
 								<tr key={index}>
 									<td className='px-4 py-3'>
-										<Text variant='sm/normal' className='text-gray-900'>
-											{item.description}
-										</Text>
+										{item.description ?
+											<Text variant='sm/normal' className='text-gray-900'>
+												{item.description}
+											</Text>
+										: isPreview ?
+											<div className='h-4 w-32 rounded bg-gray-200'></div>
+										:	null}
 									</td>
-									<td className='px-4 py-3 text-center'>
+									<td className='px-4 py-3 text-right'>
 										<Text variant='sm/normal' className='text-gray-900'>
 											{item.quantity}
 										</Text>
 									</td>
 									<td className='px-4 py-3 text-right'>
-										<Text variant='sm/normal' className='text-gray-900'>
-											{formatMinorToMajorCurrency(item.rate, currency)}
-										</Text>
+										{item.rate > 0 ?
+											<Text variant='sm/normal' className='text-gray-900'>
+												{formatMinorToMajorCurrency(item.rate, currency)}
+											</Text>
+										: isPreview ?
+											<div className='ml-auto h-4 w-16 rounded bg-gray-200'></div>
+										:	null}
 									</td>
 									<td className='px-4 py-3 text-right'>
-										<Text variant='sm/medium' className='text-gray-900'>
-											{formatMinorToMajorCurrency(item.amount, currency)}
-										</Text>
+										{item.amount > 0 ?
+											<Text variant='sm/medium' className='text-gray-900'>
+												{formatMinorToMajorCurrency(item.amount, currency)}
+											</Text>
+										: isPreview ?
+											<div className='ml-auto h-4 w-16 rounded bg-gray-200'></div>
+										:	null}
 									</td>
 								</tr>
 							))}
@@ -268,7 +380,7 @@ export function InvoiceRender({
 			</div>
 
 			{/* Total Section */}
-			<div className='px-8 py-6'>
+			<div className='py-6'>
 				<div className='ml-auto max-w-sm space-y-2'>
 					<div className='flex justify-between'>
 						<Text variant='sm/normal' className='text-gray-600'>
@@ -303,7 +415,7 @@ export function InvoiceRender({
 
 			{/* Terms and Memo */}
 			{(invoice.notes ?? invoice.payerMemo) && (
-				<div className='border-t px-8 py-6'>
+				<div className='border-t py-6'>
 					<div className='grid gap-6 md:grid-cols-2'>
 						{invoice.notes && (
 							<div>
@@ -341,14 +453,24 @@ export function InvoiceRender({
 				</div>
 			)}
 
-			{/* Payment Terms */}
-			<div className='border-t px-8 py-6'>
-				<Text variant='xs/normal' className='text-center text-gray-500'>
-					Payment via{' '}
-					{invoice.status === 'paid' ?
-						'Manual transfer (ACH/Wire), Pay by Mercury'
-					:	'Manual transfer (ACH/Wire), Pay by Mercury'}
-				</Text>
+			{/* Spacer to push footer to bottom */}
+			<div className='flex-grow'></div>
+
+			{/* Payment Terms - Footer */}
+			<div className='mt-auto py-6 print:pb-0'>
+				<div className={cn('border-t pt-6')}>
+					<div className='flex flex-row items-center justify-center gap-2 text-gray-500'>
+						<p
+							className='font-heading'
+							style={{
+								fontSize: '12px',
+								marginBottom: '1px',
+							}}
+						>
+							Barely Invoice
+						</p>
+					</div>
+				</div>
 			</div>
 		</div>
 	);

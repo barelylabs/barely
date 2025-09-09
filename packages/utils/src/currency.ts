@@ -17,3 +17,13 @@ export function formatMajorStringToMinorNumber(amountInMinor: string) {
 		:	amountInMinor;
 	return Math.round(amount * 100);
 }
+
+export function handleCurrencyMinorStringOrMajorNumber(amount: string | number) {
+	if (typeof amount === 'number') {
+		return amount;
+	}
+
+	const sanitizedAmount =
+		typeof amount === 'string' ? parseFloat(amount.replace(/^[$£€¥]/, '')) : amount;
+	return sanitizedAmount * 100;
+}

@@ -1,27 +1,29 @@
-'use client';
+import { defaultShouldDehydrateQuery, QueryClient } from '@tanstack/react-query';
+import SuperJSON from 'superjson';
 
-import { QueryClient } from '@tanstack/react-query';
-
-function makeQueryClient() {
-	return new QueryClient({
+export const makeQueryClient = () =>
+	new QueryClient({
 		defaultOptions: {
 			queries: {
-				staleTime: 60 * 1000, // 1 minute
-				refetchOnWindowFocus: false,
+				// With SSR, we usually want to set some default staleTime
+				// above 0 to avoid refetching immediately on the client
+				staleTime: 30 * 1000, // 30 seconds
+			},
+			dehydrate: {
+				serializeData: SuperJSON.serialize,
+				shouldDehydrateQuery: query =>
+					defaultShouldDehydrateQuery(query) || query.state.status === 'pending',
+				shouldRedactErrors: () => {
+					// We should not catch Next.js server errors
+					// as that's how Next.js detects dynamic pages
+					// so we cannot redact them.
+					// Next.js also automatically redacts errors for us
+					// with better digests.
+					return false;
+				},
+			},
+			hydrate: {
+				deserializeData: SuperJSON.deserialize,
 			},
 		},
 	});
-}
-
-let browserQueryClient: QueryClient | undefined = undefined;
-
-export function getQueryClient() {
-	if (typeof window === 'undefined') {
-		// Server: always make a new query client
-		return makeQueryClient();
-	} else {
-		// Browser: make a new query client if we don't already have one
-		browserQueryClient ??= makeQueryClient();
-		return browserQueryClient;
-	}
-}

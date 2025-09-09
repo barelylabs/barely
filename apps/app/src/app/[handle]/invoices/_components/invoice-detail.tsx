@@ -86,27 +86,29 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 		}),
 	);
 
-	const { mutate: duplicateInvoice, isPending: isDuplicating } = useMutation({
-		...trpc.invoice.duplicate.mutationOptions(),
-		onSuccess: data => {
-			toast.success('Invoice duplicated successfully');
-			router.push(`/${handle}/invoices/${data.id}`);
-		},
-		onError: error => {
-			toast.error(error.message || 'Failed to duplicate invoice');
-		},
-	});
+	const { mutate: duplicateInvoice, isPending: isDuplicating } = useMutation(
+		trpc.invoice.duplicate.mutationOptions({
+			onSuccess: data => {
+				toast.success('Invoice duplicated successfully');
+				router.push(`/${handle}/invoices/${data.id}`);
+			},
+			onError: error => {
+				toast.error(error.message || 'Failed to duplicate invoice');
+			},
+		}),
+	);
 
-	const { mutate: deleteInvoice, isPending: isDeleting } = useMutation({
-		...trpc.invoice.delete.mutationOptions(),
-		onSuccess: () => {
-			toast.success('Invoice deleted successfully');
-			router.push(`/${handle}/invoices`);
-		},
-		onError: error => {
-			toast.error(error.message || 'Failed to delete invoice');
-		},
-	});
+	const { mutate: deleteInvoice, isPending: isDeleting } = useMutation(
+		trpc.invoice.delete.mutationOptions({
+			onSuccess: () => {
+				toast.success('Invoice deleted successfully');
+				router.push(`/${handle}/invoices`);
+			},
+			onError: error => {
+				toast.error(error.message || 'Failed to delete invoice');
+			},
+		}),
+	);
 
 	// Get payment URL for this invoice
 	const getPaymentUrl = () => {
@@ -118,6 +120,28 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 		copyToClipboard(getPaymentUrl(), {
 			successMessage: 'Payment link copied to clipboard',
 		});
+	};
+
+	const { mutate: downloadPdf, isPending: isDownloading } = useMutation(
+		trpc.invoice.downloadPdf.mutationOptions({
+			onSuccess: data => {
+				const blob = new Blob([Buffer.from(data.pdf, 'base64')], {
+					type: 'application/pdf',
+				});
+				const url = window.URL.createObjectURL(blob);
+				const link = document.createElement('a');
+				link.href = url;
+				link.download = data.filename;
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+				window.URL.revokeObjectURL(url);
+			},
+		}),
+	);
+
+	const handleDownload = () => {
+		downloadPdf({ handle, id: invoice.id });
 	};
 
 	return (
@@ -133,34 +157,11 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 						<Button
 							size='sm'
 							look='outline'
-							onClick={async () => {
-								const response = await fetch('/api/invoice/pdf', {
-									method: 'POST',
-									headers: { 'Content-Type': 'application/json' },
-									body: JSON.stringify({ handle, invoiceId: invoice.id }),
-								});
-								const data = (await response.json()) as {
-									pdf?: string;
-									filename?: string;
-									error?: string;
-								};
-								if (data.pdf) {
-									const blob = new Blob([Buffer.from(data.pdf, 'base64')], {
-										type: 'application/pdf',
-									});
-									const url = window.URL.createObjectURL(blob);
-									const link = document.createElement('a');
-									link.href = url;
-									link.download = data.filename ?? `invoice-${invoice.invoiceNumber}.pdf`;
-									document.body.appendChild(link);
-									link.click();
-									document.body.removeChild(link);
-									window.URL.revokeObjectURL(url);
-								}
-							}}
+							onClick={handleDownload}
 							startIcon='download'
+							disabled={isDownloading}
 						>
-							Download PDF
+							{isDownloading ? 'Downloading...' : 'Download PDF'}
 						</Button>
 
 						<Button
@@ -213,7 +214,7 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 				</div>
 			</Card>
 
-			<pre>{JSON.stringify(invoice, null, 2)}</pre>
+			{/* <pre>{JSON.stringify(invoice, null, 2)}</pre> */}
 			{/* Invoice Content */}
 			<div className='grid gap-6 lg:grid-cols-3'>
 				{/* Main Invoice Details */}
@@ -226,13 +227,13 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 						<div className='space-y-4 px-6 pb-6'>
 							<div className='grid gap-4 sm:grid-cols-2'>
 								<div>
-									<Text variant='sm/normal' muted>
+									<Text variant='sm/normal' className='text-muted-foreground'>
 										Invoice Number
 									</Text>
 									<Text variant='md/medium'>{invoice.invoiceNumber}</Text>
 								</div>
 								<div>
-									<Text variant='sm/normal' muted>
+									<Text variant='sm/normal' className='text-muted-foreground'>
 										Issue Date
 									</Text>
 									<Text variant='md/medium'>
@@ -240,7 +241,7 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 									</Text>
 								</div>
 								<div>
-									<Text variant='sm/normal' muted>
+									<Text variant='sm/normal' className='text-muted-foreground'>
 										Due Date
 									</Text>
 									<Text variant='md/medium'>
@@ -249,7 +250,7 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 								</div>
 								{invoice.paidAt && (
 									<div>
-										<Text variant='sm/normal' muted>
+										<Text variant='sm/normal' className='text-muted-foreground'>
 											Paid Date
 										</Text>
 										<Text variant='md/medium'>
@@ -270,15 +271,18 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 							<div className='space-y-2'>
 								<Text variant='md/medium'>{invoice.client.name}</Text>
 								{invoice.client.company && (
-									<Text variant='sm/normal' muted>
+									<Text variant='sm/normal' className='text-muted-foreground'>
 										{invoice.client.company}
 									</Text>
 								)}
-								<Text variant='sm/normal' muted>
+								<Text variant='sm/normal' className='text-muted-foreground'>
 									{invoice.client.email}
 								</Text>
 								{invoice.client.address && (
-									<Text variant='sm/normal' muted className='whitespace-pre-line'>
+									<Text
+										variant='sm/normal'
+										className='whitespace-pre-line text-muted-foreground'
+									>
 										{invoice.client.address}
 									</Text>
 								)}
@@ -299,7 +303,7 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 										<div className='flex justify-between'>
 											<div className='flex-1'>
 												<Text variant='md/medium'>{item.description}</Text>
-												<Text variant='sm/normal' muted>
+												<Text variant='sm/normal' className='text-muted-foreground'>
 													{item.quantity} ×{' '}
 													{formatMinorToMajorCurrency(item.rate, currency)}
 												</Text>
@@ -324,7 +328,7 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 						<div className='px-6 pb-6'>
 							<div className='space-y-2'>
 								<div className='flex justify-between'>
-									<Text variant='sm/normal' muted>
+									<Text variant='sm/normal' className='text-muted-foreground'>
 										Subtotal
 									</Text>
 									<Text variant='sm/normal'>
@@ -333,7 +337,7 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 								</div>
 								{invoice.tax > 0 && (
 									<div className='flex justify-between'>
-										<Text variant='sm/normal' muted>
+										<Text variant='sm/normal' className='text-muted-foreground'>
 											Tax ({(invoice.tax / 100).toFixed(2)}%)
 										</Text>
 										<Text variant='sm/normal'>

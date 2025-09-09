@@ -1,9 +1,9 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useWorkspaceCurrency } from '@barely/hooks';
-import { formatMinorToMajorCurrency } from '@barely/utils';
+import { formatMinorToMajorCurrency, getAbsoluteUrl } from '@barely/utils';
 import { format } from 'date-fns';
 
 import { Badge } from '@barely/ui/badge';
@@ -17,15 +17,9 @@ import { useInvoice } from '~/app/[handle]/invoices/_components/invoice-context'
 export function AllInvoices() {
 	const params = useParams();
 	const handle = params.handle as string;
-	const {
-		items,
-		selection,
-		lastSelectedItemId,
-		setSelection,
-		gridListRef,
-		setShowUpdateModal,
-		isFetching,
-	} = useInvoice();
+	const router = useRouter();
+	const { items, selection, lastSelectedItemId, setSelection, gridListRef, isFetching } =
+		useInvoice();
 
 	return (
 		<>
@@ -36,9 +30,9 @@ export function AllInvoices() {
 				data-grid-list='invoices'
 				selectionMode='multiple'
 				selectionBehavior='replace'
-				onAction={async () => {
+				onAction={() => {
 					if (!lastSelectedItemId) return;
-					await setShowUpdateModal(true);
+					router.push(`/${handle}/invoices/${lastSelectedItemId}`);
 				}}
 				items={items}
 				selectedKeys={selection}
@@ -70,9 +64,9 @@ function InvoiceCard({
 	invoice: AppRouterOutputs['invoice']['byWorkspace']['invoices'][0];
 	handle: string;
 }) {
-	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } = useInvoice();
+	const { setShowArchiveModal, setShowDeleteModal } = useInvoice();
 	const currency = useWorkspaceCurrency();
-
+	const router = useRouter();
 	const getStatusColor = (status: string) => {
 		switch (status) {
 			case 'draft':
@@ -92,7 +86,8 @@ function InvoiceCard({
 		}
 	};
 
-	const href = `/${handle}/invoices/${invoice.id}`;
+	// const href = `/${handle}/invoices/${invoice.id}`;
+	const href = getAbsoluteUrl('invoice', `pay/${handle}/${invoice.id}`);
 
 	const subtitleText = `${invoice.client.name} • ${format(new Date(invoice.dueDate), 'MMM dd')}`;
 
@@ -101,7 +96,7 @@ function InvoiceCard({
 			id={invoice.id}
 			key={invoice.id}
 			textValue={invoice.invoiceNumber}
-			setShowUpdateModal={setShowUpdateModal}
+			setShowUpdateModal={() => router.push(`/${handle}/invoices/${invoice.id}`)}
 			setShowArchiveModal={setShowArchiveModal}
 			setShowDeleteModal={setShowDeleteModal}
 			title={invoice.invoiceNumber}

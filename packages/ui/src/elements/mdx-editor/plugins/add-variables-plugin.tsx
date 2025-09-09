@@ -160,7 +160,7 @@ export default function AddVariablesPlugin({
 										key={option.key}
 										aria-selected={selectedIndex === index}
 										tabIndex={-1}
-										className='hover:text-emphasis text-default aria-selected:text-emphasis cursor-pointer px-4 py-2 text-sm outline-none ring-inset transition first-of-type:rounded-t-[inherit] last-of-type:rounded-b-[inherit] aria-selected:bg-subtle hover:bg-subtle focus:outline-none focus:ring-1 focus:ring-brand-800'
+										className='hover:text-emphasis text-default aria-selected:text-emphasis focus:ring-brand-800 cursor-pointer px-4 py-2 text-sm outline-none ring-inset transition first-of-type:rounded-t-[inherit] last-of-type:rounded-b-[inherit] aria-selected:bg-subtle hover:bg-subtle focus:outline-none focus:ring-1'
 										ref={n => {
 											option.setRefElement(n);
 										}}

@@ -13,7 +13,7 @@ const buttonVariants = cva(
 				primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
 				secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
 
-				brand: 'bg-brand-500 text-brand-50 hover:bg-brand-400',
+				brand: 'bg-brand text-white hover:bg-brand/90',
 				brandAccent:
 					'bg-brand-accent text-brand-accent-foreground hover:bg-brand-accent/90',
 				success: 'bg-success text-success-foreground hover:bg-success/80',

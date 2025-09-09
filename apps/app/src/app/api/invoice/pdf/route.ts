@@ -77,7 +77,7 @@ export async function POST(request: Request) {
 
 		return NextResponse.json({
 			pdf: pdfBase64,
-			filename: `invoice-${invoice.invoiceNumber}.pdf`,
+			filename: `${invoice.workspace.name}-${invoice.invoiceNumber}.pdf`,
 		});
 	} catch (error) {
 		console.error('Error generating PDF:', error);

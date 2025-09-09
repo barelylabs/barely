@@ -1,18 +1,19 @@
 'use client';
 
-import type { z } from 'zod/v4';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useCreateOrUpdateForm } from '@barely/hooks';
 import { upsertInvoiceClientSchema } from '@barely/validators';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod/v4';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Form, SubmitButton } from '@barely/ui/forms/form';
-import { TextAreaField } from '@barely/ui/forms/text-area-field';
+import { SelectField } from '@barely/ui/forms/select-field';
 import { TextField } from '@barely/ui/forms/text-field';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
+import { Switch } from '@barely/ui/switch';
 
 import {
 	useClient,
@@ -61,14 +62,33 @@ export function CreateOrUpdateClientModal({
 		}),
 	);
 
+	const [addAddress, setAddAddress] = useState(
+		mode === 'update' ?
+			selectedClient?.addressLine1 ?
+				true
+			:	false
+		:	false,
+	);
+
 	const { form, onSubmit } = useCreateOrUpdateForm({
 		updateItem: mode === 'create' ? null : (selectedClient ?? null),
-		upsertSchema: upsertInvoiceClientSchema,
+		upsertSchema: upsertInvoiceClientSchema.extend({
+			addressLine1: addAddress ? z.string() : z.string().nullable(),
+			city: addAddress ? z.string() : z.string().nullable(),
+			state: addAddress ? z.string() : z.string().nullable(),
+			country: addAddress ? z.string() : z.string().nullable(),
+			postalCode: addAddress ? z.string() : z.string().nullable(),
+		}),
 		defaultValues: {
 			name: mode === 'update' ? (selectedClient?.name ?? '') : '',
 			email: mode === 'update' ? (selectedClient?.email ?? '') : '',
 			company: mode === 'update' ? (selectedClient?.company ?? null) : null,
-			address: mode === 'update' ? (selectedClient?.address ?? null) : null,
+			// address: mode === 'update' ? (selectedClient?.address ?? null) : null,
+			addressLine1: mode === 'update' ? (selectedClient?.addressLine1 ?? null) : null,
+			city: mode === 'update' ? (selectedClient?.city ?? null) : null,
+			state: mode === 'update' ? (selectedClient?.state ?? null) : null,
+			country: mode === 'update' ? (selectedClient?.country ?? null) : null,
+			postalCode: mode === 'update' ? (selectedClient?.postalCode ?? null) : null,
 		},
 		handleCreateItem: async d => {
 			await createClient({
@@ -97,9 +117,30 @@ export function CreateOrUpdateClientModal({
 
 	const handleSubmit = useCallback(
 		async (data: z.infer<typeof upsertInvoiceClientSchema>) => {
-			await onSubmit(data);
+			const { addressLine1, addressLine2, city, state, country, postalCode, ...rest } =
+				data;
+			const addressData =
+				addAddress ?
+					{
+						addressLine1: addressLine1 ?? null,
+						addressLine2: addressLine2 ?? null,
+						city: city ?? null,
+						state: state ?? null,
+						country: country ?? null,
+						postalCode: postalCode ?? null,
+					}
+				:	{
+						addressLine1: null,
+						addressLine2: null,
+						city: null,
+						state: null,
+						country: null,
+						postalCode: null,
+					};
+
+			await onSubmit({ ...rest, ...addressData });
 		},
-		[onSubmit],
+		[onSubmit, addAddress],
 	);
 
 	const submitDisabled = mode === 'update' && !form.formState.isDirty;
@@ -143,13 +184,69 @@ export function CreateOrUpdateClientModal({
 							placeholder='Company name (optional)'
 						/>
 
-						<TextAreaField
-							control={form.control}
-							name='address'
-							label='Address'
-							placeholder='Billing address (optional)'
-							rows={3}
-						/>
+						<div className='flex items-center justify-between'>
+							<label className='text-sm font-medium'>Add customer address</label>
+							<Switch checked={addAddress} onCheckedChange={setAddAddress} size='sm' />
+						</div>
+
+						{addAddress && (
+							<>
+								<SelectField
+									label='Country'
+									control={form.control}
+									name='country'
+									options={[
+										{
+											label: (
+												<div className='flex flex-row items-center gap-[1px]'>
+													<picture className='mr-2 flex items-center'>
+														<img
+															alt='United States'
+															src={`https://flag.vercel.app/m/US.svg`}
+															className='h-[10px] w-[16px]'
+														/>
+													</picture>
+													United States
+												</div>
+											),
+											value: 'US',
+										},
+										{
+											label: (
+												<div className='flex flex-row items-center gap-[1px]'>
+													<picture className='mr-2 flex items-center'>
+														<img
+															alt='United Kingdom'
+															src={`https://flag.vercel.app/m/GB.svg`}
+															className='h-[10px] w-[16px]'
+														/>
+													</picture>
+													United Kingdom
+												</div>
+											),
+											value: 'GB',
+										},
+									]}
+								/>
+								<TextField
+									label='Address Line 1'
+									control={form.control}
+									name='addressLine1'
+								/>
+								<TextField
+									label='Address Line 2'
+									control={form.control}
+									name='addressLine2'
+								/>
+								<TextField label='City' control={form.control} name='city' />
+								<TextField
+									label={form.watch('country') === 'GB' ? 'Region' : 'State'}
+									control={form.control}
+									name='state'
+								/>
+								<TextField label='Postal Code' control={form.control} name='postalCode' />
+							</>
+						)}
 					</div>
 				</ModalBody>
 				<ModalFooter>

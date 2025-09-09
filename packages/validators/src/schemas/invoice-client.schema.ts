@@ -13,6 +13,7 @@ export const createInvoiceClientSchema = insertInvoiceClientSchema.omit({
 	updatedAt: true,
 	deletedAt: true,
 	archivedAt: true,
+	stripeCustomerId: true,
 });
 export const updateInvoiceClientSchema = insertInvoiceClientSchema
 	.partial()
@@ -20,6 +21,7 @@ export const updateInvoiceClientSchema = insertInvoiceClientSchema
 export const upsertInvoiceClientSchema = insertInvoiceClientSchema.partial({
 	id: true,
 	workspaceId: true,
+	stripeCustomerId: true,
 });
 
 export type InsertInvoiceClient = z.input<typeof insertInvoiceClientSchema>;
@@ -54,4 +56,10 @@ export const defaultInvoiceClient: CreateInvoiceClient = {
 	email: '',
 	company: null,
 	address: null,
+	addressLine1: null,
+	addressLine2: null,
+	city: null,
+	state: null,
+	country: null,
+	postalCode: null,
 };

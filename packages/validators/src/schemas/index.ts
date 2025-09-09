@@ -7,6 +7,7 @@ export * from './campaign.schema';
 export * from './cart-funnel.schema';
 export * from './cart-order.schema';
 export * from './cart.schema';
+export * from './client-payment-method.schema';
 export * from './date.schema';
 export * from './domain.schema';
 export * from './email-address.schema';

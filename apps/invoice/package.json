@@ -25,6 +25,8 @@
 		"@barely/ui": "workspace:*",
 		"@barely/utils": "workspace:*",
 		"@barely/validators": "workspace:*",
+		"@stripe/react-stripe-js": "catalog:",
+		"@stripe/stripe-js": "catalog:",
 		"@t3-oss/env-nextjs": "catalog:",
 		"@tanstack/react-query": "catalog:",
 		"@tanstack/react-query-devtools": "^5.80.10",

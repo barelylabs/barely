@@ -1,11 +1,11 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useWorkspace, useZodForm } from '@barely/hooks';
+import { useWorkspaceWithAll, useZodForm } from '@barely/hooks';
 import {
-	formatMajorStringToMinorNumber,
 	formatMinorToMajorCurrency,
+	handleCurrencyMinorStringOrMajorNumber,
 } from '@barely/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -21,6 +21,7 @@ import { CurrencyField } from '@barely/ui/forms/currency-field';
 import { DatetimeField } from '@barely/ui/forms/datetime-field';
 import { Form } from '@barely/ui/forms/form';
 import { NumberField } from '@barely/ui/forms/number-field';
+import { SelectField } from '@barely/ui/forms/select-field';
 import { TextAreaField } from '@barely/ui/forms/text-area-field';
 import { TextField } from '@barely/ui/forms/text-field';
 import { Icon } from '@barely/ui/icon';
@@ -61,6 +62,9 @@ const paymentFormSchema = z.object({
 	invoiceDate: z.date(),
 	dueDate: z.date(),
 	payerMemo: z.string().optional(),
+	type: z.enum(['oneTime', 'recurring', 'recurringOptional']).default('oneTime'),
+	billingInterval: z.enum(['monthly', 'quarterly', 'yearly']).nullable(),
+	recurringDiscountPercent: z.number().min(0).max(100).default(0),
 });
 
 // Step 4: Review schema (just for send email preference)
@@ -76,7 +80,8 @@ export function CreateInvoiceMultiStepForm() {
 	const router = useRouter();
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
-	const { handle, currency, workspace } = useWorkspace();
+	const workspace = useWorkspaceWithAll();
+	const { handle, currency } = workspace;
 
 	const [currentStep, setCurrentStep] = useState<Step>('client');
 	const { showCreateModal, setShowCreateModal } = useClientSearchParams();
@@ -87,34 +92,22 @@ export function CreateInvoiceMultiStepForm() {
 	twoDaysFromNow.setDate(today.getDate() + 2);
 
 	// Load clients for dropdown
-	const { data: clientsData, refetch: refetchClients } = useQuery({
-		...trpc.invoiceClient.byWorkspace.queryOptions({ handle }),
-	});
+	const { data: clientsData, refetch: refetchClients } = useQuery(
+		trpc.invoiceClient.byWorkspace.queryOptions({ handle }),
+	);
 
-	// Form data that persists across steps
-	const [formData, setFormData] = useState({
-		clientId: '',
-		invoiceNumber: '',
-		poNumber: '',
-		lineItems: [{ description: '', quantity: 1, unitPrice: 0 }],
-		hasTax: false,
-		taxPercentage: 0,
-		invoiceDate: today,
-		dueDate: twoDaysFromNow,
-		payerMemo: '',
-		sendEmail: false,
-		ccEmail: '',
-	});
+	// Only clientId needs separate state since it's not in any form
+	const [selectedClientId, setSelectedClientId] = useState<string>('');
 
 	// Step 1: Details form
 	const detailsForm = useZodForm({
 		schema: detailsFormSchema,
 		defaultValues: {
-			invoiceNumber: formData.invoiceNumber,
-			poNumber: formData.poNumber,
-			lineItems: formData.lineItems,
-			hasTax: formData.hasTax,
-			taxPercentage: formData.taxPercentage,
+			invoiceNumber: '',
+			poNumber: '',
+			lineItems: [{ description: '', quantity: 1, unitPrice: 0 }],
+			hasTax: false,
+			taxPercentage: 0,
 		},
 	});
 
@@ -128,9 +121,12 @@ export function CreateInvoiceMultiStepForm() {
 	const paymentForm = useZodForm({
 		schema: paymentFormSchema,
 		defaultValues: {
-			invoiceDate: formData.invoiceDate,
-			dueDate: formData.dueDate,
-			payerMemo: formData.payerMemo,
+			invoiceDate: today,
+			dueDate: twoDaysFromNow,
+			payerMemo: '',
+			type: 'oneTime' as const,
+			billingInterval: null,
+			recurringDiscountPercent: 0,
 		},
 	});
 
@@ -138,10 +134,14 @@ export function CreateInvoiceMultiStepForm() {
 	const reviewForm = useZodForm({
 		schema: reviewFormSchema,
 		defaultValues: {
-			sendEmail: formData.sendEmail,
-			ccEmail: formData.ccEmail,
+			sendEmail: false,
+			ccEmail: '',
 		},
 	});
+	// Get next invoice number using efficient COUNT query
+	const { data: nextInvoiceNumber } = useQuery(
+		trpc.invoice.getNextInvoiceNumber.queryOptions({ handle }),
+	);
 
 	// Handle client selection
 	const handleClientSelect = useCallback(
@@ -149,73 +149,122 @@ export function CreateInvoiceMultiStepForm() {
 			if (clientId === 'new-client') {
 				void setShowCreateModal(true);
 			} else {
-				setFormData(prev => ({ ...prev, clientId }));
+				setSelectedClientId(clientId);
+
+				if (
+					!detailsForm.getValues('invoiceNumber') ||
+					detailsForm.getValues('invoiceNumber') === ''
+				) {
+					if (!nextInvoiceNumber) {
+						toast.error('No next invoice number found');
+						return;
+					}
+					console.log('setting invoice number', nextInvoiceNumber);
+					detailsForm.setValue('invoiceNumber', nextInvoiceNumber);
+				}
+
 				setCurrentStep('details');
 			}
 		},
-		[setShowCreateModal],
+		[setShowCreateModal, detailsForm, nextInvoiceNumber],
 	);
 
-	// Generate next invoice number based on existing invoices
-	const { data: invoicesData } = useQuery({
-		...trpc.invoice.byWorkspace.queryOptions({ handle }),
-	});
+	// // Set invoice number when we have data
+	// if (!detailsForm.getValues('invoiceNumber') && nextInvoiceNumber) {
+	// 	detailsForm.setValue('invoiceNumber', nextInvoiceNumber);
+	// }
 
-	const getNextInvoiceNumber = useCallback(() => {
-		if (!invoicesData?.invoices.length) return 'INV-1';
-		const lastNumber = Math.max(
-			...invoicesData.invoices
-				.map(inv => {
-					const match = inv.invoiceNumber ? /INV-(\d+)/.exec(inv.invoiceNumber) : null;
-					return match ? parseInt(match[1] ?? '0', 10) : 0;
-				})
-				.filter(Boolean),
-			0,
-		);
-		return `INV-${lastNumber + 1}`;
-	}, [invoicesData]);
+	// Compute real-time form data for preview using useMemo
+	const invoiceNumber = detailsForm.watch('invoiceNumber');
+	const poNumber = detailsForm.watch('poNumber');
+	const lineItems = detailsForm.watch('lineItems');
+	const invoiceDate = paymentForm.watch('invoiceDate');
+	const dueDate = paymentForm.watch('dueDate');
+	const payerMemo = paymentForm.watch('payerMemo');
+	const type = paymentForm.watch('type');
+	const billingInterval = paymentForm.watch('billingInterval');
+	const recurringDiscountPercent = paymentForm.watch('recurringDiscountPercent');
+	const hasTax = detailsForm.watch('hasTax');
+	const taxPercentage = detailsForm.watch('taxPercentage');
 
-	// Set invoice number when we have data
-	if (!detailsForm.getValues('invoiceNumber') && invoicesData) {
-		detailsForm.setValue('invoiceNumber', getNextInvoiceNumber());
-	}
+	const realTimeFormData = useMemo(() => {
+		return {
+			clientId: selectedClientId,
+			invoiceNumber,
+			poNumber: poNumber ?? '',
+			lineItems,
+			hasTax: hasTax ?? false,
+			taxPercentage: taxPercentage ?? 0,
+			invoiceDate,
+			dueDate,
+			payerMemo: payerMemo ?? '',
+			type,
+			billingInterval,
+			recurringDiscountPercent,
+			sendEmail: reviewForm.watch('sendEmail'),
+			ccEmail: reviewForm.watch('ccEmail'),
+		};
+	}, [
+		selectedClientId,
+		hasTax,
+		taxPercentage,
+		type,
+		billingInterval,
+		recurringDiscountPercent,
+		invoiceNumber,
+		poNumber,
+		lineItems,
+		invoiceDate,
+		dueDate,
+		payerMemo,
+		reviewForm,
+	]);
 
-	const { mutate: sendInvoice } = useMutation({
-		...trpc.invoice.send.mutationOptions(),
-	});
+	const { mutate: sendInvoice, isPending: isSending } = useMutation(
+		trpc.invoice.send.mutationOptions(),
+	);
 
-	const { mutate: createInvoice, isPending: isCreating } = useMutation({
-		...trpc.invoice.create.mutationOptions(),
-		onSuccess: data => {
-			if (formData.sendEmail) {
-				// Send email after creation
-				sendInvoice(
-					{ id: data.id, handle },
-					{
-						onSuccess: () => {
-							toast.success('Invoice created and sent successfully');
-							router.push(`/${handle}/invoices/${data.id}`);
+	const { mutateAsync: createInvoice, isPending: isCreating } = useMutation(
+		trpc.invoice.create.mutationOptions({
+			onSuccess: data => {
+				// Get sendEmail from the form at submission time
+				const shouldSendEmail = reviewForm.getValues('sendEmail');
+				if (shouldSendEmail) {
+					// Send email after creation
+					sendInvoice(
+						{ id: data.id, handle },
+						{
+							onSuccess: () => {
+								toast.success('Invoice created and sent successfully');
+								router.push(`/${handle}/invoices/${data.id}`);
+							},
+							onError: () => {
+								toast.success('Invoice created but failed to send email');
+								router.push(`/${handle}/invoices/${data.id}`);
+							},
 						},
-						onError: () => {
-							toast.success('Invoice created but failed to send email');
-							router.push(`/${handle}/invoices/${data.id}`);
-						},
-					},
-				);
-			} else {
-				toast.success('Invoice created successfully');
-				router.push(`/${handle}/invoices/${data.id}`);
-			}
-		},
-		onError: error => {
-			toast.error(error instanceof Error ? error.message : 'Failed to create invoice');
-		},
-		onSettled: async () => {
-			await queryClient.invalidateQueries({
-				queryKey: trpc.invoice.byWorkspace.queryKey(),
-			});
-		},
-	});
+					);
+				} else {
+					toast.success('Invoice created successfully');
+					router.push(`/${handle}/invoices/${data.id}`);
+				}
+			},
+			onError: error => {
+				toast.error(error instanceof Error ? error.message : 'Failed to create invoice');
+			},
+			onSettled: async () => {
+				await queryClient.invalidateQueries({
+					queryKey: [
+						trpc.invoice.byWorkspace.queryKey(),
+						trpc.invoice.getNextInvoiceNumber.queryKey(),
+					],
+				});
+				detailsForm.reset();
+				paymentForm.reset();
+				reviewForm.reset();
+			},
+		}),
+	);
 
 	// Calculate totals
 	const calculateTotals = useCallback(() => {
@@ -224,12 +273,10 @@ export function CreateInvoiceMultiStepForm() {
 		const taxPercentage = detailsForm.watch('taxPercentage');
 
 		const subtotal = lineItems.reduce((sum, item) => {
-			const unitPrice =
-				typeof item.unitPrice === 'string' ?
-					formatMajorStringToMinorNumber(item.unitPrice)
-				:	item.unitPrice;
+			// CurrencyField already outputs in minor units, so no conversion needed
+			const unitPrice = handleCurrencyMinorStringOrMajorNumber(item.unitPrice);
 			return sum + item.quantity * unitPrice;
-		}, 0); // Convert to cents
+		}, 0);
 		const taxAmount =
 			hasTax && taxPercentage ? Math.round((subtotal * taxPercentage) / 100) : 0;
 		const total = subtotal + taxAmount;
@@ -248,44 +295,53 @@ export function CreateInvoiceMultiStepForm() {
 	};
 
 	// Handle form submissions for each step
-	const handleDetailsSubmit = useCallback((data: z.infer<typeof detailsFormSchema>) => {
-		setFormData(prev => ({ ...prev, ...data }));
+	const handleDetailsSubmit = useCallback(() => {
+		// Just validate and move to next step - data is already in the form
 		setCurrentStep('payment');
 	}, []);
 
-	const handlePaymentSubmit = useCallback((data: z.infer<typeof paymentFormSchema>) => {
-		setFormData(prev => ({ ...prev, ...data }));
+	const handlePaymentSubmit = useCallback(() => {
+		// Just validate and move to next step - data is already in the form
 		setCurrentStep('review');
 	}, []);
 
-	const handleReviewSubmit = useCallback(
-		(data: z.infer<typeof reviewFormSchema>) => {
-			setFormData(prev => ({ ...prev, ...data }));
+	const handleReviewSubmit = useCallback(() => {
+		// Gather all data from forms at submission time
+		const detailsData = detailsForm.getValues();
+		const paymentData = paymentForm.getValues();
 
-			// Final submission - create the invoice
-			const { subtotal, total } = calculateTotals();
-			const processedData = {
-				clientId: formData.clientId,
-				invoiceNumber: formData.invoiceNumber || getNextInvoiceNumber(),
-				poNumber: formData.poNumber || undefined,
-				lineItems: formData.lineItems.map(item => ({
-					description: item.description,
-					quantity: item.quantity,
-					rate: Math.round(item.unitPrice),
-					amount: Math.round(item.quantity * item.unitPrice),
-				})),
-				subtotal,
-				total,
-				tax: formData.hasTax ? Math.round((subtotal * formData.taxPercentage) / 100) : 0, // Store as percentage * 100
-				invoiceDate: formData.invoiceDate,
-				dueDate: formData.dueDate,
-				payerMemo: formData.payerMemo || undefined,
-			};
+		// Final submission - create the invoice
+		const { subtotal, total } = calculateTotals();
+		const processedData = {
+			clientId: selectedClientId,
+			invoiceNumber: detailsData.invoiceNumber,
+			poNumber: detailsData.poNumber ?? undefined,
+			lineItems: detailsData.lineItems.map(item => ({
+				description: item.description,
+				quantity: item.quantity,
+				rate: item.unitPrice, // Already in minor units
+				amount: item.quantity * item.unitPrice, // Already in minor units
+			})),
+			subtotal,
+			total,
+			tax: detailsData.hasTax ? (detailsData.taxPercentage ?? 0) * 100 : 0, // Store as basis points
+			invoiceDate: paymentData.invoiceDate,
+			dueDate: paymentData.dueDate,
+			payerMemo: paymentData.payerMemo ?? undefined,
+			type: paymentData.type,
+			billingInterval: paymentData.billingInterval,
+			recurringDiscountPercent: paymentData.recurringDiscountPercent,
+		};
 
-			createInvoice({ handle, ...processedData });
-		},
-		[formData, calculateTotals, getNextInvoiceNumber, createInvoice, handle],
-	);
+		void createInvoice({ handle, ...processedData });
+	}, [
+		selectedClientId,
+		detailsForm,
+		paymentForm,
+		calculateTotals,
+		createInvoice,
+		handle,
+	]);
 
 	// Navigation handlers
 	const handleNext = () => {
@@ -293,7 +349,7 @@ export function CreateInvoiceMultiStepForm() {
 		switch (currentStep) {
 			case 'client':
 				// Client selection doesn't need validation
-				if (formData.clientId) {
+				if (selectedClientId) {
 					setCurrentStep('details');
 				}
 				break;
@@ -316,7 +372,7 @@ export function CreateInvoiceMultiStepForm() {
 		}
 	};
 
-	const selectedClientData = clientsData?.clients.find(c => c.id === formData.clientId);
+	const selectedClientData = clientsData?.clients.find(c => c.id === selectedClientId);
 
 	const renderStepContent = () => {
 		switch (currentStep) {
@@ -328,7 +384,7 @@ export function CreateInvoiceMultiStepForm() {
 							<div className='space-y-4'>
 								<div>
 									<Label htmlFor='client-select'>Name</Label>
-									<Select value={formData.clientId} onValueChange={handleClientSelect}>
+									<Select value={selectedClientId} onValueChange={handleClientSelect}>
 										<SelectTrigger id='client-select' className='mt-1.5'>
 											<SelectValue placeholder='Select a client' />
 										</SelectTrigger>
@@ -570,11 +626,66 @@ export function CreateInvoiceMultiStepForm() {
 										/>
 									</div>
 
-									<div className='flex items-center justify-between rounded-lg border p-4'>
-										<Label htmlFor='repeat-invoice' className='cursor-pointer'>
-											Repeat this invoice
-										</Label>
-										<Switch id='repeat-invoice' disabled />
+									{/* Invoice Type Selection */}
+									<div className='space-y-4'>
+										<SelectField
+											control={paymentForm.control}
+											name='type'
+											label='Invoice Type'
+											options={[
+												{ label: 'One-time Payment', value: 'oneTime' },
+												{ label: 'Recurring Payment', value: 'recurring' },
+												{
+													label: 'Customer Choice (Recommended)',
+													value: 'recurringOptional',
+												},
+											]}
+										/>
+
+										{(type === 'recurring' || type === 'recurringOptional') && (
+											<>
+												<SelectField
+													control={paymentForm.control}
+													name='billingInterval'
+													label='Billing Frequency'
+													options={[
+														{ label: 'Monthly', value: 'monthly' },
+														{ label: 'Quarterly', value: 'quarterly' },
+														{ label: 'Yearly', value: 'yearly' },
+													]}
+												/>
+
+												<NumberField
+													control={paymentForm.control}
+													name='recurringDiscountPercent'
+													label='Recurring Discount (%)'
+													placeholder='0'
+													min={0}
+													max={100}
+													step={0.1}
+													description='Discount percentage for customers who choose recurring payments'
+												/>
+											</>
+										)}
+
+										{/* Preview Section */}
+										{type === 'recurringOptional' &&
+											recurringDiscountPercent &&
+											recurringDiscountPercent > 0 && (
+												<div className='rounded-lg bg-blue-50 p-4'>
+													<Text variant='sm/medium' className='text-blue-800'>
+														Preview: Customers will see savings of{' '}
+														{formatMinorToMajorCurrency(
+															Math.round(total * (recurringDiscountPercent / 100)) *
+																(billingInterval === 'monthly' ? 12
+																: billingInterval === 'quarterly' ? 4
+																: 1),
+															currency,
+														)}{' '}
+														per year when choosing recurring payments.
+													</Text>
+												</div>
+											)}
 									</div>
 
 									<TextAreaField
@@ -693,7 +804,8 @@ export function CreateInvoiceMultiStepForm() {
 											reviewForm.setValue('sendEmail', false);
 											void reviewForm.handleSubmit(handleReviewSubmit)();
 										}}
-										loading={isCreating && !reviewForm.watch('sendEmail')}
+										loading={isCreating || isSending}
+										loadingText={isSending ? 'Sending...' : 'Creating...'}
 									>
 										Create Only
 									</Button>
@@ -703,7 +815,8 @@ export function CreateInvoiceMultiStepForm() {
 											reviewForm.setValue('sendEmail', true);
 											void reviewForm.handleSubmit(handleReviewSubmit)();
 										}}
-										loading={isCreating && reviewForm.watch('sendEmail')}
+										loading={isCreating || isSending}
+										loadingText={isSending ? 'Sending...' : 'Creating...'}
 									>
 										Create & Send Email
 										<Icon.chevronRight className='ml-2 h-4 w-4' />
@@ -722,12 +835,34 @@ export function CreateInvoiceMultiStepForm() {
 				<div className='hidden lg:block'>
 					<div className='sticky top-4'>
 						<InvoicePreview
-							formData={formData}
-							client={selectedClientData}
+							formData={realTimeFormData}
+							client={
+								selectedClientData ?
+									{
+										name: selectedClientData.name,
+										email: selectedClientData.email,
+										company: selectedClientData.company,
+										addressLine1: selectedClientData.addressLine1,
+										addressLine2: selectedClientData.addressLine2,
+										city: selectedClientData.city,
+										state: selectedClientData.state,
+										postalCode: selectedClientData.postalCode,
+										country: selectedClientData.country,
+									}
+								:	undefined
+							}
 							workspace={{
 								name: workspace.name,
 								handle: handle,
 								currency: currency,
+								supportEmail: workspace.supportEmail,
+								invoiceSupportEmail: workspace.invoiceSupportEmail,
+								invoiceAddressLine1: workspace.invoiceAddressLine1,
+								invoiceAddressLine2: workspace.invoiceAddressLine2,
+								invoiceAddressCity: workspace.invoiceAddressCity,
+								invoiceAddressState: workspace.invoiceAddressState,
+								invoiceAddressPostalCode: workspace.invoiceAddressPostalCode,
+								invoiceAddressCountry: workspace.invoiceAddressCountry,
 							}}
 						/>
 					</div>

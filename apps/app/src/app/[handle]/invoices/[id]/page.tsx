@@ -1,3 +1,4 @@
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { InvoiceDetail } from '~/app/[handle]/invoices/_components/invoice-detail';
 import { trpcCaller } from '~/trpc/server';
@@ -21,10 +22,9 @@ export default async function InvoiceDetailPage({
 				title={`Invoice ${invoice.invoiceNumber}`}
 				subtitle={`Created on ${new Date(invoice.createdAt).toLocaleDateString()}`}
 			/>
-
-			<div className='mt-6'>
+			<DashContent>
 				<InvoiceDetail invoice={invoice} handle={awaitedParams.handle} />
-			</div>
+			</DashContent>
 		</>
 	);
 }

@@ -277,19 +277,50 @@ export async function handleStripeInvoiceChargeSuccess(
 
 	// Update invoice status to paid
 	const paidAt = new Date();
-	await dbHttp
-		.update(Invoices)
-		.set({
-			status: 'paid',
-			stripePaymentIntentId:
-				typeof charge.payment_intent === 'string' ?
-					charge.payment_intent
-				:	charge.payment_intent?.id,
-			paidAt,
-		})
-		.where(eq(Invoices.id, invoiceId));
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const updateData: any = {
+		status: 'paid',
+		stripePaymentIntentId:
+			typeof charge.payment_intent === 'string' ?
+				charge.payment_intent
+			:	charge.payment_intent?.id,
+		paidAt,
+	};
+
+	// After marking invoice as paid, check if it's from a subscription
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+	if ((charge as any).invoice) {
+		// This is a subscription payment, we'll let the subscription webhook handlers manage this
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+	await dbHttp.update(Invoices).set(updateData).where(eq(Invoices.id, invoiceId));
 
 	console.log('✅ Invoice marked as paid:', invoiceId);
+
+	// Save payment method for future use (if setup_future_usage was set)
+	if (charge.payment_method && invoice.client.id) {
+		try {
+			const { saveClientPaymentMethod, getClientHasDefaultPaymentMethod } = await import(
+				'./client-payment-method.fns'
+			);
+
+			const hasDefaultMethod = await getClientHasDefaultPaymentMethod(invoice.client.id);
+
+			await saveClientPaymentMethod({
+				clientId: invoice.client.id,
+				stripePaymentMethod: charge.payment_method,
+				stripeConnectAccountId: getStripeConnectAccountId(invoice.workspace) ?? '',
+				setAsDefault: !hasDefaultMethod, // Set as default if no default exists
+				lastUsedAt: new Date(),
+			});
+
+			console.log('✅ Payment method saved for client:', invoice.client.id);
+		} catch (error) {
+			console.error('Failed to save payment method:', error);
+			// Don't fail the webhook - payment method saving is non-critical
+		}
+	}
 
 	// Send payment confirmation email
 	try {
@@ -575,4 +606,225 @@ export async function verifyStripeConnectStatus(workspaceId: string) {
 		console.error('Error verifying Stripe Connect status:', error);
 		return false;
 	}
+}
+
+// Subscription-related webhook handlers for recurring invoices
+export async function handleStripeSubscriptionUpdated(subscription: Stripe.Subscription) {
+	console.log('🔄 Processing subscription update:', subscription.id);
+
+	// Find invoice by subscription ID
+	const { eq } = await import('drizzle-orm');
+	const { Invoices } = await import('@barely/db/sql/invoice.sql');
+
+	const invoice = await dbHttp.query.Invoices.findFirst({
+		where: eq(Invoices.subscriptionId, subscription.id),
+	});
+
+	if (!invoice) {
+		console.log('No invoice found for subscription:', subscription.id);
+		return;
+	}
+
+	// Update invoice status based on subscription status
+	let newStatus = invoice.status;
+	if (subscription.status === 'active') {
+		newStatus = 'paid';
+	} else if (subscription.status === 'canceled') {
+		newStatus = 'voided';
+	}
+
+	if (newStatus !== invoice.status) {
+		await dbHttp
+			.update(Invoices)
+			.set({ status: newStatus, updatedAt: new Date() })
+			.where(eq(Invoices.id, invoice.id));
+	}
+}
+
+export async function handleStripeSubscriptionDeleted(subscription: Stripe.Subscription) {
+	console.log('❌ Processing subscription cancellation:', subscription.id);
+
+	const { eq } = await import('drizzle-orm');
+	const { Invoices } = await import('@barely/db/sql/invoice.sql');
+
+	const invoice = await dbHttp.query.Invoices.findFirst({
+		where: eq(Invoices.subscriptionId, subscription.id),
+	});
+
+	if (!invoice) {
+		console.log('No invoice found for subscription:', subscription.id);
+		return;
+	}
+
+	// Mark invoice as voided when subscription is cancelled
+	await dbHttp
+		.update(Invoices)
+		.set({ status: 'voided', updatedAt: new Date() })
+		.where(eq(Invoices.id, invoice.id));
+
+	console.log(
+		'✅ Invoice marked as voided due to subscription cancellation:',
+		invoice.id,
+	);
+}
+
+export async function handleStripeSubscriptionInvoiceSuccess(invoice: Stripe.Invoice) {
+	console.log('💳 Processing subscription invoice payment:', invoice.id);
+
+	// Get subscription ID from invoice - checking for expanded subscription object or string ID
+	let subscriptionId: string | null = null;
+
+	// Check if lines contain subscription information
+	if (invoice.lines.data.length > 0) {
+		const firstLine = invoice.lines.data[0];
+		if (
+			firstLine &&
+			'subscription' in firstLine &&
+			typeof firstLine.subscription === 'string'
+		) {
+			subscriptionId = firstLine.subscription;
+		}
+	}
+
+	if (!subscriptionId) {
+		console.log('Invoice has no subscription attached:', invoice.id);
+		return;
+	}
+
+	const { eq } = await import('drizzle-orm');
+	const { Invoices } = await import('@barely/db/sql/invoice.sql');
+
+	// Find the invoice by subscription ID
+	const dbInvoice = await dbHttp.query.Invoices.findFirst({
+		where: eq(Invoices.subscriptionId, subscriptionId),
+		with: {
+			client: true,
+			workspace: true,
+		},
+	});
+
+	if (!dbInvoice) {
+		console.log('No invoice found for subscription:', subscriptionId);
+		return;
+	}
+
+	// Update invoice with subscription ID if not already set and mark as paid
+	const paidAt = new Date();
+	await dbHttp
+		.update(Invoices)
+		.set({
+			subscriptionId,
+			status: 'paid',
+			paidAt,
+			updatedAt: new Date(),
+		})
+		.where(eq(Invoices.id, dbInvoice.id));
+
+	console.log('✅ Invoice marked as paid for subscription payment:', dbInvoice.id);
+
+	// Save payment method from subscription invoice
+	if (invoice.default_payment_method && dbInvoice.client.id) {
+		try {
+			const { saveClientPaymentMethod } = await import('./client-payment-method.fns');
+
+			// default_payment_method can be either a string ID or an expanded PaymentMethod object
+			const paymentMethodId =
+				typeof invoice.default_payment_method === 'string' ?
+					invoice.default_payment_method
+				:	invoice.default_payment_method.id;
+
+			await saveClientPaymentMethod({
+				clientId: dbInvoice.client.id,
+				stripePaymentMethod: paymentMethodId,
+				stripeConnectAccountId: getStripeConnectAccountId(dbInvoice.workspace) ?? '',
+				setAsDefault: true, // Subscription payment methods should be default
+				lastUsedAt: new Date(),
+			});
+
+			console.log(
+				'✅ Subscription payment method saved for client:',
+				dbInvoice.client.id,
+			);
+		} catch (error) {
+			console.error('Failed to save subscription payment method:', error);
+			// Don't fail the webhook - payment method saving is non-critical
+		}
+	}
+
+	// Send payment confirmation email for recurring payments
+	try {
+		queueEmailRetry(
+			() =>
+				sendInvoicePaymentReceivedEmail({
+					invoice: {
+						...dbInvoice,
+						status: 'paid',
+						paidAt,
+					},
+					paymentDetails: {
+						paymentMethod: 'Subscription',
+						transactionId: invoice.id,
+					},
+				}),
+			`Recurring payment confirmation for invoice ${dbInvoice.invoiceNumber}`,
+			{
+				maxRetries: 5,
+				retryDelay: 3000,
+				backoffMultiplier: 2,
+			},
+		);
+
+		console.log(
+			'✅ Recurring payment confirmation email sent for invoice:',
+			dbInvoice.id,
+		);
+	} catch (error) {
+		console.error('Failed to send recurring payment confirmation email:', error);
+	}
+}
+
+export async function handleStripeSubscriptionInvoiceFailed(invoice: Stripe.Invoice) {
+	console.log('❌ Processing subscription invoice payment failure:', invoice.id);
+
+	// Get subscription ID from invoice - checking for expanded subscription object or string ID
+	let subscriptionId: string | null = null;
+
+	// Check if lines contain subscription information
+	if (invoice.lines.data.length > 0) {
+		const firstLine = invoice.lines.data[0];
+		if (
+			firstLine &&
+			'subscription' in firstLine &&
+			typeof firstLine.subscription === 'string'
+		) {
+			subscriptionId = firstLine.subscription;
+		}
+	}
+
+	if (!subscriptionId) {
+		console.log('Invoice has no subscription attached:', invoice.id);
+		return;
+	}
+
+	const { eq } = await import('drizzle-orm');
+	const { Invoices } = await import('@barely/db/sql/invoice.sql');
+
+	// Find the invoice by subscription ID
+	const dbInvoice = await dbHttp.query.Invoices.findFirst({
+		where: eq(Invoices.subscriptionId, subscriptionId),
+	});
+
+	if (!dbInvoice) {
+		console.log('No invoice found for subscription:', subscriptionId);
+		return;
+	}
+
+	console.error('Subscription payment failed for invoice:', {
+		invoiceId: dbInvoice.id,
+		subscriptionId,
+		stripeInvoiceId: invoice.id,
+	});
+
+	// TODO: Handle failed recurring payments - perhaps send notification or mark for retry
+	console.log('TODO: Handle failed recurring payment notification');
 }

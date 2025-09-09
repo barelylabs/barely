@@ -1,4 +1,13 @@
-import { invoiceRenderRoute } from './invoice-render.route';
+import type {
+	InvoiceRenderRouter,
+	InvoiceRenderRouterInputs,
+	InvoiceRenderRouterOutputs,
+} from './invoice-render.route';
+import { invoiceRenderRouter } from './invoice-render.route';
 
-export const invoiceRenderRouter = invoiceRenderRoute;
-export type InvoiceRenderRouter = typeof invoiceRenderRouter;
+export {
+	invoiceRenderRouter,
+	type InvoiceRenderRouter,
+	type InvoiceRenderRouterInputs,
+	type InvoiceRenderRouterOutputs,
+};

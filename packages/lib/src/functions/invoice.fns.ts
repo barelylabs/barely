@@ -2,9 +2,74 @@ import { WORKSPACE_PLANS } from '@barely/const';
 import { dbHttp } from '@barely/db/client';
 import { Invoices, Workspaces } from '@barely/db/sql';
 import { getFirstAndLastDayOfBillingCycle, raise } from '@barely/utils';
-import { desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, isNull, sql } from 'drizzle-orm';
 
 import { libEnv } from '../../env';
+
+export async function getInvoiceById({
+	invoiceId,
+	workspaceId,
+}: {
+	invoiceId: string;
+	workspaceId?: string;
+}) {
+	const invoice = await dbHttp.query.Invoices.findFirst({
+		where: and(
+			eq(Invoices.id, invoiceId),
+			isNull(Invoices.deletedAt),
+			workspaceId ? eq(Invoices.workspaceId, workspaceId) : undefined,
+		),
+		with: {
+			workspace: {
+				columns: {
+					id: true,
+					name: true,
+					handle: true,
+					shippingAddressLine1: true,
+					shippingAddressLine2: true,
+					shippingAddressCity: true,
+					shippingAddressState: true,
+					shippingAddressPostalCode: true,
+					shippingAddressCountry: true,
+
+					stripeCustomerId: true,
+					stripeCustomerId_devMode: true,
+					currency: true,
+					supportEmail: true,
+					invoiceSupportEmail: true,
+					cartSupportEmail: true,
+					invoiceAddressLine1: true,
+					invoiceAddressLine2: true,
+					invoiceAddressCity: true,
+					invoiceAddressState: true,
+					invoiceAddressPostalCode: true,
+					invoiceAddressCountry: true,
+					stripeConnectAccountId: true,
+					stripeConnectAccountId_devMode: true,
+					stripeConnectChargesEnabled: true,
+					stripeConnectChargesEnabled_devMode: true,
+				},
+			},
+			client: {
+				columns: {
+					id: true,
+					name: true,
+					email: true,
+					company: true,
+					addressLine1: true,
+					addressLine2: true,
+					city: true,
+					state: true,
+					postalCode: true,
+					country: true,
+					stripeCustomerId: true,
+				},
+			},
+		},
+	});
+
+	return invoice;
+}
 
 export async function checkInvoiceUsageAndIncrement(workspaceId: string) {
 	// Get the workspace with current usage and plan
@@ -159,7 +224,9 @@ export async function createInvoicePaymentIntent({
 			amount,
 			currency,
 			metadata,
-			application_fee_amount: Math.round(amount * libEnv.PLATFORM_FEE_PERCENTAGE), // Platform fee from env
+			application_fee_amount: Math.round(
+				(amount * libEnv.PLATFORM_INVOICE_FEE_PERCENTAGE) / 100,
+			), // Platform fee from env
 		},
 		{
 			stripeAccount: stripeConnectAccountId,

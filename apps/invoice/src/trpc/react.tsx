@@ -4,7 +4,7 @@ import type { InvoiceRenderRouter } from '@barely/api/public/invoice-render.rout
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+// import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { createTRPCClient, httpBatchLink } from '@trpc/client';
 import SuperJSON from 'superjson';
 
@@ -13,12 +13,12 @@ import {
 	useInvoiceRenderTRPC,
 } from '@barely/api/public/invoice-render.trpc.react';
 
-import { getQueryClient } from './query-client';
+import { makeQueryClient } from './query-client';
 
 export { useInvoiceRenderTRPC };
 
 export function TRPCReactProvider({ children }: { children: ReactNode }) {
-	const queryClient = getQueryClient();
+	const queryClient = makeQueryClient();
 
 	const [trpcClient] = useState(() =>
 		createTRPCClient<InvoiceRenderRouter>({
@@ -35,7 +35,7 @@ export function TRPCReactProvider({ children }: { children: ReactNode }) {
 		<QueryClientProvider client={queryClient}>
 			<InvoiceRenderTRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
 				{children}
-				<ReactQueryDevtools />
+				{/* <ReactQueryDevtools /> */}
 			</InvoiceRenderTRPCProvider>
 		</QueryClientProvider>
 	);

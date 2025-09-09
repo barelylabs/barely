@@ -4,6 +4,7 @@ import {
 	integer,
 	jsonb,
 	pgTable,
+	real,
 	text,
 	timestamp,
 	uniqueIndex,
@@ -14,14 +15,11 @@ import { dbId, primaryId, timestamps } from '../utils';
 import { InvoiceClients } from './invoice-client.sql';
 import { Workspaces } from './workspace.sql';
 
-export const INVOICE_STATUSES = [
-	'created',
-	'sent',
-	'viewed',
-	'paid',
-	// 'overdue',
-	'voided',
-] as const;
+export const INVOICE_STATUSES = ['created', 'sent', 'viewed', 'paid', 'voided'] as const;
+
+export const INVOICE_TYPES = ['oneTime', 'recurring', 'recurringOptional'] as const;
+
+export const BILLING_INTERVALS = ['monthly', 'quarterly', 'yearly'] as const;
 
 export interface InvoiceLineItem {
 	description: string;
@@ -72,9 +70,22 @@ export const Invoices = pgTable(
 		})
 			.default('created')
 			.notNull(),
-
 		// Payment tracking
 		stripePaymentIntentId: varchar('stripePaymentIntentId', { length: 255 }),
+
+		// Recurring invoice fields
+		subscriptionId: text('subscriptionId'), // Links to Stripe subscription
+		billingInterval: varchar('billingInterval', {
+			length: 255,
+			enum: BILLING_INTERVALS,
+		}),
+		type: varchar('type', {
+			length: 255,
+			enum: INVOICE_TYPES,
+		})
+			.default('oneTime')
+			.notNull(),
+		recurringDiscountPercent: real('recurringDiscountPercent').default(0).notNull(),
 
 		// Email tracking
 		lastResendId: varchar('lastResendId', { length: 255 }), // Track the most recent Resend email ID

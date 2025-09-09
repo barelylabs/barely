@@ -1,0 +1,101 @@
+@page {
+	size: A4;
+	margin: 15mm 15mm;
+}
+
+/* Temporarily disabled @media print styles for debugging */
+@media print {
+	.pdf-container {
+		font-family:
+			'Inter',
+			-apple-system,
+			BlinkMacSystemFont,
+			sans-serif;
+		font-size: 10pt;
+		line-height: 1.4;
+		color: #000;
+		background: white;
+	}
+
+	.print-optimized {
+		padding: 0 !important;
+		margin: 0 !important;
+		min-height: auto !important;
+		box-shadow: none !important;
+		border: none !important;
+		background: white !important;
+	}
+
+	.no-print {
+		display: none !important;
+	}
+
+	.page-break {
+		page-break-before: always;
+	}
+
+	.pdf-container * {
+		-webkit-print-color-adjust: exact !important;
+		color-adjust: exact !important;
+		print-color-adjust: exact !important;
+	}
+
+	.pdf-container button,
+	.pdf-container input,
+	.pdf-container select,
+	.pdf-container textarea {
+		display: none !important;
+	}
+
+	.pdf-container table {
+		break-inside: avoid;
+	}
+
+	.pdf-container tr {
+		break-inside: avoid;
+		break-after: auto;
+	}
+
+	.pdf-container thead {
+		display: table-header-group;
+	}
+
+	.pdf-container tfoot {
+		display: table-footer-group;
+	}
+
+	.pdf-container h1,
+	.pdf-container h2,
+	.pdf-container h3,
+	.pdf-container h4,
+	.pdf-container h5,
+	.pdf-container h6 {
+		break-after: avoid;
+	}
+
+	.badge {
+		border: 1px solid #e5e7eb;
+	}
+}
+
+/* Default styles for browser rendering */
+.pdf-container {
+	font-family:
+		'Inter',
+		-apple-system,
+		BlinkMacSystemFont,
+		sans-serif;
+	background: white;
+	min-height: 100vh;
+}
+
+.print-optimized {
+	max-width: 210mm;
+	margin: 0 auto;
+	background: white;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Temporarily disabled Google Fonts import for debugging
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+*/

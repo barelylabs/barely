@@ -32,7 +32,7 @@ const DashContentHeader = (props: DashContentHeaderProps) => {
 					)}
 				</div>
 				{props.subtitle && (
-					<Text variant='sm/normal' muted>
+					<Text variant='sm/normal' className='text-muted-foreground'>
 						{props.subtitle}
 					</Text>
 				)}

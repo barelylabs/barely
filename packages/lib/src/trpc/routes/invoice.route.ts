@@ -12,6 +12,7 @@ import {
 	sendInvoiceSchema,
 	updateInvoiceSchema,
 } from '@barely/validators';
+import { TRPCError } from '@trpc/server';
 import { and, asc, desc, eq, gt, gte, inArray, isNull, lt, or } from 'drizzle-orm';
 import DOMPurify from 'isomorphic-dompurify';
 import { z } from 'zod/v4';
@@ -22,6 +23,7 @@ import {
 	calculateInvoiceTotal,
 	checkInvoiceUsageAndIncrement,
 	generateInvoiceNumber,
+	getInvoiceById,
 } from '../../functions/invoice.fns';
 import { workspaceProcedure } from '../trpc';
 
@@ -329,7 +331,13 @@ export const invoiceRoute = {
 				}
 			}
 
-			const { lineItems, tax, notes, ...rest } = input;
+			const {
+				lineItems,
+				tax,
+				notes,
+				invoiceNumber: providedInvoiceNumber,
+				...rest
+			} = input;
 
 			// Sanitize user inputs
 			const sanitizedLineItems = lineItems.map(item => ({
@@ -340,11 +348,10 @@ export const invoiceRoute = {
 			// Calculate totals
 			const { subtotal, total } = calculateInvoiceTotal(sanitizedLineItems, tax ?? 0);
 
-			// Generate invoice number
-			const invoiceNumber = await generateInvoiceNumber(
-				ctx.workspace.id,
-				ctx.workspace.handle,
-			);
+			// Use provided invoice number or generate one
+			const invoiceNumber =
+				providedInvoiceNumber ??
+				(await generateInvoiceNumber(ctx.workspace.id, ctx.workspace.handle));
 
 			const invoiceData = {
 				...rest,
@@ -517,25 +524,30 @@ export const invoiceRoute = {
 		}
 
 		const invoice =
-			(await dbHttp.query.Invoices.findFirst({
-				where: and(eq(Invoices.id, input.id), eq(Invoices.workspaceId, ctx.workspace.id)),
-				with: {
-					client: true,
-					workspace: true,
-				},
-			})) ?? raiseTRPCError({ message: 'Invoice not found' });
+			(await getInvoiceById({ invoiceId: input.id, workspaceId: ctx.workspace.id })) ??
+			raiseTRPCError({ message: 'Invoice not found' });
 
 		if (invoice.status !== 'created' && invoice.status !== 'sent') {
 			raiseTRPCError({ message: 'Cannot send invoice with status: ' + invoice.status });
 		}
 
 		// Send the invoice email with retry mechanism
+		const { generateInvoicePDFBase64Puppeteer } = await import(
+			'../../functions/invoice-pdf-puppeteer.fns'
+		);
+
+		const pdfBase64 = await generateInvoicePDFBase64Puppeteer({
+			invoice,
+			workspace: invoice.workspace,
+			client: invoice.client,
+		});
+
 		try {
 			const emailResult = await sendEmailWithRetry(
-				() => sendInvoiceEmail({ invoice }),
+				() => sendInvoiceEmail({ invoice, pdfBase64 }),
 				`Invoice email for ${invoice.invoiceNumber}`,
 				{
-					maxRetries: 3,
+					maxRetries: 0,
 					retryDelay: 2000, // Start with 2 second delay
 					backoffMultiplier: 2, // Double the delay each retry
 				},
@@ -623,5 +635,43 @@ export const invoiceRoute = {
 				.returning();
 
 			return updatedInvoices;
+		}),
+
+	getNextInvoiceNumber: workspaceProcedure.query(async ({ ctx }) => {
+		const [result] = await dbHttp
+			.select({ count: sqlCount })
+			.from(Invoices)
+			.where(eq(Invoices.workspaceId, ctx.workspace.id));
+
+		const count = result?.count ?? 0;
+		return `INV-${count + 1}`;
+	}),
+
+	downloadPdf: workspaceProcedure
+		.input(z.object({ id: z.string() }))
+		.mutation(async ({ input, ctx }) => {
+			const invoice = await getInvoiceById({
+				invoiceId: input.id,
+				workspaceId: ctx.workspace.id,
+			});
+
+			if (!invoice) {
+				throw new TRPCError({ code: 'NOT_FOUND', message: 'Invoice not found' });
+			}
+
+			const { generateInvoicePDFBase64Puppeteer } = await import(
+				'../../functions/invoice-pdf-puppeteer.fns'
+			);
+
+			const pdfBase64 = await generateInvoicePDFBase64Puppeteer({
+				invoice,
+				workspace: invoice.workspace,
+				client: invoice.client,
+			});
+
+			return {
+				pdf: pdfBase64,
+				filename: `${invoice.workspace.name}-${invoice.invoiceNumber}.pdf`,
+			};
 		}),
 } satisfies TRPCRouterRecord;

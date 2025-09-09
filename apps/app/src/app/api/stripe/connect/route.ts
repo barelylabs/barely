@@ -118,6 +118,64 @@ export async function POST(req: NextRequest) {
 			break;
 		}
 
+		case 'customer.subscription.updated': {
+			const subscription = event.data.object;
+			console.log('🔄 Subscription updated:', subscription.id);
+
+			const { handleStripeSubscriptionUpdated } = await import(
+				'@barely/lib/functions/stripe-connect.fns'
+			);
+			await handleStripeSubscriptionUpdated(subscription);
+			break;
+		}
+
+		case 'customer.subscription.deleted': {
+			const subscription = event.data.object;
+			console.log('❌ Subscription deleted:', subscription.id);
+
+			const { handleStripeSubscriptionDeleted } = await import(
+				'@barely/lib/functions/stripe-connect.fns'
+			);
+			await handleStripeSubscriptionDeleted(subscription);
+			break;
+		}
+
+		case 'invoice.payment_succeeded': {
+			const invoice = event.data.object;
+			console.log('💳 Invoice payment succeeded:', invoice.id);
+
+			// Handle subscription invoice payments based on billing_reason
+			if (
+				invoice.billing_reason === 'subscription_cycle' ||
+				invoice.billing_reason === 'subscription_create' ||
+				invoice.billing_reason === 'subscription_update'
+			) {
+				const { handleStripeSubscriptionInvoiceSuccess } = await import(
+					'@barely/lib/functions/stripe-connect.fns'
+				);
+				await handleStripeSubscriptionInvoiceSuccess(invoice);
+			}
+			break;
+		}
+
+		case 'invoice.payment_failed': {
+			const invoice = event.data.object;
+			console.log('❌ Invoice payment failed:', invoice.id);
+
+			// Handle subscription invoice payment failures based on billing_reason
+			if (
+				invoice.billing_reason === 'subscription_cycle' ||
+				invoice.billing_reason === 'subscription_create' ||
+				invoice.billing_reason === 'subscription_update'
+			) {
+				const { handleStripeSubscriptionInvoiceFailed } = await import(
+					'@barely/lib/functions/stripe-connect.fns'
+				);
+				await handleStripeSubscriptionInvoiceFailed(invoice);
+			}
+			break;
+		}
+
 		default:
 			console.log('Unhandled event', event.type);
 	}

@@ -160,7 +160,14 @@ export const Workspaces = pgTable(
 
 		/* invoice */
 		invoiceSupportEmail: varchar('invoiceSupportEmail', { length: 255 }),
+		invoiceAddressLine1: varchar('invoiceAddressLine1', { length: 255 }),
+		invoiceAddressLine2: varchar('invoiceAddressLine2', { length: 255 }),
+		invoiceAddressCity: varchar('invoiceAddressCity', { length: 255 }),
+		invoiceAddressState: varchar('invoiceAddressState', { length: 255 }),
+		invoiceAddressPostalCode: varchar('invoiceAddressPostalCode', { length: 255 }),
+		invoiceAddressCountry: varchar('invoiceAddressCountry', { length: 255 }),
 
+		/* invoice prefix */
 		/* cart */
 		cartSupportEmail: varchar('cartSupportEmail', { length: 255 }),
 		cartFeePercentageOverride: integer('cartFeePercentageOverride'),

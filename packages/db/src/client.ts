@@ -19,6 +19,7 @@ import * as brandKitSql from './sql/brand-kit.sql';
 import * as campaignSql from './sql/campaign.sql';
 import * as funnelSql from './sql/cart-funnel.sql';
 import * as cartSql from './sql/cart.sql';
+import * as clientPaymentMethodSql from './sql/client-payment-method.sql';
 import * as domainSql from './sql/domain.sql';
 import * as emailAddressSql from './sql/email-address.sql';
 import * as emailBroadcastSql from './sql/email-broadcast.sql';
@@ -79,6 +80,7 @@ export const dbSchema = {
 	...brandKitSql,
 	...campaignSql,
 	...cartSql,
+	...clientPaymentMethodSql,
 	...domainSql,
 	...emailAddressSql,
 	...emailBroadcastSql,

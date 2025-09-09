@@ -85,6 +85,7 @@ const prefixes = {
 	// invoice
 	invoice: 'inv',
 	invoiceClient: 'invc',
+	invoiceClientPaymentMethod: 'invcpm',
 	invoiceEmail: 'iem',
 } as const;
 
