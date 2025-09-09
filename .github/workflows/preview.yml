@@ -212,6 +212,40 @@ jobs:
           echo $DATABASE_URL | pnpm vercel env add DATABASE_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
           echo $DATABASE_POOL_URL | pnpm vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
 
+      - name: update vercel env - app-fm/preview/branch
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_FM_PROJECT_ID }}
+        run: |
+          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
+
+          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
+            pnpm vercel env rm DATABASE_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
+            pnpm vercel env rm DATABASE_POOL_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+          echo $DATABASE_URL | pnpm vercel env add DATABASE_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
+          echo $DATABASE_POOL_URL | pnpm vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: update vercel env - app-invoice/preview/branch
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_INVOICE_PROJECT_ID }}
+        run: |
+          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
+
+          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
+            pnpm vercel env rm DATABASE_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
+            pnpm vercel env rm DATABASE_POOL_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+          echo $DATABASE_URL | pnpm vercel env add DATABASE_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
+          echo $DATABASE_POOL_URL | pnpm vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
+
       - name: update vercel env - cart/preview/branch
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_CART_PROJECT_ID }}
@@ -232,6 +266,23 @@ jobs:
       - name: update vercel env - fm/preview/branch
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_FM_PROJECT_ID }}
+        run: |
+          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
+
+          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
+            pnpm vercel env rm DATABASE_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
+            pnpm vercel env rm DATABASE_POOL_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+          echo $DATABASE_URL | pnpm vercel env add DATABASE_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
+          echo $DATABASE_POOL_URL | pnpm vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: update vercel env - invoice/preview/branch
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_INVOICE_PROJECT_ID }}
         run: |
           branch_name=${{ needs.git-meta.outputs.git_branch_name }}
 
@@ -351,40 +402,6 @@ jobs:
       - name: update vercel env - www/preview/branch
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_WWW_PROJECT_ID }}
-        run: |
-          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
-
-          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
-            pnpm vercel env rm DATABASE_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
-
-          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
-            pnpm vercel env rm DATABASE_POOL_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
-
-          echo $DATABASE_URL | pnpm vercel env add DATABASE_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
-          echo $DATABASE_POOL_URL | pnpm vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: update vercel env - app-fm/preview/branch
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_FM_PROJECT_ID }}
-        run: |
-          branch_name=${{ needs.git-meta.outputs.git_branch_name }}
-
-          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_URL; then
-            pnpm vercel env rm DATABASE_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
-
-          if pnpm vercel env ls preview $branch_name --token=${{ secrets.VERCEL_TOKEN }} | grep -q DATABASE_POOL_URL; then
-            pnpm vercel env rm DATABASE_POOL_URL preview $branch_name --yes --token=${{ secrets.VERCEL_TOKEN }}
-          fi
-
-          echo $DATABASE_URL | pnpm vercel env add DATABASE_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
-          echo $DATABASE_POOL_URL | pnpm vercel env add DATABASE_POOL_URL preview $branch_name --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: update vercel env - app-invoice/preview/branch
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_INVOICE_PROJECT_ID }}
         run: |
           branch_name=${{ needs.git-meta.outputs.git_branch_name }}
 
