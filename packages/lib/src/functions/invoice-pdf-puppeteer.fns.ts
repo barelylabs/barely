@@ -93,7 +93,6 @@ export async function generateInvoicePDFWithPuppeteer(
 			printBackground: true,
 			preferCSSPageSize: true,
 			displayHeaderFooter: false,
-			path: '/Users/barely/Downloads/invoice-debug-01.pdf',
 		});
 
 		return Buffer.from(pdf);
@@ -106,12 +105,6 @@ export async function generateInvoicePDFWithPuppeteer(
 		if (browser) {
 			await browser.close();
 		}
-		// Ensure page is closed
-		// if (page) {
-		// 	await page.close();
-		// }
-		// // Ensure browser is closed
-		// await browser.close();
 	}
 }
 
