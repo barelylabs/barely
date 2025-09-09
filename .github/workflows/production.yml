@@ -527,7 +527,47 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Promote app to production
-        run: vercel promote dpl_${{ needs.deploy-app.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          deployment_id="dpl_${{ needs.deploy-app.outputs.deployment_id }}"
+          max_attempts=3
+          attempt=1
+          
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt of $max_attempts to promote $deployment_id"
+            
+            output=$(vercel promote $deployment_id --scope=barely --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+            exit_code=$?
+            
+            echo "$output"
+            
+            if [[ $output == *"Success!"* ]] || [[ $output == *"was promoted to"* ]]; then
+              echo "✅ Promotion successful!"
+              exit 0
+            elif [[ $output == *"No deployment promotion in progress"* ]]; then
+              echo "⚠️ Promotion failed with 'No deployment promotion in progress'"
+              if [ $attempt -lt $max_attempts ]; then
+                echo "Waiting 10 seconds before retry..."
+                sleep 10
+              fi
+            else
+              # Check exit code for other failures
+              if [ $exit_code -eq 0 ]; then
+                echo "✅ Command completed (assuming success)"
+                exit 0
+              else
+                echo "❌ Promotion failed with exit code $exit_code"
+                if [ $attempt -lt $max_attempts ]; then
+                  echo "Waiting 10 seconds before retry..."
+                  sleep 10
+                fi
+              fi
+            fi
+            
+            attempt=$((attempt + 1))
+          done
+          
+          echo "❌ All promotion attempts failed after $max_attempts tries"
+          exit 1
 
   promote-app-fm:
     name: promote app-fm to production
@@ -543,7 +583,47 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Promote app-fm to production
-        run: vercel promote dpl_${{ needs.deploy-app-fm.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          deployment_id="dpl_${{ needs.deploy-app-fm.outputs.deployment_id }}"
+          max_attempts=3
+          attempt=1
+          
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt of $max_attempts to promote $deployment_id"
+            
+            output=$(vercel promote $deployment_id --scope=barely --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+            exit_code=$?
+            
+            echo "$output"
+            
+            if [[ $output == *"Success!"* ]] || [[ $output == *"was promoted to"* ]]; then
+              echo "✅ Promotion successful!"
+              exit 0
+            elif [[ $output == *"No deployment promotion in progress"* ]]; then
+              echo "⚠️ Promotion failed with 'No deployment promotion in progress'"
+              if [ $attempt -lt $max_attempts ]; then
+                echo "Waiting 10 seconds before retry..."
+                sleep 10
+              fi
+            else
+              # Check exit code for other failures
+              if [ $exit_code -eq 0 ]; then
+                echo "✅ Command completed (assuming success)"
+                exit 0
+              else
+                echo "❌ Promotion failed with exit code $exit_code"
+                if [ $attempt -lt $max_attempts ]; then
+                  echo "Waiting 10 seconds before retry..."
+                  sleep 10
+                fi
+              fi
+            fi
+            
+            attempt=$((attempt + 1))
+          done
+          
+          echo "❌ All promotion attempts failed after $max_attempts tries"
+          exit 1
 
   promote-app-invoice:
     name: promote app-invoice to production
@@ -559,7 +639,47 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Promote app-invoice to production
-        run: vercel promote dpl_${{ needs.deploy-app-invoice.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          deployment_id="dpl_${{ needs.deploy-app-invoice.outputs.deployment_id }}"
+          max_attempts=3
+          attempt=1
+          
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt of $max_attempts to promote $deployment_id"
+            
+            output=$(vercel promote $deployment_id --scope=barely --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+            exit_code=$?
+            
+            echo "$output"
+            
+            if [[ $output == *"Success!"* ]] || [[ $output == *"was promoted to"* ]]; then
+              echo "✅ Promotion successful!"
+              exit 0
+            elif [[ $output == *"No deployment promotion in progress"* ]]; then
+              echo "⚠️ Promotion failed with 'No deployment promotion in progress'"
+              if [ $attempt -lt $max_attempts ]; then
+                echo "Waiting 10 seconds before retry..."
+                sleep 10
+              fi
+            else
+              # Check exit code for other failures
+              if [ $exit_code -eq 0 ]; then
+                echo "✅ Command completed (assuming success)"
+                exit 0
+              else
+                echo "❌ Promotion failed with exit code $exit_code"
+                if [ $attempt -lt $max_attempts ]; then
+                  echo "Waiting 10 seconds before retry..."
+                  sleep 10
+                fi
+              fi
+            fi
+            
+            attempt=$((attempt + 1))
+          done
+          
+          echo "❌ All promotion attempts failed after $max_attempts tries"
+          exit 1
 
   promote-bio:
     name: promote bio to production
@@ -575,7 +695,47 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Promote bio to production
-        run: vercel promote dpl_${{ needs.deploy-bio.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          deployment_id="dpl_${{ needs.deploy-bio.outputs.deployment_id }}"
+          max_attempts=3
+          attempt=1
+          
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt of $max_attempts to promote $deployment_id"
+            
+            output=$(vercel promote $deployment_id --scope=barely --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+            exit_code=$?
+            
+            echo "$output"
+            
+            if [[ $output == *"Success!"* ]] || [[ $output == *"was promoted to"* ]]; then
+              echo "✅ Promotion successful!"
+              exit 0
+            elif [[ $output == *"No deployment promotion in progress"* ]]; then
+              echo "⚠️ Promotion failed with 'No deployment promotion in progress'"
+              if [ $attempt -lt $max_attempts ]; then
+                echo "Waiting 10 seconds before retry..."
+                sleep 10
+              fi
+            else
+              # Check exit code for other failures
+              if [ $exit_code -eq 0 ]; then
+                echo "✅ Command completed (assuming success)"
+                exit 0
+              else
+                echo "❌ Promotion failed with exit code $exit_code"
+                if [ $attempt -lt $max_attempts ]; then
+                  echo "Waiting 10 seconds before retry..."
+                  sleep 10
+                fi
+              fi
+            fi
+            
+            attempt=$((attempt + 1))
+          done
+          
+          echo "❌ All promotion attempts failed after $max_attempts tries"
+          exit 1
 
   promote-cart:
     name: promote cart to production
@@ -591,7 +751,47 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Promote cart to production
-        run: vercel promote dpl_${{ needs.deploy-cart.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          deployment_id="dpl_${{ needs.deploy-cart.outputs.deployment_id }}"
+          max_attempts=3
+          attempt=1
+          
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt of $max_attempts to promote $deployment_id"
+            
+            output=$(vercel promote $deployment_id --scope=barely --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+            exit_code=$?
+            
+            echo "$output"
+            
+            if [[ $output == *"Success!"* ]] || [[ $output == *"was promoted to"* ]]; then
+              echo "✅ Promotion successful!"
+              exit 0
+            elif [[ $output == *"No deployment promotion in progress"* ]]; then
+              echo "⚠️ Promotion failed with 'No deployment promotion in progress'"
+              if [ $attempt -lt $max_attempts ]; then
+                echo "Waiting 10 seconds before retry..."
+                sleep 10
+              fi
+            else
+              # Check exit code for other failures
+              if [ $exit_code -eq 0 ]; then
+                echo "✅ Command completed (assuming success)"
+                exit 0
+              else
+                echo "❌ Promotion failed with exit code $exit_code"
+                if [ $attempt -lt $max_attempts ]; then
+                  echo "Waiting 10 seconds before retry..."
+                  sleep 10
+                fi
+              fi
+            fi
+            
+            attempt=$((attempt + 1))
+          done
+          
+          echo "❌ All promotion attempts failed after $max_attempts tries"
+          exit 1
 
   promote-fm:
     name: promote fm to production
@@ -607,7 +807,47 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Promote fm to production
-        run: vercel promote dpl_${{ needs.deploy-fm.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          deployment_id="dpl_${{ needs.deploy-fm.outputs.deployment_id }}"
+          max_attempts=3
+          attempt=1
+          
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt of $max_attempts to promote $deployment_id"
+            
+            output=$(vercel promote $deployment_id --scope=barely --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+            exit_code=$?
+            
+            echo "$output"
+            
+            if [[ $output == *"Success!"* ]] || [[ $output == *"was promoted to"* ]]; then
+              echo "✅ Promotion successful!"
+              exit 0
+            elif [[ $output == *"No deployment promotion in progress"* ]]; then
+              echo "⚠️ Promotion failed with 'No deployment promotion in progress'"
+              if [ $attempt -lt $max_attempts ]; then
+                echo "Waiting 10 seconds before retry..."
+                sleep 10
+              fi
+            else
+              # Check exit code for other failures
+              if [ $exit_code -eq 0 ]; then
+                echo "✅ Command completed (assuming success)"
+                exit 0
+              else
+                echo "❌ Promotion failed with exit code $exit_code"
+                if [ $attempt -lt $max_attempts ]; then
+                  echo "Waiting 10 seconds before retry..."
+                  sleep 10
+                fi
+              fi
+            fi
+            
+            attempt=$((attempt + 1))
+          done
+          
+          echo "❌ All promotion attempts failed after $max_attempts tries"
+          exit 1
 
   promote-invoice:
     name: promote invoice to production
@@ -623,7 +863,47 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Promote invoice to production
-        run: vercel promote dpl_${{ needs.deploy-invoice.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          deployment_id="dpl_${{ needs.deploy-invoice.outputs.deployment_id }}"
+          max_attempts=3
+          attempt=1
+          
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt of $max_attempts to promote $deployment_id"
+            
+            output=$(vercel promote $deployment_id --scope=barely --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+            exit_code=$?
+            
+            echo "$output"
+            
+            if [[ $output == *"Success!"* ]] || [[ $output == *"was promoted to"* ]]; then
+              echo "✅ Promotion successful!"
+              exit 0
+            elif [[ $output == *"No deployment promotion in progress"* ]]; then
+              echo "⚠️ Promotion failed with 'No deployment promotion in progress'"
+              if [ $attempt -lt $max_attempts ]; then
+                echo "Waiting 10 seconds before retry..."
+                sleep 10
+              fi
+            else
+              # Check exit code for other failures
+              if [ $exit_code -eq 0 ]; then
+                echo "✅ Command completed (assuming success)"
+                exit 0
+              else
+                echo "❌ Promotion failed with exit code $exit_code"
+                if [ $attempt -lt $max_attempts ]; then
+                  echo "Waiting 10 seconds before retry..."
+                  sleep 10
+                fi
+              fi
+            fi
+            
+            attempt=$((attempt + 1))
+          done
+          
+          echo "❌ All promotion attempts failed after $max_attempts tries"
+          exit 1
 
   promote-link:
     name: promote link to production
@@ -639,7 +919,47 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Promote link to production
-        run: vercel promote dpl_${{ needs.deploy-link.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          deployment_id="dpl_${{ needs.deploy-link.outputs.deployment_id }}"
+          max_attempts=3
+          attempt=1
+          
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt of $max_attempts to promote $deployment_id"
+            
+            output=$(vercel promote $deployment_id --scope=barely --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+            exit_code=$?
+            
+            echo "$output"
+            
+            if [[ $output == *"Success!"* ]] || [[ $output == *"was promoted to"* ]]; then
+              echo "✅ Promotion successful!"
+              exit 0
+            elif [[ $output == *"No deployment promotion in progress"* ]]; then
+              echo "⚠️ Promotion failed with 'No deployment promotion in progress'"
+              if [ $attempt -lt $max_attempts ]; then
+                echo "Waiting 10 seconds before retry..."
+                sleep 10
+              fi
+            else
+              # Check exit code for other failures
+              if [ $exit_code -eq 0 ]; then
+                echo "✅ Command completed (assuming success)"
+                exit 0
+              else
+                echo "❌ Promotion failed with exit code $exit_code"
+                if [ $attempt -lt $max_attempts ]; then
+                  echo "Waiting 10 seconds before retry..."
+                  sleep 10
+                fi
+              fi
+            fi
+            
+            attempt=$((attempt + 1))
+          done
+          
+          echo "❌ All promotion attempts failed after $max_attempts tries"
+          exit 1
 
   promote-manage-email:
     name: promote manage-email to production
@@ -655,7 +975,47 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Promote manage-email to production
-        run: vercel promote dpl_${{ needs.deploy-manage-email.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          deployment_id="dpl_${{ needs.deploy-manage-email.outputs.deployment_id }}"
+          max_attempts=3
+          attempt=1
+          
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt of $max_attempts to promote $deployment_id"
+            
+            output=$(vercel promote $deployment_id --scope=barely --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+            exit_code=$?
+            
+            echo "$output"
+            
+            if [[ $output == *"Success!"* ]] || [[ $output == *"was promoted to"* ]]; then
+              echo "✅ Promotion successful!"
+              exit 0
+            elif [[ $output == *"No deployment promotion in progress"* ]]; then
+              echo "⚠️ Promotion failed with 'No deployment promotion in progress'"
+              if [ $attempt -lt $max_attempts ]; then
+                echo "Waiting 10 seconds before retry..."
+                sleep 10
+              fi
+            else
+              # Check exit code for other failures
+              if [ $exit_code -eq 0 ]; then
+                echo "✅ Command completed (assuming success)"
+                exit 0
+              else
+                echo "❌ Promotion failed with exit code $exit_code"
+                if [ $attempt -lt $max_attempts ]; then
+                  echo "Waiting 10 seconds before retry..."
+                  sleep 10
+                fi
+              fi
+            fi
+            
+            attempt=$((attempt + 1))
+          done
+          
+          echo "❌ All promotion attempts failed after $max_attempts tries"
+          exit 1
 
   promote-nyc:
     name: promote nyc to production
@@ -671,7 +1031,47 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Promote nyc to production
-        run: vercel promote dpl_${{ needs.deploy-nyc.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          deployment_id="dpl_${{ needs.deploy-nyc.outputs.deployment_id }}"
+          max_attempts=3
+          attempt=1
+          
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt of $max_attempts to promote $deployment_id"
+            
+            output=$(vercel promote $deployment_id --scope=barely --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+            exit_code=$?
+            
+            echo "$output"
+            
+            if [[ $output == *"Success!"* ]] || [[ $output == *"was promoted to"* ]]; then
+              echo "✅ Promotion successful!"
+              exit 0
+            elif [[ $output == *"No deployment promotion in progress"* ]]; then
+              echo "⚠️ Promotion failed with 'No deployment promotion in progress'"
+              if [ $attempt -lt $max_attempts ]; then
+                echo "Waiting 10 seconds before retry..."
+                sleep 10
+              fi
+            else
+              # Check exit code for other failures
+              if [ $exit_code -eq 0 ]; then
+                echo "✅ Command completed (assuming success)"
+                exit 0
+              else
+                echo "❌ Promotion failed with exit code $exit_code"
+                if [ $attempt -lt $max_attempts ]; then
+                  echo "Waiting 10 seconds before retry..."
+                  sleep 10
+                fi
+              fi
+            fi
+            
+            attempt=$((attempt + 1))
+          done
+          
+          echo "❌ All promotion attempts failed after $max_attempts tries"
+          exit 1
 
   promote-page:
     name: promote page to production
@@ -687,7 +1087,47 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Promote page to production
-        run: vercel promote dpl_${{ needs.deploy-page.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          deployment_id="dpl_${{ needs.deploy-page.outputs.deployment_id }}"
+          max_attempts=3
+          attempt=1
+          
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt of $max_attempts to promote $deployment_id"
+            
+            output=$(vercel promote $deployment_id --scope=barely --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+            exit_code=$?
+            
+            echo "$output"
+            
+            if [[ $output == *"Success!"* ]] || [[ $output == *"was promoted to"* ]]; then
+              echo "✅ Promotion successful!"
+              exit 0
+            elif [[ $output == *"No deployment promotion in progress"* ]]; then
+              echo "⚠️ Promotion failed with 'No deployment promotion in progress'"
+              if [ $attempt -lt $max_attempts ]; then
+                echo "Waiting 10 seconds before retry..."
+                sleep 10
+              fi
+            else
+              # Check exit code for other failures
+              if [ $exit_code -eq 0 ]; then
+                echo "✅ Command completed (assuming success)"
+                exit 0
+              else
+                echo "❌ Promotion failed with exit code $exit_code"
+                if [ $attempt -lt $max_attempts ]; then
+                  echo "Waiting 10 seconds before retry..."
+                  sleep 10
+                fi
+              fi
+            fi
+            
+            attempt=$((attempt + 1))
+          done
+          
+          echo "❌ All promotion attempts failed after $max_attempts tries"
+          exit 1
 
   promote-press:
     name: promote press to production
@@ -703,7 +1143,47 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Promote press to production
-        run: vercel promote dpl_${{ needs.deploy-press.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          deployment_id="dpl_${{ needs.deploy-press.outputs.deployment_id }}"
+          max_attempts=3
+          attempt=1
+          
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt of $max_attempts to promote $deployment_id"
+            
+            output=$(vercel promote $deployment_id --scope=barely --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+            exit_code=$?
+            
+            echo "$output"
+            
+            if [[ $output == *"Success!"* ]] || [[ $output == *"was promoted to"* ]]; then
+              echo "✅ Promotion successful!"
+              exit 0
+            elif [[ $output == *"No deployment promotion in progress"* ]]; then
+              echo "⚠️ Promotion failed with 'No deployment promotion in progress'"
+              if [ $attempt -lt $max_attempts ]; then
+                echo "Waiting 10 seconds before retry..."
+                sleep 10
+              fi
+            else
+              # Check exit code for other failures
+              if [ $exit_code -eq 0 ]; then
+                echo "✅ Command completed (assuming success)"
+                exit 0
+              else
+                echo "❌ Promotion failed with exit code $exit_code"
+                if [ $attempt -lt $max_attempts ]; then
+                  echo "Waiting 10 seconds before retry..."
+                  sleep 10
+                fi
+              fi
+            fi
+            
+            attempt=$((attempt + 1))
+          done
+          
+          echo "❌ All promotion attempts failed after $max_attempts tries"
+          exit 1
 
   promote-vip:
     name: promote vip to production
@@ -719,7 +1199,47 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Promote vip to production
-        run: vercel promote dpl_${{ needs.deploy-vip.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          deployment_id="dpl_${{ needs.deploy-vip.outputs.deployment_id }}"
+          max_attempts=3
+          attempt=1
+          
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt of $max_attempts to promote $deployment_id"
+            
+            output=$(vercel promote $deployment_id --scope=barely --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+            exit_code=$?
+            
+            echo "$output"
+            
+            if [[ $output == *"Success!"* ]] || [[ $output == *"was promoted to"* ]]; then
+              echo "✅ Promotion successful!"
+              exit 0
+            elif [[ $output == *"No deployment promotion in progress"* ]]; then
+              echo "⚠️ Promotion failed with 'No deployment promotion in progress'"
+              if [ $attempt -lt $max_attempts ]; then
+                echo "Waiting 10 seconds before retry..."
+                sleep 10
+              fi
+            else
+              # Check exit code for other failures
+              if [ $exit_code -eq 0 ]; then
+                echo "✅ Command completed (assuming success)"
+                exit 0
+              else
+                echo "❌ Promotion failed with exit code $exit_code"
+                if [ $attempt -lt $max_attempts ]; then
+                  echo "Waiting 10 seconds before retry..."
+                  sleep 10
+                fi
+              fi
+            fi
+            
+            attempt=$((attempt + 1))
+          done
+          
+          echo "❌ All promotion attempts failed after $max_attempts tries"
+          exit 1
 
   promote-www:
     name: promote www to production
@@ -735,7 +1255,47 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Promote www to production
-        run: vercel promote dpl_${{ needs.deploy-www.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          deployment_id="dpl_${{ needs.deploy-www.outputs.deployment_id }}"
+          max_attempts=3
+          attempt=1
+          
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt of $max_attempts to promote $deployment_id"
+            
+            output=$(vercel promote $deployment_id --scope=barely --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+            exit_code=$?
+            
+            echo "$output"
+            
+            if [[ $output == *"Success!"* ]] || [[ $output == *"was promoted to"* ]]; then
+              echo "✅ Promotion successful!"
+              exit 0
+            elif [[ $output == *"No deployment promotion in progress"* ]]; then
+              echo "⚠️ Promotion failed with 'No deployment promotion in progress'"
+              if [ $attempt -lt $max_attempts ]; then
+                echo "Waiting 10 seconds before retry..."
+                sleep 10
+              fi
+            else
+              # Check exit code for other failures
+              if [ $exit_code -eq 0 ]; then
+                echo "✅ Command completed (assuming success)"
+                exit 0
+              else
+                echo "❌ Promotion failed with exit code $exit_code"
+                if [ $attempt -lt $max_attempts ]; then
+                  echo "Waiting 10 seconds before retry..."
+                  sleep 10
+                fi
+              fi
+            fi
+            
+            attempt=$((attempt + 1))
+          done
+          
+          echo "❌ All promotion attempts failed after $max_attempts tries"
+          exit 1
 
   # 🚨 ROLLBACK APPS (IF ANY PROMOTION FAILS) 🚨 #
   # ref: https://dev.to/philw_/using-vercels-instant-rollback-feature-in-your-own-cicd-pipeline-57oi
