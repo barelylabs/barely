@@ -7,12 +7,13 @@ import {
 	WorkspaceInviteEmailTemplate,
 	WorkspaceRegistrationInviteEmailTemplate,
 } from '@barely/email/templates/auth';
-import { newId } from '@barely/utils';
+import { getAbsoluteUrl, newId } from '@barely/utils';
 import { acceptInviteSchema, inviteMemberSchema } from '@barely/validators';
 import { and, eq, gt, or } from 'drizzle-orm';
 
 import { createMagicLink } from '@barely/auth/utils';
 
+import { libEnv } from '../../../env';
 import { privateProcedure, workspaceProcedure } from '../trpc';
 
 export const workspaceInviteRoute = {
@@ -114,8 +115,10 @@ export const workspaceInviteRoute = {
 					throw error;
 				}
 
-				// Send registration invite email
-				const registrationLink = `${process.env.NEXT_PUBLIC_APP_BASE_URL ?? 'https://app.barely.ai'}/register?inviteToken=${inviteToken}&email=${encodeURIComponent(input.email)}`;
+				const registrationLink = getAbsoluteUrl(
+					libEnv.NEXT_PUBLIC_CURRENT_APP,
+					`/register?inviteToken=${inviteToken}&email=${encodeURIComponent(input.email)}`,
+				);
 
 				const RegistrationInviteEmail = WorkspaceRegistrationInviteEmailTemplate({
 					inviterName: ctx.user.fullName ?? ctx.user.firstName ?? ctx.user.handle,
