@@ -65,7 +65,7 @@ export const rawSessionUserWith = {
 	},
 } as const;
 
-export async function createUser(user: CreateUser) {
+export async function createUser(user: CreateUser & { inviteToken?: string }) {
 	let fullName =
 		user.fullName ??
 		user.email.split('@')[0]?.replace(/\W/g, '') ??
@@ -145,6 +145,80 @@ export async function createUser(user: CreateUser) {
 		phone: phone,
 		workspaceId: newWorkspace.id,
 	});
+
+	// Handle workspace invites
+	if (user.inviteToken) {
+		// Find the invite by token
+		const invite = await dbHttp.query.WorkspaceInvites.findFirst({
+			where: and(
+				eq(WorkspaceInvites.inviteToken, user.inviteToken),
+				eq(WorkspaceInvites.email, user.email),
+				gt(WorkspaceInvites.expiresAt, new Date()),
+				isNull(WorkspaceInvites.acceptedAt),
+			),
+			with: {
+				workspace: true,
+			},
+		});
+
+		if (invite) {
+			// Add user to the invited workspace
+			await dbHttp.insert(_Users_To_Workspaces).values({
+				userId: newUserId,
+				workspaceId: invite.workspaceId,
+				role: invite.role,
+			});
+
+			// Mark invite as accepted
+			await dbHttp
+				.update(WorkspaceInvites)
+				.set({
+					acceptedAt: new Date(),
+					userId: newUserId,
+				})
+				.where(
+					and(
+						eq(WorkspaceInvites.inviteToken, user.inviteToken),
+						eq(WorkspaceInvites.email, user.email),
+					),
+				);
+		}
+	} else {
+		// Check for any pending invites by email (backward compatibility)
+		const pendingInvites = await dbHttp.query.WorkspaceInvites.findMany({
+			where: and(
+				eq(WorkspaceInvites.email, user.email),
+				gt(WorkspaceInvites.expiresAt, new Date()),
+				isNull(WorkspaceInvites.acceptedAt),
+			),
+		});
+
+		if (pendingInvites.length > 0) {
+			// Add user to all invited workspaces
+			for (const invite of pendingInvites) {
+				await dbHttp.insert(_Users_To_Workspaces).values({
+					userId: newUserId,
+					workspaceId: invite.workspaceId,
+					role: invite.role,
+				});
+			}
+
+			// Mark all invites as accepted
+			await dbHttp
+				.update(WorkspaceInvites)
+				.set({
+					acceptedAt: new Date(),
+					userId: newUserId,
+				})
+				.where(
+					and(
+						eq(WorkspaceInvites.email, user.email),
+						gt(WorkspaceInvites.expiresAt, new Date()),
+						isNull(WorkspaceInvites.acceptedAt),
+					),
+				);
+		}
+	}
 
 	return newUser;
 }

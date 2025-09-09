@@ -11,7 +11,8 @@ import { privateProcedure, publicProcedure } from '../trpc';
 
 export const userRoute = {
 	create: publicProcedure.input(createUserSchema).mutation(async ({ input }) => {
-		const newUser = await createUser({ ...input });
+		const { inviteToken, ...userInput } = input;
+		const newUser = await createUser({ ...userInput, inviteToken });
 
 		return newUser;
 	}),

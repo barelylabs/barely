@@ -24,9 +24,15 @@ import { LoginLinkSent } from '../login-success';
 
 interface RegisterFormProps extends React.HTMLAttributes<HTMLDivElement> {
 	callbackUrl?: string;
+	inviteToken?: string;
+	prefilledEmail?: string;
 }
 
-const RegisterUserForm = ({ callbackUrl }: RegisterFormProps) => {
+const RegisterUserForm = ({
+	callbackUrl,
+	inviteToken,
+	prefilledEmail,
+}: RegisterFormProps) => {
 	const trpc = useTRPC();
 	const [identifier, setIdentifier] = useState('');
 	const [creatingAccount, setCreatingAccount] = useState(false);
@@ -36,7 +42,7 @@ const RegisterUserForm = ({ callbackUrl }: RegisterFormProps) => {
 		schema: newUserContactInfoSchema,
 		defaultValues: {
 			fullName: '',
-			email: '',
+			email: prefilledEmail ?? '',
 			phone: '',
 		},
 	});
@@ -53,7 +59,9 @@ const RegisterUserForm = ({ callbackUrl }: RegisterFormProps) => {
 				// if (!newUser) throw new Error('No user returned from createUser mutation');
 
 				setIdentifier(newUser.email);
-				sendLoginEmail.mutate({ email: newUser.email, callbackUrl });
+				const finalCallbackUrl =
+					inviteToken ? `${callbackUrl ?? '/'}?inviteToken=${inviteToken}` : callbackUrl;
+				sendLoginEmail.mutate({ email: newUser.email, callbackUrl: finalCallbackUrl });
 			},
 			onError: error => {
 				toast.error(error.message);
@@ -63,7 +71,7 @@ const RegisterUserForm = ({ callbackUrl }: RegisterFormProps) => {
 
 	const onSubmit = async (user: z.infer<typeof newUserContactInfoSchema>) => {
 		setCreatingAccount(true);
-		await createUser.mutateAsync({ ...user });
+		await createUser.mutateAsync({ ...user, inviteToken });
 		return;
 	};
 
@@ -92,6 +100,7 @@ const RegisterUserForm = ({ callbackUrl }: RegisterFormProps) => {
 								autoCorrect='off'
 								autoComplete='email'
 								autoCapitalize='off'
+								disabled={!!prefilledEmail}
 								onChange={e => {
 									if (isRealEmail(e.target.value)) setValidatingEmail(true);
 								}}

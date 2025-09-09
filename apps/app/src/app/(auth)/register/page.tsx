@@ -10,10 +10,10 @@ import RegisterUserForm from './register-user-form';
 const RegisterUserPage = async ({
 	searchParams,
 }: {
-	searchParams?: Promise<{ callbackUrl?: string }>;
+	searchParams?: Promise<{ callbackUrl?: string; inviteToken?: string; email?: string }>;
 }) => {
 	const awaitedSearchParams = await searchParams;
-	const { callbackUrl } = awaitedSearchParams ?? {};
+	const { callbackUrl, inviteToken, email } = awaitedSearchParams ?? {};
 
 	await handleLoggedInOnAuthPage({ callbackUrl });
 
@@ -33,7 +33,11 @@ const RegisterUserPage = async ({
 					<H size='4'>Create an account</H>
 				</div>
 
-				<RegisterUserForm callbackUrl={callbackUrl} />
+				<RegisterUserForm
+					callbackUrl={callbackUrl}
+					inviteToken={inviteToken}
+					prefilledEmail={email}
+				/>
 
 				<Text variant={'xs/normal'} subtle>
 					By creating an account, you agree to our{' '}

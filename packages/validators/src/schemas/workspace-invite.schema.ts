@@ -17,6 +17,11 @@ export interface SessionWorkspaceInvite {
 	};
 }
 
-export const acceptInviteSchema = z.object({
-	workspaceId: z.string(),
-});
+export const acceptInviteSchema = z
+	.object({
+		workspaceId: z.string().optional(),
+		inviteToken: z.string().optional(),
+	})
+	.refine(data => data.workspaceId ?? data.inviteToken, {
+		message: 'Either workspaceId or inviteToken must be provided',
+	});
