@@ -12,6 +12,7 @@ manage_email_qr=http://$ip_address:3008
 vip_qr=http://$ip_address:3009
 nyc_qr=http://$ip_address:3010
 bio_qr=http://$ip_address:3011
+invoice_qr=http://$ip_address:3012
 
 echo "app::3000"
 qrencode -t ansiutf8 -o - $app_qr
@@ -45,5 +46,8 @@ qrencode -t ansiutf8 -o - $nyc_qr
 
 echo "bio::3011"
 qrencode -t ansiutf8 -o - $bio_qr
+
+echo "invoice::3012"
+qrencode -t ansiutf8 -o - $invoice_qr
 
 echo "email::4000"

@@ -19,6 +19,7 @@ import * as brandKitSql from './sql/brand-kit.sql';
 import * as campaignSql from './sql/campaign.sql';
 import * as funnelSql from './sql/cart-funnel.sql';
 import * as cartSql from './sql/cart.sql';
+import * as clientPaymentMethodSql from './sql/client-payment-method.sql';
 import * as domainSql from './sql/domain.sql';
 import * as emailAddressSql from './sql/email-address.sql';
 import * as emailBroadcastSql from './sql/email-broadcast.sql';
@@ -37,6 +38,9 @@ import * as fmSql from './sql/fm.sql';
 import * as formResponseSql from './sql/form-response.sql';
 import * as formSql from './sql/form.sql';
 import * as genreSql from './sql/genre.sql';
+import * as invoiceClientSql from './sql/invoice-client.sql';
+import * as invoiceEmailSql from './sql/invoice-email.sql';
+import * as invoiceSql from './sql/invoice.sql';
 import * as landingPageSql from './sql/landing-page.sql';
 import * as linkSql from './sql/link.sql';
 import * as mixtapeSql from './sql/mixtape.sql';
@@ -76,6 +80,7 @@ export const dbSchema = {
 	...brandKitSql,
 	...campaignSql,
 	...cartSql,
+	...clientPaymentMethodSql,
 	...domainSql,
 	...emailAddressSql,
 	...emailBroadcastSql,
@@ -95,6 +100,9 @@ export const dbSchema = {
 	...formResponseSql,
 	...funnelSql,
 	...genreSql,
+	...invoiceClientSql,
+	...invoiceEmailSql,
+	...invoiceSql,
 	...landingPageSql,
 	...linkSql,
 	...mixtapeSql,

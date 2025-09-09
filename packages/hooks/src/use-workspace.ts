@@ -65,6 +65,7 @@ export function useWorkspace({ onBeginSet }: { onBeginSet?: () => void } = {}) {
 	return {
 		workspace: currentWorkspace,
 		handle: currentWorkspace.handle,
+		currency: currentWorkspace.currency,
 		setWorkspace,
 		pendingTransition: pending,
 		isPersonal: currentWorkspace.type === 'personal',

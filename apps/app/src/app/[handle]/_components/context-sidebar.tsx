@@ -4,8 +4,8 @@ import type { Product } from '@barely/utils';
 import { useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useCurrentApp, useWorkspace } from '@barely/hooks';
-import { cn, getProductById } from '@barely/utils';
+import { useWorkspace } from '@barely/hooks';
+import { cn, getProductById, getSettingsRoutesForVariant } from '@barely/utils';
 import { useAtomValue } from 'jotai';
 
 import { navHistoryAtom } from '@barely/atoms/navigation-history';
@@ -29,80 +29,37 @@ interface ContextSidebarProps {
 export function ContextSidebar({ productId }: ContextSidebarProps) {
 	const pathname = usePathname();
 	const { handle, isPersonal } = useWorkspace();
-	const { hasFeature, isFmVariant } = useCurrentApp();
+	// const { hasFeature, isFmVariant } = useCurrentApp();
 	const navHistory = useAtomValue(navHistoryAtom);
 
 	const isSettings = pathname.includes('/settings');
 
 	// Settings routes configuration
 	const settingsRoutes = useMemo<ProductRoute[]>(() => {
-		// For FM variant, only show essential settings
-		if (isFmVariant) {
-			return [
-				{ path: '/settings', label: 'profile', icon: 'profile' },
-				{ path: '/settings/billing', label: 'billing', icon: 'billing' },
-			];
-		}
+		const baseRoutes = getSettingsRoutesForVariant();
 
-		// For full app, show all settings based on features
-		const allSettingsRoutes: ProductRoute[] = [
-			{ path: '/settings', label: 'profile', icon: 'profile' },
-		];
+		// Transform the routes and add special handling for team label and email nesting
+		return baseRoutes.map(route => {
+			// Special handling for team route - show "teams" for personal workspaces
+			if (route.path === '/settings/team' && isPersonal) {
+				return { ...route, label: 'teams' };
+			}
 
-		if (hasFeature('team')) {
-			allSettingsRoutes.push({
-				path: '/settings/team',
-				label: isPersonal ? 'teams' : 'team',
-				icon: 'users',
-			});
-		}
-
-		if (hasFeature('settings')) {
-			allSettingsRoutes.push(
-				{ path: '/settings/brand', label: 'brand', icon: 'brand' },
-				{ path: '/settings/socials', label: 'socials', icon: 'socials' },
-				{ path: '/settings/streaming', label: 'streaming', icon: 'music' },
-				{ path: '/settings/apps', label: 'apps', icon: 'apps' },
-				{
-					path: '/settings/email/domains',
-					label: 'email',
-					icon: 'email',
+			// Special handling for email route - add nested children
+			if (route.path === '/settings/email/domains') {
+				return {
+					...route,
 					hideChildrenWhenNotActive: true,
 					children: [
 						{ path: '/settings/email/domains', label: 'domains' },
 						{ path: '/settings/email/addresses', label: 'addresses' },
 					],
-				},
-				{ path: '/settings/domains', label: 'domains', icon: 'domain' },
-				{ path: '/settings/remarketing', label: 'remarketing', icon: 'remarketing' },
-			);
-		}
+				};
+			}
 
-		if (hasFeature('campaigns')) {
-			allSettingsRoutes.push({
-				path: '/settings/vip',
-				label: 'vip',
-				icon: 'vip',
-			});
-		}
-
-		if (hasFeature('products')) {
-			allSettingsRoutes.push({
-				path: '/settings/cart',
-				label: 'cart',
-				icon: 'cart',
-			});
-		}
-
-		if (hasFeature('settings')) {
-			allSettingsRoutes.push(
-				{ path: '/settings/payouts', label: 'payouts', icon: 'payouts' },
-				{ path: '/settings/billing', label: 'billing', icon: 'billing' },
-			);
-		}
-
-		return allSettingsRoutes;
-	}, [isFmVariant, hasFeature, isPersonal]);
+			return route;
+		});
+	}, [isPersonal]);
 
 	// Get product and its routes
 	const product = useMemo<

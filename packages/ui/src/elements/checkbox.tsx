@@ -15,7 +15,7 @@ const checkboxVariants = cva(
 				primary:
 					'border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground',
 				brand:
-					'data-[state=checked]:text-brand-foreground border-brand data-[state=checked]:border-brand data-[state=checked]:bg-brand',
+					'border-brand data-[state=checked]:border-brand data-[state=checked]:bg-brand data-[state=checked]:text-brand-foreground',
 			},
 			size: {
 				sm: 'h-4 w-4',

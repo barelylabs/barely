@@ -15,6 +15,7 @@
 		"src/forms/**/*",
 		"src/hooks/**/*",
 		"src/images/**/*",
+		"src/invoice/**/*",
 		"src/utils/**/*",
 		"tailwind.config.ts"
 	],

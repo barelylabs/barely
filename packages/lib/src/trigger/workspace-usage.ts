@@ -16,6 +16,7 @@ export const resetWorkspaceUsage = schedules.task({
 				eventUsage: 0,
 				emailUsage: 0,
 				linkUsage: 0,
+				invoiceUsage: 0,
 				fileUsage_billingCycle: 0,
 			})
 			.where(
@@ -23,8 +24,9 @@ export const resetWorkspaceUsage = schedules.task({
 					gte(Workspaces.eventUsage, 0),
 					gte(Workspaces.emailUsage, 0),
 					gte(Workspaces.linkUsage, 0),
+					gte(Workspaces.invoiceUsage, 0),
 					gte(Workspaces.fileUsage_billingCycle, 0),
 				),
-			); // reset the event usage to 0 for all workspaces that have anyusage
+			); // reset the usage to 0 for all workspaces that have any usage
 	},
 });

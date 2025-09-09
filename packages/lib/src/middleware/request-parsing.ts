@@ -186,6 +186,41 @@ export const parseLandingPageUrl = (url: string) => {
 	return { handle, key };
 };
 
+// invoice
+export const parseInvoiceReqForHandleAndKey = (req: NextRequest) => {
+	const { handle: handleFromHeaders, key: keyFromHeaders } = parseHeadersForHandleAndKey(
+		req.headers,
+	);
+
+	if (handleFromHeaders && keyFromHeaders)
+		return { handle: handleFromHeaders, key: keyFromHeaders };
+
+	const referer = req.headers.get('referer') ?? '';
+	const { handle: handleFromReferer, key: keyFromReferer } = parseInvoiceUrl(referer);
+
+	return {
+		handle: handleFromHeaders ?? handleFromReferer,
+		key: keyFromHeaders ?? keyFromReferer,
+	};
+};
+
+export const parseInvoiceUrl = (url: string) => {
+	const parsed = new URL(url);
+	const parts = parsed.pathname.split('/').filter(Boolean);
+
+	// Invoice URLs are structured as /pay/[handle]/[invoiceId]
+	// parts[0] is 'pay', parts[1] is handle, parts[2] is invoiceId (key)
+	const handle = parts[1] ?? null;
+	const key = parts[2] ?? null;
+
+	if (!handle || !key) {
+		console.log('parseInvoiceUrl', url);
+		console.log('missing handle or key', handle, key);
+	}
+
+	return { handle, key };
+};
+
 // vip
 export const parseVipReqForHandleAndKey = (req: NextRequest) => {
 	const { handle: handleFromHeaders, key: keyFromHeaders } = parseHeadersForHandleAndKey(

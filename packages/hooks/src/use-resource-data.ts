@@ -32,7 +32,13 @@ export function createResourceDataHook<
 		const queryFilters = Object.entries(filters as Record<string, unknown>).reduce(
 			(acc, [key, value]) => {
 				// Exclude any params that match modal state pattern or setter functions
-				if (!/^show.*Modal$/.test(key) && typeof value !== 'function') {
+				// Also exclude null and undefined values
+				if (
+					!/^show.*Modal$/.test(key) &&
+					typeof value !== 'function' &&
+					value !== null &&
+					value !== undefined
+				) {
 					acc[key] = value;
 				}
 				return acc;

@@ -6,7 +6,9 @@
 			"Bash(gh pr create:*)",
 			"Bash(git push:*)",
 			"Bash(git push origin:*)",
-			"Bash(git push origin HEAD:*)"
+			"Bash(git push origin HEAD:*)",
+			"mcp__context7__resolve-library-id",
+			"mcp__context7__get-library-docs"
 		],
 		"deny": []
 	},

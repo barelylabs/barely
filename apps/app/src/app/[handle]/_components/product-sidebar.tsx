@@ -4,8 +4,8 @@ import type { Product } from '@barely/utils';
 import { Fragment, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useCurrentApp, useUser, useWorkspace, useWorkspaces } from '@barely/hooks';
-import { cn, getAvailableProducts } from '@barely/utils';
+import { useUser, useWorkspace, useWorkspaces } from '@barely/hooks';
+import { cn, getProductsForVariant } from '@barely/utils';
 
 import { Avatar } from '@barely/ui/avatar';
 import {
@@ -25,7 +25,6 @@ import { WorkspaceSwitcher } from './workspace-switcher';
 export function ProductSidebar() {
 	const pathname = usePathname();
 	const { handle, isPersonal } = useWorkspace();
-	const { features } = useCurrentApp();
 	const user = useUser();
 	const allWorkspaces = useWorkspaces();
 	const router = useRouter();
@@ -36,10 +35,7 @@ export function ProductSidebar() {
 	);
 
 	// Get available products based on current app variant
-	const { core, meta, locked } = useMemo(
-		() => getAvailableProducts(features),
-		[features],
-	);
+	const { core, meta, locked } = useMemo(() => getProductsForVariant(), []);
 
 	// Determine active product based on current pathname
 	const activeProductId = useMemo(() => {

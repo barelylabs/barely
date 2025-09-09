@@ -698,7 +698,7 @@ const DateTimePicker = React.forwardRef<Partial<DateTimePickerRef>, DateTimePick
 			value,
 			onChange,
 			hourCycle = 24,
-			yearRange = 50,
+			yearRange = 5,
 			disabled = false,
 			displayFormat,
 			granularity = 'second',
@@ -782,7 +782,9 @@ const DateTimePicker = React.forwardRef<Partial<DateTimePickerRef>, DateTimePick
 						{value ?
 							format(
 								value,
-								hourCycle === 24 ? initHourFormat.hour24 : initHourFormat.hour12,
+								granularity === 'day' ? 'PPP'
+								: hourCycle === 24 ? initHourFormat.hour24
+								: initHourFormat.hour12,
 								{
 									locale: loc,
 								},

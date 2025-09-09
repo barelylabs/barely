@@ -11,8 +11,6 @@ import reactAriaComponents from 'tailwindcss-react-aria-components';
 import colors from 'tailwindcss/colors';
 import defaultTheme from 'tailwindcss/defaultTheme';
 
-import { dynamicTwClasses } from './lib/dynamic-tw';
-
 export default {
 	darkMode: ['class'],
 	content: ['src/**/*.{ts,tsx}'],
@@ -174,7 +172,7 @@ export default {
 				},
 				brand: {
 					DEFAULT: 'oklch(var(--brand) / <alpha-value>)',
-					...dynamicTwClasses('brand', 40),
+					foreground: 'oklch(var(--brand-foreground) / <alpha-value>)',
 				},
 				brandKit: {
 					bg: 'var(--brandKit-bg)',

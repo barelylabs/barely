@@ -3,7 +3,7 @@
 import type { PlanType } from '@barely/const';
 import { WORKSPACE_PLANS } from '@barely/const';
 import { useWorkspace } from '@barely/hooks';
-import { cn } from '@barely/utils';
+import { cn, isInvoiceVariant } from '@barely/utils';
 import { useMutation } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Check, Sparkles, X } from 'lucide-react';
@@ -15,7 +15,10 @@ import { Button } from '@barely/ui/button';
 import { Card } from '@barely/ui/card';
 import { H, Text } from '@barely/ui/typography';
 
+import InvoicePlansPage from './invoice-plans';
+
 export default function UpgradePage() {
+	// Hooks must be called before any conditional returns
 	const { workspace } = useWorkspace();
 	const trpc = useTRPC();
 	const currentPlan = workspace.plan;
@@ -30,6 +33,8 @@ export default function UpgradePage() {
 		),
 		billing: parseAsStringEnum(['monthly', 'yearly']).withDefault('yearly'),
 	});
+
+	// Check if we're in invoice variant and render the invoice-specific page
 
 	const showPlusPlans = params.type === 'agency';
 	const billingPeriod = params.billing;
@@ -98,7 +103,7 @@ export default function UpgradePage() {
 		return targetIndex < currentIndex ? 'Downgrade' : 'Upgrade';
 	};
 
-	// Upgrade mutation
+	// Upgrade mutation - must always call useMutation unconditionally
 	const { mutate: upgradePlan, isPending } = useMutation(
 		trpc.workspace.upgradePlan.mutationOptions({
 			onSuccess: url => {
@@ -123,6 +128,10 @@ export default function UpgradePage() {
 			billingCycle: billingPeriod,
 		});
 	};
+
+	if (isInvoiceVariant()) {
+		return <InvoicePlansPage />;
+	}
 
 	return (
 		<div className='flex-1 overflow-y-auto'>

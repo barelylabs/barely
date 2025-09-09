@@ -81,6 +81,8 @@
 		"@barely/prettier-config": "workspace:*",
 		"@barely/tailwind-config": "workspace:*",
 		"@barely/tsconfig": "workspace:*",
+		"@stripe/connect-js": "^3.3.28",
+		"@stripe/react-connect-js": "^3.3.26",
 		"@swc-jotai/debug-label": "^0.0.10",
 		"@swc-jotai/react-refresh": "^0.0.8",
 		"@tailwindcss/typography": "catalog:",

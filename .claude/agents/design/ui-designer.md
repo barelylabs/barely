@@ -24,6 +24,7 @@ When designing interfaces, you will:
 - Ensure all components work in both light and dark modes
 
 OKLCH color format:
+
 ```css
 /* OKLCH format: L% C H */
 --primary: 20.79% 0.04 265.73;  /* Lightness Chroma Hue */
@@ -35,15 +36,16 @@ className="bg-primary/50"  /* → oklch(var(--primary) / 0.5) */
 ```
 
 Example color usage:
+
 ```tsx
 // CORRECT - using CSS variables
-className="bg-background text-foreground border-border"
-className="bg-primary text-primary-foreground"
-className="bg-muted/30 text-muted-foreground"
+className = 'bg-background text-foreground border-border';
+className = 'bg-primary text-primary-foreground';
+className = 'bg-muted/30 text-muted-foreground';
 
 // INCORRECT - using dark: prefix or hardcoded colors
-className="bg-white dark:bg-gray-900"  // ❌
-className="text-gray-600 dark:text-gray-300"  // ❌
+className = 'bg-white dark:bg-gray-900'; // ❌
+className = 'text-gray-600 dark:text-gray-300'; // ❌
 ```
 
 ## 2. Component Architecture with CVA
@@ -52,30 +54,28 @@ Build scalable components using:
 
 ```tsx
 // Component variants pattern - can be inline in component file
-const componentVariants = cva(
-  'base-classes',
-  {
-    variants: {
-      variant: { primary: '', secondary: '' },
-      size: { sm: '', md: '', lg: '' },
-      look: { default: '', outline: '', ghost: '' }
-    },
-    compoundVariants: [
-      {
-        look: 'tab',
-        selected: true,
-        className: 'bg-muted text-primary',
-      }
-    ],
-    defaultVariants: {
-      variant: 'primary',
-      size: 'md'
-    }
-  }
-);
+const componentVariants = cva('base-classes', {
+	variants: {
+		variant: { primary: '', secondary: '' },
+		size: { sm: '', md: '', lg: '' },
+		look: { default: '', outline: '', ghost: '' },
+	},
+	compoundVariants: [
+		{
+			look: 'tab',
+			selected: true,
+			className: 'bg-muted text-primary',
+		},
+	],
+	defaultVariants: {
+		variant: 'primary',
+		size: 'md',
+	},
+});
 ```
 
 Follow these patterns:
+
 - Use CVA for complex component variants
 - Variants can live in the component file (no separate .variants.tsx required)
 - Compose components using shadcn/ui patterns
@@ -86,6 +86,7 @@ Follow these patterns:
 ## 3. Repository Color System
 
 ### Semantic Colors (CSS Variables):
+
 ```css
 /* Core semantic colors */
 --background / --foreground
@@ -107,7 +108,9 @@ Follow these patterns:
 ```
 
 ### Brand & App Colors:
+
 Brand-specific colors are defined in each app's globals.css:
+
 ```css
 /* In apps/[app-name]/src/styles/globals.css */
 --brand-500: /* app-specific color */;
@@ -118,6 +121,7 @@ Brand-specific colors are defined in each app's globals.css:
 ```
 
 Platform colors for music services:
+
 - spotify (green shades)
 - apple (gray shades)
 - instagram (gradient)
@@ -128,10 +132,11 @@ Platform colors for music services:
 ## 4. Typography System
 
 Use the established type scale:
+
 ```tsx
 // Text component with compound size/weight variants
 <Text variant="md/medium">Content</Text>
-<Text variant="sm/normal" muted>Secondary text</Text>
+<Text variant="sm/normal">Secondary text</Text>
 <Text variant="lg/semibold">Emphasized</Text>
 
 // Sizes: 2xs, xs, sm, md, lg, xl, 2xl, 3xl
@@ -151,10 +156,11 @@ Use the established type scale:
 ## 5. Spacing & Layout System
 
 Follow the rem-based spacing:
+
 ```css
 /* Standard spacing units */
 0.25rem (4px)   - gap-1, p-1
-0.5rem (8px)    - gap-2, p-2  
+0.5rem (8px)    - gap-2, p-2
 1rem (16px)     - gap-4, p-4
 1.5rem (24px)   - gap-6, p-6
 2rem (32px)     - gap-8, p-8
@@ -169,6 +175,7 @@ px-4 sm:px-6 lg:px-8 for responsive padding
 ## 6. Form Design Patterns
 
 Design forms using:
+
 ```tsx
 // React Hook Form integration
 // Field wrapper pattern with FormField
@@ -179,6 +186,7 @@ Design forms using:
 ```
 
 Components to leverage:
+
 - Input, Textarea, Select from elements/
 - Form fields from forms/ directory
 - Validation with Zod schemas
@@ -187,6 +195,7 @@ Components to leverage:
 ## 7. Component Organization
 
 ### File Structure:
+
 ```
 packages/ui/src/
   elements/        # Basic UI elements (Button, Input, Card)
@@ -200,6 +209,7 @@ apps/[name]/src/
 ```
 
 ### Import Patterns:
+
 ```tsx
 // CORRECT - flattened imports at package level
 import { Button } from '@barely/ui/button';
@@ -208,12 +218,13 @@ import { Text } from '@barely/ui/typography';
 import { cn } from '@barely/utils';
 
 // INCORRECT - nested paths
-import { Button } from '@barely/ui/elements/button';  // ❌ Don't use nested paths
+import { Button } from '@barely/ui/elements/button'; // ❌ Don't use nested paths
 ```
 
 ## 8. Animation & Interaction Patterns
 
 Available animations:
+
 ```css
 animate-accordion-up/down
 animate-bounce-slow
@@ -223,12 +234,14 @@ duration-200
 ```
 
 Interaction states:
+
 - hover: variants for all interactive elements
 - focus-visible: ring-2 ring-ring ring-offset-2
 - active: scale-95 for buttons
 - disabled: opacity-50 pointer-events-none
 
 Loading states pattern:
+
 ```tsx
 // Automatic text transformation when loading
 <Button loading={isLoading}>
@@ -248,6 +261,7 @@ Loading states pattern:
 ## 9. Responsive Design Patterns
 
 Mobile-first with breakpoints:
+
 ```css
 sm: 640px   # Small tablets
 md: 768px   # Tablets
@@ -257,6 +271,7 @@ xl: 1280px  # Desktops
 ```
 
 Common patterns:
+
 - Stack on mobile, row on desktop: `flex-col sm:flex-row`
 - Hide on mobile: `hidden sm:block`
 - Responsive text: `text-sm sm:text-base lg:text-lg`
@@ -265,6 +280,7 @@ Common patterns:
 ## 10. Music Industry UI Patterns
 
 Design for these specific use cases:
+
 - Smart links with platform icons
 - Streaming analytics dashboards
 - Release planning interfaces
@@ -274,6 +290,7 @@ Design for these specific use cases:
 - Email campaign builders
 
 Icon system for platforms:
+
 ```tsx
 // Multiple icon libraries in use:
 // - Lucide React (primary icons)
@@ -288,12 +305,13 @@ const SpotifyIcon = Icon.spotify;
 const PlayIcon = Icon.play;
 
 // In components:
-<Button startIcon="spotify">Play on Spotify</Button>
+<Button startIcon='spotify'>Play on Spotify</Button>;
 ```
 
 ## Component Checklist
 
 When creating new components:
+
 - [ ] Uses CSS variables for all colors (OKLCH format)
 - [ ] Works in both light and dark modes
 - [ ] Follows CVA pattern for variants
@@ -307,41 +325,31 @@ When creating new components:
 ## Common Implementation Patterns
 
 ### Card Component:
+
 ```tsx
-<Card className="bg-card border-border">
-  <CardHeader>
-    <CardTitle className="text-foreground">Title</CardTitle>
-  </CardHeader>
-  <CardContent className="text-muted-foreground">
-    Content
-  </CardContent>
+<Card className='border-border bg-card'>
+	<CardHeader>
+		<CardTitle className='text-foreground'>Title</CardTitle>
+	</CardHeader>
+	<CardContent className='text-muted-foreground'>Content</CardContent>
 </Card>
 ```
 
 ### Button with Loading:
+
 ```tsx
-<Button 
-  loading={isLoading}
-  disabled={isLoading}
-  className="w-full"
->
-  {isLoading ? 'Processing...' : 'Submit'}
+<Button loading={isLoading} disabled={isLoading} className='w-full'>
+	{isLoading ? 'Processing...' : 'Submit'}
 </Button>
 ```
 
 ### Form Field:
+
 ```tsx
-<div className="space-y-1">
-  <Label htmlFor="email">Email</Label>
-  <Input 
-    id="email"
-    type="email"
-    className="w-full"
-    placeholder="Enter email"
-  />
-  {error && (
-    <p className="text-sm text-destructive">{error}</p>
-  )}
+<div className='space-y-1'>
+	<Label htmlFor='email'>Email</Label>
+	<Input id='email' type='email' className='w-full' placeholder='Enter email' />
+	{error && <p className='text-sm text-destructive'>{error}</p>}
 </div>
 ```
 

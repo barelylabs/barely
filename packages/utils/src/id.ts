@@ -82,6 +82,11 @@ const prefixes = {
 	vipSwap: 'vip_swap',
 	vipSwapAccessLog: 'vip_sal',
 	vipSession: 'vip_sid',
+	// invoice
+	invoice: 'inv',
+	invoiceClient: 'invc',
+	invoiceClientPaymentMethod: 'invcpm',
+	invoiceEmail: 'iem',
 } as const;
 
 export function newId(prefix: keyof typeof prefixes) {

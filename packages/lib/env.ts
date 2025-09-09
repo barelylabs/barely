@@ -54,6 +54,7 @@ export const libEnv = createEnv({
 		DATABASE_POOL_URL: z.url(),
 		EASYPOST_API_KEY: z.string(),
 		GANDI_API_KEY: z.string(),
+		INTERNAL_PDF_SECRET: z.string(),
 		LOCALHOST_IP: z.string(),
 		MAILCHIMP_CLIENT_ID: z.string(),
 		MAILCHIMP_CLIENT_SECRET: z.string(),
@@ -61,6 +62,7 @@ export const libEnv = createEnv({
 		NEXTAUTH_SECRET: z.string(),
 		OPENAI_API_KEY: z.string(),
 		OPENAI_ORG_ID: z.string(),
+		PLATFORM_INVOICE_FEE_PERCENTAGE: z.coerce.number().min(0).max(100).default(0.5), // Default 0.5%
 		PUSHER_APP_SECRET: z.string(),
 		RATE_LIMIT_RECORD_CART_EVENT: rateLimitSchema,
 		RATE_LIMIT_RECORD_LINK_CLICK: rateLimitSchema,

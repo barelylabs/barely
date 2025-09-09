@@ -162,6 +162,37 @@ export const CORE_PRODUCTS: Product[] = [
 			},
 		],
 	},
+	{
+		id: 'invoices',
+		name: 'Invoices',
+		icon: 'invoice',
+		type: 'core',
+		description: 'Simple invoicing & payments',
+		requiredFeatures: ['invoices'],
+		defaultRoute: '/invoices',
+		routes: [
+			{
+				path: '/invoices',
+				label: 'Invoices',
+				icon: 'invoice',
+			},
+			{
+				path: '/invoices/new',
+				label: 'Create',
+				icon: 'plus',
+			},
+			{
+				path: '/invoices/clients',
+				label: 'Clients',
+				icon: 'users',
+			},
+			{
+				path: '/invoices/stats',
+				label: 'Analytics',
+				icon: 'stat',
+			},
+		],
+	},
 ];
 
 // Meta products that enhance core products

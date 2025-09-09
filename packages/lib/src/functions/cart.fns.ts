@@ -282,6 +282,7 @@ export async function createMainCartFromFunnel({
 	);
 
 	const metadata: z.infer<typeof stripeConnectChargeMetadataSchema> = {
+		paymentType: 'cart',
 		cartId,
 		preChargeCartStage: 'checkoutCreated',
 	};

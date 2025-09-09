@@ -6,6 +6,7 @@ import {
 	parseBioReqForHandleAndKey,
 	parseCartReqForHandleAndKey,
 	parseFmReqForHandleAndKey,
+	parseInvoiceReqForHandleAndKey,
 	parseLandingPageReqForHandleAndKey,
 	parseReqForVisitorInfo,
 	parseVipReqForHandleAndKey,
@@ -87,6 +88,8 @@ function getHandleAndKey(app: (typeof APPS)[number], req: NextRequest) {
 			return parseCartReqForHandleAndKey(req);
 		case 'fm':
 			return parseFmReqForHandleAndKey(req);
+		case 'invoice':
+			return parseInvoiceReqForHandleAndKey(req);
 		case 'page':
 			return parseLandingPageReqForHandleAndKey(req);
 		case 'vip':

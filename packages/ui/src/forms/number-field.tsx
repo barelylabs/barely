@@ -63,7 +63,9 @@ export const NumberField = <
 											type='number'
 											value={field.value}
 											onChange={e => {
-												field.onChange(e.target.value);
+												const value = e.target.value;
+												// Convert string to number, or pass empty string for clearing
+												field.onChange(value === '' ? 0 : Number(value));
 											}}
 											disabled={isDisabled}
 											isError={!!fieldState.error?.message}

@@ -20,6 +20,8 @@ export const APP_ENDPOINTS: AppRouterKeys[] = [
 	'fm',
 	'formResponse',
 	'genre',
+	'invoice',
+	'invoiceClient',
 	'landingPage',
 	'link',
 	'mailchimp',

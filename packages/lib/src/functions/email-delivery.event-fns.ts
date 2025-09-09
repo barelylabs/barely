@@ -13,6 +13,8 @@ import { wait } from '@barely/utils';
 import { emailEventSchema } from '@barely/validators/schemas';
 import { and, eq } from 'drizzle-orm';
 
+import { handleInvoiceEmailEvent, isInvoiceEmail } from './invoice-email-event.fns';
+
 export async function handleEmailEvent(payload: unknown) {
 	const event = emailEventSchema.safeParse(payload);
 
@@ -22,9 +24,25 @@ export async function handleEmailEvent(payload: unknown) {
 
 	const { type, data } = event.data;
 
-	await wait(10000); // hacky, but trying to make sure we've added the email delivery to our db at the point of receiving the event from Resend
-
 	const { email_id: resendId, from, to: toArray, subject } = data;
+
+	// Check if this is an invoice email and handle it separately
+	if (isInvoiceEmail(from)) {
+		const invoiceResult = await handleInvoiceEmailEvent({
+			type,
+			resendId,
+			to: toArray[0] ?? '',
+			subject,
+			from,
+		});
+
+		// If it was successfully handled as an invoice email, return early
+		if (invoiceResult) {
+			return new Response(`Invoice email ${type} handled`, { status: 200 });
+		}
+	}
+
+	await wait(10000); // hacky, but trying to make sure we've added the email delivery to our db at the point of receiving the event from Resend
 
 	const commonIngestData = {
 		timestamp: new Date().toISOString(),

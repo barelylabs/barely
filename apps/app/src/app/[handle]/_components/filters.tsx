@@ -77,6 +77,9 @@ interface FiltersProps<SortBy extends string = string> {
 	sortOrder?: 'asc' | 'desc';
 	setSortOrder?: (sortOrder: 'asc' | 'desc') => void;
 	sortByOptions?: { label: string; value: SortBy; icon: keyof typeof Icon }[];
+	status?: string;
+	setStatus?: (status: string) => void;
+	statusOptions?: { label: string; value: string }[];
 }
 
 export function Filters<SortBy extends string = string>({
@@ -103,6 +106,9 @@ export function Filters<SortBy extends string = string>({
 	sortOrder,
 	setSortOrder,
 	sortByOptions,
+	status,
+	setStatus,
+	statusOptions,
 }: FiltersProps<SortBy>) {
 	const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -310,6 +316,26 @@ export function Filters<SortBy extends string = string>({
 								onClick={() => toggleCanceled()}
 								size='sm'
 							/>
+						</div>
+					)}
+
+					{statusOptions && status && setStatus && (
+						<div className='flex flex-col gap-4 pb-4'>
+							<div className='flex flex-col gap-2'>
+								<Label>Status</Label>
+								<Select value={status} onValueChange={setStatus}>
+									<SelectTrigger>
+										<SelectValue placeholder='Select status' />
+									</SelectTrigger>
+									<SelectContent>
+										{statusOptions.map(option => (
+											<SelectItem key={option.value} value={option.value}>
+												{option.label}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
 						</div>
 					)}
 				</PopoverContent>

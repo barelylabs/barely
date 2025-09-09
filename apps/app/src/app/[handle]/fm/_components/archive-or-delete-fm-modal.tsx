@@ -17,7 +17,6 @@ export function ArchiveOrDeleteFmModal({ mode }: { mode: 'archive' | 'delete' })
 	const queryClient = useQueryClient();
 
 	const showModal = mode === 'archive' ? showArchiveModal : showDeleteModal;
-
 	const setShowModal = mode === 'archive' ? setShowArchiveModal : setShowDeleteModal;
 
 	const onSuccess = useCallback(async () => {

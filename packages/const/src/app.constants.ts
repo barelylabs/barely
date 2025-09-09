@@ -1,8 +1,10 @@
 export const APPS = [
 	'app',
 	'appFm',
+	'appInvoice',
 	'bio',
 	'cart',
+	'invoice',
 	'manageEmail',
 	'fm',
 	'link',
