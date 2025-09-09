@@ -199,3 +199,4 @@ export type Session = NonNullable<Awaited<ReturnType<Auth['api']['getSession']>>
 export type SessionUser = Session['user'];
 export type SessionWorkspaces = Session['workspaces'];
 export type SessionWorkspace = SessionWorkspaces[number];
+export { authEnv };
