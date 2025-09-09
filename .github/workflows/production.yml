@@ -207,6 +207,42 @@ jobs:
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
 
+  deploy-app-fm:
+    uses: ./.github/workflows/deploy-to-vercel.yml
+    needs: [git-meta, db-push, tb-push]
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    with:
+      app_name: app
+      working_directory: apps/app
+      current_app_override: fm
+      scope: barely
+      environment: production
+      git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
+      vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 110
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_FM_PROJECT_ID }}
+
+  deploy-app-invoice:
+    uses: ./.github/workflows/deploy-to-vercel.yml
+    needs: [git-meta, db-push, tb-push]
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    with:
+      app_name: app
+      working_directory: apps/app
+      current_app_override: invoice
+      scope: barely
+      environment: production
+      git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
+      vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 120
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_INVOICE_PROJECT_ID }}
+
   deploy-bio:
     uses: ./.github/workflows/deploy-to-vercel.yml
     needs: [git-meta, db-push, tb-push]
@@ -257,6 +293,23 @@ jobs:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_FM_PROJECT_ID }}
+
+  deploy-invoice:
+    uses: ./.github/workflows/deploy-to-vercel.yml
+    needs: [git-meta, db-push, tb-push]
+    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
+    with:
+      app_name: invoice
+      working_directory: apps/invoice
+      scope: barely
+      environment: production
+      git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
+      vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
+      delay_seconds: 130
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_INVOICE_PROJECT_ID }}
 
   deploy-link:
     uses: ./.github/workflows/deploy-to-vercel.yml
@@ -381,24 +434,6 @@ jobs:
       VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_WWW_PROJECT_ID }}
 
-  deploy-app-fm:
-    uses: ./.github/workflows/deploy-to-vercel.yml
-    needs: [git-meta, db-push, tb-push]
-    if: always() && needs.git-meta.result == 'success' && (needs.db-push.result == 'success' || needs.db-push.result == 'skipped') && (needs.tb-push.result == 'success' || needs.tb-push.result == 'skipped')
-    with:
-      app_name: app
-      working_directory: apps/app
-      current_app_override: fm
-      scope: barely
-      environment: production
-      git_branch: ${{ needs.git-meta.outputs.github_commit_ref }}
-      vercel_git_metadata: ${{ needs.git-meta.outputs.vercel_git_metadata }}
-      delay_seconds: 110
-    secrets:
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_FM_PROJECT_ID }}
-
   # trigger.dev
   trigger-production:
     name: trigger production
@@ -494,6 +529,38 @@ jobs:
       - name: Promote app to production
         run: vercel promote dpl_${{ needs.deploy-app.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
+  promote-app-fm:
+    name: promote app-fm to production
+    needs: [production--can-merge, deploy-app-fm]
+    if: always() && github.event_name == 'merge_group' && needs.production--can-merge.result == 'success'
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_FM_PROJECT_ID }}
+    steps:
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Promote app-fm to production
+        run: vercel promote dpl_${{ needs.deploy-app-fm.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+
+  promote-app-invoice:
+    name: promote app-invoice to production
+    needs: [production--can-merge, deploy-app-invoice]
+    if: always() && github.event_name == 'merge_group' && needs.production--can-merge.result == 'success'
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_INVOICE_PROJECT_ID }}
+    steps:
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Promote app-invoice to production
+        run: vercel promote dpl_${{ needs.deploy-app-invoice.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+
   promote-bio:
     name: promote bio to production
     needs: [production--can-merge, deploy-bio]
@@ -542,21 +609,21 @@ jobs:
       - name: Promote fm to production
         run: vercel promote dpl_${{ needs.deploy-fm.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
-  promote-app-fm:
-    name: promote app-fm to production
-    needs: [production--can-merge, deploy-app-fm]
+  promote-invoice:
+    name: promote invoice to production
+    needs: [production--can-merge, deploy-invoice]
     if: always() && github.event_name == 'merge_group' && needs.production--can-merge.result == 'success'
     runs-on: ubuntu-latest
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_FM_PROJECT_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_INVOICE_PROJECT_ID }}
     steps:
       - name: Install Vercel CLI
         run: npm i -g vercel@latest
 
-      - name: Promote app-fm to production
-        run: vercel promote dpl_${{ needs.deploy-app-fm.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Promote invoice to production
+        run: vercel promote dpl_${{ needs.deploy-invoice.outputs.deployment_id }} --scope=barely --token=${{ secrets.VERCEL_TOKEN }}
 
   promote-link:
     name: promote link to production
@@ -679,8 +746,11 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-app-invoice,
         promote-bio,
         promote-cart,
+        promote-fm,
+        promote-invoice,
         promote-link,
         promote-manage-email,
         promote-page,
@@ -711,8 +781,11 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-app-invoice,
         promote-bio,
         promote-cart,
+        promote-fm,
+        promote-invoice,
         promote-link,
         promote-manage-email,
         promote-page,
@@ -742,9 +815,12 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-app-invoice,
         promote-bio,
         promote-cart,
         promote-fm,
+        promote-invoice,
+        promote-bio,
         promote-link,
         promote-manage-email,
         promote-page,
@@ -775,9 +851,12 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-app-invoice,
         promote-bio,
         promote-cart,
         promote-fm,
+        promote-invoice,
+        promote-bio,
         promote-link,
         promote-manage-email,
         promote-page,
@@ -808,8 +887,12 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-app-invoice,
         promote-bio,
         promote-cart,
+        promote-fm,
+        promote-invoice,
+        promote-bio,
         promote-link,
         promote-manage-email,
         promote-page,
@@ -840,8 +923,12 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-app-invoice,
         promote-bio,
         promote-cart,
+        promote-fm,
+        promote-invoice,
+        promote-bio,
         promote-link,
         promote-manage-email,
         promote-page,
@@ -872,8 +959,13 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-app-invoice,
         promote-bio,
         promote-cart,
+        promote-fm,
+        promote-invoice,
+        promote-bio,
+        promote-nyc,
         promote-link,
         promote-manage-email,
         promote-page,
@@ -903,8 +995,12 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-app-invoice,
         promote-bio,
         promote-cart,
+        promote-fm,
+        promote-invoice,
+        promote-bio,
         promote-link,
         promote-manage-email,
         promote-page,
@@ -934,6 +1030,7 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-app-invoice,
         promote-bio,
         promote-cart,
         promote-link,
@@ -968,6 +1065,8 @@ jobs:
         promote-bio,
         promote-cart,
         promote-fm,
+        promote-invoice,
+        promote-bio,
         promote-link,
         promote-manage-email,
         promote-page,
@@ -998,9 +1097,12 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-app-invoice,
         promote-bio,
         promote-cart,
         promote-fm,
+        promote-invoice,
+        promote-bio,
         promote-link,
         promote-manage-email,
         promote-page,
@@ -1030,9 +1132,12 @@ jobs:
       [
         promote-app,
         promote-app-fm,
+        promote-app-invoice,
         promote-bio,
         promote-cart,
         promote-fm,
+        promote-invoice,
+        promote-bio,
         promote-link,
         promote-manage-email,
         promote-page,
@@ -1067,6 +1172,7 @@ jobs:
         production--can-merge,
         promote-app,
         promote-app-fm,
+        promote-app-invoice,
         promote-bio,
         promote-cart,
         promote-fm,
