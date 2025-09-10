@@ -15,6 +15,7 @@ export async function createInvoicePaymentSession({
 }: {
 	invoice: Invoice & {
 		client: {
+			id: string;
 			name: string;
 			email: string;
 		};
@@ -57,8 +58,9 @@ export async function createInvoicePaymentSession({
 	);
 
 	// Calculate platform fee from environment variable (default 0.5%)
-	const platformFeePercentage = libEnv.PLATFORM_INVOICE_FEE_PERCENTAGE;
-	const platformFeeAmount = Math.round(invoice.total * platformFeePercentage);
+	const platformFeeAmount = Math.round(
+		invoice.total * (libEnv.PLATFORM_INVOICE_FEE_PERCENTAGE / 100),
+	);
 
 	// Create metadata for the charge
 	const metadata = {
@@ -66,6 +68,7 @@ export async function createInvoicePaymentSession({
 		invoiceId: invoice.id,
 		workspaceId: invoice.workspaceId,
 		invoiceNumber: invoice.invoiceNumber,
+		clientId: invoice.client.id, // Add clientId for webhook processing
 	};
 
 	// Create Stripe Checkout session
@@ -154,9 +157,10 @@ export async function createInvoicePaymentIntent({
 		throw new Error('Stripe account not configured for this workspace');
 	}
 
-	// Calculate platform fee from environment variable (default 0.5%)
-	const platformFeePercentage = libEnv.PLATFORM_INVOICE_FEE_PERCENTAGE;
-	const platformFeeAmount = Math.round(invoice.total * platformFeePercentage);
+	// Calculate platform fee from environment variable (default 0.5%) as a percentage
+	const platformFeeAmount = Math.round(
+		invoice.total * (libEnv.PLATFORM_INVOICE_FEE_PERCENTAGE / 100),
+	);
 
 	// Create metadata for the charge
 	const metadata = {

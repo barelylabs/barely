@@ -345,7 +345,9 @@ export async function handleStripeInvoiceChargeSuccess(
 					},
 				}),
 			`Payment confirmation for invoice ${invoice.invoiceNumber}`,
+
 			{
+				environment: 'vercel',
 				maxRetries: 5, // More retries for payment confirmations
 				retryDelay: 3000,
 				backoffMultiplier: 2,
@@ -768,6 +770,7 @@ export async function handleStripeSubscriptionInvoiceSuccess(invoice: Stripe.Inv
 				}),
 			`Recurring payment confirmation for invoice ${dbInvoice.invoiceNumber}`,
 			{
+				environment: 'vercel',
 				maxRetries: 5,
 				retryDelay: 3000,
 				backoffMultiplier: 2,

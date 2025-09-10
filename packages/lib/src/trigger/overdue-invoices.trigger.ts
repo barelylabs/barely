@@ -75,6 +75,7 @@ export const overdueInvoicesTrigger = schedules.task({
 							}),
 						`Overdue reminder for invoice ${invoice.invoiceNumber}`,
 						{
+							environment: 'trigger',
 							maxRetries: 3,
 							retryDelay: 5000, // Start with 5 second delay for background jobs
 							backoffMultiplier: 2,
