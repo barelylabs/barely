@@ -2,17 +2,18 @@
 
 ## Overview
 
-The Journey Tracking System enables comprehensive cross-domain analytics for user flows across the barely.io ecosystem. This system solves the fundamental challenge of tracking user journeys across different domains (e.g., barely.bio → barelycart.com) where cookies cannot be shared.
+The Journey Tracking System enables comprehensive cross-domain analytics for user flows across the barely.ai ecosystem. This system solves the fundamental challenge of tracking user journeys across different domains (e.g., barely.bio → barelycart.com) where cookies cannot be shared.
 
 ## Core Problem
 
-Traditional web analytics rely on cookies for session tracking, but browser security prevents cookie sharing across different domains. This creates a "blind spot" when users navigate from one barely.io service to another, making it impossible to track conversion funnels or attribute sales to their original sources.
+Traditional web analytics rely on cookies for session tracking, but browser security prevents cookie sharing across different domains. This creates a "blind spot" when users navigate from one barely.ai service to another, making it impossible to track conversion funnels or attribute sales to their original sources.
 
 ## Solution Architecture
 
 ### 1. Journey ID as Universal Identifier
 
 Every user journey is assigned a unique Journey ID with the format:
+
 ```
 {origin}_{timestamp}_{uniqueId}
 ```
@@ -29,18 +30,19 @@ This ID persists across all domain boundaries via URL parameters.
 
 Since cookies can't cross domains, we pass tracking data through URL parameters:
 
-| Parameter | Name | Purpose | Example |
-|-----------|------|---------|---------|
-| `jid` | Journey ID | Master session identifier | `bio_1736954400000_abc123` |
-| `jsrc` | Journey Source | Last touchpoint | `bio:baresky:home` |
-| `jstep` | Journey Step | Navigation counter | `3` |
-| `rid` | Referrer ID | Current asset ID | `bio_xyz789` |
-| `orid` | Original Referrer ID | First asset in chain | `email_template_123` |
-| `fid` | Fan ID | User identifier | `fan_abc123` |
+| Parameter | Name                 | Purpose                   | Example                    |
+| --------- | -------------------- | ------------------------- | -------------------------- |
+| `jid`     | Journey ID           | Master session identifier | `bio_1736954400000_abc123` |
+| `jsrc`    | Journey Source       | Last touchpoint           | `bio:baresky:home`         |
+| `jstep`   | Journey Step         | Navigation counter        | `3`                        |
+| `rid`     | Referrer ID          | Current asset ID          | `bio_xyz789`               |
+| `orid`    | Original Referrer ID | First asset in chain      | `email_template_123`       |
+| `fid`     | Fan ID               | User identifier           | `fan_abc123`               |
 
 ### 3. Cookie Storage Per Domain
 
 Each domain stores journey information in its own cookies:
+
 - `{handle}.{key}.journeyId` - The journey identifier
 - `{handle}.{key}.journeyOrigin` - Where the journey began
 - `{handle}.{key}.journeyPath` - JSON array of touchpoints
@@ -51,6 +53,7 @@ Each domain stores journey information in its own cookies:
 ### Middleware Layer (`setVisitorCookies`)
 
 The middleware processes incoming requests and:
+
 1. Extracts journey parameters from URL
 2. Creates new journey if none exists
 3. Updates journey path with current touchpoint
@@ -59,12 +62,12 @@ The middleware processes incoming requests and:
 ```typescript
 // Journey flows from URL → Cookies → Event Recording
 if (journeyInfo.journeyId) {
-  // Continuing existing journey
-  res.cookies.set(`${handle}.${key}.journeyId`, journeyInfo.journeyId);
+	// Continuing existing journey
+	res.cookies.set(`${handle}.${key}.journeyId`, journeyInfo.journeyId);
 } else {
-  // Starting new journey
-  const newJourneyId = `${app}_${Date.now()}_${newId('journey')}`;
-  res.cookies.set(`${handle}.${key}.journeyId`, newJourneyId);
+	// Starting new journey
+	const newJourneyId = `${app}_${Date.now()}_${newId('journey')}`;
+	res.cookies.set(`${handle}.${key}.journeyId`, newJourneyId);
 }
 ```
 
@@ -75,12 +78,12 @@ Every cross-domain link is enriched with tracking parameters:
 ```typescript
 // Automatic parameter addition for cross-domain links
 const enrichedUrl = getTrackingEnrichedHref({
-  href: 'https://barelycart.com/checkout',
-  tracking: currentTrackingState,
-  currentApp: 'bio',
-  currentHandle: 'baresky',
-  currentKey: 'home',
-  currentAssetId: 'bio_123'
+	href: 'https://barelycart.com/checkout',
+	tracking: currentTrackingState,
+	currentApp: 'bio',
+	currentHandle: 'baresky',
+	currentKey: 'home',
+	currentAssetId: 'bio_123',
 });
 ```
 
@@ -105,15 +108,18 @@ Events are recorded with full journey context:
 ### Example 1: Email → Bio → Cart
 
 1. **Email Click** (Journey Start)
+
    - Creates: `journeyId: email_1736954400000_abc`
    - URL: `https://barely.bio/baresky?jid=email_1736954400000_abc&jsrc=email:broadcast:123&jstep=1`
 
 2. **Bio Page View** (Step 2)
+
    - Receives journey from URL
    - Stores in cookies: `baresky.home.journeyId`
    - Records event with `journeyStep: 2`
 
 3. **Bio Link Click** (Step 3)
+
    - Enriches cart URL with journey
    - URL: `https://barelycart.com/baresky/checkout?jid=email_1736954400000_abc&jsrc=bio:baresky:home&jstep=3`
 
@@ -124,6 +130,7 @@ Events are recorded with full journey context:
 ### Example 2: Direct Bio Visit → Cart
 
 1. **Bio Direct Visit** (Journey Start)
+
    - Creates: `journeyId: bio_1736954500000_def`
    - No incoming journey parameters
    - Starts fresh journey with origin='bio'
@@ -135,8 +142,9 @@ Events are recorded with full journey context:
 ## Analytics Queries
 
 ### Funnel Analysis
+
 ```sql
-SELECT 
+SELECT
   journeyId,
   journeyOrigin,
   countIf(type = 'bio/view') as bio_views,
@@ -148,6 +156,7 @@ GROUP BY journeyId, journeyOrigin
 ```
 
 ### Attribution Analysis
+
 ```sql
 SELECT
   originalReferrerId,
@@ -177,16 +186,19 @@ The system is designed for backward compatibility:
 ## Technical Considerations
 
 ### Performance
+
 - URL parameters add ~200 bytes to each cross-domain link
 - Cookie storage is minimal (~1KB per domain)
 - No additional network requests required
 
 ### Privacy
+
 - No PII in journey IDs
 - Parameters are visible in URLs (consider for sensitive flows)
 - Respects cookie consent preferences
 
 ### Limitations
+
 - Journey data lost if user manually removes URL parameters
 - Browser bookmark behavior may strip parameters
 - Email clients may modify URLs

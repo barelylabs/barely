@@ -23,7 +23,7 @@ export function Hero() {
 					<AnimatedSection animation='fade-up'>
 						<div className='mb-6 inline-flex items-center rounded-full bg-muted px-4 py-1.5 text-sm'>
 							<span className='text-muted-foreground'>
-								✨ New from the makers of Barely.io
+								✨ New from the builders of Barely.ai
 							</span>
 						</div>
 					</AnimatedSection>

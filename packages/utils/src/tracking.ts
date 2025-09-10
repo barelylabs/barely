@@ -5,7 +5,7 @@ import { newId } from '@barely/utils';
  * Enriches a URL with comprehensive journey tracking parameters for cross-domain analytics.
  *
  * This function is critical for maintaining user journey continuity across different domains
- * in the barely.io ecosystem (e.g., barely.bio → barelycart.com). Since cookies cannot be
+ * in the barely.ai ecosystem (e.g., barely.bio → barelycart.com). Since cookies cannot be
  * shared across domains, all tracking data must be passed via URL parameters.
  *
  * ## Journey ID Format

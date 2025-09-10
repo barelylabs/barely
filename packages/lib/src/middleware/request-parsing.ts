@@ -312,7 +312,7 @@ export function parseReferer(req: NextRequest) {
 /**
  * Parses journey tracking information from incoming request URL parameters.
  *
- * Journey tracking enables cross-domain analytics for user flows across barely.io services.
+ * Journey tracking enables cross-domain analytics for user flows across barely.ai services.
  * Each journey has a unique ID that persists across domain boundaries, allowing us to track
  * complete conversion funnels from initial touchpoint through final conversion.
  *

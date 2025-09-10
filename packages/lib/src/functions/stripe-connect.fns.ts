@@ -19,7 +19,6 @@ import {
 	incrementAssetValuesOnCartPurchase,
 	sendCartReceiptEmail,
 } from './cart.fns';
-import { queueEmailRetry } from './email-retry.fns';
 import { recordCartEvent } from './event.fns';
 import { createFan } from './fan.fns';
 import { sendInvoicePaymentReceivedEmail } from './invoice-email.fns';
@@ -330,31 +329,27 @@ export async function handleStripeInvoiceChargeSuccess(
 				`${charge.payment_method_details.card.brand} **** ${charge.payment_method_details.card.last4}`
 			:	(charge.payment_method_details?.type ?? 'Card');
 
-		// Send payment confirmation email with retry (non-blocking)
-		queueEmailRetry(
-			() =>
-				sendInvoicePaymentReceivedEmail({
-					invoice: {
-						...invoice,
-						status: 'paid',
-						paidAt,
-					},
-					paymentDetails: {
-						paymentMethod,
-						transactionId: charge.id,
-					},
-				}),
-			`Payment confirmation for invoice ${invoice.invoiceNumber}`,
-
-			{
-				environment: 'vercel',
-				maxRetries: 5, // More retries for payment confirmations
-				retryDelay: 3000,
-				backoffMultiplier: 2,
-			},
-		);
-
-		console.log('✅ Payment confirmation email sent for invoice:', invoiceId);
+		// Send payment confirmation email
+		try {
+			await sendInvoicePaymentReceivedEmail({
+				invoice: {
+					...invoice,
+					status: 'paid',
+					paidAt,
+				},
+				paymentDetails: {
+					paymentMethod,
+					transactionId: charge.id,
+				},
+			});
+			console.log('✅ Payment confirmation email sent for invoice:', invoiceId);
+		} catch (emailError) {
+			console.error(
+				`Failed to send payment confirmation email for invoice ${invoice.invoiceNumber}:`,
+				emailError,
+			);
+			// Don't throw - email failure shouldn't fail the webhook
+		}
 	} catch (error) {
 		console.error('Failed to send payment confirmation email:', error);
 		// Don't throw - we don't want to fail the webhook if email fails
@@ -755,34 +750,27 @@ export async function handleStripeSubscriptionInvoiceSuccess(invoice: Stripe.Inv
 
 	// Send payment confirmation email for recurring payments
 	try {
-		queueEmailRetry(
-			() =>
-				sendInvoicePaymentReceivedEmail({
-					invoice: {
-						...dbInvoice,
-						status: 'paid',
-						paidAt,
-					},
-					paymentDetails: {
-						paymentMethod: 'Subscription',
-						transactionId: invoice.id,
-					},
-				}),
-			`Recurring payment confirmation for invoice ${dbInvoice.invoiceNumber}`,
-			{
-				environment: 'vercel',
-				maxRetries: 5,
-				retryDelay: 3000,
-				backoffMultiplier: 2,
+		await sendInvoicePaymentReceivedEmail({
+			invoice: {
+				...dbInvoice,
+				status: 'paid',
+				paidAt,
 			},
-		);
-
+			paymentDetails: {
+				paymentMethod: 'Subscription',
+				transactionId: invoice.id,
+			},
+		});
 		console.log(
 			'✅ Recurring payment confirmation email sent for invoice:',
 			dbInvoice.id,
 		);
 	} catch (error) {
-		console.error('Failed to send recurring payment confirmation email:', error);
+		console.error(
+			`Failed to send recurring payment confirmation email for invoice ${dbInvoice.invoiceNumber}:`,
+			error,
+		);
+		// Don't throw - email failure shouldn't fail the webhook
 	}
 }
 

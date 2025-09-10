@@ -2,7 +2,7 @@
 
 ### Launch Sequence
 
-1. **Week 1-2**: Beta with barely.io users (50 beta testers)
+1. **Week 1-2**: Beta with barely.ai users (50 beta testers)
 2. **Week 3-4**: ProductHunt preparation
    - Lifetime deal for first 500 users ($99)
    - Demo video showing 60-second invoice flow
