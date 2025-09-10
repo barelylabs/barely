@@ -547,6 +547,7 @@ export const invoiceRoute = {
 				() => sendInvoiceEmail({ invoice, pdfBase64 }),
 				`Invoice email for ${invoice.invoiceNumber}`,
 				{
+					environment: 'vercel',
 					maxRetries: 0,
 					retryDelay: 2000, // Start with 2 second delay
 					backoffMultiplier: 2, // Double the delay each retry

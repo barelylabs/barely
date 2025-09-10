@@ -1,6 +1,10 @@
+import { waitUntil as waitUntilTrigger } from '@trigger.dev/sdk/v3';
+import { waitUntil as waitUntilVercel } from '@vercel/functions';
+
 import { log } from '../utils/log';
 
 interface RetryOptions {
+	environment: 'vercel' | 'trigger';
 	maxRetries?: number;
 	retryDelay?: number;
 	backoffMultiplier?: number;
@@ -15,7 +19,7 @@ interface RetryOptions {
 export async function sendEmailWithRetry<T>(
 	emailFn: () => Promise<T>,
 	emailName: string,
-	options: RetryOptions = {},
+	options: RetryOptions,
 ): Promise<T> {
 	const { maxRetries = 3, retryDelay = 1000, backoffMultiplier = 2 } = options;
 
@@ -74,16 +78,29 @@ export async function sendEmailWithRetry<T>(
 export function queueEmailRetry<T>(
 	emailFn: () => Promise<T>,
 	emailName: string,
-	options: RetryOptions = {},
+	options: RetryOptions,
 ): void {
 	// Fire and forget - don't await this
-	void sendEmailWithRetry(emailFn, emailName, options).catch(async error => {
-		// Final failure is already logged in sendEmailWithRetry
-		// Just ensure we don't have unhandled promise rejection
-		await log({
-			type: 'errors',
-			location: 'queueEmailRetry',
-			message: `${emailName} queued retry failed completely: ${error instanceof Error ? error.message : String(error)}`,
-		});
-	});
+
+	if (options.environment === 'vercel') {
+		waitUntilVercel(
+			sendEmailWithRetry(emailFn, emailName, options).catch(async error => {
+				await log({
+					type: 'errors',
+					location: 'queueEmailRetry',
+					message: `${emailName} queued retry failed completely: ${error instanceof Error ? error.message : String(error)}`,
+				});
+			}),
+		);
+	} else {
+		waitUntilTrigger(
+			sendEmailWithRetry(emailFn, emailName, options).catch(async error => {
+				await log({
+					type: 'errors',
+					location: 'queueEmailRetry',
+					message: `${emailName} queued retry failed completely: ${error instanceof Error ? error.message : String(error)}`,
+				});
+			}),
+		);
+	}
 }

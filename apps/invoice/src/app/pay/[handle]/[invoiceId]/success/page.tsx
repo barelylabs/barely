@@ -31,10 +31,6 @@ export default function PaymentSuccessPage({ params }: PageProps) {
 						<Button className='w-full' href={`/pay/${params.handle}/${params.invoiceId}`}>
 							View Invoice
 						</Button>
-
-						<Text variant='sm/normal' muted>
-							Invoice ID: {params.invoiceId}
-						</Text>
 					</div>
 				</Card>
 			</div>
