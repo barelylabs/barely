@@ -10,5 +10,11 @@ export default async function RootPage() {
 	if (!session) return redirect('/login');
 
 	const defaultWorkspace = getDefaultWorkspaceFromSession(session);
+
+	// If user has no non-personal workspace, redirect to onboarding
+	if (!defaultWorkspace) {
+		return redirect('/onboarding');
+	}
+
 	return redirect(`${defaultWorkspace.handle}/links`);
 }

@@ -433,4 +433,15 @@ export const workspaceRoute = {
 				billingCycle: input.billingCycle,
 			});
 		}),
+
+	handleExists: publicProcedure
+		.input(z.object({ handle: z.string() }))
+		.output(z.object({ handleTaken: z.boolean() }))
+		.query(async ({ input }) => {
+			const existingWorkspace = await dbHttp.query.Workspaces.findFirst({
+				where: eq(Workspaces.handle, input.handle),
+			});
+
+			return { handleTaken: !!existingWorkspace };
+		}),
 } satisfies TRPCRouterRecord;

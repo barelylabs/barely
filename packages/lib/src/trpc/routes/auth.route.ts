@@ -14,7 +14,11 @@ export const authRoute = {
 			}),
 		)
 		.mutation(async ({ input }) => {
-			const emailRes = await sendMagicLink(input);
+			// Fix: sendMagicLink expects callbackPath, not callbackUrl
+			const emailRes = await sendMagicLink({
+				email: input.email,
+				callbackPath: input.callbackUrl,
+			});
 
 			if ('error' in emailRes && emailRes.error)
 				return { success: false, message: 'Something went wrong' };
