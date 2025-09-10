@@ -23,7 +23,7 @@ export function FinalCTA() {
 							for 3 invoices per month. No credit card required.
 						</Text>
 
-						<Button size='lg' href='#waitlist' className='mb-6'>
+						<Button size='lg' href='#waitlist' className='mx-auto mb-6'>
 							Create Your First Invoice Free →
 						</Button>
 

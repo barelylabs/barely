@@ -2,7 +2,10 @@
 
 import { useState } from 'react';
 import { useZodForm } from '@barely/hooks';
+import { useMutation } from '@tanstack/react-query';
 import { z } from 'zod/v4';
+
+import { useInvoiceRenderTRPC } from '@barely/api/public/invoice-render.trpc.react';
 
 import { Button } from '@barely/ui/button';
 import { Card } from '@barely/ui/card';
@@ -30,27 +33,28 @@ export function SocialProof() {
 		},
 	});
 
+	const trpc = useInvoiceRenderTRPC();
+	const { mutateAsync: joinWaitlist } = useMutation(
+		trpc.joinWaitlist.mutationOptions({
+			onMutate: () => {
+				setIsLoading(true);
+			},
+			onSuccess: () => {
+				setIsSubmitted(true);
+			},
+			onSettled: () => {
+				setIsLoading(false);
+			},
+		}),
+	);
+
 	const handleSubmit = async (data: WaitlistData) => {
 		setIsLoading(true);
 		try {
-			const response = await fetch('/api/waitlist', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ email: data.email }),
-			});
-
-			if (!response.ok) {
-				throw new Error('Failed to submit to waitlist');
-			}
-
-			setIsSubmitted(true);
+			await joinWaitlist({ email: data.email });
 		} catch (error) {
 			console.error('Error submitting to waitlist:', error);
 			// In production, show an error message to the user
-		} finally {
-			setIsLoading(false);
 		}
 	};
 
@@ -67,7 +71,7 @@ export function SocialProof() {
 					<Card className='mx-auto max-w-2xl p-8'>
 						<div className='mb-8 text-center'>
 							<div className='mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-primary'>
-								<span className='text-sm font-medium'>🚀 Launching January 2025</span>
+								<span className='text-sm font-medium'>🚀 Launching October 2025</span>
 							</div>
 
 							<Text variant='sm/normal' className='mb-6 text-muted-foreground'>

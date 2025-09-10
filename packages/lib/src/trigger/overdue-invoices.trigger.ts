@@ -3,7 +3,6 @@ import { Invoices } from '@barely/db/sql';
 import { schedules } from '@trigger.dev/sdk/v3';
 import { and, eq, lt, or } from 'drizzle-orm';
 
-import { queueEmailRetry } from '../functions/email-retry.fns';
 import { sendInvoiceReminderEmail } from '../functions/invoice-email.fns';
 import { log } from '../utils/log';
 
@@ -66,21 +65,20 @@ export const overdueInvoicesTrigger = schedules.task({
 					// 	})
 					// 	.where(eq(Invoices.id, invoice.id));
 
-					// Send reminder email with retry mechanism (non-blocking)
-					// Use queueEmailRetry for background processing so we don't block the trigger
-					queueEmailRetry(
-						() =>
-							sendInvoiceReminderEmail({
-								invoice,
-							}),
-						`Overdue reminder for invoice ${invoice.invoiceNumber}`,
-						{
-							environment: 'trigger',
-							maxRetries: 3,
-							retryDelay: 5000, // Start with 5 second delay for background jobs
-							backoffMultiplier: 2,
-						},
-					);
+					// Send reminder email
+					// This is already in a background job (Trigger.dev), so we can await directly
+					try {
+						await sendInvoiceReminderEmail({
+							invoice,
+						});
+					} catch (emailError) {
+						await log({
+							message: `Failed to send overdue reminder email for invoice ${invoice.invoiceNumber}: ${String(emailError)}`,
+							type: 'errors',
+							location: 'overdueInvoicesTrigger',
+						});
+						// Continue processing other invoices even if one email fails
+					}
 
 					await log({
 						message: `Sent overdue reminder for invoice ${invoice.invoiceNumber} (${invoice.client.email})`,

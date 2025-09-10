@@ -70,7 +70,7 @@ export function Footer() {
 										href={getAbsoluteUrl('www')}
 										className='text-sm text-muted-foreground hover:text-foreground'
 									>
-										Barely.io
+										Barely.ai
 									</Link>
 								</li>
 								<li>

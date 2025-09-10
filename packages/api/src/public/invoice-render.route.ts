@@ -2,6 +2,7 @@ import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 import { ratelimit } from '@barely/lib';
 import { getInvoiceById } from '@barely/lib/functions/invoice.fns';
 import { createTRPCRouter, publicProcedure } from '@barely/lib/trpc';
+import { log } from '@barely/lib/utils/log';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod/v4';
 
@@ -356,6 +357,20 @@ export const invoiceRenderRouter = createTRPCRouter({
 				pdf: pdfBase64,
 				filename: `invoice-${invoice.invoiceNumber}.pdf`,
 			};
+		}),
+
+	joinWaitlist: publicProcedure
+		.input(
+			z.object({
+				email: z.string(),
+			}),
+		)
+		.mutation(async ({ input }) => {
+			await log({
+				message: `Join waitlist: ${input.email}`,
+				location: 'invoice-render.joinWaitlist',
+				type: 'users',
+			});
 		}),
 });
 

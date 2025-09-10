@@ -30,7 +30,7 @@ export function Navbar() {
 							Pricing
 						</Link>
 						<Link
-							href={getAbsoluteUrl('app')}
+							href={'#waitlist'}
 							className='text-sm font-medium text-muted-foreground hover:text-foreground'
 						>
 							Sign In
