@@ -1,6 +1,10 @@
+import { connection } from 'next/server';
+
 import { NewWorkspaceModalForOnboarding } from '../[handle]/_components/new-workspace-modal';
 
-export default function OnboardingPage() {
+export default async function OnboardingPage() {
+	await connection(); // force dynamic rendering
+
 	return (
 		<div className='flex min-h-screen items-center justify-center p-4'>
 			<div className='text-center'>

@@ -171,7 +171,7 @@ export function NewWorkspaceModal() {
 export function NewWorkspaceModalForOnboarding() {
 	const trpc = useTRPC();
 	const router = useRouter();
-	const { showNewWorkspaceModal } = useWorkspaceModalState();
+	// const { showNewWorkspaceModal } = useWorkspaceModalState();
 	const [handleToCheck, setHandleToCheck] = useState('');
 
 	const [showValidating, setShowValidating] = useState(false);
@@ -237,24 +237,12 @@ export function NewWorkspaceModalForOnboarding() {
 			return;
 		}
 
-		// If we haven't checked this handle yet, check it now
-		// if (data.handle !== handleToCheck && data.handle.length >= 3) {
-		// 	const result = await trpc.workspace.handleExists.fetch({ handle: data.handle });
-		// 	if (result.handleTaken) {
-		// 		form.setError('handle', {
-		// 			type: 'manual',
-		// 			message: handleTakenMessage,
-		// 		});
-		// 		return;
-		// 	}
-		// }
-
 		await createWorkspace(data);
 	};
 
 	return (
 		<Modal
-			showModal={showNewWorkspaceModal}
+			showModal={true}
 			setShowModal={() => void 0} // Prevent manual closing
 			preventDefaultClose={true}
 			className='max-w-md'
