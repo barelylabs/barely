@@ -23,7 +23,18 @@ export function handleCurrencyMinorStringOrMajorNumber(amount: string | number) 
 		return amount;
 	}
 
+	// Handle empty string case
+	if (amount === '') {
+		return 0;
+	}
+
 	const sanitizedAmount =
 		typeof amount === 'string' ? parseFloat(amount.replace(/^[$£€¥]/, '')) : amount;
+
+	// Handle NaN case (e.g., when parseFloat fails)
+	if (isNaN(sanitizedAmount)) {
+		return 0;
+	}
+
 	return sanitizedAmount * 100;
 }
