@@ -20,6 +20,7 @@ import { PhoneField } from '@barely/ui/forms/phone-field';
 import { TextField } from '@barely/ui/forms/text-field';
 import { Text } from '@barely/ui/typography';
 
+import { authClient } from '~/auth/client';
 import { LoginLinkSent } from '../login-success';
 
 interface RegisterFormProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -47,31 +48,41 @@ const RegisterUserForm = ({
 		},
 	});
 
-	const sendLoginEmail = useMutation(
-		trpc.auth.sendLoginEmail.mutationOptions({
-			onSuccess: () => setLoginEmailSent(true),
-		}),
-	);
-
-	const createUser = useMutation(
+	const { mutateAsync: createUser } = useMutation(
 		trpc.user.create.mutationOptions({
-			onSuccess: newUser => {
-				// if (!newUser) throw new Error('No user returned from createUser mutation');
-
+			onSuccess: async newUser => {
 				setIdentifier(newUser.email);
-				const finalCallbackUrl =
-					inviteToken ? `${callbackUrl ?? '/'}?inviteToken=${inviteToken}` : callbackUrl;
-				sendLoginEmail.mutate({ email: newUser.email, callbackUrl: finalCallbackUrl });
+
+				// Determine the callback URL based on whether user came from invite
+				let finalCallbackUrl = callbackUrl ?? '/onboarding?newWorkspace=true';
+				if ('invitedWorkspaceHandle' in newUser && newUser.invitedWorkspaceHandle) {
+					finalCallbackUrl = `/${newUser.invitedWorkspaceHandle}`;
+				}
+
+				// Small delay to ensure user is fully created in database
+				// This helps avoid race conditions with Better Auth's magic link verification
+				await new Promise(resolve => setTimeout(resolve, 500));
+
+				// Send magic link email for authentication
+				const { data } = await authClient.signIn.magicLink({
+					email: newUser.email,
+					callbackURL: finalCallbackUrl,
+				});
+
+				if (data?.status === true) {
+					setLoginEmailSent(true);
+				}
 			},
 			onError: error => {
 				toast.error(error.message);
+				setCreatingAccount(false);
 			},
 		}),
 	);
 
 	const onSubmit = async (user: z.infer<typeof newUserContactInfoSchema>) => {
 		setCreatingAccount(true);
-		await createUser.mutateAsync({ ...user, inviteToken });
+		await createUser({ ...user, inviteToken });
 		return;
 	};
 

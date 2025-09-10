@@ -147,10 +147,5 @@ export function getUserWorkspaceByHandle(user: SessionUser, handle: string) {
 
 export function getDefaultWorkspaceFromSession(session: Session) {
 	const defaultWorkspace = session.workspaces.find(w => w.type !== 'personal');
-
-	if (!defaultWorkspace) {
-		throw new Error('Default workspace not found');
-	}
-
-	return defaultWorkspace;
+	return defaultWorkspace ?? null;
 }

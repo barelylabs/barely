@@ -10,7 +10,6 @@ import {
 	truncate,
 	underscoresToSpaces,
 } from '@barely/utils';
-import { useSetAtom } from 'jotai';
 
 import { Avatar } from '@barely/ui/avatar';
 import {
@@ -25,7 +24,7 @@ import { Icon } from '@barely/ui/icon';
 import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/popover';
 import { Text } from '@barely/ui/typography';
 
-import { showNewWorkspaceModalAtom } from '~/app/[handle]/_components/new-workspace-modal';
+import { useWorkspaceModalState } from './workspace-context';
 
 interface WorkspaceSwitcherProps {
 	collapsed?: boolean;
@@ -35,7 +34,7 @@ export function WorkspaceSwitcher({ collapsed = false }: WorkspaceSwitcherProps)
 	usePusherSocketId();
 
 	const [switcherOpen, setSwitcherOpen] = useState(false);
-	const setNewWorkspaceModalOpen = useSetAtom(showNewWorkspaceModalAtom);
+	const { setShowNewWorkspaceModal } = useWorkspaceModalState();
 
 	const user = useUser();
 	const { workspace: currentWorkspace, setWorkspace: setCurrentWorkspace } = useWorkspace(
@@ -197,9 +196,9 @@ export function WorkspaceSwitcher({ collapsed = false }: WorkspaceSwitcherProps)
 
 						<CommandGroup>
 							<CommandItem
-								onSelect={() => {
+								onSelect={async () => {
 									setSwitcherOpen(false);
-									setNewWorkspaceModalOpen(true);
+									await setShowNewWorkspaceModal(true);
 								}}
 								className='cursor-pointer gap-3'
 							>

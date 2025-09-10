@@ -14,6 +14,8 @@ export const userRoute = {
 		const { inviteToken, ...userInput } = input;
 		const newUser = await createUser({ ...userInput, inviteToken });
 
+		// Important: Don't try to create magic tokens manually - Better Auth needs to handle this
+		// The client will send the magic link email after user creation
 		return newUser;
 	}),
 

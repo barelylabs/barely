@@ -43,7 +43,12 @@ export default async function HandleLayout({
 		}
 
 		const defaultWorkspace = getDefaultWorkspaceFromSession(session);
-		return redirect(`${defaultWorkspace.handle}/fm`);
+
+		if (!defaultWorkspace) {
+			return redirect('/onboarding');
+		}
+
+		return redirect(`${defaultWorkspace.handle}/bio`);
 	}
 
 	primeWorkspace(currentWorkspace);

@@ -65,7 +65,9 @@ export const rawSessionUserWith = {
 	},
 } as const;
 
-export async function createUser(user: CreateUser & { inviteToken?: string }) {
+export async function createUser(
+	user: CreateUser & { inviteToken?: string },
+): Promise<InsertUser & { invitedWorkspaceHandle?: string }> {
 	let fullName =
 		user.fullName ??
 		user.email.split('@')[0]?.replace(/\W/g, '') ??
@@ -147,6 +149,8 @@ export async function createUser(user: CreateUser & { inviteToken?: string }) {
 	});
 
 	// Handle workspace invites
+	let invitedWorkspaceHandle: string | undefined;
+
 	if (user.inviteToken) {
 		// Find the invite by token
 		const invite = await dbHttp.query.WorkspaceInvites.findFirst({
@@ -162,6 +166,9 @@ export async function createUser(user: CreateUser & { inviteToken?: string }) {
 		});
 
 		if (invite) {
+			// Store the workspace handle for redirect
+			invitedWorkspaceHandle = invite.workspace.handle;
+
 			// Add user to the invited workspace
 			await dbHttp.insert(_Users_To_Workspaces).values({
 				userId: newUserId,
@@ -220,7 +227,10 @@ export async function createUser(user: CreateUser & { inviteToken?: string }) {
 		}
 	}
 
-	return newUser;
+	return {
+		...newUser,
+		...(invitedWorkspaceHandle && { invitedWorkspaceHandle }),
+	};
 }
 
 export async function getRawSessionUserByUserId(userId: string) {

@@ -1,8 +1,8 @@
 import type { VariantProps } from 'class-variance-authority';
-import { forwardRef, useMemo } from 'react';
+import { forwardRef } from 'react';
+import { useDebouncedCallback } from '@barely/hooks';
 import { cn } from '@barely/utils';
 import { cva } from 'class-variance-authority';
-import { debounce } from 'perfect-debounce';
 
 import type { IconKey } from './icon';
 import { Icon } from './icon';
@@ -54,10 +54,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 		},
 		ref,
 	) => {
-		const onChangeDebouncedMemo = useMemo(() => {
-			if (!onChangeDebounced) return undefined;
-			return debounce(onChangeDebounced, props.debounce ?? 400);
-		}, [onChangeDebounced, props.debounce]);
+		const onChangeDebouncedMemo = useDebouncedCallback(
+			onChangeDebounced ?? (() => void 0),
+			props.debounce ?? 400,
+		);
 
 		const StartIcon = startIcon ? Icon[startIcon] : null;
 
@@ -81,10 +81,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 						className,
 					)}
 					{...props}
-					onChange={e => {
+					onChange={async e => {
 						props.onChange?.(e);
 						if (!onChangeDebounced) return;
-						onChangeDebouncedMemo?.(e).catch(err => console.error(err));
+						await onChangeDebouncedMemo(e);
 					}}
 				/>
 				{showClearButton &&
