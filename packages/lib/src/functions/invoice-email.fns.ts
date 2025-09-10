@@ -78,14 +78,20 @@ export async function sendInvoiceEmail({ invoice, pdfBase64 }: SendInvoiceEmailP
 		memo: invoice.payerMemo ?? invoice.notes ?? undefined,
 	});
 
+	const replyTo =
+		workspace.invoiceSupportEmail ??
+		workspace.supportEmail ??
+		workspace.cartSupportEmail ??
+		workspace.supportEmail ??
+		'invoices@barely.ai';
+
 	// Send email
 	const result = await sendEmail({
 		from: 'hello@barelyinvoice.com',
 		fromFriendlyName: workspace.name,
 		to: client.email,
-		bcc: [workspace.cartSupportEmail ?? '', 'invoices@barely.ai'].filter(
-			email => email.length > 0,
-		),
+		replyTo,
+		bcc: [replyTo, 'invoices@barely.ai'].filter(email => email.length > 0),
 		subject: `Invoice ${invoice.invoiceNumber} from ${workspace.name}`,
 		type: 'transactional',
 		react: emailTemplate,
@@ -177,13 +183,25 @@ export async function sendInvoiceReminderEmail({
 		memo: `REMINDER: This invoice is now overdue. ${invoice.payerMemo ?? invoice.notes ?? ''}`,
 	});
 
+	const replyTo =
+		workspace.invoiceSupportEmail ??
+		workspace.supportEmail ??
+		workspace.cartSupportEmail ??
+		workspace.supportEmail ??
+		'invoices@barely.ai';
+
 	const result = await sendEmail({
-		from: workspace.cartSupportEmail ?? 'invoices@barely.ai',
+		from: 'hello@barelyinvoice.com',
 		fromFriendlyName: workspace.name,
 		to: client.email,
-		bcc: [workspace.cartSupportEmail ?? '', 'invoices@barely.ai'].filter(
-			email => email.length > 0,
-		),
+		replyTo,
+		bcc: [
+			workspace.invoiceSupportEmail ??
+				workspace.supportEmail ??
+				workspace.cartSupportEmail ??
+				'',
+			'invoices@barely.ai',
+		].filter(email => email.length > 0),
 		subject: `[REMINDER] Invoice ${invoice.invoiceNumber} from ${workspace.name} - Payment Overdue`,
 		type: 'transactional',
 		react: emailTemplate,
@@ -275,13 +293,19 @@ export async function sendInvoicePaymentReceivedEmail({
 		client,
 	});
 
+	const replyTo =
+		workspace.invoiceSupportEmail ??
+		workspace.supportEmail ??
+		workspace.cartSupportEmail ??
+		workspace.supportEmail ??
+		'invoices@barely.ai';
+
 	const result = await sendEmail({
-		from: workspace.cartSupportEmail ?? 'invoices@barely.ai',
+		from: 'hello@barelyinvoice.com',
 		fromFriendlyName: workspace.name,
 		to: client.email,
-		bcc: [workspace.cartSupportEmail ?? '', 'invoices@barely.ai'].filter(
-			email => email.length > 0,
-		),
+		replyTo,
+		bcc: [replyTo, 'invoices@barely.ai'].filter(email => email.length > 0),
 		subject: `Payment Received - Invoice ${invoice.invoiceNumber}`,
 		type: 'transactional',
 		react: emailTemplate,
