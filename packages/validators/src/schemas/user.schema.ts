@@ -21,6 +21,7 @@ export const createUserSchema = insertUserSchema
 	.extend({
 		image: z.string().url().nullish(),
 		handle: createWorkspaceSchema.shape.handle.optional(),
+		inviteToken: z.string().optional(),
 	});
 export const upsertUserSchema = insertUserSchema.partial({ id: true });
 export const updateUserSchema = insertUserSchema.partial().required({ id: true });

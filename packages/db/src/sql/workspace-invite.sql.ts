@@ -28,6 +28,7 @@ export const WorkspaceInvites = pgTable(
 		role: varchar('role', { length: 255, enum: ['owner', 'admin', 'member'] })
 			.default('member')
 			.notNull(),
+		inviteToken: varchar('inviteToken', { length: 255 }),
 		acceptedAt: timestamp('acceptedAt'),
 		declinedAt: timestamp('declinedAt'),
 		...timestamps,
