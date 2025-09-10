@@ -17,7 +17,7 @@ import { and, asc, desc, eq, gt, gte, inArray, isNull, lt, or } from 'drizzle-or
 import DOMPurify from 'isomorphic-dompurify';
 import { z } from 'zod/v4';
 
-import { sendEmailWithRetry } from '../../functions/email-retry.fns';
+import { queueEmailRetry } from '../../functions/email-retry.fns';
 import { sendInvoiceEmail } from '../../functions/invoice-email.fns';
 import {
 	calculateInvoiceTotal,
@@ -531,51 +531,55 @@ export const invoiceRoute = {
 			raiseTRPCError({ message: 'Cannot send invoice with status: ' + invoice.status });
 		}
 
-		// Send the invoice email with retry mechanism
-		const { generateInvoicePDFBase64Puppeteer } = await import(
-			'../../functions/invoice-pdf-puppeteer.fns'
+		// Update invoice status to sent immediately
+		const updatedInvoices = await dbPool(ctx.pool)
+			.update(Invoices)
+			.set({
+				status: 'sent',
+				sentAt: new Date(),
+			})
+			.where(eq(Invoices.id, input.id))
+			.returning();
+
+		const updatedInvoice =
+			updatedInvoices[0] ??
+			raiseTRPCError({ message: 'Failed to update invoice status' });
+
+		// Queue the email sending with PDF generation in the background
+		queueEmailRetry(
+			async () => {
+				const { generateInvoicePDFBase64Puppeteer } = await import(
+					'../../functions/invoice-pdf-puppeteer.fns'
+				);
+
+				const pdfBase64 = await generateInvoicePDFBase64Puppeteer({
+					invoice,
+					workspace: invoice.workspace,
+					client: invoice.client,
+				});
+
+				const result = await sendInvoiceEmail({ invoice, pdfBase64 });
+
+				// Update with resend ID if available
+				if (result.resendId) {
+					await dbPool(ctx.pool)
+						.update(Invoices)
+						.set({ lastResendId: result.resendId })
+						.where(eq(Invoices.id, input.id));
+				}
+
+				return result;
+			},
+			`Invoice email for ${invoice.invoiceNumber}`,
+			{
+				environment: 'vercel',
+				maxRetries: 3,
+				retryDelay: 2000,
+				backoffMultiplier: 2,
+			},
 		);
 
-		const pdfBase64 = await generateInvoicePDFBase64Puppeteer({
-			invoice,
-			workspace: invoice.workspace,
-			client: invoice.client,
-		});
-
-		try {
-			const emailResult = await sendEmailWithRetry(
-				() => sendInvoiceEmail({ invoice, pdfBase64 }),
-				`Invoice email for ${invoice.invoiceNumber}`,
-				{
-					environment: 'vercel',
-					maxRetries: 0,
-					retryDelay: 2000, // Start with 2 second delay
-					backoffMultiplier: 2, // Double the delay each retry
-				},
-			);
-
-			// Update invoice status to sent with the resend ID for tracking
-			const updatedInvoices = await dbPool(ctx.pool)
-				.update(Invoices)
-				.set({
-					status: 'sent',
-					sentAt: new Date(),
-					lastResendId: emailResult.resendId, // Store Resend ID for webhook correlation
-				})
-				.where(eq(Invoices.id, input.id))
-				.returning();
-
-			return (
-				updatedInvoices[0] ??
-				raiseTRPCError({ message: 'Failed to update invoice status' })
-			);
-		} catch (error) {
-			console.error('Failed to send invoice email after retries:', error);
-			raiseTRPCError({
-				message:
-					'Failed to send invoice email after multiple attempts. Please try again later.',
-			});
-		}
+		return updatedInvoice;
 	}),
 
 	markPaid: workspaceProcedure
