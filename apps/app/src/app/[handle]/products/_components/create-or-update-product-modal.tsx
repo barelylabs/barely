@@ -66,9 +66,7 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 				await handleCloseModal();
 			},
 			onSettled: () => {
-				void queryClient.invalidateQueries({
-					queryKey: trpc.product.byWorkspace.queryKey(),
-				});
+				void queryClient.invalidateQueries(trpc.product.byWorkspace.pathFilter());
 			},
 		}),
 	);
@@ -79,9 +77,7 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 				await handleCloseModal();
 			},
 			onSettled: () => {
-				void queryClient.invalidateQueries({
-					queryKey: trpc.product.byWorkspace.queryKey(),
-				});
+				void queryClient.invalidateQueries(trpc.product.byWorkspace.pathFilter());
 			},
 		}),
 	);
@@ -188,17 +184,8 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 		focusGridList('products');
 		setProductImageUploadQueue([]);
 		if (mode === 'create') setProductImages([]);
-		await queryClient.invalidateQueries({
-			queryKey: trpc.product.byWorkspace.queryKey(),
-		});
-	}, [
-		setShowModal,
-		queryClient,
-		reset,
-		setProductImageUploadQueue,
-		mode,
-		trpc.product.byWorkspace,
-	]);
+		await queryClient.invalidateQueries(trpc.product.byWorkspace.pathFilter());
+	}, [setShowModal, queryClient, reset, setProductImageUploadQueue, mode, trpc.product]);
 
 	return (
 		<Modal
