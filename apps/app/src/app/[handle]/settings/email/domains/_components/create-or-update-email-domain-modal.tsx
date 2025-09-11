@@ -35,6 +35,9 @@ export function CreateOrUpdateEmailDomainModal({ mode }: { mode: 'create' | 'upd
 	const { mutateAsync: createEmailDomain } = useMutation(
 		trpc.emailDomain.create.mutationOptions({
 			onSuccess: async () => {
+				await queryClient.invalidateQueries({
+					queryKey: trpc.emailDomain.byWorkspace.queryKey(),
+				});
 				await handleCloseModal();
 			},
 		}),
@@ -43,6 +46,9 @@ export function CreateOrUpdateEmailDomainModal({ mode }: { mode: 'create' | 'upd
 	const { mutateAsync: updateEmailDomain } = useMutation(
 		trpc.emailDomain.update.mutationOptions({
 			onSuccess: async () => {
+				await queryClient.invalidateQueries({
+					queryKey: trpc.emailDomain.byWorkspace.queryKey(),
+				});
 				await handleCloseModal();
 			},
 		}),
@@ -79,12 +85,9 @@ export function CreateOrUpdateEmailDomainModal({ mode }: { mode: 'create' | 'upd
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
-		await queryClient.invalidateQueries({
-			queryKey: trpc.emailDomain.byWorkspace.queryKey(),
-		});
 		form.reset();
 		await setShowModal(false);
-	}, [focusGridList, queryClient, trpc, form, setShowModal]);
+	}, [focusGridList, form, setShowModal]);
 
 	// form submit
 	const handleSubmit = useCallback(
