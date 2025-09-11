@@ -9,6 +9,7 @@ import { InvoiceEmails, Invoices } from '@barely/db/sql';
 import { sendEmail } from '@barely/email';
 import {
 	InvoiceEmailTemplate,
+	InvoiceReminderEmailTemplate,
 	PaymentReceivedEmailTemplate,
 } from '@barely/email/templates';
 import { formatMinorToMajorCurrency, getAbsoluteUrl, newId } from '@barely/utils';
@@ -169,7 +170,13 @@ export async function sendInvoiceReminderEmail({
 
 	const paymentUrl = getAbsoluteUrl('invoice', `/pay/${workspace.handle}/${invoice.id}`);
 
-	const emailTemplate = InvoiceEmailTemplate({
+	// Calculate days overdue
+	const now = new Date();
+	const daysOverdue = Math.floor(
+		(now.getTime() - invoice.dueDate.getTime()) / (1000 * 60 * 60 * 24),
+	);
+
+	const emailTemplate = InvoiceReminderEmailTemplate({
 		invoiceNumber: invoice.invoiceNumber,
 		workspaceName: workspace.name,
 		// workspaceLogo is optional - would need to fetch from _avatarImages relation
@@ -180,7 +187,8 @@ export async function sendInvoiceReminderEmail({
 		total: formatMinorToMajorCurrency(invoice.total, workspace.currency),
 		paymentUrl,
 		supportEmail: workspace.cartSupportEmail ?? 'support@barely.ai',
-		memo: `REMINDER: This invoice is now overdue. ${invoice.payerMemo ?? invoice.notes ?? ''}`,
+		memo: invoice.payerMemo ?? invoice.notes ?? undefined,
+		daysOverdue: daysOverdue > 0 ? daysOverdue : undefined,
 	});
 
 	const replyTo =
@@ -281,6 +289,7 @@ export async function sendInvoicePaymentReceivedEmail({
 		paymentMethod: paymentDetails?.paymentMethod,
 		transactionId: paymentDetails?.transactionId,
 		supportEmail: workspace.cartSupportEmail ?? 'support@barely.ai',
+		memo: invoice.payerMemo ?? invoice.notes ?? undefined,
 	});
 
 	const { generateInvoicePDFBase64Puppeteer } = await import(
