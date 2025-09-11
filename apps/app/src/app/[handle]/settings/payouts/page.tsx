@@ -95,7 +95,6 @@ export function WorkspaceCurrencyForm() {
 			id: workspace.id,
 			currency: workspace.currency,
 		},
-		resetOptions: { keepDirtyValues: true },
 	});
 	const { updateWorkspace } = useUpdateWorkspace({
 		onSuccess: () => form.reset(),
@@ -111,6 +110,7 @@ export function WorkspaceCurrencyForm() {
 			onSubmit={onSubmit}
 			title='Currency'
 			subtitle='The currency your merch and invoices are priced in.'
+			disableSubmit={!form.formState.isDirty}
 		>
 			<SelectField
 				label='Currency'
