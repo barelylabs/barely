@@ -1,25 +1,17 @@
 import React from 'react';
 import {
 	Body,
-	Column,
 	Container,
 	Head,
 	Hr,
 	Html,
 	Img,
 	Preview,
-	Row,
 	Section,
 	Text,
 } from '@react-email/components';
 
-import { EmailFooter } from '../../components/email-footer';
-import {
-	InformationTableColumn,
-	InformationTableLabel,
-	InformationTableRow,
-	InformationTableValue,
-} from '../../primitives';
+import { InvoiceFooter } from '../../components/invoice-footer';
 import { container, heading, main, resetText } from '../../styles';
 
 export interface PaymentReceivedEmailProps {
@@ -34,6 +26,7 @@ export interface PaymentReceivedEmailProps {
 	paymentMethod?: string;
 	transactionId?: string;
 	supportEmail: string;
+	memo?: string;
 }
 
 export function PaymentReceivedEmailTemplate({
@@ -48,6 +41,7 @@ export function PaymentReceivedEmailTemplate({
 	paymentMethod,
 	transactionId,
 	supportEmail,
+	memo,
 }: PaymentReceivedEmailProps) {
 	const previewText = `Payment received for invoice ${invoiceNumber}`;
 
@@ -58,174 +52,296 @@ export function PaymentReceivedEmailTemplate({
 
 			<Body style={main}>
 				<Container style={container}>
-					{/* Header */}
-					<Section>
-						<Row>
-							<Column>
-								<Img
-									src={workspaceLogo ?? 'https://app.barely.ai/_static/logo.png'}
-									width='42'
-									height='42'
-									alt={workspaceName}
-								/>
-							</Column>
+					{/* Header with Logo */}
+					{workspaceLogo && (
+						<Section style={{ textAlign: 'center', marginBottom: '30px' }}>
+							<Img
+								src={workspaceLogo}
+								width='60'
+								height='60'
+								alt={workspaceName}
+								style={{ margin: '0 auto' }}
+							/>
+						</Section>
+					)}
 
-							<Column align='right' style={{ display: 'table-cell' }}>
-								<Text style={{ ...heading, fontWeight: 'bold', fontSize: '24px' }}>
-									PAYMENT RECEIVED
-								</Text>
-							</Column>
-						</Row>
-					</Section>
-
-					<Hr style={{ marginTop: '20px', marginBottom: '20px' }} />
-
-					{/* Success Message */}
-					<Section style={{ textAlign: 'center', marginBottom: '30px' }}>
-						<div
+					{/* Main Heading */}
+					<Section style={{ textAlign: 'center', marginBottom: '20px' }}>
+						<Text
 							style={{
-								display: 'inline-block',
-								backgroundColor: '#10b981',
-								borderRadius: '50%',
-								padding: '10px',
-								marginBottom: '15px',
+								...heading,
+								fontSize: '28px',
+								fontWeight: 'bold',
+								margin: '0 0 10px 0',
 							}}
 						>
-							<Text
-								style={{
-									fontSize: '32px',
-									lineHeight: '1',
-									margin: 0,
-									color: 'white',
-								}}
-							>
-								✓
-							</Text>
-						</div>
-						<Text style={{ ...heading, fontSize: '20px', marginBottom: '10px' }}>
+							Payment Received
+						</Text>
+						<Text
+							style={{
+								...resetText,
+								fontSize: '16px',
+								color: '#64748b',
+								margin: '0',
+							}}
+						>
+							Invoice #{invoiceNumber} from {workspaceName}
+						</Text>
+					</Section>
+
+					<Hr style={{ marginTop: '30px', marginBottom: '30px' }} />
+
+					{/* Payment Summary Box */}
+					<Section
+						style={{
+							borderRadius: '8px',
+							backgroundColor: '#f9fafb',
+							padding: '30px',
+							marginBottom: '30px',
+							textAlign: 'center',
+						}}
+					>
+						{/* Success Icon */}
+						<Img
+							src='https://app.barely.ai/_static/icons/invoice-check.png'
+							width='48'
+							height='48'
+							alt='Payment confirmed'
+							style={{
+								margin: '0 auto 20px auto',
+								display: 'block',
+							}}
+						/>
+
+						{/* Amount Paid */}
+						<Text
+							style={{
+								...resetText,
+								fontSize: '36px',
+								fontWeight: 'bold',
+								margin: '0 0 15px 0',
+								color: '#0f172a',
+							}}
+						>
+							{amountPaid}
+						</Text>
+
+						{/* Payment Date */}
+						<Text
+							style={{
+								...resetText,
+								fontSize: '16px',
+								color: '#64748b',
+								margin: '0 0 10px 0',
+							}}
+						>
+							Paid on{' '}
+							<span style={{ textDecoration: 'underline' }}>
+								{paymentDate.toLocaleDateString(undefined, {
+									month: 'long',
+									day: 'numeric',
+									year: 'numeric',
+								})}
+							</span>
+						</Text>
+
+						{/* Thank You Message */}
+						<Text
+							style={{
+								...resetText,
+								fontSize: '16px',
+								color: '#0f172a',
+								margin: '20px 0 0 0',
+								fontWeight: '500',
+							}}
+						>
 							Thank you for your payment!
 						</Text>
-						<Text style={{ ...resetText, fontSize: '16px', color: '#64748b' }}>
-							Your payment has been successfully processed.
-						</Text>
+
+						{/* Original Invoice Memo */}
+						{memo && (
+							<Text
+								style={{
+									...resetText,
+									fontSize: '14px',
+									color: '#475569',
+									margin: '15px 0 0 0',
+									lineHeight: '1.5',
+								}}
+							>
+								{memo}
+							</Text>
+						)}
 					</Section>
 
 					{/* Payment Details */}
 					<Section
 						style={{
-							borderCollapse: 'collapse',
-							borderSpacing: '2px',
-							borderRadius: '0.75rem',
+							borderRadius: '8px',
 							backgroundColor: '#f9fafb',
-							fontSize: '14px',
-							marginBottom: '20px',
+							padding: '25px',
+							marginBottom: '30px',
 						}}
 					>
-						<Row>
-							<InformationTableColumn>
-								<InformationTableRow>
-									<InformationTableLabel>Invoice Number</InformationTableLabel>
-									<InformationTableValue>{invoiceNumber}</InformationTableValue>
-								</InformationTableRow>
+						{/* Client Information */}
+						<div style={{ marginBottom: '20px' }}>
+							<Text
+								style={{
+									...resetText,
+									fontSize: '12px',
+									textTransform: 'uppercase',
+									letterSpacing: '0.5px',
+									color: '#64748b',
+									margin: '0 0 8px 0',
+									fontWeight: '600',
+								}}
+							>
+								Paid By
+							</Text>
+							<Text
+								style={{
+									...resetText,
+									fontSize: '16px',
+									color: '#0f172a',
+									fontWeight: 'bold',
+									margin: '0 0 5px 0',
+								}}
+							>
+								{clientName}
+							</Text>
+							{clientCompany && (
+								<Text
+									style={{
+										...resetText,
+										fontSize: '14px',
+										color: '#475569',
+										margin: '0 0 5px 0',
+									}}
+								>
+									{clientCompany}
+								</Text>
+							)}
+							<Text
+								style={{
+									...resetText,
+									fontSize: '14px',
+									color: '#475569',
+									margin: '0',
+								}}
+							>
+								{clientEmail}
+							</Text>
+						</div>
 
-								<InformationTableRow>
-									<InformationTableLabel>Amount Paid</InformationTableLabel>
-									<InformationTableValue>
-										<span style={{ fontWeight: 'bold', fontSize: '16px' }}>
-											{amountPaid}
-										</span>
-									</InformationTableValue>
-								</InformationTableRow>
+						{/* Divider */}
+						{(paymentMethod !== undefined || transactionId !== undefined) && (
+							<Hr style={{ margin: '20px 0', borderColor: '#e2e8f0' }} />
+						)}
 
-								<InformationTableRow>
-									<InformationTableLabel>Payment Date</InformationTableLabel>
-									<InformationTableValue>
-										{paymentDate.toLocaleDateString(undefined, {
-											month: 'long',
-											day: 'numeric',
-											year: 'numeric',
-										})}
-									</InformationTableValue>
-								</InformationTableRow>
+						{/* Payment Method */}
+						{paymentMethod && (
+							<div style={{ marginBottom: transactionId ? '20px' : '0' }}>
+								<Text
+									style={{
+										...resetText,
+										fontSize: '12px',
+										textTransform: 'uppercase',
+										letterSpacing: '0.5px',
+										color: '#64748b',
+										margin: '0 0 8px 0',
+										fontWeight: '600',
+									}}
+								>
+									Payment Method
+								</Text>
+								<Text
+									style={{
+										...resetText,
+										fontSize: '14px',
+										color: '#0f172a',
+										margin: '0',
+									}}
+								>
+									{paymentMethod}
+								</Text>
+							</div>
+						)}
 
-								{paymentMethod && (
-									<InformationTableRow>
-										<InformationTableLabel>Payment Method</InformationTableLabel>
-										<InformationTableValue>{paymentMethod}</InformationTableValue>
-									</InformationTableRow>
-								)}
-							</InformationTableColumn>
-
-							<InformationTableColumn>
-								<InformationTableRow>
-									<InformationTableLabel>Paid By</InformationTableLabel>
-									<InformationTableValue>
-										<span style={{ fontWeight: 'bold' }}>{clientName}</span>
-									</InformationTableValue>
-									{clientCompany && (
-										<InformationTableValue>{clientCompany}</InformationTableValue>
-									)}
-									<InformationTableValue>{clientEmail}</InformationTableValue>
-								</InformationTableRow>
-
-								{transactionId && (
-									<InformationTableRow>
-										<InformationTableLabel>Transaction ID</InformationTableLabel>
-										<InformationTableValue>
-											<span style={{ fontSize: '12px', fontFamily: 'monospace' }}>
-												{transactionId}
-											</span>
-										</InformationTableValue>
-									</InformationTableRow>
-								)}
-							</InformationTableColumn>
-						</Row>
+						{/* Transaction ID */}
+						{transactionId && (
+							<div>
+								<Text
+									style={{
+										...resetText,
+										fontSize: '12px',
+										textTransform: 'uppercase',
+										letterSpacing: '0.5px',
+										color: '#64748b',
+										margin: '0 0 8px 0',
+										fontWeight: '600',
+									}}
+								>
+									Transaction ID
+								</Text>
+								<Text
+									style={{
+										...resetText,
+										fontSize: '13px',
+										color: '#475569',
+										fontFamily: 'monospace',
+										margin: '0',
+									}}
+								>
+									{transactionId}
+								</Text>
+							</div>
+						)}
 					</Section>
 
 					{/* Receipt Notice */}
-					<Section style={{ marginTop: '30px', marginBottom: '30px' }}>
-						<Text style={{ ...resetText, fontSize: '14px', textAlign: 'center' }}>
-							This email serves as your official receipt for the payment.
+					<Section style={{ textAlign: 'center', marginBottom: '40px' }}>
+						<Text
+							style={{
+								...resetText,
+								fontSize: '14px',
+								color: '#64748b',
+								margin: '0 0 10px 0',
+							}}
+						>
+							This email serves as your official receipt.
 						</Text>
 						<Text
 							style={{
 								...resetText,
 								fontSize: '14px',
-								textAlign: 'center',
-								marginTop: '10px',
+								color: '#64748b',
+								margin: '0',
 							}}
 						>
 							Please keep this email for your records.
 						</Text>
-					</Section>
-
-					{/* Support */}
-					<Section style={{ marginTop: '40px' }}>
-						<Hr style={{ marginBottom: '20px' }} />
-						<Row>
-							<Column align='center'>
-								<Text
-									style={{
-										...resetText,
-										textAlign: 'center',
-										color: '#64748b',
-										fontSize: '12px',
-									}}
+						{supportEmail && (
+							<Text
+								style={{
+									...resetText,
+									fontSize: '14px',
+									color: '#64748b',
+									margin: '20px 0 0 0',
+								}}
+							>
+								Questions? Contact us at{' '}
+								<a
+									href={`mailto:${supportEmail}`}
+									style={{ color: '#5563eb', textDecoration: 'underline' }}
 								>
-									Questions about this payment?{' '}
-									<a
-										href={`mailto:${supportEmail}`}
-										style={{ color: '#000000', textDecoration: 'underline' }}
-									>
-										Contact us
-									</a>
-								</Text>
-							</Column>
-						</Row>
+									{supportEmail}
+								</a>
+							</Text>
+						)}
 					</Section>
 
 					{/* Footer */}
-					<EmailFooter />
+					<InvoiceFooter workspaceName={workspaceName} />
 				</Container>
 			</Body>
 		</Html>

@@ -23,7 +23,9 @@ export function InvoiceFooter({ workspaceName }: InvoiceFooterProps) {
 					color: '#64748b',
 				}}
 			>
-				{workspaceName} uses{' '}
+				{workspaceName} uses Barely Invoice to manage their invoices.
+				<br />
+				Learn more about{' '}
 				<Link
 					href='https://barelyinvoice.com'
 					target='_blank'
@@ -32,18 +34,7 @@ export function InvoiceFooter({ workspaceName }: InvoiceFooterProps) {
 						textDecoration: 'underline',
 					}}
 				>
-					Barely Invoice
-				</Link>{' '}
-				to manage their invoices.{' '}
-				<Link
-					href='https://barelyinvoice.com'
-					target='_blank'
-					style={{
-						color: '#3182ce',
-						textDecoration: 'underline',
-					}}
-				>
-					Learn more about Barely Invoice.
+					Barely Invoice.
 				</Link>
 			</Text>
 		</div>
