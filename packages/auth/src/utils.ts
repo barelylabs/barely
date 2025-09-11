@@ -7,6 +7,7 @@ import { createRandomStringGenerator } from '@better-auth/utils/random';
 
 import type { Session, SessionUser } from '.';
 import { authEnv } from '../env';
+import { getAbsoluteUrl } from './get-url';
 
 export const generateRandomString = createRandomStringGenerator(
 	'a-z',
@@ -86,14 +87,27 @@ export async function createMagicLink({
 
 	// Build the magic link URL using Better Auth's callback pattern
 
-	const vercelEnv = authEnv.NEXT_PUBLIC_VERCEL_ENV;
+	const currentApp = authEnv.NEXT_PUBLIC_CURRENT_APP;
+	const magicLinkApp =
+		currentApp === 'appFm' ? 'appFm'
+		: currentApp === 'appInvoice' ? 'appInvoice'
+		: 'app';
 
-	const baseUrl =
-		vercelEnv === 'development' ?
-			'https://127.0.0.1:' + authEnv.NEXT_PUBLIC_APP_DEV_PORT
-		:	authEnv.NEXT_PUBLIC_APP_BASE_URL;
-	const callbackUrl = encodeURIComponent(callbackPath ?? '/');
-	const magicLink = `${baseUrl}/api/auth/magic-link/verify?token=${token}&callbackURL=${callbackUrl}`;
+	const callbackURL = encodeURIComponent(callbackPath ?? '/');
+
+	const magicLink = getAbsoluteUrl(magicLinkApp, 'api/auth/magic-link/verify', {
+		query: {
+			token,
+			callbackURL,
+		},
+	});
+
+	// 👇 this was causing issues with not adding 'https://' to the url in prod.
+	// const baseUrl =
+	// 	vercelEnv === 'development' ?
+	// 		'https://127.0.0.1:' + authEnv.NEXT_PUBLIC_APP_DEV_PORT
+	// 	:	authEnv.NEXT_PUBLIC_APP_BASE_URL;
+	// const magicLink = `${baseUrl}/api/auth/magic-link/verify?token=${token}&callbackUrl=${callbackUrl}`;
 
 	return {
 		magicLink,
