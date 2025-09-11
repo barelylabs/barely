@@ -106,6 +106,7 @@ export function EmbeddedPaymentForm({
 			<Button
 				type='submit'
 				size='lg'
+				look='brand'
 				className='w-full'
 				disabled={!stripe || !elements || isProcessing}
 			>

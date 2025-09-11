@@ -23,9 +23,11 @@ export function FinalCTA() {
 							for 3 invoices per month. No credit card required.
 						</Text>
 
-						<Button size='lg' href='#waitlist' className='mx-auto mb-6'>
-							Create Your First Invoice Free →
-						</Button>
+						<div className='mb-6 flex items-center justify-center'>
+							<Button size='lg' look='brand' href='#waitlist'>
+								Create Your First Invoice Free →
+							</Button>
+						</div>
 
 						<div className='flex flex-col items-center justify-center gap-4 text-sm text-muted-foreground sm:flex-row'>
 							<span>Takes 30 seconds to sign up</span>

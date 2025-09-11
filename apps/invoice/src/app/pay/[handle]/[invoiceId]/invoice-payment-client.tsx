@@ -164,7 +164,7 @@ export function InvoicePaymentClient({
 			<div className='mx-auto max-w-6xl px-4 py-8'>
 				<div className='grid gap-8 lg:grid-cols-5'>
 					{/* Invoice Preview */}
-					<div className='lg:col-span-3'>
+					<div className='hidden md:block lg:col-span-3'>
 						<Card className='overflow-hidden p-0'>
 							<InvoiceRender
 								invoice={invoice}

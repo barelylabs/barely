@@ -97,7 +97,12 @@ export function SocialProof() {
 											className='w-full'
 										/>
 									</div>
-									<Button type='submit' loading={isLoading} className='sm:w-auto'>
+									<Button
+										type='submit'
+										look='brand'
+										loading={isLoading}
+										className='sm:w-auto'
+									>
 										Join the Waitlist
 									</Button>
 								</div>

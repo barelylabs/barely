@@ -170,8 +170,7 @@ export function Footer() {
 						<div className='flex items-center gap-2'>
 							<Icon.receipt className='h-5 w-5 text-primary' />
 							<Text variant='sm/normal' className='text-muted-foreground'>
-								© {currentYear} Barely Invoice • Part of the Barely family • Made with ❤️
-								for freelancers
+								© {currentYear} Barely Invoice • Made with ❤️ for freelancers
 							</Text>
 						</div>
 					</div>

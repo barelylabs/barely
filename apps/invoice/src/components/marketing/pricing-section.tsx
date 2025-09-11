@@ -139,7 +139,7 @@ export function PricingSection() {
 								</li>
 							</ul>
 
-							<Button className='w-full' href='#waitlist'>
+							<Button className='w-full' look='brand' href='#waitlist'>
 								Start Free Trial
 							</Button>
 							<Text

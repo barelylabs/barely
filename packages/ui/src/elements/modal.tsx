@@ -77,16 +77,13 @@ function Modal({
 			>
 				<Drawer.Overlay className='fixed inset-0 z-50 bg-muted bg-opacity-10 backdrop-blur' />
 				<Drawer.Portal>
-					<Drawer.Content
-						className={cn(
-							'fixed bottom-0 left-0 right-0 z-[60] mt-24 h-fit rounded-t-[10-px] border-t border-border bg-background',
-							props.className,
-						)}
-					>
-						<div className='sticky top-0 z-20 flex w-full items-center justify-center rounded-t-[10px] bg-inherit'>
+					<Drawer.Content className='fixed bottom-0 left-0 right-0 z-[60] mt-24 flex max-h-[95vh] flex-col rounded-t-[10-px] border-t border-border bg-background'>
+						<div className='flex w-full shrink-0 items-center justify-center rounded-t-[10px] bg-inherit'>
 							<div className='my-3 h-1 w-12 rounded-full bg-border' />
 						</div>
-						{props.children}
+						<div className='overflow-y-auto'>
+							<div className={cn('mx-auto', props.className)}>{props.children}</div>
+						</div>
 					</Drawer.Content>
 					<Drawer.Overlay />
 				</Drawer.Portal>

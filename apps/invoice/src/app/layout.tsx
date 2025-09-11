@@ -8,6 +8,8 @@ import { TRPCReactProvider } from '~/trpc/react';
 // import './globals.css';
 import '../styles/globals.css';
 
+import { TailwindIndicator } from '@barely/ui/components/tailwind-indicator';
+
 const fontHeading = localFont({
 	src: '../fonts/CalSans-SemiBold.woff2',
 	variable: '--font-heading',
@@ -48,6 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 				className={cn('font-sans antialiased', fontSans.variable, fontHeading.variable)}
 			>
 				<TRPCReactProvider>{children}</TRPCReactProvider>
+				<TailwindIndicator />
 				<Toaster />
 			</body>
 		</html>
