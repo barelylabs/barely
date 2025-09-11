@@ -44,9 +44,7 @@ export function CreateBioModal() {
 	const { mutate: createBio, isPending } = useMutation(
 		trpc.bio.createBio.mutationOptions({
 			onSuccess: async data => {
-				await queryClient.invalidateQueries({
-					queryKey: trpc.bio.byWorkspace.queryKey(),
-				});
+				await queryClient.invalidateQueries(trpc.bio.byWorkspace.pathFilter());
 				await setShowCreateModal(false);
 				form.reset();
 				// Navigate to the new bio's blocks page

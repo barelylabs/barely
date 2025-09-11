@@ -69,9 +69,7 @@ export function CreateOrUpdateFanModal({ mode }: { mode: 'create' | 'update' }) 
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
-		await queryClient.invalidateQueries({
-			queryKey: trpc.fan.byWorkspace.queryKey(),
-		});
+		await queryClient.invalidateQueries(trpc.fan.byWorkspace.pathFilter());
 		form.reset();
 		await setShowModal(false);
 	}, [form, focusGridList, queryClient, trpc, setShowModal]);
