@@ -21,9 +21,9 @@ export function Hero() {
 				<div className='mx-auto max-w-4xl text-center'>
 					{/* Badge */}
 					<AnimatedSection animation='fade-up'>
-						<div className='mb-6 inline-flex items-center rounded-full bg-muted px-4 py-1.5 text-sm'>
+						<div className='mb-6 inline-flex items-center rounded-full bg-brand/20 px-4 py-1.5 text-sm'>
 							<span className='text-muted-foreground'>
-								✨ New from the builders of Barely.ai
+								🚀 New from the builders of Barely.ai
 							</span>
 						</div>
 					</AnimatedSection>
@@ -51,8 +51,8 @@ export function Hero() {
 
 					{/* CTA Buttons */}
 					<AnimatedSection animation='fade-up' delay={300}>
-						<div className='flex flex-col justify-center gap-4 sm:flex-row'>
-							<Button size='lg' href='#waitlist' className='min-w-[200px]'>
+						<div className='flex flex-col items-center justify-center gap-4 sm:flex-row sm:items-stretch'>
+							<Button size='lg' look='brand' href='#waitlist' className='min-w-[200px]'>
 								Start Free - No Card Required
 							</Button>
 							<Button

@@ -39,6 +39,10 @@ export function useWorkspaceHotkeys({ workspace }: { workspace: SessionWorkspace
 				router.push(`/${workspace.handle}/fm`);
 				setGKeyPressed(false);
 			}
+			if (e.key === 'i' && gKeyPressed && noMetaKey && notInInput) {
+				router.push(`/${workspace.handle}/invoices`);
+				setGKeyPressed(false);
+			}
 			if (e.key === 'l' && gKeyPressed && noMetaKey && notInInput) {
 				router.push(`/${workspace.handle}/links`);
 				setGKeyPressed(false);

@@ -18,7 +18,7 @@ export function Navbar() {
 					{/* Logo */}
 					<Link href='/' className='flex items-center gap-2'>
 						<Icon.receipt className='h-6 w-6 text-primary' />
-						<span className='text-xl font-semibold'>Barely Invoice</span>
+						<span className='font-heading text-xl font-semibold'>Barely Invoice</span>
 					</Link>
 
 					{/* Desktop Navigation */}
@@ -35,7 +35,7 @@ export function Navbar() {
 						>
 							Sign In
 						</Link>
-						<Button size='sm' href='#waitlist'>
+						<Button size='sm' look='brand' href='#waitlist'>
 							Start Free →
 						</Button>
 					</div>
@@ -70,7 +70,7 @@ export function Navbar() {
 							>
 								Sign In
 							</Link>
-							<Button size='sm' href='#waitlist' className='w-full'>
+							<Button size='sm' look='brand' href='#waitlist' className='w-full'>
 								Start Free →
 							</Button>
 						</div>
