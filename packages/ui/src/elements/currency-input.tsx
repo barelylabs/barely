@@ -54,10 +54,13 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
 			console.log('values', values);
 			setFocusedValue(value ?? '');
 
-			const valueInUnits =
-				!values?.float ? 0
-				: outputUnit === 'minor' ? values.float * 100
-				: values.float;
+			// Handle empty string case
+			if (!value || value === '' || !values?.float) {
+				await onValueChange?.(0);
+				return;
+			}
+
+			const valueInUnits = outputUnit === 'minor' ? values.float * 100 : values.float;
 
 			if (!isNaN(valueInUnits)) {
 				await onValueChange?.(
