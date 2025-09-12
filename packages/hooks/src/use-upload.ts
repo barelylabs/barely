@@ -308,13 +308,27 @@ export function useUpload({
 
 	const removeFromUploadQueue = useCallback(
 		(file: File) => {
-			setUploadQueue(prev => prev.filter(q => q.file !== file));
+			setUploadQueue(prev => {
+				const itemToRemove = prev.find(q => q.file === file);
+				if (itemToRemove?.previewImage) {
+					URL.revokeObjectURL(itemToRemove.previewImage);
+				}
+				return prev.filter(q => q.file !== file);
+			});
 		},
 		[setUploadQueue],
 	);
 
 	const clearUploadQueue = useCallback(() => {
-		setUploadQueue([]);
+		setUploadQueue(prev => {
+			// Clean up all blob URLs to prevent memory leaks
+			prev.forEach(item => {
+				if (item.previewImage) {
+					URL.revokeObjectURL(item.previewImage);
+				}
+			});
+			return [];
+		});
 	}, [setUploadQueue]);
 
 	return {
