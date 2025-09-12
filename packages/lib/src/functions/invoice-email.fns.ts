@@ -88,7 +88,7 @@ export async function sendInvoiceEmail({ invoice, pdfBase64 }: SendInvoiceEmailP
 
 	// Send email
 	const result = await sendEmail({
-		from: 'hello@barelyinvoice.com',
+		from: 'hello@pay.barelyinvoice.com',
 		fromFriendlyName: workspace.name,
 		to: client.email,
 		replyTo,
@@ -199,7 +199,7 @@ export async function sendInvoiceReminderEmail({
 		'invoices@barely.ai';
 
 	const result = await sendEmail({
-		from: 'hello@barelyinvoice.com',
+		from: 'hello@pay.barelyinvoice.com',
 		fromFriendlyName: workspace.name,
 		to: client.email,
 		replyTo,
@@ -310,7 +310,7 @@ export async function sendInvoicePaymentReceivedEmail({
 		'invoices@barely.ai';
 
 	const result = await sendEmail({
-		from: 'hello@barelyinvoice.com',
+		from: 'hello@pay.barelyinvoice.com',
 		fromFriendlyName: workspace.name,
 		to: client.email,
 		replyTo,
