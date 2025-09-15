@@ -32,7 +32,7 @@ export function AllBios() {
 					// Navigate to bio blocks editor
 					const bio = items.find(b => b.id === key);
 					if (bio) {
-						router.push(`/${bio.handle}/bios/${bio.key}/blocks`);
+						router.push(`/${bio.handle}/bios/blocks?bioKey=${bio.key}`);
 					}
 				}}
 				items={items}
@@ -77,7 +77,9 @@ function BioPageCard({
 			id={bio.id}
 			key={bio.id}
 			textValue={bio.key}
-			setShowUpdateModal={() => router.push(`/${bio.handle}/bios/${bio.key}/blocks`)}
+			setShowUpdateModal={() =>
+				router.push(`/${bio.handle}/bios/blocks?bioKey=${bio.key}`)
+			}
 			setShowArchiveModal={isHomeBio ? undefined : setShowArchiveModal}
 			setShowDeleteModal={isHomeBio ? undefined : setShowDeleteModal}
 			title={bio.key}
@@ -104,7 +106,7 @@ function BioPageCard({
 			// 	},
 			// ]}
 			onAction={() => {
-				router.push(`/${bio.handle}/bios/${bio.key}/blocks`);
+				router.push(`/${bio.handle}/bios/blocks?bioKey=${bio.key}`);
 			}}
 		/>
 	);
