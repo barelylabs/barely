@@ -48,7 +48,7 @@ export function CreateBioModal() {
 				await setShowCreateModal(false);
 				form.reset();
 				// Navigate to the new bio's blocks page
-				router.push(`/${handle}/bios/${data.key}/blocks`);
+				router.push(`/${handle}/bios/blocks?bioKey=${data.key}`);
 			},
 			onError: error => {
 				console.error('Failed to create bio:', error);
