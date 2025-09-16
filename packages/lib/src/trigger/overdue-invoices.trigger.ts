@@ -22,10 +22,14 @@ export const overdueInvoicesTrigger = schedules.task({
 			const db = dbPool(pool);
 
 			// Find all invoices that are past due date and not yet paid
+			// An invoice is overdue if we're past the END of the due date (not just at the due date)
+			const today = new Date();
+			today.setHours(0, 0, 0, 0); // Start of today
+
 			const overdueInvoices = await db.query.Invoices.findMany({
 				where: and(
 					or(eq(Invoices.status, 'sent'), eq(Invoices.status, 'viewed')),
-					lt(Invoices.dueDate, new Date()),
+					lt(Invoices.dueDate, today), // Due date is before today (not including today)
 				),
 				with: {
 					client: true,
