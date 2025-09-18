@@ -1382,18 +1382,32 @@ export async function recordVipEvent({
 
 	// report event to tinybird
 	try {
+		// Extract journey info from visitor with proper defaults for VIP events
+		const journeyId = visitor?.journeyId ?? visitor?.sessionId ?? newId('barelySession');
+		const journeyOrigin = visitor?.journeyOrigin ?? journeyId.split('_')[0] ?? 'vip';
+		const journeySource =
+			visitor?.journeySource ?? `vip:${vipSwap.handle}:${vipSwap.key}`;
+		const journeyStep = visitor?.journeyStep ? parseInt(visitor.journeyStep, 10) : 1;
+		const journeyPath = visitor?.journeyPath ?? [`vip:${vipSwap.handle}:${vipSwap.key}`];
+
 		await ingestVipEvent({
 			timestamp,
 			type,
 			workspaceId: vipSwap.workspaceId,
 			assetId: vipSwap.id,
-			sessionId: visitor?.sessionId ?? newId('barelySession'),
+			sessionId: journeyId,
 			...flattenVisitorForIngest(visitor),
 			href: sourceUrl,
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : '',
 			vipSwapType: vipSwap.type,
 			vipDownloadToken: downloadToken ?? '',
 			vipEmailCaptured: emailCaptured ?? '',
+			// Journey tracking fields with proper defaults
+			journeyId,
+			journeyOrigin,
+			journeySource,
+			journeyStep,
+			journeyPath,
 		});
 	} catch (error) {
 		await log({
