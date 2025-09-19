@@ -52,6 +52,7 @@ export function UpdateEmailAddressModal() {
 	});
 
 	const { control } = form;
+	const isCurrentlyDefault = lastSelectedEmailAddress?.default === true;
 
 	const handleCloseModal = useCallback(async () => {
 		form.reset();
@@ -97,7 +98,13 @@ export function UpdateEmailAddressModal() {
 						placeholder='paul@thebeatles.com'
 					/>
 
-					<SwitchField control={control} name='default' label='Default' />
+					<SwitchField
+						control={control}
+						name='default'
+						label='Default'
+						disabled={isCurrentlyDefault}
+						disabledTooltip={isCurrentlyDefault ? 'You must have at least one default email address' : undefined}
+					/>
 				</ModalBody>
 				<ModalFooter>
 					<SubmitButton fullWidth>Update Email Address</SubmitButton>
