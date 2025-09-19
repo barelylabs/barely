@@ -18,7 +18,7 @@ import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 import {
 	useEmailDomain,
 	useEmailDomainSearchParams,
-} from '~/app/[handle]/settings/email/domains/_components/email-domain-context';
+} from '~/app/[handle]/email/domains/_components/email-domain-context';
 
 export function CreateOrUpdateEmailDomainModal({ mode }: { mode: 'create' | 'update' }) {
 	const trpc = useTRPC();

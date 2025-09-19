@@ -38,23 +38,11 @@ export function ContextSidebar({ productId }: ContextSidebarProps) {
 	const settingsRoutes = useMemo<ProductRoute[]>(() => {
 		const baseRoutes = getSettingsRoutesForVariant();
 
-		// Transform the routes and add special handling for team label and email nesting
+		// Transform the routes and add special handling for team label
 		return baseRoutes.map(route => {
 			// Special handling for team route - show "teams" for personal workspaces
 			if (route.path === '/settings/team' && isPersonal) {
 				return { ...route, label: 'teams' };
-			}
-
-			// Special handling for email route - add nested children
-			if (route.path === '/settings/email/domains') {
-				return {
-					...route,
-					hideChildrenWhenNotActive: true,
-					children: [
-						{ path: '/settings/email/domains', label: 'domains' },
-						{ path: '/settings/email/addresses', label: 'addresses' },
-					],
-				};
 			}
 
 			return route;
@@ -235,6 +223,10 @@ export function ContextSidebar({ productId }: ContextSidebarProps) {
 										{/* Grouped routes */}
 										{groups.map(group => (
 											<div key={group} className='flex flex-col gap-1'>
+												{/* Add separator before Settings group */}
+												{group === 'Settings' && (
+													<div className='my-2 h-px bg-border' />
+												)}
 												<Text variant='sm/medium' className='px-2 py-1.5 text-primary/60'>
 													{group}
 												</Text>
