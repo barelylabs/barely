@@ -8,6 +8,7 @@ import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-q
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
+import { Alert } from '@barely/ui/alert';
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { SwitchField } from '@barely/ui/forms/switch-field';
@@ -50,10 +51,20 @@ function CreateEmailAddressForm({
 
 	const { control } = form;
 	const hasNoDefault = !emailData.hasDefaultEmailAddress;
+	const hasNoDomains = domains.length === 0;
 
 	return (
 		<Form form={form} onSubmit={onSubmit}>
 			<ModalBody>
+				{hasNoDomains && (
+					<Alert
+						variant='info'
+						title='No email domains'
+						description='You need to add an email domain before creating email addresses.'
+						actionLabel='Add a domain'
+						actionHref={`/${handle}/email/domains`}
+					/>
+				)}
 				<div className='flex flex-row items-center gap-1.5'>
 					<div className='w-full flex-grow'>
 						<TextField
@@ -99,7 +110,11 @@ function CreateEmailAddressForm({
 				/>
 			</ModalBody>
 			<ModalFooter>
-				<SubmitButton loadingText='Adding Email Address' fullWidth>
+				<SubmitButton
+					loadingText='Adding Email Address'
+					fullWidth
+					disabled={hasNoDomains}
+				>
 					Add Email Address
 				</SubmitButton>
 			</ModalFooter>

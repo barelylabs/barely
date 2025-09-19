@@ -7,6 +7,7 @@ import { querySelectionSchema } from '../helpers';
 
 export const insertEmailAddressSchema = createInsertSchema(EmailAddresses, {
 	username: z.string().min(1),
+	domainId: z.string().min(1, 'Please select a domain'),
 });
 export const createEmailAddressSchema = insertEmailAddressSchema
 	.omit({ id: true })
