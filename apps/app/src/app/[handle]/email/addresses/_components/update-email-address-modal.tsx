@@ -28,6 +28,11 @@ export function UpdateEmailAddressModal() {
 			onSuccess: async () => {
 				await handleCloseModal();
 			},
+			onSettled: async () => {
+				await queryClient.invalidateQueries({
+					queryKey: trpc.emailAddress.byWorkspace.queryKey({ handle }),
+				});
+			},
 		}),
 	);
 
@@ -49,12 +54,9 @@ export function UpdateEmailAddressModal() {
 	const { control } = form;
 
 	const handleCloseModal = useCallback(async () => {
-		await queryClient.invalidateQueries({
-			queryKey: trpc.emailAddress.byWorkspace.queryKey(),
-		});
 		form.reset();
 		await setShowUpdateModal(false);
-	}, [queryClient, trpc, form, setShowUpdateModal]);
+	}, [form, setShowUpdateModal]);
 
 	const handleSubmit = useCallback(
 		async (data: z.infer<typeof updateEmailAddressSchema>) => {
