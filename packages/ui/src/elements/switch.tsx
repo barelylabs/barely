@@ -62,9 +62,9 @@ export const Switch = React.forwardRef<
 					<div
 						className={cn(
 							switchVariants({ size }),
-							'relative cursor-not-allowed bg-slate-200 radix-state-checked:bg-primary radix-state-unchecked:bg-slate-200',
+							'relative cursor-not-allowed bg-slate-200 opacity-50',
 						)}
-						data-state='delayed-open'
+						data-state={props.checked ? 'checked' : 'unchecked'}
 					>
 						<div
 							className={cn(
