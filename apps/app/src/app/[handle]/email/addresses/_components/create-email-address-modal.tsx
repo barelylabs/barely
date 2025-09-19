@@ -118,15 +118,17 @@ export function CreateEmailAddressModal() {
 			onSuccess: async () => {
 				await handleCloseModal();
 			},
+			onSettled: async () => {
+				await queryClient.invalidateQueries({
+					queryKey: trpc.emailAddress.byWorkspace.queryKey({ handle }),
+				});
+			},
 		}),
 	);
 
 	const handleCloseModal = useCallback(async () => {
-		await queryClient.invalidateQueries({
-			queryKey: trpc.emailAddress.byWorkspace.queryKey(),
-		});
 		await setShowCreateModal(false);
-	}, [queryClient, trpc, setShowCreateModal]);
+	}, [setShowCreateModal]);
 
 	const handleSubmit = useCallback(
 		async (data: z.infer<typeof createEmailAddressSchema>) => {
