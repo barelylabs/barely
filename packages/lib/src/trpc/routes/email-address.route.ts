@@ -99,11 +99,14 @@ export const emailAddressRoute = {
 					:	undefined;
 			}
 
+			const hasDefaultEmailAddress = emailAddresses.some(e => e.default === true);
+
 			return {
 				emailAddresses: emailAddresses.map(e => ({
 					...e,
 					email: `${e.username}@${e.domain.name}`,
 				})),
+				hasDefaultEmailAddress,
 				nextCursor,
 			};
 		}),
