@@ -40,9 +40,7 @@ export function CreateOrUpdateClientModal({
 	const setShowModal = mode === 'create' ? setShowCreateModal : setShowUpdateModal;
 
 	const onSettled = useCallback(async () => {
-		await queryClient.invalidateQueries({
-			queryKey: trpc.invoiceClient.byWorkspace.queryKey(),
-		});
+		await queryClient.invalidateQueries(trpc.invoiceClient.byWorkspace.pathFilter());
 	}, [queryClient, trpc.invoiceClient]);
 
 	const { mutateAsync: createClient } = useMutation(
@@ -106,9 +104,7 @@ export function CreateOrUpdateClientModal({
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
-		await queryClient.invalidateQueries({
-			queryKey: trpc.invoiceClient.byWorkspace.queryKey(),
-		});
+		await queryClient.invalidateQueries(trpc.invoiceClient.byWorkspace.pathFilter());
 		await setShowModal(false);
 		if (onClose) {
 			await onClose();

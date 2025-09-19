@@ -7,8 +7,7 @@ import type {
 	Workspace,
 } from '@barely/validators';
 import React from 'react';
-import { cn, formatMinorToMajorCurrency } from '@barely/utils';
-import { format } from 'date-fns';
+import { cn, formatDateForCountry, formatMinorToMajorCurrency } from '@barely/utils';
 
 import { Badge } from '../elements/badge';
 import { Text } from '../elements/typography';
@@ -289,7 +288,7 @@ export function InvoiceRender({
 							Invoice Date
 						</Text>
 						<Text variant='sm/medium' className='mt-1 text-gray-900'>
-							{format(invoiceDate, 'dd/MM/yyyy')}
+							{formatDateForCountry(invoiceDate, client.country)}
 						</Text>
 					</div>
 					<div>
@@ -297,7 +296,7 @@ export function InvoiceRender({
 							Due Date
 						</Text>
 						<Text variant='sm/medium' className='mt-1 text-gray-900'>
-							{format(dueDate, 'dd/MM/yyyy')}
+							{formatDateForCountry(dueDate, client.country)}
 						</Text>
 					</div>
 				</div>

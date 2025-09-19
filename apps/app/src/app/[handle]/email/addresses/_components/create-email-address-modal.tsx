@@ -134,9 +134,7 @@ export function CreateEmailAddressModal() {
 				await handleCloseModal();
 			},
 			onSettled: async () => {
-				await queryClient.invalidateQueries({
-					queryKey: trpc.emailAddress.byWorkspace.queryKey({ handle }),
-				});
+				await queryClient.invalidateQueries(trpc.emailAddress.byWorkspace.pathFilter());
 			},
 		}),
 	);

@@ -88,3 +88,38 @@ export function getFirstAndLastDayOfBillingCycle(day: number) {
 		};
 	}
 }
+
+export function formatDateForCountry(
+	date: string | number | Date,
+	country?: string | null,
+): string {
+	const dateObj =
+		typeof date === 'string' ? new Date(date)
+		: typeof date === 'number' ? new Date(date)
+		: date;
+
+	// Default to US format if country is not specified or is US
+	if (!country || country === 'US' || country === 'USA' || country === 'United States') {
+		return dateObj.toLocaleDateString('en-US', {
+			month: '2-digit',
+			day: '2-digit',
+			year: 'numeric',
+		});
+	}
+
+	// UK format for UK
+	if (country === 'UK' || country === 'GB' || country === 'United Kingdom') {
+		return dateObj.toLocaleDateString('en-GB', {
+			day: '2-digit',
+			month: '2-digit',
+			year: 'numeric',
+		});
+	}
+
+	// Default to UK format for any other country
+	return dateObj.toLocaleDateString('en-GB', {
+		day: '2-digit',
+		month: '2-digit',
+		year: 'numeric',
+	});
+}
