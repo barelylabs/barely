@@ -95,6 +95,7 @@ function CreateEmailAddressForm({
 					name='default'
 					label='Default'
 					disabled={hasNoDefault}
+					disabledTooltip={hasNoDefault ? 'You must have one default email address' : undefined}
 				/>
 			</ModalBody>
 			<ModalFooter>
