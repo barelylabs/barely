@@ -1,15 +1,18 @@
 import type { TRPCRouterRecord } from '@trpc/server';
 import { dbHttp } from '@barely/db/client';
 import { EmailBroadcasts } from '@barely/db/sql/email-broadcast.sql';
+import { EmailTemplates } from '@barely/db/sql/email-template.sql';
 import { sqlAnd } from '@barely/db/utils';
 import { newId, raiseTRPCError } from '@barely/utils';
 import {
 	createEmailBroadcastSchema,
+	createEmailBroadcastWithTemplateSchema,
+	duplicateEmailBroadcastSchema,
 	selectWorkspaceEmailBroadcastsSchema,
 	updateEmailBroadcastSchema,
 } from '@barely/validators';
 import { runs, tasks } from '@trigger.dev/sdk/v3';
-import { and, asc, desc, eq, gt, isNull, lt, or } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, inArray, isNull, lt, or } from 'drizzle-orm';
 
 import type { handleEmailBroadcast } from '../../trigger';
 import { workspaceProcedure } from '../trpc';
@@ -18,13 +21,18 @@ export const emailBroadcastRoute = {
 	byWorkspace: workspaceProcedure
 		.input(selectWorkspaceEmailBroadcastsSchema)
 		.query(async ({ input, ctx }) => {
-			const { limit, cursor, showArchived, showDeleted } = input;
+			const { limit, cursor, showArchived, showDeleted, showStatuses } = input;
 
 			const emailBroadcasts = await dbHttp.query.EmailBroadcasts.findMany({
 				with: {
 					emailTemplate: {
 						columns: {
 							name: true,
+							fromId: true,
+							subject: true,
+							previewText: true,
+							body: true,
+							replyTo: true,
 						},
 					},
 				},
@@ -41,7 +49,7 @@ export const emailBroadcastRoute = {
 						),
 					showArchived ? undefined : isNull(EmailBroadcasts.archivedAt),
 					showDeleted ? undefined : isNull(EmailBroadcasts.deletedAt),
-					// !!showStatuses?.length && inArray(EmailBroadcasts.status, showStatuses),
+					!!showStatuses?.length && inArray(EmailBroadcasts.status, showStatuses),
 				]),
 				orderBy: [desc(EmailBroadcasts.createdAt), asc(EmailBroadcasts.id)],
 				limit: limit + 1,
@@ -162,6 +170,140 @@ export const emailBroadcastRoute = {
 					id: updatedEmailBroadcast.id,
 				});
 			}
+		}),
+
+	createWithTemplate: workspaceProcedure
+		.input(createEmailBroadcastWithTemplateSchema)
+		.mutation(async ({ input, ctx }) => {
+			const {
+				// Template fields
+				name,
+				fromId,
+				subject,
+				previewText,
+				body,
+				type,
+				replyTo,
+				broadcastOnly,
+				// Broadcast fields
+				fanGroupId,
+				status = 'draft',
+				scheduledAt,
+			} = input;
+
+			// 1. Always create email template first
+			const emailTemplate = (
+				await dbHttp
+					.insert(EmailTemplates)
+					.values({
+						id: newId('emailTemplate'),
+						workspaceId: ctx.workspace.id,
+						name,
+						fromId,
+						subject,
+						previewText: previewText ?? null,
+						body,
+						type,
+						replyTo: replyTo ?? null,
+						broadcastOnly, // Hide from templates list if it's a one-off
+					})
+					.returning()
+			)[0];
+
+			if (!emailTemplate) {
+				throw new Error('Failed to create email template');
+			}
+
+			// 2. Create broadcast linked to the template
+			const emailBroadcast = (
+				await dbHttp
+					.insert(EmailBroadcasts)
+					.values({
+						id: newId('emailBroadcast'),
+						workspaceId: ctx.workspace.id,
+						emailTemplateId: emailTemplate.id,
+						fanGroupId,
+						status,
+						scheduledAt,
+					})
+					.returning()
+			)[0];
+
+			if (!emailBroadcast) {
+				throw new Error('Failed to create email broadcast');
+			}
+
+			// 3. If scheduled, trigger the broadcast
+			if (status === 'scheduled') {
+				await tasks.trigger<typeof handleEmailBroadcast>('handle-email-broadcast', {
+					id: emailBroadcast.id,
+				});
+			}
+
+			return { emailBroadcast, emailTemplate };
+		}),
+
+	duplicate: workspaceProcedure
+		.input(duplicateEmailBroadcastSchema)
+		.mutation(async ({ input, ctx }) => {
+			// 1. Get the original broadcast with its template
+			const originalBroadcast = await dbHttp.query.EmailBroadcasts.findFirst({
+				where: and(
+					eq(EmailBroadcasts.id, input.id),
+					eq(EmailBroadcasts.workspaceId, ctx.workspace.id),
+				),
+				with: {
+					emailTemplate: true,
+				},
+			});
+
+			if (!originalBroadcast) {
+				throw new Error('Email broadcast not found');
+			}
+
+			// 2. Duplicate the template with "(Copy)" suffix
+			const duplicatedTemplate = (
+				await dbHttp
+					.insert(EmailTemplates)
+					.values({
+						id: newId('emailTemplate'),
+						workspaceId: ctx.workspace.id,
+						name: `${originalBroadcast.emailTemplate.name} (Copy)`,
+						fromId: originalBroadcast.emailTemplate.fromId,
+						subject: originalBroadcast.emailTemplate.subject,
+						previewText: originalBroadcast.emailTemplate.previewText,
+						body: originalBroadcast.emailTemplate.body,
+						type: originalBroadcast.emailTemplate.type,
+						replyTo: originalBroadcast.emailTemplate.replyTo,
+						broadcastOnly: originalBroadcast.emailTemplate.broadcastOnly,
+					})
+					.returning()
+			)[0];
+
+			if (!duplicatedTemplate) {
+				throw new Error('Failed to duplicate email template');
+			}
+
+			// 3. Create new broadcast as draft
+			const duplicatedBroadcast = (
+				await dbHttp
+					.insert(EmailBroadcasts)
+					.values({
+						id: newId('emailBroadcast'),
+						workspaceId: ctx.workspace.id,
+						emailTemplateId: duplicatedTemplate.id,
+						fanGroupId: originalBroadcast.fanGroupId,
+						status: 'draft', // Always create as draft
+						scheduledAt: null, // Clear scheduled date
+					})
+					.returning()
+			)[0];
+
+			if (!duplicatedBroadcast) {
+				throw new Error('Failed to duplicate email broadcast');
+			}
+
+			return { emailBroadcast: duplicatedBroadcast, emailTemplate: duplicatedTemplate };
 		}),
 
 	// schedule: privateProcedure

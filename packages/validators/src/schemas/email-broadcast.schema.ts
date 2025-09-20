@@ -42,7 +42,7 @@ export const emailBroadcastFilterParamsSchema = commonFiltersSchema.extend({
 		'sending',
 		'sent',
 		'failed',
-	]).optional(),
+	] as const).optional(),
 });
 
 export const emailBroadcastSearchParamsSchema = emailBroadcastFilterParamsSchema.extend({
@@ -51,3 +51,28 @@ export const emailBroadcastSearchParamsSchema = emailBroadcastFilterParamsSchema
 
 export const selectWorkspaceEmailBroadcastsSchema =
 	emailBroadcastSearchParamsSchema.extend(infiniteQuerySchema.shape);
+
+// Create broadcast with inline template creation
+export const createEmailBroadcastWithTemplateSchema = z.object({
+	// Template fields
+	name: z.string(),
+	fromId: z.string(),
+	subject: z.string(),
+	previewText: z.string().optional(),
+	body: z.string(),
+	type: z.enum(['marketing', 'transactional']).default('marketing'),
+	replyTo: z.email().optional(),
+
+	// Broadcast fields
+	fanGroupId: z.string().nullable(),
+	status: z.enum(['draft', 'scheduled']).default('draft'),
+	scheduledAt: z.date().nullable(),
+
+	// Options
+	broadcastOnly: z.boolean().default(false), // If true, template won't show in templates list
+});
+
+// Duplicate broadcast
+export const duplicateEmailBroadcastSchema = z.object({
+	id: z.string(),
+});

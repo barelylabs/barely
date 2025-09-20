@@ -17,13 +17,18 @@ import {
 } from '@barely/db/sql';
 import { sqlAnd, sqlIncrement } from '@barely/db/utils';
 import { sendEmail } from '@barely/email';
-import { getAbsoluteUrl, newId, parseFullName, raise } from '@barely/utils';
+import {
+	getAbsoluteUrl,
+	getEmailAddressFromEmailAddress,
+	newId,
+	parseFullName,
+	raise,
+} from '@barely/utils';
 import { neonConfig } from '@neondatabase/serverless';
 import { logger, task, wait } from '@trigger.dev/sdk/v3';
 import { and, asc, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 import ws from 'ws';
 
-import { getEmailAddressFromEmailAddress } from '../functions/email.fns';
 import { getAssetsFromMdx } from '../functions/mdx.fns';
 import { addToMailchimpAudience } from '../integrations/mailchimp/mailchimp.endpts.audiences';
 import { renderMarkdownToReactEmail } from '../mdx/email-template.mdx';

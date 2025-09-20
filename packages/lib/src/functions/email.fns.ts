@@ -1,15 +1,6 @@
 import type { Db } from '@barely/db/client';
-import type { EmailAddress, EmailDomain } from '@barely/validators/schemas';
 
-// export function isRealEmail(email: string) {
-// 	const isRealEmail = z.email().safeParse(email);
-
-// 	if (!isRealEmail.success) {
-// 		return false;
-// 	}
-
-// 	return true;
-// }
+// import type { EmailAddress, EmailDomain } from '@barely/validators/schemas';
 
 export async function checkEmailExists(email: string, db?: Db) {
 	if (db) {
@@ -21,8 +12,8 @@ export async function checkEmailExists(email: string, db?: Db) {
 	return checkEmailExistsServerAction(email);
 }
 
-export function getEmailAddressFromEmailAddress(
-	email: Pick<EmailAddress, 'username'> & { domain: EmailDomain },
-) {
-	return `${email.username}@${email.domain.name}`;
-}
+// export function getEmailAddressFromEmailAddress(
+// 	email: Pick<EmailAddress, 'username'> & { domain: EmailDomain },
+// ) {
+// 	return `${email.username}@${email.domain.name}`;
+// }

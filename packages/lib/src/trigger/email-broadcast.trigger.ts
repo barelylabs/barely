@@ -12,6 +12,7 @@ import { sqlAnd, sqlIncrement } from '@barely/db/utils';
 import { sendEmailBatch } from '@barely/email';
 import {
 	getAbsoluteUrl,
+	getEmailAddressFromEmailAddress,
 	isDevelopment,
 	newId,
 	parseFullName,
@@ -20,7 +21,6 @@ import {
 import { task, wait } from '@trigger.dev/sdk/v3';
 import { eq } from 'drizzle-orm';
 
-import { getEmailAddressFromEmailAddress } from '../functions/email.fns';
 import { getFanGroupFansForEmail } from '../functions/fan-group.fns';
 import { getAssetsFromMdx } from '../functions/mdx.fns.js';
 import { renderMarkdownToReactEmail } from '../mdx/email-template.mdx';
@@ -223,7 +223,6 @@ async function getEmailDataForBatch({
 		emailDeliveryId,
 		fanId: fan.id,
 		to: toEmail,
-		// bcc: 'adam+broadcast-monitoring@barely.ai',
 		from: getEmailAddressFromEmailAddress(emailTemplate.from),
 		fromFriendlyName: emailTemplate.from.defaultFriendlyName ?? undefined,
 		replyTo: emailTemplate.from.replyTo ?? undefined,

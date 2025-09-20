@@ -792,7 +792,7 @@ const DateTimePicker = React.forwardRef<Partial<DateTimePickerRef>, DateTimePick
 						:	<span>{placeholder}</span>}
 					</Button>
 				</PopoverTrigger>
-				<PopoverContent className='w-auto p-0'>
+				<PopoverContent className='z-[70] w-auto p-0'>
 					<Calendar
 						mode='single'
 						selected={value}

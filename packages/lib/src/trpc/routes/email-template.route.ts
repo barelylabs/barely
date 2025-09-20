@@ -4,7 +4,7 @@ import { EmailAddresses } from '@barely/db/sql/email-address.sql';
 import { EmailTemplateGroups, EmailTemplates } from '@barely/db/sql/email-template.sql';
 import { sqlAnd, sqlStringContains } from '@barely/db/utils';
 import { sendEmail } from '@barely/email';
-import { raiseTRPCError } from '@barely/utils';
+import { getEmailAddressFromEmailAddress, raiseTRPCError } from '@barely/utils';
 import {
 	createEmailTemplateSchema,
 	selectWorkspaceEmailTemplatesSchema,
@@ -18,7 +18,6 @@ import {
 	createEmailTemplate,
 	updateEmailTemplate,
 } from '../../functions/email-template.fns';
-import { getEmailAddressFromEmailAddress } from '../../functions/email.fns';
 import { getAssetsFromMdx } from '../../functions/mdx.fns';
 import { renderMarkdownToReactEmail } from '../../mdx/email-template.mdx';
 import { workspaceProcedure } from '../trpc';

@@ -7,12 +7,12 @@ import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 
 import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
-import { EmailTemplateGroupFilters } from '~/app/[handle]/email-template-groups/_components/email-template-group-filters';
 import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 import { AllEmailTemplateGroups } from './_components/all-email-template-groups';
 import { ArchiveOrDeleteEmailTemplateGroupModal } from './_components/archive-or-delete-email-template-group-modal';
 import { CreateEmailTemplateGroupButton } from './_components/create-email-template-group-button';
 import { CreateOrUpdateEmailTemplateGroupModal } from './_components/create-or-update-email-template-group-modal';
+import { EmailTemplateGroupFilters } from './_components/email-template-group-filters';
 import { EmailTemplateGroupHotkeys } from './_components/email-template-group-hotkeys';
 
 export default async function EmailTemplateGroupsPage({
@@ -27,7 +27,7 @@ export default async function EmailTemplateGroupsPage({
 	const parsedFilters =
 		emailTemplateGroupSearchParamsSchema.safeParse(awaitedSearchParams);
 	if (!parsedFilters.success) {
-		redirect(`/${awaitedParams.handle}/email-template-groups`);
+		redirect(`/${awaitedParams.handle}/email/template-groups`);
 	}
 
 	prefetch(
