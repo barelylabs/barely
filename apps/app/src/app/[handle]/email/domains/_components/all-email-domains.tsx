@@ -23,11 +23,11 @@ import {
 } from '@barely/ui/table';
 import { Text } from '@barely/ui/typography';
 
-import { CreateEmailDomainButton } from '~/app/[handle]/settings/email/domains/_components/create-email-domain-button';
+import { CreateEmailDomainButton } from '~/app/[handle]/email/domains/_components/create-email-domain-button';
 import {
 	useEmailDomain,
 	useEmailDomainSearchParams,
-} from '~/app/[handle]/settings/email/domains/_components/email-domain-context';
+} from '~/app/[handle]/email/domains/_components/email-domain-context';
 
 type EmailDomain = AppRouterOutputs['emailDomain']['byWorkspace']['domains'][number];
 

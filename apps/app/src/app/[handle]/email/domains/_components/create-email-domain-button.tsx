@@ -2,7 +2,7 @@
 
 import { Button } from '@barely/ui/button';
 
-import { useEmailDomainSearchParams } from '~/app/[handle]/settings/email/domains/_components/email-domain-context';
+import { useEmailDomainSearchParams } from '~/app/[handle]/email/domains/_components/email-domain-context';
 
 export function CreateEmailDomainButton() {
 	const { setShowCreateModal } = useEmailDomainSearchParams();

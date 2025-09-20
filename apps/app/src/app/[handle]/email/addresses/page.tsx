@@ -5,11 +5,11 @@ import { emailAddressSearchParamsSchema } from '@barely/validators';
 
 import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
-import { AllEmailAddresses } from '~/app/[handle]/settings/email/addresses/_components/all-email-addresses';
-import { CreateEmailAddressButton } from '~/app/[handle]/settings/email/addresses/_components/create-email-address-button';
-import { CreateEmailAddressModal } from '~/app/[handle]/settings/email/addresses/_components/create-email-address-modal';
-import { EmailAddressHotkeys } from '~/app/[handle]/settings/email/addresses/_components/email-address-hotkeys';
-import { UpdateEmailAddressModal } from '~/app/[handle]/settings/email/addresses/_components/update-email-address-modal';
+import { AllEmailAddresses } from '~/app/[handle]/email/addresses/_components/all-email-addresses';
+import { CreateEmailAddressButton } from '~/app/[handle]/email/addresses/_components/create-email-address-button';
+import { CreateEmailAddressModal } from '~/app/[handle]/email/addresses/_components/create-email-address-modal';
+import { EmailAddressHotkeys } from '~/app/[handle]/email/addresses/_components/email-address-hotkeys';
+import { UpdateEmailAddressModal } from '~/app/[handle]/email/addresses/_components/update-email-address-modal';
 import { HydrateClient } from '~/trpc/server';
 
 export default async function EmailAddressesPage({
@@ -25,7 +25,7 @@ export default async function EmailAddressesPage({
 
 	if (!parsedSearchParams.success) {
 		console.error('parsedSearchParams error', parsedSearchParams.error);
-		redirect(`/${handle}/settings/email/addresses`);
+		redirect(`/${handle}/email/addresses`);
 	}
 
 	return (

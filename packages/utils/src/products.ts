@@ -250,6 +250,19 @@ export const META_PRODUCTS: Product[] = [
 				label: 'Campaigns',
 				icon: 'emailTemplateGroup',
 			},
+			// Settings
+			{
+				path: '/email/domains',
+				label: 'Domains',
+				icon: 'domain',
+				group: 'Settings',
+			},
+			{
+				path: '/email/addresses',
+				label: 'Addresses',
+				icon: 'email',
+				group: 'Settings',
+			},
 		],
 	},
 	{

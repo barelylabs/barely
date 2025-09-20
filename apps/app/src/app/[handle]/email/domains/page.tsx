@@ -5,10 +5,10 @@ import { emailDomainSearchParamsSchema } from '@barely/validators';
 
 import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
-import { AllEmailDomains } from '~/app/[handle]/settings/email/domains/_components/all-email-domains';
-import { CreateEmailDomainButton } from '~/app/[handle]/settings/email/domains/_components/create-email-domain-button';
-import { CreateOrUpdateEmailDomainModal } from '~/app/[handle]/settings/email/domains/_components/create-or-update-email-domain-modal';
-import { EmailDomainHotkeys } from '~/app/[handle]/settings/email/domains/_components/email-domain-hotkeys';
+import { AllEmailDomains } from '~/app/[handle]/email/domains/_components/all-email-domains';
+import { CreateEmailDomainButton } from '~/app/[handle]/email/domains/_components/create-email-domain-button';
+import { CreateOrUpdateEmailDomainModal } from '~/app/[handle]/email/domains/_components/create-or-update-email-domain-modal';
+import { EmailDomainHotkeys } from '~/app/[handle]/email/domains/_components/email-domain-hotkeys';
 import { HydrateClient } from '~/trpc/server';
 
 export default async function EmailDomainsPage({
@@ -24,7 +24,7 @@ export default async function EmailDomainsPage({
 
 	if (!parsedSearchParams.success) {
 		console.error('parsedSearchParams error', parsedSearchParams.error);
-		redirect(`/${handle}/settings/domains/email`);
+		redirect(`/${handle}/email/domains`);
 	}
 
 	return (

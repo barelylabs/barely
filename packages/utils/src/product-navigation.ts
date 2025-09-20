@@ -161,16 +161,5 @@ export function getSettingsRoutesForVariant(variant?: AppVariant): {
 		allSettings.push({ path: '/settings/cart', label: 'cart', icon: 'cart' });
 	}
 
-	// Email settings with nested structure
-	if (features.includes('settings')) {
-		// Note: The context sidebar handles the nested structure
-		// We just need to include the parent route here
-		allSettings.push({
-			path: '/settings/email/domains',
-			label: 'email',
-			icon: 'email',
-		});
-	}
-
 	return allSettings;
 }

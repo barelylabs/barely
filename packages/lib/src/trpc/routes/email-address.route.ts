@@ -10,7 +10,7 @@ import {
 	selectWorkspaceEmailAddressesSchema,
 	updateEmailAddressSchema,
 } from '@barely/validators';
-import { and, asc, desc, eq, gt, lt, or } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, lt, ne, or } from 'drizzle-orm';
 
 import { workspaceProcedure } from '../trpc';
 
@@ -18,18 +18,20 @@ export const emailAddressRoute = {
 	create: workspaceProcedure
 		.input(createEmailAddressSchema)
 		.mutation(async ({ ctx, input }) => {
-			const newEmailAddressData: InsertEmailAddress = {
-				...input,
-				id: newId('emailAddress'),
-				workspaceId: ctx.workspace.id,
-			};
-
-			if (input.default) {
+			// If setting as default, first unset all other defaults
+			if (input.default === true) {
 				await dbHttp
 					.update(EmailAddresses)
 					.set({ default: false })
 					.where(eq(EmailAddresses.workspaceId, ctx.workspace.id));
 			}
+
+			const newEmailAddressData: InsertEmailAddress = {
+				...input,
+				id: newId('emailAddress'),
+				workspaceId: ctx.workspace.id,
+				default: input.default ?? false,
+			};
 
 			const newEmailAddress = await dbHttp
 				.insert(EmailAddresses)
@@ -41,11 +43,18 @@ export const emailAddressRoute = {
 	update: workspaceProcedure
 		.input(updateEmailAddressSchema)
 		.mutation(async ({ ctx, input }) => {
-			if (input.default) {
+			// If setting as default, first unset all other defaults
+			if (input.default === true) {
 				await dbHttp
 					.update(EmailAddresses)
 					.set({ default: false })
-					.where(eq(EmailAddresses.workspaceId, ctx.workspace.id));
+					.where(
+						and(
+							eq(EmailAddresses.workspaceId, ctx.workspace.id),
+							// Don't update the current email address yet
+							input.id ? ne(EmailAddresses.id, input.id) : undefined,
+						),
+					);
 			}
 
 			const updatedEmailAddress = await dbHttp
@@ -99,11 +108,14 @@ export const emailAddressRoute = {
 					:	undefined;
 			}
 
+			const hasDefaultEmailAddress = emailAddresses.some(e => e.default === true);
+
 			return {
 				emailAddresses: emailAddresses.map(e => ({
 					...e,
 					email: `${e.username}@${e.domain.name}`,
 				})),
+				hasDefaultEmailAddress,
 				nextCursor,
 			};
 		}),

@@ -82,9 +82,78 @@ jobs:
           echo "Waiting ${{ inputs.delay_seconds }} seconds to prevent rate limiting..."
           sleep ${{ inputs.delay_seconds }}
 
+      - name: capture runner IP address
+        id: ip
+        run: |
+          echo "🌐 Capturing GitHub Runner IP Address for debugging..."
+          RUNNER_IP=$(curl -4 -s ifconfig.me)
+          echo "Runner IPv4: $RUNNER_IP"
+          echo "runner_ip=$RUNNER_IP" >> $GITHUB_OUTPUT
+
+          # Also add to job summary for easy access
+          echo "### Runner Information" >> $GITHUB_STEP_SUMMARY
+          echo "- **IPv4 Address**: $RUNNER_IP" >> $GITHUB_STEP_SUMMARY
+          echo "- **App**: ${{ inputs.app_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+
       - name: link vercel
         run: |
-          pnpm vercel link --repo --scope=${{ inputs.scope }} --yes --token=${{ secrets.VERCEL_TOKEN }} --debug
+          # Function to attempt vercel link with retry logic
+          attempt_vercel_link() {
+            local attempt=$1
+            local max_attempts=3
+
+            echo "🔗 Attempting to link Vercel project (attempt $attempt/$max_attempts)..."
+            echo "Runner IP: ${{ steps.ip.outputs.runner_ip }}"
+
+            if pnpm vercel link --repo --scope=${{ inputs.scope }} --yes --token=${{ secrets.VERCEL_TOKEN }} --debug; then
+              echo "✅ Successfully linked Vercel project"
+              return 0
+            else
+              local exit_code=$?
+              echo ""
+              echo "❌ Failed to link Vercel project (attempt $attempt/$max_attempts)"
+              echo "Exit code: $exit_code"
+              echo "Runner IP: ${{ steps.ip.outputs.runner_ip }}"
+              echo "Timestamp: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+              echo ""
+
+              # Add failure details to job summary
+              echo "### ❌ Vercel Link Failed" >> $GITHUB_STEP_SUMMARY
+              echo "- **Attempt**: $attempt/$max_attempts" >> $GITHUB_STEP_SUMMARY
+              echo "- **Runner IP**: ${{ steps.ip.outputs.runner_ip }}" >> $GITHUB_STEP_SUMMARY
+              echo "- **Timestamp**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+              echo "- **App**: ${{ inputs.app_name }}" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+
+              if [ $attempt -lt $max_attempts ]; then
+                local wait_time=$((attempt * 5))
+                echo "⏳ Waiting ${wait_time} seconds before retry..."
+                sleep $wait_time
+                return 1
+              else
+                echo "========================================="
+                echo "🚨 VERCEL LINK FAILURE - PLEASE REPORT TO VERCEL SUPPORT"
+                echo "========================================="
+                echo "Runner IP Address: ${{ steps.ip.outputs.runner_ip }}"
+                echo "App Name: ${{ inputs.app_name }}"
+                echo "Environment: ${{ inputs.environment }}"
+                echo "Timestamp: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+                echo ""
+                echo "Please share this IP address with Vercel Support for firewall investigation."
+                echo "Reference: ETIMEDOUT errors during concurrent deployments"
+                echo "========================================="
+                exit $exit_code
+              fi
+            fi
+          }
+
+          # Try up to 3 times
+          for i in 1 2 3; do
+            if attempt_vercel_link $i; then
+              break
+            fi
+          done
 
       - name: pull vercel
         run: |
