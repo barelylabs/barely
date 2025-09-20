@@ -161,6 +161,5 @@ export function getSettingsRoutesForVariant(variant?: AppVariant): {
 		allSettings.push({ path: '/settings/cart', label: 'cart', icon: 'cart' });
 	}
 
-
 	return allSettings;
 }

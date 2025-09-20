@@ -14,8 +14,8 @@ import { SelectField } from '@barely/ui/forms/select-field';
 import { SwitchField } from '@barely/ui/forms/switch-field';
 import { TextField } from '@barely/ui/forms/text-field';
 import { Icon } from '@barely/ui/icon';
-import { Skeleton } from '@barely/ui/skeleton';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
+import { Skeleton } from '@barely/ui/skeleton';
 
 import { useEmailAddressSearchParams } from './email-address-context';
 
@@ -106,7 +106,9 @@ function CreateEmailAddressForm({
 					name='default'
 					label='Default'
 					disabled={hasNoDefault}
-					disabledTooltip={hasNoDefault ? 'You must have one default email address' : undefined}
+					disabledTooltip={
+						hasNoDefault ? 'You must have one default email address' : undefined
+					}
 				/>
 			</ModalBody>
 			<ModalFooter>
@@ -164,42 +166,44 @@ export function CreateEmailAddressModal() {
 			className='max-h-fit max-w-md'
 		>
 			<ModalHeader icon='email' title='Add Email Address' />
-			<Suspense fallback={
-				<>
-					<ModalBody>
-						<div className='flex flex-row items-center gap-1.5'>
-							<div className='w-full flex-grow'>
-								<div className='space-y-2'>
-									<Skeleton className='h-4 w-20' />
-									<Skeleton className='h-10 w-full' />
+			<Suspense
+				fallback={
+					<>
+						<ModalBody>
+							<div className='flex flex-row items-center gap-1.5'>
+								<div className='w-full flex-grow'>
+									<div className='space-y-2'>
+										<Skeleton className='h-4 w-20' />
+										<Skeleton className='h-10 w-full' />
+									</div>
+								</div>
+								<div className='mt-[31px] h-8 w-8' />
+								<div className='min-w-1/2 w-full flex-grow'>
+									<div className='space-y-2'>
+										<Skeleton className='h-4 w-16' />
+										<Skeleton className='h-10 w-full' />
+									</div>
 								</div>
 							</div>
-							<div className='mt-[31px] h-8 w-8' />
-							<div className='min-w-1/2 w-full flex-grow'>
-								<div className='space-y-2'>
-									<Skeleton className='h-4 w-16' />
-									<Skeleton className='h-10 w-full' />
-								</div>
+							<div className='space-y-2'>
+								<Skeleton className='h-4 w-32' />
+								<Skeleton className='h-10 w-full' />
 							</div>
-						</div>
-						<div className='space-y-2'>
-							<Skeleton className='h-4 w-32' />
+							<div className='space-y-2'>
+								<Skeleton className='h-4 w-24' />
+								<Skeleton className='h-10 w-full' />
+							</div>
+							<div className='flex items-center justify-between'>
+								<Skeleton className='h-4 w-16' />
+								<Skeleton className='h-6 w-11 rounded-full' />
+							</div>
+						</ModalBody>
+						<ModalFooter>
 							<Skeleton className='h-10 w-full' />
-						</div>
-						<div className='space-y-2'>
-							<Skeleton className='h-4 w-24' />
-							<Skeleton className='h-10 w-full' />
-						</div>
-						<div className='flex items-center justify-between'>
-							<Skeleton className='h-4 w-16' />
-							<Skeleton className='h-6 w-11 rounded-full' />
-						</div>
-					</ModalBody>
-					<ModalFooter>
-						<Skeleton className='h-10 w-full' />
-					</ModalFooter>
-				</>
-			}>
+						</ModalFooter>
+					</>
+				}
+			>
 				<CreateEmailAddressForm onSubmit={handleSubmit} />
 			</Suspense>
 		</Modal>

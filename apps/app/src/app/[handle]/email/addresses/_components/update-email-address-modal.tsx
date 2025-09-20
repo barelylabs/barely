@@ -101,7 +101,11 @@ export function UpdateEmailAddressModal() {
 						name='default'
 						label='Default'
 						disabled={isCurrentlyDefault}
-						disabledTooltip={isCurrentlyDefault ? 'You must have at least one default email address' : undefined}
+						disabledTooltip={
+							isCurrentlyDefault ?
+								'You must have at least one default email address'
+							:	undefined
+						}
 					/>
 				</ModalBody>
 				<ModalFooter>

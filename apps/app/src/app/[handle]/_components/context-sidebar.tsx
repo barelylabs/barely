@@ -224,9 +224,7 @@ export function ContextSidebar({ productId }: ContextSidebarProps) {
 										{groups.map(group => (
 											<div key={group} className='flex flex-col gap-1'>
 												{/* Add separator before Settings group */}
-												{group === 'Settings' && (
-													<div className='my-2 h-px bg-border' />
-												)}
+												{group === 'Settings' && <div className='my-2 h-px bg-border' />}
 												<Text variant='sm/medium' className='px-2 py-1.5 text-primary/60'>
 													{group}
 												</Text>
