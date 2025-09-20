@@ -237,17 +237,22 @@ export const META_PRODUCTS: Product[] = [
 		type: 'meta',
 		description: 'Reach your audience directly',
 		requiredFeatures: ['forms'],
-		defaultRoute: '/email-templates',
+		defaultRoute: '/email/broadcasts',
 		monetization: 'usage',
 		routes: [
 			{
-				path: '/email-templates',
+				path: '/email/broadcasts',
+				label: 'Broadcasts',
+				icon: 'broadcast',
+			},
+			{
+				path: '/email/templates',
 				label: 'Templates',
 				icon: 'email',
 			},
 			{
-				path: '/email-template-groups',
-				label: 'Campaigns',
+				path: '/email/template-groups',
+				label: 'Template Groups',
 				icon: 'emailTemplateGroup',
 			},
 			// Settings

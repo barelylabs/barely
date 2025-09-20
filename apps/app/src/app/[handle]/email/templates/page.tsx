@@ -8,12 +8,12 @@ import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 
 import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
-import { AllEmailTemplates } from '~/app/[handle]/email-templates/_components/all-email-templates';
-import { EmailTemplateFilters } from '~/app/[handle]/email-templates/_components/email-template-filters';
 import { HydrateClient, prefetch, trpc } from '~/trpc/server';
+import { AllEmailTemplates } from './_components/all-email-templates';
 import { ArchiveOrDeleteEmailTemplateModal } from './_components/archive-or-delete-email-template-modal';
 import { CreateEmailTemplateButton } from './_components/create-email-template-button';
 import { CreateOrUpdateEmailTemplateModal } from './_components/create-or-update-email-template-modal';
+import { EmailTemplateFilters } from './_components/email-template-filters';
 import { EmailTemplateHotkeys } from './_components/email-template-hotkeys';
 
 export default async function EmailTemplatesPage({
@@ -32,7 +32,7 @@ export default async function EmailTemplatesPage({
 			type: 'errors',
 			location: 'EmailTemplatesPage',
 		});
-		redirect(`/${awaitedParams.handle}/email-templates`);
+		redirect(`/${awaitedParams.handle}/email/templates`);
 	}
 
 	prefetch(

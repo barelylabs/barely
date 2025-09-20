@@ -3,6 +3,7 @@ export * from './barely-link';
 export * from './barely-urls';
 export * from './brand-kit';
 export * from './color-conversion';
+export * from './email';
 export * from './navigation';
 export * from './product-navigation';
 export * from './products';

@@ -3,6 +3,10 @@
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import { useWorkspace } from '@barely/hooks';
 import { formatDate, formatMinorToMajorCurrency } from '@barely/utils';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Button } from '@barely/ui/button';
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
@@ -81,8 +85,10 @@ function EmailBroadcastCard({
 }: {
 	emailBroadcast: AppRouterOutputs['emailBroadcast']['byWorkspace']['emailBroadcasts'][0];
 }) {
-	const { workspace } = useWorkspace();
+	const { workspace, handle } = useWorkspace();
 	const { setShowUpdateModal, setShowDeleteModal } = useEmailBroadcastSearchParams();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
 
 	const {
 		id,
@@ -96,6 +102,23 @@ function EmailBroadcastCard({
 		deliveries,
 	} = emailBroadcast;
 
+	// Duplicate mutation
+	const { mutate: duplicateBroadcast } = useMutation(
+		trpc.emailBroadcast.duplicate.mutationOptions({
+			onSuccess: async () => {
+				await queryClient.invalidateQueries(
+					trpc.emailBroadcast.byWorkspace.queryFilter({ handle }),
+				);
+				toast.success('Email broadcast duplicated');
+			},
+			onError: error => {
+				toast.error('Failed to duplicate broadcast', {
+					description: error.message,
+				});
+			},
+		}),
+	);
+
 	return (
 		<GridListCard
 			id={id}
@@ -105,6 +128,13 @@ function EmailBroadcastCard({
 			setShowDeleteModal={setShowDeleteModal}
 			title={emailTemplate.name}
 			subtitle={emailTemplate.name}
+			commandItems={[
+				{
+					label: 'Duplicate',
+					icon: 'copy',
+					action: () => duplicateBroadcast({ id, handle }),
+				},
+			]}
 			description={
 				<div className='flex flex-row items-center gap-2'>
 					{/* <Text variant='sm/normal'>{status}</Text> */}

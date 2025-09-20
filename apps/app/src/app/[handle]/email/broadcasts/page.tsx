@@ -4,13 +4,15 @@ import { redirect } from 'next/navigation';
 import { log } from '@barely/lib/utils/log';
 import { emailBroadcastSearchParamsSchema } from '@barely/validators';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
+
 import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
-import { AllEmailBroadcasts } from '~/app/[handle]/email-broadcasts/_components/all-email-broadcasts';
-import { CreateOrUpdateEmailBroadcastModal } from '~/app/[handle]/email-broadcasts/_components/create-or-update-email-broadcast-modal';
-import { EmailBroadcastFilters } from '~/app/[handle]/email-broadcasts/_components/email-broadcast-filters';
 import { HydrateClient, prefetch, trpc } from '~/trpc/server';
+import { AllEmailBroadcasts } from './_components/all-email-broadcasts';
 import { CreateEmailBroadcastButton } from './_components/create-email-broadcast-button';
+import { CreateOrUpdateEmailBroadcastModal } from './_components/create-or-update-email-broadcast-modal';
+import { EmailBroadcastFilters } from './_components/email-broadcast-filters';
 
 export default async function EmailBroadcastsPage({
 	params,
@@ -28,7 +30,7 @@ export default async function EmailBroadcastsPage({
 			type: 'errors',
 			location: 'EmailBroadcastsPage',
 		});
-		redirect(`/${awaitedParams.handle}/email-broadcasts`);
+		redirect(`/${awaitedParams.handle}/email/broadcasts`);
 	}
 
 	prefetch(
@@ -45,8 +47,8 @@ export default async function EmailBroadcastsPage({
 				button={<CreateEmailBroadcastButton />}
 			/>
 			<DashContent>
-				<Suspense fallback={<div>Loading...</div>}>
-					<EmailBroadcastFilters />
+				<EmailBroadcastFilters />
+				<Suspense fallback={<GridListSkeleton />}>
 					<AllEmailBroadcasts />
 
 					<CreateOrUpdateEmailBroadcastModal mode='create' />
