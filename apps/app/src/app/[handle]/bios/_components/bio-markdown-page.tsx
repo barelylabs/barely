@@ -49,19 +49,19 @@ function BioMarkdownPageInner({ handle, blockId }: BioMarkdownPageProps) {
 	const { bioKey } = useBioQueryState();
 	const bioQueryKey = trpc.bio.byKey.queryOptions({
 		handle,
-		key: 'home',
+		key: bioKey,
 	}).queryKey;
 
 	const blocksQueryKey = trpc.bio.blocksByHandleAndKey.queryOptions({
 		handle,
-		key: 'home',
+		key: bioKey,
 	}).queryKey;
 
 	const { data: bio } = useSuspenseQuery(
 		trpc.bio.byKey.queryOptions(
 			{
 				handle,
-				key: 'home',
+				key: bioKey,
 			},
 			{ staleTime: 1000 * 60 * 5 },
 		),
@@ -69,7 +69,7 @@ function BioMarkdownPageInner({ handle, blockId }: BioMarkdownPageProps) {
 
 	const { data: blocks } = useSuspenseQuery(
 		trpc.bio.blocksByHandleAndKey.queryOptions(
-			{ handle, key: 'home' },
+			{ handle, key: bioKey },
 			{ staleTime: 1000 * 60 * 5 },
 		),
 	);

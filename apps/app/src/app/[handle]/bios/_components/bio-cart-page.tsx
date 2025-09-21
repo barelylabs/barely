@@ -39,6 +39,8 @@ import { Switch } from '@barely/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@barely/ui/tabs';
 import { Text } from '@barely/ui/typography';
 
+import { useBioQueryState } from '../_hooks/use-bio-query-state';
+
 interface BioCartPageProps {
 	handle: string;
 	blockId: string;
@@ -64,22 +66,23 @@ export function BioCartPage({ handle, blockId }: BioCartPageProps) {
 	const [showAnimationPopover, setShowAnimationPopover] = useState(false);
 	const [showIconPopover, setShowIconPopover] = useState(false);
 	const [learnMoreType, setLearnMoreType] = useState<'none' | 'url' | 'bio'>('none');
+	const { bioKey } = useBioQueryState();
 
 	const bioQueryKey = trpc.bio.byKey.queryOptions({
 		handle,
-		key: 'home',
+		key: bioKey,
 	}).queryKey;
 
 	const blocksQueryKey = trpc.bio.blocksByHandleAndKey.queryOptions({
 		handle,
-		key: 'home',
+		key: bioKey,
 	}).queryKey;
 
 	const { data: bio } = useSuspenseQuery(
 		trpc.bio.byKey.queryOptions(
 			{
 				handle,
-				key: 'home',
+				key: bioKey,
 			},
 			{ staleTime: 1000 * 60 * 5 },
 		),
@@ -87,7 +90,7 @@ export function BioCartPage({ handle, blockId }: BioCartPageProps) {
 
 	const { data: blocks } = useSuspenseQuery(
 		trpc.bio.blocksByHandleAndKey.queryOptions(
-			{ handle, key: 'home' },
+			{ handle, key: bioKey },
 			{ staleTime: 1000 * 60 * 5 },
 		),
 	);

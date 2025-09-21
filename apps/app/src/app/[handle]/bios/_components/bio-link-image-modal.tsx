@@ -43,6 +43,7 @@ interface BioLinkImageModalProps {
 	} | null;
 	handle: string;
 	blockId: string;
+	bioKey: string;
 }
 
 export function BioLinkImageModal({
@@ -51,6 +52,7 @@ export function BioLinkImageModal({
 	linkId,
 	currentImage,
 	handle,
+	bioKey,
 }: BioLinkImageModalProps) {
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
@@ -129,7 +131,7 @@ export function BioLinkImageModal({
 				await queryClient.invalidateQueries({
 					queryKey: [
 						['bio', 'blocksByHandleAndKey'],
-						{ input: { handle, key: 'home' }, type: 'query' },
+						{ input: { handle, key: bioKey }, type: 'query' },
 					],
 				});
 			},
@@ -155,7 +157,7 @@ export function BioLinkImageModal({
 				await queryClient.invalidateQueries({
 					queryKey: [
 						['bio', 'blocksByHandleAndKey'],
-						{ input: { handle, key: 'home' }, type: 'query' },
+						{ input: { handle, key: bioKey }, type: 'query' },
 					],
 				});
 				setIsSubmitting(false);

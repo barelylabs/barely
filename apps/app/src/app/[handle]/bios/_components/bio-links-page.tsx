@@ -226,6 +226,7 @@ function SortableLink({
 			id: link.id,
 			animateLayoutChanges: () => false,
 		});
+	const { bioKey } = useBioQueryState();
 
 	const [localTitle, setLocalTitle] = useState(link.text);
 	const [localUrl, setLocalUrl] = useState(link.url ?? '');
@@ -507,6 +508,7 @@ function SortableLink({
 				currentImage={link.image}
 				handle={handle}
 				blockId={blockId}
+				bioKey={bioKey}
 			/>
 		</div>
 	);
@@ -594,19 +596,19 @@ export function BioLinksPage({ handle, blockId }: BioLinksPageProps) {
 
 	const bioQueryKey = trpc.bio.byKey.queryOptions({
 		handle,
-		key: 'home',
+		key: bioKey,
 	}).queryKey;
 
 	const blocksQueryKey = trpc.bio.blocksByHandleAndKey.queryOptions({
 		handle,
-		key: 'home',
+		key: bioKey,
 	}).queryKey;
 
 	const { data: bio } = useSuspenseQuery(
 		trpc.bio.byKey.queryOptions(
 			{
 				handle,
-				key: 'home',
+				key: bioKey,
 			},
 			{ staleTime: 1000 * 60 * 5 }, // 5 minutes
 		),
@@ -614,7 +616,7 @@ export function BioLinksPage({ handle, blockId }: BioLinksPageProps) {
 
 	const { data: blocks } = useSuspenseQuery(
 		trpc.bio.blocksByHandleAndKey.queryOptions(
-			{ handle, key: 'home' },
+			{ handle, key: bioKey },
 			{ staleTime: 1000 * 60 * 5 }, // 5 minutes
 		),
 	);

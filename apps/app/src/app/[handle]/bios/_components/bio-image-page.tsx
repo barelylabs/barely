@@ -23,6 +23,8 @@ import { Textarea } from '@barely/ui/textarea';
 import { Text } from '@barely/ui/typography';
 import { UploadDropzone } from '@barely/ui/upload';
 
+import { useBioQueryState } from '../_hooks/use-bio-query-state';
+
 const imageUploadQueueAtom = atom<UploadQueueItem[]>([]);
 
 export function BioImagePage({ blockId }: { blockId: string }) {
@@ -38,22 +40,23 @@ export function BioImagePage({ blockId }: { blockId: string }) {
 	const [uploadTab, setUploadTab] = useState<UploadTab>('upload');
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [showReplaceImage, setShowReplaceImage] = useState(false);
+	const { bioKey } = useBioQueryState();
 
 	const bioQueryKey = trpc.bio.byKey.queryOptions({
 		handle,
-		key: 'home',
+		key: bioKey,
 	}).queryKey;
 
 	const blocksQueryKey = trpc.bio.blocksByHandleAndKey.queryOptions({
 		handle,
-		key: 'home',
+		key: bioKey,
 	}).queryKey;
 
 	const { data: bio } = useSuspenseQuery(
 		trpc.bio.byKey.queryOptions(
 			{
 				handle,
-				key: 'home',
+				key: bioKey,
 			},
 			{ staleTime: 1000 * 60 * 5 },
 		),
@@ -61,7 +64,7 @@ export function BioImagePage({ blockId }: { blockId: string }) {
 
 	const { data: blocks } = useSuspenseQuery(
 		trpc.bio.blocksByHandleAndKey.queryOptions(
-			{ handle, key: 'home' },
+			{ handle, key: bioKey },
 			{ staleTime: 1000 * 60 * 5 },
 		),
 	);
