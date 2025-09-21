@@ -2,8 +2,7 @@
 
 import type { z } from 'zod/v4';
 import React, { useState } from 'react';
-import { useParams } from 'next/navigation';
-import { useZodForm } from '@barely/hooks';
+import { useWorkspace, useZodForm } from '@barely/hooks';
 import { updateBioSchema } from '@barely/validators';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -18,16 +17,15 @@ import { Text } from '@barely/ui/typography';
 import { HeaderStyleSelector } from './header-style-selector';
 import { PageSettingsPanel } from './page-settings-panel';
 
-export function BioDesignSection() {
-	const params = useParams();
-	const handle = params.handle as string;
+export function BioDesignSection({ bioKey }: { bioKey: string }) {
+	const { handle } = useWorkspace();
 	const queryClient = useQueryClient();
 	const trpc = useTRPC();
 	const [activeTab, setActiveTab] = useState('header');
 
 	const { data: bio } = useSuspenseQuery(
 		trpc.bio.byKey.queryOptions(
-			{ handle },
+			{ handle, key: bioKey },
 			{
 				staleTime: 1000 * 60 * 5, // 5 minutes
 			},
@@ -56,7 +54,7 @@ export function BioDesignSection() {
 			},
 			onSettled: async () => {
 				await queryClient.invalidateQueries({
-					queryKey: trpc.bio.byKey.queryKey({ handle }),
+					queryKey: trpc.bio.byKey.queryKey({ handle, key: bioKey }),
 				});
 			},
 		}),
@@ -70,7 +68,7 @@ export function BioDesignSection() {
 	};
 
 	const handleOptimisticUpdate = (data: Omit<z.infer<typeof updateBioSchema>, 'id'>) => {
-		const queryKey = trpc.bio.byKey.queryKey({ handle });
+		const queryKey = trpc.bio.byKey.queryKey({ handle, key: bioKey });
 		const previousData = queryClient.getQueryData(queryKey);
 		if (!previousData) return;
 		queryClient.setQueryData(queryKey, {

@@ -12,19 +12,27 @@ export const metadata: Metadata = {
 
 export default async function BioPage({
 	params,
+	queryParams,
 }: {
 	params: Promise<{ handle: string }>;
+	queryParams: Promise<{ bioKey: string }>;
 }) {
 	const awaitedParams = await params;
+	const awaitedQueryParams = await queryParams;
 
 	// Prefetch bio data
-	prefetch(trpc.bio.byKey.queryOptions({ handle: awaitedParams.handle }));
+	prefetch(
+		trpc.bio.byKey.queryOptions({
+			handle: awaitedParams.handle,
+			key: awaitedQueryParams.bioKey,
+		}),
+	);
 
 	return (
 		<HydrateClient>
 			<DashContentHeader title='Bio Design' subtitle='Customize themes and appearance' />
 			<DashContent>
-				<BioDesignSection />
+				<BioDesignSection bioKey={awaitedQueryParams.bioKey} />
 			</DashContent>
 		</HydrateClient>
 	);

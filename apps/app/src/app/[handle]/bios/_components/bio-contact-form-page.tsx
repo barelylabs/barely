@@ -16,6 +16,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@barely/ui/tabs';
 import { Textarea } from '@barely/ui/textarea';
 import { Text } from '@barely/ui/typography';
 
+import { useBioQueryState } from '../_hooks/use-bio-query-state';
+
 export function BioContactFormPage({ blockId }: { blockId: string }) {
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
@@ -24,22 +26,23 @@ export function BioContactFormPage({ blockId }: { blockId: string }) {
 	const [editTitle, setEditTitle] = useState('');
 	const [editSubtitle, setEditSubtitle] = useState('');
 	const [blockName, setBlockName] = useState('');
+	const { bioKey } = useBioQueryState();
 
 	const bioQueryKey = trpc.bio.byKey.queryOptions({
 		handle,
-		key: 'home',
+		key: bioKey,
 	}).queryKey;
 
 	const blocksQueryKey = trpc.bio.blocksByHandleAndKey.queryOptions({
 		handle,
-		key: 'home',
+		key: bioKey,
 	}).queryKey;
 
 	const { data: bio } = useSuspenseQuery(
 		trpc.bio.byKey.queryOptions(
 			{
 				handle,
-				key: 'home',
+				key: bioKey,
 			},
 			{ staleTime: 1000 * 60 * 5 }, // 5 minutes
 		),
@@ -47,7 +50,7 @@ export function BioContactFormPage({ blockId }: { blockId: string }) {
 
 	const { data: blocks } = useSuspenseQuery(
 		trpc.bio.blocksByHandleAndKey.queryOptions(
-			{ handle, key: 'home' },
+			{ handle, key: bioKey },
 			{ staleTime: 1000 * 60 * 5 }, // 5 minutes
 		),
 	);
