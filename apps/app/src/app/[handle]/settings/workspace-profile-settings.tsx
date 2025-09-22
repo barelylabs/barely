@@ -6,7 +6,7 @@ import type { SelectFieldOption } from '@barely/ui/forms/select-field';
 import type { MDXEditorMethods } from '@barely/ui/mdx-editor';
 import type { workspaceTypeSchema } from '@barely/validators';
 import type { z } from 'zod/v4';
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useEffect } from 'react';
 import {
 	useUpdateWorkspace,
 	useUpload,
@@ -232,7 +232,22 @@ export function WorkspaceAvatarForm() {
 		onUploadComplete,
 	});
 
-	const { isPendingPresigns, uploadQueue, uploading, handleSubmit } = avatarUploadState;
+	const { isPendingPresigns, uploadQueue, uploading, handleSubmit, clearUploadQueue } = avatarUploadState;
+
+	// Clear upload queue after workspace query refresh completes
+	useEffect(() => {
+		const workspaceQueryState = queryClient.getQueryState(
+			trpc.workspace.byHandle.queryKey({ handle: workspace.handle })
+		);
+		
+		// If there's a completed upload and the workspace query is not fetching (refresh complete)
+		if (uploadQueue.some(q => q.status === 'complete') && 
+		    workspaceQueryState && 
+		    !workspaceQueryState.isFetching && 
+		    workspaceQueryState.status === 'success') {
+			clearUploadQueue();
+		}
+	}, [uploadQueue, queryClient, trpc, workspace.handle, clearUploadQueue]);
 
 	// const imagePreview =
 	// 	avatarUploadState.uploadQueue[0]?.previewImage;
@@ -302,7 +317,22 @@ export function WorkspaceHeaderForm() {
 		onUploadComplete,
 	});
 
-	const { isPendingPresigns, uploadQueue, uploading, handleSubmit } = headerUploadState;
+	const { isPendingPresigns, uploadQueue, uploading, handleSubmit, clearUploadQueue } = headerUploadState;
+
+	// Clear upload queue after workspace query refresh completes
+	useEffect(() => {
+		const workspaceQueryState = queryClient.getQueryState(
+			trpc.workspace.byHandle.queryKey({ handle: workspace.handle })
+		);
+		
+		// If there's a completed upload and the workspace query is not fetching (refresh complete)
+		if (uploadQueue.some(q => q.status === 'complete') && 
+		    workspaceQueryState && 
+		    !workspaceQueryState.isFetching && 
+		    workspaceQueryState.status === 'success') {
+			clearUploadQueue();
+		}
+	}, [uploadQueue, queryClient, trpc, workspace.handle, clearUploadQueue]);
 
 	// const imagePreview =
 	// 	headerUploadState.uploadQueue[0]?.previewImage ?? workspace.headerImageUrl;
