@@ -12,10 +12,12 @@ import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
+	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@barely/ui/dropdown-menu';
 import { Icon } from '@barely/ui/icon';
 import { Logo } from '@barely/ui/logo';
+import { useTheme } from '@barely/ui/next-theme-provider';
 import { Tooltip } from '@barely/ui/tooltip';
 import { Text } from '@barely/ui/typography';
 
@@ -28,6 +30,7 @@ export function ProductSidebar() {
 	const user = useUser();
 	const allWorkspaces = useWorkspaces();
 	const router = useRouter();
+	const { theme, setTheme } = useTheme();
 
 	// Find user's personal workspace
 	const personalWorkspace = allWorkspaces.find(
@@ -214,6 +217,38 @@ export function ProductSidebar() {
 								<span>Account</span>
 							</Link>
 						</DropdownMenuItem>
+
+						<DropdownMenuSeparator />
+
+						{/* Theme Options */}
+						<DropdownMenuItem
+							onClick={() => setTheme('light')}
+							className='flex cursor-pointer items-center gap-3 px-3'
+						>
+							<Icon.sun className='h-4 w-4 text-neutral-500' />
+							<span>Light</span>
+							{theme === 'light' && <Icon.check className='ml-auto h-4 w-4' />}
+						</DropdownMenuItem>
+
+						<DropdownMenuItem
+							onClick={() => setTheme('dark')}
+							className='flex cursor-pointer items-center gap-3 px-3'
+						>
+							<Icon.moon className='h-4 w-4 text-neutral-500' />
+							<span>Dark</span>
+							{theme === 'dark' && <Icon.check className='ml-auto h-4 w-4' />}
+						</DropdownMenuItem>
+
+						<DropdownMenuItem
+							onClick={() => setTheme('system')}
+							className='flex cursor-pointer items-center gap-3 px-3'
+						>
+							<Icon.laptop className='h-4 w-4 text-neutral-500' />
+							<span>System</span>
+							{theme === 'system' && <Icon.check className='ml-auto h-4 w-4' />}
+						</DropdownMenuItem>
+
+						<DropdownMenuSeparator />
 
 						<DropdownMenuItem
 							onClick={() => authClient.signOut().then(() => router.push('/'))}
