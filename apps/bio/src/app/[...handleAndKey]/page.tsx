@@ -45,7 +45,8 @@ export default async function BioPage({ params, searchParams }: BioRouteProps) {
 		undefined;
 	const journeyOrigin =
 		cookieStore.get(`${handle}.${key}.journeyOrigin`)?.value ?? undefined;
-	const journeyStep = cookieStore.get(`${handle}.${key}.journeyStep`)?.value ?? '1';
+	const journeyStepStr = cookieStore.get(`${handle}.${key}.journeyStep`)?.value ?? '1';
+	const journeyStep = parseInt(journeyStepStr, 10) || 1; // Default to 1 if parsing fails
 	const journeyPathStr = cookieStore.get(`${handle}.${key}.journeyPath`)?.value;
 	// const journeyPath =
 	// 	journeyPathStr ? z.array(z.string()).parse(JSON.parse(journeyPathStr)) : [];
@@ -114,8 +115,14 @@ export default async function BioPage({ params, searchParams }: BioRouteProps) {
 		currentAssetId: bio.id,
 	};
 
-	// Validate and ensure type safety
-	const tracking = bioTrackingSchema.parse(trackingData);
+	// Validate and ensure type safety - use safeParse to avoid blocking rendering
+	const trackingResult = bioTrackingSchema.safeParse(trackingData);
+	const tracking = trackingResult.success ? trackingResult.data : undefined;
+
+	// Log error for monitoring but don't block rendering
+	if (!trackingResult.success) {
+		console.error('Bio tracking validation failed:', trackingResult.error);
+	}
 
 	prefetch(trpc.bio.blocksByHandleAndKey.queryOptions({ handle, key }));
 

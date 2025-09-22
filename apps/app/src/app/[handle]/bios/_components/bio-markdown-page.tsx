@@ -3,23 +3,41 @@
 import type { AppRouterOutputs } from '@barely/lib/trpc/routes/app.route';
 import type { MDXEditorMethods } from '@barely/ui/mdx-editor';
 import React, { useCallback, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
+import { useZodForm } from '@barely/hooks';
 import { cn } from '@barely/utils';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { FileText, Trash2 } from 'lucide-react';
 import { NavigationGuardProvider, useNavigationGuard } from 'next-navigation-guard';
 import { toast } from 'sonner';
+import { z } from 'zod/v4';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Button } from '@barely/ui/button';
 import { Card } from '@barely/ui/card';
+import { Form } from '@barely/ui/forms/form';
+import { SelectField } from '@barely/ui/forms/select-field';
+import { TextField } from '@barely/ui/forms/text-field';
 import { Input } from '@barely/ui/input';
-import { MDXEditor } from '@barely/ui/mdx-editor';
+import { LoadingSpinner } from '@barely/ui/loading';
 import { Switch } from '@barely/ui/switch';
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from '@barely/ui/tabs';
 import { Text } from '@barely/ui/typography';
 
 import { useBioQueryState } from '../_hooks/use-bio-query-state';
+
+// Lazy load MDXEditor to improve initial page load
+const MDXEditor = dynamic(
+	() => import('@barely/ui/mdx-editor').then(mod => ({ default: mod.MDXEditor })),
+	{
+		ssr: false,
+		loading: () => (
+			<div className='flex h-[400px] items-center justify-center rounded-lg border bg-gray-50'>
+				<LoadingSpinner className='h-8 w-8 text-gray-400' />
+			</div>
+		),
+	},
+);
 
 interface BioMarkdownPageProps {
 	handle: string;
@@ -76,6 +94,37 @@ function BioMarkdownPageInner({ handle, blockId }: BioMarkdownPageProps) {
 
 	const block = blocks.find(b => b.id === blockId);
 
+	// CTA form schema
+	const ctaFormSchema = z.object({
+		ctaText: z.string().optional(),
+		ctaType: z.enum(['none', 'url', 'bio', 'cart']).default('none'),
+		ctaUrl: z.string().optional(),
+		ctaBioId: z.string().optional(),
+		ctaCartFunnelId: z.string().optional(),
+	});
+
+	const ctaForm = useZodForm({
+		schema: ctaFormSchema,
+		defaultValues: {
+			ctaText: '',
+			ctaType: 'none',
+			ctaUrl: '',
+			ctaBioId: undefined,
+			ctaCartFunnelId: undefined,
+		},
+	});
+
+	const ctaType = ctaForm.watch('ctaType');
+
+	// Get available bios and cart funnels for CTA
+	const biosResult = useSuspenseQuery(trpc.bio.byWorkspace.queryOptions({ handle }));
+	const bios = 'bios' in biosResult.data ? biosResult.data.bios : [];
+
+	const cartFunnelsResult = useSuspenseQuery(
+		trpc.cartFunnel.byWorkspace.queryOptions({ handle }),
+	);
+	const cartFunnels = cartFunnelsResult.data && 'cartFunnels' in cartFunnelsResult.data ? cartFunnelsResult.data.cartFunnels : [];
+
 	// Initialize form values when block loads
 	const formSetRef = useRef(false);
 
@@ -87,12 +136,28 @@ function BioMarkdownPageInner({ handle, blockId }: BioMarkdownPageProps) {
 			setBlockName(block.name ?? 'Markdown Block');
 			setMarkdown(block.markdown ?? '');
 			setOriginalMarkdown(block.markdown ?? '');
+
+			// Initialize CTA fields
+			if (block.ctaText) {
+				ctaForm.setValue('ctaText', block.ctaText);
+				if (block.targetUrl) {
+					ctaForm.setValue('ctaType', 'url');
+					ctaForm.setValue('ctaUrl', block.targetUrl);
+				} else if (block.targetBioId) {
+					ctaForm.setValue('ctaType', 'bio');
+					ctaForm.setValue('ctaBioId', block.targetBioId);
+				} else if (block.targetCartFunnelId) {
+					ctaForm.setValue('ctaType', 'cart');
+					ctaForm.setValue('ctaCartFunnelId', block.targetCartFunnelId);
+				}
+			}
+
 			formSetRef.current = true;
 		}
-	}, [block]);
+	}, [block, ctaForm]);
 
 	// Mutations
-	const { mutate: updateBlock } = useMutation(
+	const { mutate: updateBlock, isPending: isUpdating } = useMutation(
 		trpc.bio.updateBlock.mutationOptions({
 			onMutate: async data => {
 				await queryClient.cancelQueries({ queryKey: blocksQueryKey });
@@ -173,12 +238,42 @@ function BioMarkdownPageInner({ handle, blockId }: BioMarkdownPageProps) {
 
 	// Save and cancel handlers
 	const handleSaveMarkdown = () => {
-		updateBlock({
+		const ctaValues = ctaForm.getValues();
+		const updateData: any = {
 			handle,
 			id: blockId,
 			markdown,
-		});
-		// Both toast.success and setOriginalMarkdown are handled by the mutation's onSuccess
+		};
+
+		// Add CTA fields
+		if (ctaValues.ctaText && ctaValues.ctaType !== 'none') {
+			updateData.ctaText = ctaValues.ctaText;
+			// Clear all CTA target fields first
+			updateData.targetUrl = null;
+			updateData.targetBioId = null;
+			updateData.targetCartFunnelId = null;
+
+			// Set the appropriate one
+			switch (ctaValues.ctaType) {
+				case 'url':
+					updateData.targetUrl = ctaValues.ctaUrl || null;
+					break;
+				case 'bio':
+					updateData.targetBioId = ctaValues.ctaBioId || null;
+					break;
+				case 'cart':
+					updateData.targetCartFunnelId = ctaValues.ctaCartFunnelId || null;
+					break;
+			}
+		} else {
+			// Clear CTA if no text
+			updateData.ctaText = null;
+			updateData.targetUrl = null;
+			updateData.targetBioId = null;
+			updateData.targetCartFunnelId = null;
+		}
+
+		updateBlock(updateData);
 	};
 
 	const handleCancelChanges = () => {
@@ -329,11 +424,26 @@ function BioMarkdownPageInner({ handle, blockId }: BioMarkdownPageProps) {
 								You have unsaved changes
 							</Text>
 							<div className='flex gap-2'>
-								<Button onClick={handleCancelChanges} size='sm' look='outline'>
+								<Button
+									onClick={handleCancelChanges}
+									size='sm'
+									look='outline'
+									disabled={isUpdating}
+								>
 									Cancel
 								</Button>
-								<Button onClick={handleSaveMarkdown} size='sm' look='primary'>
-									Save Changes
+								<Button
+									onClick={handleSaveMarkdown}
+									size='sm'
+									look='primary'
+									disabled={isUpdating}
+								>
+									{isUpdating ?
+										<>
+											<LoadingSpinner className='mr-2 h-4 w-4' />
+											Saving...
+										</>
+									:	'Save Changes'}
 								</Button>
 							</div>
 						</div>
@@ -343,6 +453,83 @@ function BioMarkdownPageInner({ handle, blockId }: BioMarkdownPageProps) {
 							Content exceeds maximum character limit of {maxCharacters.toLocaleString()}
 						</Text>
 					)}
+				</div>
+
+				{/* CTA Section */}
+				<div className='border-t pt-4'>
+					<Text variant='sm/semibold' className='mb-2'>
+						Call to Action (Optional)
+					</Text>
+					<Text variant='xs/normal' className='mb-4 text-gray-500'>
+						Add a button that appears at the bottom of your markdown content.
+					</Text>
+
+					<Form form={ctaForm} onSubmit={() => {}}>
+						<div className='space-y-4'>
+							<TextField
+								control={ctaForm.control}
+								name='ctaText'
+								label='Button Text'
+								placeholder='e.g., Learn More, Get Started'
+							/>
+
+							{ctaForm.watch('ctaText') && (
+								<>
+									<SelectField
+										control={ctaForm.control}
+										name='ctaType'
+										label='Button Action'
+										options={[
+											{ value: 'none', label: 'No Action' },
+											{ value: 'url', label: 'External URL' },
+											{ value: 'bio', label: 'Another Bio' },
+											{ value: 'cart', label: 'Cart Funnel' },
+										]}
+									/>
+
+									{ctaType === 'url' && (
+										<TextField
+											control={ctaForm.control}
+											name='ctaUrl'
+											label='URL'
+											type='url'
+											placeholder='https://example.com'
+										/>
+									)}
+
+									{ctaType === 'bio' && (
+										<SelectField
+											control={ctaForm.control}
+											name='ctaBioId'
+											label='Select Bio'
+											options={
+												bios.map(b => ({
+													value: b.id,
+													label: b.name,
+												}))
+											}
+											placeholder='Choose a bio'
+										/>
+									)}
+
+									{ctaType === 'cart' && (
+										<SelectField
+											control={ctaForm.control}
+											name='ctaCartFunnelId'
+											label='Select Cart Funnel'
+											options={
+												cartFunnels.map(cf => ({
+													value: cf.id,
+													label: cf.name,
+												}))
+											}
+											placeholder='Choose a cart funnel'
+										/>
+									)}
+								</>
+							)}
+						</div>
+					</Form>
 				</div>
 			</div>
 
