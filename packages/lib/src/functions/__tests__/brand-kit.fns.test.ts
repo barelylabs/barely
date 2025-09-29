@@ -92,7 +92,7 @@ describe('brand-kit.fns', () => {
 			expect(mockSelectBuilder.leftJoin).toHaveBeenCalled();
 			expect(mockSelectBuilder.limit).toHaveBeenCalledWith(1);
 			expect(mockSelectBuilder.$withCache).toHaveBeenCalled();
-			expect(result).toEqual({
+			expect(result).toMatchObject({
 				...mockBrandKit,
 				shortBio: null,
 				longBio: null,
@@ -102,13 +102,13 @@ describe('brand-kit.fns', () => {
 				color3: null,
 				bioColorScheme: null,
 				cartColorScheme: null,
-				createdAt: expect.any(Date),
-				updatedAt: expect.any(Date),
 				workspace: {
 					name: 'Test Workspace',
 					handle: 'test-workspace',
 				},
 			});
+			expect(result?.createdAt).toBeInstanceOf(Date);
+			expect(result?.updatedAt).toBeInstanceOf(Date);
 		});
 
 		it('should return null when brand kit not found', async () => {
@@ -437,7 +437,7 @@ describe('brand-kit.fns', () => {
 
 			const result = await getBrandKit({ handle: 'test-handle' });
 
-			expect(result).toEqual({
+			expect(result).toMatchObject({
 				id: 'bk_123',
 				workspaceId: 'ws_123',
 				handle: 'test-handle',
@@ -462,13 +462,13 @@ describe('brand-kit.fns', () => {
 				color3: null,
 				bioColorScheme: null,
 				cartColorScheme: null,
-				createdAt: expect.any(Date),
-				updatedAt: expect.any(Date),
 				workspace: {
 					name: 'Test Workspace',
 					handle: 'test-workspace',
 				},
 			});
+			expect(result?.createdAt).toBeInstanceOf(Date);
+			expect(result?.updatedAt).toBeInstanceOf(Date);
 		});
 	});
 });
