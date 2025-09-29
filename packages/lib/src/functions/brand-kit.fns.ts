@@ -76,6 +76,14 @@ export async function getBrandKit({ handle }: { handle: string }) {
 			avatarBlurDataUrl: BrandKits.avatarBlurDataUrl,
 			headerS3Key: BrandKits.headerS3Key,
 			headerBlurDataUrl: BrandKits.headerBlurDataUrl,
+			shortBio: BrandKits.shortBio,
+			longBio: BrandKits.longBio,
+			location: BrandKits.location,
+			color1: BrandKits.color1,
+			color2: BrandKits.color2,
+			color3: BrandKits.color3,
+			bioColorScheme: BrandKits.bioColorScheme,
+			cartColorScheme: BrandKits.cartColorScheme,
 			createdAt: BrandKits.createdAt,
 			updatedAt: BrandKits.updatedAt,
 			// Workspace fields
@@ -97,6 +105,9 @@ export async function getBrandKit({ handle }: { handle: string }) {
 	// Transform to match expected nested structure
 	const { workspaceName, workspaceHandle, ...brandKitData } = brandKit;
 
+	if (!workspaceName || !workspaceHandle) {
+		return null;
+	}
 	return {
 		...brandKitData,
 		workspace:
