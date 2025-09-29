@@ -55,12 +55,20 @@ describe('brand-kit.fns', () => {
 
 			const mockSelectBuilder = {
 				from: vi.fn(),
+				leftJoin: vi.fn(),
 				where: vi.fn(),
 				limit: vi.fn(),
-				$withCache: vi.fn().mockResolvedValue([mockBrandKit]),
+				$withCache: vi.fn().mockResolvedValue([
+					{
+						...mockBrandKit,
+						workspaceName: 'Test Workspace',
+						workspaceHandle: 'test-workspace',
+					},
+				]),
 			};
 
 			mockSelectBuilder.from.mockReturnValue(mockSelectBuilder);
+			mockSelectBuilder.leftJoin.mockReturnValue(mockSelectBuilder);
 			mockSelectBuilder.where.mockReturnValue(mockSelectBuilder);
 			mockSelectBuilder.limit.mockReturnValue(mockSelectBuilder);
 
@@ -70,20 +78,29 @@ describe('brand-kit.fns', () => {
 
 			expect(mockSelect).toHaveBeenCalledTimes(1);
 			expect(mockSelectBuilder.from).toHaveBeenCalledWith(BrandKits);
+			expect(mockSelectBuilder.leftJoin).toHaveBeenCalled();
 			expect(mockSelectBuilder.limit).toHaveBeenCalledWith(1);
 			expect(mockSelectBuilder.$withCache).toHaveBeenCalled();
-			expect(result).toEqual(mockBrandKit);
+			expect(result).toEqual({
+				...mockBrandKit,
+				workspace: {
+					name: 'Test Workspace',
+					handle: 'test-workspace',
+				},
+			});
 		});
 
 		it('should return null when brand kit not found', async () => {
 			const mockSelectBuilder = {
 				from: vi.fn(),
+				leftJoin: vi.fn(),
 				where: vi.fn(),
 				limit: vi.fn(),
 				$withCache: vi.fn().mockResolvedValue([]),
 			};
 
 			mockSelectBuilder.from.mockReturnValue(mockSelectBuilder);
+			mockSelectBuilder.leftJoin.mockReturnValue(mockSelectBuilder);
 			mockSelectBuilder.where.mockReturnValue(mockSelectBuilder);
 			mockSelectBuilder.limit.mockReturnValue(mockSelectBuilder);
 
@@ -97,12 +114,14 @@ describe('brand-kit.fns', () => {
 		it('should handle database errors gracefully', async () => {
 			const mockSelectBuilder = {
 				from: vi.fn(),
+				leftJoin: vi.fn(),
 				where: vi.fn(),
 				limit: vi.fn(),
 				$withCache: vi.fn().mockRejectedValue(new Error('Database error')),
 			};
 
 			mockSelectBuilder.from.mockReturnValue(mockSelectBuilder);
+			mockSelectBuilder.leftJoin.mockReturnValue(mockSelectBuilder);
 			mockSelectBuilder.where.mockReturnValue(mockSelectBuilder);
 			mockSelectBuilder.limit.mockReturnValue(mockSelectBuilder);
 
@@ -157,12 +176,14 @@ describe('brand-kit.fns', () => {
 
 			const mockSelectBuilder = {
 				from: vi.fn(),
+				leftJoin: vi.fn(),
 				where: vi.fn(),
 				limit: vi.fn(),
 				$withCache: vi.fn().mockResolvedValue([mockBrandKit]),
 			};
 
 			mockSelectBuilder.from.mockReturnValue(mockSelectBuilder);
+			mockSelectBuilder.leftJoin.mockReturnValue(mockSelectBuilder);
 			mockSelectBuilder.where.mockReturnValue(mockSelectBuilder);
 			mockSelectBuilder.limit.mockReturnValue(mockSelectBuilder);
 
@@ -186,12 +207,14 @@ describe('brand-kit.fns', () => {
 		it('should return null when brand kit not found', async () => {
 			const mockSelectBuilder = {
 				from: vi.fn(),
+				leftJoin: vi.fn(),
 				where: vi.fn(),
 				limit: vi.fn(),
 				$withCache: vi.fn().mockResolvedValue([]),
 			};
 
 			mockSelectBuilder.from.mockReturnValue(mockSelectBuilder);
+			mockSelectBuilder.leftJoin.mockReturnValue(mockSelectBuilder);
 			mockSelectBuilder.where.mockReturnValue(mockSelectBuilder);
 			mockSelectBuilder.limit.mockReturnValue(mockSelectBuilder);
 
@@ -218,12 +241,14 @@ describe('brand-kit.fns', () => {
 
 			const mockSelectBuilder = {
 				from: vi.fn(),
+				leftJoin: vi.fn(),
 				where: vi.fn(),
 				limit: vi.fn(),
 				$withCache: vi.fn().mockResolvedValue([invalidBrandKit]),
 			};
 
 			mockSelectBuilder.from.mockReturnValue(mockSelectBuilder);
+			mockSelectBuilder.leftJoin.mockReturnValue(mockSelectBuilder);
 			mockSelectBuilder.where.mockReturnValue(mockSelectBuilder);
 			mockSelectBuilder.limit.mockReturnValue(mockSelectBuilder);
 
@@ -267,12 +292,14 @@ describe('brand-kit.fns', () => {
 
 			const mockSelectBuilder = {
 				from: vi.fn(),
+				leftJoin: vi.fn(),
 				where: vi.fn(),
 				limit: vi.fn(),
 				$withCache: vi.fn().mockResolvedValue([partialBrandKit]),
 			};
 
 			mockSelectBuilder.from.mockReturnValue(mockSelectBuilder);
+			mockSelectBuilder.leftJoin.mockReturnValue(mockSelectBuilder);
 			mockSelectBuilder.where.mockReturnValue(mockSelectBuilder);
 			mockSelectBuilder.limit.mockReturnValue(mockSelectBuilder);
 
@@ -298,12 +325,14 @@ describe('brand-kit.fns', () => {
 		it('should use $withCache for query optimization', async () => {
 			const mockSelectBuilder = {
 				from: vi.fn(),
+				leftJoin: vi.fn(),
 				where: vi.fn(),
 				limit: vi.fn(),
 				$withCache: vi.fn().mockResolvedValue([]),
 			};
 
 			mockSelectBuilder.from.mockReturnValue(mockSelectBuilder);
+			mockSelectBuilder.leftJoin.mockReturnValue(mockSelectBuilder);
 			mockSelectBuilder.where.mockReturnValue(mockSelectBuilder);
 			mockSelectBuilder.limit.mockReturnValue(mockSelectBuilder);
 
@@ -349,6 +378,7 @@ describe('brand-kit.fns', () => {
 
 			const mockSelectBuilder = {
 				from: vi.fn(),
+				leftJoin: vi.fn(),
 				where: vi.fn(),
 				limit: vi.fn(),
 				// Simulate cache miss but still returning data from DB
@@ -356,6 +386,7 @@ describe('brand-kit.fns', () => {
 			};
 
 			mockSelectBuilder.from.mockReturnValue(mockSelectBuilder);
+			mockSelectBuilder.leftJoin.mockReturnValue(mockSelectBuilder);
 			mockSelectBuilder.where.mockReturnValue(mockSelectBuilder);
 			mockSelectBuilder.limit.mockReturnValue(mockSelectBuilder);
 

@@ -1,6 +1,6 @@
 import type { z } from 'zod/v4';
 import { dbHttp } from '@barely/db/client';
-import { BrandKits } from '@barely/db/sql';
+import { BrandKits, Workspaces } from '@barely/db/sql';
 import { selectBrandKitSchema } from '@barely/validators/schemas';
 import { eq } from 'drizzle-orm';
 
@@ -57,19 +57,56 @@ const defaultCartBrandKit: CartBrandKit = {
 };
 
 export async function getBrandKit({ handle }: { handle: string }) {
-	const brandKit = await dbHttp.query.BrandKits.findFirst({
-		where: eq(BrandKits.handle, handle),
-		with: {
-			workspace: {
-				columns: {
-					name: true,
-					handle: true,
-				},
-			},
-		},
-	});
+	const brandKitResults = await dbHttp
+		.select({
+			// BrandKit fields
+			id: BrandKits.id,
+			workspaceId: BrandKits.workspaceId,
+			handle: BrandKits.handle,
+			themeCategory: BrandKits.themeCategory,
+			colorPreset: BrandKits.colorPreset,
+			colorScheme: BrandKits.colorScheme,
+			fontPreset: BrandKits.fontPreset,
+			headingFont: BrandKits.headingFont,
+			bodyFont: BrandKits.bodyFont,
+			blockStyle: BrandKits.blockStyle,
+			blockShadow: BrandKits.blockShadow,
+			blockOutline: BrandKits.blockOutline,
+			avatarS3Key: BrandKits.avatarS3Key,
+			avatarBlurDataUrl: BrandKits.avatarBlurDataUrl,
+			headerS3Key: BrandKits.headerS3Key,
+			headerBlurDataUrl: BrandKits.headerBlurDataUrl,
+			createdAt: BrandKits.createdAt,
+			updatedAt: BrandKits.updatedAt,
+			// Workspace fields
+			workspaceName: Workspaces.name,
+			workspaceHandle: Workspaces.handle,
+		})
+		.from(BrandKits)
+		.leftJoin(Workspaces, eq(Workspaces.id, BrandKits.workspaceId))
+		.where(eq(BrandKits.handle, handle))
+		.limit(1)
+		.$withCache();
 
-	return brandKit ?? null;
+	const brandKit = brandKitResults[0];
+
+	if (!brandKit) {
+		return null;
+	}
+
+	// Transform to match expected nested structure
+	const { workspaceName, workspaceHandle, ...brandKitData } = brandKit;
+
+	return {
+		...brandKitData,
+		workspace:
+			workspaceName && workspaceHandle ?
+				{
+					name: workspaceName,
+					handle: workspaceHandle,
+				}
+			:	undefined,
+	};
 }
 
 export async function getValidatedCartBrandKit({
