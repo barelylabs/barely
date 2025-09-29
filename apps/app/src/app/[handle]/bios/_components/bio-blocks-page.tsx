@@ -712,6 +712,37 @@ export function BioBlocksPage({ bioKey }: { bioKey: string }) {
 		});
 	};
 
+	const { mutate: mutateBarelyBranding } = useMutation(
+		trpc.bio.update.mutationOptions({
+			onMutate: async data => {
+				await queryClient.cancelQueries({ queryKey: bioQueryKey });
+				const previousBio = queryClient.getQueryData(bioQueryKey);
+				if (!previousBio) return;
+
+				queryClient.setQueryData(bioQueryKey, {
+					...previousBio,
+					barelyBranding: data.barelyBranding ?? true,
+				});
+				return { previousBio };
+			},
+			onError: (error, variables, context) => {
+				queryClient.setQueryData(bioQueryKey, context?.previousBio);
+			},
+			onSettled: async () => {
+				// Invalidate and refetch
+				await queryClient.invalidateQueries({ queryKey: bioQueryKey });
+			},
+		}),
+	);
+
+	const handleToggleBranding = (checked: boolean) => {
+		mutateBarelyBranding({
+			handle,
+			id: bio.id,
+			barelyBranding: checked,
+		});
+	};
+
 	const handleToggleBlock = async (blockId: string, enabled: boolean) => {
 		await updateBlockMutation.mutateAsync({
 			handle,
@@ -898,6 +929,45 @@ export function BioBlocksPage({ bioKey }: { bioKey: string }) {
 					<span className='text-sm font-medium text-gray-500'>Add block</span>
 				</button>
 			</div>
+
+			{/* Branding Block */}
+			<Card className='overflow-hidden'>
+				<div className='flex items-center justify-between'>
+					<div className='flex items-center gap-3'>
+						<div className='invisible cursor-not-allowed'>
+							<GripVertical className='h-5 w-5 text-gray-400' />
+						</div>
+						<div className='flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100'>
+							<Icon.star className='h-5 w-5 text-gray-600' />
+						</div>
+						<div>
+							<Text variant='md/medium' className='font-medium'>
+								Branding
+							</Text>
+							<Text variant='sm/normal' className='text-gray-500'>
+								Show powered by barely.ai
+							</Text>
+						</div>
+					</div>
+					<div className='flex items-center gap-2'>
+						<Switch checked={bio.barelyBranding} onCheckedChange={handleToggleBranding} />
+						<button
+							type='button'
+							className={cn(
+								buttonVariants({
+									variant: 'icon',
+									look: 'ghost',
+									size: 'sm',
+								}),
+								'invisible text-slate-500',
+							)}
+						>
+							<Icon.dotsVertical className='h-4 w-4' />
+						</button>
+						<div />
+					</div>
+				</div>
+			</Card>
 
 			{/* Add Block Modal */}
 			<AddBlockModal
