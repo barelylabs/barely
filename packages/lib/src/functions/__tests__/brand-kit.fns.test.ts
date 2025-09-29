@@ -63,6 +63,17 @@ describe('brand-kit.fns', () => {
 						...mockBrandKit,
 						workspaceName: 'Test Workspace',
 						workspaceHandle: 'test-workspace',
+						// Add missing fields that getBrandKit now selects
+						shortBio: null,
+						longBio: null,
+						location: null,
+						color1: null,
+						color2: null,
+						color3: null,
+						bioColorScheme: null,
+						cartColorScheme: null,
+						createdAt: new Date(),
+						updatedAt: new Date(),
 					},
 				]),
 			};
@@ -83,6 +94,16 @@ describe('brand-kit.fns', () => {
 			expect(mockSelectBuilder.$withCache).toHaveBeenCalled();
 			expect(result).toEqual({
 				...mockBrandKit,
+				shortBio: null,
+				longBio: null,
+				location: null,
+				color1: null,
+				color2: null,
+				color3: null,
+				bioColorScheme: null,
+				cartColorScheme: null,
+				createdAt: expect.any(Date),
+				updatedAt: expect.any(Date),
 				workspace: {
 					name: 'Test Workspace',
 					handle: 'test-workspace',
@@ -179,7 +200,11 @@ describe('brand-kit.fns', () => {
 				leftJoin: vi.fn(),
 				where: vi.fn(),
 				limit: vi.fn(),
-				$withCache: vi.fn().mockResolvedValue([mockBrandKit]),
+				$withCache: vi.fn().mockResolvedValue([{
+					...mockBrandKit,
+					workspaceName: 'Test Workspace',
+					workspaceHandle: 'test-workspace',
+				}]),
 			};
 
 			mockSelectBuilder.from.mockReturnValue(mockSelectBuilder);
@@ -237,6 +262,8 @@ describe('brand-kit.fns', () => {
 						backgroundColor: 5, // Invalid value (should be 0, 1, or 2)
 					},
 				},
+				workspaceName: 'Test Workspace',
+				workspaceHandle: 'test-workspace',
 			};
 
 			const mockSelectBuilder = {
@@ -288,6 +315,8 @@ describe('brand-kit.fns', () => {
 				// Missing required fields that should cause validation to fail
 				colorPreset: undefined,
 				colorScheme: undefined,
+				workspaceName: 'Test Workspace',
+				workspaceHandle: 'test-workspace',
 			};
 
 			const mockSelectBuilder = {
@@ -374,6 +403,8 @@ describe('brand-kit.fns', () => {
 				avatarBlurDataUrl: null,
 				headerS3Key: null,
 				headerBlurDataUrl: null,
+				workspaceName: 'Test Workspace',
+				workspaceHandle: 'test-workspace',
 			};
 
 			const mockSelectBuilder = {
@@ -382,7 +413,19 @@ describe('brand-kit.fns', () => {
 				where: vi.fn(),
 				limit: vi.fn(),
 				// Simulate cache miss but still returning data from DB
-				$withCache: vi.fn().mockResolvedValue([mockBrandKit]),
+				$withCache: vi.fn().mockResolvedValue([{
+					...mockBrandKit,
+					shortBio: null,
+					longBio: null,
+					location: null,
+					color1: null,
+					color2: null,
+					color3: null,
+					bioColorScheme: null,
+					cartColorScheme: null,
+					createdAt: new Date(),
+					updatedAt: new Date(),
+				}]),
 			};
 
 			mockSelectBuilder.from.mockReturnValue(mockSelectBuilder);
@@ -394,7 +437,38 @@ describe('brand-kit.fns', () => {
 
 			const result = await getBrandKit({ handle: 'test-handle' });
 
-			expect(result).toEqual(mockBrandKit);
+			expect(result).toEqual({
+				id: 'bk_123',
+				workspaceId: 'ws_123',
+				handle: 'test-handle',
+				themeCategory: 'classic',
+				colorPreset: 'monochrome',
+				colorScheme: mockBrandKit.colorScheme,
+				fontPreset: 'classic.playfairDisplay',
+				headingFont: 'Playfair Display',
+				bodyFont: 'Inter',
+				blockStyle: 'square',
+				blockShadow: false,
+				blockOutline: true,
+				avatarS3Key: null,
+				avatarBlurDataUrl: null,
+				headerS3Key: null,
+				headerBlurDataUrl: null,
+				shortBio: null,
+				longBio: null,
+				location: null,
+				color1: null,
+				color2: null,
+				color3: null,
+				bioColorScheme: null,
+				cartColorScheme: null,
+				createdAt: expect.any(Date),
+				updatedAt: expect.any(Date),
+				workspace: {
+					name: 'Test Workspace',
+					handle: 'test-workspace',
+				},
+			});
 		});
 	});
 });
