@@ -1,6 +1,6 @@
 import type { z } from 'zod/v4';
 import { dbHttp } from '@barely/db/client';
-import { BrandKits } from '@barely/db/sql';
+import { BrandKits, Workspaces } from '@barely/db/sql';
 import { selectBrandKitSchema } from '@barely/validators/schemas';
 import { eq } from 'drizzle-orm';
 
@@ -57,14 +57,67 @@ const defaultCartBrandKit: CartBrandKit = {
 };
 
 export async function getBrandKit({ handle }: { handle: string }) {
-	const [brandKit] = await dbHttp
-		.select()
+	const brandKitResults = await dbHttp
+		.select({
+			// BrandKit fields
+			id: BrandKits.id,
+			workspaceId: BrandKits.workspaceId,
+			handle: BrandKits.handle,
+			themeCategory: BrandKits.themeCategory,
+			colorPreset: BrandKits.colorPreset,
+			colorScheme: BrandKits.colorScheme,
+			fontPreset: BrandKits.fontPreset,
+			headingFont: BrandKits.headingFont,
+			bodyFont: BrandKits.bodyFont,
+			blockStyle: BrandKits.blockStyle,
+			blockShadow: BrandKits.blockShadow,
+			blockOutline: BrandKits.blockOutline,
+			avatarS3Key: BrandKits.avatarS3Key,
+			avatarBlurDataUrl: BrandKits.avatarBlurDataUrl,
+			headerS3Key: BrandKits.headerS3Key,
+			headerBlurDataUrl: BrandKits.headerBlurDataUrl,
+			shortBio: BrandKits.shortBio,
+			longBio: BrandKits.longBio,
+			location: BrandKits.location,
+			color1: BrandKits.color1,
+			color2: BrandKits.color2,
+			color3: BrandKits.color3,
+			bioColorScheme: BrandKits.bioColorScheme,
+			cartColorScheme: BrandKits.cartColorScheme,
+			createdAt: BrandKits.createdAt,
+			updatedAt: BrandKits.updatedAt,
+			// Workspace fields
+			workspaceName: Workspaces.name,
+			workspaceHandle: Workspaces.handle,
+		})
 		.from(BrandKits)
+		.leftJoin(Workspaces, eq(Workspaces.id, BrandKits.workspaceId))
 		.where(eq(BrandKits.handle, handle))
 		.limit(1)
 		.$withCache();
 
-	return brandKit ?? null;
+	const brandKit = brandKitResults[0];
+
+	if (!brandKit) {
+		return null;
+	}
+
+	// Transform to match expected nested structure
+	const { workspaceName, workspaceHandle, ...brandKitData } = brandKit;
+
+	if (!workspaceName || !workspaceHandle) {
+		return null;
+	}
+	return {
+		...brandKitData,
+		workspace:
+			workspaceName && workspaceHandle ?
+				{
+					name: workspaceName,
+					handle: workspaceHandle,
+				}
+			:	undefined,
+	};
 }
 
 export async function getValidatedCartBrandKit({

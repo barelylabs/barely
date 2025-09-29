@@ -2,7 +2,7 @@
 
 import type { BioBlockContext } from 'node_modules/@barely/ui/src/bio/contexts/bio-context';
 import React, { Suspense } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useWorkspace } from '@barely/hooks';
 import { useSuspenseQuery } from '@tanstack/react-query';
 
@@ -66,7 +66,7 @@ function AppBioProvider({
 	);
 }
 
-function AppBioBlocks() {
+function AppBioBlocks({ targetBlockId }: { targetBlockId?: string }) {
 	const trpc = useTRPC();
 	const { bio } = useBioContext();
 
@@ -74,13 +74,17 @@ function AppBioBlocks() {
 		trpc.bio.blocksByHandleAndKey.queryOptions({ handle: bio.handle, key: bio.key }),
 	);
 
-	return <BioBlocksRender blocks={blocks} />;
+	return <BioBlocksRender blocks={blocks} targetBlockId={targetBlockId} />;
 }
 
 export function AppBioRender({ bioKey: bioKeyProp }: { bioKey?: string }) {
 	// Use query state if bioKey not provided as prop
 	const { bioKey: bioKeyFromQuery } = useBioQueryState();
 	const bioKey = bioKeyProp ?? bioKeyFromQuery;
+
+	// Get blockId from URL search params for auto-scroll functionality
+	const searchParams = useSearchParams();
+	const targetBlockId = searchParams.get('blockId') ?? undefined;
 
 	// Wrap in phone frame - we're in the app, so this is a preview.
 	return (
@@ -93,7 +97,7 @@ export function AppBioRender({ bioKey: bioKeyProp }: { bioKey?: string }) {
 				<Suspense fallback={<div className='h-full w-full animate-pulse bg-gray-100' />}>
 					<AppBioProvider bioKey={bioKey}>
 						<BioContentAroundBlocks>
-							<AppBioBlocks />
+							<AppBioBlocks targetBlockId={targetBlockId} />
 						</BioContentAroundBlocks>
 					</AppBioProvider>
 				</Suspense>

@@ -576,7 +576,7 @@ export const bioRoute = {
 			]),
 		)
 		.mutation(async ({ input, ctx }) => {
-			const { bioId, ...blockData } = input;
+			const { bioId, prevBlockId, nextBlockId, ...blockData } = input;
 
 			// Sanitize markdown content for blocks that contain it
 			let sanitizedBlockData = blockData;
@@ -652,16 +652,50 @@ export const bioRoute = {
 				if (!cartFunnel) raiseTRPCError({ message: 'Cart funnel not found' });
 			}
 
-			// Get the last block's lexoRank to generate next rank
-			const lastBlock = await dbHttp.query._BioBlocks_To_Bios.findFirst({
-				where: eq(_BioBlocks_To_Bios.bioId, bioId),
-				orderBy: [desc(_BioBlocks_To_Bios.lexoRank)],
-			});
+			// Generate lexoRank based on position hints or append at end
+			let lexoRank: string;
 
-			const lexoRank = generateLexoRank({
-				prev: lastBlock?.lexoRank ?? null,
-				next: null,
-			});
+			if (prevBlockId || nextBlockId) {
+				// Insert at specific position
+				let prevRank: string | null = null;
+				let nextRank: string | null = null;
+
+				if (prevBlockId) {
+					const prevBlock = await dbHttp.query._BioBlocks_To_Bios.findFirst({
+						where: and(
+							eq(_BioBlocks_To_Bios.bioId, bioId),
+							eq(_BioBlocks_To_Bios.bioBlockId, prevBlockId),
+						),
+					});
+					prevRank = prevBlock?.lexoRank ?? null;
+				}
+
+				if (nextBlockId) {
+					const nextBlock = await dbHttp.query._BioBlocks_To_Bios.findFirst({
+						where: and(
+							eq(_BioBlocks_To_Bios.bioId, bioId),
+							eq(_BioBlocks_To_Bios.bioBlockId, nextBlockId),
+						),
+					});
+					nextRank = nextBlock?.lexoRank ?? null;
+				}
+
+				lexoRank = generateLexoRank({
+					prev: prevRank,
+					next: nextRank,
+				});
+			} else {
+				// Append at the end (existing behavior)
+				const lastBlock = await dbHttp.query._BioBlocks_To_Bios.findFirst({
+					where: eq(_BioBlocks_To_Bios.bioId, bioId),
+					orderBy: [desc(_BioBlocks_To_Bios.lexoRank)],
+				});
+
+				lexoRank = generateLexoRank({
+					prev: lastBlock?.lexoRank ?? null,
+					next: null,
+				});
+			}
 
 			const blockId = newId('bioBlock');
 

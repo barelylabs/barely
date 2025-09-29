@@ -541,6 +541,27 @@ function BioTwoPanelPageInner({ blockId }: { blockId: string }) {
 	const maxCharacters = 5000;
 	const isOverLimit = characterCount > maxCharacters;
 
+	// Track unsaved changes
+	// const hasUnsavedChanges =
+	// 	markdown !== originalMarkdown ||
+	// 	editTitle !== originalTitle ||
+	// 	editSubtitle !== originalSubtitle ||
+	// 	ctaText !== originalCtaText;
+
+	// Handle tab change with unsaved changes warning
+	const handleTabChange = (newTab: string) => {
+		if (hasUnsavedChanges && activeTab === 'content') {
+			const confirmMessage =
+				'You have unsaved changes. Do you want to save them before switching tabs?';
+			const result = window.confirm(confirmMessage);
+			if (result) {
+				// Save changes before switching
+				handleSaveContent();
+			}
+		}
+		setActiveTab(newTab);
+	};
+
 	// Validation
 	const isCtaIncomplete =
 		ctaText &&
@@ -622,7 +643,7 @@ function BioTwoPanelPageInner({ blockId }: { blockId: string }) {
 			</div>
 
 			{/* Tabs */}
-			<Tabs value={activeTab} onValueChange={setActiveTab} className='w-full'>
+			<Tabs value={activeTab} onValueChange={handleTabChange} className='w-full'>
 				<TabsList className='grid w-full grid-cols-3'>
 					<TabsTrigger value='image'>
 						<Image className='mr-2 h-4 w-4' />
@@ -693,66 +714,68 @@ function BioTwoPanelPageInner({ blockId }: { blockId: string }) {
 									</Button>
 								)}
 
-								<Tabs
-									value={uploadTab}
-									onValueChange={value => setUploadTab(uploadTabSchema.parse(value))}
-									className='w-full'
-								>
-									<TabsList className='grid w-full grid-cols-2'>
-										<TabsTrigger value='upload' disabled={isProcessing}>
-											Upload New
-										</TabsTrigger>
-										<TabsTrigger value='library' disabled={isProcessing}>
-											Media Library
-										</TabsTrigger>
-									</TabsList>
+								<div className='rounded-lg border border-gray-200 bg-gray-50/50 p-4'>
+									<Tabs
+										value={uploadTab}
+										onValueChange={value => setUploadTab(uploadTabSchema.parse(value))}
+										className='w-full'
+									>
+										<TabsList className='grid w-full grid-cols-2 bg-muted/70'>
+											<TabsTrigger value='upload' disabled={isProcessing}>
+												Upload New
+											</TabsTrigger>
+											<TabsTrigger value='library' disabled={isProcessing}>
+												Media Library
+											</TabsTrigger>
+										</TabsList>
 
-									<TabsContent value='upload' className='mt-6'>
-										<UploadDropzone
-											{...imageUploadState}
-											title={
-												hasImage && showReplaceImage ?
-													'Drop a new image here to replace'
-												:	'Drop image here or click to browse'
-											}
-											imagePreviewSrc={uploadPreviewImage}
-											existingImageS3Key={undefined}
-											className='min-h-[400px] w-full'
-										/>
-										{uploadPreviewImage && isProcessing && (
-											<div className='mt-4 space-y-2 rounded-lg bg-blue-50 p-3'>
-												<p className='text-center text-sm font-medium text-blue-700'>
-													{uploadingImage ?
-														`Uploading to storage... ${uploadProgress}%`
-													:	'Processing image...'}
-												</p>
-												{uploadingImage && uploadProgress > 0 && (
-													<div className='h-2 w-full overflow-hidden rounded-full bg-blue-200'>
-														<div
-															className='h-full bg-blue-600 transition-all duration-300'
-															style={{ width: `${uploadProgress}%` }}
-														/>
-													</div>
-												)}
-											</div>
-										)}
-									</TabsContent>
-
-									<TabsContent value='library' className='mt-6'>
-										<div className='min-h-[400px]'>
-											<SelectableMedia
-												selectionMode='single'
-												unavailableFiles={[]}
-												onSelect={handleMediaSelect}
+										<TabsContent value='upload' className='mt-4'>
+											<UploadDropzone
+												{...imageUploadState}
+												title={
+													hasImage && showReplaceImage ?
+														'Drop a new image here to replace'
+													:	'Drop image here or click to browse'
+												}
+												imagePreviewSrc={uploadPreviewImage}
+												existingImageS3Key={undefined}
+												className='min-h-[400px] w-full'
 											/>
-										</div>
-										<div className='mt-4 rounded-lg bg-gray-50 p-3 text-center'>
-											<p className='text-sm text-gray-600'>
-												Click an image to select and save automatically
-											</p>
-										</div>
-									</TabsContent>
-								</Tabs>
+											{uploadPreviewImage && isProcessing && (
+												<div className='mt-4 space-y-2 rounded-lg bg-blue-50 p-3'>
+													<p className='text-center text-sm font-medium text-blue-700'>
+														{uploadingImage ?
+															`Uploading to storage... ${uploadProgress}%`
+														:	'Processing image...'}
+													</p>
+													{uploadingImage && uploadProgress > 0 && (
+														<div className='h-2 w-full overflow-hidden rounded-full bg-blue-200'>
+															<div
+																className='h-full bg-blue-600 transition-all duration-300'
+																style={{ width: `${uploadProgress}%` }}
+															/>
+														</div>
+													)}
+												</div>
+											)}
+										</TabsContent>
+
+										<TabsContent value='library' className='mt-4'>
+											<div className='min-h-[400px]'>
+												<SelectableMedia
+													selectionMode='single'
+													unavailableFiles={[]}
+													onSelect={handleMediaSelect}
+												/>
+											</div>
+											<div className='mt-4 rounded-lg bg-white p-3 text-center'>
+												<p className='text-sm text-gray-600'>
+													Click an image to select and save automatically
+												</p>
+											</div>
+										</TabsContent>
+									</Tabs>
+								</div>
 							</div>
 						)}
 					</div>
@@ -833,6 +856,33 @@ function BioTwoPanelPageInner({ blockId }: { blockId: string }) {
 								{maxCharacters.toLocaleString()}
 							</Text>
 						)}
+
+						{/* Save/Cancel buttons for content changes */}
+						{hasUnsavedChanges && (
+							<div className='mt-4 flex items-center justify-between border-t pt-4'>
+								<Text variant='sm/normal' className='text-amber-600'>
+									You have unsaved changes
+								</Text>
+								<div className='flex gap-2'>
+									<Button
+										onClick={handleCancelChanges}
+										size='sm'
+										look='outline'
+										disabled={isProcessing}
+									>
+										Cancel
+									</Button>
+									<Button
+										onClick={handleSaveContent}
+										size='sm'
+										look='primary'
+										disabled={!!isProcessing || !!isCtaIncomplete}
+									>
+										Save Changes
+									</Button>
+								</div>
+							</div>
+						)}
 					</div>
 
 					{/* Call to Action */}
@@ -879,15 +929,22 @@ function BioTwoPanelPageInner({ blockId }: { blockId: string }) {
 												targetCartFunnelId: null,
 											});
 											break;
-										case 'cart':
+										case 'cart': {
 											// Clear URL and bio references when switching to cart
+											// Auto-select first cart funnel if available
+											const firstFunnelId = cartFunnels?.cartFunnels[0]?.id;
+											if (firstFunnelId) {
+												setCtaCartFunnelId(firstFunnelId);
+											}
 											updateBlock({
 												handle,
 												id: blockId,
 												targetUrl: null,
 												targetBioId: null,
+												targetCartFunnelId: firstFunnelId ?? null,
 											});
 											break;
+										}
 									}
 								}}
 							>

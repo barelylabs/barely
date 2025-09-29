@@ -775,13 +775,24 @@ export function BioCartPage({ handle, blockId }: BioCartPageProps) {
 								Additional configuration options for your cart block.
 							</Text>
 
-							{/* Placeholder for future settings */}
-							<Card className='p-6 text-center'>
-								<Settings className='mx-auto mb-3 h-12 w-12 text-gray-400' />
-								<Text variant='sm/normal' className='text-gray-500'>
-									No additional settings available for cart blocks yet.
-								</Text>
-							</Card>
+							{/* Style as Button Toggle */}
+							<div className='space-y-4'>
+								<div className='flex items-center justify-between rounded-lg border p-4'>
+									<div className='space-y-1'>
+										<label className='text-sm font-medium'>Style as Button</label>
+										<Text variant='xs/normal' className='text-gray-500'>
+											Show only the checkout button without product details. Perfect for
+											minimal designs or when product details are shown elsewhere.
+										</Text>
+									</div>
+									<Switch
+										checked={block.styleAsButton ?? false}
+										onCheckedChange={checked =>
+											updateBlock({ handle, id: blockId, styleAsButton: checked })
+										}
+									/>
+								</div>
+							</div>
 						</div>
 					</div>
 				</TabsContent>

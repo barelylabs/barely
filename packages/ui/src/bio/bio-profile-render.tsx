@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { cn, getComputedStyles } from '@barely/utils';
+import { MapPin } from 'lucide-react';
 
 import { Img } from '../elements/img';
 import { useBioContext } from './contexts/bio-context';
@@ -25,7 +26,7 @@ export function BioProfileRender() {
 
 		return (
 			<Img
-				alt={bio.handle}
+				alt={brandKit.workspace?.name ?? bio.handle}
 				s3Key={brandKit.avatarS3Key}
 				blurDataURL={brandKit.avatarBlurDataUrl ?? undefined}
 				className='h-full w-full object-cover'
@@ -43,6 +44,7 @@ export function BioProfileRender() {
 	}, [
 		brandKit.avatarS3Key,
 		brandKit.avatarBlurDataUrl,
+		brandKit.workspace?.name,
 		bio.handle,
 		isLeftStyle,
 		isCenteredStyle,
@@ -72,7 +74,11 @@ export function BioProfileRender() {
 				{!isHeroStyle && !!AvatarImage && (
 					<div
 						className={cn(
-							'overflow-hidden rounded-full bg-muted',
+							'overflow-hidden bg-muted',
+							bio.imgShape === 'circle' && 'rounded-full',
+							bio.imgShape === 'square' && 'rounded-none',
+							bio.imgShape === 'rounded' && 'rounded-lg',
+							!bio.imgShape && 'rounded-full', // default to circle if not set
 							isLeftStyle && 'h-16 w-16',
 							isCenteredStyle && 'mx-auto mb-4 h-24 w-24',
 						)}
@@ -92,7 +98,7 @@ export function BioProfileRender() {
 							fontFamily: computedStyles.fonts.headingFont,
 						}}
 					>
-						{bio.handle}
+						{brandKit.workspace?.name ?? bio.handle}
 					</h1>
 
 					{brandKit.shortBio && (
@@ -104,6 +110,25 @@ export function BioProfileRender() {
 						>
 							{brandKit.shortBio}
 						</p>
+					)}
+					{bio.showLocation && brandKit.location && (
+						<div
+							className={cn(
+								'mt-2 flex items-center gap-1',
+								(isHeroStyle || isCenteredStyle) && 'justify-center',
+								isLeftStyle && 'justify-start',
+							)}
+						>
+							<MapPin className='h-3 w-3 text-brandKit-text opacity-60' />
+							<p
+								className='text-xs font-normal text-brandKit-text opacity-60'
+								style={{
+									fontFamily: computedStyles.fonts.bodyFont,
+								}}
+							>
+								{brandKit.location}
+							</p>
+						</div>
 					)}
 				</div>
 			</div>

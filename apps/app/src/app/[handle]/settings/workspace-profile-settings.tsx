@@ -7,6 +7,7 @@ import type { MDXEditorMethods } from '@barely/ui/mdx-editor';
 import type { workspaceTypeSchema } from '@barely/validators';
 import type { z } from 'zod/v4';
 import { useCallback, useRef } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import {
 	useUpdateWorkspace,
 	useUpload,
@@ -14,8 +15,9 @@ import {
 	useWorkspaceWithAll,
 	useZodForm,
 } from '@barely/hooks';
-import { updateWorkspaceSchema } from '@barely/validators';
+import { updateWorkspaceHandleSchema, updateWorkspaceSchema } from '@barely/validators';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { TRPCError } from '@trpc/server';
 import { atom } from 'jotai';
 import HuePicker from 'simple-hue-picker/react';
 import { toast } from 'sonner';
@@ -72,29 +74,111 @@ export function DisplayOrWorkspaceNameForm() {
 }
 
 export function HandleForm() {
-	// const { form, onSubmit, isPersonal } = useWorkspaceUpdateForm({
-	// 	updateKeys: ['handle'],
-	// });
-
 	const { workspace, isPersonal } = useWorkspace();
+	const router = useRouter();
+	const pathname = usePathname();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
 
 	const form = useZodForm({
-		schema: updateWorkspaceSchema,
+		schema: updateWorkspaceHandleSchema,
 		values: {
-			id: workspace.id,
-			handle: workspace.handle,
+			newHandle: workspace.handle,
 		},
 		resetOptions: { keepDirtyValues: true },
 	});
 
-	const { updateWorkspace } = useUpdateWorkspace({
-		onSuccess: () => form.reset(),
-	});
+	const { mutateAsync: updateHandle } = useMutation(
+		trpc.workspace.updateHandle.mutationOptions({
+			onMutate: async ({ newHandle }) => {
+				// Cancel any in-flight queries
+				await queryClient.cancelQueries(trpc.workspace.byHandle.pathFilter());
+				await queryClient.cancelQueries(trpc.workspace.byHandleWithAll.pathFilter());
 
-	const onSubmit = async (data: z.infer<typeof updateWorkspaceSchema>) => {
-		await updateWorkspace({
-			...data,
+				// Save current workspace data for rollback
+				const previousWorkspace = queryClient.getQueryData(
+					trpc.workspace.byHandle.queryKey({ handle: workspace.handle }),
+				);
+				const previousWorkspaceWithAll = queryClient.getQueryData(
+					trpc.workspace.byHandleWithAll.queryKey({ handle: workspace.handle }),
+				);
+
+				// Optimistically update the workspace with new handle
+				const updatedWorkspace = { ...workspace, handle: newHandle };
+
+				// Update cache for the new handle
+				queryClient.setQueryData(
+					trpc.workspace.byHandle.queryKey({ handle: newHandle }),
+					updatedWorkspace,
+				);
+
+				// Also update the byHandleWithAll cache if it exists
+				if (previousWorkspaceWithAll) {
+					queryClient.setQueryData(
+						trpc.workspace.byHandleWithAll.queryKey({ handle: newHandle }),
+						{ ...previousWorkspaceWithAll, handle: newHandle },
+					);
+				}
+
+				return {
+					previousWorkspace,
+					previousWorkspaceWithAll,
+					oldHandle: workspace.handle,
+				};
+			},
+			onSuccess: async (data, _variables, context) => {
+				// Redirect to new URL with updated handle
+				const newPath = pathname.replace(`/${context.oldHandle}/`, `/${data.newHandle}/`);
+				router.push(newPath);
+
+				// Invalidate queries to ensure fresh data
+				await queryClient.invalidateQueries(
+					trpc.workspace.byHandle.queryFilter({ handle: data.newHandle }),
+				);
+				await queryClient.invalidateQueries(
+					trpc.workspace.byHandleWithAll.queryFilter({ handle: data.newHandle }),
+				);
+
+				// Reset form after cache is updated
+				form.reset({ newHandle: data.newHandle });
+			},
+			onError: (error, _variables, context) => {
+				// Rollback optimistic update on error
+				if (context?.previousWorkspace && context.oldHandle) {
+					queryClient.setQueryData(
+						trpc.workspace.byHandle.queryKey({ handle: context.oldHandle }),
+						context.previousWorkspace,
+					);
+				}
+				if (context?.previousWorkspaceWithAll && context.oldHandle) {
+					queryClient.setQueryData(
+						trpc.workspace.byHandleWithAll.queryKey({ handle: context.oldHandle }),
+						context.previousWorkspaceWithAll,
+					);
+				}
+
+				if (error instanceof TRPCError) {
+					toast.error(error.message);
+				}
+			},
+		}),
+	);
+
+	const onSubmit = async (data: z.infer<typeof updateWorkspaceHandleSchema>) => {
+		// Only show confirmation if handle is actually changing
+		if (data.newHandle !== workspace.handle) {
+			if (
+				!window.confirm(
+					'Warning: Changing your workspace handle will change the URL for any active links, bios, or FM pages. Are you sure you want to continue?',
+				)
+			) {
+				return;
+			}
+		}
+
+		await updateHandle({
 			handle: workspace.handle,
+			...data,
 		});
 	};
 
@@ -111,26 +195,44 @@ export function HandleForm() {
 			disableSubmit={!form.formState.isDirty}
 			formHint='Only lowercase letters, numbers, and underscores are allowed.'
 		>
-			<TextField label='' control={form.control} name='handle' />
+			<TextField label='' control={form.control} name='newHandle' />
 
 			{!isPersonal && (
 				<div className='flex flex-col gap-1'>
 					<div className='flex flex-row items-center gap-2 text-muted-foreground'>
 						<Icon.bio className='h-3 w-3' />
 						<Text variant='sm/normal' muted>
-							{form.watch('handle')}.barely.bio
+							barely.bio/{form.watch('newHandle')}
 						</Text>
 					</div>
 					<div className='flex flex-row items-center gap-2 text-muted-foreground'>
-						<Icon.newspaper className='h-3 w-3' />
+						<Icon.fm className='h-3 w-3' />
 						<Text variant='sm/normal' muted>
-							{form.watch('handle')}.barely.press
+							barely.fm/{form.watch('newHandle')}
 						</Text>
 					</div>
 					<div className='flex flex-row items-center gap-2 text-muted-foreground'>
-						<Icon.link className='h-3 w-3' />
+						<Icon.landingPage className='h-3 w-3' />
 						<Text variant='sm/normal' muted>
-							{form.watch('handle')}.barely.link/transparent-link
+							barely.page/{form.watch('newHandle')}
+						</Text>
+					</div>
+					<div className='flex flex-row items-center gap-2 text-muted-foreground'>
+						<Icon.press className='h-3 w-3' />
+						<Text variant='sm/normal' muted>
+							barely.press/{form.watch('newHandle')}
+						</Text>
+					</div>
+					<div className='flex flex-row items-center gap-2 text-muted-foreground'>
+						<Icon.vip className='h-3 w-3' />
+						<Text variant='sm/normal' muted>
+							barely.vip/{form.watch('newHandle')}
+						</Text>
+					</div>
+					<div className='flex flex-row items-center gap-2 text-muted-foreground'>
+						<Icon.cart className='h-3 w-3' />
+						<Text variant='sm/normal' muted>
+							barelycart.com/{form.watch('newHandle')}
 						</Text>
 					</div>
 				</div>
@@ -217,9 +319,14 @@ export function WorkspaceAvatarForm() {
 				handle: workspace.handle,
 				avatarFileId: fileRecord.id,
 			});
-			await queryClient.invalidateQueries({
-				queryKey: trpc.workspace.byHandle.queryKey(),
-			});
+			await Promise.all([
+				queryClient.invalidateQueries({
+					queryKey: trpc.workspace.byHandle.queryKey(),
+				}),
+				queryClient.invalidateQueries({
+					queryKey: trpc.brandKit.current.queryKey(),
+				}),
+			]);
 		},
 		[updateWorkspaceAvatar, queryClient, trpc, workspace.handle],
 	);

@@ -398,9 +398,15 @@ function CustomColorPicker({
 	};
 
 	// Convert OKLCH colors to hex for the color picker
-	// Only use colorScheme if appearancePreset is 'custom', otherwise use defaults
+	// Use existing brand colors if available, otherwise use colorScheme if custom, otherwise defaults
 	const initialColors =
-		colorPreset === 'custom' && colorScheme ?
+		color1 && color2 && color3 ?
+			([oklchToHex(color1), oklchToHex(color2), oklchToHex(color3)] as [
+				string,
+				string,
+				string,
+			])
+		: colorPreset === 'custom' && colorScheme ?
 			(colorScheme.colors.map(c => oklchToHex(c)) as [string, string, string])
 		:	(['#F97316', '#8B5CF6', '#06B6D4'] as [string, string, string]); // Default brand colors
 

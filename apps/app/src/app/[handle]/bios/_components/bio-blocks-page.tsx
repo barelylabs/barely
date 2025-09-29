@@ -3,7 +3,7 @@
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import type { BioBlockType } from '@barely/const';
 import type { DragEndEvent } from '@dnd-kit/core';
-import { useCallback, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import { useWorkspace } from '@barely/hooks';
 import { cn } from '@barely/utils';
 import {
@@ -154,6 +154,41 @@ function useDragReorderBlocks({
 	};
 }
 
+// Placeholder block component - shows while creating
+function PlaceholderBlock() {
+	return (
+		<Card className='animate-pulse overflow-hidden opacity-50'>
+			<div className='flex items-center justify-between'>
+				<div className='flex items-center gap-3'>
+					<div className='h-5 w-5 rounded bg-gray-200' />
+					<div className='h-10 w-10 rounded-lg bg-gray-200' />
+					<div className='h-5 w-32 rounded bg-gray-200' />
+				</div>
+				<div className='flex items-center gap-2'>
+					<div className='h-6 w-11 rounded-full bg-gray-200' />
+					<div className='h-8 w-8 rounded bg-gray-200' />
+				</div>
+			</div>
+		</Card>
+	);
+}
+
+// Insert Block Button Component - appears between blocks
+function InsertBlockButton({ onClick, show }: { onClick: () => void; show: boolean }) {
+	return (
+		<button
+			type='button'
+			onClick={onClick}
+			className={cn(
+				'flex h-6 w-6 items-center justify-center rounded-full border border-gray-300 bg-white shadow-sm transition-all hover:scale-110 hover:border-gray-400 hover:shadow-md',
+				show ? 'opacity-100' : 'pointer-events-none opacity-0',
+			)}
+		>
+			<Plus className='h-4 w-4 text-gray-400' />
+		</button>
+	);
+}
+
 // Sortable Block Component
 function SortableBlock({
 	block,
@@ -202,7 +237,7 @@ function SortableBlock({
 	};
 
 	return (
-		<div ref={setNodeRef} style={style}>
+		<div ref={setNodeRef} style={style} id={`block-${block.id}`}>
 			<Card className='overflow-hidden'>
 				<div className='flex items-center justify-between'>
 					<div className='flex items-center gap-3'>
@@ -299,9 +334,19 @@ function SortableBlock({
 									{block.links.length} {block.links.length === 1 ? 'link' : 'links'}
 								</Text>
 							)}
-							{block.type === 'markdown' && block.title && (
+							{block.type === 'markdown' && (
 								<Text variant='sm/normal' className='text-gray-500'>
-									{block.title}
+									{block.title ??
+										(() => {
+											// Strip markdown formatting and truncate
+											const plainText = (block.markdown ?? '')
+												.replace(/[#*`[\]()]/g, '') // Remove common markdown characters
+												.replace(/\n/g, ' ') // Replace newlines with spaces
+												.trim();
+											return plainText.length > 50 ?
+													`${plainText.substring(0, 50)}...`
+												:	plainText || 'Empty markdown block';
+										})()}
 								</Text>
 							)}
 							{block.type === 'image' && block.imageCaption && (
@@ -452,6 +497,12 @@ export function BioBlocksPage({ bioKey }: { bioKey: string }) {
 	const { handle } = useWorkspace();
 	const queryClient = useQueryClient();
 	const [addBlockModalOpen, setAddBlockModalOpen] = useState(false);
+	const [newBlockId, setNewBlockId] = useState<string | null>(null);
+	const [hoveredGapIndex, setHoveredGapIndex] = useState<number | null>(null);
+	const [insertAtIndex, setInsertAtIndex] = useState<number | null>(null);
+	const [isCreatingBlockAtIndex, setIsCreatingBlockAtIndex] = useState<number | null>(
+		null,
+	);
 
 	// DnD sensors
 	const sensors = useSensors(
@@ -499,10 +550,22 @@ export function BioBlocksPage({ bioKey }: { bioKey: string }) {
 	// Mutations
 	const createBlockMutation = useMutation(
 		trpc.bio.createBlock.mutationOptions({
+			onSuccess: data => {
+				// Capture the new block ID for scrolling
+
+				if (!data) return;
+				setNewBlockId(data.id);
+			},
 			onSettled: () => {
+				// Clear the creating state
+				setIsCreatingBlockAtIndex(null);
 				// Invalidate and refetch to get the real data with proper ID and lexoRank
 				void queryClient.invalidateQueries({ queryKey: bioQueryKey });
 				void queryClient.invalidateQueries({ queryKey: blocksQueryKey });
+			},
+			onError: () => {
+				// Clear the creating state on error
+				setIsCreatingBlockAtIndex(null);
 			},
 		}),
 	);
@@ -543,66 +606,70 @@ export function BioBlocksPage({ bioKey }: { bioKey: string }) {
 		}),
 	);
 
-	const handleAddBlock = (type: BioBlockType) => {
+	const handleAddBlock = (type: BioBlockType, atIndex?: number) => {
+		// Set the creating state to show placeholder
+		if (atIndex !== undefined) {
+			setIsCreatingBlockAtIndex(atIndex);
+		}
+
+		// Calculate prevBlockId and nextBlockId based on insertion position
+		const baseData = {
+			handle,
+			bioId: bio.id,
+			enabled: true,
+			// If atIndex is provided, calculate neighboring blocks for proper insertion
+			prevBlockId:
+				atIndex !== undefined && atIndex > 0 ? blocks[atIndex - 1]?.id : undefined,
+			nextBlockId: atIndex !== undefined ? blocks[atIndex]?.id : undefined,
+		};
+
 		switch (type) {
 			case 'links':
 				createBlockMutation.mutate({
-					handle,
-					bioId: bio.id,
+					...baseData,
 					type: 'links',
-					enabled: true,
 				});
 				break;
 			case 'contactForm':
 				createBlockMutation.mutate({
-					handle,
-					bioId: bio.id,
+					...baseData,
 					type: 'contactForm',
-					enabled: true,
 				});
 				break;
 			case 'markdown':
 				createBlockMutation.mutate({
-					handle,
-					bioId: bio.id,
+					...baseData,
 					type: 'markdown',
 					markdown: '',
-					enabled: true,
 				});
 				break;
 			case 'image':
 				createBlockMutation.mutate({
-					handle,
-					bioId: bio.id,
+					...baseData,
 					type: 'image',
 					imageFileId: null,
 					imageCaption: null,
 					imageAltText: null,
-					enabled: true,
 				});
 				break;
 			case 'twoPanel':
 				createBlockMutation.mutate({
-					handle,
-					bioId: bio.id,
+					...baseData,
 					type: 'twoPanel',
 					title: '',
 					markdown: '',
 					imageFileId: null,
 					imageMobileSide: 'top',
 					imageDesktopSide: 'left',
-					enabled: true,
 				});
 				break;
 			case 'cart':
 				createBlockMutation.mutate({
-					handle,
-					bioId: bio.id,
+					...baseData,
 					type: 'cart',
 					title: null,
 					subtitle: null,
 					targetCartFunnelId: null,
-					enabled: true,
 				});
 				break;
 			case 'fm':
@@ -611,6 +678,7 @@ export function BioBlocksPage({ bioKey }: { bioKey: string }) {
 				break; // not supported yet
 		}
 		setAddBlockModalOpen(false);
+		setInsertAtIndex(null);
 	};
 
 	const { mutate: mutateShowHeader } = useMutation(
@@ -680,21 +748,42 @@ export function BioBlocksPage({ bioKey }: { bioKey: string }) {
 		blocksQueryKey,
 	});
 
+	// Auto-scroll to newly created blocks
+	useEffect(() => {
+		if (newBlockId && blocks.some(b => b.id === newBlockId)) {
+			// Small delay to allow DOM to update
+			setTimeout(() => {
+				const element = document.getElementById(`block-${newBlockId}`);
+				if (element) {
+					element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+					// Add highlight animation
+					element.classList.add('animate-highlight');
+					setTimeout(() => {
+						element.classList.remove('animate-highlight');
+					}, 2000);
+				}
+				setNewBlockId(null);
+			}, 100);
+		}
+	}, [blocks, newBlockId]);
+
 	// bio is guaranteed to be defined with useSuspenseQuery
 	return (
-		<div className='space-y-4'>
+		<div className='flex flex-col'>
 			{/* Add Block Button */}
-			<Button
-				onClick={() => setAddBlockModalOpen(true)}
-				size='lg'
-				variant='button'
-				look='primary'
-				fullWidth
-				className='bg-gray-900 hover:bg-gray-800'
-			>
-				<Plus className='mr-2 h-5 w-5' />
-				Add block
-			</Button>
+			<div className='mb-8'>
+				<Button
+					onClick={() => setAddBlockModalOpen(true)}
+					size='lg'
+					variant='button'
+					look='primary'
+					fullWidth
+					className='bg-gray-900 hover:bg-gray-800'
+				>
+					<Plus className='mr-2 h-5 w-5' />
+					Add block
+				</Button>
+			</div>
 
 			{/* Header Block (always present) */}
 			<Card className='overflow-hidden'>
@@ -706,9 +795,14 @@ export function BioBlocksPage({ bioKey }: { bioKey: string }) {
 						<div className='flex h-10 w-10 items-center justify-center rounded-lg bg-gray-900'>
 							<User className='h-5 w-5 text-white' />
 						</div>
-						<Text variant='md/medium' className='font-medium'>
+						<Button
+							href={`/${handle}/bios/header?bioKey=${bioKey}`}
+							variant='button'
+							look='text'
+							className='h-auto p-0 text-left font-medium'
+						>
 							Header
-						</Text>
+						</Button>
 					</div>
 					<div className='flex items-center gap-2'>
 						<Switch checked={bio.showHeader} onCheckedChange={handleToggleHeader} />
@@ -741,25 +835,75 @@ export function BioBlocksPage({ bioKey }: { bioKey: string }) {
 					items={displayBlocks.map(b => b.id)}
 					strategy={verticalListSortingStrategy}
 				>
-					{displayBlocks.map(block => (
-						<SortableBlock
-							key={block.id}
-							block={block}
-							handle={handle}
-							bioKey={bioKey}
-							onToggle={handleToggleBlock}
-							onDelete={handleDeleteBlock}
-							onRename={handleRenameBlock}
-						/>
+					{displayBlocks.map((block, index) => (
+						<Fragment key={block.id}>
+							{/* Insert button above each block */}
+							{isCreatingBlockAtIndex === index ?
+								<PlaceholderBlock />
+							:	<div
+									className='relative flex h-8 items-center justify-center'
+									onMouseEnter={() => setHoveredGapIndex(index)}
+									onMouseLeave={() => setHoveredGapIndex(null)}
+								>
+									<InsertBlockButton
+										show={hoveredGapIndex === index}
+										onClick={() => {
+											setInsertAtIndex(index);
+											setAddBlockModalOpen(true);
+										}}
+									/>
+								</div>
+							}
+
+							{/* The actual block */}
+							<SortableBlock
+								block={block}
+								handle={handle}
+								bioKey={bioKey}
+								onToggle={handleToggleBlock}
+								onDelete={handleDeleteBlock}
+								onRename={handleRenameBlock}
+							/>
+						</Fragment>
 					))}
+
+					{/* Insert button at the very bottom */}
+					{isCreatingBlockAtIndex === displayBlocks.length ?
+						<PlaceholderBlock />
+					:	<div
+							className='relative flex h-8 items-center justify-center'
+							onMouseEnter={() => setHoveredGapIndex(displayBlocks.length)}
+							onMouseLeave={() => setHoveredGapIndex(null)}
+						>
+							<InsertBlockButton
+								show={hoveredGapIndex === displayBlocks.length}
+								onClick={() => {
+									setInsertAtIndex(displayBlocks.length);
+									setAddBlockModalOpen(true);
+								}}
+							/>
+						</div>
+					}
 				</SortableContext>
 			</DndContext>
+
+			{/* Add Block Button - Dashed Border Style */}
+			<div>
+				<button
+					type='button'
+					onClick={() => setAddBlockModalOpen(true)}
+					className='flex h-14 w-full items-center justify-center rounded-lg border-2 border-dashed border-gray-300 transition-colors hover:border-gray-400 hover:bg-gray-50'
+				>
+					<Plus className='mr-2 h-5 w-5 text-gray-400' />
+					<span className='text-sm font-medium text-gray-500'>Add block</span>
+				</button>
+			</div>
 
 			{/* Add Block Modal */}
 			<AddBlockModal
 				open={addBlockModalOpen}
 				onOpenChange={setAddBlockModalOpen}
-				onAddBlock={handleAddBlock}
+				onAddBlock={type => handleAddBlock(type, insertAtIndex ?? undefined)}
 			/>
 		</div>
 	);

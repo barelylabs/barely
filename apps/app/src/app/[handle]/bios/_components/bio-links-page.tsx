@@ -230,8 +230,10 @@ function SortableLink({
 
 	const [localTitle, setLocalTitle] = useState(link.text);
 	const [localUrl, setLocalUrl] = useState(link.url ?? '');
+	const [localSubtitle, setLocalSubtitle] = useState(link.subtitle ?? '');
 	const [originalTitle, setOriginalTitle] = useState(link.text);
 	const [originalUrl, setOriginalUrl] = useState(link.url);
+	const [originalSubtitle, setOriginalSubtitle] = useState(link.subtitle);
 	const [showAnimationPopover, setShowAnimationPopover] = useState(false);
 	const [showSchedulePopover, setShowSchedulePopover] = useState(false);
 	const [showImageModal, setShowImageModal] = useState(false);
@@ -263,6 +265,12 @@ function SortableLink({
 		setLocalUrl(e.target.value);
 	};
 
+	// Handle subtitle change
+	const handleSubtitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setLocalSubtitle(e.target.value);
+		onChange(link.id, { subtitle: e.target.value || null });
+	};
+
 	// Handle blur to trigger mutation
 	const handleTitleBlur = () => {
 		if (localTitle !== originalTitle) {
@@ -278,6 +286,14 @@ function SortableLink({
 			onUpdate(link.id, { url: localUrl });
 			setOriginalUrl(localUrl);
 			toast.success('Link URL updated');
+		}
+	};
+
+	const handleSubtitleBlur = () => {
+		if (localSubtitle !== originalSubtitle) {
+			onUpdate(link.id, { subtitle: localSubtitle || null });
+			setOriginalSubtitle(localSubtitle);
+			toast.success('Link subtitle updated');
 		}
 	};
 
@@ -340,6 +356,14 @@ function SortableLink({
 										autoFocus
 									/>
 								}
+								<Input
+									value={localSubtitle}
+									onChange={handleSubtitleChange}
+									onBlur={handleSubtitleBlur}
+									placeholder='Subtitle (optional)'
+									variant='contentEditable'
+									className='truncate text-sm text-muted-foreground'
+								/>
 							</div>
 							{/* Image slot */}
 							<button
@@ -518,6 +542,7 @@ function SortableLink({
 const addLinkSchema = z.object({
 	text: z.string().min(1, 'Title is required'),
 	url: z.url('Please enter a valid URL'),
+	subtitle: z.string().optional(),
 });
 
 type AddLinkData = z.infer<typeof addLinkSchema>;
@@ -535,6 +560,7 @@ function AddLinkForm({
 		defaultValues: {
 			text: '',
 			url: '',
+			subtitle: '',
 		},
 	});
 
@@ -559,6 +585,12 @@ function AddLinkForm({
 						name='url'
 						type='url'
 						placeholder='https://example.com'
+					/>
+					<TextField
+						control={form.control}
+						name='subtitle'
+						placeholder='Subtitle (optional)'
+						className='text-sm'
 					/>
 					<div className='flex gap-2'>
 						<SubmitButton size='sm'>Add Link</SubmitButton>
@@ -779,12 +811,13 @@ export function BioLinksPage({ handle, blockId }: BioLinksPageProps) {
 		}),
 	);
 
-	const handleAddLink = (data: { text: string; url: string }) => {
+	const handleAddLink = (data: { text: string; url: string; subtitle?: string }) => {
 		createLink({
 			handle,
 			blockId,
 			text: data.text,
 			url: data.url,
+			subtitle: data.subtitle,
 		});
 		setShowAddForm(false);
 	};

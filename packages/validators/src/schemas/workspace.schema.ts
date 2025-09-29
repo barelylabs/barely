@@ -47,6 +47,17 @@ export const updateWorkspaceSpotifyArtistIdSchema = z.object({
 	spotifyArtistId: z.string().nullable(),
 });
 
+export const updateWorkspaceHandleSchema = z.object({
+	newHandle: z
+		.string()
+		.min(3, 'Your workspace handle must be at least 3 characters long')
+		.max(32, 'Your workspace handle must be no more than 32 characters long')
+		.regex(
+			/^[a-zA-Z][a-zA-Z0-9-_]*$/,
+			'Your workspace handle must start with a letter and can only contain letters, numbers, dashes, and underscores',
+		),
+});
+
 // forms
 export const workspaceTypeSchema = insertWorkspaceSchema.shape.type.unwrap();
 

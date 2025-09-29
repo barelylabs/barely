@@ -142,6 +142,8 @@ export const createLinksBlockDataSchema = createInsertSchema(BioBlocks, {
 })
 	.extend({
 		bioId: z.string(), // we need this to join the block to the bio
+		prevBlockId: z.string().optional(), // for insertion position
+		nextBlockId: z.string().optional(), // for insertion position
 	})
 	.omit({
 		id: true,
@@ -160,6 +162,8 @@ export const createContactFormBlockDataSchema = createInsertSchema(BioBlocks, {
 })
 	.extend({
 		bioId: z.string(), // we need this to join the block to the bio
+		prevBlockId: z.string().optional(), // for insertion position
+		nextBlockId: z.string().optional(), // for insertion position
 	})
 	.omit({
 		id: true,
@@ -182,6 +186,8 @@ export const createMarkdownBlockDataSchema = createInsertSchema(BioBlocks, {
 })
 	.extend({
 		bioId: z.string(), // we need this to join the block to the bio
+		prevBlockId: z.string().optional(), // for insertion position
+		nextBlockId: z.string().optional(), // for insertion position
 	})
 	.omit({
 		id: true,
@@ -207,6 +213,8 @@ export const createImageBlockDataSchema = createInsertSchema(BioBlocks, {
 })
 	.extend({
 		bioId: z.string(), // we need this to join the block to the bio
+		prevBlockId: z.string().optional(), // for insertion position
+		nextBlockId: z.string().optional(), // for insertion position
 	})
 	.omit({
 		id: true,
@@ -231,6 +239,8 @@ export const createTwoPanelBlockDataSchema = createInsertSchema(BioBlocks, {
 })
 	.extend({
 		bioId: z.string(), // we need this to join the block to the bio
+		prevBlockId: z.string().optional(), // for insertion position
+		nextBlockId: z.string().optional(), // for insertion position
 	})
 	.omit({
 		id: true,
@@ -279,6 +289,8 @@ export const createCartBlockDataSchema = createInsertSchema(BioBlocks, {
 })
 	.extend({
 		bioId: z.string(), // we need this to join the block to the bio
+		prevBlockId: z.string().optional(), // for insertion position
+		nextBlockId: z.string().optional(), // for insertion position
 	})
 	.omit({
 		id: true,
