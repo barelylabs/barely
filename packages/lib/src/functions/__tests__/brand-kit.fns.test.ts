@@ -200,11 +200,13 @@ describe('brand-kit.fns', () => {
 				leftJoin: vi.fn(),
 				where: vi.fn(),
 				limit: vi.fn(),
-				$withCache: vi.fn().mockResolvedValue([{
-					...mockBrandKit,
-					workspaceName: 'Test Workspace',
-					workspaceHandle: 'test-workspace',
-				}]),
+				$withCache: vi.fn().mockResolvedValue([
+					{
+						...mockBrandKit,
+						workspaceName: 'Test Workspace',
+						workspaceHandle: 'test-workspace',
+					},
+				]),
 			};
 
 			mockSelectBuilder.from.mockReturnValue(mockSelectBuilder);
@@ -413,19 +415,21 @@ describe('brand-kit.fns', () => {
 				where: vi.fn(),
 				limit: vi.fn(),
 				// Simulate cache miss but still returning data from DB
-				$withCache: vi.fn().mockResolvedValue([{
-					...mockBrandKit,
-					shortBio: null,
-					longBio: null,
-					location: null,
-					color1: null,
-					color2: null,
-					color3: null,
-					bioColorScheme: null,
-					cartColorScheme: null,
-					createdAt: new Date(),
-					updatedAt: new Date(),
-				}]),
+				$withCache: vi.fn().mockResolvedValue([
+					{
+						...mockBrandKit,
+						shortBio: null,
+						longBio: null,
+						location: null,
+						color1: null,
+						color2: null,
+						color3: null,
+						bioColorScheme: null,
+						cartColorScheme: null,
+						createdAt: new Date(),
+						updatedAt: new Date(),
+					},
+				]),
 			};
 
 			mockSelectBuilder.from.mockReturnValue(mockSelectBuilder);
