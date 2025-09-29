@@ -9,7 +9,7 @@ export function createMarkdownComponents(computedStyles: ComputedStyles) {
 	return {
 		p: ({ children }: { children?: ReactNode }) => (
 			<p
-				className='mb-4 text-brandKit-text last:mb-0'
+				className='mb-4 text-center text-brandKit-text last:mb-0'
 				style={{
 					fontFamily: computedStyles.fonts.bodyFont,
 				}}
@@ -19,7 +19,7 @@ export function createMarkdownComponents(computedStyles: ComputedStyles) {
 		),
 		h1: ({ children }: { children?: ReactNode }) => (
 			<h1
-				className='mb-4 text-2xl font-bold text-brandKit-text'
+				className='mb-4 text-center text-2xl font-bold text-brandKit-text'
 				style={{
 					fontFamily: computedStyles.fonts.headingFont,
 				}}
@@ -29,7 +29,7 @@ export function createMarkdownComponents(computedStyles: ComputedStyles) {
 		),
 		h2: ({ children }: { children?: ReactNode }) => (
 			<h2
-				className='mb-3 text-xl font-semibold text-brandKit-text'
+				className='mb-3 text-center text-xl font-semibold text-brandKit-text'
 				style={{
 					fontFamily: computedStyles.fonts.headingFont,
 				}}
@@ -39,7 +39,7 @@ export function createMarkdownComponents(computedStyles: ComputedStyles) {
 		),
 		h3: ({ children }: { children?: ReactNode }) => (
 			<h3
-				className='mb-2 text-lg font-semibold text-brandKit-text'
+				className='mb-2 text-center text-lg font-semibold text-brandKit-text'
 				style={{
 					fontFamily: computedStyles.fonts.headingFont,
 				}}
@@ -47,9 +47,39 @@ export function createMarkdownComponents(computedStyles: ComputedStyles) {
 				{children}
 			</h3>
 		),
+		h4: ({ children }: { children?: ReactNode }) => (
+			<h4
+				className='mb-2 text-center text-base font-semibold text-brandKit-text'
+				style={{
+					fontFamily: computedStyles.fonts.headingFont,
+				}}
+			>
+				{children}
+			</h4>
+		),
+		h5: ({ children }: { children?: ReactNode }) => (
+			<h5
+				className='mb-2 text-center text-sm font-semibold text-brandKit-text'
+				style={{
+					fontFamily: computedStyles.fonts.headingFont,
+				}}
+			>
+				{children}
+			</h5>
+		),
+		h6: ({ children }: { children?: ReactNode }) => (
+			<h6
+				className='mb-2 text-center text-xs font-semibold text-brandKit-text'
+				style={{
+					fontFamily: computedStyles.fonts.headingFont,
+				}}
+			>
+				{children}
+			</h6>
+		),
 		ul: ({ children }: { children?: ReactNode }) => (
 			<ul
-				className='mb-4 list-inside list-disc space-y-1 text-brandKit-text'
+				className='mb-4 list-inside list-disc space-y-1 text-center text-brandKit-text'
 				style={{
 					fontFamily: computedStyles.fonts.bodyFont,
 				}}
@@ -59,7 +89,7 @@ export function createMarkdownComponents(computedStyles: ComputedStyles) {
 		),
 		ol: ({ children }: { children?: ReactNode }) => (
 			<ol
-				className='mb-4 list-inside list-decimal space-y-1 text-brandKit-text'
+				className='mb-4 list-inside list-decimal space-y-1 text-center text-brandKit-text'
 				style={{
 					fontFamily: computedStyles.fonts.bodyFont,
 				}}
@@ -69,7 +99,7 @@ export function createMarkdownComponents(computedStyles: ComputedStyles) {
 		),
 		blockquote: ({ children }: { children?: ReactNode }) => (
 			<blockquote
-				className='border-brandKit-text/20 mb-4 border-l-4 pl-4 italic text-brandKit-text'
+				className='border-brandKit-text/20 mx-auto mb-4 max-w-md border-l-4 pl-4 text-center italic text-brandKit-text'
 				style={{
 					fontFamily: computedStyles.fonts.bodyFont,
 				}}
@@ -144,7 +174,7 @@ export function MarkdownBlockHeader({
 		<div className='space-y-1 text-center'>
 			{title && (
 				<div
-					className='text-base font-semibold text-brandKit-text'
+					className='text-3xl font-bold text-brandKit-text'
 					style={{
 						fontFamily: headingFont,
 					}}

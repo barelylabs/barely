@@ -194,6 +194,7 @@ export const BioBlocks = pgTable(
 		}).notNull(),
 
 		enabled: boolean('enabled').default(true).notNull(),
+		styleAsButton: boolean('styleAsButton').default(false),
 
 		name: varchar('name', { length: 255 }), // for internal user user
 		title: varchar('title', { length: 255 }), // for rendering a title above the block

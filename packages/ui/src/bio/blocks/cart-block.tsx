@@ -6,8 +6,9 @@ import { BIO_BLOCK_ICON_OPTIONS } from '@barely/const';
 import {
 	cn,
 	getAbsoluteUrl,
+	getBrandKitBlockRadiusClass,
+	getBrandKitButtonRadiusClass,
 	getBrandKitOutlineClass,
-	getBrandKitRadiusClass,
 	getComputedStyles,
 	getTrackingEnrichedHref,
 } from '@barely/utils';
@@ -73,6 +74,62 @@ export function CartBlock({ block, blockIndex }: CartBlockProps) {
 
 	const hasDiscount = discount > 0 && !isPayWhatYouWant;
 
+	// If styleAsButton is true, just render the button
+	if (block.styleAsButton) {
+		return (
+			<Button
+				href={checkoutUrl}
+				target='_blank'
+				variant='button'
+				look='primary'
+				size='lg'
+				fullWidth={true}
+				className={cn(
+					'bg-brandKit-block text-brandKit-block-text',
+					'hover:bg-brandKit-block/90',
+					getBrandKitOutlineClass(computedStyles.block.outline),
+					getBrandKitButtonRadiusClass(computedStyles.block.radius),
+					// Add animation class if specified
+					block.ctaAnimation &&
+						block.ctaAnimation !== 'none' &&
+						getAnimationClass(block.ctaAnimation),
+				)}
+				style={{
+					fontFamily: computedStyles.fonts.bodyFont,
+					boxShadow: computedStyles.block.shadow,
+				}}
+				onClick={async () => {
+					if (onTargetCartFunnelClick && block.targetCartFunnel) {
+						return await onTargetCartFunnelClick(block.targetCartFunnel, {
+							blockId: block.id,
+							blockType: 'cart',
+							blockIndex,
+							linkIndex: 0,
+						});
+					}
+				}}
+			>
+				<span className='flex items-center justify-center gap-2'>
+					{block.ctaIcon &&
+						block.ctaIcon !== 'none' &&
+						(() => {
+							const iconOption = BIO_BLOCK_ICON_OPTIONS.find(
+								opt => opt.value === block.ctaIcon,
+							);
+
+							const CtaIcon =
+								iconOption?.icon ? Icon[iconOption.icon as keyof typeof Icon] : null;
+
+							if (!CtaIcon) return null;
+							return iconOption?.icon ? <CtaIcon className='h-4 w-4' /> : null;
+						})()}
+					{block.ctaText ?? 'Get Instant Access'}
+				</span>
+			</Button>
+		);
+	}
+
+	// Otherwise render the full block
 	return (
 		<div
 			className={cn(
@@ -80,7 +137,7 @@ export function CartBlock({ block, blockIndex }: CartBlockProps) {
 				// Strong container with elevated appearance
 				'bg-brandKit-block/5 backdrop-blur-sm',
 				'border-brandKit-block/20 border-2',
-				getBrandKitRadiusClass(computedStyles.block.radius),
+				getBrandKitBlockRadiusClass(computedStyles.block.radius),
 				'p-5',
 			)}
 			style={{
@@ -140,7 +197,7 @@ export function CartBlock({ block, blockIndex }: CartBlockProps) {
 						<div
 							className={cn(
 								'h-24 w-24 flex-shrink-0 overflow-hidden',
-								getBrandKitRadiusClass(computedStyles.block.radius),
+								getBrandKitBlockRadiusClass(computedStyles.block.radius),
 								'border-brandKit-text/10 border',
 							)}
 						>
@@ -211,7 +268,7 @@ export function CartBlock({ block, blockIndex }: CartBlockProps) {
 					'bg-brandKit-block text-brandKit-block-text',
 					'hover:bg-brandKit-block/90',
 					getBrandKitOutlineClass(computedStyles.block.outline),
-					getBrandKitRadiusClass(computedStyles.block.radius),
+					getBrandKitButtonRadiusClass(computedStyles.block.radius),
 					// Add animation class if specified
 					block.ctaAnimation &&
 						block.ctaAnimation !== 'none' &&

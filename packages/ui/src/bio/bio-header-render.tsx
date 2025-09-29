@@ -1,7 +1,7 @@
 import {
 	cn,
+	getBrandKitButtonRadiusClass,
 	getBrandKitOutlineClass,
-	getBrandKitRadiusClass,
 	getBrandKitShadowClass,
 	getComputedStyles,
 } from '@barely/utils';
@@ -30,7 +30,7 @@ export function BioHeaderRender() {
 				)}
 				onClick={async () => {
 					await navigator.share({
-						title: bio.handle,
+						title: brandKit.workspace?.name ?? bio.handle,
 						url: window.location.href,
 					});
 				}}
@@ -45,7 +45,7 @@ export function BioHeaderRender() {
 					className={cn(
 						'px-6 py-3',
 						'bg-brandKit-block text-brandKit-block-text',
-						getBrandKitRadiusClass(computedStyles.block.radius),
+						getBrandKitButtonRadiusClass(computedStyles.block.radius),
 						getBrandKitShadowClass(computedStyles.block.shadow),
 						getBrandKitOutlineClass(computedStyles.block.outline),
 						!bio.showSubscribeButton && 'hidden',

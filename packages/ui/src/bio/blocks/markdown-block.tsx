@@ -15,13 +15,14 @@ import { createMarkdownComponents, MarkdownBlockHeader } from './markdown-block-
 
 interface MarkdownBlockProps {
 	block: AppRouterOutputs['bio']['blocksByHandleAndKey'][number];
+	blockIndex: number;
 }
 
 /**
  * Client-side markdown block for real-time preview in the editor.
  * Uses react-markdown for instant rendering without compilation.
  */
-export function MarkdownBlock({ block }: MarkdownBlockProps) {
+export function MarkdownBlock({ block, blockIndex }: MarkdownBlockProps) {
 	const brandKit = useBrandKit();
 	const computedStyles = getComputedStyles(brandKit);
 	const { isPreview, onTargetUrlClick } = useBioContext();
@@ -74,7 +75,7 @@ export function MarkdownBlock({ block }: MarkdownBlockProps) {
 			{/* CTA Button */}
 			{block.ctaText && (
 				<div className='mt-4 flex justify-center'>
-					<CtaButton block={block} />
+					<CtaButton block={block} blockIndex={blockIndex} blockType='markdown' />
 				</div>
 			)}
 		</div>

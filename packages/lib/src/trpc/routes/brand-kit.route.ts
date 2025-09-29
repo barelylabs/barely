@@ -4,6 +4,7 @@ import { dbHttp } from '@barely/db/client';
 import { BrandKits, Workspaces } from '@barely/db/sql';
 import { newId } from '@barely/utils';
 import { createBrandKitSchema, updateBrandKitSchema } from '@barely/validators';
+import { TRPCError } from '@trpc/server';
 import { and, eq } from 'drizzle-orm';
 
 import { workspaceProcedure } from '../trpc';
@@ -15,6 +16,14 @@ export const brandKitRouter = {
 
 		const brandKit = await dbHttp.query.BrandKits.findFirst({
 			where: eq(BrandKits.workspaceId, workspaceId),
+			with: {
+				workspace: {
+					columns: {
+						name: true,
+						handle: true,
+					},
+				},
+			},
 		});
 
 		// If no brand kit exists, create one with defaults
@@ -52,7 +61,15 @@ export const brandKitRouter = {
 			};
 
 			const [created] = await dbHttp.insert(BrandKits).values(newBrandKit).returning();
-			return created;
+
+			if (!created) {
+				throw new TRPCError({
+					code: 'INTERNAL_SERVER_ERROR',
+					message: 'Failed to create brand kit',
+				});
+			}
+
+			return { ...created, workspace: workspace };
 		}
 
 		return brandKit;

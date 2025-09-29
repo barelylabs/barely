@@ -7,8 +7,8 @@ import React from 'react';
 import {
 	cn,
 	getAbsoluteUrl,
+	getBrandKitButtonRadiusClass,
 	getBrandKitOutlineClass,
-	getBrandKitRadiusClass,
 	getTrackingEnrichedHref,
 } from '@barely/utils';
 
@@ -110,6 +110,22 @@ export function TwoPanelBlockShared({
 	onTargetBioClick,
 	onTargetUrlClick,
 }: TwoPanelBlockSharedProps) {
+	// Handle click on the block in preview mode
+	const handleBlockClick = (e: React.MouseEvent) => {
+		if (isPreview && onTargetUrlClick) {
+			// Only trigger if clicking on the block itself, not on a CTA button
+			const target = e.target as HTMLElement;
+			if (!target.closest('button') && !target.closest('a')) {
+				void onTargetUrlClick('', {
+					blockId: block.id,
+					blockType: 'twoPanel',
+					blockIndex,
+					linkIndex: 0,
+					targetUrl: '',
+				});
+			}
+		}
+	};
 	// Determine CTA href based on target type
 	const getCtaHref = () => {
 		if (isPreview) {
@@ -155,13 +171,14 @@ export function TwoPanelBlockShared({
 				!isPreview && 'md:grid md:grid-cols-2 md:items-center md:gap-6',
 				imageDesktopSide === 'right' && 'md:grid-flow-dense',
 				imageMobileSide === 'bottom' && 'flex-col-reverse',
+				isPreview && 'cursor-pointer',
 			)}
+			onClick={handleBlockClick}
 		>
 			{/* Image Panel */}
 			<div
 				className={cn(
-					'relative overflow-hidden',
-					getBrandKitRadiusClass(computedStyles.block.radius),
+					'relative overflow-hidden rounded-xl', // Fixed radius for images
 					imageDesktopSide === 'right' && 'md:col-start-2',
 				)}
 			>
@@ -191,8 +208,8 @@ export function TwoPanelBlockShared({
 				{/* Title */}
 				{block.title && (
 					<Text
-						variant='md/semibold'
-						className='text-center text-brandKit-text md:text-left md:text-lg md:font-semibold'
+						variant='3xl/bold'
+						className='text-center text-brandKit-text'
 						style={{
 							fontFamily: computedStyles.fonts.headingFont,
 						}}
@@ -201,9 +218,22 @@ export function TwoPanelBlockShared({
 					</Text>
 				)}
 
+				{/* Subtitle */}
+				{block.subtitle && (
+					<Text
+						variant='sm/normal'
+						className='text-center text-brandKit-text opacity-80'
+						style={{
+							fontFamily: computedStyles.fonts.bodyFont,
+						}}
+					>
+						{block.subtitle}
+					</Text>
+				)}
+
 				{/* Markdown content - passed in from client or server component */}
 				{markdownContent && (
-					<div className='prose prose-sm max-w-none text-center text-brandKit-text md:text-left'>
+					<div className='prose prose-sm max-w-none text-center text-brandKit-text'>
 						{markdownContent}
 					</div>
 				)}
@@ -221,7 +251,7 @@ export function TwoPanelBlockShared({
 							className={cn(
 								'hover:bg-brandKit-block/80 bg-brandKit-block text-brandKit-block-text md:w-auto',
 								getBrandKitOutlineClass(computedStyles.block.outline),
-								getBrandKitRadiusClass(computedStyles.block.radius),
+								getBrandKitButtonRadiusClass(computedStyles.block.radius),
 							)}
 							style={{
 								fontFamily: computedStyles.fonts.bodyFont,

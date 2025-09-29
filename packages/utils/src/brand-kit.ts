@@ -328,14 +328,36 @@ export function getBrandKitOutlineClass(outline: string | undefined): string {
 }
 
 /**
- * Get Tailwind classes for block radius
+ * Get Tailwind classes for button radius
+ * Buttons can be fully circular with rounded-full
  */
-export function getBrandKitRadiusClass(radius: string): string {
+export function getBrandKitButtonRadiusClass(radius: string): string {
 	const radiusMap: Record<string, string> = {
 		'0px': 'rounded-none',
 		'12px': 'rounded-xl',
-		'9999px': 'rounded-full',
+		'9999px': 'rounded-full', // Buttons can be circular
 	};
 
 	return radiusMap[radius] ?? 'rounded-xl';
+}
+
+/**
+ * Get Tailwind classes for block/container radius
+ * Blocks use rounded-2xl instead of rounded-full for better appearance
+ */
+export function getBrandKitBlockRadiusClass(radius: string): string {
+	const radiusMap: Record<string, string> = {
+		'0px': 'rounded-none',
+		'12px': 'rounded-xl',
+		'9999px': 'rounded-2xl', // Blocks get nice rounded corners, not circular
+	};
+
+	return radiusMap[radius] ?? 'rounded-xl';
+}
+
+/**
+ * @deprecated Use getBrandKitButtonRadiusClass or getBrandKitBlockRadiusClass instead
+ */
+export function getBrandKitRadiusClass(radius: string): string {
+	return getBrandKitButtonRadiusClass(radius);
 }

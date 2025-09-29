@@ -4,23 +4,34 @@ import type { AppRouterOutputs } from '@barely/lib/trpc/routes/app.route';
 import type { MDXEditorMethods } from '@barely/ui/mdx-editor';
 import React, { useCallback, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { useZodForm } from '@barely/hooks';
 import { cn } from '@barely/utils';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
-import { FileText, Trash2 } from 'lucide-react';
+import { Check, FileText, Trash2 } from 'lucide-react';
 import { NavigationGuardProvider, useNavigationGuard } from 'next-navigation-guard';
 import { toast } from 'sonner';
-import { z } from 'zod/v4';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Button } from '@barely/ui/button';
 import { Card } from '@barely/ui/card';
-import { Form } from '@barely/ui/forms/form';
-import { SelectField } from '@barely/ui/forms/select-field';
-import { TextField } from '@barely/ui/forms/text-field';
+import {
+	Command,
+	CommandEmpty,
+	CommandGroup,
+	CommandInput,
+	CommandItem,
+	CommandList,
+} from '@barely/ui/command';
 import { Input } from '@barely/ui/input';
 import { LoadingSpinner } from '@barely/ui/loading';
+import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/popover';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@barely/ui/select';
 import { Switch } from '@barely/ui/switch';
 import { Text } from '@barely/ui/typography';
 
@@ -58,12 +69,6 @@ function BioMarkdownPageInner({ handle, blockId }: BioMarkdownPageProps) {
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
 	const editorRef = useRef<MDXEditorMethods>(null);
-	// const [activeTab, setActiveTab] = useState('content');
-	const [blockName, setBlockName] = useState('');
-	// const [editTitle, setEditTitle] = useState('');
-	// const [editSubtitle, setEditSubtitle] = useState('');
-	const [markdown, setMarkdown] = useState('');
-	const [originalMarkdown, setOriginalMarkdown] = useState('');
 	const { bioKey } = useBioQueryState();
 	const bioQueryKey = trpc.bio.byKey.queryOptions({
 		handle,
@@ -94,27 +99,34 @@ function BioMarkdownPageInner({ handle, blockId }: BioMarkdownPageProps) {
 
 	const block = blocks.find(b => b.id === blockId);
 
-	// CTA form schema
-	const ctaFormSchema = z.object({
-		ctaText: z.string().optional(),
-		ctaType: z.enum(['none', 'url', 'bio', 'cart']).default('none'),
-		ctaUrl: z.string().optional(),
-		ctaBioId: z.string().optional(),
-		ctaCartFunnelId: z.string().optional(),
-	});
+	// Initialize state with block data or defaults
+	const [markdown, setMarkdown] = useState(block?.markdown ?? '');
+	const [originalMarkdown, setOriginalMarkdown] = useState(block?.markdown ?? '');
+	const [blockName, setBlockName] = useState(block?.name ?? 'Markdown Block');
 
-	const ctaForm = useZodForm({
-		schema: ctaFormSchema,
-		defaultValues: {
-			ctaText: '',
-			ctaType: 'none',
-			ctaUrl: '',
-			ctaBioId: undefined,
-			ctaCartFunnelId: undefined,
-		},
-	});
+	// Title and subtitle state
+	const [editTitle, setEditTitle] = useState(block?.title ?? '');
+	const [originalTitle, setOriginalTitle] = useState(block?.title ?? '');
+	const [editSubtitle, setEditSubtitle] = useState(block?.subtitle ?? '');
+	const [originalSubtitle, setOriginalSubtitle] = useState(block?.subtitle ?? '');
 
-	const ctaType = ctaForm.watch('ctaType');
+	// CTA state variables (like two-panel page)
+	const [ctaText, setCtaText] = useState(block?.ctaText ?? '');
+	const [ctaType, setCtaType] = useState<'none' | 'url' | 'bio' | 'cart'>(
+		block?.ctaText ?
+			block.targetUrl ? 'url'
+			: block.targetBioId ? 'bio'
+			: block.targetCartFunnelId ? 'cart'
+			: 'none'
+		:	'none',
+	);
+	const [ctaUrl, setCtaUrl] = useState(block?.targetUrl ?? '');
+	const [ctaBioId, setCtaBioId] = useState<string | null>(block?.targetBioId ?? null);
+	const [ctaCartFunnelId, setCtaCartFunnelId] = useState<string | null>(
+		block?.targetCartFunnelId ?? null,
+	);
+	const [showFunnelSelector, setShowFunnelSelector] = useState(false);
+	const [showBioSelector, setShowBioSelector] = useState(false);
 
 	// Get available bios and cart funnels for CTA
 	const biosResult = useSuspenseQuery(trpc.bio.byWorkspace.queryOptions({ handle }));
@@ -123,38 +135,8 @@ function BioMarkdownPageInner({ handle, blockId }: BioMarkdownPageProps) {
 	const cartFunnelsResult = useSuspenseQuery(
 		trpc.cartFunnel.byWorkspace.queryOptions({ handle }),
 	);
-	const cartFunnels = cartFunnelsResult.data && 'cartFunnels' in cartFunnelsResult.data ? cartFunnelsResult.data.cartFunnels : [];
-
-	// Initialize form values when block loads
-	const formSetRef = useRef(false);
-
-	React.useEffect(() => {
-		if (formSetRef.current) return;
-		if (block) {
-			// setEditTitle(block.title ?? '');
-			// setEditSubtitle(block.subtitle ?? '');
-			setBlockName(block.name ?? 'Markdown Block');
-			setMarkdown(block.markdown ?? '');
-			setOriginalMarkdown(block.markdown ?? '');
-
-			// Initialize CTA fields
-			if (block.ctaText) {
-				ctaForm.setValue('ctaText', block.ctaText);
-				if (block.targetUrl) {
-					ctaForm.setValue('ctaType', 'url');
-					ctaForm.setValue('ctaUrl', block.targetUrl);
-				} else if (block.targetBioId) {
-					ctaForm.setValue('ctaType', 'bio');
-					ctaForm.setValue('ctaBioId', block.targetBioId);
-				} else if (block.targetCartFunnelId) {
-					ctaForm.setValue('ctaType', 'cart');
-					ctaForm.setValue('ctaCartFunnelId', block.targetCartFunnelId);
-				}
-			}
-
-			formSetRef.current = true;
-		}
-	}, [block, ctaForm]);
+	const cartFunnels =
+		'cartFunnels' in cartFunnelsResult.data ? cartFunnelsResult.data.cartFunnels : [];
 
 	// Mutations
 	const { mutate: updateBlock, isPending: isUpdating } = useMutation(
@@ -188,10 +170,19 @@ function BioMarkdownPageInner({ handle, blockId }: BioMarkdownPageProps) {
 				) {
 					setOriginalMarkdown(variables.markdown);
 				}
+				// Update original title if saved
+				if ('title' in variables) {
+					setOriginalTitle(variables.title ?? '');
+				}
+				// Update original subtitle if saved
+				if ('subtitle' in variables) {
+					setOriginalSubtitle(variables.subtitle ?? '');
+				}
 				toast.success('Block updated');
 			},
 			onSettled: async () => {
 				await queryClient.invalidateQueries({ queryKey: bioQueryKey });
+				await queryClient.invalidateQueries({ queryKey: blocksQueryKey });
 			},
 		}),
 	);
@@ -200,6 +191,7 @@ function BioMarkdownPageInner({ handle, blockId }: BioMarkdownPageProps) {
 		trpc.bio.deleteBlock.mutationOptions({
 			onSettled: async () => {
 				await queryClient.invalidateQueries({ queryKey: bioQueryKey });
+				await queryClient.invalidateQueries({ queryKey: blocksQueryKey });
 			},
 		}),
 	);
@@ -225,6 +217,46 @@ function BioMarkdownPageInner({ handle, blockId }: BioMarkdownPageProps) {
 		[queryClient, blocksQueryKey, blockId],
 	);
 
+	// Handle title change with optimistic update
+	const handleTitleChange = useCallback(
+		(newTitle: string) => {
+			setEditTitle(newTitle);
+			// Optimistically update cache
+			queryClient.setQueryData<BioBlock[]>(blocksQueryKey, oldBlocks => {
+				if (!oldBlocks) return oldBlocks;
+				return oldBlocks.map(b => {
+					if (b.id !== blockId) return b;
+					return { ...b, title: newTitle || null };
+				});
+			});
+		},
+		[queryClient, blocksQueryKey, blockId],
+	);
+
+	// Handle subtitle change with optimistic update
+	const handleSubtitleChange = useCallback(
+		(newSubtitle: string) => {
+			setEditSubtitle(newSubtitle);
+			// Optimistically update cache
+			queryClient.setQueryData<BioBlock[]>(blocksQueryKey, oldBlocks => {
+				if (!oldBlocks) return oldBlocks;
+				return oldBlocks.map(b => {
+					if (b.id !== blockId) return b;
+					return { ...b, subtitle: newSubtitle || null };
+				});
+			});
+		},
+		[queryClient, blocksQueryKey, blockId],
+	);
+
+	// Validation for CTA
+	const isCtaIncomplete =
+		ctaText &&
+		ctaType !== 'none' &&
+		((ctaType === 'url' && !ctaUrl) ||
+			(ctaType === 'bio' && !ctaBioId) ||
+			(ctaType === 'cart' && !ctaCartFunnelId));
+
 	// Track if content has changed
 	const hasUnsavedChanges = markdown !== originalMarkdown;
 
@@ -236,44 +268,13 @@ function BioMarkdownPageInner({ handle, blockId }: BioMarkdownPageProps) {
 		},
 	});
 
-	// Save and cancel handlers
+	// Save and cancel handlers (simplified - only saves markdown now)
 	const handleSaveMarkdown = () => {
-		const ctaValues = ctaForm.getValues();
-		const updateData: any = {
+		updateBlock({
 			handle,
 			id: blockId,
 			markdown,
-		};
-
-		// Add CTA fields
-		if (ctaValues.ctaText && ctaValues.ctaType !== 'none') {
-			updateData.ctaText = ctaValues.ctaText;
-			// Clear all CTA target fields first
-			updateData.targetUrl = null;
-			updateData.targetBioId = null;
-			updateData.targetCartFunnelId = null;
-
-			// Set the appropriate one
-			switch (ctaValues.ctaType) {
-				case 'url':
-					updateData.targetUrl = ctaValues.ctaUrl || null;
-					break;
-				case 'bio':
-					updateData.targetBioId = ctaValues.ctaBioId || null;
-					break;
-				case 'cart':
-					updateData.targetCartFunnelId = ctaValues.ctaCartFunnelId || null;
-					break;
-			}
-		} else {
-			// Clear CTA if no text
-			updateData.ctaText = null;
-			updateData.targetUrl = null;
-			updateData.targetBioId = null;
-			updateData.targetCartFunnelId = null;
-		}
-
-		updateBlock(updateData);
+		});
 	};
 
 	const handleCancelChanges = () => {
@@ -394,6 +395,45 @@ function BioMarkdownPageInner({ handle, blockId }: BioMarkdownPageProps) {
 
 			{/* Content Section (no tabs for now) */}
 			<div className='space-y-4'>
+				{/* Title and Subtitle */}
+				<div className='space-y-4'>
+					<div>
+						<label className='mb-2 block text-sm font-medium'>Title (optional)</label>
+						<Input
+							value={editTitle}
+							onChange={e => handleTitleChange(e.target.value)}
+							onBlur={() => {
+								if (editTitle !== originalTitle) {
+									updateBlock({
+										handle,
+										id: blockId,
+										title: editTitle || null,
+									});
+								}
+							}}
+							placeholder='Enter block title'
+						/>
+					</div>
+
+					<div>
+						<label className='mb-2 block text-sm font-medium'>Subtitle (optional)</label>
+						<Input
+							value={editSubtitle}
+							onChange={e => handleSubtitleChange(e.target.value)}
+							onBlur={() => {
+								if (editSubtitle !== originalSubtitle) {
+									updateBlock({
+										handle,
+										id: blockId,
+										subtitle: editSubtitle || null,
+									});
+								}
+							}}
+							placeholder='Enter block subtitle'
+						/>
+					</div>
+				</div>
+
 				{/* Markdown Editor */}
 				<div>
 					<Text variant='sm/semibold' className='mb-2'>
@@ -436,7 +476,7 @@ function BioMarkdownPageInner({ handle, blockId }: BioMarkdownPageProps) {
 									onClick={handleSaveMarkdown}
 									size='sm'
 									look='primary'
-									disabled={isUpdating}
+									disabled={isUpdating || !!isCtaIncomplete}
 								>
 									{isUpdating ?
 										<>
@@ -464,72 +504,275 @@ function BioMarkdownPageInner({ handle, blockId }: BioMarkdownPageProps) {
 						Add a button that appears at the bottom of your markdown content.
 					</Text>
 
-					<Form form={ctaForm} onSubmit={() => {}}>
-						<div className='space-y-4'>
-							<TextField
-								control={ctaForm.control}
-								name='ctaText'
-								label='Button Text'
+					<div className='space-y-4'>
+						{/* Button Text */}
+						<div>
+							<Text variant='sm/normal' className='mb-1.5'>
+								Button Text
+							</Text>
+							<Input
+								value={ctaText}
+								onChange={e => {
+									setCtaText(e.target.value);
+									// Optimistic update
+									queryClient.setQueryData<BioBlock[]>(blocksQueryKey, oldBlocks => {
+										if (!oldBlocks) return oldBlocks;
+										return oldBlocks.map(b => {
+											if (b.id !== blockId) return b;
+											return { ...b, ctaText: e.target.value };
+										});
+									});
+								}}
+								onBlur={() => {
+									updateBlock({
+										handle,
+										id: blockId,
+										ctaText: ctaText || null,
+									});
+								}}
 								placeholder='e.g., Learn More, Get Started'
 							/>
+						</div>
 
-							{ctaForm.watch('ctaText') && (
-								<>
-									<SelectField
-										control={ctaForm.control}
-										name='ctaType'
-										label='Button Action'
-										options={[
-											{ value: 'none', label: 'No Action' },
-											{ value: 'url', label: 'External URL' },
-											{ value: 'bio', label: 'Another Bio' },
-											{ value: 'cart', label: 'Cart Funnel' },
-										]}
-									/>
+						{ctaText && (
+							<>
+								{/* Button Action Type */}
+								<div>
+									<Text variant='sm/normal' className='mb-1.5'>
+										Button Action
+									</Text>
+									<Select
+										value={ctaType}
+										onValueChange={(value: 'none' | 'url' | 'bio' | 'cart') => {
+											setCtaType(value);
+											// Clear previous values when changing type
+											if (value !== 'url') setCtaUrl('');
+											if (value !== 'bio') setCtaBioId(null);
+											if (value !== 'cart') setCtaCartFunnelId(null);
 
-									{ctaType === 'url' && (
-										<TextField
-											control={ctaForm.control}
-											name='ctaUrl'
-											label='URL'
+											// Auto-select first cart funnel if switching to cart
+											if (value === 'cart' && cartFunnels.length > 0) {
+												const firstFunnelId = cartFunnels[0]?.id;
+												if (firstFunnelId) {
+													setCtaCartFunnelId(firstFunnelId);
+												}
+											}
+
+											// Save immediately
+											const updateData: {
+												handle: string;
+												id: string;
+												ctaText?: string | null;
+												targetUrl?: string | null;
+												targetBioId?: string | null;
+												targetCartFunnelId?: string | null;
+											} = {
+												handle,
+												id: blockId,
+												ctaText,
+												targetUrl: null,
+												targetBioId: null,
+												targetCartFunnelId: null,
+											};
+
+											// Set the appropriate target based on the new type
+											switch (value) {
+												case 'none':
+													// Clear all targets
+													break;
+												case 'url':
+													if (ctaUrl) updateData.targetUrl = ctaUrl;
+													break;
+												case 'bio':
+													if (ctaBioId) updateData.targetBioId = ctaBioId;
+													break;
+												case 'cart': {
+													// Use auto-selected or existing funnel ID
+													const funnelId = ctaCartFunnelId ?? cartFunnels[0]?.id;
+													if (funnelId) {
+														updateData.targetCartFunnelId = funnelId;
+													}
+													break;
+												}
+											}
+
+											updateBlock(updateData);
+										}}
+									>
+										<SelectTrigger>
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value='none'>No Action</SelectItem>
+											<SelectItem value='url'>External URL</SelectItem>
+											<SelectItem value='bio'>Another Bio</SelectItem>
+											<SelectItem value='cart'>Cart Funnel</SelectItem>
+										</SelectContent>
+									</Select>
+								</div>
+
+								{/* URL Input */}
+								{ctaType === 'url' && (
+									<div>
+										<Text variant='sm/normal' className='mb-1.5'>
+											URL
+										</Text>
+										<Input
+											value={ctaUrl}
+											onChange={e => setCtaUrl(e.target.value)}
+											onBlur={() => {
+												updateBlock({
+													handle,
+													id: blockId,
+													ctaText,
+													targetUrl: ctaUrl || null,
+													targetBioId: null,
+													targetCartFunnelId: null,
+												});
+											}}
 											type='url'
 											placeholder='https://example.com'
 										/>
-									)}
+									</div>
+								)}
 
-									{ctaType === 'bio' && (
-										<SelectField
-											control={ctaForm.control}
-											name='ctaBioId'
-											label='Select Bio'
-											options={
-												bios.map(b => ({
-													value: b.id,
-													label: b.name,
-												}))
-											}
-											placeholder='Choose a bio'
-										/>
-									)}
+								{/* Bio Selector */}
+								{ctaType === 'bio' && (
+									<div>
+										<Text variant='sm/normal' className='mb-1.5'>
+											Select Bio
+										</Text>
+										<Popover open={showBioSelector} onOpenChange={setShowBioSelector}>
+											<PopoverTrigger asChild>
+												<Button
+													variant='button'
+													look='outline'
+													role='combobox'
+													aria-expanded={showBioSelector}
+													className='w-full justify-between'
+													startIcon={ctaBioId ? 'check' : 'search'}
+													endIcon='chevronDown'
+												>
+													{ctaBioId ?
+														(bios.find(b => b.id === ctaBioId)?.key ?? 'Select a bio')
+													:	'Select a bio'}
+												</Button>
+											</PopoverTrigger>
+											<PopoverContent className='w-[250px] p-0'>
+												<Command>
+													<CommandInput placeholder='Search bios...' />
+													<CommandEmpty>No bio found.</CommandEmpty>
+													<CommandGroup>
+														<CommandList>
+															{bios.map(bio => (
+																<CommandItem
+																	key={bio.id}
+																	onSelect={() => {
+																		setCtaBioId(bio.id);
+																		setShowBioSelector(false);
+																		updateBlock({
+																			handle,
+																			id: blockId,
+																			ctaText,
+																			targetUrl: null,
+																			targetBioId: bio.id,
+																			targetCartFunnelId: null,
+																		});
+																	}}
+																>
+																	<Check
+																		className={cn(
+																			'mr-2 h-4 w-4',
+																			ctaBioId === bio.id ? 'opacity-100' : 'opacity-0',
+																		)}
+																	/>
+																	{bio.key}
+																</CommandItem>
+															))}
+														</CommandList>
+													</CommandGroup>
+												</Command>
+											</PopoverContent>
+										</Popover>
+									</div>
+								)}
 
-									{ctaType === 'cart' && (
-										<SelectField
-											control={ctaForm.control}
-											name='ctaCartFunnelId'
-											label='Select Cart Funnel'
-											options={
-												cartFunnels.map(cf => ({
-													value: cf.id,
-													label: cf.name,
-												}))
-											}
-											placeholder='Choose a cart funnel'
-										/>
-									)}
-								</>
-							)}
-						</div>
-					</Form>
+								{/* Cart Funnel Selector */}
+								{ctaType === 'cart' && (
+									<div>
+										<Text variant='sm/normal' className='mb-1.5'>
+											Select Cart Funnel
+										</Text>
+										<Popover
+											open={showFunnelSelector}
+											onOpenChange={setShowFunnelSelector}
+										>
+											<PopoverTrigger asChild>
+												<Button
+													variant='button'
+													look='outline'
+													role='combobox'
+													aria-expanded={showFunnelSelector}
+													className='w-full justify-between'
+													startIcon={ctaCartFunnelId ? 'check' : 'search'}
+													endIcon='chevronDown'
+												>
+													{ctaCartFunnelId ?
+														(cartFunnels.find(cf => cf.id === ctaCartFunnelId)?.name ??
+														'Select a cart funnel')
+													:	'Select a cart funnel'}
+												</Button>
+											</PopoverTrigger>
+											<PopoverContent className='w-[250px] p-0'>
+												<Command>
+													<CommandInput placeholder='Search cart funnels...' />
+													<CommandEmpty>No cart funnel found.</CommandEmpty>
+													<CommandGroup>
+														<CommandList>
+															{cartFunnels.map(funnel => (
+																<CommandItem
+																	key={funnel.id}
+																	onSelect={() => {
+																		setCtaCartFunnelId(funnel.id);
+																		setShowFunnelSelector(false);
+																		updateBlock({
+																			handle,
+																			id: blockId,
+																			ctaText,
+																			targetUrl: null,
+																			targetBioId: null,
+																			targetCartFunnelId: funnel.id,
+																		});
+																	}}
+																>
+																	<Check
+																		className={cn(
+																			'mr-2 h-4 w-4',
+																			ctaCartFunnelId === funnel.id ?
+																				'opacity-100'
+																			:	'opacity-0',
+																		)}
+																	/>
+																	{funnel.name}
+																</CommandItem>
+															))}
+														</CommandList>
+													</CommandGroup>
+												</Command>
+											</PopoverContent>
+										</Popover>
+									</div>
+								)}
+
+								{/* Validation message */}
+								{isCtaIncomplete && (
+									<Text variant='xs/normal' className='text-red-500'>
+										Please select a target for your CTA button
+									</Text>
+								)}
+							</>
+						)}
+					</div>
 				</div>
 			</div>
 

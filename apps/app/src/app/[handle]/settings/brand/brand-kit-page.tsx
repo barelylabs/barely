@@ -44,11 +44,6 @@ function BrandKitPageInner() {
 	const queryClient = useQueryClient();
 	const { handle } = useWorkspace();
 	const { brandKit } = useBrandKit(); // brandKit is guaranteed to be defined with suspense
-
-	// Type assertion to ensure TypeScript knows brandKit is not undefined
-	if (!brandKit) {
-		throw new Error('BrandKit should be defined with suspense');
-	}
 	const [previewTab, setPreviewTab] = useState('bio');
 	const mdxEditorRef = useRef<MDXEditorMethods>(null);
 

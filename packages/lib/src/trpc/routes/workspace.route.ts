@@ -19,6 +19,7 @@ import { newId, raiseTRPCError } from '@barely/utils';
 import {
 	createWorkspaceSchema,
 	updateCurrentWorkspaceSchema,
+	updateWorkspaceHandleSchema,
 	updateWorkspaceSpotifyArtistIdSchema,
 	workspaceAssetsSchema,
 } from '@barely/validators';
@@ -208,6 +209,52 @@ export const workspaceRoute = {
 			}
 		}),
 
+	updateHandle: workspaceProcedure
+		.input(updateWorkspaceHandleSchema)
+		.mutation(async ({ ctx, input }) => {
+			try {
+				// Check if new handle is already taken
+				const existingWorkspace = await dbHttp.query.Workspaces.findFirst({
+					where: eq(Workspaces.handle, input.newHandle),
+				});
+
+				if (existingWorkspace && existingWorkspace.id !== ctx.workspace.id) {
+					throw new TRPCError({
+						code: 'CONFLICT',
+						message: 'This handle is already taken.',
+					});
+				}
+
+				// Update the workspace handle
+				await dbHttp
+					.update(Workspaces)
+					.set({ handle: input.newHandle })
+					.where(eq(Workspaces.id, ctx.workspace.id));
+
+				// Push update event
+				try {
+					await pushEvent('workspace', 'update', {
+						id: ctx.workspace.id,
+						pageSessionId: ctx.pageSessionId,
+						socketId: ctx.pusherSocketId,
+					});
+				} catch (error) {
+					console.error('error pushing workspace update event => ', error);
+				}
+
+				return { success: true, newHandle: input.newHandle };
+			} catch (err) {
+				if (err instanceof TRPCError) throw err;
+
+				console.error('update handle error => ', err);
+
+				throw new TRPCError({
+					code: 'INTERNAL_SERVER_ERROR',
+					message: 'Failed to update workspace handle',
+				});
+			}
+		}),
+
 	updateSpotifyArtistId: workspaceProcedure
 		.input(updateWorkspaceSpotifyArtistIdSchema)
 		.mutation(async ({ ctx, input }) => {
@@ -304,11 +351,14 @@ export const workspaceRoute = {
 				.catch(console.error);
 
 			// update the brand kit avatar s3 key
-			await dbPool(ctx.pool)
+			console.log('update the brand kit avatar s3 key 👍');
+			const updatedBrandKit = await dbPool(ctx.pool)
 				.update(BrandKits)
 				.set({ avatarS3Key: avatarFile.s3Key })
-				.where(eq(BrandKits.workspaceId, ctx.workspace.id));
+				.where(eq(BrandKits.workspaceId, ctx.workspace.id))
+				.returning();
 
+			console.log('updatedBrandKit => ', updatedBrandKit);
 			// trigger the blur hash generation
 			await tasks.trigger<typeof generateFileBlurHash>('generate-file-blur-hash', {
 				fileId: avatarFile.id,

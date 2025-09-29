@@ -57,12 +57,17 @@ const defaultCartBrandKit: CartBrandKit = {
 };
 
 export async function getBrandKit({ handle }: { handle: string }) {
-	const [brandKit] = await dbHttp
-		.select()
-		.from(BrandKits)
-		.where(eq(BrandKits.handle, handle))
-		.limit(1)
-		.$withCache();
+	const brandKit = await dbHttp.query.BrandKits.findFirst({
+		where: eq(BrandKits.handle, handle),
+		with: {
+			workspace: {
+				columns: {
+					name: true,
+					handle: true,
+				},
+			},
+		},
+	});
 
 	return brandKit ?? null;
 }

@@ -31,7 +31,7 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
 			currency,
 			// prefix = '$',
 			allowNegativeValue = false,
-			placeholder = '$0',
+			placeholder,
 			className,
 			isError,
 			...props
@@ -92,6 +92,7 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
 			: valueInDollars.toFixed(2);
 
 		const prefix = currency === 'usd' ? '$' : '£';
+		const finalPlaceholder = placeholder ?? `${prefix}0`;
 
 		return (
 			<>
@@ -100,7 +101,7 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
 					{...props}
 					ref={ref}
 					name={name}
-					placeholder={placeholder}
+					placeholder={finalPlaceholder}
 					prefix={prefix}
 					decimalsLimit={2}
 					onFocus={handleFocus}

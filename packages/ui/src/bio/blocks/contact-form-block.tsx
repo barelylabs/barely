@@ -5,8 +5,9 @@ import React, { useState } from 'react';
 import { useZodForm } from '@barely/hooks';
 import {
 	cn,
+	getBrandKitBlockRadiusClass,
+	getBrandKitButtonRadiusClass,
 	getBrandKitOutlineClass,
-	getBrandKitRadiusClass,
 	getBrandKitShadowClass,
 	getComputedStyles,
 } from '@barely/utils';
@@ -83,7 +84,7 @@ export function ContactFormBlock({ block }: ContactFormBlockProps) {
 					'p-6',
 					'bg-brandKit-text',
 
-					getBrandKitRadiusClass(computedStyles.block.radius),
+					getBrandKitBlockRadiusClass(computedStyles.block.radius),
 					getBrandKitShadowClass(computedStyles.block.shadow),
 					getBrandKitOutlineClass(computedStyles.block.outline),
 				)}
@@ -146,7 +147,7 @@ export function ContactFormBlock({ block }: ContactFormBlockProps) {
 							className={cn(
 								'bg-brandKit-block-text text-brandKit-block',
 								'transition-opacity hover:opacity-90',
-								getBrandKitRadiusClass(computedStyles.block.radius),
+								getBrandKitButtonRadiusClass(computedStyles.block.radius),
 								getBrandKitOutlineClass(computedStyles.block.outline),
 								getBrandKitShadowClass(computedStyles.block.shadow),
 							)}

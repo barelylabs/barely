@@ -82,7 +82,12 @@ export const selectBrandKitSchema = createSelectSchema(BrandKits, {
 export type BioColorScheme = z.infer<typeof bioColorSchemeSchema>;
 export type CartColorScheme = z.infer<typeof cartColorSchemeSchema>;
 export type ColorScheme = z.infer<typeof colorSchemeSchema>; // Legacy
-export type BrandKit = z.infer<typeof selectBrandKitSchema>;
+export type BrandKit = z.infer<typeof selectBrandKitSchema> & {
+	workspace?: {
+		name: string;
+		handle: string;
+	};
+};
 export type PublicBrandKit = Omit<
 	BrandKit,
 	'id' | 'createdAt' | 'updatedAt' | 'archivedAt' | 'deletedAt'
@@ -145,4 +150,8 @@ export const defaultBrandKit: BrandKit = {
 	location: null,
 	blockShadow: false,
 	blockOutline: false,
+	workspace: {
+		name: 'Default',
+		handle: 'default',
+	},
 };

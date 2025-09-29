@@ -59,10 +59,11 @@ function BrandKitContextProvider({ children }: { children: ReactNode }) {
 	const { data: brandKit } = useQuery(
 		trpc.brandKit.current.queryOptions(
 			{ handle: workspace.handle },
-			{
-				initialData: workspace.brandKit ?? defaultBrandKit,
-				refetchOnWindowFocus: false,
-			},
+			// {
+			// 	initialData:
+			// 		workspace.brandKit ? { ...workspace.brandKit, workspace } : defaultBrandKit,
+			// 	refetchOnWindowFocus: false,
+			// },
 		),
 	);
 

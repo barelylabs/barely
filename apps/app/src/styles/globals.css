@@ -324,4 +324,24 @@
 			content: attr(data-content);
 		}
 	}
+
+	/* Highlight animation for auto-scrolled blocks */
+	@keyframes highlight {
+		0% {
+			outline: 2px solid transparent;
+			outline-offset: 2px;
+		}
+		50% {
+			outline: 2px solid theme('colors.primary.DEFAULT');
+			outline-offset: 2px;
+		}
+		100% {
+			outline: 2px solid transparent;
+			outline-offset: 2px;
+		}
+	}
+
+	.animate-highlight {
+		animation: highlight 2s ease-in-out;
+	}
 }

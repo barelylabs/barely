@@ -4,8 +4,8 @@ import type { AppRouterOutputs } from '@barely/lib/trpc/app.route';
 import React from 'react';
 import {
 	cn,
+	getBrandKitButtonRadiusClass,
 	getBrandKitOutlineClass,
-	getBrandKitRadiusClass,
 	getComputedStyles,
 	getTrackingEnrichedHref,
 } from '@barely/utils';
@@ -119,7 +119,7 @@ export function LinksBlock({ block, blockIndex }: LinksBlockProps) {
 							getBrandKitOutlineClass(computedStyles.block.outline),
 							isFullWidthButtons ? 'px-4 py-4' : 'px-4 py-3',
 							isFullWidthButtons ? 'rounded-none' : (
-								getBrandKitRadiusClass(computedStyles.block.radius)
+								getBrandKitButtonRadiusClass(computedStyles.block.radius)
 							),
 							animationClass, // Add the animation class
 						)}
@@ -162,9 +162,14 @@ export function LinksBlock({ block, blockIndex }: LinksBlockProps) {
 								</div>
 							)}
 							{/* Text content */}
-							<span className='flex-1 whitespace-normal break-words text-center'>
-								{link.text}
-							</span>
+							<div className='flex-1 text-center'>
+								<div className='whitespace-normal break-words'>{link.text}</div>
+								{link.subtitle && (
+									<div className='mt-1 whitespace-normal break-words text-xs opacity-80'>
+										{link.subtitle}
+									</div>
+								)}
+							</div>
 							{/* Spacer to balance when image is present */}
 							{link.image?.s3Key && <div className='w-[45px]' />}
 						</div>
