@@ -169,6 +169,14 @@ export async function recordLinkClick({
 
 	// report event to tinybird
 	try {
+		// Extract journey info from visitor with proper defaults
+		// Convert null to undefined so the schema defaults can apply
+		const journeyId = visitor?.journeyId ?? visitor?.sessionId ?? newId('linkClick');
+		const journeyOrigin = visitor?.journeyOrigin ?? journeyId.split('_')[0] ?? 'link';
+		const journeySource = visitor?.journeySource ?? `link:${link.domain}:${link.key}`;
+		const journeyStep = visitor?.journeyStep ? parseInt(visitor.journeyStep, 10) : 1;
+		const journeyPath = visitor?.journeyPath ?? [`link:${link.domain}:${link.key}`];
+
 		const eventData = webEventIngestSchema.parse({
 			timestamp,
 			workspaceId: link.workspaceId,
@@ -179,9 +187,15 @@ export async function recordLinkClick({
 			key: link.key,
 			// analytics
 			...flattenVisitorForIngest(visitor),
-			sessionId: visitor?.sessionId ?? newId('linkClick'),
+			sessionId: journeyId,
 			platform,
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : undefined,
+			// Journey tracking fields with proper defaults
+			journeyId,
+			journeyOrigin,
+			journeySource,
+			journeyStep,
+			journeyPath,
 		});
 
 		const tinybirdRes = await ingestWebEvent(eventData);
