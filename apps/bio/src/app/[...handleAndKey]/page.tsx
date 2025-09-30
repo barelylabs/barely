@@ -152,6 +152,11 @@ export async function generateMetadata({ params }: BioRouteProps) {
 		return {
 			title,
 			description,
+			...(bio.noindex === true && {
+				robots: {
+					index: false,
+				},
+			}),
 			openGraph: {
 				title,
 				description,

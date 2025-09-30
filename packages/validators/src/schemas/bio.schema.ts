@@ -53,6 +53,7 @@ export const updateBioSchema = insertBioSchema
 			.max(1000, 'Description must be less than 1000 characters')
 			.optional()
 			.nullable(),
+		noindex: z.boolean().optional().nullable(),
 	});
 
 export const publicBioSchema = z.object({
@@ -71,6 +72,7 @@ export const publicBioSchema = z.object({
 	emailCaptureIncentiveText: z.string().nullable(),
 	title: z.string().nullable(),
 	description: z.string().nullable(),
+	noindex: z.boolean().nullable(),
 });
 
 export type InsertBio = z.infer<typeof insertBioSchema>;

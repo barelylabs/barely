@@ -74,6 +74,7 @@ export const Bios = pgTable(
 		// SEO metadata
 		title: varchar('title', { length: 255 }),
 		description: text('description'),
+		noindex: boolean('noindex').default(false),
 	},
 	bio => ({
 		workspace: index('Bios_workspace_idx').on(bio.workspaceId),
