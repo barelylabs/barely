@@ -12,6 +12,7 @@ import type {
 } from '@barely/validators';
 import type { BioTrackingData } from '@barely/validators/schemas';
 import React, { useCallback } from 'react';
+import { modifyOklch } from '@barely/utils';
 import { useMutation, useSuspenseQuery } from '@tanstack/react-query';
 
 import { useBioRenderTRPC } from '@barely/api/public/bio-render.trpc.react';
@@ -199,16 +200,19 @@ export function BioBioRender({
 	brandKit: PublicBrandKit;
 	tracking?: BioTrackingData;
 }) {
-	// Get the background color from brandKit for oklch calculation
-	const bgColor =
-		brandKit.colorScheme.colors[brandKit.colorScheme.mapping.backgroundColor];
+	// Get the background color from brandKit using the new color system
+	const bgColorIndex = brandKit.bioColorScheme.bgColor;
+	const colors = [brandKit.color1, brandKit.color2, brandKit.color3];
+	const bgColor = colors[bgColorIndex] ?? brandKit.color1;
+
+	// Darken the background color for better contrast
+	const backgroundColor = modifyOklch(bgColor, { lightness: 0.85 });
 
 	return (
 		<div
 			className='min-h-screen'
 			style={{
-				// Use oklch relative color syntax to darken the background
-				backgroundColor: `oklch(from ${bgColor} calc(l - 0.3) c h)`,
+				backgroundColor,
 			}}
 		>
 			<div className='mx-auto max-w-xl px-0 py-0 sm:px-4 sm:py-12'>
