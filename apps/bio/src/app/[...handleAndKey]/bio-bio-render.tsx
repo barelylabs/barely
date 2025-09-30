@@ -12,6 +12,7 @@ import type {
 } from '@barely/validators';
 import type { BioTrackingData } from '@barely/validators/schemas';
 import React, { useCallback } from 'react';
+import { modifyOklch } from '@barely/utils';
 import { useMutation, useSuspenseQuery } from '@tanstack/react-query';
 
 import { useBioRenderTRPC } from '@barely/api/public/bio-render.trpc.react';
@@ -23,8 +24,6 @@ import {
 	useBioContext,
 } from '@barely/ui/src/bio';
 import { BioContentAroundBlocks } from '@barely/ui/src/bio/bio-content-around-blocks';
-
-import { modifyOklch } from '@barely/utils/color-conversion';
 
 import { BioLogVisit } from './bio-log-visit';
 
@@ -201,29 +200,13 @@ export function BioBioRender({
 	brandKit: PublicBrandKit;
 	tracking?: BioTrackingData;
 }) {
-	// Get the background color from brandKit
-	// Handle both new and legacy color schemes
-	let backgroundColor: string;
+	// Get the background color from brandKit using the new color system
+	const bgColorIndex = brandKit.bioColorScheme.bgColor;
+	const colors = [brandKit.color1, brandKit.color2, brandKit.color3];
+	const bgColor = colors[bgColorIndex] ?? brandKit.color1;
 
-	if (brandKit.color1 && brandKit.bioColorScheme) {
-		// Use new color system - get the color index from bioColorScheme mapping
-		const bgColorIndex = brandKit.bioColorScheme.bgColor;
-		const colors = [brandKit.color1, brandKit.color2, brandKit.color3];
-		const bgColor = colors[bgColorIndex];
-
-		// Darken the background color for better contrast
-		backgroundColor = bgColor ? modifyOklch(bgColor, { lightness: 0.85 }) : '#f5f5f5';
-	} else if (brandKit.colorScheme) {
-		// Fall back to legacy colorScheme
-		const bgColor =
-			brandKit.colorScheme.colors[brandKit.colorScheme.mapping.backgroundColor];
-
-		// Darken the background color for better contrast
-		backgroundColor = bgColor ? modifyOklch(bgColor, { lightness: 0.85 }) : '#f5f5f5';
-	} else {
-		// Final fallback
-		backgroundColor = '#f5f5f5';
-	}
+	// Darken the background color for better contrast
+	const backgroundColor = modifyOklch(bgColor, { lightness: 0.85 });
 
 	return (
 		<div
