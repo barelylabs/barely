@@ -71,79 +71,77 @@ export function InitializedMDXEditor({
 	toolbarOptions?: ToolbarOptions;
 } & MDXEditorProps) {
 	return (
-		<div className='relative w-full max-w-full overflow-hidden rounded-lg border border-border bg-background p-4'>
+		<div className='relative w-full max-w-full overflow-hidden rounded-lg border border-border bg-background p-4 pb-0'>
 			<div
-				className='mdx-editor-wrapper max-h-[70vh] w-full max-w-full overflow-y-auto overflow-x-hidden'
+				className='mdx-editor-wrapper relative w-full max-w-full'
 				style={
 					{
 						'--mdx-toolbar-max-width': '100%',
 					} as React.CSSProperties
 				}
 			>
-				<div className='w-full overflow-x-hidden'>
-					<MDXEditor
-						ref={editorRef}
-						plugins={[
-							headingsPlugin(),
-							listsPlugin(),
-							quotePlugin(),
-							variablePlugin(),
-							addVariablesPlugin(),
-							linkPlugin(),
-							linkDialogPlugin({
-								LinkDialog: () => <LinkDialog />,
-							}),
-							thematicBreakPlugin(),
-							markdownShortcutPlugin(),
-							jsxPlugin({
-								jsxComponentDescriptors: [
-									...videoJsxComponentDescriptors,
-									...buttonComponentDescriptors,
-									...imageFileJsxComponentDescriptors,
-									...mdxGridPlugin,
-								],
-							}),
+				<MDXEditor
+					ref={editorRef}
+					plugins={[
+						headingsPlugin(),
+						listsPlugin(),
+						quotePlugin(),
+						variablePlugin(),
+						addVariablesPlugin(),
+						linkPlugin(),
+						linkDialogPlugin({
+							LinkDialog: () => <LinkDialog />,
+						}),
+						thematicBreakPlugin(),
+						markdownShortcutPlugin(),
+						jsxPlugin({
+							jsxComponentDescriptors: [
+								...videoJsxComponentDescriptors,
+								...buttonComponentDescriptors,
+								...imageFileJsxComponentDescriptors,
+								...mdxGridPlugin,
+							],
+						}),
 
-							toolbarPlugin({
-								toolbarContents: () => (
-									<>
-										{toolbarOptions.undoRedo && <UndoRedo />}
-										{toolbarOptions.headings && <BlockTypeSelect />}
-										{toolbarOptions.lists && <ListsToggle />}
-										{toolbarOptions.formatting && <BoldItalicUnderlineToggles />}
+						toolbarPlugin({
+							toolbarContents: () => (
+								<>
+									{toolbarOptions.undoRedo && <UndoRedo />}
+									{toolbarOptions.headings && <BlockTypeSelect />}
+									{toolbarOptions.lists && <ListsToggle />}
+									{toolbarOptions.formatting && <BoldItalicUnderlineToggles />}
 
-										{toolbarOptions.divs && (
-											<div className='mx-2 flex flex-shrink-0 flex-row items-center'>
-												<InsertGrid />
-												<InsertCard />
-											</div>
-										)}
+									{toolbarOptions.divs && (
+										<div className='mx-2 flex flex-shrink-0 flex-row items-center'>
+											<InsertGrid />
+											<InsertCard />
+										</div>
+									)}
 
-										{toolbarOptions.links && (
-											<div className='mx-2 flex flex-shrink-0 flex-row items-center'>
-												<InsertVideoButton />
-												<InsertLinkButtonButton />
-											</div>
-										)}
+									{toolbarOptions.links && (
+										<div className='mx-2 flex flex-shrink-0 flex-row items-center'>
+											<InsertVideoButton />
+											<InsertLinkButtonButton />
+										</div>
+									)}
 
-										{toolbarOptions.barely && (
-											<div className='mx-2 flex flex-shrink-0 flex-row items-center'>
-												<InsertImageFileButton />
-												<InsertAssetButtonButton />
-											</div>
-										)}
-									</>
-								),
-							}),
-						]}
-						{...props}
-						contentEditableClassName='prose prose-sm max-w-none w-full [&>*]:max-w-full'
-						className={cn(
-							'w-full max-w-full [&_.cm-content]:max-w-full [&_.cm-scroller]:max-w-full',
-							className,
-						)}
-					/>
-				</div>
+									{toolbarOptions.barely && (
+										<div className='mx-2 flex flex-shrink-0 flex-row items-center'>
+											<InsertImageFileButton />
+											<InsertAssetButtonButton />
+										</div>
+									)}
+								</>
+							),
+						}),
+					]}
+					{...props}
+					contentEditableClassName='prose prose-sm max-w-none w-full [&>*]:max-w-full'
+					className={cn(
+						'w-full max-w-full [&_.cm-content]:max-w-full [&_.cm-scroller]:max-w-full',
+						className,
+					)}
+				/>
 			</div>
 		</div>
 	);

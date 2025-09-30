@@ -1,4 +1,4 @@
-/* MDXEditor toolbar width constraints */
+/* MDXEditor toolbar width constraints and sticky positioning */
 /* Following the pattern from the discussion - prefix with .mdxeditor for proper specificity */
 .mdxeditor [class*='_toolbarRoot_'] {
 	width: 100% !important; /* Override 'width: inherit' from module styles */
@@ -7,6 +7,14 @@
 	overflow-y: hidden !important;
 	flex-wrap: nowrap !important;
 	box-sizing: border-box !important;
+	position: sticky !important;
+	top: 0 !important;
+	z-index: 10 !important;
+	/* Use the CSS variables from the ui.module.css */
+	background-color: var(--baseBg) !important;
+	/* Ensure proper padding is maintained - use explicit value */
+	padding: 0.375rem !important; /* matches var(--spacing-1_5) */
+	min-height: 44px !important; /* Ensure toolbar has minimum height */
 }
 
 /* Ensure toolbar children don't shrink or wrap */
@@ -32,9 +40,39 @@
 
 /* Additional constraint for our wrapper */
 .mdx-editor-wrapper {
-	overflow-x: hidden !important;
 	max-width: 100% !important;
 	width: 100% !important;
+}
+
+/* Make the MDXEditor itself the scrollable container with fixed height */
+.mdx-editor-wrapper .mdxeditor {
+	max-height: 70vh !important;
+	overflow-y: auto !important;
+	overflow-x: hidden !important;
+	display: flex !important;
+	flex-direction: column !important;
+}
+
+/* Ensure the content editable area expands */
+.mdx-editor-wrapper .mdxeditor [class*='_rootContentEditableWrapper_'] {
+	flex: 1 !important;
+	min-height: 300px !important;
+}
+
+/* Fix bottom padding on content editable to prevent text cutoff in whitespace */
+/* Target the actual contenteditable div more specifically */
+.mdx-editor-wrapper [contenteditable='true'] {
+	padding-bottom: 0.25rem !important;
+}
+
+/* Also target the prose class which might have padding */
+.mdx-editor-wrapper .prose {
+	padding-bottom: 0 !important;
+}
+
+/* Target contentEditable class pattern */
+.mdx-editor-wrapper div[class*='contentEditable'] {
+	padding-bottom: 0.25rem !important;
 }
 
 .mdx-editor-wrapper .mdxeditor-root-contenteditable {
