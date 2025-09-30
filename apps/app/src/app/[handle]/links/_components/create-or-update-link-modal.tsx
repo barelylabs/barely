@@ -25,8 +25,10 @@ import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { BlurImage } from '@barely/ui/blur-image';
 import { Button } from '@barely/ui/button';
+import { CheckboxField } from '@barely/ui/forms/checkbox-field';
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
+import { TextAreaField } from '@barely/ui/forms/text-area-field';
 import { TextField } from '@barely/ui/forms/text-field';
 import { Icon } from '@barely/ui/icon';
 import { Label } from '@barely/ui/label';
@@ -253,6 +255,34 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 											:	''
 										}
 									/>
+
+									<div className='flex flex-col space-y-2'>
+										<CheckboxField
+											control={form.control}
+											name='customMetaTags'
+											label='Use custom meta tags for social previews'
+											description='Override auto-generated meta tags with custom values'
+										/>
+
+										{form.watch('customMetaTags') && (
+											<>
+												<TextField
+													name='title'
+													control={form.control}
+													label='Custom Title'
+													placeholder='Enter a custom title for social previews'
+												/>
+
+												<TextAreaField
+													name='description'
+													control={form.control}
+													label='Custom Description'
+													placeholder='Enter a custom description for social previews'
+													rows={3}
+												/>
+											</>
+										)}
+									</div>
 
 									<div className='flex flex-col space-y-1'>
 										<div className='flex flex-row justify-between'>
