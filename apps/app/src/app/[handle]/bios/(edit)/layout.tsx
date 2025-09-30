@@ -9,13 +9,13 @@ export default function BioEditLayout({ children }: { children: React.ReactEleme
 	return (
 		<div className={`flex h-full ${allFontClasses}`}>
 			{/* Left side: Edit interface */}
-			<div className='flex-1 overflow-y-auto'>{children}</div>
+			<div className='max-w-[1100px] flex-1 overflow-y-auto'>{children}</div>
 
 			{/* Right side: Preview */}
-			<div className='hidden w-[420px] border-l border-gray-200 bg-gray-50 lg:block'>
+			<div className='hidden min-w-[420px] flex-1 border-l border-gray-200 bg-gray-50 lg:block'>
 				<div className='sticky top-0 flex h-full flex-col p-8'>
 					{/* Bio key switcher */}
-					<div className='mb-4'>
+					<div className='mx-auto mb-4'>
 						<BioKeySwitcher />
 					</div>
 

@@ -41,8 +41,8 @@ export function BioKeySwitcher() {
 		bioKey === 'home' ? handle : `${handle}/${bioKey}`,
 	);
 
-	if (!data?.bios || data.bios.length <= 1) {
-		return null; // Don't show switcher if there's only one bio
+	if (!data?.bios) {
+		return null; // Don't show switcher if bios haven't loaded
 	}
 
 	return (
