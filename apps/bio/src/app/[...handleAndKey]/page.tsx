@@ -152,7 +152,7 @@ export async function generateMetadata({ params }: BioRouteProps) {
 		return {
 			title,
 			description,
-			...(bio.noindex && {
+			...(bio.noindex === true && {
 				robots: {
 					index: false,
 				},
