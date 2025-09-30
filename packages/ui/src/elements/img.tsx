@@ -1,9 +1,9 @@
 'use client';
 
 import type { StaticImport } from 'next/dist/shared/lib/get-img-props';
-import type { ImageLoaderProps, ImageProps } from 'next/image';
+import type { ImageProps } from 'next/image';
 import Image from 'next/image';
-import { libEnv } from '@barely/lib/env';
+import { getS3ImageUrl } from '@barely/files/utils';
 
 export type ImgProps = Omit<ImageProps, 'src'> &
 	(
@@ -16,18 +16,6 @@ export type ImgProps = Omit<ImageProps, 'src'> &
 				src?: never;
 		  }
 	);
-
-export const s3Loader = ({
-	s3Key,
-	width,
-	quality,
-}: Omit<ImageLoaderProps, 'src'> & { s3Key: string }) => {
-	const url = new URL(`${libEnv.NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN}/${s3Key}`);
-	url.searchParams.set('format', 'webp');
-	url.searchParams.set('width', width ? width.toString() : 'auto');
-	url.searchParams.set('quality', quality ? quality.toString() : '75');
-	return url.toString();
-};
 
 export function Img({
 	alt,
@@ -51,7 +39,9 @@ export function Img({
 				quality={quality}
 				priority={priority}
 				sizes={sizes}
-				loader={({ src, width, quality }) => s3Loader({ s3Key: src, width, quality })}
+				loader={({ src, width, quality }) =>
+					getS3ImageUrl({ s3Key: src, width, quality })
+				}
 				placeholder={(props.placeholder ?? props.blurDataURL) ? 'blur' : undefined}
 			/>
 		);

@@ -1,13 +1,12 @@
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
+import { getS3ImageUrl } from '@barely/files/utils';
 import { parseHandleAndKey } from '@barely/utils';
 import {
 	bioTrackingSchema,
 	eventReportSearchParamsSchema,
 } from '@barely/validators/schemas';
 import { z } from 'zod/v4';
-
-import { s3Loader } from '@barely/ui/img';
 
 import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 import { fetchBio, fetchBrandKit } from '../../trpc/server';
@@ -147,7 +146,9 @@ export async function generateMetadata({ params }: BioRouteProps) {
 		const title = bio.title ?? `${bio.handle} - Bio`;
 		const description = bio.description ?? `Links and content from ${bio.handle}`;
 		const imageUrl =
-			brandKit.avatarS3Key ? s3Loader({ s3Key: brandKit.avatarS3Key, width: 400 }) : null;
+			brandKit.avatarS3Key ?
+				getS3ImageUrl({ s3Key: brandKit.avatarS3Key, width: 400 })
+			:	null;
 
 		return {
 			title,
