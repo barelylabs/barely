@@ -24,6 +24,8 @@ import {
 } from '@barely/ui/src/bio';
 import { BioContentAroundBlocks } from '@barely/ui/src/bio/bio-content-around-blocks';
 
+import { modifyOklch } from '@barely/utils/color-conversion';
+
 import { BioLogVisit } from './bio-log-visit';
 
 function BioBrandKitProvider({
@@ -199,16 +201,35 @@ export function BioBioRender({
 	brandKit: PublicBrandKit;
 	tracking?: BioTrackingData;
 }) {
-	// Get the background color from brandKit for oklch calculation
-	const bgColor =
-		brandKit.colorScheme.colors[brandKit.colorScheme.mapping.backgroundColor];
+	// Get the background color from brandKit
+	// Handle both new and legacy color schemes
+	let backgroundColor: string;
+
+	if (brandKit.color1 && brandKit.bioColorScheme) {
+		// Use new color system - get the color index from bioColorScheme mapping
+		const bgColorIndex = brandKit.bioColorScheme.bgColor;
+		const colors = [brandKit.color1, brandKit.color2, brandKit.color3];
+		const bgColor = colors[bgColorIndex];
+
+		// Darken the background color for better contrast
+		backgroundColor = bgColor ? modifyOklch(bgColor, { lightness: 0.85 }) : '#f5f5f5';
+	} else if (brandKit.colorScheme) {
+		// Fall back to legacy colorScheme
+		const bgColor =
+			brandKit.colorScheme.colors[brandKit.colorScheme.mapping.backgroundColor];
+
+		// Darken the background color for better contrast
+		backgroundColor = bgColor ? modifyOklch(bgColor, { lightness: 0.85 }) : '#f5f5f5';
+	} else {
+		// Final fallback
+		backgroundColor = '#f5f5f5';
+	}
 
 	return (
 		<div
 			className='min-h-screen'
 			style={{
-				// Use oklch relative color syntax to darken the background
-				backgroundColor: `oklch(from ${bgColor} calc(l - 0.3) c h)`,
+				backgroundColor,
 			}}
 		>
 			<div className='mx-auto max-w-xl px-0 py-0 sm:px-4 sm:py-12'>
