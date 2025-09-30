@@ -503,6 +503,8 @@ export function BioBlocksPage({ bioKey }: { bioKey: string }) {
 	const [isCreatingBlockAtIndex, setIsCreatingBlockAtIndex] = useState<number | null>(
 		null,
 	);
+	const [localTitle, setLocalTitle] = useState<string>('');
+	const [localDescription, setLocalDescription] = useState<string>('');
 
 	// DnD sensors
 	const sensors = useSensors(
@@ -546,6 +548,12 @@ export function BioBlocksPage({ bioKey }: { bioKey: string }) {
 			},
 		),
 	);
+
+	// Initialize local state from bio data
+	useEffect(() => {
+		setLocalTitle(bio.title ?? '');
+		setLocalDescription(bio.description ?? '');
+	}, [bio.title, bio.description]);
 
 	// Mutations
 	const createBlockMutation = useMutation(
@@ -817,13 +825,16 @@ export function BioBlocksPage({ bioKey }: { bioKey: string }) {
 						Page Title (SEO)
 					</Text>
 					<Input
-						value={bio.title ?? ''}
-						onChange={e => {
-							mutate({
-								handle,
-								id: bio.id,
-								title: e.target.value || null,
-							});
+						value={localTitle}
+						onChange={e => setLocalTitle(e.target.value)}
+						onBlur={() => {
+							if (localTitle !== (bio.title ?? '')) {
+								mutate({
+									handle,
+									id: bio.id,
+									title: localTitle || null,
+								});
+							}
 						}}
 						placeholder={`${bio.handle} - Bio`}
 						className='w-full'
@@ -837,13 +848,16 @@ export function BioBlocksPage({ bioKey }: { bioKey: string }) {
 						Page Description (SEO)
 					</Text>
 					<textarea
-						value={bio.description ?? ''}
-						onChange={e => {
-							mutate({
-								handle,
-								id: bio.id,
-								description: e.target.value || null,
-							});
+						value={localDescription}
+						onChange={e => setLocalDescription(e.target.value)}
+						onBlur={() => {
+							if (localDescription !== (bio.description ?? '')) {
+								mutate({
+									handle,
+									id: bio.id,
+									description: localDescription || null,
+								});
+							}
 						}}
 						placeholder={`Links and content from ${bio.handle}`}
 						className='w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
