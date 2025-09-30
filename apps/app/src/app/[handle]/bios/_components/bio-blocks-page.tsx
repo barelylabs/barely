@@ -743,6 +743,15 @@ export function BioBlocksPage({ bioKey }: { bioKey: string }) {
 		});
 	};
 
+	const { mutate } = useMutation(
+		trpc.bio.update.mutationOptions({
+			onSettled: async () => {
+				// Invalidate and refetch
+				await queryClient.invalidateQueries({ queryKey: bioQueryKey });
+			},
+		}),
+	);
+
 	const handleToggleBlock = async (blockId: string, enabled: boolean) => {
 		await updateBlockMutation.mutateAsync({
 			handle,
@@ -801,6 +810,51 @@ export function BioBlocksPage({ bioKey }: { bioKey: string }) {
 	// bio is guaranteed to be defined with useSuspenseQuery
 	return (
 		<div className='flex flex-col'>
+			{/* SEO Fields */}
+			<div className='mb-8 space-y-4'>
+				<div>
+					<Text variant='sm/semibold' className='mb-1'>
+						Page Title (SEO)
+					</Text>
+					<Input
+						value={bio.title ?? ''}
+						onChange={e => {
+							mutate({
+								handle,
+								id: bio.id,
+								title: e.target.value || null,
+							});
+						}}
+						placeholder={`${bio.handle} - Bio`}
+						className='w-full'
+					/>
+					<Text variant='xs/normal' className='mt-1 text-gray-500'>
+						Used for search results and browser tabs. Defaults to "{bio.handle} - Bio"
+					</Text>
+				</div>
+				<div>
+					<Text variant='sm/semibold' className='mb-1'>
+						Page Description (SEO)
+					</Text>
+					<textarea
+						value={bio.description ?? ''}
+						onChange={e => {
+							mutate({
+								handle,
+								id: bio.id,
+								description: e.target.value || null,
+							});
+						}}
+						placeholder={`Links and content from ${bio.handle}`}
+						className='w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
+						rows={3}
+					/>
+					<Text variant='xs/normal' className='mt-1 text-gray-500'>
+						Used for search results. Defaults to "Links and content from {bio.handle}"
+					</Text>
+				</div>
+			</div>
+
 			{/* Add Block Button */}
 			<div className='mb-8'>
 				<Button

@@ -32,12 +32,28 @@ export const createBioSchema = insertBioSchema.omit({
 	deletedAt: true,
 });
 
-export const updateBioSchema = insertBioSchema.partial().required({ id: true }).omit({
-	workspaceId: true,
-	createdAt: true,
-	updatedAt: true,
-	deletedAt: true,
-});
+export const updateBioSchema = insertBioSchema
+	.partial()
+	.required({ id: true })
+	.omit({
+		workspaceId: true,
+		createdAt: true,
+		updatedAt: true,
+		deletedAt: true,
+	})
+	.extend({
+		// Extend with validation for SEO fields
+		title: z
+			.string()
+			.max(255, 'Title must be less than 255 characters')
+			.optional()
+			.nullable(),
+		description: z
+			.string()
+			.max(1000, 'Description must be less than 1000 characters')
+			.optional()
+			.nullable(),
+	});
 
 export const publicBioSchema = z.object({
 	handle: z.string(),
@@ -53,6 +69,8 @@ export const publicBioSchema = z.object({
 	barelyBranding: z.boolean(),
 	emailCaptureEnabled: z.boolean(),
 	emailCaptureIncentiveText: z.string().nullable(),
+	title: z.string().nullable(),
+	description: z.string().nullable(),
 });
 
 export type InsertBio = z.infer<typeof insertBioSchema>;
