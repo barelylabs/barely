@@ -70,6 +70,10 @@ export const Bios = pgTable(
 		// email capture settings
 		emailCaptureEnabled: boolean('emailCaptureEnabled').default(false).notNull(),
 		emailCaptureIncentiveText: varchar('emailCaptureIncentiveText', { length: 255 }),
+
+		// SEO metadata
+		title: varchar('title', { length: 255 }),
+		description: text('description'),
 	},
 	bio => ({
 		workspace: index('Bios_workspace_idx').on(bio.workspaceId),
