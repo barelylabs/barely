@@ -931,7 +931,7 @@ export function BioBlocksPage({ bioKey }: { bioKey: string }) {
 			</div>
 
 			{/* Branding Block */}
-			<Card className='overflow-hidden'>
+			<Card className='mt-8 overflow-hidden'>
 				<div className='flex items-center justify-between'>
 					<div className='flex items-center gap-3'>
 						<div className='invisible cursor-not-allowed'>
