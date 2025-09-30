@@ -3,6 +3,7 @@ import type { AllowedFileType, ContentDisposition } from '@uploadthing/shared';
 import { ALLOWED_FILE_TYPES, getTypeFromFileName } from '@uploadthing/shared';
 
 import type { AllowedFileExtension } from './types';
+import { env } from '../env';
 
 export function contentDisposition(
 	contentDisposition: ContentDisposition,
@@ -90,4 +91,18 @@ export function getFileTypeFromFileName(
 		allowedFileTypes ?? [...ALLOWED_FILE_TYPES],
 	);
 	return fileType;
+}
+
+interface S3ImageOptions {
+	s3Key: string;
+	width?: number | string;
+	quality?: number | string;
+}
+
+export function getS3ImageUrl({ s3Key, width, quality }: S3ImageOptions): string {
+	const url = new URL(`${env.NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN}/${s3Key}`);
+	url.searchParams.set('format', 'webp');
+	url.searchParams.set('width', width ? width.toString() : 'auto');
+	url.searchParams.set('quality', quality ? quality.toString() : '75');
+	return url.toString();
 }
