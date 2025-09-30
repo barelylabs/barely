@@ -1,7 +1,6 @@
 'use client';
 
-import type { TransparentLinkData } from '@barely/utils';
-import type { Link, UpsertLink } from '@barely/validators';
+import type { UpsertLink } from '@barely/validators';
 import type { UseFormReturn } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { useWorkspace } from '@barely/hooks';
@@ -9,20 +8,15 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
-import { Alert } from '@barely/ui/alert';
 import { SwitchField } from '@barely/ui/forms/switch-field';
+import { TextAreaField } from '@barely/ui/forms/text-area-field';
+import { TextField } from '@barely/ui/forms/text-field';
 import { SimpleTooltipContent, TooltipContent } from '@barely/ui/tooltip';
-
-import { TransparentLinkDisplay } from '~/app/[handle]/links/_components/create-or-update-link-modal';
 
 export function LinkOptionalSettings({
 	linkForm,
-	transparentLinkData,
-	selectedLink,
 }: {
-	selectedLink?: Link | null;
 	linkForm: UseFormReturn<UpsertLink>;
-	transparentLinkData: TransparentLinkData;
 }) {
 	const router = useRouter();
 	const trpc = useTRPC();
@@ -47,46 +41,35 @@ export function LinkOptionalSettings({
 				</div>
 			</div>
 
-			{!selectedLink?.transparent && (
-				<>
-					<div className='flex flex-col gap-2'>
-						<SwitchField
-							name='transparent'
-							label='Transparent Link'
-							control={linkForm.control}
-							infoTooltip={
-								<TooltipContent title='A permanent, transparent link. Useful for marketing.' />
-							}
-							disabled={
-								// if we're editing a link that is transparent, we can't change it back.
-								// if we don't support the app, we can't make it transparent.
-								selectedLink?.transparent ?? transparentLinkData === null
-							}
-							disabledTooltip={
-								selectedLink?.transparent ?
-									<TooltipContent title="Transparent links can't be changed back." />
-								:	<TooltipContent title="We don't currently support that app." />
-							}
-						/>
+			<SwitchField
+				name='customMetaTags'
+				label='Custom Meta Tags'
+				control={linkForm.control}
+				infoTooltip={
+					<TooltipContent title='Override auto-generated meta tags with custom values for social previews' />
+				}
+			/>
 
-						{!selectedLink?.transparent && linkForm.watch('transparent') && (
-							<Alert
-								variant='warning'
-								size='sm'
-								title='Transparent links are permanent.'
-								description="You can't change a transparent link back to a regular link."
-							/>
-						)}
+			{linkForm.watch('customMetaTags') && (
+				<div className='flex flex-col space-y-2 pl-4'>
+					<TextField
+						name='title'
+						control={linkForm.control}
+						label='Custom Title'
+						placeholder='Enter a custom title for social previews'
+					/>
 
-						{(linkForm.watch('transparent') ?? selectedLink?.transparent) && (
-							<TransparentLinkDisplay
-								transparentLink={transparentLinkData?.transparentLink}
-							/>
-						)}
-					</div>
-					<div className='w-full border-t border-border' />
-				</>
+					<TextAreaField
+						name='description'
+						control={linkForm.control}
+						label='Custom Description'
+						placeholder='Enter a custom description for social previews'
+						rows={3}
+					/>
+				</div>
 			)}
+
+			<div className='w-full border-t border-border' />
 
 			<SwitchField
 				name='remarketing'

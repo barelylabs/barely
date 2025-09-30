@@ -25,10 +25,8 @@ import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { BlurImage } from '@barely/ui/blur-image';
 import { Button } from '@barely/ui/button';
-import { CheckboxField } from '@barely/ui/forms/checkbox-field';
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
-import { TextAreaField } from '@barely/ui/forms/text-area-field';
 import { TextField } from '@barely/ui/forms/text-field';
 import { Icon } from '@barely/ui/icon';
 import { Label } from '@barely/ui/label';
@@ -73,6 +71,9 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 	const { mutateAsync: createLink } = useMutation(
 		trpc.link.create.mutationOptions({
 			onSuccess: async () => {
+				await queryClient.invalidateQueries({
+					queryKey: trpc.link.byWorkspace.queryKey(),
+				});
 				await handleCloseModal();
 			},
 		}),
@@ -81,6 +82,9 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 	const { mutateAsync: updateLink } = useMutation(
 		trpc.link.update.mutationOptions({
 			onSuccess: async () => {
+				await queryClient.invalidateQueries({
+					queryKey: trpc.link.byWorkspace.queryKey(),
+				});
 				await handleCloseModal();
 			},
 		}),
@@ -190,10 +194,7 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 		form.reset();
 		focusGridList();
 		await setShowLinkModal(false);
-		await queryClient.invalidateQueries({
-			queryKey: trpc.link.byWorkspace.queryKey(),
-		});
-	}, [focusGridList, form, queryClient, trpc.link.byWorkspace, setShowLinkModal]);
+	}, [focusGridList, form, setShowLinkModal]);
 
 	const LinkIconOrFavicon = useMemo(() => {
 		if (!metaTags?.favicon) return null;
@@ -256,34 +257,6 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 										}
 									/>
 
-									<div className='flex flex-col space-y-2'>
-										<CheckboxField
-											control={form.control}
-											name='customMetaTags'
-											label='Use custom meta tags for social previews'
-											description='Override auto-generated meta tags with custom values'
-										/>
-
-										{form.watch('customMetaTags') && (
-											<>
-												<TextField
-													name='title'
-													control={form.control}
-													label='Custom Title'
-													placeholder='Enter a custom title for social previews'
-												/>
-
-												<TextAreaField
-													name='description'
-													control={form.control}
-													label='Custom Description'
-													placeholder='Enter a custom description for social previews'
-													rows={3}
-												/>
-											</>
-										)}
-									</div>
-
 									<div className='flex flex-col space-y-1'>
 										<div className='flex flex-row justify-between'>
 											<Label className='items-center'>
@@ -339,21 +312,9 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 											</Suspense>
 										</div>
 									</div>
-									{mode === 'update' && selectedLink?.transparent && (
-										<div className='flex flex-col gap-1'>
-											<Label>Transparent Link</Label>
-											<TransparentLinkDisplay
-												transparentLink={transparentLinkData?.transparentLink}
-											/>
-										</div>
-									)}
 								</div>
 
-								<LinkOptionalSettings
-									linkForm={form}
-									selectedLink={selectedLink}
-									transparentLinkData={transparentLinkData}
-								/>
+								<LinkOptionalSettings linkForm={form} />
 							</div>
 						</ModalBody>
 						<ModalFooter>
@@ -372,25 +333,6 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 				/>
 			</div>
 		</Modal>
-	);
-}
-
-export function TransparentLinkDisplay({
-	transparentLink,
-}: {
-	transparentLink?: string;
-}) {
-	if (!transparentLink) return null;
-
-	return (
-		<div className='flex w-full max-w-full flex-col gap-1'>
-			<div className='flex h-fit min-h-[40px] w-full flex-row items-center gap-2 rounded-md border bg-slate-100 p-2'>
-				<Icon.ghost className='h-4 w-4 text-muted-foreground' />
-				<Text className='w-full break-all' variant='sm/normal'>
-					{transparentLink}
-				</Text>
-			</div>
-		</div>
 	);
 }
 
