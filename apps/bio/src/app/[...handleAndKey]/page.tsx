@@ -144,8 +144,8 @@ export async function generateMetadata({ params }: BioRouteProps) {
 		const brandKit = await fetchBrandKit(handle);
 		const bio = await fetchBio(handle, key);
 
-		const title = bio.title || `${bio.handle} - Bio`;
-		const description = bio.description || `Links and content from ${bio.handle}`;
+		const title = bio.title ?? `${bio.handle} - Bio`;
+		const description = bio.description ?? `Links and content from ${bio.handle}`;
 		const imageUrl =
 			brandKit.avatarS3Key ? s3Loader({ s3Key: brandKit.avatarS3Key, width: 400 }) : null;
 
