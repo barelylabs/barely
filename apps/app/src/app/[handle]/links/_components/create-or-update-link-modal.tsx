@@ -28,6 +28,7 @@ import { Button } from '@barely/ui/button';
 import { CheckboxField } from '@barely/ui/forms/checkbox-field';
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
+import { TextAreaField } from '@barely/ui/forms/text-area-field';
 import { TextField } from '@barely/ui/forms/text-field';
 import { Icon } from '@barely/ui/icon';
 import { Label } from '@barely/ui/label';
@@ -272,7 +273,7 @@ export function CreateOrUpdateLinkModal(props: { mode: 'create' | 'update' }) {
 													placeholder='Enter a custom title for social previews'
 												/>
 
-												<TextField
+												<TextAreaField
 													name='description'
 													control={form.control}
 													label='Custom Description'
