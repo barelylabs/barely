@@ -62,15 +62,17 @@ export function MarkdownBlock({ block, blockIndex }: MarkdownBlockProps) {
 			/>
 
 			{/* Markdown content */}
-			<div className={cn('prose prose-sm max-w-none', 'text-brandKit-text')}>
-				<ReactMarkdown
-					remarkPlugins={[remarkGfm, remarkBreaks]}
-					rehypePlugins={[rehypeRaw]}
-					components={markdownComponents}
-				>
-					{content}
-				</ReactMarkdown>
-			</div>
+			{content.trim() !== '' && (
+				<div className={cn('prose prose-sm max-w-none', 'text-brandKit-text')}>
+					<ReactMarkdown
+						remarkPlugins={[remarkGfm, remarkBreaks]}
+						rehypePlugins={[rehypeRaw]}
+						components={markdownComponents}
+					>
+						{content}
+					</ReactMarkdown>
+				</div>
+			)}
 
 			{/* CTA Button */}
 			{block.ctaText && (

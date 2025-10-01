@@ -205,8 +205,8 @@ export function BioBioRender({
 	const colors = [brandKit.color1, brandKit.color2, brandKit.color3];
 	const bgColor = colors[bgColorIndex] ?? brandKit.color1;
 
-	// Darken the background color for better contrast
-	const backgroundColor = modifyOklch(bgColor, { lightness: 0.85 });
+	// Lighten the background color slightly for subtle contrast
+	const backgroundColor = modifyOklch(bgColor, { alpha: 0.7 });
 
 	return (
 		<div
@@ -215,7 +215,7 @@ export function BioBioRender({
 				backgroundColor,
 			}}
 		>
-			<div className='mx-auto max-w-xl px-0 py-0 sm:px-4 sm:py-12'>
+			<div className='mx-auto max-w-[725px] px-0 py-0 sm:px-4 sm:py-12'>
 				<BioBrandKitProvider brandKit={brandKit}>
 					<BioBioProvider bio={bio} tracking={tracking}>
 						<BioLogVisit />
