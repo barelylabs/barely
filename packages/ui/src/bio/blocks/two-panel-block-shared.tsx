@@ -163,6 +163,11 @@ export function TwoPanelBlockShared({
 	const imageDesktopSide = block.imageDesktopSide ?? 'left';
 	const imageMobileSide = block.imageMobileSide ?? 'top';
 
+	const imgHeightToWidthRatio =
+		block.imageFile?.height && block.imageFile.width ?
+			block.imageFile.height / block.imageFile.width
+		:	1;
+
 	return (
 		<div
 			className={cn(
@@ -178,7 +183,8 @@ export function TwoPanelBlockShared({
 			{/* Image Panel */}
 			<div
 				className={cn(
-					'relative overflow-hidden rounded-xl', // Fixed radius for images
+					'relative h-full overflow-hidden rounded-xl', // Fixed radius for images
+
 					imageDesktopSide === 'right' && 'md:col-start-2',
 				)}
 			>
@@ -188,8 +194,8 @@ export function TwoPanelBlockShared({
 						blurDataURL={block.imageFile.blurDataUrl ?? undefined}
 						alt={block.imageAltText ?? block.imageCaption ?? 'Image'}
 						width={600}
-						height={600}
-						className='aspect-square h-full w-full object-cover'
+						height={600 * imgHeightToWidthRatio}
+						className='aspect-2/3 h-full w-full object-cover'
 						sizes='(max-width: 768px) 100vw, 50vw'
 						priority={false}
 						loading='lazy'
@@ -246,7 +252,7 @@ export function TwoPanelBlockShared({
 							target={block.targetUrl ? '_blank' : '_self'}
 							variant='button'
 							look='primary'
-							size='md'
+							size='lg'
 							fullWidth={true}
 							className={cn(
 								'hover:bg-brandKit-block/80 bg-brandKit-block text-brandKit-block-text md:w-auto',

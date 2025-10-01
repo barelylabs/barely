@@ -80,7 +80,7 @@ export function CtaButton({ block, blockIndex, blockType, className }: CtaButton
 			target={block.targetUrl ? '_blank' : '_self'}
 			variant='button'
 			look='primary'
-			size='md'
+			size='lg'
 			fullWidth={true}
 			className={cn(
 				'hover:bg-brandKit-block/80 bg-brandKit-block text-brandKit-block-text',

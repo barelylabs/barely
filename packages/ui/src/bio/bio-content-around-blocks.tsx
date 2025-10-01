@@ -22,7 +22,7 @@ export function BioContentAroundBlocks({ children }: { children: ReactNode }) {
 			className={cn(
 				'flex h-full flex-col justify-between gap-4 py-5',
 				'bg-brandKit-bg text-brandKit-text', // Add brandKit classes
-				brandKit.blockStyle !== 'full-width' && 'px-6',
+				brandKit.blockStyle !== 'full-width' && 'px-6 sm:px-8',
 				!isPreview ?
 					'min-h-screen sm:min-h-[calc(100vh-96px)] sm:rounded-2xl sm:shadow-2xl'
 				:	'min-h-[700px]',

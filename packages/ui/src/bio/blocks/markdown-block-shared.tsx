@@ -1,6 +1,8 @@
 import type { ComputedStyles } from '@barely/utils';
 import type { ReactNode } from 'react';
 
+import { WrapBalancer } from '../../elements/wrap-balancer';
+
 /**
  * Shared components for markdown rendering with brand kit styles.
  * These are used by both MarkdownBlock (client) and MarkdownBlockServer.
@@ -19,7 +21,7 @@ export function createMarkdownComponents(computedStyles: ComputedStyles) {
 		),
 		h1: ({ children }: { children?: ReactNode }) => (
 			<h1
-				className='mb-4 text-center text-2xl font-bold text-brandKit-text'
+				className='mb-4 text-center text-3xl font-bold text-brandKit-text'
 				style={{
 					fontFamily: computedStyles.fonts.headingFont,
 				}}
@@ -29,7 +31,7 @@ export function createMarkdownComponents(computedStyles: ComputedStyles) {
 		),
 		h2: ({ children }: { children?: ReactNode }) => (
 			<h2
-				className='mb-3 text-center text-xl font-semibold text-brandKit-text'
+				className='mb-3 text-center text-2xl font-semibold text-brandKit-text'
 				style={{
 					fontFamily: computedStyles.fonts.headingFont,
 				}}
@@ -39,7 +41,7 @@ export function createMarkdownComponents(computedStyles: ComputedStyles) {
 		),
 		h3: ({ children }: { children?: ReactNode }) => (
 			<h3
-				className='mb-2 text-center text-lg font-semibold text-brandKit-text'
+				className='mb-2 text-center text-xl font-semibold text-brandKit-text'
 				style={{
 					fontFamily: computedStyles.fonts.headingFont,
 				}}
@@ -49,7 +51,7 @@ export function createMarkdownComponents(computedStyles: ComputedStyles) {
 		),
 		h4: ({ children }: { children?: ReactNode }) => (
 			<h4
-				className='mb-2 text-center text-base font-semibold text-brandKit-text'
+				className='mb-2 text-center text-lg font-semibold text-brandKit-text'
 				style={{
 					fontFamily: computedStyles.fonts.headingFont,
 				}}
@@ -59,7 +61,7 @@ export function createMarkdownComponents(computedStyles: ComputedStyles) {
 		),
 		h5: ({ children }: { children?: ReactNode }) => (
 			<h5
-				className='mb-2 text-center text-sm font-semibold text-brandKit-text'
+				className='mb-2 text-center text-md font-semibold text-brandKit-text'
 				style={{
 					fontFamily: computedStyles.fonts.headingFont,
 				}}
@@ -69,7 +71,7 @@ export function createMarkdownComponents(computedStyles: ComputedStyles) {
 		),
 		h6: ({ children }: { children?: ReactNode }) => (
 			<h6
-				className='mb-2 text-center text-xs font-semibold text-brandKit-text'
+				className='mb-2 text-center text-sm font-semibold text-brandKit-text'
 				style={{
 					fontFamily: computedStyles.fonts.headingFont,
 				}}
@@ -170,19 +172,21 @@ export function MarkdownBlockHeader({
 }: MarkdownBlockHeaderProps) {
 	if (!title && !subtitle) return null;
 
+	const renderTitle = title && title.trim() !== '';
+	const renderSubtitle = subtitle && subtitle.trim() !== '';
 	return (
 		<div className='space-y-1 text-center'>
-			{title && (
+			{renderTitle && (
 				<div
-					className='text-3xl font-bold text-brandKit-text'
+					className='text-5xl font-bold text-brandKit-text'
 					style={{
 						fontFamily: headingFont,
 					}}
 				>
-					{title}
+					<WrapBalancer>{title}</WrapBalancer>
 				</div>
 			)}
-			{subtitle && (
+			{renderSubtitle && (
 				<div
 					className='text-xs text-brandKit-text opacity-80'
 					style={{

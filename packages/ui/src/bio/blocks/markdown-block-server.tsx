@@ -48,9 +48,12 @@ export async function MarkdownBlockServer({
 			/>
 
 			{/* Markdown content */}
-			<div className={cn('prose prose-sm max-w-none', 'text-brandKit-text')}>
-				{renderedMarkdown}
-			</div>
+			{block.markdown && block.markdown.trim() !== '' && (
+				<div className={cn('prose prose-sm max-w-none', 'text-brandKit-text')}>
+					markdown.length:{block.markdown.length.toString()}
+					{renderedMarkdown}
+				</div>
+			)}
 
 			{/* CTA Button */}
 			{block.ctaText && (
