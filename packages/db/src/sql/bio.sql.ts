@@ -71,6 +71,9 @@ export const Bios = pgTable(
 		emailCaptureEnabled: boolean('emailCaptureEnabled').default(false).notNull(),
 		emailCaptureIncentiveText: varchar('emailCaptureIncentiveText', { length: 255 }),
 
+		// layout settings
+		hasTwoPanel: boolean('hasTwoPanel').default(false).notNull(),
+
 		// SEO metadata
 		title: varchar('title', { length: 255 }),
 		description: text('description'),

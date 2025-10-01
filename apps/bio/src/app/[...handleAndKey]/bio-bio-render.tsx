@@ -215,7 +215,11 @@ export function BioBioRender({
 				backgroundColor,
 			}}
 		>
-			<div className='mx-auto max-w-[725px] px-0 py-0 sm:px-4 sm:py-12'>
+			<div
+				className={`mx-auto px-0 py-0 sm:px-4 sm:py-12 ${
+					bio.hasTwoPanel ? 'max-w-[750px]' : 'max-w-xl'
+				}`}
+			>
 				<BioBrandKitProvider brandKit={brandKit}>
 					<BioBioProvider bio={bio} tracking={tracking}>
 						<BioLogVisit />

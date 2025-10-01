@@ -725,6 +725,14 @@ export const bioRoute = {
 				lexoRank,
 			});
 
+			// If creating a twoPanel block, update the bio's hasTwoPanel flag
+			if (sanitizedBlockData.type === 'twoPanel' && sanitizedBlockData.enabled !== false) {
+				await dbPool(ctx.pool)
+					.update(Bios)
+					.set({ hasTwoPanel: true })
+					.where(and(eq(Bios.id, bioId), eq(Bios.workspaceId, ctx.workspace.id)));
+			}
+
 			return block;
 		}),
 
@@ -796,6 +804,46 @@ export const bioRoute = {
 				.where(and(eq(BioBlocks.id, id), eq(BioBlocks.workspaceId, ctx.workspace.id)))
 				.returning();
 
+			// Check if we need to update hasTwoPanel flag
+			// This handles enabling/disabling twoPanel blocks
+			if (updatedBlock && existingBlock) {
+				const wasEnabledTwoPanel = existingBlock.type === 'twoPanel' && existingBlock.enabled;
+				const isEnabledTwoPanel = updatedBlock.type === 'twoPanel' && updatedBlock.enabled;
+
+				// If status changed, we need to check all blocks
+				if (wasEnabledTwoPanel !== isEnabledTwoPanel) {
+					// Find which bio this block belongs to
+					const bioBlockRelation = await dbHttp.query._BioBlocks_To_Bios.findFirst({
+						where: eq(_BioBlocks_To_Bios.bioBlockId, id),
+					});
+
+					if (bioBlockRelation) {
+						// Check all blocks for this bio
+						const allBioBlocks = await dbHttp.query._BioBlocks_To_Bios.findMany({
+							where: eq(_BioBlocks_To_Bios.bioId, bioBlockRelation.bioId),
+							with: {
+								bioBlock: true,
+							},
+						});
+
+						const hasEnabledTwoPanel = allBioBlocks.some(
+							bb => bb.bioBlock.type === 'twoPanel' && bb.bioBlock.enabled,
+						);
+
+						// Update the bio's hasTwoPanel flag
+						await dbPool(ctx.pool)
+							.update(Bios)
+							.set({ hasTwoPanel: hasEnabledTwoPanel })
+							.where(
+								and(
+									eq(Bios.id, bioBlockRelation.bioId),
+									eq(Bios.workspaceId, ctx.workspace.id),
+								),
+							);
+					}
+				}
+			}
+
 			return updatedBlock ?? raiseTRPCError({ message: 'Failed to update block' });
 		}),
 
@@ -813,6 +861,16 @@ export const bioRoute = {
 			});
 
 			if (!bio) raiseTRPCError({ message: 'Bio not found' });
+
+			// Check if the block being deleted is a twoPanel block
+			const blockToDelete = await dbHttp.query.BioBlocks.findFirst({
+				where: and(
+					eq(BioBlocks.id, input.blockId),
+					eq(BioBlocks.workspaceId, ctx.workspace.id),
+				),
+			});
+
+			const isDeletingTwoPanel = blockToDelete?.type === 'twoPanel' && blockToDelete?.enabled;
 
 			// Remove the relationship
 			await dbPool(ctx.pool)
@@ -833,6 +891,28 @@ export const bioRoute = {
 						eq(BioBlocks.workspaceId, ctx.workspace.id),
 					),
 				);
+
+			// If we deleted a twoPanel block, check if any other enabled twoPanel blocks remain
+			if (isDeletingTwoPanel) {
+				const remainingTwoPanelBlocks = await dbHttp.query._BioBlocks_To_Bios.findMany({
+					where: eq(_BioBlocks_To_Bios.bioId, input.bioId),
+					with: {
+						bioBlock: true,
+					},
+				});
+
+				const hasRemainingTwoPanel = remainingTwoPanelBlocks.some(
+					bb => bb.bioBlock.type === 'twoPanel' && bb.bioBlock.enabled,
+				);
+
+				// Update hasTwoPanel if no twoPanel blocks remain
+				if (!hasRemainingTwoPanel) {
+					await dbPool(ctx.pool)
+						.update(Bios)
+						.set({ hasTwoPanel: false })
+						.where(and(eq(Bios.id, input.bioId), eq(Bios.workspaceId, ctx.workspace.id)));
+				}
+			}
 
 			return { success: true };
 		}),
