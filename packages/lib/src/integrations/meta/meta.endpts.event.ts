@@ -62,6 +62,11 @@ export const META_EVENT_NAMES = [
 	'Subscribe',
 	'ViewContent',
 
+	// bio
+	'barely.bio/view',
+	'barely.bio/buttonClick',
+	'barely.bio/emailCapture',
+
 	// cart
 	'barely.cart/viewCheckout',
 	'barely.cart/updateMainProductPayWhatYouWantPrice',
