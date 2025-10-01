@@ -28,7 +28,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 		// generate optimistic ID
 		cartId = newId('cart');
 		const shipTo = {
-			country: isDevelopment() ? 'UK' : req.headers.get('x-vercel-ip-country'),
+			country: isDevelopment() ? 'GB' : req.headers.get('x-vercel-ip-country'),
 			state: isDevelopment() ? 'England' : req.headers.get('x-vercel-ip-country-region'),
 			city: isDevelopment() ? 'London' : req.headers.get('x-vercel-ip-city'),
 		};

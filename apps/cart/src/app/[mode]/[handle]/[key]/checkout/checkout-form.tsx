@@ -10,7 +10,7 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { APPAREL_SIZES, isApparelSize } from '@barely/const';
 import { useDebouncedCallback, useZodForm } from '@barely/hooks';
-import { getAmountsForCheckout } from '@barely/lib/utils/cart';
+import { getAmountsForCheckout, getVatRateForCheckout } from '@barely/lib/utils/cart';
 import { cn, formatMinorToMajorCurrency, getAbsoluteUrl } from '@barely/utils';
 import { updateCheckoutCartFromCheckoutSchema } from '@barely/validators';
 import {
@@ -182,6 +182,7 @@ export function CheckoutForm({
 
 	// const [isFetchingRates, setIsFetchingRates] = useState(false);
 	const [, setIsFetchingRates] = useAtom(isFetchingRatesAtom);
+	const [, setVat] = useAtom(vatAtom);
 	const { mutateAsync: mutateAddress } = useMutation(
 		trpc.updateShippingAddressFromCheckout.mutationOptions({
 			onMutate: async data => {
@@ -304,6 +305,13 @@ export function CheckoutForm({
 							console.log('address change', e);
 							if (e.complete) {
 								const address = e.value.address;
+
+								// Update VAT rate based on shipping addresses
+								const vatRate = getVatRateForCheckout(
+									publicFunnel.workspace.shippingAddressCountry,
+									address.country,
+								);
+								setVat(vatRate);
 
 								debouncedUpdateAddress({
 									cartId,
