@@ -29,7 +29,7 @@ export function LinksBlock({ block, blockIndex }: LinksBlockProps) {
 	const showTitle = block.title && block.title.trim() !== '';
 	const showSubtitle = block.subtitle && block.subtitle.trim() !== '';
 	return (
-		<div className='space-y-3'>
+		<div className='mx-auto max-w-xl space-y-3'>
 			{/* Render block title and subtitle if they exist */}
 			{(showTitle ?? showSubtitle) && (
 				<div

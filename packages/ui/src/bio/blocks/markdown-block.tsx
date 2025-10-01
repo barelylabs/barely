@@ -51,7 +51,7 @@ export function MarkdownBlock({ block, blockIndex }: MarkdownBlockProps) {
 
 	return (
 		<div
-			className={cn('space-y-4', isPreview && 'cursor-pointer')}
+			className={cn('mx-auto max-w-xl space-y-4', isPreview && 'cursor-pointer')}
 			onClick={handleBlockClick}
 		>
 			<MarkdownBlockHeader

@@ -33,7 +33,7 @@ export function ImageBlock({ block }: ImageBlockProps) {
 
 	return (
 		<>
-			<div className='space-y-4'>
+			<div className='mx-auto max-w-xl space-y-4'>
 				{/* Block title and subtitle */}
 				{(block.title ?? block.subtitle) && (
 					<div className='space-y-1 text-center'>
