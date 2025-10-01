@@ -139,14 +139,17 @@ export function TwoPanelBlockShared({
 		} else if (block.targetBio) {
 			baseHref = getAbsoluteUrl(
 				'bio',
-				`/${block.targetBio.handle}/bio/${block.targetBio.key}`,
+				`/${block.targetBio.handle}/${block.targetBio.key}`,
 			);
 		} else if (block.targetFm) {
 			// FM routes not implemented yet
 			baseHref = getAbsoluteUrl('fm', `/${block.targetFm.handle}/${block.targetFm.key}`);
 		} else if (block.targetCartFunnel) {
 			// Cart checkout URL logic would go here
-			baseHref = getAbsoluteUrl('cart', `/${block.targetCartFunnel.key}`);
+			baseHref = getAbsoluteUrl(
+				'cart',
+				`${block.targetCartFunnel.handle}/${block.targetCartFunnel.key}/checkout`,
+			);
 		} else if (block.targetLink) {
 			// Short link redirect
 			baseHref = block.targetLink.url;
