@@ -23,10 +23,13 @@ export function getVatRateForCheckout(
 	shipFromCountry?: string | null,
 	shipToCountry?: string | null,
 ) {
+	console.log('getVatRateForCheckout >>>', shipFromCountry, shipToCountry);
 	if (shipFromCountry === 'GB' && shipToCountry === 'GB') {
+		console.log('getVatRateForCheckout >>> GB');
 		return 0.2;
 	}
 
+	console.log('getVatRateForCheckout >>> 0');
 	return 0;
 }
 
@@ -107,8 +110,11 @@ export function getAmountsForCheckout(
 	const checkoutSubtotalAmount =
 		checkoutProductAmount + checkoutShippingAmount + checkoutHandlingAmount;
 
-	const checkoutVatAmount = checkoutSubtotalAmount * vat;
+	const checkoutVatAmount = Math.round(checkoutSubtotalAmount * vat);
 	const checkoutAmount = checkoutSubtotalAmount + checkoutVatAmount;
+	console.log('checkoutVatRate >>>', vat);
+	console.log('checkoutVatAmount >>>', checkoutVatAmount);
+	console.log('checkoutAmount >>>', checkoutAmount);
 
 	return {
 		// calculated amounts

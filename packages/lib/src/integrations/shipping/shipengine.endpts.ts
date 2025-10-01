@@ -73,28 +73,36 @@ export async function getShipStationRateEstimates(props: ShippingEstimateProps) 
 		z.object({
 			rate_type: z.enum(['check', 'shipment']),
 			carrier_id: z.string(),
-			shipping_amount: z.object({
-				currency: z.string(),
-				amount: z.number(),
-			}),
-			insurance_amount: z.object({
-				currency: z.string(),
-				amount: z.number(),
-			}),
-			confirmation_amount: z.object({
-				currency: z.string(),
-				amount: z.number(),
-			}),
-			other_amount: z.object({
-				currency: z.string(),
-				amount: z.number(),
-			}),
+			shipping_amount: z
+				.object({
+					currency: z.string(),
+					amount: z.number(),
+				})
+				.nullable(),
+			insurance_amount: z
+				.object({
+					currency: z.string(),
+					amount: z.number(),
+				})
+				.nullable(),
+			confirmation_amount: z
+				.object({
+					currency: z.string(),
+					amount: z.number(),
+				})
+				.nullable(),
+			other_amount: z
+				.object({
+					currency: z.string(),
+					amount: z.number(),
+				})
+				.nullable(),
 			requested_comparison_amount: z
 				.object({
 					currency: z.string(),
 					amount: z.number(),
 				})
-				.optional(),
+				.nullable(),
 			tax_amount: z
 				.object({
 					currency: z.string(),
@@ -109,8 +117,8 @@ export async function getShipStationRateEstimates(props: ShippingEstimateProps) 
 			carrier_delivery_days: z.string().nullable(),
 			ship_date: z.string().nullable(),
 			negotiated_rate: z.boolean(),
-			service_type: z.string(),
-			service_code: z.string(),
+			service_type: z.string().nullable(),
+			service_code: z.string().nullable(),
 			trackable: z.boolean(),
 			carrier_code: z.string(),
 			carrier_nickname: z.string(),
@@ -137,6 +145,7 @@ export async function getShipStationRateEstimates(props: ShippingEstimateProps) 
 		headers: {
 			'API-Key': isUS ? libEnv.SHIPSTATION_API_KEY_US : libEnv.SHIPSTATION_API_KEY_UK,
 		},
+		logResponse: true,
 		body: {
 			carrier_ids,
 			from_country_code: shipFrom.countryCode,
@@ -164,9 +173,12 @@ export async function getShipStationRateEstimates(props: ShippingEstimateProps) 
 
 	if (response.success && response.parsed) {
 		const sortedRates = response.data
+			// Filter out invalid rates (where shipping service is unavailable)
+			.filter(r => r.validation_status !== 'invalid' && r.shipping_amount !== null)
+			// Filter out media mail if not eligible
 			.filter(r => (eligibleForMediaMail ? r : r.service_code !== 'usps_media_mail'))
 			.map(r => {
-				const negotiatedAmountInDollars = r.shipping_amount.amount;
+				const negotiatedAmountInDollars = r.shipping_amount?.amount ?? 0;
 				const retailAmountInDollars = r.requested_comparison_amount?.amount ?? 0;
 				const amountInDollars = Math.max(
 					negotiatedAmountInDollars * 1.1,
