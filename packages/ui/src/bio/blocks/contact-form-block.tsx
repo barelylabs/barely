@@ -74,7 +74,7 @@ export function ContactFormBlock({ block }: ContactFormBlockProps) {
 	return (
 		<div
 			className={cn(
-				'w-full',
+				'mx-auto w-full max-w-xl',
 				// !isFullWidthButtons && 'px-4',
 				// isFullWidthButtons && 'px-0',
 			)}

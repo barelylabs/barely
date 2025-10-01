@@ -52,7 +52,7 @@ export function BioBlocksRender({ blocks, targetBlockId }: BioBlocksRenderProps)
 	return (
 		<div
 			className={cn(
-				'flex flex-col gap-10 md:gap-12',
+				'flex flex-col gap-10 md:gap-14 lg:gap-16',
 				// brandKit.blockShadow && 'gap-4',
 				!isFullWidthButtons && '',
 				isFullWidthButtons && '', // No horizontal padding for full-width buttons
