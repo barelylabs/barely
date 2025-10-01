@@ -726,7 +726,10 @@ export const bioRoute = {
 			});
 
 			// If creating a twoPanel block, update the bio's hasTwoPanel flag
-			if (sanitizedBlockData.type === 'twoPanel' && sanitizedBlockData.enabled !== false) {
+			if (
+				sanitizedBlockData.type === 'twoPanel' &&
+				sanitizedBlockData.enabled !== false
+			) {
 				await dbPool(ctx.pool)
 					.update(Bios)
 					.set({ hasTwoPanel: true })
@@ -807,8 +810,10 @@ export const bioRoute = {
 			// Check if we need to update hasTwoPanel flag
 			// This handles enabling/disabling twoPanel blocks
 			if (updatedBlock && existingBlock) {
-				const wasEnabledTwoPanel = existingBlock.type === 'twoPanel' && existingBlock.enabled;
-				const isEnabledTwoPanel = updatedBlock.type === 'twoPanel' && updatedBlock.enabled;
+				const wasEnabledTwoPanel =
+					existingBlock.type === 'twoPanel' && existingBlock.enabled;
+				const isEnabledTwoPanel =
+					updatedBlock.type === 'twoPanel' && updatedBlock.enabled;
 
 				// If status changed, we need to check all blocks
 				if (wasEnabledTwoPanel !== isEnabledTwoPanel) {
@@ -870,7 +875,8 @@ export const bioRoute = {
 				),
 			});
 
-			const isDeletingTwoPanel = blockToDelete?.type === 'twoPanel' && blockToDelete?.enabled;
+			const isDeletingTwoPanel =
+				blockToDelete?.type === 'twoPanel' && blockToDelete.enabled;
 
 			// Remove the relationship
 			await dbPool(ctx.pool)
