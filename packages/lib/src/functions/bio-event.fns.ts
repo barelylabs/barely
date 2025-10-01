@@ -270,6 +270,14 @@ function getMetaEventFromBioEvent({
 		case 'bio/view':
 			return [
 				{
+					eventName: 'barely.bio/view',
+					customData: {
+						content_type: 'bio',
+						content_ids: [bio.id],
+						content_name: bio.handle,
+					},
+				},
+				{
 					eventName: 'PageView',
 					customData: {
 						content_type: 'bio',
@@ -281,6 +289,15 @@ function getMetaEventFromBioEvent({
 		case 'bio/buttonClick':
 			return bioLink ?
 					[
+						{
+							eventName: 'barely.bio/buttonClick',
+							customData: {
+								content_type: 'bio_link',
+								content_ids: [bioLink.id],
+								content_name: bioLink.text,
+								content_category: 'link_click',
+							},
+						},
 						{
 							eventName: 'ViewContent',
 							customData: {
@@ -294,6 +311,14 @@ function getMetaEventFromBioEvent({
 				:	null;
 		case 'bio/emailCapture':
 			return [
+				{
+					eventName: 'barely.bio/emailCapture',
+					customData: {
+						content_type: 'bio',
+						content_ids: [bio.id],
+						content_name: bio.handle,
+					},
+				},
 				{
 					eventName: 'Lead',
 					customData: {
