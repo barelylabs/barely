@@ -53,8 +53,8 @@ export const Carts = pgTable(
 		fbclid: varchar('fbclid', { length: 255 }),
 		flowActionId: dbId('flowActionId'),
 
-		sessionReferer: varchar('sessionReferer', { length: 255 }),
-		sessionRefererUrl: varchar('sessionRefererUrl', { length: 255 }),
+		sessionReferer: varchar('sessionReferer', { length: 1000 }),
+		sessionRefererUrl: varchar('sessionRefererUrl', { length: 1000 }),
 		sessionMetaCampaignId: varchar('sessionMetaCampaignId', { length: 255 }),
 		sessionMetaAdsetId: varchar('sessionMetaAdsetId', { length: 255 }),
 		sessionMetaAdId: varchar('sessionMetaAdId', { length: 255 }),
