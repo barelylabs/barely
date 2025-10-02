@@ -3,6 +3,9 @@ import {
 	BIO_BLOCK_ICON_TYPES,
 	BIO_BLOCK_TYPES,
 	BIO_HEADER_STYLES,
+	BIO_IMG_DESKTOP_SIDE,
+	BIO_IMG_MOBILE_SIDE,
+	BIO_IMG_SHAPES,
 } from '@barely/const';
 import { relations } from 'drizzle-orm';
 import {
@@ -52,7 +55,7 @@ export const Bios = pgTable(
 		// Bio-specific settings (not moving to BrandKit)
 		imgShape: varchar('imgShape', {
 			length: 255,
-			enum: ['square', 'circle', 'rounded'],
+			enum: BIO_IMG_SHAPES,
 		}),
 		socialDisplay: boolean('socialDisplay').notNull(),
 		showLocation: boolean('showLocation').default(false).notNull(),
@@ -222,11 +225,11 @@ export const BioBlocks = pgTable(
 		// Two-panel block fields
 		imageMobileSide: varchar('imageMobileSide', {
 			length: 10,
-			enum: ['top', 'bottom'],
+			enum: BIO_IMG_MOBILE_SIDE,
 		}),
 		imageDesktopSide: varchar('imageDesktopSide', {
 			length: 10,
-			enum: ['left', 'right'],
+			enum: BIO_IMG_DESKTOP_SIDE,
 		}),
 		ctaText: varchar('ctaText', { length: 100 }),
 		ctaAnimation: varchar('ctaAnimation', {
@@ -362,7 +365,7 @@ export const BioLinks = pgTable(
 
 		animate: varchar('animate', {
 			length: 255,
-			enum: ['none', 'bounce', 'wobble', 'jello', 'pulse', 'shake', 'tada'],
+			enum: BIO_BLOCK_ANIMATION_TYPES,
 		}).default('none'),
 		text: varchar('text', { length: 255 }).notNull(),
 		buttonColor: varchar('buttonColor', { length: 255 }),

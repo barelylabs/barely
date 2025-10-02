@@ -1,3 +1,12 @@
+export const BIO_IMG_SHAPES = ['square', 'circle', 'rounded'] as const;
+export type BioImgShape = (typeof BIO_IMG_SHAPES)[number];
+
+export const BIO_IMG_MOBILE_SIDE = ['top', 'bottom'] as const;
+export type BioImgMobileSide = (typeof BIO_IMG_MOBILE_SIDE)[number];
+
+export const BIO_IMG_DESKTOP_SIDE = ['left', 'right'] as const;
+export type BioImgDesktopSide = (typeof BIO_IMG_DESKTOP_SIDE)[number];
+
 export const BIO_HEADER_STYLE_CATEGORIES = [
 	'minimal',
 	'banner',
