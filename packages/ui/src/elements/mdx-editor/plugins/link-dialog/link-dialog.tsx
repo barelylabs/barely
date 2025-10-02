@@ -20,7 +20,7 @@ import classNames from 'classnames';
 import { createCommand } from 'lexical';
 import { z } from 'zod/v4';
 
-import { Form, SubmitButton } from '../../../../forms/form';
+import { Form } from '../../../../forms/form';
 import { TextField } from '../../../../forms/text-field';
 import { Button } from '../../../button';
 import { Popover, PopoverAnchor, PopoverContent } from '../../../popover';
@@ -62,7 +62,13 @@ export function LinkEditForm({ url, title, onSubmit, onCancel }: LinkEditFormPro
 				<TextField name='url' label='URL' autoFocus />
 				<TextField name='title' label='Title' />
 				<div className='flex flex-row justify-end gap-2'>
-					<SubmitButton>Save</SubmitButton>
+					<Button
+						onClick={async () => {
+							await form.handleSubmit(onSubmit)();
+						}}
+					>
+						Save
+					</Button>
 					<Button look='secondary' onClick={onCancel}>
 						Cancel
 					</Button>
