@@ -129,9 +129,9 @@ function BrandKitPageInner() {
 							form={form}
 							mdxEditorRef={mdxEditorRef as React.RefObject<MDXEditorMethods>}
 						/>
-						<div className='flex max-w-20 flex-col gap-2'>
+						{/* <div className='flex max-w-20 flex-col gap-2'>
 							<pre>{JSON.stringify(form.formState.errors, null, 2)}</pre>
-						</div>
+						</div> */}
 					</div>
 
 					{/* Desktop Preview - Right side on large screens */}

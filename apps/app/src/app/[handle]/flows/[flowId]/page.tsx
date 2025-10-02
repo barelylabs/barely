@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 
+import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { FlowBuilder } from '~/app/[handle]/flows/[flowId]/_components/flow-builder';
 import { FlowStoreProvider } from '~/app/[handle]/flows/[flowId]/_components/flow-store';
 import { FlowUpdateForm } from '~/app/[handle]/flows/[flowId]/_components/flow-update-form';
@@ -27,22 +28,24 @@ export default async function FlowsPage({
 	});
 
 	return (
-		<HydrateClient>
-			<Suspense fallback={<div>Loading...</div>}>
-				<FlowStoreProvider
-					initialFlow={initialFlow}
-					defaultEmailAddress={defaultEmailAddress}
-					initialDefaultMailchimpAudienceId={defaultMailchimpAudienceId}
-					initialDefaultEmailTemplateGroup={defaultEmailTemplateGroup}
-				>
-					<div className='flex flex-col gap-8 xl:flex-row'>
-						<FlowUpdateForm initialFlow={initialFlow} />
-						<div className='flex w-full items-center justify-center rounded-xl border border-border bg-border/25 p-10'>
-							<FlowBuilder />
+		<DashContent>
+			<HydrateClient>
+				<Suspense fallback={<div>Loading...</div>}>
+					<FlowStoreProvider
+						initialFlow={initialFlow}
+						defaultEmailAddress={defaultEmailAddress}
+						initialDefaultMailchimpAudienceId={defaultMailchimpAudienceId}
+						initialDefaultEmailTemplateGroup={defaultEmailTemplateGroup}
+					>
+						<div className='flex flex-col gap-8 xl:flex-row'>
+							<FlowUpdateForm initialFlow={initialFlow} />
+							<div className='flex w-full items-center justify-center rounded-xl border border-border bg-border/25 p-10'>
+								<FlowBuilder />
+							</div>
 						</div>
-					</div>
-				</FlowStoreProvider>
-			</Suspense>
-		</HydrateClient>
+					</FlowStoreProvider>
+				</Suspense>
+			</HydrateClient>
+		</DashContent>
 	);
 }

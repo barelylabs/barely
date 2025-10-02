@@ -1,4 +1,9 @@
-import { FM_LINK_PLATFORMS, WEB_EVENT_TYPES } from '@barely/const';
+import {
+	BIO_BLOCK_ANIMATION_TYPES,
+	BIO_BLOCK_TYPES,
+	FM_LINK_PLATFORMS,
+	WEB_EVENT_TYPES,
+} from '@barely/const';
 import { formattedUserAgentSchema, nextGeoSchema } from '@barely/db/schema';
 import { z } from 'zod/v4';
 
@@ -94,14 +99,12 @@ export const webEventIngestSchema = z
 
 export const bioEventIngestSchema = webEventIngestSchema.extend({
 	bio_blockId: z.string().nullish(),
-	bio_blockType: z.enum(['links', 'contactForm', 'cart', '']).nullish(),
+	bio_blockType: z.enum(BIO_BLOCK_TYPES).nullish(),
 	bio_blockIndex: z.number().nullish(),
 	bio_linkId: z.string().nullish(),
 	bio_linkIndex: z.number().nullish(),
 	bio_linkText: z.string().nullish(),
-	bio_linkAnimation: z
-		.enum(['none', 'bounce', 'wobble', 'jello', 'pulse', 'shake', 'tada', ''])
-		.nullish(),
+	bio_linkAnimation: z.enum(BIO_BLOCK_ANIMATION_TYPES).nullish(),
 	bio_emailMarketingOptIn: z.boolean().nullish(),
 });
 
