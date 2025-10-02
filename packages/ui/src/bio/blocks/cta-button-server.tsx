@@ -11,7 +11,7 @@ import {
 	getTrackingEnrichedHref,
 } from '@barely/utils';
 
-import { Button } from '../../elements/button';
+import { LoadingLinkButton } from '../../elements/button';
 
 interface CtaButtonServerProps {
 	block: AppRouterOutputs['bio']['blocksByHandleAndKey'][number];
@@ -76,7 +76,7 @@ export function CtaButtonServer({
 	};
 
 	return (
-		<Button
+		<LoadingLinkButton
 			href={getCtaHref()}
 			target={block.targetUrl ? '_blank' : '_self'}
 			variant='button'
@@ -95,6 +95,6 @@ export function CtaButtonServer({
 			}}
 		>
 			{block.ctaText}
-		</Button>
+		</LoadingLinkButton>
 	);
 }

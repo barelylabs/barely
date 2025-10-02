@@ -12,7 +12,7 @@ import {
 	getTrackingEnrichedHref,
 } from '@barely/utils';
 
-import { Button } from '../../elements/button';
+import { LoadingLinkButton } from '../../elements/button';
 import { useBioContext } from '../contexts/bio-context';
 import { useBrandKit } from '../contexts/brand-kit-context';
 
@@ -78,7 +78,7 @@ export function CtaButton({ block, blockIndex, blockType, className }: CtaButton
 	};
 
 	return (
-		<Button
+		<LoadingLinkButton
 			href={getCtaHref()}
 			target={block.targetUrl ? '_blank' : '_self'}
 			variant='button'
@@ -148,6 +148,6 @@ export function CtaButton({ block, blockIndex, blockType, className }: CtaButton
 			}}
 		>
 			{block.ctaText}
-		</Button>
+		</LoadingLinkButton>
 	);
 }

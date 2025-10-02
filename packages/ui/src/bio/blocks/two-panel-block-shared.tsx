@@ -12,7 +12,7 @@ import {
 	getTrackingEnrichedHref,
 } from '@barely/utils';
 
-import { Button } from '../../elements/button';
+import { LoadingLinkButton } from '../../elements/button';
 import { Img } from '../../elements/img';
 import { Text } from '../../elements/typography';
 
@@ -250,7 +250,7 @@ export function TwoPanelBlockShared({
 				{/* CTA Button */}
 				{block.ctaText && (
 					<div className='pt-2'>
-						<Button
+						<LoadingLinkButton
 							href={getCtaHref()}
 							target={block.targetUrl ? '_blank' : '_self'}
 							variant='button'
@@ -319,7 +319,7 @@ export function TwoPanelBlockShared({
 							}}
 						>
 							{block.ctaText}
-						</Button>
+						</LoadingLinkButton>
 					</div>
 				)}
 			</div>

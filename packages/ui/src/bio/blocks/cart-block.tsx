@@ -14,7 +14,7 @@ import {
 } from '@barely/utils';
 
 import { ProductPrice } from '../../components/cart/product-price';
-import { Button } from '../../elements/button';
+import { LoadingLinkButton } from '../../elements/button';
 import { Icon } from '../../elements/icon';
 import { Img } from '../../elements/img';
 import { Text } from '../../elements/typography';
@@ -78,7 +78,7 @@ export function CartBlock({ block, blockIndex }: CartBlockProps) {
 	if (block.styleAsButton) {
 		return (
 			<div className='mx-auto max-w-xl'>
-				<Button
+				<LoadingLinkButton
 					href={checkoutUrl}
 					target='_blank'
 					variant='button'
@@ -126,7 +126,7 @@ export function CartBlock({ block, blockIndex }: CartBlockProps) {
 							})()}
 						{block.ctaText ?? 'Get Instant Access'}
 					</span>
-				</Button>
+				</LoadingLinkButton>
 			</div>
 		);
 	}
@@ -258,7 +258,7 @@ export function CartBlock({ block, blockIndex }: CartBlockProps) {
 			</div>
 
 			{/* CTA Button with optional animation and icon */}
-			<Button
+			<LoadingLinkButton
 				href={checkoutUrl}
 				target='_blank'
 				variant='button'
@@ -307,7 +307,7 @@ export function CartBlock({ block, blockIndex }: CartBlockProps) {
 						})()}
 					{block.ctaText ?? 'Get Instant Access'}
 				</span>
-			</Button>
+			</LoadingLinkButton>
 
 			{/* Learn More Link */}
 			{(block.learnMoreUrl ?? block.learnMoreBioId) &&
