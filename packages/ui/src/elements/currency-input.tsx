@@ -44,6 +44,7 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
 			: initialValue.toString();
 		const [focusedValue, setFocusedValue] = useState(initialFocusedValue);
 		const [isFocused, setIsFocused] = useState(false);
+		const inputRef = React.useRef<HTMLInputElement>(null);
 
 		const handleValueChange = async (
 			value?: string,
@@ -67,6 +68,16 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
 					outputUnit === 'minor' ? Math.floor(valueInUnits) : valueInUnits,
 				);
 			}
+
+			// Fix cursor position after value change
+			// Set cursor to end of input after a short delay to ensure the value has been updated
+			setTimeout(() => {
+				const input = inputRef.current;
+				if (input && input.setSelectionRange) {
+					const length = input.value.length;
+					input.setSelectionRange(length, length);
+				}
+			}, 0);
 		};
 
 		const handleFocus = () => {
@@ -99,7 +110,17 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
 				{/* max:: {props.max} */}
 				<CurrencyInputPrimitive
 					{...props}
-					ref={ref}
+					ref={node => {
+						// Handle both refs - the internal inputRef and the forwarded ref
+						inputRef.current = node;
+						if (ref) {
+							if (typeof ref === 'function') {
+								ref(node);
+							} else {
+								ref.current = node;
+							}
+						}
+					}}
 					name={name}
 					placeholder={finalPlaceholder}
 					prefix={prefix}
