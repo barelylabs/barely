@@ -12,7 +12,7 @@ import {
 	usePublisher,
 } from '@mdxeditor/editor';
 
-import { Form, SubmitButton } from '../../../forms/form';
+import { Form } from '../../../forms/form';
 import { TextField } from '../../../forms/text-field';
 import { Button } from '../../button';
 import {
@@ -188,7 +188,14 @@ export const LinkButtonEditor: React.FC<JsxEditorProps> = ({ mdastNode }) => {
 						<H size='5'>Link Button Settings</H>
 						<TextField control={form.control} label='Link' name='href' />
 						<TextField control={form.control} label='Label' name='label' />
-						<SubmitButton fullWidth>Save</SubmitButton>
+						<Button
+							fullWidth
+							onClick={async () => {
+								await form.handleSubmit(onSubmit)();
+							}}
+						>
+							Save
+						</Button>
 					</Form>
 				</PopoverContent>
 			</Popover>
@@ -378,7 +385,14 @@ export const AssetButtonEditor: React.FC<JsxEditorProps> = ({ mdastNode }) => {
 						</Popover>
 
 						<TextField control={form.control} label='Label' name='label' />
-						<SubmitButton fullWidth>Save</SubmitButton>
+						<Button
+							fullWidth
+							onClick={async () => {
+								await form.handleSubmit(onSubmit)();
+							}}
+						>
+							Save
+						</Button>
 					</Form>
 				</PopoverContent>
 			</Popover>
