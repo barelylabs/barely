@@ -285,10 +285,19 @@ export const AssetButtonEditor: React.FC<JsxEditorProps> = ({ mdastNode }) => {
 
 	const assetOptions = assets;
 
-	const AssetIcon =
-		assetOptions[0]?.type ?
-			(Icon[assetOptions[0].type as keyof typeof Icon] ?? Icon.file)
-		:	Icon.file;
+	// Helper function to safely get icon by asset type
+	const getAssetIcon = (assetType?: string) => {
+		if (!assetType) return Icon.file;
+
+		// Type guard to check if assetType is a valid Icon key
+		const isValidIconKey = (key: string): key is keyof typeof Icon => {
+			return key in Icon;
+		};
+
+		return isValidIconKey(assetType) ? Icon[assetType] : Icon.file;
+	};
+
+	const AssetIcon = getAssetIcon(assetOptions[0]?.type);
 
 	return (
 		<div className='flex flex-row items-center justify-between gap-2 rounded-md bg-gray-100 px-2 py-2'>
@@ -336,7 +345,7 @@ export const AssetButtonEditor: React.FC<JsxEditorProps> = ({ mdastNode }) => {
 										<CommandEmpty>No results found</CommandEmpty>
 										<CommandGroup>
 											{assetOptions.map(asset => {
-												const AssetIcon = Icon[asset.type as keyof typeof Icon];
+												const AssetIcon = getAssetIcon(asset.type);
 												return (
 													<CommandItem
 														key={asset.id}
