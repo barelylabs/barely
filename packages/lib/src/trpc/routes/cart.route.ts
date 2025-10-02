@@ -37,6 +37,7 @@ import {
 	getFeeAmountForCheckout,
 	getVatRateForCheckout,
 } from '../../utils/cart';
+import { log } from '../../utils/log';
 
 export const cartRoute = {
 	brandKitByHandle: publicProcedure
@@ -802,26 +803,83 @@ export const cartRoute = {
 				return;
 			}
 
-			const updateCart: UpdateCart = { id: cart.id };
+			// const updateCart: UpdateCart = { id: cart.id };
 
-			if (!cart.visitorIp) updateCart.visitorIp = ctx.visitor?.ip;
-			if (!cart.visitorGeo) updateCart.visitorGeo = ctx.visitor?.geo;
-			if (!cart.visitorUserAgent) updateCart.visitorUserAgent = ctx.visitor?.userAgent;
-			if (!cart.visitorReferer) updateCart.visitorReferer = ctx.visitor?.referer;
-			if (!cart.visitorRefererUrl)
-				updateCart.visitorRefererUrl = ctx.visitor?.referer_url;
-			if (!cart.visitorCheckoutHref && input.event === 'cart/viewCheckout')
-				updateCart.visitorCheckoutHref = visitor?.href;
+			// if (!cart.visitorIp) updateCart.visitorIp = ctx.visitor?.ip;
+			// if (!cart.visitorGeo) updateCart.visitorGeo = ctx.visitor?.geo;
+			// if (!cart.visitorUserAgent) updateCart.visitorUserAgent = ctx.visitor?.userAgent;
+			// if (!cart.visitorReferer) updateCart.visitorReferer = ctx.visitor?.referer;
+			// if (!cart.visitorRefererUrl)
+			// 	updateCart.visitorRefererUrl = ctx.visitor?.referer_url;
+			// if (!cart.visitorCheckoutHref && input.event === 'cart/viewCheckout')
+			// 	updateCart.visitorCheckoutHref = visitor?.href;
 
-			if (
-				!!updateCart.visitorIp ||
-				!!updateCart.visitorGeo ||
-				!!updateCart.visitorUserAgent ||
-				!!updateCart.visitorReferer ||
-				!!updateCart.visitorRefererUrl ||
-				!!updateCart.visitorCheckoutHref
-			) {
-				await dbPool(ctx.pool).update(Carts).set(updateCart).where(eq(Carts.id, cart.id));
+			if (ctx.visitor) {
+				await dbPool(ctx.pool)
+					.update(Carts)
+					.set({
+						visitorIp: ctx.visitor.ip,
+						visitorGeo: ctx.visitor.geo,
+						visitorUserAgent: ctx.visitor.userAgent,
+						visitorReferer: ctx.visitor.referer,
+						visitorRefererUrl: ctx.visitor.referer_url,
+						visitorCheckoutHref: ctx.visitor.href,
+					})
+					.where(eq(Carts.id, cart.id))
+					.catch(async err => {
+						await log({
+							type: 'errors',
+							location: 'cart.route.ts::log',
+							message: `Failed to update cart with visitor info: ${JSON.stringify({
+								error: {
+									// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+									name: String(err?.name),
+									// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+									message: String(err?.message),
+									// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+									code: String(err?.code),
+									// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+									detail: String(err?.detail),
+									// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+									constraint: String(err?.constraint),
+									// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+									table: String(err?.table),
+									// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+									column: String(err?.column),
+									// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+									stack: String(err?.stack),
+								},
+								context: {
+									cartId: cart.id,
+									event: input.event,
+									updatePayload: {
+										visitorIp: ctx.visitor?.ip,
+										visitorGeo: ctx.visitor?.geo,
+										visitorUserAgent: ctx.visitor?.userAgent,
+										visitorReferer: ctx.visitor?.referer,
+										visitorRefererUrl: ctx.visitor?.referer_url,
+										visitorCheckoutHref: ctx.visitor?.href,
+									},
+									fieldLengths: {
+										ip: ctx.visitor?.ip.length,
+										referer: ctx.visitor?.referer?.length,
+										referer_url: ctx.visitor?.referer_url?.length,
+										href: ctx.visitor?.href.length,
+									},
+								},
+							})}`,
+							// error: {
+							// 	name: err?.name,
+							// 	message: err?.message,
+							// 	code: err?.code,
+							// 	detail: err?.detail,
+							// 	constraint: err?.constraint,
+							// 	table: err?.table,
+							// 	column: err?.column,
+							// 	stack: err?.stack,
+							// },
+						});
+					});
 			}
 
 			await recordCartEvent({
@@ -830,8 +888,13 @@ export const cartRoute = {
 				type: event,
 				visitor,
 				currency: cartFunnel.workspace.currency,
-			}).catch(err => {
-				console.log('error recording cart event in cart.router.log:', err);
+			}).catch(async err => {
+				// console.log('error recording cart event in cart.router.log:', err);
+				await log({
+					type: 'errors',
+					location: 'cart.route.ts',
+					message: `error recording cart event: ${String(err)}`,
+				});
 			});
 
 			return {
