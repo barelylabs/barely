@@ -103,6 +103,17 @@ export function FlowBuilder() {
 
 	const onKeyDown = useCallback((event: KeyboardEvent) => {
 		if (event.key === 'Delete' || event.key === 'Backspace') {
+			// Check if the active element is an input, textarea, or contenteditable element
+			const activeElement = document.activeElement;
+			if (
+				activeElement?.tagName === 'INPUT' ||
+				activeElement?.tagName === 'TEXTAREA' ||
+				activeElement?.getAttribute('contenteditable') === 'true'
+			) {
+				// Allow default behavior for inputs
+				return true;
+			}
+			// Prevent default behavior for flow canvas (to prevent node deletion)
 			event.preventDefault();
 			return false;
 		}
