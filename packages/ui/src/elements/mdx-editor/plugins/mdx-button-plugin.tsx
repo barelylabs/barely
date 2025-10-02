@@ -25,7 +25,7 @@ import {
 } from '../../command';
 import { Icon } from '../../icon';
 import { Popover, PopoverContent, PopoverTrigger } from '../../popover';
-import { H, Text } from '../../typography';
+import { H } from '../../typography';
 
 export const buttonComponentDescriptors: JsxComponentDescriptor[] = [
 	{
@@ -50,14 +50,12 @@ export const buttonComponentDescriptors: JsxComponentDescriptor[] = [
 				a => a.type === 'mdxJsxAttribute' && a.name === 'label',
 			)?.value;
 
+			const validHref = typeof href === 'string' && href.trim() !== '' ? href : '#';
+
 			return (
 				<div className='mx-auto h-fit w-full py-4'>
 					<div className='flex w-full flex-col'>
-						<Button
-							href={typeof href === 'string' ? href : '#'}
-							target='_blank'
-							fullWidth
-						>
+						<Button href={validHref} target='_blank' fullWidth>
 							{typeof label === 'string' ? label : ''}
 						</Button>
 						<LinkButtonEditor {...props} />
@@ -177,6 +175,9 @@ export const LinkButtonEditor: React.FC<JsxEditorProps> = ({ mdastNode }) => {
 		<div className='flex flex-row items-center justify-between gap-2 rounded-md bg-gray-100 px-2 py-2'>
 			<div className='flex flex-row items-center gap-2'>
 				<Icon.link className='h-4 w-4' />
+				<span className='text-sm text-muted-foreground'>
+					{properties.href || 'No link set'}
+				</span>
 			</div>
 			<Popover open={showEditModal} onOpenChange={open => setShowEditModal(open)}>
 				<PopoverTrigger asChild>
@@ -284,15 +285,18 @@ export const AssetButtonEditor: React.FC<JsxEditorProps> = ({ mdastNode }) => {
 
 	const assetOptions = assets;
 
-	const AssetIcon = Icon[assetOptions[0]?.type as keyof typeof Icon];
+	const AssetIcon =
+		assetOptions[0]?.type ?
+			(Icon[assetOptions[0].type as keyof typeof Icon] ?? Icon.file)
+		:	Icon.file;
 
 	return (
 		<div className='flex flex-row items-center justify-between gap-2 rounded-md bg-gray-100 px-2 py-2'>
 			<div className='flex flex-row items-center gap-2'>
 				<AssetIcon className='h-4 w-4' />
-				<Text variant='sm/normal' className='m-0' muted>
+				<span className='text-sm text-muted-foreground'>
 					{properties.assetName ? properties.assetName : 'Choose an asset'}
-				</Text>
+				</span>
 			</div>
 			<Popover
 				open={showEditModal}
@@ -317,7 +321,7 @@ export const AssetButtonEditor: React.FC<JsxEditorProps> = ({ mdastNode }) => {
 									className='flex w-full flex-row justify-between px-3 text-sm'
 									fullWidth
 								>
-									<Text variant='sm/normal'>{form.watch('asset').name}</Text>
+									<span className='text-sm'>{form.watch('asset').name}</span>
 									<Icon.chevronsUpDown className='h-4 w-4 shrink-0 opacity-50' />
 								</Button>
 							</PopoverTrigger>
