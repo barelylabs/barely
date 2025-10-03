@@ -775,11 +775,29 @@ export function CreateInvoiceMultiStepForm() {
 		}
 	};
 
-	// Refetch clients when modal closes
-	const handleClientModalClose = useCallback(async () => {
+	// Handle client modal close and auto-select created client
+	const handleClientModalClose = useCallback(async (createdClient?: { id: string; name: string; email: string }) => {
 		await refetchClients();
 		void setShowCreateModal(false);
-	}, [refetchClients, setShowCreateModal]);
+		
+		// Auto-select the newly created client if provided
+		if (createdClient) {
+			setSelectedClientId(createdClient.id);
+			
+			// Set invoice number if it's empty
+			if (
+				!detailsForm.getValues('invoiceNumber') ||
+				detailsForm.getValues('invoiceNumber') === ''
+			) {
+				if (nextInvoiceNumber) {
+					detailsForm.setValue('invoiceNumber', nextInvoiceNumber);
+				}
+			}
+			
+			// Move to the next step (details)
+			setCurrentStep('details');
+		}
+	}, [refetchClients, setShowCreateModal, detailsForm, nextInvoiceNumber]);
 
 	return (
 		<>
