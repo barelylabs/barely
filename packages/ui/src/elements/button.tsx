@@ -205,6 +205,9 @@ const LoadingLinkButton = ({
 			onClick={e => {
 				setIsLoading(true);
 				props.onClick?.(e);
+				setTimeout(() => {
+					setIsLoading(false);
+				}, 10000); // show loading for 10 seconds
 			}}
 			loading={props.loading ?? isLoading}
 		>
