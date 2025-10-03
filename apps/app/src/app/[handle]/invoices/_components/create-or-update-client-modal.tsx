@@ -25,7 +25,11 @@ export function CreateOrUpdateClientModal({
 	onClose,
 }: {
 	mode: 'create' | 'update';
-	onClose?: (createdClient?: { id: string; name: string; email: string }) => void | Promise<void>;
+	onClose?: (createdClient?: {
+		id: string;
+		name: string;
+		email: string;
+	}) => void | Promise<void>;
 }) {
 	const params = useParams();
 	const handle = params.handle as string;
@@ -45,7 +49,7 @@ export function CreateOrUpdateClientModal({
 
 	const { mutateAsync: createClient } = useMutation(
 		trpc.invoiceClient.create.mutationOptions({
-			onSuccess: async (data) => {
+			onSuccess: async data => {
 				await setShowModal(false);
 				if (onClose && mode === 'create') {
 					await onClose(data);
