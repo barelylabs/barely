@@ -25,7 +25,11 @@ export function CreateOrUpdateClientModal({
 	onClose,
 }: {
 	mode: 'create' | 'update';
-	onClose?: () => void | Promise<void>;
+	onClose?: (createdClient?: {
+		id: string;
+		name: string;
+		email: string;
+	}) => void | Promise<void>;
 }) {
 	const params = useParams();
 	const handle = params.handle as string;
@@ -45,8 +49,11 @@ export function CreateOrUpdateClientModal({
 
 	const { mutateAsync: createClient } = useMutation(
 		trpc.invoiceClient.create.mutationOptions({
-			onSuccess: async () => {
+			onSuccess: async data => {
 				await setShowModal(false);
+				if (onClose && mode === 'create') {
+					await onClose(data);
+				}
 			},
 			onSettled,
 		}),
@@ -55,6 +62,9 @@ export function CreateOrUpdateClientModal({
 		trpc.invoiceClient.update.mutationOptions({
 			onSuccess: async () => {
 				await setShowModal(false);
+				if (onClose && mode === 'update') {
+					await onClose();
+				}
 			},
 			onSettled,
 		}),
@@ -106,10 +116,10 @@ export function CreateOrUpdateClientModal({
 		focusGridList();
 		await queryClient.invalidateQueries(trpc.invoiceClient.byWorkspace.pathFilter());
 		await setShowModal(false);
-		if (onClose) {
+		if (onClose && mode === 'update') {
 			await onClose();
 		}
-	}, [focusGridList, queryClient, trpc.invoiceClient, setShowModal, onClose]);
+	}, [focusGridList, queryClient, trpc.invoiceClient, setShowModal, onClose, mode]);
 
 	const handleSubmit = useCallback(
 		async (data: z.infer<typeof upsertInvoiceClientSchema>) => {
