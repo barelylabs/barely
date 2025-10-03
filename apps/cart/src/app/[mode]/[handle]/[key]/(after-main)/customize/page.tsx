@@ -68,7 +68,7 @@ export default async function UpsellPage({
 
 	return (
 		<div className='flex flex-col gap-6 pb-12'>
-			<UpsellLog mode={mode} cartId={cartId} handle={handle} key={key} />
+			<UpsellLog mode={mode} cartId={cartId} handle={handle} cartKey={key} />
 			<div className='flex flex-col items-center gap-6 sm:gap-8'>
 				<CartSteps />
 
@@ -76,7 +76,7 @@ export default async function UpsellPage({
 					{publicFunnel.upsellProductHeadline}
 				</H>
 
-				<UpsellCountdown mode={mode} handle={handle} key={key} cartId={cartId} />
+				<UpsellCountdown mode={mode} handle={handle} cartKey={key} cartId={cartId} />
 			</div>
 
 			<div className='flex flex-col items-center gap-6'>
@@ -97,7 +97,7 @@ export default async function UpsellPage({
 				<Suspense fallback={<div>Loading...</div>}>
 					<UpsellProductPrice
 						handle={handle}
-						key={key}
+						cartKey={key}
 						cartId={cartId}
 						publicFunnel={publicFunnel}
 					/>
@@ -107,7 +107,7 @@ export default async function UpsellPage({
 					<UpsellButtons
 						mode={mode}
 						handle={handle}
-						key={key}
+						cartKey={key}
 						cartId={cartId}
 						publicFunnel={publicFunnel}
 					/>
@@ -121,7 +121,7 @@ export default async function UpsellPage({
 						<UpsellButtons
 							mode={mode}
 							handle={handle}
-							key={key}
+							cartKey={key}
 							cartId={cartId}
 							publicFunnel={publicFunnel}
 						/>

@@ -70,7 +70,7 @@ export function CheckoutForm({
 	const stripe = useStripe();
 	const elements = useElements();
 
-	const { cart } = useCart({ id: cartId, handle, key: cartKey });
+	const { cart } = useCart({ id: cartId, handle, cartKey });
 
 	const { publicFunnel } = usePublicFunnel({ handle, key: cartKey });
 
@@ -403,7 +403,7 @@ function MainProductPrice({
 	handle: string;
 	cartKey: string;
 }) {
-	const { cart } = useCart({ id: cartId, handle, key: cartKey });
+	const { cart } = useCart({ id: cartId, handle, cartKey });
 	const { publicFunnel } = usePublicFunnel({ handle, key: cartKey });
 	const { mainProduct } = publicFunnel;
 	const [vat] = useAtom(vatAtom);
@@ -433,7 +433,7 @@ function UpdateMainProductPayWhatYouWantPrice({
 	handle: string;
 	cartKey: string;
 }) {
-	const { cart, logEvent, updateCart } = useCart({ id: cartId, handle, key: cartKey });
+	const { cart, logEvent, updateCart } = useCart({ id: cartId, handle, cartKey });
 	const { publicFunnel } = usePublicFunnel({ handle, key: cartKey });
 	const { control } =
 		useFormContext<z.infer<typeof updateCheckoutCartFromCheckoutSchema>>();
@@ -709,7 +709,7 @@ function BumpFlashingArrow({
 	handle: string;
 	cartKey: string;
 }) {
-	const { cart } = useCart({ id: cartId, handle, key: cartKey });
+	const { cart } = useCart({ id: cartId, handle, cartKey });
 	return (
 		<Icon.arrowBigDown
 			className={cn('h-4 w-4 text-brandKit-block', !cart.addedBump && 'animate-pulse')}
@@ -727,7 +727,7 @@ function ToggleBumpProduct({
 	handle: string;
 	cartKey: string;
 }) {
-	const { cart, logEvent, updateCart } = useCart({ id: cartId, handle, key: cartKey });
+	const { cart, logEvent, updateCart } = useCart({ id: cartId, handle, cartKey });
 
 	return (
 		<div className='float-right flex flex-row items-center gap-2 pb-[2px] pl-2'>
@@ -768,7 +768,7 @@ function BumpProductSizes({
 	handle: string;
 	cartKey: string;
 }) {
-	const { cart, logEvent, updateCart } = useCart({ id: cartId, handle, key: cartKey });
+	const { cart, logEvent, updateCart } = useCart({ id: cartId, handle, cartKey });
 	const { publicFunnel } = usePublicFunnel({ handle, key: cartKey });
 	const { bumpProduct } = publicFunnel;
 
@@ -828,7 +828,7 @@ function StripePaymentElement({
 	cartKey: string;
 }) {
 	const [ready, setReady] = useState(false);
-	const { updateCart, logEvent } = useCart({ id: cartId, handle, key: cartKey });
+	const { updateCart, logEvent } = useCart({ id: cartId, handle, cartKey });
 	const { control } =
 		useFormContext<z.infer<typeof updateCheckoutCartFromCheckoutSchema>>();
 
@@ -965,7 +965,7 @@ export function OrderSummary({
 	handle: string;
 	cartKey: string;
 }) {
-	const { cart } = useCart({ id: cartId, handle, key: cartKey });
+	const { cart } = useCart({ id: cartId, handle, cartKey });
 	const { publicFunnel } = usePublicFunnel({ handle, key: cartKey });
 	const { mainProduct, bumpProduct } = publicFunnel;
 	const [vat] = useAtom(vatAtom);

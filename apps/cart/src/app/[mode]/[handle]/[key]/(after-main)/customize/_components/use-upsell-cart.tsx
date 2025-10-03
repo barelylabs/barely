@@ -13,14 +13,14 @@ export function useUpsellCart({
 	mode,
 	cartId,
 	handle,
-	key,
+	cartKey,
 	apparelSize,
 }: {
 	mode: 'preview' | 'live';
 	cartId: string;
 	apparelSize?: ApparelSize;
 	handle: string;
-	key: string;
+	cartKey: string;
 }) {
 	const trpc = useCartTRPC();
 	const [converting, setConverting] = useState(false);
@@ -33,7 +33,7 @@ export function useUpsellCart({
 	const { cart } = useCart({
 		id: cartId,
 		handle,
-		key,
+		cartKey,
 	});
 
 	const { mutate: buyUpsell } = useMutation(

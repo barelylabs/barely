@@ -44,7 +44,7 @@ export default async function CartSuccessPage({
 		<>
 			<SuccessLog
 				handle={handle}
-				key={key}
+				cartKey={key}
 				currentCartStage={currentCartStage ?? 'checkoutCreated'}
 			/>
 

@@ -7,15 +7,15 @@ import { useUpsellCart } from '~/app/[mode]/[handle]/[key]/(after-main)/customiz
 export function UpsellCountdown({
 	mode,
 	handle,
-	key,
+	cartKey,
 	cartId,
 }: {
 	mode: 'preview' | 'live';
 	handle: string;
-	key: string;
+	cartKey: string;
 	cartId: string;
 }) {
-	const { cart, handleDeclineUpsell } = useUpsellCart({ mode, handle, key, cartId });
+	const { cart, handleDeclineUpsell } = useUpsellCart({ mode, handle, cartKey, cartId });
 
 	const expiresAt =
 		(cart.checkoutConvertedAt ? cart.checkoutConvertedAt.getTime() : Date.now()) +

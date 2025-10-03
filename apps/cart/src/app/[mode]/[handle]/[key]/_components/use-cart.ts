@@ -7,11 +7,11 @@ import { useCartTRPC } from '@barely/api/public/cart.trpc.react';
 export function useCart({
 	id,
 	handle,
-	key,
+	cartKey,
 }: {
 	id: string;
 	handle: string;
-	key: string;
+	cartKey: string;
 }) {
 	const trpc = useCartTRPC();
 	const queryClient = useQueryClient();
@@ -23,7 +23,7 @@ export function useCart({
 			{
 				id,
 				handle,
-				key,
+				key: cartKey,
 			},
 			{
 				staleTime: 5 * 60 * 1000, // 5 minutes
@@ -37,14 +37,14 @@ export function useCart({
 		trpc.updateCheckoutFromCheckout.mutationOptions({
 			onMutate: async updateData => {
 				await queryClient.cancelQueries({
-					queryKey: trpc.byIdAndParams.queryKey({ id, handle, key }),
+					queryKey: trpc.byIdAndParams.queryKey({ id, handle, key: cartKey }),
 				});
 				const previousCart = queryClient.getQueryData(
-					trpc.byIdAndParams.queryKey({ id, handle, key }),
+					trpc.byIdAndParams.queryKey({ id, handle, key: cartKey }),
 				);
 
 				queryClient.setQueryData(
-					trpc.byIdAndParams.queryKey({ id, handle, key }),
+					trpc.byIdAndParams.queryKey({ id, handle, key: cartKey }),
 					old => {
 						if (!old) return;
 						return {
@@ -61,7 +61,7 @@ export function useCart({
 			},
 			onSettled: async () => {
 				await queryClient.invalidateQueries({
-					queryKey: trpc.byIdAndParams.queryKey({ id, handle, key }),
+					queryKey: trpc.byIdAndParams.queryKey({ id, handle, key: cartKey }),
 				});
 			},
 		}),
@@ -73,7 +73,7 @@ export function useCart({
 		syncCart({
 			id,
 			handle,
-			key,
+			key: cartKey,
 			...updateData,
 		});
 	};
