@@ -208,7 +208,7 @@
 		"react-confetti": "^6.1.0",
 		"react-confetti-explosion": "^3.0.3",
 		"react-countdown": "^2.3.5",
-		"react-currency-input-field": "^4.0.3",
+		"react-currency-input-field": "catalog:",
 		"react-day-picker": "^9.7.0",
 		"react-dom": "catalog:react19",
 		"react-dom-confetti": "^0.2.0",

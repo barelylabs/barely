@@ -33,7 +33,7 @@
 		"jotai": "catalog:",
 		"next": "catalog:",
 		"react": "catalog:react19",
-		"react-currency-input-field": "^3.8.0",
+		"react-currency-input-field": "catalog:",
 		"react-dom": "catalog:react19",
 		"react-icons": "^4.11.0",
 		"sharp": "catalog:",
