@@ -259,9 +259,8 @@ export function CreateInvoiceMultiStepForm() {
 						trpc.invoice.getNextInvoiceNumber.queryKey(),
 					],
 				});
-				detailsForm.reset();
-				paymentForm.reset();
-				reviewForm.reset();
+				// Don't reset forms here - we're redirecting on success
+				// and on error the user should keep their data
 			},
 		}),
 	);
