@@ -13,14 +13,14 @@ import { useUpsellCart } from '~/app/[mode]/[handle]/[key]/(after-main)/customiz
 export function UpsellButtons({
 	mode,
 	handle,
-	key,
+	cartKey,
 	cartId,
 	publicFunnel,
 	// upsellSizes,
 }: {
 	mode: 'preview' | 'live';
 	handle: string;
-	key: string;
+	cartKey: string;
 	cartId: string;
 	publicFunnel: PublicFunnel;
 	// upsellSizes?: ApparelSize[];
@@ -34,7 +34,7 @@ export function UpsellButtons({
 		useUpsellCart({
 			mode,
 			handle,
-			key,
+			cartKey,
 			cartId,
 			apparelSize,
 		});

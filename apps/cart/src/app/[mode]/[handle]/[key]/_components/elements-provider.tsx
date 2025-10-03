@@ -36,7 +36,7 @@ export function ElementsProvider({
 	const brandKit = useBrandKit();
 	const computedStyles = getComputedStyles(brandKit, 'cart');
 
-	const { cart } = useCart({ id: cartId, handle, key: cartKey });
+	const { cart } = useCart({ id: cartId, handle, cartKey });
 	const { publicFunnel } = usePublicFunnel({ handle, key: cartKey });
 
 	const stripeAccount =

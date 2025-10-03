@@ -13,12 +13,12 @@ export function UpsellLog({
 	cartId,
 	mode,
 	handle,
-	key,
+	cartKey,
 }: {
 	mode: 'preview' | 'live';
 	cartId: string;
 	handle: string;
-	key: string;
+	cartKey: string;
 }) {
 	const trpc = useCartTRPC();
 	const router = useRouter();
@@ -28,7 +28,7 @@ export function UpsellLog({
 	} = useCart({
 		id: cartId,
 		handle,
-		key,
+		cartKey,
 	});
 
 	const { mutate: logEvent } = useMutation(trpc.log.mutationOptions());
@@ -41,12 +41,12 @@ export function UpsellLog({
 			stage === 'upsellConverted' ||
 			stage === 'upsellDeclined'
 		) {
-			return router.push(`/${handle}/${key}/success`);
+			return router.push(`/${handle}/${cartKey}/success`);
 		}
 
 		setCartStageCookie({
 			handle,
-			key,
+			key: cartKey,
 			stage: 'upsellCreated',
 		}).catch(console.error);
 
@@ -54,7 +54,7 @@ export function UpsellLog({
 			cartId,
 			event: 'cart/viewUpsell',
 		});
-	}, [cartId, handle, key, mode, logEvent, stage, router]);
+	}, [cartId, handle, cartKey, mode, logEvent, stage, router]);
 
 	return null;
 }

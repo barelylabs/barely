@@ -8,22 +8,22 @@ import { setCartStageCookie } from '~/app/[mode]/[handle]/[key]/_actions';
 
 export function SuccessLog({
 	handle,
-	key,
+	cartKey,
 	currentCartStage,
 }: {
 	handle: string;
-	key: string;
+	cartKey: string;
 	currentCartStage: string;
 }) {
 	useEffect(() => {
 		if (currentCartStage === 'checkoutCreated') {
 			setCartStageCookie({
 				handle,
-				key,
+				key: cartKey,
 				stage: 'checkoutConverted',
 			}).catch(console.error);
 		}
-	}, [handle, key, currentCartStage]);
+	}, [handle, cartKey, currentCartStage]);
 
 	return null;
 }

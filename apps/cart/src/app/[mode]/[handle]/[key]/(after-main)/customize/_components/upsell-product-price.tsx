@@ -10,19 +10,19 @@ import { useCart } from '~/app/[mode]/[handle]/[key]/_components/use-cart';
 
 export function UpsellProductPrice({
 	handle,
-	key,
+	cartKey,
 	cartId,
 	publicFunnel,
 }: {
 	handle: string;
-	key: string;
+	cartKey: string;
 	cartId: string;
 	publicFunnel: PublicFunnel;
 }) {
 	const { cart } = useCart({
 		id: cartId,
 		handle,
-		key,
+		cartKey,
 	});
 	const vat = getVatRateForCheckout(
 		publicFunnel.workspace.shippingAddressCountry,
