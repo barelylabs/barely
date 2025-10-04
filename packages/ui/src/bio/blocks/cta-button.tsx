@@ -43,7 +43,7 @@ export function CtaButton({ block, blockIndex, blockType, className }: CtaButton
 	// Determine CTA href based on target type
 	const getCtaHref = () => {
 		if (isPreview) {
-			return `/${bio.handle}/bio/home/blocks?blockId=${block.id}`;
+			return `/${bio.handle}/bios/blocks?bioKey=${bio.key}&blockId=${block.id}`;
 		}
 
 		let baseHref = '#';
