@@ -20,6 +20,7 @@ interface CtaButtonServerProps {
 	brandKit: BrandKit;
 	bio: {
 		handle: string;
+		key?: string;
 	};
 	isPreview?: boolean;
 	tracking?: BioTrackingData;
@@ -44,7 +45,9 @@ export function CtaButtonServer({
 	// Determine CTA href based on target type
 	const getCtaHref = () => {
 		if (isPreview) {
-			return `/${bio.handle}/bio/home/blocks?blockId=${block.id}`;
+			// Only generate preview URL if bio.key is available (client-side preview)
+			if (!bio.key) return '#';
+			return `/${bio.handle}/bios/blocks?bioKey=${bio.key}&blockId=${block.id}`;
 		}
 
 		let baseHref = '#';
@@ -54,7 +57,7 @@ export function CtaButtonServer({
 		} else if (block.targetBio) {
 			baseHref = getAbsoluteUrl(
 				'bio',
-				`/${block.targetBio.handle}/bio/${block.targetBio.key}`,
+				`/${block.targetBio.handle}/${block.targetBio.key}`,
 			);
 		} else if (block.targetFm) {
 			// FM routes not implemented yet

@@ -72,7 +72,7 @@ export function LinksBlock({ block, blockIndex }: LinksBlockProps) {
 				// Apply tracking parameters to the link href with journey context
 				const originalHref = link.url ?? '#';
 				const linkHref =
-					isPreview ? `/${bio.handle}/bio/home/links?blockId=${block.id}`
+					isPreview ? `/${bio.handle}/bios/links?bioKey=${bio.key}&blockId=${block.id}`
 					: tracking && originalHref !== '#' ?
 						getTrackingEnrichedHref({
 							href: originalHref,

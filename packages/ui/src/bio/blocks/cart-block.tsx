@@ -52,7 +52,7 @@ export function CartBlock({ block, blockIndex }: CartBlockProps) {
 	const { targetCartFunnel } = block;
 	const baseCheckoutUrl =
 		isPreview ?
-			`/${bio.handle}/bio/home/blocks?blockId=${block.id}`
+			`/${bio.handle}/bios/blocks?bioKey=${bio.key}&blockId=${block.id}`
 		:	getAbsoluteUrl('cart', `/${targetCartFunnel.handle}/${targetCartFunnel.key}`);
 
 	// Apply tracking parameters to checkout URL

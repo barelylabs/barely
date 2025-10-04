@@ -141,7 +141,7 @@ export function BioContactFormPage({ blockId }: { blockId: string }) {
 			{/* Back link */}
 			<div className='mb-4'>
 				<Button
-					href={`/${handle}/bio/home/blocks`}
+					href={`/${handle}/bios/blocks?bioKey=${bioKey}`}
 					variant='button'
 					look='ghost'
 					size='sm'
