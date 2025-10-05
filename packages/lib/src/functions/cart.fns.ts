@@ -500,7 +500,7 @@ export async function sendCartReceiptEmail(cart: ReceiptCart) {
 					size:
 						(
 							cart.bumpProductApparelSize &&
-							APPAREL_TYPES.some(type => type === cart.bumpProduct.merchType)
+							APPAREL_TYPES.some(type => type === cart.bumpProduct?.merchType)
 						) ?
 							cart.bumpProductApparelSize
 						:	undefined,
@@ -521,7 +521,7 @@ export async function sendCartReceiptEmail(cart: ReceiptCart) {
 					size:
 						(
 							cart.upsellProductApparelSize &&
-							APPAREL_TYPES.some(type => type === cart.upsellProduct.merchType)
+							APPAREL_TYPES.some(type => type === cart.upsellProduct?.merchType)
 						) ?
 							cart.upsellProductApparelSize
 						:	undefined,
@@ -538,6 +538,7 @@ export async function sendCartReceiptEmail(cart: ReceiptCart) {
 		orderId,
 		date: cart.checkoutConvertedAt ?? new Date(),
 		sellerName: cart.funnel.workspace.name,
+		currency: cart.currency,
 		billingAddress: {
 			name: cart.fan.fullName,
 			postalCode: cart.fan.billingAddressPostalCode,
