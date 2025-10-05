@@ -1,7 +1,7 @@
 import { dbPool, makePool } from '@barely/db/pool';
 import { Invoices } from '@barely/db/sql';
 import { schedules } from '@trigger.dev/sdk/v3';
-import { and, eq, lt, or } from 'drizzle-orm';
+import { and, eq, gte, lt, or } from 'drizzle-orm';
 
 import { sendInvoiceReminderEmail } from '../functions/invoice-email.fns';
 import { log } from '../utils/log';
@@ -9,7 +9,7 @@ import { log } from '../utils/log';
 /**
  * Daily trigger to check for overdue invoices and send reminder emails
  * Runs at 9:00 AM ET every day
- * Updates invoice status to 'overdue' and sends reminder emails
+ * Sends reminder emails for invoices that are exactly 3, 7, or 14 days overdue
  */
 export const overdueInvoicesTrigger = schedules.task({
 	id: 'overdue-invoices',
@@ -21,15 +21,60 @@ export const overdueInvoicesTrigger = schedules.task({
 		try {
 			const db = dbPool(pool);
 
-			// Find all invoices that are past due date and not yet paid
-			// An invoice is overdue if we're past the END of the due date (not just at the due date)
+			// Get today's date at start of day
 			const today = new Date();
-			today.setHours(0, 0, 0, 0); // Start of today
+			today.setHours(0, 0, 0, 0);
 
+			// Calculate dates for invoices that are exactly 3, 7, or 14 days overdue
+			// An invoice is X days overdue when today is X days after its due date
+			const threeDaysOverdueDate = new Date(today);
+			threeDaysOverdueDate.setDate(today.getDate() - 3);
+			threeDaysOverdueDate.setHours(0, 0, 0, 0);
+
+			const sevenDaysOverdueDate = new Date(today);
+			sevenDaysOverdueDate.setDate(today.getDate() - 7);
+			sevenDaysOverdueDate.setHours(0, 0, 0, 0);
+
+			const fourteenDaysOverdueDate = new Date(today);
+			fourteenDaysOverdueDate.setDate(today.getDate() - 14);
+			fourteenDaysOverdueDate.setHours(0, 0, 0, 0);
+
+			// Calculate the next day for date range comparisons (start of next day)
+			const twoDaysOverdueDate = new Date(today);
+			twoDaysOverdueDate.setDate(today.getDate() - 2);
+			twoDaysOverdueDate.setHours(0, 0, 0, 0);
+
+			const sixDaysOverdueDate = new Date(today);
+			sixDaysOverdueDate.setDate(today.getDate() - 6);
+			sixDaysOverdueDate.setHours(0, 0, 0, 0);
+
+			const thirteenDaysOverdueDate = new Date(today);
+			thirteenDaysOverdueDate.setDate(today.getDate() - 13);
+			thirteenDaysOverdueDate.setHours(0, 0, 0, 0);
+
+			// Find invoices that are exactly 3, 7, or 14 days overdue
+			// This means their due date was exactly 3, 7, or 14 days ago
+			// Use date ranges to handle timestamps properly
 			const overdueInvoices = await db.query.Invoices.findMany({
 				where: and(
 					or(eq(Invoices.status, 'sent'), eq(Invoices.status, 'viewed')),
-					lt(Invoices.dueDate, today), // Due date is before today (not including today)
+					or(
+						// Due date was 3 days ago (>= 3 days ago at start of day, < 2 days ago at start of day)
+						and(
+							gte(Invoices.dueDate, threeDaysOverdueDate),
+							lt(Invoices.dueDate, twoDaysOverdueDate),
+						),
+						// Due date was 7 days ago (>= 7 days ago at start of day, < 6 days ago at start of day)
+						and(
+							gte(Invoices.dueDate, sevenDaysOverdueDate),
+							lt(Invoices.dueDate, sixDaysOverdueDate),
+						),
+						// Due date was 14 days ago (>= 14 days ago at start of day, < 13 days ago at start of day)
+						and(
+							gte(Invoices.dueDate, fourteenDaysOverdueDate),
+							lt(Invoices.dueDate, thirteenDaysOverdueDate),
+						),
+					),
 				),
 				with: {
 					client: true,
@@ -39,7 +84,7 @@ export const overdueInvoicesTrigger = schedules.task({
 
 			if (!overdueInvoices.length) {
 				await log({
-					message: 'No overdue invoices found',
+					message: 'No invoices found that are 3, 7, or 14 days overdue',
 					type: 'logs',
 					location: 'overdueInvoicesTrigger',
 				});
@@ -52,7 +97,7 @@ export const overdueInvoicesTrigger = schedules.task({
 			const startTime = Date.now();
 
 			await log({
-				message: `Found ${overdueInvoices.length} overdue invoices to process`,
+				message: `Found ${overdueInvoices.length} invoices that are 3, 7, or 14 days overdue to process`,
 				type: 'logs',
 				location: 'overdueInvoicesTrigger',
 			});
@@ -84,8 +129,13 @@ export const overdueInvoicesTrigger = schedules.task({
 						// Continue processing other invoices even if one email fails
 					}
 
+					// Calculate how many days overdue this invoice is
+					const daysOverdue = Math.floor(
+						(today.getTime() - invoice.dueDate.getTime()) / (1000 * 60 * 60 * 24),
+					);
+
 					await log({
-						message: `Sent overdue reminder for invoice ${invoice.invoiceNumber} (${invoice.client.email})`,
+						message: `Sent ${daysOverdue}-day overdue reminder for invoice ${invoice.invoiceNumber} (${invoice.client.email})`,
 						type: 'logs',
 						location: 'overdueInvoicesTrigger',
 					});
