@@ -55,6 +55,7 @@ export interface ReceiptEmailProps {
 		price: string;
 		payWhatYouWantPrice?: string;
 		shipping?: string;
+		size?: string;
 	}[];
 	shippingTotal?: string;
 	vatTotal: string | null;
@@ -264,6 +265,19 @@ export function ReceiptEmailTemplate({
 												</Text>
 											)}
 
+											{product.size && (
+												<Text
+													style={{
+														...resetText,
+														...mutedText,
+														marginTop: '4px',
+														fontSize: '12px',
+													}}
+												>
+													Size: {product.size}
+												</Text>
+											)}
+
 											{product.shipping && (
 												<Text
 													style={{
@@ -396,6 +410,11 @@ ReceiptEmailTemplate.PreviewProps = {
 		{
 			name: 'Rusty Grand Am :: Pre-Order CD',
 			price: '$10.00',
+		},
+		{
+			name: 'Band T-Shirt',
+			price: '$25.00',
+			size: 'L',
 		},
 	],
 	vatTotal: '£20.00',

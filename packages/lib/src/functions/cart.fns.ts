@@ -9,7 +9,7 @@ import type {
 	stripeConnectChargeMetadataSchema,
 } from '@barely/validators/schemas';
 import type { z } from 'zod/v4';
-import { MEDIAMAIL_TYPES, MERCH_DIMENSIONS } from '@barely/const';
+import { APPAREL_TYPES, MEDIAMAIL_TYPES, MERCH_DIMENSIONS } from '@barely/const';
 import { dbHttp } from '@barely/db/client';
 import {
 	CartFunnels,
@@ -478,6 +478,13 @@ export async function sendCartReceiptEmail(cart: ReceiptCart) {
 						cart.currency,
 					)
 				:	undefined,
+			size:
+				(
+					cart.mainProductApparelSize &&
+					APPAREL_TYPES.some(type => type === cart.mainProduct.merchType)
+				) ?
+					cart.mainProductApparelSize
+				:	undefined,
 		},
 
 		// bump product
@@ -490,6 +497,13 @@ export async function sendCartReceiptEmail(cart: ReceiptCart) {
 						cart.bumpShippingAndHandlingAmount ?? 0,
 						cart.currency,
 					),
+					size:
+						(
+							cart.bumpProductApparelSize &&
+							APPAREL_TYPES.some(type => type === cart.bumpProduct.merchType)
+						) ?
+							cart.bumpProductApparelSize
+						:	undefined,
 				},
 			]
 		:	[]),
@@ -504,6 +518,13 @@ export async function sendCartReceiptEmail(cart: ReceiptCart) {
 						cart.upsellShippingAndHandlingAmount ?? 0,
 						cart.currency,
 					),
+					size:
+						(
+							cart.upsellProductApparelSize &&
+							APPAREL_TYPES.some(type => type === cart.upsellProduct.merchType)
+						) ?
+							cart.upsellProductApparelSize
+						:	undefined,
 				},
 			]
 		:	[]),
