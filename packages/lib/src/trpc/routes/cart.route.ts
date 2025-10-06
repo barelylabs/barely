@@ -643,9 +643,15 @@ export const cartRoute = {
 				(cart.mainHandlingAmount ?? 0) +
 				(cart.bumpHandlingAmount ?? 0) +
 				amounts.upsellHandlingAmount;
-			updateCart.orderShippingAndHandlingAmount = amounts.upsellShippingAndHandlingAmount;
+			updateCart.orderShippingAndHandlingAmount =
+				(cart.mainShippingAndHandlingAmount ?? 0) +
+				(cart.bumpShippingAndHandlingAmount ?? 0) +
+				amounts.upsellShippingAndHandlingAmount;
+			updateCart.orderVatAmount = (cart.orderVatAmount ?? 0) + amounts.upsellVatAmount;
 			updateCart.orderAmount =
-				updateCart.orderProductAmount + updateCart.orderShippingAndHandlingAmount;
+				updateCart.orderProductAmount +
+				updateCart.orderShippingAndHandlingAmount +
+				(updateCart.orderVatAmount ?? 0);
 
 			updateCart.stage = 'upsellConverted';
 			updateCart.upsellConvertedAt = new Date();

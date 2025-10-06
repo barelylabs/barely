@@ -34,6 +34,7 @@ export interface ReceiptEmailProps {
 	sellerName: string;
 	date: Date;
 	supportEmail: string;
+	currency: 'usd' | 'gbp';
 	billingAddress: {
 		name: string;
 		city?: string | null;
@@ -55,6 +56,7 @@ export interface ReceiptEmailProps {
 		price: string;
 		payWhatYouWantPrice?: string;
 		shipping?: string;
+		size?: string;
 	}[];
 	shippingTotal?: string;
 	vatTotal: string | null;
@@ -65,6 +67,7 @@ export function ReceiptEmailTemplate({
 	orderId,
 	sellerName,
 	supportEmail,
+	currency,
 	shippingAddress,
 	billingAddress,
 	date,
@@ -189,7 +192,9 @@ export function ReceiptEmailTemplate({
 					>
 						<Row>
 							<Column align='right'>
-								<Text style={{ ...resetText, marginTop: '20px' }}>Total (USD)</Text>
+								<Text style={{ ...resetText, marginTop: '20px' }}>
+									Total ({currency.toUpperCase()})
+								</Text>
 								{vatTotal && (
 									<Text style={{ ...resetText, marginTop: 0 }}>VAT: {vatTotal}</Text>
 								)}
@@ -261,6 +266,19 @@ export function ReceiptEmailTemplate({
 													}}
 												>
 													Pay what you want: {product.payWhatYouWantPrice}
+												</Text>
+											)}
+
+											{product.size && (
+												<Text
+													style={{
+														...resetText,
+														...mutedText,
+														marginTop: '4px',
+														fontSize: '12px',
+													}}
+												>
+													Size: {product.size}
 												</Text>
 											)}
 
@@ -365,6 +383,7 @@ export function ReceiptEmailTemplate({
 ReceiptEmailTemplate.PreviewProps = {
 	orderId: 'ML4F5L8522',
 	sellerName: 'Proper Youth',
+	currency: 'usd',
 	// buyerName: 'Adam Barito',
 	shippingTotal: '$5.55',
 	total: '$115.55',
@@ -396,6 +415,11 @@ ReceiptEmailTemplate.PreviewProps = {
 		{
 			name: 'Rusty Grand Am :: Pre-Order CD',
 			price: '$10.00',
+		},
+		{
+			name: 'Band T-Shirt',
+			price: '$25.00',
+			size: 'L',
 		},
 	],
 	vatTotal: '£20.00',
