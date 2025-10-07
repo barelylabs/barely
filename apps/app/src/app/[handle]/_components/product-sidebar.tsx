@@ -38,7 +38,23 @@ export function ProductSidebar() {
 	);
 
 	// Get available products based on current app variant
-	const { core, meta, locked } = useMemo(() => getProductsForVariant(), []);
+	const { core, meta, locked } = useMemo(() => {
+		const products = getProductsForVariant();
+
+		// Extract invoice from core products and add to meta section
+		const invoiceProduct = products.core.find(p => p.id === 'invoices');
+		const coreWithoutInvoice = products.core.filter(p => p.id !== 'invoices');
+
+		// Place invoice at the beginning of meta products (above merch)
+		const metaWithInvoice =
+			invoiceProduct ? [invoiceProduct, ...products.meta] : products.meta;
+
+		return {
+			core: coreWithoutInvoice,
+			meta: metaWithInvoice,
+			locked: products.locked,
+		};
+	}, []);
 
 	// Determine active product based on current pathname
 	const activeProductId = useMemo(() => {
