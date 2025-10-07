@@ -1,1 +1,8 @@
-export const SHIPPING_CARRIERS = ['usps', 'ups', 'dhl'] as const;
+export const SHIPPING_CARRIERS = [
+	'usps',
+	'ups',
+	'dhl',
+	'royalMail',
+	'evri',
+	'dpd',
+] as const;

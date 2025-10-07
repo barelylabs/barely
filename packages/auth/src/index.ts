@@ -118,6 +118,7 @@ export function initAuth(options: {
 										stripeConnectChargesEnabled: true,
 										stripeConnectChargesEnabled_devMode: true,
 										currency: true,
+										shippingAddressCountry: true,
 									},
 									with: {
 										brandKit: true,
