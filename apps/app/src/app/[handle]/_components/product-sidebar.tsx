@@ -40,6 +40,16 @@ export function ProductSidebar() {
 	// Get available products based on current app variant
 	const { core, meta, locked } = useMemo(() => getProductsForVariant(), []);
 
+	// Separate invoice product from core products for special positioning
+	const coreWithoutInvoice = useMemo(
+		() => core.filter(product => product.id !== 'invoices'),
+		[core],
+	);
+	const invoiceProduct = useMemo(
+		() => core.find(product => product.id === 'invoices'),
+		[core],
+	);
+
 	// Determine active product based on current pathname
 	const activeProductId = useMemo(() => {
 		const path = pathname.replace(`/${handle}`, '');
@@ -144,7 +154,7 @@ export function ProductSidebar() {
 			{!isPersonal && (
 				<div className='flex-1 overflow-y-auto'>
 					<div className='space-y-1 p-3'>
-						{core.map(product => (
+						{coreWithoutInvoice.map(product => (
 							<Fragment key={product.id}>{renderProduct(product)}</Fragment>
 						))}
 					</div>
@@ -153,6 +163,11 @@ export function ProductSidebar() {
 					<div className='mx-3'>
 						<div className='h-px bg-neutral-200' />
 					</div>
+
+					{/* Invoice Product (positioned after divider) */}
+					{invoiceProduct && (
+						<div className='space-y-1 p-3'>{renderProduct(invoiceProduct)}</div>
+					)}
 
 					{/* Locked Products */}
 					{locked.length > 0 && (
