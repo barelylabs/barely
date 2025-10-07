@@ -4,6 +4,7 @@ import type { z } from 'zod/v4';
 import { useCallback, useEffect, useMemo } from 'react';
 import { SHIPPING_CARRIERS } from '@barely/const';
 import { focusGridList, useWorkspace, useZodForm } from '@barely/hooks';
+import { getAvailableCarriers } from '@barely/utils';
 import { markCartOrderAsFulfilledSchema } from '@barely/validators';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useFieldArray } from 'react-hook-form';
@@ -40,7 +41,7 @@ const shippingCarrierOptions = SHIPPING_CARRIERS.map(carrier => ({
 export function MarkCartOrderFulfilledModal() {
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
-	const { handle } = useWorkspace();
+	const { handle, workspace } = useWorkspace();
 
 	/* cart order hooks */
 	const {
@@ -49,9 +50,29 @@ export function MarkCartOrderFulfilledModal() {
 		setShowMarkAsFulfilledModal,
 	} = useCartOrder();
 
+	/* filter carriers based on workspace shipping country */
+	const availableCarriers = useMemo(
+		() => getAvailableCarriers(workspace.shippingAddressCountry),
+		[workspace.shippingAddressCountry],
+	);
+
+	const filteredCarrierOptions = useMemo(
+		() =>
+			shippingCarrierOptions.filter(option => availableCarriers.includes(option.value)),
+		[availableCarriers],
+	);
+
+	const defaultCarrier = useMemo(() => {
+		const country = workspace.shippingAddressCountry?.toUpperCase();
+		if (country === 'GB' || country === 'UK') {
+			return 'evri';
+		}
+		return 'usps';
+	}, [workspace.shippingAddressCountry]);
+
 	/* mutations */
 	const { mutateAsync: markAsFulfilled } = useMutation(
-		trpc.cartOrder.markAsFullfilled.mutationOptions({
+		trpc.cartOrder.markAsFulfilled.mutationOptions({
 			onSuccess: async () => {
 				await handleCloseModal();
 			},
@@ -73,7 +94,7 @@ export function MarkCartOrderFulfilledModal() {
 				fulfilled: true,
 				apparelSize: product.apparelSize ?? undefined,
 			})),
-			shippingCarrier: 'usps',
+			shippingCarrier: defaultCarrier,
 			shippingTrackingNumber: '',
 		},
 		resetOptions: {
@@ -139,7 +160,7 @@ export function MarkCartOrderFulfilledModal() {
 						name='shippingCarrier'
 						label='Shipping Carrier'
 						placeholder='Select shipping carrier'
-						options={shippingCarrierOptions}
+						options={filteredCarrierOptions}
 					/>
 
 					<TextField

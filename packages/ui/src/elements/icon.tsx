@@ -147,6 +147,7 @@ import {
 	MousePointerClick,
 	Music,
 	Newspaper,
+	Package,
 	PackagePlus,
 	Palette,
 	PanelLeft,
@@ -332,6 +333,7 @@ export const Icon = {
 	dots: MoreHorizontal,
 	dotsVertical: MoreVertical,
 	download: Download,
+	dpd: Package,
 
 	edit: Edit,
 	ellipsis: MoreVertical,
@@ -340,6 +342,7 @@ export const Icon = {
 	emails: Mails,
 	emailTemplate: Mail,
 	emailTemplateGroup: Mails,
+	evri: Package,
 	externalLink: ExternalLink,
 	eyeDropper: EyeDropperIcon,
 
@@ -467,6 +470,7 @@ export const Icon = {
 	remarketing: BracketsAngle,
 	refresh: RefreshCcw,
 	rocket: Rocket,
+	royalMail: Package,
 
 	safari: Safari,
 	save: Save,
