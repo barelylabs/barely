@@ -65,7 +65,7 @@ export function MarkCartOrderFulfilledModal() {
 	const defaultCarrier = useMemo(() => {
 		const country = workspace.shippingAddressCountry?.toUpperCase();
 		if (country === 'GB' || country === 'UK') {
-			return 'royalMail';
+			return 'evri';
 		}
 		return 'usps';
 	}, [workspace.shippingAddressCountry]);
