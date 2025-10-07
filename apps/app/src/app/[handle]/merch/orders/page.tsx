@@ -12,6 +12,7 @@ import { CancelCartOrderModal } from '~/app/[handle]/merch/orders/_components/ca
 import { CartOrderFilters } from '~/app/[handle]/merch/orders/_components/cart-order-filters';
 import { CartOrderHotkeys } from '~/app/[handle]/merch/orders/_components/cart-order-hotkeys';
 import { MarkCartOrderFulfilledModal } from '~/app/[handle]/merch/orders/_components/mark-cart-order-fulfilled-modal';
+import { ShipOrderModal } from '~/app/[handle]/merch/orders/_components/ship-order-modal';
 import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
 export default async function CartOrdersPage({
@@ -45,6 +46,7 @@ export default async function CartOrdersPage({
 				<Suspense fallback={<GridListSkeleton />}>
 					<AllCartOrders />
 
+					<ShipOrderModal />
 					<MarkCartOrderFulfilledModal />
 					<CancelCartOrderModal />
 					<CartOrderHotkeys />

@@ -82,10 +82,24 @@ function CartOrderCard({
 }: {
 	cartOrder: AppRouterOutputs['cartOrder']['byWorkspace']['cartOrders'][0];
 }) {
-	const { setSelection, setShowMarkAsFulfilledModal, setShowCancelCartOrderModal } =
-		useCartOrder();
+	const {
+		setSelection,
+		setShowMarkAsFulfilledModal,
+		setShowCancelCartOrderModal,
+		setShowShipOrderModal,
+	} = useCartOrder();
 
 	const { handle, workspace } = useWorkspace();
+
+	const shipCommandItem: GridListCommandItemProps = {
+		label: 'Ship',
+		icon: 'package',
+		shortcut: ['s'],
+		action: () => {
+			void setSelection(new Set([cartOrder.id]));
+			void setShowShipOrderModal(true);
+		},
+	};
 
 	const markAsFulfilledCommandItem: GridListCommandItemProps = {
 		label: 'Mark as fulfilled',
@@ -112,6 +126,7 @@ function CartOrderCard({
 	const fullShippingAddressWithLineBreaks = `${cartOrder.fullName}\n${cartOrder.shippingAddressLine1}\n${cartOrder.shippingAddressLine2 ? `${cartOrder.shippingAddressLine2}\n` : ''}${cartOrder.shippingAddressCity}, ${cartOrder.shippingAddressState} ${cartOrder.shippingAddressPostalCode}`;
 
 	const commandItems = [
+		!cartOrder.canceledAt && cartOrder.fulfillmentStatus === 'pending' && shipCommandItem,
 		cartOrder.fulfillmentStatus !== 'fulfilled' && markAsFulfilledCommandItem,
 		!cartOrder.canceledAt &&
 			cartOrder.fulfillmentStatus === 'pending' &&

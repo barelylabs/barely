@@ -253,14 +253,63 @@ export const CartFulfillments = pgTable(
 		...timestamps,
 		cartId: dbId('cartId').references(() => Carts.id),
 
+		// ===== EXISTING FIELDS =====
 		shippingCarrier: varchar('shippingCarrier', { length: 255 }),
 		shippingTrackingNumber: varchar('shippingTrackingNumber', { length: 255 }),
 		fulfilledAt: timestamp('fulfilledAt'),
+
+		// ===== NEW FIELDS FOR SHIPSTATION INTEGRATION =====
+
+		// ShipStation identifiers
+		shipstationLabelId: varchar('shipstationLabelId', { length: 255 }),
+		shipstationShipmentId: varchar('shipstationShipmentId', { length: 255 }),
+		shipstationRateId: varchar('shipstationRateId', { length: 255 }), // if created from rate
+
+		// Label details
+		labelStatus: varchar('labelStatus', {
+			length: 50,
+			enum: ['created', 'voided', 'expired'],
+		}).default('created'),
+		labelFormat: varchar('labelFormat', {
+			length: 10,
+			enum: ['pdf', 'png', 'zpl'],
+		}).default('pdf'),
+		labelDownloadUrl: varchar('labelDownloadUrl', { length: 500 }),
+		labelExpiresAt: timestamp('labelExpiresAt'), // ShipStation labels expire after 90 days
+
+		// Financial tracking
+		labelCostAmount: integer('labelCostAmount'), // in cents, what we paid ShipStation
+		labelCostCurrency: varchar('labelCostCurrency', { length: 3 }).default('USD'),
+		estimatedCostAmount: integer('estimatedCostAmount'), // what we estimated at checkout
+		estimatedCostCurrency: varchar('estimatedCostCurrency', { length: 3 }),
+		costDelta: integer('costDelta'), // actual - estimate (negative = profit, positive = loss)
+
+		// Package details (for audit/re-creation)
+		packageWeightOz: integer('packageWeightOz'),
+		packageLengthIn: integer('packageLengthIn'),
+		packageWidthIn: integer('packageWidthIn'),
+		packageHeightIn: integer('packageHeightIn'),
+
+		// Service details
+		serviceCode: varchar('serviceCode', { length: 100 }), // e.g., 'usps_priority_mail'
+		deliveryDays: integer('deliveryDays'),
+
+		// Void tracking
+		voidedAt: timestamp('voidedAt'),
+		voidedBy: dbId('voidedBy'), // user who voided (future: add relation to Users)
+		voidRefundAmount: integer('voidRefundAmount'), // refund from ShipStation in cents
+
+		// Insurance (future)
+		insuranceAmount: integer('insuranceAmount'),
+		insuranceCostAmount: integer('insuranceCostAmount'),
 	},
 	fulfillment => ({
 		cart_fulfilledAt: uniqueIndex('cart_fulfilledAt_unique').on(
 			fulfillment.cartId,
 			fulfillment.fulfilledAt,
+		),
+		shipstationLabelId: uniqueIndex('shipstation_label_id_unique').on(
+			fulfillment.shipstationLabelId,
 		),
 	}),
 );

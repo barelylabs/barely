@@ -5,6 +5,7 @@
 		"jsx": "preserve", // fixme: this is how we're handling email templates bubbling up through packages for now. i guess it makes sense - if a package is handling jsx, ts needs to know what to do with it 🤷‍♂️
 		"rootDir": ".",
 		"outDir": "dist",
+		"incremental": false,
 		"plugins": [
 			{
 				"name": "trpc-navigation-plugin",

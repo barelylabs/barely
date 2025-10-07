@@ -548,3 +548,4 @@ Each app needs a unique port:
 
 This checklist should prevent the common issues encountered during VIP app setup and significantly speed up future app creation.
 - if adding a new package, always make sure to run 'pnpm install' before pushing any changes to origin. otherwise, the pnpm-lock.yaml will be off
+- whenever you create a new branch from main, unless specifically instructed differently, you should make sure you're using the most up-to-date version of main, pulling from the origin.
