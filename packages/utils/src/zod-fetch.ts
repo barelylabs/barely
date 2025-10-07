@@ -214,6 +214,38 @@ async function zPost<Schema extends ZodType, ErrorSchema extends ZodType>(
 	return response;
 }
 
+// put
+
+async function zPut<Schema extends ZodType, ErrorSchema extends ZodType>(
+	endpoint: string,
+	schema: Schema,
+	options: ZFetchProps<ErrorSchema>,
+): Promise<ZFetchResponse<Schema, ErrorSchema>> {
+	const response = await fetch(endpoint, {
+		method: 'PUT',
+		headers: {
+			'Content-Type': options.contentType ?? 'application/json',
+			...(options.auth ? { authorization: options.auth } : {}),
+			...options.headers,
+		},
+		body:
+			options.contentType === 'application/x-www-form-urlencoded' ?
+				new URLSearchParams(options.body)
+			:	JSON.stringify(options.body),
+	})
+		.then(res => formatResponse(res, options))
+		.then(formattedRes =>
+			parseResponse(formattedRes, schema, options.errorSchema, options),
+		)
+
+		.catch(err => {
+			console.error('zPut err => ', err);
+			throw new Error('zPut err');
+		});
+
+	return response;
+}
+
 // delete
 
 async function zDelete<Schema extends ZodType, ErrorSchema extends ZodType>(
@@ -246,4 +278,4 @@ async function zDelete<Schema extends ZodType, ErrorSchema extends ZodType>(
 	return response;
 }
 
-export { zGet, zPost, zDelete };
+export { zGet, zPost, zDelete, zPut };

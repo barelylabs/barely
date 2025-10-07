@@ -162,6 +162,7 @@ import {
 	Plus,
 	PlusCircle,
 	PoundSterlingIcon,
+	Printer,
 	QrCode,
 	Radio,
 	RadioTower,
@@ -435,6 +436,7 @@ export const Icon = {
 
 	order: CashRegister,
 
+	package: Package,
 	page: File,
 	palette: Palette,
 	party: PartyPopper,
@@ -454,7 +456,8 @@ export const Icon = {
 	poster: FrameCorners,
 	press: Newspaper,
 	pressKit: Newspaper,
-	print: File,
+	print: Printer,
+	printer: Printer,
 	profile: CircleUserRound,
 	product: ScanBarcode,
 	purchase: CashRegister,

@@ -24,6 +24,7 @@ export const useCartOrderSearchParams = createResourceSearchParamsHook({
 		showCanceled: parseAsBoolean.withDefault(false),
 		showMarkAsFulfilledModal: parseAsBoolean.withDefault(false),
 		showCancelCartOrderModal: parseAsBoolean.withDefault(false),
+		showShipOrderModal: parseAsBoolean.withDefault(false),
 	},
 	additionalActions: {
 		toggleFulfilled: action(setParams =>
@@ -40,6 +41,9 @@ export const useCartOrderSearchParams = createResourceSearchParamsHook({
 		),
 		setShowCancelCartOrderModal: action((setParams, show: boolean) =>
 			setParams({ showCancelCartOrderModal: show }),
+		),
+		setShowShipOrderModal: action((setParams, show: boolean) =>
+			setParams({ showShipOrderModal: show }),
 		),
 	},
 });
