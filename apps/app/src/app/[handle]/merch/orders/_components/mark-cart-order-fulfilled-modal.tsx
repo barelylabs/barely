@@ -72,7 +72,7 @@ export function MarkCartOrderFulfilledModal() {
 
 	/* mutations */
 	const { mutateAsync: markAsFulfilled } = useMutation(
-		trpc.cartOrder.markAsFullfilled.mutationOptions({
+		trpc.cartOrder.markAsFulfilled.mutationOptions({
 			onSuccess: async () => {
 				await handleCloseModal();
 			},

@@ -351,7 +351,7 @@ export const cartOrderRoute = {
 				})
 				.where(and(eq(Carts.workspaceId, ctx.workspace.id), eq(Carts.id, input.cartId)));
 		}),
-	markAsFullfilled: workspaceProcedure
+	markAsFulfilled: workspaceProcedure
 		.input(markCartOrderAsFulfilledSchema)
 		.mutation(async ({ input, ctx }) => {
 			// console.log('marking as fulfilled', input.cartId);
