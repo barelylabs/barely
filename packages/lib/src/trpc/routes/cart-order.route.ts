@@ -9,12 +9,15 @@ import {
 } from '@barely/db/sql/cart.sql';
 import { Fans } from '@barely/db/sql/fan.sql';
 import { Products } from '@barely/db/sql/product.sql';
-import { sqlAnd } from '@barely/db/utils';
+import { Workspaces } from '@barely/db/sql/workspace.sql';
+import { sqlAnd, sqlIncrement } from '@barely/db/utils';
 import { sendEmail } from '@barely/email';
 import { ShippingUpdateEmailTemplate } from '@barely/email/templates/cart';
 import {
+	formatMinorToMajorCurrency,
 	getTrackingLink,
 	isDevelopment,
+	isProduction,
 	newId,
 	numToPaddedString,
 	raiseTRPCError,
@@ -47,6 +50,7 @@ import {
 import { getStripeConnectAccountId } from '../../functions/stripe-connect.fns';
 import { createShippingLabel } from '../../integrations/shipping/shipengine.endpts';
 import { stripe } from '../../integrations/stripe';
+import { log } from '../../utils/log';
 import { workspaceProcedure } from '../trpc';
 
 export const cartOrderRoute = {
@@ -443,6 +447,71 @@ export const cartOrderRoute = {
 				})
 				.where(and(eq(Carts.workspaceId, ctx.workspace.id), eq(Carts.id, input.cartId)));
 
+			// Transfer shipping fee back to connected account for manual fulfillment
+			// Since they're handling shipping themselves, they shouldn't pay Barely's shipping fee
+			if (cart.orderShippingAmount && cart.orderShippingAmount > 0) {
+				const stripeConnectAccount =
+					isProduction() ?
+						cart.funnel?.workspace.stripeConnectAccountId
+					:	cart.funnel?.workspace.stripeConnectAccountId_devMode;
+
+				if (stripeConnectAccount) {
+					try {
+						const orderId = numToPaddedString(await getOrCreateCartOrderId(cart), {
+							digits: 6,
+						});
+
+						await stripe.transfers.create({
+							amount: cart.orderShippingAmount,
+							currency: cart.funnel?.workspace.currency ?? 'usd',
+							destination: stripeConnectAccount,
+							description: `Shipping refund for Order #${orderId} (manual fulfillment)`,
+							metadata: {
+								cartId: cart.id,
+								orderId,
+								fulfillmentId: cartFulfillmentId,
+								reason: 'manual_fulfillment_shipping_refund',
+							},
+						});
+
+						// Log successful transfer
+						const currency = cart.funnel?.workspace.currency === 'gbp' ? 'gbp' : 'usd';
+						await log({
+							type: 'logs',
+							location: 'cartOrder.markAsFulfilled',
+							message: `Order #${orderId} manual fulfillment - transferred ${formatMinorToMajorCurrency(cart.orderShippingAmount, currency)} shipping fee back to connected account`,
+						});
+					} catch (error) {
+						// Transfer failed - credit workspace balance as fallback
+						const orderId = numToPaddedString(await getOrCreateCartOrderId(cart), {
+							digits: 6,
+						});
+						const currency = cart.funnel?.workspace.currency === 'gbp' ? 'gbp' : 'usd';
+
+						await dbPool(ctx.pool)
+							.update(Workspaces)
+							.set({
+								balance: sqlIncrement(Workspaces.balance, cart.orderShippingAmount),
+							})
+							.where(eq(Workspaces.id, ctx.workspace.id));
+
+						// Log balance credit
+						await log({
+							type: 'logs',
+							location: 'cartOrder.markAsFulfilled',
+							message: `Order #${orderId} manual fulfillment - Stripe transfer failed, credited ${formatMinorToMajorCurrency(cart.orderShippingAmount, currency)} to workspace balance`,
+						});
+
+						// Also log error details for debugging
+						await log({
+							type: 'errors',
+							location: 'cartOrder.markAsFulfilled',
+							message: `Stripe transfer failed for cart ${cart.id}: ${error instanceof Error ? error.message : 'Unknown error'}. Amount credited to workspace balance instead.`,
+						});
+					}
+				}
+			}
+
 			const orderId = numToPaddedString(await getOrCreateCartOrderId(cart), {
 				digits: 6,
 			});
@@ -641,20 +710,22 @@ export const cartOrderRoute = {
 			const costDelta = actualCostCents - collectedCostCents;
 
 			// 8. Log cost delta for monitoring
-			console.log('=== SHIPPING COST ANALYSIS ===');
-			console.log(`Order ID: ${cart.orderId}`);
-			console.log(`Estimated Cost: ${estimatedCostCents / 100} ${labelResult.currency}`);
-			console.log(`Actual Cost: ${actualCostCents / 100} ${labelResult.currency}`);
-			console.log(`Customer Paid: ${collectedCostCents / 100} ${labelResult.currency}`);
-			console.log(`Delta: ${costDelta / 100} ${labelResult.currency}`);
-			console.log(
-				`Status: ${
-					costDelta < 0 ? 'PROFIT ✓'
-					: costDelta > 0 ? 'LOSS ✗'
-					: 'BREAK EVEN'
-				}`,
-			);
-			console.log('=============================');
+			const orderId = numToPaddedString(cart.orderId ?? 0, { digits: 6 });
+			const currency = labelResult.currency === 'USD' ? 'usd' : 'gbp';
+			const statusEmoji =
+				costDelta < 0 ? '✓'
+				: costDelta > 0 ? '✗'
+				: '•';
+			const statusText =
+				costDelta < 0 ? 'PROFIT'
+				: costDelta > 0 ? 'LOSS'
+				: 'BREAK EVEN';
+
+			await log({
+				type: 'logs',
+				location: 'cartOrder.shipOrder',
+				message: `Order #${orderId} shipped | Est: ${formatMinorToMajorCurrency(estimatedCostCents, currency)} | Actual: ${formatMinorToMajorCurrency(actualCostCents, currency)} | Collected: ${formatMinorToMajorCurrency(collectedCostCents, currency)} | Delta: ${formatMinorToMajorCurrency(Math.abs(costDelta), currency)} ${statusText} ${statusEmoji}`,
+			});
 
 			// 9. Create fulfillment record with label data
 			const fulfillmentId = newId('cartFulfillment');

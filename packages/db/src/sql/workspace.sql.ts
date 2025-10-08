@@ -190,6 +190,8 @@ export const Workspaces = pgTable(
 			length: 255,
 		}),
 
+		/* balance & payments */
+		balance: integer('balance').default(0).notNull(), // in minor units (cents) - used for credits, refunds, and failed transfer fallbacks
 		orders: integer('orders').default(0).notNull(),
 		currency: varchar('currency', { length: 4, enum: ['usd', 'gbp'] })
 			.default('usd')

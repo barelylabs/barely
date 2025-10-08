@@ -411,7 +411,7 @@ export const cartRoute = {
 					application_fee_amount: getFeeAmountForCheckout({
 						productAmount: amounts.orderProductAmount,
 						vatAmount: amounts.orderVatAmount,
-						shippingAndHandlingAmount: 0, // not supported yet. in the future we take a shipping fee if they want to ship through the app.
+						shippingAmount: 0, // not supported yet. in the future we take a shipping fee if they want to ship through the app.
 						workspace: funnel.workspace,
 					}),
 				},
@@ -589,7 +589,7 @@ export const cartRoute = {
 					application_fee_amount: getFeeAmountForCheckout({
 						productAmount: amounts.upsellProductAmount,
 						vatAmount: amounts.upsellVatAmount,
-						shippingAndHandlingAmount: 0, // not supported yet. in the future we take a shipping fee if they want to ship through the app.
+						shippingAmount: 0, // not supported yet. in the future we take a shipping fee if they want to ship through the app.
 						workspace: funnel.workspace,
 					}),
 					currency: cart.workspace.currency,
