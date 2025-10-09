@@ -13,6 +13,7 @@ import { CartOrderFilters } from '~/app/[handle]/merch/orders/_components/cart-o
 import { CartOrderHotkeys } from '~/app/[handle]/merch/orders/_components/cart-order-hotkeys';
 import { MarkCartOrderFulfilledModal } from '~/app/[handle]/merch/orders/_components/mark-cart-order-fulfilled-modal';
 import { ShipOrderModal } from '~/app/[handle]/merch/orders/_components/ship-order-modal';
+import { ShippingPhoneAlert } from '~/app/[handle]/merch/orders/_components/shipping-phone-alert';
 import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
 export default async function CartOrdersPage({
@@ -43,6 +44,7 @@ export default async function CartOrdersPage({
 			<DashContentHeader title='Orders' />
 			<DashContent>
 				<CartOrderFilters />
+				<ShippingPhoneAlert />
 				<Suspense fallback={<GridListSkeleton />}>
 					<AllCartOrders />
 

@@ -5,6 +5,7 @@ import { useUpdateWorkspace, useWorkspaceWithAll, useZodForm } from '@barely/hoo
 import { updateWorkspaceSchema } from '@barely/validators';
 
 import { SettingsCardForm } from '@barely/ui/components/settings-card';
+import { PhoneField } from '@barely/ui/forms/phone-field';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { TextField } from '@barely/ui/forms/text-field';
 
@@ -138,6 +139,46 @@ export function CartSupportEmail() {
 			disableSubmit={!form.formState.isDirty}
 		>
 			<TextField label='Email' control={form.control} name='cartSupportEmail' />
+		</SettingsCardForm>
+	);
+}
+
+export function CartShippingPhone() {
+	const workspace = useWorkspaceWithAll();
+
+	const form = useZodForm({
+		schema: updateWorkspaceSchema,
+		values: {
+			id: workspace.id,
+			shippingAddressPhone: workspace.shippingAddressPhone,
+		},
+	});
+
+	const { updateWorkspace } = useUpdateWorkspace({
+		onSuccess: () => form.reset(),
+	});
+
+	const onSubmit = async (data: z.infer<typeof updateWorkspaceSchema>) => {
+		await updateWorkspace({
+			...data,
+			handle: workspace.handle,
+		});
+	};
+
+	return (
+		<SettingsCardForm
+			form={form}
+			onSubmit={onSubmit}
+			title='Shipping Phone Number'
+			subtitle='Required for purchasing shipping labels. This is your business phone number that will be used as the return contact.'
+			disableSubmit={!form.formState.isDirty}
+		>
+			<PhoneField
+				label='Phone Number'
+				control={form.control}
+				name='shippingAddressPhone'
+				placeholder='+1 (555) 123-4567'
+			/>
 		</SettingsCardForm>
 	);
 }

@@ -2,6 +2,7 @@ import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import {
 	CartShippingAddress,
+	CartShippingPhone,
 	CartSupportEmail,
 } from '~/app/[handle]/merch/carts/_components/cart-settings';
 
@@ -14,6 +15,7 @@ export default function MerchLogisticsPage() {
 			/>
 			<DashContent>
 				<CartSupportEmail />
+				<CartShippingPhone />
 				<CartShippingAddress />
 			</DashContent>
 		</>

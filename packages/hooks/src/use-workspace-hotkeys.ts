@@ -32,7 +32,7 @@ export function useWorkspaceHotkeys({ workspace }: { workspace: SessionWorkspace
 			}
 
 			if (e.key === 'c' && gKeyPressed && noMetaKey && notInInput) {
-				router.push(`/${workspace.handle}/carts`);
+				router.push(`/${workspace.handle}/merch/carts`);
 				setGKeyPressed(false);
 			}
 			if (e.key === 'f' && gKeyPressed && noMetaKey && notInInput) {
@@ -52,11 +52,11 @@ export function useWorkspaceHotkeys({ workspace }: { workspace: SessionWorkspace
 				setGKeyPressed(false);
 			}
 			if (e.key === 'o' && gKeyPressed && noMetaKey && notInInput) {
-				router.push(`/${workspace.handle}/orders`);
+				router.push(`/${workspace.handle}/merch/orders`);
 				setGKeyPressed(false);
 			}
 			if (e.key === 'p' && gKeyPressed && noMetaKey && notInInput) {
-				router.push(`/${workspace.handle}/products`);
+				router.push(`/${workspace.handle}/merch/products`);
 				setGKeyPressed(false);
 			}
 			if (e.key === 's' && gKeyPressed && noMetaKey && notInInput) {

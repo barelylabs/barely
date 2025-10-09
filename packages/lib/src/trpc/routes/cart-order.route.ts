@@ -617,6 +617,14 @@ export const cartOrderRoute = {
 				});
 			}
 
+			if (!ctx.workspace.shippingAddressPhone) {
+				throw new TRPCError({
+					code: 'PRECONDITION_FAILED',
+					message:
+						'Shipping phone number not configured. Please add your business phone number in Merch > Logistics settings to purchase shipping labels.',
+				});
+			}
+
 			// 3. Validate customer shipping address
 			if (!cart.shippingAddressLine1 || !cart.shippingAddressPostalCode) {
 				throw new TRPCError({
@@ -631,7 +639,7 @@ export const cartOrderRoute = {
 				workspaceCountry === 'GB' || workspaceCountry === 'UK' ? 'UK' : 'US';
 
 			// 5. Get cheapest rate first (to store estimate vs actual cost)
-			const { lowestShippingPrice: estimatedCostCents } =
+			const { rates, lowestShippingPrice: estimatedCostCents } =
 				await getProductsShippingRateEstimate({
 					products: input.products
 						.filter(p => p.fulfilled)
@@ -665,9 +673,13 @@ export const cartOrderRoute = {
 
 			try {
 				labelResult = await createShippingLabel({
+					carrierId:
+						rates[0]?.carrier_id ??
+						raiseTRPCError({ message: 'No carrier available for shipping' }),
 					shipFrom: {
 						name: ctx.workspace.name,
 						companyName: ctx.workspace.name,
+						phone: ctx.workspace.shippingAddressPhone,
 						addressLine1: ctx.workspace.shippingAddressLine1,
 						addressLine2: ctx.workspace.shippingAddressLine2 ?? undefined,
 						city: ctx.workspace.shippingAddressCity ?? '',
@@ -691,7 +703,10 @@ export const cartOrderRoute = {
 						widthIn: input.package.widthIn,
 						heightIn: input.package.heightIn,
 					},
-					serviceCode: input.serviceCode,
+					serviceCode:
+						input.serviceCode ??
+						rates[0]?.service_code ??
+						raiseTRPCError({ message: 'No shipping service available' }),
 					deliveryConfirmation: input.deliveryConfirmation,
 					insuranceAmount: input.insuranceAmount,
 					region,
