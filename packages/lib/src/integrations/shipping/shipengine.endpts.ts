@@ -2,16 +2,17 @@ import { zGet, zPost, zPut } from '@barely/utils';
 import { z } from 'zod/v4';
 
 import { libEnv } from '../../../env';
+import { log } from '../../utils/log';
 
 /* ===== SHIPSTATION API SCHEMAS ===== */
 
 // Address schema (used in multiple places)
 const addressSchema = z.object({
 	name: z.string(),
-	phone: z.string().optional(),
-	company_name: z.string().optional(),
+	phone: z.string().nullish(),
+	company_name: z.string().nullish(),
 	address_line1: z.string(),
-	address_line2: z.string().optional(),
+	address_line2: z.string().nullish(),
 	city_locality: z.string(),
 	state_province: z.string(),
 	postal_code: z.string(),
@@ -21,7 +22,7 @@ const addressSchema = z.object({
 
 // Package schema
 const packageSchema = z.object({
-	package_id: z.string(),
+	package_id: z.coerce.string(),
 	package_code: z.string(),
 	weight: z.object({
 		value: z.number(),
@@ -44,13 +45,13 @@ const packageSchema = z.object({
 	tracking_number: z.string(),
 	label_messages: z
 		.object({
-			reference1: z.string().optional(),
-			reference2: z.string().optional(),
-			reference3: z.string().optional(),
+			reference1: z.string().nullish(),
+			reference2: z.string().nullish(),
+			reference3: z.string().nullish(),
 		})
 		.optional(),
-	external_package_id: z.string().optional(),
-	estimated_delivery_date: z.string().nullable().optional(),
+	external_package_id: z.string().nullish(),
+	estimated_delivery_date: z.string().nullish(),
 });
 
 // Money amount schema
@@ -87,42 +88,42 @@ const createLabelResponseSchema = z.object({
 	// Costs
 	shipment_cost: moneySchema.nullable(),
 	insurance_cost: moneySchema.nullable(),
-	confirmation_amount: moneySchema.nullable().optional(),
-	other_amount: moneySchema.nullable().optional(),
+	confirmation_amount: moneySchema.nullish(),
+	other_amount: moneySchema.nullish(),
 
 	// Package
 	packages: z.array(packageSchema),
 
 	// Addresses (validated)
 	ship_to: addressSchema,
-	ship_from: addressSchema,
+	ship_from: addressSchema.optional(),
 
 	// Errors/warnings
-	validation_status: z.enum(['valid', 'invalid', 'has_warnings']),
-	warning_messages: z.array(z.string()),
-	error_messages: z.array(z.string()),
+	validation_status: z.enum(['valid', 'invalid', 'has_warnings']).optional(),
+	warning_messages: z.array(z.string()).optional(),
+	error_messages: z.array(z.string()).optional(),
 
 	// Other
 	is_return_label: z.boolean(),
-	rma_number: z.string().optional(),
+	rma_number: z.string().nullish(),
 	is_international: z.boolean(),
 	batch_id: z.string().optional(),
 	voided: z.boolean(),
-	voided_at: z.string().optional(),
+	voided_at: z.string().nullish(),
 	label_format: z.enum(['pdf', 'png', 'zpl']),
 	display_scheme: z.enum(['label', 'qr_code']),
 	label_layout: z.enum(['4x6', 'letter']),
 	trackable: z.boolean(),
-	carrier_nickname: z.string(),
-	carrier_friendly_name: z.string(),
-	delivery_days: z.number().nullable().optional(),
+	carrier_nickname: z.string().optional(),
+	carrier_friendly_name: z.string().optional(),
+	delivery_days: z.number().nullish(),
 	insurance_claim: z.any().optional(),
 	form_download: z
 		.object({
 			href: z.string(),
 			type: z.string(),
 		})
-		.optional(),
+		.nullish(),
 });
 
 // ShipStation error schema
@@ -357,10 +358,26 @@ export async function getShipStationRateEstimates(props: ShippingEstimateProps) 
 
 	if (!response.success && response.parsed) {
 		console.log('shipping errors', response.data.errors);
+
+		await log({
+			type: 'errors',
+			location: 'shipengine.getShipStationRateEstimates',
+			message: `Failed to get shipping rates: ${response.data.errors.map(e => e.message).join(', ')}`,
+			mention: true,
+		});
+
 		throw new Error('Failed to get shipping rates');
 	}
 
 	console.log('shipping response', response);
+
+	await log({
+		type: 'errors',
+		location: 'shipengine.getShipStationRateEstimates',
+		message: 'Failed to get shipping rates: Unknown error (response not parsed)',
+		mention: true,
+	});
+
 	throw new Error('Failed to get shipping rates');
 }
 
@@ -520,18 +537,30 @@ export async function createShippingLabel(
 	});
 
 	if (!response.success || !response.parsed) {
+		const errorMessage =
+			response.parsed ? response.data.errors[0]?.message : 'Unknown error';
 		console.error('ShipStation label creation failed:', response);
-		throw new Error(
-			`Failed to create shipping label: ${
-				response.parsed ? response.data.errors[0]?.message : 'Unknown error'
-			}`,
-		);
+
+		await log({
+			type: 'errors',
+			location: 'shipengine.createShippingLabel',
+			message: `Failed to create shipping label: ${errorMessage}\nRequest: ${JSON.stringify(requestBody, null, 2)}`,
+			mention: true,
+		});
+
+		throw new Error(`Failed to create shipping label: ${errorMessage}`);
 	}
 
 	const data = response.data;
 
 	// Check if the label creation failed at the carrier level
-	if (data.status === 'error' || data.error_messages.length > 0) {
+	if (
+		data.status === 'error' ||
+		(data.error_messages && data.error_messages.length > 0)
+	) {
+		const carrierError =
+			data.error_messages?.join(', ') ?? 'A label was not returned from the carrier';
+
 		console.error('ShipStation carrier error:', {
 			status: data.status,
 			validation_status: data.validation_status,
@@ -539,9 +568,15 @@ export async function createShippingLabel(
 			warnings: data.warning_messages,
 			request: requestBody,
 		});
-		throw new Error(
-			`Carrier error: ${data.error_messages.join(', ') || 'A label was not returned from the carrier'}`,
-		);
+
+		await log({
+			type: 'errors',
+			location: 'shipengine.createShippingLabel',
+			message: `Carrier error: ${carrierError}\nStatus: ${data.status}\nValidation: ${data.validation_status}\nWarnings: ${data.warning_messages?.join(', ') ?? 'none'}`,
+			mention: true,
+		});
+
+		throw new Error(`Carrier error: ${carrierError}`);
 	}
 
 	// Calculate total cost in cents
@@ -569,9 +604,9 @@ export async function createShippingLabel(
 		estimatedDeliveryDate: data.packages[0]?.estimated_delivery_date ?? undefined,
 		deliveryDays: data.delivery_days ?? undefined,
 
-		validationStatus: data.validation_status,
-		warnings: data.warning_messages,
-		errors: data.error_messages,
+		validationStatus: data.validation_status ?? 'valid',
+		warnings: data.warning_messages ?? [],
+		errors: data.error_messages ?? [],
 	};
 }
 
@@ -594,12 +629,18 @@ export async function getLabelById(
 	});
 
 	if (!response.success || !response.parsed) {
+		const errorMessage =
+			response.parsed ? response.data.errors[0]?.message : 'Unknown error';
 		console.error('ShipStation get label failed:', response);
-		throw new Error(
-			`Failed to retrieve label: ${
-				response.parsed ? response.data.errors[0]?.message : 'Unknown error'
-			}`,
-		);
+
+		await log({
+			type: 'errors',
+			location: 'shipengine.getLabelById',
+			message: `Failed to retrieve label ${labelId}: ${errorMessage}`,
+			mention: true,
+		});
+
+		throw new Error(`Failed to retrieve label: ${errorMessage}`);
 	}
 
 	const data = response.data;
@@ -629,9 +670,9 @@ export async function getLabelById(
 		estimatedDeliveryDate: data.packages[0]?.estimated_delivery_date ?? undefined,
 		deliveryDays: data.delivery_days ?? undefined,
 
-		validationStatus: data.validation_status,
-		warnings: data.warning_messages,
-		errors: data.error_messages,
+		validationStatus: data.validation_status ?? 'valid',
+		warnings: data.warning_messages ?? [],
+		errors: data.error_messages ?? [],
 	};
 }
 
@@ -662,12 +703,18 @@ export async function voidShippingLabel(
 	});
 
 	if (!response.success || !response.parsed) {
+		const errorMessage =
+			response.parsed ? response.data.errors[0]?.message : 'Unknown error';
 		console.error('ShipStation void label failed:', response);
-		throw new Error(
-			`Failed to void label: ${
-				response.parsed ? response.data.errors[0]?.message : 'Unknown error'
-			}`,
-		);
+
+		await log({
+			type: 'errors',
+			location: 'shipengine.voidShippingLabel',
+			message: `Failed to void label ${labelId}: ${errorMessage}`,
+			mention: true,
+		});
+
+		throw new Error(`Failed to void label: ${errorMessage}`);
 	}
 
 	const data = response.data;
