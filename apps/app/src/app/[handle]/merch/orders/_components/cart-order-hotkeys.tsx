@@ -11,6 +11,7 @@ export function CartOrderHotkeys() {
 		lastSelectedItem,
 		setShowMarkAsFulfilledModal,
 		setShowCancelCartOrderModal,
+		setShowShipOrderModal,
 	} = useCartOrder();
 
 	const fulfillAction = useCallback(async () => {
@@ -31,9 +32,24 @@ export function CartOrderHotkeys() {
 		await setShowCancelCartOrderModal(true);
 	}, [lastSelectedItem, setShowCancelCartOrderModal]);
 
+	const shipAction = useCallback(async () => {
+		if (
+			!lastSelectedItem ||
+			!!lastSelectedItem.canceledAt ||
+			lastSelectedItem.fulfillmentStatus !== 'pending'
+		) {
+			return;
+		}
+		await setShowShipOrderModal(true);
+	}, [lastSelectedItem, setShowShipOrderModal]);
+
 	useModalHotKeys({
 		itemSelected: selection !== 'all' && !!selection.size,
 		customHotkeys: [
+			{
+				condition: e => e.key === 's' && !e.metaKey && !e.ctrlKey && !e.shiftKey,
+				action: shipAction,
+			},
 			{
 				condition: e => e.key === 'f' && !e.metaKey && !e.ctrlKey && !e.shiftKey,
 				action: fulfillAction,
