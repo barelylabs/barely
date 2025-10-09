@@ -639,7 +639,7 @@ export const cartOrderRoute = {
 				workspaceCountry === 'GB' || workspaceCountry === 'UK' ? 'UK' : 'US';
 
 			// 5. Get cheapest rate first (to store estimate vs actual cost)
-			const { lowestShippingPrice: estimatedCostCents } =
+			const { rates, lowestShippingPrice: estimatedCostCents } =
 				await getProductsShippingRateEstimate({
 					products: input.products
 						.filter(p => p.fulfilled)
@@ -673,6 +673,9 @@ export const cartOrderRoute = {
 
 			try {
 				labelResult = await createShippingLabel({
+					carrierId:
+						rates[0]?.carrier_id ??
+						raiseTRPCError({ message: 'No carrier available for shipping' }),
 					shipFrom: {
 						name: ctx.workspace.name,
 						companyName: ctx.workspace.name,
@@ -700,7 +703,10 @@ export const cartOrderRoute = {
 						widthIn: input.package.widthIn,
 						heightIn: input.package.heightIn,
 					},
-					serviceCode: input.serviceCode,
+					serviceCode:
+						input.serviceCode ??
+						rates[0]?.service_code ??
+						raiseTRPCError({ message: 'No shipping service available' }),
 					deliveryConfirmation: input.deliveryConfirmation,
 					insuranceAmount: input.insuranceAmount,
 					region,
