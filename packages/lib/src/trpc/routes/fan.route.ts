@@ -12,7 +12,7 @@ import {
 	updateFanSchema,
 } from '@barely/validators';
 import { tasks } from '@trigger.dev/sdk/v3';
-import { and, asc, desc, eq, gt, inArray, isNull, lt, or } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, ilike, inArray, isNull, lt, or } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
 import type { importFansFromCsv } from '../../trigger';
@@ -23,10 +23,16 @@ export const fanRoute = {
 		.input(selectWorkspaceFansSchema)
 		.query(async ({ input, ctx }) => {
 			const { limit, cursor, search, showArchived } = input;
+			console.log('[FAN SEARCH DEBUG]', {
+				search,
+				searchLength: search?.length,
+				workspaceId: ctx.workspace.id,
+			});
+
 			const fans = await dbHttp.query.Fans.findMany({
 				where: sqlAnd([
 					eq(Fans.workspaceId, ctx.workspace.id),
-					!!search?.length && sqlStringContains(Fans.fullName, search),
+					!!search?.length && ilike(Fans.fullName, `%${search}%`),
 					showArchived ? undefined : isNull(Fans.archivedAt),
 					!!cursor &&
 						or(
@@ -37,6 +43,8 @@ export const fanRoute = {
 				orderBy: [desc(Fans.createdAt), asc(Fans.id)],
 				limit: limit + 1,
 			});
+
+			console.log('[FAN SEARCH RESULTS]', { count: fans.length, search });
 
 			let nextCursor: typeof cursor | undefined = undefined;
 
