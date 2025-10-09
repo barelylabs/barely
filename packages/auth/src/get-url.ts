@@ -22,6 +22,10 @@ export function getBaseUrl(app: (typeof APPS)[number], absolute = false) {
 				devPort =
 					authEnv.NEXT_PUBLIC_APP_DEV_PORT ?? raise('NEXT_PUBLIC_APP_DEV_PORT not found');
 				break;
+			case 'appInvoice':
+				devPort =
+					authEnv.NEXT_PUBLIC_APP_DEV_PORT ?? raise('NEXT_PUBLIC_APP_DEV_PORT not found');
+				break;
 			case 'bio':
 				devPort =
 					authEnv.NEXT_PUBLIC_BIO_DEV_PORT ?? raise('NEXT_PUBLIC_BIO_DEV_PORT not found');
@@ -76,7 +80,7 @@ export function getBaseUrl(app: (typeof APPS)[number], absolute = false) {
 				raise('Invalid app');
 		}
 
-		return `https://${app === 'app' || app === 'appFm' || app === 'cart' ? '127.0.0.1' : 'localhost'}:${devPort}`; // dev SSR should use localhost
+		return `https://${app === 'app' || app === 'appFm' || app === 'appInvoice' || app === 'cart' ? '127.0.0.1' : 'localhost'}:${devPort}`; // dev SSR should use localhost
 	}
 
 	let baseUrl;
@@ -86,6 +90,9 @@ export function getBaseUrl(app: (typeof APPS)[number], absolute = false) {
 			break;
 		case 'appFm':
 			baseUrl = authEnv.NEXT_PUBLIC_APP_FM_BASE_URL;
+			break;
+		case 'appInvoice':
+			baseUrl = authEnv.NEXT_PUBLIC_APP_INVOICE_BASE_URL;
 			break;
 		case 'bio':
 			baseUrl = authEnv.NEXT_PUBLIC_BIO_BASE_URL;
