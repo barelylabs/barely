@@ -445,7 +445,7 @@ export async function createShippingLabel(
 			ship_from: {
 				name: props.shipFrom.name,
 				company_name: props.shipFrom.companyName,
-				...(props.shipFrom.phone && { phone: props.shipFrom.phone }),
+				phone: props.shipFrom.phone,
 				address_line1: props.shipFrom.addressLine1,
 				address_line2: props.shipFrom.addressLine2,
 				city_locality: props.shipFrom.city,
