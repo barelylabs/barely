@@ -3,7 +3,7 @@ import '~/styles/globals.css';
 import type { Metadata } from 'next';
 import { Inter as FontSans } from 'next/font/google';
 import localFont from 'next/font/local';
-import { cn } from '@barely/utils';
+import { cn, getCurrentAppConfig } from '@barely/utils';
 import { Toaster } from 'sonner';
 
 import { TailwindIndicator } from '@barely/ui/components/tailwind-indicator';
@@ -24,22 +24,27 @@ const fontSans = FontSans({
 	preload: true,
 });
 
-export const metadata: Metadata = {
-	title: 'barely.ai',
-	icons: {
-		icon: [
-			{ url: '/_static/favicons/favicon-32x32.png', sizes: '32x32' },
-			{ url: '/_static/favicons/favicon-16x16.png', sizes: '16x16' },
-		],
-		apple: '/_static/favicons/apple-touch-icon.png',
-		other: [
-			{
-				rel: 'mask-icon',
-				url: '/_static/favicons/safari-pinned-tab.svg',
-			},
-		],
-	},
-};
+export function generateMetadata(): Metadata {
+	const appConfig = getCurrentAppConfig();
+
+	return {
+		title: appConfig.title,
+		description: appConfig.description,
+		icons: {
+			icon: [
+				{ url: '/_static/favicons/favicon-32x32.png', sizes: '32x32' },
+				{ url: '/_static/favicons/favicon-16x16.png', sizes: '16x16' },
+			],
+			apple: '/_static/favicons/apple-touch-icon.png',
+			other: [
+				{
+					rel: 'mask-icon',
+					url: '/_static/favicons/safari-pinned-tab.svg',
+				},
+			],
+		},
+	};
+}
 
 interface RootLayoutProps {
 	children: React.ReactNode;

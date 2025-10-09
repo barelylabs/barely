@@ -1,5 +1,6 @@
 // Apps
 export * from './app.constants';
+export * from './app-variant.config';
 
 // Bio
 export * from './bio.constants';

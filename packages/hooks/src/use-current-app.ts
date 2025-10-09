@@ -1,8 +1,7 @@
-import type { AppFeature, AppVariant, AppVariantConfig } from '@barely/utils';
+import type { AppFeature, AppVariant, AppVariantConfig } from '@barely/const';
 import { useMemo } from 'react';
+import { getCurrentAppConfig, getCurrentAppVariant } from '@barely/const';
 import {
-	getCurrentAppConfig,
-	getCurrentAppVariant,
 	getEnabledFeatures,
 	hasFeature,
 	isAppVariant,

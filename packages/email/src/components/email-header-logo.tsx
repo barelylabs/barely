@@ -16,12 +16,17 @@ import { Img } from '@react-email/components';
 // 	return `http://localhost:${devPort ?? ''}`; // dev SSR should use localhost
 // }
 
-const EmailHeaderLogo = () => {
+interface EmailHeaderLogoProps {
+	logoUrl?: string;
+	alt?: string;
+}
+
+const EmailHeaderLogo = ({ logoUrl, alt }: EmailHeaderLogoProps = {}) => {
 	return (
 		<div className='flex flex-col'>
 			<Img
-				src={'https://app.barely.ai/_static/logo.png'}
-				alt='barely.ai logo'
+				src={logoUrl ?? 'https://app.barely.ai/_static/logo.png'}
+				alt={alt ?? 'barely.ai logo'}
 				style={{
 					paddingTop: '0.5rem',
 					paddingBottom: '0.5rem',
