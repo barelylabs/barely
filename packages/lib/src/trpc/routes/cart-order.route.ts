@@ -65,7 +65,7 @@ export const cartOrderRoute = {
 			let searchFanIds: string[] = [];
 			console.log('[CART ORDER SEARCH DEBUG]', {
 				search,
-				searchLength: search?.length,
+				searchLength: search.length,
 				workspaceId: ctx.workspace.id,
 			});
 
