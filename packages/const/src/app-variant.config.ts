@@ -1,9 +1,9 @@
-import type { APPS } from './app.constants';
+import { APPS } from './app.constants';
 
 export type AppVariant = (typeof APPS)[number];
 
 export interface AppVariantConfig {
-	name: string;
+	name: AppVariant;
 	displayName: string;
 	title: string;
 	description?: string;
@@ -99,12 +99,27 @@ export const APP_VARIANT_CONFIGS: Record<string, AppVariantConfig> = {
 };
 
 /**
+ * Type guard to check if a string is a valid AppVariant
+ */
+function isAppVariant(value: string | undefined): value is AppVariant {
+	if (!value) return false;
+	// Iterate to avoid type casting with .includes()
+	for (const app of APPS) {
+		if (app === value) return true;
+	}
+	return false;
+}
+
+/**
  * Get the current app variant from environment
  */
 export function getCurrentAppVariant(): AppVariant | undefined {
 	// Both server and client can read from process.env in Next.js
 	// NEXT_PUBLIC_ variables are injected at build time
-	return process.env.NEXT_PUBLIC_CURRENT_APP as AppVariant | undefined;
+	const envValue = process.env.NEXT_PUBLIC_CURRENT_APP;
+
+	// Validate and return if it's a valid AppVariant
+	return isAppVariant(envValue) ? envValue : undefined;
 }
 
 /**

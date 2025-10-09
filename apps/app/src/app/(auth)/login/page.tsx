@@ -24,7 +24,7 @@ const SignInPage = async ({
 	await handleLoggedInOnAuthPage();
 
 	const appConfig = getCurrentAppConfig();
-	const backUrl = getAbsoluteUrl(appConfig.name as Parameters<typeof getAbsoluteUrl>[0]);
+	const backUrl = getAbsoluteUrl(appConfig.name);
 
 	return (
 		<div className='container flex h-screen w-screen flex-col items-center justify-center'>
