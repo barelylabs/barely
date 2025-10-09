@@ -9,7 +9,10 @@
 			"Bash(git push origin HEAD:*)",
 			"mcp__context7__resolve-library-id",
 			"mcp__context7__get-library-docs",
-			"WebSearch"
+			"WebSearch",
+			"WebFetch(domain:github.com)",
+			"WebFetch(domain:www.shipengine.com)",
+			"WebFetch(domain:raw.githubusercontent.com)"
 		],
 		"deny": []
 	},
