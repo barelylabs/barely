@@ -1,7 +1,8 @@
+// import { sendEmail } from '@barely/email';
+import { getCurrentAppConfig } from '@barely/const';
 import { eq } from '@barely/db';
 import { dbHttp } from '@barely/db/client';
 import { Users, VerificationTokens } from '@barely/db/sql';
-// import { sendEmail } from '@barely/email';
 import { SignInEmailTemplate } from '@barely/email/templates/auth';
 import { createRandomStringGenerator } from '@better-auth/utils/random';
 
@@ -122,17 +123,20 @@ export async function sendMagicLink(props: {
 }) {
 	const { magicLink, dbUser } = await createMagicLink(props);
 
+	const appConfig = getCurrentAppConfig();
+
 	const SignInEmail = SignInEmailTemplate({
 		firstName: dbUser.firstName ?? dbUser.handle ?? undefined,
 		loginLink: magicLink,
+		appName: appConfig.title,
 	});
 
 	const { sendEmail } = await import('@barely/email');
 	const emailRes = await sendEmail({
 		from: 'support@ship.barely.ai',
-		fromFriendlyName: 'Barely',
+		fromFriendlyName: appConfig.emailFromName,
 		to: props.email,
-		subject: 'Barely Login Link',
+		subject: `${appConfig.title} Login Link`,
 		type: 'transactional',
 		react: SignInEmail,
 	});

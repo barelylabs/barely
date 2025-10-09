@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { getCurrentAppConfig } from '@barely/utils';
 import logo from '@static/logo.png';
 
 import { H, Text } from '@barely/ui/typography';
@@ -17,6 +18,8 @@ const RegisterUserPage = async ({
 
 	await handleLoggedInOnAuthPage({ callbackUrl });
 
+	const appConfig = getCurrentAppConfig();
+
 	return (
 		<div className='container flex h-screen min-h-fit w-screen flex-col items-center justify-center overflow-scroll lg:max-w-none lg:grid-cols-2 lg:px-0'>
 			<Link
@@ -28,7 +31,7 @@ const RegisterUserPage = async ({
 			<div className='mx-auto flex w-[350px] max-w-full flex-col justify-center space-y-4 text-center'>
 				<div className='flex flex-col space-y-1 text-center'>
 					<div className='relative mx-auto mb-2 h-11 w-11'>
-						<Image src={logo} alt='barely.ai' fill priority sizes='44px' />
+						<Image src={logo} alt={appConfig.logoAlt} fill priority sizes='44px' />
 					</div>
 					<H size='4'>Create an account</H>
 				</div>
