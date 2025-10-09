@@ -617,6 +617,14 @@ export const cartOrderRoute = {
 				});
 			}
 
+			if (!ctx.workspace.shippingAddressPhone) {
+				throw new TRPCError({
+					code: 'PRECONDITION_FAILED',
+					message:
+						'Shipping phone number not configured. Please add your business phone number in Merch > Logistics settings to purchase shipping labels.',
+				});
+			}
+
 			// 3. Validate customer shipping address
 			if (!cart.shippingAddressLine1 || !cart.shippingAddressPostalCode) {
 				throw new TRPCError({
@@ -668,6 +676,7 @@ export const cartOrderRoute = {
 					shipFrom: {
 						name: ctx.workspace.name,
 						companyName: ctx.workspace.name,
+						phone: ctx.workspace.shippingAddressPhone,
 						addressLine1: ctx.workspace.shippingAddressLine1,
 						addressLine2: ctx.workspace.shippingAddressLine2 ?? undefined,
 						city: ctx.workspace.shippingAddressCity ?? '',

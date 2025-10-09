@@ -176,6 +176,7 @@ export const Workspaces = pgTable(
 		vipSupportEmail: varchar('vipSupportEmail', { length: 255 }),
 
 		/* for shipping */
+		shippingAddressPhone: varchar('shippingAddressPhone', { length: 255 }),
 		shippingAddressLine1: varchar('shippingAddressLine1', { length: 255 }),
 		shippingAddressLine2: varchar('shippingAddressLine2', { length: 255 }),
 		shippingAddressCity: varchar('shippingAddressCity', { length: 255 }),
