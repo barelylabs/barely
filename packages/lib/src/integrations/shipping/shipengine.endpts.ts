@@ -321,6 +321,17 @@ export async function getShipStationRateEstimates(props: ShippingEstimateProps) 
 			.filter(r => r.validation_status !== 'invalid' && r.shipping_amount !== null)
 			// Filter out media mail if not eligible
 			.filter(r => (eligibleForMediaMail ? r : r.service_code !== 'usps_media_mail'))
+			// Filter out labelless/QR services (they don't provide printable labels)
+			.filter(r => {
+				const serviceLower = (r.service_code ?? '').toLowerCase();
+				const typeLower = (r.service_type ?? '').toLowerCase();
+				return (
+					!serviceLower.includes('labelless') &&
+					!typeLower.includes('labelless') &&
+					!typeLower.includes('label less') &&
+					!typeLower.includes('qr')
+				);
+			})
 			.map(r => {
 				const negotiatedAmountInDollars = r.shipping_amount?.amount ?? 0;
 				const retailAmountInDollars = r.requested_comparison_amount?.amount ?? 0;
@@ -518,6 +529,20 @@ export async function createShippingLabel(
 	}
 
 	const data = response.data;
+
+	// Check if the label creation failed at the carrier level
+	if (data.status === 'error' || data.error_messages.length > 0) {
+		console.error('ShipStation carrier error:', {
+			status: data.status,
+			validation_status: data.validation_status,
+			errors: data.error_messages,
+			warnings: data.warning_messages,
+			request: requestBody,
+		});
+		throw new Error(
+			`Carrier error: ${data.error_messages.join(', ') || 'A label was not returned from the carrier'}`,
+		);
+	}
 
 	// Calculate total cost in cents
 	const shippingCostCents = Math.ceil((data.shipment_cost?.amount ?? 0) * 100);
