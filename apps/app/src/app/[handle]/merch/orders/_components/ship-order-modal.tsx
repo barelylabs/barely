@@ -11,6 +11,7 @@ import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Alert } from '@barely/ui/alert';
 import { Badge } from '@barely/ui/badge';
+import { Button } from '@barely/ui/button';
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { Icon } from '@barely/ui/icon';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
@@ -113,7 +114,6 @@ export function ShipOrderModal() {
 	};
 
 	const handleCloseModal = useCallback(async () => {
-		void setShowShipOrderModal(false);
 		setLabelUrl(null);
 		setTrackingNumber(null);
 		form.reset();
@@ -122,6 +122,7 @@ export function ShipOrderModal() {
 			queryKey: trpc.cartOrder.byWorkspace.queryKey(),
 		});
 
+		void setShowShipOrderModal(false);
 		focusGridList('cart-orders');
 	}, [setShowShipOrderModal, form, queryClient, trpc]);
 
@@ -161,10 +162,19 @@ export function ShipOrderModal() {
 							</Text>
 						</div>
 
-						<div className='flex flex-col gap-2'>
+						<div className='flex flex-col gap-3'>
 							<Text variant='sm/normal' className='text-muted-foreground'>
 								A shipping confirmation email has been sent to the customer.
 							</Text>
+
+							<Button
+								look='secondary'
+								size='sm'
+								onClick={() => window.open(labelUrl, '_blank')}
+								startIcon='externalLink'
+							>
+								Reopen Label for Printing
+							</Button>
 						</div>
 					</ModalBody>
 					// Form state - create label

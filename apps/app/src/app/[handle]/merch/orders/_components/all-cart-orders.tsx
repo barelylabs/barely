@@ -2,14 +2,13 @@
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import type { GridListCommandItemProps } from '@barely/ui/grid-list';
-import { Suspense } from 'react';
 import { useCopy, useWorkspace } from '@barely/hooks';
 import {
 	formatMinorToMajorCurrency,
 	getTrackingLink,
 	numToPaddedString,
 } from '@barely/utils';
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
@@ -277,9 +276,7 @@ function CartOrderCard({
 					</div>
 				</div>
 
-				<Suspense fallback={<CartOrderFulfillmentsSkeleton />}>
-					<CartOrderFulfillments cartOrderId={cartOrder.id} handle={handle} />
-				</Suspense>
+				<CartOrderFulfillments cartOrderId={cartOrder.id} handle={handle} />
 			</div>
 		</GridListCard>
 	);
@@ -293,7 +290,9 @@ function CartOrderFulfillments({
 	handle: string;
 }) {
 	const trpc = useTRPC();
-	const { data: fulfillments } = useSuspenseQuery(
+	const queryClient = useQueryClient();
+
+	const { data: fulfillments, isLoading } = useQuery(
 		trpc.cartOrder.fulfillmentsByCartId.queryOptions({
 			handle,
 			cartId: cartOrderId,
@@ -302,7 +301,28 @@ function CartOrderFulfillments({
 
 	const { copyToClipboard } = useCopy();
 
-	if (fulfillments.length === 0) return null;
+	const { mutate: reprintLabel, isPending } = useMutation({
+		mutationFn: async ({ fulfillmentId }: { fulfillmentId: string }) => {
+			const result = await queryClient.fetchQuery(
+				trpc.cartOrder.getLabelForReprint.queryOptions({
+					handle,
+					fulfillmentId,
+				}),
+			);
+			return result;
+		},
+		onSuccess: data => {
+			if (data.labelDownloadUrl) {
+				window.open(data.labelDownloadUrl, '_blank');
+			}
+		},
+		onError: (error: Error) => {
+			console.error('Failed to reprint label:', error);
+		},
+	});
+
+	if (isLoading) return <CartOrderFulfillmentsSkeleton />;
+	if (!fulfillments || fulfillments.length === 0) return null;
 
 	return (
 		<>
@@ -317,6 +337,15 @@ function CartOrderFulfillments({
 						carrier: carrier,
 						trackingNumber: trackingNumber,
 					});
+
+					// Check if label can be reprinted
+					const hasLabel = !!fulfillment.labelDownloadUrl;
+					const isNotVoided = fulfillment.labelStatus !== 'voided';
+					const isNotExpired =
+						!fulfillment.labelExpiresAt ||
+						new Date() < new Date(fulfillment.labelExpiresAt);
+					const canReprintLabel = hasLabel && isNotVoided && isNotExpired;
+
 					return (
 						<div className='flex flex-row items-center gap-2' key={fulfillment.id}>
 							<Text variant='sm/normal'>
@@ -354,6 +383,16 @@ function CartOrderFulfillments({
 										})
 									}
 								/>
+								{canReprintLabel && (
+									<Button
+										variant='icon'
+										look='ghost'
+										size='xs'
+										startIcon='print'
+										onClick={() => reprintLabel({ fulfillmentId: fulfillment.id })}
+										loading={isPending}
+									/>
+								)}
 							</div>
 						</div>
 					);

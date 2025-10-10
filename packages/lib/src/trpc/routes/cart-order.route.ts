@@ -31,12 +31,14 @@ import { TRPCError } from '@trpc/server';
 import {
 	and,
 	asc,
+	desc,
 	eq,
 	gt,
 	ilike,
 	inArray,
 	isNotNull,
 	isNull,
+	lt,
 	ne,
 	notInArray,
 	or,
@@ -61,6 +63,12 @@ export const cartOrderRoute = {
 				input;
 
 			let searchFanIds: string[] = [];
+			console.log('[CART ORDER SEARCH DEBUG]', {
+				search,
+				searchLength: search.length,
+				workspaceId: ctx.workspace.id,
+			});
+
 			if (search && search.length > 0) {
 				const fans = await dbPool(ctx.pool).query.Fans.findMany({
 					where: and(
@@ -69,10 +77,14 @@ export const cartOrderRoute = {
 							ilike(Fans.fullName, `%${search}%`),
 							ilike(Fans.email, `%${search}%`),
 							ilike(Fans.shippingAddressLine1, `%${search}%`),
+							ilike(Fans.shippingAddressLine2, `%${search}%`),
+							ilike(Fans.shippingAddressCity, `%${search}%`),
+							ilike(Fans.shippingAddressPostalCode, `%${search}%`),
 						),
 					),
 				});
 
+				console.log('[CART ORDER FAN SEARCH]', { fansFound: fans.length, search });
 				searchFanIds = fans.map(f => f.id);
 
 				if (searchFanIds.length === 0) {
@@ -139,16 +151,29 @@ export const cartOrderRoute = {
 							),
 						),
 					!!cursor &&
-						or(
+						(showFulfilled ?
+							// For fulfilled orders (newest first), use less than for cursor
 							or(
-								gt(Carts.checkoutConvertedAt, cursor.checkoutConvertedAt),
-								isNull(Carts.checkoutConvertedAt),
-							),
-							and(
-								eq(Carts.checkoutConvertedAt, cursor.checkoutConvertedAt),
-								gt(Carts.orderId, cursor.orderId),
-							),
-						),
+								or(
+									lt(Carts.fulfilledAt, cursor.checkoutConvertedAt),
+									isNull(Carts.fulfilledAt),
+								),
+								and(
+									eq(Carts.fulfilledAt, cursor.checkoutConvertedAt),
+									lt(Carts.orderId, cursor.orderId),
+								),
+							)
+							// For pending orders (oldest first), use greater than for cursor
+						:	or(
+								or(
+									gt(Carts.checkoutConvertedAt, cursor.checkoutConvertedAt),
+									isNull(Carts.checkoutConvertedAt),
+								),
+								and(
+									eq(Carts.checkoutConvertedAt, cursor.checkoutConvertedAt),
+									gt(Carts.orderId, cursor.orderId),
+								),
+							)),
 				]),
 				with: {
 					mainProduct: true,
@@ -165,7 +190,10 @@ export const cartOrderRoute = {
 						},
 					},
 				},
-				orderBy: [asc(Carts.checkoutConvertedAt), asc(Carts.orderId)],
+				orderBy:
+					showFulfilled ?
+						[desc(Carts.fulfilledAt), desc(Carts.orderId)]
+					:	[asc(Carts.checkoutConvertedAt), asc(Carts.orderId)],
 				limit: limit + 1,
 			});
 
@@ -220,17 +248,23 @@ export const cartOrderRoute = {
 
 			if (orders.length > limit) {
 				const nextOrder = orders.pop();
-				nextCursor =
-					nextOrder ?
-						{
-							orderId:
-								nextOrder.orderId ??
-								raiseTRPCError({ message: 'orderId should be defined' }),
-							checkoutConvertedAt:
-								nextOrder.checkoutConvertedAt ??
-								raiseTRPCError({ message: 'checkoutConvertedAt should be defined' }),
-						}
-					:	undefined;
+				if (nextOrder) {
+					nextCursor = {
+						orderId:
+							nextOrder.orderId ??
+							raiseTRPCError({ message: 'orderId should be defined' }),
+						checkoutConvertedAt:
+							showFulfilled ?
+								// For fulfilled orders, use fulfilledAt as cursor
+								(nextOrder.fulfilledAt ??
+								raiseTRPCError({
+									message: 'fulfilledAt should be defined for fulfilled orders',
+								}))
+								// For pending orders, use checkoutConvertedAt as cursor
+							:	(nextOrder.checkoutConvertedAt ??
+								raiseTRPCError({ message: 'checkoutConvertedAt should be defined' })),
+					};
+				}
 			}
 
 			const cartOrders = orders.map(order => {
