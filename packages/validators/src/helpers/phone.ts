@@ -6,7 +6,7 @@ import {
 	parsePhoneNumber,
 } from 'libphonenumber-js/min';
 
-type CountryCode = 'US' | 'CA';
+type CountryCode = 'US' | 'CA' | 'GB';
 
 const parseIncompletePhoneNumber = ({
 	input,
@@ -46,3 +46,5 @@ export {
 	formatInternational,
 	parseForDb,
 };
+
+export type { CountryCode };
