@@ -218,9 +218,11 @@ function MultiTrackComparison({
 					const date = formatTimestamp(row.timestamp);
 					const dateEntry = dateMap.get(date);
 					if (dateEntry) {
-						dateEntry[trackKey] = row.spotifyPopularity ?? 0;
-						if (row.spotifyPopularity && row.spotifyPopularity > max) {
-							max = row.spotifyPopularity;
+						if (row.spotifyPopularity !== null) {
+							dateEntry[trackKey] = row.spotifyPopularity;
+							if (row.spotifyPopularity > max) {
+								max = row.spotifyPopularity;
+							}
 						}
 					}
 				}
