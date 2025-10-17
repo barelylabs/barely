@@ -72,7 +72,7 @@ export const PhoneField = <
 											onValueChange={value => setCountryCode(value as CountryCode)}
 											disabled={props.disabled}
 										>
-											<SelectTrigger className='bg:transparent border-transparent pr-1 dark:border-transparent'>
+											<SelectTrigger className='border-transparent bg-transparent pr-1 dark:border-transparent'>
 												<SelectValue />
 											</SelectTrigger>
 											<SelectContent>
