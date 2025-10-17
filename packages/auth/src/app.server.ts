@@ -7,7 +7,11 @@ import { initAuth } from '@barely/auth';
 import { authEnv } from '../env';
 import { getBaseUrl } from './get-url';
 
-const baseUrl = getBaseUrl('app');
+const baseUrl = getBaseUrl(
+	authEnv.NEXT_PUBLIC_CURRENT_APP === 'appInvoice' ? 'appInvoice'
+	: authEnv.NEXT_PUBLIC_CURRENT_APP === 'appFm' ? 'appFm'
+	: 'app',
+);
 
 export const auth = initAuth({
 	baseUrl,

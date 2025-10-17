@@ -1,3 +1,4 @@
+import type { AppVariant } from '@barely/utils';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getAbsoluteUrl, getCurrentAppConfig } from '@barely/utils';
@@ -24,7 +25,23 @@ const SignInPage = async ({
 	await handleLoggedInOnAuthPage();
 
 	const appConfig = getCurrentAppConfig();
-	const backUrl = getAbsoluteUrl(appConfig.name);
+
+	let backApp: AppVariant;
+	switch (appConfig.name) {
+		case 'app':
+			backApp = 'www';
+			break;
+		case 'appFm':
+			backApp = 'fm';
+			break;
+		case 'appInvoice':
+			backApp = 'invoice';
+			break;
+		default:
+			backApp = 'www';
+	}
+
+	const backUrl = getAbsoluteUrl(backApp);
 
 	return (
 		<div className='container flex h-screen w-screen flex-col items-center justify-center'>
