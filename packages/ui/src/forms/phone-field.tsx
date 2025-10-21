@@ -1,3 +1,4 @@
+import type { CountryCode } from '@barely/validators/helpers';
 import type { FieldPath, FieldValues } from 'react-hook-form';
 import { useState } from 'react';
 import { parseIncompletePhoneNumber } from '@barely/validators/helpers';
@@ -29,7 +30,6 @@ export const PhoneField = <
 	hint,
 	...props
 }: FieldProps<TFieldValues, TName> & InputProps) => {
-	type CountryCode = 'US' | 'CA';
 	const [countryCode, setCountryCode] = useState<CountryCode>('US');
 
 	const handleInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -63,7 +63,7 @@ export const PhoneField = <
 
 							<FieldControl>
 								<div className='relative rounded-md'>
-									<div className='absolute inset-y-0 left-0 flex items-center'>
+									<div className='absolute inset-y-0 left-0 z-10 flex items-center'>
 										<label htmlFor='country' className='sr-only'>
 											Country
 										</label>
@@ -78,6 +78,7 @@ export const PhoneField = <
 											<SelectContent>
 												<SelectItem value='US'>US</SelectItem>
 												<SelectItem value='CA'>CA</SelectItem>
+												<SelectItem value='GB'>UK</SelectItem>
 											</SelectContent>
 										</Select>
 									</div>
