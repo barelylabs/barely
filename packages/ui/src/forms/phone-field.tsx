@@ -23,6 +23,14 @@ import {
 	FormItem,
 } from './form';
 
+// Country-specific phone number placeholders
+const PHONE_PLACEHOLDERS: Record<CountryCode, string> = {
+	US: '+1 (555) 123-4567',
+	CA: '+1 (416) 123-4567',
+	GB: '+44 20 1234 5678',
+	// Add more countries as needed
+};
+
 export const PhoneField = <
 	TFieldValues extends FieldValues = FieldValues,
 	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
@@ -84,7 +92,7 @@ export const PhoneField = <
 									</div>
 									<Input
 										type='tel'
-										placeholder={props.placeholder}
+										placeholder={props.placeholder ?? PHONE_PLACEHOLDERS[countryCode]}
 										className='peer pl-16'
 										{...field}
 										onKeyDown={e => handleInput(e)}

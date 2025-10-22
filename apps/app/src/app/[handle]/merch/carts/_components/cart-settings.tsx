@@ -177,7 +177,6 @@ export function CartShippingPhone() {
 				label='Phone Number'
 				control={form.control}
 				name='shippingAddressPhone'
-				placeholder='+1 (555) 123-4567'
 			/>
 		</SettingsCardForm>
 	);
