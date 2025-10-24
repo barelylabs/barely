@@ -1,30 +1,41 @@
-import type { Metadata } from 'next';
+'use client';
+
 import Link from 'next/link';
+import { NYC_RISING_PLUS } from '@barely/const';
 
 import { H } from '@barely/ui/typography';
 
 import { AnimatedSection } from '../../../components/marketing/animated-section';
 import { MarketingButton } from '../../../components/marketing/button';
-import { BarChart, GrowthChart, StatCard } from '../../../components/marketing/data-viz';
 import { PricingCard } from '../../../components/marketing/pricing-card';
+import { useContactModal } from '../../../contexts/contact-modal-context';
 
-export const metadata: Metadata = {
-	title: 'Rising+ Service - Professional Campaign Engineering | Barely NYC',
-	description:
-		'Brooklyn-based music marketing engineers for artists with 10-50K monthly listeners (or ready to jumpstart). We design and execute your campaigns with scientific precision.',
-};
+// export const metadata: Metadata = {
+// 	title: 'Rising+ Service - Professional Campaign Engineering | Barely NYC',
+// 	description:
+// 		'Brooklyn-based music marketing engineers for artists with 10-50K monthly listeners (or ready to jumpstart). We design and execute your campaigns with scientific precision.',
+// };
 
 export default function RisingPlusPage() {
+	const { open: openContactModal } = useContactModal();
 	return (
 		<main className='pt-16'>
 			{/* Page Header */}
 			<section className='px-4 py-24 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-4xl text-center'>
 					<AnimatedSection animation='fade-up'>
-						<div className='mb-4'>
-							<span className='text-xl font-semibold text-purple-300 md:text-2xl'>
-								$750/month
+						<div className='mb-4 space-y-1'>
+							<span className='block text-sm font-medium text-purple-300'>
+								First Month Special
 							</span>
+							<div className='flex items-center justify-center gap-2'>
+								<span className='text-2xl text-white/40 line-through'>
+									${NYC_RISING_PLUS.price.monthly.amount}
+								</span>
+								<span className='text-xl font-semibold text-purple-300 md:text-2xl'>
+									${NYC_RISING_PLUS.promotionalPrice?.firstMonth}/month
+								</span>
+							</div>
 						</div>
 						<H
 							size='1'
@@ -49,7 +60,7 @@ export default function RisingPlusPage() {
 					<AnimatedSection animation='fade-up'>
 						<div className='glass mb-12 rounded-2xl p-8'>
 							<H size='3' className='mb-6 text-2xl md:text-3xl'>
-								Ready to Accelerate Your Growth? Let Science Do the Heavy Lifting.
+								Ready to Accelerate Your Growth? Let us do the heavy lifting.
 							</H>
 							<p className='mb-4 text-lg leading-relaxed text-white/80'>
 								Whether you&apos;re steadily growing past 10K monthly listeners or
@@ -153,10 +164,10 @@ export default function RisingPlusPage() {
 									<span className='text-3xl'>📊</span>
 									<div>
 										<H size='5' className='mb-2'>
-											Monthly Strategy Calls with Performance Analysis
+											1-hr Monthly Strategy Call with Performance Analysis
 										</H>
 										<p className='text-white/70'>
-											30-minute sessions where we review exactly what worked, what
+											In-depth sessions where we review exactly what worked, what
 											didn&apos;t, and why. You&apos;ll see the data behind every decision
 											and understand the methodology for your next campaigns.
 										</p>
@@ -285,7 +296,7 @@ export default function RisingPlusPage() {
 			</section>
 
 			{/* What Makes Rising+ Different */}
-			<section className='bg-white/5 px-4 py-12 sm:px-6 lg:px-8'>
+			{/* <section className='bg-white/5 px-4 py-12 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-4xl'>
 					<AnimatedSection animation='fade-up'>
 						<H size='2' className='mb-12 text-center text-3xl md:text-4xl'>
@@ -316,116 +327,16 @@ export default function RisingPlusPage() {
 						))}
 					</div>
 				</div>
-			</section>
-
-			{/* Results with Data Viz */}
-			<section className='px-4 py-12 sm:px-6 lg:px-8'>
-				<div className='mx-auto max-w-6xl'>
-					<AnimatedSection animation='fade-up'>
-						<H size='2' className='mb-12 text-center text-3xl md:text-4xl'>
-							Recent Rising+ Results
-						</H>
-					</AnimatedSection>
-
-					{/* Example Client Results */}
-					<div className='space-y-16'>
-						{/* Client 1 */}
-						<AnimatedSection animation='fade-up' delay={200}>
-							<div className='glass rounded-xl p-8'>
-								<blockquote className='mb-8'>
-									<p className='mb-4 text-lg italic text-white/90'>
-										&quot;[Your name]&apos;s campaigns helped us grow from 8K to 23K
-										monthly listeners in 4 months. Finally, marketing that makes sense
-										instead of feeling like gambling.&quot;
-									</p>
-									<cite className='text-white/70'>- [Client Band], Indie Rock</cite>
-								</blockquote>
-
-								<div className='mb-8 grid grid-cols-1 gap-6 md:grid-cols-3'>
-									<StatCard label='Starting Listeners' value={8000} />
-									<StatCard
-										label='Current Listeners'
-										value={23000}
-										color='text-green-500'
-									/>
-									<StatCard
-										label='Growth Rate'
-										value={187}
-										suffix='%'
-										color='text-purple-500'
-									/>
-								</div>
-
-								<div className='mt-8'>
-									<h4 className='mb-4 text-sm text-white/70'>Monthly Listener Growth</h4>
-									<GrowthChart
-										data={[
-											{ month: 'Month 1', value: 8000 },
-											{ month: 'Month 2', value: 11500 },
-											{ month: 'Month 3', value: 17000 },
-											{ month: 'Month 4', value: 23000 },
-										]}
-									/>
-								</div>
-							</div>
-						</AnimatedSection>
-
-						{/* Client 2 */}
-						<AnimatedSection animation='fade-up' delay={300}>
-							<div className='glass rounded-xl p-8'>
-								<blockquote className='mb-8'>
-									<p className='mb-4 text-lg italic text-white/90'>
-										&quot;The transparency is incredible. I can see exactly where my ad
-										spend goes and why certain audiences convert better. Never had that
-										with other agencies.&quot;
-									</p>
-									<cite className='text-white/70'>- [Client Name], Alt Rock</cite>
-								</blockquote>
-
-								<div className='grid grid-cols-1 gap-8 md:grid-cols-2'>
-									<div>
-										<h4 className='mb-4 text-sm text-white/70'>
-											Audience Conversion by Platform
-										</h4>
-										<BarChart
-											data={[
-												{ label: 'Instagram', value: 3.2 },
-												{ label: 'TikTok', value: 2.8 },
-												{ label: 'Facebook', value: 1.9 },
-												{ label: 'YouTube', value: 2.4 },
-											]}
-											maxValue={4}
-										/>
-									</div>
-									<div>
-										<h4 className='mb-4 text-sm text-white/70'>
-											Cost Per Acquisition Reduction
-										</h4>
-										<BarChart
-											data={[
-												{ label: 'Before', value: 2.5, color: 'bg-red-500' },
-												{ label: 'After 1 Month', value: 1.8, color: 'bg-yellow-500' },
-												{ label: 'After 2 Months', value: 1.2, color: 'bg-green-500' },
-												{ label: 'Current', value: 0.95, color: 'bg-green-600' },
-											]}
-											maxValue={3}
-										/>
-									</div>
-								</div>
-							</div>
-						</AnimatedSection>
-					</div>
-				</div>
-			</section>
-
+			</section> */}
 			{/* Pricing CTA */}
 			<section className='px-4 py-24 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-md'>
 					<AnimatedSection animation='scale'>
 						<PricingCard
-							title='Rising+'
-							price='$750'
-							description='Professional campaign execution with full transparency'
+							title={NYC_RISING_PLUS.name}
+							price={`$${NYC_RISING_PLUS.promotionalPrice?.firstMonth}`}
+							originalPrice={`$${NYC_RISING_PLUS.price.monthly.amount}`}
+							description={NYC_RISING_PLUS.marketingDescription ?? ''}
 							features={[
 								'Up to 2 professional campaigns per month',
 								'Management of $1-3K monthly ad spend',
@@ -443,16 +354,18 @@ export default function RisingPlusPage() {
 						<div className='mt-8 text-center'>
 							<p className='mb-4 text-white/60'>Ready for even more growth?</p>
 							<div className='flex justify-center gap-4'>
-								<Link href='/services/bedroom'>
+								<Link href='/services'>
 									<MarketingButton marketingLook='glass' size='sm'>
-										← Back to Bedroom+
+										View All Services
 									</MarketingButton>
 								</Link>
-								<Link href='/services/breakout'>
-									<MarketingButton marketingLook='hero-primary' size='sm'>
-										See Breakout+ →
-									</MarketingButton>
-								</Link>
+								<MarketingButton
+									marketingLook='hero-primary'
+									size='sm'
+									onClick={openContactModal}
+								>
+									Get Started
+								</MarketingButton>
 							</div>
 						</div>
 					</AnimatedSection>
@@ -473,7 +386,7 @@ export default function RisingPlusPage() {
 			</section>
 
 			{/* Price Comparison */}
-			<section className='bg-white/5 px-4 py-16 sm:px-6 lg:px-8'>
+			{/* <section className='bg-white/5 px-4 py-16 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-6xl'>
 					<AnimatedSection animation='fade-up'>
 						<H size='3' className='mb-8 text-center text-2xl md:text-3xl'>
@@ -483,7 +396,6 @@ export default function RisingPlusPage() {
 
 					<AnimatedSection animation='fade-up' delay={200}>
 						<div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
-							{/* Bedroom+ - Muted */}
 							<div className='opacity-60'>
 								<Link href='/services/bedroom'>
 									<PricingCard
@@ -502,7 +414,6 @@ export default function RisingPlusPage() {
 								</Link>
 							</div>
 
-							{/* Rising+ - Featured */}
 							<PricingCard
 								title='Rising+'
 								price='$750'
@@ -518,7 +429,6 @@ export default function RisingPlusPage() {
 								featured
 							/>
 
-							{/* Breakout+ - Muted */}
 							<div className='opacity-60'>
 								<Link href='/services/breakout'>
 									<PricingCard
@@ -539,7 +449,7 @@ export default function RisingPlusPage() {
 						</div>
 					</AnimatedSection>
 				</div>
-			</section>
+			</section> */}
 		</main>
 	);
 }

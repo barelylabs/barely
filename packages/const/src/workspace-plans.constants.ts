@@ -38,6 +38,12 @@ export interface Plan {
 			};
 		};
 	};
+	promotionalPrice?: {
+		firstMonth: number;
+		description: string;
+	};
+	marketingTagline?: string;
+	marketingDescription?: string;
 	usageLimits: {
 		fans: number;
 		members: number;
@@ -449,6 +455,12 @@ const BEDROOM_PLUS_PLAN: Plan = {
 			},
 		},
 	},
+	promotionalPrice: {
+		firstMonth: 100,
+		description: 'First month special',
+	},
+	marketingTagline: 'Learn the Scientific Method for Music Marketing',
+	marketingDescription: 'Learn the scientific method for music marketing',
 	highlights: [
 		{ description: 'Everything in barely.ai Bedroom (included free)' },
 		{ description: 'Bi-weekly 30-minute coaching calls' },
@@ -519,6 +531,12 @@ const RISING_PLUS_PLAN: Plan = {
 			},
 		},
 	},
+	promotionalPrice: {
+		firstMonth: 500,
+		description: 'First month special',
+	},
+	marketingTagline: 'Professional Campaign Engineering',
+	marketingDescription: 'Professional campaign execution with full transparency',
 	highlights: [
 		{ description: 'Everything in barely.ai Rising (included free)' },
 		{ description: 'Everything in Bedroom+ PLUS:' },
@@ -590,6 +608,12 @@ const BREAKOUT_PLUS_PLAN: Plan = {
 			},
 		},
 	},
+	promotionalPrice: {
+		firstMonth: 1300,
+		description: 'First month special',
+	},
+	marketingTagline: 'Maximum Growth Engineering',
+	marketingDescription: 'Maximum growth engineering for serious artists',
 	highlights: [
 		{ description: 'Everything in barely.ai Breakout (included free)' },
 		{ description: 'Up to 2 advanced campaigns per month' },

@@ -6,6 +6,7 @@ import { H } from '@barely/ui/typography';
 import { AnimatedSection } from '../../components/marketing/animated-section';
 import { MarketingButton } from '../../components/marketing/button';
 import { OpenSourceBadge } from '../../components/marketing/trust-badges';
+import { properYouthCase } from '../../data/case-studies';
 
 export const metadata: Metadata = {
 	title: 'Our Tools - barely.ai Platform | Barely',
@@ -312,54 +313,28 @@ export default function ToolsPage() {
 						</H>
 						<div className='rounded-lg bg-white/5 p-8'>
 							<H size='3' className='mb-6 text-2xl'>
-								Real Campaign Example: Proper Youth
+								{properYouthCase.featuredHighlights?.workflowExample?.title}
 							</H>
 							<div className='space-y-4'>
-								<div className='flex items-start gap-4'>
-									<span className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-500/20 text-sm font-bold text-cyan-400'>
-										1
-									</span>
-									<div>
-										<p className='font-semibold'>Content Upload</p>
-										<p className='text-sm text-white/70'>
-											30 iPhone videos uploaded to{' '}
-											<span className='font-mono'>media</span>
-										</p>
+								{properYouthCase.featuredHighlights?.workflowExample?.steps.map(step => (
+									<div key={step.number} className='flex items-start gap-4'>
+										<span className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-500/20 text-sm font-bold text-cyan-400'>
+											{step.number}
+										</span>
+										<div>
+											<p className='font-semibold'>{step.title}</p>
+											<p
+												className='text-sm text-white/70'
+												dangerouslySetInnerHTML={{
+													__html: step.description.replace(
+														/media|links|page/g,
+														match => `<span class="font-mono">${match}</span>`,
+													),
+												}}
+											/>
+										</div>
 									</div>
-								</div>
-								<div className='flex items-start gap-4'>
-									<span className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-500/20 text-sm font-bold text-cyan-400'>
-										2
-									</span>
-									<div>
-										<p className='font-semibold'>Smart Links Created</p>
-										<p className='text-sm text-white/70'>
-											Each video gets trackable <span className='font-mono'>links</span>
-										</p>
-									</div>
-								</div>
-								<div className='flex items-start gap-4'>
-									<span className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-500/20 text-sm font-bold text-cyan-400'>
-										3
-									</span>
-									<div>
-										<p className='font-semibold'>Landing Page Built</p>
-										<p className='text-sm text-white/70'>
-											Free CD offer on custom <span className='font-mono'>page</span>
-										</p>
-									</div>
-								</div>
-								<div className='flex items-start gap-4'>
-									<span className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-500/20 text-sm font-bold text-cyan-400'>
-										4
-									</span>
-									<div>
-										<p className='font-semibold'>Automated Flow</p>
-										<p className='text-sm text-white/70'>
-											Visitor → Email capture → Welcome sequence → Merch offer
-										</p>
-									</div>
-								</div>
+								))}
 								<div className='flex items-start gap-4'>
 									<span className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-500/20 text-sm font-bold text-green-400'>
 										✓

@@ -40,6 +40,10 @@
 			"types": "./dist/templates/nyc/contact-inquiry.d.ts",
 			"default": "./src/templates/nyc/contact-inquiry.tsx"
 		},
+		"./templates/nyc/testimonial-submission": {
+			"types": "./dist/templates/nyc/testimonial-submission.d.ts",
+			"default": "./src/templates/nyc/testimonial-submission.tsx"
+		},
 		"./templates/www/contact-inquiry": {
 			"types": "./dist/templates/www/contact-inquiry.d.ts",
 			"default": "./src/templates/www/contact-inquiry.tsx"

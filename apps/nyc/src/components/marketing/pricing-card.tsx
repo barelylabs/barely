@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { cn } from '@barely/utils';
 
 import { H } from '@barely/ui/typography';
@@ -18,6 +19,7 @@ interface PricingCardProps {
 	className?: string;
 	spotsLeft?: number;
 	onCTAClick?: () => void;
+	learnMoreHref?: string;
 }
 
 export function PricingCard({
@@ -32,6 +34,7 @@ export function PricingCard({
 	className,
 	spotsLeft,
 	onCTAClick,
+	learnMoreHref,
 }: PricingCardProps) {
 	return (
 		<div
@@ -110,6 +113,15 @@ export function PricingCard({
 				>
 					{ctaText}
 				</MarketingButton>
+
+				{learnMoreHref && (
+					<Link
+						href={learnMoreHref}
+						className='mt-1.5 block text-center text-sm text-purple-300/70 underline-offset-4 transition-all hover:text-purple-200 hover:underline'
+					>
+						Learn More
+					</Link>
+				)}
 			</div>
 		</div>
 	);

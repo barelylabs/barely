@@ -7,15 +7,15 @@ import { H } from '@barely/ui/typography';
 import { AnimatedSection } from './animated-section';
 
 const problems = [
-	'Expensive services that drain your budget with minimal results',
-	"Risky playlist schemes that violate Spotify's terms",
-	'Black-box agencies that hide how they actually work',
+	'Playlist pitching services (temporary placements, no lasting fans)',
+	"Instagram 'Boost' button (expensive, no targeting, no attribution)",
+	'PR campaigns for blogs nobody reads (vanity metrics, zero ROI)',
 ];
 
 const solutions = [
-	'Data-driven campaigns with transparent reporting',
-	'Open-source tools you can see and understand',
-	'Strategies that follow platform guidelines and build real audiences',
+	'Direct-to-fan ad campaigns (platform-compliant, trackable growth)',
+	'Playlist strategies you own (build assets, not rent placements)',
+	'Merch campaigns that pay immediately (50-90% margins vs 2% streaming)',
 ];
 
 export function ProblemSolutionSection() {
@@ -36,9 +36,7 @@ export function ProblemSolutionSection() {
 					{/* Problems */}
 					<AnimatedSection animation='slide-right' delay={200}>
 						<div className='space-y-6'>
-							<h3 className='mb-8 text-2xl font-semibold text-white'>
-								Most indie artists waste money on:
-							</h3>
+							<h3 className='mb-8 text-2xl font-semibold text-white'>Empty Calories:</h3>
 							{problems.map((problem, index) => (
 								<div
 									key={index}
@@ -61,9 +59,7 @@ export function ProblemSolutionSection() {
 					{/* Solutions */}
 					<AnimatedSection animation='slide-left' delay={400}>
 						<div className='space-y-6'>
-							<h3 className='mb-8 text-2xl font-semibold text-white'>
-								Here&apos;s what actually works:
-							</h3>
+							<h3 className='mb-8 text-2xl font-semibold text-white'>Real Growth:</h3>
 							{solutions.map((solution, index) => (
 								<div
 									key={index}
