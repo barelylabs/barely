@@ -8,20 +8,19 @@ import { cn } from '@barely/utils';
 import { Icon } from '@barely/ui/icon';
 import { Img } from '@barely/ui/img';
 
+import { useContactModal } from '../../contexts/contact-modal-context';
 import { MarketingButton } from './button';
-import { ContactModal } from './contact-modal';
 
 const navItems = [
 	{ href: '/', label: 'Home' },
 	{ href: '/about', label: 'About' },
 	{ href: '/services', label: 'Services' },
 	{ href: '/case-studies', label: 'Case Studies' },
-	{ href: '/blog', label: 'Blog' },
 ];
 
 export function Navigation() {
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-	const [showContactModal, setShowContactModal] = useState(false);
+	const { open: openContactModal } = useContactModal();
 	const pathname = usePathname();
 
 	return (
@@ -35,13 +34,13 @@ export function Navigation() {
 						<Link href='/' className='flex items-center space-x-2'>
 							<Img
 								src='/_static/barely_nyc_logo.svg'
-								alt='Barely'
+								alt='Barely NYC'
 								width={32}
 								height={32}
-								className='h-8 w-8'
+								className='h-6 w-6'
 							/>
 							<span className='font-heading text-lg font-semibold text-white'>
-								Barely
+								Barely NYC
 							</span>
 						</Link>
 
@@ -79,7 +78,7 @@ export function Navigation() {
 								marketingLook='hero-secondary'
 								size='sm'
 								className='ml-2'
-								onClick={() => setShowContactModal(true)}
+								onClick={openContactModal}
 							>
 								Get Started
 							</MarketingButton>
@@ -108,13 +107,13 @@ export function Navigation() {
 						<Link href='/' className='flex items-center space-x-2'>
 							<Img
 								src='/_static/barely_nyc_logo.svg'
-								alt='Barely'
+								alt='Barely NYC'
 								width={32}
 								height={32}
-								className='h-8 w-8'
+								className='h-6 w-6'
 							/>
 							<span className='font-heading text-lg font-semibold text-white'>
-								Barely
+								Barely NYC
 							</span>
 						</Link>
 
@@ -170,7 +169,7 @@ export function Navigation() {
 							fullWidth
 							onClick={() => {
 								setMobileMenuOpen(false);
-								setShowContactModal(true);
+								openContactModal();
 							}}
 						>
 							Get Started
@@ -178,9 +177,6 @@ export function Navigation() {
 					</div>
 				</div>
 			</div>
-
-			{/* Contact Modal */}
-			<ContactModal showModal={showContactModal} setShowModal={setShowContactModal} />
 		</>
 	);
 }

@@ -12,3 +12,6 @@ export * from './vip';
 
 // Export all invoice templates
 export * from './invoice';
+
+// Export all NYC templates
+export * from './nyc';

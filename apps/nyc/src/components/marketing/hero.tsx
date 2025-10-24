@@ -156,16 +156,16 @@ export function Hero() {
 						size='1'
 						className='mb-6 font-heading text-5xl leading-tight md:text-7xl lg:text-8xl'
 					>
-						Finally, Music Marketing
+						Science the Hell Out of
 						<br />
-						<span className='gradient-text'>That Makes Sense</span>
+						<span className='gradient-text'>Your Music Career</span>
 					</H>
 				</AnimatedSection>
 
 				<AnimatedSection animation='fade-up' delay={200}>
 					<p className='mx-auto mb-8 max-w-3xl text-xl text-white/70 md:text-2xl'>
-						Stop guessing. Start growing. Turn your music into a real business that pays -
-						with transparent data you can actually understand.
+						Stop guessing. Start growing. Brooklyn-based marketing engineers helping indie
+						artists build real income from real fans—with complete transparency.
 					</p>
 					<div className='mb-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center'>
 						<div className='inline-flex items-center gap-2 rounded-full bg-purple-500/10 px-4 py-2 text-sm text-purple-300'>

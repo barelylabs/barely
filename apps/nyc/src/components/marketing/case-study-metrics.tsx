@@ -7,15 +7,14 @@ import { Icon } from '@barely/ui/icon';
 
 interface MetricData {
 	monthlyListeners: number;
-	streams: number;
-	followers: number;
-	engagementRate: string;
-	emailSubscribers?: number;
+	monthlyStreams: number;
+	totalFollowers: number;
+	totalEmailSubscribers: number;
 	monthlyRevenue: string;
-	instagram?: number;
-	tiktok?: number;
-	youtube?: number;
-	patreon?: number;
+	totalInstagramFollowers?: number;
+	totalTikTokFollowers?: number;
+	totalYouTubeSubscribers?: number;
+	totalPatreonMembers?: number;
 }
 
 interface CaseStudyMetricsProps {
@@ -47,39 +46,28 @@ export function CaseStudyMetrics({ before, after }: CaseStudyMetricsProps) {
 			highlight: true,
 		},
 		{
-			label: 'Total Streams',
+			label: 'Monthly Streams',
 			iconName: 'music',
 			iconColor: 'text-blue-500',
-			before: before.streams.toLocaleString(),
-			after: after.streams.toLocaleString(),
-			growth: calculateGrowth(before.streams, after.streams),
+			before: before.monthlyStreams.toLocaleString(),
+			after: after.monthlyStreams.toLocaleString(),
+			growth: calculateGrowth(before.monthlyStreams, after.monthlyStreams),
 		},
 		{
-			label: 'Followers',
+			label: 'Spotify Followers',
 			iconName: 'users',
 			iconColor: 'text-pink-500',
-			before: before.followers.toLocaleString(),
-			after: after.followers.toLocaleString(),
-			growth: calculateGrowth(before.followers, after.followers),
-		},
-		{
-			label: 'Engagement Rate',
-			iconName: 'heart',
-			iconColor: 'text-red-500',
-			before: before.engagementRate,
-			after: after.engagementRate,
-			growth: 0, // Calculate separately if needed
+			before: before.totalFollowers.toLocaleString(),
+			after: after.totalFollowers.toLocaleString(),
+			growth: calculateGrowth(before.totalFollowers, after.totalFollowers),
 		},
 		{
 			label: 'Email Subscribers',
 			iconName: 'email',
 			iconColor: 'text-green-500',
-			before: (before.emailSubscribers ?? 0).toLocaleString(),
-			after: (after.emailSubscribers ?? 0).toLocaleString(),
-			growth:
-				before.emailSubscribers ?
-					calculateGrowth(before.emailSubscribers, after.emailSubscribers ?? 0)
-				:	0,
+			before: before.totalEmailSubscribers.toLocaleString(),
+			after: after.totalEmailSubscribers.toLocaleString(),
+			growth: calculateGrowth(before.totalEmailSubscribers, after.totalEmailSubscribers),
 		},
 		{
 			label: 'Monthly Revenue',
@@ -93,47 +81,65 @@ export function CaseStudyMetrics({ before, after }: CaseStudyMetricsProps) {
 	];
 
 	// Add social metrics if they exist
-	if (before.instagram !== undefined && after.instagram !== undefined) {
+	if (
+		before.totalInstagramFollowers !== undefined &&
+		after.totalInstagramFollowers !== undefined
+	) {
 		metrics.push({
 			label: 'Instagram Followers',
 			iconName: 'instagram',
 			iconColor: 'text-pink-500',
-			before: before.instagram.toLocaleString(),
-			after: after.instagram.toLocaleString(),
-			growth: calculateGrowth(before.instagram, after.instagram),
+			before: before.totalInstagramFollowers.toLocaleString(),
+			after: after.totalInstagramFollowers.toLocaleString(),
+			growth: calculateGrowth(
+				before.totalInstagramFollowers,
+				after.totalInstagramFollowers,
+			),
 		});
 	}
 
-	if (before.tiktok !== undefined && after.tiktok !== undefined) {
+	if (
+		before.totalTikTokFollowers !== undefined &&
+		after.totalTikTokFollowers !== undefined
+	) {
 		metrics.push({
 			label: 'TikTok Followers',
 			iconName: 'tiktok',
 			iconColor: 'text-white',
-			before: before.tiktok.toLocaleString(),
-			after: after.tiktok.toLocaleString(),
-			growth: calculateGrowth(before.tiktok, after.tiktok),
+			before: before.totalTikTokFollowers.toLocaleString(),
+			after: after.totalTikTokFollowers.toLocaleString(),
+			growth: calculateGrowth(before.totalTikTokFollowers, after.totalTikTokFollowers),
 		});
 	}
 
-	if (before.youtube !== undefined && after.youtube !== undefined) {
+	if (
+		before.totalYouTubeSubscribers !== undefined &&
+		after.totalYouTubeSubscribers !== undefined
+	) {
 		metrics.push({
 			label: 'YouTube Subscribers',
 			iconName: 'youtube',
 			iconColor: 'text-red-500',
-			before: before.youtube.toLocaleString(),
-			after: after.youtube.toLocaleString(),
-			growth: calculateGrowth(before.youtube, after.youtube),
+			before: before.totalYouTubeSubscribers.toLocaleString(),
+			after: after.totalYouTubeSubscribers.toLocaleString(),
+			growth: calculateGrowth(
+				before.totalYouTubeSubscribers,
+				after.totalYouTubeSubscribers,
+			),
 		});
 	}
 
-	if (before.patreon !== undefined && after.patreon !== undefined) {
+	if (
+		before.totalPatreonMembers !== undefined &&
+		after.totalPatreonMembers !== undefined
+	) {
 		metrics.push({
 			label: 'Patreon Supporters',
 			iconName: 'heart',
 			iconColor: 'text-orange-500',
-			before: before.patreon.toLocaleString(),
-			after: after.patreon.toLocaleString(),
-			growth: calculateGrowth(before.patreon, after.patreon),
+			before: before.totalPatreonMembers.toLocaleString(),
+			after: after.totalPatreonMembers.toLocaleString(),
+			growth: calculateGrowth(before.totalPatreonMembers, after.totalPatreonMembers),
 		});
 	}
 

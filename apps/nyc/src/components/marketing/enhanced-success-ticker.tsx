@@ -3,14 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@barely/utils';
 
-const successStories = [
-	{ metric: '2.3M+', label: 'streams generated', icon: '🎵' },
-	{ metric: '+847%', label: 'avg listener growth', icon: '📈' },
-	{ metric: '127', label: 'artists growing', icon: '🎸' },
-	{ metric: '12/15', label: 'tours sold out', icon: '🎤' },
-	{ metric: '94%', label: 'success rate', icon: '✨' },
-	{ metric: '100%', label: 'transparent reporting', icon: '📊' },
-];
+import { successTickerData } from '../../data/case-studies';
 
 export function EnhancedSuccessTicker() {
 	const [currentIndex, setCurrentIndex] = useState(0);
@@ -23,21 +16,21 @@ export function EnhancedSuccessTicker() {
 			setIsAnimating(true);
 
 			// Measure the next item's width before switching
-			const nextIndex = (currentIndex + 1) % successStories.length;
+			const nextIndex = (currentIndex + 1) % successTickerData.length;
 			const tempDiv = document.createElement('div');
 			tempDiv.style.visibility = 'hidden';
 			tempDiv.style.position = 'absolute';
 			tempDiv.className = 'inline-flex flex-col items-center gap-3 px-6 py-3';
 			tempDiv.innerHTML = `
         <div class="flex items-center gap-4">
-          <span class="text-2xl">${successStories[nextIndex]?.icon}</span>
+          <span class="text-2xl">${successTickerData[nextIndex]?.icon}</span>
           <div class="flex items-baseline gap-2 whitespace-nowrap">
-            <span class="text-2xl font-bold">${successStories[nextIndex]?.metric}</span>
-            <span>${successStories[nextIndex]?.label}</span>
+            <span class="text-2xl font-bold">${successTickerData[nextIndex]?.metric}</span>
+            <span>${successTickerData[nextIndex]?.label}</span>
           </div>
         </div>
         <div class="flex gap-1.5">
-          ${successStories.map(() => '<div class="w-1.5 h-1.5"></div>').join('')}
+          ${successTickerData.map(() => '<div class="w-1.5 h-1.5"></div>').join('')}
         </div>
       `;
 			document.body.appendChild(tempDiv);
@@ -47,7 +40,7 @@ export function EnhancedSuccessTicker() {
 			setWidth(`${newWidth}px`);
 
 			setTimeout(() => {
-				setCurrentIndex(prev => (prev + 1) % successStories.length);
+				setCurrentIndex(prev => (prev + 1) % successTickerData.length);
 				setIsAnimating(false);
 			}, 300);
 		}, 3000);
@@ -62,7 +55,7 @@ export function EnhancedSuccessTicker() {
 		}
 	}, []);
 
-	const current = successStories[currentIndex];
+	const current = successTickerData[currentIndex];
 
 	if (!current) {
 		return null;
@@ -107,7 +100,7 @@ export function EnhancedSuccessTicker() {
 
 			{/* Progress dots */}
 			<div className='flex gap-1.5'>
-				{successStories.map((_, index) => (
+				{successTickerData.map((_, index) => (
 					<div
 						key={index}
 						className={cn(

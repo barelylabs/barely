@@ -79,7 +79,7 @@ export function ArtistTestimonials() {
 									<div className='relative rounded-3xl border border-white/10 bg-black/50 p-8 backdrop-blur-xl transition-all duration-300 group-hover:border-white/20 md:p-12'>
 										<div
 											className={cn(
-												'transition-all duration-500',
+												'flex h-[400px] flex-col transition-all duration-500 md:h-[350px]',
 												isAnimating && 'translate-y-4 opacity-0',
 											)}
 										>
@@ -89,7 +89,7 @@ export function ArtistTestimonials() {
 											</div>
 
 											{/* Quote */}
-											<blockquote className='mb-12 text-2xl font-light leading-relaxed text-white/90 md:text-3xl lg:text-4xl'>
+											<blockquote className='mb-12 line-clamp-6 flex-1 overflow-hidden text-2xl font-light leading-relaxed text-white/90 md:text-3xl lg:text-4xl'>
 												{current.quote}
 											</blockquote>
 
@@ -170,7 +170,7 @@ export function ArtistTestimonials() {
 					<AnimatedSection animation='fade-up' delay={400}>
 						<div className='mt-16 text-center'>
 							<p className='mb-6 text-white/60'>
-								Join hundreds of artists building sustainable careers
+								Join our artists building sustainable careers
 							</p>
 							<Link href='/case-studies'>
 								<MarketingButton marketingLook='hero-secondary' size='lg'>

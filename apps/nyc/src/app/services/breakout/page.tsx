@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { NYC_BREAKOUT_PLUS } from '@barely/const';
 
 import { H } from '@barely/ui/typography';
 
@@ -20,10 +21,18 @@ export default function BreakoutPlusPage() {
 			<section className='px-4 py-24 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-4xl text-center'>
 					<AnimatedSection animation='fade-up'>
-						<div className='mb-4'>
-							<span className='text-xl font-semibold text-purple-300 md:text-2xl'>
-								$1,800/month
+						<div className='mb-4 space-y-1'>
+							<span className='block text-sm font-medium text-purple-300'>
+								First Month Special
 							</span>
+							<div className='flex items-center justify-center gap-2'>
+								<span className='text-2xl text-white/40 line-through'>
+									${NYC_BREAKOUT_PLUS.price.monthly.amount}
+								</span>
+								<span className='text-xl font-semibold text-purple-300 md:text-2xl'>
+									${NYC_BREAKOUT_PLUS.promotionalPrice?.firstMonth}/month
+								</span>
+							</div>
 						</div>
 						<H
 							size='1'
@@ -49,7 +58,7 @@ export default function BreakoutPlusPage() {
 						<div className='glass mb-12 rounded-2xl border border-purple-500/30 p-8 shadow-[0_0_60px_rgba(168,85,247,0.3)]'>
 							<H size='3' className='mb-6 text-2xl md:text-3xl'>
 								You&apos;ve Proven Your Music Works. Now Let&apos;s Engineer Your
-								Breakthrough.
+								Breakout.
 							</H>
 							<p className='mb-4 text-lg leading-relaxed text-white/80'>
 								You&apos;ve built a solid fanbase and consistent streaming numbers.
@@ -175,7 +184,7 @@ export default function BreakoutPlusPage() {
 											Bi-Weekly Strategy Sessions with Advanced Analytics
 										</H>
 										<p className='text-white/70'>
-											30-minute deep dives into performance data, audience insights, and
+											1-hour deep dives into performance data, audience insights, and
 											growth optimization. You&apos;ll understand not just what&apos;s
 											working, but how to replicate and scale it.
 										</p>
@@ -306,7 +315,7 @@ export default function BreakoutPlusPage() {
 			</section>
 
 			{/* What Makes Breakout+ Different */}
-			<section className='bg-white/5 px-4 py-12 sm:px-6 lg:px-8'>
+			{/* <section className='bg-white/5 px-4 py-12 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-4xl'>
 					<AnimatedSection animation='fade-up'>
 						<H size='2' className='mb-12 text-center text-3xl md:text-4xl'>
@@ -338,10 +347,10 @@ export default function BreakoutPlusPage() {
 						))}
 					</div>
 				</div>
-			</section>
+			</section> */}
 
 			{/* Testimonials */}
-			<section className='px-4 py-12 sm:px-6 lg:px-8'>
+			{/* <section className='px-4 py-12 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-4xl'>
 					<AnimatedSection animation='fade-up'>
 						<H size='2' className='mb-12 text-center text-3xl md:text-4xl'>
@@ -373,7 +382,7 @@ export default function BreakoutPlusPage() {
 						</AnimatedSection>
 					</div>
 				</div>
-			</section>
+			</section> */}
 
 			{/* Pricing CTA */}
 			<section className='px-4 py-24 sm:px-6 lg:px-8'>
@@ -382,9 +391,10 @@ export default function BreakoutPlusPage() {
 						<div className='relative'>
 							<div className='animate-glow-pulse absolute -inset-1 rounded-2xl bg-gradient-to-r from-violet-600 to-pink-600 opacity-75 blur-lg' />
 							<PricingCard
-								title='Breakout+'
-								price='$1,800'
-								description='Maximum growth engineering for serious artists'
+								title={NYC_BREAKOUT_PLUS.name}
+								price={`$${NYC_BREAKOUT_PLUS.promotionalPrice?.firstMonth}`}
+								originalPrice={`$${NYC_BREAKOUT_PLUS.price.monthly.amount}`}
+								description={NYC_BREAKOUT_PLUS.marketingDescription ?? ''}
 								features={[
 									'Up to 2 advanced campaigns with full execution',
 									'Management of $3-6K monthly ad spend',
@@ -395,7 +405,6 @@ export default function BreakoutPlusPage() {
 									'Priority support + rapid adjustments',
 								]}
 								ctaText='Start Breakout+ Today'
-								featured
 								className='relative'
 							/>
 						</div>
@@ -435,7 +444,7 @@ export default function BreakoutPlusPage() {
 			</section>
 
 			{/* Price Comparison */}
-			<section className='bg-white/5 px-4 py-16 sm:px-6 lg:px-8'>
+			{/* <section className='bg-white/5 px-4 py-16 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-6xl'>
 					<AnimatedSection animation='fade-up'>
 						<H size='3' className='mb-8 text-center text-2xl md:text-3xl'>
@@ -445,7 +454,6 @@ export default function BreakoutPlusPage() {
 
 					<AnimatedSection animation='fade-up' delay={200}>
 						<div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
-							{/* Bedroom+ - Muted */}
 							<div className='opacity-60'>
 								<Link href='/services/bedroom'>
 									<PricingCard
@@ -464,7 +472,6 @@ export default function BreakoutPlusPage() {
 								</Link>
 							</div>
 
-							{/* Rising+ - Muted */}
 							<div className='opacity-60'>
 								<Link href='/services/rising'>
 									<PricingCard
@@ -483,7 +490,6 @@ export default function BreakoutPlusPage() {
 								</Link>
 							</div>
 
-							{/* Breakout+ - Featured */}
 							<PricingCard
 								title='Breakout+'
 								price='$1,800'
@@ -501,7 +507,7 @@ export default function BreakoutPlusPage() {
 						</div>
 					</AnimatedSection>
 				</div>
-			</section>
+			</section> */}
 		</main>
 	);
 }

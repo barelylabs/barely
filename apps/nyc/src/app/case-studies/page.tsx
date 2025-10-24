@@ -134,7 +134,7 @@ export default function CaseStudiesPage() {
 			</section>
 
 			{/* All Case Studies */}
-			<section className='bg-white/5 px-4 py-16 sm:px-6 lg:px-8'>
+			{/* <section className='bg-white/5 px-4 py-16 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-7xl'>
 					<AnimatedSection animation='fade-up'>
 						<H size='3' className='mb-12 text-center text-3xl md:text-4xl'>
@@ -158,7 +158,7 @@ export default function CaseStudiesPage() {
 							))}
 					</div>
 				</div>
-			</section>
+			</section> */}
 
 			{/* CTA Section */}
 			<section className='px-4 py-24 sm:px-6 lg:px-8'>
@@ -168,7 +168,7 @@ export default function CaseStudiesPage() {
 							Ready to Write Your Success Story?
 						</H>
 						<p className='mb-12 text-xl text-white/70'>
-							Join hundreds of artists who&apos;ve grown their audiences with transparent,
+							Join our artists who&apos;ve grown their audiences with transparent,
 							data-driven strategies.
 						</p>
 						<div className='flex flex-col justify-center gap-6 sm:flex-row'>
@@ -177,11 +177,16 @@ export default function CaseStudiesPage() {
 									View Services
 								</button>
 							</Link>
-							<Link href='/' className='inline-block'>
+							<a
+								href='https://app.usemotion.com/meet/barely/discovery'
+								target='_blank'
+								rel='noopener noreferrer'
+								className='inline-block'
+							>
 								<button className='rounded-full border-2 border-white/20 px-8 py-3 font-semibold text-white transition-all duration-300 hover:bg-white/10'>
 									Book Free Strategy Call
 								</button>
-							</Link>
+							</a>
 						</div>
 					</AnimatedSection>
 				</div>

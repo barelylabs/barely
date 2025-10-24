@@ -9,12 +9,12 @@ if neonctl branches get $branchName; then
     echo "Branch $branchName already exists."
 else
     echo "Creating branch $branchName"
-    neonctl branches create --name $branchName
+    neonctl branches create --name $branchName --role-name $me
 fi
 
 # Get the connection string for the branch
-connectionString=$(neonctl connection-string $branchName)
-connectionStringPool=$(neonctl connection-string $branchName --pooled)
+connectionString=$(neonctl connection-string $branchName --role-name $me)
+connectionStringPool=$(neonctl connection-string $branchName --pooled --role-name $me)
 
 # Check if DATABASE_URL exists in the file
 if grep -q "DATABASE_URL" .env; then

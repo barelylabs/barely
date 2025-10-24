@@ -1,29 +1,41 @@
-import type { Metadata } from 'next';
+'use client';
+
 import Link from 'next/link';
+import { NYC_BEDROOM_PLUS } from '@barely/const';
 
 import { H } from '@barely/ui/typography';
 
 import { AnimatedSection } from '../../../components/marketing/animated-section';
 import { MarketingButton } from '../../../components/marketing/button';
 import { PricingCard } from '../../../components/marketing/pricing-card';
+import { useContactModal } from '../../../contexts/contact-modal-context';
 
-export const metadata: Metadata = {
-	title: 'Bedroom+ Service - Learn Music Marketing Engineering | Barely NYC',
-	description:
-		'Perfect for artists with 0-10K monthly listeners. Bi-weekly coaching with Brooklyn-based music marketing engineers + barely.ai tools.',
-};
+// export const metadata: Metadata = {
+// 	title: 'Bedroom+ Service - Learn Music Marketing Engineering | Barely NYC',
+// 	description:
+// 		'Perfect for artists with 0-10K monthly listeners. Bi-weekly coaching with Brooklyn-based music marketing engineers + barely.ai tools.',
+// };
 
 export default function BedroomPlusPage() {
+	const { open: openContactModal } = useContactModal();
 	return (
 		<main className='pt-16'>
 			{/* Page Header */}
 			<section className='px-4 py-24 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-4xl text-center'>
 					<AnimatedSection animation='fade-up'>
-						<div className='mb-4'>
-							<span className='text-xl font-semibold text-purple-300 md:text-2xl'>
-								$200/month
+						<div className='mb-4 space-y-1'>
+							<span className='block text-sm font-medium text-purple-300'>
+								First Month Special
 							</span>
+							<div className='flex items-center justify-center gap-2'>
+								<span className='text-2xl text-white/40 line-through'>
+									${NYC_BEDROOM_PLUS.price.monthly.amount}
+								</span>
+								<span className='text-xl font-semibold text-purple-300 md:text-2xl'>
+									${NYC_BEDROOM_PLUS.promotionalPrice?.firstMonth}/month
+								</span>
+							</div>
 						</div>
 						<H
 							size='1'
@@ -288,6 +300,13 @@ export default function BedroomPlusPage() {
 											approaches
 										</span>
 									</li>
+									<li className='flex items-start gap-3'>
+										<span className='mt-0.5 text-red-500'>✗</span>
+										<span className='text-white/80'>
+											Artists looking for get-big-quick schemes. DIY marketing takes time
+											and consistent effort.
+										</span>
+									</li>
 								</ul>
 							</div>
 						</AnimatedSection>
@@ -296,7 +315,7 @@ export default function BedroomPlusPage() {
 			</section>
 
 			{/* Why Indie+ Works */}
-			<section className='bg-white/5 px-4 py-12 sm:px-6 lg:px-8'>
+			{/* <section className='bg-white/5 px-4 py-12 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-4xl'>
 					<AnimatedSection animation='fade-up'>
 						<H size='2' className='mb-12 text-center text-3xl md:text-4xl'>
@@ -327,16 +346,17 @@ export default function BedroomPlusPage() {
 						))}
 					</div>
 				</div>
-			</section>
+			</section> */}
 
 			{/* Pricing CTA */}
 			<section className='px-4 py-24 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-md'>
 					<AnimatedSection animation='scale'>
 						<PricingCard
-							title='Bedroom+'
-							price='$200'
-							description='Learn the scientific method for music marketing'
+							title={NYC_BEDROOM_PLUS.name}
+							price={`$${NYC_BEDROOM_PLUS.promotionalPrice?.firstMonth}`}
+							originalPrice={`$${NYC_BEDROOM_PLUS.price.monthly.amount}`}
+							description={NYC_BEDROOM_PLUS.marketingDescription ?? ''}
 							features={[
 								'Bi-weekly 30-minute strategy sessions',
 								'Full access to barely.ai tools (Bedroom tier)',
@@ -344,8 +364,8 @@ export default function BedroomPlusPage() {
 								'Integrated merch platform + strategy',
 								'Direct email support',
 							]}
-							ctaText='Start Bedroom+ Today'
-							featured
+							ctaText='Get Started'
+							onCTAClick={openContactModal}
 						/>
 					</AnimatedSection>
 
@@ -358,93 +378,13 @@ export default function BedroomPlusPage() {
 										View All Services
 									</MarketingButton>
 								</Link>
-								<a href='https://barely.ai' target='_blank' rel='noopener noreferrer'>
-									<MarketingButton marketingLook='scientific' size='sm'>
-										Try Tools First
-									</MarketingButton>
-								</a>
-							</div>
-						</div>
-					</AnimatedSection>
-
-					<AnimatedSection animation='fade-up' delay={300}>
-						<p className='mt-12 text-center text-sm text-white/60'>
-							Questions?{' '}
-							<a
-								href='mailto:hello@barely.nyc'
-								className='text-purple-300 underline hover:text-purple-300'
-							>
-								Email me directly
-							</a>{' '}
-							- no sales team, just the person who built this.
-						</p>
-					</AnimatedSection>
-				</div>
-			</section>
-
-			{/* Price Comparison */}
-			<section className='bg-white/5 px-4 py-16 sm:px-6 lg:px-8'>
-				<div className='mx-auto max-w-6xl'>
-					<AnimatedSection animation='fade-up'>
-						<H size='3' className='mb-8 text-center text-2xl md:text-3xl'>
-							Compare All Services
-						</H>
-					</AnimatedSection>
-
-					<AnimatedSection animation='fade-up' delay={200}>
-						<div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
-							{/* Bedroom+ - Featured */}
-							<PricingCard
-								title='Bedroom+'
-								price='$200'
-								description='Learn the scientific method'
-								features={[
-									'Bi-weekly 30-min coaching',
-									'barely.ai tools (Bedroom tier)',
-									'Campaign blueprints',
-									'Merch platform + strategy',
-									'Direct email support',
-								]}
-								ctaText='Currently Selected'
-								featured
-							/>
-
-							{/* Rising+ - Muted */}
-							<div className='opacity-60'>
-								<Link href='/services/rising'>
-									<PricingCard
-										title='Rising+'
-										price='$750'
-										description='Professional execution'
-										features={[
-											'Up to 2 campaigns/month',
-											'$1-3K ad spend management',
-											'barely.ai tools (Rising tier)',
-											'Monthly strategy calls',
-											'Revenue optimization',
-										]}
-										ctaText='Learn More →'
-									/>
-								</Link>
-							</div>
-
-							{/* Breakout+ - Muted */}
-							<div className='opacity-60'>
-								<Link href='/services/breakout'>
-									<PricingCard
-										title='Breakout+'
-										price='$1,800'
-										description='Maximum growth engineering'
-										features={[
-											'Advanced campaign execution',
-											'$3-6K ad spend management',
-											'barely.ai tools (Breakout tier)',
-											'Bi-weekly deep dives',
-											'Priority support',
-										]}
-										ctaText='Learn More →'
-									/>
-								</Link>
+								<MarketingButton
+									marketingLook='scientific'
+									size='sm'
+									onClick={openContactModal}
+								>
+									Get Started
+								</MarketingButton>
 							</div>
 						</div>
 					</AnimatedSection>

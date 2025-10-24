@@ -1,14 +1,25 @@
 export interface CaseStudyMetrics {
+	// Spotify - Monthly Stats
 	monthlyListeners: number;
-	streams: number;
-	followers: number;
-	engagementRate: string;
-	emailSubscribers: number;
+	monthlyStreams: number;
+	monthlyStreamsPerListener?: number;
+	monthlySaves?: number;
+	monthlyPlaylistAdds?: number;
+
+	// Spotify - Total/Cumulative Stats
+	totalFollowers: number;
+
+	// Revenue
 	monthlyRevenue: string;
-	instagram?: number;
-	tiktok?: number;
-	youtube?: number;
-	patreon?: number;
+
+	// Email
+	totalEmailSubscribers: number;
+
+	// Social Media - Total/Cumulative (optional)
+	totalInstagramFollowers?: number;
+	totalTikTokFollowers?: number;
+	totalYouTubeSubscribers?: number;
+	totalPatreonMembers?: number;
 }
 
 export interface CaseStudyInvestment {
@@ -31,6 +42,22 @@ export interface CaseStudyTimelineEvent {
 export interface CaseStudyTestimonial {
 	quote: string;
 	author: string;
+}
+
+export interface CaseStudyFeaturedHighlight {
+	notableAchievement?: string;
+	monthlyRevenue?: {
+		description: string;
+		timeline: string;
+	};
+	workflowExample?: {
+		title: string;
+		steps: {
+			number: number;
+			title: string;
+			description: string;
+		}[];
+	};
 }
 
 export interface CaseStudy {
@@ -65,529 +92,45 @@ export interface CaseStudy {
 		patreon?: string;
 		spotify?: string;
 	};
+	featuredHighlights?: CaseStudyFeaturedHighlight;
 }
 
-export const lunaCase: CaseStudy = {
-	id: 'bedroom-producer-to-10k',
-	artistName: 'Luna Synthesis',
-	genre: 'Electronic/Ambient',
-	serviceTier: 'Bedroom+',
-	avatarUrl:
-		'https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=400&h=400&fit=crop',
-	startDate: 'January 2024',
-	endDate: 'May 2024',
-	metrics: {
-		before: {
-			monthlyListeners: 523,
-			streams: 2100,
-			followers: 89,
-			engagementRate: '2.1%',
-			emailSubscribers: 0,
-			monthlyRevenue: '$18',
-			instagram: 450,
-			youtube: 89,
-		},
-		after: {
-			monthlyListeners: 10847,
-			streams: 45600,
-			followers: 2340,
-			engagementRate: '5.8%',
-			emailSubscribers: 487,
-			monthlyRevenue: '$342',
-			instagram: 3200,
-			youtube: 1250,
-		},
-	},
-	investment: {
-		serviceFee: '$800',
-		adSpend: '$1,200',
-		total: '$2,000',
-	},
-	challenge: `Luna had been producing high-quality ambient electronic music for 3 years but couldn't break through the algorithmic noise. Despite having a small but dedicated following, growth had plateaued at around 500 monthly listeners.`,
-	strategy: [
-		{
-			title: 'Audience Research & Segmentation',
-			description:
-				'Identified core listeners as "focus work" and "meditation" audiences through data analysis.',
-		},
-		{
-			title: 'Content Positioning',
-			description:
-				'Repositioned tracks with SEO-optimized titles and created themed playlists for different use cases.',
-		},
-		{
-			title: 'Meta Campaign Structure',
-			description:
-				'Built lookalike audiences from engaged Spotify listeners and targeted specific ambient music interests.',
-		},
-		{
-			title: 'Release Strategy',
-			description:
-				'Switched from sporadic releases to consistent bi-weekly singles with coordinated promotion.',
-		},
-	],
-	timeline: [
-		{
-			month: 'Month 1',
-			event: 'Audience research & strategy development',
-			metric: '523 → 892 listeners',
-		},
-		{
-			month: 'Month 2',
-			event: 'First Meta campaign launch',
-			metric: '892 → 2,450 listeners',
-		},
-		{
-			month: 'Month 3',
-			event: 'Spotify editorial playlist placement',
-			metric: '2,450 → 6,200 listeners',
-		},
-		{
-			month: 'Month 4',
-			event: 'Scale successful campaigns',
-			metric: '6,200 → 10,847 listeners',
-		},
-	],
-	keyResults: [
-		'Achieved first Spotify editorial playlist placement (Ambient Relaxation)',
-		'Built email list of 487 engaged fans from scratch',
-		'Increased streaming revenue by 1,800%',
-		'Created sustainable growth system continuing post-service',
-	],
-	testimonial: {
-		quote:
-			"I finally understand how music marketing actually works. It's not about tricks or hacks - it's about finding your real audience and serving them consistently. The bi-weekly coaching sessions were like having a data scientist dedicated to my music career.",
-		author: 'Luna Synthesis',
-	},
-	summary:
-		'From bedroom producer to Spotify editorial playlists in 4 months using targeted Meta campaigns and strategic release planning.',
-	featured: true,
-	socials: {
-		instagram: 'https://instagram.com/lunasynthesis',
-		youtube: 'https://youtube.com/@lunasynthesis',
-		spotify: 'https://open.spotify.com/artist/lunasynthesis',
-	},
-};
-
-export const velvetGhostsCase: CaseStudy = {
-	id: 'indie-band-tour-prep',
-	artistName: 'The Velvet Ghosts',
-	genre: 'Indie Rock',
-	serviceTier: 'Rising+',
-	avatarUrl:
-		'https://images.unsplash.com/photo-1598387993441-a364f854c3e1?w=400&h=400&fit=crop',
-	startDate: 'February 2024',
-	endDate: 'May 2024',
-	metrics: {
-		before: {
-			monthlyListeners: 8420,
-			streams: 34000,
-			followers: 1200,
-			engagementRate: '3.2%',
-			emailSubscribers: 145,
-			monthlyRevenue: '$126',
-			instagram: 2100,
-			tiktok: 850,
-		},
-		after: {
-			monthlyListeners: 32150,
-			streams: 156000,
-			followers: 5600,
-			engagementRate: '6.5%',
-			emailSubscribers: 2890,
-			monthlyRevenue: '$1,850',
-			instagram: 12500,
-			tiktok: 8900,
-		},
-	},
-	investment: {
-		serviceFee: '$1,200',
-		adSpend: '$3,000',
-		total: '$4,200',
-	},
-	challenge: `The band had a 12-city tour booked but was worried about playing to empty rooms. Previous tours barely broke even despite positive reviews and a growing online following.`,
-	strategy: [
-		{
-			title: 'Geo-Targeted Campaign Strategy',
-			description: 'Created city-specific campaigns 6-8 weeks before each tour date.',
-		},
-		{
-			title: 'Local Playlist Targeting',
-			description: 'Pitched to local curators and created city-specific content.',
-		},
-		{
-			title: 'Merch Pre-Orders',
-			description: 'Launched exclusive tour merch with local designs for each city.',
-		},
-		{
-			title: 'Fan Activation',
-			description: 'Built street teams in each market through fan engagement campaigns.',
-		},
-	],
-	timeline: [
-		{
-			month: 'Month 1',
-			event: 'Tour market analysis & strategy',
-			metric: '8,420 → 12,100 listeners',
-		},
-		{
-			month: 'Month 2',
-			event: 'Launch geo-targeted campaigns',
-			metric: '12,100 → 21,500 listeners',
-		},
-		{
-			month: 'Month 3',
-			event: 'Tour launch & optimization',
-			metric: '21,500 → 32,150 listeners',
-		},
-	],
-	keyResults: [
-		'Sold out 9 of 12 tour dates (previous record: 2 sold out)',
-		'Generated $35K in tour revenue (vs. $8K previous tour)',
-		'Built email list of 2,745 fans across tour markets',
-		'Established sustainable presence in 6 new markets',
-	],
-	testimonial: {
-		quote:
-			'We went from playing to half-empty rooms to sold-out venues. The market-specific approach was genius - we could see exactly which cities were responding and adjust our routing for next time.',
-		author: 'Jake Morrison, The Velvet Ghosts',
-	},
-	merchRevenue: {
-		before: 0,
-		after: 3000,
-	},
-	summary:
-		'Strategic market targeting in 6 tour cities resulted in sold-out shows and 3.8x listener growth.',
-	featured: true,
-	socials: {
-		instagram: 'https://instagram.com/thevelvetghosts',
-		tiktok: 'https://tiktok.com/@thevelvetghosts',
-		spotify: 'https://open.spotify.com/artist/thevelvetghosts',
-	},
-};
-
-export const maraCase: CaseStudy = {
-	id: 'singer-songwriter-fanbase',
-	artistName: 'Mara Chen',
-	genre: 'Folk/Singer-Songwriter',
-	serviceTier: 'Bedroom+',
-	avatarUrl:
-		'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=400&h=400&fit=crop',
-	startDate: 'November 2023',
-	endDate: 'May 2024',
-	metrics: {
-		before: {
-			monthlyListeners: 1205,
-			streams: 4800,
-			followers: 156,
-			engagementRate: '1.8%',
-			emailSubscribers: 0,
-			monthlyRevenue: '$38',
-			patreon: 0,
-		},
-		after: {
-			monthlyListeners: 5632,
-			streams: 28900,
-			followers: 1120,
-			engagementRate: '8.2%',
-			emailSubscribers: 2142,
-			monthlyRevenue: '$485',
-			patreon: 47,
-		},
-	},
-	investment: {
-		serviceFee: '$1,200',
-		adSpend: '$800',
-		total: '$2,000',
-	},
-	challenge: `Mara had beautiful, intimate songs but struggled to find her audience. Previous attempts at promotion felt inauthentic and didn't align with her values as an artist.`,
-	strategy: [
-		{
-			title: 'Story-First Content Strategy',
-			description:
-				'Developed content that shared the stories behind songs, connecting with fans on a deeper level.',
-		},
-		{
-			title: 'Email List Building',
-			description:
-				'Created free song downloads and exclusive acoustic versions to build direct fan relationships.',
-		},
-		{
-			title: 'Micro-Budget Testing',
-			description: 'Used $5-10/day campaigns to test different audiences and messages.',
-		},
-		{
-			title: 'Community Building',
-			description: 'Launched "Mara\'s Living Room" online community for superfans.',
-		},
-	],
-	timeline: [
-		{
-			month: 'Month 1-2',
-			event: 'Foundation & list building',
-			metric: '1,205 → 1,850 listeners',
-		},
-		{
-			month: 'Month 3-4',
-			event: 'Content strategy implementation',
-			metric: '1,850 → 3,200 listeners',
-		},
-		{
-			month: 'Month 5-6',
-			event: 'Community launch & scaling',
-			metric: '3,200 → 5,632 listeners',
-		},
-	],
-	keyResults: [
-		'Built email list of 2,142 highly engaged fans',
-		'Launched successful Patreon generating $300/month',
-		'Increased streaming revenue by 1,176%',
-		'Created sustainable fan-funded model beyond streaming',
-	],
-	testimonial: {
-		quote:
-			"I learned that authentic marketing isn't an oxymoron. By sharing my real story and building genuine connections, I found my people. The email list has become my most valuable asset.",
-		author: 'Mara Chen',
-	},
-	summary:
-		'Built a loyal email list of 2,000+ fans and increased streaming revenue by 425% through content marketing.',
-	featured: false,
-	socials: {
-		patreon: 'https://patreon.com/marachen',
-		spotify: 'https://open.spotify.com/artist/marachen',
-	},
-};
-
-export const kjCase: CaseStudy = {
-	id: 'hip-hop-breakthrough',
-	artistName: 'KJ The Prophet',
-	genre: 'Hip-Hop',
-	serviceTier: 'Breakout+',
-	avatarUrl:
-		'https://images.unsplash.com/photo-1566328386401-58aeab7f5707?w=400&h=400&fit=crop',
-	startDate: 'December 2023',
-	endDate: 'May 2024',
-	metrics: {
-		before: {
-			monthlyListeners: 45000,
-			streams: 280000,
-			followers: 8900,
-			engagementRate: '4.5%',
-			emailSubscribers: 1200,
-			monthlyRevenue: '$890',
-		},
-		after: {
-			monthlyListeners: 156000,
-			streams: 1240000,
-			followers: 42000,
-			engagementRate: '7.8%',
-			emailSubscribers: 8500,
-			monthlyRevenue: '$4,200',
-		},
-	},
-	investment: {
-		serviceFee: '$5,000',
-		adSpend: '$25,000',
-		total: '$30,000',
-	},
-	challenge: `KJ had strong regional support but couldn't break into the national hip-hop scene. Despite quality production and features with known artists, growth had stalled.`,
-	strategy: [
-		{
-			title: 'National Playlist Strategy',
-			description:
-				'Targeted national hip-hop playlists with strategic ad campaigns and curator outreach.',
-		},
-		{
-			title: 'Influencer Partnerships',
-			description:
-				'Partnered with hip-hop influencers for authentic co-signs and content.',
-		},
-		{
-			title: 'Visual Content Push',
-			description:
-				'Invested in high-quality music videos and social content for broader appeal.',
-		},
-		{
-			title: 'Strategic Features',
-			description: 'Leveraged features with rising artists to tap into new fanbases.',
-		},
-	],
-	timeline: [
-		{ month: 'Month 1', event: 'Foundation & strategy', metric: '45K → 58K listeners' },
-		{
-			month: 'Month 2',
-			event: 'Launch national campaigns',
-			metric: '58K → 82K listeners',
-		},
-		{
-			month: 'Month 3',
-			event: 'First major playlist adds',
-			metric: '82K → 115K listeners',
-		},
-		{ month: 'Month 4-5', event: 'Scale & optimize', metric: '115K → 156K listeners' },
-	],
-	keyResults: [
-		'Added to 12 major Spotify playlists (including RapCaviar)',
-		'Grew Instagram following from 15K to 78K',
-		'Secured opening slot on national tour',
-		'Increased monthly revenue by 372%',
-	],
-	testimonial: {
-		quote:
-			'The data-driven approach changed everything. We could see exactly what was working and double down. Going from regional to national recognition in 5 months felt impossible before.',
-		author: 'KJ The Prophet',
-	},
-	merchRevenue: {
-		before: 800,
-		after: 4500,
-	},
-	summary:
-		'Scaled from regional to national recognition with $5K/month ad spend and strategic playlist targeting.',
-	featured: false,
-};
-
-export const violetCase: CaseStudy = {
-	id: 'dream-pop-discovery',
-	artistName: 'Violet Skies',
-	genre: 'Dream Pop',
-	serviceTier: 'Rising+',
-	avatarUrl:
-		'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&fit=crop',
-	startDate: 'January 2024',
-	endDate: 'May 2024',
-	metrics: {
-		before: {
-			monthlyListeners: 3200,
-			streams: 15600,
-			followers: 890,
-			engagementRate: '2.8%',
-			emailSubscribers: 120,
-			monthlyRevenue: '$95',
-			tiktok: 1200,
-			instagram: 890,
-		},
-		after: {
-			monthlyListeners: 18500,
-			streams: 98000,
-			followers: 4200,
-			engagementRate: '9.2%',
-			emailSubscribers: 1850,
-			monthlyRevenue: '$620',
-			tiktok: 45000,
-			instagram: 8900,
-		},
-	},
-	investment: {
-		serviceFee: '$1,200',
-		adSpend: '$1,800',
-		total: '$3,000',
-	},
-	challenge: `Violet's dreamy, atmospheric sound was perfect for Gen Z audiences but she struggled to reach them. Previous marketing efforts felt forced and didn't match her aesthetic.`,
-	strategy: [
-		{
-			title: 'TikTok-First Strategy',
-			description:
-				'Created authentic, aesthetic-focused content that resonated with Gen Z values.',
-		},
-		{
-			title: 'Mood-Based Marketing',
-			description:
-				'Positioned music around moods and moments rather than traditional genre marketing.',
-		},
-		{
-			title: 'Sync Targeting',
-			description:
-				'Pitched to sync libraries and content creators for placement opportunities.',
-		},
-		{
-			title: 'Visual Identity',
-			description: 'Developed cohesive visual aesthetic across all platforms.',
-		},
-	],
-	timeline: [
-		{
-			month: 'Month 1',
-			event: 'TikTok strategy development',
-			metric: '3,200 → 4,800 listeners',
-		},
-		{
-			month: 'Month 2',
-			event: 'Viral moment & paid amplification',
-			metric: '4,800 → 9,200 listeners',
-		},
-		{
-			month: 'Month 3',
-			event: 'Sync placements secured',
-			metric: '9,200 → 14,100 listeners',
-		},
-		{
-			month: 'Month 4',
-			event: 'Scale successful content',
-			metric: '14,100 → 18,500 listeners',
-		},
-	],
-	keyResults: [
-		'Achieved 2.3M views on hero TikTok content',
-		'Secured 3 sync placements in indie films',
-		'Built aesthetic-focused brand loved by Gen Z',
-		'Created sustainable content system for growth',
-	],
-	testimonial: {
-		quote:
-			'I never thought marketing could feel authentic to who I am as an artist. The focus on aesthetics and mood over traditional promotion felt so much more natural. My audience found me organically.',
-		author: 'Violet Skies',
-	},
-	merchRevenue: {
-		before: 200,
-		after: 1800,
-	},
-	summary:
-		'Leveraged TikTok organic growth and paid amplification to reach Gen Z audience and land sync placements.',
-	featured: false,
-	socials: {
-		tiktok: 'https://tiktok.com/@violetskiesmusic',
-		instagram: 'https://instagram.com/violetskiesmusic',
-		spotify: 'https://open.spotify.com/artist/violetskies',
-	},
-};
-
 export const properYouthCase: CaseStudy = {
-	id: 'indie-rock-335-growth',
+	id: 'proper-youth',
 	artistName: 'Proper Youth',
 	genre: 'Indie Rock',
 	serviceTier: 'Rising+',
-	avatarUrl:
-		'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop',
+	avatarUrl: '/_static/bands/proper-youth-local-gravity.jpg',
 	startDate: 'April 2024',
 	endDate: 'October 2024',
 	metrics: {
 		before: {
-			monthlyListeners: 5629,
-			streams: 22500,
-			followers: 1850,
-			engagementRate: '3.1%',
-			emailSubscribers: 340,
+			monthlyListeners: 5579,
+			monthlyStreams: 8924,
+			monthlyStreamsPerListener: 1.6,
+			monthlySaves: 42,
+			monthlyPlaylistAdds: 232,
+			totalFollowers: 12201,
 			monthlyRevenue: '$112',
-			instagram: 2400,
-			youtube: 650,
+			totalEmailSubscribers: 340,
 		},
 		after: {
 			monthlyListeners: 24516,
-			streams: 135000,
-			followers: 8200,
-			engagementRate: '6.8%',
-			emailSubscribers: 3400,
-			monthlyRevenue: '$890',
-			instagram: 12800,
-			youtube: 2100,
+			monthlyStreams: 78322,
+			monthlyStreamsPerListener: 3.195,
+			monthlySaves: 4504,
+			monthlyPlaylistAdds: 4179,
+			totalFollowers: 13958,
+			monthlyRevenue: '$3,170.55',
+			totalEmailSubscribers: 867,
 		},
 	},
 	investment: {
-		serviceFee: '$1,200',
+		serviceFee: '$4,250',
 		adSpend: '$13,820',
-		total: '$15,020',
+		total: '$18,070',
 	},
-	challenge: `Proper Youth had spent years and thousands of dollars on playlist pitching services and publicists with nothing to show for it. They were tired of expensive failures and vanity metrics that didn't translate to real growth.`,
+	challenge: `Proper Youth had spent years chasing playlist placements and blog features that looked impressive on paper. The pattern was always the same: metrics would spike while spending money, then vanish the moment the campaigns stopped. We weren't building a fanbase - we were renting an audience of bots and passive listeners who disappeared as fast as they arrived.`,
 	strategy: [
 		{
 			title: 'Progressive Campaign Building',
@@ -612,35 +155,36 @@ export const properYouthCase: CaseStudy = {
 	],
 	timeline: [
 		{
-			month: 'April',
+			month: 'Month 1',
 			event: 'Foundation with spark campaigns',
 			metric: '5,629 → 8,234 listeners',
 		},
 		{
-			month: 'May-June',
+			month: 'Months 2-3',
 			event: 'Added Instagram & scaled winners',
 			metric: '8,234 → 11,891 listeners',
 		},
 		{
-			month: 'July-August',
+			month: 'Months 4-5',
 			event: 'Launched retargeting campaigns',
 			metric: '11,891 → 18,567 listeners',
 		},
 		{
-			month: 'Sept-Oct',
+			month: 'Months 6-7',
 			event: 'Cart campaigns for merch',
 			metric: '18,567 → 24,516 listeners',
 		},
 	],
 	keyResults: [
-		'335% growth in monthly listeners ($0.73 per new listener)',
-		'Cart campaigns achieved 1.85-2.01x ROAS',
-		'Built email list of 3,400 engaged fans',
-		'Proved iPhone videos outperform expensive productions',
+		'340% growth in monthly listeners (5,579 → 24,516)',
+		'Monthly revenue grew from $112 to $3,170 (2,730% increase)',
+		'Cart campaigns achieved 1.85-2.01x ROAS on merch sales',
+		'Built email list of 867 engaged fans',
+		'iPhone-shot videos drove more engagement than high-production content',
 	],
 	testimonial: {
 		quote:
-			"We spent years throwing money at playlist pitchers and publicists with nothing to show for it. Barely's scientific approach - testing what works, ditching what doesn't - took us from 5K to 24K listeners in 6 months. Turns out honest iPhone videos beat expensive productions, and targeting real fans beats playlist schemes every time.",
+			"We burned years on playlist pitchers and publicists with nothing real to show for it. Barely's scientific approach - test what works, kill what doesn't - took us from 5K to 24K listeners in 6 months. iPhone videos outperformed expensive productions. Targeting real fans beat playlist schemes. Simple math.",
 		author: 'Proper Youth',
 	},
 	merchRevenue: {
@@ -648,32 +192,172 @@ export const properYouthCase: CaseStudy = {
 		after: 2510,
 	},
 	summary:
-		"Achieved 335% growth with strategic ad spend and iPhone content, proving expensive productions aren't necessary.",
+		'Achieved 340% listener growth and 2,730% revenue increase in 6 months using iPhone-shot videos and data-driven Meta campaigns.',
 	featured: true,
 	socials: {
 		instagram: 'https://instagram.com/properyouth',
 		spotify: 'https://open.spotify.com/artist/properyouth',
 	},
+	featuredHighlights: {
+		notableAchievement: '1.8M streams on hit single "Off My Mind"',
+		monthlyRevenue: {
+			description: 'Monthly revenue grew from $112 to $3,170',
+			timeline: 'over 6 months',
+		},
+		workflowExample: {
+			title: 'Real Campaign Example: Proper Youth',
+			steps: [
+				{
+					number: 1,
+					title: 'Content Upload',
+					description: '30 iPhone videos uploaded to media',
+				},
+				{
+					number: 2,
+					title: 'Smart Links Created',
+					description: 'Each video gets trackable links',
+				},
+				{
+					number: 3,
+					title: 'Landing Page Built',
+					description: 'Free CD offer on custom page',
+				},
+				{
+					number: 4,
+					title: 'Automated Flow',
+					description: 'Visitor → Email capture → Welcome sequence → Merch offer',
+				},
+			],
+		},
+	},
+};
+
+export const theNowCase: CaseStudy = {
+	id: 'the-now',
+	artistName: 'The Now',
+	genre: 'Alt Rock',
+	serviceTier: 'Rising+',
+	avatarUrl: '/_static/bands/the-now-trio.jpg',
+	startDate: 'March 2025',
+	endDate: 'October 2025',
+	metrics: {
+		before: {
+			monthlyListeners: 1347,
+			monthlyStreams: 3898,
+			monthlyStreamsPerListener: 2.894,
+			monthlySaves: 163,
+			monthlyPlaylistAdds: 188,
+			totalFollowers: 1358,
+			monthlyRevenue: '$16',
+			totalEmailSubscribers: 15,
+			totalInstagramFollowers: 7207,
+		},
+		after: {
+			monthlyListeners: 19669,
+			monthlyStreams: 58708,
+			monthlyStreamsPerListener: 2.985,
+			monthlySaves: 1831,
+			monthlyPlaylistAdds: 1679,
+			totalFollowers: 1724,
+			monthlyRevenue: '$1,059',
+			totalEmailSubscribers: 35,
+			totalInstagramFollowers: 7855,
+		},
+	},
+	investment: {
+		serviceFee: '$5,750',
+		adSpend: '$12,829',
+		total: '$18,579',
+	},
+	// CLIENT: Please review and edit this challenge description to accurately reflect your situation before working with Barely
+	challenge: `The Now had just released their debut album "Too Hot To Handle" - recorded at Real World Studios with Grammy-winning producer Oli Jacobs - but were stuck at around 1,000 monthly listeners. Despite strong local support in South Wales and sharing stages with legends like Placebo and Noel Gallagher, they couldn't break beyond their regional fanbase. They needed to build sustainable momentum for the album and expand their reach across the UK and into Europe.`,
+
+	// CLIENT: Please verify these were the main strategies we used, and suggest any edits
+	strategy: [
+		{
+			title: 'Progressive Campaign Building',
+			description:
+				'Started with playlist.spark campaigns to build initial listeners, then layered in ig.spark to amplify organic content, followed by retargeting warm audiences with charge campaigns.',
+		},
+		{
+			title: 'Playlist Strategy',
+			description:
+				'Built their "ON THE ROAD" alt-rock playlist to 7K followers, creating a sustainable discovery channel for new fans.',
+		},
+		{
+			title: 'Track-Specific Push',
+			description:
+				'Focused campaigns behind "Get Out" drove major Discover Weekly placement, accelerating toward 225K streams.',
+		},
+		{
+			title: 'Free CD & Merch Launch',
+			description:
+				'Launched "pay what you want" CD campaign with autographed copies, converting engaged listeners into paying fans and email subscribers.',
+		},
+	],
+
+	timeline: [
+		{
+			month: 'Months 1-2',
+			event: 'Launch playlist.spark campaigns',
+			metric: '2,241 → 4,187 listeners',
+		},
+		{
+			month: 'Months 3-4',
+			event: 'Add ig.spark to amplify organic content',
+			metric: '4,187 → 10,230 listeners',
+		},
+		{
+			month: 'Months 5-6',
+			event: 'Launch retargeting (ig.charge, spotify.charge)',
+			metric: '10,230 → 12,767 listeners',
+		},
+		{
+			month: 'Month 7',
+			event: 'Discover Weekly boost for "Get Out"',
+			metric: '12,767 → 26,044 listeners',
+		},
+		{
+			month: 'Month 8',
+			event: 'Launch CD/merch campaigns & gig promotion',
+			metric: '26,044 → 19,669 listeners',
+		},
+	],
+
+	// CLIENT: Please review these results and suggest any edits
+	keyResults: [
+		'1,360% growth in monthly listeners (1,347 → 19,669)',
+		'Monthly revenue grew from $16 to $1,059 (6,519% increase)',
+		'Built "ON THE ROAD" playlist to 7K followers, creating sustainable discovery channel',
+		'"Get Out" accelerated toward 225K streams via major Discover Weekly push',
+		'Launched successful "pay what you want" CD campaign with autographed copies',
+		'First month of gig promotion generated $234 in ticket sales',
+	],
+	// DRAFT TESTIMONIAL for client approval - they can edit or completely rewrite
+	testimonial: {
+		quote:
+			"We'd just released our debut album and were stuck at 1K listeners despite all the work we'd put in. Barely's approach was completely different from anything we'd tried - data-driven campaigns that actually built a real fanbase. The free CD campaign brought in genuine fans who actually showed up to gigs and bought merch. Going from $16 to over $1K in monthly revenue showed us this could actually be sustainable.",
+		author: 'The Now', // CLIENT: Should this be attributed to a specific band member or just "The Now"?
+	},
+
+	// DRAFT SUMMARY - client should review
+	summary:
+		'South Wales alt-rock band achieved 1,360% listener growth and built sustainable revenue through free CD campaigns and strategic Meta advertising, expanding from regional to UK-wide fanbase.',
+	featured: true,
+	socials: {
+		instagram: 'https://www.instagram.com/thenowuk/',
+		spotify: 'https://open.spotify.com/artist/6Cd7IpKrJhEJOJnLG7VsIU',
+		youtube: 'https://www.youtube.com/@thenowofficial',
+	},
 };
 
 // Export all case studies as an array
-export const allCaseStudies: CaseStudy[] = [
-	lunaCase,
-	velvetGhostsCase,
-	properYouthCase,
-	maraCase,
-	kjCase,
-	violetCase,
-];
+export const allCaseStudies: CaseStudy[] = [properYouthCase, theNowCase];
 
 // Export as an object keyed by ID for easy lookup
 export const caseStudies: Record<string, CaseStudy> = {
-	[lunaCase.id]: lunaCase,
-	[velvetGhostsCase.id]: velvetGhostsCase,
 	[properYouthCase.id]: properYouthCase,
-	[maraCase.id]: maraCase,
-	[kjCase.id]: kjCase,
-	[violetCase.id]: violetCase,
+	[theNowCase.id]: theNowCase,
 };
 
 // Utility functions
@@ -684,3 +368,54 @@ export function getCaseStudyById(id: string): CaseStudy | undefined {
 export function getAllCaseStudyIds(): string[] {
 	return Object.keys(caseStudies);
 }
+
+// Aggregate Metrics - computed from all case studies
+export const aggregateMetrics = {
+	// Total streams generated across all case studies
+	totalStreamsGenerated: allCaseStudies.reduce((sum, study) => {
+		const streamsGenerated =
+			study.metrics.after.monthlyStreams - study.metrics.before.monthlyStreams;
+		return sum + streamsGenerated;
+	}, 0),
+
+	// Average listener growth percentage
+	averageListenerGrowth: Math.round(
+		allCaseStudies.reduce((sum, study) => {
+			const growthPercent =
+				((study.metrics.after.monthlyListeners - study.metrics.before.monthlyListeners) /
+					study.metrics.before.monthlyListeners) *
+				100;
+			return sum + growthPercent;
+		}, 0) / allCaseStudies.length,
+	),
+
+	// Total artists (case studies)
+	totalArtists: allCaseStudies.length,
+
+	// Always 100% transparent reporting (our commitment)
+	transparentReporting: 100,
+};
+
+// Success ticker data derived from aggregate metrics
+export const successTickerData = [
+	{
+		metric: `${(aggregateMetrics.totalStreamsGenerated / 1000000).toFixed(1)}M+`,
+		label: 'streams generated',
+		icon: '🎵',
+	},
+	{
+		metric: `+${aggregateMetrics.averageListenerGrowth}%`,
+		label: 'avg listener growth',
+		icon: '📈',
+	},
+	{
+		metric: aggregateMetrics.totalArtists.toString(),
+		label: 'artists growing',
+		icon: '🎸',
+	},
+	{
+		metric: `${aggregateMetrics.transparentReporting}%`,
+		label: 'transparent reporting',
+		icon: '📊',
+	},
+];

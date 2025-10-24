@@ -16,8 +16,8 @@ export function Footer() {
 								</Link>
 							</div>
 							<p className='mb-4 text-sm text-white/70'>
-								Brooklyn-based music marketing engineers for independent artists
-								worldwide. We build data-driven growth systems that actually work.
+								Brooklyn-based marketing engineers for independent artists worldwide. We
+								build data-driven growth systems that actually work.
 							</p>
 							<div className='flex items-center gap-2 text-sm text-white/50'>
 								<svg
@@ -96,14 +96,6 @@ export function Footer() {
 										className='text-sm text-white/70 transition-colors hover:text-white'
 									>
 										Case Studies
-									</Link>
-								</li>
-								<li>
-									<Link
-										href='/blog'
-										className='text-sm text-white/70 transition-colors hover:text-white'
-									>
-										Blog
 									</Link>
 								</li>
 								<li>
