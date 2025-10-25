@@ -5,11 +5,13 @@ import Link from 'next/link';
 
 import { H } from '@barely/ui/typography';
 
+import { useContactModal } from '../../contexts/contact-modal-context';
 import { AnimatedSection } from './animated-section';
 import { MarketingButton } from './button';
 
 export function Hero() {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
+	const { open: openContactModal } = useContactModal();
 
 	useEffect(() => {
 		const canvas = canvasRef.current;
@@ -197,15 +199,14 @@ export function Hero() {
 
 				<AnimatedSection animation='fade-up' delay={400}>
 					<div className='flex flex-col items-center justify-center gap-4 sm:flex-row'>
-						<a href='/services'>
-							<MarketingButton
-								marketingLook='hero-primary'
-								size='lg'
-								className='min-w-[200px]'
-							>
-								Launch Your Career
-							</MarketingButton>
-						</a>
+						<MarketingButton
+							marketingLook='hero-primary'
+							size='lg'
+							className='min-w-[200px]'
+							onClick={openContactModal}
+						>
+							Launch Your Career
+						</MarketingButton>
 						<Link href='/case-studies'>
 							<MarketingButton
 								marketingLook='hero-secondary'
