@@ -76,21 +76,21 @@ export function ArtistTestimonials() {
 									{/* Background gradient that moves on hover */}
 									<div className='absolute -inset-1 rounded-3xl bg-gradient-to-r from-purple-600 to-pink-600 opacity-25 blur transition duration-1000 group-hover:opacity-75 group-hover:duration-200' />
 
-									<div className='relative rounded-3xl border border-white/10 bg-black/50 p-8 backdrop-blur-xl transition-all duration-300 group-hover:border-white/20 md:p-12'>
+									<div className='relative rounded-3xl border border-white/10 bg-black/50 p-6 backdrop-blur-xl transition-all duration-300 group-hover:border-white/20 md:p-10'>
 										<div
 											className={cn(
-												'flex h-[320px] flex-col transition-all duration-500',
+												'flex h-[400px] flex-col transition-all duration-500 md:h-[350px]',
 												isAnimating && 'translate-y-4 opacity-0',
 											)}
 										>
 											{/* Large Quote Mark */}
-											<div className='mb-4 font-serif text-6xl leading-none text-purple-500/20'>
+											<div className='mb-2 font-serif text-4xl leading-none text-purple-500/20'>
 												&ldquo;
 											</div>
 
 											{/* Quote */}
-											<blockquote className='mb-12 flex-1 overflow-hidden'>
-												<p className='line-clamp-5 text-xl font-light leading-relaxed text-white/90 md:line-clamp-4 md:text-2xl lg:text-2xl'>
+											<blockquote className='mb-8 flex-1 overflow-hidden'>
+												<p className='line-clamp-6 text-xl font-light leading-relaxed text-white/90 md:line-clamp-5 md:text-2xl'>
 													{current.quote}
 												</p>
 											</blockquote>
