@@ -25,7 +25,7 @@ export function Navigation() {
 
 	return (
 		<>
-			<nav className='fixed left-0 right-0 top-0 z-50 border-b border-white/10'>
+			<nav className='fixed left-0 right-0 top-0 z-50 overflow-hidden border-b border-white/10'>
 				<div className='absolute inset-0 bg-black/50 backdrop-blur-xl' />
 
 				<div className='relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
