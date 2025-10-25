@@ -79,7 +79,7 @@ export function ArtistTestimonials() {
 									<div className='relative rounded-3xl border border-white/10 bg-black/50 p-8 backdrop-blur-xl transition-all duration-300 group-hover:border-white/20 md:p-12'>
 										<div
 											className={cn(
-												'flex h-[400px] flex-col transition-all duration-500 md:h-[350px]',
+												'flex h-[320px] flex-col transition-all duration-500',
 												isAnimating && 'translate-y-4 opacity-0',
 											)}
 										>
@@ -89,8 +89,10 @@ export function ArtistTestimonials() {
 											</div>
 
 											{/* Quote */}
-											<blockquote className='mb-12 line-clamp-6 flex-1 overflow-hidden text-2xl font-light leading-relaxed text-white/90 md:text-3xl lg:text-4xl'>
-												{current.quote}
+											<blockquote className='mb-12 flex-1 overflow-hidden'>
+												<p className='line-clamp-5 text-xl font-light leading-relaxed text-white/90 md:line-clamp-4 md:text-2xl lg:text-2xl'>
+													{current.quote}
+												</p>
 											</blockquote>
 
 											{/* Artist Info with Metric */}
