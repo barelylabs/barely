@@ -147,7 +147,7 @@ export function Hero() {
 			{/* Content */}
 			<div className='relative z-10 mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8'>
 				<AnimatedSection animation='fade-up'>
-					<div className='mb-4 inline-flex items-center gap-2 rounded-full bg-yellow-500/10 px-4 py-2 text-sm text-yellow-500'>
+					<div className='mb-4 mt-6 inline-flex items-center gap-2 rounded-full bg-yellow-500/10 px-4 py-2 text-sm text-yellow-500 sm:mt-0'>
 						<span className='inline-block h-2 w-2 animate-pulse rounded-full bg-yellow-500' />
 						Limited spots available for{' '}
 						{new Date().toLocaleDateString('en-US', { month: 'long' })}
@@ -164,8 +164,10 @@ export function Hero() {
 
 				<AnimatedSection animation='fade-up' delay={200}>
 					<p className='mx-auto mb-8 max-w-3xl text-xl text-white/70 md:text-2xl'>
-						Stop guessing. Start growing. Brooklyn-based marketing engineers helping indie
-						artists build real income from real fans—with complete transparency.
+						Stop guessing. Start growing.
+						<br />
+						Work with our Brooklyn-based marketing engineers to build real income from
+						real fans.
 					</p>
 					<div className='mb-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center'>
 						<div className='inline-flex items-center gap-2 rounded-full bg-purple-500/10 px-4 py-2 text-sm text-purple-300'>
