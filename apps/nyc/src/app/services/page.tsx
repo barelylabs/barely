@@ -59,7 +59,7 @@ export default function ServicesPage() {
 	return (
 		<main className='pt-16'>
 			{/* Page Header */}
-			<section className='px-4 py-24 sm:px-6 lg:px-8'>
+			<section className='px-4 py-12 sm:px-6 sm:py-16 md:py-20 lg:px-8 lg:py-24'>
 				<div className='mx-auto max-w-4xl text-center'>
 					<AnimatedSection animation='fade-up'>
 						<H size='1' className='mb-6 font-heading text-5xl md:text-6xl lg:text-7xl'>
@@ -74,7 +74,7 @@ export default function ServicesPage() {
 			</section>
 
 			{/* Pricing Cards */}
-			<section className='px-4 py-24 sm:px-6 lg:px-8'>
+			<section className='px-4 py-12 sm:px-6 sm:py-16 md:py-20 lg:px-8 lg:py-24'>
 				<div className='mx-auto max-w-6xl'>
 					<div className='grid grid-cols-1 gap-8 md:grid-cols-3'>
 						{bedroomPlusPlan && (
@@ -144,7 +144,7 @@ export default function ServicesPage() {
 			</section>
 
 			{/* Comparison Section */}
-			<section className='px-4 py-24 sm:px-6 lg:px-8'>
+			<section className='px-4 py-12 sm:px-6 sm:py-16 md:py-20 lg:px-8 lg:py-24'>
 				<div className='mx-auto max-w-4xl'>
 					<AnimatedSection animation='fade-up'>
 						<H size='2' className='mb-12 text-center text-3xl md:text-4xl'>
