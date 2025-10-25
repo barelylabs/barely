@@ -173,7 +173,7 @@ export default function CaseStudiesPage() {
 						</p>
 						<div className='flex flex-col justify-center gap-6 sm:flex-row'>
 							<Link href='/services' className='inline-block'>
-								<button className='rounded-full bg-gradient-to-r from-violet-600 to-pink-600 px-8 py-3 font-semibold text-white transition-all duration-300 hover:shadow-[0_0_40px_rgba(168,85,247,0.5)]'>
+								<button className='rounded-lg bg-gradient-to-r from-violet-600 to-pink-600 px-8 py-3 font-semibold text-white transition-all duration-300 hover:shadow-[0_0_40px_rgba(168,85,247,0.5)]'>
 									View Services
 								</button>
 							</Link>
@@ -183,7 +183,7 @@ export default function CaseStudiesPage() {
 								rel='noopener noreferrer'
 								className='inline-block'
 							>
-								<button className='rounded-full border-2 border-white/20 px-8 py-3 font-semibold text-white transition-all duration-300 hover:bg-white/10'>
+								<button className='rounded-lg border-2 border-white/20 px-8 py-3 font-semibold text-white transition-all duration-300 hover:bg-white/10'>
 									Book Free Strategy Call
 								</button>
 							</a>
