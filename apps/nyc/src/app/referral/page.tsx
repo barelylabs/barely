@@ -42,7 +42,7 @@ export default function ReferralPage() {
 
 					<div className='grid grid-cols-1 gap-8 md:grid-cols-3'>
 						<AnimatedSection animation='fade-up' delay={200}>
-							<div className='glass rounded-xl p-8 text-center'>
+							<div className='glass flex h-full flex-col rounded-xl p-8 text-center'>
 								<div className='mb-4 flex justify-center'>
 									<div className='flex h-16 w-16 items-center justify-center rounded-full bg-purple-500/20'>
 										<span className='text-3xl'>🤝</span>
@@ -58,7 +58,7 @@ export default function ReferralPage() {
 						</AnimatedSection>
 
 						<AnimatedSection animation='fade-up' delay={300}>
-							<div className='glass rounded-xl p-8 text-center'>
+							<div className='glass flex h-full flex-col rounded-xl p-8 text-center'>
 								<div className='mb-4 flex justify-center'>
 									<div className='flex h-16 w-16 items-center justify-center rounded-full bg-purple-500/20'>
 										<span className='text-3xl'>🚀</span>
@@ -74,7 +74,7 @@ export default function ReferralPage() {
 						</AnimatedSection>
 
 						<AnimatedSection animation='fade-up' delay={400}>
-							<div className='glass rounded-xl p-8 text-center'>
+							<div className='glass flex h-full flex-col rounded-xl p-8 text-center'>
 								<div className='mb-4 flex justify-center'>
 									<div className='flex h-16 w-16 items-center justify-center rounded-full bg-purple-500/20'>
 										<span className='text-3xl'>🎁</span>
@@ -84,7 +84,7 @@ export default function ReferralPage() {
 									3. You Get Rewarded
 								</H>
 								<p className='text-white/70'>
-									After their first payment clears, you get 1 month free
+									After their first payment clears, you get a credit matching their tier
 								</p>
 							</div>
 						</AnimatedSection>
