@@ -22,7 +22,8 @@ export function Hero() {
 
 		// Set canvas size
 		const resizeCanvas = () => {
-			canvas.width = window.innerWidth;
+			// Use documentElement.clientWidth to avoid scrollbar width issues on mobile
+			canvas.width = document.documentElement.clientWidth;
 			canvas.height = window.innerHeight;
 		};
 		resizeCanvas();

@@ -6,6 +6,19 @@
 
 /* Marketing-specific design tokens */
 @layer base {
+	/* Prevent horizontal scrolling on mobile */
+	html,
+	body {
+		overflow-x: hidden;
+		max-width: 100vw;
+		position: relative;
+	}
+
+	/* Ensure all elements respect viewport width */
+	* {
+		max-width: 100vw;
+		overflow-wrap: break-word;
+	}
 	:root {
 		/* Gradient definitions */
 		--gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);

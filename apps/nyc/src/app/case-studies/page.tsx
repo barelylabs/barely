@@ -171,9 +171,9 @@ export default function CaseStudiesPage() {
 							Join our artists who&apos;ve grown their audiences with transparent,
 							data-driven strategies.
 						</p>
-						<div className='flex flex-col justify-center gap-6 sm:flex-row'>
-							<Link href='/services' className='inline-block'>
-								<button className='rounded-lg bg-gradient-to-r from-violet-600 to-pink-600 px-8 py-3 font-semibold text-white transition-all duration-300 hover:shadow-[0_0_40px_rgba(168,85,247,0.5)]'>
+						<div className='flex flex-col justify-center gap-6 px-4 sm:flex-row sm:px-0'>
+							<Link href='/services' className='w-full sm:w-auto'>
+								<button className='w-full rounded-lg bg-gradient-to-r from-violet-600 to-pink-600 px-8 py-3 font-semibold text-white transition-all duration-300 hover:shadow-[0_0_40px_rgba(168,85,247,0.5)] sm:w-auto'>
 									View Services
 								</button>
 							</Link>
@@ -181,9 +181,9 @@ export default function CaseStudiesPage() {
 								href='https://app.usemotion.com/meet/barely/discovery'
 								target='_blank'
 								rel='noopener noreferrer'
-								className='inline-block'
+								className='w-full sm:w-auto'
 							>
-								<button className='rounded-lg border-2 border-white/20 px-8 py-3 font-semibold text-white transition-all duration-300 hover:bg-white/10'>
+								<button className='w-full rounded-lg border-2 border-white/20 px-8 py-3 font-semibold text-white transition-all duration-300 hover:bg-white/10 sm:w-auto'>
 									Book Free Strategy Call
 								</button>
 							</a>
