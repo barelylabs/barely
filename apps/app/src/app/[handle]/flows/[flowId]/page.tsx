@@ -1,10 +1,8 @@
 import { Suspense } from 'react';
 
 import { DashContent } from '~/app/[handle]/_components/dash-content';
-import { FlowBuilder } from '~/app/[handle]/flows/[flowId]/_components/flow-builder';
-import { FlowStoreProvider } from '~/app/[handle]/flows/[flowId]/_components/flow-store';
-import { FlowUpdateForm } from '~/app/[handle]/flows/[flowId]/_components/flow-update-form';
 import { HydrateClient, trpcCaller } from '~/trpc/server';
+import { FlowPage } from './flow-page';
 
 export default async function FlowsPage({
 	params,
@@ -31,19 +29,12 @@ export default async function FlowsPage({
 		<DashContent>
 			<HydrateClient>
 				<Suspense fallback={<div>Loading...</div>}>
-					<FlowStoreProvider
+					<FlowPage
 						initialFlow={initialFlow}
 						defaultEmailAddress={defaultEmailAddress}
-						initialDefaultMailchimpAudienceId={defaultMailchimpAudienceId}
-						initialDefaultEmailTemplateGroup={defaultEmailTemplateGroup}
-					>
-						<div className='flex flex-col gap-8 xl:flex-row'>
-							<FlowUpdateForm initialFlow={initialFlow} />
-							<div className='flex w-full items-center justify-center rounded-xl border border-border bg-border/25 p-10'>
-								<FlowBuilder />
-							</div>
-						</div>
-					</FlowStoreProvider>
+						defaultMailchimpAudienceId={defaultMailchimpAudienceId}
+						defaultEmailTemplateGroup={defaultEmailTemplateGroup}
+					/>
 				</Suspense>
 			</HydrateClient>
 		</DashContent>
