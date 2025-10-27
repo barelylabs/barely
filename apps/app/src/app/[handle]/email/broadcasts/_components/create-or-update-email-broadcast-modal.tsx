@@ -362,17 +362,13 @@ export function CreateOrUpdateEmailBroadcastModal({
 								<Button
 									disabled={submitDisabledExisting}
 									look='secondary'
-									onClick={existingTemplateForm.handleSubmit(() =>
-										handleSaveDraftExisting(existingTemplateForm.getValues()),
-									)}
+									onClick={existingTemplateForm.handleSubmit(handleSaveDraftExisting)}
 								>
 									Save Draft
 								</Button>
 
 								<Button
-									onClick={existingTemplateForm.handleSubmit(() =>
-										handleScheduleExisting(existingTemplateForm.getValues()),
-									)}
+									onClick={existingTemplateForm.handleSubmit(handleScheduleExisting)}
 									endIcon={
 										existingTemplateForm.watch('scheduledAt') ? 'calendar' : 'send'
 									}
@@ -594,9 +590,7 @@ export function CreateOrUpdateEmailBroadcastModal({
 						onClick={
 							activeTab === 'create-new' ?
 								createNewForm.handleSubmit(handleSaveDraftNew)
-							:	existingTemplateForm.handleSubmit(() =>
-									handleSaveDraftExisting(existingTemplateForm.getValues()),
-								)
+							:	existingTemplateForm.handleSubmit(handleSaveDraftExisting)
 						}
 					>
 						Save Draft
@@ -611,9 +605,7 @@ export function CreateOrUpdateEmailBroadcastModal({
 						onClick={
 							activeTab === 'create-new' ?
 								createNewForm.handleSubmit(handleScheduleNew)
-							:	existingTemplateForm.handleSubmit(() =>
-									handleScheduleExisting(existingTemplateForm.getValues()),
-								)
+							:	existingTemplateForm.handleSubmit(handleScheduleExisting)
 						}
 						endIcon={
 							(
@@ -625,7 +617,13 @@ export function CreateOrUpdateEmailBroadcastModal({
 							:	'send'
 						}
 					>
-						{existingTemplateForm.watch('scheduledAt') ? 'Schedule' : 'Send Now'}
+						{(
+							activeTab === 'create-new' ?
+								createNewForm.watch('scheduledAt')
+							:	existingTemplateForm.watch('scheduledAt')
+						) ?
+							'Schedule'
+						:	'Send Now'}
 					</Button>
 				</div>
 			</ModalFooter>
