@@ -344,6 +344,10 @@ export const theNowCase: CaseStudy = {
 	summary:
 		'South Wales alt-rock band achieved 1,360% listener growth and built sustainable revenue through free CD campaigns and strategic Meta advertising, expanding from regional to UK-wide fanbase.',
 	featured: true,
+	merchRevenue: {
+		before: 0,
+		after: 234, // First month of CD/merch campaigns
+	},
 	socials: {
 		instagram: 'https://www.instagram.com/thenowuk/',
 		spotify: 'https://open.spotify.com/artist/6Cd7IpKrJhEJOJnLG7VsIU',
