@@ -340,6 +340,10 @@ export const theNowCase: CaseStudy = {
 		author: 'The Now', // CLIENT: Should this be attributed to a specific band member or just "The Now"?
 	},
 
+	merchRevenue: {
+		before: 16,
+		after: 1059,
+	},
 	// DRAFT SUMMARY - client should review
 	summary:
 		'South Wales alt-rock band achieved 1,360% listener growth and built sustainable revenue through free CD campaigns and strategic Meta advertising, expanding from regional to UK-wide fanbase.',
