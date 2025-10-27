@@ -89,13 +89,9 @@ export default function AboutPage() {
 								Adam applied his engineering training to marketing{' '}
 								{properYouthCase.artistName}
 								&apos;s debut album &quot;So Close to Paradise.&quot; The hit single
-								&quot;Off My Mind&quot; went on to gain{' '}
-								{properYouthCase.featuredHighlights?.notableAchievement
-									?.split(' ')
-									.slice(-4)
-									.join(' ')}{' '}
-								- not because the music suddenly got better, but because he finally
-								understood how to optimize the system around it.
+								&quot;Off My Mind&quot; went on to gain 1.8M streams - not because the
+								music suddenly got better, but because he finally understood how to
+								optimize the system around it.
 							</p>
 							<p className='text-lg leading-relaxed text-white/80'>
 								Word spread. Every artist who reached out had been burned by the same
