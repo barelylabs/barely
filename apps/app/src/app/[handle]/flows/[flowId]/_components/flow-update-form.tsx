@@ -12,6 +12,7 @@ import {
 import { formatDate, raise } from '@barely/utils';
 import { updateFlowAndNodesSchema } from '@barely/validators';
 import { useMutation, useQuery, useSuspenseQuery } from '@tanstack/react-query';
+import { useNavigationGuard } from 'next-navigation-guard';
 import { toast } from 'sonner';
 import { useShallow } from 'zustand/react/shallow';
 
@@ -145,6 +146,14 @@ export function FlowUpdateForm(props: {
 		}),
 	);
 	const [testPopoverOpen, setTestPopoverOpen] = useState(false);
+
+	// Set up navigation guard for unsaved changes
+	useNavigationGuard({
+		enabled: isFormDirty,
+		confirm: () => {
+			return window.confirm('You have unsaved changes. Are you sure you want to leave?');
+		},
+	});
 
 	const handleTriggerTestFlow = (data: z.infer<typeof updateFlowAndNodesSchema>) => {
 		if (!data.testFanId) return toast('Please select a fan');

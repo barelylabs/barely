@@ -224,12 +224,14 @@ export const FlowStoreProvider = ({
 				set({
 					nodes: applyNodeChanges(changes, get().nodes),
 				});
+				get().saveSnapshot();
 			},
 
 			onEdgesChange: changes => {
 				set({
 					edges: applyEdgeChanges(changes, get().edges),
 				});
+				get().saveSnapshot();
 			},
 
 			onSelectionChange: (selection: { nodes: Node[]; edges: Edge[] }) => {
@@ -341,15 +343,17 @@ export const FlowStoreProvider = ({
 								console.log('newNodes', newNodes);
 								console.log('filteredEdges', filteredEdges);
 								console.log('createdEdge', createdEdge);
-								return set({
+								set({
 									nodes: [...newNodes],
 									edges: [...filteredEdges, createdEdge],
 								});
+								get().saveSnapshot();
+								return;
 							} else return;
 						}
 
 						console.log('edgeAboveEmpty', edgeAboveEmptyTarget);
-						return set({
+						set({
 							nodes: prevNodes.filter(node => node.id !== sourceNode.id),
 							edges: prevEdges.map(edge => {
 								if (edge.id === edgeAboveEmptyTarget.id) {
@@ -361,12 +365,15 @@ export const FlowStoreProvider = ({
 								return edge;
 							}),
 						});
+						get().saveSnapshot();
+						return;
 					}
 				}
 
 				set({
 					edges: addEdge(connection, get().edges),
 				});
+				get().saveSnapshot();
 			},
 
 			setCurrentNode: (id: string) => {
@@ -545,6 +552,7 @@ export const FlowStoreProvider = ({
 				});
 
 				set({ nodes: updatedNodes });
+				get().saveSnapshot();
 			},
 
 			updateWaitNode: (id: string, data: WaitNode['data']) => {
@@ -570,6 +578,7 @@ export const FlowStoreProvider = ({
 				});
 
 				set({ nodes: updatedNodes });
+				get().saveSnapshot();
 			},
 
 			updateSendEmailNode: (id: string, data: SendEmailNode['data']) => {
@@ -594,7 +603,8 @@ export const FlowStoreProvider = ({
 					return node;
 				});
 
-				return set({ nodes: updatedNodes });
+				set({ nodes: updatedNodes });
+				get().saveSnapshot();
 			},
 
 			updateSendEmailFromTemplateGroupNode: (
@@ -623,7 +633,8 @@ export const FlowStoreProvider = ({
 					return node;
 				});
 
-				return set({ nodes: updatedNodes });
+				set({ nodes: updatedNodes });
+				get().saveSnapshot();
 			},
 
 			updateBooleanNode: (id: string, data: BooleanNode['data']) => {
@@ -646,7 +657,8 @@ export const FlowStoreProvider = ({
 					}
 					return node;
 				});
-				return set({ nodes: updatedNodes });
+				set({ nodes: updatedNodes });
+				get().saveSnapshot();
 			},
 
 			updateAddToMailchimpAudienceNode: (
@@ -674,7 +686,8 @@ export const FlowStoreProvider = ({
 					return node;
 				});
 
-				return set({ nodes: updatedNodes });
+				set({ nodes: updatedNodes });
+				get().saveSnapshot();
 			},
 
 			// insert in between nodes
@@ -829,6 +842,7 @@ export const FlowStoreProvider = ({
 				});
 
 				set({ nodes: updatedNodes });
+				get().saveSnapshot();
 			},
 
 			//layout
