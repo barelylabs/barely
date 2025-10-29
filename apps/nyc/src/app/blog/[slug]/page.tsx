@@ -145,7 +145,7 @@ export default async function BlogPostPage({
 								</MarketingButton>
 							</Link>
 							<a
-								href='https://app.usemotion.com/meet/barely/discovery'
+								href='https://cal.com/barely/nyc'
 								target='_blank'
 								rel='noopener noreferrer'
 							>

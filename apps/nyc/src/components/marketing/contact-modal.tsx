@@ -192,7 +192,7 @@ export function ContactModal({
 								Or book a free strategy call:
 							</p>
 							<a
-								href='https://app.usemotion.com/meet/barely/discovery'
+								href='https://cal.com/barely/nyc'
 								target='_blank'
 								rel='noopener noreferrer'
 								className='block'
