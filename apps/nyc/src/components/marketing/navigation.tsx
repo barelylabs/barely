@@ -62,7 +62,7 @@ export function Navigation() {
 							))}
 
 							<a
-								href='https://app.usemotion.com/meet/barely/discovery'
+								href='https://cal.com/barely/nyc'
 								target='_blank'
 								rel='noopener noreferrer'
 							>
@@ -145,7 +145,7 @@ export function Navigation() {
 
 					<div className='mt-auto space-y-4'>
 						<a
-							href='https://app.usemotion.com/meet/barely/discovery'
+							href='https://cal.com/barely/nyc'
 							target='_blank'
 							rel='noopener noreferrer'
 							className='block'
