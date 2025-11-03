@@ -133,8 +133,8 @@ export function getCurrentAppVariant(): AppVariant {
 export function getCurrentAppConfig(): AppVariantConfig {
 	const variant = getCurrentAppVariant();
 
-	// Default to full app if no variant specified
-	if (!variant || !(variant in APP_VARIANT_CONFIGS)) {
+	// Validate variant exists in configs
+	if (!(variant in APP_VARIANT_CONFIGS)) {
 		const appConfig = APP_VARIANT_CONFIGS.app;
 		if (!appConfig) {
 			throw new Error('Default app configuration not found');
