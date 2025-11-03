@@ -549,3 +549,39 @@ Each app needs a unique port:
 This checklist should prevent the common issues encountered during VIP app setup and significantly speed up future app creation.
 - if adding a new package, always make sure to run 'pnpm install' before pushing any changes to origin. otherwise, the pnpm-lock.yaml will be off
 - whenever you create a new branch from main, unless specifically instructed differently, you should make sure you're using the most up-to-date version of main, pulling from the origin.
+
+## Git Worktree Management
+
+### Creating New Worktrees - MANDATORY PATTERN
+
+**ALWAYS follow this exact pattern when creating worktrees:**
+
+```bash
+# Step 1: Navigate to git root
+cd /Users/barely/hub/.repos/barely
+
+# Step 2: Verify location
+pwd  # Must show: /Users/barely/hub/.repos/barely
+
+# Step 3: Create worktree in worktrees/ subdirectory
+git worktree add worktrees/[branch-name] -b [branch-name]
+
+# Example:
+git worktree add worktrees/feature/new-feature -b feature/new-feature
+```
+
+### Critical Rules
+
+- **NEVER use relative paths like `.repos/` when creating worktrees** - this will create nested directories in the wrong location
+- All worktrees MUST be in `/Users/barely/hub/.repos/barely/worktrees/`
+- Use the pattern: `worktrees/[descriptive-name]`
+- Always run `pwd` to verify you're in `/Users/barely/hub/.repos/barely` before creating worktrees
+- Check existing worktrees with `git worktree list` to see the established pattern
+
+### Why This Matters
+
+If you use a relative path from the wrong directory (e.g., from `/Users/barely/hub/`), you'll create:
+- ❌ `/Users/barely/hub/.repos/barely/.repos/barely-[name]` (WRONG - nested in git repo)
+
+Instead of:
+- ✅ `/Users/barely/hub/.repos/barely/worktrees/[name]` (CORRECT - in worktrees subdirectory)
