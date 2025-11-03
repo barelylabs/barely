@@ -1,7 +1,6 @@
 'use client';
 
 import type { PlaylistQualifier } from '@barely/validators';
-import type { Metadata } from 'next';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useZodForm } from '@barely/hooks';

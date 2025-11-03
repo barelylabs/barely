@@ -1,7 +1,6 @@
 'use client';
 
 import type { PlaylistSubmission } from '@barely/validators';
-import type { Metadata } from 'next';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useZodForm } from '@barely/hooks';
@@ -12,7 +11,6 @@ import { TextField } from '@barely/ui/forms/text-field';
 import { H } from '@barely/ui/typography';
 
 import { AnimatedSection } from '../../components/marketing/animated-section';
-import { MarketingButton } from '../../components/marketing/button';
 import { SecurityBadge } from '../../components/marketing/trust-badges';
 
 export default function SubmitToBarelyIndiePage() {
