@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { H } from '@barely/ui/typography';
 import { Icon } from '@barely/ui/icon';
+import { H } from '@barely/ui/typography';
 
 import { AnimatedSection } from '../../../components/marketing/animated-section';
 import { MarketingButton } from '../../../components/marketing/button';
@@ -70,9 +70,7 @@ export default function ThankYouPage() {
 										<Icon.email className='h-4 w-4 text-purple-400' />
 									</div>
 									<div>
-										<h3 className='mb-1 font-semibold text-white'>
-											Check your email
-										</h3>
+										<h3 className='mb-1 font-semibold text-white'>Check your email</h3>
 										<p className='text-sm text-white/60'>
 											Confirmation sent to your inbox (check spam if you don't see it)
 										</p>
@@ -107,9 +105,7 @@ export default function ThankYouPage() {
 							>
 								<div className='mb-4 flex items-start justify-between'>
 									<div>
-										<h3 className='mb-1 text-xl font-bold text-white'>
-											Proper Youth
-										</h3>
+										<h3 className='mb-1 text-xl font-bold text-white'>Proper Youth</h3>
 										<p className='text-sm text-white/60'>Alt Rock • Brooklyn</p>
 									</div>
 									<Icon.arrowRight className='h-5 w-5 text-white/40 transition-transform group-hover:translate-x-1' />
@@ -129,9 +125,7 @@ export default function ThankYouPage() {
 									</div>
 									<div className='flex items-center gap-2'>
 										<Icon.users className='h-4 w-4 text-green-500' />
-										<span className='text-sm text-white/80'>
-											Built 1000+ email list
-										</span>
+										<span className='text-sm text-white/80'>Built 1000+ email list</span>
 									</div>
 								</div>
 								<p className='text-sm text-white/60'>
@@ -150,9 +144,7 @@ export default function ThankYouPage() {
 								<div className='mb-4 flex items-start justify-between'>
 									<div>
 										<h3 className='mb-1 text-xl font-bold text-white'>The Now</h3>
-										<p className='text-sm text-white/60'>
-											Indie Rock • Cleveland
-										</p>
+										<p className='text-sm text-white/60'>Indie Rock • Cleveland</p>
 									</div>
 									<Icon.arrowRight className='h-5 w-5 text-white/40 transition-transform group-hover:translate-x-1' />
 								</div>
@@ -171,9 +163,7 @@ export default function ThankYouPage() {
 									</div>
 									<div className='flex items-center gap-2'>
 										<Icon.spotify className='h-4 w-4 text-green-500' />
-										<span className='text-sm text-white/80'>
-											+750 Spotify followers
-										</span>
+										<span className='text-sm text-white/80'>+750 Spotify followers</span>
 									</div>
 								</div>
 								<p className='text-sm text-white/60'>
@@ -195,8 +185,8 @@ export default function ThankYouPage() {
 								Ready to Grow Like This?
 							</H>
 							<p className='mb-8 text-lg text-white/70'>
-								We help indie artists scale from hundreds to thousands of monthly listeners
-								using transparent, data-driven campaigns.
+								We help indie artists scale from hundreds to thousands of monthly
+								listeners using transparent, data-driven campaigns.
 							</p>
 							<div className='flex flex-col justify-center gap-4 sm:flex-row'>
 								<Link href='/submit-to-barely-indie/qualifier'>

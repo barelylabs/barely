@@ -19,7 +19,9 @@ export async function POST(request: Request) {
 		const { success: ipSuccess } = await ipRateLimit.limit(ip);
 
 		if (!ipSuccess) {
-			return new Response('Too many requests from this IP', { status: 429 });
+			const response = new Response('Too many requests from this IP', { status: 429 });
+			setCorsHeaders(response);
+			return response;
 		}
 
 		// Rate limit by email (5 requests per week)

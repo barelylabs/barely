@@ -1,18 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import type { PlaylistQualifier } from '@barely/validators';
 import type { Metadata } from 'next';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useZodForm } from '@barely/hooks';
 import { playlistQualifierSchema } from '@barely/validators';
-import type { PlaylistQualifier } from '@barely/validators';
 
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { TextAreaField } from '@barely/ui/forms/text-area-field';
 import { TextField } from '@barely/ui/forms/text-field';
-import { H } from '@barely/ui/typography';
 import { Icon } from '@barely/ui/icon';
+import { H } from '@barely/ui/typography';
 
 import { AnimatedSection } from '../../../components/marketing/animated-section';
 import { MarketingButton } from '../../../components/marketing/button';
@@ -213,9 +213,7 @@ export default function QualifierPage() {
 														1
 													</div>
 													<p>
-														<strong className='text-white'>
-															We review your info
-														</strong>{' '}
+														<strong className='text-white'>We review your info</strong>{' '}
 														and check out your current metrics
 													</p>
 												</div>
@@ -224,10 +222,8 @@ export default function QualifierPage() {
 														2
 													</div>
 													<p>
-														<strong className='text-white'>
-															Free 15-min call
-														</strong>{' '}
-														to understand your goals and challenges
+														<strong className='text-white'>Free 15-min call</strong> to
+														understand your goals and challenges
 													</p>
 												</div>
 												<div className='flex gap-3'>
@@ -235,9 +231,7 @@ export default function QualifierPage() {
 														3
 													</div>
 													<p>
-														<strong className='text-white'>
-															Custom growth plan
-														</strong>{' '}
+														<strong className='text-white'>Custom growth plan</strong>{' '}
 														with realistic timeline and budget breakdown
 													</p>
 												</div>

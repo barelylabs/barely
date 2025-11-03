@@ -5,7 +5,9 @@ const spotifyTrackUrlPattern =
 	/^https:\/\/open\.spotify\.com\/track\/[a-zA-Z0-9]{22}(\?.*)?$/;
 
 // Instagram handle pattern (with or without @)
-const instagramHandlePattern = /^@?[\w](?:\.?[\w])*$/;
+// Allows 1-30 chars, alphanumeric + underscores + periods
+// Cannot start/end with period, cannot have consecutive periods
+const instagramHandlePattern = /^@?[a-zA-Z0-9_](?:[a-zA-Z0-9._]{0,28}[a-zA-Z0-9_])?$/;
 
 /**
  * Schema for playlist submission form
@@ -27,7 +29,8 @@ export const playlistSubmissionSchema = z.object({
 		.regex(
 			instagramHandlePattern,
 			'Invalid Instagram handle. Use format: @username or username',
-		),
+		)
+		.transform(val => (val.startsWith('@') ? val : `@${val}`)),
 });
 
 /**
