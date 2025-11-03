@@ -6,6 +6,8 @@ import { H } from '@barely/ui/typography';
 
 import { AnimatedSection } from '../../../components/marketing/animated-section';
 import { MarketingButton } from '../../../components/marketing/button';
+import { CaseStudyCard } from '../../../components/marketing/case-study-card';
+import { GoalsButton } from './goals-button';
 
 export const metadata: Metadata = {
 	title: 'Submission Received | @barely.indie Playlist',
@@ -99,78 +101,31 @@ export default function ThankYouPage() {
 					<div className='grid gap-8 md:grid-cols-2'>
 						{/* Case Study 1: Proper Youth */}
 						<AnimatedSection animation='fade-up' delay={200}>
-							<Link
-								href='/case-studies/proper-youth'
-								className='glass group block h-full rounded-xl p-6 transition-all hover:scale-[1.02] hover:shadow-2xl'
-							>
-								<div className='mb-4 flex items-start justify-between'>
-									<div>
-										<h3 className='mb-1 text-xl font-bold text-white'>Proper Youth</h3>
-										<p className='text-sm text-white/60'>Alt Rock • Brooklyn</p>
-									</div>
-									<Icon.arrowRight className='h-5 w-5 text-white/40 transition-transform group-hover:translate-x-1' />
-								</div>
-								<div className='mb-4 space-y-2'>
-									<div className='flex items-center gap-2'>
-										<Icon.arrowUp className='h-4 w-4 text-green-500' />
-										<span className='text-sm text-white/80'>
-											100 → 15k monthly listeners
-										</span>
-									</div>
-									<div className='flex items-center gap-2'>
-										<Icon.dollar className='h-4 w-4 text-green-500' />
-										<span className='text-sm text-white/80'>
-											$0 → $3k-4k monthly revenue
-										</span>
-									</div>
-									<div className='flex items-center gap-2'>
-										<Icon.users className='h-4 w-4 text-green-500' />
-										<span className='text-sm text-white/80'>Built 1000+ email list</span>
-									</div>
-								</div>
-								<p className='text-sm text-white/60'>
-									Started with 100 monthly listeners. Now generates consistent revenue
-									through merch, tickets, and streams.
-								</p>
-							</Link>
+							<CaseStudyCard
+								artistName='Proper Youth'
+								genre='Alt Rock • Brooklyn'
+								serviceTier='Rising Artist'
+								beforeListeners={100}
+								afterListeners={15000}
+								growthPercentage={14900}
+								timeframe='18 months'
+								summary='Started with 100 monthly listeners. Now generates consistent revenue through merch, tickets, and streams.'
+								merchRevenue={{ before: 0, after: 3500 }}
+							/>
 						</AnimatedSection>
 
 						{/* Case Study 2: The Now */}
 						<AnimatedSection animation='fade-up' delay={400}>
-							<Link
-								href='/case-studies/the-now'
-								className='glass group block h-full rounded-xl p-6 transition-all hover:scale-[1.02] hover:shadow-2xl'
-							>
-								<div className='mb-4 flex items-start justify-between'>
-									<div>
-										<h3 className='mb-1 text-xl font-bold text-white'>The Now</h3>
-										<p className='text-sm text-white/60'>Indie Rock • Cleveland</p>
-									</div>
-									<Icon.arrowRight className='h-5 w-5 text-white/40 transition-transform group-hover:translate-x-1' />
-								</div>
-								<div className='mb-4 space-y-2'>
-									<div className='flex items-center gap-2'>
-										<Icon.arrowUp className='h-4 w-4 text-green-500' />
-										<span className='text-sm text-white/80'>
-											3k → 20k monthly listeners
-										</span>
-									</div>
-									<div className='flex items-center gap-2'>
-										<Icon.music className='h-4 w-4 text-green-500' />
-										<span className='text-sm text-white/80'>
-											1.2M total streams in 9 months
-										</span>
-									</div>
-									<div className='flex items-center gap-2'>
-										<Icon.spotify className='h-4 w-4 text-green-500' />
-										<span className='text-sm text-white/80'>+750 Spotify followers</span>
-									</div>
-								</div>
-								<p className='text-sm text-white/60'>
-									Scaled from regional following to national reach through data-driven
-									campaigns.
-								</p>
-							</Link>
+							<CaseStudyCard
+								artistName='The Now'
+								genre='Indie Rock • Cleveland'
+								serviceTier='Breakout Artist'
+								beforeListeners={3000}
+								afterListeners={20000}
+								growthPercentage={567}
+								timeframe='9 months'
+								summary='Scaled from regional following to national reach through data-driven campaigns.'
+							/>
 						</AnimatedSection>
 					</div>
 				</div>
@@ -189,15 +144,7 @@ export default function ThankYouPage() {
 								listeners using transparent, data-driven campaigns.
 							</p>
 							<div className='flex flex-col justify-center gap-4 sm:flex-row'>
-								<Link href='/submit/qualifier'>
-									<MarketingButton
-										marketingLook='hero-primary'
-										size='lg'
-										className='min-w-[200px]'
-									>
-										Tell Us Your Goals
-									</MarketingButton>
-								</Link>
+								<GoalsButton />
 								<Link href='/case-studies'>
 									<MarketingButton
 										marketingLook='scientific'
