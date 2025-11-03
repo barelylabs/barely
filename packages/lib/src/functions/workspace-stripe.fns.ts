@@ -2,7 +2,11 @@ import type { PlanType } from '@barely/const';
 import type { InsertTransactionLineItem, Transaction } from '@barely/validators/schemas';
 import type Stripe from 'stripe';
 import { NextResponse } from 'next/server';
-import { WORKSPACE_PLAN_TYPES, WORKSPACE_PLANS } from '@barely/const';
+import {
+	getCurrentAppVariant,
+	WORKSPACE_PLAN_TYPES,
+	WORKSPACE_PLANS,
+} from '@barely/const';
 import { dbHttp } from '@barely/db/client';
 import {
 	Campaigns,
@@ -370,7 +374,7 @@ export async function createUpgradeUrl(props: {
 			const portalSession = await stripe.billingPortal.sessions.create({
 				customer: stripeCustomerId,
 				return_url: getAbsoluteUrl(
-					'app',
+					getCurrentAppVariant(),
 					`${workspace.handle}/settings/billing?upgraded=true`,
 				),
 				flow_data: {
@@ -389,7 +393,7 @@ export async function createUpgradeUrl(props: {
 						type: 'redirect',
 						redirect: {
 							return_url: getAbsoluteUrl(
-								'app',
+								getCurrentAppVariant(),
 								`${workspace.handle}/settings/billing?upgraded=true`,
 							),
 						},
@@ -431,10 +435,13 @@ export async function createUpgradeUrl(props: {
 		customer: finalStripeCustomerId,
 		mode: 'subscription',
 		success_url: getAbsoluteUrl(
-			'app',
+			getCurrentAppVariant(),
 			`${workspace.handle}/settings/billing?upgraded=true`,
 		),
-		cancel_url: getAbsoluteUrl('app', `${workspace.handle}/settings/billing/upgrade`),
+		cancel_url: getAbsoluteUrl(
+			getCurrentAppVariant(),
+			`${workspace.handle}/settings/billing/upgrade`,
+		),
 		payment_method_types: ['card'],
 		line_items: [
 			{

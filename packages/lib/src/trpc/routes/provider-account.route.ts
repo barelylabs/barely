@@ -2,7 +2,7 @@ import type { TRPCRouterRecord } from '@trpc/server';
 import { dbHttp } from '@barely/db/client';
 import { ProviderAccounts } from '@barely/db/sql/provider-account.sql';
 import { sqlAnd } from '@barely/db/utils';
-import { getAbsoluteUrl } from '@barely/utils';
+import { getAbsoluteUrl, getCurrentAppVariant } from '@barely/utils';
 import { insertProviderAccountSchema } from '@barely/validators';
 import { and, eq, inArray } from 'drizzle-orm';
 import { z } from 'zod/v4';
@@ -83,7 +83,10 @@ export const providerAccountRoute = {
 
 			const state = {
 				workspaceId: ctx.workspace.id,
-				redirectUrl: getAbsoluteUrl('app', `${ctx.workspace.handle}/settings/apps`),
+				redirectUrl: getAbsoluteUrl(
+					getCurrentAppVariant(),
+					`${ctx.workspace.handle}/settings/apps`,
+				),
 			};
 
 			const base64EncodedState = Buffer.from(JSON.stringify(state)).toString('base64');
@@ -96,7 +99,7 @@ export const providerAccountRoute = {
 				mailchimpAuthorization.searchParams.set('client_id', libEnv.MAILCHIMP_CLIENT_ID);
 				mailchimpAuthorization.searchParams.set(
 					'redirect_uri',
-					getAbsoluteUrl('app', `api/apps/callback/mailchimp`),
+					getAbsoluteUrl(getCurrentAppVariant(), `api/apps/callback/mailchimp`),
 				);
 				mailchimpAuthorization.searchParams.set('state', base64EncodedState);
 				return mailchimpAuthorization.toString();
@@ -106,11 +109,14 @@ export const providerAccountRoute = {
 				const spotifyAuthorization = new URL('https://accounts.spotify.com/authorize');
 				spotifyAuthorization.searchParams.set('client_id', libEnv.SPOTIFY_CLIENT_ID);
 				spotifyAuthorization.searchParams.set('response_type', 'code');
-				const redirectUri = getAbsoluteUrl('app', `api/apps/callback/spotify`);
+				const redirectUri = getAbsoluteUrl(
+					getCurrentAppVariant(),
+					`api/apps/callback/spotify`,
+				);
 				console.log('redirectUri', redirectUri);
 				spotifyAuthorization.searchParams.set(
 					'redirect_uri',
-					getAbsoluteUrl('app', `api/apps/callback/spotify`),
+					getAbsoluteUrl(getCurrentAppVariant(), `api/apps/callback/spotify`),
 				);
 				spotifyAuthorization.searchParams.set('state', base64EncodedState);
 				spotifyAuthorization.searchParams.set(

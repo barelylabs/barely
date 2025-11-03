@@ -1,7 +1,7 @@
 import type { TRPCRouterRecord } from '@trpc/server';
 import { dbHttp } from '@barely/db/client';
 import { Workspaces } from '@barely/db/sql/workspace.sql';
-import { getAbsoluteUrl } from '@barely/utils';
+import { getAbsoluteUrl, getCurrentAppVariant } from '@barely/utils';
 import { TRPCError } from '@trpc/server';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod/v4';
@@ -199,10 +199,10 @@ export const stripeConnectRoute = {
 			const accountLink = await stripe.accountLinks.create({
 				account: stripeConnectAccountId,
 				refresh_url: getAbsoluteUrl(
-					'app',
+					getCurrentAppVariant(),
 					input.callbackPath + '?refreshOnboarding=true',
 				),
-				return_url: getAbsoluteUrl('app', input.callbackPath),
+				return_url: getAbsoluteUrl(getCurrentAppVariant(), input.callbackPath),
 				type: 'account_onboarding',
 			});
 
