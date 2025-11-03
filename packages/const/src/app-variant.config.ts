@@ -1,6 +1,8 @@
 import { APPS } from './app.constants';
 
-export type AppVariant = (typeof APPS)[number];
+export type App = (typeof APPS)[number];
+
+export type AppVariant = (typeof APPS)[number] & `app${string}`;
 
 export interface AppVariantConfig {
 	name: AppVariant;
@@ -105,7 +107,7 @@ function isAppVariant(value: string | undefined): value is AppVariant {
 	if (!value) return false;
 	// Iterate to avoid type casting with .includes()
 	for (const app of APPS) {
-		if (app === value) return true;
+		if (app === value && app.startsWith('app')) return true;
 	}
 	return false;
 }
@@ -113,13 +115,16 @@ function isAppVariant(value: string | undefined): value is AppVariant {
 /**
  * Get the current app variant from environment
  */
-export function getCurrentAppVariant(): AppVariant | undefined {
+export function getCurrentAppVariant(): AppVariant {
 	// Both server and client can read from process.env in Next.js
 	// NEXT_PUBLIC_ variables are injected at build time
 	const envValue = process.env.NEXT_PUBLIC_CURRENT_APP;
 
 	// Validate and return if it's a valid AppVariant
-	return isAppVariant(envValue) ? envValue : undefined;
+	if (isAppVariant(envValue)) {
+		return envValue;
+	}
+	throw new Error(`Invalid app variant: ${envValue}`);
 }
 
 /**
@@ -128,8 +133,8 @@ export function getCurrentAppVariant(): AppVariant | undefined {
 export function getCurrentAppConfig(): AppVariantConfig {
 	const variant = getCurrentAppVariant();
 
-	// Default to full app if no variant specified
-	if (!variant || !(variant in APP_VARIANT_CONFIGS)) {
+	// Validate variant exists in configs
+	if (!(variant in APP_VARIANT_CONFIGS)) {
 		const appConfig = APP_VARIANT_CONFIGS.app;
 		if (!appConfig) {
 			throw new Error('Default app configuration not found');
