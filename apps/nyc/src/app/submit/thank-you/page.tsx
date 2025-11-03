@@ -189,7 +189,7 @@ export default function ThankYouPage() {
 								listeners using transparent, data-driven campaigns.
 							</p>
 							<div className='flex flex-col justify-center gap-4 sm:flex-row'>
-								<Link href='/submit-to-barely-indie/qualifier'>
+								<Link href='/submit/qualifier'>
 									<MarketingButton
 										marketingLook='hero-primary'
 										size='lg'

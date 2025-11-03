@@ -79,7 +79,7 @@ export function PlaylistSubmissionEmail({
 					>
 						<Text style={styles.mutedText}>
 							This email was sent from the @barely.indie playlist submission form at
-							barely.nyc/submit-to-barely-indie
+							barely.nyc/submit
 						</Text>
 					</Section>
 				</Container>

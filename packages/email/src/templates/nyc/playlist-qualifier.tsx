@@ -118,7 +118,7 @@ export function PlaylistQualifierEmail({
 					>
 						<Text style={styles.mutedText}>
 							This email was sent from the playlist qualifier form at
-							barely.nyc/submit-to-barely-indie/qualifier
+							barely.nyc/submit/qualifier
 						</Text>
 					</Section>
 				</Container>

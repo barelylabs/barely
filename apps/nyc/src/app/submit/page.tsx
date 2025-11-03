@@ -45,7 +45,7 @@ export default function SubmitToBarelyIndiePage() {
 			}
 
 			// Redirect to thank you page on success
-			router.push('/submit-to-barely-indie/thank-you');
+			router.push('/submit/thank-you');
 		} catch (error) {
 			console.error('Form submission error:', error);
 			setSubmitError(error instanceof Error ? error.message : 'Failed to submit');
