@@ -6,6 +6,8 @@ import { H } from '@barely/ui/typography';
 
 import { AnimatedSection } from '../../../components/marketing/animated-section';
 import { MarketingButton } from '../../../components/marketing/button';
+import { CaseStudyCard } from '../../../components/marketing/case-study-card';
+import { allCaseStudies } from '../../../data/case-studies';
 
 export const metadata: Metadata = {
 	title: 'Submission Received | @barely.indie Playlist',
@@ -41,11 +43,16 @@ export default function ThankYouPage() {
 								While You Wait...
 							</H>
 							<div className='space-y-4'>
-								<div className='flex gap-4'>
-									<div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-500/20'>
+								<a
+									href='https://www.instagram.com/barely.indie/'
+									target='_blank'
+									rel='noopener noreferrer'
+									className='group flex gap-4 rounded-lg p-3 transition-all hover:bg-white/5'
+								>
+									<div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-500/20 transition-transform group-hover:scale-110'>
 										<Icon.instagram className='h-4 w-4 text-blue-400' />
 									</div>
-									<div>
+									<div className='flex-1'>
 										<h3 className='mb-1 font-semibold text-white'>
 											Follow @barely.indie
 										</h3>
@@ -53,19 +60,26 @@ export default function ThankYouPage() {
 											Stay updated on new playlist additions and indie music community
 										</p>
 									</div>
-								</div>
-								<div className='flex gap-4'>
-									<div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-500/20'>
+									<Icon.externalLink className='h-5 w-5 text-white/40 transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-white/60' />
+								</a>
+								<a
+									href='https://open.spotify.com/user/utp4m7qc09m6p72s0ztqvajdu?si=8de3eadb478a44d3'
+									target='_blank'
+									rel='noopener noreferrer'
+									className='group flex gap-4 rounded-lg p-3 transition-all hover:bg-white/5'
+								>
+									<div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-500/20 transition-transform group-hover:scale-110'>
 										<Icon.spotify className='h-4 w-4 text-green-400' />
 									</div>
-									<div>
+									<div className='flex-1'>
 										<h3 className='mb-1 font-semibold text-white'>Follow the Playlist</h3>
 										<p className='text-sm text-white/60'>
 											Get notified when your track is added (and discover new artists)
 										</p>
 									</div>
-								</div>
-								<div className='flex gap-4'>
+									<Icon.externalLink className='h-5 w-5 text-white/40 transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-white/60' />
+								</a>
+								<div className='flex gap-4 rounded-lg p-3'>
 									<div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-purple-500/20'>
 										<Icon.email className='h-4 w-4 text-purple-400' />
 									</div>
@@ -97,81 +111,44 @@ export default function ThankYouPage() {
 					</AnimatedSection>
 
 					<div className='grid gap-8 md:grid-cols-2'>
-						{/* Case Study 1: Proper Youth */}
-						<AnimatedSection animation='fade-up' delay={200}>
-							<Link
-								href='/case-studies/proper-youth'
-								className='glass group block h-full rounded-xl p-6 transition-all hover:scale-[1.02] hover:shadow-2xl'
-							>
-								<div className='mb-4 flex items-start justify-between'>
-									<div>
-										<h3 className='mb-1 text-xl font-bold text-white'>Proper Youth</h3>
-										<p className='text-sm text-white/60'>Alt Rock • Brooklyn</p>
-									</div>
-									<Icon.arrowRight className='h-5 w-5 text-white/40 transition-transform group-hover:translate-x-1' />
-								</div>
-								<div className='mb-4 space-y-2'>
-									<div className='flex items-center gap-2'>
-										<Icon.arrowUp className='h-4 w-4 text-green-500' />
-										<span className='text-sm text-white/80'>
-											100 → 15k monthly listeners
-										</span>
-									</div>
-									<div className='flex items-center gap-2'>
-										<Icon.dollar className='h-4 w-4 text-green-500' />
-										<span className='text-sm text-white/80'>
-											$0 → $3k-4k monthly revenue
-										</span>
-									</div>
-									<div className='flex items-center gap-2'>
-										<Icon.users className='h-4 w-4 text-green-500' />
-										<span className='text-sm text-white/80'>Built 1000+ email list</span>
-									</div>
-								</div>
-								<p className='text-sm text-white/60'>
-									Started with 100 monthly listeners. Now generates consistent revenue
-									through merch, tickets, and streams.
-								</p>
-							</Link>
-						</AnimatedSection>
+						{/* Reuse featured case study cards */}
+						{allCaseStudies
+							.filter(study => study.featured)
+							.slice(0, 2)
+							.map((study, index) => {
+								const beforeListeners = study.metrics.before.monthlyListeners;
+								const afterListeners = study.metrics.after.monthlyListeners;
+								const growthPercentage = Math.round(
+									((afterListeners - beforeListeners) / beforeListeners) * 100,
+								);
+								const duration =
+									study.timeline[study.timeline.length - 1]?.month ??
+									study.timeline.length + ' months';
 
-						{/* Case Study 2: The Now */}
-						<AnimatedSection animation='fade-up' delay={400}>
-							<Link
-								href='/case-studies/the-now'
-								className='glass group block h-full rounded-xl p-6 transition-all hover:scale-[1.02] hover:shadow-2xl'
-							>
-								<div className='mb-4 flex items-start justify-between'>
-									<div>
-										<h3 className='mb-1 text-xl font-bold text-white'>The Now</h3>
-										<p className='text-sm text-white/60'>Indie Rock • Cleveland</p>
-									</div>
-									<Icon.arrowRight className='h-5 w-5 text-white/40 transition-transform group-hover:translate-x-1' />
-								</div>
-								<div className='mb-4 space-y-2'>
-									<div className='flex items-center gap-2'>
-										<Icon.arrowUp className='h-4 w-4 text-green-500' />
-										<span className='text-sm text-white/80'>
-											3k → 20k monthly listeners
-										</span>
-									</div>
-									<div className='flex items-center gap-2'>
-										<Icon.music className='h-4 w-4 text-green-500' />
-										<span className='text-sm text-white/80'>
-											1.2M total streams in 9 months
-										</span>
-									</div>
-									<div className='flex items-center gap-2'>
-										<Icon.spotify className='h-4 w-4 text-green-500' />
-										<span className='text-sm text-white/80'>+750 Spotify followers</span>
-									</div>
-								</div>
-								<p className='text-sm text-white/60'>
-									Scaled from regional following to national reach through data-driven
-									campaigns.
-								</p>
-							</Link>
-						</AnimatedSection>
+								return (
+									<AnimatedSection
+										key={study.id}
+										animation='fade-up'
+										delay={200 + index * 200}
+									>
+										<Link href={`/case-studies/${study.id}`}>
+											<CaseStudyCard
+												artistName={study.artistName}
+												genre={study.genre}
+												serviceTier={study.serviceTier}
+												beforeListeners={beforeListeners}
+												afterListeners={afterListeners}
+												growthPercentage={growthPercentage}
+												timeframe={duration}
+												avatarUrl={study.avatarUrl}
+												merchRevenue={study.merchRevenue}
+												summary={study.summary}
+												featured={study.featured}
+											/>
+										</Link>
+									</AnimatedSection>
+								);
+							})}
 					</div>
 				</div>
 			</section>
