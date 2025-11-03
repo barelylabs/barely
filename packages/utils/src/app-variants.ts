@@ -54,5 +54,5 @@ export function isInvoiceVariant(): boolean {
  */
 export function isFullApp(): boolean {
 	const variant = getCurrentAppVariant();
-	return !variant || variant === 'app';
+	return variant === 'app';
 }

@@ -30,7 +30,7 @@ export function Navbar() {
 							Pricing
 						</Link>
 						<Link
-							href={'#waitlist'}
+							href={getAbsoluteUrl('appInvoice')}
 							className='text-sm font-medium text-muted-foreground hover:text-foreground'
 						>
 							Sign In
@@ -64,7 +64,7 @@ export function Navbar() {
 								Pricing
 							</Link>
 							<Link
-								href={getAbsoluteUrl('app')}
+								href={getAbsoluteUrl('appInvoice')}
 								className='text-sm font-medium text-muted-foreground hover:text-foreground'
 								onClick={() => setMobileMenuOpen(false)}
 							>
