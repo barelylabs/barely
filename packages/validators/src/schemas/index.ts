@@ -35,6 +35,7 @@ export * from './next.schema';
 export * from './stat.schema';
 export * from './playlist-pitch-review.schema';
 export * from './playlist-placement.schema';
+export * from './playlist-submission.schema';
 export * from './playlist.schema';
 export * from './press-kit.schema';
 export * from './product.schema';
