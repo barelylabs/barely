@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 interface FormData {
 	// Basic info
@@ -16,7 +16,6 @@ interface FormData {
 	// Business info
 	monthlyListeners?: string;
 	budgetRange?: '<$500/mo' | '$500-1k' | '$1k-2.5k' | '$2.5k+' | 'Not sure yet';
-	goals?: string;
 
 	// Additional info from contact form
 	name?: string;
@@ -32,8 +31,30 @@ interface FormDataContextType {
 
 const FormDataContext = createContext<FormDataContextType | undefined>(undefined);
 
+const STORAGE_KEY = 'barelynyc_form_data';
+
 export function FormDataProvider({ children }: { children: ReactNode }) {
-	const [formData, setFormData] = useState<FormData>({});
+	const [formData, setFormData] = useState<FormData>(() => {
+		// Initialize from localStorage if available
+		if (typeof window !== 'undefined') {
+			const stored = localStorage.getItem(STORAGE_KEY);
+			if (stored) {
+				try {
+					return JSON.parse(stored) as FormData;
+				} catch {
+					return {};
+				}
+			}
+		}
+		return {};
+	});
+
+	// Persist to localStorage whenever formData changes
+	useEffect(() => {
+		if (typeof window !== 'undefined') {
+			localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+		}
+	}, [formData]);
 
 	const updateFormData = (data: Partial<FormData>) => {
 		setFormData(prev => ({ ...prev, ...data }));
@@ -41,6 +62,9 @@ export function FormDataProvider({ children }: { children: ReactNode }) {
 
 	const clearFormData = () => {
 		setFormData({});
+		if (typeof window !== 'undefined') {
+			localStorage.removeItem(STORAGE_KEY);
+		}
 	};
 
 	return (

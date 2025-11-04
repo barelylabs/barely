@@ -6,12 +6,21 @@ import { ContactModal } from './contact-modal';
 
 export function GlobalContactModal() {
 	const { isOpen, close } = useContactModal();
-	const { formData } = useFormData();
+	const { formData, clearFormData } = useFormData();
+
+	// Custom close handler that also clears form data
+	const handleClose = (shouldClose: boolean) => {
+		if (!shouldClose) {
+			close();
+			// Clear the stored form data after successful use
+			clearFormData();
+		}
+	};
 
 	return (
 		<ContactModal
 			showModal={isOpen}
-			setShowModal={close}
+			setShowModal={handleClose}
 			prefillData={{
 				name: formData.name,
 				email: formData.email,
@@ -20,7 +29,6 @@ export function GlobalContactModal() {
 				instagramHandle: formData.instagramHandle,
 				spotifyTrackUrl: formData.spotifyTrackUrl,
 				budgetRange: formData.budgetRange,
-				goals: formData.goals,
 			}}
 		/>
 	);
