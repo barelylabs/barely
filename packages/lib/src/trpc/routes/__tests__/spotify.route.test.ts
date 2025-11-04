@@ -1,5 +1,3 @@
-// Test setup is handled by vitest.config.ts and test-setup.ts
-
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -11,6 +9,9 @@ import { getSessionWorkspaceByHandle } from '@barely/auth/utils';
 
 import { createCallerFactory, createTRPCRouter } from '../../trpc';
 import { spotifyRoute } from '../spotify.route';
+
+// Test setup is handled by vitest.config.ts and test-setup.ts
+// Database environment variables are skipped via SKIP_ENV_VALIDATION in test-setup.ts
 
 // Mock auth env module to prevent validation errors
 vi.mock('@barely/auth', () => ({
