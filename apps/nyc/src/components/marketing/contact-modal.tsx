@@ -61,19 +61,19 @@ export function ContactModal({
 
 	const form = useZodForm<ContactFormData, ContactFormData>({
 		schema: contactFormSchema,
-		defaultValues: {
+		values: {
 			name: prefillData?.name ?? '',
 			email: prefillData?.email ?? '',
 			artistName: prefillData?.artistName ?? '',
 			monthlyListeners: prefillData?.monthlyListeners ?? '',
 			service: preSelectedService ?? '',
 			message: '',
-			// Additional fields with prefill
 			spotifyTrackUrl: prefillData?.spotifyTrackUrl ?? '',
 			instagramHandle: prefillData?.instagramHandle ?? '',
 			budgetRange: prefillData?.budgetRange,
 			goals: prefillData?.goals ?? '',
 		},
+		resetOptions: { keepDirtyValues: true },
 	});
 
 	const handleSubmit = async (data: ContactFormData) => {
