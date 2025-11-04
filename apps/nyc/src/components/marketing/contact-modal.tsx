@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useZodForm } from '@barely/hooks';
 import { z } from 'zod/v4';
 
@@ -62,19 +62,37 @@ export function ContactModal({
 	const form = useZodForm<ContactFormData, ContactFormData>({
 		schema: contactFormSchema,
 		defaultValues: {
-			name: prefillData?.name ?? '',
-			email: prefillData?.email ?? '',
-			artistName: prefillData?.artistName ?? '',
-			monthlyListeners: prefillData?.monthlyListeners ?? '',
+			name: '',
+			email: '',
+			artistName: '',
+			monthlyListeners: '',
 			service: preSelectedService ?? '',
 			message: '',
-			// Additional fields with prefill
-			spotifyTrackUrl: prefillData?.spotifyTrackUrl ?? '',
-			instagramHandle: prefillData?.instagramHandle ?? '',
-			budgetRange: prefillData?.budgetRange,
-			goals: prefillData?.goals ?? '',
+			spotifyTrackUrl: '',
+			instagramHandle: '',
+			budgetRange: undefined,
+			goals: '',
 		},
 	});
+
+	// Update form values when modal opens or prefillData changes
+	useEffect(() => {
+		if (showModal && prefillData) {
+			// Reset form with new values when modal opens
+			form.reset({
+				name: prefillData.name ?? '',
+				email: prefillData.email ?? '',
+				artistName: prefillData.artistName ?? '',
+				monthlyListeners: prefillData.monthlyListeners ?? '',
+				service: preSelectedService ?? '',
+				message: '',
+				spotifyTrackUrl: prefillData.spotifyTrackUrl ?? '',
+				instagramHandle: prefillData.instagramHandle ?? '',
+				budgetRange: prefillData.budgetRange,
+				goals: prefillData.goals ?? '',
+			});
+		}
+	}, [showModal, prefillData, preSelectedService, form]);
 
 	const handleSubmit = async (data: ContactFormData) => {
 		setIsSubmitting(true);
