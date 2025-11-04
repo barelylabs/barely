@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { H } from '@barely/ui/typography';
 
 import { AnimatedSection } from '~/components/marketing/animated-section';
-import { CaseStudyCard } from '~/components/marketing/case-study-card';
+import { CaseStudiesSection } from '~/components/marketing/case-studies-section';
 
 import { allCaseStudies } from '~/data/case-studies';
 
@@ -107,31 +107,11 @@ export default function CaseStudiesPage() {
 			</section> */}
 
 			{/* Featured Case Studies */}
-			<section className='px-4 py-16 sm:px-6 lg:px-8'>
-				<div className='mx-auto max-w-7xl'>
-					<AnimatedSection animation='fade-up'>
-						<H size='3' className='mb-12 text-center text-3xl md:text-4xl'>
-							Featured Success Stories
-						</H>
-					</AnimatedSection>
-
-					<div className='mb-16 grid grid-cols-1 gap-8 lg:grid-cols-2'>
-						{caseStudies
-							.filter(study => study.featured)
-							.map((study, index) => (
-								<AnimatedSection
-									key={study.slug}
-									animation='fade-up'
-									delay={200 + index * 100}
-								>
-									<Link href={`/case-studies/${study.slug}`}>
-										<CaseStudyCard {...study} featured />
-									</Link>
-								</AnimatedSection>
-							))}
-					</div>
-				</div>
-			</section>
+			<CaseStudiesSection
+				title='Featured Success Stories'
+				subtitle='See how independent artists grew their audiences with transparent, data-driven strategies'
+				caseStudies={caseStudies.filter(study => study.featured)}
+			/>
 
 			{/* All Case Studies */}
 			{/* <section className='bg-white/5 px-4 py-16 sm:px-6 lg:px-8'>

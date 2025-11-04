@@ -6,7 +6,8 @@ import { H } from '@barely/ui/typography';
 
 import { AnimatedSection } from '../../../components/marketing/animated-section';
 import { MarketingButton } from '../../../components/marketing/button';
-import { CaseStudyCard } from '../../../components/marketing/case-study-card';
+import { CaseStudiesSection } from '../../../components/marketing/case-studies-section';
+import { allCaseStudies } from '../../../data/case-studies';
 import { GoalsButton } from './goals-button';
 
 export const metadata: Metadata = {
@@ -85,51 +86,35 @@ export default function ThankYouPage() {
 			</section>
 
 			{/* Case Studies Section */}
-			<section className='bg-white/5 px-4 py-16 sm:px-6 lg:px-8'>
-				<div className='mx-auto max-w-4xl'>
-					<AnimatedSection animation='fade-up'>
-						<div className='mb-12 text-center'>
-							<H size='2' className='mb-4 text-3xl md:text-4xl'>
-								How Artists Grow With Barely NYC
-							</H>
-							<p className='text-lg text-white/70'>
-								Real results from indie artists who partnered with us
-							</p>
-						</div>
-					</AnimatedSection>
+			<CaseStudiesSection
+				caseStudies={allCaseStudies.map(study => {
+					const beforeListeners = study.metrics.before.monthlyListeners;
+					const afterListeners = study.metrics.after.monthlyListeners;
+					const growthPercentage = Math.round(
+						((afterListeners - beforeListeners) / beforeListeners) * 100,
+					);
+					const duration =
+						study.timeline[study.timeline.length - 1]?.month ??
+						study.timeline.length + ' months';
 
-					<div className='grid gap-8 md:grid-cols-2'>
-						{/* Case Study 1: Proper Youth */}
-						<AnimatedSection animation='fade-up' delay={200}>
-							<CaseStudyCard
-								artistName='Proper Youth'
-								genre='Alt Rock • Brooklyn'
-								serviceTier='Rising Artist'
-								beforeListeners={100}
-								afterListeners={15000}
-								growthPercentage={14900}
-								timeframe='18 months'
-								summary='Started with 100 monthly listeners. Now generates consistent revenue through merch, tickets, and streams.'
-								merchRevenue={{ before: 0, after: 3500 }}
-							/>
-						</AnimatedSection>
-
-						{/* Case Study 2: The Now */}
-						<AnimatedSection animation='fade-up' delay={400}>
-							<CaseStudyCard
-								artistName='The Now'
-								genre='Indie Rock • Cleveland'
-								serviceTier='Breakout Artist'
-								beforeListeners={3000}
-								afterListeners={20000}
-								growthPercentage={567}
-								timeframe='9 months'
-								summary='Scaled from regional following to national reach through data-driven campaigns.'
-							/>
-						</AnimatedSection>
-					</div>
-				</div>
-			</section>
+					return {
+						slug: study.id,
+						artistName: study.artistName,
+						genre: study.genre,
+						serviceTier: study.serviceTier,
+						beforeListeners,
+						afterListeners,
+						growthPercentage,
+						timeframe: duration,
+						avatarUrl: study.avatarUrl,
+						merchRevenue: study.merchRevenue,
+						summary: study.summary,
+						featured: study.featured,
+					};
+				})}
+				variant='compact'
+				showLinks={false}
+			/>
 
 			{/* CTA Section */}
 			<section className='px-4 py-16 sm:px-6 lg:px-8'>
