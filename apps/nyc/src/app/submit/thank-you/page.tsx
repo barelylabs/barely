@@ -43,30 +43,44 @@ export default function ThankYouPage() {
 								While You Wait...
 							</H>
 							<div className='space-y-4'>
-								<div className='flex gap-4'>
+								<a
+									href='https://instagram.com/barely.indie'
+									target='_blank'
+									rel='noopener noreferrer'
+									className='flex gap-4 transition-opacity hover:opacity-80'
+								>
 									<div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-500/20'>
 										<Icon.instagram className='h-4 w-4 text-blue-400' />
 									</div>
 									<div>
-										<h3 className='mb-1 font-semibold text-white'>
+										<h3 className='mb-1 flex items-center gap-1.5 font-semibold text-white'>
 											Follow @barely.indie
+											<Icon.externalLink className='h-3.5 w-3.5 text-white/60' />
 										</h3>
 										<p className='text-sm text-white/60'>
 											Stay updated on new playlist additions and indie music community
 										</p>
 									</div>
-								</div>
-								<div className='flex gap-4'>
+								</a>
+								<a
+									href='https://open.spotify.com/user/utp4m7qc09m6p72s0ztqvajdu'
+									target='_blank'
+									rel='noopener noreferrer'
+									className='flex gap-4 transition-opacity hover:opacity-80'
+								>
 									<div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-500/20'>
 										<Icon.spotify className='h-4 w-4 text-green-400' />
 									</div>
 									<div>
-										<h3 className='mb-1 font-semibold text-white'>Follow the Playlist</h3>
+										<h3 className='mb-1 flex items-center gap-1.5 font-semibold text-white'>
+											Follow the Playlist
+											<Icon.externalLink className='h-3.5 w-3.5 text-white/60' />
+										</h3>
 										<p className='text-sm text-white/60'>
 											Get notified when your track is added (and discover new artists)
 										</p>
 									</div>
-								</div>
+								</a>
 								<div className='flex gap-4'>
 									<div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-purple-500/20'>
 										<Icon.email className='h-4 w-4 text-purple-400' />
