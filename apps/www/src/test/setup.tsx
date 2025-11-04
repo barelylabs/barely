@@ -2,7 +2,14 @@ import '@testing-library/react';
 
 import React from 'react';
 import * as matchers from '@testing-library/jest-dom/matchers';
-import { expect, vi } from 'vitest';
+import { beforeAll, expect, vi } from 'vitest';
+
+// Set up test environment variables before any tests run
+beforeAll(() => {
+	// Skip environment validation in tests
+	// eslint-disable-next-line no-restricted-properties
+	process.env.SKIP_ENV_VALIDATION = 'true';
+});
 
 expect.extend(matchers);
 

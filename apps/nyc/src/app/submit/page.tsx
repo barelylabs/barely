@@ -12,9 +12,11 @@ import { H } from '@barely/ui/typography';
 
 import { AnimatedSection } from '../../components/marketing/animated-section';
 import { SecurityBadge } from '../../components/marketing/trust-badges';
+import { useFormData } from '../../contexts/form-data-context';
 
 export default function SubmitToBarelyIndiePage() {
 	const router = useRouter();
+	const { updateFormData } = useFormData();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -33,6 +35,14 @@ export default function SubmitToBarelyIndiePage() {
 		setSubmitError(null);
 
 		try {
+			// Save form data to context before submission
+			updateFormData({
+				artistName: data.artistName,
+				email: data.email,
+				spotifyTrackUrl: data.spotifyTrackUrl,
+				instagramHandle: data.instagramHandle,
+			});
+
 			const response = await fetch('/api/playlist-submission', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
