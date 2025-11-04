@@ -1,5 +1,6 @@
 import { sendEmail } from '@barely/email';
 import { PlaylistSubmissionEmail } from '@barely/email/templates/nyc/playlist-submission';
+import { PlaylistSubmissionConfirmationEmail } from '@barely/email/templates/nyc/playlist-submission-confirmation';
 import { ratelimit } from '@barely/lib';
 import { isProduction } from '@barely/utils';
 import { playlistSubmissionSchema } from '@barely/validators';
@@ -36,8 +37,8 @@ export async function POST(request: Request) {
 			return response;
 		}
 
-		// Send email notification
-		const emailResult = await sendEmail({
+		// Send email notification to hello@barely.nyc
+		const notificationEmailResult = await sendEmail({
 			from: 'noreply@mail.barely.nyc',
 			fromFriendlyName: '@barely.indie',
 			to: 'hello@barely.nyc',
@@ -52,11 +53,29 @@ export async function POST(request: Request) {
 			replyTo: validatedData.email,
 		});
 
-		if (emailResult.error) {
-			console.error('Failed to send email:', emailResult.error);
+		if (notificationEmailResult.error) {
+			console.error('Failed to send notification email:', notificationEmailResult.error);
 			const response = new Response('Failed to send email', { status: 500 });
 			setCorsHeaders(response);
 			return response;
+		}
+
+		// Send confirmation email to artist
+		const confirmationEmailResult = await sendEmail({
+			from: 'hello@barely.nyc',
+			fromFriendlyName: 'Adam Barito',
+			to: validatedData.email,
+			subject: `Your @barely.indie submission is in! (+ How we helped The Now grow from 1.3k→19k listeners)`,
+			react: PlaylistSubmissionConfirmationEmail({
+				artistName: validatedData.artistName,
+			}),
+			type: 'transactional',
+			replyTo: 'hello@barely.nyc',
+		});
+
+		if (confirmationEmailResult.error) {
+			console.error('Failed to send confirmation email:', confirmationEmailResult.error);
+			// Don't fail the request if confirmation email fails - the submission was successful
 		}
 
 		const successResponse = new Response(JSON.stringify({ success: true }), {

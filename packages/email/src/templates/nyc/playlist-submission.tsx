@@ -28,6 +28,11 @@ export function PlaylistSubmissionEmail({
 }: PlaylistSubmissionEmailProps) {
 	const previewText = `New @barely.indie playlist submission from ${artistName}`;
 
+	// Remove @ symbol if present for URL construction
+	const instagramUsername =
+		instagramHandle.startsWith('@') ? instagramHandle.slice(1) : instagramHandle;
+	const instagramUrl = `https://instagram.com/${instagramUsername}`;
+
 	return (
 		<Html>
 			<Head />
@@ -52,7 +57,10 @@ export function PlaylistSubmissionEmail({
 							<strong>Email:</strong> {email}
 						</Text>
 						<Text style={styles.resetText}>
-							<strong>Instagram:</strong> {instagramHandle}
+							<strong>Instagram:</strong>{' '}
+							<Link href={instagramUrl} style={{ color: '#E1306C' }}>
+								{instagramHandle}
+							</Link>
 						</Text>
 					</Section>
 
