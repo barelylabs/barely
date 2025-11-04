@@ -131,6 +131,23 @@ describe('ContactModal', () => {
 		await user.type(screen.getByLabelText(/artist\/band name/i), 'Test Artist');
 		await user.type(screen.getByLabelText(/monthly listeners/i), '10000');
 		await user.type(
+			screen.getByLabelText(/spotify track url/i),
+			'https://open.spotify.com/track/test',
+		);
+		await user.type(screen.getByLabelText(/instagram handle/i), '@testartist');
+
+		// Select budget range
+		const budgetSelect = screen.getByLabelText(/monthly marketing budget/i);
+		await user.click(budgetSelect);
+		await user.click(screen.getByText('$500-1k/month'));
+
+		// Fill goals field
+		await user.type(
+			screen.getByLabelText(/what are your biggest music marketing goals/i),
+			'Grow from 1k to 10k monthly listeners',
+		);
+
+		await user.type(
 			screen.getByLabelText(/what's your biggest music marketing challenge\? \*/i),
 			'This is a test message with enough characters',
 		);
@@ -149,6 +166,10 @@ describe('ContactModal', () => {
 					monthlyListeners: '10000',
 					service: 'bedroom',
 					message: 'This is a test message with enough characters',
+					spotifyTrackUrl: 'https://open.spotify.com/track/test',
+					instagramHandle: '@testartist',
+					budgetRange: '$500-1k',
+					goals: 'Grow from 1k to 10k monthly listeners',
 				}),
 			});
 		});
