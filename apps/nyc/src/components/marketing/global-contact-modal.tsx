@@ -10,7 +10,7 @@ export function GlobalContactModal() {
 
 	// Custom close handler that also clears form data
 	const handleClose = (shouldClose: boolean) => {
-		if (shouldClose) {
+		if (!shouldClose) {
 			close();
 			// Clear the stored form data after successful use
 			clearFormData();
@@ -29,7 +29,6 @@ export function GlobalContactModal() {
 				instagramHandle: formData.instagramHandle,
 				spotifyTrackUrl: formData.spotifyTrackUrl,
 				budgetRange: formData.budgetRange,
-				goals: formData.goals,
 			}}
 		/>
 	);
