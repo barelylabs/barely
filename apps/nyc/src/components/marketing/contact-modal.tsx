@@ -27,7 +27,6 @@ interface ContactModalProps {
 		instagramHandle?: string;
 		spotifyTrackUrl?: string;
 		budgetRange?: '<$500/mo' | '$500-1k' | '$1k-2.5k' | '$2.5k+' | 'Not sure yet';
-		goals?: string;
 	};
 }
 
@@ -44,7 +43,6 @@ const contactFormSchema = z.object({
 	budgetRange: z
 		.enum(['<$500/mo', '$500-1k', '$1k-2.5k', '$2.5k+', 'Not sure yet'])
 		.optional(),
-	goals: z.string().optional(),
 });
 
 type ContactFormData = z.infer<typeof contactFormSchema>;
@@ -71,7 +69,6 @@ export function ContactModal({
 			spotifyTrackUrl: prefillData?.spotifyTrackUrl ?? '',
 			instagramHandle: prefillData?.instagramHandle ?? '',
 			budgetRange: prefillData?.budgetRange,
-			goals: prefillData?.goals ?? '',
 		},
 		resetOptions: { keepDirtyValues: true },
 	});
@@ -200,15 +197,6 @@ export function ContactModal({
 										]}
 										className='border-white/10 bg-white/5 text-white'
 									/>
-
-									<TextAreaField
-										control={form.control}
-										name='goals'
-										label='What are your biggest music marketing goals?'
-										placeholder="e.g., 'Grow from 1k to 10k monthly listeners in 6 months' or 'Generate consistent merch revenue'"
-										rows={3}
-										className='resize-none border-white/10 bg-white/5 text-white placeholder:text-white/40'
-									/>
 								</div>
 							</details>
 
@@ -244,7 +232,11 @@ export function ContactModal({
 								<Button
 									type='button'
 									look='outline'
-									onClick={() => setShowModal(false)}
+									onClick={e => {
+										e.preventDefault();
+										e.stopPropagation();
+										setShowModal(false);
+									}}
 									className='border-white/20 text-white hover:bg-white/10'
 								>
 									Cancel

@@ -16,7 +16,6 @@ interface FormData {
 	// Business info
 	monthlyListeners?: string;
 	budgetRange?: '<$500/mo' | '$500-1k' | '$1k-2.5k' | '$2.5k+' | 'Not sure yet';
-	goals?: string;
 
 	// Additional info from contact form
 	name?: string;
