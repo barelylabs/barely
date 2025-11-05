@@ -5,6 +5,7 @@ import {
 	Head,
 	Heading,
 	Html,
+	Link,
 	Preview,
 	Section,
 	Text,
@@ -19,6 +20,9 @@ export interface ContactInquiryEmailProps {
 	monthlyListeners?: string;
 	service?: string;
 	message: string;
+	spotifyTrackUrl?: string;
+	instagramHandle?: string;
+	budgetRange?: string;
 }
 
 export function ContactInquiryEmail({
@@ -28,8 +32,17 @@ export function ContactInquiryEmail({
 	monthlyListeners,
 	service,
 	message,
+	spotifyTrackUrl,
+	instagramHandle,
+	budgetRange,
 }: ContactInquiryEmailProps) {
 	const previewText = `New contact inquiry from ${name}${service ? ` - ${service.charAt(0).toUpperCase() + service.slice(1)}+ Service` : ''}`;
+
+	// Process Instagram handle for URL
+	const instagramUsername =
+		instagramHandle?.startsWith('@') ? instagramHandle.slice(1) : instagramHandle;
+	const instagramUrl =
+		instagramUsername ? `https://instagram.com/${instagramUsername}` : '';
 
 	return (
 		<Html>
@@ -73,6 +86,27 @@ export function ContactInquiryEmail({
 								<strong>Monthly Listeners:</strong> {monthlyListeners}
 							</Text>
 						)}
+						{instagramHandle && (
+							<Text style={styles.resetText}>
+								<strong>Instagram:</strong>{' '}
+								<Link href={instagramUrl} style={{ color: '#E1306C' }}>
+									{instagramHandle}
+								</Link>
+							</Text>
+						)}
+						{spotifyTrackUrl && (
+							<Text style={styles.resetText}>
+								<strong>Spotify Track:</strong>{' '}
+								<Link href={spotifyTrackUrl} style={{ color: '#1DB954' }}>
+									{spotifyTrackUrl}
+								</Link>
+							</Text>
+						)}
+						{budgetRange && (
+							<Text style={styles.resetText}>
+								<strong>Budget Range:</strong> {budgetRange}
+							</Text>
+						)}
 					</Section>
 
 					<Section style={{ marginBottom: '24px' }}>
@@ -110,6 +144,9 @@ ContactInquiryEmail.PreviewProps = {
 	service: 'rising',
 	message:
 		"I'm interested in learning more about your Rising+ service. My band has been growing steadily and we're ready to take things to the next level with professional campaign management.",
+	spotifyTrackUrl: 'https://open.spotify.com/track/1234567890abcdefghij',
+	instagramHandle: '@theexampleband',
+	budgetRange: '$1k-2.5k',
 } as ContactInquiryEmailProps;
 
 export default ContactInquiryEmail;

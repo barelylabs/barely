@@ -12,6 +12,11 @@ const contactFormSchema = z.object({
 	monthlyListeners: z.string().optional(),
 	service: z.enum(['bedroom', 'rising', 'breakout', '']).optional(),
 	message: z.string().min(10, 'Message must be at least 10 characters'),
+	spotifyTrackUrl: z.string().optional(),
+	instagramHandle: z.string().optional(),
+	budgetRange: z
+		.enum(['<$500/mo', '$500-1k', '$1k-2.5k', '$2.5k+', 'Not sure yet'])
+		.optional(),
 });
 
 export async function POST(request: Request) {
@@ -53,6 +58,9 @@ export async function POST(request: Request) {
 				monthlyListeners: validatedData.monthlyListeners,
 				service: validatedData.service,
 				message: validatedData.message,
+				spotifyTrackUrl: validatedData.spotifyTrackUrl,
+				instagramHandle: validatedData.instagramHandle,
+				budgetRange: validatedData.budgetRange,
 			}),
 			type: 'transactional',
 			replyTo: validatedData.email,
