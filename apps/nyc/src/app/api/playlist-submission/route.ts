@@ -62,7 +62,7 @@ export async function POST(request: Request) {
 
 		// Send confirmation email to artist
 		const confirmationEmailResult = await sendEmail({
-			from: 'hello@barely.nyc',
+			from: 'hello@mail.barely.nyc',
 			fromFriendlyName: 'Adam Barito',
 			to: validatedData.email,
 			subject: `Your @barely.indie submission is in! (+ How we helped The Now grow from 1.3k→19k listeners)`,
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
 				artistName: validatedData.artistName,
 			}),
 			type: 'transactional',
-			replyTo: 'hello@barely.nyc',
+			replyTo: 'hello@mail.barely.nyc',
 		});
 
 		if (confirmationEmailResult.error) {
