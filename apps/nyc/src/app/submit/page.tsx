@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useZodForm } from '@barely/hooks';
 import { playlistSubmissionSchema } from '@barely/validators';
+import { ChevronDown } from 'lucide-react';
 
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { TextField } from '@barely/ui/forms/text-field';
@@ -12,6 +13,7 @@ import { H } from '@barely/ui/typography';
 
 import { AnimatedSection } from '../../components/marketing/animated-section';
 import { SecurityBadge } from '../../components/marketing/trust-badges';
+import { PlaylistCarousel } from '../../components/playlist-carousel';
 import { useFormData } from '../../contexts/form-data-context';
 
 export default function SubmitToBarelyIndiePage() {
@@ -67,20 +69,35 @@ export default function SubmitToBarelyIndiePage() {
 	return (
 		<main className='pt-16'>
 			{/* Page Header */}
-			<section className='px-4 py-16 sm:px-6 sm:py-24 lg:px-8'>
+			<section className='px-4 pb-14 pt-16 sm:px-6 sm:pt-24 lg:px-8'>
 				<div className='mx-auto max-w-2xl text-center'>
 					<AnimatedSection animation='fade-up'>
 						<H size='1' className='mb-4 font-heading text-4xl md:text-5xl lg:text-6xl'>
 							Submit to @barely.indie
 						</H>
 						<p className='text-lg text-white/70 md:text-xl'>
-							Get your track on our curated Brooklyn-based indie playlist
+							Get your track on our curated Brooklyn-based indie playlists
 						</p>
 						<p className='mt-4 text-sm text-white/60'>
 							5-10k monthly listeners • ~300 tracks curated
 						</p>
 					</AnimatedSection>
 				</div>
+			</section>
+
+			{/* Playlist Carousel */}
+			<section className='relative pb-6 sm:pb-10'>
+				<AnimatedSection animation='fade-up' delay={100}>
+					<PlaylistCarousel />
+				</AnimatedSection>
+
+				{/* Scroll Indicator - Down Arrow */}
+				<div className='mt-8 flex justify-center'>
+					<ChevronDown className='h-6 w-6 animate-bounce text-white/40' />
+				</div>
+
+				{/* Fade Gradient - Suggests Content Below */}
+				<div className='pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-black/20' />
 			</section>
 
 			{/* Form Section */}
