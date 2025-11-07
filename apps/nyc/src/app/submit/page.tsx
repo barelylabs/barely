@@ -12,6 +12,7 @@ import { H } from '@barely/ui/typography';
 
 import { AnimatedSection } from '../../components/marketing/animated-section';
 import { SecurityBadge } from '../../components/marketing/trust-badges';
+import { PlaylistCarousel } from '../../components/playlist-carousel';
 import { useFormData } from '../../contexts/form-data-context';
 
 export default function SubmitToBarelyIndiePage() {
@@ -74,13 +75,20 @@ export default function SubmitToBarelyIndiePage() {
 							Submit to @barely.indie
 						</H>
 						<p className='text-lg text-white/70 md:text-xl'>
-							Get your track on our curated Brooklyn-based indie playlist
+							Get your track on our curated Brooklyn-based indie playlists
 						</p>
 						<p className='mt-4 text-sm text-white/60'>
 							5-10k monthly listeners • ~300 tracks curated
 						</p>
 					</AnimatedSection>
 				</div>
+			</section>
+
+			{/* Playlist Carousel */}
+			<section className='pb-16 sm:pb-20'>
+				<AnimatedSection animation='fade-up' delay={100}>
+					<PlaylistCarousel />
+				</AnimatedSection>
 			</section>
 
 			{/* Form Section */}
