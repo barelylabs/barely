@@ -1,12 +1,13 @@
+import type { NextRequest } from 'next/server';
 import { recordNYCEvent } from '@barely/lib/functions/nyc-event.fns';
 import { parseReqForVisitorInfo } from '@barely/lib/middleware/request-parsing';
 import { isProduction } from '@barely/utils';
 
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
 	try {
 		// Parse visitor info for Meta Pixel tracking
 		const visitor = parseReqForVisitorInfo({
-			req: request as never, // Type cast needed for Next.js Request
+			req,
 			handle: 'barely',
 			key: 'nyc',
 		});
