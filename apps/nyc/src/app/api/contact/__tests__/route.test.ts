@@ -16,6 +16,24 @@ vi.mock('@barely/lib', () => ({
 	})),
 }));
 
+vi.mock('@barely/lib/functions/nyc-event.fns', () => ({
+	recordNYCEvent: vi.fn().mockResolvedValue({ success: true }),
+}));
+
+vi.mock('@barely/lib/middleware/request-parsing', () => ({
+	parseReqForVisitorInfo: vi.fn(() => ({
+		ip: '127.0.0.1',
+		geo: { country: 'US' },
+		userAgent: { ua: 'test-agent' },
+		isBot: false,
+		referer: null,
+		referer_url: null,
+		href: 'http://localhost:3000',
+		sessionId: 'test-session',
+		fbclid: null,
+	})),
+}));
+
 vi.mock('@vercel/edge', () => ({
 	ipAddress: vi.fn(() => '127.0.0.1'),
 }));

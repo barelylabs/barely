@@ -1,6 +1,8 @@
 import { sendEmail } from '@barely/email';
 import { ContactInquiryEmail } from '@barely/email/templates/nyc/contact-inquiry';
 import { ratelimit } from '@barely/lib';
+import { recordNYCEvent } from '@barely/lib/functions/nyc-event.fns';
+import { parseReqForVisitorInfo } from '@barely/lib/middleware/request-parsing';
 import { isProduction } from '@barely/utils';
 import { ipAddress } from '@vercel/edge';
 import { z } from 'zod/v4';
@@ -21,6 +23,13 @@ const contactFormSchema = z.object({
 
 export async function POST(request: Request) {
 	try {
+		// Parse visitor info for Meta Pixel tracking
+		const visitor = parseReqForVisitorInfo({
+			req: request as never, // Type cast needed for Next.js Request
+			handle: 'barely',
+			key: 'nyc',
+		});
+
 		// Validate input
 		const validatedData = contactFormSchema.parse(await request.json());
 
@@ -72,6 +81,20 @@ export async function POST(request: Request) {
 			setCorsHeaders(response);
 			return response;
 		}
+
+		// Track contact form submission to Meta Pixel
+		await recordNYCEvent({
+			type: 'nyc/contactFormSubmit',
+			visitor,
+			email: validatedData.email,
+			firstName: validatedData.name.split(' ')[0],
+			lastName: validatedData.name.split(' ').slice(1).join(' ') || undefined,
+			customData: {
+				service_interest: validatedData.service ?? 'general',
+				budget_range: validatedData.budgetRange,
+				artist_name: validatedData.artistName,
+			},
+		});
 
 		const successResponse = new Response(JSON.stringify({ success: true }), {
 			status: 200,
