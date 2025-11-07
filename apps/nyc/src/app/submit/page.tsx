@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useZodForm } from '@barely/hooks';
 import { playlistSubmissionSchema } from '@barely/validators';
+import { ChevronDown } from 'lucide-react';
 
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { TextField } from '@barely/ui/forms/text-field';
@@ -85,10 +86,18 @@ export default function SubmitToBarelyIndiePage() {
 			</section>
 
 			{/* Playlist Carousel */}
-			<section className='pb-16 sm:pb-20'>
+			<section className='relative py-12'>
 				<AnimatedSection animation='fade-up' delay={100}>
 					<PlaylistCarousel />
 				</AnimatedSection>
+
+				{/* Scroll Indicator - Down Arrow */}
+				<div className='mt-8 flex justify-center'>
+					<ChevronDown className='h-6 w-6 animate-bounce text-white/40' />
+				</div>
+
+				{/* Fade Gradient - Suggests Content Below */}
+				<div className='pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-black/20' />
 			</section>
 
 			{/* Form Section */}

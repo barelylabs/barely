@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { ExternalLink } from 'lucide-react';
 
 const PLAYLISTS = [
 	{
@@ -29,14 +30,14 @@ const PLAYLISTS = [
 export function PlaylistCarousel() {
 	return (
 		<div className='w-full overflow-x-auto scrollbar-hide'>
-			<div className='flex gap-4 px-4 py-2 sm:gap-6 sm:px-6 lg:px-8'>
+			<div className='mx-auto flex max-w-6xl justify-center gap-4 px-4 py-2 sm:gap-6 sm:px-6 lg:px-8'>
 				{PLAYLISTS.map(playlist => (
 					<Link
 						key={playlist.name}
 						href={playlist.url}
 						target='_blank'
 						rel='noopener noreferrer'
-						className='group relative w-48 flex-shrink-0 sm:w-56 lg:w-64'
+						className='group relative w-32 flex-shrink-0 sm:w-48'
 					>
 						<div className='relative aspect-square overflow-hidden rounded-lg transition-transform duration-300 group-hover:scale-105'>
 							<Image
@@ -44,14 +45,13 @@ export function PlaylistCarousel() {
 								alt={playlist.name}
 								fill
 								className='object-cover transition-opacity duration-300 group-hover:opacity-80'
-								sizes='(max-width: 640px) 192px, (max-width: 1024px) 224px, 256px'
+								sizes='(max-width: 640px) 128px, 192px'
 							/>
-							<div className='absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100' />
-							<div className='absolute bottom-0 left-0 right-0 p-4 text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100'>
-								<p className='text-lg font-semibold'>{playlist.name}</p>
+							<div className='absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100'>
+								<ExternalLink className='h-8 w-8 text-white' />
 							</div>
 						</div>
-						<p className='mt-2 text-center font-medium text-gray-200 transition-colors group-hover:text-white'>
+						<p className='mt-2 text-center text-sm font-medium text-gray-200 transition-colors group-hover:text-white'>
 							{playlist.name}
 						</p>
 					</Link>
