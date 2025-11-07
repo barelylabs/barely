@@ -90,7 +90,7 @@ export function PlaylistSubmissionConfirmationEmail({
 							"ON THE ROAD" playlist to 7K followers, creating a sustainable discovery
 							channel that compounds over time.
 						</Text>
-						<Text style={styles.resetText}>
+						<Text style={{ ...styles.resetText, marginTop: '16px' }}>
 							<strong>Proper Youth</strong> (Indie Rock, Brooklyn): Achieved 340% listener
 							growth (5,579 → 24,516) and 2,730% revenue increase ($112 → $3,170/mo) in 6
 							months using iPhone-shot videos and data-driven campaigns.
@@ -124,7 +124,7 @@ export function PlaylistSubmissionConfirmationEmail({
 								style={{
 									display: 'inline-block',
 									padding: '12px 24px',
-									backgroundColor: '#0066cc',
+									backgroundColor: '#8b5cf6',
 									color: '#ffffff',
 									textDecoration: 'none',
 									borderRadius: '6px',
@@ -134,7 +134,7 @@ export function PlaylistSubmissionConfirmationEmail({
 								Book a free 15-min discovery call
 							</Link>
 						</Text>
-						<Text style={styles.resetText}>
+						<Text style={{ ...styles.resetText, marginTop: '16px' }}>
 							No obligation, no pitch deck - just an honest conversation about where
 							you're at and whether we can help.
 						</Text>
