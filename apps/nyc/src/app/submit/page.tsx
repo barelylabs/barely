@@ -86,7 +86,7 @@ export default function SubmitToBarelyIndiePage() {
 			</section>
 
 			{/* Playlist Carousel */}
-			<section className='relative py-12'>
+			<section className='relative pb-6 pt-6 sm:pb-10'>
 				<AnimatedSection animation='fade-up' delay={100}>
 					<PlaylistCarousel />
 				</AnimatedSection>

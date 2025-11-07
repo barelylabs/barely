@@ -30,7 +30,7 @@ const PLAYLISTS = [
 export function PlaylistCarousel() {
 	return (
 		<div className='w-full overflow-x-auto scrollbar-hide'>
-			<div className='mx-auto flex max-w-6xl justify-center gap-4 px-4 py-2 sm:gap-6 sm:px-6 lg:px-8'>
+			<div className='mx-auto flex max-w-6xl justify-start gap-4 px-4 py-2 sm:gap-6 sm:px-6 lg:justify-center lg:px-8'>
 				{PLAYLISTS.map(playlist => (
 					<Link
 						key={playlist.name}
