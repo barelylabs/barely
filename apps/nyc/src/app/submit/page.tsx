@@ -69,7 +69,7 @@ export default function SubmitToBarelyIndiePage() {
 	return (
 		<main className='pt-16'>
 			{/* Page Header */}
-			<section className='px-4 py-16 sm:px-6 sm:pt-24 lg:px-8'>
+			<section className='px-4 pb-14 pt-16 sm:px-6 sm:pt-24 lg:px-8'>
 				<div className='mx-auto max-w-2xl text-center'>
 					<AnimatedSection animation='fade-up'>
 						<H size='1' className='mb-4 font-heading text-4xl md:text-5xl lg:text-6xl'>
@@ -86,7 +86,7 @@ export default function SubmitToBarelyIndiePage() {
 			</section>
 
 			{/* Playlist Carousel */}
-			<section className='relative pb-6 pt-6 sm:pb-10'>
+			<section className='relative pb-6 sm:pb-10'>
 				<AnimatedSection animation='fade-up' delay={100}>
 					<PlaylistCarousel />
 				</AnimatedSection>
