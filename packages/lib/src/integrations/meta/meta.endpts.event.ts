@@ -95,6 +95,12 @@ export const META_EVENT_NAMES = [
 	'barely.vip/view',
 	'barely.vip/emailCapture',
 	'barely.vip/download',
+
+	// nyc
+	'barely.nyc/pageView',
+	'barely.nyc/contactFormSubmit',
+	'barely.nyc/playlistSubmit',
+	'barely.nyc/linkClick',
 ] as const;
 
 export type MetaEventName = (typeof META_EVENT_NAMES)[number];
