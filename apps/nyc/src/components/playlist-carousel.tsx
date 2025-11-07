@@ -37,7 +37,7 @@ export function PlaylistCarousel() {
 						href={playlist.url}
 						target='_blank'
 						rel='noopener noreferrer'
-						className='group relative w-32 flex-shrink-0 sm:w-48'
+						className='group relative w-32 flex-shrink-0 last:pr-4 sm:w-48 sm:last:pr-6 lg:last:pr-8'
 					>
 						<div className='relative aspect-square overflow-hidden rounded-lg transition-transform duration-300 group-hover:scale-105'>
 							<Image
