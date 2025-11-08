@@ -18,6 +18,7 @@ export interface PlaylistSubmissionEmailProps {
 	email: string;
 	spotifyTrackUrl: string;
 	instagramHandle: string;
+	interestedInServices?: boolean;
 }
 
 export function PlaylistSubmissionEmail({
@@ -25,6 +26,7 @@ export function PlaylistSubmissionEmail({
 	email,
 	spotifyTrackUrl,
 	instagramHandle,
+	interestedInServices = false,
 }: PlaylistSubmissionEmailProps) {
 	const previewText = `New @barely.indie playlist submission from ${artistName}`;
 
@@ -78,6 +80,34 @@ export function PlaylistSubmissionEmail({
 						</Text>
 					</Section>
 
+					{interestedInServices && (
+						<Section
+							style={{
+								marginBottom: '24px',
+								padding: '16px',
+								backgroundColor: '#f0f9ff',
+								borderRadius: '8px',
+								border: '2px solid #3b82f6',
+							}}
+						>
+							<Heading
+								as='h2'
+								style={{
+									fontSize: '18px',
+									fontWeight: 'bold',
+									marginBottom: '8px',
+									color: '#1e40af',
+								}}
+							>
+								🎯 Interested in Services
+							</Heading>
+							<Text style={{ ...styles.resetText, color: '#1e40af', fontWeight: '600' }}>
+								This artist expressed interest in professional help with Spotify growth
+								(playlist pitching, marketing strategy, analytics).
+							</Text>
+						</Section>
+					)}
+
 					<Section
 						style={{
 							marginTop: '32px',
@@ -101,6 +131,7 @@ PlaylistSubmissionEmail.PreviewProps = {
 	email: 'artist@example.com',
 	spotifyTrackUrl: 'https://open.spotify.com/track/1234567890abcdefghij',
 	instagramHandle: '@theexampleband',
+	interestedInServices: true,
 } as PlaylistSubmissionEmailProps;
 
 export default PlaylistSubmissionEmail;
