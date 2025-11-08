@@ -7,6 +7,7 @@ import { useZodForm } from '@barely/hooks';
 import { playlistSubmissionSchema } from '@barely/validators';
 import { ChevronDown } from 'lucide-react';
 
+import { CheckboxField } from '@barely/ui/forms/checkbox-field';
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { TextField } from '@barely/ui/forms/text-field';
 import { H } from '@barely/ui/typography';
@@ -23,13 +24,14 @@ export default function SubmitToBarelyIndiePage() {
 	const [submitError, setSubmitError] = useState<string | null>(null);
 	const formSectionRef = useRef<HTMLElement>(null);
 
-	const form = useZodForm<PlaylistSubmission, PlaylistSubmission>({
+	const form = useZodForm({
 		schema: playlistSubmissionSchema,
 		defaultValues: {
 			artistName: '',
 			email: '',
 			spotifyTrackUrl: '',
 			instagramHandle: '',
+			interestedInServices: false,
 		},
 	});
 
@@ -69,6 +71,7 @@ export default function SubmitToBarelyIndiePage() {
 
 	const handleScrollToForm = () => {
 		formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		setTimeout(() => form.setFocus('artistName'), 500);
 	};
 
 	return (
@@ -81,10 +84,10 @@ export default function SubmitToBarelyIndiePage() {
 							Submit to @barely.indie
 						</H>
 						<p className='text-lg text-white/70 md:text-xl'>
-							Get your track on our curated Brooklyn-based indie playlists
+							Get your indie track in front of 8k engaged listeners
 						</p>
 						<p className='mt-4 text-sm text-white/60'>
-							5-10k monthly listeners • ~300 tracks curated
+							8k monthly listeners • ~300 tracks curated
 						</p>
 					</AnimatedSection>
 				</div>
@@ -97,16 +100,45 @@ export default function SubmitToBarelyIndiePage() {
 				</AnimatedSection>
 
 				{/* Scroll Indicator - Down Arrow */}
-				<button
-					onClick={handleScrollToForm}
-					className='mt-8 flex cursor-pointer justify-center'
-					aria-label='Scroll to submission form'
-				>
-					<ChevronDown className='h-6 w-6 animate-bounce text-white/40 transition-colors hover:text-white/60' />
-				</button>
+				<div className='mt-8 flex w-full justify-center'>
+					<button
+						onClick={handleScrollToForm}
+						className='cursor-pointer'
+						aria-label='Scroll to submission form'
+					>
+						<ChevronDown className='h-6 w-6 animate-bounce text-white/40 transition-colors hover:text-white/60' />
+					</button>
+				</div>
 
 				{/* Fade Gradient - Suggests Content Below */}
 				<div className='pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-black/20' />
+			</section>
+
+			{/* Why Submit Section */}
+			<section className='px-4 pb-16 sm:px-6 lg:px-8'>
+				<div className='mx-auto max-w-2xl text-center'>
+					<AnimatedSection animation='fade-up' delay={150}>
+						<H size='2' className='mb-6 text-3xl md:text-4xl'>
+							Why Submit to @barely.indie?
+						</H>
+						<div className='space-y-4 text-left sm:text-center'>
+							<p className='text-base text-white/70 md:text-lg'>
+								<strong className='text-white'>Run by Barely NYC,</strong> a music
+								marketing agency dedicated to helping indie artists grow.
+							</p>
+							<p className='text-base text-white/70 md:text-lg'>
+								Our playlists aren't just collections—they're{' '}
+								<strong className='text-white'>actively promoted</strong> to thousands of
+								new fans every month.
+							</p>
+							<p className='text-base text-white/70 md:text-lg'>
+								You're not just getting placement, you're getting access to a{' '}
+								<strong className='text-white'>built-in audience</strong> that's already
+								engaged.
+							</p>
+						</div>
+					</AnimatedSection>
+				</div>
 			</section>
 
 			{/* Form Section */}
@@ -116,7 +148,7 @@ export default function SubmitToBarelyIndiePage() {
 						<div className='glass rounded-xl p-6 sm:p-8'>
 							<div className='mb-8'>
 								<H size='3' className='mb-2 text-2xl'>
-									Submission Form
+									Get Your Track Reviewed
 								</H>
 								<p className='text-sm text-white/60'>
 									Takes less than 2 minutes • All submissions reviewed
@@ -157,6 +189,20 @@ export default function SubmitToBarelyIndiePage() {
 									className='border-white/10 bg-white/5 text-white placeholder:text-white/40'
 								/>
 
+								<div className='rounded-lg border border-white/10 bg-white/5 p-4'>
+									<CheckboxField
+										control={form.control}
+										name='interestedInServices'
+										label={
+											<span className='text-sm text-white/80'>
+												I'm interested in professional help growing my Spotify presence{' '}
+												<span className='text-white/60'>
+													(playlist pitching, marketing strategy, analytics)
+												</span>
+											</span>
+										}
+									/>
+								</div>
 								{submitError && (
 									<div className='rounded-md border border-red-500/20 bg-red-500/10 p-3'>
 										<p className='text-sm text-red-500'>{submitError}</p>
@@ -174,7 +220,7 @@ export default function SubmitToBarelyIndiePage() {
 										loadingText='Submitting...'
 										className='bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700'
 									>
-										Submit Track
+										Submit for Review
 									</SubmitButton>
 								</div>
 							</Form>
@@ -187,7 +233,8 @@ export default function SubmitToBarelyIndiePage() {
 									<div className='space-y-2 text-sm text-white/60'>
 										<p>✓ All submissions reviewed within 1-2 weeks</p>
 										<p>✓ Email confirmation sent immediately</p>
-										<p>✓ Acceptance rate: ~15-20%</p>
+										<p>✓ We carefully curate to match our audience</p>
+										<p>✓ Actively promoted to thousands of new fans per month</p>
 									</div>
 								</div>
 
