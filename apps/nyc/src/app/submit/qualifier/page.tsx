@@ -22,7 +22,7 @@ export default function QualifierPage() {
 	const [submitSuccess, setSubmitSuccess] = useState(false);
 	const [submitError, setSubmitError] = useState<string | null>(null);
 
-	const form = useZodForm<PlaylistQualifier, PlaylistQualifier>({
+	const form = useZodForm({
 		schema: playlistQualifierSchema,
 		defaultValues: {
 			artistName: '',
@@ -31,6 +31,7 @@ export default function QualifierPage() {
 			instagramHandle: '',
 			budgetRange: '<$500/mo',
 			goals: '',
+			interestedInServices: false,
 		},
 	});
 

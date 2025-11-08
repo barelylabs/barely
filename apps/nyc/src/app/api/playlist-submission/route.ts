@@ -1,3 +1,4 @@
+import type { NextRequest } from 'next/server';
 import { sendEmail } from '@barely/email';
 import { PlaylistSubmissionEmail } from '@barely/email/templates/nyc/playlist-submission';
 import { PlaylistSubmissionConfirmationEmail } from '@barely/email/templates/nyc/playlist-submission-confirmation';
@@ -9,11 +10,11 @@ import { playlistSubmissionSchema } from '@barely/validators';
 import { ipAddress } from '@vercel/edge';
 import { z } from 'zod/v4';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
 	try {
 		// Parse visitor info for Meta Pixel tracking
 		const visitor = parseReqForVisitorInfo({
-			req: request as never, // Type cast needed for Next.js Request
+			req: request,
 			handle: 'barely',
 			key: 'nyc',
 		});
@@ -51,12 +52,13 @@ export async function POST(request: Request) {
 			from: 'noreply@mail.barely.nyc',
 			fromFriendlyName: '@barely.indie',
 			to: 'hello@barely.nyc',
-			subject: `New @barely.indie Playlist Submission - ${validatedData.artistName}`,
+			subject: `New @barely.indie Playlist Submission - ${validatedData.artistName}${validatedData.interestedInServices ? ' [INTERESTED IN SERVICES]' : ''}`,
 			react: PlaylistSubmissionEmail({
 				artistName: validatedData.artistName,
 				email: validatedData.email,
 				spotifyTrackUrl: validatedData.spotifyTrackUrl,
 				instagramHandle: validatedData.instagramHandle,
+				interestedInServices: validatedData.interestedInServices,
 			}),
 			type: 'transactional',
 			replyTo: validatedData.email,

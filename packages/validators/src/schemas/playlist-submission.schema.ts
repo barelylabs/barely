@@ -31,6 +31,7 @@ export const playlistSubmissionSchema = z.object({
 			'Invalid Instagram handle. Use format: @username or username',
 		)
 		.transform(val => (val.startsWith('@') ? val : `@${val}`)),
+	interestedInServices: z.boolean().optional().default(false),
 });
 
 /**
