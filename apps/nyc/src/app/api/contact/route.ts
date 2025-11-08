@@ -1,3 +1,4 @@
+import type { NextRequest } from 'next/server';
 import { sendEmail } from '@barely/email';
 import { ContactInquiryEmail } from '@barely/email/templates/nyc/contact-inquiry';
 import { ratelimit } from '@barely/lib';
@@ -21,11 +22,11 @@ const contactFormSchema = z.object({
 		.optional(),
 });
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
 	try {
 		// Parse visitor info for Meta Pixel tracking
 		const visitor = parseReqForVisitorInfo({
-			req: request as never, // Type cast needed for Next.js Request
+			req: request,
 			handle: 'barely',
 			key: 'nyc',
 		});

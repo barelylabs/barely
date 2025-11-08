@@ -1,3 +1,4 @@
+import type { NextRequest } from 'next/server';
 import { sendEmail } from '@barely/email';
 import { PlaylistSubmissionEmail } from '@barely/email/templates/nyc/playlist-submission';
 import { PlaylistSubmissionConfirmationEmail } from '@barely/email/templates/nyc/playlist-submission-confirmation';
@@ -9,11 +10,11 @@ import { playlistSubmissionSchema } from '@barely/validators';
 import { ipAddress } from '@vercel/edge';
 import { z } from 'zod/v4';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
 	try {
 		// Parse visitor info for Meta Pixel tracking
 		const visitor = parseReqForVisitorInfo({
-			req: request as never, // Type cast needed for Next.js Request
+			req: request,
 			handle: 'barely',
 			key: 'nyc',
 		});

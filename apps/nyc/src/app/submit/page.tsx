@@ -71,7 +71,7 @@ export default function SubmitToBarelyIndiePage() {
 
 	const handleScrollToForm = () => {
 		formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-		form.setFocus('artistName');
+		setTimeout(() => form.setFocus('artistName'), 500);∆
 	};
 
 	return (
