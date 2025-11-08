@@ -1,7 +1,7 @@
 'use client';
 
 import type { PlaylistSubmission } from '@barely/validators';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useZodForm } from '@barely/hooks';
 import { playlistSubmissionSchema } from '@barely/validators';
@@ -21,6 +21,7 @@ export default function SubmitToBarelyIndiePage() {
 	const { updateFormData } = useFormData();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [submitError, setSubmitError] = useState<string | null>(null);
+	const formSectionRef = useRef<HTMLElement>(null);
 
 	const form = useZodForm<PlaylistSubmission, PlaylistSubmission>({
 		schema: playlistSubmissionSchema,
@@ -66,6 +67,10 @@ export default function SubmitToBarelyIndiePage() {
 		}
 	};
 
+	const handleScrollToForm = () => {
+		formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	};
+
 	return (
 		<main className='pt-16'>
 			{/* Page Header */}
@@ -92,16 +97,20 @@ export default function SubmitToBarelyIndiePage() {
 				</AnimatedSection>
 
 				{/* Scroll Indicator - Down Arrow */}
-				<div className='mt-8 flex justify-center'>
-					<ChevronDown className='h-6 w-6 animate-bounce text-white/40' />
-				</div>
+				<button
+					onClick={handleScrollToForm}
+					className='mt-8 flex cursor-pointer justify-center'
+					aria-label='Scroll to submission form'
+				>
+					<ChevronDown className='h-6 w-6 animate-bounce text-white/40 transition-colors hover:text-white/60' />
+				</button>
 
 				{/* Fade Gradient - Suggests Content Below */}
 				<div className='pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-black/20' />
 			</section>
 
 			{/* Form Section */}
-			<section className='px-4 pb-24 sm:px-6 lg:px-8'>
+			<section ref={formSectionRef} className='px-4 pb-24 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-xl'>
 					<AnimatedSection animation='fade-up' delay={200}>
 						<div className='glass rounded-xl p-6 sm:p-8'>
