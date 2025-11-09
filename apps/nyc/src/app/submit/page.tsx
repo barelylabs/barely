@@ -118,13 +118,15 @@ export default function SubmitToBarelyIndiePage() {
 			<section className='px-4 pb-16 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-2xl text-center'>
 					<AnimatedSection animation='fade-up' delay={150}>
-						<H size='2' className='mb-6 text-3xl md:text-4xl'>
-							Why Submit to @barely.indie?
+						<H size='3' className='mb-6 text-2xl md:text-3xl'>
+							Why Submit?
 						</H>
 						<div className='space-y-4 text-left sm:text-center'>
 							<p className='text-base text-white/70 md:text-lg'>
-								<strong className='text-white'>Run by Barely NYC,</strong> a music
-								marketing agency dedicated to helping indie artists grow.
+								<strong className='text-white'>
+									Our playlists are curated by Barely NYC,
+								</strong>{' '}
+								a music marketing agency dedicated to helping indie artists grow.
 							</p>
 							<p className='text-base text-white/70 md:text-lg'>
 								Our playlists aren't just collections—they're{' '}
