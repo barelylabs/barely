@@ -39,6 +39,9 @@ const rateLimitSchema = z
 export const libEnv = createEnv({
 	extends: [authEnv],
 	server: {
+		AIRTABLE_ACCESS_TOKEN: z.string(),
+		AIRTABLE_BASE_ID: z.string(),
+		AIRTABLE_LEADS_TABLE_ID: z.string(),
 		ANTHROPIC_API_KEY: z.string(),
 		AUTH_SECRET: z.string(),
 		AWS_S3_BUCKET_NAME: z.string(),

@@ -2,6 +2,7 @@ import { sendEmail } from '@barely/email';
 import { PlaylistSubmissionEmail } from '@barely/email/templates/nyc/playlist-submission';
 import { PlaylistSubmissionConfirmationEmail } from '@barely/email/templates/nyc/playlist-submission-confirmation';
 import { ratelimit } from '@barely/lib';
+import { upsertPlaylistSubmissionLead } from '@barely/lib/functions/airtable-lead.fns';
 import { recordNYCEvent } from '@barely/lib/functions/nyc-event.fns';
 import { parseReqForVisitorInfo } from '@barely/lib/middleware/request-parsing';
 import { isProduction } from '@barely/utils';
@@ -97,6 +98,17 @@ export async function POST(request: Request) {
 				spotify_track_url: validatedData.spotifyTrackUrl,
 				instagram_handle: validatedData.instagramHandle,
 			},
+		});
+
+		// Capture lead in Airtable CRM (non-blocking - silent failure)
+		upsertPlaylistSubmissionLead({
+			email: validatedData.email,
+			artistName: validatedData.artistName,
+			spotifyTrackUrl: validatedData.spotifyTrackUrl,
+			instagramHandle: validatedData.instagramHandle,
+		}).catch(error => {
+			console.error('Failed to update Airtable lead from playlist submission:', error);
+			// Silent failure - don't block the request
 		});
 
 		const successResponse = new Response(JSON.stringify({ success: true }), {
