@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server';
 import { sendEmail } from '@barely/email';
 import { ContactInquiryEmail } from '@barely/email/templates/nyc/contact-inquiry';
 import { ratelimit } from '@barely/lib';
+import { upsertContactFormLead } from '@barely/lib/functions/airtable-lead.fns';
 import { recordNYCEvent } from '@barely/lib/functions/nyc-event.fns';
 import { parseReqForVisitorInfo } from '@barely/lib/middleware/request-parsing';
 import { isProduction } from '@barely/utils';
@@ -95,6 +96,22 @@ export async function POST(request: NextRequest) {
 				budget_range: validatedData.budgetRange,
 				artist_name: validatedData.artistName,
 			},
+		});
+
+		// Capture lead in Airtable CRM (non-blocking - silent failure)
+		upsertContactFormLead({
+			email: validatedData.email,
+			name: validatedData.name,
+			artistName: validatedData.artistName,
+			monthlyListeners: validatedData.monthlyListeners,
+			serviceInterest: validatedData.service,
+			budgetRange: validatedData.budgetRange,
+			initialMessage: validatedData.message,
+			spotifyTrackUrl: validatedData.spotifyTrackUrl,
+			instagramHandle: validatedData.instagramHandle,
+		}).catch(error => {
+			console.error('Failed to update Airtable lead from contact form:', error);
+			// Silent failure - don't block the request
 		});
 
 		const successResponse = new Response(JSON.stringify({ success: true }), {
