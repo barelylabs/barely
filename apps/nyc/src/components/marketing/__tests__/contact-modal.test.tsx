@@ -2,10 +2,24 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { FormDataProvider } from '../../../contexts/form-data-context';
 import { ContactModal } from '../contact-modal';
 
 // Mock fetch
 global.fetch = vi.fn() as typeof global.fetch;
+
+// Helper function to render ContactModal with FormDataProvider
+function renderContactModal(props: {
+	showModal: boolean;
+	setShowModal: (show: boolean) => void;
+	preSelectedService?: 'bedroom' | 'rising' | 'breakout';
+}) {
+	return render(
+		<FormDataProvider>
+			<ContactModal {...props} />
+		</FormDataProvider>,
+	);
+}
 
 describe('ContactModal', () => {
 	beforeEach(() => {
@@ -13,13 +27,11 @@ describe('ContactModal', () => {
 	});
 
 	it('renders the contact form correctly', () => {
-		render(
-			<ContactModal
-				showModal={true}
-				setShowModal={vi.fn()}
-				preSelectedService='bedroom'
-			/>,
-		);
+		renderContactModal({
+			showModal: true,
+			setShowModal: vi.fn(),
+			preSelectedService: 'bedroom',
+		});
 
 		expect(screen.getByLabelText(/your name \*/i)).toBeInTheDocument();
 		expect(screen.getByLabelText(/email \*/i)).toBeInTheDocument();
@@ -32,13 +44,11 @@ describe('ContactModal', () => {
 
 	it('validates required fields', async () => {
 		const user = userEvent.setup();
-		render(
-			<ContactModal
-				showModal={true}
-				setShowModal={vi.fn()}
-				preSelectedService='bedroom'
-			/>,
-		);
+		renderContactModal({
+			showModal: true,
+			setShowModal: vi.fn(),
+			preSelectedService: 'bedroom',
+		});
 
 		const submitButton = screen.getByRole('button', { name: /send message/i });
 		await user.click(submitButton);
@@ -54,13 +64,11 @@ describe('ContactModal', () => {
 
 	it('validates email format', async () => {
 		const user = userEvent.setup();
-		render(
-			<ContactModal
-				showModal={true}
-				setShowModal={vi.fn()}
-				preSelectedService='bedroom'
-			/>,
-		);
+		renderContactModal({
+			showModal: true,
+			setShowModal: vi.fn(),
+			preSelectedService: 'bedroom',
+		});
 
 		// Don't fill in other fields, just email with invalid value
 		const emailInput = screen.getByLabelText(/email \*/i);
@@ -80,13 +88,11 @@ describe('ContactModal', () => {
 
 	it('validates message length', async () => {
 		const user = userEvent.setup();
-		render(
-			<ContactModal
-				showModal={true}
-				setShowModal={vi.fn()}
-				preSelectedService='bedroom'
-			/>,
-		);
+		renderContactModal({
+			showModal: true,
+			setShowModal: vi.fn(),
+			preSelectedService: 'bedroom',
+		});
 
 		const messageInput = screen.getByLabelText(
 			/what's your biggest music marketing challenge/i,
@@ -112,13 +118,11 @@ describe('ContactModal', () => {
 			json: () => Promise.resolve({ success: true }),
 		} as Response);
 
-		render(
-			<ContactModal
-				showModal={true}
-				setShowModal={setShowModal}
-				preSelectedService='bedroom'
-			/>,
-		);
+		renderContactModal({
+			showModal: true,
+			setShowModal,
+			preSelectedService: 'bedroom',
+		});
 
 		// Fill only required fields for simplicity
 		await user.type(screen.getByLabelText(/your name \*/i), 'John Doe');
@@ -165,13 +169,11 @@ describe('ContactModal', () => {
 			text: () => Promise.resolve('Internal server error'),
 		} as Response);
 
-		render(
-			<ContactModal
-				showModal={true}
-				setShowModal={vi.fn()}
-				preSelectedService='bedroom'
-			/>,
-		);
+		renderContactModal({
+			showModal: true,
+			setShowModal: vi.fn(),
+			preSelectedService: 'bedroom',
+		});
 
 		// Fill form with valid data
 		await user.type(screen.getByLabelText(/your name \*/i), 'John Doe');
@@ -201,13 +203,11 @@ describe('ContactModal', () => {
 			text: () => Promise.resolve('Too many requests'),
 		} as Response);
 
-		render(
-			<ContactModal
-				showModal={true}
-				setShowModal={vi.fn()}
-				preSelectedService='bedroom'
-			/>,
-		);
+		renderContactModal({
+			showModal: true,
+			setShowModal: vi.fn(),
+			preSelectedService: 'bedroom',
+		});
 
 		// Fill form with valid data
 		await user.type(screen.getByLabelText(/your name \*/i), 'John Doe');
@@ -232,13 +232,11 @@ describe('ContactModal', () => {
 		const user = userEvent.setup();
 		const setShowModal = vi.fn();
 
-		render(
-			<ContactModal
-				showModal={true}
-				setShowModal={setShowModal}
-				preSelectedService='bedroom'
-			/>,
-		);
+		renderContactModal({
+			showModal: true,
+			setShowModal,
+			preSelectedService: 'bedroom',
+		});
 
 		// Click the Cancel button
 		const cancelButton = screen.getByRole('button', { name: /cancel/i });
@@ -257,13 +255,11 @@ describe('ContactModal', () => {
 		});
 		vi.mocked(global.fetch).mockReturnValueOnce(fetchPromise);
 
-		render(
-			<ContactModal
-				showModal={true}
-				setShowModal={vi.fn()}
-				preSelectedService='bedroom'
-			/>,
-		);
+		renderContactModal({
+			showModal: true,
+			setShowModal: vi.fn(),
+			preSelectedService: 'bedroom',
+		});
 
 		// Fill form with valid data
 		await user.type(screen.getByLabelText(/your name \*/i), 'John Doe');

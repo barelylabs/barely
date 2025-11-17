@@ -9,6 +9,7 @@ import { Icon } from '@barely/ui/icon';
 import { Img } from '@barely/ui/img';
 
 import { useContactModal } from '../../contexts/contact-modal-context';
+import { useCalComUrl } from '../../hooks/use-cal-com-url';
 import { MarketingButton } from './button';
 
 const navItems = [
@@ -23,6 +24,7 @@ export function Navigation() {
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 	const { open: openContactModal } = useContactModal();
 	const pathname = usePathname();
+	const calComUrl = useCalComUrl();
 
 	return (
 		<>
@@ -62,14 +64,10 @@ export function Navigation() {
 								</Link>
 							))}
 
-							<a
-								href='https://cal.com/barely/nyc'
-								target='_blank'
-								rel='noopener noreferrer'
-							>
+							<a href={calComUrl} target='_blank' rel='noopener noreferrer'>
 								<MarketingButton marketingLook='glass' size='sm' className='group ml-2'>
 									<span className='flex items-center gap-1.5'>
-										Book Call
+										Free Strategy Call
 										<Icon.externalLink className='h-3.5 w-3.5 opacity-70 transition-opacity group-hover:opacity-100' />
 									</span>
 								</MarketingButton>
@@ -146,7 +144,7 @@ export function Navigation() {
 
 					<div className='mt-auto space-y-4'>
 						<a
-							href='https://cal.com/barely/nyc'
+							href={calComUrl}
 							target='_blank'
 							rel='noopener noreferrer'
 							className='block'
@@ -158,7 +156,7 @@ export function Navigation() {
 								className='group'
 							>
 								<span className='flex items-center justify-center gap-2'>
-									Book Call
+									Free Strategy Call
 									<Icon.externalLink className='h-4 w-4 opacity-70 transition-opacity group-hover:opacity-100' />
 								</span>
 							</MarketingButton>
