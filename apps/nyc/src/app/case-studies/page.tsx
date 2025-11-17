@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { H } from '@barely/ui/typography';
 
 import { AnimatedSection } from '~/components/marketing/animated-section';
+import { CalComLink } from '~/components/marketing/cal-com-link';
 import { CaseStudiesSection } from '~/components/marketing/case-studies-section';
 
 import { allCaseStudies } from '~/data/case-studies';
@@ -147,9 +148,13 @@ export default function CaseStudiesPage() {
 						<H size='2' className='mb-8 text-4xl md:text-5xl'>
 							Ready to Write Your Success Story?
 						</H>
-						<p className='mb-12 text-xl text-white/70'>
+						<p className='mb-8 text-xl text-white/70'>
 							Join our artists who&apos;ve grown their audiences with transparent,
 							data-driven strategies.
+						</p>
+						<p className='mb-12 text-base text-white/60'>
+							See results like this? Book a free 30-minute strategy call and get your
+							custom growth plan.
 						</p>
 						<div className='flex flex-col justify-center gap-6 px-4 sm:flex-row sm:px-0'>
 							<Link href='/services' className='w-full sm:w-auto'>
@@ -157,16 +162,11 @@ export default function CaseStudiesPage() {
 									View Services
 								</button>
 							</Link>
-							<a
-								href='https://cal.com/barely/nyc'
-								target='_blank'
-								rel='noopener noreferrer'
-								className='w-full sm:w-auto'
-							>
+							<CalComLink className='w-full sm:w-auto'>
 								<button className='w-full rounded-lg border-2 border-white/20 px-8 py-3 font-semibold text-white transition-all duration-300 hover:bg-white/10 sm:w-auto'>
 									Book Free Strategy Call
 								</button>
-							</a>
+							</CalComLink>
 						</div>
 					</AnimatedSection>
 				</div>

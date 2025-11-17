@@ -9,6 +9,7 @@ import { H } from '@barely/ui/typography';
 import { BlogMDX } from '../../../components/blog/blog-mdx';
 import { AnimatedSection } from '../../../components/marketing/animated-section';
 import { MarketingButton } from '../../../components/marketing/button';
+import { CalComLink } from '../../../components/marketing/cal-com-link';
 import { getAllPosts, getPostBySlug } from '../../../lib/blog';
 
 export function generateStaticParams() {
@@ -133,24 +134,26 @@ export default async function BlogPostPage({
 						<H size='3' className='mb-4'>
 							Ready to Apply These Strategies?
 						</H>
-						<p className='mb-8 text-white/70'>
+						<p className='mb-4 text-white/70'>
 							Get personalized guidance for your music marketing journey.
 						</p>
+						<div className='mb-8 space-y-2 text-sm text-white/60'>
+							<p>• 30-minute personalized strategy session</p>
+							<p>• We'll analyze your Spotify & social data ahead of time</p>
+							<p>• You'll receive a custom strategy kick-off plan</p>
+							<p>• Plus, we'll show you exactly how barely.nyc can help you execute it</p>
+						</div>
 						<div className='flex flex-col justify-center gap-4 sm:flex-row'>
 							<Link href='/services'>
 								<MarketingButton marketingLook='hero-primary'>
 									Explore Our Services
 								</MarketingButton>
 							</Link>
-							<a
-								href='https://cal.com/barely/nyc'
-								target='_blank'
-								rel='noopener noreferrer'
-							>
+							<CalComLink>
 								<MarketingButton marketingLook='scientific'>
 									Book Free Strategy Call
 								</MarketingButton>
-							</a>
+							</CalComLink>
 						</div>
 					</AnimatedSection>
 				</div>
