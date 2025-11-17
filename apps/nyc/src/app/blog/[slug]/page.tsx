@@ -72,7 +72,7 @@ export default async function BlogPostPage({
 			</section>
 
 			{/* Post Header */}
-			<section className='px-4 py-12 sm:px-6 lg:px-8'>
+			<section className='px-4 py-6 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-4xl'>
 					<AnimatedSection animation='fade-up'>
 						<div className='mb-12 text-center'>
@@ -120,11 +120,9 @@ export default async function BlogPostPage({
 			</section>
 
 			{/* Post Content */}
-			<section className='px-4 py-12 sm:px-6 lg:px-8'>
+			<section className='px-4 pb-12 pt-0 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-4xl'>
-					<AnimatedSection animation='fade-up' delay={200}>
-						<BlogMDX markdown={post.content} />
-					</AnimatedSection>
+					<BlogMDX markdown={post.content} />
 				</div>
 			</section>
 
