@@ -12,6 +12,7 @@ import { TextField } from '@barely/ui/forms/text-field';
 import { Icon } from '@barely/ui/icon';
 import { Modal, ModalBody, ModalHeader } from '@barely/ui/modal';
 
+import { useCalComUrl } from '../../hooks/use-cal-com-url';
 import { MarketingButton } from './button';
 import { SecurityBadge } from './trust-badges';
 
@@ -53,6 +54,7 @@ export function ContactModal({
 	preSelectedService,
 	prefillData,
 }: ContactModalProps) {
+	const calComUrl = useCalComUrl();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [submitSuccess, setSubmitSuccess] = useState(false);
 	const [submitError, setSubmitError] = useState<string | null>(null);
@@ -249,7 +251,7 @@ export function ContactModal({
 								Or book a free strategy call:
 							</p>
 							<a
-								href='https://cal.com/barely/nyc'
+								href={calComUrl}
 								target='_blank'
 								rel='noopener noreferrer'
 								className='block'
@@ -260,9 +262,12 @@ export function ContactModal({
 									className='flex items-center justify-center gap-2'
 								>
 									<Icon.calendar className='h-4 w-4' />
-									Book 15-Min Discovery Call
+									Book Free 30-Min Strategy Call
 								</MarketingButton>
 							</a>
+							<p className='mt-2 text-center text-xs text-white/60'>
+								Get your custom strategy kick-off plan
+							</p>
 						</div>
 
 						<p className='mt-4 text-center text-xs text-white/50'>
