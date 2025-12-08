@@ -32,7 +32,7 @@ export type BioOnLinkClick = (
 export type BioOnContactCapture = (data: {
 	bioId: string;
 	blockId?: string; // Optional for backwards compatibility with legacy forms
-	email?: string;
+	email: string; // Email is always required (Fan.email is notNull)
 	phone?: string;
 	marketingConsent: boolean;
 	smsMarketingConsent: boolean;

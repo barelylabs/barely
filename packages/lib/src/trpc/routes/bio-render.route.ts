@@ -135,18 +135,14 @@ export const bioRenderRoute = {
 
 	captureEmail: publicProcedure
 		.input(
-			z
-				.object({
-					bioId: z.string(),
-					blockId: z.string().optional(), // Optional for backwards compatibility with legacy forms
-					email: z.email().optional(),
-					phone: z.string().optional(),
-					marketingConsent: z.boolean().default(false),
-					smsMarketingConsent: z.boolean().default(false),
-				})
-				.refine(data => data.email ?? data.phone, {
-					message: 'Email or phone is required',
-				}),
+			z.object({
+				bioId: z.string(),
+				blockId: z.string().optional(), // Optional for backwards compatibility with legacy forms
+				email: z.email(), // Email is always required (Fan.email is notNull)
+				phone: z.string().optional(),
+				marketingConsent: z.boolean().default(false),
+				smsMarketingConsent: z.boolean().default(false),
+			}),
 		)
 		.mutation(async ({ ctx, input }) => {
 			const { visitor } = ctx;
@@ -181,9 +177,8 @@ export const bioRenderRoute = {
 					},
 				})) ?? raiseTRPCError({ message: 'Bio not found' });
 
-			// Check if at least one capture method is enabled
-			// If blockId is provided, check block-level settings; otherwise fall back to bio-level (legacy)
-			let emailCaptureAllowed = false;
+			// Check if SMS capture is enabled for phone number collection
+			// Email is always captured (Fan.email is notNull)
 			let smsCaptureAllowed = false;
 
 			if (blockId) {
@@ -202,37 +197,23 @@ export const bioRenderRoute = {
 					});
 				}
 
-				emailCaptureAllowed = !!(email && (block.emailCaptureEnabled ?? true));
 				smsCaptureAllowed = !!(phone && (block.smsCaptureEnabled ?? true));
-			} else {
-				// Legacy bio-level validation (for backwards compatibility)
-				emailCaptureAllowed = !!(email && bio.emailCaptureEnabled);
-				smsCaptureAllowed = false; // Legacy forms don't support SMS
 			}
-
-			if (!emailCaptureAllowed && !smsCaptureAllowed) {
-				throw new TRPCError({
-					code: 'FORBIDDEN',
-					message: 'Contact capture is not enabled for this form.',
-				});
-			}
+			// Legacy bio-level forms don't support SMS, but email is always allowed
 
 			// Use database transaction for fan creation and contact capture
 			const pool = makePool();
 			await dbPool(pool).transaction(async tx => {
-				// Check if fan already exists globally (by email if provided, otherwise we'll create new)
-				let existingFan = null;
-				if (email) {
-					existingFan = await tx.query.Fans.findFirst({
-						where: and(eq(Fans.email, email), isNull(Fans.deletedAt)),
-					});
-				}
+				// Check if fan already exists globally by email
+				const existingFan = await tx.query.Fans.findFirst({
+					where: and(eq(Fans.email, email), isNull(Fans.deletedAt)),
+				});
 
 				let fanId: string;
 
 				if (!existingFan) {
-					// Create new fan - clean up email prefix for fullName (or use phone)
-					const emailPrefix = email?.split('@')[0] ?? 'Fan';
+					// Create new fan - clean up email prefix for fullName
+					const emailPrefix = email.split('@')[0] ?? 'Fan';
 					const cleanedName =
 						emailPrefix
 							.replace(/\+/g, ' ') // Replace + with space
@@ -240,20 +221,16 @@ export const bioRenderRoute = {
 							.replace(/\d+/g, '') // Remove numbers
 							.trim() || 'Fan'; // Fallback to 'Fan' if empty
 
-					// If we only have phone and no email, we need a placeholder email
-					// since email is required in the Fans table
-					const fanEmail = email ?? `${phone?.replace(/\D/g, '')}@sms.placeholder.local`;
-
 					const newFans = await tx
 						.insert(Fans)
 						.values({
 							id: newId('fan'),
 							workspaceId: bio.workspaceId,
-							email: fanEmail,
+							email,
 							fullName: cleanedName,
-							phoneNumber: phone,
-							emailMarketingOptIn: email ? marketingConsent : false,
-							smsMarketingOptIn: phone ? smsMarketingConsent : false,
+							phoneNumber: smsCaptureAllowed ? phone : undefined,
+							emailMarketingOptIn: marketingConsent,
+							smsMarketingOptIn: smsCaptureAllowed && phone ? smsMarketingConsent : false,
 							appReferer: 'bio', // Track that this fan came from bio page
 							createdAt: new Date(),
 							updatedAt: new Date(),
@@ -262,8 +239,8 @@ export const bioRenderRoute = {
 							target: [Fans.email],
 							set: {
 								updatedAt: new Date(),
-								...(email ? { emailMarketingOptIn: marketingConsent } : {}),
-								...(phone ?
+								emailMarketingOptIn: marketingConsent,
+								...(smsCaptureAllowed && phone ?
 									{ phoneNumber: phone, smsMarketingOptIn: smsMarketingConsent }
 								:	{}),
 							},
@@ -284,8 +261,8 @@ export const bioRenderRoute = {
 						.update(Fans)
 						.set({
 							updatedAt: new Date(),
-							...(email ? { emailMarketingOptIn: marketingConsent } : {}),
-							...(phone ?
+							emailMarketingOptIn: marketingConsent,
+							...(smsCaptureAllowed && phone ?
 								{ phoneNumber: phone, smsMarketingOptIn: smsMarketingConsent }
 							:	{}),
 							...(existingFan.appReferer ? {} : { appReferer: 'bio' as const }),

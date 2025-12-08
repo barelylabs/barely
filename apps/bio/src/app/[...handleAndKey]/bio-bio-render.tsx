@@ -151,7 +151,7 @@ function BioBioProvider({
 		async (data: {
 			bioId: string;
 			blockId?: string;
-			email?: string;
+			email: string; // Email is always required (Fan.email is notNull)
 			phone?: string;
 			marketingConsent: boolean;
 			smsMarketingConsent: boolean;

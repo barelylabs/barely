@@ -26,10 +26,11 @@ interface ContactFormBlockProps {
 	blockIndex: number;
 }
 
-// Create dynamic schema based on which capture methods are enabled
-function createContactFormSchema(emailEnabled: boolean, smsEnabled: boolean) {
-	const baseSchema = z.object({
-		email: emailEnabled ? z.email('Please enter a valid email') : z.string().optional(),
+// Create dynamic schema based on SMS capture settings
+// Email is always required (Fan.email is notNull in the database)
+function createContactFormSchema(smsEnabled: boolean) {
+	return z.object({
+		email: z.email('Please enter a valid email'),
 		phone:
 			smsEnabled ?
 				z
@@ -43,36 +44,10 @@ function createContactFormSchema(emailEnabled: boolean, smsEnabled: boolean) {
 		marketingConsent: z.boolean().default(true),
 		smsMarketingConsent: z.boolean().default(true),
 	});
-
-	// If both are enabled, require at least one
-	if (emailEnabled && smsEnabled) {
-		return baseSchema.refine(data => data.email ?? data.phone, {
-			message: 'Please provide an email or phone number',
-			path: ['email'],
-		});
-	}
-
-	// If only email is enabled, make it required
-	if (emailEnabled && !smsEnabled) {
-		return baseSchema.refine(data => !!data.email, {
-			message: 'Please enter your email',
-			path: ['email'],
-		});
-	}
-
-	// If only SMS is enabled, make phone required
-	if (!emailEnabled && smsEnabled) {
-		return baseSchema.refine(data => !!data.phone, {
-			message: 'Please enter your phone number',
-			path: ['phone'],
-		});
-	}
-
-	return baseSchema;
 }
 
 interface ContactFormData {
-	email?: string;
+	email: string;
 	phone?: string;
 	marketingConsent: boolean;
 	smsMarketingConsent: boolean;
@@ -85,14 +60,14 @@ export function ContactFormBlock({ block }: ContactFormBlockProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [submitSuccess, setSubmitSuccess] = useState(false);
 
-	// Get capture settings from block (defaults to true if not set)
-	const emailCaptureEnabled = block.emailCaptureEnabled ?? true;
+	// Get SMS capture setting from block (defaults to true if not set)
+	// Email is always required (Fan.email is notNull in the database)
 	const smsCaptureEnabled = block.smsCaptureEnabled ?? true;
 
-	// Create schema based on enabled capture methods
+	// Create schema based on SMS capture setting
 	const contactFormSchema = useMemo(
-		() => createContactFormSchema(emailCaptureEnabled, smsCaptureEnabled),
-		[emailCaptureEnabled, smsCaptureEnabled],
+		() => createContactFormSchema(smsCaptureEnabled),
+		[smsCaptureEnabled],
 	);
 
 	const form = useZodForm({
@@ -187,18 +162,16 @@ export function ContactFormBlock({ block }: ContactFormBlockProps) {
 						</Text>
 					</div>
 				:	<Form form={form} onSubmit={handleSubmit} className='space-y-4'>
-						{emailCaptureEnabled && (
-							<TextField
-								control={form.control}
-								name='email'
-								type='email'
-								placeholder='Enter your email'
-								className='w-full'
-								style={{
-									fontFamily: computedStyles.fonts.bodyFont,
-								}}
-							/>
-						)}
+						<TextField
+							control={form.control}
+							name='email'
+							type='email'
+							placeholder='Enter your email'
+							className='w-full'
+							style={{
+								fontFamily: computedStyles.fonts.bodyFont,
+							}}
+						/>
 
 						{smsCaptureEnabled && (
 							<PhoneField
@@ -213,11 +186,9 @@ export function ContactFormBlock({ block }: ContactFormBlockProps) {
 						)}
 
 						<Text variant='2xs/normal' className='text-brandKit-block-text'>
-							{emailCaptureEnabled && smsCaptureEnabled ?
+							{smsCaptureEnabled ?
 								`By submitting, you agree to receive updates and offers from @${bio.handle}.`
-							: emailCaptureEnabled ?
-								`By submitting your email, you agree to receive updates and offers from @${bio.handle}.`
-							:	`By submitting your phone number, you agree to receive SMS updates from @${bio.handle}.`
+							:	`By submitting your email, you agree to receive updates and offers from @${bio.handle}.`
 							}
 						</Text>
 

@@ -205,73 +205,37 @@ export function BioContactFormPage({ blockId }: { blockId: string }) {
 				{/* Settings Tab */}
 				<TabsContent value='settings' className='space-y-4'>
 					<div className='space-y-6'>
-						{/* Capture Methods Section */}
+						{/* SMS Capture Section */}
 						<div>
 							<Text variant='lg/semibold' className='mb-2'>
-								Capture Methods
+								SMS Capture
 							</Text>
 							<Text variant='sm/normal' className='mb-4 text-gray-500'>
-								Choose which contact information to collect. At least one method must be
-								enabled.
+								Email is always collected. Optionally enable SMS capture to also collect
+								phone numbers.
 							</Text>
-							<div className='space-y-4'>
-								<div className='flex items-center justify-between rounded-lg border p-4'>
-									<div className='flex items-center gap-3'>
-										<div className='flex h-8 w-8 items-center justify-center rounded-md bg-blue-100'>
-											<Mail className='h-4 w-4 text-blue-600' />
-										</div>
-										<div>
-											<Text variant='sm/medium'>Email Capture</Text>
-											<Text variant='xs/normal' className='text-gray-500'>
-												Collect email addresses from visitors
-											</Text>
-										</div>
+							<div className='flex items-center justify-between rounded-lg border p-4'>
+								<div className='flex items-center gap-3'>
+									<div className='flex h-8 w-8 items-center justify-center rounded-md bg-green-100'>
+										<MessageSquare className='h-4 w-4 text-green-600' />
 									</div>
-									<Switch
-										checked={block.emailCaptureEnabled ?? true}
-										onCheckedChange={checked => {
-											// Ensure at least one is enabled
-											if (!checked && !(block.smsCaptureEnabled ?? true)) {
-												toast.error('At least one capture method must be enabled');
-												return;
-											}
-											updateBlock({
-												handle,
-												id: blockId,
-												emailCaptureEnabled: checked,
-											});
-										}}
-									/>
-								</div>
-
-								<div className='flex items-center justify-between rounded-lg border p-4'>
-									<div className='flex items-center gap-3'>
-										<div className='flex h-8 w-8 items-center justify-center rounded-md bg-green-100'>
-											<MessageSquare className='h-4 w-4 text-green-600' />
-										</div>
-										<div>
-											<Text variant='sm/medium'>SMS Capture</Text>
-											<Text variant='xs/normal' className='text-gray-500'>
-												Collect phone numbers for SMS updates
-											</Text>
-										</div>
+									<div>
+										<Text variant='sm/medium'>Enable SMS Capture</Text>
+										<Text variant='xs/normal' className='text-gray-500'>
+											Collect phone numbers for SMS updates
+										</Text>
 									</div>
-									<Switch
-										checked={block.smsCaptureEnabled ?? true}
-										onCheckedChange={checked => {
-											// Ensure at least one is enabled
-											if (!checked && !(block.emailCaptureEnabled ?? true)) {
-												toast.error('At least one capture method must be enabled');
-												return;
-											}
-											updateBlock({
-												handle,
-												id: blockId,
-												smsCaptureEnabled: checked,
-											});
-										}}
-									/>
 								</div>
+								<Switch
+									checked={block.smsCaptureEnabled ?? true}
+									onCheckedChange={checked => {
+										updateBlock({
+											handle,
+											id: blockId,
+											smsCaptureEnabled: checked,
+										});
+									}}
+								/>
 							</div>
 						</div>
 

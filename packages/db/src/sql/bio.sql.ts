@@ -212,7 +212,7 @@ export const BioBlocks = pgTable(
 		subtitle: varchar('subtitle', { length: 255 }), // for rendering a subtitle below the block
 
 		// Contact form block settings (for type='contactForm')
-		emailCaptureEnabled: boolean('emailCaptureEnabled').default(true),
+		// Email is always required (Fan.email is notNull), so no toggle needed
 		smsCaptureEnabled: boolean('smsCaptureEnabled').default(true),
 
 		// Markdown block fields
