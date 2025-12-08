@@ -106,6 +106,7 @@ export const bioEventIngestSchema = webEventIngestSchema.extend({
 	bio_linkText: z.string().nullish(),
 	bio_linkAnimation: z.enum(BIO_BLOCK_ANIMATION_TYPES).nullish(),
 	bio_emailMarketingOptIn: z.boolean().nullish(),
+	bio_smsMarketingOptIn: z.boolean().nullish(),
 });
 
 export const cartEventIngestSchema = webEventIngestSchema.extend({

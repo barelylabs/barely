@@ -117,6 +117,7 @@ export async function recordBioEvent({
 	linkIndex,
 	linkAnimation,
 	emailMarketingOptIn,
+	smsMarketingOptIn,
 }: {
 	bio: Bio;
 	type: (typeof WEB_EVENT_TYPES__BIO)[number];
@@ -127,6 +128,7 @@ export async function recordBioEvent({
 	linkIndex?: number;
 	linkAnimation?: 'none' | 'bounce' | 'wobble' | 'jello' | 'pulse' | 'shake' | 'tada';
 	emailMarketingOptIn?: boolean;
+	smsMarketingOptIn?: boolean;
 	visitor?: VisitorInfo;
 	workspace: Pick<Workspace, 'id' | 'plan' | 'eventUsage' | 'eventUsageLimitOverride'>;
 }) {
@@ -224,6 +226,7 @@ export async function recordBioEvent({
 			bio_linkText: bioLink?.text ?? null,
 			bio_linkAnimation: linkAnimation ?? null,
 			bio_emailMarketingOptIn: emailMarketingOptIn ?? null,
+			bio_smsMarketingOptIn: smsMarketingOptIn ?? null,
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : undefined,
 			// Journey tracking fields (if supported by schema)
 			journeyId,
