@@ -255,7 +255,7 @@ export function BioContactFormPage({ blockId }: { blockId: string }) {
 											}
 										}}
 										onBlur={() => {
-											if (editTitle !== (block?.title ?? '')) {
+											if (editTitle !== (block.title ?? '')) {
 												updateBlock({ handle, id: blockId, title: editTitle || null });
 											}
 										}}
@@ -281,7 +281,7 @@ export function BioContactFormPage({ blockId }: { blockId: string }) {
 											}
 										}}
 										onBlur={() => {
-											if (editSubtitle !== (block?.subtitle ?? '')) {
+											if (editSubtitle !== (block.subtitle ?? '')) {
 												updateBlock({
 													handle,
 													id: blockId,
