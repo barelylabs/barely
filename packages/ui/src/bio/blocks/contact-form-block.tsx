@@ -118,8 +118,8 @@ export function ContactFormBlock({ block }: ContactFormBlockProps) {
 			<div
 				className={cn(
 					'p-6',
-					'bg-brandKit-text',
-
+					'bg-brandKit-block/5 backdrop-blur-sm',
+					'border-brandKit-block/20 border-2',
 					getBrandKitBlockRadiusClass(computedStyles.block.radius),
 					getBrandKitShadowClass(computedStyles.block.shadow),
 					getBrandKitOutlineClass(computedStyles.block.outline),
@@ -132,7 +132,7 @@ export function ContactFormBlock({ block }: ContactFormBlockProps) {
 				{block.title && (
 					<Text
 						variant='lg/semibold'
-						className='mb-2 text-center text-brandKit-block-text'
+						className='mb-2 text-center text-brandKit-block'
 						style={{
 							fontFamily: computedStyles.fonts.headingFont,
 						}}
@@ -145,7 +145,7 @@ export function ContactFormBlock({ block }: ContactFormBlockProps) {
 				{block.subtitle && (
 					<Text
 						variant='sm/normal'
-						className='mb-4 text-center text-brandKit-block-text'
+						className='text-brandKit-block/80 mb-4 text-center'
 						style={{
 							fontFamily: computedStyles.fonts.bodyFont,
 						}}
@@ -157,7 +157,7 @@ export function ContactFormBlock({ block }: ContactFormBlockProps) {
 				{/* Success Message */}
 				{submitSuccess ?
 					<div className='rounded-lg p-4 text-center'>
-						<Text variant='sm/semibold' className='text-brandKit-block-text'>
+						<Text variant='sm/semibold' className='text-brandKit-block'>
 							Thank you! We'll be in touch soon.
 						</Text>
 					</div>
@@ -166,7 +166,7 @@ export function ContactFormBlock({ block }: ContactFormBlockProps) {
 							control={form.control}
 							name='email'
 							type='email'
-							placeholder='Enter your email'
+							placeholder='you@youremail.com'
 							className='w-full'
 							style={{
 								fontFamily: computedStyles.fonts.bodyFont,
@@ -179,13 +179,14 @@ export function ContactFormBlock({ block }: ContactFormBlockProps) {
 								name='phone'
 								placeholder='Enter your phone number'
 								className='w-full'
+								selectTriggerClassName='text-brandKit-block'
 								style={{
 									fontFamily: computedStyles.fonts.bodyFont,
 								}}
 							/>
 						)}
 
-						<Text variant='2xs/normal' className='text-brandKit-block-text'>
+						<Text variant='2xs/normal' className='text-brandKit-block/80'>
 							{smsCaptureEnabled ?
 								`By submitting, you agree to receive updates and offers from @${bio.handle}.`
 							:	`By submitting your email, you agree to receive updates and offers from @${bio.handle}.`
@@ -196,7 +197,7 @@ export function ContactFormBlock({ block }: ContactFormBlockProps) {
 							loading={isSubmitting}
 							fullWidth
 							className={cn(
-								'bg-brandKit-block-text text-brandKit-block',
+								'bg-brandKit-block text-brandKit-block-text',
 								'transition-opacity hover:opacity-90',
 								getBrandKitButtonRadiusClass(computedStyles.block.radius),
 								getBrandKitOutlineClass(computedStyles.block.outline),
