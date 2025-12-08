@@ -1,6 +1,7 @@
 import type { CountryCode } from '@barely/validators/helpers';
 import type { FieldPath, FieldValues } from 'react-hook-form';
 import { useState } from 'react';
+import { cn } from '@barely/utils';
 import { parseIncompletePhoneNumber } from '@barely/validators/helpers';
 import { Controller } from 'react-hook-form';
 
@@ -36,8 +37,10 @@ export const PhoneField = <
 	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
 	hint,
+	selectTriggerClassName,
 	...props
-}: FieldProps<TFieldValues, TName> & InputProps) => {
+}: FieldProps<TFieldValues, TName> &
+	InputProps & { selectTriggerClassName?: string }) => {
 	const [countryCode, setCountryCode] = useState<CountryCode>('US');
 
 	const handleInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -80,7 +83,12 @@ export const PhoneField = <
 											onValueChange={value => setCountryCode(value as CountryCode)}
 											disabled={props.disabled}
 										>
-											<SelectTrigger className='border-transparent bg-transparent pr-1 dark:border-transparent'>
+											<SelectTrigger
+												className={cn(
+													'border-transparent bg-transparent pr-1 dark:border-transparent',
+													selectTriggerClassName,
+												)}
+											>
 												<SelectValue />
 											</SelectTrigger>
 											<SelectContent>
