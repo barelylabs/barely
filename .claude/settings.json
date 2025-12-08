@@ -12,7 +12,14 @@
 			"WebSearch",
 			"WebFetch(domain:github.com)",
 			"WebFetch(domain:www.shipengine.com)",
-			"WebFetch(domain:raw.githubusercontent.com)"
+			"WebFetch(domain:raw.githubusercontent.com)",
+            "mcp__airtable__create_record",
+            "mcp__airtable__search_records",
+            "mcp__airtable__update_records",
+            "mcp__airtable__describe_table",
+            "mcp__airtable__list_records",
+            "mcp__airtable__list_bases",
+            "mcp__airtable__list_tables"
 		],
 		"deny": []
 	},

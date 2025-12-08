@@ -39,6 +39,9 @@ const rateLimitSchema = z
 export const libEnv = createEnv({
 	extends: [authEnv],
 	server: {
+		AIRTABLE_ACCESS_TOKEN: z.string(),
+		AIRTABLE_BASE_ID: z.string(),
+		AIRTABLE_LEADS_TABLE_ID: z.string(),
 		ANTHROPIC_API_KEY: z.string(),
 		AUTH_SECRET: z.string(),
 		AWS_S3_BUCKET_NAME: z.string(),
@@ -61,6 +64,8 @@ export const libEnv = createEnv({
 		LOCALHOST_IP: z.string(),
 		MAILCHIMP_CLIENT_ID: z.string(),
 		MAILCHIMP_CLIENT_SECRET: z.string(),
+		META_PIXEL_ID_NYC: z.string(),
+		META_PIXEL_ACCESS_TOKEN_NYC: z.string(), // Required for server-side Conversions API
 		META_TEST_EVENT_CODE: z.string().optional(),
 		NEXTAUTH_SECRET: z.string(),
 		OPENAI_API_KEY: z.string(),
@@ -109,6 +114,8 @@ export const libEnv = createEnv({
 		NEXT_PUBLIC_LINK_DEV_PORT: devPortSchema,
 		NEXT_PUBLIC_MANAGE_EMAIL_DEV_PORT: devPortSchema,
 		NEXT_PUBLIC_MANAGE_EMAIL_BASE_URL: z.string(),
+		NEXT_PUBLIC_NYC_BASE_URL: z.string(),
+		NEXT_PUBLIC_NYC_DEV_PORT: devPortSchema,
 		NEXT_PUBLIC_PUSHER_APP_ID: z.string(),
 		NEXT_PUBLIC_PUSHER_APP_KEY: z.string(),
 		NEXT_PUBLIC_PUSHER_APP_CLUSTER: z.string(),
@@ -132,6 +139,8 @@ export const libEnv = createEnv({
 		NEXT_PUBLIC_FM_DEV_PORT: process.env.NEXT_PUBLIC_FM_DEV_PORT,
 		NEXT_PUBLIC_MANAGE_EMAIL_BASE_URL: process.env.NEXT_PUBLIC_MANAGE_EMAIL_BASE_URL,
 		NEXT_PUBLIC_MANAGE_EMAIL_DEV_PORT: process.env.NEXT_PUBLIC_MANAGE_EMAIL_DEV_PORT,
+		NEXT_PUBLIC_NYC_BASE_URL: process.env.NEXT_PUBLIC_NYC_BASE_URL,
+		NEXT_PUBLIC_NYC_DEV_PORT: process.env.NEXT_PUBLIC_NYC_DEV_PORT,
 		NEXT_PUBLIC_PAGE_BASE_URL: process.env.NEXT_PUBLIC_PAGE_BASE_URL,
 		NEXT_PUBLIC_PAGE_DEV_PORT: process.env.NEXT_PUBLIC_PAGE_DEV_PORT,
 		NEXT_PUBLIC_PRESS_BASE_URL: process.env.NEXT_PUBLIC_PRESS_BASE_URL,

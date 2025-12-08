@@ -33,6 +33,13 @@ export const WEB_EVENT_TYPES__BIO = [
 	'bio/emailCapture',
 ] as const;
 
+export const WEB_EVENT_TYPES__NYC = [
+	'nyc/pageView',
+	'nyc/contactFormSubmit',
+	'nyc/playlistSubmit',
+	'nyc/linkClick',
+] as const;
+
 export const WEB_EVENT_TYPES = [
 	...WEB_EVENT_TYPES__CART,
 	...WEB_EVENT_TYPES__FM,
@@ -40,6 +47,7 @@ export const WEB_EVENT_TYPES = [
 	...WEB_EVENT_TYPES__PAGE,
 	...WEB_EVENT_TYPES__VIP,
 	...WEB_EVENT_TYPES__BIO,
+	...WEB_EVENT_TYPES__NYC,
 ] as const;
 
 export type WebEventType = (typeof WEB_EVENT_TYPES)[number];

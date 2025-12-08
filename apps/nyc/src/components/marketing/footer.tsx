@@ -99,6 +99,14 @@ export function Footer() {
 									</Link>
 								</li>
 								<li>
+									<Link
+										href='/blog'
+										className='text-sm text-white/70 transition-colors hover:text-white'
+									>
+										Blog
+									</Link>
+								</li>
+								<li>
 									<a
 										href='https://barely.ai'
 										target='_blank'

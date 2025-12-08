@@ -1,3 +1,4 @@
+import type { NextRequest } from 'next/server';
 import { sendEmail } from '@barely/email';
 import { ratelimit } from '@barely/lib';
 import { ipAddress } from '@vercel/edge';
@@ -13,6 +14,24 @@ vi.mock('@barely/email', () => ({
 vi.mock('@barely/lib', () => ({
 	ratelimit: vi.fn(() => ({
 		limit: vi.fn().mockResolvedValue({ success: true }),
+	})),
+}));
+
+vi.mock('@barely/lib/functions/nyc-event.fns', () => ({
+	recordNYCEvent: vi.fn().mockResolvedValue({ success: true }),
+}));
+
+vi.mock('@barely/lib/middleware/request-parsing', () => ({
+	parseReqForVisitorInfo: vi.fn(() => ({
+		ip: '127.0.0.1',
+		geo: { country: 'US' },
+		userAgent: { ua: 'test-agent' },
+		isBot: false,
+		referer: null,
+		referer_url: null,
+		href: 'http://localhost:3000',
+		sessionId: 'test-session',
+		fbclid: null,
 	})),
 }));
 
@@ -56,7 +75,7 @@ describe('Contact API Route', () => {
 				} satisfies ContactFormData),
 			});
 
-			const response = await POST(request);
+			const response = await POST(request as NextRequest);
 			const data = (await response.json()) as ApiResponse;
 
 			expect(response.status).toBe(200);
@@ -82,7 +101,7 @@ describe('Contact API Route', () => {
 				}),
 			});
 
-			const response = await POST(request);
+			const response = await POST(request as NextRequest);
 			const data = (await response.json()) as ApiResponse;
 
 			expect(response.status).toBe(400);
@@ -100,7 +119,7 @@ describe('Contact API Route', () => {
 				}),
 			});
 
-			const response = await POST(request);
+			const response = await POST(request as NextRequest);
 			const data = (await response.json()) as ApiResponse;
 
 			expect(response.status).toBe(400);
@@ -124,7 +143,7 @@ describe('Contact API Route', () => {
 				}),
 			});
 
-			const response = await POST(request);
+			const response = await POST(request as NextRequest);
 			const data = (await response.json()) as ApiResponse;
 
 			expect(response.status).toBe(400);
@@ -149,7 +168,7 @@ describe('Contact API Route', () => {
 				}),
 			});
 
-			const response = await POST(request);
+			const response = await POST(request as NextRequest);
 
 			expect(response.status).toBe(429);
 			expect(await response.text()).toBe('Too many requests from this IP');
@@ -174,7 +193,7 @@ describe('Contact API Route', () => {
 				}),
 			});
 
-			const response = await POST(request);
+			const response = await POST(request as NextRequest);
 
 			expect(response.status).toBe(429);
 			expect(await response.text()).toBe('Too many requests from this email');
@@ -194,7 +213,7 @@ describe('Contact API Route', () => {
 				}),
 			});
 
-			const response = await POST(request);
+			const response = await POST(request as NextRequest);
 
 			expect(response.status).toBe(500);
 			expect(await response.text()).toBe('Failed to send email');
@@ -207,7 +226,7 @@ describe('Contact API Route', () => {
 				body: 'invalid json',
 			});
 
-			const response = await POST(request);
+			const response = await POST(request as NextRequest);
 
 			expect(response.status).toBe(500);
 			expect(await response.text()).toBe('Internal server error');
@@ -227,7 +246,7 @@ describe('Contact API Route', () => {
 				}),
 			});
 
-			const response = await POST(request);
+			const response = await POST(request as NextRequest);
 
 			expect(response.status).toBe(200);
 			expect(mockSendEmail).toHaveBeenCalledWith(
@@ -251,7 +270,7 @@ describe('Contact API Route', () => {
 				}),
 			});
 
-			const response = await POST(request);
+			const response = await POST(request as NextRequest);
 
 			expect(response.status).toBe(200);
 			expect(ratelimit).toHaveBeenCalledWith(10, '1 m');
