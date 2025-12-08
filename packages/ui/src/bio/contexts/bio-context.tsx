@@ -29,11 +29,17 @@ export type BioOnLinkClick = (
 	context?: BioBlockContext,
 ) => void | Promise<void>;
 
-export type BioOnEmailCapture = (data: {
+export type BioOnContactCapture = (data: {
 	bioId: string;
-	email: string;
+	blockId?: string; // Optional for backwards compatibility with legacy forms
+	email?: string;
+	phone?: string;
 	marketingConsent: boolean;
+	smsMarketingConsent: boolean;
 }) => Promise<{ success: boolean; message: string }>;
+
+// Legacy alias for backwards compatibility
+export type BioOnEmailCapture = BioOnContactCapture;
 
 export type BioOnPageView = () => void | Promise<void>;
 

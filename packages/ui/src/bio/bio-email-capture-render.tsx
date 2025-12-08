@@ -52,6 +52,7 @@ export function BioEmailCaptureRender() {
 					bioId: bio.id,
 					email: data.email,
 					marketingConsent: data.marketingConsent,
+					smsMarketingConsent: false, // This component only captures email
 				});
 				setIsSubmitted(true);
 				setSuccessMessage(result.message);
