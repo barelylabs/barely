@@ -114,17 +114,6 @@ export function BioContactFormPage({ blockId }: { blockId: string }) {
 		}
 	};
 
-	const handleSaveSettings = () => {
-		if (!block) return;
-		updateBlock({
-			handle,
-			id: blockId,
-			title: editTitle || null,
-			subtitle: editSubtitle || null,
-		});
-		toast.success('Settings saved');
-	};
-
 	// Handle missing block case
 	if (!block) {
 		return (
@@ -252,7 +241,24 @@ export function BioContactFormPage({ blockId }: { blockId: string }) {
 									<label className='mb-2 block text-sm font-medium'>Title</label>
 									<Input
 										value={editTitle}
-										onChange={e => setEditTitle(e.target.value)}
+										onChange={e => {
+											const newTitle = e.target.value;
+											setEditTitle(newTitle);
+											// Optimistically update cache for instant preview
+											const previousBlocks = queryClient.getQueryData(blocksQueryKey);
+											if (previousBlocks) {
+												const updatedBlocks = previousBlocks.map(b => {
+													if (b.id !== blockId) return b;
+													return { ...b, title: newTitle || null };
+												});
+												queryClient.setQueryData(blocksQueryKey, updatedBlocks);
+											}
+										}}
+										onBlur={() => {
+											if (editTitle !== (block?.title ?? '')) {
+												updateBlock({ handle, id: blockId, title: editTitle || null });
+											}
+										}}
 										placeholder='Get in touch'
 									/>
 								</div>
@@ -261,17 +267,33 @@ export function BioContactFormPage({ blockId }: { blockId: string }) {
 									<label className='mb-2 block text-sm font-medium'>Subtitle</label>
 									<Textarea
 										value={editSubtitle}
-										onChange={e => setEditSubtitle(e.target.value)}
+										onChange={e => {
+											const newSubtitle = e.target.value;
+											setEditSubtitle(newSubtitle);
+											// Optimistically update cache for instant preview
+											const previousBlocks = queryClient.getQueryData(blocksQueryKey);
+											if (previousBlocks) {
+												const updatedBlocks = previousBlocks.map(b => {
+													if (b.id !== blockId) return b;
+													return { ...b, subtitle: newSubtitle || null };
+												});
+												queryClient.setQueryData(blocksQueryKey, updatedBlocks);
+											}
+										}}
+										onBlur={() => {
+											if (editSubtitle !== (block?.subtitle ?? '')) {
+												updateBlock({
+													handle,
+													id: blockId,
+													subtitle: editSubtitle || null,
+												});
+											}
+										}}
 										placeholder="I'd love to hear from you! Drop me a message below."
 										rows={3}
 									/>
 								</div>
 							</div>
-						</div>
-						<div className='flex justify-end pt-4'>
-							<Button onClick={handleSaveSettings} size='lg' look='primary'>
-								Save Settings
-							</Button>
 						</div>
 					</div>
 				</TabsContent>
