@@ -165,6 +165,8 @@ export function ContactFormBlock({ block }: ContactFormBlockProps) {
 						<TextField
 							control={form.control}
 							name='email'
+							label='Email'
+							labelClassName='text-brandKit-block'
 							type='email'
 							placeholder='you@youremail.com'
 							className='w-full text-foreground'
@@ -177,6 +179,8 @@ export function ContactFormBlock({ block }: ContactFormBlockProps) {
 							<PhoneField
 								control={form.control}
 								name='phone'
+								label='Phone'
+								labelClassName='text-brandKit-block'
 								placeholder='Enter your phone number'
 								className='w-full text-foreground'
 								selectTriggerClassName='text-foreground'

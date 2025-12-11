@@ -37,6 +37,7 @@ export default {
 				heading: ['var(--font-heading)', ...defaultTheme.fontFamily.sans],
 			},
 			fontSize: {
+				'3xs': '0.5rem',
 				'2xs': '0.625rem',
 				md: '1rem',
 				'tremor-label': ['0.75rem', {}],

@@ -58,6 +58,10 @@ export function BioContactFormPage({ blockId }: { blockId: string }) {
 	// Find the specific block
 	const block = blocks.find(b => b.id === blockId);
 
+	// Store original values for blur comparison (to detect if user actually changed the value)
+	const [originalTitle] = useState(block?.title ?? '');
+	const [originalSubtitle] = useState(block?.subtitle ?? '');
+
 	// Initialize form values when block loads
 	React.useEffect(() => {
 		if (block) {
@@ -255,7 +259,7 @@ export function BioContactFormPage({ blockId }: { blockId: string }) {
 											}
 										}}
 										onBlur={() => {
-											if (editTitle !== (block.title ?? '')) {
+											if (editTitle !== originalTitle) {
 												updateBlock({ handle, id: blockId, title: editTitle || null });
 											}
 										}}
@@ -281,7 +285,7 @@ export function BioContactFormPage({ blockId }: { blockId: string }) {
 											}
 										}}
 										onBlur={() => {
-											if (editSubtitle !== (block.subtitle ?? '')) {
+											if (editSubtitle !== originalSubtitle) {
 												updateBlock({
 													handle,
 													id: blockId,
