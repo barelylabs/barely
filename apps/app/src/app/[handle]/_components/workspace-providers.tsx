@@ -19,6 +19,8 @@ import { workspaceAtom } from '@barely/atoms/workspace';
 import { BrandKitProvider } from '@barely/ui/bio';
 import { ThemeProvider } from '@barely/ui/next-theme-provider';
 
+import { ElectricPreSyncProvider } from './electric-pre-sync-provider';
+
 interface UserContextProviderProps {
 	user: SessionUser;
 	children: ReactNode;
@@ -78,11 +80,13 @@ export function WorkspaceProviders(
 	return (
 		<ThemeProvider attribute='class' defaultTheme='system' enableSystem>
 			<UserContextProvider user={props.user}>
-				<WorkspaceContextProvider workspace={props.workspace}>
-					<BrandKitContextProvider>
-						<WorkspaceUpdateNavHistory>{props.children}</WorkspaceUpdateNavHistory>
-					</BrandKitContextProvider>
-				</WorkspaceContextProvider>
+				<ElectricPreSyncProvider workspaces={props.user.workspaces}>
+					<WorkspaceContextProvider workspace={props.workspace}>
+						<BrandKitContextProvider>
+							<WorkspaceUpdateNavHistory>{props.children}</WorkspaceUpdateNavHistory>
+						</BrandKitContextProvider>
+					</WorkspaceContextProvider>
+				</ElectricPreSyncProvider>
 			</UserContextProvider>
 		</ThemeProvider>
 	);
