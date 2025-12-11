@@ -38,9 +38,10 @@ export const PhoneField = <
 >({
 	hint,
 	selectTriggerClassName,
+	labelClassName,
 	...props
 }: FieldProps<TFieldValues, TName> &
-	InputProps & { selectTriggerClassName?: string }) => {
+	InputProps & { selectTriggerClassName?: string; labelClassName?: string }) => {
 	const [countryCode, setCountryCode] = useState<CountryCode>('US');
 
 	const handleInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -70,7 +71,7 @@ export const PhoneField = <
 				render={({ field }) => {
 					return (
 						<FormItem>
-							<FieldLabel>{props.label}</FieldLabel>
+							<FieldLabel className={labelClassName}>{props.label}</FieldLabel>
 
 							<FieldControl>
 								<div className='relative rounded-md'>
