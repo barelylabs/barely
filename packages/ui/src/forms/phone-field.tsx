@@ -101,7 +101,7 @@ export const PhoneField = <
 									<Input
 										type='tel'
 										placeholder={props.placeholder ?? PHONE_PLACEHOLDERS[countryCode]}
-										className='peer pl-16'
+										className={cn('peer pl-16', props.className)}
 										{...field}
 										onKeyDown={e => handleInput(e)}
 										onFocus={() => setFocus(true)}
