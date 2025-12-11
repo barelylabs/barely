@@ -167,7 +167,7 @@ export function ContactFormBlock({ block }: ContactFormBlockProps) {
 							name='email'
 							type='email'
 							placeholder='you@youremail.com'
-							className='w-full'
+							className='w-full text-foreground'
 							style={{
 								fontFamily: computedStyles.fonts.bodyFont,
 							}}
@@ -178,8 +178,8 @@ export function ContactFormBlock({ block }: ContactFormBlockProps) {
 								control={form.control}
 								name='phone'
 								placeholder='Enter your phone number'
-								className='w-full'
-								selectTriggerClassName='text-brandKit-block'
+								className='w-full text-foreground'
+								selectTriggerClassName='text-foreground'
 								style={{
 									fontFamily: computedStyles.fonts.bodyFont,
 								}}
