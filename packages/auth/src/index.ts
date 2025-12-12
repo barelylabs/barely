@@ -1,10 +1,8 @@
+import type { PlanType, WorkspaceTimezone } from '@barely/const';
+import type { BrandKit } from '@barely/db/sql';
 import type { BetterAuthOptions } from 'better-auth';
-import { eq } from '@barely/db';
 import { dbHttp } from '@barely/db/client';
 import {
-	_Files_To_Workspaces__AvatarImage,
-	_Files_To_Workspaces__HeaderImage,
-	_Users_To_Workspaces,
 	ProviderAccounts,
 	Users,
 	UserSessions,
@@ -12,7 +10,7 @@ import {
 } from '@barely/db/sql';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { customSession, magicLink, oAuthProxy } from 'better-auth/plugins';
+import { magicLink, oAuthProxy } from 'better-auth/plugins';
 
 import { authEnv } from '../env';
 import { sendMagicLink } from './utils';
@@ -88,111 +86,8 @@ export function initAuth(options: {
 				currentURL: options.baseUrl,
 				productionURL: options.productionUrl,
 			}),
-			customSession(async ({ user, session }) => {
-				const dbUser = await dbHttp.query.Users.findFirst({
-					where: eq(Users.id, user.id),
-					columns: {
-						fullName: true,
-						firstName: true,
-						lastName: true,
-						pitchScreening: true,
-						pitchReviewing: true,
-						phone: true,
-					},
-					with: {
-						_workspaces: {
-							with: {
-								workspace: {
-									columns: {
-										id: true,
-										name: true,
-										handle: true,
-										plan: true,
-										type: true,
-										timezone: true,
-										spotifyArtistId: true,
-										stripeCustomerId: true,
-										stripeCustomerId_devMode: true,
-										stripeConnectAccountId: true,
-										stripeConnectAccountId_devMode: true,
-										stripeConnectChargesEnabled: true,
-										stripeConnectChargesEnabled_devMode: true,
-										currency: true,
-										shippingAddressLine1: true,
-										shippingAddressLine2: true,
-										shippingAddressCity: true,
-										shippingAddressState: true,
-										shippingAddressPostalCode: true,
-										shippingAddressCountry: true,
-										shippingAddressPhone: true,
-									},
-									with: {
-										brandKit: true,
-										_avatarImages: {
-											where: () => eq(_Files_To_Workspaces__AvatarImage.current, true),
-											with: {
-												file: {
-													columns: {
-														s3Key: true,
-													},
-												},
-											},
-											limit: 1,
-										},
-										_headerImages: {
-											where: () => eq(_Files_To_Workspaces__HeaderImage.current, true),
-											with: {
-												file: {
-													columns: {
-														s3Key: true,
-													},
-												},
-											},
-											limit: 1,
-										},
-									},
-								},
-							},
-						},
-						workspaceInvites: true,
-					},
-				});
-
-				if (!dbUser) {
-					throw new Error('User not found');
-				}
-
-				const workspaces = dbUser._workspaces.map(({ workspace, role }) => ({
-					...workspace,
-					avatarImageS3Key: workspace._avatarImages[0]?.file.s3Key,
-					headerImageS3Key: workspace._headerImages[0]?.file.s3Key,
-					role,
-				}));
-
-				const personalWorkspace = workspaces.find(({ type }) => type === 'personal');
-
-				if (!personalWorkspace) {
-					throw new Error('Personal workspace not found');
-				}
-
-				return {
-					...session,
-					user: {
-						...user,
-						fullName: dbUser.fullName,
-						firstName: dbUser.firstName,
-						lastName: dbUser.lastName,
-						handle: personalWorkspace.handle,
-						avatarImageS3Key: personalWorkspace.avatarImageS3Key,
-						workspaces,
-						pitchScreening: dbUser.pitchScreening,
-						pitchReviewing: dbUser.pitchReviewing,
-						workspaceInvites: dbUser.workspaceInvites,
-						phone: dbUser.phone,
-					},
-					workspaces,
-				};
-			}, options), // <- i think include options here is for custom session type reference
+			// NOTE: customSession was removed to improve auth performance.
+			// Workspace data is now fetched in tRPC workspaceProcedure instead.
 		],
 		socialProviders: {},
 		trustedOrigins: [...devTrustedOrigins, ...previewTrustedOrigins],
@@ -204,5 +99,41 @@ export function initAuth(options: {
 export type Auth = ReturnType<typeof initAuth>;
 export type Session = NonNullable<Awaited<ReturnType<Auth['api']['getSession']>>>;
 export type SessionUser = Session['user'];
-export type SessionWorkspaces = Session['workspaces'];
-export type SessionWorkspace = SessionWorkspaces[number];
+
+/**
+ * SessionWorkspace type - workspace data with brandKit and images.
+ * This data is now fetched in tRPC workspaceProcedure, not in auth session.
+ */
+export interface SessionWorkspace {
+	id: string;
+	name: string;
+	handle: string;
+	plan: PlanType;
+	type: 'personal' | 'creator' | 'solo_artist' | 'band' | 'product';
+	timezone: WorkspaceTimezone;
+	spotifyArtistId: string | null;
+	stripeCustomerId: string | null;
+	stripeCustomerId_devMode: string | null;
+	stripeConnectAccountId: string | null;
+	stripeConnectAccountId_devMode: string | null;
+	stripeConnectChargesEnabled: boolean;
+	stripeConnectChargesEnabled_devMode: boolean;
+	currency: 'usd' | 'gbp';
+	shippingAddressLine1: string | null;
+	shippingAddressLine2: string | null;
+	shippingAddressCity: string | null;
+	shippingAddressState: string | null;
+	shippingAddressPostalCode: string | null;
+	shippingAddressCountry: string | null;
+	shippingAddressPhone: string | null;
+	brandKit: BrandKit | null;
+	avatarImageS3Key: string | undefined;
+	headerImageS3Key: string | undefined;
+	role: 'owner' | 'admin' | 'member';
+	// Internal fields from Drizzle relations - kept for type compatibility
+	// These are populated by fetchUserWorkspaces but not typically used directly
+	_avatarImages: { file: { s3Key: string | null } }[];
+	_headerImages: { file: { s3Key: string | null } }[];
+}
+
+export type SessionWorkspaces = SessionWorkspace[];

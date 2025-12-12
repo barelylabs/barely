@@ -31,10 +31,6 @@
 		"./pool": {
 			"types": "./dist/pool.d.ts",
 			"default": "./src/pool.ts"
-		},
-		"./env": {
-			"types": "./dist/env.d.ts",
-			"default": "./env.ts"
 		}
 	},
 	"license": "MIT",

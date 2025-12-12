@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-import { getDefaultWorkspaceFromSession } from '@barely/auth/utils';
+import { fetchUserWorkspaces, getDefaultWorkspace } from '@barely/auth/utils';
 
 import { getSession } from '~/auth/server';
 
@@ -9,7 +9,8 @@ export default async function RootPage() {
 
 	if (!session) return redirect('/login');
 
-	const defaultWorkspace = getDefaultWorkspaceFromSession(session);
+	const workspaces = await fetchUserWorkspaces(session.user.id);
+	const defaultWorkspace = getDefaultWorkspace(workspaces);
 
 	// If user has no non-personal workspace, redirect to onboarding
 	if (!defaultWorkspace) {

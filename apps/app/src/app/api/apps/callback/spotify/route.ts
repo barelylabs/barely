@@ -1,7 +1,9 @@
 import type { NextRequest } from 'next/server';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { and, eq } from '@barely/db';
 import { dbHttp } from '@barely/db/client';
+import { _Users_To_Workspaces, Workspaces } from '@barely/db/sql';
 import { ProviderAccounts } from '@barely/db/sql/provider-account.sql';
 import { getAbsoluteUrl, getCurrentAppVariant, newId, raise } from '@barely/utils';
 import { providerStateSchema } from '@barely/validators';
@@ -32,13 +34,22 @@ export async function GET(req: NextRequest) {
 		return new Response('user not found', { status: 404 });
 	}
 
-	const workspace = session.workspaces.find(
-		workspace => workspace.id === state.workspaceId,
-	);
+	// Check if user has access to this workspace
+	const userWorkspace = await dbHttp.query._Users_To_Workspaces.findFirst({
+		where: and(
+			eq(_Users_To_Workspaces.userId, userId),
+			eq(_Users_To_Workspaces.workspaceId, state.workspaceId),
+		),
+		with: {
+			workspace: true,
+		},
+	});
 
-	if (!workspace) {
+	if (!userWorkspace) {
 		return new Response('workspace not found', { status: 404 });
 	}
+
+	const workspace = userWorkspace.workspace;
 
 	const tokenRes = await fetch('https://accounts.spotify.com/api/token', {
 		method: 'POST',

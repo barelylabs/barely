@@ -21,8 +21,17 @@ import { ThemeProvider } from '@barely/ui/next-theme-provider';
 
 import { ElectricPreSyncProvider } from './electric-pre-sync-provider';
 
+/**
+ * Extended user type that includes workspaces.
+ * SessionUser from base better-auth doesn't have workspaces,
+ * but we add them in the layout before passing to this provider.
+ */
+interface UserWithWorkspaces extends SessionUser {
+	workspaces: SessionWorkspace[];
+}
+
 interface UserContextProviderProps {
-	user: SessionUser;
+	user: UserWithWorkspaces;
 	children: ReactNode;
 }
 

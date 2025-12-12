@@ -2,11 +2,16 @@
 import { getCurrentAppConfig } from '@barely/const';
 import { eq } from '@barely/db';
 import { dbHttp } from '@barely/db/client';
-import { Users, VerificationTokens } from '@barely/db/sql';
+import {
+	_Files_To_Workspaces__AvatarImage,
+	_Files_To_Workspaces__HeaderImage,
+	Users,
+	VerificationTokens,
+} from '@barely/db/sql';
 import { SignInEmailTemplate } from '@barely/email/templates/auth';
 import { createRandomStringGenerator } from '@better-auth/utils/random';
 
-import type { Session, SessionUser } from '.';
+import type { Session, SessionUser, SessionWorkspace } from '.';
 import { authEnv } from '../env';
 import { getAbsoluteUrl } from './get-url';
 
@@ -144,26 +149,134 @@ export async function sendMagicLink(props: {
 	return emailRes;
 }
 
-export function getSessionWorkspaceByHandle(session: Session, handle: string) {
-	const workspace =
-		handle === 'account' ?
-			session.workspaces.find(w => w.type === 'personal')
-		:	session.workspaces.find(w => w.handle === handle);
-	if (!workspace) {
-		throw new Error('Workspace not found');
+/**
+ * Fetch user's workspaces from database.
+ * This was previously done in auth customSession but is now done on-demand.
+ */
+export async function fetchUserWorkspaces(userId: string): Promise<SessionWorkspace[]> {
+	const dbUser = await dbHttp.query.Users.findFirst({
+		where: eq(Users.id, userId),
+		with: {
+			_workspaces: {
+				with: {
+					workspace: {
+						columns: {
+							id: true,
+							name: true,
+							handle: true,
+							plan: true,
+							type: true,
+							timezone: true,
+							spotifyArtistId: true,
+							stripeCustomerId: true,
+							stripeCustomerId_devMode: true,
+							stripeConnectAccountId: true,
+							stripeConnectAccountId_devMode: true,
+							stripeConnectChargesEnabled: true,
+							stripeConnectChargesEnabled_devMode: true,
+							currency: true,
+							shippingAddressLine1: true,
+							shippingAddressLine2: true,
+							shippingAddressCity: true,
+							shippingAddressState: true,
+							shippingAddressPostalCode: true,
+							shippingAddressCountry: true,
+							shippingAddressPhone: true,
+						},
+						with: {
+							brandKit: true,
+							_avatarImages: {
+								where: () => eq(_Files_To_Workspaces__AvatarImage.current, true),
+								with: {
+									file: {
+										columns: {
+											s3Key: true,
+										},
+									},
+								},
+								limit: 1,
+							},
+							_headerImages: {
+								where: () => eq(_Files_To_Workspaces__HeaderImage.current, true),
+								with: {
+									file: {
+										columns: {
+											s3Key: true,
+										},
+									},
+								},
+								limit: 1,
+							},
+						},
+					},
+				},
+			},
+		},
+	});
+
+	if (!dbUser) {
+		throw new Error('User not found');
 	}
-	return workspace;
+
+	return dbUser._workspaces.map(({ workspace, role }) => ({
+		...workspace,
+		avatarImageS3Key: workspace._avatarImages[0]?.file.s3Key,
+		headerImageS3Key: workspace._headerImages[0]?.file.s3Key,
+		role,
+	}));
 }
 
-export function getUserWorkspaceByHandle(user: SessionUser, handle: string) {
-	const workspace = user.workspaces.find(w => w.handle === handle);
-	if (!workspace) {
-		throw new Error('Workspace not found');
-	}
-	return workspace;
+/**
+ * Get workspace by handle from a list of workspaces.
+ * Handle 'account' returns the personal workspace.
+ */
+export function getWorkspaceByHandle(
+	workspaces: SessionWorkspace[],
+	handle: string,
+): SessionWorkspace | undefined {
+	return handle === 'account' ?
+			workspaces.find(w => w.type === 'personal')
+		:	workspaces.find(w => w.handle === handle);
 }
 
-export function getDefaultWorkspaceFromSession(session: Session) {
-	const defaultWorkspace = session.workspaces.find(w => w.type !== 'personal');
-	return defaultWorkspace ?? null;
+/**
+ * Get the default non-personal workspace.
+ */
+export function getDefaultWorkspace(
+	workspaces: SessionWorkspace[],
+): SessionWorkspace | null {
+	return workspaces.find(w => w.type !== 'personal') ?? null;
+}
+
+/**
+ * @deprecated Session no longer contains workspaces. Use fetchUserWorkspaces() and getWorkspaceByHandle() instead.
+ */
+export function getSessionWorkspaceByHandle(
+	session: Session,
+	handle: string,
+): SessionWorkspace {
+	throw new Error(
+		'getSessionWorkspaceByHandle is deprecated. Session no longer contains workspaces. Use fetchUserWorkspaces() and getWorkspaceByHandle() instead.',
+	);
+}
+
+/**
+ * @deprecated SessionUser no longer contains workspaces. Use fetchUserWorkspaces() instead.
+ */
+export function getUserWorkspaceByHandle(
+	user: SessionUser,
+	handle: string,
+): SessionWorkspace {
+	throw new Error(
+		'getUserWorkspaceByHandle is deprecated. SessionUser no longer contains workspaces. Use fetchUserWorkspaces() and getWorkspaceByHandle() instead.',
+	);
+}
+
+/**
+ * @deprecated Session no longer contains workspaces. Use fetchUserWorkspaces() and getDefaultWorkspace() instead.
+ */
+export function getDefaultWorkspaceFromSession(session: Session): SessionWorkspace | null {
+	throw new Error(
+		'getDefaultWorkspaceFromSession is deprecated. Session no longer contains workspaces. Use fetchUserWorkspaces() and getDefaultWorkspace() instead.',
+	);
 }

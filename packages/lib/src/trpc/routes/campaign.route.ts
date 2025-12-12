@@ -28,7 +28,7 @@ import { TRPCError } from '@trpc/server';
 import { and, asc, eq, inArray } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
-import { createMagicLink } from '@barely/auth/utils';
+import { createMagicLink, fetchUserWorkspaces } from '@barely/auth/utils';
 
 import {
 	createPitchCheckoutLink,
@@ -332,10 +332,9 @@ export const campaignRoute = {
 			};
 		}),
 
-	byHandle: privateProcedure
+	byHandle: workspaceProcedure
 		.input(
 			z.object({
-				handle: z.string(),
 				limit: z.number().min(1).max(50).nullish(),
 				cursor: z.coerce.date().nullish(),
 				type: selectCampaignSchema.shape.type.optional(),
@@ -345,15 +344,7 @@ export const campaignRoute = {
 		.query(async ({ ctx, input }) => {
 			const limit = input.limit ?? 20;
 
-			const workspaceId = ctx.workspaces.find(w => w.handle === input.handle)?.id;
-
-			if (!workspaceId)
-				throw new TRPCError({
-					code: 'NOT_FOUND',
-					message: 'Workspace not found',
-				});
-
-			const campaigns = await getCampaignsByWorkspaceId(workspaceId, ctx.pool, {
+			const campaigns = await getCampaignsByWorkspaceId(ctx.workspace.id, ctx.pool, {
 				type: input.type,
 				stage: input.stage,
 				limit,
@@ -380,10 +371,11 @@ export const campaignRoute = {
 			}),
 		)
 		.query(async ({ ctx, input }) => {
+			const workspaces = await fetchUserWorkspaces(ctx.user.id);
 			const where: SQL[] = [
 				inArray(
 					Campaigns.workspaceId,
-					ctx.user.workspaces.map(w => w.id),
+					workspaces.map(w => w.id),
 				),
 			];
 

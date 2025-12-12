@@ -6,6 +6,8 @@ import { parseForDb } from '@barely/validators/helpers';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
+import { fetchUserWorkspaces } from '@barely/auth/utils';
+
 import { checkEmailExistsOnServer, createUser } from '../../functions/user.fns';
 import { privateProcedure, publicProcedure } from '../trpc';
 
@@ -43,8 +45,8 @@ export const userRoute = {
 		return invites;
 	}),
 
-	workspaces: privateProcedure.query(({ ctx }) => {
-		return ctx.user.workspaces;
+	workspaces: privateProcedure.query(async ({ ctx }) => {
+		return await fetchUserWorkspaces(ctx.user.id);
 	}),
 
 	emailExists: publicProcedure

@@ -11,7 +11,7 @@ import { waitUntil } from '@vercel/functions';
 import superjson from 'superjson';
 import { z, ZodError } from 'zod/v4';
 
-import { getSessionWorkspaceByHandle } from '@barely/auth/utils';
+import { fetchUserWorkspaces, getWorkspaceByHandle } from '@barely/auth/utils';
 
 import type { VisitorInfo } from '../middleware/request-parsing';
 
@@ -60,7 +60,7 @@ export const createTRPCContext = async (opts: {
 		getRefreshedSession,
 		session,
 		user: session?.user,
-		workspaces: session?.workspaces,
+		// NOTE: workspaces removed from base context - now fetched in workspaceProcedure
 		pageSessionId,
 		pusherSocketId,
 		visitor: opts.visitor,
@@ -167,19 +167,11 @@ export const privateProcedure = t.procedure
 			});
 		}
 
-		if (!opts.ctx.workspaces) {
-			throw new TRPCError({
-				code: 'UNAUTHORIZED',
-				message: "privateProcedure: Can't find that user's workspaces in our database.",
-			});
-		}
-
 		return opts.next({
 			ctx: {
 				...opts.ctx,
 				session: opts.ctx.session,
 				user: opts.ctx.user,
-				workspaces: opts.ctx.workspaces,
 			},
 		});
 	});
@@ -212,49 +204,43 @@ export const workspaceProcedure = publicProcedure
 		if (!ctx.session) {
 			throw new TRPCError({
 				code: 'UNAUTHORIZED',
-				message: "privateProcedure: Can't find that session in our database.",
+				message: "workspaceProcedure: Can't find that session in our database.",
 			});
 		}
 
 		if (!ctx.user) {
 			throw new TRPCError({
 				code: 'UNAUTHORIZED',
-				message: "privateProcedure: Can't find that user in our database.",
+				message: "workspaceProcedure: Can't find that user in our database.",
 			});
 		}
 
-		if (!ctx.workspaces) {
-			throw new TRPCError({
-				code: 'UNAUTHORIZED',
-				message: "privateProcedure: Can't find that user's workspaces in our database.",
-			});
-		}
+		// Fetch user's workspaces from DB (previously done in auth customSession)
+		const workspaces = await fetchUserWorkspaces(ctx.user.id);
 
-		try {
-			const workspace = getSessionWorkspaceByHandle(
-				ctx.session,
-				parsedHandle.data.handle,
-			);
+		// Find the requested workspace by handle
+		const workspace = getWorkspaceByHandle(workspaces, parsedHandle.data.handle);
 
-			if (isDevelopment()) {
-				console.log('ws: ', workspace.id);
-				console.log('ws: ', workspace.handle);
-				console.log('ws: ', workspace.timezone);
-			}
-
-			return opts.next({
-				ctx: {
-					...opts.ctx,
-					session: ctx.session,
-					user: ctx.user,
-					workspaces: ctx.workspaces,
-					workspace,
-				},
-			});
-		} catch {
+		if (!workspace) {
 			throw new TRPCError({
 				code: 'NOT_FOUND',
 				message: 'Workspace not found',
 			});
 		}
+
+		if (isDevelopment()) {
+			console.log('ws: ', workspace.id);
+			console.log('ws: ', workspace.handle);
+			console.log('ws: ', workspace.timezone);
+		}
+
+		return opts.next({
+			ctx: {
+				...opts.ctx,
+				session: ctx.session,
+				user: ctx.user,
+				workspaces,
+				workspace,
+			},
+		});
 	});

@@ -1,7 +1,11 @@
 import { redirect } from 'next/navigation';
 import { checkIfWorkspaceHasPendingInviteForUser } from '@barely/lib/functions/workspace.fns';
 
-import { getDefaultWorkspaceFromSession } from '@barely/auth/utils';
+import {
+	fetchUserWorkspaces,
+	getDefaultWorkspace,
+	getWorkspaceByHandle,
+} from '@barely/auth/utils';
 
 import { DashboardLayout } from '~/app/[handle]/_components/dashboard-layout';
 import { NewWorkspaceModal } from '~/app/[handle]/_components/new-workspace-modal';
@@ -21,20 +25,22 @@ export default async function HandleLayout({
 	if (!session) return redirect('/login');
 
 	const user = session.user;
-	const userWorkspace = user.workspaces.find(w => w.type === 'personal');
+	const workspaces = await fetchUserWorkspaces(user.id);
+	const personalWorkspace = workspaces.find(w => w.type === 'personal');
 
-	if (userWorkspace) user.avatarImageS3Key = userWorkspace.avatarImageS3Key;
+	// Create a user object with workspaces for backwards compatibility with WorkspaceProviders
+	const userWithWorkspaces = {
+		...user,
+		workspaces,
+		avatarImageS3Key: personalWorkspace?.avatarImageS3Key,
+	};
 
 	const awaitedParams = await params;
-	const currentWorkspace = user.workspaces.find(w =>
-		awaitedParams.handle === 'account' ?
-			w.type === 'personal'
-		:	w.handle === awaitedParams.handle,
-	);
+	const currentWorkspace = getWorkspaceByHandle(workspaces, awaitedParams.handle);
 
 	if (!currentWorkspace) {
 		const addedToWorkspace = await checkIfWorkspaceHasPendingInviteForUser({
-			user,
+			user: userWithWorkspaces,
 			workspaceHandle: awaitedParams.handle,
 		});
 
@@ -42,7 +48,7 @@ export default async function HandleLayout({
 			return redirect('/');
 		}
 
-		const defaultWorkspace = getDefaultWorkspaceFromSession(session);
+		const defaultWorkspace = getDefaultWorkspace(workspaces);
 
 		if (!defaultWorkspace) {
 			return redirect('/onboarding');
@@ -56,7 +62,7 @@ export default async function HandleLayout({
 
 	return (
 		<HydrateClient>
-			<WorkspaceProviders user={user} workspace={currentWorkspace}>
+			<WorkspaceProviders user={userWithWorkspaces} workspace={currentWorkspace}>
 				<div className='mx-auto flex w-full flex-1 flex-row'>
 					<NewWorkspaceModal />
 					<DashboardLayout>{children}</DashboardLayout>

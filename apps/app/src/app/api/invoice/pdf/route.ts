@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
+import { and, eq, isNull } from '@barely/db';
 import { dbHttp } from '@barely/db/client';
+import { _Users_To_Workspaces } from '@barely/db/sql';
 import { Invoices } from '@barely/db/sql/invoice.sql';
 import { generateInvoicePDFBase64 } from '@barely/lib/functions/invoice-pdf.fns';
-import { and, eq, isNull } from 'drizzle-orm';
 
 import { getSession } from '@barely/auth/app.server';
 
@@ -63,8 +64,13 @@ export async function POST(request: Request) {
 		}
 
 		// Check if user has access to this workspace
-		const hasAccess = session.user.workspaces.some(ws => ws.id === invoice.workspace.id);
-		if (!hasAccess) {
+		const userWorkspace = await dbHttp.query._Users_To_Workspaces.findFirst({
+			where: and(
+				eq(_Users_To_Workspaces.userId, session.user.id),
+				eq(_Users_To_Workspaces.workspaceId, invoice.workspace.id),
+			),
+		});
+		if (!userWorkspace) {
 			return NextResponse.json({ error: 'Access denied' }, { status: 403 });
 		}
 
