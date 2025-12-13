@@ -44,7 +44,34 @@ export const userRoute = {
 	}),
 
 	workspaces: privateProcedure.query(({ ctx }) => {
-		return ctx.user.workspaces;
+		return ctx.workspaces;
+	}),
+
+	/**
+	 * Returns the current user with all enriched data (profile + workspaces).
+	 * Used by the app layout to build the full EnrichedUser object.
+	 */
+	me: privateProcedure.query(({ ctx }) => {
+		// Return explicitly typed object to ensure proper type inference
+		return {
+			id: ctx.user.id,
+			email: ctx.user.email,
+			name: ctx.user.name ?? null,
+			emailVerified: ctx.user.emailVerified ?? false,
+			createdAt: ctx.user.createdAt,
+			updatedAt: ctx.user.updatedAt,
+			image: ctx.user.image ?? null,
+			fullName: ctx.user.fullName,
+			firstName: ctx.user.firstName,
+			lastName: ctx.user.lastName,
+			handle: ctx.user.handle,
+			avatarImageS3Key: ctx.user.avatarImageS3Key,
+			pitchScreening: ctx.user.pitchScreening,
+			pitchReviewing: ctx.user.pitchReviewing,
+			phone: ctx.user.phone,
+			workspaces: ctx.workspaces,
+			workspaceInvites: ctx.user.workspaceInvites,
+		};
 	}),
 
 	emailExists: publicProcedure

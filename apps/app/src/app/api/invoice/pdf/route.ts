@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { dbHttp } from '@barely/db/client';
 import { Invoices } from '@barely/db/sql/invoice.sql';
 import { generateInvoicePDFBase64 } from '@barely/lib/functions/invoice-pdf.fns';
+import { getUserWorkspacesById } from '@barely/lib/functions/workspace.fns';
 import { and, eq, isNull } from 'drizzle-orm';
 
 import { getSession } from '@barely/auth/app.server';
@@ -62,8 +63,9 @@ export async function POST(request: Request) {
 			return NextResponse.json({ error: 'Invalid handle for invoice' }, { status: 403 });
 		}
 
-		// Check if user has access to this workspace
-		const hasAccess = session.user.workspaces.some(ws => ws.id === invoice.workspace.id);
+		// Check if user has access to this workspace (fetch workspaces separately)
+		const { workspaces } = await getUserWorkspacesById(session.user.id);
+		const hasAccess = workspaces.some(ws => ws.id === invoice.workspace.id);
 		if (!hasAccess) {
 			return NextResponse.json({ error: 'Access denied' }, { status: 403 });
 		}
