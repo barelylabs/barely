@@ -154,6 +154,19 @@ export function createTestContext(options?: {
 	return {
 		auth: null, // We don't need the full auth API for most tests
 		getRefreshedSession: vi.fn().mockResolvedValue(session),
+		getWorkspacesForUser: vi.fn().mockResolvedValue({
+			workspaces,
+			personalWorkspace: workspace,
+			workspaceInvites: [],
+			userProfile: {
+				fullName: 'Test User',
+				firstName: 'Test',
+				lastName: 'User',
+				pitchScreening: false,
+				pitchReviewing: false,
+				phone: null,
+			},
+		}),
 		session,
 		user: enrichedUser, // Enriched user with workspaces
 		workspaces, // Workspaces are separate from session

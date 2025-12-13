@@ -11,6 +11,7 @@ import { waitUntil } from '@vercel/functions';
 import superjson from 'superjson';
 import { z, ZodError } from 'zod/v4';
 
+import type { UserWorkspaceData } from '../functions/workspace.fns';
 import type { VisitorInfo } from '../middleware/request-parsing';
 import { getUserWorkspacesById } from '../functions/workspace.fns';
 
@@ -54,9 +55,25 @@ export const createTRPCContext = async (opts: {
 		return session;
 	};
 
+	// Request-scoped cache for workspace data (deduplicates calls in batched requests)
+	const workspacesCache = new Map<string, Promise<UserWorkspaceData>>();
+
+	const getWorkspacesForUser = (
+		userId: string,
+		pool: NeonPool,
+	): Promise<UserWorkspaceData> => {
+		const cached = workspacesCache.get(userId);
+		if (cached) return cached;
+
+		const promise = getUserWorkspacesById(userId, pool);
+		workspacesCache.set(userId, promise);
+		return promise;
+	};
+
 	const context = {
 		auth: opts.auth,
 		getRefreshedSession,
+		getWorkspacesForUser,
 		session,
 		user: session?.user,
 		// NOTE: workspaces are no longer in the base context - they are lazy-loaded in privateProcedure and workspaceProcedure
@@ -166,9 +183,9 @@ export const privateProcedure = t.procedure
 			});
 		}
 
-		// Fetch workspaces for the user
+		// Fetch workspaces for the user (uses request-scoped cache)
 		const { workspaces, personalWorkspace, workspaceInvites, userProfile } =
-			await getUserWorkspacesById(opts.ctx.user.id, opts.ctx.pool);
+			await opts.ctx.getWorkspacesForUser(opts.ctx.user.id, opts.ctx.pool);
 
 		return opts.next({
 			ctx: {
@@ -235,9 +252,9 @@ export const workspaceProcedure = publicProcedure
 			});
 		}
 
-		// Fetch workspaces for the user
+		// Fetch workspaces for the user (uses request-scoped cache)
 		const { workspaces, personalWorkspace, workspaceInvites, userProfile } =
-			await getUserWorkspacesById(ctx.user.id, ctx.pool);
+			await ctx.getWorkspacesForUser(ctx.user.id, ctx.pool);
 
 		// Find the workspace by handle (handle 'account' means personal workspace)
 		const requestedHandle = parsedHandle.data.handle;
