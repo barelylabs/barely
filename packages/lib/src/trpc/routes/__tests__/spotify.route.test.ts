@@ -3,7 +3,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
 	createTestContext,
 	createTestContextWithWorkspace,
-	createTestWorkspace,
 } from '@barely/auth/test-helpers';
 // Import the mocked function to use in tests
 import { getWorkspaceByHandle } from '@barely/auth/utils';
@@ -15,67 +14,65 @@ import { spotifyRoute } from '../spotify.route';
 // Database environment variables are skipped via SKIP_ENV_VALIDATION in test-setup.ts
 
 // Use vi.hoisted to create shared state that mock factories can access
-const { workspaceOverridesRef, setWorkspaceOverrides, getUserWorkspacesById } =
-	vi.hoisted(() => {
-		const ref: { current: Record<string, unknown> | undefined } = { current: undefined };
+const { setWorkspaceOverrides, getUserWorkspacesById } = vi.hoisted(() => {
+	const ref: { current: Record<string, unknown> | undefined } = { current: undefined };
 
-		// Create mock function that will be used by both the mock factory and for importing
-		const mockGetUserWorkspacesById = vi.fn().mockImplementation(async () => {
-			// Base workspace that matches createTestWorkspace defaults
-			const baseWorkspace = {
-				id: 'workspace-123',
-				handle: 'test-workspace',
-				name: 'Test Workspace',
-				spotifyArtistId: '1234567890abcdefghij12',
-				type: 'personal',
-				avatarImageS3Key: undefined,
-				headerImageS3Key: undefined,
-				role: 'owner',
-				plan: 'free',
-				timezone: 'America/New_York',
-				stripeCustomerId: null,
-				stripeCustomerId_devMode: null,
-				stripeConnectAccountId: null,
-				stripeConnectAccountId_devMode: null,
-				stripeConnectChargesEnabled: false,
-				stripeConnectChargesEnabled_devMode: false,
-				currency: 'usd',
-				shippingAddressLine1: null,
-				shippingAddressLine2: null,
-				shippingAddressCity: null,
-				shippingAddressState: null,
-				shippingAddressPostalCode: null,
-				shippingAddressCountry: null,
-				shippingAddressPhone: null,
-				brandKit: null,
-			};
+	// Create mock function that will be used by both the mock factory and for importing
+	const mockGetUserWorkspacesById = vi.fn().mockImplementation(() => {
+		// Base workspace that matches createTestWorkspace defaults
+		const baseWorkspace = {
+			id: 'workspace-123',
+			handle: 'test-workspace',
+			name: 'Test Workspace',
+			spotifyArtistId: '1234567890abcdefghij12',
+			type: 'personal',
+			avatarImageS3Key: undefined,
+			headerImageS3Key: undefined,
+			role: 'owner',
+			plan: 'free',
+			timezone: 'America/New_York',
+			stripeCustomerId: null,
+			stripeCustomerId_devMode: null,
+			stripeConnectAccountId: null,
+			stripeConnectAccountId_devMode: null,
+			stripeConnectChargesEnabled: false,
+			stripeConnectChargesEnabled_devMode: false,
+			currency: 'usd',
+			shippingAddressLine1: null,
+			shippingAddressLine2: null,
+			shippingAddressCity: null,
+			shippingAddressState: null,
+			shippingAddressPostalCode: null,
+			shippingAddressCountry: null,
+			shippingAddressPhone: null,
+			brandKit: null,
+		};
 
-			// Apply any overrides from the ref
-			const workspace = { ...baseWorkspace, ...ref.current };
-
-			return {
-				workspaces: [workspace],
-				personalWorkspace: workspace,
-				workspaceInvites: [],
-				userProfile: {
-					fullName: 'Test User',
-					firstName: 'Test',
-					lastName: 'User',
-					pitchScreening: false,
-					pitchReviewing: false,
-					phone: null,
-				},
-			};
-		});
+		// Apply any overrides from the ref
+		const workspace = { ...baseWorkspace, ...ref.current };
 
 		return {
-			workspaceOverridesRef: ref,
-			setWorkspaceOverrides: (overrides?: Record<string, unknown>) => {
-				ref.current = overrides;
+			workspaces: [workspace],
+			personalWorkspace: workspace,
+			workspaceInvites: [],
+			userProfile: {
+				fullName: 'Test User',
+				firstName: 'Test',
+				lastName: 'User',
+				pitchScreening: false,
+				pitchReviewing: false,
+				phone: null,
 			},
-			getUserWorkspacesById: mockGetUserWorkspacesById,
 		};
 	});
+
+	return {
+		setWorkspaceOverrides: (overrides?: Record<string, unknown>) => {
+			ref.current = overrides;
+		},
+		getUserWorkspacesById: mockGetUserWorkspacesById,
+	};
+});
 
 // Mock auth env module to prevent validation errors
 vi.mock('@barely/auth', () => ({
