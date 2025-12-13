@@ -10,7 +10,7 @@ import { defaultPressKit, updatePressKitSchema } from '@barely/validators';
 import { and, eq, notInArray, sql } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
-import { getUserWorkspaceByHandle } from '@barely/auth/utils';
+import { getWorkspaceByHandle } from '@barely/auth/utils';
 
 import { privateProcedure, workspaceProcedure } from '../trpc';
 
@@ -18,8 +18,8 @@ export const pressKitRoute = {
 	byWorkspace: privateProcedure
 		.input(z.object({ handle: z.string() }))
 		.query(async ({ ctx, input }) => {
-			const { id: workspaceId, handle } = getUserWorkspaceByHandle(
-				ctx.user,
+			const { id: workspaceId, handle } = getWorkspaceByHandle(
+				ctx.workspaces,
 				input.handle,
 			);
 
