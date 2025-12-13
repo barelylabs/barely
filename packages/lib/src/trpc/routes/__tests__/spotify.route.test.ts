@@ -5,13 +5,74 @@ import {
 	createTestContextWithWorkspace,
 } from '@barely/auth/test-helpers';
 // Import the mocked function to use in tests
-import { getSessionWorkspaceByHandle } from '@barely/auth/utils';
+import { getWorkspaceByHandle } from '@barely/auth/utils';
 
 import { createCallerFactory, createTRPCRouter } from '../../trpc';
 import { spotifyRoute } from '../spotify.route';
 
 // Test setup is handled by vitest.config.ts and test-setup.ts
 // Database environment variables are skipped via SKIP_ENV_VALIDATION in test-setup.ts
+
+// Use vi.hoisted to create shared state that mock factories can access
+const { setWorkspaceOverrides, getUserWorkspacesById } = vi.hoisted(() => {
+	const ref: { current: Record<string, unknown> | undefined } = { current: undefined };
+
+	// Create mock function that will be used by both the mock factory and for importing
+	const mockGetUserWorkspacesById = vi.fn().mockImplementation(() => {
+		// Base workspace that matches createTestWorkspace defaults
+		const baseWorkspace = {
+			id: 'workspace-123',
+			handle: 'test-workspace',
+			name: 'Test Workspace',
+			spotifyArtistId: '1234567890abcdefghij12',
+			type: 'personal',
+			avatarImageS3Key: undefined,
+			headerImageS3Key: undefined,
+			role: 'owner',
+			plan: 'free',
+			timezone: 'America/New_York',
+			stripeCustomerId: null,
+			stripeCustomerId_devMode: null,
+			stripeConnectAccountId: null,
+			stripeConnectAccountId_devMode: null,
+			stripeConnectChargesEnabled: false,
+			stripeConnectChargesEnabled_devMode: false,
+			currency: 'usd',
+			shippingAddressLine1: null,
+			shippingAddressLine2: null,
+			shippingAddressCity: null,
+			shippingAddressState: null,
+			shippingAddressPostalCode: null,
+			shippingAddressCountry: null,
+			shippingAddressPhone: null,
+			brandKit: null,
+		};
+
+		// Apply any overrides from the ref
+		const workspace = { ...baseWorkspace, ...ref.current };
+
+		return {
+			workspaces: [workspace],
+			personalWorkspace: workspace,
+			workspaceInvites: [],
+			userProfile: {
+				fullName: 'Test User',
+				firstName: 'Test',
+				lastName: 'User',
+				pitchScreening: false,
+				pitchReviewing: false,
+				phone: null,
+			},
+		};
+	});
+
+	return {
+		setWorkspaceOverrides: (overrides?: Record<string, unknown>) => {
+			ref.current = overrides;
+		},
+		getUserWorkspacesById: mockGetUserWorkspacesById,
+	};
+});
 
 // Mock auth env module to prevent validation errors
 vi.mock('@barely/auth', () => ({
@@ -30,6 +91,12 @@ vi.mock('../../../../env', () => ({
 
 // Mock essential dependencies only
 vi.mock('@barely/db/client');
+vi.mock('@barely/db/pool', () => ({
+	dbPool: vi.fn(),
+	makePool: vi.fn().mockReturnValue({
+		end: vi.fn().mockResolvedValue(undefined),
+	}),
+}));
 vi.mock('../../functions/spotify.fns');
 vi.mock('../../integrations/spotify/spotify.endpts.search');
 vi.mock('../../integrations/spotify/spotify.endpts.artist');
@@ -45,7 +112,14 @@ vi.mock('../../integrations/upstash', () => ({
 }));
 
 vi.mock('@barely/auth/utils', () => ({
-	getSessionWorkspaceByHandle: vi.fn(),
+	getWorkspaceByHandle: vi.fn(),
+}));
+
+// Mock workspace functions used by workspaceProcedure middleware
+// This must reference getUserWorkspacesById from vi.hoisted
+// Path: from __tests__ -> routes -> trpc -> src -> functions/workspace.fns
+vi.mock('../../../functions/workspace.fns', () => ({
+	getUserWorkspacesById,
 }));
 
 // Create test router
@@ -56,10 +130,13 @@ const testRouter = createTRPCRouter({
 describe('spotify.route', () => {
 	const createCaller = createCallerFactory(testRouter);
 
-	// Set up mock for getSessionWorkspaceByHandle
+	// Set up mock for getWorkspaceByHandle
 	beforeEach(() => {
-		vi.mocked(getSessionWorkspaceByHandle).mockImplementation((session, handle) => {
-			const workspace = session.workspaces.find(w => w.handle === handle);
+		// Reset workspace overrides to default
+		setWorkspaceOverrides(undefined);
+
+		vi.mocked(getWorkspaceByHandle).mockImplementation((workspaces, handle) => {
+			const workspace = workspaces.find(w => w.handle === handle);
 			if (workspace) {
 				return workspace;
 			}
@@ -109,6 +186,9 @@ describe('spotify.route', () => {
 
 	describe('syncWorkspaceArtist', () => {
 		it('should validate workspace has Spotify artist ID', async () => {
+			// Set workspace overrides so the mock returns a workspace without spotifyArtistId
+			setWorkspaceOverrides({ spotifyArtistId: null });
+
 			// Create context with workspace that has no spotifyArtistId
 			const contextWithoutSpotifyId = createTestContextWithWorkspace({
 				spotifyArtistId: null,
@@ -121,6 +201,9 @@ describe('spotify.route', () => {
 		});
 
 		it('should validate Spotify artist ID format', async () => {
+			// Set workspace overrides so the mock returns a workspace with invalid spotifyArtistId
+			setWorkspaceOverrides({ spotifyArtistId: 'invalid-id' });
+
 			// Create context with invalid Spotify artist ID
 			const contextWithInvalidId = createTestContextWithWorkspace({
 				spotifyArtistId: 'invalid-id',
