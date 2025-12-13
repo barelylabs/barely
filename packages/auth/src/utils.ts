@@ -6,7 +6,7 @@ import { Users, VerificationTokens } from '@barely/db/sql';
 import { SignInEmailTemplate } from '@barely/email/templates/auth';
 import { createRandomStringGenerator } from '@better-auth/utils/random';
 
-import type { Session, SessionUser } from '.';
+import type { SessionWorkspace } from './types';
 import { authEnv } from '../env';
 import { getAbsoluteUrl } from './get-url';
 
@@ -144,26 +144,26 @@ export async function sendMagicLink(props: {
 	return emailRes;
 }
 
-export function getSessionWorkspaceByHandle(session: Session, handle: string) {
+/**
+ * Gets a workspace by handle from a workspaces array.
+ * If handle is 'account', returns the personal workspace.
+ */
+export function getWorkspaceByHandle(workspaces: SessionWorkspace[], handle: string) {
 	const workspace =
 		handle === 'account' ?
-			session.workspaces.find(w => w.type === 'personal')
-		:	session.workspaces.find(w => w.handle === handle);
+			workspaces.find(w => w.type === 'personal')
+		:	workspaces.find(w => w.handle === handle);
 	if (!workspace) {
 		throw new Error('Workspace not found');
 	}
 	return workspace;
 }
 
-export function getUserWorkspaceByHandle(user: SessionUser, handle: string) {
-	const workspace = user.workspaces.find(w => w.handle === handle);
-	if (!workspace) {
-		throw new Error('Workspace not found');
-	}
-	return workspace;
-}
-
-export function getDefaultWorkspaceFromSession(session: Session) {
-	const defaultWorkspace = session.workspaces.find(w => w.type !== 'personal');
+/**
+ * Gets the default workspace from a workspaces array.
+ * Prefers non-personal workspaces over personal workspace.
+ */
+export function getDefaultWorkspace(workspaces: SessionWorkspace[]) {
+	const defaultWorkspace = workspaces.find(w => w.type !== 'personal');
 	return defaultWorkspace ?? null;
 }

@@ -1,7 +1,7 @@
 'use client';
 
-import type { SessionUser } from '@barely/auth';
 import type { SpotifyTrackOption } from '@barely/lib/trpc/spotify.route';
+import type { EnrichedUser } from '@barely/lib/trpc/types';
 import type { newUserContactInfoSchemaWithRole } from '@barely/validators';
 import type { z } from 'zod/v4';
 import { useState } from 'react';
@@ -23,7 +23,7 @@ import { H, Text } from '@barely/ui/typography';
 
 import { PlaylistPitchContactInfoForm } from './playlist-pitch-contact-info-form';
 
-export function PlaylistPitchForm(props: { user?: SessionUser }) {
+export function PlaylistPitchForm(props: { user?: EnrichedUser }) {
 	const trpc = useTRPC();
 	const router = useRouter();
 	const { handle } = useWorkspace();

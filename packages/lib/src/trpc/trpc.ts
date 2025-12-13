@@ -11,9 +11,9 @@ import { waitUntil } from '@vercel/functions';
 import superjson from 'superjson';
 import { z, ZodError } from 'zod/v4';
 
-import { getSessionWorkspaceByHandle } from '@barely/auth/utils';
-
+import type { UserWorkspaceData } from '../functions/workspace.fns';
 import type { VisitorInfo } from '../middleware/request-parsing';
+import { getUserWorkspacesById } from '../functions/workspace.fns';
 
 /**
  * 🎁 CONTEXT
@@ -55,12 +55,28 @@ export const createTRPCContext = async (opts: {
 		return session;
 	};
 
+	// Request-scoped cache for workspace data (deduplicates calls in batched requests)
+	const workspacesCache = new Map<string, Promise<UserWorkspaceData>>();
+
+	const getWorkspacesForUser = (
+		userId: string,
+		pool: NeonPool,
+	): Promise<UserWorkspaceData> => {
+		const cached = workspacesCache.get(userId);
+		if (cached) return cached;
+
+		const promise = getUserWorkspacesById(userId, pool);
+		workspacesCache.set(userId, promise);
+		return promise;
+	};
+
 	const context = {
 		auth: opts.auth,
 		getRefreshedSession,
+		getWorkspacesForUser,
 		session,
 		user: session?.user,
-		workspaces: session?.workspaces,
+		// NOTE: workspaces are no longer in the base context - they are lazy-loaded in privateProcedure and workspaceProcedure
 		pageSessionId,
 		pusherSocketId,
 		visitor: opts.visitor,
@@ -167,19 +183,32 @@ export const privateProcedure = t.procedure
 			});
 		}
 
-		if (!opts.ctx.workspaces) {
-			throw new TRPCError({
-				code: 'UNAUTHORIZED',
-				message: "privateProcedure: Can't find that user's workspaces in our database.",
-			});
-		}
+		// Fetch workspaces for the user (uses request-scoped cache)
+		const { workspaces, personalWorkspace, workspaceInvites, userProfile } =
+			await opts.ctx.getWorkspacesForUser(opts.ctx.user.id, opts.ctx.pool);
 
 		return opts.next({
 			ctx: {
 				...opts.ctx,
 				session: opts.ctx.session,
-				user: opts.ctx.user,
-				workspaces: opts.ctx.workspaces,
+				user: {
+					...opts.ctx.user,
+					// Add profile fields from the workspace query
+					fullName: userProfile.fullName,
+					firstName: userProfile.firstName,
+					lastName: userProfile.lastName,
+					pitchScreening: userProfile.pitchScreening,
+					pitchReviewing: userProfile.pitchReviewing,
+					phone: userProfile.phone,
+					// Add personal workspace info
+					handle: personalWorkspace.handle,
+					avatarImageS3Key: personalWorkspace.avatarImageS3Key,
+					// Ensure image is string | null (not undefined)
+					image: opts.ctx.user.image ?? null,
+					workspaces,
+					workspaceInvites,
+				},
+				workspaces,
 			},
 		});
 	});
@@ -212,49 +241,65 @@ export const workspaceProcedure = publicProcedure
 		if (!ctx.session) {
 			throw new TRPCError({
 				code: 'UNAUTHORIZED',
-				message: "privateProcedure: Can't find that session in our database.",
+				message: "workspaceProcedure: Can't find that session in our database.",
 			});
 		}
 
 		if (!ctx.user) {
 			throw new TRPCError({
 				code: 'UNAUTHORIZED',
-				message: "privateProcedure: Can't find that user in our database.",
+				message: "workspaceProcedure: Can't find that user in our database.",
 			});
 		}
 
-		if (!ctx.workspaces) {
-			throw new TRPCError({
-				code: 'UNAUTHORIZED',
-				message: "privateProcedure: Can't find that user's workspaces in our database.",
-			});
-		}
+		// Fetch workspaces for the user (uses request-scoped cache)
+		const { workspaces, personalWorkspace, workspaceInvites, userProfile } =
+			await ctx.getWorkspacesForUser(ctx.user.id, ctx.pool);
 
-		try {
-			const workspace = getSessionWorkspaceByHandle(
-				ctx.session,
-				parsedHandle.data.handle,
-			);
+		// Find the workspace by handle (handle 'account' means personal workspace)
+		const requestedHandle = parsedHandle.data.handle;
+		const workspace = workspaces.find(w =>
+			requestedHandle === 'account' ?
+				w.type === 'personal'
+			:	w.handle === requestedHandle,
+		);
 
-			if (isDevelopment()) {
-				console.log('ws: ', workspace.id);
-				console.log('ws: ', workspace.handle);
-				console.log('ws: ', workspace.timezone);
-			}
-
-			return opts.next({
-				ctx: {
-					...opts.ctx,
-					session: ctx.session,
-					user: ctx.user,
-					workspaces: ctx.workspaces,
-					workspace,
-				},
-			});
-		} catch {
+		if (!workspace) {
 			throw new TRPCError({
 				code: 'NOT_FOUND',
 				message: 'Workspace not found',
 			});
 		}
+
+		if (isDevelopment()) {
+			console.log('ws: ', workspace.id);
+			console.log('ws: ', workspace.handle);
+			console.log('ws: ', workspace.timezone);
+		}
+
+		return opts.next({
+			ctx: {
+				...opts.ctx,
+				session: ctx.session,
+				user: {
+					...ctx.user,
+					// Add profile fields from the workspace query
+					fullName: userProfile.fullName,
+					firstName: userProfile.firstName,
+					lastName: userProfile.lastName,
+					pitchScreening: userProfile.pitchScreening,
+					pitchReviewing: userProfile.pitchReviewing,
+					phone: userProfile.phone,
+					// Add personal workspace info
+					handle: personalWorkspace.handle,
+					avatarImageS3Key: personalWorkspace.avatarImageS3Key,
+					// Ensure image is string | null (not undefined)
+					image: ctx.user.image ?? null,
+					workspaces,
+					workspaceInvites,
+				},
+				workspaces,
+				workspace,
+			},
+		});
 	});
