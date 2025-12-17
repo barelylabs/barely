@@ -1,19 +1,40 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { dbEnv } from '@barely/db';
+import { getUserWorkspacesById } from '@barely/lib/functions/workspace.fns';
 
 import { getSession } from '~/auth/server';
 
-export const runtime = 'edge';
+// Use Node runtime to enable DB queries for workspace verification
+export const runtime = 'nodejs';
 
 // Parameters that Electric Cloud doesn't support (used by local Electric only)
 const UNSUPPORTED_PARAMS = ['log'];
+
+// Allowlisted tables that can be synced via Electric
+const ALLOWED_TABLES = new Set([
+	'"FmPages"',
+	'"Links"',
+	'"Bios"',
+	'"EmailAddresses"',
+	'"EmailBroadcasts"',
+	'"EmailDomains"',
+	'"EmailTemplateGroups"',
+	'"EmailTemplates"',
+	'"FanGroups"',
+	'"Fans"',
+	'"InvoiceClients"',
+	'"Invoices"',
+	'"ImageFiles"',
+	'"VipSwaps"',
+]);
 
 /**
  * Electric SQL Shape Proxy Endpoint
  *
  * This endpoint proxies authenticated requests to Electric Cloud for real-time data sync.
- * It validates that the user is authenticated and forwards shape requests to Electric.
+ * It validates that the user is authenticated, has access to the requested workspace,
+ * and only allows queries to allowlisted tables with proper workspace filtering.
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
 	// Verify authentication
@@ -30,6 +51,34 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 	// Get the search params from the request
 	const url = new URL(request.url);
 	const searchParams = url.searchParams;
+
+	// Extract and validate security-critical parameters
+	const table = searchParams.get('table');
+	const where = searchParams.get('where');
+	const workspaceId = searchParams.get('params[1]');
+
+	// Validate table is in allowlist
+	if (!table || !ALLOWED_TABLES.has(table)) {
+		return new NextResponse('Invalid or disallowed table', { status: 400 });
+	}
+
+	// Validate where clause includes workspaceId filtering
+	if (!where?.includes('"workspaceId"')) {
+		return new NextResponse('Query must filter by workspaceId', { status: 400 });
+	}
+
+	// Validate workspace ID is provided
+	if (!workspaceId) {
+		return new NextResponse('Missing workspace ID parameter', { status: 400 });
+	}
+
+	// Verify user has access to the requested workspace
+	const { workspaces } = await getUserWorkspacesById(session.user.id);
+	const userWorkspaceIds = workspaces.map(w => w.id);
+
+	if (!userWorkspaceIds.includes(workspaceId)) {
+		return new NextResponse('Forbidden: workspace access denied', { status: 403 });
+	}
 
 	// Build the Electric Cloud URL
 	const electricUrl = new URL(`${dbEnv.ELECTRIC_URL}/v1/shape`);
