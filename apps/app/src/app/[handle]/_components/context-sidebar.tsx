@@ -78,8 +78,12 @@ export function ContextSidebar({ productId }: ContextSidebarProps) {
 
 	const renderRoute = (route: ProductRoute, depth = 0) => {
 		const fullPath = `/${handle}${route.path}`;
-		const isActive = pathname === fullPath || pathname.startsWith(fullPath + '/');
 		const hasChildren = route.children && route.children.length > 0;
+		// Only use startsWith for parent routes with children; use exact match for leaf routes
+		const isActive =
+			hasChildren ?
+				pathname === fullPath || pathname.startsWith(fullPath + '/')
+			:	pathname === fullPath;
 
 		// Check if this route group is currently active (for hideChildrenWhenNotActive)
 		const isGroupActive =
