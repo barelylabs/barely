@@ -1,5 +1,3 @@
-import type { PlanType, WorkspaceTimezone } from '@barely/const';
-import type { BrandKit } from '@barely/db/sql';
 import type { BetterAuthOptions } from 'better-auth';
 import { dbHttp } from '@barely/db/client';
 import {
@@ -86,8 +84,9 @@ export function initAuth(options: {
 				currentURL: options.baseUrl,
 				productionURL: options.productionUrl,
 			}),
-			// NOTE: customSession was removed to improve auth performance.
-			// Workspace data is now fetched in tRPC workspaceProcedure instead.
+			// NOTE: customSession was removed to enable Better Auth's session cache.
+			// Workspace data is now lazy-loaded in tRPC procedures via getUserWorkspacesById().
+			// See packages/lib/src/functions/workspace.fns.ts
 		],
 		socialProviders: {},
 		trustedOrigins: [...devTrustedOrigins, ...previewTrustedOrigins],
@@ -100,40 +99,6 @@ export type Auth = ReturnType<typeof initAuth>;
 export type Session = NonNullable<Awaited<ReturnType<Auth['api']['getSession']>>>;
 export type SessionUser = Session['user'];
 
-/**
- * SessionWorkspace type - workspace data with brandKit and images.
- * This data is now fetched in tRPC workspaceProcedure, not in auth session.
- */
-export interface SessionWorkspace {
-	id: string;
-	name: string;
-	handle: string;
-	plan: PlanType;
-	type: 'personal' | 'creator' | 'solo_artist' | 'band' | 'product';
-	timezone: WorkspaceTimezone;
-	spotifyArtistId: string | null;
-	stripeCustomerId: string | null;
-	stripeCustomerId_devMode: string | null;
-	stripeConnectAccountId: string | null;
-	stripeConnectAccountId_devMode: string | null;
-	stripeConnectChargesEnabled: boolean;
-	stripeConnectChargesEnabled_devMode: boolean;
-	currency: 'usd' | 'gbp';
-	shippingAddressLine1: string | null;
-	shippingAddressLine2: string | null;
-	shippingAddressCity: string | null;
-	shippingAddressState: string | null;
-	shippingAddressPostalCode: string | null;
-	shippingAddressCountry: string | null;
-	shippingAddressPhone: string | null;
-	brandKit: BrandKit | null;
-	avatarImageS3Key: string | undefined;
-	headerImageS3Key: string | undefined;
-	role: 'owner' | 'admin' | 'member';
-	// Internal fields from Drizzle relations - kept for type compatibility
-	// These are populated by fetchUserWorkspaces but not typically used directly
-	_avatarImages: { file: { s3Key: string | null } }[];
-	_headerImages: { file: { s3Key: string | null } }[];
-}
-
-export type SessionWorkspaces = SessionWorkspace[];
+// SessionWorkspace is now defined explicitly since workspaces are no longer in the session
+// They are lazy-loaded via getUserWorkspacesById() in tRPC procedures
+export type { SessionWorkspace } from './types';

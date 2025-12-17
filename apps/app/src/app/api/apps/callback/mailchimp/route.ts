@@ -1,10 +1,9 @@
 import type { NextRequest } from 'next/server';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { and, eq } from '@barely/db';
 import { dbHttp } from '@barely/db/client';
-import { _Users_To_Workspaces } from '@barely/db/sql';
 import { ProviderAccounts } from '@barely/db/sql/provider-account.sql';
+import { getUserWorkspacesById } from '@barely/lib/functions/workspace.fns';
 import { getAbsoluteUrl, getCurrentAppVariant, newId, raise } from '@barely/utils';
 import { providerStateSchema } from '@barely/validators';
 import { z } from 'zod/v4';
@@ -31,27 +30,18 @@ export async function GET(req: NextRequest) {
 	const state = providerStateSchema.parse(JSON.parse(decodedState));
 	console.log('state ', state);
 
-	const userId = session.userId;
+	const userId = session.user.id;
 	if (!userId) {
 		return new Response('user not found', { status: 400 });
 	}
 
-	// Check if user has access to this workspace
-	const userWorkspace = await dbHttp.query._Users_To_Workspaces.findFirst({
-		where: and(
-			eq(_Users_To_Workspaces.userId, userId),
-			eq(_Users_To_Workspaces.workspaceId, state.workspaceId),
-		),
-		with: {
-			workspace: true,
-		},
-	});
+	// Fetch workspaces separately (no longer in session)
+	const { workspaces } = await getUserWorkspacesById(userId);
+	const workspace = workspaces.find(w => w.id === state.workspaceId);
 
-	if (!userWorkspace) {
+	if (!workspace) {
 		return new Response('workspace not found', { status: 400 });
 	}
-
-	const workspace = userWorkspace.workspace;
 
 	const tokenRes = await fetch('https://login.mailchimp.com/oauth2/token', {
 		method: 'POST',

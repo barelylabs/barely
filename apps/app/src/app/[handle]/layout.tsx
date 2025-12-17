@@ -1,17 +1,11 @@
 import { redirect } from 'next/navigation';
 import { checkIfWorkspaceHasPendingInviteForUser } from '@barely/lib/functions/workspace.fns';
 
-import {
-	fetchUserWorkspaces,
-	getDefaultWorkspace,
-	getWorkspaceByHandle,
-} from '@barely/auth/utils';
-
 import { DashboardLayout } from '~/app/[handle]/_components/dashboard-layout';
 import { NewWorkspaceModal } from '~/app/[handle]/_components/new-workspace-modal';
 import { WorkspaceProviders } from '~/app/[handle]/_components/workspace-providers';
 import { getSession } from '~/auth/server';
-import { HydrateClient, prefetch, primeWorkspace, trpc } from '~/trpc/server';
+import { HydrateClient, prefetch, primeWorkspace, trpc, trpcCaller } from '~/trpc/server';
 
 export default async function HandleLayout({
 	params,
@@ -24,23 +18,20 @@ export default async function HandleLayout({
 
 	if (!session) return redirect('/login');
 
-	const user = session.user;
-	const workspaces = await fetchUserWorkspaces(user.id);
-	const personalWorkspace = workspaces.find(w => w.type === 'personal');
-
-	// Create a user object with workspaces for backwards compatibility with WorkspaceProviders
-	const userWithWorkspaces = {
-		...user,
-		workspaces,
-		avatarImageS3Key: personalWorkspace?.avatarImageS3Key,
-	};
+	// Fetch enriched user via tRPC (includes workspaces and profile data)
+	const user = await trpcCaller.user.me();
+	const userWorkspaces = user.workspaces;
 
 	const awaitedParams = await params;
-	const currentWorkspace = getWorkspaceByHandle(workspaces, awaitedParams.handle);
+	const currentWorkspace = userWorkspaces.find(w =>
+		awaitedParams.handle === 'account' ?
+			w.type === 'personal'
+		:	w.handle === awaitedParams.handle,
+	);
 
 	if (!currentWorkspace) {
 		const addedToWorkspace = await checkIfWorkspaceHasPendingInviteForUser({
-			user: userWithWorkspaces,
+			user,
 			workspaceHandle: awaitedParams.handle,
 		});
 
@@ -48,7 +39,8 @@ export default async function HandleLayout({
 			return redirect('/');
 		}
 
-		const defaultWorkspace = getDefaultWorkspace(workspaces);
+		// Get default workspace (prefer non-personal workspace)
+		const defaultWorkspace = userWorkspaces.find(w => w.type !== 'personal') ?? null;
 
 		if (!defaultWorkspace) {
 			return redirect('/onboarding');
@@ -62,7 +54,7 @@ export default async function HandleLayout({
 
 	return (
 		<HydrateClient>
-			<WorkspaceProviders user={userWithWorkspaces} workspace={currentWorkspace}>
+			<WorkspaceProviders user={user} workspace={currentWorkspace}>
 				<div className='mx-auto flex w-full flex-1 flex-row'>
 					<NewWorkspaceModal />
 					<DashboardLayout>{children}</DashboardLayout>

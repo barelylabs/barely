@@ -1,6 +1,7 @@
 'use client';
 
-import type { SessionUser, SessionWorkspace } from '@barely/auth';
+import type { SessionWorkspace } from '@barely/auth';
+import type { EnrichedUser } from '@barely/lib/trpc/types';
 import type { ReactNode } from 'react';
 import {
 	UserContext,
@@ -19,19 +20,8 @@ import { workspaceAtom } from '@barely/atoms/workspace';
 import { BrandKitProvider } from '@barely/ui/bio';
 import { ThemeProvider } from '@barely/ui/next-theme-provider';
 
-import { ElectricPreSyncProvider } from './electric-pre-sync-provider';
-
-/**
- * Extended user type that includes workspaces.
- * SessionUser from base better-auth doesn't have workspaces,
- * but we add them in the layout before passing to this provider.
- */
-interface UserWithWorkspaces extends SessionUser {
-	workspaces: SessionWorkspace[];
-}
-
 interface UserContextProviderProps {
-	user: UserWithWorkspaces;
+	user: EnrichedUser;
 	children: ReactNode;
 }
 
@@ -89,13 +79,11 @@ export function WorkspaceProviders(
 	return (
 		<ThemeProvider attribute='class' defaultTheme='system' enableSystem>
 			<UserContextProvider user={props.user}>
-				<ElectricPreSyncProvider workspaces={props.user.workspaces}>
-					<WorkspaceContextProvider workspace={props.workspace}>
-						<BrandKitContextProvider>
-							<WorkspaceUpdateNavHistory>{props.children}</WorkspaceUpdateNavHistory>
-						</BrandKitContextProvider>
-					</WorkspaceContextProvider>
-				</ElectricPreSyncProvider>
+				<WorkspaceContextProvider workspace={props.workspace}>
+					<BrandKitContextProvider>
+						<WorkspaceUpdateNavHistory>{props.children}</WorkspaceUpdateNavHistory>
+					</BrandKitContextProvider>
+				</WorkspaceContextProvider>
 			</UserContextProvider>
 		</ThemeProvider>
 	);

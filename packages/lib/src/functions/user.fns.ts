@@ -1,5 +1,10 @@
-import type { SessionUser } from '@barely/auth';
-import type { CreateUser, InsertUser, InsertWorkspace } from '@barely/validators';
+import type { SessionWorkspace } from '@barely/auth';
+import type {
+	CreateUser,
+	InsertUser,
+	InsertWorkspace,
+	SessionWorkspaceInvite,
+} from '@barely/validators';
 import { dbHttp } from '@barely/db/client';
 import {
 	_Files_To_Workspaces__AvatarImage,
@@ -19,6 +24,7 @@ import {
 import { parseForDb } from '@barely/validators/helpers';
 import { and, eq, gt, isNull } from 'drizzle-orm';
 
+import type { EnrichedUser } from '../trpc/types';
 import { createStripeWorkspaceCustomer } from './workspace-stripe.fns';
 
 export async function checkEmailExistsOnServer(email: string) {
@@ -277,38 +283,60 @@ export async function getRawSessionUserByUserId(userId: string) {
 
 type RawSessionUser = NonNullable<Awaited<ReturnType<typeof getRawSessionUserByUserId>>>;
 
-export function getSessionUserFromRawUser(user: RawSessionUser): SessionUser {
+export function getEnrichedUserFromRawUser(user: RawSessionUser): EnrichedUser {
 	const workspaces = user._workspaces.map(_w => ({
 		..._w.workspace,
 		avatarImageS3Key: _w.workspace._avatarImages[0]?.file.s3Key ?? '',
 		headerImageS3Key: _w.workspace._headerImages[0]?.file.s3Key ?? '',
+		stripeConnectChargesEnabled: _w.workspace.stripeConnectChargesEnabled ?? false,
+		stripeConnectChargesEnabled_devMode:
+			_w.workspace.stripeConnectChargesEnabled_devMode ?? false,
 		role: _w.role,
-	}));
+	})) as SessionWorkspace[];
 
-	const workspaceInvites = user.workspaceInvites.map(_wi => ({
-		..._wi,
-		role: _wi.role,
-	}));
+	const workspaceInvites: SessionWorkspaceInvite[] = user.workspaceInvites
+		.filter(wi => wi.role !== 'owner') // Invites can only be admin or member
+		.map(wi => ({
+			userId: wi.userId,
+			email: wi.email,
+			role: wi.role as 'admin' | 'member',
+			expiresAt: wi.expiresAt,
+			workspace: {
+				id: wi.workspace.id,
+				name: wi.workspace.name,
+				handle: wi.workspace.handle,
+			},
+		}));
 
 	const personalWorkspace = workspaces.find(w => w.type === 'personal');
 
 	const userHandle = personalWorkspace?.handle ?? raise('User handle not found');
 
-	const sessionUser: SessionUser = {
-		...user,
+	const enrichedUser: EnrichedUser = {
+		id: user.id,
+		email: user.email,
+		name: user.fullName ?? userHandle,
+		emailVerified: user.emailVerified ?? false,
+		createdAt: user.createdAt,
+		updatedAt: user.updatedAt,
+		image: null, // Users table doesn't have an image column
+		fullName: user.fullName,
+		firstName: user.firstName,
+		lastName: user.lastName,
 		handle: userHandle,
 		avatarImageS3Key: personalWorkspace?.avatarImageS3Key ?? '',
-		name: user.fullName ?? userHandle,
+		pitchScreening: user.pitchScreening ?? false,
+		pitchReviewing: user.pitchReviewing ?? false,
+		phone: user.phone,
 		workspaces,
 		workspaceInvites,
-		emailVerified: user.emailVerified ?? false,
 	};
 
-	return sessionUser;
+	return enrichedUser;
 }
 
-export async function getSessionUserByUserId(userId: string) {
+export async function getEnrichedUserByUserId(userId: string) {
 	const rawUser = await getRawSessionUserByUserId(userId);
 	if (!rawUser) return null;
-	return getSessionUserFromRawUser(rawUser);
+	return getEnrichedUserFromRawUser(rawUser);
 }

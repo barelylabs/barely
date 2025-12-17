@@ -11,9 +11,9 @@ import { waitUntil } from '@vercel/functions';
 import superjson from 'superjson';
 import { z, ZodError } from 'zod/v4';
 
-import { fetchUserWorkspaces, getWorkspaceByHandle } from '@barely/auth/utils';
-
+import type { UserWorkspaceData } from '../functions/workspace.fns';
 import type { VisitorInfo } from '../middleware/request-parsing';
+import { getUserWorkspacesById } from '../functions/workspace.fns';
 
 /**
  * 🎁 CONTEXT
@@ -55,12 +55,28 @@ export const createTRPCContext = async (opts: {
 		return session;
 	};
 
+	// Request-scoped cache for workspace data (deduplicates calls in batched requests)
+	const workspacesCache = new Map<string, Promise<UserWorkspaceData>>();
+
+	const getWorkspacesForUser = (
+		userId: string,
+		pool: NeonPool,
+	): Promise<UserWorkspaceData> => {
+		const cached = workspacesCache.get(userId);
+		if (cached) return cached;
+
+		const promise = getUserWorkspacesById(userId, pool);
+		workspacesCache.set(userId, promise);
+		return promise;
+	};
+
 	const context = {
 		auth: opts.auth,
 		getRefreshedSession,
+		getWorkspacesForUser,
 		session,
 		user: session?.user,
-		// NOTE: workspaces removed from base context - now fetched in workspaceProcedure
+		// NOTE: workspaces are no longer in the base context - they are lazy-loaded in privateProcedure and workspaceProcedure
 		pageSessionId,
 		pusherSocketId,
 		visitor: opts.visitor,
@@ -167,11 +183,32 @@ export const privateProcedure = t.procedure
 			});
 		}
 
+		// Fetch workspaces for the user (uses request-scoped cache)
+		const { workspaces, personalWorkspace, workspaceInvites, userProfile } =
+			await opts.ctx.getWorkspacesForUser(opts.ctx.user.id, opts.ctx.pool);
+
 		return opts.next({
 			ctx: {
 				...opts.ctx,
 				session: opts.ctx.session,
-				user: opts.ctx.user,
+				user: {
+					...opts.ctx.user,
+					// Add profile fields from the workspace query
+					fullName: userProfile.fullName,
+					firstName: userProfile.firstName,
+					lastName: userProfile.lastName,
+					pitchScreening: userProfile.pitchScreening,
+					pitchReviewing: userProfile.pitchReviewing,
+					phone: userProfile.phone,
+					// Add personal workspace info
+					handle: personalWorkspace.handle,
+					avatarImageS3Key: personalWorkspace.avatarImageS3Key,
+					// Ensure image is string | null (not undefined)
+					image: opts.ctx.user.image ?? null,
+					workspaces,
+					workspaceInvites,
+				},
+				workspaces,
 			},
 		});
 	});
@@ -215,11 +252,17 @@ export const workspaceProcedure = publicProcedure
 			});
 		}
 
-		// Fetch user's workspaces from DB (previously done in auth customSession)
-		const workspaces = await fetchUserWorkspaces(ctx.user.id);
+		// Fetch workspaces for the user (uses request-scoped cache)
+		const { workspaces, personalWorkspace, workspaceInvites, userProfile } =
+			await ctx.getWorkspacesForUser(ctx.user.id, ctx.pool);
 
-		// Find the requested workspace by handle
-		const workspace = getWorkspaceByHandle(workspaces, parsedHandle.data.handle);
+		// Find the workspace by handle (handle 'account' means personal workspace)
+		const requestedHandle = parsedHandle.data.handle;
+		const workspace = workspaces.find(w =>
+			requestedHandle === 'account' ?
+				w.type === 'personal'
+			:	w.handle === requestedHandle,
+		);
 
 		if (!workspace) {
 			throw new TRPCError({
@@ -238,7 +281,23 @@ export const workspaceProcedure = publicProcedure
 			ctx: {
 				...opts.ctx,
 				session: ctx.session,
-				user: ctx.user,
+				user: {
+					...ctx.user,
+					// Add profile fields from the workspace query
+					fullName: userProfile.fullName,
+					firstName: userProfile.firstName,
+					lastName: userProfile.lastName,
+					pitchScreening: userProfile.pitchScreening,
+					pitchReviewing: userProfile.pitchReviewing,
+					phone: userProfile.phone,
+					// Add personal workspace info
+					handle: personalWorkspace.handle,
+					avatarImageS3Key: personalWorkspace.avatarImageS3Key,
+					// Ensure image is string | null (not undefined)
+					image: ctx.user.image ?? null,
+					workspaces,
+					workspaceInvites,
+				},
 				workspaces,
 				workspace,
 			},

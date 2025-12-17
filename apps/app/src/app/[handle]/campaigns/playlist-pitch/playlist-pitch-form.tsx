@@ -1,6 +1,7 @@
 'use client';
 
 import type { SpotifyTrackOption } from '@barely/lib/trpc/spotify.route';
+import type { EnrichedUser } from '@barely/lib/trpc/types';
 import type { newUserContactInfoSchemaWithRole } from '@barely/validators';
 import type { z } from 'zod/v4';
 import { useState } from 'react';
@@ -22,16 +23,10 @@ import { H, Text } from '@barely/ui/typography';
 
 import { PlaylistPitchContactInfoForm } from './playlist-pitch-contact-info-form';
 
-export function PlaylistPitchForm(props: { isLoggedIn?: boolean }) {
+export function PlaylistPitchForm(props: { user?: EnrichedUser }) {
 	const trpc = useTRPC();
 	const router = useRouter();
 	const { handle } = useWorkspace();
-
-	// Fetch user's workspaces only when logged in
-	const { data: userWorkspaces } = useQuery({
-		...trpc.user.workspaces.queryOptions(),
-		enabled: !!props.isLoggedIn,
-	});
 
 	const [submitStatus, setSubmitStatus] = useState<'idle' | 'submitting' | 'success'>(
 		'idle',
@@ -69,22 +64,22 @@ export function PlaylistPitchForm(props: { isLoggedIn?: boolean }) {
 
 	const _trackSelected = !!track && !_checkingDbArtist;
 
-	const _newUserCanAccessArtist = _trackSelected && !dbArtist && !props.isLoggedIn;
+	const _newUserCanAccessArtist = _trackSelected && !dbArtist && !props.user;
 
-	const _newUserCannotAccessArtist = _trackSelected && dbArtist && !props.isLoggedIn;
+	const _newUserCannotAccessArtist = _trackSelected && dbArtist && !props.user;
 
 	const _existingUserCanAccessArtist =
 		_trackSelected &&
 		!!dbArtist &&
-		userWorkspaces?.some(
+		props.user?.workspaces.some(
 			workspace => workspace.spotifyArtistId === selectedTrack?.workspace.spotifyArtistId,
 		);
 
 	const _existingUserCannotAccessArtist =
 		_trackSelected &&
 		!!dbArtist &&
-		props.isLoggedIn &&
-		!userWorkspaces?.some(
+		props.user &&
+		!props.user.workspaces.some(
 			workspace => workspace.spotifyArtistId === selectedTrack?.workspace.spotifyArtistId,
 		);
 

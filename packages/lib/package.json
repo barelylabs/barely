@@ -64,6 +64,10 @@
 			"types": "./dist/src/trpc/trpc.d.ts",
 			"default": "./src/trpc/trpc.ts"
 		},
+		"./trpc/types": {
+			"types": "./dist/src/trpc/types.d.ts",
+			"default": "./src/trpc/types.ts"
+		},
 		"./trpc/app.react": {
 			"types": "./dist/src/trpc/trpc.app.react.d.ts",
 			"default": "./src/trpc/trpc.app.react.ts"

@@ -6,8 +6,6 @@ import { parseForDb } from '@barely/validators/helpers';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
-import { fetchUserWorkspaces } from '@barely/auth/utils';
-
 import { checkEmailExistsOnServer, createUser } from '../../functions/user.fns';
 import { privateProcedure, publicProcedure } from '../trpc';
 
@@ -45,8 +43,35 @@ export const userRoute = {
 		return invites;
 	}),
 
-	workspaces: privateProcedure.query(async ({ ctx }) => {
-		return await fetchUserWorkspaces(ctx.user.id);
+	workspaces: privateProcedure.query(({ ctx }) => {
+		return ctx.workspaces;
+	}),
+
+	/**
+	 * Returns the current user with all enriched data (profile + workspaces).
+	 * Used by the app layout to build the full EnrichedUser object.
+	 */
+	me: privateProcedure.query(({ ctx }) => {
+		// Return explicitly typed object to ensure proper type inference
+		return {
+			id: ctx.user.id,
+			email: ctx.user.email,
+			name: ctx.user.name,
+			emailVerified: ctx.user.emailVerified,
+			createdAt: ctx.user.createdAt,
+			updatedAt: ctx.user.updatedAt,
+			image: ctx.user.image,
+			fullName: ctx.user.fullName,
+			firstName: ctx.user.firstName,
+			lastName: ctx.user.lastName,
+			handle: ctx.user.handle,
+			avatarImageS3Key: ctx.user.avatarImageS3Key,
+			pitchScreening: ctx.user.pitchScreening,
+			pitchReviewing: ctx.user.pitchReviewing,
+			phone: ctx.user.phone,
+			workspaces: ctx.workspaces,
+			workspaceInvites: ctx.user.workspaceInvites,
+		};
 	}),
 
 	emailExists: publicProcedure
