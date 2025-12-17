@@ -100,17 +100,17 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 	);
 
 	try {
+		// Build headers for Electric request
+		const headers: HeadersInit = { Accept: 'application/json' };
+		const ifNoneMatch = request.headers.get('if-none-match');
+		if (ifNoneMatch) {
+			headers['If-None-Match'] = ifNoneMatch;
+		}
+
 		// Forward the request to Electric Cloud
 		const response = await fetch(electricUrl.toString(), {
 			method: 'GET',
-			headers: {
-				Accept: 'application/json',
-				// Forward relevant headers for caching/streaming
-				...(() => {
-					const ifNoneMatch = request.headers.get('if-none-match');
-					return ifNoneMatch ? { 'If-None-Match': ifNoneMatch } : {};
-				})(),
-			},
+			headers,
 		});
 
 		// Handle Electric's response
