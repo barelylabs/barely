@@ -1,11 +1,11 @@
 'use client';
 
-import type { FmPageSync } from './fm-pages.collection';
-import type { ImageFileSync } from './image-files.collection';
 import { useEffect, useMemo, useState } from 'react';
 import { useWorkspace } from '@barely/hooks';
 import { useLiveQuery } from '@tanstack/react-db';
 
+import type { FmPageSync } from './fm-pages.collection';
+import type { ImageFileSync } from './image-files.collection';
 import { useFmPagesCollection } from './fm-pages.collection';
 import { useImageFilesCollection } from './image-files.collection';
 
@@ -50,7 +50,7 @@ export function useFmPagesLiveQuery(
 	// Query FM pages using the query builder syntax
 	const fmQueryResult = useLiveQuery(
 		q => {
-			if (!shouldQuery || !fmPagesCollection) return undefined;
+			if (!shouldQuery) return undefined;
 			return q.from({ fm: fmPagesCollection });
 		},
 		[shouldQuery, fmPagesCollection],
@@ -59,7 +59,7 @@ export function useFmPagesLiveQuery(
 	// Query image files using the query builder syntax
 	const imgQueryResult = useLiveQuery(
 		q => {
-			if (!shouldQuery || !imageFilesCollection) return undefined;
+			if (!shouldQuery) return undefined;
 			return q.from({ img: imageFilesCollection });
 		},
 		[shouldQuery, imageFilesCollection],
@@ -73,10 +73,10 @@ export function useFmPagesLiveQuery(
 			shouldQuery,
 			handle: workspace.handle,
 			showArchived,
-			fmStatus: fmQueryResult?.status,
-			fmDataLength: fmQueryResult?.data?.length ?? 0,
-			imgStatus: imgQueryResult?.status,
-			imgDataLength: imgQueryResult?.data?.length ?? 0,
+			fmStatus: fmQueryResult.status,
+			fmDataLength: fmQueryResult.data?.length ?? 0,
+			imgStatus: imgQueryResult.status,
+			imgDataLength: imgQueryResult.data?.length ?? 0,
 		});
 	}, [
 		isClient,
@@ -84,19 +84,19 @@ export function useFmPagesLiveQuery(
 		shouldQuery,
 		workspace.handle,
 		showArchived,
-		fmQueryResult?.status,
-		fmQueryResult?.data?.length,
-		imgQueryResult?.status,
-		imgQueryResult?.data?.length,
+		fmQueryResult.status,
+		fmQueryResult.data?.length,
+		imgQueryResult.status,
+		imgQueryResult.data?.length,
 	]);
 
 	// Join FM pages with images client-side
 	const data = useMemo(() => {
-		if (!fmQueryResult?.data) return undefined;
+		if (!fmQueryResult.data) return undefined;
 
 		// Data from q.from({ alias: collection }) returns the raw items
 		const fmPages = fmQueryResult.data as FmPageSync[];
-		const imageFiles = (imgQueryResult?.data as ImageFileSync[] | undefined) ?? [];
+		const imageFiles = (imgQueryResult.data as ImageFileSync[] | undefined) ?? [];
 
 		// Create a map of images by ID for fast lookup
 		const imagesById = new Map(imageFiles.map(img => [img.id, img]));
@@ -114,13 +114,12 @@ export function useFmPagesLiveQuery(
 			})
 			.map(fm => ({
 				...fm,
-				coverArt: fm.coverArtId ? imagesById.get(fm.coverArtId) ?? null : null,
+				coverArt: fm.coverArtId ? (imagesById.get(fm.coverArtId) ?? null) : null,
 			}))
 			.sort(
-				(a, b) =>
-					new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+				(a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
 			);
-	}, [fmQueryResult?.data, imgQueryResult?.data, workspace.handle, showArchived]);
+	}, [fmQueryResult.data, imgQueryResult.data, workspace.handle, showArchived]);
 
 	// Return loading state if not ready
 	if (!shouldQuery) {
@@ -132,7 +131,7 @@ export function useFmPagesLiveQuery(
 	}
 
 	const isLoading =
-		fmQueryResult?.status === 'loading' || imgQueryResult?.status === 'loading';
+		fmQueryResult.status === 'loading' || imgQueryResult.status === 'loading';
 
 	return {
 		data,
@@ -140,4 +139,3 @@ export function useFmPagesLiveQuery(
 		isEnabled: true,
 	};
 }
-

@@ -34,7 +34,7 @@ export function ProductSidebar() {
 
 	// Find user's personal workspace
 	const personalWorkspace = allWorkspaces.find(
-		workspace => workspace.handle === user.handle,
+		workspace => workspace.type === 'personal',
 	);
 
 	// Get available products based on current app variant

@@ -1,10 +1,18 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
-import { useMemo, useRef } from 'react';
-import { createResourceSearchParamsHook, useFocusGridList } from '@barely/hooks';
+import { useEffect, useMemo, useRef } from 'react';
+import {
+	createResourceSearchParamsHook,
+	useFocusGridList,
+	useWorkspace,
+} from '@barely/hooks';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { useFmPagesLiveQuery, type FmPageWithCoverArt } from '~/collections';
+import { useTRPC } from '@barely/api/app/app.trpc.react';
+
+import type { FmPageWithCoverArt } from '~/collections';
+import { useFmPagesLiveQuery } from '~/collections';
 
 // Define the page data type for fm pages (for backward compatibility)
 type FmPageFromApi = AppRouterOutputs['fm']['byWorkspace']['fmPages'][0];
@@ -47,8 +55,9 @@ function mapToApiFormat(fmPage: FmPageWithCoverArt): FmPageFromApi {
 		youtubeClicks: fmPage.youtubeClicks ?? 0,
 		youtubeMusicClicks: fmPage.youtubeMusicClicks ?? 0,
 		// Map cover art - critical for images to display
-		coverArt: fmPage.coverArt
-			? {
+		coverArt:
+			fmPage.coverArt ?
+				{
 					id: fmPage.coverArt.id,
 					workspaceId: fmPage.coverArt.workspaceId,
 					type: fmPage.coverArt.type as 'image',
@@ -59,11 +68,10 @@ function mapToApiFormat(fmPage: FmPageWithCoverArt): FmPageFromApi {
 					blurDataURL: fmPage.coverArt.blurDataUrl, // UI uses blurDataURL
 					blurDataUrl: fmPage.coverArt.blurDataUrl, // Some components use blurDataUrl
 					createdAt: new Date(fmPage.coverArt.created_at),
-					deletedAt: fmPage.coverArt.deleted_at
-						? new Date(fmPage.coverArt.deleted_at)
-						: null,
+					deletedAt:
+						fmPage.coverArt.deleted_at ? new Date(fmPage.coverArt.deleted_at) : null,
 				}
-			: null,
+			:	null,
 	} as FmPageFromApi;
 }
 
@@ -72,7 +80,11 @@ function mapToApiFormat(fmPage: FmPageWithCoverArt): FmPageFromApi {
  */
 export function useFm() {
 	const searchParams = useFmSearchParams();
-	const { data: fmPages, isLoading, isEnabled } = useFmPagesLiveQuery({
+	const {
+		data: fmPages,
+		isLoading,
+		isEnabled,
+	} = useFmPagesLiveQuery({
 		showArchived: searchParams.filters.showArchived,
 	});
 
@@ -87,7 +99,7 @@ export function useFm() {
 		let filtered = fmPages;
 
 		// Apply search filter
-		const search = searchParams.filters.search?.toLowerCase();
+		const search = searchParams.filters.search.toLowerCase();
 		if (search) {
 			filtered = filtered.filter(
 				page =>
@@ -115,12 +127,33 @@ export function useFm() {
 		return items.find(item => item.id === lastSelectedItemId);
 	}, [lastSelectedItemId, items]);
 
+	// Prefetch full FM page with links when selection changes
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
+	const { handle } = useWorkspace();
+
+	useEffect(() => {
+		if (!lastSelectedItemId) return;
+		void queryClient.prefetchQuery(
+			trpc.fm.byId.queryOptions({ handle, id: lastSelectedItemId }),
+		);
+	}, [lastSelectedItemId, queryClient, trpc.fm.byId, handle]);
+
+	// Get full FM page from React Query cache (includes links)
+	const { data: selectedFmPageFull, isLoading: isLoadingFullFmPage } = useQuery({
+		...trpc.fm.byId.queryOptions({ handle, id: lastSelectedItemId ?? '' }),
+		enabled: !!lastSelectedItemId,
+		staleTime: 30_000, // 30 seconds
+	});
+
 	return {
 		// Data
 		items,
 		// Selection
 		lastSelectedItemId,
 		lastSelectedItem,
+		selectedFmPageFull, // Full record with links (prefetched via tRPC)
+		isLoadingFullFmPage, // Loading state for links spinner
 		// Loading states
 		isFetching: isLoading,
 		isFetchingNextPage: false,

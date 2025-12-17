@@ -28,7 +28,7 @@ import { TRPCError } from '@trpc/server';
 import { and, asc, eq, inArray } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
-import { createMagicLink, fetchUserWorkspaces } from '@barely/auth/utils';
+import { createMagicLink } from '@barely/auth/utils';
 
 import {
 	createPitchCheckoutLink,
@@ -39,7 +39,7 @@ import {
 } from '../../functions/campaign.fns';
 import { createTrack } from '../../functions/track.fns';
 import { createUser, getEnrichedUserByUserId } from '../../functions/user.fns';
-import { createWorkspace } from '../../functions/workspace.fns';
+import { createWorkspace, getUserWorkspacesById } from '../../functions/workspace.fns';
 import { pushEvent } from '../../integrations/pusher/pusher-server';
 import { sendText } from '../../utils/sms';
 import { privateProcedure, publicProcedure, workspaceProcedure } from '../trpc';
@@ -282,8 +282,17 @@ export const campaignRoute = {
 			// if (!campaign.track)
 			// 	throw new TRPCError({ code: 'NOT_FOUND', message: 'Track not found' });
 
+			// Fetch extended user data (privateProcedure only has basic session user)
+			const extendedUser = await getEnrichedUserByUserId(ctx.user.id);
+			if (!extendedUser) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'User not found',
+				});
+			}
+
 			const checkoutLink = await createPitchCheckoutLink({
-				user: ctx.user,
+				user: extendedUser,
 				workspace: campaign.workspace,
 				campaign,
 			});
@@ -371,7 +380,7 @@ export const campaignRoute = {
 			}),
 		)
 		.query(async ({ ctx, input }) => {
-			const workspaces = await fetchUserWorkspaces(ctx.user.id);
+			const { workspaces } = await getUserWorkspacesById(ctx.user.id, ctx.pool);
 			const where: SQL[] = [
 				inArray(
 					Campaigns.workspaceId,
@@ -453,7 +462,15 @@ export const campaignRoute = {
 		}),
 
 	toScreen: privateProcedure.query(async ({ ctx }) => {
-		if (!ctx.user.pitchScreening)
+		// Fetch extended user data to check pitchScreening permission
+		const extendedUser = await getEnrichedUserByUserId(ctx.user.id);
+		if (!extendedUser) {
+			throw new TRPCError({
+				code: 'NOT_FOUND',
+				message: 'User not found',
+			});
+		}
+		if (!extendedUser.pitchScreening)
 			throw new TRPCError({
 				code: 'UNAUTHORIZED',
 				message: 'User is not authorized to screen campaigns.',

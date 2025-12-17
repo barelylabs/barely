@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { dbEnv } from '@barely/db/env';
+import { dbEnv } from '@barely/db';
 
 import { getSession } from '~/auth/server';
 
@@ -57,9 +57,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 			headers: {
 				Accept: 'application/json',
 				// Forward relevant headers for caching/streaming
-				...(request.headers.get('if-none-match') && {
-					'If-None-Match': request.headers.get('if-none-match')!,
-				}),
+				...(() => {
+					const ifNoneMatch = request.headers.get('if-none-match');
+					return ifNoneMatch ? { 'If-None-Match': ifNoneMatch } : {};
+				})(),
 			},
 		});
 
@@ -124,4 +125,3 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 		return new NextResponse('Internal Server Error', { status: 500 });
 	}
 }
-

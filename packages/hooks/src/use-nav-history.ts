@@ -1,6 +1,7 @@
 'use client';
 
 import type { NavHistory } from '@barely/atoms/navigation-history';
+import type { SessionWorkspace } from '@barely/auth';
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAtom, useSetAtom } from 'jotai';
@@ -28,8 +29,12 @@ export function useUpdateNavHistory() {
 				:	(prev.settingsBackPath ?? defaultSettingsBackPath);
 
 			if (
-				workspaces.some(w => pathname.includes(`/${w.handle}/settings`)) &&
-				!workspaces.some(w => prev.currentPath?.includes(`/${w.handle}/settings`))
+				workspaces.some((w: SessionWorkspace) =>
+					pathname.includes(`/${w.handle}/settings`),
+				) &&
+				!workspaces.some((w: SessionWorkspace) =>
+					prev.currentPath?.includes(`/${w.handle}/settings`),
+				)
 			) {
 				settingsBackPath = prev.currentPath ?? defaultSettingsBackPath;
 			}

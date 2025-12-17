@@ -34,6 +34,9 @@ import { pushEvent } from '../../integrations/pusher/pusher-server';
 import { privateProcedure, publicProcedure, workspaceProcedure } from '../trpc';
 
 export const workspaceRoute = {
+	// Get all workspaces for the current user (uses workspaceProcedure to ensure auth)
+	all: workspaceProcedure.query(({ ctx }) => ctx.workspaces),
+
 	byHandle: workspaceProcedure.query(({ ctx }) => ctx.workspace),
 
 	byHandleWithAll: workspaceProcedure.query(async ({ ctx }) => {

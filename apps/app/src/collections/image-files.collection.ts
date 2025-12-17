@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useWorkspace } from '@barely/hooks';
 import { electricCollectionOptions } from '@tanstack/electric-db-collection';
 import { createCollection } from '@tanstack/react-db';
@@ -83,38 +83,39 @@ export function getImageFilesCollectionFromCache(
 
 /**
  * Hook to get the Image Files collection for the current workspace.
+ * The collection should already be pre-synced by ElectricPreSyncProvider.
+ * Returns null if not yet available (pre-sync still in progress).
  */
 export function useImageFilesCollection(): ImageFilesCollectionType | null {
 	const { workspace } = useWorkspace();
 	const [isClient, setIsClient] = useState(false);
+	const [, forceUpdate] = useState(0);
 
 	useEffect(() => {
 		setIsClient(true);
 	}, []);
 
-	const collection = useMemo(() => {
-		if (!isClient) {
-			return null;
-		}
+	// Poll for collection availability if not yet cached
+	useEffect(() => {
+		if (!isClient) return;
 
-		// Try to get from cache first
 		const cached = imageFilesCollectionCache.get(workspace.id);
-		if (cached) {
-			return cached;
-		}
+		if (cached) return;
 
-		// Fallback: create collection if not pre-synced
-		const baseUrl = window.location.origin;
-		try {
-			const { collection } = createImageFilesCollectionForWorkspace(workspace.id, baseUrl);
-			return collection;
-		} catch (error) {
-			console.error('[Image Files Collection] Failed to create collection:', error);
-			return null;
-		}
+		// Poll every 100ms until collection is available
+		const interval = setInterval(() => {
+			if (imageFilesCollectionCache.has(workspace.id)) {
+				forceUpdate(n => n + 1);
+				clearInterval(interval);
+			}
+		}, 100);
+
+		return () => clearInterval(interval);
 	}, [workspace.id, isClient]);
 
-	return collection;
+	// Only read from cache - pre-sync provider handles creation
+	if (!isClient) return null;
+	return imageFilesCollectionCache.get(workspace.id) ?? null;
 }
 
 /**
@@ -132,4 +133,3 @@ export function getImageFilesCollectionCache() {
 }
 
 export type { ImageFilesCollectionType };
-
