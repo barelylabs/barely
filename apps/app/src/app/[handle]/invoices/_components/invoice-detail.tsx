@@ -14,6 +14,13 @@ import { useTRPC } from '@barely/api/app/trpc.react';
 import { Badge } from '@barely/ui/badge';
 import { Button } from '@barely/ui/button';
 import { Card } from '@barely/ui/card';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from '@barely/ui/dropdown-menu';
 import { Icon } from '@barely/ui/icon';
 import { Separator } from '@barely/ui/separator';
 import { Text } from '@barely/ui/typography';
@@ -153,24 +160,15 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 						{invoice.status.toUpperCase()}
 					</Badge>
 
-					<div className='flex flex-wrap gap-2'>
-						<Button
-							size='sm'
-							look='outline'
-							onClick={handleDownload}
-							startIcon='download'
-							disabled={isDownloading}
-						>
-							{isDownloading ? 'Downloading...' : 'Download PDF'}
-						</Button>
-
+					<div className='flex flex-wrap items-center gap-2'>
+						{/* Primary Actions */}
 						<Button
 							size='sm'
 							onClick={() => sendInvoice({ handle, id: invoice.id })}
 							disabled={isSending}
 							startIcon='send'
 						>
-							Send Invoice
+							{isSending ? 'Sending...' : 'Send Invoice'}
 						</Button>
 
 						{(invoice.status === 'sent' || invoice.status === 'viewed') && (
@@ -181,35 +179,53 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 								disabled={isMarkingPaid}
 								startIcon='check'
 							>
-								Mark as Paid
+								{isMarkingPaid ? 'Marking...' : 'Mark as Paid'}
 							</Button>
 						)}
 
 						<Button size='sm' look='outline' onClick={copyPaymentLink} startIcon='link'>
-							Copy Payment Link
+							Copy Link
 						</Button>
 
-						<Button
-							size='sm'
-							look='outline'
-							onClick={() => duplicateInvoice({ handle, id: invoice.id })}
-							disabled={isDuplicating}
-						>
-							<Icon.copy className='mr-2 h-4 w-4' />
-							Duplicate
-						</Button>
-
-						{invoice.status !== 'paid' && invoice.status !== 'voided' && (
-							<Button
-								size='sm'
-								look='destructive'
-								onClick={() => deleteInvoice({ handle, ids: [invoice.id] })}
-								disabled={isDeleting}
-							>
-								<Icon.trash className='mr-2 h-4 w-4' />
-								Delete
-							</Button>
-						)}
+						{/* Secondary Actions Dropdown */}
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button size='sm' look='outline' variant='icon'>
+									<Icon.more className='h-4 w-4' />
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align='end'>
+								<DropdownMenuItem
+									onClick={handleDownload}
+									disabled={isDownloading}
+									className='cursor-pointer'
+								>
+									<Icon.download className='mr-2 h-4 w-4' />
+									{isDownloading ? 'Downloading...' : 'Download PDF'}
+								</DropdownMenuItem>
+								<DropdownMenuItem
+									onClick={() => duplicateInvoice({ handle, id: invoice.id })}
+									disabled={isDuplicating}
+									className='cursor-pointer'
+								>
+									<Icon.copy className='mr-2 h-4 w-4' />
+									{isDuplicating ? 'Duplicating...' : 'Duplicate'}
+								</DropdownMenuItem>
+								{invoice.status !== 'paid' && invoice.status !== 'voided' && (
+									<>
+										<DropdownMenuSeparator />
+										<DropdownMenuItem
+											onClick={() => deleteInvoice({ handle, ids: [invoice.id] })}
+											disabled={isDeleting}
+											className='cursor-pointer text-destructive focus:text-destructive'
+										>
+											<Icon.trash className='mr-2 h-4 w-4' />
+											{isDeleting ? 'Deleting...' : 'Delete'}
+										</DropdownMenuItem>
+									</>
+								)}
+							</DropdownMenuContent>
+						</DropdownMenu>
 					</div>
 				</div>
 			</Card>
@@ -245,7 +261,7 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 										Due Date
 									</Text>
 									<Text variant='md/medium'>
-										format(new Date(invoice.dueDate), 'MMM dd, yyyy')
+										{format(new Date(invoice.dueDate), 'MMM dd, yyyy')}
 									</Text>
 								</div>
 								{invoice.paidAt && (
