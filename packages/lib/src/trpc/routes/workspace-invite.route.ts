@@ -1,5 +1,9 @@
 import type { TRPCRouterRecord } from '@trpc/server';
-import { ONE_DAY_IN_SECONDS, TWO_WEEKS_IN_SECONDS } from '@barely/const';
+import {
+	getCurrentAppConfig,
+	ONE_DAY_IN_SECONDS,
+	TWO_WEEKS_IN_SECONDS,
+} from '@barely/const';
 import { dbPool } from '@barely/db/pool';
 import { _Users_To_Workspaces, Users, WorkspaceInvites } from '@barely/db/sql';
 import { sendEmail } from '@barely/email';
@@ -79,11 +83,15 @@ export const workspaceInviteRoute = {
 					loginLink: magicLink,
 				});
 
+				const appConfig = getCurrentAppConfig();
 				await sendEmail({
-					from: 'support@ship.barely.ai',
-					fromFriendlyName: 'Barely',
+					from:
+						appConfig.name === 'appInvoice' ?
+							'support@ship.barelyinvoice.com'
+						:	'support@ship.barely.ai',
+					fromFriendlyName: appConfig.emailFromName,
 					to: input.email,
-					subject: `You've been invited to join ${ctx.workspace.name} on barely.ai`,
+					subject: `You've been invited to join ${ctx.workspace.name} on ${appConfig.displayName}`,
 					type: 'transactional',
 					react: WorkspaceInviteEmail,
 				});
@@ -126,11 +134,15 @@ export const workspaceInviteRoute = {
 					registrationLink,
 				});
 
+				const appConfig = getCurrentAppConfig();
 				await sendEmail({
-					from: 'support@ship.barely.ai',
-					fromFriendlyName: 'Barely',
+					from:
+						appConfig.name === 'appInvoice' ?
+							'support@ship.barelyinvoice.com'
+						:	'support@ship.barely.ai',
+					fromFriendlyName: appConfig.emailFromName,
 					to: input.email,
-					subject: `You've been invited to join ${ctx.workspace.name} on barely.ai`,
+					subject: `You've been invited to join ${ctx.workspace.name} on ${appConfig.displayName}`,
 					type: 'transactional',
 					react: RegistrationInviteEmail,
 				});

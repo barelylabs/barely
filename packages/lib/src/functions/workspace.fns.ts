@@ -9,6 +9,7 @@ import type { DbPoolTransaction, NeonPool } from '@barely/db/pool';
 
 import type { SessionWorkspaceInvite } from '@barely/validators';
 import type { CreateWorkspace, InsertWorkspace, User } from '@barely/validators/schemas';
+import { getCurrentAppConfig } from '@barely/const';
 import { eq } from '@barely/db';
 import { dbHttp } from '@barely/db/client';
 import { dbPool } from '@barely/db/pool';
@@ -173,12 +174,16 @@ export async function inviteUserToWorkspace({
 		loginLink: magicLink,
 	});
 
+	const appConfig = getCurrentAppConfig();
 	const { sendEmail } = await import('@barely/email');
 	await sendEmail({
-		from: 'support@ship.barely.ai',
-		fromFriendlyName: 'Barely',
+		from:
+			appConfig.name === 'appInvoice' ?
+				'support@ship.barelyinvoice.com'
+			:	'support@ship.barely.ai',
+		fromFriendlyName: appConfig.emailFromName,
 		to: email,
-		subject: `You've been invited to join ${workspace.name} on barely.ai`,
+		subject: `You've been invited to join ${workspace.name} on ${appConfig.displayName}`,
 		type: 'transactional',
 		react: WorkspaceInviteEmail,
 	});
