@@ -194,12 +194,12 @@ export function ContextSidebar({ productId }: ContextSidebarProps) {
 					:	<div className='border-b p-4'>
 							<div className='flex items-center gap-2.5'>
 								{/* {ProductIcon && <ProductIcon className='h-5 w-5 text-neutral-700' />} */}
-								<Text variant='md/semibold' className='text-neutral-900'>
+								<Text variant='md/semibold' className='text-foreground'>
 									{product.name}
 								</Text>
 							</div>
 							{product.description && (
-								<Text variant='xs/normal' className='mt-1.5 text-neutral-500'>
+								<Text variant='xs/normal' className='mt-1.5 text-muted-foreground'>
 									{product.description}
 								</Text>
 							)}

@@ -109,14 +109,14 @@ export function WorkspaceSwitcher({ collapsed = false }: WorkspaceSwitcherProps)
 					{!collapsed && (
 						<>
 							<div className='flex flex-1 flex-col items-start justify-center'>
-								<Text variant='sm/semibold' className='truncate text-neutral-900'>
+								<Text variant='sm/semibold' className='truncate text-foreground'>
 									{truncate(normalizedObject.name, 16)}
 								</Text>
-								<Text variant='xs/normal' className='text-neutral-500'>
+								<Text variant='xs/normal' className='text-muted-foreground'>
 									{getPlanNameFromId(currentWorkspace.plan)}
 								</Text>
 							</div>
-							<Icon.chevronsUpDown className='h-4 w-4 shrink-0 text-neutral-400' />
+							<Icon.chevronsUpDown className='h-4 w-4 shrink-0 text-muted-foreground' />
 						</>
 					)}
 				</button>
@@ -134,10 +134,10 @@ export function WorkspaceSwitcher({ collapsed = false }: WorkspaceSwitcherProps)
 							priority
 						/>
 						<div className='flex-1'>
-							<Text variant='sm/semibold' className='text-neutral-900'>
+							<Text variant='sm/semibold' className='text-foreground'>
 								{currentWorkspace.name}
 							</Text>
-							<Text variant='xs/normal' className='text-neutral-500'>
+							<Text variant='xs/normal' className='text-muted-foreground'>
 								{getPlanNameFromId(currentWorkspace.plan)}
 							</Text>
 						</div>
@@ -149,17 +149,17 @@ export function WorkspaceSwitcher({ collapsed = false }: WorkspaceSwitcherProps)
 					<Link
 						href={`/${currentWorkspace.handle}/settings`}
 						onClick={() => setSwitcherOpen(false)}
-						className='flex items-center gap-3 rounded-md px-3 py-2 text-sm text-neutral-700 transition-colors hover:bg-neutral-100'
+						className='flex items-center gap-3 rounded-md px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent'
 					>
-						<Icon.settings className='h-4 w-4 text-neutral-500' />
+						<Icon.settings className='h-4 w-4 text-muted-foreground' />
 						Settings
 					</Link>
 					<Link
 						href={`/${currentWorkspace.handle}/settings/team`}
 						onClick={() => setSwitcherOpen(false)}
-						className='flex items-center gap-3 rounded-md px-3 py-2 text-sm text-neutral-700 transition-colors hover:bg-neutral-100'
+						className='flex items-center gap-3 rounded-md px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent'
 					>
-						<Icon.userPlus className='h-4 w-4 text-neutral-500' />
+						<Icon.userPlus className='h-4 w-4 text-muted-foreground' />
 						Invite members
 					</Link>
 				</div>
@@ -186,7 +186,7 @@ export function WorkspaceSwitcher({ collapsed = false }: WorkspaceSwitcherProps)
 									/>
 									<span className='flex-1'>{workspace.name}</span>
 									{currentWorkspace.handle === workspace.handle && (
-										<Icon.check className='h-4 w-4 text-neutral-500' />
+										<Icon.check className='h-4 w-4 text-muted-foreground' />
 									)}
 								</CommandItem>
 							))}
@@ -203,7 +203,7 @@ export function WorkspaceSwitcher({ collapsed = false }: WorkspaceSwitcherProps)
 								className='cursor-pointer gap-3'
 							>
 								<div className='flex h-6 w-6 items-center justify-center'>
-									<Icon.plus className='h-4 w-4 text-neutral-500' />
+									<Icon.plus className='h-4 w-4 text-muted-foreground' />
 								</div>
 								<span>Create new workspace</span>
 							</CommandItem>

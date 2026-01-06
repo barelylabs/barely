@@ -179,7 +179,7 @@ export function ProductSidebar() {
 					{/* Separator - hide for invoice variant since there's nothing after core products */}
 					{!isInvoiceVariant() && (
 						<div className='mx-3'>
-							<div className='h-px bg-neutral-200' />
+							<div className='h-px bg-border' />
 						</div>
 					)}
 
@@ -242,7 +242,7 @@ export function ProductSidebar() {
 								href='/account/settings'
 								className='flex cursor-pointer items-center gap-3 px-3'
 							>
-								<Icon.user className='h-4 w-4 text-neutral-500' />
+								<Icon.user className='h-4 w-4 text-muted-foreground' />
 								<span>Account</span>
 							</Link>
 						</DropdownMenuItem>
@@ -254,7 +254,7 @@ export function ProductSidebar() {
 							onClick={() => setTheme('light')}
 							className='flex cursor-pointer items-center gap-3 px-3'
 						>
-							<Icon.sun className='h-4 w-4 text-neutral-500' />
+							<Icon.sun className='h-4 w-4 text-muted-foreground' />
 							<span>Light</span>
 							{theme === 'light' && <Icon.check className='ml-auto h-4 w-4' />}
 						</DropdownMenuItem>
@@ -263,7 +263,7 @@ export function ProductSidebar() {
 							onClick={() => setTheme('dark')}
 							className='flex cursor-pointer items-center gap-3 px-3'
 						>
-							<Icon.moon className='h-4 w-4 text-neutral-500' />
+							<Icon.moon className='h-4 w-4 text-muted-foreground' />
 							<span>Dark</span>
 							{theme === 'dark' && <Icon.check className='ml-auto h-4 w-4' />}
 						</DropdownMenuItem>
@@ -272,7 +272,7 @@ export function ProductSidebar() {
 							onClick={() => setTheme('system')}
 							className='flex cursor-pointer items-center gap-3 px-3'
 						>
-							<Icon.laptop className='h-4 w-4 text-neutral-500' />
+							<Icon.laptop className='h-4 w-4 text-muted-foreground' />
 							<span>System</span>
 							{theme === 'system' && <Icon.check className='ml-auto h-4 w-4' />}
 						</DropdownMenuItem>
@@ -283,7 +283,7 @@ export function ProductSidebar() {
 							onClick={() => authClient.signOut().then(() => router.push('/'))}
 							className='flex cursor-pointer items-center gap-3 px-3'
 						>
-							<Icon.logOut className='h-4 w-4 text-neutral-500' />
+							<Icon.logOut className='h-4 w-4 text-muted-foreground' />
 							<span>Log out</span>
 						</DropdownMenuItem>
 					</DropdownMenuContent>
