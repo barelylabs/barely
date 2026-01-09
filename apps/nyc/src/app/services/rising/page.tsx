@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { NYC_RISING_PLUS } from '@barely/const';
+import { NYC_RISING_PLUS, NYC_STAN } from '@barely/const';
 
 import { H } from '@barely/ui/typography';
 
@@ -95,15 +95,38 @@ export default function RisingPlusPage() {
 										</H>
 										<p className='text-white/70'>
 											We design, execute, and optimize complete marketing campaigns based
-											on your goals and budget. You approve the strategy, we handle all
-											the technical implementation.
+											on your goals and budget (e.g., a single release campaign + a merch
+											push). You approve the strategy, we handle all the technical
+											implementation.
 										</p>
 									</div>
 								</div>
 							</div>
 						</AnimatedSection>
 
+						{/* Merch elevated to second position - core differentiator */}
 						<AnimatedSection animation='fade-up' delay={300}>
+							<div className='glass rounded-xl border border-green-500/30 p-6'>
+								<div className='flex items-start gap-4'>
+									<span className='text-3xl'>🛒</span>
+									<div>
+										<H size='5' className='mb-2 text-green-400'>
+											Merch Strategy + Revenue Optimization
+										</H>
+										<p className='text-white/70'>
+											<span className='font-semibold text-white'>
+												This is our core differentiator.
+											</span>{' '}
+											Physical merch can return 50-90% immediately vs. 2% for streaming.
+											We&apos;ll help you build campaigns that convert listeners into
+											buyers, not just streams. Direct-to-fan sales platform included.
+										</p>
+									</div>
+								</div>
+							</div>
+						</AnimatedSection>
+
+						<AnimatedSection animation='fade-up' delay={400}>
 							<div className='glass rounded-xl p-6'>
 								<div className='flex items-start gap-4'>
 									<span className='text-3xl'>💰</span>
@@ -115,25 +138,6 @@ export default function RisingPlusPage() {
 											Your $1-3K monthly budget working efficiently across platforms, with
 											real-time optimization and detailed attribution tracking. No wasted
 											spend, no black-box reporting.
-										</p>
-									</div>
-								</div>
-							</div>
-						</AnimatedSection>
-
-						<AnimatedSection animation='fade-up' delay={400}>
-							<div className='glass rounded-xl p-6'>
-								<div className='flex items-start gap-4'>
-									<span className='text-3xl'>🛒</span>
-									<div>
-										<H size='5' className='mb-2'>
-											Merch Strategy + Revenue Optimization
-										</H>
-										<p className='text-white/70'>
-											Direct-to-fan sales platform plus active strategy development.
-											Physical merch can return 50-90% immediately vs. 2% for streaming -
-											we&apos;ll help you build campaigns that convert listeners into
-											buyers, not just streams.
 										</p>
 									</div>
 								</div>
@@ -328,6 +332,33 @@ export default function RisingPlusPage() {
 					</div>
 				</div>
 			</section> */}
+			{/* Stan Add-on Section */}
+			<section className='bg-white/5 px-4 py-12 sm:px-6 lg:px-8'>
+				<div className='mx-auto max-w-4xl'>
+					<AnimatedSection animation='fade-up'>
+						<div className='glass rounded-xl border border-purple-500/20 p-8'>
+							<div className='flex flex-col gap-6 md:flex-row md:items-center md:justify-between'>
+								<div>
+									<H size='4' className='mb-2 text-purple-300'>
+										Want even more reach?
+									</H>
+									<p className='text-white/70'>
+										Add a Stan fan account for ${NYC_STAN.price.addon}/month. We&apos;ll
+										run a dedicated Instagram fan page for your artist project—daily
+										content, memes, and the stuff you can&apos;t post on your main.
+									</p>
+								</div>
+								<Link href='/services/stan' className='flex-shrink-0'>
+									<MarketingButton marketingLook='glass' size='sm'>
+										Learn more →
+									</MarketingButton>
+								</Link>
+							</div>
+						</div>
+					</AnimatedSection>
+				</div>
+			</section>
+
 			{/* Pricing CTA */}
 			<section className='px-4 py-24 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-md'>
@@ -340,13 +371,14 @@ export default function RisingPlusPage() {
 							features={[
 								'Up to 2 professional campaigns per month',
 								'Management of $1-3K monthly ad spend',
+								'Merch strategy + revenue optimization',
 								'Full access to barely.ai tools (Rising tier)',
 								'Monthly strategy calls with analysis',
-								'Merch strategy + revenue optimization',
 								'Real-time campaign optimization',
 							]}
 							ctaText='Start Rising+ Today'
 							featured
+							onCTAClick={openContactModal}
 						/>
 					</AnimatedSection>
 

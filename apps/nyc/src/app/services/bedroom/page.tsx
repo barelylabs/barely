@@ -296,8 +296,8 @@ export default function BedroomPlusPage() {
 									<li className='flex items-start gap-3'>
 										<span className='mt-0.5 text-red-500'>✗</span>
 										<span className='text-white/80'>
-											Artists who prefer relationship-based marketing over data-driven
-											approaches
+											Artists who want to grow through networking and industry
+											relationships rather than paid marketing and data
 										</span>
 									</li>
 									<li className='flex items-start gap-3'>
@@ -386,6 +386,22 @@ export default function BedroomPlusPage() {
 									Get Started
 								</MarketingButton>
 							</div>
+						</div>
+					</AnimatedSection>
+
+					<AnimatedSection animation='fade-up' delay={300}>
+						<div className='mt-12 rounded-xl border border-purple-500/20 bg-white/5 p-6 text-center'>
+							<p className='text-white/80'>
+								<span className='font-semibold text-purple-300'>Ready to scale?</span>{' '}
+								When you&apos;re ready to hand off execution and scale your ad budget,{' '}
+								<Link
+									href='/services/rising'
+									className='text-purple-300 underline hover:text-purple-200'
+								>
+									Rising+
+								</Link>{' '}
+								picks up where Bedroom+ leaves off.
+							</p>
 						</div>
 					</AnimatedSection>
 				</div>

@@ -1,3 +1,5 @@
+'use client';
+
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { NYC_BREAKOUT_PLUS } from '@barely/const';
@@ -7,6 +9,7 @@ import { H } from '@barely/ui/typography';
 import { AnimatedSection } from '../../../components/marketing/animated-section';
 import { MarketingButton } from '../../../components/marketing/button';
 import { PricingCard } from '../../../components/marketing/pricing-card';
+import { useContactModal } from '../../../contexts/contact-modal-context';
 
 export const metadata: Metadata = {
 	title: 'Breakout+ Service - Maximum Growth Engineering | Barely NYC',
@@ -15,6 +18,7 @@ export const metadata: Metadata = {
 };
 
 export default function BreakoutPlusPage() {
+	const { open: openContactModal } = useContactModal();
 	return (
 		<main className='pt-16'>
 			{/* Page Header */}
@@ -61,14 +65,19 @@ export default function BreakoutPlusPage() {
 								Breakout.
 							</H>
 							<p className='mb-4 text-lg leading-relaxed text-white/80'>
-								You&apos;ve built a solid fanbase and consistent streaming numbers.
+								Breakout+ is built for moments that matter: your album cycle, your first
+								headline tour, the year you want labels paying attention. This isn&apos;t
+								maintenance-mode marketing—it&apos;s a full push with everything
+								we&apos;ve got.
+							</p>
+							<p className='mb-4 text-lg leading-relaxed text-white/80'>
 								You&apos;re ready to invest serious resources into scaling to the next
-								level - but you want every dollar working efficiently with complete
+								level—and you want every dollar working efficiently with complete
 								transparency into the process.
 							</p>
 							<p className='text-xl font-semibold text-white'>
-								Breakout+ is maximum growth engineering for artists ready to dominate
-								their genre.
+								Breakout+ is maximum growth engineering for artists at an inflection
+								point.
 							</p>
 						</div>
 					</AnimatedSection>
@@ -148,9 +157,37 @@ export default function BreakoutPlusPage() {
 											Content Scheduling + Timing Optimization
 										</H>
 										<p className='text-white/70'>
-											You create the content, we optimize when and how it gets released
-											for maximum algorithmic impact. Strategic timing across platforms
-											based on your audience data and engagement patterns.
+											You create the content, we handle the release calendar. We&apos;ll
+											schedule posts across platforms based on your audience&apos;s
+											activity patterns, coordinate content drops with ad campaigns, and
+											time announcements for maximum algorithmic lift. You send us the
+											assets; we make sure they land.
+										</p>
+									</div>
+								</div>
+							</div>
+						</AnimatedSection>
+
+						{/* Stan+ Included */}
+						<AnimatedSection animation='fade-up' delay={550}>
+							<div className='glass rounded-xl border border-purple-500/30 bg-purple-500/10 p-6'>
+								<div className='flex items-start gap-4'>
+									<span className='text-3xl'>🎭</span>
+									<div>
+										<H size='5' className='mb-2 text-purple-300'>
+											Stan Fan Account Included ($500 value)
+										</H>
+										<p className='text-white/70'>
+											A dedicated Instagram fan account for your project, managed by us.
+											Daily posts, memes, repurposed content, and community
+											engagement—all the stuff that&apos;s too informal for your main but
+											builds superfan culture.{' '}
+											<Link
+												href='/services/stan'
+												className='text-purple-300 underline hover:text-purple-200'
+											>
+												Learn more about Stan →
+											</Link>
 										</p>
 									</div>
 								</div>
@@ -286,6 +323,53 @@ export default function BreakoutPlusPage() {
 				</div>
 			</section>
 
+			{/* What's Different from Rising+? */}
+			<section className='bg-white/5 px-4 py-12 sm:px-6 lg:px-8'>
+				<div className='mx-auto max-w-4xl'>
+					<AnimatedSection animation='fade-up'>
+						<H size='2' className='mb-12 text-center text-3xl md:text-4xl'>
+							How is this different from Rising+?
+						</H>
+					</AnimatedSection>
+
+					<div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+						{[
+							{
+								label: 'Higher budget ceiling',
+								desc: 'We manage up to $6K/month in ad spend (vs. $3K)',
+							},
+							{
+								label: 'More touchpoints',
+								desc: 'Bi-weekly strategy calls instead of monthly',
+							},
+							{
+								label: 'Content scheduling',
+								desc: 'We handle your release calendar and posting timing',
+							},
+							{
+								label: 'Stan account included',
+								desc: 'A managed fan Instagram page ($500 value)',
+							},
+							{
+								label: 'Priority support',
+								desc: 'Direct access for urgent optimizations and opportunities',
+							},
+							{
+								label: 'Inflection-point focus',
+								desc: 'Built for album cycles, tours, and label-ready moments',
+							},
+						].map((item, index) => (
+							<AnimatedSection key={index} animation='fade-up' delay={200 + index * 100}>
+								<div className='glass rounded-lg p-4'>
+									<p className='font-semibold text-purple-300'>{item.label}</p>
+									<p className='text-sm text-white/70'>{item.desc}</p>
+								</div>
+							</AnimatedSection>
+						))}
+					</div>
+				</div>
+			</section>
+
 			{/* Perfect For */}
 			<section className='px-4 py-12 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-4xl'>
@@ -297,10 +381,10 @@ export default function BreakoutPlusPage() {
 
 					<div className='space-y-4'>
 						{[
-							'Established artists (50K+ monthly listeners) ready for aggressive scaling',
+							'Artists at an inflection point: album cycles, tours, or label-ready moments',
 							'Musicians with $3-6K monthly marketing budgets who want maximum ROI',
 							'Artists who want complete professional execution with full transparency',
-							'Bands preparing for major releases, tours, or label negotiations',
+							'Bands preparing for major releases or label negotiations',
 							'Musicians ready to treat their art like a serious business',
 						].map((item, index) => (
 							<AnimatedSection key={index} animation='fade-up' delay={200 + index * 100}>
@@ -384,6 +468,20 @@ export default function BreakoutPlusPage() {
 				</div>
 			</section> */}
 
+			{/* Price Anchor */}
+			<section className='bg-white/5 px-4 py-12 sm:px-6 lg:px-8'>
+				<div className='mx-auto max-w-2xl text-center'>
+					<AnimatedSection animation='fade-up'>
+						<p className='text-lg text-white/80'>
+							<span className='font-semibold text-white'>For context:</span> A part-time
+							marketing hire would cost $3-4K/month minimum, and they wouldn&apos;t bring
+							this toolkit or methodology. Breakout+ gives you a full growth team at a
+							fraction of the cost.
+						</p>
+					</AnimatedSection>
+				</div>
+			</section>
+
 			{/* Pricing CTA */}
 			<section className='px-4 py-24 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-md'>
@@ -398,14 +496,15 @@ export default function BreakoutPlusPage() {
 								features={[
 									'Up to 2 advanced campaigns with full execution',
 									'Management of $3-6K monthly ad spend',
-									'Full access to barely.ai tools (Breakout tier)',
-									'Bi-weekly strategy sessions with analytics',
 									'Complete merch revenue optimization',
+									'Stan fan account included ($500 value)',
+									'Bi-weekly strategy sessions with analytics',
 									'Content scheduling + timing optimization',
 									'Priority support + rapid adjustments',
 								]}
 								ctaText='Start Breakout+ Today'
 								className='relative'
+								onCTAClick={openContactModal}
 							/>
 						</div>
 					</AnimatedSection>
@@ -419,11 +518,13 @@ export default function BreakoutPlusPage() {
 										View All Services
 									</MarketingButton>
 								</Link>
-								<a href='mailto:hello@barely.nyc'>
-									<MarketingButton marketingLook='scientific' size='sm'>
-										Book Strategy Call
-									</MarketingButton>
-								</a>
+								<MarketingButton
+									marketingLook='hero-primary'
+									size='sm'
+									onClick={openContactModal}
+								>
+									Get Started
+								</MarketingButton>
 							</div>
 						</div>
 					</AnimatedSection>
@@ -437,7 +538,7 @@ export default function BreakoutPlusPage() {
 							>
 								Email me directly
 							</a>{' '}
-							- no sales team, just the scientist who&apos;ll engineer your campaigns.
+							- no sales team, just the engineer who&apos;ll build your campaigns.
 						</p>
 					</AnimatedSection>
 				</div>

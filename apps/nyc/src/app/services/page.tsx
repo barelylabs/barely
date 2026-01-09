@@ -1,11 +1,13 @@
 'use client';
 
-import { WORKSPACE_PLANS } from '@barely/const';
+import Link from 'next/link';
+import { NYC_STAN, NYC_STAN_PLUS, WORKSPACE_PLANS } from '@barely/const';
 import { getAbsoluteUrl } from '@barely/utils';
 
 import { H } from '@barely/ui/typography';
 
 import { AnimatedSection } from '../../components/marketing/animated-section';
+import { MarketingButton } from '../../components/marketing/button';
 import { PricingCard } from '../../components/marketing/pricing-card';
 import { useContactModal } from '../../contexts/contact-modal-context';
 
@@ -41,19 +43,19 @@ export default function ServicesPage() {
 	];
 
 	const getRisingPlusFeatures = () => [
-		'Up to 2 new professional campaigns per month',
+		'Up to 2 professional campaigns per month',
 		'Management of $1,000-$3,000 monthly ad spend',
+		'Merch campaign strategy + revenue optimization',
 		'Monthly strategy calls',
 		'Full access to barely.ai tools (Rising tier)',
-		'Campaign optimization based on real-time data',
 	];
 
 	const getBreakoutPlusFeatures = () => [
-		'Up to 2 new advanced campaigns per month',
+		'Up to 2 advanced campaigns per month',
 		'Management of $3,000-$6,000 monthly ad spend',
-		'Bi-weekly strategy calls',
-		'Full access to barely.ai tools (Breakout tier)',
-		'Campaign optimization based on real-time data',
+		'Full merch revenue optimization',
+		'Stan fan account included ($500 value)',
+		'Bi-weekly strategy calls + priority support',
 	];
 
 	return (
@@ -66,8 +68,9 @@ export default function ServicesPage() {
 							Choose Your Growth Path
 						</H>
 						<p className='text-xl text-white/70 md:text-2xl'>
-							Brooklyn-based music marketing engineers helping indie artists worldwide.
-							From coaching to full campaign execution, all with scientific precision.
+							Brooklyn-based music marketing engineers helping indie artists build real
+							revenue—not just streams. From coaching to full campaign execution, all
+							with scientific precision.
 						</p>
 					</AnimatedSection>
 				</div>
@@ -159,12 +162,18 @@ export default function ServicesPage() {
 									Choose Bedroom+ if:
 								</H>
 								<ul className='space-y-2 text-white/80'>
-									<li>• You have 0-10K monthly listeners</li>
-									<li>• You want to learn marketing skills yourself</li>
+									<li>• You have time to invest in learning marketing yourself</li>
 									<li>
-										• You prefer understanding the &quot;why&quot; behind strategies
+										• Your ad budget is limited (under $1K/month) but you&apos;re ready
+										to put in the work
 									</li>
-									<li>• Your budget is limited but you have time to invest</li>
+									<li>
+										• You want to understand the &quot;why&quot; behind every strategy
+									</li>
+									<li>
+										• Typically 0-10K monthly listeners, but mindset matters more than
+										numbers
+									</li>
 								</ul>
 								<button
 									onClick={openContactModal}
@@ -181,10 +190,20 @@ export default function ServicesPage() {
 									Choose Rising+ if:
 								</H>
 								<ul className='space-y-2 text-white/80'>
-									<li>• You have 10-50K monthly listeners (or budget to jumpstart)</li>
-									<li>• You want professional campaign execution</li>
-									<li>• You have $1-3K monthly to invest in ads</li>
-									<li>• You&apos;d rather focus on creating than marketing</li>
+									<li>
+										• You have $1-3K monthly to invest in ads and want professional
+										execution
+									</li>
+									<li>
+										• You&apos;d rather focus on creating music than managing campaigns
+									</li>
+									<li>
+										• You want transparent reporting on exactly what&apos;s working
+									</li>
+									<li>
+										• Any listener count—budget and commitment matter more than current
+										size
+									</li>
 								</ul>
 								<button
 									onClick={openContactModal}
@@ -201,10 +220,15 @@ export default function ServicesPage() {
 									Choose Breakout+ if:
 								</H>
 								<ul className='space-y-2 text-white/80'>
-									<li>• You have 50K+ monthly listeners</li>
-									<li>• You&apos;re ready for aggressive scaling</li>
-									<li>• You have $3-6K monthly marketing budget</li>
-									<li>• You want maximum growth with full transparency</li>
+									<li>
+										• You have $3-6K monthly to invest in marketing and want maximum ROI
+									</li>
+									<li>
+										• You&apos;re at an inflection point: album cycle, tour, or building
+										toward label conversations
+									</li>
+									<li>• You want a full growth team, not just campaign management</li>
+									<li>• Now includes a Stan fan account to amplify your reach</li>
 								</ul>
 								<button
 									onClick={openContactModal}
@@ -215,6 +239,104 @@ export default function ServicesPage() {
 							</div>
 						</AnimatedSection>
 					</div>
+				</div>
+			</section>
+
+			{/* Stan Add-on Section */}
+			<section className='px-4 py-12 sm:px-6 sm:py-16 md:py-20 lg:px-8 lg:py-24'>
+				<div className='mx-auto max-w-4xl'>
+					<AnimatedSection animation='fade-up'>
+						<H size='2' className='mb-6 text-center text-3xl md:text-4xl'>
+							Amplify Your Reach with Stan
+						</H>
+						<p className='mb-12 text-center text-lg text-white/70'>
+							Fan accounts have become a secret weapon for artist growth—a second
+							Instagram presence that&apos;s free from the &quot;brand&quot; constraints
+							of your main channel. Memes, chopped-up video clips, fan content reposts,
+							and the chaotic energy that builds superfan communities.
+						</p>
+					</AnimatedSection>
+
+					<div className='grid grid-cols-1 gap-8 md:grid-cols-2'>
+						<AnimatedSection animation='fade-up' delay={200}>
+							<div className='glass rounded-xl p-6'>
+								<div className='mb-4 flex items-center justify-between'>
+									<H size='4' className='text-purple-300'>
+										{NYC_STAN.name}
+									</H>
+									<div className='text-right'>
+										<span className='block text-sm text-white/50 line-through'>
+											${NYC_STAN.price.addon}/mo add-on
+										</span>
+										<span className='text-lg font-semibold text-purple-300'>
+											${NYC_STAN.promotionalPrice.addon}/mo first month
+										</span>
+									</div>
+								</div>
+								<p className='mb-4 text-sm text-white/60'>
+									Or ${NYC_STAN.price.standalone}/mo standalone
+								</p>
+								<p className='mb-4 text-white/80'>
+									Daily Instagram posts mixing repurposed content, AI-generated visuals,
+									and meme-format engagement. You provide the raw material; we keep the
+									account active and growing.
+								</p>
+								<ul className='space-y-2'>
+									{NYC_STAN.features.map((feature, i) => (
+										<li key={i} className='flex items-start gap-2 text-sm text-white/70'>
+											<span className='mt-0.5 text-green-500'>✓</span>
+											{feature}
+										</li>
+									))}
+								</ul>
+							</div>
+						</AnimatedSection>
+
+						<AnimatedSection animation='fade-up' delay={300}>
+							<div className='glass rounded-xl border border-purple-500/30 p-6'>
+								<div className='mb-4 flex items-center justify-between'>
+									<H size='4' className='text-purple-300'>
+										{NYC_STAN_PLUS.name}
+									</H>
+									<div className='text-right'>
+										<span className='block text-sm text-white/50 line-through'>
+											${NYC_STAN_PLUS.price.addon}/mo add-on
+										</span>
+										<span className='text-lg font-semibold text-purple-300'>
+											${NYC_STAN_PLUS.promotionalPrice.addon}/mo first month
+										</span>
+									</div>
+								</div>
+								<p className='mb-4 text-sm text-white/60'>
+									Or ${NYC_STAN_PLUS.price.standalone}/mo standalone •{' '}
+									<span className='text-purple-300'>Included with Breakout+</span>
+								</p>
+								<p className='mb-4 text-white/80'>
+									Everything in Stan, plus active community management: responding to
+									comments, reposting fan stories, seeding interactions on your main
+									account, and building real fan culture.
+								</p>
+								<ul className='space-y-2'>
+									{NYC_STAN_PLUS.features.map((feature, i) => (
+										<li key={i} className='flex items-start gap-2 text-sm text-white/70'>
+											<span className='mt-0.5 text-green-500'>✓</span>
+											{feature}
+										</li>
+									))}
+								</ul>
+							</div>
+						</AnimatedSection>
+					</div>
+
+					<AnimatedSection animation='fade-up' delay={400}>
+						<div className='mt-8 text-center'>
+							<Link href='/services/stan'>
+								<MarketingButton marketingLook='glass' size='sm'>
+									Learn more about Stan →
+								</MarketingButton>
+							</Link>
+						</div>
+					</AnimatedSection>
 				</div>
 			</section>
 
