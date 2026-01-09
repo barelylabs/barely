@@ -72,7 +72,7 @@ export const NYC_STAN_PLUS: StanPricing = {
 		'Active community management',
 		'Cross-pollination with your main account',
 		'Growth tactics: hashtags, engagement, collaborations',
-		'Bi-weekly strategy check-ins',
+		'Monthly strategy check-ins',
 	],
 	includedWith: 'breakout.plus',
 };

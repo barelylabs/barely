@@ -278,11 +278,11 @@ export function StanContent() {
 										<span className='text-2xl'>📈</span>
 										<div>
 											<p className='font-semibold text-white'>
-												Bi-Weekly Strategy Check-Ins
+												Monthly Strategy Check-Ins
 											</p>
 											<p className='text-sm text-white/70'>
-												More frequent reviews to optimize what&apos;s working and pivot
-												quickly when something takes off.
+												Regular reviews to optimize what&apos;s working and pivot quickly
+												when something takes off.
 											</p>
 										</div>
 									</div>
