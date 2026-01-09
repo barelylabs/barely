@@ -427,7 +427,7 @@ export function BreakoutContent() {
 								]}
 								ctaText='Start Breakout+ Today'
 								className='relative'
-								onCTAClick={openContactModal}
+								onCTAClick={() => openContactModal({ service: 'breakout' })}
 							/>
 						</div>
 					</AnimatedSection>
@@ -444,7 +444,7 @@ export function BreakoutContent() {
 								<MarketingButton
 									marketingLook='hero-primary'
 									size='sm'
-									onClick={openContactModal}
+									onClick={() => openContactModal({ service: 'breakout' })}
 								>
 									Get Started
 								</MarketingButton>

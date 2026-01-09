@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useZodForm } from '@barely/hooks';
 import { z } from 'zod/v4';
 
 import { Button } from '@barely/ui/button';
+import { CheckboxField } from '@barely/ui/forms/checkbox-field';
 import { Form } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { TextAreaField } from '@barely/ui/forms/text-area-field';
@@ -12,6 +13,7 @@ import { TextField } from '@barely/ui/forms/text-field';
 import { Icon } from '@barely/ui/icon';
 import { Modal, ModalBody, ModalHeader } from '@barely/ui/modal';
 
+import type { ServiceInterest } from '../../contexts/contact-modal-context';
 import { useCalComUrl } from '../../hooks/use-cal-com-url';
 import { MarketingButton } from './button';
 import { SecurityBadge } from './trust-badges';
@@ -19,7 +21,8 @@ import { SecurityBadge } from './trust-badges';
 interface ContactModalProps {
 	showModal: boolean;
 	setShowModal: (show: boolean) => void;
-	preSelectedService?: 'bedroom' | 'rising' | 'breakout';
+	preSelectedService?: ServiceInterest;
+	preSelectedStanAddon?: boolean;
 	prefillData?: {
 		name?: string;
 		email?: string;
@@ -36,7 +39,8 @@ const contactFormSchema = z.object({
 	email: z.email('Invalid email address'),
 	artistName: z.string().optional(),
 	monthlyListeners: z.string().optional(),
-	service: z.enum(['bedroom', 'rising', 'breakout', '']).optional(),
+	service: z.enum(['bedroom', 'rising', 'breakout', 'stan', '']).optional(),
+	stanAddon: z.boolean().optional(),
 	message: z.string().min(10, 'Message must be at least 10 characters'),
 	// Additional fields from Growth Qualifier
 	spotifyTrackUrl: z.string().optional(),
@@ -52,6 +56,7 @@ export function ContactModal({
 	showModal,
 	setShowModal,
 	preSelectedService,
+	preSelectedStanAddon,
 	prefillData,
 }: ContactModalProps) {
 	const calComUrl = useCalComUrl();
@@ -67,6 +72,7 @@ export function ContactModal({
 			artistName: prefillData?.artistName ?? '',
 			monthlyListeners: prefillData?.monthlyListeners ?? '',
 			service: preSelectedService ?? '',
+			stanAddon: preSelectedStanAddon ?? false,
 			message: '',
 			spotifyTrackUrl: prefillData?.spotifyTrackUrl ?? '',
 			instagramHandle: prefillData?.instagramHandle ?? '',
@@ -74,6 +80,20 @@ export function ContactModal({
 		},
 		resetOptions: { keepDirtyValues: true },
 	});
+
+	// Update form values when pre-selected service/addon changes
+	useEffect(() => {
+		if (preSelectedService !== undefined) {
+			form.setValue('service', preSelectedService);
+		}
+		if (preSelectedStanAddon !== undefined) {
+			form.setValue('stanAddon', preSelectedStanAddon);
+		}
+	}, [preSelectedService, preSelectedStanAddon, form]);
+
+	// Watch service to conditionally show Stan addon checkbox
+	const selectedService = form.watch('service');
+	const showStanAddon = selectedService === 'bedroom' || selectedService === 'rising';
 
 	const handleSubmit = async (data: ContactFormData) => {
 		setIsSubmitting(true);
@@ -146,6 +166,31 @@ export function ContactModal({
 									className='border-white/10 bg-white/5 text-white placeholder:text-white/40'
 								/>
 							</div>
+
+							<SelectField
+								control={form.control}
+								name='service'
+								label='Interested In'
+								options={[
+									{ value: '', label: 'Not sure yet' },
+									{ value: 'bedroom', label: 'Bedroom+ (Coaching)' },
+									{ value: 'rising', label: 'Rising+ (Campaign Management)' },
+									{ value: 'breakout', label: 'Breakout+ (Full Growth Team)' },
+									{ value: 'stan', label: 'Stan (Standalone)' },
+								]}
+								className='border-white/10 bg-white/5 text-white'
+							/>
+
+							{showStanAddon && (
+								<div className='rounded-md border border-white/10 bg-white/5 p-3'>
+									<CheckboxField
+										control={form.control}
+										name='stanAddon'
+										label='Add Stan fan account management'
+										description='Daily Instagram fan account content + community building'
+									/>
+								</div>
+							)}
 
 							<details className='group'>
 								<summary className='mb-4 cursor-pointer text-sm text-white/60 hover:text-white/80'>

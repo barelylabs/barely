@@ -325,7 +325,7 @@ export function BedroomContent() {
 								'Direct email support',
 							]}
 							ctaText='Get Started'
-							onCTAClick={openContactModal}
+							onCTAClick={() => openContactModal({ service: 'bedroom' })}
 						/>
 					</AnimatedSection>
 
@@ -341,7 +341,7 @@ export function BedroomContent() {
 								<MarketingButton
 									marketingLook='scientific'
 									size='sm'
-									onClick={openContactModal}
+									onClick={() => openContactModal({ service: 'bedroom' })}
 								>
 									Get Started
 								</MarketingButton>

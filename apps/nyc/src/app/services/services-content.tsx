@@ -84,7 +84,7 @@ export function ServicesContent() {
 									features={getBedroomPlusFeatures()}
 									ctaText='Get Started'
 									spotsLeft={5}
-									onCTAClick={openContactModal}
+									onCTAClick={() => openContactModal({ service: 'bedroom' })}
 									learnMoreHref='/services/bedroom'
 								/>
 							</AnimatedSection>
@@ -101,7 +101,7 @@ export function ServicesContent() {
 									ctaText='Get Started'
 									featured
 									spotsLeft={3}
-									onCTAClick={openContactModal}
+									onCTAClick={() => openContactModal({ service: 'rising' })}
 									learnMoreHref='/services/rising'
 								/>
 							</AnimatedSection>
@@ -117,7 +117,7 @@ export function ServicesContent() {
 									features={getBreakoutPlusFeatures()}
 									ctaText='Get Started'
 									spotsLeft={2}
-									onCTAClick={openContactModal}
+									onCTAClick={() => openContactModal({ service: 'breakout' })}
 									learnMoreHref='/services/breakout'
 								/>
 							</AnimatedSection>
@@ -170,7 +170,7 @@ export function ServicesContent() {
 									</li>
 								</ul>
 								<button
-									onClick={openContactModal}
+									onClick={() => openContactModal({ service: 'bedroom' })}
 									className='mt-4 hidden text-sm text-purple-300 underline-offset-4 transition-all hover:text-purple-200 hover:underline sm:block'
 								>
 									Get Started with Bedroom+ →
@@ -198,7 +198,7 @@ export function ServicesContent() {
 									</li>
 								</ul>
 								<button
-									onClick={openContactModal}
+									onClick={() => openContactModal({ service: 'rising' })}
 									className='mt-4 hidden text-sm text-purple-300 underline-offset-4 transition-all hover:text-purple-200 hover:underline sm:block'
 								>
 									Get Started with Rising+ →
@@ -223,7 +223,7 @@ export function ServicesContent() {
 									<li>• Now includes a Stan fan account to amplify your reach</li>
 								</ul>
 								<button
-									onClick={openContactModal}
+									onClick={() => openContactModal({ service: 'breakout' })}
 									className='mt-4 hidden text-sm text-purple-300 underline-offset-4 transition-all hover:text-purple-200 hover:underline sm:block'
 								>
 									Get Started with Breakout+ →

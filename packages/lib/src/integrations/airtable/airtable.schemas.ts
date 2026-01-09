@@ -35,6 +35,7 @@ export const serviceInterestSchema = z.enum([
 	'bedroom',
 	'rising',
 	'breakout',
+	'stan',
 	'general',
 	'none',
 ]);

@@ -513,10 +513,16 @@ export function StanContent() {
 				<div className='mx-auto max-w-md text-center'>
 					<AnimatedSection animation='scale'>
 						<div className='flex flex-col gap-4 sm:flex-row sm:justify-center'>
-							<MarketingButton marketingLook='hero-primary' onClick={openContactModal}>
+							<MarketingButton
+								marketingLook='hero-primary'
+								onClick={() => openContactModal({ service: 'rising', stanAddon: true })}
+							>
 								Add Stan to Your Plan
 							</MarketingButton>
-							<MarketingButton marketingLook='glass' onClick={openContactModal}>
+							<MarketingButton
+								marketingLook='glass'
+								onClick={() => openContactModal({ service: 'stan' })}
+							>
 								Get Started Standalone
 							</MarketingButton>
 						</div>

@@ -339,7 +339,7 @@ export function RisingContent() {
 							]}
 							ctaText='Start Rising+ Today'
 							featured
-							onCTAClick={openContactModal}
+							onCTAClick={() => openContactModal({ service: 'rising' })}
 						/>
 					</AnimatedSection>
 
@@ -355,7 +355,7 @@ export function RisingContent() {
 								<MarketingButton
 									marketingLook='hero-primary'
 									size='sm'
-									onClick={openContactModal}
+									onClick={() => openContactModal({ service: 'rising' })}
 								>
 									Get Started
 								</MarketingButton>
