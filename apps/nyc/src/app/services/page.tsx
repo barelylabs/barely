@@ -69,8 +69,8 @@ export default function ServicesPage() {
 						</H>
 						<p className='text-xl text-white/70 md:text-2xl'>
 							Brooklyn-based music marketing engineers helping indie artists build real
-							revenue—not just streams. From coaching to full campaign execution, all
-							with scientific precision.
+							revenue—not just streams. From coaching to full campaign execution, all with
+							scientific precision.
 						</p>
 					</AnimatedSection>
 				</div>
@@ -164,8 +164,8 @@ export default function ServicesPage() {
 								<ul className='space-y-2 text-white/80'>
 									<li>• You have time to invest in learning marketing yourself</li>
 									<li>
-										• Your ad budget is limited (under $1K/month) but you&apos;re ready
-										to put in the work
+										• Your ad budget is limited (under $1K/month) but you&apos;re ready to
+										put in the work
 									</li>
 									<li>
 										• You want to understand the &quot;why&quot; behind every strategy
@@ -197,9 +197,7 @@ export default function ServicesPage() {
 									<li>
 										• You&apos;d rather focus on creating music than managing campaigns
 									</li>
-									<li>
-										• You want transparent reporting on exactly what&apos;s working
-									</li>
+									<li>• You want transparent reporting on exactly what&apos;s working</li>
 									<li>
 										• Any listener count—budget and commitment matter more than current
 										size

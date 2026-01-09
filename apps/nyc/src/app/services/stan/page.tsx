@@ -78,11 +78,13 @@ export default function StanPage() {
 					<AnimatedSection animation='fade-up' delay={200}>
 						<div className='glass mb-8 rounded-2xl p-8'>
 							<p className='mb-6 text-lg leading-relaxed text-white/80'>
-								Every major artist has them now—unofficial-looking Instagram accounts
-								that post memes, chopped-up clips, chaotic fan content, and all the stuff
-								that doesn&apos;t fit the artist&apos;s &quot;real&quot; feed.
+								Every major artist has them now—unofficial-looking Instagram accounts that
+								post memes, chopped-up clips, chaotic fan content, and all the stuff that
+								doesn&apos;t fit the artist&apos;s &quot;real&quot; feed.
 							</p>
-							<p className='mb-6 text-xl font-semibold text-white'>Why? Because they work.</p>
+							<p className='mb-6 text-xl font-semibold text-white'>
+								Why? Because they work.
+							</p>
 							<div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
 								{[
 									{
@@ -161,9 +163,9 @@ export default function StanPage() {
 										<div>
 											<p className='font-semibold text-white'>Daily Instagram Posts</p>
 											<p className='text-sm text-white/70'>
-												Consistent content every day—no gaps, no &quot;sorry I&apos;ve been
-												quiet&quot; energy. We keep your fan account active so the algorithm
-												keeps pushing it.
+												Consistent content every day—no gaps, no &quot;sorry I&apos;ve
+												been quiet&quot; energy. We keep your fan account active so the
+												algorithm keeps pushing it.
 											</p>
 										</div>
 									</div>
@@ -174,8 +176,8 @@ export default function StanPage() {
 											<p className='font-semibold text-white'>Content Mix That Works</p>
 											<p className='text-sm text-white/70'>
 												Chopped-up music video clips, AI-generated visuals with meme
-												captions, fan content reposts (with credit), throwback moments, lyric
-												posts, and whatever&apos;s trending that week.
+												captions, fan content reposts (with credit), throwback moments,
+												lyric posts, and whatever&apos;s trending that week.
 											</p>
 										</div>
 									</div>
@@ -183,7 +185,9 @@ export default function StanPage() {
 									<div className='flex items-start gap-4'>
 										<span className='text-2xl'>📦</span>
 										<div>
-											<p className='font-semibold text-white'>You Provide the Raw Material</p>
+											<p className='font-semibold text-white'>
+												You Provide the Raw Material
+											</p>
 											<p className='text-sm text-white/70'>
 												Send us your video files, photos, and any assets you have.
 												We&apos;ll slice them up and keep the content engine running.
@@ -194,7 +198,9 @@ export default function StanPage() {
 									<div className='flex items-start gap-4'>
 										<span className='text-2xl'>📊</span>
 										<div>
-											<p className='font-semibold text-white'>Monthly Performance Check-In</p>
+											<p className='font-semibold text-white'>
+												Monthly Performance Check-In
+											</p>
 											<p className='text-sm text-white/70'>
 												Quick recap of what&apos;s landing, what&apos;s growing, and any
 												adjustments for next month.
@@ -237,11 +243,13 @@ export default function StanPage() {
 									<div className='flex items-start gap-4'>
 										<span className='text-2xl'>💬</span>
 										<div>
-											<p className='font-semibold text-white'>Active Community Management</p>
+											<p className='font-semibold text-white'>
+												Active Community Management
+											</p>
 											<p className='text-sm text-white/70'>
-												We don&apos;t just post and ghost. Stan+ includes daily engagement:
-												responding to comments, reposting fan stories, and building actual
-												community around the account.
+												We don&apos;t just post and ghost. Stan+ includes daily
+												engagement: responding to comments, reposting fan stories, and
+												building actual community around the account.
 											</p>
 										</div>
 									</div>
@@ -253,9 +261,9 @@ export default function StanPage() {
 												Cross-Pollination with Your Main
 											</p>
 											<p className='text-sm text-white/70'>
-												Strategic comment seeding on your official posts, story reposts that
-												drive traffic both directions, and coordination with your release
-												calendar.
+												Strategic comment seeding on your official posts, story reposts
+												that drive traffic both directions, and coordination with your
+												release calendar.
 											</p>
 										</div>
 									</div>
@@ -266,7 +274,8 @@ export default function StanPage() {
 											<p className='font-semibold text-white'>Growth Tactics</p>
 											<p className='text-sm text-white/70'>
 												Hashtag strategy, engagement pods, collaboration with other fan
-												accounts in your genre, and trend-jacking when opportunities arise.
+												accounts in your genre, and trend-jacking when opportunities
+												arise.
 											</p>
 										</div>
 									</div>
@@ -274,7 +283,9 @@ export default function StanPage() {
 									<div className='flex items-start gap-4'>
 										<span className='text-2xl'>📈</span>
 										<div>
-											<p className='font-semibold text-white'>Bi-Weekly Strategy Check-Ins</p>
+											<p className='font-semibold text-white'>
+												Bi-Weekly Strategy Check-Ins
+											</p>
 											<p className='text-sm text-white/70'>
 												More frequent reviews to optimize what&apos;s working and pivot
 												quickly when something takes off.
@@ -325,7 +336,11 @@ export default function StanPage() {
 								desc: "We show you what's working and adjust for the next month.",
 							},
 						].map((item, index) => (
-							<AnimatedSection key={index} animation='slide-right' delay={200 + index * 100}>
+							<AnimatedSection
+								key={index}
+								animation='slide-right'
+								delay={200 + index * 100}
+							>
 								<div className='flex gap-4'>
 									<div className='flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-purple-500/20 font-bold text-purple-300'>
 										{item.step}
@@ -352,7 +367,7 @@ export default function StanPage() {
 								</H>
 								<ul className='space-y-3'>
 									{[
-										'Artists who know they need a fan account but don\'t have time to run one',
+										"Artists who know they need a fan account but don't have time to run one",
 										"Musicians whose 'main' feed is too curated to post casual content",
 										"Anyone who's tried to maintain a fan account and burned out after 2 weeks",
 										'Artists on Rising+ or Breakout+ who want to amplify their campaign reach',

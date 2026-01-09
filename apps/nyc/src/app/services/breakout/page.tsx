@@ -179,9 +179,9 @@ export default function BreakoutPlusPage() {
 										</H>
 										<p className='text-white/70'>
 											A dedicated Instagram fan account for your project, managed by us.
-											Daily posts, memes, repurposed content, and community
-											engagement—all the stuff that&apos;s too informal for your main but
-											builds superfan culture.{' '}
+											Daily posts, memes, repurposed content, and community engagement—all
+											the stuff that&apos;s too informal for your main but builds superfan
+											culture.{' '}
 											<Link
 												href='/services/stan'
 												className='text-purple-300 underline hover:text-purple-200'
