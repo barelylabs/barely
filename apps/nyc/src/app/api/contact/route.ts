@@ -14,7 +14,8 @@ const contactFormSchema = z.object({
 	email: z.email('Invalid email address'),
 	artistName: z.string().optional(),
 	monthlyListeners: z.string().optional(),
-	service: z.enum(['bedroom', 'rising', 'breakout', '']).optional(),
+	service: z.enum(['bedroom', 'rising', 'breakout', 'stan', '']).optional(),
+	stanAddon: z.boolean().optional(),
 	message: z.string().min(10, 'Message must be at least 10 characters'),
 	spotifyTrackUrl: z.string().optional(),
 	instagramHandle: z.string().optional(),
@@ -22,6 +23,21 @@ const contactFormSchema = z.object({
 		.enum(['<$500/mo', '$500-1k', '$1k-2.5k', '$2.5k+', 'Not sure yet'])
 		.optional(),
 });
+
+// Helper to format service interest for email subject
+function formatServiceForSubject(service?: string, stanAddon?: boolean): string {
+	const serviceNames: Record<string, string> = {
+		bedroom: 'Bedroom+',
+		rising: 'Rising+',
+		breakout: 'Breakout+',
+		stan: 'Stan (Standalone)',
+	};
+	const name = serviceNames[service ?? ''] ?? 'General Inquiry';
+	if (stanAddon && (service === 'bedroom' || service === 'rising')) {
+		return `${name} + Stan`;
+	}
+	return name;
+}
 
 export async function POST(request: NextRequest) {
 	try {
@@ -61,13 +77,14 @@ export async function POST(request: NextRequest) {
 			from: 'noreply@mail.barely.nyc',
 			fromFriendlyName: 'Barely',
 			to: 'hello@barely.nyc',
-			subject: `New Contact Form Submission - ${validatedData.service ? validatedData.service.charAt(0).toUpperCase() + validatedData.service.slice(1) + '+' : 'General Inquiry'}`,
+			subject: `New Contact Form Submission - ${formatServiceForSubject(validatedData.service, validatedData.stanAddon)}`,
 			react: ContactInquiryEmail({
 				name: validatedData.name,
 				email: validatedData.email,
 				artistName: validatedData.artistName,
 				monthlyListeners: validatedData.monthlyListeners,
 				service: validatedData.service,
+				stanAddon: validatedData.stanAddon,
 				message: validatedData.message,
 				spotifyTrackUrl: validatedData.spotifyTrackUrl,
 				instagramHandle: validatedData.instagramHandle,

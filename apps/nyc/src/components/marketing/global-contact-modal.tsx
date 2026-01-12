@@ -5,7 +5,7 @@ import { useFormData } from '../../contexts/form-data-context';
 import { ContactModal } from './contact-modal';
 
 export function GlobalContactModal() {
-	const { isOpen, close } = useContactModal();
+	const { isOpen, close, selectedService, stanAddon } = useContactModal();
 	const { formData, clearFormData } = useFormData();
 
 	// Custom close handler that also clears form data
@@ -21,6 +21,8 @@ export function GlobalContactModal() {
 		<ContactModal
 			showModal={isOpen}
 			setShowModal={handleClose}
+			preSelectedService={selectedService}
+			preSelectedStanAddon={stanAddon}
 			prefillData={{
 				name: formData.name,
 				email: formData.email,

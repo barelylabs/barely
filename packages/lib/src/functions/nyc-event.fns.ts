@@ -237,6 +237,40 @@ function getMetaEventFromNYCEvent({
 					},
 				},
 			];
+		case 'nyc/ctaClick':
+			return [
+				{
+					eventName: 'barely.nyc/ctaClick',
+					customData: {
+						...baseCustomData,
+						content_category: 'cta_click',
+					},
+				},
+				{
+					eventName: 'Lead',
+					customData: {
+						...baseCustomData,
+						content_category: 'cta_click',
+					},
+				},
+			];
+		case 'nyc/discoveryCallClick':
+			return [
+				{
+					eventName: 'barely.nyc/discoveryCallClick',
+					customData: {
+						...baseCustomData,
+						content_category: 'discovery_call',
+					},
+				},
+				{
+					eventName: 'Schedule',
+					customData: {
+						...baseCustomData,
+						content_category: 'discovery_call',
+					},
+				},
+			];
 		default:
 			return null;
 	}

@@ -17,7 +17,7 @@ interface ContactFormLeadData {
 	name: string;
 	artistName?: string;
 	monthlyListeners?: string; // String from form, needs parsing
-	serviceInterest?: 'bedroom' | 'rising' | 'breakout' | '';
+	serviceInterest?: 'bedroom' | 'rising' | 'breakout' | 'stan' | '';
 	budgetRange?: '<$500/mo' | '$500-1k' | '$1k-2.5k' | '$2.5k+' | 'Not sure yet';
 	initialMessage: string;
 	spotifyTrackUrl?: string;
