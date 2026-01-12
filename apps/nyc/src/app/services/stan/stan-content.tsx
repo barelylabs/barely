@@ -78,23 +78,12 @@ export function StanContent() {
 						</p>
 
 						{/* Hero CTA */}
-						<div className='mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center'>
+						<div className='mt-10'>
 							<MarketingButton
 								marketingLook='hero-primary'
-								onClick={() =>
-									handleCtaClick('hero', 'rising_with_stan', {
-										service: 'rising',
-										stanAddon: true,
-									})
-								}
-							>
-								Add Stan to Your Plan
-							</MarketingButton>
-							<MarketingButton
-								marketingLook='glass'
 								onClick={() => handleCtaClick('hero', 'stan', { service: 'stan' })}
 							>
-								Get Started Standalone
+								Get Started
 							</MarketingButton>
 						</div>
 					</AnimatedSection>
@@ -247,7 +236,6 @@ export function StanContent() {
 								<div className='mt-6 border-t border-white/10 pt-6'>
 									<MarketingButton
 										marketingLook='glass'
-										size='sm'
 										fullWidth
 										onClick={() =>
 											handleCtaClick('features', 'stan', { service: 'stan' })
@@ -345,7 +333,6 @@ export function StanContent() {
 								<div className='mt-6 border-t border-purple-500/20 pt-6'>
 									<MarketingButton
 										marketingLook='hero-primary'
-										size='sm'
 										fullWidth
 										onClick={() =>
 											handleCtaClick('features', 'rising_with_stan', {
@@ -628,25 +615,12 @@ export function StanContent() {
 			<section className='px-4 py-24 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-md text-center'>
 					<AnimatedSection animation='scale'>
-						<div className='flex flex-col gap-4 sm:flex-row sm:justify-center'>
-							<MarketingButton
-								marketingLook='hero-primary'
-								onClick={() =>
-									handleCtaClick('footer', 'rising_with_stan', {
-										service: 'rising',
-										stanAddon: true,
-									})
-								}
-							>
-								Add Stan to Your Plan
-							</MarketingButton>
-							<MarketingButton
-								marketingLook='glass'
-								onClick={() => handleCtaClick('footer', 'stan', { service: 'stan' })}
-							>
-								Get Started Standalone
-							</MarketingButton>
-						</div>
+						<MarketingButton
+							marketingLook='hero-primary'
+							onClick={() => handleCtaClick('footer', 'stan', { service: 'stan' })}
+						>
+							Get Started
+						</MarketingButton>
 					</AnimatedSection>
 
 					<AnimatedSection animation='fade-up' delay={200}>
