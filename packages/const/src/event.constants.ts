@@ -38,6 +38,8 @@ export const WEB_EVENT_TYPES__NYC = [
 	'nyc/contactFormSubmit',
 	'nyc/playlistSubmit',
 	'nyc/linkClick',
+	'nyc/ctaClick',
+	'nyc/discoveryCallClick',
 ] as const;
 
 export const WEB_EVENT_TYPES = [

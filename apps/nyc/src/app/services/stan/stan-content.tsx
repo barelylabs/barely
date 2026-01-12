@@ -3,14 +3,34 @@
 import Link from 'next/link';
 import { NYC_STAN, NYC_STAN_PLUS } from '@barely/const';
 
+import { Icon } from '@barely/ui/icon';
 import { H } from '@barely/ui/typography';
 
 import { AnimatedSection } from '../../../components/marketing/animated-section';
 import { MarketingButton } from '../../../components/marketing/button';
 import { useContactModal } from '../../../contexts/contact-modal-context';
+import { useCalComUrl } from '../../../hooks/use-cal-com-url';
+import { useTrackCta } from '../../../hooks/use-track-cta';
 
 export function StanContent() {
 	const { open: openContactModal } = useContactModal();
+	const calComUrl = useCalComUrl();
+	const { trackCta } = useTrackCta();
+
+	const handleCtaClick = (
+		ctaLocation: 'hero' | 'features' | 'pricing' | 'faq' | 'footer',
+		service: 'stan' | 'rising_with_stan',
+		options?: { service?: 'stan' | 'rising'; stanAddon?: boolean },
+	) => {
+		void trackCta({ ctaType: 'contact_form', ctaLocation, service });
+		openContactModal(options);
+	};
+
+	const handleDiscoveryClick = (
+		ctaLocation: 'hero' | 'features' | 'pricing' | 'faq' | 'footer',
+	) => {
+		void trackCta({ ctaType: 'discovery_call', ctaLocation });
+	};
 
 	return (
 		<main className='pt-16'>
@@ -56,6 +76,27 @@ export function StanContent() {
 						<p className='text-lg text-white/70'>
 							Your main Instagram has to stay &quot;on brand.&quot; Stan doesn&apos;t.
 						</p>
+
+						{/* Hero CTA */}
+						<div className='mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center'>
+							<MarketingButton
+								marketingLook='hero-primary'
+								onClick={() =>
+									handleCtaClick('hero', 'rising_with_stan', {
+										service: 'rising',
+										stanAddon: true,
+									})
+								}
+							>
+								Add Stan to Your Plan
+							</MarketingButton>
+							<MarketingButton
+								marketingLook='glass'
+								onClick={() => handleCtaClick('hero', 'stan', { service: 'stan' })}
+							>
+								Get Started Standalone
+							</MarketingButton>
+						</div>
 					</AnimatedSection>
 				</div>
 			</section>
@@ -202,6 +243,19 @@ export function StanContent() {
 										</div>
 									</div>
 								</div>
+
+								<div className='mt-6 border-t border-white/10 pt-6'>
+									<MarketingButton
+										marketingLook='glass'
+										size='sm'
+										fullWidth
+										onClick={() =>
+											handleCtaClick('features', 'stan', { service: 'stan' })
+										}
+									>
+										Get Started with Stan
+									</MarketingButton>
+								</div>
 							</div>
 						</AnimatedSection>
 
@@ -286,6 +340,22 @@ export function StanContent() {
 											</p>
 										</div>
 									</div>
+								</div>
+
+								<div className='mt-6 border-t border-purple-500/20 pt-6'>
+									<MarketingButton
+										marketingLook='hero-primary'
+										size='sm'
+										fullWidth
+										onClick={() =>
+											handleCtaClick('features', 'rising_with_stan', {
+												service: 'rising',
+												stanAddon: true,
+											})
+										}
+									>
+										Get Started with Stan+
+									</MarketingButton>
 								</div>
 							</div>
 						</AnimatedSection>
@@ -456,6 +526,36 @@ export function StanContent() {
 							available
 						</p>
 					</AnimatedSection>
+
+					{/* Discovery Call CTA */}
+					<AnimatedSection animation='fade-up' delay={400}>
+						<div className='mt-12 text-center'>
+							<p className='mb-4 text-white/80'>Ready to get started?</p>
+							<a
+								href={calComUrl}
+								target='_blank'
+								rel='noopener noreferrer'
+								onClick={() => handleDiscoveryClick('pricing')}
+							>
+								<MarketingButton
+									marketingLook='scientific'
+									className='inline-flex items-center gap-2'
+								>
+									<Icon.calendar className='h-4 w-4' />
+									Book Free 30-Min Strategy Call
+								</MarketingButton>
+							</a>
+							<p className='mt-4 text-sm text-white/60'>
+								Or{' '}
+								<button
+									onClick={() => handleCtaClick('pricing', 'stan', { service: 'stan' })}
+									className='text-purple-300 underline hover:text-purple-200'
+								>
+									send a message
+								</button>
+							</p>
+						</div>
+					</AnimatedSection>
 				</div>
 			</section>
 
@@ -505,6 +605,22 @@ export function StanContent() {
 							</AnimatedSection>
 						))}
 					</div>
+
+					{/* FAQ Soft CTA */}
+					<AnimatedSection animation='fade-up' delay={800}>
+						<p className='mt-10 text-center text-white/60'>
+							Still have questions?{' '}
+							<a
+								href={calComUrl}
+								target='_blank'
+								rel='noopener noreferrer'
+								onClick={() => handleDiscoveryClick('faq')}
+								className='text-purple-300 underline hover:text-purple-200'
+							>
+								Schedule a quick call
+							</a>
+						</p>
+					</AnimatedSection>
 				</div>
 			</section>
 
@@ -515,13 +631,18 @@ export function StanContent() {
 						<div className='flex flex-col gap-4 sm:flex-row sm:justify-center'>
 							<MarketingButton
 								marketingLook='hero-primary'
-								onClick={() => openContactModal({ service: 'rising', stanAddon: true })}
+								onClick={() =>
+									handleCtaClick('footer', 'rising_with_stan', {
+										service: 'rising',
+										stanAddon: true,
+									})
+								}
 							>
 								Add Stan to Your Plan
 							</MarketingButton>
 							<MarketingButton
 								marketingLook='glass'
-								onClick={() => openContactModal({ service: 'stan' })}
+								onClick={() => handleCtaClick('footer', 'stan', { service: 'stan' })}
 							>
 								Get Started Standalone
 							</MarketingButton>
