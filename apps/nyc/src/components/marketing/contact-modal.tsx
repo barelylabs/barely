@@ -171,8 +171,8 @@ export function ContactModal({
 								control={form.control}
 								name='service'
 								label='Interested In'
+								placeholder='Not sure yet'
 								options={[
-									{ value: '', label: 'Not sure yet' },
 									{ value: 'bedroom', label: 'Bedroom+ (Coaching)' },
 									{ value: 'rising', label: 'Rising+ (Campaign Management)' },
 									{ value: 'breakout', label: 'Breakout+ (Full Growth Team)' },

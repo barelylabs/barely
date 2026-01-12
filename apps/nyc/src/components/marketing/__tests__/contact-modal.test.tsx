@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { ServiceInterest } from '../../../contexts/contact-modal-context';
 import { FormDataProvider } from '../../../contexts/form-data-context';
 import { ContactModal } from '../contact-modal';
 
@@ -12,7 +13,8 @@ global.fetch = vi.fn() as typeof global.fetch;
 function renderContactModal(props: {
 	showModal: boolean;
 	setShowModal: (show: boolean) => void;
-	preSelectedService?: 'bedroom' | 'rising' | 'breakout';
+	preSelectedService?: ServiceInterest;
+	preSelectedStanAddon?: boolean;
 }) {
 	return render(
 		<FormDataProvider>
