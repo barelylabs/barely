@@ -247,7 +247,7 @@ function getMetaEventFromNYCEvent({
 					},
 				},
 				{
-					eventName: 'Lead',
+					eventName: 'ViewContent',
 					customData: {
 						...baseCustomData,
 						content_category: 'cta_click',
