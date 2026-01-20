@@ -4,6 +4,7 @@ import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import type { BioBlockType } from '@barely/const';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { Fragment, useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useWorkspace } from '@barely/hooks';
 import { cn } from '@barely/utils';
 import {
@@ -496,6 +497,7 @@ export function BioBlocksPage({ bioKey }: { bioKey: string }) {
 	const trpc = useTRPC();
 	const { handle } = useWorkspace();
 	const queryClient = useQueryClient();
+	const searchParams = useSearchParams();
 	const [addBlockModalOpen, setAddBlockModalOpen] = useState(false);
 	const [newBlockId, setNewBlockId] = useState<string | null>(null);
 	const [hoveredGapIndex, setHoveredGapIndex] = useState<number | null>(null);
@@ -814,6 +816,25 @@ export function BioBlocksPage({ bioKey }: { bioKey: string }) {
 			}, 100);
 		}
 	}, [blocks, newBlockId]);
+
+	// Auto-scroll to block when returning from edit
+	useEffect(() => {
+		const scrollToBlockId = searchParams.get('scrollToBlock');
+		if (scrollToBlockId && blocks.some(b => b.id === scrollToBlockId)) {
+			// Small delay to ensure DOM is ready
+			setTimeout(() => {
+				const element = document.getElementById(`block-${scrollToBlockId}`);
+				if (element) {
+					element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+					// Add a subtle highlight animation
+					element.classList.add('animate-pulse');
+					setTimeout(() => {
+						element.classList.remove('animate-pulse');
+					}, 2000);
+				}
+			}, 100);
+		}
+	}, [searchParams, blocks]);
 
 	// bio is guaranteed to be defined with useSuspenseQuery
 	return (

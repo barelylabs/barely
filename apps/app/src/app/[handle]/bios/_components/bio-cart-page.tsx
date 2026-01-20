@@ -218,7 +218,7 @@ export function BioCartPage({ handle, blockId }: BioCartPageProps) {
 			{/* Back link */}
 			<div className='mb-4'>
 				<Button
-					href={`/${handle}/bios/blocks?bioKey=${bio.key}`}
+					href={`/${handle}/bios/blocks?bioKey=${bio.key}&scrollToBlock=${blockId}`}
 					variant='button'
 					look='ghost'
 					size='sm'
