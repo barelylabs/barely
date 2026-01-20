@@ -29,7 +29,7 @@ export function CartDialogs() {
 					variant='warning'
 					title='No shipping from address'
 					actionLabel='Set up shipping from address'
-					actionHref={`/${handle}/settings/cart`}
+					actionHref={`/${handle}/merch/logistics`}
 				/>
 			)}
 			{!cartSupportEmail && (
@@ -37,7 +37,7 @@ export function CartDialogs() {
 					variant='warning'
 					title='Your support email is not set'
 					actionLabel='Please set up a contact email for your customers to reach out to you.'
-					actionHref={`/${handle}/settings/cart`}
+					actionHref={`/${handle}/merch/logistics`}
 				/>
 			)}
 			{!stripeConnected && (
