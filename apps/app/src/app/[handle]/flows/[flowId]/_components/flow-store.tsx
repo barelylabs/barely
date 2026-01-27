@@ -446,7 +446,7 @@ export const FlowStoreProvider = ({
 
 				const updatedNodes = prevNodes.map((node, index) => {
 					if (index === replacedNodeIndex) {
-						return newActionNode!;
+						return newActionNode;
 					} else if (index > replacedNodeIndex) {
 						return {
 							...node,
