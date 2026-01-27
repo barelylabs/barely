@@ -5,6 +5,7 @@ import './mdx-editor-overrides.css';
 
 import type { MDXEditorMethods } from '@mdxeditor/editor';
 import type { ForwardedRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { cn } from '@barely/utils';
 import {
 	BoldItalicUnderlineToggles,
@@ -70,15 +71,75 @@ export function InitializedMDXEditor({
 	editorRef: ForwardedRef<MDXEditorMethods> | null;
 	toolbarOptions?: ToolbarOptions;
 } & MDXEditorProps) {
+	const wrapperRef = useRef<HTMLDivElement>(null);
+	const contentEditableRef = useRef<HTMLDivElement | null>(null);
+
+	// Function to focus the editor and place cursor at the beginning
+	const focusEditor = useCallback(() => {
+		if (contentEditableRef.current) {
+			contentEditableRef.current.focus();
+			// Place cursor at the beginning of the first text node
+			const selection = window.getSelection();
+			if (selection) {
+				selection.removeAllRanges();
+				const range = document.createRange();
+				const firstTextNode = contentEditableRef.current.querySelector(
+					'p, h1, h2, h3, h4, h5, h6, li, div',
+				);
+				if (firstTextNode) {
+					range.setStart(firstTextNode, 0);
+					range.collapse(true);
+					selection.addRange(range);
+				} else {
+					// If no text elements, set cursor at the beginning of contentEditable
+					range.setStart(contentEditableRef.current, 0);
+					range.collapse(true);
+					selection.addRange(range);
+				}
+			}
+		}
+	}, []);
+
+	// Handle click on wrapper
+	const handleWrapperClick = useCallback(
+		(e: React.MouseEvent<HTMLDivElement>) => {
+			// Check if the click was on the wrapper or its padding area (not on the editor content)
+			const target = e.target as HTMLElement;
+			const isWrapperOrPadding =
+				target === wrapperRef.current ||
+				target.classList.contains('mdx-editor-wrapper') ||
+				target.classList.contains('mdxeditor') ||
+				(target.classList.contains('_rootContentEditableWrapper_') &&
+					!target.closest('[contenteditable="true"]'));
+
+			if (isWrapperOrPadding) {
+				focusEditor();
+			}
+		},
+		[focusEditor],
+	);
+
+	// Find and store reference to contentEditable element after mount
+	useEffect(() => {
+		if (wrapperRef.current) {
+			const contentEditable = wrapperRef.current.querySelector(
+				'[contenteditable="true"]',
+			);
+			contentEditableRef.current = contentEditable as HTMLDivElement | null;
+		}
+	}, []);
+
 	return (
 		<div className='relative w-full max-w-full overflow-hidden rounded-lg border border-border bg-background p-4 pb-0'>
 			<div
+				ref={wrapperRef}
 				className='mdx-editor-wrapper relative w-full max-w-full'
 				style={
 					{
 						'--mdx-toolbar-max-width': '100%',
 					} as React.CSSProperties
 				}
+				onClick={handleWrapperClick}
 			>
 				<MDXEditor
 					ref={editorRef}
