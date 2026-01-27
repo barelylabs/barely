@@ -419,32 +419,34 @@ export const FlowStoreProvider = ({
 
 				const newNodeX = emptyNodeX + (emptyNodeWidth - newNodeWidth) / 2;
 
+				// Try to create the new action node first, before modifying anything
+				let newActionNode: ActionNode | null = null;
+				try {
+					const test = getDefaultFlowAction({
+						flowId,
+						id,
+						position: { x: newNodeX, y: emptyNodeY },
+						type,
+						// toast,
+						mailchimpAudienceId: defaultMailchimpAudienceId ?? undefined,
+						emailTemplateGroupId: defaultEmailTemplateGroup?.id ?? undefined,
+						emailTemplate:
+							defaultFromEmail ?
+								{
+									fromId: defaultFromEmail.id,
+								}
+							:	undefined,
+					});
+					newActionNode = test.flowActionNode;
+				} catch (error) {
+					console.error('Error creating flow action node', error);
+					// Don't update any nodes if creation fails
+					return;
+				}
+
 				const updatedNodes = prevNodes.map((node, index) => {
 					if (index === replacedNodeIndex) {
-						try {
-							const test = getDefaultFlowAction({
-								flowId,
-								id,
-								position: { x: newNodeX, y: emptyNodeY },
-								type,
-								// toast,
-								mailchimpAudienceId: defaultMailchimpAudienceId ?? undefined,
-								emailTemplateGroupId: defaultEmailTemplateGroup?.id ?? undefined,
-								emailTemplate:
-									defaultFromEmail ?
-										{
-											fromId: defaultFromEmail.id,
-										}
-									:	undefined,
-							});
-
-							return test.flowActionNode;
-
-							// return test.flowActionNode satisfies ActionNode;
-						} catch (error) {
-							console.error('Error creating flow action node', error);
-							return node;
-						}
+						return newActionNode!;
 					} else if (index > replacedNodeIndex) {
 						return {
 							...node,
