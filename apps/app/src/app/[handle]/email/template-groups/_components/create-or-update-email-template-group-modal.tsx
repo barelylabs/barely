@@ -65,6 +65,9 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 			onSuccess: async () => {
 				await handleCloseModal();
 			},
+			onError: error => {
+				console.error('Failed to create email template group:', error);
+			},
 		}),
 	);
 
@@ -72,6 +75,9 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 		trpc.emailTemplateGroup.update.mutationOptions({
 			onSuccess: async () => {
 				await handleCloseModal();
+			},
+			onError: error => {
+				console.error('Failed to update email template group:', error);
 			},
 		}),
 	);
@@ -136,12 +142,15 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
-		await queryClient.invalidateQueries(
-			trpc.emailTemplateGroup.byWorkspace.queryFilter({ handle }),
-		);
-		await queryClient.invalidateQueries(
-			trpc.emailTemplate.byWorkspace.queryFilter({ handle }),
-		);
+		// Invalidate queries to refresh the list
+		await Promise.all([
+			queryClient.invalidateQueries(
+				trpc.emailTemplateGroup.byWorkspace.queryFilter({ handle }),
+			),
+			queryClient.invalidateQueries(
+				trpc.emailTemplate.byWorkspace.queryFilter({ handle }),
+			),
+		]);
 		form.reset();
 		await setShowModal(false);
 	}, [
