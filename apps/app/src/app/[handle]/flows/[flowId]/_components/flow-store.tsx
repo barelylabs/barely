@@ -367,6 +367,35 @@ export const FlowStoreProvider = ({
 						});
 						get().saveSnapshot();
 						return;
+					} else {
+						// No edge above the target - connect the parent of the empty node to the target
+						// and delete the empty node
+
+						if (!edgeAboveEmptySource) {
+							console.error('No edge above empty source node');
+							return;
+						}
+
+						// Create new edge from parent of empty node to target
+						const newEdge = {
+							id: `e-${edgeAboveEmptySource.source}-${connection.target}`,
+							source: edgeAboveEmptySource.source,
+							target: connection.target,
+							type: 'simple',
+						} satisfies SimpleEdge;
+
+						// Filter out the empty node and the edge above it
+						const filteredNodes = prevNodes.filter(node => node.id !== sourceNode.id);
+						const filteredEdges = prevEdges.filter(
+							edge => edge.id !== edgeAboveEmptySource.id,
+						);
+
+						set({
+							nodes: filteredNodes,
+							edges: [...filteredEdges, newEdge],
+						});
+						get().saveSnapshot();
+						return;
 					}
 				}
 
