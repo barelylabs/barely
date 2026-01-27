@@ -367,6 +367,29 @@ export const FlowStoreProvider = ({
 						});
 						get().saveSnapshot();
 						return;
+					} else {
+						// No edge above the target - this is the case we need to handle for merging decision trees
+						// We should NOT delete the empty node, but instead create a new connection
+
+						// Check if we're creating a valid edge that wouldn't cause issues
+						if (!edgeAboveEmptySource) {
+							console.error('No edge above empty source node');
+							return;
+						}
+
+						// Create the new edge from empty node to target
+						const newEdge = {
+							id: `e-${connection.source}-${connection.target}`,
+							source: connection.source,
+							target: connection.target,
+							type: 'simple',
+						} satisfies SimpleEdge;
+
+						set({
+							edges: [...prevEdges, newEdge],
+						});
+						get().saveSnapshot();
+						return;
 					}
 				}
 
