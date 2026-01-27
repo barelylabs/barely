@@ -87,7 +87,7 @@ export function InitializedMDXEditor({
 					'p, h1, h2, h3, h4, h5, h6, li, div',
 				);
 				if (firstTextNode) {
-					range.setStart(firstTextNode, 0);
+					range.setStart(firstTextNode.firstChild ?? firstTextNode, 0);
 					range.collapse(true);
 					selection.addRange(range);
 				} else {
