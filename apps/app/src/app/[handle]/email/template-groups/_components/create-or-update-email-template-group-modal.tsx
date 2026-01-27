@@ -5,6 +5,7 @@ import { useCreateOrUpdateForm, useWorkspace } from '@barely/hooks';
 import { upsertEmailTemplateGroupSchema } from '@barely/validators';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { useFieldArray } from 'react-hook-form';
+import { toast } from 'sonner';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
@@ -66,7 +67,7 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 				await handleCloseModal();
 			},
 			onError: error => {
-				console.error('Failed to create email template group:', error);
+				toast.error('Failed to create email template group');
 			},
 		}),
 	);
@@ -77,7 +78,7 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 				await handleCloseModal();
 			},
 			onError: error => {
-				console.error('Failed to update email template group:', error);
+				toast.error('Failed to update email template group');
 			},
 		}),
 	);
@@ -134,7 +135,7 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 
 	const activeEmailTemplates = form.watch('emailTemplates');
 	const availableEmailTemplates = emailTemplateOptions.filter(
-		eto => !activeEmailTemplates.some(aet => aet.id === eto.id),
+		eto => !activeEmailTemplates?.some(aet => aet.id === eto.id),
 	);
 
 	const showModal = mode === 'create' ? showCreateModal : showUpdateModal;
