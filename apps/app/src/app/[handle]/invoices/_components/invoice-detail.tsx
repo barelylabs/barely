@@ -70,9 +70,18 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 				toast.error(error.message || 'Failed to send invoice');
 			},
 			onSettled: async () => {
-				await queryClient.invalidateQueries({
-					queryKey: trpc.invoice.byId.queryKey(),
-				});
+				// Invalidate both the individual invoice, list queries, and stats
+				await Promise.all([
+					queryClient.invalidateQueries({
+						queryKey: trpc.invoice.byId.queryKey(),
+					}),
+					queryClient.invalidateQueries({
+						queryKey: trpc.invoice.byWorkspace.queryKey(),
+					}),
+					queryClient.invalidateQueries({
+						queryKey: trpc.invoice.stats.queryKey(),
+					}),
+				]);
 			},
 		}),
 	);
@@ -86,9 +95,18 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 				toast.error(error.message || 'Failed to mark invoice as paid');
 			},
 			onSettled: async () => {
-				await queryClient.invalidateQueries({
-					queryKey: trpc.invoice.byId.queryKey(),
-				});
+				// Invalidate both the individual invoice, list queries, and stats
+				await Promise.all([
+					queryClient.invalidateQueries({
+						queryKey: trpc.invoice.byId.queryKey(),
+					}),
+					queryClient.invalidateQueries({
+						queryKey: trpc.invoice.byWorkspace.queryKey(),
+					}),
+					queryClient.invalidateQueries({
+						queryKey: trpc.invoice.stats.queryKey(),
+					}),
+				]);
 			},
 		}),
 	);
@@ -113,6 +131,17 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 			},
 			onError: error => {
 				toast.error(error.message || 'Failed to delete invoice');
+			},
+			onSettled: async () => {
+				// Invalidate the list query and stats after deletion
+				await Promise.all([
+					queryClient.invalidateQueries({
+						queryKey: trpc.invoice.byWorkspace.queryKey(),
+					}),
+					queryClient.invalidateQueries({
+						queryKey: trpc.invoice.stats.queryKey(),
+					}),
+				]);
 			},
 		}),
 	);
