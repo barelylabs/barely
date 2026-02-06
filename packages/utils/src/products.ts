@@ -104,27 +104,28 @@ export const CORE_PRODUCTS: Product[] = [
 			},
 		],
 	},
-	{
-		id: 'pages',
-		name: 'Pages',
-		icon: 'landingPage',
-		type: 'core',
-		description: 'Easy landing pages',
-		requiredFeatures: ['bio-pages'],
-		defaultRoute: '/pages',
-		routes: [
-			{
-				path: '/pages',
-				label: 'Pages',
-				icon: 'landingPage',
-			},
-			{
-				path: '/pages/stats',
-				label: 'Analytics',
-				icon: 'stat',
-			},
-		],
-	},
+	// Pages product deprecated in favor of Bio pages
+	// {
+	// 	id: 'pages',
+	// 	name: 'Pages',
+	// 	icon: 'landingPage',
+	// 	type: 'core',
+	// 	description: 'Easy landing pages',
+	// 	requiredFeatures: ['bio-pages'],
+	// 	defaultRoute: '/pages',
+	// 	routes: [
+	// 		{
+	// 			path: '/pages',
+	// 			label: 'Pages',
+	// 			icon: 'landingPage',
+	// 		},
+	// 		{
+	// 			path: '/pages/stats',
+	// 			label: 'Analytics',
+	// 			icon: 'stat',
+	// 		},
+	// 	],
+	// },
 	{
 		id: 'vip',
 		name: 'VIP',

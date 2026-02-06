@@ -206,8 +206,8 @@ export function CreateOrUpdateVipSwapModal({ mode }: { mode: 'create' | 'update'
 			!audioUploadQueue.length &&
 			!coverUploadQueue.length);
 
-	// Check if we have existing files
-	const existingFileName = selectedVipSwap?.file.name;
+	// Note: existingFileName is not available via Electric sync
+	// To show existing file name in edit mode, would need to fetch via byId API call
 
 	// Cover image preview
 	const coverImagePreviewS3Key = selectedVipSwap?.coverImage?.s3Key;
@@ -257,11 +257,7 @@ export function CreateOrUpdateVipSwapModal({ mode }: { mode: 'create' | 'update'
 
 					<div className='flex flex-col items-start gap-1'>
 						<Label>Audio File {mode === 'create' && '*'}</Label>
-						{existingFileName && mode === 'update' && !audioUploadQueue.length && (
-							<div className='mb-2 text-sm text-muted-foreground'>
-								Current file: {existingFileName}
-							</div>
-						)}
+						{/* Note: existingFileName not available - would need byId API call to show */}
 						<UploadDropzone
 							{...audioUploadState}
 							title={

@@ -1,6 +1,5 @@
 'use client';
 
-import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import { useWorkspace } from '@barely/hooks';
 import { getAbsoluteUrl } from '@barely/utils';
 
@@ -11,6 +10,7 @@ import { GridList, GridListCard } from '@barely/ui/grid-list';
 import { Icon } from '@barely/ui/icon';
 import { Text } from '@barely/ui/typography';
 
+import type { VipSwapListItem } from './use-vip-swaps';
 import { CreateVipSwapButton } from './create-vip-swap-button';
 import { useVipSwaps, useVipSwapsSearchParams } from './use-vip-swaps';
 
@@ -51,11 +51,7 @@ export function AllVipSwaps() {
 	);
 }
 
-function VipSwapCard({
-	vipSwap,
-}: {
-	vipSwap: AppRouterOutputs['vipSwap']['byWorkspace']['vipSwaps'][0];
-}) {
+function VipSwapCard({ vipSwap }: { vipSwap: VipSwapListItem }) {
 	const { handle } = useWorkspace();
 	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } = useVipSwaps();
 
@@ -70,7 +66,7 @@ function VipSwapCard({
 			setShowArchiveModal={setShowArchiveModal}
 			setShowDeleteModal={setShowDeleteModal}
 			img={
-				vipSwap.coverImage ?
+				vipSwap.coverImage?.src ?
 					{
 						src: vipSwap.coverImage.src,
 						s3Key: vipSwap.coverImage.s3Key,
