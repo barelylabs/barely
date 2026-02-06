@@ -3,7 +3,7 @@
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import type { MDXEditorMethods } from '@barely/ui/mdx-editor';
 import type { z } from 'zod/v4';
-import { Suspense, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useWorkspace, useZodForm } from '@barely/hooks';
 import { updateBrandKitSchema } from '@barely/validators';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
@@ -14,6 +14,13 @@ import { useTRPC } from '@barely/api/app/app.trpc.react';
 
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { LoadingSpinner } from '@barely/ui/loading';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@barely/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@barely/ui/tabs';
 import { Text } from '@barely/ui/typography';
 
@@ -45,6 +52,7 @@ function BrandKitPageInner() {
 	const { handle } = useWorkspace();
 	const { brandKit } = useBrandKit(); // brandKit is guaranteed to be defined with suspense
 	const [previewTab, setPreviewTab] = useState('bio');
+	const [selectedBioKey, setSelectedBioKey] = useState('home');
 	const mdxEditorRef = useRef<MDXEditorMethods>(null);
 
 	// Initialize form with brand kit data (brandKit is guaranteed to be defined with suspense)
@@ -109,6 +117,24 @@ function BrandKitPageInner() {
 		),
 	);
 
+	// Fetch all bio pages for the workspace
+	const { data: bioPages } = useSuspenseQuery(
+		trpc.bio.byWorkspace.queryOptions(
+			{ handle },
+			{
+				staleTime: 1000 * 60 * 5, // 5 minutes
+			},
+		),
+	);
+
+	// Reset selectedBioKey to 'home' if it doesn't exist in the list
+	useEffect(() => {
+		const bioKeyExists = bioPages.bios.some(bio => bio.key === selectedBioKey);
+		if (!bioKeyExists && bioPages.bios.length > 0) {
+			setSelectedBioKey('home');
+		}
+	}, [bioPages.bios, selectedBioKey]);
+
 	const submitDisabled = !form.formState.isDirty;
 	return (
 		<Form form={form} onSubmit={handleSubmit}>
@@ -137,7 +163,7 @@ function BrandKitPageInner() {
 					{/* Desktop Preview - Right side on large screens */}
 					<div className='order-2 hidden w-full max-w-sm lg:block'>
 						<div className='sticky top-6'>
-							<div className='mb-4 flex flex-col items-center justify-between'>
+							<div className='mb-4 flex flex-col items-center justify-between gap-4'>
 								{/* <h3 className='text-lg font-semibold'>Live Preview</h3> */}
 								<Tabs value={previewTab} onValueChange={setPreviewTab}>
 									<TabsList>
@@ -153,10 +179,26 @@ function BrandKitPageInner() {
 										</TabsTrigger>
 									</TabsList>
 								</Tabs>
+
+								{/* Bio page selector */}
+								{previewTab === 'bio' && bioPages.bios.length > 0 && (
+									<Select value={selectedBioKey} onValueChange={setSelectedBioKey}>
+										<SelectTrigger className='w-full'>
+											<SelectValue placeholder='Select a bio page' />
+										</SelectTrigger>
+										<SelectContent>
+											{bioPages.bios.map(bioPage => (
+												<SelectItem key={bioPage.key} value={bioPage.key}>
+													{bioPage.key === 'home' ? 'Home' : bioPage.key}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+								)}
 							</div>
 
 							<div className='relative overflow-hidden rounded-lg'>
-								{previewTab === 'bio' && <BioPreview bio={bio} />}
+								{previewTab === 'bio' && <BioPreview bio={bio} bioKey={selectedBioKey} />}
 								{previewTab === 'page' && (
 									<div className='flex h-[600px] items-center justify-center bg-muted'>
 										<Text variant='sm/normal' className='text-muted-foreground'>
@@ -188,11 +230,17 @@ function BrandKitPageInner() {
 }
 
 // Preview component for bio using brand kit
-function BioPreview({ bio }: { bio: AppRouterOutputs['bio']['byKey'] }) {
+function BioPreview({
+	bio,
+	bioKey,
+}: {
+	bio: AppRouterOutputs['bio']['byKey'];
+	bioKey: string;
+}) {
 	return (
 		<div className='flex flex-col items-center gap-4'>
 			<span className='text-sm text-muted-foreground'>barely.bio/{bio.handle}</span>
-			<AppBioRender bioKey={'home'} />
+			<AppBioRender bioKey={bioKey} />
 		</div>
 	);
 }
