@@ -3,7 +3,7 @@
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import type { MDXEditorMethods } from '@barely/ui/mdx-editor';
 import type { z } from 'zod/v4';
-import { Suspense, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useWorkspace, useZodForm } from '@barely/hooks';
 import { updateBrandKitSchema } from '@barely/validators';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
@@ -14,7 +14,13 @@ import { useTRPC } from '@barely/api/app/app.trpc.react';
 
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { LoadingSpinner } from '@barely/ui/loading';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@barely/ui/select';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@barely/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@barely/ui/tabs';
 import { Text } from '@barely/ui/typography';
 
@@ -121,6 +127,14 @@ function BrandKitPageInner() {
 		),
 	);
 
+	// Reset selectedBioKey to 'home' if it doesn't exist in the list
+	useEffect(() => {
+		const bioKeyExists = bioPages.bios.some(bio => bio.key === selectedBioKey);
+		if (!bioKeyExists && bioPages.bios.length > 0) {
+			setSelectedBioKey('home');
+		}
+	}, [bioPages.bios, selectedBioKey]);
+
 	const submitDisabled = !form.formState.isDirty;
 	return (
 		<Form form={form} onSubmit={handleSubmit}>
@@ -216,10 +230,10 @@ function BrandKitPageInner() {
 }
 
 // Preview component for bio using brand kit
-function BioPreview({ 
-	bio, 
-	bioKey 
-}: { 
+function BioPreview({
+	bio,
+	bioKey,
+}: {
 	bio: AppRouterOutputs['bio']['byKey'];
 	bioKey: string;
 }) {
