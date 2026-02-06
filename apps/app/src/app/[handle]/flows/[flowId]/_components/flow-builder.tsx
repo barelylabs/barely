@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
 	Background,
 	Controls,
@@ -86,20 +86,26 @@ export function FlowBuilder() {
 		onSelectionChange,
 	} = useFlowStore(useShallow(selector));
 
-	const nodeTypes = {
-		trigger: TriggerNodeType,
-		empty: EmptyNodeType,
-		wait: WaitNodeType,
-		sendEmail: SendEmailNodeType,
-		sendEmailFromTemplateGroup: SendEmailFromTemplateGroupNodeType,
-		boolean: BooleanNodeType,
-		addToMailchimpAudience: MailchimpAudienceNodeType,
-	};
+	const nodeTypes = useMemo(
+		() => ({
+			trigger: TriggerNodeType,
+			empty: EmptyNodeType,
+			wait: WaitNodeType,
+			sendEmail: SendEmailNodeType,
+			sendEmailFromTemplateGroup: SendEmailFromTemplateGroupNodeType,
+			boolean: BooleanNodeType,
+			addToMailchimpAudience: MailchimpAudienceNodeType,
+		}),
+		[],
+	);
 
-	const edgeTypes = {
-		simple: SimpleEdgeType,
-		boolean: BooleanEdgeType,
-	};
+	const edgeTypes = useMemo(
+		() => ({
+			simple: SimpleEdgeType,
+			boolean: BooleanEdgeType,
+		}),
+		[],
+	);
 
 	const onKeyDown = useCallback((event: KeyboardEvent) => {
 		if (event.key === 'Delete' || event.key === 'Backspace') {

@@ -352,11 +352,11 @@ export const FlowStoreProvider = ({
 							} else return;
 						}
 
-						console.log('edgeAboveEmpty', edgeAboveEmptyTarget);
+						console.log('edgeAboveEmptySource', edgeAboveEmptySource);
 						set({
 							nodes: prevNodes.filter(node => node.id !== sourceNode.id),
 							edges: prevEdges.map(edge => {
-								if (edge.id === edgeAboveEmptyTarget.id) {
+								if (edge.id === edgeAboveEmptySource?.id) {
 									return {
 										...edge,
 										target: connection.target,
@@ -444,6 +444,12 @@ export const FlowStoreProvider = ({
 						(prevNodes.find(node => node.type === 'wait')?.measured?.width ?? 0)
 					: type === 'sendEmail' ?
 						(prevNodes.find(node => node.type === 'sendEmail')?.measured?.width ?? 0)
+					: type === 'sendEmailFromTemplateGroup' ?
+						(prevNodes.find(node => node.type === 'sendEmailFromTemplateGroup')?.measured
+							?.width ?? 0)
+					: type === 'addToMailchimpAudience' ?
+						(prevNodes.find(node => node.type === 'addToMailchimpAudience')?.measured
+							?.width ?? 0)
 					:	0;
 
 				const newNodeX = emptyNodeX + (emptyNodeWidth - newNodeWidth) / 2;
