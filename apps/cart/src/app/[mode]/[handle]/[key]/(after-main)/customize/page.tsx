@@ -88,9 +88,9 @@ export default async function UpsellPage({
 			<div className='flex flex-col items-center gap-6'>
 				{/* Product Image */}
 				<Img
-					s3Key={publicFunnel.upsellProduct?._images[0]?.file.s3Key ?? ''}
-					blurDataURL={publicFunnel.upsellProduct?._images[0]?.file.blurDataUrl ?? ''}
-					alt={publicFunnel.upsellProduct?.name ?? ''}
+					s3Key={publicFunnel.upsellProduct._images[0]?.file.s3Key ?? ''}
+					blurDataURL={publicFunnel.upsellProduct._images[0]?.file.blurDataUrl ?? ''}
+					alt={publicFunnel.upsellProduct.name}
 					width={600}
 					height={600}
 					className='mx-auto h-auto w-full max-w-[300px] rounded-lg sm:max-h-[400px]'
