@@ -76,10 +76,10 @@ export const FlowStoreProvider = ({
 			historyIndex: 0,
 			lastCommittedHistoryIndex: 0,
 			setCurrentAsLastSaved: () => {
-				// const historyIndex = get().historyIndex;
 				set({
 					lastCommittedHistoryIndex: get().historyIndex,
 				});
+				get().checkIfDirty();
 			},
 			saveSnapshot: () => {
 				const currentState = {
