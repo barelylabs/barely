@@ -38,7 +38,9 @@ export function UpsellProductPrice({
 				variant='xl/bold'
 				currency={publicFunnel.workspace.currency}
 			/>
-			<Text variant='sm/normal'>excl 20% VAT</Text>
+			{publicFunnel.workspace.shippingAddressCountry === 'GB' && (
+				<Text variant='sm/normal'>excl 20% VAT</Text>
+			)}
 		</div>
 	);
 }
