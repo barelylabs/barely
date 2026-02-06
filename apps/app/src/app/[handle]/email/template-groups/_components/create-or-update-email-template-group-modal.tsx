@@ -5,6 +5,7 @@ import { useCreateOrUpdateForm, useWorkspace } from '@barely/hooks';
 import { upsertEmailTemplateGroupSchema } from '@barely/validators';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { useFieldArray } from 'react-hook-form';
+import { toast } from 'sonner';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
@@ -65,6 +66,9 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 			onSuccess: async () => {
 				await handleCloseModal();
 			},
+			onError: error => {
+				toast.error('Failed to create email template group');
+			},
 		}),
 	);
 
@@ -72,6 +76,9 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 		trpc.emailTemplateGroup.update.mutationOptions({
 			onSuccess: async () => {
 				await handleCloseModal();
+			},
+			onError: error => {
+				toast.error('Failed to update email template group');
 			},
 		}),
 	);
@@ -128,7 +135,7 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 
 	const activeEmailTemplates = form.watch('emailTemplates');
 	const availableEmailTemplates = emailTemplateOptions.filter(
-		eto => !activeEmailTemplates.some(aet => aet.id === eto.id),
+		eto => !activeEmailTemplates?.some(aet => aet.id === eto.id),
 	);
 
 	const showModal = mode === 'create' ? showCreateModal : showUpdateModal;
@@ -136,12 +143,15 @@ export function CreateOrUpdateEmailTemplateGroupModal({
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
-		await queryClient.invalidateQueries(
-			trpc.emailTemplateGroup.byWorkspace.queryFilter({ handle }),
-		);
-		await queryClient.invalidateQueries(
-			trpc.emailTemplate.byWorkspace.queryFilter({ handle }),
-		);
+		// Invalidate queries to refresh the list
+		await Promise.all([
+			queryClient.invalidateQueries(
+				trpc.emailTemplateGroup.byWorkspace.queryFilter({ handle }),
+			),
+			queryClient.invalidateQueries(
+				trpc.emailTemplate.byWorkspace.queryFilter({ handle }),
+			),
+		]);
 		form.reset();
 		await setShowModal(false);
 	}, [
