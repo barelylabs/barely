@@ -1017,15 +1017,17 @@ export function OrderSummary({
 				}
 			</div>
 
-			<div className='flex flex-row justify-between'>
-				<Text variant='md/medium'>VAT</Text>
-				<Text variant='md/medium'>
-					{formatMinorToMajorCurrency(
-						amounts.checkoutVatAmount,
-						publicFunnel.workspace.currency,
-					)}
-				</Text>
-			</div>
+			{publicFunnel.workspace.shippingAddressCountry === 'GB' && (
+				<div className='flex flex-row justify-between'>
+					<Text variant='md/medium'>VAT</Text>
+					<Text variant='md/medium'>
+						{formatMinorToMajorCurrency(
+							amounts.checkoutVatAmount,
+							publicFunnel.workspace.currency,
+						)}
+					</Text>
+				</div>
+			)}
 
 			<div className='flex flex-row justify-between'>
 				<Text variant='xl/bold'>Total</Text>

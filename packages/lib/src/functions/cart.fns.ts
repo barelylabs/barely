@@ -560,7 +560,10 @@ export async function sendCartReceiptEmail(cart: ReceiptCart) {
 			cart.orderShippingAndHandlingAmount ?? 0,
 			cart.currency,
 		),
-		vatTotal: formatMinorToMajorCurrency(cart.orderVatAmount ?? 0, cart.currency),
+		vatTotal:
+			cart.funnel.workspace.shippingAddressCountry === 'GB' ?
+				formatMinorToMajorCurrency(cart.orderVatAmount ?? 0, cart.currency)
+			:	null,
 		total: formatMinorToMajorCurrency(cart.orderAmount, cart.currency),
 	});
 
