@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 // import { APPAREL_SIZES } from '@barely/const';
 // import { getAmountsForUpsell } from '@barely/lib/functions/cart.utils';
@@ -36,6 +37,11 @@ export default async function UpsellPage({
 	// we're just gonna grab it before rendering. Suspense for the apparel
 	// size buttons is a little awkward. But this could be modified in the future.
 	const publicFunnel = await trpcCaller.publicFunnelByHandleAndKey({ handle, key });
+
+	// Redirect to success if no upsell product is configured
+	if (!publicFunnel.upsellProduct) {
+		redirect(`/${mode}/${handle}/${key}/success`);
+	}
 
 	// const { cart } = await trpcCaller.byIdAndParams({
 	// 	id: cartId,
@@ -82,9 +88,9 @@ export default async function UpsellPage({
 			<div className='flex flex-col items-center gap-6'>
 				{/* Product Image */}
 				<Img
-					s3Key={publicFunnel.upsellProduct?._images[0]?.file.s3Key ?? ''}
-					blurDataURL={publicFunnel.upsellProduct?._images[0]?.file.blurDataUrl ?? ''}
-					alt={publicFunnel.upsellProduct?.name ?? ''}
+					s3Key={publicFunnel.upsellProduct._images[0]?.file.s3Key ?? ''}
+					blurDataURL={publicFunnel.upsellProduct._images[0]?.file.blurDataUrl ?? ''}
+					alt={publicFunnel.upsellProduct.name}
 					width={600}
 					height={600}
 					className='mx-auto h-auto w-full max-w-[300px] rounded-lg sm:max-h-[400px]'
