@@ -1,8 +1,5 @@
 import { redirect } from 'next/navigation';
-import { getDefaultProductForVariant } from '@barely/utils';
-
-import { DashContent } from '~/app/[handle]/_components/dash-content';
-import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
+import { getCurrentAppVariant, getDefaultProductForVariant } from '@barely/utils';
 
 export default async function DashboardPage({
 	params,
@@ -12,22 +9,26 @@ export default async function DashboardPage({
 	const { handle } = await params;
 
 	// Redirect to the default product route based on app variant
-	const defaultProduct = getDefaultProductForVariant();
-	if (defaultProduct) {
-		redirect(`/${handle}${defaultProduct.defaultRoute}`);
+	try {
+		const defaultProduct = getDefaultProductForVariant();
+		if (defaultProduct) {
+			redirect(`/${handle}${defaultProduct.defaultRoute}`);
+		}
+	} catch {
+		// If there's an error getting the variant, fall through to default behavior
 	}
 
 	// Fallback to current behavior if no default product found
-	return (
-		<>
-			<DashContentHeader title='Overview' />
-			<DashContent>
-				<div className='flex flex-col gap-4'>
-					<div className='flex flex-col gap-2'>
-						<p> 🛠️</p>
-					</div>
-				</div>
-			</DashContent>
-		</>
-	);
+	// For appInvoice, redirect to /invoices as a hardcoded fallback
+	try {
+		const variant = getCurrentAppVariant();
+		if (variant === 'appInvoice') {
+			redirect(`/${handle}/invoices`);
+		}
+	} catch {
+		// Ignore error and use default
+	}
+
+	// Default behavior - redirect to links page
+	redirect(`/${handle}/links`);
 }
