@@ -186,16 +186,18 @@ export function getFeeAmountForCheckout({
 	productAmount,
 	vatAmount,
 	shippingAmount,
+	barelyFulfillmentFee = 0,
 	workspace,
 }: {
 	productAmount: number;
 	vatAmount: number;
 	shippingAmount: number;
+	barelyFulfillmentFee?: number;
 	workspace: Pick<Workspace, 'plan' | 'cartFeePercentageOverride'>;
 }) {
 	const feePercentage = getFeePercentageForCheckout(workspace);
 
 	const barelyFee = Math.round(productAmount * (feePercentage / 100));
 
-	return barelyFee + vatAmount + shippingAmount;
+	return barelyFee + vatAmount + shippingAmount + barelyFulfillmentFee;
 }

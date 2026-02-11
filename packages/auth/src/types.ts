@@ -39,6 +39,10 @@ export interface SessionWorkspace {
 	shippingAddressCountry: string | null;
 	shippingAddressPhone: string | null;
 
+	// Barely fulfillment
+	barelyFulfillmentEligible: boolean;
+	barelyFulfillmentMode: 'artist_all' | 'barely_us' | 'barely_worldwide';
+
 	// Related data
 	brandKit: BrandKit | null;
 	avatarImageS3Key: string | undefined;

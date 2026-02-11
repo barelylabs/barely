@@ -306,6 +306,8 @@ export async function getUserWorkspacesById(
 							shippingAddressPostalCode: true,
 							shippingAddressCountry: true,
 							shippingAddressPhone: true,
+							barelyFulfillmentEligible: true,
+							barelyFulfillmentMode: true,
 						},
 						with: {
 							brandKit: true,
@@ -444,6 +446,8 @@ export async function getUserWorkspaceByHandle(
 							shippingAddressPostalCode: true,
 							shippingAddressCountry: true,
 							shippingAddressPhone: true,
+							barelyFulfillmentEligible: true,
+							barelyFulfillmentMode: true,
 						},
 						with: {
 							brandKit: true,

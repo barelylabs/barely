@@ -1,304 +1,258 @@
-# Jobs To Be Done (JTBD) - Barely Invoice
+# Jobs to be Done: Barely Fulfillment Partner
 
 ## Overview
 
-This document defines the core jobs that freelancers, consultants, and service providers are trying to accomplish when dealing with invoicing and payment collection. Each job focuses on the outcome the user desires, not the specific features or implementation.
+This document captures the jobs that artists are trying to accomplish when they consider using Barely as a fulfillment partner. It focuses on the "why" behind user behavior rather than the feature itself.
+
+---
+
+## Job Performers (Users)
+
+### Primary: UK/EU Artists Expanding to US Market
+- Independent musicians/bands with existing physical product sales in their home market
+- Running or planning paid advertising campaigns targeting US audiences
+- Currently blocked by shipping economics or operational complexity
+- Seeking growth without proportional increase in operational burden
+
+### Secondary: US Artists Seeking Fulfillment Partner
+- Artists who want to sell physical products but don't want to pack/ship themselves
+- May be new to physical sales or scaling beyond what they can handle
+- Value their time for creative work over operational tasks
+- Willing to pay reasonable fees for convenience
 
 ---
 
 ## Primary Jobs (High Priority)
 
-### 1. Get Paid Quickly for Completed Work
+### Job 1: Sell physical products to international customers profitably
 
-**Job Statement**  
-As a freelancer, I want to send professional invoices that clients will pay immediately, so that I can maintain positive cash flow and avoid chasing payments.
+**Job Statement:**
+> When I'm an artist with fans in the US, I want to offer them physical products with reasonable shipping costs, so I can profitably acquire customers through paid advertising.
 
-**Context**
-- Occurs immediately after completing a project or reaching a milestone
-- Triggered by finishing deliverables or monthly retainer cycles
+**Context:**
+- Artist has physical products (vinyl, CDs, merch) that fans want
+- Fans in the US see high international shipping costs and abandon carts
+- Paid acquisition (ads) becomes unprofitable when shipping kills conversion rates
+- Current solution: Don't sell to US, or accept low/negative margins
 
-**Motivation (Why this matters)**
-- Average payment collection takes 30+ days, creating cash flow problems
-- Chasing payments via email/text is uncomfortable and time-consuming
-- Unpaid invoices affect ability to pay own bills
+**Current Workarounds:**
+- Ship from UK anyway (expensive, slow, poor customer experience)
+- Set up duplicate workspace with US-based fulfillment (complex, time-consuming)
+- Avoid US market entirely (leaves money on the table)
 
-**Current Alternatives**
-- Sending Word/PDF invoices via email with bank details
-- Using QuickBooks but only utilizing 10% of features
-- Manual follow-ups and payment reminders
+**Success Criteria:**
+- US shipping costs are competitive with domestic US retailers
+- Customer acquisition cost (CAC) makes sense with US shipping rates
+- Can run profitable paid campaigns to US audiences
 
-**Desired Outcome / Success Criteria**
-- Invoice paid within 7 days of sending
-- Client can pay with one click without creating accounts
-- Automatic confirmation when payment is received
-
-**Priority Level**
-- High
+**Related Jobs:**
+- Calculate accurate shipping costs before customer checks out
+- Display shipping rates that don't cause sticker shock
 
 ---
 
-### 2. Minimize Time Spent on Administrative Tasks
+### Job 2: Manage a single, unified store for all markets
 
-**Job Statement**  
-As a consultant, I want to create and send invoices in under 60 seconds, so that I can focus on billable work instead of paperwork.
+**Job Statement:**
+> When I'm selling to customers in multiple countries, I want to manage one store with one set of products, so I don't waste time duplicating work and can see all my sales in one place.
 
-**Context**
-- End of project when wrapping up deliverables
-- Monthly/weekly billing cycles for retainer clients
-- When switching contexts between creative and administrative work
+**Context:**
+- Artists currently need separate workspaces for different fulfillment regions
+- Each workspace requires: separate Stripe account, duplicate products, duplicate landing pages, separate analytics
+- Ad campaigns must be split by geography
+- Mental overhead of managing multiple systems
 
-**Motivation (Why this matters)**
-- Currently takes 10-15 minutes per invoice
-- Mental context switching from creative to admin work is draining
-- Every minute on invoicing is a minute not earning
+**Current Workarounds:**
+- Accept the complexity and manage multiple workspaces
+- Only sell to one market to keep things simple
+- Hire help to manage the complexity (expensive)
 
-**Current Alternatives**
-- Copy-pasting from previous invoices in Google Docs
-- Maintaining spreadsheets with client details
-- Using complex accounting software with steep learning curves
+**Success Criteria:**
+- One workspace, one Stripe account, one product catalog
+- All sales visible in single dashboard
+- One set of landing pages and funnels
+- Simplified ad campaign management
 
-**Desired Outcome / Success Criteria**
-- Invoice created and sent in less than 60 seconds
-- Client details remembered and reusable
-- No learning curve or accounting knowledge required
-
-**Priority Level**
-- High
+**Related Jobs:**
+- Keep accounting simple with unified revenue streams
+- Track performance across all markets in one view
 
 ---
 
-### 3. Maintain Professional Appearance
+### Job 3: Know which orders I need to fulfill vs. which are handled for me
 
-**Job Statement**  
-As a service provider, I want to send polished, professional invoices that reflect my brand quality, so that clients take my business seriously and pay promptly.
+**Job Statement:**
+> When orders come in from different regions, I want to clearly see which ones I need to ship myself, so I don't miss any orders or duplicate fulfillment work.
 
-**Context**
-- First invoice to a new client sets the tone
-- Competing with larger agencies for contracts
-- Building trust with enterprise clients
+**Context:**
+- With split fulfillment, some orders go to the artist, some to Barely
+- Artist needs to know exactly what's on their plate
+- Don't want to accidentally ship an order that Barely is handling
+- Don't want Barely orders sitting unfulfilled because artist thought they were covered
 
-**Motivation (Why this matters)**
-- Unprofessional invoices can delay payment or lose future work
-- Brand consistency across all client touchpoints matters
-- Professional appearance justifies professional rates
+**Current Workarounds:**
+- Manually check shipping addresses on each order
+- Maintain separate tracking spreadsheet
+- Risk errors and duplicate shipments
 
-**Current Alternatives**
-- Manually formatting invoices to look professional
-- Using generic templates that don't match brand
-- Paying for expensive software with more features than needed
+**Success Criteria:**
+- Clear filter/view showing "my orders" vs "Barely orders"
+- Confidence that nothing falls through the cracks
+- Quick daily check of fulfillment queue
 
-**Desired Outcome / Success Criteria**
-- Clean, professional invoice design
-- Consistent branding across all invoices
-- Client-facing payment page that inspires confidence
-
-**Priority Level**
-- High
+**Related Jobs:**
+- Maintain high fulfillment standards across all orders
+- Keep customers happy regardless of who ships
 
 ---
 
-### 4. Track Payment Status Without Manual Checking
+## Secondary Jobs (Lower Priority)
 
-**Job Statement**  
-As a freelancer, I want to know instantly when invoices are viewed and paid, so that I can follow up appropriately and plan my finances.
+### Job 4: Outsource fulfillment entirely so I can focus on music
 
-**Context**
-- After sending an invoice, waiting for payment
-- Planning monthly expenses based on expected income
-- Deciding when to send follow-up reminders
+**Job Statement:**
+> When I want to sell physical products but don't want to deal with shipping, I want someone else to handle all fulfillment, so I can focus my time on creating music and connecting with fans.
 
-**Motivation (Why this matters)**
-- Uncertainty about whether invoice was received/reviewed
-- Not knowing if payment is coming affects financial planning
-- Manual checking of bank accounts is inefficient
+**Context:**
+- Some artists (especially US-based) see fulfillment as pure overhead
+- Time spent packing orders is time not spent on creative work
+- May be scaling to volume where self-fulfillment becomes unsustainable
+- Willing to pay per-order fees for the convenience
 
-**Current Alternatives**
-- Checking bank account daily
-- Asking clients if they received the invoice
-- Using read receipts on emails
+**Current Workarounds:**
+- Don't sell physical products at all
+- Use third-party fulfillment services (disconnected from their storefront)
+- Hire part-time help (management overhead)
 
-**Desired Outcome / Success Criteria**
-- Notification when invoice is viewed
-- Instant notification when payment is made
-- Clear status tracking (sent, viewed, paid)
+**Success Criteria:**
+- Orders flow to fulfillment partner automatically
+- Artist only needs to ensure stock is available
+- Fulfillment quality matches or exceeds what artist would do themselves
 
-**Priority Level**
-- High
-
----
-
-## Secondary Jobs (Medium Priority)
-
-### 5. Reuse Information for Repeat Clients
-
-**Job Statement**  
-As a consultant with regular clients, I want to avoid re-entering the same information repeatedly, so that I can invoice faster and reduce errors.
-
-**Context**
-- Monthly retainer invoicing
-- Repeat projects with same clients
-- Similar projects with standard pricing
-
-**Motivation (Why this matters)**
-- Typing same client details wastes time
-- Manual entry increases error risk
-- Repeat clients are 80% of business
-
-**Current Alternatives**
-- Maintaining client spreadsheet
-- Copy-pasting from old invoices
-- Memory and manual re-entry
-
-**Desired Outcome / Success Criteria**
-- Select client from dropdown
-- Duplicate previous invoices
-- Auto-fill common line items
-
-**Priority Level**
-- Medium
+**Related Jobs:**
+- Scale physical product sales without scaling operations
+- Maintain quality customer experience without direct involvement
 
 ---
 
-### 6. Handle Tax Calculations Simply
+### Job 5: Understand the costs of fulfillment partnership upfront
 
-**Job Statement**  
-As a service provider, I want to add tax to invoices correctly, so that I can comply with requirements without complexity.
+**Job Statement:**
+> When I'm considering using a fulfillment partner, I want to clearly understand the per-order costs, so I can make informed pricing and margin decisions.
 
-**Context**
-- Creating invoices for local clients
-- End of project invoicing
-- When tax rates change
+**Context:**
+- Artists need to price products accounting for all fees
+- Fulfillment fees affect per-unit margins
+- Need to compare against self-fulfillment costs (time, materials, shipping)
+- Want predictable costs, not surprises
 
-**Motivation (Why this matters)**
-- Manual tax calculation is error-prone
-- Different clients may have different tax requirements
-- Need to show tax separately for business clients
+**Current Workarounds:**
+- Calculate self-fulfillment costs manually
+- Get quotes from third-party fulfillment services
+- Guess at margins and adjust later
 
-**Desired Outcome / Success Criteria**
-- Simple percentage-based tax addition
-- Clear tax line item on invoice
-- Automatic total calculation
+**Success Criteria:**
+- Clear fee structure (flat + percentage) visible before enabling
+- Can calculate impact on margins before committing
+- No hidden fees or surprises
 
-**Priority Level**
-- Medium
-
----
-
-### 7. Provide Payment Flexibility to Clients
-
-**Job Statement**  
-As a freelancer, I want to offer easy payment options to clients, so that they have no friction or excuses for delayed payment.
-
-**Context**
-- Invoicing clients who prefer credit cards
-- International clients with different payment preferences
-- Enterprise clients with procurement processes
-
-**Motivation (Why this matters)**
-- Some clients won't do bank transfers
-- Credit card payments are faster than checks
-- Payment friction leads to delays
-
-**Current Alternatives**
-- Providing multiple payment instructions
-- Using PayPal invoices (high fees)
-- Accepting whatever client prefers
-
-**Desired Outcome / Success Criteria**
-- Credit/debit card payments accepted
-- One-click payment process
-- Secure and trusted payment flow
-
-**Priority Level**
-- Medium
+**Related Jobs:**
+- Price products to maintain healthy margins
+- Compare fulfillment partner costs vs. self-fulfillment
 
 ---
 
-## Tertiary Jobs (Low Priority - Future Consideration)
+### Job 6: Get started with fulfillment partnership quickly
 
-### 8. Build Predictable Revenue
+**Job Statement:**
+> When I've decided to use Barely as my fulfillment partner, I want to enable it and start processing orders quickly, so I can capture sales I'm currently missing.
 
-**Job Statement**  
-As an agency owner, I want to set up recurring invoices for retainer clients, so that I can build predictable monthly revenue without manual work.
+**Context:**
+- Every day without US fulfillment is lost revenue
+- Don't want a lengthy onboarding process
+- Already have products ready to ship
+- Want to start running US ad campaigns ASAP
 
-**Context**
-- Onboarding retainer clients
-- Monthly service agreements
-- Subscription-based offerings
+**Current Workarounds:**
+- Wait through complex setup processes
+- Delay campaigns until infrastructure is ready
+- Miss seasonal or promotional windows
 
-**Motivation (Why this matters)**
-- Manual monthly invoicing is repetitive
-- Predictable revenue improves business planning
-- Automatic billing improves cash flow
+**Success Criteria:**
+- Enable fulfillment in minutes after approval
+- First order can process same day
+- No complex configuration required
 
-**Current Alternatives**
-- Manual monthly invoice creation
-- Calendar reminders to send invoices
-- Stripe billing (requires technical knowledge)
-
-**Desired Outcome / Success Criteria**
-- Set up once, runs automatically
-- Client's card charged monthly
-- Recurring revenue tracking
-
-**Priority Level**
-- Low (Post-MVP)
+**Related Jobs:**
+- Move fast on market opportunities
+- Test US market demand quickly
 
 ---
 
-### 9. Provide Professional Documentation
+## Job Map: Selling Physical Products Internationally
 
-**Job Statement**  
-As a consultant, I want to provide PDF invoices when requested, so that clients can process them through their accounting systems.
+This job map shows the end-to-end process of selling physical products to international customers:
 
-**Context**
-- Enterprise clients requiring PDF documentation
-- End of year accounting
-- Client requests for records
-
-**Motivation (Why this matters)**
-- Some accounting systems require PDF uploads
-- Professional documentation for client records
-- Legal/tax compliance requirements
-
-**Current Alternatives**
-- Creating PDFs manually
-- Print to PDF from browser
-- Using complex software for just PDF generation
-
-**Desired Outcome / Success Criteria**
-- One-click PDF download
-- Professional PDF formatting
-- Include all invoice details
-
-**Priority Level**
-- Low (Post-MVP)
+| Stage | Job Steps | Current Pain Points |
+|-------|-----------|---------------------|
+| **Define** | Decide to sell physical products internationally | High barrier due to shipping complexity |
+| **Locate** | Find a fulfillment solution that works | Limited options, complex integrations |
+| **Prepare** | Set up storefront and fulfillment | Duplicate workspaces, multiple accounts |
+| **Confirm** | Verify shipping rates are competitive | Rates too high for profitable acquisition |
+| **Execute** | Process orders and fulfill them | Confusion about who ships what |
+| **Monitor** | Track orders across all markets | Split dashboards, fragmented data |
+| **Modify** | Adjust pricing or fulfillment as needed | Changes required in multiple places |
+| **Conclude** | Evaluate international expansion success | Hard to attribute results clearly |
 
 ---
 
-## Non-Jobs (What Users Don't Need)
+## Emotional and Social Jobs
 
-These are explicitly NOT jobs users are trying to accomplish:
+### Emotional Jobs
+- **Feel confident** expanding into new markets without operational overwhelm
+- **Feel relieved** that fulfillment complexity is handled
+- **Feel professional** offering competitive shipping to all customers
+- **Feel in control** of which orders are their responsibility
 
-- Manage complex accounting or bookkeeping
-- Track business expenses
-- Generate financial reports
-- Manage inventory
-- Track time spent on projects
-- Calculate complex tax scenarios
-- Integrate with accounting software
-- Manage purchase orders
-- Handle multi-currency conversions
-- Create estimates or quotes
+### Social Jobs
+- **Be seen as** a legitimate international artist/brand
+- **Avoid embarrassment** of high shipping costs scaring off fans
+- **Demonstrate credibility** through professional fulfillment experience
 
 ---
 
-## Summary
+## Outcome Expectations
 
-The core jobs focus on three critical outcomes:
+What users expect when these jobs are done well:
 
-1. **Speed**: Get invoices out in seconds, not minutes
-2. **Payment Velocity**: Get paid in days, not weeks
-3. **Simplicity**: No accounting knowledge required
+| Job | Desired Outcome | Undesired Outcome |
+|-----|-----------------|-------------------|
+| Sell internationally | Profitable US customer acquisition | Shipping costs kill ad ROI |
+| Unified store | One place to manage everything | Juggling multiple systems |
+| Know my orders | Clear fulfillment queue | Missed or duplicate shipments |
+| Outsource fulfillment | Focus on creative work | Still managing operations |
+| Understand costs | Predictable margins | Surprise fees |
+| Get started quickly | Processing orders same day | Weeks of setup |
 
-Success means freelancers spend less time on administrative work and more time on billable work, while getting paid faster with less friction.
+---
+
+## Constraints and Limitations
+
+**What users will accept:**
+- Per-order fees for fulfillment service (validated at $3-4/order)
+- Simple fulfillment modes (US-only or worldwide, not per-product)
+- Manual stock management with Barely team
+- Workspace access granted to Barely team
+
+**What users won't accept:**
+- Complex setup that takes days/weeks
+- Unpredictable or hidden fees
+- Loss of visibility into their orders
+- Degraded customer experience (slower shipping, poor packaging)
+
+---
+
+## Related Documents
+
+- [[feature|Feature: Barely Fulfillment Partner]]
+- [[PRD|Product Requirements Document]] (next step)

@@ -13,6 +13,7 @@ export const cartOrderFilterParamsSchema = commonFiltersSchema.extend({
 	showFulfilled: queryBooleanSchema.optional().default(false),
 	showPreorders: queryBooleanSchema.optional().default(false),
 	showCanceled: queryBooleanSchema.optional().default(false),
+	fulfilledBy: z.enum(['artist', 'barely', 'all']).optional().default('all'),
 });
 
 export const cartOrderSearchParamsSchema = cartOrderFilterParamsSchema.extend({

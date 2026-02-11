@@ -172,6 +172,21 @@ export const Workspaces = pgTable(
 		cartSupportEmail: varchar('cartSupportEmail', { length: 255 }),
 		cartFeePercentageOverride: integer('cartFeePercentageOverride'),
 
+		/* barely fulfillment */
+		barelyFulfillmentEligible: boolean('barelyFulfillmentEligible')
+			.default(false)
+			.notNull(),
+		barelyFulfillmentMode: varchar('barelyFulfillmentMode', {
+			length: 20,
+			enum: ['artist_all', 'barely_us', 'barely_worldwide'],
+		})
+			.default('artist_all')
+			.notNull(),
+		barelyFulfillmentFlatFeePerOrder: integer('barelyFulfillmentFlatFeePerOrder'), // in cents
+		barelyFulfillmentPercentageFeePerOrder: integer(
+			'barelyFulfillmentPercentageFeePerOrder',
+		), // percentage × 100 (e.g., 500 = 5%)
+
 		/* vip */
 		vipSupportEmail: varchar('vipSupportEmail', { length: 255 }),
 
