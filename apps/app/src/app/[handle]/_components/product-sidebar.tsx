@@ -5,7 +5,12 @@ import { Fragment, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useUser, useWorkspace, useWorkspaces } from '@barely/hooks';
-import { cn, getProductsForVariant } from '@barely/utils';
+import {
+	cn,
+	getDefaultProductForVariant,
+	getProductsForVariant,
+	isInvoiceVariant,
+} from '@barely/utils';
 
 import { Avatar } from '@barely/ui/avatar';
 import {
@@ -41,7 +46,12 @@ export function ProductSidebar() {
 	const { core, meta, locked } = useMemo(() => {
 		const products = getProductsForVariant();
 
-		// Extract invoice from core products and add to meta section
+		// For invoice variant, keep invoices in core (don't rearrange)
+		if (isInvoiceVariant()) {
+			return products;
+		}
+
+		// For full app: Extract invoice from core products and add to meta section
 		const invoiceProduct = products.core.find(p => p.id === 'invoices');
 		const coreWithoutInvoice = products.core.filter(p => p.id !== 'invoices');
 
@@ -68,8 +78,9 @@ export function ProductSidebar() {
 			}
 		}
 
-		// Default to first available product
-		return core[0]?.id ?? 'fm';
+		// Use variant-aware default instead of hardcoded fallback
+		const defaultProduct = getDefaultProductForVariant();
+		return defaultProduct?.id ?? core[0]?.id ?? 'fm';
 	}, [pathname, handle, core, meta]);
 
 	const renderProduct = (product: Product, isLocked = false) => {
@@ -165,13 +176,15 @@ export function ProductSidebar() {
 						))}
 					</div>
 
-					{/* Separator */}
-					<div className='mx-3'>
-						<div className='h-px bg-neutral-200' />
-					</div>
+					{/* Separator - hide for invoice variant since there's nothing after core products */}
+					{!isInvoiceVariant() && (
+						<div className='mx-3'>
+							<div className='h-px bg-border' />
+						</div>
+					)}
 
-					{/* Locked Products */}
-					{locked.length > 0 && (
+					{/* Locked Products - hide for invoice variant */}
+					{!isInvoiceVariant() && locked.length > 0 && (
 						<div className='space-y-1 p-3'>
 							{locked.map(product => (
 								<Fragment key={product.id}>{renderProduct(product, true)}</Fragment>
@@ -229,7 +242,7 @@ export function ProductSidebar() {
 								href='/account/settings'
 								className='flex cursor-pointer items-center gap-3 px-3'
 							>
-								<Icon.user className='h-4 w-4 text-neutral-500' />
+								<Icon.user className='h-4 w-4 text-muted-foreground' />
 								<span>Account</span>
 							</Link>
 						</DropdownMenuItem>
@@ -241,7 +254,7 @@ export function ProductSidebar() {
 							onClick={() => setTheme('light')}
 							className='flex cursor-pointer items-center gap-3 px-3'
 						>
-							<Icon.sun className='h-4 w-4 text-neutral-500' />
+							<Icon.sun className='h-4 w-4 text-muted-foreground' />
 							<span>Light</span>
 							{theme === 'light' && <Icon.check className='ml-auto h-4 w-4' />}
 						</DropdownMenuItem>
@@ -250,7 +263,7 @@ export function ProductSidebar() {
 							onClick={() => setTheme('dark')}
 							className='flex cursor-pointer items-center gap-3 px-3'
 						>
-							<Icon.moon className='h-4 w-4 text-neutral-500' />
+							<Icon.moon className='h-4 w-4 text-muted-foreground' />
 							<span>Dark</span>
 							{theme === 'dark' && <Icon.check className='ml-auto h-4 w-4' />}
 						</DropdownMenuItem>
@@ -259,7 +272,7 @@ export function ProductSidebar() {
 							onClick={() => setTheme('system')}
 							className='flex cursor-pointer items-center gap-3 px-3'
 						>
-							<Icon.laptop className='h-4 w-4 text-neutral-500' />
+							<Icon.laptop className='h-4 w-4 text-muted-foreground' />
 							<span>System</span>
 							{theme === 'system' && <Icon.check className='ml-auto h-4 w-4' />}
 						</DropdownMenuItem>
@@ -270,7 +283,7 @@ export function ProductSidebar() {
 							onClick={() => authClient.signOut().then(() => router.push('/'))}
 							className='flex cursor-pointer items-center gap-3 px-3'
 						>
-							<Icon.logOut className='h-4 w-4 text-neutral-500' />
+							<Icon.logOut className='h-4 w-4 text-muted-foreground' />
 							<span>Log out</span>
 						</DropdownMenuItem>
 					</DropdownMenuContent>

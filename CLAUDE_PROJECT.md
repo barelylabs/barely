@@ -1,95 +1,83 @@
-# Project Context: Usage Protection & Monetization
+# Project Context: Barely Fulfillment Partner
 
 ## Current Development
-
-**Working on:** Tiered usage enforcement across all resource types, fixing Stripe upgrade path, and expanding billing dashboard for full usage visibility.
-
-**Deadline:** February 28, 2026
-
-**Problem:**
-- 50 new sign-ups/month with zero revenue capture (Stripe IDs are `'fixme'`)
-- 4x database cost increase with no limit enforcement
-- Only 1 of 10 usage limits actually enforced
+Working on: Enable artists to designate Barely as their fulfillment partner for US orders (or all orders)
+Deadline: 2026-02-25
+Beta Client: The Now (UK artist)
 
 ## Key Files in This Worktree
+- `.claude/project/PRD.md` - Full product requirements (6 user stories, 6 functional requirement groups)
+- `.claude/project/plan-organized.md` - Implementation checklist organized by milestone
+- `.claude/project/JTBD.md` - Jobs to be done analysis (3 primary, 3 secondary jobs)
+- `.claude/project/feature.md` - Feature overview and business rationale
+- `.claude/project/plan.md` - Original technical implementation plan
 
-- `.claude/project/plan-organized.md` - **START HERE** - Implementation checklist by milestone
-- `.claude/project/PRD.md` - Full product requirements
-- `.claude/project/JTBD.md` - Jobs to be done analysis
-- `.claude/project/feature.md` - Feature overview and rationale
-- `.claude/project/plan.md` - Technical implementation plan
+## Current Focus
+Start with **Milestone 1: Foundation & Data Model**
 
-## Current Focus: Milestone 1 - Foundation
+1. Environment Configuration
+   - Add Barely address env vars to `.env.example`
+   - Create type-safe env access in `packages/lib/src/env.ts`
 
-**This is the blocking milestone - complete this first.**
+2. Workspace Schema Changes (`packages/db/src/sql/workspace.sql.ts`)
+   - Add `barelyFulfillmentEligible` (boolean, default false)
+   - Add `barelyFulfillmentMode` (enum: artist_all, barely_us, barely_worldwide)
+   - Add `barelyFulfillmentFlatFeePerOrder` (integer, cents)
+   - Add `barelyFulfillmentPercentageFeePerOrder` (integer, percentage × 100)
 
-### 1.1 Database Schema Changes
-- Add `eligibleForPlus` boolean (default: false)
-- Add `usageWarnings` JSONB (default: `{}`)
-- Verify/add usage tracking fields
+3. Cart Schema Changes (`packages/db/src/sql/cart.sql.ts`)
+   - Add `fulfilledBy` (enum: artist, barely)
+   - Add `barelyFulfillmentFee` (integer, cents)
 
-### 1.2 Stripe Production IDs
-All IDs have been collected - update `workspace-plans.constants.ts`:
-
-| Plan | Product ID | Monthly Price | Yearly Price |
-|------|------------|---------------|--------------|
-| Bedroom | prod_Txeo2HSM6HnJx4 | price_1SzjV0HDMmzntRhpvQKmHeC8 | price_1SzjVSHDMmzntRhpiwbdyqbv |
-| Rising | prod_TxevMytIBe6fon | price_1SzjbtHDMmzntRhprcbxD20W | price_1SzjcCHDMmzntRhpAZVE4aig |
-| Breakout | prod_TxeweGMPwBFeVm | price_1Szjd0HDMmzntRhpQzAUpny0 | price_1SzjdNHDMmzntRhpE3gZv0CW |
-| Bedroom+ | prod_Txey7RdoUEQFHi | price_1SzjeVHDMmzntRhpOy4yrqcW | price_1SzjemHDMmzntRhp0CXxI518 |
-| Rising+ | prod_TxezRHktqwlWKI | price_1SzjfOHDMmzntRhpIItqCV70 | price_1SzjfgHDMmzntRhpAfaEeT4Y |
-| Breakout+ | prod_Txf0wBNF8ZpgfR | price_1SzjgKHDMmzntRhpSSD7gNdz | price_1SzjgdHDMmzntRhpe1YEe9Wu |
-| Invoice Pro | prod_Txf4YDcKhcTd0G | price_1SzjkhHDMmzntRhpufIFDzh4 | price_1SzjksHDMmzntRhp7fan3dl1 |
-
-### 1.3 Remove Deprecated Plans
-- Remove `agency` and `pro` from WORKSPACE_PLANS
-- Update TypeScript types
-
-### 1.4 Core Enforcement Utility
-- Create `packages/lib/src/functions/usage.fns.ts`
-- Implement `checkUsageLimit()` function with tiered thresholds
+4. Core Utility Functions
+   - Create `packages/lib/src/utils/fulfillment.ts`
+   - Implement `determineFulfillmentResponsibility()`
+   - Implement `getShippingOriginAddress()`
+   - Add `calculateBarelyFulfillmentFee()` to cart utils
 
 ## Key Technical Decisions
+- Fulfillment determined at checkout (not post-purchase) - shipping rates need correct origin
+- Barely address stored in env vars (not database) - single location for MVP
+- Fee fields on workspace table - aligns with existing `cartFeePercentageOverride` pattern
+- Fulfillment mode as enum: `artist_all`, `barely_us`, `barely_worldwide`
+- Fulfillment fee added to Stripe `application_fee_amount`
+- Order filtering via simple WHERE clause on `fulfilledBy` field
 
-1. **Tiered Enforcement**: 80% soft warning → 100% stern warning → 200% hard block
-2. **Email Deduplication**: `usageWarnings` JSONB tracks sent warnings per billing cycle
-3. **Plus Plan Gating**: `eligibleForPlus` flag - false shows "Apply" → cal.com/barely/nyc
-4. **Usage Counting**: Count from database (like invoice pattern), not just counters
+## Implementation Milestones
+1. **Foundation & Data Model** ← START HERE
+   - Schema changes, env vars, utility functions
+2. **Checkout Integration**
+   - Dynamic shipping, order assignment, fee capture
+3. **Artist Settings**
+   - Fulfillment configuration UI
+4. **Order Management**
+   - Filtering by fulfillment responsibility
 
 ## Success Criteria
+- [ ] The Now processing split-fulfillment orders (US via Barely, non-US via artist)
+- [ ] 3 US clients onboarded using Barely fulfillment
+- [ ] Fulfillment fees captured automatically on Barely-fulfilled orders
+- [ ] Artists can filter orders by fulfillment responsibility
 
-- [ ] All 10 resource types have tiered enforcement
-- [ ] Warning emails at 80%/100% (once per billing cycle)
-- [ ] Hard block at 200% with upgrade messaging
-- [ ] User can upgrade Free → paid plan in production
-- [ ] Billing page shows all 10 metrics
-- [ ] Plus plans show "Apply" for non-eligible workspaces
-- [ ] Deprecated plans removed
-
-## Key Files to Modify
-
-| File | Purpose |
-|------|---------|
-| `packages/const/src/workspace-plans.constants.ts` | Stripe IDs, remove deprecated |
-| `packages/db/src/sql/workspace.sql.ts` | Schema changes |
-| `packages/lib/src/functions/usage.fns.ts` | New enforcement utility |
-| `packages/lib/src/functions/invoice.fns.ts` | Existing enforcement pattern (template) |
-
-## Implementation Order (Recommended)
-
-1. **Milestone 1: Foundation** (required first)
-2. **Milestone 3.1-3.2: Upgrade Flow** (enables revenue immediately)
-3. **Milestone 2: Warning Emails** (enables enforcement)
-4. **Milestone 3.3-3.5: Billing Dashboard** (user transparency)
-5. **Milestone 4: Resource Enforcement** (one at a time)
-6. **Milestone 5: Billing Cycle** (anytime after M1)
+## Barely Fulfillment Address (for env vars)
+```
+763 Park Pl #1R
+Brooklyn, NY 11216
+US
+```
 
 ## Quick Start
+1. This worktree is focused on implementing Barely Fulfillment Partner
+2. All project artifacts are in `.claude/project/`
+3. Start with Milestone 1 in `.claude/project/plan-organized.md`
+4. Original project docs: `0_Projects/barely-fulfillment-partner/`
 
-1. Read `.claude/project/plan-organized.md` for the full implementation checklist
-2. Start with Milestone 1.2 (Stripe IDs) - this unblocks revenue immediately
-3. Follow the existing `checkInvoiceUsageAndIncrement()` pattern in `invoice.fns.ts`
-
-## Original Project
-
-Full documentation: `/Users/barely/hub/0_Projects/barely-usage-protection/`
+## Key Files to Modify
+- `packages/db/src/sql/workspace.sql.ts` - Add fulfillment fields
+- `packages/db/src/sql/cart.sql.ts` - Add fulfilledBy and fee fields
+- `packages/lib/src/functions/cart.fns.ts` - Checkout flow integration
+- `packages/lib/src/utils/cart.ts` - Fee calculation
+- `packages/lib/src/utils/fulfillment.ts` - New file for fulfillment utilities
+- `packages/lib/src/integrations/shipping/shipengine.endpts.ts` - Dynamic shipping origin
+- `apps/app/src/app/[handle]/settings/fulfillment/page.tsx` - New settings page
+- `apps/app/src/app/[handle]/orders/` - Add fulfillment filter

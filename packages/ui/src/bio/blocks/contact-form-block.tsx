@@ -1,7 +1,7 @@
 'use client';
 
 import type { AppRouterOutputs } from '@barely/lib/trpc/app.route';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useZodForm } from '@barely/hooks';
 import {
 	cn,
@@ -11,10 +11,12 @@ import {
 	getBrandKitShadowClass,
 	getComputedStyles,
 } from '@barely/utils';
+import { isPossiblePhoneNumber } from '@barely/validators/helpers';
 import { z } from 'zod/v4';
 
 import { Text } from '../../elements/typography';
 import { Form, SubmitButton } from '../../forms/form';
+import { PhoneField } from '../../forms/phone-field';
 import { TextField } from '../../forms/text-field';
 import { useBioContext } from '../contexts/bio-context';
 import { useBrandKit } from '../contexts/brand-kit-context';
@@ -24,13 +26,32 @@ interface ContactFormBlockProps {
 	blockIndex: number;
 }
 
-// Define schema with Zod
-const contactFormSchema = z.object({
-	email: z.email('Please enter a valid email'),
-	marketingConsent: z.boolean().default(true),
-});
+// Create dynamic schema based on SMS capture settings
+// Email is always required (Fan.email is notNull in the database)
+function createContactFormSchema(smsEnabled: boolean) {
+	return z.object({
+		email: z.email('Please enter a valid email'),
+		phone:
+			smsEnabled ?
+				z
+					.string()
+					.refine(
+						val => !val || isPossiblePhoneNumber(val),
+						'Please enter a valid phone number',
+					)
+					.optional()
+			:	z.string().optional(),
+		marketingConsent: z.boolean().default(true),
+		smsMarketingConsent: z.boolean().default(true),
+	});
+}
 
-type ContactFormData = z.infer<typeof contactFormSchema>;
+interface ContactFormData {
+	email: string;
+	phone?: string;
+	marketingConsent: boolean;
+	smsMarketingConsent: boolean;
+}
 
 export function ContactFormBlock({ block }: ContactFormBlockProps) {
 	const { onEmailCapture } = useBioContext();
@@ -39,11 +60,23 @@ export function ContactFormBlock({ block }: ContactFormBlockProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [submitSuccess, setSubmitSuccess] = useState(false);
 
+	// Get SMS capture setting from block (defaults to true if not set)
+	// Email is always required (Fan.email is notNull in the database)
+	const smsCaptureEnabled = block.smsCaptureEnabled ?? true;
+
+	// Create schema based on SMS capture setting
+	const contactFormSchema = useMemo(
+		() => createContactFormSchema(smsCaptureEnabled),
+		[smsCaptureEnabled],
+	);
+
 	const form = useZodForm({
 		schema: contactFormSchema,
 		defaultValues: {
 			email: '',
+			phone: '',
 			marketingConsent: true,
+			smsMarketingConsent: true,
 		},
 	});
 
@@ -57,15 +90,18 @@ export function ContactFormBlock({ block }: ContactFormBlockProps) {
 		try {
 			await onEmailCapture({
 				bioId: bio.id,
+				blockId: block.id,
 				email: data.email,
+				phone: data.phone,
 				marketingConsent: data.marketingConsent,
+				smsMarketingConsent: data.smsMarketingConsent,
 			});
 			setSubmitSuccess(true);
 			form.reset();
 			// Reset success message after 5 seconds
 			setTimeout(() => setSubmitSuccess(false), 5000);
 		} catch (error) {
-			console.error('Failed to capture email:', error);
+			console.error('Failed to capture contact info:', error);
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -82,8 +118,8 @@ export function ContactFormBlock({ block }: ContactFormBlockProps) {
 			<div
 				className={cn(
 					'p-6',
-					'bg-brandKit-text',
-
+					'bg-brandKit-block/5 backdrop-blur-sm',
+					'border-brandKit-block/20 border-2',
 					getBrandKitBlockRadiusClass(computedStyles.block.radius),
 					getBrandKitShadowClass(computedStyles.block.shadow),
 					getBrandKitOutlineClass(computedStyles.block.outline),
@@ -96,7 +132,7 @@ export function ContactFormBlock({ block }: ContactFormBlockProps) {
 				{block.title && (
 					<Text
 						variant='lg/semibold'
-						className='mb-2 text-center text-brandKit-block-text'
+						className='mb-2 text-center text-brandKit-block'
 						style={{
 							fontFamily: computedStyles.fonts.headingFont,
 						}}
@@ -109,7 +145,7 @@ export function ContactFormBlock({ block }: ContactFormBlockProps) {
 				{block.subtitle && (
 					<Text
 						variant='sm/normal'
-						className='mb-4 text-center text-brandKit-block-text'
+						className='text-brandKit-block/80 mb-4 text-center'
 						style={{
 							fontFamily: computedStyles.fonts.bodyFont,
 						}}
@@ -121,7 +157,7 @@ export function ContactFormBlock({ block }: ContactFormBlockProps) {
 				{/* Success Message */}
 				{submitSuccess ?
 					<div className='rounded-lg p-4 text-center'>
-						<Text variant='sm/semibold' className='text-brandKit-block-text'>
+						<Text variant='sm/semibold' className='text-brandKit-block'>
 							Thank you! We'll be in touch soon.
 						</Text>
 					</div>
@@ -129,23 +165,43 @@ export function ContactFormBlock({ block }: ContactFormBlockProps) {
 						<TextField
 							control={form.control}
 							name='email'
+							label='Email'
+							labelClassName='text-brandKit-block'
 							type='email'
-							placeholder='Enter your email'
-							className='w-full'
+							placeholder='you@youremail.com'
+							className='w-full text-foreground'
 							style={{
 								fontFamily: computedStyles.fonts.bodyFont,
 							}}
 						/>
-						<Text variant='2xs/normal' className='text-brandKit-block-text'>
-							👆 by submitting your email, you agree to receive updates and offers from @
-							{bio.handle}.
+
+						{smsCaptureEnabled && (
+							<PhoneField
+								control={form.control}
+								name='phone'
+								label='Phone'
+								labelClassName='text-brandKit-block'
+								placeholder='Enter your phone number'
+								className='w-full text-foreground'
+								selectTriggerClassName='text-foreground'
+								style={{
+									fontFamily: computedStyles.fonts.bodyFont,
+								}}
+							/>
+						)}
+
+						<Text variant='2xs/normal' className='text-brandKit-block/80'>
+							{smsCaptureEnabled ?
+								`By submitting, you agree to receive updates and offers from @${bio.handle}.`
+							:	`By submitting your email, you agree to receive updates and offers from @${bio.handle}.`
+							}
 						</Text>
 
 						<SubmitButton
 							loading={isSubmitting}
 							fullWidth
 							className={cn(
-								'bg-brandKit-block-text text-brandKit-block',
+								'bg-brandKit-block text-brandKit-block-text',
 								'transition-opacity hover:opacity-90',
 								getBrandKitButtonRadiusClass(computedStyles.block.radius),
 								getBrandKitOutlineClass(computedStyles.block.outline),

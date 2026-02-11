@@ -42,7 +42,7 @@ export function BlogCard({ post }: BlogCardProps) {
 				</div>
 
 				<H
-					size='4'
+					size='5'
 					className='mb-3 text-white transition-colors group-hover:text-purple-300'
 				>
 					{post.title}

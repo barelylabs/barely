@@ -37,6 +37,7 @@ import {
 	getFeeAmountForCheckout,
 	getVatRateForCheckout,
 } from '../../utils/cart';
+import { getShippingOriginAddress } from '../../utils/fulfillment';
 import { log } from '../../utils/log';
 
 export const cartRoute = {
@@ -300,6 +301,18 @@ export const cartRoute = {
 				...update,
 			};
 
+			// Get the shipping origin based on cart's fulfilledBy (set at creation, immutable)
+			const shippingOrigin = getShippingOriginAddress({
+				fulfilledBy: cart.fulfilledBy,
+				workspace: funnel.workspace,
+			});
+
+			const shipFromAddress = {
+				state: shippingOrigin.state ?? '',
+				postalCode: shippingOrigin.postalCode ?? '',
+				countryCode: shippingOrigin.country ?? '',
+			};
+
 			if (update.shippingAddressPostalCode) {
 				console.log('updating shipping address');
 				const toCountry = update.shippingAddressCountry ?? cart.shippingAddressCountry;
@@ -320,11 +333,7 @@ export const cartRoute = {
 							products: [
 								{ product: funnel.mainProduct, quantity: cart.mainProductQuantity },
 							],
-							shipFrom: {
-								state: funnel.workspace.shippingAddressState ?? '',
-								postalCode: funnel.workspace.shippingAddressPostalCode ?? '',
-								countryCode: funnel.workspace.shippingAddressCountry ?? '',
-							},
+							shipFrom: shipFromAddress,
 							shipTo: {
 								country: toCountry,
 								state: toState,
@@ -348,11 +357,7 @@ export const cartRoute = {
 										quantity: cart.bumpProductQuantity ?? 1,
 									},
 								],
-								shipFrom: {
-									state: funnel.workspace.shippingAddressState ?? '',
-									postalCode: funnel.workspace.shippingAddressPostalCode ?? '',
-									countryCode: funnel.workspace.shippingAddressCountry ?? '',
-								},
+								shipFrom: shipFromAddress,
 								shipTo: {
 									postalCode: toPostalCode,
 									country: toCountry,
@@ -366,7 +371,8 @@ export const cartRoute = {
 				}
 			}
 
-			const shipFromCountry = funnel.workspace.shippingAddressCountry;
+			// Use the correct ship-from country for VAT calculation
+			const shipFromCountry = shippingOrigin.country;
 			const shipToCountry = update.shippingAddressCountry;
 			const vat =
 				shipFromCountry && shipToCountry ?
@@ -412,6 +418,7 @@ export const cartRoute = {
 						productAmount: amounts.orderProductAmount,
 						vatAmount: amounts.orderVatAmount,
 						shippingAmount: 0, // not supported yet. in the future we take a shipping fee if they want to ship through the app.
+						barelyFulfillmentFee: cart.barelyFulfillmentFee,
 						workspace: funnel.workspace,
 					}),
 				},
@@ -465,11 +472,17 @@ export const cartRoute = {
 				};
 			}
 
+			// Get the shipping origin based on cart's fulfilledBy (set at creation, immutable)
+			const shippingOrigin = getShippingOriginAddress({
+				fulfilledBy: cart.fulfilledBy,
+				workspace: funnel.workspace,
+			});
+
 			// if the postal code is different, we need to recalculate shipping rates
 			const shipFrom = {
-				state: funnel.workspace.shippingAddressState ?? '',
-				postalCode: funnel.workspace.shippingAddressPostalCode ?? '',
-				countryCode: funnel.workspace.shippingAddressCountry ?? '',
+				state: shippingOrigin.state ?? '',
+				postalCode: shippingOrigin.postalCode ?? '',
+				countryCode: shippingOrigin.country ?? '',
 			};
 
 			const shipTo = {
@@ -506,6 +519,7 @@ export const cartRoute = {
 			updateCart.mainShippingAmount = mainShippingAmount;
 			updateCart.bumpShippingPrice = mainPlusBumpShippingPrice - mainShippingAmount;
 
+			// Use the correct ship-from country for VAT calculation
 			const amounts = getAmountsForCheckout(
 				funnel,
 				{
@@ -513,7 +527,7 @@ export const cartRoute = {
 					...updateCart,
 				},
 				getVatRateForCheckout(
-					funnel.workspace.shippingAddressCountry,
+					shippingOrigin.country,
 					updatedAddress.shippingAddressCountry,
 				),
 			);

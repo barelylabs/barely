@@ -1,6 +1,7 @@
 import type { CountryCode } from '@barely/validators/helpers';
 import type { FieldPath, FieldValues } from 'react-hook-form';
 import { useState } from 'react';
+import { cn } from '@barely/utils';
 import { parseIncompletePhoneNumber } from '@barely/validators/helpers';
 import { Controller } from 'react-hook-form';
 
@@ -36,8 +37,11 @@ export const PhoneField = <
 	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
 	hint,
+	selectTriggerClassName,
+	labelClassName,
 	...props
-}: FieldProps<TFieldValues, TName> & InputProps) => {
+}: FieldProps<TFieldValues, TName> &
+	InputProps & { selectTriggerClassName?: string; labelClassName?: string }) => {
 	const [countryCode, setCountryCode] = useState<CountryCode>('US');
 
 	const handleInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -67,7 +71,7 @@ export const PhoneField = <
 				render={({ field }) => {
 					return (
 						<FormItem>
-							<FieldLabel>{props.label}</FieldLabel>
+							<FieldLabel className={labelClassName}>{props.label}</FieldLabel>
 
 							<FieldControl>
 								<div className='relative rounded-md'>
@@ -80,7 +84,12 @@ export const PhoneField = <
 											onValueChange={value => setCountryCode(value as CountryCode)}
 											disabled={props.disabled}
 										>
-											<SelectTrigger className='border-transparent bg-transparent pr-1 dark:border-transparent'>
+											<SelectTrigger
+												className={cn(
+													'border-transparent bg-transparent pr-1 dark:border-transparent',
+													selectTriggerClassName,
+												)}
+											>
 												<SelectValue />
 											</SelectTrigger>
 											<SelectContent>
@@ -93,7 +102,7 @@ export const PhoneField = <
 									<Input
 										type='tel'
 										placeholder={props.placeholder ?? PHONE_PLACEHOLDERS[countryCode]}
-										className='peer pl-16'
+										className={cn('peer pl-16', props.className)}
 										{...field}
 										onKeyDown={e => handleInput(e)}
 										onFocus={() => setFocus(true)}

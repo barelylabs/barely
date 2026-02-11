@@ -1,622 +1,519 @@
-# Technical Implementation Plan: Usage Protection & Monetization (Organized)
+# Technical Implementation Plan: Barely Fulfillment Partner (Organized)
 
-## Overview
-
-This document reorganizes the implementation checklist into **milestones with clear dependencies**. Each milestone can be completed and tested independently before moving to the next. Within milestones, tasks are grouped so you can implement one complete capability at a time.
+This document reorganizes the implementation checklist by end-to-end features, with clear dependencies and implementation milestones. Each milestone can be implemented, tested, and deployed independently.
 
 ---
 
-## Dependency Graph
+## Implementation Order & Dependencies
 
 ```
-Milestone 1: Foundation
-    ├── Milestone 2: Warning Email Infrastructure
-    │       └── Milestone 4: Resource Enforcement (all 10 types)
-    │
-    ├── Milestone 3: Upgrade & Billing Experience (parallel with M2)
-    │
-    └── Milestone 5: Billing Cycle Management (parallel with M2-M4)
+┌─────────────────────────────────────────────────────────────────────┐
+│  Milestone 1: Foundation & Data Model                               │
+│  (Schema, env vars, utilities - no user-facing changes)             │
+└─────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  Milestone 2: Checkout Integration                                  │
+│  (Dynamic shipping, order assignment, fee capture)                  │
+│  User Stories: US-2, US-4, US-5                                     │
+└─────────────────────────────────────────────────────────────────────┘
+                                    │
+                    ┌───────────────┴───────────────┐
+                    ▼                               ▼
+┌───────────────────────────────┐   ┌───────────────────────────────┐
+│  Milestone 3: Artist Settings │   │  Milestone 4: Order Filtering │
+│  (Configuration UI)           │   │  (Orders UI)                  │
+│  User Story: US-1             │   │  User Stories: US-3, US-6     │
+└───────────────────────────────┘   └───────────────────────────────┘
 ```
 
+**Note:** Milestones 3 and 4 can be implemented in parallel after Milestone 2.
+
 ---
 
-## Milestone 1: Foundation (BLOCKING - Must Complete First)
+## Milestone 1: Foundation & Data Model
 
-This milestone establishes all shared infrastructure. Nothing else can proceed until this is complete.
+**Goal:** Establish the data model and utilities required by all other features. No user-facing changes.
 
-### 1.1 Database Schema Changes
+**Jobs Addressed:** Foundation for all jobs - no direct user impact yet.
 
-**Files:** `packages/db/src/sql/workspace.sql.ts`
+### 1.1 Environment Configuration
 
-- [ ] Add `eligibleForPlus` boolean field (default: false)
-- [ ] Add `usageWarnings` JSONB field (default: `{}`)
-- [ ] Verify `fanUsage` integer field exists (add if not, default: 0)
-- [ ] Verify `memberUsage` integer field exists (add if not)
-- [ ] Verify `pixelUsage` integer field exists (add if not)
-- [ ] Verify `taskUsage` integer field exists (add if not)
-- [ ] Generate database migration
-- [ ] Run migration against development database
-- [ ] Verify all fields accessible via Drizzle ORM queries
-
-### 1.2 Stripe Production IDs & Plan Cleanup
-
-**Files:** `packages/const/src/workspace-plans.constants.ts`
-
-- [ ] Update `bedroom` plan:
-  - `productId.production`: `prod_Txeo2HSM6HnJx4`
-  - `price.monthly.production`: `price_1SzjV0HDMmzntRhpvQKmHeC8`
-  - `price.yearly.production`: `price_1SzjVSHDMmzntRhpiwbdyqbv`
-- [ ] Update `rising` plan:
-  - `productId.production`: `prod_TxevMytIBe6fon`
-  - `price.monthly.production`: `price_1SzjbtHDMmzntRhprcbxD20W`
-  - `price.yearly.production`: `price_1SzjcCHDMmzntRhpAZVE4aig`
-- [ ] Update `breakout` plan:
-  - `productId.production`: `prod_TxeweGMPwBFeVm`
-  - `price.monthly.production`: `price_1Szjd0HDMmzntRhpQzAUpny0`
-  - `price.yearly.production`: `price_1SzjdNHDMmzntRhpE3gZv0CW`
-- [ ] Update `bedroom.plus` plan:
-  - `productId.production`: `prod_Txey7RdoUEQFHi`
-  - `price.monthly.production`: `price_1SzjeVHDMmzntRhpOy4yrqcW`
-  - `price.yearly.production`: `price_1SzjemHDMmzntRhp0CXxI518`
-- [ ] Update `rising.plus` plan:
-  - `productId.production`: `prod_TxezRHktqwlWKI`
-  - `price.monthly.production`: `price_1SzjfOHDMmzntRhpIItqCV70`
-  - `price.yearly.production`: `price_1SzjfgHDMmzntRhpAfaEeT4Y`
-- [ ] Update `breakout.plus` plan:
-  - `productId.production`: `prod_Txf0wBNF8ZpgfR`
-  - `price.monthly.production`: `price_1SzjgKHDMmzntRhpSSD7gNdz`
-  - `price.yearly.production`: `price_1SzjgdHDMmzntRhpe1YEe9Wu`
-- [ ] Update `invoice.pro` plan:
-  - `productId.production`: `prod_Txf4YDcKhcTd0G`
-  - `price.monthly.production`: `price_1SzjkhHDMmzntRhpufIFDzh4`
-  - `price.yearly.production`: `price_1SzjksHDMmzntRhp7fan3dl1`
-- [ ] Remove `agency` plan from `WORKSPACE_PLANS` map
-- [ ] Remove `pro` plan from `WORKSPACE_PLANS` map
-- [ ] Remove `'agency'` and `'pro'` from `WORKSPACE_PLAN_TYPES` array
-- [ ] Update TypeScript types referencing removed plans
-- [ ] Search codebase for any remaining references to `agency` or `pro` plans
-
-### 1.3 Core Enforcement Utility
-
-**Files:** `packages/lib/src/functions/usage.fns.ts` (new file)
-
-- [ ] Create new file `usage.fns.ts`
-- [ ] Define types:
-  ```typescript
-  type UsageLimitType = 'fans' | 'members' | 'pixels' | 'links' | 'clicks' | 'emails' | 'events' | 'tasks' | 'storage' | 'invoices';
-  type UsageStatus = 'ok' | 'warning_80' | 'warning_100' | 'blocked_200';
+- [ ] Add environment variables to `.env.example`:
   ```
-- [ ] Implement `getUsageCount(workspaceId, limitType)`:
-  - Query database for current count based on limit type
-  - For monthly limits: count records WHERE createdAt within billing cycle
-  - For cumulative limits (fans, members, pixels): count total records
-- [ ] Implement `getUsageLimit(workspace, limitType)`:
-  - Get limit from `WORKSPACE_PLANS.get(workspace.plan)`
-  - Check for override field (e.g., `workspace.linkUsageLimitOverride`)
-  - Return override if set, otherwise plan limit
-- [ ] Implement `checkUsageLimit(workspaceId, limitType, incrementBy = 1)`:
-  - Fetch workspace with plan
-  - Call `getUsageCount()` and `getUsageLimit()`
-  - Calculate percentage: `(current + incrementBy) / limit * 100`
-  - Determine status based on thresholds (80, 100, 200)
-  - Call `hasWarningSent()` to determine `shouldSendEmail`
-  - Return: `{ status, current, limit, percentage, shouldSendEmail, upgradeUrl }`
-- [ ] Implement `incrementUsage(workspaceId, limitType, amount)`:
-  - Update appropriate usage counter field in workspace
-- [ ] Implement `markWarningSent(workspaceId, limitType, threshold)`:
-  - Update `usageWarnings` JSONB: set `{limitType}_{threshold}` to current timestamp
-- [ ] Implement `hasWarningSent(workspace, limitType, threshold)`:
-  - Check if `usageWarnings[{limitType}_{threshold}]` exists and is within current billing cycle
-- [ ] Export all functions from package index
-
-### 1.4 Foundation Testing
-
-- [ ] Unit test: `checkUsageLimit` returns correct status at 79%, 80%, 100%, 199%, 200%, 201%
-- [ ] Unit test: `getUsageLimit` respects override fields
-- [ ] Unit test: `hasWarningSent` correctly detects sent warnings within cycle
-- [ ] Integration test: Stripe IDs resolve correctly based on environment
-- [ ] Integration test: New schema fields are queryable
-
----
-
-## Milestone 2: Warning Email Infrastructure
-
-**Depends on:** Milestone 1 (enforcement utility, schema)
-
-This milestone creates the email notification system used by all enforcement points.
-
-### 2.1 Email Templates
-
-**Files:** `packages/email/src/templates/`
-
-- [ ] Create `usage-warning-80.tsx`:
-  ```typescript
-  interface Props {
-    resourceType: string;
-    resourceLabel: string; // Human-readable, e.g., "fans" → "Fans/Contacts"
-    currentUsage: number;
-    limit: number;
-    workspaceName: string;
-    upgradeUrl: string;
-  }
+  BARELY_FULFILLMENT_ADDRESS_LINE1=
+  BARELY_FULFILLMENT_ADDRESS_CITY=
+  BARELY_FULFILLMENT_ADDRESS_STATE=
+  BARELY_FULFILLMENT_ADDRESS_ZIP=
+  BARELY_FULFILLMENT_ADDRESS_COUNTRY=
   ```
-  - Subject: "You're approaching your {resourceLabel} limit on Barely"
-  - Body: Current usage, plan limit, percentage used
-  - CTA button: "View Plans" → upgradeUrl
-  - Tone: Informative, helpful
-- [ ] Create `usage-warning-100.tsx`:
-  - Same props as 80%
-  - Subject: "You've reached your {resourceLabel} limit on Barely"
-  - Body: Explain grace period (can continue until 200%)
-  - CTA button: "Upgrade Now"
-  - Tone: Urgent but supportive
-- [ ] Create `usage-blocked-200.tsx`:
-  - Same props as 80%
-  - Subject: "{resourceLabel} paused on your Barely workspace"
-  - Body: What's blocked, why, how to unblock
-  - CTA button: "Upgrade to Continue"
-  - Tone: Clear, actionable
-- [ ] Export templates from `packages/email/src/index.ts`
 
-### 2.2 Email Dispatch Logic
+- [ ] Add environment variables to production/staging environments
+  - Values: `763 Park Pl #1R`, `Brooklyn`, `NY`, `11216`, `US`
 
-**Files:** `packages/lib/src/functions/usage.fns.ts`
+- [ ] Create type-safe env access in `packages/lib/src/env.ts` or similar
+  - Validate all address fields are present when accessed
+  - Export `getBarelyFulfillmentAddress()` function
 
-- [ ] Add `getResourceLabel(limitType)` helper:
-  - Maps 'fans' → 'Fans/Contacts', 'links' → 'Links', etc.
-- [ ] Implement `sendUsageWarningEmail(workspaceId, limitType, threshold)`:
-  - Fetch workspace with owner user
-  - Get owner email address
-  - Select template based on threshold (80, 100, 200)
-  - Build upgrade URL: `/settings/billing/plans`
-  - Call `sendEmail()` with transactional type
-  - Call `markWarningSent()` to prevent duplicates
+### 1.2 Workspace Schema Changes
 
-### 2.3 Background Job
+- [ ] Add `barelyFulfillmentEligible` boolean field to `Workspaces` table in `packages/db/src/sql/workspace.sql.ts`
+  - Default: `false`
+  - Not nullable
 
-**Files:** `packages/lib/src/trigger/usage-warning-email.ts` (new file)
+- [ ] Add `barelyFulfillmentMode` enum field to `Workspaces` table
+  - Values: `'artist_all' | 'barely_us' | 'barely_worldwide'`
+  - Default: `'artist_all'`
+  - Not nullable
 
-- [ ] Create Trigger.dev task `send-usage-warning-email`:
+- [ ] Add `barelyFulfillmentFlatFeePerOrder` integer field to `Workspaces` table
+  - Stored in cents (e.g., 100 = $1.00)
+  - Nullable (null = no fee configured)
+
+- [ ] Add `barelyFulfillmentPercentageFeePerOrder` integer field to `Workspaces` table
+  - Stored as percentage × 100 (e.g., 500 = 5%)
+  - Nullable (null = no fee configured)
+
+### 1.3 Cart (Order) Schema Changes
+
+- [ ] Add `fulfilledBy` enum field to `Carts` table in `packages/db/src/sql/cart.sql.ts`
+  - Values: `'artist' | 'barely'`
+  - Default: `'artist'`
+  - Not nullable
+
+- [ ] Add `barelyFulfillmentFee` integer field to `Carts` table
+  - Stored in cents
+  - Default: `0`
+  - Not nullable
+
+### 1.4 Database Migration
+
+- [ ] Generate database migration for workspace schema changes
+- [ ] Generate database migration for cart schema changes
+- [ ] Run migrations in development environment
+- [ ] Verify existing data is unaffected (defaults applied correctly)
+
+### 1.5 Core Utility Functions
+
+- [ ] Create new file `packages/lib/src/utils/fulfillment.ts`
+
+- [ ] Implement `determineFulfillmentResponsibility()`:
   ```typescript
-  payload: {
-    workspaceId: string;
-    limitType: UsageLimitType;
-    threshold: 80 | 100 | 200;
-  }
+  export function determineFulfillmentResponsibility(params: {
+    workspaceMode: 'artist_all' | 'barely_us' | 'barely_worldwide';
+    shipToCountry: string;
+  }): 'artist' | 'barely'
   ```
-- [ ] Import and call `sendUsageWarningEmail()` within job
-- [ ] Add error handling and logging
-- [ ] Export task from trigger index
+  - If mode is `artist_all` → return `'artist'`
+  - If mode is `barely_worldwide` → return `'barely'`
+  - If mode is `barely_us` AND country is `US` → return `'barely'`
+  - If mode is `barely_us` AND country is not `US` → return `'artist'`
 
-### 2.4 Email System Testing
-
-- [ ] Visual test: Render all 3 templates with sample data
-- [ ] Unit test: `sendUsageWarningEmail` calls correct template
-- [ ] Unit test: Emails not sent if `hasWarningSent` returns true
-- [ ] Integration test: Trigger.dev job executes successfully
-
----
-
-## Milestone 3: Upgrade & Billing Experience
-
-**Depends on:** Milestone 1 (schema, Stripe IDs)
-**Can run in parallel with:** Milestone 2
-
-This milestone fixes the upgrade flow and expands the billing dashboard.
-
-### 3.1 Upgrade Flow Verification
-
-**Files:** `packages/lib/src/trpc/routes/workspace-stripe.route.ts`, `packages/lib/src/functions/workspace-stripe.fns.ts`
-
-- [ ] Verify `createCheckoutLink` mutation:
-  - Correctly reads `NEXT_PUBLIC_VERCEL_ENV` for environment detection
-  - Selects `production` price IDs when in production
-  - Selects `test` price IDs when in development/preview
-- [ ] Verify `handleStripePlanCheckoutSessionComplete`:
-  - Correctly maps Stripe price ID back to plan via `getPlanByStripePriceId()`
-  - Updates workspace `plan` field
-- [ ] Test checkout flow end-to-end in test environment (Free → Bedroom)
-
-### 3.2 Plus Plan Conditional Flow
-
-**Files:** Plans page component (locate in `apps/app`)
-
-- [ ] Add `eligibleForPlus` to workspace data query/context
-- [ ] Create `PlusPlanButton` component:
+- [ ] Implement `getShippingOriginAddress()`:
   ```typescript
-  interface Props {
-    planId: string;
-    eligibleForPlus: boolean;
-    onUpgrade: () => void;
-  }
+  export function getShippingOriginAddress(params: {
+    fulfilledBy: 'artist' | 'barely';
+    workspace: Workspace;
+  }): ShippingAddress
   ```
-  - If `!eligibleForPlus`: render "Apply" button → `https://cal.com/barely/nyc` (new tab)
-  - If `eligibleForPlus`: render standard "Upgrade" button → checkout flow
-- [ ] Style "Apply" button distinctly (outline style or different color)
-- [ ] Apply `PlusPlanButton` to Bedroom+, Rising+, Breakout+ plan cards
+  - If `fulfilledBy === 'barely'` → return Barely address from env vars
+  - If `fulfilledBy === 'artist'` → return `workspace.shippingAddress*`
 
-### 3.3 Generic Usage Metric Component
-
-**Files:** `apps/app/src/app/[handle]/settings/billing/`
-
-- [ ] Create `UsageMetricCard` component:
+- [ ] Implement `calculateBarelyFulfillmentFee()` in `packages/lib/src/utils/cart.ts`:
   ```typescript
-  interface Props {
-    label: string;
-    current: number;
-    limit: number;
-    unit?: string; // e.g., "MB" for storage
-    isUnlimited?: boolean;
-  }
+  export function calculateBarelyFulfillmentFee(params: {
+    fulfilledBy: 'artist' | 'barely';
+    productAmountInCents: number;
+    flatFeeInCents: number | null;
+    percentageFee: number | null; // 500 = 5%
+  }): number
   ```
-  - Progress bar with fill based on percentage
-  - Color: green (<80%), yellow (80-100%), red (>100%)
-  - Display: "X / Y {unit}" or "X (unlimited)"
-  - Percentage badge when > 80%
-- [ ] Refactor `LinkUsageSummary` to use `UsageMetricCard`
-- [ ] Refactor `InvoiceUsageSummary` to use `UsageMetricCard`
+  - If `fulfilledBy === 'artist'` → return `0`
+  - If fees not configured → return `0`
+  - Calculate: `flatFee + Math.round(productAmount * (percentage / 10000))`
 
-### 3.4 Usage Hook Enhancement
+### 1.6 Milestone 1 Testing
 
-**Files:** `packages/hooks/src/use-usage.ts`
+- [ ] Unit test: Workspace schema accepts new fields with correct defaults
+- [ ] Unit test: Cart schema accepts new fields with correct defaults
+- [ ] Unit test: `determineFulfillmentResponsibility()` returns correct value for all mode/country combinations:
+  - `artist_all` + any country → `artist`
+  - `barely_worldwide` + any country → `barely`
+  - `barely_us` + `US` → `barely`
+  - `barely_us` + `GB` → `artist`
+  - `barely_us` + empty/null → `artist`
+- [ ] Unit test: `getShippingOriginAddress()` returns Barely address when `fulfilledBy === 'barely'`
+- [ ] Unit test: `getShippingOriginAddress()` returns workspace address when `fulfilledBy === 'artist'`
+- [ ] Unit test: `calculateBarelyFulfillmentFee()` returns 0 for artist fulfillment
+- [ ] Unit test: `calculateBarelyFulfillmentFee()` calculates correctly for Barely fulfillment
+- [ ] Unit test: `calculateBarelyFulfillmentFee()` handles null fee configuration
 
-- [ ] Extend return object with all usage metrics:
-  - `fanUsage`, `fanLimit`
-  - `memberUsage`, `memberLimit`
-  - `pixelUsage`, `pixelLimit`
-  - `linkUsage`, `linkLimit` (verify existing)
-  - `clickUsage`, `clickLimit`
-  - `emailUsage`, `emailLimit`
-  - `eventUsage`, `eventLimit`
-  - `taskUsage`, `taskLimit`
-  - `storageUsage`, `storageLimit`
-  - `invoiceUsage`, `invoiceLimit` (verify existing)
-- [ ] Fetch additional counts from workspace query or separate queries
-- [ ] Handle "unlimited" values (return `Infinity` or special flag)
+### 1.7 Milestone 1 Security
 
-### 3.5 Billing Dashboard Expansion
-
-**Files:** `apps/app/src/app/[handle]/settings/billing/billing-summary.tsx`
-
-- [ ] Add all 10 `UsageMetricCard` components to billing page:
-  - Fans/Contacts
-  - Team Members
-  - Retargeting Pixels
-  - Links Created (this month)
-  - Link Clicks (this month)
-  - Emails Sent (this month)
-  - Events Tracked (this month)
-  - Tasks Created (this month)
-  - File Storage
-  - Invoices Created (this month)
-- [ ] Display billing cycle dates prominently at top
-- [ ] Add contextual upgrade CTA when any metric > 80%
-- [ ] Ensure responsive layout (grid on desktop, stack on mobile)
-
-### 3.6 Upgrade & Billing Testing
-
-- [ ] Test DIY upgrade flow: Free → Bedroom (test environment)
-- [ ] Test Plus plan "Apply" button opens cal.com link
-- [ ] Test Plus plan upgrade when `eligibleForPlus = true`
-- [ ] Test billing page displays all 10 metrics correctly
-- [ ] Test progress bar colors at each threshold
-- [ ] Test responsive layout on mobile viewport
+- [ ] Verify `barelyFulfillmentEligible` is NOT in any tRPC mutation input schema
+- [ ] Verify `barelyFulfillmentFlatFeePerOrder` is NOT in any tRPC mutation input schema
+- [ ] Verify `barelyFulfillmentPercentageFeePerOrder` is NOT in any tRPC mutation input schema
 
 ---
 
-## Milestone 4: Resource Enforcement
+## Milestone 2: Checkout Integration
 
-**Depends on:** Milestone 1 (enforcement utility), Milestone 2 (email system)
+**Goal:** Integrate fulfillment logic into the checkout flow. When enabled, orders will be routed correctly and fees captured.
 
-Each resource type is a self-contained unit. They can be implemented in any order within this milestone. Complete one fully (backend + frontend + test) before moving to the next.
+**Jobs Addressed:**
+- Job 1: Sell physical products to international customers profitably
+- Job 2: Manage a single, unified store for all markets
 
----
+**User Stories:**
+- US-2: See Competitive US Shipping (Customer)
+- US-4: Automatic Fulfillment Assignment (System)
+- US-5: Capture Fulfillment Fees (System)
 
-### 4.1 Fans/Contacts Enforcement
+**Prerequisite:** Milestone 1 complete
 
-**Backend - Files:** `packages/lib/src/trpc/routes/fan.route.ts`
+### 2.1 Shipping Calculation Modification
 
-- [ ] In `create` mutation, before insert:
-  - Call `checkUsageLimit(ctx.workspace.id, 'fans')`
-  - If `status === 'blocked_200'`: throw TRPCError with message including upgrade URL
-  - If `shouldSendEmail`: trigger `send-usage-warning-email` job
-- [ ] After successful insert:
-  - Call `incrementUsage(ctx.workspace.id, 'fans', 1)`
-- [ ] In `importFromCsv` mutation:
-  - Count rows in CSV
-  - Call `checkUsageLimit(ctx.workspace.id, 'fans', rowCount)`
-  - Block entire import if would exceed 200%
-  - Warn if would cross 80% or 100%
+- [ ] Modify `getShipStationRateEstimates()` in `packages/lib/src/integrations/shipping/shipengine.endpts.ts`
+  - Accept `shipFrom` address as parameter (not hardcoded to workspace)
+  - Select US or UK API key based on `shipFrom.country`
+  - Maintain backward compatibility with existing callers
 
-**Frontend - Files:** Billing page components
+- [ ] Modify `getProductsShippingRateEstimate()` in `packages/lib/src/functions/cart.fns.ts`
+  - Accept new parameter: `shipFromOverride?: ShippingAddress`
+  - If provided, use override instead of workspace address
+  - Pass to ShipStation API call
 
-- [ ] Verify `fanUsage` and `fanLimit` available from `useUsage()`
-- [ ] Add `FanUsageSummary` using `UsageMetricCard`
+### 2.2 Cart Creation Flow Integration
 
-**Testing**
+- [ ] Modify `createMainCartFromFunnel()` in `packages/lib/src/functions/cart.fns.ts`:
 
-- [ ] Test fan creation at 79%, 80%, 100%, 200% of limit
-- [ ] Test CSV import blocking when at limit
-- [ ] Test warning email triggered correctly
-- [ ] Test usage counter increments
+  **Step 1: Determine fulfillment responsibility (before shipping calculation)**
+  ```typescript
+  const fulfilledBy = determineFulfillmentResponsibility({
+    workspaceMode: workspace.barelyFulfillmentMode,
+    shipToCountry: shipTo?.country ?? '',
+  });
+  ```
 
----
+  **Step 2: Get appropriate shipping origin**
+  ```typescript
+  const shippingOrigin = getShippingOriginAddress({
+    fulfilledBy,
+    workspace,
+  });
+  ```
 
-### 4.2 Team Members Enforcement
+  **Step 3: Calculate shipping with correct origin**
+  - Pass `shippingOrigin` to `getProductsShippingRateEstimate()`
 
-**Backend - Files:** `packages/lib/src/trpc/routes/workspace-invite.route.ts`
+  **Step 4: Calculate fulfillment fee**
+  ```typescript
+  const barelyFulfillmentFee = calculateBarelyFulfillmentFee({
+    fulfilledBy,
+    productAmountInCents: mainProductAmount,
+    flatFeeInCents: workspace.barelyFulfillmentFlatFeePerOrder,
+    percentageFee: workspace.barelyFulfillmentPercentageFeePerOrder,
+  });
+  ```
 
-- [ ] In `inviteMember` mutation, before creating invite:
-  - Count current members: `SELECT COUNT(*) FROM _workspaceMembers WHERE workspaceId = ?`
-  - Call `checkUsageLimit(ctx.workspace.id, 'members')`
-  - Handle unlimited (Breakout plan): skip check if limit is `Infinity` or -1
-  - If `blocked_200`: throw TRPCError
-  - If `shouldSendEmail`: trigger warning email job
+  **Step 5: Include in application fee**
+  - Add `barelyFulfillmentFee` parameter to `getFeeAmountForCheckout()` call
 
-**Frontend - Files:** Billing page components
+  **Step 6: Store in cart record**
+  - Include `fulfilledBy` and `barelyFulfillmentFee` in cart insert
 
-- [ ] Verify `memberUsage` and `memberLimit` available from `useUsage()`
-- [ ] Add `MemberUsageSummary` using `UsageMetricCard`
-- [ ] Show "unlimited" for Breakout plan
+### 2.3 Fee Calculation Integration
 
-**Testing**
+- [ ] Modify `getFeeAmountForCheckout()` in `packages/lib/src/utils/cart.ts`
+  - Accept new parameter: `barelyFulfillmentFee: number`
+  - Add to application fee amount:
+    ```typescript
+    return barelyCartFee + vatAmount + shippingAmount + barelyFulfillmentFee
+    ```
 
-- [ ] Test member invite at limit boundary
-- [ ] Test unlimited behavior on Breakout plan
-- [ ] Test warning email triggered
+### 2.4 Data Immutability
 
----
+- [ ] Ensure `fulfilledBy` is NOT included in any cart update mutations
+- [ ] Ensure `barelyFulfillmentFee` is NOT included in any cart update mutations
+- [ ] Verify cart update schema in `packages/validators/src/` excludes these fields
 
-### 4.3 Links Enforcement
+### 2.5 Milestone 2 Testing
 
-**Backend - Files:** `packages/lib/src/trpc/routes/link.route.ts`
+- [ ] Integration test: US customer gets Brooklyn shipping rates when mode is `barely_us`
+- [ ] Integration test: UK customer gets artist shipping rates when mode is `barely_us`
+- [ ] Integration test: All customers get Brooklyn shipping rates when mode is `barely_worldwide`
+- [ ] Integration test: All customers get artist shipping rates when mode is `artist_all`
+- [ ] Integration test: Cart created with correct `fulfilledBy` value
+- [ ] Integration test: Cart created with correct `barelyFulfillmentFee` value
+- [ ] Integration test: Stripe application fee includes fulfillment fee
+- [ ] Integration test: Fulfillment fields are not modified by cart updates
+- [ ] Integration test: Missing country defaults to artist fulfillment
 
-- [ ] In `create` mutation, before insert:
-  - Call `checkUsageLimit(ctx.workspace.id, 'links')`
-  - If `blocked_200`: throw TRPCError
-  - If `shouldSendEmail`: trigger warning email job
-- [ ] After successful insert:
-  - Call `incrementUsage(ctx.workspace.id, 'links', 1)`
-- [ ] Update `getUsageCount` for links:
-  - Count from Links table WHERE `createdAt` within billing cycle AND `workspaceId` matches
+### 2.6 Manual Verification
 
-**Frontend - Files:** Billing page components
-
-- [ ] Verify `LinkUsageSummary` displays correctly with threshold colors
-
-**Testing**
-
-- [ ] Test link creation at limit boundaries
-- [ ] Test billing cycle reset resets link count
-
----
-
-### 4.4 Email Sending Enforcement
-
-**Backend - Files:** Locate email/campaign sending route
-
-- [ ] Before sending emails:
-  - Call `checkUsageLimit(ctx.workspace.id, 'emails', recipientCount)`
-  - If `blocked_200`: throw TRPCError
-  - If `shouldSendEmail`: trigger warning email job
-- [ ] After successful send:
-  - Call `incrementUsage(ctx.workspace.id, 'emails', recipientCount)`
-
-**Frontend - Files:** Billing page components
-
-- [ ] Add `EmailUsageSummary` using `UsageMetricCard`
-
-**Testing**
-
-- [ ] Test email send at limit boundaries
-- [ ] Test bulk email blocking when would exceed 200%
+- [ ] Enable eligibility for test workspace via direct database update
+- [ ] Set fulfillment mode to `barely_us` via direct database update
+- [ ] Create test order with US shipping address → verify Barely fulfillment
+- [ ] Create test order with UK shipping address → verify artist fulfillment
+- [ ] Verify shipping rates differ appropriately
 
 ---
 
-### 4.5 Event Tracking Enforcement
+## Milestone 3: Artist Fulfillment Settings
 
-**Backend - Files:** Locate analytics/event tracking endpoint
+**Goal:** Allow eligible artists to configure their fulfillment mode via the app settings.
 
-- [ ] Before tracking events:
-  - Call `checkUsageLimit(ctx.workspace.id, 'events', eventCount)`
-  - If `blocked_200`: block tracking (return error or silently drop)
-  - If `shouldSendEmail`: trigger warning email job
-- [ ] After successful tracking:
-  - Call `incrementUsage(ctx.workspace.id, 'events', eventCount)`
+**Jobs Addressed:**
+- Job 5: Understand the costs of fulfillment partnership upfront
+- Job 6: Get started with fulfillment partnership quickly
 
-**Frontend - Files:** Billing page components
+**User Story:**
+- US-1: Enable Fulfillment Mode (Artist)
 
-- [ ] Add `EventUsageSummary` using `UsageMetricCard`
+**Prerequisite:** Milestone 1 complete (Milestone 2 recommended but not required)
 
-**Testing**
+### 3.1 Validation Schema
 
-- [ ] Test event tracking at limit boundaries
+- [ ] Add `barelyFulfillmentMode` to workspace update schema in `packages/validators/src/`
+  - Type: `z.enum(['artist_all', 'barely_us', 'barely_worldwide'])`
+  - Optional field (only included when updating)
 
----
+### 3.2 API (tRPC) Updates
 
-### 4.6 Tasks Enforcement
+- [ ] Modify workspace update mutation in `packages/lib/src/trpc/routes/workspace.route.ts`
+  - Add `barelyFulfillmentMode` to allowed update fields
+  - Add validation: reject mode change if `barelyFulfillmentEligible !== true`
+  - Return clear error: "Barely fulfillment is not enabled for this workspace"
 
-**Backend - Files:** Locate task creation route
+- [ ] Create query to get fulfillment settings for workspace (or extend existing workspace query)
+  - Return: `barelyFulfillmentEligible`, `barelyFulfillmentMode`, `barelyFulfillmentFlatFeePerOrder`, `barelyFulfillmentPercentageFeePerOrder`
 
-- [ ] Before creating task:
-  - Call `checkUsageLimit(ctx.workspace.id, 'tasks')`
-  - If `blocked_200`: throw TRPCError
-  - If `shouldSendEmail`: trigger warning email job
-- [ ] After successful creation:
-  - Call `incrementUsage(ctx.workspace.id, 'tasks', 1)`
+### 3.3 Frontend Settings Page
 
-**Frontend - Files:** Billing page components
+- [ ] Create new directory: `apps/app/src/app/[handle]/settings/fulfillment/`
 
-- [ ] Add `TaskUsageSummary` using `UsageMetricCard`
+- [ ] Create `page.tsx` with fulfillment settings form
+  - Use existing `SettingsCardForm` component pattern from payouts page
+  - Fetch workspace fulfillment settings on load
 
-**Testing**
+- [ ] Implement conditional rendering based on eligibility:
+  - If `barelyFulfillmentEligible === false`:
+    ```
+    Fulfillment Partnership
+    -----------------------
+    Barely fulfillment is not currently enabled for your workspace.
 
-- [ ] Test task creation at limit boundaries
+    Interested in having Barely handle fulfillment for your orders?
+    Contact us at support@barely.io to learn more.
+    ```
+  - If `barelyFulfillmentEligible === true`: show configuration form
 
----
+- [ ] Implement radio button group for fulfillment mode selection:
+  - Option 1: "I fulfill all orders" (`artist_all`) - default
+    - Description: "You handle shipping for all orders worldwide."
+  - Option 2: "Barely fulfills US orders, I fulfill the rest" (`barely_us`)
+    - Description: "Orders shipping to US addresses are fulfilled by Barely. You handle all other orders."
+  - Option 3: "Barely fulfills all orders" (`barely_worldwide`)
+    - Description: "Barely handles shipping for all orders worldwide."
 
-### 4.7 File Storage Enforcement
+- [ ] Display current fee structure (read-only):
+  - Format: "Fulfillment fees: $X.XX + Y% per Barely-fulfilled order"
+  - Only show when eligible
+  - Show "No fees configured" if null
 
-**Backend - Files:** Locate file upload route/function
+- [ ] Implement save functionality:
+  - Call workspace update mutation with new mode
+  - Show success/error toast
+  - Setting takes effect immediately (no page reload required)
 
-- [ ] Before upload:
-  - Get file size in bytes
-  - Call `checkUsageLimit(ctx.workspace.id, 'storage', fileSizeBytes)`
-  - If `blocked_200`: throw TRPCError
-  - If `shouldSendEmail`: trigger warning email job
-- [ ] After successful upload:
-  - Call `incrementUsage(ctx.workspace.id, 'storage', fileSizeBytes)`
-  - Update both `fileUsage_total` and `fileUsage_billingCycle`
+### 3.4 Settings Navigation
 
-**Frontend - Files:** Billing page components
+- [ ] Add "Fulfillment" link to settings navigation sidebar in `apps/app/src/app/[handle]/settings/`
+  - Conditionally show only when `barelyFulfillmentEligible === true`
+  - Position after "Payouts" in navigation order
 
-- [ ] Add `StorageUsageSummary` using `UsageMetricCard`
-- [ ] Display in MB format (convert from bytes)
+### 3.5 Milestone 3 Testing
 
-**Testing**
+- [ ] Unit test: Validation schema accepts valid mode values
+- [ ] Unit test: Validation schema rejects invalid mode values
+- [ ] Unit test: Mode update mutation fails when not eligible
+- [ ] Unit test: Mode update mutation succeeds when eligible
+- [ ] Integration test: Settings page renders "contact us" for ineligible workspace
+- [ ] Integration test: Settings page renders configuration form for eligible workspace
+- [ ] Integration test: Mode change persists after save
+- [ ] Integration test: Navigation link only appears for eligible workspaces
 
-- [ ] Test file upload at limit boundaries
+### 3.6 Milestone 3 Security
 
----
-
-### 4.8 Retargeting Pixels Enforcement
-
-**Backend - Files:** Locate pixel creation route
-
-- [ ] Before creating pixel:
-  - Call `checkUsageLimit(ctx.workspace.id, 'pixels')`
-  - Special case: Free plan has limit of 0 → block immediately
-  - If `blocked_200`: throw TRPCError
-  - If `shouldSendEmail`: trigger warning email job
-- [ ] Note: Pixels are cumulative, no increment needed (counted from table)
-
-**Frontend - Files:** Billing page components
-
-- [ ] Add `PixelUsageSummary` using `UsageMetricCard`
-- [ ] Show "Not available on Free plan" when limit is 0
-
-**Testing**
-
-- [ ] Test Free plan pixel creation (should block immediately)
-- [ ] Test paid plan pixel creation at limits
-
----
-
-### 4.9 Link Clicks Enforcement
-
-**Backend - Files:** Locate click tracking endpoint
-
-- [ ] Before recording click:
-  - Call `checkUsageLimit(ctx.workspace.id, 'clicks')`
-  - If `blocked_200`: may silently drop or show error depending on UX decision
-  - If `shouldSendEmail`: trigger warning email job
-- [ ] After recording:
-  - Increment click counter (if separate from analytics events)
-
-**Frontend - Files:** Billing page components
-
-- [ ] Verify click tracking displays in `UsageMetricCard`
-
-**Testing**
-
-- [ ] Test click tracking at limit boundaries
+- [ ] Verify fulfillment mode update requires workspace write permission
+- [ ] Verify eligibility check happens server-side (not just UI)
 
 ---
 
-### 4.10 Invoice Enforcement Enhancement
+## Milestone 4: Order Management & Filtering
 
-**Backend - Files:** `packages/lib/src/functions/invoice.fns.ts`
+**Goal:** Allow artists to filter orders by fulfillment responsibility and see fulfillment details.
 
-- [ ] Refactor `checkInvoiceUsageAndIncrement` to use new `checkUsageLimit` utility
-- [ ] Add warning email dispatch:
-  - If `shouldSendEmail`: trigger `send-usage-warning-email` job
-- [ ] Maintain backward compatibility with existing error messages
-- [ ] Ensure 200% hard block behavior matches other resources
+**Jobs Addressed:**
+- Job 3: Know which orders I need to fulfill vs. which are handled for me
 
-**Frontend - Files:** Billing page components
+**User Stories:**
+- US-3: Filter Orders by Fulfillment Responsibility (Artist)
+- US-6: Access Fulfillment-Enabled Workspaces (Barely Team)
 
-- [ ] Verify `InvoiceUsageSummary` displays with threshold colors
+**Prerequisite:** Milestone 1 and 2 complete
 
-**Testing**
+### 4.1 API (tRPC) Updates
 
-- [ ] Test invoice creation triggers warnings at 80%, 100%
-- [ ] Test hard block at 200%
-- [ ] Verify existing functionality not broken
+- [ ] Modify orders list query in `packages/lib/src/trpc/routes/cart.route.ts`
+  - Add optional filter parameter: `fulfilledBy?: 'artist' | 'barely' | 'all'`
+  - Apply WHERE clause when filter is specified:
+    - `'artist'` → `WHERE fulfilledBy = 'artist'`
+    - `'barely'` → `WHERE fulfilledBy = 'barely'`
+    - `'all'` or undefined → no filter
+  - Default to `'all'` (no filter)
 
----
+- [ ] Ensure `fulfilledBy` field is included in order list response
+- [ ] Ensure `barelyFulfillmentFee` field is included in order detail response
 
-## Milestone 5: Billing Cycle Management
+### 4.2 Orders List Page
 
-**Depends on:** Milestone 1 (schema)
-**Can run in parallel with:** Milestones 2-4
+- [ ] Locate orders list component in `apps/app/src/app/[handle]/orders/`
 
-This milestone ensures usage resets properly on billing cycle boundaries.
+- [ ] Add fulfillment filter dropdown above orders list:
+  - Options: "All Orders", "My Fulfillment", "Barely Fulfillment"
+  - Default: "All Orders"
+  - Use existing dropdown/select component pattern
 
-### 5.1 Billing Cycle Reset Logic
+- [ ] Wire filter to API query parameter:
+  - Update query when filter changes
+  - Re-fetch orders with new filter value
 
-**Files:** `packages/lib/src/trigger/workspace-usage.ts`
+- [ ] Conditionally show filter only when workspace has Barely fulfillment enabled:
+  - Check `barelyFulfillmentMode !== 'artist_all'`
+  - If `artist_all`, don't show filter (all orders are artist-fulfilled anyway)
 
-- [ ] Review existing `resetWorkspaceUsage` job
-- [ ] Modify to process each workspace individually based on `billingCycleStart`:
-  - Query workspaces where today is their cycle reset day
-  - For each: reset monthly counters
-- [ ] Reset monthly counters:
-  - `linkUsage` → 0
-  - `emailUsage` → 0
-  - `eventUsage` → 0
-  - `taskUsage` → 0
-  - `invoiceUsage` → 0
-  - `fileUsage_billingCycle` → 0
-- [ ] Reset `usageWarnings` JSONB → `{}`
-- [ ] Do NOT reset cumulative counters:
-  - `fanUsage` (total fans, not monthly)
-  - `memberUsage` (current members)
-  - `pixelUsage` (current pixels)
-  - `fileUsage_total` (total storage ever)
+- [ ] (Optional) Persist filter state in URL query param for shareable links
 
-### 5.2 Self-Healing in Enforcement
+### 4.3 Order Detail Page
 
-**Files:** `packages/lib/src/functions/usage.fns.ts`
+- [ ] Locate order detail component in `apps/app/src/app/[handle]/orders/[orderId]/`
 
-- [ ] In `checkUsageLimit`, add billing cycle detection:
-  - Get current billing cycle boundaries from `getFirstAndLastDayOfBillingCycle(workspace.billingCycleStart)`
-  - If `usageWarnings` contains timestamps from previous cycle: reset it
-  - If monthly usage counter seems stale (optional heuristic): trigger reset
+- [ ] Add fulfillment information section to order detail:
+  ```
+  Fulfillment
+  -----------
+  Fulfilled by: You  (or "Barely")
+  ```
 
-### 5.3 Billing Cycle Testing
+- [ ] If fulfilled by Barely, show fee:
+  ```
+  Fulfillment Fee: $3.50
+  ```
 
-- [ ] Test billing cycle rollover behavior
-- [ ] Test that warning flags reset on new cycle
-- [ ] Test that monthly counters reset
-- [ ] Test that cumulative counters do NOT reset
-- [ ] Test self-healing when counters are stale
+- [ ] Use existing order detail layout pattern
 
----
+### 4.4 Milestone 4 Testing
 
-## Implementation Order Summary
-
-For a solo developer, the recommended order is:
-
-1. **Milestone 1: Foundation** (required first)
-2. **Milestone 3.1-3.2: Upgrade Flow** (enables revenue immediately)
-3. **Milestone 2: Warning Emails** (enables enforcement)
-4. **Milestone 3.3-3.5: Billing Dashboard** (user visibility)
-5. **Milestone 4: Resource Enforcement** (one at a time, start with highest-impact: fans, links, emails)
-6. **Milestone 5: Billing Cycle** (can be done anytime after M1)
-
-This order prioritizes:
-- Unlocking revenue (Stripe fix) as early as possible
-- Protecting highest-cost resources first
-- Providing user transparency before enforcement
+- [ ] Unit test: Orders query filters correctly by `fulfilledBy = 'artist'`
+- [ ] Unit test: Orders query filters correctly by `fulfilledBy = 'barely'`
+- [ ] Unit test: Orders query returns all when `fulfilledBy = 'all'`
+- [ ] Integration test: Filter dropdown updates displayed orders
+- [ ] Integration test: Order detail shows "You" for artist fulfillment
+- [ ] Integration test: Order detail shows "Barely" for Barely fulfillment
+- [ ] Integration test: Order detail shows fulfillment fee when applicable
+- [ ] Integration test: Filter only appears for workspaces with non-default mode
+- [ ] E2E test: User can filter orders and see correct results
 
 ---
 
-## Quick Reference: Files Changed
+## Cross-Cutting: Security & Validation Checklist
 
-| Milestone | Key Files |
-|-----------|-----------|
-| M1 | `workspace.sql.ts`, `workspace-plans.constants.ts`, `usage.fns.ts` (new) |
-| M2 | `usage-warning-80.tsx` (new), `usage-warning-100.tsx` (new), `usage-blocked-200.tsx` (new), `usage-warning-email.ts` (new) |
-| M3 | `workspace-stripe.route.ts`, `use-usage.ts`, billing page components |
-| M4 | `fan.route.ts`, `link.route.ts`, `workspace-invite.route.ts`, `invoice.fns.ts`, + other route files |
-| M5 | `workspace-usage.ts`, `usage.fns.ts` |
+Apply these checks throughout implementation:
+
+### Access Control
+
+- [ ] `barelyFulfillmentEligible` can ONLY be set via direct database access
+- [ ] `barelyFulfillmentFlatFeePerOrder` can ONLY be set via direct database access
+- [ ] `barelyFulfillmentPercentageFeePerOrder` can ONLY be set via direct database access
+- [ ] `barelyFulfillmentMode` update requires workspace write permission
+- [ ] `fulfilledBy` and `barelyFulfillmentFee` are immutable after cart creation
+
+### Input Validation
+
+- [ ] `barelyFulfillmentMode` enum values validated in update mutation
+- [ ] Eligibility checked before allowing mode change
+- [ ] Customer shipping country validated/handled gracefully
+
+### Data Integrity
+
+- [ ] `fulfilledBy` set at cart creation, not updatable after
+- [ ] `barelyFulfillmentFee` stores calculated value at time of order (not reference)
+- [ ] Historical orders unaffected by fee configuration changes
+
+### Security Tests
+
+- [ ] Security test: Cannot set eligibility via API
+- [ ] Security test: Cannot set fee config via API
+- [ ] Validation test: Invalid mode values rejected
+- [ ] Validation test: Mode change blocked when not eligible
+- [ ] Data integrity test: Fulfillment fields immutable after creation
+
+---
+
+## File Summary by Milestone
+
+### Milestone 1: Foundation
+| File | Action | Purpose |
+|------|--------|---------|
+| `.env.example` | Modify | Document new env vars |
+| `packages/lib/src/env.ts` | Modify | Add Barely address env access |
+| `packages/db/src/sql/workspace.sql.ts` | Modify | Add fulfillment fields |
+| `packages/db/src/sql/cart.sql.ts` | Modify | Add fulfillment fields |
+| `packages/lib/src/utils/fulfillment.ts` | Create | Core fulfillment utilities |
+| `packages/lib/src/utils/cart.ts` | Modify | Add fee calculation |
+
+### Milestone 2: Checkout Integration
+| File | Action | Purpose |
+|------|--------|---------|
+| `packages/lib/src/integrations/shipping/shipengine.endpts.ts` | Modify | Dynamic shipping origin |
+| `packages/lib/src/functions/cart.fns.ts` | Modify | Integrate fulfillment into checkout |
+| `packages/lib/src/utils/cart.ts` | Modify | Include fulfillment fee in app fee |
+
+### Milestone 3: Artist Settings
+| File | Action | Purpose |
+|------|--------|---------|
+| `packages/validators/src/schemas/` | Modify | Add mode to update schema |
+| `packages/lib/src/trpc/routes/workspace.route.ts` | Modify | Add mode update mutation |
+| `apps/app/src/app/[handle]/settings/fulfillment/page.tsx` | Create | Settings UI |
+| `apps/app/src/app/[handle]/settings/` (nav) | Modify | Add nav link |
+
+### Milestone 4: Order Management
+| File | Action | Purpose |
+|------|--------|---------|
+| `packages/lib/src/trpc/routes/cart.route.ts` | Modify | Add filter to orders query |
+| `apps/app/src/app/[handle]/orders/` | Modify | Add filter dropdown |
+| `apps/app/src/app/[handle]/orders/[orderId]/` | Modify | Show fulfillment info |
+
+---
+
+## Deployment Sequence
+
+1. **Deploy Milestone 1** - No user-facing changes, safe to deploy
+2. **Enable for test workspace** - Set eligibility + fees via database
+3. **Deploy Milestone 2** - Checkout integration active for eligible workspaces
+4. **Test with real orders** - Verify shipping/fees/assignment
+5. **Deploy Milestone 3** - Artists can configure via UI
+6. **Deploy Milestone 4** - Order filtering available
+7. **Enable for The Now** - Beta client goes live
+8. **Monitor & iterate** - Watch for issues, gather feedback
+
+---
+
+## Related Documents
+
+- [[feature|Feature: Barely Fulfillment Partner]]
+- [[JTBD|Jobs to be Done: Barely Fulfillment Partner]]
+- [[PRD|Product Requirements Document: Barely Fulfillment Partner]]
+- [[plan|Technical Implementation Plan (Original)]]

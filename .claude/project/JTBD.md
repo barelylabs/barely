@@ -1,259 +1,258 @@
-# Jobs to be Done: Usage Protection & Monetization
+# Jobs to be Done: Barely Fulfillment Partner
 
 ## Overview
 
-This document captures the jobs that users and the Barely team are trying to accomplish that this feature addresses. It focuses on the "why" behind behavior rather than specific features.
+This document captures the jobs that artists are trying to accomplish when they consider using Barely as a fulfillment partner. It focuses on the "why" behind user behavior rather than the feature itself.
 
 ---
 
-## User Segments
+## Job Performers (Users)
 
-### Segment 1: Free Tier Artists/Creators
+### Primary: UK/EU Artists Expanding to US Market
+- Independent musicians/bands with existing physical product sales in their home market
+- Running or planning paid advertising campaigns targeting US audiences
+- Currently blocked by shipping economics or operational complexity
+- Seeking growth without proportional increase in operational burden
 
-**Context**: Independent musicians, creators, and small teams using Barely to manage their online presence, sell merchandise, send emails to fans, and track analytics. They're on the free plan and may or may not know their usage limits.
-
-**Situation**: They're actively using the platform - creating links, adding fans, sending emails, uploading files - and their usage is growing as their audience grows.
-
-### Segment 2: Growth-Stage Artists
-
-**Context**: Artists who have outgrown the free tier limits and need more capacity. They're willing to pay for tools that help them grow but want to understand the value before committing.
-
-**Situation**: They've hit or are approaching limits and need to decide whether to upgrade, optimize their usage, or look for alternatives.
-
-### Segment 3: Barely Team (Internal)
-
-**Context**: The team building and operating the Barely platform. Responsible for sustainability and growth of the business.
-
-**Situation**: User growth is happening organically, but infrastructure costs are rising without corresponding revenue. Need to convert users while maintaining good user experience.
+### Secondary: US Artists Seeking Fulfillment Partner
+- Artists who want to sell physical products but don't want to pack/ship themselves
+- May be new to physical sales or scaling beyond what they can handle
+- Value their time for creative work over operational tasks
+- Willing to pay reasonable fees for convenience
 
 ---
 
 ## Primary Jobs (High Priority)
 
-### Job 1: Understand My Usage Status
+### Job 1: Sell physical products to international customers profitably
 
-**Job Statement**: When I'm using Barely to manage my music business, I want to know how much of my plan I'm using so I can avoid surprises and plan my activities accordingly.
+**Job Statement:**
+> When I'm an artist with fans in the US, I want to offer them physical products with reasonable shipping costs, so I can profitably acquire customers through paid advertising.
 
-**Functional Aspects**:
-- See current usage vs. limits for each resource type
-- Understand which limits I'm closest to hitting
-- Know when my usage resets (billing cycle)
+**Context:**
+- Artist has physical products (vinyl, CDs, merch) that fans want
+- Fans in the US see high international shipping costs and abandon carts
+- Paid acquisition (ads) becomes unprofitable when shipping kills conversion rates
+- Current solution: Don't sell to US, or accept low/negative margins
 
-**Emotional Aspects**:
-- Feel in control of my account
-- Avoid anxiety about unexpected shutdowns
-- Trust that the platform is transparent
+**Current Workarounds:**
+- Ship from UK anyway (expensive, slow, poor customer experience)
+- Set up duplicate workspace with US-based fulfillment (complex, time-consuming)
+- Avoid US market entirely (leaves money on the table)
 
-**Social Aspects**:
-- Look professional to my team (if collaborating)
-- Not be embarrassed by service interruptions with fans
+**Success Criteria:**
+- US shipping costs are competitive with domestic US retailers
+- Customer acquisition cost (CAC) makes sense with US shipping rates
+- Can run profitable paid campaigns to US audiences
 
-**Current Workarounds**: Users have no visibility - they either don't know limits exist or assume they're unlimited.
-
-**Success Metrics**:
-- User can answer "how much of X am I using?" within 10 seconds
-- Reduced support tickets asking about usage/limits
-
----
-
-### Job 2: Get Warned Before Problems Occur
-
-**Job Statement**: When I'm approaching my plan limits, I want to be notified proactively so I can take action before my workflow is interrupted.
-
-**Functional Aspects**:
-- Receive clear notification when approaching limits (80%)
-- Receive urgent notification when at limits (100%)
-- Have time to decide: upgrade, reduce usage, or accept constraints
-
-**Emotional Aspects**:
-- Feel respected (not surprised or punished)
-- Feel empowered to make decisions
-- Trust that Barely has my back
-
-**Social Aspects**:
-- Maintain professional service to my fans
-- Not look disorganized to collaborators
-
-**Current Workarounds**: No warnings exist - users either use unlimited resources (costing Barely money) or hit hard limits without notice.
-
-**Success Metrics**:
-- 100% of users at 80% usage receive warning
-- Reduced "why did this stop working?" support tickets
-- Increased upgrade conversions from warning state
+**Related Jobs:**
+- Calculate accurate shipping costs before customer checks out
+- Display shipping rates that don't cause sticker shock
 
 ---
 
-### Job 3: Upgrade When I Need More
+### Job 2: Manage a single, unified store for all markets
 
-**Job Statement**: When I've outgrown my current plan, I want to upgrade seamlessly so I can continue growing without interruption.
+**Job Statement:**
+> When I'm selling to customers in multiple countries, I want to manage one store with one set of products, so I don't waste time duplicating work and can see all my sales in one place.
 
-**Functional Aspects**:
-- Clear comparison of what each plan offers
-- One-click upgrade process
-- Immediate access to higher limits after payment
-- Understand the cost difference
+**Context:**
+- Artists currently need separate workspaces for different fulfillment regions
+- Each workspace requires: separate Stripe account, duplicate products, duplicate landing pages, separate analytics
+- Ad campaigns must be split by geography
+- Mental overhead of managing multiple systems
 
-**Emotional Aspects**:
-- Feel confident the upgrade is worth it
-- Feel like a valued customer, not a cash grab victim
-- Trust the payment process is secure
+**Current Workarounds:**
+- Accept the complexity and manage multiple workspaces
+- Only sell to one market to keep things simple
+- Hire help to manage the complexity (expensive)
 
-**Social Aspects**:
-- Justify the expense to bandmates/team
-- Feel like a "real" business investing in tools
+**Success Criteria:**
+- One workspace, one Stripe account, one product catalog
+- All sales visible in single dashboard
+- One set of landing pages and funnels
+- Simplified ad campaign management
 
-**Current Workarounds**: Upgrade flow is broken (throws errors in production). Users who want to pay literally cannot.
-
-**Success Metrics**:
-- Upgrade flow completion rate > 90%
-- Zero errors in production upgrade flow
-- Positive upgrade conversion rate from warning emails
+**Related Jobs:**
+- Keep accounting simple with unified revenue streams
+- Track performance across all markets in one view
 
 ---
 
-### Job 4: Keep My Business Running
+### Job 3: Know which orders I need to fulfill vs. which are handled for me
 
-**Job Statement**: When I'm at or over my limits, I want clear options to continue operating so my fans and business aren't negatively impacted.
+**Job Statement:**
+> When orders come in from different regions, I want to clearly see which ones I need to ship myself, so I don't miss any orders or duplicate fulfillment work.
 
-**Functional Aspects**:
-- Know exactly what's blocked and why
-- Have a clear path to unblock (upgrade)
-- Grace period to make decisions (not instant shutdown)
+**Context:**
+- With split fulfillment, some orders go to the artist, some to Barely
+- Artist needs to know exactly what's on their plate
+- Don't want to accidentally ship an order that Barely is handling
+- Don't want Barely orders sitting unfulfilled because artist thought they were covered
 
-**Emotional Aspects**:
-- Not feel punished or trapped
-- Feel the limits are fair
-- Trust there's a solution
+**Current Workarounds:**
+- Manually check shipping addresses on each order
+- Maintain separate tracking spreadsheet
+- Risk errors and duplicate shipments
 
-**Social Aspects**:
-- Maintain service to fans during transition
-- Not look unprofessional due to service gaps
+**Success Criteria:**
+- Clear filter/view showing "my orders" vs "Barely orders"
+- Confidence that nothing falls through the cracks
+- Quick daily check of fulfillment queue
 
-**Current Workarounds**: N/A - limits don't exist so this situation never occurs (but costs Barely money).
-
-**Success Metrics**:
-- Users at hard limit (200%) have clear upgrade CTA
-- Support ticket resolution rate for limit issues
-- Low churn rate from users hitting limits
+**Related Jobs:**
+- Maintain high fulfillment standards across all orders
+- Keep customers happy regardless of who ships
 
 ---
 
 ## Secondary Jobs (Lower Priority)
 
-### Job 5: Explore Premium Features Before Committing
+### Job 4: Outsource fulfillment entirely so I can focus on music
 
-**Job Statement**: When considering an upgrade, I want to understand what premium features I'd get so I can make an informed decision.
+**Job Statement:**
+> When I want to sell physical products but don't want to deal with shipping, I want someone else to handle all fulfillment, so I can focus my time on creating music and connecting with fans.
 
-**Functional Aspects**:
-- See feature comparison across tiers
-- Understand what "Plus" plans include (coaching)
-- Know the application process for Plus plans
+**Context:**
+- Some artists (especially US-based) see fulfillment as pure overhead
+- Time spent packing orders is time not spent on creative work
+- May be scaling to volume where self-fulfillment becomes unsustainable
+- Willing to pay per-order fees for the convenience
 
-**Emotional Aspects**:
-- Feel informed, not pressured
-- Trust the pricing is fair for the value
+**Current Workarounds:**
+- Don't sell physical products at all
+- Use third-party fulfillment services (disconnected from their storefront)
+- Hire part-time help (management overhead)
 
-**Current Workarounds**: Users can see plans page but Plus plans show broken upgrade buttons.
+**Success Criteria:**
+- Orders flow to fulfillment partner automatically
+- Artist only needs to ensure stock is available
+- Fulfillment quality matches or exceeds what artist would do themselves
 
----
-
-### Job 6: Get Personalized Help Growing (Plus Plans)
-
-**Job Statement**: When I'm serious about growing my music business, I want access to expert guidance so I can accelerate my growth beyond just tools.
-
-**Functional Aspects**:
-- Apply for Plus plan consideration
-- Have a conversation about my needs before committing
-- Get coaching/support included with plan
-
-**Emotional Aspects**:
-- Feel like a VIP, not just another user
-- Trust the coaching will be valuable
-- Feel supported in my journey
-
-**Current Workarounds**: Users interested in coaching have no clear path - Plus plan buttons are broken.
+**Related Jobs:**
+- Scale physical product sales without scaling operations
+- Maintain quality customer experience without direct involvement
 
 ---
 
-## Internal Jobs (Barely Team)
+### Job 5: Understand the costs of fulfillment partnership upfront
 
-### Job 7: Protect Infrastructure Costs
+**Job Statement:**
+> When I'm considering using a fulfillment partner, I want to clearly understand the per-order costs, so I can make informed pricing and margin decisions.
 
-**Job Statement**: When users are consuming resources, we need to ensure usage stays within sustainable bounds so the business remains viable.
+**Context:**
+- Artists need to price products accounting for all fees
+- Fulfillment fees affect per-unit margins
+- Need to compare against self-fulfillment costs (time, materials, shipping)
+- Want predictable costs, not surprises
 
-**Functional Aspects**:
-- Enforce limits on all resource types
-- Prevent runaway usage from any single workspace
-- Have visibility into overall platform usage
+**Current Workarounds:**
+- Calculate self-fulfillment costs manually
+- Get quotes from third-party fulfillment services
+- Guess at margins and adjust later
 
-**Emotional Aspects**:
-- Feel confident the platform won't be abused
-- Trust the enforcement is working
+**Success Criteria:**
+- Clear fee structure (flat + percentage) visible before enabling
+- Can calculate impact on margins before committing
+- No hidden fees or surprises
 
-**Current Workarounds**: No enforcement - costs are rising unchecked. Database bill quadrupled in 2 months.
-
-**Success Metrics**:
-- Infrastructure costs correlate with revenue
-- No single workspace causes disproportionate costs
-- Usage growth matches expected limits
-
----
-
-### Job 8: Convert Free Users to Paying Customers
-
-**Job Statement**: When users find value in the platform, we want to convert them to paid plans so we can sustain and grow the business.
-
-**Functional Aspects**:
-- Working upgrade flow from free to paid
-- Natural upgrade prompts at limit thresholds
-- Multiple tier options for different needs
-
-**Emotional Aspects**:
-- Feel good about monetization approach (value-based, not manipulative)
-- Trust the conversion funnel is working
-
-**Current Workarounds**: Impossible - Stripe IDs are placeholders, upgrade throws errors.
-
-**Success Metrics**:
-- Non-zero paid subscriptions
-- Conversion rate from free to paid
-- Revenue per user metrics
+**Related Jobs:**
+- Price products to maintain healthy margins
+- Compare fulfillment partner costs vs. self-fulfillment
 
 ---
 
-## Job Prioritization Matrix
+### Job 6: Get started with fulfillment partnership quickly
 
-| Job | Frequency | Importance | Satisfaction Gap | Priority |
-|-----|-----------|------------|------------------|----------|
-| Understand usage status | High | High | High (no visibility) | **P0** |
-| Get warned before problems | Medium | High | High (no warnings) | **P0** |
-| Upgrade when needed | Medium | Critical | Critical (broken) | **P0** |
-| Keep business running | Low | High | High (no graceful limits) | **P1** |
-| Explore premium features | Low | Medium | Medium | **P2** |
-| Get personalized help | Low | Medium | Medium | **P2** |
-| Protect infrastructure (internal) | Ongoing | Critical | Critical | **P0** |
-| Convert to paid (internal) | Ongoing | Critical | Critical | **P0** |
+**Job Statement:**
+> When I've decided to use Barely as my fulfillment partner, I want to enable it and start processing orders quickly, so I can capture sales I'm currently missing.
 
----
+**Context:**
+- Every day without US fulfillment is lost revenue
+- Don't want a lengthy onboarding process
+- Already have products ready to ship
+- Want to start running US ad campaigns ASAP
 
-## Key Insights
+**Current Workarounds:**
+- Wait through complex setup processes
+- Delay campaigns until infrastructure is ready
+- Miss seasonal or promotional windows
 
-1. **The core job isn't "limit my usage"** - it's "help me understand and control my usage so I can grow confidently." Enforcement should feel like guardrails, not punishment.
+**Success Criteria:**
+- Enable fulfillment in minutes after approval
+- First order can process same day
+- No complex configuration required
 
-2. **Warnings are more valuable than blocks** - The tiered approach (80% → 100% → 200%) gives users agency and time to decide, which builds trust and increases upgrade likelihood.
-
-3. **Broken monetization is the bottleneck** - Users may already want to upgrade but can't. Fixing the Stripe integration unlocks revenue that should already exist.
-
-4. **Transparency drives trust** - Showing all usage metrics (not just some) makes users feel the platform is honest and fair, increasing willingness to pay.
-
-5. **Plus plans need human touch** - The `eligibleForPlus` gate with "Apply" button correctly recognizes that coaching-included plans require a conversation, not just a credit card.
+**Related Jobs:**
+- Move fast on market opportunities
+- Test US market demand quickly
 
 ---
 
-## Success Definition
+## Job Map: Selling Physical Products Internationally
 
-This feature succeeds when:
+This job map shows the end-to-end process of selling physical products to international customers:
 
-1. **Users** feel informed and empowered about their usage, receive fair warnings, and can upgrade seamlessly when they choose to
-2. **Barely team** has sustainable infrastructure costs, a working monetization path, and can grow revenue alongside user growth
-3. **The relationship** between Barely and its users feels like a partnership in their growth, not an adversarial gatekeeper
+| Stage | Job Steps | Current Pain Points |
+|-------|-----------|---------------------|
+| **Define** | Decide to sell physical products internationally | High barrier due to shipping complexity |
+| **Locate** | Find a fulfillment solution that works | Limited options, complex integrations |
+| **Prepare** | Set up storefront and fulfillment | Duplicate workspaces, multiple accounts |
+| **Confirm** | Verify shipping rates are competitive | Rates too high for profitable acquisition |
+| **Execute** | Process orders and fulfill them | Confusion about who ships what |
+| **Monitor** | Track orders across all markets | Split dashboards, fragmented data |
+| **Modify** | Adjust pricing or fulfillment as needed | Changes required in multiple places |
+| **Conclude** | Evaluate international expansion success | Hard to attribute results clearly |
+
+---
+
+## Emotional and Social Jobs
+
+### Emotional Jobs
+- **Feel confident** expanding into new markets without operational overwhelm
+- **Feel relieved** that fulfillment complexity is handled
+- **Feel professional** offering competitive shipping to all customers
+- **Feel in control** of which orders are their responsibility
+
+### Social Jobs
+- **Be seen as** a legitimate international artist/brand
+- **Avoid embarrassment** of high shipping costs scaring off fans
+- **Demonstrate credibility** through professional fulfillment experience
+
+---
+
+## Outcome Expectations
+
+What users expect when these jobs are done well:
+
+| Job | Desired Outcome | Undesired Outcome |
+|-----|-----------------|-------------------|
+| Sell internationally | Profitable US customer acquisition | Shipping costs kill ad ROI |
+| Unified store | One place to manage everything | Juggling multiple systems |
+| Know my orders | Clear fulfillment queue | Missed or duplicate shipments |
+| Outsource fulfillment | Focus on creative work | Still managing operations |
+| Understand costs | Predictable margins | Surprise fees |
+| Get started quickly | Processing orders same day | Weeks of setup |
+
+---
+
+## Constraints and Limitations
+
+**What users will accept:**
+- Per-order fees for fulfillment service (validated at $3-4/order)
+- Simple fulfillment modes (US-only or worldwide, not per-product)
+- Manual stock management with Barely team
+- Workspace access granted to Barely team
+
+**What users won't accept:**
+- Complex setup that takes days/weeks
+- Unpredictable or hidden fees
+- Loss of visibility into their orders
+- Degraded customer experience (slower shipping, poor packaging)
+
+---
+
+## Related Documents
+
+- [[feature|Feature: Barely Fulfillment Partner]]
+- [[PRD|Product Requirements Document]] (next step)

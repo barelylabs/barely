@@ -151,6 +151,7 @@ interface GridListCardProps
 		value?: number | string | null;
 	}[];
 	statsHref?: string;
+	statusBadge?: ReactNode;
 }
 
 export const GridListCard = React.forwardRef<
@@ -179,6 +180,7 @@ export const GridListCard = React.forwardRef<
 			statsRight,
 			stats,
 			statsHref,
+			statusBadge,
 			...props
 		},
 		ref,
@@ -271,8 +273,12 @@ export const GridListCard = React.forwardRef<
 										</div>
 									</div>
 								)}
-								<div className='flex flex-grow flex-row items-center justify-between gap-4'>
+								<div className='flex flex-grow flex-row items-center gap-4'>
 									{typeof children === 'function' ? null : children}
+									{/* Status badge in consistent center position */}
+									{statusBadge && (
+										<div className='flex min-w-[80px] justify-center'>{statusBadge}</div>
+									)}
 									<div className='ml-auto mr-2'>
 										{stats && stats.length > 0 && (
 											<Button

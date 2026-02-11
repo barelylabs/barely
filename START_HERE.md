@@ -1,47 +1,49 @@
-# Usage Protection & Monetization - Development
+# Barely Fulfillment Partner Development
 
 ## For New Claude Code Instance
-
 1. Open Claude Code in this directory
 2. Claude will read CLAUDE_PROJECT.md for immediate context
 3. Check `.claude/project/plan-organized.md` for implementation tasks
 4. All project artifacts are available in `.claude/project/`
 
 ## Development Flow
-
-- This branch is focused solely on usage-protection
-- Use the organized plan to track progress
-- Original project: `0_Projects/barely-usage-protection/`
+- This branch is focused solely on implementing the Barely Fulfillment Partner feature
+- Use the organized plan to track progress through 4 milestones
+- Original project: `0_Projects/barely-fulfillment-partner/`
 
 ## Key Commands After Starting Claude Code
-
 - Review implementation plan: `Read .claude/project/plan-organized.md`
 - Check requirements: `Read .claude/project/PRD.md`
 - Understand user needs: `Read .claude/project/JTBD.md`
 
-## Quick Reference: Stripe IDs
+## Business Context
+- Beta client: The Now (UK artist) - products already stocked in Brooklyn
+- 3 additional US clients contingent on this feature
+- Revenue opportunity: ~$150k+ via fulfillment fees
+- Supports $1M GMV target for 2026
 
-All production IDs are ready to configure:
+## Quick Reference - Implementation Order
 
-```
-Bedroom:     prod_Txeo2HSM6HnJx4
-Rising:      prod_TxevMytIBe6fon
-Breakout:    prod_TxeweGMPwBFeVm
-Bedroom+:    prod_Txey7RdoUEQFHi
-Rising+:     prod_TxezRHktqwlWKI
-Breakout+:   prod_Txf0wBNF8ZpgfR
-Invoice Pro: prod_Txf4YDcKhcTd0G
-```
+### Milestone 1: Foundation (No user-facing changes)
+1. Add env vars for Barely address
+2. Modify workspace schema (4 new fields)
+3. Modify cart schema (2 new fields)
+4. Create fulfillment utility functions
 
-## First Task: Milestone 1 - Foundation
+### Milestone 2: Checkout Integration
+1. Modify shipping calculation to accept dynamic origin
+2. Integrate fulfillment logic into cart creation
+3. Add fulfillment fee to Stripe application_fee_amount
 
-1. Update Stripe IDs in `packages/const/src/workspace-plans.constants.ts`
-2. Remove deprecated plans (agency, pro)
-3. Add schema fields in `packages/db/src/sql/workspace.sql.ts`
-4. Create enforcement utility in `packages/lib/src/functions/usage.fns.ts`
+### Milestone 3: Artist Settings UI
+1. Create fulfillment settings page
+2. Add to settings navigation (when eligible)
 
-## Why This Matters
+### Milestone 4: Order Management
+1. Add fulfillment filter to orders query
+2. Add filter dropdown to orders UI
+3. Show fulfillment info on order detail
 
-- **Revenue**: Fixing Stripe IDs enables paid subscriptions immediately
-- **Costs**: Enforcement protects against 4x database cost growth
-- **Trust**: Transparent usage gives users confidence in the platform
+## Testing Strategy
+- Each milestone has its own test checklist in plan-organized.md
+- Manual verification steps included for checkout flow

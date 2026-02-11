@@ -10,6 +10,7 @@ import { Toaster } from 'sonner';
 import { TailwindIndicator } from '@barely/ui/components/tailwind-indicator';
 import { Container } from '@barely/ui/container';
 
+import { PageViewTracker } from '../components/analytics/page-view-tracker';
 import { Footer } from '../components/marketing/footer';
 import { GlobalContactModal } from '../components/marketing/global-contact-modal';
 import { Navigation } from '../components/marketing/navigation';
@@ -64,6 +65,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
 				)}
 			>
 				<Providers headers={await headers()}>
+					<PageViewTracker />
 					{/* <SuccessMetricsBar /> */}
 					<Navigation />
 					<Container className='max-w-full px-0 py-0'>{children}</Container>

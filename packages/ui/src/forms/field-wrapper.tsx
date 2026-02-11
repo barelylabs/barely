@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { ControllerProps, FieldPath, FieldValues } from 'react-hook-form';
+import { cn } from '@barely/utils';
 
 import type { FieldLabelAddonProps } from './form';
 import { Icon } from '../elements/icon';
@@ -37,6 +38,7 @@ export function FieldMessages(props: FieldMessagesProps) {
 
 export function FieldWrapper({
 	label,
+	labelClassName,
 	labelButton,
 	infoTooltip,
 	isDisabled,
@@ -45,6 +47,7 @@ export function FieldWrapper({
 }: {
 	children: ReactNode;
 	label?: ReactNode;
+	labelClassName?: string;
 	labelButton?: ReactNode;
 	isDisabled?: boolean;
 	toggleDisabled?: () => void;
@@ -67,7 +70,7 @@ export function FieldWrapper({
 		<>
 			{label && (
 				<FieldLabel
-					className='w-full'
+					className={cn('w-full', labelClassName)}
 					infoTooltip={infoTooltip}
 					labelButton={_labelButton}
 				>

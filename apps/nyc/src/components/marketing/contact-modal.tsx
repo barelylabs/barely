@@ -1,23 +1,37 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useZodForm } from '@barely/hooks';
 import { z } from 'zod/v4';
 
 import { Button } from '@barely/ui/button';
+import { CheckboxField } from '@barely/ui/forms/checkbox-field';
 import { Form } from '@barely/ui/forms/form';
+import { SelectField } from '@barely/ui/forms/select-field';
 import { TextAreaField } from '@barely/ui/forms/text-area-field';
 import { TextField } from '@barely/ui/forms/text-field';
 import { Icon } from '@barely/ui/icon';
 import { Modal, ModalBody, ModalHeader } from '@barely/ui/modal';
 
+import type { ServiceInterest } from '../../contexts/contact-modal-context';
+import { useCalComUrl } from '../../hooks/use-cal-com-url';
 import { MarketingButton } from './button';
 import { SecurityBadge } from './trust-badges';
 
 interface ContactModalProps {
 	showModal: boolean;
 	setShowModal: (show: boolean) => void;
-	preSelectedService?: 'bedroom' | 'rising' | 'breakout';
+	preSelectedService?: ServiceInterest;
+	preSelectedStanAddon?: boolean;
+	prefillData?: {
+		name?: string;
+		email?: string;
+		artistName?: string;
+		monthlyListeners?: string;
+		instagramHandle?: string;
+		spotifyTrackUrl?: string;
+		budgetRange?: '<$500/mo' | '$500-1k' | '$1k-2.5k' | '$2.5k+' | 'Not sure yet';
+	};
 }
 
 const contactFormSchema = z.object({
@@ -25,8 +39,15 @@ const contactFormSchema = z.object({
 	email: z.email('Invalid email address'),
 	artistName: z.string().optional(),
 	monthlyListeners: z.string().optional(),
-	service: z.enum(['bedroom', 'rising', 'breakout', '']).optional(),
+	service: z.enum(['bedroom', 'rising', 'breakout', 'stan', '']).optional(),
+	stanAddon: z.boolean().optional(),
 	message: z.string().min(10, 'Message must be at least 10 characters'),
+	// Additional fields from Growth Qualifier
+	spotifyTrackUrl: z.string().optional(),
+	instagramHandle: z.string().optional(),
+	budgetRange: z
+		.enum(['<$500/mo', '$500-1k', '$1k-2.5k', '$2.5k+', 'Not sure yet'])
+		.optional(),
 });
 
 type ContactFormData = z.infer<typeof contactFormSchema>;
@@ -35,22 +56,44 @@ export function ContactModal({
 	showModal,
 	setShowModal,
 	preSelectedService,
+	preSelectedStanAddon,
+	prefillData,
 }: ContactModalProps) {
+	const calComUrl = useCalComUrl();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [submitSuccess, setSubmitSuccess] = useState(false);
 	const [submitError, setSubmitError] = useState<string | null>(null);
 
 	const form = useZodForm<ContactFormData, ContactFormData>({
 		schema: contactFormSchema,
-		defaultValues: {
-			name: '',
-			email: '',
-			artistName: '',
-			monthlyListeners: '',
+		values: {
+			name: prefillData?.name ?? '',
+			email: prefillData?.email ?? '',
+			artistName: prefillData?.artistName ?? '',
+			monthlyListeners: prefillData?.monthlyListeners ?? '',
 			service: preSelectedService ?? '',
+			stanAddon: preSelectedStanAddon ?? false,
 			message: '',
+			spotifyTrackUrl: prefillData?.spotifyTrackUrl ?? '',
+			instagramHandle: prefillData?.instagramHandle ?? '',
+			budgetRange: prefillData?.budgetRange,
 		},
+		resetOptions: { keepDirtyValues: true },
 	});
+
+	// Update form values when pre-selected service/addon changes
+	useEffect(() => {
+		if (preSelectedService !== undefined) {
+			form.setValue('service', preSelectedService);
+		}
+		if (preSelectedStanAddon !== undefined) {
+			form.setValue('stanAddon', preSelectedStanAddon);
+		}
+	}, [preSelectedService, preSelectedStanAddon, form]);
+
+	// Watch service to conditionally show Stan addon checkbox
+	const selectedService = form.watch('service');
+	const showStanAddon = selectedService === 'bedroom' || selectedService === 'rising';
 
 	const handleSubmit = async (data: ContactFormData) => {
 		setIsSubmitting(true);
@@ -124,25 +167,82 @@ export function ContactModal({
 								/>
 							</div>
 
+							<SelectField
+								control={form.control}
+								name='service'
+								label='Interested In'
+								placeholder='Not sure yet'
+								options={[
+									{ value: 'bedroom', label: 'Bedroom+ (Coaching)' },
+									{ value: 'rising', label: 'Rising+ (Campaign Management)' },
+									{ value: 'breakout', label: 'Breakout+ (Full Growth Team)' },
+									{ value: 'stan', label: 'Stan (Standalone)' },
+								]}
+								className='border-white/10 bg-white/5 text-white'
+							/>
+
+							{showStanAddon && (
+								<div className='rounded-md border border-white/10 bg-white/5 p-3'>
+									<CheckboxField
+										control={form.control}
+										name='stanAddon'
+										label='Add Stan fan account management'
+										description='Daily Instagram fan account content + community building'
+									/>
+								</div>
+							)}
+
 							<details className='group'>
 								<summary className='mb-4 cursor-pointer text-sm text-white/60 hover:text-white/80'>
 									+ Add more details (optional)
 								</summary>
-								<div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
+								<div className='space-y-4'>
+									<div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
+										<TextField
+											control={form.control}
+											name='artistName'
+											label='Artist/Band Name'
+											placeholder='Your artist name'
+											className='border-white/10 bg-white/5 text-white placeholder:text-white/40'
+										/>
+
+										<TextField
+											control={form.control}
+											name='monthlyListeners'
+											label='Monthly Listeners'
+											placeholder='e.g., 5000'
+											className='border-white/10 bg-white/5 text-white placeholder:text-white/40'
+										/>
+									</div>
+
 									<TextField
 										control={form.control}
-										name='artistName'
-										label='Artist/Band Name'
-										placeholder='Your artist name'
+										name='spotifyTrackUrl'
+										label='Spotify Track URL'
+										placeholder='https://open.spotify.com/track/...'
 										className='border-white/10 bg-white/5 text-white placeholder:text-white/40'
 									/>
 
 									<TextField
 										control={form.control}
-										name='monthlyListeners'
-										label='Monthly Listeners'
-										placeholder='e.g., 5000'
+										name='instagramHandle'
+										label='Instagram Handle'
+										placeholder='@yourartistname'
 										className='border-white/10 bg-white/5 text-white placeholder:text-white/40'
+									/>
+
+									<SelectField
+										control={form.control}
+										name='budgetRange'
+										label='Monthly Marketing Budget'
+										options={[
+											{ value: '<$500/mo', label: 'Less than $500/month' },
+											{ value: '$500-1k', label: '$500-1k/month' },
+											{ value: '$1k-2.5k', label: '$1k-2.5k/month' },
+											{ value: '$2.5k+', label: '$2.5k+/month' },
+											{ value: 'Not sure yet', label: "Not sure yet (let's discuss)" },
+										]}
+										className='border-white/10 bg-white/5 text-white'
 									/>
 								</div>
 							</details>
@@ -179,7 +279,11 @@ export function ContactModal({
 								<Button
 									type='button'
 									look='outline'
-									onClick={() => setShowModal(false)}
+									onClick={e => {
+										e.preventDefault();
+										e.stopPropagation();
+										setShowModal(false);
+									}}
 									className='border-white/20 text-white hover:bg-white/10'
 								>
 									Cancel
@@ -192,7 +296,7 @@ export function ContactModal({
 								Or book a free strategy call:
 							</p>
 							<a
-								href='https://app.usemotion.com/meet/barely/discovery'
+								href={calComUrl}
 								target='_blank'
 								rel='noopener noreferrer'
 								className='block'
@@ -203,9 +307,12 @@ export function ContactModal({
 									className='flex items-center justify-center gap-2'
 								>
 									<Icon.calendar className='h-4 w-4' />
-									Book 15-Min Discovery Call
+									Book Free 30-Min Strategy Call
 								</MarketingButton>
 							</a>
+							<p className='mt-2 text-center text-xs text-white/60'>
+								Get your custom strategy kick-off plan
+							</p>
 						</div>
 
 						<p className='mt-4 text-center text-xs text-white/50'>

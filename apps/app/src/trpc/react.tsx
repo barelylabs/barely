@@ -6,7 +6,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import React, { useState } from 'react';
 import { usePusherSocketId } from '@barely/hooks';
-import { getAbsoluteUrl, isDevelopment } from '@barely/utils';
+import { getAbsoluteUrl, getCurrentAppVariant, isDevelopment } from '@barely/utils';
 import { isServer, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { createTRPCClient, httpBatchStreamLink, loggerLink } from '@trpc/client';
@@ -57,7 +57,7 @@ export function TRPCReactProvider(props: { children: ReactNode }) {
 							endpoint,
 							httpBatchStreamLink({
 								transformer: SuperJSON,
-								url: getAbsoluteUrl('app', `api/trpc/${endpoint}`),
+								url: getAbsoluteUrl(getCurrentAppVariant(), `api/trpc/${endpoint}`),
 								headers() {
 									const headers = new Headers();
 									headers.set('x-trpc-source', 'nextjs-react');

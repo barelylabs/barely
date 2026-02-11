@@ -103,6 +103,7 @@ function InvoiceCard({
 			subtitle={subtitleText}
 			quickActions={{
 				goToHref: href,
+				copyText: href,
 			}}
 			stats={[
 				{
@@ -112,10 +113,9 @@ function InvoiceCard({
 				},
 			]}
 			statsHref={href}
-		>
-			<Badge variant={getStatusColor(invoice.status)} className='ml-auto'>
-				{invoice.status}
-			</Badge>
-		</GridListCard>
+			statusBadge={
+				<Badge variant={getStatusColor(invoice.status)}>{invoice.status}</Badge>
+			}
+		/>
 	);
 }

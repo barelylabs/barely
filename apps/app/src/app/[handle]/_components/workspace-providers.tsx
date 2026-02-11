@@ -1,6 +1,7 @@
 'use client';
 
-import type { SessionUser, SessionWorkspace } from '@barely/auth';
+import type { SessionWorkspace } from '@barely/auth';
+import type { EnrichedUser } from '@barely/lib/trpc/types';
 import type { ReactNode } from 'react';
 import {
 	UserContext,
@@ -20,7 +21,7 @@ import { BrandKitProvider } from '@barely/ui/bio';
 import { ThemeProvider } from '@barely/ui/next-theme-provider';
 
 interface UserContextProviderProps {
-	user: SessionUser;
+	user: EnrichedUser;
 	children: ReactNode;
 }
 

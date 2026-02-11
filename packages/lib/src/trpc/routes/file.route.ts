@@ -20,7 +20,7 @@ import { ALLOWED_FILE_TYPES, getTypeFromFileName } from '@uploadthing/shared';
 import { and, asc, desc, eq, gt, inArray, lt, notInArray, or } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
-import { getUserWorkspaceByHandle } from '@barely/auth/utils';
+import { getWorkspaceByHandle } from '@barely/auth/utils';
 
 import type { sendUsageWarning } from '../../trigger';
 import { libEnv } from '../../../env';
@@ -36,7 +36,7 @@ export const fileRoute = {
 
 			const limit = input.limit ?? 20;
 
-			const workspace = getUserWorkspaceByHandle(ctx.user, handle);
+			const workspace = getWorkspaceByHandle(ctx.workspaces, handle);
 
 			const files = await dbHttp.query.Files.findMany({
 				where: sqlAnd([

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useUser, useWorkspaces } from '@barely/hooks';
-import { getAbsoluteUrl } from '@barely/utils';
+import { getAbsoluteUrl, getCurrentAppVariant } from '@barely/utils';
 import { signOut } from 'next-auth/react';
 
 import { Avatar } from '@barely/ui/avatar';
@@ -16,7 +16,6 @@ import {
 } from '@barely/ui/dropdown-menu';
 import { Icon } from '@barely/ui/icon';
 
-// export function UserAccountNav({ user }: UserAccountNavProps) {
 export function UserAccountNav() {
 	const user = useUser();
 	const allWorkspaces = useWorkspaces();
@@ -78,38 +77,14 @@ export function UserAccountNav() {
 						event.preventDefault();
 						setSigningOut(true);
 						signOut({
-							callbackUrl: getAbsoluteUrl('app', 'login'),
+							callbackUrl: getAbsoluteUrl(getCurrentAppVariant(), 'login'),
 						}).catch(err => console.error(err));
 					}}
 				>
 					{signingOut && <Icon.spinner className='mr-2 h-5 w-5 animate-spin' />}
 					{signingOut ? 'Signing out' : 'Sign out'}
 				</DropdownMenuItem>
-				{/* <form
-					action={async () => {
-						// setSigningOut(true);
-
-						await signOutAction();
-						// setSigningOut(false);
-					}}
-				>
-					<DropdownMenuItem asChild>
-						<SignOutButton />
-					</DropdownMenuItem>
-				</form> */}
-				{/* <SignOutButtonForm /> */}
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
 }
-
-// export function SignOutButton() {
-// 	const { pending } = useFormStatus();
-
-// 	return (
-// 		<button type='submit' aria-disabled={pending}>
-// 			{pending && <Icon.spinner className='mr-2 h-5 w-5 animate-spin' />}
-// 			{pending ? 'Signing out' : 'Sign out'}
-// 		</button>
-// 	);
-// }

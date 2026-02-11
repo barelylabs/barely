@@ -28,7 +28,7 @@
 		"dotenv-cli": "^7.4.1",
 		"drizzle-orm": "catalog:",
 		"jiti": "^1.21.0",
-		"next": "^15.3.4",
+		"next": "catalog:",
 		"postcss": "catalog:",
 		"react": "catalog:react19",
 		"react-dom": "catalog:react19",

@@ -16,6 +16,7 @@ import {
 	infiniteQuerySchema,
 	querySelectionSchema,
 } from '../helpers';
+import { isPossiblePhoneNumber, parseForDb } from '../helpers/phone';
 import { stdWebEventPipeQueryParamsSchema } from './tb.schema';
 
 // Bios
@@ -68,7 +69,7 @@ export const publicBioSchema = z.object({
 	showShareButton: z.boolean(),
 	showSubscribeButton: z.boolean(),
 	barelyBranding: z.boolean(),
-	emailCaptureEnabled: z.boolean(),
+	emailCaptureEnabled: z.boolean(), // Legacy email capture (for bio-email-capture-render)
 	emailCaptureIncentiveText: z.string().nullable(),
 	title: z.string().nullable(),
 	description: z.string().nullable(),
@@ -542,15 +543,30 @@ export const selectBiosFiltersSchema = biosFilterParamsSchema.extend({
 export const selectInfiniteBiosSchema =
 	selectBiosFiltersSchema.merge(infiniteQuerySchema);
 
-// Email capture schema
-export const bioEmailCaptureSchema = z.object({
-	bioId: z.string(),
-	email: z.email('Invalid email address'),
-	marketingConsent: z.boolean().default(false),
-	source: z.enum(['bio_page', 'bio_popup', 'bio_inline']).default('bio_page'),
-});
+// Email and SMS capture schema
+export const bioContactCaptureSchema = z
+	.object({
+		bioId: z.string(),
+		blockId: z.string().optional(), // Optional for backwards compatibility with legacy forms
+		email: z.email('Invalid email address').optional(),
+		phone: z
+			.string()
+			.refine(val => !val || isPossiblePhoneNumber(val), 'Invalid phone number')
+			.transform(val => (val ? parseForDb(val) : undefined))
+			.optional(),
+		marketingConsent: z.boolean().default(false),
+		smsMarketingConsent: z.boolean().default(false),
+		source: z.enum(['bio_page', 'bio_popup', 'bio_inline']).default('bio_page'),
+	})
+	.refine(data => data.email ?? data.phone, {
+		message: 'Please provide an email or phone number',
+	});
 
-export type BioEmailCapture = z.infer<typeof bioEmailCaptureSchema>;
+// Legacy alias for backwards compatibility
+export const bioEmailCaptureSchema = bioContactCaptureSchema;
+
+export type BioContactCapture = z.infer<typeof bioContactCaptureSchema>;
+export type BioEmailCapture = BioContactCapture;
 
 // stat filters
 export const bioStatFiltersSchema = stdWebEventPipeQueryParamsSchema.extend({

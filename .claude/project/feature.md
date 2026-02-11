@@ -1,244 +1,227 @@
-# Feature: Usage Protection & Monetization
+# Feature: Barely Fulfillment Partner
 
 ## Context & Background
 
-### Current State
-- **50 new sign-ups/month** since November (up from 1-2/month)
-- **4x increase in Neon database costs**
-- Users appear legitimate (unique emails, creating real workspaces)
-- **Zero revenue capture** - paid tiers exist but Stripe IDs are all `'fixme'`
-- **Most limits not enforced** - only invoice usage and cart fees are checked
+### Related Work
+- **Builds On**: Existing US and UK shipping endpoints in the barely app
+- **Extends**: Current workspace and order management system
+- **Enables**: Agency $1M GMV target for 2026
 
-### What Exists
-- Plan definitions with all limits in `workspace-plans.constants.ts`
-- Database fields for tracking usage (eventUsage, emailUsage, linkUsage, etc.)
-- Usage reset scheduler for billing cycles
-- Checkout flow code (works in test, broken in production)
-- Partial billing page showing some usage
+### Business Context
+- UK agency clients want to expand into US market but shipping from UK is prohibitively expensive
+- US clients won't consider physical media sales without a fulfillment solution
+- Current workaround (duplicate workspaces) is painful and creates operational overhead
+- This feature enables Barely to capture ~$150k+ in additional agency revenue via fulfillment fees
 
-### What's Missing
-- Production Stripe product/price IDs
-- Enforcement checks for 9 of 11 limit types
-- Warning system at threshold levels
-- Complete usage visibility for users
+### Validated Demand
+- 1 UK client (The Now) ready to go - has paid for product stocking in Brooklyn
+- 3 US clients contingent on this capability
+- Pricing validated at $3-4 per order
 
 ## Problem Statement
 
-We're experiencing real user growth but can't monetize it because the upgrade path is broken, and we can't protect against abuse because limits aren't enforced. Users on the free plan can effectively use unlimited resources, driving up infrastructure costs with no revenue offset.
+Artists selling physical products internationally face a choice: expensive cross-border shipping that kills ad ROI, or the operational nightmare of managing duplicate workspaces, Stripe accounts, and ad campaigns per region. This friction prevents UK/EU artists from effectively selling to US customers and discourages US artists from selling physical products at all.
 
 ### Evidence of Need
-- Database costs quadrupled in 2 months
-- 50 users/month × unlimited resources = unsustainable
-- Upgrade flow throws errors in production (tested: fails with 'fixme' price IDs)
+- UK client's US shipping costs make paid acquisition unprofitable
+- 3 prospective US clients won't sign without fulfillment solution
+- Current workaround requires: 2 workspaces, 2 Stripe accounts, duplicate products/funnels/landing pages, split ad campaigns
 
 ## Target Users
 
-1. **Free tier users** - Need clear boundaries on what they can use, visibility into their usage, and a working upgrade path when they need more
-2. **Barely team** - Need protection against runaway costs and ability to convert users to paid plans
+### Primary: UK/EU Artists Expanding to US
+- Already selling physical products in home market
+- Want to run paid campaigns to US audiences
+- Need affordable US shipping to make unit economics work
+- Currently blocked by shipping costs or workaround complexity
+
+### Secondary: US Artists Needing Fulfillment
+- Want to sell physical products but don't want to fulfill themselves
+- Would only consider physical media sales with a fulfillment partner
+- Willing to pay per-order fees for convenience
+
+## Current State & Pain Points
+
+### How Users Handle This Today
+- **Workaround**: Create 2 separate workspaces in the barely app
+  - Duplicate all landing pages, products, cart funnels
+  - Attach separate Stripe account to US workspace
+  - Split ad campaigns so UK fans → UK workspace, US fans → US workspace
+  - Manage sales/analytics across two separate systems
+- **Or**: Ship internationally from home country (expensive, slow, kills ad ROI)
+- **Or**: Don't sell to international customers at all
+
+### Validated Pain Points
+- Duplicate workspace setup takes significant time
+- Ongoing operational overhead managing two systems
+- Split Stripe accounts complicate accounting
+- Ad campaign management is more complex
+- Client explicitly prefers streamlined single-workspace solution
 
 ## Recommended Solution
 
-### Tiered Enforcement System
+Enable artists to designate Barely as their fulfillment partner for US orders (or all orders). When enabled:
+- Shipping estimates at checkout automatically calculate from the appropriate origin (Barely's Brooklyn address for Barely-fulfilled regions, artist's address for artist-fulfilled regions)
+- Orders are tagged with fulfillment responsibility
+- Artists can filter their orders view by fulfillment responsibility
 
-| Threshold | Behavior |
-|-----------|----------|
-| **80%** | Soft warning - in-app banner + email notification with upgrade CTA |
-| **100%** | Stern warning - more prominent in-app warning + email, still allow action |
-| **200%** | Hard limit - block action, email about shutdown, require upgrade to continue |
-
-**Email frequency**: One warning email per threshold per billing cycle (prevents spam if user hovers around threshold)
-
-### Limits to Enforce
-
-| Limit | Free | Bedroom | Rising | Breakout |
-|-------|------|---------|--------|----------|
-| Fans/contacts | 1,000 | 2,500 | 5,000 | 10,000 |
-| Team members | 1 | 5 | 10 | Unlimited |
-| Retargeting pixels | 0 | 1 | 3 | 5 |
-| Links/month | 50 | 1,000 | 5,000 | 25,000 |
-| Link clicks/month | 10,000 | 50,000 | 250,000 | 1B |
-| Emails/month | 10,000 | 10,000 | 10,000 | 10,000 |
-| Events/month | 5,000 | 50,000 | 150,000 | 500,000 |
-| Tasks/month | 100 | 2,500 | 5,000 | 10,000 |
-| File storage | 200MB | 200MB | 200MB | 200MB |
-| Invoices/month | 3 | 50 | 200 | Unlimited |
-
-*Note: Invoice enforcement already exists - extend with tiered warnings*
-
-### Working Upgrade Path
-
-#### DIY Plans (Bedroom, Rising, Breakout)
-Standard self-service upgrade flow:
-1. User clicks "Upgrade" button
-2. Redirected to Stripe Checkout with plan's price ID
-3. On successful payment, webhook updates workspace plan
-
-#### Plus Plans (Bedroom+, Rising+, Breakout+)
-Conditional flow based on `eligibleForPlus` workspace flag:
-
-| `eligibleForPlus` | Button Text | Action |
-|-------------------|-------------|--------|
-| `false` | "Apply" | Links to `cal.com/barely/nyc` |
-| `true` | "Upgrade" | Standard Stripe Checkout flow |
-
-This ensures Plus plans (which include coaching) require a conversation before purchase.
-
-### Deprecated Plans Removal
-Remove `agency` and `pro` plans entirely from codebase - they're no longer offered and have placeholder IDs.
-
-### Usage Dashboard Expansion
-
-Extend existing billing page to show all usage metrics:
-- Current: Invoices created, Link clicks
-- Add: Fans, Members, Links created, Emails sent, Events tracked, Tasks, Storage
+### Why This Approach
+- Single workspace, single Stripe account, single product catalog
+- Minimal UI changes (one setting + one filter)
+- Leverages existing shipping endpoints (US and UK already exist)
+- Simple eligibility flag allows Barely to vet artists before enabling
+- No inventory management complexity in MVP
 
 ## Success Criteria
 
-- [ ] All 10 limit types have enforcement at 80%, 100%, and 200% thresholds
-- [ ] Warning emails sent at 80% and 100% thresholds (once per threshold per billing cycle)
-- [ ] Hard block at 200% with clear upgrade messaging
-- [ ] User can upgrade from free → paid DIY plan in production (end-to-end test)
-- [ ] Plus plan upgrade shows "Apply" for non-eligible workspaces
-- [ ] Billing page shows all usage metrics with progress bars
-- [ ] Deprecated plans (agency, pro) removed from codebase
+### Business Metrics
+- UK client (The Now) successfully processing split-fulfillment orders within 2 weeks of launch
+- 3 US clients onboarded within 30 days of launch
+- Path to $1M GMV through Barely cart in 2026
+
+### Feature Metrics
+- Artists can enable Barely fulfillment in <2 minutes after approval
+- Checkout shipping estimates reflect correct origin based on destination
+- Order filtering correctly separates fulfillment responsibilities
+- Zero increase in support tickets related to shipping confusion
+
+### User Outcomes
+- Artists run single workspace for all markets
+- Shipping costs displayed to US customers are competitive (Brooklyn origin)
+- Artists can see exactly which orders they need to fulfill
 
 ## Core Functionality (MVP)
 
 ### Must Have
 
-1. **Enforcement utility function**
-   - Check usage against plan limit
-   - Return status: `ok` | `warning_80` | `warning_100` | `blocked_200`
-   - Include upgrade URL in response
-   - Track which warnings have been sent this billing cycle
+**1. Workspace Eligibility Flag**
+- Backend-set flag: `barelyFulfillmentEligible`
+- When false: current behavior, no fulfillment options visible
+- When true: artist can configure fulfillment mode
 
-2. **Enforcement integration points**
-   - Fan/contact creation → check fans limit
-   - Team member invite → check members limit
-   - Pixel creation → check pixels limit
-   - Link creation → check links limit (increment linkUsage)
-   - Email send → check emails limit (increment emailUsage)
-   - Event track → check events limit (increment eventUsage)
-   - Task creation → check tasks limit
-   - File upload → check storage limit (increment fileUsage)
+**2. Artist Fulfillment Mode Setting**
+- Location: Workspace settings
+- Options:
+  - "I fulfill all orders" (default, current behavior)
+  - "Barely fulfills US orders, I fulfill the rest"
+  - "Barely fulfills all orders"
+- Only visible when workspace is eligible
 
-3. **Warning email templates**
-   - 80% warning: "You're approaching your [resource] limit"
-   - 100% warning: "You've reached your [resource] limit"
-   - 200% blocked: "Your [resource] has been paused"
+**3. Dynamic Shipping Calculation**
+- At checkout, determine shipping origin based on:
+  - Customer's shipTo address (US vs non-US)
+  - Workspace's fulfillment mode setting
+- US customer + (US-only OR worldwide Barely fulfillment) → use US shipping endpoint with Barely's Brooklyn address
+- Non-US customer + worldwide Barely fulfillment → use US shipping endpoint with Barely's Brooklyn address
+- Otherwise → use existing logic with artist's shipFrom address
 
-4. **Stripe production IDs** ✅ COLLECTED
-   - Update `workspace-plans.constants.ts` with real IDs
-   - Remove deprecated plans (agency, pro)
+**4. Order Fulfillment Assignment**
+- When order is created, tag with fulfillment responsibility: `fulfilledBy: "artist" | "barely"`
+- Logic mirrors shipping calculation logic
+- Stored on order record for filtering
 
-5. **Plus plan conditional upgrade**
-   - Add `eligibleForPlus` boolean field to workspace schema
-   - Modify upgrade buttons to check flag
-   - "Apply" → cal.com/barely/nyc when not eligible
-   - Standard checkout when eligible
+**5. Order Filtering**
+- Add filter to orders view: "All Orders" | "My Fulfillment" | "Barely Fulfillment"
+- Simple filter on `fulfilledBy` field
+- Default to "All Orders"
 
-6. **Billing page expansion**
-   - Add usage rows for all tracked metrics
-   - Progress bar showing current/limit
-   - Color coding: green (<80%), yellow (80-100%), red (>100%)
+**6. Fulfillment Fee Capture**
+- Workspace fields: `barelyFulfillmentFlatFeePerOrder` (e.g., $1.00), `barelyFulfillmentPercentageFeePerOrder` (e.g., 5%)
+- At time of order, calculate fulfillment fee: flat fee + (order subtotal × percentage)
+- Deduct from artist payout alongside existing cart and shipping fees
+- Only applied to orders where `fulfilledBy: "barely"`
 
-### Reusable Components
-- Extend existing `checkInvoiceUsageAndIncrement()` pattern
-- Use existing `use-usage` hook for frontend
-- Use existing email infrastructure for warnings
-- Extend existing billing page components
+### Configuration
+
+**Environment Variables (not in public repo)**
+- `BARELY_FULFILLMENT_ADDRESS_LINE1` = "763 Park Pl #1R"
+- `BARELY_FULFILLMENT_ADDRESS_CITY` = "Brooklyn"
+- `BARELY_FULFILLMENT_ADDRESS_STATE` = "NY"
+- `BARELY_FULFILLMENT_ADDRESS_ZIP` = "11216"
+- `BARELY_FULFILLMENT_ADDRESS_COUNTRY` = "US"
 
 ## Out of Scope for MVP
 
-- Admin dashboard for viewing all workspace usage
-- Automatic downgrade for non-payment
-- Usage analytics/trends over time
-- Granular rate limiting (per-minute/hour)
-- Custom limit overrides via UI (already exists in DB, admin-only)
+### Explicitly Deferred
+- Inventory/stock management (handled operationally)
+- Per-product fulfillment settings (all products use same fulfillment mode)
+- Barely-side dashboard (Barely team uses existing workspace filtering)
+- Returns handling in-app (handled via support email)
+- Non-US Barely fulfillment locations
+- Complex approval workflows (simple backend flag for now)
+- Automated stock alerts or notifications
 
-## Technical Considerations
+### Available via Workaround
+- Multi-region Barely fulfillment → separate workspaces per region
+- Per-product fulfillment → manual coordination with Barely team
 
-### Enforcement Pattern
-```typescript
-// Pseudocode for enforcement utility
-async function checkUsageLimit(
-  workspaceId: string,
-  limitType: 'fans' | 'members' | 'links' | 'emails' | 'events' | 'tasks' | 'storage' | 'pixels',
-  incrementBy?: number
-): Promise<{
-  status: 'ok' | 'warning_80' | 'warning_100' | 'blocked_200';
-  current: number;
-  limit: number;
-  percentage: number;
-  upgradeUrl: string;
-  shouldSendEmail: boolean; // false if already sent this cycle
-}>
-```
+## Integration Points
 
-### Key Files to Modify
-- `packages/const/src/workspace-plans.constants.ts` - Add Stripe IDs, remove deprecated plans
-- `packages/db/src/sql/workspace.sql.ts` - Add `eligibleForPlus` field, warning tracking fields
-- `packages/lib/src/functions/usage.fns.ts` - New enforcement utilities
-- `packages/lib/src/functions/*.fns.ts` - Add checks to each feature
-- `packages/lib/src/trigger/usage-warnings.ts` - Warning email jobs
-- `apps/app/src/app/[handle]/settings/billing/page.tsx` - Expand usage display
-- Plans page component - Conditional Plus plan buttons
+### With Existing Features
+- **Shipping Endpoints**: US and UK endpoints already exist, route to appropriate one
+- **Order Management**: Add `fulfilledBy` field and filter capability
+- **Workspace Settings**: Add fulfillment mode configuration
+- **Checkout Flow**: Modify shipping calculation to consider fulfillment mode
 
-### Database Additions
-- `eligibleForPlus` boolean on workspace (default false)
-- `usageWarnings` jsonb field to track sent warnings per billing cycle:
-  ```json
-  {
-    "fans_80": "2026-02-10T...",
-    "fans_100": null,
-    "emails_80": "2026-02-08T...",
-    ...
-  }
-  ```
-
-## Stripe Production IDs
-
-### DIY Plans
-
-| Plan | Product ID | Monthly Price ID | Yearly Price ID |
-|------|------------|------------------|-----------------|
-| Bedroom | `prod_Txeo2HSM6HnJx4` | `price_1SzjV0HDMmzntRhpvQKmHeC8` | `price_1SzjVSHDMmzntRhpiwbdyqbv` |
-| Rising | `prod_TxevMytIBe6fon` | `price_1SzjbtHDMmzntRhprcbxD20W` | `price_1SzjcCHDMmzntRhpAZVE4aig` |
-| Breakout | `prod_TxeweGMPwBFeVm` | `price_1Szjd0HDMmzntRhpQzAUpny0` | `price_1SzjdNHDMmzntRhpE3gZv0CW` |
-
-### Plus Plans (Require eligibleForPlus = true)
-
-| Plan | Product ID | Monthly Price ID | Yearly Price ID |
-|------|------------|------------------|-----------------|
-| Bedroom+ | `prod_Txey7RdoUEQFHi` | `price_1SzjeVHDMmzntRhpOy4yrqcW` | `price_1SzjemHDMmzntRhp0CXxI518` |
-| Rising+ | `prod_TxezRHktqwlWKI` | `price_1SzjfOHDMmzntRhpIItqCV70` | `price_1SzjfgHDMmzntRhpAfaEeT4Y` |
-| Breakout+ | `prod_Txf0wBNF8ZpgfR` | `price_1SzjgKHDMmzntRhpSSD7gNdz` | `price_1SzjgdHDMmzntRhpe1YEe9Wu` |
-
-### Invoice Pro
-
-| Plan | Product ID | Monthly Price ID | Yearly Price ID |
-|------|------------|------------------|-----------------|
-| Invoice Pro | `prod_Txf4YDcKhcTd0G` | `price_1SzjkhHDMmzntRhpufIFDzh4` | `price_1SzjksHDMmzntRhp7fan3dl1` |
-
-## Human Review Required
-
-- [x] ~~Confirm tiered thresholds (80/100/200%) are appropriate~~ ✅ Confirmed
-- [x] ~~Review Stripe pricing matches business intent~~ ✅ All IDs collected
-- [x] ~~Should deprecated plans (agency, pro) be removed entirely?~~ ✅ Yes, remove
-- [x] ~~Confirm email warning frequency~~ ✅ Once per threshold per billing cycle
-- [x] ~~Keep Invoice Pro plan?~~ ✅ Yes, IDs provided
+### Data Model Changes
+- Workspace: Add `barelyFulfillmentEligible` (boolean), `barelyFulfillmentMode` (enum), `barelyFulfillmentFlatFeePerOrder` (decimal), `barelyFulfillmentPercentageFeePerOrder` (decimal)
+- Order: Add `fulfilledBy` (enum: artist | barely), `barelyFulfillmentFee` (decimal, calculated at order time)
 
 ## Complexity Assessment
 
 **Overall Complexity**: Medium
 
-**Reduced by:**
-- Following existing invoice enforcement pattern
-- Using existing usage tracking fields
-- Extending existing billing page components
+**Reduced Complexity Through:**
+- Using existing shipping endpoints (no new carrier integrations)
+- Simple boolean eligibility (no approval workflow)
+- No inventory management
+- No Barely-specific dashboard (reuse existing)
 
-**Remaining complexity:**
-- 10 integration points to add enforcement
-- Email template creation
-- Plus plan conditional flow
-- End-to-end testing of upgrade flow
+**Remaining Complexity:**
+- Shipping calculation routing logic
+- Ensuring checkout correctly determines fulfillment before calculating shipping
+- Order filter UI addition
+
+## Human Review Required
+
+- [x] Confirm Barely's Brooklyn address for env variables → 763 Park Pl #1R, Brooklyn, NY 11216
+- [x] Confirm fulfillment fee structure → Flat fee + percentage per order, captured at purchase time
+- [x] Confirm The Now is ready for beta testing → Ready to go ASAP
+- [x] Decide: How does Barely get notified of orders to fulfill? → Barely team gets workspace access, uses order filtering
+
+## Technical Considerations
+
+*High-level only - implementation details in later phases*
+
+- Shipping calculation happens at checkout - need to determine fulfillment responsibility before calling shipping endpoint
+- `fulfilledBy` should be immutable once order is created (based on address at time of purchase)
+- Consider: What if customer changes address after order? (Probably: don't allow, or recalculate fulfillment)
+- Env variables for Barely address keep sensitive data out of repo
+
+## Operational Considerations
+
+### Barely Fulfillment Operations
+- Barely team gets workspace access to fulfillment-enabled workspaces
+- Use "Barely Fulfillment" filter to see orders to fulfill
+- Mark orders as shipped using standard order fulfillment flow
+- Returns/support handled via existing support email channel
+
+### Client Onboarding
+- Artist requests Barely fulfillment
+- Barely team verifies product is stocked in Brooklyn
+- Barely team sets `barelyFulfillmentEligible = true` and configures fee structure
+- Artist configures fulfillment mode in workspace settings
+
+## Future Possibilities
+
+### Natural Extensions (Post-MVP)
+- Multiple Barely fulfillment locations (EU warehouse)
+- Per-product fulfillment assignment
+- Inventory sync and stock alerts
+- Barely-specific fulfillment dashboard
+- Fulfillment fee reporting/analytics
+
+### Watch For (Scope Creep)
+- Complex inventory management before validating basic fulfillment
+- Per-SKU fulfillment routing before proving demand
+- Real-time stock sync before manual process is painful

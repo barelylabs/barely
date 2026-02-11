@@ -3,7 +3,10 @@ import { mdxLink } from '@barely/ui/mdx-link';
 import { MDXRemoteRSC as MDXRemote } from '@barely/ui/mdx-remote';
 import { mdxVideoPlayer } from '@barely/ui/mdx-video-player';
 
+import { BlogCtaCard } from './blog-cta-card';
 import { blogTypography } from './blog-typography';
+import { CalComBookingLink } from './cal-com-booking-link';
+import { DiscoveryCtaCard, ResultsCtaCard, StrategyCtaCard } from './cta-card-variants';
 
 export function BlogMDX({ markdown }: { markdown: string }) {
 	const components = {
@@ -11,6 +14,11 @@ export function BlogMDX({ markdown }: { markdown: string }) {
 		...mdxVideoPlayer,
 		...mdxImageFile(),
 		...mdxLink,
+		CalComBookingLink,
+		BlogCtaCard,
+		StrategyCtaCard,
+		ResultsCtaCard,
+		DiscoveryCtaCard,
 	};
 
 	return (

@@ -195,6 +195,15 @@ export const Carts = pgTable(
 			.default('pending'),
 		fulfilledAt: timestamp('fulfilledAt'),
 
+		// barely fulfillment partner
+		fulfilledBy: varchar('fulfilledBy', {
+			length: 20,
+			enum: ['artist', 'barely'],
+		})
+			.default('artist')
+			.notNull(),
+		barelyFulfillmentFee: integer('barelyFulfillmentFee').default(0).notNull(), // in cents
+
 		shippingCarrier: varchar('shippingCarrier', { length: 255 }),
 		shippingTrackingNumber: varchar('shippingTrackingNumber', { length: 255 }),
 		shippedAt: timestamp('shippedAt'),

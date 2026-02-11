@@ -7,6 +7,7 @@ import {
 	_BioBlocks_To_Bios,
 	_BioButtons_To_Bios,
 	_BioLinks_To_BioBlocks,
+	BioBlocks,
 	BioLinks,
 	Bios,
 } from '@barely/db/sql/bio.sql';
@@ -136,23 +137,27 @@ export const bioRenderRoute = {
 		.input(
 			z.object({
 				bioId: z.string(),
-				email: z.email(),
+				blockId: z.string().optional(), // Optional for backwards compatibility with legacy forms
+				email: z.email(), // Email is always required (Fan.email is notNull)
+				phone: z.string().optional(),
 				marketingConsent: z.boolean().default(false),
+				smsMarketingConsent: z.boolean().default(false),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
 			const { visitor } = ctx;
-			const { bioId, email, marketingConsent } = input;
+			const { bioId, blockId, email, phone, marketingConsent, smsMarketingConsent } =
+				input;
 
-			// Rate limit email capture attempts by IP (3 attempts per hour)
+			// Rate limit capture attempts by IP (3 attempts per hour)
 			const { success } = await ratelimit(3, '1 h').limit(
-				`bio.email.capture.${visitor?.ip ?? '127.0.0.1'}`,
+				`bio.contact.capture.${visitor?.ip ?? '127.0.0.1'}`,
 			);
 
 			if (!success) {
 				throw new TRPCError({
 					code: 'TOO_MANY_REQUESTS',
-					message: 'Too many email capture attempts. Please try again later.',
+					message: 'Too many capture attempts. Please try again later.',
 				});
 			}
 
@@ -172,18 +177,34 @@ export const bioRenderRoute = {
 					},
 				})) ?? raiseTRPCError({ message: 'Bio not found' });
 
-			// Check if email capture is enabled for this bio
-			if (!bio.emailCaptureEnabled) {
-				throw new TRPCError({
-					code: 'FORBIDDEN',
-					message: 'Email capture is not enabled for this bio page.',
-				});
-			}
+			// Check if SMS capture is enabled for phone number collection
+			// Email is always captured (Fan.email is notNull)
+			let smsCaptureAllowed = false;
 
-			// Use database transaction for fan creation and email capture
+			if (blockId) {
+				// Block-level validation (new contact form blocks)
+				const block = await dbHttp.query.BioBlocks.findFirst({
+					where: and(
+						eq(BioBlocks.id, blockId),
+						eq(BioBlocks.workspaceId, bio.workspaceId),
+					),
+				});
+
+				if (!block || block.type !== 'contactForm') {
+					throw new TRPCError({
+						code: 'NOT_FOUND',
+						message: 'Contact form block not found.',
+					});
+				}
+
+				smsCaptureAllowed = !!(phone && (block.smsCaptureEnabled ?? true));
+			}
+			// Legacy bio-level forms don't support SMS, but email is always allowed
+
+			// Use database transaction for fan creation and contact capture
 			const pool = makePool();
 			await dbPool(pool).transaction(async tx => {
-				// Check if fan already exists globally
+				// Check if fan already exists globally by email
 				const existingFan = await tx.query.Fans.findFirst({
 					where: and(eq(Fans.email, email), isNull(Fans.deletedAt)),
 				});
@@ -207,7 +228,9 @@ export const bioRenderRoute = {
 							workspaceId: bio.workspaceId,
 							email,
 							fullName: cleanedName,
+							phoneNumber: smsCaptureAllowed ? phone : undefined,
 							emailMarketingOptIn: marketingConsent,
+							smsMarketingOptIn: smsCaptureAllowed && phone ? smsMarketingConsent : false,
 							appReferer: 'bio', // Track that this fan came from bio page
 							createdAt: new Date(),
 							updatedAt: new Date(),
@@ -217,6 +240,9 @@ export const bioRenderRoute = {
 							set: {
 								updatedAt: new Date(),
 								emailMarketingOptIn: marketingConsent,
+								...(smsCaptureAllowed && phone ?
+									{ phoneNumber: phone, smsMarketingOptIn: smsMarketingConsent }
+								:	{}),
 							},
 						})
 						.returning();
@@ -230,12 +256,15 @@ export const bioRenderRoute = {
 
 					fanId = newFans[0].id;
 				} else {
-					// Update existing fan's marketing consent
+					// Update existing fan's marketing consent and phone
 					await tx
 						.update(Fans)
 						.set({
 							updatedAt: new Date(),
 							emailMarketingOptIn: marketingConsent,
+							...(smsCaptureAllowed && phone ?
+								{ phoneNumber: phone, smsMarketingOptIn: smsMarketingConsent }
+							:	{}),
 							...(existingFan.appReferer ? {} : { appReferer: 'bio' as const }),
 						})
 						.where(eq(Fans.id, existingFan.id));
@@ -272,25 +301,38 @@ export const bioRenderRoute = {
 				return { fanId };
 			});
 
-			// Record the email capture event
+			// Record the capture event
 			await recordBioEvent({
 				bio,
 				type: 'bio/emailCapture',
 				visitor,
 				workspace: bio.workspace,
-				emailMarketingOptIn: marketingConsent,
+				emailMarketingOptIn: email ? marketingConsent : undefined,
+				smsMarketingOptIn: phone ? smsMarketingConsent : undefined,
 			});
 
-			// TODO: Trigger welcome email automation
-			// This should integrate with the email automation system once available
-			// For now, fans are created and can be managed through the admin panel
+			// Build success message based on what was captured
+			let message: string;
+			if (email && phone) {
+				message =
+					marketingConsent || smsMarketingConsent ?
+						"Thank you! You've been added to our contact list."
+					:	'Thank you! Your contact info has been captured.';
+			} else if (email) {
+				message =
+					marketingConsent ?
+						"Thank you! You've been added to our mailing list."
+					:	'Thank you! Your email has been captured.';
+			} else {
+				message =
+					smsMarketingConsent ?
+						"Thank you! You've been added to our SMS list."
+					:	'Thank you! Your phone number has been captured.';
+			}
 
 			return {
 				success: true,
-				message:
-					marketingConsent ?
-						"Thank you! You've been added to our mailing list."
-					:	'Thank you! Your email has been captured.',
+				message,
 			};
 		}),
 } satisfies TRPCRouterRecord;

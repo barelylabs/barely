@@ -1,4 +1,3 @@
-import type { SessionUser } from '@barely/auth';
 import type { Db } from '@barely/db/client';
 import type { NeonPool } from '@barely/db/pool';
 import type {
@@ -35,6 +34,7 @@ import type {
 	StripeLineItemMetadata,
 	StripeTransactionMetadata,
 } from '../integrations/stripe/stripe.schema';
+import type { EnrichedUser } from '../trpc/types';
 import { libEnv } from '../../env';
 import { stripe } from '../integrations/stripe';
 import { sendText } from '../utils/sms';
@@ -42,7 +42,7 @@ import { totalPlaylistReachByGenres } from './playlist.fns';
 import { createStripeWorkspaceCustomer } from './workspace-stripe.fns';
 
 export async function createPitchCheckoutLink(props: {
-	user: SessionUser;
+	user: EnrichedUser;
 	workspace: Workspace;
 	campaign: CampaignWithWorkspaceAndTrackAndGenres;
 }) {
@@ -298,7 +298,7 @@ export async function getCampaignsToScreen(db: Db) {
 }
 
 export async function createPlaylistPitchCampaign(props: {
-	user: SessionUser;
+	user: EnrichedUser;
 	trackId: string;
 	sendConfirmationEmail?: boolean;
 	pool: NeonPool;

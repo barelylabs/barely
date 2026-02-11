@@ -19,6 +19,7 @@ import { newId, raiseTRPCError } from '@barely/utils';
 import {
 	createWorkspaceSchema,
 	updateCurrentWorkspaceSchema,
+	updateWorkspaceFulfillmentModeSchema,
 	updateWorkspaceHandleSchema,
 	updateWorkspaceSpotifyArtistIdSchema,
 	workspaceAssetsSchema,
@@ -286,6 +287,36 @@ export const workspaceRoute = {
 						'An error occurred while adding the Spotify artist. Please try again later or reach out to support.',
 				});
 			}
+		}),
+
+	updateFulfillmentMode: workspaceProcedure
+		.input(updateWorkspaceFulfillmentModeSchema)
+		.mutation(async ({ ctx, input }) => {
+			// Verify workspace is eligible for Barely fulfillment
+			if (!ctx.workspace.barelyFulfillmentEligible) {
+				throw new TRPCError({
+					code: 'FORBIDDEN',
+					message:
+						'This workspace is not eligible for Barely fulfillment. Please contact support to enable this feature.',
+				});
+			}
+
+			await dbHttp
+				.update(Workspaces)
+				.set({ barelyFulfillmentMode: input.barelyFulfillmentMode })
+				.where(eq(Workspaces.id, ctx.workspace.id));
+
+			try {
+				await pushEvent('workspace', 'update', {
+					id: ctx.workspace.id,
+					pageSessionId: ctx.pageSessionId,
+					socketId: ctx.pusherSocketId,
+				});
+			} catch (error) {
+				console.error('error pushing workspace update event => ', error);
+			}
+
+			return { success: true, barelyFulfillmentMode: input.barelyFulfillmentMode };
 		}),
 
 	updateAvatar: workspaceProcedure

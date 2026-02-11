@@ -1,4 +1,4 @@
-import type { APPS } from '@barely/const';
+import type { App, APPS } from '@barely/const';
 
 import { authEnv } from '../env';
 
@@ -147,7 +147,7 @@ export function getBaseUrl(app: (typeof APPS)[number], absolute = false) {
 }
 
 export function getAbsoluteUrl(
-	app: (typeof APPS)[number],
+	app: App,
 	path?: string,
 	opts?: { subdomain?: string; query?: Record<string, string> },
 ) {

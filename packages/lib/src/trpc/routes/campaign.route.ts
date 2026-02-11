@@ -38,7 +38,7 @@ import {
 	getCampaignsByWorkspaceId,
 } from '../../functions/campaign.fns';
 import { createTrack } from '../../functions/track.fns';
-import { createUser, getSessionUserByUserId } from '../../functions/user.fns';
+import { createUser, getEnrichedUserByUserId } from '../../functions/user.fns';
 import { createWorkspace } from '../../functions/workspace.fns';
 import { pushEvent } from '../../integrations/pusher/pusher-server';
 import { sendText } from '../../utils/sms';
@@ -250,7 +250,7 @@ export const campaignRoute = {
 			// };
 
 			const newSessionUser =
-				(await getSessionUserByUserId(newUser.id)) ??
+				(await getEnrichedUserByUserId(newUser.id)) ??
 				raiseTRPCError({ message: 'no user found' });
 
 			const newCampaign = createPlaylistPitchCampaign({
@@ -557,7 +557,7 @@ export const campaignRoute = {
 
 				// send email to the user that created the campaign
 				// const user =
-				// 	(await getSessionUserByUserId(campaign.createdBy.id)) ??
+				// 	(await getEnrichedUserByUserId(campaign.createdBy.id)) ??
 				// 	raiseTRPCError({ message: 'no user found for that campaign' });
 				const { magicLink } = await createMagicLink({
 					// user,

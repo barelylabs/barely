@@ -1,6 +1,10 @@
+import type { NextRequest } from 'next/server';
 import { sendEmail } from '@barely/email';
 import { ContactInquiryEmail } from '@barely/email/templates/nyc/contact-inquiry';
 import { ratelimit } from '@barely/lib';
+import { upsertContactFormLead } from '@barely/lib/functions/airtable-lead.fns';
+import { recordNYCEvent } from '@barely/lib/functions/nyc-event.fns';
+import { parseReqForVisitorInfo } from '@barely/lib/middleware/request-parsing';
 import { isProduction } from '@barely/utils';
 import { ipAddress } from '@vercel/edge';
 import { z } from 'zod/v4';
@@ -10,12 +14,40 @@ const contactFormSchema = z.object({
 	email: z.email('Invalid email address'),
 	artistName: z.string().optional(),
 	monthlyListeners: z.string().optional(),
-	service: z.enum(['bedroom', 'rising', 'breakout', '']).optional(),
+	service: z.enum(['bedroom', 'rising', 'breakout', 'stan', '']).optional(),
+	stanAddon: z.boolean().optional(),
 	message: z.string().min(10, 'Message must be at least 10 characters'),
+	spotifyTrackUrl: z.string().optional(),
+	instagramHandle: z.string().optional(),
+	budgetRange: z
+		.enum(['<$500/mo', '$500-1k', '$1k-2.5k', '$2.5k+', 'Not sure yet'])
+		.optional(),
 });
 
-export async function POST(request: Request) {
+// Helper to format service interest for email subject
+function formatServiceForSubject(service?: string, stanAddon?: boolean): string {
+	const serviceNames: Record<string, string> = {
+		bedroom: 'Bedroom+',
+		rising: 'Rising+',
+		breakout: 'Breakout+',
+		stan: 'Stan (Standalone)',
+	};
+	const name = serviceNames[service ?? ''] ?? 'General Inquiry';
+	if (stanAddon && (service === 'bedroom' || service === 'rising')) {
+		return `${name} + Stan`;
+	}
+	return name;
+}
+
+export async function POST(request: NextRequest) {
 	try {
+		// Parse visitor info for Meta Pixel tracking
+		const visitor = parseReqForVisitorInfo({
+			req: request,
+			handle: 'barely',
+			key: 'nyc',
+		});
+
 		// Validate input
 		const validatedData = contactFormSchema.parse(await request.json());
 
@@ -45,14 +77,18 @@ export async function POST(request: Request) {
 			from: 'noreply@mail.barely.nyc',
 			fromFriendlyName: 'Barely',
 			to: 'hello@barely.nyc',
-			subject: `New Contact Form Submission - ${validatedData.service ? validatedData.service.charAt(0).toUpperCase() + validatedData.service.slice(1) + '+' : 'General Inquiry'}`,
+			subject: `New Contact Form Submission - ${formatServiceForSubject(validatedData.service, validatedData.stanAddon)}`,
 			react: ContactInquiryEmail({
 				name: validatedData.name,
 				email: validatedData.email,
 				artistName: validatedData.artistName,
 				monthlyListeners: validatedData.monthlyListeners,
 				service: validatedData.service,
+				stanAddon: validatedData.stanAddon,
 				message: validatedData.message,
+				spotifyTrackUrl: validatedData.spotifyTrackUrl,
+				instagramHandle: validatedData.instagramHandle,
+				budgetRange: validatedData.budgetRange,
 			}),
 			type: 'transactional',
 			replyTo: validatedData.email,
@@ -64,6 +100,36 @@ export async function POST(request: Request) {
 			setCorsHeaders(response);
 			return response;
 		}
+
+		// Track contact form submission to Meta Pixel
+		await recordNYCEvent({
+			type: 'nyc/contactFormSubmit',
+			visitor,
+			email: validatedData.email,
+			firstName: validatedData.name.split(' ')[0],
+			lastName: validatedData.name.split(' ').slice(1).join(' ') || undefined,
+			customData: {
+				service_interest: validatedData.service ?? 'general',
+				budget_range: validatedData.budgetRange,
+				artist_name: validatedData.artistName,
+			},
+		});
+
+		// Capture lead in Airtable CRM (non-blocking - silent failure)
+		upsertContactFormLead({
+			email: validatedData.email,
+			name: validatedData.name,
+			artistName: validatedData.artistName,
+			monthlyListeners: validatedData.monthlyListeners,
+			serviceInterest: validatedData.service,
+			budgetRange: validatedData.budgetRange,
+			initialMessage: validatedData.message,
+			spotifyTrackUrl: validatedData.spotifyTrackUrl,
+			instagramHandle: validatedData.instagramHandle,
+		}).catch(error => {
+			console.error('Failed to update Airtable lead from contact form:', error);
+			// Silent failure - don't block the request
+		});
 
 		const successResponse = new Response(JSON.stringify({ success: true }), {
 			status: 200,

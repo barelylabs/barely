@@ -147,6 +147,11 @@ function CartOrderCard({
 							<Badge size='xs'>
 								{cartOrder.canceledAt ? 'canceled' : cartOrder.fulfillmentStatus}
 							</Badge>
+							{cartOrder.fulfilledBy === 'barely' && (
+								<Badge size='xs' variant='info'>
+									Barely Fulfillment
+								</Badge>
+							)}
 						</div>
 						{/* <Text>{cartOrder.id}</Text> */}
 						<div className='flex flex-row gap-10'>
