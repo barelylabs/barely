@@ -158,7 +158,10 @@ export function getSettingsRoutesForVariant(variant?: AppVariant): {
 	}
 
 	if (features.includes('products')) {
-		allSettings.push({ path: '/settings/cart', label: 'cart', icon: 'cart' });
+		allSettings.push(
+			{ path: '/settings/cart', label: 'cart', icon: 'cart' },
+			{ path: '/settings/fulfillment', label: 'fulfillment', icon: 'fulfillment' },
+		);
 	}
 
 	return allSettings;

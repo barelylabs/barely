@@ -151,3 +151,16 @@ export const workspaceAssetsSchema = z.object({
 	types: z.array(z.enum(['cartFunnel', 'pressKit', 'landingPage'])).optional(),
 	search: z.string().optional(),
 });
+
+// fulfillment
+export const barelyFulfillmentModeSchema = z.enum([
+	'artist_all',
+	'barely_us',
+	'barely_worldwide',
+]);
+
+export type BarelyFulfillmentMode = z.infer<typeof barelyFulfillmentModeSchema>;
+
+export const updateWorkspaceFulfillmentModeSchema = z.object({
+	barelyFulfillmentMode: barelyFulfillmentModeSchema,
+});

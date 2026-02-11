@@ -35,6 +35,8 @@ export function createTestWorkspace(
 		shippingAddressPostalCode: null,
 		shippingAddressCountry: null,
 		shippingAddressPhone: null,
+		barelyFulfillmentEligible: false,
+		barelyFulfillmentMode: 'artist_all',
 		brandKit: null,
 	};
 
