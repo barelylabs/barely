@@ -45,6 +45,12 @@ export const libEnv = createEnv({
 		ANTHROPIC_API_KEY: z.string(),
 		AUTH_SECRET: z.string(),
 		AWS_S3_BUCKET_NAME: z.string(),
+		// Barely Fulfillment Address
+		BARELY_FULFILLMENT_ADDRESS_LINE1: z.string(),
+		BARELY_FULFILLMENT_ADDRESS_CITY: z.string(),
+		BARELY_FULFILLMENT_ADDRESS_STATE: z.string(),
+		BARELY_FULFILLMENT_ADDRESS_ZIP: z.string(),
+		BARELY_FULFILLMENT_ADDRESS_COUNTRY: z.string(),
 		AWS_S3_REGION: z.string(),
 		AWS_S3_ACCESS_KEY_ID: z.string(),
 		AWS_S3_SECRET_ACCESS_KEY: z.string(),
@@ -168,3 +174,17 @@ export const libEnv = createEnv({
 		process.env.npm_lifecycle_event === 'lint' ||
 		process.env.npm_lifecycle_event === 'test',
 });
+
+/**
+ * Returns the Barely fulfillment center address from environment variables.
+ * Used when Barely is fulfilling orders on behalf of an artist.
+ */
+export function getBarelyFulfillmentAddress() {
+	return {
+		line1: libEnv.BARELY_FULFILLMENT_ADDRESS_LINE1,
+		city: libEnv.BARELY_FULFILLMENT_ADDRESS_CITY,
+		state: libEnv.BARELY_FULFILLMENT_ADDRESS_STATE,
+		postalCode: libEnv.BARELY_FULFILLMENT_ADDRESS_ZIP,
+		country: libEnv.BARELY_FULFILLMENT_ADDRESS_COUNTRY,
+	};
+}
