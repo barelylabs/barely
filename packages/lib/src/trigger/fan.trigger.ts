@@ -7,10 +7,13 @@ import { dbHttp } from '@barely/db/client';
 import { Fans, Files } from '@barely/db/sql';
 import { getFullNameFromFirstAndLast, newId, parseFullName } from '@barely/utils';
 import { insertFanSchema } from '@barely/validators';
-import { task } from '@trigger.dev/sdk/v3';
+import { task, tasks } from '@trigger.dev/sdk/v3';
 import { parse } from 'csv-parse';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod/v4';
+
+import type { sendUsageWarning } from './workspace-usage';
+import { checkUsageLimit, getBlockedMessage } from '../functions/usage.fns';
 
 export const importFansFromCsv = task({
 	id: 'import-fans-from-csv',
@@ -144,6 +147,38 @@ export const importFansFromCsv = task({
 			}
 
 			fanRecords.push(insertFanRecord.data);
+		}
+
+		// Check usage limits before importing
+		const usageResult = await checkUsageLimit(workspaceId, 'fans', fanRecords.length);
+
+		// Hard block at 200% - reject entire import
+		if (usageResult.status === 'blocked_200') {
+			console.error(
+				`Import blocked: Would exceed 200% of fan limit. Current: ${usageResult.current}, Limit: ${usageResult.limit}, Attempting to add: ${fanRecords.length}`,
+			);
+			throw new Error(
+				getBlockedMessage('fans', usageResult.limit, 'your current') +
+					` Import of ${fanRecords.length} fans was rejected.`,
+			);
+		}
+
+		// Trigger warning email if needed (async)
+		if (usageResult.shouldSendEmail) {
+			const threshold =
+				usageResult.status === 'warning_100' ? 100
+				: usageResult.status === 'warning_80' ? 80
+				: null;
+			if (threshold) {
+				console.log(
+					`Triggering ${threshold}% usage warning email for workspace ${workspaceId}`,
+				);
+				void tasks.trigger<typeof sendUsageWarning>('send-usage-warning-email', {
+					workspaceId,
+					limitType: 'fans',
+					threshold,
+				});
+			}
 		}
 
 		const chunkSize = 50;

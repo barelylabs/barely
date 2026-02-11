@@ -3,6 +3,7 @@ import { relations } from 'drizzle-orm';
 import {
 	boolean,
 	integer,
+	jsonb,
 	pgTable,
 	text,
 	timestamp,
@@ -126,6 +127,32 @@ export const Workspaces = pgTable(
 		})
 			.default('free')
 			.notNull(),
+
+		/* plus plan eligibility - workspaces must be manually approved for plus plans */
+		eligibleForPlus: boolean('eligibleForPlus').default(false).notNull(),
+
+		/* usage warnings tracking - JSONB storing warning timestamps per limit type */
+		/* format: { "fans_80": "2024-01-15T...", "links_100": "2024-01-16T..." } */
+		usageWarnings: jsonb('usageWarnings')
+			.$type<Record<string, string>>()
+			.default({})
+			.notNull(),
+
+		/* fan usage - cumulative total fans/contacts */
+		fanUsage: integer('fanUsage').default(0).notNull(),
+		fanUsageLimitOverride: integer('fanUsageLimitOverride'),
+
+		/* member usage - current team members count (cumulative) */
+		memberUsage: integer('memberUsage').default(0).notNull(),
+		memberUsageLimitOverride: integer('memberUsageLimitOverride'),
+
+		/* pixel usage - cumulative retargeting pixels */
+		pixelUsage: integer('pixelUsage').default(0).notNull(),
+		pixelUsageLimitOverride: integer('pixelUsageLimitOverride'),
+
+		/* task usage - monthly task count */
+		taskUsage: integer('taskUsage').default(0).notNull(),
+		taskUsageLimitOverride: integer('taskUsageLimitOverride'),
 
 		/* event usage */
 		eventUsage: integer('eventUsage').default(0).notNull(),

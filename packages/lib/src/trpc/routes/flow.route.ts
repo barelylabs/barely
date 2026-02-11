@@ -18,12 +18,17 @@ import { TRPCError } from '@trpc/server';
 import { and, asc, desc, eq, gt, lt, notInArray, or } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
-import type { handleFlow } from '../../trigger';
+import type { handleFlow, sendUsageWarning } from '../../trigger';
 import {
 	getActionNodeFromFlowAction,
 	getInsertableFlowActionsFromFlowActions,
 	getTriggerNodeFromFlowTrigger,
 } from '../../functions/flows/flow.utils';
+import {
+	checkUsageLimit,
+	getBlockedMessage,
+	incrementUsage,
+} from '../../functions/usage.fns';
 import { workspaceProcedure } from '../trpc';
 
 export const flowRoute = {
@@ -275,8 +280,34 @@ export const flowRoute = {
 				cartId: z.string().optional(),
 			}),
 		)
-		.mutation(async ({ input }) => {
+		.mutation(async ({ input, ctx }) => {
 			const { flowId, fanId, cartId } = input;
+
+			// Check task usage limits before triggering
+			const usageResult = await checkUsageLimit(ctx.workspace.id, 'tasks');
+
+			// Hard block at 200%
+			if (usageResult.status === 'blocked_200') {
+				throw new TRPCError({
+					code: 'FORBIDDEN',
+					message: getBlockedMessage('tasks', usageResult.limit, ctx.workspace.plan),
+				});
+			}
+
+			// Trigger warning email if needed (async, don't await)
+			if (usageResult.shouldSendEmail) {
+				const threshold =
+					usageResult.status === 'warning_100' ? 100
+					: usageResult.status === 'warning_80' ? 80
+					: null;
+				if (threshold) {
+					void tasks.trigger<typeof sendUsageWarning>('send-usage-warning-email', {
+						workspaceId: ctx.workspace.id,
+						limitType: 'tasks',
+						threshold,
+					});
+				}
+			}
 
 			// find a trigger for this flow. we'll need to refactor this when we add more triggers 🤷‍♂️
 			const trigger = await dbHttp.query.Flow_Triggers.findFirst({
@@ -294,5 +325,8 @@ export const flowRoute = {
 				fanId,
 				cartId,
 			});
+
+			// Increment task usage counter
+			await incrementUsage(ctx.workspace.id, 'tasks', 1);
 		}),
 } satisfies TRPCRouterRecord;

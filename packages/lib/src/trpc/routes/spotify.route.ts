@@ -9,13 +9,18 @@ import { and, eq } from 'drizzle-orm';
 import * as r from 'remeda';
 import { z } from 'zod/v4';
 
-import type { syncSpotifyArtist } from '../../trigger';
+import type { sendUsageWarning, syncSpotifyArtist } from '../../trigger';
 import { libEnv } from '../../../env';
 import {
 	getSpotifyAccessToken,
 	syncSpotifyAccountPlaylists,
 	syncSpotifyAccountUser,
 } from '../../functions/spotify.fns';
+import {
+	checkUsageLimit,
+	getBlockedMessage,
+	incrementUsage,
+} from '../../functions/usage.fns';
 import { getSpotifyAlbum } from '../../integrations/spotify/spotify.endpts.album';
 import { getSpotifyArtist } from '../../integrations/spotify/spotify.endpts.artist';
 import { getSpotifyPlaylist } from '../../integrations/spotify/spotify.endpts.playlist';
@@ -371,6 +376,32 @@ export const spotifyRoute = {
 	 * @throws Error if invalid Spotify artist ID or sync fails
 	 */
 	syncWorkspaceArtist: workspaceProcedure.mutation(async ({ ctx }) => {
+		// Check task usage limits before triggering
+		const usageResult = await checkUsageLimit(ctx.workspace.id, 'tasks');
+
+		// Hard block at 200%
+		if (usageResult.status === 'blocked_200') {
+			throw new TRPCError({
+				code: 'FORBIDDEN',
+				message: getBlockedMessage('tasks', usageResult.limit, ctx.workspace.plan),
+			});
+		}
+
+		// Trigger warning email if needed (async, don't await)
+		if (usageResult.shouldSendEmail) {
+			const threshold =
+				usageResult.status === 'warning_100' ? 100
+				: usageResult.status === 'warning_80' ? 80
+				: null;
+			if (threshold) {
+				void tasks.trigger<typeof sendUsageWarning>('send-usage-warning-email', {
+					workspaceId: ctx.workspace.id,
+					limitType: 'tasks',
+					threshold,
+				});
+			}
+		}
+
 		// Rate limit: 1 request per hour per workspace
 		const limiter = ratelimit(
 			RATE_LIMITS.SYNC_ARTIST.requests,
@@ -399,6 +430,9 @@ export const spotifyRoute = {
 		await tasks.trigger<typeof syncSpotifyArtist>('sync-spotify-artist', {
 			workspaceId: ctx.workspace.id,
 		});
+
+		// Increment task usage counter
+		await incrementUsage(ctx.workspace.id, 'tasks', 1);
 
 		return { success: true, message: 'Sync initiated successfully' };
 	}),

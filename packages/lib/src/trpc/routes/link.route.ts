@@ -17,12 +17,19 @@ import {
 	selectWorkspaceLinksSchema,
 	updateLinkSchema,
 } from '@barely/validators';
+import { tasks } from '@trigger.dev/sdk/v3';
 import { TRPCError } from '@trpc/server';
 import { and, desc, eq, inArray, isNull, lt, or } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
+import type { sendUsageWarning } from '../../trigger';
 import { libEnv } from '../../../env';
 import { getRandomKey } from '../../functions/link.fns';
+import {
+	checkUsageLimit,
+	getBlockedMessage,
+	incrementUsage,
+} from '../../functions/usage.fns';
 import { ratelimit } from '../../integrations/upstash';
 import { publicProcedure, workspaceProcedure } from '../trpc';
 
@@ -85,6 +92,32 @@ export const linkRoute = {
 
 	// mutate
 	create: workspaceProcedure.input(createLinkSchema).mutation(async ({ input, ctx }) => {
+		// Check usage limits before creating link
+		const usageResult = await checkUsageLimit(ctx.workspace.id, 'links');
+
+		// Hard block at 200%
+		if (usageResult.status === 'blocked_200') {
+			throw new TRPCError({
+				code: 'FORBIDDEN',
+				message: getBlockedMessage('links', usageResult.limit, ctx.workspace.plan),
+			});
+		}
+
+		// Trigger warning email if needed (async, don't await)
+		if (usageResult.shouldSendEmail) {
+			const threshold =
+				usageResult.status === 'warning_100' ? 100
+				: usageResult.status === 'warning_80' ? 80
+				: null;
+			if (threshold) {
+				void tasks.trigger<typeof sendUsageWarning>('send-usage-warning-email', {
+					workspaceId: ctx.workspace.id,
+					limitType: 'links',
+					threshold,
+				});
+			}
+		}
+
 		const transparentLinkData = getTransparentLinkDataFromUrl(input.url, ctx.workspace);
 
 		if (input.transparent && !transparentLinkData) {
@@ -121,6 +154,10 @@ export const linkRoute = {
 		} satisfies InsertLink;
 
 		const link = await dbHttp.insert(Links).values(insertLinkValues).returning();
+
+		// Increment link usage counter after successful creation
+		await incrementUsage(ctx.workspace.id, 'links', 1);
+
 		return link;
 	}),
 

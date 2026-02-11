@@ -18,11 +18,13 @@ import {
 	parseFullName,
 	wait as waitUtil,
 } from '@barely/utils';
-import { task, wait } from '@trigger.dev/sdk/v3';
+import { task, tasks, wait } from '@trigger.dev/sdk/v3';
 import { eq } from 'drizzle-orm';
 
+import type { sendUsageWarning } from './workspace-usage';
 import { getFanGroupFansForEmail } from '../functions/fan-group.fns';
 import { getAssetsFromMdx } from '../functions/mdx.fns.js';
+import { checkUsageLimit, getBlockedMessage } from '../functions/usage.fns';
 import { renderMarkdownToReactEmail } from '../mdx/email-template.mdx';
 
 let pool: NeonPool | null = null;
@@ -137,8 +139,46 @@ export const handleEmailBroadcast = task({
 		}
 
 		console.log('fans', fans);
-		// update email broadcast status to sending
 
+		// Check usage limits before sending
+		const usageResult = await checkUsageLimit(
+			emailBroadcast.workspaceId,
+			'emails',
+			fans.length,
+		);
+
+		// Hard block at 200% - reject entire broadcast
+		if (usageResult.status === 'blocked_200') {
+			const errorMessage =
+				getBlockedMessage('emails', usageResult.limit, 'your current') +
+				` Broadcast to ${fans.length} recipients was rejected.`;
+			console.error(`Email broadcast blocked: ${errorMessage}`);
+			await db
+				.update(EmailBroadcasts)
+				.set({ status: 'failed', error: errorMessage, triggerRunId })
+				.where(eq(EmailBroadcasts.id, id));
+			throw new Error(errorMessage);
+		}
+
+		// Trigger warning email if needed (async)
+		if (usageResult.shouldSendEmail) {
+			const threshold =
+				usageResult.status === 'warning_100' ? 100
+				: usageResult.status === 'warning_80' ? 80
+				: null;
+			if (threshold) {
+				console.log(
+					`Triggering ${threshold}% email usage warning for workspace ${emailBroadcast.workspaceId}`,
+				);
+				void tasks.trigger<typeof sendUsageWarning>('send-usage-warning-email', {
+					workspaceId: emailBroadcast.workspaceId,
+					limitType: 'emails',
+					threshold,
+				});
+			}
+		}
+
+		// update email broadcast status to sending
 		await db
 			.update(EmailBroadcasts)
 			.set({ status: 'sending', triggerRunId })

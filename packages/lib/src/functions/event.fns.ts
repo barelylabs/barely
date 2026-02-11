@@ -18,7 +18,7 @@ import type {
 } from '@barely/validators/schemas';
 import type { z } from 'zod/v4';
 import { cookies } from 'next/headers';
-import { WEB_EVENT_TYPES__VIP, WORKSPACE_PLANS } from '@barely/const';
+import { WEB_EVENT_TYPES__VIP } from '@barely/const';
 import { dbHttp } from '@barely/db/client';
 import { AnalyticsEndpoints } from '@barely/db/sql/analytics-endpoint.sql';
 import { FmLinks, FmPages } from '@barely/db/sql/fm.sql';
@@ -41,14 +41,17 @@ import {
 	isDevelopment,
 	newId,
 } from '@barely/utils';
+import { tasks } from '@trigger.dev/sdk/v3';
 import { eq } from 'drizzle-orm';
 
 import type { MetaEvent } from '../integrations/meta/meta.endpts.event';
 import type { VisitorInfo } from '../middleware/request-parsing';
+import type { sendUsageWarning } from '../trigger';
 import { libEnv } from '../../env';
 import { reportEventsToMeta } from '../integrations/meta/meta.endpts.event';
 import { ratelimit } from '../integrations/upstash';
 import { log } from '../utils/log';
+import { checkUsageLimit } from './usage.fns';
 
 /**
  * Flattens visitor info (specifically geo and userAgent)
@@ -92,18 +95,13 @@ export async function recordLinkClick({
 
 	if (!success) return null;
 
-	// check if the workspace is above the event usage limit.
-	const isAboveEventUsageLimit = await checkIfWorkspaceIsAboveEventUsageLimit({
-		workspace,
+	// Check event usage limits with warning emails
+	const { shouldBlock } = await checkEventUsageLimitWithWarning({
+		workspaceId: workspace.id,
+		location: 'recordLinkClick',
 	});
 
-	if (isAboveEventUsageLimit) {
-		await log({
-			type: 'alerts',
-			location: 'recordLinkClick',
-			message: `workspace ${link.workspaceId} is above the event usage limit`,
-		});
-
+	if (shouldBlock) {
 		return;
 	}
 
@@ -230,29 +228,46 @@ export async function recordLinkClick({
 	return;
 }
 
-async function checkIfWorkspaceIsAboveEventUsageLimit({
-	workspace,
+/**
+ * Checks event usage limits using the unified usage enforcement system.
+ * Returns usage result with status, and handles warning email triggers.
+ * Block at 200% limit, warn at 80% and 100%.
+ */
+async function checkEventUsageLimitWithWarning({
+	workspaceId,
+	location,
 }: {
-	workspace: Pick<Workspace, 'id' | 'plan' | 'eventUsage' | 'eventUsageLimitOverride'>;
-}) {
-	const eventUsageLimit =
-		workspace.eventUsageLimitOverride ??
-		WORKSPACE_PLANS.get(workspace.plan)?.usageLimits.trackedEventsPerMonth;
+	workspaceId: string;
+	location: string;
+}): Promise<{ shouldBlock: boolean }> {
+	const usageResult = await checkUsageLimit(workspaceId, 'events');
 
-	if (!eventUsageLimit) {
+	// Hard block at 200%
+	if (usageResult.status === 'blocked_200') {
 		await log({
 			type: 'alerts',
-			location: 'checkIfWorkspaceIsAboveEventUsageLimit',
-			message: `no event usage limit found for workspace ${workspace.id}`,
+			location,
+			message: `workspace ${workspaceId} is above the 200% event usage limit (blocked)`,
 		});
-		return false;
+		return { shouldBlock: true };
 	}
 
-	if (workspace.eventUsage >= eventUsageLimit) {
-		return true;
+	// Trigger warning email if needed (async)
+	if (usageResult.shouldSendEmail) {
+		const threshold =
+			usageResult.status === 'warning_100' ? 100
+			: usageResult.status === 'warning_80' ? 80
+			: null;
+		if (threshold) {
+			void tasks.trigger<typeof sendUsageWarning>('send-usage-warning-email', {
+				workspaceId,
+				limitType: 'events',
+				threshold,
+			});
+		}
 	}
 
-	return false;
+	return { shouldBlock: false };
 }
 
 /* CART */
@@ -352,8 +367,6 @@ export async function recordCartEvent({
 
 	if (visitorInfo.isBot) return null;
 
-	// todo: check if the workspace is above the event usage limit. for now, we're letting all cart events get reported
-
 	// deduplication events from the same ip & cartId - only record 1 cart event per ip per cartId per hour
 	const rateLimitPeriod = libEnv.RATE_LIMIT_RECORD_CART_EVENT;
 
@@ -363,6 +376,16 @@ export async function recordCartEvent({
 
 	if (!success) {
 		console.log('log rate limit exceeded for ', visitorInfo.ip, cart.id, type);
+		return null;
+	}
+
+	// Check event usage limits with warning emails
+	const { shouldBlock } = await checkEventUsageLimitWithWarning({
+		workspaceId: cart.workspaceId,
+		location: 'recordCartEvent',
+	});
+
+	if (shouldBlock) {
 		return null;
 	}
 
@@ -845,17 +868,13 @@ export async function recordFmEvent({
 		return null;
 	}
 
-	// check if the workspace is above the event usage limit.
-	const isAboveEventUsageLimit = await checkIfWorkspaceIsAboveEventUsageLimit({
-		workspace,
+	// Check event usage limits with warning emails
+	const { shouldBlock } = await checkEventUsageLimitWithWarning({
+		workspaceId: workspace.id,
+		location: 'recordFmEvent',
 	});
 
-	if (isAboveEventUsageLimit) {
-		await log({
-			type: 'alerts',
-			location: 'recordFmEvent',
-			message: `workspace ${fmPage.workspaceId} is above the event usage limit`,
-		});
+	if (shouldBlock) {
 		return;
 	}
 
@@ -1093,16 +1112,13 @@ export async function recordPageEvent({
 		return null;
 	}
 
-	const isAboveEventUsageLimit = await checkIfWorkspaceIsAboveEventUsageLimit({
-		workspace,
+	// Check event usage limits with warning emails
+	const { shouldBlock } = await checkEventUsageLimitWithWarning({
+		workspaceId: workspace.id,
+		location: 'recordPageEvent',
 	});
 
-	if (isAboveEventUsageLimit) {
-		await log({
-			type: 'alerts',
-			location: 'recordLandingPageEvent',
-			message: `workspace ${page.workspaceId} is above the event usage limit`,
-		});
+	if (shouldBlock) {
 		return null;
 	}
 
@@ -1343,17 +1359,13 @@ export async function recordVipEvent({
 		}
 	}
 
-	// check if the workspace is above the event usage limit.
-	const isAboveEventUsageLimit = await checkIfWorkspaceIsAboveEventUsageLimit({
-		workspace,
+	// Check event usage limits with warning emails
+	const { shouldBlock } = await checkEventUsageLimitWithWarning({
+		workspaceId: workspace.id,
+		location: 'recordVipEvent',
 	});
 
-	if (isAboveEventUsageLimit) {
-		await log({
-			type: 'alerts',
-			location: 'recordVipEvent',
-			message: `workspace ${vipSwap.workspaceId} is above the event usage limit`,
-		});
+	if (shouldBlock) {
 		return;
 	}
 

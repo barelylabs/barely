@@ -125,6 +125,7 @@ export function initAuth(options: {
 										shippingAddressPostalCode: true,
 										shippingAddressCountry: true,
 										shippingAddressPhone: true,
+										eligibleForPlus: true,
 									},
 									with: {
 										brandKit: true,

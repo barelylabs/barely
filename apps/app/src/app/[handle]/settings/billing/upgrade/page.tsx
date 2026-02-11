@@ -17,6 +17,8 @@ import { H, Text } from '@barely/ui/typography';
 
 import InvoicePlansPage from './invoice-plans';
 
+const PLUS_PLAN_APPLICATION_URL = 'https://cal.com/barely/nyc';
+
 export default function UpgradePage() {
 	// Hooks must be called before any conditional returns
 	const { workspace } = useWorkspace();
@@ -278,18 +280,35 @@ export default function UpgradePage() {
 									</Text>
 
 									{/* CTA Button */}
-									<Button
-										onClick={() => handleUpgradeClick(plan.id)}
-										look={showFeaturedBadge ? 'primary' : 'secondary'}
-										className='mb-6 w-full'
-										disabled={isCurrent || isPending}
-									>
-										{isCurrent ?
-											'Current'
-										: isPending ?
-											'Processing...'
-										:	getPlanComparisonText(plan.id)}
-									</Button>
+									{/* Plus plans require eligibility - show Apply button if not eligible */}
+									{showPlusPlans && !workspace.eligibleForPlus && !isCurrent ?
+										<Button
+											onClick={() =>
+												window.open(
+													PLUS_PLAN_APPLICATION_URL,
+													'_blank',
+													'noopener,noreferrer',
+												)
+											}
+											look='secondary'
+											className='mb-6 w-full'
+											endIcon='externalLink'
+										>
+											Apply for Plus
+										</Button>
+									:	<Button
+											onClick={() => handleUpgradeClick(plan.id)}
+											look={showFeaturedBadge ? 'primary' : 'secondary'}
+											className='mb-6 w-full'
+											disabled={isCurrent || isPending}
+										>
+											{isCurrent ?
+												'Current'
+											: isPending ?
+												'Processing...'
+											:	getPlanComparisonText(plan.id)}
+										</Button>
+									}
 
 									{/* Features */}
 									<div className='space-y-3'>

@@ -13,6 +13,8 @@ import {
 } from '@barely/files';
 import { newId, raiseTRPCError } from '@barely/utils';
 import { selectWorkspaceFilesSchema, uploadFileSchema } from '@barely/validators';
+import { tasks } from '@trigger.dev/sdk/v3';
+import { TRPCError } from '@trpc/server';
 import { lookup } from '@uploadthing/mime-types';
 import { ALLOWED_FILE_TYPES, getTypeFromFileName } from '@uploadthing/shared';
 import { and, asc, desc, eq, gt, inArray, lt, notInArray, or } from 'drizzle-orm';
@@ -20,7 +22,9 @@ import { z } from 'zod/v4';
 
 import { getUserWorkspaceByHandle } from '@barely/auth/utils';
 
+import type { sendUsageWarning } from '../../trigger';
 import { libEnv } from '../../../env';
+import { checkUsageLimit, getBlockedMessage } from '../../functions/usage.fns';
 import { incrementWorkspaceFileUsage } from '../../functions/workspace.fns';
 import { privateProcedure, workspaceProcedure } from '../trpc';
 
@@ -97,6 +101,40 @@ export const fileRoute = {
 		)
 		.mutation(async ({ input, ctx }) => {
 			console.log('input => ', input);
+
+			// Calculate total size of files being uploaded
+			const totalUploadSize = input.files.reduce((acc, f) => acc + f.size, 0);
+
+			// Check storage usage limits before allowing upload
+			const usageResult = await checkUsageLimit(
+				ctx.workspace.id,
+				'storage',
+				totalUploadSize,
+			);
+
+			// Hard block at 200%
+			if (usageResult.status === 'blocked_200') {
+				throw new TRPCError({
+					code: 'FORBIDDEN',
+					message: getBlockedMessage('storage', usageResult.limit, ctx.workspace.plan),
+				});
+			}
+
+			// Trigger warning email if needed (async, don't await)
+			if (usageResult.shouldSendEmail) {
+				const threshold =
+					usageResult.status === 'warning_100' ? 100
+					: usageResult.status === 'warning_80' ? 80
+					: null;
+				if (threshold) {
+					void tasks.trigger<typeof sendUsageWarning>('send-usage-warning-email', {
+						workspaceId: ctx.workspace.id,
+						limitType: 'storage',
+						threshold,
+					});
+				}
+			}
+
 			const dbFileRecords: FileRecord[] = [];
 
 			const presigned: Presigned[] = [];
