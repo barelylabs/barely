@@ -43,6 +43,9 @@ export interface SessionWorkspace {
 	barelyFulfillmentEligible: boolean;
 	barelyFulfillmentMode: 'artist_all' | 'barely_us' | 'barely_worldwide';
 
+	// Plan eligibility
+	eligibleForPlus: boolean;
+
 	// Related data
 	brandKit: BrandKit | null;
 	avatarImageS3Key: string | undefined;

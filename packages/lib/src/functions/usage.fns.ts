@@ -2,12 +2,6 @@ import type { PlanType } from '@barely/const';
 import { WORKSPACE_PLANS } from '@barely/const';
 import { dbHttp } from '@barely/db/client';
 import { _Users_To_Workspaces, Fans, Links, Users, Workspaces } from '@barely/db/sql';
-import { sendEmail } from '@barely/email';
-import {
-	UsageBlocked200EmailTemplate,
-	UsageWarning80EmailTemplate,
-	UsageWarning100EmailTemplate,
-} from '@barely/email/templates';
 import { getAbsoluteUrl, getFirstAndLastDayOfBillingCycle } from '@barely/utils';
 import { and, count, eq, gte, isNull, sql } from 'drizzle-orm';
 
@@ -503,6 +497,13 @@ export async function sendUsageWarningEmail(
 		upgradeUrl,
 	};
 
+	// Dynamic import email templates to avoid loading email module during test imports
+	const {
+		UsageWarning80EmailTemplate,
+		UsageWarning100EmailTemplate,
+		UsageBlocked200EmailTemplate,
+	} = await import('@barely/email/templates');
+
 	switch (threshold) {
 		case 80:
 			emailTemplate = UsageWarning80EmailTemplate(templateProps);
@@ -517,6 +518,9 @@ export async function sendUsageWarningEmail(
 			subject = `${resourceLabel} paused on your Barely workspace`;
 			break;
 	}
+
+	// Dynamic import sendEmail to avoid loading email module during test imports
+	const { sendEmail } = await import('@barely/email');
 
 	// Send email
 	const result = await sendEmail({
