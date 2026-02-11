@@ -59,8 +59,16 @@ export const cartOrderRoute = {
 	byWorkspace: workspaceProcedure
 		.input(selectWorkspaceCartOrdersSchema)
 		.query(async ({ input, ctx }) => {
-			const { showFulfilled, showCanceled, showPreorders, search, fanId, limit, cursor } =
-				input;
+			const {
+				showFulfilled,
+				showCanceled,
+				showPreorders,
+				search,
+				fanId,
+				fulfilledBy,
+				limit,
+				cursor,
+			} = input;
 
 			let searchFanIds: string[] = [];
 			console.log('[CART ORDER SEARCH DEBUG]', {
@@ -125,6 +133,7 @@ export const cartOrderRoute = {
 					eq(Carts.workspaceId, ctx.workspace.id),
 					!!fanId && eq(Carts.fanId, fanId),
 					!!searchFanIds.length && inArray(Carts.fanId, searchFanIds),
+					fulfilledBy !== 'all' && eq(Carts.fulfilledBy, fulfilledBy),
 					!!preorderProductIds.length &&
 						// sqlAnd([
 						//     notInArray(Carts.mainProductId, preorderProductIds),
