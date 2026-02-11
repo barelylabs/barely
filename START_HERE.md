@@ -1,34 +1,49 @@
-# Bio Landing Page Blocks Development
+# Barely Fulfillment Partner Development
 
 ## For New Claude Code Instance
-
 1. Open Claude Code in this directory
 2. Claude will read CLAUDE_PROJECT.md for immediate context
-3. Check .claude/project/plan.md for implementation tasks
-4. All project artifacts are available in .claude/project/
+3. Check `.claude/project/plan-organized.md` for implementation tasks
+4. All project artifacts are available in `.claude/project/`
 
 ## Development Flow
-
-- This branch is focused solely on bio-landing-page-blocks
-- Use organized plan to track progress
-- Original project: 0_Projects/bio-landing-page-blocks/
+- This branch is focused solely on implementing the Barely Fulfillment Partner feature
+- Use the organized plan to track progress through 4 milestones
+- Original project: `0_Projects/barely-fulfillment-partner/`
 
 ## Key Commands After Starting Claude Code
+- Review implementation plan: `Read .claude/project/plan-organized.md`
+- Check requirements: `Read .claude/project/PRD.md`
+- Understand user needs: `Read .claude/project/JTBD.md`
 
-- Review implementation plan: Read .claude/project/plan.md
-- Check requirements: Read .claude/project/PRD.md
-- Understand user needs: Read .claude/project/JTBD.md
+## Business Context
+- Beta client: The Now (UK artist) - products already stocked in Brooklyn
+- 3 additional US clients contingent on this feature
+- Revenue opportunity: ~$150k+ via fulfillment fees
+- Supports $1M GMV target for 2026
 
-## Quick Context
+## Quick Reference - Implementation Order
 
-**What we're building**: 4 new block types for the bio platform
-1. Markdown Block - Rich text content
-2. Image Block - Images with captions
-3. Two-Panel Block - Image/text side-by-side
-4. Cart Block - Direct checkout integration
+### Milestone 1: Foundation (No user-facing changes)
+1. Add env vars for Barely address
+2. Modify workspace schema (4 new fields)
+3. Modify cart schema (2 new fields)
+4. Create fulfillment utility functions
 
-**Why**: 10+ agency clients can't use the current MDX editor. Major client needs this for merch campaign launch.
+### Milestone 2: Checkout Integration
+1. Modify shipping calculation to accept dynamic origin
+2. Integrate fulfillment logic into cart creation
+3. Add fulfillment fee to Stripe application_fee_amount
 
-**Timeline**: 1-2 days implementation
+### Milestone 3: Artist Settings UI
+1. Create fulfillment settings page
+2. Add to settings navigation (when eligible)
 
-**Key approach**: Extend existing bio platform, reuse all patterns
+### Milestone 4: Order Management
+1. Add fulfillment filter to orders query
+2. Add filter dropdown to orders UI
+3. Show fulfillment info on order detail
+
+## Testing Strategy
+- Each milestone has its own test checklist in plan-organized.md
+- Manual verification steps included for checkout flow

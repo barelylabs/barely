@@ -1,380 +1,519 @@
-# Barely Invoice MVP - Feature-Organized Implementation Plan
+# Technical Implementation Plan: Barely Fulfillment Partner (Organized)
 
-## Feature Summary
-
-Implement a workspace-scoped invoicing system as an app variant of the barely.ai platform, enabling invoice creation, client management, email delivery, and Stripe payment collection through public payment pages.
-
-## Architecture Overview
-
-The invoice app will be implemented as a new app variant (`invoice`) within the existing monorepo structure, leveraging:
-- Existing workspace multi-tenancy system for data isolation
-- Stripe Connect infrastructure for payment processing  
-- SendGrid integration for email delivery
-- App variant configuration pattern established by fm/vip apps
-- Shared UI components and authentication system
-
-## Key Technical Decisions
-
-1. **App Variant Architecture**: Use existing app variant pattern to create focused invoice interface while hiding unnecessary navigation
-2. **Database Design**: Workspace-scoped tables following existing patterns with soft deletes
-3. **Payment Processing**: Leverage existing Stripe Connect per workspace, avoiding new OAuth implementation
-4. **Public Routes**: Implement public payment pages using established public router patterns from vip/fm apps
-5. **Email Delivery**: Use SendGrid transactional API directly instead of broadcast system
-6. **Status Tracking**: Implement event-driven status updates via webhooks and database triggers
-7. **Invoice Numbers**: Use workspace-scoped sequential numbering with format `INV-{workspacePrefix}-{number}`
-
-## Dependencies & Assumptions
-
-### Dependencies
-- Workspace system fully operational (Bio MVP completion)
-- Stripe Connect configured per workspace
-- SendGrid API available for transactional emails
-- Existing auth/session management
-- Shared UI component library
-
-### Assumptions
-- Users have completed workspace onboarding
-- Stripe Connect is active for payment collection
-- Single currency (USD) for MVP
-- HTML invoice display (no PDF generation)
-- No recurring billing in MVP phase
-
-## Feature-Based Implementation Checklist
-
-### Feature 0: Core App Infrastructure & Database Foundation
-**Description**: Set up the invoice app variant and core database tables needed by all features
-
-#### App Setup
-- [x] Create `apps/invoice/` directory structure copying from `apps/fm/`
-- [x] Configure `apps/invoice/package.json` with required dependencies:
-  - Core Next.js and React dependencies
-  - tRPC client packages (excluding @trpc/react-query)
-  - UI and validation packages from workspace
-- [x] Set up `apps/invoice/next.config.mjs` with app variant configuration
-- [x] Create `apps/invoice/src/app/layout.tsx` with TRPCReactProvider wrapper
-- [x] Configure environment variables in `apps/invoice/.env`:
-  - NEXT_PUBLIC_APP_VARIANT=invoice
-  - Port configuration (3011)
-- [x] Update `packages/const/src/app.constants.ts` to add 'invoice' to APPS array
-- [x] Update `packages/auth/src/get-url.ts` to handle invoice app URLs
-- [x] Update development scripts in `scripts/dev-qr-codes.sh` for invoice app
-
-#### Database Foundation
-- [x] Create `packages/db/src/sql/invoice-client.sql.ts` with InvoiceClients table
-  - workspace-scoped client records
-  - Fields: id, workspaceId, name, email, company, address, deletedAt, createdAt, updatedAt
-  - Index on workspaceId for query performance
-- [x] Create `packages/db/src/sql/invoice.sql.ts` with Invoices table
-  - workspace-scoped invoice records
-  - Fields: id, workspaceId, invoiceNumber, clientId, lineItems (JSONB), tax, subtotal, total, dueDate, status, stripePaymentIntentId, viewedAt, paidAt, deletedAt, createdAt, updatedAt
-  - Indexes on workspaceId, clientId, status, invoiceNumber
-  - Status enum: draft, sent, viewed, paid, overdue, voided
-- [x] Import new tables in `packages/db/src/client.ts` and add to dbSchema export
-- [x] Create Zod schemas in `packages/validators/src/schemas/invoice-client.schema.ts`
-  - createInvoiceClientSchema, updateInvoiceClientSchema, selectInvoiceClientSchema
-- [x] Create Zod schemas in `packages/validators/src/schemas/invoice.schema.ts`
-  - createInvoiceSchema, updateInvoiceSchema, selectInvoiceSchema
-  - lineItemSchema for array validation
-- [x] Export schemas from `packages/validators/src/schemas/index.ts`
-- [x] Run database migration to create tables: `pnpm db:push` (ready - needs .env with DATABASE_URL)
+This document reorganizes the implementation checklist by end-to-end features, with clear dependencies and implementation milestones. Each milestone can be implemented, tested, and deployed independently.
 
 ---
 
-### Feature 1: Client Management
-**Description**: Complete CRUD operations for managing invoice clients
+## Implementation Order & Dependencies
 
-#### Backend
-- [x] Create `packages/lib/src/trpc/routes/invoice-client.route.ts` with procedures:
-  - create: Add new client to workspace
-  - update: Modify client information
-  - delete: Soft delete client
-  - list: Paginated client list for workspace
-  - byId: Get single client details
-- [x] Create `packages/api/src/app/sub/invoice-client.handler.ts`
-- [x] Add to `packages/lib/src/trpc/routes/app.route.ts`
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  Milestone 1: Foundation & Data Model                               │
+│  (Schema, env vars, utilities - no user-facing changes)             │
+└─────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  Milestone 2: Checkout Integration                                  │
+│  (Dynamic shipping, order assignment, fee capture)                  │
+│  User Stories: US-2, US-4, US-5                                     │
+└─────────────────────────────────────────────────────────────────────┘
+                                    │
+                    ┌───────────────┴───────────────┐
+                    ▼                               ▼
+┌───────────────────────────────┐   ┌───────────────────────────────┐
+│  Milestone 3: Artist Settings │   │  Milestone 4: Order Filtering │
+│  (Configuration UI)           │   │  (Orders UI)                  │
+│  User Story: US-1             │   │  User Stories: US-3, US-6     │
+└───────────────────────────────┘   └───────────────────────────────┘
+```
 
-#### Frontend
-- [x] Create client management UI in `apps/invoice/src/app/clients/page.tsx`:
-  - Client list table with search/filter
-  - Add/Edit client modal with form validation
-  - Delete confirmation dialog
-- [x] Implement `ClientForm` component using useZodForm pattern:
-  - TextField components for name, email, company
-  - TextAreaField for address
-  - Form validation with error display
-- [x] Add client dropdown component for invoice creation:
-  - Searchable select with lazy loading
-  - Quick-add new client option
-
-#### Testing
-- [ ] Unit tests for client CRUD operations
-- [ ] Form validation tests
-- [ ] Workspace isolation tests
+**Note:** Milestones 3 and 4 can be implemented in parallel after Milestone 2.
 
 ---
 
-### Feature 2: Invoice Creation & Management
-**Description**: Create, edit, duplicate, and manage invoices with line items and calculations
+## Milestone 1: Foundation & Data Model
 
-#### Backend
-- [x] Create `packages/lib/src/trpc/routes/invoice.route.ts` with procedures:
-  - create: Create new invoice with line items
-  - update: Modify draft invoices
-  - delete: Soft delete draft invoices
-  - list: Paginated invoice list with filters
-  - byId: Get single invoice with client data
-  - duplicate: Copy existing invoice
-  - markPaid: Manual payment marking
-  - send: Send invoice (email TODO)
-  - stats: Dashboard metrics
-- [x] Implement invoice number generation in `packages/lib/src/functions/invoice.fns.ts`:
-  - Sequential numbering per workspace
-  - Format: INV-{workspacePrefix}-{paddedNumber}
-  - calculateInvoiceTotal: Handles subtotals, tax, totals
-- [x] Create `packages/api/src/app/sub/invoice.handler.ts`
-- [x] Add to `packages/lib/src/trpc/routes/app.route.ts`
+**Goal:** Establish the data model and utilities required by all other features. No user-facing changes.
 
-#### Frontend
-- [x] Create invoice form in `apps/invoice/src/app/invoices/new/page.tsx`:
-  - Client selection dropdown
-  - Dynamic line items with add/remove
-  - Automatic calculation of totals
-  - Tax percentage input
-  - Due date picker
-- [x] Build invoice list view in `apps/invoice/src/app/invoices/page.tsx`: ✅ COMPLETED
-  - Status badges (draft, sent, paid, overdue)
-  - Quick actions (duplicate, send, delete)
-  - Filter by status and client
-  - Search by invoice number
-- [x] Create invoice preview/detail component: ✅ COMPLETED
-  - Professional layout matching brand
-  - Line items table with totals
-  - Client and business information display
-  - Individual invoice page at `/invoices/[id]`
+**Jobs Addressed:** Foundation for all jobs - no direct user impact yet.
 
-#### Testing
-- [ ] Unit tests for invoice number generation
-- [ ] Test line item calculation logic
-- [ ] Validate tax calculation accuracy
-- [ ] Integration tests for invoice creation flow
+### 1.1 Environment Configuration
 
----
+- [ ] Add environment variables to `.env.example`:
+  ```
+  BARELY_FULFILLMENT_ADDRESS_LINE1=
+  BARELY_FULFILLMENT_ADDRESS_CITY=
+  BARELY_FULFILLMENT_ADDRESS_STATE=
+  BARELY_FULFILLMENT_ADDRESS_ZIP=
+  BARELY_FULFILLMENT_ADDRESS_COUNTRY=
+  ```
 
-### Feature 3: Payment Collection & Processing ✅ COMPLETED
-**Description**: Public payment pages and Stripe integration for collecting payments
+- [ ] Add environment variables to production/staging environments
+  - Values: `763 Park Pl #1R`, `Brooklyn`, `NY`, `11216`, `US`
 
-#### Backend
-- ✅ Created public router in `packages/api/src/public/invoice-render.route.ts`:
-  - getInvoiceByHandle: Retrieve invoice for payment page
-  - createPaymentIntent: Create payment intent with Stripe
-  - createPaymentSession: Create Stripe Checkout session
-  - No authentication required for public access
-- ✅ Set up public router exports in `packages/api/src/public/invoice-render.router.ts`
-- ✅ Created tRPC context in `packages/api/src/public/invoice-render.trpc.react.ts`
-- ✅ Created Stripe functions in `packages/lib/src/functions/invoice-payment.fns.ts`:
-  - createInvoicePaymentSession: Stripe Checkout with workspace's Connect account
-  - createInvoicePaymentIntent: Direct payment intent creation
-  - Set payment metadata with invoiceId and workspaceId
-  - Applied 0.5% platform fee
-- ✅ Webhook handler exists at `apps/app/src/app/api/stripe/connect/route.ts`:
-  - Handles charge.succeeded event for invoice payments
-  - Routes to handleStripeInvoiceChargeSuccess
-  - Updates invoice status to 'paid' with paidAt timestamp
+- [ ] Create type-safe env access in `packages/lib/src/env.ts` or similar
+  - Validate all address fields are present when accessed
+  - Export `getBarelyFulfillmentAddress()` function
 
-#### Frontend
-- ✅ Implemented public payment page at `apps/invoice/src/app/pay/[handle]/[invoiceId]/page.tsx`:
-  - Professional invoice display with line items
-  - Payment summary card with totals
-  - Pay button triggering Stripe Checkout redirect
-  - Mobile-responsive design
-  - No authentication required
-- ✅ Created success page at `apps/invoice/src/app/pay/[handle]/[invoiceId]/success/page.tsx`
+### 1.2 Workspace Schema Changes
 
-#### Testing
-- [ ] Payment webhook signature verification tests
-- [ ] Public page rate limiting tests
-- [ ] Payment page load time optimization
-- [ ] Integration tests for payment flow
+- [ ] Add `barelyFulfillmentEligible` boolean field to `Workspaces` table in `packages/db/src/sql/workspace.sql.ts`
+  - Default: `false`
+  - Not nullable
 
----
+- [ ] Add `barelyFulfillmentMode` enum field to `Workspaces` table
+  - Values: `'artist_all' | 'barely_us' | 'barely_worldwide'`
+  - Default: `'artist_all'`
+  - Not nullable
 
-### Feature 4: Invoice Delivery & Status Tracking ✅ COMPLETED
-**Description**: Email delivery system with tracking and automatic status updates
+- [ ] Add `barelyFulfillmentFlatFeePerOrder` integer field to `Workspaces` table
+  - Stored in cents (e.g., 100 = $1.00)
+  - Nullable (null = no fee configured)
 
-#### Email System ✅
-- ✅ Created email template in `packages/email/src/templates/invoice/invoice.tsx`:
-  - Professional invoice layout with line items table
-  - Clear call-to-action payment button
-  - Payment link integration with workspace handle
-  - Tracking pixel for view status
-  - Support email and notes sections
-- ✅ Created payment received email template in `packages/email/src/templates/invoice/payment-received.tsx`:
-  - Professional confirmation layout
-  - Invoice details and payment summary
-  - Transaction ID and payment method display
-  - Thank you message with business branding
-- ✅ Implemented email sending in `packages/lib/src/functions/invoice-email.fns.ts`:
-  - SendGrid integration for transactional send
-  - Email tracking pixel generation with timestamps
-  - Three email functions: sendInvoiceEmail, sendInvoiceReminderEmail, sendInvoicePaymentReceivedEmail
-  - Proper error handling with typed error messages
-  - BCC to workspace support email for record keeping
-- ✅ Updated send invoice procedure in invoice.route.ts:
-  - Integrated sendInvoiceEmail function call
-  - Updates invoice status to 'sent' with sentAt timestamp
-  - Stores resendId for email tracking
-  - Validates invoice status before sending
+- [ ] Add `barelyFulfillmentPercentageFeePerOrder` integer field to `Workspaces` table
+  - Stored as percentage × 100 (e.g., 500 = 5%)
+  - Nullable (null = no fee configured)
 
-#### Status Tracking ✅
-- ✅ Created email tracking endpoint at `apps/app/src/app/api/invoice/track/[invoiceId]/route.ts`:
-  - Returns 1x1 transparent GIF pixel
-  - Updates invoice viewedAt timestamp on first view
-  - Changes status from 'sent' to 'viewed'
-  - Includes reminder tracking parameter
-  - Comprehensive error handling that still returns pixel
-  - Logs tracking events with workspace context
-- ✅ Added overdue automation in `packages/lib/src/trigger/overdue-invoices.trigger.ts`:
-  - Daily cron job scheduled for 9:00 AM ET
-  - Finds all invoices past due date with status 'sent' or 'viewed'
-  - Updates status to 'overdue' automatically
-  - Sends reminder emails via sendInvoiceReminderEmail
-  - Comprehensive logging with success/failure metrics
-  - Database pool cleanup in finally block
-- ✅ Registered trigger job in `packages/lib/src/trigger/index.ts`
+### 1.3 Cart (Order) Schema Changes
 
-#### Testing
-- [ ] Test email template rendering
-- [ ] Email delivery tracking tests
-- [ ] Status update automation tests
+- [ ] Add `fulfilledBy` enum field to `Carts` table in `packages/db/src/sql/cart.sql.ts`
+  - Values: `'artist' | 'barely'`
+  - Default: `'artist'`
+  - Not nullable
+
+- [ ] Add `barelyFulfillmentFee` integer field to `Carts` table
+  - Stored in cents
+  - Default: `0`
+  - Not nullable
+
+### 1.4 Database Migration
+
+- [ ] Generate database migration for workspace schema changes
+- [ ] Generate database migration for cart schema changes
+- [ ] Run migrations in development environment
+- [ ] Verify existing data is unaffected (defaults applied correctly)
+
+### 1.5 Core Utility Functions
+
+- [ ] Create new file `packages/lib/src/utils/fulfillment.ts`
+
+- [ ] Implement `determineFulfillmentResponsibility()`:
+  ```typescript
+  export function determineFulfillmentResponsibility(params: {
+    workspaceMode: 'artist_all' | 'barely_us' | 'barely_worldwide';
+    shipToCountry: string;
+  }): 'artist' | 'barely'
+  ```
+  - If mode is `artist_all` → return `'artist'`
+  - If mode is `barely_worldwide` → return `'barely'`
+  - If mode is `barely_us` AND country is `US` → return `'barely'`
+  - If mode is `barely_us` AND country is not `US` → return `'artist'`
+
+- [ ] Implement `getShippingOriginAddress()`:
+  ```typescript
+  export function getShippingOriginAddress(params: {
+    fulfilledBy: 'artist' | 'barely';
+    workspace: Workspace;
+  }): ShippingAddress
+  ```
+  - If `fulfilledBy === 'barely'` → return Barely address from env vars
+  - If `fulfilledBy === 'artist'` → return `workspace.shippingAddress*`
+
+- [ ] Implement `calculateBarelyFulfillmentFee()` in `packages/lib/src/utils/cart.ts`:
+  ```typescript
+  export function calculateBarelyFulfillmentFee(params: {
+    fulfilledBy: 'artist' | 'barely';
+    productAmountInCents: number;
+    flatFeeInCents: number | null;
+    percentageFee: number | null; // 500 = 5%
+  }): number
+  ```
+  - If `fulfilledBy === 'artist'` → return `0`
+  - If fees not configured → return `0`
+  - Calculate: `flatFee + Math.round(productAmount * (percentage / 10000))`
+
+### 1.6 Milestone 1 Testing
+
+- [ ] Unit test: Workspace schema accepts new fields with correct defaults
+- [ ] Unit test: Cart schema accepts new fields with correct defaults
+- [ ] Unit test: `determineFulfillmentResponsibility()` returns correct value for all mode/country combinations:
+  - `artist_all` + any country → `artist`
+  - `barely_worldwide` + any country → `barely`
+  - `barely_us` + `US` → `barely`
+  - `barely_us` + `GB` → `artist`
+  - `barely_us` + empty/null → `artist`
+- [ ] Unit test: `getShippingOriginAddress()` returns Barely address when `fulfilledBy === 'barely'`
+- [ ] Unit test: `getShippingOriginAddress()` returns workspace address when `fulfilledBy === 'artist'`
+- [ ] Unit test: `calculateBarelyFulfillmentFee()` returns 0 for artist fulfillment
+- [ ] Unit test: `calculateBarelyFulfillmentFee()` calculates correctly for Barely fulfillment
+- [ ] Unit test: `calculateBarelyFulfillmentFee()` handles null fee configuration
+
+### 1.7 Milestone 1 Security
+
+- [ ] Verify `barelyFulfillmentEligible` is NOT in any tRPC mutation input schema
+- [ ] Verify `barelyFulfillmentFlatFeePerOrder` is NOT in any tRPC mutation input schema
+- [ ] Verify `barelyFulfillmentPercentageFeePerOrder` is NOT in any tRPC mutation input schema
 
 ---
 
-### Feature 5: Dashboard & Analytics
-**Description**: Overview dashboard with metrics and quick actions
+## Milestone 2: Checkout Integration
 
-#### Backend
-- [ ] Implement dashboard data aggregation in invoice.route.ts:
-  - getDashboardStats procedure
-  - Efficient queries with proper indexes
-  - Cache results for performance
+**Goal:** Integrate fulfillment logic into the checkout flow. When enabled, orders will be routed correctly and fees captured.
 
-#### Frontend
-- [x] Create dashboard view at `apps/invoice/src/app/page.tsx`:
-  - Outstanding invoice total calculation
-  - Overdue invoice count and list
-  - Recent activity feed (last 10 actions)
-  - Quick action buttons
-  - This month's revenue display
+**Jobs Addressed:**
+- Job 1: Sell physical products to international customers profitably
+- Job 2: Manage a single, unified store for all markets
 
-#### Testing
-- [ ] Dashboard query performance tests
-- [ ] Data aggregation accuracy tests
-- [ ] Large dataset pagination tests
+**User Stories:**
+- US-2: See Competitive US Shipping (Customer)
+- US-4: Automatic Fulfillment Assignment (System)
+- US-5: Capture Fulfillment Fees (System)
+
+**Prerequisite:** Milestone 1 complete
+
+### 2.1 Shipping Calculation Modification
+
+- [ ] Modify `getShipStationRateEstimates()` in `packages/lib/src/integrations/shipping/shipengine.endpts.ts`
+  - Accept `shipFrom` address as parameter (not hardcoded to workspace)
+  - Select US or UK API key based on `shipFrom.country`
+  - Maintain backward compatibility with existing callers
+
+- [ ] Modify `getProductsShippingRateEstimate()` in `packages/lib/src/functions/cart.fns.ts`
+  - Accept new parameter: `shipFromOverride?: ShippingAddress`
+  - If provided, use override instead of workspace address
+  - Pass to ShipStation API call
+
+### 2.2 Cart Creation Flow Integration
+
+- [ ] Modify `createMainCartFromFunnel()` in `packages/lib/src/functions/cart.fns.ts`:
+
+  **Step 1: Determine fulfillment responsibility (before shipping calculation)**
+  ```typescript
+  const fulfilledBy = determineFulfillmentResponsibility({
+    workspaceMode: workspace.barelyFulfillmentMode,
+    shipToCountry: shipTo?.country ?? '',
+  });
+  ```
+
+  **Step 2: Get appropriate shipping origin**
+  ```typescript
+  const shippingOrigin = getShippingOriginAddress({
+    fulfilledBy,
+    workspace,
+  });
+  ```
+
+  **Step 3: Calculate shipping with correct origin**
+  - Pass `shippingOrigin` to `getProductsShippingRateEstimate()`
+
+  **Step 4: Calculate fulfillment fee**
+  ```typescript
+  const barelyFulfillmentFee = calculateBarelyFulfillmentFee({
+    fulfilledBy,
+    productAmountInCents: mainProductAmount,
+    flatFeeInCents: workspace.barelyFulfillmentFlatFeePerOrder,
+    percentageFee: workspace.barelyFulfillmentPercentageFeePerOrder,
+  });
+  ```
+
+  **Step 5: Include in application fee**
+  - Add `barelyFulfillmentFee` parameter to `getFeeAmountForCheckout()` call
+
+  **Step 6: Store in cart record**
+  - Include `fulfilledBy` and `barelyFulfillmentFee` in cart insert
+
+### 2.3 Fee Calculation Integration
+
+- [ ] Modify `getFeeAmountForCheckout()` in `packages/lib/src/utils/cart.ts`
+  - Accept new parameter: `barelyFulfillmentFee: number`
+  - Add to application fee amount:
+    ```typescript
+    return barelyCartFee + vatAmount + shippingAmount + barelyFulfillmentFee
+    ```
+
+### 2.4 Data Immutability
+
+- [ ] Ensure `fulfilledBy` is NOT included in any cart update mutations
+- [ ] Ensure `barelyFulfillmentFee` is NOT included in any cart update mutations
+- [ ] Verify cart update schema in `packages/validators/src/` excludes these fields
+
+### 2.5 Milestone 2 Testing
+
+- [ ] Integration test: US customer gets Brooklyn shipping rates when mode is `barely_us`
+- [ ] Integration test: UK customer gets artist shipping rates when mode is `barely_us`
+- [ ] Integration test: All customers get Brooklyn shipping rates when mode is `barely_worldwide`
+- [ ] Integration test: All customers get artist shipping rates when mode is `artist_all`
+- [ ] Integration test: Cart created with correct `fulfilledBy` value
+- [ ] Integration test: Cart created with correct `barelyFulfillmentFee` value
+- [ ] Integration test: Stripe application fee includes fulfillment fee
+- [ ] Integration test: Fulfillment fields are not modified by cart updates
+- [ ] Integration test: Missing country defaults to artist fulfillment
+
+### 2.6 Manual Verification
+
+- [ ] Enable eligibility for test workspace via direct database update
+- [ ] Set fulfillment mode to `barely_us` via direct database update
+- [ ] Create test order with US shipping address → verify Barely fulfillment
+- [ ] Create test order with UK shipping address → verify artist fulfillment
+- [ ] Verify shipping rates differ appropriately
 
 ---
 
-### Feature 6: Security & Performance Optimization
-**Description**: Cross-cutting concerns for security and performance
+## Milestone 3: Artist Fulfillment Settings
 
-#### Security
-- [ ] Workspace-scoped data access validation
-- [ ] XSS prevention in invoice display
-- [ ] Input sanitization for all forms
-- [ ] Rate limiting for public endpoints
+**Goal:** Allow eligible artists to configure their fulfillment mode via the app settings.
 
-#### Performance
-- [ ] Database index optimization
-- [ ] Query performance tuning
-- [ ] CDN configuration for static assets
-- [ ] Lazy loading for large lists
+**Jobs Addressed:**
+- Job 5: Understand the costs of fulfillment partnership upfront
+- Job 6: Get started with fulfillment partnership quickly
 
-#### Testing
-- [ ] Security penetration testing
-- [ ] Load testing for concurrent users
-- [ ] Performance benchmarking
+**User Story:**
+- US-1: Enable Fulfillment Mode (Artist)
+
+**Prerequisite:** Milestone 1 complete (Milestone 2 recommended but not required)
+
+### 3.1 Validation Schema
+
+- [ ] Add `barelyFulfillmentMode` to workspace update schema in `packages/validators/src/`
+  - Type: `z.enum(['artist_all', 'barely_us', 'barely_worldwide'])`
+  - Optional field (only included when updating)
+
+### 3.2 API (tRPC) Updates
+
+- [ ] Modify workspace update mutation in `packages/lib/src/trpc/routes/workspace.route.ts`
+  - Add `barelyFulfillmentMode` to allowed update fields
+  - Add validation: reject mode change if `barelyFulfillmentEligible !== true`
+  - Return clear error: "Barely fulfillment is not enabled for this workspace"
+
+- [ ] Create query to get fulfillment settings for workspace (or extend existing workspace query)
+  - Return: `barelyFulfillmentEligible`, `barelyFulfillmentMode`, `barelyFulfillmentFlatFeePerOrder`, `barelyFulfillmentPercentageFeePerOrder`
+
+### 3.3 Frontend Settings Page
+
+- [ ] Create new directory: `apps/app/src/app/[handle]/settings/fulfillment/`
+
+- [ ] Create `page.tsx` with fulfillment settings form
+  - Use existing `SettingsCardForm` component pattern from payouts page
+  - Fetch workspace fulfillment settings on load
+
+- [ ] Implement conditional rendering based on eligibility:
+  - If `barelyFulfillmentEligible === false`:
+    ```
+    Fulfillment Partnership
+    -----------------------
+    Barely fulfillment is not currently enabled for your workspace.
+
+    Interested in having Barely handle fulfillment for your orders?
+    Contact us at support@barely.io to learn more.
+    ```
+  - If `barelyFulfillmentEligible === true`: show configuration form
+
+- [ ] Implement radio button group for fulfillment mode selection:
+  - Option 1: "I fulfill all orders" (`artist_all`) - default
+    - Description: "You handle shipping for all orders worldwide."
+  - Option 2: "Barely fulfills US orders, I fulfill the rest" (`barely_us`)
+    - Description: "Orders shipping to US addresses are fulfilled by Barely. You handle all other orders."
+  - Option 3: "Barely fulfills all orders" (`barely_worldwide`)
+    - Description: "Barely handles shipping for all orders worldwide."
+
+- [ ] Display current fee structure (read-only):
+  - Format: "Fulfillment fees: $X.XX + Y% per Barely-fulfilled order"
+  - Only show when eligible
+  - Show "No fees configured" if null
+
+- [ ] Implement save functionality:
+  - Call workspace update mutation with new mode
+  - Show success/error toast
+  - Setting takes effect immediately (no page reload required)
+
+### 3.4 Settings Navigation
+
+- [ ] Add "Fulfillment" link to settings navigation sidebar in `apps/app/src/app/[handle]/settings/`
+  - Conditionally show only when `barelyFulfillmentEligible === true`
+  - Position after "Payouts" in navigation order
+
+### 3.5 Milestone 3 Testing
+
+- [ ] Unit test: Validation schema accepts valid mode values
+- [ ] Unit test: Validation schema rejects invalid mode values
+- [ ] Unit test: Mode update mutation fails when not eligible
+- [ ] Unit test: Mode update mutation succeeds when eligible
+- [ ] Integration test: Settings page renders "contact us" for ineligible workspace
+- [ ] Integration test: Settings page renders configuration form for eligible workspace
+- [ ] Integration test: Mode change persists after save
+- [ ] Integration test: Navigation link only appears for eligible workspaces
+
+### 3.6 Milestone 3 Security
+
+- [ ] Verify fulfillment mode update requires workspace write permission
+- [ ] Verify eligibility check happens server-side (not just UI)
 
 ---
 
-## Implementation Order Recommendation
+## Milestone 4: Order Management & Filtering
 
-1. **Feature 0**: Core App Infrastructure & Database Foundation ✅ COMPLETED
-2. **Feature 1**: Client Management ✅ COMPLETED (Backend & Frontend)
-3. **Feature 2**: Invoice Creation & Management ✅ COMPLETED (Backend & Frontend)
-4. **Feature 5**: Dashboard & Analytics ✅ COMPLETED (Frontend done, backend stats already in Feature 2)
-5. **Feature 3**: Payment Collection & Processing ✅ COMPLETED
-6. **Feature 4**: Invoice Delivery & Status Tracking ✅ COMPLETED
-7. **Feature 6**: Security & Performance Optimization ⏳ PENDING
+**Goal:** Allow artists to filter orders by fulfillment responsibility and see fulfillment details.
 
-Each feature can be implemented as a complete unit with its own testing, allowing for incremental deployment and validation.
+**Jobs Addressed:**
+- Job 3: Know which orders I need to fulfill vs. which are handled for me
 
-## Progress Summary
+**User Stories:**
+- US-3: Filter Orders by Fulfillment Responsibility (Artist)
+- US-6: Access Fulfillment-Enabled Workspaces (Barely Team)
 
-### ✅ Completed (2025-08-15 Session)
-- **Frontend Infrastructure**:
-  - Fixed tRPC React setup with proper provider configuration
-  - Added invoice and invoiceClient to APP_ENDPOINTS
-  - Created Card wrapper components for consistent UI
-  - Set up ESLint configuration
-  - Added sonner for toast notifications
-  
-- **Feature 1: Client Management (Frontend)**:
-  - Full CRUD UI with search, pagination, and modals
-  - ClientForm component with Zod validation
-  - Delete confirmation dialogs
-  - Integration with backend routes
-  
-- **Feature 2: Invoice Creation & Management (Frontend)**:
-  - Invoice creation form with dynamic line items ✅
-  - Tax calculation and totals ✅
-  - Client selection dropdown ✅
-  - Due date picker ✅
-  - Invoice list view with full functionality ✅
-  - Invoice detail/preview page with professional layout ✅
-  - Status badges, quick actions, filtering ✅
-  
-- **Feature 5: Dashboard (Frontend)**:
-  - Stats cards (outstanding, overdue, revenue)
-  - Recent invoices list
-  - Quick action buttons
-  - Empty states
+**Prerequisite:** Milestone 1 and 2 complete
 
-### ✅ Completed (2025-08-16 Session - Architecture Refactoring)
-- **Architecture Refactoring**:
-  - Moved all admin features from apps/invoice to apps/app/[handle]/invoices
-  - Reconfigured apps/invoice as public payment portal only
-  - Fixed tRPC patterns - separated admin routes from public routes
-  
-- **Feature 3: Payment Collection & Processing**:
-  - Created public invoice-render router with getInvoiceByHandle and createPaymentSession
-  - Implemented Stripe Checkout integration with 0.5% platform fee
-  - Built professional payment page with invoice display
-  - Integrated with existing webhook infrastructure (handleStripeInvoiceChargeSuccess)
-  - Created payment success confirmation page
+### 4.1 API (tRPC) Updates
 
-### ✅ Completed (2025-08-17 Session - Email & Automation)
-- **Feature 4: Email Delivery & Status Tracking**:
-  - Created professional invoice email template with tracking pixel
-  - Built payment received confirmation email template
-  - Implemented comprehensive email sending functions (invoice, reminder, payment received)
-  - Created email tracking endpoint that updates viewedAt and status
-  - Added daily overdue invoices trigger job running at 9 AM ET
-  - Integrated email sending with invoice send procedure
+- [ ] Modify orders list query in `packages/lib/src/trpc/routes/cart.route.ts`
+  - Add optional filter parameter: `fulfilledBy?: 'artist' | 'barely' | 'all'`
+  - Apply WHERE clause when filter is specified:
+    - `'artist'` → `WHERE fulfilledBy = 'artist'`
+    - `'barely'` → `WHERE fulfilledBy = 'barely'`
+    - `'all'` or undefined → no filter
+  - Default to `'all'` (no filter)
 
-### 🚀 Next Priority (Final 5% - Feature 6)
-- Security hardening: Rate limiting, CSRF protection, input sanitization
-- Performance optimization: Database indexes, query caching, lazy loading
-- Final testing: Security audit, load testing, end-to-end workflow validation
-- Deployment preparation: Environment configuration, monitoring setup
+- [ ] Ensure `fulfilledBy` field is included in order list response
+- [ ] Ensure `barelyFulfillmentFee` field is included in order detail response
 
-## 📈 Project Completion Status
+### 4.2 Orders List Page
 
-**95% Complete** - All core features are fully implemented and functional:
-- ✅ Core Infrastructure (Feature 0)
-- ✅ Client Management (Feature 1)
-- ✅ Invoice Management (Feature 2)
-- ✅ Payment Processing (Feature 3)
-- ✅ Email Delivery & Tracking (Feature 4)
-- ✅ Dashboard & Analytics (Feature 5)
-- ⏳ Security & Performance (Feature 6) - Last 5% remaining
+- [ ] Locate orders list component in `apps/app/src/app/[handle]/orders/`
 
-The MVP is feature-complete and ready for security hardening and performance optimization before launch.
+- [ ] Add fulfillment filter dropdown above orders list:
+  - Options: "All Orders", "My Fulfillment", "Barely Fulfillment"
+  - Default: "All Orders"
+  - Use existing dropdown/select component pattern
+
+- [ ] Wire filter to API query parameter:
+  - Update query when filter changes
+  - Re-fetch orders with new filter value
+
+- [ ] Conditionally show filter only when workspace has Barely fulfillment enabled:
+  - Check `barelyFulfillmentMode !== 'artist_all'`
+  - If `artist_all`, don't show filter (all orders are artist-fulfilled anyway)
+
+- [ ] (Optional) Persist filter state in URL query param for shareable links
+
+### 4.3 Order Detail Page
+
+- [ ] Locate order detail component in `apps/app/src/app/[handle]/orders/[orderId]/`
+
+- [ ] Add fulfillment information section to order detail:
+  ```
+  Fulfillment
+  -----------
+  Fulfilled by: You  (or "Barely")
+  ```
+
+- [ ] If fulfilled by Barely, show fee:
+  ```
+  Fulfillment Fee: $3.50
+  ```
+
+- [ ] Use existing order detail layout pattern
+
+### 4.4 Milestone 4 Testing
+
+- [ ] Unit test: Orders query filters correctly by `fulfilledBy = 'artist'`
+- [ ] Unit test: Orders query filters correctly by `fulfilledBy = 'barely'`
+- [ ] Unit test: Orders query returns all when `fulfilledBy = 'all'`
+- [ ] Integration test: Filter dropdown updates displayed orders
+- [ ] Integration test: Order detail shows "You" for artist fulfillment
+- [ ] Integration test: Order detail shows "Barely" for Barely fulfillment
+- [ ] Integration test: Order detail shows fulfillment fee when applicable
+- [ ] Integration test: Filter only appears for workspaces with non-default mode
+- [ ] E2E test: User can filter orders and see correct results
+
+---
+
+## Cross-Cutting: Security & Validation Checklist
+
+Apply these checks throughout implementation:
+
+### Access Control
+
+- [ ] `barelyFulfillmentEligible` can ONLY be set via direct database access
+- [ ] `barelyFulfillmentFlatFeePerOrder` can ONLY be set via direct database access
+- [ ] `barelyFulfillmentPercentageFeePerOrder` can ONLY be set via direct database access
+- [ ] `barelyFulfillmentMode` update requires workspace write permission
+- [ ] `fulfilledBy` and `barelyFulfillmentFee` are immutable after cart creation
+
+### Input Validation
+
+- [ ] `barelyFulfillmentMode` enum values validated in update mutation
+- [ ] Eligibility checked before allowing mode change
+- [ ] Customer shipping country validated/handled gracefully
+
+### Data Integrity
+
+- [ ] `fulfilledBy` set at cart creation, not updatable after
+- [ ] `barelyFulfillmentFee` stores calculated value at time of order (not reference)
+- [ ] Historical orders unaffected by fee configuration changes
+
+### Security Tests
+
+- [ ] Security test: Cannot set eligibility via API
+- [ ] Security test: Cannot set fee config via API
+- [ ] Validation test: Invalid mode values rejected
+- [ ] Validation test: Mode change blocked when not eligible
+- [ ] Data integrity test: Fulfillment fields immutable after creation
+
+---
+
+## File Summary by Milestone
+
+### Milestone 1: Foundation
+| File | Action | Purpose |
+|------|--------|---------|
+| `.env.example` | Modify | Document new env vars |
+| `packages/lib/src/env.ts` | Modify | Add Barely address env access |
+| `packages/db/src/sql/workspace.sql.ts` | Modify | Add fulfillment fields |
+| `packages/db/src/sql/cart.sql.ts` | Modify | Add fulfillment fields |
+| `packages/lib/src/utils/fulfillment.ts` | Create | Core fulfillment utilities |
+| `packages/lib/src/utils/cart.ts` | Modify | Add fee calculation |
+
+### Milestone 2: Checkout Integration
+| File | Action | Purpose |
+|------|--------|---------|
+| `packages/lib/src/integrations/shipping/shipengine.endpts.ts` | Modify | Dynamic shipping origin |
+| `packages/lib/src/functions/cart.fns.ts` | Modify | Integrate fulfillment into checkout |
+| `packages/lib/src/utils/cart.ts` | Modify | Include fulfillment fee in app fee |
+
+### Milestone 3: Artist Settings
+| File | Action | Purpose |
+|------|--------|---------|
+| `packages/validators/src/schemas/` | Modify | Add mode to update schema |
+| `packages/lib/src/trpc/routes/workspace.route.ts` | Modify | Add mode update mutation |
+| `apps/app/src/app/[handle]/settings/fulfillment/page.tsx` | Create | Settings UI |
+| `apps/app/src/app/[handle]/settings/` (nav) | Modify | Add nav link |
+
+### Milestone 4: Order Management
+| File | Action | Purpose |
+|------|--------|---------|
+| `packages/lib/src/trpc/routes/cart.route.ts` | Modify | Add filter to orders query |
+| `apps/app/src/app/[handle]/orders/` | Modify | Add filter dropdown |
+| `apps/app/src/app/[handle]/orders/[orderId]/` | Modify | Show fulfillment info |
+
+---
+
+## Deployment Sequence
+
+1. **Deploy Milestone 1** - No user-facing changes, safe to deploy
+2. **Enable for test workspace** - Set eligibility + fees via database
+3. **Deploy Milestone 2** - Checkout integration active for eligible workspaces
+4. **Test with real orders** - Verify shipping/fees/assignment
+5. **Deploy Milestone 3** - Artists can configure via UI
+6. **Deploy Milestone 4** - Order filtering available
+7. **Enable for The Now** - Beta client goes live
+8. **Monitor & iterate** - Watch for issues, gather feedback
+
+---
+
+## Related Documents
+
+- [[feature|Feature: Barely Fulfillment Partner]]
+- [[JTBD|Jobs to be Done: Barely Fulfillment Partner]]
+- [[PRD|Product Requirements Document: Barely Fulfillment Partner]]
+- [[plan|Technical Implementation Plan (Original)]]

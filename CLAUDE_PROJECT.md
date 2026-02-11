@@ -1,53 +1,83 @@
-# Project Context: Bio Landing Page Blocks
+# Project Context: Barely Fulfillment Partner
 
 ## Current Development
-Working on: Extending bio platform with 4 new block types for landing page creation
-Deadline: 2025-09-15 (aligns with agency client campaign launch)
+Working on: Enable artists to designate Barely as their fulfillment partner for US orders (or all orders)
+Deadline: 2026-02-25
+Beta Client: The Now (UK artist)
 
 ## Key Files in This Worktree
-- `.claude/project/PRD.md` - Full product requirements
-- `.claude/project/plan.md` - Implementation checklist by feature
-- `.claude/project/JTBD.md` - Jobs to be done analysis
-- `.claude/project/feature.md` - Feature overview and rationale
+- `.claude/project/PRD.md` - Full product requirements (6 user stories, 6 functional requirement groups)
+- `.claude/project/plan-organized.md` - Implementation checklist organized by milestone
+- `.claude/project/JTBD.md` - Jobs to be done analysis (3 primary, 3 secondary jobs)
+- `.claude/project/feature.md` - Feature overview and business rationale
+- `.claude/project/plan.md` - Original technical implementation plan
 
 ## Current Focus
-Start with Phase 1: Infrastructure Setup
-- Database migration for new block types
-- Update block registry and type definitions
-- Security headers and validation utilities
-- Performance foundation (caching, lazy loading)
+Start with **Milestone 1: Foundation & Data Model**
 
-Then implement blocks in order:
-1. Markdown Block (3-4 hours)
-2. Image Block (2-3 hours)
-3. Two-Panel Block (3-4 hours)
-4. Cart Block (2-3 hours)
+1. Environment Configuration
+   - Add Barely address env vars to `.env.example`
+   - Create type-safe env access in `packages/lib/src/env.ts`
+
+2. Workspace Schema Changes (`packages/db/src/sql/workspace.sql.ts`)
+   - Add `barelyFulfillmentEligible` (boolean, default false)
+   - Add `barelyFulfillmentMode` (enum: artist_all, barely_us, barely_worldwide)
+   - Add `barelyFulfillmentFlatFeePerOrder` (integer, cents)
+   - Add `barelyFulfillmentPercentageFeePerOrder` (integer, percentage × 100)
+
+3. Cart Schema Changes (`packages/db/src/sql/cart.sql.ts`)
+   - Add `fulfilledBy` (enum: artist, barely)
+   - Add `barelyFulfillmentFee` (integer, cents)
+
+4. Core Utility Functions
+   - Create `packages/lib/src/utils/fulfillment.ts`
+   - Implement `determineFulfillmentResponsibility()`
+   - Implement `getShippingOriginAddress()`
+   - Add `calculateBarelyFulfillmentFee()` to cart utils
 
 ## Key Technical Decisions
-- Extend existing `BioBlockType` enum (not separate system)
-- Reuse modal editor patterns from Links block
-- Leverage existing markdown editor from `@barely/ui`
-- Store block data in JSONB with zod validation
-- Use CSS Grid with container queries for Two-Panel block
-- Direct cart checkout links (no embedded iframe)
+- Fulfillment determined at checkout (not post-purchase) - shipping rates need correct origin
+- Barely address stored in env vars (not database) - single location for MVP
+- Fee fields on workspace table - aligns with existing `cartFeePercentageOverride` pattern
+- Fulfillment mode as enum: `artist_all`, `barely_us`, `barely_worldwide`
+- Fulfillment fee added to Stripe `application_fee_amount`
+- Order filtering via simple WHERE clause on `fulfilledBy` field
+
+## Implementation Milestones
+1. **Foundation & Data Model** ← START HERE
+   - Schema changes, env vars, utility functions
+2. **Checkout Integration**
+   - Dynamic shipping, order assignment, fee capture
+3. **Artist Settings**
+   - Fulfillment configuration UI
+4. **Order Management**
+   - Filtering by fulfillment responsibility
 
 ## Success Criteria
-- 80% of landing page users migrate from MDX editor within 30 days
-- 0 support tickets for basic landing page edits
-- <30 minutes from start to published landing page
-- Major agency client successfully launches merch campaign
-- Maintain <2s page load on 3G networks
-- All blocks render consistently across devices
+- [ ] The Now processing split-fulfillment orders (US via Barely, non-US via artist)
+- [ ] 3 US clients onboarded using Barely fulfillment
+- [ ] Fulfillment fees captured automatically on Barely-fulfilled orders
+- [ ] Artists can filter orders by fulfillment responsibility
+
+## Barely Fulfillment Address (for env vars)
+```
+763 Park Pl #1R
+Brooklyn, NY 11216
+US
+```
 
 ## Quick Start
-1. This worktree is focused on implementing bio landing page blocks
-2. All project artifacts are in .claude/project/
-3. Start with the organized plan in plan.md
-4. Original project docs: 0_Projects/bio-landing-page-blocks/
+1. This worktree is focused on implementing Barely Fulfillment Partner
+2. All project artifacts are in `.claude/project/`
+3. Start with Milestone 1 in `.claude/project/plan-organized.md`
+4. Original project docs: `0_Projects/barely-fulfillment-partner/`
 
-## Implementation Notes
-- Building on completed bio-mvp platform (now in production)
-- 10+ agency clients struggling with current MDX editor
-- Major agency client ready to launch merch campaign (immediate need)
-- Estimated implementation: 1-2 days total
-- Reuse everything: patterns, components, infrastructure from bio platform
+## Key Files to Modify
+- `packages/db/src/sql/workspace.sql.ts` - Add fulfillment fields
+- `packages/db/src/sql/cart.sql.ts` - Add fulfilledBy and fee fields
+- `packages/lib/src/functions/cart.fns.ts` - Checkout flow integration
+- `packages/lib/src/utils/cart.ts` - Fee calculation
+- `packages/lib/src/utils/fulfillment.ts` - New file for fulfillment utilities
+- `packages/lib/src/integrations/shipping/shipengine.endpts.ts` - Dynamic shipping origin
+- `apps/app/src/app/[handle]/settings/fulfillment/page.tsx` - New settings page
+- `apps/app/src/app/[handle]/orders/` - Add fulfillment filter

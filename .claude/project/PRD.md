@@ -1,305 +1,413 @@
-# Barely Invoice MVP – Product Requirements Document
+# Product Requirements Document: Barely Fulfillment Partner
 
-### TL;DR
+## Document Info
 
-Barely Invoice is a dead-simple invoicing tool for freelancers and consultants who need to get paid fast without accounting complexity. Built as an app variant of the barely.ai platform, it enables users to create professional invoices in under 60 seconds, send payment links via email, and get paid through Stripe within days instead of weeks. The MVP focuses exclusively on the core payment collection flow with zero unnecessary features.
+| Field | Value |
+|-------|-------|
+| Feature Name | Barely Fulfillment Partner |
+| Status | Draft |
+| Owner | Adam Barito |
+| Created | 2026-02-11 |
+| Last Updated | 2026-02-11 |
 
 ---
 
-## Goals
+## Executive Summary
 
-### Business Goals
+Enable artists to designate Barely as their fulfillment partner for US orders (or all orders), allowing them to sell physical products internationally from a single workspace with competitive shipping rates. This feature eliminates the need for duplicate workspaces, multiple Stripe accounts, and fragmented ad campaigns when selling to both domestic and US markets.
 
-- **Demonstrate Micro-SaaS Revenue**: Generate $500 MRR within month 1, $1,900 by month 3
-- **Validate Market Fit**: Prove demand for ultra-simple invoicing before full build
-- **Expand Platform Usage**: Create first B2B product variant using existing infrastructure
-- **Enable Dogfooding**: Use internally for agency client billing immediately
+**Business Impact:**
+- Enables ~$150k+ in additional agency revenue via fulfillment fees
+- Unblocks 1 UK client (The Now) ready to expand to US market
+- Enables onboarding of 3 US clients contingent on fulfillment solution
+- Supports agency goal of $1M GMV through Barely cart in 2026
 
-### User Goals
+---
 
-- **Get Paid Faster**: Reduce payment collection from 30+ days to under 7 days
-- **Save Time**: Create and send invoices in under 60 seconds (vs 10-15 minutes)
-- **Look Professional**: Send polished invoices that justify professional rates
-- **Track Payment Status**: Know instantly when invoices are viewed and paid
+## Problem Statement
+
+### The Problem
+
+Artists selling physical products internationally face a choice: expensive cross-border shipping that kills ad ROI, or the operational nightmare of managing duplicate workspaces, Stripe accounts, and ad campaigns per region.
+
+### Who It Affects
+
+1. **UK/EU artists** wanting to sell to US customers but blocked by:
+   - Prohibitive international shipping costs ($15-25+ per order from UK to US)
+   - Cart abandonment when customers see shipping at checkout
+   - Unprofitable paid acquisition due to shipping impact on unit economics
+
+2. **US artists** who want to sell physical products but:
+   - Don't want to handle fulfillment themselves
+   - Won't consider physical sales without a fulfillment partner
+   - Need a turnkey solution integrated with their existing storefront
+
+### Current Workarounds
+
+| Workaround | Pain Points |
+|------------|-------------|
+| Ship from home country | Expensive, slow, poor customer experience, kills ad ROI |
+| Duplicate workspaces | 2x products, 2x landing pages, 2x Stripe accounts, split analytics, complex ad targeting |
+| Avoid international sales | Leaves money on the table, limits growth potential |
+
+### Evidence of Need
+
+- 1 UK client (The Now) has paid for product stocking in Brooklyn and is ready to launch
+- 3 US clients will only sign if fulfillment solution is available
+- Client has explicitly stated preference for single-workspace solution over duplicates
+- Pricing validated at $3-4 per order (willing to pay for convenience)
+
+---
+
+## Goals & Success Metrics
+
+### Goals
+
+1. **Enable international expansion** - UK/EU artists can profitably sell to US customers
+2. **Simplify operations** - Single workspace for all markets
+3. **Generate fulfillment revenue** - Capture fees on Barely-fulfilled orders
+4. **Increase platform stickiness** - Active fulfillment relationships reduce churn risk
+
+### Success Metrics
+
+| Metric | Target | Measurement |
+|--------|--------|-------------|
+| Beta client live | The Now processing split-fulfillment orders | Within 2 weeks of launch |
+| US client onboarding | 3 new clients using Barely fulfillment | Within 30 days of launch |
+| Setup time | Artists enable fulfillment after approval | < 2 minutes |
+| Shipping accuracy | Correct origin used for shipping calculation | 100% of orders |
+| Order routing | Orders correctly tagged with fulfillment responsibility | 100% of orders |
+| Support tickets | No increase in shipping-related confusion tickets | Baseline or below |
 
 ### Non-Goals
 
-- Complex accounting or bookkeeping features
-- Multi-currency support
-- Recurring/subscription billing (MVP phase)
-- PDF generation (HTML invoice sufficient)
-- Automated payment reminders (manual resend only)
-- Invoice templates marketplace
-- Time tracking or expense management
-- Estimates or quotes
-- Purchase orders
+- Building inventory management system
+- Creating a separate Barely fulfillment dashboard
+- Supporting multiple Barely fulfillment locations (EU warehouse)
+- Per-product fulfillment assignment
+- In-app returns handling
 
 ---
 
 ## User Stories
 
-### Primary Persona – "Freelance Consultant"
+### Epic: Enable Barely as Fulfillment Partner
 
-- As a freelancer, I want to create an invoice with line items in under a minute, so that I can get back to billable work
-- As a consultant, I want to save client information once, so that I don't retype details for every invoice
-- As a service provider, I want clients to pay with one click, so that payment friction is eliminated
-- As a freelancer, I want to know when my invoice is viewed, so that I can follow up appropriately
-- As a consultant, I want automatic payment confirmation, so that I don't manually check my bank account
-- As a freelancer, I want to add simple tax calculations, so that I comply with requirements without complexity
-- As a service provider, I want professional-looking invoices, so that clients take my business seriously
+#### US-1: Enable Fulfillment Mode (Artist)
+> As an **artist with Barely fulfillment eligibility**, I want to **choose my fulfillment mode** so that **I can configure how my orders are handled**.
+
+**Acceptance Criteria:**
+- [ ] Fulfillment settings only visible when `barelyFulfillmentEligible = true`
+- [ ] Can select from three modes:
+  - "I fulfill all orders" (default)
+  - "Barely fulfills US orders, I fulfill the rest"
+  - "Barely fulfills all orders"
+- [ ] Setting persists and takes effect immediately
+- [ ] Can change setting at any time
+
+---
+
+#### US-2: See Competitive US Shipping (Customer)
+> As a **US customer** buying from a UK artist using Barely fulfillment, I want to **see shipping rates calculated from a US address** so that **I don't abandon my cart due to high international shipping**.
+
+**Acceptance Criteria:**
+- [ ] Shipping calculated from Barely's Brooklyn address for US customers when Barely fulfillment is enabled for US
+- [ ] Shipping rates are competitive with domestic US retailers
+- [ ] Customer sees no indication of international origin (transparent experience)
+
+---
+
+#### US-3: Filter Orders by Fulfillment Responsibility (Artist)
+> As an **artist with split fulfillment**, I want to **filter my orders by who fulfills them** so that **I know exactly which orders I need to ship**.
+
+**Acceptance Criteria:**
+- [ ] Orders view has filter: "All Orders" | "My Fulfillment" | "Barely Fulfillment"
+- [ ] Default view is "All Orders"
+- [ ] Filter accurately reflects `fulfilledBy` field on each order
+- [ ] Filter state persists during session
+
+---
+
+#### US-4: Automatic Fulfillment Assignment (System)
+> As the **system**, I want to **automatically assign fulfillment responsibility when an order is created** so that **there's no ambiguity about who ships each order**.
+
+**Acceptance Criteria:**
+- [ ] Order tagged with `fulfilledBy: "artist"` or `fulfilledBy: "barely"` at creation
+- [ ] Assignment based on:
+  - Customer's shipping address (US vs non-US)
+  - Workspace's fulfillment mode setting
+- [ ] Assignment is immutable after order creation
+- [ ] Assignment determines which fulfillment fee (if any) is captured
+
+---
+
+#### US-5: Capture Fulfillment Fees (System)
+> As **Barely**, I want to **automatically capture fulfillment fees on Barely-fulfilled orders** so that **revenue is collected without manual intervention**.
+
+**Acceptance Criteria:**
+- [ ] Fee calculated as: flat fee + (order subtotal × percentage)
+- [ ] Fee only applied when `fulfilledBy: "barely"`
+- [ ] Fee deducted from artist payout alongside cart and shipping fees
+- [ ] Fee amount stored on order record for reference
+
+---
+
+#### US-6: Access Fulfillment-Enabled Workspaces (Barely Team)
+> As a **Barely team member**, I want to **access workspaces where Barely fulfillment is enabled** so that **I can fulfill orders assigned to Barely**.
+
+**Acceptance Criteria:**
+- [ ] Barely team has workspace access (existing user access mechanism)
+- [ ] Can use "Barely Fulfillment" filter to see orders to ship
+- [ ] Can mark orders as shipped using standard fulfillment flow
+- [ ] Can view order details including shipping address
 
 ---
 
 ## Functional Requirements
 
-### **Client Management** (Priority: High)
+### FR-1: Workspace Eligibility Flag
 
-- Create new clients with name, email, company, address
-- Edit existing client information
-- View list of all clients
-- Select client from dropdown when creating invoice
-- Delete clients (with confirmation)
-- Client data scoped to workspace
+| ID | Requirement |
+|----|-------------|
+| FR-1.1 | Workspace model includes `barelyFulfillmentEligible` boolean field |
+| FR-1.2 | Field defaults to `false` for all existing and new workspaces |
+| FR-1.3 | Field can only be set via backend/database (not exposed in UI) |
+| FR-1.4 | When `false`, no fulfillment settings are visible to artist |
 
-### **Invoice Creation** (Priority: High)
+### FR-2: Fulfillment Mode Setting
 
-- Add multiple line items with description, quantity, rate
-- Automatic calculation of line totals and invoice total
-- Add simple percentage-based tax
-- Set payment due date
-- Include invoice number (auto-generated, sequential)
-- Select existing client or quick-add new one
-- Save as draft or send immediately
-- Invoice data scoped to workspace
+| ID | Requirement |
+|----|-------------|
+| FR-2.1 | Workspace model includes `barelyFulfillmentMode` enum field |
+| FR-2.2 | Enum values: `artist_all`, `barely_us`, `barely_worldwide` |
+| FR-2.3 | Default value: `artist_all` |
+| FR-2.4 | Setting exposed in workspace settings when eligible |
+| FR-2.5 | Setting takes effect immediately upon save |
 
-### **Payment Collection** (Priority: High)
+### FR-3: Fulfillment Fee Configuration
 
-- Generate unique payment link for each invoice
-- Public payment page at /pay/{workspace-handle}/{invoice-id}
-- Accept credit/debit cards via Stripe Checkout
-- Use workspace's existing Stripe Connect account
-- Automatic webhook to mark invoice as paid
-- Instant payment confirmation to user
-- Platform fee of 0.5% on collected payments
+| ID | Requirement |
+|----|-------------|
+| FR-3.1 | Workspace model includes `barelyFulfillmentFlatFeePerOrder` decimal field |
+| FR-3.2 | Workspace model includes `barelyFulfillmentPercentageFeePerOrder` decimal field |
+| FR-3.3 | Fields configured via backend when eligibility is granted |
+| FR-3.4 | Fee calculation: `flatFee + (orderSubtotal × percentageFee)` |
 
-### **Invoice Management** (Priority: High)
+### FR-4: Dynamic Shipping Calculation
 
-- View list of all invoices with status indicators
-- Filter by status (draft, sent, viewed, paid)
-- Search invoices by client or invoice number
-- Duplicate existing invoice for similar projects
-- Mark invoice as paid manually if needed
-- Delete draft invoices
+| ID | Requirement |
+|----|-------------|
+| FR-4.1 | At checkout, system determines fulfillment responsibility before calculating shipping |
+| FR-4.2 | If US customer AND mode is `barely_us` or `barely_worldwide` → use Barely address |
+| FR-4.3 | If non-US customer AND mode is `barely_worldwide` → use Barely address |
+| FR-4.4 | Otherwise → use artist's `shipFrom` address (existing behavior) |
+| FR-4.5 | Barely address read from environment variables |
 
-### **Invoice Delivery** (Priority: High)
+### FR-5: Order Fulfillment Assignment
 
-- Send invoice via email from user's workspace
-- Professional email template with payment link
-- Track when invoice email is opened (pixel tracking)
-- Update status to "viewed" automatically
-- Resend invoice manually if needed
+| ID | Requirement |
+|----|-------------|
+| FR-5.1 | Order model includes `fulfilledBy` enum field (`artist` \| `barely`) |
+| FR-5.2 | Order model includes `barelyFulfillmentFee` decimal field |
+| FR-5.3 | `fulfilledBy` set at order creation based on shipping logic |
+| FR-5.4 | `barelyFulfillmentFee` calculated and stored at order creation |
+| FR-5.5 | Both fields are immutable after order creation |
 
-### **Status Tracking** (Priority: Medium)
+### FR-6: Order Filtering
 
-- Clear status indicators: draft, sent, viewed, paid, overdue
-- Automatic status updates based on actions
-- Visual indicators in invoice list (colors/badges)
-- Overdue alerts for unpaid past-due invoices
-- Last activity timestamp on each invoice
-
-### **Dashboard** (Priority: Medium)
-
-- Total outstanding amount
-- Number of overdue invoices
-- Recent activity feed (last 10 actions)
-- Quick actions: New Invoice, View Clients
-- This month's collected total
-- Average days to payment
+| ID | Requirement |
+|----|-------------|
+| FR-6.1 | Orders view includes fulfillment filter dropdown |
+| FR-6.2 | Filter options: "All Orders", "My Fulfillment", "Barely Fulfillment" |
+| FR-6.3 | "My Fulfillment" shows orders where `fulfilledBy = artist` |
+| FR-6.4 | "Barely Fulfillment" shows orders where `fulfilledBy = barely` |
+| FR-6.5 | Default filter: "All Orders" |
 
 ---
 
 ## User Experience
 
-### Entry Point & Onboarding
+### UX-1: Fulfillment Settings (Workspace Settings)
 
-- User signs up via magic link (existing auth)
-- Workspace created/selected (existing flow)
-- Stripe Connect already configured (from other products)
-- First invoice created from template/tutorial
+**Location:** Workspace Settings > Fulfillment (new section)
 
-### Core Experience
+**Visibility:** Only when `barelyFulfillmentEligible = true`
 
-**Creating First Invoice:**
-1. User clicks "New Invoice" from dashboard
-2. Selects existing client or quick-adds new one
-3. Adds line items with automatic calculation
-4. Sets due date and tax percentage
-5. Reviews invoice preview
-6. Clicks "Send Invoice"
-7. Email sent to client with payment link
-8. User sees confirmation and returns to dashboard
+**Content:**
+```
+Fulfillment Partner
+-------------------
+Choose how your orders are fulfilled:
 
-**Client Payment Flow:**
-1. Client receives professional invoice email
-2. Clicks "Pay Now" button
-3. Lands on public payment page (no login required)
-4. Reviews invoice details
-5. Clicks "Pay with Card"
-6. Enters payment info via Stripe Checkout
-7. Sees payment confirmation
-8. User notified instantly of payment
+○ I fulfill all orders (current default)
+  You handle shipping for all orders worldwide.
 
-**Returning User Flow:**
-1. Dashboard shows outstanding invoices
-2. User duplicates previous similar invoice
-3. Updates line items and amount
-4. Selects saved client from dropdown
-5. Sends in under 60 seconds
+○ Barely fulfills US orders, I fulfill the rest
+  Orders shipping to US addresses are fulfilled by Barely.
+  You handle all other orders.
 
-### Advanced Features & Edge Cases
+○ Barely fulfills all orders
+  Barely handles shipping for all orders worldwide.
 
-- Manual payment marking for cash/check payments
-- Void invoice option for mistakes
-- Email bounce handling with manual resend
-- Payment failure notifications
-- Export invoice list as CSV (future)
+[Save Changes]
 
-### UI/UX Highlights
+Note: Fulfillment fees apply to Barely-fulfilled orders.
+Your current rates: $X.XX + Y% per order
+```
 
-- Mobile-responsive for invoice creation on the go
-- Clean, minimal interface matching barely.ai design system
-- Professional invoice layout inspiring trust
-- One-click actions throughout
-- Real-time calculation updates
-- Loading states for all async operations
+### UX-2: Order Filter (Orders View)
+
+**Location:** Orders page, above order list
+
+**Implementation:** Dropdown or segmented control
+
+```
+Filter by: [All Orders ▼]
+           ├─ All Orders
+           ├─ My Fulfillment
+           └─ Barely Fulfillment
+```
+
+### UX-3: Order Detail (Order Page)
+
+**Addition:** Show fulfillment assignment on order detail
+
+```
+Fulfillment: Barely  (or "You")
+Fulfillment Fee: $3.50  (only if Barely)
+```
 
 ---
 
-## Narrative
+## Scope
 
-Sarah is a freelance marketing consultant who just finished a website copy project for a new client. Instead of opening Google Docs to create yet another invoice template, she logs into Barely Invoice.
+### In Scope (MVP)
 
-In 45 seconds, she's created a professional invoice with three line items, added 8.5% tax, and selected her client from the dropdown (saved from last month's project). She hits send.
+| Component | Description |
+|-----------|-------------|
+| Eligibility flag | Backend-set `barelyFulfillmentEligible` on workspace |
+| Fulfillment mode | Artist-configurable setting with 3 options |
+| Fee configuration | Backend-set flat + percentage fees on workspace |
+| Shipping routing | Dynamic origin selection based on destination + mode |
+| Order tagging | `fulfilledBy` field set at order creation |
+| Fee capture | Fulfillment fee calculated and deducted from payout |
+| Order filtering | Filter orders view by fulfillment responsibility |
 
-Her client receives a clean, professional invoice email. One click takes them to a payment page that looks trustworthy and modern. Another click to "Pay Now" and they're in Stripe's secure checkout. Payment complete.
+### Out of Scope (MVP)
 
-Sarah gets a notification on her phone: "Invoice #1024 paid - $2,500 received!" The money hits her Stripe account immediately. No more checking the bank account daily or sending awkward payment reminders.
-
-By month's end, Sarah has collected payments in an average of 4 days instead of her previous 35. She's spending 5 minutes per week on invoicing instead of 2 hours. That's 7+ hours per month back for billable work.
-
----
-
-## Success Metrics
-
-### User-Centric Metrics
-
-- **Invoice Creation Time**: <60 seconds average
-- **Payment Collection Time**: <7 days average
-- **User Activation Rate**: 80% send first invoice within 24 hours
-- **Invoice Completion Rate**: 90% of started invoices get sent
-- **Client Payment Rate**: 90% pay within 30 days
-
-### Business Metrics
-
-- **Week 1**: 1 paid invoice through system
-- **Month 1**: 10 paying users, $190 MRR
-- **Month 3**: 100 paying users, $1,900 MRR
-- **Platform Fees**: 0.5% of payment volume
-- **Churn Rate**: <5% monthly
-
-### Technical Metrics
-
-- **Page Load Time**: <2 seconds
-- **Payment Page Load**: <1 second (critical for conversion)
-- **Email Delivery Rate**: >95%
-- **Webhook Success Rate**: 99.9%
-- **Uptime**: 99.9%
-
-### Tracking Plan
-
-- Invoice created (workspace_id, client_id, amount)
-- Invoice sent (invoice_id, delivery_method)
-- Invoice viewed (invoice_id, viewer_ip)
-- Payment initiated (invoice_id, amount)
-- Payment completed (invoice_id, amount, days_to_pay)
-- Client created (workspace_id)
-- User session (page_views, time_on_site)
+| Component | Reason | Future Consideration |
+|-----------|--------|---------------------|
+| Inventory management | Handled operationally | Post-MVP if volume justifies |
+| Per-product fulfillment | Adds complexity | Post-MVP based on demand |
+| Barely dashboard | Reuse existing workspace access | Post-MVP if scale requires |
+| Returns handling | Handled via support email | Post-MVP based on volume |
+| Multiple Barely locations | Start with Brooklyn only | Post-MVP for EU expansion |
+| Approval workflows | Simple flag sufficient | Post-MVP if abuse occurs |
+| Stock alerts | Manual coordination for now | Post-MVP if issues arise |
 
 ---
 
-## Technical Considerations
+## Configuration
 
-### Technical Needs
+### Environment Variables
 
-- **App Variant**: Configure as 'invoice' variant like barely.fm
-- **Database Tables**: Two new tables (invoices, clients)
-- **API Routes**: 6 new endpoints for CRUD operations
-- **Email Service**: SendGrid for invoice delivery (existing)
-- **Payment Processing**: Stripe Checkout + Connect (existing)
-- **Webhook Handler**: Stripe payment confirmation
+| Variable | Value | Purpose |
+|----------|-------|---------|
+| `BARELY_FULFILLMENT_ADDRESS_LINE1` | `763 Park Pl #1R` | Street address |
+| `BARELY_FULFILLMENT_ADDRESS_CITY` | `Brooklyn` | City |
+| `BARELY_FULFILLMENT_ADDRESS_STATE` | `NY` | State |
+| `BARELY_FULFILLMENT_ADDRESS_ZIP` | `11216` | ZIP code |
+| `BARELY_FULFILLMENT_ADDRESS_COUNTRY` | `US` | Country |
 
-### Integration Points
+### Database Schema Additions
 
-- **Authentication**: Magic link system (existing)
-- **Workspace System**: Multi-tenant architecture (existing)
-- **Stripe Connect**: Payment processing (existing)
-- **Component Library**: Reuse barely.ai UI components
-- **Email Infrastructure**: SendGrid integration (existing)
+**Workspace:**
+- `barelyFulfillmentEligible: Boolean (default: false)`
+- `barelyFulfillmentMode: Enum ['artist_all', 'barely_us', 'barely_worldwide'] (default: 'artist_all')`
+- `barelyFulfillmentFlatFeePerOrder: Decimal (nullable)`
+- `barelyFulfillmentPercentageFeePerOrder: Decimal (nullable)`
 
-### Data Storage & Privacy
-
-- All invoice data encrypted at rest
-- Client information scoped to workspace
-- PCI compliance via Stripe (no card data stored)
-- GDPR-compliant data deletion on request
-- Audit trail for all invoice modifications
-
-### Scalability & Performance
-
-- Database indexes on workspace_id, client_id, status
-- Paginated invoice lists (50 per page)
-- Lazy load client dropdown for large lists
-- CDN for static assets
-- Queue-based email sending for reliability
-
-### Potential Challenges
-
-- **Risk**: Stripe Connect not configured for workspace
-  - **Mitigation**: Graceful degradation with setup prompt
-  
-- **Risk**: Email deliverability issues
-  - **Mitigation**: Use established SendGrid account, monitor bounces
-  
-- **Risk**: Users expect recurring billing immediately
-  - **Mitigation**: Clear messaging about future features, collect feedback
-  
-- **Risk**: Payment disputes
-  - **Mitigation**: Clear terms, Stripe's dispute handling
+**Order:**
+- `fulfilledBy: Enum ['artist', 'barely'] (default: 'artist')`
+- `barelyFulfillmentFee: Decimal (default: 0)`
 
 ---
 
-## MVP Definition
+## Dependencies
 
-The MVP includes only:
-1. Client management (CRUD)
-2. Invoice creation with line items
-3. Email delivery with payment link
-4. Public payment page
-5. Stripe payment processing
-6. Status tracking
-7. Basic dashboard
+### Technical Dependencies
 
-Everything else is post-MVP based on user feedback and requests.
+| Dependency | Status | Notes |
+|------------|--------|-------|
+| US shipping endpoint | Exists | Route Barely-fulfilled orders here |
+| UK shipping endpoint | Exists | Continue using for artist-fulfilled non-US |
+| Order management | Exists | Add field and filter |
+| Workspace settings | Exists | Add new section |
+| Payout calculation | Exists | Add new fee deduction |
+
+### External Dependencies
+
+| Dependency | Owner | Notes |
+|------------|-------|-------|
+| Product stocked at Brooklyn | Barely team | The Now's products already stocked |
+| Workspace access for Barely team | Barely team | Standard user access |
+| Fee structure confirmation | Adam | $3-4/order validated with clients |
+
+---
+
+## Risks & Mitigations
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| Shipping calculated incorrectly | Medium | High | Thorough testing with all mode/destination combinations |
+| Fee deduction errors | Low | High | Validate fee calculation logic; include in order record for audit |
+| Order assigned to wrong fulfiller | Low | High | Immutable assignment at creation; clear logic documentation |
+| Barely runs out of stock | Medium | Medium | Manual coordination; handled operationally outside app |
+| Artist confusion about modes | Low | Low | Clear copy in settings; support documentation |
 
 ---
 
-## Post-MVP Roadmap
+## Launch Plan
 
-Based on user feedback, consider adding:
-1. **Week 2**: Duplicate invoice feature
-2. **Week 3**: CSV export
-3. **Month 2**: Recurring invoices (if heavily requested)
-4. **Month 3**: PDF generation (if required by users)
-5. **Future**: Templates, automated reminders, multi-currency
+### Phase 1: Beta (The Now)
+
+1. Deploy feature to production (behind eligibility flag)
+2. Enable eligibility for The Now's workspace
+3. Configure fee structure
+4. The Now enables "Barely fulfills US orders" mode
+5. Monitor first 10-20 orders for correctness
+6. Gather feedback and iterate if needed
+
+### Phase 2: US Client Onboarding
+
+1. Onboard 3 US clients with "Barely fulfills all orders" mode
+2. Configure appropriate fee structures
+3. Monitor order flow and fulfillment process
+4. Document any operational improvements needed
+
+### Phase 3: General Availability
+
+1. Establish onboarding process for new clients
+2. Document eligibility criteria
+3. Create support documentation
+4. Consider self-service request flow (future)
 
 ---
+
+## Open Questions
+
+| Question | Status | Answer |
+|----------|--------|--------|
+| ~~Barely's Brooklyn address~~ | Resolved | 763 Park Pl #1R, Brooklyn, NY 11216 |
+| ~~Fee collection mechanism~~ | Resolved | Flat + percentage, captured at order time |
+| ~~How Barely sees orders~~ | Resolved | Workspace access + order filtering |
+| ~~The Now readiness~~ | Resolved | Ready to go ASAP |
+| Customer address changes post-order | Open | Recommend: disallow or require manual review |
+
+---
+
+## Related Documents
+
+- [[feature|Feature: Barely Fulfillment Partner]]
+- [[JTBD|Jobs to be Done: Barely Fulfillment Partner]]
+- [[plan|Technical Implementation Plan]] (next step)
