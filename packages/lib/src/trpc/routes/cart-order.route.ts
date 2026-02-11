@@ -490,9 +490,14 @@ export const cartOrderRoute = {
 				})
 				.where(and(eq(Carts.workspaceId, ctx.workspace.id), eq(Carts.id, input.cartId)));
 
-			// Transfer shipping fee back to connected account for manual fulfillment
+			// Transfer shipping fee back to connected account ONLY for artist fulfillment
 			// Since they're handling shipping themselves, they shouldn't pay Barely's shipping fee
-			if (cart.orderShippingAmount && cart.orderShippingAmount > 0) {
+			// For Barely fulfillment, we keep the shipping fee to cover actual shipping costs
+			if (
+				cart.fulfilledBy === 'artist' &&
+				cart.orderShippingAmount &&
+				cart.orderShippingAmount > 0
+			) {
 				const stripeConnectAccount =
 					isProduction() ?
 						cart.funnel?.workspace.stripeConnectAccountId
