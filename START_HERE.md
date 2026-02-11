@@ -1,34 +1,47 @@
-# Bio Landing Page Blocks Development
+# Usage Protection & Monetization - Development
 
 ## For New Claude Code Instance
 
 1. Open Claude Code in this directory
 2. Claude will read CLAUDE_PROJECT.md for immediate context
-3. Check .claude/project/plan.md for implementation tasks
-4. All project artifacts are available in .claude/project/
+3. Check `.claude/project/plan-organized.md` for implementation tasks
+4. All project artifacts are available in `.claude/project/`
 
 ## Development Flow
 
-- This branch is focused solely on bio-landing-page-blocks
-- Use organized plan to track progress
-- Original project: 0_Projects/bio-landing-page-blocks/
+- This branch is focused solely on usage-protection
+- Use the organized plan to track progress
+- Original project: `0_Projects/barely-usage-protection/`
 
 ## Key Commands After Starting Claude Code
 
-- Review implementation plan: Read .claude/project/plan.md
-- Check requirements: Read .claude/project/PRD.md
-- Understand user needs: Read .claude/project/JTBD.md
+- Review implementation plan: `Read .claude/project/plan-organized.md`
+- Check requirements: `Read .claude/project/PRD.md`
+- Understand user needs: `Read .claude/project/JTBD.md`
 
-## Quick Context
+## Quick Reference: Stripe IDs
 
-**What we're building**: 4 new block types for the bio platform
-1. Markdown Block - Rich text content
-2. Image Block - Images with captions
-3. Two-Panel Block - Image/text side-by-side
-4. Cart Block - Direct checkout integration
+All production IDs are ready to configure:
 
-**Why**: 10+ agency clients can't use the current MDX editor. Major client needs this for merch campaign launch.
+```
+Bedroom:     prod_Txeo2HSM6HnJx4
+Rising:      prod_TxevMytIBe6fon
+Breakout:    prod_TxeweGMPwBFeVm
+Bedroom+:    prod_Txey7RdoUEQFHi
+Rising+:     prod_TxezRHktqwlWKI
+Breakout+:   prod_Txf0wBNF8ZpgfR
+Invoice Pro: prod_Txf4YDcKhcTd0G
+```
 
-**Timeline**: 1-2 days implementation
+## First Task: Milestone 1 - Foundation
 
-**Key approach**: Extend existing bio platform, reuse all patterns
+1. Update Stripe IDs in `packages/const/src/workspace-plans.constants.ts`
+2. Remove deprecated plans (agency, pro)
+3. Add schema fields in `packages/db/src/sql/workspace.sql.ts`
+4. Create enforcement utility in `packages/lib/src/functions/usage.fns.ts`
+
+## Why This Matters
+
+- **Revenue**: Fixing Stripe IDs enables paid subscriptions immediately
+- **Costs**: Enforcement protects against 4x database cost growth
+- **Trust**: Transparent usage gives users confidence in the platform

@@ -1,304 +1,259 @@
-# Jobs To Be Done (JTBD) - Barely Invoice
+# Jobs to be Done: Usage Protection & Monetization
 
 ## Overview
 
-This document defines the core jobs that freelancers, consultants, and service providers are trying to accomplish when dealing with invoicing and payment collection. Each job focuses on the outcome the user desires, not the specific features or implementation.
+This document captures the jobs that users and the Barely team are trying to accomplish that this feature addresses. It focuses on the "why" behind behavior rather than specific features.
+
+---
+
+## User Segments
+
+### Segment 1: Free Tier Artists/Creators
+
+**Context**: Independent musicians, creators, and small teams using Barely to manage their online presence, sell merchandise, send emails to fans, and track analytics. They're on the free plan and may or may not know their usage limits.
+
+**Situation**: They're actively using the platform - creating links, adding fans, sending emails, uploading files - and their usage is growing as their audience grows.
+
+### Segment 2: Growth-Stage Artists
+
+**Context**: Artists who have outgrown the free tier limits and need more capacity. They're willing to pay for tools that help them grow but want to understand the value before committing.
+
+**Situation**: They've hit or are approaching limits and need to decide whether to upgrade, optimize their usage, or look for alternatives.
+
+### Segment 3: Barely Team (Internal)
+
+**Context**: The team building and operating the Barely platform. Responsible for sustainability and growth of the business.
+
+**Situation**: User growth is happening organically, but infrastructure costs are rising without corresponding revenue. Need to convert users while maintaining good user experience.
 
 ---
 
 ## Primary Jobs (High Priority)
 
-### 1. Get Paid Quickly for Completed Work
+### Job 1: Understand My Usage Status
 
-**Job Statement**  
-As a freelancer, I want to send professional invoices that clients will pay immediately, so that I can maintain positive cash flow and avoid chasing payments.
+**Job Statement**: When I'm using Barely to manage my music business, I want to know how much of my plan I'm using so I can avoid surprises and plan my activities accordingly.
 
-**Context**
-- Occurs immediately after completing a project or reaching a milestone
-- Triggered by finishing deliverables or monthly retainer cycles
+**Functional Aspects**:
+- See current usage vs. limits for each resource type
+- Understand which limits I'm closest to hitting
+- Know when my usage resets (billing cycle)
 
-**Motivation (Why this matters)**
-- Average payment collection takes 30+ days, creating cash flow problems
-- Chasing payments via email/text is uncomfortable and time-consuming
-- Unpaid invoices affect ability to pay own bills
+**Emotional Aspects**:
+- Feel in control of my account
+- Avoid anxiety about unexpected shutdowns
+- Trust that the platform is transparent
 
-**Current Alternatives**
-- Sending Word/PDF invoices via email with bank details
-- Using QuickBooks but only utilizing 10% of features
-- Manual follow-ups and payment reminders
+**Social Aspects**:
+- Look professional to my team (if collaborating)
+- Not be embarrassed by service interruptions with fans
 
-**Desired Outcome / Success Criteria**
-- Invoice paid within 7 days of sending
-- Client can pay with one click without creating accounts
-- Automatic confirmation when payment is received
+**Current Workarounds**: Users have no visibility - they either don't know limits exist or assume they're unlimited.
 
-**Priority Level**
-- High
+**Success Metrics**:
+- User can answer "how much of X am I using?" within 10 seconds
+- Reduced support tickets asking about usage/limits
 
 ---
 
-### 2. Minimize Time Spent on Administrative Tasks
+### Job 2: Get Warned Before Problems Occur
 
-**Job Statement**  
-As a consultant, I want to create and send invoices in under 60 seconds, so that I can focus on billable work instead of paperwork.
+**Job Statement**: When I'm approaching my plan limits, I want to be notified proactively so I can take action before my workflow is interrupted.
 
-**Context**
-- End of project when wrapping up deliverables
-- Monthly/weekly billing cycles for retainer clients
-- When switching contexts between creative and administrative work
+**Functional Aspects**:
+- Receive clear notification when approaching limits (80%)
+- Receive urgent notification when at limits (100%)
+- Have time to decide: upgrade, reduce usage, or accept constraints
 
-**Motivation (Why this matters)**
-- Currently takes 10-15 minutes per invoice
-- Mental context switching from creative to admin work is draining
-- Every minute on invoicing is a minute not earning
+**Emotional Aspects**:
+- Feel respected (not surprised or punished)
+- Feel empowered to make decisions
+- Trust that Barely has my back
 
-**Current Alternatives**
-- Copy-pasting from previous invoices in Google Docs
-- Maintaining spreadsheets with client details
-- Using complex accounting software with steep learning curves
+**Social Aspects**:
+- Maintain professional service to my fans
+- Not look disorganized to collaborators
 
-**Desired Outcome / Success Criteria**
-- Invoice created and sent in less than 60 seconds
-- Client details remembered and reusable
-- No learning curve or accounting knowledge required
+**Current Workarounds**: No warnings exist - users either use unlimited resources (costing Barely money) or hit hard limits without notice.
 
-**Priority Level**
-- High
+**Success Metrics**:
+- 100% of users at 80% usage receive warning
+- Reduced "why did this stop working?" support tickets
+- Increased upgrade conversions from warning state
 
 ---
 
-### 3. Maintain Professional Appearance
+### Job 3: Upgrade When I Need More
 
-**Job Statement**  
-As a service provider, I want to send polished, professional invoices that reflect my brand quality, so that clients take my business seriously and pay promptly.
+**Job Statement**: When I've outgrown my current plan, I want to upgrade seamlessly so I can continue growing without interruption.
 
-**Context**
-- First invoice to a new client sets the tone
-- Competing with larger agencies for contracts
-- Building trust with enterprise clients
+**Functional Aspects**:
+- Clear comparison of what each plan offers
+- One-click upgrade process
+- Immediate access to higher limits after payment
+- Understand the cost difference
 
-**Motivation (Why this matters)**
-- Unprofessional invoices can delay payment or lose future work
-- Brand consistency across all client touchpoints matters
-- Professional appearance justifies professional rates
+**Emotional Aspects**:
+- Feel confident the upgrade is worth it
+- Feel like a valued customer, not a cash grab victim
+- Trust the payment process is secure
 
-**Current Alternatives**
-- Manually formatting invoices to look professional
-- Using generic templates that don't match brand
-- Paying for expensive software with more features than needed
+**Social Aspects**:
+- Justify the expense to bandmates/team
+- Feel like a "real" business investing in tools
 
-**Desired Outcome / Success Criteria**
-- Clean, professional invoice design
-- Consistent branding across all invoices
-- Client-facing payment page that inspires confidence
+**Current Workarounds**: Upgrade flow is broken (throws errors in production). Users who want to pay literally cannot.
 
-**Priority Level**
-- High
+**Success Metrics**:
+- Upgrade flow completion rate > 90%
+- Zero errors in production upgrade flow
+- Positive upgrade conversion rate from warning emails
 
 ---
 
-### 4. Track Payment Status Without Manual Checking
+### Job 4: Keep My Business Running
 
-**Job Statement**  
-As a freelancer, I want to know instantly when invoices are viewed and paid, so that I can follow up appropriately and plan my finances.
+**Job Statement**: When I'm at or over my limits, I want clear options to continue operating so my fans and business aren't negatively impacted.
 
-**Context**
-- After sending an invoice, waiting for payment
-- Planning monthly expenses based on expected income
-- Deciding when to send follow-up reminders
+**Functional Aspects**:
+- Know exactly what's blocked and why
+- Have a clear path to unblock (upgrade)
+- Grace period to make decisions (not instant shutdown)
 
-**Motivation (Why this matters)**
-- Uncertainty about whether invoice was received/reviewed
-- Not knowing if payment is coming affects financial planning
-- Manual checking of bank accounts is inefficient
+**Emotional Aspects**:
+- Not feel punished or trapped
+- Feel the limits are fair
+- Trust there's a solution
 
-**Current Alternatives**
-- Checking bank account daily
-- Asking clients if they received the invoice
-- Using read receipts on emails
+**Social Aspects**:
+- Maintain service to fans during transition
+- Not look unprofessional due to service gaps
 
-**Desired Outcome / Success Criteria**
-- Notification when invoice is viewed
-- Instant notification when payment is made
-- Clear status tracking (sent, viewed, paid)
+**Current Workarounds**: N/A - limits don't exist so this situation never occurs (but costs Barely money).
 
-**Priority Level**
-- High
+**Success Metrics**:
+- Users at hard limit (200%) have clear upgrade CTA
+- Support ticket resolution rate for limit issues
+- Low churn rate from users hitting limits
 
 ---
 
-## Secondary Jobs (Medium Priority)
+## Secondary Jobs (Lower Priority)
 
-### 5. Reuse Information for Repeat Clients
+### Job 5: Explore Premium Features Before Committing
 
-**Job Statement**  
-As a consultant with regular clients, I want to avoid re-entering the same information repeatedly, so that I can invoice faster and reduce errors.
+**Job Statement**: When considering an upgrade, I want to understand what premium features I'd get so I can make an informed decision.
 
-**Context**
-- Monthly retainer invoicing
-- Repeat projects with same clients
-- Similar projects with standard pricing
+**Functional Aspects**:
+- See feature comparison across tiers
+- Understand what "Plus" plans include (coaching)
+- Know the application process for Plus plans
 
-**Motivation (Why this matters)**
-- Typing same client details wastes time
-- Manual entry increases error risk
-- Repeat clients are 80% of business
+**Emotional Aspects**:
+- Feel informed, not pressured
+- Trust the pricing is fair for the value
 
-**Current Alternatives**
-- Maintaining client spreadsheet
-- Copy-pasting from old invoices
-- Memory and manual re-entry
-
-**Desired Outcome / Success Criteria**
-- Select client from dropdown
-- Duplicate previous invoices
-- Auto-fill common line items
-
-**Priority Level**
-- Medium
+**Current Workarounds**: Users can see plans page but Plus plans show broken upgrade buttons.
 
 ---
 
-### 6. Handle Tax Calculations Simply
+### Job 6: Get Personalized Help Growing (Plus Plans)
 
-**Job Statement**  
-As a service provider, I want to add tax to invoices correctly, so that I can comply with requirements without complexity.
+**Job Statement**: When I'm serious about growing my music business, I want access to expert guidance so I can accelerate my growth beyond just tools.
 
-**Context**
-- Creating invoices for local clients
-- End of project invoicing
-- When tax rates change
+**Functional Aspects**:
+- Apply for Plus plan consideration
+- Have a conversation about my needs before committing
+- Get coaching/support included with plan
 
-**Motivation (Why this matters)**
-- Manual tax calculation is error-prone
-- Different clients may have different tax requirements
-- Need to show tax separately for business clients
+**Emotional Aspects**:
+- Feel like a VIP, not just another user
+- Trust the coaching will be valuable
+- Feel supported in my journey
 
-**Desired Outcome / Success Criteria**
-- Simple percentage-based tax addition
-- Clear tax line item on invoice
-- Automatic total calculation
-
-**Priority Level**
-- Medium
+**Current Workarounds**: Users interested in coaching have no clear path - Plus plan buttons are broken.
 
 ---
 
-### 7. Provide Payment Flexibility to Clients
+## Internal Jobs (Barely Team)
 
-**Job Statement**  
-As a freelancer, I want to offer easy payment options to clients, so that they have no friction or excuses for delayed payment.
+### Job 7: Protect Infrastructure Costs
 
-**Context**
-- Invoicing clients who prefer credit cards
-- International clients with different payment preferences
-- Enterprise clients with procurement processes
+**Job Statement**: When users are consuming resources, we need to ensure usage stays within sustainable bounds so the business remains viable.
 
-**Motivation (Why this matters)**
-- Some clients won't do bank transfers
-- Credit card payments are faster than checks
-- Payment friction leads to delays
+**Functional Aspects**:
+- Enforce limits on all resource types
+- Prevent runaway usage from any single workspace
+- Have visibility into overall platform usage
 
-**Current Alternatives**
-- Providing multiple payment instructions
-- Using PayPal invoices (high fees)
-- Accepting whatever client prefers
+**Emotional Aspects**:
+- Feel confident the platform won't be abused
+- Trust the enforcement is working
 
-**Desired Outcome / Success Criteria**
-- Credit/debit card payments accepted
-- One-click payment process
-- Secure and trusted payment flow
+**Current Workarounds**: No enforcement - costs are rising unchecked. Database bill quadrupled in 2 months.
 
-**Priority Level**
-- Medium
+**Success Metrics**:
+- Infrastructure costs correlate with revenue
+- No single workspace causes disproportionate costs
+- Usage growth matches expected limits
 
 ---
 
-## Tertiary Jobs (Low Priority - Future Consideration)
+### Job 8: Convert Free Users to Paying Customers
 
-### 8. Build Predictable Revenue
+**Job Statement**: When users find value in the platform, we want to convert them to paid plans so we can sustain and grow the business.
 
-**Job Statement**  
-As an agency owner, I want to set up recurring invoices for retainer clients, so that I can build predictable monthly revenue without manual work.
+**Functional Aspects**:
+- Working upgrade flow from free to paid
+- Natural upgrade prompts at limit thresholds
+- Multiple tier options for different needs
 
-**Context**
-- Onboarding retainer clients
-- Monthly service agreements
-- Subscription-based offerings
+**Emotional Aspects**:
+- Feel good about monetization approach (value-based, not manipulative)
+- Trust the conversion funnel is working
 
-**Motivation (Why this matters)**
-- Manual monthly invoicing is repetitive
-- Predictable revenue improves business planning
-- Automatic billing improves cash flow
+**Current Workarounds**: Impossible - Stripe IDs are placeholders, upgrade throws errors.
 
-**Current Alternatives**
-- Manual monthly invoice creation
-- Calendar reminders to send invoices
-- Stripe billing (requires technical knowledge)
-
-**Desired Outcome / Success Criteria**
-- Set up once, runs automatically
-- Client's card charged monthly
-- Recurring revenue tracking
-
-**Priority Level**
-- Low (Post-MVP)
+**Success Metrics**:
+- Non-zero paid subscriptions
+- Conversion rate from free to paid
+- Revenue per user metrics
 
 ---
 
-### 9. Provide Professional Documentation
+## Job Prioritization Matrix
 
-**Job Statement**  
-As a consultant, I want to provide PDF invoices when requested, so that clients can process them through their accounting systems.
-
-**Context**
-- Enterprise clients requiring PDF documentation
-- End of year accounting
-- Client requests for records
-
-**Motivation (Why this matters)**
-- Some accounting systems require PDF uploads
-- Professional documentation for client records
-- Legal/tax compliance requirements
-
-**Current Alternatives**
-- Creating PDFs manually
-- Print to PDF from browser
-- Using complex software for just PDF generation
-
-**Desired Outcome / Success Criteria**
-- One-click PDF download
-- Professional PDF formatting
-- Include all invoice details
-
-**Priority Level**
-- Low (Post-MVP)
+| Job | Frequency | Importance | Satisfaction Gap | Priority |
+|-----|-----------|------------|------------------|----------|
+| Understand usage status | High | High | High (no visibility) | **P0** |
+| Get warned before problems | Medium | High | High (no warnings) | **P0** |
+| Upgrade when needed | Medium | Critical | Critical (broken) | **P0** |
+| Keep business running | Low | High | High (no graceful limits) | **P1** |
+| Explore premium features | Low | Medium | Medium | **P2** |
+| Get personalized help | Low | Medium | Medium | **P2** |
+| Protect infrastructure (internal) | Ongoing | Critical | Critical | **P0** |
+| Convert to paid (internal) | Ongoing | Critical | Critical | **P0** |
 
 ---
 
-## Non-Jobs (What Users Don't Need)
+## Key Insights
 
-These are explicitly NOT jobs users are trying to accomplish:
+1. **The core job isn't "limit my usage"** - it's "help me understand and control my usage so I can grow confidently." Enforcement should feel like guardrails, not punishment.
 
-- Manage complex accounting or bookkeeping
-- Track business expenses
-- Generate financial reports
-- Manage inventory
-- Track time spent on projects
-- Calculate complex tax scenarios
-- Integrate with accounting software
-- Manage purchase orders
-- Handle multi-currency conversions
-- Create estimates or quotes
+2. **Warnings are more valuable than blocks** - The tiered approach (80% → 100% → 200%) gives users agency and time to decide, which builds trust and increases upgrade likelihood.
+
+3. **Broken monetization is the bottleneck** - Users may already want to upgrade but can't. Fixing the Stripe integration unlocks revenue that should already exist.
+
+4. **Transparency drives trust** - Showing all usage metrics (not just some) makes users feel the platform is honest and fair, increasing willingness to pay.
+
+5. **Plus plans need human touch** - The `eligibleForPlus` gate with "Apply" button correctly recognizes that coaching-included plans require a conversation, not just a credit card.
 
 ---
 
-## Summary
+## Success Definition
 
-The core jobs focus on three critical outcomes:
+This feature succeeds when:
 
-1. **Speed**: Get invoices out in seconds, not minutes
-2. **Payment Velocity**: Get paid in days, not weeks
-3. **Simplicity**: No accounting knowledge required
-
-Success means freelancers spend less time on administrative work and more time on billable work, while getting paid faster with less friction.
+1. **Users** feel informed and empowered about their usage, receive fair warnings, and can upgrade seamlessly when they choose to
+2. **Barely team** has sustainable infrastructure costs, a working monetization path, and can grow revenue alongside user growth
+3. **The relationship** between Barely and its users feels like a partnership in their growth, not an adversarial gatekeeper

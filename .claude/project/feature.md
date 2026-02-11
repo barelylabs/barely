@@ -1,179 +1,244 @@
-# Feature: Barely Invoice - Overnight MVP
+# Feature: Usage Protection & Monetization
 
 ## Context & Background
 
-### Related Work
-- **Builds On**: [[0_Projects/barely-invoice-mvp/invoicing-mvp-prd]] - Full PRD exists
-- **Differs From**: Complex PRD - this is the 8-hour buildable version
-- **Integrates With**: Existing auth, Stripe, and email infrastructure
+### Current State
+- **50 new sign-ups/month** since November (up from 1-2/month)
+- **4x increase in Neon database costs**
+- Users appear legitimate (unique emails, creating real workspaces)
+- **Zero revenue capture** - paid tiers exist but Stripe IDs are all `'fixme'`
+- **Most limits not enforced** - only invoice usage and cart fees are checked
 
-### Historical Context
-- **Previous Attempts**: Publisher MVP validated agency payment pain
-- **Lessons Applied**: Start hyper-minimal, expand based on usage
-- **Success Factors**: Reuse everything, build nothing new except invoice logic
+### What Exists
+- Plan definitions with all limits in `workspace-plans.constants.ts`
+- Database fields for tracking usage (eventUsage, emailUsage, linkUsage, etc.)
+- Usage reset scheduler for billing cycles
+- Checkout flow code (works in test, broken in production)
+- Partial billing page showing some usage
+
+### What's Missing
+- Production Stripe product/price IDs
+- Enforcement checks for 9 of 11 limit types
+- Warning system at threshold levels
+- Complete usage visibility for users
 
 ## Problem Statement
 
-Freelancers need to send professional invoices and get paid quickly without complex accounting software.
+We're experiencing real user growth but can't monetize it because the upgrade path is broken, and we can't protect against abuse because limits aren't enforced. Users on the free plan can effectively use unlimited resources, driving up infrastructure costs with no revenue offset.
 
 ### Evidence of Need
-- Your agency manually chasing payments (immediate validation)
-- QuickBooks at $30/month is overkill for simple invoicing
-- Demonstrates micro-SaaS revenue while platform builds
+- Database costs quadrupled in 2 months
+- 50 users/month × unlimited resources = unsustainable
+- Upgrade flow throws errors in production (tested: fails with 'fixme' price IDs)
 
 ## Target Users
 
-Freelancers and consultants who:
-- Send 5-20 invoices per month
-- Want payment in days, not weeks
-- Don't need accounting features
-
-### Differentiation from Existing Users
-- Not served by barely.ai platform (B2B vs B2C)
-- Need invoice/payment flow, not subscription billing
-- Professional services vs creative products
-
-## Current State & Pain Points
-
-### How Users Handle This Today
-- Manual invoices in Google Docs + payment chase
-- QuickBooks ($30/mo) with 10% feature usage
-- Wave (free but complex)
-
-### Validated Pain Points
-- Creating invoice: 10-15 minutes
-- Payment collection: 30+ day average
-- No simple recurring option (without Stripe knowledge)
+1. **Free tier users** - Need clear boundaries on what they can use, visibility into their usage, and a working upgrade path when they need more
+2. **Barely team** - Need protection against runaway costs and ability to convert users to paid plans
 
 ## Recommended Solution
 
-Dead-simple invoice creation and payment collection via Stripe Checkout.
+### Tiered Enforcement System
 
-### Why This Approach
-- 80% simpler than QuickBooks
-- Leverages existing Stripe Checkout (no Connect complexity)
-- Can build in 8 hours with existing infrastructure
-- Validates before expanding
+| Threshold | Behavior |
+|-----------|----------|
+| **80%** | Soft warning - in-app banner + email notification with upgrade CTA |
+| **100%** | Stern warning - more prominent in-app warning + email, still allow action |
+| **200%** | Hard limit - block action, email about shutdown, require upgrade to continue |
+
+**Email frequency**: One warning email per threshold per billing cycle (prevents spam if user hovers around threshold)
+
+### Limits to Enforce
+
+| Limit | Free | Bedroom | Rising | Breakout |
+|-------|------|---------|--------|----------|
+| Fans/contacts | 1,000 | 2,500 | 5,000 | 10,000 |
+| Team members | 1 | 5 | 10 | Unlimited |
+| Retargeting pixels | 0 | 1 | 3 | 5 |
+| Links/month | 50 | 1,000 | 5,000 | 25,000 |
+| Link clicks/month | 10,000 | 50,000 | 250,000 | 1B |
+| Emails/month | 10,000 | 10,000 | 10,000 | 10,000 |
+| Events/month | 5,000 | 50,000 | 150,000 | 500,000 |
+| Tasks/month | 100 | 2,500 | 5,000 | 10,000 |
+| File storage | 200MB | 200MB | 200MB | 200MB |
+| Invoices/month | 3 | 50 | 200 | Unlimited |
+
+*Note: Invoice enforcement already exists - extend with tiered warnings*
+
+### Working Upgrade Path
+
+#### DIY Plans (Bedroom, Rising, Breakout)
+Standard self-service upgrade flow:
+1. User clicks "Upgrade" button
+2. Redirected to Stripe Checkout with plan's price ID
+3. On successful payment, webhook updates workspace plan
+
+#### Plus Plans (Bedroom+, Rising+, Breakout+)
+Conditional flow based on `eligibleForPlus` workspace flag:
+
+| `eligibleForPlus` | Button Text | Action |
+|-------------------|-------------|--------|
+| `false` | "Apply" | Links to `cal.com/barely/nyc` |
+| `true` | "Upgrade" | Standard Stripe Checkout flow |
+
+This ensures Plus plans (which include coaching) require a conversation before purchase.
+
+### Deprecated Plans Removal
+Remove `agency` and `pro` plans entirely from codebase - they're no longer offered and have placeholder IDs.
+
+### Usage Dashboard Expansion
+
+Extend existing billing page to show all usage metrics:
+- Current: Invoices created, Link clicks
+- Add: Fans, Members, Links created, Emails sent, Events tracked, Tasks, Storage
 
 ## Success Criteria
 
-### Week 1
-- 1 real invoice paid through system
+- [ ] All 10 limit types have enforcement at 80%, 100%, and 200% thresholds
+- [ ] Warning emails sent at 80% and 100% thresholds (once per threshold per billing cycle)
+- [ ] Hard block at 200% with clear upgrade messaging
+- [ ] User can upgrade from free → paid DIY plan in production (end-to-end test)
+- [ ] Plus plan upgrade shows "Apply" for non-eligible workspaces
+- [ ] Billing page shows all usage metrics with progress bars
+- [ ] Deprecated plans (agency, pro) removed from codebase
 
-### Month 1  
-- 10 paying customers ($190 MRR)
-- <60 second invoice creation
-- <7 day payment average
+## Core Functionality (MVP)
 
-### Month 3
-- 100 customers ($1,900 MRR)
-- Recurring invoices added IF requested
+### Must Have
 
-## Core Functionality (TRUE Overnight MVP)
+1. **Enforcement utility function**
+   - Check usage against plan limit
+   - Return status: `ok` | `warning_80` | `warning_100` | `blocked_200`
+   - Include upgrade URL in response
+   - Track which warnings have been sent this billing cycle
 
-### Must Have (8 hours)
-- Client management (CRUD)
-- Create invoice with saved clients
-- Line items with automatic totaling
-- Send payment link via email
-- Accept payment via Stripe Checkout
-- Auto-mark paid via webhook
-- Basic invoice list view
+2. **Enforcement integration points**
+   - Fan/contact creation → check fans limit
+   - Team member invite → check members limit
+   - Pixel creation → check pixels limit
+   - Link creation → check links limit (increment linkUsage)
+   - Email send → check emails limit (increment emailUsage)
+   - Event track → check events limit (increment eventUsage)
+   - Task creation → check tasks limit
+   - File upload → check storage limit (increment fileUsage)
+
+3. **Warning email templates**
+   - 80% warning: "You're approaching your [resource] limit"
+   - 100% warning: "You've reached your [resource] limit"
+   - 200% blocked: "Your [resource] has been paused"
+
+4. **Stripe production IDs** ✅ COLLECTED
+   - Update `workspace-plans.constants.ts` with real IDs
+   - Remove deprecated plans (agency, pro)
+
+5. **Plus plan conditional upgrade**
+   - Add `eligibleForPlus` boolean field to workspace schema
+   - Modify upgrade buttons to check flag
+   - "Apply" → cal.com/barely/nyc when not eligible
+   - Standard checkout when eligible
+
+6. **Billing page expansion**
+   - Add usage rows for all tracked metrics
+   - Progress bar showing current/limit
+   - Color coding: green (<80%), yellow (80-100%), red (>100%)
 
 ### Reusable Components
-- Magic link auth (existing)
-- Email sending via SendGrid (existing)
-- Stripe Checkout (simpler than Connect)
-- Database/API patterns (existing)
+- Extend existing `checkInvoiceUsageAndIncrement()` pattern
+- Use existing `use-usage` hook for frontend
+- Use existing email infrastructure for warnings
+- Extend existing billing page components
 
-## Out of Scope for Overnight MVP
+## Out of Scope for MVP
 
-### Save for Week 2+
-- Recurring/subscription invoices
-- Client management system
-- PDF generation
-- Automated reminders
-- Templates marketplace
-- Workspace/multi-user
-- Stripe Connect onboarding
-
-### Never Build
-- Expense tracking
-- Time tracking  
-- Accounting integrations
-- Inventory management
-
-## Integration Points
-
-### With Existing Infrastructure
-- Auth: Magic links (existing)
-- Email: SendGrid (existing)
-- Payments: Stripe Checkout (existing)
-- Database: Add invoices table only
-
-### Technical Integration
-- Extends: Existing Next.js app
-- Reuses: Component library, API patterns
-- New requirements: Invoice data model only
-
-## Complexity Assessment
-
-**Overall Complexity**: Simple (8 hours)
-
-**Reduced Complexity Through:**
-- No workspace system (single user)
-- No Stripe Connect (direct checkout)
-- No PDF generation (HTML only)
-- No recurring logic (one-time only)
-
-**Remaining Complexity:**
-- Invoice data model
-- Payment page design
-- Webhook handling
-
-## Human Review Required
-
-- [ ] Assumption: Freelancers will pay without recurring feature
-- [ ] Differentiation: Is "simple" enough vs free Wave?
-- [ ] Priority: Should this wait until after Bio MVP ships?
+- Admin dashboard for viewing all workspace usage
+- Automatic downgrade for non-payment
+- Usage analytics/trends over time
+- Granular rate limiting (per-minute/hour)
+- Custom limit overrides via UI (already exists in DB, admin-only)
 
 ## Technical Considerations
 
-- Two new database tables (invoices, clients)
-- 6 new routes (invoices CRUD, clients CRUD, pay, webhook)
-- Reuse existing UI components
-- Deploy as subdomain or path on existing app
-- Simple userId association (no workspaces)
+### Enforcement Pattern
+```typescript
+// Pseudocode for enforcement utility
+async function checkUsageLimit(
+  workspaceId: string,
+  limitType: 'fans' | 'members' | 'links' | 'emails' | 'events' | 'tasks' | 'storage' | 'pixels',
+  incrementBy?: number
+): Promise<{
+  status: 'ok' | 'warning_80' | 'warning_100' | 'blocked_200';
+  current: number;
+  limit: number;
+  percentage: number;
+  upgradeUrl: string;
+  shouldSendEmail: boolean; // false if already sent this cycle
+}>
+```
 
-## Migration Path
+### Key Files to Modify
+- `packages/const/src/workspace-plans.constants.ts` - Add Stripe IDs, remove deprecated plans
+- `packages/db/src/sql/workspace.sql.ts` - Add `eligibleForPlus` field, warning tracking fields
+- `packages/lib/src/functions/usage.fns.ts` - New enforcement utilities
+- `packages/lib/src/functions/*.fns.ts` - Add checks to each feature
+- `packages/lib/src/trigger/usage-warnings.ts` - Warning email jobs
+- `apps/app/src/app/[handle]/settings/billing/page.tsx` - Expand usage display
+- Plans page component - Conditional Plus plan buttons
 
-### From Manual Process
-- Import CSV of clients (future)
-- Copy/paste from Google Docs
+### Database Additions
+- `eligibleForPlus` boolean on workspace (default false)
+- `usageWarnings` jsonb field to track sent warnings per billing cycle:
+  ```json
+  {
+    "fans_80": "2026-02-10T...",
+    "fans_100": null,
+    "emails_80": "2026-02-08T...",
+    ...
+  }
+  ```
 
-### To Full Version
-- Add workspaces when multi-user need emerges
-- Add recurring when customers request
-- Gradual feature addition based on usage
+## Stripe Production IDs
 
-## Future Possibilities
+### DIY Plans
 
-### Based on Usage Data
-- IF recurring heavily requested: Add in week 3
-- IF teams need access: Add workspaces
-- IF PDF required: Add generation
-- Natural evolution toward full PRD vision
+| Plan | Product ID | Monthly Price ID | Yearly Price ID |
+|------|------------|------------------|-----------------|
+| Bedroom | `prod_Txeo2HSM6HnJx4` | `price_1SzjV0HDMmzntRhpvQKmHeC8` | `price_1SzjVSHDMmzntRhpiwbdyqbv` |
+| Rising | `prod_TxevMytIBe6fon` | `price_1SzjbtHDMmzntRhprcbxD20W` | `price_1SzjcCHDMmzntRhpAZVE4aig` |
+| Breakout | `prod_TxeweGMPwBFeVm` | `price_1Szjd0HDMmzntRhpQzAUpny0` | `price_1SzjdNHDMmzntRhpE3gZv0CW` |
 
-## The Claude Code Challenge
+### Plus Plans (Require eligibleForPlus = true)
 
-**Build Directive for Claude:**
-"You have 8 hours. Build only:
-1. Client management (create, list, select)
-2. Invoice creation with clients and line items
-3. Payment link generation via Stripe Checkout
-4. Public payment page (/pay/[invoiceId])
-5. Webhook to mark paid
-6. Basic invoice list view
+| Plan | Product ID | Monthly Price ID | Yearly Price ID |
+|------|------------|------------------|-----------------|
+| Bedroom+ | `prod_Txey7RdoUEQFHi` | `price_1SzjeVHDMmzntRhpOy4yrqcW` | `price_1SzjemHDMmzntRhp0CXxI518` |
+| Rising+ | `prod_TxezRHktqwlWKI` | `price_1SzjfOHDMmzntRhpIItqCV70` | `price_1SzjfgHDMmzntRhpAfaEeT4Y` |
+| Breakout+ | `prod_Txf0wBNF8ZpgfR` | `price_1SzjgKHDMmzntRhpSSD7gNdz` | `price_1SzjgdHDMmzntRhpe1YEe9Wu` |
 
-Two tables: invoices and clients. Use existing auth, Stripe, and email. 
-No workspaces, no recurring, no PDF. Ship by morning."
+### Invoice Pro
+
+| Plan | Product ID | Monthly Price ID | Yearly Price ID |
+|------|------------|------------------|-----------------|
+| Invoice Pro | `prod_Txf4YDcKhcTd0G` | `price_1SzjkhHDMmzntRhpufIFDzh4` | `price_1SzjksHDMmzntRhp7fan3dl1` |
+
+## Human Review Required
+
+- [x] ~~Confirm tiered thresholds (80/100/200%) are appropriate~~ ✅ Confirmed
+- [x] ~~Review Stripe pricing matches business intent~~ ✅ All IDs collected
+- [x] ~~Should deprecated plans (agency, pro) be removed entirely?~~ ✅ Yes, remove
+- [x] ~~Confirm email warning frequency~~ ✅ Once per threshold per billing cycle
+- [x] ~~Keep Invoice Pro plan?~~ ✅ Yes, IDs provided
+
+## Complexity Assessment
+
+**Overall Complexity**: Medium
+
+**Reduced by:**
+- Following existing invoice enforcement pattern
+- Using existing usage tracking fields
+- Extending existing billing page components
+
+**Remaining complexity:**
+- 10 integration points to add enforcement
+- Email template creation
+- Plus plan conditional flow
+- End-to-end testing of upgrade flow
