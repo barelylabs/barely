@@ -38,7 +38,7 @@ export function CartOrderFilters() {
 		<div className='flex flex-row items-center gap-4'>
 			{showFulfillmentFilter && (
 				<Select
-					value={filters.fulfilledBy ?? 'all'}
+					value={filters.fulfilledBy}
 					onValueChange={value => setFulfilledBy(value as 'all' | 'artist' | 'barely')}
 				>
 					<SelectTrigger className='w-[180px]'>
