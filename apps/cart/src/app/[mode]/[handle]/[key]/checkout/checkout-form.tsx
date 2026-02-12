@@ -112,7 +112,7 @@ export function CheckoutForm({
 				setShippingError(null);
 			},
 			onSuccess: data => {
-				if (!data.success) {
+				if (!data.success || !data.calculated) {
 					setShippingError('Unable to estimate shipping. Please enter your address.');
 					return;
 				}
