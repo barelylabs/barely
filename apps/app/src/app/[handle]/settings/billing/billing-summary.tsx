@@ -8,6 +8,7 @@ import { Badge } from '@barely/ui/badge';
 import { Button } from '@barely/ui/button';
 import { Text } from '@barely/ui/typography';
 
+import { EventBreakdown } from './_components/event-breakdown';
 import { UsageMetricCard } from './_components/usage-metric-card';
 
 // Co-located component: Upgrade prompt
@@ -87,15 +88,19 @@ export function BillingSummary() {
 				{/* Full app metrics */}
 				{!isInvoice && (
 					<>
-						<UsageMetricCard
-							label='Link Clicks'
-							current={metrics.linkClicks.current}
-							limit={metrics.linkClicks.limit}
-							unit='clicks'
-							isUnlimited={metrics.linkClicks.isUnlimited}
-							tooltipContent='Number of billable link clicks in the current billing cycle.'
-							showUpgradeCta={false}
-						/>
+						{/* Events with Breakdown - spans full width */}
+						<div className='col-span-1 md:col-span-2'>
+							<UsageMetricCard
+								label='Tracked Events'
+								current={metrics.events.current}
+								limit={metrics.events.limit}
+								unit='events'
+								isUnlimited={metrics.events.isUnlimited}
+								tooltipContent='Total tracked events in the current billing cycle. Includes link clicks, page views, and other interactions.'
+								showUpgradeCta={false}
+							/>
+							<EventBreakdown />
+						</div>
 
 						<UsageMetricCard
 							label='Links Created'
@@ -114,16 +119,6 @@ export function BillingSummary() {
 							unit='emails'
 							isUnlimited={metrics.emails.isUnlimited}
 							tooltipContent='Number of emails sent in the current billing cycle.'
-							showUpgradeCta={false}
-						/>
-
-						<UsageMetricCard
-							label='Tracked Events'
-							current={metrics.events.current}
-							limit={metrics.events.limit}
-							unit='events'
-							isUnlimited={metrics.events.isUnlimited}
-							tooltipContent='Number of tracked events in the current billing cycle.'
 							showUpgradeCta={false}
 						/>
 

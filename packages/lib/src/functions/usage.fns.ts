@@ -2,7 +2,6 @@ import type { PlanType } from '@barely/const';
 import { WORKSPACE_PLANS } from '@barely/const';
 import { dbHttp } from '@barely/db/client';
 import { _Users_To_Workspaces, Fans, Links, Users, Workspaces } from '@barely/db/sql';
-import { pipe_workspaceClickUsage } from '@barely/tb/query';
 import { getAbsoluteUrl, getFirstAndLastDayOfBillingCycle } from '@barely/utils';
 import { and, count, eq, gte, isNull, sql } from 'drizzle-orm';
 
@@ -14,7 +13,6 @@ export type UsageLimitType =
 	| 'members'
 	| 'pixels'
 	| 'links'
-	| 'clicks'
 	| 'emails'
 	| 'events'
 	| 'tasks'
@@ -53,7 +51,6 @@ export function getResourceLabel(limitType: UsageLimitType): string {
 		members: 'Team Members',
 		pixels: 'Retargeting Pixels',
 		links: 'Links',
-		clicks: 'Link Clicks',
 		emails: 'Emails Sent',
 		events: 'Tracked Events',
 		tasks: 'Tasks',
@@ -137,25 +134,6 @@ export async function getUsageCount(
 			return linkCount[0]?.count ?? 0;
 		}
 
-		case 'clicks': {
-			// Clicks are tracked in Tinybird - query directly for accurate count
-			const cycleStart = billingCycleStart ?? workspace.billingCycleStart ?? 1;
-			const { firstDay, lastDay } = getFirstAndLastDayOfBillingCycle(cycleStart);
-
-			try {
-				const result = await pipe_workspaceClickUsage({
-					workspaceId,
-					start: firstDay.toISOString(),
-					end: lastDay.toISOString(),
-				});
-				return result.data[0]?.clicks ?? 0;
-			} catch (error) {
-				// If Tinybird is unavailable, fail open (return 0) to avoid blocking users
-				console.error('Failed to fetch click usage from Tinybird:', error);
-				return 0;
-			}
-		}
-
 		case 'emails':
 			return workspace.emailUsage;
 
@@ -226,7 +204,6 @@ export function getUsageLimit(
 		members: plan.usageLimits.members,
 		pixels: plan.usageLimits.retargetingPixels,
 		links: plan.usageLimits.newLinksPerMonth,
-		clicks: plan.usageLimits.linkClicksPerMonth,
 		emails: plan.usageLimits.emailsPerMonth,
 		events: plan.usageLimits.trackedEventsPerMonth,
 		tasks: plan.usageLimits.tasksPerMonth,

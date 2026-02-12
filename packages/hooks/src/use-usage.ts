@@ -21,12 +21,12 @@ export interface UsageMetrics {
 	members: UsageMetric;
 	pixels: UsageMetric;
 	links: UsageMetric;
-	linkClicks: UsageMetric;
 	emails: UsageMetric;
 	events: UsageMetric;
 	tasks: UsageMetric;
 	invoices: UsageMetric;
 	storage: UsageMetric;
+	totalStorage: UsageMetric;
 }
 
 /**
@@ -54,6 +54,7 @@ export function useUsage() {
 		taskUsage,
 		invoiceUsage,
 		fileUsage_billingCycle,
+		fileUsage_total,
 		// Usage limit overrides
 		fanUsageLimitOverride,
 		memberUsageLimitOverride,
@@ -78,7 +79,6 @@ export function useUsage() {
 		retargetingPixels: plan.usageLimits.retargetingPixels,
 
 		newLinksPerMonth: plan.usageLimits.newLinksPerMonth,
-		linkClicksPerMonth: plan.usageLimits.linkClicksPerMonth,
 
 		emailsPerDay: plan.usageLimits.emailsPerDay,
 		emailsPerMonth: plan.usageLimits.emailsPerMonth,
@@ -90,6 +90,9 @@ export function useUsage() {
 
 		invoicesPerMonth: plan.usageLimits.invoicesPerMonth,
 		invoiceClients: plan.usageLimits.invoiceClients,
+
+		storagePerMonth: plan.usageLimits.storagePerMonth,
+		totalStorage: plan.usageLimits.totalStorage,
 
 		analyticsRetentionDays: plan.analyticsRetentionDays,
 	};
@@ -120,7 +123,6 @@ export function useUsage() {
 			linkUsage,
 			getEffectiveLimit(plan.usageLimits.newLinksPerMonth, linkUsageLimitOverride),
 		),
-		linkClicks: createUsageMetric(linkUsage, plan.usageLimits.linkClicksPerMonth),
 		emails: createUsageMetric(
 			emailUsage,
 			getEffectiveLimit(plan.usageLimits.emailsPerMonth, emailUsageLimitOverride),
@@ -137,10 +139,8 @@ export function useUsage() {
 			invoiceUsage,
 			getEffectiveLimit(plan.usageLimits.invoicesPerMonth, invoiceUsageLimitOverride),
 		),
-		storage: createUsageMetric(
-			fileUsage_billingCycle,
-			200000000, // 200MB default - TODO: add to plan limits
-		),
+		storage: createUsageMetric(fileUsage_billingCycle, plan.usageLimits.storagePerMonth),
+		totalStorage: createUsageMetric(fileUsage_total, plan.usageLimits.totalStorage),
 	};
 
 	const { firstDay, lastDay } = getFirstAndLastDayOfBillingCycle(billingCycleStart ?? 0);

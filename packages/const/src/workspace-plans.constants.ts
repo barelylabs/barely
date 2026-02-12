@@ -47,6 +47,7 @@ export interface Plan {
 		retargetingPixels: number;
 
 		newLinksPerMonth: number;
+		/** @deprecated Clicks are now tracked as part of trackedEventsPerMonth. Use event breakdown for visibility. */
 		linkClicksPerMonth: number;
 
 		emailsPerDay: number;
