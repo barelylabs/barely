@@ -1050,7 +1050,7 @@ export function OrderSummary({
 					<Text variant='sm/normal' className='text-red-500'>
 						{shippingError}
 					</Text>
-				: isFetchingRates ?
+				: isFetchingRates || cart.mainShippingAmount === null ?
 					<div className='flex flex-row items-center gap-2'>
 						<div className='h-4 w-10 animate-pulse rounded bg-brandKit-block-text' />
 					</div>
