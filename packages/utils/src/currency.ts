@@ -1,3 +1,20 @@
+/**
+ * Exchange rate for converting USD to GBP.
+ * Used when Barely fulfills orders from US warehouse for UK-based artists.
+ *
+ * TODO: Replace with dynamic rate fetched from exchange rate API and stored in Redis.
+ * This should be updated daily via a scheduled job.
+ */
+export const USD_TO_GBP_RATE = 0.79;
+
+/**
+ * Convert an amount from USD cents to GBP cents.
+ * Used for shipping rates when Barely fulfills from US for GBP workspaces.
+ */
+export function convertUsdToGbpCents(amountInUsdCents: number): number {
+	return Math.round(amountInUsdCents * USD_TO_GBP_RATE);
+}
+
 export function formatMinorToMajorCurrency(
 	amountInMinor: number,
 	currency: 'usd' | 'gbp',
