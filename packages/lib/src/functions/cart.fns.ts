@@ -46,7 +46,6 @@ import {
 import {
 	calculateBarelyFulfillmentFee,
 	determineFulfillmentResponsibility,
-	getShippingOriginAddress,
 } from '../utils/fulfillment';
 
 /* get funnel */
@@ -302,12 +301,6 @@ export async function createMainCartFromFunnel({
 				shipToCountry: shipTo?.country,
 			})
 		:	'artist';
-
-	// Step 2: Get appropriate shipping origin based on fulfillment responsibility
-	const shippingOrigin = getShippingOriginAddress({
-		fulfilledBy,
-		workspace: funnel.workspace,
-	});
 
 	// For VAT calculation, we need to know if we're shipping from UK
 	// If Barely is fulfilling (from US), we don't charge UK VAT
