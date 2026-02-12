@@ -114,6 +114,7 @@ export function CheckoutForm({
 			onSuccess: data => {
 				if (!data.success) {
 					setShippingError('Unable to estimate shipping. Please enter your address.');
+					return;
 				}
 				void queryClient.invalidateQueries({
 					queryKey: trpc.byIdAndParams.queryKey({
@@ -137,7 +138,8 @@ export function CheckoutForm({
 		shippingCalculated.current = true;
 		setIsFetchingRates(true);
 		void calculateShipping({ cartId, handle, key: cartKey });
-	}, [cart, cartId, handle, cartKey, calculateShipping, setIsFetchingRates]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [cart.mainShippingAmount, cartId, handle, cartKey]);
 
 	const { mutate: mutateCart } = useMutation(
 		trpc.updateCheckoutFromCheckout.mutationOptions({
@@ -950,7 +952,7 @@ function StripePaymentElement({
 				}}
 			/>
 			<CheckboxField
-				className='border-1 border-border/50 bg-white radix-state-checked:bg-brandKit-block radix-state-checked:text-white'
+				className='border-1 border-border/50 bg-white radix-state-checked:bg-brandKit-block radix-state-checked:text-brandKit-block-text'
 				control={control}
 				name='emailMarketingOptIn'
 				label='Yes, I want to receive exclusive offers and updates via email.'
@@ -1061,15 +1063,17 @@ export function OrderSummary({
 				}
 			</div>
 
-			<div className='flex flex-row justify-between'>
-				<Text variant='md/medium'>VAT</Text>
-				<Text variant='md/medium'>
-					{formatMinorToMajorCurrency(
-						amounts.checkoutVatAmount,
-						publicFunnel.workspace.currency,
-					)}
-				</Text>
-			</div>
+			{publicFunnel.workspace.shippingAddressCountry === 'GB' && (
+				<div className='flex flex-row justify-between'>
+					<Text variant='md/medium'>VAT</Text>
+					<Text variant='md/medium'>
+						{formatMinorToMajorCurrency(
+							amounts.checkoutVatAmount,
+							publicFunnel.workspace.currency,
+						)}
+					</Text>
+				</div>
+			)}
 
 			<div className='flex flex-row justify-between'>
 				<Text variant='xl/bold'>Total</Text>

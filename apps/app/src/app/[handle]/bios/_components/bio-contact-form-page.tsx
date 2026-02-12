@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useWorkspace } from '@barely/hooks';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
-import { Mail, Settings, Trash2 } from 'lucide-react';
+import { Mail, MessageSquare, Settings, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
@@ -57,6 +57,10 @@ export function BioContactFormPage({ blockId }: { blockId: string }) {
 
 	// Find the specific block
 	const block = blocks.find(b => b.id === blockId);
+
+	// Store original values for blur comparison (to detect if user actually changed the value)
+	const [originalTitle] = useState(block?.title ?? '');
+	const [originalSubtitle] = useState(block?.subtitle ?? '');
 
 	// Initialize form values when block loads
 	React.useEffect(() => {
@@ -114,17 +118,6 @@ export function BioContactFormPage({ blockId }: { blockId: string }) {
 		}
 	};
 
-	const handleSaveSettings = () => {
-		if (!block) return;
-		updateBlock({
-			handle,
-			id: blockId,
-			title: editTitle || null,
-			subtitle: editSubtitle || null,
-		});
-		toast.success('Settings saved');
-	};
-
 	// Handle missing block case
 	if (!block) {
 		return (
@@ -141,7 +134,7 @@ export function BioContactFormPage({ blockId }: { blockId: string }) {
 			{/* Back link */}
 			<div className='mb-4'>
 				<Button
-					href={`/${handle}/bios/blocks?bioKey=${bioKey}`}
+					href={`/${handle}/bios/blocks?bioKey=${bioKey}&scrollToBlock=${blockId}`}
 					variant='button'
 					look='ghost'
 					size='sm'
@@ -174,7 +167,7 @@ export function BioContactFormPage({ blockId }: { blockId: string }) {
 							placeholder='Contact Form'
 						/>
 						<Text variant='sm/normal' className='text-gray-500'>
-							Capture emails from your visitors
+							Capture contact info from your visitors
 						</Text>
 					</div>
 				</div>
@@ -205,9 +198,44 @@ export function BioContactFormPage({ blockId }: { blockId: string }) {
 				{/* Settings Tab */}
 				<TabsContent value='settings' className='space-y-4'>
 					<div className='space-y-6'>
+						{/* SMS Capture Section */}
 						<div>
 							<Text variant='lg/semibold' className='mb-2'>
-								Contact Form Settings
+								SMS Capture
+							</Text>
+							<Text variant='sm/normal' className='mb-4 text-gray-500'>
+								Email is always collected. Optionally enable SMS capture to also collect
+								phone numbers.
+							</Text>
+							<div className='flex items-center justify-between rounded-lg border p-4'>
+								<div className='flex items-center gap-3'>
+									<div className='flex h-8 w-8 items-center justify-center rounded-md bg-green-100'>
+										<MessageSquare className='h-4 w-4 text-green-600' />
+									</div>
+									<div>
+										<Text variant='sm/medium'>Enable SMS Capture</Text>
+										<Text variant='xs/normal' className='text-gray-500'>
+											Collect phone numbers for SMS updates
+										</Text>
+									</div>
+								</div>
+								<Switch
+									checked={block.smsCaptureEnabled ?? true}
+									onCheckedChange={checked => {
+										updateBlock({
+											handle,
+											id: blockId,
+											smsCaptureEnabled: checked,
+										});
+									}}
+								/>
+							</div>
+						</div>
+
+						{/* Title/Subtitle Section */}
+						<div>
+							<Text variant='lg/semibold' className='mb-2'>
+								Display Settings
 							</Text>
 							<Text variant='sm/normal' className='mb-4 text-gray-500'>
 								Customize the title and subtitle that appear above your contact form.
@@ -217,7 +245,24 @@ export function BioContactFormPage({ blockId }: { blockId: string }) {
 									<label className='mb-2 block text-sm font-medium'>Title</label>
 									<Input
 										value={editTitle}
-										onChange={e => setEditTitle(e.target.value)}
+										onChange={e => {
+											const newTitle = e.target.value;
+											setEditTitle(newTitle);
+											// Optimistically update cache for instant preview
+											const previousBlocks = queryClient.getQueryData(blocksQueryKey);
+											if (previousBlocks) {
+												const updatedBlocks = previousBlocks.map(b => {
+													if (b.id !== blockId) return b;
+													return { ...b, title: newTitle || null };
+												});
+												queryClient.setQueryData(blocksQueryKey, updatedBlocks);
+											}
+										}}
+										onBlur={() => {
+											if (editTitle !== originalTitle) {
+												updateBlock({ handle, id: blockId, title: editTitle || null });
+											}
+										}}
 										placeholder='Get in touch'
 									/>
 								</div>
@@ -226,17 +271,33 @@ export function BioContactFormPage({ blockId }: { blockId: string }) {
 									<label className='mb-2 block text-sm font-medium'>Subtitle</label>
 									<Textarea
 										value={editSubtitle}
-										onChange={e => setEditSubtitle(e.target.value)}
+										onChange={e => {
+											const newSubtitle = e.target.value;
+											setEditSubtitle(newSubtitle);
+											// Optimistically update cache for instant preview
+											const previousBlocks = queryClient.getQueryData(blocksQueryKey);
+											if (previousBlocks) {
+												const updatedBlocks = previousBlocks.map(b => {
+													if (b.id !== blockId) return b;
+													return { ...b, subtitle: newSubtitle || null };
+												});
+												queryClient.setQueryData(blocksQueryKey, updatedBlocks);
+											}
+										}}
+										onBlur={() => {
+											if (editSubtitle !== originalSubtitle) {
+												updateBlock({
+													handle,
+													id: blockId,
+													subtitle: editSubtitle || null,
+												});
+											}
+										}}
 										placeholder="I'd love to hear from you! Drop me a message below."
 										rows={3}
 									/>
 								</div>
 							</div>
-						</div>
-						<div className='flex justify-end pt-4'>
-							<Button onClick={handleSaveSettings} size='lg' look='primary'>
-								Save Settings
-							</Button>
 						</div>
 					</div>
 				</TabsContent>

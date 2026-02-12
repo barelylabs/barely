@@ -1,9 +1,9 @@
 'use client';
 
-import type { SessionUser } from '@barely/auth';
+import type { EnrichedUser } from '@barely/lib/trpc/types';
 import { createContext, useContext } from 'react';
 
-export const UserContext = createContext<SessionUser | null>(null);
+export const UserContext = createContext<EnrichedUser | null>(null);
 
 export const useUser = () => {
 	const currentUser = useContext(UserContext);

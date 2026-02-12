@@ -23,6 +23,7 @@ import { sqlIncrement } from '@barely/db/utils';
 import { sendEmail } from '@barely/email';
 import { ReceiptEmailTemplate } from '@barely/email/templates/cart';
 import {
+	convertUsdToGbpCents,
 	formatMinorToMajorCurrency,
 	isProduction,
 	numToPaddedString,
@@ -42,6 +43,11 @@ import {
 	getFeeAmountForCheckout,
 	getVatRateForCheckout,
 } from '../utils/cart';
+import {
+	calculateBarelyFulfillmentFee,
+	determineFulfillmentResponsibility,
+	getShippingOriginAddress,
+} from '../utils/fulfillment';
 
 /* get funnel */
 export const funnelWith = {
@@ -73,12 +79,21 @@ export const funnelWith = {
 			plan: true,
 			cartFeePercentageOverride: true,
 			cartSupportEmail: true,
+			shippingAddressPhone: true,
+			shippingAddressLine1: true,
+			shippingAddressLine2: true,
+			shippingAddressCity: true,
 			shippingAddressPostalCode: true,
 			shippingAddressState: true,
 			shippingAddressCountry: true,
 			stripeConnectAccountId: true,
 			stripeConnectAccountId_devMode: true,
 			currency: true,
+			// barely fulfillment
+			barelyFulfillmentEligible: true,
+			barelyFulfillmentMode: true,
+			barelyFulfillmentFlatFeePerOrder: true,
+			barelyFulfillmentPercentageFeePerOrder: true,
 		},
 	},
 	mainProduct: {
@@ -145,12 +160,21 @@ export async function getFunnelByParams(handle: string, key: string) {
 					plan: true,
 					cartFeePercentageOverride: true,
 					cartSupportEmail: true,
+					shippingAddressPhone: true,
+					shippingAddressLine1: true,
+					shippingAddressLine2: true,
+					shippingAddressCity: true,
 					shippingAddressPostalCode: true,
 					shippingAddressState: true,
 					shippingAddressCountry: true,
 					stripeConnectAccountId: true,
 					stripeConnectAccountId_devMode: true,
 					currency: true,
+					// barely fulfillment
+					barelyFulfillmentEligible: true,
+					barelyFulfillmentMode: true,
+					barelyFulfillmentFlatFeePerOrder: true,
+					barelyFulfillmentPercentageFeePerOrder: true,
 				},
 			},
 			// key: true,
@@ -269,10 +293,28 @@ export async function createMainCartFromFunnel({
 		:	funnel.workspace.stripeConnectAccountId_devMode;
 
 	if (!stripeAccount) throw new Error('Stripe account not found');
-	const vat = getVatRateForCheckout(
-		funnel.workspace.shippingAddressCountry,
-		shipTo?.country ?? '',
-	);
+
+	// Step 1: Determine fulfillment responsibility
+	const fulfilledBy =
+		funnel.workspace.barelyFulfillmentEligible ?
+			determineFulfillmentResponsibility({
+				workspaceMode: funnel.workspace.barelyFulfillmentMode,
+				shipToCountry: shipTo?.country,
+			})
+		:	'artist';
+
+	// Step 2: Get appropriate shipping origin based on fulfillment responsibility
+	const shippingOrigin = getShippingOriginAddress({
+		fulfilledBy,
+		workspace: funnel.workspace,
+	});
+
+	// For VAT calculation, we need to know if we're shipping from UK
+	// If Barely is fulfilling (from US), we don't charge UK VAT
+	const shipFromCountry =
+		fulfilledBy === 'barely' ? 'US' : funnel.workspace.shippingAddressCountry;
+
+	const vat = getVatRateForCheckout(shipFromCountry, shipTo?.country ?? '');
 	const amounts = getAmountsForCheckout(
 		funnel,
 		{
@@ -281,12 +323,21 @@ export async function createMainCartFromFunnel({
 		vat,
 	);
 
+	// Step 3: Calculate fulfillment fee
+	const barelyFulfillmentFee = calculateBarelyFulfillmentFee({
+		fulfilledBy,
+		productAmountInCents: amounts.mainProductAmount,
+		flatFeeInCents: funnel.workspace.barelyFulfillmentFlatFeePerOrder,
+		percentageFee: funnel.workspace.barelyFulfillmentPercentageFeePerOrder,
+	});
+
 	const metadata: z.infer<typeof stripeConnectChargeMetadataSchema> = {
 		paymentType: 'cart',
 		cartId,
 		preChargeCartStage: 'checkoutCreated',
 	};
 
+	// Step 4: Include fulfillment fee in application fee
 	const paymentIntent = await stripe.paymentIntents.create(
 		{
 			amount: amounts.checkoutAmount,
@@ -294,6 +345,7 @@ export async function createMainCartFromFunnel({
 				productAmount: amounts.orderProductAmount, // we just take fees on product sales, not shipping or tax
 				vatAmount: amounts.orderVatAmount,
 				shippingAmount: amounts.checkoutShippingAmount,
+				barelyFulfillmentFee,
 				workspace: funnel.workspace,
 			}),
 			currency: funnel.workspace.currency,
@@ -307,7 +359,7 @@ export async function createMainCartFromFunnel({
 		throw new Error('stripe client_secret not found');
 	}
 
-	// create cart
+	// Step 5: Create cart with fulfillment info
 	const cart: InsertCart = {
 		id: cartId,
 		workspaceId: funnel.workspace.id,
@@ -329,11 +381,16 @@ export async function createMainCartFromFunnel({
 		emailMarketingOptIn: true,
 		// amounts
 		...amounts,
+		// fulfillment
+		fulfilledBy,
+		barelyFulfillmentFee,
 	};
 
 	// Shipping is calculated post-page-load via calculateInitialShipping mutation
 	// to reduce TTFP by removing the blocking ShipStation API call from cart creation.
 	// Cart is created with null shipping amounts (the default).
+	// Fulfillment info (fulfilledBy, barelyFulfillmentFee) is stored on the cart
+	// so calculateInitialShipping can use the correct shipping origin.
 
 	await dbHttp.insert(Carts).values(cart);
 
@@ -412,6 +469,23 @@ export async function getProductsShippingRateEstimate(props: {
 		rates,
 		lowestShippingPrice: rates[0]?.shipping_amount.amount ?? 0,
 	};
+}
+
+/**
+ * Convert shipping amount from USD to workspace currency if needed.
+ * When Barely fulfills orders from the US warehouse, shipping rates come back in USD.
+ * For GBP workspaces, we need to convert to GBP before storing.
+ */
+export function convertShippingAmountIfNeeded(
+	amountInCents: number,
+	fulfilledBy: 'barely' | 'artist',
+	workspaceCurrency: string,
+): number {
+	// Barely ships from US (USD), convert to GBP if workspace uses GBP
+	if (fulfilledBy === 'barely' && workspaceCurrency === 'gbp') {
+		return convertUsdToGbpCents(amountInCents);
+	}
+	return amountInCents;
 }
 
 /* email updates */
@@ -523,7 +597,10 @@ export async function sendCartReceiptEmail(cart: ReceiptCart) {
 			cart.orderShippingAndHandlingAmount ?? 0,
 			cart.currency,
 		),
-		vatTotal: formatMinorToMajorCurrency(cart.orderVatAmount ?? 0, cart.currency),
+		vatTotal:
+			cart.funnel.workspace.shippingAddressCountry === 'GB' ?
+				formatMinorToMajorCurrency(cart.orderVatAmount ?? 0, cart.currency)
+			:	null,
 		total: formatMinorToMajorCurrency(cart.orderAmount, cart.currency),
 	});
 

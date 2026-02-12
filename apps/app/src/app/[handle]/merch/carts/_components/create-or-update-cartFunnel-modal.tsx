@@ -71,6 +71,9 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 	const { mutateAsync: createFunnel } = useMutation(
 		trpc.cartFunnel.create.mutationOptions({
 			onSuccess: async () => {
+				await queryClient.invalidateQueries(
+					trpc.cartFunnel.byWorkspace.queryFilter({ handle: workspace.handle }),
+				);
 				await handleCloseModal();
 			},
 		}),
@@ -79,6 +82,9 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 	const { mutateAsync: updateFunnel } = useMutation(
 		trpc.cartFunnel.update.mutationOptions({
 			onSuccess: async () => {
+				await queryClient.invalidateQueries(
+					trpc.cartFunnel.byWorkspace.queryFilter({ handle: workspace.handle }),
+				);
 				await handleCloseModal();
 			},
 		}),
@@ -119,17 +125,7 @@ export function CreateOrUpdateFunnelModal({ mode }: { mode: 'create' | 'update' 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
 		await setShowModal(false);
-
-		await queryClient.invalidateQueries(
-			trpc.cartFunnel.byWorkspace.queryFilter({ handle: workspace.handle }),
-		);
-	}, [
-		setShowModal,
-		focusGridList,
-		queryClient,
-		trpc.cartFunnel.byWorkspace,
-		workspace.handle,
-	]);
+	}, [setShowModal, focusGridList]);
 
 	// state
 	const mainProduct = products.find(p => p.id === form.getValues('mainProductId'));

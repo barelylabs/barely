@@ -20,6 +20,7 @@ import { z } from 'zod/v4';
 import type { generateFileBlurHash } from '../../trigger/file-blurhash.trigger';
 import { getBrandKit } from '../../functions/brand-kit.fns';
 import {
+	convertShippingAmountIfNeeded,
 	createMainCartFromFunnel,
 	getCartById,
 	getFunnelByParams,
@@ -38,6 +39,7 @@ import {
 	getFeeAmountForCheckout,
 	getVatRateForCheckout,
 } from '../../utils/cart';
+import { getShippingOriginAddress } from '../../utils/fulfillment';
 import { log } from '../../utils/log';
 
 export const cartRoute = {
@@ -301,6 +303,18 @@ export const cartRoute = {
 				...update,
 			};
 
+			// Get the shipping origin based on cart's fulfilledBy (set at creation, immutable)
+			const shippingOrigin = getShippingOriginAddress({
+				fulfilledBy: cart.fulfilledBy,
+				workspace: funnel.workspace,
+			});
+
+			const shipFromAddress = {
+				state: shippingOrigin.state ?? '',
+				postalCode: shippingOrigin.postalCode ?? '',
+				countryCode: shippingOrigin.country ?? '',
+			};
+
 			if (update.shippingAddressPostalCode) {
 				console.log('updating shipping address');
 				const toCountry = update.shippingAddressCountry ?? cart.shippingAddressCountry;
@@ -316,16 +330,12 @@ export const cartRoute = {
 					toPostalCode &&
 					toPostalCode !== cart.shippingAddressPostalCode
 				) {
-					const { lowestShippingPrice: mainShippingAmount } =
+					const { lowestShippingPrice: rawMainShippingAmount } =
 						await getProductsShippingRateEstimate({
 							products: [
 								{ product: funnel.mainProduct, quantity: cart.mainProductQuantity },
 							],
-							shipFrom: {
-								state: funnel.workspace.shippingAddressState ?? '',
-								postalCode: funnel.workspace.shippingAddressPostalCode ?? '',
-								countryCode: funnel.workspace.shippingAddressCountry ?? '',
-							},
+							shipFrom: shipFromAddress,
 							shipTo: {
 								country: toCountry,
 								state: toState,
@@ -334,10 +344,17 @@ export const cartRoute = {
 							},
 						});
 
+					// Convert shipping from USD to workspace currency if Barely is fulfilling
+					const mainShippingAmount = convertShippingAmountIfNeeded(
+						rawMainShippingAmount,
+						cart.fulfilledBy,
+						funnel.workspace.currency,
+					);
+
 					updateCart.mainShippingAmount = mainShippingAmount;
 
-					const mainPlusBumpShippingPrice =
-						!funnel.bumpProduct ? mainShippingAmount : (
+					const rawMainPlusBumpShippingPrice =
+						!funnel.bumpProduct ? rawMainShippingAmount : (
 							await getProductsShippingRateEstimate({
 								products: [
 									{
@@ -349,11 +366,7 @@ export const cartRoute = {
 										quantity: cart.bumpProductQuantity ?? 1,
 									},
 								],
-								shipFrom: {
-									state: funnel.workspace.shippingAddressState ?? '',
-									postalCode: funnel.workspace.shippingAddressPostalCode ?? '',
-									countryCode: funnel.workspace.shippingAddressCountry ?? '',
-								},
+								shipFrom: shipFromAddress,
 								shipTo: {
 									postalCode: toPostalCode,
 									country: toCountry,
@@ -363,11 +376,18 @@ export const cartRoute = {
 							}).then(({ lowestShippingPrice }) => lowestShippingPrice)
 						);
 
+					const mainPlusBumpShippingPrice = convertShippingAmountIfNeeded(
+						rawMainPlusBumpShippingPrice,
+						cart.fulfilledBy,
+						funnel.workspace.currency,
+					);
+
 					updateCart.bumpShippingPrice = mainPlusBumpShippingPrice - mainShippingAmount;
 				}
 			}
 
-			const shipFromCountry = funnel.workspace.shippingAddressCountry;
+			// Use the correct ship-from country for VAT calculation
+			const shipFromCountry = shippingOrigin.country;
 			const shipToCountry = update.shippingAddressCountry;
 			const vat =
 				shipFromCountry && shipToCountry ?
@@ -413,6 +433,7 @@ export const cartRoute = {
 						productAmount: amounts.orderProductAmount,
 						vatAmount: amounts.orderVatAmount,
 						shippingAmount: 0, // not supported yet. in the future we take a shipping fee if they want to ship through the app.
+						barelyFulfillmentFee: cart.barelyFulfillmentFee,
 						workspace: funnel.workspace,
 					}),
 				},
@@ -466,11 +487,17 @@ export const cartRoute = {
 				};
 			}
 
+			// Get the shipping origin based on cart's fulfilledBy (set at creation, immutable)
+			const shippingOrigin = getShippingOriginAddress({
+				fulfilledBy: cart.fulfilledBy,
+				workspace: funnel.workspace,
+			});
+
 			// if the postal code is different, we need to recalculate shipping rates
 			const shipFrom = {
-				state: funnel.workspace.shippingAddressState ?? '',
-				postalCode: funnel.workspace.shippingAddressPostalCode ?? '',
-				countryCode: funnel.workspace.shippingAddressCountry ?? '',
+				state: shippingOrigin.state ?? '',
+				postalCode: shippingOrigin.postalCode ?? '',
+				countryCode: shippingOrigin.country ?? '',
 			};
 
 			const shipTo = {
@@ -498,15 +525,25 @@ export const cartRoute = {
 					}),
 			]);
 
-			const mainShippingAmount = mainShippingResult.lowestShippingPrice;
+			// Convert shipping from USD to workspace currency if Barely is fulfilling
+			const mainShippingAmount = convertShippingAmountIfNeeded(
+				mainShippingResult.lowestShippingPrice,
+				cart.fulfilledBy,
+				funnel.workspace.currency,
+			);
 			const mainPlusBumpShippingPrice =
 				!funnel.bumpProduct || !mainPlusBumpShippingResult ?
 					mainShippingAmount
-				:	mainPlusBumpShippingResult.lowestShippingPrice;
+				:	convertShippingAmountIfNeeded(
+						mainPlusBumpShippingResult.lowestShippingPrice,
+						cart.fulfilledBy,
+						funnel.workspace.currency,
+					);
 
 			updateCart.mainShippingAmount = mainShippingAmount;
 			updateCart.bumpShippingPrice = mainPlusBumpShippingPrice - mainShippingAmount;
 
+			// Use the correct ship-from country for VAT calculation
 			const amounts = getAmountsForCheckout(
 				funnel,
 				{
@@ -514,7 +551,7 @@ export const cartRoute = {
 					...updateCart,
 				},
 				getVatRateForCheckout(
-					funnel.workspace.shippingAddressCountry,
+					shippingOrigin.country,
 					updatedAddress.shippingAddressCountry,
 				),
 			);
@@ -554,10 +591,16 @@ export const cartRoute = {
 				return { success: true, calculated: false };
 			}
 
+			// Get the shipping origin based on cart's fulfilledBy (set at creation, immutable)
+			const shippingOrigin = getShippingOriginAddress({
+				fulfilledBy: cart.fulfilledBy,
+				workspace: funnel.workspace,
+			});
+
 			const shipFrom = {
-				state: funnel.workspace.shippingAddressState ?? '',
-				postalCode: funnel.workspace.shippingAddressPostalCode ?? '',
-				countryCode: funnel.workspace.shippingAddressCountry ?? '',
+				state: shippingOrigin.state ?? '',
+				postalCode: shippingOrigin.postalCode ?? '',
+				countryCode: shippingOrigin.country ?? '',
 			};
 
 			const shipTo = {
@@ -590,11 +633,20 @@ export const cartRoute = {
 						}),
 				]);
 
-				const mainShippingAmount = mainShippingResult.lowestShippingPrice;
+				// Convert shipping from USD to workspace currency if Barely is fulfilling
+				const mainShippingAmount = convertShippingAmountIfNeeded(
+					mainShippingResult.lowestShippingPrice,
+					cart.fulfilledBy,
+					funnel.workspace.currency,
+				);
 				const mainPlusBumpShippingPrice =
 					!funnel.bumpProduct || !mainPlusBumpShippingResult ?
 						mainShippingAmount
-					:	mainPlusBumpShippingResult.lowestShippingPrice;
+					:	convertShippingAmountIfNeeded(
+							mainPlusBumpShippingResult.lowestShippingPrice,
+							cart.fulfilledBy,
+							funnel.workspace.currency,
+						);
 
 				const updateCart: UpdateCart = {
 					id: cart.id,
@@ -602,10 +654,8 @@ export const cartRoute = {
 					bumpShippingPrice: mainPlusBumpShippingPrice - mainShippingAmount,
 				};
 
-				const vat = getVatRateForCheckout(
-					funnel.workspace.shippingAddressCountry,
-					geo.country,
-				);
+				// Use the correct ship-from country for VAT calculation
+				const vat = getVatRateForCheckout(shippingOrigin.country, geo.country);
 
 				const amounts = getAmountsForCheckout(funnel, { ...cart, ...updateCart }, vat);
 

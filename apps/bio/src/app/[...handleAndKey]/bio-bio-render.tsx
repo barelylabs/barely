@@ -146,9 +146,16 @@ function BioBioProvider({
 		[log, bio.id],
 	);
 
-	// Handle email capture
+	// Handle contact capture (email and/or phone)
 	const handleEmailCapture = useCallback(
-		async (data: { bioId: string; email: string; marketingConsent: boolean }) => {
+		async (data: {
+			bioId: string;
+			blockId?: string;
+			email: string; // Email is always required (Fan.email is notNull)
+			phone?: string;
+			marketingConsent: boolean;
+			smsMarketingConsent: boolean;
+		}) => {
 			const result = await captureEmail(data);
 			return result;
 		},

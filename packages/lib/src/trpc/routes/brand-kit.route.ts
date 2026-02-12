@@ -106,15 +106,14 @@ export const brandKitRouter = {
 	update: workspaceProcedure
 		.input(updateBrandKitSchema)
 		.mutation(async ({ ctx, input }) => {
+			const { id, ...updateData } = input;
 			const [updated] = await dbHttp
 				.update(BrandKits)
 				.set({
-					...input,
+					...updateData,
 					updatedAt: new Date(),
 				})
-				.where(
-					and(eq(BrandKits.id, input.id), eq(BrandKits.workspaceId, ctx.workspace.id)),
-				)
+				.where(and(eq(BrandKits.id, id), eq(BrandKits.workspaceId, ctx.workspace.id)))
 				.returning();
 
 			if (!updated) {

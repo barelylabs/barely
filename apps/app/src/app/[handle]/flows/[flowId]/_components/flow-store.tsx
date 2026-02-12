@@ -76,10 +76,10 @@ export const FlowStoreProvider = ({
 			historyIndex: 0,
 			lastCommittedHistoryIndex: 0,
 			setCurrentAsLastSaved: () => {
-				// const historyIndex = get().historyIndex;
 				set({
 					lastCommittedHistoryIndex: get().historyIndex,
 				});
+				get().checkIfDirty();
 			},
 			saveSnapshot: () => {
 				const currentState = {
@@ -352,11 +352,11 @@ export const FlowStoreProvider = ({
 							} else return;
 						}
 
-						console.log('edgeAboveEmpty', edgeAboveEmptyTarget);
+						console.log('edgeAboveEmptySource', edgeAboveEmptySource);
 						set({
 							nodes: prevNodes.filter(node => node.id !== sourceNode.id),
 							edges: prevEdges.map(edge => {
-								if (edge.id === edgeAboveEmptyTarget.id) {
+								if (edge.id === edgeAboveEmptySource?.id) {
 									return {
 										...edge,
 										target: connection.target,
@@ -364,6 +364,35 @@ export const FlowStoreProvider = ({
 								}
 								return edge;
 							}),
+						});
+						get().saveSnapshot();
+						return;
+					} else {
+						// No edge above the target - connect the parent of the empty node to the target
+						// and delete the empty node
+
+						if (!edgeAboveEmptySource) {
+							console.error('No edge above empty source node');
+							return;
+						}
+
+						// Create new edge from parent of empty node to target
+						const newEdge = {
+							id: `e-${edgeAboveEmptySource.source}-${connection.target}`,
+							source: edgeAboveEmptySource.source,
+							target: connection.target,
+							type: 'simple',
+						} satisfies SimpleEdge;
+
+						// Filter out the empty node and the edge above it
+						const filteredNodes = prevNodes.filter(node => node.id !== sourceNode.id);
+						const filteredEdges = prevEdges.filter(
+							edge => edge.id !== edgeAboveEmptySource.id,
+						);
+
+						set({
+							nodes: filteredNodes,
+							edges: [...filteredEdges, newEdge],
 						});
 						get().saveSnapshot();
 						return;
@@ -415,6 +444,12 @@ export const FlowStoreProvider = ({
 						(prevNodes.find(node => node.type === 'wait')?.measured?.width ?? 0)
 					: type === 'sendEmail' ?
 						(prevNodes.find(node => node.type === 'sendEmail')?.measured?.width ?? 0)
+					: type === 'sendEmailFromTemplateGroup' ?
+						(prevNodes.find(node => node.type === 'sendEmailFromTemplateGroup')?.measured
+							?.width ?? 0)
+					: type === 'addToMailchimpAudience' ?
+						(prevNodes.find(node => node.type === 'addToMailchimpAudience')?.measured
+							?.width ?? 0)
 					:	0;
 
 				const newNodeX = emptyNodeX + (emptyNodeWidth - newNodeWidth) / 2;

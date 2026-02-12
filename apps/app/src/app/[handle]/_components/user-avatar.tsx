@@ -1,11 +1,11 @@
-import type { SessionUser } from '@barely/auth';
+import type { EnrichedUser } from '@barely/lib/trpc/types';
 import type { AvatarProps } from '@radix-ui/react-avatar';
 
 import { Avatar, AvatarFallback, AvatarRoot } from '@barely/ui/avatar';
 import { Icon } from '@barely/ui/icon';
 
 interface UserAvatarProps extends AvatarProps {
-	user: Pick<SessionUser, 'avatarImageS3Key'>;
+	user: Pick<EnrichedUser, 'avatarImageS3Key'>;
 	fallbackName: string;
 }
 

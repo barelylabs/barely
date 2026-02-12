@@ -12,7 +12,11 @@ import { useMemo } from 'react';
 import { MERCH_TYPES } from '@barely/const';
 import { useCartFunnels, useWorkspace } from '@barely/hooks';
 import { cn, formatMinorToMajorCurrency } from '@barely/utils';
-import { useSuspenseInfiniteQuery, useSuspenseQuery } from '@tanstack/react-query';
+import {
+	useQuery,
+	useSuspenseInfiniteQuery,
+	useSuspenseQuery,
+} from '@tanstack/react-query';
 import { Handle, Position } from '@xyflow/react';
 import { useShallow } from 'zustand/react/shallow';
 
@@ -399,7 +403,7 @@ export function SendEmailFromTemplateGroupNodeType({
 	const trpc = useTRPC();
 	const { handle } = useWorkspace();
 
-	const { data: emailTemplateGroup } = useSuspenseQuery(
+	const { data: emailTemplateGroup } = useQuery(
 		trpc.emailTemplateGroup.byId.queryOptions({
 			id: data.emailTemplateGroupId,
 			handle,
@@ -414,7 +418,9 @@ export function SendEmailFromTemplateGroupNodeType({
 				setShowEmailFromTemplateGroupModal(true);
 			}}
 			title='Email Template Group'
-			subtitle={`Send Email from "${emailTemplateGroup.name}"`}
+			subtitle={
+				emailTemplateGroup ? `Send Email from "${emailTemplateGroup.name}"` : 'Loading...'
+			}
 			iconClassName='h-[16px] w-[16px] text-indigo-400'
 			stripeClassName='bg-indigo-400'
 			selected={selected}

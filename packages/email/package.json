@@ -40,6 +40,18 @@
 			"types": "./dist/templates/nyc/contact-inquiry.d.ts",
 			"default": "./src/templates/nyc/contact-inquiry.tsx"
 		},
+		"./templates/nyc/playlist-qualifier": {
+			"types": "./dist/templates/nyc/playlist-qualifier.d.ts",
+			"default": "./src/templates/nyc/playlist-qualifier.tsx"
+		},
+		"./templates/nyc/playlist-submission": {
+			"types": "./dist/templates/nyc/playlist-submission.d.ts",
+			"default": "./src/templates/nyc/playlist-submission.tsx"
+		},
+		"./templates/nyc/playlist-submission-confirmation": {
+			"types": "./dist/templates/nyc/playlist-submission-confirmation.d.ts",
+			"default": "./src/templates/nyc/playlist-submission-confirmation.tsx"
+		},
 		"./templates/nyc/testimonial-submission": {
 			"types": "./dist/templates/nyc/testimonial-submission.d.ts",
 			"default": "./src/templates/nyc/testimonial-submission.tsx"

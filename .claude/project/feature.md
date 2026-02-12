@@ -1,146 +1,227 @@
-# Feature: Deferred Shipping Rate Calculation
+# Feature: Barely Fulfillment Partner
 
 ## Context & Background
 
 ### Related Work
-- **Builds On**: [[0_Projects/cart-performance-optimization]] - August 2025 project targeting 9.3s → 2.5s load time
-- **Differs From**: Previous approach focused on BrandKit caching; this addresses a different bottleneck
-- **Integrates With**: Existing `isFetchingRates` UI state already handles loading states
+- **Builds On**: Existing US and UK shipping endpoints in the barely app
+- **Extends**: Current workspace and order management system
+- **Enables**: Agency $1M GMV target for 2026
 
-### Historical Context
-- **Previous Attempts**: Cart performance project (Aug 2025) identified BrandKit blocking queries but didn't address shipping rate timing
-- **Lessons Applied**: The existing project's polling mechanism (up to 12.7s backoff) is part of the problem we're now solving
-- **Success Factors**: We're not adding new UI - leveraging existing loading states
+### Business Context
+- UK agency clients want to expand into US market but shipping from UK is prohibitively expensive
+- US clients won't consider physical media sales without a fulfillment solution
+- Current workaround (duplicate workspaces) is painful and creates operational overhead
+- This feature enables Barely to capture ~$150k+ in additional agency revenue via fulfillment fees
+
+### Validated Demand
+- 1 UK client (The Now) ready to go - has paid for product stocking in Brooklyn
+- 3 US clients contingent on this capability
+- Pricing validated at $3-4 per order
 
 ## Problem Statement
 
-Cart checkout pages take up to 5 seconds to first paint because shipping rate calculations happen during cart creation, and the page prefetch polls waiting for cart creation to complete. The ShipStation API call (500-2000ms) is in the critical path, blocking Time To First Paint.
+Artists selling physical products internationally face a choice: expensive cross-border shipping that kills ad ROI, or the operational nightmare of managing duplicate workspaces, Stripe accounts, and ad campaigns per region. This friction prevents UK/EU artists from effectively selling to US customers and discourages US artists from selling physical products at all.
 
 ### Evidence of Need
-- Gap in existing solution: BrandKit caching doesn't address shipping rate timing
-- Measurable impact: 5 second TTFP directly correlates with cart abandonment
-- Technical validation: Code investigation confirms ShipStation API is called in `createMainCartFromFunnel()` before cart record exists
+- UK client's US shipping costs make paid acquisition unprofitable
+- 3 prospective US clients won't sign without fulfillment solution
+- Current workaround requires: 2 workspaces, 2 Stripe accounts, duplicate products/funnels/landing pages, split ad campaigns
 
 ## Target Users
 
-Fans/customers attempting to purchase merchandise from artists using Barely cart.
+### Primary: UK/EU Artists Expanding to US
+- Already selling physical products in home market
+- Want to run paid campaigns to US audiences
+- Need affordable US shipping to make unit economics work
+- Currently blocked by shipping costs or workaround complexity
 
-### Differentiation from Existing Users
-- Not served by current optimization because: shipping rates weren't identified as a blocking issue until now
-- Higher need for: fast checkout experience on mobile devices
+### Secondary: US Artists Needing Fulfillment
+- Want to sell physical products but don't want to fulfill themselves
+- Would only consider physical media sales with a fulfillment partner
+- Willing to pay per-order fees for convenience
 
 ## Current State & Pain Points
 
 ### How Users Handle This Today
-- Current experience: Wait up to 5 seconds staring at loading screen
-- Bounce: Many users abandon before checkout loads
-- No workaround exists for end users
+- **Workaround**: Create 2 separate workspaces in the barely app
+  - Duplicate all landing pages, products, cart funnels
+  - Attach separate Stripe account to US workspace
+  - Split ad campaigns so UK fans → UK workspace, US fans → US workspace
+  - Manage sales/analytics across two separate systems
+- **Or**: Ship internationally from home country (expensive, slow, kills ad ROI)
+- **Or**: Don't sell to international customers at all
 
 ### Validated Pain Points
-- **TTFP blocked by external API**: ShipStation rate estimation (500-2000ms) runs during cart creation
-- **Polling compounds delay**: Page prefetch polls up to 12.7s waiting for cart to exist
-- **Critical path includes non-critical data**: Shipping rate isn't needed until user submits - yet it blocks first paint
-
-**Quantified impact**: Every extra second of load time increases abandonment. Industry standard: 3+ second load time loses 40%+ of mobile users.
+- Duplicate workspace setup takes significant time
+- Ongoing operational overhead managing two systems
+- Split Stripe accounts complicate accounting
+- Ad campaign management is more complex
+- Client explicitly prefers streamlined single-workspace solution
 
 ## Recommended Solution
 
-Defer shipping rate calculation from cart creation to a client-side side effect triggered after page load. The shipping rate should be calculated asynchronously once the checkout page has rendered, not as a prerequisite for rendering.
+Enable artists to designate Barely as their fulfillment partner for US orders (or all orders). When enabled:
+- Shipping estimates at checkout automatically calculate from the appropriate origin (Barely's Brooklyn address for Barely-fulfilled regions, artist's address for artist-fulfilled regions)
+- Orders are tagged with fulfillment responsibility
+- Artists can filter their orders view by fulfillment responsibility
 
 ### Why This Approach
-- Addresses the gap that BrandKit caching misses (shipping timing)
-- Simpler than adding caching infrastructure - just changes WHEN calculation happens
-- Leverages existing `isFetchingRates` UI state - no new components needed
-- Avoids over-engineering: not adding Redis caching, not refactoring polling
+- Single workspace, single Stripe account, single product catalog
+- Minimal UI changes (one setting + one filter)
+- Leverages existing shipping endpoints (US and UK already exist)
+- Simple eligibility flag allows Barely to vet artists before enabling
+- No inventory management complexity in MVP
 
 ## Success Criteria
 
-### Differentiated Metrics
-- **TTFP < 2 seconds** on checkout page (down from 5s)
-- **Lighthouse Performance score improvement** (baseline TBD)
-- Zero UX degradation - shipping amount still shows before user can submit
+### Business Metrics
+- UK client (The Now) successfully processing split-fulfillment orders within 2 weeks of launch
+- 3 US clients onboarded within 30 days of launch
+- Path to $1M GMV through Barely cart in 2026
 
-### Learning from Previous Attempts
-- NOT measuring: Lighthouse score in isolation (previous project had 8 features, too broad)
-- Focus on: Single metric (TTFP) with surgical change
+### Feature Metrics
+- Artists can enable Barely fulfillment in <2 minutes after approval
+- Checkout shipping estimates reflect correct origin based on destination
+- Order filtering correctly separates fulfillment responsibilities
+- Zero increase in support tickets related to shipping confusion
+
+### User Outcomes
+- Artists run single workspace for all markets
+- Shipping costs displayed to US customers are competitive (Brooklyn origin)
+- Artists can see exactly which orders they need to fulfill
 
 ## Core Functionality (MVP)
 
-### Must Have (Validated through context)
-1. **Remove shipping calculation from cart creation** - `createMainCartFromFunnel()` should skip `getProductsShippingRateEstimate()` calls
-2. **Trigger shipping calculation on page mount** - Client-side effect calculates rates after first paint
-3. **Handle null/undefined shipping gracefully** - Cart record exists without shipping amounts initially
+### Must Have
 
-### Reusable Components
-- Use existing `isFetchingRates` Jotai atom for loading state
-- Use existing `updateShippingAddressFromCheckout` mutation (already has correct Promise.all pattern)
-- Use existing OrderSummary skeleton loader for shipping line
+**1. Workspace Eligibility Flag**
+- Backend-set flag: `barelyFulfillmentEligible`
+- When false: current behavior, no fulfillment options visible
+- When true: artist can configure fulfillment mode
+
+**2. Artist Fulfillment Mode Setting**
+- Location: Workspace settings
+- Options:
+  - "I fulfill all orders" (default, current behavior)
+  - "Barely fulfills US orders, I fulfill the rest"
+  - "Barely fulfills all orders"
+- Only visible when workspace is eligible
+
+**3. Dynamic Shipping Calculation**
+- At checkout, determine shipping origin based on:
+  - Customer's shipTo address (US vs non-US)
+  - Workspace's fulfillment mode setting
+- US customer + (US-only OR worldwide Barely fulfillment) → use US shipping endpoint with Barely's Brooklyn address
+- Non-US customer + worldwide Barely fulfillment → use US shipping endpoint with Barely's Brooklyn address
+- Otherwise → use existing logic with artist's shipFrom address
+
+**4. Order Fulfillment Assignment**
+- When order is created, tag with fulfillment responsibility: `fulfilledBy: "artist" | "barely"`
+- Logic mirrors shipping calculation logic
+- Stored on order record for filtering
+
+**5. Order Filtering**
+- Add filter to orders view: "All Orders" | "My Fulfillment" | "Barely Fulfillment"
+- Simple filter on `fulfilledBy` field
+- Default to "All Orders"
+
+**6. Fulfillment Fee Capture**
+- Workspace fields: `barelyFulfillmentFlatFeePerOrder` (e.g., $1.00), `barelyFulfillmentPercentageFeePerOrder` (e.g., 5%)
+- At time of order, calculate fulfillment fee: flat fee + (order subtotal × percentage)
+- Deduct from artist payout alongside existing cart and shipping fees
+- Only applied to orders where `fulfilledBy: "barely"`
+
+### Configuration
+
+**Environment Variables (not in public repo)**
+- `BARELY_FULFILLMENT_ADDRESS_LINE1` = "763 Park Pl #1R"
+- `BARELY_FULFILLMENT_ADDRESS_CITY` = "Brooklyn"
+- `BARELY_FULFILLMENT_ADDRESS_STATE` = "NY"
+- `BARELY_FULFILLMENT_ADDRESS_ZIP` = "11216"
+- `BARELY_FULFILLMENT_ADDRESS_COUNTRY` = "US"
 
 ## Out of Scope for MVP
 
-### Learned from Previous Attempts
-- Full BrandKit caching overhaul (separate initiative)
-- Redis session caching (over-engineering for this fix)
-- Edge functions for shipping (premature optimization)
-- Stripe element pre-warming (different bottleneck)
+### Explicitly Deferred
+- Inventory/stock management (handled operationally)
+- Per-product fulfillment settings (all products use same fulfillment mode)
+- Barely-side dashboard (Barely team uses existing workspace filtering)
+- Returns handling in-app (handled via support email)
+- Non-US Barely fulfillment locations
+- Complex approval workflows (simple backend flag for now)
+- Automated stock alerts or notifications
 
-### Available in Existing Solutions
-- Loading state UI - already exists
-- Shipping recalculation on address change - already works
+### Available via Workaround
+- Multi-region Barely fulfillment → separate workspaces per region
+- Per-product fulfillment → manual coordination with Barely team
 
 ## Integration Points
 
 ### With Existing Features
-- **OrderSummary component**: Already shows loading state when `isFetchingRates = true`
-- **Checkout form**: Already disables submit button while rates fetch
-- **Address change flow**: Already triggers shipping recalculation
+- **Shipping Endpoints**: US and UK endpoints already exist, route to appropriate one
+- **Order Management**: Add `fulfilledBy` field and filter capability
+- **Workspace Settings**: Add fulfillment mode configuration
+- **Checkout Flow**: Modify shipping calculation to consider fulfillment mode
 
-### Technical Integration
-- Extends: `updateShippingAddressFromCheckout` mutation or new lightweight mutation
-- Reuses: Existing ShipEngine integration, existing rate calculation logic
-- New requirements: Client-side trigger on checkout mount, handling initial null shipping state
+### Data Model Changes
+- Workspace: Add `barelyFulfillmentEligible` (boolean), `barelyFulfillmentMode` (enum), `barelyFulfillmentFlatFeePerOrder` (decimal), `barelyFulfillmentPercentageFeePerOrder` (decimal)
+- Order: Add `fulfilledBy` (enum: artist | barely), `barelyFulfillmentFee` (decimal, calculated at order time)
 
 ## Complexity Assessment
 
-**Overall Complexity**: Simple
+**Overall Complexity**: Medium
 
 **Reduced Complexity Through:**
-- Reusing existing UI loading states
-- Reusing existing shipping calculation functions
-- Not changing the calculation logic, just the timing
+- Using existing shipping endpoints (no new carrier integrations)
+- Simple boolean eligibility (no approval workflow)
+- No inventory management
+- No Barely-specific dashboard (reuse existing)
 
 **Remaining Complexity:**
-- Ensuring cart can be created/saved without shipping amounts
-- Handling edge cases (what if rates fail to load?)
-- Coordinating the trigger timing (useEffect vs route load)
+- Shipping calculation routing logic
+- Ensuring checkout correctly determines fulfillment before calculating shipping
+- Order filter UI addition
 
 ## Human Review Required
 
-- [ ] Assumption: ShipStation API latency (500-2000ms) is the primary contributor - need to measure
-- [ ] Assumption: Cart record can exist without shipping amounts (schema allows null?)
-- [ ] Priority: Should this come before barely-usage-protection (deadline Feb 28)?
+- [x] Confirm Barely's Brooklyn address for env variables → 763 Park Pl #1R, Brooklyn, NY 11216
+- [x] Confirm fulfillment fee structure → Flat fee + percentage per order, captured at purchase time
+- [x] Confirm The Now is ready for beta testing → Ready to go ASAP
+- [x] Decide: How does Barely get notified of orders to fulfill? → Barely team gets workspace access, uses order filtering
 
 ## Technical Considerations
 
-High-level only:
-- Fits within existing React Query / tRPC patterns
-- Extends current checkout form's side effect model
-- New requirement: Initial cart state with null shipping, client-triggered calculation
+*High-level only - implementation details in later phases*
 
-## Migration Path
+- Shipping calculation happens at checkout - need to determine fulfillment responsibility before calling shipping endpoint
+- `fulfilledBy` should be immutable once order is created (based on address at time of purchase)
+- Consider: What if customer changes address after order? (Probably: don't allow, or recalculate fulfillment)
+- Env variables for Barely address keep sensitive data out of repo
 
-### From Existing Solutions
-- No user migration needed - behavior change is invisible
-- Existing carts with shipping amounts continue to work
-- New carts get shipping calculated post-load
+## Operational Considerations
 
-### Deprecation Considerations
-- Could eventually combine with shipping rate caching
-- Coexists with future BrandKit optimizations
+### Barely Fulfillment Operations
+- Barely team gets workspace access to fulfillment-enabled workspaces
+- Use "Barely Fulfillment" filter to see orders to fulfill
+- Mark orders as shipped using standard order fulfillment flow
+- Returns/support handled via existing support email channel
+
+### Client Onboarding
+- Artist requests Barely fulfillment
+- Barely team verifies product is stocked in Brooklyn
+- Barely team sets `barelyFulfillmentEligible = true` and configures fee structure
+- Artist configures fulfillment mode in workspace settings
 
 ## Future Possibilities
 
-### Based on Historical Patterns
-- If successful, could enable: pre-fetching rates based on geo before checkout
-- Watch for: scope creep into full caching layer
-- Natural evolution toward: edge-computed shipping estimates
+### Natural Extensions (Post-MVP)
+- Multiple Barely fulfillment locations (EU warehouse)
+- Per-product fulfillment assignment
+- Inventory sync and stock alerts
+- Barely-specific fulfillment dashboard
+- Fulfillment fee reporting/analytics
+
+### Watch For (Scope Creep)
+- Complex inventory management before validating basic fulfillment
+- Per-SKU fulfillment routing before proving demand
+- Real-time stock sync before manual process is painful

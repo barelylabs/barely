@@ -78,8 +78,12 @@ export function ContextSidebar({ productId }: ContextSidebarProps) {
 
 	const renderRoute = (route: ProductRoute, depth = 0) => {
 		const fullPath = `/${handle}${route.path}`;
-		const isActive = pathname === fullPath || pathname.startsWith(fullPath + '/');
 		const hasChildren = route.children && route.children.length > 0;
+		// Only use startsWith for parent routes with children; use exact match for leaf routes
+		const isActive =
+			hasChildren ?
+				pathname === fullPath || pathname.startsWith(fullPath + '/')
+			:	pathname === fullPath;
 
 		// Check if this route group is currently active (for hideChildrenWhenNotActive)
 		const isGroupActive =
@@ -190,12 +194,12 @@ export function ContextSidebar({ productId }: ContextSidebarProps) {
 					:	<div className='border-b p-4'>
 							<div className='flex items-center gap-2.5'>
 								{/* {ProductIcon && <ProductIcon className='h-5 w-5 text-neutral-700' />} */}
-								<Text variant='md/semibold' className='text-neutral-900'>
+								<Text variant='md/semibold' className='text-foreground'>
 									{product.name}
 								</Text>
 							</div>
 							{product.description && (
-								<Text variant='xs/normal' className='mt-1.5 text-neutral-500'>
+								<Text variant='xs/normal' className='mt-1.5 text-muted-foreground'>
 									{product.description}
 								</Text>
 							)}

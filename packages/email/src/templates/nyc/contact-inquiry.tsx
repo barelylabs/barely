@@ -5,6 +5,7 @@ import {
 	Head,
 	Heading,
 	Html,
+	Link,
 	Preview,
 	Section,
 	Text,
@@ -18,7 +19,26 @@ export interface ContactInquiryEmailProps {
 	artistName?: string;
 	monthlyListeners?: string;
 	service?: string;
+	stanAddon?: boolean;
 	message: string;
+	spotifyTrackUrl?: string;
+	instagramHandle?: string;
+	budgetRange?: string;
+}
+
+// Helper to format service interest with Stan addon
+function formatServiceInterest(service?: string, stanAddon?: boolean): string {
+	const serviceNames: Record<string, string> = {
+		bedroom: 'Bedroom+',
+		rising: 'Rising+',
+		breakout: 'Breakout+',
+		stan: 'Stan (Standalone)',
+	};
+	const name = serviceNames[service ?? ''] ?? 'General Inquiry';
+	if (stanAddon && (service === 'bedroom' || service === 'rising')) {
+		return `${name} + Stan add-on`;
+	}
+	return name;
 }
 
 export function ContactInquiryEmail({
@@ -27,9 +47,20 @@ export function ContactInquiryEmail({
 	artistName,
 	monthlyListeners,
 	service,
+	stanAddon,
 	message,
+	spotifyTrackUrl,
+	instagramHandle,
+	budgetRange,
 }: ContactInquiryEmailProps) {
-	const previewText = `New contact inquiry from ${name}${service ? ` - ${service.charAt(0).toUpperCase() + service.slice(1)}+ Service` : ''}`;
+	const serviceDisplay = formatServiceInterest(service, stanAddon);
+	const previewText = `New contact inquiry from ${name} - ${serviceDisplay}`;
+
+	// Process Instagram handle for URL
+	const instagramUsername =
+		instagramHandle?.startsWith('@') ? instagramHandle.slice(1) : instagramHandle;
+	const instagramUrl =
+		instagramUsername ? `https://instagram.com/${instagramUsername}` : '';
 
 	return (
 		<Html>
@@ -43,10 +74,7 @@ export function ContactInquiryEmail({
 
 					<Section style={{ marginBottom: '24px' }}>
 						<Text style={styles.resetText}>
-							<strong>Service Interest:</strong>{' '}
-							{service ?
-								`${service.charAt(0).toUpperCase() + service.slice(1)}+`
-							:	'General Inquiry'}
+							<strong>Service Interest:</strong> {serviceDisplay}
 						</Text>
 					</Section>
 
@@ -71,6 +99,27 @@ export function ContactInquiryEmail({
 						{monthlyListeners && (
 							<Text style={styles.resetText}>
 								<strong>Monthly Listeners:</strong> {monthlyListeners}
+							</Text>
+						)}
+						{instagramHandle && (
+							<Text style={styles.resetText}>
+								<strong>Instagram:</strong>{' '}
+								<Link href={instagramUrl} style={{ color: '#E1306C' }}>
+									{instagramHandle}
+								</Link>
+							</Text>
+						)}
+						{spotifyTrackUrl && (
+							<Text style={styles.resetText}>
+								<strong>Spotify Track:</strong>{' '}
+								<Link href={spotifyTrackUrl} style={{ color: '#1DB954' }}>
+									{spotifyTrackUrl}
+								</Link>
+							</Text>
+						)}
+						{budgetRange && (
+							<Text style={styles.resetText}>
+								<strong>Budget Range:</strong> {budgetRange}
 							</Text>
 						)}
 					</Section>
@@ -108,8 +157,12 @@ ContactInquiryEmail.PreviewProps = {
 	artistName: 'The Example Band',
 	monthlyListeners: '5,000',
 	service: 'rising',
+	stanAddon: true,
 	message:
 		"I'm interested in learning more about your Rising+ service. My band has been growing steadily and we're ready to take things to the next level with professional campaign management.",
+	spotifyTrackUrl: 'https://open.spotify.com/track/1234567890abcdefghij',
+	instagramHandle: '@theexampleband',
+	budgetRange: '$1k-2.5k',
 } as ContactInquiryEmailProps;
 
 export default ContactInquiryEmail;

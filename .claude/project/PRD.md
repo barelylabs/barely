@@ -1,274 +1,357 @@
-# Product Requirements Document: Deferred Shipping Rate Calculation
+# Product Requirements Document: Barely Fulfillment Partner
 
 ## Document Info
 
 | Field | Value |
 |-------|-------|
-| Feature Name | Deferred Shipping Rate Calculation |
-| Author | Product Team |
-| Created | 2026-02-12 |
-| Status | Ready for Implementation |
-| Priority | P0 - Critical |
+| Feature Name | Barely Fulfillment Partner |
+| Status | Draft |
+| Owner | Adam Barito |
+| Created | 2026-02-11 |
+| Last Updated | 2026-02-11 |
 
 ---
 
 ## Executive Summary
 
-Cart checkout pages take up to 5 seconds to first paint because shipping rate calculations (ShipStation API, 500-2000ms) happen during cart creation, blocking the entire page from rendering. This feature defers shipping rate calculation to a client-side side effect triggered after page load, reducing Time To First Paint from 5 seconds to under 2 seconds while maintaining full functionality.
+Enable artists to designate Barely as their fulfillment partner for US orders (or all orders), allowing them to sell physical products internationally from a single workspace with competitive shipping rates. This feature eliminates the need for duplicate workspaces, multiple Stripe accounts, and fragmented ad campaigns when selling to both domestic and US markets.
 
-**Business Impact**:
-- Reduce checkout abandonment caused by slow page loads
-- Increase conversion rates from the same traffic
-- Maintain shipping accuracy (calculation logic unchanged)
+**Business Impact:**
+- Enables ~$150k+ in additional agency revenue via fulfillment fees
+- Unblocks 1 UK client (The Now) ready to expand to US market
+- Enables onboarding of 3 US clients contingent on fulfillment solution
+- Supports agency goal of $1M GMV through Barely cart in 2026
 
 ---
 
 ## Problem Statement
 
-### Current Situation
-- Checkout page takes up to 5 seconds to first paint
-- Shipping rate calculation (ShipStation API) is called during cart creation
-- Cart creation must complete before page prefetch returns
-- Page prefetch polls for up to 12.7 seconds waiting for cart to exist
-- The entire checkout form is blocked while shipping calculates
+### The Problem
 
-### Impact
-- **Revenue**: Every extra second of load time increases abandonment. Industry standard: 3+ seconds loses 40%+ of mobile users
-- **User Experience**: Fans stare at loading screen, may abandon before seeing checkout form
-- **Trust**: Slow checkout signals unprofessionalism, undermines purchase confidence
+Artists selling physical products internationally face a choice: expensive cross-border shipping that kills ad ROI, or the operational nightmare of managing duplicate workspaces, Stripe accounts, and ad campaigns per region.
 
-### Evidence
-- Code investigation confirms ShipStation API call in `createMainCartFromFunnel()` (cart.fns.ts:334-372)
-- Page prefetch waits for cart to exist (cart.route.ts:205-226)
-- Cart doesn't exist until shipping calculation completes
-- Existing `isFetchingRates` UI state already handles loading - proves shipping can be async
+### Who It Affects
+
+1. **UK/EU artists** wanting to sell to US customers but blocked by:
+   - Prohibitive international shipping costs ($15-25+ per order from UK to US)
+   - Cart abandonment when customers see shipping at checkout
+   - Unprofitable paid acquisition due to shipping impact on unit economics
+
+2. **US artists** who want to sell physical products but:
+   - Don't want to handle fulfillment themselves
+   - Won't consider physical sales without a fulfillment partner
+   - Need a turnkey solution integrated with their existing storefront
+
+### Current Workarounds
+
+| Workaround | Pain Points |
+|------------|-------------|
+| Ship from home country | Expensive, slow, poor customer experience, kills ad ROI |
+| Duplicate workspaces | 2x products, 2x landing pages, 2x Stripe accounts, split analytics, complex ad targeting |
+| Avoid international sales | Leaves money on the table, limits growth potential |
+
+### Evidence of Need
+
+- 1 UK client (The Now) has paid for product stocking in Brooklyn and is ready to launch
+- 3 US clients will only sign if fulfillment solution is available
+- Client has explicitly stated preference for single-workspace solution over duplicates
+- Pricing validated at $3-4 per order (willing to pay for convenience)
 
 ---
 
 ## Goals & Success Metrics
 
-### Primary Goals
+### Goals
 
-| Goal | Success Metric | Target |
-|------|----------------|--------|
-| Reduce Time To First Paint | TTFP on checkout page | < 2 seconds (from 5s) |
-| Maintain UX quality | Shipping visible before submit | 100% of checkouts |
-| No functionality regression | Checkout completion rate | Equal or better |
+1. **Enable international expansion** - UK/EU artists can profitably sell to US customers
+2. **Simplify operations** - Single workspace for all markets
+3. **Generate fulfillment revenue** - Capture fees on Barely-fulfilled orders
+4. **Increase platform stickiness** - Active fulfillment relationships reduce churn risk
+
+### Success Metrics
+
+| Metric | Target | Measurement |
+|--------|--------|-------------|
+| Beta client live | The Now processing split-fulfillment orders | Within 2 weeks of launch |
+| US client onboarding | 3 new clients using Barely fulfillment | Within 30 days of launch |
+| Setup time | Artists enable fulfillment after approval | < 2 minutes |
+| Shipping accuracy | Correct origin used for shipping calculation | 100% of orders |
+| Order routing | Orders correctly tagged with fulfillment responsibility | 100% of orders |
+| Support tickets | No increase in shipping-related confusion tickets | Baseline or below |
 
 ### Non-Goals
-- Changing shipping rate calculation logic
-- Adding shipping rate caching
-- Modifying the checkout UI
-- Addressing other performance bottlenecks (BrandKit, etc.)
 
----
-
-## User Segments & Jobs to Be Done
-
-### Segment 1: Fans/Customers
-**Primary Jobs:**
-- Complete purchase quickly without friction
-- See the checkout form immediately when clicking "checkout"
-- Know the total including shipping before submitting payment
-
-### Segment 2: Artists/Creators (Indirect)
-**Primary Jobs:**
-- Maximize conversion rates from traffic
-- Earn revenue from fans who want to buy
-- Present a professional checkout experience
-
----
-
-## Requirements
-
-### Functional Requirements
-
-#### FR-1: Remove Shipping Calculation from Cart Creation
-
-**Description**: The cart creation flow should no longer call ShipStation API. Cart records should be created with null/undefined shipping amounts.
-
-**Current Flow:**
-1. User hits checkout URL
-2. Middleware creates cart via `/api/cart/create`
-3. `createMainCartFromFunnel()` calls `getProductsShippingRateEstimate()` (BLOCKS 500-2000ms)
-4. Cart record saved with shipping amounts
-5. Page prefetch polls for cart to exist
-6. Checkout form renders
-
-**New Flow:**
-1. User hits checkout URL
-2. Middleware creates cart via `/api/cart/create`
-3. `createMainCartFromFunnel()` skips shipping calculation
-4. Cart record saved with null shipping amounts
-5. Page prefetch returns immediately (cart exists)
-6. Checkout form renders (TTFP achieved)
-7. Client-side triggers shipping calculation (background)
-8. Shipping amounts populated and displayed
-
-**Acceptance Criteria:**
-- [ ] `createMainCartFromFunnel()` does not call `getProductsShippingRateEstimate()`
-- [ ] Cart records can be created with null shipping amounts
-- [ ] No errors when cart has null shipping initially
-
----
-
-#### FR-2: Client-Side Shipping Calculation Trigger
-
-**Description**: After checkout page renders, trigger shipping rate calculation as a side effect.
-
-**Trigger Point**: Checkout form mount (useEffect or equivalent)
-
-**Behavior:**
-1. On checkout form mount, check if shipping amounts are null
-2. If null and geo data available (from middleware), trigger shipping calculation
-3. Use existing `isFetchingRates` state to show loading indicator
-4. Update cart with shipping amounts when calculation completes
-
-**Acceptance Criteria:**
-- [ ] Shipping calculation triggers after first paint
-- [ ] Uses existing `isFetchingRates` Jotai atom for loading state
-- [ ] OrderSummary shows skeleton/loading while shipping calculates
-- [ ] Submit button remains disabled until shipping is calculated
-- [ ] Shipping amounts are correct once calculated
-
----
-
-#### FR-3: Handle Initial Null Shipping State
-
-**Description**: The checkout UI must gracefully handle carts that don't yet have shipping amounts.
-
-**OrderSummary Behavior:**
-- Show product price immediately
-- Show shipping line with loading indicator (existing skeleton)
-- Show total as "Calculating..." or similar until shipping ready
-- Update all amounts once shipping is calculated
-
-**Form Behavior:**
-- Submit button disabled while `isFetchingRates = true`
-- No error messages for null shipping (expected state)
-
-**Acceptance Criteria:**
-- [ ] OrderSummary renders without shipping amount
-- [ ] Loading indicator visible for shipping line
-- [ ] Total updates correctly when shipping is calculated
-- [ ] No console errors or UI glitches with null shipping
-
----
-
-#### FR-4: Error Handling for Failed Shipping Calculation
-
-**Description**: If shipping calculation fails post-load, show clear feedback and recovery path.
-
-**Error Scenarios:**
-- ShipStation API timeout
-- Invalid address/geo data
-- Network failure
-
-**Error Handling:**
-- Show error message in OrderSummary shipping line
-- Provide "Retry" option
-- Allow user to change address to trigger recalculation
-- Do not block form entirely - user can fix address
-
-**Acceptance Criteria:**
-- [ ] Failed shipping calculation shows clear error message
-- [ ] User can retry or update address to recalculate
-- [ ] Cart is not left in broken state
-- [ ] User is not stuck without recourse
-
----
-
-### Non-Functional Requirements
-
-#### NFR-1: Performance
-- Time To First Paint < 2 seconds (from 5 seconds)
-- Shipping calculation completes within 3 seconds of page load
-- No increase in total checkout time
-
-#### NFR-2: Reliability
-- Shipping calculation must eventually complete successfully
-- Existing error handling for ShipStation API still applies
-- Cart state remains consistent
-
-#### NFR-3: Compatibility
-- Works with existing address change flow
-- Works with bump products (main + bump shipping)
-- Works with all geo data sources (Vercel headers)
+- Building inventory management system
+- Creating a separate Barely fulfillment dashboard
+- Supporting multiple Barely fulfillment locations (EU warehouse)
+- Per-product fulfillment assignment
+- In-app returns handling
 
 ---
 
 ## User Stories
 
-### US-1: See Checkout Form Immediately
-**As a** fan ready to buy merchandise
-**I want to** see the checkout form right away
-**So that** I can start entering my information without waiting
+### Epic: Enable Barely as Fulfillment Partner
+
+#### US-1: Enable Fulfillment Mode (Artist)
+> As an **artist with Barely fulfillment eligibility**, I want to **choose my fulfillment mode** so that **I can configure how my orders are handled**.
 
 **Acceptance Criteria:**
-- Given I click "checkout" on a product page
-- When the checkout page loads
-- Then I see the checkout form within 2 seconds
-- And I can start entering my information immediately
+- [ ] Fulfillment settings only visible when `barelyFulfillmentEligible = true`
+- [ ] Can select from three modes:
+  - "I fulfill all orders" (default)
+  - "Barely fulfills US orders, I fulfill the rest"
+  - "Barely fulfills all orders"
+- [ ] Setting persists and takes effect immediately
+- [ ] Can change setting at any time
 
 ---
 
-### US-2: See Shipping Before Submitting
-**As a** fan completing checkout
-**I want to** see the shipping cost before I submit payment
-**So that** I know the total I'll be charged
+#### US-2: See Competitive US Shipping (Customer)
+> As a **US customer** buying from a UK artist using Barely fulfillment, I want to **see shipping rates calculated from a US address** so that **I don't abandon my cart due to high international shipping**.
 
 **Acceptance Criteria:**
-- Given I'm on the checkout page
-- When shipping is calculating
-- Then I see a loading indicator for shipping
-- And the submit button is disabled
-- When shipping calculation completes
-- Then I see the shipping cost
-- And I see the correct total
-- And the submit button is enabled
+- [ ] Shipping calculated from Barely's Brooklyn address for US customers when Barely fulfillment is enabled for US
+- [ ] Shipping rates are competitive with domestic US retailers
+- [ ] Customer sees no indication of international origin (transparent experience)
 
 ---
 
-### US-3: Recover from Shipping Errors
-**As a** fan with an unusual address
-**I want to** understand why shipping can't be calculated
-**So that** I can fix the issue and complete my purchase
+#### US-3: Filter Orders by Fulfillment Responsibility (Artist)
+> As an **artist with split fulfillment**, I want to **filter my orders by who fulfills them** so that **I know exactly which orders I need to ship**.
 
 **Acceptance Criteria:**
-- Given shipping calculation fails
-- When I view the checkout page
-- Then I see a clear error message
-- And I can retry or update my address
-- When I fix the issue
-- Then shipping recalculates successfully
+- [ ] Orders view has filter: "All Orders" | "My Fulfillment" | "Barely Fulfillment"
+- [ ] Default view is "All Orders"
+- [ ] Filter accurately reflects `fulfilledBy` field on each order
+- [ ] Filter state persists during session
 
 ---
 
-## Out of Scope
+#### US-4: Automatic Fulfillment Assignment (System)
+> As the **system**, I want to **automatically assign fulfillment responsibility when an order is created** so that **there's no ambiguity about who ships each order**.
 
-The following are explicitly **not** included in this feature:
+**Acceptance Criteria:**
+- [ ] Order tagged with `fulfilledBy: "artist"` or `fulfilledBy: "barely"` at creation
+- [ ] Assignment based on:
+  - Customer's shipping address (US vs non-US)
+  - Workspace's fulfillment mode setting
+- [ ] Assignment is immutable after order creation
+- [ ] Assignment determines which fulfillment fee (if any) is captured
 
-- Shipping rate caching or memoization
-- Changes to the ShipStation API integration logic
-- Changes to shipping rate markup calculations
-- BrandKit caching or other performance optimizations
-- Edge function deployment for shipping
-- Pre-fetching shipping based on IP geo before checkout
-- Changes to the checkout form UI design
-- Changes to the address change flow
+---
+
+#### US-5: Capture Fulfillment Fees (System)
+> As **Barely**, I want to **automatically capture fulfillment fees on Barely-fulfilled orders** so that **revenue is collected without manual intervention**.
+
+**Acceptance Criteria:**
+- [ ] Fee calculated as: flat fee + (order subtotal × percentage)
+- [ ] Fee only applied when `fulfilledBy: "barely"`
+- [ ] Fee deducted from artist payout alongside cart and shipping fees
+- [ ] Fee amount stored on order record for reference
+
+---
+
+#### US-6: Access Fulfillment-Enabled Workspaces (Barely Team)
+> As a **Barely team member**, I want to **access workspaces where Barely fulfillment is enabled** so that **I can fulfill orders assigned to Barely**.
+
+**Acceptance Criteria:**
+- [ ] Barely team has workspace access (existing user access mechanism)
+- [ ] Can use "Barely Fulfillment" filter to see orders to ship
+- [ ] Can mark orders as shipped using standard fulfillment flow
+- [ ] Can view order details including shipping address
+
+---
+
+## Functional Requirements
+
+### FR-1: Workspace Eligibility Flag
+
+| ID | Requirement |
+|----|-------------|
+| FR-1.1 | Workspace model includes `barelyFulfillmentEligible` boolean field |
+| FR-1.2 | Field defaults to `false` for all existing and new workspaces |
+| FR-1.3 | Field can only be set via backend/database (not exposed in UI) |
+| FR-1.4 | When `false`, no fulfillment settings are visible to artist |
+
+### FR-2: Fulfillment Mode Setting
+
+| ID | Requirement |
+|----|-------------|
+| FR-2.1 | Workspace model includes `barelyFulfillmentMode` enum field |
+| FR-2.2 | Enum values: `artist_all`, `barely_us`, `barely_worldwide` |
+| FR-2.3 | Default value: `artist_all` |
+| FR-2.4 | Setting exposed in workspace settings when eligible |
+| FR-2.5 | Setting takes effect immediately upon save |
+
+### FR-3: Fulfillment Fee Configuration
+
+| ID | Requirement |
+|----|-------------|
+| FR-3.1 | Workspace model includes `barelyFulfillmentFlatFeePerOrder` decimal field |
+| FR-3.2 | Workspace model includes `barelyFulfillmentPercentageFeePerOrder` decimal field |
+| FR-3.3 | Fields configured via backend when eligibility is granted |
+| FR-3.4 | Fee calculation: `flatFee + (orderSubtotal × percentageFee)` |
+
+### FR-4: Dynamic Shipping Calculation
+
+| ID | Requirement |
+|----|-------------|
+| FR-4.1 | At checkout, system determines fulfillment responsibility before calculating shipping |
+| FR-4.2 | If US customer AND mode is `barely_us` or `barely_worldwide` → use Barely address |
+| FR-4.3 | If non-US customer AND mode is `barely_worldwide` → use Barely address |
+| FR-4.4 | Otherwise → use artist's `shipFrom` address (existing behavior) |
+| FR-4.5 | Barely address read from environment variables |
+
+### FR-5: Order Fulfillment Assignment
+
+| ID | Requirement |
+|----|-------------|
+| FR-5.1 | Order model includes `fulfilledBy` enum field (`artist` \| `barely`) |
+| FR-5.2 | Order model includes `barelyFulfillmentFee` decimal field |
+| FR-5.3 | `fulfilledBy` set at order creation based on shipping logic |
+| FR-5.4 | `barelyFulfillmentFee` calculated and stored at order creation |
+| FR-5.5 | Both fields are immutable after order creation |
+
+### FR-6: Order Filtering
+
+| ID | Requirement |
+|----|-------------|
+| FR-6.1 | Orders view includes fulfillment filter dropdown |
+| FR-6.2 | Filter options: "All Orders", "My Fulfillment", "Barely Fulfillment" |
+| FR-6.3 | "My Fulfillment" shows orders where `fulfilledBy = artist` |
+| FR-6.4 | "Barely Fulfillment" shows orders where `fulfilledBy = barely` |
+| FR-6.5 | Default filter: "All Orders" |
+
+---
+
+## User Experience
+
+### UX-1: Fulfillment Settings (Workspace Settings)
+
+**Location:** Workspace Settings > Fulfillment (new section)
+
+**Visibility:** Only when `barelyFulfillmentEligible = true`
+
+**Content:**
+```
+Fulfillment Partner
+-------------------
+Choose how your orders are fulfilled:
+
+○ I fulfill all orders (current default)
+  You handle shipping for all orders worldwide.
+
+○ Barely fulfills US orders, I fulfill the rest
+  Orders shipping to US addresses are fulfilled by Barely.
+  You handle all other orders.
+
+○ Barely fulfills all orders
+  Barely handles shipping for all orders worldwide.
+
+[Save Changes]
+
+Note: Fulfillment fees apply to Barely-fulfilled orders.
+Your current rates: $X.XX + Y% per order
+```
+
+### UX-2: Order Filter (Orders View)
+
+**Location:** Orders page, above order list
+
+**Implementation:** Dropdown or segmented control
+
+```
+Filter by: [All Orders ▼]
+           ├─ All Orders
+           ├─ My Fulfillment
+           └─ Barely Fulfillment
+```
+
+### UX-3: Order Detail (Order Page)
+
+**Addition:** Show fulfillment assignment on order detail
+
+```
+Fulfillment: Barely  (or "You")
+Fulfillment Fee: $3.50  (only if Barely)
+```
+
+---
+
+## Scope
+
+### In Scope (MVP)
+
+| Component | Description |
+|-----------|-------------|
+| Eligibility flag | Backend-set `barelyFulfillmentEligible` on workspace |
+| Fulfillment mode | Artist-configurable setting with 3 options |
+| Fee configuration | Backend-set flat + percentage fees on workspace |
+| Shipping routing | Dynamic origin selection based on destination + mode |
+| Order tagging | `fulfilledBy` field set at order creation |
+| Fee capture | Fulfillment fee calculated and deducted from payout |
+| Order filtering | Filter orders view by fulfillment responsibility |
+
+### Out of Scope (MVP)
+
+| Component | Reason | Future Consideration |
+|-----------|--------|---------------------|
+| Inventory management | Handled operationally | Post-MVP if volume justifies |
+| Per-product fulfillment | Adds complexity | Post-MVP based on demand |
+| Barely dashboard | Reuse existing workspace access | Post-MVP if scale requires |
+| Returns handling | Handled via support email | Post-MVP based on volume |
+| Multiple Barely locations | Start with Brooklyn only | Post-MVP for EU expansion |
+| Approval workflows | Simple flag sufficient | Post-MVP if abuse occurs |
+| Stock alerts | Manual coordination for now | Post-MVP if issues arise |
+
+---
+
+## Configuration
+
+### Environment Variables
+
+| Variable | Value | Purpose |
+|----------|-------|---------|
+| `BARELY_FULFILLMENT_ADDRESS_LINE1` | `763 Park Pl #1R` | Street address |
+| `BARELY_FULFILLMENT_ADDRESS_CITY` | `Brooklyn` | City |
+| `BARELY_FULFILLMENT_ADDRESS_STATE` | `NY` | State |
+| `BARELY_FULFILLMENT_ADDRESS_ZIP` | `11216` | ZIP code |
+| `BARELY_FULFILLMENT_ADDRESS_COUNTRY` | `US` | Country |
+
+### Database Schema Additions
+
+**Workspace:**
+- `barelyFulfillmentEligible: Boolean (default: false)`
+- `barelyFulfillmentMode: Enum ['artist_all', 'barely_us', 'barely_worldwide'] (default: 'artist_all')`
+- `barelyFulfillmentFlatFeePerOrder: Decimal (nullable)`
+- `barelyFulfillmentPercentageFeePerOrder: Decimal (nullable)`
+
+**Order:**
+- `fulfilledBy: Enum ['artist', 'barely'] (default: 'artist')`
+- `barelyFulfillmentFee: Decimal (default: 0)`
 
 ---
 
 ## Dependencies
 
+### Technical Dependencies
+
 | Dependency | Status | Notes |
 |------------|--------|-------|
-| `isFetchingRates` Jotai atom | ✅ Exists | checkout-form.tsx |
-| OrderSummary skeleton loader | ✅ Exists | Shows loading state |
-| Submit button disabled state | ✅ Exists | Disabled while fetching rates |
-| `updateShippingAddressFromCheckout` mutation | ✅ Exists | Has Promise.all pattern |
-| ShipEngine integration | ✅ Exists | No changes needed |
-| Cart schema | ⚠️ TBD | Verify shipping fields allow null |
+| US shipping endpoint | Exists | Route Barely-fulfilled orders here |
+| UK shipping endpoint | Exists | Continue using for artist-fulfilled non-US |
+| Order management | Exists | Add field and filter |
+| Workspace settings | Exists | Add new section |
+| Payout calculation | Exists | Add new fee deduction |
+
+### External Dependencies
+
+| Dependency | Owner | Notes |
+|------------|-------|-------|
+| Product stocked at Brooklyn | Barely team | The Now's products already stocked |
+| Workspace access for Barely team | Barely team | Standard user access |
+| Fee structure confirmation | Adam | $3-4/order validated with clients |
 
 ---
 
@@ -276,60 +359,55 @@ The following are explicitly **not** included in this feature:
 
 | Risk | Likelihood | Impact | Mitigation |
 |------|------------|--------|------------|
-| Shipping fails more often post-load | Low | Medium | Same ShipStation call, just different timing |
-| User submits before shipping loads | N/A | N/A | Submit button disabled until complete |
-| Cart schema requires shipping | Low | High | Verify schema allows null before implementation |
-| Race condition with address changes | Low | Medium | Existing debounce handles this |
+| Shipping calculated incorrectly | Medium | High | Thorough testing with all mode/destination combinations |
+| Fee deduction errors | Low | High | Validate fee calculation logic; include in order record for audit |
+| Order assigned to wrong fulfiller | Low | High | Immutable assignment at creation; clear logic documentation |
+| Barely runs out of stock | Medium | Medium | Manual coordination; handled operationally outside app |
+| Artist confusion about modes | Low | Low | Clear copy in settings; support documentation |
 
 ---
 
 ## Launch Plan
 
-### Phase 1: Schema Verification
-- Confirm cart schema allows null shipping amounts
-- Identify any validation that requires shipping
+### Phase 1: Beta (The Now)
 
-### Phase 2: Cart Creation Changes
-- Remove `getProductsShippingRateEstimate()` calls from `createMainCartFromFunnel()`
-- Cart creates immediately without shipping
+1. Deploy feature to production (behind eligibility flag)
+2. Enable eligibility for The Now's workspace
+3. Configure fee structure
+4. The Now enables "Barely fulfills US orders" mode
+5. Monitor first 10-20 orders for correctness
+6. Gather feedback and iterate if needed
 
-### Phase 3: Client-Side Trigger
-- Add useEffect or similar to trigger shipping calculation on mount
-- Use existing mutation or create lightweight variant
-- Integrate with existing `isFetchingRates` state
+### Phase 2: US Client Onboarding
 
-### Phase 4: Testing & Validation
-- Measure TTFP before and after
-- Test various geo scenarios
-- Test error handling
+1. Onboard 3 US clients with "Barely fulfills all orders" mode
+2. Configure appropriate fee structures
+3. Monitor order flow and fulfillment process
+4. Document any operational improvements needed
 
-### Phase 5: Deploy
-- Deploy to production
-- Monitor checkout completion rates
-- Monitor ShipStation API success rates
+### Phase 3: General Availability
+
+1. Establish onboarding process for new clients
+2. Document eligibility criteria
+3. Create support documentation
+4. Consider self-service request flow (future)
 
 ---
 
-## Appendix
+## Open Questions
 
-### A: Key Files Reference
+| Question | Status | Answer |
+|----------|--------|--------|
+| ~~Barely's Brooklyn address~~ | Resolved | 763 Park Pl #1R, Brooklyn, NY 11216 |
+| ~~Fee collection mechanism~~ | Resolved | Flat + percentage, captured at order time |
+| ~~How Barely sees orders~~ | Resolved | Workspace access + order filtering |
+| ~~The Now readiness~~ | Resolved | Ready to go ASAP |
+| Customer address changes post-order | Open | Recommend: disallow or require manual review |
 
-| File | Location | Role |
-|------|----------|------|
-| Cart creation | `packages/lib/src/functions/cart.fns.ts:334-372` | Remove shipping call |
-| Page prefetch | `apps/cart/src/app/[mode]/[handle]/[key]/checkout/page.tsx:52-53` | Benefits from faster cart |
-| Polling wait | `packages/lib/src/trpc/routes/cart.route.ts:205-226` | Resolves faster |
-| Loading state | `apps/cart/src/app/[mode]/[handle]/[key]/checkout/checkout-form.tsx` | `isFetchingRates` atom |
-| Shipping API | `packages/lib/src/integrations/shipping/shipengine.endpts.ts:289-317` | No changes |
+---
 
-### B: Existing Parallel Pattern
+## Related Documents
 
-The correct `Promise.all()` pattern for shipping calculation already exists in `updateShippingAddressFromCheckout` (cart.route.ts:482-498). This can be reused or referenced for the client-side trigger.
-
-### C: Performance Baseline
-
-| Metric | Current | Target |
-|--------|---------|--------|
-| Time To First Paint | ~5 seconds | < 2 seconds |
-| Total checkout time | ~5 seconds + user input | ~2 seconds + shipping calc + user input |
-| Perceived speed | Slow, frustrating | Fast, professional |
+- [[feature|Feature: Barely Fulfillment Partner]]
+- [[JTBD|Jobs to be Done: Barely Fulfillment Partner]]
+- [[plan|Technical Implementation Plan]] (next step)

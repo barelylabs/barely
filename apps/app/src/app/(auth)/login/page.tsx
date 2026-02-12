@@ -1,4 +1,4 @@
-import type { AppVariant } from '@barely/utils';
+import type { App } from '@barely/const';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getAbsoluteUrl, getCurrentAppConfig } from '@barely/utils';
@@ -26,7 +26,7 @@ const SignInPage = async ({
 
 	const appConfig = getCurrentAppConfig();
 
-	let backApp: AppVariant;
+	let backApp: App;
 	switch (appConfig.name) {
 		case 'app':
 			backApp = 'www';

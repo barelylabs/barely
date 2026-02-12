@@ -1,13 +1,11 @@
 import { redirect } from 'next/navigation';
 import { checkIfWorkspaceHasPendingInviteForUser } from '@barely/lib/functions/workspace.fns';
 
-import { getDefaultWorkspaceFromSession } from '@barely/auth/utils';
-
 import { DashboardLayout } from '~/app/[handle]/_components/dashboard-layout';
 import { NewWorkspaceModal } from '~/app/[handle]/_components/new-workspace-modal';
 import { WorkspaceProviders } from '~/app/[handle]/_components/workspace-providers';
 import { getSession } from '~/auth/server';
-import { HydrateClient, prefetch, primeWorkspace, trpc } from '~/trpc/server';
+import { HydrateClient, prefetch, primeWorkspace, trpc, trpcCaller } from '~/trpc/server';
 
 export default async function HandleLayout({
 	params,
@@ -20,13 +18,12 @@ export default async function HandleLayout({
 
 	if (!session) return redirect('/login');
 
-	const user = session.user;
-	const userWorkspace = user.workspaces.find(w => w.type === 'personal');
-
-	if (userWorkspace) user.avatarImageS3Key = userWorkspace.avatarImageS3Key;
+	// Fetch enriched user via tRPC (includes workspaces and profile data)
+	const user = await trpcCaller.user.me();
+	const userWorkspaces = user.workspaces;
 
 	const awaitedParams = await params;
-	const currentWorkspace = user.workspaces.find(w =>
+	const currentWorkspace = userWorkspaces.find(w =>
 		awaitedParams.handle === 'account' ?
 			w.type === 'personal'
 		:	w.handle === awaitedParams.handle,
@@ -42,7 +39,8 @@ export default async function HandleLayout({
 			return redirect('/');
 		}
 
-		const defaultWorkspace = getDefaultWorkspaceFromSession(session);
+		// Get default workspace (prefer non-personal workspace)
+		const defaultWorkspace = userWorkspaces.find(w => w.type !== 'personal') ?? null;
 
 		if (!defaultWorkspace) {
 			return redirect('/onboarding');

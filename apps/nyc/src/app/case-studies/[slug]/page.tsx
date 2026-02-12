@@ -8,6 +8,7 @@ import { H } from '@barely/ui/typography';
 
 import { AnimatedSection } from '~/components/marketing/animated-section';
 import { MarketingButton } from '~/components/marketing/button';
+import { CalComLink } from '~/components/marketing/cal-com-link';
 import { CaseStudyMetrics } from '~/components/marketing/case-study-metrics';
 import { CaseStudyTimeline } from '~/components/marketing/case-study-timeline';
 
@@ -354,9 +355,13 @@ export default async function CaseStudyPage({
 						<H size='2' className='mb-6 text-4xl md:text-5xl'>
 							Ready to Write Your Success Story?
 						</H>
-						<p className='mb-12 text-xl text-white/70'>
+						<p className='mb-4 text-xl text-white/70'>
 							Every artist&apos;s journey is unique. Let&apos;s design a strategy that
 							works for your music.
+						</p>
+						<p className='mb-12 text-base text-white/60'>
+							See results like this? Book a free 30-minute strategy call and get your
+							custom growth plan.
 						</p>
 					</AnimatedSection>
 
@@ -367,11 +372,11 @@ export default async function CaseStudyPage({
 									View Services
 								</MarketingButton>
 							</Link>
-							<Link href='/'>
+							<CalComLink>
 								<MarketingButton marketingLook='hero-secondary' size='lg'>
 									Book Free Strategy Call
 								</MarketingButton>
-							</Link>
+							</CalComLink>
 						</div>
 					</AnimatedSection>
 				</div>

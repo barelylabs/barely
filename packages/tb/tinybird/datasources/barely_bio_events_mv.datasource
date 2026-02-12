@@ -31,8 +31,43 @@ SCHEMA >
     `bio_linkIndex` Nullable(Int16),
     `bio_linkText` Nullable(String),
     `bio_linkAnimation` Nullable(String),
-    `bio_emailMarketingOptIn` Nullable(UInt8)
+    `bio_emailMarketingOptIn` Nullable(UInt8),
+    `bio_smsMarketingOptIn` Nullable(UInt8)
 
+FORWARD_QUERY >
+    SELECT
+        timestamp,
+        type,
+        workspaceId,
+        assetId,
+        city,
+        region,
+        country,
+        device,
+        browser,
+        os,
+        referer,
+        fanId,
+        sessionId,
+        sessionReferer,
+        sessionEmailTemplateId,
+        sessionEmailBroadcastId,
+        sessionLandingPageId,
+        sessionFlowActionId,
+        sessionMetaCampaignId,
+        sessionMetaAdSetId,
+        sessionMetaAdId,
+        sessionMetaPlacement,
+        linkClickDestinationHref,
+        bio_blockId,
+        bio_blockType,
+        bio_blockIndex,
+        bio_linkId,
+        bio_linkIndex,
+        bio_linkText,
+        bio_linkAnimation,
+        bio_emailMarketingOptIn,
+        defaultValueOfTypeName('Nullable(UInt8)') AS bio_smsMarketingOptIn
 
 ENGINE "MergeTree"
 ENGINE_PARTITION_KEY "toYYYYMM(timestamp)"

@@ -32,7 +32,8 @@ SQL >
       bio_linkIndex,
       bio_linkText,
       bio_linkAnimation,
-      bio_emailMarketingOptIn
+      bio_emailMarketingOptIn,
+      bio_smsMarketingOptIn
     FROM barely_events
     WHERE assetId LIKE 'bio_%'
 

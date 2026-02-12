@@ -59,8 +59,16 @@ export const cartOrderRoute = {
 	byWorkspace: workspaceProcedure
 		.input(selectWorkspaceCartOrdersSchema)
 		.query(async ({ input, ctx }) => {
-			const { showFulfilled, showCanceled, showPreorders, search, fanId, limit, cursor } =
-				input;
+			const {
+				showFulfilled,
+				showCanceled,
+				showPreorders,
+				search,
+				fanId,
+				fulfilledBy,
+				limit,
+				cursor,
+			} = input;
 
 			let searchFanIds: string[] = [];
 			console.log('[CART ORDER SEARCH DEBUG]', {
@@ -125,6 +133,7 @@ export const cartOrderRoute = {
 					eq(Carts.workspaceId, ctx.workspace.id),
 					!!fanId && eq(Carts.fanId, fanId),
 					!!searchFanIds.length && inArray(Carts.fanId, searchFanIds),
+					fulfilledBy !== 'all' && eq(Carts.fulfilledBy, fulfilledBy),
 					!!preorderProductIds.length &&
 						// sqlAnd([
 						//     notInArray(Carts.mainProductId, preorderProductIds),
@@ -481,9 +490,14 @@ export const cartOrderRoute = {
 				})
 				.where(and(eq(Carts.workspaceId, ctx.workspace.id), eq(Carts.id, input.cartId)));
 
-			// Transfer shipping fee back to connected account for manual fulfillment
+			// Transfer shipping fee back to connected account ONLY for artist fulfillment
 			// Since they're handling shipping themselves, they shouldn't pay Barely's shipping fee
-			if (cart.orderShippingAmount && cart.orderShippingAmount > 0) {
+			// For Barely fulfillment, we keep the shipping fee to cover actual shipping costs
+			if (
+				cart.fulfilledBy === 'artist' &&
+				cart.orderShippingAmount &&
+				cart.orderShippingAmount > 0
+			) {
 				const stripeConnectAccount =
 					isProduction() ?
 						cart.funnel?.workspace.stripeConnectAccountId

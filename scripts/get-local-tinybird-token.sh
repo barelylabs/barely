@@ -21,7 +21,8 @@ if ! cd packages/tb/tinybird; then
 fi
 
 # Get the admin token using tb token ls and parsing the output
-TINYBIRD_TOKEN=$(tb token ls 2>/dev/null | grep -A1 "name: admin token" | grep "token:" | awk '{print $2}')
+# Look for "workspace admin token" or any admin-like token
+TINYBIRD_TOKEN=$(tb token ls 2>/dev/null | grep -A1 "name: workspace admin token" | grep "token:" | awk '{print $2}')
 
 if [ -n "$TINYBIRD_TOKEN" ]; then
     # Navigate back to project root

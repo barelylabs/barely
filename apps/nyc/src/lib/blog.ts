@@ -15,6 +15,7 @@ export interface BlogPost {
 
 // Author avatar mapping
 const authorAvatars: Record<string, string> = {
+	'Adam Barito': '/_static/avatars/adam-barito-avatar.jpg',
 	Barely:
 		'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop',
 	'Dr. Sarah Chen':

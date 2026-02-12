@@ -229,7 +229,7 @@
 		"vaul": "^1.1.2"
 	},
 	"peerDependencies": {
-		"next": "^15.3.4",
+		"next": "catalog:",
 		"postcss": "^8.4.32"
 	},
 	"eslintConfig": {

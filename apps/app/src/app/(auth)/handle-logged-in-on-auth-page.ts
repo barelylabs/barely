@@ -1,7 +1,6 @@
 import type { SessionWorkspace } from '@barely/auth';
 import { redirect } from 'next/navigation';
-
-import { getDefaultWorkspaceFromSession } from '@barely/auth/utils';
+import { getUserWorkspacesById } from '@barely/lib/functions/workspace.fns';
 
 import { getSession } from '~/auth/server';
 
@@ -14,16 +13,14 @@ export async function handleLoggedInOnAuthPage(props?: { callbackUrl?: string })
 		return redirect(props.callbackUrl);
 	}
 
-	if (session) defaultWorkspace = getDefaultWorkspaceFromSession(session);
+	if (session?.user) {
+		// Fetch workspaces separately (no longer in session)
+		const { workspaces } = await getUserWorkspacesById(session.user.id);
+		// Get default workspace (prefer non-personal workspace)
+		defaultWorkspace = workspaces.find(w => w.type !== 'personal') ?? null;
+	}
+
 	if (defaultWorkspace) return redirect(`/${defaultWorkspace.handle}/fm`);
-	// try {
-	// 	console.log('defaultWorkspace.handle', defaultWorkspace?.handle);
-	// 	console.log('defaultWorkspace', defaultWorkspace);
-	// } catch (e) {
-	// 	console.log('defaultWorkspace error', defaultWorkspace);
-	// 	console.log('defaultWorkspace error', e);
-	// 	return;
-	// }
 
 	// Don't redirect to root if no session - this prevents redirect loops
 	return;

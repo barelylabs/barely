@@ -39,9 +39,18 @@ const rateLimitSchema = z
 export const libEnv = createEnv({
 	extends: [authEnv],
 	server: {
+		AIRTABLE_ACCESS_TOKEN: z.string(),
+		AIRTABLE_BASE_ID: z.string(),
+		AIRTABLE_LEADS_TABLE_ID: z.string(),
 		ANTHROPIC_API_KEY: z.string(),
 		AUTH_SECRET: z.string(),
 		AWS_S3_BUCKET_NAME: z.string(),
+		// Barely Fulfillment Address
+		BARELY_FULFILLMENT_ADDRESS_LINE1: z.string(),
+		BARELY_FULFILLMENT_ADDRESS_CITY: z.string(),
+		BARELY_FULFILLMENT_ADDRESS_STATE: z.string(),
+		BARELY_FULFILLMENT_ADDRESS_ZIP: z.string(),
+		BARELY_FULFILLMENT_ADDRESS_COUNTRY: z.string(),
 		AWS_S3_REGION: z.string(),
 		AWS_S3_ACCESS_KEY_ID: z.string(),
 		AWS_S3_SECRET_ACCESS_KEY: z.string(),
@@ -61,6 +70,8 @@ export const libEnv = createEnv({
 		LOCALHOST_IP: z.string(),
 		MAILCHIMP_CLIENT_ID: z.string(),
 		MAILCHIMP_CLIENT_SECRET: z.string(),
+		META_PIXEL_ID_NYC: z.string(),
+		META_PIXEL_ACCESS_TOKEN_NYC: z.string(), // Required for server-side Conversions API
 		META_TEST_EVENT_CODE: z.string().optional(),
 		NEXTAUTH_SECRET: z.string(),
 		OPENAI_API_KEY: z.string(),
@@ -109,6 +120,8 @@ export const libEnv = createEnv({
 		NEXT_PUBLIC_LINK_DEV_PORT: devPortSchema,
 		NEXT_PUBLIC_MANAGE_EMAIL_DEV_PORT: devPortSchema,
 		NEXT_PUBLIC_MANAGE_EMAIL_BASE_URL: z.string(),
+		NEXT_PUBLIC_NYC_BASE_URL: z.string(),
+		NEXT_PUBLIC_NYC_DEV_PORT: devPortSchema,
 		NEXT_PUBLIC_PUSHER_APP_ID: z.string(),
 		NEXT_PUBLIC_PUSHER_APP_KEY: z.string(),
 		NEXT_PUBLIC_PUSHER_APP_CLUSTER: z.string(),
@@ -132,6 +145,8 @@ export const libEnv = createEnv({
 		NEXT_PUBLIC_FM_DEV_PORT: process.env.NEXT_PUBLIC_FM_DEV_PORT,
 		NEXT_PUBLIC_MANAGE_EMAIL_BASE_URL: process.env.NEXT_PUBLIC_MANAGE_EMAIL_BASE_URL,
 		NEXT_PUBLIC_MANAGE_EMAIL_DEV_PORT: process.env.NEXT_PUBLIC_MANAGE_EMAIL_DEV_PORT,
+		NEXT_PUBLIC_NYC_BASE_URL: process.env.NEXT_PUBLIC_NYC_BASE_URL,
+		NEXT_PUBLIC_NYC_DEV_PORT: process.env.NEXT_PUBLIC_NYC_DEV_PORT,
 		NEXT_PUBLIC_PAGE_BASE_URL: process.env.NEXT_PUBLIC_PAGE_BASE_URL,
 		NEXT_PUBLIC_PAGE_DEV_PORT: process.env.NEXT_PUBLIC_PAGE_DEV_PORT,
 		NEXT_PUBLIC_PRESS_BASE_URL: process.env.NEXT_PUBLIC_PRESS_BASE_URL,
@@ -159,3 +174,17 @@ export const libEnv = createEnv({
 		process.env.npm_lifecycle_event === 'lint' ||
 		process.env.npm_lifecycle_event === 'test',
 });
+
+/**
+ * Returns the Barely fulfillment center address from environment variables.
+ * Used when Barely is fulfilling orders on behalf of an artist.
+ */
+export function getBarelyFulfillmentAddress() {
+	return {
+		line1: libEnv.BARELY_FULFILLMENT_ADDRESS_LINE1,
+		city: libEnv.BARELY_FULFILLMENT_ADDRESS_CITY,
+		state: libEnv.BARELY_FULFILLMENT_ADDRESS_STATE,
+		postalCode: libEnv.BARELY_FULFILLMENT_ADDRESS_ZIP,
+		country: libEnv.BARELY_FULFILLMENT_ADDRESS_COUNTRY,
+	};
+}

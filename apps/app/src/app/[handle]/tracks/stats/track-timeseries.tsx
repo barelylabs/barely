@@ -124,7 +124,9 @@ function SingleTrackStats({
 		.map(row => ({
 			...row,
 			date: formatTimestamp(row.timestamp ?? raise('timestamp is required')),
-		}));
+			timestamp: new Date(row.timestamp ?? raise('timestamp is required')),
+		}))
+		.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
 
 	// Calculate stats
 	const validPopularities = timeseries
@@ -195,7 +197,10 @@ function MultiTrackComparison({
 }) {
 	// Create a unified date range across all tracks and calculate max value
 	const { chartData, maxValue } = useMemo(() => {
-		const dateMap = new Map<string, { date: string; [key: string]: number | string }>();
+		const dateMap = new Map<
+			string,
+			{ date: string; timestamp: Date; [key: string]: number | string | Date }
+		>();
 		let max = 0;
 
 		// Get all unique dates
@@ -204,7 +209,7 @@ function MultiTrackComparison({
 				if (row.timestamp) {
 					const date = formatTimestamp(row.timestamp);
 					if (!dateMap.has(date)) {
-						dateMap.set(date, { date });
+						dateMap.set(date, { date, timestamp: new Date(row.timestamp) });
 					}
 				}
 			});
@@ -230,7 +235,7 @@ function MultiTrackComparison({
 		});
 
 		const sortedData = Array.from(dateMap.values()).sort(
-			(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+			(a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
 		);
 
 		// Calculate a nice rounded max value with some padding

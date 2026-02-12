@@ -1,222 +1,509 @@
-# Technical Implementation Plan: Deferred Shipping Rate Calculation
+# Technical Implementation Plan: Barely Fulfillment Partner
 
 ## Feature Summary
 
-Defer shipping rate calculation from cart creation to a client-side side effect triggered after checkout page render, reducing Time To First Paint from ~5 seconds to <2 seconds by removing the blocking ShipStation API call from the critical path.
+Implement a fulfillment partner system that allows eligible workspaces to route orders to Barely for fulfillment based on customer shipping destination. The system will dynamically select shipping origin (artist's address vs Barely's Brooklyn address) at checkout, tag orders with fulfillment responsibility, capture fulfillment fees, and provide filtering in the orders UI.
+
+---
 
 ## Architecture Overview
 
-The solution modifies the cart creation flow to skip shipping calculation, then triggers shipping calculation client-side after the checkout form mounts. This leverages existing UI loading states and mutation patterns.
+### Components Affected
 
-**Components Affected:**
+| Layer | Component | Changes |
+|-------|-----------|---------|
+| **Database** | `packages/db/src/sql/workspace.sql.ts` | Add fulfillment eligibility, mode, and fee fields |
+| **Database** | `packages/db/src/sql/cart.sql.ts` | Add `fulfilledBy` and `barelyFulfillmentFee` fields |
+| **Shared Logic** | `packages/lib/src/functions/cart.fns.ts` | Add fulfillment determination logic to checkout |
+| **Shared Logic** | `packages/lib/src/integrations/shipping/shipengine.endpts.ts` | Support dynamic shipping origin |
+| **Shared Logic** | `packages/lib/src/utils/cart.ts` | Add fulfillment fee calculation |
+| **API** | `packages/lib/src/trpc/routes/workspace.route.ts` | Add fulfillment mode update mutation |
+| **Frontend** | `apps/app/src/app/[handle]/settings/fulfillment/` | New fulfillment settings page |
+| **Frontend** | `apps/app/src/app/[handle]/orders/` | Add fulfillment filter to orders list |
+| **Config** | Environment variables | Add Barely fulfillment address |
 
-| Layer | Component | Change |
-|-------|-----------|--------|
-| Backend | `createMainCartFromFunnel()` in cart.fns.ts | Remove shipping calculation |
-| Backend | New tRPC mutation or modified existing | Calculate shipping post-load |
-| Frontend | checkout-form.tsx | Add useEffect to trigger shipping on mount |
-| Frontend | OrderSummary component | Handle initial null shipping state |
-| Database | Cart schema | No change (already nullable) |
+### Data Flow
 
-**Data Flow (New):**
 ```
-1. User hits checkout URL
-2. Middleware fires /api/cart/create (no shipping calc)
-3. Cart record saved with null shipping amounts
-4. Page prefetch returns immediately
-5. Checkout form renders (TTFP achieved)
-6. useEffect detects null shipping → triggers mutation
-7. isFetchingRates = true → loading state shown
-8. ShipStation API called (background)
-9. Cart updated with shipping amounts
-10. isFetchingRates = false → amounts displayed
+1. Checkout Request (cart/create)
+   ↓
+2. Determine Fulfillment Responsibility
+   - Check workspace.barelyFulfillmentMode
+   - Check customer shipTo.country
+   - Assign: 'barely' | 'artist'
+   ↓
+3. Select Shipping Origin
+   - If 'barely' → use Barely Brooklyn address (env vars)
+   - If 'artist' → use workspace.shippingAddress* (existing)
+   ↓
+4. Calculate Shipping (ShipStation API)
+   - Route to US API if shipping from Brooklyn
+   - Route to UK API if shipping from UK
+   ↓
+5. Calculate Fulfillment Fee (if 'barely')
+   - flatFee + (productAmount × percentageFee)
+   ↓
+6. Create Cart Record
+   - Store fulfilledBy, barelyFulfillmentFee
+   - Include in Stripe application fee
+   ↓
+7. Order Management
+   - Filter by fulfilledBy in orders UI
+   - Display fulfillment assignment on order detail
 ```
+
+---
 
 ## Key Technical Decisions
 
-### 1. Remove shipping from cart creation entirely
-**Rationale:** The shipping calculation is the only external API call in `createMainCartFromFunnel()`. Removing it eliminates the 500-2000ms blocking call from the critical path.
+### 1. Fulfillment Determination at Checkout (not post-purchase)
 
-### 2. Create new lightweight mutation for initial shipping calculation
-**Rationale:** The existing `updateShippingAddressFromCheckout` requires a full address with postal code. For initial calculation, we only have geo data (country, state, city) from Vercel headers. A new mutation allows simpler inputs and clearer separation of concerns.
+**Decision:** Determine `fulfilledBy` at cart creation based on customer's shipping address.
 
-### 3. Use existing isFetchingRates atom for loading state
-**Rationale:** The state management pattern already exists and is observed by SubmitButton and OrderSummary. Reusing it ensures consistent behavior and avoids duplication.
+**Rationale:**
+- Shipping rates must be calculated from the correct origin before payment
+- Customer sees accurate shipping cost at checkout
+- Assignment is immutable once order is created (prevents confusion)
 
-### 4. Trigger on checkout form mount with geo data from cart
-**Rationale:** The middleware already extracts geo data from Vercel headers and passes it to cart creation. This data is stored on the cart record and can be used for initial shipping calculation.
+**Trade-off:** If customer changes address post-purchase, fulfillment assignment doesn't change. This is acceptable for MVP (handled operationally).
 
-### 5. Handle null shipping gracefully in UI (no error state)
-**Rationale:** Null shipping on initial render is expected, not an error. The UI should show a loading indicator, not an error message.
+---
+
+### 2. Environment Variables for Barely Address (not database)
+
+**Decision:** Store Barely's fulfillment address in environment variables, not in the database.
+
+**Rationale:**
+- Single fulfillment location for MVP (no need for dynamic lookup)
+- Keeps sensitive address out of public codebase
+- Easy to change without database migration
+- Aligns with existing pattern for API keys
+
+**Variables:**
+```
+BARELY_FULFILLMENT_ADDRESS_LINE1
+BARELY_FULFILLMENT_ADDRESS_CITY
+BARELY_FULFILLMENT_ADDRESS_STATE
+BARELY_FULFILLMENT_ADDRESS_ZIP
+BARELY_FULFILLMENT_ADDRESS_COUNTRY
+```
+
+---
+
+### 3. Fee Fields on Workspace (not separate pricing table)
+
+**Decision:** Add `barelyFulfillmentFlatFeePerOrder` and `barelyFulfillmentPercentageFeePerOrder` directly to workspace table.
+
+**Rationale:**
+- Simple 1:1 relationship (one fee structure per workspace)
+- Aligns with existing `cartFeePercentageOverride` pattern
+- Backend-configurable (not exposed in artist UI)
+- Easy to audit and adjust per client
+
+**Trade-off:** Less flexible than a separate pricing table, but sufficient for MVP.
+
+---
+
+### 4. Fulfillment Mode as Enum (not boolean)
+
+**Decision:** Use `barelyFulfillmentMode` enum with three values instead of separate boolean flags.
+
+**Values:**
+- `artist_all` - Artist fulfills all orders (default, current behavior)
+- `barely_us` - Barely fulfills US orders, artist fulfills rest
+- `barely_worldwide` - Barely fulfills all orders
+
+**Rationale:**
+- Clear, mutually exclusive states
+- Easy to extend with new modes later (e.g., `barely_eu`)
+- Single field to check in fulfillment logic
+- Matches UX design (radio button selection)
+
+---
+
+### 5. Fulfillment Fee Included in Application Fee
+
+**Decision:** Add `barelyFulfillmentFee` to Stripe's `application_fee_amount` at payment intent creation.
+
+**Rationale:**
+- Automatic collection at point of sale
+- No need for separate invoicing or reconciliation
+- Aligns with existing fee collection pattern
+- Artist sees net payout after all fees
+
+**Implementation:**
+```typescript
+application_fee_amount = barelyCartFee + vatAmount + shippingAmount + barelyFulfillmentFee
+```
+
+---
+
+### 6. Filter Orders by `fulfilledBy` Field (not separate table)
+
+**Decision:** Add `fulfilledBy` as a simple enum field on carts table, filter via WHERE clause.
+
+**Rationale:**
+- Most orders have single fulfillment responsibility
+- Simple query: `WHERE fulfilledBy = 'barely'`
+- No join overhead
+- Sufficient for MVP scale
+
+**Trade-off:** Doesn't support split shipments within single order (out of scope for MVP).
+
+---
 
 ## Dependencies & Assumptions
 
-**Dependencies:**
-- `isFetchingRatesAtom` (Jotai atom in checkout-form.tsx) - for loading state
-- `getProductsShippingRateEstimate()` (shipengine.endpts.ts) - shipping calculation
-- `atomWithToggle` pattern from @barely/ui - for boolean atom
-- Cart schema shipping fields are nullable - ✅ Verified (cart.sql.ts lines 96, 103, 112-114)
+### Dependencies
 
-**Assumptions:**
-- Geo data (country, state, city) from Vercel headers is sufficient for initial shipping estimate
-- The existing debounce pattern (500ms) is acceptable for the initial trigger
-- Rate limiting (30 req/min) will not be hit by initial calculations
-- ShipStation API latency remains 500-2000ms
+| Dependency | Type | Status | Notes |
+|------------|------|--------|-------|
+| ShipStation US API | External | Exists | `SHIPSTATION_API_KEY_US` already configured |
+| ShipStation UK API | External | Exists | `SHIPSTATION_API_KEY_UK` already configured |
+| Drizzle ORM | Internal | Exists | Used for all schema definitions |
+| tRPC | Internal | Exists | Used for all API mutations |
+| Stripe Connect | External | Exists | Application fee mechanism in place |
+| Workspace settings pattern | Internal | Exists | `/settings/payouts/` as reference |
+
+### Assumptions
+
+1. **Single Barely Location:** Brooklyn is the only Barely fulfillment location for MVP
+2. **US = Barely Territory:** US country code (`US`) determines Barely fulfillment eligibility
+3. **No Split Shipments:** Each order has single fulfillment responsibility
+4. **Backend-Controlled Eligibility:** `barelyFulfillmentEligible` is set via database, not UI
+5. **Existing User Access:** Barely team accesses workspaces via standard user invitation
+6. **No Address Changes Post-Order:** Customer cannot change shipping address after checkout (or requires manual review)
+
+---
 
 ## Implementation Checklist
 
-### Feature 1: Remove Shipping from Cart Creation
+### Feature 1: Workspace Fulfillment Configuration
 
-**Backend - cart.fns.ts:**
-- [ ] In `createMainCartFromFunnel()`, remove the shipping calculation block (lines 334-373)
-  - Remove the `if (shipTo?.country && shipTo.state && shipTo.city)` conditional
-  - Remove both `getProductsShippingRateEstimate()` calls
-  - Remove assignments to `cart.mainShippingAmount` and `cart.bumpShippingPrice`
-- [ ] Ensure cart record is created with null shipping amounts (default behavior)
-- [ ] Verify no other code paths in `createMainCartFromFunnel()` set shipping amounts
+This feature adds the data model and API for configuring Barely fulfillment on a workspace.
 
-**Testing:**
-- [ ] Test that cart creation completes without shipping calculation
-- [ ] Verify cart record has null shipping amounts after creation
-- [ ] Measure cart creation time before/after change
+#### Database Schema
+
+- [ ] Add `barelyFulfillmentEligible` boolean field to `Workspaces` table in `packages/db/src/sql/workspace.sql.ts`
+  - Default: `false`
+  - Not nullable
+
+- [ ] Add `barelyFulfillmentMode` enum field to `Workspaces` table
+  - Values: `'artist_all' | 'barely_us' | 'barely_worldwide'`
+  - Default: `'artist_all'`
+  - Not nullable
+
+- [ ] Add `barelyFulfillmentFlatFeePerOrder` integer field to `Workspaces` table
+  - Stored in cents (e.g., 100 = $1.00)
+  - Nullable (null = no fee configured)
+
+- [ ] Add `barelyFulfillmentPercentageFeePerOrder` integer field to `Workspaces` table
+  - Stored as percentage × 100 (e.g., 500 = 5%)
+  - Nullable (null = no fee configured)
+
+- [ ] Generate and run database migration for workspace schema changes
+
+#### Validation Schema
+
+- [ ] Add `barelyFulfillmentMode` to workspace update schema in `packages/validators/src/`
+  - Only allow update if `barelyFulfillmentEligible` is true
+  - Validate enum values
+
+#### API (tRPC)
+
+- [ ] Add `barelyFulfillmentMode` to allowed update fields in `packages/lib/src/trpc/routes/workspace.route.ts`
+  - Validate eligibility before allowing mode change
+  - Return error if not eligible
+
+- [ ] Create query to get fulfillment settings for workspace
+  - Return: `eligible`, `mode`, `flatFee`, `percentageFee`
+
+#### Frontend (Settings Page)
+
+- [ ] Create new directory: `apps/app/src/app/[handle]/settings/fulfillment/`
+
+- [ ] Create `page.tsx` with fulfillment settings form
+  - Conditionally render based on `barelyFulfillmentEligible`
+  - If not eligible: show "Contact us to enable Barely fulfillment"
+  - If eligible: show radio button selection for mode
+
+- [ ] Implement radio button group for fulfillment mode
+  - Option 1: "I fulfill all orders" (`artist_all`)
+  - Option 2: "Barely fulfills US orders, I fulfill the rest" (`barely_us`)
+  - Option 3: "Barely fulfills all orders" (`barely_worldwide`)
+
+- [ ] Display current fee structure (read-only)
+  - Format: "$X.XX + Y% per Barely-fulfilled order"
+  - Only show when eligible
+
+- [ ] Add "Fulfillment" link to settings navigation sidebar
+  - Only show when `barelyFulfillmentEligible` is true
+
+- [ ] Use existing `SettingsCardForm` component pattern from payouts page
+
+#### Testing
+
+- [ ] Unit test: Workspace schema accepts new fields with correct defaults
+- [ ] Unit test: Mode update validation rejects invalid values
+- [ ] Unit test: Mode update fails when not eligible
+- [ ] Integration test: Settings page renders correctly for eligible workspace
+- [ ] Integration test: Settings page shows contact message for ineligible workspace
+- [ ] Integration test: Mode change persists and takes effect
 
 ---
 
-### Feature 2: New Initial Shipping Calculation Mutation
+### Feature 2: Dynamic Shipping Calculation
 
-**Backend - cart.route.ts:**
-- [ ] Create new tRPC mutation `calculateInitialShipping` with schema:
-  ```typescript
-  {
-    cartId: z.string(),
-    handle: z.string(),
-    key: z.string(),
-  }
+This feature modifies checkout to calculate shipping from the correct origin based on fulfillment assignment.
+
+#### Environment Variables
+
+- [ ] Add environment variables to `.env.example`:
   ```
-- [ ] Implement mutation logic:
-  - Fetch cart and funnel by cartId, handle, key
-  - Extract shipTo from cart's geo data fields (stored during creation)
-  - Extract shipFrom from funnel workspace shipping address
-  - Call `getProductsShippingRateEstimate()` using Promise.all pattern (copy from lines 482-498)
-  - Update cart with calculated shipping amounts
-  - Return updated amounts
-- [ ] Add rate limiting (reuse existing pattern from line 433-437)
-- [ ] Handle case where geo data is insufficient (return early, no error)
-
-**Validators - cart.schema.ts:**
-- [ ] Add `calculateInitialShippingSchema` validator with cartId, handle, key fields
-
-**Testing:**
-- [ ] Test mutation with valid geo data returns shipping amounts
-- [ ] Test mutation with missing geo data returns gracefully (no crash)
-- [ ] Test rate limiting prevents abuse
-
----
-
-### Feature 3: Client-Side Shipping Trigger on Mount
-
-**Frontend - checkout-form.tsx:**
-- [ ] Import the new `calculateInitialShipping` mutation from tRPC client
-- [ ] Add useMutation hook for `calculateInitialShipping`:
-  ```typescript
-  const { mutateAsync: calculateShipping } = useMutation(
-    trpc.calculateInitialShipping.mutationOptions({
-      onMutate: () => setIsFetchingRates(true),
-      onSettled: () => setIsFetchingRates(false),
-    }),
-  );
+  BARELY_FULFILLMENT_ADDRESS_LINE1=
+  BARELY_FULFILLMENT_ADDRESS_CITY=
+  BARELY_FULFILLMENT_ADDRESS_STATE=
+  BARELY_FULFILLMENT_ADDRESS_ZIP=
+  BARELY_FULFILLMENT_ADDRESS_COUNTRY=
   ```
-- [ ] Add useEffect to trigger shipping calculation on mount:
+
+- [ ] Add environment variables to production environment
+  - Values: `763 Park Pl #1R`, `Brooklyn`, `NY`, `11216`, `US`
+
+- [ ] Create type-safe env access in `packages/lib/src/env.ts` or similar
+  - Validate all address fields are present when accessed
+
+#### Fulfillment Determination Logic
+
+- [ ] Create utility function `determineFulfillmentResponsibility()` in `packages/lib/src/utils/fulfillment.ts`
   ```typescript
-  const shippingCalculated = useRef(false);
-
-  useEffect(() => {
-    if (shippingCalculated.current) return;
-    if (!cart.mainShippingAmount && cart.shippingAddressCountry) {
-      shippingCalculated.current = true;
-      calculateShipping({ cartId, handle, key: cartKey });
-    }
-  }, [cart, cartId, handle, cartKey, calculateShipping]);
+  function determineFulfillmentResponsibility(params: {
+    workspaceMode: 'artist_all' | 'barely_us' | 'barely_worldwide';
+    shipToCountry: string;
+  }): 'artist' | 'barely'
   ```
-- [ ] Ensure isFetchingRates is set to true before mutation starts
-- [ ] Invalidate cart query after mutation succeeds to update UI
+  - If mode is `artist_all` → return `'artist'`
+  - If mode is `barely_worldwide` → return `'barely'`
+  - If mode is `barely_us` AND country is `US` → return `'barely'`
+  - If mode is `barely_us` AND country is not `US` → return `'artist'`
 
-**Testing:**
-- [ ] Test that shipping calculation triggers on checkout form mount
-- [ ] Test that shipping calculation only triggers once (useRef guard)
-- [ ] Test that isFetchingRates shows loading state during calculation
-- [ ] Test that shipping amounts update correctly after calculation
+- [ ] Create utility function `getShippingOriginAddress()` in `packages/lib/src/utils/fulfillment.ts`
+  ```typescript
+  function getShippingOriginAddress(params: {
+    fulfilledBy: 'artist' | 'barely';
+    workspace: Workspace;
+  }): ShippingAddress
+  ```
+  - If `fulfilledBy === 'barely'` → return Barely address from env vars
+  - If `fulfilledBy === 'artist'` → return `workspace.shippingAddress*`
 
----
+#### Shipping Calculation Modification
 
-### Feature 4: Handle Null Shipping State in UI
+- [ ] Modify `getProductsShippingRateEstimate()` in `packages/lib/src/functions/cart.fns.ts`
+  - Accept new parameter: `shipFromOverride?: ShippingAddress`
+  - If provided, use override instead of workspace address
+  - Pass to ShipStation API call
 
-**Frontend - checkout-form.tsx (OrderSummary section):**
-- [ ] Verify OrderSummary already handles isFetchingRates loading state (lines 1007-1017)
-- [ ] Ensure shipping line shows pulse animation when isFetchingRates is true
-- [ ] Ensure total calculation handles null shipping gracefully
-  - Check `getAmountsForCheckout()` handles null shipping amounts
-  - If not, add null coalescing: `amounts.checkoutShippingAndHandlingAmount ?? 0`
+- [ ] Modify `getShipStationRateEstimates()` in `packages/lib/src/integrations/shipping/shipengine.endpts.ts`
+  - Accept `shipFrom` address as parameter (not hardcoded to workspace)
+  - Select US or UK API key based on `shipFrom.country`
 
-**Frontend - checkout-form.tsx (SubmitButton section):**
-- [ ] Verify SubmitButton is disabled when isFetchingRates is true (lines 931-956)
-- [ ] No changes needed if already working
+- [ ] Update cart creation flow in `createMainCartFromFunnel()`
+  1. Before calculating shipping, determine fulfillment responsibility
+  2. Get appropriate shipping origin address
+  3. Pass origin to shipping rate estimate function
 
-**Frontend - checkout-form.tsx (Initial render):**
-- [ ] Set isFetchingRates to true on initial render if shipping is null
-  - Add initialization: `const [isFetchingRates, setIsFetchingRates] = useAtom(isFetchingRatesAtom);`
-  - Set initial value based on cart.mainShippingAmount being null
+#### Testing
 
-**Testing:**
-- [ ] Test OrderSummary shows loading state when shipping is null
-- [ ] Test SubmitButton is disabled when shipping is calculating
-- [ ] Test total displays correctly once shipping is calculated
-- [ ] Test no console errors with null shipping amounts
-
----
-
-### Feature 5: Error Handling for Failed Shipping Calculation
-
-**Backend - cart.route.ts:**
-- [ ] In `calculateInitialShipping` mutation, wrap ShipStation call in try/catch
-- [ ] Return error state without throwing (allows UI to handle gracefully)
-- [ ] Log errors for monitoring
-
-**Frontend - checkout-form.tsx:**
-- [ ] Handle error response from calculateInitialShipping mutation
-- [ ] Show error message in OrderSummary shipping line area
-- [ ] Provide retry mechanism (button to recalculate)
-- [ ] Allow user to enter full address to trigger address-based calculation
-
-**Shared - Error state atom:**
-- [ ] Consider adding `shippingErrorAtom` to track error state
-- [ ] Or reuse existing error handling patterns in the form
-
-**Testing:**
-- [ ] Test error display when ShipStation API fails
-- [ ] Test retry functionality
-- [ ] Test that entering address recovers from error state
+- [ ] Unit test: `determineFulfillmentResponsibility()` returns correct value for all mode/country combinations
+- [ ] Unit test: `getShippingOriginAddress()` returns Barely address when `fulfilledBy === 'barely'`
+- [ ] Unit test: `getShippingOriginAddress()` returns workspace address when `fulfilledBy === 'artist'`
+- [ ] Integration test: US customer gets Brooklyn shipping rates when mode is `barely_us`
+- [ ] Integration test: UK customer gets artist shipping rates when mode is `barely_us`
+- [ ] Integration test: All customers get Brooklyn shipping rates when mode is `barely_worldwide`
 
 ---
 
-### Feature 6: Integration & Regression Testing
+### Feature 3: Order Fulfillment Assignment & Fee Capture
 
-**End-to-End Tests:**
-- [ ] Test complete checkout flow with deferred shipping calculation
-- [ ] Test checkout with bump product (requires both shipping calculations)
-- [ ] Test checkout without bump product
-- [ ] Test checkout with invalid/missing geo data
-- [ ] Test address change after initial shipping calculation
-- [ ] Test page reload during shipping calculation
+This feature tags orders with fulfillment responsibility and calculates/captures fulfillment fees.
 
-**Performance Validation:**
-- [ ] Measure TTFP before implementation (baseline)
-- [ ] Measure TTFP after implementation (should be <2 seconds)
-- [ ] Verify total checkout time is not increased
-- [ ] Monitor ShipStation API success rates
+#### Database Schema
 
-**Regression Tests:**
-- [ ] Verify existing address change flow still works
-- [ ] Verify bump product toggle updates shipping correctly
-- [ ] Verify quantity changes trigger shipping recalculation
-- [ ] Verify submit button remains disabled until shipping calculated
+- [ ] Add `fulfilledBy` enum field to `Carts` table in `packages/db/src/sql/cart.sql.ts`
+  - Values: `'artist' | 'barely'`
+  - Default: `'artist'`
+  - Not nullable
+
+- [ ] Add `barelyFulfillmentFee` integer field to `Carts` table
+  - Stored in cents
+  - Default: `0`
+  - Not nullable
+
+- [ ] Generate and run database migration for cart schema changes
+
+#### Fee Calculation
+
+- [ ] Create utility function `calculateBarelyFulfillmentFee()` in `packages/lib/src/utils/cart.ts`
+  ```typescript
+  function calculateBarelyFulfillmentFee(params: {
+    fulfilledBy: 'artist' | 'barely';
+    productAmountInCents: number;
+    flatFeeInCents: number | null;
+    percentageFee: number | null; // 500 = 5%
+  }): number
+  ```
+  - If `fulfilledBy === 'artist'` → return `0`
+  - If fees not configured → return `0`
+  - Calculate: `flatFee + Math.round(productAmount * (percentage / 10000))`
+
+- [ ] Modify `getFeeAmountForCheckout()` in `packages/lib/src/utils/cart.ts`
+  - Accept new parameter: `barelyFulfillmentFee: number`
+  - Add to application fee amount:
+    ```typescript
+    return barelyCartFee + vatAmount + shippingAmount + barelyFulfillmentFee
+    ```
+
+#### Cart Creation Flow
+
+- [ ] Modify `createMainCartFromFunnel()` in `packages/lib/src/functions/cart.fns.ts`
+  1. After determining fulfillment responsibility, calculate fulfillment fee
+  2. Pass fulfillment fee to `getFeeAmountForCheckout()`
+  3. Store `fulfilledBy` and `barelyFulfillmentFee` in cart insert
+
+- [ ] Ensure `fulfilledBy` and `barelyFulfillmentFee` are immutable after cart creation
+  - Do not include in any cart update mutations
+
+#### Testing
+
+- [ ] Unit test: `calculateBarelyFulfillmentFee()` returns 0 for artist fulfillment
+- [ ] Unit test: `calculateBarelyFulfillmentFee()` calculates correctly for Barely fulfillment
+- [ ] Unit test: `calculateBarelyFulfillmentFee()` handles null fee configuration
+- [ ] Integration test: Cart created with correct `fulfilledBy` value
+- [ ] Integration test: Cart created with correct `barelyFulfillmentFee` value
+- [ ] Integration test: Stripe application fee includes fulfillment fee
+- [ ] Integration test: Fulfillment fields are not modified by cart updates
+
+---
+
+### Feature 4: Order Filtering UI
+
+This feature adds fulfillment filtering to the orders view in the app dashboard.
+
+#### API (tRPC)
+
+- [ ] Modify orders list query in `packages/lib/src/trpc/routes/cart.route.ts`
+  - Add optional filter parameter: `fulfilledBy?: 'artist' | 'barely' | 'all'`
+  - Apply WHERE clause when filter is specified
+  - Default to `'all'` (no filter)
+
+- [ ] Ensure `fulfilledBy` field is included in order list response
+
+#### Frontend (Orders Page)
+
+- [ ] Locate orders list component in `apps/app/src/app/[handle]/orders/`
+
+- [ ] Add fulfillment filter dropdown above orders list
+  - Options: "All Orders", "My Fulfillment", "Barely Fulfillment"
+  - Default: "All Orders"
+  - Use existing dropdown/select component pattern
+
+- [ ] Wire filter to API query parameter
+  - Update query when filter changes
+  - Persist filter state in URL query param (optional)
+
+- [ ] Conditionally show filter only when workspace has Barely fulfillment enabled
+  - Check `barelyFulfillmentMode !== 'artist_all'`
+
+#### Frontend (Order Detail)
+
+- [ ] Locate order detail component in `apps/app/src/app/[handle]/orders/[orderId]/`
+
+- [ ] Add fulfillment information section to order detail
+  - Display: "Fulfillment: You" or "Fulfillment: Barely"
+  - If Barely: Display "Fulfillment Fee: $X.XX"
+
+- [ ] Use existing order detail layout pattern
+
+#### Testing
+
+- [ ] Unit test: Orders query filters correctly by `fulfilledBy`
+- [ ] Integration test: Filter dropdown updates displayed orders
+- [ ] Integration test: Order detail shows correct fulfillment assignment
+- [ ] Integration test: Filter only appears for eligible workspaces
+- [ ] E2E test: User can filter orders and see correct results
+
+---
+
+### Feature 5: Security & Validation
+
+This feature ensures proper access control and data validation.
+
+#### Access Control
+
+- [ ] Verify `barelyFulfillmentEligible` can only be set via direct database access
+  - Do not expose in any tRPC mutation
+  - Do not include in workspace update schema
+
+- [ ] Verify `barelyFulfillmentFlatFeePerOrder` and `barelyFulfillmentPercentageFeePerOrder` can only be set via direct database access
+  - Do not expose in any tRPC mutation
+
+- [ ] Verify fulfillment mode update requires workspace write permission
+  - Use existing workspace authorization pattern
+
+#### Input Validation
+
+- [ ] Validate `barelyFulfillmentMode` enum values in update mutation
+  - Reject invalid values with clear error message
+
+- [ ] Validate eligibility before allowing mode change
+  - Return error: "Barely fulfillment is not enabled for this workspace"
+
+- [ ] Validate customer shipping address country before determining fulfillment
+  - Handle missing country gracefully (default to artist fulfillment)
+
+#### Data Integrity
+
+- [ ] Ensure `fulfilledBy` is set at cart creation, not updatable after
+  - Remove from any cart update mutations if present
+
+- [ ] Ensure `barelyFulfillmentFee` matches calculation at time of order
+  - Store calculated value, not reference to fee config
+  - Handles fee config changes without affecting historical orders
+
+#### Testing
+
+- [ ] Security test: Cannot set eligibility via API
+- [ ] Security test: Cannot set fee config via API
+- [ ] Validation test: Invalid mode values rejected
+- [ ] Validation test: Mode change blocked when not eligible
+- [ ] Data integrity test: Fulfillment fields immutable after creation
+
+---
+
+## File Summary
+
+| File | Action | Purpose |
+|------|--------|---------|
+| `packages/db/src/sql/workspace.sql.ts` | Modify | Add fulfillment fields to workspace |
+| `packages/db/src/sql/cart.sql.ts` | Modify | Add fulfillment fields to cart |
+| `packages/validators/src/schemas/` | Modify | Add fulfillment mode to update schema |
+| `packages/lib/src/utils/fulfillment.ts` | Create | Fulfillment determination and address logic |
+| `packages/lib/src/utils/cart.ts` | Modify | Add fulfillment fee calculation |
+| `packages/lib/src/functions/cart.fns.ts` | Modify | Integrate fulfillment into checkout flow |
+| `packages/lib/src/integrations/shipping/shipengine.endpts.ts` | Modify | Support dynamic shipping origin |
+| `packages/lib/src/trpc/routes/workspace.route.ts` | Modify | Add fulfillment mode update |
+| `packages/lib/src/trpc/routes/cart.route.ts` | Modify | Add fulfillment filter to orders query |
+| `packages/lib/src/env.ts` | Modify | Add Barely address env vars |
+| `apps/app/src/app/[handle]/settings/fulfillment/page.tsx` | Create | Fulfillment settings UI |
+| `apps/app/src/app/[handle]/orders/` | Modify | Add fulfillment filter |
+| `apps/app/src/app/[handle]/orders/[orderId]/` | Modify | Show fulfillment on order detail |
+| `.env.example` | Modify | Document new env vars |
+
+---
+
+## Related Documents
+
+- [[feature|Feature: Barely Fulfillment Partner]]
+- [[JTBD|Jobs to be Done: Barely Fulfillment Partner]]
+- [[PRD|Product Requirements Document: Barely Fulfillment Partner]]

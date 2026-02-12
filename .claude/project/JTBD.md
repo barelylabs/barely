@@ -1,211 +1,258 @@
-# Jobs to be Done: Deferred Shipping Rate Calculation
+# Jobs to be Done: Barely Fulfillment Partner
 
 ## Overview
 
-This document captures the jobs that users are trying to accomplish when checking out on Barely cart. It focuses on the "why" behind behavior - specifically, why checkout speed matters and what users are actually trying to accomplish.
+This document captures the jobs that artists are trying to accomplish when they consider using Barely as a fulfillment partner. It focuses on the "why" behind user behavior rather than the feature itself.
 
 ---
 
-## User Segments
+## Job Performers (Users)
 
-### Segment 1: Fans/Customers
+### Primary: UK/EU Artists Expanding to US Market
+- Independent musicians/bands with existing physical product sales in their home market
+- Running or planning paid advertising campaigns targeting US audiences
+- Currently blocked by shipping economics or operational complexity
+- Seeking growth without proportional increase in operational burden
 
-**Context**: Music fans who have discovered an artist's merchandise through their bio link, social media, or website. They've found something they want to buy and have clicked through to checkout.
-
-**Situation**: They're in purchase mode - credit card ready, decision made, just need to complete the transaction. They may be on mobile (most common), possibly on cellular data, and have limited patience.
-
-### Segment 2: Artists/Creators (Indirect)
-
-**Context**: Musicians and creators using Barely cart to sell merchandise. They don't experience the checkout directly but are impacted by conversion rates.
-
-**Situation**: They've invested in merchandise, set up their store, and are driving traffic to their cart. Every abandoned checkout is lost revenue and wasted marketing effort.
+### Secondary: US Artists Seeking Fulfillment Partner
+- Artists who want to sell physical products but don't want to pack/ship themselves
+- May be new to physical sales or scaling beyond what they can handle
+- Value their time for creative work over operational tasks
+- Willing to pay reasonable fees for convenience
 
 ---
 
 ## Primary Jobs (High Priority)
 
-### Job 1: Complete My Purchase Quickly
+### Job 1: Sell physical products to international customers profitably
 
-**Job Statement**: When I've decided to buy merchandise from an artist I support, I want to complete checkout as fast as possible so I can get back to what I was doing.
+**Job Statement:**
+> When I'm an artist with fans in the US, I want to offer them physical products with reasonable shipping costs, so I can profitably acquire customers through paid advertising.
 
-**Functional Aspects**:
-- See the checkout form immediately when I click "checkout"
-- Enter my information without waiting for pages to load
-- Submit payment and get confirmation quickly
+**Context:**
+- Artist has physical products (vinyl, CDs, merch) that fans want
+- Fans in the US see high international shipping costs and abandon carts
+- Paid acquisition (ads) becomes unprofitable when shipping kills conversion rates
+- Current solution: Don't sell to US, or accept low/negative margins
 
-**Emotional Aspects**:
-- Feel confident the site is working (not broken)
-- Maintain purchase momentum before second-guessing
-- Not feel frustrated or impatient
-- Trust my payment information is being handled properly
+**Current Workarounds:**
+- Ship from UK anyway (expensive, slow, poor customer experience)
+- Set up duplicate workspace with US-based fulfillment (complex, time-consuming)
+- Avoid US market entirely (leaves money on the table)
 
-**Social Aspects**:
-- Support the artist I care about
-- Complete the transaction before getting distracted
+**Success Criteria:**
+- US shipping costs are competitive with domestic US retailers
+- Customer acquisition cost (CAC) makes sense with US shipping rates
+- Can run profitable paid campaigns to US audiences
 
-**Current Workarounds**: Users wait up to 5 seconds staring at a loading screen, or abandon entirely.
-
-**Success Metrics**:
-- Time from click to interactive checkout < 2 seconds
-- Reduced bounce rate on checkout page
-- Higher checkout completion rate
-
----
-
-### Job 2: Know What I'm Paying Before I Commit
-
-**Job Statement**: When I'm ready to checkout, I want to see the total cost including shipping so I can confirm my purchase decision.
-
-**Functional Aspects**:
-- See product price clearly
-- See shipping cost before entering payment
-- Understand the total I'll be charged
-
-**Emotional Aspects**:
-- Feel informed, not surprised
-- Trust the pricing is fair
-- Feel confident in my purchase decision
-
-**Social Aspects**:
-- Justify the purchase to myself/others
-
-**Current Workarounds**: Shipping is calculated but blocks the entire page from loading - users don't even see the form until shipping is calculated.
-
-**Success Metrics**:
-- Shipping cost visible before payment submission
-- Clear loading indicator while shipping calculates (not blocking the page)
+**Related Jobs:**
+- Calculate accurate shipping costs before customer checks out
+- Display shipping rates that don't cause sticker shock
 
 ---
 
-### Job 3: Trust the Checkout Process
+### Job 2: Manage a single, unified store for all markets
 
-**Job Statement**: When I'm entering my payment information, I want to feel confident the process is secure and reliable so I don't hesitate to complete my purchase.
+**Job Statement:**
+> When I'm selling to customers in multiple countries, I want to manage one store with one set of products, so I don't waste time duplicating work and can see all my sales in one place.
 
-**Functional Aspects**:
-- See a professional, responsive checkout form
-- Have clear feedback on form state and errors
-- See secure payment indicators (Stripe badge, etc.)
+**Context:**
+- Artists currently need separate workspaces for different fulfillment regions
+- Each workspace requires: separate Stripe account, duplicate products, duplicate landing pages, separate analytics
+- Ad campaigns must be split by geography
+- Mental overhead of managing multiple systems
 
-**Emotional Aspects**:
-- Feel the site is legitimate and professional
-- Trust my payment will go through
-- Not worry about double-charges or failed transactions
+**Current Workarounds:**
+- Accept the complexity and manage multiple workspaces
+- Only sell to one market to keep things simple
+- Hire help to manage the complexity (expensive)
 
-**Social Aspects**:
-- Feel good about supporting the artist through a quality experience
+**Success Criteria:**
+- One workspace, one Stripe account, one product catalog
+- All sales visible in single dashboard
+- One set of landing pages and funnels
+- Simplified ad campaign management
 
-**Current Workarounds**: Slow loading undermines trust - users may question if the site is broken or legitimate.
+**Related Jobs:**
+- Keep accounting simple with unified revenue streams
+- Track performance across all markets in one view
 
-**Success Metrics**:
-- Reduced "is this site safe?" support inquiries
-- Higher payment completion rate after form interaction
+---
+
+### Job 3: Know which orders I need to fulfill vs. which are handled for me
+
+**Job Statement:**
+> When orders come in from different regions, I want to clearly see which ones I need to ship myself, so I don't miss any orders or duplicate fulfillment work.
+
+**Context:**
+- With split fulfillment, some orders go to the artist, some to Barely
+- Artist needs to know exactly what's on their plate
+- Don't want to accidentally ship an order that Barely is handling
+- Don't want Barely orders sitting unfulfilled because artist thought they were covered
+
+**Current Workarounds:**
+- Manually check shipping addresses on each order
+- Maintain separate tracking spreadsheet
+- Risk errors and duplicate shipments
+
+**Success Criteria:**
+- Clear filter/view showing "my orders" vs "Barely orders"
+- Confidence that nothing falls through the cracks
+- Quick daily check of fulfillment queue
+
+**Related Jobs:**
+- Maintain high fulfillment standards across all orders
+- Keep customers happy regardless of who ships
 
 ---
 
 ## Secondary Jobs (Lower Priority)
 
-### Job 4: Recover If Something Goes Wrong
+### Job 4: Outsource fulfillment entirely so I can focus on music
 
-**Job Statement**: If shipping can't be calculated or something fails, I want clear feedback so I know what to do next.
+**Job Statement:**
+> When I want to sell physical products but don't want to deal with shipping, I want someone else to handle all fulfillment, so I can focus my time on creating music and connecting with fans.
 
-**Functional Aspects**:
-- See clear error messages if shipping fails
-- Have option to retry or contact support
-- Not lose my cart contents
+**Context:**
+- Some artists (especially US-based) see fulfillment as pure overhead
+- Time spent packing orders is time not spent on creative work
+- May be scaling to volume where self-fulfillment becomes unsustainable
+- Willing to pay per-order fees for the convenience
 
-**Emotional Aspects**:
-- Not feel stuck or confused
-- Trust there's a path forward
+**Current Workarounds:**
+- Don't sell physical products at all
+- Use third-party fulfillment services (disconnected from their storefront)
+- Hire part-time help (management overhead)
 
-**Current Workarounds**: N/A - current flow blocks everything, so failures are catastrophic.
+**Success Criteria:**
+- Orders flow to fulfillment partner automatically
+- Artist only needs to ensure stock is available
+- Fulfillment quality matches or exceeds what artist would do themselves
 
----
-
-### Job 5: Get Accurate Shipping Information
-
-**Job Statement**: When I'm buying merchandise, I want accurate shipping costs and delivery estimates so I can plan accordingly.
-
-**Functional Aspects**:
-- See shipping options and prices
-- Understand estimated delivery time
-- Know if there are any shipping restrictions
-
-**Emotional Aspects**:
-- Feel informed about what to expect
-- Trust the shipping estimate is accurate
-
-**Current Workarounds**: Shipping is already calculated (just at the wrong time in the flow).
+**Related Jobs:**
+- Scale physical product sales without scaling operations
+- Maintain quality customer experience without direct involvement
 
 ---
 
-## Internal Jobs (Barely/Artist)
+### Job 5: Understand the costs of fulfillment partnership upfront
 
-### Job 6: Maximize Checkout Conversions
+**Job Statement:**
+> When I'm considering using a fulfillment partner, I want to clearly understand the per-order costs, so I can make informed pricing and margin decisions.
 
-**Job Statement**: When fans reach checkout, we want them to complete their purchase so artists earn revenue and fans get their merchandise.
+**Context:**
+- Artists need to price products accounting for all fees
+- Fulfillment fees affect per-unit margins
+- Need to compare against self-fulfillment costs (time, materials, shipping)
+- Want predictable costs, not surprises
 
-**Functional Aspects**:
-- Fast, frictionless checkout experience
-- No unnecessary loading or delays
-- Clear path from cart to confirmation
+**Current Workarounds:**
+- Calculate self-fulfillment costs manually
+- Get quotes from third-party fulfillment services
+- Guess at margins and adjust later
 
-**Emotional Aspects**:
-- Feel confident the checkout is optimized
-- Trust conversion rates are as high as possible
+**Success Criteria:**
+- Clear fee structure (flat + percentage) visible before enabling
+- Can calculate impact on margins before committing
+- No hidden fees or surprises
 
-**Current Workarounds**: Accepting lower conversion rates due to slow checkout.
-
-**Success Metrics**:
-- Checkout completion rate improvement
-- Reduced cart abandonment
-- Higher revenue per visitor
-
----
-
-## Job Prioritization Matrix
-
-| Job | Frequency | Importance | Satisfaction Gap | Priority |
-|-----|-----------|------------|------------------|----------|
-| Complete purchase quickly | Every checkout | Critical | High (5s wait) | **P0** |
-| Know what I'm paying | Every checkout | High | Low (shipping shows, just slowly) | **P1** |
-| Trust the checkout process | Every checkout | High | Medium (slow = unprofessional) | **P1** |
-| Recover from failures | Rare | Medium | Unknown | **P2** |
-| Get accurate shipping info | Every checkout | Medium | Low (accuracy is fine) | **P2** |
-| Maximize conversions (internal) | Ongoing | Critical | High (slow = abandonment) | **P0** |
+**Related Jobs:**
+- Price products to maintain healthy margins
+- Compare fulfillment partner costs vs. self-fulfillment
 
 ---
 
-## Key Insights
+### Job 6: Get started with fulfillment partnership quickly
 
-1. **The core job isn't "calculate shipping faster"** - it's "let me complete my purchase without friction." Shipping calculation is a means to an end, not the end itself.
+**Job Statement:**
+> When I've decided to use Barely as my fulfillment partner, I want to enable it and start processing orders quickly, so I can capture sales I'm currently missing.
 
-2. **Timing matters more than the calculation itself** - The shipping rates are accurate and the UI already handles loading states. The problem is purely WHEN the calculation happens, not HOW it's done.
+**Context:**
+- Every day without US fulfillment is lost revenue
+- Don't want a lengthy onboarding process
+- Already have products ready to ship
+- Want to start running US ad campaigns ASAP
 
-3. **First paint is the critical moment** - The psychological switch from "waiting" to "doing" happens when the form appears. Every second before first paint feels longer than seconds spent filling out the form.
+**Current Workarounds:**
+- Wait through complex setup processes
+- Delay campaigns until infrastructure is ready
+- Miss seasonal or promotional windows
 
-4. **Slow checkout signals unprofessionalism** - Fans may subconsciously distrust a slow checkout, even if the calculation is accurate. Speed is a trust signal.
+**Success Criteria:**
+- Enable fulfillment in minutes after approval
+- First order can process same day
+- No complex configuration required
 
-5. **Mobile users are least patient and most common** - Mobile checkout is the primary use case, and mobile users on cellular data are the most sensitive to load times.
-
-6. **Shipping doesn't need to block anything** - Users can't submit payment until shipping is calculated anyway (button is disabled). So there's zero functional reason to block first paint for it.
+**Related Jobs:**
+- Move fast on market opportunities
+- Test US market demand quickly
 
 ---
 
-## Success Definition
+## Job Map: Selling Physical Products Internationally
 
-This feature succeeds when:
+This job map shows the end-to-end process of selling physical products to international customers:
 
-1. **Fans** see the checkout form in under 2 seconds, enter their information while shipping calculates in the background, and complete purchases with higher conversion rates
-
-2. **Artists** earn more revenue from the same traffic because fewer fans abandon during checkout
-
-3. **The experience** feels instant and professional, building trust in the Barely platform
+| Stage | Job Steps | Current Pain Points |
+|-------|-----------|---------------------|
+| **Define** | Decide to sell physical products internationally | High barrier due to shipping complexity |
+| **Locate** | Find a fulfillment solution that works | Limited options, complex integrations |
+| **Prepare** | Set up storefront and fulfillment | Duplicate workspaces, multiple accounts |
+| **Confirm** | Verify shipping rates are competitive | Rates too high for profitable acquisition |
+| **Execute** | Process orders and fulfill them | Confusion about who ships what |
+| **Monitor** | Track orders across all markets | Split dashboards, fragmented data |
+| **Modify** | Adjust pricing or fulfillment as needed | Changes required in multiple places |
+| **Conclude** | Evaluate international expansion success | Hard to attribute results clearly |
 
 ---
 
-## What This Isn't About
+## Emotional and Social Jobs
 
-- **Not about shipping accuracy** - The calculation logic doesn't change
-- **Not about UI changes** - Loading states already exist
-- **Not about caching complexity** - Just changing timing, not infrastructure
-- **Not about the full cart optimization project** - Surgical fix for one specific bottleneck
+### Emotional Jobs
+- **Feel confident** expanding into new markets without operational overwhelm
+- **Feel relieved** that fulfillment complexity is handled
+- **Feel professional** offering competitive shipping to all customers
+- **Feel in control** of which orders are their responsibility
+
+### Social Jobs
+- **Be seen as** a legitimate international artist/brand
+- **Avoid embarrassment** of high shipping costs scaring off fans
+- **Demonstrate credibility** through professional fulfillment experience
+
+---
+
+## Outcome Expectations
+
+What users expect when these jobs are done well:
+
+| Job | Desired Outcome | Undesired Outcome |
+|-----|-----------------|-------------------|
+| Sell internationally | Profitable US customer acquisition | Shipping costs kill ad ROI |
+| Unified store | One place to manage everything | Juggling multiple systems |
+| Know my orders | Clear fulfillment queue | Missed or duplicate shipments |
+| Outsource fulfillment | Focus on creative work | Still managing operations |
+| Understand costs | Predictable margins | Surprise fees |
+| Get started quickly | Processing orders same day | Weeks of setup |
+
+---
+
+## Constraints and Limitations
+
+**What users will accept:**
+- Per-order fees for fulfillment service (validated at $3-4/order)
+- Simple fulfillment modes (US-only or worldwide, not per-product)
+- Manual stock management with Barely team
+- Workspace access granted to Barely team
+
+**What users won't accept:**
+- Complex setup that takes days/weeks
+- Unpredictable or hidden fees
+- Loss of visibility into their orders
+- Degraded customer experience (slower shipping, poor packaging)
+
+---
+
+## Related Documents
+
+- [[feature|Feature: Barely Fulfillment Partner]]
+- [[PRD|Product Requirements Document]] (next step)

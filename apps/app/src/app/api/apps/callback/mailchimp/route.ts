@@ -3,7 +3,8 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { dbHttp } from '@barely/db/client';
 import { ProviderAccounts } from '@barely/db/sql/provider-account.sql';
-import { getAbsoluteUrl, newId, raise } from '@barely/utils';
+import { getUserWorkspacesById } from '@barely/lib/functions/workspace.fns';
+import { getAbsoluteUrl, getCurrentAppVariant, newId, raise } from '@barely/utils';
 import { providerStateSchema } from '@barely/validators';
 import { z } from 'zod/v4';
 
@@ -29,12 +30,14 @@ export async function GET(req: NextRequest) {
 	const state = providerStateSchema.parse(JSON.parse(decodedState));
 	console.log('state ', state);
 
-	const userId = session.userId;
+	const userId = session.user.id;
 	if (!userId) {
 		return new Response('user not found', { status: 400 });
 	}
 
-	const workspace = session.workspaces.find(w => w.id === state.workspaceId);
+	// Fetch workspaces separately (no longer in session)
+	const { workspaces } = await getUserWorkspacesById(userId);
+	const workspace = workspaces.find(w => w.id === state.workspaceId);
 
 	if (!workspace) {
 		return new Response('workspace not found', { status: 400 });
@@ -49,7 +52,7 @@ export async function GET(req: NextRequest) {
 			grant_type: 'authorization_code',
 			client_id: appEnv.MAILCHIMP_CLIENT_ID,
 			client_secret: appEnv.MAILCHIMP_CLIENT_SECRET,
-			redirect_uri: getAbsoluteUrl('app', 'api/apps/callback/mailchimp'),
+			redirect_uri: getAbsoluteUrl(getCurrentAppVariant(), 'api/apps/callback/mailchimp'),
 			code,
 		}),
 	}).catch(err => {

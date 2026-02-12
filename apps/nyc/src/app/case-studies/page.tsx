@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { H } from '@barely/ui/typography';
 
 import { AnimatedSection } from '~/components/marketing/animated-section';
-import { CaseStudyCard } from '~/components/marketing/case-study-card';
+import { CalComLink } from '~/components/marketing/cal-com-link';
+import { CaseStudiesSection } from '~/components/marketing/case-studies-section';
 
 import { allCaseStudies } from '~/data/case-studies';
 
@@ -107,31 +108,11 @@ export default function CaseStudiesPage() {
 			</section> */}
 
 			{/* Featured Case Studies */}
-			<section className='px-4 py-16 sm:px-6 lg:px-8'>
-				<div className='mx-auto max-w-7xl'>
-					<AnimatedSection animation='fade-up'>
-						<H size='3' className='mb-12 text-center text-3xl md:text-4xl'>
-							Featured Success Stories
-						</H>
-					</AnimatedSection>
-
-					<div className='mb-16 grid grid-cols-1 gap-8 lg:grid-cols-2'>
-						{caseStudies
-							.filter(study => study.featured)
-							.map((study, index) => (
-								<AnimatedSection
-									key={study.slug}
-									animation='fade-up'
-									delay={200 + index * 100}
-								>
-									<Link href={`/case-studies/${study.slug}`}>
-										<CaseStudyCard {...study} featured />
-									</Link>
-								</AnimatedSection>
-							))}
-					</div>
-				</div>
-			</section>
+			<CaseStudiesSection
+				title='Featured Success Stories'
+				subtitle='See how independent artists grew their audiences with transparent, data-driven strategies'
+				caseStudies={caseStudies.filter(study => study.featured)}
+			/>
 
 			{/* All Case Studies */}
 			{/* <section className='bg-white/5 px-4 py-16 sm:px-6 lg:px-8'>
@@ -167,9 +148,13 @@ export default function CaseStudiesPage() {
 						<H size='2' className='mb-8 text-4xl md:text-5xl'>
 							Ready to Write Your Success Story?
 						</H>
-						<p className='mb-12 text-xl text-white/70'>
+						<p className='mb-8 text-xl text-white/70'>
 							Join our artists who&apos;ve grown their audiences with transparent,
 							data-driven strategies.
+						</p>
+						<p className='mb-12 text-base text-white/60'>
+							See results like this? Book a free 30-minute strategy call and get your
+							custom growth plan.
 						</p>
 						<div className='flex flex-col justify-center gap-6 px-4 sm:flex-row sm:px-0'>
 							<Link href='/services' className='w-full sm:w-auto'>
@@ -177,16 +162,11 @@ export default function CaseStudiesPage() {
 									View Services
 								</button>
 							</Link>
-							<a
-								href='https://app.usemotion.com/meet/barely/discovery'
-								target='_blank'
-								rel='noopener noreferrer'
-								className='w-full sm:w-auto'
-							>
+							<CalComLink className='w-full sm:w-auto'>
 								<button className='w-full rounded-lg border-2 border-white/20 px-8 py-3 font-semibold text-white transition-all duration-300 hover:bg-white/10 sm:w-auto'>
 									Book Free Strategy Call
 								</button>
-							</a>
+							</CalComLink>
 						</div>
 					</AnimatedSection>
 				</div>
