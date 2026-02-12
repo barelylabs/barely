@@ -46,7 +46,6 @@ import {
 import {
 	calculateBarelyFulfillmentFee,
 	determineFulfillmentResponsibility,
-	getShippingOriginAddress,
 } from '../utils/fulfillment';
 
 /* get funnel */
@@ -303,12 +302,6 @@ export async function createMainCartFromFunnel({
 			})
 		:	'artist';
 
-	// Step 2: Get appropriate shipping origin based on fulfillment responsibility
-	const shippingOrigin = getShippingOriginAddress({
-		fulfilledBy,
-		workspace: funnel.workspace,
-	});
-
 	// For VAT calculation, we need to know if we're shipping from UK
 	// If Barely is fulfilling (from US), we don't charge UK VAT
 	const shipFromCountry =
@@ -386,58 +379,11 @@ export async function createMainCartFromFunnel({
 		barelyFulfillmentFee,
 	};
 
-	// Step 6: Calculate shipping with correct origin
-	if (shipTo?.country && shipTo.state && shipTo.city) {
-		const shipFromAddress = {
-			state: shippingOrigin.state ?? '',
-			postalCode: shippingOrigin.postalCode ?? '',
-			countryCode: shippingOrigin.country ?? '',
-		};
-
-		const { lowestShippingPrice: rawMainShippingAmount } =
-			await getProductsShippingRateEstimate({
-				products: [{ product: funnel.mainProduct, quantity: 1 }],
-				shipFrom: shipFromAddress,
-				shipTo: {
-					country: shipTo.country,
-					state: shipTo.state,
-					city: shipTo.city,
-				},
-			});
-
-		// Convert shipping from USD to workspace currency if Barely is fulfilling
-		const mainShippingAmount = convertShippingAmountIfNeeded(
-			rawMainShippingAmount,
-			fulfilledBy,
-			funnel.workspace.currency,
-		);
-
-		cart.mainShippingAmount = mainShippingAmount;
-
-		const rawMainPlusBumpShippingPrice =
-			!funnel.bumpProduct ? rawMainShippingAmount : (
-				await getProductsShippingRateEstimate({
-					products: [
-						{ product: funnel.mainProduct, quantity: 1 },
-						{ product: funnel.bumpProduct, quantity: 1 },
-					],
-					shipFrom: shipFromAddress,
-					shipTo: {
-						country: shipTo.country,
-						state: shipTo.state,
-						city: shipTo.city,
-					},
-				}).then(rates => rates.lowestShippingPrice)
-			);
-
-		const mainPlusBumpShippingPrice = convertShippingAmountIfNeeded(
-			rawMainPlusBumpShippingPrice,
-			fulfilledBy,
-			funnel.workspace.currency,
-		);
-
-		cart.bumpShippingPrice = mainPlusBumpShippingPrice - mainShippingAmount;
-	}
+	// Shipping is calculated post-page-load via calculateInitialShipping mutation
+	// to reduce TTFP by removing the blocking ShipStation API call from cart creation.
+	// Cart is created with null shipping amounts (the default).
+	// Fulfillment info (fulfilledBy, barelyFulfillmentFee) is stored on the cart
+	// so calculateInitialShipping can use the correct shipping origin.
 
 	await dbHttp.insert(Carts).values(cart);
 

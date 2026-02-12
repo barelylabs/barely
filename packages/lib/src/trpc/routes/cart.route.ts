@@ -7,6 +7,7 @@ import { Carts } from '@barely/db/sql/cart.sql';
 import { publicProcedure } from '@barely/lib/trpc';
 import { getAbsoluteUrl, isProduction, newId, raiseTRPCError, wait } from '@barely/utils';
 import {
+	calculateInitialShippingSchema,
 	updateCheckoutCartFromCheckoutSchema,
 	updateShippingAddressFromCheckoutSchema,
 } from '@barely/validators';
@@ -567,6 +568,108 @@ export const cartRoute = {
 			return {
 				success: true,
 			};
+		}),
+
+	calculateInitialShipping: publicProcedure
+		.input(calculateInitialShippingSchema)
+		.mutation(async ({ input, ctx }) => {
+			const rateLimit = ratelimit(30, '1 m');
+			const { success } = await rateLimit.limit(input.cartId);
+			if (!success) {
+				throw new TRPCError({ code: 'TOO_MANY_REQUESTS', message: 'Too many requests' });
+			}
+
+			const cart = await getCartById(input.cartId, input.handle, input.key);
+			if (!cart) throw new TRPCError({ code: 'NOT_FOUND', message: 'Cart not found' });
+
+			const funnel = cart.funnel ?? raiseTRPCError({ message: 'funnel not found' });
+
+			// Use geo data from the visitor info stored on the cart
+			const geo = cart.visitorGeo;
+			if (!geo?.country || !geo.region || !geo.city) {
+				// No geo data available - shipping will be calculated when user enters address
+				return { success: true, calculated: false };
+			}
+
+			// Get the shipping origin based on cart's fulfilledBy (set at creation, immutable)
+			const shippingOrigin = getShippingOriginAddress({
+				fulfilledBy: cart.fulfilledBy,
+				workspace: funnel.workspace,
+			});
+
+			const shipFrom = {
+				state: shippingOrigin.state ?? '',
+				postalCode: shippingOrigin.postalCode ?? '',
+				countryCode: shippingOrigin.country ?? '',
+			};
+
+			const shipTo = {
+				country: geo.country,
+				state: geo.region,
+				city: geo.city,
+			};
+
+			try {
+				const [mainShippingResult, mainPlusBumpShippingResult] = await Promise.all([
+					getProductsShippingRateEstimate({
+						products: [
+							{ product: funnel.mainProduct, quantity: cart.mainProductQuantity },
+						],
+						shipFrom,
+						shipTo,
+					}),
+					!funnel.bumpProduct ?
+						Promise.resolve(null)
+					:	getProductsShippingRateEstimate({
+							products: [
+								{ product: funnel.mainProduct, quantity: cart.mainProductQuantity },
+								{
+									product: funnel.bumpProduct,
+									quantity: cart.bumpProductQuantity ?? 1,
+								},
+							],
+							shipFrom,
+							shipTo,
+						}),
+				]);
+
+				// Convert shipping from USD to workspace currency if Barely is fulfilling
+				const mainShippingAmount = convertShippingAmountIfNeeded(
+					mainShippingResult.lowestShippingPrice,
+					cart.fulfilledBy,
+					funnel.workspace.currency,
+				);
+				const mainPlusBumpShippingPrice =
+					!funnel.bumpProduct || !mainPlusBumpShippingResult ?
+						mainShippingAmount
+					:	convertShippingAmountIfNeeded(
+							mainPlusBumpShippingResult.lowestShippingPrice,
+							cart.fulfilledBy,
+							funnel.workspace.currency,
+						);
+
+				const updateCart: UpdateCart = {
+					id: cart.id,
+					mainShippingAmount,
+					bumpShippingPrice: mainPlusBumpShippingPrice - mainShippingAmount,
+				};
+
+				// Use the correct ship-from country for VAT calculation
+				const vat = getVatRateForCheckout(shippingOrigin.country, geo.country);
+
+				const amounts = getAmountsForCheckout(funnel, { ...cart, ...updateCart }, vat);
+
+				await dbPool(ctx.pool)
+					.update(Carts)
+					.set({ ...updateCart, ...amounts })
+					.where(eq(Carts.id, cart.id))
+					.returning();
+
+				return { success: true, calculated: true };
+			} catch (error) {
+				console.error('calculateInitialShipping error:', error);
+				return { success: false, calculated: false };
+			}
 		}),
 
 	buyUpsell: publicProcedure
