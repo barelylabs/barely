@@ -19,6 +19,7 @@ import { z } from 'zod/v4';
 import type { generateFileBlurHash } from '../../trigger/file-blurhash.trigger';
 import { getBrandKit } from '../../functions/brand-kit.fns';
 import {
+	convertShippingAmountIfNeeded,
 	createMainCartFromFunnel,
 	getCartById,
 	getFunnelByParams,
@@ -328,7 +329,7 @@ export const cartRoute = {
 					toPostalCode &&
 					toPostalCode !== cart.shippingAddressPostalCode
 				) {
-					const { lowestShippingPrice: mainShippingAmount } =
+					const { lowestShippingPrice: rawMainShippingAmount } =
 						await getProductsShippingRateEstimate({
 							products: [
 								{ product: funnel.mainProduct, quantity: cart.mainProductQuantity },
@@ -342,10 +343,17 @@ export const cartRoute = {
 							},
 						});
 
+					// Convert shipping from USD to workspace currency if Barely is fulfilling
+					const mainShippingAmount = convertShippingAmountIfNeeded(
+						rawMainShippingAmount,
+						cart.fulfilledBy,
+						funnel.workspace.currency,
+					);
+
 					updateCart.mainShippingAmount = mainShippingAmount;
 
-					const mainPlusBumpShippingPrice =
-						!funnel.bumpProduct ? mainShippingAmount : (
+					const rawMainPlusBumpShippingPrice =
+						!funnel.bumpProduct ? rawMainShippingAmount : (
 							await getProductsShippingRateEstimate({
 								products: [
 									{
@@ -366,6 +374,12 @@ export const cartRoute = {
 								},
 							}).then(({ lowestShippingPrice }) => lowestShippingPrice)
 						);
+
+					const mainPlusBumpShippingPrice = convertShippingAmountIfNeeded(
+						rawMainPlusBumpShippingPrice,
+						cart.fulfilledBy,
+						funnel.workspace.currency,
+					);
 
 					updateCart.bumpShippingPrice = mainPlusBumpShippingPrice - mainShippingAmount;
 				}
@@ -510,11 +524,20 @@ export const cartRoute = {
 					}),
 			]);
 
-			const mainShippingAmount = mainShippingResult.lowestShippingPrice;
+			// Convert shipping from USD to workspace currency if Barely is fulfilling
+			const mainShippingAmount = convertShippingAmountIfNeeded(
+				mainShippingResult.lowestShippingPrice,
+				cart.fulfilledBy,
+				funnel.workspace.currency,
+			);
 			const mainPlusBumpShippingPrice =
 				!funnel.bumpProduct || !mainPlusBumpShippingResult ?
 					mainShippingAmount
-				:	mainPlusBumpShippingResult.lowestShippingPrice;
+				:	convertShippingAmountIfNeeded(
+						mainPlusBumpShippingResult.lowestShippingPrice,
+						cart.fulfilledBy,
+						funnel.workspace.currency,
+					);
 
 			updateCart.mainShippingAmount = mainShippingAmount;
 			updateCart.bumpShippingPrice = mainPlusBumpShippingPrice - mainShippingAmount;

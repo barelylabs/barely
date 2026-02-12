@@ -23,6 +23,7 @@ import { sqlIncrement } from '@barely/db/utils';
 import { sendEmail } from '@barely/email';
 import { ReceiptEmailTemplate } from '@barely/email/templates/cart';
 import {
+	convertUsdToGbpCents,
 	formatMinorToMajorCurrency,
 	isProduction,
 	numToPaddedString,
@@ -393,7 +394,7 @@ export async function createMainCartFromFunnel({
 			countryCode: shippingOrigin.country ?? '',
 		};
 
-		const { lowestShippingPrice: mainShippingAmount } =
+		const { lowestShippingPrice: rawMainShippingAmount } =
 			await getProductsShippingRateEstimate({
 				products: [{ product: funnel.mainProduct, quantity: 1 }],
 				shipFrom: shipFromAddress,
@@ -404,10 +405,17 @@ export async function createMainCartFromFunnel({
 				},
 			});
 
+		// Convert shipping from USD to workspace currency if Barely is fulfilling
+		const mainShippingAmount = convertShippingAmountIfNeeded(
+			rawMainShippingAmount,
+			fulfilledBy,
+			funnel.workspace.currency,
+		);
+
 		cart.mainShippingAmount = mainShippingAmount;
 
-		const mainPlusBumpShippingPrice =
-			!funnel.bumpProduct ? mainShippingAmount : (
+		const rawMainPlusBumpShippingPrice =
+			!funnel.bumpProduct ? rawMainShippingAmount : (
 				await getProductsShippingRateEstimate({
 					products: [
 						{ product: funnel.mainProduct, quantity: 1 },
@@ -421,6 +429,12 @@ export async function createMainCartFromFunnel({
 					},
 				}).then(rates => rates.lowestShippingPrice)
 			);
+
+		const mainPlusBumpShippingPrice = convertShippingAmountIfNeeded(
+			rawMainPlusBumpShippingPrice,
+			fulfilledBy,
+			funnel.workspace.currency,
+		);
 
 		cart.bumpShippingPrice = mainPlusBumpShippingPrice - mainShippingAmount;
 	}
@@ -502,6 +516,23 @@ export async function getProductsShippingRateEstimate(props: {
 		rates,
 		lowestShippingPrice: rates[0]?.shipping_amount.amount ?? 0,
 	};
+}
+
+/**
+ * Convert shipping amount from USD to workspace currency if needed.
+ * When Barely fulfills orders from the US warehouse, shipping rates come back in USD.
+ * For GBP workspaces, we need to convert to GBP before storing.
+ */
+export function convertShippingAmountIfNeeded(
+	amountInCents: number,
+	fulfilledBy: 'barely' | 'artist',
+	workspaceCurrency: string,
+): number {
+	// Barely ships from US (USD), convert to GBP if workspace uses GBP
+	if (fulfilledBy === 'barely' && workspaceCurrency === 'gbp') {
+		return convertUsdToGbpCents(amountInCents);
+	}
+	return amountInCents;
 }
 
 /* email updates */
