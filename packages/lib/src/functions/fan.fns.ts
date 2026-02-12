@@ -5,6 +5,7 @@ import { tasks } from '@trigger.dev/sdk/v3';
 import { and, eq } from 'drizzle-orm';
 
 import type { handleFlow } from '../trigger/flow.trigger';
+import { checkUsageLimit, incrementUsage } from './usage.fns';
 
 export async function createFan(props: {
 	workspaceId: string;
@@ -49,10 +50,15 @@ export async function createFan(props: {
 
 	if (newFanFlowTriggers.length) {
 		for (const newFanFlowTrigger of newFanFlowTriggers) {
-			await tasks.trigger<typeof handleFlow>('handle-flow', {
-				triggerId: newFanFlowTrigger.id,
-				fanId: newFan.id,
-			});
+			// Check task usage limit before triggering flow
+			const usageResult = await checkUsageLimit(props.workspaceId, 'tasks');
+			if (usageResult.status !== 'blocked_200') {
+				await tasks.trigger<typeof handleFlow>('handle-flow', {
+					triggerId: newFanFlowTrigger.id,
+					fanId: newFan.id,
+				});
+				await incrementUsage(props.workspaceId, 'tasks', 1);
+			}
 		}
 	}
 

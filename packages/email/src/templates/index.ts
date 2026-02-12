@@ -15,3 +15,6 @@ export * from './invoice';
 
 // Export all NYC templates
 export * from './nyc';
+
+// Export all usage warning templates
+export * from './usage';

@@ -15,6 +15,7 @@ import { _Users_To_Workspaces } from '@barely/db/sql/user.sql';
 import { WorkspaceInvites } from '@barely/db/sql/workspace-invite.sql';
 import { Workspaces } from '@barely/db/sql/workspace.sql';
 import { sqlAnd, sqlStringContains } from '@barely/db/utils';
+import { pipe_workspaceEventBreakdown } from '@barely/tb/query';
 import { newId, raiseTRPCError } from '@barely/utils';
 import {
 	createWorkspaceSchema,
@@ -524,5 +525,26 @@ export const workspaceRoute = {
 			});
 
 			return { handleTaken: !!existingWorkspace };
+		}),
+
+	eventBreakdown: workspaceProcedure
+		.input(
+			z.object({
+				start: z.string(),
+				end: z.string(),
+			}),
+		)
+		.query(async ({ ctx, input }) => {
+			try {
+				const result = await pipe_workspaceEventBreakdown({
+					workspaceId: ctx.workspace.id,
+					start: input.start,
+					end: input.end,
+				});
+				return result.data;
+			} catch (error) {
+				console.error('Failed to fetch event breakdown from Tinybird:', error);
+				return []; // Fail open - don't break billing page if Tinybird is down
+			}
 		}),
 } satisfies TRPCRouterRecord;

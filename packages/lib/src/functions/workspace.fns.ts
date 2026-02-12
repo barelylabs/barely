@@ -308,6 +308,7 @@ export async function getUserWorkspacesById(
 							shippingAddressPhone: true,
 							barelyFulfillmentEligible: true,
 							barelyFulfillmentMode: true,
+							eligibleForPlus: true,
 						},
 						with: {
 							brandKit: true,
@@ -448,6 +449,7 @@ export async function getUserWorkspaceByHandle(
 							shippingAddressPhone: true,
 							barelyFulfillmentEligible: true,
 							barelyFulfillmentMode: true,
+							eligibleForPlus: true,
 						},
 						with: {
 							brandKit: true,

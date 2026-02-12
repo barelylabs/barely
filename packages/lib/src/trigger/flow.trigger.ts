@@ -13,9 +13,8 @@ import {
 	FlowRunActions,
 	Flows,
 	ProviderAccounts,
-	Workspaces,
 } from '@barely/db/sql';
-import { sqlAnd, sqlIncrement } from '@barely/db/utils';
+import { sqlAnd } from '@barely/db/utils';
 import { sendEmail } from '@barely/email';
 import {
 	getAbsoluteUrl,
@@ -25,11 +24,17 @@ import {
 	raise,
 } from '@barely/utils';
 import { neonConfig } from '@neondatabase/serverless';
-import { logger, task, wait } from '@trigger.dev/sdk/v3';
+import { logger, task, tasks, wait } from '@trigger.dev/sdk/v3';
 import { and, asc, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 import ws from 'ws';
 
+import type { sendUsageWarning } from './workspace-usage';
 import { getAssetsFromMdx } from '../functions/mdx.fns';
+import {
+	checkUsageLimit,
+	getBlockedMessage,
+	incrementUsage,
+} from '../functions/usage.fns';
 import { addToMailchimpAudience } from '../integrations/mailchimp/mailchimp.endpts.audiences';
 import { renderMarkdownToReactEmail } from '../mdx/email-template.mdx';
 
@@ -714,6 +719,48 @@ async function handleSendEmailFromTemplateToFan({
 		return { nextAction, emailSent: false };
 	}
 
+	// Check email usage limits before sending
+	const usageResult = await checkUsageLimit(workspaceId, 'emails');
+
+	// Hard block at 200%
+	if (usageResult.status === 'blocked_200') {
+		const errorMessage = getBlockedMessage('emails', usageResult.limit, 'your current');
+		logger.warn(`Flow email blocked for workspace ${workspaceId}: ${errorMessage}`);
+
+		const { nextAction } = await getNextAction({
+			flowId: action.flowId,
+			currentNodeId: action.id,
+		});
+
+		await dbPool(getPool())
+			.update(FlowRunActions)
+			.set({
+				status: 'skipped',
+				skippedReason: 'email usage limit exceeded (200%)',
+			})
+			.where(eq(FlowRunActions.id, flowRunActionId));
+
+		return { nextAction, emailSent: false };
+	}
+
+	// Trigger warning email if needed (async, don't await)
+	if (usageResult.shouldSendEmail) {
+		const threshold =
+			usageResult.status === 'warning_100' ? 100
+			: usageResult.status === 'warning_80' ? 80
+			: null;
+		if (threshold) {
+			logger.info(
+				`Triggering ${threshold}% email usage warning for workspace ${workspaceId}`,
+			);
+			void tasks.trigger<typeof sendUsageWarning>('send-usage-warning-email', {
+				workspaceId,
+				limitType: 'emails',
+				threshold,
+			});
+		}
+	}
+
 	const { firstName, lastName } = parseFullName(fan.fullName);
 
 	const { cartFunnels, landingPages, links, pressKits } = await getAssetsFromMdx(
@@ -806,10 +853,7 @@ async function handleSendEmailFromTemplateToFan({
 			flowRunActionId,
 		});
 
-		await dbPool(getPool())
-			.update(Workspaces)
-			.set({ emailUsage: sqlIncrement(Workspaces.emailUsage) })
-			.where(eq(Workspaces.id, workspaceId));
+		await incrementUsage(workspaceId, 'emails', 1);
 	}
 
 	const { nextAction } = await getNextAction({

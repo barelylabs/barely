@@ -13,17 +13,50 @@ import {
 } from '@barely/email/templates/auth';
 import { getAbsoluteUrl, newId } from '@barely/utils';
 import { acceptInviteSchema, inviteMemberSchema } from '@barely/validators';
+import { tasks } from '@trigger.dev/sdk/v3';
+import { TRPCError } from '@trpc/server';
 import { and, eq, gt, or } from 'drizzle-orm';
 
 import { createMagicLink } from '@barely/auth/utils';
 
+import type { sendUsageWarning } from '../../trigger';
 import { libEnv } from '../../../env';
+import { checkUsageLimit, getBlockedMessage } from '../../functions/usage.fns';
 import { privateProcedure, workspaceProcedure } from '../trpc';
 
 export const workspaceInviteRoute = {
 	inviteMember: workspaceProcedure
 		.input(inviteMemberSchema)
 		.mutation(async ({ ctx, input }) => {
+			// Check usage limits before inviting member
+			const usageResult = await checkUsageLimit(ctx.workspace.id, 'members');
+
+			// Handle unlimited (some plans have unlimited members)
+			if (!usageResult.isUnlimited) {
+				// Hard block at 200%
+				if (usageResult.status === 'blocked_200') {
+					throw new TRPCError({
+						code: 'FORBIDDEN',
+						message: getBlockedMessage('members', usageResult.limit, ctx.workspace.plan),
+					});
+				}
+
+				// Trigger warning email if needed (async, don't await)
+				if (usageResult.shouldSendEmail) {
+					const threshold =
+						usageResult.status === 'warning_100' ? 100
+						: usageResult.status === 'warning_80' ? 80
+						: null;
+					if (threshold) {
+						void tasks.trigger<typeof sendUsageWarning>('send-usage-warning-email', {
+							workspaceId: ctx.workspace.id,
+							limitType: 'members',
+							threshold,
+						});
+					}
+				}
+			}
+
 			const expiresAt = new Date(Date.now() + TWO_WEEKS_IN_SECONDS * 1000); // 2 weeks
 
 			// Try to find existing user

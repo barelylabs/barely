@@ -24,7 +24,7 @@ export const workspaceStripeRoute = {
 					'bedroom.plus',
 					'rising.plus',
 					'breakout.plus',
-					'agency',
+					'invoice.pro',
 				]),
 				billingCycle: z.enum(['monthly', 'yearly']),
 				successPath: z.string().optional(),

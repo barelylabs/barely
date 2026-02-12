@@ -1,14 +1,65 @@
 import { dbHttp } from '@barely/db/client';
 import { Workspaces } from '@barely/db/sql';
-import { schedules } from '@trigger.dev/sdk/v3';
-import { gte, or } from 'drizzle-orm';
+import { logger, schedules, task } from '@trigger.dev/sdk/v3';
+import { eq, or } from 'drizzle-orm';
 
+import type { UsageLimitType } from '../functions/usage.fns';
+import { sendUsageWarningEmail } from '../functions/usage.fns';
+
+/**
+ * Daily scheduled task that resets usage counters for workspaces
+ * on their individual billing cycle reset day.
+ *
+ * Runs daily and only resets workspaces where today matches their billingCycleStart.
+ *
+ * Resets monthly counters:
+ * - eventUsage, emailUsage, linkUsage, invoiceUsage, taskUsage, fileUsage_billingCycle
+ * - usageWarnings (JSONB tracking which warning emails have been sent)
+ *
+ * Does NOT reset cumulative counters:
+ * - fanUsage (total fans ever added)
+ * - pixelUsage (current active pixels - counted from table)
+ * - fileUsage_total (total storage ever used)
+ */
 export const resetWorkspaceUsage = schedules.task({
 	id: 'reset-workspace-usage',
 
 	run: async () => {
-		// console.log('Resetting workspace usage (console)', { payload, ctx });
-		// logger.log('Resetting workspace usage (logger)');
+		// Get today's day of month (1-31)
+		const today = new Date();
+		const todayDay = today.getDate();
+
+		logger.info(`Running billing cycle reset for day ${todayDay}`);
+
+		// Find workspaces where today is their billing cycle reset day
+		// Build conditions array to avoid passing undefined to or()
+		const conditions = [eq(Workspaces.billingCycleStart, todayDay)];
+
+		// On day 1, also reset workspaces with billingCycleStart = 0 (default)
+		if (todayDay === 1) {
+			conditions.push(eq(Workspaces.billingCycleStart, 0));
+		}
+
+		const workspacesToReset = await dbHttp.query.Workspaces.findMany({
+			where: conditions.length > 1 ? or(...conditions) : conditions[0],
+			columns: {
+				id: true,
+				name: true,
+				billingCycleStart: true,
+			},
+		});
+
+		if (workspacesToReset.length === 0) {
+			logger.info(`No workspaces have billing cycle reset on day ${todayDay}`);
+			return { resetCount: 0 };
+		}
+
+		logger.info(
+			`Found ${workspacesToReset.length} workspaces to reset: ${workspacesToReset.map(w => w.name || w.id).join(', ')}`,
+		);
+
+		// Reset usage for each workspace
+		const workspaceIds = workspacesToReset.map(w => w.id);
 
 		await dbHttp
 			.update(Workspaces)
@@ -18,15 +69,52 @@ export const resetWorkspaceUsage = schedules.task({
 				linkUsage: 0,
 				invoiceUsage: 0,
 				fileUsage_billingCycle: 0,
+				taskUsage: 0,
+				usageWarnings: {}, // Reset warnings for new billing cycle
 			})
-			.where(
-				or(
-					gte(Workspaces.eventUsage, 0),
-					gte(Workspaces.emailUsage, 0),
-					gte(Workspaces.linkUsage, 0),
-					gte(Workspaces.invoiceUsage, 0),
-					gte(Workspaces.fileUsage_billingCycle, 0),
-				),
-			); // reset the usage to 0 for all workspaces that have any usage
+			.where(or(...workspaceIds.map(id => eq(Workspaces.id, id))));
+
+		logger.info(`Reset usage counters for ${workspacesToReset.length} workspaces`);
+
+		return { resetCount: workspacesToReset.length, workspaceIds };
+	},
+});
+
+/**
+ * Send usage warning email task
+ * Triggered when a workspace reaches usage thresholds (80%, 100%, 200%)
+ */
+export const sendUsageWarning = task({
+	id: 'send-usage-warning-email',
+	retry: {
+		maxAttempts: 3,
+		minTimeoutInMs: 1000,
+		maxTimeoutInMs: 10000,
+	},
+	run: async ({
+		workspaceId,
+		limitType,
+		threshold,
+	}: {
+		workspaceId: string;
+		limitType: UsageLimitType;
+		threshold: 80 | 100 | 200;
+	}) => {
+		console.log(
+			`Sending usage warning email for workspace ${workspaceId}, limit type: ${limitType}, threshold: ${threshold}%`,
+		);
+
+		const result = await sendUsageWarningEmail(workspaceId, limitType, threshold);
+
+		if (!result.success) {
+			console.error(`Failed to send usage warning email: ${result.error}`);
+			throw new Error(result.error ?? 'Unknown error sending usage warning email');
+		}
+
+		console.log(
+			`Successfully sent ${threshold}% usage warning email for ${limitType} to workspace ${workspaceId}`,
+		);
+
+		return { success: true, threshold, limitType, workspaceId };
 	},
 });

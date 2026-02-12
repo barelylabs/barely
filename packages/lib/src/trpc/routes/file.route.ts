@@ -13,6 +13,8 @@ import {
 } from '@barely/files';
 import { newId, raiseTRPCError } from '@barely/utils';
 import { selectWorkspaceFilesSchema, uploadFileSchema } from '@barely/validators';
+import { tasks } from '@trigger.dev/sdk/v3';
+import { TRPCError } from '@trpc/server';
 import { lookup } from '@uploadthing/mime-types';
 import { ALLOWED_FILE_TYPES, getTypeFromFileName } from '@uploadthing/shared';
 import { and, asc, desc, eq, gt, inArray, lt, notInArray, or } from 'drizzle-orm';
@@ -20,7 +22,9 @@ import { z } from 'zod/v4';
 
 import { getWorkspaceByHandle } from '@barely/auth/utils';
 
+import type { sendUsageWarning } from '../../trigger';
 import { libEnv } from '../../../env';
+import { checkUsageLimit, getBlockedMessage } from '../../functions/usage.fns';
 import { incrementWorkspaceFileUsage } from '../../functions/workspace.fns';
 import { privateProcedure, workspaceProcedure } from '../trpc';
 
@@ -96,14 +100,82 @@ export const fileRoute = {
 			}),
 		)
 		.mutation(async ({ input, ctx }) => {
-			console.log('input => ', input);
+			// Calculate total size of files being uploaded
+			const totalUploadSize = input.files.reduce((acc, f) => acc + f.size, 0);
+
+			// Check monthly storage usage limits before allowing upload
+			const monthlyUsageResult = await checkUsageLimit(
+				ctx.workspace.id,
+				'storage',
+				totalUploadSize,
+			);
+
+			// Hard block at 200% of monthly limit
+			if (monthlyUsageResult.status === 'blocked_200') {
+				throw new TRPCError({
+					code: 'FORBIDDEN',
+					message: getBlockedMessage(
+						'storage',
+						monthlyUsageResult.limit,
+						ctx.workspace.plan,
+					),
+				});
+			}
+
+			// Check total storage limit before allowing upload
+			const totalUsageResult = await checkUsageLimit(
+				ctx.workspace.id,
+				'totalStorage',
+				totalUploadSize,
+			);
+
+			// Hard block at 200% of total storage limit
+			if (totalUsageResult.status === 'blocked_200') {
+				throw new TRPCError({
+					code: 'FORBIDDEN',
+					message: getBlockedMessage(
+						'totalStorage',
+						totalUsageResult.limit,
+						ctx.workspace.plan,
+					),
+				});
+			}
+
+			// Trigger warning emails if needed (async, don't await)
+			if (monthlyUsageResult.shouldSendEmail) {
+				const threshold =
+					monthlyUsageResult.status === 'warning_100' ? 100
+					: monthlyUsageResult.status === 'warning_80' ? 80
+					: null;
+				if (threshold) {
+					void tasks.trigger<typeof sendUsageWarning>('send-usage-warning-email', {
+						workspaceId: ctx.workspace.id,
+						limitType: 'storage',
+						threshold,
+					});
+				}
+			}
+
+			if (totalUsageResult.shouldSendEmail) {
+				const threshold =
+					totalUsageResult.status === 'warning_100' ? 100
+					: totalUsageResult.status === 'warning_80' ? 80
+					: null;
+				if (threshold) {
+					void tasks.trigger<typeof sendUsageWarning>('send-usage-warning-email', {
+						workspaceId: ctx.workspace.id,
+						limitType: 'totalStorage',
+						threshold,
+					});
+				}
+			}
+
 			const dbFileRecords: FileRecord[] = [];
 
 			const presigned: Presigned[] = [];
 
 			await Promise.all(
 				input.files.map(async f => {
-					console.log('f', f);
 					const fileId = newId('file');
 
 					const s3Key = getFileKey({
@@ -193,7 +265,6 @@ export const fileRoute = {
 			}),
 		)
 		.mutation(async ({ input, ctx }) => {
-			console.log('completing multipart upload', input);
 			await completeMultipartUpload(input);
 
 			const uploadedFiles = await dbHttp

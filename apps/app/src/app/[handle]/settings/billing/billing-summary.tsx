@@ -2,60 +2,14 @@
 
 import { useRouter } from 'next/navigation';
 import { useUsage, useWorkspaceWithAll } from '@barely/hooks';
-import { getPlanNameFromId, isInvoiceVariant, nFormatter } from '@barely/utils';
+import { getPlanNameFromId, isInvoiceVariant } from '@barely/utils';
 
 import { Badge } from '@barely/ui/badge';
 import { Button } from '@barely/ui/button';
-import { Progress } from '@barely/ui/progress';
-import { InfoTooltip } from '@barely/ui/tooltip';
 import { Text } from '@barely/ui/typography';
 
-// Co-located component: Link usage summary
-function LinkUsageSummary() {
-	const { linkUsage, usageLimits } = useUsage();
-
-	return (
-		<div className='flex flex-col space-y-2 border-b px-6 py-10'>
-			<div className='flex items-center space-x-2'>
-				<Text variant='lg/semibold'>Total Link Clicks</Text>
-				<InfoTooltip content='Number of billable link clicks in the current billing cycle.' />
-			</div>
-
-			<Text variant='sm/normal'>
-				{nFormatter(linkUsage)} / {nFormatter(usageLimits.linkClicksPerMonth)} clicks (
-				{((linkUsage / usageLimits.linkClicksPerMonth) * 100).toFixed(1)}%)
-			</Text>
-			<Progress size='sm' value={linkUsage} max={usageLimits.linkClicksPerMonth} />
-		</div>
-	);
-}
-
-// Co-located component: Invoice usage summary
-function InvoiceUsageSummary() {
-	const { invoiceUsage, usageLimits } = useUsage();
-	const invoiceLimit = usageLimits.invoicesPerMonth;
-	const isUnlimited = invoiceLimit === Number.MAX_SAFE_INTEGER;
-
-	return (
-		<div className='flex flex-col space-y-2 border-b px-6 py-10'>
-			<div className='flex items-center space-x-2'>
-				<Text variant='lg/semibold'>Invoices Created</Text>
-				<InfoTooltip content='Number of invoices created in the current billing cycle.' />
-			</div>
-
-			<Text variant='sm/normal'>
-				{isUnlimited ?
-					`${nFormatter(invoiceUsage)} invoices created`
-				:	<>
-						{nFormatter(invoiceUsage)} / {nFormatter(invoiceLimit)} invoices (
-						{((invoiceUsage / invoiceLimit) * 100).toFixed(1)}%)
-					</>
-				}
-			</Text>
-			{!isUnlimited && <Progress size='sm' value={invoiceUsage} max={invoiceLimit} />}
-		</div>
-	);
-}
+import { EventBreakdown } from './_components/event-breakdown';
+import { UsageMetricCard } from './_components/usage-metric-card';
 
 // Co-located component: Upgrade prompt
 function UpgradePrompt() {
@@ -100,11 +54,12 @@ function UpgradePrompt() {
 
 export function BillingSummary() {
 	const { plan } = useWorkspaceWithAll();
-	const { firstDay, lastDay } = useUsage();
+	const { firstDay, lastDay, metrics } = useUsage();
 	const isInvoice = isInvoiceVariant();
 
 	return (
 		<div className='flex flex-col rounded-lg border'>
+			{/* Plan Info Header */}
 			<div className='flex flex-col space-y-2 border-b px-6 py-10'>
 				<Text variant='2xl/semibold'>Plan & Usage</Text>
 
@@ -115,11 +70,80 @@ export function BillingSummary() {
 				</Text>
 			</div>
 
-			{/* Show invoice usage in both app variants */}
-			{(isInvoice || plan !== 'free') && <InvoiceUsageSummary />}
+			{/* Usage Metrics Grid */}
+			<div className='grid grid-cols-1 gap-6 border-b px-6 py-10 md:grid-cols-2'>
+				{/* Invoice usage - shown in both app variants */}
+				{(isInvoice || plan !== 'free') && (
+					<UsageMetricCard
+						label='Invoices Created'
+						current={metrics.invoices.current}
+						limit={metrics.invoices.limit}
+						unit='invoices'
+						isUnlimited={metrics.invoices.isUnlimited}
+						tooltipContent='Number of invoices created in the current billing cycle.'
+						showUpgradeCta={false}
+					/>
+				)}
 
-			{/* Only show link usage in full app */}
-			{!isInvoice && <LinkUsageSummary />}
+				{/* Full app metrics */}
+				{!isInvoice && (
+					<>
+						{/* Events with Breakdown - spans full width */}
+						<div className='col-span-1 md:col-span-2'>
+							<UsageMetricCard
+								label='Tracked Events'
+								current={metrics.events.current}
+								limit={metrics.events.limit}
+								unit='events'
+								isUnlimited={metrics.events.isUnlimited}
+								tooltipContent='Total tracked events in the current billing cycle. Includes link clicks, page views, and other interactions.'
+								showUpgradeCta={false}
+							/>
+							<EventBreakdown />
+						</div>
+
+						<UsageMetricCard
+							label='Links Created'
+							current={metrics.links.current}
+							limit={metrics.links.limit}
+							unit='links'
+							isUnlimited={metrics.links.isUnlimited}
+							tooltipContent='Number of new links created in the current billing cycle.'
+							showUpgradeCta={false}
+						/>
+
+						<UsageMetricCard
+							label='Emails Sent'
+							current={metrics.emails.current}
+							limit={metrics.emails.limit}
+							unit='emails'
+							isUnlimited={metrics.emails.isUnlimited}
+							tooltipContent='Number of emails sent in the current billing cycle.'
+							showUpgradeCta={false}
+						/>
+
+						<UsageMetricCard
+							label='Fans/Contacts'
+							current={metrics.fans.current}
+							limit={metrics.fans.limit}
+							unit='fans'
+							isUnlimited={metrics.fans.isUnlimited}
+							tooltipContent='Total number of fans and contacts in your workspace.'
+							showUpgradeCta={false}
+						/>
+
+						<UsageMetricCard
+							label='Team Members'
+							current={metrics.members.current}
+							limit={metrics.members.limit}
+							unit='members'
+							isUnlimited={metrics.members.isUnlimited}
+							tooltipContent='Total number of team members in your workspace.'
+							showUpgradeCta={false}
+						/>
+					</>
+				)}
+			</div>
 
 			<UpgradePrompt />
 		</div>

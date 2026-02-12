@@ -7,9 +7,6 @@ export const WORKSPACE_PLAN_TYPES = [
 	'rising.plus',
 	'breakout.plus',
 	'invoice.pro',
-	// deprecated
-	'agency',
-	'pro',
 ] as const;
 
 export type PlanType = (typeof WORKSPACE_PLAN_TYPES)[number];
@@ -50,6 +47,7 @@ export interface Plan {
 		retargetingPixels: number;
 
 		newLinksPerMonth: number;
+		/** @deprecated Clicks are now tracked as part of trackedEventsPerMonth. Use event breakdown for visibility. */
 		linkClicksPerMonth: number;
 
 		emailsPerDay: number;
@@ -62,6 +60,9 @@ export interface Plan {
 
 		invoicesPerMonth: number;
 		invoiceClients: number;
+
+		storagePerMonth: number; // bytes - new uploads allowed per billing cycle
+		totalStorage: number; // bytes - maximum cumulative storage allowed
 	};
 	cartFeePercentage: number;
 
@@ -109,6 +110,8 @@ const FREE_PLAN: Plan = {
 		tasksPerMonth: 100,
 		invoicesPerMonth: 3,
 		invoiceClients: 10,
+		storagePerMonth: 200 * 1024 * 1024, // 200MB
+		totalStorage: 500 * 1024 * 1024, // 500MB
 	},
 	cartFeePercentage: 15,
 
@@ -167,7 +170,7 @@ const BEDROOM_PLAN: Plan = {
 		'For bedroom producers, solo artists, and bands just starting their journey (0-10K monthly listeners).',
 	productId: {
 		test: 'prod_ShKXpl67BoBRaQ',
-		production: 'fixme',
+		production: 'prod_Txeo2HSM6HnJx4',
 	},
 	usageLimits: {
 		fans: 2500,
@@ -187,6 +190,9 @@ const BEDROOM_PLAN: Plan = {
 
 		invoicesPerMonth: 50,
 		invoiceClients: 100,
+
+		storagePerMonth: 1 * 1024 * 1024 * 1024, // 1GB
+		totalStorage: 5 * 1024 * 1024 * 1024, // 5GB
 	},
 	cartFeePercentage: 12,
 
@@ -207,14 +213,14 @@ const BEDROOM_PLAN: Plan = {
 			amount: 30,
 			priceIds: {
 				test: 'price_1Rlvs7HDMmzntRhpeTLBPOIK',
-				production: 'fixme',
+				production: 'price_1SzjV0HDMmzntRhpvQKmHeC8',
 			},
 		},
 		yearly: {
 			amount: 25 * 12,
 			priceIds: {
 				test: 'price_1RlvwUHDMmzntRhpdK3mUc7A',
-				production: 'fixme',
+				production: 'price_1SzjVSHDMmzntRhpiwbdyqbv',
 			},
 		},
 	},
@@ -244,7 +250,7 @@ const RISING_PLAN: Plan = {
 	description: 'For growing artists ready to scale (10-50K monthly listeners).',
 	productId: {
 		test: 'prod_ShKfQ5DEx73MmF',
-		production: 'fixme',
+		production: 'prod_TxevMytIBe6fon',
 	},
 	usageLimits: {
 		fans: 5000,
@@ -264,6 +270,9 @@ const RISING_PLAN: Plan = {
 
 		invoicesPerMonth: 200,
 		invoiceClients: 500,
+
+		storagePerMonth: 5 * 1024 * 1024 * 1024, // 5GB
+		totalStorage: 25 * 1024 * 1024 * 1024, // 25GB
 	},
 	cartFeePercentage: 10,
 
@@ -285,14 +294,14 @@ const RISING_PLAN: Plan = {
 			amount: 90,
 			priceIds: {
 				test: 'price_1RlvzlHDMmzntRhpot7OXCvS',
-				production: 'fixme',
+				production: 'price_1SzjbtHDMmzntRhprcbxD20W',
 			},
 		},
 		yearly: {
 			amount: 75 * 12,
 			priceIds: {
 				test: 'price_1Rlw0gHDMmzntRhpIS3BGjkK',
-				production: 'fixme',
+				production: 'price_1SzjcCHDMmzntRhpAZVE4aig',
 			},
 		},
 	},
@@ -323,7 +332,7 @@ const BREAKOUT_PLAN: Plan = {
 		'For established artists ready for aggressive growth (50K+ monthly listeners).',
 	productId: {
 		test: 'prod_ShKhssDV4rE47O',
-		production: 'fixme',
+		production: 'prod_TxeweGMPwBFeVm',
 	},
 	usageLimits: {
 		fans: 10000,
@@ -343,6 +352,9 @@ const BREAKOUT_PLAN: Plan = {
 
 		invoicesPerMonth: Number.MAX_SAFE_INTEGER,
 		invoiceClients: Number.MAX_SAFE_INTEGER,
+
+		storagePerMonth: 20 * 1024 * 1024 * 1024, // 20GB
+		totalStorage: 100 * 1024 * 1024 * 1024, // 100GB
 	},
 	cartFeePercentage: 6,
 
@@ -364,14 +376,14 @@ const BREAKOUT_PLAN: Plan = {
 			amount: 300,
 			priceIds: {
 				test: 'price_1Rlw1vHDMmzntRhphNGpdipv',
-				production: 'fixme',
+				production: 'price_1Szjd0HDMmzntRhpQzAUpny0',
 			},
 		},
 		yearly: {
 			amount: 250 * 12,
 			priceIds: {
 				test: 'price_1Rlw2hHDMmzntRhpkUG4wGbM',
-				production: 'fixme',
+				production: 'price_1SzjdNHDMmzntRhpE3gZv0CW',
 			},
 		},
 	},
@@ -403,7 +415,7 @@ const BEDROOM_PLUS_PLAN: Plan = {
 		'Learn the Scientific Method for Music Marketing. Perfect for bedroom producers, solo artists, and bands just starting their journey (0-10K monthly listeners).',
 	productId: {
 		test: 'prod_ShKjzyXbIjmMEL',
-		production: 'fixme',
+		production: 'prod_Txey7RdoUEQFHi',
 	},
 	usageLimits: {
 		fans: 2500,
@@ -423,6 +435,9 @@ const BEDROOM_PLUS_PLAN: Plan = {
 
 		invoicesPerMonth: 50,
 		invoiceClients: 100,
+
+		storagePerMonth: 1 * 1024 * 1024 * 1024, // 1GB (same as Bedroom)
+		totalStorage: 5 * 1024 * 1024 * 1024, // 5GB (same as Bedroom)
 	},
 	cartFeePercentage: 10,
 
@@ -444,14 +459,14 @@ const BEDROOM_PLUS_PLAN: Plan = {
 			amount: 200,
 			priceIds: {
 				test: 'price_1Rlw4CHDMmzntRhpYb1kOwD2',
-				production: 'fixme',
+				production: 'price_1SzjeVHDMmzntRhpOy4yrqcW',
 			},
 		},
 		yearly: {
 			amount: 165 * 12,
 			priceIds: {
 				test: 'price_1Rlw4fHDMmzntRhpcizF3ulE',
-				production: 'fixme',
+				production: 'price_1SzjemHDMmzntRhp0CXxI518',
 			},
 		},
 	},
@@ -479,7 +494,7 @@ const RISING_PLUS_PLAN: Plan = {
 		'Professional Campaign Engineering. Perfect for growing artists ready to scale (10-50K monthly listeners).',
 	productId: {
 		test: 'prod_ShKm91q39B6mii',
-		production: 'fixme',
+		production: 'prod_TxezRHktqwlWKI',
 	},
 	usageLimits: {
 		fans: 5000,
@@ -499,6 +514,9 @@ const RISING_PLUS_PLAN: Plan = {
 
 		invoicesPerMonth: 200,
 		invoiceClients: 500,
+
+		storagePerMonth: 5 * 1024 * 1024 * 1024, // 5GB (same as Rising)
+		totalStorage: 25 * 1024 * 1024 * 1024, // 25GB (same as Rising)
 	},
 	cartFeePercentage: 8,
 
@@ -520,14 +538,14 @@ const RISING_PLUS_PLAN: Plan = {
 			amount: 750,
 			priceIds: {
 				test: 'price_1Rlw6THDMmzntRhpBiuodrAw',
-				production: 'fixme',
+				production: 'price_1SzjfOHDMmzntRhpIItqCV70',
 			},
 		},
 		yearly: {
 			amount: 750 * 10,
 			priceIds: {
 				test: 'price_1Rlw7tHDMmzntRhpVJ9g6GEf',
-				production: 'fixme',
+				production: 'price_1SzjfgHDMmzntRhpAfaEeT4Y',
 			},
 		},
 	},
@@ -556,7 +574,7 @@ const BREAKOUT_PLUS_PLAN: Plan = {
 		'Maximum Growth Engineering. Perfect for established artists ready for aggressive growth (50K+ monthly listeners).',
 	productId: {
 		test: 'prod_ShKpMfE7KJqteF',
-		production: 'fixme',
+		production: 'prod_Txf0wBNF8ZpgfR',
 	},
 	usageLimits: {
 		fans: Number.MAX_SAFE_INTEGER,
@@ -576,6 +594,9 @@ const BREAKOUT_PLUS_PLAN: Plan = {
 
 		invoicesPerMonth: Number.MAX_SAFE_INTEGER,
 		invoiceClients: Number.MAX_SAFE_INTEGER,
+
+		storagePerMonth: 20 * 1024 * 1024 * 1024, // 20GB (same as Breakout)
+		totalStorage: 100 * 1024 * 1024 * 1024, // 100GB (same as Breakout)
 	},
 	cartFeePercentage: 6,
 
@@ -597,14 +618,14 @@ const BREAKOUT_PLUS_PLAN: Plan = {
 			amount: 1800,
 			priceIds: {
 				test: 'price_1Rlw9NHDMmzntRhpPruiNcJy',
-				production: 'fixme',
+				production: 'price_1SzjgKHDMmzntRhpSSD7gNdz',
 			},
 		},
 		yearly: {
 			amount: 1800 * 10,
 			priceIds: {
 				test: 'price_1RlwAGHDMmzntRhpk0fXofIu',
-				production: 'fixme',
+				production: 'price_1SzjgdHDMmzntRhpe1YEe9Wu',
 			},
 		},
 	},
@@ -632,7 +653,7 @@ const INVOICE_PRO_PLAN: Plan = {
 	description: 'Professional invoicing with recurring billing and automation',
 	productId: {
 		test: 'prod_invoice_pro_test',
-		production: 'fixme',
+		production: 'prod_Txf4YDcKhcTd0G',
 	},
 	usageLimits: {
 		fans: 100, // minimal for invoice-only plan
@@ -652,6 +673,9 @@ const INVOICE_PRO_PLAN: Plan = {
 
 		invoicesPerMonth: Number.MAX_SAFE_INTEGER,
 		invoiceClients: Number.MAX_SAFE_INTEGER,
+
+		storagePerMonth: 200 * 1024 * 1024, // 200MB (same as Free)
+		totalStorage: 500 * 1024 * 1024, // 500MB (same as Free)
 	},
 	cartFeePercentage: 15, // not applicable for invoice-only
 
@@ -672,14 +696,14 @@ const INVOICE_PRO_PLAN: Plan = {
 			amount: 9,
 			priceIds: {
 				test: 'price_invoice_pro_monthly_test',
-				production: 'fixme',
+				production: 'price_1SzjkhHDMmzntRhpufIFDzh4',
 			},
 		},
 		yearly: {
 			amount: 90, // $7.50/month when billed yearly
 			priceIds: {
 				test: 'price_invoice_pro_yearly_test',
-				production: 'fixme',
+				production: 'price_1SzjksHDMmzntRhp7fan3dl1',
 			},
 		},
 	},
@@ -706,53 +730,4 @@ export const WORKSPACE_PLANS = new Map<PlanType, Plan>([
 	['rising.plus', RISING_PLUS_PLAN],
 	['breakout.plus', BREAKOUT_PLUS_PLAN],
 	['invoice.pro', INVOICE_PRO_PLAN],
-	// deprecated
-	[
-		'agency',
-		{
-			...BREAKOUT_PLUS_PLAN,
-			id: 'agency',
-			name: 'Agency',
-			price: {
-				monthly: {
-					amount: 1800,
-					priceIds: {
-						test: 'fixme',
-						production: 'fixme',
-					},
-				},
-				yearly: {
-					amount: 1800,
-					priceIds: {
-						test: 'fixme',
-						production: 'fixme',
-					},
-				},
-			},
-		},
-	],
-	[
-		'pro',
-		{
-			...BREAKOUT_PLUS_PLAN,
-			id: 'pro',
-			name: 'Pro',
-			price: {
-				monthly: {
-					amount: 1800,
-					priceIds: {
-						test: 'fixme',
-						production: 'fixme',
-					},
-				},
-				yearly: {
-					amount: 1800,
-					priceIds: {
-						test: 'fixme',
-						production: 'fixme',
-					},
-				},
-			},
-		},
-	],
 ]);

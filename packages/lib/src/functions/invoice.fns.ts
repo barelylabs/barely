@@ -1,10 +1,11 @@
-import { WORKSPACE_PLANS } from '@barely/const';
 import { dbHttp } from '@barely/db/client';
 import { Invoices, Workspaces } from '@barely/db/sql';
-import { getFirstAndLastDayOfBillingCycle, raise } from '@barely/utils';
-import { and, desc, eq, isNull, sql } from 'drizzle-orm';
+import { tasks } from '@trigger.dev/sdk/v3';
+import { and, desc, eq, isNull } from 'drizzle-orm';
 
+import type { sendUsageWarning } from '../trigger';
 import { libEnv } from '../../env';
+import { checkUsageLimit, getBlockedMessage, incrementUsage } from './usage.fns';
 
 export async function getInvoiceById({
 	invoiceId,
@@ -72,7 +73,7 @@ export async function getInvoiceById({
 }
 
 export async function checkInvoiceUsageAndIncrement(workspaceId: string) {
-	// Get the workspace with current usage and plan
+	// Get the workspace to check plan for error message
 	const workspace = await dbHttp.query.Workspaces.findFirst({
 		where: eq(Workspaces.id, workspaceId),
 	});
@@ -81,77 +82,31 @@ export async function checkInvoiceUsageAndIncrement(workspaceId: string) {
 		throw new Error('Workspace not found');
 	}
 
-	// Get the plan details
-	const plan = WORKSPACE_PLANS.get(workspace.plan);
-	if (!plan) {
-		throw new Error('Invalid workspace plan');
+	// Check usage limits using unified function
+	const usageResult = await checkUsageLimit(workspaceId, 'invoices');
+
+	// Hard block at 200%
+	if (usageResult.status === 'blocked_200') {
+		throw new Error(getBlockedMessage('invoices', usageResult.limit, workspace.plan));
 	}
 
-	// Get the usage limit, considering override
-	const invoiceLimit =
-		workspace.invoiceUsageLimitOverride ?? plan.usageLimits.invoicesPerMonth;
-
-	// Check if we're at the limit (unless it's unlimited)
-	if (
-		invoiceLimit !== Number.MAX_SAFE_INTEGER &&
-		workspace.invoiceUsage >= invoiceLimit
-	) {
-		// Check if we need to reset based on billing cycle
-		const { firstDay } = getFirstAndLastDayOfBillingCycle(
-			workspace.billingCycleStart ?? 0,
-		);
-
-		// Count invoices created this billing cycle
-		const invoicesThisCycle = await dbHttp
-			.select({ count: sql<number>`count(*)` })
-			.from(Invoices)
-			.where(
-				sql`${Invoices.workspaceId} = ${workspaceId} AND ${Invoices.createdAt} >= ${firstDay}`,
-			);
-
-		const currentCycleCount = invoicesThisCycle[0]?.count ?? 0;
-
-		// If the count in the database doesn't match our stored usage,
-		// it might be a new billing cycle - update the stored usage
-		if (currentCycleCount < workspace.invoiceUsage) {
-			// Reset the counter for new billing cycle
-			await dbHttp
-				.update(Workspaces)
-				.set({ invoiceUsage: currentCycleCount })
-				.where(eq(Workspaces.id, workspaceId));
-
-			// Re-check if we're still at the limit
-			if (currentCycleCount >= invoiceLimit) {
-				const planName = plan.name;
-				if (workspace.plan === 'free') {
-					throw new Error(
-						`You've reached your limit of ${invoiceLimit} invoices per month on the ${planName} plan. Upgrade to Invoice Pro for unlimited invoices.`,
-					);
-				} else {
-					throw new Error(
-						`You've reached your limit of ${invoiceLimit} invoices per month on the ${planName} plan. Please upgrade your plan for more invoices.`,
-					);
-				}
-			}
-		} else if (currentCycleCount >= invoiceLimit) {
-			const planName = plan.name;
-			if (workspace.plan === 'free') {
-				raise(
-					`You've reached your limit of ${invoiceLimit} invoices per month on the ${planName} plan. Upgrade to Invoice Pro for unlimited invoices.`,
-				);
-			} else {
-				raise(
-					`You've reached your limit of ${invoiceLimit} invoices per month on the ${planName} plan. Please upgrade your plan for more invoices.`,
-				);
-			}
+	// Trigger warning email if needed (async, don't await)
+	if (usageResult.shouldSendEmail) {
+		const threshold =
+			usageResult.status === 'warning_100' ? 100
+			: usageResult.status === 'warning_80' ? 80
+			: null;
+		if (threshold) {
+			void tasks.trigger<typeof sendUsageWarning>('send-usage-warning-email', {
+				workspaceId,
+				limitType: 'invoices',
+				threshold,
+			});
 		}
 	}
 
 	// Increment the usage counter
-	await dbHttp
-		.update(Workspaces)
-		.set({ invoiceUsage: sql`${Workspaces.invoiceUsage} + 1` })
-		.where(eq(Workspaces.id, workspaceId));
+	await incrementUsage(workspaceId, 'invoices', 1);
 }
 
 export async function generateInvoiceNumber(

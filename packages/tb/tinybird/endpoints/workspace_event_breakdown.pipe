@@ -1,0 +1,21 @@
+DESCRIPTION >
+    Returns event counts by type for a workspace within a date range.
+    Used for billing page breakdown display.
+
+TOKEN "workspace_event_breakdown_read" READ
+
+NODE event_breakdown
+SQL >
+    %
+        SELECT
+            type,
+            count() as count
+        FROM barely_events
+        WHERE
+            workspaceId = {{ String(workspaceId, description="The workspace ID", required=True) }}
+            AND timestamp >= {{ DateTime(start, description="Start of date range (ISO format)") }}
+            AND timestamp < {{ DateTime(end, description="End of date range (ISO format)") }}
+        GROUP BY type
+        ORDER BY count DESC
+
+TYPE endpoint
