@@ -48,6 +48,7 @@ import { useCart } from '../_components/use-cart';
 import { usePublicFunnel } from '../_components/use-public-funnel';
 
 const isFetchingRatesAtom = atomWithToggle(false);
+const shippingErrorAtom = atom<string | null>(null);
 const vatAtom = atom(0);
 
 export function CheckoutForm({
@@ -98,6 +99,45 @@ export function CheckoutForm({
 			logged.current = true;
 		}
 	}, [cartId, handle, cartKey, logEvent, publicFunnel]);
+
+	// deferred shipping calculation - triggered on mount when cart has no shipping
+	const [, setIsFetchingRates] = useAtom(isFetchingRatesAtom);
+	const [, setShippingError] = useAtom(shippingErrorAtom);
+	const shippingCalculated = useRef(false);
+
+	const { mutateAsync: calculateShipping } = useMutation(
+		trpc.calculateInitialShipping.mutationOptions({
+			onMutate: () => {
+				setIsFetchingRates(true);
+				setShippingError(null);
+			},
+			onSuccess: data => {
+				if (!data.success) {
+					setShippingError('Unable to estimate shipping. Please enter your address.');
+				}
+				void queryClient.invalidateQueries({
+					queryKey: trpc.byIdAndParams.queryKey({
+						id: cartId,
+						handle,
+						key: cartKey,
+					}),
+				});
+			},
+			onError: () => {
+				setShippingError('Unable to estimate shipping. Please enter your address.');
+			},
+			onSettled: () => setIsFetchingRates(false),
+		}),
+	);
+
+	useEffect(() => {
+		if (shippingCalculated.current) return;
+		if (cart.mainShippingAmount !== null) return;
+
+		shippingCalculated.current = true;
+		setIsFetchingRates(true);
+		void calculateShipping({ cartId, handle, key: cartKey });
+	}, [cart, cartId, handle, cartKey, calculateShipping, setIsFetchingRates]);
 
 	const { mutate: mutateCart } = useMutation(
 		trpc.updateCheckoutFromCheckout.mutationOptions({
@@ -179,13 +219,12 @@ export function CheckoutForm({
 	const debouncedUpdateEmail = useDebouncedCallback(updateEmail, 500);
 
 	// update address
-
-	// const [isFetchingRates, setIsFetchingRates] = useState(false);
-	const [, setIsFetchingRates] = useAtom(isFetchingRatesAtom);
 	const [, setVat] = useAtom(vatAtom);
 	const { mutateAsync: mutateAddress } = useMutation(
 		trpc.updateShippingAddressFromCheckout.mutationOptions({
 			onMutate: async data => {
+				setShippingError(null);
+
 				await queryClient.cancelQueries({
 					queryKey: trpc.byIdAndParams.queryKey({
 						id: cartId,
@@ -971,6 +1010,7 @@ export function OrderSummary({
 	const [vat] = useAtom(vatAtom);
 	const amounts = getAmountsForCheckout(publicFunnel, cart, vat);
 	const [isFetchingRates] = useAtom(isFetchingRatesAtom);
+	const [shippingError] = useAtom(shippingErrorAtom);
 
 	return (
 		<div className='flex max-w-sm flex-col gap-2'>
@@ -1004,7 +1044,11 @@ export function OrderSummary({
 			<div className='flex flex-row justify-between'>
 				<Text variant='md/medium'>Shipping</Text>
 
-				{isFetchingRates ?
+				{shippingError ?
+					<Text variant='sm/normal' className='text-red-500'>
+						{shippingError}
+					</Text>
+				: isFetchingRates ?
 					<div className='flex flex-row items-center gap-2'>
 						<div className='h-4 w-10 animate-pulse rounded bg-brandKit-block-text' />
 					</div>

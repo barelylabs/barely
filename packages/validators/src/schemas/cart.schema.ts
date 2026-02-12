@@ -80,6 +80,13 @@ export const updateShippingAddressFromCheckoutSchema = z.object({
 	shippingAddressCity: z.string(),
 	shippingAddressPostalCode: z.string(),
 });
+// initial shipping calculation (deferred from cart creation for TTFP optimization)
+export const calculateInitialShippingSchema = z.object({
+	cartId: z.string(),
+	handle: z.string(),
+	key: z.string(),
+});
+
 // stat filters
 export const cartStatFiltersSchema = stdWebEventPipeQueryParamsSchema.extend(
 	cartFiltersSchema.shape,

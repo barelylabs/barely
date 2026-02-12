@@ -331,46 +331,9 @@ export async function createMainCartFromFunnel({
 		...amounts,
 	};
 
-	if (shipTo?.country && shipTo.state && shipTo.city) {
-		const { lowestShippingPrice: mainShippingAmount } =
-			await getProductsShippingRateEstimate({
-				products: [{ product: funnel.mainProduct, quantity: 1 }],
-				shipFrom: {
-					state: funnel.workspace.shippingAddressState ?? '',
-					postalCode: funnel.workspace.shippingAddressPostalCode ?? '',
-					countryCode: funnel.workspace.shippingAddressCountry ?? '',
-				},
-				shipTo: {
-					country: shipTo.country,
-					state: shipTo.state,
-					city: shipTo.city,
-				},
-			});
-
-		cart.mainShippingAmount = mainShippingAmount;
-
-		const mainPlusBumpShippingPrice =
-			!funnel.bumpProduct ? mainShippingAmount : (
-				await getProductsShippingRateEstimate({
-					products: [
-						{ product: funnel.mainProduct, quantity: 1 },
-						{ product: funnel.bumpProduct, quantity: 1 },
-					],
-					shipFrom: {
-						state: funnel.workspace.shippingAddressState ?? '',
-						postalCode: funnel.workspace.shippingAddressPostalCode ?? '',
-						countryCode: funnel.workspace.shippingAddressCountry ?? '',
-					},
-					shipTo: {
-						country: shipTo.country,
-						state: shipTo.state,
-						city: shipTo.city,
-					},
-				}).then(rates => rates.lowestShippingPrice)
-			);
-
-		cart.bumpShippingPrice = mainPlusBumpShippingPrice - mainShippingAmount;
-	}
+	// Shipping is calculated post-page-load via calculateInitialShipping mutation
+	// to reduce TTFP by removing the blocking ShipStation API call from cart creation.
+	// Cart is created with null shipping amounts (the default).
 
 	await dbHttp.insert(Carts).values(cart);
 
