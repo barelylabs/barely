@@ -32,13 +32,16 @@ export const resetWorkspaceUsage = schedules.task({
 		logger.info(`Running billing cycle reset for day ${todayDay}`);
 
 		// Find workspaces where today is their billing cycle reset day
-		// Handle both null (default to 1) and matching day
+		// Build conditions array to avoid passing undefined to or()
+		const conditions = [eq(Workspaces.billingCycleStart, todayDay)];
+
+		// On day 1, also reset workspaces with billingCycleStart = 0 (default)
+		if (todayDay === 1) {
+			conditions.push(eq(Workspaces.billingCycleStart, 0));
+		}
+
 		const workspacesToReset = await dbHttp.query.Workspaces.findMany({
-			where: or(
-				eq(Workspaces.billingCycleStart, todayDay),
-				// If billingCycleStart is null/0, treat as day 1
-				todayDay === 1 ? eq(Workspaces.billingCycleStart, 0) : undefined,
-			),
+			where: conditions.length > 1 ? or(...conditions) : conditions[0],
 			columns: {
 				id: true,
 				name: true,

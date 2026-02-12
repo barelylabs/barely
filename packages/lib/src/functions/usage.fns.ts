@@ -2,6 +2,7 @@ import type { PlanType } from '@barely/const';
 import { WORKSPACE_PLANS } from '@barely/const';
 import { dbHttp } from '@barely/db/client';
 import { _Users_To_Workspaces, Fans, Links, Users, Workspaces } from '@barely/db/sql';
+import { pipe_workspaceClickUsage } from '@barely/tb/query';
 import { getAbsoluteUrl, getFirstAndLastDayOfBillingCycle } from '@barely/utils';
 import { and, count, eq, gte, isNull, sql } from 'drizzle-orm';
 
@@ -18,6 +19,7 @@ export type UsageLimitType =
 	| 'events'
 	| 'tasks'
 	| 'storage'
+	| 'totalStorage'
 	| 'invoices';
 
 /**
@@ -55,7 +57,8 @@ export function getResourceLabel(limitType: UsageLimitType): string {
 		emails: 'Emails Sent',
 		events: 'Tracked Events',
 		tasks: 'Tasks',
-		storage: 'File Storage',
+		storage: 'Monthly Storage',
+		totalStorage: 'Total Storage',
 		invoices: 'Invoices',
 	};
 	return labels[limitType];
@@ -83,6 +86,7 @@ export async function getUsageCount(
 			eventUsage: true,
 			taskUsage: true,
 			fileUsage_billingCycle: true,
+			fileUsage_total: true,
 			invoiceUsage: true,
 			billingCycleStart: true,
 		},
@@ -133,10 +137,24 @@ export async function getUsageCount(
 			return linkCount[0]?.count ?? 0;
 		}
 
-		case 'clicks':
-			// Clicks are tracked externally (Tinybird), use stored counter
-			// This would need to be synchronized from analytics
-			return 0; // TODO: Implement click tracking counter
+		case 'clicks': {
+			// Clicks are tracked in Tinybird - query directly for accurate count
+			const cycleStart = billingCycleStart ?? workspace.billingCycleStart ?? 1;
+			const { firstDay, lastDay } = getFirstAndLastDayOfBillingCycle(cycleStart);
+
+			try {
+				const result = await pipe_workspaceClickUsage({
+					workspaceId,
+					start: firstDay.toISOString(),
+					end: lastDay.toISOString(),
+				});
+				return result.data[0]?.clicks ?? 0;
+			} catch (error) {
+				// If Tinybird is unavailable, fail open (return 0) to avoid blocking users
+				console.error('Failed to fetch click usage from Tinybird:', error);
+				return 0;
+			}
+		}
 
 		case 'emails':
 			return workspace.emailUsage;
@@ -149,6 +167,9 @@ export async function getUsageCount(
 
 		case 'storage':
 			return workspace.fileUsage_billingCycle;
+
+		case 'totalStorage':
+			return workspace.fileUsage_total;
 
 		case 'invoices':
 			return workspace.invoiceUsage;
@@ -209,7 +230,8 @@ export function getUsageLimit(
 		emails: plan.usageLimits.emailsPerMonth,
 		events: plan.usageLimits.trackedEventsPerMonth,
 		tasks: plan.usageLimits.tasksPerMonth,
-		storage: 200000000, // 200MB default - TODO: add to plan limits
+		storage: plan.usageLimits.storagePerMonth,
+		totalStorage: plan.usageLimits.totalStorage,
 		invoices: plan.usageLimits.invoicesPerMonth,
 	};
 
@@ -368,6 +390,7 @@ export async function incrementUsage(
 		events: 'eventUsage',
 		tasks: 'taskUsage',
 		storage: 'fileUsage_billingCycle',
+		totalStorage: 'fileUsage_total',
 		invoices: 'invoiceUsage',
 	};
 

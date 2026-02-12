@@ -59,6 +59,9 @@ export interface Plan {
 
 		invoicesPerMonth: number;
 		invoiceClients: number;
+
+		storagePerMonth: number; // bytes - new uploads allowed per billing cycle
+		totalStorage: number; // bytes - maximum cumulative storage allowed
 	};
 	cartFeePercentage: number;
 
@@ -106,6 +109,8 @@ const FREE_PLAN: Plan = {
 		tasksPerMonth: 100,
 		invoicesPerMonth: 3,
 		invoiceClients: 10,
+		storagePerMonth: 200 * 1024 * 1024, // 200MB
+		totalStorage: 500 * 1024 * 1024, // 500MB
 	},
 	cartFeePercentage: 15,
 
@@ -184,6 +189,9 @@ const BEDROOM_PLAN: Plan = {
 
 		invoicesPerMonth: 50,
 		invoiceClients: 100,
+
+		storagePerMonth: 1 * 1024 * 1024 * 1024, // 1GB
+		totalStorage: 5 * 1024 * 1024 * 1024, // 5GB
 	},
 	cartFeePercentage: 12,
 
@@ -261,6 +269,9 @@ const RISING_PLAN: Plan = {
 
 		invoicesPerMonth: 200,
 		invoiceClients: 500,
+
+		storagePerMonth: 5 * 1024 * 1024 * 1024, // 5GB
+		totalStorage: 25 * 1024 * 1024 * 1024, // 25GB
 	},
 	cartFeePercentage: 10,
 
@@ -340,6 +351,9 @@ const BREAKOUT_PLAN: Plan = {
 
 		invoicesPerMonth: Number.MAX_SAFE_INTEGER,
 		invoiceClients: Number.MAX_SAFE_INTEGER,
+
+		storagePerMonth: 20 * 1024 * 1024 * 1024, // 20GB
+		totalStorage: 100 * 1024 * 1024 * 1024, // 100GB
 	},
 	cartFeePercentage: 6,
 
@@ -420,6 +434,9 @@ const BEDROOM_PLUS_PLAN: Plan = {
 
 		invoicesPerMonth: 50,
 		invoiceClients: 100,
+
+		storagePerMonth: 1 * 1024 * 1024 * 1024, // 1GB (same as Bedroom)
+		totalStorage: 5 * 1024 * 1024 * 1024, // 5GB (same as Bedroom)
 	},
 	cartFeePercentage: 10,
 
@@ -496,6 +513,9 @@ const RISING_PLUS_PLAN: Plan = {
 
 		invoicesPerMonth: 200,
 		invoiceClients: 500,
+
+		storagePerMonth: 5 * 1024 * 1024 * 1024, // 5GB (same as Rising)
+		totalStorage: 25 * 1024 * 1024 * 1024, // 25GB (same as Rising)
 	},
 	cartFeePercentage: 8,
 
@@ -573,6 +593,9 @@ const BREAKOUT_PLUS_PLAN: Plan = {
 
 		invoicesPerMonth: Number.MAX_SAFE_INTEGER,
 		invoiceClients: Number.MAX_SAFE_INTEGER,
+
+		storagePerMonth: 20 * 1024 * 1024 * 1024, // 20GB (same as Breakout)
+		totalStorage: 100 * 1024 * 1024 * 1024, // 100GB (same as Breakout)
 	},
 	cartFeePercentage: 6,
 
@@ -649,6 +672,9 @@ const INVOICE_PRO_PLAN: Plan = {
 
 		invoicesPerMonth: Number.MAX_SAFE_INTEGER,
 		invoiceClients: Number.MAX_SAFE_INTEGER,
+
+		storagePerMonth: 200 * 1024 * 1024, // 200MB (same as Free)
+		totalStorage: 500 * 1024 * 1024, // 500MB (same as Free)
 	},
 	cartFeePercentage: 15, // not applicable for invoice-only
 

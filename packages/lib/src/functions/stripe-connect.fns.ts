@@ -22,6 +22,7 @@ import {
 import { recordCartEvent } from './event.fns';
 import { createFan } from './fan.fns';
 import { sendInvoicePaymentReceivedEmail } from './invoice-email.fns';
+import { checkUsageLimit, incrementUsage } from './usage.fns';
 
 export async function handleStripeConnectChargeSuccess(
 	charge: Stripe.Charge,
@@ -201,12 +202,17 @@ export async function handleStripeConnectChargeSuccess(
 		});
 
 		for (const trigger of newCartOrderTriggers) {
-			// todo: abstract this to a function. require cartOrderId and fanId
-			await tasks.trigger<typeof handleFlow>('handle-flow', {
-				triggerId: trigger.id,
-				cartId: prevCart.id,
-				fanId: fan.id,
-			});
+			// Check task usage limit before triggering flow
+			// Note: Fail silently - don't block checkout if task limit hit
+			const usageResult = await checkUsageLimit(prevCart.workspaceId, 'tasks');
+			if (usageResult.status !== 'blocked_200') {
+				await tasks.trigger<typeof handleFlow>('handle-flow', {
+					triggerId: trigger.id,
+					cartId: prevCart.id,
+					fanId: fan.id,
+				});
+				await incrementUsage(prevCart.workspaceId, 'tasks', 1);
+			}
 		}
 
 		// newFan triggers
@@ -220,11 +226,16 @@ export async function handleStripeConnectChargeSuccess(
 			});
 
 			for (const trigger of newFanTriggers) {
-				// todo: abstract this to a function. require fanId
-				await tasks.trigger<typeof handleFlow>('handle-flow', {
-					triggerId: trigger.id,
-					fanId: fan.id,
-				});
+				// Check task usage limit before triggering flow
+				// Note: Fail silently - don't block checkout if task limit hit
+				const usageResult = await checkUsageLimit(prevCart.workspaceId, 'tasks');
+				if (usageResult.status !== 'blocked_200') {
+					await tasks.trigger<typeof handleFlow>('handle-flow', {
+						triggerId: trigger.id,
+						fanId: fan.id,
+					});
+					await incrementUsage(prevCart.workspaceId, 'tasks', 1);
+				}
 			}
 		}
 	}

@@ -100,36 +100,71 @@ export const fileRoute = {
 			}),
 		)
 		.mutation(async ({ input, ctx }) => {
-			console.log('input => ', input);
-
 			// Calculate total size of files being uploaded
 			const totalUploadSize = input.files.reduce((acc, f) => acc + f.size, 0);
 
-			// Check storage usage limits before allowing upload
-			const usageResult = await checkUsageLimit(
+			// Check monthly storage usage limits before allowing upload
+			const monthlyUsageResult = await checkUsageLimit(
 				ctx.workspace.id,
 				'storage',
 				totalUploadSize,
 			);
 
-			// Hard block at 200%
-			if (usageResult.status === 'blocked_200') {
+			// Hard block at 200% of monthly limit
+			if (monthlyUsageResult.status === 'blocked_200') {
 				throw new TRPCError({
 					code: 'FORBIDDEN',
-					message: getBlockedMessage('storage', usageResult.limit, ctx.workspace.plan),
+					message: getBlockedMessage(
+						'storage',
+						monthlyUsageResult.limit,
+						ctx.workspace.plan,
+					),
 				});
 			}
 
-			// Trigger warning email if needed (async, don't await)
-			if (usageResult.shouldSendEmail) {
+			// Check total storage limit before allowing upload
+			const totalUsageResult = await checkUsageLimit(
+				ctx.workspace.id,
+				'totalStorage',
+				totalUploadSize,
+			);
+
+			// Hard block at 200% of total storage limit
+			if (totalUsageResult.status === 'blocked_200') {
+				throw new TRPCError({
+					code: 'FORBIDDEN',
+					message: getBlockedMessage(
+						'totalStorage',
+						totalUsageResult.limit,
+						ctx.workspace.plan,
+					),
+				});
+			}
+
+			// Trigger warning emails if needed (async, don't await)
+			if (monthlyUsageResult.shouldSendEmail) {
 				const threshold =
-					usageResult.status === 'warning_100' ? 100
-					: usageResult.status === 'warning_80' ? 80
+					monthlyUsageResult.status === 'warning_100' ? 100
+					: monthlyUsageResult.status === 'warning_80' ? 80
 					: null;
 				if (threshold) {
 					void tasks.trigger<typeof sendUsageWarning>('send-usage-warning-email', {
 						workspaceId: ctx.workspace.id,
 						limitType: 'storage',
+						threshold,
+					});
+				}
+			}
+
+			if (totalUsageResult.shouldSendEmail) {
+				const threshold =
+					totalUsageResult.status === 'warning_100' ? 100
+					: totalUsageResult.status === 'warning_80' ? 80
+					: null;
+				if (threshold) {
+					void tasks.trigger<typeof sendUsageWarning>('send-usage-warning-email', {
+						workspaceId: ctx.workspace.id,
+						limitType: 'totalStorage',
 						threshold,
 					});
 				}
@@ -141,7 +176,6 @@ export const fileRoute = {
 
 			await Promise.all(
 				input.files.map(async f => {
-					console.log('f', f);
 					const fileId = newId('file');
 
 					const s3Key = getFileKey({
@@ -231,7 +265,6 @@ export const fileRoute = {
 			}),
 		)
 		.mutation(async ({ input, ctx }) => {
-			console.log('completing multipart upload', input);
 			await completeMultipartUpload(input);
 
 			const uploadedFiles = await dbHttp

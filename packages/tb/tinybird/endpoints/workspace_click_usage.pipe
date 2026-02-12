@@ -1,0 +1,18 @@
+DESCRIPTION >
+    Returns the total click count for a workspace within a date range.
+    Used for usage limit enforcement.
+
+TOKEN "workspace_click_usage_read" READ
+
+NODE click_count
+SQL >
+    %
+        SELECT
+            countIf(type = 'link/click') as clicks
+        FROM barely_link_events_mv
+        WHERE
+            workspaceId = {{ String(workspaceId, description="The workspace ID", required=True) }}
+            AND timestamp >= {{ DateTime(start, description="Start of date range (ISO format)") }}
+            AND timestamp < {{ DateTime(end, description="End of date range (ISO format)") }}
+
+TYPE endpoint

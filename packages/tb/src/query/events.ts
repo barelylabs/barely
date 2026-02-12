@@ -1004,3 +1004,33 @@ export const pipe_bioAnimationPerformance = tinybird.buildPipe({
 		performance_rank: z.number(),
 	}),
 });
+
+// Usage tracking pipes
+export const workspaceClickUsageParamsSchema = z.object({
+	workspaceId: z.string(),
+	start: z.string(),
+	end: z.string(),
+});
+
+export const pipe_workspaceClickUsage = tinybird.buildPipe({
+	pipe: 'workspace_click_usage',
+	parameters: workspaceClickUsageParamsSchema,
+	data: z.object({
+		clicks: z.number(),
+	}),
+});
+
+export const workspaceEventBreakdownParamsSchema = z.object({
+	workspaceId: z.string(),
+	start: z.string(),
+	end: z.string(),
+});
+
+export const pipe_workspaceEventBreakdown = tinybird.buildPipe({
+	pipe: 'workspace_event_breakdown',
+	parameters: workspaceEventBreakdownParamsSchema,
+	data: z.object({
+		type: z.string(),
+		count: z.number(),
+	}),
+});
