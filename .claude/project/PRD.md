@@ -1,305 +1,335 @@
-# Barely Invoice MVP – Product Requirements Document
+# Product Requirements Document: Deferred Shipping Rate Calculation
 
-### TL;DR
+## Document Info
 
-Barely Invoice is a dead-simple invoicing tool for freelancers and consultants who need to get paid fast without accounting complexity. Built as an app variant of the barely.ai platform, it enables users to create professional invoices in under 60 seconds, send payment links via email, and get paid through Stripe within days instead of weeks. The MVP focuses exclusively on the core payment collection flow with zero unnecessary features.
+| Field | Value |
+|-------|-------|
+| Feature Name | Deferred Shipping Rate Calculation |
+| Author | Product Team |
+| Created | 2026-02-12 |
+| Status | Ready for Implementation |
+| Priority | P0 - Critical |
 
 ---
 
-## Goals
+## Executive Summary
 
-### Business Goals
+Cart checkout pages take up to 5 seconds to first paint because shipping rate calculations (ShipStation API, 500-2000ms) happen during cart creation, blocking the entire page from rendering. This feature defers shipping rate calculation to a client-side side effect triggered after page load, reducing Time To First Paint from 5 seconds to under 2 seconds while maintaining full functionality.
 
-- **Demonstrate Micro-SaaS Revenue**: Generate $500 MRR within month 1, $1,900 by month 3
-- **Validate Market Fit**: Prove demand for ultra-simple invoicing before full build
-- **Expand Platform Usage**: Create first B2B product variant using existing infrastructure
-- **Enable Dogfooding**: Use internally for agency client billing immediately
+**Business Impact**:
+- Reduce checkout abandonment caused by slow page loads
+- Increase conversion rates from the same traffic
+- Maintain shipping accuracy (calculation logic unchanged)
 
-### User Goals
+---
 
-- **Get Paid Faster**: Reduce payment collection from 30+ days to under 7 days
-- **Save Time**: Create and send invoices in under 60 seconds (vs 10-15 minutes)
-- **Look Professional**: Send polished invoices that justify professional rates
-- **Track Payment Status**: Know instantly when invoices are viewed and paid
+## Problem Statement
+
+### Current Situation
+- Checkout page takes up to 5 seconds to first paint
+- Shipping rate calculation (ShipStation API) is called during cart creation
+- Cart creation must complete before page prefetch returns
+- Page prefetch polls for up to 12.7 seconds waiting for cart to exist
+- The entire checkout form is blocked while shipping calculates
+
+### Impact
+- **Revenue**: Every extra second of load time increases abandonment. Industry standard: 3+ seconds loses 40%+ of mobile users
+- **User Experience**: Fans stare at loading screen, may abandon before seeing checkout form
+- **Trust**: Slow checkout signals unprofessionalism, undermines purchase confidence
+
+### Evidence
+- Code investigation confirms ShipStation API call in `createMainCartFromFunnel()` (cart.fns.ts:334-372)
+- Page prefetch waits for cart to exist (cart.route.ts:205-226)
+- Cart doesn't exist until shipping calculation completes
+- Existing `isFetchingRates` UI state already handles loading - proves shipping can be async
+
+---
+
+## Goals & Success Metrics
+
+### Primary Goals
+
+| Goal | Success Metric | Target |
+|------|----------------|--------|
+| Reduce Time To First Paint | TTFP on checkout page | < 2 seconds (from 5s) |
+| Maintain UX quality | Shipping visible before submit | 100% of checkouts |
+| No functionality regression | Checkout completion rate | Equal or better |
 
 ### Non-Goals
+- Changing shipping rate calculation logic
+- Adding shipping rate caching
+- Modifying the checkout UI
+- Addressing other performance bottlenecks (BrandKit, etc.)
 
-- Complex accounting or bookkeeping features
-- Multi-currency support
-- Recurring/subscription billing (MVP phase)
-- PDF generation (HTML invoice sufficient)
-- Automated payment reminders (manual resend only)
-- Invoice templates marketplace
-- Time tracking or expense management
-- Estimates or quotes
-- Purchase orders
+---
+
+## User Segments & Jobs to Be Done
+
+### Segment 1: Fans/Customers
+**Primary Jobs:**
+- Complete purchase quickly without friction
+- See the checkout form immediately when clicking "checkout"
+- Know the total including shipping before submitting payment
+
+### Segment 2: Artists/Creators (Indirect)
+**Primary Jobs:**
+- Maximize conversion rates from traffic
+- Earn revenue from fans who want to buy
+- Present a professional checkout experience
+
+---
+
+## Requirements
+
+### Functional Requirements
+
+#### FR-1: Remove Shipping Calculation from Cart Creation
+
+**Description**: The cart creation flow should no longer call ShipStation API. Cart records should be created with null/undefined shipping amounts.
+
+**Current Flow:**
+1. User hits checkout URL
+2. Middleware creates cart via `/api/cart/create`
+3. `createMainCartFromFunnel()` calls `getProductsShippingRateEstimate()` (BLOCKS 500-2000ms)
+4. Cart record saved with shipping amounts
+5. Page prefetch polls for cart to exist
+6. Checkout form renders
+
+**New Flow:**
+1. User hits checkout URL
+2. Middleware creates cart via `/api/cart/create`
+3. `createMainCartFromFunnel()` skips shipping calculation
+4. Cart record saved with null shipping amounts
+5. Page prefetch returns immediately (cart exists)
+6. Checkout form renders (TTFP achieved)
+7. Client-side triggers shipping calculation (background)
+8. Shipping amounts populated and displayed
+
+**Acceptance Criteria:**
+- [ ] `createMainCartFromFunnel()` does not call `getProductsShippingRateEstimate()`
+- [ ] Cart records can be created with null shipping amounts
+- [ ] No errors when cart has null shipping initially
+
+---
+
+#### FR-2: Client-Side Shipping Calculation Trigger
+
+**Description**: After checkout page renders, trigger shipping rate calculation as a side effect.
+
+**Trigger Point**: Checkout form mount (useEffect or equivalent)
+
+**Behavior:**
+1. On checkout form mount, check if shipping amounts are null
+2. If null and geo data available (from middleware), trigger shipping calculation
+3. Use existing `isFetchingRates` state to show loading indicator
+4. Update cart with shipping amounts when calculation completes
+
+**Acceptance Criteria:**
+- [ ] Shipping calculation triggers after first paint
+- [ ] Uses existing `isFetchingRates` Jotai atom for loading state
+- [ ] OrderSummary shows skeleton/loading while shipping calculates
+- [ ] Submit button remains disabled until shipping is calculated
+- [ ] Shipping amounts are correct once calculated
+
+---
+
+#### FR-3: Handle Initial Null Shipping State
+
+**Description**: The checkout UI must gracefully handle carts that don't yet have shipping amounts.
+
+**OrderSummary Behavior:**
+- Show product price immediately
+- Show shipping line with loading indicator (existing skeleton)
+- Show total as "Calculating..." or similar until shipping ready
+- Update all amounts once shipping is calculated
+
+**Form Behavior:**
+- Submit button disabled while `isFetchingRates = true`
+- No error messages for null shipping (expected state)
+
+**Acceptance Criteria:**
+- [ ] OrderSummary renders without shipping amount
+- [ ] Loading indicator visible for shipping line
+- [ ] Total updates correctly when shipping is calculated
+- [ ] No console errors or UI glitches with null shipping
+
+---
+
+#### FR-4: Error Handling for Failed Shipping Calculation
+
+**Description**: If shipping calculation fails post-load, show clear feedback and recovery path.
+
+**Error Scenarios:**
+- ShipStation API timeout
+- Invalid address/geo data
+- Network failure
+
+**Error Handling:**
+- Show error message in OrderSummary shipping line
+- Provide "Retry" option
+- Allow user to change address to trigger recalculation
+- Do not block form entirely - user can fix address
+
+**Acceptance Criteria:**
+- [ ] Failed shipping calculation shows clear error message
+- [ ] User can retry or update address to recalculate
+- [ ] Cart is not left in broken state
+- [ ] User is not stuck without recourse
+
+---
+
+### Non-Functional Requirements
+
+#### NFR-1: Performance
+- Time To First Paint < 2 seconds (from 5 seconds)
+- Shipping calculation completes within 3 seconds of page load
+- No increase in total checkout time
+
+#### NFR-2: Reliability
+- Shipping calculation must eventually complete successfully
+- Existing error handling for ShipStation API still applies
+- Cart state remains consistent
+
+#### NFR-3: Compatibility
+- Works with existing address change flow
+- Works with bump products (main + bump shipping)
+- Works with all geo data sources (Vercel headers)
 
 ---
 
 ## User Stories
 
-### Primary Persona – "Freelance Consultant"
+### US-1: See Checkout Form Immediately
+**As a** fan ready to buy merchandise
+**I want to** see the checkout form right away
+**So that** I can start entering my information without waiting
 
-- As a freelancer, I want to create an invoice with line items in under a minute, so that I can get back to billable work
-- As a consultant, I want to save client information once, so that I don't retype details for every invoice
-- As a service provider, I want clients to pay with one click, so that payment friction is eliminated
-- As a freelancer, I want to know when my invoice is viewed, so that I can follow up appropriately
-- As a consultant, I want automatic payment confirmation, so that I don't manually check my bank account
-- As a freelancer, I want to add simple tax calculations, so that I comply with requirements without complexity
-- As a service provider, I want professional-looking invoices, so that clients take my business seriously
-
----
-
-## Functional Requirements
-
-### **Client Management** (Priority: High)
-
-- Create new clients with name, email, company, address
-- Edit existing client information
-- View list of all clients
-- Select client from dropdown when creating invoice
-- Delete clients (with confirmation)
-- Client data scoped to workspace
-
-### **Invoice Creation** (Priority: High)
-
-- Add multiple line items with description, quantity, rate
-- Automatic calculation of line totals and invoice total
-- Add simple percentage-based tax
-- Set payment due date
-- Include invoice number (auto-generated, sequential)
-- Select existing client or quick-add new one
-- Save as draft or send immediately
-- Invoice data scoped to workspace
-
-### **Payment Collection** (Priority: High)
-
-- Generate unique payment link for each invoice
-- Public payment page at /pay/{workspace-handle}/{invoice-id}
-- Accept credit/debit cards via Stripe Checkout
-- Use workspace's existing Stripe Connect account
-- Automatic webhook to mark invoice as paid
-- Instant payment confirmation to user
-- Platform fee of 0.5% on collected payments
-
-### **Invoice Management** (Priority: High)
-
-- View list of all invoices with status indicators
-- Filter by status (draft, sent, viewed, paid)
-- Search invoices by client or invoice number
-- Duplicate existing invoice for similar projects
-- Mark invoice as paid manually if needed
-- Delete draft invoices
-
-### **Invoice Delivery** (Priority: High)
-
-- Send invoice via email from user's workspace
-- Professional email template with payment link
-- Track when invoice email is opened (pixel tracking)
-- Update status to "viewed" automatically
-- Resend invoice manually if needed
-
-### **Status Tracking** (Priority: Medium)
-
-- Clear status indicators: draft, sent, viewed, paid, overdue
-- Automatic status updates based on actions
-- Visual indicators in invoice list (colors/badges)
-- Overdue alerts for unpaid past-due invoices
-- Last activity timestamp on each invoice
-
-### **Dashboard** (Priority: Medium)
-
-- Total outstanding amount
-- Number of overdue invoices
-- Recent activity feed (last 10 actions)
-- Quick actions: New Invoice, View Clients
-- This month's collected total
-- Average days to payment
+**Acceptance Criteria:**
+- Given I click "checkout" on a product page
+- When the checkout page loads
+- Then I see the checkout form within 2 seconds
+- And I can start entering my information immediately
 
 ---
 
-## User Experience
+### US-2: See Shipping Before Submitting
+**As a** fan completing checkout
+**I want to** see the shipping cost before I submit payment
+**So that** I know the total I'll be charged
 
-### Entry Point & Onboarding
-
-- User signs up via magic link (existing auth)
-- Workspace created/selected (existing flow)
-- Stripe Connect already configured (from other products)
-- First invoice created from template/tutorial
-
-### Core Experience
-
-**Creating First Invoice:**
-1. User clicks "New Invoice" from dashboard
-2. Selects existing client or quick-adds new one
-3. Adds line items with automatic calculation
-4. Sets due date and tax percentage
-5. Reviews invoice preview
-6. Clicks "Send Invoice"
-7. Email sent to client with payment link
-8. User sees confirmation and returns to dashboard
-
-**Client Payment Flow:**
-1. Client receives professional invoice email
-2. Clicks "Pay Now" button
-3. Lands on public payment page (no login required)
-4. Reviews invoice details
-5. Clicks "Pay with Card"
-6. Enters payment info via Stripe Checkout
-7. Sees payment confirmation
-8. User notified instantly of payment
-
-**Returning User Flow:**
-1. Dashboard shows outstanding invoices
-2. User duplicates previous similar invoice
-3. Updates line items and amount
-4. Selects saved client from dropdown
-5. Sends in under 60 seconds
-
-### Advanced Features & Edge Cases
-
-- Manual payment marking for cash/check payments
-- Void invoice option for mistakes
-- Email bounce handling with manual resend
-- Payment failure notifications
-- Export invoice list as CSV (future)
-
-### UI/UX Highlights
-
-- Mobile-responsive for invoice creation on the go
-- Clean, minimal interface matching barely.ai design system
-- Professional invoice layout inspiring trust
-- One-click actions throughout
-- Real-time calculation updates
-- Loading states for all async operations
+**Acceptance Criteria:**
+- Given I'm on the checkout page
+- When shipping is calculating
+- Then I see a loading indicator for shipping
+- And the submit button is disabled
+- When shipping calculation completes
+- Then I see the shipping cost
+- And I see the correct total
+- And the submit button is enabled
 
 ---
 
-## Narrative
+### US-3: Recover from Shipping Errors
+**As a** fan with an unusual address
+**I want to** understand why shipping can't be calculated
+**So that** I can fix the issue and complete my purchase
 
-Sarah is a freelance marketing consultant who just finished a website copy project for a new client. Instead of opening Google Docs to create yet another invoice template, she logs into Barely Invoice.
-
-In 45 seconds, she's created a professional invoice with three line items, added 8.5% tax, and selected her client from the dropdown (saved from last month's project). She hits send.
-
-Her client receives a clean, professional invoice email. One click takes them to a payment page that looks trustworthy and modern. Another click to "Pay Now" and they're in Stripe's secure checkout. Payment complete.
-
-Sarah gets a notification on her phone: "Invoice #1024 paid - $2,500 received!" The money hits her Stripe account immediately. No more checking the bank account daily or sending awkward payment reminders.
-
-By month's end, Sarah has collected payments in an average of 4 days instead of her previous 35. She's spending 5 minutes per week on invoicing instead of 2 hours. That's 7+ hours per month back for billable work.
-
----
-
-## Success Metrics
-
-### User-Centric Metrics
-
-- **Invoice Creation Time**: <60 seconds average
-- **Payment Collection Time**: <7 days average
-- **User Activation Rate**: 80% send first invoice within 24 hours
-- **Invoice Completion Rate**: 90% of started invoices get sent
-- **Client Payment Rate**: 90% pay within 30 days
-
-### Business Metrics
-
-- **Week 1**: 1 paid invoice through system
-- **Month 1**: 10 paying users, $190 MRR
-- **Month 3**: 100 paying users, $1,900 MRR
-- **Platform Fees**: 0.5% of payment volume
-- **Churn Rate**: <5% monthly
-
-### Technical Metrics
-
-- **Page Load Time**: <2 seconds
-- **Payment Page Load**: <1 second (critical for conversion)
-- **Email Delivery Rate**: >95%
-- **Webhook Success Rate**: 99.9%
-- **Uptime**: 99.9%
-
-### Tracking Plan
-
-- Invoice created (workspace_id, client_id, amount)
-- Invoice sent (invoice_id, delivery_method)
-- Invoice viewed (invoice_id, viewer_ip)
-- Payment initiated (invoice_id, amount)
-- Payment completed (invoice_id, amount, days_to_pay)
-- Client created (workspace_id)
-- User session (page_views, time_on_site)
+**Acceptance Criteria:**
+- Given shipping calculation fails
+- When I view the checkout page
+- Then I see a clear error message
+- And I can retry or update my address
+- When I fix the issue
+- Then shipping recalculates successfully
 
 ---
 
-## Technical Considerations
+## Out of Scope
 
-### Technical Needs
+The following are explicitly **not** included in this feature:
 
-- **App Variant**: Configure as 'invoice' variant like barely.fm
-- **Database Tables**: Two new tables (invoices, clients)
-- **API Routes**: 6 new endpoints for CRUD operations
-- **Email Service**: SendGrid for invoice delivery (existing)
-- **Payment Processing**: Stripe Checkout + Connect (existing)
-- **Webhook Handler**: Stripe payment confirmation
-
-### Integration Points
-
-- **Authentication**: Magic link system (existing)
-- **Workspace System**: Multi-tenant architecture (existing)
-- **Stripe Connect**: Payment processing (existing)
-- **Component Library**: Reuse barely.ai UI components
-- **Email Infrastructure**: SendGrid integration (existing)
-
-### Data Storage & Privacy
-
-- All invoice data encrypted at rest
-- Client information scoped to workspace
-- PCI compliance via Stripe (no card data stored)
-- GDPR-compliant data deletion on request
-- Audit trail for all invoice modifications
-
-### Scalability & Performance
-
-- Database indexes on workspace_id, client_id, status
-- Paginated invoice lists (50 per page)
-- Lazy load client dropdown for large lists
-- CDN for static assets
-- Queue-based email sending for reliability
-
-### Potential Challenges
-
-- **Risk**: Stripe Connect not configured for workspace
-  - **Mitigation**: Graceful degradation with setup prompt
-  
-- **Risk**: Email deliverability issues
-  - **Mitigation**: Use established SendGrid account, monitor bounces
-  
-- **Risk**: Users expect recurring billing immediately
-  - **Mitigation**: Clear messaging about future features, collect feedback
-  
-- **Risk**: Payment disputes
-  - **Mitigation**: Clear terms, Stripe's dispute handling
+- Shipping rate caching or memoization
+- Changes to the ShipStation API integration logic
+- Changes to shipping rate markup calculations
+- BrandKit caching or other performance optimizations
+- Edge function deployment for shipping
+- Pre-fetching shipping based on IP geo before checkout
+- Changes to the checkout form UI design
+- Changes to the address change flow
 
 ---
 
-## MVP Definition
+## Dependencies
 
-The MVP includes only:
-1. Client management (CRUD)
-2. Invoice creation with line items
-3. Email delivery with payment link
-4. Public payment page
-5. Stripe payment processing
-6. Status tracking
-7. Basic dashboard
-
-Everything else is post-MVP based on user feedback and requests.
+| Dependency | Status | Notes |
+|------------|--------|-------|
+| `isFetchingRates` Jotai atom | ✅ Exists | checkout-form.tsx |
+| OrderSummary skeleton loader | ✅ Exists | Shows loading state |
+| Submit button disabled state | ✅ Exists | Disabled while fetching rates |
+| `updateShippingAddressFromCheckout` mutation | ✅ Exists | Has Promise.all pattern |
+| ShipEngine integration | ✅ Exists | No changes needed |
+| Cart schema | ⚠️ TBD | Verify shipping fields allow null |
 
 ---
 
-## Post-MVP Roadmap
+## Risks & Mitigations
 
-Based on user feedback, consider adding:
-1. **Week 2**: Duplicate invoice feature
-2. **Week 3**: CSV export
-3. **Month 2**: Recurring invoices (if heavily requested)
-4. **Month 3**: PDF generation (if required by users)
-5. **Future**: Templates, automated reminders, multi-currency
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| Shipping fails more often post-load | Low | Medium | Same ShipStation call, just different timing |
+| User submits before shipping loads | N/A | N/A | Submit button disabled until complete |
+| Cart schema requires shipping | Low | High | Verify schema allows null before implementation |
+| Race condition with address changes | Low | Medium | Existing debounce handles this |
 
 ---
+
+## Launch Plan
+
+### Phase 1: Schema Verification
+- Confirm cart schema allows null shipping amounts
+- Identify any validation that requires shipping
+
+### Phase 2: Cart Creation Changes
+- Remove `getProductsShippingRateEstimate()` calls from `createMainCartFromFunnel()`
+- Cart creates immediately without shipping
+
+### Phase 3: Client-Side Trigger
+- Add useEffect or similar to trigger shipping calculation on mount
+- Use existing mutation or create lightweight variant
+- Integrate with existing `isFetchingRates` state
+
+### Phase 4: Testing & Validation
+- Measure TTFP before and after
+- Test various geo scenarios
+- Test error handling
+
+### Phase 5: Deploy
+- Deploy to production
+- Monitor checkout completion rates
+- Monitor ShipStation API success rates
+
+---
+
+## Appendix
+
+### A: Key Files Reference
+
+| File | Location | Role |
+|------|----------|------|
+| Cart creation | `packages/lib/src/functions/cart.fns.ts:334-372` | Remove shipping call |
+| Page prefetch | `apps/cart/src/app/[mode]/[handle]/[key]/checkout/page.tsx:52-53` | Benefits from faster cart |
+| Polling wait | `packages/lib/src/trpc/routes/cart.route.ts:205-226` | Resolves faster |
+| Loading state | `apps/cart/src/app/[mode]/[handle]/[key]/checkout/checkout-form.tsx` | `isFetchingRates` atom |
+| Shipping API | `packages/lib/src/integrations/shipping/shipengine.endpts.ts:289-317` | No changes |
+
+### B: Existing Parallel Pattern
+
+The correct `Promise.all()` pattern for shipping calculation already exists in `updateShippingAddressFromCheckout` (cart.route.ts:482-498). This can be reused or referenced for the client-side trigger.
+
+### C: Performance Baseline
+
+| Metric | Current | Target |
+|--------|---------|--------|
+| Time To First Paint | ~5 seconds | < 2 seconds |
+| Total checkout time | ~5 seconds + user input | ~2 seconds + shipping calc + user input |
+| Perceived speed | Slow, frustrating | Fast, professional |

@@ -1,34 +1,40 @@
-# Bio Landing Page Blocks Development
+# Cart Checkout TTFP Optimization - Development
 
 ## For New Claude Code Instance
 
 1. Open Claude Code in this directory
 2. Claude will read CLAUDE_PROJECT.md for immediate context
-3. Check .claude/project/plan.md for implementation tasks
-4. All project artifacts are available in .claude/project/
+3. Check `.claude/project/plan-organized.md` for implementation tasks
+4. All project artifacts are available in `.claude/project/`
 
 ## Development Flow
 
-- This branch is focused solely on bio-landing-page-blocks
-- Use organized plan to track progress
-- Original project: 0_Projects/bio-landing-page-blocks/
+- This branch is focused solely on cart-checkout-ttfp
+- Use organized plan to track progress through milestones
+- Original project: `0_Projects/cart-checkout-ttfp/` (in vault root)
+
+## Implementation Milestones
+
+| Milestone | Description |
+|-----------|-------------|
+| M0 | Performance Baseline (measure current TTFP) |
+| M1 | Remove Shipping from Cart Creation |
+| M2 | Create Shipping Calculation Mutation |
+| M3 | Handle Null Shipping in UI |
+| M4 | Client-Side Shipping Trigger |
+| M5 | Error Handling |
+| M6 | Integration Testing |
 
 ## Key Commands After Starting Claude Code
 
-- Review implementation plan: Read .claude/project/plan.md
-- Check requirements: Read .claude/project/PRD.md
-- Understand user needs: Read .claude/project/JTBD.md
+- Review implementation plan: `Read .claude/project/plan-organized.md`
+- Check requirements: `Read .claude/project/PRD.md`
+- Understand user needs: `Read .claude/project/JTBD.md`
 
-## Quick Context
+## Quick Reference
 
-**What we're building**: 4 new block types for the bio platform
-1. Markdown Block - Rich text content
-2. Image Block - Images with captions
-3. Two-Panel Block - Image/text side-by-side
-4. Cart Block - Direct checkout integration
+**Target:** TTFP < 2 seconds (from 5s)
 
-**Why**: 10+ agency clients can't use the current MDX editor. Major client needs this for merch campaign launch.
+**Core Change:** Remove shipping calculation from cart creation, trigger it client-side after page renders
 
-**Timeline**: 1-2 days implementation
-
-**Key approach**: Extend existing bio platform, reuse all patterns
+**Key File:** `packages/lib/src/functions/cart.fns.ts` lines 334-373

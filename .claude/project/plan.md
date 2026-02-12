@@ -1,251 +1,222 @@
-# Barely Invoice MVP - Technical Implementation Plan
+# Technical Implementation Plan: Deferred Shipping Rate Calculation
 
 ## Feature Summary
 
-Implement a workspace-scoped invoicing system as an app variant of the barely.ai platform, enabling invoice creation, client management, email delivery, and Stripe payment collection through public payment pages.
+Defer shipping rate calculation from cart creation to a client-side side effect triggered after checkout page render, reducing Time To First Paint from ~5 seconds to <2 seconds by removing the blocking ShipStation API call from the critical path.
 
 ## Architecture Overview
 
-The invoice app will be implemented as a new app variant (`invoice`) within the existing monorepo structure, leveraging:
-- Existing workspace multi-tenancy system for data isolation
-- Stripe Connect infrastructure for payment processing  
-- SendGrid integration for email delivery
-- App variant configuration pattern established by fm/vip apps
-- Shared UI components and authentication system
+The solution modifies the cart creation flow to skip shipping calculation, then triggers shipping calculation client-side after the checkout form mounts. This leverages existing UI loading states and mutation patterns.
 
-### Components Affected
-- New app: `apps/invoice/`
-- Database: Two new tables (Invoices, InvoiceClients)
-- API: New tRPC routes for invoice operations
-- Validators: New Zod schemas for invoice data validation
-- Email: New invoice email template
-- Constants: App configuration updates
+**Components Affected:**
+
+| Layer | Component | Change |
+|-------|-----------|--------|
+| Backend | `createMainCartFromFunnel()` in cart.fns.ts | Remove shipping calculation |
+| Backend | New tRPC mutation or modified existing | Calculate shipping post-load |
+| Frontend | checkout-form.tsx | Add useEffect to trigger shipping on mount |
+| Frontend | OrderSummary component | Handle initial null shipping state |
+| Database | Cart schema | No change (already nullable) |
+
+**Data Flow (New):**
+```
+1. User hits checkout URL
+2. Middleware fires /api/cart/create (no shipping calc)
+3. Cart record saved with null shipping amounts
+4. Page prefetch returns immediately
+5. Checkout form renders (TTFP achieved)
+6. useEffect detects null shipping → triggers mutation
+7. isFetchingRates = true → loading state shown
+8. ShipStation API called (background)
+9. Cart updated with shipping amounts
+10. isFetchingRates = false → amounts displayed
+```
 
 ## Key Technical Decisions
 
-1. **App Variant Architecture**: Use existing app variant pattern to create focused invoice interface while hiding unnecessary navigation
-2. **Database Design**: Workspace-scoped tables following existing patterns with soft deletes
-3. **Payment Processing**: Leverage existing Stripe Connect per workspace, avoiding new OAuth implementation
-4. **Public Routes**: Implement public payment pages using established public router patterns from vip/fm apps
-5. **Email Delivery**: Use SendGrid transactional API directly instead of broadcast system
-6. **Status Tracking**: Implement event-driven status updates via webhooks and database triggers
-7. **Invoice Numbers**: Use workspace-scoped sequential numbering with format `INV-{workspacePrefix}-{number}`
+### 1. Remove shipping from cart creation entirely
+**Rationale:** The shipping calculation is the only external API call in `createMainCartFromFunnel()`. Removing it eliminates the 500-2000ms blocking call from the critical path.
+
+### 2. Create new lightweight mutation for initial shipping calculation
+**Rationale:** The existing `updateShippingAddressFromCheckout` requires a full address with postal code. For initial calculation, we only have geo data (country, state, city) from Vercel headers. A new mutation allows simpler inputs and clearer separation of concerns.
+
+### 3. Use existing isFetchingRates atom for loading state
+**Rationale:** The state management pattern already exists and is observed by SubmitButton and OrderSummary. Reusing it ensures consistent behavior and avoids duplication.
+
+### 4. Trigger on checkout form mount with geo data from cart
+**Rationale:** The middleware already extracts geo data from Vercel headers and passes it to cart creation. This data is stored on the cart record and can be used for initial shipping calculation.
+
+### 5. Handle null shipping gracefully in UI (no error state)
+**Rationale:** Null shipping on initial render is expected, not an error. The UI should show a loading indicator, not an error message.
 
 ## Dependencies & Assumptions
 
-### Dependencies
-- Workspace system fully operational (Bio MVP completion)
-- Stripe Connect configured per workspace
-- SendGrid API available for transactional emails
-- Existing auth/session management
-- Shared UI component library
+**Dependencies:**
+- `isFetchingRatesAtom` (Jotai atom in checkout-form.tsx) - for loading state
+- `getProductsShippingRateEstimate()` (shipengine.endpts.ts) - shipping calculation
+- `atomWithToggle` pattern from @barely/ui - for boolean atom
+- Cart schema shipping fields are nullable - ✅ Verified (cart.sql.ts lines 96, 103, 112-114)
 
-### Assumptions
-- Users have completed workspace onboarding
-- Stripe Connect is active for payment collection
-- Single currency (USD) for MVP
-- HTML invoice display (no PDF generation)
-- No recurring billing in MVP phase
+**Assumptions:**
+- Geo data (country, state, city) from Vercel headers is sufficient for initial shipping estimate
+- The existing debounce pattern (500ms) is acceptable for the initial trigger
+- Rate limiting (30 req/min) will not be hit by initial calculations
+- ShipStation API latency remains 500-2000ms
 
 ## Implementation Checklist
 
-### Feature 1: Database Schema & Models
+### Feature 1: Remove Shipping from Cart Creation
 
-- [ ] Create `packages/db/src/sql/invoice-client.sql.ts` with InvoiceClients table
-  - workspace-scoped client records
-  - Fields: id, workspaceId, name, email, company, address, deletedAt, createdAt, updatedAt
-  - Index on workspaceId for query performance
-  
-- [ ] Create `packages/db/src/sql/invoice.sql.ts` with Invoices table
-  - workspace-scoped invoice records
-  - Fields: id, workspaceId, invoiceNumber, clientId, lineItems (JSONB), tax, subtotal, total, dueDate, status, stripePaymentIntentId, viewedAt, paidAt, deletedAt, createdAt, updatedAt
-  - Indexes on workspaceId, clientId, status, invoiceNumber
-  - Status enum: draft, sent, viewed, paid, overdue, voided
+**Backend - cart.fns.ts:**
+- [ ] In `createMainCartFromFunnel()`, remove the shipping calculation block (lines 334-373)
+  - Remove the `if (shipTo?.country && shipTo.state && shipTo.city)` conditional
+  - Remove both `getProductsShippingRateEstimate()` calls
+  - Remove assignments to `cart.mainShippingAmount` and `cart.bumpShippingPrice`
+- [ ] Ensure cart record is created with null shipping amounts (default behavior)
+- [ ] Verify no other code paths in `createMainCartFromFunnel()` set shipping amounts
 
-- [ ] Import new tables in `packages/db/src/client.ts` and add to dbSchema export
+**Testing:**
+- [ ] Test that cart creation completes without shipping calculation
+- [ ] Verify cart record has null shipping amounts after creation
+- [ ] Measure cart creation time before/after change
 
-- [ ] Create Zod schemas in `packages/validators/src/schemas/invoice-client.schema.ts`
-  - createInvoiceClientSchema, updateInvoiceClientSchema, selectInvoiceClientSchema
-  
-- [ ] Create Zod schemas in `packages/validators/src/schemas/invoice.schema.ts`
-  - createInvoiceSchema, updateInvoiceSchema, selectInvoiceSchema
-  - lineItemSchema for array validation
-  
-- [ ] Export schemas from `packages/validators/src/schemas/index.ts`
+---
 
-- [ ] Run database migration to create tables: `pnpm db:push`
+### Feature 2: New Initial Shipping Calculation Mutation
 
-### Feature 2: Invoice App Setup
+**Backend - cart.route.ts:**
+- [ ] Create new tRPC mutation `calculateInitialShipping` with schema:
+  ```typescript
+  {
+    cartId: z.string(),
+    handle: z.string(),
+    key: z.string(),
+  }
+  ```
+- [ ] Implement mutation logic:
+  - Fetch cart and funnel by cartId, handle, key
+  - Extract shipTo from cart's geo data fields (stored during creation)
+  - Extract shipFrom from funnel workspace shipping address
+  - Call `getProductsShippingRateEstimate()` using Promise.all pattern (copy from lines 482-498)
+  - Update cart with calculated shipping amounts
+  - Return updated amounts
+- [ ] Add rate limiting (reuse existing pattern from line 433-437)
+- [ ] Handle case where geo data is insufficient (return early, no error)
 
-- [ ] Create `apps/invoice/` directory structure copying from `apps/fm/`
+**Validators - cart.schema.ts:**
+- [ ] Add `calculateInitialShippingSchema` validator with cartId, handle, key fields
 
-- [ ] Configure `apps/invoice/package.json` with required dependencies:
-  - Core Next.js and React dependencies
-  - tRPC client packages (excluding @trpc/react-query)
-  - UI and validation packages from workspace
+**Testing:**
+- [ ] Test mutation with valid geo data returns shipping amounts
+- [ ] Test mutation with missing geo data returns gracefully (no crash)
+- [ ] Test rate limiting prevents abuse
 
-- [ ] Set up `apps/invoice/next.config.mjs` with app variant configuration
+---
 
-- [ ] Create `apps/invoice/src/app/layout.tsx` with TRPCReactProvider wrapper
+### Feature 3: Client-Side Shipping Trigger on Mount
 
-- [ ] Configure environment variables in `apps/invoice/.env`:
-  - NEXT_PUBLIC_APP_VARIANT=invoice
-  - Port configuration (3011)
+**Frontend - checkout-form.tsx:**
+- [ ] Import the new `calculateInitialShipping` mutation from tRPC client
+- [ ] Add useMutation hook for `calculateInitialShipping`:
+  ```typescript
+  const { mutateAsync: calculateShipping } = useMutation(
+    trpc.calculateInitialShipping.mutationOptions({
+      onMutate: () => setIsFetchingRates(true),
+      onSettled: () => setIsFetchingRates(false),
+    }),
+  );
+  ```
+- [ ] Add useEffect to trigger shipping calculation on mount:
+  ```typescript
+  const shippingCalculated = useRef(false);
 
-- [ ] Update `packages/const/src/app.constants.ts` to add 'invoice' to APPS array
+  useEffect(() => {
+    if (shippingCalculated.current) return;
+    if (!cart.mainShippingAmount && cart.shippingAddressCountry) {
+      shippingCalculated.current = true;
+      calculateShipping({ cartId, handle, key: cartKey });
+    }
+  }, [cart, cartId, handle, cartKey, calculateShipping]);
+  ```
+- [ ] Ensure isFetchingRates is set to true before mutation starts
+- [ ] Invalidate cart query after mutation succeeds to update UI
 
-- [ ] Update `packages/auth/src/get-url.ts` to handle invoice app URLs
+**Testing:**
+- [ ] Test that shipping calculation triggers on checkout form mount
+- [ ] Test that shipping calculation only triggers once (useRef guard)
+- [ ] Test that isFetchingRates shows loading state during calculation
+- [ ] Test that shipping amounts update correctly after calculation
 
-- [ ] Update development scripts in `scripts/dev-qr-codes.sh` for invoice app
+---
 
-### Feature 3: Client Management CRUD
+### Feature 4: Handle Null Shipping State in UI
 
-- [ ] Create `packages/lib/src/trpc/routes/invoice-client.route.ts` with procedures:
-  - create: Add new client to workspace
-  - update: Modify client information
-  - delete: Soft delete client
-  - list: Paginated client list for workspace
-  - byId: Get single client details
+**Frontend - checkout-form.tsx (OrderSummary section):**
+- [ ] Verify OrderSummary already handles isFetchingRates loading state (lines 1007-1017)
+- [ ] Ensure shipping line shows pulse animation when isFetchingRates is true
+- [ ] Ensure total calculation handles null shipping gracefully
+  - Check `getAmountsForCheckout()` handles null shipping amounts
+  - If not, add null coalescing: `amounts.checkoutShippingAndHandlingAmount ?? 0`
 
-- [ ] Create client management UI in `apps/invoice/src/app/clients/page.tsx`:
-  - Client list table with search/filter
-  - Add/Edit client modal with form validation
-  - Delete confirmation dialog
+**Frontend - checkout-form.tsx (SubmitButton section):**
+- [ ] Verify SubmitButton is disabled when isFetchingRates is true (lines 931-956)
+- [ ] No changes needed if already working
 
-- [ ] Implement `ClientForm` component using useZodForm pattern:
-  - TextField components for name, email, company
-  - TextAreaField for address
-  - Form validation with error display
+**Frontend - checkout-form.tsx (Initial render):**
+- [ ] Set isFetchingRates to true on initial render if shipping is null
+  - Add initialization: `const [isFetchingRates, setIsFetchingRates] = useAtom(isFetchingRatesAtom);`
+  - Set initial value based on cart.mainShippingAmount being null
 
-- [ ] Add client dropdown component for invoice creation:
-  - Searchable select with lazy loading
-  - Quick-add new client option
+**Testing:**
+- [ ] Test OrderSummary shows loading state when shipping is null
+- [ ] Test SubmitButton is disabled when shipping is calculating
+- [ ] Test total displays correctly once shipping is calculated
+- [ ] Test no console errors with null shipping amounts
 
-### Feature 4: Invoice Creation & Management
+---
 
-- [ ] Create `packages/lib/src/trpc/routes/invoice.route.ts` with procedures:
-  - create: Create new invoice with line items
-  - update: Modify draft invoices
-  - delete: Soft delete draft invoices
-  - list: Paginated invoice list with filters
-  - byId: Get single invoice with client data
-  - duplicate: Copy existing invoice
-  - markPaid: Manual payment marking
+### Feature 5: Error Handling for Failed Shipping Calculation
 
-- [ ] Implement invoice number generation in `packages/lib/src/functions/invoice.fns.ts`:
-  - Sequential numbering per workspace
-  - Format: INV-{workspacePrefix}-{paddedNumber}
+**Backend - cart.route.ts:**
+- [ ] In `calculateInitialShipping` mutation, wrap ShipStation call in try/catch
+- [ ] Return error state without throwing (allows UI to handle gracefully)
+- [ ] Log errors for monitoring
 
-- [ ] Create invoice form in `apps/invoice/src/app/invoices/new/page.tsx`:
-  - Client selection dropdown
-  - Dynamic line items with add/remove
-  - Automatic calculation of totals
-  - Tax percentage input
-  - Due date picker
+**Frontend - checkout-form.tsx:**
+- [ ] Handle error response from calculateInitialShipping mutation
+- [ ] Show error message in OrderSummary shipping line area
+- [ ] Provide retry mechanism (button to recalculate)
+- [ ] Allow user to enter full address to trigger address-based calculation
 
-- [ ] Build invoice list view in `apps/invoice/src/app/invoices/page.tsx`:
-  - Status badges (draft, sent, paid, overdue)
-  - Quick actions (duplicate, send, delete)
-  - Filter by status and client
-  - Search by invoice number
+**Shared - Error state atom:**
+- [ ] Consider adding `shippingErrorAtom` to track error state
+- [ ] Or reuse existing error handling patterns in the form
 
-- [ ] Create invoice preview component:
-  - Professional layout matching brand
-  - Line items table with totals
-  - Client and business information display
+**Testing:**
+- [ ] Test error display when ShipStation API fails
+- [ ] Test retry functionality
+- [ ] Test that entering address recovers from error state
 
-### Feature 5: Email Delivery System
+---
 
-- [ ] Create email template in `packages/email/src/templates/invoice.tsx`:
-  - Professional invoice layout
-  - Clear call-to-action button
-  - Payment link integration
-  - Tracking pixel for view status
+### Feature 6: Integration & Regression Testing
 
-- [ ] Implement email sending in `packages/lib/src/functions/invoice-email.fns.ts`:
-  - SendGrid integration for transactional send
-  - Email tracking pixel generation
-  - Retry logic for failed sends
+**End-to-End Tests:**
+- [ ] Test complete checkout flow with deferred shipping calculation
+- [ ] Test checkout with bump product (requires both shipping calculations)
+- [ ] Test checkout without bump product
+- [ ] Test checkout with invalid/missing geo data
+- [ ] Test address change after initial shipping calculation
+- [ ] Test page reload during shipping calculation
 
-- [ ] Add send invoice procedure to invoice.route.ts:
-  - Generate payment link
-  - Send email via SendGrid
-  - Update invoice status to 'sent'
-  - Log email activity
+**Performance Validation:**
+- [ ] Measure TTFP before implementation (baseline)
+- [ ] Measure TTFP after implementation (should be <2 seconds)
+- [ ] Verify total checkout time is not increased
+- [ ] Monitor ShipStation API success rates
 
-- [ ] Create email tracking endpoint in `apps/invoice/src/app/api/track/[invoiceId]/route.ts`:
-  - Update invoice viewedAt timestamp
-  - Change status to 'viewed'
-  - Return 1x1 transparent pixel
-
-### Feature 6: Payment Collection
-
-- [ ] Create public router in `packages/api/src/public/invoice-render.route.ts`:
-  - getInvoiceByHandle: Retrieve invoice for payment page
-  - No authentication required for public access
-
-- [ ] Set up public router exports in `packages/api/src/public/invoice-render.router.ts`
-
-- [ ] Create tRPC context in `packages/api/src/public/invoice-render.trpc.react.ts`
-
-- [ ] Implement public payment page at `apps/invoice/src/app/pay/[handle]/[invoiceId]/page.tsx`:
-  - Invoice details display
-  - Pay button triggering Stripe Checkout
-  - Mobile-responsive design
-  - No authentication required
-
-- [ ] Create Stripe Checkout session in `packages/lib/src/functions/invoice-payment.fns.ts`:
-  - Use workspace's Stripe Connect account
-  - Set payment intent metadata with invoiceId
-  - Configure success/cancel URLs
-  - Apply 0.5% platform fee
-
-- [ ] Implement Stripe webhook handler at `apps/invoice/src/app/api/webhooks/stripe/route.ts`:
-  - Handle payment_intent.succeeded event
-  - Update invoice status to 'paid'
-  - Record paidAt timestamp
-  - Send payment confirmation email
-
-### Feature 7: Dashboard & Analytics
-
-- [ ] Create dashboard view at `apps/invoice/src/app/page.tsx`:
-  - Outstanding invoice total calculation
-  - Overdue invoice count and list
-  - Recent activity feed (last 10 actions)
-  - Quick action buttons
-  - This month's revenue display
-
-- [ ] Implement dashboard data aggregation in invoice.route.ts:
-  - getDashboardStats procedure
-  - Efficient queries with proper indexes
-  - Cache results for performance
-
-- [ ] Add status update cron job in `packages/lib/src/trigger/invoice-status.trigger.ts`:
-  - Daily check for overdue invoices
-  - Update status based on due date
-  - Optional: Send overdue notifications
-
-### Feature 8: Testing & Security
-
-- [ ] Write unit tests for invoice number generation
-- [ ] Test line item calculation logic
-- [ ] Validate tax calculation accuracy
-- [ ] Test email template rendering
-
-- [ ] Implement integration tests for:
-  - Invoice creation flow
-  - Payment webhook handling
-  - Email delivery tracking
-
-- [ ] Security validations:
-  - Workspace-scoped data access
-  - Public page rate limiting
-  - Payment webhook signature verification
-  - XSS prevention in invoice display
-
-- [ ] Performance testing:
-  - Large client list pagination
-  - Invoice list query optimization
-  - Payment page load time
-
-The next step is to organize the implementation plan by features. Run `/product-development:05_organize-plan` when ready.
+**Regression Tests:**
+- [ ] Verify existing address change flow still works
+- [ ] Verify bump product toggle updates shipping correctly
+- [ ] Verify quantity changes trigger shipping recalculation
+- [ ] Verify submit button remains disabled until shipping calculated

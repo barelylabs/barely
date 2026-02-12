@@ -1,304 +1,211 @@
-# Jobs To Be Done (JTBD) - Barely Invoice
+# Jobs to be Done: Deferred Shipping Rate Calculation
 
 ## Overview
 
-This document defines the core jobs that freelancers, consultants, and service providers are trying to accomplish when dealing with invoicing and payment collection. Each job focuses on the outcome the user desires, not the specific features or implementation.
+This document captures the jobs that users are trying to accomplish when checking out on Barely cart. It focuses on the "why" behind behavior - specifically, why checkout speed matters and what users are actually trying to accomplish.
+
+---
+
+## User Segments
+
+### Segment 1: Fans/Customers
+
+**Context**: Music fans who have discovered an artist's merchandise through their bio link, social media, or website. They've found something they want to buy and have clicked through to checkout.
+
+**Situation**: They're in purchase mode - credit card ready, decision made, just need to complete the transaction. They may be on mobile (most common), possibly on cellular data, and have limited patience.
+
+### Segment 2: Artists/Creators (Indirect)
+
+**Context**: Musicians and creators using Barely cart to sell merchandise. They don't experience the checkout directly but are impacted by conversion rates.
+
+**Situation**: They've invested in merchandise, set up their store, and are driving traffic to their cart. Every abandoned checkout is lost revenue and wasted marketing effort.
 
 ---
 
 ## Primary Jobs (High Priority)
 
-### 1. Get Paid Quickly for Completed Work
+### Job 1: Complete My Purchase Quickly
 
-**Job Statement**  
-As a freelancer, I want to send professional invoices that clients will pay immediately, so that I can maintain positive cash flow and avoid chasing payments.
+**Job Statement**: When I've decided to buy merchandise from an artist I support, I want to complete checkout as fast as possible so I can get back to what I was doing.
 
-**Context**
-- Occurs immediately after completing a project or reaching a milestone
-- Triggered by finishing deliverables or monthly retainer cycles
+**Functional Aspects**:
+- See the checkout form immediately when I click "checkout"
+- Enter my information without waiting for pages to load
+- Submit payment and get confirmation quickly
 
-**Motivation (Why this matters)**
-- Average payment collection takes 30+ days, creating cash flow problems
-- Chasing payments via email/text is uncomfortable and time-consuming
-- Unpaid invoices affect ability to pay own bills
+**Emotional Aspects**:
+- Feel confident the site is working (not broken)
+- Maintain purchase momentum before second-guessing
+- Not feel frustrated or impatient
+- Trust my payment information is being handled properly
 
-**Current Alternatives**
-- Sending Word/PDF invoices via email with bank details
-- Using QuickBooks but only utilizing 10% of features
-- Manual follow-ups and payment reminders
+**Social Aspects**:
+- Support the artist I care about
+- Complete the transaction before getting distracted
 
-**Desired Outcome / Success Criteria**
-- Invoice paid within 7 days of sending
-- Client can pay with one click without creating accounts
-- Automatic confirmation when payment is received
+**Current Workarounds**: Users wait up to 5 seconds staring at a loading screen, or abandon entirely.
 
-**Priority Level**
-- High
-
----
-
-### 2. Minimize Time Spent on Administrative Tasks
-
-**Job Statement**  
-As a consultant, I want to create and send invoices in under 60 seconds, so that I can focus on billable work instead of paperwork.
-
-**Context**
-- End of project when wrapping up deliverables
-- Monthly/weekly billing cycles for retainer clients
-- When switching contexts between creative and administrative work
-
-**Motivation (Why this matters)**
-- Currently takes 10-15 minutes per invoice
-- Mental context switching from creative to admin work is draining
-- Every minute on invoicing is a minute not earning
-
-**Current Alternatives**
-- Copy-pasting from previous invoices in Google Docs
-- Maintaining spreadsheets with client details
-- Using complex accounting software with steep learning curves
-
-**Desired Outcome / Success Criteria**
-- Invoice created and sent in less than 60 seconds
-- Client details remembered and reusable
-- No learning curve or accounting knowledge required
-
-**Priority Level**
-- High
+**Success Metrics**:
+- Time from click to interactive checkout < 2 seconds
+- Reduced bounce rate on checkout page
+- Higher checkout completion rate
 
 ---
 
-### 3. Maintain Professional Appearance
+### Job 2: Know What I'm Paying Before I Commit
 
-**Job Statement**  
-As a service provider, I want to send polished, professional invoices that reflect my brand quality, so that clients take my business seriously and pay promptly.
+**Job Statement**: When I'm ready to checkout, I want to see the total cost including shipping so I can confirm my purchase decision.
 
-**Context**
-- First invoice to a new client sets the tone
-- Competing with larger agencies for contracts
-- Building trust with enterprise clients
+**Functional Aspects**:
+- See product price clearly
+- See shipping cost before entering payment
+- Understand the total I'll be charged
 
-**Motivation (Why this matters)**
-- Unprofessional invoices can delay payment or lose future work
-- Brand consistency across all client touchpoints matters
-- Professional appearance justifies professional rates
+**Emotional Aspects**:
+- Feel informed, not surprised
+- Trust the pricing is fair
+- Feel confident in my purchase decision
 
-**Current Alternatives**
-- Manually formatting invoices to look professional
-- Using generic templates that don't match brand
-- Paying for expensive software with more features than needed
+**Social Aspects**:
+- Justify the purchase to myself/others
 
-**Desired Outcome / Success Criteria**
-- Clean, professional invoice design
-- Consistent branding across all invoices
-- Client-facing payment page that inspires confidence
+**Current Workarounds**: Shipping is calculated but blocks the entire page from loading - users don't even see the form until shipping is calculated.
 
-**Priority Level**
-- High
+**Success Metrics**:
+- Shipping cost visible before payment submission
+- Clear loading indicator while shipping calculates (not blocking the page)
 
 ---
 
-### 4. Track Payment Status Without Manual Checking
+### Job 3: Trust the Checkout Process
 
-**Job Statement**  
-As a freelancer, I want to know instantly when invoices are viewed and paid, so that I can follow up appropriately and plan my finances.
+**Job Statement**: When I'm entering my payment information, I want to feel confident the process is secure and reliable so I don't hesitate to complete my purchase.
 
-**Context**
-- After sending an invoice, waiting for payment
-- Planning monthly expenses based on expected income
-- Deciding when to send follow-up reminders
+**Functional Aspects**:
+- See a professional, responsive checkout form
+- Have clear feedback on form state and errors
+- See secure payment indicators (Stripe badge, etc.)
 
-**Motivation (Why this matters)**
-- Uncertainty about whether invoice was received/reviewed
-- Not knowing if payment is coming affects financial planning
-- Manual checking of bank accounts is inefficient
+**Emotional Aspects**:
+- Feel the site is legitimate and professional
+- Trust my payment will go through
+- Not worry about double-charges or failed transactions
 
-**Current Alternatives**
-- Checking bank account daily
-- Asking clients if they received the invoice
-- Using read receipts on emails
+**Social Aspects**:
+- Feel good about supporting the artist through a quality experience
 
-**Desired Outcome / Success Criteria**
-- Notification when invoice is viewed
-- Instant notification when payment is made
-- Clear status tracking (sent, viewed, paid)
+**Current Workarounds**: Slow loading undermines trust - users may question if the site is broken or legitimate.
 
-**Priority Level**
-- High
+**Success Metrics**:
+- Reduced "is this site safe?" support inquiries
+- Higher payment completion rate after form interaction
 
 ---
 
-## Secondary Jobs (Medium Priority)
+## Secondary Jobs (Lower Priority)
 
-### 5. Reuse Information for Repeat Clients
+### Job 4: Recover If Something Goes Wrong
 
-**Job Statement**  
-As a consultant with regular clients, I want to avoid re-entering the same information repeatedly, so that I can invoice faster and reduce errors.
+**Job Statement**: If shipping can't be calculated or something fails, I want clear feedback so I know what to do next.
 
-**Context**
-- Monthly retainer invoicing
-- Repeat projects with same clients
-- Similar projects with standard pricing
+**Functional Aspects**:
+- See clear error messages if shipping fails
+- Have option to retry or contact support
+- Not lose my cart contents
 
-**Motivation (Why this matters)**
-- Typing same client details wastes time
-- Manual entry increases error risk
-- Repeat clients are 80% of business
+**Emotional Aspects**:
+- Not feel stuck or confused
+- Trust there's a path forward
 
-**Current Alternatives**
-- Maintaining client spreadsheet
-- Copy-pasting from old invoices
-- Memory and manual re-entry
-
-**Desired Outcome / Success Criteria**
-- Select client from dropdown
-- Duplicate previous invoices
-- Auto-fill common line items
-
-**Priority Level**
-- Medium
+**Current Workarounds**: N/A - current flow blocks everything, so failures are catastrophic.
 
 ---
 
-### 6. Handle Tax Calculations Simply
+### Job 5: Get Accurate Shipping Information
 
-**Job Statement**  
-As a service provider, I want to add tax to invoices correctly, so that I can comply with requirements without complexity.
+**Job Statement**: When I'm buying merchandise, I want accurate shipping costs and delivery estimates so I can plan accordingly.
 
-**Context**
-- Creating invoices for local clients
-- End of project invoicing
-- When tax rates change
+**Functional Aspects**:
+- See shipping options and prices
+- Understand estimated delivery time
+- Know if there are any shipping restrictions
 
-**Motivation (Why this matters)**
-- Manual tax calculation is error-prone
-- Different clients may have different tax requirements
-- Need to show tax separately for business clients
+**Emotional Aspects**:
+- Feel informed about what to expect
+- Trust the shipping estimate is accurate
 
-**Desired Outcome / Success Criteria**
-- Simple percentage-based tax addition
-- Clear tax line item on invoice
-- Automatic total calculation
-
-**Priority Level**
-- Medium
+**Current Workarounds**: Shipping is already calculated (just at the wrong time in the flow).
 
 ---
 
-### 7. Provide Payment Flexibility to Clients
+## Internal Jobs (Barely/Artist)
 
-**Job Statement**  
-As a freelancer, I want to offer easy payment options to clients, so that they have no friction or excuses for delayed payment.
+### Job 6: Maximize Checkout Conversions
 
-**Context**
-- Invoicing clients who prefer credit cards
-- International clients with different payment preferences
-- Enterprise clients with procurement processes
+**Job Statement**: When fans reach checkout, we want them to complete their purchase so artists earn revenue and fans get their merchandise.
 
-**Motivation (Why this matters)**
-- Some clients won't do bank transfers
-- Credit card payments are faster than checks
-- Payment friction leads to delays
+**Functional Aspects**:
+- Fast, frictionless checkout experience
+- No unnecessary loading or delays
+- Clear path from cart to confirmation
 
-**Current Alternatives**
-- Providing multiple payment instructions
-- Using PayPal invoices (high fees)
-- Accepting whatever client prefers
+**Emotional Aspects**:
+- Feel confident the checkout is optimized
+- Trust conversion rates are as high as possible
 
-**Desired Outcome / Success Criteria**
-- Credit/debit card payments accepted
-- One-click payment process
-- Secure and trusted payment flow
+**Current Workarounds**: Accepting lower conversion rates due to slow checkout.
 
-**Priority Level**
-- Medium
+**Success Metrics**:
+- Checkout completion rate improvement
+- Reduced cart abandonment
+- Higher revenue per visitor
 
 ---
 
-## Tertiary Jobs (Low Priority - Future Consideration)
+## Job Prioritization Matrix
 
-### 8. Build Predictable Revenue
-
-**Job Statement**  
-As an agency owner, I want to set up recurring invoices for retainer clients, so that I can build predictable monthly revenue without manual work.
-
-**Context**
-- Onboarding retainer clients
-- Monthly service agreements
-- Subscription-based offerings
-
-**Motivation (Why this matters)**
-- Manual monthly invoicing is repetitive
-- Predictable revenue improves business planning
-- Automatic billing improves cash flow
-
-**Current Alternatives**
-- Manual monthly invoice creation
-- Calendar reminders to send invoices
-- Stripe billing (requires technical knowledge)
-
-**Desired Outcome / Success Criteria**
-- Set up once, runs automatically
-- Client's card charged monthly
-- Recurring revenue tracking
-
-**Priority Level**
-- Low (Post-MVP)
+| Job | Frequency | Importance | Satisfaction Gap | Priority |
+|-----|-----------|------------|------------------|----------|
+| Complete purchase quickly | Every checkout | Critical | High (5s wait) | **P0** |
+| Know what I'm paying | Every checkout | High | Low (shipping shows, just slowly) | **P1** |
+| Trust the checkout process | Every checkout | High | Medium (slow = unprofessional) | **P1** |
+| Recover from failures | Rare | Medium | Unknown | **P2** |
+| Get accurate shipping info | Every checkout | Medium | Low (accuracy is fine) | **P2** |
+| Maximize conversions (internal) | Ongoing | Critical | High (slow = abandonment) | **P0** |
 
 ---
 
-### 9. Provide Professional Documentation
+## Key Insights
 
-**Job Statement**  
-As a consultant, I want to provide PDF invoices when requested, so that clients can process them through their accounting systems.
+1. **The core job isn't "calculate shipping faster"** - it's "let me complete my purchase without friction." Shipping calculation is a means to an end, not the end itself.
 
-**Context**
-- Enterprise clients requiring PDF documentation
-- End of year accounting
-- Client requests for records
+2. **Timing matters more than the calculation itself** - The shipping rates are accurate and the UI already handles loading states. The problem is purely WHEN the calculation happens, not HOW it's done.
 
-**Motivation (Why this matters)**
-- Some accounting systems require PDF uploads
-- Professional documentation for client records
-- Legal/tax compliance requirements
+3. **First paint is the critical moment** - The psychological switch from "waiting" to "doing" happens when the form appears. Every second before first paint feels longer than seconds spent filling out the form.
 
-**Current Alternatives**
-- Creating PDFs manually
-- Print to PDF from browser
-- Using complex software for just PDF generation
+4. **Slow checkout signals unprofessionalism** - Fans may subconsciously distrust a slow checkout, even if the calculation is accurate. Speed is a trust signal.
 
-**Desired Outcome / Success Criteria**
-- One-click PDF download
-- Professional PDF formatting
-- Include all invoice details
+5. **Mobile users are least patient and most common** - Mobile checkout is the primary use case, and mobile users on cellular data are the most sensitive to load times.
 
-**Priority Level**
-- Low (Post-MVP)
+6. **Shipping doesn't need to block anything** - Users can't submit payment until shipping is calculated anyway (button is disabled). So there's zero functional reason to block first paint for it.
 
 ---
 
-## Non-Jobs (What Users Don't Need)
+## Success Definition
 
-These are explicitly NOT jobs users are trying to accomplish:
+This feature succeeds when:
 
-- Manage complex accounting or bookkeeping
-- Track business expenses
-- Generate financial reports
-- Manage inventory
-- Track time spent on projects
-- Calculate complex tax scenarios
-- Integrate with accounting software
-- Manage purchase orders
-- Handle multi-currency conversions
-- Create estimates or quotes
+1. **Fans** see the checkout form in under 2 seconds, enter their information while shipping calculates in the background, and complete purchases with higher conversion rates
+
+2. **Artists** earn more revenue from the same traffic because fewer fans abandon during checkout
+
+3. **The experience** feels instant and professional, building trust in the Barely platform
 
 ---
 
-## Summary
+## What This Isn't About
 
-The core jobs focus on three critical outcomes:
-
-1. **Speed**: Get invoices out in seconds, not minutes
-2. **Payment Velocity**: Get paid in days, not weeks
-3. **Simplicity**: No accounting knowledge required
-
-Success means freelancers spend less time on administrative work and more time on billable work, while getting paid faster with less friction.
+- **Not about shipping accuracy** - The calculation logic doesn't change
+- **Not about UI changes** - Loading states already exist
+- **Not about caching complexity** - Just changing timing, not infrastructure
+- **Not about the full cart optimization project** - Surgical fix for one specific bottleneck

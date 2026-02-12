@@ -1,53 +1,79 @@
-# Project Context: Bio Landing Page Blocks
+# Project Context: Cart Checkout TTFP Optimization
 
 ## Current Development
-Working on: Extending bio platform with 4 new block types for landing page creation
-Deadline: 2025-09-15 (aligns with agency client campaign launch)
+
+**Working on:** Reduce checkout page Time To First Paint from 5 seconds to under 2 seconds by deferring shipping rate calculation to post-page-load.
+
+**Deadline:** February 26, 2026
+
+**Branch:** `feature/cart-checkout-ttfp`
 
 ## Key Files in This Worktree
+
 - `.claude/project/PRD.md` - Full product requirements
-- `.claude/project/plan.md` - Implementation checklist by feature
+- `.claude/project/plan-organized.md` - Implementation checklist by milestone
 - `.claude/project/JTBD.md` - Jobs to be done analysis
 - `.claude/project/feature.md` - Feature overview and rationale
+- `.claude/project/plan.md` - Technical implementation plan
 
 ## Current Focus
-Start with Phase 1: Infrastructure Setup
-- Database migration for new block types
-- Update block registry and type definitions
-- Security headers and validation utilities
-- Performance foundation (caching, lazy loading)
 
-Then implement blocks in order:
-1. Markdown Block (3-4 hours)
-2. Image Block (2-3 hours)
-3. Two-Panel Block (3-4 hours)
-4. Cart Block (2-3 hours)
+**Milestone 0: Performance Baseline**
+- Measure current TTFP on checkout page using Lighthouse/DevTools
+- Record current cart creation time
+- Document current checkout completion rate
+- Screenshot current OrderSummary loading behavior
+
+Then proceed to:
+
+**Milestone 1: Remove Shipping from Cart Creation**
+- File: `packages/lib/src/functions/cart.fns.ts`
+- Remove lines 334-373 (shipping calculation block)
+- Cart should create with null shipping amounts
 
 ## Key Technical Decisions
-- Extend existing `BioBlockType` enum (not separate system)
-- Reuse modal editor patterns from Links block
-- Leverage existing markdown editor from `@barely/ui`
-- Store block data in JSONB with zod validation
-- Use CSS Grid with container queries for Two-Panel block
-- Direct cart checkout links (no embedded iframe)
+
+1. **Remove shipping from cart creation entirely** - Eliminates 500-2000ms blocking call
+2. **Create new lightweight mutation** - `calculateInitialShipping` for post-load calculation
+3. **Use existing isFetchingRates atom** - Already handles loading state
+4. **Trigger on checkout form mount** - useEffect pattern with geo data from cart
 
 ## Success Criteria
-- 80% of landing page users migrate from MDX editor within 30 days
-- 0 support tickets for basic landing page edits
-- <30 minutes from start to published landing page
-- Major agency client successfully launches merch campaign
-- Maintain <2s page load on 3G networks
-- All blocks render consistently across devices
+
+- [ ] TTFP on checkout page < 2 seconds (from 5s)
+- [ ] Shipping visible before user can submit payment
+- [ ] Zero UX degradation - existing loading states handle async calculation
+- [ ] No increase in checkout errors or failures
+
+## Key Files to Modify
+
+| File | Change |
+|------|--------|
+| `packages/lib/src/functions/cart.fns.ts` | Remove shipping calculation (lines 334-373) |
+| `packages/validators/src/schemas/cart.schema.ts` | Add new schema |
+| `packages/lib/src/trpc/routes/cart.route.ts` | Add new mutation |
+| `apps/cart/src/app/[mode]/[handle]/[key]/checkout/checkout-form.tsx` | Trigger + UI |
+
+## Root Cause (Validated)
+
+The ShipStation API call (500-2000ms) happens in `createMainCartFromFunnel()`, which must complete before the cart record exists, which must exist before the page prefetch can return.
+
+```
+URL hit → Middleware → /api/cart/create → createMainCartFromFunnel()
+    → getProductsShippingRateEstimate() [BLOCKING 500-2000ms]
+    → Cart record saved → Page prefetch returns → Checkout renders
+```
+
+## Existing Patterns to Leverage
+
+1. **`isFetchingRates` Jotai atom** - checkout-form.tsx line 50
+2. **Promise.all shipping pattern** - cart.route.ts lines 482-498
+3. **OrderSummary skeleton** - Already shows loading state
+4. **Submit button disabled** - Already disabled while fetching rates
 
 ## Quick Start
-1. This worktree is focused on implementing bio landing page blocks
-2. All project artifacts are in .claude/project/
-3. Start with the organized plan in plan.md
-4. Original project docs: 0_Projects/bio-landing-page-blocks/
 
-## Implementation Notes
-- Building on completed bio-mvp platform (now in production)
-- 10+ agency clients struggling with current MDX editor
-- Major agency client ready to launch merch campaign (immediate need)
-- Estimated implementation: 1-2 days total
-- Reuse everything: patterns, components, infrastructure from bio platform
+1. This worktree is focused on implementing this specific project
+2. All project artifacts are in `.claude/project/`
+3. Start with the organized plan in `plan-organized.md`
+4. Original project docs: `0_Projects/cart-checkout-ttfp/` (in vault root)

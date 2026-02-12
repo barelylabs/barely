@@ -1,179 +1,146 @@
-# Feature: Barely Invoice - Overnight MVP
+# Feature: Deferred Shipping Rate Calculation
 
 ## Context & Background
 
 ### Related Work
-- **Builds On**: [[0_Projects/barely-invoice-mvp/invoicing-mvp-prd]] - Full PRD exists
-- **Differs From**: Complex PRD - this is the 8-hour buildable version
-- **Integrates With**: Existing auth, Stripe, and email infrastructure
+- **Builds On**: [[0_Projects/cart-performance-optimization]] - August 2025 project targeting 9.3s → 2.5s load time
+- **Differs From**: Previous approach focused on BrandKit caching; this addresses a different bottleneck
+- **Integrates With**: Existing `isFetchingRates` UI state already handles loading states
 
 ### Historical Context
-- **Previous Attempts**: Publisher MVP validated agency payment pain
-- **Lessons Applied**: Start hyper-minimal, expand based on usage
-- **Success Factors**: Reuse everything, build nothing new except invoice logic
+- **Previous Attempts**: Cart performance project (Aug 2025) identified BrandKit blocking queries but didn't address shipping rate timing
+- **Lessons Applied**: The existing project's polling mechanism (up to 12.7s backoff) is part of the problem we're now solving
+- **Success Factors**: We're not adding new UI - leveraging existing loading states
 
 ## Problem Statement
 
-Freelancers need to send professional invoices and get paid quickly without complex accounting software.
+Cart checkout pages take up to 5 seconds to first paint because shipping rate calculations happen during cart creation, and the page prefetch polls waiting for cart creation to complete. The ShipStation API call (500-2000ms) is in the critical path, blocking Time To First Paint.
 
 ### Evidence of Need
-- Your agency manually chasing payments (immediate validation)
-- QuickBooks at $30/month is overkill for simple invoicing
-- Demonstrates micro-SaaS revenue while platform builds
+- Gap in existing solution: BrandKit caching doesn't address shipping rate timing
+- Measurable impact: 5 second TTFP directly correlates with cart abandonment
+- Technical validation: Code investigation confirms ShipStation API is called in `createMainCartFromFunnel()` before cart record exists
 
 ## Target Users
 
-Freelancers and consultants who:
-- Send 5-20 invoices per month
-- Want payment in days, not weeks
-- Don't need accounting features
+Fans/customers attempting to purchase merchandise from artists using Barely cart.
 
 ### Differentiation from Existing Users
-- Not served by barely.ai platform (B2B vs B2C)
-- Need invoice/payment flow, not subscription billing
-- Professional services vs creative products
+- Not served by current optimization because: shipping rates weren't identified as a blocking issue until now
+- Higher need for: fast checkout experience on mobile devices
 
 ## Current State & Pain Points
 
 ### How Users Handle This Today
-- Manual invoices in Google Docs + payment chase
-- QuickBooks ($30/mo) with 10% feature usage
-- Wave (free but complex)
+- Current experience: Wait up to 5 seconds staring at loading screen
+- Bounce: Many users abandon before checkout loads
+- No workaround exists for end users
 
 ### Validated Pain Points
-- Creating invoice: 10-15 minutes
-- Payment collection: 30+ day average
-- No simple recurring option (without Stripe knowledge)
+- **TTFP blocked by external API**: ShipStation rate estimation (500-2000ms) runs during cart creation
+- **Polling compounds delay**: Page prefetch polls up to 12.7s waiting for cart to exist
+- **Critical path includes non-critical data**: Shipping rate isn't needed until user submits - yet it blocks first paint
+
+**Quantified impact**: Every extra second of load time increases abandonment. Industry standard: 3+ second load time loses 40%+ of mobile users.
 
 ## Recommended Solution
 
-Dead-simple invoice creation and payment collection via Stripe Checkout.
+Defer shipping rate calculation from cart creation to a client-side side effect triggered after page load. The shipping rate should be calculated asynchronously once the checkout page has rendered, not as a prerequisite for rendering.
 
 ### Why This Approach
-- 80% simpler than QuickBooks
-- Leverages existing Stripe Checkout (no Connect complexity)
-- Can build in 8 hours with existing infrastructure
-- Validates before expanding
+- Addresses the gap that BrandKit caching misses (shipping timing)
+- Simpler than adding caching infrastructure - just changes WHEN calculation happens
+- Leverages existing `isFetchingRates` UI state - no new components needed
+- Avoids over-engineering: not adding Redis caching, not refactoring polling
 
 ## Success Criteria
 
-### Week 1
-- 1 real invoice paid through system
+### Differentiated Metrics
+- **TTFP < 2 seconds** on checkout page (down from 5s)
+- **Lighthouse Performance score improvement** (baseline TBD)
+- Zero UX degradation - shipping amount still shows before user can submit
 
-### Month 1  
-- 10 paying customers ($190 MRR)
-- <60 second invoice creation
-- <7 day payment average
+### Learning from Previous Attempts
+- NOT measuring: Lighthouse score in isolation (previous project had 8 features, too broad)
+- Focus on: Single metric (TTFP) with surgical change
 
-### Month 3
-- 100 customers ($1,900 MRR)
-- Recurring invoices added IF requested
+## Core Functionality (MVP)
 
-## Core Functionality (TRUE Overnight MVP)
-
-### Must Have (8 hours)
-- Client management (CRUD)
-- Create invoice with saved clients
-- Line items with automatic totaling
-- Send payment link via email
-- Accept payment via Stripe Checkout
-- Auto-mark paid via webhook
-- Basic invoice list view
+### Must Have (Validated through context)
+1. **Remove shipping calculation from cart creation** - `createMainCartFromFunnel()` should skip `getProductsShippingRateEstimate()` calls
+2. **Trigger shipping calculation on page mount** - Client-side effect calculates rates after first paint
+3. **Handle null/undefined shipping gracefully** - Cart record exists without shipping amounts initially
 
 ### Reusable Components
-- Magic link auth (existing)
-- Email sending via SendGrid (existing)
-- Stripe Checkout (simpler than Connect)
-- Database/API patterns (existing)
+- Use existing `isFetchingRates` Jotai atom for loading state
+- Use existing `updateShippingAddressFromCheckout` mutation (already has correct Promise.all pattern)
+- Use existing OrderSummary skeleton loader for shipping line
 
-## Out of Scope for Overnight MVP
+## Out of Scope for MVP
 
-### Save for Week 2+
-- Recurring/subscription invoices
-- Client management system
-- PDF generation
-- Automated reminders
-- Templates marketplace
-- Workspace/multi-user
-- Stripe Connect onboarding
+### Learned from Previous Attempts
+- Full BrandKit caching overhaul (separate initiative)
+- Redis session caching (over-engineering for this fix)
+- Edge functions for shipping (premature optimization)
+- Stripe element pre-warming (different bottleneck)
 
-### Never Build
-- Expense tracking
-- Time tracking  
-- Accounting integrations
-- Inventory management
+### Available in Existing Solutions
+- Loading state UI - already exists
+- Shipping recalculation on address change - already works
 
 ## Integration Points
 
-### With Existing Infrastructure
-- Auth: Magic links (existing)
-- Email: SendGrid (existing)
-- Payments: Stripe Checkout (existing)
-- Database: Add invoices table only
+### With Existing Features
+- **OrderSummary component**: Already shows loading state when `isFetchingRates = true`
+- **Checkout form**: Already disables submit button while rates fetch
+- **Address change flow**: Already triggers shipping recalculation
 
 ### Technical Integration
-- Extends: Existing Next.js app
-- Reuses: Component library, API patterns
-- New requirements: Invoice data model only
+- Extends: `updateShippingAddressFromCheckout` mutation or new lightweight mutation
+- Reuses: Existing ShipEngine integration, existing rate calculation logic
+- New requirements: Client-side trigger on checkout mount, handling initial null shipping state
 
 ## Complexity Assessment
 
-**Overall Complexity**: Simple (8 hours)
+**Overall Complexity**: Simple
 
 **Reduced Complexity Through:**
-- No workspace system (single user)
-- No Stripe Connect (direct checkout)
-- No PDF generation (HTML only)
-- No recurring logic (one-time only)
+- Reusing existing UI loading states
+- Reusing existing shipping calculation functions
+- Not changing the calculation logic, just the timing
 
 **Remaining Complexity:**
-- Invoice data model
-- Payment page design
-- Webhook handling
+- Ensuring cart can be created/saved without shipping amounts
+- Handling edge cases (what if rates fail to load?)
+- Coordinating the trigger timing (useEffect vs route load)
 
 ## Human Review Required
 
-- [ ] Assumption: Freelancers will pay without recurring feature
-- [ ] Differentiation: Is "simple" enough vs free Wave?
-- [ ] Priority: Should this wait until after Bio MVP ships?
+- [ ] Assumption: ShipStation API latency (500-2000ms) is the primary contributor - need to measure
+- [ ] Assumption: Cart record can exist without shipping amounts (schema allows null?)
+- [ ] Priority: Should this come before barely-usage-protection (deadline Feb 28)?
 
 ## Technical Considerations
 
-- Two new database tables (invoices, clients)
-- 6 new routes (invoices CRUD, clients CRUD, pay, webhook)
-- Reuse existing UI components
-- Deploy as subdomain or path on existing app
-- Simple userId association (no workspaces)
+High-level only:
+- Fits within existing React Query / tRPC patterns
+- Extends current checkout form's side effect model
+- New requirement: Initial cart state with null shipping, client-triggered calculation
 
 ## Migration Path
 
-### From Manual Process
-- Import CSV of clients (future)
-- Copy/paste from Google Docs
+### From Existing Solutions
+- No user migration needed - behavior change is invisible
+- Existing carts with shipping amounts continue to work
+- New carts get shipping calculated post-load
 
-### To Full Version
-- Add workspaces when multi-user need emerges
-- Add recurring when customers request
-- Gradual feature addition based on usage
+### Deprecation Considerations
+- Could eventually combine with shipping rate caching
+- Coexists with future BrandKit optimizations
 
 ## Future Possibilities
 
-### Based on Usage Data
-- IF recurring heavily requested: Add in week 3
-- IF teams need access: Add workspaces
-- IF PDF required: Add generation
-- Natural evolution toward full PRD vision
-
-## The Claude Code Challenge
-
-**Build Directive for Claude:**
-"You have 8 hours. Build only:
-1. Client management (create, list, select)
-2. Invoice creation with clients and line items
-3. Payment link generation via Stripe Checkout
-4. Public payment page (/pay/[invoiceId])
-5. Webhook to mark paid
-6. Basic invoice list view
-
-Two tables: invoices and clients. Use existing auth, Stripe, and email. 
-No workspaces, no recurring, no PDF. Ship by morning."
+### Based on Historical Patterns
+- If successful, could enable: pre-fetching rates based on geo before checkout
+- Watch for: scope creep into full caching layer
+- Natural evolution toward: edge-computed shipping estimates
