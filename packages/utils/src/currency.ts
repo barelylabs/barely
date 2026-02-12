@@ -2,10 +2,12 @@
  * Exchange rate for converting USD to GBP.
  * Used when Barely fulfills orders from US warehouse for UK-based artists.
  *
+ * Hardcoded at 0.75 based on Dec 2024 - Feb 2026 range of 0.73-0.76.
+ *
  * TODO: Replace with dynamic rate fetched from exchange rate API and stored in Redis.
  * This should be updated daily via a scheduled job.
  */
-export const USD_TO_GBP_RATE = 0.79;
+export const USD_TO_GBP_RATE = 0.75;
 
 /**
  * Convert an amount from USD cents to GBP cents.
