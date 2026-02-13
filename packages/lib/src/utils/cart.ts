@@ -83,8 +83,8 @@ export function getAmountsForCheckout(
 	const mainProductQuantity = cart.mainProductQuantity ?? 1;
 	const mainProductAmount = mainProductPrice * mainProductQuantity;
 	const mainHandlingAmount = funnel.mainProductHandling ?? 0;
-	const mainShippingAmount = cart.mainShippingAmount ?? 0;
-	const mainShippingAndHandlingAmount = mainShippingAmount + mainHandlingAmount;
+	const mainShippingAmountForCalc = cart.mainShippingAmount ?? 0;
+	const mainShippingAndHandlingAmount = mainShippingAmountForCalc + mainHandlingAmount;
 
 	// bump product
 	// const addedBump = cart.addedBump ?? false;
@@ -96,14 +96,14 @@ export function getAmountsForCheckout(
 	);
 	const bumpProductQuantity = cart.bumpProductQuantity ?? 1;
 	const bumpProductAmount = cart.addedBump ? bumpProductPrice * bumpProductQuantity : 0;
-	const bumpShippingPrice = cart.bumpShippingPrice ?? 0;
-	const bumpShippingAmount = cart.addedBump ? bumpShippingPrice : 0;
+	const bumpShippingPriceForCalc = cart.bumpShippingPrice ?? 0;
+	const bumpShippingAmount = cart.addedBump ? bumpShippingPriceForCalc : 0;
 	const bumpHandlingAmount = 0;
 	const bumpShippingAndHandlingAmount = bumpShippingAmount + bumpHandlingAmount;
 
 	// main + bump
 	const checkoutProductAmount = mainProductAmount + bumpProductAmount;
-	const checkoutShippingAmount = mainShippingAmount + bumpShippingAmount;
+	const checkoutShippingAmount = mainShippingAmountForCalc + bumpShippingAmount;
 	const checkoutHandlingAmount = mainHandlingAmount + bumpHandlingAmount;
 	const checkoutShippingAndHandlingAmount =
 		checkoutShippingAmount + checkoutHandlingAmount;
@@ -120,13 +120,13 @@ export function getAmountsForCheckout(
 		// calculated amounts
 		mainProductPrice,
 		mainProductAmount,
-		mainShippingAmount,
+		mainShippingAmount: cart.mainShippingAmount ?? null,
 		mainHandlingAmount,
 		mainShippingAndHandlingAmount,
 
 		bumpProductPrice,
 		bumpProductAmount,
-		bumpShippingPrice,
+		bumpShippingPrice: cart.bumpShippingPrice ?? null,
 		bumpShippingAmount,
 		bumpHandlingAmount,
 		bumpShippingAndHandlingAmount,
