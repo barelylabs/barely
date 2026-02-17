@@ -456,14 +456,14 @@ const BEDROOM_PLUS_PLAN: Plan = {
 
 	price: {
 		monthly: {
-			amount: 200,
+			amount: 250,
 			priceIds: {
 				test: 'price_1Rlw4CHDMmzntRhpYb1kOwD2',
 				production: 'price_1SzjeVHDMmzntRhpOy4yrqcW',
 			},
 		},
 		yearly: {
-			amount: 165 * 12,
+			amount: 2500,
 			priceIds: {
 				test: 'price_1Rlw4fHDMmzntRhpcizF3ulE',
 				production: 'price_1SzjemHDMmzntRhp0CXxI518',
@@ -471,7 +471,7 @@ const BEDROOM_PLUS_PLAN: Plan = {
 		},
 	},
 	promotionalPrice: {
-		firstMonth: 100,
+		firstMonth: 125,
 		description: 'First month special',
 	},
 	marketingTagline: 'Learn the Scientific Method for Music Marketing',
