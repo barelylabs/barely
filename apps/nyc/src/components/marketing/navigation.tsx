@@ -16,6 +16,7 @@ const navItems = [
 	{ href: '/', label: 'Home' },
 	{ href: '/about', label: 'About' },
 	{ href: '/services', label: 'Services' },
+	{ href: '/services/labels', label: 'Labels & Distributors' },
 	{ href: '/case-studies', label: 'Case Studies' },
 	{ href: '/blog', label: 'Blog' },
 ];
