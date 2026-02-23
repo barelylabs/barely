@@ -14,15 +14,12 @@ export function LabelsContent() {
 			<section className='px-4 py-24 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-4xl text-center'>
 					<AnimatedSection animation='fade-up'>
-						<H
-							size='1'
-							className='mb-6 font-heading text-5xl md:text-6xl lg:text-7xl'
-						>
+						<H size='1' className='mb-6 font-heading text-5xl md:text-6xl lg:text-7xl'>
 							Labels & Distributors
 						</H>
 						<p className='text-xl text-white/70 md:text-2xl'>
-							Roster-level marketing engineering for labels and distributors who need
-							more than a campaign vendor.
+							Roster-level marketing engineering for labels and distributors who need more
+							than a campaign vendor.
 						</p>
 					</AnimatedSection>
 				</div>
@@ -42,11 +39,11 @@ export function LabelsContent() {
 									pushes.
 								</p>
 								<p>
-									We work with labels and distributors who want a single, reliable
-									partner across their roster. Someone who understands label economics,
-									knows how to prioritize limited budgets across artists at different
-									stages, and can zoom out from any individual campaign to ask
-									what&apos;s actually moving the needle for the label as a whole.
+									We work with labels and distributors who want a single, reliable partner
+									across their roster. Someone who understands label economics, knows how
+									to prioritize limited budgets across artists at different stages, and
+									can zoom out from any individual campaign to ask what&apos;s actually
+									moving the needle for the label as a whole.
 								</p>
 							</div>
 						</div>
@@ -65,12 +62,12 @@ export function LabelsContent() {
 
 					<AnimatedSection animation='fade-up' delay={200}>
 						<p className='text-lg leading-relaxed text-white/80'>
-							Working with us at the roster level can mean anything from managing a
-							single priority artist campaign on behalf of the label, to building a
-							label-wide marketing architecture — shared playlist assets, release
-							sequencing, owned audience strategy — with ongoing strategic input as your
-							roster grows. We structure these engagements around what you actually need,
-							not a fixed package.
+							Working with us at the roster level can mean anything from managing a single
+							priority artist campaign on behalf of the label, to building a label-wide
+							marketing architecture — shared playlist assets, release sequencing, owned
+							audience strategy — with ongoing strategic input as your roster grows. We
+							structure these engagements around what you actually need, not a fixed
+							package.
 						</p>
 					</AnimatedSection>
 				</div>
@@ -128,9 +125,9 @@ export function LabelsContent() {
 								Label and roster engagements are structured in two layers. Individual
 								artist campaigns are available at our standard rates, with volume
 								arrangements for ongoing roster work. Roster-wide strategy, release
-								planning, and program management is a separate engagement priced based
-								on roster scope and complexity — book a call to talk through what makes
-								sense for your situation.
+								planning, and program management is a separate engagement priced based on
+								roster scope and complexity — book a call to talk through what makes sense
+								for your situation.
 							</p>
 						</div>
 					</AnimatedSection>
