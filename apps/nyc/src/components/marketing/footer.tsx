@@ -73,6 +73,14 @@ export function Footer() {
 										Breakout+ Growth Team
 									</Link>
 								</li>
+								<li>
+									<Link
+										href='/services/labels'
+										className='text-sm text-white/70 transition-colors hover:text-white'
+									>
+										Labels & Distributors
+									</Link>
+								</li>
 							</ul>
 						</div>
 

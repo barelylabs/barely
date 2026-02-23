@@ -16,9 +16,21 @@ const navItems = [
 	{ href: '/', label: 'Home' },
 	{ href: '/about', label: 'About' },
 	{ href: '/services', label: 'Services' },
+	{ href: '/services/labels', label: 'Labels' },
 	{ href: '/case-studies', label: 'Case Studies' },
 	{ href: '/blog', label: 'Blog' },
 ];
+
+function isNavItemActive(pathname: string, href: string) {
+	if (href === '/') return pathname === '/';
+	// Check if a more specific nav item matches first
+	const moreSpecificMatch = navItems.some(
+		item =>
+			item.href !== href && item.href.startsWith(href) && pathname.startsWith(item.href),
+	);
+	if (moreSpecificMatch) return false;
+	return pathname.startsWith(href);
+}
 
 export function Navigation() {
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -55,9 +67,9 @@ export function Navigation() {
 									href={item.href}
 									className={cn(
 										'text-sm font-medium transition-colors duration-200',
-										pathname === item.href ?
-											'text-white'
-										:	'text-white/70 hover:text-white',
+										isNavItemActive(pathname, item.href) ? 'text-white' : (
+											'text-white/70 hover:text-white'
+										),
 									)}
 								>
 									{item.label}
@@ -131,9 +143,9 @@ export function Navigation() {
 								href={item.href}
 								className={cn(
 									'text-2xl font-medium transition-colors duration-200',
-									pathname === item.href ?
-										'text-white'
-									:	'text-white/70 hover:text-white',
+									isNavItemActive(pathname, item.href) ? 'text-white' : (
+										'text-white/70 hover:text-white'
+									),
 								)}
 								onClick={() => setMobileMenuOpen(false)}
 							>

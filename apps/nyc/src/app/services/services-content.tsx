@@ -234,6 +234,29 @@ export function ServicesContent() {
 				</div>
 			</section>
 
+			{/* Labels & Distributors Section */}
+			<section className='px-4 py-12 sm:px-6 sm:py-16 md:py-20 lg:px-8 lg:py-24'>
+				<div className='mx-auto max-w-4xl'>
+					<AnimatedSection animation='fade-up'>
+						<div className='glass rounded-2xl border border-purple-500/20 p-8 transition-all hover:border-purple-500/30'>
+							<H size='3' className='mb-4 text-2xl md:text-3xl'>
+								Working with a label or distributor?
+							</H>
+							<p className='mb-6 text-lg text-white/80'>
+								We offer custom roster-level partnerships for labels and distributors —
+								from single-artist campaign management through the label, to full roster
+								strategy and program management.
+							</p>
+							<Link href='/services/labels'>
+								<MarketingButton marketingLook='glass' size='sm'>
+									Learn more →
+								</MarketingButton>
+							</Link>
+						</div>
+					</AnimatedSection>
+				</div>
+			</section>
+
 			{/* Stan Add-on Section */}
 			<section className='px-4 py-12 sm:px-6 sm:py-16 md:py-20 lg:px-8 lg:py-24'>
 				<div className='mx-auto max-w-4xl'>
