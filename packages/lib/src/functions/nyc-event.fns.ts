@@ -2,9 +2,11 @@ import type { WEB_EVENT_TYPES__NYC } from '@barely/const';
 import { isDevelopment } from '@barely/utils';
 
 import type { MetaEvent } from '../integrations/meta/meta.endpts.event';
+import type { TiktokEvent } from '../integrations/tiktok/tiktok.endpts.event';
 import type { VisitorInfo } from '../middleware/request-parsing';
 import { libEnv } from '../../env';
 import { reportEventsToMeta } from '../integrations/meta/meta.endpts.event';
+import { reportEventsToTiktok } from '../integrations/tiktok/tiktok.endpts.event';
 import { ratelimit } from '../integrations/upstash';
 import { log } from '../utils/log';
 
@@ -159,6 +161,39 @@ export async function recordNYCEvent({
 		return null;
 	}
 
+	// ♪ TikTok ♪
+	const tiktokPixelCode = libEnv.TIKTOK_PIXEL_CODE_NYC;
+	const tiktokAccessToken = libEnv.TIKTOK_PIXEL_ACCESS_TOKEN_NYC;
+
+	if (tiktokPixelCode && tiktokAccessToken) {
+		const tiktokEvents = getTiktokEventsFromNYCEvent({ eventType: type, customData });
+
+		if (tiktokEvents) {
+			try {
+				await reportEventsToTiktok({
+					pixelCode: tiktokPixelCode,
+					accessToken: tiktokAccessToken,
+					sourceUrl,
+					ip: visitor?.ip,
+					ua: visitor?.userAgent.ua,
+					geo: visitor?.geo,
+					email,
+					phone,
+					firstName,
+					lastName,
+					events: tiktokEvents,
+					ttclid: visitor?.ttclid ?? null,
+				});
+			} catch (err) {
+				await log({
+					type: 'errors',
+					location: 'recordNYCEvent',
+					message: `error reporting NYC event to tiktok => ${String(err)}`,
+				});
+			}
+		}
+	}
+
 	return { success: true };
 }
 
@@ -271,6 +306,40 @@ function getMetaEventFromNYCEvent({
 					},
 				},
 			];
+		default:
+			return null;
+	}
+}
+
+/* ♪ TikTok Event Helpers ♪ */
+
+function getTiktokEventsFromNYCEvent({
+	eventType,
+	customData,
+}: {
+	eventType: (typeof WEB_EVENT_TYPES__NYC)[number];
+	customData?: Record<string, unknown>;
+}): TiktokEvent[] | null {
+	switch (eventType) {
+		case 'nyc/pageView':
+			return [{ eventName: 'Pageview' }];
+		case 'nyc/contactFormSubmit':
+			return [
+				{
+					eventName: 'SubmitForm',
+					properties: {
+						description: customData?.service_interest as string | undefined,
+					},
+				},
+			];
+		case 'nyc/playlistSubmit':
+			return [{ eventName: 'SubmitForm' }];
+		case 'nyc/linkClick':
+			return [{ eventName: 'ClickButton' }];
+		case 'nyc/ctaClick':
+			return [{ eventName: 'ClickButton' }];
+		case 'nyc/discoveryCallClick':
+			return [{ eventName: 'Contact' }];
 		default:
 			return null;
 	}

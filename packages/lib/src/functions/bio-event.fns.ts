@@ -13,8 +13,10 @@ import { isDevelopment, newId } from '@barely/utils';
 import { eq } from 'drizzle-orm';
 
 import type { MetaEvent } from '../integrations/meta/meta.endpts.event';
+import type { TiktokEvent } from '../integrations/tiktok/tiktok.endpts.event';
 import type { VisitorInfo } from '../middleware/request-parsing';
 import { reportEventsToMeta } from '../integrations/meta/meta.endpts.event';
+import { reportEventsToTiktok } from '../integrations/tiktok/tiktok.endpts.event';
 import { ratelimit } from '../integrations/upstash';
 import { log } from '../utils/log';
 import { flattenVisitorForIngest } from './event.fns';
@@ -200,6 +202,35 @@ export async function recordBioEvent({
 			})
 		:	{ reported: false };
 
+	// ♪ TikTok ♪
+	const tiktokPixel = analyticsEndpoints.find(endpoint => endpoint.platform === 'tiktok');
+	const tiktokEvents = getTiktokEventsFromBioEvent({
+		bio,
+		bioLink,
+		eventType: type,
+	});
+
+	const tiktokRes =
+		tiktokPixel?.accessToken && tiktokEvents ?
+			await reportEventsToTiktok({
+				pixelCode: tiktokPixel.id,
+				accessToken: tiktokPixel.accessToken,
+				sourceUrl,
+				ip: visitor?.ip,
+				ua: visitor?.userAgent.ua,
+				geo: visitor?.geo,
+				events: tiktokEvents,
+				ttclid: visitor?.ttclid ?? null,
+			}).catch(async err => {
+				await log({
+					type: 'errors',
+					location: 'recordBioEvent',
+					message: `err reporting bio event to tiktok => ${err}`,
+				});
+				return { reported: false };
+			})
+		:	{ reported: false };
+
 	// report event to tinybird with journey tracking
 	try {
 		// Extract journey info from visitor
@@ -228,6 +259,7 @@ export async function recordBioEvent({
 			bio_emailMarketingOptIn: emailMarketingOptIn ?? null,
 			bio_smsMarketingOptIn: smsMarketingOptIn ?? null,
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : undefined,
+			reportedToTiktok: tiktokPixel && tiktokRes.reported ? tiktokPixel.id : undefined,
 			// Journey tracking fields (if supported by schema)
 			journeyId,
 			journeyOrigin,
@@ -329,6 +361,42 @@ function getMetaEventFromBioEvent({
 						content_ids: [bio.id],
 						content_name: bio.handle,
 					},
+				},
+			];
+		default:
+			return null;
+	}
+}
+
+/* ♪ TikTok Event Helpers ♪ */
+
+function getTiktokEventsFromBioEvent({
+	bioLink,
+	eventType,
+}: {
+	bio: Bio;
+	bioLink?: BioLink;
+	eventType: (typeof WEB_EVENT_TYPES__BIO)[number];
+}): TiktokEvent[] | null {
+	switch (eventType) {
+		case 'bio/view':
+			return [
+				{
+					eventName: 'Pageview',
+				},
+			];
+		case 'bio/buttonClick':
+			return bioLink ?
+					[
+						{
+							eventName: 'ClickButton',
+						},
+					]
+				:	null;
+		case 'bio/emailCapture':
+			return [
+				{
+					eventName: 'SubmitForm',
 				},
 			];
 		default:
