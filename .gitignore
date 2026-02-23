@@ -56,6 +56,7 @@ yarn-error.log*
 # cache files
 .cache
 .eslintcache
+node-compile-cache/
 
 # turbo
 .turbo
