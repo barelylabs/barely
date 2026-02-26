@@ -69,6 +69,8 @@ export const cartFunnelRoute = {
 				workspaceId: ctx.workspace.id,
 				handle: ctx.workspace.handle,
 				key: sanitizeKey(input.key),
+				bumpProductId: input.bumpProductId || null,
+				upsellProductId: input.upsellProductId || null,
 			};
 
 			const funnel = await dbHttp.insert(CartFunnels).values(funnelData).returning();
@@ -84,6 +86,8 @@ export const cartFunnelRoute = {
 				.set({
 					...input,
 					key: input.key ? sanitizeKey(input.key) : undefined,
+					bumpProductId: input.bumpProductId || null,
+					upsellProductId: input.upsellProductId || null,
 				})
 				.where(
 					and(
