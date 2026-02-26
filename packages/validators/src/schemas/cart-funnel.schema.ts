@@ -13,10 +13,9 @@ export const insertCartFunnelSchema = createInsertSchema(CartFunnels, {
 	name: name => name.min(1, 'Name is required'),
 	key: key => key.min(4, 'Key is required'),
 	mainProductId: mainProductId => mainProductId.min(1, 'Main product is required'),
-	bumpProductId: bumpProductId =>
-		bumpProductId.transform(v => (!v?.length ? null : v)),
+	bumpProductId: bumpProductId => bumpProductId.transform(v => (!v.length ? null : v)),
 	upsellProductId: upsellProductId =>
-		upsellProductId.transform(v => (!v?.length ? null : v)),
+		upsellProductId.transform(v => (!v.length ? null : v)),
 	mainProductPayWhatYouWantMin: mainProductPayWhatYouWantMin =>
 		mainProductPayWhatYouWantMin
 			.min(0, 'Minimum price must be 0 or greater')
