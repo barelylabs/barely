@@ -2,22 +2,11 @@
 
 import { useWorkspace } from '@barely/hooks';
 
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@barely/ui/select';
+import { Label } from '@barely/ui/label';
+import { Switch } from '@barely/ui/switch';
 
 import { Filters } from '~/app/[handle]/_components/filters';
 import { useCartOrderSearchParams } from '~/app/[handle]/merch/orders/_components/cart-order-context';
-
-const FULFILLED_BY_OPTIONS = [
-	{ value: 'all', label: 'All Orders' },
-	{ value: 'artist', label: 'My Fulfillment' },
-	{ value: 'barely', label: 'Barely Fulfillment' },
-] as const;
 
 export function CartOrderFilters() {
 	const { workspace } = useWorkspace();
@@ -28,30 +17,25 @@ export function CartOrderFilters() {
 		toggleFulfilled,
 		togglePreorders,
 		toggleCanceled,
-		setFulfilledBy,
+		toggleBarelyOrders,
 	} = useCartOrderSearchParams();
 
-	// Only show fulfillment filter if workspace is eligible for Barely fulfillment
 	const showFulfillmentFilter = workspace.barelyFulfillmentEligible;
 
 	return (
 		<div className='flex flex-row items-center gap-4'>
 			{showFulfillmentFilter && (
-				<Select
-					value={filters.fulfilledBy}
-					onValueChange={value => setFulfilledBy(value as 'all' | 'artist' | 'barely')}
-				>
-					<SelectTrigger className='w-[180px]'>
-						<SelectValue placeholder='Filter by fulfillment' />
-					</SelectTrigger>
-					<SelectContent>
-						{FULFILLED_BY_OPTIONS.map(option => (
-							<SelectItem key={option.value} value={option.value}>
-								{option.label}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
+				<div className='flex flex-row items-center gap-2'>
+					<Switch
+						id='showBarelyOrdersSwitch'
+						checked={!!filters.showBarelyOrders}
+						onClick={() => toggleBarelyOrders()}
+						size='sm'
+					/>
+					<Label htmlFor='showBarelyOrdersSwitch' className='text-sm'>
+						Include Barely orders
+					</Label>
+				</div>
 			)}
 			<Filters
 				search={filters.search}
