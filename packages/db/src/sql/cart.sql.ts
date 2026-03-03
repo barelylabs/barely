@@ -51,6 +51,7 @@ export const Carts = pgTable(
 		landingPageId: dbId('landingPageId'),
 		refererId: dbId('refererId'),
 		fbclid: varchar('fbclid', { length: 255 }),
+		ttclid: varchar('ttclid', { length: 255 }),
 		flowActionId: dbId('flowActionId'),
 
 		sessionReferer: varchar('sessionReferer', { length: 1000 }),

@@ -440,6 +440,11 @@ export function parseSession({
 			req.cookies.get(`${handle}.${key}.fbclid`)?.value
 		:	req.cookies.getAll().find(cookie => cookie.name.endsWith('.fbclid'))?.value) ?? null;
 
+	const ttclid =
+		(handleAndKeyExist ?
+			req.cookies.get(`${handle}.${key}.ttclid`)?.value
+		:	req.cookies.getAll().find(cookie => cookie.name.endsWith('.ttclid'))?.value) ?? null;
+
 	const sessionMetaCampaignId =
 		(handleAndKeyExist ?
 			req.cookies.get(`${handle}.${key}.sessionMetaCampaignId`)?.value
@@ -467,6 +472,7 @@ export function parseSession({
 	return {
 		fanId,
 		fbclid,
+		ttclid,
 		sessionId,
 		sessionMetaCampaignId,
 		sessionMetaAdsetId,
@@ -503,6 +509,7 @@ export const visitorInfoSchema = z.object({
 	// session
 	sessionId: z.string().nullable(),
 	fbclid: z.string().nullable(),
+	ttclid: z.string().nullable(),
 	sessionMetaCampaignId: z.string().nullable(),
 	sessionMetaAdsetId: z.string().nullable(),
 	sessionMetaAdId: z.string().nullable(),
@@ -761,6 +768,12 @@ export async function setVisitorCookies({
 			maxAge: 60 * 60 * 24,
 		});
 
+	if (params.has('ttclid'))
+		res.cookies.set(`${handle}.${key}.ttclid`, params.get('ttclid') ?? '', {
+			httpOnly: true,
+			maxAge: 60 * 60 * 24,
+		});
+
 	if (params.has('metaCampaignId'))
 		res.cookies.set(
 			`${handle}.${key}.sessionMetaCampaignId`,
@@ -875,6 +888,7 @@ export const DEFAULT_VISITOR_INFO: VisitorInfo = {
 	href: 'https://localhost:3000/',
 	fanId: null,
 	fbclid: null,
+	ttclid: null,
 	sessionMetaCampaignId: null,
 	sessionMetaAdsetId: null,
 	sessionMetaAdId: null,

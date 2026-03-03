@@ -43,3 +43,15 @@ export const insertMetaPixelSchema = createInsertSchema(AnalyticsEndpoints, {
 			message: 'Your access token should be at least 150 characters',
 		}),
 });
+
+export const insertTiktokPixelSchema = createInsertSchema(AnalyticsEndpoints, {
+	id: id =>
+		id.min(1, {
+			message: 'Pixel code is required',
+		}),
+	platform: platform => platform.refine(p => p === 'tiktok', 'Invalid platform'),
+	accessToken: accessToken =>
+		accessToken.min(1, {
+			message: 'Access token is required',
+		}),
+});

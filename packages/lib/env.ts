@@ -73,6 +73,8 @@ export const libEnv = createEnv({
 		META_PIXEL_ID_NYC: z.string(),
 		META_PIXEL_ACCESS_TOKEN_NYC: z.string(), // Required for server-side Conversions API
 		META_TEST_EVENT_CODE: z.string().optional(),
+		TIKTOK_PIXEL_CODE_NYC: z.string().default(''),
+		TIKTOK_PIXEL_ACCESS_TOKEN_NYC: z.string().default(''),
 		NEXTAUTH_SECRET: z.string(),
 		OPENAI_API_KEY: z.string(),
 		OPENAI_ORG_ID: z.string(),

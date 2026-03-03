@@ -45,10 +45,12 @@ import { tasks } from '@trigger.dev/sdk/v3';
 import { eq } from 'drizzle-orm';
 
 import type { MetaEvent } from '../integrations/meta/meta.endpts.event';
+import type { TiktokEvent } from '../integrations/tiktok/tiktok.endpts.event';
 import type { VisitorInfo } from '../middleware/request-parsing';
 import type { sendUsageWarning } from '../trigger';
 import { libEnv } from '../../env';
 import { reportEventsToMeta } from '../integrations/meta/meta.endpts.event';
+import { reportEventsToTiktok } from '../integrations/tiktok/tiktok.endpts.event';
 import { ratelimit } from '../integrations/upstash';
 import { log } from '../utils/log';
 import { checkUsageLimit } from './usage.fns';
@@ -165,6 +167,45 @@ export async function recordLinkClick({
 			})
 		:	{ reported: false };
 
+	// ♪ TikTok ♪
+	const tiktokPixel = analyticsEndpoints.find(endpoint => endpoint.platform === 'tiktok');
+	const ttclid = new URL(href).searchParams.get('ttclid') ?? visitor?.ttclid ?? null;
+
+	const tiktokRes =
+		tiktokPixel?.accessToken ?
+			await reportEventsToTiktok({
+				pixelCode: tiktokPixel.id,
+				accessToken: tiktokPixel.accessToken,
+				sourceUrl,
+				ip: visitor?.ip,
+				ua: visitor?.userAgent.ua,
+				geo: visitor?.geo,
+				ttclid,
+				events: [
+					{
+						eventName: 'barely.link/click',
+						properties: {
+							platform,
+						},
+					},
+					{
+						eventName: 'ViewContent',
+						properties: {
+							content_type: 'product',
+							linkId: link.id,
+						},
+					},
+				],
+			}).catch(async err => {
+				await log({
+					type: 'errors',
+					location: 'recordLinkClick',
+					message: `err reporting link click to tiktok => ${err}`,
+				});
+				return { reported: false };
+			})
+		:	{ reported: false };
+
 	// report event to tinybird
 	try {
 		// Extract journey info from visitor with proper defaults
@@ -188,6 +229,7 @@ export async function recordLinkClick({
 			sessionId: journeyId,
 			platform,
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : undefined,
+			reportedToTiktok: tiktokPixel && tiktokRes.reported ? tiktokPixel.id : undefined,
 			// Journey tracking fields with proper defaults
 			journeyId,
 			journeyOrigin,
@@ -330,6 +372,7 @@ export async function recordCartEvent({
 		referer: cart.visitorReferer ?? visitor?.referer ?? 'Unknown',
 		referer_url: cart.visitorRefererUrl ?? visitor?.referer_url ?? 'Unknown',
 		fbclid: cart.fbclid ?? visitor?.fbclid ?? null,
+		ttclid: cart.ttclid ?? visitor?.ttclid ?? null,
 		sessionId: cart.id,
 		sessionMetaCampaignId:
 			cart.sessionMetaCampaignId ?? visitor?.sessionMetaCampaignId ?? null,
@@ -445,6 +488,38 @@ export async function recordCartEvent({
 		:	{ reported: false };
 
 	// ♪ TikTok ♪
+	const tiktokPixel = analyticsEndpoints.find(endpoint => endpoint.platform === 'tiktok');
+	const tiktokEvents = getTiktokEventsFromCartEvent({ cart, eventType: type });
+
+	const ttclid =
+		cart.ttclid ??
+		cookieStore.get(`${cartFunnel.handle}.${cartFunnel.key}.ttclid`)?.value ??
+		null;
+
+	const tiktokRes =
+		tiktokPixel?.accessToken && tiktokEvents ?
+			await reportEventsToTiktok({
+				pixelCode: tiktokPixel.id,
+				accessToken: tiktokPixel.accessToken,
+				sourceUrl,
+				email,
+				phone,
+				firstName,
+				lastName,
+				ip: visitorInfo.ip,
+				ua: visitorInfo.userAgent.ua,
+				geo: visitorInfo.geo,
+				events: tiktokEvents,
+				ttclid,
+			}).catch(async err => {
+				await log({
+					type: 'errors',
+					location: 'recordCartEvent',
+					message: `err reporting cart event to tiktok => ${err}`,
+				});
+				return { reported: false };
+			})
+		:	{ reported: false };
 
 	// 🐦 report event to tinybird with journey tracking
 	try {
@@ -467,6 +542,7 @@ export async function recordCartEvent({
 			// analytics
 			...flattenVisitorForIngest(visitorInfo),
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : '',
+			reportedToTiktok: tiktokPixel && tiktokRes.reported ? tiktokPixel.id : '',
 			...cartEventData,
 			// Journey tracking (if supported by schema)
 			journeyId,
@@ -915,6 +991,35 @@ export async function recordFmEvent({
 			})
 		:	{ reported: false };
 
+	// ♪ TikTok ♪
+	const tiktokPixel = analyticsEndpoints.find(endpoint => endpoint.platform === 'tiktok');
+	const tiktokEvents = getTiktokEventsFromFmEvent({
+		fmPage,
+		fmLink,
+		eventType: type,
+	});
+
+	const tiktokRes =
+		tiktokPixel?.accessToken && tiktokEvents ?
+			await reportEventsToTiktok({
+				pixelCode: tiktokPixel.id,
+				accessToken: tiktokPixel.accessToken,
+				sourceUrl,
+				ip: visitor?.ip,
+				ua: visitor?.userAgent.ua,
+				geo: visitor?.geo,
+				events: tiktokEvents,
+				ttclid: visitor?.ttclid ?? null,
+			}).catch(async err => {
+				await log({
+					type: 'errors',
+					location: 'recordFmEvent',
+					message: `err reporting fm event to tiktok => ${err}`,
+				});
+				return { reported: false };
+			})
+		:	{ reported: false };
+
 	// report event to tb
 
 	try {
@@ -936,6 +1041,7 @@ export async function recordFmEvent({
 			linkClickDestinationHref: fmLink?.url ?? null,
 			platform: fmLink?.platform ?? '',
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : undefined,
+			reportedToTiktok: tiktokPixel && tiktokRes.reported ? tiktokPixel.id : undefined,
 			// Journey tracking fields with proper defaults
 			journeyId,
 			journeyOrigin,
@@ -956,6 +1062,7 @@ export async function recordFmEvent({
 			linkClickDestinationHref: fmLink?.url ?? '',
 			fmLinkPlatform: fmLink?.platform ?? '',
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : '',
+			reportedToTiktok: tiktokPixel && tiktokRes.reported ? tiktokPixel.id : '',
 			// Journey tracking fields with proper defaults
 			journeyId,
 			journeyOrigin,
@@ -1153,6 +1260,36 @@ export async function recordPageEvent({
 			})
 		:	{ reported: false };
 
+	// ♪ TikTok ♪
+	const tiktokPixel = analyticsEndpoints.find(endpoint => endpoint.platform === 'tiktok');
+	const tiktokEvents = getTiktokEventsFromPageEvent({
+		page,
+		linkClickDestinationHref,
+		linkClickDestinationAssetId,
+		eventType: type,
+	});
+
+	const tiktokRes =
+		tiktokPixel?.accessToken && tiktokEvents ?
+			await reportEventsToTiktok({
+				pixelCode: tiktokPixel.id,
+				accessToken: tiktokPixel.accessToken,
+				sourceUrl,
+				ip: visitor?.ip,
+				ua: visitor?.userAgent.ua,
+				geo: visitor?.geo,
+				events: tiktokEvents,
+				ttclid: visitor?.ttclid ?? null,
+			}).catch(async err => {
+				await log({
+					type: 'errors',
+					location: 'recordPageEvent',
+					message: `err reporting page event to tiktok => ${err}`,
+				});
+				return { reported: false };
+			})
+		:	{ reported: false };
+
 	// report event to tinybird
 	try {
 		await ingestPageEvent({
@@ -1166,6 +1303,7 @@ export async function recordPageEvent({
 			linkClickDestinationAssetId: linkClickDestinationAssetId ?? '',
 			linkClickDestinationHref: linkClickDestinationHref ?? '',
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : '',
+			reportedToTiktok: tiktokPixel && tiktokRes.reported ? tiktokPixel.id : '',
 		});
 
 		// console.log('tinybirdRes for page event => ', tinybirdRes);
@@ -1406,6 +1544,35 @@ export async function recordVipEvent({
 			})
 		:	{ reported: false };
 
+	// ♪ TikTok ♪
+	const tiktokPixel = analyticsEndpoints.find(endpoint => endpoint.platform === 'tiktok');
+	const tiktokEvents = getTiktokEventsFromVipEvent({
+		vipSwap,
+		eventType: type,
+		emailCaptured,
+	});
+
+	const tiktokRes =
+		tiktokPixel?.accessToken && tiktokEvents ?
+			await reportEventsToTiktok({
+				pixelCode: tiktokPixel.id,
+				accessToken: tiktokPixel.accessToken,
+				sourceUrl,
+				ip: visitor?.ip,
+				ua: visitor?.userAgent.ua,
+				geo: visitor?.geo,
+				events: tiktokEvents,
+				ttclid: visitor?.ttclid ?? null,
+			}).catch(async err => {
+				await log({
+					type: 'errors',
+					location: 'recordVipEvent',
+					message: `err reporting vip event to tiktok => ${err}`,
+				});
+				return { reported: false };
+			})
+		:	{ reported: false };
+
 	// report event to tinybird
 	try {
 		// Extract journey info from visitor with proper defaults for VIP events
@@ -1425,6 +1592,7 @@ export async function recordVipEvent({
 			...flattenVisitorForIngest(visitor),
 			href: sourceUrl,
 			reportedToMeta: metaPixel && metaRes.reported ? metaPixel.id : '',
+			reportedToTiktok: tiktokPixel && tiktokRes.reported ? tiktokPixel.id : '',
 			vipSwapType: vipSwap.type,
 			vipDownloadToken: downloadToken ?? '',
 			vipEmailCaptured: emailCaptured ?? '',
@@ -1531,6 +1699,271 @@ function getMetaEventFromVipEvent({
 					customData: {
 						content_type: 'barely.vip/download',
 						vipSwapId: vipSwap.id,
+					},
+				},
+			];
+		default:
+			return null;
+	}
+}
+
+/* ♪ TikTok Event Helpers ♪ */
+
+function getTiktokEventsFromCartEvent({
+	cart,
+	eventType,
+}: {
+	cart: Cart;
+	eventType: (typeof WEB_EVENT_TYPES__CART)[number];
+}): TiktokEvent[] | null {
+	switch (eventType) {
+		case 'cart/viewCheckout':
+			return [
+				{
+					eventName: 'InitiateCheckout',
+					properties: {
+						content_type: 'product',
+						contents: [
+							{
+								content_id: cart.mainProductId,
+								quantity: 1,
+								price: cart.mainProductPrice / 100,
+							},
+						],
+						currency: 'USD',
+						value: cart.mainProductPrice / 100,
+					},
+				},
+			];
+		case 'cart/addPaymentInfo':
+			return [
+				{
+					eventName: 'AddPaymentInfo',
+					properties: {
+						content_type: 'product',
+						contents: [
+							{
+								content_id: cart.mainProductId,
+								quantity: 1,
+								price: cart.mainProductPrice / 100,
+							},
+						],
+						currency: 'USD',
+						value: cart.mainProductPrice / 100,
+					},
+				},
+			];
+		case 'cart/addBump':
+			if (!cart.bumpProductId) return null;
+			return [
+				{
+					eventName: 'AddToCart',
+					properties: {
+						content_type: 'product',
+						contents: [
+							{
+								content_id: cart.bumpProductId,
+								quantity: 1,
+								price: (cart.bumpProductPrice ?? 0) / 100,
+							},
+						],
+						currency: 'USD',
+						value: (cart.bumpProductPrice ?? 0) / 100,
+					},
+				},
+			];
+		case 'cart/purchaseMainWithoutBump':
+			return [
+				{
+					eventName: 'CompletePayment',
+					properties: {
+						content_type: 'product',
+						contents: [
+							{
+								content_id: cart.mainProductId,
+								quantity: 1,
+								price: cart.mainProductPrice / 100,
+							},
+						],
+						currency: 'USD',
+						value: cart.mainProductPrice / 100,
+					},
+				},
+			];
+		case 'cart/purchaseMainWithBump':
+			if (!cart.bumpProductId) return null;
+			return [
+				{
+					eventName: 'CompletePayment',
+					properties: {
+						content_type: 'product',
+						contents: [
+							{
+								content_id: cart.mainProductId,
+								quantity: 1,
+								price: cart.mainProductPrice / 100,
+							},
+							{
+								content_id: cart.bumpProductId,
+								quantity: 1,
+								price: (cart.bumpProductPrice ?? 0) / 100,
+							},
+						],
+						currency: 'USD',
+						value: (cart.mainProductPrice + (cart.bumpProductPrice ?? 0)) / 100,
+					},
+				},
+			];
+		case 'cart/viewUpsell':
+			if (!cart.upsellProductId) return null;
+			return [
+				{
+					eventName: 'ViewContent',
+					properties: {
+						content_type: 'product',
+						contents: [{ content_id: cart.upsellProductId }],
+					},
+				},
+			];
+		case 'cart/purchaseUpsell':
+			if (!cart.upsellProductId) return null;
+			return [
+				{
+					eventName: 'CompletePayment',
+					properties: {
+						content_type: 'product',
+						contents: [
+							{
+								content_id: cart.upsellProductId,
+								quantity: 1,
+								price: (cart.upsellProductPrice ?? 0) / 100,
+							},
+						],
+						currency: 'USD',
+						value: (cart.upsellProductPrice ?? 0) / 100,
+					},
+				},
+			];
+		case 'cart/viewOrderConfirmation':
+		case 'cart/updateMainProductPayWhatYouWantPrice':
+		case 'cart/addEmail':
+		case 'cart/addShippingInfo':
+		case 'cart/removeBump':
+		case 'cart/checkoutPurchase':
+		case 'cart/declineUpsell':
+			return null;
+	}
+}
+
+function getTiktokEventsFromFmEvent({
+	fmPage,
+	fmLink,
+	eventType,
+}: {
+	fmPage: FmPage;
+	fmLink?: FmLink;
+	eventType: (typeof WEB_EVENT_TYPES__FM)[number];
+}): TiktokEvent[] | null {
+	switch (eventType) {
+		case 'fm/view':
+			return [
+				{
+					eventName: 'ViewContent',
+					properties: {
+						fmId: fmPage.id,
+					},
+				},
+			];
+		case 'fm/linkClick':
+			return [
+				{
+					eventName: 'ClickButton',
+					properties: {
+						fmId: fmPage.id,
+						platform: fmLink?.platform,
+					},
+				},
+			];
+		default:
+			return null;
+	}
+}
+
+function getTiktokEventsFromPageEvent({
+	page,
+	eventType,
+	linkClickDestinationHref,
+	linkClickDestinationAssetId,
+}: {
+	page: LandingPage;
+	linkClickDestinationHref?: string;
+	linkClickDestinationAssetId?: string;
+	eventType: (typeof WEB_EVENT_TYPES__PAGE)[number];
+}): TiktokEvent[] | null {
+	switch (eventType) {
+		case 'page/view':
+			return [
+				{
+					eventName: 'Pageview',
+					properties: {
+						pageId: page.id,
+					},
+				},
+			];
+		case 'page/linkClick':
+			return [
+				{
+					eventName: 'ClickButton',
+					properties: {
+						pageId: page.id,
+						linkClickDestinationAssetId,
+						linkClickDestinationHref,
+					},
+				},
+			];
+		default:
+			return null;
+	}
+}
+
+function getTiktokEventsFromVipEvent({
+	vipSwap,
+	eventType,
+	emailCaptured,
+}: {
+	vipSwap: VipSwap;
+	eventType: (typeof WEB_EVENT_TYPES__VIP)[number];
+	emailCaptured?: string;
+}): TiktokEvent[] | null {
+	switch (eventType) {
+		case 'vip/view':
+			return [
+				{
+					eventName: 'ViewContent',
+					properties: {
+						vipSwapId: vipSwap.id,
+						vipSwapType: vipSwap.type,
+					},
+				},
+			];
+		case 'vip/emailCapture':
+			return [
+				{
+					eventName: 'SubmitForm',
+					properties: {
+						vipSwapId: vipSwap.id,
+						vipSwapType: vipSwap.type,
+						email: emailCaptured,
+					},
+				},
+			];
+		case 'vip/download':
+			return [
+				{
+					eventName: 'CompleteRegistration',
+					properties: {
+						vipSwapId: vipSwap.id,
+						vipSwapType: vipSwap.type,
 					},
 				},
 			];
