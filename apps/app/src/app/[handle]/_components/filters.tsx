@@ -68,6 +68,8 @@ interface FiltersProps<SortBy extends string = string> {
 	toggleFulfilled?: () => void;
 	showDeleted?: boolean;
 	toggleDeleted?: () => void;
+	showBarelyFulfillments?: boolean;
+	toggleBarelyFulfillments?: () => void;
 	clearAllFilters: () => void;
 	groupBy?: boolean;
 	toggleGroupBy?: () => void;
@@ -90,6 +92,8 @@ export function Filters<SortBy extends string = string>({
 	toggleArchived,
 	showDeleted,
 	toggleDeleted,
+	showBarelyFulfillments,
+	toggleBarelyFulfillments,
 	showCanceled,
 	toggleCanceled,
 	showFulfilled,
@@ -142,6 +146,9 @@ export function Filters<SortBy extends string = string>({
 			if (e.shiftKey && e.key === 'X' && hotkeysEnabled && !metaOrCtrl) {
 				toggleCanceled?.();
 			}
+			if (e.shiftKey && e.key === 'B' && hotkeysEnabled && !metaOrCtrl) {
+				toggleBarelyFulfillments?.();
+			}
 			if (e.key === 'Escape' && hotkeysEnabled && !metaOrCtrl) {
 				clearAllFilters();
 				if (searchInputRef.current) {
@@ -153,6 +160,7 @@ export function Filters<SortBy extends string = string>({
 			clearAllFilters,
 			toggleArchived,
 			toggleDeleted,
+			toggleBarelyFulfillments,
 			toggleFulfilled,
 			togglePreorders,
 			toggleCanceled,
@@ -246,6 +254,23 @@ export function Filters<SortBy extends string = string>({
 								id='showFulfilledSwitch'
 								checked={!!showFulfilled}
 								onClick={() => toggleFulfilled()}
+								size='sm'
+							/>
+						</div>
+					)}
+
+					{toggleBarelyFulfillments !== undefined && (
+						<div className='group flex flex-row items-center justify-between gap-4'>
+							<Label htmlFor='showBarelyFulfillmentsSwitch'>
+								<div className='flex flex-row items-center gap-2'>
+									<DisplayShortcutIcon shortcut={['Shift', 'B']} icon='package' />
+									Include Barely fulfillments
+								</div>
+							</Label>
+							<Switch
+								id='showBarelyFulfillmentsSwitch'
+								checked={!!showBarelyFulfillments}
+								onClick={() => toggleBarelyFulfillments()}
 								size='sm'
 							/>
 						</div>
