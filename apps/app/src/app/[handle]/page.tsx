@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { getCurrentAppVariant, getDefaultProductForVariant } from '@barely/utils';
+import { getDefaultProductForVariant } from '@barely/utils';
 
 export default async function DashboardPage({
 	params,
@@ -9,23 +9,20 @@ export default async function DashboardPage({
 	const { handle } = await params;
 
 	// Redirect to the default product route based on app variant
+	// Only wrap getDefaultProductForVariant() in try-catch, NOT redirect(),
+	// because Next.js redirect() works by throwing a NEXT_REDIRECT error internally
+	let defaultProduct: ReturnType<typeof getDefaultProductForVariant> | undefined;
 	try {
-		const defaultProduct = getDefaultProductForVariant();
-		if (defaultProduct) {
-			redirect(`/${handle}${defaultProduct.defaultRoute}`);
-		}
+		defaultProduct = getDefaultProductForVariant();
 	} catch {
-		// If there's an error getting the variant, fall through to default behavior
+		// If there's an error getting the variant, default to links
+		redirect(`/${handle}/links`);
 	}
 
-	// Fallback to current behavior if no default product found
-	// For appInvoice, redirect to /invoices as a hardcoded fallback
-	// Fallback: redirect to /invoices for appInvoice, otherwise /links
-	const variant = getCurrentAppVariant();
-	if (variant === 'appInvoice') {
-		redirect(`/${handle}/invoices`);
+	if (defaultProduct) {
+		redirect(`/${handle}${defaultProduct.defaultRoute}`);
 	}
 
-	// Default behavior - redirect to links page
+	// Fallback if no default product found
 	redirect(`/${handle}/links`);
 }
