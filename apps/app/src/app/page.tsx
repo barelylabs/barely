@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getUserWorkspacesById } from '@barely/lib/functions/workspace.fns';
+import { getDefaultProductForVariant } from '@barely/utils';
 
 import { getDefaultWorkspace } from '@barely/auth/utils';
 
@@ -19,5 +20,18 @@ export default async function RootPage() {
 		return redirect('/onboarding');
 	}
 
-	return redirect(`${defaultWorkspace.handle}/links`);
+	// Redirect to the default product route based on app variant
+	let defaultProduct: ReturnType<typeof getDefaultProductForVariant> | undefined;
+	try {
+		defaultProduct = getDefaultProductForVariant();
+	} catch {
+		// If there's an error getting the variant, default to links
+		return redirect(`/${defaultWorkspace.handle}/links`);
+	}
+
+	if (defaultProduct) {
+		return redirect(`/${defaultWorkspace.handle}${defaultProduct.defaultRoute}`);
+	}
+
+	return redirect(`/${defaultWorkspace.handle}/links`);
 }
