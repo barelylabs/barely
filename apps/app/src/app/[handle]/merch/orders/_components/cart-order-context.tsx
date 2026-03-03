@@ -6,11 +6,9 @@ import {
 	createResourceDataHook,
 	createResourceSearchParamsHook,
 } from '@barely/hooks';
-import { parseAsBoolean, parseAsStringLiteral } from 'nuqs';
+import { parseAsBoolean } from 'nuqs';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
-
-const FULFILLED_BY_OPTIONS = ['all', 'artist', 'barely'] as const;
 
 // Define the page data type for cart orders
 interface CartOrderPageData {
@@ -24,7 +22,7 @@ export const useCartOrderSearchParams = createResourceSearchParamsHook({
 		showFulfilled: parseAsBoolean.withDefault(false),
 		showPreorders: parseAsBoolean.withDefault(false),
 		showCanceled: parseAsBoolean.withDefault(false),
-		fulfilledBy: parseAsStringLiteral(FULFILLED_BY_OPTIONS).withDefault('all'),
+		showBarelyOrders: parseAsBoolean.withDefault(false),
 		showMarkAsFulfilledModal: parseAsBoolean.withDefault(false),
 		showCancelCartOrderModal: parseAsBoolean.withDefault(false),
 		showShipOrderModal: parseAsBoolean.withDefault(false),
@@ -39,9 +37,8 @@ export const useCartOrderSearchParams = createResourceSearchParamsHook({
 		toggleCanceled: action(setParams =>
 			setParams(prev => ({ showCanceled: !prev.showCanceled })),
 		),
-		setFulfilledBy: action(
-			(setParams, fulfilledBy: (typeof FULFILLED_BY_OPTIONS)[number]) =>
-				setParams({ fulfilledBy }),
+		toggleBarelyOrders: action(setParams =>
+			setParams(prev => ({ showBarelyOrders: !prev.showBarelyOrders })),
 		),
 		setShowMarkAsFulfilledModal: action((setParams, show: boolean) =>
 			setParams({ showMarkAsFulfilledModal: show }),

@@ -65,7 +65,7 @@ export const cartOrderRoute = {
 				showPreorders,
 				search,
 				fanId,
-				fulfilledBy,
+				showBarelyOrders,
 				limit,
 				cursor,
 			} = input;
@@ -133,7 +133,7 @@ export const cartOrderRoute = {
 					eq(Carts.workspaceId, ctx.workspace.id),
 					!!fanId && eq(Carts.fanId, fanId),
 					!!searchFanIds.length && inArray(Carts.fanId, searchFanIds),
-					fulfilledBy !== 'all' && eq(Carts.fulfilledBy, fulfilledBy),
+					!showBarelyOrders && eq(Carts.fulfilledBy, 'artist'),
 					!!preorderProductIds.length &&
 						// sqlAnd([
 						//     notInArray(Carts.mainProductId, preorderProductIds),
