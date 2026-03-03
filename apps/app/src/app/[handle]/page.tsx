@@ -20,13 +20,10 @@ export default async function DashboardPage({
 
 	// Fallback to current behavior if no default product found
 	// For appInvoice, redirect to /invoices as a hardcoded fallback
-	try {
-		const variant = getCurrentAppVariant();
-		if (variant === 'appInvoice') {
-			redirect(`/${handle}/invoices`);
-		}
-	} catch {
-		// Ignore error and use default
+	// Fallback: redirect to /invoices for appInvoice, otherwise /links
+	const variant = getCurrentAppVariant();
+	if (variant === 'appInvoice') {
+		redirect(`/${handle}/invoices`);
 	}
 
 	// Default behavior - redirect to links page
