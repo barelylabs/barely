@@ -6,6 +6,7 @@ import { ratelimit } from '@barely/lib';
 import { upsertPlaylistSubmissionLead } from '@barely/lib/functions/airtable-lead.fns';
 import { recordNYCEvent } from '@barely/lib/functions/nyc-event.fns';
 import { parseReqForVisitorInfo } from '@barely/lib/middleware/request-parsing';
+import { log } from '@barely/lib/utils/log';
 import { isProduction } from '@barely/utils';
 import { playlistSubmissionSchema } from '@barely/validators';
 import { ipAddress } from '@vercel/edge';
@@ -67,6 +68,12 @@ export async function POST(request: NextRequest) {
 
 		if (notificationEmailResult.error) {
 			console.error('Failed to send notification email:', notificationEmailResult.error);
+			await log({
+				type: 'errors',
+				location: 'nyc/playlist-submission',
+				message: `Failed to send playlist submission email for ${validatedData.email} (${validatedData.artistName}). Error: ${JSON.stringify(notificationEmailResult.error)}`,
+				mention: true,
+			});
 			const response = new Response('Failed to send email', { status: 500 });
 			setCorsHeaders(response);
 			return response;
@@ -87,8 +94,21 @@ export async function POST(request: NextRequest) {
 
 		if (confirmationEmailResult.error) {
 			console.error('Failed to send confirmation email:', confirmationEmailResult.error);
+			await log({
+				type: 'errors',
+				location: 'nyc/playlist-submission',
+				message: `Failed to send confirmation email to ${validatedData.email} (${validatedData.artistName}). Error: ${JSON.stringify(confirmationEmailResult.error)}`,
+			});
 			// Don't fail the request if confirmation email fails - the submission was successful
 		}
+
+		// Log lead to Slack as a reliable fallback notification
+		await log({
+			type: 'leads',
+			location: 'nyc/playlist-submission',
+			message: `*New Playlist Submission Lead*\n>Artist: ${validatedData.artistName}\n>Email: ${validatedData.email}\n>Spotify: ${validatedData.spotifyTrackUrl}\n>Instagram: ${validatedData.instagramHandle ?? 'N/A'}\n>Interested in services: ${validatedData.interestedInServices ? 'Yes' : 'No'}\n>Resend ID: ${notificationEmailResult.resendId ?? 'unknown'}`,
+			mention: validatedData.interestedInServices === true,
+		});
 
 		// Track playlist submission to Meta Pixel
 		await recordNYCEvent({
