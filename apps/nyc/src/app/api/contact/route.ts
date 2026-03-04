@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
 		void log({
 			type: 'leads',
 			location: 'nyc/contact-form',
-			message: `*New Contact Form Lead*\n>Name: ${esc(validatedData.name)}\n>Email: ${esc(validatedData.email)}\n>Artist: ${esc(validatedData.artistName ?? 'N/A')}\n>Service: ${validatedData.service ?? 'general'}${validatedData.stanAddon ? ' + Stan' : ''}\n>Budget: ${validatedData.budgetRange ?? 'N/A'}\n>Listeners: ${esc(validatedData.monthlyListeners ?? 'N/A')}\n>Instagram: ${esc(validatedData.instagramHandle ?? 'N/A')}\n>Message: ${esc(validatedData.message.slice(0, 200))}${validatedData.message.length > 200 ? '...' : ''}\n>Resend ID: ${emailResult.resendId ?? 'unknown'}`,
+		message: `*New Contact Form Lead*\n>Name: ${esc(validatedData.name)}\n>Email: ${esc(validatedData.email)}\n>Artist: ${esc(validatedData.artistName ?? 'N/A')}\n>Service: ${validatedData.service ?? 'general'}${validatedData.stanAddon ? ' + Stan' : ''}\n>Budget: ${esc(validatedData.budgetRange ?? 'N/A')}\n>Listeners: ${esc(validatedData.monthlyListeners ?? 'N/A')}\n>Instagram: ${esc(validatedData.instagramHandle ?? 'N/A')}\n>Message: ${esc(validatedData.message.slice(0, 200))}${validatedData.message.length > 200 ? '...' : ''}\n>Resend ID: ${emailResult.resendId ?? 'unknown'}`,
 			mention: true,
 		});
 
