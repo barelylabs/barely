@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
 		void log({
 			type: 'leads',
 			location: 'nyc/playlist-submission',
-			message: `*New Playlist Submission Lead*\n>Artist: ${esc(validatedData.artistName)}\n>Email: ${esc(validatedData.email)}\n>Spotify: ${esc(validatedData.spotifyTrackUrl)}\n>Instagram: ${esc(validatedData.instagramHandle)}\n>Interested in services: ${validatedData.interestedInServices ? 'Yes' : 'No'}\n>Resend ID: ${notificationEmailResult.resendId}`,
+		message: `*New Playlist Submission Lead*\n>Artist: ${esc(validatedData.artistName)}\n>Email: ${esc(validatedData.email)}\n>Spotify: ${esc(validatedData.spotifyTrackUrl)}\n>Instagram: ${esc(validatedData.instagramHandle)}\n>Interested in services: ${validatedData.interestedInServices ? 'Yes' : 'No'}\n>Resend ID: ${notificationEmailResult.resendId ?? 'unknown'}`,
 			mention: validatedData.interestedInServices === true,
 		});
 
