@@ -414,60 +414,89 @@ export function parseSession({
 		:	req.cookies.getAll().find(cookie => cookie.name.endsWith('.sessionRefererUrl'))
 				?.value) ?? null;
 
+	// Check URL params first, then fall back to cookies.
+	// This ensures tracking values are captured on the first request,
+	// before cookies have been set by setVisitorCookies().
+
+	// URLSearchParams.get() returns "" for empty params like ?key=, which would
+	// override valid cookie values since ?? doesn't short-circuit on empty strings.
+	// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+	const urlParam = (key: string) => params.get(key) || null;
+
 	const sessionEmailBroadcastId =
+		urlParam('emailBroadcastId') ??
 		(handleAndKeyExist ?
 			req.cookies.get(`${handle}.${key}.sessionEmailBroadcastId`)?.value
 		:	req.cookies.getAll().find(cookie => cookie.name.endsWith('.sessionEmailBroadcastId'))
-				?.value) ?? null;
+				?.value) ??
+		null;
 	const sessionEmailTemplateId =
+		urlParam('emailTemplateId') ??
 		(handleAndKeyExist ?
 			req.cookies.get(`${handle}.${key}.sessionEmailTemplateId`)?.value
 		:	req.cookies.getAll().find(cookie => cookie.name.endsWith('.sessionEmailTemplateId'))
-				?.value) ?? null;
+				?.value) ??
+		null;
 	const sessionFlowActionId =
+		urlParam('flowActionId') ??
 		(handleAndKeyExist ?
 			req.cookies.get(`${handle}.${key}.sessionFlowActionId`)?.value
 		:	req.cookies.getAll().find(cookie => cookie.name.endsWith('.sessionFlowActionId'))
-				?.value) ?? null;
+				?.value) ??
+		null;
 	const sessionLandingPageId =
+		urlParam('landingPageId') ??
 		(handleAndKeyExist ?
 			req.cookies.get(`${handle}.${key}.sessionLandingPageId`)?.value
 		:	req.cookies.getAll().find(cookie => cookie.name.endsWith('.sessionLandingPageId'))
-				?.value) ?? null;
+				?.value) ??
+		null;
 
 	const fbclid =
+		urlParam('fbclid') ??
 		(handleAndKeyExist ?
 			req.cookies.get(`${handle}.${key}.fbclid`)?.value
-		:	req.cookies.getAll().find(cookie => cookie.name.endsWith('.fbclid'))?.value) ?? null;
+		:	req.cookies.getAll().find(cookie => cookie.name.endsWith('.fbclid'))?.value) ??
+		null;
 
 	const ttclid =
+		urlParam('ttclid') ??
 		(handleAndKeyExist ?
 			req.cookies.get(`${handle}.${key}.ttclid`)?.value
-		:	req.cookies.getAll().find(cookie => cookie.name.endsWith('.ttclid'))?.value) ?? null;
+		:	req.cookies.getAll().find(cookie => cookie.name.endsWith('.ttclid'))?.value) ??
+		null;
 
 	const sessionMetaCampaignId =
+		urlParam('metaCampaignId') ??
 		(handleAndKeyExist ?
 			req.cookies.get(`${handle}.${key}.sessionMetaCampaignId`)?.value
 		:	req.cookies.getAll().find(cookie => cookie.name.endsWith('.sessionMetaCampaignId'))
-				?.value) ?? null;
+				?.value) ??
+		null;
 
 	const sessionMetaAdsetId =
+		urlParam('metaAdsetId') ??
 		(handleAndKeyExist ?
 			req.cookies.get(`${handle}.${key}.sessionMetaAdsetId`)?.value
 		:	req.cookies.getAll().find(cookie => cookie.name.endsWith('.sessionMetaAdsetId'))
-				?.value) ?? null;
+				?.value) ??
+		null;
 
 	const sessionMetaAdId =
+		urlParam('metaAdId') ??
 		(handleAndKeyExist ?
 			req.cookies.get(`${handle}.${key}.sessionMetaAdId`)?.value
 		:	req.cookies.getAll().find(cookie => cookie.name.endsWith('.sessionMetaAdId'))
-				?.value) ?? null;
+				?.value) ??
+		null;
 
 	const sessionMetaPlacement =
+		urlParam('metaPlacement') ??
 		(handleAndKeyExist ?
 			req.cookies.get(`${handle}.${key}.sessionMetaPlacement`)?.value
 		:	req.cookies.getAll().find(cookie => cookie.name.endsWith('.sessionMetaPlacement'))
-				?.value) ?? null;
+				?.value) ??
+		null;
 
 	return {
 		fanId,
