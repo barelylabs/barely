@@ -6,7 +6,7 @@ import { ratelimit } from '@barely/lib';
 import { upsertPlaylistSubmissionLead } from '@barely/lib/functions/airtable-lead.fns';
 import { recordNYCEvent } from '@barely/lib/functions/nyc-event.fns';
 import { parseReqForVisitorInfo } from '@barely/lib/middleware/request-parsing';
-import { log } from '@barely/lib/utils/log';
+import { escapeSlackMrkdwn, log } from '@barely/lib/utils/log';
 import { isProduction } from '@barely/utils';
 import { playlistSubmissionSchema } from '@barely/validators';
 import { ipAddress } from '@vercel/edge';
@@ -102,11 +102,12 @@ export async function POST(request: NextRequest) {
 			// Don't fail the request if confirmation email fails - the submission was successful
 		}
 
-		// Log lead to Slack as a reliable fallback notification
-		await log({
+		// Log lead to Slack as a reliable fallback notification (non-blocking)
+		const esc = escapeSlackMrkdwn;
+		void log({
 			type: 'leads',
 			location: 'nyc/playlist-submission',
-			message: `*New Playlist Submission Lead*\n>Artist: ${validatedData.artistName}\n>Email: ${validatedData.email}\n>Spotify: ${validatedData.spotifyTrackUrl}\n>Instagram: ${validatedData.instagramHandle ?? 'N/A'}\n>Interested in services: ${validatedData.interestedInServices ? 'Yes' : 'No'}\n>Resend ID: ${notificationEmailResult.resendId ?? 'unknown'}`,
+			message: `*New Playlist Submission Lead*\n>Artist: ${esc(validatedData.artistName)}\n>Email: ${esc(validatedData.email)}\n>Spotify: ${esc(validatedData.spotifyTrackUrl)}\n>Instagram: ${esc(validatedData.instagramHandle ?? 'N/A')}\n>Interested in services: ${validatedData.interestedInServices ? 'Yes' : 'No'}\n>Resend ID: ${notificationEmailResult.resendId ?? 'unknown'}`,
 			mention: validatedData.interestedInServices === true,
 		});
 

@@ -20,6 +20,10 @@ const TYPE_ICONS = {
 	logs: ':speech_balloon:',
 };
 
+export function escapeSlackMrkdwn(text: string): string {
+	return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 export const log = async ({
 	message,
 	type,
@@ -36,7 +40,12 @@ export const log = async ({
 	}
 
 	const HOOK = logTypeToEnv[type];
-	if (!HOOK) return;
+	if (!HOOK) {
+		console.warn(
+			`[log] No Slack webhook configured for type "${type}" — message dropped: ${message}`,
+		);
+		return;
+	}
 
 	const mentionUser = libEnv.BARELY_SLACK_NOTIFY_USER ?? null;
 
