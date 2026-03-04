@@ -447,11 +447,27 @@ export async function recordCartEvent({
 	});
 
 	const sourceUrl = visitorInfo.referer_url ?? ''; // this is an api route, so we want the source of the api call
-	const cookieStore = await cookies();
+
+	// cookies() may throw when called outside a request context (e.g. from Stripe webhooks or Trigger.dev jobs)
+	let cookieStore: Awaited<ReturnType<typeof cookies>> | null = null;
+	try {
+		cookieStore = await cookies();
+	} catch {
+		// no request context available - this is expected for webhook-initiated events
+	}
+
+	// safely parse fbclid from sourceUrl - new URL() throws on invalid URLs like 'Unknown'
+	let sourceUrlFbclid: string | null = null;
+	try {
+		sourceUrlFbclid = new URL(sourceUrl).searchParams.get('fbclid');
+	} catch {
+		// sourceUrl is not a valid URL - this is expected for webhook-initiated events
+	}
+
 	const fbclid =
 		cart.fbclid ??
-		cookieStore.get(`${cartFunnel.handle}.${cartFunnel.key}.fbclid`)?.value ??
-		new URL(sourceUrl).searchParams.get('fbclid');
+		cookieStore?.get(`${cartFunnel.handle}.${cartFunnel.key}.fbclid`)?.value ??
+		sourceUrlFbclid;
 
 	const email = cart.emailMarketingOptIn && cart.email ? cart.email : undefined;
 	const phone = cart.smsMarketingOptIn && cart.phone ? cart.phone : undefined;
@@ -493,7 +509,7 @@ export async function recordCartEvent({
 
 	const ttclid =
 		cart.ttclid ??
-		cookieStore.get(`${cartFunnel.handle}.${cartFunnel.key}.ttclid`)?.value ??
+		cookieStore?.get(`${cartFunnel.handle}.${cartFunnel.key}.ttclid`)?.value ??
 		null;
 
 	const tiktokRes =
