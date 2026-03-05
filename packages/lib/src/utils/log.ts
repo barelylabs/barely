@@ -5,6 +5,7 @@ import { libEnv } from '../../env';
 const logTypeToEnv = {
 	alerts: libEnv.BARELY_SLACK_HOOK_ALERTS,
 	errors: libEnv.BARELY_SLACK_HOOK_ERRORS,
+	leads: libEnv.BARELY_SLACK_HOOK_LEADS,
 	sales: libEnv.BARELY_SLACK_HOOK_SALES,
 	users: libEnv.BARELY_SLACK_HOOK_USERS,
 	logs: libEnv.BARELY_SLACK_HOOK_LOGS,
@@ -13,10 +14,15 @@ const logTypeToEnv = {
 const TYPE_ICONS = {
 	alerts: ':rotating_light:',
 	errors: ':no_entry:',
+	leads: ':briefcase:',
 	sales: ':money_with_wings:',
 	users: ':busts_in_silhouette:',
 	logs: ':speech_balloon:',
 };
+
+export function escapeSlackMrkdwn(text: string): string {
+	return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 
 export const log = async ({
 	message,
@@ -24,35 +30,26 @@ export const log = async ({
 	location,
 	mention = false,
 }: {
-	type: 'alerts' | 'errors' | 'sales' | 'users' | 'logs';
+	type: 'alerts' | 'errors' | 'leads' | 'sales' | 'users' | 'logs';
 	location: string;
 	message: string;
 	mention?: boolean;
 }) => {
-	/* 
-  Log a message to the console 
-  */
-	if (
-		isDevelopment() ||
-		!libEnv.BARELY_SLACK_HOOK_ALERTS ||
-		!libEnv.BARELY_SLACK_HOOK_ERRORS ||
-		!libEnv.BARELY_SLACK_HOOK_SALES ||
-		!libEnv.BARELY_SLACK_HOOK_USERS ||
-		!libEnv.BARELY_SLACK_HOOK_LOGS
-	) {
+	if (isDevelopment()) {
 		return console.log(`>> ${location ? `loc :: ${location} // ` : ''}`, message);
 	}
 
 	const HOOK = logTypeToEnv[type];
-	if (!HOOK) return;
+	if (!HOOK) {
+		console.warn(
+			`[log] No Slack webhook configured for type "${type}" — message dropped: ${message}`,
+		);
+		return;
+	}
 
 	const mentionUser = libEnv.BARELY_SLACK_NOTIFY_USER ?? null;
 
 	try {
-		/* 
-		Log a message to Threads error channel 
-		*/
-
 		return await fetch(HOOK, {
 			method: 'POST',
 			headers: {

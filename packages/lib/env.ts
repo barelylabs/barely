@@ -58,6 +58,7 @@ export const libEnv = createEnv({
 		BARELY_SLACK_HOOK_ERRORS: z.url().optional(),
 		BARELY_SLACK_HOOK_SALES: z.url().optional(),
 		BARELY_SLACK_HOOK_USERS: z.url().optional(),
+		BARELY_SLACK_HOOK_LEADS: z.url().optional(),
 		BARELY_SLACK_HOOK_LOGS: z.url().optional(),
 		BARELY_SLACK_NOTIFY_USER: z.string().optional(),
 		BOT_SPOTIFY_ACCOUNT_ID: z.string(),

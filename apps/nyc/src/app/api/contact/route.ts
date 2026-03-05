@@ -5,6 +5,7 @@ import { ratelimit } from '@barely/lib';
 import { upsertContactFormLead } from '@barely/lib/functions/airtable-lead.fns';
 import { recordNYCEvent } from '@barely/lib/functions/nyc-event.fns';
 import { parseReqForVisitorInfo } from '@barely/lib/middleware/request-parsing';
+import { escapeSlackMrkdwn, log } from '@barely/lib/utils/log';
 import { isProduction } from '@barely/utils';
 import { ipAddress } from '@vercel/edge';
 import { z } from 'zod/v4';
@@ -96,10 +97,25 @@ export async function POST(request: NextRequest) {
 
 		if (emailResult.error) {
 			console.error('Failed to send email:', emailResult.error);
+			await log({
+				type: 'errors',
+				location: 'nyc/contact-form',
+				message: `Failed to send contact form email for ${validatedData.email} (${validatedData.name}). Service: ${validatedData.service ?? 'general'}. Error: ${JSON.stringify(emailResult.error)}`,
+				mention: true,
+			});
 			const response = new Response('Failed to send email', { status: 500 });
 			setCorsHeaders(response);
 			return response;
 		}
+
+		// Log lead to Slack as a reliable fallback notification (non-blocking)
+		const esc = escapeSlackMrkdwn;
+		void log({
+			type: 'leads',
+			location: 'nyc/contact-form',
+			message: `*New Contact Form Lead*\n>Name: ${esc(validatedData.name)}\n>Email: ${esc(validatedData.email)}\n>Artist: ${esc(validatedData.artistName ?? 'N/A')}\n>Service: ${validatedData.service ?? 'general'}${validatedData.stanAddon ? ' + Stan' : ''}\n>Budget: ${esc(validatedData.budgetRange ?? 'N/A')}\n>Listeners: ${esc(validatedData.monthlyListeners ?? 'N/A')}\n>Instagram: ${esc(validatedData.instagramHandle ?? 'N/A')}\n>Message: ${esc(validatedData.message.slice(0, 200))}${validatedData.message.length > 200 ? '...' : ''}\n>Resend ID: ${emailResult.resendId ?? 'unknown'}`,
+			mention: true,
+		});
 
 		// Track contact form submission to Meta Pixel
 		await recordNYCEvent({
