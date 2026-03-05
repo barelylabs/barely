@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePusherSocketId, useUser, useWorkspace, useWorkspaces } from '@barely/hooks';
 import {
 	cn,
+	formatMinorToMajorCurrency,
 	getPlanNameFromId,
 	toTitleCase,
 	truncate,
@@ -115,6 +116,15 @@ export function WorkspaceSwitcher({ collapsed = false }: WorkspaceSwitcherProps)
 								<Text variant='xs/normal' className='text-muted-foreground'>
 									{getPlanNameFromId(currentWorkspace.plan)}
 								</Text>
+								{currentWorkspace.balance > 0 && (
+									<Text variant='xs/normal' className='text-green-600'>
+										{formatMinorToMajorCurrency(
+											currentWorkspace.balance,
+											currentWorkspace.currency,
+										)}{' '}
+										credit
+									</Text>
+								)}
 							</div>
 							<Icon.chevronsUpDown className='h-4 w-4 shrink-0 text-muted-foreground' />
 						</>
@@ -140,6 +150,15 @@ export function WorkspaceSwitcher({ collapsed = false }: WorkspaceSwitcherProps)
 							<Text variant='xs/normal' className='text-muted-foreground'>
 								{getPlanNameFromId(currentWorkspace.plan)}
 							</Text>
+							{currentWorkspace.balance > 0 && (
+								<Text variant='xs/normal' className='text-green-600'>
+									{formatMinorToMajorCurrency(
+										currentWorkspace.balance,
+										currentWorkspace.currency,
+									)}{' '}
+									credit
+								</Text>
+							)}
 						</div>
 					</div>
 				</div>

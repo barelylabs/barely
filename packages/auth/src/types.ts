@@ -27,8 +27,9 @@ export interface SessionWorkspace {
 	stripeConnectChargesEnabled: boolean;
 	stripeConnectChargesEnabled_devMode: boolean;
 
-	// Currency
+	// Currency & balance
 	currency: 'usd' | 'gbp';
+	balance: number;
 
 	// Shipping address
 	shippingAddressLine1: string | null;

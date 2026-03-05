@@ -182,6 +182,17 @@ export const workspaceRoute = {
 	update: workspaceProcedure
 		.input(updateCurrentWorkspaceSchema)
 		.mutation(async ({ ctx, input }) => {
+			// Prevent currency change when workspace has a non-zero balance
+			if (input.currency && input.currency !== ctx.workspace.currency) {
+				if (ctx.workspace.balance > 0) {
+					throw new TRPCError({
+						code: 'BAD_REQUEST',
+						message:
+							'Cannot change currency while workspace has a non-zero balance. Please contact support to resolve your balance first.',
+					});
+				}
+			}
+
 			try {
 				const updatedWorkspace = await dbHttp
 					.update(Workspaces)
