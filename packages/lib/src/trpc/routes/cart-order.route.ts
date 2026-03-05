@@ -565,7 +565,10 @@ export const cartOrderRoute = {
 								error instanceof Error ? error.message : 'Unknown error';
 						}
 
-						chargesEnabled: cart.funnel?.workspace.stripeConnectChargesEnabled ?? false, // from funnel snapshot, may not reflect current state
+						const detailString = Object.entries(errorDetails)
+							.filter(([, v]) => v !== undefined && v !== null)
+							.map(([k, v]) => `${k}=${String(v)}`)
+							.join(', ');
 
 						// Log balance credit
 						await log({
