@@ -28,6 +28,7 @@ export function createTestWorkspace(
 		stripeConnectChargesEnabled: false,
 		stripeConnectChargesEnabled_devMode: false,
 		currency: 'usd',
+		balance: 0,
 		shippingAddressLine1: null,
 		shippingAddressLine2: null,
 		shippingAddressCity: null,

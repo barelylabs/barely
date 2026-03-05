@@ -43,6 +43,7 @@ import {
 	notInArray,
 	or,
 } from 'drizzle-orm';
+import { Stripe } from 'stripe';
 import { z } from 'zod/v4';
 
 import {
@@ -543,6 +544,32 @@ export const cartOrderRoute = {
 							})
 							.where(eq(Workspaces.id, ctx.workspace.id));
 
+						// Build structured error details for debugging
+						const errorDetails: Record<string, unknown> = {
+							cartId: cart.id,
+							orderId,
+							amount: cart.orderShippingAmount,
+							currency,
+							connectedAccount: stripeConnectAccount,
+							chargesEnabled: cart.funnel?.workspace.stripeConnectChargesEnabled ?? false,
+						};
+
+						if (error instanceof Stripe.errors.StripeError) {
+							errorDetails.stripeErrorType = error.type;
+							errorDetails.stripeErrorCode = error.code;
+							errorDetails.stripeStatusCode = error.statusCode;
+							errorDetails.stripeDeclineCode = error.decline_code;
+							errorDetails.stripeMessage = error.message;
+						} else {
+							errorDetails.errorMessage =
+								error instanceof Error ? error.message : 'Unknown error';
+						}
+
+						const detailString = Object.entries(errorDetails)
+							.filter(([, v]) => v !== undefined && v !== null)
+							.map(([k, v]) => `${k}=${String(v)}`)
+							.join(', ');
+
 						// Log balance credit
 						await log({
 							type: 'logs',
@@ -550,11 +577,12 @@ export const cartOrderRoute = {
 							message: `Order #${orderId} manual fulfillment - Stripe transfer failed, credited ${formatMinorToMajorCurrency(cart.orderShippingAmount, currency)} to workspace balance`,
 						});
 
-						// Also log error details for debugging
+						// Log error details for debugging with mention to alert team
 						await log({
 							type: 'errors',
 							location: 'cartOrder.markAsFulfilled',
-							message: `Stripe transfer failed for cart ${cart.id}: ${error instanceof Error ? error.message : 'Unknown error'}. Amount credited to workspace balance instead.`,
+							message: `Stripe transfer failed: ${detailString}`,
+							mention: true,
 						});
 					}
 				}

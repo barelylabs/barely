@@ -3,7 +3,7 @@
 import type { z } from 'zod/v4';
 import { useUpdateWorkspace, useWorkspaceWithAll, useZodForm } from '@barely/hooks';
 import { getFeePercentageForCheckout } from '@barely/lib/utils/cart';
-import { isProduction } from '@barely/utils';
+import { formatMinorToMajorCurrency, isProduction } from '@barely/utils';
 import { updateWorkspaceSchema } from '@barely/validators';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -104,18 +104,21 @@ export function WorkspaceCurrencyForm() {
 		await updateWorkspace({ ...data, handle: workspace.handle });
 	};
 
+	const hasBalance = workspace.balance > 0;
+
 	return (
 		<SettingsCardForm
 			form={form}
 			onSubmit={onSubmit}
 			title='Currency'
 			subtitle='The currency your merch and invoices are priced in.'
-			disableSubmit={!form.formState.isDirty}
+			disableSubmit={!form.formState.isDirty || hasBalance}
 		>
 			<SelectField
 				label='Currency'
 				control={form.control}
 				name='currency'
+				disabled={hasBalance}
 				options={[
 					{
 						label: (
@@ -137,6 +140,13 @@ export function WorkspaceCurrencyForm() {
 					},
 				]}
 			/>
+			{hasBalance && (
+				<Text variant='sm/normal' className='text-muted-foreground'>
+					Currency cannot be changed while your workspace has a{' '}
+					{formatMinorToMajorCurrency(workspace.balance, workspace.currency)} balance.
+					Please contact support to resolve your balance first.
+				</Text>
+			)}
 		</SettingsCardForm>
 	);
 }
