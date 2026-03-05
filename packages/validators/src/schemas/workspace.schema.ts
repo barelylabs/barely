@@ -29,6 +29,7 @@ export const updateWorkspaceSchema = insertWorkspaceSchema
 
 export const updateCurrentWorkspaceSchema = updateWorkspaceSchema.omit({
 	id: true,
+	balance: true,
 });
 
 export const upsertWorkspaceSchema = insertWorkspaceSchema.partial({
