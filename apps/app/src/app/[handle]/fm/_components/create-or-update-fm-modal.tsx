@@ -24,6 +24,7 @@ import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { TextField } from '@barely/ui/forms/text-field';
 import { Label } from '@barely/ui/label';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
+import { Skeleton } from '@barely/ui/skeleton';
 import { UploadDropzone } from '@barely/ui/upload';
 
 import { useFm, useFmSearchParams } from '~/app/[handle]/fm/_components/fm-context';
@@ -35,9 +36,14 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 	const queryClient = useQueryClient();
 	const { handle } = useWorkspace();
 	/* fm context */
-	const { lastSelectedItem: selectedFmPage, focusGridList } = useFm();
+	const { lastSelectedItem, selectedFmPageFull, isLoadingFullFmPage, focusGridList } =
+		useFm();
 	const { showCreateModal, showUpdateModal, setShowCreateModal, setShowUpdateModal } =
 		useFmSearchParams();
+
+	// For update mode, prefer the full record (has links), fall back to Electric-synced item
+	const selectedFmPage =
+		mode === 'update' ? (selectedFmPageFull ?? lastSelectedItem) : null;
 
 	/* mutations */
 	const { mutateAsync: createFm } = useMutation(
@@ -178,6 +184,14 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 	const currentTitle = form.watch('title');
 	const currentKey = form.watch('key');
 
+	// Only show loading for fields that are empty and waiting for Spotify data
+	const isLoadingTitle = isLoadingSpotifyMetadata && !currentTitle;
+	const isLoadingKey = isLoadingSpotifyMetadata && !currentKey;
+	const isLoadingArtwork =
+		isLoadingSpotifyMetadata &&
+		!selectedFmPage?.coverArt?.src &&
+		!artworkUploadQueue.length;
+
 	useEffect(() => {
 		if (!spotifyTitle) return;
 		if (currentTitle === '') {
@@ -260,26 +274,26 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 						label='Title'
 						control={form.control}
 						name='title'
-						disabled={isLoadingSpotifyMetadata}
-						className={isLoadingSpotifyMetadata ? 'animate-pulse' : ''}
+						disabled={isLoadingTitle}
+						className={isLoadingTitle ? 'animate-pulse' : ''}
 					/>
 					<TextField
 						label='Key'
 						control={form.control}
 						name='key'
-						disabled={isLoadingSpotifyMetadata}
-						className={isLoadingSpotifyMetadata ? 'animate-pulse' : ''}
+						disabled={isLoadingKey}
+						className={isLoadingKey ? 'animate-pulse' : ''}
 						onChange={e => {
 							form.setValue('key', sanitizeKey(e.target.value), { shouldDirty: true });
 						}}
 					/>
 
 					<div
-						className={`flex flex-col items-start gap-1 ${isLoadingSpotifyMetadata ? 'animate-pulse' : ''}`}
+						className={`flex flex-col items-start gap-1 ${isLoadingArtwork ? 'animate-pulse' : ''}`}
 					>
 						<Label>
 							Artwork{' '}
-							{isLoadingSpotifyMetadata && (
+							{isLoadingArtwork && (
 								<span className='text-sm text-muted-foreground'>(loading...)</span>
 							)}
 						</Label>
@@ -295,56 +309,69 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 					<div className='flex w-full flex-col items-start gap-1'>
 						<Label>Links</Label>
 
-						<div className='flex w-full flex-col gap-4'>
-							{linkFields.map((field, index) => {
-								return (
+						{mode === 'update' && isLoadingFullFmPage ?
+							<div className='flex w-full flex-col gap-4'>
+								{[1, 2].map(i => (
 									<div
-										key={field.id}
+										key={i}
 										className='flex flex-col space-y-2 border border-border p-4'
 									>
-										<TextField
-											label={form.getValues(`links.${index}.platform`)}
-											control={form.control}
-											name={`links.${index}.url`}
-											labelButton={
-												<div className='flex flex-row space-x-2'>
-													<Button
-														variant='icon'
-														startIcon='chevronUp'
-														look='ghost'
-														size='sm'
-														onClick={() => moveLink(index, index - 1)}
-													/>
-													<Button
-														variant='icon'
-														startIcon='chevronDown'
-														look='ghost'
-														size='sm'
-														onClick={() => moveLink(index, index + 1)}
-													/>
-													<Button
-														variant='icon'
-														startIcon='delete'
-														look='ghost'
-														size='sm'
-														onClick={() => removeLink(index)}
-													/>
-												</div>
-											}
-										/>
-										{isSpotifyPlaylistUrl &&
-											form.getValues(`links.${index}.platform`) === 'spotify' && (
-												<TextField
-													label='spotify track url (optional)'
-													infoTooltip='If you provide a link to a track included the playlist, we can link directly to the track within the playlist'
-													control={form.control}
-													name={`links.${index}.spotifyTrackUrl`}
-												/>
-											)}
+										<Skeleton className='h-4 w-16' />
+										<Skeleton className='h-10 w-full' />
 									</div>
-								);
-							})}
-						</div>
+								))}
+							</div>
+						:	<div className='flex w-full flex-col gap-4'>
+								{linkFields.map((field, index) => {
+									return (
+										<div
+											key={field.id}
+											className='flex flex-col space-y-2 border border-border p-4'
+										>
+											<TextField
+												label={form.getValues(`links.${index}.platform`)}
+												control={form.control}
+												name={`links.${index}.url`}
+												labelButton={
+													<div className='flex flex-row space-x-2'>
+														<Button
+															variant='icon'
+															startIcon='chevronUp'
+															look='ghost'
+															size='sm'
+															onClick={() => moveLink(index, index - 1)}
+														/>
+														<Button
+															variant='icon'
+															startIcon='chevronDown'
+															look='ghost'
+															size='sm'
+															onClick={() => moveLink(index, index + 1)}
+														/>
+														<Button
+															variant='icon'
+															startIcon='delete'
+															look='ghost'
+															size='sm'
+															onClick={() => removeLink(index)}
+														/>
+													</div>
+												}
+											/>
+											{isSpotifyPlaylistUrl &&
+												form.getValues(`links.${index}.platform`) === 'spotify' && (
+													<TextField
+														label='spotify track url (optional)'
+														infoTooltip='If you provide a link to a track included the playlist, we can link directly to the track within the playlist'
+														control={form.control}
+														name={`links.${index}.spotifyTrackUrl`}
+													/>
+												)}
+										</div>
+									);
+								})}
+							</div>
+						}
 					</div>
 
 					<div className='grid grid-cols-2 gap-4'>

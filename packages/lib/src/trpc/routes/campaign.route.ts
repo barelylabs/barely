@@ -39,7 +39,7 @@ import {
 } from '../../functions/campaign.fns';
 import { createTrack } from '../../functions/track.fns';
 import { createUser, getEnrichedUserByUserId } from '../../functions/user.fns';
-import { createWorkspace } from '../../functions/workspace.fns';
+import { createWorkspace, getUserWorkspacesById } from '../../functions/workspace.fns';
 import { pushEvent } from '../../integrations/pusher/pusher-server';
 import { sendText } from '../../utils/sms';
 import { privateProcedure, publicProcedure, workspaceProcedure } from '../trpc';
@@ -282,8 +282,17 @@ export const campaignRoute = {
 			// if (!campaign.track)
 			// 	throw new TRPCError({ code: 'NOT_FOUND', message: 'Track not found' });
 
+			// Fetch extended user data (privateProcedure only has basic session user)
+			const extendedUser = await getEnrichedUserByUserId(ctx.user.id);
+			if (!extendedUser) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'User not found',
+				});
+			}
+
 			const checkoutLink = await createPitchCheckoutLink({
-				user: ctx.user,
+				user: extendedUser,
 				workspace: campaign.workspace,
 				campaign,
 			});
@@ -332,10 +341,9 @@ export const campaignRoute = {
 			};
 		}),
 
-	byHandle: privateProcedure
+	byHandle: workspaceProcedure
 		.input(
 			z.object({
-				handle: z.string(),
 				limit: z.number().min(1).max(50).nullish(),
 				cursor: z.coerce.date().nullish(),
 				type: selectCampaignSchema.shape.type.optional(),
@@ -345,15 +353,7 @@ export const campaignRoute = {
 		.query(async ({ ctx, input }) => {
 			const limit = input.limit ?? 20;
 
-			const workspaceId = ctx.workspaces.find(w => w.handle === input.handle)?.id;
-
-			if (!workspaceId)
-				throw new TRPCError({
-					code: 'NOT_FOUND',
-					message: 'Workspace not found',
-				});
-
-			const campaigns = await getCampaignsByWorkspaceId(workspaceId, ctx.pool, {
+			const campaigns = await getCampaignsByWorkspaceId(ctx.workspace.id, ctx.pool, {
 				type: input.type,
 				stage: input.stage,
 				limit,
@@ -380,10 +380,11 @@ export const campaignRoute = {
 			}),
 		)
 		.query(async ({ ctx, input }) => {
+			const { workspaces } = await getUserWorkspacesById(ctx.user.id, ctx.pool);
 			const where: SQL[] = [
 				inArray(
 					Campaigns.workspaceId,
-					ctx.user.workspaces.map(w => w.id),
+					workspaces.map(w => w.id),
 				),
 			];
 
@@ -461,7 +462,15 @@ export const campaignRoute = {
 		}),
 
 	toScreen: privateProcedure.query(async ({ ctx }) => {
-		if (!ctx.user.pitchScreening)
+		// Fetch extended user data to check pitchScreening permission
+		const extendedUser = await getEnrichedUserByUserId(ctx.user.id);
+		if (!extendedUser) {
+			throw new TRPCError({
+				code: 'NOT_FOUND',
+				message: 'User not found',
+			});
+		}
+		if (!extendedUser.pitchScreening)
 			throw new TRPCError({
 				code: 'UNAUTHORIZED',
 				message: 'User is not authorized to screen campaigns.',
