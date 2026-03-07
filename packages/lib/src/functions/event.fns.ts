@@ -424,7 +424,9 @@ export async function recordCartEvent({
 			type: 'errors',
 			location: 'recordCartEvent',
 			message: `rate limit check failed for cart ${cart.id} (proceeding): ${String(err)}`,
-		}).catch(() => { /* non-critical */ });
+		}).catch(() => {
+			/* non-critical */
+		});
 	}
 	if (rateLimited) {
 		console.log('rate limit exceeded for', visitorInfo.ip, cart.id, type);
@@ -444,7 +446,9 @@ export async function recordCartEvent({
 			type: 'errors',
 			location: 'recordCartEvent',
 			message: `usage limit check failed for cart ${cart.id} (proceeding): ${String(err)}`,
-		}).catch(() => { /* non-critical */ });
+		}).catch(() => {
+			/* non-critical */
+		});
 	}
 	if (shouldBlock) {
 		return null;
@@ -458,7 +462,9 @@ export async function recordCartEvent({
 			type: 'sales',
 			location: 'recordCartEvent',
 			message: `${cartFunnel.handle} checkout [${cart.id}] :: ${formatMinorToMajorCurrency(cart.checkoutAmount, currency)}`,
-		}).catch(() => { /* non-critical */ });
+		}).catch(() => {
+			/* non-critical */
+		});
 	}
 
 	if (type === 'cart/purchaseUpsell') {
@@ -466,7 +472,9 @@ export async function recordCartEvent({
 			type: 'sales',
 			location: 'recordCartEvent',
 			message: `${cartFunnel.handle} upsell [${cart.id}] :: ${formatMinorToMajorCurrency(cart.upsellProductAmount ?? 0, currency)}`,
-		}).catch(() => { /* non-critical */ });
+		}).catch(() => {
+			/* non-critical */
+		});
 	}
 
 	let analyticsEndpoints: (typeof AnalyticsEndpoints.$inferSelect)[] = [];
@@ -479,7 +487,9 @@ export async function recordCartEvent({
 			type: 'errors',
 			location: 'recordCartEvent',
 			message: `analytics endpoints query failed for cart ${cart.id}: ${String(err)}`,
-		}).catch(() => { /* non-critical */ });
+		}).catch(() => {
+			/* non-critical */
+		});
 	}
 
 	// ∞ Meta ∞
@@ -491,10 +501,16 @@ export async function recordCartEvent({
 		currency,
 	});
 
-	const rawSourceUrl = visitorInfo.referer_url;
-	const sourceUrl =
-		rawSourceUrl && rawSourceUrl !== 'Unknown' ? rawSourceUrl
-		: `https://${cartFunnel.handle}.barely.io/${cartFunnel.key}`;
+	const fallbackUrl = `https://${cartFunnel.handle}.barely.io/${cartFunnel.key}`;
+	let sourceUrl = fallbackUrl;
+	if (visitorInfo.referer_url) {
+		try {
+			new URL(visitorInfo.referer_url);
+			sourceUrl = visitorInfo.referer_url;
+		} catch {
+			// referer_url is not a valid absolute URL; use fallback
+		}
+	}
 
 	// cookies() may throw when called outside a request context (e.g. from Stripe webhooks or Trigger.dev jobs)
 	let cookieStore: Awaited<ReturnType<typeof cookies>> | null = null;
@@ -754,9 +770,10 @@ function getMetaEventsFromCartEvent({
 				},
 			];
 		case 'cart/purchaseMainWithBump': {
-			const contentIds = cart.bumpProductId ?
-				[cart.mainProductId, cart.bumpProductId]
-			:	[cart.mainProductId];
+			const contentIds =
+				cart.bumpProductId ?
+					[cart.mainProductId, cart.bumpProductId]
+				:	[cart.mainProductId];
 			const value = (cart.mainProductPrice + (cart.bumpProductPrice ?? 0)) / 100;
 			return [
 				{

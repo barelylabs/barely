@@ -266,7 +266,7 @@ export const metaServerEventSchema = z
 		eventTime: z.number().int().min(0),
 		// userData: metaUserDataSchema,
 		actionSource: z.enum(['website', 'mobile_app']),
-		sourceUrl: z.string().min(1),
+		sourceUrl: z.string().url(),
 		// optional
 		customData: z.record(z.string(), z.coerce.string()).optional(),
 		optOut: z.boolean().optional(),
