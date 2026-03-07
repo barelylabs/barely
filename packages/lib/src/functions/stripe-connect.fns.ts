@@ -20,6 +20,7 @@ import {
 	sendCartReceiptEmail,
 } from './cart.fns';
 import { recordCartEvent } from './event.fns';
+import { log } from '../utils/log';
 import { createFan } from './fan.fns';
 import { sendInvoicePaymentReceivedEmail } from './invoice-email.fns';
 import { checkUsageLimit, incrementUsage } from './usage.fns';
@@ -164,8 +165,12 @@ export async function handleStripeConnectChargeSuccess(
 					'cart/purchaseMainWithBump'
 				:	'cart/purchaseMainWithoutBump',
 			currency: cartFunnel.workspace.currency,
-		}).catch(err => {
-			console.log('error recording cart event:', err);
+		}).catch(async err => {
+			await log({
+				type: 'errors',
+				location: 'stripe-connect.fns.ts::handleStripeConnectChargeSuccess',
+				message: `error recording cart event for cart ${cartId}: ${String(err)}`,
+			}).catch(() => { /* non-critical */ });
 		});
 
 		// increment value

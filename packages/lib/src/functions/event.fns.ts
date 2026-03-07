@@ -413,30 +413,74 @@ export async function recordCartEvent({
 	// deduplication events from the same ip & cartId - only record 1 cart event per ip per cartId per hour
 	const rateLimitPeriod = libEnv.RATE_LIMIT_RECORD_CART_EVENT;
 
-	const { success } = await ratelimit(1, rateLimitPeriod).limit(
-		`recordCartEvent:${visitorInfo.ip}:${cart.id}:${type}`,
-	);
-
-	if (!success) {
-		console.log('log rate limit exceeded for ', visitorInfo.ip, cart.id, type);
+	let rateLimited = false;
+	try {
+		const { success } = await ratelimit(1, rateLimitPeriod).limit(
+			`recordCartEvent:${visitorInfo.ip}:${cart.id}:${type}`,
+		);
+		rateLimited = !success;
+	} catch (err) {
+		await log({
+			type: 'errors',
+			location: 'recordCartEvent',
+			message: `rate limit check failed for cart ${cart.id} (proceeding): ${String(err)}`,
+		}).catch(() => { /* non-critical */ });
+	}
+	if (rateLimited) {
+		console.log('rate limit exceeded for', visitorInfo.ip, cart.id, type);
 		return null;
 	}
 
 	// Check event usage limits with warning emails
-	const { shouldBlock } = await checkEventUsageLimitWithWarning({
-		workspaceId: cart.workspaceId,
-		location: 'recordCartEvent',
-	});
-
+	let shouldBlock = false;
+	try {
+		const usageResult = await checkEventUsageLimitWithWarning({
+			workspaceId: cart.workspaceId,
+			location: 'recordCartEvent',
+		});
+		shouldBlock = usageResult.shouldBlock;
+	} catch (err) {
+		await log({
+			type: 'errors',
+			location: 'recordCartEvent',
+			message: `usage limit check failed for cart ${cart.id} (proceeding): ${String(err)}`,
+		}).catch(() => { /* non-critical */ });
+	}
 	if (shouldBlock) {
 		return null;
 	}
 
 	const timestamp = new Date(Date.now()).toISOString();
 
-	const analyticsEndpoints = await dbHttp.query.AnalyticsEndpoints.findMany({
-		where: eq(AnalyticsEndpoints.workspaceId, cart.workspaceId),
-	});
+	// Report sales to Slack FIRST - this is the most critical notification
+	if (type === 'cart/purchaseMainWithoutBump' || type === 'cart/purchaseMainWithBump') {
+		await log({
+			type: 'sales',
+			location: 'recordCartEvent',
+			message: `${cartFunnel.handle} checkout [${cart.id}] :: ${formatMinorToMajorCurrency(cart.checkoutAmount, currency)}`,
+		}).catch(() => { /* non-critical */ });
+	}
+
+	if (type === 'cart/purchaseUpsell') {
+		await log({
+			type: 'sales',
+			location: 'recordCartEvent',
+			message: `${cartFunnel.handle} upsell [${cart.id}] :: ${formatMinorToMajorCurrency(cart.upsellProductAmount ?? 0, currency)}`,
+		}).catch(() => { /* non-critical */ });
+	}
+
+	let analyticsEndpoints: (typeof AnalyticsEndpoints.$inferSelect)[] = [];
+	try {
+		analyticsEndpoints = await dbHttp.query.AnalyticsEndpoints.findMany({
+			where: eq(AnalyticsEndpoints.workspaceId, cart.workspaceId),
+		});
+	} catch (err) {
+		await log({
+			type: 'errors',
+			location: 'recordCartEvent',
+			message: `analytics endpoints query failed for cart ${cart.id}: ${String(err)}`,
+		}).catch(() => { /* non-critical */ });
+	}
 
 	// ∞ Meta ∞
 	const metaPixel = analyticsEndpoints.find(endpoint => endpoint.platform === 'meta');
@@ -444,9 +488,13 @@ export async function recordCartEvent({
 		cart,
 		funnel: cartFunnel,
 		eventType: type,
+		currency,
 	});
 
-	const sourceUrl = visitorInfo.referer_url ?? ''; // this is an api route, so we want the source of the api call
+	const rawSourceUrl = visitorInfo.referer_url;
+	const sourceUrl =
+		rawSourceUrl && rawSourceUrl !== 'Unknown' ? rawSourceUrl
+		: `https://${cartFunnel.handle}.barely.io/${cartFunnel.key}`;
 
 	// cookies() may throw when called outside a request context (e.g. from Stripe webhooks or Trigger.dev jobs)
 	let cookieStore: Awaited<ReturnType<typeof cookies>> | null = null;
@@ -505,7 +553,7 @@ export async function recordCartEvent({
 
 	// ♪ TikTok ♪
 	const tiktokPixel = analyticsEndpoints.find(endpoint => endpoint.platform === 'tiktok');
-	const tiktokEvents = getTiktokEventsFromCartEvent({ cart, eventType: type });
+	const tiktokEvents = getTiktokEventsFromCartEvent({ cart, eventType: type, currency });
 
 	const ttclid =
 		cart.ttclid ??
@@ -537,7 +585,7 @@ export async function recordCartEvent({
 			})
 		:	{ reported: false };
 
-	// 🐦 report event to tinybird with journey tracking
+	// report event to tinybird with journey tracking
 	try {
 		const cartEventData = getCartEventData({ cart, eventType: type });
 
@@ -584,23 +632,6 @@ export async function recordCartEvent({
 		});
 	}
 
-	// report sales to slack
-	if (type === 'cart/purchaseMainWithoutBump' || type === 'cart/purchaseMainWithBump') {
-		await log({
-			type: 'sales',
-			location: 'recordCartEvent',
-			message: `${cartFunnel.handle} checkout [${cart.id}] :: ${formatMinorToMajorCurrency(cart.checkoutAmount, currency)}`,
-		});
-	}
-
-	if (type === 'cart/purchaseUpsell') {
-		await log({
-			type: 'sales',
-			location: 'recordCartEvent',
-			message: `${cartFunnel.handle} upsell [${cart.id}] :: ${formatMinorToMajorCurrency(cart.upsellProductAmount ?? 0, currency)}`,
-		});
-	}
-
 	// increment the workspace event usage count in db
 	await dbHttp
 		.update(Workspaces)
@@ -611,31 +642,36 @@ export async function recordCartEvent({
 function getMetaEventsFromCartEvent({
 	cart,
 	eventType,
+	currency,
 }: {
 	cart: Cart;
 	funnel: CartFunnel;
 	eventType: (typeof WEB_EVENT_TYPES__CART)[number];
+	currency: 'usd' | 'gbp';
 }): MetaEvent[] | null {
+	const cur = currency.toUpperCase();
 	switch (eventType) {
 		case 'cart/viewCheckout':
 			return [
 				{
 					eventName: 'barely.cart/viewCheckout',
+					eventId: `${cart.id}_barely.cart/viewCheckout`,
 					customData: {
 						cartId: cart.id,
 						content_ids: [cart.mainProductId],
 						content_type: 'product',
-						currency: 'USD',
+						currency: cur,
 						value: cart.mainProductPrice / 100,
 					},
 				},
 				{
 					eventName: 'InitiateCheckout',
+					eventId: `${cart.id}_InitiateCheckout`,
 					customData: {
 						cartId: cart.id,
 						content_ids: [cart.mainProductId],
 						content_type: 'product',
-						currency: 'USD',
+						currency: cur,
 						value: cart.mainProductPrice / 100,
 					},
 				},
@@ -644,21 +680,23 @@ function getMetaEventsFromCartEvent({
 			return [
 				{
 					eventName: 'barely.cart/addPaymentInfo',
+					eventId: `${cart.id}_barely.cart/addPaymentInfo`,
 					customData: {
 						cartId: cart.id,
 						content_ids: [cart.mainProductId],
 						content_type: 'product',
-						currency: 'USD',
+						currency: cur,
 						value: cart.mainProductPrice / 100,
 					},
 				},
 				{
 					eventName: 'AddPaymentInfo',
+					eventId: `${cart.id}_AddPaymentInfo`,
 					customData: {
 						cartId: cart.id,
 						content_ids: [cart.mainProductId],
 						content_type: 'product',
-						currency: 'USD',
+						currency: cur,
 						value: cart.mainProductPrice / 100,
 					},
 				},
@@ -668,21 +706,23 @@ function getMetaEventsFromCartEvent({
 			return [
 				{
 					eventName: 'barely.cart/addBump',
+					eventId: `${cart.id}_barely.cart/addBump`,
 					customData: {
 						cartId: cart.id,
 						content_ids: [cart.bumpProductId],
 						content_type: 'product',
-						currency: 'USD',
+						currency: cur,
 						value: (cart.bumpProductPrice ?? 0) / 100,
 					},
 				},
 				{
 					eventName: 'AddToCart',
+					eventId: `${cart.id}_AddToCart`,
 					customData: {
 						cartId: cart.id,
 						content_ids: [cart.bumpProductId],
 						content_type: 'product',
-						currency: 'USD',
+						currency: cur,
 						value: (cart.bumpProductPrice ?? 0) / 100,
 					},
 				},
@@ -691,56 +731,65 @@ function getMetaEventsFromCartEvent({
 			return [
 				{
 					eventName: 'barely.cart/purchase',
+					eventId: `${cart.id}_barely.cart/purchase_mainWithoutBump`,
 					customData: {
 						cartId: cart.id,
 						content_ids: [cart.mainProductId],
 						content_type: 'product',
-						currency: 'USD',
+						currency: cur,
 						cartPurchaseType: 'mainWithoutBump',
 						value: cart.mainProductPrice / 100,
 					},
 				},
 				{
 					eventName: 'Purchase',
+					eventId: `${cart.id}_Purchase_mainWithoutBump`,
 					customData: {
 						cartId: cart.id,
 						content_ids: [cart.mainProductId],
 						content_type: 'product',
-						currency: 'USD',
+						currency: cur,
 						value: cart.mainProductPrice / 100,
 					},
 				},
 			];
-		case 'cart/purchaseMainWithBump':
-			if (!cart.bumpProductId) return null;
+		case 'cart/purchaseMainWithBump': {
+			const contentIds = cart.bumpProductId ?
+				[cart.mainProductId, cart.bumpProductId]
+			:	[cart.mainProductId];
+			const value = (cart.mainProductPrice + (cart.bumpProductPrice ?? 0)) / 100;
 			return [
 				{
 					eventName: 'barely.cart/purchase',
+					eventId: `${cart.id}_barely.cart/purchase_mainWithBump`,
 					customData: {
 						cartId: cart.id,
-						content_ids: [cart.mainProductId, cart.bumpProductId],
+						content_ids: contentIds,
 						content_type: 'product',
-						currency: 'USD',
+						currency: cur,
 						cartPurchaseType: 'mainWithBump',
-						value: (cart.mainProductPrice + (cart.bumpProductPrice ?? 0)) / 100,
+						value,
 					},
 				},
 				{
 					eventName: 'Purchase',
+					eventId: `${cart.id}_Purchase_mainWithBump`,
 					customData: {
 						cartId: cart.id,
-						content_ids: [cart.mainProductId, cart.bumpProductId],
+						content_ids: contentIds,
 						content_type: 'product',
-						currency: 'USD',
-						value: (cart.mainProductPrice + (cart.bumpProductPrice ?? 0)) / 100,
+						currency: cur,
+						value,
 					},
 				},
 			];
+		}
 		case 'cart/viewUpsell':
 			if (!cart.upsellProductId) return null;
 			return [
 				{
 					eventName: 'barely.cart/viewUpsell',
+					eventId: `${cart.id}_barely.cart/viewUpsell`,
 					customData: {
 						cartId: cart.id,
 						content_ids: [cart.upsellProductId],
@@ -749,6 +798,7 @@ function getMetaEventsFromCartEvent({
 				},
 				{
 					eventName: 'ViewContent',
+					eventId: `${cart.id}_ViewContent_upsell`,
 					customData: {
 						cartId: cart.id,
 						content_ids: [cart.upsellProductId],
@@ -761,23 +811,25 @@ function getMetaEventsFromCartEvent({
 			return [
 				{
 					eventName: 'barely.cart/purchase',
+					eventId: `${cart.id}_barely.cart/purchase_upsell`,
 					customData: {
 						cartId: cart.id,
 						upsellProductId: cart.upsellProductId,
 						content_ids: [cart.upsellProductId],
 						content_type: 'product',
-						currency: 'USD',
+						currency: cur,
 						cartPurchaseType: 'upsell',
 						value: (cart.upsellProductPrice ?? 0) / 100,
 					},
 				},
 				{
 					eventName: 'Purchase',
+					eventId: `${cart.id}_Purchase_upsell`,
 					customData: {
 						cartId: cart.id,
 						content_ids: [cart.upsellProductId],
 						content_type: 'product',
-						currency: 'USD',
+						currency: cur,
 						value: (cart.upsellProductPrice ?? 0) / 100,
 					},
 				},
@@ -1728,10 +1780,13 @@ function getMetaEventFromVipEvent({
 function getTiktokEventsFromCartEvent({
 	cart,
 	eventType,
+	currency,
 }: {
 	cart: Cart;
 	eventType: (typeof WEB_EVENT_TYPES__CART)[number];
+	currency: 'usd' | 'gbp';
 }): TiktokEvent[] | null {
+	const cur = currency.toUpperCase();
 	switch (eventType) {
 		case 'cart/viewCheckout':
 			return [
@@ -1746,7 +1801,7 @@ function getTiktokEventsFromCartEvent({
 								price: cart.mainProductPrice / 100,
 							},
 						],
-						currency: 'USD',
+						currency: cur,
 						value: cart.mainProductPrice / 100,
 					},
 				},
@@ -1764,7 +1819,7 @@ function getTiktokEventsFromCartEvent({
 								price: cart.mainProductPrice / 100,
 							},
 						],
-						currency: 'USD',
+						currency: cur,
 						value: cart.mainProductPrice / 100,
 					},
 				},
@@ -1783,7 +1838,7 @@ function getTiktokEventsFromCartEvent({
 								price: (cart.bumpProductPrice ?? 0) / 100,
 							},
 						],
-						currency: 'USD',
+						currency: cur,
 						value: (cart.bumpProductPrice ?? 0) / 100,
 					},
 				},
@@ -1801,35 +1856,40 @@ function getTiktokEventsFromCartEvent({
 								price: cart.mainProductPrice / 100,
 							},
 						],
-						currency: 'USD',
+						currency: cur,
 						value: cart.mainProductPrice / 100,
 					},
 				},
 			];
-		case 'cart/purchaseMainWithBump':
-			if (!cart.bumpProductId) return null;
+		case 'cart/purchaseMainWithBump': {
+			const contents = [
+				{
+					content_id: cart.mainProductId,
+					quantity: 1,
+					price: cart.mainProductPrice / 100,
+				},
+				...(cart.bumpProductId ?
+					[
+						{
+							content_id: cart.bumpProductId,
+							quantity: 1,
+							price: (cart.bumpProductPrice ?? 0) / 100,
+						},
+					]
+				:	[]),
+			];
 			return [
 				{
 					eventName: 'CompletePayment',
 					properties: {
 						content_type: 'product',
-						contents: [
-							{
-								content_id: cart.mainProductId,
-								quantity: 1,
-								price: cart.mainProductPrice / 100,
-							},
-							{
-								content_id: cart.bumpProductId,
-								quantity: 1,
-								price: (cart.bumpProductPrice ?? 0) / 100,
-							},
-						],
-						currency: 'USD',
+						contents,
+						currency: cur,
 						value: (cart.mainProductPrice + (cart.bumpProductPrice ?? 0)) / 100,
 					},
 				},
 			];
+		}
 		case 'cart/viewUpsell':
 			if (!cart.upsellProductId) return null;
 			return [
@@ -1855,7 +1915,7 @@ function getTiktokEventsFromCartEvent({
 								price: (cart.upsellProductPrice ?? 0) / 100,
 							},
 						],
-						currency: 'USD',
+						currency: cur,
 						value: (cart.upsellProductPrice ?? 0) / 100,
 					},
 				},
