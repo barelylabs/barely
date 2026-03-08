@@ -109,6 +109,7 @@ export type MetaEventName = (typeof META_EVENT_NAMES)[number];
 export interface MetaEvent {
 	eventName: MetaEventName;
 	customData: MetaEventCustomData;
+	eventId?: string;
 }
 
 export interface MetaEventProps {
@@ -140,8 +141,13 @@ export async function reportEventsToMeta(props: MetaEventProps) {
 	const { ip, geo, ua, time, email, phone, firstName, lastName } = props;
 	const { pixelId, accessToken, sourceUrl, events } = props;
 
-	const urlObject = new URL(sourceUrl);
-	const fbclid = props.fbclid ?? urlObject.searchParams.get('fbclid');
+	let sourceUrlFbclid: string | null = null;
+	try {
+		sourceUrlFbclid = new URL(sourceUrl).searchParams.get('fbclid');
+	} catch {
+		// sourceUrl may not be a valid URL (e.g., webhook-initiated events)
+	}
+	const fbclid = props.fbclid ?? sourceUrlFbclid;
 
 	const unixTimeSinceEpoch_ms = Math.floor(time ?? Date.now()); // unix timestamp in ms
 	const unixTimeSinceEpoch_s = Math.floor(unixTimeSinceEpoch_ms / 1000); // unix timestamp in seconds
@@ -170,6 +176,7 @@ export async function reportEventsToMeta(props: MetaEventProps) {
 			actionSource: 'website',
 			sourceUrl,
 			customData: event.customData,
+			eventId: event.eventId,
 		});
 
 		if (safeParsedEvent.success) {

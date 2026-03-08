@@ -13,6 +13,7 @@ import { Stripe } from 'stripe';
 import type { handleAbandonedUpsell } from '../trigger/cart.trigger';
 import type { handleFlow } from '../trigger/flow.trigger';
 import { stripe } from '../integrations/stripe';
+import { log } from '../utils/log';
 import {
 	createOrderIdForCart,
 	getCartById,
@@ -164,8 +165,14 @@ export async function handleStripeConnectChargeSuccess(
 					'cart/purchaseMainWithBump'
 				:	'cart/purchaseMainWithoutBump',
 			currency: cartFunnel.workspace.currency,
-		}).catch(err => {
-			console.log('error recording cart event:', err);
+		}).catch(async err => {
+			await log({
+				type: 'errors',
+				location: 'stripe-connect.fns.ts::handleStripeConnectChargeSuccess',
+				message: `error recording cart event for cart ${cartId}: ${String(err)}`,
+			}).catch(() => {
+				/* non-critical */
+			});
 		});
 
 		// increment value

@@ -796,20 +796,24 @@ export const cartRoute = {
 			updateCart.stage = 'upsellConverted';
 			updateCart.upsellConvertedAt = new Date();
 
-			if (ctx.visitor?.ip) {
-				await recordCartEvent({
-					cart: {
-						...cart,
-						...updateCart,
-					},
-					cartFunnel: funnel,
-					type: 'cart/purchaseUpsell',
-					visitor: ctx.visitor,
-					currency: funnel.workspace.currency,
-				}).catch(err => {
-					console.log('error recording upsellcart event:', err);
+			await recordCartEvent({
+				cart: {
+					...cart,
+					...updateCart,
+				},
+				cartFunnel: funnel,
+				type: 'cart/purchaseUpsell',
+				visitor: ctx.visitor,
+				currency: funnel.workspace.currency,
+			}).catch(async err => {
+				await log({
+					type: 'errors',
+					location: 'cart.route.ts::buyUpsell',
+					message: `error recording upsell event for cart ${cart.id}: ${String(err)}`,
+				}).catch(() => {
+					/* non-critical */
 				});
-			}
+			});
 
 			await sendCartReceiptEmail({
 				...cart,
@@ -880,8 +884,14 @@ export const cartRoute = {
 				type: 'cart/declineUpsell',
 				visitor: ctx.visitor,
 				currency: funnel.workspace.currency,
-			}).catch(err => {
-				console.log('error recording upsellcart event:', err);
+			}).catch(async err => {
+				await log({
+					type: 'errors',
+					location: 'cart.route.ts::declineUpsell',
+					message: `error recording decline upsell event for cart ${cart.id}: ${String(err)}`,
+				}).catch(() => {
+					/* non-critical */
+				});
 			});
 			// if (!!ctx.visitor?.ip || !!cart.visitorIp) {
 			// }
