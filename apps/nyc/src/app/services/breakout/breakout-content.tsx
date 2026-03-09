@@ -161,20 +161,19 @@ export function BreakoutContent() {
 							</div>
 						</AnimatedSection>
 
-						{/* Stan+ Included */}
+						{/* Stan TikTok Included */}
 						<AnimatedSection animation='fade-up' delay={550}>
 							<div className='glass rounded-xl border border-purple-500/30 bg-purple-500/10 p-6'>
 								<div className='flex items-start gap-4'>
 									<span className='text-3xl'>🎭</span>
 									<div>
 										<H size='5' className='mb-2 text-purple-300'>
-											Stan Fan Account Included ($500 value)
+											Stan TikTok Fan Account Included ($500 value)
 										</H>
 										<p className='text-white/70'>
-											A dedicated Instagram fan account for your project, managed by us.
-											Daily posts, memes, repurposed content, and community engagement—all
-											the stuff that&apos;s too informal for your main but builds superfan
-											culture.{' '}
+											A dedicated TikTok fan account for your project, managed by us.
+											Daily posts (3x/day) from a dedicated device—memes, repurposed
+											content, and the chaotic energy that drives discovery and reach.{' '}
 											<Link
 												href='/services/stan'
 												className='text-purple-300 underline hover:text-purple-200'
@@ -340,8 +339,8 @@ export function BreakoutContent() {
 								desc: 'We handle your release calendar and posting timing',
 							},
 							{
-								label: 'Stan account included',
-								desc: 'A managed fan Instagram page ($500 value)',
+								label: 'Stan TikTok account included',
+								desc: 'A managed TikTok fan account ($500 value)',
 							},
 							{
 								label: 'Priority support',
@@ -420,7 +419,7 @@ export function BreakoutContent() {
 									'Up to 2 advanced campaigns with full execution',
 									'Management of $3-6K monthly ad spend',
 									'Complete merch revenue optimization',
-									'Stan fan account included ($500 value)',
+									'Stan TikTok fan account included ($500 value)',
 									'Bi-weekly strategy sessions with analytics',
 									'Content scheduling + timing optimization',
 									'Priority support + rapid adjustments',

@@ -1,5 +1,8 @@
 'use client';
 
+import Link from 'next/link';
+import { NYC_STAN } from '@barely/const';
+
 import { H } from '@barely/ui/typography';
 
 import { AnimatedSection } from '../../../components/marketing/animated-section';
@@ -73,6 +76,54 @@ export function LabelsContent() {
 				</div>
 			</section>
 
+			{/* Stan Roster Packages */}
+			<section className='px-4 py-12 sm:px-6 lg:px-8'>
+				<div className='mx-auto max-w-4xl'>
+					<AnimatedSection animation='fade-up'>
+						<H size='2' className='mb-6 text-3xl md:text-4xl'>
+							Stan Roster Packages
+						</H>
+					</AnimatedSection>
+
+					<AnimatedSection animation='fade-up' delay={200}>
+						<div className='glass rounded-2xl border border-purple-500/20 p-8'>
+							<p className='mb-6 text-lg leading-relaxed text-white/80'>
+								Build TikTok presence across your entire roster with our Stan service.
+								Each artist gets a dedicated TikTok fan account with daily posts (3x/day)
+								from a dedicated device—pure reach and discovery at scale.
+							</p>
+							<div className='mb-6 grid grid-cols-1 gap-4 md:grid-cols-3'>
+								<div className='rounded-lg bg-white/5 p-4 text-center'>
+									<p className='text-2xl font-bold text-white'>
+										${NYC_STAN.volumePricing.twoToFour}
+									</p>
+									<p className='text-sm text-white/70'>per account/mo (2-4 accounts)</p>
+								</div>
+								<div className='rounded-lg bg-white/5 p-4 text-center'>
+									<p className='text-2xl font-bold text-white'>
+										${NYC_STAN.volumePricing.fivePlus}
+									</p>
+									<p className='text-sm text-white/70'>per account/mo (5+ accounts)</p>
+								</div>
+								<div className='rounded-lg bg-purple-500/10 p-4 text-center'>
+									<p className='text-2xl font-bold text-purple-300'>
+										${NYC_STAN.labelPackage.price.toLocaleString()}
+									</p>
+									<p className='text-sm text-white/70'>
+										up to {NYC_STAN.labelPackage.maxAccounts} accounts/mo
+									</p>
+								</div>
+							</div>
+							<Link href='/services/stan'>
+								<MarketingButton marketingLook='glass' size='sm'>
+									Learn more about Stan →
+								</MarketingButton>
+							</Link>
+						</div>
+					</AnimatedSection>
+				</div>
+			</section>
+
 			{/* Who This Is For */}
 			<section className='px-4 py-12 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-4xl'>
@@ -106,6 +157,18 @@ export function LabelsContent() {
 								</div>
 							</div>
 						</AnimatedSection>
+
+						<AnimatedSection animation='fade-up' delay={400}>
+							<div className='glass rounded-xl p-6 transition-all hover:border-purple-500/30'>
+								<div className='flex items-start gap-4'>
+									<span className='mt-0.5 text-green-500'>✓</span>
+									<p className='text-lg text-white/80'>
+										Labels wanting to build consistent TikTok presence across their
+										roster without managing it in-house
+									</p>
+								</div>
+							</div>
+						</AnimatedSection>
 					</div>
 				</div>
 			</section>
@@ -121,14 +184,25 @@ export function LabelsContent() {
 
 					<AnimatedSection animation='fade-up' delay={200}>
 						<div className='glass rounded-2xl p-8'>
-							<p className='text-lg leading-relaxed text-white/80'>
-								Label and roster engagements are structured in two layers. Individual
-								artist campaigns are available at our standard rates, with volume
-								arrangements for ongoing roster work. Roster-wide strategy, release
-								planning, and program management is a separate engagement priced based on
-								roster scope and complexity — book a call to talk through what makes sense
-								for your situation.
-							</p>
+							<div className='space-y-4 text-lg leading-relaxed text-white/80'>
+								<p>
+									<span className='font-semibold text-white'>Stan roster packages:</span>{' '}
+									TikTok fan account management across your roster, with volume pricing
+									starting at ${NYC_STAN.volumePricing.twoToFour}/account/month for 2-4
+									accounts. Label package available for up to{' '}
+									{NYC_STAN.labelPackage.maxAccounts} accounts at $
+									{NYC_STAN.labelPackage.price.toLocaleString()}/month.
+								</p>
+								<p>
+									<span className='font-semibold text-white'>Campaign management:</span>{' '}
+									Individual artist campaigns at standard rates with volume arrangements
+									for ongoing roster work. Roster-wide strategy, release planning, and
+									program management is separately priced based on scope and complexity.
+								</p>
+								<p>
+									Book a call to talk through what makes sense for your situation.
+								</p>
+							</div>
 						</div>
 					</AnimatedSection>
 				</div>

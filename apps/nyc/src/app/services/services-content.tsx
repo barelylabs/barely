@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { NYC_STAN, NYC_STAN_PLUS, WORKSPACE_PLANS } from '@barely/const';
+import { NYC_STAN, WORKSPACE_PLANS } from '@barely/const';
 import { getAbsoluteUrl } from '@barely/utils';
 
 import { H } from '@barely/ui/typography';
@@ -48,7 +48,7 @@ export function ServicesContent() {
 		'Up to 2 advanced campaigns per month',
 		'Management of $3,000-$6,000 monthly ad spend',
 		'Full merch revenue optimization',
-		'Stan fan account included ($500 value)',
+		'Stan TikTok fan account included ($500 value)',
 		'Bi-weekly strategy calls + priority support',
 	];
 
@@ -220,7 +220,7 @@ export function ServicesContent() {
 										toward label conversations
 									</li>
 									<li>• You want a full growth team, not just campaign management</li>
-									<li>• Now includes a Stan fan account to amplify your reach</li>
+									<li>• Now includes a Stan TikTok fan account to expand your reach</li>
 								</ul>
 								<button
 									onClick={() => openContactModal({ service: 'breakout' })}
@@ -262,88 +262,56 @@ export function ServicesContent() {
 				<div className='mx-auto max-w-4xl'>
 					<AnimatedSection animation='fade-up'>
 						<H size='2' className='mb-6 text-center text-3xl md:text-4xl'>
-							Amplify Your Reach with Stan
+							Expand Your Reach with Stan
 						</H>
 						<p className='mb-12 text-center text-lg text-white/70'>
-							Fan accounts have become a secret weapon for artist growth—a second
-							Instagram presence that&apos;s free from the &quot;brand&quot; constraints
-							of your main channel. Memes, chopped-up video clips, fan content reposts,
-							and the chaotic energy that builds superfan communities.
+							Fan accounts are a breadth play—pure reach and exposure at scale. A
+							dedicated TikTok presence free from the &quot;brand&quot; constraints of
+							your main channel. Memes, chopped-up video clips, fan content reposts, and
+							the chaotic energy that builds discovery.
 						</p>
 					</AnimatedSection>
 
-					<div className='grid grid-cols-1 gap-8 md:grid-cols-2'>
-						<AnimatedSection animation='fade-up' delay={200}>
-							<div className='glass rounded-xl p-6'>
-								<div className='mb-4 flex items-center justify-between'>
-									<H size='4' className='text-purple-300'>
-										{NYC_STAN.name}
-									</H>
-									<div className='text-right'>
-										<span className='block text-sm text-white/50 line-through'>
-											${NYC_STAN.price.addon}/mo add-on
-										</span>
-										<span className='text-lg font-semibold text-purple-300'>
-											${NYC_STAN.promotionalPrice.addon}/mo first month
-										</span>
-									</div>
+					<AnimatedSection animation='fade-up' delay={200}>
+						<div className='glass rounded-xl p-6'>
+							<div className='mb-4 flex items-center justify-between'>
+								<H size='4' className='text-purple-300'>
+									{NYC_STAN.name}
+								</H>
+								<div className='text-right'>
+									<p className='text-lg font-semibold text-white'>
+										${NYC_STAN.price.standalone}/mo
+									</p>
+									<p className='text-sm text-purple-300'>
+										${NYC_STAN.price.risingBundle}/mo for Rising+ clients
+									</p>
 								</div>
-								<p className='mb-4 text-sm text-white/60'>
-									Or ${NYC_STAN.price.standalone}/mo standalone
-								</p>
-								<p className='mb-4 text-white/80'>
-									Daily Instagram posts mixing repurposed content, AI-generated visuals,
-									and meme-format engagement. You provide the raw material; we keep the
-									account active and growing.
-								</p>
-								<ul className='space-y-2'>
-									{NYC_STAN.features.map((feature, i) => (
-										<li key={i} className='flex items-start gap-2 text-sm text-white/70'>
-											<span className='mt-0.5 text-green-500'>✓</span>
-											{feature}
-										</li>
-									))}
-								</ul>
 							</div>
-						</AnimatedSection>
+							<p className='mb-4 text-sm text-purple-300'>
+								Included with Breakout+ at no extra cost
+							</p>
+							<p className='mb-4 text-white/80'>
+								Daily TikTok posts (3x/day) from a dedicated device. Chopped-up clips,
+								AI-generated visuals, meme-format content, and community engagement. You
+								provide the raw material; we keep the account active and growing.
+							</p>
+							<ul className='mb-4 space-y-2'>
+								{NYC_STAN.features.map((feature, i) => (
+									<li key={i} className='flex items-start gap-2 text-sm text-white/70'>
+										<span className='mt-0.5 text-green-500'>✓</span>
+										{feature}
+									</li>
+								))}
+							</ul>
+							<p className='text-sm text-white/60'>
+								Volume pricing available for multiple accounts. Label package: up to{' '}
+								{NYC_STAN.labelPackage.maxAccounts} accounts for $
+								{NYC_STAN.labelPackage.price.toLocaleString()}/mo.
+							</p>
+						</div>
+					</AnimatedSection>
 
-						<AnimatedSection animation='fade-up' delay={300}>
-							<div className='glass rounded-xl border border-purple-500/30 p-6'>
-								<div className='mb-4 flex items-center justify-between'>
-									<H size='4' className='text-purple-300'>
-										{NYC_STAN_PLUS.name}
-									</H>
-									<div className='text-right'>
-										<span className='block text-sm text-white/50 line-through'>
-											${NYC_STAN_PLUS.price.addon}/mo add-on
-										</span>
-										<span className='text-lg font-semibold text-purple-300'>
-											${NYC_STAN_PLUS.promotionalPrice.addon}/mo first month
-										</span>
-									</div>
-								</div>
-								<p className='mb-4 text-sm text-white/60'>
-									Or ${NYC_STAN_PLUS.price.standalone}/mo standalone •{' '}
-									<span className='text-purple-300'>Included with Breakout+</span>
-								</p>
-								<p className='mb-4 text-white/80'>
-									Everything in Stan, plus active community management: responding to
-									comments, reposting fan stories, seeding interactions on your main
-									account, and building real fan culture.
-								</p>
-								<ul className='space-y-2'>
-									{NYC_STAN_PLUS.features.map((feature, i) => (
-										<li key={i} className='flex items-start gap-2 text-sm text-white/70'>
-											<span className='mt-0.5 text-green-500'>✓</span>
-											{feature}
-										</li>
-									))}
-								</ul>
-							</div>
-						</AnimatedSection>
-					</div>
-
-					<AnimatedSection animation='fade-up' delay={400}>
+					<AnimatedSection animation='fade-up' delay={300}>
 						<div className='mt-8 text-center'>
 							<Link href='/services/stan'>
 								<MarketingButton marketingLook='glass' size='sm'>

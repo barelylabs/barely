@@ -304,9 +304,11 @@ export function RisingContent() {
 										Want even more reach?
 									</H>
 									<p className='text-white/70'>
-										Add a Stan fan account for ${NYC_STAN.price.addon}/month. We&apos;ll
-										run a dedicated Instagram fan page for your artist project—daily
-										content, memes, and the stuff you can&apos;t post on your main.
+										Add a Stan TikTok fan account for $
+										{NYC_STAN.price.risingBundle}/month (discounted from $
+										{NYC_STAN.price.standalone} for Rising+ clients, setup fee waived).
+										Daily content from a dedicated device—memes, clips, and the stuff
+										you can&apos;t post on your main.
 									</p>
 								</div>
 								<Link href='/services/stan' className='flex-shrink-0'>

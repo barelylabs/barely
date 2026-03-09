@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { NYC_STAN, NYC_STAN_PLUS } from '@barely/const';
+import { NYC_STAN } from '@barely/const';
 
 import { Icon } from '@barely/ui/icon';
 import { H } from '@barely/ui/typography';
@@ -38,30 +38,17 @@ export function StanContent() {
 			<section className='px-4 py-24 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-4xl text-center'>
 					<AnimatedSection animation='fade-up'>
-						<div className='mb-4 space-y-1'>
-							<span className='block text-sm font-medium text-purple-300'>
-								First Month Special
-							</span>
-							<div className='flex items-center justify-center gap-4'>
-								<div className='text-center'>
-									<span className='block text-sm text-white/50'>Stan</span>
-									<span className='text-white/40 line-through'>
-										${NYC_STAN.price.addon}
-									</span>
-									<span className='ml-2 text-purple-300'>
-										${NYC_STAN.promotionalPrice.addon}/mo
-									</span>
-								</div>
-								<span className='text-white/30'>|</span>
-								<div className='text-center'>
-									<span className='block text-sm text-white/50'>Stan+</span>
-									<span className='text-white/40 line-through'>
-										${NYC_STAN_PLUS.price.addon}
-									</span>
-									<span className='ml-2 text-purple-300'>
-										${NYC_STAN_PLUS.promotionalPrice.addon}/mo
-									</span>
-								</div>
+						<div className='mb-4 flex items-center justify-center gap-4'>
+							<div className='text-center'>
+								<span className='text-lg font-semibold text-white'>
+									${NYC_STAN.price.standalone}/mo
+								</span>
+							</div>
+							<span className='text-white/30'>|</span>
+							<div className='text-center'>
+								<span className='text-lg font-semibold text-purple-300'>
+									${NYC_STAN.price.risingBundle}/mo for Rising+ clients
+								</span>
 							</div>
 						</div>
 						<H
@@ -74,7 +61,7 @@ export function StanContent() {
 							Fan Account Management for Artists Who Get It
 						</p>
 						<p className='text-lg text-white/70'>
-							Your main Instagram has to stay &quot;on brand.&quot; Stan doesn&apos;t.
+							Your main TikTok has to stay &quot;on brand.&quot; Stan doesn&apos;t.
 						</p>
 
 						{/* Hero CTA */}
@@ -102,9 +89,10 @@ export function StanContent() {
 					<AnimatedSection animation='fade-up' delay={200}>
 						<div className='glass mb-8 rounded-2xl p-8'>
 							<p className='mb-6 text-lg leading-relaxed text-white/80'>
-								Every major artist has them now—unofficial-looking Instagram accounts that
-								post memes, chopped-up clips, chaotic fan content, and all the stuff that
-								doesn&apos;t fit the artist&apos;s &quot;real&quot; feed.
+								Every major artist has them now—TikTok accounts that post memes,
+								chopped-up clips, chaotic fan content, and all the stuff that
+								doesn&apos;t fit the artist&apos;s &quot;real&quot; feed. They&apos;re
+								breadth machines: pure reach and exposure at scale.
 							</p>
 							<p className='mb-6 text-xl font-semibold text-white'>
 								Why? Because they work.
@@ -113,8 +101,8 @@ export function StanContent() {
 								{[
 									{
 										icon: '📈',
-										title: 'Algorithm-friendly',
-										desc: 'More posts = more surface area for discovery',
+										title: 'Algorithm-friendly infrastructure',
+										desc: 'A dedicated device running a dedicated account means clean signals to the algorithm. More posts = more surface area for discovery.',
 									},
 									{
 										icon: '💬',
@@ -147,203 +135,257 @@ export function StanContent() {
 					<AnimatedSection animation='fade-up' delay={300}>
 						<p className='text-center text-lg text-white/80'>
 							<span className='font-semibold text-white'>The problem:</span> Running a
-							good fan account takes 30-60 minutes a day of consistent posting. You
-							don&apos;t have that time. We do.
+							good fan account is infrastructure work—dedicated devices, daily posting
+							schedules, engagement management. It takes 30-60 minutes a day of consistent
+							effort. You don&apos;t have that time. We do.
 						</p>
 					</AnimatedSection>
 				</div>
 			</section>
 
-			{/* What You Get - Stan */}
+			{/* What You Get */}
 			<section className='bg-white/5 px-4 py-12 sm:px-6 lg:px-8'>
-				<div className='mx-auto max-w-6xl'>
+				<div className='mx-auto max-w-4xl'>
 					<AnimatedSection animation='fade-up'>
 						<H size='2' className='mb-12 text-center text-3xl md:text-4xl'>
 							What You Get
 						</H>
 					</AnimatedSection>
 
-					<div className='grid grid-cols-1 gap-8 lg:grid-cols-2'>
-						{/* Stan Tier */}
-						<AnimatedSection animation='slide-right' delay={200}>
-							<div className='glass h-full rounded-xl p-8'>
-								<div className='mb-6 flex items-center justify-between'>
-									<H size='3' className='text-purple-300'>
-										{NYC_STAN.name}
-									</H>
-									<div className='text-right'>
-										<p className='text-sm text-white/50'>
-											${NYC_STAN.price.addon}/mo add-on
+					<div className='space-y-6'>
+						<AnimatedSection animation='fade-up' delay={200}>
+							<div className='glass rounded-xl p-6'>
+								<div className='flex items-start gap-4'>
+									<span className='text-2xl'>🎬</span>
+									<div>
+										<p className='font-semibold text-white'>
+											Daily TikTok Posts (3x/day)
 										</p>
-										<p className='text-sm text-white/50'>
-											${NYC_STAN.price.standalone}/mo standalone
+										<p className='text-sm text-white/70'>
+											Three posts per day, every day, manually posted from a dedicated
+											device. No scheduling tools, no automation flags—just consistent,
+											authentic content that the algorithm rewards. Chopped-up music video
+											clips, AI-generated visuals, meme-format content, fan reposts, and
+											whatever&apos;s trending.
 										</p>
 									</div>
-								</div>
-
-								<div className='space-y-6'>
-									<div className='flex items-start gap-4'>
-										<span className='text-2xl'>🎬</span>
-										<div>
-											<p className='font-semibold text-white'>Daily Instagram Posts</p>
-											<p className='text-sm text-white/70'>
-												Consistent content every day—no gaps, no &quot;sorry I&apos;ve
-												been quiet&quot; energy. We keep your fan account active so the
-												algorithm keeps pushing it.
-											</p>
-										</div>
-									</div>
-
-									<div className='flex items-start gap-4'>
-										<span className='text-2xl'>🎨</span>
-										<div>
-											<p className='font-semibold text-white'>Content Mix That Works</p>
-											<p className='text-sm text-white/70'>
-												Chopped-up music video clips, AI-generated visuals with meme
-												captions, fan content reposts (with credit), throwback moments,
-												lyric posts, and whatever&apos;s trending that week.
-											</p>
-										</div>
-									</div>
-
-									<div className='flex items-start gap-4'>
-										<span className='text-2xl'>📦</span>
-										<div>
-											<p className='font-semibold text-white'>
-												You Provide the Raw Material
-											</p>
-											<p className='text-sm text-white/70'>
-												Send us your video files, photos, and any assets you have.
-												We&apos;ll slice them up and keep the content engine running.
-											</p>
-										</div>
-									</div>
-
-									<div className='flex items-start gap-4'>
-										<span className='text-2xl'>📊</span>
-										<div>
-											<p className='font-semibold text-white'>
-												Monthly Performance Check-In
-											</p>
-											<p className='text-sm text-white/70'>
-												Quick recap of what&apos;s landing, what&apos;s growing, and any
-												adjustments for next month.
-											</p>
-										</div>
-									</div>
-								</div>
-
-								<div className='mt-6 border-t border-white/10 pt-6'>
-									<MarketingButton
-										marketingLook='glass'
-										fullWidth
-										onClick={() =>
-											handleCtaClick('features', 'stan', { service: 'stan' })
-										}
-									>
-										Get Started with Stan
-									</MarketingButton>
 								</div>
 							</div>
 						</AnimatedSection>
 
-						{/* Stan+ Tier */}
-						<AnimatedSection animation='slide-left' delay={300}>
-							<div className='glass h-full rounded-xl border border-purple-500/30 p-8'>
-								<div className='mb-6 flex items-center justify-between'>
-									<div className='flex items-center gap-2'>
-										<H size='3' className='text-purple-300'>
-											{NYC_STAN_PLUS.name}
-										</H>
-										<span className='rounded-full bg-purple-500/20 px-2 py-0.5 text-xs text-purple-300'>
-											Most Popular
-										</span>
-									</div>
-									<div className='text-right'>
-										<p className='text-sm text-white/50'>
-											${NYC_STAN_PLUS.price.addon}/mo add-on
+						<AnimatedSection animation='fade-up' delay={250}>
+							<div className='glass rounded-xl p-6'>
+								<div className='flex items-start gap-4'>
+									<span className='text-2xl'>📱</span>
+									<div>
+										<p className='font-semibold text-white'>
+											Dedicated Device Infrastructure
 										</p>
-										<p className='text-sm text-white/50'>
-											${NYC_STAN_PLUS.price.standalone}/mo standalone
+										<p className='text-sm text-white/70'>
+											Your Stan account runs on its own device with its own IP. This
+											isn&apos;t a shortcut—it&apos;s how you build a clean account that
+											the algorithm trusts. No shared devices, no VPNs, no red flags.
 										</p>
 									</div>
 								</div>
+							</div>
+						</AnimatedSection>
 
-								<p className='mb-6 text-sm text-purple-300'>
-									Included with Breakout+ at no extra cost
+						<AnimatedSection animation='fade-up' delay={300}>
+							<div className='glass rounded-xl p-6'>
+								<div className='flex items-start gap-4'>
+									<span className='text-2xl'>🎨</span>
+									<div>
+										<p className='font-semibold text-white'>
+											Cohesive Aesthetic, Defined with You
+										</p>
+										<p className='text-sm text-white/70'>
+											During onboarding, we establish the account&apos;s visual identity
+											together—color palette, content types, tone, what&apos;s on-brand
+											and what&apos;s off-limits. Then we run with it.
+										</p>
+									</div>
+								</div>
+							</div>
+						</AnimatedSection>
+
+						<AnimatedSection animation='fade-up' delay={350}>
+							<div className='glass rounded-xl p-6'>
+								<div className='flex items-start gap-4'>
+									<span className='text-2xl'>💬</span>
+									<div>
+										<p className='font-semibold text-white'>
+											We Reply to Everything
+										</p>
+										<p className='text-sm text-white/70'>
+											DMs and comments get responses. This is how you build a community,
+											not just an audience. We handle the daily engagement so the account
+											feels alive.
+										</p>
+									</div>
+								</div>
+							</div>
+						</AnimatedSection>
+
+						<AnimatedSection animation='fade-up' delay={400}>
+							<div className='glass rounded-xl p-6'>
+								<div className='flex items-start gap-4'>
+									<span className='text-2xl'>🛡️</span>
+									<div>
+										<p className='font-semibold text-white'>Shadowban Protection</p>
+										<p className='text-sm text-white/70'>
+											Dedicated devices, manual posting, and careful content practices
+											minimize shadowban risk. If something does get flagged, we know how
+											to handle it.
+										</p>
+									</div>
+								</div>
+							</div>
+						</AnimatedSection>
+
+						<AnimatedSection animation='fade-up' delay={450}>
+							<div className='glass rounded-xl p-6'>
+								<div className='flex items-start gap-4'>
+									<span className='text-2xl'>📊</span>
+									<div>
+										<p className='font-semibold text-white'>
+											Monthly Performance Check-Ins
+										</p>
+										<p className='text-sm text-white/70'>
+											Quick recap of what&apos;s landing, what&apos;s growing, and any
+											adjustments for next month.
+										</p>
+									</div>
+								</div>
+							</div>
+						</AnimatedSection>
+
+						<AnimatedSection animation='fade-up' delay={500}>
+							<div className='glass rounded-xl p-6'>
+								<div className='flex items-start gap-4'>
+									<span className='text-2xl'>🔧</span>
+									<div>
+										<p className='font-semibold text-white'>
+											Additional Services Negotiable
+										</p>
+										<p className='text-sm text-white/70'>
+											Need something beyond the standard scope? Cross-pollination with
+											your main account, coordinated release campaigns, or custom content
+											types—we&apos;re flexible. Let&apos;s talk about what you need.
+										</p>
+									</div>
+								</div>
+							</div>
+						</AnimatedSection>
+					</div>
+
+					{/* IG Reels Add-on */}
+					<AnimatedSection animation='fade-up' delay={550}>
+						<div className='glass mt-8 rounded-xl border border-purple-500/20 p-6'>
+							<div className='flex items-start gap-4'>
+								<span className='text-2xl'>📸</span>
+								<div>
+									<p className='font-semibold text-purple-300'>
+										Instagram Reels Add-On (+${NYC_STAN.igReelsAddon}/mo)
+									</p>
+									<p className='text-sm text-white/70'>
+										Repurpose your TikTok content to Instagram Reels for additional
+										reach. Same content, different platform, more surface area.
+									</p>
+								</div>
+							</div>
+						</div>
+					</AnimatedSection>
+
+					<AnimatedSection animation='fade-up' delay={600}>
+						<div className='mt-8 text-center'>
+							<MarketingButton
+								marketingLook='hero-primary'
+								onClick={() =>
+									handleCtaClick('features', 'stan', { service: 'stan' })
+								}
+							>
+								Get Started with Stan
+							</MarketingButton>
+						</div>
+					</AnimatedSection>
+				</div>
+			</section>
+
+			{/* Breadth vs. Depth */}
+			<section className='px-4 py-12 sm:px-6 lg:px-8'>
+				<div className='mx-auto max-w-4xl'>
+					<AnimatedSection animation='fade-up'>
+						<H size='2' className='mb-8 text-center text-3xl md:text-4xl'>
+							Breadth vs. Depth
+						</H>
+					</AnimatedSection>
+
+					<AnimatedSection animation='fade-up' delay={200}>
+						<div className='glass rounded-2xl p-8'>
+							<p className='mb-6 text-lg leading-relaxed text-white/80'>
+								Stan is a <span className='font-semibold text-white'>breadth</span>{' '}
+								play—maximizing your surface area for discovery. It&apos;s how new
+								listeners find you.
+							</p>
+							<p className='mb-6 text-lg leading-relaxed text-white/80'>
+								Our standard services (Bedroom+, Rising+, Breakout+) are{' '}
+								<span className='font-semibold text-white'>depth</span>
+								—converting that exposure into real fans, real revenue, and real
+								careers.
+							</p>
+							<p className='text-lg leading-relaxed text-white/80'>
+								The best results come from both working together. That&apos;s why Stan
+								is discounted for Rising+ clients and included with Breakout+.
+							</p>
+						</div>
+					</AnimatedSection>
+				</div>
+			</section>
+
+			{/* Setup & Onboarding */}
+			<section className='bg-white/5 px-4 py-12 sm:px-6 lg:px-8'>
+				<div className='mx-auto max-w-4xl'>
+					<AnimatedSection animation='fade-up'>
+						<H size='2' className='mb-8 text-center text-3xl md:text-4xl'>
+							Setup & Onboarding
+						</H>
+					</AnimatedSection>
+
+					<div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
+						<AnimatedSection animation='fade-up' delay={200}>
+							<div className='glass rounded-xl p-6 text-center'>
+								<p className='mb-2 text-2xl font-bold text-white'>
+									${NYC_STAN.setupFees.simple}
 								</p>
+								<p className='font-semibold text-white'>Simple Setup</p>
+								<p className='mt-2 text-sm text-white/70'>
+									Existing account with clear direction. We learn your vibe and start
+									posting.
+								</p>
+							</div>
+						</AnimatedSection>
 
-								<p className='mb-6 text-white/80'>Everything in Stan, plus:</p>
+						<AnimatedSection animation='fade-up' delay={300}>
+							<div className='glass rounded-xl p-6 text-center'>
+								<p className='mb-2 text-2xl font-bold text-white'>
+									${NYC_STAN.setupFees.customMin}-${NYC_STAN.setupFees.customMax}
+								</p>
+								<p className='font-semibold text-white'>Custom Setup</p>
+								<p className='mt-2 text-sm text-white/70'>
+									New account creation with custom branding, aesthetic development, and
+									content system design.
+								</p>
+							</div>
+						</AnimatedSection>
 
-								<div className='space-y-6'>
-									<div className='flex items-start gap-4'>
-										<span className='text-2xl'>💬</span>
-										<div>
-											<p className='font-semibold text-white'>
-												Active Community Management
-											</p>
-											<p className='text-sm text-white/70'>
-												We don&apos;t just post and ghost. Stan+ includes daily
-												engagement: responding to comments, reposting fan stories, and
-												building actual community around the account.
-											</p>
-										</div>
-									</div>
-
-									<div className='flex items-start gap-4'>
-										<span className='text-2xl'>🔄</span>
-										<div>
-											<p className='font-semibold text-white'>
-												Cross-Pollination with Your Main
-											</p>
-											<p className='text-sm text-white/70'>
-												Strategic comment seeding on your official posts, story reposts
-												that drive traffic both directions, and coordination with your
-												release calendar.
-											</p>
-										</div>
-									</div>
-
-									<div className='flex items-start gap-4'>
-										<span className='text-2xl'>🎯</span>
-										<div>
-											<p className='font-semibold text-white'>Growth Tactics</p>
-											<p className='text-sm text-white/70'>
-												Hashtag strategy, engagement pods, collaboration with other fan
-												accounts in your genre, and trend-jacking when opportunities
-												arise.
-											</p>
-										</div>
-									</div>
-
-									<div className='flex items-start gap-4'>
-										<span className='text-2xl'>📈</span>
-										<div>
-											<p className='font-semibold text-white'>
-												Monthly Strategy Check-Ins
-											</p>
-											<p className='text-sm text-white/70'>
-												Regular reviews to optimize what&apos;s working and pivot quickly
-												when something takes off.
-											</p>
-										</div>
-									</div>
-								</div>
-
-								<div className='mt-6 border-t border-purple-500/20 pt-6'>
-									<MarketingButton
-										marketingLook='hero-primary'
-										fullWidth
-										onClick={() =>
-											handleCtaClick('features', 'rising_with_stan', {
-												service: 'rising',
-												stanAddon: true,
-											})
-										}
-									>
-										Get Started with Stan+
-									</MarketingButton>
-								</div>
+						<AnimatedSection animation='fade-up' delay={400}>
+							<div className='glass rounded-xl border border-purple-500/20 p-6 text-center'>
+								<p className='mb-2 text-2xl font-bold text-purple-300'>Waived</p>
+								<p className='font-semibold text-purple-300'>Rising+ Clients</p>
+								<p className='mt-2 text-sm text-white/70'>
+									Setup fee waived for Rising+ clients adding Stan to their plan.
+								</p>
 							</div>
 						</AnimatedSection>
 					</div>
@@ -368,18 +410,18 @@ export function StanContent() {
 							},
 							{
 								step: '2',
-								title: 'Account Setup',
-								desc: 'We create (or take over) the fan account with proper branding that looks authentic, not corporate.',
+								title: 'Account Setup on Dedicated Device',
+								desc: 'We set up (or take over) the fan account on its own device with proper branding that looks authentic, not corporate.',
 							},
 							{
 								step: '3',
-								title: 'Content Calendar',
-								desc: "We build out the first month's content mix and get your approval on the general direction.",
+								title: 'Content System Build',
+								desc: "We build out the content pipeline—visual templates, content categories, posting schedule—and get your approval on the general direction.",
 							},
 							{
 								step: '4',
-								title: 'Daily Execution',
-								desc: "Posts go out every day. You don't have to think about it.",
+								title: 'Daily Execution (3x Manual Posts)',
+								desc: "Three posts per day, every day, manually posted from the dedicated device. You don't have to think about it.",
 							},
 							{
 								step: '5',
@@ -418,11 +460,11 @@ export function StanContent() {
 								</H>
 								<ul className='space-y-3'>
 									{[
-										"Artists who know they need a fan account but don't have time to run one",
-										"Musicians whose 'main' feed is too curated to post casual content",
-										"Anyone who's tried to maintain a fan account and burned out after 2 weeks",
-										'Artists on Rising+ or Breakout+ who want to amplify their campaign reach',
-										'Indie labels looking to build buzz across multiple artists',
+										"Artists who know they need consistent TikTok presence but don't have time",
+										"Musicians whose main feed is too curated for chaotic fan content",
+										"Artists on Rising+ or Breakout+ who want breadth alongside their depth campaigns",
+										'Indie labels looking to build TikTok presence across multiple artists',
+										"Anyone who's tried to maintain a fan account and burned out",
 									].map((item, index) => (
 										<li key={index} className='flex items-start gap-3'>
 											<span className='mt-0.5 text-green-500'>✓</span>
@@ -443,6 +485,7 @@ export function StanContent() {
 										'Artists who want direct control over every post (this is hands-off by design)',
 										"Musicians who aren't comfortable with meme-style or casual content",
 										'Projects with very limited visual assets (we need raw material to work with)',
+										'Artists looking for a social media manager for their main account',
 									].map((item, index) => (
 										<li key={index} className='flex items-start gap-3'>
 											<span className='mt-0.5 text-red-500'>✗</span>
@@ -471,46 +514,89 @@ export function StanContent() {
 								<thead>
 									<tr className='border-b border-white/10'>
 										<th className='p-4 text-left text-white/70'></th>
-										<th className='p-4 text-center text-white/70'>
-											Add-On
-											<span className='block text-xs'>(with Bedroom+ or Rising+)</span>
-										</th>
 										<th className='p-4 text-center text-white/70'>Standalone</th>
+										<th className='p-4 text-center text-white/70'>
+											Rising+ Bundle
+										</th>
 										<th className='p-4 text-center text-white/70'>Included With</th>
 									</tr>
 								</thead>
 								<tbody>
 									<tr className='border-b border-white/10'>
-										<td className='p-4 font-semibold text-white'>{NYC_STAN.name}</td>
-										<td className='p-4 text-center text-white'>
-											${NYC_STAN.price.addon}/month
-										</td>
+										<td className='p-4 font-semibold text-white'>Stan (TikTok)</td>
 										<td className='p-4 text-center text-white'>
 											${NYC_STAN.price.standalone}/month
 										</td>
-										<td className='p-4 text-center text-white/50'>—</td>
-									</tr>
-									<tr>
-										<td className='p-4 font-semibold text-purple-300'>
-											{NYC_STAN_PLUS.name}
-										</td>
-										<td className='p-4 text-center text-white'>
-											${NYC_STAN_PLUS.price.addon}/month
-										</td>
-										<td className='p-4 text-center text-white'>
-											${NYC_STAN_PLUS.price.standalone}/month
+										<td className='p-4 text-center text-purple-300'>
+											${NYC_STAN.price.risingBundle}/month
 										</td>
 										<td className='p-4 text-center text-purple-300'>Breakout+</td>
+									</tr>
+									<tr>
+										<td className='p-4 font-semibold text-white/70'>
+											+ IG Reels Add-On
+										</td>
+										<td className='p-4 text-center text-white/70'>
+											+${NYC_STAN.igReelsAddon}/month
+										</td>
+										<td className='p-4 text-center text-white/70'>
+											+${NYC_STAN.igReelsAddon}/month
+										</td>
+										<td className='p-4 text-center text-white/50'>—</td>
 									</tr>
 								</tbody>
 							</table>
 						</div>
 					</AnimatedSection>
 
+					{/* Volume Pricing */}
 					<AnimatedSection animation='fade-up' delay={300}>
-						<p className='mt-6 text-center text-sm italic text-purple-300'>
-							First month special: {NYC_STAN.promotionalPrice.description} pricing
-							available
+						<div className='mt-8'>
+							<H size='4' className='mb-4 text-center text-white/80'>
+								Volume Pricing
+							</H>
+							<div className='glass overflow-hidden rounded-xl'>
+								<table className='w-full'>
+									<thead>
+										<tr className='border-b border-white/10'>
+											<th className='p-4 text-left text-white/70'>Accounts</th>
+											<th className='p-4 text-center text-white/70'>
+												Per Account/Month
+											</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr className='border-b border-white/10'>
+											<td className='p-4 text-white'>2-4 accounts</td>
+											<td className='p-4 text-center text-white'>
+												${NYC_STAN.volumePricing.twoToFour}/month
+											</td>
+										</tr>
+										<tr className='border-b border-white/10'>
+											<td className='p-4 text-white'>5+ accounts</td>
+											<td className='p-4 text-center text-white'>
+												${NYC_STAN.volumePricing.fivePlus}/month
+											</td>
+										</tr>
+										<tr>
+											<td className='p-4 text-purple-300'>
+												Label Package (up to {NYC_STAN.labelPackage.maxAccounts})
+											</td>
+											<td className='p-4 text-center text-purple-300'>
+												${NYC_STAN.labelPackage.price.toLocaleString()}/month
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</AnimatedSection>
+
+					<AnimatedSection animation='fade-up' delay={350}>
+						<p className='mt-6 text-center text-sm text-white/60'>
+							Setup fee: ${NYC_STAN.setupFees.simple} (simple) or $
+							{NYC_STAN.setupFees.customMin}-${NYC_STAN.setupFees.customMax} (custom).
+							Waived for Rising+ clients.
 						</p>
 					</AnimatedSection>
 
@@ -546,8 +632,32 @@ export function StanContent() {
 				</div>
 			</section>
 
-			{/* FAQ */}
+			{/* For Labels & Management Companies */}
 			<section className='bg-white/5 px-4 py-12 sm:px-6 lg:px-8'>
+				<div className='mx-auto max-w-4xl'>
+					<AnimatedSection animation='fade-up'>
+						<div className='glass rounded-2xl border border-purple-500/20 p-8'>
+							<H size='3' className='mb-4 text-2xl md:text-3xl'>
+								For Labels & Management Companies
+							</H>
+							<p className='mb-4 text-lg text-white/80'>
+								Managing TikTok presence across a roster? Our label package covers up
+								to {NYC_STAN.labelPackage.maxAccounts} accounts for $
+								{NYC_STAN.labelPackage.price.toLocaleString()}/month with volume
+								discounts for larger rosters.
+							</p>
+							<Link href='/services/labels'>
+								<MarketingButton marketingLook='glass' size='sm'>
+									Learn more about label partnerships →
+								</MarketingButton>
+							</Link>
+						</div>
+					</AnimatedSection>
+				</div>
+			</section>
+
+			{/* FAQ */}
+			<section className='px-4 py-12 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-4xl'>
 					<AnimatedSection animation='fade-up'>
 						<H size='2' className='mb-12 text-center text-3xl md:text-4xl'>
@@ -559,7 +669,7 @@ export function StanContent() {
 						{[
 							{
 								q: 'What platform do you post on?',
-								a: "Instagram only for now. We've found it's where fan accounts have the most established playbook and best engagement patterns. TikTok fan accounts may be available in the future.",
+								a: "TikTok is the primary platform. It's where fan accounts have the best organic reach and discovery potential right now. Instagram Reels is available as a paid add-on for $150/month—same content repurposed to a second platform.",
 							},
 							{
 								q: 'Do I need to approve every post?',
@@ -567,7 +677,7 @@ export function StanContent() {
 							},
 							{
 								q: 'What if the account takes off and needs more attention?',
-								a: "Good problem to have. If a Stan account grows significantly and requires more active moderation, we'll talk about adjusting the scope. Stan+ is designed to handle more active accounts.",
+								a: "Good problem to have. If a Stan account grows significantly and requires more active moderation, we'll talk about adjusting the scope. Additional services are always negotiable.",
 							},
 							{
 								q: 'Can you take over an existing fan account?',
@@ -579,10 +689,34 @@ export function StanContent() {
 							},
 							{
 								q: 'How is this different from hiring a social media manager?',
-								a: "A generalist social media manager would cost $1,500-3,000/month and probably wouldn't understand fan account culture. We're specialists in this specific format, with a systemized workflow that keeps costs down while maintaining quality.",
+								a: "A generalist social media manager would cost $1,500-3,000/month and probably wouldn't understand fan account culture or TikTok-specific growth patterns. We're specialists in this specific format, with dedicated device infrastructure and a systemized workflow that keeps costs down while maintaining quality.",
+							},
+							{
+								q: "What if I don't have much footage?",
+								a: "We can work with limited assets—AI-generated visuals, lyric posts, meme formats, and creative repurposing go a long way. But the more raw material you can provide, the better the account will perform. We'll talk through what you have during onboarding.",
+							},
+							{
+								q: 'Do you offer volume discounts?',
+								a: `Yes. 2-4 accounts are $${NYC_STAN.volumePricing.twoToFour}/month each, 5+ accounts are $${NYC_STAN.volumePricing.fivePlus}/month each, and we have a label package for up to ${NYC_STAN.labelPackage.maxAccounts} accounts at $${NYC_STAN.labelPackage.price.toLocaleString()}/month.`,
+							},
+							{
+								q: 'What does the setup fee cover?',
+								a: `$${NYC_STAN.setupFees.simple} for simple setups (existing account, clear direction) or $${NYC_STAN.setupFees.customMin}-$${NYC_STAN.setupFees.customMax} for custom setups (new account creation, branding, aesthetic development). Setup fee is waived for Rising+ clients.`,
+							},
+							{
+								q: 'Why TikTok instead of Instagram?',
+								a: "TikTok's algorithm rewards consistent posting from clean accounts more than any other platform right now. The discovery potential for fan accounts is significantly higher on TikTok. We offer Instagram Reels as an add-on for artists who want both.",
+							},
+							{
+								q: 'What does engagement include?',
+								a: 'We respond to DMs and comments on the Stan account. This is community management for the fan account specifically—not your main account. If you need main account management, that falls under additional negotiable services.',
+							},
+							{
+								q: 'How do you handle shadowbans?',
+								a: "Dedicated devices, manual posting, and careful content practices are our first line of defense. We don't use scheduling tools or automation that could flag the account. If something does get flagged, we have protocols for recovery.",
 							},
 						].map((item, index) => (
-							<AnimatedSection key={index} animation='fade-up' delay={200 + index * 100}>
+							<AnimatedSection key={index} animation='fade-up' delay={200 + index * 50}>
 								<div className='glass rounded-xl p-6'>
 									<H size='5' className='mb-3'>
 										{item.q}
