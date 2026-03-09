@@ -53,6 +53,7 @@ import {
 import { getStripeConnectAccountId } from '../../functions/stripe-connect.fns';
 import { createShippingLabel } from '../../integrations/shipping/shipengine.endpts';
 import { stripe } from '../../integrations/stripe';
+import { getShippingOriginAddress } from '../../utils/fulfillment';
 import { log } from '../../utils/log';
 import { workspaceProcedure } from '../trpc';
 
@@ -681,24 +682,34 @@ export const cartOrderRoute = {
 				});
 			}
 
-			// 2. Validate workspace has shipping address configured
-			if (
-				!ctx.workspace.shippingAddressLine1 ||
-				!ctx.workspace.shippingAddressPostalCode
-			) {
-				throw new TRPCError({
-					code: 'PRECONDITION_FAILED',
-					message:
-						'Workspace shipping address not configured. Please update your settings.',
-				});
-			}
+			// 2. Determine ship-from origin based on who fulfills the order
+			const isBarelyFulfilled = cart.fulfilledBy === 'barely';
 
-			if (!ctx.workspace.shippingAddressPhone) {
-				throw new TRPCError({
-					code: 'PRECONDITION_FAILED',
-					message:
-						'Shipping phone number not configured. Please add your business phone number in Merch > Logistics settings to purchase shipping labels.',
-				});
+			const originAddress = getShippingOriginAddress({
+				fulfilledBy: cart.fulfilledBy === 'barely' ? 'barely' : 'artist',
+				workspace: ctx.workspace,
+			});
+
+			// For artist fulfillment, validate workspace shipping address
+			if (!isBarelyFulfilled) {
+				if (
+					!ctx.workspace.shippingAddressLine1 ||
+					!ctx.workspace.shippingAddressPostalCode
+				) {
+					throw new TRPCError({
+						code: 'PRECONDITION_FAILED',
+						message:
+							'Workspace shipping address not configured. Please update your settings.',
+					});
+				}
+
+				if (!ctx.workspace.shippingAddressPhone) {
+					throw new TRPCError({
+						code: 'PRECONDITION_FAILED',
+						message:
+							'Shipping phone number not configured. Please add your business phone number in Merch > Logistics settings to purchase shipping labels.',
+					});
+				}
 			}
 
 			// 3. Validate customer shipping address
@@ -710,9 +721,14 @@ export const cartOrderRoute = {
 			}
 
 			// 4. Determine region for API key selection
-			const workspaceCountry = ctx.workspace.shippingAddressCountry?.toUpperCase();
+			// Barely-fulfilled orders always use the US API key
 			const region: 'US' | 'UK' =
-				workspaceCountry === 'GB' || workspaceCountry === 'UK' ? 'UK' : 'US';
+				isBarelyFulfilled ? 'US' : (
+					(() => {
+						const workspaceCountry = ctx.workspace.shippingAddressCountry?.toUpperCase();
+						return workspaceCountry === 'GB' || workspaceCountry === 'UK' ? 'UK' : 'US';
+					})()
+				);
 
 			// 5. Get cheapest rate first (to store estimate vs actual cost)
 			const { rates, lowestShippingPrice: estimatedCostCents } =
@@ -732,9 +748,9 @@ export const cartOrderRoute = {
 						})
 						.filter((p): p is { product: Product; quantity: number } => p !== null),
 					shipFrom: {
-						postalCode: ctx.workspace.shippingAddressPostalCode,
-						countryCode: ctx.workspace.shippingAddressCountry ?? 'US',
-						state: ctx.workspace.shippingAddressState ?? '',
+						postalCode: originAddress.postalCode ?? '',
+						countryCode: originAddress.country ?? 'US',
+						state: originAddress.state ?? '',
 					},
 					shipTo: {
 						postalCode: cart.shippingAddressPostalCode,
@@ -753,15 +769,15 @@ export const cartOrderRoute = {
 						rates[0]?.carrier_id ??
 						raiseTRPCError({ message: 'No carrier available for shipping' }),
 					shipFrom: {
-						name: ctx.workspace.name,
+						name: originAddress.name ?? ctx.workspace.name,
 						companyName: ctx.workspace.name,
-						phone: ctx.workspace.shippingAddressPhone,
-						addressLine1: ctx.workspace.shippingAddressLine1,
-						addressLine2: ctx.workspace.shippingAddressLine2 ?? undefined,
-						city: ctx.workspace.shippingAddressCity ?? '',
-						state: ctx.workspace.shippingAddressState ?? '',
-						postalCode: ctx.workspace.shippingAddressPostalCode,
-						countryCode: ctx.workspace.shippingAddressCountry ?? 'US',
+						phone: originAddress.phone ?? '',
+						addressLine1: originAddress.line1 ?? '',
+						addressLine2: originAddress.line2 ?? undefined,
+						city: originAddress.city ?? '',
+						state: originAddress.state ?? '',
+						postalCode: originAddress.postalCode ?? '',
+						countryCode: originAddress.country ?? 'US',
 					},
 					shipTo: {
 						name: cart.fullName ?? 'Customer',

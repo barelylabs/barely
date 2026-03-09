@@ -45,12 +45,13 @@ export const libEnv = createEnv({
 		ANTHROPIC_API_KEY: z.string(),
 		AUTH_SECRET: z.string(),
 		AWS_S3_BUCKET_NAME: z.string(),
-		// Barely Fulfillment Address
-		BARELY_FULFILLMENT_ADDRESS_LINE1: z.string(),
-		BARELY_FULFILLMENT_ADDRESS_CITY: z.string(),
-		BARELY_FULFILLMENT_ADDRESS_STATE: z.string(),
-		BARELY_FULFILLMENT_ADDRESS_ZIP: z.string(),
-		BARELY_FULFILLMENT_ADDRESS_COUNTRY: z.string(),
+		// Barely US Warehouse
+		BARELY_US_WAREHOUSE_NAME: z.string(),
+		BARELY_US_WAREHOUSE_PHONE: z.string(),
+		BARELY_US_WAREHOUSE_ADDRESS_LINE1: z.string(),
+		BARELY_US_WAREHOUSE_CITY: z.string(),
+		BARELY_US_WAREHOUSE_STATE: z.string(),
+		BARELY_US_WAREHOUSE_POSTAL_CODE: z.string(),
 		AWS_S3_REGION: z.string(),
 		AWS_S3_ACCESS_KEY_ID: z.string(),
 		AWS_S3_SECRET_ACCESS_KEY: z.string(),
@@ -184,10 +185,12 @@ export const libEnv = createEnv({
  */
 export function getBarelyFulfillmentAddress() {
 	return {
-		line1: libEnv.BARELY_FULFILLMENT_ADDRESS_LINE1,
-		city: libEnv.BARELY_FULFILLMENT_ADDRESS_CITY,
-		state: libEnv.BARELY_FULFILLMENT_ADDRESS_STATE,
-		postalCode: libEnv.BARELY_FULFILLMENT_ADDRESS_ZIP,
-		country: libEnv.BARELY_FULFILLMENT_ADDRESS_COUNTRY,
+		name: libEnv.BARELY_US_WAREHOUSE_NAME,
+		phone: libEnv.BARELY_US_WAREHOUSE_PHONE,
+		line1: libEnv.BARELY_US_WAREHOUSE_ADDRESS_LINE1,
+		city: libEnv.BARELY_US_WAREHOUSE_CITY,
+		state: libEnv.BARELY_US_WAREHOUSE_STATE,
+		postalCode: libEnv.BARELY_US_WAREHOUSE_POSTAL_CODE,
+		country: 'US',
 	};
 }
