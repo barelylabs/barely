@@ -48,9 +48,17 @@ export const log = async ({
 	}
 
 	const mentionUser = libEnv.BARELY_SLACK_NOTIFY_USER ?? null;
+	const prefix = `${mention && mentionUser ? `<@${mentionUser}>\n` : ''}${TYPE_ICONS[type]} *${location}*\n`;
+
+	// Slack block text limit is 3000 chars — truncate message to fit
+	const maxMessageLength = 2900 - prefix.length;
+	const truncatedMessage =
+		message.length > maxMessageLength ?
+			message.slice(0, maxMessageLength) + '... [truncated]'
+		:	message;
 
 	try {
-		return await fetch(HOOK, {
+		const res = await fetch(HOOK, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -61,13 +69,42 @@ export const log = async ({
 						type: 'section',
 						text: {
 							type: 'mrkdwn',
-							text: `${mention && mentionUser ? `<@${mentionUser}>\n` : ''}${TYPE_ICONS[type]} *${location}*\n${message}`,
+							text: `${prefix}${truncatedMessage}`,
 						},
 					},
 				],
 			}),
 		});
+
+		if (!res.ok) {
+			throw new Error(`Slack responded ${res.status}`);
+		}
 	} catch (error) {
-		console.log('Failed to log to Barely Slack. Error: ', error);
+		// Fallback: try a simple error message to #errors channel
+		try {
+			const errHook = logTypeToEnv.errors;
+			if (errHook) {
+				await fetch(errHook, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						blocks: [
+							{
+								type: 'section',
+								text: {
+									type: 'mrkdwn',
+									text: `:warning: *[log fallback]* Failed to log to #${type} from ${location}: ${String(error instanceof Error ? error.message : error).slice(0, 200)}`,
+								},
+							},
+						],
+					}),
+				});
+			}
+		} catch {
+			// Last resort: console.error so it appears in Vercel logs
+			console.error(
+				`[log] Failed to log to Slack. type=${type}, location=${location}, message=${message.slice(0, 500)}`,
+			);
+		}
 	}
 };

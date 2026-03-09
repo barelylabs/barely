@@ -810,8 +810,6 @@ export const cartRoute = {
 					type: 'errors',
 					location: 'cart.route.ts::buyUpsell',
 					message: `error recording upsell event for cart ${cart.id}: ${String(err)}`,
-				}).catch(() => {
-					/* non-critical */
 				});
 			});
 
@@ -889,8 +887,6 @@ export const cartRoute = {
 					type: 'errors',
 					location: 'cart.route.ts::declineUpsell',
 					message: `error recording decline upsell event for cart ${cart.id}: ${String(err)}`,
-				}).catch(() => {
-					/* non-critical */
 				});
 			});
 			// if (!!ctx.visitor?.ip || !!cart.visitorIp) {
@@ -977,8 +973,6 @@ export const cartRoute = {
 							location: 'cart.route.ts::log',
 							// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 							message: `Failed to update cart ${cart.id} [${input.event}] with visitor info: ${String(err?.message ?? err).slice(0, 500)} | fieldLengths: ip=${ctx.visitor?.ip.length}, referer_url=${ctx.visitor?.referer_url?.length}, href=${ctx.visitor?.href.length}`,
-						}).catch(() => {
-							/* non-critical */
 						});
 					});
 			}
