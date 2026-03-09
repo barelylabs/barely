@@ -54,8 +54,8 @@ export const Carts = pgTable(
 		ttclid: varchar('ttclid', { length: 255 }),
 		flowActionId: dbId('flowActionId'),
 
-		sessionReferer: varchar('sessionReferer', { length: 1000 }),
-		sessionRefererUrl: varchar('sessionRefererUrl', { length: 1000 }),
+		sessionReferer: varchar('sessionReferer', { length: 2048 }),
+		sessionRefererUrl: varchar('sessionRefererUrl', { length: 2048 }),
 		sessionMetaCampaignId: varchar('sessionMetaCampaignId', { length: 255 }),
 		sessionMetaAdsetId: varchar('sessionMetaAdsetId', { length: 255 }),
 		sessionMetaAdId: varchar('sessionMetaAdId', { length: 255 }),
@@ -69,9 +69,9 @@ export const Carts = pgTable(
 		visitorUserAgent: jsonb('visitorUserAgent').$type<Partial<NextFormattedUserAgent>>(),
 		visitorIsBot: boolean('visitorIsBot').default(false),
 		visitorReferer: varchar('visitorReferer', { length: 255 }),
-		visitorRefererUrl: varchar('visitorRefererUrl', { length: 255 }),
+		visitorRefererUrl: varchar('visitorRefererUrl', { length: 2048 }),
 		visitorRefererId: varchar('visitorRefererId', { length: 255 }),
-		visitorCheckoutHref: varchar('visitorCheckoutHref', { length: 255 }),
+		visitorCheckoutHref: varchar('visitorCheckoutHref', { length: 2048 }),
 
 		// stripe (on creation)
 		checkoutStripePaymentIntentId: varchar('checkoutStripePaymentIntentId', {
