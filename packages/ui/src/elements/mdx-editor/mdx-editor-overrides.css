@@ -57,6 +57,7 @@
 .mdx-editor-wrapper .mdxeditor [class*='_rootContentEditableWrapper_'] {
 	flex: 1 !important;
 	min-height: 300px !important;
+	cursor: text !important; /* Show text cursor to indicate clickable area */
 }
 
 /* Fix bottom padding on content editable to prevent text cutoff in whitespace */
