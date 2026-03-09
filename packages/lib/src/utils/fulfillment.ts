@@ -6,6 +6,7 @@ export type FulfillmentMode = 'artist_all' | 'barely_us' | 'barely_worldwide';
 export type FulfilledBy = 'artist' | 'barely';
 
 export interface ShippingAddress {
+	name?: string | null;
 	line1: string | null;
 	line2?: string | null;
 	city: string | null;

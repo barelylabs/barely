@@ -130,9 +130,12 @@ export function ShipOrderModal() {
 
 	if (!selectedCartOrder) return null;
 
-	// Determine carrier based on workspace country
-	const workspaceCountry = workspace.shippingAddressCountry?.toUpperCase();
-	const isUK = workspaceCountry === 'GB' || workspaceCountry === 'UK';
+	// Determine carrier: Barely-fulfilled orders always use USPS (US warehouse)
+	const isBarelyFulfilled = selectedCartOrder.fulfilledBy === 'barely';
+	const isUK =
+		!isBarelyFulfilled &&
+		(workspace.shippingAddressCountry?.toUpperCase() === 'GB' ||
+			workspace.shippingAddressCountry?.toUpperCase() === 'UK');
 	const carrier = isUK ? 'evri' : 'usps';
 	const CarrierIcon = Icon[carrier];
 

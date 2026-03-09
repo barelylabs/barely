@@ -50,10 +50,13 @@ export function MarkCartOrderFulfilledModal() {
 		setShowMarkAsFulfilledModal,
 	} = useCartOrder();
 
-	/* filter carriers based on workspace shipping country */
+	/* filter carriers based on who fulfills the order */
+	const shippingCountry =
+		selectedCartOrder?.fulfilledBy === 'barely' ? 'US' : workspace.shippingAddressCountry;
+
 	const availableCarriers = useMemo(
-		() => getAvailableCarriers(workspace.shippingAddressCountry),
-		[workspace.shippingAddressCountry],
+		() => getAvailableCarriers(shippingCountry),
+		[shippingCountry],
 	);
 
 	const filteredCarrierOptions = useMemo(
@@ -63,12 +66,12 @@ export function MarkCartOrderFulfilledModal() {
 	);
 
 	const defaultCarrier = useMemo(() => {
-		const country = workspace.shippingAddressCountry?.toUpperCase();
+		const country = shippingCountry?.toUpperCase();
 		if (country === 'GB' || country === 'UK') {
 			return 'evri';
 		}
 		return 'usps';
-	}, [workspace.shippingAddressCountry]);
+	}, [shippingCountry]);
 
 	/* mutations */
 	const { mutateAsync: markAsFulfilled } = useMutation(
