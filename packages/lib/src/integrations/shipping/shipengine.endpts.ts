@@ -157,7 +157,7 @@ type ShipToEstimate = {
 );
 
 export interface ShippingEstimateProps {
-	carriers?: ('usps' | 'ups' | 'dhl' | 'evri' | 'dpd')[];
+	carriers?: ('usps' | 'ups' | 'evri' | 'dpd')[];
 	shipFrom: {
 		postalCode: string;
 		countryCode: string;
