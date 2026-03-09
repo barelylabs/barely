@@ -24,6 +24,6 @@ export const config = {
 		 * - sitemap (sitemap file)
 		 * - robots (robots.txt file)
 		 */
-		'/((?!api|_next|_static|.well-known|favicon|sitemap|robots).*)',
+		'/((?!api|_next|_static|.well-known|favicon|sitemap|robots|apple-touch-icon|meta\\.json).*)',
 	],
 };

@@ -135,6 +135,6 @@ export const config = {
 		 * - robots (robots file)
 		 * - png files
 		 */
-		'/((?!api|_next|_static|.well-known|favicon|logos|sitemap|site.webmanifest|robots|.*\\.png).*)',
+		'/((?!api|_next|_static|.well-known|favicon|logos|sitemap|site.webmanifest|robots|.*\\.png|apple-touch-icon|meta\\.json).*)',
 	],
 };
