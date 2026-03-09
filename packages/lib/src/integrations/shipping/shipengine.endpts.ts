@@ -264,7 +264,7 @@ export async function getShipStationRateEstimates(props: ShippingEstimateProps) 
 			service_code: z.string().nullable(),
 			trackable: z.boolean(),
 			carrier_code: z.string(),
-			carrier_nickname: z.string(),
+			carrier_nickname: z.string().nullable(),
 			carrier_friendly_name: z.string(),
 			validation_status: z.enum(['valid', 'invalid', 'has_warnings', 'unknown']),
 			warning_messages: z.array(z.string()),
