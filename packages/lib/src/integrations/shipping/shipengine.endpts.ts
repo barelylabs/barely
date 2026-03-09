@@ -157,7 +157,7 @@ type ShipToEstimate = {
 );
 
 export interface ShippingEstimateProps {
-	carriers?: ('usps' | 'ups' | 'dhl' | 'evri' | 'dpd')[];
+	carriers?: ('usps' | 'ups' | 'evri' | 'dpd')[];
 	shipFrom: {
 		postalCode: string;
 		countryCode: string;
@@ -197,11 +197,9 @@ export async function getShipStationRateEstimates(props: ShippingEstimateProps) 
 		switch (carrier) {
 			// US
 			case 'usps':
-				return 'se-6337733';
+				return 'se-6600486';
 			case 'ups':
-				return 'se-6337734';
-			case 'dhl':
-				return 'se-6341012';
+				return 'se-6600487';
 			// UK
 			case 'evri':
 				return 'se-333604';
