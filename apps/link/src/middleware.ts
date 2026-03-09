@@ -12,7 +12,9 @@ import { getAbsoluteUrl } from '@barely/utils';
 import { eq } from 'drizzle-orm';
 
 export const config = {
-	matcher: ['/((?!api|mobile|_next|_static|favicon|logos|sitemap|atom|404|500).*)'],
+	matcher: [
+		'/((?!api|mobile|_next|_static|favicon|logos|sitemap|atom|404|500|apple-touch-icon|meta\\.json).*)',
+	],
 };
 
 export async function middleware(req: NextRequest, ev: NextFetchEvent) {

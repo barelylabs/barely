@@ -501,7 +501,7 @@ export async function recordCartEvent({
 		currency,
 	});
 
-	const fallbackUrl = `https://${cartFunnel.handle}.barely.io/${cartFunnel.key}`;
+	const fallbackUrl = `https://barelycart.com/${cartFunnel.handle}/${cartFunnel.key}/checkout`;
 	let sourceUrl = fallbackUrl;
 	if (visitorInfo.referer_url) {
 		try {
@@ -1021,11 +1021,9 @@ export async function recordFmEvent({
 	);
 
 	if (!success) {
-		await log({
-			type: 'alerts',
-			location: 'recordFmEvent',
-			message: `rate limit exceeded for ${visitor?.ip} ${fmPage.id} ${type} ${fmLink?.platform}`,
-		});
+		console.log(
+			`rate limit exceeded for ${visitor?.ip} ${fmPage.id} ${type} ${fmLink?.platform}`,
+		);
 		return null;
 	}
 
