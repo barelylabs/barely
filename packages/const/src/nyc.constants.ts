@@ -12,67 +12,67 @@ export const NYC_RISING_PLUS =
 export const NYC_BREAKOUT_PLUS =
 	WORKSPACE_PLANS.get('breakout.plus') ?? raise('Breakout+ plan not found');
 
-// Stan Service - Fan Account Management Add-on
-export interface StanPricing {
-	id: 'stan' | 'stan.plus';
+// Stan Service - TikTok Fan Account Management
+export interface StanConfig {
+	id: 'stan';
 	name: string;
 	description: string;
 	marketingTagline: string;
 	price: {
-		addon: number; // Price when added to Bedroom+ or Rising+
-		standalone: number; // Price when purchased alone
-	};
-	promotionalPrice: {
-		addon: number; // 30% off first month
 		standalone: number;
-		description: string;
+		risingBundle: number; // Discounted price for Rising+ clients
+	};
+	igReelsAddon: number; // Monthly add-on for Instagram Reels repurposing
+	volumePricing: {
+		twoToFour: number; // Per-account price for 2-4 accounts
+		fivePlus: number; // Per-account price for 5+ accounts
+	};
+	labelPackage: {
+		price: number; // Monthly price for label roster package
+		maxAccounts: number; // Max accounts included
+	};
+	setupFees: {
+		simple: number; // Simple setup (existing account, clear direction)
+		customMin: number; // Custom setup minimum
+		customMax: number; // Custom setup maximum
+		risingWaived: boolean; // Waived for Rising+ clients
 	};
 	features: string[];
-	includedWith?: 'breakout.plus'; // Stan+ is included with Breakout+
+	includedWith: 'breakout.plus'; // Stan TikTok included with Breakout+
 }
 
-export const NYC_STAN: StanPricing = {
+export const NYC_STAN: StanConfig = {
 	id: 'stan',
 	name: 'Stan',
-	description: 'Daily Instagram fan account management for artists',
+	description: 'Daily TikTok fan account management for artists',
 	marketingTagline: 'Fan Account Management for Artists Who Get It',
 	price: {
-		addon: 250,
 		standalone: 500,
+		risingBundle: 400,
 	},
-	promotionalPrice: {
-		addon: 150, // ~40% off (matching the $250 → $150 in doc)
-		standalone: 350, // 30% off
-		description: 'First month special',
+	igReelsAddon: 150,
+	volumePricing: {
+		twoToFour: 400,
+		fivePlus: 350,
 	},
-	features: [
-		'Daily Instagram posts',
-		'Content mix: clips, AI visuals, memes, reposts',
-		'You provide raw material, we keep it running',
-		'Monthly performance check-in',
-	],
-};
-
-export const NYC_STAN_PLUS: StanPricing = {
-	id: 'stan.plus',
-	name: 'Stan+',
-	description: 'Full fan account management with active community building',
-	marketingTagline: 'Everything in Stan, plus active community management',
-	price: {
-		addon: 500,
-		standalone: 1000,
+	labelPackage: {
+		price: 2500,
+		maxAccounts: 8,
 	},
-	promotionalPrice: {
-		addon: 350, // 30% off
-		standalone: 700, // 30% off
-		description: 'First month special',
+	setupFees: {
+		simple: 250,
+		customMin: 500,
+		customMax: 1000,
+		risingWaived: true,
 	},
 	features: [
-		'Everything in Stan',
-		'Active community management',
-		'Cross-pollination with your main account',
-		'Growth tactics: hashtags, engagement, collaborations',
-		'Monthly strategy check-ins',
+		'Daily TikTok posts (3x/day, manually posted)',
+		'Dedicated device infrastructure',
+		'Cohesive aesthetic defined with you',
+		'DM and comment responses',
+		'Shadowban protection protocols',
+		'Monthly performance check-ins',
+		'Instagram Reels add-on available',
 	],
 	includedWith: 'breakout.plus',
 };

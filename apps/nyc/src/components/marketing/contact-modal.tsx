@@ -187,7 +187,7 @@ export function ContactModal({
 										control={form.control}
 										name='stanAddon'
 										label='Add Stan fan account management'
-										description='Daily Instagram fan account content + community building'
+										description='Daily TikTok fan account content + community building'
 									/>
 								</div>
 							)}
